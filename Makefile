@@ -1,5 +1,5 @@
 PYTHON ?= python3
-.PHONY: setup pull fetch verify test reproduce doctor index catalogue catalogue-check rea-install rea-doctor rea-mcp rea-smoke rea-mcp-check rea-native-smoke
+.PHONY: setup pull fetch verify test reproduce doctor index fde-index catalogue catalogue-check rea-install rea-doctor rea-mcp rea-smoke rea-mcp-check rea-native-smoke
 setup:
 	./scripts/setup.sh
 pull:
@@ -20,6 +20,9 @@ doctor:
 index:
 	$(PYTHON) tools/elf_index.py --release 94
 	$(PYTHON) tools/elf_index.py --release 115
+fde-index:
+	$(PYTHON) tools/fde_extents.py --release 94
+	$(PYTHON) tools/fde_extents.py --release 115
 catalogue:
 	$(PYTHON) tools/catalogue.py
 catalogue-check:

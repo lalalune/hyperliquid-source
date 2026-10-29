@@ -8,6 +8,7 @@ make doctor
 make verify test
 make catalogue-check
 make index
+make fde-index
 python3 tools/ghidra_plan.py --release 94
 ```
 
@@ -16,6 +17,10 @@ Ghidra, Docker, a node or a visor. `make index` verifies each node digest and
 writes ordered unwind starts to `work/index/`. These are address-discovery
 leads: the next indexed start is an upper bound, not a decoded function size.
 No component ownership or function equivalence follows from this index.
+`make fde-index` decodes every `.eh_frame` FDE into `work/index/` start/end
+extents, checks them against that index and lists uncovered `.text` gaps. An
+FDE extent is still not a validated function boundary; see
+[RE-001 FDE extents](../research/work-items/RE-001-fde-extents/README.md).
 
 `ghidra_plan.py` prints a static import command for a fresh, digest-named
 project under `work/ghidra/`. Set `GHIDRA_HOME` when Ghidra is not discovered.
@@ -52,6 +57,7 @@ configuration or assume an REA server is connected.
   Executable-section membership is only a coarse filter. Every seed still needs
   disassembly, cross-reference and function-boundary validation.
 - A fail-closed unwind indexer for the captured nodes' exact ELF/header encoding.
+- A fail-closed FDE extent decoder, cross-checked against GNU readelf for both nodes.
 
 The local preflight on 2026-10-28 found Python, Git LFS, GPG, ripgrep,
 LLVM 22.1.4, Java 21.0.10, Ghidra 12.1.4 and both Rust versions. That describes
