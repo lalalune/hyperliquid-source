@@ -6,6 +6,7 @@ tools/fde_extents.py (RE-001) and instruction text comes from a GNU objdump
 linear sweep of .text. No captured code is executed.
 """
 import argparse
+import bisect
 import collections
 import csv
 import hashlib
@@ -21,22 +22,26 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))  # also under python -I
 RELEASES = ('94', '115')
 OBJDUMP_ARGS = ('-d', '--no-show-raw-insn', '-w', '-j', '.text')
-CLASSES = ('identical', 'moved_only', 'changed', 'equivalent_unpaired', 'unmatched_94', 'unmatched_115')
+CLASSES = ('identical', 'moved_only', 'changed', 'duplicate_ordered', 'equivalent_unpaired', 'unmatched_94',
+           'unmatched_115')
 LIMITATIONS = (
     'Structural drift only, not behavioural equivalence. A function here is one FDE extent: split hot/cold parts '
     'are separate rows and code without unwind data is absent. objdump is a linear sweep, so data inside .text '
     'can mis-decode. moved_only means equal after masking only address-like operands (branch targets outside the '
-    'extent, RIP-relative displacements, immediates inside the mapped image); data those addresses point to is '
+    'extent and RIP-relative displacements; immediates are compared verbatim because both targets are PIE without '
+    'text relocations); data those addresses point to is '
     'not compared, so a changed .rodata constant reached through RIP can still be moved_only. changed pairs are '
     'inferred from call-graph position plus a size bound, not proven to be the same source function. '
-    'equivalent_unpaired rows have a masked twin on the other side but no unique pairing. Unmatched rows are not '
+    'duplicate_ordered pairs equal masked bodies from a duplicate group by address order inside the same gap '
+    'between call-graph anchors; which copy pairs with which is an inference. '
+    'equivalent_unpaired rows have a masked twin on the other side (possibly already paired) but no pairing of '
+    'their own. Unmatched rows have no masked twin and are not '
     'proven additions or removals. Path rows describe embedded strings only, not code ownership.')
 
 INSN_RE = re.compile(r'^\s*([0-9a-f]+):\t(.*)$')
 SYMBOL_RE = re.compile(r'\s*<[^>]*>')
 BRANCH_RE = re.compile(r'^(call|jmp|j[a-z]{1,3}|loop[a-z]*|jrcxz|jecxz)\s+(?:0x)?([0-9a-f]+)$')
 RIP_RE = re.compile(r'-?0x[0-9a-f]+\(%rip\)')
-HEX_RE = re.compile(r'(\$?)(-?0x[0-9a-f]+)')
 
 
 def target_kind(target, starts, plt):
@@ -47,7 +52,7 @@ def target_kind(target, starts, plt):
     return 'unknown'
 
 
-def normalize(text, start, end, image, starts, plt):
+def normalize(text, start, end, starts, plt):
     """Mask address-like operands in one objdump instruction.
 
     Returns (masked text, mask labels, direct call target or None). Intra-extent branches keep their
@@ -68,17 +73,10 @@ def normalize(text, start, end, image, starts, plt):
     if RIP_RE.search(text):
         masks.append('rip')
         text = RIP_RE.sub('RIP', text)
-
-    def mask(m):
-        value = int(m.group(2), 16)
-        if image[0] <= value < image[1]:
-            masks.append('image_immediate')
-            return f'{m.group(1)}ADDR'
-        return m.group(0)
-    return HEX_RE.sub(mask, text), tuple(masks), None
+    return text, tuple(masks), None
 
 
-def fingerprint(extents, read, lines, image, plt):
+def fingerprint(extents, read, lines, plt):
     """Per-extent raw and masked SHA-256, mask counts and ordered unique direct FDE callees.
 
     `extents` are (start, end) pairs sorted by start; `read(start, end)` returns the extent bytes;
@@ -101,7 +99,7 @@ def fingerprint(extents, read, lines, image, plt):
         row = rows[i]
         if va < row['start']:
             continue
-        masked, labels, callee = normalize(m.group(2), row['start'], row['end'], image, starts, plt)
+        masked, labels, callee = normalize(m.group(2), row['start'], row['end'], starts, plt)
         row['norm'].update(masked.encode() + b'\n')
         row['insns'] += 1
         row['masks'].update(labels)
@@ -128,9 +126,11 @@ def match(old, new):
 
     Seeds are hashes unique on both sides (raw first, then masked). Each pair then propagates to
     unpaired callees and callers whose masked hash is unique within that neighbourhood, and to
-    callees at the same call position when both callee lists have equal length and sizes are within 2x.
+    callees at the same call position when both callee lists have equal length, sizes are within 2x and
+    neither body has a masked twin anywhere on the other side.
     """
     pairs, taken = {}, set()
+    norms = ({r['norm'] for r in old}, {r['norm'] for r in new})
     by_old = {r['start']: r for r in old}
     by_new = {r['start']: r for r in new}
     for key in ('raw', 'norm'):
@@ -163,25 +163,72 @@ def match(old, new):
         if len(a['callees']) == len(b['callees']):
             for ca, cb in zip(a['callees'], b['callees']):
                 x, y = by_old[ca], by_new[cb]
-                if ca not in pairs and cb not in taken and x['size'] <= 2 * y['size'] and y['size'] <= 2 * x['size']:
+                if (ca not in pairs and cb not in taken and x['norm'] not in norms[1] and y['norm'] not in norms[0]
+                        and x['size'] <= 2 * y['size'] and y['size'] <= 2 * x['size']):
                     pair(x, y, 'callee-position')
         if added:
             work = sorted(set(work) | set(added))
     return pairs
 
 
+def monotonic_anchors(pairs):
+    """Longest chain of pairs increasing in both releases (ties broken by lowest #115 start)."""
+    items = sorted((a, b) for a, (b, _) in pairs.items())
+    tails, tail_idx, prev = [], [], [-1] * len(items)
+    for i, (_, b) in enumerate(items):
+        k = bisect.bisect_left(tails, b)
+        if k:
+            prev[i] = tail_idx[k - 1]
+        if k == len(tails):
+            tails.append(b)
+            tail_idx.append(i)
+        else:
+            tails[k], tail_idx[k] = b, i
+    chain, i = [], tail_idx[-1] if tail_idx else -1
+    while i >= 0:
+        chain.append(items[i])
+        i = prev[i]
+    return chain[::-1]
+
+
+def order_duplicates(old, new, pairs):
+    """Pair leftover equal-masked duplicates by address order inside each gap between monotonic anchors.
+
+    A masked-hash group is paired in a gap only when that gap holds the same number of its members on
+    both sides; other members stay unpaired. Returns {old_start: (new_start, evidence)}.
+    """
+    taken = {b for b, _ in pairs.values()}
+    chain = monotonic_anchors(pairs)
+    left_keys, right_keys = [a for a, _ in chain], [b for _, b in chain]
+    groups = {}
+    for side, rows, used, keys in ((0, old, pairs, left_keys), (1, new, taken, right_keys)):
+        for r in rows:
+            if r['start'] not in used:
+                gap = bisect.bisect_left(keys, r['start'])
+                groups.setdefault((r['norm'], gap), ([], []))[side].append(r['start'])
+    out = {}
+    for (_, gap), (xs, ys) in sorted(groups.items()):
+        if xs and len(xs) == len(ys):
+            for a, b in zip(sorted(xs), sorted(ys)):
+                out[a] = (b, f'duplicate-order-gap-{gap}')
+    return out
+
+
 def classify(old, new):
     """Return sorted TSV rows: class, raw/masked verdicts, both coordinates, evidence."""
     pairs = match(old, new)
+    ordered = order_duplicates(old, new, pairs)
+    pairs = {**pairs, **ordered}
     taken = {b for b, _ in pairs.values()}
     by_new = {r['start']: r for r in new}
-    twins = ({r['norm'] for r in old if r['start'] not in pairs} & {r['norm'] for r in new if r['start'] not in taken})
+    # A masked twin anywhere on the other side, paired or not: such a row is a duplicate, not unmatched.
+    twins = {r['norm'] for r in old} & {r['norm'] for r in new}
     rows = []
     for a in old:
         if a['start'] in pairs:
             b_start, evidence = pairs[a['start']]
             b = by_new[b_start]
-            cls = verdict(a, b)
+            cls = 'duplicate_ordered' if a['start'] in ordered else verdict(a, b)
             rows.append([cls, str(a['raw'] == b['raw']).lower(), str(a['norm'] == b['norm']).lower(),
                          hex(a['start']), a['size'], hex(b_start), b['size'], evidence])
         else:
@@ -229,6 +276,26 @@ def tsv_bytes(rows):
     return handle.getvalue().encode()
 
 
+def require_pie_without_textrel(data, secs):
+    """Fail closed unless code cannot hold absolute image addresses as immediates.
+
+    In an ET_DYN image with no text relocations every image address in code is RIP-relative, so
+    immediates are constants and are compared verbatim instead of masked.
+    """
+    if data[:4] != b'\x7fELF' or data[4] != 2 or data[5] != 1 or int.from_bytes(data[16:18], 'little') != 3:
+        raise ValueError('Expected a little-endian 64-bit ET_DYN (PIE) image')
+    dynamic = secs.get('.dynamic')
+    if dynamic is None:
+        raise ValueError('No .dynamic section')
+    for at in range(dynamic['offset'], dynamic['offset'] + dynamic['size'], 16):
+        tag, value = int.from_bytes(data[at:at + 8], 'little'), int.from_bytes(data[at + 8:at + 16], 'little')
+        if tag == 0:
+            return
+        if tag == 22 or (tag == 30 and value & 4):
+            raise ValueError('Text relocations present; immediates could be image addresses')
+    raise ValueError('Unterminated .dynamic section')
+
+
 def load_release(release):
     from artifacts import check
     from elf_index import sections
@@ -241,8 +308,7 @@ def load_release(release):
     text, plt = secs['.text'], secs['.plt']
     _, extents, _ = fde_extents(data)
     spans = [(f['start'], f['end']) for f in extents if f['section'] == '.text']
-    loaded = [s for s in secs.values() if s['address']]
-    image = (min(s['address'] for s in loaded), max(s['address'] + s['size'] for s in loaded))
+    require_pie_without_textrel(data, secs)
 
     def read(start, end):
         offset = text['offset'] + start - text['address']
@@ -252,7 +318,7 @@ def load_release(release):
         raise RuntimeError('GNU objdump not found')
     proc = subprocess.Popen([objdump, *OBJDUMP_ARGS, str(ROOT / rel)], stdout=subprocess.PIPE, text=True,
                             env={'LC_ALL': 'C', 'PATH': '/usr/bin:/bin'})
-    rows = fingerprint(spans, read, proc.stdout, image, (plt['address'], plt['address'] + plt['size']))
+    rows = fingerprint(spans, read, proc.stdout, (plt['address'], plt['address'] + plt['size']))
     proc.stdout.close()
     if proc.wait() != 0:
         raise RuntimeError('objdump failed')

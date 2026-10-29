@@ -8,14 +8,14 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 sys.path.insert(0, str(ROOT / 'research/work-items/RE-014-release-drift'))
-from release_drift import classify, fingerprint, normalize, path_strings, tsv_bytes
+from release_drift import classify, fingerprint, monotonic_anchors, normalize, path_strings, require_pie_without_textrel, tsv_bytes
 import mutation_controls
 
-IMAGE, PLT, STARTS = (0x1000, 0x900000), (0x900, 0x980), {0x2000}
+PLT, STARTS = (0x900, 0x980), {0x2000}
 
 
 def norm(text, start=0x1000, end=0x1100):
-    return normalize(text, start, end, IMAGE, STARTS, PLT)
+    return normalize(text, start, end, STARTS, PLT)
 
 
 def row(start, raw, masked, size=16, callees=()):
@@ -37,9 +37,12 @@ class Normalize(unittest.TestCase):
         self.assertEqual(norm('jmp    3000'), ('jmp @unknown', ('branch_unknown',), None))
         self.assertEqual(norm('jne    1010'), ('jne +0x10', (), None))
         self.assertEqual(norm('lea    0x1234(%rip),%rax        # 5678 <bar>'), ('lea RIP,%rax', ('rip',), None))
-        self.assertEqual(norm('mov    $0x2000,%edi'), ('mov $ADDR,%edi', ('image_immediate',), None))
 
-    def test_negative_control_constants_outside_the_image_survive(self):
+    def test_negative_control_immediates_and_displacements_are_never_masked(self):
+        # PIE without text relocations: an immediate that falls inside the image range is still a constant.
+        self.assertEqual(norm('mov    $0x2000,%edi')[0], 'mov $0x2000,%edi')
+        self.assertNotEqual(norm('sub    $0x348,%rsp')[0], norm('sub    $0x3d8,%rsp')[0])
+        self.assertNotEqual(norm('movb   $0x0,0x340(%rsp)')[0], norm('movb   $0x0,0x3c8(%rsp)')[0])
         self.assertEqual(norm('mov    $0x2a,%eax')[0], 'mov $0x2a,%eax')
         self.assertEqual(norm('mov    0x18(%rsp),%rax')[0], 'mov 0x18(%rsp),%rax')
         self.assertNotEqual(norm('mov    $0x2a,%eax')[0], norm('mov    $0x2b,%eax')[0])
@@ -54,7 +57,7 @@ class Fingerprint(unittest.TestCase):
              '    1010:\tret\n']
 
     def run_fp(self, spans, lines=None):
-        return fingerprint(spans, lambda s, e: bytes(e - s), lines or self.LINES, IMAGE, PLT)
+        return fingerprint(spans, lambda s, e: bytes(e - s), lines or self.LINES, PLT)
 
     def test_records_call_sites_and_masks(self):
         rows = self.run_fp([(0x1000, 0x1007), (0x1010, 0x1011)])
@@ -74,12 +77,14 @@ class Classify(unittest.TestCase):
         table = classify(old, new)
         self.assertEqual([r[:3] for r in table], [['identical', 'true', 'true'], ['moved_only', 'false', 'true']])
 
-    def test_negative_control_duplicate_hashes_are_never_guessed(self):
+    def test_negative_control_duplicate_hashes_never_get_a_hash_match_class(self):
         old = [row(0x10, 'a', 'm'), row(0x20, 'b', 'm')]
         new = [row(0x110, 'c', 'm'), row(0x120, 'd', 'm'), row(0x130, 'e', 'x')]
-        self.assertEqual(sorted(r[0] for r in classify(old, new)),
-                         ['equivalent_unpaired', 'equivalent_unpaired', 'equivalent_unpaired',
-                          'equivalent_unpaired', 'unmatched_115'])
+        rows = classify(old, new)
+        self.assertEqual(sorted(r[0] for r in rows), ['duplicate_ordered', 'duplicate_ordered', 'unmatched_115'])
+        self.assertTrue(all(r[7].startswith('duplicate-order-gap-') for r in rows if r[0] == 'duplicate_ordered'))
+        three = classify(old + [row(0x30, 'f', 'm')], new)
+        self.assertEqual(sorted(r[0] for r in three), ['equivalent_unpaired'] * 5 + ['unmatched_115'])
 
     def test_callee_position_pairs_changed_code_only_within_size_bound(self):
         old = [row(0x10, 'p', 'P', callees=[0x20]), row(0x20, 'x', 'X', size=100)]
@@ -88,10 +93,64 @@ class Classify(unittest.TestCase):
         self.assertEqual([r[0] for r in classify(old, near)], ['identical', 'changed'])
         self.assertEqual([r[0] for r in classify(old, far)], ['unmatched_115', 'identical', 'unmatched_94'])
 
+    def test_negative_control_callee_position_never_claims_a_body_with_a_twin(self):
+        old = [row(0x10, 'p', 'P', callees=[0x20]), row(0x20, 'x', 'X')]
+        new = [row(0x110, 'p', 'P', callees=[0x120]), row(0x120, 'y', 'Y'), row(0x130, 'x2', 'X'), row(0x140, 'q', 'X')]
+        self.assertEqual([r[0] for r in classify(old, new)],
+                         ['unmatched_115', 'equivalent_unpaired', 'equivalent_unpaired', 'identical', 'equivalent_unpaired'])
+
+    def test_duplicates_pair_by_order_only_within_one_anchor_gap(self):
+        anchors_old = [row(0x10, 'a', 'A'), row(0x100, 'b', 'B')]
+        anchors_new = [row(0x110, 'a', 'A'), row(0x200, 'b', 'B')]
+        old = anchors_old + [row(0x20, 'd', 'D'), row(0x30, 'd', 'D')]
+        new = anchors_new + [row(0x150, 'd', 'D'), row(0x160, 'd', 'D')]
+        rows = {r[3]: r for r in classify(old, new)}
+        self.assertEqual(rows['0x20'][0], 'duplicate_ordered')
+        self.assertEqual(rows['0x20'][5], '0x150')
+        self.assertEqual(rows['0x30'][5], '0x160')
+        self.assertEqual(rows['0x20'][1:3], ['true', 'true'])
+
+    def test_negative_control_duplicates_split_across_gaps_stay_unpaired(self):
+        old = [row(0x10, 'a', 'A'), row(0x100, 'b', 'B'), row(0x20, 'd', 'D'), row(0x30, 'd', 'D')]
+        new = [row(0x110, 'a', 'A'), row(0x200, 'b', 'B'), row(0x150, 'd', 'D'), row(0x250, 'd', 'D')]
+        self.assertEqual(sorted(r[0] for r in classify(old, new))[:2], ['equivalent_unpaired'] * 2)
+        self.assertNotIn('duplicate_ordered', [r[0] for r in classify(old, new)])
+
+    def test_a_leftover_copy_of_a_paired_body_is_equivalent_not_unmatched(self):
+        old = [row(0x10, 'x1', 'X'), row(0x20, 'x2', 'X')]
+        new = [row(0x110, 'x1', 'X'), row(0x120, 'y', 'Y')]
+        self.assertEqual([r[0] for r in classify(old, new)], ['unmatched_115', 'identical', 'equivalent_unpaired'])
+
+    def test_anchor_chain_drops_crossing_pairs(self):
+        pairs = {0x10: (0x110, ''), 0x20: (0x300, ''), 0x30: (0x120, ''), 0x40: (0x130, '')}
+        self.assertEqual(monotonic_anchors(pairs), [(0x10, 0x110), (0x30, 0x120), (0x40, 0x130)])
+
     def test_output_is_independent_of_input_order(self):
         old = [row(0x10, 'p', 'P', callees=[0x20, 0x30]), row(0x20, 'x', 'X'), row(0x30, 'z', 'Z')]
         new = [row(0x110, 'p', 'P', callees=[0x120, 0x130]), row(0x120, 'y', 'Y'), row(0x130, 'z2', 'Z')]
         self.assertEqual(tsv_bytes(classify(old, new)), tsv_bytes(classify(old[::-1], new[::-1])))
+
+
+class PieGuard(unittest.TestCase):
+    @staticmethod
+    def elf(e_type, dynamic):
+        data = bytearray(b'\x7fELF\x02\x01' + bytes(58) + dynamic)
+        data[16:18] = e_type.to_bytes(2, 'little')
+        return bytes(data), {'.dynamic': {'offset': 64, 'size': len(dynamic)}}
+
+    @staticmethod
+    def dyn(*entries):
+        return b''.join(t.to_bytes(8, 'little') + v.to_bytes(8, 'little') for t, v in entries)
+
+    def test_accepts_pie_without_text_relocations(self):
+        require_pie_without_textrel(*self.elf(3, self.dyn((30, 8), (0, 0))))
+
+    def test_fails_closed_on_non_pie_or_text_relocations(self):
+        for e_type, dynamic in ((2, self.dyn((0, 0))), (3, self.dyn((22, 0), (0, 0))), (3, self.dyn((30, 4), (0, 0))),
+                                (3, self.dyn((30, 8)))):
+            with self.subTest(e_type=e_type, dynamic=dynamic.hex()):
+                with self.assertRaises(ValueError):
+                    require_pie_without_textrel(*self.elf(e_type, dynamic))
 
 
 class PathStrings(unittest.TestCase):

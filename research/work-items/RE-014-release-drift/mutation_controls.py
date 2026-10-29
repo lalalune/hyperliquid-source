@@ -15,7 +15,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3] / 'tools'))
 from release_drift import classify, fingerprint
 
 BASE = 0x1000
-IMAGE = (BASE, BASE + 0x1000)
 PLT = (0x900, 0x980)
 
 
@@ -45,11 +44,11 @@ def rows(code, spans):
         out = subprocess.run(['objdump', '-D', '-b', 'binary', '-m', 'i386:x86-64', '-w', '--no-show-raw-insn',
                               f'--adjust-vma={BASE:#x}', handle.name], capture_output=True, text=True, check=True,
                              env={'LC_ALL': 'C', 'PATH': '/usr/bin:/bin'}).stdout
-    return fingerprint(spans, lambda s, e: code[s - BASE:e - BASE], out.splitlines(), IMAGE, PLT)
+    return fingerprint(spans, lambda s, e: code[s - BASE:e - BASE], out.splitlines(), PLT)
 
 
-def classes(**mutation):
-    table = classify(rows(*layout()), rows(*layout(**mutation)))
+def classes(old=None, **mutation):
+    table = classify(rows(*layout(**(old or {}))), rows(*layout(**mutation)))
     return {(r[3] or '115:' + r[5]): r[0] for r in table}
 
 
@@ -58,6 +57,9 @@ CASES = [
     ('unchanged', {}, {'0x1000': 'identical', '0x1010': 'identical', '0x1030': 'identical'}),
     ('callee moved', {'b_at': 0x1040}, {'0x1000': 'identical', '0x1010': 'moved_only', '0x1030': 'identical'}),
     ('constant changed', {'constant': 0x2b}, {'0x1000': 'identical', '0x1010': 'changed', '0x1030': 'identical'}),
+    # Both constants lie inside the code's address range; a PIE constant must still be compared.
+    ('in-image-range constant changed', {'old': {'constant': 0x1048}, 'constant': 0x1050},
+     {'0x1000': 'identical', '0x1010': 'changed', '0x1030': 'identical'}),
     ('instruction changed', {'push': b'\x53'}, {'0x1000': 'identical', '0x1010': 'changed', '0x1030': 'identical'}),
     ('call retargeted to non-FDE code', {'a_call': 0x1060},
      {'0x1000': 'identical', '0x1010': 'changed', '0x1030': 'identical'}),
