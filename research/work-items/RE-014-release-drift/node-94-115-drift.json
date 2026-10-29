@@ -8,48 +8,49 @@
     "added115:94=false,115=true": 35
   },
   "class_bytes_115": {
-    "changed": 2132918,
-    "equivalent_unpaired": 7144962,
-    "identical": 397057,
-    "moved_only": 7868106,
-    "unmatched_115": 65118374,
+    "changed": 1882017,
+    "duplicate_ordered": 637831,
+    "equivalent_unpaired": 6785593,
+    "identical": 396679,
+    "moved_only": 8039647,
+    "unmatched_115": 64919650,
     "unmatched_94": 0
   },
   "class_bytes_94": {
-    "changed": 2118246,
-    "equivalent_unpaired": 6400714,
-    "identical": 397057,
-    "moved_only": 7868106,
+    "changed": 1861740,
+    "duplicate_ordered": 637831,
+    "equivalent_unpaired": 5916192,
+    "identical": 396679,
+    "moved_only": 8039647,
     "unmatched_115": 0,
-    "unmatched_94": 52613292
+    "unmatched_94": 52545326
   },
   "classes": {
-    "changed": 1895,
-    "equivalent_unpaired": 94240,
-    "identical": 2028,
-    "moved_only": 14877,
-    "unmatched_115": 67970,
-    "unmatched_94": 56802
+    "changed": 1606,
+    "duplicate_ordered": 5058,
+    "equivalent_unpaired": 85692,
+    "identical": 2016,
+    "moved_only": 14608,
+    "unmatched_115": 67719,
+    "unmatched_94": 56625
   },
-  "drift_tsv_sha256": "36716f72d421deb172c4f54634e20c321d441b8655c6e669ff6617e8388229dd",
+  "drift_tsv_sha256": "2d6a10f473954ee0ca576b224bd9680847bd3bc116efcd6ef63bfb947dd782d8",
   "instructions": {
     "115": 18827581,
     "94": 15730149
   },
-  "limitations": "Structural drift only, not behavioural equivalence. A function here is one FDE extent: split hot/cold parts are separate rows and code without unwind data is absent. objdump is a linear sweep, so data inside .text can mis-decode. moved_only means equal after masking only address-like operands (branch targets outside the extent, RIP-relative displacements, immediates inside the mapped image); data those addresses point to is not compared, so a changed .rodata constant reached through RIP can still be moved_only. changed pairs are inferred from call-graph position plus a size bound, not proven to be the same source function. equivalent_unpaired rows have a masked twin on the other side but no unique pairing. Unmatched rows are not proven additions or removals. Path rows describe embedded strings only, not code ownership.",
+  "limitations": "Structural drift only, not behavioural equivalence. A function here is one FDE extent: split hot/cold parts are separate rows and code without unwind data is absent. objdump is a linear sweep, so data inside .text can mis-decode. moved_only means equal after masking only address-like operands (branch targets outside the extent and RIP-relative displacements; immediates are compared verbatim because both targets are PIE without text relocations); data those addresses point to is not compared, so a changed .rodata constant reached through RIP can still be moved_only. changed pairs are inferred from call-graph position plus a size bound, not proven to be the same source function. duplicate_ordered pairs equal masked bodies from a duplicate group by address order inside the same gap between call-graph anchors; which copy pairs with which is an inference. equivalent_unpaired rows have a masked twin on the other side (possibly already paired) but no pairing of their own. Unmatched rows have no masked twin and are not proven additions or removals. Path rows describe embedded strings only, not code ownership.",
   "masked_operands": {
     "115": {
       "branch_fde": 558403,
       "branch_plt": 113386,
       "branch_unknown": 7421,
-      "image_immediate": 344601,
       "rip": 955207
     },
     "94": {
       "branch_fde": 496825,
       "branch_plt": 107390,
       "branch_unknown": 7422,
-      "image_immediate": 291921,
       "rip": 884000
     }
   },
