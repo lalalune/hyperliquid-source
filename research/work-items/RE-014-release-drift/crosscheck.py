@@ -8,6 +8,8 @@ Takes a deterministic sample (every Nth row of each class, in TSV order) and che
   moved_only   -> file bytes differ, sizes equal, and the disassembly is equal once every
                   hex number is masked (a broader mask than the tool's)
   changed      -> file bytes differ
+  duplicate_ordered -> sizes equal, bytes equal iff the row says raw_equal, and the disassembly is
+                  equal once every hex number is masked
 Prints one JSON summary; exits non-zero on any contradiction. No assert, so it holds under -O.
 """
 from pathlib import Path
@@ -63,7 +65,7 @@ def main():
     with open(args.tsv, newline='') as handle:
         for row in csv.DictReader(handle, delimiter='\t'):
             kind = row['class']
-            if kind not in ('identical', 'moved_only', 'changed'):
+            if kind not in ('identical', 'moved_only', 'changed', 'duplicate_ordered'):
                 continue
             seen[kind] = seen.get(kind, 0) + 1
             if (seen[kind] - 1) % args.every:
@@ -73,7 +75,11 @@ def main():
             sa, sb = int(row['size_94']), int(row['size_115'])
             same_bytes = raw('94', a, sa) == raw('115', b, sb)
             label = f'{kind} {a:#x}/{b:#x}'
-            if kind == 'identical':
+            if kind == 'duplicate_ordered':
+                masked = broad(a, sa, b, sb)
+                if sa != sb or masked[0] != masked[1] or same_bytes != (row['raw_equal'] == 'true'):
+                    problems.append(label + ': not an equal-masked duplicate')
+            elif kind == 'identical':
                 if not same_bytes or len(set(map(tuple, broad(a, sa, b, sb)))) != 1:
                     problems.append(label)
             elif same_bytes:

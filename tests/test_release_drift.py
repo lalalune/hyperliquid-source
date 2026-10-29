@@ -131,6 +131,30 @@ class Classify(unittest.TestCase):
         self.assertEqual(tsv_bytes(classify(old, new)), tsv_bytes(classify(old[::-1], new[::-1])))
 
 
+class Reconcile(unittest.TestCase):
+    @staticmethod
+    def module():
+        import importlib.util
+        path = Path(__file__).resolve().parents[1] / 'research/work-items/RE-014-release-drift/reconcile.py'
+        spec = importlib.util.spec_from_file_location('reconcile', path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_cross_tab_separates_partner_and_norm_agreement(self):
+        ours = {0x10: ('moved_only', 0x110), 0x20: ('moved_only', 0x120), 0x30: ('unmatched_94', None)}
+        theirs = {0x10: ('moved', 0x110), 0x20: ('moved', 0x130), 0x30: ('removed', None)}
+        norms = ({0x10: 'a', 0x20: 'b', 0x30: 'c'}, {0x110: 'a', 0x120: 'b', 0x130: 'b'})
+        cells = self.module().reconcile(ours, theirs, norms)['cells']
+        self.assertEqual(cells['moved_only|moved'], {'rows': 2, 'same_partner': 1, 'other_partner': 1,
+                                                     'our_pair_their_norm_equal': 2, 'our_pair_their_norm_differs': 0})
+        self.assertEqual(cells['unmatched_94|removed']['rows'], 1)
+
+    def test_fails_closed_when_the_94_rows_differ(self):
+        with self.assertRaises(SystemExit):
+            self.module().reconcile({0x10: ('identical', 0x110)}, {0x20: ('moved', 0x120)})
+
+
 class PieGuard(unittest.TestCase):
     @staticmethod
     def elf(e_type, dynamic):
