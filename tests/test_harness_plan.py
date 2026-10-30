@@ -141,6 +141,46 @@ class RequestGateTests(unittest.TestCase):
         self.assertEqual(plan['status'], 'planned')
         self.assertEqual(plan['declared_side_effects'], ['writes_fixture_output'])
 
+    def test_denial_text_does_not_cover_network_allow(self):
+        req = self._load('deny-network.json')
+        req['approval_present'] = True
+        with tempfile.TemporaryDirectory() as tmp:
+            approval = Path(tmp) / 'APPROVAL.md'
+            approval.write_text(
+                f"request_id={req['request_id']} is unauthorized\n",
+                encoding='utf-8',
+            )
+            with mock.patch.object(hp, 'APPROVAL_PATH', approval):
+                with self.assertRaisesRegex(ValueError, 'APPROVAL.md does not cover'):
+                    hp.validate_request(req, self.fixtures)
+
+    def test_other_request_approval_does_not_cover_network_allow(self):
+        req = self._load('deny-network.json')
+        req['approval_present'] = True
+        with tempfile.TemporaryDirectory() as tmp:
+            approval = Path(tmp) / 'APPROVAL.md'
+            approval.write_text(
+                f"authorized request_id={req['request_id']}-extended\n",
+                encoding='utf-8',
+            )
+            with mock.patch.object(hp, 'APPROVAL_PATH', approval):
+                with self.assertRaisesRegex(ValueError, 'APPROVAL.md does not cover'):
+                    hp.validate_request(req, self.fixtures)
+
+    def test_genuine_approval_still_covers_network_allow(self):
+        req = self._load('deny-network.json')
+        req['approval_present'] = True
+        with tempfile.TemporaryDirectory() as tmp:
+            approval = Path(tmp) / 'APPROVAL.md'
+            approval.write_text(
+                f"authorized request_id={req['request_id']}\n",
+                encoding='utf-8',
+            )
+            with mock.patch.object(hp, 'APPROVAL_PATH', approval):
+                plan = hp.validate_request(req, self.fixtures)
+        self.assertEqual(plan['status'], 'planned')
+        self.assertEqual(plan['network'], 'allow')
+
     def test_superset_fixture_effect_cover_accepted(self):
         fixtures, fid = self._fixtures_with_effect()
         req = self._load('plan-only.json')

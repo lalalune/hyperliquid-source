@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -93,7 +94,14 @@ def approval_covers(request_id: str) -> bool:
     if not APPROVAL_PATH.is_file():
         return False
     text = APPROVAL_PATH.read_text()
-    return request_id in text and 'authorized' in text.lower()
+    # Both must appear on the same line as whole tokens. A bare substring
+    # match would let a denial ("unauthorized") or another request's
+    # approval ("<id>-extended") pass the network/execute gate.
+    request_token = re.compile(
+        r'(?<![A-Za-z0-9_.-])' + re.escape(request_id) + r'(?![A-Za-z0-9_.-])')
+    authorized_word = re.compile(r'(?<![A-Za-z])authorized(?![A-Za-z])', re.IGNORECASE)
+    return any(request_token.search(line) and authorized_word.search(line)
+               for line in text.splitlines())
 
 
 def validate_request(request: dict, fixtures_by_id: dict) -> dict:
