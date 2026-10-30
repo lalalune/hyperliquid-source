@@ -67,16 +67,25 @@ def check_digest(data, expected=SHA256):
 
 
 def sections(data):
-    if data[:6] != b'\x7fELF\x02\x01':
+    if data[:6] != b'\x7fELF\x02\x01' or len(data) < 64:
         raise EvidenceError('not an ELF64 little-endian file')
     shoff = struct.unpack_from('<Q', data, 0x28)[0]
     shentsize, shnum, shstrndx = struct.unpack_from('<HHH', data, 0x3a)
+    if shentsize < 64 or shstrndx >= shnum or shoff + shentsize * shnum > len(data):
+        raise EvidenceError('Invalid or unsupported ELF section table')
     raw = [struct.unpack_from('<IIQQQQIIQQ', data, shoff + i * shentsize) for i in range(shnum)]
     stroff = raw[shstrndx][4]
     out = {}
     for name, _typ, _flags, addr, off, size, *_ in raw:
-        end = data.index(b'\0', stroff + name)
-        out[data[stroff + name:end].decode()] = (addr, off, size)
+        try:
+            end = data.index(b'\0', stroff + name)
+        except ValueError:
+            raise EvidenceError('Invalid section name offset') from None
+        try:
+            decoded = data[stroff + name:end].decode()
+        except UnicodeDecodeError:
+            raise EvidenceError('Non-UTF8 section name') from None
+        out[decoded] = (addr, off, size)
     return out
 
 
