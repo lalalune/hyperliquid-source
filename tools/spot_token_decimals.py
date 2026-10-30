@@ -146,8 +146,14 @@ class Fdes:
         if struct.unpack_from('<I', body, 0)[0] != 0:
             raise EvidenceError('CIE id is not zero')
         version = body[4]
-        end = body.index(b'\0', 5)
-        aug = body[5:end].decode()
+        try:
+            end = body.index(b'\0', 5)
+        except ValueError:
+            raise EvidenceError('Unterminated CIE augmentation') from None
+        try:
+            aug = body[5:end].decode()
+        except UnicodeDecodeError:
+            raise EvidenceError('Non-ASCII CIE augmentation') from None
         i = end + 1
         _, i = uleb(body, i)
         _, i = uleb(body, i)
@@ -157,15 +163,29 @@ class Fdes:
             _, i = uleb(body, i)
         if not aug.startswith('z'):
             raise EvidenceError('CIE without z augmentation')
-        _, i = uleb(body, i)
+        aug_length, i = uleb(body, i)
+        aug_end = i + aug_length
+        if aug_end > len(body):
+            raise EvidenceError('CIE augmentation data outside record')
         for ch in aug[1:]:
             if ch == 'R':
+                if i >= aug_end:
+                    raise EvidenceError('Truncated CIE augmentation data')
                 return body[i]
             if ch == 'L':
+                if i >= aug_end:
+                    raise EvidenceError('Truncated CIE augmentation data')
                 i += 1
             elif ch == 'P':
+                if i >= aug_end:
+                    raise EvidenceError('Truncated CIE augmentation data')
                 penc = body[i]
-                i += 1 + {0x03: 4, 0x0b: 4, 0x04: 8, 0x0c: 8}[penc & 0x0f]
+                step = {0x03: 4, 0x0b: 4, 0x04: 8, 0x0c: 8}.get(penc & 0x0f)
+                if step is None:
+                    raise EvidenceError(f'Unsupported personality encoding {penc:#x}')
+                if i + 1 + step > aug_end:
+                    raise EvidenceError('Truncated CIE augmentation data')
+                i += 1 + step
             else:
                 raise EvidenceError(f'unsupported augmentation {aug!r}')
         raise EvidenceError('CIE has no R augmentation')
