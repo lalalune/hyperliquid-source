@@ -1,6 +1,8 @@
 import bisect
+import contextlib
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import re
@@ -8,6 +10,7 @@ import shutil
 import struct
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -24,6 +27,7 @@ HUB = 0x24AF210
 DESER = 0x28C7C80
 SNAPSHOT_GATE = 0x27E91D0
 HUB_TO_DESER_SITE = 0x24AFF82
+USER_IP_HUB_LEAS = (0x24B1BB1, 0x24B1BE4)
 SCOPED_COUNTS = {
     "info_server/src/abci_state_info_handler.rs": 17,
     "info_server/src/f_types/position.rs": 1,
@@ -84,6 +88,51 @@ class InfoRequestPathTests(unittest.TestCase):
             "info_server/src/user_ip.rs",
         })
         self.assertEqual(locs["info_server/src/handle_request.rs"], [30, 49, 120])
+
+    def test_hub_missing_required_file_rejected(self):
+        # Retarget the hub's user_ip.rs Location leas to an abci_state_info_handler.rs
+        # Location: the hub then lacks user_ip.rs but holds another info_server file.
+        locs = irp.first_party_locations(self.elf, irp.relative_relocs(self.elf))
+        leas = irp.lea_targets(self.elf)
+        user_ip = {s for s, (f, _l, _c) in locs.items() if f == "info_server/src/user_ip.rs"}
+        self.assertEqual(sorted(x for s in user_ip for x in leas.get(s, ())), list(USER_IP_HUB_LEAS))
+        other = min(s for s, (f, _l, _c) in locs.items()
+                    if f == "info_server/src/abci_state_info_handler.rs")
+        b = bytearray(DATA)
+        for site in USER_IP_HUB_LEAS:
+            o = self.elf.off(site)
+            self.assertEqual((b[o + 1], b[o + 2] & 0xC7), (0x8D, 0x05))
+            struct.pack_into("<i", b, o + 3, other - (site + 7))
+        b = bytes(b)
+        with self.assertRaisesRegex(irp.EvidenceError, r"missing \['info_server/src/user_ip.rs'\]"):
+            irp.build(b, expected_sha256=hashlib.sha256(b).hexdigest())
+
+    def test_independent_verify_rejects_tag_not_at_anchor(self):
+        spec = importlib.util.spec_from_file_location("re012_iv", PACKET / "independent_verify.py")
+        iv = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(iv)
+        packet = json.loads((PACKET / "info-request-path.json").read_bytes())
+        # (a) text with no lea-anchored .rodata occurrence, packet anchor kept;
+        # (b) anchor/occurrence moved to a lea target that holds other text.
+        # (c) each of kind, occurrence and anchor changed on its own.
+        cases = (("passes", {}), ("fails", {"text": "secrets"}),
+                 ("fails", {"anchor": "0x1e3f36", "occurrence": "0x1e3f36"}),
+                 ("fails", {"kind": "len_prefix"}), ("fails", {"occurrence": "0x3f611f"}),
+                 ("fails", {"anchor": "0x3f611d"}))
+        for want, change in cases:
+            d = json.loads(json.dumps(packet))
+            next(t for t in d["tags"] if t["text"] == "liquidatable").update(change)
+            with self.subTest(change=change), tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / "info-request-path.json"
+                path.write_bytes(json.dumps(d).encode())
+                old = iv.JSON, iv.OUT_SHA
+                iv.JSON, iv.OUT_SHA = path, hashlib.sha256(path.read_bytes()).hexdigest()
+                try:
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        rc = iv.main()
+                finally:
+                    iv.JSON, iv.OUT_SHA = old
+                self.assertEqual(rc, 0 if want == "passes" else 1)
 
     def test_hub_call_bytes(self):
         self.assertEqual(self.elf.read(HUB_TO_DESER_SITE, 5), bytes.fromhex("e8f97c4100"))

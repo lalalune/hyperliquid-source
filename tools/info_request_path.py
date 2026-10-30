@@ -329,11 +329,12 @@ def build(data: bytes, ref_request: Path = ROOT / REF_REQUEST,
         f: sorted(v) for f, v in sorted(fn_files.get(HUB, {}).items())
         if f.startswith(SCOPE_PREFIX)
     }
-    if set(hub_locs) < {"info_server/src/handle_request.rs",
-                        "info_server/src/router.rs",
-                        "info_server/src/handler.rs",
-                        "info_server/src/user_ip.rs"}:
-        raise EvidenceError(f"hub Location set incomplete: {hub_locs}")
+    missing = {"info_server/src/handle_request.rs",
+               "info_server/src/router.rs",
+               "info_server/src/handler.rs",
+               "info_server/src/user_ip.rs"} - set(hub_locs)
+    if missing:
+        raise EvidenceError(f"hub Location set incomplete, missing {sorted(missing)}: {hub_locs}")
 
     # Tags
     tags_list = serde_rename_tags(ref_request.read_text(encoding="utf-8"))

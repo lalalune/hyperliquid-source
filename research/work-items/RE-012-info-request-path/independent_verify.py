@@ -2,8 +2,10 @@
 """Independent RE-012 verifier (no imports from tools/).
 
 Re-derives hub→deser call bytes, FDE membership of pinned starts via a
-fresh .eh_frame_hdr walk, and presence of each JSON tag as a rodata
-substring with a nearby RIP lea — then compares to the packet JSON.
+fresh .eh_frame_hdr walk, and, for each JSON tag, every rodata occurrence
+of its text that a RIP lea anchors (exactly or via a length byte) — then
+requires the packet's (kind, occurrence, anchor) to be one of them. Only
+lea targets count here; the tool also accepts RELATIVE relocation targets.
 Verdict: PASS / FAIL / INCONCLUSIVE.
 """
 from __future__ import annotations
@@ -101,8 +103,9 @@ def main():
     ev.append(f"call@{SITE:#x} bytes={call.hex()} dest={dest:#x}")
     if call != bytes.fromhex("e8f97c4100") or dest != DESER:
         return verdict("FAIL", ev + ["hub→deser call mismatch"])
-    # tags: each text must appear in .rodata and have a lea within ±32 of
-    # occurrence or occurrence-1 (len-prefix)
+    # tags: re-derive every .rodata occurrence of the text that a RIP lea
+    # targets exactly, or through the length byte before it (len_prefix), and
+    # require the packet's (kind, occurrence, anchor) to be one of them
     ro_va, ro_o, ro_sz = secs[".rodata"]
     ro = data[ro_o:ro_o + ro_sz]
     t_va, t_o, t_sz = secs[".text"]
@@ -113,24 +116,26 @@ def main():
         if i + 7 > len(text):
             continue
         lea_tgts.add(t_va + i + 7 + struct.unpack_from("<i", text, i + 3)[0])
-    missing = []
+    missing, mismatched = [], []
     for tag in d["tags"]:
         b = tag["text"].encode()
-        idx = ro.find(b)
-        if idx < 0:
+        found = set()
+        for m in re.finditer(re.escape(b), ro):
+            s = ro_va + m.start()
+            if s in lea_tgts:
+                found.add(("exact", s, s))
+            elif m.start() > 0 and ro[m.start() - 1] == len(b) and s - 1 in lea_tgts:
+                found.add(("len_prefix", s, s - 1))
+        if not found:
             missing.append(tag["text"])
-            continue
-        occ = ro_va + idx
-        anchored = (occ in lea_tgts) or (occ - 1 in lea_tgts)
-        # also accept packet-reported anchor
-        pkt_anchor = int(tag["anchor"], 16)
-        if pkt_anchor in lea_tgts:
-            anchored = True
-        if not anchored:
-            missing.append(tag["text"])
-    ev.append(f"tags_checked={len(d['tags'])} unanchored_indep={len(missing)}")
+        elif (tag["kind"], int(tag["occurrence"], 16), int(tag["anchor"], 16)) not in found:
+            mismatched.append(tag["text"])
+    ev.append(f"tags_checked={len(d['tags'])} unanchored_indep={len(missing)} "
+              f"packet_anchor_mismatch={len(mismatched)}")
     if missing:
         return verdict("FAIL", ev + [f"unanchored: {missing[:5]}"])
+    if mismatched:
+        return verdict("FAIL", ev + [f"packet anchor not re-derived: {mismatched[:5]}"])
     if d["tag_count"] != 56 or len(d["tags"]) != 56:
         return verdict("FAIL", ev + ["tag_count"])
     if d["hub"]["to_deserializer"]["to"] != "0x28c7c80":
