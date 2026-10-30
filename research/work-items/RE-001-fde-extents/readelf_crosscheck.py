@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parents[3]
 FDE = re.compile(r'^([0-9a-f]+) [0-9a-f]+ [0-9a-f]+ FDE cie=[0-9a-f]+ pc=([0-9a-f]+)\.\.([0-9a-f]+)$', re.M)
@@ -18,6 +19,16 @@ def main():
     p.add_argument('--readelf', default='readelf')
     args = p.parse_args()
     binary = ROOT / f'artifacts/node/{args.release}/hl-node'
+    # The reported binary_sha256 comes from the fde_extents summary, so the
+    # bytes readelf is about to parse must first be verified against the
+    # pinned manifest, exactly as tools/fde_extents.py does before it
+    # generates that summary. Without this, a substituted or corrupted
+    # binary still cross-checks as identical under the pinned digest.
+    sys.path.insert(0, str(ROOT / 'tools'))
+    from artifacts import check
+    item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files']
+                if i['path'] == f'artifacts/node/{args.release}/hl-node')
+    check(binary, item)
     summary = json.loads((ROOT / f'work/index/node-{args.release}-fde.json').read_text())
     with (ROOT / f'work/index/node-{args.release}-fde.tsv').open() as handle:
         ours = {(int(r['start_va'], 16), int(r['end_va'], 16), int(r['fde_va'], 16))
