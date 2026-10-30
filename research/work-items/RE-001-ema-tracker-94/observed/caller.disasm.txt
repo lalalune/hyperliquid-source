@@ -1,0 +1,110 @@
+# capstone 5.0.7 rendering of the single GOT-indirect caller 0x474fb90..0x474fcf0
+0x474fb90  55                   push rbp
+0x474fb91  4157                 push r15
+0x474fb93  4156                 push r14
+0x474fb95  4154                 push r12
+0x474fb97  53                   push rbx
+0x474fb98  4883ec30             sub rsp, 0x30
+0x474fb9c  4889f3               mov rbx, rsi
+0x474fb9f  4989fe               mov r14, rdi
+0x474fba2  8b2e                 mov ebp, dword ptr [rsi]
+0x474fba4  3b2a                 cmp ebp, dword ptr [rdx]
+0x474fba6  0f9ec0               setle al
+0x474fba9  7518                 jne 0x474fbc3
+0x474fbab  8b4304               mov eax, dword ptr [rbx + 4]
+0x474fbae  3b4204               cmp eax, dword ptr [rdx + 4]
+0x474fbb1  0f96c0               setbe al
+0x474fbb4  750d                 jne 0x474fbc3
+0x474fbb6  8b4308               mov eax, dword ptr [rbx + 8]
+0x474fbb9  3b4208               cmp eax, dword ptr [rdx + 8]
+0x474fbbc  770d                 ja 0x474fbcb
+0x474fbbe  e9fc000000           jmp 0x474fcbf
+0x474fbc3  84c0                 test al, al
+0x474fbc5  0f85f4000000         jne 0x474fcbf
+0x474fbcb  f20f11442408         movsd qword ptr [rsp + 8], xmm0
+0x474fbd1  418b463c             mov eax, dword ptr [r14 + 0x3c]
+0x474fbd5  89442418             mov dword ptr [rsp + 0x18], eax
+0x474fbd9  498b4634             mov rax, qword ptr [r14 + 0x34]
+0x474fbdd  4889442410           mov qword ptr [rsp + 0x10], rax
+0x474fbe2  488d742414           lea rsi, [rsp + 0x14]
+0x474fbe7  488d7c2420           lea rdi, [rsp + 0x20]
+0x474fbec  ba1e000000           mov edx, 0x1e
+0x474fbf1  31c9                 xor ecx, ecx
+0x474fbf3  ff15afec0101         call qword ptr [rip + 0x101ecaf]
+0x474fbf9  488b442428           mov rax, qword ptr [rsp + 0x28]
+0x474fbfe  48b9000000004057ffff movabs rcx, 0xffff574000000000
+0x474fc08  4801c1               add rcx, rax
+0x474fc0b  48ba81aefeff7faefeff movabs rdx, 0xfffeae7ffffeae81
+0x474fc15  4839d1               cmp rcx, rdx
+0x474fc18  0f82ae000000         jb 0x474fccc
+0x474fc1e  448b642420           mov r12d, dword ptr [rsp + 0x20]
+0x474fc23  448b7c2424           mov r15d, dword ptr [rsp + 0x24]
+0x474fc28  8b7c2410             mov edi, dword ptr [rsp + 0x10]
+0x474fc2c  48b9572951cea0c84518 movabs rcx, 0x1845c8a0ce512957
+0x474fc36  48f7e9               imul rcx
+0x474fc39  4889d6               mov rsi, rdx
+0x474fc3c  48c1ee3f             shr rsi, 0x3f
+0x474fc40  48c1ea0d             shr rdx, 0xd
+0x474fc44  01d6                 add esi, edx
+0x474fc46  ff1564ec0101         call qword ptr [rip + 0x101ec64]
+0x474fc4c  85c0                 test eax, eax
+0x474fc4e  747c                 je 0x474fccc
+0x474fc50  39c5                 cmp ebp, eax
+0x474fc52  0f9ec0               setle al
+0x474fc55  7517                 jne 0x474fc6e
+0x474fc57  44396304             cmp dword ptr [rbx + 4], r12d
+0x474fc5b  0f96c0               setbe al
+0x474fc5e  750e                 jne 0x474fc6e
+0x474fc60  44397b08             cmp dword ptr [rbx + 8], r15d
+0x474fc64  f20f10442408         movsd xmm0, qword ptr [rsp + 8]
+0x474fc6a  770c                 ja 0x474fc78
+0x474fc6c  eb51                 jmp 0x474fcbf
+0x474fc6e  84c0                 test al, al
+0x474fc70  f20f10442408         movsd xmm0, qword ptr [rsp + 8]
+0x474fc76  7547                 jne 0x474fcbf
+0x474fc78  418b4628             mov eax, dword ptr [r14 + 0x28]
+0x474fc7c  85c0                 test eax, eax
+0x474fc7e  7422                 je 0x474fca2
+0x474fc80  39e8                 cmp eax, ebp
+0x474fc82  0f9fc1               setg cl
+0x474fc85  7517                 jne 0x474fc9e
+0x474fc87  498b462c             mov rax, qword ptr [r14 + 0x2c]
+0x474fc8b  394304               cmp dword ptr [rbx + 4], eax
+0x474fc8e  0f92c1               setb cl
+0x474fc91  750b                 jne 0x474fc9e
+0x474fc93  48c1e820             shr rax, 0x20
+0x474fc97  394308               cmp dword ptr [rbx + 8], eax
+0x474fc9a  7306                 jae 0x474fca2
+0x474fc9c  eb21                 jmp 0x474fcbf
+0x474fc9e  84c9                 test cl, cl
+0x474fca0  751d                 jne 0x474fcbf
+0x474fca2  4d8d7e28             lea r15, [r14 + 0x28]
+0x474fca6  4c89f7               mov rdi, r14
+0x474fca9  4889de               mov rsi, rbx
+0x474fcac  ff153efc0101         call qword ptr [rip + 0x101fc3e]
+0x474fcb2  8b4308               mov eax, dword ptr [rbx + 8]
+0x474fcb5  41894708             mov dword ptr [r15 + 8], eax
+0x474fcb9  488b03               mov rax, qword ptr [rbx]
+0x474fcbc  498907               mov qword ptr [r15], rax
+0x474fcbf  4883c430             add rsp, 0x30
+0x474fcc3  5b                   pop rbx
+0x474fcc4  415c                 pop r12
+0x474fcc6  415e                 pop r14
+0x474fcc8  415f                 pop r15
+0x474fcca  5d                   pop rbp
+0x474fccb  c3                   ret 
+0x474fccc  488d3d4ca3acfb       lea rdi, [rip - 0x4535cb4]
+0x474fcd3  488d153eb2f100       lea rdx, [rip + 0xf1b23e]
+0x474fcda  be26000000           mov esi, 0x26
+0x474fcdf  ff1583e70101         call qword ptr [rip + 0x101e783]
+0x474fce5  cc                   int3 
+0x474fce6  cc                   int3 
+0x474fce7  cc                   int3 
+0x474fce8  cc                   int3 
+0x474fce9  cc                   int3 
+0x474fcea  cc                   int3 
+0x474fceb  cc                   int3 
+0x474fcec  cc                   int3 
+0x474fced  cc                   int3 
+0x474fcee  cc                   int3 
+0x474fcef  cc                   int3 

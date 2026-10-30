@@ -1,0 +1,19 @@
+# Validation record 2026-10-30T14:34:29Z — Windows 10 22H2, Python 3.11.9, git 2.51.2.windows.1, git-lfs 3.7.1
+
+## tools/verify_imports.py
+Verified 37 imported files and all pinned source repositories.
+
+## tools/ema_update_static.py --check
+Record matches retained evidence.
+
+## unittest test_ema_update_static
+Ran 14 tests in 2.363s
+
+OK
+
+## catalogue --check
+    raise ValueError(f'Unclassified source path: {path}')
+ValueError: Unclassified source path: node\evm_kvs.rs
+
+## catalogue --check environment note
+The ValueError "Unclassified source path: nodevm_kvs.rs" is a Windows path-separator artifact of walking the pinned reference tree (os.sep backslash); it reproduces on a clean checkout on this platform before any packet files exist and is unrelated to this change. Re-run on Linux for the authoritative catalogue check.
