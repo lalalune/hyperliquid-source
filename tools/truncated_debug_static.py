@@ -8,7 +8,7 @@ import re
 import struct
 import subprocess
 from pathlib import Path
-from artifacts import ROOT, check
+from artifacts import ROOT, check, manifest_item
 from elf_index import sections
 
 PATH_VA = 0x201a1a
@@ -102,7 +102,7 @@ def rejects_boundary_byte(value, kind):
     return signed <= -65 if kind == 'bf-jle' else signed < -64
 
 def generate(binary, output):
-    identity = next(i for i in json.loads((ROOT/'provenance/artifacts.json').read_text())['files'] if i['path']=='artifacts/node/94/hl-node')
+    identity = manifest_item(ROOT,'artifacts/node/94/hl-node')
     check(binary,identity)
     data = binary.read_bytes()
     bindings = source_bindings(data)

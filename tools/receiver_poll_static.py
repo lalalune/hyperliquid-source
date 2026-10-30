@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 import struct
 import subprocess
-from artifacts import ROOT, check
+from artifacts import ROOT, check, manifest_item
 from elf_index import sections
 
 RANGES = {
@@ -114,8 +114,7 @@ def relocations(data):
     return [rows[slot] for slot in sorted(rows)]
 
 def generate(binary, output):
-    identity = next(item for item in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files']
-                    if item['path'] == 'artifacts/node/94/hl-node')
+    identity = manifest_item(ROOT, 'artifacts/node/94/hl-node')
     check(binary, identity)
     data = binary.read_bytes()
     instruction_controls(data)

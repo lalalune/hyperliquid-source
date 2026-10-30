@@ -57,6 +57,37 @@ class ArtifactTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             a.verify_pinned_pairs(self.root)
 
+    def write_manifest(self, text):
+        manifest = self.root / 'provenance/artifacts.json'
+        manifest.parent.mkdir(parents=True, exist_ok=True)
+        manifest.write_text(text)
+
+    def test_manifest_duplicate_key_rejected(self):
+        sha = self.item['sha256']
+        self.write_manifest(
+            '{"signing_fingerprint": "X", "files": [{"path": "bin/node", "size": 4, '
+            f'"sha256": "{sha}", "sha256": "{sha}"}}]}}')
+        with self.assertRaises(ValueError):
+            a.load_manifest(self.root)
+
+    def test_manifest_duplicate_path_rejected(self):
+        sha = self.item['sha256']
+        self.write_manifest(
+            '{"signing_fingerprint": "X", "files": ['
+            f'{{"path": "bin/node", "size": 4, "sha256": "{sha}"}}, '
+            f'{{"path": "bin/node", "size": 4, "sha256": "{sha}"}}]}}')
+        with self.assertRaises(ValueError):
+            a.load_manifest(self.root)
+
+    def test_manifest_loads_and_item_lookup(self):
+        sha = self.item['sha256']
+        self.write_manifest(
+            '{"signing_fingerprint": "X", "files": ['
+            f'{{"path": "bin/node", "size": 4, "sha256": "{sha}"}}]}}')
+        manifest = a.load_manifest(self.root)
+        self.assertEqual(manifest['files'][0]['sha256'], sha)
+        self.assertEqual(a.manifest_item(self.root, 'bin/node')['size'], 4)
+
     def test_corrupt_existing_file_not_overwritten(self):
         p = self.root / self.item['path']
         p.parent.mkdir()

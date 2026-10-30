@@ -8,7 +8,7 @@ import re
 import struct
 import subprocess
 
-from artifacts import ROOT, check
+from artifacts import ROOT, check, manifest_item
 from elf_index import sections
 
 START, END = 0x4726A50, 0x4726D2C
@@ -98,8 +98,7 @@ def relocations(data):
 
 
 def run(binary, output):
-    item = next(x for x in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files']
-                if x['path'] == 'artifacts/node/94/hl-node')
+    item = manifest_item(ROOT, 'artifacts/node/94/hl-node')
     check(binary, item)
     data = binary.read_bytes()
     controls = static_controls(data)

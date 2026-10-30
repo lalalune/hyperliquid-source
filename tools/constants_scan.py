@@ -33,6 +33,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
+from artifacts import load_manifest
 from elf_index import sections, unwind_index  # noqa: E402
 
 REFERENCE = ROOT / 'references/can1357-hl/global_constants/aws_name.rs'
@@ -48,7 +49,7 @@ class ScanError(ValueError):
 def artifact(release):
     path = ROOT / f'artifacts/node/{release}/hl-node'
     data = path.read_bytes()
-    record = json.loads((ROOT / 'provenance/artifacts.json').read_text())
+    record = load_manifest(ROOT)
     expected = next((f['sha256'] for f in record['files']
                      if f['path'] == f'artifacts/node/{release}/hl-node'), None)
     if expected is None:

@@ -28,6 +28,34 @@ def check(path, item):
         raise ValueError(f'Artifact size/SHA-256 mismatch: {path}')
 
 
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f'Duplicate key in artifact manifest: {key}')
+        result[key] = value
+    return result
+
+
+def load_manifest(root=ROOT):
+    """Parse the artifact manifest strictly.
+
+    A duplicated key inside one entry (plain json.loads keeps the last
+    value) or a duplicated path entry lets a substitute binary inherit a
+    pinned identity, so both are rejected instead of silently resolved.
+    """
+    manifest = json.loads((root / 'provenance/artifacts.json').read_text(),
+                          object_pairs_hook=_unique_object)
+    paths = [item['path'] for item in manifest['files']]
+    if len(set(paths)) != len(paths):
+        raise ValueError('Duplicate path in artifact manifest')
+    return manifest
+
+
+def manifest_item(root, relative):
+    return next(i for i in load_manifest(root)['files'] if i['path'] == relative)
+
+
 def fetch_one(root, item):
     path = root / item['path']
     if path.exists():
@@ -88,7 +116,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command', choices=['verify', 'fetch'])
     args = parser.parse_args()
-    manifest = json.loads((ROOT / 'provenance/artifacts.json').read_text())
+    manifest = load_manifest()
     for item in manifest['files']:
         if args.command == 'fetch':
             fetch_one(ROOT, item)

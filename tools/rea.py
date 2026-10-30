@@ -9,7 +9,7 @@ import subprocess
 import sys
 
 from doctor import locate_ghidra
-from artifacts import check
+from artifacts import check, manifest_item
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = json.loads((ROOT / 'config/rea.json').read_text())
@@ -62,7 +62,7 @@ def environment(node):
 
 def target(name):
     relative = CONFIG['targets'][name]
-    item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == relative)
+    item = manifest_item(ROOT, relative)
     check(ROOT / relative, item)
     return {'path': str(ROOT / relative), 'sha256': item['sha256'], 'provider_id': CONFIG['provider']}
 

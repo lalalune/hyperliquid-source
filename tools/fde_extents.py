@@ -276,9 +276,9 @@ def main():
     p.add_argument('--release', choices=['94', '115'], required=True)
     p.add_argument('--output-dir', type=Path, default=ROOT / 'work/index')
     args = p.parse_args()
-    from artifacts import check
+    from artifacts import check, manifest_item
     rel = f'artifacts/node/{args.release}/hl-node'
-    item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == rel)
+    item = manifest_item(ROOT, rel)
     check(ROOT / rel, item)
     summary = generate(ROOT / rel, args.output_dir / f'node-{args.release}-fde')
     expected = json.loads((ROOT / f'research/imported/hl-node-{args.release}.inventory.json').read_text())['fde_count_eh_frame_hdr']

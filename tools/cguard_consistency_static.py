@@ -2,7 +2,7 @@
 """Target94 configuration consistency/comparison and conditional counter evidence."""
 import argparse,hashlib,json,re,struct,subprocess
 from pathlib import Path
-from artifacts import ROOT,check
+from artifacts import ROOT,check,manifest_item
 from elf_index import sections
 RANGES = {'configuration-path': (21210480, 21212780), 'value-comparator': (21256240, 21256526), 'handle-construction': (20860128, 20860475)}
 CONTROLS = {21210507: '498d6f0148392f753a', 21210530: '803dc7053404024c897c24204c897c24380f9444246c66c744246d0001c74424680a0000004c897c2450eb2c', 21210644: 'f0410fb04d000f8505060000', 21210656: '49396d687531', 21210726: 'e8c5b1000084c00f85d8020000', 21211444: '498d7d68488db42488000000ba88000000ff1595363304', 21211599: 'e85cae000084c00f857b010000', 21211947: '4883f9ff0f84d3010000488d4101498945584883f9640f83a6010000', 21212098: '31c9b001f0410fb04d00756e', 21256240: '0fb6474c3a464c75720fb6474d3a464d75698b47483b464875610fb6474e3a464e7558', 21256290: '31c0483b07488b0671424839d80f85d1000000', 21256375: '488b5710483b56100f8581000000488b4608488b4f084989fe4889cf4989f74889c6ff15998a32044c89fe4c89f785c0755d', 21256432: '488b5728483b5628754c488b4620488b4f204989fe4889cf4989f74889c6ff15648a32044c89fe4c89f785c07528', 21256483: '488b5740483b56407519488b7638488b7f38ff153d8a320485c00f94c05b415e415fc331c05b415e415fc3cccc'}
@@ -33,7 +33,7 @@ def relocations(data):
     return [result[s] for s in sorted(result)]
 
 def generate(binary,output):
-    identity=next(i for i in json.loads((ROOT/'provenance/artifacts.json').read_text())['files'] if i['path']=='artifacts/node/94/hl-node')
+    identity=manifest_item(ROOT,'artifacts/node/94/hl-node')
     check(binary,identity)
     data=binary.read_bytes();controls(data);rela=relocations(data)
     frames=subprocess.check_output(['readelf','-wf',str(binary)],text=True)

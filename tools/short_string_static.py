@@ -8,7 +8,7 @@ import re
 import struct
 import subprocess
 
-from artifacts import ROOT, check
+from artifacts import ROOT, check, manifest_item
 from elf_index import sections
 
 RANGES = {'constructor': (0x1449A80, 0x144A009), 'packer': (0x144A010, 0x144A069),
@@ -94,8 +94,7 @@ def decoded_reference(line):
 
 
 def generate(binary, output):
-    identity = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files']
-                    if i['path'] == 'artifacts/node/94/hl-node')
+    identity = manifest_item(ROOT, 'artifacts/node/94/hl-node')
     check(binary, identity)
     data = binary.read_bytes()
     byte_controls, relocs = controls(data), relevant_relocations(data)

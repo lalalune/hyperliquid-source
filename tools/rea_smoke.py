@@ -5,13 +5,13 @@ from pathlib import Path
 import subprocess
 import sys
 
-from artifacts import ROOT, check
+from artifacts import ROOT, check, load_manifest
 
 version = subprocess.check_output([sys.executable, str(ROOT / 'tools/rea.py'), '--version'], text=True).strip()
 config = json.loads((ROOT / 'config/rea.json').read_text())
 if version != config['version']:
     raise SystemExit('Unexpected REA CLI version')
-manifest = json.loads((ROOT / 'provenance/artifacts.json').read_text())
+manifest = load_manifest()
 out = ROOT / 'work/rea-smoke'
 out.mkdir(parents=True, exist_ok=True)
 for release in ['94', '115']:

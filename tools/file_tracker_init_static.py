@@ -2,7 +2,7 @@
 """Target94 file-tracker initialization observations; static only."""
 import argparse,hashlib,json,re,struct,subprocess
 from pathlib import Path
-from artifacts import ROOT,check
+from artifacts import ROOT,check,manifest_item
 from elf_index import sections
 RANGES = {'initializer': (20760960, 20762239), 'regular-mode-predicate': (21276432, 21276804), 'metadata-path': (21285168, 21285441), 'load-path': (21288048, 21289819), 'initial-write-path': (21295152, 21296189)}
 CONTROLS = {20761120: 'ff15c21f3a0484c07423', 20761236: 'e8972508004885c00f85d2020000', 20761287: '48c743501a40f600c743580000000048b8000000000000144048894330', 20761376: 'ff15ca1e3a04837c24080175074c8b642410eb3a', 20761431: 'e814090800488b4424084c8b6424104889c148f7d97115', 20761610: '488d354cffe1fe488d0d70a02904488d7c2408488d542438', 20761640: '48b8000000000000144048894330c7433800000000', 20761677: '48c743501a40f600c743580000000048c743180000000048c743200800000048c743280000000048894348', 20761741: '48892b4c896b084c897310488b44246048894318488b44246848894320488b4424704889432848b8000000000000144048', 21276521: 'b800f00000234424483d00800000400f94c5', 21295197: '4883fa09752248b82f6465762f6e756c483345000fb64d084883f16c4809c1750c31c0e9e6020000'}
@@ -34,7 +34,7 @@ def relocations(data):
     return [result[s] for s in sorted(result)]
 
 def generate(binary,output):
-    identity=next(i for i in json.loads((ROOT/'provenance/artifacts.json').read_text())['files'] if i['path']=='artifacts/node/94/hl-node')
+    identity=manifest_item(ROOT,'artifacts/node/94/hl-node')
     check(binary,identity)
     data=binary.read_bytes();controls(data);rela=relocations(data)
     frames=subprocess.check_output(['readelf','-wf',str(binary)],text=True)

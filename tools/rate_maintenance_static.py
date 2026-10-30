@@ -2,7 +2,7 @@
 """Target94 rate-limiter-associated guarded maintenance/reset evidence."""
 import argparse,hashlib,json,re,struct,subprocess
 from pathlib import Path
-from artifacts import ROOT,check
+from artifacts import ROOT,check,manifest_item
 from elf_index import sections
 RANGES = {'guarded-caller': (74533904, 74534907), 'maintenance-path': (80263264, 80263708), 'iterator-helper': (75992096, 75993472)}
 CONTROLS = {74533921: '440fb677204180fe010f8533030000', 74533957: '4c89ffe8136c5700', 74534054: 'f00fb04d000f85a5000000', 74534446: 'ff1554960501489885c04c0f45f84d85ff0f98c00f9fc128c149', 74534712: 'e8131e2400', 74534738: 'ff1558a00501', 74534744: '31c9b001f00fb04d007550', 74534755: '4489f0', 80263274: '488b87780100004885c07472', 80263364: 'e857d3beff', 80263429: '498d5611beff000000ff15e428ae00', 80263444: '498d46014889c148c1e9034883e0f84829c84983fe08490f42c6eb02', 80263474: '48c783300100000000000048898328010000', 80263521: '498d5611beff000000ff158828ae00', 80263536: '498d46014889c148c1e9034883e0f84829c84983fe08490f42c6eb02', 80263566: '48c783780100000000000048898370010000', 80263584: '31c0483b43187010488d7b18488d359d77ab00e8383fa9ff', 80263637: '498d5611beff000000ff151428ae00', 80263652: '498d46014889c148c1e9034883e0f84829c84983fe08490f42c6eb02', 80263682: '48c783a801000000000000488983a0010000'}
@@ -33,7 +33,7 @@ def relocations(data):
     return [result[s] for s in sorted(result)]
 
 def generate(binary,output):
-    identity=next(i for i in json.loads((ROOT/'provenance/artifacts.json').read_text())['files'] if i['path']=='artifacts/node/94/hl-node')
+    identity=manifest_item(ROOT,'artifacts/node/94/hl-node')
     check(binary,identity)
     data=binary.read_bytes();controls(data);rela=relocations(data)
     frames=subprocess.check_output(['readelf','-wf',str(binary)],text=True)
