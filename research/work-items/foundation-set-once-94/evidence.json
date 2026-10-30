@@ -1,0 +1,102 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "windows": [
+    {
+      "start_va": "0x1515880",
+      "fde_end_va_exclusive": "0x15158b2",
+      "fde_bytes": 50,
+      "fde_body_sha256": "4a53e3c3f2546e595f702627e8b080639dd741625aeb6b3ad99222e34d3b86aa",
+      "fde_section_offset": "0x14454",
+      "padding_int3_bytes": 14
+    },
+    {
+      "start_va": "0x15158c0",
+      "fde_end_va_exclusive": "0x1515900",
+      "fde_bytes": 64,
+      "fde_body_sha256": "83fa385dace721599f793a015859482061bbbf42d813f1f7d1531221daf5bade",
+      "fde_section_offset": "0x14468",
+      "padding_int3_bytes": 0
+    },
+    {
+      "start_va": "0x1515900",
+      "fde_end_va_exclusive": "0x1515937",
+      "fde_bytes": 55,
+      "fde_body_sha256": "c45ada160b7e3c5a9c094c2cf9da35dba7bf4d2df8d52d0e1a0f52637d1f4798",
+      "fde_section_offset": "0x1447c",
+      "padding_int3_bytes": 9
+    },
+    {
+      "start_va": "0x1515940",
+      "fde_end_va_exclusive": "0x1515979",
+      "fde_bytes": 57,
+      "fde_body_sha256": "012e552af2390ddc59a03938d6cb84918bd4bd60b4fe1c2f166406d40c043aac",
+      "fde_section_offset": "0x14490",
+      "padding_int3_bytes": 7
+    },
+    {
+      "start_va": "0x1515980",
+      "fde_end_va_exclusive": "0x15159b9",
+      "fde_bytes": 57,
+      "fde_body_sha256": "20614ce052a2f28fe45b883b713759d599af0200237ec697382a5f2b3b007aee",
+      "fde_section_offset": "0x144a4",
+      "padding_int3_bytes": 7
+    }
+  ],
+  "cells": {
+    "byte_cell": {
+      "window": "0x1515880",
+      "field": "0xa0(rdi)",
+      "field_size": "byte",
+      "sentinel": 7,
+      "input_range": "1..7",
+      "stored": "input - 1"
+    },
+    "table_cell": {
+      "window": "0x15158c0",
+      "field": "0xa0(rdi)",
+      "field_size": "byte",
+      "sentinel": 7,
+      "input_range": "0..6",
+      "table": "0x5040302010006",
+      "table_map": "0->6, 1->0, 2->1, 3->2, 4->3, 5->4, 6->5",
+      "stored": "table[input]"
+    },
+    "flag_cells": [
+      {
+        "window": "0x1515900",
+        "flag_field": "0x78(rdi)",
+        "flag_test": "low byte == 0 means unset",
+        "flag_store": "full u32 value 1",
+        "value_field": "0x7c(rdi)",
+        "input_range": "1..12",
+        "remap": "12 stored as 0"
+      },
+      {
+        "window": "0x1515940",
+        "flag_field": "0x80(rdi)",
+        "flag_test": "full u32 == 1 means set",
+        "flag_store": "full u32 value 1",
+        "value_field": "0x84(rdi)",
+        "input_range": "0..59",
+        "remap": null
+      },
+      {
+        "window": "0x1515980",
+        "flag_field": "0x88(rdi)",
+        "flag_test": "full u32 == 1 means set",
+        "flag_store": "full u32 value 1",
+        "value_field": "0x8c(rdi)",
+        "input_range": "0..60",
+        "remap": null
+      }
+    ]
+  },
+  "protocol": "out-of-range input returns 0; an unset cell stores the input and returns 8; a set cell returns 8 when the stored value matches and 1 when it differs",
+  "distinction": "mechanically distinct from the submitted once-flag packet (PR #174): these five windows contain no lock prefix, no atomic exchange, no call, no thread-local test, and no tail jump through an imported slot; every path ends in a plain ret",
+  "claim": "these windows implement the same set-once protocol with per-window fields and ranges",
+  "inferred_label": null,
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
