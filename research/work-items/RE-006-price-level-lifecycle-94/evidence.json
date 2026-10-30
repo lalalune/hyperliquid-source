@@ -1,0 +1,312 @@
+{
+  "anchors": [
+    {
+      "bytes": 43,
+      "end_va": "0x430f876",
+      "file_offset": "0x430e84b",
+      "label": "side-price-key",
+      "observation": "select -price/book+0x80 for side byte 0, +price/book+0x98 otherwise",
+      "raw_hex": "488b4c24704889ce48f7de488dbd80000000488d8598000000807c244800480f45f1480f45f8e81a402900",
+      "sha256": "bb254d219c407539ec6fb946a767f0cd91f472b677dea1623edda91656cf599a",
+      "start_va": "0x430f84b"
+    },
+    {
+      "bytes": 27,
+      "end_va": "0x430fa0b",
+      "file_offset": "0x430e9f0",
+      "label": "allocation-call",
+      "observation": "prepare and call the allocation/accounting helper",
+      "raw_hex": "4889ef4c89ea488b8c24800c00004c8b842418020000e8b58bfdff",
+      "sha256": "eb615a8c57379608d469af432ff0945ab0f45cbc93afcefeb8155831be419fb5",
+      "start_va": "0x430f9f0"
+    },
+    {
+      "bytes": 26,
+      "end_va": "0x430f98a",
+      "file_offset": "0x430e970",
+      "label": "new-slot-links",
+      "observation": "copy the level tail Option into the new slot previous link and clear its next Option",
+      "raw_hex": "410f104424100f298424c005000048c78424d005000000000000",
+      "sha256": "8746446bc4de58b52fe66c0fad63d063b6080f9358d12ee86d2f04755d41af13",
+      "start_va": "0x430f970"
+    },
+    {
+      "bytes": 107,
+      "end_va": "0x430fa79",
+      "file_offset": "0x430ea0e",
+      "label": "level-tail-append",
+      "observation": "initialize empty head, validate old tail, write old-tail next and new tail",
+      "raw_hex": "41803c2400750d49c70424010000004d8974240841837c2410017541498b4c2418488b8424c0000000483b080f8393140000488b842428010000488b004869c9f8000000833c08020f84771400004801c848c74010010000004c89701849c7442410010000004d89742418",
+      "sha256": "11586a4299d6af2f6fd7b743c9bced23d9b1e92bc1146709165c95342c819934",
+      "start_va": "0x430fa0e"
+    },
+    {
+      "bytes": 104,
+      "end_va": "0x42e86d6",
+      "file_offset": "0x42e766e",
+      "label": "insert-total-add",
+      "observation": "add the slot +0xc8 qword to the supplied total, overflow diagnostic then u64::MAX",
+      "raw_hex": "4d8b274c89e04c01e8723e4989074989e7baf80000004c89ff4889deff1550594801498b5e204c89f74889de4c89fae8eec52b004889d84881c4680200005b415c415d415e415f5dc3488d35ba42430131ffff15caaa48014d01ec48c7c0ffffffff490f43c4eba3",
+      "sha256": "82c57bc752b6963bde6f75121c119660a47a5b8fca58ac9ef4c00db0f96e0066",
+      "start_va": "0x42e866e"
+    },
+    {
+      "bytes": 59,
+      "end_va": "0x42e8618",
+      "file_offset": "0x42e75dd",
+      "label": "insert-size-load",
+      "observation": "load the inserted slot's unsigned accounting quantity from +0xc8",
+      "raw_hex": "8b86f0000000894424480f1086e00000000f11442438488b86d80000000fb68ec2000000488bb6a00000004c8babc800000048c744240800000000",
+      "sha256": "7357a5a6ce2ef51259a6842f06e421906d7423de2213e77e530c68f88ca0ceab",
+      "start_va": "0x42e85dd"
+    },
+    {
+      "bytes": 165,
+      "end_va": "0x45a4d50",
+      "file_offset": "0x45a3cab",
+      "label": "slab-append-or-reuse",
+      "observation": "increment occupied count, append at len or replace discriminant-2 free slot",
+      "raw_hex": "488b4710488b4f1848ffc148c7c2ffffffff480f45d1488957184839c6754c4d3b3e7514488b2b4c8b63504c8b6b584c89f7ff15d5f71c014969fff800000049037e08baf80000004889deff15e4921c0149ffc74d897e104d897e204883c4185b415c415d415e415f5dc37338498b7e084969c7f8000000833c070275274801c7488b470849894620baf80000004889de4883c4185b415c415d415e415f5dff2590921c01",
+      "sha256": "f43d52b00add325c8e6cb10f4acb51208d0b482c9f0a594c5634447c0ddcd297",
+      "start_va": "0x45a4cab"
+    },
+    {
+      "bytes": 39,
+      "end_va": "0x42e8c2b",
+      "file_offset": "0x42e7c04",
+      "label": "remove-key-guard",
+      "observation": "key<len and slot discriminant!=2; otherwise return absent discriminant 2",
+      "raw_hex": "483b56107315488b46084869faf80000004c8b24384983fc02750c48c70302000000e9f9020000",
+      "sha256": "953b545ed49f0dade81c365e27125fd32f8b4f3554c5ef323da64262ad66efd2",
+      "start_va": "0x42e8c04"
+    },
+    {
+      "bytes": 34,
+      "end_va": "0x42e8d5e",
+      "file_offset": "0x42e7d3c",
+      "label": "slab-free-list-delete",
+      "observation": "write vacant=2, link old free head, decrement count with floor 0, set free head=key",
+      "raw_hex": "48c7000200000048897808488b7e184531c94883ef014c0f43cf4c894e1848895620",
+      "sha256": "7ff3c5876d7f93438a161de3e86332e2ed69529f1833a7d7922168eabdfa68e1",
+      "start_va": "0x42e8d3c"
+    },
+    {
+      "bytes": 26,
+      "end_va": "0x42e8d24",
+      "file_offset": "0x42e7d0a",
+      "label": "remove-size-load",
+      "observation": "load the removed slot's unsigned accounting quantity from +0xc8",
+      "raw_hex": "4c8bb8c80000004c8bb0d8000000448b88f000000044894c2450",
+      "sha256": "90d93228bcdf8851432ebed115640464e2483ac79111184684a6b0188ec8fc21",
+      "start_va": "0x42e8d0a"
+    },
+    {
+      "bytes": 34,
+      "end_va": "0x42e8e23",
+      "file_offset": "0x42e7e01",
+      "label": "remove-total-sub",
+      "observation": "subtract removed slot +0xc8 qword from total, underflow diagnostic then zero",
+      "raw_hex": "4c8b284d29fd73174531ed488d357d3b430131ffff1575a34801488b4424304c8928",
+      "sha256": "4aa62662b120b1fb53b7ab2c78770b4186571b508a33a5eddba208ff7a9abfdd",
+      "start_va": "0x42e8e01"
+    },
+    {
+      "bytes": 64,
+      "end_va": "0x42f84f9",
+      "file_offset": "0x42f74b9",
+      "label": "remove-side-price-key",
+      "observation": "select book+0x80/-price or book+0x98/+price from one-bit side",
+      "raw_hex": "488db380000000488d83980000000fb64c240ff6c101480f45f0488b8424a80000004885c00f887b0200004889c248f7daf6c101480f45d04889942428040000",
+      "sha256": "43033fca05bc50faf07486758df4e610bc41e9dc0d3cee9af83053bb5cfffe0e",
+      "start_va": "0x42f84b9"
+    },
+    {
+      "bytes": 84,
+      "end_va": "0x42f85e4",
+      "file_offset": "0x42f7590",
+      "label": "unlink-prev-or-head",
+      "observation": "validate previous slot then replace its next; absent previous replaces level head",
+      "raw_hex": "488d3d294442014c3b4b100f83e8010000488b53084d69c1f800000042833c02020f84d20100004c01c2488b7c246848897a104c8b4424704c8942184885ff752c4c895408f04c894c08f8807c08e000756feb51",
+      "sha256": "88567a3c4c183928d56f24d282782280e1b3fe3d37520b52878d835cda29841c",
+      "start_va": "0x42f8590"
+    },
+    {
+      "bytes": 88,
+      "end_va": "0x42f863c",
+      "file_offset": "0x42f75e4",
+      "label": "unlink-next-or-tail",
+      "observation": "validate next slot then replace its previous; absent next replaces level tail",
+      "raw_hex": "488b7c246848897c08e04c8b4424704c894408e84885ff74d4488d3dd44342014c3b43100f837b010000488b53084d69c0f800000042833c02020f84650100004c01c24c89124c894a08807c08e000751c807c08f0007515",
+      "sha256": "51a8f022469bd81206602b9631560328c257b9bd7c9a23c1fcadd3a28759e2de",
+      "start_va": "0x42f85e4"
+    },
+    {
+      "bytes": 28,
+      "end_va": "0x42f8651",
+      "file_offset": "0x42f7635",
+      "label": "remove-empty-level",
+      "observation": "when both level option discriminants are zero, call the map removal helper",
+      "raw_hex": "807c08f0007515488dbc24c0000000488d942428040000e80fb06400",
+      "sha256": "338c257ed9de3a3a2073b5f0907117e0cabc2cda359b350cb3025a3dc22cb4d0",
+      "start_va": "0x42f8635"
+    }
+  ],
+  "call_edges": [
+    {
+      "bytes": "e8b58bfdff",
+      "label": "insert body -> accounting/allocation",
+      "site_va": "0x430fa06",
+      "target_va": "0x42e85c0"
+    },
+    {
+      "bytes": "e8eec52b00",
+      "label": "accounting/allocation -> slab insert",
+      "site_va": "0x42e869d",
+      "target_va": "0x45a4c90"
+    },
+    {
+      "bytes": "e80a0effff",
+      "label": "removal caller -> slab remove/accounting",
+      "site_va": "0x42f7de1",
+      "target_va": "0x42e8bf0"
+    }
+  ],
+  "captured_binary_executed": false,
+  "coordinate_system": "linked ELF virtual addresses; .text file offset = VA - 0x1000",
+  "fde_count": 121299,
+  "functions": [
+    {
+      "bytes": 15152,
+      "direct_call_hits": [
+        "0x42d58a8",
+        "0x430885a",
+        "0x4ceb5c9"
+      ],
+      "end_va": "0x4311140",
+      "file_offset": "0x430c610",
+      "label": "resting-insert-body",
+      "sha256": "45535616036f3ea0c8ae705efb4c353decc295d83ae1187f7b26bca65b6a17bd",
+      "start_va": "0x430d610"
+    },
+    {
+      "bytes": 333,
+      "direct_call_hits": [
+        "0x430fa06",
+        "0x431adf6"
+      ],
+      "end_va": "0x42e870d",
+      "file_offset": "0x42e75c0",
+      "label": "insert-accounting-and-allocation",
+      "sha256": "334bd8ac6c0baed15a867c6be677401827821fb42658746822a2dd56d3fab597",
+      "start_va": "0x42e85c0"
+    },
+    {
+      "bytes": 307,
+      "direct_call_hits": [
+        "0x42e869d"
+      ],
+      "end_va": "0x45a4dc3",
+      "file_offset": "0x45a3c90",
+      "label": "slab-insert-f8",
+      "sha256": "cb91deb28860f3066506bfbc124dab4ceeba0266edc4ba49273021c6f5e72744",
+      "start_va": "0x45a4c90"
+    },
+    {
+      "bytes": 4004,
+      "direct_call_hits": [
+        "0x42f7838",
+        "0x4303ced",
+        "0x430f5e3",
+        "0x4d1ec12"
+      ],
+      "end_va": "0x42f8834",
+      "file_offset": "0x42f6890",
+      "label": "removal-caller-and-unlink",
+      "sha256": "5785b9d2d7e290883954253bdd15c9651219dab25590249841a729ed11c89787",
+      "start_va": "0x42f7890"
+    },
+    {
+      "bytes": 903,
+      "direct_call_hits": [
+        "0x42f7de1",
+        "0x42f8d91"
+      ],
+      "end_va": "0x42e8f77",
+      "file_offset": "0x42e7bf0",
+      "label": "slab-remove-f8-and-accounting",
+      "sha256": "5ad03f1317b206980179a7e90c675f5e3cc5d0e233e3900017c259d845885a9f",
+      "start_va": "0x42e8bf0"
+    }
+  ],
+  "limits": "One linked resting-order insertion/removal family only. Labels are inferred roles; no external action dispatcher, concurrency contract, duplicate predicate, full matcher, or source equivalence is claimed.",
+  "source_locations": [
+    {
+      "column": 21,
+      "line": 1048,
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/book/book/mod.rs",
+      "path_va": "0x200d17",
+      "slot_va": "0x571c9a8"
+    },
+    {
+      "column": 56,
+      "line": 1286,
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/book/book/mod.rs",
+      "path_va": "0x200d17",
+      "slot_va": "0x571c9c0"
+    },
+    {
+      "column": 56,
+      "line": 1294,
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/book/book/mod.rs",
+      "path_va": "0x200d17",
+      "slot_va": "0x571c9d8"
+    },
+    {
+      "column": 43,
+      "line": 514,
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/book/book/impl_insert_order.rs",
+      "path_va": "0x1eaba7",
+      "slot_va": "0x571c9f0"
+    },
+    {
+      "column": 59,
+      "line": 517,
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/book/book/impl_insert_order.rs",
+      "path_va": "0x1eaba7",
+      "slot_va": "0x571ca08"
+    },
+    {
+      "column": 56,
+      "line": 445,
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/book/book/impl_insert_order.rs",
+      "path_va": "0x1eaba7",
+      "slot_va": "0x571ca20"
+    },
+    {
+      "column": 85,
+      "line": 768,
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/book/book/impl_insert_order.rs",
+      "path_va": "0x1eaba7",
+      "slot_va": "0x571ca38"
+    },
+    {
+      "column": 17,
+      "line": 167,
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/book/book/impl_insert_order.rs",
+      "path_va": "0x1eaba7",
+      "slot_va": "0x571ca50"
+    },
+    {
+      "column": 21,
+      "line": 79,
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/slab/slab.rs",
+      "path_va": "0x1e8a36",
+      "slot_va": "0x572afd0"
+    }
+  ],
+  "target": {
+    "bytes": 91774280,
+    "path": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  }
+}
