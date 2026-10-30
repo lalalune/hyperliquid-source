@@ -107,8 +107,8 @@ def fde_index(elf: Elf):
             raise EvidenceError(f"FDE pc_begin mismatch at {fde_va:#x}")
         starts.append(pc)
         ends.append(pc + struct.unpack_from("<I", d, fo + 12)[0])
-    if starts != sorted(starts):
-        raise EvidenceError(".eh_frame_hdr table not sorted")
+    if any(b <= a for a, b in zip(starts, starts[1:])):
+        raise EvidenceError(".eh_frame_hdr table not strictly sorted")
     return starts, ends
 
 

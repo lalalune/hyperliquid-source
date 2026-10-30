@@ -178,6 +178,20 @@ class InfoRequestPathTests(unittest.TestCase):
         self.assertTrue(irp.is_fde_start(starts, SNAPSHOT_GATE))
         self.assertFalse(irp.is_fde_start(starts, DESER + 1))
 
+    def test_duplicate_fde_start_rejected(self):
+        data = bytearray(DATA)
+        addr, off, _size = self.elf.sections[".eh_frame_hdr"]
+        count = struct.unpack_from("<I", data, off + 8)[0]
+        self.assertGreater(count, 10_000)
+        pos = off + 12 + 8 * 10_000
+        pc_prev = addr + struct.unpack_from("<i", data, pos - 8)[0]
+        fde_va = addr + struct.unpack_from("<i", data, pos + 4)[0]
+        struct.pack_into("<i", data, pos, pc_prev - addr)
+        fo = self.elf.off(fde_va)
+        struct.pack_into("<i", data, fo + 8, pc_prev - (fde_va + 8))
+        with self.assertRaisesRegex(irp.EvidenceError, "not strictly sorted"):
+            irp.fde_index(irp.Elf(bytes(data)))
+
     def test_template_anchor_nul_prefix(self):
         leas = irp.lea_targets(self.elf)
         tpl = next(s for s in self.r["side_effects"] if s["kind"] == "template")
