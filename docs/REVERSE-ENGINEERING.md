@@ -9,6 +9,7 @@ make verify test
 make catalogue-check
 make index
 make fde-index
+make fde-gaps
 python3 tools/ghidra_plan.py --release 94
 ```
 
@@ -21,6 +22,9 @@ No component ownership or function equivalence follows from this index.
 extents, checks them against that index and lists uncovered `.text` gaps. An
 FDE extent is still not a validated function boundary; see
 [RE-001 FDE extents](../research/work-items/RE-001-fde-extents/README.md).
+`make fde-gaps` decodes the gaps that hold more than `0xcc` with GNU objdump,
+splits their non-fill bytes into islands and lists validated references into
+them; see [RE-001 FDE gap classes](../research/work-items/RE-001-fde-gap-classes/README.md).
 
 `ghidra_plan.py` prints a static import command for a fresh, digest-named
 project under `work/ghidra/`. Set `GHIDRA_HOME` when Ghidra is not discovered.
@@ -58,6 +62,7 @@ configuration or assume an REA server is connected.
   disassembly, cross-reference and function-boundary validation.
 - A fail-closed unwind indexer for the captured nodes' exact ELF/header encoding.
 - A fail-closed FDE extent decoder, cross-checked against GNU readelf for both nodes.
+- An FDE gap classifier with validated references into code that has no FDE.
 
 The local preflight on 2026-10-28 found Python, Git LFS, GPG, ripgrep,
 LLVM 22.1.4, Java 21.0.10, Ghidra 12.1.4 and both Rust versions. That describes
