@@ -56,14 +56,19 @@ sha256 `84d8647a...`), reached only through GOT slot `0x576f8f0` by a single
 or `lea` reference exists anywhere in `.text`.
 
 Struct offsets (observation from load/store operands only): `f64 @ +0x0`,
-`f64 @ +0x8`, `f64 @ +0x10`, `{u64, u32} @ +0x18`. The two lanes are updated
-as one `movupd` pair and the accessor sites divide lane0 by lane1, so the
-inferred labels are `num @ +0x0` and `denom @ +0x8` (inferred, consistent with
-the `self.denom` message below).
+`f64 @ +0x8`, `f64 @ +0x10`, and a 12-byte `{qword, dword} @ +0x18` copied
+from the sample argument. The two lanes are updated as one `movupd` pair and
+the accessor sites divide lane0 by lane1, so the inferred labels are
+`num @ +0x0` and `denom @ +0x8` (inferred, consistent with the `self.denom`
+message below). The `{qword, dword}` field split is observed from the copy;
+the seconds/nanoseconds naming used below for readability is inferred and not
+yet bound — the elapsed helper's own callee performs date-style arithmetic on
+the leading dwords, so the unit interpretation stays open until that family
+is bound.
 
 Update flow, per decoded instructions:
 
-1. If the timestamp's low seconds dword at `+0x18` is zero, the interval is
+1. If the timestamp's low dword at `+0x18` is zero, the interval is
    the shared constant `1.0` at `0x20a730` and the elapsed helper is skipped.
    This is a low-dword test only; a timestamp with zero low dword but nonzero
    high dword would also take this path (limitation, not a claim about
@@ -84,7 +89,7 @@ Update flow, per decoded instructions:
    `1.0`.
 6. Lanes update: `num' = sample*dt + decay*num`, `denom' = dt + decay*denom`
    (`mulsd`/`unpcklpd`/`mulpd`/`addpd`/`movupd` at `0x1479293..0x14792b7`),
-   then the 12-byte sample timestamp is copied to `+0x18`.
+   then the 12-byte sample timestamp fields are copied to `+0x18`.
 
 The accessor assert `assertion failed: self.denom > 0.` at
 `ema_tracker.rs:59:13` (Location `0x566c5c0`, shared message at `0x21a843`)

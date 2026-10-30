@@ -266,7 +266,7 @@ def analyze(data):
                     inferred_label='ema_tracker time-decayed num/denom update'),
         struct_layout=dict(observed=dict(num='f64 @ +0x0', denom='f64 @ +0x8',
                                          tau='f64 @ +0x10',
-                                         last_timestamp='{u64 secs, u32 nanos} @ +0x18'),
+                                         last_timestamp='{qword, dword} @ +0x18 (field split observed; unit naming inferred)'),
                            claim='observation from load/store offsets only'),
         semantics=dict(
             default_interval=dict(when='last_timestamp secs dword == 0',

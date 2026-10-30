@@ -77,7 +77,8 @@ class EmaUpdateEvidenceTests(unittest.TestCase):
         self.assertEqual(layout['num'], 'f64 @ +0x0')
         self.assertEqual(layout['denom'], 'f64 @ +0x8')
         self.assertEqual(layout['tau'], 'f64 @ +0x10')
-        self.assertEqual(layout['last_timestamp'], '{u64 secs, u32 nanos} @ +0x18')
+        self.assertEqual(layout['last_timestamp'],
+                         '{qword, dword} @ +0x18 (field split observed; unit naming inferred)')
 
     def test_accessor_sites_share_one_location(self):
         sites = self.result['accessor_sites']
