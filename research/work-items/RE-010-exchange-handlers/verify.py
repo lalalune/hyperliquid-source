@@ -27,12 +27,32 @@ def fail(msg):
     raise SystemExit(1)
 
 
+PACKET_FILES = frozenset({
+    'README.md', 'exchange-dispatch.json', 'objdump-excerpts.txt',
+})
+
+
 def main():
+    listed = set()
     for line in (HERE / 'MANIFEST.sha256').read_text().splitlines():
         want, name = line.split('  ', 1)
         got = hashlib.sha256((HERE / name).read_bytes()).hexdigest()
         if got != want:
             fail(f'{name} sha256 {got} != manifest {want}')
+        listed.add(name)
+    # This packet's manifest pins the evidence files and README.md; this
+    # script is committed unlisted. Comparing the manifest only against
+    # the directory is not enough: an evidence file deleted together with
+    # its manifest row leaves the two sets equal. So the listed set must
+    # also equal the pinned packet file set, and the directory must not
+    # hold unlisted files.
+    if listed != PACKET_FILES:
+        fail(f'manifest file set differs from the pinned packet files: '
+             f'missing rows {sorted(PACKET_FILES - listed)}, unexpected rows {sorted(listed - PACKET_FILES)}')
+    present = {p.name for p in HERE.iterdir() if p.is_file()} - {'MANIFEST.sha256', 'verify.py'}
+    if listed != present:
+        fail(f'manifest file set differs from packet contents: '
+             f'unlisted {sorted(present - listed)}, missing {sorted(listed - present)}')
     try:
         result = ed.build(ed.TARGET.read_bytes())
     except ed.EvidenceError as e:

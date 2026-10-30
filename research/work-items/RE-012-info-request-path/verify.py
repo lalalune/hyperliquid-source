@@ -38,11 +38,29 @@ def load(name):
     return m
 
 
+PACKET_FILES = frozenset({
+    "README.md", "independent_verify.py", "info-request-path.json",
+    "objdump-excerpts.txt", "verify.py",
+})
+
+
 def main():
+    listed = set()
     for line in (HERE / "MANIFEST.sha256").read_text().splitlines():
         digest, name = line.split("  ", 1)
         got = hashlib.sha256((HERE / name).read_bytes()).hexdigest()
         check(got == digest, f"manifest mismatch for {name}")
+        listed.add(name)
+    # The manifest pins every packet file except itself (README). Comparing
+    # it only against the directory is not enough: a file deleted together
+    # with its manifest row leaves the two sets equal. So the listed set
+    # must also equal the packet's pinned file set, and the directory must
+    # not hold unlisted files.
+    check(listed == PACKET_FILES, f"manifest file set differs from the pinned packet files: "
+          f"missing rows {sorted(PACKET_FILES - listed)}, unexpected rows {sorted(listed - PACKET_FILES)}")
+    present = {p.name for p in HERE.iterdir() if p.is_file()} - {"MANIFEST.sha256"}
+    check(listed == present, f"manifest file set differs from packet contents: "
+          f"unlisted {sorted(present - listed)}, missing {sorted(listed - present)}")
     binary = (ROOT / "artifacts/node/94/hl-node").read_bytes()
     check(hashlib.sha256(binary).hexdigest() == BIN_SHA256, "binary sha256")
     irp = load("info_request_path")
