@@ -71,6 +71,13 @@ class DurationTargetTests(unittest.TestCase):
         sec=next(s for s in self.sections if s['type']!=8 and s['address']<=va<s['address']+s['size'])
         return sec['offset']+va-sec['address']
 
+    def test_duplicate_relocation_rejected(self):
+        rel = next(s for s in self.sections if s['name'] == '.rela.dyn')
+        data = bytearray(self.data)
+        data[rel['offset']:rel['offset'] + 24] = data[rel['offset'] + 24:rel['offset'] + 48]
+        with self.assertRaisesRegex(ValueError, 'Duplicate relocation address'):
+            guards.analyze(bytes(data), self.records)
+
     def test_retained_record_matches_target(self):
         self.assertEqual(self.result,json.loads((guards.PACKET/'evidence.json').read_text()))
 

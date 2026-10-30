@@ -147,7 +147,10 @@ def analyze(data,records,objdump=None):
                  (0x392fb64,0x392fca1,'0f82'),(0x392fc7c,0x392fca1,'72')]:branch(*args)
     rel = named['.rela.dyn']; raw = read(rel['address'],rel['size'])
     require(len(raw)%24==0,'Truncated RELA section')
-    rels = {a:(info,addend) for a,info,addend in struct.iter_unpack('<QQq',raw)}
+    rels = {}
+    for a,info,addend in struct.iter_unpack('<QQq',raw):
+        require(a not in rels,'Duplicate relocation address')
+        rels[a] = (info,addend)
     for address,target in records['relative_slots'].items():
         require(rels.get(int(address,16))==(8,int(target,16)),'Relative call slot changed')
     for location in records['source_locations']:

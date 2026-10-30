@@ -122,6 +122,13 @@ class MillisEvidenceTests(unittest.TestCase):
         for text in [raw.replace('151f755:','151f756:'),raw.rsplit('\n',2)[0]]:
             with self.assertRaises(ValueError):millis.decode_export(text,start,end,body)
 
+    def test_duplicate_relocation_rejected(self):
+        rel = next(s for s in self.sections if s['name'] == '.rela.dyn')
+        data = bytearray(self.data)
+        data[rel['offset']:rel['offset'] + 24] = data[rel['offset'] + 24:rel['offset'] + 48]
+        with self.assertRaisesRegex(ValueError, 'Duplicate relocation address'):
+            millis.analyze(bytes(data), self.records)
+
     def test_millisecond_split_boundary_cases(self):
         first,day,second_day=self.result['division_proofs']
         for value in [0,1,999,1000,1001,86399999,86400000,86400001,millis.U64]:

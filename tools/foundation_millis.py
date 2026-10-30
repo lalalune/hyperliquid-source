@@ -103,7 +103,10 @@ def analyze(data, records, objdump=None):
     require(read(0x1e1153,len(message)) == message, 'Error message changed')
     rel = named['.rela.dyn']; raw = read(rel['address'],rel['size'])
     require(len(raw)%24 == 0, 'Truncated relocations')
-    rels = {address:(info,addend) for address,info,addend in struct.iter_unpack('<QQq',raw)}
+    rels = {}
+    for address,info,addend in struct.iter_unpack('<QQq',raw):
+        require(address not in rels, 'Duplicate relocation address')
+        rels[address] = (info,addend)
     for address,target in records['relative_slots'].items():
         require(rels.get(int(address,16)) == (8,int(target,16)), 'Relative call slot changed')
     # Attribute call sites through relocated Location-shaped records. This
