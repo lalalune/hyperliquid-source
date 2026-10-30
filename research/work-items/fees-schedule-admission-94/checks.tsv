@@ -1,0 +1,37 @@
+order	function	site	label	exit	condition	vectors
+1	0x3c02dc0	0x3c035c8	cross_order	loud	cross[i] > cross[i-1], list seeded with +0x48	12
+2	0x3c02dc0	0x3c03608	add_order	loud	add[i] > add[i-1], list seeded with +0x50	9
+3	0x3c02dc0	0x3c03648	spot_cross_order	loud	spot_cross[i] > spot_cross[i-1], list seeded with +0x58	11
+4	0x3c02dc0	0x3c0368c	spot_add_order	loud	spot_add[i] > spot_add[i-1], list seeded with +0x60	8
+5	0x3c02dc0	0x3c0373c	mm_add_order	loud	mm add[i] > mm add[i-1], list seeded with +0x50	13
+6	0x3c02dc0	0x3c037e8	spot_mm_add_order	loud	mm add[i] > mm add[i-1], list seeded with +0x60	2
+7	0x3c02dc0	0x3c03816	ntl_order	loud	ntl[i-1] >= ntl[i] unsigned, list seeded with 0	48
+8	0x3c02dc0	0x3c03837	maker_fraction_order	loud	cutoff[i-1] >= cutoff[i], list seeded with 0.0	31
+9	0x3c02dc0	0x3c03862	vip_word5_order	loud	word5[i] > word5[i-1], list seeded with 1.0	4
+10	0x3c02dc0	0x3c0388f	stake_bps_order	loud	bps[i] <= bps[i-1], previous starts at 0.0	17
+11	0x3c02dc0	0x3c038b0	stake_discount_order	loud	discount[i] <= discount[i-1], previous starts at 0.0	24
+12	0x3c02dc0	0x3c038bd	stake_bps_cap	loud	last bps > 5.0	2
+13	0x3c02dc0	0x3c038cb	stake_discount_cap	loud	last discount > 0.5	6
+14	0x3c02dc0	0x3c03a7e	keep_high	silent	+0x70 > 1.0	19
+15	0x3c02dc0	0x3c03a8e	referral_low	silent	0.0 > +0x68	15
+16	0x3c02dc0	0x3c03aa2	referral_high	silent	+0x68 > 1.0	9
+17	0x3c02dc0	0x3c03ab2	keep_low	silent	0.0 > +0x70	21
+18	0x3c02dc0	0x3c03b73	discount_high	silent	last discount > 1.0 (never reached, see limits)	0
+19	0x3c02dc0	0x3c03b83	discount_low	silent	0.0 > last discount (never reached, see limits)	0
+20	0x3c02dc0	0x3c03b97	extra_sum	silent	sum of +0x78 map values > 1.0, sum starts at -0.0	19
+21	0x3c02dc0	0x3c03bae	aligned0_high	loud	+0x90 > 1.0	12
+22	0x3c02dc0	0x3c03bcd	aligned1_low	loud	1.0 > +0x98	7
+23	0x3c02dc0	0x3c03bdc	aligned2_low	loud	1.0 > +0xa0	9
+24	0x3c02dc0	0x3c03c9a	perp_floors	silent	0x3c05c30 false for cross, add, mm add	153
+25	0x3c02dc0	0x3c03d58	spot_floors	silent	0x3c05c30 false for spot cross, spot add, mm add	29
+26	0x3c02dc0	0x3c03db4	cross_negative	silent	0.0 > x over cross then spot cross lists	2
+27	0x3c02dc0	0x3c03dc6	cross_cap	silent	x > 0.001 over cross then spot cross lists	2
+28	0x3c02dc0	0x3c04115	add_cap	silent	|x| > 0.001 over add, mm add, spot add, spot mm add lists	2
+1	0x3c05c30	0x3c05d6a	net_plain	floor	floor > net + add_low	16
+2	0x3c05c30	0x3c05dac	net_fifth	floor	floor > fma(net, 0.2, add_low * 0.2)	42
+3	0x3c05c30	0x3c05de2	net_six	floor	floor > fma(net, 6.0, add_low * 6.0)	0
+4	0x3c05c30	0x3c05ea8	keep_tenth	floor	floor > fma(keep_net, 0.1, add_low * 0.1)	30
+5	0x3c05c30	0x3c05eb4	keep_six	floor	floor > fma(keep_net, 6.0, add_low * 6.0)	0
+6	0x3c05c30	0x3c05ec0	keep_fifth	floor	floor > fma(keep_net, 0.2, add_low * 0.2)	0
+7	0x3c05c30	0x3c05ed4	keep_plain	floor	floor > keep_net + add_low	0
+8	0x3c05c30	0x3c05ee0	net_tenth	floor	floor > fma(net, 0.1, add_low * 0.1)	34
