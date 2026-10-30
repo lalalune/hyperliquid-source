@@ -229,8 +229,10 @@ What remains, explained but not changed:
 
 No Rust implementation; deterministic offline tooling and static observation.
 
-- `mutation_controls.py` assembles a C→A→B call chain, disassembles real
-  bytes with objdump and mutates the #115 side. The checks are: moving B
+- `mutation_controls.py` assembles a C→A→B call chain, decodes the real
+  bytes with its own pure-Python AT&T decoder (no objdump or readelf; the
+  GNU tools are only an optional cross-check in `crosscheck.py` and
+  `verify.py`, which skip with a reason on non-GNU) and mutates the #115 side. The checks are: moving B
   gives `moved_only` for A; changing an instruction, a constant (including
   one inside the code's address range on both sides), or a call
   target (to non-FDE code or to the PLT) gives `changed`; an added function
