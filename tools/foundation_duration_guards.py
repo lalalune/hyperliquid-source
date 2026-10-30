@@ -176,6 +176,19 @@ def analyze(data,records,objdump=None):
                 captured_binary_executed=False,progress_gate_requested=False)
 
 
+def _unique_object(pairs):
+    out = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError(f'Duplicate key in retained check input: {key}')
+        out[key] = value
+    return out
+
+
+def load_check(path):
+    return json.loads(Path(path).read_text(), object_pairs_hook=_unique_object)
+
+
 def inspect(path,objdump=None):
     data = Path(path).read_bytes()
     require(len(data)==91774280 and hashlib.sha256(data).hexdigest()==SHA256,'Expected exact node #94 size/SHA-256')
@@ -189,7 +202,7 @@ def main():
     parser.add_argument('--check',type=Path)
     args = parser.parse_args(); result = inspect(args.binary,args.objdump)
     if args.check:
-        require(result==json.loads(args.check.read_text()),'Retained evidence differs')
+        require(result==load_check(args.check),'Retained evidence differs')
         print('Duration floating guard evidence reproduces exactly.')
     else:
         print(json.dumps(result,indent=2))
