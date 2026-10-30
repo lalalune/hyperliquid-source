@@ -271,6 +271,19 @@ def generate(binary, prefix):
     return summary
 
 
+def _unique_object(pairs):
+    out = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError(f'Duplicate key in inventory input: {key}')
+        out[key] = value
+    return out
+
+
+def load_inventory(path):
+    return json.loads(Path(path).read_text(), object_pairs_hook=_unique_object)
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--release', choices=['94', '115'], required=True)
@@ -281,7 +294,7 @@ def main():
     item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == rel)
     check(ROOT / rel, item)
     summary = generate(ROOT / rel, args.output_dir / f'node-{args.release}-fde')
-    expected = json.loads((ROOT / f'research/imported/hl-node-{args.release}.inventory.json').read_text())['fde_count_eh_frame_hdr']
+    expected = load_inventory(ROOT / f'research/imported/hl-node-{args.release}.inventory.json')['fde_count_eh_frame_hdr']
     if summary['unwind_table_entries'] != expected:
         raise ValueError('Parsed unwind count differs from retained inventory')
     print(json.dumps(summary, indent=2))
