@@ -249,6 +249,24 @@ def fde_edges(elf, starts, ends, relocs, fde_start):
     return {"start": fde_start, "end": c[1], "edges": edges}
 
 
+def side_effect_markers(tags):
+    """Side-effect marker entries for every SIDE_EFFECT_TAG, or EvidenceError.
+
+    build() previously located each tag through a bare next(), so a request
+    file missing one of the fixed side-effect tags escaped as StopIteration,
+    contradicting this module's own next(..., None) + EvidenceError pattern
+    for the hub->deser edge.
+    """
+    out = []
+    for tag in SIDE_EFFECT_TAGS:
+        match = next((x for x in tags if x["text"] == tag), None)
+        if match is None:
+            raise EvidenceError(f"side-effect tag {tag!r} not in request")
+        out.append({"marker": tag, "kind": "tag", **{k: match[k] for k in
+                    ("occurrence", "anchor", "functions", "lea_sites")}})
+    return out
+
+
 def build(data: bytes, ref_request: Path = ROOT / REF_REQUEST,
           expected_sha256: str = EXPECTED_SHA256) -> dict:
     sha = hashlib.sha256(data).hexdigest()
@@ -367,11 +385,7 @@ def build(data: bytes, ref_request: Path = ROOT / REF_REQUEST,
         })
 
     # Side-effect markers
-    side = []
-    for tag in SIDE_EFFECT_TAGS:
-        t = next(x for x in tags if x["text"] == tag)
-        side.append({"marker": tag, "kind": "tag", **{k: t[k] for k in
-                    ("occurrence", "anchor", "functions", "lea_sites")}})
+    side = side_effect_markers(tags)
     tpl_anchors = literal_anchors(elf, "template", SNAPSHOT_TEMPLATE, leas, relocs)
     if not tpl_anchors:
         raise EvidenceError("snapshot localhost template not anchored")
