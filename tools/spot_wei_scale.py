@@ -100,12 +100,18 @@ class Image:
         o = self.off(va, size)
         return self.data[o:o + size]
 
+    def section(self, name):
+        try:
+            return self.sec[name]
+        except KeyError:
+            raise EvidenceError(f'missing required section {name}') from None
+
     def text(self):
-        addr, off, size = self.sec['.text']
+        addr, off, size = self.section('.text')
         return addr, self.data[off:off + size]
 
     def relative_relocs(self):
-        _, off, size = self.sec['.rela.dyn']
+        _, off, size = self.section('.rela.dyn')
         return {where: addend for where, info, addend in
                 struct.iter_unpack('<QQq', self.data[off:off + size]) if info & 0xffffffff == 8}
 
@@ -136,7 +142,7 @@ class Fdes:
 
     def __init__(self, img):
         self.img = img
-        hdr = img.sec['.eh_frame_hdr'][0]
+        hdr = img.section('.eh_frame_hdr')[0]
         version, ptr_enc, cnt_enc, tbl_enc = img.read(hdr, 4)
         if (version, cnt_enc, tbl_enc) != (1, 0x03, 0x3b):
             raise EvidenceError('unexpected .eh_frame_hdr encodings')
@@ -199,14 +205,14 @@ class Fdes:
 
 def find_locations(img, relocs):
     """Rust Location records whose file pointer ends with SOURCE_SUFFIX: {(line, col): VA}."""
-    addr, off, size = img.sec['.rodata']
+    addr, off, size = img.section('.rodata')
     ro = img.data[off:off + size]
     first = ro.find(SOURCE_SUFFIX + b'\0')
     if first == -1 or ro.find(SOURCE_SUFFIX + b'\0', first + 1) != -1:
         raise EvidenceError('expected exactly one spot_meta.rs path in .rodata')
     end = addr + first + len(SOURCE_SUFFIX)
     out = {}
-    drr = img.sec['.data.rel.ro']
+    drr = img.section('.data.rel.ro')
     for where, addend in relocs.items():
         if not (drr[0] <= where < drr[0] + drr[2] - 24) or not addr <= addend < end:
             continue
