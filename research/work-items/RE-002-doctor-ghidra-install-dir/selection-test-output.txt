@@ -1,0 +1,42 @@
+BEFORE: baseline doctor, new real-CLI controls
+FFF.
+======================================================================
+FAIL: test_documented_install_directory_is_selected_over_legacy (__main__.DoctorGhidraSelectionTests.test_documented_install_directory_is_selected_over_legacy) (options=['GHIDRA_INSTALL_DIR'])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<local-checkout>\work\hyperliquid-contribution\tests\test_doctor_ghidra.py", line 47, in test_documented_install_directory_is_selected_over_legacy
+    self.assertTrue(result['available'])
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_documented_install_directory_is_selected_over_legacy (__main__.DoctorGhidraSelectionTests.test_documented_install_directory_is_selected_over_legacy) (options=['GHIDRA_INSTALL_DIR', 'GHIDRA_HOME'])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<local-checkout>\work\hyperliquid-contribution\tests\test_doctor_ghidra.py", line 48, in test_documented_install_directory_is_selected_over_legacy
+    self.assertEqual(result['home'], str(selected))
+AssertionError: <temporary>/legacy != <temporary>/selected
+- <local-checkout>\work\pumpfun-contribution\work\test-temp\tmpw42daou8\legacy
+?                                                                                                                                -- ^
++ <local-checkout>\work\pumpfun-contribution\work\test-temp\tmpw42daou8\selected
+?                                                                                                                              ++   ^^^
+
+
+======================================================================
+FAIL: test_invalid_explicit_install_is_not_replaced_by_another_provider (__main__.DoctorGhidraSelectionTests.test_invalid_explicit_install_is_not_replaced_by_another_provider)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<local-checkout>\work\hyperliquid-contribution\tests\test_doctor_ghidra.py", line 57, in test_invalid_explicit_install_is_not_replaced_by_another_provider
+    self.assertFalse(result['available'])
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.578s
+
+FAILED (failures=3)
+
+AFTER: modified doctor, same controls
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.490s
+
+OK

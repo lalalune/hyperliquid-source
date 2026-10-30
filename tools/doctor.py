@@ -9,6 +9,10 @@ import sys
 
 
 def locate_ghidra():
+    explicit = os.environ.get('GHIDRA_INSTALL_DIR')
+    if explicit:
+        directory = Path(explicit)
+        return directory if (directory / 'support/analyzeHeadless').is_file() else None
     candidates = []
     if os.environ.get('GHIDRA_HOME'):
         candidates.append(Path(os.environ['GHIDRA_HOME']))
