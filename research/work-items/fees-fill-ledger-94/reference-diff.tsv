@@ -1,0 +1,8 @@
+verdict	reference	reference_says	bytes_say
+shape differs	l1/fees/compute.rs apply_builder_vault_fee_split	per_user totals keyed by user, per_recipient[recipient][user]	one tree per user keyed by a 64-bit key; a recipient is credited in word U of its own value, plus map [builder][key] at FeeTracker +0x150
+differs	l1/fees/compute.rs secondary_paid_100x	the second amount is added to a total of the paying user	the builder step changes no word of the paying user
+differs	l1/fees/compute.rs net_after_rebate_100x	checked_sub, and no add and no diagnostic on underflow	each of the two subtractions floors at 0 and calls the recorder; the stored value is the same
+differs	l1/fees/compute.rs add_recipient_amount	always adds the amount	a builder amount of 0 skips both maps; a referrer amount of 0 still creates the bucket and the value
+differs	l1/fees/compute.rs add_external_volume	second key is a day, current_day_bucket	perp key [state+0x50]; spot key the word at +8 of a 32-byte pair entry, so no date; the string after V U C is token_to_state
+names	l1/fees/compute.rs UserSplitTotals	builder_paid, net_after_rebate, protocol_component	serde keys r, F, T; record +0 is the referrer tag and +0x28 the builder tag in the fee output
+absent	l1/raw_vlm.rs, l1/scaled_vlm.rs	per-user and per-day volume only	the six-word value is not modelled; only V is a volume
