@@ -33,6 +33,8 @@ def uleb(data, pos, end):
         result |= (byte & 0x7f) << shift
         shift += 7
         if byte < 0x80:
+            if result >= 1 << 64:
+                raise ValueError('Oversized ULEB128')
             return result, pos
 
 
@@ -46,7 +48,10 @@ def sleb(data, pos, end):
         result |= (byte & 0x7f) << shift
         shift += 7
         if byte < 0x80:
-            return result - (1 << shift) if byte & 0x40 else result, pos
+            value = result - (1 << shift) if byte & 0x40 else result
+            if not -(1 << 63) <= value < 1 << 63:
+                raise ValueError('Oversized SLEB128')
+            return value, pos
 
 
 def sdata4(data, pos, end):
