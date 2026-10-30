@@ -87,13 +87,13 @@ class FeesComputeEvidenceTests(unittest.TestCase):
         slots = {}
         for off in range(0, len(raw), 24):
             address, info, addend = struct.unpack_from('<QQq', raw, off)
-            if info == 8 and address in (fc.GOT_PANIC_DISPLAY, fc.GOT_QTY_HELPER,
+            if info == 8 and address in (fc.GOT_PANIC_DISPLAY, fc.GOT_LOCK_HELPER,
                                          fc.GOT_PANIC_FMT, fc.GOT_SELF,
                                          fc.FEES_LOC, fc.NTL_LOC):
                 slots[address] = (rela['address'] + off, addend)
         self.assertEqual(len(slots), 6)
         messages = {fc.GOT_PANIC_DISPLAY: 'Panic display callee changed',
-                    fc.GOT_QTY_HELPER: 'Quantity helper GOT changed',
+                    fc.GOT_LOCK_HELPER: 'Lock helper GOT changed',
                     fc.GOT_PANIC_FMT: 'Panic fmt callee changed',
                     fc.GOT_SELF: 'Self GOT slot changed',
                     fc.FEES_LOC: 'FEES Location relocation changed|Location path changed|Ambiguous or unmapped',

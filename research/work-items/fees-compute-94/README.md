@@ -40,7 +40,7 @@ inlined sites), `qtys/mod.rs:843:1`, and `core/src/num/mod.rs:320:5` under
 rustc commit `e408947bfd200af42db322daf0fadfe7e26d3bd1` — the same build hash
 as the staking and vault packets.
 
-Six sites call the quantity helper `0x358dcd0` through GOT `0x5773190` with
+Six sites call the shared lock helper `0x358dcd0` through GOT `0x5773190` (a parking_lot-anchored read-guard acquisition; the fees body holds `impl_ntl.rs:664:1` Locations for the guarded conversions) with
 the pair `(0, &impl_ntl.rs:664:1 Location)`; two sites show register spills
 between the arguments and the call. Each is followed by an `add` whose carry
 selects the `-1` sentinel through `cmovae` — the saturating conversion
@@ -68,5 +68,4 @@ Not implemented: no reconstructed Rust, no two-build comparison.
 - Unknowns: the helper's conversion semantics, the six direct callees, the
   three callers. No execution, Rust build, hosted CI, or gate.
 
-Next: the quantity helper `0x358dcd0` (shared by the vault packet's dominant
-callee) and its conversion contract.
+Next: the shared lock helper `0x358dcd0` itself (parking_lot 0.12.3 raw_rwlock.rs + std once.rs Locations), which also dominates the vault packet's call sites.

@@ -4,7 +4,7 @@
 Binds the first fees-component body to the node #94 digest: its FDE-bounded
 body, five source Locations across five files (perp_meta, fees/compute,
 qtys/impl_ntl, qtys/mod, and a rustc-hashed core/num), the six inlined
-quantity-construction sites with their saturating cmov pattern, the fee-rate
+lock-acquisition sites with their saturating cmov pattern, the fee-rate
 float constants (1.0, 0.1, i64 range), the division-by-10 magic pair, the
 noreturn panic pair, and the three-caller census. Static byte/record checks
 only; the captured binary is never executed.
@@ -29,8 +29,8 @@ RUSTC_HASH = 'e408947bfd200af42db322daf0fadfe7e26d3bd1'
 ONE_VA, TENTH_VA, MAX_F64_VA, PREV_MAX_VA, MIN_F64_VA = (
     0x20a730, 0x20a880, 0x20a7f0, 0x20a2c8, 0x20acb8)
 DIV10_MAGIC_HI, DIV10_MAGIC_LO = 0x0147ae147ae147ae, 0xfeb851eb851eb852
-GOT_PANIC_DISPLAY, GOT_QTY_HELPER, GOT_PANIC_FMT = 0x576e470, 0x5773190, 0x576e048
-PANIC_DISPLAY_FN, QTY_HELPER_FN, PANIC_FMT_FN = 0x157a9f0, 0x358dcd0, 0x157aa10
+GOT_PANIC_DISPLAY, GOT_LOCK_HELPER, GOT_PANIC_FMT = 0x576e470, 0x5773190, 0x576e048
+PANIC_DISPLAY_FN, LOCK_HELPER_FN, PANIC_FMT_FN = 0x157a9f0, 0x358dcd0, 0x157aa10
 GOT_SELF = 0x5774560
 CALLERS = [0x24fc475, 0x4329c95, 0x432a525]
 
@@ -113,7 +113,7 @@ BODY = bytes.fromhex(
     'ff488d3d023aeafc488d0dc9f0ff014c8d05a2edff01488d542440be2b000000ff15ca81'
     '0502488d3d1befff01ff15ad8c0502')
 
-# Six quantity-construction sites: (lea rsi site, following saturating tail).
+# Six lock-acquisition sites: (lea rsi site, following saturating tail).
 NTL_SITES = [0x3715be3, 0x3715c07, 0x3715c29, 0x3715dcc, 0x3715e06, 0x3715e2e]
 SAT_TAILS = ['4c037c2410', '4c01eb', None, None, None, None]
 
@@ -200,23 +200,23 @@ def analyze(data):
     require(reader.read(PREV_MAX_VA, 8) == struct.pack('<d', float(2**63 - 1025)), 'pre-max f64 changed')
     require(reader.read(MIN_F64_VA, 8) == struct.pack('<d', -2.0**63), 'i64::MIN f64 changed')
 
-    # Six quantity-construction sites: (0, &impl_ntl Location) -> helper, then
+    # Six lock-acquisition sites: (0, &impl_ntl Location) -> helper, then
     # an add whose carry selects the -1 sentinel via cmovae.
     LEA35 = bytes.fromhex('488d35')
     FF15 = bytes.fromhex('ff15')
     for site in NTL_SITES:
         off = site - START
-        require(body[off:off + 3] == LEA35, f'Quantity site lea changed at {site:#x}')
+        require(body[off:off + 3] == LEA35, f'Lock site lea changed at {site:#x}')
         require(site + 7 + struct.unpack_from('<i', body, off + 3)[0] == NTL_LOC,
-                f'Quantity site Location changed at {site:#x}')
+                f'Lock site Location changed at {site:#x}')
         require(body[off + 7:off + 9] == bytes.fromhex('31ff'),
-                f'Quantity site zero argument changed at {site:#x}')
+                f'Lock site zero argument changed at {site:#x}')
         # The helper call follows within sixteen bytes (two sites carry
         # register spills between the arguments and the call).
         call_off = body.find(FF15, off + 9, off + 25)
-        require(call_off >= 0, f'Quantity site call opcode changed at {site:#x}')
+        require(call_off >= 0, f'Lock site call opcode changed at {site:#x}')
         require(START + call_off + 6 + struct.unpack_from('<i', body, call_off + 2)[0]
-                == GOT_QTY_HELPER, f'Quantity site helper target changed at {site:#x}')
+                == GOT_LOCK_HELPER, f'Lock site helper target changed at {site:#x}')
     for site, tail in zip(NTL_SITES, SAT_TAILS):
         if tail:
             raw = bytes.fromhex(tail)
@@ -225,7 +225,7 @@ def analyze(data):
                     f'Saturating tail changed after {site:#x}')
 
     require(rels.get(GOT_PANIC_DISPLAY) == PANIC_DISPLAY_FN, 'Panic display callee changed')
-    require(rels.get(GOT_QTY_HELPER) == QTY_HELPER_FN, 'Quantity helper GOT changed')
+    require(rels.get(GOT_LOCK_HELPER) == LOCK_HELPER_FN, 'Lock helper GOT changed')
     require(rels.get(GOT_PANIC_FMT) == PANIC_FMT_FN, 'Panic fmt callee changed')
 
     text = reader.by_name['.text']
@@ -260,7 +260,7 @@ def analyze(data):
         coordinate_system='ELF virtual addresses, no runtime rebase',
         function=dict(start_va=hex(START), end_va_exclusive=hex(END), bytes=BODY_LEN,
                       sha256=hashlib.sha256(body).hexdigest(), fde_va=hex(FDE_VA),
-                      inferred_label='fee computation with quantity construction'),
+                      inferred_label='fee computation behind a shared read lock'),
         locations=dict(fees=dict(location_va=hex(FEES_LOC), line=50, column=42,
                                  path='l1/src/fees/compute.rs'),
                        perp_meta=dict(location_va=hex(PERP_LOC), line=194, column=38),
@@ -270,8 +270,8 @@ def analyze(data):
                        core_num=dict(location_va=hex(NUM_LOC), line=320, column=5,
                                      path='library/core/src/num/mod.rs',
                                      rustc_commit=RUSTC_HASH)),
-        quantity_sites=dict(count=len(NTL_SITES), helper=hex(QTY_HELPER_FN),
-                            got=hex(GOT_QTY_HELPER),
+        lock_sites=dict(count=len(NTL_SITES), helper=hex(LOCK_HELPER_FN),
+                            got=hex(GOT_LOCK_HELPER),
                             observed='each site passes (0, &impl_ntl.rs:664 Location) and '
                                      'follows with an add whose carry selects the -1 sentinel'),
         constants=dict(one=hex(ONE_VA), one_tenth=hex(TENTH_VA),
