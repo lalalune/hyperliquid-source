@@ -1,0 +1,55 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "function": {
+    "start_va": "0x14079a0",
+    "end_va_exclusive": "0x14079c7",
+    "bytes": 39,
+    "sha256": "8e5c35217a7b98fd0ca63b8f197de986233b13e7b7da4f9c560e59994366adfe",
+    "fde_section_offset": "0x79d0",
+    "padding_bytes": 9,
+    "padding_stride_end": "0x14079d0",
+    "inferred_label": "drop thunk, 168-byte elements"
+  },
+  "behavior": {
+    "call_order": "per-element call 0x13ef370 first, then null guard",
+    "length_load": "u64 length at rdi+0, base pointer at rdi+8 on fall-through",
+    "element_size": "0xa8",
+    "size_formula": "length * 0xa8 (mod 2^64)",
+    "early_return_on": [
+      "length == 0"
+    ],
+    "flag_at_tail_jump": "rdx = 0 (xor edx,edx, never set otherwise)",
+    "edges": {
+      "1": "0xa8",
+      "2": "0x150",
+      "16": "0xa80",
+      "255": "0xa758",
+      "4096": "0xa8000"
+    },
+    "per_element_call_target": "0x13ef370",
+    "per_element_call_claimed_here": false
+  },
+  "tail_call": {
+    "slot": "0x576e010",
+    "target": "0x54c8cb0",
+    "registers": "rdi = field+8, rsi = length * 0xa8, rdx = 0",
+    "target_claimed_here": false
+  },
+  "incoming_pattern_scan": {
+    "section": ".text",
+    "byte_count": 70370352,
+    "e8_candidates": [
+      "0x1407367"
+    ],
+    "ff15_ff25_candidates": [],
+    "validated_caller_fde": [
+      "0x1407040",
+      "0x14073b7"
+    ],
+    "complete_xref_census": false
+  },
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
