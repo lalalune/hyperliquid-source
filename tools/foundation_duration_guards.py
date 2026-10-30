@@ -92,6 +92,10 @@ def decode_export(output,start,end,body):
 def analyze(data,records,objdump=None):
     secs = sections(data); named = {s['name']:s for s in secs}
 
+    def section(name):
+        require(name in named, f'Missing section {name}')
+        return named[name]
+
     def read(va,size):
         matches = [s for s in secs if s['type']!=8 and s['address']<=va and va+size<=s['address']+s['size']]
         require(len(matches)==1,'Unmapped or ambiguous VA')
@@ -145,7 +149,7 @@ def analyze(data,records,objdump=None):
                  (0x392fb18,0x392fb2c,'77'),(0x392fc54,0x392fc64,'77'),
                  (0x392fb26,0x392fc88,'0f82'),(0x392fc62,0x392fc88,'72'),
                  (0x392fb64,0x392fca1,'0f82'),(0x392fc7c,0x392fca1,'72')]:branch(*args)
-    rel = named['.rela.dyn']; raw = read(rel['address'],rel['size'])
+    rel = section('.rela.dyn'); raw = read(rel['address'],rel['size'])
     require(len(raw)%24==0,'Truncated RELA section')
     rels = {a:(info,addend) for a,info,addend in struct.iter_unpack('<QQq',raw)}
     for address,target in records['relative_slots'].items():
