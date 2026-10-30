@@ -103,21 +103,21 @@ def run(binary, output):
     check(binary, item)
     data = binary.read_bytes()
     controls = static_controls(data)
-    frames = subprocess.check_output(['readelf', '-wf', str(binary)], text=True)
+    frames = subprocess.check_output(['readelf', '-wf', str(binary)], text=True, encoding='utf-8')
     ranges = frame_ranges(frames)
     for pair in [(START, END), (CALLER_START, CALLER_END), (HELPER_START, HELPER_END)]:
         if ranges.count(pair) != 1:
             raise ValueError(f'Expected one decoded FDE for {pair}')
     # Stream the complete .text decoder output rather than scanning raw E8 bytes.
     with subprocess.Popen(['objdump', '-d', '-j', '.text', str(binary)],
-                          stdout=subprocess.PIPE, text=True) as proc:
+                          stdout=subprocess.PIPE, text=True, encoding='utf-8') as proc:
         callers = direct_callers(proc.stdout)
         if proc.wait() != 0:
             raise ValueError('Full .text disassembly failed')
     if callers != EXPECTED_CALLERS:
         raise ValueError(f'Decoded direct caller set changed: {callers}')
     output.mkdir(parents=True, exist_ok=True)
-    relocation_text = subprocess.check_output(['readelf', '-rW', str(binary)], text=True)
+    relocation_text = subprocess.check_output(['readelf', '-rW', str(binary)], text=True, encoding='utf-8')
     relevant_slots = {int(r['slot_va'], 16) for r in relocations(data)}
     relocation_lines = [line for line in relocation_text.splitlines()
                         if re.match(r'^([0-9a-f]+)\s', line) and
@@ -125,28 +125,29 @@ def run(binary, output):
     if not any('memcmp@GLIBC_2.2.5' in line and line.startswith('000000000576e488 ')
                for line in relocation_lines):
         raise ValueError('Lookup comparator symbol changed')
-    (output / 'relocations.txt').write_text('\n'.join(relocation_lines) + '\n')
+    (output / 'relocations.txt').write_text('\n'.join(relocation_lines) + '\n', encoding='utf-8', newline='\n')
     raw = {}
     for name, begin, end in [('status', START, END), ('consumer', CALLER_START, CALLER_END),
                              ('elapsed-helper', HELPER_START, HELPER_END)]:
         command = ['objdump', '-d', f'--start-address={begin:#x}', f'--stop-address={end:#x}', str(binary)]
-        text = subprocess.check_output(command, text=True)
+        text = subprocess.check_output(command, text=True, encoding='utf-8')
         # Exclude the local absolute pathname from durable deterministic evidence.
         text = text.replace(str(binary), '<authenticated-node94>')
-        (output / f'{name}.objdump.txt').write_text(text)
+        (output / f'{name}.objdump.txt').write_text(text, encoding='utf-8', newline='\n')
         offset, body = mapped(data, begin, end - begin)
         raw[name] = {'start_va': hex(begin), 'end_va': hex(end), 'file_offset': hex(offset),
                      'bytes': len(body), 'sha256': hashlib.sha256(body).hexdigest()}
     (output / 'frames.txt').write_text('\n'.join(line for line in frames.splitlines()
         if 'FDE' in line and any(f'pc={a:016x}..{b:016x}' in line for a, b in
-                               [(START, END), (CALLER_START, CALLER_END), (HELPER_START, HELPER_END)])) + '\n')
+                               [(START, END), (CALLER_START, CALLER_END), (HELPER_START, HELPER_END)])) + '\n',
+        encoding='utf-8', newline='\n')
     result = {'target_sha256': item['sha256'], 'target_bytes': len(data), 'ranges': raw,
               'fde_record_count': len(ranges), 'direct_callers_in_decoded_text': [hex(v) for v in callers],
               'instruction_controls': controls, 'relocations': relocations(data),
               'literal_180_va': '0x20acd8', 'source_path_va': '0x6fb82a',
               'captured_binary_executed': False,
               'limits': 'One static status function; no indirect-caller completeness, live behavior, EMA implementation, Rust build or component gate.'}
-    (output / 'records.json').write_text(json.dumps(result, indent=2) + '\n')
+    (output / 'records.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8', newline='\n')
     return result
 
 
