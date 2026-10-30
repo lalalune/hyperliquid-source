@@ -1,3 +1,4 @@
+import re
 import struct
 from pathlib import Path
 import sys
@@ -106,6 +107,56 @@ class XrefTests(unittest.TestCase):
     def test_window_before_first_start_fails(self):
         with self.assertRaises(ScanError):
             window([0x1000], 0x0FFF)
+
+
+ROOT = Path(__file__).resolve().parents[1]
+ARTIFACT = ROOT / 'artifacts/node/94/hl-node'
+
+
+@unittest.skipUnless(ARTIFACT.exists(), 'captured node #94 not present')
+class ReadmeAnchorTests(unittest.TestCase):
+    def test_serde_bound_strings_start_at_cited_relocated_targets(self):
+        data = ARTIFACT.read_bytes()
+        readme = (ROOT / 'research/work-items/constants/README.md').read_text()
+        rodata, rel_ro = section(data, '.rodata'), section(data, '.data.rel.ro')
+        relocs = relocations(data)
+        for text in ('variant index 0 <= i < 76', 'variant index 0 <= i < 4'):
+            with self.subTest(text=text):
+                cited = re.search(rf'`{re.escape(text)}` at `(0x[0-9a-f]+)`'
+                                  rf'(?: \(`&str` pair `(0x[0-9a-f]+)`)?', readme)
+                self.assertIsNotNone(cited)
+                va = int(cited.group(1), 16)
+                start = rodata['offset'] + va - rodata['address']
+                self.assertEqual(data[start:start + len(text)], text.encode())
+                self.assertIsNotNone(cited.group(2), 'cite the relocated &str pair')
+                pair = int(cited.group(2), 16)
+                self.assertEqual(relocs[pair], va)
+                length = struct.unpack_from('<Q', data, rel_ro['offset'] + pair + 8 - rel_ro['address'])[0]
+                self.assertEqual(length, len(text))
+        bound = re.search(r'\| agree 76/76 \| table `0x5668288`; bound `(0x[0-9a-f]+)` \|', readme)
+        self.assertIsNotNone(bound)
+        start = rodata['offset'] + int(bound.group(1), 16) - rodata['address']
+        self.assertEqual(data[start:start + 25], b'variant index 0 <= i < 76')
+
+    def test_default_select_instructions_are_at_cited_addresses(self):
+        data = ARTIFACT.read_bytes()
+        readme = (ROOT / 'research/work-items/constants/README.md').read_text()
+        text = section(data, '.text')
+
+        def insn(va, size):
+            start = text['offset'] + va - text['address']
+            return data[start:start + size].hex()
+
+        sites = re.search(r'`cmovel %eax,%ebp` \(`(0x[0-9a-f]+)`, `(0x[0-9a-f]+)`, `(0x[0-9a-f]+)`\)', readme)
+        self.assertIsNotNone(sites)
+        test, mov, cmove = (int(g, 16) for g in sites.groups())
+        self.assertEqual((insn(test, 3), insn(mov, 5), insn(cmove, 3)),
+                         ('4084ed', 'bd20000000', '0f44e8'))  # testb %bpl / movl $0x20 / cmovel
+        row = re.search(r'\| `DEFAULT_AWS_NAME = NvTestnet` \(32\) \| agree \| '
+                        r'`(0x[0-9a-f]+)`, `(0x[0-9a-f]+)` \|', readme)
+        self.assertIsNotNone(row)
+        fallback, select = (int(g, 16) for g in row.groups())
+        self.assertEqual((insn(fallback, 3), insn(select, 5)), ('40b520', 'bd20000000'))
 
 
 if __name__ == '__main__':
