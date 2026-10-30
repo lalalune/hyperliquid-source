@@ -128,6 +128,8 @@ def relative_relocs(elf: Elf) -> dict:
     _a, off, size = elf.sections[".rela.dyn"]
     out = {}
     for o in range(off, off + size, 24):
+        if o + 24 > len(elf.data):
+            raise EvidenceError(".rela.dyn truncated")
         r_off, info, add = struct.unpack_from("<QQq", elf.data, o)
         if info & 0xFFFFFFFF == 8:
             out[r_off] = add
