@@ -136,7 +136,10 @@ class Elf:
         stro = secs[shstrndx][4]
         self.sections = {}
         for s in secs:
-            name = data[stro + s[0]:data.index(b"\0", stro + s[0])].decode()
+            try:
+                name = data[stro + s[0]:data.index(b"\0", stro + s[0])].decode()
+            except UnicodeDecodeError:
+                raise EvidenceError('section name is not valid UTF-8')
             self.sections[name] = (s[3], s[4], s[5])
 
     def off(self, va):
