@@ -102,6 +102,8 @@ def fde_index(elf: Elf):
         pc = addr + struct.unpack_from("<i", d, pos)[0]
         fde_va = addr + struct.unpack_from("<i", d, pos + 4)[0]
         fo = elf.off(fde_va)
+        if fo is None:
+            raise EvidenceError(f"FDE at {fde_va:#x} not file-backed")
         pc_begin = fde_va + 8 + struct.unpack_from("<i", d, fo + 8)[0]
         if pc_begin != pc:
             raise EvidenceError(f"FDE pc_begin mismatch at {fde_va:#x}")
