@@ -159,6 +159,8 @@ def fde_index(elf: Elf):
     if (ver, ep_enc, cnt_enc, tab_enc) != (1, 0x1B, 0x03, 0x3B):
         raise EvidenceError("unexpected .eh_frame_hdr encodings")
     count = struct.unpack_from("<I", d, off + 8)[0]
+    if off + 12 + 8 * count > off + size or off + 12 + 8 * count > len(d):
+        raise EvidenceError(".eh_frame_hdr table truncated")
     starts, ends = [], []
     for i in range(count):
         pos = off + 12 + 8 * i
