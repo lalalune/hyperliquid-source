@@ -2,10 +2,12 @@ import json
 from pathlib import Path
 import struct
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
+import build_provenance
 from build_provenance import OUT, TARGETS, derive, diff, interpret, record
 
 
@@ -114,6 +116,48 @@ class DeriveTests(unittest.TestCase):
 def captured(release):
     path = ROOT / TARGETS[release]
     return path.is_file() and path.stat().st_size > 1_000_000
+
+
+class CheckModeTests(unittest.TestCase):
+    """--check must compare bytes, not newline-translated text."""
+
+    def setUp(self):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        self.root = Path(temp.name)
+        self.saved = (build_provenance.ROOT, build_provenance.OUT,
+                      build_provenance.record, sys.argv)
+        build_provenance.ROOT = self.root
+        build_provenance.OUT = self.root / 'out'
+        build_provenance.record = lambda release: {'target': 'x', 'facts': []}
+        self.text = json.dumps({'target': 'x', 'facts': []},
+                               indent=1, sort_keys=True) + '\n'
+        self.path = build_provenance.OUT / 'provenance-94.json'
+        self.path.parent.mkdir(parents=True)
+
+    def tearDown(self):
+        (build_provenance.ROOT, build_provenance.OUT,
+         build_provenance.record, sys.argv) = self.saved
+
+    def run_main(self, *argv):
+        sys.argv = ['build_provenance.py', *argv]
+        build_provenance.main()
+
+    def test_lf_record_passes_check(self):
+        self.path.write_bytes(self.text.encode('utf-8'))
+        self.run_main('--check', '94')
+
+    def test_crlf_record_fails_check(self):
+        # Exactly what a Windows text-mode rewrite leaves on disk: the same
+        # text with CRLF endings. A read_text() comparison translates the
+        # CRLF back to LF and certifies the drifted bytes as matching.
+        self.path.write_bytes(self.text.replace('\n', '\r\n').encode('utf-8'))
+        with self.assertRaises(SystemExit):
+            self.run_main('--check', '94')
+
+    def test_write_mode_emits_canonical_lf_bytes(self):
+        self.run_main('94')
+        self.assertEqual(self.path.read_bytes(), self.text.encode('utf-8'))
 
 
 @unittest.skipUnless(all(captured(r) for r in TARGETS), 'captured binaries not materialized (git lfs pull)')

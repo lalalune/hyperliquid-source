@@ -259,11 +259,14 @@ def main():
         path = OUT / f'provenance-{release}.json'
         text = json.dumps(record(release), indent=1, sort_keys=True) + '\n'
         if args.check:
-            if not path.exists() or path.read_text() != text:
+            # Byte-exact: a text comparison would translate CRLF back to LF
+            # and certify a record whose bytes drifted (e.g. a Windows
+            # text-mode rewrite) as matching.
+            if not path.exists() or path.read_bytes() != text.encode('utf-8'):
                 stale.append(str(path.relative_to(ROOT)))
         else:
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(text)
+            path.write_text(text, encoding='utf-8', newline='\n')
             print('wrote', path.relative_to(ROOT))
     if stale:
         raise SystemExit('Stale provenance records: ' + ', '.join(stale) + '; run make provenance')
