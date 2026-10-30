@@ -1,0 +1,59 @@
+test_end_to_end_report_is_pinned (test_bridge_inventory.ArtifactTests.test_end_to_end_report_is_pinned) ... ok
+test_explicit_relative_artifact_writes_canonical_evidence (test_bridge_inventory.ArtifactTests.test_explicit_relative_artifact_writes_canonical_evidence) ... FAIL
+test_external_artifact_is_portable_and_still_digest_checked (test_bridge_inventory.ArtifactTests.test_external_artifact_is_portable_and_still_digest_checked) ... FAIL
+test_missing_literal_is_detected (test_bridge_inventory.ArtifactTests.test_missing_literal_is_detected) ... ok
+test_rejects_corrupted_digest (test_bridge_inventory.ArtifactTests.test_rejects_corrupted_digest) ... ok
+test_decodes_seeded_shape (test_bridge_inventory.ChainSiteTests.test_decodes_seeded_shape) ... ok
+test_rejects_missing_compare (test_bridge_inventory.ChainSiteTests.test_rejects_missing_compare) ... ok
+test_rejects_non_register_cmove (test_bridge_inventory.ChainSiteTests.test_rejects_non_register_cmove) ... ok
+test_rejects_swapped_immediates (test_bridge_inventory.ChainSiteTests.test_rejects_swapped_immediates) ... ok
+test_skips_interleaved_tag_store (test_bridge_inventory.ChainSiteTests.test_skips_interleaved_tag_store) ... ok
+test_decodes_relative_entries (test_bridge_inventory.TableTests.test_decodes_relative_entries) ... ok
+test_rejects_arm_outside_function (test_bridge_inventory.TableTests.test_rejects_arm_outside_function) ... ok
+test_ignores_absolute_and_wrong_target (test_bridge_inventory.XrefTests.test_ignores_absolute_and_wrong_target) ... ok
+test_resolves_movups_disp32 (test_bridge_inventory.XrefTests.test_resolves_movups_disp32) ... ok
+
+======================================================================
+FAIL: test_explicit_relative_artifact_writes_canonical_evidence (test_bridge_inventory.ArtifactTests.test_explicit_relative_artifact_writes_canonical_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<checkout>/tests/test_bridge_inventory.py", line 122, in test_explicit_relative_artifact_writes_canonical_evidence
+    self.assert_report_and_excerpts(result, output, relative.as_posix())
+  File "<checkout>/tests/test_bridge_inventory.py", line 107, in assert_report_and_excerpts
+    self.assertEqual(result.returncode, 0, result.stderr)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<checkout>/tools/bridge_inventory.py", line 471, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "<checkout>/tools/bridge_inventory.py", line 421, in main
+    'artifact': str(args.artifact.relative_to(ROOT)),
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: 'artifacts/node/94/hl-node' is not in the subpath of '<checkout>'
+
+
+======================================================================
+FAIL: test_external_artifact_is_portable_and_still_digest_checked (test_bridge_inventory.ArtifactTests.test_external_artifact_is_portable_and_still_digest_checked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<checkout>/tests/test_bridge_inventory.py", line 131, in test_external_artifact_is_portable_and_still_digest_checked
+    self.assert_report_and_excerpts(result, output, external.name)
+  File "<checkout>/tests/test_bridge_inventory.py", line 107, in assert_report_and_excerpts
+    self.assertEqual(result.returncode, 0, result.stderr)
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<checkout>/tools/bridge_inventory.py", line 471, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "<checkout>/tools/bridge_inventory.py", line 421, in main
+    'artifact': str(args.artifact.relative_to(ROOT)),
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/pathlib.py", line 682, in relative_to
+    raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+ValueError: '<external-input>/verified-node94' is not in the subpath of '<checkout>'
+
+
+----------------------------------------------------------------------
+Ran 14 tests in 15.028s
+
+FAILED (failures=2)

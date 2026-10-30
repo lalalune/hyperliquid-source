@@ -2,7 +2,9 @@ import contextlib
 import io
 import json
 from pathlib import Path
+import shutil
 import struct
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -94,6 +96,51 @@ class TableTests(unittest.TestCase):
 
 
 class ArtifactTests(unittest.TestCase):
+    def run_cli(self, artifact, output):
+        return subprocess.run(
+            [sys.executable, str(ROOT / 'tools/bridge_inventory.py'),
+             '--artifact', str(artifact), '--out', str(output)],
+            cwd=ROOT, capture_output=True, text=True, timeout=120,
+        )
+
+    def assert_report_and_excerpts(self, result, output, artifact_name):
+        self.assertEqual(result.returncode, 0, result.stderr)
+        canonical = ROOT / 'research/work-items/bridge/evidence'
+        expected = json.loads((canonical / 'bridge-inventory.json').read_text())
+        expected['artifact'] = artifact_name
+        self.assertEqual(json.loads(result.stdout), expected)
+        self.assertEqual((output / 'bridge-inventory.json').read_text(), result.stdout)
+        excerpts = list(canonical.glob('*.bin'))
+        self.assertEqual(len(excerpts), 4)
+        self.assertEqual({p.name for p in output.glob('*.bin')}, {p.name for p in excerpts})
+        for excerpt in excerpts:
+            self.assertEqual((output / excerpt.name).read_bytes(), excerpt.read_bytes())
+
+    @unittest.skipUnless(ARTIFACT.exists(), 'captured node #94 not present')
+    def test_explicit_relative_artifact_writes_canonical_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'report'
+            relative = ARTIFACT.relative_to(ROOT)
+            result = self.run_cli(relative, output)
+            self.assert_report_and_excerpts(result, output, relative.as_posix())
+
+    @unittest.skipUnless(ARTIFACT.exists(), 'captured node #94 not present')
+    def test_external_artifact_is_portable_and_still_digest_checked(self):
+        with tempfile.TemporaryDirectory() as directory:
+            external = Path(directory) / 'verified-node94'
+            shutil.copyfile(ARTIFACT, external)
+            output = Path(directory) / 'report'
+            result = self.run_cli(external, output)
+            self.assert_report_and_excerpts(result, output, external.name)
+            self.assertNotIn(str(external.parent), result.stdout)
+            with external.open('r+b') as handle:
+                handle.write(b'bad!')
+            refused_output = Path(directory) / 'refused'
+            refused = self.run_cli(external, refused_output)
+            self.assertNotEqual(refused.returncode, 0)
+            self.assertIn('SHA-256', refused.stderr)
+            self.assertFalse(refused_output.exists())
+
     def test_rejects_corrupted_digest(self):
         with tempfile.NamedTemporaryFile() as handle:
             handle.write(b'\x7fELF')

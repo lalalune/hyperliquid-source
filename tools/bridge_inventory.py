@@ -347,7 +347,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--release', type=int, default=94, choices=sorted(TARGET_SHA256))
     parser.add_argument('--artifact', type=Path,
-                        default=ROOT / 'artifacts/node/94/hl-node')
+                        default=ROOT / 'artifacts/node/94/hl-node',
+                        help='SHA-256-verified input, with a relative or absolute path')
     parser.add_argument('--out', type=Path, help='write JSON report and excerpts here')
     args = parser.parse_args(argv)
 
@@ -416,9 +417,14 @@ def main(argv=None):
     if encoder_va not in withdrawal_arm['direct_calls']:
         raise ValueError(f'{encoder_va:#x}: arm does not call the expected encoder')
     withdrawal_encoder = decode_encoder(data, mapping, encoder_va)
+    # Retain repository-relative names without exposing external workstation paths.
+    try:
+        artifact_name = args.artifact.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        artifact_name = args.artifact.name
     report = {
         'release': f'node{args.release}',
-        'artifact': str(args.artifact.relative_to(ROOT)),
+        'artifact': artifact_name,
         'artifact_sha256': actual,
         'artifact_size': len(data),
         'coordinate_system': 'linked VA; file offset = VA - 0x1000 inside .text, '
