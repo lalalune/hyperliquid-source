@@ -186,5 +186,11 @@ class StateRootsTests(unittest.TestCase):
                     self.assertRegex(out, rf"{s:x}:\s+lea\s+-?0x[0-9a-f]+\(%rip\),%r\w+\s+# {a['anchor']:x}")
 
 
+
+class MainErrorTests(unittest.TestCase):
+    def test_main_reports_missing_binary(self):
+        self.assertEqual(sr.main(['--binary', '/tmp/definitely-missing-hl.bin']), 2)
+
+
 if __name__ == "__main__":
     unittest.main()

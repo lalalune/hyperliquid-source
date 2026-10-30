@@ -262,5 +262,11 @@ class ConsensusWireTests(unittest.TestCase):
         self.assertIn("0f 92 c0", out)        # setb %al
 
 
+
+class MainErrorTests(unittest.TestCase):
+    def test_main_reports_missing_binary(self):
+        self.assertEqual(cw.main(['--binary', '/tmp/definitely-missing-hl.bin']), 2)
+
+
 if __name__ == "__main__":
     unittest.main()
