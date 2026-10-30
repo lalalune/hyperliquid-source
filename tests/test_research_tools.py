@@ -6,7 +6,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from catalogue import owner, validate_progress
+from catalogue import generate, owner, validate_progress
 from elf_index import entry_file_offset, sections, target_for, unwind_index
 
 
@@ -86,6 +86,54 @@ class CatalogueTests(unittest.TestCase):
     def test_missing_component_rejected(self):
         d = copy.deepcopy(self.progress); del d['components']['visor']
         with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
+
+
+    def input_root(self, inventory94=None, literal_items=()):
+        import tempfile
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        root = Path(temp.name)
+        (root / 'research/imported').mkdir(parents=True)
+        (root / 'references/can1357-hl').mkdir(parents=True)
+        (root / 'artifacts/node/94').mkdir(parents=True)
+        comp = {"id": "foundation", "name": "Foundation", "patterns": ["base/*"],
+                "depends_on": [], "scope": "x", "first_task": "y", "artifact": "node94"}
+        (root / 'research/components.json').write_text(json.dumps(
+            {"components": [comp], "known_first_party_crates": ["base"]}))
+        (root / 'research/progress.json').write_text(json.dumps(
+            {"gates": {"mapped": "m"}, "components": {"foundation":
+             {"gates": {"mapped": False}, "evidence": [], "raw_equal_bodies": 0,
+              "normalized_only_bodies": 0, "total_function_windows": None}}}))
+        plain = json.dumps({"first_party_files": {}, "fde_count_eh_frame_hdr": 1})
+        (root / 'research/imported/hl-node-94.inventory.json').write_text(
+            inventory94 if inventory94 is not None else plain)
+        for name in ('hl-node-115', 'hl-visor'):
+            (root / f'research/imported/{name}.inventory.json').write_text(plain)
+        (root / 'research/imported/can1357-literal-classes.json').write_text(
+            json.dumps({"items": list(literal_items)}))
+        (root / 'artifacts/node/94/hl-node').write_bytes(bytes(fixture()))
+        return root
+
+    def test_duplicate_inventory_key_rejected(self):
+        dup = ('{"first_party_files": {"base": ["a.rs"], "base": ["b.rs"]},'
+               ' "fde_count_eh_frame_hdr": 1}')
+        root = self.input_root(inventory94=dup)
+        with self.assertRaises(ValueError):
+            generate(root)
+
+    def test_duplicate_literal_item_rejected(self):
+        item = {"crate": "base", "file": "base/a.rs",
+                "literal": "attempt to add with overflow", "class": "grounded"}
+        root = self.input_root(literal_items=[item, dict(item)])
+        with self.assertRaises(ValueError):
+            generate(root)
+
+    def test_clean_inputs_still_generate(self):
+        item = {"crate": "base", "file": "base/a.rs",
+                "literal": "attempt to add with overflow", "class": "grounded"}
+        root = self.input_root(literal_items=[item])
+        out = generate(root)
+        self.assertIn('docs/PROGRESS.md', out)
 
 
 class VisorIndexTests(unittest.TestCase):
