@@ -43,8 +43,14 @@ class Elf:
         if data[:4] != b"\x7fELF" or data[4] != 2 or data[5] != 1:
             raise EvidenceError("not an ELF64 little-endian file")
         self.data = data
+        if len(data) < 64:
+            raise EvidenceError("truncated ELF header")
         phoff, shoff = struct.unpack_from("<QQ", data, 0x20)
         phentsize, phnum, shentsize, shnum, shstrndx = struct.unpack_from("<HHHHH", data, 0x36)
+        if phnum and phoff + (phnum - 1) * phentsize + 40 > len(data):
+            raise EvidenceError("program header table extends past end of file")
+        if shnum and shoff + (shnum - 1) * shentsize + 64 > len(data):
+            raise EvidenceError("section header table extends past end of file")
         self.loads = []
         for i in range(phnum):
             p_type, _f, p_off, p_va, _pa, p_filesz = struct.unpack_from("<IIQQQQ", data, phoff + i * phentsize)
