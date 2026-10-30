@@ -26,7 +26,20 @@ note_re = re.compile(r"sub_[0-9A-Fa-f]{4,}|\b0x[0-9A-Fa-f]{5,}\b|\bsee\b|—|TOD
 
 
 def unescape(s):
-    return re.sub(r"\\(.)", lambda m: esc.get(m.group(1), m.group(0)), s)
+    out, i = [], 0
+    while i < len(s):
+        if s[i] == "\\" and i + 1 < len(s):
+            c = s[i + 1]
+            if c == "x" and re.fullmatch(r"[0-9A-Fa-f]{2}", s[i + 2:i + 4] or ""):
+                out.append(chr(int(s[i + 2:i + 4], 16)))
+                i += 4
+                continue
+            out.append(esc.get(c, "\\" + c))
+            i += 2
+            continue
+        out.append(s[i])
+        i += 1
+    return "".join(out)
 
 
 # Attribute arguments that only exist at compile time (paths, case conventions, cfgs, docs).
