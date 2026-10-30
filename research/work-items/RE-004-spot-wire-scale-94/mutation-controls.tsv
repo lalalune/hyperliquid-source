@@ -1,0 +1,21 @@
+control	helper	patch_va	old	new	patch	outcome	first_stop
+ten	0x4ca6940	0x4ca69ca	0a	0b	mov $10,%esi becomes 11	detected	0x4ca6940 q=1 b=0: fact outside the closed form: [('gt', 11000000), ('small', 11000000)]
+hundred	0x4ca6940	0x4ca69e1	64	65	imul 100 becomes 101	detected	0x4ca6940 q=1 b=0: fact outside the closed form: [('gt', 10100000), ('small', 10100000)]
+ten-thousand	0x4ca6940	0x4ca6a04	10	11	imul 10000 becomes 10001	detected	0x4ca6940 q=1 b=0: fact outside the closed form: [('gt', 10001000), ('small', 10001000)]
+hundred-million	0x4ca6940	0x4ca6a15	00	01	imul 1e8 becomes 1e8+1	detected	0x4ca6940 q=0 b=0: fact outside the closed form: [('gt', 100000001), ('small', 100000001)]
+decimals-gate	0x4ca6940	0x4ca69b6	08	07	sub $8,%r9b becomes sub $7	detected	0x4ca6940 q=0 b=0: fact outside the closed form: [('gt', 10000000), ('small', 10000000)]
+borrow-gate	0x4ca6940	0x4ca69a6	0f82	90e9	jb to the panic becomes jmp	detected	0x4ca6940 q=0 b=0: 1 leaves, wanted 6
+quote-field	0x4ca6940	0x4ca6993	49	48	quote byte +0x49 becomes +0x48	detected	0x4ca6940 q=0 b=0: 1 leaves, wanted 6
+base-field	0x4ca6940	0x4ca699f	48	49	base byte +0x48 becomes +0x49	detected	0x4ca6940 q=0 b=0: 1 leaves, wanted 6
+zero-gate-64	0x4ca6940	0x4ca6a30	76	72	64-bit jbe becomes jb	detected	0x4ca6940 q=0 b=0: fact outside the closed form: [('ge', 100000000)]
+zero-gate-32	0x4ca6940	0x4ca6a3e	77	73	32-bit ja becomes jae	detected	0x4ca6940 q=0 b=0: fact outside the closed form: [('ge', 100000000)]
+remainder	0x4ca6940	0x4ca6a43	75b4	9090	jne after the remainder test removed	detected	0x4ca6940 q=0 b=0: 4 leaves, wanted 6
+price-tag	0x4ca6940	0x4ca69ae	65	64	tag 0x65 becomes 0x64	detected	0x4ca6940 q=0 b=0: x < s gave ('err', 100)
+ok-tag	0x4ca6940	0x4ca6a4b	86	85	ok word 0x186 becomes 0x185	detected	an error wrote a value
+second-copy	0x230af90	0x230b031	64	65	imul 100 becomes 101 in the other copy	detected	0x230af90 q=1 b=0: fact outside the closed form: [('gt', 10100000), ('small', 10100000)]
+size-gate	0x4ca6a90	0x4ca6ada	08	07	sub $8,%eax becomes sub $7	detected	0x4ca6a90 b=0: fact outside the closed form: [('exact', 10000000), ('small', 10000000)]
+size-field	0x4ca6a90	0x4ca6ad0	48	49	base byte +0x48 becomes +0x49	detected	0x4ca6a90 b=0: 1 leaves, wanted 4
+size-remainder-64	0x4ca6a90	0x4ca6afb	74	eb	je after the 64-bit remainder test becomes jmp	detected	0x4ca6a90 b=0: 3 leaves, wanted 4
+size-remainder-32	0x4ca6a90	0x4ca6b3f	75bc	9090	jne after the 32-bit remainder test removed	detected	0x4ca6a90 b=0: 3 leaves, wanted 4
+size-hundred	0x4ca6a90	0x4ca6b1d	64	65	imul 100 becomes 101	detected	0x4ca6a90 b=1: fact outside the closed form: [('exact', 10100000), ('small', 10100000)]
+size-tag	0x4ca6a90	0x4ca6ad6	66	64	tag 0x66 becomes 0x64	detected	0x4ca6a90 b=0: a remainder gave ('err', 100)
