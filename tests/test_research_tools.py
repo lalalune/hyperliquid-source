@@ -88,6 +88,40 @@ class CatalogueTests(unittest.TestCase):
         with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
 
 
+    def run_catalogue_main(self, root, argv):
+        import catalogue
+        original = (catalogue.ROOT, catalogue.generate, sys.argv)
+        catalogue.ROOT = root
+        catalogue.generate = lambda: {'docs/PROGRESS.md': '# Progress\u2014x\nline2\n'}
+        sys.argv = ['catalogue.py'] + argv
+        try:
+            catalogue.main()
+        finally:
+            catalogue.ROOT, catalogue.generate, sys.argv = original
+
+    def catalogue_root(self):
+        import tempfile
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        root = Path(temp.name)
+        (root / 'docs').mkdir(parents=True)
+        return root
+
+    def test_catalogue_check_rejects_crlf_drift(self):
+        root = self.catalogue_root()
+        content = '# Progress\u2014x\nline2\n'
+        (root / 'docs/PROGRESS.md').write_bytes(content.replace('\n', '\r\n').encode())
+        with self.assertRaises(SystemExit):
+            self.run_catalogue_main(root, ['--check'])
+
+    def test_catalogue_write_then_check_roundtrip(self):
+        root = self.catalogue_root()
+        content = '# Progress\u2014x\nline2\n'
+        self.run_catalogue_main(root, [])
+        self.assertEqual((root / 'docs/PROGRESS.md').read_bytes(), content.encode())
+        self.run_catalogue_main(root, ['--check'])
+
+
 class VisorIndexTests(unittest.TestCase):
     def test_target_for_maps_nodes_and_visor(self):
         self.assertEqual(
