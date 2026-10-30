@@ -1,0 +1,908 @@
+{
+  "book_map": [
+    {
+      "meaning": "slab pointer, stride 0xf8",
+      "offset": "0x8"
+    },
+    {
+      "meaning": "slab length",
+      "offset": "0x10"
+    },
+    {
+      "meaning": "id table control bytes",
+      "offset": "0x28"
+    },
+    {
+      "meaning": "id table bucket mask",
+      "offset": "0x30"
+    },
+    {
+      "meaning": "id table item count; 0 skips the probe",
+      "offset": "0x40"
+    },
+    {
+      "meaning": "side tree: root, height, length; bound for side 1",
+      "offset": "0x80"
+    },
+    {
+      "meaning": "side tree: root, height, length; bound for side 0",
+      "offset": "0x98"
+    }
+  ],
+  "callers": {
+    "cursor_slot": [
+      {
+        "function": "0x26cb280",
+        "site": "0x26cb645"
+      },
+      {
+        "function": "0x42d2790",
+        "site": "0x42d2b3b"
+      },
+      {
+        "function": "0x42d3d50",
+        "site": "0x42d40fb"
+      }
+    ],
+    "refresh": [
+      {
+        "function": "0x22293c0",
+        "site": "0x2229404"
+      },
+      {
+        "function": "0x26fed00",
+        "site": "0x26fef91"
+      }
+    ]
+  },
+  "cases": {
+    "cursor": 155,
+    "not_run_on_the_copies": 19,
+    "refresh": 192
+  },
+  "constants": {
+    "side_cap": 100,
+    "span_name": {
+      "text": "hyperliquidity_ensure_orders",
+      "va": "0x3ef968"
+    },
+    "user_tail_mask": {
+      "bytes": "ffffffff000000000000000000000000",
+      "va": "0x206610"
+    }
+  },
+  "copies": [
+    {
+      "cancel_all": "0x43038b0",
+      "cancel_one": "0x42f7290",
+      "cases": 173,
+      "entry": "0x42d2790",
+      "field_offset_counts_that_differ_from_first": {
+        "0x0": [
+          27,
+          26
+        ],
+        "0x1f0": [
+          9,
+          18
+        ],
+        "0x80": [
+          1,
+          2
+        ]
+      },
+      "instructions_run": 677196,
+      "map_first_step": "0x4948400",
+      "map_later_step": "0x42bb520",
+      "mismatches": 0,
+      "place": "0x42d5310"
+    },
+    {
+      "cancel_all": "0x4303b30",
+      "cancel_one": "0x42f7700",
+      "cases": 173,
+      "entry": "0x42d3d50",
+      "field_offset_counts_that_differ_from_first": {
+        "0x0": [
+          27,
+          26
+        ],
+        "0x1f0": [
+          9,
+          18
+        ],
+        "0x80": [
+          1,
+          2
+        ]
+      },
+      "instructions_run": 677196,
+      "map_first_step": "0x4948400",
+      "map_later_step": "0x42bb520",
+      "mismatches": 0,
+      "place": "0x42d5650"
+    }
+  ],
+  "edges": [
+    {
+      "end": "0x26e4611",
+      "meaning": "cancel all of a user's orders in one book",
+      "target": "0x26e4240"
+    },
+    {
+      "end": "0x26de3c7",
+      "meaning": "cancel one order id",
+      "target": "0x26de280"
+    },
+    {
+      "end": "0x26cca10",
+      "meaning": "place one order record",
+      "target": "0x26cc730"
+    },
+    {
+      "end": "0x286b14d",
+      "meaning": "first step of the result map drop",
+      "target": "0x286ada0"
+    },
+    {
+      "end": "0x1b2651e",
+      "meaning": "later steps of the result map drop",
+      "target": "0x1b263c0"
+    },
+    {
+      "end": "0x1eb3754",
+      "meaning": "end of the result map drop",
+      "target": "0x1eb3690"
+    },
+    {
+      "end": "0x22297bb",
+      "meaning": "span wrapper",
+      "target": "0x22293c0"
+    },
+    {
+      "end": "0x26ff186",
+      "meaning": "block step",
+      "target": "0x26fed00"
+    }
+  ],
+  "first_mismatch": "",
+  "functions": [
+    {
+      "end": "0x26cc72c",
+      "instructions": 1058,
+      "instructions_stepped": 945,
+      "role": "refresh",
+      "size": 5292,
+      "start": "0x26cb280"
+    },
+    {
+      "end": "0x32639b9",
+      "instructions": 161,
+      "instructions_stepped": 160,
+      "role": "cursor",
+      "size": 601,
+      "start": "0x3263760"
+    },
+    {
+      "end": "0x42d3d41",
+      "instructions": 1110,
+      "instructions_stepped": 839,
+      "role": "refresh, second copy",
+      "size": 5553,
+      "start": "0x42d2790"
+    },
+    {
+      "end": "0x42d5301",
+      "instructions": 1110,
+      "instructions_stepped": 839,
+      "role": "refresh, third copy",
+      "size": 5553,
+      "start": "0x42d3d50"
+    }
+  ],
+  "instructions_stepped": 2025275,
+  "ladder_map": [
+    {
+      "meaning": "level vector capacity; 1 << 63 is the niche for no ladder, which is skipped",
+      "offset": "0x0",
+      "type": "u64"
+    },
+    {
+      "meaning": "level vector, stride 0x18",
+      "offset": "0x8",
+      "type": "pointer"
+    },
+    {
+      "meaning": "level count",
+      "offset": "0x10",
+      "type": "u64"
+    },
+    {
+      "meaning": "order size in size units",
+      "offset": "0x18",
+      "type": "u64"
+    }
+  ],
+  "level_map": [
+    {
+      "meaning": "tag, read as a dword: 1 means +0x08 holds a resting order id",
+      "offset": "0x0",
+      "type": "u64"
+    },
+    {
+      "meaning": "order id, written from the place result",
+      "offset": "0x8",
+      "type": "u64"
+    },
+    {
+      "meaning": "price, raw; never written here",
+      "offset": "0x10",
+      "type": "u64"
+    }
+  ],
+  "locations": [
+    {
+      "column": 47,
+      "line": 19,
+      "path": "l1/src/books.rs",
+      "slot": "0x56bb478"
+    },
+    {
+      "column": 47,
+      "line": 560,
+      "path": "library/alloc/src/collections/btree/navigate.rs",
+      "slot": "0x56c23a0"
+    },
+    {
+      "column": 36,
+      "line": 173,
+      "path": "library/alloc/src/collections/btree/navigate.rs",
+      "slot": "0x56c23b8"
+    },
+    {
+      "column": 47,
+      "line": 534,
+      "path": "library/alloc/src/collections/btree/navigate.rs",
+      "slot": "0x56c5540"
+    },
+    {
+      "column": 48,
+      "line": 600,
+      "path": "library/alloc/src/collections/btree/navigate.rs",
+      "slot": "0x56c5528"
+    },
+    {
+      "column": 39,
+      "line": 198,
+      "path": "library/alloc/src/collections/btree/navigate.rs",
+      "slot": "0x56c5570"
+    },
+    {
+      "column": 25,
+      "line": 565,
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x56df828"
+    },
+    {
+      "column": 33,
+      "line": 113,
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x56f21f0"
+    },
+    {
+      "column": 57,
+      "line": 1199,
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x56f2270"
+    }
+  ],
+  "mismatches": 0,
+  "mutations": {
+    "killed": 470,
+    "survived": 37,
+    "unreached": 20
+  },
+  "nodes": {
+    "balance_tree": {
+      "edges": 368,
+      "keys": 8,
+      "length": 362,
+      "size": 464,
+      "stride": 24,
+      "values": 96
+    },
+    "ladder_and_side_tree": {
+      "capacity": 11,
+      "edges": 456,
+      "index": 448,
+      "keys": 360,
+      "length": 450,
+      "parent": 352,
+      "size": 552,
+      "value_stride": 32,
+      "values": 0
+    }
+  },
+  "pins": [
+    {
+      "bytes": "48837c241863",
+      "function": "0x26cb280",
+      "meaning": "cmp qword [rsp+0x18], 0x63: the side count, 100 and up stops new orders",
+      "sites": [
+        "0x26cbb30",
+        "0x26cbba0",
+        "0x26cbcf0"
+      ]
+    },
+    {
+      "bytes": "48837c241864",
+      "function": "0x26cb280",
+      "meaning": "cmp qword [rsp+0x18], 0x64: the same cap after a cancel",
+      "sites": [
+        "0x26cbd29"
+      ]
+    },
+    {
+      "bytes": "48837d4000",
+      "function": "0x26cb280",
+      "meaning": "cmp qword [rbp+0x40], 0: id table item count",
+      "sites": [
+        "0x26cba71"
+      ]
+    },
+    {
+      "bytes": "4869fad8000000",
+      "function": "0x26cb280",
+      "meaning": "imul rdi, rdx, 0xd8: book stride",
+      "sites": [
+        "0x26cb51b"
+      ]
+    },
+    {
+      "bytes": "4869c9f8000000",
+      "function": "0x26cb280",
+      "meaning": "imul rcx, rcx, 0xf8: slab stride",
+      "sites": [
+        "0x26cbb53"
+      ]
+    },
+    {
+      "bytes": "4969cfd8000000",
+      "function": "0x26cb280",
+      "meaning": "imul rcx, r15, 0xd8: order record stride",
+      "sites": [
+        "0x26cbbeb"
+      ]
+    },
+    {
+      "bytes": "4869f028020000",
+      "function": "0x26cb280",
+      "meaning": "imul rsi, rax, 0x228: fill stride",
+      "sites": [
+        "0x26cc28c"
+      ]
+    },
+    {
+      "bytes": "48b9c5a9622eea7a35f1",
+      "function": "0x26cb280",
+      "meaning": "movabs rcx, FX multiplier of the id table",
+      "sites": [
+        "0x26cba88"
+      ]
+    },
+    {
+      "bytes": "48c1c014",
+      "function": "0x26cb280",
+      "meaning": "rol rax, 20: the hash rotate",
+      "sites": [
+        "0x26cba96"
+      ]
+    },
+    {
+      "bytes": "833901",
+      "function": "0x26cb280",
+      "meaning": "cmp dword [rcx], 1: level tag",
+      "sites": [
+        "0x26cba63"
+      ]
+    },
+    {
+      "bytes": "833c0802",
+      "function": "0x26cb280",
+      "meaning": "cmp dword [rax+rcx], 2: vacant slab slot",
+      "sites": [
+        "0x26cbb5a"
+      ]
+    },
+    {
+      "bytes": "41b902000000",
+      "function": "0x26cb280",
+      "meaning": "mov r9d, 2: reason, cancel-all and cancel-one",
+      "sites": [
+        "0x26cb328",
+        "0x26cbdd4"
+      ]
+    },
+    {
+      "bytes": "81f9ffff0000",
+      "function": "0x26cb280",
+      "meaning": "cmp ecx, 0xffff: all 16 compared bytes of the user equal",
+      "sites": [
+        "0x26cbb8b"
+      ]
+    },
+    {
+      "bytes": "3888c2000000",
+      "function": "0x26cb280",
+      "meaning": "cmp al, [rax+0xc2]-style side compare",
+      "sites": [
+        "0x26cbce8"
+      ]
+    },
+    {
+      "bytes": "4c39a0c8000000",
+      "function": "0x26cb280",
+      "meaning": "cmp [rax+0xc8], r12: slot size against the wanted size",
+      "sites": [
+        "0x26cbcf8"
+      ]
+    },
+    {
+      "bytes": "48c1e205",
+      "function": "0x3263760",
+      "meaning": "shl rdx, 5: pair stride",
+      "sites": [
+        "0x326378b"
+      ]
+    },
+    {
+      "bytes": "4969f4e8000000",
+      "function": "0x3263760",
+      "meaning": "imul rsi, r12, 0xe8: token stride",
+      "sites": [
+        "0x326383c"
+      ]
+    },
+    {
+      "bytes": "be0a000000",
+      "function": "0x3263760",
+      "meaning": "mov esi, 10: first power",
+      "sites": [
+        "0x32638a2"
+      ]
+    },
+    {
+      "bytes": "486bf664",
+      "function": "0x3263760",
+      "meaning": "imul rsi, rsi, 100",
+      "sites": [
+        "0x32638b1"
+      ]
+    },
+    {
+      "bytes": "4869f610270000",
+      "function": "0x3263760",
+      "meaning": "imul rsi, rsi, 10000",
+      "sites": [
+        "0x32638c4"
+      ]
+    },
+    {
+      "bytes": "4869f600e1f505",
+      "function": "0x3263760",
+      "meaning": "imul rsi, rsi, 100000000",
+      "sites": [
+        "0x32638da"
+      ]
+    },
+    {
+      "bytes": "48ba0000c16ff2862300",
+      "function": "0x3263760",
+      "meaning": "movabs rdx, 1e16",
+      "sites": [
+        "0x32638f4"
+      ]
+    }
+  ],
+  "record_map": [
+    {
+      "meaning": "1",
+      "offset": "0x0",
+      "size": 8
+    },
+    {
+      "meaning": "size: the ladder size, or the remainder on the first ask",
+      "offset": "0x8",
+      "size": 8
+    },
+    {
+      "meaning": "0",
+      "offset": "0x10",
+      "size": 8
+    },
+    {
+      "meaning": "0",
+      "offset": "0x20",
+      "size": 8
+    },
+    {
+      "meaning": "0, with +0x38 = 8 and +0x40 = 0: an empty vector",
+      "offset": "0x30",
+      "size": 8
+    },
+    {
+      "meaning": "0",
+      "offset": "0x48",
+      "size": 8
+    },
+    {
+      "meaning": "0",
+      "offset": "0x70",
+      "size": 8
+    },
+    {
+      "meaning": "level price, raw",
+      "offset": "0x80",
+      "size": 8
+    },
+    {
+      "meaning": "block time in milliseconds, clamped at 0",
+      "offset": "0x88",
+      "size": 8
+    },
+    {
+      "meaning": "0",
+      "offset": "0x90",
+      "size": 2
+    },
+    {
+      "meaning": "side: 0 for levels below the cursor, 1 for the cursor and above",
+      "offset": "0xa2",
+      "size": 1
+    },
+    {
+      "meaning": "0",
+      "offset": "0xa8",
+      "size": 8
+    },
+    {
+      "meaning": "cursor index, a stale word behind the tag at +0xa8",
+      "offset": "0xb0",
+      "size": 8
+    },
+    {
+      "meaning": "user 0xff * 20",
+      "offset": "0xb8",
+      "size": 20
+    },
+    {
+      "meaning": "0",
+      "offset": "0xcc",
+      "size": 1
+    }
+  ],
+  "reference_claims": [
+    {
+      "bytes": "size and offset agree; the two words are a tag and a resting order id: 1 at +0x00 makes +0x08 an id that is looked up in the book, and each placed order writes both",
+      "claim": "HyperliquidityLevel is 24 bytes: two unknown words and the price at +0x10",
+      "reference": "l1/hyperliquidity.rs:53-57"
+    },
+    {
+      "bytes": "no size or flag is read from a level: the size is the ladder's +0x18, or the remainder for the first ask",
+      "claim": "HyperliquidityLevel holds a price, a size and a flag",
+      "reference": "l1/exchange/impl_spot_deploy.rs:180"
+    },
+    {
+      "bytes": "the tree value here is 0x20 bytes, the node's value slots run to +0x160 at stride 0x20, and the only word past the vector is the order size at +0x18; the base balance comes from the 0xff user's balance tree instead",
+      "claim": "HyperliquidityBook also holds base_balance and a USDC amount",
+      "reference": "l1/hyperliquidity.rs:39-44 and l1/exchange/impl_spot_deploy.rs:172-177"
+    },
+    {
+      "bytes": "the refresh `0x26cb280` is the reader; no function in the reference has its loop, the cursor, the crossing skip or the cap of 100",
+      "claim": "by_spot is read only by contains_key and written by insert",
+      "reference": "l1/ (whole tree)"
+    }
+  ],
+  "refresh_outcomes": {
+    "cancels and new orders": 9,
+    "cancels only": 1,
+    "flat ladder, all cancelled": 2,
+    "new orders only": 161,
+    "no ladder read": 4,
+    "nothing to change": 8,
+    "panic": 7
+  },
+  "result_map": [
+    {
+      "meaning": "fill vector capacity; 1 << 63 means the place failed and the level is left alone",
+      "offset": "0x0"
+    },
+    {
+      "meaning": "fill vector pointer, stride 0x228",
+      "offset": "0x8"
+    },
+    {
+      "meaning": "result map root, 0 for none",
+      "offset": "0x18"
+    },
+    {
+      "meaning": "result map height",
+      "offset": "0x20"
+    },
+    {
+      "meaning": "result map length",
+      "offset": "0x28"
+    },
+    {
+      "meaning": "order id, stored in the level with tag 1",
+      "offset": "0x30"
+    }
+  ],
+  "slot_map": [
+    {
+      "meaning": "tag dword; 2 is vacant",
+      "offset": "0x0"
+    },
+    {
+      "meaning": "side byte, compared with the walk's side",
+      "offset": "0xc2"
+    },
+    {
+      "meaning": "size, compared with the wanted size",
+      "offset": "0xc8"
+    },
+    {
+      "meaning": "user, 20 bytes",
+      "offset": "0xe0"
+    }
+  ],
+  "slots": {
+    "0x576dfc8": {
+      "meaning": "index bounds panic",
+      "target": "0x157b64f"
+    },
+    "0x576e010": {
+      "meaning": "free, stubbed",
+      "target": "0x54c8cb0"
+    },
+    "0x576e470": {
+      "meaning": "panic with Location",
+      "target": "0x157a9f0"
+    },
+    "0x5773170": {
+      "meaning": "user map lookup, stubbed",
+      "target": "0x371b3a0"
+    },
+    "0x5774458": {
+      "meaning": "grow the cancel id vector, stubbed",
+      "target": "0x32d5780"
+    },
+    "0x5774750": {
+      "meaning": "level cursor of one ladder, run real",
+      "target": "0x3263760"
+    },
+    "0x5774758": {
+      "meaning": "grow the order record vector, stubbed",
+      "target": "0x454eee0"
+    }
+  },
+  "strides": {
+    "book": 216,
+    "fill": 552,
+    "ladder_value": 32,
+    "level": 24,
+    "order_record": 216,
+    "pair": 32,
+    "slab": 248,
+    "token": 232
+  },
+  "target": {
+    "file": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "worked_example": {
+    "block": {
+      "balance_units": 3500,
+      "best_ask_key": 1400,
+      "best_bid_key": -1000,
+      "orders": [
+        {
+          "price": 1200,
+          "side": 0,
+          "size": 1000
+        },
+        {
+          "price": 1160,
+          "side": 0,
+          "size": 1000
+        },
+        {
+          "price": 1120,
+          "side": 0,
+          "size": 1000
+        },
+        {
+          "price": 1080,
+          "side": 0,
+          "size": 1000
+        },
+        {
+          "price": 1040,
+          "side": 0,
+          "size": 1000
+        },
+        {
+          "price": 1000,
+          "side": 0,
+          "size": 1000
+        },
+        {
+          "price": 1240,
+          "side": 1,
+          "size": 500
+        },
+        {
+          "price": 1280,
+          "side": 1,
+          "size": 1000
+        },
+        {
+          "price": 1320,
+          "side": 1,
+          "size": 1000
+        },
+        {
+          "price": 1360,
+          "side": 1,
+          "size": 1000
+        }
+      ]
+    },
+    "cursor_table": [
+      {
+        "balance_units": 0,
+        "index": 10,
+        "partial": 0,
+        "remainder": 0
+      },
+      {
+        "balance_units": 500,
+        "index": 9,
+        "partial": 1,
+        "remainder": 500
+      },
+      {
+        "balance_units": 1000,
+        "index": 9,
+        "partial": 0,
+        "remainder": 0
+      },
+      {
+        "balance_units": 1500,
+        "index": 8,
+        "partial": 1,
+        "remainder": 500
+      },
+      {
+        "balance_units": 2000,
+        "index": 8,
+        "partial": 0,
+        "remainder": 0
+      },
+      {
+        "balance_units": 2500,
+        "index": 7,
+        "partial": 1,
+        "remainder": 500
+      },
+      {
+        "balance_units": 3000,
+        "index": 7,
+        "partial": 0,
+        "remainder": 0
+      },
+      {
+        "balance_units": 3500,
+        "index": 6,
+        "partial": 1,
+        "remainder": 500
+      },
+      {
+        "balance_units": 4000,
+        "index": 6,
+        "partial": 0,
+        "remainder": 0
+      },
+      {
+        "balance_units": 4500,
+        "index": 5,
+        "partial": 1,
+        "remainder": 500
+      },
+      {
+        "balance_units": 5000,
+        "index": 5,
+        "partial": 0,
+        "remainder": 0
+      },
+      {
+        "balance_units": 5500,
+        "index": 4,
+        "partial": 1,
+        "remainder": 500
+      },
+      {
+        "balance_units": 6000,
+        "index": 4,
+        "partial": 0,
+        "remainder": 0
+      },
+      {
+        "balance_units": 6500,
+        "index": 3,
+        "partial": 1,
+        "remainder": 500
+      },
+      {
+        "balance_units": 7000,
+        "index": 3,
+        "partial": 0,
+        "remainder": 0
+      },
+      {
+        "balance_units": 7500,
+        "index": 2,
+        "partial": 1,
+        "remainder": 500
+      },
+      {
+        "balance_units": 8000,
+        "index": 2,
+        "partial": 0,
+        "remainder": 0
+      },
+      {
+        "balance_units": 8500,
+        "index": 1,
+        "partial": 1,
+        "remainder": 500
+      },
+      {
+        "balance_units": 9000,
+        "index": 1,
+        "partial": 0,
+        "remainder": 0
+      },
+      {
+        "balance_units": 9500,
+        "index": 0,
+        "partial": 1,
+        "remainder": 500
+      },
+      {
+        "balance_units": 10000,
+        "index": 0,
+        "partial": 0,
+        "remainder": 0
+      },
+      {
+        "balance_units": 10500,
+        "index": 0,
+        "partial": 1,
+        "remainder": 500
+      },
+      {
+        "balance_units": 11000,
+        "index": 0,
+        "partial": 0,
+        "remainder": 0
+      }
+    ],
+    "ladder": {
+      "first_price": 1000,
+      "levels": 10,
+      "order_size": 1000,
+      "price_step": 40
+    }
+  }
+}
