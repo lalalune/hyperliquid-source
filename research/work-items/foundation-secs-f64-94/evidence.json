@@ -1,0 +1,70 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "function": {
+    "start_va": "0x1450a60",
+    "fde_end_va_exclusive": "0x1450ad3",
+    "index_stride_end_va_exclusive": "0x1450ae0",
+    "fde_bytes": 115,
+    "index_stride_bytes": 128,
+    "fde_body_sha256": "2c4019e9f32c0ac8ad84b8195a7ee656052a3e574eae6bc25a7ee832e955f623",
+    "index_stride_sha256": "f235466023dd6d58a78258133b2e377037b4832d41828078c78baa8f1c832410",
+    "fde_section_offset": "0xad24",
+    "inferred_label": "seconds-as-f64 conversion window"
+  },
+  "arithmetic": {
+    "inputs": "helper return pair: whole seconds in rax, sub-second field in edx (low 32 bits of rdx, sign-extended)",
+    "borrow": "1 iff whole < 0 and sub > 0; sub adjusted by -1000000000 when borrowed",
+    "seconds_scale": 1000000,
+    "sub_divisor": 1000,
+    "result_divisor": 1000000.0,
+    "formula": "((whole + borrow) * 1000000 + trunc((sub - borrow * 1000000000) / 1000)) / 1000000.0",
+    "resolution": "microsecond truncation of the sub-second field (toward zero)",
+    "overflow": "multiply overflow or add overflow both return +0.0 via the shared andpd tail at 0x1450ac9",
+    "worked_examples": {
+      "(0, 0)": 0.0,
+      "(-1, 500000000)": -0.5,
+      "(2, 1500)": 2.000001,
+      "(0, -1500)": -1e-06,
+      "(1, -1)": 1.0,
+      "(-2, -2500)": -2.000002,
+      "(9223372036855, 0)": 0.0,
+      "(9223372036854, 2147483647)": 0.0
+    }
+  },
+  "call_edges": {
+    "helper_slot": "0x576eaa0",
+    "helper_target": "0x151d1b0",
+    "helper_fde": [
+      "0x151d1b0",
+      "0x151d33f"
+    ],
+    "incoming_slot": "0x576f6c8",
+    "incoming_sites": [
+      "0x44ab1b2"
+    ],
+    "incoming_caller_fde": [
+      "0x44aa5a0",
+      "0x44ab55b"
+    ],
+    "overflow_tail": "0x1450ac9",
+    "divisor_va": "0x20ae60",
+    "mask_va": "0x202ed0"
+  },
+  "incoming_pattern_scan": {
+    "section": ".text",
+    "byte_count": 70370352,
+    "ff15_ff25_candidates": [
+      "0x44ab1b2"
+    ],
+    "e8_candidates": [],
+    "validated_caller_fde": [
+      "0x44aa5a0",
+      "0x44ab55b"
+    ],
+    "complete_xref_census": false
+  },
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
