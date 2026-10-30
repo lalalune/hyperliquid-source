@@ -1,0 +1,12 @@
+verdict	reference	reference_says	bytes_say
+differs	handlers/55_start_fee_trial.rs add_days	u32 day counter, checked_add	packed chrono date (year, ordinal, flags), first word of the 12-byte time at exchange +0x60; calendar add through the helper with the text `NaiveDate + TimeDelta` overflowed
+differs	FeeTrialDefaults	volume anchor and multiplier are runtime fields	only the four rates come from the tracker (+0x48); the row helper writes constants 0.0 and 1.0 for the other two
+differs	FeeTrialRecord.trial_end_day and the cooldown test	one field: stored as today + 14, read back for + 90	two fields: the writer stores value +0x70 and the cooldown reads value +0xb0, which the writer never writes
+differs	FeeTrialRecord.active	one flag gates both the active error and the current profile	value +0 selects the row; the active error needs a non-zero date at value +0x70
+differs	FeeTrialRecord layout	requested_rates and previous_rates are plain fields	the reader copies them only when the date is non-zero, so the date is an Option niche for them
+differs	build_trial_record no-effect test	effective == current	any(current[i] - scaled[i] > 0); differs only for a NaN current rate
+differs	resolve_volume_discount	a NaN volume stops at the first tier	a NaN volume keeps walking and takes the last discount
+agrees	apply_start_fee_trial	disabled, active, template, cooldown, no effect, write linked users and sender	same order; the row is built first, and parse errors sit between active and template
+agrees	is_supported_fee_trial	four rates of one template, or two add rates plus one override for both cross rates	same; both add rates must match inside one template row before an override counts
+agrees	handler gates	status 141 for byte 3 at +0x8f2, then status 219 for a sub account	same at 0x21e00be and 0x21e02bd
+absent	handlers/55_start_fee_trial.rs	the two fixed addresses are not modelled	all-0xff and all-0xfe senders get a zero row with multiplier 0, so only a negative requested rate has an effect

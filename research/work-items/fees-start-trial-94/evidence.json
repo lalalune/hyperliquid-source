@@ -1,0 +1,414 @@
+{
+ "action_fields": [
+  "perpAddBaseRate",
+  "perpCrossBaseRate",
+  "spotAddBaseRate",
+  "spotCrossBaseRate",
+  "struct StartFeeTrialAction with 4 elements"
+ ],
+ "binary": "artifacts/node/94/hl-node",
+ "calendar_tables": {
+  "deltas": {
+   "entries": 401,
+   "sha256": "25aaa39a8eb1ce46f7d87855944e78f393cc34f6077d322918ad212015ad9f46",
+   "va": "0x250354"
+  },
+  "flags": {
+   "entries": 400,
+   "sha256": "d4998d79b18634a4227880dc249c5744dc4e028a3829363494a6a3a2e1cc82f4",
+   "va": "0x2504e5"
+  },
+  "mismatches": 0
+ },
+ "date_examples": [
+  {
+   "days": 14,
+   "end": {
+    "ordinal": 1,
+    "packed": "0xfd601b",
+    "year": 2027
+   },
+   "plain_integer_add": "0xfd5618",
+   "start": {
+    "ordinal": 352,
+    "packed": "0xfd560a",
+    "year": 2026
+   }
+  },
+  {
+   "days": 14,
+   "end": {
+    "ordinal": 60,
+    "packed": "0xfd03c6",
+    "year": 2024
+   },
+   "plain_integer_add": "0xfd02f4",
+   "start": {
+    "ordinal": 46,
+    "packed": "0xfd02e6",
+    "year": 2024
+   }
+  },
+  {
+   "days": 90,
+   "end": {
+    "ordinal": 60,
+    "packed": "0xfd63cb",
+    "year": 2027
+   },
+   "plain_integer_add": "0xfd5554",
+   "start": {
+    "ordinal": 335,
+    "packed": "0xfd54fa",
+    "year": 2026
+   }
+  }
+ ],
+ "date_panic_text": "`NaiveDate + TimeDelta` overflowed",
+ "equivalent": {
+  "0x1450813": "the day count only feeds a TimeDelta range check; 14 and 90 stay well inside it, and this byte is in `pinned` or `bytes` of instructions.tsv",
+  "0x145081a": "the day count only feeds a TimeDelta range check; 14 and 90 stay well inside it, and this byte is in `pinned` or `bytes` of instructions.tsv",
+  "0x1450827": "the day count only feeds a TimeDelta range check; 14 and 90 stay well inside it, and this byte is in `pinned` or `bytes` of instructions.tsv",
+  "0x1450850": "length of the panic text; the outcome is the panic, and test_date_panic_text reads this byte",
+  "0x37464f9": "x != x and unordered(x, x) are the same predicate on one register",
+  "0x3746512": "x != x and unordered(x, x) are the same predicate on one register"
+ },
+ "examples": [
+  {
+   "name": "fresh user, one linked user",
+   "row": {
+    "end": "0xfd53da",
+    "rates": [
+     9e-05,
+     0.00015,
+     4.5e-05,
+     0.00027
+    ]
+   },
+   "status": "0x186"
+  },
+  {
+   "name": "rates already met",
+   "row": null,
+   "status": "0x136"
+  },
+  {
+   "name": "ended trial, cooldown day 90",
+   "row": {
+    "end": "0xfd53da",
+    "rates": [
+     5e-05,
+     5e-05,
+     5e-05,
+     5e-05
+    ]
+   },
+   "status": "0x186"
+  },
+  {
+   "name": "ended trial, cooldown day 89",
+   "row": null,
+   "status": "0x137"
+  },
+  {
+   "name": "end date set, cooldown word 0",
+   "row": null,
+   "status": "0x134"
+  }
+ ],
+ "functions": {
+  "0x1450810": {
+   "end": "0x145085b",
+   "executed": 17,
+   "fde": "0xcec18c",
+   "instructions": 17
+  },
+  "0x151f870": {
+   "end": "0x151fa9c",
+   "executed": 114,
+   "fde": "0xcf65ac",
+   "instructions": 145
+  },
+  "0x3596da0": {
+   "end": "0x3596f00",
+   "executed": 75,
+   "fde": "0xe32d54",
+   "instructions": 75
+  },
+  "0x3743df0": {
+   "end": "0x374401f",
+   "executed": 128,
+   "fde": "0xe4e28c",
+   "instructions": 128
+  },
+  "0x3744020": {
+   "end": "0x3744547",
+   "executed": 273,
+   "fde": "0xe4e2c8",
+   "instructions": 274
+  },
+  "0x37463f0": {
+   "end": "0x3746564",
+   "executed": 91,
+   "fde": "0xe4e398",
+   "instructions": 91
+  },
+  "0x374fe60": {
+   "end": "0x374ff96",
+   "executed": 72,
+   "fde": "0xe4ef80",
+   "instructions": 72
+  },
+  "0x379a610": {
+   "end": "0x379a74e",
+   "executed": 87,
+   "fde": "0xe5e0f8",
+   "instructions": 87
+  },
+  "0x3c058f0": {
+   "end": "0x3c05c22",
+   "executed": 166,
+   "fde": "0xe9e328",
+   "instructions": 166
+  }
+ },
+ "groups": {
+  "action": 44,
+  "cooldown": 49,
+  "dates": 150,
+  "effect": 311,
+  "gates": 20,
+  "overrides": 36,
+  "probe": 56,
+  "random": 600,
+  "sweep": 1203,
+  "templates": 26,
+  "tiers": 96,
+  "writes": 101
+ },
+ "handler_copies": [
+  {
+   "differs": [],
+   "instructions": 165,
+   "start": "0x4677580"
+  },
+  {
+   "differs": [
+    {
+     "delta": "0xa80",
+     "first": "cmp [rcx+0x8f2]:8,0x3",
+     "here": "cmp [rcx+0x1372]:8,0x3",
+     "va": "0x467784e"
+    },
+    {
+     "delta": "0xa80",
+     "first": "cmp [rcx+0x3828]:64,0x0",
+     "here": "cmp [rcx+0x42a8]:64,0x0",
+     "va": "0x467787c"
+    },
+    {
+     "delta": "0xa80",
+     "first": "lea rdi,[r12+0x3830]:64",
+     "here": "lea rdi,[r12+0x42b0]:64",
+     "va": "0x467788a"
+    },
+    {
+     "delta": "0xa80",
+     "first": "mov rcx,[r12+0x3810]:64",
+     "here": "mov rcx,[r12+0x4290]:64",
+     "va": "0x46778a3"
+    },
+    {
+     "delta": "0xa80",
+     "first": "mov rdx,[r12+0x3818]:64",
+     "here": "mov rdx,[r12+0x4298]:64",
+     "va": "0x46778ab"
+    },
+    {
+     "delta": "0xa80",
+     "first": "cmp [r12+0x37f8]:64,0x0",
+     "here": "cmp [r12+0x4278]:64,0x0",
+     "va": "0x467796c"
+    },
+    {
+     "delta": "0xa80",
+     "first": "lea rdi,[r12+0x3800]:64",
+     "here": "lea rdi,[r12+0x4280]:64",
+     "va": "0x467797b"
+    },
+    {
+     "delta": "0xa80",
+     "first": "mov rcx,[r12+0x37e0]:64",
+     "here": "mov rcx,[r12+0x4260]:64",
+     "va": "0x4677994"
+    },
+    {
+     "delta": "0xa80",
+     "first": "mov rsi,[r12+0x37e8]:64",
+     "here": "mov rsi,[r12+0x4268]:64",
+     "va": "0x467799c"
+    },
+    {
+     "delta": "0xa80",
+     "first": "lea rsi,[r12+0x5d0]:64",
+     "here": "lea rsi,[r12+0x1050]:64",
+     "va": "0x4677a6e"
+    }
+   ],
+   "instructions": 165,
+   "start": "0x4677840"
+  }
+ ],
+ "killed": 278,
+ "mismatches": 0,
+ "mutants": 284,
+ "outcomes": {
+  "0x134": 56,
+  "0x135": 174,
+  "0x136": 175,
+  "0x137": 174,
+  "0x138": 47,
+  "0x143": 17,
+  "0x186": 1989,
+  "0x187": 4,
+  "0x77": 4,
+  "0x9d": 4,
+  "0xab": 10,
+  "panic": 38
+ },
+ "padding_not_executed": 1,
+ "pinned": [
+  {
+   "bytes": "80b9f208000003",
+   "meaning": "handler: compare byte +0x8f2 with 3",
+   "va": "0x21e00be"
+  },
+  {
+   "bytes": "498db424d0050000",
+   "meaning": "handler: tracker is exchange +0x5d0",
+   "va": "0x21e02de"
+  },
+  {
+   "bytes": "418b442468",
+   "meaning": "handler: third word of the time at exchange +0x68",
+   "va": "0x21e02e6"
+  },
+  {
+   "bytes": "498b442460",
+   "meaning": "handler: first two words of the time at exchange +0x60",
+   "va": "0x21e02ef"
+  },
+  {
+   "bytes": "498db424d0050000",
+   "meaning": "second copy: tracker is exchange +0x5d0",
+   "va": "0x46777ae"
+  },
+  {
+   "bytes": "498db42450100000",
+   "meaning": "third copy: tracker is exchange +0x1050",
+   "va": "0x4677a6e"
+  },
+  {
+   "bytes": "418b6d00",
+   "meaning": "writer: date is the first word of the time argument",
+   "va": "0x3744203"
+  },
+  {
+   "bytes": "428b7c09e0",
+   "meaning": "writer: cooldown date is bucket end -0x20, entry +0xc8, value +0xb0",
+   "va": "0x37442fe"
+  },
+  {
+   "bytes": "44896870",
+   "meaning": "writer: linked users get the date at value +0x70",
+   "va": "0x3744488"
+  },
+  {
+   "bytes": "48c70001000000",
+   "meaning": "writer: sender value +0 = 1",
+   "va": "0x37444c4"
+  },
+  {
+   "bytes": "be0e000000",
+   "meaning": "writer: 14 days",
+   "va": "0x374431f"
+  },
+  {
+   "bytes": "be5a000000",
+   "meaning": "writer: 90 days",
+   "va": "0x3744307"
+  },
+  {
+   "bytes": "4869c080510100",
+   "meaning": "day helper: 86400 seconds a day",
+   "va": "0x1450813"
+  }
+ ],
+ "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+ "slots": {
+  "0x576e468": "0x157a9b0",
+  "0x576e8b0": "0x151f870",
+  "0x576f6b8": "0x1450810",
+  "0x57731d8": "0x3799510",
+  "0x5773328": "0x374fe60",
+  "0x5773680": "0x357d310",
+  "0x5773968": "0x4ead680",
+  "0x57748f8": "0x3743df0",
+  "0x5775e28": "0x37463f0"
+ },
+ "status_text": {
+  "0x134": "Fee trial has already started.",
+  "0x135": "Fee trial rate does not exist.",
+  "0x136": "Fee trial rates are already met.",
+  "0x137": "Fee trial ended too recently.",
+  "0x138": "Fee trials are disabled.",
+  "0x143": "Invalid input length",
+  "0x8d": "Action only allowed on testnet",
+  "0xab": "Error converting decimal to float",
+  "0xdb": "Sub-account may not perform this action."
+ },
+ "stubs": [
+  "0x399c7a0",
+  "0x357d310",
+  "0x3799510",
+  "0x4ead680",
+  "0x3762510",
+  "0x157a9b0"
+ ],
+ "subjects": [
+  "0x3744020",
+  "0x37463f0",
+  "0x1450810",
+  "0x3c058f0",
+  "0x374fe60"
+ ],
+ "survey_vectors": 471,
+ "unexecuted": [
+  {
+   "end": "0x151f9bb",
+   "start": "0x151f969",
+   "why": "date helper, result in the first part of a 365-day estimate: only a negative or a very long add lands there; 14 or 90 days reach the slow path only across a year end and end in January to March"
+  },
+  {
+   "end": "0x151fa9c",
+   "start": "0x151fa4e",
+   "why": "five panics of the date helper: internal invariants, no input date reaches them"
+  }
+ ],
+ "vectors": 2692,
+ "writer_callers": [
+  {
+   "function": "0x21e00b0",
+   "site": "0x21e0306"
+  },
+  {
+   "function": "0x4677580",
+   "site": "0x46777d6"
+  },
+  {
+   "function": "0x4677840",
+   "site": "0x4677a96"
+  }
+ ],
+ "writer_slot": "0x3744020"
+}
