@@ -1,0 +1,79 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "function": {
+    "start_va": "0x1417c40",
+    "end_va_exclusive": "0x1417c77",
+    "bytes": 55,
+    "sha256": "dc304b11d0b463b42efa83e7ccf5d911fc4d48891be95da42bf771518b8efc70",
+    "fde_section_offset": "0x88e4",
+    "padding_bytes": 9,
+    "padding_stride_end": "0x1417c80",
+    "inferred_label": "fixed-88 dealloc-size helper"
+  },
+  "arithmetic": {
+    "input_load": "u64 count at rdi+8, base pointer at rdi",
+    "element_size": "0x58",
+    "header": "0x67",
+    "trailer": "0x11",
+    "aligned_formula": "(count*0x58 + 0x67) with low 4 bits cleared (floor to 16)",
+    "size_formula": "count + floored(count*0x58 + 0x67) + 0x11 (mod 2^64)",
+    "pointer_formula": "field - floored(count*0x58 + 0x67)",
+    "flag_formula": "(size < 0x10) ? 4 : 0",
+    "flag_always_zero_nonwrapping": true,
+    "early_return_on": [
+      "count == 0",
+      "size == 0 (64-bit wrap only)"
+    ],
+    "edges": {
+      "1": {
+        "aligned": "0xb0",
+        "size": "0xc2",
+        "flag": "0x0"
+      },
+      "15": {
+        "aligned": "0x580",
+        "size": "0x5a0",
+        "flag": "0x0"
+      },
+      "16": {
+        "aligned": "0x5e0",
+        "size": "0x601",
+        "flag": "0x0"
+      },
+      "255": {
+        "aligned": "0x5800",
+        "size": "0x5910",
+        "flag": "0x0"
+      },
+      "4096": {
+        "aligned": "0x58060",
+        "size": "0x59071",
+        "flag": "0x0"
+      }
+    },
+    "checked_nonwrapping_counts": 10000
+  },
+  "tail_call": {
+    "slot": "0x576e010",
+    "target": "0x54c8cb0",
+    "registers": "rdi = field - aligned, rsi = size, rdx = flag, rcx = entry value",
+    "target_claimed_here": false
+  },
+  "incoming_pattern_scan": {
+    "section": ".text",
+    "byte_count": 70370352,
+    "e8_candidates": [
+      "0x143f645"
+    ],
+    "ff15_ff25_candidates": [],
+    "validated_caller_fde": [
+      "0x143f520",
+      "0x143f670"
+    ],
+    "complete_xref_census": false
+  },
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
