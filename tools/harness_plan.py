@@ -83,6 +83,10 @@ def validate_fixtures(fixtures_doc: dict, protocol: dict) -> dict:
         digest = row['target_sha256']
         if len(digest) != 64 or any(c not in '0123456789abcdef' for c in digest):
             raise ValueError(f'fixture {fid} has invalid target_sha256')
+        payload_digest = row['payload_sha256']
+        if (not isinstance(payload_digest, str) or len(payload_digest) != 64
+                or any(c not in '0123456789abcdef' for c in payload_digest)):
+            raise ValueError(f'fixture {fid} has invalid payload_sha256')
         by_id[fid] = row
     if not by_id:
         raise ValueError('fixture-identities.json has no fixtures')
