@@ -2,14 +2,12 @@
 """Check the repo-local stdio MCP handshake; launches only an owned REA server."""
 import argparse
 import json
-import os
 from pathlib import Path
-import selectors
 import subprocess
 import sys
-import time
 
 from artifacts import ROOT
+from mcp_stdio import JsonLineReader
 
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument('--require-ghidra', action='store_true')
@@ -25,33 +23,14 @@ with (work / 'mcp-stderr.log').open('wb') as diagnostics:
     launch += ['mcp']
     child = subprocess.Popen(launch, stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=diagnostics, cwd=ROOT)
-    selector = selectors.DefaultSelector()
-    selector.register(child.stdout, selectors.EVENT_READ)
-    buffer = bytearray()
+    reader = JsonLineReader(child.stdout)
 
     def send(value):
         child.stdin.write((json.dumps(value) + '\n').encode())
         child.stdin.flush()
 
     def receive(request_id, timeout=60):
-        deadline = time.monotonic() + timeout
-        while time.monotonic() < deadline:
-            while b'\n' in buffer:
-                line, _, remainder = buffer.partition(b'\n')
-                buffer[:] = remainder
-                value = json.loads(line)
-                if value.get('id') == request_id:
-                    if 'error' in value:
-                        raise RuntimeError(value['error'])
-                    return value['result']
-            ready = selector.select(max(0, deadline - time.monotonic()))
-            if not ready:
-                break
-            block = os.read(child.stdout.fileno(), 65536)
-            if not block:
-                raise RuntimeError('REA stdio server closed; inspect work/rea-smoke/mcp-stderr.log')
-            buffer.extend(block)
-        raise RuntimeError('REA stdio handshake deadline exceeded')
+        return reader.receive(request_id, timeout)
 
     opened = False
     try:
@@ -117,12 +96,14 @@ with (work / 'mcp-stderr.log').open('wb') as diagnostics:
                     raise RuntimeError('Native session cleanup failed')
             except Exception as error:
                 cleanup_error = error
-        selector.close()
         child.terminate()
         try:
             child.wait(timeout=10)
         except subprocess.TimeoutExpired:
             child.kill()
             child.wait(timeout=10)
+        reader.join()
+        child.stdout.close()
+        child.stdin.close()
         if cleanup_error is not None:
             raise cleanup_error
