@@ -1,0 +1,62 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "function": {
+    "start_va": "0x1510260",
+    "end_va_exclusive": "0x1510293",
+    "stride_end_va": "0x15102a0",
+    "bytes": 51,
+    "padding_bytes": 13,
+    "sha256": "91984875576669b84ea555ef4c50388e5798dc95929d3eb00ec8cc06ac797a77",
+    "fde_section_offset": "0x13ca4",
+    "observed_behavior": "sign test on rsi, panic path on negative, tail call otherwise",
+    "inferred_label": null
+  },
+  "sign_test": {
+    "instruction": "test rsi,rsi",
+    "branch": "js to panic arm",
+    "panic_arm_va": "0x151026d",
+    "non_negative_path": "xor edx,edx then tail call"
+  },
+  "panic_arm": {
+    "message_va": "0x21da2e",
+    "message": "called `Result::unwrap()` on an `Err` value",
+    "message_length": 43,
+    "helper_slot": "0x576e048",
+    "helper_target": "0x157aa10",
+    "argument_slots": {
+      "rcx": "0x56709e8",
+      "r8": "0x5670b58"
+    }
+  },
+  "tail_call": {
+    "slot": "0x576e010",
+    "target": "0x54c8cb0",
+    "target_fde": [
+      "0x54c8cb0",
+      "0x54c8d55"
+    ],
+    "target_named": false
+  },
+  "argument_slots": {
+    "r8_path": "/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bytes-1.11.1/src/bytes.rs",
+    "r8_path_length": 91,
+    "r8_slot_fields": [
+      0,
+      91,
+      "0x4900000548",
+      0
+    ],
+    "rcx_slot_fields": [
+      0,
+      0,
+      1,
+      0
+    ],
+    "rcx_slot_interpretation": null,
+    "r8_third_field_interpretation": null
+  },
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
