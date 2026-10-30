@@ -41,6 +41,16 @@ PAYLOAD_LABELS = ['ModifyValidator', 'ChangeDisputePeriodSeconds',
                   'ChangeBlockDurationMillis', 'ChangeLockerThreshold',
                   'UpdateValidatorSet', 'RequestWithdrawal', 'Reserved',
                   'InvalidateWithdrawals']
+# Arm extents the "up to the next arm target" rule cannot give, each validated
+# against the bytes. The arm with the highest target (6) ends at its
+# unconditional `jmp 0x358e920` (e9 at 0x358e7af). Arm 7 leaves its window
+# through `je 0x358e7b4` (0f 84 at 0x358e2b6) into a continuation that clones
+# the payload's vector of 32-byte elements, stores the invalidateWithdrawals
+# name buffer and ends with the encoder call at 0x358e856; no other branch in
+# struct_hash reaches it. Past that call arm 7 falls through its own copy of
+# the hash tail to 0x358e920, which has no e8 calls or RIP-relative literals.
+LAST_ARM_JMP = 0x358e7af
+ARM_CONTINUATIONS = {7: [(0x358e2b6, 0x358e7b4, 0x358e85b)]}  # branch, start, end
 REQUEST_WITHDRAWAL_LITERAL = b'requestWithdrawal'
 REQUEST_WITHDRAWAL_LENGTH = len(REQUEST_WITHDRAWAL_LITERAL)
 
@@ -306,7 +316,7 @@ def decode_encoder(data, mapping, start):
 def direct_calls(data, mapping, start, span):
     raw = mapping.read(data, start, span)
     calls = []
-    for index in range(len(raw) - 5):
+    for index in range(len(raw) - 4):  # a 5-byte call may end exactly at the window end
         if raw[index] == 0xE8:
             calls.append(start + index + 5 + struct.unpack_from('<i', raw, index + 1)[0])
     return calls
@@ -328,11 +338,38 @@ def decode_struct_hash_table(data, mapping):
     return arms
 
 
+def arm_windows(data, mapping, arms):
+    """Return {discriminant: (span, continuations)} for the dispatch arms."""
+    targets = sorted(arm['target_va'] for arm in arms)
+    windows = {}
+    for arm in arms:
+        start = arm['target_va']
+        following = [t for t in targets if t > start]
+        if following:
+            span = following[0] - start
+        else:
+            if not start < LAST_ARM_JMP or mapping.read(data, LAST_ARM_JMP, 1) != b'\xe9':
+                raise ValueError(f'{LAST_ARM_JMP:#x}: last arm does not end with jmp rel32')
+            span = LAST_ARM_JMP + 5 - start
+        continuations = []
+        for branch, begin, end in ARM_CONTINUATIONS.get(arm['discriminant'], ()):
+            raw = mapping.read(data, branch, 6)
+            if not start <= branch < start + span or raw[0] != 0x0F or raw[1] & 0xF0 != 0x80:
+                raise ValueError(f'{branch:#x}: expected jcc rel32 inside arm {arm["discriminant"]}')
+            if branch + 6 + struct.unpack_from('<i', raw, 2)[0] != begin:
+                raise ValueError(f'{branch:#x}: jcc does not reach continuation {begin:#x}')
+            if mapping.read(data, end - 5, 1) != b'\xe8':
+                raise ValueError(f'{end - 5:#x}: continuation does not end with a call')
+            continuations.append({'branch_va': branch, 'start_va': begin, 'end_va': end})
+        windows[arm['discriminant']] = (span, continuations)
+    return windows
+
+
 def literal_loads(data, mapping, arm_va, span=0x400):
     """Return literal bytes copied by the arm, using the 8-bit literal table."""
     raw = mapping.read(data, arm_va, span)
     hits = []
-    for index in range(len(raw) - 8):
+    for index in range(len(raw) - 6):  # a 7-byte movups may end exactly at the window end
         if raw[index] != 0x0F or raw[index + 1] not in (0x10, 0x11):
             continue
         if raw[index + 2] & 0xC7 != 0x05:
@@ -369,17 +406,20 @@ def main(argv=None):
 
     struct_start, struct_end = function_bounds(data, xrefs[0]['instruction_va'])
     arms = decode_struct_hash_table(data, mapping)
-    targets = sorted(arm['target_va'] for arm in arms)
+    windows = arm_windows(data, mapping, arms)
     arm_loads = []
     for arm in arms:
-        following = [t for t in targets if t > arm['target_va']]
-        span = (following[0] - arm['target_va']) if following else 0x300
-        loads = literal_loads(data, mapping, arm['target_va'], span)
+        span, continuations = windows[arm['discriminant']]
+        ranges = [(arm['target_va'], span)] + [(c['start_va'], c['end_va'] - c['start_va'])
+                                               for c in continuations]
         arm_loads.append({'discriminant': arm['discriminant'],
                           'reference_label': PAYLOAD_LABELS[arm['discriminant']],
                           'target_va': arm['target_va'], 'span': span,
-                          'literal_loads': loads,
-                          'direct_calls': direct_calls(data, mapping, arm['target_va'], span)})
+                          'continuations': continuations,
+                          'literal_loads': [h for va, n in ranges
+                                            for h in literal_loads(data, mapping, va, n)],
+                          'direct_calls': [c for va, n in ranges
+                                           for c in direct_calls(data, mapping, va, n)]})
 
     chain_sites = []
     for offset in find_all(data, b'\xb1\xa4\x00\x00'):

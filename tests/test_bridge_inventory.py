@@ -1,4 +1,5 @@
 import contextlib
+import hashlib
 import io
 import json
 from pathlib import Path
@@ -74,6 +75,21 @@ class XrefTests(unittest.TestCase):
         self.assertEqual(bi.rip_relative_xrefs(data, mapping, 0x2013), [])
 
 
+class WindowScanTests(unittest.TestCase):
+    def test_call_ending_at_window_end_is_found(self):
+        call = b'\xe8' + struct.pack('<i', 0x100)  # call at 0x1003 -> 0x1108
+        data, mapping = mapping_for(b'\x90' * 3 + call)
+        self.assertEqual(bi.direct_calls(data, mapping, 0x1000, 8), [0x1108])
+        self.assertEqual(bi.direct_calls(data, mapping, 0x1000, 7), [])
+
+    def test_literal_load_ending_at_window_end_is_found(self):
+        load = bytes.fromhex('0f1005') + struct.pack('<i', 0x20)  # movups at 0x1002
+        data, mapping = mapping_for(b'\x90' * 2 + load)
+        self.assertEqual(bi.literal_loads(data, mapping, 0x1000, 9),
+                         [{'load_va': 0x1002, 'literal_va': 0x1029}])
+        self.assertEqual(bi.literal_loads(data, mapping, 0x1000, 8), [])
+
+
 class TableTests(unittest.TestCase):
     def test_rejects_arm_outside_function(self):
         table = struct.pack('<8i', *([0x7FFF] * 8))
@@ -120,6 +136,43 @@ class ArtifactTests(unittest.TestCase):
         self.assertEqual(layout['account']['offset'], 1)
         self.assertEqual(layout['destination']['offset'], 0x15)
         self.assertEqual(report['struct_hash']['withdrawal_encoder']['tags'], [6, 0, 0, 4, 4])
+        arms = {a['discriminant']: a for a in report['struct_hash']['arms']}
+        # Reserved (6) ends at its jmp at 0x358e7af; 0x3c97be0 belongs to arm 7's continuation.
+        self.assertEqual((arms[6]['span'], arms[6]['direct_calls'], arms[6]['continuations']),
+                         (0x23A, [0x3C9F240], []))
+        self.assertEqual(arms[7]['direct_calls'], [0x3C97BE0])
+        self.assertEqual(arms[7]['continuations'],
+                         [{'branch_va': 0x358E2B6, 'start_va': 0x358E7B4, 'end_va': 0x358E85B}])
+        self.assertTrue(all(arms[i]['continuations'] == [] for i in arms if i != 7))
+
+    @unittest.skipUnless(ARTIFACT.exists(), 'captured node #94 not present')
+    def test_arm_extent_pins_fail_closed(self):
+        data = ARTIFACT.read_bytes()
+        mapping = bi.Mapping(bi.load_segments(data))
+        arms = bi.decode_struct_hash_table(data, mapping)
+        for patch, message in (
+                (('LAST_ARM_JMP', 0x358E7AE), 'last arm does not end with jmp'),
+                (('ARM_CONTINUATIONS', {7: [(0x358E2B6, 0x358E7B5, 0x358E85B)]}), 'does not reach'),
+                (('ARM_CONTINUATIONS', {7: [(0x358E2B7, 0x358E7B4, 0x358E85B)]}), 'expected jcc'),
+                (('ARM_CONTINUATIONS', {6: [(0x358E2B6, 0x358E7B4, 0x358E85B)]}), 'expected jcc'),
+                (('ARM_CONTINUATIONS', {7: [(0x358E2B6, 0x358E7B4, 0x358E85C)]}), 'does not end with a call')):
+            with self.subTest(patch=patch), mock.patch.object(bi, *patch):
+                with self.assertRaisesRegex(ValueError, message):
+                    bi.arm_windows(data, mapping, arms)
+
+    @unittest.skipUnless(ARTIFACT.exists(), 'captured node #94 not present')
+    def test_packet_regenerates_and_manifest_matches(self):
+        packet = ROOT / 'research/work-items/bridge'
+        with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(bi.main(['--release', '94', '--out', tmp]), 0)
+            for path in Path(tmp).iterdir():
+                self.assertEqual(path.read_bytes(), (packet / 'evidence' / path.name).read_bytes(), path.name)
+        # Packet files only; the manifest also pins ../../../tools and tests
+        # for `shasum -c`, which edits to those files must refresh.
+        for line in (packet / 'evidence/MANIFEST.sha256').read_text().splitlines():
+            digest, name = line.split('  ', 1)
+            if not name.startswith('../'):
+                self.assertEqual(hashlib.sha256((packet / name).read_bytes()).hexdigest(), digest, name)
 
 
 if __name__ == '__main__':

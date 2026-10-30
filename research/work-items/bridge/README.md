@@ -35,7 +35,9 @@ excerpts beside this record were produced with Apple LLVM `objdump` 17.0.0:
 objdump -d --start-address=<start> --stop-address=<end> artifacts/node/94/hl-node
 ```
 
-`evidence/MANIFEST.sha256` pins every retained file. Tool inputs are only
+`evidence/MANIFEST.sha256` pins every retained file; check it from this
+directory with `shasum -a 256 -c evidence/MANIFEST.sha256`; its packet-file
+entries are also checked by `tests/test_bridge_inventory.py`. Tool inputs are only
 `artifacts/node/94/hl-node` and the unwind table parser `tools/elf_index.py`
 (`.eh_frame_hdr` only, for function boundaries).
 
@@ -129,8 +131,23 @@ discriminant `5` selects the arm; the hashed word sequence is the 17-byte litera
 account, destination, amount, nonce, each padded per the finisher at `0x1592160`;
 the request tag is `0x61`; the signature chain id is `42161` only for chain
 discriminant `3` and `421614` for every other value. Boundary cases not yet
-measured: chain discriminants above `3`, and the `Reserved = 6` arm, which calls
-`0x3c9f240`/`0x3c97be0` and loads no literal.
+measured: chain discriminants above `3`, and the `Reserved = 6` arm. That arm
+calls `0x37db0d0` through RELATIVE slot `0x5775da0` (`ff 15` at `0x358e592`),
+writes the 6-byte name `unlock` from immediates (`0x358e634`/`0x358e63a`, so no
+RIP-relative literal load), direct-calls only `0x3c9f240` (`0x358e6e5`) and ends
+at `jmp 0x358e920` (`0x358e7af`).
+
+Arm extents: each arm runs to the next arm target, except arm 6, which is last
+and ends at that `jmp`, and arm 7 (`InvalidateWithdrawals`), which also owns the
+continuation `0x358e7b4..0x358e85b`. Arm 7 reaches it only through `je` at
+`0x358e2b6`; it clones the payload's vector of 32-byte elements, stores the
+0x15-byte `invalidateWithdrawals` name buffer (filled in arm 7 from `0x595083`)
+and calls the encoder `0x3c97be0` at `0x358e856`. The recorded continuation
+stops at that call: arm 7 then falls through its own copy of the hash tail to
+`0x358e920`, a range with no `e8` calls or RIP-relative literal loads. An
+earlier revision scanned arm 6 over a
+fixed `0x300` bytes, which ran into this block and credited `0x3c97be0` to
+`Reserved` instead of `InvalidateWithdrawals`.
 
 ## Results and limitations
 
@@ -139,8 +156,9 @@ Machine-readable metrics, with denominators:
 - literal occurrences found: `1/1`; xrefs resolved to it: `1/1`.
 - dispatch arms resolved to a target inside the function: `8/8`; arms whose
   literal is loaded in place: `5/8` (1, 2, 3, 5, 7); arm 0 composes `modify` +
-  role through `0x1344760`, arms 4 and 6 delegate to `0x37db5d0` and
-  `0x37db0d0`.
+  role through `0x1344760`; arm 4 delegates to `0x37db5d0` and jumps to the
+  epilogue `0x358e946`; arm 6 calls `0x37db0d0` through the GOT, then hashes
+  `unlock` through `0x3c9f240`.
 - chain-id sites decoded with matching operands: `3/3`.
 - withdrawal-arm field copies pinned: `4/4`; encoder tags pinned: `5/5`.
 - function bodies proven complete: `0/3`; the dispatch tables at `0x3d6518` and
