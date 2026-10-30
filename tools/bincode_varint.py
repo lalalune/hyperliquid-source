@@ -131,6 +131,8 @@ def sections(data):
     stro = raw[shstrndx][4]
     out = {}
     for h in raw:
+        if h[1] == 8:  # SHT_NOBITS occupies no file bytes; mapping its VAs would
+            continue  # return unrelated file bytes as if they lived there.
         end = data.index(b'\0', stro + h[0])
         out[data[stro + h[0]:end].decode()] = {'addr': h[3], 'offset': h[4], 'size': h[5]}
     for name in ('.text', '.eh_frame', '.eh_frame_hdr', '.rela.dyn', '.data.rel.ro', '.rodata'):
