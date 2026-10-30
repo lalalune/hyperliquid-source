@@ -179,7 +179,10 @@ def uleb(buf, i):
 
 
 def read_enc(img, va, enc):
-    size, code = {0x03: (4, '<I'), 0x0b: (4, '<i'), 0x04: (8, '<Q'), 0x0c: (8, '<q')}[enc & 0x0f]
+    fmt = {0x03: (4, '<I'), 0x0b: (4, '<i'), 0x04: (8, '<Q'), 0x0c: (8, '<q')}.get(enc & 0x0f)
+    if fmt is None:
+        raise EvidenceError(f'unsupported pointer encoding {enc:#x}')
+    size, code = fmt
     val = struct.unpack(code, img.read(va, size))[0]
     if enc & 0x70 == 0x10:
         val += va
