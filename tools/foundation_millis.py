@@ -69,10 +69,11 @@ def analyze(data, records, objdump=None):
         return data[offset:offset+size]
 
     require(records['target_sha256'] == SHA256, 'Record target identity changed')
+    require('.eh_frame' in named, 'Missing section .eh_frame')
+    eh = named['.eh_frame']['address']
     windows = []
     instruction_starts = set()
     exports = {}
-    eh = named['.eh_frame']['address']
     for row in records['windows']:
         start,end = int(row['start_va'],16),int(row['end_va_exclusive'],16)
         body = read(start,end-start)
