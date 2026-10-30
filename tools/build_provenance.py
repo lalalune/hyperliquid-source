@@ -6,6 +6,7 @@ Each fact is labelled exact (bytes read at a stated section/offset), inferred
 """
 import argparse
 import collections
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -13,7 +14,6 @@ import struct
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from artifacts import check
 from elf_index import sections
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -228,8 +228,12 @@ def record(release):
     manifest = json.loads((ROOT / 'provenance/artifacts.json').read_text())
     rel = TARGETS[release]
     item = next(x for x in manifest['files'] if x['path'] == rel)
-    check(ROOT / rel, item)
-    facts = derive((ROOT / rel).read_bytes())
+    # Authenticate the same immutable byte string passed to derive(). A path
+    # can be replaced between a separate check() and read_bytes().
+    data = (ROOT / rel).read_bytes()
+    if len(data) != item['size'] or hashlib.sha256(data).hexdigest() != item['sha256']:
+        raise ValueError(f'Artifact size/SHA-256 mismatch: {ROOT / rel}')
+    facts = derive(data)
     return {'target': rel, 'sha256': item['sha256'], 'size': item['size'],
             'tool': 'tools/build_provenance.py', 'facts': facts + interpret(facts)}
 
