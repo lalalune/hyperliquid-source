@@ -2,6 +2,7 @@
 """Checksum-locked artifact recovery and static signature verification."""
 import argparse
 import hashlib
+import http.client
 import json
 import os
 from pathlib import Path
@@ -20,11 +21,22 @@ def digest(path):
     return h.hexdigest()
 
 
+def is_lfs_pointer(path, item):
+    """True when path is the Git LFS v1 pointer for exactly this item."""
+    if path.stat().st_size > 1024:
+        return False
+    lines = path.read_bytes().decode('ascii', 'replace').splitlines()
+    return (lines[:1] == ['version https://git-lfs.github.com/spec/v1']
+            and f"oid sha256:{item['sha256']}" in lines and f"size {item['size']}" in lines)
+
+
 def check(path, item):
     path = Path(path)
     if not path.is_file():
         raise ValueError(f'Missing artifact: {path}')
     if path.stat().st_size != item['size'] or digest(path) != item['sha256']:
+        if is_lfs_pointer(path, item):
+            raise ValueError(f'Git LFS pointer, not the artifact: {path}; run git lfs pull')
         raise ValueError(f'Artifact size/SHA-256 mismatch: {path}')
 
 
@@ -50,6 +62,18 @@ def fetch_one(root, item):
     finally:
         if temp is not None:
             temp.unlink(missing_ok=True)
+
+
+def fetch_all(root, manifest):
+    """Try every item, so one unrecoverable file does not block the others."""
+    failures = []
+    for item in manifest['files']:
+        try:
+            fetch_one(root, item)
+        except (OSError, ValueError, http.client.HTTPException) as error:
+            failures.append(f"{item['path']}: {error}")
+    if failures:
+        raise ValueError('Not recovered by fetch:\n  ' + '\n  '.join(failures))
 
 
 def verify_signatures(root, fingerprint):
@@ -89,9 +113,9 @@ def main():
     parser.add_argument('command', choices=['verify', 'fetch'])
     args = parser.parse_args()
     manifest = json.loads((ROOT / 'provenance/artifacts.json').read_text())
+    if args.command == 'fetch':
+        fetch_all(ROOT, manifest)
     for item in manifest['files']:
-        if args.command == 'fetch':
-            fetch_one(ROOT, item)
         check(ROOT / item['path'], item)
         print(f"SHA-256 OK: {item['path']}")
     verify_signatures(ROOT, manifest['signing_fingerprint'])

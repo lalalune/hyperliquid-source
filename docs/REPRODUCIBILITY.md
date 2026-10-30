@@ -27,7 +27,12 @@ for the stale aggregate fields in the saved JSON; its item-level labels
 match the supplied written summary.
 
 `make fetch` downloads only absent files and verifies bytes before an atomic
-rename. An existing damaged file fails rather than being overwritten. #94 has
+rename. It tries every manifest file, then fails once, listing each file it
+could not recover. An existing damaged file fails rather than being
+overwritten; a Git LFS pointer in place of a binary is reported as such and
+also left alone (`git lfs pull` replaces it; without Git LFS, deleting it lets
+`make fetch` download a file that has a recovery URL, but Git then shows the
+binary as modified, so do not commit it). #94 has
 a commit-pinned GitHub LFS recovery URL; the visor publisher URL is
 mutable and may fail the historical checksum. #115 has no verified immutable
 public recovery URL; retrieve it via project Git LFS. Metadata is retained in Git. Git LFS is the canonical complete retrieval path.
