@@ -1,0 +1,426 @@
+{
+  "callers": [
+    {
+      "admission_compare": "0x204a0b5",
+      "call": "0x204aad2",
+      "fde": "0x2049950",
+      "flag": "[rbx+0x50]",
+      "flag_test": {
+        "imm": 0,
+        "skip_target": "0x204ac6e",
+        "va": "0x204aaa5"
+      },
+      "input_len": "[rbx+0x70]",
+      "input_ptr": "[rbx+0x68]",
+      "limit_arg": "rcx = [rbx+0x28]",
+      "max_len": "[rbx+0x28]",
+      "same_max_len_as_admission": true
+    },
+    {
+      "admission_compare": "0x43a09c5",
+      "call": "0x43a13e2",
+      "fde": "0x43a0260",
+      "flag": "[rbx+0x50]",
+      "flag_test": {
+        "imm": 0,
+        "skip_target": "0x43a157e",
+        "va": "0x43a13b5"
+      },
+      "input_len": "[rbx+0x70]",
+      "input_ptr": "[rbx+0x68]",
+      "limit_arg": "rcx = [rbx+0x28]",
+      "max_len": "[rbx+0x28]",
+      "same_max_len_as_admission": true
+    },
+    {
+      "admission_compare": "0x4b7320b",
+      "call": "0x4b73a4d",
+      "fde": "0x4b72900",
+      "flag": "[rbx+0x50]",
+      "flag_test": {
+        "imm": 0,
+        "skip_target": "0x4b73c23",
+        "va": "0x4b73a20"
+      },
+      "input_len": "[rbx+0x70]",
+      "input_ptr": "[rbx+0x68]",
+      "limit_arg": "rcx = [rbx+0x28]",
+      "max_len": "[rbx+0x28]",
+      "same_max_len_as_admission": true
+    },
+    {
+      "admission_compare": "0x2263e9d",
+      "call": "0x2264edb",
+      "fde": "0x22615b0",
+      "flag": "[r12+0x50]",
+      "flag_test": {
+        "imm": 1,
+        "skip_target": "0x2266d44",
+        "va": "0x2264ea8"
+      },
+      "input_len": "[r12+0x70]",
+      "input_ptr": "[r12+0x68]",
+      "limit_arg": "rcx = [r12+0x28]",
+      "max_len": "[r12+0x28]",
+      "same_max_len_as_admission": true
+    },
+    {
+      "admission_compare": "0x4747019",
+      "base_link": "0x4747039",
+      "call": "0x47470c9",
+      "fde": "0x4744160",
+      "flag": "[r15+0x3f8]",
+      "flag_test": {
+        "imm": 1,
+        "skip_target": "0x47476a6",
+        "va": "0x474708f"
+      },
+      "input_len": "[r15+0x418]",
+      "input_ptr": "[r15+0x410]",
+      "limit_arg": "rcx = [r15+0x3d0]",
+      "max_len": "[rcx+0x3d0]",
+      "same_max_len_as_admission": true
+    }
+  ],
+  "census": {
+    "direct_refs": [],
+    "lz4_flex_path_pointers": {
+      "0.11.6/src/block/compress.rs": 37,
+      "0.11.6/src/block/decompress_safe.rs": 9,
+      "0.11.6/src/sink.rs": 12
+    },
+    "relocations_to_decompressor": [
+      "0x5773810"
+    ],
+    "slot_calls": [
+      "0x204aad2",
+      "0x2264edb",
+      "0x43a13e2",
+      "0x47470c9",
+      "0x4b73a4d"
+    ],
+    "template_leas": {
+      "0x1ee8cb": [
+        "0x3d1b555"
+      ],
+      "0x20101d": [
+        "0x3d1b342"
+      ]
+    }
+  },
+  "decompressor": {
+    "bytes": 2667,
+    "fde": [
+      "0x3d1abc0",
+      "0x3d1b62b"
+    ],
+    "got_slot": "0x5773810"
+  },
+  "entry": {
+    "allocation": {
+      "args": [
+        "1",
+        "uncompressed_size"
+      ],
+      "call": "0x3d1ac13",
+      "callee": "0x54c0780",
+      "slot": "0x576e298",
+      "zero_size_target": "0x3d1ac2d",
+      "zero_size_test": "0x3d1ac01"
+    },
+    "limit": {
+      "before_allocation": true,
+      "branch": "0x3d1abfb",
+      "compare": "0x3d1abf8",
+      "equal_admitted": true,
+      "over_target": "0x3d1b4e6",
+      "rejects": "max_len < uncompressed_size"
+    },
+    "over_limit": {
+      "arguments_in_order": [
+        {
+          "name": "buf.len()",
+          "value": "input length (r15, [rsp+0xc0])"
+        },
+        {
+          "name": "uncompressed_size",
+          "value": "prefix ([rsp+0xb0])"
+        },
+        {
+          "name": "max_len",
+          "value": "caller rcx ([rsp+0xa8])"
+        }
+      ],
+      "constructor": "0x3d26ab0",
+      "template": "0x1ee8cb",
+      "template_lea": "0x3d1b555"
+    },
+    "prefix": {
+      "byte_order": "little",
+      "load": "0x3d1abee",
+      "offset": 0,
+      "width_bits": 32
+    },
+    "short_input": {
+      "compare": "0x3d1abd9",
+      "constructor": "0x3d26e80",
+      "error": "ExpectedAnotherByte",
+      "error_tag": 2,
+      "rejects_len_at_most": 3,
+      "target": "0x3d1b37e"
+    }
+  },
+  "errors": {
+    "common_path": "0x3d1b309",
+    "err_niche": "0x8000000000000000",
+    "failure_formatter": "0x3d1ab80",
+    "failure_template": "0x20101d",
+    "failure_template_lea": "0x3d1b342",
+    "tags": [
+      {
+        "error": "OutputTooSmall",
+        "selected_by": {
+          "branch": "0x3d1afae",
+          "compare": "0x3d1afab",
+          "kind": "ja"
+        },
+        "tag": 0,
+        "tag_va": "0x3d1b431"
+      },
+      {
+        "error": "LiteralOutOfBounds",
+        "selected_by": {
+          "branch": "0x3d1b071",
+          "compare": "0x3d1b06e",
+          "kind": "ja"
+        },
+        "tag": 1,
+        "tag_va": "0x3d1b444"
+      },
+      {
+        "error": "ExpectedAnotherByte",
+        "tag": 2,
+        "tag_va": "0x3d1b303"
+      },
+      {
+        "error": "OffsetZero",
+        "selected_by": {
+          "branch": "0x3d1ad49",
+          "compare": "0x3d1ad46",
+          "kind": "je"
+        },
+        "tag": 3,
+        "tag_va": "0x3d1b2ef"
+      },
+      {
+        "error": "OffsetOutOfBounds",
+        "selected_by": {
+          "branch": "0x3d1ad58",
+          "compare": "0x3d1ad55",
+          "kind": "jb"
+        },
+        "tag": 4,
+        "tag_va": "0x3d1b2c7"
+      }
+    ]
+  },
+  "lz4_flex_locations": {
+    "0x5718ea0": {
+      "col": 40,
+      "line": 184,
+      "path": "0.11.6/src/sink.rs"
+    },
+    "0x5718eb8": {
+      "col": 21,
+      "line": 184,
+      "path": "0.11.6/src/sink.rs"
+    },
+    "0x5718ed0": {
+      "col": 53,
+      "line": 174,
+      "path": "0.11.6/src/sink.rs"
+    },
+    "0x5718ee8": {
+      "col": 42,
+      "line": 174,
+      "path": "0.11.6/src/sink.rs"
+    },
+    "0x5718f00": {
+      "col": 30,
+      "line": 194,
+      "path": "0.11.6/src/sink.rs"
+    },
+    "0x5718f18": {
+      "col": 13,
+      "line": 194,
+      "path": "0.11.6/src/sink.rs"
+    },
+    "0x5718f30": {
+      "col": 9,
+      "line": 125,
+      "path": "0.11.6/src/sink.rs"
+    },
+    "0x5718f48": {
+      "col": 9,
+      "line": 39,
+      "path": "0.11.6/src/block/decompress_safe.rs"
+    },
+    "0x5718f60": {
+      "col": 24,
+      "line": 289,
+      "path": "0.11.6/src/block/decompress_safe.rs"
+    },
+    "0x5718f78": {
+      "col": 23,
+      "line": 286,
+      "path": "0.11.6/src/block/decompress_safe.rs"
+    },
+    "0x5718f90": {
+      "col": 41,
+      "line": 138,
+      "path": "0.11.6/src/block/decompress_safe.rs"
+    },
+    "0x5718fa8": {
+      "col": 33,
+      "line": 190,
+      "path": "0.11.6/src/block/decompress_safe.rs"
+    },
+    "0x5718fc0": {
+      "col": 33,
+      "line": 194,
+      "path": "0.11.6/src/block/decompress_safe.rs"
+    },
+    "0x5718fd8": {
+      "col": 12,
+      "line": 227,
+      "path": "0.11.6/src/block/decompress_safe.rs"
+    },
+    "0x5718ff0": {
+      "col": 44,
+      "line": 200,
+      "path": "0.11.6/src/block/decompress_safe.rs"
+    },
+    "0x5719008": {
+      "col": 31,
+      "line": 196,
+      "path": "0.11.6/src/block/decompress_safe.rs"
+    }
+  },
+  "model": {
+    "cases": [
+      {
+        "binary": "ExpectedAnotherByte",
+        "max_len": 16,
+        "payload_len": 0,
+        "prefix": 0,
+        "reference": "Lz4InputTooShort"
+      },
+      {
+        "binary": "ExpectedAnotherByte",
+        "max_len": 16,
+        "payload_len": 3,
+        "prefix": 0,
+        "reference": "Lz4InputTooShort"
+      },
+      {
+        "binary": "decode",
+        "max_len": 16,
+        "payload_len": 4,
+        "prefix": 0,
+        "reference": "decode"
+      },
+      {
+        "binary": "decode",
+        "max_len": 16,
+        "payload_len": 4,
+        "prefix": 16,
+        "reference": "decode"
+      },
+      {
+        "binary": "lz4 bytes over limit",
+        "max_len": 16,
+        "payload_len": 4,
+        "prefix": 17,
+        "reference": "Lz4DecodedOverLimit"
+      },
+      {
+        "binary": "decode",
+        "max_len": 4294967295,
+        "payload_len": 100,
+        "prefix": 4294967295,
+        "reference": "decode"
+      },
+      {
+        "binary": "lz4 bytes over limit",
+        "max_len": 4294967294,
+        "payload_len": 100,
+        "prefix": 4294967295,
+        "reference": "Lz4DecodedOverLimit"
+      }
+    ],
+    "predicate_disagreements": 0
+  },
+  "ok": {
+    "capacity": "uncompressed_size",
+    "len": "min(write position, uncompressed_size)",
+    "len_clamp": "0x3d1b2cf",
+    "length_equality_checked": false,
+    "vec_store": "0x3d1b2db"
+  },
+  "source_bindings": [
+    {
+      "check": "u32 extension byte sum overflow",
+      "location": {
+        "col": 9,
+        "file": "src/block/decompress_safe.rs",
+        "line": 39
+      },
+      "outcome": "panic via slot 0x576e118",
+      "sites": [
+        "0x3d1af2e",
+        "0x3d1af73"
+      ]
+    },
+    {
+      "check": "literal_length > input.len() - input_pos",
+      "compare": "0x3d1b06e",
+      "location": {
+        "col": 33,
+        "file": "src/block/decompress_safe.rs",
+        "line": 190
+      },
+      "outcome": "tag 1 LiteralOutOfBounds"
+    },
+    {
+      "check": "literal_length > capacity - pos",
+      "compare": "0x3d1b083",
+      "location": {
+        "col": 33,
+        "file": "src/block/decompress_safe.rs",
+        "line": 194
+      },
+      "outcome": "tag 0 OutputTooSmall"
+    },
+    {
+      "add": "0x3d1b44f",
+      "check": "expected = pos + literal_length",
+      "location": {
+        "col": 31,
+        "file": "src/block/decompress_safe.rs",
+        "line": 196
+      },
+      "outcome": "tag 0 OutputTooSmall {expected, actual}"
+    },
+    {
+      "check": "pos + match_length > capacity",
+      "compare": "0x3d1afab",
+      "location": {
+        "col": 12,
+        "file": "src/block/decompress_safe.rs",
+        "line": 227
+      },
+      "outcome": "tag 0 OutputTooSmall"
+    }
+  ],
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
