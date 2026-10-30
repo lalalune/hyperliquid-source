@@ -1,0 +1,61 @@
+{
+  "call_census": {
+    "direct_e8": 0,
+    "got_indirect": [
+      "0x13cfdc1",
+      "0x1447166",
+      "0x1450a61"
+    ],
+    "got_slot": "0x576eaa0",
+    "known_consumers": [
+      "0x1447166 (shared Time Sub helper, separate packet)",
+      "0x13cfdc1",
+      "0x1450a61"
+    ]
+  },
+  "captured_binary_executed": false,
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "core": {
+    "bytes": 399,
+    "end_va_exclusive": "0x151d33f",
+    "fde_va": "0xcf630c",
+    "inferred_label": "chrono NaiveDate-style signed difference core",
+    "sha256": "7d783da64ba2b6a92c7a084c5d658daa9daaabd81d9a03b3b9e6bef4e8a2af4f",
+    "start_va": "0x151d1b0"
+  },
+  "era_constants": {
+    "cycle_days": 146097,
+    "days_per_year": 365,
+    "div1e9_magic": "0x112e0be826d694b3",
+    "div400_magic": "0x51eb851f",
+    "nanos_per_second": 1000000000,
+    "secs_per_day": 86400
+  },
+  "leap_table": {
+    "entries": 400,
+    "model": "cumulative proleptic-Gregorian leap days per 400-year cycle",
+    "source": "chrono-0.4.38 naive/date/mod.rs table",
+    "va": "0x250354",
+    "validated_entries": 400
+  },
+  "packed_date": {
+    "days_formula": "146097*floor_div(year,400) + 365*r + table[r] + ordinal, r = year mod 400",
+    "invalid_check": "sum == 0 (year 0, ordinal 0) branches to panic",
+    "observed": "year = dword >>a 13; ordinal = (dword >> 4) & 511"
+  },
+  "panic": {
+    "callee": "0x157b520",
+    "column": 5,
+    "line": 2334,
+    "location_va": "0x5672188",
+    "path": "chrono-0.4.38/src/naive/date/mod.rs",
+    "sites": [
+      "0x151d20f",
+      "0x151d262"
+    ]
+  },
+  "progress_gate_requested": false,
+  "result_model": "returns (i64 total seconds in rax, i32 nanosecond remainder in edx normalized to [0, 1e9)); tail borrow cmovs recorded structurally",
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
