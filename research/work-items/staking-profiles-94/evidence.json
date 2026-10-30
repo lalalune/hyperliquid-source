@@ -1,0 +1,67 @@
+{
+  "assert_panic": {
+    "callee": "0x157b7f0",
+    "column": 17,
+    "line": 243,
+    "location_va": "0x56e9c30",
+    "message": "assertion failed: profiles.insert(validator_profile)",
+    "message_va": "0x58bfde",
+    "path": "l1/src/staking.rs"
+  },
+  "call_census": {
+    "containing_function": {
+      "end": "0x336a360",
+      "start": "0x3369db0"
+    },
+    "denominator": "complete .text scan for e8 / slot-ff15 / lea encodings",
+    "direct_e8": 0,
+    "got_indirect": [
+      "0x3369dd1"
+    ],
+    "got_slot": "0x5775c78",
+    "lea_references": 0
+  },
+  "captured_binary_executed": false,
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "function": {
+    "bytes": 1504,
+    "end_va_exclusive": "0x3366b60",
+    "fde_va": "0x116bea8",
+    "inferred_label": "staking validator_profiles_at_epoch",
+    "sha256": "00dda1b3f81eb9e94ca1a5730a61df3bd39cf2de26df135a07002e5df4358afe",
+    "start_va": "0x3366580"
+  },
+  "progress_gate_requested": false,
+  "stdlib_panics": {
+    "accum": {
+      "callee": "0x157b480",
+      "location": "core/src/iter/traits/accum.rs:204:1",
+      "note": "both checked-add carry branches land here",
+      "sites": 1
+    },
+    "divergence": "the binary panics on delegator-sum overflow instead of returning an arithmetic-error variant; the reference sketch proposes checked_add().ok_or(ArithmeticOverflow), which the bytes do not support",
+    "navigate": {
+      "callee": "0x157a9f0",
+      "locations": "alloc/src/collections/btree/navigate.rs:534:47 (x2) and :161:36 (x1)",
+      "sites": 3
+    },
+    "rustc_commit": "e408947bfd200af42db322daf0fadfe7e26d3bd1"
+  },
+  "structure": {
+    "delegator_sum": "BTreeMap walk with count word +0x13e, values base +0x148; two checked u64 adds branch on carry to the accum panic",
+    "duplicate_guard": {
+      "callee": "0x3399380",
+      "observed": "result test routes the duplicate case to the assert panic",
+      "site": "0x3366a7f"
+    },
+    "epoch_lookup": "BTreeMap walk: node count word at +0x21a, children at +0x220, 8-byte key compare; not-found returns Err tag 0x97",
+    "result_tags": {
+      "err_epoch_missing": "0x97",
+      "ok": "0x186",
+      "ok_layout": "qword +0x18, xmm +0x08, epoch qword +0x20, word tag +0x00"
+    },
+    "validator_iteration": "64-byte stride; profile fields copied from entry +0x18/+0x28/+0x2c/+0x3c"
+  },
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
