@@ -12,7 +12,22 @@ from doctor import locate_ghidra
 from artifacts import check
 
 ROOT = Path(__file__).resolve().parents[1]
-CONFIG = json.loads((ROOT / 'config/rea.json').read_text())
+
+
+def _unique_object(pairs):
+    out = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError(f'Duplicate key in REA config input: {key}')
+        out[key] = value
+    return out
+
+
+def load_config(path):
+    return json.loads(Path(path).read_text(), object_pairs_hook=_unique_object)
+
+
+CONFIG = load_config(ROOT / 'config/rea.json')
 
 
 def supported_node(version):
