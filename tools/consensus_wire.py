@@ -136,7 +136,11 @@ class Elf:
         stro = secs[shstrndx][4]
         self.sections = {}
         for s in secs:
-            name = data[stro + s[0]:data.index(b"\0", stro + s[0])].decode()
+            try:
+                end = data.index(b"\0", stro + s[0])
+            except ValueError:
+                raise EvidenceError("unterminated section name") from None
+            name = data[stro + s[0]:end].decode()
             self.sections[name] = (s[3], s[4], s[5])
 
     def off(self, va):
