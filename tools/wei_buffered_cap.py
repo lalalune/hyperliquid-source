@@ -609,17 +609,33 @@ def direct_refs(text_va, text, targets):
 
 def find_tail(insns):
     """Anchors of the cap arithmetic inside one function listing."""
-    idx = next(i for i, ins in enumerate(insns) if ins[1] == 'cvtsi2sd')
+    idx = next((i for i, ins in enumerate(insns) if ins[1] == 'cvtsi2sd'), None)
+    if idx is None:
+        raise EvidenceError('no cvtsi2sd anchor in listing')
     load = insns[idx - 1]
     if load[3] != 'mov    eax,DWORD PTR [rsp+0x14]':
         raise EvidenceError(f'unexpected factor load at {load[0]:#x}')
-    ok_store = next(i for i in range(idx, len(insns)) if insns[i][3] == 'mov    WORD PTR [rdi],0x186')
-    err_store = next(i for i in range(idx, len(insns)) if insns[i][3] == 'mov    WORD PTR [rdi],0x13f')
+    ok_store = next((i for i in range(idx, len(insns)) if insns[i][3] == 'mov    WORD PTR [rdi],0x186'), None)
+    if ok_store is None:
+        raise EvidenceError('no ok store anchor in listing')
+    err_store = next((i for i in range(idx, len(insns)) if insns[i][3] == 'mov    WORD PTR [rdi],0x13f'), None)
+    if err_store is None:
+        raise EvidenceError('no error store anchor in listing')
+    if err_store + 1 >= len(insns):
+        raise EvidenceError('no join instruction after error store')
     join = insns[err_store + 1][2][0][1]
-    mul_buffer = next(i for i in range(idx, ok_store) if insns[i][1] == 'mulsd' and insns[i][2][1][0] == 'a')
-    stage2 = next(i for i in range(mul_buffer, ok_store) if insns[i][1] == 'ucomisd')
-    stage1_end = next(i for i in range(idx, stage2) if insns[i][3] == 'movq   xmm2,rcx')
-    tag_b2 = next(i for i in range(stage2, ok_store) if insns[i][1] == 'mov' and insns[i][2][1] == ('i', 0xb2))
+    mul_buffer = next((i for i in range(idx, ok_store) if insns[i][1] == 'mulsd' and insns[i][2][1][0] == 'a'), None)
+    if mul_buffer is None:
+        raise EvidenceError('no mulsd anchor in listing')
+    stage2 = next((i for i in range(mul_buffer, ok_store) if insns[i][1] == 'ucomisd'), None)
+    if stage2 is None:
+        raise EvidenceError('no ucomisd anchor in listing')
+    stage1_end = next((i for i in range(idx, stage2) if insns[i][3] == 'movq   xmm2,rcx'), None)
+    if stage1_end is None:
+        raise EvidenceError('no stage1 end anchor in listing')
+    tag_b2 = next((i for i in range(stage2, ok_store) if insns[i][1] == 'mov' and insns[i][2][1] == ('i', 0xb2)), None)
+    if tag_b2 is None:
+        raise EvidenceError('no 0xb2 tag anchor in listing')
     return {'tail_start': load[0], 'cvt': insns[idx][0], 'join': join, 'stage1_end': insns[stage1_end][0],
             'stage2': insns[stage2][0], 'stage2_end': insns[tag_b2][0], 'ok_store': insns[ok_store][0],
             'err_store': insns[err_store][0], 'indices': (idx - 1, ok_store + 1)}
