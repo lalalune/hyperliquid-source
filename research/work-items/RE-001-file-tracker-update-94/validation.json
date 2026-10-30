@@ -1,0 +1,97 @@
+{
+  "task": "RE-001",
+  "component": "foundation",
+  "source_base": "1f8c67c63ca4794c9689235471c60297f8a5c985",
+  "target": {
+    "release": "94",
+    "bytes": 91774280,
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "reference_commit": "999556f6e0a474b8312db96ec3149e1c44e97c23",
+  "platform": "macOS arm64",
+  "python": "3.14.7",
+  "tools": {
+    "objdump": "GNU Binutils 2.46.1",
+    "readelf": "GNU Binutils 2.46.1",
+    "second_objdump": "Apple LLVM 21.0.0"
+  },
+  "tool_selection": {
+    "objdump": "/opt/homebrew/bin/x86_64-w64-mingw32-objdump",
+    "readelf": "/opt/homebrew/bin/x86_64-w64-mingw32-readelf",
+    "second_objdump": "/usr/bin/objdump",
+    "make_environment": "work/tool-bin/objdump and work/tool-bin/readelf are local symlinks to those GNU tools; prepend work/tool-bin and /opt/homebrew/bin to PATH. No tracked environment changes."
+  },
+  "commands": [
+    "/opt/homebrew/bin/python3 tools/file_tracker_update_static.py --objdump /opt/homebrew/bin/x86_64-w64-mingw32-objdump --readelf /opt/homebrew/bin/x86_64-w64-mingw32-readelf --second-objdump /usr/bin/objdump --output research/work-items/RE-001-file-tracker-update-94/observed",
+    "/opt/homebrew/bin/python3 tools/file_tracker_update_static.py --objdump /opt/homebrew/bin/x86_64-w64-mingw32-objdump --readelf /opt/homebrew/bin/x86_64-w64-mingw32-readelf --second-objdump /usr/bin/objdump --output work/file-tracker-update-reproduced",
+    "diff -qr research/work-items/RE-001-file-tracker-update-94/observed work/file-tracker-update-reproduced",
+    "/opt/homebrew/bin/python3 -m unittest discover -s tests -p test_file_tracker_update_static.py -v",
+    "make PYTHON=/opt/homebrew/bin/python3 doctor verify test catalogue-check reproduce",
+    "git diff --check"
+  ],
+  "before": {
+    "required_checks": "pass with GNU tools selected",
+    "tests": 431,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "reproduce": "pass"
+  },
+  "after": {
+    "required_checks": "pass",
+    "tests": 441,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "focused_tests": 10,
+    "reproduce": "pass",
+    "unchanged_input_hashes_signatures_imports_pins": "pass",
+    "catalogue_check": "pass",
+    "diff_check": "pass"
+  },
+  "reproduction": {
+    "files": 7,
+    "byte_identical": true,
+    "normalization": "Only binary pathname in disassembler headers replaced with <authenticated-node94>."
+  },
+  "window": {
+    "start_va": "0x13cc5d0",
+    "end_va": "0x13cc973",
+    "file_offset": "0x13cb5d0",
+    "bytes": 931,
+    "instructions": 226,
+    "dual_decoder_equal": true,
+    "fde_crosscheck": "Repository parser and GNU readelf agree for updater and selected caller."
+  },
+  "negative_controls": [
+    "Every one of 15 instruction obligations mutated in authenticated original bytes, with outer digest gate bypassed only for local checks.",
+    "Nine targeted branch-condition/store-offset substitutions.",
+    "Both diagnostic byte sequences corrupted.",
+    "All eight selected call operands retargeted.",
+    "All seven RELA addends retargeted; missing and duplicate binding controls.",
+    "Actual updater FDE range changed independently of digest gate.",
+    "Missing, false-byte and incomplete decoder coverage.",
+    "Wrong release and same-size corrupted original rejected before tool invocation."
+  ],
+  "initial_environment_failure": {
+    "tests": 357,
+    "failures": 4,
+    "errors": 12,
+    "skipped": 15,
+    "cause": "Initial default PATH lacked GNU readelf and selected Apple objdump rendering. Repeated the same suite using installed GNU tools, without changing repository code."
+  },
+  "source_files": {
+    "tools/file_tracker_update_static.py": "3c0a05ae1ab198dfe60576c106295be760f2ced9821cf63fc25e62ec29c46849",
+    "tests/test_file_tracker_update_static.py": "99c49cf01445956430f2129ece70645f00b414025f6da49a0a572ff1b9651e53"
+  },
+  "captured_binaries_executed": false,
+  "network_or_chain_actions": false,
+  "rust_implementation_or_matching_claim": false,
+  "component_gates_changed": false,
+  "hosted_ci_run": false,
+  "limitations": [
+    "One selected updater and one supporting direct caller; no complete caller census.",
+    "Opaque helper/drop/unwind effects, time/value layouts and reentrancy remain unresolved.",
+    "Decoder agreement and static corruption controls do not establish runtime or reconstructed Rust equivalence."
+  ]
+}
