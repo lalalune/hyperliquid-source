@@ -1,0 +1,29 @@
+2026-10-30, Windows x86_64, Python 3.14.3, GNU binutils 2.47 (default AT&T).
+Independent main base 6fb86319763b30860f92b9da746cbe4f9b637573;
+earlier own packets are not stacked.
+
+Existing authenticated LFS artifacts/imports and seven exact reference pins
+were reused. No captured binary executed.
+
+make doctor verify test: exit 0.
+Doctor analysis_ready true, exact_rebuild_ready false.
+Verify 8 artifact identities, 3 signatures, 37 imports, all 7 source pins pass.
+Test 27 tests pass (original 20 + 7 packet tests), 0.790 seconds.
+
+python3 tools/bucket_guard_static.py: exit 0.
+Repeat --output work/bucket-guard-repeat: exit 0.
+diff -ru work/bucket-guard-init-94 work/bucket-guard-repeat: exit 0;
+all 6 exports byte-identical. This is an author repeat, not independent peer review.
+
+Seven tests include 17 real instruction/control corruptions, 4 actual RELA retargets,
+source corruption, struct field layout checks (pattern, compression, count) and
+debug struct name verification, integer duration scaling constants (1000, 1000000, 86400),
+and guarded latency timing flag with atomic lock cmpxchg spinlock unlock.
+Mutation tests bypass the complete input hash check to test local obligations.
+
+required-checks.log has local installation/worktree prefixes replaced by
+<repo>/<tools-root>/<source-repo> and Windows CRLF converted to LF for Git.
+Raw instruction, frame and relocation exports are not normalized.
+
+No Rust build/implementation, full rate-limiter, scheduler, concurrency contract,
+target or emulator execution, chain/node traffic, runtime equivalence, gates or hosted CI claim.
