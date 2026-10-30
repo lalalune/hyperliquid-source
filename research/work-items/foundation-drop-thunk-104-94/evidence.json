@@ -1,0 +1,59 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "function": {
+    "start_va": "0x14522b0",
+    "end_va_exclusive": "0x1452306",
+    "bytes": 86,
+    "sha256": "a6a59a46e01098d54e9ca42a5dbfa30e25f28fdce3346aeefb8f898b251000b7",
+    "fde_section_offset": "0x2eed18",
+    "padding_bytes": 10,
+    "padding_stride_end": "0x1452310",
+    "inferred_label": "drop thunk, 104-byte elements"
+  },
+  "behavior": {
+    "call_order": "per-element call 0x13ef560 first, then null guard",
+    "length_load": "u64 length at rdi+0, base pointer at rdi+8 on fall-through",
+    "element_size": "0x68",
+    "size_formula": "length * 0x68 (mod 2^64)",
+    "early_return_on": [
+      "length == 0"
+    ],
+    "flag_at_tail_jump": "rdx = 0 (xor edx,edx, never set otherwise)",
+    "edges": {
+      "1": "0x68",
+      "2": "0xd0",
+      "16": "0x680",
+      "255": "0x6798",
+      "4096": "0x68000"
+    },
+    "per_element_call_target": "0x13ef560",
+    "per_element_call_claimed_here": false,
+    "landing_pad": "inside FDE 0x14522e3..0x1452306: reload length, null guard, same multiply, tail-slot call, then _Unwind_Resume call 0x5660110"
+  },
+  "tail_call": {
+    "slot": "0x576e010",
+    "target": "0x54c8cb0",
+    "registers": "rdi = field+8, rsi = length * 0x68, rdx = 0",
+    "target_claimed_here": false
+  },
+  "incoming_pattern_scan": {
+    "section": ".text",
+    "byte_count": 70370352,
+    "e8_candidates": [
+      "0x1453a00",
+      "0x14546a7"
+    ],
+    "ff15_ff25_candidates": [],
+    "validated_caller_fdes": [
+      "0x14538e0",
+      "0x1453a71",
+      "0x1454620",
+      "0x14546d7"
+    ],
+    "complete_xref_census": false
+  },
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
