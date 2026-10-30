@@ -55,7 +55,11 @@ class Elf:
         self.sections = {}
         for s in raw:
             end = data.index(b"\0", stro + s[0])
-            self.sections[data[stro + s[0]:end].decode()] = (s[3], s[4], s[5])
+            try:
+                name = data[stro + s[0]:end].decode()
+            except UnicodeDecodeError:
+                raise EvidenceError("section name is not valid UTF-8")
+            self.sections[name] = (s[3], s[4], s[5])
 
     def off(self, va: int) -> int:
         for v, o, n in self.loads:
