@@ -8,7 +8,10 @@ Stdlib only; reuses the ELF/FDE/relocation readers in ``tools/state_roots.py``.
     whose path lies in a ``blake3-*``, ``tiny-keccak-*``, ``sha2-*`` or
     ``ripemd-*`` crate directory;
   - ``const:<name>``: the function's bytes contain a pinned hash constant as a
-    little-endian immediate;
+    little-endian immediate (a u64 constant counts only as the imm64 of a
+    REX.W ``b8+r`` ``movabs``, the sole x86-64 encoding with an 8-byte
+    immediate; elsewhere 8 mostly-zero bytes match ordinary disp32/imm32
+    operand tails);
   - ``keccak_rc_table``: the function ``lea``s the 24-qword Keccak-f round
     constant table in ``.rodata``.
 * Call edges come from byte-scanned ``e8``/``e9`` rel32 calls/jumps that land
@@ -70,6 +73,11 @@ KINDS_DIRECT = ("rel32", "slot")
 KINDS_ALL = ("rel32", "slot", "vtable")
 
 
+def is_movabs_imm64(text: bytes, i: int) -> bool:
+    """True when ``text[i:i+8]`` is the immediate of ``REX.W b8+r imm64``."""
+    return i >= 2 and 0x48 <= text[i - 2] <= 0x4F and 0xB8 <= text[i - 1] <= 0xBF
+
+
 def build(data: bytes, expected_sha256: str = sr.EXPECTED_SHA256) -> dict:
     base = sr.build(data, expected_sha256=expected_sha256)
     elf = sr.Elf(data)
@@ -124,7 +132,8 @@ def build(data: bytes, expected_sha256: str = sr.EXPECTED_SHA256) -> dict:
                 reasons[f].add("crate_location:" + m.group(1))
     const_sites = []
     for name, pat in CONSTANTS:
-        sites = [t_va + m.start() for m in re.finditer(re.escape(pat), text)]
+        sites = [t_va + m.start() for m in re.finditer(re.escape(pat), text)
+                 if len(pat) != 8 or is_movabs_imm64(text, m.start())]
         fns = sorted({own(s) for s in sites if own(s) is not None})
         for f in fns:
             reasons[f].add("const:" + name)

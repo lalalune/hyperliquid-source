@@ -26,7 +26,7 @@ the hashers.
 | `fixture-schema.json` | Snapshot fixture schema (`re009-snapshot-fixture/v1`) |
 | `hashers.json` | Hasher inventory, constants, call graph, chains from scoped/`lt_hashes` sources, RE-005 encoder check |
 | `objdump-excerpts.txt` | Narrow windows for the `/dev/null` compares and every literal `lea` site |
-| `hashers-objdump-excerpts.txt` | Narrow windows for the blake3 call chains |
+| `hashers-objdump-excerpts.txt` | Narrow windows for the blake3 call chains, the false RC[1] byte match, every u32 constant hit's instruction, and rotate counts |
 | `verify.py` | Manifest, regenerated hashes, pinned facts for both JSON files |
 | `MANIFEST.sha256` | sha256 of the packet files |
 
@@ -91,15 +91,28 @@ the hashers.
 
 `tools/state_hashers.py` replaces the earlier exploration-script negative.
 
-### Hasher inventory (30 functions, 0 with a first-party Location)
+### Hasher inventory (29 functions, 0 with a first-party Location)
 
 A function is a hasher if it has a crate panic Location in
 `blake3-*` / `tiny-keccak-*` / `sha2-*` / `ripemd-*`, or if its `.text` bytes
 contain a pinned IV / K / RC constant, or if it `lea`s the Keccak-f round
-constant table. Counts: blake3 Location 13, sha2 Location 6, tiny-keccak
-Location 2, ripemd Location 1, blake3/sha IV-constant-only 3, sha2 K-constant
--only 3, keccak RC-table `lea` 1, keccak RC immediate 1. **None of the 30
-also holds a first-party Location.**
+constant table. A u64 constant counts only as the imm64 of a REX.W `b8+r`
+`movabs`, the only x86-64 encoding with an 8-byte immediate. Counts: blake3
+Location 13, sha2 Location 6, tiny-keccak Location 2, ripemd Location 1,
+blake3/sha IV-constant-only 3, sha2 K-constant-only 3, keccak RC-table `lea`
+1. **None of the 29 also holds a first-party Location.**
+
+An earlier revision of this packet counted 30 hashers. The extra one,
+0x506cb20..0x506e509, came from a raw 8-byte scan for Keccak RC[1]
+(`82 80 00 00 00 00 00 00`) matching at 0x506d98d. That address is inside
+`506d98b: 48 c7 82 80 00 00 00 00 00 00 00  mov QWORD PTR [rdx+0x80],0x0`:
+the matched bytes are the ModRM byte, disp32 `0x80` and the first three bytes
+of imm32 `0`, not a constant. The function has no `rol`/`ror`/`rorx`/`shld`/
+`shrd` and calls libstdc++ `std::string` helpers. RC[2] would need a
+`movabs` and has no hit. RC[1] (0x8082) fits an imm32, so the `movabs` rule
+cannot probe it; instead, a linear sweep of `.text` finds no instruction with
+a `0x8082` operand and no `movabs` carrying any 64-bit Keccak RC (commands
+and results in `hashers-objdump-excerpts.txt`).
 
 Call graph (byte-scanned): 495523 rel32 `e8`/`e9` edges that land on an FDE
 start, 345767 RIP-slot `ff 15`/`ff 25` edges whose slot is a RELATIVE
@@ -151,17 +164,25 @@ So the LtHash *file* is referenced from three functions, but only the
 
 ### Hash constants are never inlined into first-party code
 
-Every blake3 IV word, sha256/sha512 K word and keccak RC immediate that
-appears as a little-endian constant in `.text` sits inside a hasher FDE that
-has no first-party Location. The Keccak-f RC table at 0x7d04c8 is referenced
-only by 0x4f59480.
+Every blake3 IV word and sha256/sha512 K word that appears as a
+little-endian constant in `.text` sits inside a hasher FDE that has no
+first-party Location. No Keccak RC appears as an instruction operand (see
+above), so the Keccak constant evidence is the Keccak-f RC table at 0x7d04c8,
+which is referenced only by 0x4f59480. The 4-byte IV/K words are matched by a
+byte scan without an operand-field check. Decoding each hasher from its FDE
+start places every one of the 33 u32 hits in the last four bytes of its
+instruction: 12 are the imm32 of an `add`, 10 the disp32 of a `lea`, and 11
+the high dword of a sha512 IV/K `movabs` imm64 (9 in 0x4e9a8a0, plus 0x4ec4b2b
+and 0x4ec4ba6 in 0x4ec4a40). The six constant-only hashers contain 32–736
+`rol`/`ror`/`rorx`/`shld`/`shrd` each. These decodes are recorded in
+`hashers-objdump-excerpts.txt`; `verify.py` does not re-run them.
 
 ### RE-005 bincode encoders do not feed the hashers
 
 The 7 RE-005 (PR #10) integer-encoder FDE starts
 (0x27ab0a0, 0x27ab280, 0x27ab300, 0x27ab5b0, 0x4aa9ae0, 0x4aa9f80, 0x4aaa230)
 reach 506–510 functions each and never a hasher. Their 90 direct callers and
-the 290 hasher direct callers are disjoint. None of the three
+the 289 hasher direct callers are disjoint. None of the three
 `/lt_hashes.json` referencers reaches any of those encoders. So encoded
 varint output is **not** shown to be the blake3 input on this path.
 
