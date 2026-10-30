@@ -1,0 +1,9 @@
+verdict	reference	reference_says	bytes_say
+agree	l1/scaled_vlm.rs:40	bounds 1000 and 10000, step 5e8, bonus 4000	same numbers at all six sites; the step is a shift by 8, a multiply and a shift by 75, proved for every u64
+agree	l1/exchange/impl_trading.rs:26	STATUS_ACTION_CAP = 195	same tag 0xc3; its Display arm prints the text in evidence.json, so the name "action cap" is the part that differs
+agree	l1/exchange/impl_trading.rs:125	expanded bound needs order_kind == 2 and not reduce_only	byte +0x19 must be 2 and bit 0 of byte +0x31 clear, tested only from 1000 up; the two names stay the reference labels
+agree	l1/exchange/impl_trading.rs:506	submitted_order_count saturating add before the check	a word in the state (attempts_word in copies.tsv) goes up by one with saturation before the count is read
+agree	l1/scaled_vlm.rs:277	per-dex entries first, then the base entry, saturating	same order and saturation; per-dex adds report to one Location, base adds to scaled_vlm.rs:15:21 and raw_vlm.rs:17:21; the raw sum is checked and then unused
+differ	l1/exchange/impl_trading.rs:1033	is_vault_privileged: user[0] != 0 and user[19] == 0	the 10000 bound comes from 0x37e4fb0, a byte compare with the fixed list in addresses.tsv; addresses of the reference shape outside the list stay on the volume bound (vectors)
+differ	l1/exchange/impl_trading.rs:741	the check inserts current + 1 into user_action_count	the gate writes one word, the attempts counter; the count map and all other watched state stay byte identical on both routes (checked on every evaluation)
+differ	l1/exchange/impl_trading.rs:762	total_scaled_vlm_for_user adds base, main, alt and per_dex maps	the gate adds the per-dex entries and one map at state +0x80, no other map is read: strict state bytes fault on any other read
