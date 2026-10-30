@@ -61,7 +61,9 @@ def rip_target(body, start, off, prefix, length):
 def census(data, fdes):
     # Scan every byte of .text for this exact RIP-relative LEA encoding. Raw
     # candidates are then tied to a unique FDE and checked as decoded instructions.
-    text = next(s for s in sections(data) if s['name'] == '.text')
+    text = next((s for s in sections(data) if s['name'] == '.text'), None)
+    if text is None:
+        raise ValueError('No .text section')
     raw = data[text['offset']:text['offset']+text['size']]
     ordered = sorted(fdes)
     starts = [a for a, b in ordered]
