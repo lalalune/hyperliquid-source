@@ -1,0 +1,58 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "function": {
+    "start_va": "0x152f710",
+    "end_va_exclusive": "0x152f76c",
+    "bytes": 92,
+    "sha256": "d6f256ab1299a58bd63e6089efa9c4d5c1fa7524cd03848933be06033ba7464f",
+    "fde_section_offset": "0x302128",
+    "padding_bytes": 4,
+    "padding_stride_end": "0x152f770",
+    "inferred_label": "drop thunk, 240-byte elements"
+  },
+  "behavior": {
+    "call_order": "per-element call 0x15443a0 first, then null guard",
+    "length_load": "u64 length at rdi+0, base pointer at rdi+8 on fall-through",
+    "element_size": "0xf0",
+    "size_formula": "length * 0xf0 (mod 2^64)",
+    "early_return_on": [
+      "length == 0"
+    ],
+    "flag_at_tail_jump": "rdx = 0 (xor edx,edx, never set otherwise)",
+    "edges": {
+      "1": "0xf0",
+      "2": "0x1e0",
+      "16": "0xf00",
+      "255": "0xef10",
+      "4096": "0xf0000"
+    },
+    "per_element_call_target": "0x15443a0",
+    "per_element_call_claimed_here": false,
+    "landing_pad": "reload length, null guard, same multiply and tail slot, else restore saved pointer and call resume PLT entry 0x5660110",
+    "resume_call_target": "0x5660110",
+    "resume_call_claimed_here": false
+  },
+  "tail_call": {
+    "slot": "0x576e010",
+    "target": "0x54c8cb0",
+    "registers": "rdi = field+8, rsi = length * 0xf0, rdx = 0",
+    "target_claimed_here": false
+  },
+  "incoming_pattern_scan": {
+    "section": ".text",
+    "byte_count": 70370352,
+    "e8_candidates": [
+      "0x152bffc"
+    ],
+    "ff15_ff25_candidates": [],
+    "validated_caller_fde": [
+      "0x152aab0",
+      "0x152c040"
+    ],
+    "complete_xref_census": false
+  },
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
