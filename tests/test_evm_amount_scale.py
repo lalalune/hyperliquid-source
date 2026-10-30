@@ -7,6 +7,8 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from gnu_binutils import requires_gnu  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOL = ROOT / 'tools' / 'evm_amount_scale.py'
@@ -31,6 +33,7 @@ def small(text, rows):
     return eas.parse_listing(listing + f'\n  {0x1000 + 4 * len(rows):x}:\tint3')
 
 
+@requires_gnu('objdump')
 class Fixture(unittest.TestCase):
     def set_up_class(cls):
         if not CACHE:

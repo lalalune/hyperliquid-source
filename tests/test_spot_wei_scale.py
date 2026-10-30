@@ -6,6 +6,8 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from gnu_binutils import requires_gnu  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOL = ROOT / 'tools' / 'spot_wei_scale.py'
@@ -40,6 +42,7 @@ def find(insns, mn, pred=lambda ins: True):
 CACHE = {}
 
 
+@requires_gnu('objdump')
 class Fixture(unittest.TestCase):
     def set_up_class(cls):
         if not CACHE:

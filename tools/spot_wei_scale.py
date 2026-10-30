@@ -20,7 +20,7 @@ Two claims are evaluated:
     python3 tools/spot_wei_scale.py --out <dir>
 
 writes evidence.json, holders.tsv, helpers.tsv, pow10-exponents.tsv and
-helper-bytes.txt.  Only the Python standard library and objdump are used.
+helper-bytes.txt.  Only the Python standard library and GNU objdump are used.
 """
 
 import argparse
@@ -32,6 +32,9 @@ import struct
 import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from gnu_binutils import gnu_objdump  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 BINARY = 'artifacts/node/94/hl-node'
@@ -262,7 +265,10 @@ def panic_message(img, target):
 # ------------------------------------------------------------ instruction reader
 
 def disassemble(binary, start, end):
-    cmd = ['objdump', '-d', '-M', 'intel', '--no-show-raw-insn',
+    objdump, why = gnu_objdump()
+    if objdump is None:
+        raise EvidenceError(f'{why}; the listing parser reads GNU objdump Intel syntax only')
+    cmd = [objdump, '-d', '-M', 'intel', '--no-show-raw-insn',
            f'--start-address={start:#x}', f'--stop-address={end:#x}', str(binary)]
     return subprocess.run(cmd, capture_output=True, text=True, check=True).stdout
 

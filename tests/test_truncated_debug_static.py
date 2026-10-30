@@ -8,8 +8,10 @@ import sys
 import unittest
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 from artifacts import ROOT,check
+from gnu_binutils import requires_gnu
 from truncated_debug_static import PROFILES,SLOTS,PATH_VA,read_va,source_bindings,profile,census,rejects_boundary_byte
 
+@requires_gnu('readelf')
 class TruncatedDebugTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

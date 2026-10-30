@@ -7,6 +7,8 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from gnu_binutils import requires_gnu  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOL = ROOT / 'tools' / 'wei_buffered_cap.py'
@@ -33,6 +35,7 @@ def mutate(insns, va, mnemonic=None, ops=None):
     return out
 
 
+@requires_gnu('objdump')
 class Fixture(unittest.TestCase):
     def set_up_class(cls):
         if not CACHE:
