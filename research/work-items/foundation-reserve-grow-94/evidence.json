@@ -1,0 +1,48 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "windows": [
+    {
+      "start_va": "0x1520ce0",
+      "fde_end_va_exclusive": "0x1520d41",
+      "fde_bytes": 97,
+      "fde_body_sha256": "06c04ae9562e5133fe587b70d0bc8f343ad69fe79dfa1631671eb7cbdd8e369d",
+      "fde_section_offset": "0x153f4"
+    }
+  ],
+  "memcpy_slot": {
+    "slot": "0x576dfe0",
+    "relocation": "R_X86_64_GLOB_DAT",
+    "symbol_index": 6,
+    "symbol": "memcpy@GLIBC_2.14",
+    "addend": 0,
+    "stored_file_bytes": "zero"
+  },
+  "grow_callee": {
+    "start_va": "0x1564e60",
+    "fde_end_va_exclusive": "0x1564eee",
+    "fde_section_offset": "0x18064",
+    "body_decoded": false,
+    "runtime_target_named": false
+  },
+  "behavior": {
+    "input_fields": "capacity field at 0(rdi), base pointer at 8(rdi), length field at 0x10(rdi)",
+    "remaining": "remaining = capacity - length, unsigned 64-bit",
+    "gate": "slow arm taken exactly when requested (rdx) > remaining, unsigned",
+    "fast_path": "memcpy(base + length, entry rsi, requested); length += requested; return 0 with rdx restored to requested",
+    "slow_arm": "call 0x1564e60 with (object, old length, requested, rcx = 1, r8d = 1); reload length; jump back to the fast path without re-checking capacity",
+    "capacity_boundaries": {
+      "10/4/5": "fast",
+      "10/4/6": "fast",
+      "10/4/7": "slow",
+      "0/0/0": "fast",
+      "0/0/1": "slow"
+    },
+    "padding": "fifteen int3 bytes follow the window before the next FDE start"
+  },
+  "claim": "one append window: memcpy past the current length when capacity allows, otherwise an unnamed grow call and a retry",
+  "inferred_label": null,
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
