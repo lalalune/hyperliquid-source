@@ -1,0 +1,56 @@
+{
+  "counts": {
+    "boundary_rows": 24,
+    "dependency_edges": 19,
+    "functions": 8,
+    "instruction_controls": 30,
+    "locations": 7
+  },
+  "formulas": {
+    "eligibility": "signed surplus < 0; zero is ineligible",
+    "initial_u64": "sat_sub(floor(notional / (2 * leverage)), prior_contribution)",
+    "maintenance_u64": "floor(sat_sub(sat_mul(notional, 2), sat_mul(prior_contribution, 4 * leverage)) / (6 * leverage))",
+    "signed_notional_i64": "checked(position_size_i64 * nonnegative_price_i64)"
+  },
+  "limits": [
+    "Raw price, size and notional widths and operations are proved; decimal scaling is not.",
+    "FDE ranges are unwind extents, not a complete function census.",
+    "The tier tree implementation, recorder body, all callers, and complete liquidation execution are not closed.",
+    "A zero leverage is not rejected by the shown single-tier admission branch, but requirement division would have a zero divisor.",
+    "No independently authored Rust component is claimed because surrounding layouts and unit scales remain incomplete."
+  ],
+  "scope": {
+    "mode_jump_destinations": [
+      "0x3717888",
+      "0x37174cb",
+      "0x371751f",
+      "0x37175b6",
+      "0x37174f0"
+    ],
+    "proved_transition": "admitted tier records -> mode-3 maintenance requirement -> cross/isolated surplus < 0 candidate admission",
+    "state_mutation": "candidate-vector append only; the bounded path does not write position records",
+    "tier_record_fixture": [
+      {
+        "leverage": 50,
+        "lower": 0,
+        "prior": 0
+      },
+      {
+        "leverage": 20,
+        "lower": 1000,
+        "prior": 15
+      },
+      {
+        "leverage": 10,
+        "lower": 1000000,
+        "prior": 25015
+      }
+    ]
+  },
+  "target": {
+    "bytes": 91774280,
+    "captured_binary_executed": false,
+    "path": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  }
+}

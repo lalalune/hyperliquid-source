@@ -1,0 +1,34 @@
+RE-007 qualification transcript summary
+base: 1f8c67c63ca4794c9689235471c60297f8a5c985
+target: 3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f
+captured binary executed: false
+
+PASS  python3 tools/margin_path_static.py
+      {"boundary_rows": 24, "dependency_edges": 19, "functions": 8, "instruction_controls": 30, "locations": 7}
+
+PASS  python3 -m unittest discover -s tests -p 'test_margin_path_static.py' -v
+      Ran 17 tests in 2.170s; OK
+
+PASS  make verify
+      pinned artifacts and signatures valid; 37 imports and all pinned repositories verified
+
+PASS  make catalogue-check
+      catalogue and progress tables match pinned inputs
+
+PASS  make reproduce
+      artifact/inventory and retained-evidence reproduction completed successfully
+
+PASS  PATH=/opt/homebrew/opt/binutils/bin:$PATH make test
+      Ran 448 tests in 117.783s; OK
+
+ENV   An earlier default-PATH run stopped at test_foundation_hour with
+      OSError: [Errno 28] No space left on device. No source assertion failed.
+      Disposable uv/npm/pip/pnpm caches were pruned; the complete suite was then
+      rerun with GNU binutils first on PATH and passed as reported above.
+
+DIAGNOSTIC  PATH=/opt/homebrew/opt/binutils/bin:$PATH make doctor
+      exit 1; analysis_ready=false; exact_rebuild_ready=false
+      Python, git, git-lfs, gpg, rg and Rust 1.94.1 available.
+      Java/Ghidra and Rust 1.95.0 unavailable. Recovered manifests, exact build
+      provenance, accepted implementation and comparator remain unavailable.
+      captured_binaries_executed=false.
