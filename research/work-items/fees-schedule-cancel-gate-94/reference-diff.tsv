@@ -1,0 +1,10 @@
+reference	claim	observed
+l1/scaled_vlm.rs:55	DAILY_UPDATE_DELAY_DAYS = 5, a five-day chrono delta	5 is the seconds field of the TimeDelta in edx; a deadline must be later than now + 5 s
+l1/scaled_vlm.rs:51	MAX_DAILY_SCALED_VLM_ENTRIES = 10, len of a per-user date map	compare is on the first u64 of one map value keyed by a 20-byte user; this function never writes that u64
+l1/scaled_vlm.rs:47	MIN_DAILY_UPDATE_SCALED_VLM = 100000000, a daily-volume update gate	same number; the gated action is scheduleCancel and the message prints Required: $ with 1000000.0
+l1/scaled_vlm.rs:156	shortfall value (scaled as i32 as f64) / 100.0	cvtsi2sd is 64-bit; no reachable difference because the value is below 100000000
+l1/scaled_vlm.rs:409	clear_user clears the per-user date map	only the date dword of the entry becomes 0; the entry, its count and its time fields stay
+l1/exchange/handlers/18_schedule_cancel.rs:138	rejects when deadline_ms <= now_ms	rejects when the deadline is not later than now + 5 s
+l1/exchange/handlers/18_schedule_cancel.rs:148	stores the raw deadline in two u32 words	stores chrono date dword, seconds of day and nanoseconds
+l1/exchange/handlers/18_schedule_cancel.rs:160	representable when day >= 2146764485 and <= u32 max	days below 0x7ff506c5 pass the guard and the real date helper then limits them to 262142-12-31
+l1/exchange/handlers/18_schedule_cancel.rs:20	result codes 390, 319, 268, 269, 270, 133	same six values; 319 prints Invalid input number and 133 prints Cannot create Time from input
