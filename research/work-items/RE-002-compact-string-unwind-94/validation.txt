@@ -1,0 +1,66 @@
+Recorded 2026-10-30 UTC, repository root.
+Base 1f8c67c63ca4794c9689235471c60297f8a5c985.
+macOS15.7.7 arm64; Python3.12.10; GNU binutils2.47.20260726;
+Apple LLVM17.0.0. No package installation or target execution.
+PATH=/opt/homebrew/opt/binutils/bin:/private/tmp/slop-git-lfs/bin:$PATH
+LLVM_OBJDUMP=/Library/Developer/CommandLineTools/usr/bin/llvm-objdump
+
+Before implementation, unchanged main:
+  make doctor verify test catalogue-check reproduce: exit0.
+  431 tests pass95.514s. Analysis ready; exact rebuild not ready.
+  Existing FDE packet excludes LSDA contents; provenance packet infers unwind
+  support from table size but asks for ownership. No new product bug claimed.
+
+Final implementation:
+  python3 tools/compact_string_unwind.py --output
+    research/work-items/RE-002-compact-string-unwind-94/observed: exit0.
+  python3 -m unittest discover -s tests -p test_compact_string_unwind.py -v:
+    9/9 pass1.466s, no skips. Actual GNU/LLVM comparison included.
+  python3 tools/compact_string_unwind.py --output
+    work/compact-string-unwind-repeat: exit0.
+  diff -ru research/work-items/RE-002-compact-string-unwind-94/observed
+    work/compact-string-unwind-repeat: exit0, all6 exports identical.
+  make doctor verify test catalogue-check reproduce after final source edit:
+    exit0;440 tests pass98.634s, no skipped tests.
+    All8 artifact identities,3 public signatures,37 imports and7 reference
+    pins verified. Catalogue and original inventories/classifications unchanged.
+  LLVM_OBJDUMP=/nonexistent/llvm-objdump python3 -m unittest discover
+    -s tests -p test_compact_string_unwind.py -v: exit0,8 pass/1 explicit skip.
+    This proves GNU-only core checks remain usable with optional LLVM absent;
+    it is NOT packet reproduction. Packet generation always requires LLVM.
+
+Scope and result:
+  One exact constructor FDE,1417bytes,315 logical instructions.
+  Both native decoders agree after8 explicitly recorded LLVM17 standalone
+  LOCK display-prefix joins. Raw listings remain unmodified; no operand/byte
+  masking. Decoder formatting is separate from semantic records.
+  LSDA13 intervals;4 distinct landing pads;26 decoded calls;25 associated
+  using return-PC-minus-one. One final-pad call has no table entry.
+  Six intervals have no pad,6 nonzero-pad/action0,1 nonzero-pad/action1.
+  The selected action is signed filter-1,next0. Type/filter implementation
+  and the local personality remain opaque. No global panic-handler inference.
+  Source Location RELA, personality RELA/FDE and external _Unwind_Resume
+  call/PLT/JUMP_SLOT/dynamic-symbol bindings checked independently.
+
+Below-digest controls on actual copied target data:
+  Seven LSDA mutations reject unsupported LPStart/type/call encoding,
+  changed table length, overlapping/interior boundaries and action cycles.
+  Two actual RELA retargets reject source and personality rebinding.
+  One actual PLT displacement retarget rejects a different resume binding.
+  Another structurally valid action mutation(-1->0) changes the decoded
+  action while census counts stay unchanged; no digest-only detection claim.
+  Prefix controls reject orphan/unsupported standalone LOCK display records.
+  Wrong input fails before output publication.
+
+Development observations:
+  The first native comparison correctly refused LLVM17's separate LOCK
+  display records. The explicit byte-preserving joins are retained and tested.
+  Early development used a nonexistent `entsize` key from the common section
+  reader; the collector now reads the actual ELF64 dynsym header field.
+  A first full439-test run passed before separating optional decoder-format
+  metadata from portable semantics; the final440-test run followed that edit.
+
+All original packets/imports/pins and all progress gates remain unchanged.
+No Rust implementation/build, native/emulator execution, runtime cleanup
+oracle, whole-crate panic flag, selected panic handler, complete callee/type
+closure, whole-ELF match, #115/visor result or hosted CI success is claimed.
