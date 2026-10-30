@@ -77,6 +77,12 @@ class Elf:
             name = data[stro + s[0]:data.index(b"\0", stro + s[0])].decode()
             self.sections[name] = (s[3], s[4], s[5])  # addr, offset, size
 
+    def section(self, name):
+        try:
+            return self.sections[name]
+        except KeyError:
+            raise EvidenceError(f"missing section {name}") from None
+
     def off(self, va):
         for v, o, s in self.loads:
             if v <= va < v + s:
@@ -108,7 +114,7 @@ def _pe(data, pos, enc, base):
 
 def fde_index(elf: Elf):
     """Return (sorted starts, ends) from the .eh_frame_hdr table and each FDE's pc_range."""
-    addr, off, size = elf.sections[".eh_frame_hdr"]
+    addr, off, size = elf.section(".eh_frame_hdr")
     d = elf.data
     ver, ep_enc, cnt_enc, tab_enc = d[off:off + 4]
     if (ver, ep_enc, cnt_enc, tab_enc) != (1, 0x1B, 0x03, 0x3B):
@@ -139,7 +145,7 @@ def containing(starts, ends, va):
 
 
 def relative_relocs(elf: Elf) -> dict:
-    _a, off, size = elf.sections[".rela.dyn"]
+    _a, off, size = elf.section(".rela.dyn")
     out = {}
     for o in range(off, off + size, 24):
         r_off, info, add = struct.unpack_from("<QQq", elf.data, o)
@@ -150,8 +156,8 @@ def relative_relocs(elf: Elf) -> dict:
 
 def first_party_locations(elf, relocs):
     """Panic Location {&str file, u32 line, u32 col} records for first-party files."""
-    ro_va, _o, ro_size = elf.sections[".rodata"]
-    drr_va, _o2, drr_size = elf.sections[".data.rel.ro"]
+    ro_va, _o, ro_size = elf.section(".rodata")
+    drr_va, _o2, drr_size = elf.section(".data.rel.ro")
     out = {}
     for slot, a in relocs.items():
         if not (drr_va <= slot < drr_va + drr_size and ro_va <= a < ro_va + ro_size):
@@ -166,7 +172,7 @@ def first_party_locations(elf, relocs):
 
 
 def lea_targets(elf):
-    t_va, t_off, t_size = elf.sections[".text"]
+    t_va, t_off, t_size = elf.section(".text")
     text = elf.data[t_off:t_off + t_size]
     out = {}
     for m in LEA_RE.finditer(text):
@@ -179,7 +185,7 @@ def lea_targets(elf):
 
 
 def literal_anchors(elf, kind, lit, leas, relocs):
-    ro_va, ro_off, ro_size = elf.sections[".rodata"]
+    ro_va, ro_off, ro_size = elf.section(".rodata")
     ro = elf.data[ro_off:ro_off + ro_size]
     rel_targets = set(relocs.values())
     out = []
@@ -217,7 +223,7 @@ def build(data: bytes, ref_root: Path = ROOT / REF_DIR, expected_sha256: str = E
     relocs = relative_relocs(elf)
     locs = first_party_locations(elf, relocs)
     leas = lea_targets(elf)
-    t_va, _o, t_size = elf.sections[".text"]
+    t_va, _o, t_size = elf.section(".text")
 
     def owner(site):
         c = containing(starts, ends, site)
