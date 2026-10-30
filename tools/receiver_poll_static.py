@@ -95,13 +95,19 @@ def relocations(data):
                 # Resolve this actual linked symbol table entry; do not infer exit
                 # from an address annotation or a reference source function name.
                 symbol_index = struct.unpack_from('<I', data, shoff + section_index * shsize + 40)[0]
+                if symbol_index >= len(section_rows):
+                    raise ValueError(f'Receiver symbol table index out of range: {symbol_index}')
                 symbol_section = section_rows[symbol_index]
                 string_index = struct.unpack_from('<I', data, shoff + symbol_index * shsize + 40)[0]
+                if string_index >= len(section_rows):
+                    raise ValueError(f'Receiver string table index out of range: {string_index}')
                 string_section = section_rows[string_index]
                 entry_size = struct.unpack_from('<Q', data, shoff + symbol_index * shsize + 56)[0]
                 if symbol_section['type'] != 11 or entry_size != 24:
                     raise ValueError('Unexpected dynamic symbol table')
                 symbol = symbol_section['offset'] + (info >> 32) * entry_size
+                if symbol + 4 > len(data):
+                    raise ValueError('Receiver symbol entry outside file')
                 name_offset = struct.unpack_from('<I', data, symbol)[0]
                 start = string_section['offset'] + name_offset
                 name = data[start:data.index(b'\0', start)].decode('ascii')
