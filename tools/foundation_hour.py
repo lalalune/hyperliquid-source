@@ -38,6 +38,10 @@ def analyze(data):
     secs = sections(data)
     by_name = {s['name']: s for s in secs}
 
+    def section(name):
+        require(name in by_name, f'Missing section {name}')
+        return by_name[name]
+
     def read(va, size):
         matches = [s for s in secs if s['type'] != 8 and s['address'] <= va
                    and va + size <= s['address'] + s['size']]
@@ -48,7 +52,7 @@ def analyze(data):
 
     body = read(START, END - START)
     require(body == BODY, 'Hour instruction window changed')
-    eh = by_name['.eh_frame']
+    eh = section('.eh_frame')
     require(read(eh['address'], len(CIE)) == CIE, 'CIE changed')
     caller_cie = bytes.fromhex('1c00000000000000017a504c5200017810079b29ca7b041b1b0c070890010000')
     require(read(eh['address'] + 0x2dc714, len(caller_cie)) == caller_cie, 'Caller CIE changed')
@@ -60,7 +64,7 @@ def analyze(data):
         pc = eh['address'] + offset + 8 + struct.unpack_from('<i', record, 8)[0]
         extent = struct.unpack_from('<I', record, 12)[0]
         require((pc, pc + extent) == (start, end), 'FDE PC/range changed')
-    relsec = by_name['.rela.dyn']
+    relsec = section('.rela.dyn')
     require(relsec['size'] % 24 == 0, 'Truncated RELA section')
     rels = {}
     raw = read(relsec['address'], relsec['size'])
@@ -94,7 +98,7 @@ def analyze(data):
 
     # This byte-pattern scan is explicitly NOT a complete xref census. LLVM
     # disassembly from the caller FDE start validates the one retained candidate.
-    text = by_name['.text']; code = read(text['address'], text['size'])
+    text = section('.text'); code = read(text['address'], text['size'])
     indirect, direct = [], []
     for opcode in (b'\xff\x15', b'\xff\x25', b'\xe8'):
         pos = 0
