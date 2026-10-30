@@ -93,5 +93,16 @@ class EvmExtraWeiDecimalsTest(unittest.TestCase):
                 self.assertTrue(filecmp.cmp(Path(tmp) / name, PACKET / name, shallow=False), name)
 
 
+
+class MeasuredAdmittedTests(unittest.TestCase):
+    def test_no_verified_site_measures_nothing(self):
+        self.assertEqual(tool.measured_admitted([]), [])
+
+    def test_measured_from_site_guard_not_message(self):
+        site = {'guards': [{'k': 237, 'c': 234, 'jcc': 'ja'}]}
+        self.assertEqual(tool.measured_admitted([site]),
+                         tool.admitted_signed(237, 234, 'ja'))
+
+
 if __name__ == '__main__':
     unittest.main()

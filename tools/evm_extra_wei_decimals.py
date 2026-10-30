@@ -392,6 +392,16 @@ def gate_jump(buf, base_va, guard_off, already_va):
     return out
 
 
+def measured_admitted(ok):
+    """Admitted i8 values measured from the fully verified sites' guards.
+
+    The summary reports this set rather than restating the range parsed
+    out of the error message: with no fully verified site it is empty.
+    """
+    return sorted({v for s in ok for v in admitted_signed(
+        s['guards'][0]['k'], s['guards'][0]['c'], s['guards'][0]['jcc'])})
+
+
 def analyse(data):
     digest = check_digest(data)
     img = Image(data)
@@ -429,6 +439,7 @@ def analyse(data):
     ok = [s for s in sites if len(s['guards']) == 1 and s['guards'][0]['admitted_equals_message_range']
           and s['guards'][0]['ok_target_outside_error_block'] and s['guards'][0]['ok_target_in_function']
           and s['payload'] and s['payload']['length'] == len(MESSAGE) and s['payload']['stores_ptr_and_len']]
+    measured = measured_admitted(ok)
     forms = sorted({(s['guards'][0]['adjust'].split()[0], s['guards'][0]['k'], s['guards'][0]['c'],
                      s['guards'][0]['jcc']) for s in sites if len(s['guards']) == 1})
     tags = sorted({s['payload']['tag'] for s in sites if s['payload']})
@@ -449,7 +460,9 @@ def analyse(data):
             'lea_refs': len(leas), 'functions': len(funcs),
             'sites_with_exactly_one_guard': sum(1 for s in sites if len(s['guards']) == 1),
             'sites_fully_verified': len(ok), 'guard_forms': len(forms),
-            'admitted_i8_min': lo, 'admitted_i8_max': hi, 'admitted_count': len(expected),
+            'admitted_i8_min': measured[0] if measured else None,
+            'admitted_i8_max': measured[-1] if measured else None,
+            'admitted_count': len(measured),
             'error_tags': tags,
             'sites_gated_by_already_set': sum(1 for s in sites if len(s['gate']) == 1),
             'sites_ok_path_stores_input_byte': sum(
