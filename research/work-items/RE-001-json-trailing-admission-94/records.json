@@ -1,0 +1,78 @@
+{
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "ranges": [
+    {
+      "start_va": "0x15ba010",
+      "end_va": "0x15ba1c8",
+      "file_offset": "0x15b9010",
+      "bytes": 440,
+      "sha256": "86f9090343566d5391ce8e80a4c12f4e785f9ba61543e2e37b1cfafaf6548ba9"
+    },
+    {
+      "start_va": "0x1611910",
+      "end_va": "0x1615281",
+      "file_offset": "0x1610910",
+      "bytes": 14705,
+      "sha256": "6d9a41f7a41c9152a30cc84e81b87b247c4c473d257d44e04ff0ae1114997e3c"
+    }
+  ],
+  "input_and_cursor_state": {
+    "original_pointer_offset": "0x18",
+    "original_length_offset": "0x20",
+    "cursor_offset": "0x28",
+    "initial_cursor": 0
+  },
+  "initial_delegate": {
+    "site": "0x15ba05b",
+    "target": "0x15c0d90",
+    "state_rsi": "rsp"
+  },
+  "result_skip_sentinel": "0x8000000000000001",
+  "tail_check": {
+    "mask": "0x100002600",
+    "unsigned_maximum": 32,
+    "accepted_bytes": [
+      9,
+      10,
+      13,
+      32
+    ],
+    "load_site": "0x15ba0f0",
+    "cursor_store_site": "0x15ba101",
+    "non_whitespace_branch": "0x15ba13a",
+    "local_error_code": "0x16",
+    "error_helper": "0x15b8e90",
+    "out_error_pointer_offset": "0x8"
+  },
+  "reference_correction": {
+    "lead": "base/http_client.rs parse_json_rpc_response",
+    "observed_order": "initial delegate first, then forward cursor end check",
+    "not_established": "backwards ASCII-whitespace pre-trim before delegate",
+    "form_feed_0x0c": "excluded by observed mask, included by stamped Rust u8::is_ascii_whitespace"
+  },
+  "selected_caller": {
+    "site": "0x1613e08",
+    "output_rdi": "rsp+0x70",
+    "input_rsi": "rbp",
+    "length_rdx": "r14"
+  },
+  "direct_targets": {
+    "0x15ba05b": "0x15c0d90",
+    "0x15ba151": "0x15b8e90",
+    "0x15ba18d": "0x15bcf70",
+    "0x15ba19a": "0x15bdc60",
+    "0x15ba1c3": "0x5660110",
+    "0x1613e08": "0x15ba010"
+  },
+  "instruction_controls": {
+    "0x15ba01a": "4889fb488974241848895424200f57c00f114424284889742438488954244048c704240000000048c74424080100000048c744241000000000c6442448804889e6e8306d0000",
+    "0x15ba060": "49be01000000000000804c39330f84a3000000",
+    "0x15ba0bd": "488b442420488b4c24284839c1734a488b54241848f7d848ffc148be0026000001000000",
+    "0x15ba0f0": "0fb67c0aff4883ff20773f480fa3fe733948894c2428488d3c0848ffc748ffc14883ff0175da",
+    "0x15ba12c": "4889d84881c4d80000005b415ec3",
+    "0x15ba13a": "48c78424c0000000160000004889e7488db424c0000000e83aedffff488943084c8933",
+    "0x1613dfd": "488d7c24704889ee4c89f2e80362faff488b442470488d4b014839c80f8573020000"
+  },
+  "captured_binary_executed": false,
+  "limits": "One 440-byte wrapper and one selected caller edge. The full enclosing 14705-byte caller is decoded for boundaries, not recovered. Initial parser semantics, concrete response/result types, error enum name, cleanup helpers, all callers and whole-parser acceptance/equivalence are unproved. Tail model assumes a non-sentinel initial result and valid cursor <= length."
+}
