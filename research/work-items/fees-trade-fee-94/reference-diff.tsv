@@ -1,0 +1,12 @@
+verdict	reference	reference_says	bytes_say
+not found	l1/fees/compute.rs	side fields are read as inputs; no producer	perp 0x37130b0 and spot 0x3742460 compute them
+supported	l1/fees/compute.rs TradeSideFeeInfo	primary_recipient with a recipient and an amount	side +0x58 tag, +0x60 amount, +0x68 address are output +0x00, +0x08, +0x10: the referrer
+supported	l1/fees/compute.rs TradeSideFeeInfo	secondary_recipient with a recipient and an amount	side +0x80 tag, +0x88 amount, +0x90 address are output +0x28, +0x30, +0x38: the builder
+differs	l1/fees/compute.rs TradeSideFeeInfo	protocol_component at the third amount	that word is output +0x60, the excess of the previous rates over the current rates; the deployer and remainder words are +0x68 and +0x70
+differs	l1/exchange/handlers/55_start_fee_trial.rs FeeTrialRuntime	records_by_user is a BTreeMap	read from one hash table of 0xe8-byte buckets that also holds the referrer binding and the window map
+supported	l1/exchange/handlers/55_start_fee_trial.rs FeeTrialRecord	effective_rates, volume_anchor, requested_rates, previous_rates, trial_end_day, carried_discount_multiplier	row words +0x00, +0x20, +0x28, +0x48, +0x68 (u32), +0x70 in that order; requested rates at +0x28 are not read here
+supported	l1/exchange/handlers/55_start_fee_trial.rs resolve_volume_discount	last tier with min_volume_anchor <= anchor	the scan over ctx +0x38/+0x40 16-byte rows gives the same row
+differs	l1/exchange/handlers/55_start_fee_trial.rs FeeRates	the active flag is one bool	the row reader tests the low byte of the tag, the window helper compares the 32-bit word with 1
+differs	l1/exchange/handlers/55_start_fee_trial.rs FeeTrialDefaults	defaults carry volume_anchor and carried_discount_multiplier	the default row writes constants 0.0 and 1.0; ctx +0x68 and +0x70 are the discount and the fixed share
+supported	l1/exchange/handlers/25_set_referrer.rs UserReferrerBinding	user to referrer binding in an address hash table	flag at bucket end -0x1c, 20-byte referrer at bucket end -0x1b
+not found	references/can1357-hl/l1	no deployer split, no 0.5 cap, no 1e11 or 2.5e9 limit in a fee path	all three are in the bytes
