@@ -1039,7 +1039,9 @@ def check_caller_pins(binary, fdes):
 
 def check_quotient_reads(insns):
     """After the divide call the only memory reads are the numerator limbs through rbx."""
-    pos = next(i for i, ins in enumerate(insns) if ins[0] == CALL_DIV)
+    pos = next((i for i, ins in enumerate(insns) if ins[0] == CALL_DIV), None)
+    if pos is None:
+        raise EvidenceError(f'no instruction at {CALL_DIV:#x}')
     reads = [ins for ins in insns[pos + 1:] if ins[0] < CAP_INSN and any(op[0] == 'm' for op in ins[2])]
     checked(len(reads) == 4, 'unexpected reads after the divide call')
     checked(all(ins[2][1][2] == RBX for ins in reads), 'a read after the divide call is not through rbx')
