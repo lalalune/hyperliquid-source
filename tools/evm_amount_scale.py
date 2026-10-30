@@ -976,7 +976,9 @@ def check_constants(insns):
 
 def exponent_source(insns, site):
     """Describe how esi is set before one call site, from the caller's own instructions."""
-    pos = next(i for i, ins in enumerate(insns) if ins[0] == site)
+    pos = next((i for i, ins in enumerate(insns) if ins[0] == site), None)
+    if pos is None:
+        raise EvidenceError(f'no instruction at {site:#x}')
     for ins in reversed(insns[max(0, pos - 6):pos]):
         if ins[2] and ins[2][0] == ('r', RSI, 4):
             if ins[1] == 'mov' and ins[2][1][0] == 'i':
