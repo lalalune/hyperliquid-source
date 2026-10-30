@@ -1,0 +1,567 @@
+{
+  "argument_differences": 0,
+  "callers": [
+    {
+      "bytes_before": "31f6",
+      "flag": 0,
+      "function": "0x22297c0",
+      "site": "0x222a0f5"
+    },
+    {
+      "bytes_before": "be01000000",
+      "flag": 1,
+      "function": "0x23e7d10",
+      "site": "0x23e85e8"
+    }
+  ],
+  "cases": {
+    "cycle": 147,
+    "driver": 41
+  },
+  "constants": {
+    "elapsed_location": {
+      "line": 84,
+      "path": "l1/src/time.rs"
+    },
+    "f64": {
+      "0x20a448": -1e-15,
+      "0x20a730": 1.0,
+      "0x20a8a8": 10.0,
+      "0x20b080": 1e-15
+    },
+    "power_table": {
+      "entries_checked": 23,
+      "last": 1e+22,
+      "va": "0x3e0e90"
+    },
+    "reset_window_floor": 10.0,
+    "sample_default_seconds": 1.0,
+    "span_name": {
+      "text": "hyperliquidity_ensure_orders",
+      "va": "0x3ef968"
+    },
+    "span_options": "b81e85eb51b89e3f9a9999999999a93f",
+    "transfer_floor": 1000000000,
+    "user_literal": {
+      "first_16": "fefefefefefefefefefefefefefefefe",
+      "va": "0x206be0"
+    }
+  },
+  "cycle_outcomes": {
+    "balance short": 6,
+    "gates closed or no key": 23,
+    "order placed": 105,
+    "panic": 10,
+    "price conversion failed": 3
+  },
+  "edges": [
+    {
+      "end": "0x26e4611",
+      "meaning": "cancel a user's orders in one book",
+      "target": "0x26e4240"
+    },
+    {
+      "end": "0x26cca10",
+      "meaning": "place one order record",
+      "target": "0x26cc730"
+    },
+    {
+      "end": "0x230b841",
+      "meaning": "tick of a raw price",
+      "target": "0x230b590"
+    },
+    {
+      "end": "0x286b14d",
+      "meaning": "walk of the order result map",
+      "target": "0x286ada0"
+    },
+    {
+      "end": "0x1eada54",
+      "meaning": "drop of a conversion error",
+      "target": "0x1ead7f0"
+    },
+    {
+      "end": "0x2710110",
+      "meaning": "class transfer path, reference label",
+      "target": "0x270f6f0"
+    },
+    {
+      "end": "0x277ee04",
+      "meaning": "drop of a transfer error",
+      "target": "0x277eba0"
+    },
+    {
+      "end": "0x26cc72c",
+      "meaning": "hyperliquidity order step",
+      "target": "0x26cb280"
+    },
+    {
+      "end": "0x22297bb",
+      "meaning": "span wrapper around that step",
+      "target": "0x22293c0"
+    },
+    {
+      "end": "0x24fdd54",
+      "meaning": "event flush",
+      "target": "0x24fc8a0"
+    }
+  ],
+  "entry_map": [
+    {
+      "meaning": "decaying sum: sum * (1 - 1/window) + sample * seconds",
+      "offset": "0x0",
+      "type": "f64"
+    },
+    {
+      "meaning": "decaying weight: weight * (1 - 1/window) + seconds",
+      "offset": "0x8",
+      "type": "f64"
+    },
+    {
+      "meaning": "window; lifted to at least 10 only on reset",
+      "offset": "0x10",
+      "type": "f64"
+    },
+    {
+      "meaning": "samples since reset, saturating",
+      "offset": "0x18",
+      "type": "u64"
+    },
+    {
+      "meaning": "time of the last sample; a zero first word means none",
+      "offset": "0x20",
+      "type": "12 bytes"
+    },
+    {
+      "meaning": "spot pair and book index",
+      "offset": "0x30",
+      "type": "u64"
+    },
+    {
+      "meaning": "quote amount of one order",
+      "offset": "0x38",
+      "type": "u64"
+    },
+    {
+      "meaning": "price cap",
+      "offset": "0x40",
+      "type": "f64"
+    }
+  ],
+  "exchange_map": [
+    {
+      "meaning": "block time word, 12 bytes",
+      "offset": "0x60"
+    },
+    {
+      "meaning": "user map, `0x371b3a0` key",
+      "offset": "0x80"
+    },
+    {
+      "meaning": "spot metadata; pairs at +0x1f8 of the exchange, tokens at +0x210",
+      "offset": "0x90"
+    },
+    {
+      "meaning": "perp market array, stride 0x2f0, length at +0x5c8",
+      "offset": "0x5c0"
+    },
+    {
+      "meaning": "byte passed in esi to the cycle, which never reads it",
+      "offset": "0x8f2"
+    },
+    {
+      "meaning": "spot book vector, pointer at +8, length at +0x10, stride 0xd8",
+      "offset": "0x3380"
+    },
+    {
+      "meaning": "time bucket width in milliseconds",
+      "offset": "0x38d0"
+    },
+    {
+      "meaning": "last bucket seen",
+      "offset": "0x38d8"
+    },
+    {
+      "meaning": "config tree: root, height, length",
+      "offset": "0x3a00"
+    },
+    {
+      "meaning": "any nonzero byte skips the whole step",
+      "offset": "0x3ac8"
+    }
+  ],
+  "first_mismatch": "",
+  "functions": [
+    {
+      "end": "0x1e83e1f",
+      "instructions": 555,
+      "instructions_stepped": 539,
+      "role": "cycle",
+      "size": 2767,
+      "start": "0x1e83350"
+    },
+    {
+      "end": "0x26ff186",
+      "instructions": 250,
+      "instructions_stepped": 234,
+      "role": "driver",
+      "size": 1158,
+      "start": "0x26fed00"
+    },
+    {
+      "end": "0x2397ad3",
+      "instructions": 124,
+      "instructions_stepped": 69,
+      "role": "top of book reader, run real, not mutated",
+      "size": 531,
+      "start": "0x23978c0"
+    }
+  ],
+  "instructions_stepped": 73757,
+  "locations": [
+    {
+      "column": 47,
+      "line": 19,
+      "path": "l1/src/books.rs",
+      "slot": "0x56bb478"
+    },
+    {
+      "column": 47,
+      "line": 560,
+      "path": "library/alloc/src/collections/btree/navigate.rs",
+      "slot": "0x56905c8"
+    },
+    {
+      "column": 25,
+      "line": 565,
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x5690308"
+    },
+    {
+      "column": 33,
+      "line": 113,
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x56f21f0"
+    },
+    {
+      "column": 9,
+      "line": 984,
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x56f2258"
+    },
+    {
+      "column": 25,
+      "line": 565,
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x56f1fd8"
+    }
+  ],
+  "mismatches": 0,
+  "mutations": {
+    "killed": 277,
+    "survived": 25,
+    "unreached": 4
+  },
+  "nodes": {
+    "balance_tree": {
+      "edges": 368,
+      "keys": 8,
+      "length": 362,
+      "size": 464,
+      "stride": 24,
+      "values": 96
+    },
+    "config_tree": {
+      "capacity": 11,
+      "edges": 896,
+      "index": 888,
+      "keys": 8,
+      "length": 890,
+      "parent": 0,
+      "size": 992,
+      "value_stride": 72,
+      "values": 96
+    },
+    "side_tree": {
+      "edges": 456,
+      "index": 448,
+      "keys": 360,
+      "length": 450,
+      "parent": 352,
+      "size": 552
+    }
+  },
+  "pins": [
+    {
+      "bytes": "4c69f9d8000000",
+      "function": "0x1e83350",
+      "meaning": "imul r15, rcx, 0xd8: book stride",
+      "sites": [
+        "0x1e83669"
+      ]
+    },
+    {
+      "bytes": "fefefefe",
+      "function": "0x1e83350",
+      "meaning": "mov dword [..], 0xfefefefe: tail of the user literal, in the cancel, the lookup and the order",
+      "sites": [
+        "0x1e83696",
+        "0x1e83a4c",
+        "0x1e83c77"
+      ]
+    },
+    {
+      "bytes": "ba010000004c89d1",
+      "function": "0x1e83350",
+      "meaning": "mov edx, 1 then the cancel arguments: flag 1",
+      "sites": [
+        "0x1e836a2"
+      ]
+    },
+    {
+      "bytes": "41b902000000",
+      "function": "0x1e83350",
+      "meaning": "mov r9d, 2: cancel reason 2",
+      "sites": [
+        "0x1e836af"
+      ]
+    },
+    {
+      "bytes": "48b80100000054000000",
+      "function": "0x1e83350",
+      "meaning": "movabs rax, 0x5400000001: tag 1, line 84 of time.rs",
+      "sites": [
+        "0x1e837dc"
+      ]
+    },
+    {
+      "bytes": "6681bc24e00000008601",
+      "function": "0x1e83350",
+      "meaning": "cmp word [rsp+0xe0], 0x186: success status",
+      "sites": [
+        "0x1e83993"
+      ]
+    },
+    {
+      "bytes": "4869f028020000",
+      "function": "0x1e83350",
+      "meaning": "imul rsi, rax, 0x228: fill stride",
+      "sites": [
+        "0x1e83cc1"
+      ]
+    },
+    {
+      "bytes": "4869c9e8000000",
+      "function": "0x1e83350",
+      "meaning": "imul rcx, rcx, 0xe8: token stride, quote",
+      "sites": [
+        "0x1e8373f"
+      ]
+    },
+    {
+      "bytes": "4869d2e8000000",
+      "function": "0x1e83350",
+      "meaning": "imul rdx, rdx, 0xe8: token stride, base",
+      "sites": [
+        "0x1e8374b"
+      ]
+    },
+    {
+      "bytes": "80bfc83a000000",
+      "function": "0x26fed00",
+      "meaning": "cmp byte [rdi+0x3ac8], 0: gate",
+      "sites": [
+        "0x26fed11"
+      ]
+    },
+    {
+      "bytes": "4883bf103a000000",
+      "function": "0x26fed00",
+      "meaning": "cmp qword [rdi+0x3a10], 0: tree length",
+      "sites": [
+        "0x26fed23"
+      ]
+    },
+    {
+      "bytes": "482d00ca9a3b",
+      "function": "0x26fed00",
+      "meaning": "sub rax, 0x3b9aca00: balance floor",
+      "sites": [
+        "0x26fedaf"
+      ]
+    },
+    {
+      "bytes": "4981c4f0020000",
+      "function": "0x26fed00",
+      "meaning": "add r12, 0x2f0: market stride",
+      "sites": [
+        "0x26fedca"
+      ]
+    },
+    {
+      "bytes": "41b801000000",
+      "function": "0x26fed00",
+      "meaning": "mov r8d, 1: transfer flag, and the year arm",
+      "sites": [
+        "0x26fee2b",
+        "0x26fefb7"
+      ]
+    },
+    {
+      "bytes": "48c74424481c000000",
+      "function": "0x26fed00",
+      "meaning": "mov qword [rsp+0x48], 0x1c: span name length",
+      "sites": [
+        "0x26ff085"
+      ]
+    },
+    {
+      "bytes": "6681bc24a80000008601",
+      "function": "0x26fed00",
+      "meaning": "cmp word [rsp+0xa8], 0x186: success status",
+      "sites": [
+        "0x26fee3f"
+      ]
+    },
+    {
+      "bytes": "4180fe01",
+      "function": "0x22293c0",
+      "meaning": "cmp r14b, 1: the span runs its body only for flag 1",
+      "sites": [
+        "0x22293d6"
+      ]
+    }
+  ],
+  "record_map": [
+    {
+      "meaning": "1",
+      "offset": "0x0",
+      "size": 8
+    },
+    {
+      "meaning": "size: amount / limit, floored",
+      "offset": "0x8",
+      "size": 8
+    },
+    {
+      "meaning": "8, the dangling pointer of an empty vector; +0x30 and +0x40 are 0",
+      "offset": "0x38",
+      "size": 8
+    },
+    {
+      "meaning": "0, the first word `0x26cc730` tests",
+      "offset": "0x48",
+      "size": 8
+    },
+    {
+      "meaning": "limit price, raw",
+      "offset": "0x80",
+      "size": 8
+    },
+    {
+      "meaning": "time in milliseconds, clamped at 0",
+      "offset": "0x88",
+      "size": 8
+    },
+    {
+      "meaning": "0, side byte and the byte tested at `0x26cc7ca`",
+      "offset": "0x90",
+      "size": 2
+    },
+    {
+      "meaning": "0",
+      "offset": "0xa2",
+      "size": 1
+    },
+    {
+      "meaning": "user 0xfe * 20",
+      "offset": "0xb8",
+      "size": 20
+    },
+    {
+      "meaning": "0, the byte the mid-price builders set to 1 or 4",
+      "offset": "0xcc",
+      "size": 1
+    }
+  ],
+  "reference_claims": [
+    {
+      "bytes": "the factor is 1 - 1/window and does not depend on elapsed; elapsed is added as a weight; there is no clamp; elapsed above the window resets the state and drops the sample",
+      "claim": "`0x1E83350` is ImpactState::observe: alpha = (elapsed / window).clamp(0, 1), sum and weight blended by alpha, elapsed in seconds",
+      "reference": "l1/books.rs:984-997"
+    },
+    {
+      "bytes": "agrees, but the reset arm is reached only by elapsed above the window, and the window is not lifted on an update",
+      "claim": "reset clamps the window to at least 10 and clears last_update_ms",
+      "reference": "l1/books.rs:976-982"
+    },
+    {
+      "bytes": "the floor is `1e-15 > weight` skips, so a weight of exactly 1e-15 passes; the sum also has a negative floor the reference does not have",
+      "claim": "normalized returns sum / weight when weight > 1e-15",
+      "reference": "l1/books.rs:999-1001"
+    },
+    {
+      "bytes": "the function walks a config tree, cancels and places orders for one user; none of this is in the reference, and neither is the 0xfe literal or the span name",
+      "claim": "impact notional from a sample",
+      "reference": "l1/books.rs (the function around the label)"
+    },
+    {
+      "bytes": "taken as a lead only: the driver passes it a market id, the user, 1 and the amount; its body is not evaluated here",
+      "claim": "`0x270F6F0` is the shared class transfer path",
+      "reference": "l1/exchange/handlers/59_system_usd_class_transfer.rs:93"
+    }
+  ],
+  "slots": {
+    "0x576dfc8": {
+      "meaning": "index bounds panic",
+      "target": "0x157b64f"
+    },
+    "0x576e150": {
+      "meaning": "subtract overflow panic",
+      "target": "0x157b520"
+    },
+    "0x576e470": {
+      "meaning": "panic with Location",
+      "target": "0x157a9f0"
+    },
+    "0x576e8c0": {
+      "meaning": "elapsed seconds",
+      "target": "0x1447130"
+    },
+    "0x5773170": {
+      "meaning": "user map lookup",
+      "target": "0x371b3a0"
+    },
+    "0x57731f0": {
+      "meaning": "f64 price to raw price",
+      "target": "0x375e190"
+    },
+    "0x5774660": {
+      "meaning": "movable amount of a user in one market, stubbed",
+      "target": "0x36f7560"
+    }
+  },
+  "strides": {
+    "book": 216,
+    "fill": 552,
+    "market": 752,
+    "pair": 32,
+    "token": 232
+  },
+  "target": {
+    "file": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "worked_example": {
+    "mean_after": 1410.6466165413533,
+    "reference_sum": 211.99999999999997,
+    "reference_weight": 1.9166666666666665,
+    "sample": 2500.0,
+    "seconds": 2.5,
+    "sum_after": 6253.866666666667,
+    "sum_before": 4.0,
+    "weight_after": 4.433333333333334,
+    "weight_before": 2.0,
+    "window": 30.0
+  }
+}
