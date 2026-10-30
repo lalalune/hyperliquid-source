@@ -1,0 +1,70 @@
+case	outcome	value_tag_or_location
+native flag zero	tag	0xfb
+native flag two	tag	0xfb
+flag beats a bad native id	tag	0xfb
+no tree, one price of token 1	ok	0xf4240
+tree holds native only	ok	0xf4240
+tree holds quote only	ok	0x7724
+tree holds both	ok	0x938f6946b
+tree empty leaf	ok	0xf4240
+tree with 30 keys, hit in a child	ok	0x3d0900
+tree with 30 keys, hit in the root	ok	0x28b0b
+tree with 30 keys, miss	ok	0xf4240
+key just above the last leaf key	ok	0xf4240
+key equals a stale slot	ok	0xf4240
+native id out of range, not in tree	panic	0x56f21f0
+no tokens	panic	0x56f21f0
+native sz above token 0 wei	panic	0x56f2258
+native one price power 19	ok	0x1
+native one price power 20	panic	0x56f2240
+native one price power 32	panic	0x56f2240
+native one price power 48	panic	0x56f2240
+product over the limit	tag	0x13f
+product at the limit	ok	0x8000000000000000
+product one above the limit	tag	0x13f
+product wraps	tag	0x13f
+product wraps to a small value	tag	0x13f
+product beats a bad pair	tag	0x13f
+pair index out of range	bounds	0x56bb188
+pair index in range	ok	0xf4240
+quote zero uses divisor one	ok	0xf4240
+quote zero with a tree entry	ok	0x895440
+quote id out of range, no tree	panic	0x56f21f0
+quote id out of range, in tree	panic	0x56f21f0
+quote wei below sz, in tree	panic	0x56f2270
+quote wei minus sz 19	ok	0x0
+quote wei minus sz 20	panic	0x56f2270
+quote divide floors	ok	0x0
+native id out of range, in tree	panic	0x56f21f0
+native id out of range, overflow path	panic	0x56f21f0
+native id out of range, 32-bit divide	panic	0x56f21f0
+native wei below sz, in tree	panic	0x56f2270
+quote price zero	ok	0x0
+gate one below	ok	0x28f5d
+gate exact	ok	0x147af
+gate one above	ok	0x147af
+gate keeps the product	ok	0x147b
+wide product, quotient stays below the gate	ok	0x7
+wide product, quotient at the gate	ok	0x20000
+wide product, second multiply overflows	ok	0x20000
+wide product, quote zero	ok	0x1
+wide product, product just above 2^32	ok	0x1
+wide product, small words divide	ok	0x28f5d
+exact amount needs no ceiling	ok	0xfa0
+ceiling adds one	ok	0xfa1
+amount at 2^64 - 1	ok	0x1
+amount high word set	tag	0xb2
+amount just below 2^64	ok	0xffffffffffffffff
+ceiling carries into the high word	tag	0xb2
+ceiling carry beats a bad factor word	tag	0xb2
+factor zero	ok	0x0
+factor one	ok	0x0
+factor 1.0	ok	0xf4240
+factor at the limit	ok	0xf6950
+factor one above the limit	tag	0xb2
+factor top word	tag	0xb2
+factor bit 31	tag	0xb2
+amount above 2^53 rounds	ok	0x20000000000000
+amount 2^63 at 1.0	ok	0x8000000000000000
+amount near 2^64 at 1.01	ok	0xffffffffffffffff
+high bits of the amount at 1.0	ok	0xffffffffffffffff
