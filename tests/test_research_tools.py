@@ -87,6 +87,32 @@ class CatalogueTests(unittest.TestCase):
         d = copy.deepcopy(self.progress); del d['components']['visor']
         with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
 
+    def test_boolean_match_count_rejected(self):
+        d = copy.deepcopy(self.progress)
+        d['components']['orderbook']['raw_equal_bodies'] = True
+        with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
+
+    def test_fractional_match_count_rejected(self):
+        d = copy.deepcopy(self.progress)
+        row = d['components']['orderbook']
+        row['raw_equal_bodies'] = 1.5; row['total_function_windows'] = 3
+        with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
+
+    def test_boolean_denominator_rejected(self):
+        d = copy.deepcopy(self.progress)
+        row = d['components']['orderbook']
+        row['raw_equal_bodies'] = 1; row['total_function_windows'] = True
+        with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
+
+    def test_duplicate_component_rejected(self):
+        parts = self.parts + [copy.deepcopy(self.parts[0])]
+        with self.assertRaises(ValueError): validate_progress(parts, self.progress, self.root)
+
+    def test_missing_progress_field_rejected(self):
+        d = copy.deepcopy(self.progress)
+        del d['components']['orderbook']['raw_equal_bodies']
+        with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
+
 
 class VisorIndexTests(unittest.TestCase):
     def test_target_for_maps_nodes_and_visor(self):

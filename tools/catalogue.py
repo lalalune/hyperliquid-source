@@ -19,19 +19,27 @@ def owner(path, components):
 
 
 def validate_progress(components, progress, root):
-    ids = {c['id'] for c in components}
+    ids = [c['id'] for c in components]
+    if len(set(ids)) != len(ids):
+        raise ValueError('Duplicate component id')
+    ids = set(ids)
     if set(progress['components']) != ids:
         raise ValueError('Progress components differ from scope')
     for c in components:
         if not set(c['depends_on']) <= ids:
             raise ValueError('Unknown dependency')
         row = progress['components'][c['id']]
+        if not {'gates', 'raw_equal_bodies', 'normalized_only_bodies',
+                'total_function_windows', 'evidence'} <= set(row):
+            raise ValueError('Invalid progress record')
         if set(row['gates']) != set(progress['gates']) or any(type(v) is not bool for v in row['gates'].values()):
             raise ValueError('Invalid acceptance gate record')
+        if any(type(row[k]) is not int for k in ('raw_equal_bodies', 'normalized_only_bodies')):
+            raise ValueError('Invalid match count')
         if row['raw_equal_bodies'] < 0 or row['normalized_only_bodies'] < 0:
             raise ValueError('Negative match count')
         total = row['total_function_windows']
-        if total is not None and (total < 0 or row['raw_equal_bodies'] + row['normalized_only_bodies'] > total):
+        if total is not None and (type(total) is not int or total < 0 or row['raw_equal_bodies'] + row['normalized_only_bodies'] > total):
             raise ValueError('Invalid match denominator')
         if any(row['gates'].values()) and not row['evidence']:
             raise ValueError('Completed gates require reviewed evidence records')
