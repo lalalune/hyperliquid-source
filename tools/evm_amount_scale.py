@@ -170,11 +170,15 @@ class Image:
 def uleb(buf, i):
     val = shift = 0
     while True:
+        if i >= len(buf) or shift > 63:
+            raise EvidenceError('Truncated or oversized ULEB128')
         b = buf[i]
         i += 1
         val |= (b & 0x7f) << shift
         shift += 7
         if b < 0x80:
+            if val >= 1 << 64:
+                raise EvidenceError('ULEB128 value exceeds 64 bits')
             return val, i
 
 
