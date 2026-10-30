@@ -61,6 +61,10 @@ def analyze(data, records, objdump=None):
     secs = sections(data)
     named = {s['name']:s for s in secs}
 
+    def section(name):
+        require(name in named, f'Missing section {name}')
+        return named[name]
+
     def read(va, size):
         matches = [s for s in secs if s['type'] != 8 and s['address'] <= va
                    and va+size <= s['address']+s['size']]
@@ -101,7 +105,7 @@ def analyze(data, records, objdump=None):
     require(0x14509ba+7+struct.unpack('<i',read(0x14509bd,4))[0] == 0x1e1152, 'Format reference changed')
     message = b'from_unix_millis: out-of-range input '
     require(read(0x1e1153,len(message)) == message, 'Error message changed')
-    rel = named['.rela.dyn']; raw = read(rel['address'],rel['size'])
+    rel = section('.rela.dyn'); raw = read(rel['address'],rel['size'])
     require(len(raw)%24 == 0, 'Truncated relocations')
     rels = {address:(info,addend) for address,info,addend in struct.iter_unpack('<QQq',raw)}
     for address,target in records['relative_slots'].items():
