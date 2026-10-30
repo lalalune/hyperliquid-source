@@ -1,0 +1,83 @@
+{
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "target_bytes": 91774280,
+  "component_id": "RE-007",
+  "subsystem": "l1/clearinghouse/margin_table",
+  "source_file": {
+    "va": "0x1fc39b",
+    "path": "/home/ubuntu/hl/code_Mainnet/l1/src/clearinghouse/margin_table.rs",
+    "len": 65
+  },
+  "ranges": {
+    "max_leverage_for_position": {
+      "start_va": "0x3333580",
+      "end_va": "0x333366e",
+      "file_offset": "0x3332580",
+      "bytes": 238,
+      "sha256": "70a264b0719c28fec54a5c7aab0d8d50c133795abf14ef1ec43a17938616bb1e",
+      "inferred_role": "position leverage lookup with empty-tier fallback (50x, 0x32)"
+    },
+    "margin_after_tier_offset_div_6x_leverage": {
+      "start_va": "0x3333670",
+      "end_va": "0x33337f9",
+      "file_offset": "0x3332670",
+      "bytes": 393,
+      "sha256": "3c931bafcdd34ed228728e61b2c7fc1e1a21b66ffe554d8a4c87bde083ba82f9",
+      "inferred_role": "tier offset margin calculation: (2 * notional - 4 * leverage * prior_contrib) / (6 * leverage)"
+    },
+    "ntl_div_2x_leverage_minus_prior_contribution": {
+      "start_va": "0x3333800",
+      "end_va": "0x3333915",
+      "file_offset": "0x3332800",
+      "bytes": 277,
+      "sha256": "2774ef152d00b90e6d846604c65ada3efc7d58de4865338d84c49235e33e79f8",
+      "inferred_role": "mode-2 tier contribution: notional / (2 * leverage) - prior_contrib (saturating sub)"
+    }
+  },
+  "relocations": [
+    {
+      "slot_va": "0x5775998",
+      "info": "0x8",
+      "addend": "0x3333580",
+      "target_role": "max_leverage_for_position"
+    },
+    {
+      "slot_va": "0x57759a0",
+      "info": "0x8",
+      "addend": "0x3333670",
+      "target_role": "margin_after_tier_offset_div_6x_leverage"
+    },
+    {
+      "slot_va": "0x57746e8",
+      "info": "0x8",
+      "addend": "0x3333800",
+      "target_role": "ntl_div_2x_leverage_minus_prior_contribution"
+    }
+  ],
+  "panic_locations": [
+    {
+      "record_va": "0x56e9b40",
+      "path_va": "0x1fc39b",
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/clearinghouse/margin_table.rs",
+      "line": 107,
+      "column": 105,
+      "caller_sites": [
+        "0x33337a9",
+        "0x3333906"
+      ]
+    },
+    {
+      "record_va": "0x56e9b58",
+      "path_va": "0x1fc39b",
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/clearinghouse/margin_table.rs",
+      "line": 101,
+      "column": 57,
+      "caller_sites": [
+        "0x370c06f"
+      ]
+    }
+  ],
+  "captured_binary_executed": false,
+  "live_network_executed": false,
+  "limits": "Three exact margin table calculation routines and panic location references only. No full liquidation engine, order execution, position state solver, cross-margin graph, node #115 or visor claims."
+}
