@@ -199,7 +199,10 @@ def first_party_locations(elf, relocs):
     for slot, a in relocs.items():
         if not (drr_va <= slot < drr_va + drr_size and ro_va <= a < ro_va + ro_size):
             continue
-        ln, line, col = struct.unpack_from("<QII", elf.read(slot + 8, 16))
+        buf = elf.read(slot + 8, 16)
+        if len(buf) < 16:
+            raise EvidenceError("location record truncated")
+        ln, line, col = struct.unpack_from("<QII", buf)
         if not 0 < ln < 256 or line == 0 or col == 0:
             continue
         s = elf.read(a, ln)
