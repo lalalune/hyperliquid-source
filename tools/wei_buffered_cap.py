@@ -100,12 +100,18 @@ class Image:
         o = self.off(va, size)
         return self.data[o:o + size]
 
+    def section(self, name):
+        try:
+            return self.sec[name]
+        except KeyError:
+            raise EvidenceError(f'missing required section {name}') from None
+
     def text(self):
-        addr, off, size = self.sec['.text']
+        addr, off, size = self.section('.text')
         return addr, self.data[off:off + size]
 
     def relative_relocs(self):
-        _, off, size = self.sec['.rela.dyn']
+        _, off, size = self.section('.rela.dyn')
         return {where: addend for where, info, addend in
                 struct.iter_unpack('<QQq', self.data[off:off + size]) if info & 0xffffffff == 8}
 
@@ -136,7 +142,7 @@ class Fdes:
 
     def __init__(self, img):
         self.img = img
-        hdr = img.sec['.eh_frame_hdr'][0]
+        hdr = img.section('.eh_frame_hdr')[0]
         version, ptr_enc, cnt_enc, tbl_enc = img.read(hdr, 4)
         if (version, cnt_enc, tbl_enc) != (1, 0x03, 0x3b):
             raise EvidenceError('unexpected .eh_frame_hdr encodings')
@@ -576,7 +582,7 @@ LEA_RIP_RE = re.compile(rb'[\x48\x4c]\x8d[\x05\x0d\x15\x1d\x25\x2d\x35\x3d]....'
 
 
 def find_constant(img, value):
-    addr, off, size = img.sec['.rodata']
+    addr, off, size = img.section('.rodata')
     ro = img.data[off:off + size]
     needle = struct.pack('<d', value)
     hits = [m.start() for m in re.finditer(re.escape(needle), ro)]

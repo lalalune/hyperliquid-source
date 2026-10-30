@@ -1,0 +1,96 @@
+"""Missing required sections must fail closed in wei_buffered_cap.
+
+Image.text(), Image.relative_relocs(), Fdes.__init__ and
+find_constant() are all on the analyse() path, so each genuinely
+requires its section (.text, .rela.dyn, .eh_frame_hdr and .rodata
+respectively). On base they are bare dict lookups, so an ELF without
+one of them escapes main()'s EvidenceError-only handler as a KeyError
+traceback instead of a clean rejection.
+"""
+import struct
+import sys
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / 'tools'))
+import wei_buffered_cap as wbc
+
+
+def synthetic_elf(contents):
+    """Minimal ELF64-LE with the given PROGBITS sections (name -> bytes)."""
+    names = list(contents)
+    shstr = b'\x00' + b''.join(n.encode() + b'\x00' for n in names) + b'.shstrtab\x00'
+    offsets = {}
+    pos = 1
+    for name in names:
+        offsets[name] = pos
+        pos += len(name) + 1
+    shstrtab_name = pos
+    ehsize, shentsize = 64, 64
+    body = b''
+    file_offsets = {}
+    for name in names:
+        file_offsets[name] = ehsize + len(body)
+        body += contents[name]
+    shoff = ehsize + len(body) + len(shstr)
+
+    def sh(name, typ, flags, addr, off, size):
+        return struct.pack('<IIQQQQIIQQ', name, typ, flags, addr, off, size, 0, 0, 1, 0)
+
+    headers = [sh(0, 0, 0, 0, 0, 0)]
+    addr = 0x400000
+    for name in names:
+        headers.append(sh(offsets[name], 1, 6, addr, file_offsets[name], len(contents[name])))
+        addr += 0x1000
+    headers.append(sh(shstrtab_name, 3, 0, 0, ehsize + len(body), len(shstr)))
+    ehdr = bytearray(64)
+    ehdr[0:6] = b'\x7fELF\x02\x01'
+    struct.pack_into('<Q', ehdr, 0x28, shoff)
+    struct.pack_into('<HHH', ehdr, 0x3a, shentsize, len(headers), len(headers) - 1)
+    return bytes(ehdr) + body + shstr + b''.join(headers)
+
+
+BASE = {'.text': b'\x90' * 16, '.rela.dyn': b'\x00' * 24,
+        '.eh_frame_hdr': b'\x00' * 16, '.rodata': b'\x00' * 32}
+
+
+def without(name):
+    return {k: v for k, v in BASE.items() if k != name}
+
+
+class MissingSectionTests(unittest.TestCase):
+    def test_missing_text_is_evidence_error(self):
+        img = wbc.Image(synthetic_elf(without('.text')))
+        with self.assertRaises(wbc.EvidenceError):
+            img.text()
+
+    def test_missing_rela_dyn_is_evidence_error(self):
+        img = wbc.Image(synthetic_elf(without('.rela.dyn')))
+        with self.assertRaises(wbc.EvidenceError):
+            img.relative_relocs()
+
+    def test_missing_eh_frame_hdr_is_evidence_error(self):
+        img = wbc.Image(synthetic_elf(without('.eh_frame_hdr')))
+        with self.assertRaises(wbc.EvidenceError):
+            wbc.Fdes(img)
+
+    def test_missing_rodata_is_evidence_error(self):
+        img = wbc.Image(synthetic_elf(without('.rodata')))
+        with self.assertRaises(wbc.EvidenceError):
+            wbc.find_constant(img, 1.001)
+
+    def test_present_sections_unchanged(self):
+        img = wbc.Image(synthetic_elf(BASE))
+        self.assertEqual(img.section('.text'), (0x400000, 64, 16))
+        self.assertEqual(img.text()[1][:4], b'\x90' * 4)
+
+    def test_section_accessor_names_the_missing_section(self):
+        img = wbc.Image(synthetic_elf(without('.rodata')))
+        with self.assertRaises(wbc.EvidenceError) as ctx:
+            img.section('.rodata')
+        self.assertIn('.rodata', str(ctx.exception))
+
+
+if __name__ == '__main__':
+    unittest.main()
