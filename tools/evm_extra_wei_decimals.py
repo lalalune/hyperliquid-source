@@ -67,7 +67,9 @@ def sections(data):
     raw = [struct.unpack_from('<IIQQQQIIQQ', data, shoff + i * shentsize) for i in range(shnum)]
     stroff = raw[shstrndx][4]
     out = {}
-    for name, _typ, _flags, addr, off, size, *_ in raw:
+    for name, typ, _flags, addr, off, size, *_ in raw:
+        if typ == 8:  # SHT_NOBITS occupies no file bytes; mapping its VAs would
+            continue  # return unrelated file bytes as if they lived there.
         end = data.index(b'\0', stroff + name)
         out[data[stroff + name:end].decode()] = (addr, off, size)
     return out
