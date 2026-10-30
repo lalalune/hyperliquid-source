@@ -1,0 +1,621 @@
+{
+  "byte_pins": [
+    {
+      "bytes": "483d81c3c901",
+      "meaning": "perp: remainder notional compared with 30000001 (cmp rax, setae)",
+      "va": "0x4339c2b"
+    },
+    {
+      "bytes": "4881fd001bb700",
+      "meaning": "perp: limit price compared with 12000000",
+      "va": "0x4339c3c"
+    },
+    {
+      "bytes": "b8001bb700",
+      "meaning": "perp: 12000000 is the dividend of the floor size",
+      "va": "0x4339c45"
+    },
+    {
+      "bytes": "ba005ed0b2",
+      "meaning": "spot: remainder notional limit 3000000000",
+      "va": "0x4337273"
+    },
+    {
+      "bytes": "4881fd008c8647",
+      "meaning": "spot: limit price compared with 1200000000",
+      "va": "0x4337286"
+    },
+    {
+      "bytes": "b8008c8647",
+      "meaning": "spot: 1200000000 is the dividend of the floor size",
+      "va": "0x433728f"
+    },
+    {
+      "bytes": "ba03000000",
+      "meaning": "perp: the slice cap multiplies the even size by 3",
+      "va": "0x4339cd8"
+    },
+    {
+      "bytes": "ba03000000",
+      "meaning": "spot: the slice cap multiplies the even size by 3",
+      "va": "0x4337322"
+    },
+    {
+      "bytes": "c4e2f1a9c2c3",
+      "meaning": "fma target: vfmadd213sd xmm0, xmm1, xmm2 then ret",
+      "va": "0x565fd20"
+    },
+    {
+      "bytes": "c4e3f96bc210c3",
+      "meaning": "second fma target: four-operand FMA4 form then ret",
+      "va": "0x565fd30"
+    },
+    {
+      "bytes": "48890576851200",
+      "meaning": "the resolver stores the chosen target in the pointer at 0x57882e8",
+      "va": "0x565fd6b"
+    },
+    {
+      "bytes": "488b051d8a1200",
+      "meaning": "the wrapper loads that pointer",
+      "va": "0x565f8c4"
+    }
+  ],
+  "cases": {
+    "advance": 122,
+    "drain": 69,
+    "heap": 96,
+    "slice_perp": 280,
+    "slice_spot": 264
+  },
+  "constants": {
+    "book_stride": "0xd8",
+    "book_top_field": "0x80",
+    "catch_up_multiple": 3,
+    "divisor": 10000,
+    "finish_word": "0x8000000000000002",
+    "heap_entry": "0x28",
+    "jitter_modulus": 40,
+    "market_stride": "0x2f0",
+    "record_size": {
+      "perp": "0x278",
+      "spot": "0x268"
+    },
+    "record_tag": 4,
+    "row": "0x20",
+    "significant_figures": 5,
+    "slice_record": "0x70",
+    "step_seconds": 30,
+    "thresholds": {
+      "perp": {
+        "floor": 12000000,
+        "whole": 30000000
+      },
+      "spot": {
+        "floor": 1200000000,
+        "whole": 3000000000
+      }
+    }
+  },
+  "copies": [
+    {
+      "advance": "0x42eef80",
+      "collect": "0x47f7fd0",
+      "count": "0x1048",
+      "drain": "0x42f1500",
+      "family": "perp",
+      "markets": "0x1040",
+      "slice": "0x4339480"
+    },
+    {
+      "advance": "0x42f0af0",
+      "collect": "0x47f7520",
+      "count": "0x5c8",
+      "drain": "0x42f18c0",
+      "family": "perp",
+      "markets": "0x5c0",
+      "slice": "0x4338210"
+    },
+    {
+      "advance": "0x42f0240",
+      "collect": "0x47f6c30",
+      "drain": "0x42f2040",
+      "family": "spot",
+      "slice": "0x4336b90"
+    },
+    {
+      "advance": "0x42ef990",
+      "collect": "0x47f5c90",
+      "drain": "0x42f1c80",
+      "family": "spot",
+      "slice": "0x43377c0"
+    }
+  ],
+  "drain_copy_differences": 3,
+  "first_mismatch": "",
+  "float_constants": {
+    "buckets_divisor_60": 60.0,
+    "buy_factor": 1.03,
+    "jitter_divisor": 100.0,
+    "jitter_offset": -0.2,
+    "sell_factor": 0.97,
+    "step_30": 30.0
+  },
+  "functions": [
+    {
+      "end": "0x42f18bd",
+      "instructions": 212,
+      "instructions_stepped": 195,
+      "role": "drain",
+      "size": 957,
+      "start": "0x42f1500"
+    },
+    {
+      "end": "0x42f1c7d",
+      "instructions": 212,
+      "instructions_stepped": 195,
+      "role": "drain",
+      "size": 957,
+      "start": "0x42f18c0"
+    },
+    {
+      "end": "0x42f23fd",
+      "instructions": 212,
+      "instructions_stepped": 195,
+      "role": "drain",
+      "size": 957,
+      "start": "0x42f2040"
+    },
+    {
+      "end": "0x42f203d",
+      "instructions": 212,
+      "instructions_stepped": 195,
+      "role": "drain",
+      "size": 957,
+      "start": "0x42f1c80"
+    },
+    {
+      "end": "0x4339fdd",
+      "instructions": 642,
+      "instructions_stepped": 624,
+      "role": "slice",
+      "size": 2909,
+      "start": "0x4339480"
+    },
+    {
+      "end": "0x4338d6d",
+      "instructions": 642,
+      "instructions_stepped": 624,
+      "role": "slice",
+      "size": 2909,
+      "start": "0x4338210"
+    },
+    {
+      "end": "0x43375d1",
+      "instructions": 593,
+      "instructions_stepped": 579,
+      "role": "slice",
+      "size": 2625,
+      "start": "0x4336b90"
+    },
+    {
+      "end": "0x4338201",
+      "instructions": 593,
+      "instructions_stepped": 579,
+      "role": "slice",
+      "size": 2625,
+      "start": "0x43377c0"
+    },
+    {
+      "end": "0x42ef98e",
+      "instructions": 489,
+      "instructions_stepped": 470,
+      "role": "advance",
+      "size": 2574,
+      "start": "0x42eef80"
+    },
+    {
+      "end": "0x42f14fe",
+      "instructions": 489,
+      "instructions_stepped": 470,
+      "role": "advance",
+      "size": 2574,
+      "start": "0x42f0af0"
+    },
+    {
+      "end": "0x42f0aef",
+      "instructions": 444,
+      "instructions_stepped": 431,
+      "role": "advance",
+      "size": 2223,
+      "start": "0x42f0240"
+    },
+    {
+      "end": "0x42f023f",
+      "instructions": 444,
+      "instructions_stepped": 431,
+      "role": "advance",
+      "size": 2223,
+      "start": "0x42ef990"
+    },
+    {
+      "end": "0x44c1abd",
+      "instructions": 125,
+      "instructions_stepped": 120,
+      "role": "heap push",
+      "size": 445,
+      "start": "0x44c1900"
+    },
+    {
+      "end": "0x44c13f4",
+      "instructions": 265,
+      "instructions_stepped": 261,
+      "role": "heap pop",
+      "size": 1044,
+      "start": "0x44c0fe0"
+    },
+    {
+      "end": "0x565f481",
+      "instructions": 0,
+      "instructions_stepped": 0,
+      "role": "round",
+      "size": 113,
+      "start": "0x565f410"
+    },
+    {
+      "end": "0x565f6e7",
+      "instructions": 0,
+      "instructions_stepped": 0,
+      "role": "ceil",
+      "size": 119,
+      "start": "0x565f670"
+    },
+    {
+      "end": "0x565f784",
+      "instructions": 0,
+      "instructions_stepped": 0,
+      "role": "floor",
+      "size": 148,
+      "start": "0x565f6f0"
+    }
+  ],
+  "heap_entry_map": [
+    {
+      "meaning": "order id",
+      "offset": "0x0",
+      "size": 8
+    },
+    {
+      "meaning": "due time",
+      "offset": "0x8",
+      "size": 12
+    },
+    {
+      "meaning": "user",
+      "offset": "0x14",
+      "size": 20
+    }
+  ],
+  "instructions_stepped": 1548965,
+  "locations": [
+    {
+      "column": 29,
+      "line": 11,
+      "path": "l1/src/dex_registry/clearinghouses.rs",
+      "slot": "0x56e9ae0"
+    },
+    {
+      "column": 16,
+      "line": 14,
+      "path": "l1/src/books.rs",
+      "slot": "0x56dfda8"
+    },
+    {
+      "column": 1,
+      "line": 9,
+      "path": "l1/src/qtys/impl_sz.rs",
+      "slot": "0x571c990"
+    },
+    {
+      "column": 13,
+      "line": 89,
+      "path": "base/src/duration.rs",
+      "slot": "0x566adf8"
+    },
+    {
+      "column": 13,
+      "line": 112,
+      "path": "base/src/duration.rs",
+      "slot": "0x566ab58"
+    },
+    {
+      "column": 38,
+      "line": 1631,
+      "path": "chrono-0.4.38/src/naive/datetime/mod.rs",
+      "slot": "0x566af18"
+    }
+  ],
+  "mismatches": 0,
+  "mutations": {
+    "killed": 904,
+    "survived": 90,
+    "unreached": 8
+  },
+  "order_map": [
+    {
+      "meaning": "asset, packed as dex * 10000 + local",
+      "offset": "0x0",
+      "size": 8
+    },
+    {
+      "meaning": "total size",
+      "offset": "0x8",
+      "size": 8
+    },
+    {
+      "meaning": "duration in seconds, f64",
+      "offset": "0x10",
+      "size": 8
+    },
+    {
+      "meaning": "side: 0 takes the 1.03 price and floors to a tick, nonzero takes 0.97 and adds a tick",
+      "offset": "0x20",
+      "size": 1
+    },
+    {
+      "meaning": "copied to the slice at +0x31",
+      "offset": "0x21",
+      "size": 1
+    },
+    {
+      "meaning": "nonzero turns on the time jitter",
+      "offset": "0x22",
+      "size": 1
+    },
+    {
+      "meaning": "executed size",
+      "offset": "0x28",
+      "size": 8
+    },
+    {
+      "meaning": "step counter, saturating",
+      "offset": "0x38",
+      "size": 8
+    },
+    {
+      "meaning": "next due time, date word then seconds then nanos",
+      "offset": "0x40",
+      "size": 12
+    },
+    {
+      "meaning": "user, which is what the slice and the reschedule use",
+      "offset": "0x4c",
+      "size": 20
+    }
+  ],
+  "other_advance_callers": [
+    "0x42ed300",
+    "0x42ee6e0",
+    "0x42eca60",
+    "0x42edcf0"
+  ],
+  "outcomes": {
+    "advance failed removal": 8,
+    "advance finish": 240,
+    "advance nothing": 16,
+    "advance panic": 32,
+    "advance requeue": 192,
+    "drain with rows": 84,
+    "drain without rows": 192,
+    "slice perp none": 14,
+    "slice perp order": 434,
+    "slice perp panic": 14,
+    "slice perp reschedule": 98,
+    "slice spot none": 14,
+    "slice spot order": 448,
+    "slice spot panic": 6,
+    "slice spot reschedule": 60
+  },
+  "pairing": [
+    {
+      "from": "0x42f1500",
+      "sites": [
+        "0x42f187d"
+      ],
+      "to": "0x47f7fd0"
+    },
+    {
+      "from": "0x47f7fd0",
+      "sites": [
+        "0x47f803d",
+        "0x47f821e"
+      ],
+      "to": "0x4339480"
+    },
+    {
+      "from": "0x4339480",
+      "sites": [
+        "0x4339f4c"
+      ],
+      "to": "0x42eef80"
+    },
+    {
+      "from": "0x42f18c0",
+      "sites": [
+        "0x42f1c3d"
+      ],
+      "to": "0x47f7520"
+    },
+    {
+      "from": "0x47f7520",
+      "sites": [
+        "0x47f758d",
+        "0x47f776e"
+      ],
+      "to": "0x4338210"
+    },
+    {
+      "from": "0x4338210",
+      "sites": [
+        "0x4338cdc"
+      ],
+      "to": "0x42f0af0"
+    },
+    {
+      "from": "0x42f2040",
+      "sites": [
+        "0x42f23bd"
+      ],
+      "to": "0x47f6c30"
+    },
+    {
+      "from": "0x47f6c30",
+      "sites": [
+        "0x47f6c9d",
+        "0x47f6e7e"
+      ],
+      "to": "0x4336b90"
+    },
+    {
+      "from": "0x4336b90",
+      "sites": [
+        "0x43375a2"
+      ],
+      "to": "0x42f0240"
+    },
+    {
+      "from": "0x42f1c80",
+      "sites": [
+        "0x42f1ffd"
+      ],
+      "to": "0x47f5c90"
+    },
+    {
+      "from": "0x47f5c90",
+      "sites": [
+        "0x47f5cfd",
+        "0x47f5ede"
+      ],
+      "to": "0x43377c0"
+    },
+    {
+      "from": "0x43377c0",
+      "sites": [
+        "0x43381d2"
+      ],
+      "to": "0x42ef990"
+    }
+  ],
+  "reference_claims": [
+    {
+      "bytes": "agrees: the constants at 0x20a1a0 and 0x20abf8 are 30.0 and 60.0",
+      "claim": "TWAP step is 30 s and the retry bucket 60 s",
+      "reference": "l1/time.rs:10-12"
+    },
+    {
+      "bytes": "agrees, and the same count is the slice denominator, not only a retry limit",
+      "claim": "the limit is 2 * (duration / 60) + 1, saturating",
+      "reference": "l1/time.rs:149-153"
+    },
+    {
+      "bytes": "agrees for the decision; the finish removes the order and writes a record with second word 0x8000000000000002",
+      "claim": "advance_and_decide finishes at the target or past the limit, else defers",
+      "reference": "l1/time.rs:201-211"
+    },
+    {
+      "bytes": "agrees; +0x18 and +0x30 are not read by any function in this packet",
+      "claim": "fields filled_or_progress at +0x28, slice_counter at +0x38, next_fire_time at +0x40",
+      "reference": "l1/time.rs:163-178"
+    },
+    {
+      "bytes": "this packet supplies them from the bytes",
+      "claim": "no slice size, limit price, jitter or heap drain is written down",
+      "reference": "l1/time.rs, l1/exchange/handlers/35_twap_order.rs"
+    }
+  ],
+  "slice_map": [
+    {
+      "meaning": "tag: 1 is an order, 2 is none",
+      "offset": "0x0",
+      "size": 8
+    },
+    {
+      "meaning": "size",
+      "offset": "0x8",
+      "size": 8
+    },
+    {
+      "meaning": "constant 3",
+      "offset": "0x10",
+      "size": 1
+    },
+    {
+      "meaning": "constant 2",
+      "offset": "0x19",
+      "size": 1
+    },
+    {
+      "meaning": "limit price",
+      "offset": "0x20",
+      "size": 8
+    },
+    {
+      "meaning": "asset",
+      "offset": "0x28",
+      "size": 8
+    },
+    {
+      "meaning": "order byte +0x20",
+      "offset": "0x30",
+      "size": 1
+    },
+    {
+      "meaning": "order byte +0x21",
+      "offset": "0x31",
+      "size": 1
+    },
+    {
+      "meaning": "constant 0",
+      "offset": "0x32",
+      "size": 1
+    },
+    {
+      "meaning": "asset again",
+      "offset": "0x48",
+      "size": 8
+    },
+    {
+      "meaning": "order id",
+      "offset": "0x50",
+      "size": 8
+    },
+    {
+      "meaning": "user",
+      "offset": "0x58",
+      "size": 20
+    }
+  ],
+  "slots": {
+    "0x576e8a8": "0x15206e0",
+    "0x576e8b0": "0x151f870",
+    "0x576e8c0": "0x1447130",
+    "0x576efb8": "0x1459ca0",
+    "0x576f6d8": "0x565f410",
+    "0x576f6e0": "0x565f8c0",
+    "0x5773190": "0x358dcd0",
+    "0x57747c8": "0x565f670",
+    "0x5774e10": "0x3730b40",
+    "0x5774e18": "0x565f6f0"
+  },
+  "strings": {
+    "assert_a": "assertion failed: self.0 >= 0.",
+    "assert_b": "assertion failed: self >= 0.",
+    "expect": "`NaiveDateTime + TimeDelta` overflowed",
+    "time_file_suffix": "src/time.rs",
+    "unwrap": "called `Result::unwrap()` on an `Err` value"
+  },
+  "target": {
+    "file": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  }
+}
