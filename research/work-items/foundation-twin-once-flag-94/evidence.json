@@ -1,0 +1,72 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "windows": [
+    {
+      "start_va": "0x15080c0",
+      "fde_end_va_exclusive": "0x150811b",
+      "fde_bytes": 91,
+      "fde_body_sha256": "76f00d2294cfaa263a8c801cc12a21e0a405e4a113d3f03ae143cc97cb994738",
+      "fde_section_offset": "0x13600",
+      "padding_int3_bytes": 5
+    },
+    {
+      "start_va": "0x15081b0",
+      "fde_end_va_exclusive": "0x1508202",
+      "fde_bytes": 82,
+      "fde_body_sha256": "7c598f96458bb3ef13d54cae43290eadeffbe56742153c0fa67f31c6a3d3bb62",
+      "fde_section_offset": "0x13624",
+      "padding_int3_bytes": 14
+    }
+  ],
+  "flag_sources": {
+    "twin1": "incoming sil byte",
+    "twin2": "byte at 8(rdi) after loading the pointer at [rdi] into rbx"
+  },
+  "swap_targets": {
+    "twin1": "(rdi)",
+    "twin2": "(rbx) where rbx holds [rdi]"
+  },
+  "shared_edges": {
+    "global_slot": {
+      "slot": "0x576e720",
+      "relocation": "R_X86_64_RELATIVE",
+      "target_cell": "0x5788598",
+      "cell_section": ".bss"
+    },
+    "call_slot": {
+      "slot": "0x576eb98",
+      "relocation": "R_X86_64_RELATIVE",
+      "callee": "0x4eef080",
+      "callee_fde_end_va_exclusive": "0x4eef08e",
+      "callee_fde_section_offset": "0x280d50",
+      "callee_behavior": "cmpq $0, %fs:-0x428; sete %al; ret",
+      "callee_body_decoded": true
+    },
+    "syscall_slot": {
+      "slot": "0x576ea40",
+      "relocation": "R_X86_64_GLOB_DAT",
+      "dynamic_symbol": "syscall",
+      "symbol_index": 19,
+      "addend": 0,
+      "immediates": {
+        "edi": 202,
+        "edx": 129,
+        "ecx": 1
+      },
+      "control": "tail jump, not a call"
+    }
+  },
+  "behavior": {
+    "twin1_entry": "flag 2 returns; odd flag goes to the swap; even flag checks the global cell, nonzero goes to the call arm, zero goes to the swap",
+    "twin2_entry": "nonzero flag byte goes to the swap; zero flag byte checks the global cell, nonzero goes to the call arm, zero goes to the swap",
+    "call_arm": "callee returns 1 exactly when the thread-local cell is zero; 1 skips the byte-4 set, 0 sets byte 4 of the flag object to 1, then both rejoin the swap",
+    "swap": "atomically exchange 0 into the flag target; old value 2 takes the syscall tail jump, any other old value returns",
+    "differences": "flag source, early flag-2 return only in twin 1, swap target register, and call-arm register save; global slot, call slot, syscall slot and immediates are shared"
+  },
+  "claim": "two near-identical flag state machines differing only in flag source, early flag-2 return, swap target and call-arm register save",
+  "inferred_label": null,
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
