@@ -54,7 +54,9 @@ def fetch_one(root, item):
 
 def verify_signatures(root, fingerprint):
     with tempfile.TemporaryDirectory(prefix='hl-verify-') as home:
-        base = ['gpg', '--batch', '--no-options', '--homedir', home]
+        # This workflow imports only a public verification key. It must not
+        # require starting a secret-key agent or other helper in a sandbox.
+        base = ['gpg', '--batch', '--no-options', '--no-autostart', '--homedir', home]
         subprocess.run(base + ['--import', str(root / 'artifacts/keys/pub_key.asc')],
                        check=True, capture_output=True)
         for rel in ['node/94/hl-node', 'node/115/hl-node', 'visor/captured/hl-visor']:
