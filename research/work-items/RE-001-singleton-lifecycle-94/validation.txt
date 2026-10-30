@@ -1,0 +1,50 @@
+Native validation, 2026-10-30
+Independent main base6fb86319763b30860f92b9da746cbe4f9b637573;
+no PR22/PR24 source, tests or evidence stacked.
+Ubuntu24.04/WSL2, Python3.12.3, GNU readelf/objdump2.42 (default AT&T).
+Git LFS3.4.1/ripgrep14.1.0 are locally extracted Ubuntu package binaries;
+no system installation or package maintainer hooks were run.
+Existing native Git LFS and ripgrep runtimes were available to the checks.
+
+make doctor: exit0; analysis_ready true; exact_rebuild_ready false.
+make verify test catalogue-check reproduce: exit0.
+verify:8 artifact identities,3 signatures,37 immutable imported files,
+all7 pinned source repositories accepted.
+test:26tests pass (original20 plus6 lifecycle tests).
+catalogue-check: catalogue and progress tables match pinned inputs.
+reproduce: both original inventories and raw/refined classifications match;
+counts grounded822 drift60 notes116 late1 case11 partial56 unanchored386.
+
+python3 tools/singleton_lifecycle.py --output work/singleton-lifecycle-94: exit0.
+Independent reviewer output work/reviewer-independent-singleton: exit0.
+Independent root output work/root-independent-singleton: exit0.
+diff -ru work/root-independent-singleton work/reviewer-independent-singleton:
+exit0, all9 exported files byte-identical.
+diff -ru work/root-independent-singleton work/singleton-lifecycle-94:
+exit0, all9 exported files byte-identical; retained as observed/.
+
+python3 -m unittest discover -s tests -p test_singleton_lifecycle.py -v:
+exit0,6tests pass;24 real instruction corruptions,6 real descriptor/path
+corruptions,6 actual RELA retarget subcases,3 actual call-byte decodes,
+and parser negatives. Corruption controls run below the global SHA check.
+
+Separate reviewer initial make doctor without the process-local PATH exited1:
+git-lfs and rg were unavailable on that PATH. This does not describe the
+author's correctly configured passing doctor run above; no failure was hidden.
+Reviewer rerun with the required native tools available: exit0,
+analysis_ready true, exact_rebuild_ready false. Reviewer independently ran
+make verify and the6 focused tests: pass; the full26-test/reproduce/catalogue
+results above are the author's checks, not an independent full-suite claim.
+
+No captured node/visor/emulator execution, chain/node networking, Rust build,
+runtime equivalence, complete singleton/concurrency API or gate change claimed.
+
+Current resubmission on main1f8c67c63ca4794c9689235471c60297f8a5c985:
+make doctor verify test catalogue-check reproduce: exit0;437tests pass,149.730s.
+Current producer and author repeat: all9exports byte-identical(diff exit0).
+Historical peer-review statements above describe the original packet only.
+Initial current verify failed because a new reference checkout still held
+a Git LFS pointer; materializing its existing authenticated object fixed it
+without modifying reference content or pins. No failure was discarded.
+Current required-checks.log replaces local checkout/tool prefixes with
+<repo>/<tools-root> and normalizes CRLF toLF; raw instruction exports unchanged.
