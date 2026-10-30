@@ -57,6 +57,12 @@ class Elf:
             end = data.index(b"\0", stro + s[0])
             self.sections[data[stro + s[0]:end].decode()] = (s[3], s[4], s[5])
 
+    def section(self, name):
+        try:
+            return self.sections[name]
+        except KeyError:
+            raise EvidenceError(f"missing section {name}") from None
+
     def off(self, va: int) -> int:
         for v, o, n in self.loads:
             if v <= va < v + n:
@@ -69,7 +75,7 @@ class Elf:
 
 
 def fde_index(elf: Elf):
-    va, off, size = elf.sections[".eh_frame_hdr"]
+    va, off, size = elf.section(".eh_frame_hdr")
     d = elf.data
     if d[off] != 1 or tuple(d[off + 1:off + 4]) != (0x1B, 0x03, 0x3B):
         raise EvidenceError("unexpected .eh_frame_hdr encodings")
@@ -93,7 +99,7 @@ def fde_index(elf: Elf):
 
 
 def relative_relocs(elf: Elf) -> dict:
-    _va, off, size = elf.sections[".rela.dyn"]
+    _va, off, size = elf.section(".rela.dyn")
     out = {}
     for i in range(0, size, 24):
         r_off, r_info, r_add = struct.unpack_from("<QQq", elf.data, off + i)
