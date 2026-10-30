@@ -32,8 +32,17 @@ KNOWN_TARGET_DIGESTS = {
 }
 
 
+def _unique_object(pairs):
+    out = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError(f'Duplicate key in harness JSON input: {key}')
+        out[key] = value
+    return out
+
+
 def load_json(path: Path):
-    return json.loads(path.read_text())
+    return json.loads(path.read_text(), object_pairs_hook=_unique_object)
 
 
 def validate_protocol(protocol: dict) -> None:
