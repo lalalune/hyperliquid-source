@@ -71,6 +71,8 @@ class Elf:
             if p_type == 1:
                 self.loads.append((p_va, p_off, p_filesz))
         secs = [struct.unpack_from("<IIQQQQIIQQ", data, shoff + i * shentsize) for i in range(shnum)]
+        if shstrndx >= len(secs):
+            raise EvidenceError("section name string table index out of range")
         stro = secs[shstrndx][4]
         self.sections = {}
         for s in secs:

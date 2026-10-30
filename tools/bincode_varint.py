@@ -127,6 +127,8 @@ def sections(data):
     shentsize, shnum, shstrndx = struct.unpack_from('<HHH', data, 58)
     if shentsize != 64 or shoff + shnum * 64 > len(data):
         raise EvidenceError('section header table is truncated or malformed')
+    if shstrndx >= shnum:
+        raise EvidenceError('section name string table index out of range')
     raw = [struct.unpack_from('<IIQQQQIIQQ', data, shoff + i * 64) for i in range(shnum)]
     stro = raw[shstrndx][4]
     out = {}

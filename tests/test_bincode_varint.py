@@ -198,5 +198,18 @@ class BinutilsCrossCheck(unittest.TestCase):
         self.assertEqual(boundary_misses(shifted), [0x27ab30c])
 
 
+
+class SectionHeaderTests(unittest.TestCase):
+    def test_sections_rejects_shstrndx_out_of_range(self):
+        data = bytearray(128)
+        data[:6] = b'\x7fELF\x02\x01'
+        data[40:48] = (64).to_bytes(8, 'little')
+        data[58:60] = (64).to_bytes(2, 'little')
+        data[60:62] = (1).to_bytes(2, 'little')
+        data[62:64] = (3).to_bytes(2, 'little')
+        with self.assertRaises(bv.EvidenceError):
+            bv.sections(bytes(data))
+
+
 if __name__ == '__main__':
     unittest.main()
