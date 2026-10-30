@@ -1,0 +1,91 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "function": {
+    "start_va": "0x140e430",
+    "end_va_exclusive": "0x140e486",
+    "bytes": 86,
+    "sha256": "561063252ae8f989979892f43980cbb64df4504d7ab7445a3d7984cbc97b9220",
+    "fde_section_offset": "0x8260",
+    "padding_bytes": 10,
+    "padding_stride_end": "0x140e490",
+    "inferred_label": "generic dealloc-size helper"
+  },
+  "arithmetic": {
+    "input_loads": "u64 count at rdi+0x20, align at rdi+0x10, elem_size at rdi+0x08, base at rdi+0x18",
+    "padded_formula": "(count + 1) * elem_size (mod 2^64)",
+    "pad_formula": "(-align) & (align + padded - 1) (mod 2^64)",
+    "size_formula": "count + pad + 0x11 (mod 2^64)",
+    "pointer_formula": "base - pad (mod 2^64)",
+    "flag_formula": "tzcnt(align) if (align > size or align >= 0x11) else 0; tzcnt(0) = 64",
+    "early_return_on": [
+      "count == 0",
+      "size == 0 (64-bit wrap only)"
+    ],
+    "edges": {
+      "count=1,align=16,elem=8": {
+        "padded": "0x10",
+        "pad": "0x10",
+        "size": "0x22",
+        "flag": 0
+      },
+      "count=1,align=32,elem=8": {
+        "padded": "0x10",
+        "pad": "0x20",
+        "size": "0x32",
+        "flag": 5
+      },
+      "count=3,align=8,elem=24": {
+        "padded": "0x60",
+        "pad": "0x60",
+        "size": "0x74",
+        "flag": 0
+      },
+      "count=2,align=24,elem=16": {
+        "padded": "0x30",
+        "pad": "0x40",
+        "size": "0x53",
+        "flag": 3
+      },
+      "count=5,align=17,elem=4": {
+        "padded": "0x18",
+        "pad": "0x28",
+        "size": "0x3e",
+        "flag": 0
+      },
+      "count=1,align=64,elem=1": {
+        "padded": "0x2",
+        "pad": "0x40",
+        "size": "0x52",
+        "flag": 6
+      }
+    },
+    "nonwrapping_grid_cases": 4800,
+    "nonwrapping_flag_rule": "tzcnt(align) if align >= 0x11 else 0"
+  },
+  "tail_call": {
+    "slot": "0x576e010",
+    "target": "0x54c8cb0",
+    "registers": "rdi = base - pad, rsi = size, rdx = flag, rcx = tzcnt(align), rax = align",
+    "target_claimed_here": false
+  },
+  "incoming_pattern_scan": {
+    "section": ".text",
+    "byte_count": 70370352,
+    "e8_candidates": [
+      "0x141cee2",
+      "0x141d9f6",
+      "0x141e0e2",
+      "0x141e81c",
+      "0x141ef12",
+      "0x141f663",
+      "0x141fdb7",
+      "0x1420513"
+    ],
+    "ff15_ff25_candidates": [],
+    "complete_xref_census": false
+  },
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
