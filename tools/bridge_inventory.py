@@ -205,6 +205,8 @@ def decode_chain_site(data, mapping, va):
     offset = head + 2
     moves = {}
     while len(moves) < 2:
+        if offset + 6 > len(raw):
+            raise ValueError(f'{va:#x}: immediate moves run past the read window')
         opcode = raw[offset]
         if opcode in range(0xB8, 0xC0):
             moves[opcode - 0xB8] = struct.unpack_from('<I', raw, offset + 1)[0]
@@ -216,6 +218,8 @@ def decode_chain_site(data, mapping, va):
             offset += 3  # movb $imm8, (%rax)
         else:
             raise ValueError(f'{va:#x}: unexpected byte {opcode:#x} before the immediate moves')
+    if offset + 4 > len(raw):
+        raise ValueError(f'{va:#x}: cmovcc runs past the read window')
     if raw[offset] not in (0x48, 0x4C) or raw[offset + 1] != 0x0F or raw[offset + 2] not in CONDITIONAL_MOVE:
         raise ValueError(f'{va:#x}: expected REX.W cmovcc')
     modrm = raw[offset + 3]
@@ -343,7 +347,7 @@ def literal_loads(data, mapping, arm_va, span=0x400):
     return hits
 
 
-def main(argv=None):
+def run(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--release', type=int, default=94, choices=sorted(TARGET_SHA256))
     parser.add_argument('--artifact', type=Path,
@@ -465,6 +469,14 @@ def main(argv=None):
         (args.out / 'request-withdrawal-arm.bin').write_bytes(excerpt)
     sys.stdout.write(text)
     return 0
+
+
+def main(argv=None):
+    try:
+        return run(argv)
+    except (ValueError, OSError) as e:
+        print(f'bridge_inventory: {e}', file=sys.stderr)
+        return 1
 
 
 if __name__ == '__main__':

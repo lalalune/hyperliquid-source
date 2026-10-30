@@ -122,5 +122,17 @@ class ArtifactTests(unittest.TestCase):
         self.assertEqual(report['struct_hash']['withdrawal_encoder']['tags'], [6, 0, 0, 4, 4])
 
 
+
+class ChainSiteWindowTests(unittest.TestCase):
+    def test_rejects_moves_running_past_window(self):
+        payload = bytes.fromhex('4180ff03') + b'\xc6\x00\x61' * 12
+        data, mapping = mapping_for(payload)
+        with self.assertRaises(ValueError):
+            bi.decode_chain_site(data, mapping, 0x1000)
+
+    def test_main_reports_missing_artifact(self):
+        self.assertEqual(bi.main(['--artifact', '/tmp/definitely-missing-hl.bin']), 1)
+
+
 if __name__ == '__main__':
     unittest.main()
