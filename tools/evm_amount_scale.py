@@ -132,20 +132,26 @@ class Image:
         o = self.off(va, size)
         return self.data[o:o + size]
 
+    def section(self, name):
+        try:
+            return self.sec[name]
+        except KeyError:
+            raise EvidenceError(f'missing required section {name}') from None
+
     def text(self):
-        addr, off, size = self.sec['.text']
+        addr, off, size = self.section('.text')
         return addr, self.data[off:off + size]
 
     def in_rodata(self, va, size):
-        addr, _, sz = self.sec['.rodata']
+        addr, _, sz = self.section('.rodata')
         return addr <= va and va + size <= addr + sz
 
     def slots(self):
         """GOT contents after load: RELATIVE addends, plus the two libc symbols the helpers use."""
-        _, off, size = self.sec['.rela.dyn']
-        _, sym_off, _ = self.sec['.dynsym']
-        _, str_off, _ = self.sec['.dynstr']
-        got = self.sec['.got']
+        _, off, size = self.section('.rela.dyn')
+        _, sym_off, _ = self.section('.dynsym')
+        _, str_off, _ = self.section('.dynstr')
+        got = self.section('.got')
         stubs = {b'memset': MEMSET_STUB, b'memcpy': MEMCPY_STUB}
         out = {}
         for where, info, addend in struct.iter_unpack('<QQq', self.data[off:off + size]):
@@ -162,7 +168,7 @@ class Image:
         return out
 
     def relative_relocs(self):
-        _, off, size = self.sec['.rela.dyn']
+        _, off, size = self.section('.rela.dyn')
         return {where: addend for where, info, addend in
                 struct.iter_unpack('<QQq', self.data[off:off + size]) if info & 0xffffffff == 8}
 
@@ -193,7 +199,7 @@ class Fdes:
 
     def __init__(self, img):
         self.img = img
-        hdr = img.sec['.eh_frame_hdr'][0]
+        hdr = img.section('.eh_frame_hdr')[0]
         version, ptr_enc, cnt_enc, tbl_enc = img.read(hdr, 4)
         if (version, cnt_enc, tbl_enc) != (1, 0x03, 0x3b):
             raise EvidenceError('unexpected .eh_frame_hdr encodings')
