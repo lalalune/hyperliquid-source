@@ -48,6 +48,22 @@ def generate(root=ROOT):
     validate_progress(components, progress, root)
     inventories = {v: json.loads((root / f'research/imported/hl-node-{v}.inventory.json').read_text()) for v in ['94', '115']}
     inventories['visor'] = json.loads((root / 'research/imported/hl-visor.inventory.json').read_text())
+    # The published unwind counts must come from the pinned binaries, not
+    # from the inventory files' own claims: elf_index and fde_extents recount
+    # the .eh_frame_hdr table and reject a differing inventory, and the
+    # catalogue --check only compares generated output with itself, so an
+    # unverified claim would otherwise be republished indefinitely.
+    from artifacts import check
+    from elf_index import unwind_index
+    manifest = json.loads((root / 'provenance/artifacts.json').read_text())
+    for v, relative in [('94', 'artifacts/node/94/hl-node'),
+                        ('115', 'artifacts/node/115/hl-node'),
+                        ('visor', 'artifacts/visor/captured/hl-visor')]:
+        item = next(i for i in manifest['files'] if i['path'] == relative)
+        check(root / relative, item)
+        _, entries = unwind_index((root / relative).read_bytes())
+        if len(entries) != inventories[v]['fde_count_eh_frame_hdr']:
+            raise ValueError(f'Inventory unwind count differs from the pinned binary: {relative}')
     paths = {}
     excluded = {}
     for v, inv in inventories.items():
