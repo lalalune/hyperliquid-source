@@ -103,6 +103,7 @@ def analyze(data,records,objdump=None):
     require((start,end)==(0x392fab0,0x392fcba),'Scope changed')
     body = read(start,end-start)
     require(hashlib.sha256(body).hexdigest()==records['body_sha256'],'Instruction window changed')
+    require('.eh_frame' in named,'Missing section .eh_frame')
     eh = named['.eh_frame']['address']; fde_offset = int(records['fde_offset'],16)
     fde,cie = bytes.fromhex(records['fde_hex']),bytes.fromhex(records['cie_hex'])
     require(read(eh+fde_offset,len(fde))==fde,'FDE changed')
