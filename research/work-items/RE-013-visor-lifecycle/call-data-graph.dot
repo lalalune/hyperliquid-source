@@ -1,0 +1,45 @@
+digraph visor_lifecycle {
+  rankdir=LR;
+  node [shape=box, fontname="monospace"];
+
+  metadata [label="metadata/artifact selection\n0x415620..0x416cce"];
+  node_meta [shape=note, label="node_metadata.json\n0x7b2670 -> 0x7c0b1"];
+  visor_meta [shape=note, label="visor_metadata.json\n0x7b2680 -> 0x7c0c3"];
+  readiness [label="freeze/readiness\n0x5b41b0..0x5b470d"];
+  state [label="visor/child async state\n0x5e44c0..0x5ea1c1"];
+  download [label="download + verification\n0x4148b0..0x4155a2"];
+  transport [label="transport adapter\n0x416cd0..0x416e50"];
+  digest [label="32-byte digest helper\n0x396750..0x3968c3"];
+  command [label="command output helper\n0x42a290..0x42a4c2"];
+  gpg_error [label="GPG failure adapter\n0x4172e0..0x417342"];
+  cleanup [label="cleanup helper\n0x3a13e0..0x3a15c2"];
+  unlink [shape=ellipse, label="unlink import"];
+  quorum [label="quorum + publication\n0x416f30..0x41718a"];
+  fs_publish [shape=ellipse, label="async filesystem helpers\nfull effects unresolved"];
+  spawn [label="Rust process spawn\n0x66f280..0x6718f9"];
+  pidfd [shape=ellipse, label="pidfd_spawnp import"];
+  posix [shape=ellipse, label="posix_spawnp import"];
+  exec [shape=ellipse, label="execvp fallback"];
+  terminate [label="child termination\n0x5e2d70..0x5e334e"];
+  kill [shape=ellipse, label="kill(?, 9) import"];
+
+  node_meta -> metadata [label="R_X86_64_RELATIVE"];
+  visor_meta -> metadata [label="R_X86_64_RELATIVE"];
+  readiness -> state [style=dashed, label="policy result consumed; exact edge unresolved"];
+  metadata -> state [style=dashed, label="selected state; async ownership unresolved"];
+  state -> download [label="0x5e62d1 via slot 0x7e6550"];
+  download -> transport [label="0x414bfa / 0x414c49"];
+  download -> digest [label="0x414ca9 / 0x41501c via slot 0x7e5e58"];
+  download -> command [label="0x414e75"];
+  command -> gpg_error [label="non-null result: 0x414ea0"];
+  download -> cleanup [label="slot 0x7e5610"];
+  cleanup -> unlink [label="0x3a146e"];
+  state -> quorum [label="0x5e63b6 via slot 0x7e6558"];
+  quorum -> fs_publish [style=dashed, label="async calls; destination derivation incomplete"];
+  state -> spawn [label="0x5e8cf9"];
+  spawn -> pidfd [label="0x671078 when available"];
+  spawn -> posix [label="0x6710f3 fallback"];
+  spawn -> exec [label="0x6713bf -> 0x671900 -> 0x671c7f"];
+  state -> terminate [label="0x5e75f5 via slot 0x7e7738"];
+  terminate -> kill [label="0x5e314e / 0x5e3192"];
+}
