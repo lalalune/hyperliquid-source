@@ -1,0 +1,62 @@
+{
+  "arithmetic": {
+    "borrow_adjust": "if rax < 0 and edx > 0 then rax += 1 and edx -= 1e9",
+    "constants": {
+      "one_e6_va": "0x20ae60",
+      "one_e9_immediate": true
+    },
+    "inner_pair": "call 0x151d1b0 returns (i64 rax, i32 edx); meaning unresolved",
+    "magic_divisor": "0x10624dd3",
+    "magic_shift": 38,
+    "micros": "(rax_adjusted * 1e6) + trunc_div(edx_adjusted, 1000)",
+    "negative_route": "comparison cascade routes to format/saturate path returning 0.0",
+    "overflow": "imul or add overflow returns 0.0",
+    "result": "f64(micros) / 1e6"
+  },
+  "call_census": {
+    "denominators": "complete .text byte scan for e8 / ff15-to-slot / lea encodings",
+    "direct_e8": 0,
+    "distinct_caller_functions": 60,
+    "got_indirect_sites": 72,
+    "known_consumers": [
+      "0x1479229 (ema_tracker update, separate packet)",
+      "0x4726c81 (heartbeat status body, PR #22)"
+    ],
+    "lea_references": 0
+  },
+  "captured_binary_executed": false,
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "format_anchor": {
+    "flag_gated": "odd flag dword may route to the panic path",
+    "panic_state_va": "0x577ab98",
+    "panic_state_value": 3,
+    "prefix": "\tTime Sub ",
+    "string_va": "0x1f9cb6"
+  },
+  "got_targets": {
+    "dealloc": "0x54c8cb0",
+    "fmt": "0x1344760",
+    "inner": "0x151d1b0",
+    "panic_path": "0x4ee3b20",
+    "self_slot": "0x576e8c0"
+  },
+  "helper": {
+    "bytes": 368,
+    "end_va_exclusive": "0x14472a0",
+    "fde_va": "0xfcf3a8",
+    "inferred_label": "shared \"Time Sub\" difference helper",
+    "sha256": "53e1c201b2220f438c5d55b5885a92b487df8f40c7ee4cf180f584de62d50cc8",
+    "start_va": "0x1447130"
+  },
+  "progress_gate_requested": false,
+  "signature": {
+    "cascade": "A/0 vs B/2 (setl), A/1 vs B/1 (setb), A/2 vs B/2 (jb); field meaning unresolved",
+    "observed": {
+      "rdi": "pointer to 12-byte operand A (three dwords)",
+      "rsi": "pointer to 12-byte operand B (three dwords) followed by a dword flag and a 16-byte descriptor",
+      "xmm0": "f64 result"
+    }
+  },
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
