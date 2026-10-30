@@ -75,6 +75,12 @@ class Image:
         self.data = data
         self.sec = sections(data)
 
+    def section(self, name):
+        try:
+            return self.sec[name]
+        except KeyError:
+            raise EvidenceError(f'missing section {name}') from None
+
     def off(self, va, size=1):
         for addr, off, sz in self.sec.values():
             if addr and addr <= va and va + size <= addr + sz:
@@ -86,7 +92,7 @@ class Image:
         return self.data[o:o + size]
 
     def text(self):
-        addr, off, size = self.sec['.text']
+        addr, off, size = self.section('.text')
         return addr, self.data[off:off + size]
 
 
@@ -117,7 +123,7 @@ class Fdes:
 
     def __init__(self, img):
         self.img = img
-        hdr = img.sec['.eh_frame_hdr'][0]
+        hdr = img.section('.eh_frame_hdr')[0]
         version, ptr_enc, cnt_enc, tbl_enc = img.read(hdr, 4)
         if (version, cnt_enc, tbl_enc) != (1, 0x03, 0x3b):
             raise EvidenceError('unexpected .eh_frame_hdr encodings')
@@ -182,7 +188,7 @@ def needle(name, visited):
 
 
 def find_piece(img, name, visited):
-    addr, off, size = img.sec['.rodata']
+    addr, off, size = img.section('.rodata')
     ro = img.data[off:off + size]
     nd = needle(name, visited)
     hits = []
