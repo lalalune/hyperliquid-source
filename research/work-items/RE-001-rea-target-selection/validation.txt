@@ -1,0 +1,126 @@
+Validation on macOS 26.7.1 arm64, Python 3.14.7, GNU binutils 2.47.20260726.
+Working directory: repository root. Absolute local paths omitted.
+All commands below actually ran. Full logs remain in ignored work/contribution/.
+
+Base 1f8c67c63ca4794c9689235471c60297f8a5c985 with the two added tests:
+PATH="/opt/homebrew/opt/binutils/bin:$PATH" make test
+exit: 2 (make reports the unittest failure)
+FAIL: test_cli_rejects_surplus_arguments_without_emitting_a_target (test_rea_launcher.TargetSelectionTests.test_cli_rejects_surplus_arguments_without_emitting_a_target) (args=('115', '--format', 'json'))
+FAIL: test_cli_rejects_surplus_arguments_without_emitting_a_target (test_rea_launcher.TargetSelectionTests.test_cli_rejects_surplus_arguments_without_emitting_a_target) (args=('visor', 'extra'))
+FAIL: test_cli_rejects_surplus_arguments_without_emitting_a_target (test_rea_launcher.TargetSelectionTests.test_cli_rejects_surplus_arguments_without_emitting_a_target) (args=('94', '115'))
+FAIL: test_cli_rejects_surplus_arguments_without_emitting_a_target (test_rea_launcher.TargetSelectionTests.test_cli_rejects_surplus_arguments_without_emitting_a_target) (args=('unknown', 'extra'))
+FAIL: test_cli_rejects_surplus_arguments_without_emitting_a_target (test_rea_launcher.TargetSelectionTests.test_cli_rejects_surplus_arguments_without_emitting_a_target) (args=('--format', 'json'))
+Ran 433 tests in 146.332s
+FAILED (failures=5)
+
+After the fix:
+PATH="/opt/homebrew/opt/binutils/bin:$PATH" make test
+exit: 0
+Ran 433 tests in 139.653s
+OK
+
+python3 -m unittest discover -s tests -p test_rea_launcher.py -v
+exit: 0
+test_exact_supported_version_boundaries (test_rea_launcher.RuntimeSelectionTests.test_exact_supported_version_boundaries) ... ok
+test_explicit_incompatible_runtime_not_silently_replaced (test_rea_launcher.RuntimeSelectionTests.test_explicit_incompatible_runtime_not_silently_replaced) ... ok
+test_explicit_provider_environment_preserved (test_rea_launcher.RuntimeSelectionTests.test_explicit_provider_environment_preserved) ... ok
+test_project_dependency_and_runtime_pins_agree (test_rea_launcher.RuntimeSelectionTests.test_project_dependency_and_runtime_pins_agree) ... ok
+test_target_bound_to_artifact_manifest (test_rea_launcher.RuntimeSelectionTests.test_target_bound_to_artifact_manifest) ... ok
+test_cli_preserves_default_and_explicit_artifact_identities (test_rea_launcher.TargetSelectionTests.test_cli_preserves_default_and_explicit_artifact_identities) ... ok
+test_cli_rejects_surplus_arguments_without_emitting_a_target (test_rea_launcher.TargetSelectionTests.test_cli_rejects_surplus_arguments_without_emitting_a_target) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.639s
+
+OK
+
+make doctor verify catalogue-check
+exit: 0
+Doctor (installation paths omitted):
+{
+  "analysis_ready": true,
+  "exact_rebuild_ready": false,
+  "missing_rebuild_evidence": [
+    "Recovered Cargo manifests and dependency locks",
+    "Target Linux build flags and exact LLVM/fork provenance",
+    "Accepted reconstructed implementation and comparison harness"
+  ],
+  "required_tools": [
+    {
+      "name": "python",
+      "available": true,
+      "version": "Python 3.14.7"
+    },
+    {
+      "name": "git",
+      "available": true,
+      "version": "git version 2.50.1 (Apple Git-155)"
+    },
+    {
+      "name": "git-lfs",
+      "available": true,
+      "version": "git-lfs/3.8.1 (GitHub; darwin arm64; go 1.27.3)"
+    },
+    {
+      "name": "gpg",
+      "available": true,
+      "version": "gpg (GnuPG/MacGPG2) 2.2.41"
+    },
+    {
+      "name": "rg",
+      "available": true,
+      "version": "ripgrep 15.1.0"
+    }
+  ],
+  "optional_tools": [
+    {
+      "name": "llvm-objdump",
+      "available": true,
+      "version": "Homebrew LLVM version 18.1.4"
+    },
+    {
+      "name": "java",
+      "available": true,
+      "version": "java version \"22.0.1\" 2024-04-16"
+    },
+    {
+      "name": "rust-1.94.1",
+      "available": true,
+      "version": "rustc 1.94.1 (e408947bf 2026-03-25)"
+    },
+    {
+      "name": "rust-1.95.0",
+      "available": true,
+      "version": "rustc 1.95.0 (59807616e 2026-04-14)"
+    }
+  ],
+  "ghidra": {
+    "available": false,
+    "version": null,
+    "started": false
+  },
+  "captured_binaries_executed": false
+}
+
+python3 tools/artifacts.py verify
+SHA-256 OK: artifacts/keys/pub_key.asc
+SHA-256 OK: artifacts/node/115/hl-node
+SHA-256 OK: artifacts/node/115/hl-node.asc
+SHA-256 OK: artifacts/node/115/node_metadata.json
+SHA-256 OK: artifacts/node/94/hl-node
+SHA-256 OK: artifacts/node/94/hl-node.asc
+SHA-256 OK: artifacts/visor/captured/hl-visor
+SHA-256 OK: artifacts/visor/captured/hl-visor.asc
+Valid signature: node/94/hl-node
+Valid signature: node/115/hl-node
+Valid signature: visor/captured/hl-visor
+Pinned upstream binary, signature and public key match.
+python3 tools/verify_imports.py
+Verified 37 imported files and all pinned source repositories.
+python3 tools/catalogue.py --check
+Catalogue and progress tables match pinned inputs.
+
+git diff --check
+exit: 0
+
+No captured binary, Ghidra, native service, or chain action was executed.

@@ -13,6 +13,48 @@ rea = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rea)
 
 
+class TargetSelectionTests(unittest.TestCase):
+    def run_target(self, *args):
+        return subprocess.run(
+            [sys.executable, str(rea.ROOT / 'tools/rea.py'), 'target', *args],
+            capture_output=True, text=True, check=False,
+        )
+
+    def test_cli_preserves_default_and_explicit_artifact_identities(self):
+        manifest = json.loads((rea.ROOT / 'provenance/artifacts.json').read_text())
+        for args, relative in [
+            ((), 'artifacts/node/94/hl-node'),
+            (('94',), 'artifacts/node/94/hl-node'),
+            (('115',), 'artifacts/node/115/hl-node'),
+            (('visor',), 'artifacts/visor/captured/hl-visor'),
+        ]:
+            with self.subTest(args=args):
+                result = self.run_target(*args)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stderr, '')
+                item = next(row for row in manifest['files'] if row['path'] == relative)
+                self.assertEqual(json.loads(result.stdout), {
+                    'path': str(rea.ROOT / relative),
+                    'sha256': item['sha256'],
+                    'provider_id': 'ghidra',
+                })
+
+    def test_cli_rejects_surplus_arguments_without_emitting_a_target(self):
+        for args in [
+            ('115', '--format', 'json'),
+            ('visor', 'extra'),
+            ('94', '115'),
+            ('unknown', 'extra'),
+            ('--format', 'json'),
+        ]:
+            with self.subTest(args=args):
+                result = self.run_target(*args)
+                self.assertEqual(result.returncode, 1, result.stdout)
+                self.assertEqual(result.stdout, '')
+                self.assertIn('Usage: rea.py target [94|115|visor]', result.stderr)
+                self.assertNotIn('Traceback', result.stderr)
+
+
 class RuntimeSelectionTests(unittest.TestCase):
     def test_exact_supported_version_boundaries(self):
         for version in ['22.23.4', '24.22.1', '26.12.1', '27.0.0']:

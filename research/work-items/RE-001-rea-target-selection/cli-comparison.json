@@ -1,0 +1,152 @@
+{
+  "base_commit": "1f8c67c63ca4794c9689235471c60297f8a5c985",
+  "normalization": "Only the absolute checkout prefix in stdout/stderr is replaced with <repo>.",
+  "targets": [
+    {
+      "path": "artifacts/node/94/hl-node",
+      "size": 91774280,
+      "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+    },
+    {
+      "path": "artifacts/node/115/hl-node",
+      "size": 105896032,
+      "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+    },
+    {
+      "path": "artifacts/visor/captured/hl-visor",
+      "size": 8305392,
+      "sha256": "89338207c793d80ac2fba75bb0d36c659e2cabc87a94e61a57ba532b8d212e31"
+    }
+  ],
+  "cases": [
+    {
+      "command": [
+        "python3",
+        "tools/rea.py",
+        "target"
+      ],
+      "before": {
+        "exit_code": 0,
+        "stdout": "{\n  \"path\": \"<repo>/artifacts/node/94/hl-node\",\n  \"sha256\": \"3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f\",\n  \"provider_id\": \"ghidra\"\n}\n",
+        "stderr": ""
+      },
+      "after": {
+        "exit_code": 0,
+        "stdout": "{\n  \"path\": \"<repo>/artifacts/node/94/hl-node\",\n  \"sha256\": \"3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f\",\n  \"provider_id\": \"ghidra\"\n}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tools/rea.py",
+        "target",
+        "94"
+      ],
+      "before": {
+        "exit_code": 0,
+        "stdout": "{\n  \"path\": \"<repo>/artifacts/node/94/hl-node\",\n  \"sha256\": \"3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f\",\n  \"provider_id\": \"ghidra\"\n}\n",
+        "stderr": ""
+      },
+      "after": {
+        "exit_code": 0,
+        "stdout": "{\n  \"path\": \"<repo>/artifacts/node/94/hl-node\",\n  \"sha256\": \"3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f\",\n  \"provider_id\": \"ghidra\"\n}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tools/rea.py",
+        "target",
+        "115"
+      ],
+      "before": {
+        "exit_code": 0,
+        "stdout": "{\n  \"path\": \"<repo>/artifacts/node/115/hl-node\",\n  \"sha256\": \"a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301\",\n  \"provider_id\": \"ghidra\"\n}\n",
+        "stderr": ""
+      },
+      "after": {
+        "exit_code": 0,
+        "stdout": "{\n  \"path\": \"<repo>/artifacts/node/115/hl-node\",\n  \"sha256\": \"a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301\",\n  \"provider_id\": \"ghidra\"\n}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tools/rea.py",
+        "target",
+        "visor"
+      ],
+      "before": {
+        "exit_code": 0,
+        "stdout": "{\n  \"path\": \"<repo>/artifacts/visor/captured/hl-visor\",\n  \"sha256\": \"89338207c793d80ac2fba75bb0d36c659e2cabc87a94e61a57ba532b8d212e31\",\n  \"provider_id\": \"ghidra\"\n}\n",
+        "stderr": ""
+      },
+      "after": {
+        "exit_code": 0,
+        "stdout": "{\n  \"path\": \"<repo>/artifacts/visor/captured/hl-visor\",\n  \"sha256\": \"89338207c793d80ac2fba75bb0d36c659e2cabc87a94e61a57ba532b8d212e31\",\n  \"provider_id\": \"ghidra\"\n}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tools/rea.py",
+        "target",
+        "115",
+        "--format",
+        "json"
+      ],
+      "before": {
+        "exit_code": 0,
+        "stdout": "{\n  \"path\": \"<repo>/artifacts/node/94/hl-node\",\n  \"sha256\": \"3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f\",\n  \"provider_id\": \"ghidra\"\n}\n",
+        "stderr": ""
+      },
+      "after": {
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "Usage: rea.py target [94|115|visor]; unexpected extra arguments\n"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tools/rea.py",
+        "target",
+        "visor",
+        "extra"
+      ],
+      "before": {
+        "exit_code": 0,
+        "stdout": "{\n  \"path\": \"<repo>/artifacts/node/94/hl-node\",\n  \"sha256\": \"3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f\",\n  \"provider_id\": \"ghidra\"\n}\n",
+        "stderr": ""
+      },
+      "after": {
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "Usage: rea.py target [94|115|visor]; unexpected extra arguments\n"
+      }
+    },
+    {
+      "command": [
+        "python3",
+        "tools/rea.py",
+        "target",
+        "unknown",
+        "extra"
+      ],
+      "before": {
+        "exit_code": 0,
+        "stdout": "{\n  \"path\": \"<repo>/artifacts/node/94/hl-node\",\n  \"sha256\": \"3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f\",\n  \"provider_id\": \"ghidra\"\n}\n",
+        "stderr": ""
+      },
+      "after": {
+        "exit_code": 1,
+        "stdout": "",
+        "stderr": "Usage: rea.py target [94|115|visor]; unexpected extra arguments\n"
+      }
+    }
+  ]
+}
