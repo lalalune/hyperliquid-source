@@ -462,7 +462,7 @@ def analyse(data):
 
 def write(out, result, funcs, table):
     out.mkdir(parents=True, exist_ok=True)
-    (out / 'evidence.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
+    (out / 'evidence.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8', newline='\n')
     rows = ['lea_va\tfn_start\tfn_end\tguard_va\tadjust\tk\tcmp_reg\tc\tjcc\tok_target\t'
             'admitted_min\tadmitted_max\tadmitted_count\tlen_imm\ttag\tgate_je']
     for s in result['sites']:
@@ -480,7 +480,7 @@ def write(out, result, funcs, table):
     rows.append('byte\ti8\t' + '\t'.join(table[0]['admitted']))
     for t in table:
         rows.append(f"{t['byte']:#04x}\t{t['i8']}\t" + '\t'.join(str(v).lower() for v in t['admitted'].values()))
-    (out / 'guards.tsv').write_text('\n'.join(rows) + '\n')
+    (out / 'guards.tsv').write_text('\n'.join(rows) + '\n', encoding='utf-8', newline='\n')
     lines = []
     for s in result['sites']:
         start = int(s['fn_start'], 16)
@@ -493,7 +493,7 @@ def write(out, result, funcs, table):
         for k in range(lo, hi, 16):
             lines.append(f'{k:x}: {fn[k - start:min(k + 16, hi) - start].hex(" ")}')
         lines.append('')
-    (out / 'guard-bytes.txt').write_text('\n'.join(lines))
+    (out / 'guard-bytes.txt').write_text('\n'.join(lines), encoding='utf-8', newline='\n')
 
 
 def main(argv=None):

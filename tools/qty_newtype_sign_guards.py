@@ -533,7 +533,7 @@ def analyse(data):
 
 def write(out, result, callers):
     out.mkdir(parents=True, exist_ok=True)
-    (out / 'evidence.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
+    (out / 'evidence.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8', newline='\n')
     rows = ['newtype\tvisited\tcall_va\tconstructor\tcaller_start\tcaller_end\ttest_va\tregister\tjcc\t'
             'error_entry\terror_to_call_bytes\tvalue_tied_to_message\tok_store_unchanged\tmismatch']
     for t in result['types']:
@@ -548,7 +548,7 @@ def write(out, result, callers):
                     str(g['spilled_value_is_tested_value'] and g['spill_slot_passed_to_error']).lower(),
                     str(g['ok_stores_tested_value_unchanged']).lower(),
                     str(s.get('mismatch_vs_message_predicate', '-'))]))
-    (out / 'call-sites.tsv').write_text('\n'.join(rows) + '\n')
+    (out / 'call-sites.tsv').write_text('\n'.join(rows) + '\n', encoding='utf-8', newline='\n')
     # Bytes from each guard's test through the constructor call (the decided window).
     lines = []
     for t in result['types']:
@@ -568,7 +568,7 @@ def write(out, result, callers):
                         a, b = int(e['test_va'], 16), int(e['va'], 16) + len(e['bytes_hex']) // 2
                         lines.append(f"{a:x}: {fn[a - start:b - start].hex(' ')}  ; i{e['width']} test, jns ok, jmp error")
                 lines.append('')
-    (out / 'guard-bytes.txt').write_text('\n'.join(lines))
+    (out / 'guard-bytes.txt').write_text('\n'.join(lines), encoding='utf-8', newline='\n')
 
 
 def main(argv=None):

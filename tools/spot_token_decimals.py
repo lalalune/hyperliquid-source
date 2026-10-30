@@ -528,7 +528,7 @@ def analyse(data):
 
 def write(out, result, funcs, grid):
     out.mkdir(parents=True, exist_ok=True)
-    (out / 'evidence.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
+    (out / 'evidence.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8', newline='\n')
     rows = ['family\tlea_va\tfn_start\tfn_end\tguard_va\tdecoded\tadmitted_pairs\tmismatch\tsz_load\twei_load']
     for g in result['deploy_sites']:
         rows.append('\t'.join(['deploy', g['lea_va'], g['fn_start'], g['fn_end'], g['start_va'],
@@ -550,7 +550,7 @@ def write(out, result, funcs, grid):
     for c in grid:
         rows.append(f"{c['sz']}\t{c['wei']}\t" + ','.join(str(int(v)) for v in c['deploy'])
                     + '\t' + ','.join(str(int(v)) for v in c['range']))
-    (out / 'admission.tsv').write_text('\n'.join(rows) + '\n')
+    (out / 'admission.tsv').write_text('\n'.join(rows) + '\n', encoding='utf-8', newline='\n')
     lines = []
     spans = [(g['fn_start'], g['fn_fde'], int(g['gate']['va'], 16) if g['gate'] else int(g['start_va'], 16),
               int(g['end_va'], 16), g['lea_va']) for g in result['deploy_sites']]
@@ -564,7 +564,7 @@ def write(out, result, funcs, grid):
         for k in range(lo, hi, 16):
             lines.append(f'{k:x}: {fn[k - start:min(k + 16, hi) - start].hex(" ")}')
         lines.append('')
-    (out / 'guard-bytes.txt').write_text('\n'.join(lines))
+    (out / 'guard-bytes.txt').write_text('\n'.join(lines), encoding='utf-8', newline='\n')
 
 
 def main(argv=None):

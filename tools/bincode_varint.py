@@ -295,9 +295,9 @@ def main(argv=None):
         print(f'bincode_varint: {e}', file=sys.stderr)
         return 1
     if a.output:
-        a.output.write_text(text)
+        a.output.write_text(text, encoding='utf-8', newline='\n')
     else:
-        sys.stdout.write(text)
+        sys.stdout.buffer.write(text.encode('utf-8'))
     return 0
 
 

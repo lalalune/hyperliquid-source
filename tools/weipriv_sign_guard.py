@@ -370,7 +370,7 @@ def analyse(data):
 
 def write(out, result, callers):
     out.mkdir(parents=True, exist_ok=True)
-    (out / 'evidence.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
+    (out / 'evidence.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8', newline='\n')
     rows = ['call_va\tconstructor\tcaller_start\tcaller_end\ttest_va\tregister\tjcc\terror_entry\t'
             'error_to_call_bytes\tvalue_tied_to_message\tok_store_unchanged']
     for s in result['call_sites']:
@@ -383,7 +383,7 @@ def write(out, result, callers):
                                    str(g['error_to_call_bytes']),
                                    str(g['spilled_value_is_tested_value'] and g['spill_slot_passed_to_error']).lower(),
                                    str(g['ok_stores_tested_value_unchanged']).lower()]))
-    (out / 'call-sites.tsv').write_text('\n'.join(rows) + '\n')
+    (out / 'call-sites.tsv').write_text('\n'.join(rows) + '\n', encoding='utf-8', newline='\n')
     lines = []
     for start in sorted(callers):
         r, fn = callers[start]
@@ -391,7 +391,7 @@ def write(out, result, callers):
         for k in range(0, len(fn), 16):
             lines.append(f'{start + k:x}: {fn[k:k + 16].hex(" ")}')
         lines.append('')
-    (out / 'caller-bytes.txt').write_text('\n'.join(lines))
+    (out / 'caller-bytes.txt').write_text('\n'.join(lines), encoding='utf-8', newline='\n')
 
 
 def main(argv=None):
