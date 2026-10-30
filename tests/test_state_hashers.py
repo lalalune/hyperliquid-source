@@ -167,5 +167,11 @@ class StateHashersTests(unittest.TestCase):
             self.assertRegex(out, rf"(?m)^ +{s:x}:\s+ff 15 [0-9a-f ]+\s+call\s+QWORD PTR \[rip\+0x[0-9a-f]+\]\s+# {slot:x}")
 
 
+
+class MainErrorTests(unittest.TestCase):
+    def test_main_reports_missing_binary(self):
+        self.assertEqual(sh.main(['--binary', '/tmp/definitely-missing-hl.bin']), 2)
+
+
 if __name__ == "__main__":
     unittest.main()
