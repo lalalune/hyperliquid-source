@@ -1,0 +1,91 @@
+{
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "target_bytes": 91774280,
+  "component_id": "RE-007",
+  "subsystem": "l1/clearinghouse/position",
+  "fde": {
+    "start_va": "0x3717480",
+    "end_va": "0x37179c5",
+    "file_offset": "0x3716480",
+    "bytes": 1349,
+    "sha256": "6f0049a71097c33ddc9aa2b3e1e51b98cbbdadcbc07a0034c7c91b16da13ee3d",
+    "inferred_role": "compute_position_margin_requirement / compute_margin_requirement_by_mode"
+  },
+  "jump_table": {
+    "va": "0x59742c",
+    "file_offset": "0x59742c",
+    "entries_count": 5,
+    "bytes_hex": "5c0418039f001803f30018038a011803c4001803",
+    "modes": [
+      {
+        "mode_index": 0,
+        "relative_offset": 51905628,
+        "relative_offset_hex": "0x0318045c",
+        "target_va": "0x3717888",
+        "inferred_variant": "NoRequirement (0)"
+      },
+      {
+        "mode_index": 1,
+        "relative_offset": 51904671,
+        "relative_offset_hex": "0x0318009f",
+        "target_va": "0x37174cb",
+        "inferred_variant": "SimpleMaxLeverage (1)"
+      },
+      {
+        "mode_index": 2,
+        "relative_offset": 51904755,
+        "relative_offset_hex": "0x031800f3",
+        "target_va": "0x371751f",
+        "inferred_variant": "Initial (2)"
+      },
+      {
+        "mode_index": 3,
+        "relative_offset": 51904906,
+        "relative_offset_hex": "0x0318018a",
+        "target_va": "0x37175b6",
+        "inferred_variant": "Maintenance (3)"
+      },
+      {
+        "mode_index": 4,
+        "relative_offset": 51904708,
+        "relative_offset_hex": "0x031800c4",
+        "target_va": "0x37174f0",
+        "inferred_variant": "CappedLeverage (4)"
+      }
+    ]
+  },
+  "table_cutoff": {
+    "constant_value": 50,
+    "constant_hex": "0x32",
+    "comparison_sites": [
+      "0x3717524",
+      "0x37175bb"
+    ],
+    "inferred_semantics": "selector < 50 selects stack-allocated single-tier table; selector >= 50 traverses custom BTreeMap"
+  },
+  "source_locations": [
+    {
+      "record_va": "0x56f1fa8",
+      "path_va": "0x1ead59",
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/clearinghouse/position.rs",
+      "line": 204,
+      "column": 57,
+      "caller_sites": [
+        "0x3717925"
+      ]
+    },
+    {
+      "record_va": "0x56f21d8",
+      "path_va": "0x1f56ec",
+      "path": "/home/ubuntu/hl/code_Mainnet/l1/src/perp_meta.rs",
+      "line": 279,
+      "column": 86,
+      "caller_sites": [
+        "0x3717964"
+      ]
+    }
+  ],
+  "captured_binary_executed": false,
+  "live_network_executed": false,
+  "limits": "Single FDE 0x3717480..0x37179c5 and jump table 0x59742c only. No full liquidation engine, order execution, position state solver, cross-margin graph, node #115 or visor claims."
+}
