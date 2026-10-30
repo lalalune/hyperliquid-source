@@ -1,0 +1,68 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "windows": [
+    {
+      "start_va": "0x151f0a0",
+      "fde_end_va_exclusive": "0x151f0fe",
+      "fde_bytes": 94,
+      "fde_body_sha256": "48507a731d3afd4f86578d4b329f18a63ad9ab03fa5207f615e1a651b33f49f9",
+      "fde_section_offset": "0x14f5c",
+      "element_size": 4
+    },
+    {
+      "start_va": "0x151f100",
+      "fde_end_va_exclusive": "0x151f15e",
+      "fde_bytes": 94,
+      "fde_body_sha256": "2abf06bf86d84573a6780e72b38cd80494cdbe7ad7fb67411befaec024f77df1",
+      "fde_section_offset": "0x14f88",
+      "element_size": 8
+    }
+  ],
+  "shared_routine": {
+    "start_va": "0x151f160",
+    "fde_end_va_exclusive": "0x151f238",
+    "fde_section_offset": "0x14fb4",
+    "body_decoded": false
+  },
+  "behavior": {
+    "input_fields": "first field at 0(rdi) is the length, second field at 8(rdi) is passed through in rdx",
+    "doubled_length": "lea (rsi, rsi, 1) doubles the length field",
+    "clamp": "count = doubled length if doubled length >= 5 else 4",
+    "clamp_boundaries": {
+      "0": 4,
+      "1": 4,
+      "2": 4,
+      "3": 6,
+      "4": 8
+    },
+    "call_arguments": "rdi = stack out-slot, rsi = original length, rdx = second input field, rcx = count, r8d = element size",
+    "flag_arm": "out-slot flag == 1 takes the indirect-call arm, else out-slot pointer is stored at 8(rbx) and count at (rbx)",
+    "padding": "two int3 bytes follow each window before the next FDE start"
+  },
+  "twin_difference": {
+    "differing_byte_offsets": [
+      "0x28",
+      "0x30",
+      "0x5a"
+    ],
+    "element_size_immediates": [
+      4,
+      8
+    ],
+    "shared_call_target": "0x151f160",
+    "indirect_call_slot": "0x576dfb8"
+  },
+  "error_arm_slot": {
+    "slot": "0x576dfb8",
+    "relocation": "R_X86_64_RELATIVE",
+    "addend": "0x1346068",
+    "stored_file_bytes": "zero",
+    "runtime_target_named": false
+  },
+  "claim": "two near-identical windows differing only in element size",
+  "inferred_label": null,
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
