@@ -67,3 +67,25 @@ class VerifyImportsTests(unittest.TestCase):
             with self.assertRaises(ValueError) as caught:
                 verify_imports.verify(self.root)
         self.assertIn('Unreadable pinned source', str(caught.exception))
+
+
+class RepositoryManifestCoverageTests(unittest.TestCase):
+    def test_every_retained_import_is_pinned(self):
+        # Retained evidence that `make verify` must hash-check: the tracked
+        # files, or outside a git checkout a walk that skips what .gitignore
+        # ignores in these trees (.DS_Store, __pycache__, *.py[cod]).
+        root = Path(__file__).resolve().parents[1]
+        tops = ('research/imported', 'research/upstream-docs', 'tools/legacy')
+        try:
+            listed = subprocess.run(['git', '-C', str(root), 'ls-files', '-z', '--', *tops],
+                                    capture_output=True, check=True).stdout.decode()
+            retained = {p for p in listed.split('\0') if p}
+        except (OSError, subprocess.CalledProcessError):
+            retained = {p.relative_to(root).as_posix()
+                        for top in tops for p in (root / top).rglob('*')
+                        if p.is_file() and '__pycache__' not in p.parts
+                        and p.name != '.DS_Store' and p.suffix not in ('.pyc', '.pyo', '.pyd')}
+        pinned = {item['path'] for item in
+                  json.loads((root / 'provenance/imports.json').read_text())['files']}
+        self.assertEqual(sorted(retained - pinned), [])
+        self.assertEqual(sorted(pinned - retained), [])
