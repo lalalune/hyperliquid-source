@@ -161,7 +161,11 @@ def first_party_locations(elf, relocs):
             continue
         s = elf.read(a, ln)
         if s.startswith(FIRST_PARTY) and s.endswith(b".rs") and b"\0" not in s:
-            out[slot] = (s[len(FIRST_PARTY):].decode(), line, col)
+            try:
+                name = s[len(FIRST_PARTY):].decode()
+            except UnicodeDecodeError:
+                raise EvidenceError("first-party location name not UTF-8")
+            out[slot] = (name, line, col)
     return out
 
 
