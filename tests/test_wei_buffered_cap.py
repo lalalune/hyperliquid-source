@@ -211,5 +211,28 @@ class EvaluatorControls(unittest.TestCase):
         self.assertEqual(wbc.cvttsd2si(-1.5), wbc.MASK)
 
 
+
+class ReciprocalShiftExtractionTests(unittest.TestCase):
+    @staticmethod
+    def insn(va, mn, text):
+        return (va, mn, [], text)
+
+    def idiom(self, shr):
+        return [self.insn(0x1000, 'movabs', 'movabs rax,0x346dc5d63886594b'),
+                self.insn(0x100a, 'mul', 'mul    QWORD PTR [rbx]'),
+                self.insn(0x100d, 'mov', 'mov    r15,rdx'),
+                self.insn(0x1010, 'shr', f'shr    r15,{shr}')]
+
+    def test_extracts_modelled_shift(self):
+        self.assertEqual(wbc.extract_reciprocal_shift(self.idiom('0xb')), 75)
+
+    def test_extracts_a_different_shift(self):
+        self.assertEqual(wbc.extract_reciprocal_shift(self.idiom('0xc')), 76)
+
+    def test_no_idiom_no_shift(self):
+        self.assertIsNone(wbc.extract_reciprocal_shift(
+            [self.insn(0x1000, 'nop', 'nop')]))
+
+
 if __name__ == '__main__':
     unittest.main()

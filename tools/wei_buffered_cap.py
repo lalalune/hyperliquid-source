@@ -695,6 +695,33 @@ def check_site(machine, tail, insns):
             'doubles': len(double_grid()), 'clamp_mismatch': clamp}
 
 
+def extract_reciprocal_shift(insns):
+    """Total right shift of the reciprocal division idiom, from the code.
+
+    The sequence is: movabs rax, RECIPROCAL; mul <src> (unsigned, leaving
+    the 128-bit product in rdx:rax); mov reg, rdx (the high half, an
+    implicit shift of 64); shr reg, imm. Returns 64 + imm, or None when
+    the idiom is not present in this shape.
+    """
+    for i, ins in enumerate(insns):
+        if not re.search(r'movabs rax,0x346dc5d63886594b', ins[3]):
+            continue
+        window = insns[i + 1:i + 10]
+        if not any(w[1] == 'mul' for w in window):
+            return None
+        for j, w in enumerate(window):
+            m = re.search(r'mov\s+(r\w+),rdx$', w[3])
+            if not m:
+                continue
+            for v in window[j + 1:]:
+                s = re.search(rf'shr\s+{m.group(1)},0x([0-9a-f]+)$', v[3])
+                if s:
+                    return 64 + int(s.group(1), 16)
+            return None
+        return None
+    return None
+
+
 def scan_head(insns):
     """Decoded facts of the accumulation loop, by instruction text."""
     text = [ins[3] for ins in insns]
@@ -725,6 +752,7 @@ def analyse(binary_path, data):
         raise EvidenceError('no reference to the 1.001 constant')
 
     sites, forms, details = [], {}, []
+    reciprocal_shifts = set()
     agg = {'grid': 0, 'grid_mismatch': 0, 'factor_window_mismatch': 0, 'clamp_mismatch': 0, 'doubles': 0}
     recorder = None
     for ref in sse:
@@ -732,6 +760,11 @@ def analyse(binary_path, data):
         insns = parse_listing(disassemble(binary_path, r['start'], r['end']))
         tail = find_tail(insns)
         heads = scan_head(insns)
+        if heads['dex_reciprocal']:
+            shift = extract_reciprocal_shift(insns)
+            if shift is None:
+                raise EvidenceError('reciprocal shift not extractable at a dex site')
+            reciprocal_shifts.add(shift)
         drops = {DROP_A, DROP_B} & set(int(c, 16) for c in heads['direct_calls'])
         rec_lea = next(ins for ins in insns if ins[1] == 'call' and ins[2][0][0] == 'a'
                        and ins[0] > tail['ok_store'] and relocs.get(ins[2][0][2]) == RECORDER_TARGET)
@@ -785,6 +818,9 @@ def analyse(binary_path, data):
     for site, start in zip(sites, starts):
         site['direct_refs'] = [[kind, hex(va)] for kind, va in refs[start]]
     limit_refs = rip_refs(text_va, text, find_constant(img, 1.01))[0]
+    if len(reciprocal_shifts) != 1:
+        raise EvidenceError(f'reciprocal shifts disagree across sites: {sorted(reciprocal_shifts)}')
+    reciprocal_shift = reciprocal_shifts.pop()
 
     result = {
         'task': 'RE-004', 'question': 'Wei cap arithmetic: factor guard, float chain, buffered saturating add',
@@ -795,8 +831,8 @@ def analyse(binary_path, data):
                      'location': {'va': hex(RECORD_LOCATION), 'file': path.split(b'/code_Mainnet/')[-1].decode(),
                                   'line': line, 'col': col}},
         'sites': sites, 'tail_text': list(tail_form),
-        'reciprocal_10000': {'multiplier': hex(RECIPROCAL), 'shift': 75,
-                             'exact_for_all_u64': reciprocal_exact(RECIPROCAL, 75, 10000)},
+        'reciprocal_10000': {'multiplier': hex(RECIPROCAL), 'shift': reciprocal_shift,
+                             'exact_for_all_u64': reciprocal_exact(RECIPROCAL, reciprocal_shift, 10000)},
         'factor': {'max_admitted': MAX_FACTOR_INT,
                    'quotient_at_max': (MAX_FACTOR_INT / 1e8).hex(), 'limit': (1.01).hex(),
                    'quotient_above_max': ((MAX_FACTOR_INT + 1) / 1e8).hex()},
@@ -816,7 +852,7 @@ def analyse(binary_path, data):
             'doubles_per_site': agg['doubles'] // len(sites), 'clamp_mismatches': agg['clamp_mismatch'],
             'max_factor_int': MAX_FACTOR_INT,
             'lead_grid_mismatches': lead_mismatch, 'lead_clamp_differences': len(lead_clamp),
-            'reciprocal_exact': reciprocal_exact(RECIPROCAL, 75, 10000),
+            'reciprocal_exact': reciprocal_exact(RECIPROCAL, reciprocal_shift, 10000),
             'nan_or_inf_reachable': not (math.isfinite(max_x) and math.isfinite(max_y)),
         },
     }
