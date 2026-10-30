@@ -1,0 +1,67 @@
+{
+  "call_census": {
+    "containing_function": {
+      "end": "0x489a550",
+      "start": "0x4898810"
+    },
+    "denominator": "complete .text scan for e8 and lea encodings",
+    "direct_e8": [
+      "0x4899415",
+      "0x4899910"
+    ],
+    "lea_references": 0
+  },
+  "captured_binary_executed": false,
+  "chrono_anchors": {
+    "callee1": {
+      "got": "0x576e8a8",
+      "observed": "takes (out, timestamp fields, 30, 0)",
+      "target": "0x15206e0"
+    },
+    "callee2": {
+      "got": "0x576e8b0",
+      "target": "0x151f870"
+    },
+    "day_division": {
+      "divisor": 86400,
+      "magic": "0x1845c8a0ce512957",
+      "observed": "callee1 result divided into whole days for callee2"
+    },
+    "panic": {
+      "callee": "0x157a9b0",
+      "column": 38,
+      "line": 1631,
+      "location_va": "0x566af18",
+      "message": "`NaiveDateTime + TimeDelta` overflowed",
+      "message_va": "0x21a01f",
+      "path": "chrono-0.4.38/src/naive/datetime/mod.rs"
+    },
+    "range_gate": {
+      "high": "0xfffeae7ffffeae81",
+      "low": "0xffff574000000000",
+      "observed": "callee1 result + low compared against high; below routes to the panic"
+    }
+  },
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "guard": {
+    "bytes": 341,
+    "end_va_exclusive": "0x474fce5",
+    "fde_va": "0xef91d0",
+    "inferred_label": "ema window guard around the update body",
+    "sha256": "2b098dfa6d806c619401899dd89d9a71750a99f639e5008b4ff80e490d81a4ba",
+    "start_va": "0x474fb90"
+  },
+  "progress_gate_requested": false,
+  "structure": {
+    "cascades": "three lexicographic three-dword timestamp comparisons (sample vs window argument; sample vs callee2 result; stored window vs sample)",
+    "post_update": "12-byte sample timestamp copied to context +0x28",
+    "sample_forward": "xmm0 spilled at entry, reloaded before the update call",
+    "update_call": {
+      "note": "the only caller of the ema_tracker update body",
+      "site": "0x474fcac",
+      "target": "0x14791c0"
+    }
+  },
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
