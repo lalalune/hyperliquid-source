@@ -80,6 +80,8 @@ def fde_index(elf: Elf):
         pc_rel, fde_rel = struct.unpack_from("<ii", d, off + 12 + 8 * i)
         start, fde_va = va + pc_rel, va + fde_rel
         fo = elf.off(fde_va)
+        if fo + 16 > len(d):
+            raise EvidenceError(f"FDE at {fde_va:#x} truncated")
         pc_begin = fde_va + 8 + struct.unpack_from("<i", d, fo + 8)[0]
         pc_range = struct.unpack_from("<I", d, fo + 12)[0]
         if pc_begin != start:
