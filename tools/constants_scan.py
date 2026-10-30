@@ -216,7 +216,7 @@ def xrefs(data, text, targets):
         end = base + offset + 6
         target = end + struct.unpack_from('<i', data, offset + 2)[0]
         if target in wanted:
-            wanted[target].append((base + offset, data[offset - 1:offset + 6].hex()))
+            wanted[target].append((base + offset - 1, data[offset - 1:offset + 6].hex()))
     return wanted
 
 

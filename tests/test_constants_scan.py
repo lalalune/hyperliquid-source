@@ -98,7 +98,15 @@ class XrefTests(unittest.TestCase):
 
     def test_resolves_rip_relative_operand(self):
         found = xrefs(self.data, section(self.data, '.text'), [0x2002])
-        self.assertEqual(found[0x2002], [(0x1001, '488d35fb0f0000')])
+        self.assertEqual(found[0x2002], [(0x1000, '488d35fb0f0000')])
+
+    def test_site_maps_to_the_reported_instruction_bytes(self):
+        text = section(self.data, '.text')
+        found = xrefs(self.data, text, [0x2002])
+        for site, instruction in found[0x2002]:
+            offset = text['offset'] + site - text['address']
+            raw = bytes.fromhex(instruction)
+            self.assertEqual(self.data[offset:offset + len(raw)], raw)
 
     def test_window_is_nearest_start(self):
         self.assertEqual(window([0x1000, 0x2000], 0x1001), (0x1000, 0x2000))

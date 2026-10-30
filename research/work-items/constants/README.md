@@ -37,9 +37,9 @@ Retained outputs:
 
 | File | Content | SHA-256 |
 | --- | --- | --- |
-| `constants.json` | machine-readable record | `e904db8f717a905edc933701592e3b22135a162bdd16a9e3e501a9a36e664f8b` |
+| `constants.json` | machine-readable record | `f96c97435f2c1195cc4a05a578725e575950d7cb14a2e191a6d13f2d49cf33db` |
 | `strings.tsv` | 2 seeds + 76 table entries | `5c9a65c930f0645661e96fc7e5a59c51baff38b86d0cd2d424e170f0c44ed65b` |
-| `xrefs.tsv` | 9 reference sites | `06d7d4a091d2652dc79129cfa844a30b0d142634f2d6f8ba5aa639001c78329b` |
+| `xrefs.tsv` | 9 reference sites | `d0da5edc9b6f7156b331d32db5d5dc7dceae04777b53fbed65d3d4daed979e8b` |
 | `context.txt` | raw hex around each cited address | `373eb95d9c81ec837f3e40a5f0374c9783e01afb0e769a93a6a2031aa0f58e0b` |
 | `disassembly/select_cham_dir.txt` | window `0x164f810`–`0x164f970` | `9545e0535a5ff09d7bdddc3e135ad0a1eb1babd2ef88e156a55b739ebddcb296` |
 | `disassembly/read_static_config_aws_name.txt` | window `0x164fb80`–`0x164fea0` | `42b6cd41f85042a5d11f6c2069cda7ed042b4b7c8dbc0b78f0d90fd9cb7e1e28` |
@@ -49,6 +49,8 @@ Retained outputs:
 Coordinates are linked virtual addresses (VA). `.rodata` has VA == file offset
 in this link; `.text` is offset by `0x1000`, so `xrefs.tsv` carries both the
 site VA and its file offset.
+
+The xref site coordinates and generated output hashes were corrected in [RE-015 xref instruction starts](../RE-015-xref-instruction-starts/README.md). The original scanner reported the opcode byte after the REX prefix; the corrected sites point at the first byte of each reported instruction. Target addresses, instruction bytes, table contents and window bounds are unchanged.
 
 ## Evidence
 
@@ -62,8 +64,8 @@ byte is the piece length. All path entries below use the same marker.
 
 | Seed | Text VA | Entry VA | Entry bytes | Xref site | Window |
 | --- | ---: | ---: | --- | ---: | --- |
-| `/static_config` | `0x1ef5f7` | `0x1ef5f5` | `c0 0e` | `0x164fbaf` | `0x164fb80`–`0x164fea0` |
-| `/cham` | `0x1fc0ee` | `0x1fc0ec` | `c0 05` | `0x164f841` | `0x164f810`–`0x164f970` |
+| `/static_config` | `0x1ef5f7` | `0x1ef5f5` | `c0 0e` | `0x164fbae` | `0x164fb80`–`0x164fea0` |
+| `/cham` | `0x1fc0ee` | `0x1fc0ec` | `c0 05` | `0x164f840` | `0x164f810`–`0x164f970` |
 
 The second byte of each entry equals the text length (14 and 5), and the text
 is NUL-terminated. A naive search for the text address finds no xref at all:
@@ -107,15 +109,15 @@ indirect table walks in the scan set.
 
 | Target | Target VA | Site | Window |
 | --- | ---: | ---: | --- |
-| `/cham` | `0x1fc0ec` | `0x164f841` | `0x164f810`–`0x164f970` |
-| `/hl` | `0x1ed055` | `0x164f88e` | `0x164f810`–`0x164f970` |
-| `/static_config` | `0x1ef5f5` | `0x164fbaf` | `0x164fb80`–`0x164fea0` |
-| `/code` | `0x1ed05b` | `0x164ff60` | `0x164ff00`–`0x1650060` |
-| `cham_dir does not exist: ` | `0x1f6798` | `0x164ffe9` | `0x164ff00`–`0x1650060` |
-| `could not create ` | `0x201ea5` | `0x164f9a5` | `0x164f970`–`0x164fa80` |
-| `AWS_NAME_STRINGS` | `0x5668288` | `0x13f5892` | `0x13f4360`–`0x13f5980` |
-| `AWS_NAME_STRINGS` | `0x5668288` | `0x13f61ce` | `0x13f5980`–`0x13f6410` |
-| `AWS_NAME_STRINGS` | `0x5668288` | `0x13f6c2c` | `0x13f6410`–`0x13f6dc0` |
+| `/cham` | `0x1fc0ec` | `0x164f840` | `0x164f810`–`0x164f970` |
+| `/hl` | `0x1ed055` | `0x164f88d` | `0x164f810`–`0x164f970` |
+| `/static_config` | `0x1ef5f5` | `0x164fbae` | `0x164fb80`–`0x164fea0` |
+| `/code` | `0x1ed05b` | `0x164ff5f` | `0x164ff00`–`0x1650060` |
+| `cham_dir does not exist: ` | `0x1f6798` | `0x164ffe8` | `0x164ff00`–`0x1650060` |
+| `could not create ` | `0x201ea5` | `0x164f9a4` | `0x164f970`–`0x164fa80` |
+| `AWS_NAME_STRINGS` | `0x5668288` | `0x13f5891` | `0x13f4360`–`0x13f5980` |
+| `AWS_NAME_STRINGS` | `0x5668288` | `0x13f61cd` | `0x13f5980`–`0x13f6410` |
+| `AWS_NAME_STRINGS` | `0x5668288` | `0x13f6c2b` | `0x13f6410`–`0x13f6dc0` |
 
 The three table sites are the `unknown_variant` fallbacks of three string→variant
 parsers at `0x13f4360`, `0x13f5980` and `0x13f6410`; each builds
