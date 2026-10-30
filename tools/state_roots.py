@@ -196,6 +196,7 @@ def literal_anchors(elf, kind, lit, leas, relocs):
             if t in leas or t in rel_targets:
                 out.append({"occurrence": s, "anchor": t, "lea_sites": sorted(leas.get(t, ())),
                             "reloc_slots": sorted(k for k, v in relocs.items() if v == t)})
+                break
     return out
 
 

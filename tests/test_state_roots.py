@@ -186,5 +186,19 @@ class StateRootsTests(unittest.TestCase):
                     self.assertRegex(out, rf"{s:x}:\s+lea\s+-?0x[0-9a-f]+\(%rip\),%r\w+\s+# {a['anchor']:x}")
 
 
+
+class TemplateAnchorTests(unittest.TestCase):
+    def test_template_literal_gets_single_anchor(self):
+        class StubElf:
+            pass
+        data = b'\x00fmt:' + b'/CHECKPOINT_COMPLETE' + b'\x00'
+        elf = StubElf()
+        elf.data = data
+        elf.sections = {'.rodata': (0x1000, 0, len(data))}
+        anchors = sr.literal_anchors(elf, 'template', '/CHECKPOINT_COMPLETE',
+                                     {0x1001: [0x5000], 0x1005: [0x6000]}, {})
+        self.assertEqual([a['anchor'] for a in anchors], [0x1001])
+
+
 if __name__ == "__main__":
     unittest.main()
