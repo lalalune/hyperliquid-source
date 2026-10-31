@@ -1,0 +1,59 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x375fb50 0x375fb50..0x375fc29; byte records are authoritative
+375fb50  50                     push rax
+375fb51  488b8788010000         mov rax, qword ptr [rdi + 0x188]
+375fb58  4885c0                 test rax, rax
+375fb5b  0f84ae000000           je 0x375fc0f
+375fb61  4839c6                 cmp rsi, rax
+375fb64  0f83a5000000           jae 0x375fc0f
+375fb6a  488b8780010000         mov rax, qword ptr [rdi + 0x180]
+375fb71  0fb64849               movzx ecx, byte ptr [rax + 0x49]
+375fb75  4869d6e8000000         imul rdx, rsi, 0xe8
+375fb7c  2a4c1048               sub cl, byte ptr [rax + rdx + 0x48]
+375fb80  0f8296000000           jb 0x375fc1c
+375fb86  b801000000             mov eax, 1
+375fb8b  7502                   jne 0x375fb8f
+375fb8d  59                     pop rcx
+375fb8e  c3                     ret 
+375fb8f  0fb6f1                 movzx esi, cl
+375fb92  40f6c601               test sil, 1
+375fb96  740a                   je 0x375fba2
+375fb98  b80a000000             mov eax, 0xa
+375fb9d  83fe01                 cmp esi, 1
+375fba0  74eb                   je 0x375fb8d
+375fba2  f6c102                 test cl, 2
+375fba5  740e                   je 0x375fbb5
+375fba7  486bc064               imul rax, rax, 0x64
+375fbab  89f2                   mov edx, esi
+375fbad  83e2fe                 and edx, 0xfffffffe
+375fbb0  83fa02                 cmp edx, 2
+375fbb3  74d8                   je 0x375fb8d
+375fbb5  f6c104                 test cl, 4
+375fbb8  7411                   je 0x375fbcb
+375fbba  4869c010270000         imul rax, rax, 0x2710
+375fbc1  89f2                   mov edx, esi
+375fbc3  83e2fc                 and edx, 0xfffffffc
+375fbc6  83fa04                 cmp edx, 4
+375fbc9  74c2                   je 0x375fb8d
+375fbcb  f6c108                 test cl, 8
+375fbce  7411                   je 0x375fbe1
+375fbd0  4869c000e1f505         imul rax, rax, 0x5f5e100
+375fbd7  89f2                   mov edx, esi
+375fbd9  83e2f8                 and edx, 0xfffffff8
+375fbdc  83fa08                 cmp edx, 8
+375fbdf  74ac                   je 0x375fb8d
+375fbe1  f6c110                 test cl, 0x10
+375fbe4  741c                   je 0x375fc02
+375fbe6  48b90000c16ff2862300   movabs rcx, 0x2386f26fc10000
+375fbf0  48f7e1                 mul rcx
+375fbf3  0f90c1                 seto cl
+375fbf6  83e6f0                 and esi, 0xfffffff0
+375fbf9  83fe10                 cmp esi, 0x10
+375fbfc  7504                   jne 0x375fc02
+375fbfe  84c9                   test cl, cl
+375fc00  748b                   je 0x375fb8d
+375fc02  488d3d3726f901         lea rdi, [rip + 0x1f92637]
+375fc09  ff1561e80002           call qword ptr [rip + 0x200e861]
+375fc0f  488d3dda25f901         lea rdi, [rip + 0x1f925da]
+375fc16  ff1554e80002           call qword ptr [rip + 0x200e854]
+375fc1c  488d3d3526f901         lea rdi, [rip + 0x1f92635]
+375fc23  ff1527e50002           call qword ptr [rip + 0x200e527]
