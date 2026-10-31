@@ -20,6 +20,7 @@ from pathlib import Path
 import re
 import struct
 import sys
+from source_files import rust_files
 
 EXPECTED_SHA256 = "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
 DISPATCHER = 0x2759240
@@ -267,7 +268,7 @@ TEXT_LO, TEXT_HI = 0x1343C80, 0x1343C80 + 0x431C430
 def survey_addresses(src_dir: Path, starts, ends):
     """Classify every .text-range hex literal in the reconstruction's exchange tree."""
     rows = []
-    for path in sorted(src_dir.rglob("*.rs")):
+    for path in sorted(rust_files(src_dir)):
         seen = set()
         for m in HEX_RE.finditer(path.read_text(encoding="utf-8")):
             va = int(m.group(1).replace("_", ""), 16)

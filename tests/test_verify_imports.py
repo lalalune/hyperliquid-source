@@ -42,6 +42,42 @@ class VerifyImportsTests(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()):
             verify_imports.verify(self.root)
 
+    def test_hidden_untracked_source_is_rejected(self):
+        self.git('config', 'status.showUntrackedFiles', 'no')
+        with contextlib.redirect_stdout(io.StringIO()):
+            verify_imports.verify(self.root)
+        (self.sub / 'unexpected.rs').write_text('// Extra source, not in the pinned commit.\n')
+        # The user's display preference hides a file that source scans can read.
+        self.assertEqual(self.git('status', '--porcelain'), '')
+        with self.assertRaisesRegex(ValueError, 'Modified source reference: refs/sub'):
+            verify_imports.verify(self.root)
+
+    def check_index_flag(self, flag):
+        self.git('update-index', '--' + flag, '--', 'file')
+        with contextlib.redirect_stdout(io.StringIO()):
+            verify_imports.verify(self.root)
+        index = (self.sub / '.git/index').read_bytes()
+        marker = self.git('ls-files', '-v', '--', 'file')
+        (self.sub / 'file').write_text('y')
+        self.assertEqual(self.git('status', '--porcelain', '--untracked-files=all'), '')
+        with self.assertRaisesRegex(ValueError, 'Modified source reference: refs/sub'):
+            verify_imports.verify(self.root)
+        self.assertEqual((self.sub / '.git/index').read_bytes(), index)
+        self.assertEqual(self.git('ls-files', '-v', '--', 'file'), marker)
+        (self.sub / 'file').unlink()
+        with self.assertRaisesRegex(ValueError, 'Modified source reference: refs/sub'):
+            verify_imports.verify(self.root)
+        (self.sub / 'file').write_text('x')
+        with contextlib.redirect_stdout(io.StringIO()):
+            verify_imports.verify(self.root)
+        self.assertEqual(self.git('ls-files', '-v', '--', 'file'), marker)
+
+    def test_assume_unchanged_does_not_hide_modified_source(self):
+        self.check_index_flag('assume-unchanged')
+
+    def test_skip_worktree_does_not_hide_modified_source(self):
+        self.check_index_flag('skip-worktree')
+
     def test_missing_submodule_names_the_fix(self):
         shutil.rmtree(self.sub)
         self.sub.mkdir()
