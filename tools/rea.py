@@ -70,6 +70,8 @@ def target(name):
 def main(argv=None):
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] == 'target':
+        if 'targets' not in CONFIG:
+            raise ValueError('config/rea.json missing targets')
         name = args[1] if len(args) == 2 else CONFIG['default_target']
         if name not in CONFIG['targets']:
             raise ValueError('Unknown target; use 94, 115 or visor')
