@@ -64,3 +64,44 @@ class ArtifactTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             a.fetch_one(self.root, self.item)
         self.assertEqual(p.read_bytes(), b'evil')
+
+    def _signature_root(self):
+        for rel in ['node/94/hl-node', 'node/115/hl-node', 'visor/captured/hl-visor']:
+            for suffix in ('', '.asc'):
+                p = self.root / 'artifacts' / rel
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.with_name(p.name + suffix).write_bytes(b'x')
+        (self.root / 'artifacts/keys').mkdir(parents=True, exist_ok=True)
+        (self.root / 'artifacts/keys/pub_key.asc').write_bytes(b'key')
+
+    def _fake_gpg(self, extra=''):
+        fingerprint = 'A' * 40
+
+        def run(command, **kwargs):
+            if '--import' in command:
+                return a.subprocess.CompletedProcess(command, 0, '', '')
+            stdout = f'[GNUPG:] VALIDSIG {fingerprint} 2026-01-01 1 0 4 0 1 8 00 {fingerprint}\n'
+            if extra and command[-1].endswith('node/94/hl-node'):
+                stdout += extra + '\n'
+            return a.subprocess.CompletedProcess(command, 0, stdout, '')
+        return run
+
+    def test_valid_signature_accepted(self):
+        self._signature_root()
+        with patch.object(a.subprocess, 'run', side_effect=self._fake_gpg()):
+            a.verify_signatures(self.root, 'A' * 40)
+
+    def test_revoked_key_signature_rejected(self):
+        self._signature_root()
+        with patch.object(a.subprocess, 'run',
+                          side_effect=self._fake_gpg('[GNUPG:] REVKEYSIG DEADBEEF Test')):
+            with self.assertRaises(ValueError) as caught:
+                a.verify_signatures(self.root, 'A' * 40)
+        self.assertIn('not currently valid', str(caught.exception))
+
+    def test_expired_key_signature_rejected(self):
+        self._signature_root()
+        with patch.object(a.subprocess, 'run',
+                          side_effect=self._fake_gpg('[GNUPG:] KEYEXPIRED 1')):
+            with self.assertRaises(ValueError):
+                a.verify_signatures(self.root, 'A' * 40)
