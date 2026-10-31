@@ -1,0 +1,46 @@
+name	address	bytes	note
+pending_cap	0x39494f6	4983ff31	cmp r15, 49; jbe passes: 50 voted rows refuse with 0x36
+allow_all_read	0x394915f	80b89002000000	S +0x290: allow_all_validators skips the allowed set
+allowed_read	0x3949184	4c8b8020010000	S +0x120: allowed_validators root
+active_read	0x3949256	807e5000	tracker +0x50: active byte
+key_stride	0x39495cd	41c1e507	shl r13d, 7: tracker keys are 0x80 bytes
+value_stride	0x3949632	496bc770	imul rax, r15, 0x70: tracker values are 0x70 bytes
+value_stakes_root	0x3949636	488b8c03c0050000	value +0x40 at node +0x580: the stake snapshot root
+done_store	0x394986a	41c6476c01	value +0x6c = 1 after a finish; no row in this function reads it
+quorum_word	0x3949528	48b80a00000000000080	word0 below this value is variant 6
+quorum_table_index	0x3949532	4939010f9244240f	cmp word0; setb selects the f64 table index
+quorum_table_load	0x3949986	f20f1004c8	movsd xmm0, table[index]
+ttl_seconds	0x3949b93	ba803a0900	edx = 604800: 7 days added to the block time
+name_tail	0x3949c69	48b95f747261636b6572	tail of the 15 byte text l1_vote_tracker
+name_head	0x3949c77	48b96c315f766f74655f	head of the 15 byte text l1_vote_tracker
+profile_root	0x3949962	4c8ba350010000	S +0x150: validator_to_profile root
+profile_signer	0x3949a56	0f104500	row +0x40: signer read through the rbp walk
+inner_mask	0x22cdc2e	be7c030000	esi = 0x37c: inner tags 2,3,4,5,6,8,9 pass
+inner_bit	0x22cdc33	480fa3ce	bt rsi, rcx
+handler_len_limit	0x22cdbf9	4883f864	len above 100 refuses with 0x143: variants 0 and 5
+handler_len_short	0x22cdc08	4883f815	len at or above 21 refuses with 0x140: variants 0 and 5
+handler_dex_limit	0x22cdcb4	4983fc64	len above 100 refuses with 0x143: variant 3
+handler_dex_short	0x22cdd1e	4983fc14	len above 20 refuses with 0x140: variant 3
+host_tracker	0x2706a7b	498db778360000	lea rsi, [r15 + 0x3678]: tracker in the state
+host_chain	0x27067f7	0fb686f2080000	state +0x8f2: chain byte
+stream_len_limit	0x2706f1d	4883fa64	text above 100 refuses with 0x143
+stream_map	0x270706a	4881c668320000	state +0x3268: risk_free_rate map
+stream_validators	0x2706e5f	488b8e08090000	state +0x908: validator membership root
+stake_compare	0x33ee267	f20f595718	mulsd xmm2, [rdi + 0x18]: total times the row ratio
+stake_strict	0x33ee26c	660f2ec20f97c0	ucomisd; seta: voted must be strictly above
+bucket_finished	0x394674d	66c743180100	bucket +0x18 word = 1 at a finish
+quorum_table	0x209510	555555555555e53f9a9999999999c93f	f64 pair: index 0 is 0.66666666666666663, index 1 is 0.20000000000000001
+rate_bound	0x20a730	000000000000f03f	f64 1: a rate strictly above it refuses with 0x140
+disable_perp_dex_word	0x1f4dabf	49bd1200000000000080	serde body of DisablePerpDex writes this value minus 5 at 0x1f4db22: variant 3
+wire_text	0x3b1988		struct ValidatorL1VoteTracker with 5 elements
+wire_text	0x3b2087		struct ValidatorL1StreamTracker with 1 element
+wire_text	0x3d3199		struct ValidatorL1StreamAction with 1 element
+wire_text	0x3b2079		risk_free_rate
+wire_text	0x3d318d		riskFreeRate
+wire_text	0x3b350b		struct variant ValidatorL1VoteAction::ModifyAqav2 with 5 elements
+wire_text	0x3b354c		tuple variant ValidatorL1VoteAction::AlignedQuoteToken with 2 elements
+wire_text	0x3b3592		tuple variant ValidatorL1VoteAction::QuarantineUser with 2 elements
+wire_text	0x3b35d5		tuple variant ValidatorL1VoteAction::AllowHip3GrowthMode with 2 elements
+wire_text	0x3b361d		tuple variant ValidatorL1VoteAction::CanonicalTokenDeployer with 2 elements
+wire_text	0x3b3668		tuple variant ValidatorL1VoteAction::DisablePerpDex with 2 elements
+wire_text	0x3b34c8		technicalStakertreasuryStakertreasuryEvmAddressevmRebalanceContract
