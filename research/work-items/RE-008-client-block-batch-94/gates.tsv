@@ -1,0 +1,37 @@
+group	order	site	rule	otherwise	outcome_label	cases
+poll	1	0x475a40a	QC round < state +0x108 `last_recv_round`: warning `received old client block`, block dropped, success	next row	old block	8
+poll	2	0x475a4b7	QC round == last_recv_round: set state +0x118 `bootstrapped`, call the buffer	next row	buffered	66
+poll	3	0x475a67a	QC round over last_recv_round with bootstrapped set: `unexpected client block round`, outer tag 0x2c	next row	gap after start	37
+poll	4	0x475ac0d	QC round over last_recv_round with bootstrapped clear: node_bootstrap future for rounds last_recv_round + 1 (saturating) to QC round, 300.0 s	-	bootstrap	35
+join	5	0x4548071	body word present: rows pass through, no lookup	next row	-	-
+join	6	0x45480c3	hash count <= 0x333333333333333, the 0x28 byte row bound	panic	panic row limit	1
+join	7	0x4548257	each hash in block order is in the local tx map; repeats are kept	tag 0x1c, built rows dropped	check 0x1c	5
+join	8	0x4548460	rows go to a new 0x28 byte Arc: strong 1, weak 1, cap, ptr, len	-	-	-
+buffer	9	0x4360025	QC round == state +0x108	outer tag 0x2c, both Arcs dropped; the poll compares first, so only 0x4389070 can reach it	check 0x2c	29
+buffer	10	0x4360035	state +0x108 = block round, before any check of the block	-	-	-
+buffer	11	0x4360062	pending vector full: growth 0x454ee00, capacity doubled, at least 4	-	-	-
+buffer	12	0x4360099	proof word None: no verify	verify	-	-
+buffer	13	0x43600a3	no proof: pending length <= 100 is success	owned text, pending and state stay	text too many	1
+buffer	14	0x4360150	mutex at state +0xf0 +0x10; slow path 0x4e0f640 with 1000000000	-	-	-
+buffer	15	0x436016b	batch verify: whole pending vector, state +0x110 as the start round, table at the mutex object +0x18	-	-	-
+buffer	16	0x436017c	verify failed: warning `failed to verify client block batch`, unlock, error returned; pending and state +0x108 stay	-	-	-
+buffer	17	0x4360198	verify passed: state +0x110 = state +0x108, pending vector taken	-	flushed	92
+buffer	18	0x4360252	channel word +0x1c0 bit 0 set: row dropped, line `client block send failed`, the rest dropped, outer tag 0x35; state +0x110 keeps its new value	word + 2, push	check 0x35	16
+buffer	19	0x43602de	waker at channel +0x100 fires once when the channel flag word was 0	-	-	-
+batch	20	0x45476a7	batch length != 0	tag 0x14	check 0x14	1
+batch	21	0x4547712	proof word None or this is the last block	tag 0x1a	check 0x1a	2
+batch	22	0x454771f	QC round == previous round; start round for the first block	tag 0x15	check 0x15	43
+batch	23	0x4547727	from the second block on: QC hash == digest of the previous block; the first block has no hash check	tag 0x16	check 0x16	7
+batch	24	0x4547773	0x454b700 on the block	its error	check 0x1	47
+batch	25	0x45478d1	each tx row: Keccak-256 of the tx bytes == row hash; rate 0x88, delimiter 0x01	tag 0x17	check 0x17	11
+batch	26	0x45478ff	row count == block hash count	tag 0x18	check 0x18	14
+batch	27	0x4547966	row hashes equal the block hash vector, in order	tag 0x18	check 0x18	14
+batch	28	0x4547981	12 byte row time == block +0x90, word by word	tag 0x19	check 0x19	14
+batch	29	0x45479d1	previous round = block round, previous hash = digest of this block; no rule on rounds moving by 1	-	-	-
+batch	30	0x4547a0f	last block has a proof	tag 0x1b	check 0x1b	1
+batch	31	0x4547b87	0x454b700 on the child at block +0x108	its error	-	-
+batch	32	0x4547bac	0x4758d70 on the QC at block +0x200	its error	-	-
+batch	33	0x4547bf0	QC hash inside the child == digest of the last block	tag 0x1d	check 0x1d	10
+batch	34	0x4547c68	hash of the block +0x200 QC == digest of the child	tag 0x1e after a clock read 0x14385c0 and a second digest, both unused	check 0x1e	16
+batch	35	0x4547cb8	child round == last block round + 1, saturating at u64 max	tag 0x1f	check 0x1f	22
+batch	36	0x4547cbe	tag 0x2a is success; the round in the +0x200 QC and the QC round in the child are never read	-	flushed	92

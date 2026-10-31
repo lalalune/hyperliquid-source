@@ -1,0 +1,76 @@
+group	address	bytes	meaning
+poll	0x475a3f5	488b4950	QC round load
+poll	0x475a400	488b9008010000	last_recv_round load
+poll	0x475a407	4839d1	compare
+poll	0x475a40a	0f83a7000000	jae
+poll	0x475a4b7	0f85b6010000	jne
+poll	0x475a4bd	c6801801000001	set bootstrapped
+poll	0x475a502	ff1560c10101	call slot 0x5776668
+poll	0x475a67a	0f848d050000	gap arm: bootstrapped set
+poll	0x475a833	4d8d772c	outer tag 0x2c
+poll	0x475ac0d	48ffc2	start round + 1
+poll	0x475ac17	480f45f2	saturate
+poll	0x475ac40	4989b518020000	start
+poll	0x475ac47	49898d20020000	end
+poll	0x475ac72	48b80000000000c07240	300.0 bits
+join	0x4548071	4885c0	body test
+join	0x45480b6	48b83333333333333303	row bound
+join	0x45481f4	440fb7a5c2010000	node length +0x1c2
+join	0x4548225	ff155d622201	memcmp slot
+join	0x4548257	0f82ca000000	height out: missing
+join	0x454825d	488bacddc8010000	child +0x1c8
+join	0x45482a4	488b84dd68010000	value +0x168
+join	0x45482ac	f048ff00	Arc clone
+join	0x454835d	48be1c00000000000080	tag 0x1c
+join	0x454845b	bf28000000	body Arc 0x28
+buffer	0x436001e	483b8e08010000	expected round
+buffer	0x4360025	0f85c7000000	outer round branch
+buffer	0x4360035	48898e08010000	store round
+buffer	0x4360099	0f8597000000	proof branch
+buffer	0x436009f	4983fc64	100
+buffer	0x43600a3	0f866c020000	jbe
+buffer	0x43600d2	4983c52a	text tag
+buffer	0x43600fc	4883ca2c	tag 0x2c
+buffer	0x4360141	498b8e10010000	start round argument
+buffer	0x4360150	f0410fb05010	lock
+buffer	0x436016b	e820751e00	call verifier
+buffer	0x4360198	49898610010000	confirmed store
+buffer	0x4360252	0f85ab010000	closed bit
+buffer	0x4360291	e87a787e00	push
+buffer	0x43602de	ff5008	wake
+buffer	0x4360315	4983c540	tag 0x40
+buffer	0x4360535	4983c535	tag 0x35
+buffer	0x4360567	ba00ca9a3b	lock wait argument
+batch	0x45476a7	0f846e030000	empty
+batch	0x45476fe	4939bd08010000	proof word
+batch	0x4547712	0f8464030000	proof position
+batch	0x4547718	498b4d50	QC round
+batch	0x454771c	4c39f9	round compare
+batch	0x4547727	7436	first block skip
+batch	0x4547729	f3410f6f4558	QC hash low
+batch	0x4547759	0f8590030000	hash branch
+batch	0x4547773	e8883f0000	verify block
+batch	0x454784e	48c784246002000088000000	Keccak rate 0x88
+batch	0x454785a	66c78424680200000100	delimiter 0x01
+batch	0x454786f	ff1563692201	hasher update
+batch	0x4547893	ff1547692201	hasher finish
+batch	0x45478d1	0f84d9feffff	tx hash branch
+batch	0x45478ff	0f8556010000	count
+batch	0x4547966	74b8	row hash branch
+batch	0x4547981	0f85a8010000	time word 0
+batch	0x4547992	0f8597010000	time word 1
+batch	0x45479a3	0f8586010000	time word 2
+batch	0x45479a9	4d8bbd98000000	round
+batch	0x45479d1	e87a460000	block digest
+batch	0x4547a0f	0f8523010000	last proof
+batch	0x4547b6d	e8de440000	digest of the last block
+batch	0x4547b87	e8743b0000	verify child
+batch	0x4547bac	e8bf112100	verify QC
+batch	0x4547bf0	7421	child hash branch
+batch	0x4547c2e	e81d440000	digest of the child
+batch	0x4547c68	7439	proof hash branch
+batch	0x4547c6a	ff1518782201	clock read
+batch	0x4547ca3	49ffc7	round + 1
+batch	0x4547cad	490f45c7	saturate
+batch	0x4547cb1	49398690010000	child round
+batch	0x4547cb8	7513	consecutive branch
