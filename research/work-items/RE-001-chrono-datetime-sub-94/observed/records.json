@@ -1,0 +1,93 @@
+{
+  "call_census": {
+    "denominator": "complete .text scan for e8, ff 15 and 48 8d encodings",
+    "direct_e8": 0,
+    "got_mediated": [
+      "0x151c698",
+      "0x2229fd4",
+      "0x470f1b4",
+      "0x4717007"
+    ],
+    "lea_references": 0
+  },
+  "captured_binary_executed": false,
+  "chrono_anchors": {
+    "day_division": {
+      "divisor": 86400,
+      "identity": "exact n // 86400 for non-negative n",
+      "magic": "0x1845c8a0ce512957",
+      "variant": "unsigned (shr 63 / shr 13), unlike the signed variant inside callee1"
+    },
+    "locations": [
+      {
+        "column": 27,
+        "line": 475,
+        "location_va": "0x5671eb0",
+        "path": "time_delta.rs"
+      },
+      {
+        "column": 16,
+        "line": 670,
+        "location_va": "0x5671ec8",
+        "path": "naive/time/mod.rs"
+      },
+      {
+        "column": 26,
+        "line": 473,
+        "location_va": "0x5671e98",
+        "path": "time_delta.rs"
+      }
+    ],
+    "negation": {
+      "delta_paths": "time_delta.rs:473 and :475 (impl Neg sites)",
+      "nanos_complement": 1000000000,
+      "observed": "(-1 - secs, 1e9 - nanos) when nanos nonzero; (0 - secs, 0) otherwise",
+      "secs_borrow": -1
+    },
+    "range_gates": {
+      "date": {
+        "high": "0xffbe76c8b4395811",
+        "low": "0xffdf3b645a1cac08",
+        "observed": "first gate over the day carry"
+      },
+      "datetime": {
+        "high": "0xfffeae7ffffeae81",
+        "low": "0xffff574000000000",
+        "observed": "second gate, identical constants to the ema window-guard packet"
+      }
+    },
+    "sentinel": {
+      "observed": "day carry equal to i64::MIN routes to a panic",
+      "value": "0x8000000000000000"
+    }
+  },
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "helper_got": {
+    "callee1": {
+      "site": "0x151d0d0",
+      "slot": "0x576e8a8",
+      "target": "0x15206e0"
+    },
+    "callee2": {
+      "site": "0x151d143",
+      "slot": "0x576e8b0",
+      "target": "0x151f870"
+    }
+  },
+  "panic_got": {
+    "0x576e150": "0x157b520",
+    "0x576eb38": "0x157b4c0"
+  },
+  "progress_gate_requested": false,
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "wrapper": {
+    "bytes": 292,
+    "end_va_exclusive": "0x151d1a4",
+    "fde_va": "0xcf62d8",
+    "got": "0x576f748",
+    "inferred_label": "NaiveDateTime Sub wrapper: negate TimeDelta, shift NaiveTime, gate day carry, shift NaiveDate",
+    "sha256": "3f96a01676715f243bd1b5a5e72e1558584e55a767468634fcf142c158191b15",
+    "start_va": "0x151d080"
+  }
+}
