@@ -93,5 +93,17 @@ class EvmExtraWeiDecimalsTest(unittest.TestCase):
                 self.assertTrue(filecmp.cmp(Path(tmp) / name, PACKET / name, shallow=False), name)
 
 
+class MainErrorHandlingTests(unittest.TestCase):
+    def test_missing_binary_is_one_line_error(self):
+        err = io.StringIO()
+        with tempfile.TemporaryDirectory() as d:
+            with contextlib.redirect_stderr(err):
+                rc = tool.main(['--binary', '/nonexistent.bin', '--out', str(Path(d) / 'out.json')])
+        self.assertEqual(rc, 1)
+        self.assertTrue(err.getvalue().startswith('error: '))
+        self.assertEqual(len(err.getvalue().strip().splitlines()), 1)
+        self.assertNotIn('Traceback', err.getvalue())
+
+
 if __name__ == '__main__':
     unittest.main()

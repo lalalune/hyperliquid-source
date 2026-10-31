@@ -503,7 +503,7 @@ def main(argv=None):
     args = ap.parse_args(argv)
     try:
         result, funcs, table = analyse(args.binary.read_bytes())
-    except EvidenceError as exc:
+    except (EvidenceError, OSError) as exc:
         print(f'error: {exc}', file=sys.stderr)
         return 1
     write(args.out, result, funcs, table)
