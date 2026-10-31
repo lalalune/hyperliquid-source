@@ -12,6 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def owner(path, components):
+    if any('id' not in c for c in components):
+        raise ValueError('Invalid component record')
     for c in components:
         if any(fnmatch.fnmatchcase(path, p) for p in c['patterns']):
             return c['id']
