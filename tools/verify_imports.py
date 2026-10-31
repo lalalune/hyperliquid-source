@@ -20,6 +20,8 @@ def git(root, path, *args):
 def verify(root):
     manifest = json.loads((root / 'provenance/imports.json').read_text())
     for item in manifest['files']:
+        if not isinstance(item, dict) or 'path' not in item:
+            raise ValueError('Invalid import manifest record')
         check(root / item['path'], item)
     for repo in json.loads((root / 'provenance/sources.json').read_text())['repositories']:
         if not (root / repo['path'] / '.git').exists():
