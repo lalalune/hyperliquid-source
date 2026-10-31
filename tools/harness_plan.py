@@ -137,6 +137,10 @@ def validate_request(request: dict, fixtures_by_id: dict) -> dict:
         if not isinstance(effects, list):
             raise ValueError(f'fixture {fid} declared_side_effects must be a list')
         for effect in effects:
+            if not isinstance(effect, str):
+                raise ValueError(
+                    f'fixture {fid} declared_side_effects entries must be strings'
+                )
             if effect not in seen_effects:
                 seen_effects.add(effect)
                 required_effects.append(effect)
