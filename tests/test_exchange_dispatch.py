@@ -275,5 +275,90 @@ class Binutils(unittest.TestCase):
             self.assertEqual(fdes[r['fde_start']], r['fde_end'])
 
 
+def _elf_code_mid_file(code, va=0x400000):
+    """Minimal ELF64 with `code` as the only PT_LOAD, section headers after it."""
+    shstr = b'\x00.text\x00.shstrtab\x00'
+    ehsize, phentsize, shentsize = 64, 56, 64
+    phoff = ehsize
+    code_off = phoff + phentsize
+    shoff = code_off + len(code)
+    shstr_off = shoff + 3 * shentsize
+    ident = b'\x7fELF' + bytes([2, 1, 1]) + b'\x00' * 9
+    eh = ident + struct.pack('<HHIQQQIHHHHHH', 2, 0x3E, 1, va, phoff, shoff, 0,
+                             ehsize, phentsize, 1, shentsize, 3, 2)
+    ph = struct.pack('<IIQQQQQQ', 1, 5, code_off, va, va, len(code), len(code), 0x1000)
+
+    def sh(name, typ, flags, addr, off, size):
+        return struct.pack('<IIQQQQIIQQ', name, typ, flags, addr, off, size, 0, 0, 1, 0)
+
+    shs = b'\x00' * shentsize
+    shs += sh(1, 1, 6, va, code_off, len(code))
+    shs += sh(7, 3, 0, 0, shstr_off, len(shstr))
+    return eh + ph + code + shs + shstr
+
+
+def _elf_code_at_eof(code, va=0x400000):
+    """Same minimal ELF, but the segment's bytes are the last bytes of the file."""
+    shstr = b'\x00.text\x00.shstrtab\x00'
+    ehsize, phentsize, shentsize = 64, 56, 64
+    phoff = ehsize
+    shoff = phoff + phentsize
+    shstr_off = shoff + 3 * shentsize
+    code_off = shstr_off + len(shstr)
+    ident = b'\x7fELF' + bytes([2, 1, 1]) + b'\x00' * 9
+    eh = ident + struct.pack('<HHIQQQIHHHHHH', 2, 0x3E, 1, va, phoff, shoff, 0,
+                             ehsize, phentsize, 1, shentsize, 3, 2)
+    ph = struct.pack('<IIQQQQQQ', 1, 5, code_off, va, va, len(code), len(code), 0x1000)
+
+    def sh(name, typ, flags, addr, off, size):
+        return struct.pack('<IIQQQQIIQQ', name, typ, flags, addr, off, size, 0, 0, 1, 0)
+
+    shs = b'\x00' * shentsize
+    shs += sh(1, 1, 6, va, code_off, len(code))
+    shs += sh(7, 3, 0, 0, shstr_off, len(shstr))
+    return eh + ph + shs + shstr + code
+
+
+class ReadBounds(unittest.TestCase):
+    # REX.W + add rax,imm32 with the imm32 missing: a 3-byte segment tail.
+    TRUNC = b'\x48\x81\xc0'
+
+    def test_read_within_segment_unchanged(self):
+        elf = ed.Elf(_elf_code_mid_file(self.TRUNC))
+        self.assertEqual(elf.read(0x400000, 3), self.TRUNC)
+        self.assertEqual(elf.read(0x400002, 1), b'\xc0')
+
+    def test_read_past_segment_end_raises(self):
+        # Bytes past the segment exist in the file (section headers) but are
+        # mapped at no VA; read() must not hand them out as segment content.
+        elf = ed.Elf(_elf_code_mid_file(self.TRUNC))
+        with self.assertRaises(ed.EvidenceError):
+            elf.read(0x400000, 16)
+        with self.assertRaises(ed.EvidenceError):
+            elf.read(0x400001, 3)
+
+    def test_walk_code_at_eof_raises_evidence_error(self):
+        elf = ed.Elf(_elf_code_at_eof(self.TRUNC))
+        with self.assertRaises(ed.EvidenceError):
+            ed.walk(elf, 0x400000, {}, [0x400000])
+
+    def test_decode_one_truncated_instruction_raises(self):
+        with self.assertRaises(ed.EvidenceError):
+            ed.decode_one(self.TRUNC, 0, 0x400000)
+
+    def test_decode_one_truncated_modrm_raises(self):
+        # REX.W + mov with a ModRM byte announcing a SIB that is not there.
+        with self.assertRaises(ed.EvidenceError):
+            ed.decode_one(b'\x48\x8b\x04', 0, 0x400000)
+
+    def test_well_formed_control_walk_unchanged(self):
+        code = b'\xe8\x00\x00\x00\x00' + b'\x00' * 715  # call +0, segment of 720
+        elf = ed.Elf(_elf_code_mid_file(code))
+        addrs, jccs, term = ed.walk(elf, 0x400000, {}, [0x400000, 0x400005])
+        self.assertEqual(addrs, [0x400000])
+        self.assertEqual(jccs, [])
+        self.assertEqual(term, {'site': 0x400000, 'kind': 'rel32', 'target': 0x400005})
+
+
 if __name__ == '__main__':
     unittest.main()

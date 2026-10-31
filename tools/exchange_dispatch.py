@@ -64,8 +64,15 @@ class Elf:
         raise EvidenceError(f"unmapped va {va:#x}")
 
     def read(self, va: int, n: int) -> bytes:
-        o = self.off(va)
-        return self.data[o:o + n]
+        for v, o, sz in self.loads:
+            if v <= va < v + sz:
+                if va + n > v + sz:
+                    raise EvidenceError(
+                        f"read of {n} bytes at {va:#x} crosses segment end {v + sz:#x}")
+                if o + va - v + n > len(self.data):
+                    raise EvidenceError(f"read at {va:#x} runs past end of file")
+                return self.data[o + va - v:o + va - v + n]
+        raise EvidenceError(f"unmapped va {va:#x}")
 
 
 def fde_index(elf: Elf):
@@ -134,18 +141,24 @@ class Insn:
 
 def _modrm(code, i):
     """Return (length of ModRM+SIB+displacement, RIP displacement or None, reg field)."""
+    if i >= len(code):
+        raise EvidenceError("truncated instruction: ModRM byte past end of buffer")
     m = code[i]
     mod, reg, rm = m >> 6, (m >> 3) & 7, m & 7
     n = 1
     rip = None
     if mod != 3 and rm == 4:
+        if i + 1 >= len(code):
+            raise EvidenceError("truncated instruction: SIB byte past end of buffer")
         sib = code[i + 1]
         n += 1
         if mod == 0 and sib & 7 == 5:
             n += 4
     if mod == 0 and rm == 5:
-        rip = struct.unpack_from("<i", code, i + 1)[0]
         n += 4
+        if i + n > len(code):
+            raise EvidenceError("truncated instruction: displacement past end of buffer")
+        rip = struct.unpack_from("<i", code, i + 1)[0]
     elif mod == 1:
         n += 1
     elif mod == 2:
@@ -159,22 +172,32 @@ def decode_one(code, i, va):
     Anything outside the subset raises EvidenceError instead of being guessed.
     """
     start = i
+
+    def need(k):
+        if k > len(code):
+            raise EvidenceError(f"truncated instruction at {va:#x}")
+
+    need(i + 1)
     opsize16 = False
     if code[i] == 0x66:
         opsize16 = True
         i += 1
+        need(i + 1)
     rex_w = False
     if 0x40 <= code[i] <= 0x4F:
         rex_w = bool(code[i] & 8)
         i += 1
+        need(i + 1)
     op = code[i]
     i += 1
     if op == 0x0F:
+        need(i + 1)
         op2 = code[i]
         i += 1
         if op2 in (0x10, 0x11, 0x28, 0x29, 0xB6, 0xB7):
             i += _modrm(code, i)[0]
         elif 0x80 <= op2 <= 0x8F:
+            need(i + 4)
             rel = struct.unpack_from("<i", code, i)[0]
             i += 4
             return Insn(va, i - start, "jcc", va + i - start + rel)
@@ -193,10 +216,12 @@ def decode_one(code, i, va):
     elif 0xB8 <= op <= 0xBF:
         i += 8 if rex_w else 4
     elif op in (0xE8, 0xE9):
+        need(i + 4)
         rel = struct.unpack_from("<i", code, i)[0]
         i += 4
         return Insn(va, i - start, "call" if op == 0xE8 else "jmp", va + i - start + rel)
     elif op == 0xEB or 0x70 <= op <= 0x7F:
+        need(i + 1)
         rel = struct.unpack_from("<b", code, i)[0]
         i += 1
         return Insn(va, i - start, "jmp" if op == 0xEB else "jcc", va + i - start + rel)
@@ -208,6 +233,7 @@ def decode_one(code, i, va):
         raise EvidenceError(f"unsupported ff /{reg} at {va:#x}")
     else:
         raise EvidenceError(f"unsupported opcode {op:02x} at {va:#x}")
+    need(i)
     return Insn(va, i - start)
 
 
