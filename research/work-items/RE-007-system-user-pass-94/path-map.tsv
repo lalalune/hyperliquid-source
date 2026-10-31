@@ -1,0 +1,13 @@
+order	stage	address	behaviour
+1	user row	0x2739d70 head	find the user in the map at +0x598, or use the default row
+2	health read	0x28db540	read failure returns its byte; negative words panic in unwrap; row word +8 of 0 returns the row byte
+3	gate	+0x5b3	only byte 1 enters the body; every other value goes to step 12
+4	rows	0x3739ef0	rows (token, debt, supply) of the system user; failure releases the gate unless its byte is 0x11
+5	row scan	0x2739d70 loop	available = min(supply, pool word +0x18) + spot balance, saturating; token 0 adds its floor value to have; other tokens with debt record shortfall = debt - available, saturating at 0
+6	need	0x32815f0	need adds the ceil value of the token 0 debt and of every shortfall, at the row price
+7	sell loop	need > have	for tokens other than 0 with no debt row: cancel, read the balance after the cancel, sell it all
+8	quote cancel	need > 0	cancel token 0 once, then the buy loop
+9	buy loop	need > 0	in key order: cancel, buy the shortfall computed before any cancel
+10	order	0x27653a0	slippage 0.01 sell, 0.005 buy; guard words keep sell at or above and buy at or below; size = min(wei to size, 5e13 / reference price); a sell of size 0 stops, a buy of size 0 still goes out
+11	release	+0x5b3	missing token, value limit or a failed cancel clears the gate, before the writer in step 12
+12	finish	0x2730520, 0x2739b00	event writer with the system address, then the post check with gap = high word - low word
