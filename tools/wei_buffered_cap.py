@@ -854,7 +854,7 @@ def main(argv=None):
     args = ap.parse_args(argv)
     try:
         result, boundary_rows, details = analyse(args.binary, args.binary.read_bytes())
-    except (EvidenceError, Unmodelled) as exc:
+    except (EvidenceError, Unmodelled, OSError) as exc:
         print(f'error: {exc}', file=sys.stderr)
         return 1
     write(args.out, result, boundary_rows, details)

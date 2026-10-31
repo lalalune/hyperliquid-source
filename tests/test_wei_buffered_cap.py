@@ -1,6 +1,8 @@
 """Controls for tools/wei_buffered_cap.py (RE-004, node #94)."""
 
+import contextlib
 import filecmp
+import io
 import importlib.util
 import math
 import sys
@@ -209,6 +211,18 @@ class EvaluatorControls(unittest.TestCase):
         self.assertEqual(wbc.cvttsd2si(2.0 ** 63), 1 << 63)
         self.assertEqual(wbc.cvttsd2si(math.nan), 1 << 63)
         self.assertEqual(wbc.cvttsd2si(-1.5), wbc.MASK)
+
+
+class MainErrorHandlingTests(unittest.TestCase):
+    def test_missing_binary_is_one_line_error(self):
+        err = io.StringIO()
+        with tempfile.TemporaryDirectory() as d:
+            with contextlib.redirect_stderr(err):
+                rc = wbc.main(['--binary', '/nonexistent.bin', '--out', str(Path(d) / 'out.json')])
+        self.assertEqual(rc, 1)
+        self.assertTrue(err.getvalue().startswith('error: '))
+        self.assertEqual(len(err.getvalue().strip().splitlines()), 1)
+        self.assertNotIn('Traceback', err.getvalue())
 
 
 if __name__ == '__main__':
