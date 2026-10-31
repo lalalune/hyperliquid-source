@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 import struct
 import subprocess
+import sys
 from elf_index import sections
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -186,12 +187,17 @@ def main():
     parser.add_argument('--binary',type=Path,default=TARGET)
     parser.add_argument('--objdump',help='Rerun LLVM instead of using retained raw exports')
     parser.add_argument('--check',type=Path)
-    args = parser.parse_args(); result = inspect(args.binary,args.objdump)
-    if args.check:
-        require(result == json.loads(args.check.read_text()), 'Retained evidence changed')
-        print('Foundation millis evidence reproduces exactly.')
-    else:
-        print(json.dumps(result,indent=2))
+    args = parser.parse_args()
+    try:
+        result = inspect(args.binary,args.objdump)
+        if args.check:
+            require(result == json.loads(args.check.read_text()), 'Retained evidence changed')
+            print('Foundation millis evidence reproduces exactly.')
+        else:
+            print(json.dumps(result,indent=2))
+    except (ValueError, OSError, struct.error, subprocess.CalledProcessError) as error:
+        print(f'foundation_millis: {error}', file=sys.stderr)
+        raise SystemExit(1)
 
 
 if __name__ == '__main__':
