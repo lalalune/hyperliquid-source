@@ -1,0 +1,70 @@
+# capstone 5.0.7 disassembly of the datetime-Sub wrapper 0x151d080..0x151d1a4; byte records are authoritative
+151d080  4157                   push r15
+151d082  4156                   push r14
+151d084  53                     push rbx
+151d085  4883ec20               sub rsp, 0x20
+151d089  4989f6                 mov r14, rsi
+151d08c  4889fb                 mov rbx, rdi
+151d08f  85c9                   test ecx, ecx
+151d091  0f84d6000000           je 0x151d16d
+151d097  89c8                   mov eax, ecx
+151d099  b900ca9a3b             mov ecx, 0x3b9aca00
+151d09e  29c1                   sub ecx, eax
+151d0a0  0f80f1000000           jo 0x151d197
+151d0a6  48c7c0ffffffff         mov rax, 0xffffffffffffffff
+151d0ad  4889d6                 mov rsi, rdx
+151d0b0  48f7de                 neg rsi
+151d0b3  0f80c4000000           jo 0x151d17d
+151d0b9  498d7604               lea rsi, [r14 + 4]
+151d0bd  49bf0000000000000080   movabs r15, 0x8000000000000000
+151d0c7  4829d0                 sub rax, rdx
+151d0ca  4889e7                 mov rdi, rsp
+151d0cd  4889c2                 mov rdx, rax
+151d0d0  ff15d2172504           call qword ptr [rip + 0x42517d2]
+151d0d6  488b442408             mov rax, qword ptr [rsp + 8]
+151d0db  4c39f8                 cmp rax, r15
+151d0de  0f84a6000000           je 0x151d18a
+151d0e4  48b908ac1c5a643bdfff   movabs rcx, 0xffdf3b645a1cac08
+151d0ee  4801c1                 add rcx, rax
+151d0f1  48ba115839b4c876beff   movabs rdx, 0xffbe76c8b4395811
+151d0fb  4839d1                 cmp rcx, rdx
+151d0fe  725a                   jb 0x151d15a
+151d100  48b9000000004057ffff   movabs rcx, 0xffff574000000000
+151d10a  4801c1                 add rcx, rax
+151d10d  48ba81aefeff7faefeff   movabs rdx, 0xfffeae7ffffeae81
+151d117  4839d1                 cmp rcx, rdx
+151d11a  723e                   jb 0x151d15a
+151d11c  f20f100424             movsd xmm0, qword ptr [rsp]
+151d121  0f29442410             movaps xmmword ptr [rsp + 0x10], xmm0
+151d126  418b3e                 mov edi, dword ptr [r14]
+151d129  48b9572951cea0c84518   movabs rcx, 0x1845c8a0ce512957
+151d133  48f7e9                 imul rcx
+151d136  4889d6                 mov rsi, rdx
+151d139  48c1ee3f               shr rsi, 0x3f
+151d13d  48c1ea0d               shr rdx, 0xd
+151d141  01d6                   add esi, edx
+151d143  ff1567172504           call qword ptr [rip + 0x4251767]
+151d149  85c0                   test eax, eax
+151d14b  740d                   je 0x151d15a
+151d14d  8903                   mov dword ptr [rbx], eax
+151d14f  0f28442410             movaps xmm0, xmmword ptr [rsp + 0x10]
+151d154  0f134304               movlps qword ptr [rbx + 4], xmm0
+151d158  eb06                   jmp 0x151d160
+151d15a  c70300000000           mov dword ptr [rbx], 0
+151d160  4889d8                 mov rax, rbx
+151d163  4883c420               add rsp, 0x20
+151d167  5b                     pop rbx
+151d168  415e                   pop r14
+151d16a  415f                   pop r15
+151d16c  c3                     ret 
+151d16d  31c0                   xor eax, eax
+151d16f  31c9                   xor ecx, ecx
+151d171  4889d6                 mov rsi, rdx
+151d174  48f7de                 neg rsi
+151d177  0f813cffffff           jno 0x151d0b9
+151d17d  488d3d2c4d1504         lea rdi, [rip + 0x4154d2c]
+151d184  ff15ae192504           call qword ptr [rip + 0x42519ae]
+151d18a  488d3d374d1504         lea rdi, [rip + 0x4154d37]
+151d191  ff15a1192504           call qword ptr [rip + 0x42519a1]
+151d197  488d3dfa4c1504         lea rdi, [rip + 0x4154cfa]
+151d19e  ff15ac0f2504           call qword ptr [rip + 0x4250fac]
