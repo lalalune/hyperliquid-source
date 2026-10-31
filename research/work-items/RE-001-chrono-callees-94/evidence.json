@@ -1,0 +1,169 @@
+{
+  "call_census": {
+    "callee_date": {
+      "direct_e8": 0,
+      "got_indirect_sites": 150,
+      "got_slot": "0x576e8b0"
+    },
+    "callee_time": {
+      "direct_e8": 0,
+      "got_indirect_sites": 133,
+      "got_slot": "0x576e8a8"
+    },
+    "note": "byte-pattern census over the complete .text for e8/ff15 encodings",
+    "window_guard_sites": {
+      "callee_date": "0x474fc46",
+      "callee_time": "0x474fbf3"
+    }
+  },
+  "callee_date": {
+    "bytes": 556,
+    "end_va_exclusive": "0x151fa9c",
+    "fde_va": "0xcf65ac",
+    "got_slot": "0x576e8b0",
+    "inferred_label": "chrono NaiveDate day shift returning packed date or 0 (observed None marker)",
+    "sha256": "5fc9431c76cedeeb8d87bfe5895752d8c87745d079472c66df7c147faed42b05",
+    "start_va": "0x151f870"
+  },
+  "callee_time": {
+    "bytes": 354,
+    "end_va_exclusive": "0x1520842",
+    "fde_va": "0xcf67f0",
+    "got_slot": "0x576e8a8",
+    "inferred_label": "chrono NaiveTime overflowing TimeDelta addition (seconds-of-day, fraction, day-carry seconds result)",
+    "sha256": "f6d2c0cb541ca95cf1d97de0b4541242bdf72ea6e800d9715acc50b9f95e7e4e",
+    "start_va": "0x15206e0"
+  },
+  "captured_binary_executed": false,
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "day_division": {
+    "divisor": 86400,
+    "identity": "euclidean decomposition (magic quotient plus explicit remainder fixup) validated on a signed grid",
+    "magic": "0x1845c8a0ce512957",
+    "shared_with": "RE-001-ema-window-guard-94 day division"
+  },
+  "era_constants": {
+    "cycle_days": 146097,
+    "cycle_years": 400,
+    "days_per_year": 365,
+    "div146097_magic": "0x396b06bd",
+    "div400_magic": "0x51eb851f",
+    "leap_year_days": 366,
+    "year_estimate_magic": "0x6719f361"
+  },
+  "identities": {
+    "day_cycle_exhaustive": "146097/146097 pass",
+    "day_division_grid": "pass",
+    "div146097_grid": "pass",
+    "div400_grid": "pass",
+    "fast_path_day_count": "pass",
+    "flag_table_400": "pass",
+    "leap_table_400": "pass",
+    "year_gate": "[-262143, 262142]"
+  },
+  "normalization": {
+    "carry_threshold": 2000000000,
+    "nanos_per_second": 1000000000,
+    "negative_step": -1000000000,
+    "observed": "input fraction compared against 1e9/2e9; six arithmetic-overflow panics guard the adds"
+  },
+  "packed_layout": {
+    "flags": "dword & 0xf; bit 3 (8) marks a common year; bits 0-2 are the Jan-1 weekday class",
+    "ordinal": "(dword >> 4) & 0x1ff",
+    "result": "year << 13 | ordinal << 4 | flags, or 0 when the ordinal or year-range check fails",
+    "year": "dword >>a 13"
+  },
+  "panic_anchors": {
+    "callees": {
+      "got_a": "0x576e118",
+      "got_b": "0x576e150",
+      "got_index": "0x576dfc8",
+      "panic_a": "0x157b480",
+      "panic_b": "0x157b520",
+      "panic_index": "0x157b64f"
+    },
+    "date_mod": [
+      {
+        "column": 9,
+        "line": 2325,
+        "location_va": "0x5672140"
+      },
+      {
+        "column": 27,
+        "line": 2326,
+        "location_va": "0x5672158"
+      },
+      {
+        "column": 9,
+        "line": 2326,
+        "location_va": "0x5672170"
+      },
+      {
+        "column": 5,
+        "line": 2334,
+        "location_va": "0x5672188"
+      }
+    ],
+    "internals": [
+      {
+        "column": 9,
+        "line": 80,
+        "location_va": "0x56721a0",
+        "table_length_operands": [
+          400,
+          401
+        ]
+      }
+    ],
+    "time_mod": [
+      {
+        "column": 60,
+        "line": 623,
+        "location_va": "0x5672350"
+      },
+      {
+        "column": 24,
+        "line": 627,
+        "location_va": "0x5672368"
+      },
+      {
+        "column": 9,
+        "line": 628,
+        "location_va": "0x5672380"
+      },
+      {
+        "column": 13,
+        "line": 635,
+        "location_va": "0x5672398"
+      },
+      {
+        "column": 13,
+        "line": 632,
+        "location_va": "0x56723b0"
+      },
+      {
+        "column": 25,
+        "line": 639,
+        "location_va": "0x56723c8"
+      }
+    ]
+  },
+  "progress_gate_requested": false,
+  "tables": {
+    "leap_cumulative": {
+      "entries": 400,
+      "model": "cumulative proleptic-Gregorian leap days per 400-year cycle",
+      "sentinel_entry_400": 97,
+      "shared_with": "RE-001-datediff-chrono-94 leap table",
+      "va": "0x250354"
+    },
+    "year_flags": {
+      "entries": 400,
+      "model": "(8 if common else 0) | ((dow(Jan 1) + 1) % 7 + 1) over the astronomical 400-year cycle; 97 leap entries",
+      "va": "0x2504e5",
+      "validated_entries": 400
+    }
+  },
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
