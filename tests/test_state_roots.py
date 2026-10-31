@@ -1,5 +1,7 @@
 import bisect
+import contextlib
 import hashlib
+import io
 import importlib.util
 import json
 import os
@@ -184,6 +186,17 @@ class StateRootsTests(unittest.TestCase):
                                           f"--stop-address={s + 7:#x}", str(BIN)],
                                          capture_output=True, text=True, check=True).stdout
                     self.assertRegex(out, rf"{s:x}:\s+lea\s+-?0x[0-9a-f]+\(%rip\),%r\w+\s+# {a['anchor']:x}")
+
+
+class MainErrorHandlingTests(unittest.TestCase):
+    def test_missing_binary_is_one_line_error(self):
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            rc = sr.main(["--binary", "/nonexistent.bin"])
+        self.assertEqual(rc, 2)
+        self.assertTrue(err.getvalue().startswith("state_roots: "))
+        self.assertEqual(len(err.getvalue().strip().splitlines()), 1)
+        self.assertNotIn("Traceback", err.getvalue())
 
 
 if __name__ == "__main__":
