@@ -50,6 +50,12 @@ def entry_file_offset(data):
 
 def unwind_index(data):
     secs = sections(data)
+    # The next() lookups below take the first section of a given name, so a
+    # duplicate would silently decide which bytes the index reads. Refuse
+    # the ambiguity for every name this function looks up.
+    for name in ('.eh_frame_hdr', '.eh_frame'):
+        if sum(s['name'] == name for s in secs) > 1:
+            raise ValueError(f'Duplicate section: {name}')
     header = next((s for s in secs if s['name'] == '.eh_frame_hdr'), None)
     if header is None:
         raise ValueError('No .eh_frame_hdr')

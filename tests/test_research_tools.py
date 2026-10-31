@@ -57,6 +57,22 @@ class UnwindTests(unittest.TestCase):
     def test_rejects_truncated_sections(self):
         with self.assertRaises(ValueError): sections(fixture()[:600])
 
+    def _with_duplicate_section(self, name):
+        data = bytearray(fixture()) + bytearray(64)
+        struct.pack_into('<HHH', data, 58, 64, 6, 1)
+        names = b'\x00.shstrtab\x00.text\x00.eh_frame_hdr\x00.eh_frame\x00'
+        struct.pack_into('<IIQQQQIIQQ', data, 512 + 5 * 64,
+                         names.index(name), 1, 2, 0x999, 400, 20, 0, 0, 1, 0)
+        return bytes(data)
+
+    def test_rejects_duplicate_eh_frame_hdr_section(self):
+        with self.assertRaisesRegex(ValueError, r'Duplicate section: \.eh_frame_hdr'):
+            unwind_index(self._with_duplicate_section(b'.eh_frame_hdr'))
+
+    def test_rejects_duplicate_eh_frame_section(self):
+        with self.assertRaisesRegex(ValueError, r'Duplicate section: \.eh_frame'):
+            unwind_index(self._with_duplicate_section(b'.eh_frame\x00'))
+
 
 class CatalogueTests(unittest.TestCase):
     def setUp(self):
