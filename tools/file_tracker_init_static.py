@@ -35,6 +35,8 @@ def relocations(data):
 
 def generate(binary,output):
     identity=next(i for i in json.loads((ROOT/'provenance/artifacts.json').read_text())['files'] if i['path']=='artifacts/node/94/hl-node')
+    missing=[field for field in ('size','sha256') if field not in identity]
+    if missing: raise ValueError(f"provenance/artifacts.json entry for artifacts/node/94/hl-node is missing {'/'.join(missing)}")
     check(binary,identity)
     data=binary.read_bytes();controls(data);rela=relocations(data)
     frames=subprocess.check_output(['readelf','-wf',str(binary)],text=True)
