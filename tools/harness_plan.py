@@ -78,6 +78,8 @@ def validate_fixtures(fixtures_doc: dict, protocol: dict) -> dict:
         if missing:
             raise ValueError(f'fixture {row.get("fixture_id")} missing {missing}')
         fid = row['fixture_id']
+        if not isinstance(fid, str):
+            raise ValueError('fixture_id must be a string')
         if fid in by_id:
             raise ValueError(f'duplicate fixture_id: {fid}')
         digest = row['target_sha256']
