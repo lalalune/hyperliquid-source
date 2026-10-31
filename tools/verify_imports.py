@@ -32,4 +32,8 @@ def verify(root):
 
 
 if __name__ == '__main__':
-    verify(Path(__file__).resolve().parents[1])
+    try:
+        verify(Path(__file__).resolve().parents[1])
+    except (ValueError, OSError) as error:
+        print(f'verify_imports: {error}', file=sys.stderr)
+        sys.exit(1)
