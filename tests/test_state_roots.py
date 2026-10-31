@@ -186,5 +186,56 @@ class StateRootsTests(unittest.TestCase):
                     self.assertRegex(out, rf"{s:x}:\s+lea\s+-?0x[0-9a-f]+\(%rip\),%r\w+\s+# {a['anchor']:x}")
 
 
+class ElfSectionNameBoundsTests(unittest.TestCase):
+    """Synthetic ELF64 whose .shstrtab is followed by other bytes.
+
+    On base, Elf.__init__ located each section name with an unbounded
+    data.index(b'\\0', ...), so a name unterminated inside .shstrtab was
+    silently read with bytes borrowed from past the table, and a name
+    offset outside the table was read from following bytes instead of
+    failing closed. This composes with open #254 (unterminated-name
+    ValueError conversion), which keeps the unbounded index.
+    """
+
+    def build(self, table, trailing, entries):
+        # entries: (name_offset, offset, size); last entry is .shstrtab.
+        data = bytearray(0x500)
+        data[:6] = b'\x7fELF\x02\x01'
+        struct.pack_into('<Q', data, 0x20, 0)
+        struct.pack_into('<Q', data, 0x28, 64)
+        struct.pack_into('<HHHHH', data, 0x36, 56, 0, 64,
+                         len(entries), len(entries) - 1)
+        for i, (name_off, off, size) in enumerate(entries):
+            struct.pack_into('<IIQQQQIIQQ', data, 64 + i * 64,
+                             name_off, 3, 0, 0, off, size, 0, 0, 1, 0)
+        data[0x400:0x400 + len(table)] = table
+        data[0x400 + len(table):0x400 + len(table) + len(trailing)] = trailing
+        return bytes(data)
+
+    def test_borrowed_terminator_rejected(self):
+        data = self.build(b'\x00.extra', b'_name\x00',
+                          [(0, 0, 0), (1, 0x200, 0x10), (0, 0x400, 7)])
+        with self.assertRaises(sr.EvidenceError):
+            sr.Elf(data)
+
+    def test_offset_outside_table_rejected(self):
+        data = self.build(b'\x00.extra', b'_name\x00',
+                          [(0, 0, 0), (9, 0x200, 0x10), (0, 0x400, 7)])
+        with self.assertRaises(sr.EvidenceError):
+            sr.Elf(data)
+
+    def test_offset_at_table_end_rejected(self):
+        data = self.build(b'\x00.extra', b'_name\x00',
+                          [(0, 0, 0), (7, 0x200, 0x10), (0, 0x400, 7)])
+        with self.assertRaises(sr.EvidenceError):
+            sr.Elf(data)
+
+    def test_terminated_names_still_parse(self):
+        data = self.build(b'\x00.text\x00.shstrtab\x00', b'',
+                          [(0, 0, 0), (1, 0x200, 0x10), (7, 0x400, 17)])
+        elf = sr.Elf(data)
+        self.assertEqual(sorted(elf.sections), ['', '.shstrtab', '.text'])
+
+
 if __name__ == "__main__":
     unittest.main()
