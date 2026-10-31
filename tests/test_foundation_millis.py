@@ -137,4 +137,110 @@ class MillisEvidenceTests(unittest.TestCase):
             self.assertLess(remainder*1000000,1<<32)
 
 
-if __name__=='__main__':unittest.main()
+
+def synthetic_elf(rows, contents):
+    """Minimal ELF64 carrying the given (name, address, size) section rows;
+    contents maps a row index to the bytes placed at that row's offset."""
+    shstr_row = len(rows)
+    rows = list(rows) + [('.shstrtab', 0, 0)]
+    names = b'\0'
+    name_off = {}
+    for name, _addr, _size in rows:
+        if name not in name_off:
+            name_off[name] = len(names)
+            names += name.encode() + b'\0'
+    rows[shstr_row] = ('.shstrtab', 0, len(names))
+    shoff = 0x1000
+    data = bytearray(shoff + len(rows) * 64)
+    data[0:6] = b'\x7fELF\x02\x01'
+    off = 0x200
+    offsets = []
+    for i, (_name, _addr, size) in enumerate(rows):
+        offsets.append(off)
+        blob = contents.get(i, b'')
+        data[off:off + len(blob)] = blob
+        off += max(size, len(blob)) + 0x10
+    data[offsets[shstr_row]:offsets[shstr_row] + len(names)] = names
+    struct.pack_into('<Q', data, 40, shoff)
+    struct.pack_into('<HHH', data, 58, 64, len(rows), shstr_row)
+    for i, (name, addr, size) in enumerate(rows):
+        struct.pack_into('<IIQQQQIIQQ', data, shoff + i * 64,
+                         name_off[name], 1, 0, addr, offsets[i], size, 0, 0, 1, 0)
+    return bytes(data)
+
+
+class DuplicateSectionNameTests(unittest.TestCase):
+    """analyze() reads .eh_frame/.rela.dyn through a name->section dict
+    that keeps only the last same-named section. A duplicate name must be
+    refused: with the valid .eh_frame first the pinned FDE gate failed at
+    once, with it last the same bytes passed every FDE/CIE gate, so the
+    verdict flipped on section order alone. The window is zero-length so
+    the FDE/CIE gates are the first content checks reached."""
+    START, EH_GOOD, EH_BAD = 0x1000000, 0x3000000, 0x4000000
+
+    def fixture(self, eh_order):
+        fde = bytearray(16)
+        struct.pack_into('<i', fde, 8, self.START - (self.EH_GOOD + 0x10 + 8))
+        struct.pack_into('<I', fde, 12, 0)
+        cie = b'CIE!' + b'\0' * 12
+        eh = bytearray(0x100)
+        eh[0:len(cie)] = cie
+        eh[0x10:0x10 + len(fde)] = fde
+        records = dict(target_sha256=millis.SHA256, windows=[dict(
+            name='conversion', start_va=hex(self.START), end_va_exclusive=hex(self.START),
+            body_sha256=hashlib.sha256(b'').hexdigest(),
+            fde_offset=hex(0x10), fde_hex=bytes(fde).hex(),
+            cie_offset=hex(0), cie_hex=cie.hex())])
+        rows = [('.text', self.START, 0x100),
+                ('.eh_frame', self.EH_GOOD, 0x100),
+                ('.eh_frame', self.EH_BAD, 0x100),
+                ('.rela.dyn', 0x5000000, 0)]
+        blobs = {1: bytes(eh), 2: b'\0' * 0x100}
+        if eh_order == 'bad-first':
+            rows = [rows[0], rows[2], rows[1], rows[3]]
+            blobs = {1: b'\0' * 0x100, 2: bytes(eh)}
+        return synthetic_elf(rows, blobs), records
+
+    def test_duplicate_eh_frame_rejected_in_either_order(self):
+        for order in ('good-first', 'bad-first'):
+            with self.subTest(order=order):
+                data, records = self.fixture(order)
+                with self.assertRaisesRegex(ValueError, 'Duplicate section: .eh_frame'):
+                    millis.analyze(data, records)
+
+    def test_duplicate_rela_dyn_rejected(self):
+        rows = [('.text', self.START, 0x100),
+                ('.eh_frame', self.EH_GOOD, 0x100),
+                ('.rela.dyn', 0x5000000, 0), ('.rela.dyn', 0x6000000, 0)]
+        _data, records = self.fixture('bad-first')
+        fde = bytearray(16)
+        struct.pack_into('<i', fde, 8, self.START - (self.EH_GOOD + 0x10 + 8))
+        cie = b'CIE!' + b'\0' * 12
+        eh = bytearray(0x100)
+        eh[0:len(cie)] = cie
+        eh[0x10:0x10 + len(fde)] = fde
+        data = synthetic_elf(rows, {1: bytes(eh)})
+        with self.assertRaisesRegex(ValueError, 'Duplicate section: .rela.dyn'):
+            millis.analyze(data, records)
+
+    def test_unconsumed_duplicate_names_still_tolerated(self):
+        # The guard is scoped to the names analyze() reads; duplicates of a
+        # section it never looks up must not be rejected.
+        data, records = self.fixture('bad-first')
+        rows = [('.text', self.START, 0x100),
+                ('.eh_frame', self.EH_GOOD, 0x100),
+                ('.rela.dyn', 0x5000000, 0),
+                ('.debug_info', 0x6000000, 0), ('.debug_info', 0x7000000, 0)]
+        fde = bytearray(16)
+        struct.pack_into('<i', fde, 8, self.START - (self.EH_GOOD + 0x10 + 8))
+        cie = b'CIE!' + b'\0' * 12
+        eh = bytearray(0x100)
+        eh[0:len(cie)] = cie
+        eh[0x10:0x10 + len(fde)] = fde
+        data = synthetic_elf(rows, {1: bytes(eh)})
+        with self.assertRaises(ValueError) as caught:
+            millis.analyze(data, records)
+        self.assertNotIn('Duplicate section', str(caught.exception))
+
+
+if __name__ == '__main__':unittest.main()
