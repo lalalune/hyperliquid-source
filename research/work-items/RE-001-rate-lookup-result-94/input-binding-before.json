@@ -1,0 +1,34 @@
+{
+  "baseline_commit": "f1dad89734bb94f3a87d6d5bb1a697b8f202e4b2",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "native_replacement_sha256": "6cf0c8e306b4e76c6ae5613b08013e0c8fc8edb9c600d12e39d61972ec44d488",
+  "private_source_inode_replaced": true,
+  "patch": {
+    "file_offset": 19573316,
+    "fde_va": "0x12aaa40",
+    "old_cie_va": "0xfbdc2c",
+    "replacement_cie_va": "0xce1518",
+    "old_field_hex": "18ce2e00",
+    "new_field_hex": "2c955c00"
+  },
+  "native_input_command": [
+    "readelf",
+    "-wf",
+    "<owned-private-input>"
+  ],
+  "baseline_collector_accepted": true,
+  "canonical_raw_frame_line": "005c9528 000000000000003c 002ece18 FDE cie=002dc714 pc=0000000004956d50..0000000004956eeb",
+  "accepted_changed_raw_frame_line": "005c9528 000000000000003c 005c952c FDE cie=00000000 pc=0000000004956d50..0000000004956eeb",
+  "baseline_recorded_cie_va": "0xfbdc2c",
+  "other_exports_byte_identical": {
+    "relocations.txt": true,
+    "records.json": true,
+    "lookup.objdump.txt": true,
+    "frames.txt": false,
+    "caller-result-use.objdump.txt": true
+  },
+  "canonical_capture_unchanged": true,
+  "target_executed": false,
+  "regression_before": "FAIL: ValueError not raised",
+  "regression_after": "PASS: real native readers consume only the admitted private snapshot; final source identity/digest check rejects the changed source before output creation."
+}
