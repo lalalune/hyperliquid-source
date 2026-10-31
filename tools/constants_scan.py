@@ -258,6 +258,8 @@ def main():
                 raise ScanError(f'table entry {index}: {got!r} != reference {want!r}')
         raise ScanError('table and reference differ in length')
 
+    if 'NvTestnet' not in names:
+        raise ScanError('NvTestnet is not in the reference order')
     default_index = names.index('NvTestnet')
     if default_index != 32:
         raise ScanError('NvTestnet is not discriminant 32 in the reference order')

@@ -2,8 +2,10 @@ import struct
 from pathlib import Path
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+import constants_scan
 from constants_scan import (ScanError, entries_size, pool_entry, relocations,
                             section, string_table, window, xrefs)
 
@@ -106,6 +108,54 @@ class XrefTests(unittest.TestCase):
     def test_window_before_first_start_fails(self):
         with self.assertRaises(ScanError):
             window([0x1000], 0x0FFF)
+
+
+class MainDefaultIndexTests(unittest.TestCase):
+    """main()'s NvTestnet lookup must fail closed like every other check."""
+
+    def _run_main(self, names):
+        def fake_pool(data, rodata, needle, require_marker=False):
+            if needle in ('/hl', '/code', 'cham_dir does not exist: ',
+                          'could not create '):
+                raise ScanError('messages sentinel')
+            return (0, 0, False)
+
+        def fake_table(data, rodata, relro, wanted, count=None):
+            return (0x3000, [(0x3000 + i * 16, 0x2000 + i, len(n), n)
+                             for i, n in enumerate(names)])
+
+        class FakeConfig:
+            def read_text(self):
+                return 'DEFAULT_AWS_NAME: AwsName = AwsName::NvTestnet\n'
+
+        patches = [
+            mock.patch.object(constants_scan, 'artifact',
+                              lambda release: (b'', 'digest')),
+            mock.patch.object(constants_scan, 'section',
+                              lambda data, name: {'address': 0, 'offset': 0,
+                                                  'size': 0, 'name': name}),
+            mock.patch.object(constants_scan, 'expected_names',
+                              lambda: list(names)),
+            mock.patch.object(constants_scan, 'REFERENCE_CONFIG', FakeConfig()),
+            mock.patch.object(constants_scan, 'pool_entry', fake_pool),
+            mock.patch.object(constants_scan, 'string_table', fake_table),
+            mock.patch.object(sys, 'argv', ['constants_scan.py']),
+        ]
+        for patch in patches:
+            patch.start()
+            self.addCleanup(patch.stop)
+        return constants_scan.main()
+
+    def test_reference_without_nvtestnet_is_rejected(self):
+        names = [f'Name{i}' for i in range(76)]
+        with self.assertRaisesRegex(ScanError, 'NvTestnet is not in the reference order'):
+            self._run_main(names)
+
+    def test_reference_with_nvtestnet_passes_the_lookup(self):
+        names = [f'Name{i}' for i in range(76)]
+        names[32] = 'NvTestnet'
+        with self.assertRaisesRegex(ScanError, 'messages sentinel'):
+            self._run_main(names)
 
 
 if __name__ == '__main__':
