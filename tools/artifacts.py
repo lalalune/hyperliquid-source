@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import urllib.request
 
@@ -100,4 +101,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except (ValueError, OSError) as error:
+        print(f'artifacts: {error}', file=sys.stderr)
+        raise SystemExit(1)
