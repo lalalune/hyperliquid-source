@@ -95,14 +95,25 @@ class TableTests(unittest.TestCase):
 
 class ArtifactTests(unittest.TestCase):
     def test_rejects_corrupted_digest(self):
-        with tempfile.NamedTemporaryFile() as handle:
-            handle.write(b'\x7fELF')
-            handle.flush()
+        # NamedTemporaryFile keeps an exclusive delete-on-close handle on Windows,
+        # so the artifact loader cannot reopen it by name there.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'hl-node'
+            path.write_bytes(b'\x7fELF')
             with self.assertRaisesRegex(ValueError, 'SHA-256'):
-                bi.load_artifact(Path(handle.name), 94)
+                bi.load_artifact(path, 94)
 
     def test_missing_literal_is_detected(self):
         self.assertEqual(bi.find_all(b'no literal here', b'requestWithdrawal'), [])
+
+    @unittest.skipUnless(ARTIFACT.exists(), 'captured node #94 not present')
+    def test_out_evidence_is_byte_identical(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with contextlib.redirect_stdout(io.StringIO()):
+                bi.main(['--release', '94', '--out', tmp])
+            self.assertEqual(
+                (Path(tmp) / 'bridge-inventory.json').read_bytes(),
+                (ROOT / 'research/work-items/bridge/evidence/bridge-inventory.json').read_bytes())
 
     @unittest.skipUnless(ARTIFACT.exists(), 'captured node #94 not present')
     def test_end_to_end_report_is_pinned(self):
@@ -111,6 +122,7 @@ class ArtifactTests(unittest.TestCase):
             bi.main(['--release', '94'])
         report = json.loads(out.getvalue())
         self.assertEqual(report['artifact_sha256'], bi.TARGET_SHA256[94])
+        self.assertEqual(report['artifact'], 'artifacts/node/94/hl-node')
         self.assertEqual(report['literal']['va'], bi.SEED_LITERAL_OFFSET)
         self.assertEqual(len(report['chain_id_sites']), 3)
         seeded = bi.Mapping(bi.load_segments(ARTIFACT.read_bytes())).offset_to_va(bi.SEED_CHAIN_OFFSET)
