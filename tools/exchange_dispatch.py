@@ -89,6 +89,11 @@ def fde_index(elf: Elf):
         prev = start
         starts.append(start)
         ends.append(start + pc_range)
+    for i in range(len(starts) - 1):
+        if ends[i] > starts[i + 1]:
+            raise EvidenceError(
+                f"FDE at {starts[i]:#x} ends at {ends[i]:#x}, "
+                f"overlapping next start {starts[i + 1]:#x}")
     return starts, ends
 
 

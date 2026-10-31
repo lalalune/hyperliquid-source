@@ -275,5 +275,62 @@ class Binutils(unittest.TestCase):
             self.assertEqual(fdes[r['fde_start']], r['fde_end'])
 
 
+
+def synthetic_elf(entries):
+    """Minimal ELF64 whose .eh_frame_hdr table carries the given (pc, range)
+    FDE specs; needs no materialized binary, unlike the pinned-evidence tests."""
+    va = 0x400000
+    hdr_off = 0x200
+    table = bytearray(bytes([1, 0x1B, 0x03, 0x3B, 0, 0, 0, 0]))
+    table += struct.pack('<I', len(entries))
+    fde_blobs = {}
+    for j, (pc, rng) in enumerate(entries):
+        fde_va = va + 0x2000 + j * 0x1000
+        disp = pc - fde_va - 8
+        fde_blobs[fde_va - va] = struct.pack('<8x') + struct.pack('<i', disp) + struct.pack('<I', rng)
+        table += struct.pack('<ii', pc - (va + hdr_off), fde_va - (va + hdr_off))
+    shstr = b'\x00.eh_frame_hdr\x00.shstrtab\x00'
+    shoff = 0x1000
+    total = max(shoff + 3 * 64, max(fde_blobs) + 16 if fde_blobs else 0x1000)
+    data = bytearray(total)
+    data[0:6] = b'\x7fELF\x02\x01'
+    struct.pack_into('<HHIQQQIHHHHHH', data, 16, 2, 0x3E, 1, 0, 64, shoff, 0,
+                     64, 56, 1, 64, 3, 2)
+    struct.pack_into('<IIQQQQQQ', data, 64, 1, 5, 0, va, va, len(data), len(data), 0x1000)
+    data[hdr_off:hdr_off + len(table)] = table
+    for off, blob in fde_blobs.items():
+        data[off:off + len(blob)] = blob
+    shstr_off = shoff + 3 * 64
+    data[shstr_off:shstr_off + len(shstr)] = shstr
+
+    def sh(name_off, typ, flags, addr, off, size):
+        return struct.pack('<IIQQQQIIQQ', name_off, typ, flags, addr, off, size, 0, 0, 1, 0)
+    secs = b'\x00' * 64
+    secs += sh(1, 1, 0, va + hdr_off, hdr_off, len(table))
+    secs += sh(15, 3, 0, 0, shstr_off, len(shstr))
+    data[shoff:shoff + len(secs)] = secs
+    return ed.Elf(bytes(data))
+
+
+class FdeIndexOverlapTests(unittest.TestCase):
+    """fde_index() enforced strictly-sorted starts, so duplicates were
+    already rejected, but an FDE ending past the next start still passed
+    silently and left containing() to resolve the overlap by bisect order
+    alone. This is the exchange_dispatch overlap-only slice of open #496
+    (consensus_wire) and #522/#524 (info_request_path, state_roots)."""
+
+    def test_overlapping_fde_ranges_rejected(self):
+        with self.assertRaisesRegex(ed.EvidenceError, 'overlapping next start'):
+            ed.fde_index(synthetic_elf([(0x401000, 0x200), (0x401100, 0x100)]))
+
+    def test_adjacent_fde_ranges_accepted(self):
+        starts, ends = ed.fde_index(synthetic_elf([(0x401000, 0x100), (0x401100, 0x100)]))
+        self.assertEqual((starts, ends), ([0x401000, 0x401100], [0x401100, 0x401200]))
+
+    def test_duplicate_fde_start_still_rejected(self):
+        with self.assertRaisesRegex(ed.EvidenceError, 'not strictly sorted'):
+            ed.fde_index(synthetic_elf([(0x401000, 0x100), (0x401000, 0x100)]))
+
+
 if __name__ == '__main__':
     unittest.main()
