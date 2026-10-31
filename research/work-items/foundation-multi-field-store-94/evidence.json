@@ -1,0 +1,104 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "function": {
+    "start_va": "0x55c6be0",
+    "end_va_exclusive": "0x55c6c3a",
+    "bytes": 90,
+    "sha256": "1098c4965f873391b19fff9495eaa0c6f69824a88c858508653a219d80f3401f",
+    "fde_section_offset": "0x2d3af0",
+    "stride_padding_bytes": 6,
+    "next_fde_start_va": "0x55c6c40",
+    "inferred_label": "multi-field default/store"
+  },
+  "rule": {
+    "unsigned_form": "[rdi+0x14] = source unconditionally; [rdi+0x8] = min(source-field default 3 if zero, [rdi+0x4] default min((source-7) mod 2^32, 6) if zero); [rdi+0xc] = 0x40 if zero; [rdi+0x10] = saturating (source - [rdi+0x4]) if zero, all 32-bit unsigned",
+    "edges": {
+      "all-zero": {
+        "store_14": "0x0",
+        "field_08": "0x3",
+        "field_0c": "0x40",
+        "field_04": "0x6",
+        "field_10": "0x0",
+        "return_eax": "0x3"
+      },
+      "mid": {
+        "store_14": "0xa",
+        "field_08": "0x3",
+        "field_0c": "0x1",
+        "field_04": "0x3",
+        "field_10": "0x7",
+        "return_eax": "0x3"
+      },
+      "nonzero-d-e": {
+        "store_14": "0x14",
+        "field_08": "0x3",
+        "field_0c": "0x40",
+        "field_04": "0x4",
+        "field_10": "0x9",
+        "return_eax": "0x3"
+      },
+      "small-source": {
+        "store_14": "0x5",
+        "field_08": "0x6",
+        "field_0c": "0x2",
+        "field_04": "0x6",
+        "field_10": "0x0",
+        "return_eax": "0x6"
+      },
+      "source-14": {
+        "store_14": "0xe",
+        "field_08": "0x6",
+        "field_0c": "0x3",
+        "field_04": "0x6",
+        "field_10": "0x8",
+        "return_eax": "0x6"
+      },
+      "source-13": {
+        "store_14": "0xd",
+        "field_08": "0x2",
+        "field_0c": "0x40",
+        "field_04": "0x6",
+        "field_10": "0x7",
+        "return_eax": "0x2"
+      },
+      "source-7": {
+        "store_14": "0x7",
+        "field_08": "0x0",
+        "field_0c": "0x40",
+        "field_04": "0x0",
+        "field_10": "0x7",
+        "return_eax": "0x0"
+      },
+      "source-max": {
+        "store_14": "0xffffffff",
+        "field_08": "0x1",
+        "field_0c": "0x1",
+        "field_04": "0x6",
+        "field_10": "0xfffffff9",
+        "return_eax": "0x1"
+      },
+      "all-nonzero": {
+        "store_14": "0x64",
+        "field_08": "0x4",
+        "field_0c": "0x5",
+        "field_04": "0x4",
+        "field_10": "0x3",
+        "return_eax": "0x4"
+      }
+    }
+  },
+  "incoming_pattern_scan": {
+    "section": ".text",
+    "byte_count": 70370352,
+    "e8_candidate_count": 1,
+    "caller_fdes": [
+      "0x555d1f0..0x555e60f"
+    ],
+    "complete_xref_census": false
+  },
+  "naming_relocation": null,
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
