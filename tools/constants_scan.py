@@ -110,6 +110,8 @@ def relocations(data):
     sec = section(data, '.rela.dyn')
     if entries_size(data, '.rela.dyn') != 24:
         raise ScanError('unsupported .rela.dyn entsize')
+    if sec['size'] % 24:
+        raise ScanError('truncated .rela.dyn entry')
     out = {}
     for index in range(sec['size'] // 24):
         offset, info, addend = struct.unpack_from('<QQq', data, sec['offset'] + index * 24)
