@@ -94,6 +94,8 @@ def main():
             fetch_one(ROOT, item)
         check(ROOT / item['path'], item)
         print(f"SHA-256 OK: {item['path']}")
+    if 'signing_fingerprint' not in manifest:
+        raise ValueError('Invalid artifact manifest')
     verify_signatures(ROOT, manifest['signing_fingerprint'])
     verify_pinned_pairs(ROOT)
     print('Pinned upstream binary, signature and public key match.')

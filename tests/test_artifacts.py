@@ -1,3 +1,4 @@
+import sys
 import hashlib
 import importlib.util
 from pathlib import Path
@@ -64,3 +65,19 @@ class ArtifactTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             a.fetch_one(self.root, self.item)
         self.assertEqual(p.read_bytes(), b'evil')
+
+    def test_main_missing_signing_fingerprint_rejected(self):
+        manifest_dir = self.root / 'provenance'
+        manifest_dir.mkdir()
+        (manifest_dir / 'artifacts.json').write_text('{"files": []}')
+        with patch.object(a, 'ROOT', self.root), patch.object(sys, 'argv', ['artifacts.py', 'verify']):
+            with self.assertRaises(ValueError):
+                a.main()
+
+    def test_main_files_and_fingerprint_pass_guard(self):
+        manifest_dir = self.root / 'provenance'
+        manifest_dir.mkdir()
+        (manifest_dir / 'artifacts.json').write_text('{"files": [], "signing_fingerprint": "unused"}')
+        with patch.object(a, 'ROOT', self.root), patch.object(sys, 'argv', ['artifacts.py', 'verify']), \
+                patch.object(a, 'verify_signatures'), patch.object(a, 'verify_pinned_pairs'):
+            a.main()
