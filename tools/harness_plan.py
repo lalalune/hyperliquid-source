@@ -74,6 +74,8 @@ def validate_fixtures(fixtures_doc: dict, protocol: dict) -> dict:
     fields = protocol['fixture_identity_fields']
     by_id = {}
     for row in fixtures_doc.get('fixtures', []):
+        if not isinstance(row, dict):
+            raise ValueError('Invalid fixture record')
         missing = [key for key in fields if key not in row]
         if missing:
             raise ValueError(f'fixture {row.get("fixture_id")} missing {missing}')
