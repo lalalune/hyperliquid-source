@@ -93,6 +93,61 @@ class TableTests(unittest.TestCase):
         self.assertEqual([a['discriminant'] for a in arms], list(range(8)))
 
 
+class FunctionBoundsTests(unittest.TestCase):
+    """Synthetic ELF whose first function is followed by alignment padding."""
+
+    TEXT, HDR, FRAME = 0x1000, 0x2000, 0x3000
+
+    def build(self, functions):
+        # functions: list of (start, pc_range), one FDE record each.
+        frame = bytearray()
+        fde_vas = []
+        for start, pc_range in functions:
+            fde_va = self.FRAME + len(frame)
+            body = struct.pack('<I', 0)                    # CIE pointer (unread)
+            body += struct.pack('<i', start - (fde_va + 8))  # initial_location
+            body += struct.pack('<I', pc_range)            # address_range
+            frame += struct.pack('<I', len(body)) + body
+            fde_vas.append(fde_va)
+        header = bytes([1, 0x1B, 0x03, 0x3B])
+        header += struct.pack('<i', self.FRAME - (self.HDR + 4))
+        header += struct.pack('<I', len(functions))
+        for (start, _range), fde_va in zip(functions, fde_vas):
+            header += struct.pack('<i', start - self.HDR)
+            header += struct.pack('<i', fde_va - self.HDR)
+        names = b'\0.shstrtab\0.text\0.eh_frame_hdr\0.eh_frame\0'
+        shoff = 0x800
+        data = bytearray(shoff + 5 * 64)
+        data[:6] = b'\x7fELF\x02\x01'
+        struct.pack_into('<Q', data, 40, shoff)
+        struct.pack_into('<HHH', data, 58, 64, 5, 1)
+        data[64:64 + len(names)] = names
+        data[0x400:0x400 + len(header)] = header
+        data[0x600:0x600 + len(frame)] = frame
+        rows = [(0, 0, 0, 0, 0, 0),
+                (names.index(b'.shstrtab'), 3, 0, 0, 64, len(names)),
+                (names.index(b'.text'), 1, 6, self.TEXT, 0x200, 0x100),
+                (names.index(b'.eh_frame_hdr'), 1, 2, self.HDR, 0x400, len(header)),
+                (names.index(b'.eh_frame\0'), 1, 2, self.FRAME, 0x600, len(frame))]
+        for index, row in enumerate(rows):
+            struct.pack_into('<IIQQQQIIQQ', data, shoff + index * 64, *row, 0, 0, 1, 0)
+        return bytes(data)
+
+    def test_end_is_fde_extent_not_next_start(self):
+        data = self.build([(0x1000, 0x10), (0x1020, 0x20)])
+        # 0x1010..0x1020 is padding; the next start must not become the end.
+        self.assertEqual(bi.function_bounds(data, 0x1008), (0x1000, 0x1010))
+
+    def test_last_function_end_comes_from_fde(self):
+        data = self.build([(0x1000, 0x10), (0x1020, 0x20)])
+        self.assertEqual(bi.function_bounds(data, 0x1030), (0x1020, 0x1040))
+
+    def test_precedes_first_start_still_rejected(self):
+        data = self.build([(0x1000, 0x10)])
+        with self.assertRaisesRegex(ValueError, 'precedes the first unwind start'):
+            bi.function_bounds(data, 0x800)
+
+
 class ArtifactTests(unittest.TestCase):
     def test_rejects_corrupted_digest(self):
         with tempfile.NamedTemporaryFile() as handle:

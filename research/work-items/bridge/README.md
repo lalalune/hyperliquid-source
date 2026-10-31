@@ -47,15 +47,16 @@ Both values are in the JSON for every reported site.
 
 ### Function boundaries
 
-| region | FDE start | next FDE start | note |
+| region | FDE start | FDE end | note |
 | --- | --- | --- | --- |
 | field encoder (`struct_hash`) | `0x358de50` | `0x358ea60` | 8-arm dispatch on the payload discriminant |
-| request construction (`bridge_request`) | `0x358ea60` | `0x358ed20` | calls the encoder, writes tag, selects chain id |
-| action-field state machine | `0x22ae8a0` | `0x22b1080` | inlines the same construction at `0x22af640` |
-| shared request builder | `0x3341af0` | `0x3342190` | second inlined chain-id site |
+| request construction (`bridge_request`) | `0x358ea60` | `0x358ed18` | calls the encoder, writes tag, selects chain id |
+| action-field state machine | `0x22ae8a0` | `0x22b107c` | inlines the same construction at `0x22af640` |
+| shared request builder | `0x3341af0` | `0x334218c` | second inlined chain-id site |
 
-Unwind starts are boundaries, not proven body extents; the three bodies are
-large and only the cited windows were decoded.
+Ends are FDE extents (`pc_begin + pc_range`), not the next unwind start: the
+alignment padding after a body is not part of the function. The three bodies
+are large and only the cited windows were decoded.
 
 ### `requestWithdrawal` literal and its single xref
 

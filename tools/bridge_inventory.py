@@ -133,15 +133,27 @@ class Mapping:
 
 
 def function_bounds(data, va):
-    """Enclosing and following unwind start for `va` (FDE start table)."""
-    _sections, entries = unwind_index(data)
+    """Enclosing function extent for `va`: FDE pc_begin .. pc_begin + pc_range.
+
+    The end comes from the enclosing FDE body (as in info_request_path's
+    fde_index), not from the next unwind start: a function followed by
+    alignment padding ends before the padding, while the next start sits
+    after it.
+    """
+    secs, entries = unwind_index(data)
     starts = sorted(entry['start'] for entry in entries)
     index = bisect.bisect_right(starts, va) - 1
     if index < 0:
         raise ValueError(f'VA {va:#x} precedes the first unwind start')
     start = starts[index]
-    end = starts[index + 1] if index + 1 < len(starts) else None
-    return start, end
+    entry = next(e for e in entries if e['start'] == start)
+    frame = next(s for s in secs if s['name'] == '.eh_frame')
+    fde_offset = frame['offset'] + entry['fde'] - frame['address']
+    pc_begin = entry['fde'] + 8 + struct.unpack_from('<i', data, fde_offset + 8)[0]
+    if pc_begin != start:
+        raise ValueError(f'FDE pc_begin {pc_begin:#x} != unwind start {start:#x}')
+    pc_range = struct.unpack_from('<I', data, fde_offset + 12)[0]
+    return start, start + pc_range
 
 
 def find_all(data, needle):
