@@ -113,5 +113,91 @@ class HourEvidenceTests(unittest.TestCase):
             hour.analyze(self.mutated(va, call))
 
 
+def synthetic_elf(rows, contents):
+    """Minimal ELF64 carrying the given (name, address, size) section rows;
+    contents maps a row index to the bytes placed at that row's offset."""
+    shstr_row = len(rows)
+    rows = list(rows) + [('.shstrtab', 0, 0)]
+    names = b'\0'
+    name_off = {}
+    for name, _addr, _size in rows:
+        if name not in name_off:
+            name_off[name] = len(names)
+            names += name.encode() + b'\0'
+    rows[shstr_row] = ('.shstrtab', 0, len(names))
+    shoff = 0x1000
+    data = bytearray(shoff + len(rows) * 64)
+    data[0:6] = b'\x7fELF\x02\x01'
+    off = 0x200
+    offsets = []
+    for i, (_name, _addr, size) in enumerate(rows):
+        offsets.append(off)
+        blob = contents.get(i, b'')
+        data[off:off + len(blob)] = blob
+        off += max(size, len(blob)) + 0x10
+    data[offsets[shstr_row]:offsets[shstr_row] + len(names)] = names
+    struct.pack_into('<Q', data, 40, shoff)
+    struct.pack_into('<HHH', data, 58, 64, len(rows), shstr_row)
+    for i, (name, addr, size) in enumerate(rows):
+        struct.pack_into('<IIQQQQIIQQ', data, shoff + i * 64,
+                         name_off[name], 1, 0, addr, offsets[i], size, 0, 0, 1, 0)
+    return bytes(data)
+
+
+class DuplicateSectionNameTests(unittest.TestCase):
+    """analyze() reads .eh_frame/.rela.dyn/.text through a name->section
+    dict that keeps only the last same-named section. A duplicate name must
+    be refused: with the valid .eh_frame first the pinned CIE gate failed at
+    once, with it last the same bytes passed and ran much further, so the
+    verdict flipped on section order alone."""
+    EH_GOOD, EH_BAD = 0x3000000, 0x4000000
+
+    def hour_elf(self, eh_order):
+        rows = [('.text', hour.START, hour.END - hour.START),
+                ('.eh_frame', self.EH_GOOD, 0x100),
+                ('.eh_frame', self.EH_BAD, 0x100),
+                ('.rela.dyn', 0x5000000, 0)]
+        blobs = {0: hour.BODY,
+                 1: hour.CIE + b'\0' * (0x100 - len(hour.CIE)),
+                 2: b'\0' * 0x100}
+        if eh_order == 'bad-first':
+            rows = [rows[0], rows[2], rows[1], rows[3]]
+            blobs = {0: hour.BODY, 1: b'\0' * 0x100,
+                     2: hour.CIE + b'\0' * (0x100 - len(hour.CIE))}
+        return synthetic_elf(rows, blobs)
+
+    def test_duplicate_eh_frame_rejected_in_either_order(self):
+        for order in ('good-first', 'bad-first'):
+            with self.subTest(order=order):
+                with self.assertRaisesRegex(ValueError, 'Duplicate section: .eh_frame'):
+                    hour.analyze(self.hour_elf(order))
+
+    def test_duplicate_rela_dyn_and_text_rejected(self):
+        base = [('.text', hour.START, hour.END - hour.START),
+                ('.eh_frame', self.EH_GOOD, 0x100),
+                ('.rela.dyn', 0x5000000, 0)]
+        blobs = {0: hour.BODY,
+                 1: hour.CIE + b'\0' * (0x100 - len(hour.CIE))}
+        for name, addr in [('.rela.dyn', 0x6000000), ('.text', 0x7000000)]:
+            with self.subTest(name=name):
+                data = synthetic_elf(base + [(name, addr, 0)], blobs)
+                with self.assertRaisesRegex(ValueError, 'Duplicate section: ' + name):
+                    hour.analyze(data)
+
+    def test_unconsumed_duplicate_names_still_tolerated(self):
+        # The guard is scoped to the names analyze() reads; duplicates of a
+        # section it never looks up must not be rejected.
+        rows = [('.text', hour.START, hour.END - hour.START),
+                ('.eh_frame', self.EH_GOOD, 0x100),
+                ('.rela.dyn', 0x5000000, 0),
+                ('.debug_info', 0x6000000, 0),
+                ('.debug_info', 0x7000000, 0)]
+        blobs = {0: hour.BODY,
+                 1: hour.CIE + b'\0' * (0x100 - len(hour.CIE))}
+        with self.assertRaises(ValueError) as caught:
+            hour.analyze(synthetic_elf(rows, blobs))
+        self.assertNotIn('Duplicate section', str(caught.exception))
+
+
 if __name__ == '__main__':
     unittest.main()

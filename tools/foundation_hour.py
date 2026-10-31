@@ -37,6 +37,12 @@ def analyze(data):
     """Structural checks, separate from identity so corruption controls reach them."""
     secs = sections(data)
     by_name = {s['name']: s for s in secs}
+    # The dict above keeps only the last section of a given name, so a
+    # duplicate would silently decide which bytes the pinned checks below
+    # run against. Refuse the ambiguity for every name this tool reads,
+    # mirroring read()'s exactly-one-match rule for VA mappings.
+    for name in ('.eh_frame', '.rela.dyn', '.text'):
+        require(sum(s['name'] == name for s in secs) <= 1, 'Duplicate section: ' + name)
 
     def read(va, size):
         matches = [s for s in secs if s['type'] != 8 and s['address'] <= va

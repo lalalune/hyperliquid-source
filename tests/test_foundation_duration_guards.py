@@ -1,5 +1,6 @@
 """Static real-target evidence and independent binary64 comparison controls."""
 import copy
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -109,6 +110,99 @@ class DurationTargetTests(unittest.TestCase):
         for changed in [raw.replace('392fb1e:','392fb1f:'),
                         raw.replace('66 0f 2e c8','66 0f 2e c9'),raw.rsplit('\n',2)[0]]:
             with self.assertRaises(ValueError):guards.decode_export(changed,start,end,body)
+
+
+def synthetic_elf(rows,contents):
+    """Minimal ELF64 carrying the given (name, address, size) section rows;
+    contents maps a row index to the bytes placed at that row's offset."""
+    shstr_row=len(rows)
+    rows=list(rows)+[('.shstrtab',0,0)]
+    names=b'\0';name_off={}
+    for name,_addr,_size in rows:
+        if name not in name_off:
+            name_off[name]=len(names);names+=name.encode()+b'\0'
+    rows[shstr_row]=('.shstrtab',0,len(names))
+    shoff=0x1000
+    data=bytearray(shoff+len(rows)*64)
+    data[0:6]=b'\x7fELF\x02\x01'
+    off=0x200;offsets=[]
+    for i,(_name,_addr,size) in enumerate(rows):
+        offsets.append(off)
+        blob=contents.get(i,b'')
+        data[off:off+len(blob)]=blob
+        off+=max(size,len(blob))+0x10
+    data[offsets[shstr_row]:offsets[shstr_row]+len(names)]=names
+    struct.pack_into('<Q',data,40,shoff)
+    struct.pack_into('<HHH',data,58,64,len(rows),shstr_row)
+    for i,(name,addr,size) in enumerate(rows):
+        struct.pack_into('<IIQQQQIIQQ',data,shoff+i*64,
+                         name_off[name],1,0,addr,offsets[i],size,0,0,1,0)
+    return bytes(data)
+
+
+class DuplicateSectionNameTests(unittest.TestCase):
+    """analyze() reads .eh_frame/.rela.dyn through a name->section dict
+    that keeps only the last same-named section. A duplicate name must be
+    refused: with the valid .eh_frame first the pinned FDE gate failed at
+    once, with it last the same bytes passed every FDE/CIE gate, so the
+    verdict flipped on section order alone."""
+    START,END=0x392fab0,0x392fcba
+    EH_GOOD,EH_BAD=0x3000000,0x4000000
+
+    def fixture(self,eh_order):
+        body=bytes(range(256))*3
+        body=body[:self.END-self.START]
+        fde=bytearray(16)
+        struct.pack_into('<i',fde,8,self.START-(self.EH_GOOD+0x10+8))
+        struct.pack_into('<I',fde,12,self.END-self.START)
+        cie=b'CIE!'+b'\0'*12
+        records=dict(target_sha256=guards.SHA256,start_va=hex(self.START),
+                     end_va_exclusive=hex(self.END),
+                     body_sha256=hashlib.sha256(body).hexdigest(),
+                     fde_offset=hex(0x10),fde_hex=bytes(fde).hex(),
+                     cie_offset=hex(0),cie_hex=cie.hex(),
+                     relative_slots={},source_locations=[])
+        eh=bytearray(0x100);eh[0:len(cie)]=cie;eh[0x10:0x10+len(fde)]=fde
+        rows=[('.text',self.START,self.END-self.START),
+              ('.eh_frame',self.EH_GOOD,0x100),
+              ('.eh_frame',self.EH_BAD,0x100),
+              ('.rela.dyn',0x5000000,0)]
+        blobs={0:body,1:bytes(eh),2:b'\0'*0x100}
+        if eh_order=='bad-first':
+            rows=[rows[0],rows[2],rows[1],rows[3]]
+            blobs={0:body,1:b'\0'*0x100,2:bytes(eh)}
+        return synthetic_elf(rows,blobs),records,body,bytes(eh)
+
+    def test_duplicate_eh_frame_rejected_in_either_order(self):
+        for order in ('good-first','bad-first'):
+            with self.subTest(order=order):
+                data,records,_body,_eh=self.fixture(order)
+                with self.assertRaisesRegex(ValueError,'Duplicate section: .eh_frame'):
+                    guards.analyze(data,records)
+
+    def test_duplicate_rela_dyn_rejected(self):
+        _data,_records,body,eh=self.fixture('good-first')
+        rows=[('.text',self.START,self.END-self.START),
+              ('.eh_frame',self.EH_GOOD,0x100),
+              ('.rela.dyn',0x5000000,0),('.rela.dyn',0x6000000,0)]
+        data=synthetic_elf(rows,{0:body,1:eh})
+        _d,records,_b,_e=self.fixture('good-first')
+        with self.assertRaisesRegex(ValueError,'Duplicate section: .rela.dyn'):
+            guards.analyze(data,records)
+
+    def test_unconsumed_duplicate_names_still_tolerated(self):
+        # The guard is scoped to the names analyze() reads; duplicates of a
+        # section it never looks up must not be rejected.
+        _data,_records,body,eh=self.fixture('good-first')
+        rows=[('.text',self.START,self.END-self.START),
+              ('.eh_frame',self.EH_GOOD,0x100),
+              ('.rela.dyn',0x5000000,0),
+              ('.debug_info',0x6000000,0),('.debug_info',0x7000000,0)]
+        data=synthetic_elf(rows,{0:body,1:eh})
+        _d,records,_b,_e=self.fixture('good-first')
+        with self.assertRaises(ValueError) as caught:
+            guards.analyze(data,records)
+        self.assertNotIn('Duplicate section',str(caught.exception))
 
 
 if __name__=='__main__':unittest.main()

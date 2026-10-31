@@ -91,6 +91,12 @@ def decode_export(output,start,end,body):
 
 def analyze(data,records,objdump=None):
     secs = sections(data); named = {s['name']:s for s in secs}
+    # The dict above keeps only the last section of a given name, so a
+    # duplicate would silently decide which bytes the pinned checks below
+    # run against. Refuse the ambiguity for every name this tool reads,
+    # mirroring read()'s exactly-one-match rule for VA mappings.
+    for name in ('.eh_frame','.rela.dyn'):
+        require(sum(s['name']==name for s in secs)<=1,'Duplicate section: '+name)
 
     def read(va,size):
         matches = [s for s in secs if s['type']!=8 and s['address']<=va and va+size<=s['address']+s['size']]
