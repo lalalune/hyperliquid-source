@@ -1,0 +1,360 @@
+{
+  "accept": {
+    "accept4": "0x3cd6220",
+    "fde": "0x2048f10",
+    "ipv6_peer": "SocketAddr tag bit 0 set -> \"ip not v4\" (0x288cab0), close fd, tag 2",
+    "listener_fd_minus_one": "panic at /home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.44.2/src/io/poll_evented.rs:288:26",
+    "other_error": "0x20495a5 -> 0x288d0d0 -> tag 2",
+    "pending": "tag 3",
+    "registration": "0x4f76f80(interest 3); failure closes the fd -> tag 2; Tokio shutdown -> tag 2",
+    "would_block": "kind 13 (SimpleMessage/Custom/Simple) or Os 11 -> 0x2049425, clear readiness; no result"
+  },
+  "callers": {
+    "accept_poll": {
+      "0x2032ae0": [
+        "0x2032c10",
+        "0x2032c76",
+        "0x2032cd7",
+        "0x2032d6e",
+        "0x2032dd9",
+        "0x2032e3a",
+        "0x2032ec9",
+        "0x2032f4e",
+        "0x2032fca"
+      ],
+      "0x203f3e0": [
+        "0x203fbac"
+      ],
+      "0x2041c60": [
+        "0x204242c"
+      ]
+    },
+    "scanned": ".text, every e8 rel32; no RELATIVE slots",
+    "select": "0x2032ae0 polls the same accept future from 9 sites (not decoded)"
+  },
+  "fdes": [
+    "0x203f3e0",
+    "0x2041c60",
+    "0x2048f10"
+  ],
+  "loop": {
+    "error": {
+      "after": "drop the error, jmp 0x203fb84 (accept poll); no return, no sleep",
+      "format": "{} ERROR >>> {} @@ node failed to accept {} connection: {}\n\n",
+      "kind": "byte state+0x220 (1 -> gossip, else validator)",
+      "sink": "stdout via 0x576e968 -> 0x4edba50",
+      "tag": 2
+    },
+    "pending": "tag 3 -> state+0x222 = 3, poll metrics, return 1",
+    "poll": "0x2048f10",
+    "resume": "state 0 starts, 3 resumes at 0x203fb92, else panic /home/ubuntu/hl/code_Mainnet/node/src/connections.rs:186:84",
+    "spawn": {
+      "clone": "0x22b8310(state+0xc8)",
+      "labels": {
+        "0x225e3b0": {
+          "flag": 1,
+          "label": "gossip",
+          "task": "handle_stream_connection"
+        },
+        "0x225e860": {
+          "flag": 0,
+          "label": "validator",
+          "task": "handle_stream_connection"
+        }
+      },
+      "targets": {
+        "0x203f3e0": "0x225e860",
+        "0x2041c60": "0x225e3b0"
+      }
+    }
+  },
+  "metrics": {
+    "clock": "0x4ee3800(1) at poll entry, at resume and at Pending exit",
+    "first_poll": {
+      "counters": {
+        "count": "0x18",
+        "ns": "0x58"
+      },
+      "gate": "byte state+0x230 == 0, then set to 1",
+      "value": "now - created ([task+0x38], [task+0x40])"
+    },
+    "idle": {
+      "counters": {
+        "count": "0x20",
+        "ns": "0x60"
+      },
+      "gate": "woke = swap([task+0x10], 0) > state+0x228",
+      "value": "woke - state+0x228 (ns since created)"
+    },
+    "monitor": "[[state]+0x30]",
+    "poll": {
+      "last_end": "state+0x228 = end - created (ns)",
+      "split": {
+        "at_or_above": {
+          "count": "0x38",
+          "ns": "0x78"
+        },
+        "below": {
+          "count": "0x30",
+          "ns": "0x70"
+        },
+        "threshold": "Duration at monitor+0x90/+0x98"
+      },
+      "value": "end - start (start at resume 0x203f713, end at Pending 0x203fc8e)"
+    },
+    "scheduled": {
+      "counters": {
+        "count": "0x28",
+        "ns": "0x68"
+      },
+      "gate": "woke != 0",
+      "split": {
+        "at_or_above": {
+          "count": "0x40",
+          "ns": "0x88"
+        },
+        "below": {
+          "count": "0x48",
+          "ns": "0x80"
+        },
+        "threshold": "Duration at monitor+0xa0/+0xa8"
+      },
+      "value": "now - (created + woke)"
+    },
+    "waker": "0x5691688 (clone, wake, wake_by_ref, drop) wraps the task waker"
+  },
+  "operands": {
+    "locations": {
+      "0x5691708": "/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-metrics-0.3.1/src/task.rs:2483:23",
+      "0x5692c80": "/home/ubuntu/hl/code_Mainnet/node/src/connections.rs:186:84",
+      "0x56932e8": "/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.44.2/src/io/poll_evented.rs:288:26",
+      "0x5753120": "/rustc/e408947bfd200af42db322daf0fadfe7e26d3bd1/library/std/src/time.rs:429:33"
+    },
+    "targets": {
+      "0x203f3fc": "0x4ee3800",
+      "0x203f424": "0x203f4c4",
+      "0x203f470": "0x4ee3730",
+      "0x203f4d1": "0x203f4f7",
+      "0x203f4e6": "0x203fa4b",
+      "0x203f4f5": "0x203f500",
+      "0x203f4fa": "0x203f621",
+      "0x203f529": "0x203fa01",
+      "0x203f543": "0x203f554",
+      "0x203f548": "0x203fa01",
+      "0x203f58a": "0x4ee3730",
+      "0x203f5df": "0x203f602",
+      "0x203f5f4": "0x203f604",
+      "0x203f600": "0x203f60e",
+      "0x203f602": "0x203f5f6",
+      "0x203f6e2": "0x5691688",
+      "0x203f713": "0x4ee3800",
+      "0x203f728": "0x203f740",
+      "0x203f72d": "0x203fb92",
+      "0x203f733": "0x5692c80",
+      "0x203f73a": "0x576f038",
+      "0x203fa01": "0x7ce45a",
+      "0x203fa08": "0x5753120",
+      "0x203fa14": "0x576e468",
+      "0x203fa4b": "0x5691708",
+      "0x203fa52": "0x576e150",
+      "0x203fbac": "0x2048f10",
+      "0x203fbbd": "0x203fc82",
+      "0x203fbe0": "0x576dfe0",
+      "0x203fbed": "0x203fe36",
+      "0x203fbfa": "0x203fe36",
+      "0x203fc07": "0x203fe36",
+      "0x203fc14": "0x203fe36",
+      "0x203fc21": "0x203fe36",
+      "0x203fc40": "0x204003f",
+      "0x203fc57": "0x203fde9",
+      "0x203fc6b": "0x203fe03",
+      "0x203fc7d": "0x203fe0d",
+      "0x203fc8e": "0x4ee3800",
+      "0x203fcd8": "0x4ee3730",
+      "0x203fd57": "0x4ee3730",
+      "0x203fd69": "0x203fd7b",
+      "0x203fd8b": "0x203fda2",
+      "0x203fd94": "0x203fda4",
+      "0x203fda0": "0x203fdae",
+      "0x203fda2": "0x203fd96",
+      "0x203fe3a": "0x203ff85",
+      "0x203fe4a": "0x576e8a0",
+      "0x203fe85": "0x3c42d1",
+      "0x203feb8": "0x577ab68",
+      "0x203fec0": "0x203fff9",
+      "0x203fec6": "0x577ab58",
+      "0x203fee1": "0x297b0e0",
+      "0x203fefd": "0x21b7390",
+      "0x203ff14": "0x57735e8",
+      "0x203ff30": "0x576e4f0",
+      "0x203ff3f": "0x1fb0d4",
+      "0x203ff4e": "0x576e968",
+      "0x203ff5f": "0x203ff76",
+      "0x203ff64": "0x203ff76",
+      "0x203ff70": "0x576e010",
+      "0x203ff80": "0x203fb84",
+      "0x203ff9a": "0x576dfe0",
+      "0x203ffbf": "0x22b8310",
+      "0x203ffe3": "0x225e860",
+      "0x203ffe8": "0x203fb84",
+      "0x2041c7c": "0x4ee3800",
+      "0x2041ca4": "0x2041d44",
+      "0x2041cf0": "0x4ee3730",
+      "0x2041d51": "0x2041d77",
+      "0x2041d66": "0x20422cb",
+      "0x2041d75": "0x2041d80",
+      "0x2041d7a": "0x2041ea1",
+      "0x2041da9": "0x2042281",
+      "0x2041dc3": "0x2041dd4",
+      "0x2041dc8": "0x2042281",
+      "0x2041e0a": "0x4ee3730",
+      "0x2041e5f": "0x2041e82",
+      "0x2041e74": "0x2041e84",
+      "0x2041e80": "0x2041e8e",
+      "0x2041e82": "0x2041e76",
+      "0x2041f62": "0x5691688",
+      "0x2041f93": "0x4ee3800",
+      "0x2041fa8": "0x2041fc0",
+      "0x2041fad": "0x2042412",
+      "0x2041fb3": "0x5692c80",
+      "0x2041fba": "0x576f038",
+      "0x2042281": "0x7ce45a",
+      "0x2042288": "0x5753120",
+      "0x2042294": "0x576e468",
+      "0x20422cb": "0x5691708",
+      "0x20422d2": "0x576e150",
+      "0x204242c": "0x2048f10",
+      "0x204243d": "0x2042502",
+      "0x2042460": "0x576dfe0",
+      "0x204246d": "0x20426b6",
+      "0x204247a": "0x20426b6",
+      "0x2042487": "0x20426b6",
+      "0x2042494": "0x20426b6",
+      "0x20424a1": "0x20426b6",
+      "0x20424c0": "0x20428bf",
+      "0x20424d7": "0x2042669",
+      "0x20424eb": "0x2042683",
+      "0x20424fd": "0x204268d",
+      "0x204250e": "0x4ee3800",
+      "0x2042558": "0x4ee3730",
+      "0x20425d7": "0x4ee3730",
+      "0x20425e9": "0x20425fb",
+      "0x204260b": "0x2042622",
+      "0x2042614": "0x2042624",
+      "0x2042620": "0x204262e",
+      "0x2042622": "0x2042616",
+      "0x20426ba": "0x2042805",
+      "0x20426ca": "0x576e8a0",
+      "0x2042705": "0x3c42d1",
+      "0x2042738": "0x577ab68",
+      "0x2042740": "0x2042879",
+      "0x2042746": "0x577ab58",
+      "0x2042761": "0x297b0e0",
+      "0x204277d": "0x21b7390",
+      "0x2042794": "0x57735e8",
+      "0x20427b0": "0x576e4f0",
+      "0x20427bf": "0x1fb0d4",
+      "0x20427ce": "0x576e968",
+      "0x20427df": "0x20427f6",
+      "0x20427e4": "0x20427f6",
+      "0x20427f0": "0x576e010",
+      "0x2042800": "0x2042404",
+      "0x204281a": "0x576dfe0",
+      "0x204283f": "0x22b8310",
+      "0x2042863": "0x225e3b0",
+      "0x2042868": "0x2042404",
+      "0x2049378": "0x20497b4",
+      "0x204938a": "0x3cd6220",
+      "0x2049397": "0x20494d6",
+      "0x20493bd": "0x3c3d58",
+      "0x20493d7": "0x2049425",
+      "0x20493d9": "0x20495a5",
+      "0x20493fb": "0x2049425",
+      "0x20493fd": "0x20495a5",
+      "0x204941f": "0x20495a5",
+      "0x2049458": "0x2049469",
+      "0x2049467": "0x2049450",
+      "0x2049528": "0x5755fa0",
+      "0x204952f": "0x576f0a8",
+      "0x204953c": "0x5755fa0",
+      "0x2049558": "0x4f76f80",
+      "0x2049571": "0x204962a",
+      "0x204957b": "0x576e708",
+      "0x2049581": "0x20495ad",
+      "0x2049583": "0x7d1281",
+      "0x2049594": "0x576ee60",
+      "0x20495b8": "0x288d0d0",
+      "0x20495e7": "0x576dfe0",
+      "0x2049625": "0x20496fd",
+      "0x204967c": "0x2049715",
+      "0x2049682": "0x3c4be5",
+      "0x204968e": "0x288cab0",
+      "0x204969b": "0x28963c0",
+      "0x20496a7": "0x20496af",
+      "0x20496a9": "0x576e708",
+      "0x20496b4": "0x1fc1ad0",
+      "0x20496bf": "0x20495c6",
+      "0x20497b4": "0x56932e8",
+      "0x20497bb": "0x576e470",
+      "0x225e460": "0x706ece",
+      "0x225e474": "0x576e000",
+      "0x225e4a6": "0x3d78b8",
+      "0x225e910": "0x706ec5",
+      "0x225e924": "0x576e000",
+      "0x225e956": "0x3d78b8",
+      "0x4b6f896": "0x4b6f8ad",
+      "0x4b6f898": "0x706ece",
+      "0x4b6f8a7": "0x576e000",
+      "0x4b6f8ad": "0x706ec5",
+      "0x4b6f8bc": "0x576e000",
+      "0x4edba61": "0x7cd20b"
+    },
+    "waker_vtable": [
+      "0x1f6ad20",
+      "0x219a6d0",
+      "0x219a6e0",
+      "0x219a6b0"
+    ]
+  },
+  "target": "artifacts/node/94/hl-node",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "twins": {
+    "compared_bytes": 1777,
+    "only_difference": "0x203ffe3: call 0x225e860 (validator) vs 0x2042863: call 0x225e3b0 (gossip)",
+    "rel_operands": 66,
+    "shift": "0x2880",
+    "window_pairs": 8
+  },
+  "windows": {
+    "accept": "0x2049370",
+    "accepted": "0x20494d6",
+    "add_overflow_a": "0x203fa01",
+    "add_overflow_b": "0x2042281",
+    "closed": "0x20497b4",
+    "dispatch_a": "0x203fe36",
+    "dispatch_b": "0x20426b6",
+    "entry_a": "0x203f3e0",
+    "entry_b": "0x2041c60",
+    "flag_g": "0x225e5ac",
+    "flag_v": "0x225ea5c",
+    "kind_fmt": "0x4b6f890",
+    "label_g": "0x225e460",
+    "label_v": "0x225e910",
+    "loop_a": "0x203fb84",
+    "loop_b": "0x2042404",
+    "overflow_a": "0x203fa4b",
+    "overflow_b": "0x20422cb",
+    "pending_a": "0x203fc82",
+    "pending_b": "0x2042502",
+    "poll_pending": "0x20496ec",
+    "print_label": "0x4edba50",
+    "resume_a": "0x203f6d7",
+    "resume_b": "0x2041f57",
+    "task_g": "0x225e4a6",
+    "task_v": "0x225e956",
+    "timing_a": "0x203f4c4",
+    "timing_b": "0x2041d44",
+    "v4_check": "0x204962a",
+    "would_block": "0x2049425"
+  }
+}
