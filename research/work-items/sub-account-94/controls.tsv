@@ -1,0 +1,25 @@
+vaddr	hex_bytes	desc	status
+0x36f3627	4981f880969800	cmp $0x989680, %r8 (MIN_CREATE_EQUITY_RAW = 10_000_000)	PASS
+0x36f3630	f2490f2ac0	cvtsi2sd %r8, %xmm0 (convert equity_raw to float)	PASS
+0x36f3635	f20f5e052373b1fc	divsd -0x34e8cdd(%rip), %xmm0 (divide by 100.0 at 0x20a960)	PASS
+0x36f363d	66c703dd00	movw $0xdd, (%rbx) (SubAccountsNotEligible = 221)	PASS
+0x36f3734	48babfd5edbdcefee6db	movabs $0xdbe6fecebdedd5bf, %rdx (magic mul for / 10_000_000_000)	PASS
+0x36f3748	4883fa28	cmp $0x28, %rdx (SUB_ACCOUNT_CAP_MAX_BONUS = 40)	PASS
+0x36f3755	4883c00a	add $0xa, %rax (SUB_ACCOUNT_CAP_BASE = 10)	PASS
+0x36f39ca	66c703d600	movw $0xd6, (%rbx) (TooManySubAccounts = 214)	PASS
+0x36f39e9	66c703d800	movw $0xd8, (%rbx) (DuplicateSubAccountUser = 216)	PASS
+0x36f390c	4983ff64	cmp $0x64, %r15 (MAX_WIRE_NAME_BYTES = 100)	PASS
+0x36f3916	66bd4301	mov $0x143, %bp (FullNameTooLong = 323)	PASS
+0x36f3a36	81fd86010000	cmp $0x186, %ebp (SUCCESS_CODE = 390)	PASS
+0x36f3bcd	488d1564e0ff01	lea 0x1ffe064(%rip), %rdx (panic record at 0x56f1c38)	PASS
+0x36f3d2c	0f10056df8b0fc	movups -0x34f0793(%rip), %xmm0 (domain createSubAccount at 0x2035a0)	PASS
+0x36f43db	6641c70424d900	movw $0xd9, (%r12) (SubAccountInvalidName = 217)	PASS
+0x36f45ec	66bbd700	mov $0xd7, %bx (SubAccountNameNotUnique = 215)	PASS
+0x36f431e	66c7034301	movw $0x143, (%rbx) (FullNameTooLong = 323)	PASS
+0x36f434c	66c703dc00	movw $0xdc, (%rbx) (SubAccountNotRegistered = 220)	PASS
+0x36f466e	c604017b	movb $0x7b, (%rcx,%rax,1) (open brace in JSON serializer)	PASS
+0x36f4684	488d358639eafc	lea -0x315c67a(%rip), %rsi (key n at 0x598011)	PASS
+0x36f46ae	488d35803ceafc	lea -0x315c380(%rip), %rsi (key s at 0x598335)	PASS
+0x36f4735	488d35653ceafc	lea -0x315c39b(%rip), %rsi (key m at 0x5983a1)	PASS
+0x36f4ed5	488d357236eafc	lea -0x315c98e(%rip), %rsi (key user_to_sub_accounts at 0x59854e)	PASS
+0x36f4f3d	488d351e36eafc	lea -0x315c9e2(%rip), %rsi (key sub_account_to_master at 0x598562)	PASS
