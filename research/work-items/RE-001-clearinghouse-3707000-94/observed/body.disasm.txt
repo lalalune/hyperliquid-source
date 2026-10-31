@@ -1,0 +1,483 @@
+# capstone 5.0.7 disassembly of clearinghouse body 0x3707000 0x3707000..0x3707902; byte records are authoritative
+3707000  55                     push rbp
+3707001  4157                   push r15
+3707003  4156                   push r14
+3707005  4155                   push r13
+3707007  4154                   push r12
+3707009  53                     push rbx
+370700a  4881ec78010000         sub rsp, 0x178
+3707011  4d89c5                 mov r13, r8
+3707014  4989cc                 mov r12, rcx
+3707017  4989d7                 mov r15, rdx
+370701a  4989f6                 mov r14, rsi
+370701d  48897c2408             mov qword ptr [rsp + 8], rdi
+3707022  4889f7                 mov rdi, rsi
+3707025  4889d6                 mov rsi, rdx
+3707028  ff1532d60602           call qword ptr [rip + 0x206d632]
+370702e  4889c3                 mov rbx, rax
+3707031  418b4710               mov eax, dword ptr [r15 + 0x10]
+3707035  89442420               mov dword ptr [rsp + 0x20], eax
+3707039  f3410f6f07             movdqu xmm0, xmmword ptr [r15]
+370703e  660f7f442410           movdqa xmmword ptr [rsp + 0x10], xmm0
+3707044  4983be1001000000       cmp qword ptr [r14 + 0x110], 0
+370704c  0f84dc000000           je 0x370712e
+3707052  498daef8000000         lea rbp, [r14 + 0xf8]
+3707059  498dbe18010000         lea rdi, [r14 + 0x118]
+3707060  4c89fe                 mov rsi, r15
+3707063  e838572900             call 0x399c7a0
+3707068  4889c6                 mov rsi, rax
+370706b  48c1ee39               shr rsi, 0x39
+370706f  498b8ef8000000         mov rcx, qword ptr [r14 + 0xf8]
+3707076  498b9600010000         mov rdx, qword ptr [r14 + 0x100]
+370707d  660f6ec6               movd xmm0, esi
+3707081  660f60c0               punpcklbw xmm0, xmm0
+3707085  f20f70c000             pshuflw xmm0, xmm0, 0
+370708a  660f70c044             pshufd xmm0, xmm0, 0x44
+370708f  488d7188               lea rsi, [rcx - 0x78]
+3707093  31ff                   xor edi, edi
+3707095  660f76c9               pcmpeqd xmm1, xmm1
+3707099  4821d0                 and rax, rdx
+370709c  f30f6f1401             movdqu xmm2, xmmword ptr [rcx + rax]
+37070a1  660f6fda               movdqa xmm3, xmm2
+37070a5  660f74d8               pcmpeqb xmm3, xmm0
+37070a9  66440fd7c3             pmovmskb r8d, xmm3
+37070ae  4585c0                 test r8d, r8d
+37070b1  745d                   je 0x3707110
+37070b3  f3450fbcc8             tzcnt r9d, r8d
+37070b8  4901c1                 add r9, rax
+37070bb  4921d1                 and r9, rdx
+37070be  49f7d9                 neg r9
+37070c1  4d6bc978               imul r9, r9, 0x78
+37070c5  f3420f6f1c0e           movdqu xmm3, xmmword ptr [rsi + r9]
+37070cb  660f6e642420           movd xmm4, dword ptr [rsp + 0x20]
+37070d1  66420f6e6c0e10         movd xmm5, dword ptr [rsi + r9 + 0x10]
+37070d8  660f745c2410           pcmpeqb xmm3, xmmword ptr [rsp + 0x10]
+37070de  660f74ec               pcmpeqb xmm5, xmm4
+37070e2  660fdbdd               pand xmm3, xmm5
+37070e6  66440fd7cb             pmovmskb r9d, xmm3
+37070eb  4181f9ffff0000         cmp r9d, 0xffff
+37070f2  7456                   je 0x370714a
+37070f4  458d48ff               lea r9d, [r8 - 1]
+37070f8  664521c1               and r9w, r8w
+37070fc  4589c8                 mov r8d, r9d
+37070ff  75b2                   jne 0x37070b3
+3707101  6666666666662e0f1f840000000000 nop word ptr cs:[rax + rax]
+3707110  660f74d1               pcmpeqb xmm2, xmm1
+3707114  66440fd7c2             pmovmskb r8d, xmm2
+3707119  4585c0                 test r8d, r8d
+370711c  7510                   jne 0x370712e
+370711e  4801f8                 add rax, rdi
+3707121  4883c010               add rax, 0x10
+3707125  4883c710               add rdi, 0x10
+3707129  e96bffffff             jmp 0x3707099
+370712e  488b442408             mov rax, qword ptr [rsp + 8]
+3707133  66c7004800             mov word ptr [rax], 0x48
+3707138  4881c478010000         add rsp, 0x178
+370713f  5b                     pop rbx
+3707140  415c                   pop r12
+3707142  415d                   pop r13
+3707144  415e                   pop r14
+3707146  415f                   pop r15
+3707148  5d                     pop rbp
+3707149  c3                     ret 
+370714a  4d85ed                 test r13, r13
+370714d  7459                   je 0x37071a8
+370714f  48b94b598638d6c56d34   movabs rcx, 0x346dc5d63886594b
+3707159  4c89e0                 mov rax, r12
+370715c  48f7e1                 mul rcx
+370715f  48c1ea0b               shr rdx, 0xb
+3707163  493b5630               cmp rdx, qword ptr [r14 + 0x30]
+3707167  0f8576060000           jne 0x37077e3
+370716d  4869ca10270000         imul rcx, rdx, 0x2710
+3707174  4c89e0                 mov rax, r12
+3707177  4829c8                 sub rax, rcx
+370717a  493b4610               cmp rax, qword ptr [r14 + 0x10]
+370717e  0f835f060000           jae 0x37077e3
+3707184  4d85ed                 test r13, r13
+3707187  792b                   jns 0x37071b4
+3707189  498b4e08               mov rcx, qword ptr [r14 + 8]
+370718d  488d0440               lea rax, [rax + rax*2]
+3707191  48c1e004               shl rax, 4
+3707195  807c012802             cmp byte ptr [rcx + rax + 0x28], 2
+370719a  7518                   jne 0x37071b4
+370719c  488b442408             mov rax, qword ptr [rsp + 8]
+37071a1  66c7004e00             mov word ptr [rax], 0x4e
+37071a6  eb90                   jmp 0x3707138
+37071a8  488b442408             mov rax, qword ptr [rsp + 8]
+37071ad  66c7004900             mov word ptr [rax], 0x49
+37071b2  eb84                   jmp 0x3707138
+37071b4  4939dd                 cmp r13, rbx
+37071b7  7e0f                   jle 0x37071c8
+37071b9  488b442408             mov rax, qword ptr [rsp + 8]
+37071be  66c7004b00             mov word ptr [rax], 0x4b
+37071c3  e970ffffff             jmp 0x3707138
+37071c8  418b4710               mov eax, dword ptr [r15 + 0x10]
+37071cc  89442420               mov dword ptr [rsp + 0x20], eax
+37071d0  f3410f6f07             movdqu xmm0, xmmword ptr [r15]
+37071d5  660f7f442410           movdqa xmmword ptr [rsp + 0x10], xmm0
+37071db  488d742410             lea rsi, [rsp + 0x10]
+37071e0  4889ef                 mov rdi, rbp
+37071e3  e858f7e8ff             call 0x3596940
+37071e8  4889c5                 mov rbp, rax
+37071eb  488b4020               mov rax, qword ptr [rax + 0x20]
+37071ef  488b5d00               mov rbx, qword ptr [rbp]
+37071f3  488d4d08               lea rcx, [rbp + 8]
+37071f7  48837d1800             cmp qword ptr [rbp + 0x18], 0
+37071fc  4889842490000000       mov qword ptr [rsp + 0x90], rax
+3707204  48894c2478             mov qword ptr [rsp + 0x78], rcx
+3707209  744a                   je 0x3707255
+370720b  488b31                 mov rsi, qword ptr [rcx]
+370720e  4885f6                 test rsi, rsi
+3707211  0f84d9050000           je 0x37077f0
+3707217  488b5510               mov rdx, qword ptr [rbp + 0x10]
+370721b  488d7c2410             lea rdi, [rsp + 0x10]
+3707220  e83b46ceff             call 0x33eb860
+3707225  488b4520               mov rax, qword ptr [rbp + 0x20]
+3707229  4889442428             mov qword ptr [rsp + 0x28], rax
+370722e  48837d3800             cmp qword ptr [rbp + 0x38], 0
+3707233  743e                   je 0x3707273
+3707235  488b7528               mov rsi, qword ptr [rbp + 0x28]
+3707239  4885f6                 test rsi, rsi
+370723c  0f84bb050000           je 0x37077fd
+3707242  488b5530               mov rdx, qword ptr [rbp + 0x30]
+3707246  488dbc24a0000000       lea rdi, [rsp + 0xa0]
+370724e  e86dc3cdff             call 0x33e35c0
+3707253  eb36                   jmp 0x370728b
+3707255  48c744241000000000     mov qword ptr [rsp + 0x10], 0
+370725e  48c744242000000000     mov qword ptr [rsp + 0x20], 0
+3707267  4889442428             mov qword ptr [rsp + 0x28], rax
+370726c  48837d3800             cmp qword ptr [rbp + 0x38], 0
+3707271  75c2                   jne 0x3707235
+3707273  48c78424a000000000000000 mov qword ptr [rsp + 0xa0], 0
+370727f  48c78424b000000000000000 mov qword ptr [rsp + 0xb0], 0
+370728b  498dbe88010000         lea rdi, [r14 + 0x188]
+3707292  488b8424b0000000       mov rax, qword ptr [rsp + 0xb0]
+370729a  4889842450010000       mov qword ptr [rsp + 0x150], rax
+37072a2  488b8424a0000000       mov rax, qword ptr [rsp + 0xa0]
+37072aa  4889842440010000       mov qword ptr [rsp + 0x140], rax
+37072b2  488b8424a8000000       mov rax, qword ptr [rsp + 0xa8]
+37072ba  4889842448010000       mov qword ptr [rsp + 0x148], rax
+37072c2  488b4550               mov rax, qword ptr [rbp + 0x50]
+37072c6  4889842468010000       mov qword ptr [rsp + 0x168], rax
+37072ce  8b4558                 mov eax, dword ptr [rbp + 0x58]
+37072d1  89842470010000         mov dword ptr [rsp + 0x170], eax
+37072d8  48899c2418010000       mov qword ptr [rsp + 0x118], rbx
+37072e0  0f10442410             movups xmm0, xmmword ptr [rsp + 0x10]
+37072e5  f30f6f4c2420           movdqu xmm1, xmmword ptr [rsp + 0x20]
+37072eb  0f11842420010000       movups xmmword ptr [rsp + 0x120], xmm0
+37072f3  f30f7f8c2430010000     movdqu xmmword ptr [rsp + 0x130], xmm1
+37072fc  0f104540               movups xmm0, xmmword ptr [rbp + 0x40]
+3707300  0f11842458010000       movups xmmword ptr [rsp + 0x158], xmm0
+3707308  418b4710               mov eax, dword ptr [r15 + 0x10]
+370730c  89442420               mov dword ptr [rsp + 0x20], eax
+3707310  f3410f6f07             movdqu xmm0, xmmword ptr [r15]
+3707315  660f7f442410           movdqa xmmword ptr [rsp + 0x10], xmm0
+370731b  488d742410             lea rsi, [rsp + 0x10]
+3707320  e86b42c9ff             call 0x339b590
+3707325  418b4710               mov eax, dword ptr [r15 + 0x10]
+3707329  89842410010000         mov dword ptr [rsp + 0x110], eax
+3707330  f3410f6f07             movdqu xmm0, xmmword ptr [r15]
+3707335  660f7f842400010000     movdqa xmmword ptr [rsp + 0x100], xmm0
+370733e  4c89a42498000000       mov qword ptr [rsp + 0x98], r12
+3707346  4c8b4c2478             mov r9, qword ptr [rsp + 0x78]
+370734b  498b01                 mov rax, qword ptr [r9]
+370734e  4885c0                 test rax, rax
+3707351  0f847b000000           je 0x37073d2
+3707357  488b4d10               mov rcx, qword ptr [rbp + 0x10]
+370735b  0fb7b022030000         movzx esi, word ptr [rax + 0x322]
+3707362  89f7                   mov edi, esi
+3707364  c1e703                 shl edi, 3
+3707367  48c7c2ffffffff         mov rdx, 0xffffffffffffffff
+370736e  6690                   nop 
+3707370  4885ff                 test rdi, rdi
+3707373  7427                   je 0x370739c
+3707375  4c3ba4d0d0020000       cmp r12, qword ptr [rax + rdx*8 + 0x2d0]
+370737d  410f97c0               seta r8b
+3707381  4180d800               sbb r8b, 0
+3707385  48ffc2                 inc rdx
+3707388  4883c7f8               add rdi, -8
+370738c  4180f801               cmp r8b, 1
+3707390  74de                   je 0x3707370
+3707392  410fb6f0               movzx esi, r8b
+3707396  85f6                   test esi, esi
+3707398  7419                   je 0x37073b3
+370739a  eb03                   jmp 0x370739f
+370739c  4889f2                 mov rdx, rsi
+370739f  4883e901               sub rcx, 1
+37073a3  0f82f6030000           jb 0x370779f
+37073a9  488b84d028030000       mov rax, qword ptr [rax + rdx*8 + 0x328]
+37073b1  eba8                   jmp 0x370735b
+37073b3  4889442418             mov qword ptr [rsp + 0x18], rax
+37073b8  48894c2420             mov qword ptr [rsp + 0x20], rcx
+37073bd  4889542428             mov qword ptr [rsp + 0x28], rdx
+37073c2  4c894c2430             mov qword ptr [rsp + 0x30], r9
+37073c7  48c744241000000000     mov qword ptr [rsp + 0x10], 0
+37073d0  eb13                   jmp 0x37073e5
+37073d2  4c894c2410             mov qword ptr [rsp + 0x10], r9
+37073d7  4c89642418             mov qword ptr [rsp + 0x18], r12
+37073dc  48c744242000000000     mov qword ptr [rsp + 0x20], 0
+37073e5  488d7c2410             lea rdi, [rsp + 0x10]
+37073ea  488db42498000000       lea rsi, [rsp + 0x98]
+37073f2  4c89f2                 mov rdx, r14
+37073f5  e82660cbff             call 0x33bd420
+37073fa  488b4810               mov rcx, qword ptr [rax + 0x10]
+37073fe  448b5004               mov r10d, dword ptr [rax + 4]
+3707402  48898c2488000000       mov qword ptr [rsp + 0x88], rcx
+370740a  4885c9                 test rcx, rcx
+370740d  4889442478             mov qword ptr [rsp + 0x78], rax
+3707412  4489942484000000       mov dword ptr [rsp + 0x84], r10d
+370741a  0f8493000000           je 0x37074b3
+3707420  833801                 cmp dword ptr [rax], 1
+3707423  0f8596000000           jne 0x37074bf
+3707429  488d842420010000       lea rax, [rsp + 0x120]
+3707431  4c89a424a0000000       mov qword ptr [rsp + 0xa0], r12
+3707439  488b8c2420010000       mov rcx, qword ptr [rsp + 0x120]
+3707441  4885c9                 test rcx, rcx
+3707444  0f84a0000000           je 0x37074ea
+370744a  488b942428010000       mov rdx, qword ptr [rsp + 0x128]
+3707452  0fb7b922030000         movzx edi, word ptr [rcx + 0x322]
+3707459  4189f8                 mov r8d, edi
+370745c  41c1e003               shl r8d, 3
+3707460  48c7c6ffffffff         mov rsi, 0xffffffffffffffff
+3707467  660f1f840000000000     nop word ptr [rax + rax]
+3707470  4d85c0                 test r8, r8
+3707473  7427                   je 0x370749c
+3707475  4c3ba4f1d0020000       cmp r12, qword ptr [rcx + rsi*8 + 0x2d0]
+370747d  410f97c1               seta r9b
+3707481  4180d900               sbb r9b, 0
+3707485  48ffc6                 inc rsi
+3707488  4983c0f8               add r8, -8
+370748c  4180f901               cmp r9b, 1
+3707490  74de                   je 0x3707470
+3707492  410fb6f9               movzx edi, r9b
+3707496  85ff                   test edi, edi
+3707498  7431                   je 0x37074cb
+370749a  eb03                   jmp 0x370749f
+370749c  4889fe                 mov rsi, rdi
+370749f  4883ea01               sub rdx, 1
+37074a3  0f8218030000           jb 0x37077c1
+37074a9  488b8cf128030000       mov rcx, qword ptr [rcx + rsi*8 + 0x328]
+37074b1  eb9f                   jmp 0x3707452
+37074b3  66b84a00               mov ax, 0x4a
+37074b7  4531ed                 xor r13d, r13d
+37074ba  e9f0000000             jmp 0x37075af
+37074bf  66b84d00               mov ax, 0x4d
+37074c3  4531ed                 xor r13d, r13d
+37074c6  e9e4000000             jmp 0x37075af
+37074cb  48894c2418             mov qword ptr [rsp + 0x18], rcx
+37074d0  4889542420             mov qword ptr [rsp + 0x20], rdx
+37074d5  4889742428             mov qword ptr [rsp + 0x28], rsi
+37074da  4889442430             mov qword ptr [rsp + 0x30], rax
+37074df  48c744241000000000     mov qword ptr [rsp + 0x10], 0
+37074e8  eb13                   jmp 0x37074fd
+37074ea  4889442410             mov qword ptr [rsp + 0x10], rax
+37074ef  4c89642418             mov qword ptr [rsp + 0x18], r12
+37074f4  48c744242000000000     mov qword ptr [rsp + 0x20], 0
+37074fd  488d7c2410             lea rdi, [rsp + 0x10]
+3707502  488db424a0000000       lea rsi, [rsp + 0xa0]
+370750a  4c89f2                 mov rdx, r14
+370750d  e80e5fcbff             call 0x33bd420
+3707512  833801                 cmp dword ptr [rax], 1
+3707515  0f85f1020000           jne 0x370780c
+370751b  488b4808               mov rcx, qword ptr [rax + 8]
+370751f  4c01e9                 add rcx, r13
+3707522  0f80ff020000           jo 0x3707827
+3707528  48894808               mov qword ptr [rax + 8], rcx
+370752c  488b842418010000       mov rax, qword ptr [rsp + 0x118]
+3707534  4c29e8                 sub rax, r13
+3707537  0f80f6020000           jo 0x3707833
+370753d  4889842418010000       mov qword ptr [rsp + 0x118], rax
+3707545  4d85ed                 test r13, r13
+3707548  7934                   jns 0x370757e
+370754a  4d8d4e60               lea r9, [r14 + 0x60]
+370754e  450fb686ed020000       movzx r8d, byte ptr [r14 + 0x2ed]
+3707556  4c893424               mov qword ptr [rsp], r14
+370755a  488dbc2418010000       lea rdi, [rsp + 0x118]
+3707562  be01000000             mov esi, 1
+3707567  4c89e2                 mov rdx, r12
+370756a  b904000000             mov ecx, 4
+370756f  ff157bd10602           call qword ptr [rip + 0x206d17b]
+3707575  4885c0                 test rax, rax
+3707578  0f8815020000           js 0x3707793
+370757e  488b4c2478             mov rcx, qword ptr [rsp + 0x78]
+3707583  488b4108               mov rax, qword ptr [rcx + 8]
+3707587  4c01e8                 add rax, r13
+370758a  0f80af020000           jo 0x370783f
+3707590  48894108               mov qword ptr [rcx + 8], rax
+3707594  488b5d00               mov rbx, qword ptr [rbp]
+3707598  4889d8                 mov rax, rbx
+370759b  4c29e8                 sub rax, r13
+370759e  0f80a7020000           jo 0x370784b
+37075a4  48894500               mov qword ptr [rbp], rax
+37075a8  66b88601               mov ax, 0x186
+37075ac  41b501                 mov r13b, 1
+37075af  4883c520               add rbp, 0x20
+37075b3  4d8d8670010000         lea r8, [r14 + 0x170]
+37075ba  6689442410             mov word ptr [rsp + 0x10], ax
+37075bf  488b442478             mov rax, qword ptr [rsp + 0x78]
+37075c4  488b5010               mov rdx, qword ptr [rax + 0x10]
+37075c8  8b5804                 mov ebx, dword ptr [rax + 4]
+37075cb  4c89e7                 mov rdi, r12
+37075ce  488bb42488000000       mov rsi, qword ptr [rsp + 0x88]
+37075d6  4889e9                 mov rcx, rbp
+37075d9  e872fdfeff             call 0x36f7350
+37075de  399c2484000000         cmp dword ptr [rsp + 0x84], ebx
+37075e5  7419                   je 0x3707600
+37075e7  498dbe28010000         lea rdi, [r14 + 0x128]
+37075ee  488db42400010000       lea rsi, [rsp + 0x100]
+37075f6  4c89e2                 mov rdx, r12
+37075f9  89d9                   mov ecx, ebx
+37075fb  e8a0700000             call 0x370e6a0
+3707600  0f10442460             movups xmm0, xmmword ptr [rsp + 0x60]
+3707605  0f298424f0000000       movaps xmmword ptr [rsp + 0xf0], xmm0
+370760d  0f10442450             movups xmm0, xmmword ptr [rsp + 0x50]
+3707612  0f298424e0000000       movaps xmmword ptr [rsp + 0xe0], xmm0
+370761a  f30f6f442410           movdqu xmm0, xmmword ptr [rsp + 0x10]
+3707620  f30f6f4c2420           movdqu xmm1, xmmword ptr [rsp + 0x20]
+3707626  f30f6f542430           movdqu xmm2, xmmword ptr [rsp + 0x30]
+370762c  f30f6f5c2440           movdqu xmm3, xmmword ptr [rsp + 0x40]
+3707632  660f7f9c24d0000000     movdqa xmmword ptr [rsp + 0xd0], xmm3
+370763b  660f7f9424c0000000     movdqa xmmword ptr [rsp + 0xc0], xmm2
+3707644  660f7f8c24b0000000     movdqa xmmword ptr [rsp + 0xb0], xmm1
+370764d  660f7f8424a0000000     movdqa xmmword ptr [rsp + 0xa0], xmm0
+3707656  488b8c2420010000       mov rcx, qword ptr [rsp + 0x120]
+370765e  4885c9                 test rcx, rcx
+3707661  743d                   je 0x37076a0
+3707663  488b942428010000       mov rdx, qword ptr [rsp + 0x128]
+370766b  488b842430010000       mov rax, qword ptr [rsp + 0x130]
+3707673  48c744241800000000     mov qword ptr [rsp + 0x18], 0
+370767c  48894c2420             mov qword ptr [rsp + 0x20], rcx
+3707681  4889542428             mov qword ptr [rsp + 0x28], rdx
+3707686  48c744243800000000     mov qword ptr [rsp + 0x38], 0
+370768f  48894c2440             mov qword ptr [rsp + 0x40], rcx
+3707694  4889542448             mov qword ptr [rsp + 0x48], rdx
+3707699  b901000000             mov ecx, 1
+370769e  eb04                   jmp 0x37076a4
+37076a0  31c9                   xor ecx, ecx
+37076a2  31c0                   xor eax, eax
+37076a4  4c8da42440010000       lea r12, [rsp + 0x140]
+37076ac  48894c2410             mov qword ptr [rsp + 0x10], rcx
+37076b1  48894c2430             mov qword ptr [rsp + 0x30], rcx
+37076b6  4889442450             mov qword ptr [rsp + 0x50], rax
+37076bb  488d9c2400010000       lea rbx, [rsp + 0x100]
+37076c3  4c8d6c2410             lea r13, [rsp + 0x10]
+37076c8  0f1f840000000000       nop dword ptr [rax + rax]
+37076d0  4889df                 mov rdi, rbx
+37076d3  4c89ee                 mov rsi, r13
+37076d6  e825d0caff             call 0x33b4700
+37076db  4883bc240001000000     cmp qword ptr [rsp + 0x100], 0
+37076e4  75ea                   jne 0x37076d0
+37076e6  4c89e7                 mov rdi, r12
+37076e9  e802b7ceff             call 0x33f2df0
+37076ee  488b4500               mov rax, qword ptr [rbp]
+37076f2  4883bc249000000000     cmp qword ptr [rsp + 0x90], 0
+37076fb  7419                   je 0x3707716
+37076fd  4885c0                 test rax, rax
+3707700  7540                   jne 0x3707742
+3707702  4981c658010000         add r14, 0x158
+3707709  4c89f7                 mov rdi, r14
+370770c  4c89fe                 mov rsi, r15
+370770f  e8cc58caff             call 0x33acfe0
+3707714  eb2c                   jmp 0x3707742
+3707716  4885c0                 test rax, rax
+3707719  7427                   je 0x3707742
+370771b  4981c658010000         add r14, 0x158
+3707722  418b4710               mov eax, dword ptr [r15 + 0x10]
+3707726  89442420               mov dword ptr [rsp + 0x20], eax
+370772a  f3410f6f07             movdqu xmm0, xmmword ptr [r15]
+370772f  660f7f442410           movdqa xmmword ptr [rsp + 0x10], xmm0
+3707735  488d742410             lea rsi, [rsp + 0x10]
+370773a  4c89f7                 mov rdi, r14
+370773d  e84e3ec9ff             call 0x339b590
+3707742  0f288424f0000000       movaps xmm0, xmmword ptr [rsp + 0xf0]
+370774a  488b442408             mov rax, qword ptr [rsp + 8]
+370774f  0f114050               movups xmmword ptr [rax + 0x50], xmm0
+3707753  0f288424e0000000       movaps xmm0, xmmword ptr [rsp + 0xe0]
+370775b  0f114040               movups xmmword ptr [rax + 0x40], xmm0
+370775f  0f288424a0000000       movaps xmm0, xmmword ptr [rsp + 0xa0]
+3707767  0f288c24b0000000       movaps xmm1, xmmword ptr [rsp + 0xb0]
+370776f  0f289424c0000000       movaps xmm2, xmmword ptr [rsp + 0xc0]
+3707777  0f289c24d0000000       movaps xmm3, xmmword ptr [rsp + 0xd0]
+370777f  0f115830               movups xmmword ptr [rax + 0x30], xmm3
+3707783  0f115020               movups xmmword ptr [rax + 0x20], xmm2
+3707787  0f114810               movups xmmword ptr [rax + 0x10], xmm1
+370778b  0f1100                 movups xmmword ptr [rax], xmm0
+370778e  e9a5f9ffff             jmp 0x3707138
+3707793  66b84c00               mov ax, 0x4c
+3707797  4531ed                 xor r13d, r13d
+370779a  e910feffff             jmp 0x37075af
+370779f  4889442420             mov qword ptr [rsp + 0x20], rax
+37077a4  48c744242800000000     mov qword ptr [rsp + 0x28], 0
+37077ad  4889542430             mov qword ptr [rsp + 0x30], rdx
+37077b2  4c894c2410             mov qword ptr [rsp + 0x10], r9
+37077b7  4c89642418             mov qword ptr [rsp + 0x18], r12
+37077bc  e924fcffff             jmp 0x37073e5
+37077c1  48894c2420             mov qword ptr [rsp + 0x20], rcx
+37077c6  48c744242800000000     mov qword ptr [rsp + 0x28], 0
+37077cf  4889742430             mov qword ptr [rsp + 0x30], rsi
+37077d4  4889442410             mov qword ptr [rsp + 0x10], rax
+37077d9  4c89642418             mov qword ptr [rsp + 0x18], r12
+37077de  e91afdffff             jmp 0x37074fd
+37077e3  488d3dd6a9fe01         lea rdi, [rip + 0x1fea9d6]
+37077ea  ff15806c0602           call qword ptr [rip + 0x2066c80]
+37077f0  488d3d5932fe01         lea rdi, [rip + 0x1fe3259]
+37077f7  ff15736c0602           call qword ptr [rip + 0x2066c73]
+37077fd  488d3d4c32fe01         lea rdi, [rip + 0x1fe324c]
+3707804  ff15666c0602           call qword ptr [rip + 0x2066c66]
+370780a  eb19                   jmp 0x3707825
+370780c  488d3d8617e9fc         lea rdi, [rip - 0x316e87a]
+3707813  488d15cea6fe01         lea rdx, [rip + 0x1fea6ce]
+370781a  be28000000             mov esi, 0x28
+370781f  ff15e3680602           call qword ptr [rip + 0x20668e3]
+3707825  0f0b                   ud2 
+3707827  66b8be00               mov ax, 0xbe
+370782b  4531ed                 xor r13d, r13d
+370782e  e97cfdffff             jmp 0x37075af
+3707833  4531ed                 xor r13d, r13d
+3707836  66b8bf00               mov ax, 0xbf
+370783a  e970fdffff             jmp 0x37075af
+370783f  4531ed                 xor r13d, r13d
+3707842  66b8be00               mov ax, 0xbe
+3707846  e964fdffff             jmp 0x37075af
+370784b  488d35a6a4fe01         lea rsi, [rip + 0x1fea4a6]
+3707852  31ff                   xor edi, edi
+3707854  ff1536b90602           call qword ptr [rip + 0x206b936]
+370785a  31c0                   xor eax, eax
+370785c  4c39eb                 cmp rbx, r13
+370785f  0f99c0                 setns al
+3707862  48b9ffffffffffffff7f   movabs rcx, 0x7fffffffffffffff
+370786c  4801c1                 add rcx, rax
+370786f  4c29eb                 sub rbx, r13
+3707872  480f40d9               cmovo rbx, rcx
+3707876  4889d8                 mov rax, rbx
+3707879  e926fdffff             jmp 0x37075a4
+370787e  4889c3                 mov rbx, rax
+3707881  6681bc24a00000008601   cmp word ptr [rsp + 0xa0], 0x186
+370788b  7467                   je 0x37078f4
+370788d  488dbc24a0000000       lea rdi, [rsp + 0xa0]
+3707895  e876ac0500             call 0x3762510
+370789a  eb58                   jmp 0x37078f4
+370789c  ff1586680602           call qword ptr [rip + 0x2066886]
+37078a2  4889c3                 mov rbx, rax
+37078a5  4584ed                 test r13b, r13b
+37078a8  7528                   jne 0x37078d2
+37078aa  488d7c2410             lea rdi, [rsp + 0x10]
+37078af  e85cac0500             call 0x3762510
+37078b4  eb1c                   jmp 0x37078d2
+37078b6  ff156c680602           call qword ptr [rip + 0x206686c]
+37078bc  4889c3                 mov rbx, rax
+37078bf  4c89e7                 mov rdi, r12
+37078c2  e829b5ceff             call 0x33f2df0
+37078c7  eb2b                   jmp 0x37078f4
+37078c9  ff1559680602           call qword ptr [rip + 0x2066859]
+37078cf  4889c3                 mov rbx, rax
+37078d2  488dbc2418010000       lea rdi, [rsp + 0x118]
+37078da  e831a40500             call 0x3761d10
+37078df  eb13                   jmp 0x37078f4
+37078e1  ff1541680602           call qword ptr [rip + 0x2066841]
+37078e7  4889c3                 mov rbx, rax
+37078ea  488d7c2410             lea rdi, [rsp + 0x10]
+37078ef  e85c61cfff             call 0x33fda50
+37078f4  4889df                 mov rdi, rbx
+37078f7  e81488f501             call 0x5660110
+37078fc  ff1526680602           call qword ptr [rip + 0x2066826]
