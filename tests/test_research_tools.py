@@ -72,6 +72,10 @@ class CatalogueTests(unittest.TestCase):
     def test_unknown_tree_rejected(self):
         with self.assertRaises(ValueError): owner('unrecognized/private.rs', self.parts)
 
+    def test_missing_component_patterns_rejected(self):
+        parts = copy.deepcopy(self.parts); del parts[0]['patterns']
+        with self.assertRaises(ValueError): owner('l1/exchange/handlers/14_order.rs', parts)
+
     def test_complete_gate_without_evidence_rejected(self):
         d = copy.deepcopy(self.progress)
         d['components']['orderbook']['gates']['built'] = True
