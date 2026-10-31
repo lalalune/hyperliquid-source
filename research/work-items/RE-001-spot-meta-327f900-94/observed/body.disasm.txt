@@ -1,0 +1,82 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x327f900 0x327f900..0x327fa32; byte records are authoritative
+327f900  50                     push rax
+327f901  488b8170010000         mov rax, qword ptr [rcx + 0x170]
+327f908  4839c7                 cmp rdi, rax
+327f90b  0f8311010000           jae 0x327fa22
+327f911  488b8168010000         mov rax, qword ptr [rcx + 0x168]
+327f918  48c1e705               shl rdi, 5
+327f91c  488b0438               mov rax, qword ptr [rax + rdi]
+327f920  483b8188010000         cmp rax, qword ptr [rcx + 0x188]
+327f927  0f83e8000000           jae 0x327fa15
+327f92d  4989d0                 mov r8, rdx
+327f930  488b8980010000         mov rcx, qword ptr [rcx + 0x180]
+327f937  4869d0e8000000         imul rdx, rax, 0xe8
+327f93e  0fb6441149             movzx eax, byte ptr [rcx + rdx + 0x49]
+327f943  2a441148               sub al, byte ptr [rcx + rdx + 0x48]
+327f947  0f82a9000000           jb 0x327f9f6
+327f94d  bf01000000             mov edi, 1
+327f952  752f                   jne 0x327f983
+327f954  48b8000064a7b3b6e00d   movabs rax, 0xde0b6b3a7640000
+327f95e  31d2                   xor edx, edx
+327f960  49f7f0                 div r8
+327f963  4889c1                 mov rcx, rax
+327f966  4889f0                 mov rax, rsi
+327f969  4809f8                 or rax, rdi
+327f96c  48c1e820               shr rax, 0x20
+327f970  0f848d000000           je 0x327fa03
+327f976  4889f0                 mov rax, rsi
+327f979  31d2                   xor edx, edx
+327f97b  48f7f7                 div rdi
+327f97e  e986000000             jmp 0x327fa09
+327f983  0fb6c8                 movzx ecx, al
+327f986  f6c101                 test cl, 1
+327f989  740a                   je 0x327f995
+327f98b  bf0a000000             mov edi, 0xa
+327f990  83f901                 cmp ecx, 1
+327f993  74bf                   je 0x327f954
+327f995  a802                   test al, 2
+327f997  740e                   je 0x327f9a7
+327f999  486bff64               imul rdi, rdi, 0x64
+327f99d  89ca                   mov edx, ecx
+327f99f  83e2fe                 and edx, 0xfffffffe
+327f9a2  83fa02                 cmp edx, 2
+327f9a5  74ad                   je 0x327f954
+327f9a7  a804                   test al, 4
+327f9a9  7411                   je 0x327f9bc
+327f9ab  4869ff10270000         imul rdi, rdi, 0x2710
+327f9b2  89ca                   mov edx, ecx
+327f9b4  83e2fc                 and edx, 0xfffffffc
+327f9b7  83fa04                 cmp edx, 4
+327f9ba  7498                   je 0x327f954
+327f9bc  a808                   test al, 8
+327f9be  7411                   je 0x327f9d1
+327f9c0  4869ff00e1f505         imul rdi, rdi, 0x5f5e100
+327f9c7  89ca                   mov edx, ecx
+327f9c9  83e2f8                 and edx, 0xfffffff8
+327f9cc  83fa08                 cmp edx, 8
+327f9cf  7483                   je 0x327f954
+327f9d1  a810                   test al, 0x10
+327f9d3  7421                   je 0x327f9f6
+327f9d5  48ba0000c16ff2862300   movabs rdx, 0x2386f26fc10000
+327f9df  4889f8                 mov rax, rdi
+327f9e2  48f7e2                 mul rdx
+327f9e5  700f                   jo 0x327f9f6
+327f9e7  4889c7                 mov rdi, rax
+327f9ea  83e1f0                 and ecx, 0xfffffff0
+327f9ed  83f910                 cmp ecx, 0x10
+327f9f0  0f845effffff           je 0x327f954
+327f9f6  488d3d73284702         lea rdi, [rip + 0x2472873]
+327f9fd  ff156dea4e02           call qword ptr [rip + 0x24eea6d]
+327fa03  89f0                   mov eax, esi
+327fa05  31d2                   xor edx, edx
+327fa07  f7f7                   div edi
+327fa09  4839c8                 cmp rax, rcx
+327fa0c  480f42c8               cmovb rcx, rax
+327fa10  4889c8                 mov rax, rcx
+327fa13  59                     pop rcx
+327fa14  c3                     ret 
+327fa15  488d3dd4274702         lea rdi, [rip + 0x24727d4]
+327fa1c  ff154eea4e02           call qword ptr [rip + 0x24eea4e]
+327fa22  488d15fffd4502         lea rdx, [rip + 0x245fdff]
+327fa29  4889c6                 mov rsi, rax
+327fa2c  ff1596e54e02           call qword ptr [rip + 0x24ee596]
