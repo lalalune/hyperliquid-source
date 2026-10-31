@@ -98,8 +98,13 @@ def relocations(data):
 
 
 def run(binary, output):
-    item = next(x for x in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files']
-                if x['path'] == 'artifacts/node/94/hl-node')
+    manifest = json.loads((ROOT / 'provenance/artifacts.json').read_text())
+    if not isinstance(manifest, dict) or not isinstance(manifest.get('files'), list): raise ValueError('Invalid artifact manifest')
+    for entry in manifest['files']:
+        if not isinstance(entry, dict) or 'path' not in entry: raise ValueError('Invalid artifact record')
+    item = next((x for x in manifest['files']
+                 if x['path'] == 'artifacts/node/94/hl-node'), None)
+    if item is None: raise ValueError('No provenance/artifacts.json entry for artifacts/node/94/hl-node')
     check(binary, item)
     data = binary.read_bytes()
     controls = static_controls(data)
