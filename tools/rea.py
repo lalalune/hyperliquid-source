@@ -63,6 +63,9 @@ def environment(node):
 def target(name):
     relative = CONFIG['targets'][name]
     item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == relative)
+    missing = [field for field in ('size', 'sha256') if field not in item]
+    if missing:
+        raise ValueError(f'config/rea.json target {name!r} manifest entry for {relative!r} is missing {", ".join(missing)}')
     check(ROOT / relative, item)
     return {'path': str(ROOT / relative), 'sha256': item['sha256'], 'provider_id': CONFIG['provider']}
 
