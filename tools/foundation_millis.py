@@ -175,10 +175,23 @@ def analyze(data, records, objdump=None):
                 captured_binary_executed=False,complete_cfg=False,progress_gate_requested=False)
 
 
+def _unique_record_object(pairs):
+    out = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError(f'Duplicate key in retained records input: {key}')
+        out[key] = value
+    return out
+
+
+def load_records(path):
+    return json.loads(Path(path).read_text(), object_pairs_hook=_unique_record_object)
+
+
 def inspect(path, objdump=None):
     data = Path(path).read_bytes()
     require(len(data) == 91774280 and hashlib.sha256(data).hexdigest() == SHA256, 'Expected exact node #94 size/SHA-256')
-    return analyze(data,json.loads((PACKET/'records.json').read_text()),objdump)
+    return analyze(data,load_records(PACKET/'records.json'),objdump)
 
 
 def main():
