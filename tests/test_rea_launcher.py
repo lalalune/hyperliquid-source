@@ -30,7 +30,7 @@ class RuntimeSelectionTests(unittest.TestCase):
             env = rea.environment(Path('/chosen/node/bin/node'))
             self.assertEqual(env['GHIDRA_INSTALL_DIR'], '/chosen/ghidra')
             self.assertEqual(env['JAVA_HOME'], '/chosen/java')
-            self.assertEqual(env['PATH'].split(os.pathsep)[0], '/chosen/node/bin')
+            self.assertEqual(env['PATH'].split(os.pathsep)[0], str(Path('/chosen/node/bin')))
 
     def test_target_bound_to_artifact_manifest(self):
         row = rea.target('94')
