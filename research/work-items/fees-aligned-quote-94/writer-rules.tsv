@@ -1,0 +1,11 @@
+mode	condition	result	note
+all	token past list	panic	bounds check on state +0x218
+all	row +0xd2 bit 0 clear	0xef	no stub runs
+enable	status missing or byte not 0	0xef	force does not help
+enable	another aligned token has this deployer	0xf0	inactive entries count
+enable	gate refuses	gate payload	0x60 bytes forwarded, mode 4 when the token is in the set, else 2
+enable	entry exists, active 0, force 0	0xdf	cannot enable disabled aligned quote token
+enable	entry exists otherwise	0x186	active = 1, other value words stay, dex bytes = 1
+enable	no entry	0x186	insert: words 0, state +0x60 time, active 1, dex bytes = 1
+disable	force 0, status present and not 1	0xdf	cannot disable aligned quote token before disabling quote token
+disable	otherwise	0x186	active = 0 when an entry exists; a missing entry is no error; dex bytes = 0
