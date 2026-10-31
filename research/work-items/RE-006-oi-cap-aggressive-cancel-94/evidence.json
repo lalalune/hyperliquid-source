@@ -1,0 +1,380 @@
+{
+  "cases": {
+    "total": 456
+  },
+  "doubles": {
+    "added": -1.0,
+    "cap_factor": 0.9,
+    "ratio": 0.01,
+    "step_first_limit": 0.01,
+    "step_second_limit": 0.05
+  },
+  "fields": {
+    "asset_row": {
+      "+0x00": "price word used when the +0x40 word is stale, and always in mode 3",
+      "+0x20": "price in the at-cap test",
+      "+0x40": "price word used while block time <= stored time + 1800 s",
+      "+0x50/+0x54/+0x58": "stored time: date, seconds, nanoseconds"
+    },
+    "book": {
+      "+0x08/+0x10": "slab pointer and length",
+      "+0x28/+0x30/+0x40": "hash map control, mask, items",
+      "+0xb8/+0xc0/+0xc8": "user tree root, height, length"
+    },
+    "dex_row": {
+      "+0x10": "asset count",
+      "+0x170/+0x178": "map asset to size: root, height",
+      "+0x1b0": "total cap, i64",
+      "+0x1e8/+0x1f0": "mode 3 set of assets: root, height",
+      "+0x208": "pointer to a block with the asset cap map at +0x30/+0x38",
+      "+0x230": "mode byte",
+      "+0x30": "dex number, asset id = dex * 10000 + index",
+      "+0x68/+0x70": "asset row pointer and length, stride 0x60"
+    },
+    "slab_slot": {
+      "+0x00": "state, 2 = vacant",
+      "+0xa0": "limit price, u64",
+      "+0xc2": "side byte",
+      "+0xd8": "order id"
+    },
+    "state": {
+      "+0x1040/+0x1048": "the same list in the second copy",
+      "+0x5c0/+0x5c8": "dex row list pointer and length in the first and third copies, stride 0x2f0"
+    }
+  },
+  "first_mismatch": "",
+  "functions": [
+    {
+      "end": "0x26e54c4",
+      "evaluated_to": "0x26e54c4",
+      "instructions": 665,
+      "instructions_stepped": 387,
+      "role": "sweep, first copy",
+      "size": 3076,
+      "start": "0x26e48c0"
+    },
+    {
+      "end": "0x2228a0d",
+      "evaluated_to": "0x2228538",
+      "instructions": 215,
+      "instructions_stepped": 212,
+      "role": "step up to its timing tail, first copy",
+      "size": 2269,
+      "start": "0x2228130"
+    },
+    {
+      "end": "0x3714295",
+      "evaluated_to": "0x3714295",
+      "instructions": 206,
+      "instructions_stepped": 194,
+      "role": "at-cap test",
+      "size": 885,
+      "start": "0x3713f20"
+    }
+  ],
+  "instructions_stepped": 392525,
+  "locations": [
+    {
+      "column": 18,
+      "line": 202,
+      "name": "asset row bound in the step, first copy",
+      "path": "l1/src/clearinghouse/oracle/oracle.rs",
+      "slot": "0x569daf8"
+    },
+    {
+      "column": 18,
+      "line": 202,
+      "name": "asset row bound in the step, other copies",
+      "path": "l1/src/clearinghouse/oracle/oracle.rs",
+      "slot": "0x572e3d0"
+    },
+    {
+      "column": 18,
+      "line": 197,
+      "name": "asset row bound in the at-cap test",
+      "path": "l1/src/clearinghouse/oracle/oracle.rs",
+      "slot": "0x56f1cb0"
+    },
+    {
+      "column": 1,
+      "line": 843,
+      "name": "negative cap in the at-cap test",
+      "path": "l1/src/qtys/mod.rs",
+      "slot": "0x56f1ce0"
+    },
+    {
+      "column": 29,
+      "line": 11,
+      "name": "dex index in the step",
+      "path": "l1/src/dex_registry/clearinghouses.rs",
+      "slot": "0x56e9ae0"
+    }
+  ],
+  "mismatches": 0,
+  "mutations": {
+    "killed": 278,
+    "survived": 36,
+    "unreached": 126
+  },
+  "outcomes": {
+    "at-cap test false": 48,
+    "at-cap test true": 21,
+    "host panic: bounds": 6,
+    "host panic: multiply overflow": 3,
+    "host panic: unwrap": 3,
+    "pred panic: bounds": 1,
+    "pred panic: unwrap": 2,
+    "step no sweep": 18,
+    "step sweeps": 72,
+    "sweep cancels": 171,
+    "sweep cancels nothing": 111
+  },
+  "reason": {
+    "name": "openInterestCapCanceled",
+    "value": 8
+  },
+  "reference_claims": [
+    {
+      "claim": "no text cancel_aggressive_orders_at_oi_cap and no function that cancels resting orders by distance from a price",
+      "observed": "the step name is at 0x3efab7 and the sweep is 0x26e48c0",
+      "reference": "l1/ (whole tree)",
+      "verdict": "missing in the reference"
+    },
+    {
+      "claim": "collect_perps_at_open_interest_cap walks open_interest_by_asset and skips size 0",
+      "observed": "0x2228130 walks every asset index of every dex row and asks 0x3713f20; a missing size counts as 0 and the total test still runs",
+      "reference": "l1/clearinghouse/clearinghouse.rs:614",
+      "verdict": "shape differs"
+    }
+  ],
+  "status_names": {
+    "0": "open",
+    "1": "filled",
+    "10": "reduceOnlyCanceled",
+    "11": "siblingFilledCanceled",
+    "12": "delistedCanceled",
+    "13": "liquidatedCanceled",
+    "14": "outcomeSettledCanceled",
+    "15": "scheduledCancel",
+    "16": "internalCancel",
+    "17": "tickRejected",
+    "18": "minTradeNtlRejected",
+    "19": "perpMarginRejected",
+    "2": "canceled",
+    "20": "perpMaxPositionRejected",
+    "21": "reduceOnlyRejected",
+    "22": "badAloPxRejected",
+    "23": "iocCancelRejected",
+    "24": "badTriggerPxRejected",
+    "25": "marketOrderNoLiquidityRejected",
+    "26": "positionIncreaseAtOpenInterestCapRejected",
+    "27": "positionFlipAtOpenInterestCapRejected",
+    "28": "tooAggressiveAtOpenInterestCapRejected",
+    "29": "openInterestIncreaseRejected",
+    "3": "triggered",
+    "30": "insufficientSpotBalanceRejected",
+    "31": "oracleRejected",
+    "32": "outcomeSettledRejected",
+    "33": "hip3CrossMarginReduceOnly",
+    "34": "hip3CrossMarginDisabled",
+    "35": "haltedRejected",
+    "4": "rejected",
+    "5": "marginCanceled",
+    "6": "perpMaxPositionCanceled",
+    "7": "vaultWithdrawalCanceled",
+    "8": "openInterestCapCanceled",
+    "9": "selfTradeCanceled"
+  },
+  "step_name": "cancel_aggressive_orders_at_oi_cap",
+  "step_sites": [
+    {
+      "bucket_field": "0x38b8",
+      "caller": "0x22297c0",
+      "name": "0x3efab7",
+      "period_field": "0x38b0",
+      "site": "0x2229b8b"
+    },
+    {
+      "bucket_field": "0x4338",
+      "caller": "0x47162d0",
+      "name": "0x714eb8",
+      "period_field": "0x4330",
+      "site": "0x47166ed"
+    },
+    {
+      "bucket_field": "0x38b8",
+      "caller": "0x470e9a0",
+      "name": "0x714eb8",
+      "period_field": "0x38b0",
+      "site": "0x470ed6b"
+    }
+  ],
+  "sweep_bytes": [
+    {
+      "bytes": "488b87b8000000",
+      "meaning": "mov rax, [rdi+0xb8]",
+      "va": "0x26e48fc"
+    },
+    {
+      "bytes": "488b97c8000000",
+      "meaning": "mov rdx, [rdi+0xc8]",
+      "va": "0x26e4903"
+    },
+    {
+      "bytes": "833c0802",
+      "meaning": "cmp dword [rax+rcx], 2",
+      "va": "0x26e4de9"
+    },
+    {
+      "bytes": "f20f1088a0000000",
+      "meaning": "movsd xmm1, [rax+0xa0]",
+      "va": "0x26e4df6"
+    },
+    {
+      "bytes": "80b8c200000000",
+      "meaning": "cmp byte [rax+0xc2], 0",
+      "va": "0x26e4e2a"
+    },
+    {
+      "bytes": "41b908000000",
+      "meaning": "mov r9d, 8",
+      "va": "0x26e53c3"
+    },
+    {
+      "bytes": "488b87b8000000",
+      "meaning": "mov rax, [rdi+0xb8]",
+      "va": "0x43054cc"
+    },
+    {
+      "bytes": "488b97c8000000",
+      "meaning": "mov rdx, [rdi+0xc8]",
+      "va": "0x43054d3"
+    },
+    {
+      "bytes": "833c0802",
+      "meaning": "cmp dword [rax+rcx], 2",
+      "va": "0x43059b9"
+    },
+    {
+      "bytes": "f20f1088a0000000",
+      "meaning": "movsd xmm1, [rax+0xa0]",
+      "va": "0x43059c6"
+    },
+    {
+      "bytes": "80b8c200000000",
+      "meaning": "cmp byte [rax+0xc2], 0",
+      "va": "0x43059fa"
+    },
+    {
+      "bytes": "41b908000000",
+      "meaning": "mov r9d, 8",
+      "va": "0x4305f93"
+    },
+    {
+      "bytes": "488b87b8000000",
+      "meaning": "mov rax, [rdi+0xb8]",
+      "va": "0x43060dc"
+    },
+    {
+      "bytes": "488b97c8000000",
+      "meaning": "mov rdx, [rdi+0xc8]",
+      "va": "0x43060e3"
+    },
+    {
+      "bytes": "833c0802",
+      "meaning": "cmp dword [rax+rcx], 2",
+      "va": "0x43065c9"
+    },
+    {
+      "bytes": "f20f1088a0000000",
+      "meaning": "movsd xmm1, [rax+0xa0]",
+      "va": "0x43065d6"
+    },
+    {
+      "bytes": "80b8c200000000",
+      "meaning": "cmp byte [rax+0xc2], 0",
+      "va": "0x430660a"
+    },
+    {
+      "bytes": "41b908000000",
+      "meaning": "mov r9d, 8",
+      "va": "0x4306ba3"
+    }
+  ],
+  "target": {
+    "file": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "worked_boundaries": [
+    {
+      "cancelled": true,
+      "px": 101,
+      "reference": 100,
+      "side": 0,
+      "value": "0.010000000000000009"
+    },
+    {
+      "cancelled": true,
+      "px": 99,
+      "reference": 100,
+      "side": 1,
+      "value": "0.010000000000000009"
+    },
+    {
+      "cancelled": true,
+      "px": 1010000,
+      "reference": 1000000,
+      "side": 0,
+      "value": "0.010000000000000009"
+    },
+    {
+      "cancelled": true,
+      "px": 990000,
+      "reference": 1000000,
+      "side": 1,
+      "value": "0.010000000000000009"
+    },
+    {
+      "cancelled": true,
+      "px": 202,
+      "reference": 200,
+      "side": 0,
+      "value": "0.010000000000000009"
+    },
+    {
+      "cancelled": true,
+      "px": 1010,
+      "reference": 1000,
+      "side": 0,
+      "value": "0.010000000000000009"
+    },
+    {
+      "cancelled": false,
+      "px": 1009999,
+      "reference": 1000000,
+      "side": 0,
+      "value": "0.009999000000000091"
+    },
+    {
+      "cancelled": true,
+      "px": 5,
+      "reference": 0,
+      "side": 0,
+      "value": "inf"
+    },
+    {
+      "cancelled": false,
+      "px": 5,
+      "reference": 0,
+      "side": 1,
+      "value": "-inf"
+    },
+    {
+      "cancelled": false,
+      "px": 0,
+      "reference": 0,
+      "side": 0,
+      "value": "nan"
+    }
+  ]
+}
