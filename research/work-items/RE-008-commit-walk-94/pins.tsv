@@ -1,0 +1,83 @@
+group	address	bytes	meaning
+caller	0x44ae320	e84bd6ffff	tx arm calls the walk
+caller	0x44b04ab	0f8541130000	block arm, error tag jump
+caller	0x44b04c5	0f820f130000	block arm, round compare jump
+caller	0x44b12e6	e914050000	block arm, ok tail jump
+caller	0x44b1802	e869a1ffff	shared tail calls the walk
+tip	0x44ab9bf	0f85d9120000	empty map returns
+tip	0x44abb6f	498bb788000000	round of the first entry
+tip	0x44abb9c	488b9417f0010000	round of the next entry
+tip	0x44abba7	4d0f46f9	cmovbe: a later entry wins a tie
+tip	0x44abccd	410f104748	tip QC hash, first half
+chain	0x44abd8e	0f82930e0000	tip parent lookup fails to the ask
+chain	0x44abdb2	0f1043c0	child QC hash, first half
+chain	0x44abe5c	0f82c50d0000	second lookup fails to the ask
+chain	0x44abe81	48ffc0	start round plus 1
+chain	0x44abe8b	480f45c8	saturating at u64 max
+chain	0x44abe8f	48390b	child round compare
+chain	0x44abe9f	0f85f90d0000	not consecutive: return
+walk	0x44abf47	498b8698010000	committed round read
+walk	0x44abf56	0f8640090000	start at or under the committed round
+walk	0x44ac0dd	48394500	tag compare
+walk	0x44ac0e9	0f84e60a0000	tag ...01: missing
+walk	0x44ac170	e87b443100	collect txs
+walk	0x44ac2d4	48398688000000	child round against walked round + 1
+walk	0x44ac2e3	0f85fb030000	no proof when not consecutive
+walk	0x44ac6e4	48b80000000000000080	proof None word
+walk	0x44ac6ee	4889842448050000	stored in the proof
+walk	0x44ac6c4	4839c1	parent round against the committed round
+walk	0x44ac6d9	0f879af8ffff	walk continues
+walk	0x44ac8b4	0f853e040000	stop above or below: drop everything
+walk	0x44ac8cf	488901	committed round written
+walk	0x44ac8d8	0f843f060000	no record: prune only
+sums	0x44ac257	490f42d5	tx count saturates
+sums	0x44ac2a5	490f42c5	byte count saturates
+sums	0x44ac913	49bdffffffffffffff7f	i64 max cap of stat 1
+sums	0x44ac93c	4c0f42eb	i64 max cap of stat 2
+ask	0x44acbef	488b742408	ask with this state
+ask	0x44acbf7	41b901000000	reason 1, tx missing
+ask	0x44acc84	4531c9	reason 0, parent of tip or child
+ask	0x44ad058	41b902000000	reason 2, ancestor
+ask	0x44ad032	ff1550242c01	lazy global read before reason 2
+ask	0x44acec4	48c78424a00100000a000000	request becomes outbox tag 0xa
+prune	0x44acab7	e8445a4900	remove one tx
+prune	0x44acad4	4883f801	tags ...01 and ...02 skip the sample
+prune	0x44acb9d	be12000000	sample 0x12
+prune	0x44acbb7	488d0da2342701	seen insert Location
+prune	0x44ad126	e815e53e00	next tx past 20 s
+prune	0x44ad436	e885ac3e00	next block under the committed round
+prune	0x44ad2a4	be03000000	stat 3
+tx age	0x489b6f6	ba14000000	20 seconds, edx of the chrono add
+tx age	0x489b705	31c9	zero nanoseconds
+tx age	0x489b76b	413b06	date compare
+tx age	0x489b773	453b6e04	seconds compare
+tx age	0x489b780	413b4608	nanoseconds compare
+tx age	0x489b784	730d	at or after keeps the tx
+block age	0x4898140	498b9414f0010000	block round
+block age	0x489814b	483b17	compare with the committed round
+block age	0x489814e	0f82e4000000	below goes out
+throttle	0x44b8095	c644241001	tag byte 1
+throttle	0x44b8078	488b8698010000	committed round in the key
+throttle	0x44b820b	41f6c501	r8 picks the wait
+throttle	0x44b8211	f20f10051725d5fb	wait 1.0
+throttle	0x44b8272	7306	time compare
+throttle	0x44b827a	41807c242401	sent flag
+throttle	0x44b830b	41c644242401	sent flag set
+throttle	0x44b832a	be05000000	stat 5
+throttle	0x4958816	ba01000000	row insert stat count
+throttle	0x495881b	be04000000	stat 4
+seen	0x4356b26	4388842c6c010000	existing key: byte rewritten
+seen	0x4356be3	483b4338	length over the limit at +0x38
+seen	0x4356c58	e873f45e00	evict from the map
+seen	0x44a8c82	48c7842418090000a0860100	limit 100000 at rsp+0x918, record base rsp+0x8e0
+seen	0x44a904a	0f118424b8030000	record moved to rsp+0x3b8
+seen	0x44a97b3	488db42480030000	state image at rsp+0x380
+seen	0x44a97bb	ba38020000	first 0x238 bytes of the state
+gaps	0x44ad5eb	833b00	first block time store test
+gaps	0x44ad5f4	41833c2400	first wall time store test
+gaps	0x44ad6f1	f20f10442418	sample 0x10
+gaps	0x44ad704	f20f10442430	sample 0x11
+outbox	0x47f5255	48c742f803000000	tag 3 per record
+time sub	0x1447181	4869c640420f00	seconds to microseconds
+time sub	0x144719c	4869c9d34d6210	nanoseconds over 1000
+time sub	0x14471c6	f20f5e05923cdcfe	divide by 1e6

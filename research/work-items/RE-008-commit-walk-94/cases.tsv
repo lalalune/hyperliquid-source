@@ -1,0 +1,360 @@
+case	outcome	blocks	txs	committed_before	committed_after	records	records_with_proof	requests	txs_after	blocks_after
+no blocks	no blocks	0	0	100	100	0	0	0	0	0
+one block, parent absent	tip parent missing, no request	1	0	100	100	0	0	0	0	1
+row stamped exactly 1 s ago	tip parent missing, request	1	0	100	100	0	0	1	0	1
+row stamped 1 ns under 1 s ago	tip parent missing, no request	1	0	100	100	0	0	0	0	1
+row already sent	tip parent missing, no request	1	0	100	100	0	0	0	0	1
+row of an older watermark	tip parent missing, no request	1	0	120	120	0	0	0	0	1
+row with another reason	tip parent missing, request	1	0	100	100	0	0	1	0	1
+row with both reasons	tip parent missing, request	1	0	100	100	0	0	1	0	1
+two blocks, second parent absent	second parent missing, no request	2	0	100	100	0	0	0	0	2
+two blocks, second parent absent, due	second parent missing, request	2	0	100	100	0	0	1	0	2
+three blocks, gap of 2 under the child	rounds not consecutive	4	0	100	100	0	0	0	0	4
+gap only above the child commits	committed	4	0	100	101	1	1	0	0	3
+one commit, child consecutive	committed	4	0	100	101	1	1	0	0	3
+watermark equals start	nothing to commit, pruned	4	0	101	101	0	0	0	0	3
+start under watermark	walk passed the watermark	4	0	102	102	0	0	0	0	4
+commit with txs	committed	4	3	100	101	1	1	0	1	3
+three block commit	committed	6	3	100	103	3	3	0	0	3
+gap inside the walk, no proof	committed	6	0	100	105	3	2	0	0	3
+walk jumps over the watermark	walk passed the watermark	4	1	100	100	0	0	0	1	4
+second tx missing	tx missing, no request	5	2	100	100	0	0	0	2	5
+tx missing in an older block	tx missing, no request	5	1	100	100	0	0	0	1	5
+tx with skip tag counts as missing	tx missing, no request	4	2	100	100	0	0	0	2	4
+tx missing, row due	tx missing, request	4	1	100	100	0	0	1	1	4
+empty tx map	tx missing, no request	4	0	100	100	0	0	0	0	4
+ancestor missing	ancestor missing, no request	3	0	100	100	0	0	0	0	3
+ancestor missing, row due	ancestor missing, request	3	0	100	100	0	0	1	0	3
+ancestor missing after a commit candidate	ancestor missing, no request	4	2	100	100	0	0	0	2	4
+tie on top round, last key wins	tip parent missing, no request	5	0	100	100	0	0	0	0	5
+tie on top round, first key would commit	tip parent missing, no request	5	0	100	100	0	0	0	0	5
+fork below the new watermark dropped	committed	6	0	100	101	1	1	0	0	4
+fork at the new watermark kept	committed	5	0	100	101	1	1	0	0	4
+old block dropped on an idle pass	nothing to commit, pruned	5	0	101	101	0	0	0	0	3
+tx exactly 20 s old kept	nothing to commit, pruned	4	1	101	101	0	0	0	1	3
+tx 1 ns past 20 s dropped	nothing to commit, pruned	4	2	101	101	0	0	0	1	3
+two txs dropped, stat 3	nothing to commit, pruned	4	3	101	101	0	0	0	1	3
+tx time crosses midnight, kept	nothing to commit, pruned	4	1	101	101	0	0	0	1	3
+tx on the day before, dropped	nothing to commit, pruned	4	1	101	101	0	0	0	0	3
+tx on the next day, kept	nothing to commit, pruned	4	1	101	101	0	0	0	1	3
+key already seen, byte rewritten	committed	4	2	100	101	1	1	0	0	3
+seen limit evicts oldest	committed	4	2	100	101	1	1	0	0	3
+seen limit on rewrite	committed	4	2	100	101	1	1	0	0	3
+seen deque wraps	committed	4	2	100	101	1	1	0	0	3
+same tx in two blocks	committed	5	1	100	102	2	2	0	0	3
+same tx twice in a block	committed	4	1	100	101	1	1	0	0	3
+round u64 max	committed	4	0	18446744073709551614	18446744073709551615	1	1	0	0	3
+sizes saturate	committed	4	2	100	101	1	1	0	0	3
+sizes above i64 max	committed	4	2	100	101	1	1	0	0	3
+QC rounds ignored	committed	4	0	100	101	1	1	0	0	3
+gap samples with earlier state	committed	5	0	100	102	2	2	0	0	3
+block time goes backwards	committed	4	0	100	101	1	1	0	0	3
+first commit sets gap state	committed	5	0	100	102	2	2	0	0	3
+tx latency keeps microseconds	committed	4	2	100	101	1	1	0	0	3
+twelve hashes in a two level tx map	nothing to commit, pruned	3	16	100	100	0	0	0	16	3
+two level block map, idle	nothing to commit, pruned	16	0	113	113	0	0	0	0	3
+two level block map, commit	committed	16	0	100	113	13	13	0	0	3
+two level block map, prune	nothing to commit, pruned	20	0	113	113	0	0	0	0	3
+two level tx map, idle prune walk	nothing to commit, pruned	4	30	101	101	0	0	0	30	3
+eleven blocks in one leaf	committed	11	0	100	108	8	8	0	0	3
+nine txs in one block	committed	4	9	100	101	1	1	0	0	3
+vector 0	walk passed the watermark	3	6	102	102	0	0	0	6	3
+vector 1	tip parent missing, no request	4	2	103	103	0	0	0	2	4
+vector 2	second parent missing, request	4	2	100	100	0	0	1	2	4
+vector 3	rounds not consecutive	11	11	100	100	0	0	0	11	11
+vector 4	committed	7	10	104	105	1	1	0	3	3
+vector 5	rounds not consecutive	6	8	101	101	0	0	0	8	6
+vector 6	tx missing, no request	8	7	100	100	0	0	0	7	8
+vector 7	walk passed the watermark	6	7	106	106	0	0	0	7	6
+vector 8	second parent missing, no request	2	5	100	100	0	0	0	5	2
+vector 9	ancestor missing, request	8	7	100	100	0	0	1	7	8
+vector 10	tx missing, no request	4	4	101	101	0	0	0	4	4
+vector 11	committed	8	10	106	109	2	2	0	4	3
+vector 12	ancestor missing, no request	4	2	102	102	0	0	0	2	4
+vector 13	walk passed the watermark	3	4	105	105	0	0	0	4	3
+vector 14	walk passed the watermark	9	9	104	104	0	0	0	9	9
+vector 15	walk passed the watermark	5	7	105	105	0	0	0	7	5
+vector 16	second parent missing, no request	3	3	103	103	0	0	0	3	3
+vector 17	walk passed the watermark	9	11	105	105	0	0	0	11	9
+vector 18	committed	5	5	103	104	1	1	0	1	3
+vector 19	tx missing, no request	8	9	104	104	0	0	0	9	8
+vector 20	tx missing, no request	8	6	102	102	0	0	0	6	8
+vector 21	walk passed the watermark	6	5	105	105	0	0	0	5	6
+vector 22	ancestor missing, request	4	4	101	101	0	0	1	4	4
+vector 23	walk passed the watermark	5	5	106	106	0	0	0	5	5
+vector 24	rounds not consecutive	5	6	106	106	0	0	0	6	5
+vector 25	tx missing, no request	10	9	102	102	0	0	0	9	10
+vector 26	rounds not consecutive	8	11	103	103	0	0	0	11	8
+vector 27	ancestor missing, request	5	5	100	100	0	0	1	5	5
+vector 28	ancestor missing, request	10	7	101	101	0	0	1	7	10
+vector 29	walk passed the watermark	4	3	103	103	0	0	0	3	4
+vector 30	second parent missing, request	2	1	102	102	0	0	1	1	2
+vector 31	rounds not consecutive	9	8	102	102	0	0	0	8	9
+vector 32	tx missing, no request	9	11	104	104	0	0	0	11	9
+vector 33	tx missing, no request	9	7	102	102	0	0	0	7	9
+vector 34	tx missing, no request	9	11	106	106	0	0	0	11	9
+vector 35	walk passed the watermark	4	5	103	103	0	0	0	5	4
+vector 36	nothing to commit, pruned	4	3	104	104	0	0	0	1	3
+vector 37	committed	9	3	105	107	2	2	0	2	3
+vector 38	committed	8	10	102	105	3	3	0	3	3
+vector 39	walk passed the watermark	4	6	106	106	0	0	0	6	4
+vector 40	second parent missing, request	4	6	100	100	0	0	1	6	4
+vector 41	walk passed the watermark	5	7	104	104	0	0	0	7	5
+vector 42	tx missing, no request	5	6	101	101	0	0	0	6	5
+vector 43	walk passed the watermark	4	3	102	102	0	0	0	3	4
+vector 44	second parent missing, no request	4	6	103	103	0	0	0	6	4
+vector 45	rounds not consecutive	6	9	100	100	0	0	0	9	6
+vector 46	rounds not consecutive	5	10	103	103	0	0	0	10	5
+vector 47	committed	9	8	101	105	4	4	0	3	3
+vector 48	committed	10	11	101	107	5	4	0	5	3
+vector 49	walk passed the watermark	7	11	106	106	0	0	0	11	7
+vector 50	walk passed the watermark	6	2	106	106	0	0	0	2	6
+vector 51	committed	8	10	106	110	3	2	0	2	3
+vector 52	rounds not consecutive	8	8	106	106	0	0	0	8	8
+vector 53	ancestor missing, no request	5	6	102	102	0	0	0	6	5
+vector 54	tx missing, no request	9	7	102	102	0	0	0	7	9
+vector 55	rounds not consecutive	8	7	105	105	0	0	0	7	8
+vector 56	rounds not consecutive	10	8	103	103	0	0	0	8	10
+vector 57	ancestor missing, no request	9	11	101	101	0	0	0	11	9
+vector 58	rounds not consecutive	4	4	106	106	0	0	0	4	4
+vector 59	walk passed the watermark	3	7	104	104	0	0	0	7	3
+vector 60	committed	6	6	103	106	2	2	0	3	3
+vector 61	walk passed the watermark	4	4	105	105	0	0	0	4	4
+vector 62	rounds not consecutive	7	9	100	100	0	0	0	9	7
+vector 63	second parent missing, request	2	5	100	100	0	0	1	5	2
+vector 64	second parent missing, no request	3	1	100	100	0	0	0	1	3
+vector 65	committed	8	8	104	110	5	4	0	3	3
+vector 66	nothing to commit, pruned	6	7	102	102	0	0	0	4	4
+vector 67	committed	8	8	102	105	2	2	0	2	3
+vector 68	walk passed the watermark	4	4	106	106	0	0	0	4	4
+vector 69	rounds not consecutive	6	6	105	105	0	0	0	6	6
+vector 70	committed	9	11	105	108	3	3	0	2	3
+vector 71	ancestor missing, request	9	2	100	100	0	0	1	2	9
+vector 72	ancestor missing, no request	5	4	102	102	0	0	0	4	5
+vector 73	tx missing, no request	10	9	103	103	0	0	0	9	10
+vector 74	committed	10	7	106	107	1	1	0	1	3
+vector 75	second parent missing, request	2	2	104	104	0	0	1	2	2
+vector 76	committed	8	3	103	104	1	1	0	1	3
+vector 77	second parent missing, no request	3	2	101	101	0	0	0	2	3
+vector 78	second parent missing, no request	3	5	100	100	0	0	0	5	3
+vector 79	walk passed the watermark	3	7	101	101	0	0	0	7	3
+vector 80	nothing to commit, pruned	5	5	103	103	0	0	0	3	4
+vector 81	tx missing, no request	7	11	101	101	0	0	0	11	7
+vector 82	rounds not consecutive	10	11	102	102	0	0	0	11	10
+vector 83	rounds not consecutive	3	1	104	104	0	0	0	1	3
+vector 84	ancestor missing, no request	3	5	101	101	0	0	0	5	3
+vector 85	committed	7	5	104	107	3	3	0	1	3
+vector 86	walk passed the watermark	6	8	104	104	0	0	0	8	6
+vector 87	walk passed the watermark	4	4	105	105	0	0	0	4	4
+vector 88	committed	11	9	105	109	3	2	0	3	3
+vector 89	tx missing, no request	8	4	100	100	0	0	0	4	8
+vector 90	second parent missing, no request	3	4	101	101	0	0	0	4	3
+vector 91	tip parent missing, no request	3	4	103	103	0	0	0	4	3
+vector 92	rounds not consecutive	7	8	106	106	0	0	0	8	7
+vector 93	nothing to commit, pruned	6	6	105	105	0	0	0	5	3
+vector 94	rounds not consecutive	8	11	101	101	0	0	0	11	8
+vector 95	ancestor missing, no request	6	6	101	101	0	0	0	6	6
+vector 96	committed	7	9	101	104	3	3	0	2	3
+vector 97	tip parent missing, no request	1	4	106	106	0	0	0	4	1
+vector 98	tx missing, no request	11	5	105	105	0	0	0	5	11
+vector 99	ancestor missing, no request	7	5	103	103	0	0	0	5	7
+vector 100	ancestor missing, no request	5	6	101	101	0	0	0	6	5
+vector 101	second parent missing, request	4	2	103	103	0	0	1	2	4
+vector 102	ancestor missing, request	4	6	101	101	0	0	1	6	4
+vector 103	nothing to commit, pruned	6	4	104	104	0	0	0	1	3
+vector 104	committed	9	11	106	107	1	1	0	5	3
+vector 105	tip parent missing, request	3	4	103	103	0	0	1	4	3
+vector 106	ancestor missing, no request	8	10	102	102	0	0	0	10	8
+vector 107	ancestor missing, no request	5	3	102	102	0	0	0	3	5
+vector 108	second parent missing, request	2	5	100	100	0	0	1	5	2
+vector 109	nothing to commit, pruned	6	4	101	101	0	0	0	2	4
+vector 110	committed	7	11	104	108	3	2	0	3	3
+vector 111	walk passed the watermark	3	3	105	105	0	0	0	3	3
+vector 112	nothing to commit, pruned	7	6	106	106	0	0	0	3	3
+vector 113	committed	5	7	103	104	1	1	0	2	3
+vector 114	walk passed the watermark	7	6	105	105	0	0	0	6	7
+vector 115	walk passed the watermark	9	9	105	105	0	0	0	9	9
+vector 116	nothing to commit, pruned	5	7	104	104	0	0	0	5	3
+vector 117	rounds not consecutive	7	10	105	105	0	0	0	10	7
+vector 118	ancestor missing, no request	5	5	100	100	0	0	0	5	5
+vector 119	ancestor missing, request	8	11	101	101	0	0	1	11	8
+vector 120	walk passed the watermark	5	5	106	106	0	0	0	5	5
+vector 121	rounds not consecutive	10	11	106	106	0	0	0	11	10
+vector 122	committed	9	6	104	109	3	1	0	1	3
+vector 123	rounds not consecutive	7	5	104	104	0	0	0	5	7
+vector 124	second parent missing, no request	2	1	102	102	0	0	0	1	2
+vector 125	committed	7	8	103	105	2	2	0	0	3
+vector 126	tip parent missing, no request	1	0	104	104	0	0	0	0	1
+vector 127	ancestor missing, no request	5	4	100	100	0	0	0	4	5
+vector 128	rounds not consecutive	6	3	106	106	0	0	0	3	6
+vector 129	ancestor missing, no request	4	6	102	102	0	0	0	6	4
+vector 130	second parent missing, no request	3	2	100	100	0	0	0	2	3
+vector 131	nothing to commit, pruned	5	0	102	102	0	0	0	0	3
+vector 132	walk passed the watermark	8	6	106	106	0	0	0	6	8
+vector 133	walk passed the watermark	3	6	106	106	0	0	0	6	3
+vector 134	rounds not consecutive	5	4	104	104	0	0	0	4	5
+vector 135	tx missing, no request	9	9	102	102	0	0	0	9	9
+vector 136	tx missing, no request	9	9	101	101	0	0	0	9	9
+vector 137	walk passed the watermark	6	2	106	106	0	0	0	2	6
+vector 138	walk passed the watermark	7	3	103	103	0	0	0	3	7
+vector 139	ancestor missing, request	4	6	100	100	0	0	1	6	4
+vector 140	walk passed the watermark	3	5	105	105	0	0	0	5	3
+vector 141	walk passed the watermark	9	8	106	106	0	0	0	8	9
+vector 142	nothing to commit, pruned	3	3	103	103	0	0	0	0	3
+vector 143	ancestor missing, no request	7	11	100	100	0	0	0	11	7
+vector 144	committed	5	8	103	104	1	1	0	3	3
+vector 145	committed	6	3	103	105	1	1	0	2	3
+vector 146	tx missing, no request	8	11	101	101	0	0	0	11	8
+vector 147	rounds not consecutive	8	10	102	102	0	0	0	10	8
+vector 148	walk passed the watermark	4	5	103	103	0	0	0	5	4
+vector 149	walk passed the watermark	9	10	106	106	0	0	0	10	9
+vector 150	ancestor missing, no request	4	4	101	101	0	0	0	4	4
+vector 151	second parent missing, no request	3	1	106	106	0	0	0	1	3
+vector 152	walk passed the watermark	4	1	103	103	0	0	0	1	4
+vector 153	walk passed the watermark	6	11	105	105	0	0	0	11	6
+vector 154	tx missing, no request	8	9	100	100	0	0	0	9	8
+vector 155	nothing to commit, pruned	9	7	104	104	0	0	0	1	3
+vector 156	ancestor missing, no request	9	9	102	102	0	0	0	9	9
+vector 157	ancestor missing, no request	5	5	100	100	0	0	0	5	5
+vector 158	second parent missing, request	2	3	101	101	0	0	1	3	2
+vector 159	walk passed the watermark	9	6	106	106	0	0	0	6	9
+vector 160	rounds not consecutive	11	7	102	102	0	0	0	7	11
+vector 161	rounds not consecutive	9	10	100	100	0	0	0	10	9
+vector 162	tx missing, no request	11	6	104	104	0	0	0	6	11
+vector 163	ancestor missing, no request	5	3	102	102	0	0	0	3	5
+vector 164	tip parent missing, no request	2	4	102	102	0	0	0	4	2
+vector 165	tx missing, no request	11	7	100	100	0	0	0	7	11
+vector 166	committed	10	9	105	109	3	2	0	3	3
+vector 167	nothing to commit, pruned	7	11	105	105	0	0	0	8	3
+vector 168	second parent missing, no request	2	6	104	104	0	0	0	6	2
+vector 169	walk passed the watermark	4	3	103	103	0	0	0	3	4
+vector 170	walk passed the watermark	5	1	103	103	0	0	0	1	5
+vector 171	committed	6	8	100	101	1	1	0	3	3
+vector 172	ancestor missing, no request	9	10	100	100	0	0	0	10	9
+vector 173	rounds not consecutive	10	7	104	104	0	0	0	7	10
+vector 174	rounds not consecutive	8	8	104	104	0	0	0	8	8
+vector 175	rounds not consecutive	7	8	102	102	0	0	0	8	7
+vector 176	tx missing, no request	9	11	104	104	0	0	0	11	9
+vector 177	rounds not consecutive	6	8	106	106	0	0	0	8	6
+vector 178	committed	7	11	106	108	1	1	0	7	3
+vector 179	second parent missing, request	3	3	104	104	0	0	1	3	3
+vector 180	tx missing, no request	9	4	104	104	0	0	0	4	9
+vector 181	rounds not consecutive	6	4	100	100	0	0	0	4	6
+vector 182	rounds not consecutive	9	11	100	100	0	0	0	11	9
+vector 183	nothing to commit, pruned	6	5	105	105	0	0	0	2	3
+vector 184	committed	9	7	105	108	2	1	0	2	3
+vector 185	committed	4	1	100	101	1	1	0	1	3
+vector 186	tx missing, no request	8	6	103	103	0	0	0	6	8
+vector 187	tip parent missing, no request	3	4	104	104	0	0	0	4	3
+vector 188	rounds not consecutive	6	4	104	104	0	0	0	4	6
+vector 189	rounds not consecutive	8	7	100	100	0	0	0	7	8
+vector 190	second parent missing, no request	4	3	104	104	0	0	0	3	4
+vector 191	walk passed the watermark	4	3	104	104	0	0	0	3	4
+vector 192	tx missing, no request	9	6	103	103	0	0	0	6	9
+vector 193	nothing to commit, pruned	6	4	106	106	0	0	0	1	3
+vector 194	ancestor missing, request	10	8	100	100	0	0	1	8	10
+vector 195	rounds not consecutive	7	6	100	100	0	0	0	6	7
+vector 196	committed	5	5	105	108	2	2	0	1	3
+vector 197	tx missing, no request	4	4	101	101	0	0	0	4	4
+vector 198	walk passed the watermark	3	8	103	103	0	0	0	8	3
+vector 199	rounds not consecutive	8	8	100	100	0	0	0	8	8
+vector 200	walk passed the watermark	3	5	103	103	0	0	0	5	3
+vector 201	walk passed the watermark	3	3	105	105	0	0	0	3	3
+vector 202	rounds not consecutive	11	8	105	105	0	0	0	8	11
+vector 203	ancestor missing, request	7	10	100	100	0	0	1	10	7
+vector 204	committed	4	5	102	103	1	1	0	2	3
+vector 205	rounds not consecutive	4	6	105	105	0	0	0	6	4
+vector 206	tx missing, no request	10	10	100	100	0	0	0	10	10
+vector 207	second parent missing, no request	2	2	102	102	0	0	0	2	2
+vector 208	tx missing, no request	9	11	103	103	0	0	0	11	9
+vector 209	tip parent missing, no request	4	4	105	105	0	0	0	4	4
+vector 210	walk passed the watermark	5	6	103	103	0	0	0	6	5
+vector 211	committed	7	10	103	108	4	3	0	3	3
+vector 212	tip parent missing, no request	3	3	102	102	0	0	0	3	3
+vector 213	tx missing, no request	8	6	100	100	0	0	0	6	8
+vector 214	second parent missing, no request	2	2	104	104	0	0	0	2	2
+vector 215	rounds not consecutive	7	7	101	101	0	0	0	7	7
+vector 216	tx missing, no request	3	4	100	100	0	0	0	4	3
+vector 217	committed	8	7	105	107	2	2	0	2	3
+vector 218	committed	5	7	102	103	1	1	0	3	3
+vector 219	tip parent missing, no request	3	1	105	105	0	0	0	1	3
+vector 220	rounds not consecutive	6	8	106	106	0	0	0	8	6
+vector 221	rounds not consecutive	8	10	100	100	0	0	0	10	8
+vector 222	nothing to commit, pruned	5	7	104	104	0	0	0	3	3
+vector 223	rounds not consecutive	6	10	100	100	0	0	0	10	6
+vector 224	committed	10	7	102	106	4	4	0	2	3
+vector 225	nothing to commit, pruned	4	3	103	103	0	0	0	2	3
+vector 226	committed	6	5	104	106	2	2	0	2	3
+vector 227	committed	9	6	104	105	1	1	0	4	3
+vector 228	rounds not consecutive	9	6	105	105	0	0	0	6	9
+vector 229	rounds not consecutive	5	3	105	105	0	0	0	3	5
+vector 230	walk passed the watermark	3	4	105	105	0	0	0	4	3
+vector 231	committed	7	7	104	110	4	3	0	1	3
+vector 232	second parent missing, no request	4	4	104	104	0	0	0	4	4
+vector 233	walk passed the watermark	5	4	106	106	0	0	0	4	5
+vector 234	rounds not consecutive	9	5	106	106	0	0	0	5	9
+vector 235	tip parent missing, request	2	4	104	104	0	0	1	4	2
+vector 236	second parent missing, no request	3	2	103	103	0	0	0	2	3
+vector 237	tx missing, no request	8	11	103	103	0	0	0	11	8
+vector 238	committed	6	7	103	105	1	1	0	1	3
+vector 239	tx missing, no request	8	11	101	101	0	0	0	11	8
+vector 240	ancestor missing, no request	9	10	100	100	0	0	0	10	9
+vector 241	second parent missing, request	4	4	100	100	0	0	1	4	4
+vector 242	tip parent missing, no request	2	1	100	100	0	0	0	1	2
+vector 243	tip parent missing, no request	1	1	103	103	0	0	0	1	1
+vector 244	tip parent missing, no request	1	3	104	104	0	0	0	3	1
+vector 245	ancestor missing, no request	3	2	102	102	0	0	0	2	3
+vector 246	walk passed the watermark	9	7	106	106	0	0	0	7	9
+vector 247	rounds not consecutive	6	6	104	104	0	0	0	6	6
+vector 248	ancestor missing, no request	6	3	100	100	0	0	0	3	6
+vector 249	tx missing, no request	8	9	102	102	0	0	0	9	8
+vector 250	walk passed the watermark	5	5	106	106	0	0	0	5	5
+vector 251	ancestor missing, no request	9	5	101	101	0	0	0	5	9
+vector 252	rounds not consecutive	3	4	104	104	0	0	0	4	3
+vector 253	committed	7	6	104	108	3	2	0	1	3
+vector 254	rounds not consecutive	7	6	104	104	0	0	0	6	7
+vector 255	second parent missing, no request	2	3	100	100	0	0	0	3	2
+vector 256	rounds not consecutive	6	2	106	106	0	0	0	2	6
+vector 257	committed	10	8	103	108	5	5	0	2	3
+vector 258	second parent missing, request	4	4	102	102	0	0	1	4	4
+vector 259	committed	4	3	103	105	1	1	0	1	3
+vector 260	rounds not consecutive	5	4	100	100	0	0	0	4	5
+vector 261	rounds not consecutive	10	11	105	105	0	0	0	11	10
+vector 262	ancestor missing, no request	11	9	101	101	0	0	0	9	11
+vector 263	committed	10	11	103	106	3	3	0	1	3
+vector 264	walk passed the watermark	4	2	106	106	0	0	0	2	4
+vector 265	ancestor missing, no request	6	6	100	100	0	0	0	6	6
+vector 266	second parent missing, no request	2	2	100	100	0	0	0	2	2
+vector 267	second parent missing, no request	2	3	103	103	0	0	0	3	2
+vector 268	walk passed the watermark	7	6	106	106	0	0	0	6	7
+vector 269	committed	6	5	101	104	2	1	0	0	3
+vector 270	tx missing, no request	5	6	101	101	0	0	0	6	5
+vector 271	nothing to commit, pruned	6	5	106	106	0	0	0	2	3
+vector 272	ancestor missing, request	6	2	101	101	0	0	1	2	6
+vector 273	tx missing, no request	7	6	101	101	0	0	0	6	7
+vector 274	committed	8	8	105	108	2	2	0	5	3
+vector 275	committed	8	8	104	105	1	1	0	1	3
+vector 276	rounds not consecutive	6	5	100	100	0	0	0	5	6
+vector 277	rounds not consecutive	10	11	104	104	0	0	0	11	10
+vector 278	rounds not consecutive	4	3	103	103	0	0	0	3	4
+vector 279	second parent missing, request	4	2	102	102	0	0	1	2	4
+vector 280	walk passed the watermark	7	7	105	105	0	0	0	7	7
+vector 281	rounds not consecutive	6	7	104	104	0	0	0	7	6
+vector 282	second parent missing, no request	2	4	100	100	0	0	0	4	2
+vector 283	walk passed the watermark	4	1	104	104	0	0	0	1	4
+vector 284	rounds not consecutive	6	7	105	105	0	0	0	7	6
+vector 285	nothing to commit, pruned	6	3	104	104	0	0	0	1	3
+vector 286	tip parent missing, no request	3	5	103	103	0	0	0	5	3
+vector 287	second parent missing, no request	2	3	101	101	0	0	0	3	2
+vector 288	tx missing, no request	4	2	100	100	0	0	0	2	4
+vector 289	walk passed the watermark	3	5	105	105	0	0	0	5	3
+vector 290	ancestor missing, request	8	8	102	102	0	0	1	8	8
+vector 291	ancestor missing, request	9	6	102	102	0	0	1	6	9
+vector 292	second parent missing, no request	4	1	103	103	0	0	0	1	4
+vector 293	rounds not consecutive	5	4	105	105	0	0	0	4	5
+vector 294	rounds not consecutive	10	4	104	104	0	0	0	4	10
+vector 295	second parent missing, request	4	2	100	100	0	0	1	2	4
+vector 296	tip parent missing, no request	2	3	105	105	0	0	0	3	2
+vector 297	rounds not consecutive	6	8	106	106	0	0	0	8	6
+vector 298	committed	9	11	102	110	5	2	0	1	3
+vector 299	committed	9	10	103	107	4	4	0	5	3

@@ -1,0 +1,22 @@
+order	site	rule	otherwise	outcome_label	cases
+1	0x44ab9bf	block map root and length are both nonzero	return	no blocks	1
+2	0x44abba7	tip = highest round in the block map, the last key in key order on a tie	-	-	-
+3	0x44abd8e	child = block named by the tip QC hash	request reason 0 for that hash	tip parent missing	25
+4	0x44abe5c	start = block named by the child QC hash	request reason 0 for that hash	second parent missing	37
+5	0x44abe9f	child.round == saturating(start.round + 1)	return, no prune	rounds not consecutive	59
+6	0x44abf56	start.round above the committed round starts the walk	skip the walk	-	-
+7	0x44ac0e9	every tx hash of the walked block is in the tx map with a tag other than ...01	request reason 1 for the walked block, partial walk dropped	tx missing	40
+8	0x44ac2e3	proof present when child.round == saturating(walked.round + 1)	proof None word	-	-
+9	0x44ac670	parent of the walked block is in the block map	0x14385c0, request reason 2 for that hash, partial walk dropped	ancestor missing	41
+10	0x44ac6d9	keep walking while the parent round is above the committed round	stop	-	-
+11	0x44ac8b4	last round reached equals the committed round	return, partial walk dropped, no prune	walk passed the watermark	54
+12	0x44ac8cf	committed round = start.round	-	-	-
+13	0x44ac8d8	at least one record	prune only	nothing to commit, pruned	30
+14	0x44ac909	stats 0, 1, 2: blocks, txs, bytes, last two capped at i64 max	-	-	-
+15	0x44aca24	log committed with block hashes and tx hashes, walk order	-	-	-
+16	0x44acab7	remove each tx, sample event time minus tx time, write tx byte to the seen map	a second removal of one hash does nothing	-	-
+17	0x44acf22	records reversed, oldest first	-	-	-
+18	0x489b76b	drop txs with time + 20 s strictly below event time, any tag	-	-	-
+19	0x489814e	drop blocks with round strictly below the committed round, any branch	-	-	-
+20	0x44ad5eb	per record, sample block time and wall time gaps	-	-	-
+21	0x47f5255	push one tag 3 outbox row per record	-	committed	72
