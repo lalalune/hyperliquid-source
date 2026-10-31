@@ -19,9 +19,15 @@ for i in range(shnum):
     name, typ, flags, addr, off, size = struct.unpack_from("<IIQQQQ", data, shoff + i * shentsize)
     secs.append([name, typ, addr, off, size])
 strtab_off = secs[shstrndx][3]
+strtab_size = secs[shstrndx][4]
+strtab = data[strtab_off:strtab_off + strtab_size]
 for s in secs:
-    end = data.index(b"\0", strtab_off + s[0])
-    s[0] = data[strtab_off + s[0]:end].decode()
+    if s[0] >= len(strtab):
+        raise SystemExit(f"{path}: section name offset {s[0]} outside .shstrtab")
+    end = strtab.find(b"\0", s[0])
+    if end < 0:
+        raise SystemExit(f"{path}: unterminated section name at offset {s[0]}")
+    s[0] = strtab[s[0]:end].decode()
 by_name = {s[0]: s for s in secs}
 
 
