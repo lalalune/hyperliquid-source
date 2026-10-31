@@ -87,6 +87,12 @@ class CatalogueTests(unittest.TestCase):
         d = copy.deepcopy(self.progress); del d['components']['visor']
         with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
 
+    def test_non_dict_progress_row_rejected(self):
+        for bad in (None, 5, ['gates']):
+            d = copy.deepcopy(self.progress)
+            d['components']['orderbook'] = bad
+            with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
+
 
 class VisorIndexTests(unittest.TestCase):
     def test_target_for_maps_nodes_and_visor(self):
