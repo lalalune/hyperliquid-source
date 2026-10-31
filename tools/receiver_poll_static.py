@@ -104,7 +104,10 @@ def relocations(data):
                 symbol = symbol_section['offset'] + (info >> 32) * entry_size
                 name_offset = struct.unpack_from('<I', data, symbol)[0]
                 start = string_section['offset'] + name_offset
-                name = data[start:data.index(b'\0', start)].decode('ascii')
+                try:
+                    name = data[start:data.index(b'\0', start)].decode('ascii')
+                except UnicodeDecodeError:
+                    raise ValueError('Receiver dynamic symbol name is not ASCII')
                 if info & 0xFFFFFFFF != 6 or name != 'exit' or addend != 0:
                     raise ValueError('Exit import binding changed')
                 exit_symbol = True
