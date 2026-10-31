@@ -85,6 +85,8 @@ def relocations(data):
     for section_index, section in enumerate(section_rows):
         if section['type'] != 4:
             continue
+        if section['size'] % 24:
+            raise ValueError('Truncated relocation section')
         for offset in range(section['offset'], section['offset'] + section['size'], 24):
             slot, info, addend = struct.unpack_from('<QQq', data, offset)
             if slot in RELATIVE:
