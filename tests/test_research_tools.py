@@ -87,6 +87,17 @@ class CatalogueTests(unittest.TestCase):
         d = copy.deepcopy(self.progress); del d['components']['visor']
         with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
 
+    def test_non_dict_component_record_rejected(self):
+        # The 'id'/'patterns' key-presence guards of #321/#325 assume dict
+        # records: the string/list cases below carry the key, so they slip
+        # past those guards and crash at the subscript instead.
+        for bad in (5, None, 'id-patterns', ['id']):
+            parts = copy.deepcopy(self.parts)
+            parts[0] = bad
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                validate_progress(parts, self.progress, self.root)
+        validate_progress(self.parts, self.progress, self.root)
+
 
 class VisorIndexTests(unittest.TestCase):
     def test_target_for_maps_nodes_and_visor(self):
