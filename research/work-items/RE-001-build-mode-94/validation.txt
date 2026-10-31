@@ -1,0 +1,31 @@
+Native validation, 2026-10-31
+Base: 1f8c67c63ca4794c9689235471c60297f8a5c985
+Reference: can1357-hl 999556f6e0a474b8312db96ec3149e1c44e97c23 (unchanged)
+Linux x86-64 container, Python 3.13.18, GNU readelf/objdump 2.42 (Ubuntu), Git LFS 3.4.1.
+objdump -d uses default AT&T syntax; addresses are ELF VAs, not file offsets.
+LFS artifacts materialized from the project's own Git LFS media URLs; all
+digests checked by make verify. Captured binaries were never executed.
+
+make doctor: exit0; analysis_ready true; exact_rebuild_ready false
+(rust 1.94.1/1.95.0 and Ghidra not installed; not needed for this packet).
+make verify: exit0; artifact identities and signatures pass;
+all37 imported files and all pinned source repositories pass.
+make test: exit0; 439 tests pass (431 at base + 8 build-mode tests).
+make catalogue-check: exit0; catalogue/progress tables match pinned inputs.
+make reproduce: exit0; counts grounded822 drift60 notes116 late1 case11
+partial56 unanchored386.
+
+python3 tools/build_mode_static.py --output work/build-mode-static-94: exit0.
+Repeat into work/build-mode-static-94-b: diff -r identical.
+Final repeat into work/bm-check: diff -ru against observed/ identical
+(all10 exported files). Final output retained in observed/.
+
+python3 -m unittest discover -s tests -p test_build_mode_static.py -v:
+exit0, eight tests pass; 36 instruction windows x first/last byte = 72
+corruption subcases, 11 literal/template corruptions, 16 RELA retargets,
+3 reference-swapped line/column rewrites, template-decoder negatives,
+objdump parser positives/negatives, byte-identical records.json and
+references.tsv regeneration. Corruptions run below the whole-input digest gate.
+
+No target execution, emulator execution, node/chain networking, Rust component
+build, runtime differential, hosted CI or gate change claimed.
