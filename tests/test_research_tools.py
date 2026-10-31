@@ -83,6 +83,33 @@ class CatalogueTests(unittest.TestCase):
         row['raw_equal_bodies'] = 2; row['total_function_windows'] = 1
         with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
 
+    def test_gate_schema_rejects_additional_acceptance_credit(self):
+        d = copy.deepcopy(self.progress)
+        d['gates']['extra'] = 'An extra milestone would allow 125% completion.'
+        for row in d['components'].values():
+            row['gates']['extra'] = False
+        with self.assertRaisesRegex(ValueError, 'four acceptance gates'):
+            validate_progress(self.parts, d, self.root)
+
+    def test_gate_schema_rejects_missing_or_replaced_gate(self):
+        for replacement in (None, 'source_imported'):
+            with self.subTest(replacement=replacement):
+                d = copy.deepcopy(self.progress)
+                del d['gates']['identity']
+                for row in d['components'].values():
+                    del row['gates']['identity']
+                if replacement is not None:
+                    d['gates'][replacement] = 'Not target code/data/call identity.'
+                    for row in d['components'].values():
+                        row['gates'][replacement] = False
+                with self.assertRaisesRegex(ValueError, 'four acceptance gates'):
+                    validate_progress(self.parts, d, self.root)
+
+    def test_gate_schema_accepts_canonical_names_in_any_order(self):
+        d = copy.deepcopy(self.progress)
+        d['gates'] = dict(reversed(list(d['gates'].items())))
+        validate_progress(self.parts, d, self.root)
+
     def test_missing_component_rejected(self):
         d = copy.deepcopy(self.progress); del d['components']['visor']
         with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
