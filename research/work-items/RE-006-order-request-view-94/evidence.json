@@ -1,0 +1,180 @@
+{
+  "cases": {
+    "total": 284
+  },
+  "fields": {
+    "child_row": {
+      "content": "the first 0x48 bytes of a request",
+      "size": "0x48"
+    },
+    "request": {
+      "+0x00/+0x08": "size option: tag, value",
+      "+0x10": "word: tif byte in its low byte with no trigger, trigger price with one",
+      "+0x18": "market byte",
+      "+0x19": "2 no trigger, 0 take profit, 1 stop",
+      "+0x1a": "6 bytes copied on a trigger",
+      "+0x20": "limit price",
+      "+0x30": "side byte",
+      "+0x31": "reduceOnly byte",
+      "+0x32": "cloid, 17 bytes",
+      "+0x48": "0x28 bytes handed to every child, not read here",
+      "+0x70/+0x78/+0x80": "child rows: capacity, pointer, count; stride 0x48",
+      "+0x88": "meta block",
+      "+0x90": "oid",
+      "+0x98": "chrono date word",
+      "+0x9c": "seconds of the day",
+      "+0xa0": "nanoseconds",
+      "+0xa4": "user, 20 bytes",
+      "size": "0xb8 by reads; last read ends at +0xb8"
+    }
+  },
+  "first_mismatch": "",
+  "functions": [
+    {
+      "end": "0x42ff00d",
+      "instructions": 333,
+      "instructions_stepped": 284,
+      "role": "spot request builder",
+      "size": 1693,
+      "start": "0x42fe970"
+    },
+    {
+      "end": "0x42fe96d",
+      "instructions": 333,
+      "instructions_stepped": 284,
+      "role": "perp request builder",
+      "size": 1693,
+      "start": "0x42fe2d0"
+    },
+    {
+      "end": "0x47f6c27",
+      "instructions": 166,
+      "instructions_stepped": 133,
+      "role": "spot child row map",
+      "size": 727,
+      "start": "0x47f6950"
+    },
+    {
+      "end": "0x47f7c37",
+      "instructions": 166,
+      "instructions_stepped": 133,
+      "role": "perp child row map",
+      "size": 727,
+      "start": "0x47f7960"
+    },
+    {
+      "end": "0x42fc2e8",
+      "instructions": 320,
+      "instructions_stepped": 239,
+      "role": "spot resting builder, helper",
+      "size": 1592,
+      "start": "0x42fbcb0"
+    },
+    {
+      "end": "0x42fc78a",
+      "instructions": 238,
+      "instructions_stepped": 198,
+      "role": "perp resting builder, helper",
+      "size": 1178,
+      "start": "0x42fc2f0"
+    },
+    {
+      "end": "0x43029c9",
+      "instructions": 318,
+      "instructions_stepped": 237,
+      "role": "spot trigger builder, helper",
+      "size": 1609,
+      "start": "0x4302380"
+    },
+    {
+      "end": "0x4302f64",
+      "instructions": 286,
+      "instructions_stepped": 249,
+      "role": "perp trigger builder, helper",
+      "size": 1428,
+      "start": "0x43029d0"
+    }
+  ],
+  "instructions_stepped": 209624,
+  "mismatches": 0,
+  "mutations": {
+    "killed": 198,
+    "survived": 96,
+    "unreached": 34
+  },
+  "outcomes": {
+    "perp resting record": 73,
+    "perp trigger record": 62,
+    "spot resting record": 74,
+    "spot trigger record": 63,
+    "stop bounds spot past the list": 2,
+    "stop overflow size decimals above 6": 2,
+    "stop overflow wei decimals below size decimals": 2,
+    "stop panic asset of another dex or past the list": 4,
+    "stop panic token past the row list": 2
+  },
+  "reference_claims": [
+    {
+      "claim": "wire order types are decoded elsewhere; no path from a request to a record of named fields",
+      "observed": "0x42fe970 and 0x42fe2d0 build it",
+      "reference": "l1/order_wire.rs",
+      "verdict": "absent from the reference"
+    }
+  ],
+  "target": {
+    "file": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "time_examples": [
+    {
+      "millis": 0,
+      "nanos": 0,
+      "ordinal": 1,
+      "seconds": 0,
+      "year": 1970
+    },
+    {
+      "millis": 1,
+      "nanos": 1000000,
+      "ordinal": 1,
+      "seconds": 0,
+      "year": 1970
+    },
+    {
+      "millis": 0,
+      "nanos": 999000000,
+      "ordinal": 365,
+      "seconds": 86399,
+      "year": 1969
+    },
+    {
+      "millis": 1709168400123,
+      "nanos": 123456789,
+      "ordinal": 60,
+      "seconds": 3600,
+      "year": 2024
+    }
+  ],
+  "twins": [
+    {
+      "call_targets_that_differ": {
+        "0x42fbcb0": "0x42fc2f0",
+        "0x4302380": "0x43029d0",
+        "0x47f6950": "0x47f7960"
+      },
+      "instructions": 333,
+      "left": "0x42fe970",
+      "right": "0x42fe2d0",
+      "rip_words_that_differ": 6
+    },
+    {
+      "call_targets_that_differ": {
+        "0x42fe970": "0x42fe2d0"
+      },
+      "instructions": 166,
+      "left": "0x47f6950",
+      "right": "0x47f7960",
+      "rip_words_that_differ": 7
+    }
+  ]
+}
