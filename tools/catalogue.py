@@ -20,6 +20,8 @@ def owner(path, components):
 
 def validate_progress(components, progress, root):
     ids = {c['id'] for c in components}
+    if 'components' not in progress:
+        raise ValueError('Invalid progress record')
     if set(progress['components']) != ids:
         raise ValueError('Progress components differ from scope')
     for c in components:
