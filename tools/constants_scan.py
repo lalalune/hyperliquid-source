@@ -132,9 +132,11 @@ def expected_names():
 def pool_entry(data, rodata, needle, require_marker=False):
     """Locate `needle` as a `[c0] <len> <text> 00` pool entry in .rodata.
 
-    The 0xc0 byte is an optional alignment marker emitted before a literal; when
-    present it is the byte the code points at. Entries without it are prefixed
-    by the length byte alone. Exactly one candidate must exist.
+    In the compiler-stamped format-template layout, 0xc0 is a default argument
+    placeholder. This matcher includes that preceding token when present,
+    because the selected code sites point there, then locates the literal's
+    length-prefixed bytes. It does not evaluate the placeholder's argument.
+    Exactly one candidate must exist.
     """
     encoded = needle.encode()
     starts = []

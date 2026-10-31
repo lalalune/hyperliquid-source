@@ -52,21 +52,29 @@ site VA and its file offset.
 
 ## Evidence
 
-### The seeds are pool entries, not plain literals
+### The seeds are literal suffixes in format templates
 
-Both seeds sit in a compact format-argument pool. An entry is
-`[alignment marker] [length] [bytes] 00`; the marker `0xc0` carries 0–6 padding
-bytes in its low three bits, zero here. The module's own builder at `0x1344760`
-decodes that shape: a byte with bit 7 set is consumed as padding flags, the next
-byte is the piece length. All path entries below use the same marker.
+Both selected anchors have bytes `c0 [length] [literal bytes] 00` in a compact
+format template. Under the compiler-stamped Rust representation, `0xc0` is a
+default argument placeholder, followed here by a length-prefixed literal
+suffix. Placeholder low bits describe optional formatting fields; they are
+not alignment padding. The zero byte ends the template.
+
+The shared formatter at `0x1344760` walks this encoding. Its failure Location
+points into Rust `alloc/src/fmt.rs:650:14`; it is not established as code owned
+by `global_constants`. The scanner's legacy pool/marker field names and all
+recorded coordinates remain unchanged. The placeholder's value and complete
+rendered path remain outside this inventory claim. See the
+[correction evidence](../RE-015-format-prefix-correction-94/README.md) for
+the target binding and pinned Rust layout contract.
 
 | Seed | Text VA | Entry VA | Entry bytes | Xref site | Window |
 | --- | ---: | ---: | --- | ---: | --- |
 | `/static_config` | `0x1ef5f7` | `0x1ef5f5` | `c0 0e` | `0x164fbaf` | `0x164fb80`–`0x164fea0` |
 | `/cham` | `0x1fc0ee` | `0x1fc0ec` | `c0 05` | `0x164f841` | `0x164f810`–`0x164f970` |
 
-The second byte of each entry equals the text length (14 and 5), and the text
-is NUL-terminated. A naive search for the text address finds no xref at all:
+The second byte of each anchor equals the literal length (14 and 5), and `00`
+terminates each selected template. A naive search for the text address finds no xref at all:
 both code sites point two bytes before it. `NvTestnet` at `0x2180ff` is the same
 trap in another form: it is a slice of one concatenated name blob and has no
 direct xref either; its canonical reference is the pair at `0x5668488`.
