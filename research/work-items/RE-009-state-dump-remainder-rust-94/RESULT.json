@@ -1,0 +1,1266 @@
+{
+  "status": "SCALAR_RUST_EXPRESSION_BUILD_AND_COMPARISON_PASS",
+  "original_static_commit": "1cf8e6b4af0a049978627dee8de0146c1303aff6",
+  "compiler": {
+    "argv": "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+    "version": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: x86_64-unknown-linux-gnu\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+    "executable_sha256": "ef6d716e5d1c6c93def277c0afa037c21e7a74f7de3aed4ee0700646c3301b1d",
+    "meaning": "Repository-pinned research component compiler, not recovered original node compiler."
+  },
+  "host_linker_driver": {
+    "path": "/usr/bin/cc",
+    "version": "cc (Debian 14.2.0-19) 14.2.0\nCopyright (C) 2024 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f",
+    "explicitly_passed_to_rustc": true
+  },
+  "source_sha256s": {
+    "src/node94-euclidean-remainder/lib.rs": "52db8d6f7a0b06e35f10220b88f5db3c323d9395accfcf867ee54c343788d190",
+    "src/node94-euclidean-remainder/target-vectors.tsv": "0cfbef1de59d1bd8f2be84aece1b5a5a220a645bd1facbc223b6d023d7ac8903",
+    "tools/state_dump_remainder_rust.py": "a25cc7ee76cde0a3dc79f36f0155e4eddabed41067426fa1422bb5cb58483fcb"
+  },
+  "source_compiler_and_target_unchanged": true,
+  "oracle": {
+    "target": {
+      "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+      "bytes": 91774280,
+      "release": 94
+    },
+    "original_static_commit": "1cf8e6b4af0a049978627dee8de0146c1303aff6",
+    "parameters": {
+      "multiplier": 1749024623285053783,
+      "high_shift": 13,
+      "quotient_sign_shift": 63,
+      "divisor": 86400,
+      "remainder_sign_shift": 63,
+      "repair_mask": 86400,
+      "index_guard_add": -2146764485,
+      "index_threshold": 18446744069414584320,
+      "index_offset": 719163,
+      "excluded_status": 1,
+      "output_offsets": [
+        0,
+        4,
+        8
+      ],
+      "consumer": {
+        "buffer": 96,
+        "first_load": 0,
+        "pair_load": 4,
+        "first_store": 188,
+        "pair_store": 180,
+        "tag_store": 176,
+        "tag": 1
+      }
+    },
+    "whole_i64_algebra": {
+      "domain": {
+        "min": -9223372036854775808,
+        "max": 9223372036854775807
+      },
+      "total_shift": 77,
+      "delta": 12928,
+      "max_magnitude_times_delta": 119239753692458541645824,
+      "strict_bound": 151115727451828646838272,
+      "multiplier_odd": true,
+      "observed_quotient_expression": "(signed_high64(s*M) >> high_shift) + (unsigned64(signed_high64(s*M)) >> quotient_sign_shift)",
+      "observed_field_expression": "low32(low32(s-q*D) + ((s-q*D) SAR remainder_sign_shift AND repair_mask))",
+      "multiply_lemma": "Signed64 times positive signed64 fits signed128; signed_high64 is floor(product/2^64). Two arithmetic shifts compose to floor(product/2^K).",
+      "positive_lemma": "For 0<=n<=2^63, 0<=n*M/2^K-n/D<1/D; fractional parts of n/D are multiples of1/D, so floors agree.",
+      "negative_lemma": "For 0<n<=2^63<2^K, oddM implies n*M not divisible by2^K. Signed-high shift plus unsigned-high sign bit is ceil(-n*M/2^K)=-floor(n/D). Zero separately gives0.",
+      "product_lemma": "The truncating quotient timesD lies within signed64; subtraction is exact and |remainder|<D.",
+      "repair_lemma": "SAR63 yields0 or-1; adding its AND-withD produces Euclidean remainder in[0,D). Low32 arithmetic preserves it because D<2^32.",
+      "index_guard_lemma": "No signed64 overflow in floor_quotient+guard_add; unsigned threshold is equivalent to signed32 containment of floor_quotient+index_offset.",
+      "second_field_identity": "s mod D (Euclidean)",
+      "normal_return_conditions": [
+        "raw previous-helper status != excluded_status",
+        "index guard passes",
+        "opaque index-callee EAX !=0",
+        "normal calls/valid regions/native ABI and alias conditions hold"
+      ]
+    },
+    "case_count": 1906,
+    "fixture_sha256": "0cfbef1de59d1bd8f2be84aece1b5a5a220a645bd1facbc223b6d023d7ac8903",
+    "inputs_sha256": "866348f09ef1d8050b8d7ecce5bbdf848a53ad362c215e44eb1e4b56b471af46",
+    "expected_values": "Actual extracted multiply-high/shift/sign/repair equations; no % or rem_euclid in expected-value generation.",
+    "limits": "Total scalar arithmetic cases, not observed full-helper successes; original guards/callees/ABI remain conditional."
+  },
+  "profiles": [
+    {
+      "name": "debug",
+      "opt_level": 0,
+      "ordinary_Rust_tests": 1,
+      "independent_production_cases": 1906,
+      "actual_values_sha256": "0cfbef1de59d1bd8f2be84aece1b5a5a220a645bd1facbc223b6d023d7ac8903",
+      "expected_values_sha256": "0cfbef1de59d1bd8f2be84aece1b5a5a220a645bd1facbc223b6d023d7ac8903",
+      "library_sha256": "66e108fbc0f1dbc851bb459220f46b4ec759a66b2134d128086fd269618dc1b6",
+      "matched": true
+    },
+    {
+      "name": "optimized",
+      "opt_level": 3,
+      "ordinary_Rust_tests": 1,
+      "independent_production_cases": 1906,
+      "actual_values_sha256": "0cfbef1de59d1bd8f2be84aece1b5a5a220a645bd1facbc223b6d023d7ac8903",
+      "expected_values_sha256": "0cfbef1de59d1bd8f2be84aece1b5a5a220a645bd1facbc223b6d023d7ac8903",
+      "library_sha256": "c031d5724e137cfc8c6e18ed643342e3ec610b37e9a47481b140b97aedc11164",
+      "matched": true
+    }
+  ],
+  "same_toolchain_reproducibility": {
+    "build_a_bytes": 6640,
+    "build_b_bytes": 6640,
+    "build_a_sha256": "c031d5724e137cfc8c6e18ed643342e3ec610b37e9a47481b140b97aedc11164",
+    "build_b_sha256": "c031d5724e137cfc8c6e18ed643342e3ec610b37e9a47481b140b97aedc11164",
+    "raw_equal": true,
+    "normalization": "none",
+    "original_node_binary_match_claimed": false
+  },
+  "compiled_Rust_mutations": [
+    {
+      "name": "wrong-divisor",
+      "compiled": true,
+      "ordinary_test_failed": true,
+      "independent_production_mismatches": 1902,
+      "first_witness": {
+        "input": -9223372036854775808,
+        "expected": 30592,
+        "actual": 39137
+      },
+      "source_sha256": "3353e27b5eb5e1ca99192a41f149d73cd4f41ae2d92fa60596650b2c48c42951",
+      "library_sha256": "a11ccdf8dc0f2b39306705cbc33a93828f00962efaa1bfcb4c7479c41f94a4cc"
+    },
+    {
+      "name": "signed-remainder",
+      "compiled": true,
+      "ordinary_test_failed": true,
+      "independent_production_mismatches": 792,
+      "first_witness": {
+        "input": -9223372036854775808,
+        "expected": 30592,
+        "actual": 4294911488
+      },
+      "source_sha256": "244b3366af300cbde3a48250ffd5de5666a43273760822e8dd6dcf71adff9261",
+      "library_sha256": "8f87dd77ff41bdf9de7da3c92fea1b57b038b4075dcf2d4a0205bee9224bf825"
+    },
+    {
+      "name": "narrow-u16",
+      "compiled": true,
+      "ordinary_test_failed": true,
+      "independent_production_mismatches": 526,
+      "first_witness": {
+        "input": -9220349334674836247,
+        "expected": 72553,
+        "actual": 7017
+      },
+      "source_sha256": "024474746b8fd00b5815d0902bc4099ffdada5da01ebdff05da98664fa9565c6",
+      "library_sha256": "7385f1013162b370f402837df05fec66cb7c2a98e34e36cc6e3fa4b108a4277d"
+    },
+    {
+      "name": "wrong-zero",
+      "compiled": true,
+      "ordinary_test_failed": true,
+      "independent_production_mismatches": 1,
+      "first_witness": {
+        "input": 0,
+        "expected": 0,
+        "actual": 86400
+      },
+      "source_sha256": "a77e79a5768f78cfbe09d47887cc58350d5a9e5453bb13498b4f763841a435be",
+      "library_sha256": "cca64c410292f67ecf549b3effbf14117e2f8adeac7e33a55d8f124585a5bd6d"
+    }
+  ],
+  "target_operand_controls": [
+    {
+      "name": "multiplier-minus-one",
+      "site": "0x151cbf1",
+      "witness": 86400,
+      "expected": 0,
+      "mutated_expression_result": 86400,
+      "semantic_difference": true,
+      "rejection": "Multiplier/divisor proof domain changed",
+      "captured_target_executed_or_modified": false
+    },
+    {
+      "name": "high-shift12",
+      "site": "0x151cc09",
+      "witness": 172800,
+      "expected": 0,
+      "mutated_expression_result": 4294880896,
+      "semantic_difference": true,
+      "rejection": "Positive approximation bound fails",
+      "captured_target_executed_or_modified": false
+    },
+    {
+      "name": "quotient-sign-shift62",
+      "site": "0x151cc05",
+      "witness": -86400,
+      "expected": 0,
+      "mutated_expression_result": 4294880896,
+      "semantic_difference": true,
+      "rejection": "Observed sign repairs changed",
+      "captured_target_executed_or_modified": false
+    }
+  ],
+  "commands": [
+    {
+      "label": "debug-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--crate-type=rlib",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout/src/node94-euclidean-remainder/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/debug/libnode94_euclidean_remainder.rlib",
+        "-C",
+        "metadata=node94-remainder-86400",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.023,
+      "logs": {
+        "stdout": {
+          "file": "debug-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "debug-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "debug-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--test",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout/src/node94-euclidean-remainder/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/debug/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.086,
+      "logs": {
+        "stdout": {
+          "file": "debug-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "debug-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "debug-tests",
+      "argv": [
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/debug/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "debug-tests.stdout",
+          "bytes": 171,
+          "sha256": "edf8f466953836fd97e0c25974e217d0455e8670e0d5b76c6e1e9c0d47647e96"
+        },
+        "stderr": {
+          "file": "debug-tests.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "debug-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "remainder_comparison",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "node94_euclidean_remainder=/tmp/hl-remainder-rust-build-20261031/final-component-build/debug/libnode94_euclidean_remainder.rlib",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/debug/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.085,
+      "logs": {
+        "stdout": {
+          "file": "debug-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "debug-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "debug-production-run",
+      "argv": [
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/debug/comparison",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "debug-production-run.stdout",
+          "bytes": 42089,
+          "sha256": "0cfbef1de59d1bd8f2be84aece1b5a5a220a645bd1facbc223b6d023d7ac8903"
+        },
+        "stderr": {
+          "file": "debug-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "optimized-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--crate-type=rlib",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout/src/node94-euclidean-remainder/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/optimized/libnode94_euclidean_remainder.rlib",
+        "-C",
+        "metadata=node94-remainder-86400",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.022,
+      "logs": {
+        "stdout": {
+          "file": "optimized-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "optimized-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "optimized-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--test",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout/src/node94-euclidean-remainder/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/optimized/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.127,
+      "logs": {
+        "stdout": {
+          "file": "optimized-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "optimized-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "optimized-tests",
+      "argv": [
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/optimized/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "optimized-tests.stdout",
+          "bytes": 171,
+          "sha256": "edf8f466953836fd97e0c25974e217d0455e8670e0d5b76c6e1e9c0d47647e96"
+        },
+        "stderr": {
+          "file": "optimized-tests.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "optimized-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "remainder_comparison",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "node94_euclidean_remainder=/tmp/hl-remainder-rust-build-20261031/final-component-build/optimized/libnode94_euclidean_remainder.rlib",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/optimized/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.144,
+      "logs": {
+        "stdout": {
+          "file": "optimized-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "optimized-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "optimized-production-run",
+      "argv": [
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/optimized/comparison",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "optimized-production-run.stdout",
+          "bytes": 42089,
+          "sha256": "0cfbef1de59d1bd8f2be84aece1b5a5a220a645bd1facbc223b6d023d7ac8903"
+        },
+        "stderr": {
+          "file": "optimized-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "repro-a",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--crate-type=rlib",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout/src/node94-euclidean-remainder/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/repro-a/libnode94_euclidean_remainder.rlib",
+        "-C",
+        "metadata=node94-remainder-86400",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.022,
+      "logs": {
+        "stdout": {
+          "file": "repro-a.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "repro-a.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "repro-b",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--crate-type=rlib",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout/src/node94-euclidean-remainder/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/repro-b/libnode94_euclidean_remainder.rlib",
+        "-C",
+        "metadata=node94-remainder-86400",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.022,
+      "logs": {
+        "stdout": {
+          "file": "repro-b.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "repro-b.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-divisor-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--crate-type=rlib",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-divisor/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-divisor/build/libnode94_euclidean_remainder.rlib",
+        "-C",
+        "metadata=node94-remainder-86400",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.038,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-divisor-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-wrong-divisor-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-divisor-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "remainder_comparison",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "node94_euclidean_remainder=/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-divisor/build/libnode94_euclidean_remainder.rlib",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-divisor/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.081,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-divisor-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-wrong-divisor-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-divisor-production-run",
+      "argv": [
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-divisor/comparison",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-divisor-production-run.stdout",
+          "bytes": 44021,
+          "sha256": "7182313b8c028620f049fd05db3ea51ee49ac08a649f7345f3094eae9060470c"
+        },
+        "stderr": {
+          "file": "mutant-wrong-divisor-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-divisor-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--test",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-divisor/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-divisor/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.078,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-divisor-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-wrong-divisor-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-divisor-tests",
+      "argv": [
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-divisor/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 101,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-divisor-tests.stdout",
+          "bytes": 252,
+          "sha256": "5a90f792cb97914dd49f9ae4ecfbd13d12d77eb0be13cf2a625ceec28ea639e6"
+        },
+        "stderr": {
+          "file": "mutant-wrong-divisor-tests.stderr",
+          "bytes": 340,
+          "sha256": "522c01514b8870edf29f0f9d4fe9df6628def36e031899ce8630d7abd2a73c02"
+        }
+      }
+    },
+    {
+      "label": "mutant-signed-remainder-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--crate-type=rlib",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-signed-remainder/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-signed-remainder/build/libnode94_euclidean_remainder.rlib",
+        "-C",
+        "metadata=node94-remainder-86400",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.019,
+      "logs": {
+        "stdout": {
+          "file": "mutant-signed-remainder-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-signed-remainder-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-signed-remainder-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "remainder_comparison",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "node94_euclidean_remainder=/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-signed-remainder/build/libnode94_euclidean_remainder.rlib",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-signed-remainder/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.079,
+      "logs": {
+        "stdout": {
+          "file": "mutant-signed-remainder-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-signed-remainder-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-signed-remainder-production-run",
+      "argv": [
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-signed-remainder/comparison",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-signed-remainder-production-run.stdout",
+          "bytes": 46695,
+          "sha256": "30ca32e425f1d46fc41c7efcf9363fb51b115ad870785785ad991f8f2f71d398"
+        },
+        "stderr": {
+          "file": "mutant-signed-remainder-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-signed-remainder-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--test",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-signed-remainder/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-signed-remainder/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.078,
+      "logs": {
+        "stdout": {
+          "file": "mutant-signed-remainder-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-signed-remainder-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-signed-remainder-tests",
+      "argv": [
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-signed-remainder/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 101,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-signed-remainder-tests.stdout",
+          "bytes": 252,
+          "sha256": "5a90f792cb97914dd49f9ae4ecfbd13d12d77eb0be13cf2a625ceec28ea639e6"
+        },
+        "stderr": {
+          "file": "mutant-signed-remainder-tests.stderr",
+          "bytes": 348,
+          "sha256": "acf7e3cb517a5dfd14a233e74f420667c2e7836e2d3df41669767389e4cc6774"
+        }
+      }
+    },
+    {
+      "label": "mutant-narrow-u16-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--crate-type=rlib",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-narrow-u16/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-narrow-u16/build/libnode94_euclidean_remainder.rlib",
+        "-C",
+        "metadata=node94-remainder-86400",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.019,
+      "logs": {
+        "stdout": {
+          "file": "mutant-narrow-u16-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-narrow-u16-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-narrow-u16-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "remainder_comparison",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "node94_euclidean_remainder=/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-narrow-u16/build/libnode94_euclidean_remainder.rlib",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-narrow-u16/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.078,
+      "logs": {
+        "stdout": {
+          "file": "mutant-narrow-u16-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-narrow-u16-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-narrow-u16-production-run",
+      "argv": [
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-narrow-u16/comparison",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-narrow-u16-production-run.stdout",
+          "bytes": 41961,
+          "sha256": "2937d090cd2d8d8ea78a5f6abef7eff7cef8a1abd4c2f4c2a980fd696d69fc83"
+        },
+        "stderr": {
+          "file": "mutant-narrow-u16-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-narrow-u16-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--test",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-narrow-u16/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-narrow-u16/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.085,
+      "logs": {
+        "stdout": {
+          "file": "mutant-narrow-u16-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-narrow-u16-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-narrow-u16-tests",
+      "argv": [
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-narrow-u16/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 101,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-narrow-u16-tests.stdout",
+          "bytes": 252,
+          "sha256": "5a90f792cb97914dd49f9ae4ecfbd13d12d77eb0be13cf2a625ceec28ea639e6"
+        },
+        "stderr": {
+          "file": "mutant-narrow-u16-tests.stderr",
+          "bytes": 336,
+          "sha256": "c86f66dfdab51580ba11f814458509f7b0e810e491d416e77b51c3e05e97fb38"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-zero-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--crate-type=rlib",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-zero/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-zero/build/libnode94_euclidean_remainder.rlib",
+        "-C",
+        "metadata=node94-remainder-86400",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.018,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-zero-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-wrong-zero-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-zero-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "remainder_comparison",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "node94_euclidean_remainder=/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-zero/build/libnode94_euclidean_remainder.rlib",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-zero/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.08,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-zero-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-wrong-zero-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-zero-production-run",
+      "argv": [
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-zero/comparison",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-zero-production-run.stdout",
+          "bytes": 42093,
+          "sha256": "3b55f8ea9f7b7e0a456d9ad09b87cd76664ad99ed164ddd61a779b9a8fc6f601"
+        },
+        "stderr": {
+          "file": "mutant-wrong-zero-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-zero-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "node94_euclidean_remainder",
+        "--test",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-zero/lib.rs",
+        "-o",
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-zero/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-fifth-20261031/rust_remainder/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.076,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-zero-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-wrong-zero-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-zero-tests",
+      "argv": [
+        "/tmp/hl-remainder-rust-build-20261031/final-component-build/mutant-wrong-zero/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 101,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-zero-tests.stdout",
+          "bytes": 252,
+          "sha256": "5a90f792cb97914dd49f9ae4ecfbd13d12d77eb0be13cf2a625ceec28ea639e6"
+        },
+        "stderr": {
+          "file": "mutant-wrong-zero-tests.stderr",
+          "bytes": 314,
+          "sha256": "6020f7967ac33ad306f00be8137182625dfadc495e43dec1f121d30ab83b0080"
+        }
+      }
+    }
+  ],
+  "captured_original_executed_or_emulated": false,
+  "limits": [
+    "Only this pure total numeric expression; original status/index/callee/ABI guards still qualify native writes.",
+    "Finite compiled comparisons support the scalar implementation; no original compiler/ABI/whole-helper/byte-match/component gate.",
+    "No Cargo workspace/dependencies; source test and library built directly with rustc; all compiler outputs in requested fresh directory."
+  ]
+}
