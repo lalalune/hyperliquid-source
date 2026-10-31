@@ -1,0 +1,40 @@
+Window FDE (eh_frame section offset 0x1cdd08):
+001cdd08 0000000000000010 001cdd0c FDE cie=00000000 pc=0000000003cd2460..0000000003cd2490
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop
+
+Note: the physically following record in .eh_frame order (offset 0x1cdd1c) is
+pc=0000000003cd3860..0000000003cd3a17, NOT the next function in address order.
+The FDE whose PC equals the window end (0x3cd2490) is the caller FDE below, at
+section offset 0x50f1bc. The checker locks that record, not the adjacent one.
+
+Caller FDE, whose PC is exactly the window end (eh_frame section offset 0x50f1bc):
+0050f1bc 0000000000000050 00232aac FDE cie=002dc714 pc=0000000003cd2490..0000000003cd2d53
+  Augmentation data:     6f a1 8f ff
+  DW_CFA_advance_loc: 1 to 0000000003cd2491
+  DW_CFA_def_cfa_offset: 16
+  DW_CFA_advance_loc: 2 to 0000000003cd2493
+  DW_CFA_def_cfa_offset: 24
+  DW_CFA_advance_loc: 2 to 0000000003cd2495
+  DW_CFA_def_cfa_offset: 32
+  DW_CFA_advance_loc: 2 to 0000000003cd2497
+  DW_CFA_def_cfa_offset: 40
+  DW_CFA_advance_loc: 2 to 0000000003cd2499
+  DW_CFA_def_cfa_offset: 48
+  DW_CFA_advance_loc: 1 to 0000000003cd249a
+  DW_CFA_def_cfa_offset: 56
+
+Shared CIE at section offset 0x0:
+00000000 0000000000000014 00000000 CIE
+  Version:               1
+  Augmentation:          "zR"
+  Code alignment factor: 1
+  Data alignment factor: -8
+  Return address column: 16
+  Augmentation data:     1b
+  DW_CFA_def_cfa: r7 (rsp) ofs 8
+  DW_CFA_offset: r16 (rip) at cfa-8
+  DW_CFA_nop
+  DW_CFA_nop
+
