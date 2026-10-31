@@ -1,0 +1,41 @@
+case	end	code	marks_written	dirty	calls_in_order
+both sides exist	tag	0x186	4=50000000 5=50000000	0	validate resolve lookup lookup batch_a batch_b
+validator refuses	error	0xef		0	validate
+validator text error	error	0x17b		0	validate
+resolver refuses	tag	0x140		1	validate resolve recorder insert free free free free
+resolver refuses, zero user	tag	0x140		1	validate resolve recorder free free free free
+resolver refuses, last user byte only	tag	0x140		1	validate resolve recorder insert free free free free
+resolver refuses, first user byte only	tag	0x140		1	validate resolve recorder insert free free free free
+primary row at table end	panic	0x56f21f0		0	validate resolve
+primary row past table	panic	0x56f21f0		0	validate resolve
+linked row at table end	panic	0x56f21f0	4=50000000	0	validate resolve lookup
+primary pair at pair end	bounds	0xc		0	validate resolve
+linked pair at pair end	bounds	0xc	4=50000000	0	validate resolve lookup
+primary quote differs	tag	0x140		1	validate resolve drop recorder insert free free free free
+linked quote differs	tag	0x140	4=50000000	1	validate resolve lookup drop recorder insert free free free free
+linked quote differs, zero user	tag	0x140	4=50000000	1	validate resolve lookup drop recorder free free free free
+only the first list entry counts	tag	0x186	4=50000000 5=50000000	0	validate resolve lookup lookup batch_a batch_b
+primary lookup fails	tag	0x140		1	validate resolve lookup recorder insert free free free free
+linked lookup fails after primary stored	tag	0x140	4=4	1	validate resolve lookup lookup recorder insert free free free free
+primary mark row at end	bounds	0xe		0	validate resolve
+linked mark row at end	bounds	0xe	4=50000000	0	validate resolve lookup
+primary deployed new	tag	0x186	5=50000000 6=150	0	validate resolve deploy liquidity free free lookup lookup batch_a batch_b
+linked deployed new	tag	0x186	4=4 6=50000000	0	validate resolve lookup deploy liquidity free free lookup batch_a batch_b
+both deployed new	tag	0x186	6=5 7=6	0	validate resolve deploy liquidity free free lookup deploy liquidity free free lookup batch_a batch_b
+new primary, decimal fails	tag	0x140		1	validate resolve drop recorder insert free free free free
+new primary, deploy fails	tag	0x140		1	validate resolve deploy drop recorder insert free free free free
+new primary, liquidity fails	tag	0x140		1	validate resolve deploy liquidity free free drop recorder insert free free free free
+new primary, lookup fails	tag	0x140		1	validate resolve deploy liquidity free free lookup recorder insert free free free free
+new linked, decimal fails	tag	0x140	4=4	1	validate resolve lookup drop recorder insert free free free free
+new linked, deploy fails	tag	0x140	4=4	1	validate resolve lookup deploy drop recorder insert free free free free
+new linked, liquidity fails	tag	0x140	4=4	1	validate resolve lookup deploy liquidity free free drop recorder insert free free free free
+new primary skips the quote test	tag	0x186	5=50000000 6=150	0	validate resolve deploy liquidity free free lookup lookup batch_a batch_b
+new linked skips the quote test	tag	0x186	4=4 6=50000000	0	validate resolve lookup deploy liquidity free free lookup batch_a batch_b
+outcome id zero	tag	0x186	4=50000000 5=50000000	0	validate resolve lookup lookup batch_a batch_b
+record strings have no capacity, refused	tag	0x140		1	validate resolve recorder insert
+record strings have no capacity, accepted	tag	0x186	4=50000000 5=50000000	0	validate resolve lookup lookup batch_a batch_b
+value zero	tag	0x186	4=1 5=1	0	validate resolve lookup lookup batch_a batch_b
+value one and two	tag	0x186	4=1 5=1	0	validate resolve lookup lookup batch_a batch_b
+value three	tag	0x186	4=2 5=3	0	validate resolve lookup lookup batch_a batch_b
+value MAX	tag	0x186	4=9223372036854775808 5=4611686018427387904	0	validate resolve lookup lookup batch_a batch_b
+value above 2^53	tag	0x186	4=4503599627370496 5=4503599627370498	0	validate resolve lookup lookup batch_a batch_b
