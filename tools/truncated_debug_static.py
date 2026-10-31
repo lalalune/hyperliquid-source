@@ -33,6 +33,8 @@ def source_bindings(data):
     for sec in sections(data):
         if sec['type'] != 4:
             continue
+        if sec['size'] % 24:
+            raise ValueError('Truncated relocation section')
         for off in range(sec['offset'], sec['offset']+sec['size'], 24):
             slot, info, addend = struct.unpack_from('<QQq', data, off)
             if slot in SLOTS:
