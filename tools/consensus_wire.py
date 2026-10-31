@@ -146,10 +146,15 @@ class Elf:
         return None
 
     def read(self, va, n):
-        o = self.off(va)
-        if o is None:
-            raise EvidenceError(f"{va:#x} not file-backed")
-        return self.data[o:o + n]
+        for v, o, sz in self.loads:
+            if v <= va < v + sz:
+                if va + n > v + sz:
+                    raise EvidenceError(
+                        f"read of {n} bytes at {va:#x} crosses segment end {v + sz:#x}")
+                if o + va - v + n > len(self.data):
+                    raise EvidenceError(f"read at {va:#x} runs past end of file")
+                return self.data[o + va - v:o + va - v + n]
+        raise EvidenceError(f"{va:#x} not file-backed")
 
 
 def fde_index(elf: Elf):
