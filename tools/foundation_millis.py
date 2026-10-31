@@ -46,9 +46,17 @@ def prove_division(multiplier, shift, divisor, maximum):
 def decode_export(output, start, end, body):
     rows = []
     for line in output.splitlines():
-        match = re.match(r'^\s*([0-9a-f]+):\s*((?:[0-9a-f]{2}\s+)+)', line)
+        match = re.match(r'^\s*([0-9a-f]+):\s*((?:[0-9a-f]{2}\s+)+)(.*)$', line)
         if match:
-            rows.append((int(match[1],16), bytes.fromhex(match[2])))
+            address, raw = int(match[1],16), bytes.fromhex(match[2])
+            # GNU objdump wraps instructions longer than 7 bytes: the bytes
+            # past the seventh continue on an addressed row whose mnemonic
+            # field is empty. Merge such a row into the previous instruction
+            # instead of counting it as a separate instruction.
+            if rows and not match[3].strip() and address == rows[-1][0]+len(rows[-1][1]):
+                rows[-1] = (rows[-1][0], rows[-1][1]+raw)
+            else:
+                rows.append((address, raw))
     cursor = start
     for address, raw in rows:
         require(address == cursor, 'Noncontiguous disassembly or off-by-one address')

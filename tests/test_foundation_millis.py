@@ -115,6 +115,49 @@ class MillisEvidenceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Calendar source relocation'):
             millis.analyze(self.data,records)
 
+    def test_gnu_objdump_wrapped_instruction_counts_once(self):
+        # Recorded exports of the same window prefix: GNU objdump wraps the
+        # 10-byte movabs at 0x13c8e39 after 7 bytes, and its last 3 bytes
+        # continue on an addressed row with an empty mnemonic field. Both
+        # formats must decode to the same 14 instructions, not 14 vs 15.
+        start,end=0x13c8e10,0x13c8e43;off=self.offset(start);body=self.data[off:off+end-start]
+        gnu='\n'.join([
+            ' 13c8e10:\t41 57                \tpush   %r15',
+            ' 13c8e12:\t41 56                \tpush   %r14',
+            ' 13c8e14:\t41 54                \tpush   %r12',
+            ' 13c8e16:\t53                   \tpush   %rbx',
+            ' 13c8e17:\t48 83 ec 18          \tsub    $0x18,%rsp',
+            ' 13c8e1b:\t48 89 fb             \tmov    %rdi,%rbx',
+            ' 13c8e1e:\t48 8b 46 08          \tmov    0x8(%rsi),%rax',
+            ' 13c8e22:\t48 f7 26             \tmulq   (%rsi)',
+            ' 13c8e25:\t0f 80 02 01 00 00    \tjo     13c8f2d <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x3bdeed3>',
+            ' 13c8e2b:\t49 89 c6             \tmov    %rax,%r14',
+            ' 13c8e2e:\t4c 89 34 24          \tmov    %r14,(%rsp)',
+            ' 13c8e32:\t4c 89 f0             \tmov    %r14,%rax',
+            ' 13c8e35:\t48 c1 e8 03          \tshr    $0x3,%rax',
+            ' 13c8e39:\t48 b9 cf f7 53 e3 a5 \tmovabs $0x20c49ba5e353f7cf,%rcx',
+            ' 13c8e40:\t9b c4 20 '])
+        llvm='\n'.join([
+            ' 13c8e10: 41 57                        \tpushq\t%r15',
+            ' 13c8e12: 41 56                        \tpushq\t%r14',
+            ' 13c8e14: 41 54                        \tpushq\t%r12',
+            ' 13c8e16: 53                           \tpushq\t%rbx',
+            ' 13c8e17: 48 83 ec 18                  \tsubq\t$0x18, %rsp',
+            ' 13c8e1b: 48 89 fb                     \tmovq\t%rdi, %rbx',
+            ' 13c8e1e: 48 8b 46 08                  \tmovq\t0x8(%rsi), %rax',
+            ' 13c8e22: 48 f7 26                     \tmulq\t(%rsi)',
+            ' 13c8e25: 0f 80 02 01 00 00            \tjo\t0x13c8f2d <.text+0x852ad>',
+            ' 13c8e2b: 49 89 c6                     \tmovq\t%rax, %r14',
+            ' 13c8e2e: 4c 89 34 24                  \tmovq\t%r14, (%rsp)',
+            ' 13c8e32: 4c 89 f0                     \tmovq\t%r14, %rax',
+            ' 13c8e35: 48 c1 e8 03                  \tshrq\t$0x3, %rax',
+            ' 13c8e39: 48 b9 cf f7 53 e3 a5 9b c4 20\tmovabsq\t$0x20c49ba5e353f7cf, %rcx # imm = 0x20C49BA5E353F7CF'])
+        decoded=millis.decode_export(gnu,start,end,body)
+        self.assertEqual(decoded,millis.decode_export(llvm,start,end,body))
+        self.assertEqual(len(decoded),14)
+        self.assertEqual(decoded[0x13c8e39],bytes.fromhex('48 b9 cf f7 53 e3 a5 9b c4 20'))
+        self.assertNotIn(0x13c8e40,decoded)
+
     def test_calendar_helper_disassembly_boundary_control(self):
         row=self.records['windows'][2];start=int(row['start_va'],16);end=int(row['end_va_exclusive'],16)
         raw=(millis.PACKET/'calendar_helper.objdump.txt').read_text()

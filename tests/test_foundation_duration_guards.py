@@ -110,5 +110,30 @@ class DurationTargetTests(unittest.TestCase):
                         raw.replace('66 0f 2e c8','66 0f 2e c9'),raw.rsplit('\n',2)[0]]:
             with self.assertRaises(ValueError):guards.decode_export(changed,start,end,body)
 
+    def test_gnu_objdump_wrapped_instruction_counts_once(self):
+        # Recorded exports of the same window prefix: GNU objdump wraps the
+        # 8-byte movsd at 0x392fabd after 7 bytes, and its last byte continues
+        # on an addressed row with an empty mnemonic field. Both formats must
+        # decode to the same 5 instructions, not 5 (LLVM) vs 6 (GNU).
+        start,end=0x392fab0,0x392fac5;off=self.offset(start);body=self.data[off:off+end-start]
+        gnu='\n'.join([
+            ' 392fab0:\t53                   \tpush   %rbx',
+            ' 392fab1:\t89 f3                \tmov    %esi,%ebx',
+            ' 392fab3:\t40 80 ff 02          \tcmp    $0x2,%dil',
+            ' 392fab7:\t0f 83 b7 00 00 00    \tjae    392fb74 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x167828c>',
+            ' 392fabd:\tf2 0f 10 0d 6b ad 8d \tmovsd  -0x3725295(%rip),%xmm1        # 20a830 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x4d9d5d0>',
+            ' 392fac4:\tfc '])
+        llvm='\n'.join([
+            ' 392fab0: 53                           \tpushq\t%rbx',
+            ' 392fab1: 89 f3                        \tmovl\t%esi, %ebx',
+            ' 392fab3: 40 80 ff 02                  \tcmpb\t$0x2, %dil',
+            ' 392fab7: 0f 83 b7 00 00 00            \tjae\t0x392fb74 <.text+0x25ebef4>',
+            ' 392fabd: f2 0f 10 0d 6b ad 8d fc      \tmovsd\t-0x3725295(%rip), %xmm1 # 0x20a830'])
+        decoded=guards.decode_export(gnu,start,end,body)
+        self.assertEqual(decoded,guards.decode_export(llvm,start,end,body))
+        self.assertEqual(len(decoded),5)
+        self.assertEqual(decoded[0x392fabd],bytes.fromhex('f2 0f 10 0d 6b ad 8d fc'))
+        self.assertNotIn(0x392fac4,decoded)
+
 
 if __name__=='__main__':unittest.main()
