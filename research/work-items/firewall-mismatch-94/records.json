@@ -1,0 +1,143 @@
+{
+  "caller": {
+    "args": {
+      "edx": "byte [[r13+0x8] + 0x8f2]",
+      "r8": "[r13+0x18] (throttle state)",
+      "rcx": "[r13+0x10] + 0x8f8",
+      "rdi": "r15 + 0x588 (firewall map)",
+      "rsi": "copy of 20 bytes at [[r13]]"
+    },
+    "call": "0x45250d1",
+    "fde": "0x4524f70",
+    "result": "unused: the caller overwrites rax at 0x45250d6, the instruction after the call; the callee main path jumps from 0x4b29636 to the level-gate epilogue 0x4b2902a"
+  },
+  "callers": {
+    "direct_e8": [
+      "0x45250d1"
+    ],
+    "relative_slots": [],
+    "scanned": ".text, every e8 rel32"
+  },
+  "difference": {
+    "abci_minus_firewall": "[rsp+0x110] = [rsp+0x140] - [rsp+0x128], then the 0x42b9a50/0x49559c0 pass",
+    "firewall_minus_abci": "[rsp+0xb0] = [rsp+0x128] - [rsp+0x140]",
+    "other_is": "rdx",
+    "self_is": "rsi",
+    "why": "self.len <= other.len >> 4 selects the search iterator (std ITER_PERFORMANCE_TIPPING_SIZE_DIFF = 16)"
+  },
+  "fde": "0x4b28ff0",
+  "flow": {
+    "abci_collect": "0x444f680",
+    "abci_minus_nonempty": "0x4b293ed",
+    "abci_slot": "0x5773b48",
+    "caller_call": "0x4b28ff0",
+    "caller_log_slot": "0x576e978",
+    "diff1": "0x44c1ce0",
+    "diff1_collect": "0x444fbc0",
+    "diff2": "0x44c1ce0",
+    "diff2_collect": "0x444fbc0",
+    "elapsed_date_ne": "0x14471d4",
+    "elapsed_frac_lt": "0x14471d8",
+    "elapsed_secs_ne": "0x14471d4",
+    "elapsed_slot": "0x576e8c0",
+    "first_log": "0x4b29480",
+    "formatter": "0x458bde0",
+    "fw_collect": "0x444fa30",
+    "level_clear": "0x4b29090",
+    "level_high": "0x4b29090",
+    "level_init": "0x4b2903c",
+    "level_slot": "0x576e928",
+    "location": "0x5738490",
+    "log_slot": "0x576e978",
+    "million": "0x20ae60",
+    "now_slot": "0x576e8a0",
+    "once_slot": "0x576e8b8",
+    "pass_start": "0x42b9a50",
+    "pass_step": "0x49559c0",
+    "raw_mdg_path": "0x216f6d",
+    "since_slot": "0x576eaa0",
+    "small_skip": "0x4b29511",
+    "tail_ret": "0x4b2902a",
+    "template": "0x1fa618",
+    "throttle_skip": "0x4b29511",
+    "time_sub_template": "0x1f9cb6",
+    "tip_search": "0x44c2221",
+    "wall_clock": "0x4ee3800"
+  },
+  "gate": {
+    "bound": 6,
+    "skip": "len(abci_minus_firewall) == 0 and len(firewall_minus_abci) <= 6"
+  },
+  "level_gate": {
+    "byte": "+0x48",
+    "continues_for": "any other value, including > 0x11",
+    "once_state": "+0x50 (non-zero runs the init call through slot 0x576e8b8 first)",
+    "returns_early_for": [
+      1,
+      2,
+      15,
+      17
+    ],
+    "static": "0x577b288"
+  },
+  "log": {
+    "args": {
+      "abci_minus_firewall": "[rsp+0x110]",
+      "firewall_minus_abci": "[rsp+0xb0]"
+    },
+    "emit": "0x143d010",
+    "first_byte": "0x3c",
+    "first_byte_is": "literal length 60 (0x3c, ASCII \"<\")",
+    "formatter": "0x458bde0",
+    "location": "/home/ubuntu/hl/code_Mainnet/node/src/firewall_ips.rs:65:13",
+    "template": [
+      "firewall does not match validators @@ [abci_minus_firewall: ",
+      null,
+      "] @ [firewall_minus_abci: ",
+      null,
+      "]"
+    ]
+  },
+  "sets": {
+    "[rsp+0x128]": {
+      "collect": "0x444fa30",
+      "name": "firewall",
+      "source": "arg0 (rdi) BTreeMap {root, height, len}"
+    },
+    "[rsp+0x140]": {
+      "collect": "0x444f680",
+      "name": "abci",
+      "source": "0x45c3d20(arg1 20-byte value, arg2 byte, arg3 state)"
+    }
+  },
+  "target": "artifacts/node/94/hl-node",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "throttle": {
+    "elapsed": {
+      "call": "0x1447130",
+      "panic": "Time Sub {} {} when now < last",
+      "since": "0x151d1b0",
+      "unit": "(secs * 1e6 + nanos / 1000) / 1e6"
+    },
+    "interval": "f64 at +0x0",
+    "last": "12-byte wall time at +0x8 (+0x8 == 0 is None)",
+    "now": {
+      "call": "0x151cba0",
+      "clock": "clock_gettime(0 = CLOCK_REALTIME)"
+    },
+    "path": "/home/ubuntu/hl/code_Mainnet/base/src/raw_mdg.rs",
+    "rule": "None -> log; else log only if elapsed > interval (ucomisd/jbe, NaN skips)",
+    "state": "r8 (caller [r13+0x18])",
+    "update": "now is stored to +0x8 only on the log path"
+  },
+  "windows": {
+    "body": "0x4b29098",
+    "caller": "0x452502e",
+    "elapsed": "0x1447130",
+    "elapsed_panic": "0x14471d4",
+    "gate": "0x4b28ff0",
+    "tail": "0x4b29620",
+    "tipping": "0x44c201e",
+    "wall_now": "0x151cba0"
+  }
+}
