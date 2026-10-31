@@ -172,6 +172,13 @@ def fde_index(elf: Elf):
         ends.append(pc + struct.unpack_from("<I", d, fo + 12)[0])
     if starts != sorted(starts):
         raise EvidenceError(".eh_frame_hdr table not sorted")
+    for i in range(len(starts) - 1):
+        if starts[i] == starts[i + 1]:
+            raise EvidenceError(f"duplicate FDE start {starts[i]:#x}")
+        if ends[i] > starts[i + 1]:
+            raise EvidenceError(
+                f"FDE at {starts[i]:#x} ends at {ends[i]:#x}, "
+                f"overlapping next start {starts[i + 1]:#x}")
     return starts, ends
 
 

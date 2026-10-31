@@ -26,6 +26,46 @@ def tool(name):
     return shutil.which(name)
 
 
+def synthetic_fde_elf(entries):
+    """Minimal ELF whose .eh_frame_hdr search table lists (pc, range_len)
+    FDE records, with file offsets == VAs (one identity LOAD)."""
+    hdr_va, ehf_va = 0x1000, 0x2000
+    ehf = bytearray()
+    fde_vas = []
+    for i, (pc, length) in enumerate(entries):
+        va = ehf_va + 16 * i
+        body = bytearray(16)
+        struct.pack_into("<i", body, 8, pc - (va + 8))  # initial_location (sdata4 pcrel)
+        struct.pack_into("<I", body, 12, length)        # address range
+        ehf += body
+        fde_vas.append(va)
+    hdr = bytearray()
+    hdr += bytes([1, 0x1B, 0x03, 0x3B])
+    hdr += struct.pack("<i", ehf_va - (hdr_va + 4))
+    hdr += struct.pack("<I", len(entries))
+    for (pc, _length), fva in zip(entries, fde_vas):
+        hdr += struct.pack("<ii", pc - hdr_va, fva - hdr_va)
+    shstr = b"\0.eh_frame_hdr\0.eh_frame\0.shstrtab\0"
+    off_shstr, phoff, shoff = 0x2800, 0x40, 0x2900
+    data = bytearray(shoff + 4 * 64)
+    data[0:6] = b"\x7fELF\x02\x01"
+    struct.pack_into("<Q", data, 0x20, phoff)
+    struct.pack_into("<Q", data, 0x28, shoff)
+    struct.pack_into("<HHHHH", data, 0x36, 56, 1, 64, 4, 3)
+    struct.pack_into("<IIQQQQQQ", data, phoff, 1, 5, 0, 0, 0, len(data), len(data), 0x1000)
+    data[hdr_va:hdr_va + len(hdr)] = hdr
+    data[ehf_va:ehf_va + len(ehf)] = ehf
+    data[off_shstr:off_shstr + len(shstr)] = shstr
+    secs = [(0, 0, 0, 0, 0, 0),
+            (1, 1, 0, hdr_va, hdr_va, len(hdr)),
+            (15, 1, 0, ehf_va, ehf_va, len(ehf)),
+            (25, 3, 0, 0, off_shstr, len(shstr))]
+    for i, s in enumerate(secs):
+        struct.pack_into("<IIQQQQIIQQ", data, shoff + i * 64,
+                         s[0], s[1], s[2], s[3], s[4], s[5], 0, 0, 1, 0)
+    return bytes(data)
+
+
 @unittest.skipIf(DATA is None, "pinned binary not present")
 class ConsensusWireTests(unittest.TestCase):
     @classmethod
@@ -260,6 +300,32 @@ class ConsensusWireTests(unittest.TestCase):
         self.assertIn("48 f7 e2", out)        # mul %rdx
         self.assertIn("48 01 c9", out)        # add %rcx,%rcx
         self.assertIn("0f 92 c0", out)        # setb %al
+
+
+class ConsensusWireFdeTableTests(unittest.TestCase):
+    """fde_index must reject tables that containing() cannot resolve
+    soundly: duplicate starts make the answer depend on table order, and
+    an overlapping earlier range hides addresses from the single-candidate
+    lookup. Synthetic ELFs only; the pinned binary is not needed."""
+
+    def test_duplicate_fde_start_rejected(self):
+        for entries in ([(0x5000, 0x10), (0x5000, 0x40)],
+                        [(0x5000, 0x40), (0x5000, 0x10)]):
+            with self.assertRaises(cw.EvidenceError):
+                cw.fde_index(cw.Elf(synthetic_fde_elf(entries)))
+
+    def test_overlapping_fde_ranges_rejected(self):
+        elf = cw.Elf(synthetic_fde_elf([(0x5000, 0x200), (0x5100, 0x50)]))
+        with self.assertRaises(cw.EvidenceError):
+            cw.fde_index(elf)
+
+    def test_adjacent_fde_ranges_accepted(self):
+        elf = cw.Elf(synthetic_fde_elf([(0x5000, 0x100), (0x5100, 0x50)]))
+        starts, ends = cw.fde_index(elf)
+        self.assertEqual((starts, ends), ([0x5000, 0x5100], [0x5100, 0x5150]))
+        self.assertEqual(cw.containing(starts, ends, 0x50FF), (0x5000, 0x5100))
+        self.assertEqual(cw.containing(starts, ends, 0x514F), (0x5100, 0x5150))
+        self.assertIsNone(cw.containing(starts, ends, 0x5150))
 
 
 if __name__ == "__main__":
