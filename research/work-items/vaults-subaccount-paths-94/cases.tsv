@@ -1,0 +1,29 @@
+action	scenario	tag	code_or_panic	accounts_or_copied	model
+transfer	deposit: master pays, sub-account receives	13	None	[["30353a3f44494e53585d62676c71767b80858a8f", -2, -2], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 2, 2]]	same
+transfer	withdraw: sub-account pays, master receives	13	None	[["30353a3f44494e53585d62676c71767b80858a8f", 2, 2], ["555a5f64696e73787d82878c91969ba0a5aaafb4", -2, -2]]	same
+transfer	balance one below usd: code 51	14	51	[]	same
+transfer	usd 9999: the two sums move 0	13	None	[["30353a3f44494e53585d62676c71767b80858a8f", 0, 0], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 0, 0]]	same
+transfer	usd 19999: the two sums move 1	13	None	[["30353a3f44494e53585d62676c71767b80858a8f", -1, -1], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 1, 1]]	same
+transfer	zero usd beats the link test	14	49	[]	same
+transfer	usd at the cut beats zero and link tests	14	319	[]	same
+transfer	address linked to another master: code 218	14	218	[]	same
+transfer	unknown address: code 218, same as another master	14	218	[]	same
+transfer	master class 3, byte 1 zero: code 367	14	367	[]	same
+transfer	sub-account class 4, byte 0 zero: code 367	14	367	[]	same
+transfer	class 2 passes with both bytes zero	13	None	[["30353a3f44494e53585d62676c71767b80858a8f", 0, 0], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 0, 0]]	same
+transfer	no clearinghouse: unwrap panic after the link test	panic	91134712	null	same
+transfer	sender sums near i64::MIN saturate, recorder runs	13	None	[["30353a3f44494e53585d62676c71767b80858a8f", -9223372036854775808, -9223372036854775808], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 50000, 50000]]	same
+transfer	receiver sums near i64::MAX saturate, recorder runs	13	None	[["30353a3f44494e53585d62676c71767b80858a8f", -50000, -50000], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 9223372036854775807, 9223372036854775807]]	same
+transfer	flag word 0: 32 zero bytes in the event hash	13	None	[["30353a3f44494e53585d62676c71767b80858a8f", 0, 0], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 0, 0]]	same
+transfer	link stored past the first 16 rows: second probe group	13	None	[["30353a3f44494e53585d62676c71767b80858a8f", 0, 0], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 0, 0]]	same
+transfer	master == sub-account linked to itself: no self test in this path	13	None	[["30353a3f44494e53585d62676c71767b80858a8f", 0, 0]]	same
+create	created, both settings equal: no row written	6	e9eef3f8fd02070c11161b20252a2f34393e4348	[]	same
+create	derived address already in the user table: code 216	14	216	[]	same
+create	inner code copied out with its payload	14	215	[]	same
+create	settings differ: master copy stored under the sub-account	6	e9eef3f8fd02070c11161b20252a2f34393e4348	["e9eef3f8fd02070c11161b20252a2f34393e4348"]	same
+create	NaN word compares unequal: copy runs on equal bytes	6	e9eef3f8fd02070c11161b20252a2f34393e4348	["e9eef3f8fd02070c11161b20252a2f34393e4348"]	same
+encode	withdrawal shape string, address, address, uint, uint: 17-byte literal	5	224	8bf020819e35241b15b59db19dea2ecf3066d2d165b99b9393bfb2431cf0aa2b	same
+encode	two dynamic fields: tails follow in token order	3	256	052df5249c953bb08dc8cbfea095712c23b268fd0e785f875096c2c7ed0c2cf1	same
+encode	empty string: length word only	1	64	1cca23f135d6a051c5bceab95d8bbc3983a92021783ffe3540c209f682c5c93b	same
+encode	FixedBytes of 33 bytes: two head words, right padded, no length word	2	96	4a48ea04219d6b733a028c1b0bd723de133b531cab184e4770823a553f184cc9	same
+encode	Int minus one: all 32 bytes ff	1	32	af9613760f72635fbdb44a5a0a63c39f12af30f950a6ee5c971be188e89c4051	same

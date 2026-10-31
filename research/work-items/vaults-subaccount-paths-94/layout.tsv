@@ -1,0 +1,44 @@
+struct	offset	width	va	instruction	meaning
+transfer_action	0x0	8	0x27148f1	mov rbx,[rcx]:64	usd
+transfer_action	0x8	20	0x1e60d58	movups xmm0,[r14+0x8]:128	sub-account address
+transfer_action	0x1c	1	0x2714910	movzx raxd,[rcx+0x1c]:8	is_deposit
+modify_action	0x0	8	0x22cdfcc	cmp rax,[rsi]:64	Option<String> capacity word; i64::MIN is None
+modify_action	0x8	8	0x22cdfe1	mov rbp,[r15+0x8]:64	name pointer
+modify_action	0x10	8	0x22cdfe5	mov r12,[r15+0x10]:64	name length
+modify_action	0x18	20	0x22ce031	movups xmm0,[r15]:128	sub-account address; r15 = action + 0x18
+create_action	0x8	8	0x27e3324	mov rbp,[r13+0x8]:64	name pointer
+create_action	0x10	8	0x27e3328	mov r13,[r13+0x10]:64	name length
+exchange	0x0	4	0x2714cc6	cmp [r15]:32,0x1	equal to 1 selects a real hash from 0x3987cb0, otherwise 32 zero bytes
+exchange	0x60	12	0x2714cbd	mov rcx,[r15+0x60]:64	time copied into the event
+exchange	0x318	16	0x27e36f9	add r14,0x318	second row map argument of 0x1f84b30, row 0x58 bytes
+exchange	0x5b0	1	0x1e60d45	cmp [r12+0x5b0]:8,0x0	pass byte for user class above 3
+exchange	0x5b1	1	0x1e60d38	cmp [r12+0x5b1]:8,0x0	pass byte for user class 3
+exchange	0x5c0	8	0x2714b65	mov r14,[rcx+0x5c0]:64	clearinghouse array pointer
+exchange	0x5c8	8	0x2714b52	cmp [rcx+0x5c8]:64,0x0	clearinghouse count; zero panics with code 321 in the Err payload
+exchange	0x5d0	16	0x27e33fe	lea r13,[r14+0x5d0]:64	argument of 0x3743df0 for master and sub-account
+exchange	0x690	16	0x27e364e	lea rdi,[r14+0x690]:64	map argument of 0x1f84840, row 0xe8 bytes
+exchange	0x740	8	0x27e31fb	mov rcx,[r14+0x740]:64	user table control bytes, row 0x58 bytes
+exchange	0x748	8	0x27e3202	mov rdx,[r14+0x748]:64	user table mask
+exchange	0x758	8	0x27e31d2	cmp [r14+0x758]:64,0x0	user table item count
+exchange	0x760	16	0x27e31e0	lea rdi,[r14+0x760]:64	user table hasher argument of 0x2840fb0
+exchange	0x8f2	1	0x2714cd9	movzx rsid,[r12+0x8f2]:8	chain byte passed to the hash
+exchange	0x37e0	16	0x27e315d	lea r12,[rcx+0x37e0]:64	SubAccounts; user_to_sub_accounts map starts here
+exchange	0x3810	8	0x271499e	mov rdx,[r15+0x3810]:64	sub_account_to_master control bytes, row 0x28 bytes
+exchange	0x3818	8	0x27149a5	mov rsi,[r15+0x3818]:64	sub_account_to_master mask
+exchange	0x3828	8	0x2714961	cmp [rsi+0x3828]:64,0x0	sub_account_to_master item count
+exchange	0x3830	16	0x271497d	lea rdi,[rsi+0x3830]:64	sub_account_to_master hasher argument of 0x399c7a0
+sub_account_row	0x0	20	0x27149fb	movdqu xmm3,[r8+r14*8]:128	key: sub-account address
+sub_account_row	0x14	20	0x2714a6d	movdqu xmm0,[rdx+r14*8-0x14]:128	value: master address
+user_row	0x10	8	0x2714d96	mov rbp,[r14+0x10]:64	i64 sum, transfer moves usd / 10000
+user_row	0x18	8	0x2714daa	mov rbp,[r14+0x18]:64	i64 sum, transfer moves usd / 10000
+user_row	0x3c	1	0x1e60d30	cmp [rax+0x3c]:8,0x3	user class byte read through 0x2755400; row pointer is key + 0x18
+event	0x0	8	0x2714c5d	mov [rsp+0x150]:64,rax	tag 0x800000000000000e
+event	0x8	8	0x2714c1a	movsd.st xmm0,[rsp+0x158]:64	usd as f64 / 1e6
+event	0x10	20	0x2714c27	movups.st xmm0,[rsp+0x160]:128	from
+event	0x24	20	0x2714c3f	movups.st xmm0,[rsp+0x174]:128	to
+token	0x0	1	0x3c97940	mov [rbx]:8,0x6	first ethabi token tag 6 String: capacity, pointer and length follow at +0x08
+token	0x28	1	0x3c9795d	mov [rbx+0x28]:8,0x0	second token tag 0 Address: 20 bytes at +0x29
+token	0x50	1	0x3c97971	mov [rbx+0x50]:8,0x4	third token tag 4 Uint: little-endian limbs at +0x58
+encoder_input	0x0	24	0x3c97933	movups xmm0,[r15]:128	domain String, 24 bytes moved to the token
+encoder_input	0x18	20	0x3c97961	movups xmm0,[r15+0x18]:128	master address
+encoder_input	0x30	8	0x3c9793c	mov rax,[r15+0x30]:64	sub-account count, low limb of the Uint

@@ -1,0 +1,63 @@
+group	va	instruction	meaning
+transfer wrapper	0x1e60d30	cmp [rax+0x3c]:8,0x3	class byte of the master
+transfer wrapper	0x1e60d38	cmp [r12+0x5b1]:8,0x0	class 3 reads pass byte 0x5b1
+transfer wrapper	0x1e60d45	cmp [r12+0x5b0]:8,0x0	class above 3 reads pass byte 0x5b0
+transfer wrapper	0x1e60d6c	cmp [rax+0x3c]:8,0x3	class byte of the sub-account, same rule
+transfer wrapper	0x1e60d7f	mov [rbx+0x8]:16,0x16f	code 367
+transfer wrapper	0x1e60daf	call 0x27148e0	body call
+transfer wrapper	0x1e60db4	cmp [rsp]:16,0x186	code 390 maps to tag 13
+transfer body	0x27148f1	mov rbx,[rcx]:64	usd
+transfer body	0x27148f4	mov rax,0xccccccccccccccc	usd cut
+transfer body	0x2714a55	mov [rdi]:16,0x13f	code 319 before the zero test
+transfer body	0x2714a63	mov [rdi]:16,0x31	code 49
+transfer body	0x2714910	movzx raxd,[rcx+0x1c]:8	is_deposit
+transfer body	0x2714933	cmovne r8,rdx	deposit picks the master as sender
+transfer body	0x2714937	cmove rax,rdx	withdraw picks the master as receiver
+transfer body	0x2714961	cmp [rsi+0x3828]:64,0x0	empty link table means code 218
+transfer body	0x271498f	call 0x399c7a0	hash of the sub-account address
+transfer body	0x2714b12	mov [rdi]:16,0xda	code 218 for both miss and wrong master
+transfer body	0x2714b52	cmp [rcx+0x5c8]:64,0x0	clearinghouse count tested after the link
+transfer body	0x2714bcc	call [0x5774660]:64	available balance of the sender
+transfer body	0x2714bda	mov [r13]:16,0x33	code 51
+transfer body	0x2714bf1	call [0x57749d8]:64	debit of the sender
+transfer body	0x2714c05	call 0x36ff4f0	credit of the receiver
+transfer body	0x2714c0d	cvtsi2sd xmm0,rbx	usd read as a signed i64
+transfer body	0x2714c12	divsd xmm0,[0x20ae60]:64	divide by 1e6
+transfer body	0x2714c53	mov rax,0x800000000000000e	event tag
+transfer body	0x2714c65	mov rdid,0x28	user Vec of 40 bytes
+transfer body	0x2714cc6	cmp [r15]:32,0x1	real hash only when exchange +0 is 1
+transfer body	0x2714d3f	call [0x5774738]:64	event push before the two account rows
+transfer body	0x2714d71	call 0x1f849b0	sender row
+transfer body	0x2714d79	mov rcx,0x346dc5d63886594b	divide by 10000 multiplier
+transfer body	0x2714d8c	shr rbx,0xb	quotient shift
+transfer body	0x2714da0	jo 0x2714e32	sender +0x10 overflow arm
+transfer body	0x2714db4	jo 0x2714e61	sender +0x18 overflow arm
+transfer body	0x2714de3	call 0x1f849b0	receiver row
+transfer body	0x2714df2	jo 0x2714e93	receiver +0x10 overflow arm
+transfer body	0x2714e09	jo 0x2714ebe	receiver +0x18 overflow arm
+transfer body	0x2714e13	mov [rdi]:16,0x186	code 390
+modify wrapper	0x22cdfcc	cmp rax,[rsi]:64	None test: 0 - word overflows only for i64::MIN
+modify wrapper	0x22cdfd1	mov r12,0x8000000000000000	None passes i64::MIN on
+modify wrapper	0x22ce056	call [0x5773d20]:64	call through the slot for 0x36f40d0, also for None
+modify wrapper	0x22ce05e	cmp [rsp+0x38]:16,0x186	code 390 maps to tag 13
+create wrapper	0x27e317d	call [0x5774f40]:64	derive first
+create wrapper	0x27e31d2	cmp [r14+0x758]:64,0x0	empty user table skips the test
+create wrapper	0x27e335e	mov [rbx+0x8]:16,0xd8	code 216 from the user table
+create wrapper	0x27e3317	call 0x275fee0	equity of the master
+create wrapper	0x27e33ba	call [0x5774f48]:64	inner create with the equity
+create wrapper	0x27e341a	call rbp	settings of the master
+create wrapper	0x27e3438	call rbp	settings of the new sub-account
+create wrapper	0x27e3443	ucomisd xmm0,[rsp+0xe8]:64	f64 word +0x70 first
+create wrapper	0x27e34eb	mov raxd,[rsp+0x1a8]:32	u32 +0x68 of the master
+create wrapper	0x27e3507	je 0x27e3586	both non-zero compares the middle words
+create wrapper	0x27e3669	call 0x1f84840	row entry for the sub-account
+create wrapper	0x27e366e	mov [rax]:64,0x1	first word of the row is 1
+create wrapper	0x27e36f4	call 0x1f849b0	user row for the sub-account
+create wrapper	0x27e3717	call 0x1f84b30	second row map
+create wrapper	0x27e371c	mov [rbx]:8,0x6	success tag 6 with the address at +1
+token list	0x3c97940	mov [rbx]:8,0x6	String token
+token list	0x3c9795d	mov [rbx+0x28]:8,0x0	Address token
+token list	0x3c97971	mov [rbx+0x50]:8,0x4	Uint token
+token list	0x3c97975	mov [rbx+0x58]:64,rax	low limb is the count
+token list	0x3c9799e	mov rdxd,0x3	three tokens
+token list	0x3c979a9	call [0x576ed20]:64	encode through the slot
