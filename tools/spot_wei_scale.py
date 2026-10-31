@@ -1186,10 +1186,10 @@ def main(argv=None):
     args = ap.parse_args(argv)
     try:
         result, exponents, byte_dump = analyse(args.binary, args.binary.read_bytes())
-    except (EvidenceError, Unmodelled, Panic) as exc:
+        write(args.out, result, exponents, byte_dump)
+    except (EvidenceError, Unmodelled, Panic, OSError) as exc:
         print(f'error: {exc}', file=sys.stderr)
         return 1
-    write(args.out, result, exponents, byte_dump)
     print(json.dumps(result['summary'], sort_keys=True))
     return 0
 

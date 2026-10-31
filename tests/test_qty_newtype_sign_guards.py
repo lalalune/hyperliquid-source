@@ -1,4 +1,6 @@
+import contextlib
 import hashlib
+import io
 from pathlib import Path
 import struct
 import sys
@@ -140,6 +142,17 @@ class BinaryTests(unittest.TestCase):
         self.assertEqual(set(manifest), {p.name for p in PACKET.iterdir() if p.name != 'MANIFEST.sha256'})
         for name, digest in manifest.items():
             self.assertEqual(hashlib.sha256((PACKET / name).read_bytes()).hexdigest(), digest, name)
+
+
+class MainErrorHandlingTest(unittest.TestCase):
+    def test_missing_binary_is_one_line_error(self):
+        err = io.StringIO()
+        with tempfile.TemporaryDirectory() as d, contextlib.redirect_stderr(err):
+            rc = qsg.main(['--out', d, '--binary', '/nonexistent.bin'])
+        self.assertEqual(rc, 1)
+        self.assertTrue(err.getvalue().startswith('error: '))
+        self.assertEqual(len(err.getvalue().strip().splitlines()), 1)
+        self.assertNotIn('Traceback', err.getvalue())
 
 
 if __name__ == '__main__':
