@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -141,8 +142,80 @@ class NegativeControls(unittest.TestCase):
 
 
 def struct_error():
-    import struct
     return struct.error
+
+
+def location_elf(text, rodata, relro):
+    """Minimal ELF64 whose section table the RE-005 reader accepts.
+
+    `rodata` is the whole .rodata section. The byte X that follows it in the
+    file belongs to no section, so a length that overruns .rodata can see it.
+    """
+    names = b'\0.shstrtab\0.text\0.eh_frame\0.eh_frame_hdr\0.rela.dyn\0.data.rel.ro\0.rodata\0'
+    chunks = [
+        ('.shstrtab', 0, names),
+        ('.text', 0x1000, text),
+        ('.eh_frame', 0, b''),
+        ('.eh_frame_hdr', 0, b''),
+        ('.rela.dyn', 0, b''),
+        ('.data.rel.ro', 0x3000, relro),
+        ('.rodata', 0x2000, rodata),
+    ]
+    body = bytearray(64)
+    body[:6] = b'\x7fELF\x02\x01'
+    laid = []
+    for name, addr, blob in chunks:
+        laid.append((name, addr, len(body), len(blob)))
+        body += blob
+    body += b'X'
+    struct.pack_into('<Q', body, 40, len(body))
+    struct.pack_into('<HHH', body, 58, 64, 1 + len(chunks), 1)
+    body += struct.pack('<IIQQQQIIQQ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    for name, addr, off, size in laid:
+        body += struct.pack('<IIQQQQIIQQ', names.index(name.encode() + b'\0'), 1, 0, addr, off, size, 0, 0, 1, 0)
+    return bytes(body)
+
+
+class PanicLocationBounds(unittest.TestCase):
+    LEA_VA = 0x1000
+    LOC_VA = 0x3000
+    PATH_VA = 0x2000
+
+    def elf(self, rodata, length, relro_size=24):
+        text = bytes.fromhex('488d3d') + struct.pack('<i', self.LOC_VA - (self.LEA_VA + 7))
+        if relro_size == 24:
+            relro = struct.pack('<QQII', 0, length, 3, 4)
+        elif relro_size == 20:
+            relro = struct.pack('<QQI', 0, length, 9)
+        else:
+            raise AssertionError(relro_size)
+        return location_elf(text, rodata, relro)
+
+    def read(self, data):
+        return bv.panic_location(data, bv.sections(data), {self.LOC_VA: self.PATH_VA}, self.LEA_VA)
+
+    def test_path_contained_in_rodata_is_reported(self):
+        got = self.read(self.elf(b'/a.rs', 5))
+        self.assertEqual(got['path'], '/a.rs')
+        self.assertEqual(got['line'], 3)
+        self.assertEqual(got['column'], 4)
+        self.assertEqual(got['location'], hex(self.LOC_VA))
+        self.assertEqual(got['path_va'], hex(self.PATH_VA))
+
+    def test_length_past_rodata_is_rejected(self):
+        data = self.elf(b'/a.rs', 6)
+        with self.assertRaisesRegex(bv.EvidenceError, r'range 0x2000\+6 leaves section \.rodata'):
+            self.read(data)
+
+    def test_header_past_location_section_is_rejected(self):
+        data = self.elf(b'/a.rs', 5, relro_size=20)
+        with self.assertRaisesRegex(bv.EvidenceError, r'range 0x3008\+16 leaves section \.data\.rel\.ro'):
+            self.read(data)
+
+    def test_non_utf8_path_is_rejected(self):
+        data = self.elf(b'\xff', 1)
+        with self.assertRaisesRegex(bv.EvidenceError, 'is not UTF-8'):
+            self.read(data)
 
 
 class Determinism(unittest.TestCase):

@@ -195,19 +195,44 @@ def relative_relocs(data, secs):
     return out
 
 
+def bytes_in_section(data, secs, va, size):
+    """Return `size` bytes at `va` from the section `va_to_off` would select.
+
+    A declared length must not continue into the next section or past EOF.
+    `va_to_off` only checks that the first byte is mapped, and a Python slice
+    silently shortens a read that runs off the end of the file.
+    """
+    if size <= 0:
+        raise EvidenceError(f'range {va:#x} has non-positive length {size}')
+    for name, s in secs.items():
+        if s['addr'] and s['addr'] <= va < s['addr'] + s['size']:
+            if va + size > s['addr'] + s['size']:
+                raise EvidenceError(f'range {va:#x}+{size} leaves section {name}')
+            off = s['offset'] + va - s['addr']
+            blob = data[off:off + size]
+            if len(blob) != size:
+                raise EvidenceError(f'range {va:#x}+{size} leaves the file')
+            return blob
+    raise EvidenceError(f'address {va:#x} is outside every section')
+
+
 def panic_location(data, secs, relocs, lea_va):
-    o = va_to_off(secs, lea_va)
-    if data[o:o + 3] != b'\x48\x8d\x3d':
+    insn = bytes_in_section(data, secs, lea_va, 7)
+    if insn[:3] != b'\x48\x8d\x3d':
         raise EvidenceError(f'no lea rdi,[rip+disp] at {lea_va:#x}')
-    loc = lea_va + 7 + struct.unpack_from('<i', data, o + 3)[0]
+    loc = lea_va + 7 + struct.unpack_from('<i', insn, 3)[0]
     if loc not in relocs:
         raise EvidenceError(f'Location {loc:#x} has no RELATIVE relocation')
     path_va = relocs[loc]
-    lo = va_to_off(secs, loc)
-    length, line, col = struct.unpack_from('<QII', data, lo + 8)
-    po = va_to_off(secs, path_va)
+    length, line, col = struct.unpack_from('<QII', bytes_in_section(data, secs, loc + 8, 16))
+    if length <= 0:
+        raise EvidenceError(f'panic path at {path_va:#x} has empty length')
+    try:
+        path = bytes_in_section(data, secs, path_va, length).decode()
+    except UnicodeDecodeError:
+        raise EvidenceError(f'panic path at {path_va:#x} is not UTF-8') from None
     return {'location': f'{loc:#x}', 'path_va': f'{path_va:#x}',
-            'path': data[po:po + length].decode(), 'line': line, 'column': col}
+            'path': path, 'line': line, 'column': col}
 
 
 def scan(data, expected_sha256=SHA256):
