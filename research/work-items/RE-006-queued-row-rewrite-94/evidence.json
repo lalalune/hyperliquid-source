@@ -1,0 +1,385 @@
+{
+  "cases": {
+    "total": 913
+  },
+  "fields": {
+    "block_of_a_driver": {
+      "+0x00/+0x08": "new id option: tag, value",
+      "+0x10": "request",
+      "+0x18": "state",
+      "+0x20": "16 bytes handed to the transform",
+      "+0x30": "old id",
+      "+0x38": "f64 added to sz",
+      "+0x40": "user, 20 bytes"
+    },
+    "fill_row": {
+      "+0x08": "first leg, 0xf8 bytes",
+      "+0x100": "second leg, 0xf8 bytes",
+      "+0x1c8": "id in the second leg, leg +0xc8",
+      "+0x1f8": "spot index",
+      "+0x200": "price",
+      "+0x208": "size",
+      "+0x210": "price * size",
+      "+0x218": "word set to 0 by a turn",
+      "+0x22c": "byte, set from the transform result",
+      "+0x230": "amount, turned as value - amount",
+      "+0x23a": "side byte",
+      "+0xd0": "id in the first leg, leg +0xc8"
+    },
+    "record_0xa8_used_here": {
+      "+0x68": "sz, from the earlier open order view reading",
+      "+0x70": "oid, same source"
+    },
+    "request_used_here": {
+      "+0x19": "byte k; 2 keeps +0x1a..+0x1f",
+      "+0x28": "book index",
+      "+0x30": "side byte",
+      "+0x32": "cloid flag, +0x33 cloid"
+    },
+    "row_0x268": {
+      "+0x00": "kind word; kind = word - 2, or 7 for words 0 and 1",
+      "kind 1, +0x08": "inner word; 2 selects a record at +0x38 with flag +0x100, 0, 1 and 3 a record at +0x30 with flag +0x119, others are skipped",
+      "kind 6 and above 8": "fill row"
+    },
+    "state": {
+      "+0x1f8/+0x200": "spot list: pointer, length, stride 0x20; meta +0x168/+0x170",
+      "+0x210/+0x218": "token rows: pointer, length, stride 0xe8; meta +0x180/+0x188",
+      "+0x3388/+0x3390": "books, stride 0xd8, first and third copies",
+      "+0x3e08/+0x3e10": "books, stride 0xd8, second copy",
+      "+0x60": "12 byte time block handed to the record builder",
+      "+0x90": "spot meta"
+    },
+    "token_row": {
+      "+0x58/+0x60": "book list: pointer, length"
+    }
+  },
+  "first_mismatch": "",
+  "functions": [
+    {
+      "end": "0x24f92d2",
+      "instructions": 188,
+      "instructions_stepped": 166,
+      "role": "driver, first copy",
+      "size": 850,
+      "start": "0x24f8f80"
+    },
+    {
+      "end": "0x24f9d28",
+      "instructions": 457,
+      "instructions_stepped": 450,
+      "role": "row test, first copy",
+      "size": 2632,
+      "start": "0x24f92e0"
+    },
+    {
+      "end": "0x432955e",
+      "instructions": 130,
+      "instructions_stepped": 124,
+      "role": "driver, second copy",
+      "size": 638,
+      "start": "0x43292e0"
+    },
+    {
+      "end": "0x47f50c9",
+      "instructions": 78,
+      "instructions_stepped": 61,
+      "role": "row walk, second copy",
+      "size": 265,
+      "start": "0x47f4fc0"
+    },
+    {
+      "end": "0x47d714f",
+      "instructions": 115,
+      "instructions_stepped": 108,
+      "role": "row test, second copy",
+      "size": 463,
+      "start": "0x47d6f80"
+    },
+    {
+      "end": "0x43297de",
+      "instructions": 130,
+      "instructions_stepped": 124,
+      "role": "driver, third copy",
+      "size": 638,
+      "start": "0x4329560"
+    },
+    {
+      "end": "0x47f51d9",
+      "instructions": 78,
+      "instructions_stepped": 61,
+      "role": "row walk, third copy",
+      "size": 265,
+      "start": "0x47f50d0"
+    },
+    {
+      "end": "0x47d731f",
+      "instructions": 115,
+      "instructions_stepped": 108,
+      "role": "row test, third copy",
+      "size": 463,
+      "start": "0x47d7150"
+    },
+    {
+      "end": "0x44728be",
+      "instructions": 171,
+      "instructions_stepped": 171,
+      "role": "fill gate, second and third copies",
+      "size": 878,
+      "start": "0x4472550"
+    },
+    {
+      "end": "0x47c3b74",
+      "instructions": 105,
+      "instructions_stepped": 105,
+      "role": "leg copy",
+      "size": 452,
+      "start": "0x47c39b0"
+    },
+    {
+      "end": "0x379061e",
+      "instructions": 218,
+      "instructions_stepped": 218,
+      "role": "fill turn",
+      "size": 1054,
+      "start": "0x3790200"
+    },
+    {
+      "end": "0x3c188ec",
+      "instructions": 224,
+      "instructions_stepped": 219,
+      "role": "leg update",
+      "size": 940,
+      "start": "0x3c18540"
+    },
+    {
+      "end": "0x24f8f7a",
+      "instructions": 122,
+      "instructions_stepped": 122,
+      "role": "fill totals, first copy",
+      "size": 490,
+      "start": "0x24f8d90"
+    },
+    {
+      "end": "0x47d6f7a",
+      "instructions": 122,
+      "instructions_stepped": 122,
+      "role": "fill totals, second copy",
+      "size": 490,
+      "start": "0x47d6d90"
+    }
+  ],
+  "host_bytes": [
+    {
+      "bytes": "48b90000000000000080",
+      "meaning": "movabs rcx, the None word of the first insert result",
+      "va": "0x26d56aa"
+    },
+    {
+      "bytes": "48394c2428",
+      "meaning": "cmp [rsp+0x28], rcx",
+      "va": "0x26d56b4"
+    },
+    {
+      "bytes": "31c0",
+      "meaning": "xor eax, eax: no new id, on the arm with nothing left resting",
+      "va": "0x26d5385"
+    },
+    {
+      "bytes": "b801000000",
+      "meaning": "mov eax, 1: new id present",
+      "va": "0x26d56a5"
+    }
+  ],
+  "instructions_stepped": 190514,
+  "locations": [
+    {
+      "column": 25,
+      "line": 565,
+      "name": "spot or book index past the spot list",
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x56f1fd8"
+    },
+    {
+      "column": 33,
+      "line": 113,
+      "name": "token past the rows",
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x56f21f0"
+    },
+    {
+      "column": 16,
+      "line": 14,
+      "name": "book index, first copy",
+      "path": "l1/src/books.rs",
+      "slot": "0x56bb460"
+    },
+    {
+      "column": 16,
+      "line": 14,
+      "name": "book index, second and third copies",
+      "path": "l1/src/books.rs",
+      "slot": "0x5742320"
+    },
+    {
+      "column": 1,
+      "line": 827,
+      "name": "first total",
+      "path": "l1/src/qtys/mod.rs",
+      "slot": "0x56b8570"
+    },
+    {
+      "column": 1,
+      "line": 829,
+      "name": "second total",
+      "path": "l1/src/qtys/mod.rs",
+      "slot": "0x56b8588"
+    },
+    {
+      "column": 1,
+      "line": 827,
+      "name": "first total, second copy",
+      "path": "l1/src/qtys/mod.rs",
+      "slot": "0x572ff98"
+    },
+    {
+      "column": 1,
+      "line": 829,
+      "name": "second total, second copy",
+      "path": "l1/src/qtys/mod.rs",
+      "slot": "0x572ffb0"
+    },
+    {
+      "column": 1,
+      "line": 831,
+      "name": "saturating leg add",
+      "path": "l1/src/qtys/mod.rs",
+      "slot": "0x56dfd78"
+    }
+  ],
+  "mismatches": 0,
+  "mutations": {
+    "killed": 821,
+    "survived": 20,
+    "unreached": 18
+  },
+  "outcomes": {
+    "legs: stopped": 40,
+    "legs: updated": 90,
+    "rewrite: done": 681,
+    "rewrite: panic": 9,
+    "totals: none": 20,
+    "totals: some": 38,
+    "turn: 2": 2,
+    "turn: code 0": 2,
+    "turn: code 1": 1,
+    "turn: code 17": 4,
+    "turn: code 4": 1,
+    "turn: code 7": 2,
+    "turn: code 8": 1,
+    "turn: code 9": 3,
+    "turn: panic": 3,
+    "turn: turned": 16
+  },
+  "reference_claims": [
+    {
+      "claim": "the replace flow removes the old order, inserts the new one and rebinds child ids",
+      "observed": "that flow has no step that rewrites queued rows; none of the 13 functions here is named in the tree",
+      "reference": "l1/exchange/handlers/12_modify.rs:143",
+      "verdict": "absent from the reference"
+    },
+    {
+      "claim": "both 616-byte and 632-byte event-vector monomorphs exist",
+      "observed": "the row stride here is 0x268 (616)",
+      "reference": "l1/qtys/impl_sz.rs:392",
+      "verdict": "agrees for 616"
+    },
+    {
+      "claim": "GENERATED_ORDER_ROW_BYTES is 552",
+      "observed": "fill stride 0x228 (552) in 0x24f8d90 and 0x47d6d90, which read +0x1f8, +0x200, +0x208",
+      "reference": "l1/exchange/impl_bole.rs:13",
+      "verdict": "same size; the reference does not name these fields"
+    },
+    {
+      "claim": "no price turn of a fill to a sibling book",
+      "observed": "0x3790200 and 0x24f92e0, 0x4472550",
+      "reference": "whole tree",
+      "verdict": "absent from the reference"
+    }
+  ],
+  "slots": {
+    "0x5773190": "0x358dcd0",
+    "0x5773198": "0x3728670",
+    "0x5774370": "0x3790200",
+    "0x5774768": "0x37606b0"
+  },
+  "target": {
+    "file": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "twins": [
+    {
+      "call_targets_that_differ": {
+        "0x47f4fc0": "0x47f50d0"
+      },
+      "field_words_that_differ": {
+        "0x4329346": "498b87103e0000 to 498b8790330000",
+        "0x43293b5": "490387083e0000 to 49038788330000"
+      },
+      "instructions": 130,
+      "left": "0x43292e0",
+      "right": "0x4329560",
+      "rip_words_that_differ": 3
+    },
+    {
+      "call_targets_that_differ": {
+        "0x47d6f80": "0x47d7150"
+      },
+      "field_words_that_differ": {},
+      "instructions": 78,
+      "left": "0x47f4fc0",
+      "right": "0x47f50d0",
+      "rip_words_that_differ": 2
+    },
+    {
+      "call_targets_that_differ": {},
+      "field_words_that_differ": {},
+      "instructions": 115,
+      "left": "0x47d6f80",
+      "right": "0x47d7150",
+      "rip_words_that_differ": 3
+    },
+    {
+      "call_targets_that_differ": {},
+      "field_words_that_differ": {},
+      "instructions": 122,
+      "left": "0x24f8d90",
+      "right": "0x47d6d90",
+      "rip_words_that_differ": 7
+    }
+  ],
+  "worked_examples": {
+    "fill totals of (key 5, 4, 100) and (key 5, 6, 100)": {
+      "average": 20,
+      "first": 10,
+      "key": 5,
+      "second": 200
+    },
+    "fill turn": {
+      "input": {
+        "price": 60000000,
+        "side": 1,
+        "size": 25,
+        "spot": 1,
+        "value": 100000000
+      },
+      "output": {
+        "cleared_word": 0,
+        "notional": 1000000000,
+        "price": 40000000,
+        "side": 0,
+        "size": 25,
+        "spot": 1
+      }
+    }
+  }
+}
