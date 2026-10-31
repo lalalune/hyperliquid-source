@@ -1,0 +1,23 @@
+name	address	bytes	note
+wei_guard	0x1e5fa8e	48b8cccccccccccccc0c	movabs rax,0xccccccccccccccc: wrapper limit
+mode_byte	0x1e5fa9d	440fb64e45	movzx r9d,byte [rsi+0x45]: mode byte of the action
+gate_tag	0x2757ff4	8b8680000000	mov eax,[rsi+0x80]: dword compared with 1
+host_tag_byte	0x2769337	80be8000000000	cmp byte [rsi+0x80],0: the host reads one byte of the same word
+states_field	0x275817a	498b85700b0000	mov rax,[r13+0xb70]: validator_to_state root
+state_stride	0x2758206	4983c61c	add r14,0x1c: 28 byte values
+floor_field	0x27582ba	498b85380b0000	mov rax,[r13+0xb38]: the value word of the row is this floor
+unregister_word	0x2769007	48b80100000000000080	movabs rax,0x8000000000000001: first word of the action in the refused arm
+floor_serializer_row	0x399078d	488d8b40020000	lea rcx,[rbx+0x240]: value of the key at the next row, S+0x240 is E+0xb38
+state_serializer_row	0x39907eb	4881c378020000	add rbx,0x278, then 0x3a05a10 writes the key validator_to_state: S+0x278 is E+0xb70
+allow_all_field	0x276903a	80be880b000000	cmp byte [rsi+0xb88],0: allow_all_validators
+allowed_field	0x27690a9	488b86180a0000	mov rax,[rsi+0xa18]: allowed_validators root
+chain_field	0x2769053	80bef208000000	cmp byte [rsi+0x8f2],0
+event_niche	0x4856cb3	483b8708080000	cmp rax,[rdi+0x808] with rax 0: overflow only for the i64::MIN word
+event_kind	0x4856d44	48b80000000000000080	movabs rax,0x8000000000000000, then inc: record kind word 0x8000000000000001
+user_states_field	0x3996270	498d8ef8010000	lea rcx,[r14+0x1f8]: user_states
+stamp_flag	0x3996230	4180782900	cmp byte [r8+0x29],0: no stamp when clear
+key_self_delegation_requirement	0x3990794	488d355166c1fc	lea rsi of the key text in the CStaking serializer path
+key_validator_to_state	0x3a05a24	488d350014bafc	lea rsi of the key text in the CStaking serializer path
+year_constant	0x20a4d0	000000007e187e41	double 31557600.0, the seconds argument of the gate
+lock_table_values	0x207150	000000007e187e410000000000c07240	31557600.0 then 300.0: chain 1 and 2 take index 1
+power_table	0x584b08		23 doubles 1e0 to 1e22, index = wei decimals
