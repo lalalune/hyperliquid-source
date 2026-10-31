@@ -1,0 +1,585 @@
+{
+  "cases": {
+    "total": 548
+  },
+  "copies": {
+    "a": {
+      "direct": "0x4d3ddb0",
+      "entry": "0x445e270",
+      "location": "0x571fd18",
+      "panic_note": "0x571fd60",
+      "pre": "0x4c21720",
+      "second": "0x4d2f4a0"
+    },
+    "b": {
+      "direct": "0x4d3be40",
+      "entry": "0x445e630",
+      "location": "0x571fd18",
+      "panic_note": "0x571fd60",
+      "pre": "0x4c21230",
+      "second": "0x4d2e9e0"
+    },
+    "c": {
+      "direct": "0x4d3c640",
+      "entry": "0x445e9f0",
+      "location": "0x571fd18",
+      "panic_note": "0x571fd60",
+      "pre": "0x4c21230",
+      "second": "0x4d2e9e0"
+    },
+    "d": {
+      "direct": "0x4d3e860",
+      "entry": "0x445edb0",
+      "location": "0x571fd18",
+      "panic_note": "0x571fd60",
+      "pre": "0x4c21720",
+      "second": "0x4d2f4a0"
+    }
+  },
+  "direct_result_offset": {
+    "a": 8,
+    "b": 0,
+    "c": 8,
+    "d": 0
+  },
+  "fields": {
+    "direct_block": {
+      "+0x00": "order, 0x48 bytes",
+      "+0x48": "context, 0x50 bytes",
+      "+0x98": "user pointer",
+      "+0xa0": "pointer to the flag byte"
+    },
+    "map_node": {
+      "+0x798": "keys, 11 slots of 8 bytes",
+      "+0x7f2": "length, u16",
+      "+0x7f8": "edges"
+    },
+    "order": {
+      "+0x00/+0x08": "size option: tag, value",
+      "+0x10": "tif byte",
+      "+0x11": "8 bytes copied",
+      "+0x19": "byte k; 2 is the slab shape",
+      "+0x1a": "6 bytes copied",
+      "+0x20": "price",
+      "+0x28": "spot index",
+      "+0x30": "side",
+      "+0x31": "reduce only",
+      "+0x32": "cloid, 17 bytes"
+    },
+    "quote_result": {
+      "+0": "tag: 0 or 1 go on, 2 direct, 3 stop",
+      "+0x10": "low price",
+      "+0x18": "high price",
+      "+0x20": "last",
+      "+8": "x, or the stop code"
+    },
+    "replace_result": {
+      "+0": "1",
+      "+0x10..+0x1f": "tif and bytes of the order, k forced to 2",
+      "+0x20": "price",
+      "+0x28": "spot",
+      "+0x30": "side 1, reduce only 0",
+      "+0x32": "cloid",
+      "+0x48/+0x50": "base, quote",
+      "+0x58": "last",
+      "+8": "new size"
+    },
+    "report": {
+      "+0": "byte: 1 stops",
+      "+0x18": "low threshold",
+      "+0x20": "middle threshold",
+      "+0x28": "high threshold",
+      "+1": "code",
+      "+8": "value compared"
+    },
+    "second_block": {
+      "+0x00": "first 0x48 bytes of the preprocess result",
+      "+0x48": "context, 0x50 bytes",
+      "+0x98/+0xa0/+0xa8": "base, quote, last",
+      "+0xb0": "user, 20 bytes"
+    },
+    "state": {
+      "+0x1f8/+0x200": "spot rows: pointer, count, stride 0x20; words 0 and 1 are read",
+      "+0x498": "first argument of the account lookup 0x373acd0",
+      "+0x560": "block given to the health report; +0x568 root and +0x570 height of a map with u64 keys and 0xb0 byte values",
+      "+0x5b0": "bit 0 set sends the order direct",
+      "+0x5b3": "must be exactly 1; written 0 by the adapters after word 0x187",
+      "+0x5b4": "bit 0 set sends the order direct",
+      "+0x80": "first argument of the balance row lookup 0x371b3a0",
+      "+0x90": "meta block given to every amount helper"
+    }
+  },
+  "first_mismatch": "",
+  "functions": [
+    {
+      "end": "0x4c21c0c",
+      "instructions": 290,
+      "instructions_stepped": 290,
+      "role": "preprocess, first copy",
+      "size": 1260,
+      "start": "0x4c21720"
+    },
+    {
+      "end": "0x4c2171c",
+      "instructions": 290,
+      "instructions_stepped": 290,
+      "role": "preprocess, second copy",
+      "size": 1260,
+      "start": "0x4c21230"
+    },
+    {
+      "end": "0x26d2556",
+      "instructions": 288,
+      "instructions_stepped": 288,
+      "role": "preprocess, third copy",
+      "size": 1254,
+      "start": "0x26d2070"
+    },
+    {
+      "end": "0x48cfb89",
+      "instructions": 27,
+      "instructions_stepped": 27,
+      "role": "health class",
+      "size": 89,
+      "start": "0x48cfb30"
+    },
+    {
+      "end": "0x28db539",
+      "instructions": 27,
+      "instructions_stepped": 27,
+      "role": "health class, third copy",
+      "size": 89,
+      "start": "0x28db4e0"
+    },
+    {
+      "end": "0x445e621",
+      "instructions": 184,
+      "instructions_stepped": 178,
+      "role": "caller A, run with no mutants",
+      "size": 945,
+      "start": "0x445e270"
+    },
+    {
+      "end": "0x445e9e1",
+      "instructions": 184,
+      "instructions_stepped": 178,
+      "role": "caller B, run with no mutants",
+      "size": 945,
+      "start": "0x445e630"
+    },
+    {
+      "end": "0x445eda1",
+      "instructions": 184,
+      "instructions_stepped": 178,
+      "role": "caller C, run with no mutants",
+      "size": 945,
+      "start": "0x445e9f0"
+    },
+    {
+      "end": "0x445f161",
+      "instructions": 184,
+      "instructions_stepped": 178,
+      "role": "caller D, run with no mutants",
+      "size": 945,
+      "start": "0x445edb0"
+    }
+  ],
+  "guard_writers": [
+    {
+      "fde": "0x222caf0",
+      "va": "0x222cbde",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x222caf0",
+      "va": "0x222cbf2",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x222caf0",
+      "va": "0x222cd25",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x2355f40",
+      "va": "0x2359431",
+      "write": "register"
+    },
+    {
+      "fde": "0x26d0e50",
+      "va": "0x26d15d7",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x26d16b0",
+      "va": "0x26d1c1b",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x2739d70",
+      "va": "0x273ad96",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x445e270",
+      "va": "0x445e5ac",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x445e630",
+      "va": "0x445e96c",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x445e9f0",
+      "va": "0x445ed2c",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x445edb0",
+      "va": "0x445f0ec",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x47121b0",
+      "va": "0x471229e",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x47121b0",
+      "va": "0x47122b2",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x47121b0",
+      "va": "0x47123e5",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x4714080",
+      "va": "0x471416e",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x4714080",
+      "va": "0x4714182",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x4714080",
+      "va": "0x47142b5",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x4caa870",
+      "va": "0x4cadd31",
+      "write": "register"
+    },
+    {
+      "fde": "0x4cb3200",
+      "va": "0x4cb66c1",
+      "write": "register"
+    },
+    {
+      "fde": "0x4d4a260",
+      "va": "0x4d4a326",
+      "write": "imm8 0x0"
+    },
+    {
+      "fde": "0x4d4a3a0",
+      "va": "0x4d4a466",
+      "write": "imm8 0x0"
+    }
+  ],
+  "host_bytes": [
+    {
+      "bytes": "498b8e40070000",
+      "meaning": "mov rcx, [r14+0x740]: the row table of the user row lookup the first preprocess calls",
+      "va": "0x46f3011"
+    },
+    {
+      "bytes": "498b8ec0110000",
+      "meaning": "mov rcx, [r14+0x11c0]: the row table of the lookup the second preprocess calls",
+      "va": "0x46f2e91"
+    },
+    {
+      "bytes": "80783c04",
+      "meaning": "cmp byte [rax+0x3c], 4: the mode gate of the first preprocess",
+      "va": "0x4c2190e"
+    },
+    {
+      "bytes": "80783c04",
+      "meaning": "cmp byte [rax+0x3c], 4: the mode gate of the second preprocess",
+      "va": "0x4c2141e"
+    },
+    {
+      "bytes": "483dffc99a3b",
+      "meaning": "cmp rax, 0x3b9ac9ff: last refused notional",
+      "va": "0x4c21b07"
+    },
+    {
+      "bytes": "48bafeffffffffffff7f",
+      "meaning": "mov rdx, 0x7ffffffffffffffe: last admitted product",
+      "va": "0x4c21ac5"
+    },
+    {
+      "bytes": "4180e6014588b5b3050000",
+      "meaning": "and r14b, 1; mov [r13+0x5b3], r14b: sub table 0x3dd340 entry 0, reached with inner word 2 in the action arm the main table sends words below 0x12 to",
+      "va": "0x235942d"
+    },
+    {
+      "bytes": "6681bc24100100008701",
+      "meaning": "cmp word [rsp+0x110], 0x187, after the second path of 0x26d16b0",
+      "va": "0x26d1c0f"
+    },
+    {
+      "bytes": "41c686b305000000",
+      "meaning": "mov byte [r14+0x5b3], 0, in 0x26d16b0",
+      "va": "0x26d1c1b"
+    },
+    {
+      "bytes": "41c686b305000000",
+      "meaning": "mov byte [r14+0x5b3], 0, in 0x26d0e50",
+      "va": "0x26d15d7"
+    }
+  ],
+  "instructions_stepped": 93691,
+  "locations": [
+    {
+      "column": 25,
+      "line": 565,
+      "name": "spot past the list, in the preprocess",
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x5742350"
+    },
+    {
+      "column": 25,
+      "line": 565,
+      "name": "spot past the list, in the adapters",
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x571fd18"
+    },
+    {
+      "column": 28,
+      "line": 621,
+      "name": "location given to the direct path",
+      "path": "l1/src/spot_clearinghouse/cl_trait.rs",
+      "slot": "0x571fd60"
+    },
+    {
+      "column": 25,
+      "line": 565,
+      "name": "spot past the list, in the third preprocess",
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x56bd208"
+    },
+    {
+      "column": 1,
+      "line": 6,
+      "name": "recorder: saturating balance arithmetic",
+      "path": "l1/src/qtys/impl_wei.rs",
+      "slot": "0x56dfd90"
+    }
+  ],
+  "mismatches": 0,
+  "mutations": {
+    "killed": 447,
+    "survived": 3,
+    "unreached": 0
+  },
+  "outcomes": {
+    "adapter: direct": 68,
+    "adapter: index panic": 12,
+    "adapter: second path": 40,
+    "adapter: second path, rejected": 4,
+    "health: class 0": 6,
+    "health: class 1": 4,
+    "health: class 2": 4,
+    "health: class 3": 10,
+    "health: flag 1": 4,
+    "pre: direct, flag 0": 180,
+    "pre: direct, flag 1": 33,
+    "pre: index panic": 9,
+    "pre: second path": 156,
+    "pre: stop code": 18
+  },
+  "preprocess_copies": {
+    "a": {
+      "entry": "0x4c21720",
+      "location": "0x5742350",
+      "report": "0x48cfb90",
+      "room": "0x48cac10",
+      "user_row": "0x46f2fe0"
+    },
+    "b": {
+      "entry": "0x4c21230",
+      "location": "0x5742350",
+      "report": "0x48cfb90",
+      "room": "0x48cac10",
+      "user_row": "0x46f2e60"
+    },
+    "c": {
+      "entry": "0x26d2070",
+      "location": "0x56bd208",
+      "report": "0x28db540",
+      "room": "0x28d8b10",
+      "user_row": "0x2755400"
+    }
+  },
+  "reference_claims": [
+    {
+      "claim": "preprocess_main_spot_order and preprocess_perp_dex_order are trait methods with no body in the tree",
+      "observed": "two bodies, 0x4c21720 and 0x4c21230, equal but for the user row lookup",
+      "reference": "l1/spot_clearinghouse/cl_trait.rs:328",
+      "verdict": "bodies are new here; which name goes with which body is not settled"
+    },
+    {
+      "claim": "ctx.tag > 1 skips the preprocess",
+      "observed": "cmp dword [rcx], 1; ja",
+      "reference": "l1/spot_clearinghouse/cl_trait.rs:359",
+      "verdict": "agrees, as a u32 compare"
+    },
+    {
+      "claim": "fallback or status 3 runs the direct path",
+      "observed": "tag 3 takes it with flag 0, tag 2 with the byte of the result",
+      "reference": "l1/spot_clearinghouse/cl_trait.rs:367",
+      "verdict": "agrees; the code of a tag 3 result is dropped"
+    },
+    {
+      "claim": "the direct path gets the opposite side book",
+      "observed": "word (side ^ 1) of the spot row",
+      "reference": "l1/spot_clearinghouse/cl_trait.rs:373",
+      "verdict": "agrees"
+    },
+    {
+      "claim": "391, 225 and 10 are the failure word, the rejected word and its code",
+      "observed": "0x187, 0xe1 and 0xa, and a write of 0 to state +0x5b3",
+      "reference": "l1/spot_clearinghouse/cl_trait.rs:12",
+      "verdict": "agrees"
+    },
+    {
+      "claim": "use_main_book_for_replace picks one of two replace bodies and goes with the preprocess choice",
+      "observed": "0x4c21720 always pairs with 0x4d2f4a0, 0x4c21230 with 0x4d2e9e0",
+      "reference": "l1/spot_clearinghouse/cl_trait.rs:386",
+      "verdict": "pairing agrees; the replace bodies are not read here"
+    }
+  ],
+  "slots": {
+    "0x5773170": "0x371b3a0",
+    "0x5773e58": "0x373acd0",
+    "0x5774768": "0x37606b0",
+    "0x5774770": "0x3724e80",
+    "0x5774778": "0x37344a0",
+    "0x5774780": "0x375fa80"
+  },
+  "target": {
+    "file": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "twins": [
+    {
+      "call_targets_that_differ": {
+        "0x46f2fe0": "0x46f2e60"
+      },
+      "field_words_that_differ": {},
+      "instructions": 290,
+      "left": "0x4c21720",
+      "right": "0x4c21230",
+      "rip_targets_that_differ": {},
+      "rip_words_compared_as_targets": 12
+    },
+    {
+      "call_targets_that_differ": {
+        "0x4c21720": "0x4c21230",
+        "0x4d2f4a0": "0x4d2e9e0",
+        "0x4d3ddb0": "0x4d3be40"
+      },
+      "field_words_that_differ": {
+        "0x445e279": "4881ec00020000 to 4881ecf0010000",
+        "0x445e3b7": "488dbc2498010000 to 488dbc2490010000",
+        "0x445e3e3": "0f108424f0010000 to 0f108424e0010000",
+        "0x445e3ef": "0f108424e0010000 to 0f108424d0010000",
+        "0x445e3fb": "0f108424a0010000 to 0f10842490010000",
+        "0x445e403": "0f108c24b0010000 to 0f108c24a0010000",
+        "0x445e40b": "0f109424c0010000 to 0f109424b0010000",
+        "0x445e413": "0f109c24d0010000 to 0f109c24c0010000",
+        "0x445e42d": "4881c400020000 to 4881c4f0010000"
+      },
+      "instructions": 184,
+      "left": "0x445e270",
+      "right": "0x445e630",
+      "rip_targets_that_differ": {},
+      "rip_words_compared_as_targets": 3
+    },
+    {
+      "call_targets_that_differ": {
+        "0x4c21720": "0x4c21230",
+        "0x4d2f4a0": "0x4d2e9e0",
+        "0x4d3ddb0": "0x4d3c640"
+      },
+      "field_words_that_differ": {},
+      "instructions": 184,
+      "left": "0x445e270",
+      "right": "0x445e9f0",
+      "rip_targets_that_differ": {},
+      "rip_words_compared_as_targets": 3
+    },
+    {
+      "call_targets_that_differ": {
+        "0x4d3ddb0": "0x4d3e860"
+      },
+      "field_words_that_differ": {
+        "0x445e279": "4881ec00020000 to 4881ecf0010000",
+        "0x445e3b7": "488dbc2498010000 to 488dbc2490010000",
+        "0x445e3e3": "0f108424f0010000 to 0f108424e0010000",
+        "0x445e3ef": "0f108424e0010000 to 0f108424d0010000",
+        "0x445e3fb": "0f108424a0010000 to 0f10842490010000",
+        "0x445e403": "0f108c24b0010000 to 0f108c24a0010000",
+        "0x445e40b": "0f109424c0010000 to 0f109424b0010000",
+        "0x445e413": "0f109c24d0010000 to 0f109c24c0010000",
+        "0x445e42d": "4881c400020000 to 4881c4f0010000"
+      },
+      "instructions": 184,
+      "left": "0x445e270",
+      "right": "0x445edb0",
+      "rip_targets_that_differ": {},
+      "rip_words_compared_as_targets": 3
+    }
+  ],
+  "variant_name_rows": {
+    "rows": [
+      "e",
+      "disabled",
+      "i",
+      "d",
+      "dexAbstraction",
+      "u",
+      "unifiedAccount",
+      "p",
+      "portfolioMargin",
+      "variant index 0 <= i < 5"
+    ],
+    "table": "0x570d358"
+  },
+  "worked_example": {
+    "input": {
+      "high": 2100000,
+      "last": 900,
+      "low": 1900000,
+      "price": 2000000,
+      "size": 1000,
+      "x": 700
+    },
+    "output": {
+      "base": 17,
+      "k": 2,
+      "last": 900,
+      "price": 2000000,
+      "quote": 34,
+      "reduce_only": 0,
+      "side": 1,
+      "size": 701,
+      "tag": 1
+    }
+  }
+}
