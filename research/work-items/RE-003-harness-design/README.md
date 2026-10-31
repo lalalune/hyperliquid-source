@@ -49,10 +49,13 @@ validate a request, print the plan, refuse execution.
 
 - Design checklist in `protocol.json` is satisfied by the files in this directory
   and by the unit tests.
-- Synthetic fixtures use the empty SHA-256 as a placeholder payload. Real
-  expectation blobs wait on RE-001 windows and later component packets.
+- The positive fixture binds a real expectation blob: the 89-byte
+  recursive-packer window measured by RE-001
+  (`research/work-items/RE-001-short-string-94`, fixture
+  `94-pos-equal-window-v1`). The negative controls remain synthetic templates.
+  Broader real-fixture coverage waits on later component packets.
 - Container isolation recommendation points at `.devcontainer/Dockerfile`;
   the container build itself is not verified here.
-- Next question: after RE-001 lands measured windows, replace the synthetic
-  positive fixture with one digest-bound expectation and implement the
-  comparator behind the same approval gate.
+- Next question: implement the comparator behind the same approval gate.
+  The synthetic positive fixture has been replaced with one digest-bound
+  RE-001 expectation.
