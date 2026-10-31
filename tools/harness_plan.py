@@ -117,7 +117,11 @@ def validate_request(request: dict, fixtures_by_id: dict) -> dict:
     fixture_ids = request['fixture_ids']
     if not isinstance(fixture_ids, list) or not fixture_ids:
         raise ValueError('fixture_ids must be a non-empty list')
+    seen_fixture_ids = set()
     for fid in fixture_ids:
+        if fid in seen_fixture_ids:
+            raise ValueError(f'duplicate fixture_id: {fid}')
+        seen_fixture_ids.add(fid)
         if fid not in fixtures_by_id:
             raise ValueError(f'unknown fixture_id: {fid}')
         row = fixtures_by_id[fid]
