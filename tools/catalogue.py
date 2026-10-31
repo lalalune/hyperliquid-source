@@ -19,6 +19,8 @@ def owner(path, components):
 
 
 def validate_progress(components, progress, root):
+    if any('scope' in c and type(c['scope']) is not str for c in components):
+        raise ValueError('Invalid component record')
     ids = {c['id'] for c in components}
     if set(progress['components']) != ids:
         raise ValueError('Progress components differ from scope')
