@@ -1,0 +1,338 @@
+{
+ "callers": {
+  "direct": [
+   {
+    "direct_calls": [
+     "0x235b14a",
+     "0x273c429"
+    ],
+    "function": "0x273bf80"
+   },
+   {
+    "direct_calls": [
+     "0x273fe64"
+    ],
+    "function": "0x273c140"
+   },
+   {
+    "direct_calls": [
+     "0x4cafa40",
+     "0x4cb83d0",
+     "0x4d4c897",
+     "0x4d4cd87"
+    ],
+    "function": "0x4d4c3e0"
+   },
+   {
+    "direct_calls": [
+     "0x4d51fa6"
+    ],
+    "function": "0x4d4c5a0"
+   },
+   {
+    "direct_calls": [
+     "0x4d579c6"
+    ],
+    "function": "0x4d4ca90"
+   }
+  ],
+  "rewrite_slot": "0x5774b88",
+  "rewrite_slot_calls": [
+   "0x273c030",
+   "0x4d4c48e"
+  ]
+ },
+ "cases": {
+  "outcomes": {
+   "gate error 0x143": 6,
+   "gate error 0x154": 27,
+   "gate error 0x99": 9,
+   "gate ok": 27,
+   "loop ok": 8,
+   "loop panic": 8,
+   "rewrite ok": 155,
+   "rewrite panic": 13
+  },
+  "total": 253
+ },
+ "dex_list_reads": [
+  {
+   "gate": "0x273c140",
+   "offset": "0x5b8",
+   "site": "0x273c1e3"
+  },
+  {
+   "gate": "0x4d4c5a0",
+   "offset": "0x5b8",
+   "site": "0x4d4c643"
+  },
+  {
+   "gate": "0x4d4ca90",
+   "offset": "0x1038",
+   "site": "0x4d4cb33"
+  }
+ ],
+ "fields": [
+  {
+   "shape": "asset row pointer and row count; row stride 0x30, table id at row +0x18",
+   "where": "clearinghouse +0x08, +0x10"
+  },
+  {
+   "shape": "dex number compared with asset / 10000",
+   "where": "clearinghouse +0x30"
+  },
+  {
+   "shape": "custom tables: B-tree root and height; key u32 at +0x270, table value at +0x08 stride 0x38, length +0x29e, edges +0x2a0",
+   "where": "clearinghouse +0x38, +0x40"
+  },
+  {
+   "shape": "word copied to +0x30 of a built-in table",
+   "where": "clearinghouse +0x50"
+  },
+  {
+   "shape": "user hash table walked into a sorted address tree; row stride 0x78",
+   "where": "clearinghouse +0xf8"
+  },
+  {
+   "shape": "leverage index, argument of 0x370e6a0",
+   "where": "clearinghouse +0x128"
+  },
+  {
+   "shape": "per-asset map, argument of 0x36f7350",
+   "where": "clearinghouse +0x170"
+  },
+  {
+   "shape": "address set, gets every user that holds the asset",
+   "where": "clearinghouse +0x188"
+  },
+  {
+   "shape": "position B-tree root and height, then a count word; key u64 at +0x2c8, value at +0x00 stride 0x40, length +0x322, edges +0x328",
+   "where": "user row +0x08, +0x10, +0x20"
+  },
+  {
+   "shape": "leverage u32, signed size, table id u32",
+   "where": "position +0x04, +0x10, +0x38"
+  },
+  {
+   "shape": "tier B-tree root, height, length; key u64 at +0x168, value stride 0x20, leverage byte at value +0x18, length +0x1c2, first edge +0x1c8",
+   "where": "table +0x18, +0x20, +0x28"
+  }
+ ],
+ "first_mismatch": "",
+ "functions": [
+  {
+   "bytes": 1264,
+   "end": "0x273c630",
+   "instructions": 273,
+   "instructions_stepped": 207,
+   "role": "gate, copy 1",
+   "sha256": "0290e396323b3ce0a69081493fd6bb052056cc8d7355fd78e6f2ad5f5a61a5a7",
+   "start": "0x273c140"
+  },
+  {
+   "bytes": 1264,
+   "end": "0x4d4ca90",
+   "instructions": 275,
+   "instructions_stepped": 209,
+   "role": "gate, copy 2",
+   "sha256": "a8e2d2ead49f0ebbd70c950180921514c7aba527b48d1f1cdc240d3ee79876fd",
+   "start": "0x4d4c5a0"
+  },
+  {
+   "bytes": 1264,
+   "end": "0x4d4cf80",
+   "instructions": 275,
+   "instructions_stepped": 209,
+   "role": "gate, copy 3",
+   "sha256": "d6e6ade3b576bb2add663674f28041bb9ab3edfbf830814cf87956d3bcedd4b7",
+   "start": "0x4d4ca90"
+  },
+  {
+   "bytes": 440,
+   "end": "0x273c138",
+   "instructions": 97,
+   "instructions_stepped": 66,
+   "role": "apply loop, copy 1",
+   "sha256": "db2e273a86558f36bc4167a32e3d7f8479977a63b43e22fb1dc11051e349baff",
+   "start": "0x273bf80"
+  },
+  {
+   "bytes": 438,
+   "end": "0x4d4c596",
+   "instructions": 97,
+   "instructions_stepped": 65,
+   "role": "apply loop, copy 2",
+   "sha256": "26a52a1d93d68ef70af363769d5610715a7a2296f9db4a59c62c80d9de326c07",
+   "start": "0x4d4c3e0"
+  },
+  {
+   "bytes": 3105,
+   "end": "0x37052a1",
+   "instructions": 617,
+   "instructions_stepped": 495,
+   "role": "per-user rewrite",
+   "sha256": "159153119605486409b018eda035c9f9c6ce30f6f1787575761a2645af3c61d5",
+   "start": "0x3704680"
+  },
+  {
+   "bytes": 2294,
+   "end": "0x3334216",
+   "instructions": 520,
+   "instructions_stepped": 200,
+   "role": "table compare",
+   "sha256": "4b122d87b384156cd4e309c7689c9f55c0a2c054b35c50ca13796a094e067e0e",
+   "start": "0x3333920"
+  },
+  {
+   "bytes": 361,
+   "end": "0x3398239",
+   "instructions": 90,
+   "instructions_stepped": 35,
+   "role": "memo first insert",
+   "sha256": "11d0063b32319938fdaba76d3903eb4e7301c63c7b2d937a0610c8bd43146f5c",
+   "start": "0x33980d0"
+  },
+  {
+   "bytes": 562,
+   "end": "0x33bd852",
+   "instructions": 134,
+   "instructions_stepped": 96,
+   "role": "memo miss closure",
+   "sha256": "e442e5b0999016ba92c700303ea2b27d0ec8a2fd0c05f058819ddb6814146c55",
+   "start": "0x33bd620"
+  },
+  {
+   "bytes": 316,
+   "end": "0x37599bc",
+   "instructions": 73,
+   "instructions_stepped": 63,
+   "role": "table getter",
+   "sha256": "e5e9889275c2e3fbc7ba3b88c7d1fed201e11edbc9e31bc4e3adbe28117fdbd3",
+   "start": "0x3759880"
+  },
+  {
+   "bytes": 497,
+   "end": "0x33bd611",
+   "instructions": 104,
+   "instructions_stepped": 17,
+   "role": "position entry",
+   "sha256": "facda27188cd7b0b014d4678c8becfb6c681c97f456072a2a17abe0763f9498f",
+   "start": "0x33bd420"
+  }
+ ],
+ "instructions_stepped": 173624,
+ "locations": [
+  {
+   "column": 38,
+   "line": 194,
+   "path": "l1/src/perp_meta.rs",
+   "role": "asset id not in this dex, or index at or above the row count",
+   "slot": "0x56f21c0"
+  },
+  {
+   "column": 86,
+   "line": 279,
+   "path": "l1/src/perp_meta.rs",
+   "role": "custom table id missing from the map at +0x38",
+   "slot": "0x56f21d8"
+  }
+ ],
+ "mismatches": 0,
+ "missing_table_payload": [
+  {
+   "label": "missing id first, nothing accepted",
+   "tag": "0x154",
+   "word_at_out_plus_4": "0xa5a5a5a5"
+  },
+  {
+   "label": "missing id 99 after accepted id 51",
+   "tag": "0x154",
+   "word_at_out_plus_4": "0x33"
+  },
+  {
+   "label": "missing id 99 after 7 then 51",
+   "tag": "0x154",
+   "word_at_out_plus_4": "0x33"
+  }
+ ],
+ "mutations": {
+  "killed": 471,
+  "survived": 152,
+  "unreached": 319
+ },
+ "reference_claims": [
+  {
+   "claim": "names SetMarginTableIds and a change row with margin_table_id",
+   "observed": "the name is right; the action has no apply code in the reference tree",
+   "reference": "l1/action/vote_global.rs:75",
+   "verdict": "apply path missing"
+  },
+  {
+   "claim": "a table id change is one field write on the asset",
+   "observed": "0x3704680 also walks every user: leverage clamp to the first tier, and a position table change only for compare result 1",
+   "reference": "l1/perp_meta.rs:298",
+   "verdict": "per-user step missing"
+  },
+  {
+   "claim": "0 no more permissive, 1 strictly more permissive, 2 incomparable",
+   "observed": "0x3333920 gives the same three results over both tier lists",
+   "reference": "l1/clearinghouse/margin_table.rs:198 relation_to",
+   "verdict": "agrees; address and consumer were not named"
+  }
+ ],
+ "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+ "variant_name_strings": [
+  "0x5a687c",
+  "0x5b50bd"
+ ],
+ "worked": [
+  {
+   "label": "new table lower everywhere",
+   "leverage_after": 20,
+   "leverage_before": 33,
+   "new_table": 51,
+   "old_table": 50,
+   "position_table_after": 50
+  },
+  {
+   "label": "new table higher everywhere",
+   "leverage_after": 33,
+   "leverage_before": 33,
+   "new_table": 50,
+   "old_table": 51,
+   "position_table_after": 50
+  },
+  {
+   "label": "tier curves cross",
+   "leverage_after": 30,
+   "leverage_before": 33,
+   "new_table": 53,
+   "old_table": 50,
+   "position_table_after": 50
+  },
+  {
+   "label": "equal tiers under another id",
+   "leverage_after": 33,
+   "leverage_before": 33,
+   "new_table": 55,
+   "old_table": 50,
+   "position_table_after": 50
+  },
+  {
+   "label": "builtin 10x to custom",
+   "leverage_after": 7,
+   "leverage_before": 7,
+   "new_table": 50,
+   "old_table": 10,
+   "position_table_after": 50
+  },
+  {
+   "label": "custom to builtin 5x",
+   "leverage_after": 5,
+   "leverage_before": 33,
+   "new_table": 5,
+   "old_table": 50,
+   "position_table_after": 50
+  }
+ ]
+}
