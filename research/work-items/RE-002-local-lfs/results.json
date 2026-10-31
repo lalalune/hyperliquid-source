@@ -1,0 +1,110 @@
+{
+  "base": "1f8c67c63ca4794c9689235471c60297f8a5c985",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "candidate_sha256": {
+    "Makefile": "dadc584e4ff42dbcd65b9d1442a49f580e8dbfdf7ce8985bd278eb9fd5d7fb28",
+    "scripts/setup.sh": "a628ee2fa75c7fbf6fe26ee03370543c377bbbb7062d1029371f093908c1f4d8",
+    "research/work-items/RE-002-local-lfs/reproduce.py": "ec39892ed34c2171c1bcf7a0122a6354a3874324c3db6cf7229467ec396fae74"
+  },
+  "git_lfs": "git-lfs/3.8.1 (GitHub; darwin arm64; go 1.27.3)",
+  "global_config_unchanged": true,
+  "submodule_pins_unchanged": true,
+  "captured_binaries_executed": false,
+  "phases": [
+    {
+      "phase": "base_without_filters",
+      "pull_exit": 0,
+      "verify_exit": 2,
+      "targets": {
+        "artifacts/node/94/hl-node": {
+          "size": 133,
+          "sha256": "c8f552458b7f12a513e5984c589e24cd5a072addf88c04feba5bc301b2ae3db7"
+        },
+        "references/can1357-hl/bin/hl-node-mainnet-new": {
+          "size": 133,
+          "sha256": "c8f552458b7f12a513e5984c589e24cd5a072addf88c04feba5bc301b2ae3db7"
+        }
+      },
+      "pull_output": "git submodule update --init --recursive\ngit lfs pull\nSkipping object checkout, Git LFS is not installed for this repository.\nConsider installing it with 'git lfs install'.\ngit -C references/can1357-hl lfs pull\nSkipping object checkout, Git LFS is not installed for this repository.\nConsider installing it with 'git lfs install'.\n",
+      "verify_output": "python3 tools/artifacts.py verify\nSHA-256 OK: artifacts/keys/pub_key.asc\nTraceback (most recent call last):\n  File \"/private<fixture>/checkout/tools/artifacts.py\", line 103, in <module>\n    main()\n    ~~~~^^\n  File \"/private<fixture>/checkout/tools/artifacts.py\", line 95, in main\n    check(ROOT / item['path'], item)\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/private<fixture>/checkout/tools/artifacts.py\", line 28, in check\n    raise ValueError(f'Artifact size/SHA-256 mismatch: {path}')\nValueError: Artifact size/SHA-256 mismatch: /private<fixture>/checkout/artifacts/node/115/hl-node\nmake: *** [verify] Error 1\n"
+    },
+    {
+      "phase": "base_with_parent_filters_only",
+      "pull_exit": 0,
+      "verify_exit": 2,
+      "targets": {
+        "artifacts/node/94/hl-node": {
+          "size": 91774280,
+          "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+        },
+        "references/can1357-hl/bin/hl-node-mainnet-new": {
+          "size": 133,
+          "sha256": "c8f552458b7f12a513e5984c589e24cd5a072addf88c04feba5bc301b2ae3db7"
+        }
+      },
+      "pull_output": "git submodule update --init --recursive\ngit lfs pull\ngit -C references/can1357-hl lfs pull\nSkipping object checkout, Git LFS is not installed for this repository.\nConsider installing it with 'git lfs install'.\n",
+      "verify_output": "python3 tools/artifacts.py verify\nSHA-256 OK: artifacts/keys/pub_key.asc\nSHA-256 OK: artifacts/node/115/hl-node\nSHA-256 OK: artifacts/node/115/hl-node.asc\nSHA-256 OK: artifacts/node/115/node_metadata.json\nSHA-256 OK: artifacts/node/94/hl-node\nSHA-256 OK: artifacts/node/94/hl-node.asc\nSHA-256 OK: artifacts/visor/captured/hl-visor\nSHA-256 OK: artifacts/visor/captured/hl-visor.asc\nValid signature: node/94/hl-node\nValid signature: node/115/hl-node\nValid signature: visor/captured/hl-visor\nTraceback (most recent call last):\n  File \"/private<fixture>/checkout/tools/artifacts.py\", line 103, in <module>\n    main()\n    ~~~~^^\n  File \"/private<fixture>/checkout/tools/artifacts.py\", line 98, in main\n    verify_pinned_pairs(ROOT)\n    ~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/private<fixture>/checkout/tools/artifacts.py\", line 84, in verify_pinned_pairs\n    raise ValueError(f'Pinned upstream mismatch: {left} != {right}')\nValueError: Pinned upstream mismatch: artifacts/node/94/hl-node != references/can1357-hl/bin/hl-node-mainnet-new\nmake: *** [verify] Error 1\n"
+    },
+    {
+      "phase": "candidate",
+      "pull_exit": 0,
+      "verify_exit": 0,
+      "targets": {
+        "artifacts/node/94/hl-node": {
+          "size": 91774280,
+          "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+        },
+        "references/can1357-hl/bin/hl-node-mainnet-new": {
+          "size": 91774280,
+          "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+        }
+      },
+      "pull_output": "git lfs install --local\nUpdated Git hooks.\nGit LFS initialized.\ngit submodule update --init --recursive\ngit -C references/can1357-hl lfs install --local\nUpdated Git hooks.\nGit LFS initialized.\ngit lfs pull\ngit -C references/can1357-hl lfs pull\n",
+      "verify_output": "python3 tools/artifacts.py verify\nSHA-256 OK: artifacts/keys/pub_key.asc\nSHA-256 OK: artifacts/node/115/hl-node\nSHA-256 OK: artifacts/node/115/hl-node.asc\nSHA-256 OK: artifacts/node/115/node_metadata.json\nSHA-256 OK: artifacts/node/94/hl-node\nSHA-256 OK: artifacts/node/94/hl-node.asc\nSHA-256 OK: artifacts/visor/captured/hl-visor\nSHA-256 OK: artifacts/visor/captured/hl-visor.asc\nValid signature: node/94/hl-node\nValid signature: node/115/hl-node\nValid signature: visor/captured/hl-visor\nPinned upstream binary, signature and public key match.\npython3 tools/verify_imports.py\nVerified 37 imported files and all pinned source repositories.\n"
+    },
+    {
+      "phase": "candidate_repeated",
+      "pull_exit": 0,
+      "verify_exit": 0,
+      "targets": {
+        "artifacts/node/94/hl-node": {
+          "size": 91774280,
+          "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+        },
+        "references/can1357-hl/bin/hl-node-mainnet-new": {
+          "size": 91774280,
+          "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+        }
+      },
+      "pull_output": "git lfs install --local\nUpdated Git hooks.\nGit LFS initialized.\ngit submodule update --init --recursive\ngit -C references/can1357-hl lfs install --local\nUpdated Git hooks.\nGit LFS initialized.\ngit lfs pull\ngit -C references/can1357-hl lfs pull\n",
+      "verify_output": "python3 tools/artifacts.py verify\nSHA-256 OK: artifacts/keys/pub_key.asc\nSHA-256 OK: artifacts/node/115/hl-node\nSHA-256 OK: artifacts/node/115/hl-node.asc\nSHA-256 OK: artifacts/node/115/node_metadata.json\nSHA-256 OK: artifacts/node/94/hl-node\nSHA-256 OK: artifacts/node/94/hl-node.asc\nSHA-256 OK: artifacts/visor/captured/hl-visor\nSHA-256 OK: artifacts/visor/captured/hl-visor.asc\nValid signature: node/94/hl-node\nValid signature: node/115/hl-node\nValid signature: visor/captured/hl-visor\nPinned upstream binary, signature and public key match.\npython3 tools/verify_imports.py\nVerified 37 imported files and all pinned source repositories.\n"
+    }
+  ],
+  "environment": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "python": "3.14.7",
+    "git": "git version 2.54.0 (Apple Git-157)",
+    "gpg": "gpg (GnuPG) 2.5.22"
+  },
+  "network_control": "macOS sandbox denied IP networking; Unix sockets allowed for isolated GPG verification",
+  "working_checkout_validation": {
+    "base_after_manual_configuration": {
+      "doctor": 0,
+      "verify": 0,
+      "tests": 431,
+      "failures": 0,
+      "errors": 0,
+      "catalogue_check": 0
+    },
+    "candidate": {
+      "setup": 0,
+      "doctor": 0,
+      "verify": 0,
+      "tests": 431,
+      "failures": 0,
+      "errors": 0,
+      "catalogue_check": 0
+    },
+    "hosted_ci_observed": false
+  }
+}

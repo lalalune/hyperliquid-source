@@ -8,6 +8,7 @@ python3 -c 'import sys; assert sys.version_info >= (3,10), "Python 3.10+ require
 git lfs version
 git lfs install --local
 git submodule update --init --recursive
+git -C references/can1357-hl lfs install --local
 git lfs pull
 git -C references/can1357-hl lfs pull
 rustup toolchain install 1.94.1 --profile minimal --component rustfmt,clippy --no-self-update
