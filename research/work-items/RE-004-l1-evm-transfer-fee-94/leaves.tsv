@@ -1,0 +1,29 @@
+function	conditions	result
+next_base_fee	base + add(lo(Q_up),1) carries & e > 0 & hi(mul(dhigh,T)) == 0 & hi(mul(T,dlow)) + lo(mul(dhigh,T)) fits & hi(Q_up) == 0 & lo(Q_up) < 1 & D_or > 0 & used > T	panic add_overflow 43:13
+next_base_fee	base + add(lo(Q_up),1) fits & e > 0 & hi(mul(dhigh,T)) == 0 & hi(mul(T,dlow)) + lo(mul(dhigh,T)) fits & hi(Q_up) == 0 & lo(Q_up) < 1 & D_or > 0 & used > T	return add(base,add(lo(Q_up),1))
+next_base_fee	base + lo(Q_up) carries & e > 0 & hi(mul(dhigh,T)) == 0 & hi(mul(T,dlow)) + lo(mul(dhigh,T)) fits & hi(Q_up) > 0 & lo(Q_up) < 1 & D_or > 0 & used > T	panic add_overflow 43:13
+next_base_fee	base + lo(Q_up) carries & e > 0 & hi(mul(dhigh,T)) == 0 & hi(mul(T,dlow)) + lo(mul(dhigh,T)) fits & lo(Q_up) >= 1 & D_or > 0 & used > T	panic add_overflow 43:13
+next_base_fee	base + lo(Q_up) fits & e > 0 & hi(mul(dhigh,T)) == 0 & hi(mul(T,dlow)) + lo(mul(dhigh,T)) fits & hi(Q_up) > 0 & lo(Q_up) < 1 & D_or > 0 & used > T	return add(base,lo(Q_up))
+next_base_fee	base + lo(Q_up) fits & e > 0 & hi(mul(dhigh,T)) == 0 & hi(mul(T,dlow)) + lo(mul(dhigh,T)) fits & lo(Q_up) >= 1 & D_or > 0 & used > T	return add(base,lo(Q_up))
+next_base_fee	base <= lo(Q_down) & e > 0 & hi(mul(dhigh,T)) == 0 & hi(mul(T,dlow)) + lo(mul(dhigh,T)) fits & D_or > 0 & used < T	return 0
+next_base_fee	base > lo(Q_down) & e > 0 & hi(mul(dhigh,T)) == 0 & hi(mul(T,dlow)) + lo(mul(dhigh,T)) fits & D_or > 0 & used < T	return sub(base,lo(Q_down))
+next_base_fee	e == 0	panic div_by_zero 33:22
+next_base_fee	e > 0 & hi(mul(dhigh,T)) == 0 & hi(mul(T,dlow)) + lo(mul(dhigh,T)) carries & used < T	panic mul_overflow 57:23
+next_base_fee	e > 0 & hi(mul(dhigh,T)) == 0 & hi(mul(T,dlow)) + lo(mul(dhigh,T)) carries & used > T	panic mul_overflow 48:27
+next_base_fee	e > 0 & hi(mul(dhigh,T)) == 0 & hi(mul(T,dlow)) + lo(mul(dhigh,T)) fits & D_or == 0 & used < T	panic div_by_zero 56:17
+next_base_fee	e > 0 & hi(mul(dhigh,T)) == 0 & hi(mul(T,dlow)) + lo(mul(dhigh,T)) fits & D_or == 0 & used > T	panic div_by_zero 47:21
+next_base_fee	e > 0 & hi(mul(dhigh,T)) > 0 & used < T	panic mul_overflow 57:23
+next_base_fee	e > 0 & hi(mul(dhigh,T)) > 0 & used > T	panic mul_overflow 48:27
+next_base_fee	e > 0 & used == T	return base
+price	low8(tag) == 0 & tag > 1	return 0x5f5e100
+price	low8(tag) > 0 & stale < 0x5f5e101 & tag > 1	return 0x5f5e100
+price	low8(tag) > 0 & stale >= 0x5f5e101 & tag > 1	return stale
+price	next < 0x5f5e101 & tag == 1	return 0x5f5e100
+price	next >= 0x5f5e101 & tag == 1	return next
+price	tag < 1	return 0x5f5e100
+fee	0xccccccccccccccb < lo(C_default) & bit0(flag) == 0 & hi(C_default) == 0	return out [out+0:2]=0x14d
+fee	0xccccccccccccccb < lo(C_gas) & bit0(flag) > 0 & hi(C_gas) == 0	return out [out+0:2]=0x14d
+fee	0xccccccccccccccb >= lo(C_default) & bit0(flag) == 0 & hi(C_default) == 0	return out [out+0:2]=0x186 [out+8:8]=lo(C_default)
+fee	0xccccccccccccccb >= lo(C_gas) & bit0(flag) > 0 & hi(C_gas) == 0	return out [out+0:2]=0x186 [out+8:8]=lo(C_gas)
+fee	bit0(flag) == 0 & hi(C_default) > 0	return out [out+0:2]=0x14d
+fee	bit0(flag) > 0 & hi(C_gas) > 0	return out [out+0:2]=0x14d
