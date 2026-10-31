@@ -128,11 +128,19 @@ def sections(data):
     if shentsize != 64 or shoff + shnum * 64 > len(data):
         raise EvidenceError('section header table is truncated or malformed')
     raw = [struct.unpack_from('<IIQQQQIIQQ', data, shoff + i * 64) for i in range(shnum)]
-    stro = raw[shstrndx][4]
+    stro, strsize = raw[shstrndx][4], raw[shstrndx][5]
+    if stro > len(data) or strsize > len(data) - stro:
+        raise EvidenceError('section name table extends past end of file')
+    table = data[stro:stro + strsize]
     out = {}
     for h in raw:
-        end = data.index(b'\0', stro + h[0])
-        out[data[stro + h[0]:end].decode()] = {'addr': h[3], 'offset': h[4], 'size': h[5]}
+        name_off = h[0]
+        if name_off >= len(table):
+            raise EvidenceError('section name offset outside .shstrtab')
+        end = table.find(b'\0', name_off)
+        if end < 0:
+            raise EvidenceError('unterminated section name')
+        out[table[name_off:end].decode()] = {'addr': h[3], 'offset': h[4], 'size': h[5]}
     for name in ('.text', '.eh_frame', '.eh_frame_hdr', '.rela.dyn', '.data.rel.ro', '.rodata'):
         if name not in out:
             raise EvidenceError(f'missing section {name}')
