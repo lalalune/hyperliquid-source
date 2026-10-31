@@ -182,12 +182,12 @@ names, owners and evidence. It contains no file contents or encodings.
 ## Rerun
 
 ```
-sudo -u pumpdev -H bash -lc 'source ~/.pumpenv; cd ~/hl-re009-wt && \
+cd "$(git rev-parse --show-toplevel)" && \
   P=research/work-items/RE-009-storage-state-roots && \
   python3 -B tools/state_roots.py --out $P/state-roots.json --schema-out $P/fixture-schema.json && \
   python3 -B tools/state_hashers.py --out $P/hashers.json && \
   python3 -I -B $P/verify.py && python3 -O -B $P/verify.py && \
-  python3 -B -m unittest tests.test_state_roots tests.test_state_hashers'
+  python3 -B -m unittest tests.test_state_roots tests.test_state_hashers
 ```
 
 ## What this does not claim
