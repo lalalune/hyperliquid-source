@@ -1,0 +1,23 @@
+{
+  "status": "PROOF_DOMAIN_CORRECTION_BEFORE_IMPLEMENTATION",
+  "initialPremise": "q..q+24 disjoint from input and stack-save region; active return slot was not explicitly included.",
+  "counterexamples": [
+    {
+      "case": "q=S",
+      "effect": "Success tag write qword0 overwrites the validator return address at[S,S+8), so the proposed total-return contract does not follow from that initial premise."
+    },
+    {
+      "case": "B overlaps[S-24,S)",
+      "effect": "Initial register-save pushes can change supposedly immutable input bytes before validation."
+    }
+  ],
+  "correctedValidatorDomain": "Valid nonwrapping stack+return[S-24,S+8); q24 disjoint from this and B; B disjoint from this full interval; captured code/table and selected bindings immutable.",
+  "correctedUsedAdapterDomain": "At adapter entrySa, q=[Sa-24,Sa), CALLslot[Sa-32,Sa-24), validator saves[Sa-56,Sa-32), originalRET[Sa,Sa+8); B disjoint combined[Sa-56,Sa+8).",
+  "proofOnly": true,
+  "capturedCodeExecuted": false,
+  "targetBug": false,
+  "original1009Edited": false,
+  "credit": "Independent peer domain review before source freeze.",
+  "immutableImageSeparation": "Result and active stack writes are disjoint from captured immutable code/table/selected binding regions.",
+  "endpointRefinement": "Finite arrival at local RET with defined fields; valid ordinary hardware call/return-state contents are an explicit additional condition, not proved by interval readability."
+}
