@@ -72,8 +72,11 @@ def validate_fixtures(fixtures_doc: dict, protocol: dict) -> dict:
     if fixtures_doc.get('task_id') != 'RE-003':
         raise ValueError('fixture-identities.json task_id must be RE-003')
     fields = protocol['fixture_identity_fields']
+    fixtures = fixtures_doc.get('fixtures', [])
+    if not isinstance(fixtures, list):
+        raise ValueError('fixtures must be a list')
     by_id = {}
-    for row in fixtures_doc.get('fixtures', []):
+    for row in fixtures:
         missing = [key for key in fields if key not in row]
         if missing:
             raise ValueError(f'fixture {row.get("fixture_id")} missing {missing}')
