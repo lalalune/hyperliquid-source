@@ -205,6 +205,8 @@ class Fdes:
             loc, fde = struct.unpack_from('<ii', table, i * 8)
             self.starts.append(hdr + loc)
             self.fde.append(hdr + fde)
+        if any(b <= a for a, b in zip(self.starts, self.starts[1:])):
+            raise EvidenceError('.eh_frame_hdr table not strictly increasing')
         self.count = count
 
     def cie_r_encoding(self, cie):
