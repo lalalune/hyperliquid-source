@@ -62,6 +62,8 @@ def generate(root=ROOT):
     for p in source_paths | paths['94'] | paths['115']:
         owner(p, components)
     literal_items = json.loads((root / 'research/imported/can1357-literal-classes.json').read_text())['items']
+    if any('class' not in i for i in literal_items):
+        raise ValueError('Invalid literal-classes record')
     rows = []
     for c in components:
         source = sorted(p for p in source_paths if owner(p, components) == c['id'])
