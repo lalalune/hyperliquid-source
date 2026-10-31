@@ -1,0 +1,66 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x32813d0 0x32813d0..0x32814b2; byte records are authoritative
+32813d0  50                     push rax
+32813d1  483bb288010000         cmp rsi, qword ptr [rdx + 0x188]
+32813d8  0f83c7000000           jae 0x32814a5
+32813de  488b8a80010000         mov rcx, qword ptr [rdx + 0x180]
+32813e5  4869d6e8000000         imul rdx, rsi, 0xe8
+32813ec  0fb6441149             movzx eax, byte ptr [rcx + rdx + 0x49]
+32813f1  2a441148               sub al, byte ptr [rcx + rdx + 0x48]
+32813f5  0f8295000000           jb 0x3281490
+32813fb  b901000000             mov ecx, 1
+3281400  751a                   jne 0x328141c
+3281402  4889f8                 mov rax, rdi
+3281405  4809c8                 or rax, rcx
+3281408  48c1e820               shr rax, 0x20
+328140c  0f848b000000           je 0x328149d
+3281412  4889f8                 mov rax, rdi
+3281415  31d2                   xor edx, edx
+3281417  48f7f1                 div rcx
+328141a  59                     pop rcx
+328141b  c3                     ret 
+328141c  0fb6f0                 movzx esi, al
+328141f  40f6c601               test sil, 1
+3281423  740a                   je 0x328142f
+3281425  b90a000000             mov ecx, 0xa
+328142a  83fe01                 cmp esi, 1
+328142d  74d3                   je 0x3281402
+328142f  a802                   test al, 2
+3281431  740e                   je 0x3281441
+3281433  486bc964               imul rcx, rcx, 0x64
+3281437  89f2                   mov edx, esi
+3281439  83e2fe                 and edx, 0xfffffffe
+328143c  83fa02                 cmp edx, 2
+328143f  74c1                   je 0x3281402
+3281441  a804                   test al, 4
+3281443  7411                   je 0x3281456
+3281445  4869c910270000         imul rcx, rcx, 0x2710
+328144c  89f2                   mov edx, esi
+328144e  83e2fc                 and edx, 0xfffffffc
+3281451  83fa04                 cmp edx, 4
+3281454  74ac                   je 0x3281402
+3281456  a808                   test al, 8
+3281458  7411                   je 0x328146b
+328145a  4869c900e1f505         imul rcx, rcx, 0x5f5e100
+3281461  89f2                   mov edx, esi
+3281463  83e2f8                 and edx, 0xfffffff8
+3281466  83fa08                 cmp edx, 8
+3281469  7497                   je 0x3281402
+328146b  a810                   test al, 0x10
+328146d  7421                   je 0x3281490
+328146f  48ba0000c16ff2862300   movabs rdx, 0x2386f26fc10000
+3281479  4889c8                 mov rax, rcx
+328147c  48f7e2                 mul rdx
+328147f  700f                   jo 0x3281490
+3281481  4889c1                 mov rcx, rax
+3281484  83e6f0                 and esi, 0xfffffff0
+3281487  83fe10                 cmp esi, 0x10
+328148a  0f8472ffffff           je 0x3281402
+3281490  488d3dd90d4702         lea rdi, [rip + 0x2470dd9]
+3281497  ff15d3cf4e02           call qword ptr [rip + 0x24ecfd3]
+328149d  89f8                   mov eax, edi
+328149f  31d2                   xor edx, edx
+32814a1  f7f1                   div ecx
+32814a3  59                     pop rcx
+32814a4  c3                     ret 
+32814a5  488d3d440d4702         lea rdi, [rip + 0x2470d44]
+32814ac  ff15becf4e02           call qword ptr [rip + 0x24ecfbe]
