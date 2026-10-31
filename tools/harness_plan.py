@@ -81,6 +81,8 @@ def validate_fixtures(fixtures_doc: dict, protocol: dict) -> dict:
         if fid in by_id:
             raise ValueError(f'duplicate fixture_id: {fid}')
         digest = row['target_sha256']
+        if not isinstance(digest, str):
+            raise ValueError(f'fixture {fid} has invalid target_sha256')
         if len(digest) != 64 or any(c not in '0123456789abcdef' for c in digest):
             raise ValueError(f'fixture {fid} has invalid target_sha256')
         by_id[fid] = row
