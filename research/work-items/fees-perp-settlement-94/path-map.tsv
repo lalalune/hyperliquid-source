@@ -1,0 +1,18 @@
+order	stage	address	behaviour
+1	caller	0x26ed0ec, 0x4312265, 0x4315ec5, 0x37087ed	slot 0x5774868; rdi is a dex clearinghouse (row of stride 0x2f0 in the 3 match hosts), esi one byte, rdx the fill, rcx ctx
+2	exempt test	0x37e4fb0	slot 0x5773228 on each party address, party 0 first: 8 fixed addresses; a hit skips every fee step and sets a flag; the size must still be >= 0
+3	fee	0x37130b0	slot 0x5774890, frame: party +0x20..+0x48, ctx, asset, user, s = party == fill +0x234, party, flag; notional fill +0x218
+4	sign gate	0x3710a70	gross and rebate must be >= 0 as i64, else panic at 0x5714c10
+5	row and dirty mark	0x3596940, 0x339b590	row of clearinghouse +0xf8, created on a miss; user goes into set +0x188
+6	position entry	0x33bd420	inline B-tree search of row +8 by asset, then entry by handle; a vacant asset inserts a value
+7	fee debit	0x3710a70	net = gross - rebate; value byte +0 == 0: row +0 -= net; else value +8 -= net; signed saturating, recorder 0x56f1cf8
+8	position wrapper	0x36f7350	asset, size, the same size, row +0x20, clearinghouse +0x170: a size that does not move changes no count and no total; only the asset total entry appears
+9	dead arms	0x370e6a0, 0x33acfe0, 0x339b590	leverage hook and set +0x158 follow value +4 and row +0x20, which this site cannot move
+10	deposit total	0x3710a70	clearinghouse +0x238 total_net_deposit falls by extra (skipped at 0), builder (tag bit 0), referrer (tag dword == 1); sign gate on each; saturating, recorder 0x5714c28
+11	sums	0x3710a70	deployer and protocol words of both parties, signed saturating, recorder 0x570b4e0
+12	party block	0x3710a70	whole 0x78 byte fee output stored at party +0x58..+0xd0
+13	size gate	0x3710a70	fill +0x210 must be >= 0 as i64, else panic at 0x56ee580; party 0 gets +size, party 1 gets -size
+14	position update	0x36fe830	(out, clearinghouse, asset, fill +0x200, signed size, user, stack word net or 0); a tag other than 0x186 panics at 0x56f1f90
+15	znfn	0x3710a70	no exempt party and deployer + protocol == 0: clearinghouse +0x2d8 (key znfn) += notional, unsigned saturating, recorder 0x5714d30; lazy cell 0x577ab98 forced first
+16	credit	0x37067b0	slot 0x5774918 (clearinghouse, deployer sum, protocol sum, ctx) on every fill, also at 0
+17	maker margin	0x36f57f0, 0x3710a70	maker size read from its row; outer map +0x128 by user, inner by asset; row size replaced, outer entry end -8 += f(new) - f(old)

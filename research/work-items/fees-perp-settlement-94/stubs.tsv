@@ -1,0 +1,15 @@
+address	role	note
+0x37130b0	fee of one party, slot 0x5774890	fees-trade-fee-94; whole frame checked, output bytes come from the vector
+0x37067b0	dex fee credit, slot 0x5774918	fees-collection-94; arguments listed and compared
+0x3596940	user row of clearinghouse +0xf8, inserts	row created on a miss
+0x36f57f0	user row, read only	a shared empty row on a miss
+0x339b590	address set insert	called with clearinghouse +0x188 and +0x158; listed and compared
+0x33acfe0	address set remove	called with clearinghouse +0x158; listed and compared
+0x33bd420	position entry by search handle	handle words checked against an independent tree walk; a vacant handle inserts a default value
+0x36f7350	size hook, stub in the fill vectors	run real in its own size hook vectors; in fill vectors arguments checked and row +0x20 is forced from the vector
+0x33bc4d0	asset total entry	handle checked against an independent tree walk; runs under the real size hook only
+0x370e6a0	leverage hook	never called: its gate compares two reads of value +4 around one store that cannot touch +4
+0x36fe830	position update of the fill	arguments checked; adds the signed size or returns an error tag
+0x399c7a0	address hash	a test hash, hasher place checked
+0x399c4a0	asset hash	a test hash, hasher place checked
+0x358dcd0	amount recorder, slot 0x5773190	every call listed and compared

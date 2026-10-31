@@ -1,0 +1,9 @@
+part	rule
+s > 0	big = end -0x30, small = end -0x38, count = end -0x20
+s <= 0	big = end -0x38, small = end -0x30, count = end -0x28
+product	p = K * |s|, K = end -0x10; p above 2^63 - 2 or a carry gives value 0
+gate	count == 0, count > big gives value 0
+doubles	2 * |s| saturates with a recorder call; big < 2p or count < 2|s| gives value 0
+value	w = floor(big / count) * (count - 2|s|); w above 2^63 - 2 gives 0, else min(w, big - 2p)
+result	f(s) = floor(max(small, value) / L), L = dword end -8
+sum	sum = sat(sum + f(new)) then floor at 0 of sum - f(old); both limits call the recorder at 0x56f1f30

@@ -1,0 +1,9 @@
+reference	reference_says	bytes_say
+l1/exchange/impl_trading.rs apply_trade_outcome	maker and taker deltas from taker_side	party 0 always gets +size, party 1 always -size; fill +0x234 only names the maker for s and the margin tail
+l1/fees/compute.rs apply_perp_funding_and_volume_update	paid fee units per user, no balance debit	that name fits 0x37153f0; the debit, gross - rebate, happens in 0x3710a70, which the reference does not model
+l1/clearinghouse/clearinghouse.rs apply_trade_or_fill_update side_notional_hint	a notional hint	the stack word is the party's net fee, 0 for an exempt party
+l1/clearinghouse/impl_first_dex.rs remaining_notional_budget at +0x238	a transfer budget	serializer 0x370c340 prints +0x238 under total_net_deposit, and this path lowers it by builder, referrer and extra amounts
+l1/clearinghouse/clearinghouse.rs rescale_position_oi_unit	runs when the unit changes	the gate at 0x3710f82 compares two reads of value +4 around one balance store, so 0x370e6a0 cannot run from here
+l1/clearinghouse/clearinghouse.rs update_open_interest_by_slot	subtract old, add new, saturating, entry removed at 0	0x36f7350 also keeps row +0x20, panics on |i64::MIN|, and never removes an entry
+all of l1	no znfn	clearinghouse +0x2d8, key znfn, grows by notional only on a fill with zero deployer + protocol and no exempt party
+l1/exchange/impl_trading.rs is_vault_privileged	a limit for the action cap	the same 8 addresses in 0x37e4fb0 also skip the fee of a fill

@@ -1,0 +1,20 @@
+address	bytes	meaning
+0x3710a93	488b8218020000	fill +0x218 is the notional given to the fee slot
+0x3710abf	0fb68234020000	fill +0x234 is the maker party index
+0x3710cf8	0f9484249c000000	fee frame +0x4c: sete on party == fill +0x234
+0x3710f1b	488b6810	position value +0x10, size, read before the balance store
+0x3710f23	803800	position value byte +0: 0 picks row +0, else value +8
+0x3710f2a	8b4004	position value +4 read before the balance store
+0x3710f5a	498b542410	the same size word read again after the store
+0x3710f5f	458b642404	the same +4 word read again after the store
+0x371107e	498b9e38020000	pool word at clearinghouse +0x238
+0x37113c3	488b9bd8020000	clearinghouse +0x2d8 read in the zero fee arm
+0x37113f1	ff1521350602	call through slot 0x5774918, the dex fee credit
+0x37116ba	49f7e7	unsigned product K * |size|
+0x371172f	4d01ff	2 * |size|, old value
+0x371173b	4d01d2	2 * product, old value
+0x3711892	49895df8	maker sum stored at outer entry end -8
+0x36f736d	0f85b3000000	size hook: old 0 and new not 0 goes to the count increment
+0x370c810	498b9738020000	serializer: clearinghouse +0x238 right after the key total_net_deposit
+0x370c855	498b9740020000	serializer: clearinghouse +0x240 right after the key total_non_bridge_deposit
+0x370ca1c	4d8b87d8020000	serializer: clearinghouse +0x2d8 right before the key znfn
