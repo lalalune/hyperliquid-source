@@ -69,6 +69,8 @@ def validate_protocol(protocol: dict) -> None:
 
 
 def validate_fixtures(fixtures_doc: dict, protocol: dict) -> dict:
+    if not isinstance(fixtures_doc, dict):
+        raise ValueError('fixture-identities.json must be a mapping')
     if fixtures_doc.get('task_id') != 'RE-003':
         raise ValueError('fixture-identities.json task_id must be RE-003')
     fields = protocol['fixture_identity_fields']
