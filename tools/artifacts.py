@@ -38,12 +38,16 @@ def fetch_one(root, item):
         raise ValueError(f'No upstream recovery URL for {path}; run git lfs pull / git restore')
     path.parent.mkdir(parents=True, exist_ok=True)
     temp = None
+    written = 0
     try:
         with tempfile.NamedTemporaryFile(dir=path.parent, suffix='.part', delete=False) as f:
             temp = Path(f.name)
             with urllib.request.urlopen(url, timeout=120) as response:
                 for block in iter(lambda: response.read(1024 * 1024), b''):
+                    if len(block) > item['size'] - written:
+                        raise ValueError(f'Artifact exceeds manifest size: {path}')
                     f.write(block)
+                    written += len(block)
         check(temp, item)
         temp.chmod(0o644)
         os.replace(temp, path)
