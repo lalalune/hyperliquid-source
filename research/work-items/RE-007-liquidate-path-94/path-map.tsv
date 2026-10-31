@@ -1,0 +1,17 @@
+order	stage	address	behaviour
+1	liquidator gate	0x23e66f0	the action's second address (+0x34) must be in the set at +0x3948; miss = 0x23 (35)
+2	signer gate	0x23e66f0	signer == that address passes; else the address must be a key of the agent map +0x8d0, miss = 0x23; then follow value +0x98 key to key until a value equals the signer, a missing key = 0x7c (124) with signer and address
+3a	one asset, tag 2	0x3c0cc70	classifier status is passed out; kind 1 = 0x15e (350); encoded id / 10000 past the dex table panics; dex row byte +0x230 != 3 = 0x61 (97); flag 1
+3b	list, odd tag	0x23e66f0	map length > 10000 or one set length > 10000 = 0x143 (323); each asset as in 3a into a u64 set
+3c	list entry signer	0x284bb50, 0x284bc20, 0x275f050	the entry address must be in the set +0x3948 (0x23); signer == address passes; else key of the agent map (0x23) and chain (0x7c)
+3d	other tags	0x23e66f0	even tag other than 2: no assets, flag 0
+4	route	0x3424d20	default address listed = 0x25 (37); walks the map in key order, pushes each address after the default, inserts each asset, a repeated asset = 0x24 (36) with the id
+5	execute	0x2725150	called with dex index 0 always, the user at +0x20, flag, id and the route
+6	plan	0x36fff10	status other than 0x186 is returned as is; else rows of 0x68
+7	events	0x392b7b0, 0x3576710	one event per row: name Isolated when word 0 is 1 else Cross, +0x30 and signed +0x38 / 1e6 as doubles, block time, block row
+8a	cancel, one asset	0x26e3ef0, 0x24fb610	book table +0x3370 row id/10000, book id%10000, reason 13, flush by id/10000
+8b	cancel, whole dex	0x36f57f0, 0x26e3ef0	for every market of the dex, id = dex row +0x30 * 10000 + index; a position with word 0 != 0 and +0x10 != 0 keeps its orders; all others cancel with reason 13
+9	order ids	0x2725150	for each row one id per item from exchange +0x38, saturating at u64::MAX, ids taken even for skipped items
+10	hand-over price	0x2725150	for each item of size != 0: share = |value| / row +0x30 (0.0 when +0x30 is 0); rest = value - saturating(row +0x38 * share), saturating with a log; long rest >= 1, short rest <= -1; px = floor(|rest| / |size|), at least 1; px * |size| >= i64::MAX panics
+11	send	0x2397010, 0x26f4cd0, 0x24fb610	order row from 8 pointers; tag 2 panics; send with source byte 1 and 32 block bytes; mode bytes k, b, k, b with k = 1 when row word 0 is 0 else 2 and b = 1 for size < 0
+12	end	0x2725150	row word 0 == 2 ends the walk and frees the rest; returns the +0x28 word of every row

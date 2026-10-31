@@ -1,0 +1,15 @@
+label	result	calls
+default not in the set	0x23	none
+signer differs, empty agent map	0x23	none
+signer differs, default not a key	0x23	none
+signer is the direct value	ok	drop iter,run,drop route
+signer three steps away	ok	drop iter,run,drop route
+chain ends short of the signer	0x7c	none
+single asset, spot kind	0x15e	classify
+single asset, dex 1 not main	0x61	classify
+list, map length 10001	0x143	drop map
+list, entry is default	0x25	classify,drop iter
+list, entry not a liquidator	0x23	classify,drop set,drop map
+list, entry chain misses	0x7c	classify,drop set,drop map
+list, duplicate asset across entries	0x24	classify,classify,classify,classify,drop iter,drop assets
+list, value length 10001	0x143	drop set,drop map
