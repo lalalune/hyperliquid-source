@@ -41,6 +41,25 @@ def validate_progress(components, progress, root):
                 raise ValueError('Missing or external progress evidence')
 
 
+def node94_binary(root):
+    """Read the node #94 artifact only after its pinned-manifest check.
+
+    Every other binary consumer in tools/ verifies the file against
+    provenance/artifacts.json before parsing it. generate() stamps this
+    file's SHA-256 into seed-candidates.json and derives the seeds'
+    executable-section membership from it, so the bytes must be the
+    pinned artifact, not whatever currently sits at the path.
+    """
+    from artifacts import check
+    identity = next((i for i in json.loads((root / 'provenance/artifacts.json').read_text())['files']
+                     if i['path'] == 'artifacts/node/94/hl-node'), None)
+    if identity is None:
+        raise ValueError('Missing artifact manifest entry: artifacts/node/94/hl-node')
+    path = root / 'artifacts/node/94/hl-node'
+    check(path, identity)
+    return path.read_bytes()
+
+
 def generate(root=ROOT):
     config = json.loads((root / 'research/components.json').read_text())
     components = config['components']
@@ -81,7 +100,7 @@ def generate(root=ROOT):
     result = {'research/catalogue/components.json': json.dumps(output, indent=2) + '\n'}
     # Addresses in imported prose are leads only. Executable-section membership is not validation.
     from elf_index import sections
-    data = (root / 'artifacts/node/94/hl-node').read_bytes()
+    data = node94_binary(root)
     execsecs = [s for s in sections(data) if s['flags'] & 4]
     seeds = []
     for path in sorted(source_paths):
