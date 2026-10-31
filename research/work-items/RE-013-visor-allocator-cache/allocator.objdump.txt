@@ -1,0 +1,44 @@
+
+allocator.bin:     file format binary
+
+
+Disassembly of section .data:
+
+000000000070bf30 <.data>:
+  70bf30:	f3 0f 1e fa                                     	endbr64
+  70bf34:	48 81 ff 00 10 00 00                            	cmp    rdi,0x1000
+  70bf3b:	0f 87 7f 00 00 00                               	ja     0x70bfc0
+  70bf41:	48 8d 15 78 05 30 00                            	lea    rdx,[rip+0x300578]        # 0xa0c4c0
+  70bf48:	48 8d 47 07                                     	lea    rax,[rdi+0x7]
+  70bf4c:	48 c7 c1 80 f3 ff ff                            	mov    rcx,0xfffffffffffff380
+  70bf53:	48 c1 e8 03                                     	shr    rax,0x3
+  70bf57:	48 8d 35 a2 07 30 00                            	lea    rsi,[rip+0x3007a2]        # 0xa0c700
+  70bf5e:	44 0f b6 04 02                                  	movzx  r8d,BYTE PTR [rdx+rax*1]
+  70bf63:	64 4c 8b 91 38 03 00 00                         	mov    r10,QWORD PTR fs:[rcx+0x338]
+  70bf6b:	4e 03 14 c6                                     	add    r10,QWORD PTR [rsi+r8*8]
+  70bf6f:	64 4c 3b 91 40 03 00 00                         	cmp    r10,QWORD PTR fs:[rcx+0x340]
+  70bf77:	73 47                                           	jae    0x70bfc0
+  70bf79:	64 4c 8b 1c 25 00 00 00 00                      	mov    r11,QWORD PTR fs:0x0
+  70bf82:	4f 8d 0c 40                                     	lea    r9,[r8+r8*2]
+  70bf86:	4b 8d 04 cb                                     	lea    rax,[r11+r9*8]
+  70bf8a:	48 01 c8                                        	add    rax,rcx
+  70bf8d:	48 8b 90 60 03 00 00                            	mov    rdx,QWORD PTR [rax+0x360]
+  70bf94:	48 8b 32                                        	mov    rsi,QWORD PTR [rdx]
+  70bf97:	4c 8d 42 08                                     	lea    r8,[rdx+0x8]
+  70bf9b:	66 3b 90 70 03 00 00                            	cmp    dx,WORD PTR [rax+0x370]
+  70bfa2:	74 24                                           	je     0x70bfc8
+  70bfa4:	4c 89 80 60 03 00 00                            	mov    QWORD PTR [rax+0x360],r8
+  70bfab:	64 4c 89 91 38 03 00 00                         	mov    QWORD PTR fs:[rcx+0x338],r10
+  70bfb3:	48 83 80 68 03 00 00 01                         	add    QWORD PTR [rax+0x368],0x1
+  70bfbb:	48 89 f0                                        	mov    rax,rsi
+  70bfbe:	c3                                              	ret
+  70bfbf:	90                                              	nop
+  70bfc0:	e9 ab e1 ff ff                                  	jmp    0x70a170
+  70bfc5:	0f 1f 00                                        	nop    DWORD PTR [rax]
+  70bfc8:	66 3b 90 74 03 00 00                            	cmp    dx,WORD PTR [rax+0x374]
+  70bfcf:	74 ef                                           	je     0x70bfc0
+  70bfd1:	4c 89 80 60 03 00 00                            	mov    QWORD PTR [rax+0x360],r8
+  70bfd8:	66 44 89 80 70 03 00 00                         	mov    WORD PTR [rax+0x370],r8w
+  70bfe0:	64 4c 89 91 38 03 00 00                         	mov    QWORD PTR fs:[rcx+0x338],r10
+  70bfe8:	48 83 80 68 03 00 00 01                         	add    QWORD PTR [rax+0x368],0x1
+  70bff0:	eb c9                                           	jmp    0x70bfbb

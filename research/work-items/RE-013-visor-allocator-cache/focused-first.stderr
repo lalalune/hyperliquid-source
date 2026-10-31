@@ -1,0 +1,68 @@
+test_actual_extent_all_terminal_paths_and_return_word (test_visor_allocator_cache.VisorAllocatorCacheTests.test_actual_extent_all_terminal_paths_and_return_word) ... ok
+test_actual_fde_nobits_binding_and_used_caller_controls (test_visor_allocator_cache.VisorAllocatorCacheTests.test_actual_fde_nobits_binding_and_used_caller_controls) ... FAIL
+test_actual_guard_address_cursor_and_return_mutations_rejected (test_visor_allocator_cache.VisorAllocatorCacheTests.test_actual_guard_address_cursor_and_return_mutations_rejected) ... ok
+test_cached_zero_or_unaligned_word_has_no_local_rejection (test_visor_allocator_cache.VisorAllocatorCacheTests.test_cached_zero_or_unaligned_word_has_no_local_rejection) ... FAIL
+test_fs_base_loaded_word_and_nobits_values_are_not_conflated (test_visor_allocator_cache.VisorAllocatorCacheTests.test_fs_base_loaded_word_and_nobits_values_are_not_conflated) ... ok
+test_full_identity_refused_before_any_native_call (test_visor_allocator_cache.VisorAllocatorCacheTests.test_full_identity_refused_before_any_native_call) ... ok
+test_ordered_writes_do_not_assume_independent_pre_entry_counter (test_visor_allocator_cache.VisorAllocatorCacheTests.test_ordered_writes_do_not_assume_independent_pre_entry_counter) ... ok
+test_real_private_native_mutation_and_source_symlink_replacement (test_visor_allocator_cache.VisorAllocatorCacheTests.test_real_private_native_mutation_and_source_symlink_replacement) ... ERROR
+test_repeat_packet_and_real_cli_prior_output_preservation (test_visor_allocator_cache.VisorAllocatorCacheTests.test_repeat_packet_and_real_cli_prior_output_preservation) ... ok
+test_request_rounding_and_counter_wrap_are_only_address_algebra (test_visor_allocator_cache.VisorAllocatorCacheTests.test_request_rounding_and_counter_wrap_are_only_address_algebra) ... ok
+
+======================================================================
+ERROR: test_real_private_native_mutation_and_source_symlink_replacement (test_visor_allocator_cache.VisorAllocatorCacheTests.test_real_private_native_mutation_and_source_symlink_replacement)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/dev/shm/hyperliquid-wave-fifth-20261031/visor_allocator/checkout/tests/test_visor_allocator_cache.py", line 159, in test_real_private_native_mutation_and_source_symlink_replacement
+    cache.collect(self.data)
+  File "/dev/shm/hyperliquid-wave-fifth-20261031/visor_allocator/checkout/tools/visor_allocator_cache.py", line 267, in collect
+    return derive(data)
+           ^^^^^^^^^^^^
+  File "/dev/shm/hyperliquid-wave-fifth-20261031/visor_allocator/checkout/tools/visor_allocator_cache.py", line 175, in derive
+    rows, native, method = decode(body)
+                           ^^^^^^^^^^^^
+  File "/dev/shm/hyperliquid-wave-fifth-20261031/visor_allocator/checkout/tools/visor_allocator_cache.py", line 93, in decode
+    version = subprocess.check_output(['objdump', '--version'], env=environment, encoding='utf-8').splitlines()[0]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/mock.py", line 1204, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/dev/shm/hyperliquid-wave-fifth-20261031/visor_allocator/checkout/tests/test_visor_allocator_cache.py", line 145, in altered
+    p = Path(kwargs['cwd']) / 'allocator.bin'
+             ~~~~~~^^^^^^^
+KeyError: 'cwd'
+
+======================================================================
+FAIL: test_actual_fde_nobits_binding_and_used_caller_controls (test_visor_allocator_cache.VisorAllocatorCacheTests.test_actual_fde_nobits_binding_and_used_caller_controls)
+----------------------------------------------------------------------
+ValueError: Section outside file
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/dev/shm/hyperliquid-wave-fifth-20261031/visor_allocator/checkout/tests/test_visor_allocator_cache.py", line 127, in test_actual_fde_nobits_binding_and_used_caller_controls
+    with self.assertRaisesRegex(ValueError, 'NOBITS'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "NOBITS" does not match "Section outside file"
+
+======================================================================
+FAIL: test_cached_zero_or_unaligned_word_has_no_local_rejection (test_visor_allocator_cache.VisorAllocatorCacheTests.test_cached_zero_or_unaligned_word_has_no_local_rejection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/dev/shm/hyperliquid-wave-fifth-20261031/visor_allocator/checkout/tests/test_visor_allocator_cache.py", line 103, in test_cached_zero_or_unaligned_word_has_no_local_rejection
+    self.assertTrue(all('rsi' not in x and 'rax' not in x for x in comparisons))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.545s
+
+FAILED (failures=2, errors=1)
