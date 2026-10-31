@@ -1,0 +1,52 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "function": {
+    "start_va": "0x25acc20",
+    "end_va_exclusive": "0x25acc6e",
+    "bytes": 78,
+    "sha256": "97a69885f4ce8f473e5c0139e173b3c35bbee945b4519ffa9ad5d7e5bdbe1aaa",
+    "fde_section_offset": "0x94080",
+    "stride_padding_bytes": 2,
+    "next_fde_start_va": "0x25acc70",
+    "inferred_label": "byte remap"
+  },
+  "rule": {
+    "early_range": "[0xc0, 0xe0)",
+    "low_range": "<= 0x8f",
+    "tags": {
+      "0x90": "(sil & 0xf) | 0x90",
+      "0xa0": "(sil & 0x1f) | 0xa0"
+    },
+    "low_mask": 15,
+    "low_or": 128,
+    "otherwise": "esi unchanged",
+    "edges": {
+      "c0-early": "0x123456c0",
+      "df-early": "0x123456df",
+      "e0-fallthrough": "0xdeadbeef",
+      "bf-fallthrough": "0xdeadbeef",
+      "zero": "0xabcdef12",
+      "one": "0x82",
+      "8f": "0x8f",
+      "90": "0x98",
+      "91": "0x12345678",
+      "a0": "0xb8",
+      "a1": "0x12345678"
+    }
+  },
+  "incoming_pattern_scan": {
+    "section": ".text",
+    "byte_count": 70370352,
+    "e8_candidate_count": 124,
+    "sampled_caller_fdes": [
+      "0x1dfe650..0x1dfe798",
+      "0x1e007f0..0x1e009c6"
+    ],
+    "complete_xref_census": false
+  },
+  "naming_relocation": null,
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
