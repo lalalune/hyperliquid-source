@@ -1,0 +1,81 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x375e300 0x375e300..0x375e421; byte records are authoritative
+375e300  50                     push rax
+375e301  488b8670010000         mov rax, qword ptr [rsi + 0x170]
+375e308  4839c2                 cmp rdx, rax
+375e30b  0f83fa000000           jae 0x375e40b
+375e311  48c1e205               shl rdx, 5
+375e315  48039668010000         add rdx, qword ptr [rsi + 0x168]
+375e31c  84c9                   test cl, cl
+375e31e  7421                   je 0x375e341
+375e320  4c8b5208               mov r10, qword ptr [rdx + 8]
+375e324  4c89c0                 mov rax, r8
+375e327  49f7e1                 mul r9
+375e32a  7051                   jo 0x375e37d
+375e32c  b901000000             mov ecx, 1
+375e331  4c8917                 mov qword ptr [rdi], r10
+375e334  48894f08               mov qword ptr [rdi + 8], rcx
+375e338  48894710               mov qword ptr [rdi + 0x10], rax
+375e33c  4889f8                 mov rax, rdi
+375e33f  59                     pop rcx
+375e340  c3                     ret 
+375e341  4c8b12                 mov r10, qword ptr [rdx]
+375e344  4c3b9688010000         cmp r10, qword ptr [rsi + 0x188]
+375e34b  0f83ad000000           jae 0x375e3fe
+375e351  488b8e80010000         mov rcx, qword ptr [rsi + 0x180]
+375e358  4969d2e8000000         imul rdx, r10, 0xe8
+375e35f  0fb6441149             movzx eax, byte ptr [rcx + rdx + 0x49]
+375e364  2a441148               sub al, byte ptr [rcx + rdx + 0x48]
+375e368  0f8283000000           jb 0x375e3f1
+375e36e  b901000000             mov ecx, 1
+375e373  750c                   jne 0x375e381
+375e375  4c89c8                 mov rax, r9
+375e378  48f7e1                 mul rcx
+375e37b  71af                   jno 0x375e32c
+375e37d  31c9                   xor ecx, ecx
+375e37f  ebb0                   jmp 0x375e331
+375e381  0fb6f0                 movzx esi, al
+375e384  40f6c601               test sil, 1
+375e388  740a                   je 0x375e394
+375e38a  b90a000000             mov ecx, 0xa
+375e38f  83fe01                 cmp esi, 1
+375e392  74e1                   je 0x375e375
+375e394  a802                   test al, 2
+375e396  740e                   je 0x375e3a6
+375e398  486bc964               imul rcx, rcx, 0x64
+375e39c  89f2                   mov edx, esi
+375e39e  83e2fe                 and edx, 0xfffffffe
+375e3a1  83fa02                 cmp edx, 2
+375e3a4  74cf                   je 0x375e375
+375e3a6  a804                   test al, 4
+375e3a8  7411                   je 0x375e3bb
+375e3aa  4869c910270000         imul rcx, rcx, 0x2710
+375e3b1  89f2                   mov edx, esi
+375e3b3  83e2fc                 and edx, 0xfffffffc
+375e3b6  83fa04                 cmp edx, 4
+375e3b9  74ba                   je 0x375e375
+375e3bb  a808                   test al, 8
+375e3bd  7411                   je 0x375e3d0
+375e3bf  4869c900e1f505         imul rcx, rcx, 0x5f5e100
+375e3c6  89f2                   mov edx, esi
+375e3c8  83e2f8                 and edx, 0xfffffff8
+375e3cb  83fa08                 cmp edx, 8
+375e3ce  74a5                   je 0x375e375
+375e3d0  a810                   test al, 0x10
+375e3d2  741d                   je 0x375e3f1
+375e3d4  48ba0000c16ff2862300   movabs rdx, 0x2386f26fc10000
+375e3de  4889c8                 mov rax, rcx
+375e3e1  48f7e2                 mul rdx
+375e3e4  700b                   jo 0x375e3f1
+375e3e6  4889c1                 mov rcx, rax
+375e3e9  83e6f0                 and esi, 0xfffffff0
+375e3ec  83fe10                 cmp esi, 0x10
+375e3ef  7484                   je 0x375e375
+375e3f1  488d3d783ef901         lea rdi, [rip + 0x1f93e78]
+375e3f8  ff1572000102           call qword ptr [rip + 0x2010072]
+375e3fe  488d3deb3df901         lea rdi, [rip + 0x1f93deb]
+375e405  ff1565000102           call qword ptr [rip + 0x2010065]
+375e40b  488d0dc63bf901         lea rcx, [rip + 0x1f93bc6]
+375e412  4889d7                 mov rdi, rdx
+375e415  4889c6                 mov rsi, rax
+375e418  4889ca                 mov rdx, rcx
+375e41b  ff15a7fb0002           call qword ptr [rip + 0x200fba7]
