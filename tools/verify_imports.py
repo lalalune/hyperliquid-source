@@ -19,6 +19,8 @@ def git(root, path, *args):
 
 def verify(root):
     manifest = json.loads((root / 'provenance/imports.json').read_text())
+    if not isinstance(manifest, dict) or 'files' not in manifest:
+        raise ValueError('Invalid import manifest')
     for item in manifest['files']:
         check(root / item['path'], item)
     for repo in json.loads((root / 'provenance/sources.json').read_text())['repositories']:
