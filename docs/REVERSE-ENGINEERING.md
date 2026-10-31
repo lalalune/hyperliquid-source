@@ -24,6 +24,8 @@ FDE extent is still not a validated function boundary; see
 
 `ghidra_plan.py` prints a static import command for a fresh, digest-named
 project under `work/ghidra/`. Set `GHIDRA_HOME` when Ghidra is not discovered.
+On Windows it prints a PowerShell plan for `analyzeHeadless.bat`; on POSIX
+hosts it retains the shell plan for `analyzeHeadless`.
 Run the printed command when ready for the substantial import; save the tool
 version, options, log and completeness of analysis. The 1,800-second per-file
 analysis budget may produce partial results. Reuse that project for later
