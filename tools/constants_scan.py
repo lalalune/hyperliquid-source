@@ -149,7 +149,7 @@ def pool_entry(data, rodata, needle, require_marker=False):
     hits = []
     for offset in starts:
         length = len(encoded)
-        if data[offset + length] not in (0, POOL_MARKER):
+        if offset + length >= len(data) or data[offset + length] not in (0, POOL_MARKER):
             continue
         if offset - 2 >= rodata['offset'] and data[offset - 2] == POOL_MARKER and data[offset - 1] == length:
             hits.append((offset - 2, True))

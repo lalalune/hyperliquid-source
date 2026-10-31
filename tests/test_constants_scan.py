@@ -68,6 +68,22 @@ class PoolTests(unittest.TestCase):
         with self.assertRaises(ScanError):
             pool_entry(self.data, self.rodata, '/cham', require_marker=True)
 
+    def test_needle_ending_at_eof_is_rejected(self):
+        data = bytearray(b'\x00' * 0x100)
+        data[0xFC] = 3
+        data[0xFD:0x100] = b'abc'
+        rodata = {'offset': 0, 'size': len(data), 'address': 0x2000}
+        with self.assertRaises(ScanError):
+            pool_entry(bytes(data), rodata, 'abc')
+
+    def test_entry_terminated_at_last_byte_still_found(self):
+        data = bytearray(b'\x00' * 0x100)
+        data[0xFB] = 3
+        data[0xFC:0xFF] = b'abc'
+        rodata = {'offset': 0, 'size': len(data), 'address': 0x2000}
+        entry, text, prefixed = pool_entry(bytes(data), rodata, 'abc')
+        self.assertEqual((entry, text, prefixed), (0x2000 + 0xFB, 0x2000 + 0xFC, False))
+
 
 class TableTests(unittest.TestCase):
     def setUp(self):
