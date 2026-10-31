@@ -1,0 +1,14 @@
+order	stage	address	behaviour
+0a	filter	0x3767210	over all users in parallel: report score above hard = class 0, above mid = class 1, others leave; the system address leaves; flag = class 1 and score >= 1000000; a failed report keeps its byte and code, byte 2 leaves
+0b	list	0x3739be0	in key order the first failed row stops with its code, the system address is skipped, the others enter a map of user to flag
+1	gate	0x2765600 head	only +0x5b3 == 1 enters; any other byte returns 0x11
+2	user list	0x3739be0	failure returns its code; rows are (user, flag) in key order
+3	tier cancels	0x2755400, 0x2731030	state byte +0x3c >= 4 and bit 0 of +0x5b0 clear asks for a cancel word; else the word stays 0x8000000000000002
+4	class	0x373d8e0	score above hard = 0, above mid = 1, above soft = 2, else 3; a failed report stops the sweep with its code
+5	healthy or system	class >= 2 or user 0xbb x 20	word 0x8000000000000001 counts index 2, other negative words index 1, a positive word is freed; no row
+6	unhealthy	class 0 or 1	counts index 3 by list flag and index 0 by low flag; low flag = class 1 and score >= 1000000
+7	row	0x28db540, 0x3736bd0	failed health stops the sweep, negative words panic; tag 2 inserts the user in the set at +0x8b8, anything else pushes a 0x80 row
+8	move	0x3735db0	every row token adds its 2 pairs to the system account, tag 3 ends the walk; the user keeps only the pairs with an odd tag and the old account map is dropped
+9	amounts	0x2765600 stage 2	odd row tag: token map amount x token word +0x78 / 1e14, a missing token or quotient >= 2^64 drops the row; even tag: every b side row at share = ceil value of a / floor value of b, 1.0 when b is 0
+10	send	0x251a290, 0x26f4400, 0x24fc8a0	orders built from the list; when any exist they are sent with source byte 1, mode 0x90009 for odd tags and 0x80008 for even tags, then flushed
+11	final check	0x28db540	after the row, score above mid or hard counts index 4 by the row byte +0x7c; a failed health stops the sweep and drops the rows left
