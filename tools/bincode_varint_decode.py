@@ -63,6 +63,19 @@ DISPATCH_FUNCTIONS = 16
 LOCATION_LEAS = (0x25593ea, 0x25593f7)
 
 
+def section_slice(data, secs, va, size):
+    """Return `(file_offset, bytes)` for a range that lies in one section."""
+    for section in secs.values():
+        if not section['addr']:
+            continue
+        if section['addr'] <= va and va + size <= section['addr'] + section['size']:
+            off = section['offset'] + va - section['addr']
+            if off < 0 or off + size > len(data):
+                raise bv.EvidenceError(f'range {va:#x}+{size} leaves the file')
+            return off, data[off:off + size]
+    raise bv.EvidenceError(f'range {va:#x}+{size} leaves its section')
+
+
 def scan(data, expected_sha256=bv.SHA256):
     digest = hashlib.sha256(data).hexdigest()
     if digest != expected_sha256:
@@ -79,8 +92,10 @@ def scan(data, expected_sha256=bv.SHA256):
         rows = []
         for va, hexbytes, meaning in anchors:
             want = bytes.fromhex(hexbytes)
-            o = bv.va_to_off(secs, va)
-            if not start <= va < end or data[o:o + len(want)] != want:
+            if not start <= va < end:
+                raise bv.EvidenceError(f'{name}: bytes at {va:#x} are not {hexbytes}')
+            o, got = section_slice(data, secs, va, len(want))
+            if got != want:
                 raise bv.EvidenceError(f'{name}: bytes at {va:#x} are not {hexbytes}')
             rows.append({'va': f'{va:#x}', 'file_offset': f'{o:#x}', 'bytes': hexbytes, 'meaning': meaning})
         o = bv.va_to_off(secs, table)

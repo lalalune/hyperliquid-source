@@ -48,6 +48,19 @@ def scan_mutated(buf):
     return dv.scan(buf, expected_sha256=hashlib.sha256(buf).hexdigest())
 
 
+class AnchorBounds(unittest.TestCase):
+    def test_anchor_inside_section_is_returned(self):
+        raw = bytes.fromhex('81f9fb000000')
+        secs = {'.text': {'addr': 0x1000, 'offset': 0, 'size': len(raw)}}
+        self.assertEqual(dv.section_slice(raw, secs, 0x1000, len(raw)), (0, raw))
+
+    def test_anchor_that_leaves_section_is_rejected(self):
+        raw = bytes.fromhex('81f9fb000000')
+        secs = {'.text': {'addr': 0x1000, 'offset': 0, 'size': 2}}
+        with self.assertRaisesRegex(bv.EvidenceError, r'range 0x1000\+6 leaves its section'):
+            dv.section_slice(raw, secs, 0x1000, len(raw))
+
+
 class Pinned(unittest.TestCase):
     def test_output_hash(self):
         self.assertEqual(hashlib.sha256(bv.render(dv.scan(data())).encode()).hexdigest(), OUTPUT_SHA256)
