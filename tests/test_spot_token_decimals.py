@@ -1,6 +1,7 @@
 import contextlib
 import filecmp
 import io
+import struct
 import sys
 import tempfile
 import unittest
@@ -121,6 +122,78 @@ class SpotTokenDecimalsTest(unittest.TestCase):
                 self.assertEqual(tool.main(['--out', tmp]), 0)
             for name in GENERATED:
                 self.assertTrue(filecmp.cmp(Path(tmp) / name, PACKET / name, shallow=False), name)
+
+
+_EHF_HDR_VA = 0x1000
+_EHF_FRAME_VA = 0x2000
+
+# CIE understood by Fdes.cie_r_encoding: id=0, version=1, aug "zR",
+# code_align=1, data_align=-1 (0x7f), retreg=0x10, aug_len=1, R enc=0x1b
+# (DW_EH_PE_pcrel | DW_EH_PE_sdata4).
+_EHF_CIE = (struct.pack('<I', 20) + struct.pack('<I', 0) + bytes([1]) + b'zR\0'
+            + bytes([1, 0x7f, 0x10, 1, 0x1b]) + b'\0\0\0')
+
+
+def _ehf_fde(va, cie_va, start, length):
+    return (struct.pack('<I', 16) + struct.pack('<I', va + 4 - cie_va)
+            + struct.pack('<i', start - (va + 8)) + struct.pack('<i', length))
+
+
+def synthetic_ehf_elf(entries):
+    """Minimal ELF whose .eh_frame_hdr search table holds the (start, length)
+    FDE entries in the given order."""
+    ehf = bytearray(_EHF_CIE)
+    fde_vas = []
+    for i, (start, length) in enumerate(entries):
+        va = _EHF_FRAME_VA + 20 + 16 * i
+        ehf += _ehf_fde(va, _EHF_FRAME_VA, start, length)
+        fde_vas.append(va)
+    ehf += b'\0' * (192 - len(ehf))  # cie_r_encoding reads a fixed 64-byte window
+    hdr = bytearray()
+    hdr += bytes([1, 0x1b, 0x03, 0x3b])
+    hdr += struct.pack('<i', _EHF_FRAME_VA - (_EHF_HDR_VA + 4))  # eh_frame_ptr
+    hdr += struct.pack('<I', len(entries))                       # fde_count
+    for (start, _length), fva in zip(entries, fde_vas):
+        hdr += struct.pack('<ii', start - _EHF_HDR_VA, fva - _EHF_HDR_VA)
+    shstr = b'\0.eh_frame_hdr\0.eh_frame\0.shstrtab\0'
+    off_hdr, off_ehf, off_shstr, shoff = 0x100, 0x200, 0x400, 0x500
+    data = bytearray(shoff + 4 * 64)
+    data[off_hdr:off_hdr + len(hdr)] = hdr
+    data[off_ehf:off_ehf + len(ehf)] = ehf
+    data[off_shstr:off_shstr + len(shstr)] = shstr
+    data[0:6] = b'\x7fELF\x02\x01'
+    struct.pack_into('<Q', data, 0x28, shoff)
+    struct.pack_into('<HHH', data, 0x3a, 64, 4, 3)
+    secs = [(0, 0, 0, 0, 0, 0),
+            (1, 1, 0, _EHF_HDR_VA, off_hdr, len(hdr)),
+            (15, 1, 0, _EHF_FRAME_VA, off_ehf, len(ehf)),
+            (25, 3, 0, 0, off_shstr, len(shstr))]
+    for i, s in enumerate(secs):
+        struct.pack_into('<IIQQQQIIQQ', data, shoff + i * 64,
+                         s[0], s[1], s[2], s[3], s[4], s[5], 0, 0, 1, 0)
+    return bytes(data)
+
+
+class FdesTableOrderTests(unittest.TestCase):
+    def test_sorted_unique_table_is_accepted(self):
+        fdes = tool.Fdes(tool.Image(synthetic_ehf_elf([(0x5000, 0x10), (0x6000, 0x20)])))
+        self.assertEqual(fdes.range_of(0x5000), {'start': 0x5000, 'end': 0x5010,
+                                                 'fde': fdes.fde[0], 'hdr_index': 0})
+        self.assertEqual(fdes.range_of(0x600f)['end'], 0x6020)
+
+    def test_duplicate_starts_are_rejected(self):
+        # Same start, contradictory lengths: range_of would flip its verdict
+        # on the entry order alone.
+        for entries in ([(0x5000, 0x10), (0x5000, 0x40)],
+                        [(0x5000, 0x40), (0x5000, 0x10)]):
+            with self.assertRaises(tool.EvidenceError):
+                tool.Fdes(tool.Image(synthetic_ehf_elf(entries)))
+
+    def test_unsorted_table_is_rejected(self):
+        # The wide 0x5000 FDE is listed before the 0x4000 FDE; bisect over the
+        # unchecked table would reject VAs the 0x5000 FDE covers.
+        with self.assertRaises(tool.EvidenceError):
+            tool.Fdes(tool.Image(synthetic_ehf_elf([(0x5000, 0x100), (0x4000, 0x10)])))
 
 
 if __name__ == '__main__':
