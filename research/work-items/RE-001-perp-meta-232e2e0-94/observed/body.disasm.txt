@@ -1,0 +1,86 @@
+# capstone 5.0.7 disassembly of perp_meta body 0x232e2e0 0x232e2e0..0x232e41e; byte records are authoritative
+232e2e0  4883ec18               sub rsp, 0x18
+232e2e4  440fb64e09             movzx r9d, byte ptr [rsi + 9]
+232e2e9  4180f902               cmp r9b, 2
+232e2ed  7508                   jne 0x232e2f7
+232e2ef  0fb606                 movzx eax, byte ptr [rsi]
+232e2f2  e9f1000000             jmp 0x232e3e8
+232e2f7  4989d0                 mov r8, rdx
+232e2fa  48ba4b598638d6c56d34   movabs rdx, 0x346dc5d63886594b
+232e304  4c89c0                 mov rax, r8
+232e307  48f7e2                 mul rdx
+232e30a  48c1ea0b               shr rdx, 0xb
+232e30e  483b5130               cmp rdx, qword ptr [rcx + 0x30]
+232e312  0f85ec000000           jne 0x232e404
+232e318  4869c210270000         imul rax, rdx, 0x2710
+232e31f  4929c0                 sub r8, rax
+232e322  4c3b4110               cmp r8, qword ptr [rcx + 0x10]
+232e326  0f83d8000000           jae 0x232e404
+232e32c  488b4108               mov rax, qword ptr [rcx + 8]
+232e330  4b8d0c40               lea rcx, [r8 + r8*2]
+232e334  48c1e104               shl rcx, 4
+232e338  0fb644082a             movzx eax, byte ptr [rax + rcx + 0x2a]
+232e33d  83f807                 cmp eax, 7
+232e340  0f83cb000000           jae 0x232e411
+232e346  440fb64608             movzx r8d, byte ptr [rsi + 8]
+232e34b  488b0e                 mov rcx, qword ptr [rsi]
+232e34e  8d5002                 lea edx, [rax + 2]
+232e351  89d6                   mov esi, edx
+232e353  83e601                 and esi, 1
+232e356  488d34f6               lea rsi, [rsi + rsi*8]
+232e35a  48ffc6                 inc rsi
+232e35d  f6c202                 test dl, 2
+232e360  7411                   je 0x232e373
+232e362  486bf664               imul rsi, rsi, 0x64
+232e366  4189d2                 mov r10d, edx
+232e369  4183e20e               and r10d, 0xe
+232e36d  4183fa02               cmp r10d, 2
+232e371  7431                   je 0x232e3a4
+232e373  f6c204                 test dl, 4
+232e376  7516                   jne 0x232e38e
+232e378  6641ba6500             mov r10w, 0x65
+232e37d  83f806                 cmp eax, 6
+232e380  741b                   je 0x232e39d
+232e382  66448917               mov word ptr [rdi], r10w
+232e386  4889f8                 mov rax, rdi
+232e389  4883c418               add rsp, 0x18
+232e38d  c3                     ret 
+232e38e  4869f610270000         imul rsi, rsi, 0x2710
+232e395  83e20c                 and edx, 0xc
+232e398  83fa04                 cmp edx, 4
+232e39b  7407                   je 0x232e3a4
+232e39d  4869f600e1f505         imul rsi, rsi, 0x5f5e100
+232e3a4  4889c8                 mov rax, rcx
+232e3a7  4809f0                 or rax, rsi
+232e3aa  48c1e820               shr rax, 0x20
+232e3ae  7414                   je 0x232e3c4
+232e3b0  4889c8                 mov rax, rcx
+232e3b3  31d2                   xor edx, edx
+232e3b5  48f7f6                 div rsi
+232e3b8  6641ba6500             mov r10w, 0x65
+232e3bd  4839ce                 cmp rsi, rcx
+232e3c0  7612                   jbe 0x232e3d4
+232e3c2  ebbe                   jmp 0x232e382
+232e3c4  89c8                   mov eax, ecx
+232e3c6  31d2                   xor edx, edx
+232e3c8  f7f6                   div esi
+232e3ca  6641ba6500             mov r10w, 0x65
+232e3cf  4839ce                 cmp rsi, rcx
+232e3d2  77ae                   ja 0x232e382
+232e3d4  4885d2                 test rdx, rdx
+232e3d7  75a9                   jne 0x232e382
+232e3d9  4488442410             mov byte ptr [rsp + 0x10], r8b
+232e3de  4889442408             mov qword ptr [rsp + 8], rax
+232e3e3  488b4c2409             mov rcx, qword ptr [rsp + 9]
+232e3e8  884708                 mov byte ptr [rdi + 8], al
+232e3eb  48894f09               mov qword ptr [rdi + 9], rcx
+232e3ef  44884f11               mov byte ptr [rdi + 0x11], r9b
+232e3f3  6641ba8601             mov r10w, 0x186
+232e3f8  66448917               mov word ptr [rdi], r10w
+232e3fc  4889f8                 mov rax, rdi
+232e3ff  4883c418               add rsp, 0x18
+232e403  c3                     ret 
+232e404  488d3db53d3c03         lea rdi, [rip + 0x33c3db5]
+232e40b  ff155f004403           call qword ptr [rip + 0x344005f]
+232e411  488d3d384f3c03         lea rdi, [rip + 0x33c4f38]
+232e418  ff1532fd4303           call qword ptr [rip + 0x343fd32]
