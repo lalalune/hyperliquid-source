@@ -87,6 +87,14 @@ class CatalogueTests(unittest.TestCase):
         d = copy.deepcopy(self.progress); del d['components']['visor']
         with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
 
+    def test_non_list_evidence_record_rejected(self):
+        # A non-list evidence value must fail closed as a ValueError, like
+        # every other malformed progress record — on base it escaped as
+        # TypeError from iterating the evidence value.
+        d = copy.deepcopy(self.progress)
+        d['components']['orderbook']['evidence'] = None
+        with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
+
 
 class VisorIndexTests(unittest.TestCase):
     def test_target_for_maps_nodes_and_visor(self):
