@@ -49,6 +49,9 @@ def artifact(release):
     path = ROOT / f'artifacts/node/{release}/hl-node'
     data = path.read_bytes()
     record = json.loads((ROOT / 'provenance/artifacts.json').read_text())
+    for entry in record['files']:
+        if not isinstance(entry, dict) or 'path' not in entry or 'sha256' not in entry:
+            raise ScanError('invalid provenance record')
     expected = next((f['sha256'] for f in record['files']
                      if f['path'] == f'artifacts/node/{release}/hl-node'), None)
     if expected is None:
