@@ -1,0 +1,13 @@
+verdict	reference	reference_says	bytes_say
+differs	ReferrerCodeEntry owner_tag	owner address plus one trailing u32	the code tree value is 20 bytes: stride 0x14 at 0x3743479, and the last dword at 0x37434cb is bytes 16 to 19 of the address compared with the user at 0x37434f1
+differs	UserReferrerBinding referrer_tag	a u32 after the 20-byte referrer	the row takes 20 bytes at +0xcd: 16 at 0x3743845, 4 at 0x374384e
+differs	row creation in set_referrer	row made only on the missing profile branch; an Err from the bucket step leaves none	the row is made before the flag test at 0x3743632..0x3743722, so a first call refused with 0xa1 keeps a new empty row
+differs	binding_by_user	a map of bindings only	tracker +0xc0, stride 0xe8; a new row also writes zero at +0x18, +0x98, +0xa8, +0xb0, +0xc0, +0xc8, and +0xa0 takes eight unset stack bytes
+differs	ReferredUserLog and referred_users	a Vec of (user, at_ms), push on each success	a B-tree keyed by user with the raw 12-byte time words as value; a user already there has the value replaced, the length stays, and the remaining count still drops
+differs	now_ms u64	an unsigned time	the signed time from the date words is clamped at 0 (0x394b8a0), so a time before 1970 is bucket 0
+same	MAX_REFERRER_CODE_LEN	100	cmp r8,0x65 with jb at 0x27de28b; the helper has no length test
+same	MIN_NEW_USERS_PER_BUCKET	1000	cmp rax,0x3e9 and floor 1000 at 0x394b8de, 0x394b8e4
+same	status numbers	390, 323, 158, 159, 161, 162	tags 0x186, 0x143, 0x9e, 0x9f, 0xa1, 0xa2
+same	order	code, self, already set, profile, width, count	the same, with the row made between self and already set
+same	missing profile	status 390, binding not written	the same at 0x3743851; the row stays with flag 0
+same	bucket	now / width, refresh on change, refuse at 0, then decrement	the same; 32-bit and 64-bit divide give one result
