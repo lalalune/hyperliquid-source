@@ -89,6 +89,8 @@ def main():
     parser.add_argument('command', choices=['verify', 'fetch'])
     args = parser.parse_args()
     manifest = json.loads((ROOT / 'provenance/artifacts.json').read_text())
+    if not isinstance(manifest, dict) or 'files' not in manifest:
+        raise ValueError('Invalid artifact manifest')
     for item in manifest['files']:
         if args.command == 'fetch':
             fetch_one(ROOT, item)
