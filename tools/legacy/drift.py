@@ -97,8 +97,8 @@ for (top, _), c in cls.items():
     per[top][c] += 1
 n = len(cls)
 print(f"{n} distinct literals (len>={min_len}, no '{{')")
-print("overall: " + "  ".join(f"{c} {tot[c]} ({100 * tot[c] / n:.1f}%)" for c in order))
-print(f"verbatim in source binary #94: {tot['grounded'] + tot['drift']} ({100 * (tot['grounded'] + tot['drift']) / n:.1f}%)")
+print("overall: " + "  ".join(f"{c} {tot[c]} ({100 * tot[c] / max(n, 1):.1f}%)" for c in order))
+print(f"verbatim in source binary #94: {tot['grounded'] + tot['drift']} ({100 * (tot['grounded'] + tot['drift']) / max(n, 1):.1f}%)")
 print(f"{'crate':18s}" + "".join(f"{c:>11s}" for c in order) + "   in#94%")
 for top, cnt in sorted(per.items(), key=lambda kv: -sum(kv[1].values())):
     m = sum(cnt.values())
