@@ -1,3 +1,6 @@
+> The original static results below describe `ffe914ad2f261fedd6b179fa085aecfa6460de52`.
+> The independent Rust component and its additional evidence are described in the final section.
+
 # RE-004: static validation of node #94's unsigned 128-bit division helper
 
 - Component: quantities/rounding, one dependency of the existing
@@ -149,3 +152,63 @@ No progress gate is requested; all incomplete component gates stay false.
 Next question: can the normalized high-denominator estimate and single correction
 be proved correct over the entire unsigned 128-bit domain, independently of this
 finite evaluator?
+
+
+## Independent Rust quotient component
+
+`components/node94-u128-division` supplies a new safe no_std two-limb quotient
+interface. The original packet had no Rust implementation. Binary long
+division on u64 limbs avoids invoking a u128 division primitive that could
+create a dependency on the compiler runtime helper under investigation. Its
+128 input-bit steps are an independently authored algorithm, not a recovery
+of the target's optimized instruction paths, performance or native ABI.
+No unlicensed inferred reference code was read or copied.
+
+The public constructor rejects a zero divisor before division. That checked
+boundary is deliberately distinct from the captured helper's divide faults;
+it is not native fault equivalence. For nonzero divisors, Rust debug and
+release each compare both complete quotient limbs on all159,431 cases from
+a fresh authenticated instruction-evaluator export. Repeated inputs remain
+included. Five tests per profile pass with zero ignored. A direct Cargo test
+explicitly ignores the corpus until its export is supplied; the runner
+supplies it and includes the test.
+
+```sh
+python3 tools/u128_division_rust.py --controls --output work/u128-rust-fresh
+python3 research/work-items/RE-004-u128-division-94/rust/verify.py
+```
+
+The runner creates one owned non-executable node94 snapshot, repeats both
+native helper decodes and the complete static evaluation, and requires the
+results to equal the unchanged original evidence.json. It rebinds the full
+incoming GNU caller and actual ff15/RELATIVE slot. Its fresh per-case stream
+must match original digest
+`3c830d08cd836da43ed56369a3cac2834dc67b4ce2aae53d82d4c7a5faf8b80e`.
+All original disassemblies, evidence.json, six ELF corruption controls and
+zero-divisor observations remain unchanged.
+
+Eight actual Rust-source mutations compile, then fail tests: bit order,
+missing top input bit, strict low-limb comparison, borrow propagation,
+cross-limb shift, high quotient limb, high divisor limb and the nonzero
+constructor boundary. Formatting and Clippy with warnings denied pass.
+Two clean offline release builds produce raw-identical13,248-byte rlibs,
+SHA256 `e0a36ee398526fcef0140935bffb1b6b1cc246a2a43ad40af0bb039713e4961c`.
+The complete emitted LLVM IR from both builds is retained. It contains the
+quotient definition and no i128 division/remainder instruction or division
+runtime call. That is a host component observation, not captured ELF identity.
+
+`rust/` retains exact tool versions, normalized command logs, comparison
+results and source pins. Its verifier checks the packet manifest, source
+bindings and static-result binding; it does not rerun Cargo or claim a build.
+Use the runner above for fresh comparison/build/control results. Successful
+owned compiler caches are removed between builds; actual archives, mutant
+sources, full vectors, IR and logs remain under the ignored output directory.
+No package was installed or fetched. Existing Rust/Cargo1.88.0 built the
+component on macOS arm64, using GNU2.47 and Apple LLVM17 for static decoding.
+
+Finite agreement does not establish the full2^256 input domain, native
+execution, Linux build provenance, ABI compatibility, historical source,
+compiler-library ownership, caller reachability or whole-node equivalence.
+The original full-domain estimate/correction proof question remains open.
+No root workspace, reference pin, imported artifact, catalogue or component
+completion gate is changed.

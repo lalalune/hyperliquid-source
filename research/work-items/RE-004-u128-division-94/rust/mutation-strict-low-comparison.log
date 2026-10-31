@@ -1,0 +1,43 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.00s
+     Running unittests src/lib.rs (work/u128-rust-retained/target-mutant-strict-low-comparison/debug/deps/hyperliquid_node94_u128_division-457d444822429af0)
+
+running 5 tests
+test tests::low_limb_borrow_reaches_the_high_limb ... ok
+test tests::checked_boundary_rejects_only_the_zero_pair ... ok
+test tests::quotient_preserves_both_limbs ... FAILED
+test tests::exact_division_and_smaller_numerators ... FAILED
+test tests::authenticated_target_corpus ... FAILED
+
+failures:
+
+---- tests::quotient_preserves_both_limbs stdout ----
+
+thread 'tests::quotient_preserves_both_limbs' panicked at src/tests.rs:15:5:
+assertion `left == right` failed
+  left: Words { low: 18446744073709551615, high: 9223372036854775807 }
+ right: Words { low: 18446744073709551615, high: 18446744073709551615 }
+
+---- tests::exact_division_and_smaller_numerators stdout ----
+
+thread 'tests::exact_division_and_smaller_numerators' panicked at src/tests.rs:15:5:
+assertion `left == right` failed
+  left: Words { low: 0, high: 0 }
+ right: Words { low: 1, high: 0 }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- tests::authenticated_target_corpus stdout ----
+
+thread 'tests::authenticated_target_corpus' panicked at src/tests.rs:15:5:
+assertion `left == right` failed
+  left: Words { low: 0, high: 0 }
+ right: Words { low: 1, high: 0 }
+
+
+failures:
+    tests::authenticated_target_corpus
+    tests::exact_division_and_smaller_numerators
+    tests::quotient_preserves_both_limbs
+
+test result: FAILED. 2 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--lib`
