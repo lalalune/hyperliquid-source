@@ -36,7 +36,7 @@ attr_key = re.compile(r"\b(rename_all|rename_all_fields|skip_serializing_if|defa
                       r"\s*=\s*$")
 items, attr_only = {}, set()  # (top, literal) -> first file
 for root, _, files in os.walk(src):
-    if "/.git" in root:
+    if ".git" in root.split(os.sep):
         continue
     for f in files:
         if f.endswith(".rs"):

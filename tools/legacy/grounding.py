@@ -24,7 +24,7 @@ def unescape(s):
 per_dir = collections.defaultdict(lambda: [0, 0])
 misses, seen = collections.defaultdict(list), set()
 for root, _, files in os.walk(src):
-    if "/.git" in root:
+    if ".git" in root.split(os.sep):
         continue
     for f in files:
         if not f.endswith(".rs"):
