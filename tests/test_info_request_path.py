@@ -260,5 +260,50 @@ class InfoRequestPathTests(unittest.TestCase):
                 rf"{site:x}:\s+lea\s+-?0x[0-9a-f]+\(%rip\),%r\w+\s+# {anchor:x}")
 
 
+def _elf_code_mid_file(code, va=0x400000):
+    """Minimal ELF64 with `code` as the only PT_LOAD, section headers after it."""
+    shstr = b'\x00.text\x00.shstrtab\x00'
+    ehsize, phentsize, shentsize = 64, 56, 64
+    phoff = ehsize
+    code_off = phoff + phentsize
+    shoff = code_off + len(code)
+    shstr_off = shoff + 3 * shentsize
+    ident = b'\x7fELF' + bytes([2, 1, 1]) + b'\x00' * 9
+    eh = ident + struct.pack('<HHIQQQIHHHHHH', 2, 0x3E, 1, va, phoff, shoff, 0,
+                             ehsize, phentsize, 1, shentsize, 3, 2)
+    ph = struct.pack('<IIQQQQQQ', 1, 5, code_off, va, va, len(code), len(code), 0x1000)
+
+    def sh(name, typ, flags, addr, off, size):
+        return struct.pack('<IIQQQQIIQQ', name, typ, flags, addr, off, size, 0, 0, 1, 0)
+
+    shs = b'\x00' * shentsize
+    shs += sh(1, 1, 6, va, code_off, len(code))
+    shs += sh(7, 3, 0, 0, shstr_off, len(shstr))
+    return eh + ph + code + shs + shstr
+
+
+class SegmentReadBoundsTests(unittest.TestCase):
+    # A 3-byte segment tail: bytes past the segment exist in the file
+    # (section headers) but are mapped at no VA.
+    TRUNC = b'\x48\x81\xc0'
+
+    def test_read_within_segment_unchanged(self):
+        elf = irp.Elf(_elf_code_mid_file(self.TRUNC))
+        self.assertEqual(elf.read(0x400000, 3), self.TRUNC)
+        self.assertEqual(elf.read(0x400002, 1), b'\xc0')
+
+    def test_read_past_segment_end_raises(self):
+        elf = irp.Elf(_elf_code_mid_file(self.TRUNC))
+        with self.assertRaises(irp.EvidenceError):
+            elf.read(0x400000, 16)
+        with self.assertRaises(irp.EvidenceError):
+            elf.read(0x400001, 3)
+
+    def test_read_unmapped_va_still_rejected(self):
+        elf = irp.Elf(_elf_code_mid_file(self.TRUNC))
+        with self.assertRaises(irp.EvidenceError):
+            elf.read(0x500000, 1)
+
+
 if __name__ == "__main__":
     unittest.main()
