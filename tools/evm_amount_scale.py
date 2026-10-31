@@ -1186,9 +1186,13 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     parser.add_argument('--out', required=True, type=Path)
     args = parser.parse_args(argv)
-    binary = ROOT / BINARY
-    data = binary.read_bytes()
-    result, table, bounds, _ = analyse(binary, data)
+    try:
+        binary = ROOT / BINARY
+        data = binary.read_bytes()
+        result, table, bounds, _ = analyse(binary, data)
+    except (EvidenceError, OSError) as exc:
+        print(f'error: {exc}', file=sys.stderr)
+        return 1
     write_outputs(args.out, result, table, bounds, data)
     v = result['vectors']
     print(f"vectors {v['total']}, mismatches {v['mismatches']}, sites {len(result['sites'])}, "

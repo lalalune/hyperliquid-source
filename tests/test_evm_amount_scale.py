@@ -1,6 +1,8 @@
 """Controls for tools/evm_amount_scale.py (RE-004, node #94)."""
 
+import contextlib
 import filecmp
+import io
 import hashlib
 import importlib.util
 import sys
@@ -316,6 +318,26 @@ class Evaluator(unittest.TestCase):
         self.assertEqual(m.regs[eas.RCX], 2 ** 64 - 3)
         m = self.execute(['mov    eax,0x80', 'bsr    rcx,rax'])
         self.assertEqual(m.regs[eas.RCX], 7)
+
+
+class MainErrorHandlingTests(unittest.TestCase):
+    def test_missing_binary_is_one_line_error(self):
+        # main() takes no --binary flag: the binary path is fixed, so point
+        # the module at a nonexistent path and confirm the missing file is
+        # reported as a one-line diagnostic instead of a traceback.
+        old = eas.BINARY
+        eas.BINARY = 'artifacts/node/94/does-not-exist-hl-node'
+        try:
+            err = io.StringIO()
+            with tempfile.TemporaryDirectory() as d:
+                with contextlib.redirect_stderr(err):
+                    rc = eas.main(['--out', str(Path(d) / 'out')])
+        finally:
+            eas.BINARY = old
+        self.assertEqual(rc, 1)
+        self.assertTrue(err.getvalue().startswith('error: '))
+        self.assertEqual(len(err.getvalue().strip().splitlines()), 1)
+        self.assertNotIn('Traceback', err.getvalue())
 
 
 if __name__ == '__main__':
