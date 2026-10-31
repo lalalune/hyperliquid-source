@@ -418,7 +418,7 @@ def main(argv=None):
     withdrawal_encoder = decode_encoder(data, mapping, encoder_va)
     report = {
         'release': f'node{args.release}',
-        'artifact': str(args.artifact.relative_to(ROOT)),
+        'artifact': args.artifact.relative_to(ROOT).as_posix(),
         'artifact_sha256': actual,
         'artifact_size': len(data),
         'coordinate_system': 'linked VA; file offset = VA - 0x1000 inside .text, '

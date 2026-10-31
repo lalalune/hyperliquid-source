@@ -1152,23 +1152,24 @@ def analyse(binary_path, data):
 
 def write(out, result, exponents, byte_dump):
     out.mkdir(parents=True, exist_ok=True)
-    (out / 'evidence.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
+    (out / 'evidence.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n',
+                                       encoding='utf-8', newline='\n')
     rows = ['fn_start\tfn_end\tfde\tsize\tlea_sites\tladder_load\tladder_sub\tjoin\tresult_reg\tdisp_wei\tdisp_sz\tmismatch']
     for r in result['holders']:
         for c in r['ladders']:
             rows.append('\t'.join([r['start'], r['end'], r['fde'], str(r['size']), ','.join(r['lea_sites']),
                                    c['load_va'], c['sub_va'], c['join_va'], c['result_reg'],
                                    hex(c['wei_disp']), hex(c['sz_disp']), str(c['mismatch'])]))
-    (out / 'holders.tsv').write_text('\n'.join(rows) + '\n')
+    (out / 'holders.tsv').write_text('\n'.join(rows) + '\n', encoding='utf-8', newline='\n')
     rows = ['name\tentry\tsize\tvectors\tmismatch\tb_nonzero_only\tformula']
     for h in result['helpers']:
         rows.append('\t'.join([h['name'], h['entry'], str(h['size']), str(h['vectors']), str(h['mismatch']),
                                str(h['b_nonzero_only']), h['formula']]))
-    (out / 'helpers.tsv').write_text('\n'.join(rows) + '\n')
+    (out / 'helpers.tsv').write_text('\n'.join(rows) + '\n', encoding='utf-8', newline='\n')
     rows = ['k\tvalue\tadmitted\tequals_10_pow_k']
     for e in exponents:
         rows.append(f"{e['k']}\t{e['value'] if e['value'] is not None else 'panic'}\t{int(e['admitted'])}\t{int(e['equals_pow10'])}")
-    (out / 'pow10-exponents.tsv').write_text('\n'.join(rows) + '\n')
+    (out / 'pow10-exponents.tsv').write_text('\n'.join(rows) + '\n', encoding='utf-8', newline='\n')
     lines = []
     for entry in sorted(byte_dump):
         raw = byte_dump[entry]
@@ -1176,7 +1177,7 @@ def write(out, result, exponents, byte_dump):
         for k in range(0, len(raw), 16):
             lines.append(f'{entry + k:x}: {raw[k:k + 16].hex(" ")}')
         lines.append('')
-    (out / 'helper-bytes.txt').write_text('\n'.join(lines))
+    (out / 'helper-bytes.txt').write_text('\n'.join(lines), encoding='utf-8', newline='\n')
 
 
 def main(argv=None):

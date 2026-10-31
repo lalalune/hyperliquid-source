@@ -825,7 +825,8 @@ def analyse(binary_path, data):
 
 def write(out, result, boundary_rows, details):
     out.mkdir(parents=True, exist_ok=True)
-    (out / 'evidence.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
+    (out / 'evidence.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n',
+                                       encoding='utf-8', newline='\n')
     rows = ['ref_va\tfn_start\tfn_end\tfde\tsize\tgrid\tgrid_mismatch\tfactor_window_mismatch\tdoubles\tclamp_mismatch'
             '\tdex_variant\tdirect_calls']
     for s in result['sites']:
@@ -834,17 +835,17 @@ def write(out, result, boundary_rows, details):
                                str(r['grid_mismatch']), str(r['factor_window_mismatch']), str(r['doubles']),
                                str(r['clamp_mismatch']), str(int(s['head']['dex_reciprocal'])),
                                ','.join(s['head']['direct_calls'])]))
-    (out / 'sites.tsv').write_text('\n'.join(rows) + '\n')
+    (out / 'sites.tsv').write_text('\n'.join(rows) + '\n', encoding='utf-8', newline='\n')
     rows = ['amount\tfactor\ttag\tvalue\trecorded']
     for a, f, tag, val, rec in boundary_rows:
         rows.append(f"{a}\t{f}\t{tag:#x}\t{'-' if val is None else val}\t{int(rec)}")
-    (out / 'boundaries.tsv').write_text('\n'.join(rows) + '\n')
+    (out / 'boundaries.tsv').write_text('\n'.join(rows) + '\n', encoding='utf-8', newline='\n')
     lines = []
     for start, raw in details:
         lines.append(f'# tail bytes of function {start:#x}')
         lines.append(raw.hex())
         lines.append('')
-    (out / 'tail-bytes.txt').write_text('\n'.join(lines))
+    (out / 'tail-bytes.txt').write_text('\n'.join(lines), encoding='utf-8', newline='\n')
 
 
 def main(argv=None):
