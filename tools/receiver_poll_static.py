@@ -103,8 +103,13 @@ def relocations(data):
                     raise ValueError('Unexpected dynamic symbol table')
                 symbol = symbol_section['offset'] + (info >> 32) * entry_size
                 name_offset = struct.unpack_from('<I', data, symbol)[0]
-                start = string_section['offset'] + name_offset
-                name = data[start:data.index(b'\0', start)].decode('ascii')
+                if name_offset >= string_section['size']:
+                    raise ValueError('Receiver dynamic symbol name offset outside string table')
+                string_table = data[string_section['offset']:string_section['offset'] + string_section['size']]
+                end = string_table.find(b'\0', name_offset)
+                if end < 0:
+                    raise ValueError('Receiver dynamic symbol name not terminated inside string table')
+                name = string_table[name_offset:end].decode('ascii')
                 if info & 0xFFFFFFFF != 6 or name != 'exit' or addend != 0:
                     raise ValueError('Exit import binding changed')
                 exit_symbol = True
