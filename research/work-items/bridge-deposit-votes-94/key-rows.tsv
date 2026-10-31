@@ -1,0 +1,22 @@
+function	at	bytes	operation	note
+0x374e2e0	0x374e334	0f8315020000	jcc	amount limit test
+0x374e2e0	0x374e36b	e860f288ff	call	finished lookup
+0x374e2e0	0x374e38b	493b8638010000	cmp	block word against last pruned
+0x374e2e0	0x374e392	0f86c2010000	jcc	at or below: 0x2e
+0x374e2e0	0x374e3df	e82c911f00	call	tracker
+0x374e2e0	0x374e4d7	e8341ec5ff	call	finished insert
+0x374e2e0	0x374e510	e86b3f1f00	call	row removal
+0x374e2e0	0x374e532	4801e8	add	bal plus amount
+0x374e2e0	0x374e549	0f934302	set	result byte: amount at or over the level
+0x3947510	0x394788f	e8bc5e69ff	call	row lookup
+0x3947510	0x3947c7b	80784000	cmp	row finished byte
+0x3947510	0x3947e1b	e88090ffff	call	quorum before the insert
+0x3947510	0x3947e81	e81a90ffff	call	quorum after the insert
+0x3947510	0x3947e93	c6414001	mov	row finished
+0x3940ea0	0x3940f26	e8355ca2ff	call	stake test
+0x3940ea0	0x3941023	4020eb	and	both tests
+0x3bde1f0	0x3bde208	660f2ec8	ucomisd	q against zero
+0x3bde1f0	0x3bde591	660f2edc	ucomisd	hits against q times list
+0x1e646c0	0x1e6482b	66c740082b00	mov	status 0x2b
+0x1e646c0	0x1e647a9	c644244b01	mov	listed vote tag
+0x1e5feb0	0x1e5ff19	c68424ca00000001	mov	voter vote tag
