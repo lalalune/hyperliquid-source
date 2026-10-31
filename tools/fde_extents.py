@@ -176,7 +176,10 @@ def fde_extents(data):
     if frame_ptr != frame['address']:
         raise ValueError('.eh_frame_hdr eh_frame_ptr does not name .eh_frame')
     executable = [s for s in secs if s['flags'] & 4 and s['size']]
-    except_table = next((s for s in secs if s['name'] == '.gcc_except_table'), None)
+    except_tables = [s for s in secs if s['name'] == '.gcc_except_table']
+    if len(except_tables) > 1:
+        raise ValueError('Duplicate section: .gcc_except_table')
+    except_table = except_tables[0] if except_tables else None
     by_va = {f['fde']: f for f in fdes}
     if len(by_va) != len(fdes):
         raise ValueError('Duplicate FDE record addresses')
