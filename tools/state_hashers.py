@@ -100,7 +100,11 @@ def build(data: bytes, expected_sha256: str = sr.EXPECTED_SHA256) -> dict:
         for site in leas.get(slot, ()):
             f = own(site)
             if f is not None:
-                fn_paths[f].add(p.decode())
+                try:
+                    decoded = p.decode()
+                except UnicodeDecodeError:
+                    raise EvidenceError(f"Location path at {a:#x} is not valid UTF-8")
+                fn_paths[f].add(decoded)
     fp_prefix = sr.FIRST_PARTY.decode()
 
     def first_party_files(f):
