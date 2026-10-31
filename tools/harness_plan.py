@@ -121,6 +121,11 @@ def validate_request(request: dict, fixtures_by_id: dict) -> dict:
         if fid not in fixtures_by_id:
             raise ValueError(f'unknown fixture_id: {fid}')
         row = fixtures_by_id[fid]
+        if row['target_release'] != release:
+            raise ValueError(
+                f'fixture {fid} release {row["target_release"]!r} does not match '
+                f'request release {release!r}'
+            )
         if row['target_sha256'] != request['target_sha256']:
             raise ValueError(
                 f'fixture {fid} digest {row["target_sha256"]} does not match '

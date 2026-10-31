@@ -75,6 +75,39 @@ class RequestGateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'target_sha256 does not match'):
             hp.validate_request(req, self.fixtures)
 
+    def test_selected_fixture_release_must_match_request(self):
+        import copy
+        for release in ('115', 'visor', 'unknown', None, 94, [], {}):
+            with self.subTest(release=release):
+                fixtures = copy.deepcopy(self.fixtures)
+                req = self._load('plan-only.json')
+                fixtures[req['fixture_ids'][0]]['target_release'] = release
+                with self.assertRaisesRegex(ValueError, 'release.*does not match request release'):
+                    hp.validate_request(req, fixtures)
+
+    def test_release_mismatch_cannot_be_hidden_by_matching_digest(self):
+        import copy
+        fixtures = copy.deepcopy(self.fixtures)
+        req = self._load('plan-only.json')
+        req['target_release'] = '115'
+        req['target_sha256'] = hp.KNOWN_TARGET_DIGESTS['115']
+        row = fixtures[req['fixture_ids'][0]]
+        row['target_sha256'] = req['target_sha256']
+        self.assertEqual(row['target_release'], '94')
+        with self.assertRaisesRegex(ValueError, 'release.*does not match request release'):
+            hp.validate_request(req, fixtures)
+
+    def test_matching_release_and_digest_accepted_for_every_target(self):
+        import copy
+        for release, digest in hp.KNOWN_TARGET_DIGESTS.items():
+            with self.subTest(release=release):
+                fixtures = copy.deepcopy(self.fixtures)
+                req = self._load('plan-only.json')
+                req['target_release'], req['target_sha256'] = release, digest
+                row = fixtures[req['fixture_ids'][0]]
+                row['target_release'], row['target_sha256'] = release, digest
+                self.assertEqual(hp.validate_request(req, fixtures)['target_release'], release)
+
     def test_unknown_fixture_rejected(self):
         req = self._load('plan-only.json')
         req['fixture_ids'] = ['does-not-exist']
