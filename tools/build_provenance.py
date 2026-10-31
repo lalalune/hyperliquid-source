@@ -84,6 +84,36 @@ def dynamic(data, by_name):
     return tags, name
 
 
+def has_gnu_property_note(data, secs):
+    """Identify GNU type-5 records in SHT_NOTE data, independently of names."""
+    shoff = struct.unpack_from('<Q', data, 40)[0]
+    shentsize = struct.unpack_from('<H', data, 58)[0]
+    found = False
+    for index, sec in enumerate(secs):
+        if sec['type'] != 7:  # SHT_NOTE is file-backed; sections() checks its span.
+            continue
+        declared_alignment = struct.unpack_from('<Q', data, shoff + index * shentsize + 48)[0]
+        alignment = 8 if declared_alignment == 8 else 4
+        offset, end = sec['offset'], sec['offset'] + sec['size']
+        while offset < end:
+            if end - offset < 12:
+                raise ValueError('Note header outside section')
+            namesz, descsz, kind = struct.unpack_from('<III', data, offset)
+            name_start = offset + 12
+            name_end = name_start + namesz
+            desc_start = sec['offset'] + ((name_end - sec['offset'] + alignment - 1) // alignment) * alignment
+            desc_end = desc_start + descsz
+            if name_end > end or desc_end > end:
+                raise ValueError('Note payload outside section')
+            if kind == 5 and data[name_start:name_end] == b'GNU\0':
+                found = True
+            offset = (end if desc_end == end else sec['offset'] +
+                      ((desc_end - sec['offset'] + alignment - 1) // alignment) * alignment)
+            if offset > end:
+                raise ValueError('Note padding outside section')
+    return found
+
+
 def derive(data):
     secs = sections(data)
     by_name = {s['name']: s for s in secs}
@@ -94,7 +124,7 @@ def derive(data):
     f.exact('elf.has_symtab', '.symtab' in by_name, note='section table lookup')
     f.exact('elf.debug_sections', sorted(n for n in by_name if n.startswith(('.debug', '.zdebug'))),
             note='section table lookup')
-    f.exact('elf.has_gnu_property_note', '.note.gnu.property' in by_name,
+    f.exact('elf.has_gnu_property_note', has_gnu_property_note(data, secs),
             note='absent note means no IBT/SHSTK property was recorded by the linker')
 
     comment = by_name.get('.comment')

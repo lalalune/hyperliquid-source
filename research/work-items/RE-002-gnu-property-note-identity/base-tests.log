@@ -1,0 +1,62 @@
+test_later_property_follows_an_eight_byte_aligned_note (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_later_property_follows_an_eight_byte_aligned_note) ... FAIL
+test_name_alone_does_not_establish_the_note_identity (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_name_alone_does_not_establish_the_note_identity) ... 
+  test_name_alone_does_not_establish_the_note_identity (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_name_alone_does_not_establish_the_note_identity) (payload='040000001000000005000000474e5500028000c0040000000100000000000000', section_type=1) ... FAIL
+  test_name_alone_does_not_establish_the_note_identity (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_name_alone_does_not_establish_the_note_identity) (payload='04000000100000000500000042414400028000c0040000000100000000000000', section_type=7) ... FAIL
+  test_name_alone_does_not_establish_the_note_identity (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_name_alone_does_not_establish_the_note_identity) (payload='040000001000000001000000474e5500028000c0040000000100000000000000', section_type=7) ... FAIL
+test_property_survives_a_section_rename (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_property_survives_a_section_rename) ... 
+  test_property_survives_a_section_rename (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_property_survives_a_section_rename) (name=b'.note.provenance-control') ... FAIL
+test_truncated_note_payload_is_not_presence_evidence (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_truncated_note_payload_is_not_presence_evidence) ... FAIL
+
+======================================================================
+FAIL: test_later_property_follows_an_eight_byte_aligned_note (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_later_property_follows_an_eight_byte_aligned_note)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/dev/shm/hyperliquid-wave-next-20261031/provenance/checkout/tests/test_gnu_property_note_provenance.py", line 62, in test_later_property_follows_an_eight_byte_aligned_note
+    self.assertIs(present(elf(b'.note.combined', payload)), True)
+AssertionError: False is not True
+
+======================================================================
+FAIL: test_name_alone_does_not_establish_the_note_identity (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_name_alone_does_not_establish_the_note_identity) (payload='040000001000000005000000474e5500028000c0040000000100000000000000', section_type=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/dev/shm/hyperliquid-wave-next-20261031/provenance/checkout/tests/test_gnu_property_note_provenance.py", line 56, in test_name_alone_does_not_establish_the_note_identity
+    self.assertIs(present(elf(b'.note.gnu.property', payload, kind)), False)
+AssertionError: True is not False
+
+======================================================================
+FAIL: test_name_alone_does_not_establish_the_note_identity (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_name_alone_does_not_establish_the_note_identity) (payload='04000000100000000500000042414400028000c0040000000100000000000000', section_type=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/dev/shm/hyperliquid-wave-next-20261031/provenance/checkout/tests/test_gnu_property_note_provenance.py", line 56, in test_name_alone_does_not_establish_the_note_identity
+    self.assertIs(present(elf(b'.note.gnu.property', payload, kind)), False)
+AssertionError: True is not False
+
+======================================================================
+FAIL: test_name_alone_does_not_establish_the_note_identity (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_name_alone_does_not_establish_the_note_identity) (payload='040000001000000001000000474e5500028000c0040000000100000000000000', section_type=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/dev/shm/hyperliquid-wave-next-20261031/provenance/checkout/tests/test_gnu_property_note_provenance.py", line 56, in test_name_alone_does_not_establish_the_note_identity
+    self.assertIs(present(elf(b'.note.gnu.property', payload, kind)), False)
+AssertionError: True is not False
+
+======================================================================
+FAIL: test_property_survives_a_section_rename (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_property_survives_a_section_rename) (name=b'.note.provenance-control')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/dev/shm/hyperliquid-wave-next-20261031/provenance/checkout/tests/test_gnu_property_note_provenance.py", line 50, in test_property_survives_a_section_rename
+    self.assertIs(present(elf(name, note())), True)
+AssertionError: False is not True
+
+======================================================================
+FAIL: test_truncated_note_payload_is_not_presence_evidence (test_gnu_property_note_provenance.GNUPropertyNoteTests.test_truncated_note_payload_is_not_presence_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/dev/shm/hyperliquid-wave-next-20261031/provenance/checkout/tests/test_gnu_property_note_provenance.py", line 65, in test_truncated_note_payload_is_not_presence_evidence
+    with self.assertRaisesRegex(ValueError, 'Note payload outside section'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.002s
+
+FAILED (failures=6)

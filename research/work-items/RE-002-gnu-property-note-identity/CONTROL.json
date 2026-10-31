@@ -1,0 +1,156 @@
+{
+  "baseCommit": "1f8c67c63ca4794c9689235471c60297f8a5c985",
+  "baseHelperSHA256": "0e5d85c97c671fabd528882566b5bcb3e8187e84f53c3fdcb45210c88df29887",
+  "fixedHelperSHA256": "38f7a381c20b853207ebecc287ac82d556437d08a6608bb749dee92c859883c2",
+  "fixtureSource": "int main(void) { return 0; }\n",
+  "fixtureSourceSHA256": "2ad75d95660563887d8d3f1d0ae1dcf18c2379cbd83a5c72f5ab276351ee6949",
+  "toolVersions": {
+    "gcc": "gcc (Debian 14.2.0-19) 14.2.0",
+    "objcopy": "GNU objcopy (GNU Binutils for Debian) 2.44",
+    "readelf": "GNU readelf (GNU Binutils for Debian) 2.44"
+  },
+  "commands": [
+    {
+      "argv": [
+        "gcc",
+        "-O0",
+        "-Wl,--build-id=none,-z,ibt",
+        "fixture.c",
+        "-o",
+        "original.elf"
+      ],
+      "exitCode": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "",
+      "export": null
+    },
+    {
+      "argv": [
+        "objcopy",
+        "--rename-section",
+        ".note.gnu.property=.note.provenance-control",
+        "original.elf",
+        "renamed.elf"
+      ],
+      "exitCode": 0,
+      "stdoutSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "",
+      "export": null
+    },
+    {
+      "argv": [
+        "readelf",
+        "--notes",
+        "--program-headers",
+        "--wide",
+        "original.elf"
+      ],
+      "exitCode": 0,
+      "stdoutSHA256": "3fa54d91078ad84456b36d459013fd3c88a32642c327e8a90d4b6d23e050910d",
+      "stderr": "",
+      "export": "original.readelf.txt"
+    },
+    {
+      "argv": [
+        "readelf",
+        "--notes",
+        "--program-headers",
+        "--wide",
+        "renamed.elf"
+      ],
+      "exitCode": 0,
+      "stdoutSHA256": "7a08192cd4eb69f0803d0d44fe6c5d4edddf13a3cb22b8bf660e05f5941a00f3",
+      "stderr": "",
+      "export": "renamed.readelf.txt"
+    }
+  ],
+  "results": {
+    "original": {
+      "bytes": 15752,
+      "SHA256": "3c22cd3ee9f3edf595ccbc3f353e68342af9c64268819e05b516596480e2fc21",
+      "baseFact": {
+        "key": "elf.has_gnu_property_note",
+        "label": "exact",
+        "value": true,
+        "evidence": {
+          "note": "absent note means no IBT/SHSTK property was recorded by the linker"
+        }
+      },
+      "fixedFact": {
+        "key": "elf.has_gnu_property_note",
+        "label": "exact",
+        "value": true,
+        "evidence": {
+          "note": "absent note means no IBT/SHSTK property was recorded by the linker"
+        }
+      },
+      "noteSection": {
+        "type": 7,
+        "flags": 2,
+        "address": 8416,
+        "offset": 8416,
+        "size": 48,
+        "name": ".note.gnu.property"
+      },
+      "noteSHA256": "5c4eadc048677e9201f774c7be11e1cde333dea63bbb7566e92d0865cab26468",
+      "noteHex": "040000002000000005000000474e5500020000c0040000000100000000000000028000c0040000000100000000000000",
+      "containingNoteSegments": [
+        {
+          "type": 4,
+          "file_offset": 8416,
+          "bytes": 48
+        },
+        {
+          "type": 1685382483,
+          "file_offset": 8416,
+          "bytes": 48
+        }
+      ]
+    },
+    "renamed": {
+      "bytes": 15752,
+      "SHA256": "5e704b05f19ef45e5a9d6e68ca193839f09df8ec251eaa0b6094dcf12b68ba38",
+      "baseFact": {
+        "key": "elf.has_gnu_property_note",
+        "label": "exact",
+        "value": false,
+        "evidence": {
+          "note": "absent note means no IBT/SHSTK property was recorded by the linker"
+        }
+      },
+      "fixedFact": {
+        "key": "elf.has_gnu_property_note",
+        "label": "exact",
+        "value": true,
+        "evidence": {
+          "note": "absent note means no IBT/SHSTK property was recorded by the linker"
+        }
+      },
+      "noteSection": {
+        "type": 7,
+        "flags": 2,
+        "address": 8416,
+        "offset": 8416,
+        "size": 48,
+        "name": ".note.provenance-control"
+      },
+      "noteSHA256": "5c4eadc048677e9201f774c7be11e1cde333dea63bbb7566e92d0865cab26468",
+      "noteHex": "040000002000000005000000474e5500020000c0040000000100000000000000028000c0040000000100000000000000",
+      "containingNoteSegments": [
+        {
+          "type": 4,
+          "file_offset": 8416,
+          "bytes": 48
+        },
+        {
+          "type": 1685382483,
+          "file_offset": 8416,
+          "bytes": 48
+        }
+      ]
+    }
+  },
+  "noteBytesUnchanged": true,
+  "ELFExecuted": false,
+  "limits": "Independent ordinary host-ELF metadata control. No captured target flags, CPU features, host/runtime compatibility or reconstruction are inferred. Fixture hashes bind this observed compiler/linker run."
+}
