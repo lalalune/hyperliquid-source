@@ -1,0 +1,26 @@
+scenario	result	orders	calls	model
+snapshot: first block of a new date stores Some(total)	return	[1, 5000000]	["dfc24b077bc1425ad1dea75bcb6f8158e10df303"]	same
+snapshot: same date: stored value kept	return	[1, 77]	[]	same
+snapshot: previous date later than now: kept	return	[1, 77]	[]	same
+snapshot: chain byte 1: no compare, kept	return	[1, 77]	[]	same
+snapshot: no HLP vault: kept	return	[1, 77]	[]	same
+snapshot: negative total stores Some(0)	return	[1, 0]	["dfc24b077bc1425ad1dea75bcb6f8158e10df303"]	same
+snapshot: no clearinghouse: panic only after the vault is found	unwrap	null	[]	same
+sell at 0.97 of the midpoint, plus one tick	return	[[1, 2000, 970100]]	["producer", "oracle", "hash", "tick", "insert", "post", "drain", "final", "free", "ctx_drop"]	same
+sell on an exact multiple still adds a tick	return	[[1, 2000, 2425100]]	["producer", "oracle", "hash", "tick", "insert", "post", "drain", "final", "free", "ctx_drop"]	same
+buy at 1.03 of the midpoint, down to a tick	return	[[0, 2000, 1030000]]	["producer", "oracle", "hash", "tick", "insert", "post", "drain", "final", "free", "ctx_drop"]	same
+price below one tick on a buy: limit becomes 1	return	[[0, 2000, 1]]	["producer", "oracle", "hash", "tick", "insert", "post", "drain", "final", "free", "ctx_drop"]	same
+notional 9999999 skipped	return	[]	["producer", "oracle", "hash", "free", "ctx_drop"]	same
+notional 10000000 acts	return	[[1, 2000, 970100]]	["producer", "oracle", "hash", "tick", "insert", "post", "drain", "final", "free", "ctx_drop"]	same
+notional past 64 bits acts	return	[[1, 4611686018427387904, 970100]]	["producer", "oracle", "hash", "tick", "insert", "post", "drain", "final", "free", "ctx_drop"]	same
+no bid or no ask: no order, final step still runs	return	[]	["producer", "oracle", "hash", "final", "free", "ctx_drop"]	same
+side byte 2 ends the walk	return	[]	["producer", "oracle", "hash", "free", "ctx_drop"]	same
+producer none: returns before the oracle table	return	[]	["producer"]	same
+insert error: no post step, buffer freed	return	[[1, 2000, 970100]]	["producer", "oracle", "hash", "tick", "insert", "free", "final", "free", "ctx_drop"]	same
+insert error with capacity 0: nothing freed	return	[[1, 2000, 970100]]	["producer", "oracle", "hash", "tick", "insert", "final", "free", "ctx_drop"]	same
+filled rows are drained after the post step	return	[[1, 2000, 970100]]	["producer", "oracle", "hash", "tick", "insert", "post", "free", "drain", "final", "free", "ctx_drop"]	same
+flag word not 1: hash stays zero	return	[[1, 2000, 970100]]	["producer", "oracle", "tick", "insert", "post", "drain", "final", "free", "ctx_drop"]	same
+no clearinghouse: panic before the producer	unwrap	[]	[]	same
+oracle index past the table: bounds panic	bounds	[]	["producer", "oracle", "hash"]	same
+dex past the collection: panic only for a large row	unwrap	[]	["producer", "oracle", "hash"]	same
+dex past the collection, small row: skipped	return	[]	["producer", "oracle", "hash", "free", "ctx_drop"]	same

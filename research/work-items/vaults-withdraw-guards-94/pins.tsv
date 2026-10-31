@@ -1,0 +1,93 @@
+group	va	instruction	meaning
+vote	0x2357731	ucomisd xmm1,xmm0	fraction below 0 refused
+vote	0x2357735	ja 0x235b84b	jump to code 271
+vote	0x235773b	ucomisd xmm0,[0x20a730]:64	fraction above 1 refused
+vote	0x2357743	ja 0x235b84b	jump to code 271
+vote	0x2357749	movsd.st xmm0,[r13+0x39c8]:64	store of max_hlp_withdraw_fraction_per_day
+vote	0x235b84f	mov [rax]:16,0x10f	code 271 (0x10f)
+begin_block	0x222a0fa	mov raxd,[r14+0x8]:32	previous time word kept by the caller
+begin_block	0x222a10a	lea rsi,[rsp+0x20]:64	previous time pointer
+begin_block	0x222a112	call 0x2702e80	snapshot step in the begin block list
+snapshot	0x2702e91	mov raxd,[rsi]:32	date word of the previous block
+snapshot	0x2702e93	cmp raxd,[rdi+0x60]:32	compare with the date word of the block time at +0x60
+snapshot	0x2702e96	jge 0x2703022	same or later: nothing to do
+snapshot	0x2702e9c	movzx raxd,[rdi+0x8f2]:8	chain byte
+snapshot	0x2702ea3	cmp raxd,0x2	below 2: nothing to do
+snapshot	0x2702eae	movups xmm0,[0x3ef9dc]:128	chain 2 address bytes
+snapshot	0x2702eba	mov [rsp+0x20]:32,0xa0b0eafa	chain 2 address tail
+snapshot	0x2702ed3	movups xmm0,[0x3ef9f0]:128	chain above 2 address bytes
+snapshot	0x2702edf	mov [rsp+0x20]:32,0x3f30de1	chain above 2 address tail
+snapshot	0x2702fba	cmp [r14+0x5c8]:64,0x0	clearinghouse count, read only after the vault is found
+snapshot	0x2703001	call [0x5774968]:64	total equity through its slot
+snapshot	0x2703007	xor rcxd,rcxd	floor at 0
+snapshot	0x270300c	cmovg rcx,rax	floor at 0
+snapshot	0x2703010	mov [r14+0xbb0]:64,0x1	Option tag
+snapshot	0x270301b	mov [r14+0xbb8]:64,rcx	Option value
+entry	0x26f7297	cmp [rdi+0x5c8]:64,0x0	clearinghouse count before any work
+entry	0x26f72f3	call [0x57748c8]:64	row producer through its slot, fraction in xmm0
+entry	0x26f7301	neg rax	none word: neg overflows on 0x8000000000000000
+entry	0x26f7304	jo 0x26f7b7f	none word returns at once
+entry	0x26f732f	add rbx,0x60	oracle table from clearinghouse +0x60
+entry	0x26f733e	call 0x27ae040	oracle table
+entry	0x26f7343	cmp [rbp]:32,0x1	flag word 1 computes the 32-byte hash
+entry	0x26f7351	movzx rsid,[rbp+0x8f2]:8	chain byte passed to the hash
+entry	0x26f7363	call 0x3987cb0	hash
+row	0x26f7399	add [rax+0x7f048d4b]:8,raxb	row stride 0x18: len times 3
+row	0x26f73a4	lea rax,[r14+rax*8]:64	row stride 0x18: end pointer
+row	0x26f740b	movzx raxd,[r14+0x8]:8	side byte
+row	0x26f7410	cmp raxb,0x2	side byte 2 ends the walk
+row	0x26f7437	mov rbx,rdx	asset / 10000: 0x346dc5d63886594b
+row	0x26f743e	imul3 rax,rbx,0x2710	asset modulo 10000
+row	0x26f7448	cmp r13,rsi	oracle row bound
+row	0x26f7474	mul [rcx+rdx*1+0x20]:64	size times oracle value, 64 x 64
+row	0x26f747f	cmp r14,[rsp+0x1a0]:64	above 0x7ffffffffffffffe acts
+row	0x26f7492	cmp [rbp+0x5c8]:64,0x0	clearinghouse count checked for a small row
+row	0x26f74af	cmp r14,0x98967f	notional floor 9,999,999
+row	0x26f74b6	ja 0x26f7520	above the floor acts
+book	0x26f7520	cmp rbx,[rbp+0x3378]:64	dex bound
+book	0x26f752d	imul3 r14,rbx,0x138	dex stride 0x138
+book	0x26f7578	cmp r13,[r14+0x10]:64	book bound
+book	0x26f758b	imul3 r15,r13,0xd8	book stride 0xd8
+book	0x26f75b3	mov rbp,[r14+r15*1+0xb0]:64	book asset +0xb0
+book	0x26f75cf	cmp rdx,[rcx+0x5c8]:64	asset of the book over 10000 against the clearinghouse count
+book	0x26f7604	lea rsi,[r14+0x80]:64	book +0x80 for the best keys
+book	0x26f7613	call 0x23973d0	best keys
+price	0x26f7641	shr rax,0x1	midpoint: (a & b) + ((a ^ b) >> 1)
+price	0x26f7650	jne 0x26f7680	no price branch
+price	0x26f765c	lea rax,[rcx+0xa]:64	no price word 0x800000000000000a
+price	0x26f7695	movsd xmm2,[0x20ac58]:64	sell factor 0.97
+price	0x26f769d	test [rsp+0x7]:8,0x1	side byte bit 0 picks 0.97
+price	0x26f76a4	movsd xmm2,[0x20a770]:64	buy factor 1.03
+price	0x26f76bc	call [0x576f6d8]:64	round
+price	0x26f76c6	maxsd xmm0,xmm1	floor at 0
+price	0x26f7732	cmp r12,0x1	zero price becomes 1
+price	0x26f7736	adc r12,0x0	zero price becomes 1
+price	0x26f7743	call 0x230b390	tick
+price	0x26f7775	inc rdx	quotient plus one
+price	0x26f7787	cmove rdx,rax	buy keeps the quotient
+price	0x26f778e	mul rcx	quotient times tick
+price	0x26f7794	cmp rax,0x1	zero limit becomes 1
+price	0x26f7798	adc rax,0x0	zero limit becomes 1
+record	0x26f78aa	mov [rsp+0x50]:64,0x1	record word 0
+record	0x26f78b3	mov [rsp+0x58]:64,r12	record size
+record	0x26f78b8	mov [rsp+0xc0]:64,0x6	record +0x70 tag 6
+record	0x26f78c4	mov [rsp+0xd0]:64,rsi	record limit
+record	0x26f78cc	mov [rsp+0xd8]:64,rcx	record time in ms
+record	0x26f78d4	mov [rsp+0xe0]:16,0x1	record +0x90
+record	0x26f78de	mov [rsp+0xf2]:8,rbpb	record side byte
+record	0x26f78fa	movupd.st xmm0,[rcx]:128	record user: the vault address
+record	0x26f78fe	mov [rsp+0x11c]:8,0x1	record +0xcc: 1
+record	0x26f7929	call 0x26ebdc0	order insert
+after	0x26f7937	cmp rbx,[rax+0x5c8]:64	clearinghouse count for the row dex
+after	0x26f7980	cmp rcx,rax	first word 0x8000000000000000 means error
+after	0x26f7a0e	call 0x26f4cd0	post-insert step
+after	0x26f7a24	imul3 rsi,r15,0x238	filled buffer 0x238 per row
+after	0x26f7aa1	jle 0x26f73d5	error capacity not positive: nothing to free
+after	0x26f73f4	call 0x24fb610	final step on every path
+exit	0x26f7b61	lea rsi,[r12+r12*2]:64	rows freed
+exit	0x26f7b7a	call 0x2782940	oracle table dropped
+host	0x2736934	mov rdi,[r13+0xbb8]:64	hlp_start_of_day_account_value in the vaultTransfer body
+host	0x273693b	movq xmm0,[r13+0x39c8]:64	max_hlp_withdraw_fraction_per_day in the vaultTransfer body
+host	0x2736944	call 0x26f6050	floor = value * (1 - fraction), helper 0x26f6050
+host	0x2736a85	je 0x2736a9e	validation flag gates the reduction loop
+host	0x2736a99	call 0x26f7280	reduction loop
