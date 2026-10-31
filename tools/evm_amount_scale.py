@@ -213,7 +213,10 @@ class Fdes:
             raise EvidenceError('CIE id is not zero')
         version = body[4]
         end = body.index(b'\0', 5)
-        aug = body[5:end].decode()
+        try:
+            aug = body[5:end].decode()
+        except UnicodeDecodeError:
+            raise EvidenceError('CIE augmentation is not valid UTF-8')
         i = end + 1
         _, i = uleb(body, i)
         _, i = uleb(body, i)
