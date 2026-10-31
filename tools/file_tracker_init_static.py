@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Target94 file-tracker initialization observations; static only."""
 import argparse,hashlib,json,re,struct,subprocess
+import sys
 from pathlib import Path
 from artifacts import ROOT,check
 from elf_index import sections
@@ -45,13 +46,17 @@ def generate(binary,output):
         offset,body=read_va(data,start,end-start)
         ranges[name]={'start_va':hex(start),'end_va':hex(end),'file_offset':hex(offset),'bytes':len(body),'sha256':hashlib.sha256(body).hexdigest()}
         raw=subprocess.check_output(['objdump','-d',f'--start-address={start:#x}',f'--stop-address={end:#x}',str(binary)],text=True)
-        (output/(name+'.objdump.txt')).write_text(raw.replace(str(binary),'<authenticated-node94>'))
-    (output/'frames.txt').write_text('\n'.join(line for line in frames.splitlines()if 'FDE'in line and any(f'pc={a:016x}..{b:016x}'in line for a,b in RANGES.values()))+'\n')
+        (output/(name+'.objdump.txt')).write_text(raw.replace(str(binary),'<authenticated-node94>'), encoding='utf-8', newline='\n')
+    (output/'frames.txt').write_text('\n'.join(line for line in frames.splitlines()if 'FDE'in line and any(f'pc={a:016x}..{b:016x}'in line for a,b in RANGES.values()))+'\n', encoding='utf-8', newline='\n')
     raw_rela=subprocess.check_output(['readelf','-rW',str(binary)],text=True)
-    (output/'relocations.txt').write_text('\n'.join(line for line in raw_rela.splitlines()if re.match(r'^[0-9a-f]+\s',line)and int(line.split()[0],16)in RELATIVE)+'\n')
+    (output/'relocations.txt').write_text('\n'.join(line for line in raw_rela.splitlines()if re.match(r'^[0-9a-f]+\s',line)and int(line.split()[0],16)in RELATIVE)+'\n', encoding='utf-8', newline='\n')
     result={'target_sha256':identity['sha256'],'target_bytes':len(data),'ranges':ranges,'controls':{hex(a):b for a,b in CONTROLS.items()},'literal_bytes':{hex(a):b for a,b in LITERALS.items()},'relocations':rela,'captured_binary_executed':False,'limits':'One initializer and four helper extents. No full tracker type/update protocol, filesystem execution, parser/schema equivalence, metadata clock/calendar proof, helper closure or progress gate.'}
-    (output/'records.json').write_text(json.dumps(result,indent=2)+'\n');return result
+    (output/'records.json').write_text(json.dumps(result,indent=2)+'\n', encoding='utf-8', newline='\n');return result
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--binary',type=Path,default=ROOT/'artifacts/node/94/hl-node');parser.add_argument('--output',type=Path,default=ROOT/'work/file-tracker-init-94');args=parser.parse_args()
-    print(json.dumps(generate(args.binary.resolve(),args.output),indent=2))
+    try:
+        print(json.dumps(generate(args.binary.resolve(),args.output),indent=2))
+    except (ValueError, OSError, subprocess.CalledProcessError) as error:
+        print(f'file_tracker_init_static: {error}', file=sys.stderr)
+        raise SystemExit(1)

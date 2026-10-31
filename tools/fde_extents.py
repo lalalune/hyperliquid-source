@@ -62,6 +62,8 @@ def pcrel(data, pos, end, base_va, offset_base):
 
 
 def parse_cie(data, start, body, end, va, base):
+    if body >= end:
+        raise ValueError(f'Truncated CIE record at {va + start - base:#x}')
     version = data[body]
     if version != 1:
         raise ValueError(f'Unsupported CIE version {version} at {va + start - base:#x}')
@@ -267,7 +269,7 @@ def generate(binary, prefix):
         writer.writerow(['start_va', 'end_va', 'size', 'section', 'int3_only'])
         for g in gaps:
             writer.writerow([hex(g['start']), hex(g['end']), g['end'] - g['start'], g['section'], str(g['int3_only']).lower()])
-    prefix.with_suffix('.json').write_text(json.dumps(summary, indent=2) + '\n')
+    prefix.with_suffix('.json').write_bytes((json.dumps(summary, indent=2) + '\n').encode())
     return summary
 
 

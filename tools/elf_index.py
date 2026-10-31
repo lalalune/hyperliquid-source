@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import struct
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -96,7 +97,7 @@ def generate(binary, prefix):
     summary = {'binary_sha256': hashlib.sha256(data).hexdigest(), 'unwind_entries': len(entries),
                'unique_starts': len({e['start'] for e in entries}), 'executable_sections': [s for s in secs if s['flags'] & 4],
                'limitations': 'Unwind index entries are not a complete function census. The next-index upper bound is not a decoded FDE function extent. No component ownership or equivalence is established.'}
-    prefix.with_suffix('.json').write_text(json.dumps(summary, indent=2) + '\n')
+    prefix.with_suffix('.json').write_bytes((json.dumps(summary, indent=2) + '\n').encode())
     return summary
 
 
@@ -116,15 +117,19 @@ def main():
     p.add_argument('--release', choices=['94', '115', 'visor'], required=True)
     p.add_argument('--output-dir', type=Path, default=ROOT / 'work/index')
     args = p.parse_args()
-    from artifacts import check
-    rel, inventory, prefix = target_for(args.release)
-    item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == rel)
-    check(ROOT / rel, item)
-    summary = generate(ROOT / rel, args.output_dir / prefix)
-    expected = json.loads((ROOT / inventory).read_text())['fde_count_eh_frame_hdr']
-    if summary['unwind_entries'] != expected:
-        raise ValueError('Parsed unwind count differs from retained inventory')
-    print(json.dumps(summary, indent=2))
+    try:
+        from artifacts import check
+        rel, inventory, prefix = target_for(args.release)
+        item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == rel)
+        check(ROOT / rel, item)
+        summary = generate(ROOT / rel, args.output_dir / prefix)
+        expected = json.loads((ROOT / inventory).read_text())['fde_count_eh_frame_hdr']
+        if summary['unwind_entries'] != expected:
+            raise ValueError('Parsed unwind count differs from retained inventory')
+        print(json.dumps(summary, indent=2))
+    except (ValueError, OSError, struct.error) as error:
+        print(f'elf_index: {error}', file=sys.stderr)
+        raise SystemExit(1)
 
 
 if __name__ == '__main__':

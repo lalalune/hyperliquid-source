@@ -119,6 +119,14 @@ class FdeExtentTests(unittest.TestCase):
         self.assertIsNone(ordered[1]['lsda'])
         self.assertEqual(summary['with_lsda'], 0)
 
+    def test_rejects_length_four_cie(self):
+        # A CIE record must contain its version byte; the old reader took the
+        # first byte of the next record and reported an augmentation error.
+        data, layout = build()
+        struct.pack_into('<I', data, OFFSET[FRAME] + layout['cie']['zR'], 4)
+        with self.assertRaisesRegex(ValueError, 'Truncated CIE record'):
+            eh_frame_records(data)
+
     def test_rejects_negative_range(self):
         data, layout = build()
         struct.pack_into('<i', data, OFFSET[FRAME] + layout['fde'][0] + 12, -16)

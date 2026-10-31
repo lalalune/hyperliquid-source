@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Digest-bound static observations of node #94 compact-string construction."""
 import argparse
+import sys
 import hashlib
 import json
 from pathlib import Path
@@ -127,7 +128,7 @@ def generate(binary, output):
                  if re.match(r'^[0-9a-f]+\s', line) and int(line.split()[0], 16) in slots]
     if len(rela_rows) != len(slots):
         raise ValueError('Independent readelf relocation row count differs')
-    (output / 'relocations.txt').write_text('\n'.join(rela_rows) + '\n')
+    (output / 'relocations.txt').write_text('\n'.join(rela_rows) + '\n', encoding='utf-8', newline='\n')
     ranges = {}
     for name, (begin, end) in RANGES.items():
         offset, body = read_va(data, begin, end - begin)
@@ -135,14 +136,14 @@ def generate(binary, output):
                         'bytes': len(body), 'sha256': hashlib.sha256(body).hexdigest()}
         text = subprocess.check_output(['objdump', '-d', f'--start-address={begin:#x}',
                                         f'--stop-address={end:#x}', str(binary)], text=True)
-        (output / f'{name}.objdump.txt').write_text(text.replace(str(binary), '<authenticated-node94>'))
+        (output / f'{name}.objdump.txt').write_text(text.replace(str(binary), '<authenticated-node94>'), encoding='utf-8', newline='\n')
     for site, begin, end in CALLERS:
         # Retain caller context without claiming its opaque calls are closed.
         text = subprocess.check_output(['objdump', '-d', f'--start-address={begin:#x}',
                                         f'--stop-address={end:#x}', str(binary)], text=True)
-        (output / f'caller-{site:x}.objdump.txt').write_text(text.replace(str(binary), '<authenticated-node94>'))
+        (output / f'caller-{site:x}.objdump.txt').write_text(text.replace(str(binary), '<authenticated-node94>'), encoding='utf-8', newline='\n')
     (output / 'frames.txt').write_text('\n'.join(line for line in frames_text.splitlines()
-        if 'FDE' in line and any(f'pc={a:016x}..{b:016x}' in line for a, b in scope)) + '\n')
+        if 'FDE' in line and any(f'pc={a:016x}..{b:016x}' in line for a, b in scope)) + '\n', encoding='utf-8', newline='\n')
     records = {'target_sha256': identity['sha256'], 'target_bytes': len(data),
                'ranges': ranges, 'decoded_fde_count': len(fdes), 'instruction_controls': byte_controls,
                'relocations': relocs, 'decoded_references': references,
@@ -151,7 +152,7 @@ def generate(binary, output):
                'carrier_observation': 'P(i) = byte[i] OR (P(i+1) << 8); P(length)=0; checked 128-bit shift. Constructor starts at i=0.',
                'captured_binary_executed': False,
                'limits': 'Static constructor/packer/alias control flow; hash-feed, cache, allocation, panic and lock callees not closed. No full alias algorithm, struct/serialization ABI, runtime equivalence or gate.'}
-    (output / 'records.json').write_text(json.dumps(records, indent=2) + '\n')
+    (output / 'records.json').write_text(json.dumps(records, indent=2) + '\n', encoding='utf-8', newline='\n')
     return records
 
 
@@ -160,4 +161,8 @@ if __name__ == '__main__':
     parser.add_argument('--binary', type=Path, default=ROOT / 'artifacts/node/94/hl-node')
     parser.add_argument('--output', type=Path, default=ROOT / 'work/short-string-static-94')
     args = parser.parse_args()
-    print(json.dumps(generate(args.binary.resolve(), args.output), indent=2))
+    try:
+        print(json.dumps(generate(args.binary.resolve(), args.output), indent=2))
+    except (ValueError, OSError, subprocess.CalledProcessError) as error:
+        print(f'short_string_static: {error}', file=sys.stderr)
+        raise SystemExit(1)
