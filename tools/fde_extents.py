@@ -68,7 +68,10 @@ def parse_cie(data, start, body, end, va, base):
     terminator = data.find(b'\0', body + 1, end)
     if terminator < 0:
         raise ValueError('Unterminated CIE augmentation')
-    augmentation = data[body + 1:terminator].decode('ascii')
+    try:
+        augmentation = data[body + 1:terminator].decode('ascii')
+    except UnicodeDecodeError:
+        raise ValueError(f'Unsupported CIE augmentation {data[body + 1:terminator]!r}; do not guess')
     if not augmentation.startswith('z') or set(augmentation) - AUGMENTATION_CHARS or augmentation.count('z') != 1:
         raise ValueError(f'Unsupported CIE augmentation {augmentation!r}; do not guess')
     pos = terminator + 1
