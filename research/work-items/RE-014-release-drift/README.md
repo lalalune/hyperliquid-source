@@ -29,6 +29,7 @@ and returns `(None, reason)` otherwise. `verify.py` and `crosscheck.py` then
 **SKIP with an explicit reason** (exit 2 / SystemExit) — they do **not** PASS
 when the GNU verifier is unavailable. Retained JSON evidence in this packet is
 unchanged from the closed PR #9 drift run under GNU objdump 2.44.
+Drift-verify is only authoritative in the CI container (pinned GNU objdump 2.44); elsewhere it reports SKIPPED.
 
 ## Reproduce
 

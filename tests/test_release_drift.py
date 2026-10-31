@@ -209,5 +209,105 @@ class GnuObjdumpDetection(unittest.TestCase):
             self.assertTrue(info)
 
 
+
+class VerifyObjdumpVersionGate(unittest.TestCase):
+    """verify.py SKIPPED exit 2 when GNU objdump version is not exactly 2.44.
+
+    No real objdump required: version strings are fed through parse_objdump_version
+    and a monkeypatched gnu_objdump().
+    """
+
+    PINNED_LINE = "GNU objdump (GNU Binutils for Debian) 2.44"
+
+    def test_parse_objdump_version_tokens(self):
+        import verify as re014_verify
+        self.assertEqual(re014_verify.parse_objdump_version(self.PINNED_LINE), "2.44")
+        self.assertEqual(
+            re014_verify.parse_objdump_version("GNU objdump (GNU Binutils) 2.46.1"),
+            "2.46.1",
+        )
+        self.assertEqual(re014_verify.parse_objdump_version("GNU objdump 2.4"), "2.4")
+        self.assertEqual(re014_verify.parse_objdump_version("GNU objdump 2.440"), "2.440")
+        self.assertIsNone(re014_verify.parse_objdump_version(""))
+        self.assertIsNone(re014_verify.parse_objdump_version("(empty --version)"))
+        self.assertIsNone(re014_verify.parse_objdump_version("GNU objdump (no version)"))
+
+    def test_negative_control_nearby_versions_are_not_2_44(self):
+        import verify as re014_verify
+        for line in (
+            "GNU objdump (GNU Binutils) 2.4",
+            "GNU objdump (GNU Binutils) 2.440",
+            "GNU objdump (GNU Binutils for Debian) 2.43",
+            "GNU objdump (GNU Binutils) 2.44.0",
+        ):
+            with self.subTest(line=line):
+                ver = re014_verify.parse_objdump_version(line)
+                self.assertIsNotNone(ver)
+                self.assertNotEqual(ver, "2.44")
+
+    def _run_main_with_objdump_line(self, line, path="/usr/bin/objdump"):
+        import io
+        import contextlib
+        import release_drift
+        import verify as re014_verify
+        original = release_drift.gnu_objdump
+        release_drift.gnu_objdump = lambda: (path, line)
+        buf = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(buf):
+                re014_verify.main()
+        except SystemExit as exc:
+            return exc.code, buf.getvalue()
+        finally:
+            release_drift.gnu_objdump = original
+        return 0, buf.getvalue()
+
+    def test_version_2_46_1_skipped_exit_2(self):
+        code, out = self._run_main_with_objdump_line(
+            "GNU objdump (GNU Binutils) 2.46.1"
+        )
+        self.assertEqual(code, 2)
+        self.assertIn("SKIPPED (not a PASS)", out)
+        self.assertIn("2.44", out)
+        self.assertIn("2.46.1", out)
+
+    def test_unparseable_version_skipped_exit_2(self):
+        code, out = self._run_main_with_objdump_line("GNU objdump (weird build)")
+        self.assertEqual(code, 2)
+        self.assertIn("SKIPPED (not a PASS)", out)
+        self.assertIn("could not parse version", out)
+
+    def test_version_2_44_gate_allows_pinned_line_through(self):
+        """2.44 with the exact pinned branding must not SKIP at the version gate.
+
+        Stops before the expensive rebuild by making the pinned-line check fail
+        with a distinct non-2 exit (existing behaviour for branding mismatch is
+        unrelated; here we only prove the version gate lets 2.44 through).
+        """
+        # Use a 2.44 line that is NOT the Debian pinned string: version gate
+        # passes, then the existing exact-line check raises SystemExit(str) -> 1.
+        code, out = self._run_main_with_objdump_line(
+            "GNU objdump (GNU Binutils) 2.44"
+        )
+        self.assertNotEqual(code, 2)
+        self.assertNotIn("SKIPPED (not a PASS)", out)
+        # Existing exact-match failure: SystemExit(str) — process exit is 1;
+        # unittest sees the message string as the exception code.
+        self.assertIsInstance(code, str)
+        self.assertIn("needs", code)
+        self.assertIn("found", code)
+
+    def test_negative_2_4_and_2_440_skipped_not_treated_as_2_44(self):
+        for ver in ("2.4", "2.440"):
+            with self.subTest(ver=ver):
+                code, out = self._run_main_with_objdump_line(
+                    f"GNU objdump (GNU Binutils) {ver}"
+                )
+                self.assertEqual(code, 2)
+                self.assertIn("SKIPPED (not a PASS)", out)
+                self.assertIn(ver, out)
+
+
+
 if __name__ == '__main__':
     unittest.main()

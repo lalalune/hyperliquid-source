@@ -8,12 +8,34 @@ import hashlib
 import json
 import subprocess
 import sys
+import re
 import tempfile
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 OUTPUTS = ('node-94-115-drift.tsv', 'node-94-115-drift.json', 'node-94-115-paths.json')
 RETAINED = ('node-94-115-drift.json', 'node-94-115-paths.json')
+
+
+_OBJDUMP_VERSION_TOKEN = re.compile(r"^[0-9]+(?:\.[0-9]+)+$")
+
+
+def parse_objdump_version(line):
+    """Return the trailing dotted version token from an objdump --version first line.
+
+    Deterministic: last whitespace-separated field must match N(.N)+ exactly
+    (e.g. 2.44, 2.46.1). Returns None if missing or unparseable. 2.4 and 2.440
+    are distinct from 2.44.
+    """
+    if not isinstance(line, str):
+        return None
+    text = line.strip()
+    if not text:
+        return None
+    token = text.split()[-1]
+    if _OBJDUMP_VERSION_TOKEN.fullmatch(token):
+        return token
+    return None
 
 
 def sha256(path):
@@ -32,6 +54,21 @@ def main():
     if not objdump_path:
         # Evidence rebuild needs GNU; skip with reason — do not claim PASS.
         print(f'RE-014 verify SKIPPED (not a PASS): {objdump}', flush=True)
+        raise SystemExit(2)
+    version = parse_objdump_version(objdump)
+    if version is None:
+        print(
+            'RE-014 verify SKIPPED (not a PASS): fingerprints pinned to GNU objdump 2.44; '
+            f'could not parse version from {objdump!r}',
+            flush=True,
+        )
+        raise SystemExit(2)
+    if version != '2.44':
+        print(
+            'RE-014 verify SKIPPED (not a PASS): fingerprints pinned to GNU objdump 2.44; '
+            f'detected {version} ({objdump!r})',
+            flush=True,
+        )
         raise SystemExit(2)
     if objdump != expected['pinned']['objdump']:
         raise SystemExit(f'RE-014 verify needs {expected["pinned"]["objdump"]!r}, found {objdump!r}')
