@@ -110,26 +110,34 @@ class Mapping:
         self.segments = segments
 
     def va_to_offset(self, va, size=1):
-        for off, vaddr, filesz, _flags in self.segments:
-            if vaddr <= va and va + size <= vaddr + filesz:
-                return off + (va - vaddr)
-        raise ValueError(f'VA {va:#x} not backed by file bytes')
+        offsets = {off + va - vaddr for off, vaddr, filesz, _flags in self.segments
+                   if vaddr <= va and va + size <= vaddr + filesz}
+        if not offsets:
+            raise ValueError(f'VA {va:#x} not backed by file bytes')
+        if len(offsets) != 1:
+            raise ValueError(f'VA {va:#x} has ambiguous file mappings')
+        return offsets.pop()
 
     def offset_to_va(self, offset):
-        for off, vaddr, filesz, _flags in self.segments:
-            if off <= offset < off + filesz:
-                return vaddr + (offset - off)
-        raise ValueError(f'offset {offset:#x} outside loadable segments')
+        addresses = {vaddr + offset - off for off, vaddr, filesz, _flags in self.segments
+                     if off <= offset < off + filesz}
+        if not addresses:
+            raise ValueError(f'offset {offset:#x} outside loadable segments')
+        if len(addresses) != 1:
+            raise ValueError(f'offset {offset:#x} has ambiguous virtual mappings')
+        return addresses.pop()
 
     def read(self, data, va, size):
         off = self.va_to_offset(va, size)
         return data[off:off + size]
 
     def execute_segment(self):
-        for off, vaddr, filesz, flags in self.segments:
-            if flags & 1:
-                return off, vaddr, filesz
-        raise ValueError('No executable segment')
+        regions = {(off, vaddr, filesz) for off, vaddr, filesz, flags in self.segments if flags & 1}
+        if not regions:
+            raise ValueError('No executable segment')
+        if len(regions) != 1:
+            raise ValueError('Multiple executable regions; single-region scan would be incomplete')
+        return regions.pop()
 
 
 def function_bounds(data, va):
