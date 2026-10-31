@@ -1,0 +1,1192 @@
+python3 tools/doctor.py
+{
+  "analysis_ready": true,
+  "exact_rebuild_ready": false,
+  "missing_rebuild_evidence": [
+    "Recovered Cargo manifests and dependency locks",
+    "Target Linux build flags and exact LLVM/fork provenance",
+    "Accepted reconstructed implementation and comparison harness"
+  ],
+  "required_tools": [
+    {
+      "name": "python",
+      "available": true,
+      "version": "Python 3.12.3",
+      "executable": "/usr/bin/python3"
+    },
+    {
+      "name": "git",
+      "available": true,
+      "version": "git version 2.43.0",
+      "executable": "/usr/bin/git"
+    },
+    {
+      "name": "git-lfs",
+      "available": true,
+      "version": "git-lfs/3.4.1 (GitHub; linux amd64; go 1.22.2)",
+      "executable": "<tools-root>/git-lfs-runtime/usr/bin/git-lfs"
+    },
+    {
+      "name": "gpg",
+      "available": true,
+      "version": "gpg (GnuPG) 2.4.4",
+      "executable": "/usr/bin/gpg"
+    },
+    {
+      "name": "rg",
+      "available": true,
+      "version": "ripgrep 14.1.0",
+      "executable": "<tools-root>/ripgrep-runtime/usr/bin/rg"
+    }
+  ],
+  "optional_tools": [
+    {
+      "name": "llvm-objdump",
+      "available": false
+    },
+    {
+      "name": "java",
+      "available": false
+    },
+    {
+      "name": "rust-1.94.1",
+      "available": false
+    },
+    {
+      "name": "rust-1.95.0",
+      "available": false
+    }
+  ],
+  "ghidra": {
+    "available": false,
+    "home": null,
+    "version": null,
+    "started": false
+  },
+  "captured_binaries_executed": false
+}
+python3 tools/artifacts.py verify
+SHA-256 OK: artifacts/keys/pub_key.asc
+SHA-256 OK: artifacts/node/115/hl-node
+SHA-256 OK: artifacts/node/115/hl-node.asc
+SHA-256 OK: artifacts/node/115/node_metadata.json
+SHA-256 OK: artifacts/node/94/hl-node
+SHA-256 OK: artifacts/node/94/hl-node.asc
+SHA-256 OK: artifacts/visor/captured/hl-visor
+SHA-256 OK: artifacts/visor/captured/hl-visor.asc
+Valid signature: node/94/hl-node
+Valid signature: node/115/hl-node
+Valid signature: visor/captured/hl-visor
+Pinned upstream binary, signature and public key match.
+python3 tools/verify_imports.py
+Verified 37 imported files and all pinned source repositories.
+python3 -m unittest discover -s tests -v
+test_corrupt_existing_file_not_overwritten (test_artifacts.ArtifactTests.test_corrupt_existing_file_not_overwritten) ... ok
+test_failed_download_does_not_publish_partial (test_artifacts.ArtifactTests.test_failed_download_does_not_publish_partial) ... ok
+test_missing_pinned_reference_names_the_fix (test_artifacts.ArtifactTests.test_missing_pinned_reference_names_the_fix) ... ok
+test_pinned_reference_mismatch_rejected (test_artifacts.ArtifactTests.test_pinned_reference_mismatch_rejected) ... ok
+test_tamper_same_size_rejected (test_artifacts.ArtifactTests.test_tamper_same_size_rejected) ... ok
+test_valid_download_and_existing_file_no_network (test_artifacts.ArtifactTests.test_valid_download_and_existing_file_no_network) ... ok
+test_anchor_bytes_match_objdump (test_bincode_varint.BinutilsCrossCheck.test_anchor_bytes_match_objdump) ... ok
+test_fde_extents_match_readelf (test_bincode_varint.BinutilsCrossCheck.test_fde_extents_match_readelf) ... ok
+test_idiom_vas_are_objdump_instruction_starts (test_bincode_varint.BinutilsCrossCheck.test_idiom_vas_are_objdump_instruction_starts) ... ok
+test_off_by_one_idiom_va_rejected (test_bincode_varint.BinutilsCrossCheck.test_off_by_one_idiom_va_rejected) ... ok
+test_hashseed_independent (test_bincode_varint.Determinism.test_hashseed_independent) ... ok
+test_corrupted_digest_rejected (test_bincode_varint.NegativeControls.test_corrupted_digest_rejected) ... ok
+test_idiom_outside_pinned_functions_rejected (test_bincode_varint.NegativeControls.test_idiom_outside_pinned_functions_rejected) ... ok
+test_node_115_rejected (test_bincode_varint.NegativeControls.test_node_115_rejected) ... ok
+test_swapped_marker_immediates_rejected (test_bincode_varint.NegativeControls.test_swapped_marker_immediates_rejected) ... ok
+test_swapped_threshold_immediate_rejected (test_bincode_varint.NegativeControls.test_swapped_threshold_immediate_rejected) ... ok
+test_truncated_input_rejected (test_bincode_varint.NegativeControls.test_truncated_input_rejected) ... ok
+test_untampered_mutation_baseline_passes (test_bincode_varint.NegativeControls.test_untampered_mutation_baseline_passes) ... ok
+test_wrong_call_count_rejected (test_bincode_varint.NegativeControls.test_wrong_call_count_rejected) ... ok
+test_wrong_fde_rejected (test_bincode_varint.NegativeControls.test_wrong_fde_rejected) ... ok
+test_committed_json_matches_recomputation (test_bincode_varint.PinnedOutput.test_committed_json_matches_recomputation) ... ok
+test_exact_counts (test_bincode_varint.PinnedOutput.test_exact_counts) ... ok
+test_output_hash_is_pinned (test_bincode_varint.PinnedOutput.test_output_hash_is_pinned) ... ok
+test_stays_off_pr8_bridge_encoder (test_bincode_varint.PinnedOutput.test_stays_off_pr8_bridge_encoder) ... ok
+test_anchor_objdump (test_bincode_varint_decode.Binutils.test_anchor_objdump) ... ok
+test_dispatch_vas_are_objdump_instruction_starts (test_bincode_varint_decode.Binutils.test_dispatch_vas_are_objdump_instruction_starts) ... ok
+test_fde_readelf (test_bincode_varint_decode.Binutils.test_fde_readelf) ... ok
+test_off_by_one_va_rejected (test_bincode_varint_decode.Binutils.test_off_by_one_va_rejected) ... ok
+test_rex_b_sites_start_at_prefix (test_bincode_varint_decode.Binutils.test_rex_b_sites_start_at_prefix) ... ok
+test_hashseed (test_bincode_varint_decode.Determinism.test_hashseed) ... ok
+test_digest (test_bincode_varint_decode.Negative.test_digest) ... ok
+test_extra_dispatch_site_rejected (test_bincode_varint_decode.Negative.test_extra_dispatch_site_rejected) ... ok
+test_identity_baseline (test_bincode_varint_decode.Negative.test_identity_baseline) ... ok
+test_swapped_jump_table_entries (test_bincode_varint_decode.Negative.test_swapped_jump_table_entries) ... ok
+test_swapped_load_width (test_bincode_varint_decode.Negative.test_swapped_load_width) ... ok
+test_swapped_tag_threshold (test_bincode_varint_decode.Negative.test_swapped_tag_threshold) ... ok
+test_truncated (test_bincode_varint_decode.Negative.test_truncated) ... ok
+test_committed_json (test_bincode_varint_decode.Pinned.test_committed_json) ... ok
+test_exact_values (test_bincode_varint_decode.Pinned.test_exact_values) ... ok
+test_off_pr8_bridge (test_bincode_varint_decode.Pinned.test_off_pr8_bridge) ... ok
+test_output_hash (test_bincode_varint_decode.Pinned.test_output_hash) ... ok
+test_end_to_end_report_is_pinned (test_bridge_inventory.ArtifactTests.test_end_to_end_report_is_pinned) ... ok
+test_missing_literal_is_detected (test_bridge_inventory.ArtifactTests.test_missing_literal_is_detected) ... ok
+test_rejects_corrupted_digest (test_bridge_inventory.ArtifactTests.test_rejects_corrupted_digest) ... ok
+test_decodes_seeded_shape (test_bridge_inventory.ChainSiteTests.test_decodes_seeded_shape) ... ok
+test_rejects_missing_compare (test_bridge_inventory.ChainSiteTests.test_rejects_missing_compare) ... ok
+test_rejects_non_register_cmove (test_bridge_inventory.ChainSiteTests.test_rejects_non_register_cmove) ... ok
+test_rejects_swapped_immediates (test_bridge_inventory.ChainSiteTests.test_rejects_swapped_immediates) ... ok
+test_skips_interleaved_tag_store (test_bridge_inventory.ChainSiteTests.test_skips_interleaved_tag_store) ... ok
+test_decodes_relative_entries (test_bridge_inventory.TableTests.test_decodes_relative_entries) ... ok
+test_rejects_arm_outside_function (test_bridge_inventory.TableTests.test_rejects_arm_outside_function) ... ok
+test_ignores_absolute_and_wrong_target (test_bridge_inventory.XrefTests.test_ignores_absolute_and_wrong_target) ... ok
+test_resolves_movups_disp32 (test_bridge_inventory.XrefTests.test_resolves_movups_disp32) ... ok
+test_committed_records_reproduce_from_verified_targets (test_build_provenance.CapturedTargetTests.test_committed_records_reproduce_from_verified_targets) ... ok
+test_node_94_and_115_toolchains_differ (test_build_provenance.CapturedTargetTests.test_node_94_and_115_toolchains_differ) ... ok
+test_bind_now_accepts_every_abi_encoding (test_build_provenance.DeriveTests.test_bind_now_accepts_every_abi_encoding) ... ok
+test_comment_stamps_are_exact_with_their_offsets (test_build_provenance.DeriveTests.test_comment_stamps_are_exact_with_their_offsets) ... ok
+test_dependency_paths_keep_versions_only_where_present (test_build_provenance.DeriveTests.test_dependency_paths_keep_versions_only_where_present) ... ok
+test_diff_ignores_offsets_and_reports_changed_values (test_build_provenance.DeriveTests.test_diff_ignores_offsets_and_reports_changed_values) ... ok
+test_dynamic_entries_after_dt_null_are_ignored (test_build_provenance.DeriveTests.test_dynamic_entries_after_dt_null_are_ignored) ... ok
+test_non_elf_input_is_rejected (test_build_provenance.DeriveTests.test_non_elf_input_is_rejected) ... ok
+test_unrecorded_settings_stay_unknown (test_build_provenance.DeriveTests.test_unrecorded_settings_stay_unknown) ... ok
+test_actual_branch_field_counter_and_unlock_corruptions (test_cguard_consistency_static.CGuardConsistencyTests.test_actual_branch_field_counter_and_unlock_corruptions) ... ok
+test_actual_instruction_data_and_global_bindings (test_cguard_consistency_static.CGuardConsistencyTests.test_actual_instruction_data_and_global_bindings) ... ok
+test_actual_source_location_and_global_retargets (test_cguard_consistency_static.CGuardConsistencyTests.test_actual_source_location_and_global_retargets) ... ok
+test_actual_source_path_corruption (test_cguard_consistency_static.CGuardConsistencyTests.test_actual_source_path_corruption) ... ok
+test_count_store_precedes_old_value_limit_check (test_cguard_consistency_static.CGuardConsistencyTests.test_count_store_precedes_old_value_limit_check) ... ok
+test_four_scalar_field_offsets_and_shared_failure_target (test_cguard_consistency_static.CGuardConsistencyTests.test_four_scalar_field_offsets_and_shared_failure_target) ... ok
+test_cross_edge_rel32_mutation_drops_edge (test_consensus_wire.ConsensusWireTests.test_cross_edge_rel32_mutation_drops_edge) ... ok
+test_fde_end_exclusive_and_seed_off_by_one (test_consensus_wire.ConsensusWireTests.test_fde_end_exclusive_and_seed_off_by_one) ... ok
+test_hashseed_invariance (test_consensus_wire.ConsensusWireTests.test_hashseed_invariance) ... ok
+test_lea_retarget_drops_tag_owner (test_consensus_wire.ConsensusWireTests.test_lea_retarget_drops_tag_owner) ... ok
+test_location_len_mutation_drops_record (test_consensus_wire.ConsensusWireTests.test_location_len_mutation_drops_record) ... ok
+test_location_line_mutation_changes_output (test_consensus_wire.ConsensusWireTests.test_location_line_mutation_changes_output) ... ok
+test_negative_control_literal (test_consensus_wire.ConsensusWireTests.test_negative_control_literal) ... ok
+test_non_elf_rejected (test_consensus_wire.ConsensusWireTests.test_non_elf_rejected) ... ok
+test_objdump_quorum_compare (test_consensus_wire.ConsensusWireTests.test_objdump_quorum_compare) ... ok
+test_objdump_tag_leas (test_consensus_wire.ConsensusWireTests.test_objdump_tag_leas) ... ok
+test_packet_matches_tool (test_consensus_wire.ConsensusWireTests.test_packet_matches_tool) ... ok
+test_pinned_counts_and_hashes (test_consensus_wire.ConsensusWireTests.test_pinned_counts_and_hashes) ... ok
+test_quorum_imm3_mutation_rejected (test_consensus_wire.ConsensusWireTests.test_quorum_imm3_mutation_rejected) ... ok
+test_quorum_math_sites (test_consensus_wire.ConsensusWireTests.test_quorum_math_sites) ... ok
+test_quorum_setb_mutation_rejected (test_consensus_wire.ConsensusWireTests.test_quorum_setb_mutation_rejected) ... ok
+test_quorum_slot_reloc_tamper_rejected (test_consensus_wire.ConsensusWireTests.test_quorum_slot_reloc_tamper_rejected) ... ok
+test_readelf_fde_bounds (test_consensus_wire.ConsensusWireTests.test_readelf_fde_bounds) ... ok
+test_readelf_location_slots (test_consensus_wire.ConsensusWireTests.test_readelf_location_slots) ... ok
+test_seed_edit_changes_status (test_consensus_wire.ConsensusWireTests.test_seed_edit_changes_status) ... ok
+test_seed_fde_status (test_consensus_wire.ConsensusWireTests.test_seed_fde_status) ... ok
+test_signature_map_cross_edges (test_consensus_wire.ConsensusWireTests.test_signature_map_cross_edges) ... ok
+test_template_anchor_is_exact (test_consensus_wire.ConsensusWireTests.test_template_anchor_is_exact) ... ok
+test_wrong_binary_hash_rejected (test_consensus_wire.ConsensusWireTests.test_wrong_binary_hash_rejected) ... ok
+test_duplicate_marker_entries_are_rejected (test_constants_scan.PoolTests.test_duplicate_marker_entries_are_rejected) ... ok
+test_finds_marker_and_text (test_constants_scan.PoolTests.test_finds_marker_and_text) ... ok
+test_unprefixed_copy_is_not_a_marker_candidate (test_constants_scan.PoolTests.test_unprefixed_copy_is_not_a_marker_candidate) ... ok
+test_entsize_is_read (test_constants_scan.TableTests.test_entsize_is_read) ... ok
+test_reads_pointer_length_pairs_in_order (test_constants_scan.TableTests.test_reads_pointer_length_pairs_in_order) ... ok
+test_relative_relocations_only (test_constants_scan.TableTests.test_relative_relocations_only) ... ok
+test_wrong_expected_count_fails (test_constants_scan.TableTests.test_wrong_expected_count_fails) ... ok
+test_resolves_rip_relative_operand (test_constants_scan.XrefTests.test_resolves_rip_relative_operand) ... ok
+test_window_before_first_start_fails (test_constants_scan.XrefTests.test_window_before_first_start_fails) ... ok
+test_window_is_nearest_start (test_constants_scan.XrefTests.test_window_is_nearest_start) ... ok
+test_carry_chain (test_evm_amount_scale.Evaluator.test_carry_chain) ... ok
+test_cmov_32_clears_upper_when_not_taken (test_evm_amount_scale.Evaluator.test_cmov_32_clears_upper_when_not_taken) ... ok
+test_divide_fault_stops (test_evm_amount_scale.Evaluator.test_divide_fault_stops) ... ok
+test_int3_stops (test_evm_amount_scale.Evaluator.test_int3_stops) ... ok
+test_misaligned_movaps_stops (test_evm_amount_scale.Evaluator.test_misaligned_movaps_stops) ... ok
+test_mul_imul_bsr (test_evm_amount_scale.Evaluator.test_mul_imul_bsr) ... ok
+test_partial_register_merge (test_evm_amount_scale.Evaluator.test_partial_register_merge) ... ok
+test_read_outside_model_stops (test_evm_amount_scale.Evaluator.test_read_outside_model_stops) ... ok
+test_shifts (test_evm_amount_scale.Evaluator.test_shifts) ... ok
+test_unknown_mnemonic_stops (test_evm_amount_scale.Evaluator.test_unknown_mnemonic_stops) ... ok
+test_unknown_target_stops (test_evm_amount_scale.Evaluator.test_unknown_target_stops) ... ok
+test_unset_flag_stops (test_evm_amount_scale.Evaluator.test_unset_flag_stops) ... ok
+test_unset_memory_stops (test_evm_amount_scale.Evaluator.test_unset_memory_stops) ... ok
+test_unset_register_stops (test_evm_amount_scale.Evaluator.test_unset_register_stops) ... ok
+test_write_outside_ram_stops (test_evm_amount_scale.Evaluator.test_write_outside_ram_stops) ... ok
+test_cap_compare_flipped (test_evm_amount_scale.NegativeControls.test_cap_compare_flipped) ... ok
+test_changed_cap (test_evm_amount_scale.NegativeControls.test_changed_cap) ... ok
+test_divide_helper_step (test_evm_amount_scale.NegativeControls.test_divide_helper_step) ... ok
+test_ladder_multiplier (test_evm_amount_scale.NegativeControls.test_ladder_multiplier) ... ok
+test_multiply_helper_step (test_evm_amount_scale.NegativeControls.test_multiply_helper_step) ... ok
+test_multiply_overflow_ignored (test_evm_amount_scale.NegativeControls.test_multiply_overflow_ignored) ... ok
+test_out_of_range_va (test_evm_amount_scale.NegativeControls.test_out_of_range_va) ... ok
+test_sign_branch_flipped (test_evm_amount_scale.NegativeControls.test_sign_branch_flipped) ... ok
+test_tampered_digest (test_evm_amount_scale.NegativeControls.test_tampered_digest) ... ok
+test_unmodified_passes (test_evm_amount_scale.NegativeControls.test_unmodified_passes) ... ok
+test_upper_limbs_ignored (test_evm_amount_scale.NegativeControls.test_upper_limbs_ignored) ... ok
+test_wrong_model (test_evm_amount_scale.NegativeControls.test_wrong_model) ... ok
+test_wrong_site_list (test_evm_amount_scale.NegativeControls.test_wrong_site_list) ... ok
+test_amount_is_changed_in_place_only_when_dividing (test_evm_amount_scale.Results.test_amount_is_changed_in_place_only_when_dividing) ... ok
+test_bounds (test_evm_amount_scale.Results.test_bounds) ... ok
+test_cap_identity (test_evm_amount_scale.Results.test_cap_identity) ... ok
+test_counts (test_evm_amount_scale.Results.test_counts) ... ok
+test_extents (test_evm_amount_scale.Results.test_extents) ... ok
+test_floor_and_dead_remainder (test_evm_amount_scale.Results.test_floor_and_dead_remainder) ... ok
+test_lead_witnesses (test_evm_amount_scale.Results.test_lead_witnesses) ... ok
+test_manifest (test_evm_amount_scale.Results.test_manifest) ... ok
+test_only_the_panic_is_unexecuted (test_evm_amount_scale.Results.test_only_the_panic_is_unexecuted) ... ok
+test_outputs_match_packet (test_evm_amount_scale.Results.test_outputs_match_packet) ... ok
+test_rdi_is_never_needed (test_evm_amount_scale.Results.test_rdi_is_never_needed) ... ok
+test_sites (test_evm_amount_scale.Results.test_sites) ... ok
+test_table_every_i8 (test_evm_amount_scale.Results.test_table_every_i8) ... ok
+test_decoder_both_forms_and_prefix_dedup (test_evm_extra_wei_decimals.EvmExtraWeiDecimalsTest.test_decoder_both_forms_and_prefix_dedup) ... ok
+test_decoder_rejects_corrupted_guard (test_evm_extra_wei_decimals.EvmExtraWeiDecimalsTest.test_decoder_rejects_corrupted_guard) ... ok
+test_every_guard_admits_exactly_message_range (test_evm_extra_wei_decimals.EvmExtraWeiDecimalsTest.test_every_guard_admits_exactly_message_range) ... ok
+test_generated_files_match_packet (test_evm_extra_wei_decimals.EvmExtraWeiDecimalsTest.test_generated_files_match_packet) ... ok
+test_model_negative_controls (test_evm_extra_wei_decimals.EvmExtraWeiDecimalsTest.test_model_negative_controls) ... ok
+test_out_of_range_addresses (test_evm_extra_wei_decimals.EvmExtraWeiDecimalsTest.test_out_of_range_addresses) ... ok
+test_rejects_wrong_digest (test_evm_extra_wei_decimals.EvmExtraWeiDecimalsTest.test_rejects_wrong_digest) ... ok
+test_summary (test_evm_extra_wei_decimals.EvmExtraWeiDecimalsTest.test_summary) ... ok
+test_arms_are_instruction_starts (test_exchange_dispatch.Binutils.test_arms_are_instruction_starts) ... ok
+test_fde_bounds_match_readelf (test_exchange_dispatch.Binutils.test_fde_bounds_match_readelf) ... ok
+test_paths_match_objdump (test_exchange_dispatch.Binutils.test_paths_match_objdump) ... ok
+test_slot_targets_match_readelf (test_exchange_dispatch.Binutils.test_slot_targets_match_readelf) ... ok
+test_fde_end_exclusive (test_exchange_dispatch.Boundaries.test_fde_end_exclusive) ... ok
+test_off_by_one_arm_entry_rejected_or_differs (test_exchange_dispatch.Boundaries.test_off_by_one_arm_entry_rejected_or_differs) ... ok
+test_off_by_one_handler_starts (test_exchange_dispatch.Boundaries.test_off_by_one_handler_starts) ... ok
+test_unknown_opcode_rejected (test_exchange_dispatch.Boundaries.test_unknown_opcode_rejected) ... ok
+test_hashseed_independent (test_exchange_dispatch.Determinism.test_hashseed_independent) ... ok
+test_committed_json (test_exchange_dispatch.Pinned.test_committed_json) ... ok
+test_exact_rows (test_exchange_dispatch.Pinned.test_exact_rows) ... ok
+test_exact_summary (test_exchange_dispatch.Pinned.test_exact_summary) ... ok
+test_output_hash (test_exchange_dispatch.Pinned.test_output_hash) ... ok
+test_unclaimed_extension_arms (test_exchange_dispatch.Pinned.test_unclaimed_extension_arms) ... ok
+test_call_retarget_changes_status (test_exchange_dispatch.Tamper.test_call_retarget_changes_status) ... ok
+test_jump_idiom_mutation_rejected (test_exchange_dispatch.Tamper.test_jump_idiom_mutation_rejected) ... ok
+test_source_claim_mutations (test_exchange_dispatch.Tamper.test_source_claim_mutations) ... ok
+test_tag_bias_mutation_rejected (test_exchange_dispatch.Tamper.test_tag_bias_mutation_rejected) ... ok
+test_truncated_after_claims (test_exchange_dispatch.Tamper.test_truncated_after_claims) ... ok
+test_truncated_table_rejects_claims (test_exchange_dispatch.Tamper.test_truncated_table_rejects_claims) ... ok
+test_wrong_sha_rejected (test_exchange_dispatch.Tamper.test_wrong_sha_rejected) ... ok
+test_counts_fde_missing_from_table (test_fde_extents.FdeExtentTests.test_counts_fde_missing_from_table) ... ok
+test_counts_overlap_instead_of_hiding_it (test_fde_extents.FdeExtentTests.test_counts_overlap_instead_of_hiding_it) ... ok
+test_counts_table_start_that_differs_from_fde (test_fde_extents.FdeExtentTests.test_counts_table_start_that_differs_from_fde) ... ok
+test_decodes_extents_lsda_and_gaps (test_fde_extents.FdeExtentTests.test_decodes_extents_lsda_and_gaps) ... ok
+test_gap_and_tail_measured_from_running_end (test_fde_extents.FdeExtentTests.test_gap_and_tail_measured_from_running_end) ... ok
+test_nested_extents_leave_no_false_gap (test_fde_extents.FdeExtentTests.test_nested_extents_leave_no_false_gap) ... ok
+test_rejects_64_bit_record (test_fde_extents.FdeExtentTests.test_rejects_64_bit_record) ... ok
+test_rejects_augmentation_length_mismatch (test_fde_extents.FdeExtentTests.test_rejects_augmentation_length_mismatch) ... ok
+test_rejects_bad_cie_pointer (test_fde_extents.FdeExtentTests.test_rejects_bad_cie_pointer) ... ok
+test_rejects_bytes_after_terminator (test_fde_extents.FdeExtentTests.test_rejects_bytes_after_terminator) ... ok
+test_rejects_header_frame_pointer_mismatch (test_fde_extents.FdeExtentTests.test_rejects_header_frame_pointer_mismatch) ... ok
+test_rejects_missing_terminator (test_fde_extents.FdeExtentTests.test_rejects_missing_terminator) ... ok
+test_rejects_negative_range (test_fde_extents.FdeExtentTests.test_rejects_negative_range) ... ok
+test_rejects_table_entry_that_is_not_an_fde (test_fde_extents.FdeExtentTests.test_rejects_table_entry_that_is_not_an_fde) ... ok
+test_rejects_unsupported_augmentation (test_fde_extents.FdeExtentTests.test_rejects_unsupported_augmentation) ... ok
+test_rejects_unsupported_pointer_encoding (test_fde_extents.FdeExtentTests.test_rejects_unsupported_pointer_encoding) ... ok
+test_zero_lsda_is_null_not_a_pointer (test_fde_extents.FdeExtentTests.test_zero_lsda_is_null_not_a_pointer) ... ok
+test_actual_diagnostic_and_source_bytes (test_file_tracker_init_static.FileTrackerTests.test_actual_diagnostic_and_source_bytes) ... ok
+test_actual_helper_and_source_retargets (test_file_tracker_init_static.FileTrackerTests.test_actual_helper_and_source_retargets) ... ok
+test_actual_initializer_and_predicate_instructions (test_file_tracker_init_static.FileTrackerTests.test_actual_initializer_and_predicate_instructions) ... ok
+test_actual_target_obligations (test_file_tracker_init_static.FileTrackerTests.test_actual_target_obligations) ... ok
+test_dev_null_length_and_bytes_in_actual_immediates (test_file_tracker_init_static.FileTrackerTests.test_dev_null_length_and_bytes_in_actual_immediates) ... ok
+test_regular_mode_mask_all_low16_values (test_file_tracker_init_static.FileTrackerTests.test_regular_mode_mask_all_low16_values) ... ok
+test_finite_prefix_and_nonfinite_bypass_are_distinct (test_foundation_duration_guards.ArchitecturalModelTests.test_finite_prefix_and_nonfinite_bypass_are_distinct) ... ok
+test_guard_matches_independent_float_comparison (test_foundation_duration_guards.ArchitecturalModelTests.test_guard_matches_independent_float_comparison) ... ok
+test_partition_covers_all_patterns_without_enumeration_claim (test_foundation_duration_guards.ArchitecturalModelTests.test_partition_covers_all_patterns_without_enumeration_claim) ... ok
+test_fde_and_relative_slot_corruption_rejected (test_foundation_duration_guards.DurationTargetTests.test_fde_and_relative_slot_corruption_rejected) ... ok
+test_raw_disassembly_corruption_controls (test_foundation_duration_guards.DurationTargetTests.test_raw_disassembly_corruption_controls) ... ok
+test_retained_record_matches_target (test_foundation_duration_guards.DurationTargetTests.test_retained_record_matches_target) ... ok
+test_source_location_and_assertion_text_mutations_rejected (test_foundation_duration_guards.DurationTargetTests.test_source_location_and_assertion_text_mutations_rejected) ... ok
+test_target_instruction_and_bound_mutations_rejected (test_foundation_duration_guards.DurationTargetTests.test_target_instruction_and_bound_mutations_rejected) ... ok
+test_wrong_target_and_truncation_rejected (test_foundation_duration_guards.DurationTargetTests.test_wrong_target_and_truncation_rejected) ... ok
+test_additional_call_candidate_rejected (test_foundation_hour.HourEvidenceTests.test_additional_call_candidate_rejected) ... ok
+test_arithmetic_edges_from_decoded_operands (test_foundation_hour.HourEvidenceTests.test_arithmetic_edges_from_decoded_operands) ... ok
+test_caller_displacement_mutation_rejected (test_foundation_hour.HourEvidenceTests.test_caller_displacement_mutation_rejected) ... ok
+test_fde_extent_mutation_rejected (test_foundation_hour.HourEvidenceTests.test_fde_extent_mutation_rejected) ... ok
+test_identity_rejects_truncation_and_mutation (test_foundation_hour.HourEvidenceTests.test_identity_rejects_truncation_and_mutation) ... ok
+test_independent_disassembly_and_corruption_controls (test_foundation_hour.HourEvidenceTests.test_independent_disassembly_and_corruption_controls) ... ok
+test_instruction_mutations_rejected (test_foundation_hour.HourEvidenceTests.test_instruction_mutations_rejected) ... ok
+test_location_line_mutation_rejected (test_foundation_hour.HourEvidenceTests.test_location_line_mutation_rejected) ... ok
+test_relocation_target_mutation_rejected (test_foundation_hour.HourEvidenceTests.test_relocation_target_mutation_rejected) ... ok
+test_retained_record_matches_authenticated_target (test_foundation_hour.HourEvidenceTests.test_retained_record_matches_authenticated_target) ... ok
+test_actual_instruction_and_error_message_mutations (test_foundation_millis.MillisEvidenceTests.test_actual_instruction_and_error_message_mutations) ... ok
+test_calendar_helper_disassembly_boundary_control (test_foundation_millis.MillisEvidenceTests.test_calendar_helper_disassembly_boundary_control) ... ok
+test_calendar_location_line_corruption_rejected (test_foundation_millis.MillisEvidenceTests.test_calendar_location_line_corruption_rejected) ... ok
+test_calendar_source_relocation_corruption_rejected (test_foundation_millis.MillisEvidenceTests.test_calendar_source_relocation_corruption_rejected) ... ok
+test_calendar_tables_reject_corruption_past_digest_lock (test_foundation_millis.MillisEvidenceTests.test_calendar_tables_reject_corruption_past_digest_lock) ... ok
+test_disassembly_off_by_one_and_byte_corruption_rejected (test_foundation_millis.MillisEvidenceTests.test_disassembly_off_by_one_and_byte_corruption_rejected) ... ok
+test_fde_and_cie_record_corruption_rejected (test_foundation_millis.MillisEvidenceTests.test_fde_and_cie_record_corruption_rejected) ... ok
+test_millisecond_split_boundary_cases (test_foundation_millis.MillisEvidenceTests.test_millisecond_split_boundary_cases) ... ok
+test_relative_slot_retargeting_rejected (test_foundation_millis.MillisEvidenceTests.test_relative_slot_retargeting_rejected) ... ok
+test_retained_evidence_reproduces (test_foundation_millis.MillisEvidenceTests.test_retained_evidence_reproduces) ... ok
+test_wrong_target_and_truncated_input_rejected (test_foundation_millis.MillisEvidenceTests.test_wrong_target_and_truncated_input_rejected) ... ok
+test_complete_domain_certificates_and_critical_values (test_foundation_millis.ReciprocalTests.test_complete_domain_certificates_and_critical_values) ... ok
+test_wrong_reciprocal_and_shift_are_rejected (test_foundation_millis.ReciprocalTests.test_wrong_reciprocal_and_shift_are_rejected) ... ok
+test_approval_file_must_not_be_committed (test_harness_plan.ProtocolPacketTests.test_approval_file_must_not_be_committed) ... ok
+test_check_packet_ok (test_harness_plan.ProtocolPacketTests.test_check_packet_ok) ... ok
+test_protocol_and_fixtures_validate (test_harness_plan.ProtocolPacketTests.test_protocol_and_fixtures_validate) ... ok
+test_approval_present_but_file_missing_rejected (test_harness_plan.RequestGateTests.test_approval_present_but_file_missing_rejected) ... ok
+test_cli_accepts_plan_only_example (test_harness_plan.RequestGateTests.test_cli_accepts_plan_only_example) ... ok
+test_cli_rejects_execute_example (test_harness_plan.RequestGateTests.test_cli_rejects_execute_example) ... ok
+test_even_with_approval_tool_refuses_execute (test_harness_plan.RequestGateTests.test_even_with_approval_tool_refuses_execute) ... ok
+test_exact_fixture_effect_cover_accepted (test_harness_plan.RequestGateTests.test_exact_fixture_effect_cover_accepted) ... ok
+test_execute_without_approval_rejected (test_harness_plan.RequestGateTests.test_execute_without_approval_rejected) ... ok
+test_network_allow_without_approval_rejected (test_harness_plan.RequestGateTests.test_network_allow_without_approval_rejected) ... ok
+test_omitted_fixture_effects_rejected (test_harness_plan.RequestGateTests.test_omitted_fixture_effects_rejected) ... ok
+test_plan_only_accepted (test_harness_plan.RequestGateTests.test_plan_only_accepted) ... ok
+test_superset_fixture_effect_cover_accepted (test_harness_plan.RequestGateTests.test_superset_fixture_effect_cover_accepted) ... ok
+test_target_digest_mismatch_rejected (test_harness_plan.RequestGateTests.test_target_digest_mismatch_rejected) ... ok
+test_underdeclared_fixture_effects_rejected (test_harness_plan.RequestGateTests.test_underdeclared_fixture_effects_rejected) ... ok
+test_unknown_fixture_rejected (test_harness_plan.RequestGateTests.test_unknown_fixture_rejected) ... ok
+test_wrong_digest_fixture_rejected (test_harness_plan.RequestGateTests.test_wrong_digest_fixture_rejected) ... ok
+test_callers_are_decoded_direct_calls_not_address_mentions (test_heartbeat_status.HeartbeatStatusTests.test_callers_are_decoded_direct_calls_not_address_mentions) ... ok
+test_real_branch_data_and_consumer_corruptions (test_heartbeat_status.HeartbeatStatusTests.test_real_branch_data_and_consumer_corruptions) ... ok
+test_real_elapsed_relocation_retarget_is_rejected (test_heartbeat_status.HeartbeatStatusTests.test_real_elapsed_relocation_retarget_is_rejected) ... ok
+test_real_target_controls (test_heartbeat_status.HeartbeatStatusTests.test_real_target_controls) ... ok
+test_all_tags_lea_anchored (test_info_request_path.InfoRequestPathTests.test_all_tags_lea_anchored) ... ok
+test_fde_end_exclusive_and_off_by_one (test_info_request_path.InfoRequestPathTests.test_fde_end_exclusive_and_off_by_one) ... ok
+test_hashseed_invariance (test_info_request_path.InfoRequestPathTests.test_hashseed_invariance) ... ok
+test_hub_call_bytes (test_info_request_path.InfoRequestPathTests.test_hub_call_bytes) ... ok
+test_hub_deser_rel32_nop_rejected (test_info_request_path.InfoRequestPathTests.test_hub_deser_rel32_nop_rejected) ... ok
+test_hub_deser_rel32_retarget_rejected (test_info_request_path.InfoRequestPathTests.test_hub_deser_rel32_retarget_rejected) ... ok
+test_hub_locations (test_info_request_path.InfoRequestPathTests.test_hub_locations) ... ok
+test_lea_retarget_changes_tag_owner (test_info_request_path.InfoRequestPathTests.test_lea_retarget_changes_tag_owner) ... ok
+test_linked_hl_node_locations (test_info_request_path.InfoRequestPathTests.test_linked_hl_node_locations) ... ok
+test_location_len_mutation_drops_record (test_info_request_path.InfoRequestPathTests.test_location_len_mutation_drops_record) ... ok
+test_location_line_mutation_changes_output (test_info_request_path.InfoRequestPathTests.test_location_line_mutation_changes_output) ... ok
+test_negative_control_literal (test_info_request_path.InfoRequestPathTests.test_negative_control_literal) ... ok
+test_non_elf_rejected (test_info_request_path.InfoRequestPathTests.test_non_elf_rejected) ... ok
+test_objdump_hub_deser_call (test_info_request_path.InfoRequestPathTests.test_objdump_hub_deser_call) ... ok
+test_objdump_tag_leas (test_info_request_path.InfoRequestPathTests.test_objdump_tag_leas) ... ok
+test_packet_matches_tool (test_info_request_path.InfoRequestPathTests.test_packet_matches_tool) ... ok
+test_pinned_counts_and_hashes (test_info_request_path.InfoRequestPathTests.test_pinned_counts_and_hashes) ... ok
+test_readelf_fde_bounds_sample (test_info_request_path.InfoRequestPathTests.test_readelf_fde_bounds_sample) ... ok
+test_side_effect_markers (test_info_request_path.InfoRequestPathTests.test_side_effect_markers) ... ok
+test_tag_anchor_tamper_rejects_missing_tag (test_info_request_path.InfoRequestPathTests.test_tag_anchor_tamper_rejects_missing_tag) ... ok
+test_template_anchor_nul_prefix (test_info_request_path.InfoRequestPathTests.test_template_anchor_nul_prefix) ... ok
+test_wrong_binary_hash_rejected (test_info_request_path.InfoRequestPathTests.test_wrong_binary_hash_rejected) ... ok
+test_actual_control_baseline (test_iter_value_consistency_static.PacketTests.test_actual_control_baseline) ... ok
+test_actual_instruction_corruptions (test_iter_value_consistency_static.PacketTests.test_actual_instruction_corruptions) ... ok
+test_actual_literal_corruptions (test_iter_value_consistency_static.PacketTests.test_actual_literal_corruptions) ... ok
+test_actual_location_layout_corruption (test_iter_value_consistency_static.PacketTests.test_actual_location_layout_corruption) ... ok
+test_actual_relocation_retargets (test_iter_value_consistency_static.PacketTests.test_actual_relocation_retargets) ... ok
+test_decoded_compare_widths_tags_and_assertion_edge (test_iter_value_consistency_static.PacketTests.test_decoded_compare_widths_tags_and_assertion_edge) ... ok
+test_corrupted_binary_is_rejected (test_qty_newtype_sign_guards.BinaryTests.test_corrupted_binary_is_rejected) ... ok
+test_flipped_guards_in_real_caller (test_qty_newtype_sign_guards.BinaryTests.test_flipped_guards_in_real_caller) ... ok
+test_out_of_range_addresses_and_unknown_piece (test_qty_newtype_sign_guards.BinaryTests.test_out_of_range_addresses_and_unknown_piece) ... ok
+test_packet_files_regenerate_byte_for_byte (test_qty_newtype_sign_guards.BinaryTests.test_packet_files_regenerate_byte_for_byte) ... ok
+test_summary (test_qty_newtype_sign_guards.BinaryTests.test_summary) ... ok
+test_digest_mismatch_is_rejected (test_qty_newtype_sign_guards.DecoderTests.test_digest_mismatch_is_rejected) ... ok
+test_models_and_message_predicates (test_qty_newtype_sign_guards.DecoderTests.test_models_and_message_predicates) ... ok
+test_narrow_test_widths (test_qty_newtype_sign_guards.DecoderTests.test_narrow_test_widths) ... ok
+test_only_sign_branches_count (test_qty_newtype_sign_guards.DecoderTests.test_only_sign_branches_count) ... ok
+test_synthetic_guard_and_corruptions (test_qty_newtype_sign_guards.DecoderTests.test_synthetic_guard_and_corruptions) ... ok
+test_test_reg_reg_only (test_qty_newtype_sign_guards.DecoderTests.test_test_reg_reg_only) ... ok
+test_actual_guard_reset_and_call_instruction_corruptions (test_rate_maintenance_static.RateMaintenanceTests.test_actual_guard_reset_and_call_instruction_corruptions) ... ok
+test_actual_source_global_and_callback_retargets (test_rate_maintenance_static.RateMaintenanceTests.test_actual_source_global_and_callback_retargets) ... ok
+test_actual_source_path (test_rate_maintenance_static.RateMaintenanceTests.test_actual_source_path) ... ok
+test_actual_target_controls (test_rate_maintenance_static.RateMaintenanceTests.test_actual_target_controls) ... ok
+test_guard_byte_branch_all256_encodings (test_rate_maintenance_static.RateMaintenanceTests.test_guard_byte_branch_all256_encodings) ... ok
+test_three_identical_integer_reset_formulas (test_rate_maintenance_static.RateMaintenanceTests.test_three_identical_integer_reset_formulas) ... ok
+test_exact_supported_version_boundaries (test_rea_launcher.RuntimeSelectionTests.test_exact_supported_version_boundaries) ... ok
+test_explicit_incompatible_runtime_not_silently_replaced (test_rea_launcher.RuntimeSelectionTests.test_explicit_incompatible_runtime_not_silently_replaced) ... ok
+test_explicit_provider_environment_preserved (test_rea_launcher.RuntimeSelectionTests.test_explicit_provider_environment_preserved) ... ok
+test_project_dependency_and_runtime_pins_agree (test_rea_launcher.RuntimeSelectionTests.test_project_dependency_and_runtime_pins_agree) ... ok
+test_target_bound_to_artifact_manifest (test_rea_launcher.RuntimeSelectionTests.test_target_bound_to_artifact_manifest) ... ok
+test_actual_controls_tables_and_exit_import (test_receiver_poll_static.ReceiverPollTests.test_actual_controls_tables_and_exit_import) ... ok
+test_actual_exit_symbol_cannot_be_relabelled (test_receiver_poll_static.ReceiverPollTests.test_actual_exit_symbol_cannot_be_relabelled) ... ok
+test_actual_instruction_corruptions_below_digest_gate (test_receiver_poll_static.ReceiverPollTests.test_actual_instruction_corruptions_below_digest_gate) ... ok
+test_actual_jump_table_displacements_below_digest_gate (test_receiver_poll_static.ReceiverPollTests.test_actual_jump_table_displacements_below_digest_gate) ... ok
+test_actual_relative_call_and_source_retargets (test_receiver_poll_static.ReceiverPollTests.test_actual_relative_call_and_source_retargets) ... ok
+test_actual_source_attribution_corruption (test_receiver_poll_static.ReceiverPollTests.test_actual_source_attribution_corruption) ... ok
+test_complete_gate_without_evidence_rejected (test_research_tools.CatalogueTests.test_complete_gate_without_evidence_rejected) ... ok
+test_fabricated_denominator_rejected (test_research_tools.CatalogueTests.test_fabricated_denominator_rejected) ... ok
+test_missing_component_rejected (test_research_tools.CatalogueTests.test_missing_component_rejected) ... ok
+test_specific_handler_before_exchange_fallback (test_research_tools.CatalogueTests.test_specific_handler_before_exchange_fallback) ... ok
+test_unknown_tree_rejected (test_research_tools.CatalogueTests.test_unknown_tree_rejected) ... ok
+test_data_relative_negative_start (test_research_tools.UnwindTests.test_data_relative_negative_start) ... ok
+test_entry_uses_source_offset_not_linked_or_rebased_address (test_research_tools.UnwindTests.test_entry_uses_source_offset_not_linked_or_rebased_address) ... ok
+test_rejects_non_executable_start (test_research_tools.UnwindTests.test_rejects_non_executable_start) ... ok
+test_rejects_truncated_sections (test_research_tools.UnwindTests.test_rejects_truncated_sections) ... ok
+test_rejects_truncated_table (test_research_tools.UnwindTests.test_rejects_truncated_table) ... ok
+test_rejects_unknown_encoding (test_research_tools.UnwindTests.test_rejects_unknown_encoding) ... ok
+test_retained_visor_inventory_matches_unwind_when_bytes_present (test_research_tools.VisorIndexTests.test_retained_visor_inventory_matches_unwind_when_bytes_present) ... ok
+test_target_for_maps_nodes_and_visor (test_research_tools.VisorIndexTests.test_target_for_maps_nodes_and_visor) ... ok
+test_address_mentions_are_not_decoded_calls (test_short_string_static.ShortStringStaticTests.test_address_mentions_are_not_decoded_calls) ... ok
+test_real_admission_packing_alias_controls (test_short_string_static.ShortStringStaticTests.test_real_admission_packing_alias_controls) ... ok
+test_real_caller_bytes_resolve_to_constructor_slot (test_short_string_static.ShortStringStaticTests.test_real_caller_bytes_resolve_to_constructor_slot) ... ok
+test_real_got_and_source_attribution_retargets_rejected (test_short_string_static.ShortStringStaticTests.test_real_got_and_source_attribution_retargets_rejected) ... ok
+test_real_representation_and_route_corruptions (test_short_string_static.ShortStringStaticTests.test_real_representation_and_route_corruptions) ... ok
+test_deploy_decoder_rejects_corruption (test_spot_token_decimals.SpotTokenDecimalsTest.test_deploy_decoder_rejects_corruption) ... ok
+test_every_guard_matches_message_predicate (test_spot_token_decimals.SpotTokenDecimalsTest.test_every_guard_matches_message_predicate) ... ok
+test_generated_files_match_packet (test_spot_token_decimals.SpotTokenDecimalsTest.test_generated_files_match_packet) ... ok
+test_model_negative_controls (test_spot_token_decimals.SpotTokenDecimalsTest.test_model_negative_controls) ... ok
+test_out_of_range_and_message_parsing (test_spot_token_decimals.SpotTokenDecimalsTest.test_out_of_range_and_message_parsing) ... ok
+test_range_decoder_and_corruptions (test_spot_token_decimals.SpotTokenDecimalsTest.test_range_decoder_and_corruptions) ... ok
+test_rejects_wrong_digest (test_spot_token_decimals.SpotTokenDecimalsTest.test_rejects_wrong_digest) ... ok
+test_summary (test_spot_token_decimals.SpotTokenDecimalsTest.test_summary) ... ok
+test_divide_by_zero_stops (test_spot_wei_scale.EvaluatorControls.test_divide_by_zero_stops) ... ok
+test_poisoned_register_stops (test_spot_wei_scale.EvaluatorControls.test_poisoned_register_stops) ... ok
+test_sub_borrow_and_mul_overflow (test_spot_wei_scale.EvaluatorControls.test_sub_borrow_and_mul_overflow) ... ok
+test_unknown_call_stops (test_spot_wei_scale.EvaluatorControls.test_unknown_call_stops) ... ok
+test_unknown_mnemonic_stops (test_spot_wei_scale.EvaluatorControls.test_unknown_mnemonic_stops) ... ok
+test_writing_32_bits_clears_top (test_spot_wei_scale.EvaluatorControls.test_writing_32_bits_clears_top) ... ok
+test_clamp_direction_changed (test_spot_wei_scale.HelperControls.test_clamp_direction_changed) ... ok
+test_fallback_overflow_flag_inverted (test_spot_wei_scale.HelperControls.test_fallback_overflow_flag_inverted) ... ok
+test_floor_one_removed (test_spot_wei_scale.HelperControls.test_floor_one_removed) ... ok
+test_hundred_divisor_changed (test_spot_wei_scale.HelperControls.test_hundred_divisor_changed) ... ok
+test_round_up_flag_inverted (test_spot_wei_scale.HelperControls.test_round_up_flag_inverted) ... ok
+test_side_token_swapped (test_spot_wei_scale.HelperControls.test_side_token_swapped) ... ok
+test_call_slot_requires_indirect_call (test_spot_wei_scale.InputControls.test_call_slot_requires_indirect_call) ... ok
+test_digest_rejects_flipped_byte (test_spot_wei_scale.InputControls.test_digest_rejects_flipped_byte) ... ok
+test_elf_magic_rejected (test_spot_wei_scale.InputControls.test_elf_magic_rejected) ... ok
+test_fde_lookup_rejects_address_before_table (test_spot_wei_scale.InputControls.test_fde_lookup_rejects_address_before_table) ... ok
+test_lea_scan_exact_target (test_spot_wei_scale.InputControls.test_lea_scan_exact_target) ... ok
+test_panic_stub_shape_enforced (test_spot_wei_scale.InputControls.test_panic_stub_shape_enforced) ... ok
+test_va_outside_sections_rejected (test_spot_wei_scale.InputControls.test_va_outside_sections_rejected) ... ok
+test_corrupted_step_constant (test_spot_wei_scale.LadderControls.test_corrupted_step_constant) ... ok
+test_high_exponent_mask_changed (test_spot_wei_scale.LadderControls.test_high_exponent_mask_changed) ... ok
+test_inverted_borrow_branch (test_spot_wei_scale.LadderControls.test_inverted_borrow_branch) ... ok
+test_off_by_one_model_detected (test_spot_wei_scale.LadderControls.test_off_by_one_model_detected) ... ok
+test_overflow_branch_removed (test_spot_wei_scale.LadderControls.test_overflow_branch_removed) ... ok
+test_unchanged_is_clean (test_spot_wei_scale.LadderControls.test_unchanged_is_clean) ... ok
+test_counts (test_spot_wei_scale.Results.test_counts) ... ok
+test_divergence_direction (test_spot_wei_scale.Results.test_divergence_direction) ... ok
+test_exponent_table (test_spot_wei_scale.Results.test_exponent_table) ... ok
+test_no_at_sign_in_outputs (test_spot_wei_scale.Results.test_no_at_sign_in_outputs) ... ok
+test_panic_message_is_unwrap (test_spot_wei_scale.Results.test_panic_message_is_unwrap) ... ok
+test_regeneration_is_byte_identical (test_spot_wei_scale.Results.test_regeneration_is_byte_identical) ... ok
+test_bad_encoder_list_rejected (test_state_hashers.StateHashersTests.test_bad_encoder_list_rejected) ... ok
+test_call_site_mutation_moves_chain (test_state_hashers.StateHashersTests.test_call_site_mutation_moves_chain) ... ok
+test_chains (test_state_hashers.StateHashersTests.test_chains) ... ok
+test_constant_mutation_removes_reason (test_state_hashers.StateHashersTests.test_constant_mutation_removes_reason) ... ok
+test_constants_absent_from_first_party (test_state_hashers.StateHashersTests.test_constants_absent_from_first_party) ... ok
+test_hasher_boundaries (test_state_hashers.StateHashersTests.test_hasher_boundaries) ... ok
+test_hashseed_invariance (test_state_hashers.StateHashersTests.test_hashseed_invariance) ... ok
+test_objdump_call_sites_from_function_start (test_state_hashers.StateHashersTests.test_objdump_call_sites_from_function_start) ... ok
+test_pinned_output (test_state_hashers.StateHashersTests.test_pinned_output) ... ok
+test_re005_encoders_not_linked (test_state_hashers.StateHashersTests.test_re005_encoders_not_linked) ... ok
+test_readelf_slots_and_fdes (test_state_hashers.StateHashersTests.test_readelf_slots_and_fdes) ... ok
+test_reloc_addend_off_by_one_breaks_chain (test_state_hashers.StateHashersTests.test_reloc_addend_off_by_one_breaks_chain) ... ok
+test_wrong_binary_rejected (test_state_hashers.StateHashersTests.test_wrong_binary_rejected) ... ok
+test_dev_null_imm_mutation_removed (test_state_roots.StateRootsTests.test_dev_null_imm_mutation_removed) ... ok
+test_dev_null_without_ninth_byte_check_rejected (test_state_roots.StateRootsTests.test_dev_null_without_ninth_byte_check_rejected) ... ok
+test_fde_end_exclusive_and_seed_off_by_one (test_state_roots.StateRootsTests.test_fde_end_exclusive_and_seed_off_by_one) ... ok
+test_hashseed_invariance (test_state_roots.StateRootsTests.test_hashseed_invariance) ... ok
+test_lea_retarget_drops_literal_owner (test_state_roots.StateRootsTests.test_lea_retarget_drops_literal_owner) ... ok
+test_literal_owners (test_state_roots.StateRootsTests.test_literal_owners) ... ok
+test_location_len_mutation_drops_record (test_state_roots.StateRootsTests.test_location_len_mutation_drops_record) ... ok
+test_location_line_mutation_changes_output (test_state_roots.StateRootsTests.test_location_line_mutation_changes_output) ... ok
+test_negative_control_literal (test_state_roots.StateRootsTests.test_negative_control_literal) ... ok
+test_non_elf_rejected (test_state_roots.StateRootsTests.test_non_elf_rejected) ... ok
+test_objdump_literal_leas (test_state_roots.StateRootsTests.test_objdump_literal_leas) ... ok
+test_packet_files_match_tool (test_state_roots.StateRootsTests.test_packet_files_match_tool) ... ok
+test_pinned_counts_and_hashes (test_state_roots.StateRootsTests.test_pinned_counts_and_hashes) ... ok
+test_readelf_fde_bounds (test_state_roots.StateRootsTests.test_readelf_fde_bounds) ... ok
+test_readelf_location_slots (test_state_roots.StateRootsTests.test_readelf_location_slots) ... ok
+test_seed_edit_changes_status (test_state_roots.StateRootsTests.test_seed_edit_changes_status) ... ok
+test_template_anchor_is_exact (test_state_roots.StateRootsTests.test_template_anchor_is_exact) ... ok
+test_wrong_binary_hash_rejected (test_state_roots.StateRootsTests.test_wrong_binary_hash_rejected) ... ok
+test_actual_family_and_source_bindings (test_truncated_debug_static.TruncatedDebugTests.test_actual_family_and_source_bindings) ... ok
+test_actual_guard_and_prefix_corruptions (test_truncated_debug_static.TruncatedDebugTests.test_actual_guard_and_prefix_corruptions) ... ok
+test_actual_source_retargets_and_path (test_truncated_debug_static.TruncatedDebugTests.test_actual_source_retargets_and_path) ... ok
+test_both_decoded_signed_predicates_all256_bytes (test_truncated_debug_static.TruncatedDebugTests.test_both_decoded_signed_predicates_all256_bytes) ... ok
+test_length_and_fixed_cutpoint_branch_destinations (test_truncated_debug_static.TruncatedDebugTests.test_length_and_fixed_cutpoint_branch_destinations) ... ok
+test_valid_utf8_boundary_examples_and_local_limit (test_truncated_debug_static.TruncatedDebugTests.test_valid_utf8_boundary_examples_and_local_limit) ... ok
+test_clean_pin_passes (test_verify_imports.VerifyImportsTests.test_clean_pin_passes) ... ok
+test_commit_mismatch_rejected (test_verify_imports.VerifyImportsTests.test_commit_mismatch_rejected) ... ok
+test_missing_git_binary_is_a_message (test_verify_imports.VerifyImportsTests.test_missing_git_binary_is_a_message) ... ok
+test_missing_submodule_names_the_fix (test_verify_imports.VerifyImportsTests.test_missing_submodule_names_the_fix) ... ok
+test_modified_reference_rejected (test_verify_imports.VerifyImportsTests.test_modified_reference_rejected) ... ok
+test_cvttsd2si_indefinite (test_wei_buffered_cap.EvaluatorControls.test_cvttsd2si_indefinite) ... ok
+test_poisoned_xmm_stops (test_wei_buffered_cap.EvaluatorControls.test_poisoned_xmm_stops) ... ok
+test_unknown_call_stops (test_wei_buffered_cap.EvaluatorControls.test_unknown_call_stops) ... ok
+test_unknown_mnemonic_stops (test_wei_buffered_cap.EvaluatorControls.test_unknown_mnemonic_stops) ... ok
+test_absent_constant_rejected (test_wei_buffered_cap.InputControls.test_absent_constant_rejected) ... ok
+test_address_outside_sections_rejected (test_wei_buffered_cap.InputControls.test_address_outside_sections_rejected) ... ok
+test_digest_rejects_tampering (test_wei_buffered_cap.InputControls.test_digest_rejects_tampering) ... ok
+test_fde_rejects_low_address (test_wei_buffered_cap.InputControls.test_fde_rejects_low_address) ... ok
+test_add_immediate (test_wei_buffered_cap.InstructionControls.test_add_immediate) ... ok
+test_buffer_constant_swapped (test_wei_buffered_cap.InstructionControls.test_buffer_constant_swapped) ... ok
+test_clamp_bound_swapped (test_wei_buffered_cap.InstructionControls.test_clamp_bound_swapped) ... ok
+test_factor_branch_inverted (test_wei_buffered_cap.InstructionControls.test_factor_branch_inverted) ... ok
+test_high_half_conversion_removed (test_wei_buffered_cap.InstructionControls.test_high_half_conversion_removed) ... ok
+test_overflow_compare_changed (test_wei_buffered_cap.InstructionControls.test_overflow_compare_changed) ... ok
+test_unchanged_is_clean (test_wei_buffered_cap.InstructionControls.test_unchanged_is_clean) ... ok
+test_clamp_values (test_wei_buffered_cap.Models.test_clamp_values) ... ok
+test_double_grid_includes_bounds (test_wei_buffered_cap.Models.test_double_grid_includes_bounds) ... ok
+test_factor_bound (test_wei_buffered_cap.Models.test_factor_bound) ... ok
+test_reciprocal_controls (test_wei_buffered_cap.Models.test_reciprocal_controls) ... ok
+test_counts (test_wei_buffered_cap.Results.test_counts) ... ok
+test_every_site_read_by_mulsd (test_wei_buffered_cap.Results.test_every_site_read_by_mulsd) ... ok
+test_lead_difference_is_positive_infinity_only (test_wei_buffered_cap.Results.test_lead_difference_is_positive_infinity_only) ... ok
+test_regeneration_is_byte_identical (test_wei_buffered_cap.Results.test_regeneration_is_byte_identical) ... ok
+test_rounding_example (test_wei_buffered_cap.Results.test_rounding_example) ... ok
+test_saturation (test_wei_buffered_cap.Results.test_saturation) ... ok
+test_corrupted_binary_is_rejected (test_weipriv_sign_guard.BinaryTests.test_corrupted_binary_is_rejected) ... ok
+test_flipped_guard_in_real_caller_is_not_matched (test_weipriv_sign_guard.BinaryTests.test_flipped_guard_in_real_caller_is_not_matched) ... ok
+test_out_of_range_addresses (test_weipriv_sign_guard.BinaryTests.test_out_of_range_addresses) ... ok
+test_packet_files_regenerate_byte_for_byte (test_weipriv_sign_guard.BinaryTests.test_packet_files_regenerate_byte_for_byte) ... ok
+test_summary (test_weipriv_sign_guard.BinaryTests.test_summary) ... ok
+test_digest_mismatch_is_rejected (test_weipriv_sign_guard.DecoderTests.test_digest_mismatch_is_rejected) ... ok
+test_guard_model_boundaries (test_weipriv_sign_guard.DecoderTests.test_guard_model_boundaries) ... ok
+test_only_sign_branches_count (test_weipriv_sign_guard.DecoderTests.test_only_sign_branches_count) ... ok
+test_synthetic_guard_and_corruptions (test_weipriv_sign_guard.DecoderTests.test_synthetic_guard_and_corruptions) ... ok
+test_test_reg_reg_only (test_weipriv_sign_guard.DecoderTests.test_test_reg_reg_only) ... ok
+
+----------------------------------------------------------------------
+Ran 437 tests in 159.600s
+
+OK
+{
+  "protocol": "ok",
+  "fixtures": 3,
+  "plan": {
+    "status": "planned",
+    "request_id": "re003-plan-only-001",
+    "target_release": "94",
+    "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+    "fixture_ids": [
+      "syn-94-pos-equal-window-v1"
+    ],
+    "network": "deny",
+    "execute_target": false,
+    "declared_side_effects": [],
+    "workdir": "work/harness/",
+    "note": "Plan only. No captured binary was executed."
+  }
+}
+{
+  "status": "planned",
+  "request_id": "re003-plan-only-001",
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "fixture_ids": [
+    "syn-94-pos-equal-window-v1"
+  ],
+  "network": "deny",
+  "execute_target": false,
+  "declared_side_effects": [],
+  "workdir": "work/harness/",
+  "note": "Plan only. No captured binary was executed."
+}
+{
+  "status": "rejected",
+  "reason": "execute_target requires APPROVAL.md covering this request_id (fail closed; this tool never spawns hl-node or hl-visor)"
+}
+{"all_sites_one_tied_guard": true, "call_sites": 34, "call_sites_with_exactly_one_sign_guard": 34, "caller_functions": 34, "constructors": 16, "guard_value_is_formatted_value": 34, "jns_guards": 23, "js_guards": 11, "lea_refs": 16, "mismatch_vs_message_predicate": 0, "narrow_guards": 21, "narrow_mismatch_vs_message_predicate": 0, "ok_path_stores_unchanged": 11, "unexplained_error_entries": 0}
+{"call_sites": 6, "call_sites_with_exactly_one_sign_guard": 6, "constructors": 5, "guard_value_is_formatted_value": true, "lea_refs": 5, "ok_path_stores_unchanged": 4}
+python3 tools/catalogue.py --check
+Catalogue and progress tables match pinned inputs.
+python3 tools/reproduce.py
+SHA-256 OK: artifacts/keys/pub_key.asc
+SHA-256 OK: artifacts/node/115/hl-node
+SHA-256 OK: artifacts/node/115/hl-node.asc
+SHA-256 OK: artifacts/node/115/node_metadata.json
+SHA-256 OK: artifacts/node/94/hl-node
+SHA-256 OK: artifacts/node/94/hl-node.asc
+SHA-256 OK: artifacts/visor/captured/hl-visor
+SHA-256 OK: artifacts/visor/captured/hl-visor.asc
+Valid signature: node/94/hl-node
+Valid signature: node/115/hl-node
+Valid signature: visor/captured/hl-visor
+Pinned upstream binary, signature and public key match.
+{
+ "file_size": 91774280,
+ "elf_type": "DYN (PIE)",
+ "machine": "x86-64",
+ "entry": "0x1343c80",
+ "has_symtab": false,
+ "debug_sections": [],
+ "comment": [
+  "GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "clang version 21.1.0-rc2",
+  "Linker: LLD 21.1.8 (/checkout/src/llvm-project/llvm 00d23d10dc48c6bb9d57ba96d4a748d85d77d0c7)",
+  "rustc version 1.94.1 (e408947bf 2026-03-25)"
+ ],
+ "build_id": "29a7b9d6c31d0c687c376a834eba4f3ddaac660b",
+ "needed": [
+  "libstdc++.so.6",
+  "libssl.so.3",
+  "libcrypto.so.3",
+  "libgcc_s.so.1",
+  "libm.so.6",
+  "libc.so.6",
+  "ld-linux-x86-64.so.2"
+ ],
+ "dynsym_count": 509,
+ "fde_count_eh_frame_hdr": 121299,
+ "eh_frame_hdr_encodings": [
+  "0x1b",
+  "0x3",
+  "0x3b"
+ ],
+ "git_build_stamps": [],
+ "rustc_commits": [
+  "e408947bfd200af42db322daf0fadfe7e26d3bd1"
+ ],
+ "source_roots": [
+  "/home/ubuntu/hl/code_Mainnet"
+ ],
+ "first_party_crates": {
+  "base": 38,
+  "db": 6,
+  "evm_rpc": 6,
+  "global_constants": 2,
+  "info_server": 7,
+  "l1": 70,
+  "net_utils": 12,
+  "node": 32
+ },
+ "vendored_crates": "0 crates",
+ "forked_crates": {},
+ "std_deps": {
+  "addr2line": [
+   "0.25.1"
+  ],
+  "gimli": [
+   "0.32.3"
+  ],
+  "hashbrown": [
+   "0.16.1"
+  ],
+  "miniz_oxide": [
+   "0.8.9"
+  ],
+  "rustc-demangle": [
+   "0.1.26"
+  ]
+ },
+ "registry_crates": {
+  "alloy-consensus": [
+   "0.9.2"
+  ],
+  "alloy-eip2930": [
+   "0.1.0"
+  ],
+  "alloy-eip7702": [
+   "0.5.0"
+  ],
+  "alloy-eips": [
+   "0.9.2"
+  ],
+  "alloy-rlp": [
+   "0.3.10"
+  ],
+  "alloy-trie": [
+   "0.7.8"
+  ],
+  "anyhow": [
+   "1.0.86"
+  ],
+  "arc-swap": [
+   "1.7.1"
+  ],
+  "arrayvec": [
+   "0.7.4"
+  ],
+  "aurora-engine-modexp": [
+   "1.1.0"
+  ],
+  "axum": [
+   "0.6.20"
+  ],
+  "axum-core": [
+   "0.3.4"
+  ],
+  "axum-extra": [
+   "0.8.0"
+  ],
+  "bitvec": [
+   "1.0.1"
+  ],
+  "blake3": [
+   "1.7.0"
+  ],
+  "block-buffer": [
+   "0.9.0"
+  ],
+  "blst": [
+   "0.3.13"
+  ],
+  "bs58": [
+   "0.5.1"
+  ],
+  "bytes": [
+   "1.11.1"
+  ],
+  "bzip2-sys": [
+   "0.1.11+1.0.8"
+  ],
+  "c-kzg": [
+   "1.0.3"
+  ],
+  "chrono": [
+   "0.4.38"
+  ],
+  "clap": [
+   "2.34.0"
+  ],
+  "const-hex": [
+   "1.14.0"
+  ],
+  "const-oid": [
+   "0.9.6"
+  ],
+  "crossbeam-deque": [
+   "0.8.5"
+  ],
+  "crossbeam-epoch": [
+   "0.9.18"
+  ],
+  "curve25519-dalek-ng": [
+   "4.1.1"
+  ],
+  "ecdsa": [
+   "0.16.9"
+  ],
+  "ethabi": [
+   "18.0.0"
+  ],
+  "ethers-core": [
+   "2.0.14"
+  ],
+  "foldhash": [
+   "0.1.4",
+   "0.2.0"
+  ],
+  "form_urlencoded": [
+   "1.2.1"
+  ],
+  "futures-channel": [
+   "0.3.31"
+  ],
+  "futures-core": [
+   "0.3.31"
+  ],
+  "futures-util": [
+   "0.3.31"
+  ],
+  "h2": [
+   "0.3.26"
+  ],
+  "hashbrown": [
+   "0.14.5",
+   "0.16.1"
+  ],
+  "http": [
+   "0.2.12"
+  ],
+  "httparse": [
+   "1.9.4"
+  ],
+  "httpdate": [
+   "1.0.3"
+  ],
+  "hyper": [
+   "0.14.29"
+  ],
+  "iana-time-zone": [
+   "0.1.60"
+  ],
+  "icu_collections": [
+   "1.5.0"
+  ],
+  "icu_normalizer": [
+   "1.5.0"
+  ],
+  "idna": [
+   "1.0.3"
+  ],
+  "idna_adapter": [
+   "1.2.0"
+  ],
+  "impl-serde": [
+   "0.4.0"
+  ],
+  "indexmap": [
+   "2.5.0"
+  ],
+  "itoa": [
+   "1.0.11"
+  ],
+  "jsonrpsee-core": [
+   "0.24.7"
+  ],
+  "jsonrpsee-types": [
+   "0.24.7"
+  ],
+  "k256": [
+   "0.13.3"
+  ],
+  "log-mdc": [
+   "0.1.0"
+  ],
+  "log4rs": [
+   "1.3.0"
+  ],
+  "lru": [
+   "0.16.3"
+  ],
+  "lz4_flex": [
+   "0.11.6"
+  ],
+  "matchit": [
+   "0.7.3"
+  ],
+  "mime": [
+   "0.3.17"
+  ],
+  "mio": [
+   "1.0.2"
+  ],
+  "native-tls": [
+   "0.2.12"
+  ],
+  "num_cpus": [
+   "1.17.0"
+  ],
+  "once_cell": [
+   "1.20.2"
+  ],
+  "openssl": [
+   "0.10.72"
+  ],
+  "openssl-sys": [
+   "0.9.107"
+  ],
+  "parking_lot": [
+   "0.12.3"
+  ],
+  "parking_lot_core": [
+   "0.9.10"
+  ],
+  "percent-encoding": [
+   "2.3.1"
+  ],
+  "primitive-types": [
+   "0.12.2"
+  ],
+  "rand": [
+   "0.8.5"
+  ],
+  "rand_chacha": [
+   "0.3.1"
+  ],
+  "rand_core": [
+   "0.6.4"
+  ],
+  "rayon": [
+   "1.10.0"
+  ],
+  "rayon-core": [
+   "1.12.1"
+  ],
+  "revm": [
+   "19.2.0"
+  ],
+  "revm-interpreter": [
+   "15.0.0"
+  ],
+  "revm-precompile": [
+   "16.0.0"
+  ],
+  "revm-primitives": [
+   "15.1.0"
+  ],
+  "ripemd": [
+   "0.1.3"
+  ],
+  "rmp-serde": [
+   "1.3.0"
+  ],
+  "rocksdb": [
+   "0.21.0"
+  ],
+  "ruint": [
+   "1.12.3"
+  ],
+  "rust_decimal": [
+   "1.36.0"
+  ],
+  "rustc-hash": [
+   "2.1.0"
+  ],
+  "rustc-hex": [
+   "2.1.0"
+  ],
+  "ryu": [
+   "1.0.18"
+  ],
+  "sec1": [
+   "0.7.3"
+  ],
+  "secp256k1": [
+   "0.29.0"
+  ],
+  "secp256k1-sys": [
+   "0.10.0"
+  ],
+  "serde": [
+   "1.0.217"
+  ],
+  "serde_json": [
+   "1.0.120"
+  ],
+  "serde_path_to_error": [
+   "0.1.16"
+  ],
+  "sha2": [
+   "0.10.8",
+   "0.9.9"
+  ],
+  "shlex": [
+   "1.3.0"
+  ],
+  "signal-hook-registry": [
+   "1.4.2"
+  ],
+  "slab": [
+   "0.4.9"
+  ],
+  "smallvec": [
+   "1.13.2"
+  ],
+  "socket2": [
+   "0.4.10",
+   "0.5.7"
+  ],
+  "substrate-bn": [
+   "0.6.0"
+  ],
+  "subtle": [
+   "2.6.1"
+  ],
+  "sysinfo": [
+   "0.29.11"
+  ],
+  "textwrap": [
+   "0.11.0"
+  ],
+  "threadpool": [
+   "1.8.1"
+  ],
+  "tiny-keccak": [
+   "2.0.2"
+  ],
+  "tokio": [
+   "1.44.2"
+  ],
+  "tokio-metrics": [
+   "0.3.1"
+  ],
+  "tokio-native-tls": [
+   "0.3.1"
+  ],
+  "tokio-util": [
+   "0.7.11"
+  ],
+  "tower": [
+   "0.4.13"
+  ],
+  "tracing-core": [
+   "0.1.36"
+  ],
+  "unicode-width": [
+   "0.1.13"
+  ],
+  "url": [
+   "2.5.4"
+  ],
+  "want": [
+   "0.3.1"
+  ],
+  "wyz": [
+   "0.5.1"
+  ]
+ }
+}
+{
+ "file_size": 105896032,
+ "elf_type": "DYN (PIE)",
+ "machine": "x86-64",
+ "entry": "0x1419300",
+ "has_symtab": false,
+ "debug_sections": [],
+ "comment": [
+  "rustc version 1.95.0 (59807616e 2026-04-14)",
+  "Linker: LLD 22.1.2 (/checkout/src/llvm-project/llvm 1cb4e3833c1919c2e6fb579a23ac0e2b22587b7e)",
+  "GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "clang version 22.1.0-rc2"
+ ],
+ "build_id": "ac2880fcda5e49007a8e4fb1ea6aa7dd1b2eae01",
+ "needed": [
+  "libstdc++.so.6",
+  "libssl.so.3",
+  "libcrypto.so.3",
+  "libgcc_s.so.1",
+  "libm.so.6",
+  "libc.so.6",
+  "ld-linux-x86-64.so.2"
+ ],
+ "dynsym_count": 510,
+ "fde_count_eh_frame_hdr": 135313,
+ "eh_frame_hdr_encodings": [
+  "0x1b",
+  "0x3",
+  "0x3b"
+ ],
+ "git_build_stamps": [],
+ "rustc_commits": [
+  "59807616e1fa2540724bfbac14d7976d7e4a3860"
+ ],
+ "source_roots": [
+  "/home/ubuntu/hl/code_Mainnet"
+ ],
+ "first_party_crates": {
+  "base": 33,
+  "db": 5,
+  "evm_rpc": 6,
+  "global_constants": 2,
+  "info_server": 7,
+  "l1": 77,
+  "net_utils": 12,
+  "node": 38,
+  "threadthread_spawn_forevertokio_spawn_foreverdiscriminantbase": 1
+ },
+ "vendored_crates": "15 crates",
+ "forked_crates": {
+  "bincode-fork": 4,
+  "hyper-fork": 200,
+  "hyper-tls-fork": 1,
+  "reth-chainspec": 1,
+  "reth-ethereum-forks": 1,
+  "reth-rpc-eth-types": 2,
+  "reth-rpc-server-types": 1,
+  "revm-precompile": 12
+ },
+ "std_deps": {
+  "addr2line": [
+   "0.25.1"
+  ],
+  "gimli": [
+   "0.32.3"
+  ],
+  "hashbrown": [
+   "0.16.1"
+  ],
+  "miniz_oxide": [
+   "0.8.9"
+  ],
+  "rustc-demangle": [
+   "0.1.27"
+  ]
+ },
+ "registry_crates": {}
+}
+{
+ "file_size": 8305392,
+ "elf_type": "DYN (PIE)",
+ "machine": "x86-64",
+ "entry": "0x2bd180",
+ "has_symtab": false,
+ "debug_sections": [],
+ "comment": [
+  "rustc version 1.95.0 (59807616e 2026-04-14)",
+  "Linker: LLD 22.1.2 (/checkout/src/llvm-project/llvm 1cb4e3833c1919c2e6fb579a23ac0e2b22587b7e)",
+  "GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "clang version 22.1.0-rc2"
+ ],
+ "build_id": "b55c82cd4de234f23c768e5adff1e84e6adbc9a6",
+ "needed": [
+  "libssl.so.3",
+  "libcrypto.so.3",
+  "libgcc_s.so.1",
+  "libm.so.6",
+  "libc.so.6",
+  "ld-linux-x86-64.so.2"
+ ],
+ "dynsym_count": 260,
+ "fde_count_eh_frame_hdr": 11028,
+ "eh_frame_hdr_encodings": [
+  "0x1b",
+  "0x3",
+  "0x3b"
+ ],
+ "git_build_stamps": [
+  "c6b742f0456580eac0f90e9ecdd9a63a39f5540a 2026-09-09 08:31:33 +0000 uncommitted=false"
+ ],
+ "rustc_commits": [
+  "59807616e1fa2540724bfbac14d7976d7e4a3860"
+ ],
+ "source_roots": [
+  "/home/ubuntu/hl/code_Mainnet"
+ ],
+ "first_party_crates": {
+  "base": 27,
+  "global_constants": 2,
+  "net_utils": 3,
+  "node": 4,
+  "threadthread_spawn_forevertokio_spawn_foreverdiscriminantbase": 1
+ },
+ "vendored_crates": "9 crates",
+ "forked_crates": {
+  "hyper-fork": 199,
+  "hyper-tls-fork": 1
+ },
+ "std_deps": {
+  "addr2line": [
+   "0.25.1"
+  ],
+  "gimli": [
+   "0.32.3"
+  ],
+  "hashbrown": [
+   "0.16.1"
+  ],
+  "miniz_oxide": [
+   "0.8.9"
+  ],
+  "rustc-demangle": [
+   "0.1.27"
+  ]
+ },
+ "registry_crates": {}
+}
+excluded 11 compile-time attribute literals (e.g. ['Option::is_none', 'Option::is_none', 'Option::is_none', 'PascalCase', 'Vec::is_empty'])
+1452 distinct literals (len>=8, no '{')
+overall: grounded 822 (56.6%)  drift 60 (4.1%)  late 1 (0.1%)  notes 80 (5.5%)  partial 46 (3.2%)  case 11 (0.8%)  unanchored 432 (29.8%)
+verbatim in source binary #94: 882 (60.7%)
+crate                grounded      drift       late      notes    partial       case unanchored   in#94%
+l1                        330         13          1         44         26          8        291    48.1%
+node                      153         22          0          5         11          1         39    75.8%
+base                      111         20          0         31          4          1         54    59.3%
+evm_rpc                    51          2          0          0          3          1         22    67.1%
+info_server                76          1          0          0          1          0          1    97.5%
+global_constants           65          0          0          0          0          0          2    97.0%
+net_utils                  21          2          0          0          0          0         18    56.1%
+db                         14          0          0          0          1          0          5    70.0%
+bincode_fork                1          0          0          0          0          0          0   100.0%
+-- drift examples:
+    evm_rpc/evm_write_forwarder.rs: 'http://rpc.hyperliquid.xyz/evm'
+    evm_rpc/evm_write_forwarder.rs: 'http://rpc.hyperliquid-testnet.xyz/evm'
+    base/crit_msg.rs: '/hyperliquid_data/skip_crit_msg_stats'
+    base/crit_msg.rs: '/tmp/crit_msg_latest_stats'
+    base/crit_msg.rs: 'is_ignored'
+    base/crit_msg.rs: 'first_msg'
+    base/hour.rs: 'assertion failed: hour <= 24'
+    base/hour.rs: '`NaiveDateTime + TimeDelta` overflowed'
+-- partial examples:
+    evm_rpc/evm_rpc.rs: 'The batch request exceeded its limit of 20 requests'
+    evm_rpc/evm_rpc.rs: 'reward percentiles must be in [0, 100]'
+    evm_rpc/evm_rpc.rs: 'topic must be null, a hash, or an array of hashes'
+    base/time.rs: 'Unix epoch is a valid NaiveDateTime'
+    base/time.rs: 'SystemTime before Unix epoch'
+    base/daily_liner.rs: "daily liner key must not start or end with '/'"
+    base/cid.rs: 'a sequence of CID alias entries'
+    node/abci_stream.rs: 'could not establish abci stream from peer, retrying'
+-- unanchored examples:
+    evm_rpc/evm_rpc.rs: 'serializing JSON-RPC error response cannot fail'
+    evm_rpc/evm_rpc.rs: 'serializing JSON-RPC batch-limit error response cannot fail'
+    evm_rpc/evm_rpc.rs: 'serializing JSON-RPC request error cannot fail'
+    evm_rpc/evm_rpc.rs: 'serializing JSON-RPC response cannot fail'
+    evm_rpc/evm_rpc.rs: 'raw_transaction'
+    evm_rpc/evm_rpc.rs: 'serializing JSON-RPC HTTP response cannot fail'
+    evm_rpc/evm_rpc.rs: 'building JSON-RPC HTTP response cannot fail'
+    evm_rpc/evm_rpc.rs: 'expected no params'
+-- notes examples:
+    base/build_mode.rs: 'unexpected BuildMode discriminant panic — see sub_13CD410 / build_mode'
+    base/build_mode.rs: 'opaque command object layout and caller-owned argv transfer — see sub_'
+    base/production.rs: 'write singleton context fields and lazy template names — see base_prod'
+    base/production.rs: 'spawn detached monitor_disk_and_backup_logs worker — see base_producti'
+    base/production.rs: ' ended, restarting in ... See ... for output'
+    base/production.rs: 'reconstruct full LoopParent async restart driver — see base_production'
+    base/production.rs: 'perform async touch request — see base_production__async_touch_state_p'
+    base/production.rs: 'perform async touch request and alert on failure — see base_production'
+Inventories, raw counts and refined item classifications reproduce the imported evidence.
+Refined counts: {'grounded': 822, 'drift': 60, 'notes': 116, 'late': 1, 'case': 11, 'partial': 56, 'unanchored': 386}
