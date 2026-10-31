@@ -102,7 +102,12 @@ def rejects_boundary_byte(value, kind):
     return signed <= -65 if kind == 'bf-jle' else signed < -64
 
 def generate(binary, output):
-    identity = next(i for i in json.loads((ROOT/'provenance/artifacts.json').read_text())['files'] if i['path']=='artifacts/node/94/hl-node')
+    manifest = json.loads((ROOT/'provenance/artifacts.json').read_text())
+    if not isinstance(manifest, dict) or not isinstance(manifest.get('files'), list): raise ValueError('Invalid artifact manifest')
+    for entry in manifest['files']:
+        if not isinstance(entry, dict) or 'path' not in entry: raise ValueError('Invalid artifact record')
+    identity = next((i for i in manifest['files'] if i['path'] == 'artifacts/node/94/hl-node'), None)
+    if identity is None: raise ValueError('No provenance/artifacts.json entry for artifacts/node/94/hl-node')
     check(binary,identity)
     data = binary.read_bytes()
     bindings = source_bindings(data)
