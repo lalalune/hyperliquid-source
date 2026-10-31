@@ -25,6 +25,8 @@ def sections(data):
             raise ValueError('Section outside file')
         rows.append(dict(name_offset=name, type=typ, flags=flags, address=addr, offset=off, size=size))
     names = rows[names_index]
+    if names['type'] == 8:
+        raise ValueError('Section name table is NOBITS')
     table = data[names['offset']:names['offset'] + names['size']]
     for row in rows:
         off = row.pop('name_offset')
