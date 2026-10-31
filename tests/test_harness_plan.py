@@ -1,4 +1,5 @@
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -152,6 +153,48 @@ class RequestGateTests(unittest.TestCase):
             plan['declared_side_effects'],
             ['writes_fixture_output', 'extra_declared'],
         )
+
+
+class PlanScopeCliTests(unittest.TestCase):
+    def _request(self):
+        return hp.load_json(PACKET / 'examples/plan-only.json')
+
+    def _plan(self, request):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'request.json'
+            path.write_text(json.dumps(request), encoding='utf-8')
+            result = subprocess.run(
+                [sys.executable, '-B', *(['-O'] if sys.flags.optimize else []),
+                 str(ROOT / 'tools/harness_plan.py'), '--request', str(path)],
+                capture_output=True, text=True, timeout=30,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return json.loads(result.stdout)
+
+    def test_cli_preserves_required_component_and_question(self):
+        request = self._request()
+        plan = self._plan(request)
+        for field in ('component_id', 'bounded_question'):
+            self.assertIn(field, plan)
+            self.assertEqual(plan[field], request[field])
+
+    def test_cli_distinguishes_different_components(self):
+        request = self._request()
+        original = self._plan(request)
+        request['component_id'] = 'foundation'
+        changed = self._plan(request)
+        self.assertNotEqual(original, changed)
+        self.assertEqual(changed['component_id'], 'foundation')
+        self.assertEqual(changed['bounded_question'], request['bounded_question'])
+
+    def test_cli_distinguishes_different_questions(self):
+        request = self._request()
+        original = self._plan(request)
+        request['bounded_question'] = 'Record another bounded offline question'
+        changed = self._plan(request)
+        self.assertNotEqual(original, changed)
+        self.assertEqual(changed['bounded_question'], request['bounded_question'])
+        self.assertEqual(changed['component_id'], request['component_id'])
 
 
 if __name__ == '__main__':

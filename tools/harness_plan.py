@@ -185,6 +185,8 @@ def validate_request(request: dict, fixtures_by_id: dict) -> dict:
     return {
         'status': 'planned',
         'request_id': request['request_id'],
+        'component_id': request['component_id'],
+        'bounded_question': request['bounded_question'],
         'target_release': release,
         'target_sha256': request['target_sha256'],
         'fixture_ids': fixture_ids,
