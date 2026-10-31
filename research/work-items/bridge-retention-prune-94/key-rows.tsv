@@ -1,0 +1,31 @@
+function	at	bytes	operation	note
+0x22297c0	0x2229f93	3b03	cmp	date word of the previous time against the block time
+0x22297c0	0x2229f95	7d7c	jcc	not a later date: skip the prune
+0x22297c0	0x2229fb5	3c03	cmp	chain byte against 3
+0x22297c0	0x2229fb7	b8803a0900	mov	604800 seconds
+0x22297c0	0x2229fbc	ba80510100	mov	86400 seconds
+0x22297c0	0x2229fc1	480f44d0	cmov	the long span only on 3
+0x22297c0	0x2229fd4	ff156e575403	calli	time minus span
+0x22297c0	0x2229fdf	0f84f10d0000	jcc	date word 0 is None: panic
+0x22297c0	0x2229fe5	498dbc2498330000	lea	bridge at state +0x3398
+0x22297c0	0x222a00d	ff154d9a5403	calli	prune through the slot
+0x374f170	0x374f187	4c8baf38010000	mov	read last_pruned_deposit_block_number
+0x374f170	0x374f1ea	4d39eb	cmp	block word against the running floor
+0x374f170	0x374f1ed	4d0f47eb	cmov	floor rises, unsigned
+0x374f170	0x374f3a8	43398cf7d0020000	cmp	row date word
+0x374f170	0x374f3b0	410f9ec3	set	signed date
+0x374f170	0x374f3e5	41397e0c	cmp	row seconds
+0x374f170	0x374f3e9	410f96c3	set	unsigned seconds
+0x374f170	0x374f3ef	45394610	cmp	row nanoseconds
+0x374f170	0x374f3f3	0f86e7fdffff	jcc	equal time counts as old
+0x374f170	0x374f4bb	80bc248800000006	cmp	deposit iterator ends on byte +0x38 = 6
+0x374f170	0x374f56b	837c247000	cmp	withdrawal iterator ends on date word 0
+0x374f170	0x374f572	4c89ab38010000	mov	store the floor
+0x3314dd0	0x3314e56	4d3b0a	cmp	deposit key block word against the floor
+0x3314dd0	0x3314e59	0f86dc000000	jcc	at or below the floor: remove
+0x3314ff0	0x3315077	453b11	cmp	withdrawal time date word
+0x3314ff0	0x331507a	410f9fc2	set	signed date
+0x3314ff0	0x331508f	453b5104	cmp	withdrawal seconds
+0x3314ff0	0x3315093	410f97c2	set	unsigned seconds
+0x3314ff0	0x331509d	453b5108	cmp	withdrawal nanoseconds
+0x3314ff0	0x33150a1	770e	jcc	strictly later stays
