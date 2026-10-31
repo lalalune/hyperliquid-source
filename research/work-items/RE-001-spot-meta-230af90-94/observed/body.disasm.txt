@@ -1,0 +1,87 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x230af90 0x230af90..0x230b0d2; byte records are authoritative
+230af90  50                     push rax
+230af91  488b8670010000         mov rax, qword ptr [rsi + 0x170]
+230af98  4839c1                 cmp rcx, rax
+230af9b  0f8311010000           jae 0x230b0b2
+230afa1  4989d0                 mov r8, rdx
+230afa4  48c1e105               shl rcx, 5
+230afa8  4c8b8e68010000         mov r9, qword ptr [rsi + 0x168]
+230afaf  488b9688010000         mov rdx, qword ptr [rsi + 0x188]
+230afb6  498b440908             mov rax, qword ptr [r9 + rcx + 8]
+230afbb  4839d0                 cmp rax, rdx
+230afbe  0f83e1000000           jae 0x230b0a5
+230afc4  498b0c09               mov rcx, qword ptr [r9 + rcx]
+230afc8  4839d1                 cmp rcx, rdx
+230afcb  0f83d4000000           jae 0x230b0a5
+230afd1  488b9680010000         mov rdx, qword ptr [rsi + 0x180]
+230afd8  4869c0e8000000         imul rax, rax, 0xe8
+230afdf  0fb6440249             movzx eax, byte ptr [rdx + rax + 0x49]
+230afe4  4869c9e8000000         imul rcx, rcx, 0xe8
+230afeb  0fb6540a48             movzx edx, byte ptr [rdx + rcx + 0x48]
+230aff0  4189c2                 mov r10d, eax
+230aff3  4128d2                 sub r10b, dl
+230aff6  0f82c9000000           jb 0x230b0c5
+230affc  66b96500               mov cx, 0x65
+230b000  4589d1                 mov r9d, r10d
+230b003  4180e908               sub r9b, 8
+230b007  7740                   ja 0x230b049
+230b009  be01000000             mov esi, 1
+230b00e  7459                   je 0x230b069
+230b010  41f6d9                 neg r9b
+230b013  41f6c101               test r9b, 1
+230b017  740b                   je 0x230b024
+230b019  be0a000000             mov esi, 0xa
+230b01e  4180fa07               cmp r10b, 7
+230b022  7445                   je 0x230b069
+230b024  450fb6d1               movzx r10d, r9b
+230b028  41f6c102               test r9b, 2
+230b02c  7411                   je 0x230b03f
+230b02e  486bf664               imul rsi, rsi, 0x64
+230b032  4589d3                 mov r11d, r10d
+230b035  4183e30e               and r11d, 0xe
+230b039  4183fb02               cmp r11d, 2
+230b03d  742a                   je 0x230b069
+230b03f  41f6c104               test r9b, 4
+230b043  750c                   jne 0x230b051
+230b045  38d0                   cmp al, dl
+230b047  7419                   je 0x230b062
+230b049  66890f                 mov word ptr [rdi], cx
+230b04c  4889f8                 mov rax, rdi
+230b04f  59                     pop rcx
+230b050  c3                     ret 
+230b051  4869f610270000         imul rsi, rsi, 0x2710
+230b058  4183e20c               and r10d, 0xc
+230b05c  4183fa04               cmp r10d, 4
+230b060  7407                   je 0x230b069
+230b062  4869f600e1f505         imul rsi, rsi, 0x5f5e100
+230b069  4c89c0                 mov rax, r8
+230b06c  4809f0                 or rax, rsi
+230b06f  48c1e820               shr rax, 0x20
+230b073  740f                   je 0x230b084
+230b075  4c89c0                 mov rax, r8
+230b078  31d2                   xor edx, edx
+230b07a  48f7f6                 div rsi
+230b07d  4c39c6                 cmp rsi, r8
+230b080  760e                   jbe 0x230b090
+230b082  ebc5                   jmp 0x230b049
+230b084  4489c0                 mov eax, r8d
+230b087  31d2                   xor edx, edx
+230b089  f7f6                   div esi
+230b08b  4c39c6                 cmp rsi, r8
+230b08e  77b9                   ja 0x230b049
+230b090  4885d2                 test rdx, rdx
+230b093  75b4                   jne 0x230b049
+230b095  48894708               mov qword ptr [rdi + 8], rax
+230b099  66b98601               mov cx, 0x186
+230b09d  66890f                 mov word ptr [rdi], cx
+230b0a0  4889f8                 mov rax, rdi
+230b0a3  59                     pop rcx
+230b0a4  c3                     ret 
+230b0a5  488d3d44713e03         lea rdi, [rip + 0x33e7144]
+230b0ac  ff15be334603           call qword ptr [rip + 0x34633be]
+230b0b2  488d151f6f3e03         lea rdx, [rip + 0x33e6f1f]
+230b0b9  4889cf                 mov rdi, rcx
+230b0bc  4889c6                 mov rsi, rax
+230b0bf  ff15032f4603           call qword ptr [rip + 0x3462f03]
+230b0c5  488d3d8c713e03         lea rdi, [rip + 0x33e718c]
+230b0cc  ff157e304603           call qword ptr [rip + 0x346307e]
