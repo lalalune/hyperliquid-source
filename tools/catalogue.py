@@ -56,7 +56,7 @@ def generate(root=ROOT):
         excluded[v] = {crate: files for crate, files in inv['first_party_files'].items()
                        if crate not in config['known_first_party_crates']}
     reference = root / 'references/can1357-hl'
-    source_paths = {str(p.relative_to(reference)) for p in reference.rglob('*.rs')}
+    source_paths = {p.relative_to(reference).as_posix() for p in reference.rglob('*.rs')}
     first_party_source = {p for p in source_paths if p.split('/')[0] in config['known_first_party_crates']}
     # Every known path must be owned once by the ordered taxonomy, including added #115 paths.
     for p in source_paths | paths['94'] | paths['115']:
