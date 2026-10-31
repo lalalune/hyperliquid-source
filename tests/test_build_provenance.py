@@ -2,10 +2,12 @@ import json
 from pathlib import Path
 import struct
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
+import build_provenance as bp
 from build_provenance import OUT, TARGETS, derive, diff, interpret, record
 
 
@@ -109,6 +111,56 @@ class DeriveTests(unittest.TestCase):
     def test_non_elf_input_is_rejected(self):
         with self.assertRaises(ValueError):
             derive(b'not an elf' * 10)
+
+
+class RecordTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        art = self.root / TARGETS['94']
+        art.parent.mkdir(parents=True)
+        art.write_bytes(b'fake-node-bytes')
+        (self.root / 'provenance').mkdir()
+        self.old_root, self.old_check, self.old_derive = bp.ROOT, bp.check, bp.derive
+        bp.ROOT = self.root
+        bp.check = lambda path, item: None
+        bp.derive = lambda data: []
+
+    def tearDown(self):
+        bp.ROOT, bp.check, bp.derive = self.old_root, self.old_check, self.old_derive
+        self.tmp.cleanup()
+
+    def _write_manifest(self, text):
+        (self.root / 'provenance/artifacts.json').write_text(text)
+
+    def _valid_item(self):
+        return {'path': TARGETS['94'], 'sha256': '0' * 64, 'size': 15}
+
+    def test_missing_files_key_is_rejected(self):
+        self._write_manifest('{}')
+        with self.assertRaises(ValueError):
+            record('94')
+
+    def test_non_dict_manifest_is_rejected(self):
+        self._write_manifest('[]')
+        with self.assertRaises(ValueError):
+            record('94')
+
+    def test_missing_target_entry_is_rejected(self):
+        self._write_manifest(json.dumps({'files': [{'path': 'artifacts/node/115/hl-node',
+                                                    'sha256': '0' * 64, 'size': 1}]}))
+        with self.assertRaises(ValueError):
+            record('94')
+
+    def test_non_dict_files_entry_is_rejected(self):
+        self._write_manifest(json.dumps({'files': ['not-a-record']}))
+        with self.assertRaises(ValueError):
+            record('94')
+
+    def test_valid_manifest_still_records(self):
+        self._write_manifest(json.dumps({'files': [self._valid_item()]}))
+        rec = record('94')
+        self.assertEqual((rec['target'], rec['sha256'], rec['size']), (TARGETS['94'], '0' * 64, 15))
 
 
 def captured(release):

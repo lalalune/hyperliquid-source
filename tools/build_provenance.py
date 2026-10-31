@@ -226,8 +226,13 @@ def interpret(items):
 
 def record(release):
     manifest = json.loads((ROOT / 'provenance/artifacts.json').read_text())
+    if not isinstance(manifest, dict) or not isinstance(manifest.get('files'), list):
+        raise ValueError('Invalid artifact manifest')
     rel = TARGETS[release]
-    item = next(x for x in manifest['files'] if x['path'] == rel)
+    item = next((x for x in manifest['files']
+                 if isinstance(x, dict) and x.get('path') == rel), None)
+    if item is None:
+        raise ValueError('Invalid artifact manifest')
     check(ROOT / rel, item)
     facts = derive((ROOT / rel).read_bytes())
     return {'target': rel, 'sha256': item['sha256'], 'size': item['size'],
