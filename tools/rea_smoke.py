@@ -12,11 +12,18 @@ config = json.loads((ROOT / 'config/rea.json').read_text())
 if version != config['version']:
     raise SystemExit('Unexpected REA CLI version')
 manifest = json.loads((ROOT / 'provenance/artifacts.json').read_text())
+if not isinstance(manifest, dict) or not isinstance(manifest.get('files'), list):
+    raise SystemExit('Invalid artifact manifest: provenance/artifacts.json must be an object with a files list')
+for entry in manifest['files']:
+    if not isinstance(entry, dict) or 'path' not in entry:
+        raise SystemExit('Invalid artifact record in provenance/artifacts.json: entry without path')
 out = ROOT / 'work/rea-smoke'
 out.mkdir(parents=True, exist_ok=True)
 for release in ['94', '115']:
     relative = config['targets'][release]
-    expected = next(i for i in manifest['files'] if i['path'] == relative)
+    expected = next((i for i in manifest['files'] if i['path'] == relative), None)
+    if expected is None:
+        raise SystemExit(f'No provenance/artifacts.json entry for {relative}')
     check(ROOT / relative, expected)
     output = subprocess.check_output([sys.executable, str(ROOT / 'tools/rea.py'), 'inspect-rust-binary', str(ROOT / relative), '--format', 'json'], text=True)
     evidence = json.loads(output)
