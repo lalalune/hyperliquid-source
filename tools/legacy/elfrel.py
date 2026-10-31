@@ -33,6 +33,8 @@ def v2o(vaddr):
 
 
 relative = {}
+if ".rela.dyn" not in by_name:
+    raise SystemExit(f"{path}: no .rela.dyn section")
 _, _, _, off, size = by_name[".rela.dyn"]
 for i in range(0, size, 24):
     r_offset, r_info, r_addend = struct.unpack_from("<QQq", data, off + i)
