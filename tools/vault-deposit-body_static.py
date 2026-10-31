@@ -1,0 +1,661 @@
+#!/usr/bin/env python3
+"""Authenticated node94 vault-deposit-body binding (0x3956320).
+
+Machine-derived static binding: FDE record, body bytes, every branch
+destination, every direct and GOT-mediated call site, every panic
+Location, and the whole-.text caller census, all checked byte-exactly
+against the authenticated node #94 digest. Static checks only; the
+captured binary is never executed.
+"""
+import argparse
+import hashlib
+import json
+import struct
+from pathlib import Path
+from elf_index import sections
+
+ROOT = Path(__file__).resolve().parents[1]
+TARGET = ROOT / 'artifacts/node/94/hl-node'
+SHA256 = '3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f'
+
+START, END = 0x3956320, 0x3957bbb
+FDE_VA = 0x11c7594
+FDE = bytes.fromhex(
+    '500000006c99200084ed78029b18000004f71190ff410e10420e18420e20420e'
+    '28420e30410e38470ec00383078c068d058e048f03860203ca150e38410e3042'
+    '0e28420e20420e18420e10410e08410ec0030000'
+)
+BODY = bytes.fromhex(
+    '554157415641554154534881ec880100004989ce48895424084989f74889bc24'
+    'c8000000498b0048890424498b4808498b5010488944245048894c241848894c'
+    '2458488954241048895424604881c684000000488d7c24504889742420e8fefa'
+    'ffff4889c3498b074883f8024c897c24284c89b424d000000048898424d80000'
+    '000f826e020000498b47084d8b77184885c00f95c14d85f60f95c220ca80fa01'
+    '0f854f0200004d8b6f104531ff488d6c24504c8d642430660f1f840000000000'
+    'f6c1010f84fc1600004d85ff7422410fb78fe60000004939cd0f83c10000004c'
+    '89f94c89eae9d9000000660f1f4400004d85ed74384c89e94989c74883e10774'
+    '3131d2666666662e0f1f8400000000004d8bbfe800000048ffc24839d175f14c'
+    '89e84829d04983fd087315eb514989c7eb4c4c89e84983fd0872430f1f440000'
+    '498b8fe8000000488b89e8000000488b89e8000000488b89e8000000488b89e8'
+    '000000488b89e8000000488b89e80000004c8bb9e80000004883c0f875c231c0'
+    '4531ed410fb78fe60000004939cd0f824bffffff6666662e0f1f840000000000'
+    '498b0f4885c90f844c14000048ffc0410fb797e40000004989cf663b91e60000'
+    '0073dd4885c00f8494000000488d34d14881c6f00000004889c74883e7070f84'
+    'cc0000004531c0660f1f8400000000004c8b3e498db7e800000049ffc04c39c7'
+    '75ee4889c74c29c74883f80872436690488b06488b80e8000000488b80e80000'
+    '00488b80e8000000488b80e8000000488b80e8000000488b80e80000004c8bb8'
+    'e8000000498db7e80000004883c7f875bf4531edeb11662e0f1f840000000000'
+    '4c8d6a014989cf488d04928b54811889542440660f10448108660f2944243048'
+    '89ef4c89e6e8d6f8ffff4889d94801c1702c4889cbb101b80000000049ffce0f'
+    '851bfeffffeb4e660f1f8400000000004889c74883f8087298e952ffffff48c1'
+    'f93f48ba00000000000000804831d14801c3480f40d931ff488d35e973db01ff'
+    '158bcbe101b101b80000000049ffce0f85cbfdfffff644240801745b66b91300'
+    '4c8bbc24d00000004981ff80969800488b7c24284c8b2424722d4c8964245048'
+    '8b4424184889442458488b4424104889442460488d742450ff15dafbe10166b9'
+    '12004939c77640488b8424c8000000668908e97d120000488b4c24208b411089'
+    '442460660f1001660f29442450488d7424504c8b24244c89e7ff15c1dfe10149'
+    '89df4839c3754f4885db7e5c488b4c24208b4110894424400f10010f29442430'
+    '8b411089442460660f1001660f29442450488d7424504c89e7ff1581dfe1014c'
+    '39f87336488b8424c800000066c7003300e9fe110000488b8424c800000066c7'
+    '001400e9ec110000488b8424c800000066c7001200e9da110000488d7424304c'
+    '89e74c89faff15ade2e1014d8bb424380200004c89f04c29f84c89bc24d00000'
+    '000f80e31100004c8bb424d800000049898424380200004c89642450488b4424'
+    '184889442458488b4424104889442460488d7c2450488b742420e801f7ffff49'
+    '89c54183fe020f8269020000488b742428488b46084c8b76184885c00f95c14d'
+    '85f60f95c220ca80fa010f85450200004c8b66104531ff488d6c24500f1f4000'
+    'f6c1010f841c1300004d85ff7422410fb78fe60000004939cc0f83c10000004c'
+    '89f94c89e2e9d9000000660f1f4400004d85e474384c89e14989c74883e10774'
+    '3131d2666666662e0f1f8400000000004d8bbfe800000048ffc24839d175f14c'
+    '89e04829d04983fc087315eb514989c7eb4c4c89e04983fc0872430f1f440000'
+    '498b8fe8000000488b89e8000000488b89e8000000488b89e8000000488b89e8'
+    '000000488b89e8000000488b89e80000004c8bb9e80000004883c0f875c24531'
+    'e431c0410fb78fe60000004939cc0f824bffffff6666662e0f1f840000000000'
+    '498b0f4885c90f846811000048ffc0410fb797e40000004989cf663b91e60000'
+    '0073dd4885c00f8494000000488d34d14881c6f00000004889c74883e7070f84'
+    'cc0000004531c0660f1f8400000000004c8b3e498db7e800000049ffc04c39c7'
+    '75ee4889c74c29c74883f80872436690488b06488b80e8000000488b80e80000'
+    '00488b80e8000000488b80e8000000488b80e8000000488b80e80000004c8bb8'
+    'e8000000498db7e80000004883c7f875bf4531e4eb11662e0f1f840000000000'
+    '4c8d62014989cf488d04928b54811889542440660f10448108660f2944243048'
+    '89ef488d742430e8f4f4ffff4c89e94801c1702a4989cdb101b80000000049ff'
+    'ce0f8519feffffeb4c0f1f80000000004889c74883f8087298e952ffffff48c1'
+    'f93f48ba00000000000000804831d14901c54c0f40e931ff488d350970db01ff'
+    '15abc7e101b101b80000000049ffce0f85cbfdffff4d85ed4c8b742428750841'
+    'c686ac0000000148c78424b00000000000000048c78424c00000000000000048'
+    '8b4c24208b411089442460660f1001660f294424504c8bbc24d00000004c89fa'
+    '48f7da488dbc24b0000000488d742450e84bd9a4ff498b4650498b76604885c0'
+    '0f95c14885f60f95c220ca80fa010f85f30b00004889b424500100000f57c0f2'
+    '480f2ac3f2490f2acff20f118c2460010000f20f5ec8f20f118c245801000031'
+    'c94885c00f95c148898c24f0000000498b7658498d8e9800000048894c241849'
+    'b9ffffffffffffff7f488d0d40e1db0148898c2440010000488d0d51e4db0148'
+    '898c2438010000488d0d742dc6fc48898c24300100004531ed4531d20f1f4000'
+    '4d85ed754bf68424f0000000017441b90100000048898c24f00000004885f674'
+    '554889f14989c54883e107744e31d2904d8badf802000048ffc24839d175f148'
+    '89f04829d04883fe087345e97e000000f68424f0000000010f84a80d0000410f'
+    'b78df60200004839ce73754c89e94889f2e9910000004989c5eb534889f04883'
+    'fe08724a6666662e0f1f840000000000498b8df8020000488b89f8020000488b'
+    '89f8020000488b89f8020000488b89f8020000488b89f8020000488b89f80200'
+    '004c8ba9f80200004883c0f875c231f631c0410fb78df60200004839ce728c90'
+    '498b8d100200004885c90f84aa0d000048ffc0410fb795f40200004989cd663b'
+    '91f602000073d94885c00f8490000000488d34d14881c6000300004889c74883'
+    'e7070f84b80700004531c00f1f4400004c8b2e498db5f802000049ffc04c39c7'
+    '75ee4889c74c29c74883f80872436690488b06488b80f8020000488b80f80200'
+    '00488b80f8020000488b80f8020000488b80f8020000488b80f80200004c8ba8'
+    'f8020000498db5f80200004883c7f875bf4531c0eb11662e0f1f840000000000'
+    '4c8d42014989cd488d3492488d145248c1e204488d04118bbcb12802000089bc'
+    '24200100000f1084b1180200000f2984241001000048898424e0000000f20f10'
+    '0411f20f5984246001000066480f7ec14c21c9660f57c948baffffffffffffef'
+    '7f4839d17f42f20f100daa3f8bfc660f2ec8771c660f2e05d43a8bfc7712660f'
+    '28c8eb246666662e0f1f840000000000f20f1015803f8bfcf20f5fd0f20f100d'
+    'ac3a8bfcf20f5dcaf2480f2cc9660f2e0d73358bfc490f47c9660f2ec941be00'
+    '0000004c0f4bf14c89b424f8000000488b40084885c00f88a30d00000f57c0f2'
+    '480f2ac0f20f5984245801000066480f7ec04c21c8660f57c948b9ffffffffff'
+    'ffef7f4839c87f40f20f100d083f8bfc660f2ec8771a660f2e05323a8bfc7710'
+    '660f28c8eb22662e0f1f840000000000f20f1015e03e8bfcf20f5fd0f20f100d'
+    '0c3a8bfcf20f5dca4c898424d8000000f2480f2cc1660f2e0dcb348bfc490f47'
+    'c1660f2ec9bb00000000480f4bd848899c24480100004c89f04829d84d89d40f'
+    '804b0600000f57c0f2480f2ac0488b442428f20f59406866480f7ec04c21c866'
+    '0f57c948b9ffffffffffffef7f4839c87f36f20f100d5e3e8bfc660f2ec87710'
+    '660f2e0588398bfc7706660f28c8eb18f20f1015403e8bfcf20f5fd0f20f100d'
+    '6c398bfcf20f5dcaf24c0f2cf1660f2e0d33348bfc4d0f47f1660f2ec9b80000'
+    '00004c0f4af04d85f6bd000000004c0f4ef04c89b424000100004c8bbc24f800'
+    '00004c89fb4c29f30f80d105000048899c24e80000004885db0f8f0f01000048'
+    '8d8424f80000004889842468010000488d842448010000488984247001000048'
+    '8d8424000100004889842478010000488d8424e8000000488984248001000048'
+    '8d8424e00000004889842408010000488d8424680100004889442450488d05dd'
+    'a4d8ff4889442458488d8c247001000048894c24604889442468488d8c247801'
+    '000048894c2470488d0d229bd8ff48894c2478488d8c248001000048898c2480'
+    '0000004889842488000000488d8424080100004889842490000000488d050e9d'
+    'd8ff4889842498000000488d7c2430488d3553a289fc488d542450ff157f70e1'
+    '01488b742430488b7c24388b05c73be20185c00f85350600004885f6740831d2'
+    'ff152a70e101488b9c24e80000004c8bb424e00000004d8b7e104c89f94829d9'
+    '0f80dd0400004c89f049894e10488b4808488b9424480100004885d2480f4ed5'
+    '4829d1731931ff488d35eadcdb01ff155cc1e101488b8424e000000031c94889'
+    '48084c8bb424f80000004c89e34c01f30f80c804000048895c24104c8ba424e8'
+    '0000004d85e44c0f4ee58b84242001000089442460660f28842410010000660f'
+    '29442450488b3c24488d7424504c89e2e85b84daff488b04244c8bb038020000'
+    '4c89f34c01e30f80a3040000488b0424488998380200004c8ba424b00000004d'
+    '85e40f84d80000004c8bb424b8000000410fb784243e01000048894424088d04'
+    '85000000004c8d3c8049f7df48c7c5ffffffffbb600000000f1f840000000000'
+    '498d041f4883f8607446498d341cba14000000488dbc2410010000ff156773e1'
+    '0148984885c00f98c10f9fc028c848ffc54883c3143c0174c70fb6c085c07430'
+    '4983ee017319e9a70200000f1f440000488b6c24084983ee010f82930200004d'
+    '8ba4ec40010000e964ffffff0f1f40004c896424584c8974246048896c246848'
+    '8d8424b0000000488944247048c744245000000000eb3b660f1f840000000000'
+    '8b842420010000488d4c2470894110660f28842410010000660f1101488d8424'
+    'b0000000488944245048c744245800000000488d7c2450e8c444a6ff4989c44c'
+    '8bbc24e80000004c8b304c89f34c01fb0f808503000049891c24488b4c24188b'
+    '411089442460660f1001660f294424504c8ba42400010000488b3c24488d7424'
+    '504c89e2e8c782daff4d85e40f88c0080000488b04244c8bb0380200004c89f3'
+    '4c01e30f805e030000488b042448899838020000488b4c24188b411089442440'
+    '660f1001660f294424304c8ba424b00000004d85e40f84d50000004c8bb424b8'
+    '000000410fb784243e01000048894424088d0485000000004c8d3c8049f7df48'
+    'c7c5ffffffffbb600000000f1f440000498d041f4883f8607446498d341cba14'
+    '000000488d7c2430ff15ba71e10148984885c00f98c10f9fc028c848ffc54883'
+    'c3143c0174ca0fb6c085c074334983ee01731ce93b0100000f1f840000000000'
+    '488b6c24084983ee010f82240100004d8ba4ec40010000e967ffffff0f1f4000'
+    '4c896424584c8974246048896c2468488d8424b0000000488944247048c74424'
+    '5000000000eb32660f1f8400000000008b4110488d542470894210660f100166'
+    '0f1102488d8424b0000000488944245048c744245800000000488d7c2450e81d'
+    '43a6ff4c8bb424000100004d85f60f888b0700004989c44c8b384c89fb4c01f3'
+    '49b9ffffffffffffff7f4c8b5424100f801e02000049891c24b80000000048ff'
+    '8c2450010000488bb424d80000000f852cf7ffffe9910200000f1f8000000000'
+    '4889c74883f8080f82a4f8ffffe95ef8ffff4c8964245848c744246000000000'
+    '48896c24688b842420010000488d4c2470894110660f28842410010000660f11'
+    '01488d8424b00000004889442450e99ffdffff4c8964245848c7442460000000'
+    '0048896c2468488b4c24188b4110488d542470894210660f1001660f1102488d'
+    '8424b00000004889442450e909ffffff4d89cf31ff488d35acd7db01ff150ebd'
+    'e10131c04939de0f99c04d89f94c01f84929de4c0f40f04c89f0e986f9ffff31'
+    'ff488d3580d7db01ff15e2bce10131c04d39f70f99c048b9ffffffffffffff7f'
+    '4801c84d29f74c0f40f84c89fb48899c24e80000004885db0f8f10fbffffe9fc'
+    'f9ffff31ff488d353cd7db01ff159ebce10131c04939df0f99c048b9ffffffff'
+    'ffffff7f4801c84929df4c0f40f8488b8424e00000004c89f9e9ebfaffff31ff'
+    '488d3561d8db01ff1563bce10148c1fb3f48b800000000000000804831c34d01'
+    'f44c0f40e34c89642410e90cfbffff31ff488d35f8a6d901ff1532bce10148c1'
+    'fb3f48b800000000000000804831c34d01e6490f41dee931fbffff31ff488d35'
+    '04d8db01ff1506bce10148c1fb3f48b800000000000000804831c34d01fe490f'
+    '41dee94ffcffff31ff488d35a0a6d901ff15dabbe10148c1fb3f48b800000000'
+    '000000804831c34d01e6490f41dee976fcffff31ff488d35acd7db01ff15aebb'
+    'e10148c1fb3f48b800000000000000804831c34d01f7490f41df49b9ffffffff'
+    'ffffff7f4c8b542410e9a7fdffff4989fe4889742408488d056335e201488944'
+    '2430488d4424304889442450488d3d6535e201be01000000488d542450488d0d'
+    '2429d1014c8d050529d101ff156772e101488b7424084c89f74885f60f857cf9'
+    'ffffe97ff9ffff4531d24c89d5488b9c24d00000004829dd0f80dd0200004c8b'
+    '6424284c8b2c244889eb48f7db480f48dd4885ed0f98c10f9fc028c80f842802'
+    '00000fb6c083f801756c418b8424a800000089442440410f108424980000000f'
+    '29442430418b8424a80000008944246066410f10842498000000660f29442450'
+    '488d7424504c89efff1572cfe1014885db0f88550400004839d80f833a010000'
+    '66c74424503300488d7c2450e85f200400e9b4010000488b4c24208b41108944'
+    '2460660f1001660f29442450488d7424504c89ef4889dae8b47ddaff4885db0f'
+    '88070400004d8bbd380200004d89fe4901de0f805402000048896c24184d89b5'
+    '38020000488b8424b0000000488d0d2d62db014885c048894c24100f84200300'
+    '004c8bac24b8000000488b2df86ce1014c8d7060488904240fb7803e01000048'
+    '894424088d0485000000004c8d3c8049c7c4ffffffff31db0f1f840000000000'
+    '4939df7431498d341eba14000000488b7c2420ffd548984885c00f98c10f9fc0'
+    '28c849ffc44883c3143c0174d30fb6c085c07507eb204c8b642408488b042449'
+    '83ed010f82980200004a8b84e040010000e97affffff488b0c244a8b5ce10848'
+    '89d84c8b7424184c29f00f80ab0100004a8944e108e990000000488d7424304c'
+    '89ef4889daff158dd1e1014d8bb5380200004c89f04829d80f80c8010000498d'
+    '9c249800000049898538020000488dbc24b00000004889dee8c3bdc3ff4989c7'
+    '4885c00f84d00100004d8b374c89f04829e80f80ca0100004983c4504989074c'
+    '89e74889dee876bec3ff4889c34885c00f84df0100004c8b73104c89f04829e8'
+    '0f80eb01000048894310488b8424c0000000488b8c24c8000000488941184889'
+    'c8660f108424b0000000660f11410866c70186014881c4880100005b415c415d'
+    '415e415f5dc3488d3de363db01ff155d6be101e95c020000488d3dc926d901ff'
+    '154b6be101e94a0200000f99c00fb6c048b9ffffffffffffff7f4801c14d29fe'
+    '488d35b1a3d9014c0f40f131ffff153db8e1014c89f0e9ecedffff4d89d6488d'
+    '35c3d2db0131ffff1523b8e1014c8b6424284c8b2c2431c04939de0f99c048b9'
+    'ffffffffffffff7f4801c14929de4c0f40f14c89f5e9edfcffff488d3d3763db'
+    '01ff15c96ae101e9c8010000488d359da2d90131ffff15d5b7e10149c1fe3f48'
+    'b800000000000000804c31f04901df4c0f40f84d89fee97dfdffff488d3546d2'
+    'db0131ffff15a6b7e10131c04c39f30f99c048b9ffffffffffffff7f4801c14c'
+    '29f3480f40d9488b04244a895ce008e9b6feffff488d3dcd25d901ff154f6ae1'
+    '01e94e010000488d35cba2d90131ffff155bb7e10131c04939de0f99c048b9ff'
+    'ffffffffffff7f4801c14929de4c0f40f14c89f0e905feffff488d05585fdb01'
+    'eb3a488d35bfd1db0131ffff151fb7e10131c04939ee0f99c048b9ffffffffff'
+    'ffff7f4801c14929ee4c0f40f14c89f0e903feffff488d05345fdb0148894424'
+    '10488b7c2410ff15c469e101e9c3000000488d3570d1db0131ffff15d0b6e101'
+    '31c04939ee0f99c048b9ffffffffffffff7f4801c14929ee4c0f40f14c897310'
+    'e9e5fdffff488d3d3410d901ff157e69e101488d055a1fc4fc48898424300100'
+    '00488d0528a8d9014889842438010000488d05c9a1d901488984244001000048'
+    '8d942408010000be2b000000488bbc2430010000488b8c24380100004c8b8424'
+    '40010000ff15fe64e101eb28488d3d001fc4fc488d0dd6a7d9014c8d057fa1d9'
+    '01488d942408010000be2b000000ff15d464e1010f0b4889c348837c24080074'
+    '1f4c89f7488b74240831d2ff157f64e101eb0deb08eb060f0b0f0b0f0b4889c3'
+    '488dbc24b0000000e863aca9ff4889dfe85b85d001ff156d65e101'
+)
+BODY_SHA256 = '6bbc4e0e629ceb56acdea64bf1eb4a5c064cb172a23a16862061970a4647d558'
+BRANCHES = [
+    (0x81, '0f826e020000', 2, 6, 0x3956615),
+    (0xa0, '0f854f020000', 2, 6, 0x3956615),
+    (0xc3, '0f84fc160000', 2, 6, 0x3957ae5),
+    (0xcc, '7422', 1, 2, 0x3956410),
+    (0xd9, '0f83c1000000', 2, 6, 0x39564c0),
+    (0xe5, 'e9d9000000', 1, 5, 0x39564e3),
+    (0xf3, '7438', 1, 2, 0x395644d),
+    (0xff, '7431', 1, 2, 0x3956452),
+    (0x11d, '75f1', 1, 2, 0x3956430),
+    (0x129, '7315', 1, 2, 0x3956460),
+    (0x12b, 'eb51', 1, 2, 0x395649e),
+    (0x130, 'eb4c', 1, 2, 0x395649e),
+    (0x139, '7243', 1, 2, 0x395649e),
+    (0x17c, '75c2', 1, 2, 0x3956460),
+    (0x18e, '0f824bffffff', 2, 6, 0x39563ff),
+    (0x1a6, '0f844c140000', 2, 6, 0x3957918),
+    (0x1c1, '73dd', 1, 2, 0x39564c0),
+    (0x1c6, '0f8494000000', 2, 6, 0x3956580),
+    (0x1de, '0f84cc000000', 2, 6, 0x39565d0),
+    (0x200, '75ee', 1, 2, 0x3956510),
+    (0x20c, '7243', 1, 2, 0x3956571),
+    (0x24f, '75bf', 1, 2, 0x3956530),
+    (0x254, 'eb11', 1, 2, 0x3956587),
+    (0x290, '702c', 1, 2, 0x39565de),
+    (0x29f, '0f851bfeffff', 2, 6, 0x39563e0),
+    (0x2a5, 'eb4e', 1, 2, 0x3956615),
+    (0x2b7, '7298', 1, 2, 0x3956571),
+    (0x2b9, 'e952ffffff', 1, 5, 0x3956530),
+    (0x2ef, '0f85cbfdffff', 2, 6, 0x39563e0),
+    (0x2fa, '745b', 1, 2, 0x3956677),
+    (0x318, '722d', 1, 2, 0x3956667),
+    (0x345, '7640', 1, 2, 0x39566a7),
+    (0x352, 'e97d120000', 1, 5, 0x39578f4),
+    (0x385, '754f', 1, 2, 0x39566f6),
+    (0x38a, '7e5c', 1, 2, 0x3956708),
+    (0x3c2, '7336', 1, 2, 0x395671a),
+    (0x3d1, 'e9fe110000', 1, 5, 0x39578f4),
+    (0x3e3, 'e9ec110000', 1, 5, 0x39578f4),
+    (0x3f5, 'e9da110000', 1, 5, 0x39578f4),
+    (0x421, '0f80e3110000', 2, 6, 0x395792a),
+    (0x466, '0f8269020000', 2, 6, 0x39569f5),
+    (0x48a, '0f8545020000', 2, 6, 0x39569f5),
+    (0x4a3, '0f841c130000', 2, 6, 0x3957ae5),
+    (0x4ac, '7422', 1, 2, 0x39567f0),
+    (0x4b9, '0f83c1000000', 2, 6, 0x39568a0),
+    (0x4c5, 'e9d9000000', 1, 5, 0x39568c3),
+    (0x4d3, '7438', 1, 2, 0x395682d),
+    (0x4df, '7431', 1, 2, 0x3956832),
+    (0x4fd, '75f1', 1, 2, 0x3956810),
+    (0x509, '7315', 1, 2, 0x3956840),
+    (0x50b, 'eb51', 1, 2, 0x395687e),
+    (0x510, 'eb4c', 1, 2, 0x395687e),
+    (0x519, '7243', 1, 2, 0x395687e),
+    (0x55c, '75c2', 1, 2, 0x3956840),
+    (0x56e, '0f824bffffff', 2, 6, 0x39567df),
+    (0x586, '0f8468110000', 2, 6, 0x3957a14),
+    (0x5a1, '73dd', 1, 2, 0x39568a0),
+    (0x5a6, '0f8494000000', 2, 6, 0x3956960),
+    (0x5be, '0f84cc000000', 2, 6, 0x39569b0),
+    (0x5e0, '75ee', 1, 2, 0x39568f0),
+    (0x5ec, '7243', 1, 2, 0x3956951),
+    (0x62f, '75bf', 1, 2, 0x3956910),
+    (0x634, 'eb11', 1, 2, 0x3956967),
+    (0x672, '702a', 1, 2, 0x39569be),
+    (0x681, '0f8519feffff', 2, 6, 0x39567c0),
+    (0x687, 'eb4c', 1, 2, 0x39569f5),
+    (0x697, '7298', 1, 2, 0x3956951),
+    (0x699, 'e952ffffff', 1, 5, 0x3956910),
+    (0x6cf, '0f85cbfdffff', 2, 6, 0x39567c0),
+    (0x6dd, '7508', 1, 2, 0x3956a07),
+    (0x74e, '0f85f30b0000', 2, 6, 0x3957667),
+    (0x7e3, '754b', 1, 2, 0x3956b50),
+    (0x7ed, '7441', 1, 2, 0x3956b50),
+    (0x7ff, '7455', 1, 2, 0x3956b76),
+    (0x80b, '744e', 1, 2, 0x3956b7b),
+    (0x81d, '75f1', 1, 2, 0x3956b30),
+    (0x829, '7345', 1, 2, 0x3956b90),
+    (0x82b, 'e97e000000', 1, 5, 0x3956bce),
+    (0x838, '0f84a80d0000', 2, 6, 0x3957906),
+    (0x849, '7375', 1, 2, 0x3956be0),
+    (0x851, 'e991000000', 1, 5, 0x3956c07),
+    (0x859, 'eb53', 1, 2, 0x3956bce),
+    (0x862, '724a', 1, 2, 0x3956bce),
+    (0x8ac, '75c2', 1, 2, 0x3956b90),
+    (0x8bd, '728c', 1, 2, 0x3956b6b),
+    (0x8ca, '0f84aa0d0000', 2, 6, 0x395799a),
+    (0x8e5, '73d9', 1, 2, 0x3956be0),
+    (0x8ea, '0f8490000000', 2, 6, 0x3956ca0),
+    (0x902, '0f84b8070000', 2, 6, 0x39573e0),
+    (0x920, '75ee', 1, 2, 0x3956c30),
+    (0x92c, '7243', 1, 2, 0x3956c91),
+    (0x96f, '75bf', 1, 2, 0x3956c50),
+    (0x974, 'eb11', 1, 2, 0x3956ca7),
+    (0x9e4, '7f42', 1, 2, 0x3956d48),
+    (0x9f2, '771c', 1, 2, 0x3956d30),
+    (0x9fc, '7712', 1, 2, 0x3956d30),
+    (0xa02, 'eb24', 1, 2, 0x3956d48),
+    (0xa56, '0f88a30d0000', 2, 6, 0x3957b1f),
+    (0xa86, '7f40', 1, 2, 0x3956de8),
+    (0xa94, '771a', 1, 2, 0x3956dd0),
+    (0xa9e, '7710', 1, 2, 0x3956dd0),
+    (0xaa4, 'eb22', 1, 2, 0x3956de8),
+    (0xaff, '0f804b060000', 2, 6, 0x3957470),
+    (0xb30, '7f36', 1, 2, 0x3956e88),
+    (0xb3e, '7710', 1, 2, 0x3956e70),
+    (0xb48, '7706', 1, 2, 0x3956e70),
+    (0xb4e, 'eb18', 1, 2, 0x3956e88),
+    (0xba8, '0f80d1050000', 2, 6, 0x395749f),
+    (0xbb9, '0f8f0f010000', 2, 6, 0x3956fee),
+    (0xcb3, '0f8535060000', 2, 6, 0x395760e),
+    (0xcbc, '7408', 1, 2, 0x3956fe6),
+    (0xce0, '0f80dd040000', 2, 6, 0x39574e3),
+    (0xd03, '7319', 1, 2, 0x395703e),
+    (0xd30, '0f80c8040000', 2, 6, 0x395751e),
+    (0xd86, '0f80a3040000', 2, 6, 0x395754f),
+    (0xda2, '0f84d8000000', 2, 6, 0x39571a0),
+    (0xde8, '7446', 1, 2, 0x3957150),
+    (0xe17, '74c7', 1, 2, 0x3957100),
+    (0xe1e, '7430', 1, 2, 0x3957170),
+    (0xe24, '7319', 1, 2, 0x395715f),
+    (0xe26, 'e9a7020000', 1, 5, 0x39573f2),
+    (0xe39, '0f8293020000', 2, 6, 0x39573f2),
+    (0xe47, 'e964ffffff', 1, 5, 0x39570d0),
+    (0xe75, 'eb3b', 1, 2, 0x39571d2),
+    (0xed0, '0f8085030000', 2, 6, 0x395757b),
+    (0xf0c, '0f88c0080000', 2, 6, 0x3957af2),
+    (0xf23, '0f805e030000', 2, 6, 0x39575a7),
+    (0xf55, '0f84d5000000', 2, 6, 0x3957350),
+    (0xf98, '7446', 1, 2, 0x3957300),
+    (0xfc4, '74ca', 1, 2, 0x39572b0),
+    (0xfcb, '7433', 1, 2, 0x3957320),
+    (0xfd1, '731c', 1, 2, 0x395730f),
+    (0xfd3, 'e93b010000', 1, 5, 0x3957433),
+    (0xfe9, '0f8224010000', 2, 6, 0x3957433),
+    (0xff7, 'e967ffffff', 1, 5, 0x3957283),
+    (0x1025, 'eb32', 1, 2, 0x3957379),
+    (0x106e, '0f888b070000', 2, 6, 0x3957b1f),
+    (0x108f, '0f801e020000', 2, 6, 0x39575d3),
+    (0x10ae, '0f852cf7ffff', 2, 6, 0x3956b00),
+    (0x10b4, 'e991020000', 1, 5, 0x395766a),
+    (0x10c7, '0f82a4f8ffff', 2, 6, 0x3956c91),
+    (0x10cd, 'e95ef8ffff', 1, 5, 0x3956c50),
+    (0x110e, 'e99ffdffff', 1, 5, 0x39571d2),
+    (0x114b, 'e909ffffff', 1, 5, 0x3957379),
+    (0x117a, 'e986f9ffff', 1, 5, 0x3956e25),
+    (0x11b8, '0f8f10fbffff', 2, 6, 0x3956fee),
+    (0x11be, 'e9fcf9ffff', 1, 5, 0x3956edf),
+    (0x11f9, 'e9ebfaffff', 1, 5, 0x3957009),
+    (0x122a, 'e90cfbffff', 1, 5, 0x395705b),
+    (0x1256, 'e931fbffff', 1, 5, 0x39570ac),
+    (0x1282, 'e94ffcffff', 1, 5, 0x39571f6),
+    (0x12ae, 'e976fcffff', 1, 5, 0x3957249),
+    (0x12e9, 'e9a7fdffff', 1, 5, 0x39573b5),
+    (0x133c, '0f857cf9ffff', 2, 6, 0x3956fde),
+    (0x1342, 'e97ff9ffff', 1, 5, 0x3956fe6),
+    (0x1358, '0f80dd020000', 2, 6, 0x395795b),
+    (0x137c, '0f8428020000', 2, 6, 0x39578ca),
+    (0x1388, '756c', 1, 2, 0x3957716),
+    (0x13d1, '0f8855040000', 2, 6, 0x3957b4c),
+    (0x13da, '0f833a010000', 2, 6, 0x395783a),
+    (0x13f1, 'e9b4010000', 1, 5, 0x39578ca),
+    (0x141f, '0f8807040000', 2, 6, 0x3957b4c),
+    (0x1432, '0f8054020000', 2, 6, 0x39579ac),
+    (0x145b, '0f8420030000', 2, 6, 0x3957aa1),
+    (0x14a3, '7431', 1, 2, 0x39577f6),
+    (0x14cb, '74d3', 1, 2, 0x39577c0),
+    (0x14d2, '7507', 1, 2, 0x39577fb),
+    (0x14d4, 'eb20', 1, 2, 0x3957816),
+    (0x14e3, '0f8298020000', 2, 6, 0x3957aa1),
+    (0x14f1, 'e97affffff', 1, 5, 0x3957790),
+    (0x150a, '0f80ab010000', 2, 6, 0x39579db),
+    (0x1515, 'e990000000', 1, 5, 0x39578ca),
+    (0x1538, '0f80c8010000', 2, 6, 0x3957a26),
+    (0x1563, '0f84d0010000', 2, 6, 0x3957a59),
+    (0x1572, '0f80ca010000', 2, 6, 0x3957a62),
+    (0x1590, '0f84df010000', 2, 6, 0x3957a95),
+    (0x15a0, '0f80eb010000', 2, 6, 0x3957ab1),
+    (0x15f3, 'e95c020000', 1, 5, 0x3957b74),
+    (0x1605, 'e94a020000', 1, 5, 0x3957b74),
+    (0x1636, 'e9ecedffff', 1, 5, 0x3956747),
+    (0x1675, 'e9edfcffff', 1, 5, 0x3957687),
+    (0x1687, 'e9c8010000', 1, 5, 0x3957b74),
+    (0x16b6, 'e97dfdffff', 1, 5, 0x3957758),
+    (0x16ef, 'e9b6feffff', 1, 5, 0x39578ca),
+    (0x1701, 'e94e010000', 1, 5, 0x3957b74),
+    (0x1734, 'e905feffff', 1, 5, 0x395785e),
+    (0x1740, 'eb3a', 1, 2, 0x3957a9c),
+    (0x1770, 'e903feffff', 1, 5, 0x3957898),
+    (0x178c, 'e9c3000000', 1, 5, 0x3957b74),
+    (0x17c0, 'e9e5fdffff', 1, 5, 0x39578ca),
+    (0x182a, 'eb28', 1, 2, 0x3957b74),
+    (0x185f, '741f', 1, 2, 0x3957ba0),
+    (0x1871, 'eb0d', 1, 2, 0x3957ba0),
+    (0x1873, 'eb08', 1, 2, 0x3957b9d),
+    (0x1875, 'eb06', 1, 2, 0x3957b9d),
+]
+DIRECT_CALLS = [
+    (0x395637d, 0x3955e80),
+    (0x39565a5, 0x3955e80),
+    (0x395677a, 0x3955e80),
+    (0x3956987, 0x3955e80),
+    (0x3956a50, 0x33a43a0),
+    (0x3957090, 0x36ff4f0),
+    (0x39571d7, 0x33bb6a0),
+    (0x3957224, 0x36ff4f0),
+    (0x395737e, 0x33bb6a0),
+    (0x395770c, 0x3999770),
+    (0x3957737, 0x36ff4f0),
+    (0x3957878, 0x3593640),
+    (0x39578a5, 0x3593720),
+    (0x3957ba8, 0x33f2810),
+    (0x3957bb0, 0x5660110),
+]
+# GOT-mediated call sites: (site, slot); slot targets via relocations.
+INDIRECT_CALLS = [
+    (0x39565ff, 0x5773190),
+    (0x3956658, 0x5776238),
+    (0x3956699, 0x5774660),
+    (0x39566d9, 0x5774660),
+    (0x3956725, 0x57749d8),
+    (0x39569df, 0x5773190),
+    (0x3956fbb, 0x576e040),
+    (0x3956fe0, 0x576e010),
+    (0x395702e, 0x5773190),
+    (0x395711b, 0x576e488),
+    (0x39572c8, 0x576e488),
+    (0x395747c, 0x5773190),
+    (0x39574a8, 0x5773190),
+    (0x39574ec, 0x5773190),
+    (0x3957527, 0x5773190),
+    (0x3957558, 0x5773190),
+    (0x3957584, 0x5773190),
+    (0x39575b0, 0x5773190),
+    (0x39575dc, 0x5773190),
+    (0x395764b, 0x576e8b8),
+    (0x39576e8, 0x5774660),
+    (0x3957845, 0x57749d8),
+    (0x395790d, 0x576e470),
+    (0x395791f, 0x576e470),
+    (0x395794d, 0x5773190),
+    (0x3957967, 0x5773190),
+    (0x39579a1, 0x576e470),
+    (0x39579b5, 0x5773190),
+    (0x39579e4, 0x5773190),
+    (0x3957a1b, 0x576e470),
+    (0x3957a2f, 0x5773190),
+    (0x3957a6b, 0x5773190),
+    (0x3957aa6, 0x576e470),
+    (0x3957aba, 0x5773190),
+    (0x3957aec, 0x576e470),
+    (0x3957b44, 0x576e048),
+    (0x3957b6e, 0x576e048),
+    (0x3957b8b, 0x576e010),
+    (0x3957bb5, 0x576e128),
+]
+# Panic Locations: (lea site, Location struct VA, path bytes, line, column).
+LOCATIONS = [
+    (0x3957906, 0x570dcf0, bytes.fromhex('2f72757374632f653430383934376266643230306166343264623332326461663066616466653765323664336264312f6c6962726172792f616c6c6f632f7372632f636f6c6c656374696f6e732f62747265652f6e617669676174652e7273'), 173, 36),
+    (0x3957918, 0x56e9fe8, bytes.fromhex('2f72757374632f653430383934376266643230306166343264623332326461663066616466653765323664336264312f6c6962726172792f616c6c6f632f7372632f636f6c6c656374696f6e732f62747265652f6e617669676174652e7273'), 534, 47),
+    (0x395799a, 0x570dcd8, bytes.fromhex('2f72757374632f653430383934376266643230306166343264623332326461663066616466653765323664336264312f6c6962726172792f616c6c6f632f7372632f636f6c6c656374696f6e732f62747265652f6e617669676174652e7273'), 560, 47),
+    (0x3957a14, 0x56e9fe8, bytes.fromhex('2f72757374632f653430383934376266643230306166343264623332326461663066616466653765323664336264312f6c6962726172792f616c6c6f632f7372632f636f6c6c656374696f6e732f62747265652f6e617669676174652e7273'), 534, 47),
+    (0x3957ae5, 0x56e8b20, bytes.fromhex('2f72757374632f653430383934376266643230306166343264623332326461663066616466653765323664336264312f6c6962726172792f616c6c6f632f7372632f636f6c6c656374696f6e732f62747265652f6e617669676174652e7273'), 161, 36),
+]
+CALLERS = []
+CALLER_FUNCTIONS = {}
+LEA_REFS = 0
+OWN_GOT_SLOTS = ['0x57748b8']
+GOT_SITES = {'0x57748b8': '0x4cdae33'}
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+class Reader:
+    def __init__(self, data):
+        self.data = data
+        self.sections = sections(data)
+        self.by_name = {s['name']: s for s in self.sections}
+
+    def read(self, va, size):
+        matches = [s for s in self.sections if s['type'] != 8
+                   and s['address'] <= va and va + size <= s['address'] + s['size']]
+        require(len(matches) == 1, f'Ambiguous or unmapped VA {va:#x}')
+        s = matches[0]
+        off = s['offset'] + va - s['address']
+        return self.data[off:off + size]
+
+
+def relocations(reader):
+    raw = reader.read(reader.by_name['.rela.dyn']['address'],
+                      reader.by_name['.rela.dyn']['size'])
+    rels = {}
+    for off in range(0, len(raw), 24):
+        address, info, addend = struct.unpack_from('<QQq', raw, off)
+        if info == 8:
+            require(address not in rels, 'Duplicate relative relocation')
+            rels[address] = addend
+    return rels
+
+
+def analyze(data):
+    reader = Reader(data)
+    body = reader.read(START, END - START)
+    require(body == BODY, 'Body bytes changed')
+    require(hashlib.sha256(body).hexdigest() == BODY_SHA256, 'Body hash changed')
+
+    eh = reader.by_name['.eh_frame']
+    require(eh['address'] <= FDE_VA < eh['address'] + eh['size'],
+            'FDE outside .eh_frame')
+    record = reader.read(FDE_VA, len(FDE))
+    require(record == FDE, 'FDE record changed')
+    length = struct.unpack_from('<I', record, 0)[0]
+    pc = FDE_VA + 8 + struct.unpack_from('<i', record, 8)[0]
+    extent = struct.unpack_from('<I', record, 12)[0]
+    require(length == len(FDE) - 4, 'FDE length changed')
+    require((pc, pc + extent) == (START, END), 'FDE PC range changed')
+
+    for offset, pattern, rel_pos, insn_len, destination in BRANCHES:
+        raw = bytes.fromhex(pattern)
+        require(body[offset:offset + len(raw)] == raw,
+                f'Branch instruction changed at +{offset:#x}')
+        fmt = '<b' if insn_len == 2 else '<i'
+        rel = struct.unpack_from(fmt, body, offset + rel_pos)[0]
+        require(START + offset + insn_len + rel == destination,
+                f'Branch destination changed at +{offset:#x}')
+        require(START <= destination < END, 'Branch escapes body')
+
+    for site, target in DIRECT_CALLS:
+        off = site - START
+        require(body[off] == 0xe8, f'Direct call opcode changed at {site:#x}')
+        rel = struct.unpack_from('<i', body, off + 1)[0]
+        require(site + 5 + rel == target,
+                f'Direct call destination changed at {site:#x}')
+
+    rels = relocations(reader)
+    for site, slot in INDIRECT_CALLS:
+        off = site - START
+        require(body[off:off + 2] == b'\xff\x15',
+                f'Indirect call opcode changed at {site:#x}')
+        disp = struct.unpack_from('<i', body, off + 2)[0]
+        require(site + 6 + disp == slot,
+                f'Indirect call slot changed at {site:#x}')
+
+    seen = []
+    for site, loc_va, path, line, column in LOCATIONS:
+        off = site - START
+        require(body[off:off + 3] in (b'\x48\x8d\x3d', b'\x48\x8d\x15',
+                                      b'\x4c\x8d\x1d'),
+                f'Location lea changed at {site:#x}')
+        require(site + 7 + struct.unpack_from('<i', body, off + 3)[0] == loc_va,
+                f'Location address changed at {site:#x}')
+        path_va = rels.get(loc_va)
+        require(path_va is not None, f'Location relocation missing at {loc_va:#x}')
+        length_, line_, column_ = struct.unpack('<QII', reader.read(loc_va + 8, 16))
+        require((length_, line_, column_) == (len(path), line, column),
+                f'Location layout changed at {loc_va:#x}')
+        require(reader.read(path_va, length_) == path,
+                f'panic path changed at {loc_va:#x}')
+        seen.append(dict(location_va=hex(loc_va), line=line, column=column,
+                         path=path.decode().rsplit('src/', 1)[-1]))
+
+    text = reader.by_name['.text']
+    code = reader.read(text['address'], text['size'])
+    direct = []
+    pos = 0
+    while (pos := code.find(b'\xe8', pos)) >= 0:
+        if pos + 5 <= len(code):
+            destination = (text['address'] + pos + 5
+                           + struct.unpack_from('<i', code, pos + 1)[0])
+            if destination == START:
+                direct.append(text['address'] + pos)
+        pos += 1
+    require(direct == CALLERS, f'Direct caller census changed: {[hex(x) for x in direct]}')
+
+    lea_refs = 0
+    pos = 0
+    while (pos := code.find(b'\x48\x8d', pos)) >= 0:
+        if pos + 7 <= len(code) and (code[pos + 2] & 0xC7) == 0x05:
+            destination = (text['address'] + pos + 7
+                           + struct.unpack_from('<i', code, pos + 3)[0])
+            if destination == START:
+                lea_refs += 1
+        pos += 1
+    require(lea_refs == LEA_REFS, f'lea census changed: {lea_refs}')
+
+    from collections import Counter
+    return dict(
+        target_release='94', target_sha256=SHA256,
+        coordinate_system='ELF virtual addresses, no runtime rebase',
+        body=dict(start_va=hex(START), end_va_exclusive=hex(END), bytes=len(body),
+                  sha256=BODY_SHA256, fde_va=hex(FDE_VA)),
+        locations=seen,
+        direct_calls={hex(t): n for t, n in Counter(t for _, t in DIRECT_CALLS).items()},
+        indirect_got={hex(slot): n for slot, n in
+                      Counter(slot for _, slot in INDIRECT_CALLS).items()},
+        call_census=dict(direct_e8=[hex(x) for x in CALLERS], lea_references=LEA_REFS,
+                         caller_functions=CALLER_FUNCTIONS,
+                         own_got_slots=OWN_GOT_SLOTS, got_sites=GOT_SITES,
+                         denominator='complete .text scan for e8 and lea encodings'),
+        captured_binary_executed=False, progress_gate_requested=False)
+
+
+def inspect(path):
+    data = Path(path).read_bytes()
+    require(len(data) == 91774280 and hashlib.sha256(data).hexdigest() == SHA256,
+            'Expected exact node #94 size/SHA-256')
+    return analyze(data)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--binary', type=Path, default=TARGET)
+    parser.add_argument('--check', type=Path, help='Compare with retained JSON; fail on drift')
+    parser.add_argument('--output', type=Path, help='Write the record JSON to this path')
+    args = parser.parse_args()
+    result = inspect(args.binary)
+    text = json.dumps(result, indent=2, sort_keys=True) + '\n'
+    if args.check is not None:
+        expected = args.check.read_text()
+        require(text == expected, 'Retained evidence record drifted')
+        print('Record matches retained evidence.')
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(text)
+    else:
+        print(text)
+
+
+if __name__ == '__main__':
+    main()
+
