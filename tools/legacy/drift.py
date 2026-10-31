@@ -69,7 +69,7 @@ for key in items:
         cls[key] = "notes"
     else:
         words = key[1].split()
-        wins = {" ".join(words[i:i + 3]) for i in range(max(1, len(words) - 2))}
+        wins = {" ".join(words[i:i + 3]) for i in range(len(words) - 2)}
         windows[key] = {w for w in wins if len(w) >= 10 and "\n" not in w}
 
 pats = sorted({w for ws in windows.values() for w in ws})
