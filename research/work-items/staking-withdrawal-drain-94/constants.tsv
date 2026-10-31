@@ -1,0 +1,15 @@
+name	address	bytes	note
+gate_tag	0x26fdb01	83bf8000000001	cmp dword [rdi+0x80],1: any other low word ends the step
+queue_field	0x26fdb6d	498db6080b0000	lea rsi,[r14+0xb08]: staking +0x8f8 plus +0x210
+user_field	0x26fdb9e	498d86f00a0000	lea rax,[r14+0xaf0]: staking +0x8f8 plus +0x1f8
+copy_c_queue_field	0x4ce5c65	498db788150000	lea rsi,[r15+0x1588]: same field, shifted by 0xa80
+copy_c_user_field	0x4ce5ca2	498d8770150000	lea rax,[r15+0x1570]: same field, shifted by 0xa80
+totals_field	0x3c13478	4983c618	add r14,0x18: the total map sits after the time map
+drain_deposit_byte	0x26fddbf	c68424e800000000	mov byte [rsp+0xe8],0: the record byte is 0 here and 1 in the deposit
+kind_word	0x26fddc7	48b81600000000000080	movabs rax,0x8000000000000016: record kind word
+token_stride	0x26fdc34	4869442418e8000000	imul rax,[rsp+0x18],0xe8: token row stride
+decimals_field	0x26fdd6c	0fb6440849	movzx eax,byte [rax+rcx+0x49]: wei decimals byte
+row_stride	0x26fddfb	4983c720	add r15,0x20: queue rows are 32 bytes
+count_rule	0x3babef8	4883e801	sub rax,1: count falls, the ja after it keeps a row only when the old count was above 1
+balance_rule	0x3308434	482b442460	sub rax,[rsp+0x60]: amount from the first word of the user row
+power_table	0x584b08		23 doubles 1e0 to 1e22 at index = wei decimals
