@@ -101,6 +101,9 @@ def validate_request(request: dict, fixtures_by_id: dict) -> dict:
     if missing:
         raise ValueError(f'request missing fields: {missing}')
 
+    if not isinstance(request['request_id'], str):
+        raise ValueError('request_id must be a string')
+
     release = request['target_release']
     if release not in KNOWN_TARGET_DIGESTS:
         raise ValueError(f'unknown target_release: {release}')
