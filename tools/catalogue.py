@@ -26,6 +26,8 @@ def validate_progress(components, progress, root):
         if not set(c['depends_on']) <= ids:
             raise ValueError('Unknown dependency')
         row = progress['components'][c['id']]
+        if type(row['gates']) is not dict:
+            raise ValueError('Invalid acceptance gate record')
         if set(row['gates']) != set(progress['gates']) or any(type(v) is not bool for v in row['gates'].values()):
             raise ValueError('Invalid acceptance gate record')
         if row['raw_equal_bodies'] < 0 or row['normalized_only_bodies'] < 0:
