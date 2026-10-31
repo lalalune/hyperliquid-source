@@ -43,6 +43,8 @@ def validate_progress(components, progress, root):
 
 def generate(root=ROOT):
     config = json.loads((root / 'research/components.json').read_text())
+    if not isinstance(config['known_first_party_crates'], list):
+        raise ValueError('Invalid component configuration')
     components = config['components']
     progress = json.loads((root / 'research/progress.json').read_text())
     validate_progress(components, progress, root)
