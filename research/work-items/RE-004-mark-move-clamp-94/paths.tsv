@@ -1,0 +1,6 @@
+path	conditions	exit	clamp_argument
+1	!(B<(N/D))&!((N/D)<(1.0/B)) && not notmark && 0.010000000000001>=abs(((N/P)+-1.0))	store	
+2	!(B<(N/D))&!((N/D)<(1.0/B)) && not notmark && not 0.010000000000001>=abs(((N/P)+-1.0)) && nonfinite	clamp	((((N/P)+-1.0)+1.0)*P)
+3	!(B<(N/D))&!((N/D)<(1.0/B)) && not notmark && not 0.010000000000001>=abs(((N/P)+-1.0)) && not nonfinite	clamp	((minsd(0.01,maxsd(-0.01,((N/P)+-1.0)))+1.0)*P)
+4	!(B<(N/D))&!((N/D)<(1.0/B)) && notmark	store	
+5	not !(B<(N/D))&!((N/D)<(1.0/B))	reject	

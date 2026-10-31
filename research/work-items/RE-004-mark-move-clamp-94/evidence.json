@@ -1,0 +1,88 @@
+{
+ "binary": "artifacts/node/94/hl-node",
+ "constant_reads": [
+  [
+   "0x21ff400",
+   "below64=1,gate=1,half=1,high=1,low=1,two64=2"
+  ],
+  [
+   "0x42d0250",
+   "below64=1,gate=1,half=1,high=1,low=1,two64=2"
+  ]
+ ],
+ "copy_rip_rows": 73,
+ "copy_rows_compared": 691,
+ "distinct_paths": 5,
+ "events_per_kind": {
+  "check": 15330,
+  "done": 15304,
+  "free": 3,
+  "grow": 1,
+  "guard": 9,
+  "log:clamp": 1639,
+  "log:reject": 11414,
+  "pad": 1344,
+  "panic": 17,
+  "round": 1640
+ },
+ "fixed_model": {
+  "last_fixed_down": 50,
+  "last_fixed_up": 49,
+  "swept_to": 200000
+ },
+ "fixed_points": {
+  "first_previous_moved_down": 51,
+  "first_previous_moved_up": 50,
+  "last_unmoved_down": 50,
+  "last_unmoved_up": 49
+ },
+ "grid_cases": 12696,
+ "message_leas": {
+  "0x1e52ad": [
+   "0x21ffdc9",
+   "0x42d0c19"
+  ],
+  "0x1e7579": [
+   "0x21fffe0",
+   "0x42d0e30"
+  ]
+ },
+ "messages": {
+  "clamp": "Price moved too far, new price is clamped",
+  "guard": "base/src/err_dur_guard.rs",
+  "reject": "Price moved too far"
+ },
+ "mutations": {
+  "killed": 232,
+  "survived": 17,
+  "total": 249
+ },
+ "named_cases": 125,
+ "panic_locations": [
+  [
+   "index",
+   "0x56f21c0",
+   "l1/src/perp_meta.rs",
+   194,
+   38
+  ],
+  [
+   "digits",
+   "0x56f3350",
+   "l1/src/perp_meta.rs",
+   319,
+   28
+  ]
+ ],
+ "power_tables": {
+  "0x21ff400": "0x3e0e90",
+  "0x42d0250": "0x6f7470"
+ },
+ "random_cases": 2500,
+ "raw_paths": 20,
+ "reached_rows": 655,
+ "rule": "with r = float(new)/float(daily): rejected unless !(band < r) and !(r < 1/band); then kind Mark: q = float(new)/float(previous) - 1, |q| <= 0.010000000000001 stores new, else stores max(1, saturated round(previous * (1 +- 0.01)))",
+ "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+ "total_rows": 691,
+ "writer_runs": 81
+}
