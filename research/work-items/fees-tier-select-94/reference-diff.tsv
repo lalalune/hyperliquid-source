@@ -1,0 +1,6 @@
+verdict	reference	reference_says	bytes_say
+absent	references/can1357-hl/l1/fees/compute.rs	no tier selection, no vip or mm row	the head of 3 row builders picks a vip row and an mm row from 14 prior days of volume
+partial	info_server/abci_state_info_handler.rs FeeTier	ntl_cutoff, cross, add, spot_cross, spot_add	a vip row is 0x30 bytes: 4 f64 at +0..+0x18, the cutoff at +0x20, then one more f64 at +0x28 that the reference type lacks
+differs	info_server/abci_state_info_handler.rs FeeSchedule	one list tiers: Vec<FeeTier>	2 lists: vip rows at state +0x5d8 and mm rows at +0x5f0; .rodata names struct FeeTiers with fields vip and mm
+absent	references/can1357-hl	no MmFees, no maker_fraction_cutoff, no weigh_spot_volume_double	all three strings are in .rodata; mm rows are (fraction, rate) pairs read at +0 and +8
+unverified	l1/action/vote_global.rs FeeSchedule	9 u64 bps fields	the node .rodata also says 9 elements but names tiers, referral_discount and other fields; the action decoder was not read here
