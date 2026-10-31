@@ -56,8 +56,10 @@ def unwind_index(data):
     off, base = header['offset'], header['address']
     if header['size'] < 12 or data[off:off + 4] != bytes([1, 0x1b, 0x03, 0x3b]):
         raise ValueError('Unsupported .eh_frame_hdr encodings; do not guess')
+    if off + 12 > len(data):
+        raise ValueError('Unwind table is truncated')
     count = struct.unpack_from('<I', data, off + 8)[0]
-    if 12 + count * 8 > header['size']:
+    if 12 + count * 8 > header['size'] or off + 12 + count * 8 > len(data):
         raise ValueError('Unwind table is truncated')
     executable = [s for s in secs if s['flags'] & 4 and s['size']]
     entries = []
