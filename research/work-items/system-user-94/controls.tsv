@@ -1,0 +1,25 @@
+vaddr	hex_bytes	desc	status
+0x3b9d9b0	50	push %rax (stack alignment)	PASS
+0x3b9d9b1	480337	add (%rdi), %rsi (current = cursor + offset)	PASS
+0x3b9d9b4	7234	jb 0x3b9d9ea (overflow check 1: jb panic)	PASS
+0x3b9d9b9	48ffc0	inc %rax (next = current + 1)	PASS
+0x3b9d9bc	742c	je 0x3b9d9ea (overflow check 2: je panic)	PASS
+0x3b9d9be	488b4f08	mov 0x8(%rdi), %rcx (load tail_allowance)	PASS
+0x3b9d9c2	4801c1	add %rax, %rcx (bounded_next = next + tail_allowance)	PASS
+0x3b9d9c5	7223	jb 0x3b9d9ea (overflow check 3: jb panic)	PASS
+0x3b9d9c7	4883f91e	cmp $0x1e, %rcx (cmp NUM_SYSTEM_USERS = 30, bounded_next)	PASS
+0x3b9d9cd	48c7071e000000	movq $0x1e, (%rdi) (self.cursor = 30 clamp on bound breach)	PASS
+0x3b9d9d4	b01e	mov $0x1e, %al (return SYSTEM_USER_END_SENTINEL = 30)	PASS
+0x3b9d9d8	488907	mov %rax, (%rdi) (self.cursor = next)	PASS
+0x3b9d9db	4883fe1e	cmp $0x1e, %rsi (cmp 30, current)	PASS
+0x3b9d9df	b81e000000	mov $0x1e, %eax (sentinel fallback)	PASS
+0x3b9d9e4	480f42c6	cmovb %rsi, %rax (cmovb current to rax)	PASS
+0x3b9d9ea	488d3dff55b701	lea 0x1b755ff(%rip), %rdi (panic record at 0x5712ff0)	PASS
+0x3705701	410fb64648	movzbl 0x48(%r14), %eax (load system user index)	PASS
+0x3705706	8d48ee	lea -0x12(%rax), %ecx (ecx = index - 18)	PASS
+0x3705709	83f908	cmp $0x8, %ecx (cmp 8, index - 18 for range 18..=25)	PASS
+0x37065c6	83f80a	cmp $0xa, %eax (cmp index, 10)	PASS
+0x37065ee	b900600040	mov $0x40006000, %ecx (PRIVILEGED_SYSTEM_USER_BITMASK: bits 13, 14, 30)	PASS
+0x37065f3	0fa3c1	bt %eax, %ecx (bit test index in privilege bitmask)	PASS
+0x327084d	488d35ac4131fd	lea -0x2cebe54(%rip), %rsi (address at 0x584a00 [0x33; 20])	PASS
+0x3270863	488d357a4131fd	lea -0x2cebe86(%rip), %rsi (address at 0x5849e4 [0x22; 20])	PASS
