@@ -74,12 +74,16 @@ def program_headers(data):
 def dynamic(data, by_name):
     dyn, dstr = by_name['.dynamic'], section_bytes(data, by_name['.dynstr'])
     raw = section_bytes(data, dyn)
+    if len(raw) % 16:
+        raise ValueError('Incomplete .dynamic entry')
     tags = []
     for i in range(0, len(raw) - 15, 16):
         tag = struct.unpack_from('<qQ', raw, i)
         if tag[0] == 0:  # DT_NULL ends the dynamic array; later slots are not entries
             break
         tags.append(tag)
+    else:
+        raise ValueError('Missing DT_NULL terminator in .dynamic')
     name = lambda v: dstr[v:dstr.index(b'\0', v)].decode()
     return tags, name
 
