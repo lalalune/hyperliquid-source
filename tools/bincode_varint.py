@@ -132,7 +132,10 @@ def sections(data):
     out = {}
     for h in raw:
         end = data.index(b'\0', stro + h[0])
-        out[data[stro + h[0]:end].decode()] = {'addr': h[3], 'offset': h[4], 'size': h[5]}
+        name = data[stro + h[0]:end].decode()
+        if name in out:
+            raise EvidenceError(f'Duplicate section: {name}')
+        out[name] = {'addr': h[3], 'offset': h[4], 'size': h[5]}
     for name in ('.text', '.eh_frame', '.eh_frame_hdr', '.rela.dyn', '.data.rel.ro', '.rodata'):
         if name not in out:
             raise EvidenceError(f'missing section {name}')
