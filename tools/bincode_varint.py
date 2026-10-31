@@ -123,6 +123,8 @@ IDIOMS = {
 def sections(data):
     if data[:6] != b'\x7fELF\x02\x01':
         raise EvidenceError('not a little-endian ELF64 file')
+    if len(data) < 64:
+        raise EvidenceError('truncated ELF header')
     shoff = struct.unpack_from('<Q', data, 40)[0]
     shentsize, shnum, shstrndx = struct.unpack_from('<HHH', data, 58)
     if shentsize != 64 or shoff + shnum * 64 > len(data):
