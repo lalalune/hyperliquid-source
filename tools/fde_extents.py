@@ -279,6 +279,9 @@ def main():
     from artifacts import check
     rel = f'artifacts/node/{args.release}/hl-node'
     item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == rel)
+    missing = [field for field in ('size', 'sha256') if field not in item]
+    if missing:
+        raise ValueError(f'provenance/artifacts.json entry for {rel} is missing {'/'.join(missing)}')
     check(ROOT / rel, item)
     summary = generate(ROOT / rel, args.output_dir / f'node-{args.release}-fde')
     expected = json.loads((ROOT / f'research/imported/hl-node-{args.release}.inventory.json').read_text())['fde_count_eh_frame_hdr']
