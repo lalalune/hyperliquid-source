@@ -1,12 +1,14 @@
 import copy
+import hashlib
 import json
 from pathlib import Path
 import struct
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from catalogue import owner, validate_progress
+from catalogue import owner, seed_artifact, validate_progress
 from elf_index import entry_file_offset, sections, target_for, unwind_index
 
 
@@ -86,6 +88,41 @@ class CatalogueTests(unittest.TestCase):
     def test_missing_component_rejected(self):
         d = copy.deepcopy(self.progress); del d['components']['visor']
         with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
+
+
+class SeedArtifactTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        (self.root / 'artifacts/node/94').mkdir(parents=True)
+        (self.root / 'provenance').mkdir()
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def record(self, digest, size):
+        (self.root / 'provenance/artifacts.json').write_text(json.dumps({'files': [
+            {'path': 'artifacts/node/94/hl-node', 'size': size, 'sha256': digest}]}))
+
+    def test_matching_bytes_accepted(self):
+        payload = b'\x7fELF\x02\x01' + bytes(58)
+        (self.root / 'artifacts/node/94/hl-node').write_bytes(payload)
+        self.record(hashlib.sha256(payload).hexdigest(), len(payload))
+        self.assertEqual(seed_artifact(self.root), payload)
+
+    def test_lfs_pointer_is_not_hashed_as_the_artifact(self):
+        pointer = (b'version https://git-lfs.github.com/spec/v1\n'
+                   b'oid sha256:' + b'0' * 64 + b'\nsize 8305392\n')
+        (self.root / 'artifacts/node/94/hl-node').write_bytes(pointer)
+        self.record('f' * 64, 8305392)
+        with self.assertRaises(ValueError):
+            seed_artifact(self.root)
+
+    def test_missing_provenance_record_rejected(self):
+        (self.root / 'artifacts/node/94/hl-node').write_bytes(b'\x7fELF')
+        (self.root / 'provenance/artifacts.json').write_text(json.dumps({'files': []}))
+        with self.assertRaises(ValueError):
+            seed_artifact(self.root)
 
 
 class VisorIndexTests(unittest.TestCase):

@@ -41,6 +41,23 @@ def validate_progress(components, progress, root):
                 raise ValueError('Missing or external progress evidence')
 
 
+def seed_artifact(root):
+    """Read the #94 node bytes only after they match their stored size and SHA-256.
+
+    The generated seed digest is published as the #94 artifact identity, so a
+    Git LFS pointer or any other substituted file must fail here rather than be
+    hashed and written into research/catalogue/seed-candidates.json.
+    """
+    from artifacts import check
+    relative = 'artifacts/node/94/hl-node'
+    manifest = json.loads((root / 'provenance/artifacts.json').read_text())
+    item = next((f for f in manifest['files'] if f['path'] == relative), None)
+    if item is None:
+        raise ValueError(f'No provenance record for {relative}')
+    check(root / relative, item)
+    return (root / relative).read_bytes()
+
+
 def generate(root=ROOT):
     config = json.loads((root / 'research/components.json').read_text())
     components = config['components']
@@ -81,7 +98,7 @@ def generate(root=ROOT):
     result = {'research/catalogue/components.json': json.dumps(output, indent=2) + '\n'}
     # Addresses in imported prose are leads only. Executable-section membership is not validation.
     from elf_index import sections
-    data = (root / 'artifacts/node/94/hl-node').read_bytes()
+    data = seed_artifact(root)
     execsecs = [s for s in sections(data) if s['flags'] & 4]
     seeds = []
     for path in sorted(source_paths):
