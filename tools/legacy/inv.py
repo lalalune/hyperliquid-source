@@ -27,8 +27,12 @@ for i in range(shnum):
         "<IIQQQQIIQQ", data, shoff + i * shentsize)
     secs.append(dict(name=name, type=typ, addr=addr, off=off, size=size, link=link))
 stroff = secs[shstrndx]["off"]
+strtab = data[stroff:stroff + secs[shstrndx]["size"]]
 for s in secs:
-    s["name"] = data[stroff + s["name"]:data.index(b"\0", stroff + s["name"])].decode()
+    assert s["name"] < len(strtab), "section name offset outside .shstrtab"
+    end = strtab.find(b"\0", s["name"])
+    assert end >= 0, "unterminated section name"
+    s["name"] = strtab[s["name"]:end].decode()
 sec = {s["name"]: s for s in secs}
 
 
