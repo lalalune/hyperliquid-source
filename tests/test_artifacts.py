@@ -1,6 +1,8 @@
 import hashlib
 import importlib.util
+import json
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -41,6 +43,17 @@ class ArtifactTests(unittest.TestCase):
         a.check(self.root / self.item['path'], self.item)
         with patch.object(a.urllib.request, 'urlopen', side_effect=AssertionError('network')):
             a.fetch_one(self.root, self.item)
+
+    def test_manifest_entry_missing_path_rejected(self):
+        manifest = {'files': [{'size': 4, 'sha256': '0' * 64}], 'signing_fingerprint': 'X'}
+        (self.root / 'provenance').mkdir()
+        (self.root / 'provenance/artifacts.json').write_text(json.dumps(manifest))
+        with patch.object(a, 'ROOT', self.root), \
+             patch.object(a, 'verify_signatures'), \
+             patch.object(a, 'verify_pinned_pairs'), \
+             patch.object(sys, 'argv', ['artifacts.py', 'verify']):
+            with self.assertRaises(ValueError):
+                a.main()
 
     def test_missing_pinned_reference_names_the_fix(self):
         with self.assertRaises(ValueError) as caught:
