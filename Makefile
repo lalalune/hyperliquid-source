@@ -1,5 +1,5 @@
 PYTHON ?= python3
-.PHONY: setup pull fetch verify test reproduce doctor index fde-index catalogue catalogue-check provenance rea-install rea-doctor rea-mcp rea-smoke rea-mcp-check rea-native-smoke
+.PHONY: setup pull fetch verify test reproduce doctor index fde-index target-cpu-features catalogue catalogue-check provenance rea-install rea-doctor rea-mcp rea-smoke rea-mcp-check rea-native-smoke
 setup:
 	./scripts/setup.sh
 pull:
@@ -25,6 +25,10 @@ index:
 fde-index:
 	$(PYTHON) tools/fde_extents.py --release 94
 	$(PYTHON) tools/fde_extents.py --release 115
+target-cpu-features:
+	$(PYTHON) tools/target_cpu_features.py --release 94 --out work/target-cpu-features/94
+	$(PYTHON) tools/target_cpu_features.py --release 115 --out work/target-cpu-features/115
+	$(PYTHON) tools/target_cpu_features.py --release visor --out work/target-cpu-features/visor
 visor-index:
 	$(PYTHON) tools/elf_index.py --release visor
 catalogue:
