@@ -178,6 +178,10 @@ def string_table(data, rodata, relro, names, count=EXPECTED_VARIANTS):
             continue
         if not 2 <= length <= 16:
             continue
+        # The pointer is inside .rodata. Every byte of the declared length has
+        # to be there too; the next section's bytes are not part of this string.
+        if pointer + length > rodata['address'] + rodata['size']:
+            continue
         text = data[va_to_offset(rodata, pointer):va_to_offset(rodata, pointer) + length]
         if not text.isascii() or not all(32 < byte < 127 for byte in text):
             continue

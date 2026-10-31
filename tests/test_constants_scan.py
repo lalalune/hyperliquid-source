@@ -85,6 +85,28 @@ class TableTests(unittest.TestCase):
             string_table(self.data, section(self.data, '.rodata'),
                          section(self.data, '.data.rel.ro'), {'/cham', 'abc'}, count=3)
 
+    def test_string_that_leaves_rodata_is_not_a_row(self):
+        # 'a' is the last .rodata byte; 'bc' are the first bytes of the next section.
+        self.data[0x43F] = ord('a')
+        self.data[0x440:0x442] = b'bc'
+        struct.pack_into('<Q', self.data, 0x448, 3)
+        struct.pack_into('<QQq', self.data, 0x480, 0x3000, 8, 0x20FF)
+        struct.pack_into('<QQq', self.data, 0x480 + 24, 0, 0, 0)
+        with self.assertRaises(ScanError):
+            string_table(self.data, section(self.data, '.rodata'),
+                         section(self.data, '.data.rel.ro'), {'abc'}, count=1)
+
+    def test_string_ending_on_last_rodata_byte_is_kept(self):
+        self.data[0x43E:0x440] = b'ab'
+        self.data[0x440] = ord('Z')
+        struct.pack_into('<Q', self.data, 0x448, 2)
+        struct.pack_into('<QQq', self.data, 0x480, 0x3000, 8, 0x20FE)
+        struct.pack_into('<QQq', self.data, 0x480 + 24, 0, 0, 0)
+        va, rows = string_table(self.data, section(self.data, '.rodata'),
+                                section(self.data, '.data.rel.ro'), {'ab'}, count=1)
+        self.assertEqual(va, 0x3000)
+        self.assertEqual(rows[0][3], 'ab')
+
     def test_relative_relocations_only(self):
         self.assertEqual(relocations(self.data), {0x3000: 0x2002, 0x3010: 0x2020})
 
