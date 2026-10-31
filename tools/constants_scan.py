@@ -102,7 +102,10 @@ def section_name(data, index, entsize, count):
     end = table.find(b'\0', start)
     if end < 0:
         raise ScanError('unterminated section name')
-    return table[start:end].decode('utf-8')
+    try:
+        return table[start:end].decode('utf-8')
+    except UnicodeDecodeError:
+        raise ScanError('section name is not valid UTF-8')
 
 
 def relocations(data):

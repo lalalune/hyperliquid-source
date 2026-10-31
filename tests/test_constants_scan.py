@@ -92,6 +92,23 @@ class TableTests(unittest.TestCase):
         self.assertEqual(entries_size(self.data, '.rela.dyn'), 24)
 
 
+class SectionNameEncodingTests(unittest.TestCase):
+    def setUp(self):
+        self.data = fixture()
+
+    def test_nonutf8_section_name_fails_closed(self):
+        # On base the bare .decode() in section_name escapes as
+        # UnicodeDecodeError; with the fix it raises ScanError, like
+        # every other malformed-name case in this function.
+        index = self.data.find(b'.text\x00')
+        self.data[index:index + 5] = b'\xff\xfe\xfd\xfc\xfd'
+        with self.assertRaises(ScanError):
+            entries_size(bytes(self.data), '.rela.dyn')
+
+    def test_ascii_section_names_still_parse(self):
+        self.assertEqual(entries_size(self.data, '.rela.dyn'), 24)
+
+
 class XrefTests(unittest.TestCase):
     def setUp(self):
         self.data = fixture()
