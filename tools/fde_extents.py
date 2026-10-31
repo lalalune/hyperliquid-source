@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import struct
+import sys
 
 from elf_index import sections, unwind_index
 
@@ -276,16 +277,21 @@ def main():
     p.add_argument('--release', choices=['94', '115'], required=True)
     p.add_argument('--output-dir', type=Path, default=ROOT / 'work/index')
     args = p.parse_args()
-    from artifacts import check
-    rel = f'artifacts/node/{args.release}/hl-node'
-    item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == rel)
-    check(ROOT / rel, item)
-    summary = generate(ROOT / rel, args.output_dir / f'node-{args.release}-fde')
-    expected = json.loads((ROOT / f'research/imported/hl-node-{args.release}.inventory.json').read_text())['fde_count_eh_frame_hdr']
-    if summary['unwind_table_entries'] != expected:
-        raise ValueError('Parsed unwind count differs from retained inventory')
+    try:
+        from artifacts import check
+        rel = f'artifacts/node/{args.release}/hl-node'
+        item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == rel)
+        check(ROOT / rel, item)
+        summary = generate(ROOT / rel, args.output_dir / f'node-{args.release}-fde')
+        expected = json.loads((ROOT / f'research/imported/hl-node-{args.release}.inventory.json').read_text())['fde_count_eh_frame_hdr']
+        if summary['unwind_table_entries'] != expected:
+            raise ValueError('Parsed unwind count differs from retained inventory')
+    except (ValueError, OSError) as e:
+        print(f'fde_extents: {e}', file=sys.stderr)
+        return 1
     print(json.dumps(summary, indent=2))
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())
