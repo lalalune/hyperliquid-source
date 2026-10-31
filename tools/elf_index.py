@@ -33,7 +33,10 @@ def sections(data):
         end = table.find(b'\0', off)
         if end < 0:
             raise ValueError('Unterminated section name')
-        row['name'] = table[off:end].decode('utf-8')
+        try:
+            row['name'] = table[off:end].decode('utf-8')
+        except UnicodeDecodeError:
+            raise ValueError('Invalid section name encoding')
     return rows
 
 
