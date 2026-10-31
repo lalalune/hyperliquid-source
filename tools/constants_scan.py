@@ -358,7 +358,7 @@ def main():
     if args.out:
         args.out.mkdir(parents=True, exist_ok=True)
         for name, content in outputs.items():
-            (args.out / name).write_text(content)
+            (args.out / name).write_text(content, encoding='utf-8', newline='\n')
     print(f'#94 {digest}')
     print('seeds: ' + ', '.join(f'{k}={v[1]:#x}' for k, v in seeds.items()))
     print(f'table: {table_va:#x}, {len(table)} entries, default NvTestnet={default_index}')

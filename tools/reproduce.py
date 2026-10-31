@@ -42,7 +42,7 @@ per = collections.defaultdict(collections.Counter)
 for item in new['items']:
     per[item['crate']][item['class']] += 1
 new['per_crate'] = {k: dict(v) for k, v in per.items()}
-(out / name).write_text(json.dumps(new, indent=1) + '\n')
+(out / name).write_text(json.dumps(new, indent=1) + '\n', encoding='utf-8', newline='\n')
 def canonical(d):
     return sorted((i['crate'], i['literal'], i['class']) for i in d['items'])
 if canonical(old) != canonical(new):

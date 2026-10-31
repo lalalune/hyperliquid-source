@@ -156,7 +156,7 @@ def main():
                 raise SystemExit(f'Stale catalogue: {relative}; run make catalogue')
         else:
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(content)
+            path.write_text(content, encoding='utf-8', newline='\n')
     print('Catalogue and progress tables match pinned inputs.' if args.check else 'Catalogue and progress tables regenerated.')
 
 

@@ -91,7 +91,7 @@ with (work / 'mcp-stderr.log').open('wb') as diagnostics:
             send({'jsonrpc':'2.0','id':4,'method':'tools/call','params':{
                 'name':'procedure_pseudo_code','arguments':{'procedure':f'file-offset:{entry_offset:#x}'}}})
             native = receive(4, timeout=420)
-            (work / 'visor-native-call.json').write_text(json.dumps(native, indent=2) + '\n')
+            (work / 'visor-native-call.json').write_text(json.dumps(native, indent=2) + '\n', encoding='utf-8', newline='\n')
             if native.get('isError'):
                 raise RuntimeError('Native smoke failed; inspect work/rea-smoke/visor-native-call.json')
             record = native.get('structuredContent')
@@ -101,11 +101,11 @@ with (work / 'mcp-stderr.log').open('wb') as diagnostics:
                 raise RuntimeError('Native evidence belongs to a different artifact')
             if not isinstance(record['normalized_result'], str) or not record['normalized_result'].strip():
                 raise RuntimeError('No visor entrypoint pseudocode returned')
-            (work / 'visor-native-evidence.json').write_text(json.dumps(record, indent=2) + '\n')
+            (work / 'visor-native-evidence.json').write_text(json.dumps(record, indent=2) + '\n', encoding='utf-8', newline='\n')
             report['entry_file_offset'] = hex(entry_offset)
             report['native_evidence_id'] = record['evidence_id']
             report['native_profile'] = 'native-smoke (reduced analysis)'
-        (work / 'mcp-handshake.json').write_text(json.dumps(report, indent=2) + '\n')
+        (work / 'mcp-handshake.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8', newline='\n')
         print(f"REA {expected} stdio MCP handshake passed; Ghidra {ghidra['availability']['status']}.")
     finally:
         cleanup_error = None

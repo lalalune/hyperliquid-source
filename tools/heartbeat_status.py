@@ -125,7 +125,7 @@ def run(binary, output):
     if not any('memcmp@GLIBC_2.2.5' in line and line.startswith('000000000576e488 ')
                for line in relocation_lines):
         raise ValueError('Lookup comparator symbol changed')
-    (output / 'relocations.txt').write_text('\n'.join(relocation_lines) + '\n')
+    (output / 'relocations.txt').write_text('\n'.join(relocation_lines) + '\n', encoding='utf-8', newline='\n')
     raw = {}
     for name, begin, end in [('status', START, END), ('consumer', CALLER_START, CALLER_END),
                              ('elapsed-helper', HELPER_START, HELPER_END)]:
@@ -133,20 +133,20 @@ def run(binary, output):
         text = subprocess.check_output(command, text=True)
         # Exclude the local absolute pathname from durable deterministic evidence.
         text = text.replace(str(binary), '<authenticated-node94>')
-        (output / f'{name}.objdump.txt').write_text(text)
+        (output / f'{name}.objdump.txt').write_text(text, encoding='utf-8', newline='\n')
         offset, body = mapped(data, begin, end - begin)
         raw[name] = {'start_va': hex(begin), 'end_va': hex(end), 'file_offset': hex(offset),
                      'bytes': len(body), 'sha256': hashlib.sha256(body).hexdigest()}
     (output / 'frames.txt').write_text('\n'.join(line for line in frames.splitlines()
         if 'FDE' in line and any(f'pc={a:016x}..{b:016x}' in line for a, b in
-                               [(START, END), (CALLER_START, CALLER_END), (HELPER_START, HELPER_END)])) + '\n')
+                               [(START, END), (CALLER_START, CALLER_END), (HELPER_START, HELPER_END)])) + '\n', encoding='utf-8', newline='\n')
     result = {'target_sha256': item['sha256'], 'target_bytes': len(data), 'ranges': raw,
               'fde_record_count': len(ranges), 'direct_callers_in_decoded_text': [hex(v) for v in callers],
               'instruction_controls': controls, 'relocations': relocations(data),
               'literal_180_va': '0x20acd8', 'source_path_va': '0x6fb82a',
               'captured_binary_executed': False,
               'limits': 'One static status function; no indirect-caller completeness, live behavior, EMA implementation, Rust build or component gate.'}
-    (output / 'records.json').write_text(json.dumps(result, indent=2) + '\n')
+    (output / 'records.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8', newline='\n')
     return result
 
 

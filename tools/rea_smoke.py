@@ -25,5 +25,5 @@ for release in ['94', '115']:
         raise SystemExit('REA analyzed a different artifact')
     if evidence['operation'] != 'inspect_rust_binary':
         raise SystemExit('Unexpected REA operation')
-    (out / f'node-{release}-rust.json').write_text(output)
+    (out / f'node-{release}-rust.json').write_text(output, encoding='utf-8', newline='\n')
     print(f"REA {version}: #{release} static input verified ({evidence['evidence_id']})")
