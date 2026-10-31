@@ -1,0 +1,12 @@
+verdict	reference	reference_says	bytes_say
+differs	register_referrer doc: shared helper, user path a7 = 0	only the a7 = 0 path is described	three of six callers push 1; that mode has no volume test, tests the length first, and replaces the code of a user who has a profile
+differs	ReferrerProfile n_per_bucket = 0	always 0 on this path	true for the three flag 0 callers; the flag 1 arm passes a caller value in r9, stored at profile +0x40
+differs	ReferrerProfile stats_0 and stats_1 as two u128 fields	two zero-initialized 128-bit fields	the new profile writes +0x18, +0x20, +0x30, +0x38 as zero and leaves +0x28 unwritten
+differs	UserEligibilityState eligibility_total_raw	one stored u64 on the user	a sum over the token tree at row +0xb0, first word of each 0x30-byte value, saturating, with one call to the recorder per overflow
+differs	users lookup	a HashMap of users	an empty table (item word 0), a missing row, a null root and a tree length of 0 all give 0xa5
+differs	CodeTooLongInHelper doc	unreachable through the user wrapper	true for the wrapper; with flag 0 the test still comes after the volume test, and with flag 1 it comes first, but the arm itself stops 101 bytes with 0x143 before the call
+differs	status::DUPLICATE_CODE comments	another referrer owns this code	with flag 1 and no profile, a code held by the same address also gives 0xa3
+same	MAX_REFERRER_CODE_LEN	100	cmp r8,0x65 with jb at 0x27e30ac, cmp r8,0x64 at 0x3744edb and 0x374550f
+same	MIN_REFERRER_ELIGIBILITY_RAW	1000000, at least	cmp rcx,0xf4240 with jae at 0x37454e0
+same	status numbers	390, 160, 163, 164, 165, 323	tags 0x186, 0xa0, 0xa3, 0xa4, 0xa5, 0x143
+same	order with flag 0	volume, owner, code	the same, with the length test between volume and owner
