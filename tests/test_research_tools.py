@@ -87,6 +87,13 @@ class CatalogueTests(unittest.TestCase):
         d = copy.deepcopy(self.progress); del d['components']['visor']
         with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
 
+    def test_missing_progress_gates_rejected(self):
+        # A progress record without its top-level gates key must fail closed
+        # as a ValueError — on base it escaped as KeyError from the gate
+        # comparison in the component loop.
+        d = copy.deepcopy(self.progress); del d['gates']
+        with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
+
 
 class VisorIndexTests(unittest.TestCase):
     def test_target_for_maps_nodes_and_visor(self):

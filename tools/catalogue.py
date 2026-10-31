@@ -19,6 +19,8 @@ def owner(path, components):
 
 
 def validate_progress(components, progress, root):
+    if type(progress) is not dict or 'gates' not in progress:
+        raise ValueError('Invalid progress record')
     ids = {c['id'] for c in components}
     if set(progress['components']) != ids:
         raise ValueError('Progress components differ from scope')
