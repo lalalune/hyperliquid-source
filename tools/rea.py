@@ -95,6 +95,8 @@ def main(argv=None):
         if not (package / 'package.json').is_file():
             raise ValueError('Pinned REA package is absent. Run make rea-install.')
         metadata = json.loads((package / 'package.json').read_text())
+        if 'version' not in CONFIG:
+            raise ValueError('config/rea.json missing version')
         if metadata.get('version') != CONFIG['version']:
             raise ValueError('REA package version differs from config/rea.json; run make rea-install')
         command = [str(node), str(package / 'scripts/rea.mjs'), *(args or ['--help'])]
