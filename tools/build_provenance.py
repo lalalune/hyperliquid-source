@@ -86,6 +86,12 @@ def dynamic(data, by_name):
 
 def derive(data):
     secs = sections(data)
+    # The dict below keeps only the last section of a given name, so a
+    # duplicate would silently decide which bytes the facts below read.
+    # Refuse the ambiguity for every name whose content derive() reads.
+    for name in ('.comment', '.interp', '.dynamic', '.dynstr', '.gcc_except_table'):
+        if sum(s['name'] == name for s in secs) > 1:
+            raise ValueError(f'Duplicate section: {name}')
     by_name = {s['name']: s for s in secs}
     f = Facts(data, secs)
 

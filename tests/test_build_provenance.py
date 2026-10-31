@@ -55,6 +55,32 @@ def dynamic_facts(tags):
     return {i['key']: i['value'] for i in derive(dynamic_elf(tags))}
 
 
+def sectioned_elf(pairs):
+    distinct = [b'.shstrtab']
+    for name, _ in pairs:
+        if name not in distinct:
+            distinct.append(name)
+    names = b'\x00' + b''.join(n + b'\x00' for n in distinct)
+    body = bytearray(64)
+    body[:6] = b'\x7fELF\x02\x01'
+    struct.pack_into('<HH', body, 16, 3, 0x3E)
+    blobs = [names] + [blob for _, blob in pairs]
+    offsets = []
+    for blob in blobs:
+        offsets.append(len(body))
+        body += blob
+    shoff = len(body)
+    struct.pack_into('<Q', body, 40, shoff)
+    struct.pack_into('<HHH', body, 58, 64, 2 + len(pairs), 1)
+    rows = [(0, 0, 0, 0, 0, 0)]
+    rows.append((names.index(b'.shstrtab\x00'), 3, 0, 0, offsets[0], len(names)))
+    for (name, blob), off in zip(pairs, offsets[1:]):
+        rows.append((names.index(name + b'\x00'), 1, 0, 0, off, len(blob)))
+    for row in rows:
+        body += struct.pack('<IIQQQQIIQQ', *row, 0, 0, 1, 0)
+    return bytes(body)
+
+
 def by_key(items, key):
     return [i for i in items if i['key'] == key]
 
@@ -105,6 +131,16 @@ class DeriveTests(unittest.TestCase):
         self.assertIs(dynamic_facts([(0, 0)])['dynamic.bind_now'], False)
         for tags in ([(30, 8), (0, 0)], [(0x6FFFFFFB, 1), (0, 0)], [(24, 0), (0, 0)]):
             self.assertIs(dynamic_facts(tags)['dynamic.bind_now'], True, tags)
+
+    def test_duplicate_comment_section_rejected(self):
+        data = sectioned_elf([(b'.comment', b'FIRST\x00'), (b'.comment', b'SECOND\x00')])
+        with self.assertRaisesRegex(ValueError, r'Duplicate section: \.comment'):
+            derive(data)
+
+    def test_duplicate_interp_section_rejected(self):
+        data = sectioned_elf([(b'.interp', b'/lib/first\x00'), (b'.interp', b'/lib/second\x00')])
+        with self.assertRaisesRegex(ValueError, r'Duplicate section: \.interp'):
+            derive(data)
 
     def test_non_elf_input_is_rejected(self):
         with self.assertRaises(ValueError):
