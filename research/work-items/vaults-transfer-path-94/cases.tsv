@@ -1,0 +1,22 @@
+family	scenario	code_or_panic	accounts	calls	model
+body	deposit: vault moves both sums, depositor only +0x18	390	[["30353a3f44494e53585d62676c71767b80858a8f", 0, -1000], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 1000, 1000]]	['deposit', 'event', 'ch', 'account', 'account']	same
+body	deposit one below 5000000: code 41	41	[]	[]	same
+body	gate equal to now passes: 300 ms exactly	390	[["30353a3f44494e53585d62676c71767b80858a8f", 0, -1000], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 1000, 1000]]	['deposit', 'event', 'ch', 'account', 'account']	same
+body	one ns short: code 31, stored time unchanged	31	[]	[]	same
+body	code 319 still stores the new time	319	[]	[]	same
+body	gate rolls past midnight	390	[["30353a3f44494e53585d62676c71767b80858a8f", 0, -1000], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 1000, 1000]]	['deposit', 'event', 'ch', 'account', 'account']	same
+body	missing vault: code 7 with the vault address	7	[]	[]	same
+body	caller is a normal vault: code 25 with the caller	25	[]	[]	same
+body	caller is a child vault: code 25	25	[]	[]	same
+body	caller is a parent and target is its child: passes	390	[["30353a3f44494e53585d62676c71767b80858a8f", 0, -1000], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 1000, 1000]]	['deposit', 'event', 'ch', 'account', 'account']	same
+body	caller is a parent and target is not its child: code 25	25	[]	[]	same
+body	closed vault: code 8	8	[]	[]	same
+body	withdraw with no leader event: one event, sums move	390	[["30353a3f44494e53585d62676c71767b80858a8f", 0, 3], ["555a5f64696e73787d82878c91969ba0a5aaafb4", -3, -3]]	['validate', 'pre', 'ch', 'withdraw', 'event', 'ch', 'account', 'account']	same
+body	withdraw with leader event: two events, leader first	390	[["30353a3f44494e53585d62676c71767b80858a8f", 0, 3], ["555a5f64696e73787d82878c91969ba0a5aaafb4", -3, -3]]	['validate', 'pre', 'ch', 'withdraw', 'event', 'event', 'ch', 'account', 'account']	same
+body	withdraw body returns the none word: code 390, no event, no sum	390	[]	['validate', 'pre', 'ch', 'withdraw']	same
+body	flag from validation runs the post step	390	[["30353a3f44494e53585d62676c71767b80858a8f", 0, 3], ["555a5f64696e73787d82878c91969ba0a5aaafb4", -3, -3]]	['validate', 'pre', 'post', 'ch', 'withdraw', 'event', 'ch', 'account', 'account']	same
+body	Mainnet special vault with switch on: cap passed to validation	390	[["30353a3f44494e53585d62676c71767b80858a8f", 0, 3], ["dfc24b077bc1425ad1dea75bcb6f8158e10df303", -3, -3]]	['validate', 'pre', 'ch', 'withdraw', 'event', 'ch', 'account', 'account']	same
+body	same vault with switch off: no cap	390	[["30353a3f44494e53585d62676c71767b80858a8f", 0, 3], ["dfc24b077bc1425ad1dea75bcb6f8158e10df303", -3, -3]]	['validate', 'pre', 'ch', 'withdraw', 'event', 'ch', 'account', 'account']	same
+body	chain 1: no address compare	390	[["30353a3f44494e53585d62676c71767b80858a8f", 0, 3], ["dfc24b077bc1425ad1dea75bcb6f8158e10df303", -3, -3]]	['validate', 'pre', 'ch', 'withdraw', 'event', 'ch', 'account', 'account']	same
+body	scale near 1e10 clamps at 0x147ae147ae147ae	390	[["30353a3f44494e53585d62676c71767b80858a8f", 0, -9223372036854], ["555a5f64696e73787d82878c91969ba0a5aaafb4", 9223372036854, 9223372036854]]	['deposit', 'event', 'ch', 'account', 'account']	same
+body	deposit whose scaled value reaches i64::MIN: panic after the event	panic	null	[]	same

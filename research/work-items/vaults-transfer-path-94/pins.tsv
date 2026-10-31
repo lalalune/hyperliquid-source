@@ -1,0 +1,65 @@
+group	va	instruction	meaning
+wrapper	0x1e5fb68	xor rcxd,rcxd	zero flag
+wrapper	0x1e5fb6a	xor r8d,r8d	zero key
+wrapper	0x1e5fb72	call 0x27312c0	router call
+wrapper	0x1e5fb7d	cmp [rsp+0x18]:16,0x186	code 390 maps to tag 13
+router	0x27312fa	movzx rbxd,[rax+0x3c]:8	class byte
+router	0x27312fe	cmp rbxd,0x4	class 4 and up branch
+router	0x2731307	test [r15+0x5b1]:8,0x1	bit 0 of +0x5b1 takes the direct call
+router	0x2731315	cmp rbxd,0x2	class below 2 takes the direct call
+router	0x273131e	jne 0x2731521	class 3 takes the slow route
+router	0x273132c	cmp raxd,0x2	class 2 with fewer than 2 items takes the direct call
+router	0x273133f	or raxb,[rsp+0x28]:8	switch off or flag set takes the direct call
+router	0x273134b	test r14,r14	zero key takes the direct call
+router	0x27313b1	call 0x272d000	settlement before the body
+router	0x2731436	call 0x27362b0	body on the class 2 route
+router	0x273143b	cmp [r15+0x3acb]:8,0x1	settlement after the body only with the switch
+router	0x27314f2	call 0x277eba0	failed settlement is dropped
+router	0x27314fc	test [r15+0x5b0]:8,0x1	bit 0 of +0x5b0
+router	0x2731517	call 0x27362b0	direct body call
+router	0x2731569	call 0x1f84640	window row
+router	0x27315cb	mov [r12]:16,0x170	code 368
+router	0x27315db	inc rax	row counter
+router	0x27315f4	inc rax	exchange counter
+router	0x2731649	imul3 rax,r13,0x2f0	clearinghouse stride 0x2f0
+router	0x2731691	call 0x272fe00	slow entry step
+router	0x27316b1	call 0x27362b0	body on the slow route
+router	0x27316cc	call 0x272f880	class 4 exit step
+router	0x2731700	call 0x272d000	class 3 settlement, failure dropped
+body	0x27362ce	mov rax,[rcx+0x58]:64	depth counter on entry
+body	0x273632e	mov rcxd,0x11e1a300	300,000,000 ns
+body	0x273639f	cmp r14d,raxd	date compare
+body	0x27363ab	cmp r12d,r15d	seconds compare
+body	0x27363b7	cmp rbpd,rbxd	nanosecond compare
+body	0x27363bf	mov [r13+0x3ab0]:32,r14d	new time stored before any other test
+body	0x273650b	mov [rax]:16,0x1f	code 31
+body	0x27363f9	mov rax,0xccccccccccccccc	usd cut
+body	0x273651a	mov [rax]:16,0x13f	code 319
+body	0x2736528	cmp [r15-0x10]:32,0x2	caller is a vault: tag below 2 is refused
+body	0x27365f7	mov [rcx]:16,0x19	code 25 with the caller
+body	0x27366ca	mov [rcx]:16,0x7	code 7 with the vault
+body	0x27366d4	cmp [rbp+0xac]:8,0x0	is_closed
+body	0x27366e2	mov [rax]:16,0x8	code 8
+body	0x2736744	cmp r14,0x4c4b40	deposit minimum
+body	0x2736752	mov [rax]:16,0x29	code 41
+body	0x2736819	call [0x5774b48]:64	deposit body
+body	0x2736838	cmp r14,rax	none word means code in the rest of the result
+body	0x2736786	cmp raxd,0x2	chain byte branch
+body	0x273692a	cmp [r13+0xbb0]:8,0x0	cap switch
+body	0x2736944	call 0x26f6050	cap formula
+body	0x2736a08	call [0x5774b50]:64	withdraw validation
+body	0x2736a7d	call 0x26f7ef0	pre-withdraw step
+body	0x2736a82	test rbxb,0x1	flag runs the post step
+body	0x2736b39	call [0x5774b58]:64	withdraw body
+body	0x2736b47	je 0x273701f	none word: code 390 with no event
+body	0x2736b70	je 0x2736e32	second word none skips the leader event
+body	0x2736e27	call [0x5774738]:64	leader event first
+body	0x2736f72	call [0x5774738]:64	user event
+body	0x2736f90	call [0x5774b60]:64	scale and clamp
+body	0x2736fe1	call 0x2712a00	vault sums
+body	0x2737017	call 0x2712a00	user sum
+body	0x2737024	mov [rax]:16,0x186	code 390
+sums	0x2712a30	imul1 r13	signed divide by 10000
+sums	0x2712a51	cmovne r15,r14	flag picks the second amount for +0x18
+cap	0x26f6066	subsd xmm2,xmm0	1 - fraction
+cap	0x26f606a	mulsd xmm1,xmm2	base * (1 - fraction)

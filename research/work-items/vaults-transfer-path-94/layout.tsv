@@ -1,0 +1,26 @@
+struct	offset	width	va	instruction	meaning
+action	0x0	8	0x27363f6	mov rcx,[r15]:64	usd
+action	0x8	20	0x27363e9	movups xmm0,[r15+0x8]:128	vault address
+action	0x1c	1	0x27363d9	movzx rdxd,[r15+0x1c]:8	is_deposit
+vault_value	0x0	4	0x2736528	cmp [r15-0x10]:32,0x2	relationship tag; r15 = value + 0x10
+vault_value	0x8	8	0x2736538	mov rax,[r15-0x8]:64	child set root
+vault_value	0x10	8	0x2736545	mov r12,[r15]:64	child set height
+vault_value	0x98	20	0x2736bbf	movdqu xmm0,[rbp+0x98]:128	leader, the only user of the second event
+vault_value	0xac	1	0x27366d4	cmp [rbp+0xac]:8,0x0	is_closed
+exchange	0x58	8	0x27362ce	mov rax,[rcx+0x58]:64	depth counter, saturating up on entry and down on exit
+exchange	0x60	12	0x27362e9	mov r14,[r13+0x60]:64	time: date, seconds, nanoseconds
+exchange	0x5b0	1	0x27314fc	test [r15+0x5b0]:8,0x1	bit 0: class 4 and up take the direct call
+exchange	0x5b1	1	0x2731307	test [r15+0x5b1]:8,0x1	bit 0: class below 4 takes the direct call
+exchange	0x5c8	8	0x2736705	cmp [r13+0x5c8]:64,0x0	clearinghouse count
+exchange	0x7d0	8	0x27315ed	mov rax,[r15+0x7d0]:64	saturating counter of the slow route
+exchange	0x8d0	8	0x2736419	mov rbp,[r13+0x8d0]:64	vault map root
+exchange	0x8d8	8	0x273644b	mov r12,[r13+0x8d8]:64	vault map height
+exchange	0x8f2	1	0x273677e	movzx raxd,[r13+0x8f2]:8	chain byte selecting the special vault address
+exchange	0xbb0	1	0x273692a	cmp [r13+0xbb0]:8,0x0	cap switch for the special vault
+exchange	0xbb8	8	0x2736934	mov rdi,[r13+0xbb8]:64	cap base, u64 read as i64
+exchange	0x39c8	8	0x273693b	movq xmm0,[r13+0x39c8]:64	cap fraction: cap = base * (1 - fraction)
+exchange	0x3ab0	12	0x273630d	mov rax,[r13+0x3ab0]:64	last accepted time
+exchange	0x3acb	1	0x2731335	movzx raxd,[r15+0x3acb]:8	switch of the settlement route
+account	0x10	8	0x2712a41	mov rbp,[rbx+0x10]:64	i64 sum, moved for the vault only
+account	0x18	8	0x2712a6d	mov r14,[rbx+0x18]:64	i64 sum, moved for both addresses
+clearinghouse	0x2a0	8	0x370c1e5	mulsd xmm0,[rdi+0x2a0]:64	f64 scale on the amount
