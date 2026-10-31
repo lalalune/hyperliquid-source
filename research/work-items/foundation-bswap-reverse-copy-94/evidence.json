@@ -1,0 +1,47 @@
+{
+  "behavior": {
+    "arguments": "rdi = destination base; rsi = source base. Four qwords are read at [rsi+0x00..0x18] and four qwords are written at [rdi+0x00..0x18]. No other argument is read and no other field is written.",
+    "branch_targets": {},
+    "calls_inside_window": 0,
+    "edges": {
+      "order_reversal_only": "with source qwords [1, 2, 3, 4] the destination becomes [0x0400000000000000, 0x0300000000000000, 0x0200000000000000, 0x0100000000000000]: reversal and swap compose, neither alone explains the output.",
+      "single_byte": "with source [0x00000000000000ff, 0, 0, 0] the destination is [0, 0, 0, 0xff00000000000000]: the low byte of the first source qword becomes the high byte of the last destination qword.",
+      "swap_only_check": "with source qwords [0x0102030405060708, 0x1112131415161718, 0x2122232425262728, 0x3132333435363738] the destination is [0x3837363534333231, 0x2827262524232221, 0x1817161514131211, 0x0807060504030201].",
+      "zero": "with all source qwords 0 the destination is all 0."
+    },
+    "entry_shape": "Opens with mov 0x18(%rsi),%rax (NOT endbr64); zero branches, zero calls inside; a single ret.",
+    "return_rule": "[rdi+0x00] = bswap([rsi+0x18]), [rdi+0x08] = bswap([rsi+0x10]), [rdi+0x10] = bswap([rsi+0x08]), [rdi+0x18] = bswap([rsi+0x00]); each bswap reverses the byte order of one 64-bit word. The copy is 32 bytes total with reversed order and reversed byte order."
+  },
+  "captured_binary_executed": false,
+  "coordinate_system": "ELF virtual addresses, without a guessed loader or Ghidra rebase. The ELF section table maps .text with file offset = VA - 0x1000; the retained .eh_frame has equal file offset and VA. The tools resolve sections rather than assuming one global VA/file-offset relationship.",
+  "function": {
+    "bytes": 43,
+    "end_va_exclusive": "0x5632dbb",
+    "padding_bytes": 5,
+    "sha256": "d09c0b3ec0e07d25fd136956eaaf02a0512471313bd032d93bd4a18db0ff0f02",
+    "start_va": "0x5632d90"
+  },
+  "incoming_pattern_scan": {
+    "caller_fdes": [
+      [
+        "0x563ecc0",
+        "0x563ef9f"
+      ],
+      [
+        "0x563ff20",
+        "0x5640295"
+      ]
+    ],
+    "caller_setup": null,
+    "e8_candidates": [
+      "0x563ed52",
+      "0x563ff6f"
+    ],
+    "note": "Byte-pattern scan over the full .text section (70,370,352 bytes) for e8 sites whose rel32 lands on the window start; exactly two sites found, each boundary-confirmed inside its own caller FDE. This is explicitly not a complete xref census: indirect calls, tail jumps, and PLT references are out of scope for the scan.",
+    "relocation_note": "No R_X86_64_RELATIVE record in any .rela.* section names this window as addend (full-section scan: 80,022 .rela.dyn + 278 .rela.plt entries).",
+    "relocation_slots": [],
+    "section_bytes": 70370352
+  },
+  "progress_gate_requested": false,
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
