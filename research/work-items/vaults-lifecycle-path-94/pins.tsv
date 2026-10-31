@@ -1,0 +1,217 @@
+group	site	decoded	meaning
+entry	0x2736738	cmp [rsp+0x7]:8,0x0	byte is_deposit test in the transfer host
+entry	0x2736742	je 0x273675c	zero byte leaves for the withdraw arm
+entry	0x2736744	cmp r14,0x4c4b40	deposit minimum 5000000 raw units
+entry	0x273674b	jae 0x27367b4	at or above the minimum continues to the deposit call
+entry	0x2736752	mov [rax]:16,0x29	below the minimum stores code 41
+entry	0x2736815	xor r9d,r9d	deposit from the transfer host passes flag 0
+entry	0x2736819	call [0x5774b48]:64	call through the slot of 0x395b3a0
+entry	0x4d42684	cmp r14,0x4c4b40	same minimum in the second transfer host copy
+entry	0x4d42692	mov [rax]:16,0x29	second copy stores code 41
+entry	0x4d42758	xor r9d,r9d	second copy passes flag 0
+entry	0x4d4275c	call [0x5774b48]:64	second copy calls 0x395b3a0
+entry	0x4d465c4	cmp r14,0x4c4b40	same minimum in the third transfer host copy
+entry	0x4d465d2	mov [rax]:16,0x29	third copy stores code 41
+entry	0x4d46695	xor r9d,r9d	third copy passes flag 0
+entry	0x4d46699	call [0x5774b48]:64	third copy calls 0x395b3a0
+entry	0x395b1d6	mov r9d,0x1	create-vault deposit passes flag 1
+entry	0x395b1dc	call [0x5774b48]:64	0x395af60 calls 0x395b3a0
+g1	0x395b3c0	cmp r15,0x1	relationship tag compared with 1 (child)
+g1	0x395b3c4	jne 0x395b403	other tags skip gate 1
+g1	0x395b3f1	cmp raxd,0xffff	20-byte compare of depositor with leader +0x98
+g1	0x395b3f6	je 0x395b403	leader passes gate 1
+g1	0x395b3f8	mov [rdi+0x8]:16,0x16	child vault and depositor not leader: code 22
+g2	0x395b403	cmp [r14+0xad]:8,0x0	allow_deposits compared with 0
+g2	0x395b40b	jne 0x395b44a	deposits on passes gate 2
+g2	0x395b43d	je 0x395b44a	leader passes gate 2
+g2	0x395b43f	mov [rdi+0x8]:16,0x17	deposits off and depositor not leader: code 23
+total	0x395b494	lea rsi,[r14+0x84]:64	vault address +0x84
+total	0x395b4a8	call 0x3955e80	equity of the vault address
+total	0x395b4b0	cmp r15d,0x2	tag below 2 skips the child walk
+total	0x395b4c2	jb 0x395b749	branch past the child walk
+total	0x395b6cc	call 0x3955e80	equity of one child, saturating sum in r12
+g3	0x395b74c	test r12,r12	sign of the summed total
+g3	0x395b74f	jns 0x395b764	total >= 0 passes gate 3
+g3	0x395b756	call [0x5773230]:64	negative total asks list A (0x37e4e50) about the vault address
+g3	0x395b75e	je 0x395bb3f	not on list A leaves for code 9
+g3	0x395bb44	mov [rdi+0x8]:16,0x9	negative total and vault not on list A: code 9
+g4	0x395b764	cmp [rsp+0x8]:8,0x0	flag argument (saved r9b)
+g4	0x395b771	je 0x395b7ee	flag 0 runs the exemption tests, flag 1 goes straight to the balance check
+g4	0x395b829	cmp [rsp+0x20]:32,0x1	child vault skips the leader share gate
+g4	0x395b82e	je 0x395b773	branch to balance check
+g4	0x395b838	je 0x395b773	depositor equal to leader skips the leader share gate
+g4	0x395b843	call [0x5773228]:64	list B (0x37e4fb0) about the vault address
+g4	0x395b84b	jne 0x395b773	on list B skips the leader share gate
+g4	0x395b858	je 0x395bc04	empty record map: code 2
+g4	0x395b90a	jb 0x395bc04	leader has no record: code 2
+g4	0x395b8f2	jmp 0x395bb4f	leader record found, go to the share arithmetic
+g4	0x395bb57	mulsd xmm0,[r15]:64	leader equity = total as f64 * share
+g4	0x395bbd7	divsd xmm2,[0x20ae60]:64	equity / 1e6
+g4	0x395bbe9	add rax,r13	u64 add of max(total, 0) and amount
+g4	0x395bbec	jb 0x395bcf1	carry goes to the saturating recorder arm
+g4	0x395bbfe	jbe 0x395bd2c	equity at or above 1e-7 continues
+g4	0x395bc09	mov [rdi+0x8]:16,0x2	leader share gate failure: code 2
+g4	0x395bd61	ja 0x395bc04	denominator below 1e-15: code 2
+g4	0x395bd67	divsd xmm2,xmm0	equity / new total
+g4	0x395bd6b	movsd xmm0,[0x20a4c0]:64	constant 0.05
+g4	0x395bd73	ucomisd xmm0,xmm2	compare 0.05 with the fraction
+g4	0x395bd77	jbe 0x395b773	fraction >= 0.05 (or unordered) continues
+g5	0x395b7af	call [0x5774660]:64	available balance of the depositor (0x36f7560)
+g5	0x395b7b8	js 0x395bd9c	amount with the sign bit set panics at qtys/mod.rs:843
+g5	0x395b7be	cmp rax,r13	compare available with amount
+g5	0x395b7c1	jae 0x395b922	enough balance continues
+g5	0x395b7c7	mov [rsp+0x90]:16,0x33	payload tag 51 for the logged error
+g5	0x395b7d9	call 0x3999770	hand the logged error to 0x3999770
+g5	0x395b7e3	mov [rdi+0x8]:16,0x2c	insufficient balance: code 44
+move	0x395b932	call [0x57749d8]:64	debit depositor (0x370a3d0)
+move	0x395b942	sub rax,r13	subtract amount from context +0x238
+move	0x395b950	mov [rbx+0x238]:64,rax	store context +0x238
+move	0x395b981	call 0x36ff4f0	credit vault address (0x36ff4f0)
+move	0x395b990	add rax,r13	add amount back to context +0x238
+move	0x395b99e	mov [rcx+0x238]:64,rax	store context +0x238
+share	0x395b9db	mov rdx,r13	delta = amount
+share	0x395b9de	mov rcx,r12	old total = r12, the sum taken before the debit
+share	0x395b9e6	call 0x395a2c0	redistribute shares
+post	0x395bd8f	lea rdi,[0x570da30]:64	depositor record missing after the update panics at vault/mod.rs:407:58
+post	0x395baaf	add rax,r15	record +0x08: u64 add of amount
+post	0x395bab2	jb 0x395bc91	carry goes to the recorder arm (qtys/mod.rs:829)
+post	0x395bab8	mov [rbx]:64,rax	store record +0x08
+post	0x395bac2	add rax,r15	record +0x10: i64 add of amount
+post	0x395baca	jo 0x395bcb3	overflow goes to the recorder arm (qtys/mod.rs:830)
+post	0x395bad0	mov [rbx+0x8]:64,rax	store record +0x10
+post	0x395bad9	mov [rbx+0x24]:32,raxd	store record +0x2c dword of the 12-byte time
+post	0x395bae0	mov [rbx+0x1c]:64,rax	store record +0x24 qword of the 12-byte time
+post	0x395baf1	movups.st xmm0,[rdi+0x10]:128	receipt +0x10: vault address
+post	0x395bb1c	divsd xmm1,[0x20ae60]:64	receipt amount / 1e6
+post	0x395bb2e	add rax,0xffffffffffffffeb	tag 0x8000000000000019 - 0x15
+post	0x395bb32	mov [rdi]:64,rax	store receipt tag 0x8000000000000004
+post	0x395bb35	movsd.st xmm1,[rdi+0x8]:64	store receipt +0x08
+rebalance	0x395a2ea	add r13,rdx	new total = old total + delta
+rebalance	0x395a2ed	jo 0x395ae9e	overflow goes to the recorder arm (qtys/impl_ntl.rs:62)
+rebalance	0x395a2f8	cmovg rax,r13	clamp new total to >= 0
+rebalance	0x395a303	jle 0x395a5b8	delta <= 0 skips the recomputed sum
+rebalance	0x395a326	call 0x3955e80	delta > 0 recomputes vault equity
+rebalance	0x395a336	mov r15,rax	recomputed sum lives in r15 only
+rebalance	0x395a5a9	mov rcx,[rsp+0x8]:64	rcx is reloaded from the saved caller value
+rebalance	0x395a5ae	mov r13,[rsp+0x18]:64	r13 is reloaded from the saved new total
+rebalance	0x395a5b3	mov rax,[rsp+0x20]:64	rax is reloaded from the saved clamp
+rebalance	0x395a5bb	jle 0x395a5cf	new total <= 0 gives denominator 0.0
+rebalance	0x395a5c5	divsd xmm0,[0x20ae60]:64	denominator = clamp / 1e6
+rebalance	0x395a5dc	cvtsi2sd xmm0,rcx	old equity uses the caller rcx
+rebalance	0x395a5e1	divsd xmm0,[0x20ae60]:64	old_usd = rcx / 1e6
+rebalance	0x395a65e	lea rax,[rsp+0xe8]:64	closure captures the address of old_usd
+rebalance	0x395a66e	lea r15,[rsp+0xb8]:64	r15 is overwritten; the recomputed sum has no reader
+rebalance	0x395a681	call 0x3316bf0	collect records into a temporary address->f64 map
+rebalance	0x3be61fc	mulsd xmm0,[rcx]:64	collect closure: share * old_usd
+rebalance	0x395a79e	call 0x33baed0	temporary entry for the depositor, inserted at 0.0 when missing
+rebalance	0x395a7ab	divsd xmm0,[0x20ae60]:64	delta / 1e6
+rebalance	0x395a7b3	addsd xmm0,[rax]:64	add delta to the temporary equity
+rebalance	0x395a7b7	movsd.st xmm0,[rax]:64	store the temporary equity
+rebalance	0x395a831	ucomisd xmm0,[rsp+0x20]:64	compare 1e-15 with the denominator
+rebalance	0x395a841	jbe 0x395aa30	denominator >= 1e-15 takes the division loop
+rebalance	0x395a9c3	mov [rdx]:64,rax	new record: first 12-byte time at +0x18
+rebalance	0x395a9cf	mov [rdx+0xc]:64,rax	new record: second 12-byte time at +0x24
+rebalance	0x395a9de	call 0x33be930	entry insert with the default record
+rebalance	0x395a9e3	mov [rax]:64,0x0	zero arm stores share 0.0 only
+rebalance	0x395aa54	movsd xmm0,[rax+rdx*8+0x8]:64	read temporary equity
+rebalance	0x395aa7e	ucomisd xmm1,xmm0	compare 1e-7 with equity
+rebalance	0x395aa82	ja 0x395aa8e	equity below 1e-7 keeps share 0.0
+rebalance	0x395aa84	divsd xmm0,[rsp+0x20]:64	share = equity / denominator
+rebalance	0x395abee	call 0x33be930	entry insert with the default record
+rebalance	0x395abf9	movsd.st xmm0,[rax]:64	division arm stores share only
+rebalance	0x395ac57	mov rcx,[r12+0x50]:64	after the drain, a walk over every record that stores nothing
+rebalance	0x395ae4b	add rsp,0x188	function epilogue
+equity	0x3955ed8	call [0x5773178]:64	margin summary reader (0x37d79e0) over the clearinghouse state
+equity	0x3955ede	mov r12,[rsp+0x60]:64	first output qword is the perp value
+equity	0x3955efd	call [0x5773170]:64	user entry in the context+8 spot ledger (0x371b3a0)
+equity	0x3955f83	mov r13,[rcx+rdi*1+0x48]:64	value of token key 0
+equity	0x3955f8c	mov rax,[rbx+0x100]:64	context+0x10 +0x100 address map
+equity	0x395620e	mov rcx,0x5af3107a3fff	divisor 1e14 limit
+equity	0x3956269	mov rcx,0x5af3107a4000	u128 / 1e14 path
+equity	0x3956222	add rcx,r13	sum of token value and scaled second term
+equity	0x3956233	shr rcx,0x2	unsigned sum >> 2
+equity	0x3956237	mov rdx,0x28f5c28f5c28f5c3	reciprocal of 25 in the /100 sequence
+equity	0x395624e	add rax,rdx	signed add to the perp value
+equity	0x3956251	jo 0x39562f8	overflow goes to the recorder arm (qtys/impl_ntl.rs:62)
+create	0x395af95	cmp rax,r11	initial compared with the 0xccc cut
+create	0x395af98	jae 0x395afb6	at or above the cut stores code 319
+create	0x395af9a	cmp rax,0x5f5e0ff	initial compared with 99999999
+create	0x395afa2	mov [rbx+0x8]:16,0x1	initial at or below 99999999: code 1
+create	0x395afa8	mov [rbx]:64,0x3	error result tag 3
+create	0x395afb6	mov [rbx+0x8]:16,0x13f	code 319
+create	0x395b000	cmp r12,0x65	name length compared with 101
+create	0x395b029	mov [rbx+0x8]:16,0x143	code 323 for a name of 101 or more
+create	0x395b03b	cmp r12,0x3	name length compared with 3
+create	0x395b04e	cmp r12,0x33	name length compared with 51
+create	0x395b095	mov [rbx+0x8]:16,r11w	name length code 3 or 4
+create	0x395b069	cmp r13,0xfb	description length compared with 251
+create	0x395b083	mov [rbx+0x8]:16,0x143	code 323 for a description of 251 or more
+create	0x395b0ce	cmp r13,0x9	description length compared with 10
+create	0x395b293	mov [rbx+0x8]:16,0x5	description below 10: code 5
+create	0x395b0ea	cmp rdxb,0x3	chain byte compared with 3
+create	0x395b0f1	lea rdx,[0x2069c0]:64	lockup table 20.0, 86400.0
+create	0x395b0f8	movsd xmm0,[rdx+rbp*8]:64	load lockup by chain test
+create	0x395b134	test rdxb,rdxb	child flag test
+create	0x395b138	movsd xmm1,[0x20a880]:64	non-child commission 0.1
+create	0x395b1ac	mov [rsp+0x78]:64,rdx	relationship tag = zero-extended child flag
+create	0x395b1b1	mov [rsp+0x124]:32,0x100	is_closed 0, allow_deposits 1, always_close 0, s 0
+create	0x395b245	jne 0x395b2ae	tag other than 0x8000000000000019 is a deposit success
+create	0x395b27d	mov [rbx]:64,0x3	deposit failure leaves Result tag 3
+create	0x395b366	mov rdxd,0xb0	success copies 0xb0 bytes of Vault into the result
+createhost	0x2732f5a	test r12b,r12b	action byte test
+createhost	0x2732f5d	je 0x2733222	byte 0 runs the reserve gates
+createhost	0x2733247	call [0x5774660]:64	available balance of the leader
+createhost	0x273324d	mov rcx,0x2540be400	reserve 10000000000
+createhost	0x273325f	lea rdx,[rdi+rcx*1]:64	first amount plus reserve
+createhost	0x2733270	jae 0x2733e7c	add would overflow: code 190
+createhost	0x2733276	cmp rax,rdx	available compared with amount plus reserve
+createhost	0x2733280	mov [rax]:16,0x145	too little available: code 325
+createhost	0x273329d	cmp r15,rcx	second amount compared with reserve
+createhost	0x27332ab	mov [rax]:16,0x146	below the reserve: code 326
+createhost	0x27333c6	mov [rcx]:16,0x0	vault key already present: code 0 with the address
+createhost	0x2733594	call [0x5774b08]:64	call 0x395af60
+createhost	0x2733606	cmp rax,0x3	result tag 3 means error
+modifyhost	0x2704b8e	je 0x2704cb2	empty vault map: code 7
+modifyhost	0x2704c33	jb 0x2704cb2	vault not found: code 7
+modifyhost	0x2704cd4	mov [r15]:16,0x7	code 7 with the address
+modifyhost	0x2704caa	call [0x5774978]:64	call 0x3959900
+modify	0x3959958	cmp raxd,0xffff	action address compared with vault +0x84
+modify	0x395995d	je 0x39599b6	same address continues
+modify	0x395995f	mov [r12]:16,0x186	other exits store code 390
+modify	0x3959a13	cmp [rdx+0x64]:8,0x0	make-parent byte test
+modify	0x3959a1d	cmp [rsi]:64,0x0	tag other than 0 leaves with code 390
+modify	0x3959aab	call [0x5773178]:64	margin summary of the vault address
+modify	0x3959ab1	cmp [rsp+0x70]:64,0x0	output +0x10 compared with 0
+modify	0x3959adc	jne 0x395995f	non-zero leaves with code 390
+modify	0x3959ae7	mov [rsi]:64,0x2	tag becomes 2, parent
+modify	0x3959b10	cmp rbx,r14	name option test
+modify	0x3959b6d	cmp rbp,0x65	name length compared with 101
+modify	0x3959b9a	mov [r12]:16,0x143	code 323
+modify	0x3959ba7	cmp rbp,0x32	name length compared with 51
+modify	0x3959bb1	cmp rbp,0x3	name length compared with 3
+modify	0x3959bb7	mov [r12]:16,raxw	name code 3 or 4
+modify	0x3959c68	cmp rcx,0xfb	description length compared with 251
+modify	0x3959c9c	cmp rcx,0xa	description length compared with 10
+modify	0x3959ca2	mov [r12]:16,0x5	description below 10: code 5
+modify	0x3959b22	cmp [rsp+0x98]:64,0x0	lockup option test
+modify	0x3959b4f	cmp rax,0x3d0900	lockup compared with 4000000
+modify	0x3959b55	ja 0x3959e19	above 4000000 leaves with code 390
+modify	0x3959b63	movsd.st xmm0,[rsi+0x70]:64	store lockup_duration
+modify	0x3959d2c	cmp [rsp+0x90]:64,0x0	commission option test
+modify	0x3959d51	cmp rax,0x3e8	commission compared with 1000
+modify	0x3959d65	divsd xmm0,[0x20a830]:64	commission / 10000
+modify	0x3959d6d	movsd.st xmm0,[rsi+0x68]:64	store leader_commission
+modify	0x3959d8c	mov [r12]:16,0x13f	code 319
+modify	0x3959d9d	mov [rsi+0xad]:8,raxb	store allow_deposits
+modify	0x3959da9	mov [rsi+0xae]:8,r11b	store always_close_on_withdraw
+modify	0x3959dba	cmp [rsi]:32,0x1	tag compared with 1, child
+modify	0x3959dbd	jne 0x3959e19	other tags leave with code 390
+modify	0x3959df8	call [0x5773170]:64	ledger of the vault address (0x371b3a0)
+modify	0x395a015	call [0x5773e58]:64	second ledger of the vault address (0x373acd0)
+modify	0x395a212	mov [r13+0xaf]:8,raxb	store field s
+modify	0x3999ced	cmp [rbx]:32,0x2	Vault drop tests tag against 2 before freeing the child set
+reader	0x395988f	mov rax,[r14]:64	read stored 12-byte time (record +0x24)
+reader	0x395989c	movsd xmm0,[rax+0x70]:64	vault +0x70 f64
+reader	0x39598ad	call [0x576efb8]:64	time + seconds helper (0x1459ca0)
+reader	0x39598b5	mov rdid,0xaf93b	missing record path: day count 719163
+reader	0x39598ba	call [0x576e890]:64	date-from-days helper (0x151f6f0)

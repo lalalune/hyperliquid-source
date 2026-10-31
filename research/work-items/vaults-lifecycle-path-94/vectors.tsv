@@ -1,0 +1,22 @@
+span	input	result	note
+leader_gate	total=1000000000 amount=5000000 share=0.1	pass	share well above the bound
+leader_gate	total=100000000 amount=5000000 share=0.0525	pass	exactly 5.25 / 105 = 0.05 passes
+leader_gate	total=100000000 amount=5000000 share=0.0524999	fraction<0.05	just below 5 percent
+leader_gate	total=1000000000 amount=1000000000 share=0.1	pass	deposit halves the leader fraction to 5 percent
+leader_gate	total=1000000000 amount=1000000000 share=0.0999999	fraction<0.05	same deposit, slightly smaller share
+leader_gate	total=1000000000 amount=5000000 share=0.0	equity<1e-7	leader record with share 0
+leader_gate	total=-5000000 amount=5000000 share=0.1	equity<1e-7	negative total gives negative equity
+leader_gate	total=0 amount=5000000 share=0.1	equity<1e-7	zero total gives zero equity
+leader_gate	total=1000000000 amount=18446744073709551615 share=0.5	fraction<0.05 records=0x5714d18	u64 carry saturates through the recorder
+new_total	old=10 delta=5	new=15 clamp=15	plain add
+new_total	old=10 delta=-20	new=-10 clamp=0	negative new total clamps to 0
+new_total	old=9223372036854775807 delta=1	new=9223372036854775807 clamp=9223372036854775807 records=0x570d988	saturates through the recorder
+usd	old=1000000000 new=1005000000 r15=0	denominator=1005.0 old_usd=1000.0	recomputed sum 0
+usd	old=1000000000 new=1005000000 r15=5000000000	denominator=1005.0 old_usd=1000.0	recomputed sum 5e9 changes nothing
+share	equity=9.9e-08 denominator=10.0	0.0	below 1e-7: share 0
+share	equity=1e-07 denominator=10.0	1e-08	exactly 1e-7 divides
+share	equity=5.0 denominator=10.0	0.5	plain division
+branch	denominator=0.0	zero	every entry gets share 0.0
+branch	denominator=9.9e-16	zero	every entry gets share 0.0
+branch	denominator=1e-15	divide	entries use the share span
+branch	denominator=1.0	divide	entries use the share span

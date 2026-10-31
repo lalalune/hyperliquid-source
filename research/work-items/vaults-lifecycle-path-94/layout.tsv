@@ -1,0 +1,49 @@
+owner	offset	width	site	decoded	note
+vault	0x0	8	0x395b3bd	mov r15,[rsi]:64	relationship tag: 0 normal, 1 child, 2 parent
+vault	0x8	8	0x3959aee	mov [rsi+0x8]:64,0x0	parent variant: child set root, cleared when a vault becomes parent
+vault	0x18	8	0x3959af6	mov [rsi+0x18]:64,0x0	parent variant: child set length
+vault	0x20	8	0x3959c42	mov [rsi+0x20]:64,rbx	name capacity
+vault	0x28	8	0x3959c46	mov [rsi+0x28]:64,r13	name pointer
+vault	0x30	8	0x3959c4a	mov [rsi+0x30]:64,rbp	name length
+vault	0x38	8	0x3959d0f	mov [rsi+0x38]:64,r15	description capacity
+vault	0x40	8	0x3959d13	mov [rsi+0x40]:64,rdi	description pointer
+vault	0x48	8	0x3959d17	mov [rsi+0x48]:64,rcx	description length
+vault	0x68	8	0x3959d6d	movsd.st xmm0,[rsi+0x68]:64	leader_commission f64
+vault	0xaf	1	0x395a212	mov [r13+0xaf]:8,raxb	field named s
+vault	0xae	1	0x3959da9	mov [rsi+0xae]:8,r11b	always_close_on_withdraw
+action	0x0	8	0x39599c3	mov rax,[rdx]:64	commission option tag, 0 is None
+action	0x8	8	0x39599ce	mov rax,[rdx+0x8]:64	commission value
+action	0x10	8	0x39599da	mov rax,[rdx+0x10]:64	lockup option tag, 0 is None
+action	0x18	8	0x39599e6	mov rax,[rdx+0x18]:64	lockup value
+action	0x20	8	0x395991e	mov rbx,[rdx+0x20]:64	name capacity, 1 << 63 is None
+action	0x38	8	0x3959926	mov r15,[rdx+0x38]:64	description capacity, 1 << 63 is None
+action	0x50	16	0x395992e	movdqu xmm0,[rdx+0x50]:128	vault address head
+action	0x64	1	0x3959a13	cmp [rdx+0x64]:8,0x0	make-parent byte
+action	0x65	1	0x39599f2	movzx raxd,[rdx+0x65]:8	allow_deposits option, 2 is None
+action	0x66	1	0x39599fa	movzx r11d,[rdx+0x66]:8	always_close_on_withdraw option, 2 is None
+action	0x67	1	0x39599ff	movzx r8d,[rdx+0x67]:8	s option, 2 is None
+vault	0x8	8	0x395b4c8	mov rax,[r14+0x8]:64	child address set root
+vault	0x10	8	0x395b4ea	mov r15,[r14+0x10]:64	child address set height
+vault	0x18	8	0x395b4cc	mov rbx,[r14+0x18]:64	child address set length
+vault	0x50	8	0x395a5f2	mov rax,[r12+0x50]:64	record map root
+vault	0x58	8	0x395a5f7	mov rcx,[r12+0x58]:64	record map height
+vault	0x60	8	0x395a609	mov rsi,[r12+0x60]:64	record map length
+vault	0x70	8	0x395989c	movsd xmm0,[rax+0x70]:64	lockup_duration, f64 seconds added to record +0x24
+vault	0x84	20	0x395b494	lea rsi,[r14+0x84]:64	vault address, argument of the equity helper
+vault	0x98	16	0x395b3ca	movdqu xmm1,[r14+0x98]:128	leader address head
+vault	0xa8	4	0x395b3dc	movd xmm2,[r14+0xa8]:32	leader address tail
+vault	0xad	1	0x395b403	cmp [r14+0xad]:8,0x0	allow_deposits
+record	0x0	8	0x395abf9	movsd.st xmm0,[rax]:64	f64 share
+record	0x8	8	0x395baa4	mov r14,[rbx]:64	u64 running sum, rbx = record + 8
+record	0x10	8	0x395babb	mov r14,[rbx+0x8]:64	i64 running sum
+record	0x18	12	0x395a9c3	mov [rdx]:64,rax	12-byte time, written only when the record is created
+record	0x24	12	0x395bae0	mov [rbx+0x1c]:64,rax	12-byte time, rewritten by each deposit
+node	0x210	8	0x395ad80	mov rdi,[rsi+0x210]:64	parent pointer, stored map
+node	0x218	220	0x395ba08	lea rsi,[r14+0x218]:64	keys, 20 bytes each, after 11 values of 48 bytes
+node	0x2f6	2	0x395ba0f	movzx raxd,[r14+0x2f6]:16	length
+node	0x2f8	96	0x395ba97	mov r14,[r14+rbp*8+0x2f8]:64	edges
+receipt	0x0	8	0x395bb32	mov [rdi]:64,rax	tag
+receipt	0x8	8	0x395bb35	movsd.st xmm1,[rdi+0x8]:64	amount as f64 / 1e6; code u16 on the error tag
+receipt	0x10	16	0x395baf1	movups.st xmm0,[rdi+0x10]:128	vault address head
+receipt	0x20	4	0x395bb05	mov [rdi+0x20]:32,raxd	vault address tail
+context	0x238	8	0x395b950	mov [rbx+0x238]:64,rax	i64 total; debit and credit legs cancel here
