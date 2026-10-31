@@ -1,0 +1,142 @@
+{
+  "after": {
+    "args": "(out [rsp+0x318], r15, {1, [rbp+0x2d0], [rbp+0x2d8]}, &[rsp+0x2b])",
+    "loader": "0x28f52d0"
+  },
+  "compare": {
+    "changed": "not (map_eq(+0x570, v+0x0) and set_eq(+0x588, v+0x18) and set_eq(+0x5a0, v+0x30))",
+    "equality": "len differs -> false; both empty -> true (map)",
+    "map_eq": "0x28a73c0",
+    "set_eq": "0x28a6f50",
+    "short_circuit": "a false comparison skips the rest (changed stays 1)"
+  },
+  "fde": "0x28f6960",
+  "flow": {
+    "abci_slot": "0x5773b48",
+    "check_call": "0x27cdf00",
+    "check_fast": "0x28f6c29",
+    "check_name": "0x3f6a88",
+    "ck_map_eq": "0x28a73c0",
+    "ck_map_ne": "0x27cdff4",
+    "ck_set1_eq": "0x28a6f50",
+    "ck_set1_ne": "0x27cdff4",
+    "ck_set2_eq": "0x28a6f50",
+    "ck_sleep": "0x576e8f8",
+    "compute_slot": "0x5773b50",
+    "drop_value": "0x28b0f00",
+    "elapsed_slot": "0x576e8c0",
+    "lazy_back_a": "0x28f6b31",
+    "lazy_back_b": "0x28f6c29",
+    "lazy_back_c": "0x28f6cf4",
+    "lazy_done_a": "0x28f6b31",
+    "lazy_init_b": "0x28f7186",
+    "lazy_init_c": "0x28f725e",
+    "lazy_location": "0x5669f50",
+    "lazy_state": "0x577ab98",
+    "lazy_value": "0x577ab80",
+    "lazy_vtable": "0x5669f68",
+    "level_clear_a": "0x28f6b31",
+    "level_high_a": "0x28f6b31",
+    "level_slot": "0x576e928",
+    "loader_call": "0x28f52d0",
+    "map_empty": "0x28a7826",
+    "map_len_ne": "0x28a7822",
+    "maybe_call": "0x27dc3f0",
+    "maybe_fast": "0x28f6b31",
+    "maybe_name": "0x3f6a6f",
+    "mw_closure": "0x222d750",
+    "mw_sleep": "0x576e8f8",
+    "no_last": "0x28f6a59",
+    "now_slot": "0x576e8a0",
+    "once_slot": "0x576e8b8",
+    "raw_mdg_path": "0x216f6d",
+    "set_len_ne": "0x28a737b",
+    "skip_branch": "0x28f699d",
+    "skip_jump": "0x28f6d4f",
+    "slow_a": "0x20aab8",
+    "slow_b": "0x20aab8",
+    "slow_c": "0x20aab8",
+    "throttled": "0x28f6b2e",
+    "to_loader": "0x28f6d4f",
+    "unchanged": "0x28f6d0f",
+    "update_call": "0x27d6460",
+    "update_fast": "0x28f6cf4",
+    "update_name": "0x3f6a9a"
+  },
+  "names": {
+    "check": "check_computed_ips",
+    "maybe": "firewall_ips_maybe_update",
+    "update": "update_computed_ips"
+  },
+  "no_log": {
+    "fde": "0x28f6960..0x28f7302",
+    "hits": [],
+    "scanned": "e8 to 0x143d010 or 0x4b28ff0; ff15 via 0x576e978"
+  },
+  "sections": {
+    "check_computed_ips": {
+      "base": "[rbp+0x290] + 0x10",
+      "call": "0x27cdf00",
+      "lock": "read, +0x568 (+0x10)",
+      "returns": "{wait, hold, changed byte +0x10}",
+      "runs": "unless skipped"
+    },
+    "compute": {
+      "args": "abci set (slot 0x5773b48), byte [r15+0x8f2], [rbp+0x298]+0x10, ran flag",
+      "call": "slot 0x5773b50 -> 0x45c42b0",
+      "out": "[rsp+0x1c8], three 0x18-byte fields",
+      "runs": "unless skipped"
+    },
+    "firewall_ips_maybe_update": {
+      "base": "[rbp+0x298] + 0x10",
+      "call": "0x27dc3f0",
+      "closure": "0x222d750(+0x570)",
+      "lock": "write, +0x568 (0 -> 8)",
+      "runs": "throttle passed",
+      "sleep": "50 if byte [[rbp+0x298]+0x5e0]"
+    },
+    "update_computed_ips": {
+      "base": "[rbp+0x290] + 0x10",
+      "call": "0x27d6460",
+      "lock": "write, +0x568 (0 -> 8)",
+      "otherwise": "computed value dropped (0x28b0f00, 0x28acb80 x2)",
+      "runs": "changed != 0"
+    }
+  },
+  "skip": {
+    "loader_flag": "[rsp+0x2b] = 0 (1 otherwise)",
+    "payload": "20 bytes at [rbp+0x261], passed to the abci builder with tag 1",
+    "skips": "all three sections",
+    "test": "[rbp+0x260] == 1"
+  },
+  "slow": {
+    "action": "call_once (slot 0x576e8b8) on the lazy static 0x577ab80 if its state 0x577ab98 is not 0; init 0x143ea60 takes the init fn, calls it, stores 24 bytes",
+    "location": "/rustc/e408947bfd200af42db322daf0fadfe7e26d3bd1/library/std/src/sync/once.rs:219:20",
+    "measure": "wait + hold of each section",
+    "then": "continues with the next step; nothing else on this path",
+    "threshold": 3.0,
+    "when": "> 3.0 and byte [0x577b288+0x48] in mask 0x803c6000"
+  },
+  "target": "artifacts/node/94/hl-node",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "throttle": {
+    "elapsed": "0x1447130",
+    "ran_flag": "r12b = 1 if the section ran, else 0; passed as r8 to 0x45c42b0",
+    "rule": "never run, or elapsed > interval (ucomisd/jbe, NaN skips) -> store now, run the section",
+    "state": "[rbp+0x278] f64 interval, [rbp+0x280] 12-byte wall time (dword 0 = never)"
+  },
+  "windows": {
+    "check_section": "0x27cdf00",
+    "entry": "0x28f6960",
+    "lazy_init": "0x143ea60",
+    "lazy_paths": "0x28f714a",
+    "map_eq": "0x28a73c0",
+    "map_eq_result": "0x28a7822",
+    "maybe_lock": "0x27dc3f0",
+    "maybe_sleep": "0x27dc4ea",
+    "sections": "0x28f6b31",
+    "set_eq": "0x28a6f50",
+    "set_eq_false": "0x28a737b",
+    "update_lock": "0x27d6460"
+  }
+}
