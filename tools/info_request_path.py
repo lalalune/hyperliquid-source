@@ -92,6 +92,8 @@ class Elf:
 def fde_index(elf: Elf):
     addr, off, size = elf.sections[".eh_frame_hdr"]
     d = elf.data
+    if size < 12:
+        raise EvidenceError("truncated .eh_frame_hdr header")
     ver, ep_enc, cnt_enc, tab_enc = d[off:off + 4]
     if (ver, ep_enc, cnt_enc, tab_enc) != (1, 0x1B, 0x03, 0x3B):
         raise EvidenceError("unexpected .eh_frame_hdr encodings")
