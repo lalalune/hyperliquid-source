@@ -20,6 +20,9 @@ def owner(path, components):
 
 def validate_progress(components, progress, root):
     ids = {c['id'] for c in components}
+    if isinstance(progress, dict) and 'components' in progress \
+            and not isinstance(progress['components'], dict):
+        raise ValueError('Progress components must be a mapping')
     if set(progress['components']) != ids:
         raise ValueError('Progress components differ from scope')
     for c in components:
