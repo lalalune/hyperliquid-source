@@ -210,6 +210,25 @@ def panic_location(data, secs, relocs, lea_va):
             'path': data[po:po + length].decode(), 'line': line, 'column': col}
 
 
+def section_slice(data, secs, va, size):
+    """Return `(file_offset, bytes)` for a range that lies in one section.
+
+    `va_to_off` only checks that the first byte is mapped, so an anchor
+    straddling the end of its section would silently borrow the next
+    section's bytes; those bytes are not the function's evidence.
+    """
+    for s in secs.values():
+        if s['addr'] and s['addr'] <= va < s['addr'] + s['size']:
+            if va + size > s['addr'] + s['size']:
+                raise EvidenceError(f'range {va:#x}+{size} leaves its section')
+            off = s['offset'] + va - s['addr']
+            blob = data[off:off + size]
+            if len(blob) != size:
+                raise EvidenceError(f'range {va:#x}+{size} leaves the file')
+            return off, blob
+    raise EvidenceError(f'address {va:#x} is outside every section')
+
+
 def scan(data, expected_sha256=SHA256):
     """expected_sha256 exists only so tests can feed mutated copies past the digest gate."""
     digest = hashlib.sha256(data).hexdigest()
@@ -229,8 +248,8 @@ def scan(data, expected_sha256=SHA256):
             if not start <= va < end:
                 raise EvidenceError(f'{name}: anchor {va:#x} outside its FDE')
             want = bytes.fromhex(hexbytes)
-            o = va_to_off(secs, va)
-            if data[o:o + len(want)] != want:
+            o, got = section_slice(data, secs, va, len(want))
+            if got != want:
                 raise EvidenceError(f'{name}: bytes at {va:#x} are not {hexbytes}')
             rows.append({'va': f'{va:#x}', 'file_offset': f'{o:#x}', 'bytes': hexbytes, 'meaning': meaning})
         sites = direct_calls(tbytes, text['addr'], start)
