@@ -94,6 +94,10 @@ def build(data: bytes, expected_sha256: str = sr.EXPECTED_SHA256) -> dict:
         ln, line, col = struct.unpack_from("<QII", elf.read(slot + 8, 16))
         if not 0 < ln < 256 or line == 0 or col == 0:
             continue
+        if slot + 24 > dr_va + dr_size:
+            raise EvidenceError(f"Location record at {slot:#x} past .data.rel.ro")
+        if a + ln > ro_va + ro_size:
+            raise EvidenceError(f"Location path at {a:#x} past .rodata")
         p = elf.read(a, ln)
         if not p.endswith(b".rs") or b"\0" in p:
             continue
