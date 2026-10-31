@@ -1,0 +1,1456 @@
+{
+  "status": "VISOR_CLASS_SCALAR_BUILD_AND_COMPARISON_PASS",
+  "compiler": {
+    "path": "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+    "version": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: x86_64-unknown-linux-gnu\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+    "executable_sha256": "ef6d716e5d1c6c93def277c0afa037c21e7a74f7de3aed4ee0700646c3301b1d",
+    "meaning": "Repository-pinned research compiler, not recovered original visor compiler."
+  },
+  "host_linker_driver": {
+    "path": "/usr/bin/cc",
+    "version": "cc (Debian 14.2.0-19) 14.2.0\nCopyright (C) 2024 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+    "sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f",
+    "explicitly_passed_to_rustc": true
+  },
+  "source_sha256s": {
+    "src/visor-large-request-class/lib.rs": "631bb39e4436b9a398f4d560ed6c7450e9f1fb373b4bb8d84e1808528226a712",
+    "src/visor-large-request-class/target-vectors.tsv": "565c082a2d82e5ca7db3cc41fe20937aafb73c0479b740a089f022368ce01196",
+    "research/work-items/RE-013-visor-allocator-large-request/observed/class-intervals.tsv": "47925b6ba8152cbd65d91a2b681b1d3d05500b64a5332f1eb42b3ddf599635aa",
+    "tools/visor_large_request_rust.py": "5cb1a179ca909ec6703ed6fb1cdb4d18bd946642175403a2da3caab0ddb374f5",
+    "tools/visor_allocator_large_request.py": "9888b214eec4c0941dee26ff97c12cdcc5dad09c56cf5ad5142950b554fcccd6"
+  },
+  "source_compiler_and_target_unchanged": true,
+  "oracle": {
+    "target": {
+      "sha256": "89338207c793d80ac2fba75bb0d36c659e2cabc87a94e61a57ba532b8d212e31",
+      "bytes": 8305392,
+      "release": "captured visor"
+    },
+    "native_constants": {
+      "small_limit": 4096,
+      "maximum": 8070450532247928832,
+      "shift_floor": 7,
+      "class_floor": 6,
+      "shift_subtract": 3,
+      "fraction_mask": 3,
+      "class_bias": -23,
+      "class_limit": 231,
+      "stored_word": 12,
+      "call_target": 8022176,
+      "class_scale": 4
+    },
+    "class_interval_count": 203,
+    "case_count": 1876,
+    "some_cases": 1243,
+    "chosen_None_cases": 633,
+    "fixture_sha256": "565c082a2d82e5ca7db3cc41fe20937aafb73c0479b740a089f022368ce01196",
+    "inputs_sha256": "87ccc279666efd99aa4b948ec359627e90b38b7d03c85b5b68693511b9f50f8e",
+    "class_intervals_sha256": "47925b6ba8152cbd65d91a2b681b1d3d05500b64a5332f1eb42b3ddf599635aa",
+    "expected_values": "Membership in203 fresh actual-target-derived integer intervals; not Rust output or leading_zeros implementation.",
+    "None_meaning": "Only outside the chosen numeric proof domain; not captured allocator failure/null/errno.",
+    "limits": "No target execution, allocation interface, TLS/cache initialization, original ABI/types/units/compiler, byte identity or gate."
+  },
+  "profiles": [
+    {
+      "name": "debug",
+      "opt_level": 0,
+      "ordinary_Rust_tests": 1,
+      "independent_production_cases": 1876,
+      "actual_values_sha256": "565c082a2d82e5ca7db3cc41fe20937aafb73c0479b740a089f022368ce01196",
+      "expected_values_sha256": "565c082a2d82e5ca7db3cc41fe20937aafb73c0479b740a089f022368ce01196",
+      "library_sha256": "c9b119011fe77a62b208176291180fe35076235c4ced494a860a424688fa9762",
+      "matched": true
+    },
+    {
+      "name": "optimized",
+      "opt_level": 3,
+      "ordinary_Rust_tests": 1,
+      "independent_production_cases": 1876,
+      "actual_values_sha256": "565c082a2d82e5ca7db3cc41fe20937aafb73c0479b740a089f022368ce01196",
+      "expected_values_sha256": "565c082a2d82e5ca7db3cc41fe20937aafb73c0479b740a089f022368ce01196",
+      "library_sha256": "e96977c7d05a4501d4ce5f8016328b9ce15b7c409712c924f5d25d942c0c60b3",
+      "matched": true
+    }
+  ],
+  "same_toolchain_reproducibility": {
+    "build_a_bytes": 7102,
+    "build_b_bytes": 7102,
+    "build_a_sha256": "e96977c7d05a4501d4ce5f8016328b9ce15b7c409712c924f5d25d942c0c60b3",
+    "build_b_sha256": "e96977c7d05a4501d4ce5f8016328b9ce15b7c409712c924f5d25d942c0c60b3",
+    "raw_equal": true,
+    "normalization": "none",
+    "original_visor_match_claimed": false
+  },
+  "compiled_Rust_mutations": [
+    {
+      "name": "lower-inclusive",
+      "compiled": true,
+      "ordinary_test_exit_code": 101,
+      "independent_production_mismatches": 1,
+      "first_witness": {
+        "input": 4096,
+        "expected": null,
+        "actual": 28
+      },
+      "source_sha256": "2a1a73f1f8a8eac45188a1aa74cb18eb6bfdc9587269a6841f8b5ced536127a2",
+      "library_sha256": "180d697dd633c088c3024c75cee0013b15037d14b1c3ed69a24e9b3f93ab4d90"
+    },
+    {
+      "name": "upper-exclusive",
+      "compiled": true,
+      "ordinary_test_exit_code": 101,
+      "independent_production_mismatches": 1,
+      "first_witness": {
+        "input": 8070450532247928832,
+        "expected": 231,
+        "actual": null
+      },
+      "source_sha256": "97c77faaeafc38a63d2b011b8aefc9d4cfd8dd457c5945bfa8d3aa72c064a7b7",
+      "library_sha256": "19ce0c6575b215b4c7b4b6969e11da4f55ab8749a7a8cdaf6e994e91fb8984a0"
+    },
+    {
+      "name": "power-of-two-k",
+      "compiled": true,
+      "ordinary_test_exit_code": 101,
+      "independent_production_mismatches": 50,
+      "first_witness": {
+        "input": 8192,
+        "expected": 32,
+        "actual": 36
+      },
+      "source_sha256": "4b2931cb25e6c236b520e9791867543e7330b9285f33185a18f029cbfea36d4d",
+      "library_sha256": "5504d64f4a3c98669a442df3618c954b389e8c384b273ba9d681e916b31d02ed"
+    },
+    {
+      "name": "fraction-mask",
+      "compiled": true,
+      "ordinary_test_exit_code": 101,
+      "independent_production_mismatches": 1243,
+      "first_witness": {
+        "input": 4097,
+        "expected": 29,
+        "actual": 33
+      },
+      "source_sha256": "ec6d14e181e56df46db9a380d99fdd27f380e94ed8e0832e31fb9e3af989d3cb",
+      "library_sha256": "96856bd56134dc6aaa983aa8ae860ac313326f68dfe4ada7fe883312f1e801bb"
+    },
+    {
+      "name": "wrong-bias",
+      "compiled": true,
+      "ordinary_test_exit_code": 101,
+      "independent_production_mismatches": 1243,
+      "first_witness": {
+        "input": 4097,
+        "expected": 29,
+        "actual": 30
+      },
+      "source_sha256": "a7e92cad0269969772c86dd470d6f4e1a19726bb2f159ab14bbe5e99290a2a03",
+      "library_sha256": "2b1b2ed2a01bee52aa6ebc06d722d55c84bb0713d7415c647ab95caee8005858"
+    }
+  ],
+  "target_operand_controls": [
+    {
+      "name": "class-bias-minus22",
+      "fragment": "large-classifier",
+      "site": "0x70a672",
+      "witness": 4097,
+      "original_class": 29,
+      "counterfactual_interval_class_or_outside": 30,
+      "different": true,
+      "admission_rejection": "Native class partition endpoints differ",
+      "None_in_counterfactual": "Only outside that changed analytic domain, not allocation failure.",
+      "captured_target_executed_or_modified": false
+    },
+    {
+      "name": "small-guard4097",
+      "fragment": "entry-guards",
+      "site": "0x70a1bd",
+      "witness": 4097,
+      "original_class": 29,
+      "counterfactual_interval_class_or_outside": null,
+      "different": true,
+      "admission_rejection": "Native class partition endpoints differ",
+      "None_in_counterfactual": "Only outside that changed analytic domain, not allocation failure.",
+      "captured_target_executed_or_modified": false
+    },
+    {
+      "name": "maximum-minus-one",
+      "fragment": "large-classifier",
+      "site": "0x70a622",
+      "witness": 8070450532247928832,
+      "original_class": 231,
+      "counterfactual_interval_class_or_outside": null,
+      "different": true,
+      "admission_rejection": "Native class partition endpoints differ",
+      "None_in_counterfactual": "Only outside that changed analytic domain, not allocation failure.",
+      "captured_target_executed_or_modified": false
+    }
+  ],
+  "commands": [
+    {
+      "label": "rustc-identity",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "-vV"
+      ],
+      "exit_code": 0,
+      "seconds": 0.01,
+      "logs": {
+        "stdout": {
+          "file": "rustc-identity.stdout",
+          "bytes": 196,
+          "sha256": "a834181975ab3494d51a1a01e4a9d4321fecd674a52e3db3cf93b3b84b6fc2c1"
+        },
+        "stderr": {
+          "file": "rustc-identity.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "linker-identity",
+      "argv": [
+        "/usr/bin/cc",
+        "--version"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "linker-identity.stdout",
+          "bytes": 231,
+          "sha256": "78fc11ae2c3ff7c235eb18ed90989d18f6cc864fb27027f839368cd0888deebc"
+        },
+        "stderr": {
+          "file": "linker-identity.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "debug-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--crate-type=rlib",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout/src/visor-large-request-class/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/debug/libvisor_large_request_class.rlib",
+        "-C",
+        "metadata=visor-large-request-class",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.024,
+      "logs": {
+        "stdout": {
+          "file": "debug-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "debug-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "debug-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--test",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout/src/visor-large-request-class/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/debug/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.089,
+      "logs": {
+        "stdout": {
+          "file": "debug-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "debug-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "debug-tests",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/debug/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "seconds": 0.003,
+      "logs": {
+        "stdout": {
+          "file": "debug-tests.stdout",
+          "bytes": 184,
+          "sha256": "077d74d92e7d0a7d9b4863d9b7d826ccf400f36286d087e8e0ae0ce7d8b3f654"
+        },
+        "stderr": {
+          "file": "debug-tests.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "debug-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_class_comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "visor_large_request_class=/tmp/hl-visor-class-rust-build-20261031/final-component-build/debug/libvisor_large_request_class.rlib",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/debug/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.089,
+      "logs": {
+        "stdout": {
+          "file": "debug-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "debug-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "debug-production-run",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/debug/comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "debug-production-run.stdout",
+          "bytes": 39337,
+          "sha256": "565c082a2d82e5ca7db3cc41fe20937aafb73c0479b740a089f022368ce01196"
+        },
+        "stderr": {
+          "file": "debug-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "optimized-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--crate-type=rlib",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout/src/visor-large-request-class/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/optimized/libvisor_large_request_class.rlib",
+        "-C",
+        "metadata=visor-large-request-class",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.024,
+      "logs": {
+        "stdout": {
+          "file": "optimized-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "optimized-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "optimized-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--test",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout/src/visor-large-request-class/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/optimized/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.132,
+      "logs": {
+        "stdout": {
+          "file": "optimized-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "optimized-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "optimized-tests",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/optimized/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 0,
+      "seconds": 0.003,
+      "logs": {
+        "stdout": {
+          "file": "optimized-tests.stdout",
+          "bytes": 184,
+          "sha256": "077d74d92e7d0a7d9b4863d9b7d826ccf400f36286d087e8e0ae0ce7d8b3f654"
+        },
+        "stderr": {
+          "file": "optimized-tests.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "optimized-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_class_comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "visor_large_request_class=/tmp/hl-visor-class-rust-build-20261031/final-component-build/optimized/libvisor_large_request_class.rlib",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/optimized/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.162,
+      "logs": {
+        "stdout": {
+          "file": "optimized-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "optimized-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "optimized-production-run",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/optimized/comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.003,
+      "logs": {
+        "stdout": {
+          "file": "optimized-production-run.stdout",
+          "bytes": 39337,
+          "sha256": "565c082a2d82e5ca7db3cc41fe20937aafb73c0479b740a089f022368ce01196"
+        },
+        "stderr": {
+          "file": "optimized-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "repro-a",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--crate-type=rlib",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout/src/visor-large-request-class/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/repro-a/libvisor_large_request_class.rlib",
+        "-C",
+        "metadata=visor-large-request-class",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.022,
+      "logs": {
+        "stdout": {
+          "file": "repro-a.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "repro-a.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "repro-b",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--crate-type=rlib",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout/src/visor-large-request-class/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/repro-b/libvisor_large_request_class.rlib",
+        "-C",
+        "metadata=visor-large-request-class",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.019,
+      "logs": {
+        "stdout": {
+          "file": "repro-b.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "repro-b.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-lower-inclusive-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--crate-type=rlib",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-lower-inclusive/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-lower-inclusive/build/libvisor_large_request_class.rlib",
+        "-C",
+        "metadata=visor-large-request-class",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.027,
+      "logs": {
+        "stdout": {
+          "file": "mutant-lower-inclusive-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-lower-inclusive-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-lower-inclusive-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_class_comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "visor_large_request_class=/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-lower-inclusive/build/libvisor_large_request_class.rlib",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-lower-inclusive/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.084,
+      "logs": {
+        "stdout": {
+          "file": "mutant-lower-inclusive-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-lower-inclusive-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-lower-inclusive-production-run",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-lower-inclusive/comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-lower-inclusive-production-run.stdout",
+          "bytes": 39335,
+          "sha256": "1c4d94b7a34fcd78998279c2fbf34adf6bda886b1c7bd39e2c72b04fcfe6b3d4"
+        },
+        "stderr": {
+          "file": "mutant-lower-inclusive-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-lower-inclusive-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--test",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-lower-inclusive/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-lower-inclusive/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.085,
+      "logs": {
+        "stdout": {
+          "file": "mutant-lower-inclusive-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-lower-inclusive-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-lower-inclusive-tests",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-lower-inclusive/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 101,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-lower-inclusive-tests.stdout",
+          "bytes": 278,
+          "sha256": "c008c99938a84a7829baf8a468927f95f0cc16263095a695895aa1b746acd7db"
+        },
+        "stderr": {
+          "file": "mutant-lower-inclusive-tests.stderr",
+          "bytes": 343,
+          "sha256": "599a901dee7cd3fe716e8feee576f723b19dec28fd61d40c329b74f94c85852d"
+        }
+      }
+    },
+    {
+      "label": "mutant-upper-exclusive-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--crate-type=rlib",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-upper-exclusive/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-upper-exclusive/build/libvisor_large_request_class.rlib",
+        "-C",
+        "metadata=visor-large-request-class",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.024,
+      "logs": {
+        "stdout": {
+          "file": "mutant-upper-exclusive-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-upper-exclusive-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-upper-exclusive-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_class_comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "visor_large_request_class=/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-upper-exclusive/build/libvisor_large_request_class.rlib",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-upper-exclusive/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.082,
+      "logs": {
+        "stdout": {
+          "file": "mutant-upper-exclusive-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-upper-exclusive-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-upper-exclusive-production-run",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-upper-exclusive/comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-upper-exclusive-production-run.stdout",
+          "bytes": 39338,
+          "sha256": "9f90097215f52df737dd81a16603253e7ac14637c466b43df115027ce74d98cf"
+        },
+        "stderr": {
+          "file": "mutant-upper-exclusive-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-upper-exclusive-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--test",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-upper-exclusive/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-upper-exclusive/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.086,
+      "logs": {
+        "stdout": {
+          "file": "mutant-upper-exclusive-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-upper-exclusive-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-upper-exclusive-tests",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-upper-exclusive/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 101,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-upper-exclusive-tests.stdout",
+          "bytes": 278,
+          "sha256": "c008c99938a84a7829baf8a468927f95f0cc16263095a695895aa1b746acd7db"
+        },
+        "stderr": {
+          "file": "mutant-upper-exclusive-tests.stderr",
+          "bytes": 359,
+          "sha256": "f31c36ebc5610cde80b68a66b8d751899b5e3a4a8c1c9cbf63bcacaad1725130"
+        }
+      }
+    },
+    {
+      "label": "mutant-power-of-two-k-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--crate-type=rlib",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-power-of-two-k/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-power-of-two-k/build/libvisor_large_request_class.rlib",
+        "-C",
+        "metadata=visor-large-request-class",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.022,
+      "logs": {
+        "stdout": {
+          "file": "mutant-power-of-two-k-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-power-of-two-k-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-power-of-two-k-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_class_comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "visor_large_request_class=/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-power-of-two-k/build/libvisor_large_request_class.rlib",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-power-of-two-k/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.088,
+      "logs": {
+        "stdout": {
+          "file": "mutant-power-of-two-k-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-power-of-two-k-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-power-of-two-k-production-run",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-power-of-two-k/comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-power-of-two-k-production-run.stdout",
+          "bytes": 39338,
+          "sha256": "17d8111d4e196b3ffc3a6cfa36bed949fbe873f66e0c18ddb4916918a2b3e7bb"
+        },
+        "stderr": {
+          "file": "mutant-power-of-two-k-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-power-of-two-k-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--test",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-power-of-two-k/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-power-of-two-k/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.102,
+      "logs": {
+        "stdout": {
+          "file": "mutant-power-of-two-k-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-power-of-two-k-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-power-of-two-k-tests",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-power-of-two-k/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 101,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-power-of-two-k-tests.stdout",
+          "bytes": 278,
+          "sha256": "c008c99938a84a7829baf8a468927f95f0cc16263095a695895aa1b746acd7db"
+        },
+        "stderr": {
+          "file": "mutant-power-of-two-k-tests.stderr",
+          "bytes": 346,
+          "sha256": "cb0188e620cbcaf62192e57bc3ff58840828ce643d7d259a5696f1242bfea0a4"
+        }
+      }
+    },
+    {
+      "label": "mutant-fraction-mask-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--crate-type=rlib",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-fraction-mask/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-fraction-mask/build/libvisor_large_request_class.rlib",
+        "-C",
+        "metadata=visor-large-request-class",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.023,
+      "logs": {
+        "stdout": {
+          "file": "mutant-fraction-mask-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-fraction-mask-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-fraction-mask-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_class_comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "visor_large_request_class=/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-fraction-mask/build/libvisor_large_request_class.rlib",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-fraction-mask/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.085,
+      "logs": {
+        "stdout": {
+          "file": "mutant-fraction-mask-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-fraction-mask-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-fraction-mask-production-run",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-fraction-mask/comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-fraction-mask-production-run.stdout",
+          "bytes": 39353,
+          "sha256": "84df68853d00ffd7e1f93d06aee78434c86fade555dc3ebca892778d7b72d7a5"
+        },
+        "stderr": {
+          "file": "mutant-fraction-mask-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-fraction-mask-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--test",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-fraction-mask/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-fraction-mask/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.083,
+      "logs": {
+        "stdout": {
+          "file": "mutant-fraction-mask-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-fraction-mask-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-fraction-mask-tests",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-fraction-mask/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 101,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-fraction-mask-tests.stdout",
+          "bytes": 278,
+          "sha256": "c008c99938a84a7829baf8a468927f95f0cc16263095a695895aa1b746acd7db"
+        },
+        "stderr": {
+          "file": "mutant-fraction-mask-tests.stderr",
+          "bytes": 345,
+          "sha256": "8061d9def2ea9c2440f88969072ad5b3ad0abde540f5f622ff8c10a6df80a5d9"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-bias-library",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--crate-type=rlib",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-wrong-bias/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-wrong-bias/build/libvisor_large_request_class.rlib",
+        "-C",
+        "metadata=visor-large-request-class",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.024,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-bias-library.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-wrong-bias-library.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-bias-production-link",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_class_comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/comparison-main.rs",
+        "--extern",
+        "visor_large_request_class=/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-wrong-bias/build/libvisor_large_request_class.rlib",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-wrong-bias/comparison",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.089,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-bias-production-link.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-wrong-bias-production-link.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-bias-production-run",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-wrong-bias/comparison",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/inputs.txt"
+      ],
+      "exit_code": 0,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-bias-production-run.stdout",
+          "bytes": 39341,
+          "sha256": "a181990a2eaf9fbc411c601b24b43d9f1aef1cecd9ac1e2d27fa93fff9957a1f"
+        },
+        "stderr": {
+          "file": "mutant-wrong-bias-production-run.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-bias-test-build",
+      "argv": [
+        "/tmp/hl-rem-rust-1.94.1-20261031/prefix/bin/rustc",
+        "--crate-name",
+        "visor_large_request_class",
+        "--test",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-wrong-bias/lib.rs",
+        "-o",
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-wrong-bias/module-tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "linker=/usr/bin/cc",
+        "--remap-path-prefix",
+        "/dev/shm/hyperliquid-wave-seventh-20261031/visor_request_class/checkout=/reconstruction"
+      ],
+      "exit_code": 0,
+      "seconds": 0.082,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-bias-test-build.stdout",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "stderr": {
+          "file": "mutant-wrong-bias-test-build.stderr",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "label": "mutant-wrong-bias-tests",
+      "argv": [
+        "/tmp/hl-visor-class-rust-build-20261031/final-component-build/mutant-wrong-bias/module-tests",
+        "--nocapture"
+      ],
+      "exit_code": 101,
+      "seconds": 0.002,
+      "logs": {
+        "stdout": {
+          "file": "mutant-wrong-bias-tests.stdout",
+          "bytes": 278,
+          "sha256": "c008c99938a84a7829baf8a468927f95f0cc16263095a695895aa1b746acd7db"
+        },
+        "stderr": {
+          "file": "mutant-wrong-bias-tests.stderr",
+          "bytes": 342,
+          "sha256": "24a409779a6158c7ffe0bd9b3f6d9ff87fb75feea87483f30743235e6ded8301"
+        }
+      }
+    }
+  ],
+  "captured_original_executed_or_emulated": false,
+  "limits": [
+    "Only numeric class on4097..0x7000000000000000; None outside is a chosen API restriction.",
+    "Original TLS route/caches/tables/allocation and local error-call/store/return are unimplemented.",
+    "Finite comparisons support the integer proof; no private ABI/units/original compiler/byte identity/gates.",
+    "Production receives input values only, not expectations; no filesystem sandbox is claimed."
+  ]
+}

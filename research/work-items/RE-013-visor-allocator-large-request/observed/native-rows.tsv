@@ -1,0 +1,57 @@
+va	hex	assembly
+0x70a170	f30f1efa	endbr64
+0x70a174	4157	push   r15
+0x70a176	4156	push   r14
+0x70a178	4155	push   r13
+0x70a17a	4154	push   r12
+0x70a17c	55	push   rbp
+0x70a17d	4889fd	mov    rbp,rdi
+0x70a180	53	push   rbx
+0x70a181	4881ec98000000	sub    rsp,0x98
+0x70a188	64488b1c2500000000	mov    rbx,QWORD PTR fs:0x0
+0x70a191	64488b042528000000	mov    rax,QWORD PTR fs:0x28
+0x70a19a	4889842488000000	mov    QWORD PTR [rsp+0x88],rax
+0x70a1a2	48c7c080f3ffff	mov    rax,0xfffffffffffff380
+0x70a1a9	4801c3	add    rbx,rax
+0x70a1ac	6480b83003000000	cmp    BYTE PTR fs:[rax+0x330],0x0
+0x70a1b4	0f8596020000	jne    0x70a450
+0x70a1ba	4881fd00100000	cmp    rbp,0x1000
+0x70a1c1	0f8759040000	ja     0x70a620
+0x70a1db	4181fee7000000	cmp    r14d,0xe7
+0x70a1e2	0f8754020000	ja     0x70a43c
+0x70a2b0	488b842488000000	mov    rax,QWORD PTR [rsp+0x88]
+0x70a2b8	64482b042528000000	sub    rax,QWORD PTR fs:0x28
+0x70a2c1	0f857c140000	jne    0x70b743
+0x70a2c7	4881c498000000	add    rsp,0x98
+0x70a2ce	4c89e0	mov    rax,r12
+0x70a2d1	5b	pop    rbx
+0x70a2d2	5d	pop    rbp
+0x70a2d3	415c	pop    r12
+0x70a2d5	415d	pop    r13
+0x70a2d7	415e	pop    r14
+0x70a2d9	415f	pop    r15
+0x70a2db	c3	ret
+0x70a43c	e85fc40900	call   0x7a68a0
+0x70a441	4531e4	xor    r12d,r12d
+0x70a444	c7000c000000	mov    DWORD PTR [rax],0xc
+0x70a44a	e961feffff	jmp    0x70a2b0
+0x70a620	49bd0000000000000070	movabs r13,0x7000000000000000
+0x70a62a	4939ed	cmp    r13,rbp
+0x70a62d	0f8209feffff	jb     0x70a43c
+0x70a633	4c8d642dff	lea    r12,[rbp+rbp*1-0x1]
+0x70a638	b907000000	mov    ecx,0x7
+0x70a63d	48c7c2ffffffff	mov    rdx,0xffffffffffffffff
+0x70a644	be06000000	mov    esi,0x6
+0x70a649	4d0fbdd4	bsr    r10,r12
+0x70a64d	4c8d7dff	lea    r15,[rbp-0x1]
+0x70a651	4139ca	cmp    r10d,ecx
+0x70a654	410f43ca	cmovae ecx,r10d
+0x70a658	83e903	sub    ecx,0x3
+0x70a65b	48d3e2	shl    rdx,cl
+0x70a65e	4c21fa	and    rdx,r15
+0x70a661	48d3ea	shr    rdx,cl
+0x70a664	83e203	and    edx,0x3
+0x70a667	4139f2	cmp    r10d,esi
+0x70a66a	440f42d6	cmovb  r10d,esi
+0x70a66e	468d7492e9	lea    r14d,[rdx+r10*4-0x17]
+0x70a673	e963fbffff	jmp    0x70a1db

@@ -1,0 +1,56 @@
+{
+  "after": {
+    "actual_input_bytes": 87,
+    "actual_mutant_sha256": "83484635018ee28169d971bbb89539b6d9c8679618d52e31e6a7cba4666bb0c9",
+    "actual_native_mutated_rows": [
+      {
+        "assembly": "cmp    rbp,0xffffffffffffffff",
+        "hex": "4881fdffffffff",
+        "va": "0x70a1ba"
+      }
+    ],
+    "after": "ffffffff",
+    "before": "00100000",
+    "disposition": "rejected-unsupported-witness",
+    "name": "sign-extended-negative-limit",
+    "obligation": "REX.W CMP imm32 sign extension",
+    "reason": "sign-extended negative CMP immediate outside bounded proof family",
+    "target_artifact_modified": false,
+    "va": "0x70a1bd"
+  },
+  "all_component_gates_unchanged": true,
+  "before": {
+    "acceptedCertificate": {
+      "count": 124,
+      "firstInterval": {
+        "class": 108,
+        "fractional": 3,
+        "k": 32,
+        "lower": 4294967296,
+        "upper": 4294967296
+      },
+      "lastInterval": {
+        "class": 231,
+        "fractional": 2,
+        "k": 63,
+        "lower": 6917529027641081857,
+        "upper": 8070450532247928832
+      },
+      "small_limit": 4294967295
+    },
+    "actualGNUrow": "  70a1ba:\t48 81 fd ff ff ff ff                         \tcmp    rbp,0xffffffffffffffff",
+    "actualMutation": "CMP RBP,imm32 at70a1ba: only immediate bytes00100000\u2192ffffffff; REX.W81/7 sign-extends imm32 to64.",
+    "authorEditedByReviewer": false,
+    "counterexample": "For request2^32, accepted certificate calls it large and supplies class, but native CMP uses unsigned threshold2^64\u22121, so JA never takes this large-classifier route.",
+    "originalPinnedTargetFactsAffected": false,
+    "producerSHA256": "0e46485862927a0e890ed4a00b63c186191e382dd9240696de3e629787df1af9",
+    "proposedNarrowCorrection": "Require encoded small_limit imm32<=INT32_MAX before treating it as unsigned64 threshold, or decode signedimm32 then64bitcast and reject unsupporteddomain. Add actual byte control.",
+    "result": "PRELIMINARY-VARIABLE-FIELD-INTERPRETATION-DEFECT",
+    "scope": "Only unpinned prove_fragments family seam; authenticated originalimm0x1000 positive is correctly interpreted.",
+    "targetExecuted": false
+  },
+  "old_source_sha256": "0e46485862927a0e890ed4a00b63c186191e382dd9240696de3e629787df1af9",
+  "old_source_test_and_peer_receipt_preserved": true,
+  "original_pinned_target_facts_changed": false,
+  "scope": "Review-discovered proof-family seam bug, not a captured-target defect"
+}
