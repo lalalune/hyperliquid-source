@@ -69,7 +69,11 @@ def sections(data):
     out = {}
     for name, _typ, _flags, addr, off, size, *_ in raw:
         end = data.index(b'\0', stroff + name)
-        out[data[stroff + name:end].decode()] = (addr, off, size)
+        try:
+            decoded = data[stroff + name:end].decode()
+        except UnicodeDecodeError:
+            raise EvidenceError('section name is not valid UTF-8')
+        out[decoded] = (addr, off, size)
     return out
 
 
