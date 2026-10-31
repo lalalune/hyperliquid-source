@@ -62,6 +62,8 @@ def grouped(data, pattern):
 
 
 def section_bytes(data, sec):
+    if sec['type'] == 8:
+        raise ValueError('Cannot derive file-backed facts from NOBITS section: ' + sec['name'])
     return data[sec['offset']:sec['offset'] + sec['size']]
 
 
