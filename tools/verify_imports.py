@@ -17,11 +17,18 @@ def git(root, path, *args):
         raise ValueError(f'Unreadable pinned source: {path}; {SETUP}') from None
 
 
+def load_manifest(root, name):
+    path = root / 'provenance' / name
+    if not path.is_file():
+        raise ValueError(f'Missing manifest: provenance/{name}')
+    return json.loads(path.read_text())
+
+
 def verify(root):
-    manifest = json.loads((root / 'provenance/imports.json').read_text())
+    manifest = load_manifest(root, 'imports.json')
     for item in manifest['files']:
         check(root / item['path'], item)
-    for repo in json.loads((root / 'provenance/sources.json').read_text())['repositories']:
+    for repo in load_manifest(root, 'sources.json')['repositories']:
         if not (root / repo['path'] / '.git').exists():
             raise ValueError(f'Missing pinned source: {repo["path"]}; {SETUP}')
         if git(root, repo['path'], 'rev-parse', 'HEAD') != repo['commit']:
