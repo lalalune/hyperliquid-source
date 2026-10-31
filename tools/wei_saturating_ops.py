@@ -149,6 +149,9 @@ def fde_table(blob):
             raise EvidenceError(f'FDE at {fde:#x} does not begin at {start:#x}')
         table.append((start, start + size))
     table.sort()
+    for (first, _), (second, _) in zip(table, table[1:]):
+        if first == second:
+            raise EvidenceError(f'duplicate FDE start {second:#x}')
     return table
 
 
