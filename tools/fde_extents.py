@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Decode captured ELF64-LE .eh_frame FDE extents without executing or disassembling code."""
 import argparse
+import bisect
 import collections
 import csv
 import hashlib
@@ -20,7 +21,8 @@ INT3 = 0xcc
 LIMITATIONS = ('An FDE extent is the unwind-described address range, not a validated function boundary. '
                'Split hot/cold parts get separate FDEs and code without unwind data has none. Gap classes are '
                'byte patterns only: other-byte gaps may hold NOP fill, data or code without FDEs. '
-               'No component ownership or equivalence is established.')
+               'Call targets come from a byte scan for E8, so an E8 inside an immediate is also a candidate, '
+               'and no control-flow graph is built. No component ownership or equivalence is established.')
 
 
 def uleb(data, pos, end):
@@ -167,6 +169,133 @@ def is_int3_fill(data, section, start, end):
     return data[offset:offset + end - start].count(INT3) == end - start
 
 
+def section_for(secs, address):
+    return next((s for s in secs if s['type'] != 8 and s['address'] <= address < s['address'] + s['size']), None)
+
+
+def va_to_offset(secs, address):
+    section = section_for(secs, address)
+    if section is None:
+        raise ValueError(f'Address outside the file mapping: {address:#x}')
+    return section['offset'] + address - section['address']
+
+
+def relative_relocations(data, secs):
+    """R_X86_64_RELATIVE addends keyed by the slot they overwrite (PIE array entries)."""
+    table = next((s for s in secs if s['name'] == '.rela.dyn'), None)
+    values = {}
+    if table is None:
+        return values
+    blob = data[table['offset']:table['offset'] + table['size']]
+    for index in range(0, len(blob) - 23, 24):
+        offset, info, addend = struct.unpack_from('<QQq', blob, index)
+        if info & 0xffffffff == 8:
+            values[offset] = addend
+    return values
+
+
+def entrypoints(data, secs, rows):
+    """Locate the ELF entry and the DT_INIT/DT_INIT_ARRAY/DT_FINI_ARRAY addresses.
+
+    Membership is reported against FDE starts, never claimed as a function
+    boundary. Array slots are read through their R_X86_64_RELATIVE addend,
+    because a PIE stores zero in the slot itself.
+    """
+    starts = {r['start'] for r in rows}
+    relocated = relative_relocations(data, secs)
+    found = {'elf_entry': struct.unpack_from('<Q', data, 24)[0]}
+    dynamic = next((s for s in secs if s['name'] == '.dynamic'), None)
+    arrays = {'DT_INIT_ARRAY': (25, 27), 'DT_FINI_ARRAY': (26, 28)}
+    if dynamic is not None:
+        blob = data[dynamic['offset']:dynamic['offset'] + dynamic['size']]
+        tags = {}
+        for index in range(0, len(blob) - 15, 16):
+            tag, value = struct.unpack_from('<qQ', blob, index)
+            if tag == 12:
+                found['DT_INIT'] = value
+            for name, (tag_id, size_id) in arrays.items():
+                if tag == tag_id:
+                    tags[name] = [value, tags.get(name, [None, None])[1]]
+                elif tag == size_id:
+                    tags[name] = [tags.get(name, [None, None])[0], value]
+        for name, (address, size) in tags.items():
+            section = section_for(secs, address) if address else None
+            if section is None:
+                continue
+            count = min((size or section['size']) // 8, 4096)
+            base = va_to_offset(secs, address)
+            values = [relocated.get(address + i * 8, struct.unpack_from('<Q', data, base + i * 8)[0])
+                      for i in range(count)]
+            found[name] = {'address': address, 'address_on_fde_start': address in starts,
+                           'entries': count,
+                           'relocated_entries': sum(address + i * 8 in relocated for i in range(count)),
+                           'entries_on_fde_start': sum(v in starts for v in values),
+                           'entries_in_executable_section': sum(
+                               (section_for(secs, v) or {}).get('flags', 0) & 4 != 0 for v in values)}
+    report = {}
+    for name, value in found.items():
+        if isinstance(value, dict):
+            report[name] = value
+            continue
+        section = section_for(secs, value)
+        report[name] = {'address': value, 'section': section['name'] if section else None,
+                        'on_fde_start': value in starts}
+    return report
+
+
+def direct_targets(data, secs, rows, gaps):
+    """Classify rel32 E8 call targets against extents and gaps, per executable section.
+
+    Every section with contents is scanned, including the PLT and the init/fini
+    stubs, which carry no FDEs. Targets are bucketed by the section that holds
+    the target, so stub callers do not inflate the gap reach. With overlapping
+    extents the nearest preceding start wins; both captured nodes have none.
+    """
+    starts = [r['start'] for r in rows]
+    ranges = [(r['start'], r['end']) for r in rows]
+    gap_starts = [g['start'] for g in gaps]
+    gap_ends = [g['end'] for g in gaps]
+    with_fdes = {r['section'] for r in rows}
+    counts = collections.defaultdict(collections.Counter)
+    reached = collections.defaultdict(set)
+    for section in (s for s in secs if s['flags'] & 4 and s['size']):
+        blob = data[section['offset']:section['offset'] + section['size']]
+        low = section['address']
+        for index in range(len(blob) - 4):
+            if blob[index] != 0xe8:
+                continue
+            target = low + index + 5 + struct.unpack_from('<i', blob, index + 1)[0]
+            holder = section_for(secs, target)
+            if holder is None or not holder['flags'] & 4:
+                counts['outside_executable']['outside_executable'] += 1
+                continue
+            if holder['name'] not in with_fdes:
+                counts[holder['name']]['section_without_fdes'] += 1
+                continue
+            position = bisect.bisect_right(starts, target)
+            if position and ranges[position - 1][0] <= target < ranges[position - 1][1]:
+                counts[holder['name']]['fde_start' if ranges[position - 1][0] == target else 'fde_interior'] += 1
+                continue
+            gap_index = bisect.bisect_right(gap_starts, target) - 1
+            if gap_index >= 0 and target < gap_ends[gap_index]:
+                counts[holder['name']]['gap_start' if target == gap_starts[gap_index] else 'gap_interior'] += 1
+                reached[holder['name']].add(gap_index)
+                continue
+            counts[holder['name']]['unclassified'] += 1
+    report = {name: dict(sorted(row.items())) for name, row in sorted(counts.items())}
+    hits = {}
+    for name, indexes in sorted(reached.items()):
+        code = [i for i in indexes if not gaps[i]['int3_only']]
+        hits[name] = {'gaps_reached': len(indexes),
+                      'gap_bytes_reached': sum(gaps[i]['end'] - gaps[i]['start'] for i in indexes),
+                      'non_padding_gaps_reached': len(code),
+                      'non_padding_gap_bytes_reached': sum(gaps[i]['end'] - gaps[i]['start'] for i in code)}
+    totals = collections.Counter()
+    for row in report.values():
+        totals.update(row)
+    return {'by_section': report, 'totals': dict(sorted(totals.items()))}, hits
+
+
 def fde_extents(data):
     secs, table = unwind_index(data)
     cies, fdes = eh_frame_records(data, secs)
@@ -231,6 +360,7 @@ def fde_extents(data):
             covered[name] += max(0, end - max(fde['start'], reach))
             reach = max(reach, end)
         edges[name] = ((inside[0]['start'] - lower, upper - reach) if inside else (section['size'], 0))
+    targets, reached = direct_targets(data, secs, ordered, gaps)
     summary = {
         'binary_sha256': hashlib.sha256(data).hexdigest(),
         'cie_records': len(cies),
@@ -248,6 +378,9 @@ def fde_extents(data):
                                             'bytes_before_first_fde': edges[s['name']][0],
                                             'bytes_after_last_fde': edges[s['name']][1]}
                                 for s in executable},
+        'entrypoints': entrypoints(data, secs, ordered),
+        'direct_e8_call_targets': targets,
+        'gaps_reached_by_direct_calls': reached,
         'limitations': LIMITATIONS,
     }
     return summary, ordered, gaps

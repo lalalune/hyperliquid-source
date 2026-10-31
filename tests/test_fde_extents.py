@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 from fde_extents import eh_frame_records, fde_extents
 
 TEXT, HDR, FRAME, EXCEPT = 0x1000, 0x2000, 0x3000, 0x4000
+DYNAMIC, ARRAY = 0x5000, 0x6000
 OFFSET = {TEXT: 0x400, HDR: 0x500, FRAME: 0x600, EXCEPT: 0x700}
 SHOFF = 0x800
 # (start, size, lsda, cie): one int3 gap at 0x1010 and one non-int3 gap at 0x1030.
@@ -17,8 +18,12 @@ def sdata4(value):
     return struct.pack('<i', value)
 
 
-def build(functions=FUNCTIONS):
-    """Build a minimal ELF64-LE image with the encodings observed in the captured nodes."""
+def build(functions=FUNCTIONS, links=False):
+    """Build a minimal ELF64-LE image with the encodings observed in the captured nodes.
+
+    With ``links`` the image also carries .rela.dyn, .dynamic and .init_array so the
+    entrypoint membership pass has something to resolve.
+    """
     frame, layout = bytearray(), {'cie': {}, 'fde': []}
 
     def record(make_body):
@@ -56,11 +61,13 @@ def build(functions=FUNCTIONS):
     for start_va, fde_va in rows:
         header += sdata4(start_va - HDR) + sdata4(fde_va - HDR)
 
-    data = bytearray(SHOFF + 6 * 64)
+    data = bytearray(SHOFF + (9 if links else 6) * 64)
     data[:6] = b'\x7fELF\x02\x01'
     struct.pack_into('<Q', data, 40, SHOFF)
-    struct.pack_into('<HHH', data, 58, 64, 6, 1)
+    struct.pack_into('<HHH', data, 58, 64, 9 if links else 6, 1)
     names = b'\0.shstrtab\0.text\0.eh_frame_hdr\0.eh_frame\0.gcc_except_table\0'
+    if links:
+        names += b'.rela.dyn\0.dynamic\0.init_array\0'
     data[64:64 + len(names)] = names
     text = bytearray(b'\xcc' * 0x40)
     text[0x30:0x38] = b'\x90' * 8
@@ -72,6 +79,22 @@ def build(functions=FUNCTIONS):
              (names.index(b'.eh_frame_hdr'), 1, 2, HDR, OFFSET[HDR], len(header)),
              (names.index(b'.eh_frame\0'), 1, 2, FRAME, OFFSET[FRAME], len(frame)),
              (names.index(b'.gcc_except_table'), 1, 2, EXCEPT, OFFSET[EXCEPT], 0x10)]
+    if links:
+        # A relocated init_array slot, one dynamic tag pair and a call into the non-int3 gap.
+        data.extend(bytes(0x50))
+        rela, dynamic, array = len(data) - 0x50, len(data) - 0x30, len(data) - 0x8
+        struct.pack_into('<Q', data, 24, 0x1000)
+        struct.pack_into('<QQq', data, rela, ARRAY, 8, 0x1000)
+        struct.pack_into('<qQ', data, dynamic, 25, ARRAY)
+        struct.pack_into('<qQ', data, dynamic + 16, 27, 8)
+        struct.pack_into('<qQ', data, dynamic + 32, 0, 0)
+        data[OFFSET[TEXT] + 8] = 0xe8
+        struct.pack_into('<i', data, OFFSET[TEXT] + 9, 0x1004 - (TEXT + 8 + 5))
+        data[OFFSET[TEXT] + 0x10] = 0xe8
+        struct.pack_into('<i', data, OFFSET[TEXT] + 0x11, 0x1030 - (TEXT + 0x10 + 5))
+        table += [(names.index(b'.rela.dyn'), 1, 2, 0, rela, 24),
+                  (names.index(b'.dynamic'), 1, 3, DYNAMIC, dynamic, 48),
+                  (names.index(b'.init_array'), 1, 3, ARRAY, array, 8)]
     for index, row in enumerate(table):
         struct.pack_into('<IIQQQQIIQQ', data, SHOFF + index * 64, *row, 0, 0, 1, 0)
     layout['frame_size_field'] = SHOFF + 4 * 64 + 32
@@ -191,6 +214,28 @@ class FdeExtentTests(unittest.TestCase):
         data, _ = build()
         struct.pack_into('<i', data, OFFSET[HDR] + 4, FRAME + 4 - (HDR + 4))
         with self.assertRaises(ValueError): fde_extents(data)
+
+    def test_entrypoints_resolved_through_relative_relocations(self):
+        data, _ = build(links=True)
+        summary = fde_extents(data)[0]
+        self.assertTrue(summary['entrypoints']['elf_entry']['on_fde_start'])
+        self.assertEqual(summary['entrypoints']['DT_INIT_ARRAY']['address'], ARRAY)
+        self.assertEqual(summary['entrypoints']['DT_INIT_ARRAY']['relocated_entries'], 1)
+        self.assertEqual(summary['entrypoints']['DT_INIT_ARRAY']['entries_on_fde_start'], 1)
+
+    def test_direct_calls_bucketed_by_target_section(self):
+        data, _ = build(links=True)
+        summary = fde_extents(data)[0]
+        self.assertEqual(summary['direct_e8_call_targets']['by_section']['.text'],
+                         {'fde_interior': 1, 'gap_start': 1})
+        self.assertEqual(summary['gaps_reached_by_direct_calls']['.text']['non_padding_gaps_reached'], 1)
+
+    def test_init_array_slot_without_relocation_reads_zero(self):
+        data, _ = build(links=True)
+        struct.pack_into('<Q', data, len(data) - 0x50 + 8, 0)  # drop r_info type
+        summary = fde_extents(data)[0]
+        self.assertEqual(summary['entrypoints']['DT_INIT_ARRAY']['relocated_entries'], 0)
+        self.assertEqual(summary['entrypoints']['DT_INIT_ARRAY']['entries_on_fde_start'], 0)
 
 
 if __name__ == '__main__':

@@ -18,7 +18,12 @@ writes ordered unwind starts to `work/index/`. These are address-discovery
 leads: the next indexed start is an upper bound, not a decoded function size.
 No component ownership or function equivalence follows from this index.
 `make fde-index` decodes every `.eh_frame` FDE into `work/index/` start/end
-extents, checks them against that index and lists uncovered `.text` gaps. An
+extents, checks them against that index and lists uncovered `.text` gaps. The
+same run resolves `e_entry`, `DT_INIT` and the `DT_INIT_ARRAY`/`DT_FINI_ARRAY`
+slots, and buckets every rel32 `E8` target by where it lands: FDE start, FDE
+interior, gap start, gap interior, a section without FDEs (PLT/init/fini) or
+outside executable sections. Both are membership and reachability signals, not
+a call graph. An
 FDE extent is still not a validated function boundary; see
 [RE-001 FDE extents](../research/work-items/RE-001-fde-extents/README.md).
 

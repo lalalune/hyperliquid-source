@@ -1,0 +1,97 @@
+{
+  "binary_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "fde_records": 135313,
+  "executable_sections": {
+    ".text": {
+      "section_bytes": 83719936,
+      "fde_covered_bytes": 82661417,
+      "bytes_before_first_fde": 0,
+      "bytes_after_last_fde": 0
+    },
+    ".init": {
+      "section_bytes": 27,
+      "fde_covered_bytes": 0,
+      "bytes_before_first_fde": 27,
+      "bytes_after_last_fde": 0
+    },
+    ".fini": {
+      "section_bytes": 13,
+      "fde_covered_bytes": 0,
+      "bytes_before_first_fde": 13,
+      "bytes_after_last_fde": 0
+    },
+    ".plt": {
+      "section_bytes": 4464,
+      "fde_covered_bytes": 0,
+      "bytes_before_first_fde": 4464,
+      "bytes_after_last_fde": 0
+    }
+  },
+  "same_section_gaps": {
+    "int3_only_gaps": 126642,
+    "int3_only_bytes": 992570,
+    "other_bytes_gaps": 133,
+    "other_bytes_bytes": 65949
+  },
+  "entrypoints": {
+    "elf_entry": {
+      "address": 21074688,
+      "section": ".text",
+      "on_fde_start": true
+    },
+    "DT_INIT": {
+      "address": 104794624,
+      "section": ".init",
+      "on_fde_start": false
+    },
+    "DT_INIT_ARRAY": {
+      "address": 104806088,
+      "address_on_fde_start": false,
+      "entries": 168,
+      "relocated_entries": 168,
+      "entries_on_fde_start": 167,
+      "entries_in_executable_section": 168
+    },
+    "DT_FINI_ARRAY": {
+      "address": 104806080,
+      "address_on_fde_start": false,
+      "entries": 1,
+      "relocated_entries": 1,
+      "entries_on_fde_start": 0,
+      "entries_in_executable_section": 1
+    }
+  },
+  "direct_e8_call_targets": {
+    "by_section": {
+      ".plt": {
+        "section_without_fdes": 112107
+      },
+      ".text": {
+        "fde_interior": 11460,
+        "fde_start": 545621,
+        "gap_interior": 157,
+        "gap_start": 26
+      },
+      "outside_executable": {
+        "outside_executable": 131078
+      }
+    },
+    "totals": {
+      "fde_interior": 11460,
+      "fde_start": 545621,
+      "gap_interior": 157,
+      "gap_start": 26,
+      "outside_executable": 131078,
+      "section_without_fdes": 112107
+    }
+  },
+  "gaps_reached_by_direct_calls": {
+    ".text": {
+      "gaps_reached": 151,
+      "gap_bytes_reached": 62868,
+      "non_padding_gaps_reached": 3,
+      "non_padding_gap_bytes_reached": 61393
+    }
+  },
+  "limitations": "An FDE extent is the unwind-described address range, not a validated function boundary. Split hot/cold parts get separate FDEs and code without unwind data has none. Gap classes are byte patterns only: other-byte gaps may hold NOP fill, data or code without FDEs. Call targets come from a byte scan for E8, so an E8 inside an immediate is also a candidate, and no control-flow graph is built. No component ownership or equivalence is established."
+}
