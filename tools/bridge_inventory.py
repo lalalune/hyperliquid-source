@@ -173,7 +173,7 @@ def rip_relative_xrefs(data, mapping, target_va):
     off, vaddr, filesz = mapping.execute_segment()
     body = data[off:off + filesz]
     refs = []
-    for index in range(len(body) - 4):
+    for index in range(len(body) - 3):
         head = rip_relative_insn_head(body, index)
         if head is None:
             continue

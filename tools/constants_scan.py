@@ -205,7 +205,8 @@ def xrefs(data, text, targets):
     """RIP-relative operands whose resolved address is one of `targets`."""
     base = text['address'] - text['offset']
     wanted = {target: [] for target in targets}
-    for offset in range(text['offset'] + 1, text['offset'] + text['size'] - 7):
+    # offset names the opcode after REX; the remaining encoding occupies 6 bytes.
+    for offset in range(text['offset'] + 1, text['offset'] + text['size'] - 5):
         rex, opcode = data[offset - 1], data[offset]
         if rex not in (0x48, 0x49, 0x4C, 0x4D):
             continue
