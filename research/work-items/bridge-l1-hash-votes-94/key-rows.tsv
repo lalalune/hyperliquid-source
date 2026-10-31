@@ -1,0 +1,35 @@
+function	at	bytes	operation	note
+0x1e5f010	0x1e5f03c	0f87bc000000	jcc	height limit
+0x1e5f010	0x1e5f076	e8a5659801	call	digest of height and hash
+0x1e5f010	0x1e5f086	ff15cc0d9103	calli	signature recovery
+0x1e5f010	0x1e5f098	66ba7a00	mov	recovery failed: 0x7a
+0x1e5f010	0x1e5f0f3	3dffff0000	cmp	recovered address against signer
+0x1e5f010	0x1e5f0fa	66ba1f01	mov	other address: 0x11f
+0x1e5f010	0x1e5f149	ff15d93f9103	calli	core
+0x1e5f010	0x1e5f161	c60309	mov	outcome 9
+0x394ac70	0x394ac95	0f8360020000	jcc	height limit
+0x394ac70	0x394acc4	498bb150010000	mov	linked user map root
+0x394ac70	0x394ad37	4181fbffff0000	cmp	linked user address compare
+0x394ac70	0x394b058	ff15ea80e201	calli	signer to voter key
+0x394ac70	0x394b092	0f84c1020000	jcc	no voter and no link: 0x91
+0x394ac70	0x394b10f	e86cab1f00	call	scan at height
+0x394ac70	0x394b165	e87687ffff	call	tracker
+0x394ac70	0x394b176	0f85cf010000	jcc	no quorum result
+0x394ac70	0x394b183	490f47f5	cmov	highest_quorum_height is a maximum
+0x394ac70	0x394b20c	e84fa89cff	call	hot_user_to_signature collect
+0x394ac70	0x394b2ae	ff15d491e201	calli	row list growth
+0x394ac70	0x394b30f	4981ed50c30000	sub	height minus the window
+0x394ac70	0x394b316	490f43d5	cmov	floor of 0
+0x394ac70	0x394b328	e86379ffff	call	prune
+0x394ac70	0x394b359	6641c7069100	mov	status 0x91
+0x37e5620	0x37e564f	0f100dca69a2fc	movx	digest words
+0x37e5620	0x37e56f8	e8a321a6ff	call	encoder
+0x37e5620	0x37e572b	ff1597a9f801	calli	digest update
+0x32478a0	0x3247a14	ff1506b75202	calli	prefixed hex of the hash
+0x32478a0	0x32478eb	e830153500	call	array of two
+0x32478a0	0x3247930	e86b45fbff	call	height
+0x3b45c80	0x3b45d15	4883fa01	cmp	one hash at this height
+0x3bd7af0	0x3bd7bc6	ffd3	calli	voter key to hot user
+0x3bd7af0	0x3bd7bd2	7457	jcc	unresolved voter skipped
+0x3bc3150	0x3bc3180	49837e3800	cmp	row hot map length
+0x3942c90	0x3942ccf	e84c1867ff	call	split at the floor
