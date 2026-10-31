@@ -199,9 +199,17 @@ def first_party_locations(elf, relocs):
     for slot, a in relocs.items():
         if not (drr_va <= slot < drr_va + drr_size and ro_va <= a < ro_va + ro_size):
             continue
+        # elf.read() only checks the first byte is file-backed, so a record
+        # straddling the section end would silently borrow the next
+        # section's bytes; the 16-byte record must lie inside .data.rel.ro.
+        if slot + 24 > drr_va + drr_size:
+            raise EvidenceError("location record leaves .data.rel.ro")
         ln, line, col = struct.unpack_from("<QII", elf.read(slot + 8, 16))
         if not 0 < ln < 256 or line == 0 or col == 0:
             continue
+        # Likewise the path itself must lie inside .rodata.
+        if a + ln > ro_va + ro_size:
+            raise EvidenceError("location path leaves .rodata")
         s = elf.read(a, ln)
         if s.startswith(FIRST_PARTY) and s.endswith(b".rs") and b"\0" not in s:
             out[slot] = (s[len(FIRST_PARTY):].decode(), line, col)
