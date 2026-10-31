@@ -1,0 +1,127 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x3281190 0x3281190..0x3281341; byte records are authoritative
+3281190  50                     push rax
+3281191  488b8170010000         mov rax, qword ptr [rcx + 0x170]
+3281198  4839c2                 cmp rdx, rax
+328119b  0f838a010000           jae 0x328132b
+32811a1  488b8168010000         mov rax, qword ptr [rcx + 0x168]
+32811a8  48c1e205               shl rdx, 5
+32811ac  488b441008             mov rax, qword ptr [rax + rdx + 8]
+32811b1  483b8188010000         cmp rax, qword ptr [rcx + 0x188]
+32811b8  0f83e1000000           jae 0x328129f
+32811be  488b8980010000         mov rcx, qword ptr [rcx + 0x180]
+32811c5  4869d0e8000000         imul rdx, rax, 0xe8
+32811cc  0fb6441149             movzx eax, byte ptr [rcx + rdx + 0x49]
+32811d1  2a441148               sub al, byte ptr [rcx + rdx + 0x48]
+32811d5  0f82a8000000           jb 0x3281283
+32811db  b901000000             mov ecx, 1
+32811e0  7526                   jne 0x3281208
+32811e2  4889f8                 mov rax, rdi
+32811e5  48f7e6                 mul rsi
+32811e8  0f80be000000           jo 0x32812ac
+32811ee  4889c2                 mov rdx, rax
+32811f1  4809ca                 or rdx, rcx
+32811f4  48c1ea20               shr rdx, 0x20
+32811f8  0f8492000000           je 0x3281290
+32811fe  31d2                   xor edx, edx
+3281200  48f7f1                 div rcx
+3281203  e98c000000             jmp 0x3281294
+3281208  440fb6c0               movzx r8d, al
+328120c  41f6c001               test r8b, 1
+3281210  740b                   je 0x328121d
+3281212  b90a000000             mov ecx, 0xa
+3281217  4183f801               cmp r8d, 1
+328121b  74c5                   je 0x32811e2
+328121d  a802                   test al, 2
+328121f  740f                   je 0x3281230
+3281221  486bc964               imul rcx, rcx, 0x64
+3281225  4489c2                 mov edx, r8d
+3281228  83e2fe                 and edx, 0xfffffffe
+328122b  83fa02                 cmp edx, 2
+328122e  74b2                   je 0x32811e2
+3281230  a804                   test al, 4
+3281232  7412                   je 0x3281246
+3281234  4869c910270000         imul rcx, rcx, 0x2710
+328123b  4489c2                 mov edx, r8d
+328123e  83e2fc                 and edx, 0xfffffffc
+3281241  83fa04                 cmp edx, 4
+3281244  749c                   je 0x32811e2
+3281246  a808                   test al, 8
+3281248  7412                   je 0x328125c
+328124a  4869c900e1f505         imul rcx, rcx, 0x5f5e100
+3281251  4489c2                 mov edx, r8d
+3281254  83e2f8                 and edx, 0xfffffff8
+3281257  83fa08                 cmp edx, 8
+328125a  7486                   je 0x32811e2
+328125c  a810                   test al, 0x10
+328125e  7423                   je 0x3281283
+3281260  48ba0000c16ff2862300   movabs rdx, 0x2386f26fc10000
+328126a  4889c8                 mov rax, rcx
+328126d  48f7e2                 mul rdx
+3281270  7011                   jo 0x3281283
+3281272  4889c1                 mov rcx, rax
+3281275  4183e0f0               and r8d, 0xfffffff0
+3281279  4183f810               cmp r8d, 0x10
+328127d  0f845fffffff           je 0x32811e2
+3281283  488d3de60f4702         lea rdi, [rip + 0x2470fe6]
+328128a  ff15e0d14e02           call qword ptr [rip + 0x24ed1e0]
+3281290  31d2                   xor edx, edx
+3281292  f7f1                   div ecx
+3281294  4885c0                 test rax, rax
+3281297  0f848a000000           je 0x3281327
+328129d  59                     pop rcx
+328129e  c3                     ret 
+328129f  488d3d4a0f4702         lea rdi, [rip + 0x2470f4a]
+32812a6  ff15c4d14e02           call qword ptr [rip + 0x24ed1c4]
+32812ac  4889f8                 mov rax, rdi
+32812af  4809c8                 or rax, rcx
+32812b2  48c1e820               shr rax, 0x20
+32812b6  740a                   je 0x32812c2
+32812b8  4889f8                 mov rax, rdi
+32812bb  31d2                   xor edx, edx
+32812bd  48f7f1                 div rcx
+32812c0  eb06                   jmp 0x32812c8
+32812c2  89f8                   mov eax, edi
+32812c4  31d2                   xor edx, edx
+32812c6  f7f1                   div ecx
+32812c8  4885d2                 test rdx, rdx
+32812cb  7451                   je 0x328131e
+32812cd  4889f0                 mov rax, rsi
+32812d0  4809c8                 or rax, rcx
+32812d3  48c1e820               shr rax, 0x20
+32812d7  740a                   je 0x32812e3
+32812d9  4889f0                 mov rax, rsi
+32812dc  31d2                   xor edx, edx
+32812de  48f7f1                 div rcx
+32812e1  eb06                   jmp 0x32812e9
+32812e3  89f0                   mov eax, esi
+32812e5  31d2                   xor edx, edx
+32812e7  f7f1                   div ecx
+32812e9  4885d2                 test rdx, rdx
+32812ec  741d                   je 0x328130b
+32812ee  4839fe                 cmp rsi, rdi
+32812f1  4889f8                 mov rax, rdi
+32812f4  480f47c6               cmova rax, rsi
+32812f8  4889c2                 mov rdx, rax
+32812fb  4809ca                 or rdx, rcx
+32812fe  48c1ea20               shr rdx, 0x20
+3281302  740f                   je 0x3281313
+3281304  31d2                   xor edx, edx
+3281306  48f7f1                 div rcx
+3281309  eb0c                   jmp 0x3281317
+328130b  4889c6                 mov rsi, rax
+328130e  4889f8                 mov rax, rdi
+3281311  eb0b                   jmp 0x328131e
+3281313  31d2                   xor edx, edx
+3281315  f7f1                   div ecx
+3281317  4839fe                 cmp rsi, rdi
+328131a  480f43f7               cmovae rsi, rdi
+328131e  48f7e6                 mul rsi
+3281321  0f816dffffff           jno 0x3281294
+3281327  31c0                   xor eax, eax
+3281329  59                     pop rcx
+328132a  c3                     ret 
+328132b  488d0df6e44502         lea rcx, [rip + 0x245e4f6]
+3281332  4889d7                 mov rdi, rdx
+3281335  4889c6                 mov rsi, rax
+3281338  4889ca                 mov rdx, rcx
+328133b  ff1587cc4e02           call qword ptr [rip + 0x24ecc87]
