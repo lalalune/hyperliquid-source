@@ -102,7 +102,7 @@ def validate_request(request: dict, fixtures_by_id: dict) -> dict:
         raise ValueError(f'request missing fields: {missing}')
 
     release = request['target_release']
-    if release not in KNOWN_TARGET_DIGESTS:
+    if not isinstance(release, str) or release not in KNOWN_TARGET_DIGESTS:
         raise ValueError(f'unknown target_release: {release}')
     expected = KNOWN_TARGET_DIGESTS[release]
     if request['target_sha256'] != expected:
