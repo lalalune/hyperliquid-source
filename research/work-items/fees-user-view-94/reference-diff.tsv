@@ -1,0 +1,7 @@
+verdict	reference	reference_says	bytes_say
+differs	info_server/abci_state_info_handler.rs UserFeesResponse	active_referral_discount: Option<String>	an f64 at +0xe8 with no tag, always written
+differs	info_server/abci_state_info_handler.rs UserFeesResponse	fee_trial_escrow: Option<String>	an f64 at +0xf0 with no tag, 0.0 when nothing is held
+differs	info_server/abci_state_info_handler.rs UserFeesResponse	active_staking_discount: Option<String>	2 f64 at +0xf8 and +0x100 with no tag: the stake share and the ladder pick; the serializer is a separate one, unread
+differs	info_server/abci_state_info_handler.rs UserFeesResponse	staking_link: Option<Address>	a tag byte with values 0, 1, 2 beside 20 address bytes; tag 3 is none
+agrees	info_server/abci_state_info_handler.rs UserFeesResponse	trial, next_trial_available_timestamp: Option	both have a tag word: +0 and +0x30
+absent	references/can1357-hl/l1/fees/compute.rs	no user view path	one read lock over the whole read, 2 Durations stored behind the view, 14-day list
