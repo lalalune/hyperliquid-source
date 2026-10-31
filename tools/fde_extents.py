@@ -112,7 +112,10 @@ def parse_cie(data, start, body, end, va, base):
 def eh_frame_records(data, secs=None):
     """Return CIEs keyed by VA and FDEs in section order from a captured .eh_frame."""
     secs = secs or sections(data)
-    frame = next((s for s in secs if s['name'] == '.eh_frame'), None)
+    frames = [s for s in secs if s['name'] == '.eh_frame']
+    if len(frames) > 1:
+        raise ValueError('Duplicate section: .eh_frame')
+    frame = frames[0] if frames else None
     if frame is None or frame['type'] == 8:
         raise ValueError('No .eh_frame contents')
     base, limit, va = frame['offset'], frame['offset'] + frame['size'], frame['address']
