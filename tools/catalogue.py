@@ -61,7 +61,10 @@ def generate(root=ROOT):
     # Every known path must be owned once by the ordered taxonomy, including added #115 paths.
     for p in source_paths | paths['94'] | paths['115']:
         owner(p, components)
-    literal_items = json.loads((root / 'research/imported/can1357-literal-classes.json').read_text())['items']
+    literal_data = json.loads((root / 'research/imported/can1357-literal-classes.json').read_text())
+    if 'items' not in literal_data:
+        raise ValueError('Invalid literal-classes record')
+    literal_items = literal_data['items']
     rows = []
     for c in components:
         source = sorted(p for p in source_paths if owner(p, components) == c['id'])
