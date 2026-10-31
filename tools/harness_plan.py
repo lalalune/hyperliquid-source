@@ -77,6 +77,8 @@ def validate_fixtures(fixtures_doc: dict, protocol: dict) -> dict:
         missing = [key for key in fields if key not in row]
         if missing:
             raise ValueError(f'fixture {row.get("fixture_id")} missing {missing}')
+        if 'fixture_id' not in row or 'target_sha256' not in row:
+            raise ValueError('fixture row missing fixture_id or target_sha256')
         fid = row['fixture_id']
         if fid in by_id:
             raise ValueError(f'duplicate fixture_id: {fid}')
