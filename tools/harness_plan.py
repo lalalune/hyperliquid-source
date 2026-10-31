@@ -56,7 +56,7 @@ def validate_protocol(protocol: dict) -> None:
         raise ValueError('protocol.json task_id must be RE-003')
     if protocol.get('execution_default') != 'denied':
         raise ValueError('execution_default must be denied')
-    if not protocol.get('requires_execution_approval'):
+    if protocol['requires_execution_approval'] is not True:
         raise ValueError('requires_execution_approval must be true')
     isolation = protocol['isolation']
     if isolation.get('network') != 'deny':
@@ -100,6 +100,9 @@ def validate_request(request: dict, fixtures_by_id: dict) -> dict:
     missing = [key for key in REQUIRED_REQUEST_FIELDS if key not in request]
     if missing:
         raise ValueError(f'request missing fields: {missing}')
+    for field in ('execute_target', 'approval_present'):
+        if type(request[field]) is not bool:
+            raise ValueError(f'{field} must be a boolean')
 
     release = request['target_release']
     if release not in KNOWN_TARGET_DIGESTS:
@@ -155,9 +158,9 @@ def validate_request(request: dict, fixtures_by_id: dict) -> dict:
         [*required_effects, *request['declared_side_effects']]
     ))
 
-    execute = bool(request['execute_target'])
+    execute = request['execute_target']
     network_allow = request['network'] == 'allow'
-    approval_claimed = bool(request['approval_present'])
+    approval_claimed = request['approval_present']
     approval_ok = approval_covers(request['request_id'])
 
     if approval_claimed and not approval_ok:
