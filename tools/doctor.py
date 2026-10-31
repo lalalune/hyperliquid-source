@@ -36,10 +36,22 @@ def probe(name, command):
         return {'name': name, 'available': False, 'error': str(exc)}
 
 
+def probe_gnu(name):
+    # Analysis tools and tests invoke plain `objdump`/`readelf` with GNU-only
+    # flags (-M intel, -wf, --debug-dump). macOS ships LLVM objdump under that name.
+    result = probe(name, [shutil.which(name), '--version'])
+    if result['available'] and 'GNU' not in result['version']:
+        result['available'] = False
+    if not result['available']:
+        result['hint'] = f'put GNU binutils {name} first on PATH (macOS: brew install binutils; export PATH="$(brew --prefix binutils)/bin:$PATH")'
+    return result
+
+
 def report():
     required = [probe('python', [sys.executable, '--version'])]
     for name, args in [('git', ['--version']), ('git-lfs', ['version']), ('gpg', ['--version']), ('rg', ['--version'])]:
         required.append(probe(name, [shutil.which(name), *args]))
+    required.extend(probe_gnu(name) for name in ['objdump', 'readelf'])
     optional = [probe('llvm-objdump', [locate_llvm(), '--version']), probe('java', [shutil.which('java'), '-version'])]
     rustup = shutil.which('rustup')
     for version in ['1.94.1', '1.95.0']:
