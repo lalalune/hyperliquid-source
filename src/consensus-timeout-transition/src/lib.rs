@@ -76,13 +76,22 @@ impl RoundState {
             return Ok(TimeoutAdmission::Duplicate);
         }
 
-        self.verified_timeouts.insert(validator);
+        // Compute both weights before mutating, so a StakeOverflow error
+        // leaves the state untouched like every other rejection outcome.
+        // The signed sum covers the stored set plus this validator, exactly
+        // as if it had been inserted first.
         let total_weight = checked_sum(stakes.values().copied())?;
-        let signed_weight = checked_sum(
+        let mut signed_weight = checked_sum(
             self.verified_timeouts
                 .iter()
                 .filter_map(|key| stakes.get(key).copied()),
         )?;
+        if let Some(stake) = stakes.get(&validator).copied() {
+            signed_weight = signed_weight
+                .checked_add(stake)
+                .ok_or(ModelError::StakeOverflow)?;
+        }
+        self.verified_timeouts.insert(validator);
 
         if !has_strict_two_thirds(signed_weight, total_weight) {
             return Ok(TimeoutAdmission::Stored {
@@ -303,5 +312,23 @@ mod tests {
             state.admit_verified_timeout(id(1), 1, &table),
             Err(ModelError::StakeOverflow)
         );
+    }
+
+    #[test]
+    fn stake_overflow_error_is_side_effect_free() {
+        let table = stakes(&[(1, u64::MAX), (2, 1)]);
+        let mut state = RoundState::new(1);
+        let before = state.clone();
+        assert_eq!(
+            state.admit_verified_timeout(id(1), 1, &table),
+            Err(ModelError::StakeOverflow)
+        );
+        assert_eq!(state, before);
+        // A retry reports the same error, not a phantom duplicate.
+        assert_eq!(
+            state.admit_verified_timeout(id(1), 1, &table),
+            Err(ModelError::StakeOverflow)
+        );
+        assert_eq!(state, before);
     }
 }
