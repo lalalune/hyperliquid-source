@@ -62,7 +62,9 @@ def environment(node):
 
 def target(name):
     relative = CONFIG['targets'][name]
-    item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == relative)
+    item = next((i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == relative), None)
+    if item is None:
+        raise ValueError(f'config/rea.json target {name!r} has no provenance/artifacts.json entry')
     check(ROOT / relative, item)
     return {'path': str(ROOT / relative), 'sha256': item['sha256'], 'provider_id': CONFIG['provider']}
 
