@@ -96,7 +96,7 @@ def generate(binary, prefix):
     summary = {'binary_sha256': hashlib.sha256(data).hexdigest(), 'unwind_entries': len(entries),
                'unique_starts': len({e['start'] for e in entries}), 'executable_sections': [s for s in secs if s['flags'] & 4],
                'limitations': 'Unwind index entries are not a complete function census. The next-index upper bound is not a decoded FDE function extent. No component ownership or equivalence is established.'}
-    prefix.with_suffix('.json').write_text(json.dumps(summary, indent=2) + '\n')
+    prefix.with_suffix('.json').write_bytes((json.dumps(summary, indent=2) + '\n').encode())
     return summary
 
 

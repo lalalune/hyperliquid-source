@@ -118,14 +118,14 @@ def generate(binary, output):
         if not re.search(rf'^\s*{site:x}:\s+4c 8d 05 .*\blea\b',disasm,re.M):
             raise ValueError('Candidate source LEA is not decoded instruction')
         raw.append(disasm.replace(str(binary),'<authenticated-node94>'))
-    (output/'family.objdump.txt').write_text('\n'.join(raw))
+    (output/'family.objdump.txt').write_text('\n'.join(raw), encoding='utf-8', newline='\n')
     selected = {(int(r['start_va'],16),int(r['end_va'],16)) for r in rows}
-    (output/'frames.txt').write_text('\n'.join(line for line in frames.splitlines() if any(f'pc={a:016x}..{b:016x}' in line for a,b in selected))+'\n')
+    (output/'frames.txt').write_text('\n'.join(line for line in frames.splitlines() if any(f'pc={a:016x}..{b:016x}' in line for a,b in selected))+'\n', encoding='utf-8', newline='\n')
     relas = subprocess.check_output(['readelf','-rW',str(binary)],text=True)
     wanted = set(SLOTS)|{0x576e040,0x576e008,0x576e070}
-    (output/'relocations.txt').write_text('\n'.join(line for line in relas.splitlines() if re.match(r'^[0-9a-f]+\s',line) and int(line.split()[0],16) in wanted)+'\n')
+    (output/'relocations.txt').write_text('\n'.join(line for line in relas.splitlines() if re.match(r'^[0-9a-f]+\s',line) and int(line.split()[0],16) in wanted)+'\n', encoding='utf-8', newline='\n')
     result = {'target_sha256':identity['sha256'],'target_bytes':len(data),'fde_records_parsed':len(fdes),'census_scope':'Every .text byte for RIP-relative 64-bit LEAs to these five source Location slots, validated as instructions within FDEs; not all functions or all possible source references.','family_bytes':sum(r['bytes'] for r in rows),'profiles':{kind:sum(r['guard_profile']==kind for r in rows) for kind in PROFILES},'source_bindings':bindings,'ranges':rows,'captured_binary_executed':False,'limits':'Local branch/prefix evidence, not complete UTF-8 validation, target input reachability, exact formatted output, formatter/helper closure, runtime equivalence or component completion.'}
-    (output/'records.json').write_text(json.dumps(result,indent=2)+'\n')
+    (output/'records.json').write_text(json.dumps(result,indent=2)+'\n', encoding='utf-8', newline='\n')
     return result
 
 if __name__ == '__main__':
