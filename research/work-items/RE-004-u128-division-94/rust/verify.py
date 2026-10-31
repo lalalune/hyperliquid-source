@@ -9,11 +9,11 @@ PACKET = HERE.parent
 ROOT = HERE.parents[3]
 SOURCE_FILES = {
     '.gitattributes',
-    'components/node94-u128-division/Cargo.toml',
-    'components/node94-u128-division/Cargo.lock',
-    'components/node94-u128-division/README.md',
-    'components/node94-u128-division/src/lib.rs',
-    'components/node94-u128-division/src/tests.rs',
+    'src/node94-u128-division/Cargo.toml',
+    'src/node94-u128-division/Cargo.lock',
+    'src/node94-u128-division/README.md',
+    'src/node94-u128-division/src/lib.rs',
+    'src/node94-u128-division/src/tests.rs',
     'tools/u128_division.py',
     'tools/u128_division_rust.py',
     'tools/spot_wei_scale.py',

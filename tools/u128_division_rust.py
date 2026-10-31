@@ -17,7 +17,7 @@ import tempfile
 import u128_division as u
 
 ROOT = Path(__file__).resolve().parents[1]
-COMPONENT = ROOT / 'components/node94-u128-division'
+COMPONENT = ROOT / 'src/node94-u128-division'
 PACKET = ROOT / 'research/work-items/RE-004-u128-division-94'
 BINARY = ROOT / 'artifacts/node/94/hl-node'
 

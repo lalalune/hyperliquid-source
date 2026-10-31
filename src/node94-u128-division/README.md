@@ -11,7 +11,22 @@ instruction sequence, compiler-library attribution or performance match.
 `NonZeroWords::new` rejects a zero divisor before division. The captured
 helper instead reaches hardware divide faults; no native trap is reproduced.
 
-From the repository root, with existing GNU and LLVM objdump and Cargo/rustc:
+From the repository root, ordinary component tests need only an existing
+Rust/Cargo toolchain; they do not invoke GNU/LLVM decoders or Z3:
+
+```sh
+cargo test --manifest-path src/node94-u128-division/Cargo.toml --offline --locked
+```
+
+This runs four focused tests and explicitly ignores the corpus until its
+authenticated export exists. The evidence runner below sets
+`NODE94_U128_VECTORS` and includes the corpus: five tests per profile, zero
+ignored.
+
+The optional target-backed evidence run additionally requires existing GNU
+and LLVM objdump executables. `scripts/setup.sh` does not install these tools.
+GNU objdump must be on `PATH` as `gobjdump` or `objdump`; LLVM objdump must be
+on `PATH` as `llvm-objdump` or named by `LLVM_OBJDUMP`:
 
 ```sh
 python3 tools/u128_division_rust.py --controls --output work/u128-rust-fresh
@@ -33,10 +48,10 @@ Successful compiler caches are removed between controls, retaining raw logs,
 mutant sources, emitted IR and both actual release archives under `work/`.
 Unexpected failures retain their build tree for diagnosis.
 
-A direct `cargo test --manifest-path components/node94-u128-division/Cargo.toml
---offline --locked` runs four focused tests and explicitly ignores the corpus
-until its authenticated export exists. The runner sets `NODE94_U128_VECTORS`
-and includes the corpus: five tests per profile, zero ignored.
+The separate RE-004 arithmetic verifier also requires an existing Z3
+executable on `PATH` or supplied with `--z3`; setup does not install it.
+These prerequisites are optional for ordinary Cargo tests. Explicit evidence
+commands fail when a prerequisite is missing; a skipped proof is not a pass.
 
 Existing Rust1.88 is the host component minimum. The root rebuild toolchain,
 imports, reference pins and component gates remain unchanged. Finite agreement
