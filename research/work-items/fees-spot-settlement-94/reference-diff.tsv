@@ -1,0 +1,11 @@
+reference	reference_says	bytes_say
+l1/spot_clearinghouse/cl_trait.rs update_supply_delta	before >= after subtracts, else adds	collected >= paid adds, else subtracts: the sign is reversed
+l1/spot_clearinghouse/cl_trait.rs update_supply_delta	no deployer share	deployer credit comes before the pool
+l1/spot_clearinghouse/cl_trait.rs token_supply_deltas	a supply delta	fee pool: exchange +0x420 in the sweep 0x26fe810
+l1/spot_clearinghouse/types.rs adjust_pair_supply_delta	gross = base wei, offset = quote wei	inputs are the accumulators, never the fill amounts
+l1/spot_clearinghouse/types.rs TokenInfo::deployer_share	needs aligned_quote.active	no aligned test; row +0xd2 bit 0 and not listed in clearinghouse +0x260
+l1/spot_clearinghouse/types.rs credit_deployer_share	returns early at credit 0	row, balance entry and index row are still created
+l1/spot_clearinghouse/cl_trait.rs balance_covers	available >= wei, 0 always passes	total >= wei, hold not read; a missing entry passes only at 0
+l1/spot_clearinghouse/cl_trait.rs settle_one_party	receive_delta = leg0, debit_delta = leg1	receive = fill amount - gross; pay = fill amount; rebate credited on the paid token
+l1/spot_clearinghouse/cl_trait.rs settle_one_party	spot side picks the tokens	party 0 always receives base, party 1 always receives quote
+l1/spot_clearinghouse/cl_trait.rs reserve_resting_spot_order	the nearest shape for one party	0x372e0a0 raises no hold: it takes a fee capped by total - hold

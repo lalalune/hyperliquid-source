@@ -1,0 +1,10 @@
+input	leg	accumulator	balance_effect
+record +0x50 gross	leg 0	converted, added to acc[0]	taken from the received amount
+record +0x50 gross	leg 1	as is, added to acc[1]	taken from the received amount
+record +0x58 rebate	leg 0	as is, added to acc[3]	credited to total of the paid token
+record +0x58 rebate	leg 1	converted, added to acc[2]	credited to total of the paid token
+record +8, tag +0 bit 0	leg n	added to acc[2 + n]	no balance effect here
+record +0x30, tag +0x28 byte	leg n	added to acc[2 + n]	no balance effect here
+record +0x60, skipped when 0	leg n	added to acc[2 + n]	no balance effect here
+acc[0] - acc[2]	base token	net of the base token	tail
+acc[1] - acc[3]	quote token	net of the quote token	tail

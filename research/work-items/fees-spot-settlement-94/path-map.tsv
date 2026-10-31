@@ -1,0 +1,11 @@
+order	stage	address	behaviour
+1	caller	0x26e9acc, 0x430ef6c, 0x431a35c	matched fill; second argument is one byte from the caller, carried to fee record +0x56
+2	amounts	0x372b9d0	slot 0x57747a0 gives base token, ok bit, base wei; quote wei = px * sz; overflow or ok clear returns with no change; spot past the list panics first
+3	balance gate	0x372b9d0	party 0 total of quote >= quote wei, party 1 total of base >= base wei; hold is not read; a miss returns with no change
+4	fee gate	0x372b9d0	pair base in clearinghouse +0x260 gives class 1; else outcome test true means no fee record; else class 0
+5	fee	0x3742460	per party record, cross byte = party index == fill +0x224 (fees-trade-fee-94, fees-aligned-quote-94)
+6	split	0x3c018a0	accumulators by leg, see split-rules.tsv
+7	party balances	0x372b9d0	gross leaves the received amount, rebate goes to the paid token, then receive, then pay; total and hold both fall
+8	tail	0x372b9d0	for base then quote: paid above collected takes the gap from the pool; else deployer share, then the rest to the pool
+9	sweep	0x26fe810	exchange +0x420 = clearinghouse +0x3a0: the pool is what fees-collection-94 drains
+10	order charge	0x372e0a0	one party, leg 1, record +0x58 cleared; fee taken from quote, at most total - hold; pool takes the uncapped accumulator
