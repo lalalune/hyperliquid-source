@@ -71,6 +71,20 @@ def program_headers(data):
     return [struct.unpack_from('<IIQQQQQQ', data, phoff + i * entsize) for i in range(count)]
 
 
+def dynamic_string(table, offset, context):
+    """Read one DT_* string that must be NUL-terminated inside .dynstr."""
+    if not isinstance(offset, int) or isinstance(offset, bool) or offset < 0 or offset >= len(table):
+        raise ValueError(f'{context} string offset is outside .dynstr')
+    end = table.find(b'\0', offset)
+    if end < 0:
+        raise ValueError(f'{context} string is not terminated inside .dynstr')
+    raw = table[offset:end]
+    try:
+        return raw.decode('utf-8')
+    except UnicodeDecodeError as error:
+        raise ValueError(f'{context} string is not UTF-8') from error
+
+
 def dynamic(data, by_name):
     dyn, dstr = by_name['.dynamic'], section_bytes(data, by_name['.dynstr'])
     raw = section_bytes(data, dyn)
@@ -80,7 +94,10 @@ def dynamic(data, by_name):
         if tag[0] == 0:  # DT_NULL ends the dynamic array; later slots are not entries
             break
         tags.append(tag)
-    name = lambda v: dstr[v:dstr.index(b'\0', v)].decode()
+
+    def name(value, context):
+        return dynamic_string(dstr, value, context)
+
     return tags, name
 
 
@@ -118,14 +135,15 @@ def derive(data):
 
     if '.dynamic' in by_name:
         tags, name = dynamic(data, by_name)
-        f.exact('dynamic.needed', [name(v) for t, v in tags if t == 1], by_name['.dynamic']['offset'])
+        f.exact('dynamic.needed', [name(v, 'DT_NEEDED') for t, v in tags if t == 1], by_name['.dynamic']['offset'])
         flags = [v for t, v in tags if t == 30]
         flags1 = [v for t, v in tags if t == 0x6FFFFFFB]
         f.exact('dynamic.bind_now', any(t == 24 for t, _ in tags)  # DT_BIND_NOW
                 or bool(flags and flags[0] & 8) or bool(flags1 and flags1[0] & 1),
                 by_name['.dynamic']['offset'])
         f.exact('dynamic.pie_flag', bool(flags1 and flags1[0] & 0x08000000), by_name['.dynamic']['offset'])
-        f.exact('dynamic.runpath', [name(v) for t, v in tags if t in (15, 29)], by_name['.dynamic']['offset'])
+        f.exact('dynamic.runpath', [name(v, 'DT_RPATH' if t == 15 else 'DT_RUNPATH') for t, v in tags if t in (15, 29)],
+                by_name['.dynamic']['offset'])
         names = section_bytes(data, by_name['.dynstr']).decode('ascii', 'replace').split('\0')
         f.exact('dynamic.hardening_imports', sorted({n for n in names if re.fullmatch(r'__stack_chk_fail|__[a-z]+_chk', n)}),
                 by_name['.dynstr']['offset'])

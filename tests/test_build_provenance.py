@@ -30,9 +30,8 @@ def elf(comment, rodata):
     return bytes(body), offsets
 
 
-def dynamic_elf(tags):
+def dynamic_elf(tags, dynstr=b'\0libfixture.so\0'):
     names = b'\0.shstrtab\0.dynstr\0.dynamic\0'
-    dynstr = b'\0libfixture.so\0'
     blob = b''.join(struct.pack('<qQ', *tag) for tag in tags)
     body = bytearray(64)
     body[:6] = b'\x7fELF\x02\x01'
@@ -109,6 +108,14 @@ class DeriveTests(unittest.TestCase):
     def test_non_elf_input_is_rejected(self):
         with self.assertRaises(ValueError):
             derive(b'not an elf' * 10)
+
+    def test_dynamic_string_must_stay_inside_dynstr(self):
+        with self.assertRaisesRegex(ValueError, r'DT_NEEDED string offset is outside \.dynstr'):
+            dynamic_facts([(1, 100), (0, 0)])
+        with self.assertRaisesRegex(ValueError, r'DT_RPATH string is not terminated inside \.dynstr'):
+            derive(dynamic_elf([(15, 1), (0, 0)], dynstr=b'\0lib'))
+        with self.assertRaisesRegex(ValueError, r'DT_NEEDED string is not UTF-8'):
+            derive(dynamic_elf([(1, 1), (0, 0)], dynstr=b'\0\xff\0'))
 
 
 def captured(release):
