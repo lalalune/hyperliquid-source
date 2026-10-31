@@ -228,6 +228,9 @@ def record(release):
     manifest = json.loads((ROOT / 'provenance/artifacts.json').read_text())
     rel = TARGETS[release]
     item = next(x for x in manifest['files'] if x['path'] == rel)
+    missing = [f for f in ('size', 'sha256') if f not in item]
+    if missing:
+        raise ValueError(f'provenance/artifacts.json entry for {rel} is missing ' + '/'.join(missing))
     check(ROOT / rel, item)
     facts = derive((ROOT / rel).read_bytes())
     return {'target': rel, 'sha256': item['sha256'], 'size': item['size'],
