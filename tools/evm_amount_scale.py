@@ -144,7 +144,7 @@ class Image:
         """GOT contents after load: RELATIVE addends, plus the two libc symbols the helpers use."""
         _, off, size = self.sec['.rela.dyn']
         _, sym_off, _ = self.sec['.dynsym']
-        _, str_off, _ = self.sec['.dynstr']
+        _, str_off, str_size = self.sec['.dynstr']
         got = self.sec['.got']
         stubs = {b'memset': MEMSET_STUB, b'memcpy': MEMCPY_STUB}
         out = {}
@@ -156,7 +156,14 @@ class Image:
                 out[where] = addend & MASK
             elif typ == 6:
                 n = struct.unpack_from('<I', self.data, sym_off + sym * 24)[0]
-                name = self.data[str_off + n:self.data.index(b'\0', str_off + n)]
+                # The symbol name has to end inside .dynstr. A NUL in the next
+                # section is not this symbol's terminator.
+                if n >= str_size:
+                    raise EvidenceError('dynamic symbol name outside .dynstr')
+                end = self.data.find(b'\0', str_off + n, str_off + str_size)
+                if end < 0:
+                    raise EvidenceError('unterminated dynamic symbol name')
+                name = self.data[str_off + n:end]
                 if name in stubs:
                     out[where] = stubs[name]
         return out

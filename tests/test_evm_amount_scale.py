@@ -3,6 +3,7 @@
 import filecmp
 import hashlib
 import importlib.util
+import struct
 import sys
 import tempfile
 import unittest
@@ -316,6 +317,33 @@ class Evaluator(unittest.TestCase):
         self.assertEqual(m.regs[eas.RCX], 2 ** 64 - 3)
         m = self.execute(['mov    eax,0x80', 'bsr    rcx,rax'])
         self.assertEqual(m.regs[eas.RCX], 7)
+
+
+def got_image(dynstr, extra, name_off):
+    rela = struct.pack('<QQq', 0x3000, 6, 0)
+    sym = struct.pack('<IBBHQQ', name_off, 0, 0, 0, 0, 0)
+    data = dynstr + extra + rela + sym
+    img = object.__new__(eas.Image)
+    img.data = data
+    rela_off = len(dynstr) + len(extra)
+    img.sec = {
+        '.rela.dyn': (0, rela_off, len(rela)),
+        '.dynsym': (0, rela_off + len(rela), len(sym)),
+        '.dynstr': (0, 0, len(dynstr)),
+        '.got': (0x3000, 0, 8),
+    }
+    return img
+
+
+class DynstrNameBounds(unittest.TestCase):
+    def test_memset_terminated_inside_dynstr_is_a_stub(self):
+        slots = got_image(b'memset\0', b'XXXX', 0).slots()
+        self.assertEqual(slots, {0x3000: eas.MEMSET_STUB})
+
+    def test_memset_finished_outside_dynstr_is_rejected(self):
+        img = got_image(b'memse', b't\0', 0)
+        with self.assertRaisesRegex(eas.EvidenceError, 'unterminated dynamic symbol name'):
+            img.slots()
 
 
 if __name__ == '__main__':
