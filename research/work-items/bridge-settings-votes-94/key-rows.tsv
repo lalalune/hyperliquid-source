@@ -1,0 +1,33 @@
+function	at	bytes	operation	note
+0x2355f40	0x2355f5a	488d45ee	lea	case is the raw tag minus 0x12
+0x2355f40	0x2355f7d	ffe1	jmpi	main jump
+0x2355f40	0x2356c56	0f83cb550000	jcc	fee limit
+0x2355f40	0x2356c5c	4981c5b8050000	add	first dex list
+0x2355f40	0x2356c68	ff1512d14103	calli	first dex
+0x2355f40	0x2356c6e	48899850020000	mov	fee store, dex +0x250
+0x2355f40	0x2358169	e85281b2ff	call	toggle map cap
+0x2355f40	0x2358204	e8b7aa5100	call	next toggle
+0x2355f40	0x2358242	80bc086c01000000	cmp	flag byte of the row
+0x2355f40	0x2358267	748a	jcc	zero: remove
+0x2355f40	0x2358293	e8c8814f00	call	insert
+0x2355f40	0x23581f9	e862f85000	call	remove
+0x2355f40	0x2359480	e8eb65b2ff	call	list cap
+0x2355f40	0x23594b3	4981c5a0360000	add	state +0x36a0
+0x2355f40	0x23594bd	e8fef55400	call	drop the old list
+0x2355f40	0x23594c6	49894510	mov	store the new length
+0x2355f40	0x23594ce	66410f114500	movx	store root and height
+0x2355f40	0x23582da	410fb64f08	movzx	selector byte
+0x2355f40	0x23582df	410fb64709	movzx	value byte
+0x2355f40	0x235b43a	2401	and	keep one bit
+0x2355f40	0x235b43c	418885a2310000	mov	state +0x31a2
+0x2355f40	0x235b443	0f8454090000	jcc	cleared: go clear oaw
+0x2355f40	0x235b455	ff15357d4103	calli	set: recorder 3
+0x2355f40	0x235b460	2401	and	keep one bit
+0x2355f40	0x235b462	418885d8340000	mov	state +0x34d8
+0x2355f40	0x235bd9d	41c685d834000000	mov	oaw cleared
+0x1e802c0	0x1e802d0	483d10270000	cmp	cap 10000
+0x1e802c0	0x1e802d6	763e	jcc	at or below: pass the map on
+0x1e802c0	0x1e802d8	66c7034301	mov	status 0x143
+0x1e7fa70	0x1e7fa80	483d10270000	cmp	cap 10000
+0x1e7fa70	0x1e7fa86	763e	jcc	at or below: pass the set on
+0x1e7fa70	0x1e7fa88	66c7034301	mov	status 0x143
