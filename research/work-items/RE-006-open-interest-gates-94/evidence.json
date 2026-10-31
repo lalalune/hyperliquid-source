@@ -1,0 +1,395 @@
+{
+  "cases": {
+    "total": 328
+  },
+  "data_words": {
+    "0x5773190": "0x358dcd0",
+    "0x57739a0": "0x3c978c0",
+    "0x57739a8": "0x3818cf0",
+    "0x57739b0": "0x38033f0",
+    "0x5774988": "0x3709040",
+    "0x57762e8": "0x3bddf10"
+  },
+  "displays": {
+    "0x3818cf0": {
+      "kind 0": "Spot",
+      "kind 1": "Mark",
+      "other kinds": "External"
+    },
+    "0x3bddf10": {
+      "byte 0": "oracle",
+      "other bytes": "reference"
+    }
+  },
+  "field_names": {
+    "0x6effa7": "asset",
+    "0x6f0123": "user_trackers",
+    "0x6f055f": "BookOrders",
+    "0x704d49": "SideMap"
+  },
+  "fields": {
+    "book_list": {
+      "+0x08": "book rows pointer",
+      "+0x10": "book rows length",
+      "row +0xd0": "total_sz",
+      "row stride": "0xd8"
+    },
+    "owner": {
+      "+0x10": "asset count, must equal the wire list length; the total fold's end",
+      "+0x170/+0x178": "map asset to size: root, height",
+      "+0x1b0": "total cap, i64",
+      "+0x230": "mode byte: 3 skips the total gate and turns on the second record",
+      "+0x30": "dex number, asset id = dex * 10000 + index",
+      "+0x68/+0x70": "asset rows pointer and length, stride 0x60, signed price at +0x20"
+    },
+    "price_lists": {
+      "+0x00/+0x08/+0x10": "kind 0 Spot: capacity, pointer, length, rows (asset, price)",
+      "+0x18/+0x20/+0x28": "kind 1 Mark",
+      "+0x30/+0x38/+0x40": "kind 2 External",
+      "+0x48": "source byte, 0 oracle, other reference"
+    },
+    "result": {
+      "+0x00..+0x50": "price lists, word 0x8000000000000000 at +0 means an error follows at +8",
+      "+0x50/+0x58/+0x60": "text list: capacity, pointer, length, rows of 24 bytes"
+    },
+    "size_map_node": {
+      "+0x08": "keys, u64",
+      "+0x60": "values, u64",
+      "+0xba": "length, u16",
+      "+0xc0": "edges"
+    }
+  },
+  "first_mismatch": "",
+  "functions": [
+    {
+      "end": "0x3709552",
+      "instructions": 242,
+      "instructions_stepped": 218,
+      "role": "update gate",
+      "size": 1298,
+      "start": "0x3709040"
+    },
+    {
+      "end": "0x3bfd79e",
+      "instructions": 253,
+      "instructions_stepped": 208,
+      "role": "three list retain",
+      "size": 990,
+      "start": "0x3bfd3c0"
+    },
+    {
+      "end": "0x3bc38f0",
+      "instructions": 172,
+      "instructions_stepped": 156,
+      "role": "row closure",
+      "size": 704,
+      "start": "0x3bc3630"
+    },
+    {
+      "end": "0x3709034",
+      "instructions": 104,
+      "instructions_stepped": 104,
+      "role": "size times price check",
+      "size": 436,
+      "start": "0x3708e80"
+    },
+    {
+      "end": "0x3be6654",
+      "instructions": 144,
+      "instructions_stepped": 138,
+      "role": "total notional fold",
+      "size": 564,
+      "start": "0x3be6420"
+    },
+    {
+      "end": "0x3bfd3b5",
+      "instructions": 115,
+      "instructions_stepped": 96,
+      "role": "Mark list clear",
+      "size": 485,
+      "start": "0x3bfd1d0"
+    }
+  ],
+  "host_bytes": [
+    {
+      "bytes": "4869d7d8000000",
+      "meaning": "imul rdx, rdi, 0xd8: the row closure indexes book rows with stride 0xd8",
+      "va": "0x3bc3717"
+    },
+    {
+      "bytes": "488b8410d0000000",
+      "meaning": "mov rax, [rax+rdx+0xd0]: and reads book +0xd0",
+      "va": "0x3bc371e"
+    },
+    {
+      "bytes": "49898c39d0000000",
+      "meaning": "mov [r9+rdi+0xd0], rcx: the book row reader stores +0xd0 last",
+      "va": "0x4848afa"
+    },
+    {
+      "bytes": "49898430d0000000",
+      "meaning": "mov [r8+rsi+0xd0], rax: the same store in the second reader",
+      "va": "0x484a9dc"
+    },
+    {
+      "bytes": "4c8ba7c8000000",
+      "meaning": "mov r12, [rdi+0xc8]: 0x49e4f20 takes the old slot size",
+      "va": "0x49e4f30"
+    },
+    {
+      "bytes": "4c89c3",
+      "meaning": "mov rbx, r8: its pointer argument",
+      "va": "0x49e4f40"
+    },
+    {
+      "bytes": "488997c8000000",
+      "meaning": "mov [rdi+0xc8], rdx: it writes the new slot size",
+      "va": "0x49e4f49"
+    },
+    {
+      "bytes": "4c8b3b",
+      "meaning": "mov r15, [rbx]: it reads the running total",
+      "va": "0x49e4fde"
+    },
+    {
+      "bytes": "4d29e7",
+      "meaning": "sub r15, r12: subtracts the old size",
+      "va": "0x49e4fe1"
+    },
+    {
+      "bytes": "4c893b",
+      "meaning": "mov [rbx], r15: stores it",
+      "va": "0x49e5001"
+    },
+    {
+      "bytes": "4c89f8",
+      "meaning": "mov rax, r15",
+      "va": "0x49e5004"
+    },
+    {
+      "bytes": "4c01f0",
+      "meaning": "add rax, r14: adds the new size",
+      "va": "0x49e5007"
+    },
+    {
+      "bytes": "488903",
+      "meaning": "mov [rbx], rax: stores the running total",
+      "va": "0x49e500c"
+    }
+  ],
+  "instructions_stepped": 92769,
+  "limits": {
+    "row_limit": "0x199999999999999a",
+    "row_limit_times_10": "18446744073709551620",
+    "second_record_limit": "0x28f5c28f5c28f5d",
+    "two_to_64": "18446744073709551616"
+  },
+  "locations": [
+    {
+      "column": 16,
+      "line": 14,
+      "name": "book row bound",
+      "path": "l1/src/books.rs",
+      "slot": "0x56dfda8"
+    },
+    {
+      "column": 22,
+      "line": 554,
+      "name": "second record, passed by the row closure",
+      "path": "l1/src/clearinghouse/clearinghouse.rs",
+      "slot": "0x57146f0"
+    },
+    {
+      "column": 1,
+      "line": 35,
+      "name": "first record, size sum",
+      "path": "l1/src/qtys/impl_sz.rs",
+      "slot": "0x56f1c98"
+    },
+    {
+      "column": 1,
+      "line": 844,
+      "name": "negative book total",
+      "path": "l1/src/qtys/mod.rs",
+      "slot": "0x56f1c80"
+    },
+    {
+      "column": 1,
+      "line": 843,
+      "name": "negative total cap",
+      "path": "l1/src/qtys/mod.rs",
+      "slot": "0x56f1ce0"
+    },
+    {
+      "column": 18,
+      "line": 197,
+      "name": "asset row bound",
+      "path": "l1/src/clearinghouse/oracle/oracle.rs",
+      "slot": "0x5714c58"
+    }
+  ],
+  "mismatches": 0,
+  "mutations": {
+    "killed": 285,
+    "survived": 10,
+    "unreached": 16
+  },
+  "outcomes": {
+    "check pass []": 21,
+    "check pass [record]": 11,
+    "check text [format record]": 18,
+    "check text [format]": 47,
+    "clear done []": 1,
+    "clear done [format free grow]": 2,
+    "clear done [format free]": 20,
+    "clear done [format]": 2,
+    "clear done [free]": 1,
+    "host length []": 1,
+    "host length [free]": 1,
+    "host ok [collect drop map format free grow parse]": 2,
+    "host ok [collect drop map format free parse]": 13,
+    "host ok [collect drop map format parse]": 2,
+    "host ok [collect drop map free parse]": 2,
+    "host ok [collect drop map parse]": 12,
+    "host ok [format parse record]": 1,
+    "host ok [parse]": 1,
+    "host parse [parse]": 2,
+    "panic: add overflow": 1,
+    "panic: bounds": 30,
+    "panic: multiply overflow": 1,
+    "panic: unwrap": 4,
+    "retain done []": 13,
+    "retain done [format grow]": 23,
+    "retain done [format]": 19,
+    "row dropped [format grow]": 4,
+    "row dropped [format record]": 1,
+    "row dropped [format]": 28,
+    "row kept []": 15,
+    "total none []": 7,
+    "total sum []": 22
+  },
+  "reference_claims": [
+    {
+      "claim": "retain_if_under_open_interest_cap compares stored size plus a request against a per asset cap map, when a side flag is on",
+      "observed": "0x3708e80 compares (stored size + book total_sz) * price with one fixed limit; no cap map is read and there is no side flag",
+      "reference": "l1/clearinghouse/clearinghouse.rs:645",
+      "verdict": "rule differs"
+    },
+    {
+      "claim": "the text is 'open interest cap: asset= requested_delta= current_open_interest= cap='",
+      "observed": "the text at 0x1fa4b9 is 'Asset open interest exceeded cap asset= kind=, oi=', and oi is the product over 1e6",
+      "reference": "l1/clearinghouse/clearinghouse.rs:716",
+      "verdict": "text differs"
+    },
+    {
+      "claim": "a failing row logs one record",
+      "observed": "a failing row pushes two strings and leaves its price list",
+      "reference": "l1/clearinghouse/clearinghouse.rs:657",
+      "verdict": "differs"
+    },
+    {
+      "claim": "Book has no running size total; total_resting_sz folds the orders map",
+      "observed": "field +0xd0 is written out as total_sz, read at load, and kept by 0x49e4f20 as new size minus old size",
+      "reference": "l1/books.rs:535",
+      "verdict": "field missing in the reference"
+    },
+    {
+      "claim": "Book keeps mark_px and oracle_px",
+      "observed": "field +0x78 is written out as last_trade_px by 0x438a810",
+      "reference": "l1/books.rs:547",
+      "verdict": "name differs"
+    }
+  ],
+  "serde_fields": [
+    {
+      "fields": {
+        "0x78": {
+          "load": "0x431ecc8",
+          "name": "last_trade_px",
+          "writer": "0x438a810"
+        },
+        "0xd0": {
+          "load": "0x431ecdd",
+          "name": "total_sz",
+          "writer": "0x438b140"
+        }
+      },
+      "writer": "0x431ea20"
+    },
+    {
+      "fields": {
+        "0x78": {
+          "load": "0x431f151",
+          "name": "last_trade_px",
+          "writer": "0x438afb0"
+        },
+        "0xd0": {
+          "load": "0x431f169",
+          "name": "total_sz",
+          "writer": "0x438ae60"
+        }
+      },
+      "writer": "0x431eee0"
+    },
+    {
+      "fields": {
+        "0x78": {
+          "load": "0x431f4a8",
+          "name": "last_trade_px",
+          "writer": "0x438a810"
+        },
+        "0xd0": {
+          "load": "0x431f4bd",
+          "name": "total_sz",
+          "writer": "0x438b140"
+        }
+      },
+      "writer": "0x431f200"
+    },
+    {
+      "fields": {
+        "0x78": {
+          "load": "0x431f931",
+          "name": "last_trade_px",
+          "writer": "0x438afb0"
+        },
+        "0xd0": {
+          "load": "0x431f949",
+          "name": "total_sz",
+          "writer": "0x438ae60"
+        }
+      },
+      "writer": "0x431f6c0"
+    }
+  ],
+  "target": {
+    "file": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "texts": {
+    "0x1e9abe": {
+      "text": "Missing price, keeping old {} price asset={} oracle_kind={}",
+      "use": "row and Mark list drop"
+    },
+    "0x1fa4b9": {
+      "text": "Asset open interest exceeded cap asset={} kind={}, oi={}",
+      "use": "per asset gate"
+    },
+    "0x1fe7ec": {
+      "text": "Total open interest exceeded 10x of total open interest cap: total_open_interest={} total_open_interest_cap={}",
+      "use": "total gate"
+    }
+  },
+  "worked_example": {
+    "book_total_alone_drops_rows_left": [
+      0,
+      0,
+      0
+    ],
+    "book_total_alone_texts": 6,
+    "limit": 1844674407370955162,
+    "product_at_limit": "fails",
+    "product_just_under": "passes",
+    "second_limit": 184467440737095517
+  }
+}
