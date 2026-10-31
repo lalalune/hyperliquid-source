@@ -30,6 +30,32 @@ def elf(comment, rodata):
     return bytes(body), offsets
 
 
+def stripping_elf(*, symbols, debug):
+    """Section-table fixture with a valid minimal DWARF 4 compile unit."""
+    entries = [(b'.shstrtab', 3, b'', 0, 0, 0)]
+    if symbols:
+        entries += [(b'.strtab', 3, b'\0', 0, 0, 0),
+                    (b'.symtab', 2, bytes(24), 2, 1, 24)]
+    if debug:
+        # Unit length 8: version 4, abbrev offset 0, pointer size 8, root DIE 1.
+        entries += [(b'.debug_info', 1, struct.pack('<IHI', 8, 4, 0) + b'\x08\x01', 0, 0, 0),
+                    (b'.debug_abbrev', 1, b'\x01\x11\x00\x00\x00\x00', 0, 0, 0)]
+    names = b'\0' + b''.join(name + b'\0' for name, *_ in entries)
+    entries[0] = (b'.shstrtab', 3, names, 0, 0, 0)
+    body = bytearray(64)
+    body[:6] = b'\x7fELF\x02\x01'
+    struct.pack_into('<HH', body, 16, 3, 0x3E)
+    rows = [bytes(64)]
+    for name, kind, data, link, info, entsize in entries:
+        rows.append(struct.pack('<IIQQQQIIQQ', names.index(name + b'\0'), kind,
+                                0, 0, len(body), len(data), link, info, 1, entsize))
+        body += data
+    struct.pack_into('<Q', body, 40, len(body))
+    struct.pack_into('<HHH', body, 58, 64, len(rows), 1)
+    body += b''.join(rows)
+    return bytes(body)
+
+
 def dynamic_elf(tags):
     names = b'\0.shstrtab\0.dynstr\0.dynamic\0'
     dynstr = b'\0libfixture.so\0'
@@ -105,6 +131,23 @@ class DeriveTests(unittest.TestCase):
         self.assertIs(dynamic_facts([(0, 0)])['dynamic.bind_now'], False)
         for tags in ([(30, 8), (0, 0)], [(0x6FFFFFFB, 1), (0, 0)], [(24, 0), (0, 0)]):
             self.assertIs(dynamic_facts(tags)['dynamic.bind_now'], True, tags)
+
+    def test_stripping_inference_preserves_retained_debug_sections(self):
+        for symbols, debug, expected in (
+                (False, True, 'static symbols absent; debug sections retained'),
+                (False, False, 'symbols and debuginfo removed'),
+                (True, True, 'not stripped'), (True, False, 'not stripped')):
+            with self.subTest(symbols=symbols, debug=debug):
+                exact = derive(stripping_elf(symbols=symbols, debug=debug))
+                self.assertIs(by_key(exact, 'elf.has_symtab')[0]['value'], symbols)
+                self.assertEqual(bool(by_key(exact, 'elf.debug_sections')[0]['value']), debug)
+                self.assertEqual(by_key(interpret(exact), 'stripped')[0]['value'], expected)
+
+    def test_unstripped_reasoning_matches_the_present_symbol_table(self):
+        exact = derive(stripping_elf(symbols=True, debug=True))
+        reasoning = by_key(interpret(exact), 'stripped')[0]['evidence']['reasoning']
+        self.assertIn('.symtab is present', reasoning)
+        self.assertNotIn('no .symtab', reasoning)
 
     def test_non_elf_input_is_rejected(self):
         with self.assertRaises(ValueError):

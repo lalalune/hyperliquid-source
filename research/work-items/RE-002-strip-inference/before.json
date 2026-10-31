@@ -1,0 +1,298 @@
+{
+  "cases": [
+    {
+      "bytes": 16592,
+      "exact": {
+        "elf.debug_sections": [
+          ".debug_abbrev",
+          ".debug_aranges",
+          ".debug_info",
+          ".debug_line",
+          ".debug_line_str",
+          ".debug_str"
+        ],
+        "elf.has_symtab": true
+      },
+      "fixture": "unstripped",
+      "readelfCompilationUnits": 1,
+      "sectionEvidence": [
+        "[26] .debug_aranges    PROGBITS        0000000000000000 00302f 000030 00      0   0  1",
+        "[27] .debug_info       PROGBITS        0000000000000000 00305f 000054 00      0   0  1",
+        "[28] .debug_abbrev     PROGBITS        0000000000000000 0030b3 00003a 00      0   0  1",
+        "[29] .debug_line       PROGBITS        0000000000000000 0030ed 00004f 00      0   0  1",
+        "[30] .debug_str        PROGBITS        0000000000000000 00313c 000055 01  MS  0   0  1",
+        "[31] .debug_line_str   PROGBITS        0000000000000000 003191 000013 01  MS  0   0  1",
+        "[32] .symtab           SYMTAB          0000000000000000 0031a8 000348 18     33  18  8"
+      ],
+      "sha256": "2e5a72a7bd28a3cdcdeee7e365e24f30def43df07f92d105123018d69c90e020",
+      "stripped": [
+        {
+          "evidence": {
+            "reasoning": "no .symtab or .debug* sections; this could be Cargo strip= or a post-link strip"
+          },
+          "key": "stripped",
+          "label": "inferred",
+          "value": "not stripped"
+        }
+      ]
+    },
+    {
+      "bytes": 15144,
+      "exact": {
+        "elf.debug_sections": [
+          ".debug_abbrev",
+          ".debug_aranges",
+          ".debug_info",
+          ".debug_line",
+          ".debug_line_str",
+          ".debug_str"
+        ],
+        "elf.has_symtab": false
+      },
+      "fixture": "debug-retained",
+      "readelfCompilationUnits": 1,
+      "sectionEvidence": [
+        "[26] .debug_aranges    PROGBITS        0000000000000000 00302f 000030 00      0   0  1",
+        "[27] .debug_info       PROGBITS        0000000000000000 00305f 000054 00      0   0  1",
+        "[28] .debug_abbrev     PROGBITS        0000000000000000 0030b3 00003a 00      0   0  1",
+        "[29] .debug_line       PROGBITS        0000000000000000 0030ed 00004f 00      0   0  1",
+        "[30] .debug_str        PROGBITS        0000000000000000 00313c 000055 01  MS  0   0  1",
+        "[31] .debug_line_str   PROGBITS        0000000000000000 003191 000013 01  MS  0   0  1"
+      ],
+      "sha256": "0fc7554bc47a9e63a0894962c368e3b1691d58f9be8a95ad96e0fbfa98ed1721",
+      "stripped": [
+        {
+          "evidence": {
+            "reasoning": "no .symtab or .debug* sections; this could be Cargo strip= or a post-link strip"
+          },
+          "key": "stripped",
+          "label": "inferred",
+          "value": "symbols and debuginfo removed"
+        }
+      ]
+    },
+    {
+      "bytes": 14304,
+      "exact": {
+        "elf.debug_sections": [],
+        "elf.has_symtab": false
+      },
+      "fixture": "fully-stripped",
+      "readelfCompilationUnits": 0,
+      "sectionEvidence": [],
+      "sha256": "859afc50498fc6c307cad82c6f445fe5a8513556ead52e4303f2e9ce585c5bb5",
+      "stripped": [
+        {
+          "evidence": {
+            "reasoning": "no .symtab or .debug* sections; this could be Cargo strip= or a post-link strip"
+          },
+          "key": "stripped",
+          "label": "inferred",
+          "value": "symbols and debuginfo removed"
+        }
+      ]
+    },
+    {
+      "bytes": 15600,
+      "exact": {
+        "elf.debug_sections": [],
+        "elf.has_symtab": true
+      },
+      "fixture": "symbols-retained",
+      "readelfCompilationUnits": 0,
+      "sectionEvidence": [
+        "[26] .symtab           SYMTAB          0000000000000000 003030 0002d0 18     27  13  8"
+      ],
+      "sha256": "944f87c45711cb6d441fc7882ad36205d67b51a518e6a1b83b7ca1e52a4a70ff",
+      "stripped": [
+        {
+          "evidence": {
+            "reasoning": "no .symtab or .debug* sections; this could be Cargo strip= or a post-link strip"
+          },
+          "key": "stripped",
+          "label": "inferred",
+          "value": "not stripped"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/cc",
+        "--version"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "cc (Debian 14.2.0-19) 14.2.0\nCopyright (C) 2024 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+    },
+    {
+      "argv": [
+        "/usr/bin/strip",
+        "--version"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "GNU strip (GNU Binutils for Debian) 2.44\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis program is free software; you may redistribute it under the terms of\nthe GNU General Public License version 3 or (at your option) any later version.\nThis program has absolutely no warranty.\n"
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "--version"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "GNU readelf (GNU Binutils for Debian) 2.44\nCopyright (C) 2025 Free Software Foundation, Inc.\nThis program is free software; you may redistribute it under the terms of\nthe GNU General Public License version 3 or (at your option) any later version.\nThis program has absolutely no warranty.\n"
+    },
+    {
+      "argv": [
+        "/usr/bin/cc",
+        "-g",
+        "-O0",
+        "-fdebug-prefix-map=<work>=/fixture",
+        "-Wl,--build-id=none",
+        "fixture.c",
+        "-o",
+        "unstripped"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/strip",
+        "--strip-all",
+        "--keep-section=.debug*",
+        "-o",
+        "debug-retained",
+        "unstripped"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/strip",
+        "--strip-all",
+        "-o",
+        "fully-stripped",
+        "unstripped"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/strip",
+        "--strip-debug",
+        "-o",
+        "symbols-retained",
+        "unstripped"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "-W",
+        "-S",
+        "unstripped"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "There are 35 section headers, starting at offset 0x3810:\n\nSection Headers:\n  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al\n  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0\n  [ 1] .interp           PROGBITS        0000000000000318 000318 00001c 00   A  0   0  1\n  [ 2] .gnu.hash         GNU_HASH        0000000000000338 000338 000024 00   A  3   0  8\n  [ 3] .dynsym           DYNSYM          0000000000000360 000360 000090 18   A  4   1  8\n  [ 4] .dynstr           STRTAB          00000000000003f0 0003f0 000088 00   A  0   0  1\n  [ 5] .gnu.version      VERSYM          0000000000000478 000478 00000c 02   A  3   0  2\n  [ 6] .gnu.version_r    VERNEED         0000000000000488 000488 000030 00   A  4   1  8\n  [ 7] .rela.dyn         RELA            00000000000004b8 0004b8 0000c0 18   A  3   0  8\n  [ 8] .init             PROGBITS        0000000000001000 001000 000017 00  AX  0   0  4\n  [ 9] .plt              PROGBITS        0000000000001020 001020 000010 10  AX  0   0 16\n  [10] .plt.got          PROGBITS        0000000000001030 001030 000008 08  AX  0   0  8\n  [11] .text             PROGBITS        0000000000001040 001040 0000f4 00  AX  0   0 16\n  [12] .fini             PROGBITS        0000000000001134 001134 000009 00  AX  0   0  4\n  [13] .rodata           PROGBITS        0000000000002000 002000 000004 04  AM  0   0  4\n  [14] .eh_frame_hdr     PROGBITS        0000000000002004 002004 00002c 00   A  0   0  4\n  [15] .eh_frame         PROGBITS        0000000000002030 002030 0000ac 00   A  0   0  8\n  [16] .note.gnu.property NOTE            00000000000020e0 0020e0 000020 00   A  0   0  8\n  [17] .note.ABI-tag     NOTE            0000000000002100 002100 000020 00   A  0   0  4\n  [18] .init_array       INIT_ARRAY      0000000000003e00 002e00 000008 08  WA  0   0  8\n  [19] .fini_array       FINI_ARRAY      0000000000003e08 002e08 000008 08  WA  0   0  8\n  [20] .dynamic          DYNAMIC         0000000000003e10 002e10 0001b0 10  WA  4   0  8\n  [21] .got              PROGBITS        0000000000003fc0 002fc0 000028 08  WA  0   0  8\n  [22] .got.plt          PROGBITS        0000000000003fe8 002fe8 000018 08  WA  0   0  8\n  [23] .data             PROGBITS        0000000000004000 003000 000010 00  WA  0   0  8\n  [24] .bss              NOBITS          0000000000004010 003010 000008 00  WA  0   0  1\n  [25] .comment          PROGBITS        0000000000000000 003010 00001f 01  MS  0   0  1\n  [26] .debug_aranges    PROGBITS        0000000000000000 00302f 000030 00      0   0  1\n  [27] .debug_info       PROGBITS        0000000000000000 00305f 000054 00      0   0  1\n  [28] .debug_abbrev     PROGBITS        0000000000000000 0030b3 00003a 00      0   0  1\n  [29] .debug_line       PROGBITS        0000000000000000 0030ed 00004f 00      0   0  1\n  [30] .debug_str        PROGBITS        0000000000000000 00313c 000055 01  MS  0   0  1\n  [31] .debug_line_str   PROGBITS        0000000000000000 003191 000013 01  MS  0   0  1\n  [32] .symtab           SYMTAB          0000000000000000 0031a8 000348 18     33  18  8\n  [33] .strtab           STRTAB          0000000000000000 0034f0 0001cc 00      0   0  1\n  [34] .shstrtab         STRTAB          0000000000000000 0036bc 00014d 00      0   0  1\nKey to Flags:\n  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n  L (link order), O (extra OS processing required), G (group), T (TLS),\n  C (compressed), x (unknown), o (OS specific), E (exclude),\n  D (mbind), l (large), p (processor specific)\n"
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "--debug-dump=info",
+        "unstripped"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Contents of the .debug_info section:\n\n  Compilation Unit @ offset 0:\n   Length:        0x50 (32-bit)\n   Version:       5\n   Unit Type:     DW_UT_compile (1)\n   Abbrev Offset: 0\n   Pointer Size:  8\n <0><c>: Abbrev Number: 1 (DW_TAG_compile_unit)\n    <d>   DW_AT_producer    : (indirect string, offset: 0): GNU C17 14.2.0 -mtune=generic -march=x86-64 -g -O0 -fasynchronous-unwind-tables\n    <11>   DW_AT_language    : 29\t(C11)\n    <12>   DW_AT_name        : (indirect line string, offset: 0x9): fixture.c\n    <16>   DW_AT_comp_dir    : (indirect line string, offset: 0): /fixture\n    <1a>   DW_AT_low_pc      : 0x1129\n    <22>   DW_AT_high_pc     : 0xb\n    <2a>   DW_AT_stmt_list   : 0\n <1><2e>: Abbrev Number: 2 (DW_TAG_subprogram)\n    <2f>   DW_AT_external    : 1\n    <2f>   DW_AT_name        : (indirect string, offset: 0x50): main\n    <33>   DW_AT_decl_file   : 1\n    <34>   DW_AT_decl_line   : 1\n    <35>   DW_AT_decl_column : 5\n    <36>   DW_AT_prototyped  : 1\n    <36>   DW_AT_type        : <0x4c>\n    <3a>   DW_AT_low_pc      : 0x1129\n    <42>   DW_AT_high_pc     : 0xb\n    <4a>   DW_AT_frame_base  : 1 byte block: 9c \t(DW_OP_call_frame_cfa)\n    <4c>   DW_AT_call_all_calls: 1\n <1><4c>: Abbrev Number: 3 (DW_TAG_base_type)\n    <4d>   DW_AT_byte_size   : 4\n    <4e>   DW_AT_encoding    : 5\t(signed)\n    <4f>   DW_AT_name        : int\n <1><53>: Abbrev Number: 0\n\n"
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "-W",
+        "-S",
+        "debug-retained"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "There are 33 section headers, starting at offset 0x32e8:\n\nSection Headers:\n  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al\n  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0\n  [ 1] .interp           PROGBITS        0000000000000318 000318 00001c 00   A  0   0  1\n  [ 2] .gnu.hash         GNU_HASH        0000000000000338 000338 000024 00   A  3   0  8\n  [ 3] .dynsym           DYNSYM          0000000000000360 000360 000090 18   A  4   1  8\n  [ 4] .dynstr           STRTAB          00000000000003f0 0003f0 000088 00   A  0   0  1\n  [ 5] .gnu.version      VERSYM          0000000000000478 000478 00000c 02   A  3   0  2\n  [ 6] .gnu.version_r    VERNEED         0000000000000488 000488 000030 00   A  4   1  8\n  [ 7] .rela.dyn         RELA            00000000000004b8 0004b8 0000c0 18   A  3   0  8\n  [ 8] .init             PROGBITS        0000000000001000 001000 000017 00  AX  0   0  4\n  [ 9] .plt              PROGBITS        0000000000001020 001020 000010 10  AX  0   0 16\n  [10] .plt.got          PROGBITS        0000000000001030 001030 000008 08  AX  0   0  8\n  [11] .text             PROGBITS        0000000000001040 001040 0000f4 00  AX  0   0 16\n  [12] .fini             PROGBITS        0000000000001134 001134 000009 00  AX  0   0  4\n  [13] .rodata           PROGBITS        0000000000002000 002000 000004 04  AM  0   0  4\n  [14] .eh_frame_hdr     PROGBITS        0000000000002004 002004 00002c 00   A  0   0  4\n  [15] .eh_frame         PROGBITS        0000000000002030 002030 0000ac 00   A  0   0  8\n  [16] .note.gnu.property NOTE            00000000000020e0 0020e0 000020 00   A  0   0  8\n  [17] .note.ABI-tag     NOTE            0000000000002100 002100 000020 00   A  0   0  4\n  [18] .init_array       INIT_ARRAY      0000000000003e00 002e00 000008 08  WA  0   0  8\n  [19] .fini_array       FINI_ARRAY      0000000000003e08 002e08 000008 08  WA  0   0  8\n  [20] .dynamic          DYNAMIC         0000000000003e10 002e10 0001b0 10  WA  4   0  8\n  [21] .got              PROGBITS        0000000000003fc0 002fc0 000028 08  WA  0   0  8\n  [22] .got.plt          PROGBITS        0000000000003fe8 002fe8 000018 08  WA  0   0  8\n  [23] .data             PROGBITS        0000000000004000 003000 000010 00  WA  0   0  8\n  [24] .bss              NOBITS          0000000000004010 003010 000008 00  WA  0   0  1\n  [25] .comment          PROGBITS        0000000000000000 003010 00001f 01  MS  0   0  1\n  [26] .debug_aranges    PROGBITS        0000000000000000 00302f 000030 00      0   0  1\n  [27] .debug_info       PROGBITS        0000000000000000 00305f 000054 00      0   0  1\n  [28] .debug_abbrev     PROGBITS        0000000000000000 0030b3 00003a 00      0   0  1\n  [29] .debug_line       PROGBITS        0000000000000000 0030ed 00004f 00      0   0  1\n  [30] .debug_str        PROGBITS        0000000000000000 00313c 000055 01  MS  0   0  1\n  [31] .debug_line_str   PROGBITS        0000000000000000 003191 000013 01  MS  0   0  1\n  [32] .shstrtab         STRTAB          0000000000000000 0031a4 00013d 00      0   0  1\nKey to Flags:\n  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n  L (link order), O (extra OS processing required), G (group), T (TLS),\n  C (compressed), x (unknown), o (OS specific), E (exclude),\n  D (mbind), l (large), p (processor specific)\n"
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "--debug-dump=info",
+        "debug-retained"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Contents of the .debug_info section:\n\n  Compilation Unit @ offset 0:\n   Length:        0x50 (32-bit)\n   Version:       5\n   Unit Type:     DW_UT_compile (1)\n   Abbrev Offset: 0\n   Pointer Size:  8\n <0><c>: Abbrev Number: 1 (DW_TAG_compile_unit)\n    <d>   DW_AT_producer    : (indirect string, offset: 0): GNU C17 14.2.0 -mtune=generic -march=x86-64 -g -O0 -fasynchronous-unwind-tables\n    <11>   DW_AT_language    : 29\t(C11)\n    <12>   DW_AT_name        : (indirect line string, offset: 0x9): fixture.c\n    <16>   DW_AT_comp_dir    : (indirect line string, offset: 0): /fixture\n    <1a>   DW_AT_low_pc      : 0x1129\n    <22>   DW_AT_high_pc     : 0xb\n    <2a>   DW_AT_stmt_list   : 0\n <1><2e>: Abbrev Number: 2 (DW_TAG_subprogram)\n    <2f>   DW_AT_external    : 1\n    <2f>   DW_AT_name        : (indirect string, offset: 0x50): main\n    <33>   DW_AT_decl_file   : 1\n    <34>   DW_AT_decl_line   : 1\n    <35>   DW_AT_decl_column : 5\n    <36>   DW_AT_prototyped  : 1\n    <36>   DW_AT_type        : <0x4c>\n    <3a>   DW_AT_low_pc      : 0x1129\n    <42>   DW_AT_high_pc     : 0xb\n    <4a>   DW_AT_frame_base  : 1 byte block: 9c \t(DW_OP_call_frame_cfa)\n    <4c>   DW_AT_call_all_calls: 1\n <1><4c>: Abbrev Number: 3 (DW_TAG_base_type)\n    <4d>   DW_AT_byte_size   : 4\n    <4e>   DW_AT_encoding    : 5\t(signed)\n    <4f>   DW_AT_name        : int\n <1><53>: Abbrev Number: 0\n\n"
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "-W",
+        "-S",
+        "fully-stripped"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "There are 27 section headers, starting at offset 0x3120:\n\nSection Headers:\n  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al\n  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0\n  [ 1] .interp           PROGBITS        0000000000000318 000318 00001c 00   A  0   0  1\n  [ 2] .gnu.hash         GNU_HASH        0000000000000338 000338 000024 00   A  3   0  8\n  [ 3] .dynsym           DYNSYM          0000000000000360 000360 000090 18   A  4   1  8\n  [ 4] .dynstr           STRTAB          00000000000003f0 0003f0 000088 00   A  0   0  1\n  [ 5] .gnu.version      VERSYM          0000000000000478 000478 00000c 02   A  3   0  2\n  [ 6] .gnu.version_r    VERNEED         0000000000000488 000488 000030 00   A  4   1  8\n  [ 7] .rela.dyn         RELA            00000000000004b8 0004b8 0000c0 18   A  3   0  8\n  [ 8] .init             PROGBITS        0000000000001000 001000 000017 00  AX  0   0  4\n  [ 9] .plt              PROGBITS        0000000000001020 001020 000010 10  AX  0   0 16\n  [10] .plt.got          PROGBITS        0000000000001030 001030 000008 08  AX  0   0  8\n  [11] .text             PROGBITS        0000000000001040 001040 0000f4 00  AX  0   0 16\n  [12] .fini             PROGBITS        0000000000001134 001134 000009 00  AX  0   0  4\n  [13] .rodata           PROGBITS        0000000000002000 002000 000004 04  AM  0   0  4\n  [14] .eh_frame_hdr     PROGBITS        0000000000002004 002004 00002c 00   A  0   0  4\n  [15] .eh_frame         PROGBITS        0000000000002030 002030 0000ac 00   A  0   0  8\n  [16] .note.gnu.property NOTE            00000000000020e0 0020e0 000020 00   A  0   0  8\n  [17] .note.ABI-tag     NOTE            0000000000002100 002100 000020 00   A  0   0  4\n  [18] .init_array       INIT_ARRAY      0000000000003e00 002e00 000008 08  WA  0   0  8\n  [19] .fini_array       FINI_ARRAY      0000000000003e08 002e08 000008 08  WA  0   0  8\n  [20] .dynamic          DYNAMIC         0000000000003e10 002e10 0001b0 10  WA  4   0  8\n  [21] .got              PROGBITS        0000000000003fc0 002fc0 000028 08  WA  0   0  8\n  [22] .got.plt          PROGBITS        0000000000003fe8 002fe8 000018 08  WA  0   0  8\n  [23] .data             PROGBITS        0000000000004000 003000 000010 00  WA  0   0  8\n  [24] .bss              NOBITS          0000000000004010 003010 000008 00  WA  0   0  1\n  [25] .comment          PROGBITS        0000000000000000 003010 00001f 01  MS  0   0  1\n  [26] .shstrtab         STRTAB          0000000000000000 00302f 0000ed 00      0   0  1\nKey to Flags:\n  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n  L (link order), O (extra OS processing required), G (group), T (TLS),\n  C (compressed), x (unknown), o (OS specific), E (exclude),\n  D (mbind), l (large), p (processor specific)\n"
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "--debug-dump=info",
+        "fully-stripped"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "-W",
+        "-S",
+        "symbols-retained"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "There are 29 section headers, starting at offset 0x35b0:\n\nSection Headers:\n  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al\n  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0\n  [ 1] .interp           PROGBITS        0000000000000318 000318 00001c 00   A  0   0  1\n  [ 2] .gnu.hash         GNU_HASH        0000000000000338 000338 000024 00   A  3   0  8\n  [ 3] .dynsym           DYNSYM          0000000000000360 000360 000090 18   A  4   1  8\n  [ 4] .dynstr           STRTAB          00000000000003f0 0003f0 000088 00   A  0   0  1\n  [ 5] .gnu.version      VERSYM          0000000000000478 000478 00000c 02   A  3   0  2\n  [ 6] .gnu.version_r    VERNEED         0000000000000488 000488 000030 00   A  4   1  8\n  [ 7] .rela.dyn         RELA            00000000000004b8 0004b8 0000c0 18   A  3   0  8\n  [ 8] .init             PROGBITS        0000000000001000 001000 000017 00  AX  0   0  4\n  [ 9] .plt              PROGBITS        0000000000001020 001020 000010 10  AX  0   0 16\n  [10] .plt.got          PROGBITS        0000000000001030 001030 000008 08  AX  0   0  8\n  [11] .text             PROGBITS        0000000000001040 001040 0000f4 00  AX  0   0 16\n  [12] .fini             PROGBITS        0000000000001134 001134 000009 00  AX  0   0  4\n  [13] .rodata           PROGBITS        0000000000002000 002000 000004 04  AM  0   0  4\n  [14] .eh_frame_hdr     PROGBITS        0000000000002004 002004 00002c 00   A  0   0  4\n  [15] .eh_frame         PROGBITS        0000000000002030 002030 0000ac 00   A  0   0  8\n  [16] .note.gnu.property NOTE            00000000000020e0 0020e0 000020 00   A  0   0  8\n  [17] .note.ABI-tag     NOTE            0000000000002100 002100 000020 00   A  0   0  4\n  [18] .init_array       INIT_ARRAY      0000000000003e00 002e00 000008 08  WA  0   0  8\n  [19] .fini_array       FINI_ARRAY      0000000000003e08 002e08 000008 08  WA  0   0  8\n  [20] .dynamic          DYNAMIC         0000000000003e10 002e10 0001b0 10  WA  4   0  8\n  [21] .got              PROGBITS        0000000000003fc0 002fc0 000028 08  WA  0   0  8\n  [22] .got.plt          PROGBITS        0000000000003fe8 002fe8 000018 08  WA  0   0  8\n  [23] .data             PROGBITS        0000000000004000 003000 000010 00  WA  0   0  8\n  [24] .bss              NOBITS          0000000000004010 003010 000008 00  WA  0   0  1\n  [25] .comment          PROGBITS        0000000000000000 003010 00001f 01  MS  0   0  1\n  [26] .symtab           SYMTAB          0000000000000000 003030 0002d0 18     27  13  8\n  [27] .strtab           STRTAB          0000000000000000 003300 0001af 00      0   0  1\n  [28] .shstrtab         STRTAB          0000000000000000 0034af 0000fd 00      0   0  1\nKey to Flags:\n  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n  L (link order), O (extra OS processing required), G (group), T (TLS),\n  C (compressed), x (unknown), o (OS specific), E (exclude),\n  D (mbind), l (large), p (processor specific)\n"
+    },
+    {
+      "argv": [
+        "/usr/bin/readelf",
+        "--debug-dump=info",
+        "symbols-retained"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": ""
+    }
+  ],
+  "fixtureSourceSHA256": "e341c722d325011613e6dc95bad2a1da0c5d3efe9d7105647eea8a35812fbcf1",
+  "limits": "Only newly authored host C fixtures are compiled and statically read. No fixture or captured target is executed. This is a tooling classification proof, not Hyperliquid source recovery, build identity or behavior evidence.",
+  "schema": "provenance-strip-inference-control-v1",
+  "targetContext": {
+    "release": "94",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "toolSHA256": "0e5d85c97c671fabd528882566b5bcb3e8187e84f53c3fdcb45210c88df29887",
+  "tools": {
+    "cc": "cc (Debian 14.2.0-19) 14.2.0",
+    "readelf": "GNU readelf (GNU Binutils for Debian) 2.44",
+    "strip": "GNU strip (GNU Binutils for Debian) 2.44"
+  },
+  "workAlias": "<work> is the new directory supplied by --work; command cwd is <work>"
+}

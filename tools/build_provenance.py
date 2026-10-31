@@ -206,8 +206,18 @@ def interpret(items):
         f.inferred('debug_assertions', 'off (release-like profile)',
                    'std ub_checks precondition message is absent; it is emitted when debug assertions '
                    'are enabled in the calling crate. Weak: absence can also mean no checked API was used')
-    f.inferred('stripped', 'symbols and debuginfo removed' if get('elf.has_symtab') == [False] else 'not stripped',
-               'no .symtab or .debug* sections; this could be Cargo strip= or a post-link strip')
+    debug_sections = (get('elf.debug_sections') or [[]])[0]
+    if get('elf.has_symtab') == [False]:
+        if debug_sections:
+            f.inferred('stripped', 'static symbols absent; debug sections retained',
+                       '.symtab is absent but debug sections are present: ' + ', '.join(debug_sections) +
+                       '; this does not identify a historical strip command')
+        else:
+            f.inferred('stripped', 'symbols and debuginfo removed',
+                       'no .symtab or .debug* sections; this could be Cargo strip= or a post-link strip')
+    else:
+        f.inferred('stripped', 'not stripped',
+                   '.symtab is present, so static symbols remain; elf.debug_sections records debug sections separately')
     f.unknown('overflow_checks', 'overflow panic strings exist, but only callers into core panic_const '
               'helpers from first-party code would show the profile; needs xref analysis (RE-001)')
     for key, resolve in [
