@@ -1,0 +1,10 @@
+verdict	reference	reference_says	bytes_say
+differs	claimable_reward_rows, staking wording	per-user staking reward rows	the writer reads the token tree at row +0xb0 of FeeTracker user_states (tracker +0xc0, exchange +0x5d0); no staking state is read
+differs	order of the loop	one loop: consume, balance, unit credit, event per token	the writer 0x3743930 finishes every token first, then the handler loops over the returned vector
+differs	quote_notional_usdc_8dp passed to the balance update	the balance update takes the notional	r9 at 0x371d120 is the scale tree value at meta +0x1c0, else the unit price of 0x375fb50, and 0 for token 0
+differs	ClaimRewardEvent	user, asset id, wei, notional	event variant 0x11 holds a name string from 0x3c0d6e0 and an f64 wei / 10^wei decimals; the user is a one-item list argument, with time and block arguments
+same	minimum_claim_wei	100000000 raw notional and spot metadata	edi 0x5f5e100 at 0x3743c93, price from metadata only; no market price enters the floor
+same	dust skip	zero skipped, below floor skipped, seen flag before the floor test	the same at 0x3743c74, 0x3743cac, 0x3743cb9
+same	status numbers	390, 166, 167	tags 0x186, 0xa6, 0xa7; the seen flag is the low bit of the status
+same	consume_reward	zero claimable, saturating add into claimed	value +8 zeroed at 0x3743cc5, value +0x10 saturating at 0x3743cd3..0x3743d2b
+same	units divide	/ 10000	reciprocal at 0x2711112 with shr 0xb
