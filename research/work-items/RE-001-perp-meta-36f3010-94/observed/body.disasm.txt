@@ -1,0 +1,87 @@
+# capstone 5.0.7 disassembly of perp_meta body 0x36f3010 0x36f3010..0x36f3192; byte records are authoritative
+36f3010  53                     push rbx
+36f3011  4881ecc0000000         sub rsp, 0xc0
+36f3018  4989d0                 mov r8, rdx
+36f301b  48ba4b598638d6c56d34   movabs rdx, 0x346dc5d63886594b
+36f3025  4c89c0                 mov rax, r8
+36f3028  48f7e2                 mul rdx
+36f302b  48c1ea0b               shr rdx, 0xb
+36f302f  483b5630               cmp rdx, qword ptr [rsi + 0x30]
+36f3033  0f853f010000           jne 0x36f3178
+36f3039  4869c210270000         imul rax, rdx, 0x2710
+36f3040  4929c0                 sub r8, rax
+36f3043  4c3b4610               cmp r8, qword ptr [rsi + 0x10]
+36f3047  0f832b010000           jae 0x36f3178
+36f304d  488b4608               mov rax, qword ptr [rsi + 8]
+36f3051  4b8d1440               lea rdx, [r8 + r8*2]
+36f3055  48c1e204               shl rdx, 4
+36f3059  0fb644102a             movzx eax, byte ptr [rax + rdx + 0x2a]
+36f305e  3c07                   cmp al, 7
+36f3060  0f831f010000           jae 0x36f3185
+36f3066  4889fb                 mov rbx, rdi
+36f3069  b206                   mov dl, 6
+36f306b  28c2                   sub dl, al
+36f306d  0fb6c2                 movzx eax, dl
+36f3070  4889e7                 mov rdi, rsp
+36f3073  4889ce                 mov rsi, rcx
+36f3076  ba02000000             mov edx, 2
+36f307b  89c1                   mov ecx, eax
+36f307d  ff15c5070802           call qword ptr [rip + 0x20807c5]
+36f3083  66813c248601           cmp word ptr [rsp], 0x186
+36f3089  7534                   jne 0x36f30bf
+36f308b  488b442408             mov rax, qword ptr [rsp + 8]
+36f3090  4885c0                 test rax, rax
+36f3093  0f84ce000000           je 0x36f3167
+36f3099  66c7442460a900         mov word ptr [rsp + 0x60], 0xa9
+36f30a0  48894308               mov qword ptr [rbx + 8], rax
+36f30a4  66c7038601             mov word ptr [rbx], 0x186
+36f30a9  488d7c2460             lea rdi, [rsp + 0x60]
+36f30ae  e85df40600             call 0x3762510
+36f30b3  4889d8                 mov rax, rbx
+36f30b6  4881c4c0000000         add rsp, 0xc0
+36f30bd  5b                     pop rbx
+36f30be  c3                     ret 
+36f30bf  0f10442450             movups xmm0, xmmword ptr [rsp + 0x50]
+36f30c4  0f298424b0000000       movaps xmmword ptr [rsp + 0xb0], xmm0
+36f30cc  0f10442440             movups xmm0, xmmword ptr [rsp + 0x40]
+36f30d1  0f298424a0000000       movaps xmmword ptr [rsp + 0xa0], xmm0
+36f30d9  0f100424               movups xmm0, xmmword ptr [rsp]
+36f30dd  0f104c2410             movups xmm1, xmmword ptr [rsp + 0x10]
+36f30e2  0f10542420             movups xmm2, xmmword ptr [rsp + 0x20]
+36f30e7  0f105c2430             movups xmm3, xmmword ptr [rsp + 0x30]
+36f30ec  0f299c2490000000       movaps xmmword ptr [rsp + 0x90], xmm3
+36f30f4  0f29942480000000       movaps xmmword ptr [rsp + 0x80], xmm2
+36f30fc  0f294c2470             movaps xmmword ptr [rsp + 0x70], xmm1
+36f3101  0f29442460             movaps xmmword ptr [rsp + 0x60], xmm0
+36f3106  488d7c2460             lea rdi, [rsp + 0x60]
+36f310b  e800f40600             call 0x3762510
+36f3110  0fb7442406             movzx eax, word ptr [rsp + 6]
+36f3115  66894306               mov word ptr [rbx + 6], ax
+36f3119  8b442402               mov eax, dword ptr [rsp + 2]
+36f311d  894302                 mov dword ptr [rbx + 2], eax
+36f3120  488b442408             mov rax, qword ptr [rsp + 8]
+36f3125  0f10442420             movups xmm0, xmmword ptr [rsp + 0x20]
+36f312a  0f114320               movups xmmword ptr [rbx + 0x20], xmm0
+36f312e  0f10442430             movups xmm0, xmmword ptr [rsp + 0x30]
+36f3133  0f114330               movups xmmword ptr [rbx + 0x30], xmm0
+36f3137  0f10442440             movups xmm0, xmmword ptr [rsp + 0x40]
+36f313c  0f114340               movups xmmword ptr [rbx + 0x40], xmm0
+36f3140  0f10442450             movups xmm0, xmmword ptr [rsp + 0x50]
+36f3145  0f114350               movups xmmword ptr [rbx + 0x50], xmm0
+36f3149  0f10442410             movups xmm0, xmmword ptr [rsp + 0x10]
+36f314e  0f114310               movups xmmword ptr [rbx + 0x10], xmm0
+36f3152  66c703a900             mov word ptr [rbx], 0xa9
+36f3157  48894308               mov qword ptr [rbx + 8], rax
+36f315b  4889d8                 mov rax, rbx
+36f315e  4881c4c0000000         add rsp, 0xc0
+36f3165  5b                     pop rbx
+36f3166  c3                     ret 
+36f3167  66c703a900             mov word ptr [rbx], 0xa9
+36f316c  4889d8                 mov rax, rbx
+36f316f  4881c4c0000000         add rsp, 0xc0
+36f3176  5b                     pop rbx
+36f3177  c3                     ret 
+36f3178  488d3d41f0ff01         lea rdi, [rip + 0x1fff041]
+36f317f  ff15ebb20702           call qword ptr [rip + 0x207b2eb]
+36f3185  488d3dc4010002         lea rdi, [rip + 0x20001c4]
+36f318c  ff15beaf0702           call qword ptr [rip + 0x207afbe]
