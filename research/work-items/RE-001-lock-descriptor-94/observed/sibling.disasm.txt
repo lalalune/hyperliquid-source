@@ -1,0 +1,71 @@
+# sibling 0x358db60 (rare read-lock guard variant)
+# capstone 5.0.7 rendered disassembly, labeled; byte records in body hex are authoritative
+0x358db60:	push	rbx
+0x358db61:	sub	rsp, 0x20
+0x358db65:	mov	eax, dword ptr [rip + 0x21f872d]
+0x358db6b:	test	eax, eax
+0x358db6d:	jne	0x358dbf4
+0x358db73:	mov	ecx, 8
+0x358db78:	xor	eax, eax
+0x358db7a:	lock cmpxchg	qword ptr [rip + 0x21f86f5], rcx
+0x358db83:	jne	0x358dc42
+0x358db89:	lea	rax, [rip + 0x21f86e8]
+0x358db90:	lea	rcx, [rip + 0x21f86e2]
+0x358db97:	cmp	rcx, rax
+0x358db9a:	jb	0x358dc6b
+0x358dba0:	mov	rax, qword ptr [rip + 0x21f86d9]
+0x358dba7:	mov	qword ptr [rip + 0x21f86ce], 0
+0x358dbb2:	mov	qword ptr [rsp + 8], rax
+0x358dbb7:	movups	xmm0, xmmword ptr [rip + 0x21f86ca]
+0x358dbbe:	mov	qword ptr [rip + 0x21f86c7], 0
+0x358dbc9:	movups	xmmword ptr [rsp + 0x10], xmm0
+0x358dbce:	lea	rdi, [rsp + 8]
+0x358dbd3:	call	0x33f64b0
+0x358dbd8:	xor	ecx, ecx
+0x358dbda:	mov	eax, 8
+0x358dbdf:	lock cmpxchg	qword ptr [rip + 0x21f8690], rcx
+0x358dbe8:	jne	0x358dc78
+0x358dbee:	add	rsp, 0x20
+0x358dbf2:	pop	rbx
+0x358dbf3:	ret	
+0x358dbf4:	lea	rax, [rip + 0x21f867d]
+0x358dbfb:	mov	qword ptr [rsp], rax
+0x358dbff:	mov	rax, rsp
+0x358dc02:	mov	qword ptr [rsp + 8], rax
+0x358dc07:	lea	rdi, [rip + 0x21f868a]
+0x358dc0e:	lea	rcx, [rip + 0x2160b73]
+0x358dc15:	lea	r8, [rip + 0x2160b94]
+0x358dc1c:	lea	rdx, [rsp + 8]
+0x358dc21:	mov	esi, 1
+0x358dc26:	call	qword ptr [rip + 0x21e0c8c]
+0x358dc2c:	mov	ecx, 8
+0x358dc31:	xor	eax, eax
+0x358dc33:	lock cmpxchg	qword ptr [rip + 0x21f863c], rcx
+0x358dc3c:	je	0x358db89
+0x358dc42:	lea	rdi, [rip + 0x21f862f]
+0x358dc49:	mov	edx, 0x3b9aca00
+0x358dc4e:	call	qword ptr [rip + 0x21e19ac]
+0x358dc54:	lea	rax, [rip + 0x21f861d]
+0x358dc5b:	lea	rcx, [rip + 0x21f8617]
+0x358dc62:	cmp	rcx, rax
+0x358dc65:	jae	0x358dba0
+0x358dc6b:	lea	rdi, [rip + 0x2163a86]
+0x358dc72:	call	qword ptr [rip + 0x21e04a0]
+0x358dc78:	lea	rdi, [rip + 0x21f85f9]
+0x358dc7f:	xor	esi, esi
+0x358dc81:	call	qword ptr [rip + 0x21e1981]
+0x358dc87:	add	rsp, 0x20
+0x358dc8b:	pop	rbx
+0x358dc8c:	ret	
+0x358dc8d:	mov	rbx, rax
+0x358dc90:	xor	ecx, ecx
+0x358dc92:	mov	eax, 8
+0x358dc97:	lock cmpxchg	qword ptr [rip + 0x21f85d8], rcx
+0x358dca0:	jne	0x358dcaa
+0x358dca2:	mov	rdi, rbx
+0x358dca5:	call	0x5660110
+0x358dcaa:	lea	rdi, [rip + 0x21f85c7]
+0x358dcb1:	xor	esi, esi
+0x358dcb3:	call	qword ptr [rip + 0x21e194f]
+0x358dcb9:	jmp	0x358dca2
+0x358dcbb:	call	qword ptr [rip + 0x21e0467]
