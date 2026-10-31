@@ -1,0 +1,12 @@
+va	opcode_hex	description
+0x333057e	0f8835030000	js 33308b9 (sign check / buffer underflow guard)
+0x33305b2	4d0fafc149c1e823	imul r8, r9; shr r8, 0x23 (reciprocal div by 10)
+0x33305fa	4c39f1	cmp rcx, r14 (mantissa upper bound check)
+0x3330842	48c744244020000060	mov [rsp+0x40], 0x60000020 (compact buffer size/capacity 0x20)
+0x33308c7	4c8d05b2913b02	lea r8, [rip+0x23b91b2] -> 0x56e9a80 (order_wire.rs:326:35)
+0x3340fed	895338	mov [rbx+0x38], edx (struct end tag / field at +0x38)
+0x3341602	496bcd38	imul rcx, r13, 0x38 (OrderWire array indexing stride 56 bytes)
+0x3341614	4889740810	mov [rax+rcx+0x10], rsi (OrderWire limit_px field offset)
+0x3341619	4c89440818	mov [rax+rcx+0x18], r8 (OrderWire sz field offset)
+0x3341a6e	488d0d3b803a02	lea rcx, [rip+0x23a803b] -> 0x56e9ab0 (order_wire.rs:133:53)
+0x3341a98	4c8d05f97f3a02	lea r8, [rip+0x23a7ff9] -> 0x56e9a98 (order_wire.rs:123:86)
