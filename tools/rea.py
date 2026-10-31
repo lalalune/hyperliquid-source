@@ -84,6 +84,8 @@ def main(argv=None):
     node = find_node()
     env = environment(node)
     if profile is not None:
+        if 'disabled_analyzers' not in profile:
+            raise ValueError('config/rea.json profile missing disabled_analyzers')
         env['REA_GHIDRA_DISABLED_ANALYZERS'] = ','.join(profile['disabled_analyzers'])
     if args and args[0] == 'install':
         npm = node.parent / 'npm'
