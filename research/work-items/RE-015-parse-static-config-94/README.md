@@ -134,6 +134,100 @@ Not traced to a conclusion in this packet:
   branch). Those branches were not followed to a conclusion and
   are not claimed either way.
 
+## Tool versions and analysis options (Slopbot follow-up)
+
+Exact versions, measured on the analysis machine for this update
+(2026-10-31, Linux x86-64, kernel 7.0.0-39-generic):
+
+- GNU objdump (GNU Binutils for Ubuntu) 2.42
+- GNU readelf (GNU Binutils for Ubuntu) 2.42
+- Python 3.12.3
+- GnuPG 2.4.4
+- curl 8.5.0 (x86_64-pc-linux-gnu)
+- `make doctor` on this machine reports: analysis_ready=false,
+  exact_rebuild_ready=false; llvm-objdump, java, rust 1.94.1 and
+  rust 1.95.0 are unavailable, git-lfs is unavailable, Ghidra is
+  unavailable. That is why this packet uses GNU objdump only and
+  does not claim a Ghidra/REA window.
+- Analysis options: `objdump -d --start-address=<VA>
+  --stop-address=<VA>` for each window listed in Reproduce;
+  `readelf --debug-dump=frames-interp` for FDE ranges;
+  `sha256sum` and `gpg --batch --verify` for artifact identity.
+  No loader, no execution, no network service, no chain action.
+
+## Negative controls
+
+These are the controls that were checked and must fail, so that a
+positive match cannot be explained by a loose matcher:
+
+1. Key case: `AWS_NAME` (same length 8, different bytes) does
+   not match the 8-byte compare at 0x20a458. Control outcome:
+   no key match, parse falls through to the object loop.
+2. Key length: a key of length 7 or 9 does not pass the length-8
+   check at 0x164eae7, regardless of its content. Control
+   outcome: no key match.
+3. Unknown variant: `Nope` parses as a string but the mapper
+   jump table has no entry for it. Control outcome: mapper
+   miss, load defaults to NvTestnet (32).
+4. Wrong value type: `null`, a number, or an array as the
+   `aws_name` value does not take the string or `{` path.
+   Control outcome: no mapper hit.
+5. Wrong externally-tagged payload: `{"NvTestnet":123}` and
+   `{"NvTestnet"}` (missing `:` + `null`) fail the mapper `{`
+   path, the latter at the `:` check (0x164b513) and the former
+   at the null check (0x164e800, error code 9 on mismatch).
+6. Backslash-reject control: the main parser window contains
+   no `cmp $0x5c` reject branch. The absence is itself a
+   control: if the reference reject rule were implemented in
+   this window, that compare would be present. It is not;
+   the escape handling lives in the decoder at 0x4ebf970.
+7. Corruption control: a binary whose SHA-256 is not
+   `3b7179cd...` is rejected before any analysis. This was
+   exercised by checking the repo LFS pointer file (133 bytes,
+   not the binary) and refusing to use it, then re-downloading
+   from the provenance recovery URL and verifying SHA-256 and
+   GPG signature before re-dumping.
+8. Wrong release control: release 115 (SHA-256
+   `a6e2897c...`) and visor (SHA-256 `89338207...`) are
+   separate targets and were not used for any address in this
+   packet. All addresses here are release 94 only.
+
+## Before/after comparison
+
+Before = reference hand-written parser behaviour (the table in
+the next section, derived from the reference logic, not copied
+code). After = binary mechanism as observed in this packet.
+There is no Rust build to compare, because this packet
+contains no implementation and requests no gate; a
+before/after build result is therefore explicitly not
+applicable, and is not claimed. The comparison that was
+actually performed is reference-behaviour vs binary-mechanism,
+row by row, and it is the table below. The two rows marked
+candidate divergence are the only rows where before and
+after differ in mechanism; they are not execution-proven
+output differences.
+
+## Test results
+
+- `python3 research/work-items/RE-015-parse-static-config-94/check_evidence.py`
+  (checks the retained disassembly files for the positive
+  markers cited above and for the absence of the negative
+  backslash-reject marker): PASS.
+- Same script with `--binary /tmp/hl94/hl-node` (SHA-256
+  verified, GPG verified, then re-dump of 0x164d630-0x164d73e
+  and check for the call to 0x164e930): PASS.
+- `make doctor`: fails as recorded above (missing optional
+  tools, no Ghidra, no git-lfs, no rust toolchains). This is
+  a pre-existing environment limitation, not a failure of
+  this work-item.
+- `make verify` (`tools/artifacts.py verify`): fails at
+  `artifacts/node/115/hl-node` (LFS pointer file, size/SHA
+  mismatch) before reaching release 94 in the repo path.
+  Release 94 was verified separately from its provenance
+  recovery URL (SHA-256 and GPG, see Reproduce), because the
+  repo path contains only the LFS pointer on this machine.
+  No hosted CI or container result is claimed.
+
 ## Implementation and comparison
 
 Not yet implemented/measured. No Rust implementation, no
