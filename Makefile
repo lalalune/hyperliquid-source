@@ -13,6 +13,9 @@ verify:
 	$(PYTHON) tools/verify_imports.py
 test:
 	$(PYTHON) -m unittest discover -s tests -v
+.PHONY: kind5-rust
+kind5-rust:
+	$(PYTHON) tools/kind5_reader_rust.py --controls
 provenance:
 	$(PYTHON) tools/build_provenance.py
 reproduce:

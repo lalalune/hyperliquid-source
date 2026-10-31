@@ -1,0 +1,37 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.00s
+     Running unittests src/lib.rs (work/kind5-rust-src-1838-after/target-mutants/fast-threshold/debug/deps/hyperliquid_node94_kind5_reader-49db751752099e9e)
+
+running 7 tests
+test tests::overflow_precedes_charge_and_limit_failure_follows_charge ... ok
+test tests::nonminimal_payloads_and_all_nonzero_endian_bytes_are_retained ... ok
+test tests::inactive_output_bytes_survive_reuse ... ok
+test tests::raw_selector_two_bypasses_gate_and_wrapper_stays_little_endian ... ok
+test tests::short_payload_consumes_only_its_marker ... ok
+test tests::wrapper_invalid_marker_consumption_changes_at_nine_bytes ... FAILED
+test tests::authenticated_instruction_corpus ... FAILED
+
+failures:
+
+---- tests::wrapper_invalid_marker_consumption_changes_at_nine_bytes stdout ----
+
+thread 'tests::wrapper_invalid_marker_consumption_changes_at_nine_bytes' panicked at src/tests.rs:44:13:
+assertion `left == right` failed
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- tests::authenticated_instruction_corpus stdout ----
+
+thread 'tests::authenticated_instruction_corpus' panicked at src/tests.rs:152:9:
+assertion `left == right` failed: state at fixture 15874
+  left: [0, 0, 0, 0, 165, 165, 165, 165, 255, 255, 255, 255, 255, 255, 255, 255, 0, 0, 3, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+ right: [0, 0, 0, 0, 165, 165, 165, 165, 255, 255, 255, 255, 255, 255, 255, 255, 1, 0, 3, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+
+failures:
+    tests::authenticated_instruction_corpus
+    tests::wrapper_invalid_marker_consumption_changes_at_nine_bytes
+
+test result: FAILED. 5 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+error: test failed, to rerun pass `--lib`

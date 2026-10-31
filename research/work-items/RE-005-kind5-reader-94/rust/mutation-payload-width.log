@@ -1,0 +1,45 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.00s
+     Running unittests src/lib.rs (work/kind5-rust-src-1838-after/target-mutants/payload-width/debug/deps/hyperliquid_node94_kind5_reader-49db751752099e9e)
+
+running 7 tests
+test tests::inactive_output_bytes_survive_reuse ... ok
+test tests::overflow_precedes_charge_and_limit_failure_follows_charge ... ok
+test tests::short_payload_consumes_only_its_marker ... ok
+test tests::wrapper_invalid_marker_consumption_changes_at_nine_bytes ... ok
+test tests::nonminimal_payloads_and_all_nonzero_endian_bytes_are_retained ... FAILED
+test tests::raw_selector_two_bypasses_gate_and_wrapper_stays_little_endian ... FAILED
+test tests::authenticated_instruction_corpus ... FAILED
+
+failures:
+
+---- tests::nonminimal_payloads_and_all_nonzero_endian_bytes_are_retained stdout ----
+
+thread 'tests::nonminimal_payloads_and_all_nonzero_endian_bytes_are_retained' panicked at src/tests.rs:15:9:
+assertion `left == right` failed
+  left: Missing(2)
+ right: Value(1)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- tests::raw_selector_two_bypasses_gate_and_wrapper_stays_little_endian stdout ----
+
+thread 'tests::raw_selector_two_bypasses_gate_and_wrapper_stays_little_endian' panicked at src/tests.rs:75:5:
+assertion `left == right` failed
+  left: Missing(2)
+ right: Value(13330)
+
+---- tests::authenticated_instruction_corpus stdout ----
+
+thread 'tests::authenticated_instruction_corpus' panicked at src/tests.rs:147:9:
+assertion `left == right` failed: output at fixture 252
+  left: [0, 165, 165, 165, 165, 165, 165, 165, 4, 0, 0, 0, 0, 0, 0, 0, 165, 165, 165, 165, 165, 165, 165, 165]
+ right: [0, 165, 165, 165, 165, 165, 165, 165, 2, 0, 0, 0, 0, 0, 0, 0, 165, 165, 165, 165, 165, 165, 165, 165]
+
+
+failures:
+    tests::authenticated_instruction_corpus
+    tests::nonminimal_payloads_and_all_nonzero_endian_bytes_are_retained
+    tests::raw_selector_two_bypasses_gate_and_wrapper_stays_little_endian
+
+test result: FAILED. 4 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--lib`
