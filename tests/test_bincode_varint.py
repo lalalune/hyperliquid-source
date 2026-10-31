@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -196,6 +197,26 @@ class BinutilsCrossCheck(unittest.TestCase):
         shifted = list(sites)
         shifted[i] = (sites[i][0] + 1, sites[i][1])
         self.assertEqual(boundary_misses(shifted), [0x27ab30c])
+
+
+class RelativeRelocBounds(unittest.TestCase):
+    def test_aligned_relative_record_is_kept(self):
+        data = struct.pack('<QQq', 0x1000, 8, 0x2000)
+        found = bv.relative_relocs(data, {'.rela.dyn': {'offset': 0, 'size': 24, 'addr': 0}})
+        self.assertEqual(found, {0x1000: 0x2000})
+
+    def test_tail_read_from_the_next_bytes_is_rejected(self):
+        good = struct.pack('<QQq', 0x1000, 8, 0x2000)
+        forged = struct.pack('<QQq', 0x9999, 8, 0x1111)
+        secs = {'.rela.dyn': {'offset': 0, 'size': 25, 'addr': 0}}
+        with self.assertRaisesRegex(bv.EvidenceError, 'truncated .rela.dyn'):
+            bv.relative_relocs(good + forged, secs)
+
+    def test_tail_at_eof_is_rejected(self):
+        data = struct.pack('<QQq', 0x1000, 8, 0x2000) + b'\x00'
+        secs = {'.rela.dyn': {'offset': 0, 'size': len(data), 'addr': 0}}
+        with self.assertRaisesRegex(bv.EvidenceError, 'truncated .rela.dyn'):
+            bv.relative_relocs(data, secs)
 
 
 if __name__ == '__main__':

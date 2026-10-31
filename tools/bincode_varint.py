@@ -187,6 +187,8 @@ def direct_calls(text, base, target):
 
 def relative_relocs(data, secs):
     r = secs['.rela.dyn']
+    if r['size'] % 24:
+        raise EvidenceError('truncated .rela.dyn')
     out = {}
     for o in range(r['offset'], r['offset'] + r['size'], 24):
         where, info, addend = struct.unpack_from('<QQq', data, o)
