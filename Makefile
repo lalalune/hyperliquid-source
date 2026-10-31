@@ -11,6 +11,7 @@ fetch:
 verify:
 	$(PYTHON) tools/artifacts.py verify
 	$(PYTHON) tools/verify_imports.py
+	$(PYTHON) tools/verify_packets.py
 test:
 	$(PYTHON) -m unittest discover -s tests -v
 provenance:
