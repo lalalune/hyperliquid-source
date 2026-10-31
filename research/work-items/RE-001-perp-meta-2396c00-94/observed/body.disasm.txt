@@ -1,0 +1,75 @@
+# capstone 5.0.7 disassembly of perp_meta body 0x2396c00 0x2396c00..0x2396d49; byte records are authoritative
+2396c00  50                     push rax
+2396c01  4989d0                 mov r8, rdx
+2396c04  4c8b1e                 mov r11, qword ptr [rsi]
+2396c07  4c8b4e08               mov r9, qword ptr [rsi + 8]
+2396c0b  660f57c0               xorpd xmm0, xmm0
+2396c0f  49ba4b598638d6c56d34   movabs r10, 0x346dc5d63886594b
+2396c19  660f57c9               xorpd xmm1, xmm1
+2396c1d  4d85db                 test r11, r11
+2396c20  0f8481000000           je 0x2396ca7
+2396c26  498bb0b0000000         mov rsi, qword ptr [r8 + 0xb0]
+2396c2d  4889f0                 mov rax, rsi
+2396c30  49f7e2                 mul r10
+2396c33  48c1ea0b               shr rdx, 0xb
+2396c37  483b5130               cmp rdx, qword ptr [rcx + 0x30]
+2396c3b  0f85ee000000           jne 0x2396d2f
+2396c41  4869c210270000         imul rax, rdx, 0x2710
+2396c48  4829c6                 sub rsi, rax
+2396c4b  483b7110               cmp rsi, qword ptr [rcx + 0x10]
+2396c4f  0f83da000000           jae 0x2396d2f
+2396c55  488b4108               mov rax, qword ptr [rcx + 8]
+2396c59  488d1476               lea rdx, [rsi + rsi*2]
+2396c5d  48c1e204               shl rdx, 4
+2396c61  0fb644102a             movzx eax, byte ptr [rax + rdx + 0x2a]
+2396c66  4883f807               cmp rax, 7
+2396c6a  0f83cc000000           jae 0x2396d3c
+2396c70  ba06000000             mov edx, 6
+2396c75  66490f6ed3             movq xmm2, r11
+2396c7a  660f6215fed1e6fd       punpckldq xmm2, xmmword ptr [rip - 0x2192e02]
+2396c82  660f5c1516c2e6fd       subpd xmm2, xmmword ptr [rip - 0x2193dea]
+2396c8a  29c2                   sub edx, eax
+2396c8c  660f28ca               movapd xmm1, xmm2
+2396c90  660f15ca               unpckhpd xmm1, xmm2
+2396c94  f20f58ca               addsd xmm1, xmm2
+2396c98  c1e203                 shl edx, 3
+2396c9b  488d05eea104fe         lea rax, [rip - 0x1fb5e12]
+2396ca2  f20f5e0c02             divsd xmm1, qword ptr [rdx + rax]
+2396ca7  4d85c9                 test r9, r9
+2396caa  7475                   je 0x2396d21
+2396cac  498bb0b0000000         mov rsi, qword ptr [r8 + 0xb0]
+2396cb3  4889f0                 mov rax, rsi
+2396cb6  49f7e2                 mul r10
+2396cb9  48c1ea0b               shr rdx, 0xb
+2396cbd  483b5130               cmp rdx, qword ptr [rcx + 0x30]
+2396cc1  756c                   jne 0x2396d2f
+2396cc3  4869c210270000         imul rax, rdx, 0x2710
+2396cca  4829c6                 sub rsi, rax
+2396ccd  483b7110               cmp rsi, qword ptr [rcx + 0x10]
+2396cd1  735c                   jae 0x2396d2f
+2396cd3  488b4108               mov rax, qword ptr [rcx + 8]
+2396cd7  488d0c76               lea rcx, [rsi + rsi*2]
+2396cdb  48c1e104               shl rcx, 4
+2396cdf  0fb644082a             movzx eax, byte ptr [rax + rcx + 0x2a]
+2396ce4  4883f807               cmp rax, 7
+2396ce8  7352                   jae 0x2396d3c
+2396cea  b906000000             mov ecx, 6
+2396cef  66490f6ed1             movq xmm2, r9
+2396cf4  660f621584d1e6fd       punpckldq xmm2, xmmword ptr [rip - 0x2192e7c]
+2396cfc  660f5c159cc1e6fd       subpd xmm2, xmmword ptr [rip - 0x2193e64]
+2396d04  29c1                   sub ecx, eax
+2396d06  660f28c2               movapd xmm0, xmm2
+2396d0a  660f15c2               unpckhpd xmm0, xmm2
+2396d0e  f20f58c2               addsd xmm0, xmm2
+2396d12  c1e103                 shl ecx, 3
+2396d15  488d0574a104fe         lea rax, [rip - 0x1fb5e8c]
+2396d1c  f20f5e0401             divsd xmm0, qword ptr [rcx + rax]
+2396d21  f20f110f               movsd qword ptr [rdi], xmm1
+2396d25  f20f114708             movsd qword ptr [rdi + 8], xmm0
+2396d2a  4889f8                 mov rax, rdi
+2396d2d  59                     pop rcx
+2396d2e  c3                     ret 
+2396d2f  488d3d8ab43503         lea rdi, [rip + 0x335b48a]
+2396d36  ff1534773d03           call qword ptr [rip + 0x33d7734]
+2396d3c  488d3d0dc63503         lea rdi, [rip + 0x335c60d]
+2396d43  ff1507743d03           call qword ptr [rip + 0x33d7407]
