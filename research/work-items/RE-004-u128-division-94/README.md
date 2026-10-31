@@ -212,3 +212,34 @@ compiler-library ownership, caller reachability or whole-node equivalence.
 The original full-domain estimate/correction proof question remains open.
 No root workspace, reference pin, imported artifact, catalogue or component
 completion gate is changed.
+
+
+## Normalized estimate arithmetic argument
+
+The additional [math/PROOF.md](math/PROOF.md) addresses the original
+estimate/correction question with a mathematical argument conditional on its
+explicit instruction-to-math translation. Eight polynomial arithmetic
+queries are unsatisfiable; all eight assumption sets are separately
+satisfiable, and three weakened-hypothesis controls become satisfiable.
+The key bound uses `delta <= 2H-1 <= H^2` and
+`N*delta < M^2*H^2 <= T*D`, yielding an estimate at most one above the true
+quotient. The decrement/clamp and one correction then have an explicit
+all-input arithmetic argument. This is not a formally verified CPU model
+or an independently checked solver proof object.
+
+```sh
+python3 research/work-items/RE-004-u128-division-94/math/verify.py \
+  --output work/u128-math-fresh
+```
+
+Existing Z3 4.15.2 checked the queries. Fresh GNU/LLVM decodes rebind the same
+198 bytes / 71 instructions. The verifier checks 2,663 finite translation
+cases at all64 normalization exponents, including the shift-by64 boundary,
+clamp and both correction outcomes. Those cases corroborate the manual
+translation; they are distinct from the general arithmetic queries.
+Normal and optimized Python produce identical observation records. Raw
+solver output, native listings, query/source/tool hashes and limits are
+retained under `math/`. A timeout or unexpected solver answer is a non-pass.
+The existing Rust component, its complete 159,431-case evidence and every
+original static artifact are unchanged. No native execution, ISA formal
+verification, caller closure, compiler/source attribution or gate is claimed.
