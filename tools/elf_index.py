@@ -64,7 +64,10 @@ def unwind_index(data):
     for i in range(count):
         start_delta, fde_delta = struct.unpack_from('<ii', data, off + 12 + i * 8)
         start, fde = base + start_delta, base + fde_delta
-        section = next((s for s in executable if s['address'] <= start < s['address'] + s['size']), None)
+        matches = [s for s in executable if s['address'] <= start < s['address'] + s['size']]
+        if len(matches) > 1:
+            raise ValueError(f'Ambiguous executable section for unwind start: {start:#x}')
+        section = matches[0] if matches else None
         if section is None:
             raise ValueError(f'Unwind start outside executable sections: {start:#x}')
         fde_section = next((s for s in secs if s['name'] == '.eh_frame'), None)
@@ -75,7 +78,7 @@ def unwind_index(data):
     if starts != sorted(starts):
         raise ValueError('Unwind index is not ordered')
     for row in entries:
-        sec = next(s for s in executable if s['name'] == row['section'])
+        sec = next(s for s in executable if s['address'] <= row['start'] < s['address'] + s['size'])
         following = bisect.bisect_right(starts, row['start'])
         upper = sec['address'] + sec['size']
         if following < len(starts):
