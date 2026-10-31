@@ -43,6 +43,32 @@ def find_node():
     raise ValueError('REA 6.8.0 needs Node ^22.23.4, ^24.22.1 or >=26.12.1. Install the .nvmrc version or set REA_NODE to a supported executable.')
 
 
+def find_java_home(java):
+    """Resolve a full JDK, including macOS's system launcher and Java 8 JREs."""
+    executable = Path(java).resolve()
+    if sys.platform == 'darwin' and executable == Path('/usr/bin/java').resolve():
+        # This is an OS launcher, not a JDK at /usr. Use the platform JDK
+        # resolver without dumping potentially private JVM properties.
+        try:
+            result = subprocess.run(['/usr/libexec/java_home'], capture_output=True,
+                                    text=True, timeout=5)
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+        if result.returncode or not result.stdout.strip():
+            return None
+        home = Path(result.stdout.strip())
+        if not home.is_absolute():
+            return None
+    else:
+        home = executable.parent.parent
+    # Java 8 can expose the nested JRE executable even when a full JDK exists.
+    if home.name == 'jre' and (home.parent / 'bin/javac').is_file():
+        home = home.parent
+    if (home / 'bin/java').is_file() and (home / 'bin/javac').is_file():
+        return home
+    return None
+
+
 def environment(node):
     env = os.environ.copy()
     env['PATH'] = str(node.parent) + os.pathsep + env.get('PATH', '')
@@ -54,8 +80,8 @@ def environment(node):
     if not env.get('JAVA_HOME'):
         java = shutil.which('java', path=env['PATH'])
         if java:
-            home = Path(java).resolve().parent.parent
-            if (home / 'bin/java').is_file():
+            home = find_java_home(java)
+            if home is not None:
                 env['JAVA_HOME'] = str(home)
     return env
 

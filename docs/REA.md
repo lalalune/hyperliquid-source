@@ -35,6 +35,9 @@ Set `GHIDRA_INSTALL_DIR` to an existing standard Ghidra installation and
 `JAVA_HOME` to a compatible full JDK. Explicit values are preserved. The
 launcher can discover the previously installed Ghidra under
 `~/.local/share/rea-tools/ghidra_*_PUBLIC` and Java on PATH.
+For the macOS `/usr/bin/java` launcher, discovery uses `/usr/libexec/java_home`.
+A Java 8 nested JRE is normalized to its enclosing JDK. Automatic discovery
+requires both `bin/java` and `bin/javac`; explicit `JAVA_HOME` still wins.
 The x86-64 targets do not need the sBPF extension.
 
 ```sh
