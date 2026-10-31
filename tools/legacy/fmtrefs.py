@@ -17,8 +17,10 @@ data = open(binary, "rb").read()
 
 
 def decode(addr, limit=400):
+    if not 0 <= addr < len(data):
+        return "{?out-of-range}"
     out, i = [], addr
-    while i < addr + limit:
+    while i < addr + limit and i < len(data):
         b = data[i]
         if b == 0:
             break
