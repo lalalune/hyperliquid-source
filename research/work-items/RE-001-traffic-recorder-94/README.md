@@ -82,8 +82,10 @@ Verified observations, each pinned by byte controls in `observed/records.json`:
    inside the range the reference named.
 6. **30-second cadence, twice.** Both poll loops arm their sleep future from an
    inline `movabsq $0x403E000000000000` (30.0): copy A at `0x3D1412B` storing
-   future+`0xB8`, the report task at `0x3D21763` storing future+`0xD8`. Both
-   poll it through the shared sleep-from-f64 function `0x3D0EEE0`.
+   future+`0xB8`, the report task at `0x3D21763` storing future+`0xD8`. Copy A
+   polls its future through the shared sleep-from-f64 function `0x3D0EEE0`
+   (call at `0x3D14039`); the report task polls its future through `0x3D1E830`
+   (call at `0x3D21785`), a function this packet does **not** validate.
 7. **Shared global bucket table.** After the sleep resolves, both copy A and
    the report task take the same global one-byte lock at `0x5786480`
    (`lock cmpxchgb` at `0x3D14076` / `0x3D217C2`) before draining the global
@@ -130,7 +132,9 @@ and its corruption controls in `tests/test_traffic_recorder_static.py`.
   is corrected above; its `first_update_seen`/counter field names remain
   inferred labels, not recovered names.
 - Not covered: indirect callers (async executor dispatch), the bucket-table
-  iteration callee `0x3D2B7B0`, formatting helper internals, `#115` drift, and
-  any runtime behavior. No component gate is requested; transport gates stay
-  false. Next bounded question: the bucket-table drain callee `0x3D2B7B0` and
-  the label strings keyed into it.
+  iteration callee `0x3D2B7B0`, the report task's sleep poller `0x3D1E830`
+  (called at `0x3D21785`; relationship to `0x3D0EEE0` unexamined), formatting
+  helper internals, `#115` drift, and any runtime behavior. No component gate
+  is requested; transport gates stay false. Next bounded question: the
+  bucket-table drain callee `0x3D2B7B0` and the label strings keyed into it,
+  then the `0x3D1E830`/`0x3D0EEE0` sleep-poller pair.
