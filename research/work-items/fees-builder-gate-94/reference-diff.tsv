@@ -1,0 +1,10 @@
+verdict	reference	reference_says	bytes_say
+differs	14_order.rs validate_main_perp_like	validated.len() > 100 gives a builder order count error	the compared word is action +8, the builder fee rate; the order count is action +0x38; rate 101 with one order gives 0x129 at 0x1ea3a32
+differs	14_order.rs validate_spot_or_extended	validated.len() > 1000 gives a builder order count error	same word at 0x1ea4727 with 1000
+differs	14_order.rs STATUS_BUILDER_ORDER_COUNT_TOO_LARGE	name of the status	tag 0x129 Display text is Builder fee is too high.
+differs	14_order.rs validate_main_perp_like comment	approval failure sits inside the ExtendedNa branch	the approval lookup runs for any kind when the builder flag is set; kind 3 only adds the 0x2511900 path after it
+same	14_order.rs comment on 0x1EA3F60	approval lookup failure reports 296	0x128 = 296, written at 0x1ea4734
+differs	14_order.rs comment on 0x1EA3F60	cap overflow reports 180	that is 0xb4, whose text is about the delegatable balance for a priority order, not a builder cap
+same	14_order.rs comment on 0x1EA3F60	l1_sub_account__lookup_master collapses subaccounts onto their master	0x36f3ed0 through slot 0x5773220, table +0x3810 of the exchange state
+differs	14_order.rs comment on 0x1EA3140	resolve the master account when needed	same table read inline, in both the builder path and the kind 3 path, with no separate condition
+differs	14_order.rs validate_spot_or_extended	kinds 1 and 2 reach validate_grouping	kinds 1 and 2 stop at tag 0xf5 with TP/SL before any grouping arm, so the arms at 0x1ea4aaa and 0x1ea4ac5 cannot run
