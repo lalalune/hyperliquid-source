@@ -15,7 +15,7 @@ ghidra = locate_ghidra()
 if not ghidra:
     raise SystemExit('Set GHIDRA_HOME to an installation with support/analyzeHeadless')
 relative = f'artifacts/node/{args.release}/hl-node'
-item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == relative)
+item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text(encoding='utf-8'))['files'] if i['path'] == relative)
 check(ROOT / relative, item)
 project_dir = ROOT / 'work/ghidra'
 name = f"hl-node-{args.release}-{item['sha256'][:12]}"

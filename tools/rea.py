@@ -12,7 +12,7 @@ from doctor import locate_ghidra
 from artifacts import check
 
 ROOT = Path(__file__).resolve().parents[1]
-CONFIG = json.loads((ROOT / 'config/rea.json').read_text())
+CONFIG = json.loads((ROOT / 'config/rea.json').read_text(encoding='utf-8'))
 
 
 def supported_node(version):
@@ -62,7 +62,7 @@ def environment(node):
 
 def target(name):
     relative = CONFIG['targets'][name]
-    item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == relative)
+    item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text(encoding='utf-8'))['files'] if i['path'] == relative)
     check(ROOT / relative, item)
     return {'path': str(ROOT / relative), 'sha256': item['sha256'], 'provider_id': CONFIG['provider']}
 
@@ -94,7 +94,7 @@ def main(argv=None):
         package = ROOT / 'node_modules/rea-agents'
         if not (package / 'package.json').is_file():
             raise ValueError('Pinned REA package is absent. Run make rea-install.')
-        metadata = json.loads((package / 'package.json').read_text())
+        metadata = json.loads((package / 'package.json').read_text(encoding='utf-8'))
         if metadata.get('version') != CONFIG['version']:
             raise ValueError('REA package version differs from config/rea.json; run make rea-install')
         command = [str(node), str(package / 'scripts/rea.mjs'), *(args or ['--help'])]

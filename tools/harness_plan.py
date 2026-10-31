@@ -33,7 +33,7 @@ KNOWN_TARGET_DIGESTS = {
 
 
 def load_json(path: Path):
-    return json.loads(path.read_text())
+    return json.loads(path.read_text(encoding='utf-8'))
 
 
 def validate_protocol(protocol: dict) -> None:
@@ -92,7 +92,7 @@ def validate_fixtures(fixtures_doc: dict, protocol: dict) -> dict:
 def approval_covers(request_id: str) -> bool:
     if not APPROVAL_PATH.is_file():
         return False
-    text = APPROVAL_PATH.read_text()
+    text = APPROVAL_PATH.read_text(encoding='utf-8')
     return request_id in text and 'authorized' in text.lower()
 
 

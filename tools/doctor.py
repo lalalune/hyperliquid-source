@@ -49,7 +49,7 @@ def report():
     if ghidra:
         properties = ghidra / 'Ghidra/application.properties'
         if properties.is_file():
-            ghidra_version = next((line.split('=', 1)[1] for line in properties.read_text().splitlines() if line.startswith('application.version=')), None)
+            ghidra_version = next((line.split('=', 1)[1] for line in properties.read_text(encoding='utf-8').splitlines() if line.startswith('application.version=')), None)
     return {'analysis_ready': all(t['available'] for t in required) and sys.version_info >= (3, 10),
             'exact_rebuild_ready': False,
             'missing_rebuild_evidence': ['Recovered Cargo manifests and dependency locks', 'Target Linux build flags and exact LLVM/fork provenance', 'Accepted reconstructed implementation and comparison harness'],

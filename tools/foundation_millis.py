@@ -89,7 +89,7 @@ def analyze(data, records, objdump=None):
             output = subprocess.check_output([objdump,'-d',f'--start-address={start:#x}',
                                               f'--stop-address={end:#x}','artifacts/node/94/hl-node'],cwd=ROOT,text=True)
         else:
-            output = (PACKET / (row['name']+'.objdump.txt')).read_text()
+            output = (PACKET / (row['name']+'.objdump.txt')).read_text(encoding='utf-8')
         exports[row['name']] = output
         ins = decode_export(output,start,end,body)
         instruction_starts.update(ins)
@@ -178,7 +178,7 @@ def analyze(data, records, objdump=None):
 def inspect(path, objdump=None):
     data = Path(path).read_bytes()
     require(len(data) == 91774280 and hashlib.sha256(data).hexdigest() == SHA256, 'Expected exact node #94 size/SHA-256')
-    return analyze(data,json.loads((PACKET/'records.json').read_text()),objdump)
+    return analyze(data,json.loads((PACKET/'records.json').read_text(encoding='utf-8')),objdump)
 
 
 def main():
@@ -188,7 +188,7 @@ def main():
     parser.add_argument('--check',type=Path)
     args = parser.parse_args(); result = inspect(args.binary,args.objdump)
     if args.check:
-        require(result == json.loads(args.check.read_text()), 'Retained evidence changed')
+        require(result == json.loads(args.check.read_text(encoding='utf-8')), 'Retained evidence changed')
         print('Foundation millis evidence reproduces exactly.')
     else:
         print(json.dumps(result,indent=2))

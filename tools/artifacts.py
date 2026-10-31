@@ -88,7 +88,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command', choices=['verify', 'fetch'])
     args = parser.parse_args()
-    manifest = json.loads((ROOT / 'provenance/artifacts.json').read_text())
+    manifest = json.loads((ROOT / 'provenance/artifacts.json').read_text(encoding='utf-8'))
     for item in manifest['files']:
         if args.command == 'fetch':
             fetch_one(ROOT, item)

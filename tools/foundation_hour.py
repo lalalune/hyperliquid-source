@@ -140,7 +140,7 @@ def main():
     args = parser.parse_args()
     result = inspect(args.binary)
     if args.check:
-        require(result == json.loads(args.check.read_text()), 'Retained evidence differs')
+        require(result == json.loads(args.check.read_text(encoding='utf-8')), 'Retained evidence differs')
         print('Foundation hour evidence reproduces exactly.')
     else:
         print(json.dumps(result, indent=2))
