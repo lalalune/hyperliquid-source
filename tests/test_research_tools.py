@@ -87,6 +87,10 @@ class CatalogueTests(unittest.TestCase):
         d = copy.deepcopy(self.progress); del d['components']['visor']
         with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
 
+    def test_missing_component_depends_on_rejected(self):
+        parts = copy.deepcopy(self.parts); del parts[0]['depends_on']
+        with self.assertRaises(ValueError): validate_progress(parts, self.progress, self.root)
+
 
 class VisorIndexTests(unittest.TestCase):
     def test_target_for_maps_nodes_and_visor(self):
