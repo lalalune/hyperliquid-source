@@ -1,0 +1,151 @@
+{
+  "abi": {
+    "rdi": "20-byte RIPEMD-160 state (5 x u32 little-endian)",
+    "rsi": "pointer to one 64-byte message block",
+    "side_effect": "state overwritten with post-compress digest words (LE)",
+    "simd": "scalar compress carved; no alternate SIMD dispatcher examined"
+  },
+  "binary_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "carved_len": 5776,
+  "carved_sha256": "9da4dd9d6f7ad3288ba0fafbc8323f441ff24d39bef6e9deb5922fa7c5e9303c",
+  "emu_ran": true,
+  "emu_skipped": false,
+  "finalize_ff15_slot": "0x5776fb0",
+  "finalize_ff15_slot_match": true,
+  "finalize_ff15_va": "0x4ea049b",
+  "finalize_mov_slot": "0x5776fb0",
+  "finalize_mov_slot_match": true,
+  "finalize_mov_va": "0x4ea043a",
+  "finalize_va": "0x4ea0200",
+  "fn": "0x4ea55f0",
+  "fn_end": "0x4ea6c80",
+  "fn_ret": "0x4ea6c7f",
+  "got_ff15_caller_count": 1,
+  "got_mov_caller_count": 1,
+  "got_rela": {
+    "r_addend": "0x4ea55f0",
+    "r_info": "0x8",
+    "r_offset": "0x5776fb0"
+  },
+  "got_slot": "0x5776fb0",
+  "key_bytes": [
+    {
+      "bytes": "554157415641554154534883ec18",
+      "expected": "554157415641554154534883ec18",
+      "match": true,
+      "note": "compress push/sub rsp,0x18",
+      "va": "0x4ea55f0"
+    },
+    {
+      "bytes": "c3",
+      "expected": "c3",
+      "match": true,
+      "note": "compress ret",
+      "va": "0x4ea6c7f"
+    },
+    {
+      "bytes": "554157415641554154534881ec680100",
+      "expected": "554157415641554154534881ec680100",
+      "match": true,
+      "note": "finalize push/sub rsp,0x168",
+      "va": "0x4ea0200"
+    },
+    {
+      "bytes": "488b1d6f6b8d00",
+      "expected": "488b1d6f6b8d00",
+      "match": true,
+      "note": "finalize mov rbx,[GOT compress]",
+      "va": "0x4ea043a"
+    },
+    {
+      "bytes": "ffd3",
+      "expected": "ffd3",
+      "match": true,
+      "note": "finalize call *rbx",
+      "va": "0x4ea044a"
+    },
+    {
+      "bytes": "ffd3",
+      "expected": "ffd3",
+      "match": true,
+      "note": "finalize call *rbx (second)",
+      "va": "0x4ea0486"
+    },
+    {
+      "bytes": "ff150f6b8d00",
+      "expected": "ff150f6b8d00",
+      "match": true,
+      "note": "finalize call *[GOT compress]",
+      "va": "0x4ea049b"
+    },
+    {
+      "bytes": "488d3dc8f08a00",
+      "expected": "488d3dc8f08a00",
+      "match": true,
+      "note": "lea Location slot",
+      "va": "0x4ea0541"
+    }
+  ],
+  "key_insns_count": 8,
+  "location_lea_target": "0x574f610",
+  "location_lea_target_match": true,
+  "location_lea_va": "0x4ea0541",
+  "location_path_len": 89,
+  "location_path_match": true,
+  "location_path_sha256": "36b681955d65e83df460197ed445c5afd9833b222b962608ca53fe2ae2349d35",
+  "location_path_suffix": "ripemd-0.1.3/src/lib.rs",
+  "location_path_va": "0x1f1474",
+  "location_rela": {
+    "r_addend": "0x1f1474",
+    "r_info": "0x8",
+    "r_offset": "0x574f610"
+  },
+  "location_rela_slot": "0x574f610",
+  "vectors": {
+    "abc": {
+      "emulated_digest_hex": "8eb208f7e05d987a9b044a8e98c6b087f15a0bfc",
+      "emulated_digest_sha256": "6e6a062f9d47792387aadcb7f1a0ad1a53929326f037856a5603ab5195f2b6f7",
+      "emulated_match": true,
+      "expected_digest_hex": "8eb208f7e05d987a9b044a8e98c6b087f15a0bfc",
+      "expected_digest_sha256": "6e6a062f9d47792387aadcb7f1a0ad1a53929326f037856a5603ab5195f2b6f7",
+      "nblocks": 1,
+      "padded_hex": "61626380000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001800000000000000"
+    },
+    "alphanum": {
+      "emulated_digest_hex": "b0e20b6e3116640286ed3a87a5713079b21f5189",
+      "emulated_digest_sha256": "1dcdb40259745305cfdd003fc7f8e8d5f7e71f4451776f0b2bc786224d22f8fc",
+      "emulated_match": true,
+      "expected_digest_hex": "b0e20b6e3116640286ed3a87a5713079b21f5189",
+      "expected_digest_sha256": "1dcdb40259745305cfdd003fc7f8e8d5f7e71f4451776f0b2bc786224d22f8fc",
+      "nblocks": 2,
+      "padded_hex": "4142434445464748494a4b4c4d4e4f505152535455565758595a6162636465666768696a6b6c6d6e6f707172737475767778797a3031323334353637383980000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f001000000000000"
+    },
+    "az": {
+      "emulated_digest_hex": "f71c27109c692c1b56bbdceb5b9d2865b3708dbc",
+      "emulated_digest_sha256": "3c2068bc75666d5027e900f106d44b379976dffd194f122f0e15a85398b2e2dd",
+      "emulated_match": true,
+      "expected_digest_hex": "f71c27109c692c1b56bbdceb5b9d2865b3708dbc",
+      "expected_digest_sha256": "3c2068bc75666d5027e900f106d44b379976dffd194f122f0e15a85398b2e2dd",
+      "nblocks": 1,
+      "padded_hex": "6162636465666768696a6b6c6d6e6f707172737475767778797a800000000000000000000000000000000000000000000000000000000000d000000000000000"
+    },
+    "empty": {
+      "emulated_digest_hex": "9c1185a5c5e9fc54612808977ee8f548b2258d31",
+      "emulated_digest_sha256": "865c88e13bcf1d8651fc37ea134a9fb02310883c92532e0ad859511510314f4a",
+      "emulated_match": true,
+      "expected_digest_hex": "9c1185a5c5e9fc54612808977ee8f548b2258d31",
+      "expected_digest_sha256": "865c88e13bcf1d8651fc37ea134a9fb02310883c92532e0ad859511510314f4a",
+      "nblocks": 1,
+      "padded_hex": "80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "message_digest": {
+      "emulated_digest_hex": "5d0689ef49d2fae572b881b123a85ffa21595f36",
+      "emulated_digest_sha256": "f811a844757c94142d101388b727bfa05dc7968fa7edc708dce5ba7ef3235bed",
+      "emulated_match": true,
+      "expected_digest_hex": "5d0689ef49d2fae572b881b123a85ffa21595f36",
+      "expected_digest_sha256": "f811a844757c94142d101388b727bfa05dc7968fa7edc708dce5ba7ef3235bed",
+      "nblocks": 1,
+      "padded_hex": "6d657373616765206469676573748000000000000000000000000000000000000000000000000000000000000000000000000000000000007000000000000000"
+    }
+  }
+}
