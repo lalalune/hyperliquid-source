@@ -1,0 +1,62 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x37606b0 0x37606b0..0x376078a; byte records are authoritative
+37606b0  50                     push rax
+37606b1  483bb788010000         cmp rsi, qword ptr [rdi + 0x188]
+37606b8  0f83bf000000           jae 0x376077d
+37606be  488b8f80010000         mov rcx, qword ptr [rdi + 0x180]
+37606c5  4869f6e8000000         imul rsi, rsi, 0xe8
+37606cc  0fb6443149             movzx eax, byte ptr [rcx + rsi + 0x49]
+37606d1  2a443148               sub al, byte ptr [rcx + rsi + 0x48]
+37606d5  0f8295000000           jb 0x3760770
+37606db  b901000000             mov ecx, 1
+37606e0  7514                   jne 0x37606f6
+37606e2  31f6                   xor esi, esi
+37606e4  4889d0                 mov rax, rdx
+37606e7  48f7e1                 mul rcx
+37606ea  4889c2                 mov rdx, rax
+37606ed  400f91c6               setno sil
+37606f1  4889f0                 mov rax, rsi
+37606f4  59                     pop rcx
+37606f5  c3                     ret 
+37606f6  0fb6f0                 movzx esi, al
+37606f9  40f6c601               test sil, 1
+37606fd  740a                   je 0x3760709
+37606ff  b90a000000             mov ecx, 0xa
+3760704  83fe01                 cmp esi, 1
+3760707  74d9                   je 0x37606e2
+3760709  a802                   test al, 2
+376070b  740e                   je 0x376071b
+376070d  486bc964               imul rcx, rcx, 0x64
+3760711  89f7                   mov edi, esi
+3760713  83e7fe                 and edi, 0xfffffffe
+3760716  83ff02                 cmp edi, 2
+3760719  74c7                   je 0x37606e2
+376071b  a804                   test al, 4
+376071d  7411                   je 0x3760730
+376071f  4869c910270000         imul rcx, rcx, 0x2710
+3760726  89f7                   mov edi, esi
+3760728  83e7fc                 and edi, 0xfffffffc
+376072b  83ff04                 cmp edi, 4
+376072e  74b2                   je 0x37606e2
+3760730  a808                   test al, 8
+3760732  7411                   je 0x3760745
+3760734  4869c900e1f505         imul rcx, rcx, 0x5f5e100
+376073b  89f7                   mov edi, esi
+376073d  83e7f8                 and edi, 0xfffffff8
+3760740  83ff08                 cmp edi, 8
+3760743  749d                   je 0x37606e2
+3760745  a810                   test al, 0x10
+3760747  7427                   je 0x3760770
+3760749  48bf0000c16ff2862300   movabs rdi, 0x2386f26fc10000
+3760753  4889c8                 mov rax, rcx
+3760756  4889d1                 mov rcx, rdx
+3760759  48f7e7                 mul rdi
+376075c  7012                   jo 0x3760770
+376075e  4889ca                 mov rdx, rcx
+3760761  4889c1                 mov rcx, rax
+3760764  83e6f0                 and esi, 0xfffffff0
+3760767  83fe10                 cmp esi, 0x10
+376076a  0f8472ffffff           je 0x37606e2
+3760770  488d3df91af901         lea rdi, [rip + 0x1f91af9]
+3760777  ff15f3dc0002           call qword ptr [rip + 0x200dcf3]
+376077d  488d3d6c1af901         lea rdi, [rip + 0x1f91a6c]
+3760784  ff15e6dc0002           call qword ptr [rip + 0x200dce6]
