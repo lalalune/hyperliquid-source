@@ -1,0 +1,85 @@
+function	va	bytes	target	meaning
+closure	0x432fc20	488b4718		source pointer read from closure +0x18
+closure	0x432fc24	488b4f20		source length read from closure +0x20
+closure	0x432fc32	66c744240e0001		two option bytes: byte 0 = 0, byte 1 = 1
+closure	0x432fc4d	488d1500a0eefb	0x219c54	retry label pointer
+closure	0x432fc5e	b90f000000		retry label length 15
+closure	0x432fc66	4531c0		sleep list pointer None
+closure	0x432fc69	e8529a09fd	0x13c96c0	call retry helper
+closure	0x432fc79	0f8025010000	0x432fda4	Err branch to unwrap panic
+closure	0x432fc89	4c8b6308		destination pointer from closure +0x08
+closure	0x432fc8d	488b4b10		destination length from closure +0x10
+closure	0x432fc91	4c89ff		first argument = compressed path pointer
+closure	0x432fc97	ff153bf34301	0x576efd8	call the mv helper through its GOT slot
+closure	0x432fc9d	4885c0		test mv result
+closure	0x432fca0	756d	0x432fd0f	nonzero mv result goes to unwrap panic
+closure	0x432fcc2	c6052887450101	0x57883f1	store 1 in the byte beside the lock
+closure	0x432fd22	4c8d05e7d13e01	0x571cf10	mv unwrap Location
+closure	0x432fdcb	4c8d0526d13e01	0x571cef8	compress unwrap Location
+retry	0x13c96f5	0fb60e		option byte 0 into ecx
+retry	0x13c96fd	440fb64601		option byte 1 into r8d
+retry	0x13c9716	e8956c0800	0x14503b0	first attempt
+retry	0x13c9720	0f819a020000	0x13c99c0	Ok first attempt returns at once
+retry	0x13c9737	7419	0x13c9752	None sleep list takes the default table
+retry	0x13c9746	0f84e0010000	0x13c992c	empty explicit list goes straight to exhaustion
+retry	0x13c9752	4c8d3d7fd6e4fe	0x216dd8	default table start
+retry	0x13c975e	48c744243003000000		default table length 3
+retry	0x13c9767	488d0582d6e4fe	0x216df0	default table end
+retry	0x13c9795	f20f590dc316e4fe	0x20ae60	seconds to microseconds factor
+retry	0x13c98ce	0fb608		option byte 0 for the retried call
+retry	0x13c98d1	440fb64001		option byte 1 for the retried call
+retry	0x13c98ef	e8bc6a0800	0x14503b0	retried attempt
+retry	0x13c9902	0f85ab000000	0x13c99b3	Ok retried attempt leaves the loop
+retry	0x13c9926	0f8564feffff	0x13c9790	next sleep while entries remain
+retry	0x13c9971	488d353735e3fe	0x1fceaf	exhaustion template
+worker	0x14503d1	4883fa04		length below 4 skips the suffix test
+worker	0x14503d7	817c16fc2e6c7a34		last four bytes compared with .lz4
+worker	0x14503df	0f8441030000	0x1450726	match goes to the zip_inner error
+worker	0x14503e5	894c2444		option byte 0 saved
+worker	0x14503ff	488d050aa62104	0x566aa10	static &str holding .lz4
+worker	0x1450410	488d35bb0bd9fe	0x1e0fd2	template for path ++ .lz4
+worker	0x145043c	ff154eeb3104	0x576ef90	remove any old output file
+worker	0x1450442	807c240801		removal error tag
+worker	0x1450453	488d059a9cdbfe	0x20a0f4	--rm text
+worker	0x145045a	4584ed		option byte 1 test
+worker	0x1450462	480f45c8		pointer = --rm when option byte 1 is set
+worker	0x145046a	c1e002		length = option byte 1 times 4
+worker	0x145047d	488b542460		input path pointer for first quote
+worker	0x1450496	ff15bce33104	0x576e858	quote input path
+worker	0x1450563	ff15efe23104	0x576e858	quote output path
+worker	0x14505f9	488d8424c8000000		command argument 0 = option text
+worker	0x145060b	488d842488000000		command argument 1 = quoted input
+worker	0x1450624	488d4c2470		command argument 2 = quoted output
+worker	0x1450633	488d358adbdafe	0x1fe1c4	command template
+worker	0x14506c2	807c244400		option byte 0 test
+worker	0x14506c9	c68424b800000001		shell flag byte set when option byte 0 is set
+worker	0x14506d9	ff15e9e13104	0x576e8c8	run the shell command
+worker	0x145073c	488d35a4c9dafe	0x1fd0e7	guard error template
+mv	0x1404db1	ff1529a23604	0x576efe0	read optional config string
+mv	0x1404dc2	7107	0x1404dcb	Some continues
+mv	0x1404dc4	31c0		None returns Ok with nothing run
+mv	0x1404de4	488d051937e1fe	0x218504	argument 0 text
+mv	0x1404df0	48c744243803000000		argument 0 length
+mv	0x1404df9	488d050737e1fe	0x218507	argument 1 text
+mv	0x1404e05	48c744244802000000		argument 1 length
+mv	0x1404e0e	488d05ed36e1fe	0x218502	argument 2 text
+mv	0x1404e1a	48c744245802000000		argument 2 length
+mv	0x1404e23	4c89642460		argument 3 pointer = first path
+mv	0x1404e28	4c897c2468		argument 3 length
+mv	0x1404e2d	4c89742470		argument 4 pointer = second path
+mv	0x1404e32	48895c2478		argument 4 length
+mv	0x1404e53	e8a80d0500	0x1455c00	join the five words
+mv	0x1404e71	c644242800		shell flag byte clear
+mv	0x1404e80	488d35ec28e1fe	0x217773	wait_retry label
+mv	0x1404e8c	ba11000000		wait_retry label length 17
+mv	0x1404e91	31c9		sleep list None
+mv	0x1404e93	e8e841fcff	0x13c9080	run with wait_retry
+getter	0x14050ed	4c8b3d7c9a3604	0x576eb70	global config pointer slot
+getter	0x140510f	493b87a8010000		option tag at config +0x1a8
+getter	0x1405118	4d8bb7b8010000		string length at config +0x1b8
+getter	0x1405127	4d8bbfb0010000		string pointer at config +0x1b0
+remove	0x144ccc8	ff151a1d3204	0x576e9e8	exists test
+remove	0x144ccd2	0f84d2010000	0x144ceaa	missing file returns Ok
+remove	0x144cd2e	ff155c293204	0x576f690	unlink through the GOT
+thread	0x433a9f7	488d4328		payload at closure box +0x28
+thread	0x433aa1a	ff1510bc4301	0x5776630	call the closure
