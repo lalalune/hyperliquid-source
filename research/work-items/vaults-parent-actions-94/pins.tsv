@@ -1,0 +1,149 @@
+group	va	instruction	meaning
+modify	0x22c5fdb	mov raxd,[rsi+0x12]:32	copy the 20-byte address tail from action +0x12
+modify	0x22c5feb	movzx raxd,[rsi]:16	copy the two flag bytes
+modify	0x22c6003	call 0x26f6a80	wrapper calls the body
+modify	0x22c6008	mov raxb,0xd	tag 13 by default
+modify	0x22c600a	cmp [rsp+0x20]:16,0x186	body code 390 keeps tag 13
+modify	0x22c6049	mov raxb,0xe	other codes give tag 14
+modify	0x26f6aa8	test rax,rax	empty vault map
+modify	0x26f6b28	inc rbx	key index rises while memcmp says greater
+modify	0x26f6b53	jb 0x26f6bf8	height exhausted: vault missing
+modify	0x26f6b6b	movdqu xmm0,[r13+0x14]:128	found: r13 = value + 0x84, start of vault_user
+modify	0x26f6b76	movdqu xmm1,[rax]:128	leader compare reads the caller
+modify	0x26f6b95	mov rsiw,0x11	code 17 prepared
+modify	0x26f6ba4	jne 0x26f6c12	caller is not the leader
+modify	0x26f6bab	movdqu xmm0,[rdi+0x2]:128	action address
+modify	0x26f6bb0	movdqu xmm1,[r13]:128	stored vault_user
+modify	0x26f6bd1	mov rsiw,0x186	code 390 is prepared before the vault_user compare
+modify	0x26f6bdb	jne 0x26f6c12	vault_user mismatch: success with no store
+modify	0x26f6be4	cmp rdxb,0x2	allow_deposits value 2 keeps the byte
+modify	0x26f6be9	mov [r13+0x29]:8,rdxb	store allow_deposits at vault +0xad
+modify	0x26f6bed	cmp rcxb,0x2	always_close value 2 keeps the byte
+modify	0x26f6bf2	mov [r13+0x2a]:8,rcxb	store always_close_on_withdraw at vault +0xae
+modify	0x26f6c0e	mov rsiw,0x7	vault missing: code 7, address echoed at +0x02
+distribute	0x1e6003d	mov rax,0xccccccccccccccc	cut 0x0ccccccccccccccc
+distribute	0x1e60047	cmp r8,rax	usd compared with the cut
+distribute	0x1e60077	mov [rbx+0x8]:16,0x13f	at or above the cut: code 319
+distribute	0x1e6005a	call 0x26f6110	wrapper calls the host
+distribute	0x1e6005f	cmp [rsp+0x20]:16,0x186	host code 390 gives tag 13
+distribute	0x1e600b9	mov [rbx]:8,0xe	any other code gives tag 14
+distribute	0x26f61f2	cmp [r13+0x14]:8,0x0	is_closed at vault +0xac: r13 = value + 0x98
+distribute	0x26f61fe	mov [rax]:16,0x8	closed: code 8
+distribute	0x26f6221	mov [rcx]:16,0x7	vault missing: code 7
+distribute	0x26f6261	mov [rax]:16,0x11	caller is not the leader: code 17
+distribute	0x26f6278	cmp [rsp+0x20]:64,0x0	usd compared with zero
+distribute	0x26f62da	call [0x5774660]:64	available balance of the vault address
+distribute	0x26f62e0	mov rbpd,0x1	usd != 0 passes flag 1 to the body
+distribute	0x26f62e5	cmp [rsp+0x20]:64,rax	usd compared with available
+distribute	0x26f62ef	mov [rax]:16,0x12	usd above available: code 18
+distribute	0x26f62f9	xor rbpd,rbpd	usd == 0 passes flag 0 and skips the balance test
+distribute	0x26f6310	add r13,0xffffffffffffff68	r13 back to the Vault base
+distribute	0x26f6373	call [0x57748b8]:64	distribution body through its slot
+distribute	0x26f6383	jne 0x26f6883	other body codes are copied out
+apply	0x26f64e8	mov rbx,[rax+rcx*8+0x8]:64	value of the address -> i64 change map
+apply	0x26f6536	cvtsi2sd xmm0,rbx	change as i64 to f64
+apply	0x26f653b	mulsd xmm0,[r14+0x2a0]:64	multiply by clearinghouse 0 +0x2a0
+apply	0x26f6567	jg 0x26f658d	non-finite product leaves 0.0
+apply	0x26f6597	cvttsd2si r12,xmm1	truncating cast, not a rounding step
+apply	0x26f65dd	je 0x26f695e	i64::MIN goes to the abs panic
+apply	0x26f65b1	mov rcx,0x147ae147ae147ae	clamp 0x147ae147ae147ae
+apply	0x26f65f8	mov rax,0xfeb851eb851eb852	lower clamp
+apply	0x26f665b	je 0x26f66f0	address equal to the vault takes the two-sum arm
+apply	0x26f6688	call 0x1f849b0	user account entry
+apply	0x26f66a6	shr rax,0x3f	reciprocal sequence for signed / 10000
+apply	0x26f66b1	mov r14,[r13+0x18]:64	other addresses change only +0x18
+apply	0x26f66bb	jno 0x26f6764	i64 add without overflow
+apply	0x26f66ca	call [0x5773190]:64	overflow recorder, then saturate
+apply	0x26f6740	mov r14,[r13+0x10]:64	vault address changes +0x10 too
+apply	0x26f6750	mov [r13+0x10]:64,rbx	store +0x10
+apply	0x26f676d	call [0x576dfd8]:64	allocate a one-address Vec for the event
+apply	0x26f67c7	cmp [r15]:32,0x1	exchange +0 selects the hash
+apply	0x26f6431	neg rax	abs of the clamped amount, not of the raw change
+apply	0x26f6440	divsd xmm0,[0x20ae60]:64	event amount / 1e6
+apply	0x26f6476	add rax,0x6	event tag 0x8000000000000006
+apply	0x26f64a1	call [0x5774738]:64	event push
+apply	0x26f690b	mov [rax]:16,0x186	all changes done: code 390
+nethost	0x27e8cda	cmp r12,0x2711	asset length limit 10001
+nethost	0x27e8ce7	mov [rbx+0x8]:16,0x143	too many assets: code 323, payload points at action +0x18
+nethost	0x27e8ea7	mov rsid,[rcx+rdx*4+0x8]:32	next u32 asset from the BTreeSet
+nethost	0x27e8ec0	call [0x5773950]:64	classifier through its slot
+nethost	0x27e8ed0	jne 0x27e8fad	classifier failure is copied out
+nethost	0x27e8ed6	cmp [rsp+0x30]:32,0x1	kind 1 is spot
+nethost	0x27e900e	mov [rbx+0x8]:16,0x15e	spot: code 350
+nethost	0x27e8f02	cmp rbx,[rax+0x5c8]:64	dex index against the clearinghouse count
+nethost	0x27e8f09	jae 0x27e9163	past the count: unwrap panic with code 321, not a stored code
+nethost	0x27e8f27	imul3 rax,rbx,0x2f0	clearinghouse stride 0x2f0
+nethost	0x27e8f2e	cmp [r15+rax*1+0x230]:8,0x3	byte +0x230 must be 3
+nethost	0x27e901a	mov [rbx+0x8]:16,0x61	not ready: code 97 with the asset
+nethost	0x27e8f47	call 0x284cc30	insert the u64 asset
+nethost	0x27e8f90	cmp r12,0x2711	child length limit 10001, tested after the assets
+nethost	0x27e8fa1	mov [rbx+0x8]:16,0x143	too many children: code 323, payload points at the action
+nethost	0x27e90e9	call 0x26f6c30	call the core
+nethost	0x27e90f5	jne 0x27e9103	other core codes are copied out
+netcore	0x26f6c62	je 0x26f6e5d	empty vault map
+netcore	0x26f6d2b	mov raxw,0x18	code 24 prepared
+netcore	0x26f6d2f	cmp [rbp-0x10]:32,0x2	relationship tag
+netcore	0x26f6d33	jb 0x26f6ecc	below 2: code 24
+netcore	0x26f6d53	je 0x26f6e78	empty child list skips the set walk
+netcore	0x26f6d65	je 0x26f6ec8	empty stored set: code 27
+netcore	0x26f6e29	sub rbp,0x1	key greater than the node: descend or stop
+netcore	0x26f6ec8	mov raxw,0x1b	child outside the set: code 27
+netcore	0x26f6e72	mov raxw,0x7	vault missing: code 7
+netcore	0x26f6ea2	jne 0x26f6f14	exchange +0 selects the hash
+netcore	0x26f6f27	cmp [r14+0x5c8]:64,0x0	clearinghouse count zero panics
+netcore	0x26f6f35	mov r13,[r14+0x5c0]:64	clearinghouse 0 only
+netcore	0x26f6f55	movzx rdxd,[r14+0x8f2]:8	chain byte argument
+netcore	0x26f6f9f	call [0x57748c0]:64	scan through its slot
+netcore	0x26f7043	je 0x26f70ce	no next asset entry ends the loop
+netcore	0x26f7089	mov rdi,[r13+0x68]:64	oracle rows of clearinghouse 0
+netcore	0x26f70a0	push 0x50005	stack flag 0x50005
+netcore	0x26f70a5	call 0x26f4cd0	fill rows for one asset
+netcore	0x26f717a	call 0x24fb610	post step over the rows
+netcore	0x26f7184	mov [rbx]:16,0x186	success code 390
+scan	0x3707c3b	cmp r8,0x1	length compared with 1
+scan	0x3707c3f	ja 0x3707ca7	more than one child runs the scan
+scan	0x3707c41	mov [rbp]:64,0x0	one or zero children: empty map, success
+scan	0x3707d3c	cvtsi2sd xmm0,r14	n as i64 to f64
+scan	0x3707dad	movsd xmm1,[0x20a730]:64	constant 1.0
+scan	0x3707db5	divsd xmm1,xmm0	weight = 1.0 / n
+scan	0x3707e88	cmp [r13+0x110]:64,0x0	empty user table reads as size 0
+scan	0x3707e40	mov rbx,[rax+rdi*1-0x30]:64	position +0x10 size
+scan	0x3707e48	add rbp,rbx	i64 sum over every child, first included
+scan	0x3707e4b	jo 0x37081de	overflow recorder, then saturate
+scan	0x3708278	mulsd xmm0,[rsp+0x70]:64	sum * weight, not sum / n
+scan	0x37082e8	cvttsd2si rax,xmm1	truncating cast
+scan	0x3708310	mov [rsp+0x50]:64,rcx	target size
+scan	0x3708339	sub rdi,rax	asset % 10000
+scan	0x370833f	jae 0x3708a6a	oracle row bound
+scan	0x3708351	mov rax,[rax+rcx*1+0x20]:64	oracle row +0x20
+scan	0x37083be	test r15,r15	first child never moves on its own
+scan	0x37083c1	je 0x3708390	index 0 is skipped
+scan	0x37083c8	cmp [rsp+0x1c]:8,0x2	chain byte 2 enables the perp_meta test
+scan	0x37083e7	jne 0x3708a5b	dex test, perp_meta.rs:194
+scan	0x3708410	cmp [rcx+rax*1+0x28]:8,0x2	perp_meta row +0x28
+scan	0x3708415	je 0x3708390	byte 2 skips this child
+scan	0x37085e8	sub rbp,[rsp+0x50]:64	size minus target
+scan	0x37085ed	jno 0x3708605	no overflow
+scan	0x3708610	je 0x3708390	zero change skips the child
+scan	0x3708619	cmp raxd,0x1	side from the sign
+scan	0x370868a	call 0x3c188f0	closure builds the candidate
+scan	0x3708695	cmovs r12,rbp	absolute size
+scan	0x370869e	mul r12	price * size
+scan	0x37086b0	cmp rax,rdx	limit i64::MAX
+scan	0x37086b8	je 0x3708390	overflow or at the limit skips the child, ids already spent
+scan	0x37086f8	je 0x3708390	tag 2 skip; the closure in this path always writes 1
+scan	0x370878c	call [0x5774558]:64	margin test of both sides
+scan	0x3708797	test raxd,0x101	both low bits must be set
+scan	0x370879c	jne 0x3708390	refusal skips the child
+scan	0x37087ed	call [0x5774868]:64	apply the fill now, inside the scan
+scan	0x37088d3	call 0x33bd860	map entry for the asset
+scan	0x370837b	call [0x576dfe0]:64	push 0x238 bytes on the asset Vec
+closure	0x3c1890c	mov rax,[rsi+rax*8+0x8]:64	side 0: first address is the child; side 1: the first child
+closure	0x3c1894a	call 0x36f57f0	user table entry
+closure	0x3c189c6	mov rbp,[rcx+rdi*1-0x30]:64	first side position size
+closure	0x3c189ee	mov [r12+0x38]:64,rax	id counter +1, saturating
+closure	0x3c189fa	sete raxb	second side is the other address
+closure	0x3c18ac2	mov [r12+0x38]:64,rdx	id counter +1 again
+closure	0x3c18ac7	mov [rbx]:64,0x1	tag 1 in the first slot
+closure	0x3c18aea	mov [rbx+0x58]:64,0x2	field +0x58 = 2
+closure	0x3c18b05	mov [rbx+0x100]:64,0x1	second side tag

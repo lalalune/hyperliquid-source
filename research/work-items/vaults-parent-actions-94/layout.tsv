@@ -1,0 +1,61 @@
+struct	offset	width	va	instruction	meaning
+modify_action	0x0	1	0x26f6bdd	movzx rdxd,[rdi]:8	allow_deposits tri-state; 2 keeps the stored byte
+modify_action	0x1	1	0x26f6be0	movzx rcxd,[rdi+0x1]:8	always_close_on_withdraw tri-state; 2 keeps the stored byte
+modify_action	0x2	20	0x26f6bab	movdqu xmm0,[rdi+0x2]:128	vault address
+distribute_action	0x0	8	0x1e6003a	mov r8,[rsi]:64	usd
+distribute_action	0x8	20	0x1e60032	movups xmm0,[rsi+0x8]:128	vault address
+net_action	0x8	8	0x27e904b	mov r14,[rax+0x8]:64	child address Vec pointer
+net_action	0x10	8	0x27e8f8c	mov r12,[rax+0x10]:64	child address Vec length, 20-byte items
+net_action	0x18	8	0x27e8d02	mov rax,[rsi+0x18]:64	asset BTreeSet root
+net_action	0x20	8	0x27e8d0e	mov r14,[rsi+0x20]:64	asset BTreeSet height
+net_action	0x28	8	0x27e8cd6	mov r12,[rsi+0x28]:64	asset BTreeSet length
+asset_set_node	0x8	4	0x27e8ea7	mov rsid,[rcx+rdx*4+0x8]:32	u32 keys
+asset_set_node	0x34	2	0x27e8e20	movzx rdxd,[rbp+0x34]:16	parent index
+asset_set_node	0x36	2	0x27e8d68	movzx rcxd,[rbp+0x36]:16	length
+asset_set_node	0x38	8	0x27e8dc0	mov rcx,[rbp+0x38]:64	first edge
+vault_map_node	0x798	20	0x26f6ac4	lea rsi,[rax+0x798]:64	keys, 20 bytes each, after 11 values of 0xb0 bytes
+vault_map_node	0x876	2	0x26f6acb	movzx rcxd,[rax+0x876]:16	length
+vault_map_node	0x878	8	0x26f6b5e	mov rax,[rax+rbx*8+0x878]:64	edges
+child_set_node	0x8	20	0x26f6dbf	lea rsi,[rax+0x8]:64	address keys
+child_set_node	0xe6	2	0x26f6dc8	movzx raxd,[rax+0xe6]:16	length
+child_set_node	0xe8	8	0x26f6e50	mov rax,[rax+r12*8+0xe8]:64	edges
+exchange	0x0	4	0x26f67c7	cmp [r15]:32,0x1	equal to 1 selects a real hash from 0x3987cb0, otherwise 32 zero bytes
+exchange	0x38	8	0x3c189d6	mov rax,[r12+0x38]:64	id counter; the closure takes two ids per candidate
+exchange	0x60	12	0x3707cbe	mov rax,[rcx+0x60]:64	time copied into each record
+exchange	0x5c0	8	0x26f6295	mov rbp,[r15+0x5c0]:64	clearinghouses.rs array pointer, stride 0x2f0
+exchange	0x5c8	8	0x26f6284	cmp [r15+0x5c8]:64,0x0	clearinghouse count; zero panics with code 321 in the Err payload
+exchange	0x740	16	0x26f63e3	lea rax,[r15+0x740]:64	user account map argument of 0x1f849b0
+exchange	0x8d0	8	0x26f6aa1	mov rax,[rsi+0x8d0]:64	vault map root
+exchange	0x8d8	8	0x26f6ab1	mov rcx,[rsi+0x8d8]:64	vault map height
+exchange	0x8f2	1	0x26f6f55	movzx rdxd,[r14+0x8f2]:8	chain byte passed to the scan
+clearinghouse	0x8	8	0x3708404	mov rcx,[r13+0x8]:64	perp_meta rows, stride 0x30
+clearinghouse	0x10	8	0x37083fa	cmp rax,[r13+0x10]:64	perp_meta row count
+clearinghouse	0x30	8	0x37083e3	cmp rdx,[r13+0x30]:64	dex index of this clearinghouse
+clearinghouse	0x68	8	0x3708345	mov rax,[r13+0x68]:64	oracle rows, stride 0x60
+clearinghouse	0x70	8	0x370831a	mov rsi,[r13+0x70]:64	oracle row count
+clearinghouse	0xf8	8	0x3708010	mov rax,[r13+0xf8]:64	user table control bytes, bucket 0x78
+clearinghouse	0x100	8	0x3708017	mov rcx,[r13+0x100]:64	user table mask
+clearinghouse	0x110	8	0x3707e88	cmp [r13+0x110]:64,0x0	user table item count
+clearinghouse	0x118	16	0x3707ea1	movdqu xmm0,[r13+0x118]:128	user table SipHash keys
+clearinghouse	0x2a0	8	0x26f653b	mulsd xmm0,[r14+0x2a0]:64	f64 scale on distribution amounts
+user_bucket	0x20	8	0x3708139	mov rax,[rbp+0x8]:64	position map root; rbp = bucket + 0x18
+user_bucket	0x28	8	0x3708146	mov rcx,[rbp+0x10]:64	position map height
+position_node	0x2c8	8	0x3708175	cmp r14,[rax+rdx*8+0x2d0]:64	u64 asset keys; rdx starts at -1
+position_node	0x322	2	0x370814a	movzx rsid,[rax+0x322]:16	length
+position_node	0x328	8	0x37081b9	mov rax,[rax+rdx*8+0x328]:64	edges
+position_value	0x10	8	0x3707e40	mov rbx,[rax+rdi*1-0x30]:64	signed size; values are 0x40 bytes and rdi is (index+1)*0x40
+account	0x10	8	0x26f6740	mov r14,[r13+0x10]:64	i64 sum, changed only for the vault address
+account	0x18	8	0x26f66b1	mov r14,[r13+0x18]:64	i64 sum, changed for every address
+fill	0x8	8	0x3c18ace	mov [rbx+0x8]:64,rbp	first side position size
+fill	0xd0	8	0x3c18af7	mov [rbx+0xd0]:64,rdx	first side id
+fill	0xd8	20	0x3c1892b	movups.st xmm0,[rdi+0xd8]:128	first side address
+fill	0x108	8	0x3c18b10	mov [rbx+0x108]:64,rax	second side position size
+fill	0x1d0	8	0x3c18b43	mov [rbx+0x1d0]:64,rcx	second side id
+fill	0x1d8	20	0x3c18a1c	movups.st xmm0,[rbx+0x1d8]:128	second side address
+fill	0x200	8	0x3708726	mov [rsp+0x778]:64,rax	oracle price
+fill	0x208	8	0x370872e	mov [rsp+0x780]:64,rbx	asset
+fill	0x210	8	0x3708736	mov [rsp+0x788]:64,r12	absolute size change
+fill	0x218	8	0x3708743	mov [rsp+0x790]:64,rax	price * size
+fill	0x220	8	0x370874b	mov [rsp+0x798]:64,0x0	stored as zero
+fill	0x228	12	0x3708764	mov [rcx+0x220]:64,rax	time; rcx = record + 8
+fill	0x234	1	0x370877a	mov [rsp+0x7ac]:8,raxb	side byte: 1 when the child is above the target

@@ -1,0 +1,20 @@
+action	scenario	tag	code_or_panic	fills_side_asset_size_notional_ids	model
+net	3 children, first holds all: both others buy 100 from it	13	390	[[0, 0, 100, 5000000000, 1000, 1001], [0, 0, 100, 5000000000, 1002, 1003]]	same
+net	sum 301 of 3: target 100 by truncation, first keeps the odd unit	13	390	[[1, 0, 201, 10050000000, 1000, 1001], [0, 0, 100, 5000000000, 1002, 1003]]	same
+net	first child takes every other side	13	390	[[1, 0, 101, 5050000000, 1000, 1001]]	same
+net	single child: no fill, still success	13	390	[]	same
+net	no child: no fill, still success	13	390	[]	same
+net	opposite positions net to zero	13	390	[[0, 0, 10, 500000000, 1000, 1001]]	same
+net	negative sum -1 of 2: target trunc(-0.5) = 0	13	390	[[0, 0, 4, 200000000, 1000, 1001]]	same
+net	margin refuses one side: child skipped, ids spent, success	13	390	[]	same
+net	price * size at or past i64::MAX: child skipped, ids spent	13	390	[]	same
+net	chain byte 2 and perp_meta byte 2: every child skipped	13	390	[]	same
+net	13 assets: asset set and position maps at height 1	13	390	[[0, 0, 5, 35, 1000, 1001], [0, 1, 5, 35, 1002, 1003], [0, 2, 5, 35, 1004, 1005], [0, 3, 5, 35, 1006, 1007], [0, 4, 5, 35, 1008, 1009], [0, 5, 5, 35, 1010, 1011], [0, 6, 5, 35, 1012, 1013], [0, 7, 5, 35, 1014, 1015], [0, 8, 5, 35, 1016, 1017], [0, 9, 5, 35, 1018, 1019], [0, 10, 5, 35, 1020, 1021], [0, 11, 5, 35, 1022, 1023], [0, 12, 5, 35, 1024, 1025]]	same
+net	sizes at i64::MAX: sum saturates, recorder runs	13	390	[[1, 0, 4611686018427387903, 4611686018427387903, 1000, 1001]]	same
+net	size minus target overflows: saturates, recorder runs, notional skip	13	390	[[1, 0, 6917529027641081855, 6917529027641081855, 1000, 1001], [1, 0, 6917529027641081855, 6917529027641081855, 1004, 1005]]	same
+net	asset past the oracle rows: bounds panic	panic	0x56f1cb0	[]	same
+net	dex index past the clearinghouse list: unwrap panic with code 321	panic	0x56e9ae0	[]	same
+net	10001 assets: code 323	14	323	[]	same
+net	10001 children: code 323	14	323	[]	same
+net	child vault as caller: code 24	14	24	[]	same
+net	child outside the stored set: code 27	14	27	[]	same
