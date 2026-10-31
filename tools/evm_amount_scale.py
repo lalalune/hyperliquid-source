@@ -143,6 +143,8 @@ class Image:
     def slots(self):
         """GOT contents after load: RELATIVE addends, plus the two libc symbols the helpers use."""
         _, off, size = self.sec['.rela.dyn']
+        if off + size > len(self.data) or size % 24:
+            raise EvidenceError('.rela.dyn truncated')
         _, sym_off, _ = self.sec['.dynsym']
         _, str_off, _ = self.sec['.dynstr']
         got = self.sec['.got']
