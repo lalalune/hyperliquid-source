@@ -42,9 +42,9 @@ def entry_file_offset(data):
     secs = sections(data)
     entry = struct.unpack_from('<Q', data, 24)[0]
     offsets = {s['offset'] + entry - s['address'] for s in secs
-               if s['type'] != 8 and s['address'] <= entry < s['address'] + s['size']}
+               if s['type'] != 8 and s['flags'] & 4 and s['address'] <= entry < s['address'] + s['size']}
     if len(offsets) != 1:
-        raise ValueError('ELF entry does not have one unambiguous file mapping')
+        raise ValueError('ELF entry does not have one unambiguous executable file mapping')
     return offsets.pop()
 
 
