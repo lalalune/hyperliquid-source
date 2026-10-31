@@ -138,12 +138,17 @@ This plan describes the build for anyone who has the source. It has not been run
 | `lto` | Cross-crate inlining evidence, or a matched rebuild |
 | `codegen_units` | Function order and partitioning in a matched rebuild |
 | `overflow_checks` | Callers of the core overflow panic helpers inside first-party code |
-| `target_cpu_features` | Unconditional AVX or BMI use outside runtime-dispatched paths |
 | `frame_pointers` | A prologue survey over FDE-bounded functions |
 | `rustflags` | The original build config |
 | `cargo_lock` | The original `Cargo.lock`. Paths give versions for #94 registry crates and only 18 of 131 vendored #115 directories |
 | `first_party_crate_versions` | First-party paths carry no versions |
 | `panic_strategy` (visor only) | Map LSDA owners to Rust functions |
+
+### Resolved fields
+
+| Field | Resolution |
+| --- | --- |
+| `target_cpu_features` | [`RE-002-target-cpu-features`](../RE-002-target-cpu-features/README.md): an FDE-bounded instruction census of all three targets. Hard BMI1/BMI2/AVX/AVX-512 use is present (935 BMI2 and 3,440 AVX sites in #94) and **no** hard-ISA function also executes CPUID; CPUID sits in 10 dedicated 27–31 byte functions. `tzcnt_lzcnt` is counted separately because `F3 0F BC/BD` is the `rep bsf`/`rep bsr` alias and does not require BMI. Callee-side dispatch is not yet ruled out. |
 
 Two more questions are open:
 
