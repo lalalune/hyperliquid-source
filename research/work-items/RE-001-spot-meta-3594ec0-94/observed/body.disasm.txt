@@ -1,0 +1,84 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x3594ec0 0x3594ec0..0x3594fe4; byte records are authoritative
+3594ec0  4157                   push r15
+3594ec2  4156                   push r14
+3594ec4  4154                   push r12
+3594ec6  53                     push rbx
+3594ec7  50                     push rax
+3594ec8  483b9188010000         cmp rdx, qword ptr [rcx + 0x188]
+3594ecf  0f8302010000           jae 0x3594fd7
+3594ed5  488b8180010000         mov rax, qword ptr [rcx + 0x180]
+3594edc  4869cae8000000         imul rcx, rdx, 0xe8
+3594ee3  0fb6540849             movzx edx, byte ptr [rax + rcx + 0x49]
+3594ee8  2a540848               sub dl, byte ptr [rax + rcx + 0x48]
+3594eec  0f82d8000000           jb 0x3594fca
+3594ef2  4889f3                 mov rbx, rsi
+3594ef5  b801000000             mov eax, 1
+3594efa  7555                   jne 0x3594f51
+3594efc  48f7e7                 mul rdi
+3594eff  4989d6                 mov r14, rdx
+3594f02  4989c7                 mov r15, rax
+3594f05  4531e4                 xor r12d, r12d
+3594f08  4889c7                 mov rdi, rax
+3594f0b  4889d6                 mov rsi, rdx
+3594f0e  4889da                 mov rdx, rbx
+3594f11  31c9                   xor ecx, ecx
+3594f13  ff158f921d02           call qword ptr [rip + 0x21d928f]
+3594f19  4889c1                 mov rcx, rax
+3594f1c  4889d6                 mov rsi, rdx
+3594f1f  4889d7                 mov rdi, rdx
+3594f22  480faffb               imul rdi, rbx
+3594f26  48f7e3                 mul rbx
+3594f29  4801fa                 add rdx, rdi
+3594f2c  4929c7                 sub r15, rax
+3594f2f  4919d6                 sbb r14, rdx
+3594f32  31c0                   xor eax, eax
+3594f34  4d09fe                 or r14, r15
+3594f37  0f95c0                 setne al
+3594f3a  4801c8                 add rax, rcx
+3594f3d  4883d600               adc rsi, 0
+3594f41  490f45c4               cmovne rax, r12
+3594f45  4883c408               add rsp, 8
+3594f49  5b                     pop rbx
+3594f4a  415c                   pop r12
+3594f4c  415e                   pop r14
+3594f4e  415f                   pop r15
+3594f50  c3                     ret 
+3594f51  0fb6ca                 movzx ecx, dl
+3594f54  f6c101                 test cl, 1
+3594f57  740a                   je 0x3594f63
+3594f59  b80a000000             mov eax, 0xa
+3594f5e  83f901                 cmp ecx, 1
+3594f61  7499                   je 0x3594efc
+3594f63  f6c202                 test dl, 2
+3594f66  740e                   je 0x3594f76
+3594f68  486bc064               imul rax, rax, 0x64
+3594f6c  89ce                   mov esi, ecx
+3594f6e  83e6fe                 and esi, 0xfffffffe
+3594f71  83fe02                 cmp esi, 2
+3594f74  7486                   je 0x3594efc
+3594f76  f6c204                 test dl, 4
+3594f79  7415                   je 0x3594f90
+3594f7b  4869c010270000         imul rax, rax, 0x2710
+3594f82  89ce                   mov esi, ecx
+3594f84  83e6fc                 and esi, 0xfffffffc
+3594f87  83fe04                 cmp esi, 4
+3594f8a  0f846cffffff           je 0x3594efc
+3594f90  f6c208                 test dl, 8
+3594f93  7415                   je 0x3594faa
+3594f95  4869c000e1f505         imul rax, rax, 0x5f5e100
+3594f9c  89ce                   mov esi, ecx
+3594f9e  83e6f8                 and esi, 0xfffffff8
+3594fa1  83fe08                 cmp esi, 8
+3594fa4  0f8452ffffff           je 0x3594efc
+3594faa  f6c210                 test dl, 0x10
+3594fad  741b                   je 0x3594fca
+3594faf  48ba0000c16ff2862300   movabs rdx, 0x2386f26fc10000
+3594fb9  48f7e2                 mul rdx
+3594fbc  700c                   jo 0x3594fca
+3594fbe  83e1f0                 and ecx, 0xfffffff0
+3594fc1  83f910                 cmp ecx, 0x10
+3594fc4  0f8432ffffff           je 0x3594efc
+3594fca  488d3d9fd21502         lea rdi, [rip + 0x215d29f]
+3594fd1  ff1599941d02           call qword ptr [rip + 0x21d9499]
+3594fd7  488d3d12d21502         lea rdi, [rip + 0x215d212]
+3594fde  ff158c941d02           call qword ptr [rip + 0x21d948c]
