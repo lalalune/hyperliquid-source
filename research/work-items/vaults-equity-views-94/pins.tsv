@@ -1,0 +1,50 @@
+group	va	instruction	meaning
+total	0x3957bd4	lea rsi,[rdi+0x84]:64	vault address at +0x84
+total	0x3957be6	cmp [r15]:32,0x1	tag 2 and up walk the child set
+total	0x3957bf0	mov rax,[r15+0x8]:64	child set root
+total	0x3957bf4	mov r13,[r15+0x18]:64	child set length
+total	0x3957ded	jo 0x3957e1e	overflow branch
+total	0x3957e2f	add r14,rax	saturating add
+total	0x3957e32	cmovo r14,rcx	saturating add
+total	0x3957e3f	call [0x5773190]:64	recorder
+user	0x3957ea8	mov rcx,[rdi+0x50]:64	follower map root
+user	0x3957eaf	je 0x395825a	no map: 0
+user	0x3957ecd	lea rsi,[rcx+0x218]:64	key array
+user	0x3957ee0	lea r15,[rcx-0x30]:64	value array
+user	0x3957f6b	movsd xmm0,[r15]:64	share is the first f64 of the row
+user	0x3957f92	cmp [r15]:32,0x2	tag 2 and up walk the child set
+user	0x3958208	cvtsi2sd xmm0,r14	total as f64
+user	0x3958213	mulsd xmm2,xmm0	share times total
+user	0x3958237	cmp rax,rdx	non-finite gives 0
+user	0x3958273	ucomisd xmm0,[0x20a2c8]:64	high clamp
+user	0x3958285	cmovp rax,rcx	NaN gives 0
+user	0x395828c	cmovle rax,rcx	not positive gives 0
+list	0x2581459	cmp [rbx+0x1048]:64,0x0	clearinghouse count
+list	0x25814ac	call [0x5774678]:64	user equity
+list	0x25814b2	test rax,rax	zero equity is skipped
+list	0x25814e1	call [0x5774680]:64	lockup end time
+list	0x25815c1	divsd xmm0,[0x20ae60]:64	equity over 1e6
+list	0x25815d0	mov [rax+0x20]:32,rdxd	row vault address tail
+list	0x25815dc	movsd.st xmm0,[rax]:64	row equity
+list	0x25815e0	mov [rax+0x8]:64,rcx	row locked until
+list	0x258153b	mov rdid,0xa0	first allocation, 4 rows of 0x28
+list	0x25819d7	mov r8d,0x28	growth stride
+summary	0x2a35f57	movzx raxd,[rsi+0xac]:8	closed byte
+summary	0x2a35f62	mov r12d,[rsi+0x78]:32	creation date
+summary	0x2a35fc0	call [0x5774968]:64	total equity through its slot
+summary	0x2a35fc9	cmp r13,0x2	tag 2 and up copy the child set
+summary	0x2a35fef	call 0x2a0d090	child set clone
+summary	0x2a360d5	divsd xmm0,[0x20ae60]:64	total over 1e6
+summary	0x2a360bd	imul3 rcx,rcx,0x3e8	seconds to milliseconds
+summary	0x2a360cc	cmovg rdx,rcx	time clamp at 0
+summary	0x2a36115	movsd.st xmm0,[rbx+0x38]:64	tvl word
+summary	0x2a3611f	mov [rbx+0x70]:8,raxb	closed word
+summary	0x26b2d7e	call [0x57746d0]:64	row builder through its slot
+summary	0x26b2d8c	imul3 rax,r8,0x78	row stride 0x78
+query	0x27cf90a	lea rax,[r12+0x570]:64	exchange at state +0x570
+query	0x27cf924	mov rcx,[r12+0x18c0]:64	vault map root in the state frame
+query	0x27cf996	call 0x25813f0	row builder
+query	0x27cf0d7	lea rax,[r13+0x570]:64	exchange at state +0x570
+query	0x27cf0de	mov rcx,[r13+0x18c0]:64	vault map root in the state frame
+query	0x27cf144	imul3 rsi,r14,0x78	one row of 0x78 per vault, no leader test on the way
+query	0x27cf1cb	call 0x26b2b00	summary loop
