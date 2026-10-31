@@ -220,6 +220,18 @@ output differences.
   tools, no Ghidra, no git-lfs, no rust toolchains). This is
   a pre-existing environment limitation, not a failure of
   this work-item.
+- `make test`: 195 tests, 7 failures, 82 errors, 6 skipped
+  (pre-existing, LFS-pointer related, unrelated to this
+  work-item; see redump_notes.md for the full record).
+- `make catalogue-check`: fails at elf_index with
+  "Expected ELF64 little-endian input" (LFS pointer, not
+  ELF). Both are recorded honestly, not claimed as passed.
+- Re-dump notes: see redump_notes.md for the 0x20a458 byte
+  contents (`aws_namecapacity`), the 76 distinct mapper
+  discriminants (exactly 0x00-0x4b), and the full FDE windows
+  for the string scanner (0x4ebfd80-0x4ec0072) and decoder
+  (0x4ebf970-0x4ebfc06). The previous truncated scanner
+  file has been replaced with the full window.
 - `make verify` (`tools/artifacts.py verify`): fails at
   `artifacts/node/115/hl-node` (LFS pointer file, size/SHA
   mismatch) before reaching release 94 in the repo path.
