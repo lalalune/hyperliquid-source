@@ -109,11 +109,18 @@ def sections(data):
     shoff = struct.unpack_from('<Q', data, 0x28)[0]
     shentsize, shnum, shstrndx = struct.unpack_from('<HHH', data, 0x3a)
     raw = [struct.unpack_from('<IIQQQQIIQQ', data, shoff + i * shentsize) for i in range(shnum)]
-    stroff = raw[shstrndx][4]
+    stroff, strsize = raw[shstrndx][4], raw[shstrndx][5]
+    if stroff > len(data) or strsize > len(data) - stroff:
+        raise EvidenceError('section name table extends past end of file')
+    table = data[stroff:stroff + strsize]
     out = {}
     for name, _typ, _flags, addr, off, size, *_ in raw:
-        end = data.index(b'\0', stroff + name)
-        out[data[stroff + name:end].decode()] = (addr, off, size)
+        if name >= len(table):
+            raise EvidenceError('section name offset outside .shstrtab')
+        end = table.find(b'\0', name)
+        if end < 0:
+            raise EvidenceError('unterminated section name')
+        out[table[name:end].decode()] = (addr, off, size)
     return out
 
 

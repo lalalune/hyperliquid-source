@@ -3,6 +3,7 @@
 import filecmp
 import hashlib
 import importlib.util
+import struct
 import sys
 import tempfile
 import unittest
@@ -316,6 +317,56 @@ class Evaluator(unittest.TestCase):
         self.assertEqual(m.regs[eas.RCX], 2 ** 64 - 3)
         m = self.execute(['mov    eax,0x80', 'bsr    rcx,rax'])
         self.assertEqual(m.regs[eas.RCX], 7)
+
+
+def elf_with_names(inside, outside=b'', extra_name_off=None):
+    """ELF64 whose .shstrtab is `inside` and whose next file bytes are `outside`."""
+    shstr_off = 64
+    labels = [b'', b'.text', b'.shstrtab', b'.extra']
+    shoff = shstr_off + len(inside) + len(outside)
+
+    def name_off(label):
+        if label == b'':
+            return 0
+        return inside.index(label)
+
+    headers = b''
+    for label in labels:
+        off, size = (shstr_off, len(inside)) if label == b'.shstrtab' else (0, 0)
+        off_name = extra_name_off if (label == b'.extra' and extra_name_off is not None) else name_off(label)
+        headers += struct.pack('<IIQQQQIIQQ', off_name, 3 if label == b'.shstrtab' else 1,
+                               0, 0, off, size, 0, 0, 1, 0)
+    header = bytearray(64)
+    header[0:6] = b'\x7fELF\x02\x01'
+    struct.pack_into('<Q', header, 40, shoff)
+    struct.pack_into('<HHH', header, 58, 64, len(labels), labels.index(b'.shstrtab'))
+    return bytes(header) + inside + outside + headers
+
+
+NAMES = b'\0.text\0.shstrtab\0'
+
+
+class SectionNameBoundsTests(unittest.TestCase):
+    def test_name_terminated_inside_shstrtab_is_kept(self):
+        self.assertIn('.extra', eas.sections(elf_with_names(NAMES + b'.extra\0')))
+
+    def test_name_finished_outside_shstrtab_is_rejected(self):
+        # '.extra' has no NUL inside .shstrtab; its terminator lives in the
+        # following bytes, which the old unbounded search accepted as
+        # '.extra_name'.
+        with self.assertRaisesRegex(eas.EvidenceError, 'unterminated section name'):
+            eas.sections(elf_with_names(NAMES + b'.extra', b'_name\0'))
+
+    def test_unterminated_name_is_rejected(self):
+        with self.assertRaisesRegex(eas.EvidenceError, 'unterminated section name'):
+            eas.sections(elf_with_names(NAMES + b'.extra'))
+
+    def test_name_offset_outside_shstrtab_is_rejected(self):
+        # The offset points at 'bogus' in the bytes after .shstrtab; on base
+        # it was read as a section name instead of being rejected.
+        inside = NAMES + b'.extra\0'
+        with self.assertRaisesRegex(eas.EvidenceError, 'section name offset outside .shstrtab'):
+            eas.sections(elf_with_names(inside, b'bogus\0', extra_name_off=len(inside)))
 
 
 if __name__ == '__main__':
