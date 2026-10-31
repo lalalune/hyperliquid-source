@@ -68,6 +68,10 @@ def section_bytes(data, sec):
 def program_headers(data):
     phoff = struct.unpack_from('<Q', data, 32)[0]
     entsize, count = struct.unpack_from('<HH', data, 54)
+    if not count:
+        return []
+    if entsize != 56 or phoff < 64 or phoff + entsize * count > len(data):
+        raise ValueError('Invalid or unsupported ELF64 program-header table')
     return [struct.unpack_from('<IIQQQQQQ', data, phoff + i * entsize) for i in range(count)]
 
 
