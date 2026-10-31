@@ -1,4 +1,5 @@
 import struct
+import subprocess
 from pathlib import Path
 import sys
 import unittest
@@ -106,6 +107,20 @@ class XrefTests(unittest.TestCase):
     def test_window_before_first_start_fails(self):
         with self.assertRaises(ScanError):
             window([0x1000], 0x0FFF)
+
+
+class MainErrorHandlingTests(unittest.TestCase):
+    def test_missing_binary_prints_one_line_error(self):
+        # No artifacts/node/999/hl-node exists, so artifact() raises
+        # FileNotFoundError; the __main__ handler must turn it into the
+        # tool's one-line diagnostic, not a traceback.
+        tool = Path(__file__).resolve().parents[1] / 'tools' / 'constants_scan.py'
+        result = subprocess.run([sys.executable, str(tool), '--release', '999'],
+                                capture_output=True, text=True, timeout=60)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertIn('constants_scan: ', result.stderr)
+        self.assertEqual(len(result.stderr.strip().splitlines()), 1)
 
 
 if __name__ == '__main__':
