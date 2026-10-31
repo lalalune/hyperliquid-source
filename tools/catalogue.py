@@ -48,6 +48,9 @@ def generate(root=ROOT):
     validate_progress(components, progress, root)
     inventories = {v: json.loads((root / f'research/imported/hl-node-{v}.inventory.json').read_text()) for v in ['94', '115']}
     inventories['visor'] = json.loads((root / 'research/imported/hl-visor.inventory.json').read_text())
+    for inv in inventories.values():
+        if not isinstance(inv['first_party_files'], dict):
+            raise ValueError('Invalid inventory record')
     paths = {}
     excluded = {}
     for v, inv in inventories.items():
