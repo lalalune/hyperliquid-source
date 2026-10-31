@@ -255,7 +255,7 @@ def classify(claim, first_call, branch_calls, starts):
         return "claimed_not_fde_start"
     if first_call is not None and first_call["target"] == ea:
         return "real_first_call"
-    if first_call is None and ea in branch_calls:
+    if ea in branch_calls:
         return "real_first_call_on_branch"
     return "fde_start_not_called_from_arm"
 

@@ -275,5 +275,37 @@ class Binutils(unittest.TestCase):
             self.assertEqual(fdes[r['fde_start']], r['fde_end'])
 
 
+class Classify(unittest.TestCase):
+    STARTS = [0x1000, 0x2000, 0x3000]
+    CLAIM = {"case": 7, "wire_type": "x", "rust_variant": "Y",
+             "claimed_ea": 0x2000, "claimed_symbol": "handler_y"}
+    OTHER_FIRST = {"site": 0x2759300, "kind": "rel32", "target": 0x1000}
+
+    def test_branch_call_with_other_first_call(self):
+        # The arm's straight-line path calls a different function first, but
+        # a conditional branch in the same arm calls the claimed handler:
+        # the claim IS called from the arm, so it is a branch first call,
+        # not an uncalled FDE start.
+        self.assertEqual(
+            ed.classify(self.CLAIM, self.OTHER_FIRST, [0x2000], self.STARTS),
+            "real_first_call_on_branch")
+
+    def test_branch_call_only(self):
+        self.assertEqual(
+            ed.classify(self.CLAIM, None, [0x2000], self.STARTS),
+            "real_first_call_on_branch")
+
+    def test_direct_first_call(self):
+        first = {"site": 1, "kind": "rel32", "target": 0x2000}
+        self.assertEqual(
+            ed.classify(self.CLAIM, first, [], self.STARTS),
+            "real_first_call")
+
+    def test_uncalled_handler(self):
+        self.assertEqual(
+            ed.classify(self.CLAIM, self.OTHER_FIRST, [], self.STARTS),
+            "fde_start_not_called_from_arm")
+
+
 if __name__ == '__main__':
     unittest.main()
