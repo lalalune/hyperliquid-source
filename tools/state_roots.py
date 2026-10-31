@@ -71,6 +71,8 @@ class Elf:
             if p_type == 1:
                 self.loads.append((p_va, p_off, p_filesz))
         secs = [struct.unpack_from("<IIQQQQIIQQ", data, shoff + i * shentsize) for i in range(shnum)]
+        if secs[shstrndx][1] == 8:
+            raise EvidenceError("section name table is NOBITS")
         stro = secs[shstrndx][4]
         self.sections = {}
         for s in secs:
