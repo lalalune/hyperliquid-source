@@ -71,6 +71,8 @@ class Elf:
 def fde_index(elf: Elf):
     va, off, size = elf.sections[".eh_frame_hdr"]
     d = elf.data
+    if size < 12:
+        raise EvidenceError("truncated .eh_frame_hdr header")
     if d[off] != 1 or tuple(d[off + 1:off + 4]) != (0x1B, 0x03, 0x3B):
         raise EvidenceError("unexpected .eh_frame_hdr encodings")
     count = struct.unpack_from("<I", d, off + 8)[0]
