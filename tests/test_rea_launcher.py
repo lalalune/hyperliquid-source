@@ -14,6 +14,24 @@ spec.loader.exec_module(rea)
 
 
 class RuntimeSelectionTests(unittest.TestCase):
+    def test_windows_launcher_preserves_command_exit_status(self):
+        for exit_status in (0, 23):
+            with self.subTest(exit_status=exit_status), \
+                 patch.object(rea.sys, 'platform', 'win32'), \
+                 patch.object(rea, 'find_node', return_value=Path('/chosen/node/bin/node')), \
+                 patch.object(rea, 'environment', return_value={'PATH': 'fixture'}), \
+                 patch.object(Path, 'is_file', return_value=True), \
+                 patch.object(Path, 'read_text', return_value=json.dumps({'version': rea.CONFIG['version']})), \
+                 patch.object(rea.os, 'chdir'), \
+                 patch.object(rea.os, 'execvpe', side_effect=SystemExit(0)), \
+                 patch.object(rea.os, 'spawnve', return_value=exit_status) as run:
+                with self.assertRaises(SystemExit) as exited:
+                    rea.main(['--version'])
+                self.assertEqual(exited.exception.code, exit_status)
+                if run.called:
+                    self.assertEqual(run.call_args.args[2][-1], '--version')
+                    self.assertEqual(run.call_args.args[3], {'PATH': 'fixture'})
+
     def test_exact_supported_version_boundaries(self):
         for version in ['22.23.4', '24.22.1', '26.12.1', '27.0.0']:
             with self.subTest(version=version): self.assertTrue(rea.supported_node(version))

@@ -99,6 +99,9 @@ def main(argv=None):
             raise ValueError('REA package version differs from config/rea.json; run make rea-install')
         command = [str(node), str(package / 'scripts/rea.mjs'), *(args or ['--help'])]
     os.chdir(ROOT)
+    if sys.platform == 'win32':
+        # Windows exec overlays do not return the child's failure status.
+        raise SystemExit(os.spawnve(os.P_WAIT, command[0], command, env))
     os.execvpe(command[0], command, env)
 
 
