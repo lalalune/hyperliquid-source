@@ -1,0 +1,542 @@
+{
+ "binary": "artifacts/node/94/hl-node",
+ "copies": [
+  {
+   "differs": [],
+   "instructions": 85,
+   "of": "0x2758330",
+   "start": "0x4d80fb0"
+  },
+  {
+   "differs": [
+    {
+     "first": "cmp [rsi+0x5c8]:64,0x0",
+     "here": "cmp [rsi+0x1048]:64,0x0",
+     "va": "0x4d81140"
+    },
+    {
+     "first": "mov r15,[rsi+0x5c0]:64",
+     "here": "mov r15,[rsi+0x1040]:64",
+     "va": "0x4d81154"
+    },
+    {
+     "first": "add rsi,0x5d0",
+     "here": "add rsi,0x1050",
+     "va": "0x4d811d2"
+    }
+   ],
+   "instructions": 85,
+   "of": "0x2758330",
+   "start": "0x4d81120"
+  },
+  {
+   "differs": [
+    {
+     "first": "call 0x2758330",
+     "here": "call 0x4d81120",
+     "va": "0x46bbadd"
+    }
+   ],
+   "instructions": 74,
+   "of": "0x1e60a90",
+   "start": "0x46bba70"
+  },
+  {
+   "differs": [
+    {
+     "first": "call 0x2758330",
+     "here": "call 0x4d80fb0",
+     "va": "0x46bbbfd"
+    }
+   ],
+   "instructions": 74,
+   "of": "0x1e60a90",
+   "start": "0x46bbb90"
+  },
+  {
+   "differs": [
+    {
+     "first": "call 0x2758330",
+     "here": "call 0x4d80fb0",
+     "va": "0x4c0397a"
+    }
+   ],
+   "instructions": 41,
+   "of": "0x1e64620",
+   "start": "0x4c03940"
+  },
+  {
+   "differs": [
+    {
+     "first": "call 0x2758330",
+     "here": "call 0x4d81120",
+     "va": "0x4c03a1a"
+    }
+   ],
+   "instructions": 41,
+   "of": "0x1e64620",
+   "start": "0x4c039e0"
+  }
+ ],
+ "copy_cases": [
+  "user entry, parser error",
+  "user entry, gate error",
+  "system entry, gate error",
+  "gate, writer error",
+  "parser, decimal error",
+  "parser, scale error"
+ ],
+ "equivalent": {
+  "0x27583f7": "taking the error copy keeps tag 0x186 in the output, and callers read only that tag",
+  "0x379958a": "clears bit 0 of the compare only: the parser returns no NaN whose payload is that bit alone",
+  "0x3799597": "the bound moves past inf, then inf reaches 0x4eac740 with exponent 972, which refuses it with the same status",
+  "0x37995b1": "only the word above bit 32 of this mask is used, and the low byte is below it",
+  "0x37995eb": "every subnormal f64 scales to mantissa 0 at 28 places, so this path and the zero path give the same Decimal",
+  "0x37995ed": "every subnormal f64 scales to mantissa 0 at 28 places, so this path and the zero path give the same Decimal",
+  "0x37995f1": "every subnormal f64 scales to mantissa 0 at 28 places, so this path and the zero path give the same Decimal",
+  "0x37995f5": "every subnormal f64 scales to mantissa 0 at 28 places, so this path and the zero path give the same Decimal",
+  "0x37995f9": "every subnormal f64 scales to mantissa 0 at 28 places, so this path and the zero path give the same Decimal",
+  "0x3799601": "every subnormal f64 scales to mantissa 0 at 28 places, so this path and the zero path give the same Decimal",
+  "0x379963c": "flag word of a zero Decimal: the mantissa stays 0 through the scale, so the result is 0 either way",
+  "0x3799640": "flag word of a zero Decimal: the mantissa stays 0 through the scale, so the result is 0 either way",
+  "0x3799643": "flag word of a zero Decimal: the mantissa stays 0 through the scale, so the result is 0 either way",
+  "0x3799691": "dead store: nothing reads this stack copy after the drop, the same value goes to the output on the next line",
+  "0x37996a5": "the bound moves to tag 5, which this text parser does not return"
+ },
+ "examples": [
+  {
+   "millis": 1000,
+   "path": "decimal",
+   "reference": 1000,
+   "status": "0x186",
+   "text": "1%"
+  },
+  {
+   "millis": 1000,
+   "path": "decimal",
+   "reference": null,
+   "status": "0x186",
+   "text": "+1%"
+  },
+  {
+   "millis": 0,
+   "path": "decimal",
+   "reference": null,
+   "status": "0x186",
+   "text": "-0%"
+  },
+  {
+   "millis": 10000,
+   "path": "decimal",
+   "reference": null,
+   "status": "0x186",
+   "text": "1_0%"
+  },
+  {
+   "millis": 500,
+   "path": "decimal",
+   "reference": 500,
+   "status": "0x186",
+   "text": ".5%"
+  },
+  {
+   "millis": 5000,
+   "path": "decimal",
+   "reference": 5000,
+   "status": "0x186",
+   "text": "5.%"
+  },
+  {
+   "millis": 1,
+   "path": "decimal",
+   "reference": null,
+   "status": "0x186",
+   "text": "0.0010%"
+  },
+  {
+   "millis": null,
+   "path": "decimal",
+   "reference": null,
+   "status": "0x12a",
+   "text": "0.0001%"
+  },
+  {
+   "millis": 1,
+   "path": "float",
+   "reference": null,
+   "status": "0x186",
+   "text": "1e-3%"
+  },
+  {
+   "millis": 100000,
+   "path": "float",
+   "reference": null,
+   "status": "0x186",
+   "text": "1E2%"
+  },
+  {
+   "millis": 1,
+   "path": "float",
+   "reference": null,
+   "status": "0x186",
+   "text": "0.1e-2%"
+  },
+  {
+   "millis": null,
+   "path": "float",
+   "reference": null,
+   "status": "0x12a",
+   "text": "0.29e-2%"
+  },
+  {
+   "millis": 1000,
+   "path": "float",
+   "reference": null,
+   "status": "0x186",
+   "text": "1.00000000000000000000000000049%"
+  },
+  {
+   "millis": 9223372036854775806,
+   "path": "decimal",
+   "reference": 9223372036854775806,
+   "status": "0x186",
+   "text": "9223372036854775.806%"
+  },
+  {
+   "millis": null,
+   "path": "decimal",
+   "reference": 9223372036854775807,
+   "status": "0x12a",
+   "text": "9223372036854775.807%"
+  },
+  {
+   "millis": null,
+   "path": "none",
+   "reference": null,
+   "status": "0x12a",
+   "text": "inf%"
+  },
+  {
+   "millis": null,
+   "path": "decimal",
+   "reference": null,
+   "status": "0x12a",
+   "text": "-1%"
+  }
+ ],
+ "functions": {
+  "0x1e60a90": {
+   "end": "0x1e60ba5",
+   "executed": 74,
+   "fde": "0xd1d7f8",
+   "instructions": 74
+  },
+  "0x1e64620": {
+   "end": "0x1e646be",
+   "executed": 41,
+   "fde": "0xd1daf0",
+   "instructions": 41
+  },
+  "0x2758330": {
+   "end": "0x275849a",
+   "executed": 78,
+   "fde": "0x10f0d70",
+   "instructions": 85
+  },
+  "0x3364cd0": {
+   "end": "0x3364ec6",
+   "executed": 99,
+   "fde": "0xdf99b0",
+   "instructions": 99
+  },
+  "0x37459e0": {
+   "end": "0x3745a5b",
+   "executed": 37,
+   "fde": "0xe4e318",
+   "instructions": 37
+  },
+  "0x3799510": {
+   "end": "0x3799703",
+   "executed": 112,
+   "fde": "0x11a7ff8",
+   "instructions": 126
+  }
+ },
+ "gate_callers": [
+  {
+   "function": "0x1e60a90",
+   "site": "0x1e60afd"
+  },
+  {
+   "function": "0x1e64620",
+   "site": "0x1e6465a"
+  }
+ ],
+ "gate_copy_callers": {
+  "0x4d80fb0": [
+   {
+    "function": "0x46bbb90",
+    "site": "0x46bbbfd"
+   },
+   {
+    "function": "0x4c03940",
+    "site": "0x4c0397a"
+   }
+  ],
+  "0x4d81120": [
+   {
+    "function": "0x46bba70",
+    "site": "0x46bbadd"
+   },
+   {
+    "function": "0x4c039e0",
+    "site": "0x4c03a1a"
+   }
+  ]
+ },
+ "groups": {
+  "cap": 4,
+  "copy": 6,
+  "curated": 149,
+  "digits": 500,
+  "exponent": 500,
+  "gate": 8,
+  "limit": 5,
+  "long": 300,
+  "no-dex": 6,
+  "random": 80,
+  "shape": 1500,
+  "text": 1
+ },
+ "helpers": {
+  "executed": 3278,
+  "functions": 71,
+  "instructions": 7292
+ },
+ "killed": 250,
+ "mismatches": 0,
+ "mutants": 266,
+ "padding_not_executed": 0,
+ "parser_callers": [
+  {
+   "function": "0x1e60a90",
+   "site": "0x1e60ac7"
+  },
+  {
+   "function": "0x23e7d10",
+   "site": "0x23e8420"
+  },
+  {
+   "function": "0x46bba70",
+   "site": "0x46bbaa7"
+  },
+  {
+   "function": "0x46bbb90",
+   "site": "0x46bbbc7"
+  },
+  {
+   "function": "0x4ad78b0",
+   "site": "0x4ad7fc0"
+  },
+  {
+   "function": "0x4ad81e0",
+   "site": "0x4ad88f0"
+  }
+ ],
+ "pinned": [
+  {
+   "bytes": "4883fa65",
+   "meaning": "user entry: length below 0x65 passes",
+   "va": "0x1e60aa8"
+  },
+  {
+   "bytes": "66c743084301",
+   "meaning": "user entry: tag 0x143",
+   "va": "0x1e60aae"
+  },
+  {
+   "bytes": "418b4750",
+   "meaning": "user entry: last word of the address at action +0x50",
+   "va": "0x1e60add"
+  },
+  {
+   "bytes": "410f104740",
+   "meaning": "user entry: first words of the address at action +0x40",
+   "va": "0x1e60ae5"
+  },
+  {
+   "bytes": "48b8cccccccccccccc0c",
+   "meaning": "system entry: limit 0x0ccc...cc",
+   "va": "0x1e6463d"
+  },
+  {
+   "bytes": "807c16ff25",
+   "meaning": "parser: last byte is 0x25",
+   "va": "0x3364cd8"
+  },
+  {
+   "bytes": "31d2",
+   "meaning": "parser: mode 0 for the scaled conversion",
+   "va": "0x3364d19"
+  },
+  {
+   "bytes": "b903000000",
+   "meaning": "parser: 3 decimal digits for the scaled conversion",
+   "va": "0x3364d1b"
+  },
+  {
+   "bytes": "4883bec805000000",
+   "meaning": "gate: length word at exchange +0x5c8",
+   "va": "0x2758350"
+  },
+  {
+   "bytes": "48817c2410ffe0f505",
+   "meaning": "gate: signed compare of the first word with 99999999",
+   "va": "0x27583ca"
+  },
+  {
+   "bytes": "4881c6d0050000",
+   "meaning": "gate: fee tracker is exchange +0x5d0",
+   "va": "0x27583e2"
+  },
+  {
+   "bytes": "488dbec0000000",
+   "meaning": "writer: table is tracker +0xc0",
+   "va": "0x37459f2"
+  },
+  {
+   "bytes": "4883b8900000000a",
+   "meaning": "writer: compare the map length at value +0x90 with 10",
+   "va": "0x3745a0a"
+  },
+  {
+   "bytes": "4883e880",
+   "meaning": "writer: map at value +0x80",
+   "va": "0x3745a14"
+  },
+  {
+   "bytes": "410fb784243e010000",
+   "meaning": "map insert: node length at +0x13e",
+   "va": "0x339df8a"
+  }
+ ],
+ "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+ "slots": {
+  "0x576eae8": "0x15756d0",
+  "0x5773168": "0x3364cd0",
+  "0x5773178": "0x37d79e0",
+  "0x57731d8": "0x3799510",
+  "0x5773848": "0x3750350",
+  "0x5774d30": "0x37459e0",
+  "0x5775968": "0x4eacd00"
+ },
+ "status_text": {
+  "0x127": "Builder has insufficient balance to be approved.",
+  "0x12a": "Percentage is invalid.",
+  "0x12b": "Too many builders approved. Remove a builder by calling approve with max fee of 0.",
+  "0x13f": "Invalid input number",
+  "0x141": "Invalid perp DEX",
+  "0x143": "Invalid input length",
+  "0xa8": "Invalid number of decimals",
+  "0xac": "Invalid decimal number"
+ },
+ "stubs": {
+  "book": "0x36f57f0",
+  "drop_error": "0x3379490",
+  "drop_failure": "0x3762510",
+  "free": "0x54c8cb0",
+  "hash": "0x399c7a0",
+  "malloc": "0x54c06b0",
+  "reserve": "0x357d310",
+  "summary": "0x37d79e0"
+ },
+ "subjects": [
+  "0x1e60a90",
+  "0x1e64620",
+  "0x3364cd0",
+  "0x3799510",
+  "0x2758330",
+  "0x37459e0"
+ ],
+ "survey_vectors": 427,
+ "text_outcomes": {
+  "0x12a": 1956,
+  "0x186": 993
+ },
+ "text_paths": {
+  "decimal": 930,
+  "float": 795,
+  "none": 1224
+ },
+ "text_rule_rows": {
+  "exponent": {
+   "bytes": 10000,
+   "count": 253,
+   "first": "1e1%",
+   "reference": null
+  },
+  "minus sign with zero value": {
+   "bytes": 0,
+   "count": 9,
+   "first": "-0%",
+   "reference": null
+  },
+  "more than 28 places, f64 fallback": {
+   "bytes": 1000,
+   "count": 8,
+   "first": "1.00000000000000000000000000000%",
+   "reference": null
+  },
+  "more than 3 places with zero tail": {
+   "bytes": 0,
+   "count": 40,
+   "first": "0.0000%",
+   "reference": null
+  },
+  "other": {
+   "bytes": null,
+   "count": 2,
+   "first": "9223372036854775.807%",
+   "reference": 9223372036854775807
+  },
+  "plus sign": {
+   "bytes": 0,
+   "count": 18,
+   "first": "+0%",
+   "reference": null
+  },
+  "underscore": {
+   "bytes": 10000,
+   "count": 87,
+   "first": "1_0%",
+   "reference": null
+  }
+ },
+ "unexecuted": [
+  {
+   "end": "0x3799703",
+   "start": "0x37996d8",
+   "why": "unwind landing pad of the f64 path: needs a panic inside the Decimal conversion"
+  },
+  {
+   "end": "0x275849a",
+   "start": "0x275847d",
+   "why": "ud2 after the unwrap panic, unwind landing pad and the trap after it"
+  }
+ ],
+ "vectors": 3059,
+ "writer_callers": [
+  {
+   "function": "0x2758330",
+   "site": "0x27583f1"
+  },
+  {
+   "function": "0x4d80fb0",
+   "site": "0x4d81071"
+  },
+  {
+   "function": "0x4d81120",
+   "site": "0x4d811e1"
+  }
+ ]
+}

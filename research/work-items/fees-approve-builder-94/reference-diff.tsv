@@ -1,0 +1,10 @@
+verdict	reference	reference_says	bytes_say
+differs	MIN_SIGNED_ACCOUNT_VALUE_EXCLUSIVE_RAW doc	the caller's aggregate margin summary	the gate looks up the builder address: rsi of 0x36f57f0 is a copy of the rcx argument, the row of the user comes later in 0x37459e0 from rdx
+differs	parse_unsigned_decimal_millis	no plus sign, no underscore, no exponent, at most 3 places	Decimal text first, then f64 text, then an exact scale by 10^3; see text-rule rows in evidence.json
+differs	apply_approve_builder_fee_raw order	no failure when the first dex is missing	a non-zero fee panics (Result::unwrap on status 0x141) when exchange +0x5c8 is 0
+differs	54 summary doc	aggregate_position_margin_summary(..., false, true)	edx = 1 and ecx = 1 at 0x27583c1 (the file 70 text says true, true)
+same	STATUS_ACCOUNT_VALUE_TOO_SMALL and limit	295 when value <= 99999999	tag 0x127, signed compare at 0x27583ca
+same	MAX_TRACKED_BUILDER_FEES_BEFORE_INSERT	reject when the count is above 10	tag 0x12b at 0x3745a0a, an overwrite of a known builder is refused too
+same	system raw limit	reject 0x0ccccccccccccccc and above with 319	tag 0x13f at 0x1e64647, before the gate, carries the fee
+same	length limit	reject 101 bytes and more	tag 0x143, but in 0x1e60aa8 and not in the parser; word = action pointer
+same	status 298	invalid fee rate	tag 0x12a for every parser failure
