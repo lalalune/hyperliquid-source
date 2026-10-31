@@ -1,0 +1,81 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "owners": [
+    {
+      "role": "step",
+      "start": "0x4770f40",
+      "end": "0x47710d9",
+      "bytes": 409,
+      "instructions": 101,
+      "file_offset": "0x476ff40",
+      "sha256": "085721faf2d6da872af52d3a7d41f276d7e77f54dd112d73fe2ce593453d7c1a",
+      "frames": {
+        "fde": {
+          "va": "0x12c741c",
+          "bytes_hex": "400000001c9e28001c9b4a0399010000043b6c08ff410e10420e18420e20410e28440e800183058e048f03860202e80e28410e20420e18420e10410e08410e8001000000"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "constructor",
+      "start": "0x47710e0",
+      "end": "0x477165a",
+      "bytes": 1402,
+      "instructions": 255,
+      "file_offset": "0x47700e0",
+      "sha256": "42a37dbf8d9b6a146327b41470416cde070ebc827dfadb5eab9e9f24132ab677",
+      "frames": {
+        "fde": {
+          "va": "0x12c7460",
+          "bytes_hex": "50000000609e2800789c4a037a050000042f6c08ff410e10420e18420e20420e28420e30410e38470ea01183078c068d058e048f038602032b040e38410e30420e28420e20420e18420e10410e08410ea0110000"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    }
+  ],
+  "parameters": {
+    "capacity_shift": 61,
+    "state_read_offset": 48,
+    "state_init_offset": 48,
+    "cas_offset": 48,
+    "closed_mask": 1,
+    "threshold": 2,
+    "delta": -2
+  },
+  "capacity_guard_pass_domain": [
+    0,
+    2305843009213693951
+  ],
+  "initial_state_equation": "word=2*capacity; even, <=2^62-2; bit0 clear",
+  "conditional_success_equation": "even word>=2 and winning CAS: word becomes word-2; abstract word/2 decreases by1",
+  "local_failure_output_tags": {
+    "odd_gate": 0,
+    "empty_gate": 1,
+    "provider_zero": "provider byte propagated"
+  },
+  "provider_success_output": "owner pointer at+0; dword1 at+8; provider word at+0x10 and dword at+0x18",
+  "provider_failure_followup": "after raw output stores, byte CAS at owner+0x10 then opaque call5ce5310 with (owner+0x10,1,owner+0x10), then owner decrement",
+  "relative_bindings": {
+    "0x6496548": "0x432e0f",
+    "0x6496560": "0x432e0f",
+    "0x64e21f8": "0x5ce88c0",
+    "0x64e01f8": "0x5bb59d0",
+    "0x64e1078": "0x154c700",
+    "0x64df480": "0x6355830"
+  },
+  "direct_bindings": {
+    "0x4770fe7": "0x4774c50",
+    "0x477106e": "0x5ce5310",
+    "0x47710c6": "0x47707a0",
+    "0x47710ce": "0x63f0a50"
+  },
+  "captured_code_executed": false,
+  "limits": "Static constructor initialization prefix and conditional packed-state attempt only. No complete constructor return, IP/key/cache policy, original Rust layout/error ABI, all callers, helper/rollback/unwind closure, concurrency fairness/exclusion guarantee or gate. No post-INC signed-value interpretation of JLE is assumed."
+}
