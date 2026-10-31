@@ -74,6 +74,8 @@ def unwind_index(data):
     starts = [e['start'] for e in entries]
     if starts != sorted(starts):
         raise ValueError('Unwind index is not ordered')
+    if any(b <= a for a, b in zip(starts, starts[1:])):
+        raise ValueError('Unwind index has duplicate starts')
     for row in entries:
         sec = next(s for s in executable if s['name'] == row['section'])
         following = bisect.bisect_right(starts, row['start'])
