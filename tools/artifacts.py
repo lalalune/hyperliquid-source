@@ -52,20 +52,49 @@ def fetch_one(root, item):
             temp.unlink(missing_ok=True)
 
 
-def verify_signatures(root, fingerprint):
+KEY = 'artifacts/keys/pub_key.asc'
+
+
+def signature_pairs(manifest):
+    """Derive detached-signature coverage from the artifact manifest itself.
+
+    The manifest is the authority for the retained inputs, so an artifact added
+    there must be verified without editing this module. A detached signature
+    without its signed file, a binary artifact without a signature, or a
+    manifest that records no signatures at all is an incomplete record and
+    fails closed.
+    """
+    paths = {item['path'] for item in manifest['files']}
+    pairs = sorted((path[:-4], path) for path in paths
+                   if path.endswith('.asc') and path != KEY)
+    for binary, signature in pairs:
+        if binary not in paths:
+            raise ValueError(f'Detached signature without a signed artifact: {signature}')
+    unsigned = sorted(path for path in paths
+                      if not path.endswith(('.asc', '.json')) and path + '.asc' not in paths)
+    if unsigned:
+        raise ValueError(f'Artifact without a detached signature: {unsigned[0]}')
+    if not pairs:
+        raise ValueError('Artifact manifest records no detached signatures')
+    return pairs
+
+
+def verify_signatures(root, manifest):
+    fingerprint = manifest['signing_fingerprint']
+    pairs = signature_pairs(manifest)
     with tempfile.TemporaryDirectory(prefix='hl-verify-') as home:
         base = ['gpg', '--batch', '--no-options', '--homedir', home]
-        subprocess.run(base + ['--import', str(root / 'artifacts/keys/pub_key.asc')],
+        subprocess.run(base + ['--import', str(root / KEY)],
                        check=True, capture_output=True)
-        for rel in ['node/94/hl-node', 'node/115/hl-node', 'visor/captured/hl-visor']:
-            binary = root / 'artifacts' / rel
-            result = subprocess.run(base + ['--status-fd', '1', '--verify', str(binary) + '.asc', str(binary)],
+        for relative, signature in pairs:
+            binary = root / relative
+            result = subprocess.run(base + ['--status-fd', '1', '--verify', str(root / signature), str(binary)],
                                     check=True, capture_output=True, text=True)
             valid = [line.split() for line in result.stdout.splitlines()
                      if line.startswith('[GNUPG:] VALIDSIG ')]
             if not any(row[2] == fingerprint or row[-1] == fingerprint for row in valid):
-                raise ValueError(f'Expected signing fingerprint not found: {rel}')
-            print(f'Valid signature: {rel}')
+                raise ValueError(f'Expected signing fingerprint not found: {relative}')
+            print(f'Valid signature: {relative}')
 
 
 PAIRS = [
@@ -94,7 +123,7 @@ def main():
             fetch_one(ROOT, item)
         check(ROOT / item['path'], item)
         print(f"SHA-256 OK: {item['path']}")
-    verify_signatures(ROOT, manifest['signing_fingerprint'])
+    verify_signatures(ROOT, manifest)
     verify_pinned_pairs(ROOT)
     print('Pinned upstream binary, signature and public key match.')
 
