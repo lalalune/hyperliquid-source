@@ -1,0 +1,30 @@
+group	order	site	rule	otherwise	outcome_label	cases
+verify_qc	1	0x4758daa	QC round over table +0x58: warning, go on	no stop	-	-
+verify_qc	2	0x4758e56	stake set for the QC round; none skips the signature loop and holds tag 0x28	held tag 0x28	-	-
+verify_qc	3	0x4758f46	digest variant 1 over 0x38 bytes: QC hash +0x30, pair +0x18, round +0x28	-	-	-
+verify_qc	4	0x4758ffc	vote signer in the stake set	held tag 2, loop ends	check 0x2	24
+verify_qc	5	0x4759050	recover of the vote signature at row +0x18	held tag 2, loop ends	check 0x2	24
+verify_qc	6	0x4759085	recovered address equals the row's signer	held tag 2, loop ends	check 0x2	24
+verify_qc	7	0x47590ca	signers go to a sorted unique set, quorum 0x4ad90d0 over it	held tag 9	check 0x9	44
+verify_qc	8	0x47591f9	QC pair +0x18,+0x20 against table +0x40,+0x48; both words	next rows	-	-
+verify_qc	9	0x4759220	pair differs, first word higher and quorum passed: panic `observed qc for newer hardfork, crashing`	tag 0 with both pairs, any held result dropped	panic newer hardfork	29
+verify_qc	10	0x4759203	pair equal, QC round under the start round	tag 7	check 0x7	1
+verify_qc	11	0x4759288	pair equal, QC round == start round: QC hash all zero and 0 votes	tag 8	check 0x8	33
+verify_qc	12	0x475928f	same: success with no quorum read, the held result is dropped	-	-	-
+verify_qc	13	0x475929f	pair equal, QC round over start round: the held result is the answer	-	-	-
+verify_tc	14	0x4759519	TC round over table +0x58: warning, go on	no stop	-	-
+verify_tc	15	0x47595ac	stake set for the TC round	tag 0x28	-	-
+verify_tc	16	0x47595e8	at least one vote	tag 0x0b	check 0xb	2
+verify_tc	17	0x4759608	every vote round +0x50 equals the TC round, first mismatch named	tag 0x0f	check 0xf	13
+verify_tc	18	0x47596e3	highest vote QC round +0x28 is chosen; the later vote wins a tie	-	-	-
+verify_tc	19	0x4759754	0x454aa10 flag 1 on that vote: only this QC is verified	its error	-	-
+verify_tc	20	0x475982b	0x4768f80: every vote through 0x454aa10 flag 0 (site 0x476f448)	its error	check 0x1	32
+verify_tc	21	0x4759939	voters go to a sorted unique set, quorum 0x4ad90d0	tag 0x0a	check 0xa	2
+verify_timeout	22	0x454aaf6	flag set: QC at vote +0 verifies before the signature	its error	-	-
+verify_timeout	23	0x454accc	vote signer +0x58 in the set, recover of +0x70 over digest variant 2, same address	tag 1	check 0x1	32
+quorum	24	0x4ad93ca	each set address found in the stake tree adds its stake; a missing one adds nothing; carry panics	panic	panic stake overflow	2
+quorum	25	0x4ad944f	all stakes in the tree add up; carry panics	panic	panic stake overflow	2
+quorum	26	0x4ad9623	3 * signed > 2 * total on 128 bit values, strict	false	check 0x9	44
+stake_set	27	0x42c9947	limit = table +0 + 2000, saturating	-	-	-
+stake_set	28	0x42c997f	round < limit: bound = table +0; otherwise bound = max(table +0, round - 200)	-	-	-
+stake_set	29	0x42c998c	answer = the last table key at or under bound	none	check 0x28	8

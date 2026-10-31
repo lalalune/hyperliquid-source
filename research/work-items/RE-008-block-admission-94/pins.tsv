@@ -1,0 +1,100 @@
+group	address	bytes	meaning
+arm	0x44af43e	e80dcc0900	digest variant 0 gives the block hash
+arm	0x44af46d	e8fe982a00	verify_qc before admission
+arm	0x44af484	0f85310f0000	failure skips the QC record
+arm	0x44af4f3	e868c0ffff	call 0x44ab560
+arm	0x44b0421	e8ea7f0000	admission
+arm	0x44b0f6c	e89f740000	admission in the list loop
+arm	0x44b1802	e869a1ffff	commit attempt on the shared tail
+register	0x44b8445	e8b6320900	call 0x454b700: verify first
+register	0x44b8463	4d8b8e88000000	load block round
+register	0x44b846a	488b8598010000	load committed round
+register	0x44b8471	4939c1	compare
+register	0x44b8474	0f83f0000000	jae: equal passes
+register	0x44b847a	498d4c24d9	tag 3
+register	0x44b864c	498d4424dc	tag 6
+register	0x44b86a7	4c69c5f8000000	block row stride 0xf8
+register	0x44b86ba	4e398c02f0010000	round compare at row +0x88
+register	0x44b8927	498d4424e4	tag 0xe
+register	0x44b888f	e86c0f0000	call 0x44b9800
+register	0x44b920e	498b4610	lookup loop start
+register	0x44b9416	49bc2a00000000000080	lookup loop end, success word
+register	0x44b8a2c	c68424c000000000	request key tag byte 0
+register	0x44b8a4b	e810cf4800	call 0x4945960
+register	0x44b8ad0	e81b723000	call 0x47bfcf0
+register	0x44b8b52	498d4424d7	placeholder tag
+register	0x44b8e10	80bd3002000000	forward flag
+register	0x44b8f12	0f85dd000000	closed bit
+register	0x44b8f31	498d4424d6	channel row word
+register	0x44b91d5	e8e6084a00	call 0x4959ac0
+verify_signed	0x454b72a	7673	jbe past the warning
+verify_signed	0x454b7b4	0f8455010000	none: tag 0x28
+verify_signed	0x454b7ef	ff152bb22201	call slot 0x5776a20
+verify_signed	0x454b81b	e830080000	digest variant 0
+verify_signed	0x454b96a	ff15e8442201	recover slot
+verify_signed	0x454b9cb	3dffff0000	all 20 bytes
+verify_signed	0x454ba25	4983c6d9	tag 1
+verify_block	0x47b01e3	ff153f34fc00	proposer rule slot
+verify_block	0x47b0265	3dffff0000	all 20 bytes
+verify_block	0x47b039d	4983c5e2	tag 0xc
+verify_block	0x47b0405	e86689faff	call verify_qc
+verify_block	0x47b0410	4d396640	QC round compare
+verify_block	0x47b0414	736a	jae: strict
+verify_block	0x47b041a	49394668	TC None test
+verify_block	0x47b0420	49ffcc	block round - 1
+verify_block	0x47b0423	4d39a680000000	TC round compare
+verify_block	0x47b0439	e8b290faff	call verify_tc
+verify_block	0x47b0480	4983c5da	tag 4
+verify_block	0x47b0489	4983c5db	tag 5
+verify_qc	0x4758da6	483b4258	high round compare
+verify_qc	0x4758f26	48c744243001000000	digest variant 1
+verify_qc	0x4759045	ff150d6e0101	recover slot
+verify_qc	0x47590bd	e8de87cfff	signer set
+verify_qc	0x47590ca	ff1518da0101	quorum slot
+verify_qc	0x4759195	498d47e1	tag 9
+verify_qc	0x47591b9	498d47da	tag 2
+verify_qc	0x47591d8	498b4c2440	pair word 0
+verify_qc	0x47591dd	498b442448	pair word 1
+verify_qc	0x47591f9	751b	pair branch
+verify_qc	0x47591fb	48398424b0000000	start round compare
+verify_qc	0x4759205	4983c7df	tag 7
+verify_qc	0x4759216	4839ca	first word only
+verify_qc	0x4759219	400f97c7	seta
+verify_qc	0x4759220	0f85e6000000	to the panic
+verify_qc	0x4759226	4983c7d8	tag 0
+verify_qc	0x4759283	3dffff0000	hash all zero
+verify_qc	0x475928a	48837b1000	no votes
+verify_qc	0x47592fa	4983c7e0	tag 8
+verify_qc	0x4759366	ff152c4d0101	panic call
+verify_tc	0x47595e8	0f8485000000	no votes
+verify_tc	0x4759605	4c39f1	vote round compare
+verify_tc	0x4759600	498b4c0450	vote round at +0x50
+verify_tc	0x47596d1	4d0f47cf	tie keeps the later
+verify_tc	0x475971b	4c0f46f8	last odd vote
+verify_tc	0x475974a	b901000000	flag 1
+verify_tc	0x475974f	e8bc12dfff	call 0x454aa10
+verify_tc	0x475982b	e850f70000	parallel loop
+verify_tc	0x4759855	e8367ecfff	voter set
+verify_tc	0x4759865	ff157dd20101	quorum slot
+verify_tc	0x475993f	4983c4e0	tag 0xa
+verify_tc	0x4759673	4983c4e1	tag 0xb
+verify_tc	0x4759689	4883c0e5	tag 0xf
+verify_timeout	0x454aaf3	4084ed	flag
+verify_timeout	0x454ab03	e868e22000	call verify_qc
+verify_timeout	0x454aae5	48c744243002000000	digest variant 2
+verify_timeout	0x454ac3e	ff1514522201	recover slot
+quorum	0x4ad93ca	4c0354d808	add stake
+quorum	0x4ad944f	4a034cda08	add total
+quorum	0x4ad9612	ba03000000	3
+quorum	0x4ad961a	48f7e2	mul signed
+quorum	0x4ad961d	4801c9	double total
+quorum	0x4ad9620	4839c1	low
+quorum	0x4ad9623	4819d6	high
+quorum	0x4ad9626	0f92c0	setb
+stake_set	0x42c9947	4881fa30f8ffff	near the top
+stake_set	0x42c9953	4881c1d0070000	add 2000
+stake_set	0x42c9967	4c8d82d0070000	add 2000
+stake_set	0x42c996e	488d8838ffffff	round - 200
+stake_set	0x42c9978	480f47ca	max with base
+stake_set	0x42c997f	480f42ca	under limit: base
+stake_set	0x42c998c	e86f07ffff	range walk

@@ -1,0 +1,23 @@
+group	order	site	rule	otherwise	outcome_label	cases
+verify_signed	1	0x454b72a	block round over table +0x58: warning `Querying stakes for high round`, then go on	no stop	-	-
+verify_signed	2	0x454b7b4	stake set lookup for the block round	tag 0x28	check 0x28	8
+verify_block	3	0x47b0208	proposer rule for the block round succeeds	its error, unchanged	check 0x10	1
+verify_block	4	0x47b026a	block +0x9c equals the rule's proposer, all 20 bytes	warning, tag 0x0c	check 0xc	45
+verify_block	5	0x47b040e	QC at block +0x18 verifies	its error, unchanged	check 0x9	44
+verify_block	6	0x47b0414	QC round is strictly under block round; no lower bound, a gap passes	tag 4	check 0x4	25
+verify_block	7	0x47b041e	no TC: success here, so a QC gap needs no TC	-	-	-
+verify_block	8	0x47b042a	TC round == block round - 1	tag 5	check 0x5	4
+verify_block	9	0x47b0442	TC verifies	its error, unchanged	check 0xa	2
+verify_signed	10	0x454b8e4	proposer found in the stake set of the block round	tag 1	check 0x1	32
+verify_signed	11	0x454b974	recover of signature +0xb0 over digest variant 0 succeeds	tag 1	check 0x1	32
+verify_signed	12	0x454b9df	recovered address equals the proposer	tag 1	check 0x1	32
+register	13	0x44b8474	block round >= state +0x198; equal passes	tag 3	below committed	4
+register	14	0x44b85f8	block hash not in the block map at state +0x1b8	tag 6	duplicate hash	5
+register	15	0x44b86c2	no stored block has this round; rows are read in key order and the first hit is named	tag 0x0e with both block texts	same round	7
+register	16	0x44b888f	ancestor walk 0x44b9800 from the block's QC hash, then a loop over the block's hashes at 0x44b9284 that looks in the seen map and the walk's set; neither result is used	no stop	-	-
+register	17	0x44b8a4b	request row (tag byte 0, block hash) leaves the map at state +0x1d0	no stop	-	-
+register	18	0x44b8ad0	hashes absent from the tx map are collected in block order, repeats kept	no stop	-	-
+register	19	0x44b8bfa	each unknown hash gets a tx row: event time, tag 0x8000000000000001; a repeat rewrites the same row	no stop	-	-
+register	20	0x44b8e17	state +0x230 clear: block clone goes to the channel at state +0x158 as a row with word 0x8000000000000000, box, hash	skip	-	-
+register	21	0x44b8f12	channel word +0x1c0 bit 0 set: row dropped and sender count returned	row pushed, word + 2, waker fired once	-	-
+register	22	0x44b91d5	block goes into the map under the caller's hash; the assertion text at 0x44b9141 guards a second insert	-	registered	96

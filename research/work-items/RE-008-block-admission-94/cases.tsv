@@ -1,0 +1,457 @@
+case	outcome	block_round	qc_round	qc_votes	tc_votes	blocks_after	txs_after
+register plain	registered	1000	999	3	-	1	2
+register no hashes	registered	1000	999	3	-	1	0
+register one unknown	registered	1000	999	3	-	1	2
+register all unknown	registered	1000	999	3	-	1	2
+register unknown repeated	registered	1000	999	3	-	1	2
+register known repeated	registered	1000	999	3	-	1	1
+register unknown past leaf end	registered	1000	999	3	-	1	4
+register unknown between keys	registered	1000	999	3	-	1	3
+register two level tx map	registered	1000	999	3	-	1	18
+register two level tx map found then missing	registered	1000	999	3	-	1	17
+register no tx map unknown second	registered	1000	999	3	-	1	6
+register two level tx map found	registered	1000	999	3	-	1	16
+register forward off	registered	1000	999	3	-	1	2
+register closed channel	registered	1000	999	3	-	1	2
+register with waker	registered	1000	999	3	-	1	2
+register drops request row	registered	1000	999	3	-	1	2
+register other request row	registered	1000	999	3	-	1	2
+register at committed round	registered	1000	999	3	-	1	2
+register seen tx	registered	1000	999	3	-	1	2
+register seen other	registered	1000	999	3	-	1	2
+register seen tx missing from tx map	registered	1000	999	3	-	1	1
+register with parent stored	registered	1000	999	3	-	2	2
+register with chain stored	registered	1000	999	3	-	4	2
+register chain reaches committed	registered	1000	999	3	-	3	2
+register chain below committed	registered	1000	999	3	-	3	2
+register ancestor holds same hash	registered	1000	999	3	-	2	1
+register ancestor and seen	registered	1000	999	3	-	2	2
+register over gap	registered	1005	999	3	-	2	2
+register first in empty map	registered	1000	999	3	-	1	2
+register map of other rounds	registered	1000	999	3	-	6	2
+register two level block map	registered	1000	999	3	-	17	2
+register many other rounds	registered	1000	999	3	-	17	2
+below committed by one	below committed	1000	999	3	-	0	0
+far below committed	below committed	1000	999	3	-	0	0
+duplicate hash	duplicate hash	1000	999	3	-	1	0
+duplicate hash other round	duplicate hash	1000	999	3	-	1	0
+duplicate hash in two level map	duplicate hash	1000	999	3	-	16	0
+same round other hash	same round	1000	999	3	-	1	0
+same round other hash low key	same round	1000	999	3	-	1	0
+same round in two level map	same round	1000	999	3	-	16	0
+same round first of two	same round	1000	999	3	-	2	0
+below committed wins over duplicate	below committed	1000	999	3	-	1	0
+duplicate wins over same round	duplicate hash	1000	999	3	-	2	0
+bad block wins over duplicate	check 0xc	1000	999	3	-	1	0
+wrong proposer	check 0xc	1000	999	3	-	0	0
+proposer rule error	check 0x28	1000	999	3	-	0	0
+proposer rule other error	check 0x10	1000	999	3	-	0	0
+proposer not staked	check 0x1	1000	999	3	-	0	0
+block signature broken	check 0x1	1000	999	3	-	0	0
+block signature stale digest	check 0x1	1000	999	3	-	0	0
+block signature other signer	check 0x1	1000	999	3	-	0	0
+proposer last of two level set	check 0x9	1000	999	3	-	0	0
+proposer in left leaf of two level set	check 0x9	1000	999	3	-	0	0
+proposer on root of two level set	check 0x9	1000	999	3	-	0	0
+proposer absent two level set	check 0x9	1000	999	3	-	0	0
+signature checked after QC	check 0x4	1000	1500	3	-	0	0
+signature checked after TC	check 0xb	1000	999	3	0	0	0
+no stake table	check 0x28	1000	999	3	-	0	0
+round high warns	registered	1000	999	3	-	1	2
+round equal limit quiet	registered	1000	999	3	-	1	2
+qc round high warns	registered	1000	999	3	-	1	2
+table base over round	registered	1000	999	3	-	1	2
+lag picks older set	registered	3000	2999	3	-	1	2
+lag edge exact	registered	3000	2999	3	-	1	2
+lag edge new set used	check 0x2	3000	2999	3	-	0	2
+qc round one under lag edge	check 0x2	3000	2999	3	-	0	0
+inside recent span uses base	registered	1999	1998	3	-	1	2
+span edge first lagged round	check 0x1	2000	1999	3	-	0	0
+span edge one under lag key	registered	2000	1999	3	-	1	2
+base high round low	registered	3000	2999	3	-	1	2
+base saturated span	registered	1000	999	3	-	1	2
+base near span end	registered	18446744073709551610	18446744073709551609	3	-	1	2
+base exactly at saturation edge	registered	1000	999	3	-	1	2
+base one under saturation edge	registered	1000	999	3	-	1	2
+base top round top	registered	18446744073709551615	18446744073709551614	3	-	1	2
+table first key over bound	check 0x28	3000	2999	3	-	0	0
+table single key equal bound	check 0x28	3000	2999	3	-	0	2
+table many keys	registered	30000	29999	3	-	1	2
+table many keys second leaf	registered	12205	12204	3	-	1	2
+table many keys root key	check 0x2	7200	7199	3	-	0	2
+table many keys bound on leaf end	check 0x1	6200	6199	3	-	0	2
+qc two of three short	check 0x9	1000	999	2	-	0	0
+qc exact two thirds fails	check 0x9	1000	999	2	-	0	0
+qc one over two thirds	registered	1000	999	2	-	1	2
+qc all signers	registered	1000	999	4	-	1	2
+qc no signers	check 0x9	1000	999	0	-	0	0
+qc repeated signer counts once	check 0x9	1000	999	5	-	0	0
+qc repeated signer reaches quorum	registered	1000	999	4	-	1	2
+qc single signer	registered	1000	999	1	-	1	2
+qc signer not staked	check 0x2	1000	999	3	-	0	0
+qc broken signature	check 0x2	1000	999	3	-	0	0
+qc stale digest	check 0x2	1000	999	3	-	0	0
+qc signature of other signer	check 0x2	1000	999	3	-	0	0
+qc stake weights	registered	1000	999	1	-	1	2
+qc weight one short	check 0x9	1000	999	2	-	0	0
+qc huge stakes no wrap	registered	1000	999	3	-	1	2
+qc huge stakes short	check 0x9	1000	999	2	-	0	0
+qc double of total past 2^64	registered	1000	999	4	-	1	2
+qc doubled total carry kept	registered	1000	999	3	-	1	2
+qc signed sum overflow	panic stake overflow	1000	999	2	-	0	0
+qc total overflow	panic stake overflow	1000	999	1	-	0	0
+qc zero total stake	check 0x9	1000	999	1	-	0	0
+qc many signers two level	registered	1000	999	13	-	1	2
+qc twelve of thirteen	check 0xc	1000	999	12	-	0	0
+qc nine of thirteen short	check 0x9	1000	999	8	-	0	0
+qc nine of thirteen pass	registered	1000	999	9	-	1	2
+qc round equals block	check 0x4	1000	1000	3	-	0	0
+qc round over block	check 0x4	1000	1500	3	-	0	0
+qc round far under block	registered	1000	600	3	-	1	2
+qc no stake set	check 0x28	3000	150	3	-	0	0
+qc no stake set same version start edge	check 0x28	3000	150	0	-	0	2
+genesis qc	registered	1000	100	0	-	1	2
+genesis qc with hash	check 0x8	1000	100	0	-	0	0
+genesis qc high hash word	check 0x8	1000	100	0	-	0	0
+genesis qc with votes	check 0x8	1000	100	3	-	0	0
+qc under start	check 0x7	1000	99	3	-	0	0
+qc one over start	registered	1000	101	3	-	1	2
+qc one over start bad votes	check 0x9	1000	101	1	-	0	0
+older version	check 0x0	1000	999	3	-	0	0
+older version start differs	check 0x0	1000	999	3	-	0	0
+same version other start	check 0x0	1000	999	3	-	0	0
+same version other start low	check 0x0	1000	999	3	-	0	0
+newer version good votes panics	panic newer hardfork	1000	999	3	-	0	0
+newer version short votes	check 0x0	1000	999	1	-	0	0
+newer version bad signature	check 0x0	1000	999	3	-	0	0
+newer version no stake set	check 0x28	3000	150	3	-	0	0
+same version start higher good votes	check 0x0	1000	999	3	-	0	0
+tc good	registered	1000	990	3	3	1	2
+tc two qc rounds tie	registered	1000	990	3	3	1	2
+tc four votes	registered	1000	990	3	4	1	2
+tc five votes	registered	1000	990	3	5	1	2
+tc round not previous	check 0x5	1000	990	3	3	0	0
+tc round equals block	check 0x5	1000	990	3	3	0	0
+tc empty	check 0xb	1000	990	3	0	0	0
+tc vote round differs first	check 0xf	1000	990	3	1	0	0
+tc vote round differs last	check 0xf	1000	990	3	3	0	0
+tc no quorum	check 0xa	1000	990	3	2	0	0
+tc repeated voter counts once	check 0xa	1000	990	3	4	0	0
+tc voter not staked	check 0x1	1000	990	3	3	0	0
+tc voter signature broken	check 0x1	1000	990	3	3	0	0
+tc voter stale digest	check 0x1	1000	990	3	3	0	0
+tc voter other signer	check 0x1	1000	990	3	3	0	0
+tc highest qc bad	check 0x9	1000	990	3	3	0	0
+tc lower qc bad is ignored	registered	1000	990	3	3	1	2
+tc tie takes the later vote	registered	1000	990	3	3	1	2
+tc tie later vote bad	check 0x9	1000	990	3	3	0	0
+tc pair tie later bad	check 0x2	1000	990	3	2	0	0
+tc pair tie first bad	check 0x2	1000	990	3	2	0	2
+tc single vote	check 0x2	1000	990	3	1	0	2
+tc single vote bad qc	check 0x2	1000	990	3	1	0	0
+tc high round warns	registered	1000	990	3	3	1	2
+tc no stake set	check 0x28	3000	2000	3	1	0	0
+tc with qc round after tc round	registered	1000	999	3	3	1	2
+no tc qc gap	registered	1000	700	3	-	1	2
+tc older version in highest qc	check 0x0	1000	990	3	3	0	0
+tc newer version in highest qc panics	panic newer hardfork	1000	990	3	3	0	0
+vector 0	check 0x4	1007	1007	6	-	3	0
+vector 1	check 0x9	1024	1022	3	-	1	1
+vector 2	check 0x9	1025	1025	2	-	1	0
+vector 3	check 0xf	1046	1045	4	4	2	0
+vector 4	check 0x0	1027	100	6	-	1	4
+vector 5	check 0x8	1002	100	5	-	0	3
+vector 6	panic newer hardfork	1045	1045	4	-	1	1
+vector 7	check 0x2	1038	1035	3	-	0	3
+vector 8	check 0xc	1046	101	3	3	4	0
+vector 9	check 0xc	1033	1031	3	3	5	3
+vector 10	check 0x4	1042	1042	4	-	0	3
+vector 11	check 0x0	1047	101	2	-	0	1
+vector 12	panic newer hardfork	1024	1024	6	-	3	5
+vector 13	registered	1038	1037	3	-	2	3
+vector 14	check 0x4	1024	1024	8	-	3	2
+vector 15	check 0x0	1049	1046	6	-	5	1
+vector 16	registered	1039	1037	5	-	1	2
+vector 17	check 0x0	1014	100	4	-	1	0
+vector 18	check 0x1	1005	1003	3	-	4	2
+vector 19	check 0x8	1031	100	6	-	3	4
+vector 20	check 0x9	1011	1008	5	-	5	3
+vector 21	check 0x8	1002	100	5	5	4	2
+vector 22	check 0x0	1029	100	5	5	3	4
+vector 23	check 0x0	1004	1002	5	-	2	5
+vector 24	check 0xc	1038	1035	4	-	2	5
+vector 25	check 0x4	1008	1008	3	-	1	1
+vector 26	check 0xc	1039	1039	2	-	3	1
+vector 27	check 0x9	1020	1017	2	-	5	4
+vector 28	check 0xc	1033	101	3	-	0	1
+vector 29	check 0x0	1015	1015	5	5	2	4
+vector 30	check 0x0	1039	1039	6	-	1	4
+vector 31	check 0x8	1047	100	3	3	1	3
+vector 32	registered	1014	1013	5	-	2	6
+vector 33	panic newer hardfork	1034	100	6	-	5	0
+vector 34	check 0x9	1009	1007	4	4	4	1
+vector 35	check 0x2	1042	1039	6	-	4	4
+vector 36	panic newer hardfork	1035	1035	4	-	3	1
+vector 37	check 0x0	1025	1025	5	5	3	3
+vector 38	check 0x8	1009	100	6	-	1	2
+vector 39	check 0xf	1037	1035	4	4	0	5
+vector 40	check 0x0	1044	1042	6	6	3	4
+vector 41	check 0xc	1034	1033	3	-	2	4
+vector 42	check 0xc	1026	1023	5	-	3	2
+vector 43	check 0x2	1049	101	5	-	5	4
+vector 44	check 0x4	1019	1019	3	-	3	1
+vector 45	check 0xc	1013	1013	4	4	4	4
+vector 46	below committed	1047	101	3	-	0	1
+vector 47	check 0x9	1000	101	2	-	2	3
+vector 48	check 0xc	1007	1007	4	-	3	3
+vector 49	check 0x4	1031	1031	5	5	3	3
+vector 50	check 0x1	1036	1035	6	-	5	1
+vector 51	check 0xf	1012	1010	7	7	0	2
+vector 52	check 0x2	1030	1030	3	3	4	6
+vector 53	check 0x0	1040	1039	4	-	3	1
+vector 54	check 0x0	1002	101	3	-	3	1
+vector 55	check 0xc	1026	1026	6	-	0	1
+vector 56	check 0x4	1036	1036	5	-	3	4
+vector 57	check 0xf	1016	101	7	7	0	1
+vector 58	check 0x8	1006	100	7	-	4	0
+vector 59	check 0x9	1013	1011	6	-	4	3
+vector 60	check 0x9	1027	101	3	-	2	4
+vector 61	panic newer hardfork	1038	1036	7	-	4	1
+vector 62	check 0x2	1030	1030	4	-	3	2
+vector 63	check 0x1	1012	1009	5	5	0	1
+vector 64	check 0xc	1013	1013	4	-	5	1
+vector 65	check 0x4	1044	1044	4	-	2	5
+vector 66	check 0x0	1036	1033	3	3	5	1
+vector 67	check 0x8	1004	100	4	-	3	0
+vector 68	check 0x8	1011	100	3	-	4	0
+vector 69	check 0x0	1007	1007	2	-	3	1
+vector 70	check 0x0	1044	1041	4	-	0	3
+vector 71	check 0x4	1032	1032	7	-	0	3
+vector 72	check 0x8	1002	100	3	-	0	2
+vector 73	check 0x2	1040	101	4	-	5	3
+vector 74	check 0xc	1039	101	4	4	4	3
+vector 75	check 0x9	1007	1007	2	-	4	5
+vector 76	panic newer hardfork	1030	1027	5	-	1	0
+vector 77	check 0xc	1025	1022	3	-	2	3
+vector 78	registered	1021	1020	7	-	4	1
+vector 79	check 0xc	1027	100	7	7	4	2
+vector 80	check 0x0	1049	1049	4	-	5	0
+vector 81	check 0x0	1029	101	4	4	5	4
+vector 82	check 0x9	1006	1006	1	1	3	1
+vector 83	check 0x9	1017	1017	1	1	0	3
+vector 84	check 0x1	1008	1006	3	3	3	0
+vector 85	check 0x1	1023	1021	3	-	2	0
+vector 86	check 0xc	1043	1040	4	4	0	3
+vector 87	check 0x0	1044	100	6	-	3	2
+vector 88	check 0x0	1040	1038	3	-	0	4
+vector 89	check 0x0	1027	1024	2	-	4	1
+vector 90	check 0x9	1044	1044	1	-	2	1
+vector 91	panic newer hardfork	1007	1007	5	-	3	2
+vector 92	registered	1006	1004	5	-	6	4
+vector 93	check 0xc	1006	1005	5	-	4	5
+vector 94	check 0xc	1007	1007	5	-	1	3
+vector 95	check 0x8	1025	100	5	-	5	0
+vector 96	check 0x1	1021	1018	5	-	2	3
+vector 97	check 0x0	1023	1022	4	-	5	0
+vector 98	check 0xf	1045	1042	7	7	5	5
+vector 99	registered	1004	101	7	7	5	3
+vector 100	registered	1026	101	3	-	2	1
+vector 101	panic newer hardfork	1006	101	4	4	5	3
+vector 102	check 0xc	1006	100	8	-	1	5
+vector 103	check 0x4	1045	1045	5	5	1	4
+vector 104	check 0xc	1006	100	4	-	5	6
+vector 105	registered	1022	101	4	-	4	5
+vector 106	check 0xc	1040	1038	4	-	5	0
+vector 107	check 0x2	1017	1017	7	-	4	4
+vector 108	check 0x0	1004	1003	4	-	2	1
+vector 109	check 0xc	1018	1018	6	6	3	3
+vector 110	check 0x1	1006	101	4	4	5	4
+vector 111	check 0x0	1011	1011	3	-	1	5
+vector 112	check 0x8	1038	100	6	-	2	1
+vector 113	check 0x0	1006	101	2	2	5	3
+vector 114	check 0x9	1045	1042	3	-	3	2
+vector 115	check 0x4	1029	1029	6	6	3	3
+vector 116	check 0x0	1019	1016	3	-	1	1
+vector 117	check 0xc	1008	1008	3	-	3	2
+vector 118	check 0x1	1005	1002	5	-	3	6
+vector 119	check 0x1	1021	101	5	5	3	3
+vector 120	check 0xc	1018	100	5	-	0	1
+vector 121	check 0x8	1007	100	6	6	1	0
+vector 122	check 0x0	1031	1028	2	-	2	1
+vector 123	registered	1025	1023	5	-	2	4
+vector 124	check 0xc	1022	1022	4	-	3	3
+vector 125	check 0x2	1025	101	3	-	4	4
+vector 126	check 0x9	1032	1032	2	-	4	3
+vector 127	check 0x0	1022	100	5	-	3	4
+vector 128	check 0x0	1009	1008	6	-	0	2
+vector 129	check 0x4	1019	1019	4	-	2	0
+vector 130	check 0xc	1038	101	3	-	1	4
+vector 131	check 0x0	1034	100	4	-	0	3
+vector 132	check 0x0	1014	100	4	-	1	2
+vector 133	check 0x2	1002	1001	5	5	5	6
+vector 134	check 0x0	1036	1033	4	-	5	2
+vector 135	check 0x8	1025	100	4	-	1	3
+vector 136	registered	1029	101	4	-	6	2
+vector 137	check 0x0	1001	100	4	-	1	3
+vector 138	panic newer hardfork	1046	1045	5	-	4	0
+vector 139	check 0x0	1035	100	2	-	0	4
+vector 140	check 0x8	1017	100	5	5	3	3
+vector 141	check 0x0	1011	101	4	-	0	0
+vector 142	check 0x2	1011	1010	3	-	2	4
+vector 143	panic newer hardfork	1016	1015	4	4	2	3
+vector 144	check 0x9	1043	1043	1	1	0	0
+vector 145	check 0xc	1010	101	4	-	4	4
+vector 146	check 0x8	1039	100	3	-	3	0
+vector 147	check 0xc	1000	998	5	5	4	1
+vector 148	panic newer hardfork	1040	1037	4	-	3	3
+vector 149	check 0x0	1022	101	4	4	3	2
+vector 150	check 0x4	1026	1026	6	-	5	3
+vector 151	check 0x0	1044	100	8	-	3	4
+vector 152	check 0x1	1009	101	6	-	3	0
+vector 153	check 0x1	1003	101	3	3	2	4
+vector 154	check 0x0	1011	1008	3	-	5	4
+vector 155	check 0x0	1035	1033	7	-	1	3
+vector 156	check 0x8	1007	100	4	-	2	2
+vector 157	check 0x1	1015	1014	6	6	2	4
+vector 158	check 0x0	1036	1035	4	4	3	1
+vector 159	registered	1033	101	3	-	5	5
+vector 160	check 0xc	1015	100	4	-	1	4
+vector 161	check 0xf	1040	1037	5	5	0	4
+vector 162	registered	1045	1042	4	-	3	5
+vector 163	panic newer hardfork	1027	101	4	-	4	1
+vector 164	panic newer hardfork	1023	1021	4	-	2	1
+vector 165	check 0x9	1002	1001	2	-	5	3
+vector 166	check 0xf	1028	1027	5	5	2	1
+vector 167	check 0x0	1043	1040	5	-	2	2
+vector 168	check 0x8	1012	100	3	3	0	0
+vector 169	registered	1011	1008	4	-	2	2
+vector 170	check 0x0	1015	1013	3	-	1	2
+vector 171	check 0x0	1034	1034	5	5	0	2
+vector 172	check 0x0	1030	1027	5	-	0	1
+vector 173	check 0xf	1011	101	6	6	1	3
+vector 174	check 0x5	1013	1010	4	4	2	2
+vector 175	check 0x1	1037	1035	5	-	1	1
+vector 176	check 0x0	1015	1013	5	-	2	5
+vector 177	check 0x9	1002	1000	5	-	0	4
+vector 178	check 0x1	1020	1017	3	3	4	2
+vector 179	check 0xc	1030	100	2	2	3	3
+vector 180	check 0x0	1027	1027	2	-	3	0
+vector 181	check 0xc	1036	1034	2	-	2	0
+vector 182	check 0xc	1018	1018	3	3	5	2
+vector 183	check 0x9	1015	1015	4	4	0	4
+vector 184	check 0x1	1006	1005	3	-	3	2
+vector 185	check 0x9	1003	101	2	2	0	5
+vector 186	registered	1038	1037	7	-	5	1
+vector 187	check 0x8	1041	100	3	3	4	1
+vector 188	check 0x4	1016	1016	4	-	2	5
+vector 189	check 0x9	1016	1016	2	-	3	2
+vector 190	panic newer hardfork	1025	100	3	-	1	3
+vector 191	check 0x9	1022	1021	2	-	4	4
+vector 192	registered	1026	101	4	-	3	3
+vector 193	check 0x0	1042	1039	7	-	2	2
+vector 194	registered	1027	1026	3	-	6	5
+vector 195	check 0xc	1024	1024	4	4	1	3
+vector 196	check 0x2	1043	1043	6	-	5	2
+vector 197	check 0x0	1020	1020	3	-	1	3
+vector 198	check 0x4	1022	1022	5	5	2	0
+vector 199	check 0x4	1047	1047	5	-	3	0
+vector 200	panic newer hardfork	1006	1006	6	6	2	0
+vector 201	panic newer hardfork	1009	1008	3	-	4	4
+vector 202	check 0x0	1035	1035	3	-	5	4
+vector 203	check 0x0	1003	101	3	-	3	2
+vector 204	check 0x8	1008	100	6	6	3	1
+vector 205	check 0xc	1042	1040	3	3	1	1
+vector 206	check 0x0	1004	1002	2	-	4	5
+vector 207	registered	1042	101	4	-	3	5
+vector 208	check 0x0	1036	1036	5	-	2	0
+vector 209	check 0x4	1032	1032	6	6	1	1
+vector 210	check 0x9	1042	1039	3	3	3	1
+vector 211	check 0x8	1046	100	2	-	0	5
+vector 212	check 0x2	1047	1044	5	5	3	4
+vector 213	check 0x0	1034	1031	4	4	1	2
+vector 214	registered	1023	1022	3	-	4	3
+vector 215	check 0x0	1010	101	6	-	4	1
+vector 216	check 0xf	1014	101	5	5	2	3
+vector 217	check 0xc	1006	1006	3	-	1	0
+vector 218	check 0x1	1032	1030	7	-	5	1
+vector 219	panic newer hardfork	1017	100	5	-	3	4
+vector 220	panic newer hardfork	1013	100	2	2	1	4
+vector 221	check 0x5	1016	1013	4	4	1	0
+vector 222	check 0x4	1023	1023	5	5	1	1
+vector 223	check 0x8	1015	100	2	-	5	5
+vector 224	check 0x2	1020	101	4	4	5	3
+vector 225	check 0x0	1045	100	1	-	0	2
+vector 226	check 0x1	1036	1034	6	-	4	2
+vector 227	check 0x9	1044	101	3	-	2	0
+vector 228	panic newer hardfork	1003	1002	7	-	1	1
+vector 229	panic newer hardfork	1011	1009	3	-	3	0
+vector 230	check 0x8	1033	100	3	-	0	3
+vector 231	registered	1023	1022	3	3	2	3
+vector 232	registered	1011	1010	4	4	2	3
+vector 233	panic newer hardfork	1028	1026	4	-	3	3
+vector 234	registered	1035	101	6	-	4	3
+vector 235	check 0x8	1038	100	3	3	0	2
+vector 236	check 0x9	1018	101	3	-	4	3
+vector 237	check 0x0	1017	1014	2	-	5	1
+vector 238	check 0x0	1040	1040	5	-	1	3
+vector 239	check 0x0	1002	101	5	5	3	4
+vector 240	check 0x1	1013	101	4	-	2	1
+vector 241	check 0x0	1000	100	7	7	1	0
+vector 242	check 0x8	1029	100	7	-	0	5
+vector 243	check 0x0	1011	100	3	3	5	0
+vector 244	check 0xc	1022	100	6	-	1	1
+vector 245	check 0x0	1024	1021	5	5	1	3
+vector 246	check 0x9	1007	101	1	-	5	3
+vector 247	check 0x8	1022	100	6	6	0	3
+vector 248	panic newer hardfork	1039	1039	6	-	5	4
+vector 249	check 0x4	1028	1028	5	-	4	4
+vector 250	check 0x0	1018	1018	2	-	3	2
+vector 251	check 0xc	1049	1046	0	0	2	3
+vector 252	check 0xc	1021	101	4	4	3	2
+vector 253	check 0x0	1016	100	7	-	4	2
+vector 254	check 0x1	1033	1031	5	-	5	3
+vector 255	check 0x4	1012	1012	3	-	3	4
+vector 256	check 0x0	1037	101	3	-	1	1
+vector 257	check 0x0	1020	100	5	-	1	4
+vector 258	registered	1010	101	4	-	5	3
+vector 259	check 0x0	1021	1021	6	6	2	0
+vector 260	registered	1004	101	5	-	6	4
+vector 261	check 0x9	1018	101	4	4	5	2
+vector 262	panic newer hardfork	1008	101	4	-	2	4
+vector 263	check 0x0	1003	1002	2	-	2	3
+vector 264	check 0xc	1015	1015	2	2	1	0
+vector 265	check 0x0	1033	1032	2	-	5	3
+vector 266	check 0x9	1041	1041	1	-	4	4
+vector 267	panic newer hardfork	1025	100	3	3	0	4
+vector 268	panic newer hardfork	1006	100	4	-	0	4
+vector 269	check 0x1	1007	1004	6	-	2	2
+vector 270	check 0x4	1033	1033	5	-	5	4
+vector 271	check 0xc	1034	101	5	5	5	3
+vector 272	check 0x1	1042	1039	4	-	3	4
+vector 273	check 0x8	1021	100	4	-	2	0
+vector 274	check 0x0	1028	101	2	2	0	4
+vector 275	check 0xc	1002	100	4	-	4	4
+vector 276	check 0x4	1021	1021	3	-	1	2
+vector 277	check 0x8	1019	100	2	-	4	3
+vector 278	check 0x8	1045	100	2	-	0	1
+vector 279	check 0x0	1037	101	3	3	3	3
+vector 280	check 0x0	1030	1030	5	5	0	4
+vector 281	check 0x9	1025	1025	1	-	3	0
+vector 282	check 0x8	1023	100	4	-	0	1
+vector 283	same round	1018	1017	5	-	2	3
+vector 284	registered	1019	101	5	-	6	3
+vector 285	check 0xc	1038	100	4	4	3	0
+vector 286	registered	1016	1015	5	-	5	6
+vector 287	same round	1017	1016	6	-	1	2
+vector 288	duplicate hash	1044	1042	5	-	4	4
+vector 289	registered	1007	1006	4	-	3	3
+vector 290	check 0x1	1036	1035	6	6	4	3
+vector 291	check 0x8	1017	100	2	-	4	4
+vector 292	panic newer hardfork	1015	1014	3	-	4	2
+vector 293	check 0x0	1018	1018	7	7	0	3
+vector 294	check 0xf	1000	997	8	8	5	4
+vector 295	check 0x9	1048	101	3	3	3	3
+vector 296	same round	1031	1030	3	-	2	3
+vector 297	check 0xf	1049	1046	5	5	3	3
+vector 298	panic newer hardfork	1022	1020	4	-	2	3
+vector 299	check 0xc	1026	100	4	4	5	0
