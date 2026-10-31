@@ -168,7 +168,8 @@ def string_table(data, rodata, relro, names, count=EXPECTED_VARIANTS):
     """Find the longest 16-byte-stride (pointer, length) run into .rodata."""
     relocs = relocations(data)
     hits = {}
-    for offset in range(0, relro['size'] - 16, 8):
+    # A complete 16-byte slot may start exactly at size - 16.
+    for offset in range(0, relro['size'] - 15, 8):
         slot = relro['address'] + offset
         pointer = relocs.get(slot)
         if pointer is None:
