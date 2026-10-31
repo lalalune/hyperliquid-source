@@ -51,7 +51,7 @@ def entry_file_offset(data):
 def unwind_index(data):
     secs = sections(data)
     header = next((s for s in secs if s['name'] == '.eh_frame_hdr'), None)
-    if header is None:
+    if header is None or header['type'] == 8:
         raise ValueError('No .eh_frame_hdr')
     off, base = header['offset'], header['address']
     if header['size'] < 12 or data[off:off + 4] != bytes([1, 0x1b, 0x03, 0x3b]):
@@ -59,7 +59,7 @@ def unwind_index(data):
     count = struct.unpack_from('<I', data, off + 8)[0]
     if 12 + count * 8 > header['size']:
         raise ValueError('Unwind table is truncated')
-    executable = [s for s in secs if s['flags'] & 4 and s['size']]
+    executable = [s for s in secs if s['type'] != 8 and s['flags'] & 4 and s['size']]
     entries = []
     for i in range(count):
         start_delta, fde_delta = struct.unpack_from('<ii', data, off + 12 + i * 8)
@@ -68,7 +68,7 @@ def unwind_index(data):
         if section is None:
             raise ValueError(f'Unwind start outside executable sections: {start:#x}')
         fde_section = next((s for s in secs if s['name'] == '.eh_frame'), None)
-        if fde_section is None or not fde_section['address'] <= fde < fde_section['address'] + fde_section['size']:
+        if fde_section is None or fde_section['type'] == 8 or not fde_section['address'] <= fde < fde_section['address'] + fde_section['size']:
             raise ValueError('FDE pointer outside .eh_frame')
         entries.append({'index': i, 'start': start, 'fde': fde, 'section': section['name']})
     starts = [e['start'] for e in entries]
