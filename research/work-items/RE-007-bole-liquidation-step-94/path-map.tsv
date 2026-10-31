@@ -1,0 +1,11 @@
+order	stage	address	behaviour
+1	block host	0x22297c0, 0x470e9a0, 0x47162d0	bucket gate: millis / word +0x4d8, stored in +0x4e0 when larger; byte +0x20 of the step record says the bucket moved
+2	step body	0x222caf0, 0x4714080, 0x47121b0	does nothing unless byte +0x20 is 1; first dex row must exist
+3	token refresh	0x373b060	for each token: index writer, then price median and band; token 0 keeps its price
+4	index writer	0x3740990	rate from use, index growth over elapsed millis / 31557600000, reserve share, pending to paid
+5	median	0x359ca70	sorted copy; middle value, or average of the two middle values, 0 when empty
+6	system user pass	0x2739d70 family	not stepped; a result other than 0x11 clears +0x5b3; it reads rows through 0x3739ef0 and 0x3733d70
+7	row collector	0x3739ef0, 0x3733d70	system user rows: ceil of word +8 by the borrow index, floor of word +0x18 by the supply index
+8	second sweep	0x2765600 family	not stepped; a result other than 0x11 clears +0x5b3
+9	debt flag	step body	report of the system user: flag +0x5b4 set past the cap +0x590, released at 80 percent
+10	user sweep	0x26fdf20, 0x4ce64c0, 0x4ce6db0	visit pmn users after the cursor, wrapping; users with a nonzero word +8 go to the per-user entry
