@@ -36,6 +36,8 @@ def validate_progress(components, progress, root):
         if any(row['gates'].values()) and not row['evidence']:
             raise ValueError('Completed gates require reviewed evidence records')
         for evidence in row['evidence']:
+            if type(evidence) is not str:
+                raise ValueError('Invalid progress evidence record')
             p = (root / evidence).resolve()
             if not p.is_relative_to(root.resolve()) or not p.is_file():
                 raise ValueError('Missing or external progress evidence')

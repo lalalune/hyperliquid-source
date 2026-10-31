@@ -87,6 +87,15 @@ class CatalogueTests(unittest.TestCase):
         d = copy.deepcopy(self.progress); del d['components']['visor']
         with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
 
+    def test_non_string_evidence_entry_rejected(self):
+        for bad in (123, {'a': 1}, ['x'], None, True):
+            d = copy.deepcopy(self.progress)
+            d['components']['foundation']['evidence'] = [bad]
+            with self.assertRaises(ValueError): validate_progress(self.parts, d, self.root)
+        d = copy.deepcopy(self.progress)
+        d['components']['foundation']['evidence'] = ['research/components.json']
+        validate_progress(self.parts, d, self.root)
+
 
 class VisorIndexTests(unittest.TestCase):
     def test_target_for_maps_nodes_and_visor(self):
