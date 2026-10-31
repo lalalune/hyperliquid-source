@@ -1,0 +1,91 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x32814c0 0x32814c0..0x32815ef; byte records are authoritative
+32814c0  50                     push rax
+32814c1  4989d0                 mov r8, rdx
+32814c4  41b901000000           mov r9d, 1
+32814ca  4885f6                 test rsi, rsi
+32814cd  742c                   je 0x32814fb
+32814cf  483bb188010000         cmp rsi, qword ptr [rcx + 0x188]
+32814d6  0f83ef000000           jae 0x32815cb
+32814dc  488b8980010000         mov rcx, qword ptr [rcx + 0x180]
+32814e3  4869d6e8000000         imul rdx, rsi, 0xe8
+32814ea  0fb6441149             movzx eax, byte ptr [rcx + rdx + 0x49]
+32814ef  2a441148               sub al, byte ptr [rcx + rdx + 0x48]
+32814f3  0f82af000000           jb 0x32815a8
+32814f9  7535                   jne 0x3281530
+32814fb  4889f8                 mov rax, rdi
+32814fe  49f7e0                 mul r8
+3281501  0f80ae000000           jo 0x32815b5
+3281507  4889c1                 mov rcx, rax
+328150a  4c09c9                 or rcx, r9
+328150d  48c1e920               shr rcx, 0x20
+3281511  740f                   je 0x3281522
+3281513  31d2                   xor edx, edx
+3281515  49f7f1                 div r9
+3281518  4889c2                 mov rdx, rax
+328151b  b801000000             mov eax, 1
+3281520  59                     pop rcx
+3281521  c3                     ret 
+3281522  31d2                   xor edx, edx
+3281524  41f7f1                 div r9d
+3281527  89c2                   mov edx, eax
+3281529  b801000000             mov eax, 1
+328152e  59                     pop rcx
+328152f  c3                     ret 
+3281530  0fb6c8                 movzx ecx, al
+3281533  f6c101                 test cl, 1
+3281536  740b                   je 0x3281543
+3281538  41b90a000000           mov r9d, 0xa
+328153e  83f901                 cmp ecx, 1
+3281541  74b8                   je 0x32814fb
+3281543  a802                   test al, 2
+3281545  740e                   je 0x3281555
+3281547  4d6bc964               imul r9, r9, 0x64
+328154b  89ca                   mov edx, ecx
+328154d  83e2fe                 and edx, 0xfffffffe
+3281550  83fa02                 cmp edx, 2
+3281553  74a6                   je 0x32814fb
+3281555  a804                   test al, 4
+3281557  7411                   je 0x328156a
+3281559  4d69c910270000         imul r9, r9, 0x2710
+3281560  89ca                   mov edx, ecx
+3281562  83e2fc                 and edx, 0xfffffffc
+3281565  83fa04                 cmp edx, 4
+3281568  7491                   je 0x32814fb
+328156a  a808                   test al, 8
+328156c  7415                   je 0x3281583
+328156e  4d69c900e1f505         imul r9, r9, 0x5f5e100
+3281575  89ca                   mov edx, ecx
+3281577  83e2f8                 and edx, 0xfffffff8
+328157a  83fa08                 cmp edx, 8
+328157d  0f8478ffffff           je 0x32814fb
+3281583  a810                   test al, 0x10
+3281585  7421                   je 0x32815a8
+3281587  48ba0000c16ff2862300   movabs rdx, 0x2386f26fc10000
+3281591  4c89c8                 mov rax, r9
+3281594  48f7e2                 mul rdx
+3281597  700f                   jo 0x32815a8
+3281599  4989c1                 mov r9, rax
+328159c  83e1f0                 and ecx, 0xfffffff0
+328159f  83f910                 cmp ecx, 0x10
+32815a2  0f8453ffffff           je 0x32814fb
+32815a8  488d3dc10c4702         lea rdi, [rip + 0x2470cc1]
+32815af  ff15bbce4e02           call qword ptr [rip + 0x24ecebb]
+32815b5  4889f8                 mov rax, rdi
+32815b8  4c09c8                 or rax, r9
+32815bb  48c1e820               shr rax, 0x20
+32815bf  7417                   je 0x32815d8
+32815c1  4889f8                 mov rax, rdi
+32815c4  31d2                   xor edx, edx
+32815c6  49f7f1                 div r9
+32815c9  eb14                   jmp 0x32815df
+32815cb  488d3d1e0c4702         lea rdi, [rip + 0x2470c1e]
+32815d2  ff1598ce4e02           call qword ptr [rip + 0x24ece98]
+32815d8  89f8                   mov eax, edi
+32815da  31d2                   xor edx, edx
+32815dc  41f7f1                 div r9d
+32815df  49f7e0                 mul r8
+32815e2  4889c2                 mov rdx, rax
+32815e5  b800000000             mov eax, 0
+32815ea  0f91c0                 setno al
+32815ed  59                     pop rcx
+32815ee  c3                     ret 
