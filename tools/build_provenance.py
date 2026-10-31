@@ -107,7 +107,11 @@ def derive(data):
 
     interp = by_name.get('.interp')
     if interp:
-        f.exact('interp', section_bytes(data, interp).rstrip(b'\0').decode(), interp['offset'])
+        try:
+            text = section_bytes(data, interp).rstrip(b'\0').decode()
+        except UnicodeDecodeError:
+            raise ValueError('Invalid interp encoding')
+        f.exact('interp', text, interp['offset'])
 
     phdrs = program_headers(data)
     kinds = {0x6474E552: 'GNU_RELRO', 0x6474E551: 'GNU_STACK', 0x6474E550: 'GNU_EH_FRAME'}
