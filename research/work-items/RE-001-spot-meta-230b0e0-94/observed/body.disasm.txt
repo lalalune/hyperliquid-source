@@ -1,0 +1,73 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x230b0e0 0x230b0e0..0x230b1dc; byte records are authoritative
+230b0e0  50                     push rax
+230b0e1  488b8670010000         mov rax, qword ptr [rsi + 0x170]
+230b0e8  4839c1                 cmp rcx, rax
+230b0eb  0f83d8000000           jae 0x230b1c9
+230b0f1  488b8668010000         mov rax, qword ptr [rsi + 0x168]
+230b0f8  48c1e105               shl rcx, 5
+230b0fc  488b0408               mov rax, qword ptr [rax + rcx]
+230b100  483b8688010000         cmp rax, qword ptr [rsi + 0x188]
+230b107  0f83af000000           jae 0x230b1bc
+230b10d  488b8e80010000         mov rcx, qword ptr [rsi + 0x180]
+230b114  4869c0e8000000         imul rax, rax, 0xe8
+230b11b  440fb6440148           movzx r8d, byte ptr [rcx + rax + 0x48]
+230b121  4489c0                 mov eax, r8d
+230b124  66b96600               mov cx, 0x66
+230b128  83e808                 sub eax, 8
+230b12b  7720                   ja 0x230b14d
+230b12d  be01000000             mov esi, 1
+230b132  7521                   jne 0x230b155
+230b134  4889d0                 mov rax, rdx
+230b137  4809f0                 or rax, rsi
+230b13a  48c1e820               shr rax, 0x20
+230b13e  7446                   je 0x230b186
+230b140  4889d0                 mov rax, rdx
+230b143  31d2                   xor edx, edx
+230b145  48f7f6                 div rsi
+230b148  4885d2                 test rdx, rdx
+230b14b  7444                   je 0x230b191
+230b14d  66890f                 mov word ptr [rdi], cx
+230b150  4889f8                 mov rax, rdi
+230b153  59                     pop rcx
+230b154  c3                     ret 
+230b155  f7d8                   neg eax
+230b157  a801                   test al, 1
+230b159  740b                   je 0x230b166
+230b15b  be0a000000             mov esi, 0xa
+230b160  4183f807               cmp r8d, 7
+230b164  74ce                   je 0x230b134
+230b166  a802                   test al, 2
+230b168  7411                   je 0x230b17b
+230b16a  486bf664               imul rsi, rsi, 0x64
+230b16e  4189c1                 mov r9d, eax
+230b171  4183e10e               and r9d, 0xe
+230b175  4183f902               cmp r9d, 2
+230b179  74b9                   je 0x230b134
+230b17b  a804                   test al, 4
+230b17d  7522                   jne 0x230b1a1
+230b17f  4585c0                 test r8d, r8d
+230b182  75c9                   jne 0x230b14d
+230b184  eb2a                   jmp 0x230b1b0
+230b186  89d0                   mov eax, edx
+230b188  31d2                   xor edx, edx
+230b18a  f7f6                   div esi
+230b18c  4885d2                 test rdx, rdx
+230b18f  75bc                   jne 0x230b14d
+230b191  48894708               mov qword ptr [rdi + 8], rax
+230b195  66b98601               mov cx, 0x186
+230b199  66890f                 mov word ptr [rdi], cx
+230b19c  4889f8                 mov rax, rdi
+230b19f  59                     pop rcx
+230b1a0  c3                     ret 
+230b1a1  4869f610270000         imul rsi, rsi, 0x2710
+230b1a8  83e00c                 and eax, 0xc
+230b1ab  83f804                 cmp eax, 4
+230b1ae  7484                   je 0x230b134
+230b1b0  4869f600e1f505         imul rsi, rsi, 0x5f5e100
+230b1b7  e978ffffff             jmp 0x230b134
+230b1bc  488d3d2d703e03         lea rdi, [rip + 0x33e702d]
+230b1c3  ff15a7324603           call qword ptr [rip + 0x34632a7]
+230b1c9  488d15086e3e03         lea rdx, [rip + 0x33e6e08]
+230b1d0  4889cf                 mov rdi, rcx
+230b1d3  4889c6                 mov rsi, rax
+230b1d6  ff15ec2d4603           call qword ptr [rip + 0x3462dec]
