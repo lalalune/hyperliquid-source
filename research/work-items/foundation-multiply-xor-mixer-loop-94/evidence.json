@@ -1,0 +1,115 @@
+{
+  "behavior": {
+    "arguments": "rdi = base pointer; rsi = length; rdx = seed B; rcx = seed A; r8 = xor key. No field is written; the window only reads the buffer and returns a folded value.",
+    "calls_inside_window": 0,
+    "edges": {
+      "zero_length": "n=0 -> bound zero -> return seedA ^ seedB (0x1111 ^ 0x2222 = 0x3333).",
+      "short_length": "n=5 (<16) -> bound zero -> same seed xor.",
+      "single_step": "n=16, mem=[1, 2], key=0, A=3, B=5 -> 6 (hand trace in README).",
+      "far_chunk": "n=32, mem=[1, 2, 3, 4], key=0, A=3, B=5 -> 8; one step over the far chunk, then the meeting guard exits.",
+      "two_step_overlap": "n=48, mem=[1, 2, 3, 4, 5, 6], key=0, A=3, B=5 -> 77; the second step re-reads the middle chunk from both streams.",
+      "high_part": "n=16, mem=[0, 3], key=0, A=all-ones, B=0 -> 0xFFFFFFFFFFFFFFF6; the 128-bit product's high half folds into the result."
+    },
+    "entry_shape": "Straight-line setup, one loop with two forward branches (meeting guard, loop-back) plus the zero-bound entry branch, one ret; no call opcode inside the window.",
+    "return_rule": "L = rsi & 0x7fffffffffffffff; if (rsi & 0x7ffffffffffffff0) == 0, return seedA ^ seedB. Else, with base2 = rdi + (rsi & 0xf), A = seedA, B = seedB, p = rdi, r11 = rsi & 0x7ffffffffffffff0: repeat { bound = base2 + r11; if p >= bound (unsigned) stop; A ^= [p+8]; (hi1, lo1) = ([bound-8] ^ key) * A; B ^= [p]; (hi2, lo2) = ([bound-16] ^ key) * B; A = hi1 ^ lo1; B = hi2 ^ lo2; p += 16; r11 -= 16 } until r11 == 0; return A ^ B. Multiplies are unsigned 64x64->128.",
+    "weakness": "Heavy for the easy-packet bar: a loop with two 128-bit multiplies per step, not a single gate. The window is bound only because its full rule locks exactly from its own bytes and was re-verified against an independent byte-level emulator over 5,062 cases with zero mismatches (see reverification).",
+    "iteration_count": "ceil(L/32) steps for L >= 16, else 0; the forward and backward streams may overlap near the meeting point."
+  },
+  "captured_binary_executed": false,
+  "coordinate_system": "ELF virtual addresses, without a guessed loader or Ghidra rebase. The ELF section table maps .text with file offset = VA - 0x1000; the retained .eh_frame has equal file offset and VA. The tools resolve sections rather than assuming one global VA/file-offset relationship.",
+  "function": {
+    "bytes": 102,
+    "end_va_exclusive": "0x1648946",
+    "padding_bytes": 10,
+    "sha256": "5377cd2a2ec106f3e005d2cde837a3804ed6d7d61db07f4a9907395d01685562",
+    "start_va": "0x16488e0"
+  },
+  "incoming_pattern_scan": {
+    "e8_candidates": [],
+    "note": "Byte-pattern scan over the full .text section (70,370,352 bytes) for e8 sites whose rel32 lands on the window start; zero sites found. This is explicitly not a complete xref census: indirect calls, tail jumps, and PLT references are out of scope for the scan.",
+    "relocation_slots": [
+      [
+        ".rela.dyn",
+        "0x57709e8"
+      ]
+    ],
+    "relocation_note": "One R_X86_64_RELATIVE slot (0x57709e8, addend 0x16488e0) names the window; reported as a slot list, no meaning claimed.",
+    "section_bytes": 70370352
+  },
+  "progress_gate_requested": false,
+  "reverification": {
+    "method": "Dev-time only (not part of the packet, which is stdlib-only): the window bytes were decoded with Capstone and executed by a small instruction interpreter (mov/movabs/and/lea/cmp/xor/mul/add/branches/ret, with ZF/CF tracking and a bounds-checked buffer) against the closed-form rule in the checker. The interpreter derives every operand from the Capstone decode, so it is independent of the rule's transcription; a misread register, displacement, or multiply order would surface as a mismatch. The emulator script is not committed (it needs Capstone, which is not stdlib); the 8 fixed vectors below were produced by the emulator and are replayed by the checker.",
+    "cases": 5062,
+    "mismatches": 0,
+    "domain": "Effective lengths 0..1024 exhaustive x 2 seed sets (2,050 runs); 3,000 random runs with effective length <= 2048 and edge seeds (0, 1, 2^64-1, 2^63, 0x8000000000000000, 0x7fffffffffffffff); 12 raw-length variants with bit 63 set (same effective length). Every run asserted all reads inside the effective-length buffer.",
+    "vectors": [
+      {
+        "length": 0,
+        "seedB": "0x7222d7283ab5a383",
+        "seedA": "0xfdec65fe72129737",
+        "key": "0x93548b905e5c7474",
+        "buffer_hex": "",
+        "expected": "0x8fceb2d648a734b4"
+      },
+      {
+        "length": 16,
+        "seedB": "0xaa8323f6a1773963",
+        "seedA": "0x35ae2cd6def04b77",
+        "key": "0x804b29624fefc8ef",
+        "buffer_hex": "8aac14e4c7933d3a27aa3500ad938836",
+        "expected": "0x2e19783a26d6613f"
+      },
+      {
+        "length": 17,
+        "seedB": "0x2d90fe01606c0351",
+        "seedA": "0xf393401ccfbba094",
+        "key": "0xbedd5e4a7aec65c2",
+        "buffer_hex": "40d411b24b278cfe30e65605e0836fc42d",
+        "expected": "0x298f6146bd1c34a5"
+      },
+      {
+        "length": 32,
+        "seedB": "0x4994ea6aadb140c2",
+        "seedA": "0xa941ad93b422ffbf",
+        "key": "0xaf53638f7d7a4f47",
+        "buffer_hex": "20c9a39c6030583f1103f1878805563dfec53ffecfd8cce3afb61a1bbf92de4d",
+        "expected": "0x47e6b82aa36b12c0"
+      },
+      {
+        "length": 33,
+        "seedB": "0x59193081e9cb74cd",
+        "seedA": "0xe1b0a38e24284f82",
+        "key": "0x6d9819cf2a4bf79f",
+        "buffer_hex": "ca068ffab7f45146a62991889ada50e3552cec24ad31c567423697ecddc0150566",
+        "expected": "0xbaae818f64b3501b"
+      },
+      {
+        "length": 48,
+        "seedB": "0x22bdd5559bb22f1",
+        "seedA": "0x44f45befbfab26db",
+        "key": "0x8f6aa4b93364aad3",
+        "buffer_hex": "feb88b1fd4f08020a91e8e0e41232f5bfb9e6290fe1da768e97fc56e128bc380f3c695db6e480b067c52f7cfca22e3f5",
+        "expected": "0x9f87f2d725fa222b"
+      },
+      {
+        "length": 64,
+        "seedB": "0xd6f9efd61d919ed3",
+        "seedA": "0xaae62996a1ff5451",
+        "key": "0x4dc57e4a2ecf474e",
+        "buffer_hex": "d3fde5d5e917508b93c9adb3a7525820a6b3be435dd8e4bd903cfc1ef746a6e7f2b7bf6aec0548fd48757a239ffaa0268d359c672dc20008eae5d7d6109ef15a",
+        "expected": "0x7fb638ec9f2ccd6f"
+      },
+      {
+        "length": 100,
+        "seedB": "0xce87b25dfe593bc2",
+        "seedA": "0xa8d3a6db9d36fa29",
+        "key": "0x44a02d39be66def7",
+        "buffer_hex": "f8c05b9912cce048584a4c0206d9fc2d5c59c6eb31ad08bc8a3e59aa2fd840274274b69b6d2f3d1c15d6bfcc440b4421608b08e1947c1ab6749dc2af4be4bf8dd97dbfe8014f510a7fd1b8e63506b20661b97cdba2664725be0c9509ed6e714eab3c62f3",
+        "expected": "0xcd534dd774b8f3b9"
+      }
+    ]
+  },
+  "scout_corrections": "The round-12 scout note listed this window (backup B2, the last unbuilt round-12 item) with FDE [0x16488e0, 0x1648946), 102 bytes, 10 padding bytes, zero direct callers, one naming slot 0x57709e8, and nearest claimed window three-way unsigned clamp 0x15e4f70 (packet #16) 0x63970 away. Every element verified exactly. Two phrasing points are reconciled explicitly: the scout's compressed per-step summary ('rcx ^= rax, r9 ^= r10') glosses the two mov steps (rcx = high half of the second product, then xor low half; r9 = high half of the first product, then xor low half) \u2014 the full register trace in the README is equivalent, not a correction. And the scout's 'zero calls' describes the window body (no call opcode inside it), while the incoming scan independently finds zero direct sites \u2014 the two statements agree. Unlike most packets, this window does NOT open with endbr64; its first instruction is mov %rcx,%r9.",
+  "target_release": "node #94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
