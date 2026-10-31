@@ -1,0 +1,10 @@
+verdict	reference	reference_says	bytes_say
+same	handlers/11_link_staking_user.rs request_link	staked, self, trading established, staking established, then a pending row	4 tests in that order; 0x2769ff0 does the first and the slot 0x5774df0 writer the other 3 and the insert
+same	handlers/11_link_staking_user.rs finalize_link	row must be pending and name the signer; 2 rows written	0x3b462a0 writes the trading row, then the staking row, and tests nothing about the staking row
+differs	handlers/11 LinkRelationship	PendingRequest, TradingLinked, StakingLinked	the decoder at 0x3b464e0 names the tags Requested, TradingUser, StakingUser, fields staking_user and trading_user
+differs	handlers/11 staking_users_with_staked_hype	a set of addresses	state +0xaf0 is a map of address to 24 bytes; 0x2769ff0 tests the key only, but the row builders read value word 0
+differs	handlers/11 gate of 0x2769ff0	the index means the user has staked HYPE	the test is presence of a key: a row with value words 0 still passes, and the amount is not read
+absent	references/can1357-hl/l1	no text or handler for action 0x1e648c0	it tests that the row of the payload is TradingUser of the signer and inserts the payload in the set at +0x8b8
+absent	references/can1357-hl/l1/fees	no stake share and no ladder at +0x608	3 row builders compute the share in basis points and scale positive rates
+same	info_server/abci_state_info_handler.rs	response fields staking_link and active_staking_discount	field names only; no path from those fields to these functions was traced
+unverified	exchange/stake_requirement.rs available_delegated_stake	requirement against delegated stake	the list call takes bytes 4 and 1 and is a stub here; the name is a lead only
