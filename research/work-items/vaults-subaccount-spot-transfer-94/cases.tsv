@@ -1,0 +1,58 @@
+family	scenario	result	model
+core	plain transfer	status 390 gas step	same
+core	spot disabled	status 249	same
+core	same address	status 222	same
+core	destination is a vault	status 28	same
+core	sender is a vault	status 390 gas step	same
+core	destination is twenty 0xff bytes	status 28	same
+core	sender in the token block set	status 344	same
+core	destination in the token block set	status 344	same
+core	block set skipped by record +0xb0 bit 0	status 390 gas step	same
+core	kind 3 with a nonzero class word	status 347	same
+core	kind 5 ignores the class word	status 390 gas step	same
+core	payload with a user destination	status 347	same
+core	foreign system address 0x20..07	status 330	same
+core	system range top 9999	status 330	same
+core	one above the system range	status 390 gas step	same
+core	0x2222 address when not this token	status 330	same
+core	own system address	status 390 into system	same
+core	own system address, token 2 is the special token	status 390 into system	same
+core	USDC to system at the limit	status 390 into system	same
+core	USDC to system over the limit	status 38	same
+core	USDC to system with the off flag	status 38	same
+core	free balance one short	status 247	same
+core	free balance exact	status 390 gas step	same
+core	hold word overflow	status 247	same
+core	sender system address, USDC map debit short	status 356	same
+core	sender system address, USDC map debit	status 390 system sender	same
+core	USDC into system, map add saturates	status 390 into system	same
+core	chain byte 3 skips the map	status 390 into system	same
+core	value above i64 panics	panic unwrap	same
+core	value cap 1e16 on a plain token	status 390 gas step	same
+core	token 1 keeps the value uncapped	status 390 gas step	same
+core	system sender, no gas quote	status 390 system sender	same
+core	system sender, flag bit marks the row	status 390 system sender	same
+core	gas quote, token not in the gas tree and no special token	status 390 sink	same
+core	gas quote, tree byte 1 and another special token	status 390 sink	same
+core	gas quote, special token with zero price	status 390 sink	same
+core	gas quote, special token uses the transfer price	status 390 receiver fee	same
+core	gas quote above the 100x gate	status 390 sink	same
+core	gas quote at the 100x gate	status 390 sink	same
+core	fee quote fails	status 390 sink	same
+core	fee at or above the amount goes to the sink	status 390 sink	same
+core	fee taken from the receiver	status 390 receiver fee	same
+core	fee above the receiver first word, no fee event	status 390 system sender	same
+core	the unused destination lookup hits	status 390 sink	same
+subAccountSpotTransfer	deposit moves signer to sub	tag 13 status 390 gas step	same
+subAccountSpotTransfer	withdraw moves sub to signer	tag 13 status 390 gas step	same
+subAccountSpotTransfer	spot disabled	tag 14 status 249	same
+subAccountSpotTransfer	signer class 3 gated	tag 14 status 367	same
+subAccountSpotTransfer	sub class 4 gated	tag 14 status 367	same
+subAccountSpotTransfer	sub class 4 allowed	tag 13 status 390 gas step	same
+subAccountSpotTransfer	no sub-account rows	tag 14 status 218	same
+subAccountSpotTransfer	sub-account of another master	tag 14 status 218	same
+subAccountSpotTransfer	master equals sub, row maps to self	tag 14 status 222	same
+subAccountSpotTransfer	token name 101 bytes	tag 14 status 323	same
+subAccountSpotTransfer	amount 101 bytes	tag 14 status 323	same
+subAccountSpotTransfer	unknown token	tag 14 status 248	same
+subAccountSpotTransfer	sub is a vault	tag 14 status 28	same

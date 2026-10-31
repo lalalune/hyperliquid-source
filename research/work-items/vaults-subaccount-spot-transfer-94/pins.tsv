@@ -1,0 +1,259 @@
+group	va	instruction	meaning
+handler	0x1e6442e	cmp [rcx+0x3ac8]:8,0x0	spot flag at exchange +0x3ac8 read first
+handler	0x1e64437	mov [rbx+0x8]:16,0xf9	status 0xf9 before any account lookup
+handler	0x1e6445c	call 0x2755400	class row of the signer
+handler	0x1e64461	cmp [rax+0x3c]:8,0x3	class byte +0x3c, above 3 and equal to 3 split
+handler	0x1e64469	cmp [r15+0x5b1]:8,0x0	class 3 reads +0x5b1
+handler	0x1e64475	cmp [r15+0x5b0]:8,0x0	class above 3 reads +0x5b0
+handler	0x1e6447f	mov raxd,[r14+0x40]:32	sub-account address at action +0x30
+handler	0x1e64496	call 0x2755400	class row of the sub-account
+handler	0x1e6449b	cmp [rax+0x3c]:8,0x3	same class test for the second address
+handler	0x1e644b0	mov [rbx+0x8]:16,0x16f	status 0x16f
+handler	0x1e644b6	mov raxb,0xe	tag 0xe for every failure
+handler	0x1e644df	call 0x2717a70	sub-account step
+handler	0x1e644e4	cmp [rsp]:16,0x186	390 from the step
+handler	0x1e644ec	mov raxb,0xd	tag 0xd
+map	0x2717a99	cmp [rcx+0x44]:8,0x0	is_deposit byte at action +0x44
+map	0x2717aa5	cmovne rcx,rdx	flag set: from is the signer
+map	0x2717aa9	cmove rax,rdx	flag clear: to is the signer
+map	0x2717ad0	cmp [rsi+0x3828]:64,0x0	row count at exchange +0x3828
+map	0x2717ad8	je 0x2717c06	no rows fails at once
+map	0x2717af1	call 0x399c7a0	address hash
+map	0x2717afd	mov rcx,[r15+0x3810]:64	control bytes at +0x3810
+map	0x2717b04	mov rdx,[r15+0x3818]:64	bucket mask at +0x3818
+map	0x2717b1d	lea rsi,[rcx-0x28]:64	row stride 0x28: control minus 0x28
+map	0x2717b4f	lea r9,[r9+r9*4]:64	row index times 5
+map	0x2717b53	movdqu xmm3,[rsi+r9*8]:128	stride 8 on the 5x index
+map	0x2717bae	movdqu xmm0,[rcx+r9*8-0x14]:128	master bytes at row +0x14
+map	0x2717bca	movdqu xmm1,[r12]:128	signer compared with the master
+map	0x2717c04	je 0x2717c6e	equal goes on
+map	0x2717c55	mov [rbx]:16,0xda	status 0xda: from and to in the payload
+map	0x2717c94	mov r9,[r14+0x10]:64	token string length
+map	0x2717c98	cmp r9,0x65	limit: below 0x65
+map	0x2717c9e	mov [rbx]:16,0x143	status 0x143
+map	0x2717ca3	mov [rbx+0x8]:64,r14	pointer word only on the token branch
+map	0x2717ca9	cmp [r14+0x28]:64,0x65	amount string length at action +0x28
+map	0x2717cd7	mov [rbx]:16,0x143	status 0x143, no pointer word
+map	0x2717cc8	push 0x0	Option word 0 on the stack
+map	0x2717ccc	call 0x2714570	parse step
+parse	0x2714587	cmp [rsi+0x3ac8]:8,0x0	spot flag again
+parse	0x2714590	mov raxw,0xf9	status 0xf9
+parse	0x27145d3	call [0x5774a28]:64	token by name through a slot
+parse	0x27145db	je 0x2714741	miss
+parse	0x27145fc	call [0x57731d8]:64	decimal text parse through a slot
+parse	0x2714602	movzx raxd,[rsp+0x98]:16	status of the text parse
+parse	0x271460a	cmp raxd,0x186	390
+parse	0x2714625	cmp r12,[r14+0x218]:64	token bound
+parse	0x2714639	imul3 rcx,r12,0xe8	token row stride 0xe8
+parse	0x2714640	movzx rcxd,[rax+rcx*1+0x49]:8	wei decimals at row +0x49
+parse	0x2714655	mov rdxd,0x1	edx 1
+parse	0x271465a	call [0x5773848]:64	decimal to scaled u64
+parse	0x27146bb	mov [rsp+0xb8]:64,r12	record +0x20 token
+parse	0x27146c3	mov [rsp+0xc0]:64,rdx	record +0x28 amount
+parse	0x27146cb	mov [rsp+0x148]:8,0x0	record +0xb0 cleared
+parse	0x27146d3	mov [rsp+0x98]:64,rcx	record +0 Option word
+parse	0x27146db	mov [rsp+0xa0]:64,rax	record +8 value
+parse	0x27146e3	mov [rsp+0xc8]:64,0x0	record +0x30 cleared
+parse	0x27146ef	mov [rsp+0xa8]:64,0x3	record +0x10 kind 3
+parse	0x271470b	call 0x2712ce0	transfer core
+parse	0x2714855	mov raxw,0xf8	status 0xf8, token text cloned
+spot	0x1f660ca	cmp rdx,0x65	dest length gate
+spot	0x1f660d0	mov [rbx+0x8]:16,0x143	status 0x143
+spot	0x1f660e3	call [0x576e840]:64	address text parse
+spot	0x1f660f9	mov [rbx+0x8]:16,0xb6	status 0xb6
+spot	0x1f66123	mov r9,[r14+0x28]:64	token length
+spot	0x1f66137	cmp [r14+0x40]:64,0x65	amount length
+spot	0x1f66156	push [r14+0x68]:64	time pushed
+spot	0x1f6615a	push 0x1	Option word 1
+core	0x2712e22	mov rcxw,0xf9	status 0xf9
+core	0x2712e26	cmp [r12+0x3ac8]:8,0x0	spot flag a third time
+core	0x2712e65	cmp raxd,0xffff	from equal to to
+core	0x2712f67	mov rcxw,0xde	status 0xde
+core	0x2712ea2	mov rax,[r12+0x8d0]:64	vault tree root, exchange +0x8d0
+core	0x2712eb8	mov rcx,[r12+0x8d8]:64	vault tree height
+core	0x2712ed4	lea rsi,[rax+0x798]:64	vault key array +0x798
+core	0x2712ee0	movzx raxd,[rax+0x876]:16	vault node length +0x876
+core	0x2712f09	mov rdxd,0x14	20-byte key compare
+core	0x2712f5a	mov rax,[rax+rbp*8+0x878]:64	vault tree edge +0x878
+core	0x2712f36	jmp 0x27130c7	hit fails
+core	0x2712f79	pcmpeqb xmm0,[0x206610]:128	last four bytes against ffffffff
+core	0x2712f85	pcmpeqb xmm1,[rsp+0xa0]:128	first sixteen bytes against 0xff
+core	0x2712f9b	je 0x27130c7	twenty 0xff bytes fail as a vault
+core	0x27130c7	mov rcxw,0x1c	status 0x1c
+core	0x2712fa8	test [rsp+0x70]:8,0x1	record +0xb0 bit 0 skips both block checks
+core	0x2712fd7	cmp rsi,[r12+0x218]:64	token bound
+core	0x2712ff4	cmp [rax+rcx*1+0x10]:32,0x1	token row +0x10 Option tag 1
+core	0x2713002	mov rdx,[rax+0x18]:64	block set root +0x18
+core	0x2713012	mov rax,[rax+0x20]:64	block set height +0x20
+core	0x271302a	lea rsi,[rcx+0x8]:64	block key array +8
+core	0x2713033	movzx raxd,[rcx+0xe6]:16	block node length +0xe6
+core	0x2713096	jmp 0x27132d8	sender hit
+core	0x27132d8	mov rcxw,0x158	status 0x158
+core	0x2713142	call [0x5774a08]:64	destination block test through a slot
+core	0x2713148	mov rcxw,0x158	status 0x158
+core	0x2713166	add rax,0xfffffffffffffffd	kind minus 3
+core	0x271316f	cmp rax,0x2	kinds 3 and 4 only
+core	0x271317d	call [0x5773198]:64	token class word
+core	0x2713191	mov [rbx]:16,0x15b	status 0x15b
+core	0x271319b	cmp [r12+0x80]:32,0x1	state +0x80 tag 1
+core	0x27131a6	cmp rsi,[r12+0x88]:64	special token index +0x88
+core	0x27131b0	movdqa xmm0,[0x203c60]:128	0x22 fill
+core	0x27131da	bswap r15	big-endian token index
+core	0x27131f4	mov [rsp+0x120]:8,0x20	first byte 0x20
+core	0x2713289	call [0x5774a10]:64	system range test
+core	0x2713292	setne rcxb	record +0x30 word present
+core	0x2713299	mov rdxd,0x14a	status 0x14a
+core	0x271329e	mov raxd,0x15b	status 0x15b
+core	0x27132ba	je 0x2713346	token 0 to the own system address
+core	0x271336b	call [0x5773170]:64	balance row of the system address
+core	0x271337e	call [0x5774770]:64	three-word read
+core	0x2713390	add rcx,[rsp+0x10]:64	total plus amount
+core	0x2713395	jb 0x27132aa	carry fails
+core	0x271339b	cmp rcx,[r12+0x3a48]:64	USDC limit at exchange +0x3a48
+core	0x27133a9	cmp [r12+0x31a2]:8,0x0	off flag at exchange +0x31a2
+core	0x271338c	mov raxw,0x26	status 0x26
+core	0x2713325	call 0x27101a0	gas quote, sender not the system address
+core	0x27133c6	call 0x27101a0	gas quote, sender is the system address
+core	0x27133df	cmp [r12+0x758]:64,0x0	destination row count at +0x758
+core	0x27133f9	call 0x2840fb0	hash of the unused lookup
+core	0x2713490	je 0x27134bd	a hit goes to the same label
+core	0x27134ab	jne 0x27134bd	a miss goes to the same label
+core	0x27134c1	mov raxb,0x2	route 2
+core	0x2713339	mov [rsp+0x3c]:32,0x0	route 0
+core	0x27132c0	mov raxb,0x1	route 1
+core	0x2713516	call [0x5774a18]:64	free balance test
+core	0x271362c	mov [rbx]:16,0xf7	status 0xf7
+core	0x271356a	cmp [r12+0x8f2]:8,0x3	chain byte 3 skips the map
+core	0x2713590	cmp [rax+0xbc]:8,0x1	token 0 record +0xbc tag
+core	0x27135c6	cmp raxd,0x1	route 1 adds
+core	0x27135df	call 0x284b9f0	map find, sender
+core	0x2713603	lea rsi,[0x56dfd90]:64	overflow location
+core	0x2713617	mov rax,0xffffffffffffffff	saturates
+core	0x2713667	pmovmskb raxd,xmm0	route 0 needs from equal to the EVM word
+core	0x27136a5	pmovmskb raxd,xmm0	route 2 skips when to equals the EVM word
+core	0x27136c0	call 0x284b9f0	map find, destination
+core	0x27136cd	sub rax,[rsp+0x10]:64	checked subtract
+core	0x27136d9	mov [rbx]:16,0x164	status 0x164
+core	0x27136de	mov [rbx+0x8]:64,0x0	payload word 0
+core	0x2713743	test rbpb,rbpb	route 0 charges gas
+core	0x27137b2	call 0x2711a80	gas step
+core	0x2713845	cmp rbpb,0x2	gas class 2 and up
+core	0x271386d	call 0x270f6f0	follow-up step
+core	0x27138e7	call 0x2711440	recipient step
+core	0x2713bf3	call 0x2715320	own system address send
+core	0x2713c9d	call 0x284c640	map insert after the send
+core	0x2713cd3	call [0x5774730]:64	second word raised
+core	0x2714011	mov [rbx]:16,0xf7	status 0xf7
+core	0x2713cfa	call [0x5774910]:64	USDC price of the token
+core	0x2713d08	cmp [rsp+0x68]:64,0x2	kinds 3 and 4 cost word
+core	0x2713d14	cmovae r13,[rsp+0x260]:64	cost selector
+core	0x2713d30	mov r13,[rsp+0x278]:64	kind 2 uses record +0x18
+core	0x2713d4a	call [0x5774a20]:64	USDC value
+core	0x2713d56	js 0x2714469	sign bit panics
+core	0x2713d88	mov rcxd,0x1	ecx 1
+core	0x2713d95	call 0x371d120	debit
+core	0x2713da0	jae 0x2713ddc	tally only for kinds 3 and 4
+core	0x2713da5	neg rdx	negative value
+core	0x2713dd7	call 0x2712a00	tally
+core	0x2713ea7	call 0x2716f90	credit side
+core	0x2713f37	call 0x2712af0	merge
+core	0x2713f3c	cmp [rsp+0x260]:32,0x3	event only for kind 3
+core	0x2713f63	mov rdid,0x28	two addresses
+core	0x2713fdd	cmp [r14]:32,0x1	block hash when state tag is 1
+core	0x271427b	lea rcx,[0x584b08]:64	power of ten table
+core	0x27142dc	subpd xmm0,[0x204c30]:128	u64 to f64
+core	0x271432c	shufpd xmm2,[0x204900]:128,0x2	1e6 from the second double
+core	0x271433e	divpd xmm0,xmm2	amount over 10^decimals, value over 1e6
+core	0x27142ff	cmp [r14+0x78]:8,0x0	state +0x78 replaces the word
+core	0x2714306	mov rcx,[r14+0x50]:64	state +0x50
+core	0x27143c4	mov rax,0x800000000000000f	ledger event tag
+core	0x27143f6	call [0x5774738]:64	ledger event
+core	0x2714424	mov [rbx]:16,0x186	status 390
+sysrange	0x37e511e	pcmpeqb xmm1,[0x203fc0]:128	last four bytes of the 0x22 address
+sysrange	0x37e5126	pcmpeqb xmm0,[0x203c60]:128	first sixteen bytes
+sysrange	0x37e514e	mov [rsp+0xc]:8,0x20	first byte 0x20
+sysrange	0x37e5171	js 0x37e51be	below 0x20 00..00 is out
+sysrange	0x37e5189	mov rax,0xf27000000000000	upper bound word
+sysrange	0x37e51ad	setle raxb	at most 0x20 00..27 0f
+block	0x375fc3e	cmp rdx,[rdi+0x188]:64	token bound
+block	0x375fc59	cmp [rax+rcx*1+0x10]:32,0x1	Option tag
+block	0x375fc6b	test rcx,rcx	root
+debit	0x371b8aa	call [0x5773170]:64	balance row through a slot
+debit	0x371b8b0	mov rcx,[rax+0x10]:64	tree root
+debit	0x371b8bf	movzx rdid,[rcx+0x16a]:16	node length +0x16a
+debit	0x371b923	mov rax,[rcx+r8*1+0x48]:64	first word of the value
+debit	0x371b928	mov rcx,[rcx+r8*1+0x50]:64	second word of the value
+debit	0x371b933	add rbx,rcx	amount plus second word
+debit	0x371b936	cmp rbx,rcx	no carry
+debit	0x371b93c	cmp rbx,rax	at most first word
+raise	0x371b14e	cmp rdx,[rdi+0x198]:64	token bound
+raise	0x371b15d	test rcx,rcx	amount 0 returns true
+raise	0x371b245	mov [rsp+0x8]:16,0xea	status 0xea
+raise	0x371b26f	mov rsi,[rdx+r13*1-0x30]:64	row +0x28 tree
+raise	0x371b345	call 0x33bb560	entry
+raise	0x371b351	add r14,rdx	amount plus second word
+raise	0x371b359	jb 0x371b258	carry fails
+raise	0x371b35f	cmp r14,[rcx]:64	above first word fails
+raise	0x371b368	mov [rcx+0x8]:64,r14	second word stored
+value	0x371fcc8	test rsi,rsi	token 0 branch
+value	0x371fd5c	shr r15,0x2	divide by 100
+value	0x371fd60	mov rcx,0x28f5c28f5c28f5c3	0x28f5c28f5c28f5c3
+value	0x371fce3	je 0x371fd7d	price 0 gives 0
+value	0x371fcf8	call [0x57738b0]:64	product and divide
+value	0x371fd0a	cmp rbx,0x1	token 1 has no cap
+value	0x371fd27	cmp [rcx+rdx*1+0x40]:64,0x4	name length 4
+value	0x371fd3a	cmp [rcx]:32,0x45505948	HYPE word
+value	0x371fd42	mov rcx,0x2386f26fc10000	cap 1e16
+merge	0x2712b07	ucomisd xmm0,xmm3	first part positive keeps its name
+merge	0x2712b5f	call [0x57746b8]:64	token name for the second part
+merge	0x2712b99	cmp [rsi]:32,0x45505948	HYPE keeps both parts apart
+merge	0x2712bb8	call [0x576e378]:64	name compare
+merge	0x2712c26	addsd xmm1,xmm2	equal names add
+merge	0x2712c0a	movupd xmm0,[r14]:128	second name replaces an empty first
+credit	0x2716fc9	cmp [rsi+0x10]:8,0x2	route 2 and up
+credit	0x2716fd3	mov r15,[rsi+0x18]:64	record +0x18 gas quote
+credit	0x2716fd7	test [rsi+0x20]:8,0x1	record +0x20 bit 0
+credit	0x271702b	mov [rax+0x3d]:8,0x1	row byte +0x3d set
+credit	0x2717040	mov rax,[rbx+0x2e0]:64	gas tree at state +0x2e0
+credit	0x2717057	movzx rsid,[rax+0x62]:16	gas node length +0x62
+credit	0x27170a9	mov rax,[rax+rdx*8+0x70]:64	gas node edge +0x70
+credit	0x2717271	cmp [rax+rdx*1+0x64]:8,0x1	gas node byte +0x64
+credit	0x2717278	mov rbpw,0xfb	status 0xfb
+credit	0x271727c	cmp [rbx+0x80]:8,0x0	state +0x80 tag byte
+credit	0x2717289	mov rbpw,0xea	status 0xea
+credit	0x271728d	cmp r14,[rbx+0x88]:64	special token only
+credit	0x27172ad	mov rbpw,0x160	status 0x160
+credit	0x27172c0	call [0x5774548]:64	gas price
+credit	0x27172c6	mov rbpw,0x13f	status 0x13f
+credit	0x27172ca	mov rcx,0x68db8bac710cb	100x gate 0x68db8bac710cb
+credit	0x27172d9	imul3 rdi,r15,0x64	gas times 100
+credit	0x27172ea	call 0x333e310	token amount of the value
+credit	0x27172fd	cmp rdx,r8	fee at or above the amount
+credit	0x2717302	mov [rsp+0x8]:64,rdx	fee kept
+credit	0x2717333	call [0x5774a48]:64	sink
+credit	0x27170d9	call 0x371d120	credit, ecx 0
+credit	0x2717138	mov rax,rbx	value / 10000 added to row +0x10
+credit	0x271716a	call 0x2716bc0	post-credit step
+credit	0x27171ad	call [0x5774730]:64	raise on the receiver
+credit	0x27171ec	call 0x371d120	debit of the fee
+credit	0x2717342	shr r13,0x2	token 0 divides by 100
+credit	0x27173ad	cmovae r15,rax	cap 1e16
+credit	0x27173f9	add rax,rdx	fee value / 10000 subtracted
+credit	0x2717537	mov rax,0x8000000000000012	event tag 0x8000000000000012
+credit	0x2717566	lea rax,[rbx+0x420]:64	token total at state +0x420
+credit	0x2717584	movzx rdid,[rcx+0xba]:16	total node length +0xba
+credit	0x27175d6	mov rcx,[rcx+rsi*8+0xc0]:64	total node edge +0xc0
+credit	0x2717633	mov [rax]:64,rcx	total plus fee
+credit	0x2717656	divsd xmm0,[r12+rax*8]:64	fee in token units returned in xmm0
+callers	0x1e5fdd5	mov [rsp+0x90]:64,0x3	kind 3 at 0x1e5fcf0
+callers	0x235d17b	mov [rsp+0x140]:64,0x3	kind 3 at 0x2355f40
+callers	0x27199b2	xor raxd,raxd	kind 0 at 0x27196e0
+callers	0x27199b8	mov raxd,0x2	kind 2 at 0x27196e0
+callers	0x27199c2	mov raxd,0x1	kind 1 at 0x27196e0
+callers	0x2719a1b	mov [rsp+0x50]:64,rax	kind word at 0x27196e0
+callers	0x2719a20	mov [rsp+0x58]:64,rdx	word +0x18 at 0x27196e0
+callers	0x272c154	mov [rsp+0x340]:64,0x4	kind 4 at 0x272bd60
+callers	0x275121e	mov [rsp+0xd0]:64,0x3	kind 3 at 0x2750e60
+callers	0x27511e4	mov [rsp+0x170]:8,0x1	record +0xb0 = 1 at 0x2750e60, the one caller that skips the block set
+callers	0x27511f4	movups.st xmm0,[rsp+0x171]:128	twenty bytes at record +0xb1
+callers	0x2751206	mov [rsp+0xc0]:64,0x0	Option word 0

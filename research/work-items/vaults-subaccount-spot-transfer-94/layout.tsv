@@ -1,0 +1,28 @@
+struct	offset	width	va	instruction	meaning
+action	0x10	8	0x2717c94	mov r9,[r14+0x10]:64	token string length
+action	0x28	8	0x2717ca9	cmp [r14+0x28]:64,0x65	amount string length
+action	0x44	1	0x2717a99	cmp [rcx+0x44]:8,0x0	is_deposit
+action	0x30	16	0x2717a90	movups xmm0,[rcx+0x30]:128	sub-account address
+exchange	0x3ac8	1	0x1e6442e	cmp [rcx+0x3ac8]:8,0x0	spot disabled
+exchange	0x5b1	1	0x1e64469	cmp [r15+0x5b1]:8,0x0	class 3 allowed
+exchange	0x5b0	1	0x1e64475	cmp [r15+0x5b0]:8,0x0	class above 3 allowed
+exchange	0x3828	8	0x2717ad0	cmp [rsi+0x3828]:64,0x0	sub-account rows
+exchange	0x3810	8	0x2717afd	mov rcx,[r15+0x3810]:64	sub-account control bytes
+exchange	0x3818	8	0x2717b04	mov rdx,[r15+0x3818]:64	sub-account mask
+exchange	0x8d0	8	0x2712ea2	mov rax,[r12+0x8d0]:64	vault tree root
+exchange	0x8d8	8	0x2712eb8	mov rcx,[r12+0x8d8]:64	vault tree height
+exchange	0x218	8	0x2712fd7	cmp rsi,[r12+0x218]:64	token count
+exchange	0x210	8	0x2712fe5	mov rax,[r12+0x210]:64	token rows
+exchange	0x80	4	0x271319b	cmp [r12+0x80]:32,0x1	special token tag
+exchange	0x88	8	0x27131a6	cmp rsi,[r12+0x88]:64	special token index
+exchange	0x3a48	8	0x271339b	cmp rcx,[r12+0x3a48]:64	USDC into EVM limit
+exchange	0x31a2	1	0x27133a9	cmp [r12+0x31a2]:8,0x0	USDC into EVM off
+exchange	0x8f2	1	0x271356a	cmp [r12+0x8f2]:8,0x3	chain byte
+exchange	0x2e0	8	0x2717040	mov rax,[rbx+0x2e0]:64	gas tree root
+exchange	0x2e8	8	0x2717050	mov rcx,[rbx+0x2e8]:64	gas tree height
+exchange	0x420	8	0x271756d	mov rcx,[rbx+0x420]:64	token fee total root
+exchange	0x428	8	0x271757d	mov rdx,[rbx+0x428]:64	token fee total height
+record	0x10	8	0x2712dcc	mov rax,[r13+0x10]:64	kind
+record	0x18	8	0x2712dd8	mov rax,[r13+0x18]:64	word used by kind 2
+record	0xb0	1	0x2712d34	movzx raxd,[r13+0xb0]:8	skip block checks in bit 0
+transfer_core_record	0x88	16	0x2712d04	movups xmm0,[rdx+0x88]:128	from
