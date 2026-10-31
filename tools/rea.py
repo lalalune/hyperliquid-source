@@ -61,6 +61,8 @@ def environment(node):
 
 
 def target(name):
+    if 'targets' not in CONFIG:
+        raise ValueError('config/rea.json missing targets')
     relative = CONFIG['targets'][name]
     item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == relative)
     check(ROOT / relative, item)
