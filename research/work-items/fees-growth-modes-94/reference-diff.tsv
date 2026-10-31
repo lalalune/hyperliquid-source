@@ -1,0 +1,9 @@
+verdict	reference	reference_says	bytes_say
+absent	asset/pdi.rs PdiAction	no growth mode action, no setter	0x273b4b0 + 2 copies take a BTreeMap of names to booleans and hold 2 passes: test every key, then write
+differs	perp_meta.rs GrowthMode	serde names normal, allowHip3, frozen	serializer 0x37585e0 prints enabled, disabled, blocked for bytes 0, 1, any other
+differs	perp_meta.rs last_growth_mode_change_time	Option of u64	asset row +0x1c holds 3 dwords of a chrono time; a zero first dword is None (0x273b723), the other two are then ignored
+differs	asset/pdi.rs growth_mode_allowed	a bool on the asset, false blocks a fee scale above 1	the same byte +0x29 holds the mode; values 0, 1 pass and 2 or above gives tag 0xe7 Growth mode blocked by validators
+same	asset/pdi.rs PdiStatus	FeeScaleGrowthModeBlocked = 230	tag 0xe6, used here in the other direction: mode true is refused while the dex scale is above 1
+same	asset/pdi.rs find_by_dex_name_or_first_mut	empty name takes a row with no name	0x3332270 takes row 0 for an empty name with no status test; 0x273b78b then skips the scale test for a status 3 row
+same	fees/compute.rs line 195	multiply by 0.1 when the asset byte at +0x29 is clear	sete at 0x3713228 picks table row 1 = 0.1 for byte 0, row 0 = 1.0 otherwise; read here only as a pin, 0x37130b0 is not evaluated by this tool
+unverified	perp_meta.rs GrowthMode::Frozen	byte 2 is frozen	no writer of byte 2 was found; text 0xe7 names validators, so a vote path is a guess
