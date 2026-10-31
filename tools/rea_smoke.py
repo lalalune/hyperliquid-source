@@ -7,7 +7,7 @@ import sys
 
 from artifacts import ROOT, check
 
-version = subprocess.check_output([sys.executable, str(ROOT / 'tools/rea.py'), '--version'], text=True).strip()
+version = subprocess.check_output([sys.executable, str(ROOT / 'tools/rea.py'), '--version'], text=True, encoding='utf-8').strip()
 config = json.loads((ROOT / 'config/rea.json').read_text())
 if version != config['version']:
     raise SystemExit('Unexpected REA CLI version')
@@ -18,7 +18,7 @@ for release in ['94', '115']:
     relative = config['targets'][release]
     expected = next(i for i in manifest['files'] if i['path'] == relative)
     check(ROOT / relative, expected)
-    output = subprocess.check_output([sys.executable, str(ROOT / 'tools/rea.py'), 'inspect-rust-binary', str(ROOT / relative), '--format', 'json'], text=True)
+    output = subprocess.check_output([sys.executable, str(ROOT / 'tools/rea.py'), 'inspect-rust-binary', str(ROOT / relative), '--format', 'json'], text=True, encoding='utf-8')
     evidence = json.loads(output)
     observed = evidence['normalized_result']['artifact']
     if observed['sha256'] != expected['sha256'] or observed['bytes'] != expected['size']:

@@ -35,7 +35,7 @@ def find_node():
         candidates += [str(p) for p in sorted((Path.home() / '.nvm/versions/node').glob('*/bin/node'), reverse=True)]
     for item in dict.fromkeys(c for c in candidates if c):
         try:
-            result = subprocess.run([item, '--version'], capture_output=True, text=True, timeout=5)
+            result = subprocess.run([item, '--version'], capture_output=True, text=True, timeout=5, encoding='utf-8')
             if result.returncode == 0 and supported_node(result.stdout):
                 return Path(item).resolve()
         except (OSError, subprocess.TimeoutExpired):

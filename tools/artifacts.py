@@ -60,7 +60,7 @@ def verify_signatures(root, fingerprint):
         for rel in ['node/94/hl-node', 'node/115/hl-node', 'visor/captured/hl-visor']:
             binary = root / 'artifacts' / rel
             result = subprocess.run(base + ['--status-fd', '1', '--verify', str(binary) + '.asc', str(binary)],
-                                    check=True, capture_output=True, text=True)
+                                    check=True, capture_output=True, text=True, encoding='utf-8')
             valid = [line.split() for line in result.stdout.splitlines()
                      if line.startswith('[GNUPG:] VALIDSIG ')]
             if not any(row[2] == fingerprint or row[-1] == fingerprint for row in valid):

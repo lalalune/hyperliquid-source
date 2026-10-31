@@ -87,7 +87,7 @@ def analyze(data, records, objdump=None):
         require((pc,pc+struct.unpack_from('<I',fde,12)[0]) == (start,end), 'FDE range disagrees')
         if objdump:
             output = subprocess.check_output([objdump,'-d',f'--start-address={start:#x}',
-                                              f'--stop-address={end:#x}','artifacts/node/94/hl-node'],cwd=ROOT,text=True)
+                                              f'--stop-address={end:#x}','artifacts/node/94/hl-node'],cwd=ROOT,text=True, encoding='utf-8')
         else:
             output = (PACKET / (row['name']+'.objdump.txt')).read_text()
         exports[row['name']] = output

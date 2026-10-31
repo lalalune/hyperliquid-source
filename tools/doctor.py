@@ -29,7 +29,7 @@ def probe(name, command):
     if not command or not command[0]:
         return {'name': name, 'available': False}
     try:
-        p = subprocess.run(command, text=True, capture_output=True, timeout=10)
+        p = subprocess.run(command, text=True, capture_output=True, timeout=10, encoding='utf-8')
         lines = (p.stdout + p.stderr).splitlines()
         return {'name': name, 'available': p.returncode == 0, 'version': lines[0] if lines else '', 'executable': command[0]}
     except (OSError, subprocess.TimeoutExpired) as exc:

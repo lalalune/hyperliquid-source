@@ -99,7 +99,7 @@ def generate(binary, output):
     check(binary, identity)
     data = binary.read_bytes()
     byte_controls, relocs = controls(data), relevant_relocations(data)
-    frames_text = subprocess.check_output(['readelf', '-wf', str(binary)], text=True)
+    frames_text = subprocess.check_output(['readelf', '-wf', str(binary)], text=True, encoding='utf-8')
     fdes = [(int(a, 16), int(b, 16)) for a, b in
             re.findall(r'FDE[^\n]*pc=([0-9a-fA-F]+)\.\.([0-9a-fA-F]+)', frames_text)]
     scope = list(RANGES.values()) + [(begin, end) for _, begin, end in CALLERS]
@@ -108,7 +108,7 @@ def generate(binary, output):
             raise ValueError(f'Expected one exact FDE range: {pair}')
     references = []
     with subprocess.Popen(['objdump', '-d', '-j', '.text', str(binary)],
-                          stdout=subprocess.PIPE, text=True) as process:
+                          stdout=subprocess.PIPE, text=True, encoding='utf-8') as process:
         for line in process.stdout:
             ref = decoded_reference(line)
             if ref and ((ref[1] == 'GOT' and ref[2] in SLOTS) or
@@ -121,7 +121,7 @@ def generate(binary, output):
     if constructor_sites != [site for site, _, _ in CALLERS]:
         raise ValueError('Constructor GOT caller set changed')
     output.mkdir(parents=True, exist_ok=True)
-    rela_text = subprocess.check_output(['readelf', '-rW', str(binary)], text=True)
+    rela_text = subprocess.check_output(['readelf', '-rW', str(binary)], text=True, encoding='utf-8')
     slots = {int(row['slot_va'], 16) for row in relocs}
     rela_rows = [line for line in rela_text.splitlines()
                  if re.match(r'^[0-9a-f]+\s', line) and int(line.split()[0], 16) in slots]
@@ -134,12 +134,12 @@ def generate(binary, output):
         ranges[name] = {'start_va': hex(begin), 'end_va': hex(end), 'file_offset': hex(offset),
                         'bytes': len(body), 'sha256': hashlib.sha256(body).hexdigest()}
         text = subprocess.check_output(['objdump', '-d', f'--start-address={begin:#x}',
-                                        f'--stop-address={end:#x}', str(binary)], text=True)
+                                        f'--stop-address={end:#x}', str(binary)], text=True, encoding='utf-8')
         (output / f'{name}.objdump.txt').write_text(text.replace(str(binary), '<authenticated-node94>'))
     for site, begin, end in CALLERS:
         # Retain caller context without claiming its opaque calls are closed.
         text = subprocess.check_output(['objdump', '-d', f'--start-address={begin:#x}',
-                                        f'--stop-address={end:#x}', str(binary)], text=True)
+                                        f'--stop-address={end:#x}', str(binary)], text=True, encoding='utf-8')
         (output / f'caller-{site:x}.objdump.txt').write_text(text.replace(str(binary), '<authenticated-node94>'))
     (output / 'frames.txt').write_text('\n'.join(line for line in frames_text.splitlines()
         if 'FDE' in line and any(f'pc={a:016x}..{b:016x}' in line for a, b in scope)) + '\n')

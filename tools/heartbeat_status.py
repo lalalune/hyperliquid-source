@@ -103,21 +103,21 @@ def run(binary, output):
     check(binary, item)
     data = binary.read_bytes()
     controls = static_controls(data)
-    frames = subprocess.check_output(['readelf', '-wf', str(binary)], text=True)
+    frames = subprocess.check_output(['readelf', '-wf', str(binary)], text=True, encoding='utf-8')
     ranges = frame_ranges(frames)
     for pair in [(START, END), (CALLER_START, CALLER_END), (HELPER_START, HELPER_END)]:
         if ranges.count(pair) != 1:
             raise ValueError(f'Expected one decoded FDE for {pair}')
     # Stream the complete .text decoder output rather than scanning raw E8 bytes.
     with subprocess.Popen(['objdump', '-d', '-j', '.text', str(binary)],
-                          stdout=subprocess.PIPE, text=True) as proc:
+                          stdout=subprocess.PIPE, text=True, encoding='utf-8') as proc:
         callers = direct_callers(proc.stdout)
         if proc.wait() != 0:
             raise ValueError('Full .text disassembly failed')
     if callers != EXPECTED_CALLERS:
         raise ValueError(f'Decoded direct caller set changed: {callers}')
     output.mkdir(parents=True, exist_ok=True)
-    relocation_text = subprocess.check_output(['readelf', '-rW', str(binary)], text=True)
+    relocation_text = subprocess.check_output(['readelf', '-rW', str(binary)], text=True, encoding='utf-8')
     relevant_slots = {int(r['slot_va'], 16) for r in relocations(data)}
     relocation_lines = [line for line in relocation_text.splitlines()
                         if re.match(r'^([0-9a-f]+)\s', line) and
@@ -130,7 +130,7 @@ def run(binary, output):
     for name, begin, end in [('status', START, END), ('consumer', CALLER_START, CALLER_END),
                              ('elapsed-helper', HELPER_START, HELPER_END)]:
         command = ['objdump', '-d', f'--start-address={begin:#x}', f'--stop-address={end:#x}', str(binary)]
-        text = subprocess.check_output(command, text=True)
+        text = subprocess.check_output(command, text=True, encoding='utf-8')
         # Exclude the local absolute pathname from durable deterministic evidence.
         text = text.replace(str(binary), '<authenticated-node94>')
         (output / f'{name}.objdump.txt').write_text(text)

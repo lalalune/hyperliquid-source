@@ -12,7 +12,7 @@ SETUP = 'run git submodule update --init --recursive'
 
 def git(root, path, *args):
     try:
-        return subprocess.check_output(['git', '-C', str(root / path), *args], text=True, stderr=subprocess.DEVNULL).strip()
+        return subprocess.check_output(['git', '-C', str(root / path), *args], text=True, stderr=subprocess.DEVNULL, encoding='utf-8').strip()
     except (subprocess.CalledProcessError, FileNotFoundError):
         raise ValueError(f'Unreadable pinned source: {path}; {SETUP}') from None
 

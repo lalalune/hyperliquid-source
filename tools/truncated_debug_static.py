@@ -106,14 +106,14 @@ def generate(binary, output):
     check(binary,identity)
     data = binary.read_bytes()
     bindings = source_bindings(data)
-    frames = subprocess.check_output(['readelf','-wf',str(binary)],text=True)
+    frames = subprocess.check_output(['readelf','-wf',str(binary)],text=True, encoding='utf-8')
     fdes = [(int(a,16),int(b,16)) for a,b in re.findall(r'FDE[^\n]*pc=([0-9a-f]+)\.\.([0-9a-f]+)',frames)]
     rows = census(data,fdes)
     output.mkdir(parents=True,exist_ok=True)
     raw = []
     for row in rows:
         start,end = int(row['start_va'],16),int(row['end_va'],16)
-        disasm = subprocess.check_output(['objdump','-d',f'--start-address={start:#x}',f'--stop-address={end:#x}',str(binary)],text=True)
+        disasm = subprocess.check_output(['objdump','-d',f'--start-address={start:#x}',f'--stop-address={end:#x}',str(binary)],text=True, encoding='utf-8')
         site = int(row['source_xref'],16)
         if not re.search(rf'^\s*{site:x}:\s+4c 8d 05 .*\blea\b',disasm,re.M):
             raise ValueError('Candidate source LEA is not decoded instruction')
@@ -121,7 +121,7 @@ def generate(binary, output):
     (output/'family.objdump.txt').write_text('\n'.join(raw))
     selected = {(int(r['start_va'],16),int(r['end_va'],16)) for r in rows}
     (output/'frames.txt').write_text('\n'.join(line for line in frames.splitlines() if any(f'pc={a:016x}..{b:016x}' in line for a,b in selected))+'\n')
-    relas = subprocess.check_output(['readelf','-rW',str(binary)],text=True)
+    relas = subprocess.check_output(['readelf','-rW',str(binary)],text=True, encoding='utf-8')
     wanted = set(SLOTS)|{0x576e040,0x576e008,0x576e070}
     (output/'relocations.txt').write_text('\n'.join(line for line in relas.splitlines() if re.match(r'^[0-9a-f]+\s',line) and int(line.split()[0],16) in wanted)+'\n')
     result = {'target_sha256':identity['sha256'],'target_bytes':len(data),'fde_records_parsed':len(fdes),'census_scope':'Every .text byte for RIP-relative 64-bit LEAs to these five source Location slots, validated as instructions within FDEs; not all functions or all possible source references.','family_bytes':sum(r['bytes'] for r in rows),'profiles':{kind:sum(r['guard_profile']==kind for r in rows) for kind in PROFILES},'source_bindings':bindings,'ranges':rows,'captured_binary_executed':False,'limits':'Local branch/prefix evidence, not complete UTF-8 validation, target input reachability, exact formatted output, formatter/helper closure, runtime equivalence or component completion.'}
