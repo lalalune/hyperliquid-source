@@ -153,20 +153,31 @@ def fde_extents(data, secs):
     """Return {pc_begin: pc_end} from .eh_frame_hdr's table and each FDE body."""
     hdr = secs['.eh_frame_hdr']
     h = hdr['offset']
+    if hdr['size'] < 12:
+        raise EvidenceError('truncated .eh_frame_hdr')
     version, eh_ptr_enc, count_enc, table_enc = data[h:h + 4]
     if (version, eh_ptr_enc, count_enc, table_enc) != (1, 0x1b, 0x03, 0x3b):
         raise EvidenceError('unexpected .eh_frame_hdr encodings')
     count = struct.unpack_from('<I', data, h + 8)[0]
+    if 12 + count * 8 > hdr['size']:
+        raise EvidenceError('truncated .eh_frame_hdr table')
     ef = secs['.eh_frame']
+    frame_end = ef['addr'] + ef['size']
     out = {}
     for i in range(count):
         start_rel, fde_rel = struct.unpack_from('<ii', data, h + 12 + i * 8)
         start = hdr['addr'] + start_rel
         fde_va = hdr['addr'] + fde_rel
+        # The indexed record must itself lie in .eh_frame. A negative file
+        # offset would make unpack_from read the end of the file instead.
+        if fde_va < ef['addr'] or fde_va + 16 > frame_end:
+            raise EvidenceError(f'FDE at {fde_va:#x} is outside .eh_frame')
         fo = ef['offset'] + fde_va - ef['addr']
         length, cie_ptr = struct.unpack_from('<II', data, fo)
-        if length in (0, 0xffffffff) or cie_ptr == 0:
+        if length in (0, 0xffffffff) or cie_ptr == 0 or length < 12:
             raise EvidenceError(f'FDE at {fde_va:#x} is malformed')
+        if fo + 4 + length > ef['offset'] + ef['size']:
+            raise EvidenceError(f'FDE at {fde_va:#x} is truncated')
         begin_rel, pc_range = struct.unpack_from('<iI', data, fo + 8)
         begin = fde_va + 8 + begin_rel
         if begin != start:

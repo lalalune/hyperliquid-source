@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -141,8 +142,65 @@ class NegativeControls(unittest.TestCase):
 
 
 def struct_error():
-    import struct
     return struct.error
+
+
+def framed_elf(hdr_size, count, table, fde):
+    """ELF64 with a .eh_frame_hdr of exactly `hdr_size` bytes.
+
+    `table` is appended in the file after those bytes, so a reader that ignores
+    the section size can treat it as an index entry.
+    """
+    names = b'\0.shstrtab\0.text\0.eh_frame\0.eh_frame_hdr\0.rela.dyn\0.data.rel.ro\0.rodata\0'
+    hdr = bytes([1, 0x1b, 0x03, 0x3b]) + b'\0\0\0\0' + struct.pack('<I', count) + table
+    body = bytearray(64)
+    body[:6] = b'\x7fELF\x02\x01'
+    chunks = []
+
+    def add(name, addr, blob, size=None):
+        chunks.append((name, addr, len(body), len(blob) if size is None else size))
+        body.extend(blob)
+
+    add('.shstrtab', 0, names)
+    add('.text', 0x1000, b'\x90')
+    add('.eh_frame_hdr', 0x2000, hdr[:hdr_size], hdr_size)
+    if len(hdr) > hdr_size:
+        body.extend(hdr[hdr_size:])
+    add('.eh_frame', 0x5000, fde)
+    add('.rela.dyn', 0, b'')
+    add('.data.rel.ro', 0, b'')
+    add('.rodata', 0, b'')
+    struct.pack_into('<Q', body, 40, len(body))
+    struct.pack_into('<HHH', body, 58, 64, 1 + len(chunks), 1)
+    body += struct.pack('<IIQQQQIIQQ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    for name, addr, off, size in chunks:
+        body += struct.pack('<IIQQQQIIQQ', names.index(name.encode() + b'\0'), 1, 0, addr, off, size, 0, 0, 1, 0)
+    return bytes(body)
+
+
+class FdeTableBounds(unittest.TestCase):
+    def record(self, length):
+        begin_rel = 0x3000 - (0x5000 + 8)
+        # Pad so a short length still has readable bytes after the record.
+        body = struct.pack('<IIiI', length, 1, begin_rel, 0x10)
+        return body + b'\x00' * 16
+
+    def test_index_entry_inside_header_is_decoded(self):
+        table = struct.pack('<ii', 0x1000, 0x3000)
+        data = framed_elf(12 + len(table), 1, table, self.record(12))
+        self.assertEqual(bv.fde_extents(data, bv.sections(data)), {0x3000: 0x3010})
+
+    def test_index_entry_past_header_is_rejected(self):
+        table = struct.pack('<ii', 0x1000, 0x3000)
+        data = framed_elf(12, 1, table, self.record(12))
+        with self.assertRaisesRegex(bv.EvidenceError, 'truncated .eh_frame_hdr table'):
+            bv.fde_extents(data, bv.sections(data))
+
+    def test_short_fde_body_is_rejected(self):
+        table = struct.pack('<ii', 0x1000, 0x3000)
+        data = framed_elf(12 + len(table), 1, table, self.record(4))
+        with self.assertRaisesRegex(bv.EvidenceError, 'malformed'):
+            bv.fde_extents(data, bv.sections(data))
 
 
 class Determinism(unittest.TestCase):
