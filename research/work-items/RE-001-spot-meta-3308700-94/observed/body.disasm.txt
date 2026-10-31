@@ -1,0 +1,70 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x3308700 0x3308700..0x330880c; byte records are authoritative
+3308700  53                     push rbx
+3308701  488b4708               mov rax, qword ptr [rdi + 8]
+3308705  4c8b4718               mov r8, qword ptr [rdi + 0x18]
+3308709  4c39c0                 cmp rax, r8
+330870c  0f84d1000000           je 0x33087e3
+3308712  488b0e                 mov rcx, qword ptr [rsi]
+3308715  4c8b5608               mov r10, qword ptr [rsi + 8]
+3308719  4c8b5e10               mov r11, qword ptr [rsi + 0x10]
+330871d  4883c010               add rax, 0x10
+3308721  f30f6f01               movdqu xmm0, xmmword ptr [rcx]
+3308725  660f6e4910             movd xmm1, dword ptr [rcx + 0x10]
+330872a  eb19                   jmp 0x3308745
+330872c  0f1f4000               nop dword ptr [rax]
+3308730  498d49f0               lea rcx, [r9 - 0x10]
+3308734  498d4110               lea rax, [r9 + 0x10]
+3308738  4883c110               add rcx, 0x10
+330873c  4c39c1                 cmp rcx, r8
+330873f  0f8496000000           je 0x33087db
+3308745  4989c1                 mov r9, rax
+3308748  488b40f0               mov rax, qword ptr [rax - 0x10]
+330874c  498b49f8               mov rcx, qword ptr [r9 - 8]
+3308750  488b10                 mov rdx, qword ptr [rax]
+3308753  f30f6f11               movdqu xmm2, xmmword ptr [rcx]
+3308757  660f74d0               pcmpeqb xmm2, xmm0
+330875b  660f6e5910             movd xmm3, dword ptr [rcx + 0x10]
+3308760  660f74d9               pcmpeqb xmm3, xmm1
+3308764  660fdbda               pand xmm3, xmm2
+3308768  660fd7c3               pmovmskb eax, xmm3
+330876c  3dffff0000             cmp eax, 0xffff
+3308771  75bd                   jne 0x3308730
+3308773  493b9250010000         cmp rdx, qword ptr [r10 + 0x150]
+330877a  72b4                   jb 0x3308730
+330877c  493b9288010000         cmp rdx, qword ptr [r10 + 0x188]
+3308783  7362                   jae 0x33087e7
+3308785  498b8a80010000         mov rcx, qword ptr [r10 + 0x180]
+330878c  4869f2e8000000         imul rsi, rdx, 0xe8
+3308793  48837c316001           cmp qword ptr [rcx + rsi + 0x60], 1
+3308799  7795                   ja 0x3308730
+330879b  b801000000             mov eax, 1
+33087a0  7533                   jne 0x33087d5
+33087a2  4801f1                 add rcx, rsi
+33087a5  4883c150               add rcx, 0x50
+33087a9  488b4908               mov rcx, qword ptr [rcx + 8]
+33087ad  488b09                 mov rcx, qword ptr [rcx]
+33087b0  498bb270010000         mov rsi, qword ptr [r10 + 0x170]
+33087b7  4839f1                 cmp rcx, rsi
+33087ba  733c                   jae 0x33087f8
+33087bc  498b33                 mov rsi, qword ptr [r11]
+33087bf  498b9a68010000         mov rbx, qword ptr [r10 + 0x168]
+33087c6  48c1e105               shl rcx, 5
+33087ca  4839740b08             cmp qword ptr [rbx + rcx + 8], rsi
+33087cf  0f855bffffff           jne 0x3308730
+33087d5  4c894f08               mov qword ptr [rdi + 8], r9
+33087d9  5b                     pop rbx
+33087da  c3                     ret 
+33087db  31c0                   xor eax, eax
+33087dd  4c894f08               mov qword ptr [rdi + 8], r9
+33087e1  5b                     pop rbx
+33087e2  c3                     ret 
+33087e3  31c0                   xor eax, eax
+33087e5  5b                     pop rbx
+33087e6  c3                     ret 
+33087e7  4c894f08               mov qword ptr [rdi + 8], r9
+33087eb  488d3dfe993e02         lea rdi, [rip + 0x23e99fe]
+33087f2  ff15785c4602           call qword ptr [rip + 0x2465c78]
+33087f8  4c894f08               mov qword ptr [rdi + 8], r9
+33087fc  488d15d5973e02         lea rdx, [rip + 0x23e97d5]
+3308803  4889cf                 mov rdi, rcx
+3308806  ff15bc574602           call qword ptr [rip + 0x24657bc]
