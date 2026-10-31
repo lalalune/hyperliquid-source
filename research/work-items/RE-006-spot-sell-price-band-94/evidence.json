@@ -1,0 +1,221 @@
+{
+  "cases": {
+    "total": 117
+  },
+  "constants": [
+    {
+      "bits": "0x3fef5c28f5c28f5c",
+      "meaning": "factor of the high price",
+      "va": "0x20aa58",
+      "value": "0.98"
+    },
+    {
+      "bits": "0xc2d6bcc41e900000",
+      "meaning": "divisor of the rate",
+      "va": "0x20ae90",
+      "value": "-100000000000000.0"
+    },
+    {
+      "bits": "0x3ff0000000000000",
+      "meaning": "added twice",
+      "va": "0x20a730",
+      "value": "1.0"
+    },
+    {
+      "bits": "0xbfeccccccccccccd",
+      "meaning": "slope of the low factor",
+      "va": "0x20a978",
+      "value": "-0.9"
+    },
+    {
+      "bits": "0x43f0000000000000",
+      "meaning": "cap of a cast",
+      "va": "0x20a510",
+      "value": "1.8446744073709552e+19"
+    },
+    {
+      "bits": "0x43efffffffffffff",
+      "meaning": "last cast below the top",
+      "va": "0x20a218",
+      "value": "1.844674407370955e+19"
+    },
+    {
+      "bits": "0x43e0000000000000",
+      "meaning": "cast shift",
+      "va": "0x20a7f0",
+      "value": "9.223372036854776e+18"
+    }
+  ],
+  "curve": [
+    {
+      "low_factor": "0.09999999999999998",
+      "rate": 0,
+      "word": 0
+    },
+    {
+      "low_factor": "0.32499999999999996",
+      "rate": 25000000000000,
+      "word": 10000000000000
+    },
+    {
+      "low_factor": "0.55",
+      "rate": 50000000000000,
+      "word": 25000000000000
+    },
+    {
+      "low_factor": "0.774999999999991",
+      "rate": 74999999999999,
+      "word": 49999999999999
+    },
+    {
+      "low_factor": "0.849999999999997",
+      "rate": 83333333333333,
+      "word": 50000000000000
+    },
+    {
+      "low_factor": "0.9249999999999939",
+      "rate": 91666666666666,
+      "word": 75000000000000
+    },
+    {
+      "low_factor": "1.0",
+      "rate": 100000000000000,
+      "word": 100000000000000
+    },
+    {
+      "low_factor": "1.299999999999997",
+      "rate": 133333333333333,
+      "word": 200000000000000
+    }
+  ],
+  "fields": {
+    "account": {
+      "+0x18/+0x20": "root and height of a tree by token, stride 0x20",
+      "word +0x08": "quote row: debt word",
+      "word +0x18": "base row: held word"
+    },
+    "arguments": {
+      "first stack word": "meta at state +0x90",
+      "r8": "quote",
+      "r9": "map at state +0x560",
+      "rcx": "base",
+      "rdi": "result",
+      "rdx": "spot",
+      "rsi": "account"
+    },
+    "result": {
+      "+0x00": "tag",
+      "+0x08": "x, or the stop code",
+      "+0x10": "low",
+      "+0x18": "high",
+      "+0x20": "last"
+    },
+    "row_map_node": {
+      "+0x00": "values, stride 0xb0",
+      "+0x798": "keys",
+      "+0x7f2": "length",
+      "+0x7f8": "edges"
+    },
+    "token_row": {
+      "+0x00": "byte: 0 on the base row gives tag 2",
+      "+0x08": "base: the word of the rate",
+      "+0x10": "first argument of 0x3594ec0 (base), second (quote), also a scale argument (base)",
+      "+0x58": "quote: multiplies the debt word",
+      "+0x78": "base: divides and multiplies the held word"
+    },
+    "word_tree_node": {
+      "+0x00": "values, stride 0x20",
+      "+0x168": "keys",
+      "+0x1c2": "length",
+      "+0x1c8": "edges"
+    }
+  },
+  "first_mismatch": "",
+  "functions": [
+    {
+      "end": "0x3734bc3",
+      "instructions": 438,
+      "instructions_stepped": 436,
+      "role": "band",
+      "size": 1827,
+      "start": "0x37344a0"
+    },
+    {
+      "end": "0x565f481",
+      "instructions": 24,
+      "instructions_stepped": 24,
+      "role": "round, real, no mutants",
+      "size": 113,
+      "start": "0x565f410"
+    }
+  ],
+  "host_bytes": [
+    {
+      "bytes": "48b8ff1f3d88792d0000",
+      "meaning": "mov rax, 0x2d79883d1fff: last word on the lower arm of the rate",
+      "va": "0x373470b"
+    },
+    {
+      "bytes": "48be00407a10f35a0000",
+      "meaning": "mov rsi, 1e14: added to twice the word in the divisor",
+      "va": "0x3734715"
+    },
+    {
+      "bytes": "48b80080f420e6b50000",
+      "meaning": "mov rax, 2e14: added on the upper arm",
+      "va": "0x3734724"
+    },
+    {
+      "bytes": "48beabaaaaaaaaaaaaaa",
+      "meaning": "mov rsi, inverse of 3",
+      "va": "0x373473c"
+    },
+    {
+      "bytes": "48b900c06e31d9100100",
+      "meaning": "mov rcx, 3e14: multiplier on the lower arm",
+      "va": "0x373475f"
+    },
+    {
+      "bytes": "bf00e1f505",
+      "meaning": "mov edi, 100000000: first argument of the first scale call",
+      "va": "0x3734a2c"
+    }
+  ],
+  "instructions_stepped": 48890,
+  "mismatches": 0,
+  "mutations": {
+    "killed": 157,
+    "survived": 11,
+    "unreached": 0
+  },
+  "outcomes": {
+    "stop 3": 9,
+    "stop 6": 1,
+    "stop 9": 8,
+    "tag 0": 2,
+    "tag 1": 86,
+    "tag 2": 11
+  },
+  "slots": {
+    "0x576f6d8": "0x565f410",
+    "0x5774778": "0x37344a0",
+    "0x5774790": "0x32813d0"
+  },
+  "target": {
+    "file": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "worked_example": {
+    "high": 1960000100,
+    "last": 250000000,
+    "low": 1400000010,
+    "price": 2000000000,
+    "tag": 1,
+    "ticks": [
+      100,
+      10
+    ],
+    "word": 40000000000000,
+    "x": 123456
+  }
+}
