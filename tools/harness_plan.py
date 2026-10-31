@@ -59,6 +59,8 @@ def validate_protocol(protocol: dict) -> None:
     if not protocol.get('requires_execution_approval'):
         raise ValueError('requires_execution_approval must be true')
     isolation = protocol['isolation']
+    if not isinstance(isolation, dict):
+        raise ValueError('isolation must be a dict')
     if isolation.get('network') != 'deny':
         raise ValueError('isolation.network must default to deny')
     if not protocol['positive_controls'] or not protocol['negative_controls']:
