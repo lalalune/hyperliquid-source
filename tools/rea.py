@@ -30,6 +30,8 @@ def find_node():
     if explicit:
         candidates = [explicit]
     else:
+        if 'preferred_node' not in CONFIG:
+            raise ValueError('config/rea.json missing preferred_node')
         candidates = [str(Path.home() / '.nvm/versions/node' / ('v' + CONFIG['preferred_node']) / 'bin/node'),
                       shutil.which('node'), '/opt/homebrew/bin/node', '/usr/local/bin/node']
         candidates += [str(p) for p in sorted((Path.home() / '.nvm/versions/node').glob('*/bin/node'), reverse=True)]
