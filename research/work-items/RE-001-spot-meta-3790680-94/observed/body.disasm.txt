@@ -1,0 +1,86 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x3790680 0x3790680..0x37907d9; byte records are authoritative
+3790680  4157                   push r15
+3790682  4156                   push r14
+3790684  4155                   push r13
+3790686  4154                   push r12
+3790688  53                     push rbx
+3790689  4883ec10               sub rsp, 0x10
+379068d  4989f6                 mov r14, rsi
+3790690  4889fb                 mov rbx, rdi
+3790693  4885d2                 test rdx, rdx
+3790696  0f98c0                 sets al
+3790699  4889d7                 mov rdi, rdx
+379069c  48f7df                 neg rdi
+379069f  480f48fa               cmovs rdi, rdx
+37906a3  30c8                   xor al, cl
+37906a5  488bb670010000         mov rsi, qword ptr [rsi + 0x170]
+37906ac  7427                   je 0x37906d5
+37906ae  4939f1                 cmp r9, rsi
+37906b1  0f8312010000           jae 0x37907c9
+37906b7  498b8668010000         mov rax, qword ptr [r14 + 0x168]
+37906be  49c1e105               shl r9, 5
+37906c2  4a8b740808             mov rsi, qword ptr [rax + r9 + 8]
+37906c7  493bb688010000         cmp rsi, qword ptr [r14 + 0x188]
+37906ce  725a                   jb 0x379072a
+37906d0  e9e7000000             jmp 0x37907bc
+37906d5  4939f1                 cmp r9, rsi
+37906d8  0f83eb000000           jae 0x37907c9
+37906de  498b8668010000         mov rax, qword ptr [r14 + 0x168]
+37906e5  49c1e105               shl r9, 5
+37906e9  4a8b3408               mov rsi, qword ptr [rax + r9]
+37906ed  4d85c0                 test r8, r8
+37906f0  0f8488000000           je 0x379077e
+37906f6  4989d4                 mov r12, rdx
+37906f9  4531ff                 xor r15d, r15d
+37906fc  4989f5                 mov r13, rsi
+37906ff  4c89c2                 mov rdx, r8
+3790702  31c9                   xor ecx, ecx
+3790704  4d89f0                 mov r8, r14
+3790707  e804dcbaff             call 0x333e310
+379070c  a801                   test al, 1
+379070e  0f84a3000000           je 0x37907b7
+3790714  4d3bae88010000         cmp r13, qword ptr [r14 + 0x188]
+379071b  0f839b000000           jae 0x37907bc
+3790721  4889d7                 mov rdi, rdx
+3790724  4c89ee                 mov rsi, r13
+3790727  4c89e2                 mov rdx, r12
+379072a  4869c6e8000000         imul rax, rsi, 0xe8
+3790731  66480f6ec7             movq xmm0, rdi
+3790736  498b8e80010000         mov rcx, qword ptr [r14 + 0x180]
+379073d  660f62053b37a7fc       punpckldq xmm0, xmmword ptr [rip - 0x358c8c5]
+3790745  660f5c055327a7fc       subpd xmm0, xmmword ptr [rip - 0x358d8ad]
+379074d  0fb6440149             movzx eax, byte ptr [rcx + rax + 0x49]
+3790752  660f28c8               movapd xmm1, xmm0
+3790756  660f15c8               unpckhpd xmm1, xmm0
+379075a  f20f58c8               addsd xmm1, xmm0
+379075e  488d0da343dffc         lea rcx, [rip - 0x320bc5d]
+3790765  f20f5e0cc1             divsd xmm1, qword ptr [rcx + rax*8]
+379076a  4885d2                 test rdx, rdx
+379076d  7908                   jns 0x3790777
+379076f  660f570d797ba7fc       xorpd xmm1, xmmword ptr [rip - 0x3588487]
+3790777  660f290c24             movapd xmmword ptr [rsp], xmm1
+379077c  eb09                   jmp 0x3790787
+379077e  660f57c0               xorpd xmm0, xmm0
+3790782  660f290424             movapd xmmword ptr [rsp], xmm0
+3790787  41bf01000000           mov r15d, 1
+379078d  488d7b10               lea rdi, [rbx + 0x10]
+3790791  4c89f2                 mov rdx, r14
+3790794  ff151e3ffe01           call qword ptr [rip + 0x1fe3f1e]
+379079a  4c893b                 mov qword ptr [rbx], r15
+379079d  0f280424               movaps xmm0, xmmword ptr [rsp]
+37907a1  f20f114308             movsd qword ptr [rbx + 8], xmm0
+37907a6  4889d8                 mov rax, rbx
+37907a9  4883c410               add rsp, 0x10
+37907ad  5b                     pop rbx
+37907ae  415c                   pop r12
+37907b0  415d                   pop r13
+37907b2  415e                   pop r14
+37907b4  415f                   pop r15
+37907b6  c3                     ret 
+37907b7  4c89ee                 mov rsi, r13
+37907ba  ebd1                   jmp 0x379078d
+37907bc  488d3d2d1af601         lea rdi, [rip + 0x1f61a2d]
+37907c3  ff15a7dcfd01           call qword ptr [rip + 0x1fddca7]
+37907c9  488d150818f601         lea rdx, [rip + 0x1f61808]
+37907d0  4c89cf                 mov rdi, r9
+37907d3  ff15efd7fd01           call qword ptr [rip + 0x1fdd7ef]
