@@ -1,0 +1,73 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x3be6950 0x3be6950..0x3be6a58; byte records are authoritative
+3be6950  55                     push rbp
+3be6951  4157                   push r15
+3be6953  4156                   push r14
+3be6955  53                     push rbx
+3be6956  50                     push rax
+3be6957  488b0f                 mov rcx, qword ptr [rdi]
+3be695a  4c8b4708               mov r8, qword ptr [rdi + 8]
+3be695e  4c39c1                 cmp rcx, r8
+3be6961  0f83ab000000           jae 0x3be6a12
+3be6967  4c8b0e                 mov r9, qword ptr [rsi]
+3be696a  4c8b5e08               mov r11, qword ptr [rsi + 8]
+3be696e  498bb170010000         mov rsi, qword ptr [r9 + 0x170]
+3be6975  4889cb                 mov rbx, rcx
+3be6978  48c1e305               shl rbx, 5
+3be697c  4883cb08               or rbx, 8
+3be6980  31c0                   xor eax, eax
+3be6982  4989ca                 mov r10, rcx
+3be6985  eb12                   jmp 0x3be6999
+3be6987  660f1f840000000000     nop word ptr [rax + rax]
+3be6990  4883c320               add rbx, 0x20
+3be6994  4d39d0                 cmp r8, r10
+3be6997  747d                   je 0x3be6a16
+3be6999  4939f2                 cmp r10, rsi
+3be699c  0f8398000000           jae 0x3be6a3a
+3be69a2  4d89d6                 mov r14, r10
+3be69a5  49ffc2                 inc r10
+3be69a8  498b9168010000         mov rdx, qword ptr [r9 + 0x168]
+3be69af  488b141a               mov rdx, qword ptr [rdx + rbx]
+3be69b3  4885d2                 test rdx, rdx
+3be69b6  74d8                   je 0x3be6990
+3be69b8  4881fa6e050000         cmp rdx, 0x56e
+3be69bf  7706                   ja 0x3be69c7
+3be69c1  41803b02               cmp byte ptr [r11], 2
+3be69c5  74c9                   je 0x3be6990
+3be69c7  493b9188010000         cmp rdx, qword ptr [r9 + 0x188]
+3be69ce  7357                   jae 0x3be6a27
+3be69d0  4d8bb180010000         mov r14, qword ptr [r9 + 0x180]
+3be69d7  4c69fae8000000         imul r15, rdx, 0xe8
+3be69de  4b837c3e4005           cmp qword ptr [r14 + r15 + 0x40], 5
+3be69e4  7525                   jne 0x3be6a0b
+3be69e6  4d01fe                 add r14, r15
+3be69e9  4d8b7638               mov r14, qword ptr [r14 + 0x38]
+3be69ed  418b2e                 mov ebp, dword ptr [r14]
+3be69f0  332d0b309bfc           xor ebp, dword ptr [rip - 0x364cff5]
+3be69f6  450fb67604             movzx r14d, byte ptr [r14 + 4]
+3be69fb  44323503309bfc         xor r14b, byte ptr [rip - 0x364cffd]
+3be6a02  450fb6f6               movzx r14d, r14b
+3be6a06  4109ee                 or r14d, ebp
+3be6a09  7485                   je 0x3be6990
+3be6a0b  b801000000             mov eax, 1
+3be6a10  eb07                   jmp 0x3be6a19
+3be6a12  31c0                   xor eax, eax
+3be6a14  eb06                   jmp 0x3be6a1c
+3be6a16  4d89c2                 mov r10, r8
+3be6a19  4c8917                 mov qword ptr [rdi], r10
+3be6a1c  4883c408               add rsp, 8
+3be6a20  5b                     pop rbx
+3be6a21  415e                   pop r14
+3be6a23  415f                   pop r15
+3be6a25  5d                     pop rbp
+3be6a26  c3                     ret 
+3be6a27  49ffc6                 inc r14
+3be6a2a  4c8937                 mov qword ptr [rdi], r14
+3be6a2d  488d3dbcb7b001         lea rdi, [rip + 0x1b0b7bc]
+3be6a34  ff15367ab801           call qword ptr [rip + 0x1b87a36]
+3be6a3a  4839ce                 cmp rsi, rcx
+3be6a3d  480f47ce               cmova rcx, rsi
+3be6a41  488d4101               lea rax, [rcx + 1]
+3be6a45  488907                 mov qword ptr [rdi], rax
+3be6a48  488d1589b5b001         lea rdx, [rip + 0x1b0b589]
+3be6a4f  4889cf                 mov rdi, rcx
+3be6a52  ff157075b801           call qword ptr [rip + 0x1b87570]
