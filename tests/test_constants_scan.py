@@ -68,6 +68,27 @@ class PoolTests(unittest.TestCase):
         with self.assertRaises(ScanError):
             pool_entry(self.data, self.rodata, '/cham', require_marker=True)
 
+    def test_terminator_past_rodata_is_rejected(self):
+        # length 3 + "abc" fill a 4-byte section; the NUL is the next file byte.
+        data = bytearray(0x20)
+        data[0] = 3
+        data[1:4] = b'abc'
+        data[4] = 0
+        rodata = {'offset': 0, 'size': 4, 'address': 0x2000}
+        with self.assertRaises(ScanError):
+            pool_entry(bytes(data), rodata, 'abc')
+
+    def test_terminator_on_last_section_byte_is_accepted(self):
+        # The section ends after the NUL, and the file continues past it.
+        data = bytearray(0x10)
+        data[0] = 3
+        data[1:4] = b'abc'
+        data[4] = 0
+        data[5] = 0xFF
+        rodata = {'offset': 0, 'size': 5, 'address': 0x2000}
+        entry, text, prefixed = pool_entry(bytes(data), rodata, 'abc')
+        self.assertEqual((entry, text, prefixed), (0x2000, 0x2001, False))
+
 
 class TableTests(unittest.TestCase):
     def setUp(self):

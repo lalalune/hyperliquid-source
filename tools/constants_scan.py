@@ -149,6 +149,12 @@ def pool_entry(data, rodata, needle, require_marker=False):
     hits = []
     for offset in starts:
         length = len(encoded)
+        # The length byte and text were found inside .rodata. The terminator is
+        # the next byte and must be in that section too; a NUL in the following
+        # section is not this entry's terminator. Also refuse a short buffer so
+        # the index itself cannot run off the file.
+        if offset + length >= end or offset + length >= len(data):
+            continue
         if data[offset + length] not in (0, POOL_MARKER):
             continue
         if offset - 2 >= rodata['offset'] and data[offset - 2] == POOL_MARKER and data[offset - 1] == length:
