@@ -206,8 +206,12 @@ def panic_location(data, secs, relocs, lea_va):
     lo = va_to_off(secs, loc)
     length, line, col = struct.unpack_from('<QII', data, lo + 8)
     po = va_to_off(secs, path_va)
+    try:
+        path = data[po:po + length].decode()
+    except UnicodeDecodeError:
+        raise EvidenceError('panic location path is not valid UTF-8')
     return {'location': f'{loc:#x}', 'path_va': f'{path_va:#x}',
-            'path': data[po:po + length].decode(), 'line': line, 'column': col}
+            'path': path, 'line': line, 'column': col}
 
 
 def scan(data, expected_sha256=SHA256):
