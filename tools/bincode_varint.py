@@ -171,6 +171,8 @@ def fde_extents(data, secs):
         begin = fde_va + 8 + begin_rel
         if begin != start:
             raise EvidenceError(f'FDE at {fde_va:#x} disagrees with its index entry')
+        if begin in out:
+            raise EvidenceError(f'duplicate FDE start {begin:#x}')
         out[begin] = begin + pc_range
     return out
 
