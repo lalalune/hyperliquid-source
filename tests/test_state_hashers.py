@@ -1,5 +1,7 @@
+import contextlib
 import hashlib
 import importlib.util
+import io
 import json
 import os
 import re
@@ -165,6 +167,17 @@ class StateHashersTests(unittest.TestCase):
                                   f"--stop-address={e:#x}", str(BIN)], capture_output=True, text=True,
                                  check=True).stdout
             self.assertRegex(out, rf"(?m)^ +{s:x}:\s+ff 15 [0-9a-f ]+\s+call\s+QWORD PTR \[rip\+0x[0-9a-f]+\]\s+# {slot:x}")
+
+
+class MainErrorHandlingTests(unittest.TestCase):
+    def test_missing_binary_is_one_line_error(self):
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            rc = sh.main(["--binary", "/nonexistent.bin"])
+        self.assertEqual(rc, 2)
+        self.assertTrue(err.getvalue().startswith("state_hashers: "))
+        self.assertEqual(len(err.getvalue().strip().splitlines()), 1)
+        self.assertNotIn("Traceback", err.getvalue())
 
 
 if __name__ == "__main__":

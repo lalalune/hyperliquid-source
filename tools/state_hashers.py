@@ -297,7 +297,7 @@ def main(argv=None):
     a = ap.parse_args(argv)
     try:
         text = render(build(a.binary.read_bytes()))
-    except EvidenceError as e:
+    except (EvidenceError, OSError) as e:
         print(f"state_hashers: {e}", file=sys.stderr)
         return 2
     if a.out:
