@@ -150,6 +150,12 @@ Two more questions are open:
 - The `clang version 2x.1.0-rc2` stamps match the toolchain's LLVM major version, not Ubuntu 24.04's packaged clang. They may come from C objects in the Rust toolchain itself. Which input object carries them is not checked.
 - The base versions of every fork are unknown.
 
+The [stock Rust carrier investigation](../RE-002-std-clang-carriers/EVIDENCE.md)
+now records signed-distribution comment carriers and a code-compatible builtin
+window in all three captures. Multiple carriers and identical cross-release
+code leave the actual historical input object and native build flags unresolved;
+this partial result does not close the provenance question above.
+
 ## Results and limitations
 
 - `tools/build_provenance.py --check` passes for all three targets at upstream `6fb8631`. `tests/test_build_provenance.py` regenerates each record from the verified target and compares it with the committed JSON. It also runs synthetic-ELF tests that need no LFS data.
