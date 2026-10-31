@@ -129,6 +129,9 @@ class Image:
         starts = [hdr["addr"] + start for start, _ in pairs]
         if starts != sorted(starts):
             raise EvidenceError("unsorted .eh_frame_hdr table")
+        for first, second in zip(starts, starts[1:]):
+            if first == second:
+                raise EvidenceError(f"duplicate FDE start {second:#x}")
         return starts, [hdr["addr"] + fde for _, fde in pairs]
 
     def offset(self, va):
