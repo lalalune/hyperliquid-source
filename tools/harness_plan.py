@@ -97,6 +97,8 @@ def approval_covers(request_id: str) -> bool:
 
 
 def validate_request(request: dict, fixtures_by_id: dict) -> dict:
+    if not isinstance(request, dict):
+        raise ValueError('request must be a mapping')
     missing = [key for key in REQUIRED_REQUEST_FIELDS if key not in request]
     if missing:
         raise ValueError(f'request missing fields: {missing}')
