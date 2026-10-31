@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-for tool in git python3 rg gpg rustup; do
+for tool in git python3 rg gpg rustup git-lfs; do
   command -v "$tool" >/dev/null || { echo "Missing prerequisite: $tool" >&2; exit 1; }
 done
 python3 -c 'import sys; assert sys.version_info >= (3,10), "Python 3.10+ required"'
