@@ -91,7 +91,7 @@ def derive(data):
 
     f.exact('elf.type', {2: 'EXEC', 3: 'DYN'}.get(struct.unpack_from('<H', data, 16)[0]), 16)
     f.exact('elf.machine', {0x3E: 'x86-64'}.get(struct.unpack_from('<H', data, 18)[0]), 18)
-    f.exact('elf.has_symtab', '.symtab' in by_name, note='section table lookup')
+    f.exact('elf.has_symtab', any(s['type'] == 2 for s in secs), note='section table lookup')
     f.exact('elf.debug_sections', sorted(n for n in by_name if n.startswith(('.debug', '.zdebug'))),
             note='section table lookup')
     f.exact('elf.has_gnu_property_note', '.note.gnu.property' in by_name,
