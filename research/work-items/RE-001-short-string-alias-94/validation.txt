@@ -1,0 +1,69 @@
+Recorded 2026-10-30 UTC. Working directory: repository root.
+Base: 1f8c67c63ca4794c9689235471c60297f8a5c985.
+Host: macOS15.7.7 arm64; Python3.12.10; GNU binutils2.47.20260726;
+Apple LLVM17.0.0; isolated GitLFS3.8.1. No new packages installed.
+PATH=/opt/homebrew/opt/binutils/bin:/private/tmp/slop-git-lfs/bin:$PATH
+LLVM_OBJDUMP=/Library/Developer/CommandLineTools/usr/bin/llvm-objdump
+
+Baseline (unchanged main):
+  make doctor verify test catalogue-check reproduce: exit0.
+  analysis_ready=true; exact_rebuild_ready=false. No Java/Ghidra/Rust installed.
+  431 tests pass in94.407s. Authenticated inputs/imports/pins and generated
+  catalogue pass; original inventories and literal classifications reproduce.
+  Existing compact-string packet explicitly leaves hash-feed unclosed; it
+  makes no input/output alias claim. No product runtime defect is asserted.
+
+Final source:
+  python3 tools/short_string_alias.py --output
+    research/work-items/RE-001-short-string-alias-94/observed: exit0.
+  python3 -m unittest discover -s tests -p test_short_string_alias.py -v:
+    9 tests pass in6.868s, including7 actual ELF instruction-byte mutations.
+  python3 tools/short_string_alias.py --output work/short-string-alias-final:
+    exit0. Full64-bit counter hashes checked before modulo reduction.
+  diff -ru research/work-items/RE-001-short-string-alias-94/observed
+    work/short-string-alias-final: exit0, no differences across all6 exports.
+  make test after the last source change: exit0,440 tests pass in104.642s.
+  make doctor verify catalogue-check reproduce after the last source change:
+    exit0. Analysis ready, exact rebuild not ready;8 file identities,
+    3 public signatures,37 imported files and7 pinned submodules verified.
+    Catalogue and original inventories/classifications unchanged.
+
+Positive denominator:
+  2 exact FDEs,1045 bytes,292 instructions; GNU/LLVM byte/boundary agreement.
+  78 distinct inputs,780 full64-bit counter hashes,78 ten-letter aliases,
+  0 mismatches.61 inputs exceed16bytes;17 shorter diagnostic inputs.
+  264 split-feed sequences,1056 per-write state comparisons,0 mismatches.
+  284/292 instructions visited, including141/141 feed instructions.
+  Both outcomes at12/12 helper conditionals;1/3 producer conditionals.
+  8 unvisited output-growth instructions explicitly listed in records.json.
+
+Negative controls:
+  Actual ELF byte mutations, re-decoded by BOTH GNU and LLVM below digest gate:
+    delimiter ff->fe at0x13c6109;
+    counter feed width4->3 at0x13c6124;
+    initial-state low byte75->74 at0x13c60a2;
+    partial-word rotate13->12 at0x13daaec;
+    full-word rotate13->12 at0x13dab5d;
+    finalization xor ff->fe at0x13c618e;
+    output offset41->42 at0x13c6252.
+  All7 disagree with unchanged word equations (not only whole-file hashing).
+  Capacity0 reaches actual grow call0x13c6284->0x13edc40 and fails as an
+  unclosed callee. No allocator/body stub is used. Architectural width,
+  carry/overflow, flags, memory-boundary and duplicate-address controls pass.
+  Delimiter omission and counter endian reversal give different hashes.
+
+Setup limitations preserved:
+  Initial branch switch succeeded but its LFS post-checkout hook could not
+  find git-lfs because PATH was not yet exported. Re-ran the installed
+  LFS post-checkout with the correct PATH; no hook removed or bypassed.
+  Initial sandboxed verify stopped at public-key import in a fresh temporary
+  GPG home. The authorized offline checks then passed with the same isolated
+  public-key-only command outside that sandbox. No personal keyring was read.
+  A first full440-test check passed before strengthening the comparison to
+  record/check complete64-bit hashes; all440 tests were repeated afterward.
+
+No captured executable launch/executable mapping, target process, signing,
+chain action, live service, paid resource or data set. Finite static transfers
+only. No Rust implementation, native differential execution, hosted CI,
+whole-target equivalence, #115/visor claim or gate change. Cache/allocation,
+locks, acceptance/consumer, serialization and unwind contracts remain open.

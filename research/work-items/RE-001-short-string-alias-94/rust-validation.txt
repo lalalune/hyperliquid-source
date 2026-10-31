@@ -1,0 +1,112 @@
+Rust contract addition to the same PR219; no new contribution/PR split.
+Before head: 3b349f0480a631ed61af302138685921e8959ab0.
+Upstream base: 1f8c67c63ca4794c9689235471c60297f8a5c985.
+Before: complete static Python packet; components/node94-alias did not exist.
+After: independently authored standalone Rust library + Cargo.lock, no dependencies/build script.
+This is a bounded implementation result, not an ordinary application-bug claim.
+
+Host: macOS15.7.7 arm64; rustc1.88.0 / cargo1.88.0 / Python3.12.10.
+GNU binutils2.47.20260726 and Apple LLVM17.0.0.
+PATH=/opt/homebrew/opt/binutils/bin:/private/tmp/slop-git-lfs/bin:$PATH
+LLVM_OBJDUMP=/Library/Developer/CommandLineTools/usr/bin/llvm-objdump
+
+Final comparison:
+python3 tools/short_string_alias_rust.py --controls --output work/short-string-alias-rust-final
+Exit0. Fresh authenticated instruction transfers byte-match the committed vectors.
+Each debug/release profile: 2 test suites pass, 78 aliases,780 full counter hashes,
+264 split-feed sequences/1056 per-write states match. No skips. Doc-tests:0.
+Two fresh release-library builds are raw equal; comparison.json records hashes.
+Eight source mutations compile and fail actual comparisons (exit101), not merely a digest gate.
+The original evaluator, seven actual ELF byte-control tests and original observed exports are unchanged.
+
+Initial cargo fmt --check reported one multiline assert formatting difference.
+cargo fmt corrected it; final formatcheck, clippy -Dwarnings and all comparisons pass.
+The first shell continued after that initial format failure; it is not represented as a green check.
+
+Required repository checks and actual exit codes/times:
+[
+  {
+    "check": "doctor",
+    "command": [
+      "make",
+      "doctor"
+    ],
+    "exitCode": 0,
+    "seconds": 0.15201449999585748
+  },
+  {
+    "check": "verify",
+    "command": [
+      "make",
+      "verify"
+    ],
+    "exitCode": 0,
+    "seconds": 1.0346166249364614
+  },
+  {
+    "check": "test",
+    "command": [
+      "make",
+      "test"
+    ],
+    "exitCode": 0,
+    "seconds": 107.14612566702999
+  },
+  {
+    "check": "catalogue",
+    "command": [
+      "make",
+      "catalogue-check"
+    ],
+    "exitCode": 0,
+    "seconds": 0.26807583402842283
+  },
+  {
+    "check": "reproduce",
+    "command": [
+      "make",
+      "reproduce"
+    ],
+    "exitCode": 0,
+    "seconds": 25.716599916806445
+  },
+  {
+    "check": "rust-format",
+    "command": [
+      "cargo",
+      "fmt",
+      "--manifest-path",
+      "components/node94-alias/Cargo.toml",
+      "--",
+      "--check"
+    ],
+    "exitCode": 0
+  },
+  {
+    "check": "rust-clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--locked",
+      "--offline",
+      "--all-targets",
+      "--manifest-path",
+      "components/node94-alias/Cargo.toml",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exitCode": 0
+  }
+]
+make test:440tests pass. The existing fail-closed execution-request test prints rejected;
+that is the expected refusal, not target execution or a failed test.
+make reproduce:all retained legacy exports reproduce. No signature check bypassed;
+make verify uses a temporary keyring with the repository public key only.
+
+Only log pathnames are replaced with <repo>/<crate>/<control>/<output> placeholders.
+Original raw disassemblies and records are not rewritten.
+No captured target process/JIT/executable mapping, chain/network action, target x86-64
+build, runtime equivalence, full-constructor/cache/allocator/locking/ABI claim,
+normalization mask, speed claim, progress gate, hosted CI or acceptance claim.
+Authoring: OpenAI / gpt-6.1-sol / codex-desktop26.1027.30824. Spend$0.

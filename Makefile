@@ -1,5 +1,5 @@
 PYTHON ?= python3
-.PHONY: setup pull fetch verify test reproduce doctor index fde-index catalogue catalogue-check provenance rea-install rea-doctor rea-mcp rea-smoke rea-mcp-check rea-native-smoke
+.PHONY: setup pull fetch verify test reproduce doctor index fde-index catalogue catalogue-check provenance rea-install rea-doctor rea-mcp rea-smoke rea-mcp-check rea-native-smoke alias-rust
 setup:
 	./scripts/setup.sh
 pull:
@@ -13,6 +13,8 @@ verify:
 	$(PYTHON) tools/verify_imports.py
 test:
 	$(PYTHON) -m unittest discover -s tests -v
+alias-rust:
+	$(PYTHON) tools/short_string_alias_rust.py --controls
 provenance:
 	$(PYTHON) tools/build_provenance.py
 reproduce:

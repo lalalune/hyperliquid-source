@@ -1,0 +1,232 @@
+{
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "target_bytes": 91774280,
+  "rustc": "rustc 1.88.0 (6b00bc388 2025-06-23) (Homebrew)\nbinary: rustc\ncommit-hash: 6b00bc3880198600130e1cf62b8f8a93494488cc\ncommit-date: 2025-06-23\nhost: aarch64-apple-darwin\nrelease: 1.88.0\nLLVM version: 20.1.7\n",
+  "cargo": "cargo 1.88.0 (Homebrew)",
+  "host_platform": "darwin",
+  "source_sha256": {
+    "src/node94-alias/Cargo.toml": "743098b4a93ebb5df41bedcb09c01ec8069d25211649789614f581e41e95c960",
+    "src/node94-alias/Cargo.lock": "23e5baec5d97db92097d32a3ed4b272b501e360c4a13a0355f803e598ea89672",
+    "src/node94-alias/src/lib.rs": "53a51e25a05d68a90bcb62400fba32888a374cbfbf98b134582e9d17ce604f9e",
+    "src/node94-alias/src/tests.rs": "0591ec43343aaa92b4eeb05210f68a5b42aca24c524b99ca1feb2aabecb312e1",
+    "src/node94-alias/evidence/contract-vectors.txt": "c251fda827b608e7930625149643e79c2562dd67605300f48e17c1ba1a9bdf6c"
+  },
+  "comparison_script_sha256": "f153598faa086b32bb831f027b00ea286c0c6915f1c432d64e93ad6407898c4c",
+  "static_evaluator_sha256": "9f8af3f0cec24570454bf477a704042af770f70e99f5be0de63fbae7742a2530",
+  "fresh_vectors_sha256": "c251fda827b608e7930625149643e79c2562dd67605300f48e17c1ba1a9bdf6c",
+  "alias_comparisons_per_profile": 78,
+  "full_hash_comparisons_per_profile": 780,
+  "stream_sequences_per_profile": 264,
+  "per_write_state_comparisons_per_profile": 1056,
+  "profiles": [
+    "debug",
+    "release"
+  ],
+  "rust_source_corruption_controls": 8,
+  "rust_source_mutations": [
+    {
+      "name": "initial-word",
+      "before": "0x736f6d6570736575",
+      "after": "0x736f6d6570736574"
+    },
+    {
+      "name": "delimiter",
+      "before": "state.write(&[0xff]);",
+      "after": "state.write(&[0xfe]);"
+    },
+    {
+      "name": "counter-endian",
+      "before": "(counter as u32).to_le_bytes()",
+      "after": "(counter as u32).to_be_bytes()"
+    },
+    {
+      "name": "mix-rotation",
+      "before": "rotate_left(13)",
+      "after": "rotate_left(12)"
+    },
+    {
+      "name": "word-endian",
+      "before": "u64::from_le_bytes",
+      "after": "u64::from_be_bytes"
+    },
+    {
+      "name": "length-byte",
+      "before": "(self.length & 255) << 56",
+      "after": "(self.length & 127) << 56"
+    },
+    {
+      "name": "final-domain",
+      "before": "words[2] ^= 255;",
+      "after": "words[2] ^= 254;"
+    },
+    {
+      "name": "output-offset",
+      "before": "*letter = 65 +",
+      "after": "*letter = 66 +"
+    }
+  ],
+  "release_build_a_sha256": "1a11d596f617c68937730b64d3d663fc591c4202cdb2fd8a934166f0e647986e",
+  "release_build_b_sha256": "1a11d596f617c68937730b64d3d663fc591c4202cdb2fd8a934166f0e647986e",
+  "release_builds_raw_equal": true,
+  "release_build_normalization": null,
+  "commands": [
+    {
+      "check": "debug-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "src/node94-alias/Cargo.toml"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check": "release-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "src/node94-alias/Cargo.toml"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check": "release-build-a",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "src/node94-alias/Cargo.toml"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check": "release-build-b",
+      "command": [
+        "cargo",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "src/node94-alias/Cargo.toml"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check": "mutation-initial-word",
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "<mutated-copy>/Cargo.toml"
+      ],
+      "exit_code": 101
+    },
+    {
+      "check": "mutation-delimiter",
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "<mutated-copy>/Cargo.toml"
+      ],
+      "exit_code": 101
+    },
+    {
+      "check": "mutation-counter-endian",
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "<mutated-copy>/Cargo.toml"
+      ],
+      "exit_code": 101
+    },
+    {
+      "check": "mutation-mix-rotation",
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "<mutated-copy>/Cargo.toml"
+      ],
+      "exit_code": 101
+    },
+    {
+      "check": "mutation-word-endian",
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "<mutated-copy>/Cargo.toml"
+      ],
+      "exit_code": 101
+    },
+    {
+      "check": "mutation-length-byte",
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "<mutated-copy>/Cargo.toml"
+      ],
+      "exit_code": 101
+    },
+    {
+      "check": "mutation-final-domain",
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "<mutated-copy>/Cargo.toml"
+      ],
+      "exit_code": 101
+    },
+    {
+      "check": "mutation-output-offset",
+      "command": [
+        "cargo",
+        "test",
+        "--release",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "<mutated-copy>/Cargo.toml"
+      ],
+      "exit_code": 101
+    }
+  ],
+  "captured_executable_launched": false,
+  "external_dependencies": 0,
+  "scope": "Host Rust contract vs finite static transfers, not captured runtime/ABI/whole-ELF equivalence. No allocator/cache/constructor implementation, target-native build, component gate or speed claim."
+}
