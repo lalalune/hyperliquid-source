@@ -63,6 +63,8 @@ def validate_protocol(protocol: dict) -> None:
         raise ValueError('isolation.network must default to deny')
     if not protocol['positive_controls'] or not protocol['negative_controls']:
         raise ValueError('protocol must name positive and negative controls')
+    if not isinstance(protocol['request_fields'], list):
+        raise ValueError('protocol request_fields must be a list')
     for field in REQUIRED_REQUEST_FIELDS:
         if field not in protocol['request_fields']:
             raise ValueError(f'protocol request_fields missing {field}')
