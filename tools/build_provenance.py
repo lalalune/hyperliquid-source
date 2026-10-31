@@ -102,7 +102,11 @@ def derive(data):
         pos = comment['offset']
         for chunk in section_bytes(data, comment).split(b'\0'):
             if chunk:
-                f.exact('comment', chunk.decode(), data.index(chunk, pos))
+                try:
+                    text = chunk.decode()
+                except UnicodeDecodeError:
+                    raise ValueError('Invalid comment encoding')
+                f.exact('comment', text, data.index(chunk, pos))
             pos += len(chunk) + 1
 
     interp = by_name.get('.interp')
