@@ -132,7 +132,11 @@ def sections(data):
     out = {}
     for h in raw:
         end = data.index(b'\0', stro + h[0])
-        out[data[stro + h[0]:end].decode()] = {'addr': h[3], 'offset': h[4], 'size': h[5]}
+        try:
+            name = data[stro + h[0]:end].decode()
+        except UnicodeDecodeError:
+            raise EvidenceError('section name is not valid UTF-8')
+        out[name] = {'addr': h[3], 'offset': h[4], 'size': h[5]}
     for name in ('.text', '.eh_frame', '.eh_frame_hdr', '.rela.dyn', '.data.rel.ro', '.rodata'):
         if name not in out:
             raise EvidenceError(f'missing section {name}')
