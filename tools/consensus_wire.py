@@ -507,7 +507,7 @@ def main(argv=None):
     a = ap.parse_args(argv)
     try:
         r = build(a.binary.read_bytes())
-    except EvidenceError as e:
+    except (EvidenceError, OSError) as e:
         print(f"consensus_wire: {e}", file=sys.stderr)
         return 2
     text = render(r)

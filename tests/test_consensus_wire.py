@@ -1,5 +1,7 @@
 import bisect
+import contextlib
 import hashlib
+import io
 import importlib.util
 import json
 import os
@@ -260,6 +262,17 @@ class ConsensusWireTests(unittest.TestCase):
         self.assertIn("48 f7 e2", out)        # mul %rdx
         self.assertIn("48 01 c9", out)        # add %rcx,%rcx
         self.assertIn("0f 92 c0", out)        # setb %al
+
+
+class MainErrorHandlingTests(unittest.TestCase):
+    def test_missing_binary_is_one_line_error(self):
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            rc = cw.main(["--binary", "/nonexistent.bin"])
+        self.assertEqual(rc, 2)
+        self.assertTrue(err.getvalue().startswith("consensus_wire: "))
+        self.assertEqual(len(err.getvalue().strip().splitlines()), 1)
+        self.assertNotIn("Traceback", err.getvalue())
 
 
 if __name__ == "__main__":
