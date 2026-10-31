@@ -1,11 +1,15 @@
+import hashlib
+import json
 import struct
+import tempfile
 from pathlib import Path
 import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from constants_scan import (ScanError, entries_size, pool_entry, relocations,
-                            section, string_table, window, xrefs)
+import constants_scan as cs
+from constants_scan import (ScanError, artifact, entries_size, pool_entry,
+                            relocations, section, string_table, window, xrefs)
 
 
 def fixture():
@@ -45,6 +49,48 @@ def fixture():
     data[0x4C0:0x4C4] = bytes([1, 0x1B, 3, 0x3B])
     struct.pack_into('<Iii', data, 0x4C8, 1, -0x3000, 0x1000)
     return data
+
+
+class ArtifactTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmp.name)
+        art = self.root / 'artifacts/node/94/hl-node'
+        art.parent.mkdir(parents=True)
+        self.data = b'fake-node-bytes'
+        art.write_bytes(self.data)
+        (self.root / 'provenance').mkdir()
+        self.old_root = cs.ROOT
+        cs.ROOT = self.root
+
+    def tearDown(self):
+        cs.ROOT = self.old_root
+        self.tmp.cleanup()
+
+    def _write_record(self, text):
+        (self.root / 'provenance/artifacts.json').write_text(text)
+
+    def test_missing_files_key_is_rejected(self):
+        self._write_record('{}')
+        with self.assertRaises(ScanError):
+            artifact('94')
+
+    def test_non_dict_record_is_rejected(self):
+        self._write_record('[]')
+        with self.assertRaises(ScanError):
+            artifact('94')
+
+    def test_non_list_files_is_rejected(self):
+        self._write_record('{"files": {}}')
+        with self.assertRaises(ScanError):
+            artifact('94')
+
+    def test_valid_record_still_verifies(self):
+        digest = hashlib.sha256(self.data).hexdigest()
+        self._write_record(json.dumps({'files': [{'path': 'artifacts/node/94/hl-node',
+                                                  'sha256': digest}]}))
+        data, expected = artifact('94')
+        self.assertEqual((data, expected), (self.data, digest))
 
 
 class PoolTests(unittest.TestCase):
