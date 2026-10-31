@@ -1,0 +1,12 @@
+verdict	reference	reference_says	bytes_say
+differs	synthetic_addr layout	tail in bytes 8..16	the big-endian tail ends at byte 19: literal bytes 12..20 (movabs at 0x37e5221 stores from block +0xc, which is byte 12)
+differs	range tops for 0x30 and 0x31	address <= ceiling	strictly below 0x4e20 and 0x2710 (js at 0x37e5249, 0x37e52c3); only the 0x32 top is included (setle at 0x37e5335)
+differs	range top for 0x32	999999	tail 0x270f = 9999 at 0x37e5311
+differs	fee_exempt_sender	one exempt sender gives fee 0 inside the exemption list	a separate outcome: gas 0 with second result 1 (0x271050d); the caller keeps that second result; byte +0xbc of token row 0 must be 1
+differs	order of the sender test	exempt sender tested with the destination lists	all the same order, except a flagged sender skips every destination list and the token row, as the reference says; a destination in the 0x20 block is not in the reference gas test at all
+differs	block 0x20	one address, rejected when a policy flag is set	in this function a whole block 0x20..00 to 0x20..270f gives gas 0 and no reject
+differs	empty token list	no such case	panic at spot_meta.rs:113:33 after every destination test passed (0x2710516)
+differs	number of functions	one	three bodies; 0x4d00b00 reads the lists at +0x1040 and the row table at +0x11c0
+same	FIRST_DEX_FEE_USD6	1000000	immediate at 0x27101e8
+same	force_fee_sender_profiles	sender profile byte +61	byte +0x3d of the row from the helper, tested at 0x27101d5
+same	destination tests	tables at exchange+1472 and +792 and the all-0x22 address	dex list +0x5c0 (table +0xf8 of each row), table +0x318, block 0x59c10c
