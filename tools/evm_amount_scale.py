@@ -163,6 +163,8 @@ class Image:
 
     def relative_relocs(self):
         _, off, size = self.sec['.rela.dyn']
+        if off + size > len(self.data) or size % 24:
+            raise EvidenceError('.rela.dyn truncated')
         return {where: addend for where, info, addend in
                 struct.iter_unpack('<QQq', self.data[off:off + size]) if info & 0xffffffff == 8}
 
