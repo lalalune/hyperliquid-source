@@ -1,0 +1,41 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "function": {
+    "start_va": "0x55c6c40",
+    "end_va_exclusive": "0x55c6c77",
+    "bytes": 55,
+    "sha256": "870d7451ce9ea720f99ed16dcdb9b410544afaf279db5803df18e0a14d683168",
+    "fde_section_offset": "0x2d3b04",
+    "stride_padding_bytes": 9,
+    "next_fde_start_va": "0x55c6c80",
+    "inferred_label": "stack-arg shift sum"
+  },
+  "rule": {
+    "unsigned_form": "flag at [rsp+8] != 1 -> 0, else (1 << ((arg1 - min(arg1, arg2)) mod 64)) + (8 << (arg1 mod 64)) mod 2^64, arg1 at [rsp+0xc], arg2 at [rsp+0x10], unsigned 32-bit min",
+    "edges": {
+      "flag-zero": "0x0",
+      "flag-two": "0x0",
+      "both-zero": "0x9",
+      "arg1-above": "0x104",
+      "arg1-below": "0x41",
+      "arg1-64": "0x9",
+      "arg1-65": "0x11",
+      "arg1-70": "0x240",
+      "arg1-max": "0x8000000000000000"
+    }
+  },
+  "incoming_pattern_scan": {
+    "section": ".text",
+    "byte_count": 70370352,
+    "e8_candidate_count": 1,
+    "caller_fdes": [
+      "0x555b930..0x555bbf8"
+    ],
+    "complete_xref_census": false
+  },
+  "naming_relocation": null,
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
