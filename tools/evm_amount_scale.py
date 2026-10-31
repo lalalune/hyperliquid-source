@@ -1168,18 +1168,22 @@ def analyse(binary, data):
 
 def write_outputs(out, result, table, bounds, data):
     out.mkdir(parents=True, exist_ok=True)
-    (out / 'evidence.json').write_text(json.dumps(result, indent=1, sort_keys=True) + '\n')
+    (out / 'evidence.json').write_text(json.dumps(result, indent=1, sort_keys=True) + '\n',
+                                       encoding='utf-8', newline='\n')
     lines = ['exponent_i8\tabs\tpower_or_none']
     lines += [f'{e}\t{k}\t{p if p is not None else "none"}' for e, k, p in table]
-    (out / 'exponent-table.tsv').write_text('\n'.join(lines) + '\n')
+    (out / 'exponent-table.tsv').write_text('\n'.join(lines) + '\n',
+                                             encoding='utf-8', newline='\n')
     lines = ['exponent_i8\tpower\tlargest_admitted_amount\tresult_there\tfirst_rejected_amount']
     lines += ['\t'.join(str(v) for v in row) for row in bounds]
-    (out / 'boundaries.tsv').write_text('\n'.join(lines) + '\n')
+    (out / 'boundaries.tsv').write_text('\n'.join(lines) + '\n',
+                                         encoding='utf-8', newline='\n')
     img = Image(data)
     rows = [f'# {SCALE:#x}..{SCALE_END:#x} raw bytes, VA then hex']
     for va in range(SCALE, SCALE_END, 16):
         rows.append(f'{va:#x} {img.read(va, min(16, SCALE_END - va)).hex()}')
-    (out / 'function-bytes.txt').write_text('\n'.join(rows) + '\n')
+    (out / 'function-bytes.txt').write_text('\n'.join(rows) + '\n',
+                                             encoding='utf-8', newline='\n')
 
 
 def main(argv=None):
