@@ -51,11 +51,18 @@ class Elf:
             if p_type == 1:
                 self.loads.append((p_va, p_off, p_filesz))
         raw = [struct.unpack_from("<IIQQQQIIQQ", data, shoff + i * shentsize) for i in range(shnum)]
-        stro = raw[shstrndx][4]
+        stro, strsize = raw[shstrndx][4], raw[shstrndx][5]
+        if stro > len(data) or strsize > len(data) - stro:
+            raise EvidenceError("section name table extends past end of file")
+        table = data[stro:stro + strsize]
         self.sections = {}
         for s in raw:
-            end = data.index(b"\0", stro + s[0])
-            self.sections[data[stro + s[0]:end].decode()] = (s[3], s[4], s[5])
+            if s[0] >= len(table):
+                raise EvidenceError("section name offset outside .shstrtab")
+            end = table.find(b"\0", s[0])
+            if end < 0:
+                raise EvidenceError("unterminated section name")
+            self.sections[table[s[0]:end].decode()] = (s[3], s[4], s[5])
 
     def off(self, va: int) -> int:
         for v, o, n in self.loads:
