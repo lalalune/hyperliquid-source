@@ -1,0 +1,690 @@
+{
+  "buffers": [
+    {
+      "gate_jump": "0x47f1914",
+      "name": "node_fills",
+      "name_lea": "0x47f16f4",
+      "object_offset": "0x4e8",
+      "stack_slot": "0xef0"
+    },
+    {
+      "gate_jump": "0x47f1fa4",
+      "name": "node_raw_book_diffs",
+      "name_lea": "0x47f1933",
+      "object_offset": "0x5b0",
+      "stack_slot": "0x1080"
+    },
+    {
+      "gate_jump": "falls in after the node_fills block, closed with it at 0x47f191a",
+      "name": "node_twap_statuses",
+      "name_lea": "0x47f1b52",
+      "object_offset": "0x678",
+      "stack_slot": "0xfb8"
+    },
+    {
+      "gate_jump": "0x47f1db8",
+      "name": "node_order_statuses",
+      "name_lea": "0x47f1fbd",
+      "object_offset": "0x740",
+      "stack_slot": "0x1148"
+    },
+    {
+      "gate_jump": "0x47f21c4",
+      "name": "misc_events",
+      "name_lea": "0x47f1dd1",
+      "object_offset": "0x808",
+      "stack_slot": "0x1210"
+    },
+    {
+      "gate_jump": "0x47f23eb",
+      "name": "hip3_oracle_updates",
+      "name_lea": "0x47f21dd",
+      "object_offset": "0x8d0",
+      "stack_slot": "0x12d8"
+    },
+    {
+      "gate_jump": "0x47f260f",
+      "name": "system_and_core_writer_actions",
+      "name_lea": "0x47f2404",
+      "object_offset": "0x998",
+      "stack_slot": "0x220"
+    }
+  ],
+  "cases": {
+    "total": 449
+  },
+  "config": [
+    {
+      "bytes": "440fb66602",
+      "meaning": "config byte +2 goes to r12b",
+      "va": "0x47f15be"
+    },
+    {
+      "bytes": "4584e4",
+      "meaning": "r12b gates the node_fills block",
+      "va": "0x47f1911"
+    },
+    {
+      "bytes": "440fb67603",
+      "meaning": "config byte +3 goes to r14b, the node_raw_book_diffs gate",
+      "va": "0x47f15c3"
+    },
+    {
+      "bytes": "440fb65e04",
+      "meaning": "config byte +4 goes to r11b",
+      "va": "0x47f15c8"
+    },
+    {
+      "bytes": "44885c240f",
+      "meaning": "r11b goes to stack +0xf",
+      "va": "0x47f1620"
+    },
+    {
+      "bytes": "807c240f00",
+      "meaning": "stack +0xf gates the node_order_statuses block",
+      "va": "0x47f1db3"
+    },
+    {
+      "bytes": "807e0800",
+      "meaning": "config byte +8 set",
+      "va": "0x47f15e8"
+    },
+    {
+      "bytes": "488b35",
+      "meaning": "loads the slot of the global flush byte",
+      "va": "0x47f15ee"
+    },
+    {
+      "bytes": "c60601",
+      "meaning": "and stores 1 there",
+      "va": "0x47f15f5"
+    }
+  ],
+  "drains": [
+    {
+      "meaning": "order status drain passes object +0x740",
+      "va": "0x4858075"
+    },
+    {
+      "meaning": "and calls the batch rotation",
+      "target": "0x47052b0",
+      "va": "0x48580d8"
+    },
+    {
+      "meaning": "TWAP drain passes object +0x678",
+      "va": "0x4857e57"
+    },
+    {
+      "meaning": "and calls the batch rotation",
+      "target": "0x47046b0",
+      "va": "0x4857eba"
+    }
+  ],
+  "first_mismatch": "",
+  "functions": [
+    {
+      "end": "0x47f1588",
+      "instructions": 241,
+      "instructions_stepped": 199,
+      "role": "row kind 3 handler",
+      "size": 1160,
+      "start": "0x47f1100"
+    },
+    {
+      "end": "0x47f10f5",
+      "instructions": 215,
+      "instructions_stepped": 197,
+      "role": "row kind 4 handler",
+      "size": 997,
+      "start": "0x47f0d10"
+    },
+    {
+      "end": "0x47edc28",
+      "instructions": 153,
+      "instructions_stepped": 131,
+      "role": "status output mode switch",
+      "size": 664,
+      "start": "0x47ed990"
+    },
+    {
+      "end": "0x44c83a2",
+      "instructions": 58,
+      "instructions_stepped": 33,
+      "role": "pending rows left after the walk",
+      "size": 194,
+      "start": "0x44c82e0"
+    },
+    {
+      "end": "0x48589cb",
+      "instructions": 235,
+      "instructions_stepped": 232,
+      "role": "block end: entry and the TWAP and order status arms",
+      "size": 4907,
+      "start": "0x48576a0"
+    },
+    {
+      "end": "0x4703da1",
+      "instructions": 161,
+      "instructions_stepped": 148,
+      "role": "status file rotation",
+      "size": 753,
+      "start": "0x4703ab0"
+    },
+    {
+      "end": "0x47037a1",
+      "instructions": 161,
+      "instructions_stepped": 148,
+      "role": "status stream rotation",
+      "size": 753,
+      "start": "0x47034b0"
+    },
+    {
+      "end": "0x47055a1",
+      "instructions": 161,
+      "instructions_stepped": 148,
+      "role": "status batch rotation",
+      "size": 753,
+      "start": "0x47052b0"
+    },
+    {
+      "end": "0x47022a1",
+      "instructions": 161,
+      "instructions_stepped": 148,
+      "role": "twap file rotation",
+      "size": 753,
+      "start": "0x4701fb0"
+    },
+    {
+      "end": "0x47061a1",
+      "instructions": 161,
+      "instructions_stepped": 148,
+      "role": "twap stream rotation",
+      "size": 753,
+      "start": "0x4705eb0"
+    },
+    {
+      "end": "0x47049a1",
+      "instructions": 161,
+      "instructions_stepped": 148,
+      "role": "twap batch rotation",
+      "size": 753,
+      "start": "0x47046b0"
+    },
+    {
+      "end": "0x45b4033",
+      "instructions": 85,
+      "instructions_stepped": 63,
+      "role": "status file line",
+      "size": 323,
+      "start": "0x45b3ef0"
+    },
+    {
+      "end": "0x45b3363",
+      "instructions": 85,
+      "instructions_stepped": 63,
+      "role": "status stream line",
+      "size": 323,
+      "start": "0x45b3220"
+    },
+    {
+      "end": "0x45b3ce3",
+      "instructions": 85,
+      "instructions_stepped": 63,
+      "role": "status batch line",
+      "size": 323,
+      "start": "0x45b3ba0"
+    },
+    {
+      "end": "0x45b9bf3",
+      "instructions": 85,
+      "instructions_stepped": 63,
+      "role": "twap file line",
+      "size": 323,
+      "start": "0x45b9ab0"
+    },
+    {
+      "end": "0x45b2d63",
+      "instructions": 85,
+      "instructions_stepped": 63,
+      "role": "twap stream line",
+      "size": 323,
+      "start": "0x45b2c20"
+    },
+    {
+      "end": "0x45bc803",
+      "instructions": 85,
+      "instructions_stepped": 63,
+      "role": "twap batch line",
+      "size": 323,
+      "start": "0x45bc6c0"
+    },
+    {
+      "end": "0x47ef62c",
+      "instructions": 85,
+      "instructions_stepped": 80,
+      "role": "status row serializer",
+      "size": 348,
+      "start": "0x47ef4d0"
+    },
+    {
+      "end": "0x48652f7",
+      "instructions": 14,
+      "instructions_stepped": 6,
+      "role": "status key wrapper",
+      "size": 55,
+      "start": "0x48652c0"
+    },
+    {
+      "end": "0x48653b7",
+      "instructions": 14,
+      "instructions_stepped": 6,
+      "role": "order key wrapper",
+      "size": 55,
+      "start": "0x4865380"
+    },
+    {
+      "end": "0x4a9f7a0",
+      "instructions": 101,
+      "instructions_stepped": 97,
+      "role": "order field",
+      "size": 384,
+      "start": "0x4a9f620"
+    },
+    {
+      "end": "0x4a98d8a",
+      "instructions": 135,
+      "instructions_stepped": 131,
+      "role": "hash field",
+      "size": 522,
+      "start": "0x4a98b80"
+    },
+    {
+      "end": "0x4a937ae",
+      "instructions": 126,
+      "instructions_stepped": 122,
+      "role": "builder field",
+      "size": 478,
+      "start": "0x4a935d0"
+    },
+    {
+      "end": "0x43271b9",
+      "instructions": 74,
+      "instructions_stepped": 69,
+      "role": "builder object",
+      "size": 281,
+      "start": "0x43270a0"
+    },
+    {
+      "end": "0x47efecb",
+      "instructions": 72,
+      "instructions_stepped": 57,
+      "role": "status streaming serializer",
+      "size": 299,
+      "start": "0x47efda0"
+    },
+    {
+      "end": "0x47efd92",
+      "instructions": 72,
+      "instructions_stepped": 57,
+      "role": "status batch serializer",
+      "size": 290,
+      "start": "0x47efc70"
+    },
+    {
+      "end": "0x4a78a2c",
+      "instructions": 136,
+      "instructions_stepped": 132,
+      "role": "status events field, one row",
+      "size": 524,
+      "start": "0x4a78820"
+    },
+    {
+      "end": "0x4aa1fae",
+      "instructions": 167,
+      "instructions_stepped": 162,
+      "role": "status events field, all rows",
+      "size": 654,
+      "start": "0x4aa1d20"
+    },
+    {
+      "end": "0x47f025b",
+      "instructions": 72,
+      "instructions_stepped": 57,
+      "role": "TWAP streaming serializer",
+      "size": 299,
+      "start": "0x47f0130"
+    },
+    {
+      "end": "0x47f0712",
+      "instructions": 72,
+      "instructions_stepped": 57,
+      "role": "TWAP batch serializer",
+      "size": 290,
+      "start": "0x47f05f0"
+    },
+    {
+      "end": "0x4a8d1fc",
+      "instructions": 136,
+      "instructions_stepped": 132,
+      "role": "TWAP events field, one row",
+      "size": 524,
+      "start": "0x4a8cff0"
+    },
+    {
+      "end": "0x4a96b2e",
+      "instructions": 169,
+      "instructions_stepped": 164,
+      "role": "TWAP events field, all rows",
+      "size": 670,
+      "start": "0x4a96890"
+    },
+    {
+      "end": "0x4a9a5d8",
+      "instructions": 241,
+      "instructions_stepped": 237,
+      "role": "status text field: table 0x7038dc is a row in earlier packets, run with no mutants",
+      "size": 1080,
+      "start": "0x4a9a1a0"
+    },
+    {
+      "end": "0x4a833a2",
+      "instructions": 109,
+      "instructions_stepped": 105,
+      "role": "address field: a row in #1036, run with no mutants",
+      "size": 418,
+      "start": "0x4a83200"
+    }
+  ],
+  "instructions_stepped": 426727,
+  "json_keys": [
+    {
+      "function": "0x47ef4d0",
+      "key": "time",
+      "lea": "0x47ef50a",
+      "row_offset": "0xd0"
+    },
+    {
+      "function": "0x47ef4d0",
+      "key": "user",
+      "lea": "0x47ef538",
+      "row_offset": "0xdc"
+    },
+    {
+      "function": "0x47ef4d0",
+      "key": "hash",
+      "lea": "0x47ef566",
+      "row_offset": "0xf0"
+    },
+    {
+      "function": "0x47ef4d0",
+      "key": "builder",
+      "lea": "0x47ef585",
+      "row_offset": "0x0"
+    },
+    {
+      "function": "0x48652c0",
+      "key": "status",
+      "lea": "0x48652c8",
+      "row_offset": "0x111"
+    },
+    {
+      "function": "0x4865380",
+      "key": "order",
+      "lea": "0x4865388",
+      "row_offset": "0x28"
+    },
+    {
+      "function": "0x43270a0",
+      "key": "b",
+      "lea": "0x43270db",
+      "row_offset": "0x10"
+    },
+    {
+      "function": "0x43270a0",
+      "key": "f",
+      "lea": "0x43270fd",
+      "row_offset": "0x8"
+    },
+    {
+      "function": "0x47efda0",
+      "key": "local_time",
+      "lea": "0x47efddb",
+      "row_offset": "0x120"
+    },
+    {
+      "function": "0x47efda0",
+      "key": "block_time",
+      "lea": "0x47efe08",
+      "row_offset": "0x12c"
+    },
+    {
+      "function": "0x47efda0",
+      "key": "block_number",
+      "lea": "0x47efe31",
+      "row_offset": "0x118"
+    },
+    {
+      "function": "0x47efda0",
+      "key": "events",
+      "lea": "0x47efe53",
+      "row_offset": "0x0"
+    },
+    {
+      "function": "0x47efc70",
+      "key": "local_time",
+      "lea": "0x47efca8",
+      "row_offset": "0x20"
+    },
+    {
+      "function": "0x47efc70",
+      "key": "block_time",
+      "lea": "0x47efcd2",
+      "row_offset": "0x2c"
+    },
+    {
+      "function": "0x47efc70",
+      "key": "block_number",
+      "lea": "0x47efcf8",
+      "row_offset": "0x18"
+    },
+    {
+      "function": "0x47efc70",
+      "key": "events",
+      "lea": "0x47efd1a",
+      "row_offset": "0x0"
+    },
+    {
+      "function": "0x47f0130",
+      "key": "local_time",
+      "lea": "0x47f016b",
+      "row_offset": "0x90"
+    },
+    {
+      "function": "0x47f0130",
+      "key": "block_time",
+      "lea": "0x47f0198",
+      "row_offset": "0x9c"
+    },
+    {
+      "function": "0x47f0130",
+      "key": "block_number",
+      "lea": "0x47f01c1",
+      "row_offset": "0x88"
+    },
+    {
+      "function": "0x47f0130",
+      "key": "events",
+      "lea": "0x47f01e3",
+      "row_offset": "0x0"
+    }
+  ],
+  "line_shapes": [
+    {
+      "first": "0x45b3ef0",
+      "other": "0x45b3220",
+      "same_instruction_shape": true,
+      "size": 323
+    },
+    {
+      "first": "0x45b3ef0",
+      "other": "0x45b3ba0",
+      "same_instruction_shape": true,
+      "size": 323
+    },
+    {
+      "first": "0x45b3ef0",
+      "other": "0x45b9ab0",
+      "same_instruction_shape": true,
+      "size": 323
+    },
+    {
+      "first": "0x45b3ef0",
+      "other": "0x45b2c20",
+      "same_instruction_shape": true,
+      "size": 323
+    },
+    {
+      "first": "0x45b3ef0",
+      "other": "0x45bc6c0",
+      "same_instruction_shape": true,
+      "size": 323
+    }
+  ],
+  "mismatches": 0,
+  "mutations": {
+    "killed": 1239,
+    "survived": 43,
+    "unreached": 127
+  },
+  "outcomes": {
+    "block: status, 0 steps": 5,
+    "block: status, 1 steps": 2,
+    "block: status, 2 steps": 1,
+    "block: status, 3 steps": 1,
+    "block: status, 4 steps": 7,
+    "block: status, 5 steps": 1,
+    "block: status, panic overflow": 3,
+    "block: twap, 0 steps": 5,
+    "block: twap, 1 steps": 2,
+    "block: twap, 2 steps": 2,
+    "block: twap, 3 steps": 2,
+    "block: twap, 4 steps": 7,
+    "block: twap, 5 steps": 2,
+    "block: twap, panic overflow": 3,
+    "buffer: file": 3,
+    "buffer: no block": 2,
+    "buffer: panic overflow": 3,
+    "buffer: stream": 8,
+    "buffer: vector": 5,
+    "file: closed": 12,
+    "file: line": 96,
+    "file: panic hour": 12,
+    "file: panic unwrap": 6,
+    "handler: direct, closed": 6,
+    "handler: direct, open": 10,
+    "handler: flush, closed": 4,
+    "handler: flush, open": 14,
+    "handler: pending, closed": 2,
+    "handler: pending, open": 6,
+    "line: status batch": 17,
+    "line: status file": 93,
+    "line: status stream": 17,
+    "line: twap batch": 16,
+    "line: twap file": 7,
+    "line: twap stream": 7,
+    "sink: kind 3": 2,
+    "sink: kind 4": 2,
+    "twap: closed": 13,
+    "twap: file": 13,
+    "twap: no block": 2,
+    "twap: panic overflow": 3,
+    "twap: stream": 19,
+    "twap: vector": 6
+  },
+  "rotation_shapes": [
+    {
+      "first": "0x4703ab0",
+      "other": "0x47034b0",
+      "same_instruction_shape": true,
+      "size": 753
+    },
+    {
+      "first": "0x4703ab0",
+      "other": "0x47052b0",
+      "same_instruction_shape": true,
+      "size": 753
+    },
+    {
+      "first": "0x4703ab0",
+      "other": "0x4701fb0",
+      "same_instruction_shape": true,
+      "size": 753
+    },
+    {
+      "first": "0x4703ab0",
+      "other": "0x4705eb0",
+      "same_instruction_shape": true,
+      "size": 753
+    },
+    {
+      "first": "0x4703ab0",
+      "other": "0x47046b0",
+      "same_instruction_shape": true,
+      "size": 753
+    }
+  ],
+  "row_site_census": {
+    "hosts": 25,
+    "inner_2": 22,
+    "inner_4": 30,
+    "sites": 52
+  },
+  "samples": [
+    "{\"time\":\"Cb0b1b2b3b4b5b6b7b8b9babb\",\"user\":\"0x00112233445566778899aabbccddeeff01234567\",\"hash\":null,\"builder\":null,\"status\":\"filled\",\"order\":\"O9091929394959697\"}\n",
+    "{\"time\":\"Cb0b1b2b3b4b5b6b7b8b9babb\",\"user\":\"0x00112233445566778899aabbccddeeff01234567\",\"hash\":\"0x11161b20252a2f34393e43484d52575c61666b70757a7f84898e93989da2a7ac\",\"builder\":{\"b\":\"0xf0e1d2c3b4a5968778695a4b3c2d1e0f10203040\",\"f\":7},\"status\":\"canceled\",\"order\":\"O9091929394959697\"}\n",
+    "{\"local_time\":\"L505152535455565758595a5b\",\"block_time\":\"T707172737475767778797a7b\",\"block_number\":999,\"events\":[{\"time\":\"Cb0b1b2b3b4b5b6b7b8b9babb\",\"user\":\"0x00112233445566778899aabbccddeeff01234567\",\"hash\":null,\"builder\":null,\"status\":\"filled\",\"order\":\"O9091929394959697\"},{\"time\":\"Cb0b1b2b3b4b5b6b7b8b9babb\",\"user\":\"0x00112233445566778899aabbccddeeff01234567\",\"hash\":null,\"builder\":null,\"status\":\"triggered\",\"order\":\"O9091929394959697\"}]}\n"
+  ],
+  "sinks": [
+    {
+      "arm": "0x4854a3f",
+      "handler": "0x47f1100",
+      "jump_site": "0x4854a5a",
+      "row_kind": 3,
+      "sink": "0x48547d0",
+      "slot": "0x5776b00",
+      "table": "0x6fd33c"
+    },
+    {
+      "arm": "0x4854824",
+      "handler": "0x47f0d10",
+      "jump_site": "0x485483f",
+      "row_kind": 4,
+      "sink": "0x48547d0",
+      "slot": "0x5776af8",
+      "table": "0x6fd33c"
+    },
+    {
+      "arm": "0x485543c",
+      "handler": "0x47f1100",
+      "jump_site": "0x4855457",
+      "row_kind": 3,
+      "sink": "0x48551e0",
+      "slot": "0x5776b00",
+      "table": "0x6fd35c"
+    },
+    {
+      "arm": "0x4855234",
+      "handler": "0x47f0d10",
+      "jump_site": "0x485524f",
+      "row_kind": 4,
+      "sink": "0x48551e0",
+      "slot": "0x5776af8",
+      "table": "0x6fd35c"
+    }
+  ],
+  "status_names": 36,
+  "target": {
+    "file": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  }
+}
