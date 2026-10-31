@@ -16,6 +16,9 @@ if not ghidra:
     raise SystemExit('Set GHIDRA_HOME to an installation with support/analyzeHeadless')
 relative = f'artifacts/node/{args.release}/hl-node'
 item = next(i for i in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files'] if i['path'] == relative)
+missing = [field for field in ('size', 'sha256') if field not in item]
+if missing:
+    raise SystemExit(f'provenance/artifacts.json entry for {relative} is missing {", ".join(missing)}')
 check(ROOT / relative, item)
 project_dir = ROOT / 'work/ghidra'
 name = f"hl-node-{args.release}-{item['sha256'][:12]}"
