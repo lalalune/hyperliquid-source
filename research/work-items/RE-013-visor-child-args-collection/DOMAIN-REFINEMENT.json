@@ -1,0 +1,10 @@
+{
+  "status": "PRE_FREEZE_EXTERNAL_PROOF_PREMISE_CORRECTION",
+  "initial_premise": "Callbacks explicitly preserve callee-saved registers; allocator paragraph stated only finite normal fresh/non-null storage and copy paragraph byte/frame/input preservation.",
+  "counterexample": "A hypothetical fresh-returning allocator that clobbers live R15 length or R14 source would satisfy that narrow wording while breaking the caller dataflow. This is a proof-domain counterexample, not an observed behavior of the captured allocator.",
+  "correction": "All used callbacks/allocator/memcpy preserve SysV RBX/RBP/R12-R15 and callerRSP, live caller-local words, immutable input/image and prior outputs except declared fresh-destination writes; explicit across PROOF/record/README.",
+  "peer_review_before_freeze": true,
+  "captured_code_executed": false,
+  "target_defect": false,
+  "published1029_changed": false
+}
