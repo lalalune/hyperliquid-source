@@ -88,6 +88,8 @@ def load_segments(data):
     """Return loadable segments as (file_offset, va, size, flags)."""
     if data[:6] != b'\x7fELF\x02\x01':
         raise ValueError('Expected ELF64 little-endian input')
+    if len(data) < 56:
+        raise ValueError('Invalid or unsupported program header table')
     phoff = struct.unpack_from('<Q', data, 32)[0]
     phentsize, phnum = struct.unpack_from('<HH', data, 54)
     if phentsize < 56 or not phnum or phoff + phentsize * phnum > len(data):
