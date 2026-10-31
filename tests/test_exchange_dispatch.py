@@ -11,6 +11,8 @@ import subprocess
 import sys
 import tempfile
 import unittest
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from gnu_binutils import requires_gnu  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
@@ -215,6 +217,7 @@ class Boundaries(unittest.TestCase):
             ed.decode_one(b'\xf4' + b'\0' * 15, 0, 0x1000)  # hlt not in subset
 
 
+@requires_gnu('objdump', 'readelf')
 class Binutils(unittest.TestCase):
     def test_arms_are_instruction_starts(self):
         od = objdump_lines()

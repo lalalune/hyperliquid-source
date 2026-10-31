@@ -3,12 +3,13 @@ import importlib.util
 import json
 import os
 import re
-import shutil
 import struct
 import subprocess
 import sys
 import unittest
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from gnu_binutils import requires_gnu  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location("state_hashers", ROOT / "tools/state_hashers.py")
@@ -144,7 +145,7 @@ class StateHashersTests(unittest.TestCase):
         self.assertNotEqual((sr.containing(starts, ends, 0x14FA004) or (0,))[0], BLAKE3_FN)
 
     # --- external cross-checks ------------------------------------------
-    @unittest.skipIf(shutil.which("readelf") is None, "readelf missing")
+    @requires_gnu("readelf")
     def test_readelf_slots_and_fdes(self):
         rel = subprocess.run(["readelf", "-rW", str(BIN)], capture_output=True, text=True, check=True).stdout
         for slot, tgt in ((BLAKE3_SLOT, BLAKE3_FN), (0x57739F8, 0x394B410)):
@@ -153,7 +154,7 @@ class StateHashersTests(unittest.TestCase):
         for f, e in ((BLAKE3_FN, 0x14FA004), (0x394B410, 0x394B657)):
             self.assertIn(f"pc={f:016x}..{e:016x}", fr)
 
-    @unittest.skipIf(shutil.which("objdump") is None, "objdump missing")
+    @requires_gnu("objdump")
     def test_objdump_call_sites_from_function_start(self):
         starts, ends = sr.fde_index(self.elf)
         sites = [(0x3269AE0, s, BLAKE3_SLOT) for s in (0x3269D96, 0x3269FB1, 0x326A1BD)]

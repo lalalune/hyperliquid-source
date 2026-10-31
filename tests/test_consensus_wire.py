@@ -4,13 +4,14 @@ import importlib.util
 import json
 import os
 import re
-import shutil
 import struct
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from gnu_binutils import requires_gnu  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location("consensus_wire", ROOT / "tools/consensus_wire.py")
@@ -20,10 +21,6 @@ BIN = ROOT / "artifacts/node/94/hl-node"
 PACKET = ROOT / "research/work-items/RE-008-consensus-wire-state"
 OUTPUT_SHA256 = "c3be6de771cf5856b5e36560f3ac93d13168f78e7991870b7b870fef4ad3dd3a"
 DATA = BIN.read_bytes() if BIN.exists() else None
-
-
-def tool(name):
-    return shutil.which(name)
 
 
 @unittest.skipIf(DATA is None, "pinned binary not present")
@@ -221,7 +218,7 @@ class ConsensusWireTests(unittest.TestCase):
         self.assertEqual(st[0x47B01B1], "inside_fde")
         self.assertNotIn(0x47B01B0, st)
 
-    @unittest.skipIf(tool("readelf") is None, "readelf missing")
+    @requires_gnu("readelf")
     def test_readelf_fde_bounds(self):
         out = subprocess.run(["readelf", "-wf", str(BIN)], capture_output=True, text=True, check=True).stdout
         pairs = sorted({(int(a, 16), int(b, 16))
@@ -229,7 +226,7 @@ class ConsensusWireTests(unittest.TestCase):
         starts, ends = cw.fde_index(self.elf)
         self.assertEqual(pairs, sorted(zip(starts, ends)))
 
-    @unittest.skipIf(tool("readelf") is None, "readelf missing")
+    @requires_gnu("readelf")
     def test_readelf_location_slots(self):
         out = subprocess.run(["readelf", "-rW", str(BIN)], capture_output=True, text=True, check=True).stdout
         rel = {int(m.group(1), 16): int(m.group(2), 16)
@@ -238,7 +235,7 @@ class ConsensusWireTests(unittest.TestCase):
         for l in self.r["scoped_locations"]:
             self.assertIn(l["slot"], rel)
 
-    @unittest.skipIf(tool("objdump") is None, "objdump missing")
+    @requires_gnu("objdump")
     def test_objdump_tag_leas(self):
         for x in self.r["tags"]:
             for a in x["anchors"]:
@@ -251,7 +248,7 @@ class ConsensusWireTests(unittest.TestCase):
                         out,
                         rf"{s:x}:\s+lea\s+-?0x[0-9a-f]+\(%rip\),%r\w+\s+# {a['anchor']:x}")
 
-    @unittest.skipIf(tool("objdump") is None, "objdump missing")
+    @requires_gnu("objdump")
     def test_objdump_quorum_compare(self):
         out = subprocess.run(
             ["objdump", "-d", "--start-address=0x4ad960b", "--stop-address=0x4ad9629", str(BIN)],

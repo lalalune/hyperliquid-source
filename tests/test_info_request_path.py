@@ -4,12 +4,13 @@ import importlib.util
 import json
 import os
 import re
-import shutil
 import struct
 import subprocess
 import sys
 import unittest
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from gnu_binutils import requires_gnu  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location(
@@ -33,10 +34,6 @@ SCOPED_COUNTS = {
     "info_server/src/router.rs": 1,
     "info_server/src/user_ip.rs": 1,
 }
-
-
-def tool(name):
-    return shutil.which(name)
 
 
 @unittest.skipIf(DATA is None, "pinned binary not present")
@@ -215,7 +212,7 @@ class InfoRequestPathTests(unittest.TestCase):
             self.assertTrue(t["lea_sites"], msg=t["text"])
             self.assertIn(t["kind"], ("exact", "len_prefix"))
 
-    @unittest.skipIf(tool("readelf") is None, "readelf missing")
+    @requires_gnu("readelf")
     def test_readelf_fde_bounds_sample(self):
         # Full -wf is huge; spot-check pinned FDEs via -wF filtered parse of
         # our own index against a targeted readelf -wf window is awkward, so
@@ -234,7 +231,7 @@ class InfoRequestPathTests(unittest.TestCase):
         for pinned in (HUB, DESER, SNAPSHOT_GATE):
             self.assertTrue(irp.is_fde_start(starts, pinned))
 
-    @unittest.skipIf(tool("objdump") is None, "objdump missing")
+    @requires_gnu("objdump")
     def test_objdump_hub_deser_call(self):
         out = subprocess.run(
             ["objdump", "-d", "--start-address=0x24aff82", "--stop-address=0x24aff87",
@@ -244,7 +241,7 @@ class InfoRequestPathTests(unittest.TestCase):
         self.assertIn("call", out)
         self.assertIn("28c7c80", out)
 
-    @unittest.skipIf(tool("objdump") is None, "objdump missing")
+    @requires_gnu("objdump")
     def test_objdump_tag_leas(self):
         for text in ("meta", "fileSnapshot", "clearinghouseState"):
             t = next(x for x in self.r["tags"] if x["text"] == text)

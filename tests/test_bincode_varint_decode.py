@@ -2,11 +2,12 @@
 import hashlib
 import os
 from pathlib import Path
-import shutil
 import struct
 import subprocess
 import sys
 import unittest
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from gnu_binutils import requires_gnu  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
@@ -115,8 +116,8 @@ class Determinism(unittest.TestCase):
         self.assertEqual(hashlib.sha256(outs.pop()).hexdigest(), OUTPUT_SHA256)
 
 
-@unittest.skipUnless(shutil.which('readelf') and shutil.which('objdump'), 'binutils required')
 class Binutils(unittest.TestCase):
+    @requires_gnu('objdump', 'readelf')
     def test_fde_readelf(self):
         out = subprocess.run(['readelf', '--debug-dump=frames', str(bv.TARGET)], check=True,
                              capture_output=True, text=True).stdout
@@ -124,6 +125,7 @@ class Binutils(unittest.TestCase):
             s, e = int(d['fde_start'], 16), int(d['fde_end'], 16)
             self.assertIn(f'pc={s:016x}..{e:016x}', out)
 
+    @requires_gnu('objdump', 'readelf')
     def test_anchor_objdump(self):
         for d in dv.scan(data())['decoders']:
             for a in d['anchors']:
@@ -138,6 +140,7 @@ class Binutils(unittest.TestCase):
     def sites(self):
         return [(int(s['va'], 16), int(s['fde_start'], 16)) for s in dv.scan(data())['tag_dispatch_sites']]
 
+    @requires_gnu('objdump', 'readelf')
     def test_dispatch_vas_are_objdump_instruction_starts(self):
         self.assertEqual(boundary_misses(self.sites()), [])
 
@@ -147,6 +150,7 @@ class Binutils(unittest.TestCase):
             '0x2558fe2', '0x2559079', '0x2561b18', '0x2973ac6', '0x2973bb6',
             '0x466d895', '0x466d9c5', '0x466db15'])
 
+    @requires_gnu('objdump', 'readelf')
     def test_off_by_one_va_rejected(self):
         sites = self.sites()
         for i in (sites.index((0x2558fe2, 0x2558ee0)), sites.index((0x466bd5b, 0x466bd10))):
