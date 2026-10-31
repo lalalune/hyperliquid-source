@@ -260,5 +260,37 @@ class InfoRequestPathTests(unittest.TestCase):
                 rf"{site:x}:\s+lea\s+-?0x[0-9a-f]+\(%rip\),%r\w+\s+# {anchor:x}")
 
 
+class ElfShstrtabTypeTests(unittest.TestCase):
+    """A NOBITS section name table occupies no file bytes, so names read
+    from its offset are phantom names, not a string table."""
+
+    NAMES = b'\0.text\0.shstrtab\0'
+
+    def build(self, shstrtab_type):
+        data = bytearray(0x2000)
+        data[0:6] = b'\x7fELF\x02\x01'
+        struct.pack_into('<Q', data, 0x20, 0)    # phoff
+        struct.pack_into('<Q', data, 0x28, 64)   # shoff
+        struct.pack_into('<HHHHH', data, 0x36, 0, 0, 64, 3, 2)
+
+        def section(index, name, typ, flags, addr, off, size):
+            struct.pack_into('<IIQQQQIIQQ', data, 64 + index * 64,
+                             name, typ, flags, addr, off, size, 0, 0, 1, 0)
+
+        section(0, 0, 0, 0, 0, 0, 0)
+        section(1, 1, 1, 0x6, 0x400000, 0x1000, 0x10)  # .text
+        section(2, 7, shstrtab_type, 0, 0, 0x1000, len(self.NAMES))
+        data[0x1000:0x1000 + len(self.NAMES)] = self.NAMES
+        return bytes(data)
+
+    def test_nobits_shstrtab_rejected(self):
+        with self.assertRaises(irp.EvidenceError):
+            irp.Elf(self.build(8))
+
+    def test_strtab_shstrtab_accepted(self):
+        self.assertEqual(sorted(irp.Elf(self.build(3)).sections),
+                         ['', '.shstrtab', '.text'])
+
+
 if __name__ == "__main__":
     unittest.main()
