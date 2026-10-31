@@ -1,0 +1,8 @@
+verdict	reference	reference_says	bytes_say
+differs	exchange/handlers/26_spot_deploy.rs set_deployer_trading_fee_share	share > 100000 fails, else the token field is written	the setter also refuses any share >= the stored one (cannot increase), so an unset share of 0 can only stay 0 outside the legacy rule
+differs	exchange/handlers/26_spot_deploy.rs SetDeployerTradingFeeShare	no legacy rule	token <= 0xc3 with byte +0x8f2 == 3: a stored 0 may be set to any allowed value, a stored value may not go to 0 (cannot reset legacy token fee share)
+differs	exchange/handlers/26_spot_deploy.rs SpotDeployAction::SetDeployerTradingFeeShare	action holds share: u64	the action holds text at +0x10, +0x18 (at most 100 bytes) and the arm calls 0x3364cd0 on it; token at +0x20
+differs	dex_registry/perp_dex.rs PerpDexError::InvalidFeeRecipient	only the tag and text; no rule	tag 0x163 comes from 2 tests: the address has no row in any dex table nor in the map behind 0x3721c10, or it is in the map at exchange +0x8d0
+differs	asset/pdi.rs PdiStatus::DisableUnauthorized	status 227 means an unauthorized disable	tag 0xe3 text is Invalid perp deployer; the gate gives it to kind 0xe from a non-deployer, tag 0xe4 to others
+same	dex_registry/perp_dex.rs perp_dex_error	InvalidFeeRecipient 355, text Invalid perp DEX fee recipient	tag 0x163 and the Display arm text
+same	spot_meta.rs MAX_DEPLOYER_TRADING_FEE_SHARE	100000	cmp rcx,0x186a0 in the 3 setters
