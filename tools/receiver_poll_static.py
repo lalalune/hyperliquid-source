@@ -114,8 +114,13 @@ def relocations(data):
     return [rows[slot] for slot in sorted(rows)]
 
 def generate(binary, output):
-    identity = next(item for item in json.loads((ROOT / 'provenance/artifacts.json').read_text())['files']
-                    if item['path'] == 'artifacts/node/94/hl-node')
+    manifest = json.loads((ROOT / 'provenance/artifacts.json').read_text())
+    if not isinstance(manifest, dict) or not isinstance(manifest.get('files'), list): raise ValueError('Invalid artifact manifest')
+    for entry in manifest['files']:
+        if not isinstance(entry, dict) or 'path' not in entry: raise ValueError('Invalid artifact record')
+    identity = next((item for item in manifest['files']
+                     if item['path'] == 'artifacts/node/94/hl-node'), None)
+    if identity is None: raise ValueError('No provenance/artifacts.json entry for artifacts/node/94/hl-node')
     check(binary, identity)
     data = binary.read_bytes()
     instruction_controls(data)
