@@ -1,0 +1,15 @@
+verdict	reference	reference_says	bytes_say
+differs	asset/pdi.rs apply_fee_scale_update	cooldown is 60 s when mode_tag == 3, else 2592000 s	sete at 0x3718e8f picks row 1 of the table at 0x208d90 when dl == 3: 2592000 s for mode 3, 60 s for any other byte
+differs	asset/pdi.rs apply_fee_scale_update	checked_add_seconds_f64 and skip the wait test on None	the add has no None: 0x1459df1 panics with chrono text; 0x3718ed2 reads the 12 result bytes with no tag
+differs	asset/pdi.rs apply_fee_scale_update	!(0.0..=3.0).contains rejects NaN	two ucomisd + ja tests let NaN pass at 0x3718e43 and 0x3718e4d, and it is stored; the only caller gets its value through the decimal parser 0x374fe60
+differs	asset/pdi.rs apply_fee_scale_update	message: fee scale must be between 0 and 3	tag 0xe5 holds f64 3.0 at +8; its Display parts are Fee scale cannot be negative or greater than, the number, and a full stop
+differs	asset/pdi.rs apply_fee_scale_update	message: can only change fee scale once every 30.0 days	the argument is f64 30.0 shown by 0x1571d50 with min precision 0 (xor edx,edx at 0x1571d6b), so the digits are 30 by inference; tag 0xe0 Display adds the prefix Error deploying perp
+differs	asset/pdi.rs PdiStatus::DisableUnauthorized	status 227 means an unauthorized disable	tag 0xe3 text is Invalid perp deployer, returned here for dex byte +0x230 == 3
+differs	asset/pdi.rs find_by_dex_name_or_first_mut	empty name takes the first lookup-visible dex, none gives UnknownDex	an empty name takes row 0 with no status test at 0x3332406, and panics by unwrap at 0x333245e on an empty table
+differs	asset/pdi.rs find_by_dex_name_or_first_mut	name length bound is inside the lookup	0x3332380 has no length test; the arm tests name length after the text and its parser, and tests text length first
+differs	asset/pdi.rs PdiAction::SetFeeScale	action holds fee_scale: f64	the action holds a String at +0x20 (at most 100 bytes) that 0x374fe60 turns into f64 at run time
+differs	asset/pdi.rs apply_fee_scale_update	dex.assets.iter().any has no arithmetic	the loop forms asset number dex index x 10000 + i: both overflows panic at l1/src/asset/pdi.rs:30:14
+same	asset/pdi.rs apply_fee_scale_update	order: range, status, wait, assets, write	same order in 0x3718e30
+same	asset/pdi.rs apply_fee_scale_update	time and value change together only when the value differs	jne + jnp at 0x3718f2b; an equal value keeps the time and returns 0x186
+same	asset/pdi.rs PdiStatus	InvalidFeeScale 229, FeeScaleGrowthModeBlocked 230, ExplicitMessage 224, UnknownDex 321, Bounds 323, Ok 390	tags 0xe5, 0xe6, 0xe0, 0x141, 0x143, 0x186
+unverified	asset/pdi.rs growth_mode_allowed	asset field name	byte +0x29 of a 0x30 row: zero blocks a scale above 1; tag 0xe6 text speaks of setting growth mode, so the reference name is not established
