@@ -1,0 +1,1202 @@
+# RE-014 excerpts. Tools: GNU objdump (GNU Binutils) 2.47.20260726; GNU readelf (GNU Binutils) 2.47.20260726.
+# Run from the repository root. Disassembly: GNU objdump, Intel syntax, raw bytes shown.
+# Edits to the raw output: the file-format/section header lines are dropped, the nearest-dynamic-symbol
+# labels '<...>' are removed and trailing whitespace is stripped; every other character is verbatim.
+# readelf output is filtered to the listed offsets or FDE starts. Addresses are ELF virtual addresses (PIE, base 0).
+# These are representative windows; every other cited site is checked against objdump/readelf by the Binutils tests.
+
+## #94 execute instance 0 entry: tests dl and the cl byte before the idiom
+$ objdump -d -M intel --start-address=0x2759240 --stop-address=0x2759293 artifacts/node/94/hl-node
+ 2759240:	55                   	push   rbp
+ 2759241:	41 57                	push   r15
+ 2759243:	41 56                	push   r14
+ 2759245:	41 55                	push   r13
+ 2759247:	41 54                	push   r12
+ 2759249:	53                   	push   rbx
+ 275924a:	48 81 ec 58 01 00 00 	sub    rsp,0x158
+ 2759251:	4d 89 cd             	mov    r13,r9
+ 2759254:	4d 89 c4             	mov    r12,r8
+ 2759257:	49 89 f7             	mov    r15,rsi
+ 275925a:	48 89 fb             	mov    rbx,rdi
+ 275925d:	84 d2                	test   dl,dl
+ 275925f:	75 12                	jne    2759273
+ 2759261:	80 f9 0e             	cmp    cl,0xe
+ 2759264:	77 1c                	ja     2759282
+ 2759266:	0f b6 c1             	movzx  eax,cl
+ 2759269:	b9 1d 50 00 00       	mov    ecx,0x501d
+ 275926e:	0f a3 c1             	bt     ecx,eax
+ 2759271:	73 0f                	jae    2759282
+ 2759273:	bf 32 00 00 00       	mov    edi,0x32
+ 2759278:	ff 15 7a 56 01 03    	call   QWORD PTR [rip+0x301567a]        # 576e8f8
+ 275927e:	84 c0                	test   al,al
+ 2759280:	74 11                	je     2759293
+ 2759282:	bf 01 00 00 00       	mov    edi,0x1
+ 2759287:	e8 74 a5 78 02       	call   4ee3800
+ 275928c:	49 89 c6             	mov    r14,rax
+ 275928f:	89 d5                	mov    ebp,edx
+ 2759291:	eb 05                	jmp    2759298
+
+## #94 execute instance 1 entry: the same instruction sequence (also instance 2, and #115 instances 1 and 2)
+$ objdump -d -M intel --start-address=0x4d83050 --stop-address=0x4d830a3 artifacts/node/94/hl-node
+ 4d83050:	55                   	push   rbp
+ 4d83051:	41 57                	push   r15
+ 4d83053:	41 56                	push   r14
+ 4d83055:	41 55                	push   r13
+ 4d83057:	41 54                	push   r12
+ 4d83059:	53                   	push   rbx
+ 4d8305a:	48 81 ec 58 01 00 00 	sub    rsp,0x158
+ 4d83061:	4d 89 cd             	mov    r13,r9
+ 4d83064:	4d 89 c4             	mov    r12,r8
+ 4d83067:	49 89 f7             	mov    r15,rsi
+ 4d8306a:	48 89 fb             	mov    rbx,rdi
+ 4d8306d:	84 d2                	test   dl,dl
+ 4d8306f:	75 12                	jne    4d83083
+ 4d83071:	80 f9 0e             	cmp    cl,0xe
+ 4d83074:	77 1c                	ja     4d83092
+ 4d83076:	0f b6 c1             	movzx  eax,cl
+ 4d83079:	b9 1d 50 00 00       	mov    ecx,0x501d
+ 4d8307e:	0f a3 c1             	bt     ecx,eax
+ 4d83081:	73 0f                	jae    4d83092
+ 4d83083:	bf 32 00 00 00       	mov    edi,0x32
+ 4d83088:	ff 15 6a b8 9e 00    	call   QWORD PTR [rip+0x9eb86a]        # 576e8f8
+ 4d8308e:	84 c0                	test   al,al
+ 4d83090:	74 11                	je     4d830a3
+ 4d83092:	bf 01 00 00 00       	mov    edi,0x1
+ 4d83097:	e8 64 07 16 00       	call   4ee3800
+ 4d8309c:	49 89 c6             	mov    r14,rax
+ 4d8309f:	89 d5                	mov    ebp,edx
+ 4d830a1:	eb 05                	jmp    4d830a8
+
+## #94 execute instance 0 (0x2759240) tag-to-index idiom and jump
+$ objdump -d -M intel --start-address=0x2759293 --stop-address=0x27592bd artifacts/node/94/hl-node
+ 2759293:	bd 00 ca 9a 3b       	mov    ebp,0x3b9aca00
+ 2759298:	49 8b 04 24          	mov    rax,QWORD PTR [r12]
+ 275929c:	48 8d 48 8c          	lea    rcx,[rax-0x74]
+ 27592a0:	48 83 f8 74          	cmp    rax,0x74
+ 27592a4:	b8 14 00 00 00       	mov    eax,0x14
+ 27592a9:	48 0f 43 c1          	cmovae rax,rcx
+ 27592ad:	48 8d 0d 74 4b c9 fd 	lea    rcx,[rip+0xfffffffffdc94b74]        # 3ede28
+ 27592b4:	48 63 04 81          	movsxd rax,DWORD PTR [rcx+rax*4]
+ 27592b8:	48 01 c8             	add    rax,rcx
+ 27592bb:	ff e0                	jmp    rax
+
+## #94 execute instance 1 (0x4d83050) same idiom
+$ objdump -d -M intel --start-address=0x4d830a3 --stop-address=0x4d830cd artifacts/node/94/hl-node
+ 4d830a3:	bd 00 ca 9a 3b       	mov    ebp,0x3b9aca00
+ 4d830a8:	49 8b 04 24          	mov    rax,QWORD PTR [r12]
+ 4d830ac:	48 8d 48 8c          	lea    rcx,[rax-0x74]
+ 4d830b0:	48 83 f8 74          	cmp    rax,0x74
+ 4d830b4:	b8 14 00 00 00       	mov    eax,0x14
+ 4d830b9:	48 0f 43 c1          	cmovae rax,rcx
+ 4d830bd:	48 8d 0d 38 fd 98 fb 	lea    rcx,[rip+0xfffffffffb98fd38]        # 712dfc
+ 4d830c4:	48 63 04 81          	movsxd rax,DWORD PTR [rcx+rax*4]
+ 4d830c8:	48 01 c8             	add    rax,rcx
+ 4d830cb:	ff e0                	jmp    rax
+
+## #94 execute instance 2 (0x4d84170) same idiom
+$ objdump -d -M intel --start-address=0x4d841c3 --stop-address=0x4d841ed artifacts/node/94/hl-node
+ 4d841c3:	bd 00 ca 9a 3b       	mov    ebp,0x3b9aca00
+ 4d841c8:	49 8b 04 24          	mov    rax,QWORD PTR [r12]
+ 4d841cc:	48 8d 48 8c          	lea    rcx,[rax-0x74]
+ 4d841d0:	48 83 f8 74          	cmp    rax,0x74
+ 4d841d4:	b8 14 00 00 00       	mov    eax,0x14
+ 4d841d9:	48 0f 43 c1          	cmovae rax,rcx
+ 4d841dd:	48 8d 0d 78 ed 98 fb 	lea    rcx,[rip+0xfffffffffb98ed78]        # 712f5c
+ 4d841e4:	48 63 04 81          	movsxd rax,DWORD PTR [rcx+rax*4]
+ 4d841e8:	48 01 c8             	add    rax,rcx
+ 4d841eb:	ff e0                	jmp    rax
+
+## #94 a direct caller of execute instance 0 (one of 5 call sites in 3 functions, plus the multiSig thunk)
+$ objdump -d -M intel --start-address=0x24bce44 --stop-address=0x24bce49 artifacts/node/94/hl-node
+ 24bce44:	e8 f7 c3 29 00       	call   2759240
+
+## #94 serializer 0x2821000 idiom (tag load from [rdi]), table directly after
+$ objdump -d -M intel --start-address=0x2821000 --stop-address=0x2821028 artifacts/node/94/hl-node
+ 2821000:	48 83 ec 48          	sub    rsp,0x48
+ 2821004:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+ 2821007:	48 8d 48 8c          	lea    rcx,[rax-0x74]
+ 282100b:	48 83 f8 74          	cmp    rax,0x74
+ 282100f:	b8 14 00 00 00       	mov    eax,0x14
+ 2821014:	48 0f 43 c1          	cmovae rax,rcx
+ 2821018:	48 8d 0d 85 13 bd fd 	lea    rcx,[rip+0xfffffffffdbd1385]        # 3f23a4
+ 282101f:	48 63 04 81          	movsxd rax,DWORD PTR [rcx+rax*4]
+ 2821023:	48 01 c8             	add    rax,rcx
+ 2821026:	ff e0                	jmp    rax
+
+## #94 serializer 0x2821000 arm 0: 'Action', 'Noop', 'type', 'noop' stored at [rsp+0/0x10/0x20/0x30]
+$ objdump -d -M intel --start-address=0x2821028 --stop-address=0x2821094 artifacts/node/94/hl-node
+ 2821028:	48 8d 05 b9 32 bd fd 	lea    rax,[rip+0xfffffffffdbd32b9]        # 3f42e8
+ 282102f:	48 89 04 24          	mov    QWORD PTR [rsp],rax
+ 2821033:	48 c7 44 24 08 06 00 	mov    QWORD PTR [rsp+0x8],0x6
+ 282103a:	00 00
+ 282103c:	48 8d 05 39 8e 9e fd 	lea    rax,[rip+0xfffffffffd9e8e39]        # 209e7c
+ 2821043:	48 89 44 24 10       	mov    QWORD PTR [rsp+0x10],rax
+ 2821048:	48 c7 44 24 18 04 00 	mov    QWORD PTR [rsp+0x18],0x4
+ 282104f:	00 00
+ 2821051:	48 8d 05 1c 90 9e fd 	lea    rax,[rip+0xfffffffffd9e901c]        # 20a074
+ 2821058:	48 89 44 24 20       	mov    QWORD PTR [rsp+0x20],rax
+ 282105d:	48 c7 44 24 28 04 00 	mov    QWORD PTR [rsp+0x28],0x4
+ 2821064:	00 00
+ 2821066:	48 8d 05 d3 90 9e fd 	lea    rax,[rip+0xfffffffffd9e90d3]        # 20a140
+ 282106d:	48 89 44 24 30       	mov    QWORD PTR [rsp+0x30],rax
+ 2821072:	48 c7 44 24 38 04 00 	mov    QWORD PTR [rsp+0x38],0x4
+ 2821079:	00 00
+ 282107b:	48 89 74 24 40       	mov    QWORD PTR [rsp+0x40],rsi
+ 2821080:	48 8d 35 f2 29 bb fd 	lea    rsi,[rip+0xfffffffffdbb29f2]        # 3d3a79
+ 2821087:	48 89 e7             	mov    rdi,rsp
+ 282108a:	ba 0a 00 00 00       	mov    edx,0xa
+ 282108f:	e8 2c 0b 16 00       	call   2981bc0
+
+## #94 serializer 0x2821000 arm 1: 'approveAgent' pointer of VARIANTS copy 0x56c46e0 (slot 1 differs between copies)
+$ objdump -d -M intel --start-address=0x28222a1 --stop-address=0x2822305 artifacts/node/94/hl-node
+ 28222a1:	48 83 c7 08          	add    rdi,0x8
+ 28222a5:	48 8d 05 3c 20 bd fd 	lea    rax,[rip+0xfffffffffdbd203c]        # 3f42e8
+ 28222ac:	48 89 04 24          	mov    QWORD PTR [rsp],rax
+ 28222b0:	48 c7 44 24 08 06 00 	mov    QWORD PTR [rsp+0x8],0x6
+ 28222b7:	00 00
+ 28222b9:	48 8d 05 2e 20 bd fd 	lea    rax,[rip+0xfffffffffdbd202e]        # 3f42ee
+ 28222c0:	48 89 44 24 10       	mov    QWORD PTR [rsp+0x10],rax
+ 28222c5:	48 c7 44 24 18 0d 00 	mov    QWORD PTR [rsp+0x18],0xd
+ 28222cc:	00 00
+ 28222ce:	48 8d 05 9f 7d 9e fd 	lea    rax,[rip+0xfffffffffd9e7d9f]        # 20a074
+ 28222d5:	48 89 44 24 20       	mov    QWORD PTR [rsp+0x20],rax
+ 28222da:	48 c7 44 24 28 04 00 	mov    QWORD PTR [rsp+0x28],0x4
+ 28222e1:	00 00
+ 28222e3:	48 8d 05 f3 18 bd fd 	lea    rax,[rip+0xfffffffffdbd18f3]        # 3f3bdd
+ 28222ea:	48 89 44 24 30       	mov    QWORD PTR [rsp+0x30],rax
+ 28222ef:	48 c7 44 24 38 0c 00 	mov    QWORD PTR [rsp+0x38],0xc
+ 28222f6:	00 00
+ 28222f8:	48 89 74 24 40       	mov    QWORD PTR [rsp+0x40],rsi
+ 28222fd:	48 89 e6             	mov    rsi,rsp
+ 2822300:	e8 8b d9 66 ff       	call   1e8fc90
+
+## #94 serializer 0x334f770 arm 1: 'approveAgent' pointer of VARIANTS copy 0x56e8bd0
+$ objdump -d -M intel --start-address=0x3350a11 --stop-address=0x3350a75 artifacts/node/94/hl-node
+ 3350a11:	48 83 c7 08          	add    rdi,0x8
+ 3350a15:	48 8d 05 cd b0 23 fd 	lea    rax,[rip+0xfffffffffd23b0cd]        # 58bae9
+ 3350a1c:	48 89 04 24          	mov    QWORD PTR [rsp],rax
+ 3350a20:	48 c7 44 24 08 06 00 	mov    QWORD PTR [rsp+0x8],0x6
+ 3350a27:	00 00
+ 3350a29:	48 8d 05 bf b0 23 fd 	lea    rax,[rip+0xfffffffffd23b0bf]        # 58baef
+ 3350a30:	48 89 44 24 10       	mov    QWORD PTR [rsp+0x10],rax
+ 3350a35:	48 c7 44 24 18 0d 00 	mov    QWORD PTR [rsp+0x18],0xd
+ 3350a3c:	00 00
+ 3350a3e:	48 8d 05 2f 96 eb fc 	lea    rax,[rip+0xfffffffffceb962f]        # 20a074
+ 3350a45:	48 89 44 24 20       	mov    QWORD PTR [rsp+0x20],rax
+ 3350a4a:	48 c7 44 24 28 04 00 	mov    QWORD PTR [rsp+0x28],0x4
+ 3350a51:	00 00
+ 3350a53:	48 8d 05 d4 9e 23 fd 	lea    rax,[rip+0xfffffffffd239ed4]        # 58a92e
+ 3350a5a:	48 89 44 24 30       	mov    QWORD PTR [rsp+0x30],rax
+ 3350a5f:	48 c7 44 24 38 0c 00 	mov    QWORD PTR [rsp+0x38],0xc
+ 3350a66:	00 00
+ 3350a68:	48 89 74 24 40       	mov    QWORD PTR [rsp+0x40],rsi
+ 3350a6d:	48 89 e6             	mov    rsi,rsp
+ 3350a70:	e8 db 25 ff ff       	call   3343050
+
+## #94 serializer 0x2821000 arm 62: payload at rdi+8, 'CDeposit' / 'cDeposit' (the cDeposit pointer 0x20ab90 is shared by all three copies)
+$ objdump -d -M intel --start-address=0x2822656 --stop-address=0x28226ba artifacts/node/94/hl-node
+ 2822656:	48 83 c7 08          	add    rdi,0x8
+ 282265a:	48 8d 05 87 1c bd fd 	lea    rax,[rip+0xfffffffffdbd1c87]        # 3f42e8
+ 2822661:	48 89 04 24          	mov    QWORD PTR [rsp],rax
+ 2822665:	48 c7 44 24 08 06 00 	mov    QWORD PTR [rsp+0x8],0x6
+ 282266c:	00 00
+ 282266e:	48 8d 05 cb 7f 9e fd 	lea    rax,[rip+0xfffffffffd9e7fcb]        # 20a640
+ 2822675:	48 89 44 24 10       	mov    QWORD PTR [rsp+0x10],rax
+ 282267a:	48 c7 44 24 18 08 00 	mov    QWORD PTR [rsp+0x18],0x8
+ 2822681:	00 00
+ 2822683:	48 8d 05 ea 79 9e fd 	lea    rax,[rip+0xfffffffffd9e79ea]        # 20a074
+ 282268a:	48 89 44 24 20       	mov    QWORD PTR [rsp+0x20],rax
+ 282268f:	48 c7 44 24 28 04 00 	mov    QWORD PTR [rsp+0x28],0x4
+ 2822696:	00 00
+ 2822698:	48 8d 05 f1 84 9e fd 	lea    rax,[rip+0xfffffffffd9e84f1]        # 20ab90
+ 282269f:	48 89 44 24 30       	mov    QWORD PTR [rsp+0x30],rax
+ 28226a4:	48 c7 44 24 38 08 00 	mov    QWORD PTR [rsp+0x38],0x8
+ 28226ab:	00 00
+ 28226ad:	48 89 74 24 40       	mov    QWORD PTR [rsp+0x40],rsi
+ 28226b2:	48 89 e6             	mov    rsi,rsp
+ 28226b5:	e8 c6 49 68 ff       	call   1ea7080
+
+## #94 serializer 0x281e850: one 'mov rbx,rdi' between the idiom and the table
+$ objdump -d -M intel --start-address=0x281e850 --stop-address=0x281e87c artifacts/node/94/hl-node
+ 281e850:	53                   	push   rbx
+ 281e851:	48 83 ec 50          	sub    rsp,0x50
+ 281e855:	48 8b 06             	mov    rax,QWORD PTR [rsi]
+ 281e858:	48 8d 48 8c          	lea    rcx,[rax-0x74]
+ 281e85c:	48 83 f8 74          	cmp    rax,0x74
+ 281e860:	b8 14 00 00 00       	mov    eax,0x14
+ 281e865:	48 0f 43 c1          	cmovae rax,rcx
+ 281e869:	48 89 fb             	mov    rbx,rdi
+ 281e86c:	48 8d 0d d1 39 bd fd 	lea    rcx,[rip+0xfffffffffdbd39d1]        # 3f2244
+ 281e873:	48 63 04 81          	movsxd rax,DWORD PTR [rcx+rax*4]
+ 281e877:	48 01 c8             	add    rax,rcx
+ 281e87a:	ff e0                	jmp    rax
+
+## #94 serializer 0x281e850 arm 62: the same quadruple 8 bytes higher, 'cDeposit' at [rsp+0x38], length at [rsp+0x40]
+$ objdump -d -M intel --start-address=0x282009b --stop-address=0x2820105 artifacts/node/94/hl-node
+ 282009b:	48 83 c6 08          	add    rsi,0x8
+ 282009f:	48 8d 05 42 42 bd fd 	lea    rax,[rip+0xfffffffffdbd4242]        # 3f42e8
+ 28200a6:	48 89 44 24 08       	mov    QWORD PTR [rsp+0x8],rax
+ 28200ab:	48 c7 44 24 10 06 00 	mov    QWORD PTR [rsp+0x10],0x6
+ 28200b2:	00 00
+ 28200b4:	48 8d 05 85 a5 9e fd 	lea    rax,[rip+0xfffffffffd9ea585]        # 20a640
+ 28200bb:	48 89 44 24 18       	mov    QWORD PTR [rsp+0x18],rax
+ 28200c0:	48 c7 44 24 20 08 00 	mov    QWORD PTR [rsp+0x20],0x8
+ 28200c7:	00 00
+ 28200c9:	48 8d 05 a4 9f 9e fd 	lea    rax,[rip+0xfffffffffd9e9fa4]        # 20a074
+ 28200d0:	48 89 44 24 28       	mov    QWORD PTR [rsp+0x28],rax
+ 28200d5:	48 c7 44 24 30 04 00 	mov    QWORD PTR [rsp+0x30],0x4
+ 28200dc:	00 00
+ 28200de:	48 8d 05 ab aa 9e fd 	lea    rax,[rip+0xfffffffffd9eaaab]        # 20ab90
+ 28200e5:	48 89 44 24 38       	mov    QWORD PTR [rsp+0x38],rax
+ 28200ea:	48 c7 44 24 40 08 00 	mov    QWORD PTR [rsp+0x40],0x8
+ 28200f1:	00 00
+ 28200f3:	48 89 54 24 48       	mov    QWORD PTR [rsp+0x48],rdx
+ 28200f8:	48 8d 54 24 08       	lea    rdx,[rsp+0x8]
+ 28200fd:	48 89 df             	mov    rdi,rbx
+ 2820100:	e8 db 88 66 ff       	call   1e889e0
+
+## #94 idiom site 0x16ef79e: 'dec rax; cmp rax,0x52; ja' bounds check, then a 0x53-entry table
+$ objdump -d -M intel --start-address=0x16ef790 --stop-address=0x16ef7cf artifacts/node/94/hl-node
+ 16ef790:	41 57                	push   r15
+ 16ef792:	41 56                	push   r14
+ 16ef794:	41 54                	push   r12
+ 16ef796:	53                   	push   rbx
+ 16ef797:	48 83 ec 68          	sub    rsp,0x68
+ 16ef79b:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+ 16ef79e:	48 8d 48 8c          	lea    rcx,[rax-0x74]
+ 16ef7a2:	48 83 f8 74          	cmp    rax,0x74
+ 16ef7a6:	b8 14 00 00 00       	mov    eax,0x14
+ 16ef7ab:	48 0f 43 c1          	cmovae rax,rcx
+ 16ef7af:	48 ff c8             	dec    rax
+ 16ef7b2:	48 83 f8 52          	cmp    rax,0x52
+ 16ef7b6:	0f 87 4f 09 00 00    	ja     16f010b
+ 16ef7bc:	48 89 fb             	mov    rbx,rdi
+ 16ef7bf:	48 8d 0d 8a 52 ba fe 	lea    rcx,[rip+0xfffffffffeba528a]        # 294a50
+ 16ef7c6:	48 63 04 81          	movsxd rax,DWORD PTR [rcx+rax*4]
+ 16ef7ca:	48 01 c8             	add    rax,rcx
+ 16ef7cd:	ff e0                	jmp    rax
+
+## #94 idiom site 0x3341eb8: table lea directly after the idiom, two stack stores before the jmp
+$ objdump -d -M intel --start-address=0x3341eb8 --stop-address=0x3341ee3 artifacts/node/94/hl-node
+ 3341eb8:	48 8d 48 8c          	lea    rcx,[rax-0x74]
+ 3341ebc:	48 83 f8 74          	cmp    rax,0x74
+ 3341ec0:	b8 14 00 00 00       	mov    eax,0x14
+ 3341ec5:	48 0f 43 c1          	cmovae rax,rcx
+ 3341ec9:	48 8d 0d 00 5d 24 fd 	lea    rcx,[rip+0xfffffffffd245d00]        # 587bd0
+ 3341ed0:	48 63 04 81          	movsxd rax,DWORD PTR [rcx+rax*4]
+ 3341ed4:	48 01 c8             	add    rax,rcx
+ 3341ed7:	4c 89 6c 24 68       	mov    QWORD PTR [rsp+0x68],r13
+ 3341edc:	4c 89 74 24 60       	mov    QWORD PTR [rsp+0x60],r14
+ 3341ee1:	ff e0                	jmp    rax
+
+## #94 idiom site 0x335ecb3: a byte lookup and ret, no jump table
+$ objdump -d -M intel --start-address=0x335ecb0 --stop-address=0x335ecd0 artifacts/node/94/hl-node
+ 335ecb0:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+ 335ecb3:	48 8d 48 8c          	lea    rcx,[rax-0x74]
+ 335ecb7:	48 83 f8 74          	cmp    rax,0x74
+ 335ecbb:	b8 14 00 00 00       	mov    eax,0x14
+ 335ecc0:	48 0f 43 c1          	cmovae rax,rcx
+ 335ecc4:	48 8d 0d 0d d5 22 fd 	lea    rcx,[rip+0xfffffffffd22d50d]        # 58c1d8
+ 335eccb:	0f b6 04 08          	movzx  eax,BYTE PTR [rax+rcx*1]
+ 335eccf:	c3                   	ret
+
+## #94 idiom site 0x1e8e041: a bit test, no jump table
+$ objdump -d -M intel --start-address=0x1e8e041 --stop-address=0x1e8e075 artifacts/node/94/hl-node
+ 1e8e041:	48 8d 48 8c          	lea    rcx,[rax-0x74]
+ 1e8e045:	48 83 f8 74          	cmp    rax,0x74
+ 1e8e049:	b8 14 00 00 00       	mov    eax,0x14
+ 1e8e04e:	48 0f 43 c1          	cmovae rax,rcx
+ 1e8e052:	66 41 be 12 01       	mov    r14w,0x112
+ 1e8e057:	48 83 f8 2b          	cmp    rax,0x2b
+ 1e8e05b:	0f 87 98 09 00 00    	ja     1e8e9f9
+ 1e8e061:	48 b9 08 64 00 00 00 	movabs rcx,0x80000006408
+ 1e8e068:	08 00 00
+ 1e8e06b:	48 0f a3 c1          	bt     rcx,rax
+ 1e8e06f:	0f 83 47 08 00 00    	jae    1e8e8bc
+
+## #94 idiom site 0x1d3feee in another register allocation (tag rax, index rcx, temp rdx): dec rcx; cmp rcx,0x52; ja; mov rbx,rdi; then a 0x53-entry table
+$ objdump -d -M intel --start-address=0x1d3feee --stop-address=0x1d3ff1f artifacts/node/94/hl-node
+ 1d3feee:	48 8d 50 8c          	lea    rdx,[rax-0x74]
+ 1d3fef2:	48 83 f8 74          	cmp    rax,0x74
+ 1d3fef6:	b9 14 00 00 00       	mov    ecx,0x14
+ 1d3fefb:	48 0f 43 ca          	cmovae rcx,rdx
+ 1d3feff:	48 ff c9             	dec    rcx
+ 1d3ff02:	48 83 f9 52          	cmp    rcx,0x52
+ 1d3ff06:	0f 87 57 06 00 00    	ja     1d40563
+ 1d3ff0c:	48 89 fb             	mov    rbx,rdi
+ 1d3ff0f:	48 8d 15 fa b7 67 fe 	lea    rdx,[rip+0xfffffffffe67b7fa]        # 3bb710
+ 1d3ff16:	48 63 0c 8a          	movsxd rcx,DWORD PTR [rdx+rcx*4]
+ 1d3ff1a:	48 01 d1             	add    rcx,rdx
+ 1d3ff1d:	ff e1                	jmp    rcx
+
+## #94 idiom site 0x335edde (temp rdi): a stack reload 'mov r13,[rsp+0x1120]' before an 88-entry table with 88 distinct targets that is no serializer
+$ objdump -d -M intel --start-address=0x335eddb --stop-address=0x335ee07 artifacts/node/94/hl-node
+ 335eddb:	48 8b 06             	mov    rax,QWORD PTR [rsi]
+ 335edde:	48 8d 78 8c          	lea    rdi,[rax-0x74]
+ 335ede2:	48 83 f8 74          	cmp    rax,0x74
+ 335ede6:	b8 14 00 00 00       	mov    eax,0x14
+ 335edeb:	48 0f 43 c7          	cmovae rax,rdi
+ 335edef:	4c 8b ac 24 20 11 00 	mov    r13,QWORD PTR [rsp+0x1120]
+ 335edf6:	00
+ 335edf7:	48 8d 3d 3e 9f 22 fd 	lea    rdi,[rip+0xfffffffffd229f3e]        # 588d3c
+ 335edfe:	48 63 04 87          	movsxd rax,DWORD PTR [rdi+rax*4]
+ 335ee02:	48 01 f8             	add    rax,rdi
+ 335ee05:	ff e0                	jmp    rax
+
+## #94 not part of the survey: the 32-bit byte-truncated form (movzx ecx,cl; mov eax,0x14; cmovae eax,ecx) in function 0x335ec90
+$ objdump -d -M intel --start-address=0x335ec90 --stop-address=0x335eca6 artifacts/node/94/hl-node
+ 335ec90:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+ 335ec93:	8d 48 8c             	lea    ecx,[rax-0x74]
+ 335ec96:	48 83 f8 74          	cmp    rax,0x74
+ 335ec9a:	0f b6 c9             	movzx  ecx,cl
+ 335ec9d:	b8 14 00 00 00       	mov    eax,0x14
+ 335eca2:	0f 43 c1             	cmovae eax,ecx
+ 335eca5:	c3                   	ret
+
+## #94 execute instance 0 arm 52 (VARIANTS[52] = multiSig, I2): first call
+$ objdump -d -M intel --start-address=0x275a0cf --stop-address=0x275a0f5 artifacts/node/94/hl-node
+ 275a0cf:	41 8b 45 10          	mov    eax,DWORD PTR [r13+0x10]
+ 275a0d3:	89 44 24 10          	mov    DWORD PTR [rsp+0x10],eax
+ 275a0d7:	41 0f 10 45 00       	movups xmm0,XMMWORD PTR [r13+0x0]
+ 275a0dc:	0f 29 04 24          	movaps XMMWORD PTR [rsp],xmm0
+ 275a0e0:	49 8b 74 24 20       	mov    rsi,QWORD PTR [r12+0x20]
+ 275a0e5:	48 8d 7c 24 68       	lea    rdi,[rsp+0x68]
+ 275a0ea:	48 89 e2             	mov    rdx,rsp
+ 275a0ed:	4c 89 f9             	mov    rcx,r15
+ 275a0f0:	e8 5b 4d 0d 00       	call   282ee50
+
+## #94 arm-52 first-call target 0x282ee50 (66 bytes): calls instance 0 back
+$ objdump -d -M intel --start-address=0x282ee50 --stop-address=0x282ee92 artifacts/node/94/hl-node
+ 282ee50:	41 57                	push   r15
+ 282ee52:	41 56                	push   r14
+ 282ee54:	41 54                	push   r12
+ 282ee56:	53                   	push   rbx
+ 282ee57:	50                   	push   rax
+ 282ee58:	48 89 cb             	mov    rbx,rcx
+ 282ee5b:	49 89 d6             	mov    r14,rdx
+ 282ee5e:	49 89 f7             	mov    r15,rsi
+ 282ee61:	49 89 fc             	mov    r12,rdi
+ 282ee64:	48 89 f7             	mov    rdi,rsi
+ 282ee67:	ff 15 73 44 f4 02    	call   QWORD PTR [rip+0x2f44473]        # 57732e0
+ 282ee6d:	0f b6 c8             	movzx  ecx,al
+ 282ee70:	4c 89 e7             	mov    rdi,r12
+ 282ee73:	48 89 de             	mov    rsi,rbx
+ 282ee76:	31 d2                	xor    edx,edx
+ 282ee78:	4d 89 f8             	mov    r8,r15
+ 282ee7b:	4d 89 f1             	mov    r9,r14
+ 282ee7e:	e8 bd a3 f2 ff       	call   2759240
+ 282ee83:	4c 89 e0             	mov    rax,r12
+ 282ee86:	48 83 c4 08          	add    rsp,0x8
+ 282ee8a:	5b                   	pop    rbx
+ 282ee8b:	41 5c                	pop    r12
+ 282ee8d:	41 5e                	pop    r14
+ 282ee8f:	41 5f                	pop    r15
+ 282ee91:	c3                   	ret
+
+## #94 instance 1 arm-52 first-call target 0x48f5850 (66 bytes): calls instance 1 (0x4d83050)
+$ objdump -d -M intel --start-address=0x48f5850 --stop-address=0x48f5892 artifacts/node/94/hl-node
+ 48f5850:	41 57                	push   r15
+ 48f5852:	41 56                	push   r14
+ 48f5854:	41 54                	push   r12
+ 48f5856:	53                   	push   rbx
+ 48f5857:	50                   	push   rax
+ 48f5858:	48 89 cb             	mov    rbx,rcx
+ 48f585b:	49 89 d6             	mov    r14,rdx
+ 48f585e:	49 89 f7             	mov    r15,rsi
+ 48f5861:	49 89 fc             	mov    r12,rdi
+ 48f5864:	48 89 f7             	mov    rdi,rsi
+ 48f5867:	ff 15 73 da e7 00    	call   QWORD PTR [rip+0xe7da73]        # 57732e0
+ 48f586d:	0f b6 c8             	movzx  ecx,al
+ 48f5870:	4c 89 e7             	mov    rdi,r12
+ 48f5873:	48 89 de             	mov    rsi,rbx
+ 48f5876:	31 d2                	xor    edx,edx
+ 48f5878:	4d 89 f8             	mov    r8,r15
+ 48f587b:	4d 89 f1             	mov    r9,r14
+ 48f587e:	e8 cd d7 48 00       	call   4d83050
+ 48f5883:	4c 89 e0             	mov    rax,r12
+ 48f5886:	48 83 c4 08          	add    rsp,0x8
+ 48f588a:	5b                   	pop    rbx
+ 48f588b:	41 5c                	pop    r12
+ 48f588d:	41 5e                	pop    r14
+ 48f588f:	41 5f                	pop    r15
+ 48f5891:	c3                   	ret
+
+## #94 instance 2 arm-52 first-call target 0x48f5800 (66 bytes): calls instance 2 (0x4d84170)
+$ objdump -d -M intel --start-address=0x48f5800 --stop-address=0x48f5842 artifacts/node/94/hl-node
+ 48f5800:	41 57                	push   r15
+ 48f5802:	41 56                	push   r14
+ 48f5804:	41 54                	push   r12
+ 48f5806:	53                   	push   rbx
+ 48f5807:	50                   	push   rax
+ 48f5808:	48 89 cb             	mov    rbx,rcx
+ 48f580b:	49 89 d6             	mov    r14,rdx
+ 48f580e:	49 89 f7             	mov    r15,rsi
+ 48f5811:	49 89 fc             	mov    r12,rdi
+ 48f5814:	48 89 f7             	mov    rdi,rsi
+ 48f5817:	ff 15 c3 da e7 00    	call   QWORD PTR [rip+0xe7dac3]        # 57732e0
+ 48f581d:	0f b6 c8             	movzx  ecx,al
+ 48f5820:	4c 89 e7             	mov    rdi,r12
+ 48f5823:	48 89 de             	mov    rsi,rbx
+ 48f5826:	31 d2                	xor    edx,edx
+ 48f5828:	4d 89 f8             	mov    r8,r15
+ 48f582b:	4d 89 f1             	mov    r9,r14
+ 48f582e:	e8 3d e9 48 00       	call   4d84170
+ 48f5833:	4c 89 e0             	mov    rax,r12
+ 48f5836:	48 83 c4 08          	add    rsp,0x8
+ 48f583a:	5b                   	pop    rbx
+ 48f583b:	41 5c                	pop    r12
+ 48f583d:	41 5e                	pop    r14
+ 48f583f:	41 5f                	pop    r15
+ 48f5841:	c3                   	ret
+
+## #94 arm-62 handler 0x1f65f80 (cDeposit per I2) from FDE start to the c_deposit.rs Location lea
+$ objdump -d -M intel --start-address=0x1f65f80 --stop-address=0x1f65fe1 artifacts/node/94/hl-node
+ 1f65f80:	41 57                	push   r15
+ 1f65f82:	41 56                	push   r14
+ 1f65f84:	41 55                	push   r13
+ 1f65f86:	41 54                	push   r12
+ 1f65f88:	53                   	push   rbx
+ 1f65f89:	48 81 ec 90 00 00 00 	sub    rsp,0x90
+ 1f65f90:	48 89 fb             	mov    rbx,rdi
+ 1f65f93:	4c 8b a9 88 00 00 00 	mov    r13,QWORD PTR [rcx+0x88]
+ 1f65f9a:	80 b9 80 00 00 00 00 	cmp    BYTE PTR [rcx+0x80],0x0
+ 1f65fa1:	66 c7 44 24 18 fb 00 	mov    WORD PTR [rsp+0x18],0xfb
+ 1f65fa8:	74 6f                	je     1f66019
+ 1f65faa:	49 89 cc             	mov    r12,rcx
+ 1f65fad:	49 89 d6             	mov    r14,rdx
+ 1f65fb0:	49 89 f7             	mov    r15,rsi
+ 1f65fb3:	48 8d 7c 24 18       	lea    rdi,[rsp+0x18]
+ 1f65fb8:	e8 e3 8b 81 00       	call   277eba0
+ 1f65fbd:	48 c7 44 24 78 00 00 	mov    QWORD PTR [rsp+0x78],0x0
+ 1f65fc4:	00 00
+ 1f65fc6:	41 8b 46 10          	mov    eax,DWORD PTR [r14+0x10]
+ 1f65fca:	89 44 24 10          	mov    DWORD PTR [rsp+0x10],eax
+ 1f65fce:	41 0f 10 06          	movups xmm0,XMMWORD PTR [r14]
+ 1f65fd2:	0f 29 04 24          	movaps XMMWORD PTR [rsp],xmm0
+ 1f65fd6:	48 83 ec 08          	sub    rsp,0x8
+ 1f65fda:	48 8d 05 df b4 72 03 	lea    rax,[rip+0x372b4df]        # 56914c0
+
+## #94 arm-62 handlers of instances 1 and 2: c_deposit.rs Location leas at 0x47b835a (in 0x47b8300) and 0x47b844a (in 0x47b83f0)
+$ objdump -d -M intel --start-address=0x47b835a --stop-address=0x47b8361 artifacts/node/94/hl-node
+ 47b835a:	48 8d 05 17 78 f7 00 	lea    rax,[rip+0xf77817]        # 572fb78
+$ objdump -d -M intel --start-address=0x47b844a --stop-address=0x47b8451 artifacts/node/94/hl-node
+ 47b844a:	48 8d 05 27 77 f7 00 	lea    rax,[rip+0xf77727]        # 572fb78
+
+## #94 arm-8 handler 0x1f661c0 (evmRawTx per I2): evm_raw_tx.rs Location lea
+$ objdump -d -M intel --start-address=0x1f67364 --stop-address=0x1f6736b artifacts/node/94/hl-node
+ 1f67364:	48 8d 0d 1d 8f 72 03 	lea    rcx,[rip+0x3728f1d]        # 5690288
+
+## #94 arm-8 handlers of instances 1 and 2: leas at 0x4521e07 (in 0x4521330) and 0x4522d17 (in 0x4522240)
+$ objdump -d -M intel --start-address=0x4521e07 --stop-address=0x4521e0e artifacts/node/94/hl-node
+ 4521e07:	48 8d 0d 52 e0 1f 01 	lea    rcx,[rip+0x11fe052]        # 571fe60
+$ objdump -d -M intel --start-address=0x4522d17 --stop-address=0x4522d1e artifacts/node/94/hl-node
+ 4522d17:	48 8d 0d 42 d1 1f 01 	lea    rcx,[rip+0x11fd142]        # 571fe60
+
+## #94 arm-43 handler 0x1e5fb20 (vaultTransfer per I2): vault_transfer.rs Location lea
+$ objdump -d -M intel --start-address=0x1e5fb4c --stop-address=0x1e5fb53 artifacts/node/94/hl-node
+ 1e5fb4c:	4c 8d 1d cd ef 82 03 	lea    r11,[rip+0x382efcd]        # 568eb20
+
+## #94 arm-47 handler 0x1f67810 (withdraw3 per I2): withdraw3.rs Location lea
+$ objdump -d -M intel --start-address=0x1f6783c --stop-address=0x1f67843 artifacts/node/94/hl-node
+ 1f6783c:	4c 8d 1d 95 9c 72 03 	lea    r11,[rip+0x3729c95]        # 56914d8
+
+## #94 a serde enum 'OutcomeDeploy' (len 0xd) with 10 variants (VARIANTS 0x5713558) in function 0x3913400
+$ objdump -d -M intel --start-address=0x391402b --stop-address=0x391404f artifacts/node/94/hl-node
+ 391402b:	48 8d 15 e8 27 ca fc 	lea    rdx,[rip+0xfffffffffcca27e8]        # 5b681a
+ 3914032:	4c 8d 05 1f f5 df 01 	lea    r8,[rip+0x1dff51f]        # 5713558
+ 3914039:	48 89 e7             	mov    rdi,rsp
+ 391403c:	b9 0d 00 00 00       	mov    ecx,0xd
+ 3914041:	41 b9 0a 00 00 00    	mov    r9d,0xa
+ 3914047:	4c 89 f6             	mov    rsi,r14
+ 391404a:	e8 21 42 15 ff       	call   2a68270
+
+## #115 execute instance 0 entry: loads the action from [rsi+0x18] and computes the gate byte inline
+$ objdump -d -M intel --start-address=0x2bdbaa0 --stop-address=0x2bdbb07 artifacts/node/115/hl-node
+ 2bdbaa0:	55                   	push   rbp
+ 2bdbaa1:	41 57                	push   r15
+ 2bdbaa3:	41 56                	push   r14
+ 2bdbaa5:	41 55                	push   r13
+ 2bdbaa7:	41 54                	push   r12
+ 2bdbaa9:	53                   	push   rbx
+ 2bdbaaa:	48 81 ec 18 01 00 00 	sub    rsp,0x118
+ 2bdbab1:	49 89 cf             	mov    r15,rcx
+ 2bdbab4:	49 89 d5             	mov    r13,rdx
+ 2bdbab7:	48 89 fb             	mov    rbx,rdi
+ 2bdbaba:	4c 8b 66 18          	mov    r12,QWORD PTR [rsi+0x18]
+ 2bdbabe:	49 8b 04 24          	mov    rax,QWORD PTR [r12]
+ 2bdbac2:	8d 48 7a             	lea    ecx,[rax+0x7a]
+ 2bdbac5:	48 3d 86 00 00 00    	cmp    rax,0x86
+ 2bdbacb:	0f b6 c9             	movzx  ecx,cl
+ 2bdbace:	b8 14 00 00 00       	mov    eax,0x14
+ 2bdbad3:	0f 43 c1             	cmovae eax,ecx
+ 2bdbad6:	3c 0e                	cmp    al,0xe
+ 2bdbad8:	77 1c                	ja     2bdbaf6
+ 2bdbada:	0f b6 c0             	movzx  eax,al
+ 2bdbadd:	b9 1d 50 00 00       	mov    ecx,0x501d
+ 2bdbae2:	0f a3 c1             	bt     ecx,eax
+ 2bdbae5:	73 0f                	jae    2bdbaf6
+ 2bdbae7:	bf 32 00 00 00       	mov    edi,0x32
+ 2bdbaec:	ff 15 36 55 90 03    	call   QWORD PTR [rip+0x3905536]        # 64e1028
+ 2bdbaf2:	84 c0                	test   al,al
+ 2bdbaf4:	74 11                	je     2bdbb07
+ 2bdbaf6:	bf 01 00 00 00       	mov    edi,0x1
+ 2bdbafb:	e8 e0 87 0a 03       	call   5c842e0
+ 2bdbb00:	49 89 c6             	mov    r14,rax
+ 2bdbb03:	89 d5                	mov    ebp,edx
+ 2bdbb05:	eb 05                	jmp    2bdbb0c
+
+## #115 execute instance 1 entry: the #94 instance entry sequence (dl test, cl byte)
+$ objdump -d -M intel --start-address=0x55f99b0 --stop-address=0x55f9a03 artifacts/node/115/hl-node
+ 55f99b0:	55                   	push   rbp
+ 55f99b1:	41 57                	push   r15
+ 55f99b3:	41 56                	push   r14
+ 55f99b5:	41 55                	push   r13
+ 55f99b7:	41 54                	push   r12
+ 55f99b9:	53                   	push   rbx
+ 55f99ba:	48 81 ec 18 01 00 00 	sub    rsp,0x118
+ 55f99c1:	4d 89 cd             	mov    r13,r9
+ 55f99c4:	4d 89 c4             	mov    r12,r8
+ 55f99c7:	49 89 f7             	mov    r15,rsi
+ 55f99ca:	48 89 fb             	mov    rbx,rdi
+ 55f99cd:	84 d2                	test   dl,dl
+ 55f99cf:	75 12                	jne    55f99e3
+ 55f99d1:	80 f9 0e             	cmp    cl,0xe
+ 55f99d4:	77 1c                	ja     55f99f2
+ 55f99d6:	0f b6 c1             	movzx  eax,cl
+ 55f99d9:	b9 1d 50 00 00       	mov    ecx,0x501d
+ 55f99de:	0f a3 c1             	bt     ecx,eax
+ 55f99e1:	73 0f                	jae    55f99f2
+ 55f99e3:	bf 32 00 00 00       	mov    edi,0x32
+ 55f99e8:	ff 15 3a 76 ee 00    	call   QWORD PTR [rip+0xee763a]        # 64e1028
+ 55f99ee:	84 c0                	test   al,al
+ 55f99f0:	74 11                	je     55f9a03
+ 55f99f2:	bf 01 00 00 00       	mov    edi,0x1
+ 55f99f7:	e8 e4 a8 68 00       	call   5c842e0
+ 55f99fc:	49 89 c6             	mov    r14,rax
+ 55f99ff:	89 d5                	mov    ebp,edx
+ 55f9a01:	eb 05                	jmp    55f9a08
+
+## #115 execute instance 0 (0x2bdbaa0) tag-to-index idiom and jump
+$ objdump -d -M intel --start-address=0x2bdbb07 --stop-address=0x2bdbb2f artifacts/node/115/hl-node
+ 2bdbb07:	bd 00 ca 9a 3b       	mov    ebp,0x3b9aca00
+ 2bdbb0c:	49 8b 04 24          	mov    rax,QWORD PTR [r12]
+ 2bdbb10:	48 2d 86 00 00 00    	sub    rax,0x86
+ 2bdbb16:	b9 14 00 00 00       	mov    ecx,0x14
+ 2bdbb1b:	48 0f 43 c8          	cmovae rcx,rax
+ 2bdbb1f:	48 8d 05 3a e8 a2 fd 	lea    rax,[rip+0xfffffffffda2e83a]        # 60a360
+ 2bdbb26:	48 63 0c 88          	movsxd rcx,DWORD PTR [rax+rcx*4]
+ 2bdbb2a:	48 01 c1             	add    rcx,rax
+ 2bdbb2d:	ff e1                	jmp    rcx
+
+## #115 execute instance 1 (0x55f99b0) same idiom
+$ objdump -d -M intel --start-address=0x55f9a03 --stop-address=0x55f9a2b artifacts/node/115/hl-node
+ 55f9a03:	bd 00 ca 9a 3b       	mov    ebp,0x3b9aca00
+ 55f9a08:	49 8b 04 24          	mov    rax,QWORD PTR [r12]
+ 55f9a0c:	48 2d 86 00 00 00    	sub    rax,0x86
+ 55f9a12:	b9 14 00 00 00       	mov    ecx,0x14
+ 55f9a17:	48 0f 43 c8          	cmovae rcx,rax
+ 55f9a1b:	48 8d 05 e6 e0 32 fb 	lea    rax,[rip+0xfffffffffb32e0e6]        # 927b08
+ 55f9a22:	48 63 0c 88          	movsxd rcx,DWORD PTR [rax+rcx*4]
+ 55f9a26:	48 01 c1             	add    rcx,rax
+ 55f9a29:	ff e1                	jmp    rcx
+
+## #115 execute instance 2 (0x55faa80) same idiom
+$ objdump -d -M intel --start-address=0x55faad3 --stop-address=0x55faafb artifacts/node/115/hl-node
+ 55faad3:	bd 00 ca 9a 3b       	mov    ebp,0x3b9aca00
+ 55faad8:	49 8b 04 24          	mov    rax,QWORD PTR [r12]
+ 55faadc:	48 2d 86 00 00 00    	sub    rax,0x86
+ 55faae2:	b9 14 00 00 00       	mov    ecx,0x14
+ 55faae7:	48 0f 43 c8          	cmovae rcx,rax
+ 55faaeb:	48 8d 05 86 d1 32 fb 	lea    rax,[rip+0xfffffffffb32d186]        # 927c78
+ 55faaf2:	48 63 0c 88          	movsxd rcx,DWORD PTR [rax+rcx*4]
+ 55faaf6:	48 01 c1             	add    rcx,rax
+ 55faaf9:	ff e1                	jmp    rcx
+
+## #115 [r15] dispatcher 0x2bda7c0: entry, sentinel, tag load through r15, idiom and 92-entry table
+$ objdump -d -M intel --start-address=0x2bda7c0 --stop-address=0x2bda84c artifacts/node/115/hl-node
+ 2bda7c0:	55                   	push   rbp
+ 2bda7c1:	41 57                	push   r15
+ 2bda7c3:	41 56                	push   r14
+ 2bda7c5:	41 55                	push   r13
+ 2bda7c7:	41 54                	push   r12
+ 2bda7c9:	53                   	push   rbx
+ 2bda7ca:	48 81 ec b8 00 00 00 	sub    rsp,0xb8
+ 2bda7d1:	49 89 cf             	mov    r15,rcx
+ 2bda7d4:	49 89 d4             	mov    r12,rdx
+ 2bda7d7:	49 89 f5             	mov    r13,rsi
+ 2bda7da:	48 89 fb             	mov    rbx,rdi
+ 2bda7dd:	48 8b 01             	mov    rax,QWORD PTR [rcx]
+ 2bda7e0:	8d 48 7a             	lea    ecx,[rax+0x7a]
+ 2bda7e3:	48 3d 86 00 00 00    	cmp    rax,0x86
+ 2bda7e9:	0f b6 c9             	movzx  ecx,cl
+ 2bda7ec:	b8 14 00 00 00       	mov    eax,0x14
+ 2bda7f1:	0f 43 c1             	cmovae eax,ecx
+ 2bda7f4:	3c 0e                	cmp    al,0xe
+ 2bda7f6:	77 1c                	ja     2bda814
+ 2bda7f8:	0f b6 c0             	movzx  eax,al
+ 2bda7fb:	b9 1d 50 00 00       	mov    ecx,0x501d
+ 2bda800:	0f a3 c1             	bt     ecx,eax
+ 2bda803:	73 0f                	jae    2bda814
+ 2bda805:	bf 32 00 00 00       	mov    edi,0x32
+ 2bda80a:	ff 15 18 68 90 03    	call   QWORD PTR [rip+0x3906818]        # 64e1028
+ 2bda810:	84 c0                	test   al,al
+ 2bda812:	74 11                	je     2bda825
+ 2bda814:	bf 01 00 00 00       	mov    edi,0x1
+ 2bda819:	e8 c2 9a 0a 03       	call   5c842e0
+ 2bda81e:	49 89 c6             	mov    r14,rax
+ 2bda821:	89 d5                	mov    ebp,edx
+ 2bda823:	eb 05                	jmp    2bda82a
+ 2bda825:	bd 00 ca 9a 3b       	mov    ebp,0x3b9aca00
+ 2bda82a:	49 8b 07             	mov    rax,QWORD PTR [r15]
+ 2bda82d:	48 2d 86 00 00 00    	sub    rax,0x86
+ 2bda833:	b9 14 00 00 00       	mov    ecx,0x14
+ 2bda838:	48 0f 43 c8          	cmovae rcx,rax
+ 2bda83c:	48 8d 05 bd f6 a2 fd 	lea    rax,[rip+0xfffffffffda2f6bd]        # 609f00
+ 2bda843:	48 63 0c 88          	movsxd rcx,DWORD PTR [rax+rcx*4]
+ 2bda847:	48 01 c1             	add    rcx,rax
+ 2bda84a:	ff e1                	jmp    rcx
+
+## #115 [r15] dispatcher 0x54a2f90: sentinel, tag load and idiom
+$ objdump -d -M intel --start-address=0x54a2ff5 --stop-address=0x54a301d artifacts/node/115/hl-node
+ 54a2ff5:	bd 00 ca 9a 3b       	mov    ebp,0x3b9aca00
+ 54a2ffa:	49 8b 07             	mov    rax,QWORD PTR [r15]
+ 54a2ffd:	48 2d 86 00 00 00    	sub    rax,0x86
+ 54a3003:	b9 14 00 00 00       	mov    ecx,0x14
+ 54a3008:	48 0f 43 c8          	cmovae rcx,rax
+ 54a300c:	48 8d 05 09 37 48 fb 	lea    rax,[rip+0xfffffffffb483709]        # 92671c
+ 54a3013:	48 63 0c 88          	movsxd rcx,DWORD PTR [rax+rcx*4]
+ 54a3017:	48 01 c1             	add    rcx,rax
+ 54a301a:	ff e1                	jmp    rcx
+ 54a301c:	48                   	rex.W
+
+## #115 [r15] dispatcher 0x54a3a00: sentinel, tag load and idiom
+$ objdump -d -M intel --start-address=0x54a3a65 --stop-address=0x54a3a8d artifacts/node/115/hl-node
+ 54a3a65:	bd 00 ca 9a 3b       	mov    ebp,0x3b9aca00
+ 54a3a6a:	49 8b 07             	mov    rax,QWORD PTR [r15]
+ 54a3a6d:	48 2d 86 00 00 00    	sub    rax,0x86
+ 54a3a73:	b9 14 00 00 00       	mov    ecx,0x14
+ 54a3a78:	48 0f 43 c8          	cmovae rcx,rax
+ 54a3a7c:	48 8d 05 09 2e 48 fb 	lea    rax,[rip+0xfffffffffb482e09]        # 92688c
+ 54a3a83:	48 63 0c 88          	movsxd rcx,DWORD PTR [rax+rcx*4]
+ 54a3a87:	48 01 c1             	add    rcx,rax
+ 54a3a8a:	ff e1                	jmp    rcx
+ 54a3a8c:	48                   	rex.W
+
+## #115 [r15] dispatcher 0x2bda7c0 arms 62 and 91 (VARIANTS[62] = cDeposit, VARIANTS[91] = cDeposit2, I2): two distinct first calls
+$ objdump -d -M intel --start-address=0x2bdadde --stop-address=0x2bdadf3 artifacts/node/115/hl-node
+ 2bdadde:	49 83 c7 08          	add    r15,0x8
+ 2bdade2:	48 89 e7             	mov    rdi,rsp
+ 2bdade5:	4c 89 ee             	mov    rsi,r13
+ 2bdade8:	4c 89 e2             	mov    rdx,r12
+ 2bdadeb:	4c 89 f9             	mov    rcx,r15
+ 2bdadee:	e8 2d ca 03 00       	call   2c17820
+$ objdump -d -M intel --start-address=0x2bda893 --stop-address=0x2bda8a8 artifacts/node/115/hl-node
+ 2bda893:	49 83 c7 08          	add    r15,0x8
+ 2bda897:	48 89 e7             	mov    rdi,rsp
+ 2bda89a:	4c 89 ee             	mov    rsi,r13
+ 2bda89d:	4c 89 e2             	mov    rdx,r12
+ 2bda8a0:	4c 89 f9             	mov    rcx,r15
+ 2bda8a3:	e8 68 4f 03 00       	call   2c0f810
+
+## #115 a direct caller of the [r15] dispatcher 0x2bda7c0 (one of 5 call sites in 3 functions)
+$ objdump -d -M intel --start-address=0x2704c0c --stop-address=0x2704c11 artifacts/node/115/hl-node
+ 2704c0c:	e8 af 5b 4d 00       	call   2bda7c0
+
+## #115 [r15] arm-52 handler 0x2c12690 calls execute instance 0; 0x5536770 calls instance 1; 0x551cb40 calls instance 2
+$ objdump -d -M intel --start-address=0x2c129f7 --stop-address=0x2c129fc artifacts/node/115/hl-node
+ 2c129f7:	e8 a4 90 fc ff       	call   2bdbaa0
+$ objdump -d -M intel --start-address=0x5536e14 --stop-address=0x5536e19 artifacts/node/115/hl-node
+ 5536e14:	e8 97 2b 0c 00       	call   55f99b0
+$ objdump -d -M intel --start-address=0x551d1e4 --stop-address=0x551d1e9 artifacts/node/115/hl-node
+ 551d1e4:	e8 97 d8 0d 00       	call   55faa80
+
+## #115 [r15] arm-79 handler 0x2c19f20 calls the [r12] arm-79 handler 0x283b5b0 (userOutcome per I2)
+$ objdump -d -M intel --start-address=0x2c1a255 --stop-address=0x2c1a25a artifacts/node/115/hl-node
+ 2c1a255:	e8 56 13 c2 ff       	call   283b5b0
+
+## #115 serializer 0x2bc95f0 idiom
+$ objdump -d -M intel --start-address=0x2bc95f0 --stop-address=0x2bc9616 artifacts/node/115/hl-node
+ 2bc95f0:	48 83 ec 48          	sub    rsp,0x48
+ 2bc95f4:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+ 2bc95f7:	48 2d 86 00 00 00    	sub    rax,0x86
+ 2bc95fd:	b9 14 00 00 00       	mov    ecx,0x14
+ 2bc9602:	48 0f 43 c8          	cmovae rcx,rax
+ 2bc9606:	48 8d 05 5f fe a3 fd 	lea    rax,[rip+0xfffffffffda3fe5f]        # 60946c
+ 2bc960d:	48 63 0c 88          	movsxd rcx,DWORD PTR [rax+rcx*4]
+ 2bc9611:	48 01 c1             	add    rcx,rax
+ 2bc9614:	ff e1                	jmp    rcx
+
+## #115 serializer 0x2bcbbf0: one 'mov rbx,rdi' between the idiom and the table
+$ objdump -d -M intel --start-address=0x2bcbbf0 --stop-address=0x2bcbc1a artifacts/node/115/hl-node
+ 2bcbbf0:	53                   	push   rbx
+ 2bcbbf1:	48 83 ec 50          	sub    rsp,0x50
+ 2bcbbf5:	48 8b 06             	mov    rax,QWORD PTR [rsi]
+ 2bcbbf8:	48 2d 86 00 00 00    	sub    rax,0x86
+ 2bcbbfe:	b9 14 00 00 00       	mov    ecx,0x14
+ 2bcbc03:	48 0f 43 c8          	cmovae rcx,rax
+ 2bcbc07:	48 89 fb             	mov    rbx,rdi
+ 2bcbc0a:	48 8d 05 cb d9 a3 fd 	lea    rax,[rip+0xfffffffffda3d9cb]        # 6095dc
+ 2bcbc11:	48 63 0c 88          	movsxd rcx,DWORD PTR [rax+rcx*4]
+ 2bcbc15:	48 01 c1             	add    rcx,rax
+ 2bcbc18:	ff e1                	jmp    rcx
+
+## #115 idiom site 0x36b1573: range compares and ret, no jump table
+$ objdump -d -M intel --start-address=0x36b1570 --stop-address=0x36b1594 artifacts/node/115/hl-node
+ 36b1570:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+ 36b1573:	48 2d 86 00 00 00    	sub    rax,0x86
+ 36b1579:	b9 14 00 00 00       	mov    ecx,0x14
+ 36b157e:	48 0f 43 c8          	cmovae rcx,rax
+ 36b1582:	b0 01                	mov    al,0x1
+ 36b1584:	8d 51 e4             	lea    edx,[rcx-0x1c]
+ 36b1587:	83 fa 40             	cmp    edx,0x40
+ 36b158a:	73 01                	jae    36b158d
+ 36b158c:	c3                   	ret
+ 36b158d:	48 83 f9 1b          	cmp    rcx,0x1b
+ 36b1591:	73 01                	jae    36b1594
+ 36b1593:	c3                   	ret
+
+## #115 idiom site 0x36c2033: a byte lookup and ret, no jump table
+$ objdump -d -M intel --start-address=0x36c2030 --stop-address=0x36c204e artifacts/node/115/hl-node
+ 36c2030:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+ 36c2033:	48 2d 86 00 00 00    	sub    rax,0x86
+ 36c2039:	b9 14 00 00 00       	mov    ecx,0x14
+ 36c203e:	48 0f 43 c8          	cmovae rcx,rax
+ 36c2042:	48 8d 05 17 bd 0d fd 	lea    rax,[rip+0xfffffffffd0dbd17]        # 79dd60
+ 36c2049:	0f b6 04 01          	movzx  eax,BYTE PTR [rcx+rax*1]
+ 36c204d:	c3                   	ret
+
+## #115 idiom site 0x189f8be in another register allocation (tag rcx, index rax): dec rax; cmp rax,0x59; ja; mov rbx,rdi; then a 0x5a-entry table
+$ objdump -d -M intel --start-address=0x189f8be --stop-address=0x189f8ee artifacts/node/115/hl-node
+ 189f8be:	48 81 e9 86 00 00 00 	sub    rcx,0x86
+ 189f8c5:	b8 14 00 00 00       	mov    eax,0x14
+ 189f8ca:	48 0f 43 c1          	cmovae rax,rcx
+ 189f8ce:	48 ff c8             	dec    rax
+ 189f8d1:	48 83 f8 59          	cmp    rax,0x59
+ 189f8d5:	0f 87 b7 0d 00 00    	ja     18a0692
+ 189f8db:	48 89 fb             	mov    rbx,rdi
+ 189f8de:	48 8d 0d d3 0c c1 fe 	lea    rcx,[rip+0xfffffffffec10cd3]        # 4b05b8
+ 189f8e5:	48 63 04 81          	movsxd rax,DWORD PTR [rcx+rax*4]
+ 189f8e9:	48 01 c8             	add    rax,rcx
+ 189f8ec:	ff e0                	jmp    rax
+
+## #115 idiom site 0x36c319f (index rdi): a stack reload 'mov r14,[rsp+0x920]' before a 92-entry table with 92 distinct targets that is no serializer
+$ objdump -d -M intel --start-address=0x36c319c --stop-address=0x36c31c6 artifacts/node/115/hl-node
+ 36c319c:	48 8b 06             	mov    rax,QWORD PTR [rsi]
+ 36c319f:	48 2d 86 00 00 00    	sub    rax,0x86
+ 36c31a5:	bf 14 00 00 00       	mov    edi,0x14
+ 36c31aa:	48 0f 43 f8          	cmovae rdi,rax
+ 36c31ae:	4c 8b b4 24 20 09 00 	mov    r14,QWORD PTR [rsp+0x920]
+ 36c31b5:	00
+ 36c31b6:	48 8d 05 63 7f 0d fd 	lea    rax,[rip+0xfffffffffd0d7f63]        # 79b120
+ 36c31bd:	48 63 3c b8          	movsxd rdi,DWORD PTR [rax+rdi*4]
+ 36c31c1:	48 01 c7             	add    rdi,rax
+ 36c31c4:	ff e7                	jmp    rdi
+
+## #115 serializer 0x2bc95f0 arm 90: 'OutcomeDeploy' / 'outcomeDeploy'
+$ objdump -d -M intel --start-address=0x2bcbb0f --stop-address=0x2bcbb73 artifacts/node/115/hl-node
+ 2bcbb0f:	48 83 c7 08          	add    rdi,0x8
+ 2bcbb13:	48 8d 05 70 21 a4 fd 	lea    rax,[rip+0xfffffffffda42170]        # 60dc8a
+ 2bcbb1a:	48 89 04 24          	mov    QWORD PTR [rsp],rax
+ 2bcbb1e:	48 c7 44 24 08 06 00 	mov    QWORD PTR [rsp+0x8],0x6
+ 2bcbb25:	00 00
+ 2bcbb27:	48 8d 05 17 26 a4 fd 	lea    rax,[rip+0xfffffffffda42617]        # 60e145
+ 2bcbb2e:	48 89 44 24 10       	mov    QWORD PTR [rsp+0x10],rax
+ 2bcbb33:	48 c7 44 24 18 0d 00 	mov    QWORD PTR [rsp+0x18],0xd
+ 2bcbb3a:	00 00
+ 2bcbb3c:	48 8d 05 01 e6 88 fd 	lea    rax,[rip+0xfffffffffd88e601]        # 45a144
+ 2bcbb43:	48 89 44 24 20       	mov    QWORD PTR [rsp+0x20],rax
+ 2bcbb48:	48 c7 44 24 28 04 00 	mov    QWORD PTR [rsp+0x28],0x4
+ 2bcbb4f:	00 00
+ 2bcbb51:	48 8d 05 fa 0d a4 fd 	lea    rax,[rip+0xfffffffffda40dfa]        # 60c952
+ 2bcbb58:	48 89 44 24 30       	mov    QWORD PTR [rsp+0x30],rax
+ 2bcbb5d:	48 c7 44 24 38 0d 00 	mov    QWORD PTR [rsp+0x38],0xd
+ 2bcbb64:	00 00
+ 2bcbb66:	48 89 74 24 40       	mov    QWORD PTR [rsp+0x40],rsi
+ 2bcbb6b:	48 89 e6             	mov    rsi,rsp
+ 2bcbb6e:	e8 dd 4f d3 ff       	call   2900b50
+
+## #115 serializer 0x2bc95f0 arm 91: 'CDeposit2' / 'cDeposit2'
+$ objdump -d -M intel --start-address=0x2bc9759 --stop-address=0x2bc97bd artifacts/node/115/hl-node
+ 2bc9759:	48 83 c7 08          	add    rdi,0x8
+ 2bc975d:	48 8d 05 26 45 a4 fd 	lea    rax,[rip+0xfffffffffda44526]        # 60dc8a
+ 2bc9764:	48 89 04 24          	mov    QWORD PTR [rsp],rax
+ 2bc9768:	48 c7 44 24 08 06 00 	mov    QWORD PTR [rsp+0x8],0x6
+ 2bc976f:	00 00
+ 2bc9771:	48 8d 05 da 49 a4 fd 	lea    rax,[rip+0xfffffffffda449da]        # 60e152
+ 2bc9778:	48 89 44 24 10       	mov    QWORD PTR [rsp+0x10],rax
+ 2bc977d:	48 c7 44 24 18 09 00 	mov    QWORD PTR [rsp+0x18],0x9
+ 2bc9784:	00 00
+ 2bc9786:	48 8d 05 b7 09 89 fd 	lea    rax,[rip+0xfffffffffd8909b7]        # 45a144
+ 2bc978d:	48 89 44 24 20       	mov    QWORD PTR [rsp+0x20],rax
+ 2bc9792:	48 c7 44 24 28 04 00 	mov    QWORD PTR [rsp+0x28],0x4
+ 2bc9799:	00 00
+ 2bc979b:	48 8d 05 bd 31 a4 fd 	lea    rax,[rip+0xfffffffffda431bd]        # 60c95f
+ 2bc97a2:	48 89 44 24 30       	mov    QWORD PTR [rsp+0x30],rax
+ 2bc97a7:	48 c7 44 24 38 09 00 	mov    QWORD PTR [rsp+0x38],0x9
+ 2bc97ae:	00 00
+ 2bc97b0:	48 89 74 24 40       	mov    QWORD PTR [rsp+0x40],rsi
+ 2bc97b5:	48 89 e6             	mov    rsi,rsp
+ 2bc97b8:	e8 73 0d de ff       	call   29aa530
+
+## #115 execute instance 0 arm 91 (VARIANTS[91] = cDeposit2, I2): jumps into arm 62
+$ objdump -d -M intel --start-address=0x2bdbb82 --stop-address=0x2bdbb8c artifacts/node/115/hl-node
+ 2bdbb82:	49 8b 4c 24 08       	mov    rcx,QWORD PTR [r12+0x8]
+ 2bdbb87:	e9 cb 08 00 00       	jmp    2bdc457
+
+## #115 execute instance 0 arm 62 (VARIANTS[62] = cDeposit, I2) and the shared tail at 0x2bdc457
+$ objdump -d -M intel --start-address=0x2bdc452 --stop-address=0x2bdc46a artifacts/node/115/hl-node
+ 2bdc452:	49 8b 4c 24 28       	mov    rcx,QWORD PTR [r12+0x28]
+ 2bdc457:	48 89 e7             	mov    rdi,rsp
+ 2bdc45a:	4c 89 fe             	mov    rsi,r15
+ 2bdc45d:	4c 89 ea             	mov    rdx,r13
+ 2bdc460:	e8 8b f7 08 00       	call   2c6bbf0
+ 2bdc465:	e9 7a 04 00 00       	jmp    2bdc8e4
+
+## #115 execute instance 0 arm 52 (VARIANTS[52] = multiSig, I2): calls the dispatcher itself
+$ objdump -d -M intel --start-address=0x2bdc831 --stop-address=0x2bdc84d artifacts/node/115/hl-node
+ 2bdc831:	49 83 c4 08          	add    r12,0x8
+ 2bdc835:	48 8d 7c 24 70       	lea    rdi,[rsp+0x70]
+ 2bdc83a:	4c 89 e6             	mov    rsi,r12
+ 2bdc83d:	4c 89 ea             	mov    rdx,r13
+ 2bdc840:	4c 89 f9             	mov    rcx,r15
+ 2bdc843:	e8 58 f2 ff ff       	call   2bdbaa0
+ 2bdc848:	e9 01 01 00 00       	jmp    2bdc94e
+
+## #115 execute instance 1 arm 52: inline tag index, then a self call; cmp rax,imm32 (0x55fa739), cmovae and xor are outside the RE-010 decoder
+$ objdump -d -M intel --start-address=0x55fa72e --stop-address=0x55fa75c artifacts/node/115/hl-node
+ 55fa72e:	4d 8b 44 24 20       	mov    r8,QWORD PTR [r12+0x20]
+ 55fa733:	49 8b 00             	mov    rax,QWORD PTR [r8]
+ 55fa736:	8d 48 7a             	lea    ecx,[rax+0x7a]
+ 55fa739:	48 3d 86 00 00 00    	cmp    rax,0x86
+ 55fa73f:	0f b6 c1             	movzx  eax,cl
+ 55fa742:	b9 14 00 00 00       	mov    ecx,0x14
+ 55fa747:	0f 43 c8             	cmovae ecx,eax
+ 55fa74a:	48 8d 7c 24 70       	lea    rdi,[rsp+0x70]
+ 55fa74f:	4c 89 fe             	mov    rsi,r15
+ 55fa752:	31 d2                	xor    edx,edx
+ 55fa754:	4d 89 e9             	mov    r9,r13
+ 55fa757:	e8 54 f2 ff ff       	call   55f99b0
+
+## #115 execute instance 2 arm 52: the same, calling 0x55faa80
+$ objdump -d -M intel --start-address=0x55fb7fe --stop-address=0x55fb82c artifacts/node/115/hl-node
+ 55fb7fe:	4d 8b 44 24 20       	mov    r8,QWORD PTR [r12+0x20]
+ 55fb803:	49 8b 00             	mov    rax,QWORD PTR [r8]
+ 55fb806:	8d 48 7a             	lea    ecx,[rax+0x7a]
+ 55fb809:	48 3d 86 00 00 00    	cmp    rax,0x86
+ 55fb80f:	0f b6 c1             	movzx  eax,cl
+ 55fb812:	b9 14 00 00 00       	mov    ecx,0x14
+ 55fb817:	0f 43 c8             	cmovae ecx,eax
+ 55fb81a:	48 8d 7c 24 70       	lea    rdi,[rsp+0x70]
+ 55fb81f:	4c 89 fe             	mov    rsi,r15
+ 55fb822:	31 d2                	xor    edx,edx
+ 55fb824:	4d 89 e9             	mov    r9,r13
+ 55fb827:	e8 54 f2 ff ff       	call   55faa80
+
+## #115 execute instance 0 arm 23 (VARIANTS[23] = validatorL1Status, I2)
+$ objdump -d -M intel --start-address=0x2bdc6f0 --stop-address=0x2bdc707 artifacts/node/115/hl-node
+ 2bdc6f0:	49 83 c4 08          	add    r12,0x8
+ 2bdc6f4:	48 8d 7c 24 70       	lea    rdi,[rsp+0x70]
+ 2bdc6f9:	4c 89 e6             	mov    rsi,r12
+ 2bdc6fc:	4c 89 ea             	mov    rdx,r13
+ 2bdc6ff:	4c 89 f9             	mov    rcx,r15
+ 2bdc702:	e8 49 49 fb ff       	call   2b91050
+
+## #115 execute instance 0 arm 79 (VARIANTS[79] = userOutcome, I2)
+$ objdump -d -M intel --start-address=0x2bdbb8c --stop-address=0x2bdbbb4 artifacts/node/115/hl-node
+ 2bdbb8c:	49 83 c4 08          	add    r12,0x8
+ 2bdbb90:	41 8b 45 10          	mov    eax,DWORD PTR [r13+0x10]
+ 2bdbb94:	89 44 24 10          	mov    DWORD PTR [rsp+0x10],eax
+ 2bdbb98:	41 0f 10 45 00       	movups xmm0,XMMWORD PTR [r13+0x0]
+ 2bdbb9d:	0f 29 04 24          	movaps XMMWORD PTR [rsp],xmm0
+ 2bdbba1:	48 8d 7c 24 70       	lea    rdi,[rsp+0x70]
+ 2bdbba6:	48 89 e2             	mov    rdx,rsp
+ 2bdbba9:	4c 89 e6             	mov    rsi,r12
+ 2bdbbac:	4c 89 f9             	mov    rcx,r15
+ 2bdbbaf:	e8 fc f9 c5 ff       	call   283b5b0
+
+## #115 arm-90 handler 0x283c2d0 (outcomeDeploy per I2): direct call to the impl_outcome_deploy.rs owner
+$ objdump -d -M intel --start-address=0x283c5b6 --stop-address=0x283c5bb artifacts/node/115/hl-node
+ 283c5b6:	e8 a5 d3 41 00       	call   2c59960
+
+## #115 0x2913750, not an arm handler, also calls 0x2c59960
+$ objdump -d -M intel --start-address=0x2913a2d --stop-address=0x2913a32 artifacts/node/115/hl-node
+ 2913a2d:	e8 2e 5f 34 00       	call   2c59960
+
+## #115 instances 1 and 2: arm-90 handlers 0x4fe9d90 and 0x4fea170 call the owners 0x55cfe90 and 0x55d1ff0
+$ objdump -d -M intel --start-address=0x4fea0f7 --stop-address=0x4fea0fc artifacts/node/115/hl-node
+ 4fea0f7:	e8 94 5d 5e 00       	call   55cfe90
+$ objdump -d -M intel --start-address=0x4fea4d7 --stop-address=0x4fea4dc artifacts/node/115/hl-node
+ 4fea4d7:	e8 14 7b 5e 00       	call   55d1ff0
+
+## #115 0x50d3f40 and 0x50d3530, not arm handlers, also call 0x55cfe90 and 0x55d1ff0
+$ objdump -d -M intel --start-address=0x50d4214 --stop-address=0x50d4219 artifacts/node/115/hl-node
+ 50d4214:	e8 77 bc 4f 00       	call   55cfe90
+$ objdump -d -M intel --start-address=0x50d3804 --stop-address=0x50d3809 artifacts/node/115/hl-node
+ 50d3804:	e8 e7 e7 4f 00       	call   55d1ff0
+
+## #115 0x2c59960: impl_outcome_deploy.rs Location leas (lines 303 and 221)
+$ objdump -d -M intel --start-address=0x2c59db3 --stop-address=0x2c59dba artifacts/node/115/hl-node
+ 2c59db3:	48 8d 0d 16 3b 7f 03 	lea    rcx,[rip+0x37f3b16]        # 644d8d0
+
+## #115 0x2c59960: second impl_outcome_deploy.rs Location lea
+$ objdump -d -M intel --start-address=0x2c5a91d --stop-address=0x2c5a924 artifacts/node/115/hl-node
+ 2c5a91d:	48 8d 0d c4 2f 7f 03 	lea    rcx,[rip+0x37f2fc4]        # 644d8e8
+
+## #115 arm-79 handler 0x283b5b0 (userOutcome per I2): user_outcome.rs Location leas (lines 55, 59)
+$ objdump -d -M intel --start-address=0x283b73d --stop-address=0x283b744 artifacts/node/115/hl-node
+ 283b73d:	48 8d 0d ac 03 c0 03 	lea    rcx,[rip+0x3c003ac]        # 643baf0
+
+## #115 arm-79 handler 0x283b5b0: second user_outcome.rs Location lea
+$ objdump -d -M intel --start-address=0x283beed --stop-address=0x283bef4 artifacts/node/115/hl-node
+ 283beed:	48 8d 05 14 fc bf 03 	lea    rax,[rip+0x3bffc14]        # 643bb08
+
+## #115 arm-44 handler 0x283c6b0 (vaultTransfer per I2): vault_transfer.rs Location lea
+$ objdump -d -M intel --start-address=0x283c6dc --stop-address=0x283c6e3 artifacts/node/115/hl-node
+ 283c6dc:	4c 8d 1d 3d f4 bf 03 	lea    r11,[rip+0x3bff43d]        # 643bb20
+
+## #115 arm-48 handler 0x246cd10 (withdraw3 per I2): withdraw3.rs Location lea
+$ objdump -d -M intel --start-address=0x246cd3c --stop-address=0x246cd43 artifacts/node/115/hl-node
+ 246cd3c:	4c 8d 1d 95 37 fc 03 	lea    r11,[rip+0x3fc3795]        # 64304d8
+
+## #94 RELATIVE relocations of the cited VARIANTS / bound / Location slots and of the OutcomeDeploy VARIANTS 0x5713558 (10 names + bound)
+$ readelf -rW artifacts/node/94/hl-node   # filtered to offsets 0x56c46c8, 0x56c46e0, 0x56c46f0, 0x56c4700, 0x56c4ac0, 0x56c4c60, 0x56e8bc8, 0x56e8bd0, 0x56e8be0, 0x56e8bf0, 0x56e8fb0, 0x56e9150, 0x5733120, 0x5733130, 0x5733140, 0x5733150, 0x5733510, 0x57336b0, 0x56914c0, 0x5690288, 0x5713558, 0x5713568, 0x5713578, 0x5713588, 0x5713598, 0x57135a8, 0x57135b8, 0x57135c8, 0x57135d8, 0x57135e8, 0x57135f8
+0000000005690288  0000000000000008 R_X86_64_RELATIVE                         1dd81b
+00000000056914c0  0000000000000008 R_X86_64_RELATIVE                         1f2099
+00000000056c46c8  0000000000000008 R_X86_64_RELATIVE                         1f3fae
+00000000056c46e0  0000000000000008 R_X86_64_RELATIVE                         20a140
+00000000056c46f0  0000000000000008 R_X86_64_RELATIVE                         3f3bdd
+00000000056c4700  0000000000000008 R_X86_64_RELATIVE                         3f3be9
+00000000056c4ac0  0000000000000008 R_X86_64_RELATIVE                         20ab90
+00000000056c4c60  0000000000000008 R_X86_64_RELATIVE                         3f4076
+00000000056e8bc8  0000000000000008 R_X86_64_RELATIVE                         336ee10
+00000000056e8bd0  0000000000000008 R_X86_64_RELATIVE                         20a140
+00000000056e8be0  0000000000000008 R_X86_64_RELATIVE                         58a92e
+00000000056e8bf0  0000000000000008 R_X86_64_RELATIVE                         58a93a
+00000000056e8fb0  0000000000000008 R_X86_64_RELATIVE                         20ab90
+00000000056e9150  0000000000000008 R_X86_64_RELATIVE                         58adf0
+0000000005713558  0000000000000008 R_X86_64_RELATIVE                         5b4d35
+0000000005713568  0000000000000008 R_X86_64_RELATIVE                         5b4d49
+0000000005713578  0000000000000008 R_X86_64_RELATIVE                         5b4d58
+0000000005713588  0000000000000008 R_X86_64_RELATIVE                         5b4d7a
+0000000005713598  0000000000000008 R_X86_64_RELATIVE                         5b4d93
+00000000057135a8  0000000000000008 R_X86_64_RELATIVE                         5b4da0
+00000000057135b8  0000000000000008 R_X86_64_RELATIVE                         5b4dae
+00000000057135c8  0000000000000008 R_X86_64_RELATIVE                         2083f0
+00000000057135d8  0000000000000008 R_X86_64_RELATIVE                         5b4dc6
+00000000057135e8  0000000000000008 R_X86_64_RELATIVE                         5b4dda
+00000000057135f8  0000000000000008 R_X86_64_RELATIVE                         5b4df3
+0000000005733120  0000000000000008 R_X86_64_RELATIVE                         700c7a
+0000000005733130  0000000000000008 R_X86_64_RELATIVE                         20a140
+0000000005733140  0000000000000008 R_X86_64_RELATIVE                         700c87
+0000000005733150  0000000000000008 R_X86_64_RELATIVE                         700c93
+0000000005733510  0000000000000008 R_X86_64_RELATIVE                         20ab90
+00000000057336b0  0000000000000008 R_X86_64_RELATIVE                         70113c
+
+## #115 RELATIVE relocations of the cited VARIANTS / bound / Location slots
+$ readelf -rW artifacts/node/115/hl-node   # filtered to offsets 0x644cc28, 0x644cc40, 0x644cc50, 0x644cc60, 0x644d200, 0x6467f88, 0x6467f90, 0x6467f98, 0x6467fa8, 0x6467fb8, 0x6468558, 0x649bab8, 0x649bac8, 0x649bad8, 0x649bae8, 0x649c088, 0x643baf0, 0x643bb08, 0x644d8d0, 0x644d8e8
+000000000643baf0  0000000000000008 R_X86_64_RELATIVE                         43f111
+000000000643bb08  0000000000000008 R_X86_64_RELATIVE                         43f111
+000000000644cc28  0000000000000008 R_X86_64_RELATIVE                         438cbf
+000000000644cc40  0000000000000008 R_X86_64_RELATIVE                         45a204
+000000000644cc50  0000000000000008 R_X86_64_RELATIVE                         60c489
+000000000644cc60  0000000000000008 R_X86_64_RELATIVE                         60c495
+000000000644d200  0000000000000008 R_X86_64_RELATIVE                         60c968
+000000000644d8d0  0000000000000008 R_X86_64_RELATIVE                         432caf
+000000000644d8e8  0000000000000008 R_X86_64_RELATIVE                         432caf
+0000000006467f88  0000000000000008 R_X86_64_RELATIVE                         3c5e3f0
+0000000006467f90  0000000000000008 R_X86_64_RELATIVE                         3c4d910
+0000000006467f98  0000000000000008 R_X86_64_RELATIVE                         45a204
+0000000006467fa8  0000000000000008 R_X86_64_RELATIVE                         79c717
+0000000006467fb8  0000000000000008 R_X86_64_RELATIVE                         79c723
+0000000006468558  0000000000000008 R_X86_64_RELATIVE                         79cc08
+000000000649bab8  0000000000000008 R_X86_64_RELATIVE                         916169
+000000000649bac8  0000000000000008 R_X86_64_RELATIVE                         45a204
+000000000649bad8  0000000000000008 R_X86_64_RELATIVE                         91619a
+000000000649bae8  0000000000000008 R_X86_64_RELATIVE                         9161a6
+000000000649c088  0000000000000008 R_X86_64_RELATIVE                         916679
+
+## #94 VARIANTS copy 0x56c46e0: first two (ptr, len) slots; ptr qwords are 0 in the file and set by the RELATIVE relocations; len 4 ('noop'), 0xc ('approveAgent')
+$ objdump -s --start-address=0x56c46e0 --stop-address=0x56c4700 artifacts/node/94/hl-node
+ 56c46e0 00000000 00000000 04000000 00000000  ................
+ 56c46f0 00000000 00000000 0c000000 00000000  ................
+
+## #94 bound slot 0x56c4c60: len 0x19 = len('variant index 0 <= i < 88')
+$ objdump -s --start-address=0x56c4c60 --stop-address=0x56c4c70 artifacts/node/94/hl-node
+ 56c4c60 00000000 00000000 19000000 00000000  ................
+
+## #94 the words directly before copy 0x56c46e0: a Location record at 0x56c46c8 {ptr, len, line, col}
+$ objdump -s --start-address=0x56c46c8 --stop-address=0x56c46e0 artifacts/node/94/hl-node
+ 56c46c8 00000000 00000000 47000000 00000000  ........G.......
+ 56c46d8 4c000000 0c000000                    L.......
+
+## #94 c_deposit.rs Location record 0x56914c0 {ptr, len 0x37, line 9, col 0x12}
+$ objdump -s --start-address=0x56914c0 --stop-address=0x56914d8 artifacts/node/94/hl-node
+ 56914c0 00000000 00000000 37000000 00000000  ........7.......
+ 56914d0 09000000 12000000                    ........
+
+## #94 .rodata strings at the addends 0x20a140 ('noop') and 0x3f4076 (bound text)
+$ objdump -s --start-address=0x20a140 --stop-address=0x20a144 artifacts/node/94/hl-node
+ 20a140 6e6f6f70                             noop
+$ objdump -s --start-address=0x3f4076 --stop-address=0x3f408f artifacts/node/94/hl-node
+ 3f4076 7661 7269616e 7420696e 64657820 3020 variant index 0
+ 3f4086 3c3d 2069203c 203838                 <= i < 88
+
+## #94 .rodata path string at addend 0x1f2099 (55 bytes)
+$ objdump -s --start-address=0x1f2099 --stop-address=0x1f20d0 artifacts/node/94/hl-node
+ 1f2099 2f686f 6d652f75 62756e74 752f686c 2f /home/ubuntu/hl/
+ 1f20a9 636f64 655f4d61 696e6e65 742f6c31 2f code_Mainnet/l1/
+ 1f20b9 737263 2f616374 696f6e2f 635f6465 70 src/action/c_dep
+ 1f20c9 6f7369 742e7273                      osit.rs
+
+## #94 .rodata 'OutcomeDeploy' at 0x5b681a (13 bytes) and the 10-variant bound text at 0x5b4df3
+$ objdump -s --start-address=0x5b681a --stop-address=0x5b6827 artifacts/node/94/hl-node
+ 5b681a 4f75 74636f6d 65446570 6c6f79        OutcomeDeploy
+$ objdump -s --start-address=0x5b4df3 --stop-address=0x5b4e0c artifacts/node/94/hl-node
+ 5b4df3 76 61726961 6e742069 6e646578 203020 variant index 0
+ 5b4e03 3c 3d206920 3c203130                 <= i < 10
+
+## #94 .rodata 'CDeposit' at 0x20a640 and 'cDeposit' at 0x20ab90 (the serializer arm-62 strings)
+$ objdump -s --start-address=0x20a640 --stop-address=0x20a648 artifacts/node/94/hl-node
+ 20a640 43446570 6f736974                    CDeposit
+$ objdump -s --start-address=0x20ab90 --stop-address=0x20ab98 artifacts/node/94/hl-node
+ 20ab90 63446570 6f736974                    cDeposit
+
+## #94 Location-shaped record 0x566eca0 (base/src/lu.rs, line 2, col 0): excluded by the col != 0 rule
+$ objdump -s --start-address=0x566eca0 --stop-address=0x566ecb8 artifacts/node/94/hl-node
+ 566eca0 00000000 00000000 2b000000 00000000  ........+.......
+ 566ecb0 02000000 00000000                    ........
+
+## #115 VARIANTS copy 0x644cc40: first two slots (len 4, 0xc)
+$ objdump -s --start-address=0x644cc40 --stop-address=0x644cc60 artifacts/node/115/hl-node
+ 644cc40 00000000 00000000 04000000 00000000  ................
+ 644cc50 00000000 00000000 0c000000 00000000  ................
+
+## #115 bound slot 0x644d200: len 0x19 = len('variant index 0 <= i < 92')
+$ objdump -s --start-address=0x644d200 --stop-address=0x644d210 artifacts/node/115/hl-node
+ 644d200 00000000 00000000 19000000 00000000  ................
+
+## #115 the words directly before copy 0x644cc40: a Location record at 0x644cc28 {ptr, len, line, col}
+$ objdump -s --start-address=0x644cc28 --stop-address=0x644cc40 artifacts/node/115/hl-node
+ 644cc28 00000000 00000000 55000000 00000000  ........U.......
+ 644cc38 36000000 3e000000                    6...>...
+
+## #115 impl_outcome_deploy.rs Location records 0x644d8d0 {len 0x26, line 0x12f=303, col 0x37} and 0x644d8e8 {len 0x26, line 0xdd=221, col 0x27}
+$ objdump -s --start-address=0x644d8d0 --stop-address=0x644d900 artifacts/node/115/hl-node
+ 644d8d0 00000000 00000000 26000000 00000000  ........&.......
+ 644d8e0 2f010000 37000000 00000000 00000000  /...7...........
+ 644d8f0 26000000 00000000 dd000000 27000000  &...........'...
+
+## #115 user_outcome.rs Location records 0x643baf0 {len 0x1d, line 0x37=55, col 0x38} and 0x643bb08 {line 0x3b=59, col 0x1a}
+$ objdump -s --start-address=0x643baf0 --stop-address=0x643bb20 artifacts/node/115/hl-node
+ 643baf0 00000000 00000000 1d000000 00000000  ................
+ 643bb00 37000000 38000000 00000000 00000000  7...8...........
+ 643bb10 1d000000 00000000 3b000000 1a000000  ........;.......
+
+## #115 .rodata strings at the addends 0x45a204 ('noop') and 0x60c968 (bound text)
+$ objdump -s --start-address=0x45a204 --stop-address=0x45a208 artifacts/node/115/hl-node
+ 45a204 6e6f6f70                             noop
+$ objdump -s --start-address=0x60c968 --stop-address=0x60c981 artifacts/node/115/hl-node
+ 60c968 76617269 616e7420 696e6465 78203020  variant index 0
+ 60c978 3c3d2069 203c2039 32                 <= i < 92
+
+## #115 .rodata relative path strings at addends 0x43f111 (29 bytes) and 0x432caf (38 bytes)
+$ objdump -s --start-address=0x43f111 --stop-address=0x43f12e artifacts/node/115/hl-node
+ 43f111 6c312f 7372632f 61637469 6f6e2f75 73 l1/src/action/us
+ 43f121 65725f 6f757463 6f6d652e 7273        er_outcome.rs
+$ objdump -s --start-address=0x432caf --stop-address=0x432cd5 artifacts/node/115/hl-node
+ 432caf 6c 312f7372 632f6578 6368616e 67652f l1/src/exchange/
+ 432cbf 69 6d706c5f 6f757463 6f6d655f 646570 impl_outcome_dep
+ 432ccf 6c 6f792e72 73                       loy.rs
+
+## #115 .rodata 'OutcomeDeploy' 0x60e145, 'outcomeDeploy' 0x60c952, 'CDeposit2' 0x60e152, 'cDeposit2' 0x60c95f (the serializer arm-90/91 strings)
+$ objdump -s --start-address=0x60e145 --stop-address=0x60e15b artifacts/node/115/hl-node
+ 60e145 4f7574 636f6d65 4465706c 6f794344 65 OutcomeDeployCDe
+ 60e155 706f73 697432                        posit2
+$ objdump -s --start-address=0x60c952 --stop-address=0x60c968 artifacts/node/115/hl-node
+ 60c952 6f75 74636f6d 65446570 6c6f7963 4465 outcomeDeploycDe
+ 60c962 706f 73697432                        posit2
+
+## #115 Location-shaped record 0x64013d8 (base/src/lu.rs, line 2, col 0): excluded by the col != 0 rule
+$ objdump -s --start-address=0x64013d8 --stop-address=0x64013f0 artifacts/node/115/hl-node
+ 64013d8 00000000 00000000 0e000000 00000000  ................
+ 64013e8 02000000 00000000                    ........
+
+## #94 FDE bounds (pc=start..end, end exclusive) of the cited dispatchers, serializers, handlers and owners
+$ readelf -wf artifacts/node/94/hl-node   # filtered to the FDEs starting at 0x2759240, 0x4d83050, 0x4d84170, 0x281e850, 0x2821000, 0x2823450, 0x2825c00, 0x334cfa0, 0x334f770, 0x3351bc0, 0x48e3b50, 0x48e5fa0, 0x48e8750, 0x48eaf00, 0x1f65f80, 0x47b8300, 0x47b83f0, 0x1f661c0, 0x204c4e0, 0x282ee50, 0x48f5850, 0x48f5800, 0x23e8640, 0x1e5f010, 0x335ec90, 0x1d3fee0, 0x335edb0, 0x3360b40, 0x3913400
+0034f2ac 0000000000000260 00072b9c FDE cie=002dc714 pc=0000000001d3fee0..0000000001d40ba1
+0003bfb0 000000000000004c 0003bfb4 FDE cie=00000000 pc=0000000001e5f010..0000000001e5f1b4
+00048800 0000000000000054 00048804 FDE cie=00000000 pc=0000000001f65f80..0000000001f6606f
+0037c108 0000000000000050 0009f9f8 FDE cie=002dc714 pc=0000000001f661c0..0000000001f6780b
+0004bb50 000000000000005c 0004bb54 FDE cie=00000000 pc=000000000204c4e0..000000000204cd20
+0007c2b4 0000000000000038 0007c2b8 FDE cie=00000000 pc=00000000023e8640..00000000023e86e3
+0040f9f4 0000000000000050 001332e4 FDE cie=002dc714 pc=0000000002759240..000000000275a376
+000abe14 0000000000000368 000abe18 FDE cie=00000000 pc=000000000281e850..0000000002820ffd
+000ac180 0000000000000278 000ac184 FDE cie=00000000 pc=0000000002821000..0000000002823450
+000ac3fc 0000000000000368 000ac400 FDE cie=00000000 pc=0000000002823450..0000000002825bfd
+000ac768 0000000000000278 000ac76c FDE cie=00000000 pc=0000000002825c00..0000000002828050
+000acac8 0000000000000034 000acacc FDE cie=00000000 pc=000000000282ee50..000000000282ee92
+0011754c 0000000000000370 00117550 FDE cie=00000000 pc=000000000334cfa0..000000000334f766
+001178c0 0000000000000278 001178c4 FDE cie=00000000 pc=000000000334f770..0000000003351bc0
+00117b3c 0000000000000370 00117b40 FDE cie=00000000 pc=0000000003351bc0..0000000003354386
+00118000 0000000000000010 00118004 FDE cie=00000000 pc=000000000335ec90..000000000335eca6
+00118070 0000000000000044 00118074 FDE cie=00000000 pc=000000000335edb0..00000000033609e8
+001180cc 0000000000000044 001180d0 FDE cie=00000000 pc=0000000003360b40..0000000003362b29
+0018a9dc 0000000000000034 0018a9e0 FDE cie=00000000 pc=0000000003913400..00000000039145e5
+0021be14 0000000000000054 0021be18 FDE cie=00000000 pc=00000000047b8300..00000000047b83ef
+0021be6c 0000000000000054 0021be70 FDE cie=00000000 pc=00000000047b83f0..00000000047b84df
+0023267c 0000000000000278 00232680 FDE cie=00000000 pc=00000000048e3b50..00000000048e5fa0
+002328f8 0000000000000370 002328fc FDE cie=00000000 pc=00000000048e5fa0..00000000048e874c
+00232c6c 0000000000000370 00232c70 FDE cie=00000000 pc=00000000048e8750..00000000048eaefc
+00232fe0 0000000000000278 00232fe4 FDE cie=00000000 pc=00000000048eaf00..00000000048ed350
+0023345c 0000000000000034 00233460 FDE cie=00000000 pc=00000000048f5800..00000000048f5842
+00233494 0000000000000034 00233498 FDE cie=00000000 pc=00000000048f5850..00000000048f5892
+00604680 0000000000000050 00327f70 FDE cie=002dc714 pc=0000000004d83050..0000000004d84164
+006046d4 0000000000000050 00327fc4 FDE cie=002dc714 pc=0000000004d84170..0000000004d85284
+
+## #115 FDE bounds (pc=start..end, end exclusive) of the cited dispatchers, serializers, handlers and owners
+$ readelf -wf artifacts/node/115/hl-node   # filtered to the FDEs starting at 0x2bdbaa0, 0x55f99b0, 0x55faa80, 0x2bda7c0, 0x54a2f90, 0x54a3a00, 0x2bc95f0, 0x2bcbbf0, 0x2bce570, 0x2bd0ef0, 0x36aef70, 0x36b1600, 0x36b3f80, 0x4d81e00, 0x4d84400, 0x4d86d80, 0x4d89700, 0x2c6bbf0, 0x2a1dd50, 0x283b5b0, 0x283c2d0, 0x2c59960, 0x55cfe90, 0x55d1ff0, 0x2c17820, 0x2c0f810, 0x2c19f20, 0x2c12690, 0x551cb40, 0x5536770, 0x2913750, 0x50d3f40, 0x50d3530, 0x189f8b0, 0x36c3180
+003eaf1c 000000000000016c 000547f4 FDE cie=0039672c pc=000000000189f8b0..00000000018a0903
+000b42bc 000000000000009c 000b42c0 FDE cie=00000000 pc=000000000283b5b0..000000000283bf9d
+000b43d4 000000000000004c 000b43d8 FDE cie=00000000 pc=000000000283c2d0..000000000283c628
+004b26c0 0000000000000050 0011bf98 FDE cie=0039672c pc=0000000002913750..0000000002914169
+004c46ac 00000000000000b0 0012df84 FDE cie=0039672c pc=0000000002a1dd50..0000000002a1eb71
+000dda20 0000000000000294 000dda24 FDE cie=00000000 pc=0000000002bc95f0..0000000002bcbbe1
+000ddcb8 0000000000000398 000ddcbc FDE cie=00000000 pc=0000000002bcbbf0..0000000002bce565
+000de054 0000000000000398 000de058 FDE cie=00000000 pc=0000000002bce570..0000000002bd0ee5
+000de3f0 0000000000000294 000de3f4 FDE cie=00000000 pc=0000000002bd0ef0..0000000002bd34e1
+004e121c 0000000000000050 0014aaf4 FDE cie=0039672c pc=0000000002bda7c0..0000000002bdb225
+004e1270 0000000000000050 0014ab48 FDE cie=0039672c pc=0000000002bdbaa0..0000000002bdcb65
+004e2ec8 0000000000000050 0014c7a0 FDE cie=0039672c pc=0000000002c0f810..0000000002c0fda9
+004e31f8 0000000000000050 0014cad0 FDE cie=0039672c pc=0000000002c12690..0000000002c12c09
+004e378c 0000000000000050 0014d064 FDE cie=0039672c pc=0000000002c17820..0000000002c17db9
+004e3a2c 0000000000000050 0014d304 FDE cie=0039672c pc=0000000002c19f20..0000000002c1a3ee
+004e62b8 0000000000000050 0014fb90 FDE cie=0039672c pc=0000000002c59960..0000000002c5bac0
+004e6d94 0000000000000050 0015066c FDE cie=0039672c pc=0000000002c6bbf0..0000000002c6bed9
+0015aa70 0000000000000294 0015aa74 FDE cie=00000000 pc=00000000036aef70..00000000036b1562
+0015ad20 0000000000000398 0015ad24 FDE cie=00000000 pc=00000000036b1600..00000000036b3f7d
+0015b0bc 0000000000000398 0015b0c0 FDE cie=00000000 pc=00000000036b3f80..00000000036b68fd
+0015b628 0000000000000044 0015b62c FDE cie=00000000 pc=00000000036c3180..00000000036c5348
+00277e4c 0000000000000294 00277e50 FDE cie=00000000 pc=0000000004d81e00..0000000004d843f2
+002780e4 0000000000000398 002780e8 FDE cie=00000000 pc=0000000004d84400..0000000004d86d76
+00278480 0000000000000398 00278484 FDE cie=00000000 pc=0000000004d86d80..0000000004d896f6
+0027881c 0000000000000294 00278820 FDE cie=00000000 pc=0000000004d89700..0000000004d8bcf2
+00673614 0000000000000050 002dceec FDE cie=0039672c pc=00000000050d3530..00000000050d3f39
+00673668 0000000000000050 002dcf40 FDE cie=0039672c pc=00000000050d3f40..00000000050d4949
+006ac838 0000000000000050 00316110 FDE cie=0039672c pc=00000000054a2f90..00000000054a39f8
+006ac88c 0000000000000050 00316164 FDE cie=0039672c pc=00000000054a3a00..00000000054a4468
+006aff10 0000000000000050 003197e8 FDE cie=0039672c pc=000000000551cb40..000000000551d429
+006b1014 0000000000000050 0031a8ec FDE cie=0039672c pc=0000000005536770..0000000005537059
+006b6ca8 0000000000000050 00320580 FDE cie=0039672c pc=00000000055cfe90..00000000055d1ff0
+006b6cfc 0000000000000050 003205d4 FDE cie=0039672c pc=00000000055d1ff0..00000000055d4150
+006b8070 0000000000000050 00321948 FDE cie=0039672c pc=00000000055f99b0..00000000055faa79
+006b80c4 0000000000000050 0032199c FDE cie=0039672c pc=00000000055faa80..00000000055fbb49
+
+## #94 compiler and linker strings in .comment
+$ readelf -p .comment artifacts/node/94/hl-node   # filtered to the rustc and LLD lines
+  [    47]  Linker: LLD 21.1.8 (/checkout/src/llvm-project/llvm 00d23d10dc48c6bb9d57ba96d4a748d85d77d0c7)
+  [    a5]  rustc version 1.94.1 (e408947bf 2026-03-25)
+
+## #115 compiler and linker strings in .comment
+$ readelf -p .comment artifacts/node/115/hl-node   # filtered to the rustc and LLD lines
+  [     0]  rustc version 1.95.0 (59807616e 2026-04-14)
+  [    2c]  Linker: LLD 22.1.2 (/checkout/src/llvm-project/llvm 1cb4e3833c1919c2e6fb579a23ac0e2b22587b7e)
