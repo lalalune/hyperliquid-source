@@ -1,0 +1,64 @@
+{
+  "call_census": {
+    "giant": {
+      "direct_e8": 0,
+      "got_indirect": [
+        "0x1400e4f"
+      ],
+      "got_slot": "0x576ea80",
+      "lea_refs": 0
+    },
+    "note": "byte-pattern census over the complete .text for e8/ff15/lea encodings",
+    "wrapper": {
+      "direct_e8": 0,
+      "got_indirect": [
+        "0x44ab1b2"
+      ],
+      "got_slot": "0x576f6c8",
+      "lea_refs": 0
+    }
+  },
+  "captured_binary_executed": false,
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "giant": {
+    "bytes": 7186,
+    "datediff_call_offset": "0x1141",
+    "end_va_exclusive": "0x13d0892",
+    "fde_va": "0xfc624c",
+    "got_slot": "0x576ea80",
+    "scope": "FDE record and the datediff call site only; the body itself stays unbound",
+    "start_va": "0x13cec80"
+  },
+  "identities": {
+    "div1000_trunc_grid": "pass over [-1e9, 1e9] samples"
+  },
+  "progress_gate_requested": false,
+  "shared_anchors": {
+    "abs_mask": "0x202ed0",
+    "datediff_core": "0x151d1b0",
+    "datediff_got": "0x576eaa0",
+    "note": "datediff core and 1e6 double shared with RE-001-datediff-chrono-94",
+    "one_e6_double": "0x20ae60"
+  },
+  "structure": {
+    "immediates": {
+      "div1000_magic": "0x10624dd3",
+      "div1000_shift": 38,
+      "micros_per_second": 1000000,
+      "nanos_per_second": 1000000000
+    },
+    "observed": "datediff returns (i64 seconds, i32 nanos); a borrow flag (seconds < 0 and nanos > 0) adjusts both parts; the seconds scale by 1e6, the nanos divide by 1000 through the 0x10624dd3 magic with shift 38, the sums convert to double and divide by the shared 1e6 double; the result is masked with the absolute-value constant pair",
+    "overflow_guards": "two seto/jne pairs skip the conversion on overflow"
+  },
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "wrapper": {
+    "bytes": 115,
+    "end_va_exclusive": "0x1450ad3",
+    "fde_va": "0xcec23c",
+    "got_slot": "0x576f6c8",
+    "inferred_label": "date-difference to float-seconds wrapper",
+    "sha256": "2c4019e9f32c0ac8ad84b8195a7ee656052a3e574eae6bc25a7ee832e955f623",
+    "start_va": "0x1450a60"
+  }
+}

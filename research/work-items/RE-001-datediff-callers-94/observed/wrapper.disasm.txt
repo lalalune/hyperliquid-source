@@ -1,0 +1,34 @@
+# wrapper 0x1450a60 (datediff-to-float-seconds)
+# capstone 5.0.7 rendered disassembly, labeled; byte records authoritative
+0x1450a60:	push	rax
+0x1450a61:	call	qword ptr [rip + 0x431e039]
+0x1450a67:	test	rax, rax
+0x1450a6a:	sets	sil
+0x1450a6e:	test	edx, edx
+0x1450a70:	setg	cl
+0x1450a73:	and	cl, sil
+0x1450a76:	movzx	esi, cl
+0x1450a79:	add	rsi, rax
+0x1450a7c:	imul	rax, rsi, 0xf4240
+0x1450a83:	xorpd	xmm0, xmm0
+0x1450a87:	jo	0x1450ac9
+0x1450a89:	lea	esi, [rdx - 0x3b9aca00]
+0x1450a8f:	test	cl, cl
+0x1450a91:	cmove	esi, edx
+0x1450a94:	movsxd	rcx, esi
+0x1450a97:	imul	rcx, rcx, 0x10624dd3
+0x1450a9e:	mov	rdx, rcx
+0x1450aa1:	shr	rdx, 0x3f
+0x1450aa5:	sar	rcx, 0x26
+0x1450aa9:	add	ecx, edx
+0x1450aab:	movsxd	rcx, ecx
+0x1450aae:	add	rax, rcx
+0x1450ab1:	seto	cl
+0x1450ab4:	test	cl, 1
+0x1450ab7:	jne	0x1450ac9
+0x1450ab9:	xorps	xmm0, xmm0
+0x1450abc:	cvtsi2sd	xmm0, rax
+0x1450ac1:	divsd	xmm0, qword ptr [rip - 0x1245c69]
+0x1450ac9:	andpd	xmm0, xmmword ptr [rip - 0x124dc01]
+0x1450ad1:	pop	rax
+0x1450ad2:	ret	
