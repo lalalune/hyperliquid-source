@@ -78,6 +78,8 @@ def entries_size(data, name):
     """Read sh_entsize for `name` from the raw section table."""
     if data[:6] != b'\x7fELF\x02\x01':
         raise ScanError('expected ELF64 little-endian input')
+    if len(data) < 64:
+        raise ScanError('truncated ELF header')
     shoff = struct.unpack_from('<Q', data, 40)[0]
     entsize, count, _ = struct.unpack_from('<HHH', data, 58)
     if entsize < 64 or shoff + entsize * count > len(data):
