@@ -1,0 +1,421 @@
+{
+  "assumptions_for_conditional_six_flow": [
+    "Shown calls return normally and preserve the native ABI callee-saved registers and stack frames.",
+    "Observed input/output regions are valid, and selected frame buffers remain live and distinct.",
+    "Opaque helper calls do not alias/clobber the output carrier or its saved pointer, especially the post-store call."
+  ],
+  "bodies": {
+    "constructor": {
+      "bytes": 69,
+      "cie": {
+        "augmentation": "zR",
+        "code_align": 1,
+        "data_align": -8,
+        "fde_encoding": 27,
+        "lsda_encoding": null,
+        "personality_slot": null,
+        "raw_record": {
+          "file_offset": "0xce1518",
+          "raw": "1400000000000000017a5200017810011b0c070890010000",
+          "va": "0xce1518"
+        },
+        "va": 13505816
+      },
+      "end": "0x26bb405",
+      "fde": {
+        "file_offset": "0xd7e7e8",
+        "raw": "24000000d4d20900d0cb93014500000000420e10410e18440e4083038e027a0e18410e10420e0800",
+        "va": "0xd7e7e8"
+      },
+      "file_offset": "0x26ba3c0",
+      "lsda": null,
+      "sha256": "5c4618bd1cc54299c17a57aa0ba4403b306a93d95841758c778340b0e00b5de2",
+      "start": "0x26bb3c0"
+    },
+    "consumer": {
+      "bytes": 275,
+      "cie": {
+        "augmentation": "zR",
+        "code_align": 1,
+        "data_align": -8,
+        "fde_encoding": 27,
+        "lsda_encoding": null,
+        "personality_slot": null,
+        "raw_record": {
+          "file_offset": "0xce1518",
+          "raw": "1400000000000000017a5200017810011b0c070890010000",
+          "va": "0xce1518"
+        },
+        "va": 13505816
+      },
+      "end": "0x16ca353",
+      "fde": {
+        "file_offset": "0xd07378",
+        "raw": "44000000645e0200c02e9c001301000000410e10440e40830202690e10410e08410e404c0e10410e08410e40550e10410e08410e40660e10410e08410e4002540e10410e08000000",
+        "va": "0xd07378"
+      },
+      "file_offset": "0x16c9240",
+      "lsda": null,
+      "sha256": "f012a515a762930c26dfb97b010af8293d94e7a0f635f43a95484ed76bdf2cf4",
+      "start": "0x16ca240"
+    },
+    "producer": {
+      "bytes": 168,
+      "cie": {
+        "augmentation": "zPLR",
+        "code_align": 1,
+        "data_align": -8,
+        "fde_encoding": 27,
+        "lsda_encoding": 27,
+        "personality_slot": 91727464,
+        "raw_record": {
+          "file_offset": "0xfbdc2c",
+          "raw": "1c00000000000000017a504c5200017810079b29ca7b041b1b0c070890010000",
+          "va": "0xfbdc2c"
+        },
+        "va": 16505900
+      },
+      "end": "0x17047a8",
+      "fde": {
+        "file_offset": "0x1006298",
+        "raw": "400000007086040060e46f00a8000000045f9594ff420e10420e18420e20420e28410e3083068c058d048e038f0202710e28420e20420e18420e10420e08410e30000000",
+        "va": "0x1006298"
+      },
+      "file_offset": "0x1703700",
+      "lsda": "0x94f808",
+      "sha256": "e2d4de277edf45e26f3af86f1d3bc7678fd42bc7a88790e024a15de0226302d7",
+      "start": "0x1704700"
+    }
+  },
+  "calls": {
+    "constructor": [
+      {
+        "kind": "relocated-slot",
+        "slot": "0x576e040",
+        "va": "0x26bb3ec"
+      },
+      {
+        "kind": "direct",
+        "target": "0x1704700",
+        "va": "0x26bb3f8"
+      }
+    ],
+    "consumer": [
+      {
+        "kind": "direct",
+        "target": "0x27a22f0",
+        "va": "0x16ca2ef"
+      },
+      {
+        "kind": "direct",
+        "target": "0x26bb3c0",
+        "va": "0x16ca30a"
+      }
+    ],
+    "producer": [
+      {
+        "kind": "relocated-slot",
+        "slot": "0x576dfb8",
+        "va": "0x170471e"
+      },
+      {
+        "kind": "relocated-slot",
+        "slot": "0x576dfd8",
+        "va": "0x170472e"
+      },
+      {
+        "kind": "relocated-slot",
+        "slot": "0x576dfe0",
+        "va": "0x170474d"
+      },
+      {
+        "kind": "relocated-slot",
+        "slot": "0x576e010",
+        "va": "0x1704770"
+      },
+      {
+        "kind": "relocated-slot",
+        "slot": "0x576e010",
+        "va": "0x170479a"
+      },
+      {
+        "kind": "direct",
+        "target": "0x5660110",
+        "va": "0x17047a3"
+      }
+    ]
+  },
+  "captured_binary_executed": false,
+  "component_gates_requested": false,
+  "conclusion": "A visible byte-6 producer store is linked to a real comparison with 9. Final returned carrier value remains qualified/unknown without the helper/private-frame assumptions.",
+  "denominator": "Three unwind-described ranges totaling 512 bytes; no whole-node/function-coverage claim.",
+  "direct_write_gap": "Bytes 1..7 have no explicit output-pointer store in this body; initialization/type/padding is not established.",
+  "native": {
+    "constructor": {
+      "branches": [],
+      "calls": [
+        "0x26bb3ec",
+        "0x26bb3f8"
+      ],
+      "instruction_count": 19,
+      "limits": "Intraprocedural graph treats calls as normally returning; it does not prove call effects or exception feasibility.",
+      "returns": [
+        "0x26bb404"
+      ],
+      "traps": []
+    },
+    "consumer": {
+      "branches": [
+        "0x16ca24b",
+        "0x16ca250",
+        "0x16ca25f",
+        "0x16ca26e",
+        "0x16ca27a",
+        "0x16ca29e",
+        "0x16ca316",
+        "0x16ca320"
+      ],
+      "calls": [
+        "0x16ca2ef",
+        "0x16ca30a"
+      ],
+      "instruction_count": 83,
+      "limits": "Intraprocedural graph treats calls as normally returning; it does not prove call effects or exception feasibility.",
+      "returns": [
+        "0x16ca2af",
+        "0x16ca2bd",
+        "0x16ca2d4",
+        "0x16ca2fc",
+        "0x16ca352"
+      ],
+      "traps": []
+    },
+    "producer": {
+      "branches": [
+        "0x1704717",
+        "0x1704729",
+        "0x1704737",
+        "0x170473c",
+        "0x1704769",
+        "0x1704788",
+        "0x1704793"
+      ],
+      "byte6_store_dominates_local_normal_return": true,
+      "calls": [
+        "0x170471e",
+        "0x170472e",
+        "0x170474d",
+        "0x1704770",
+        "0x170479a",
+        "0x17047a3"
+      ],
+      "explicit_output_pointer_store_vas": [
+        "0x1704753",
+        "0x1704757",
+        "0x170475b",
+        "0x170475f"
+      ],
+      "instruction_count": 55,
+      "limits": "Intraprocedural graph treats calls as normally returning; it does not prove call effects or exception feasibility.",
+      "returns": [
+        "0x1704782"
+      ],
+      "traps": [
+        "0x1704724"
+      ]
+    }
+  },
+  "native_input_binding": "Private non-hardlinked snapshot authenticated before and after all native reads; source pathname is not reopened by native tools.",
+  "native_tool_versions": {
+    "objdump": "GNU objdump (GNU Binutils for Debian) 2.44",
+    "readelf": "GNU readelf (GNU Binutils for Debian) 2.44"
+  },
+  "observed_output_writes": [
+    {
+      "bytes": 8,
+      "offset": 8,
+      "source": "input word+16",
+      "va": "0x1704753"
+    },
+    {
+      "bytes": 8,
+      "offset": 16,
+      "source": "selected helper-return word or constant1",
+      "va": "0x1704757"
+    },
+    {
+      "bytes": 8,
+      "offset": 24,
+      "source": "input word+16",
+      "va": "0x170475b"
+    },
+    {
+      "bytes": 1,
+      "offset": 0,
+      "va": "0x170475f",
+      "value": 6
+    }
+  ],
+  "post_store_opaque_call": "0x1704770 through 0x576e010; output alias/clobber behavior is unclosed.",
+  "producer_lsda": {
+    "call_associations": [
+      {
+        "call_va": "0x170471e",
+        "lookup_pc": "0x1704723",
+        "return_pc": "0x1704724",
+        "row_index": 0
+      },
+      {
+        "call_va": "0x170472e",
+        "lookup_pc": "0x1704733",
+        "return_pc": "0x1704734",
+        "row_index": 1
+      },
+      {
+        "call_va": "0x170474d",
+        "lookup_pc": "0x1704752",
+        "return_pc": "0x1704753",
+        "row_index": 1
+      },
+      {
+        "call_va": "0x1704770",
+        "lookup_pc": "0x1704775",
+        "return_pc": "0x1704776",
+        "row_index": 1
+      },
+      {
+        "call_va": "0x170479a",
+        "lookup_pc": "0x170479f",
+        "return_pc": "0x17047a0",
+        "row_index": 1
+      },
+      {
+        "call_va": "0x17047a3",
+        "lookup_pc": "0x17047a7",
+        "return_pc": "0x17047a8",
+        "row_index": 1
+      }
+    ],
+    "call_site_encoding": "ULEB128",
+    "decoded_prefix_bytes": 14,
+    "file_offset": "0x94f808",
+    "limits": "Static call-site/landing-pad association only; personality and exception behavior unclosed.",
+    "lpstart": "omitted/body start",
+    "raw": "ffff010a1b098a01002484010000",
+    "rows": [
+      {
+        "action": 0,
+        "end": "0x1704724",
+        "landing_pad": "0x170478a",
+        "raw_uleb_values": [
+          27,
+          9,
+          138,
+          0
+        ],
+        "start": "0x170471b"
+      },
+      {
+        "action": 0,
+        "end": "0x17047a8",
+        "landing_pad": null,
+        "raw_uleb_values": [
+          36,
+          132,
+          0,
+          0
+        ],
+        "start": "0x1704724"
+      }
+    ],
+    "type_encoding": "omitted",
+    "va": "0x94f808"
+  },
+  "relocations": [
+    {
+      "addend": "0x1346068",
+      "file_offset": "0x1b1b20",
+      "raw": "b8df76050000000008000000000000006860340100000000",
+      "slot": "0x576dfb8",
+      "symbol": "",
+      "symbol_index": 0,
+      "type": 8
+    },
+    {
+      "addend": "0x54c06b0",
+      "file_offset": "0x1b1b80",
+      "raw": "d8df7605000000000800000000000000b0064c0500000000",
+      "slot": "0x576dfd8",
+      "symbol": "",
+      "symbol_index": 0,
+      "type": 8
+    },
+    {
+      "addend": "0x0",
+      "file_offset": "0x1d4ad0",
+      "raw": "e0df76050000000006000000060000000000000000000000",
+      "slot": "0x576dfe0",
+      "symbol": "memcpy",
+      "symbol_index": 6,
+      "type": 6
+    },
+    {
+      "addend": "0x54c8cb0",
+      "file_offset": "0x1b1c10",
+      "raw": "10e07605000000000800000000000000b08c4c0500000000",
+      "slot": "0x576e010",
+      "symbol": "",
+      "symbol_index": 0,
+      "type": 8
+    },
+    {
+      "addend": "0x1344760",
+      "file_offset": "0x1b1c88",
+      "raw": "40e076050000000008000000000000006047340100000000",
+      "slot": "0x576e040",
+      "symbol": "",
+      "symbol_index": 0,
+      "type": 8
+    },
+    {
+      "addend": "0x1570740",
+      "file_offset": "0x1b3848",
+      "raw": "d0e976050000000008000000000000004007570100000000",
+      "slot": "0x576e9d0",
+      "symbol": "",
+      "symbol_index": 0,
+      "type": 8
+    },
+    {
+      "addend": "0x0",
+      "file_offset": "0x1dba00",
+      "raw": "b08d77050000000007000000070000000000000000000000",
+      "slot": "0x5778db0",
+      "symbol": "_Unwind_Resume",
+      "symbol_index": 7,
+      "type": 7
+    },
+    {
+      "addend": "0x4f14ca0",
+      "file_offset": "0x1d0c48",
+      "raw": "68a67705000000000800000000000000a04cf10400000000",
+      "slot": "0x577a668",
+      "symbol": "",
+      "symbol_index": 0,
+      "type": 8
+    }
+  ],
+  "schema": "re001-wei-constructor-carrier-94/1",
+  "source_base": "1f8c67c63ca4794c9689235471c60297f8a5c985",
+  "target": {
+    "bytes": 91774280,
+    "release": 94,
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "used_chain": [
+    "constructor retains its entry output pointer and passes it to 0x1704700",
+    "consumer passes its stack+16, reloads that byte at 0x16ca30f and compares with 9 at 0x16ca314",
+    "unequal continuation forwards the loaded byte at 0x16ca344",
+    "another consumer route directly stores 9 at 0x16ca2a4; no unreachable/dead-9 claim"
+  ]
+}
