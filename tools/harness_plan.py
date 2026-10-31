@@ -37,6 +37,8 @@ def load_json(path: Path):
 
 
 def validate_protocol(protocol: dict) -> None:
+    if not isinstance(protocol, dict):
+        raise ValueError('protocol.json must be a mapping')
     required = [
         'schema_version',
         'task_id',
