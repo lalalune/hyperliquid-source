@@ -1,0 +1,41 @@
+Executed validation, 2026-10-30
+Baseline: 1f8c67c63ca4794c9689235471c60297f8a5c985
+Target node94 SHA-256: 3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f
+Tool source SHA-256: fcc0df1885f320f64dd54a67a9eda0b337c180c50c98cffa678d9a0b73b6303a
+Test source SHA-256: e6e45076f864c24d298271dbacc5dfa0e2af8457be4029edc147806badabe52a
+
+Platform: macOS 15.7.7 arm64
+Python 3.12.10; Apple LLVM objdump 17.0.0
+GNU objdump/readelf 2.47.20260726; Git LFS 3.8.1
+PATH prepended: /opt/homebrew/opt/binutils/bin:/private/tmp/slop-git-lfs/bin
+LLVM_OBJDUMP=/Library/Developer/CommandLineTools/usr/bin/llvm-objdump
+
+make doctor: exit0, analysis_ready=true, exact_rebuild_ready=false.
+Java, pinned Rust and Ghidra were not installed; no exact rebuild claimed.
+make verify: exit0; all artifact digests and three signatures valid,
+pinned reference copies match; 37 imported files and all source pins verified.
+GNU-equipped baseline make test: exit0, 431 tests, no failures/errors/skips.
+Final make verify test catalogue-check: exit0, 439 tests in101.946s, OK;
+Catalogue and progress tables match pinned inputs.
+Focused python3 -m unittest discover -s tests -p test_u128_division.py -v:
+exit0, 8 tests in3.330s, OK.
+make reproduce: exit0; inventories, raw counts and refined item classes reproduce.
+Refined counts: grounded822, drift60, notes116, late1, unanchored386, partial56, case11.
+
+python3 tools/u128_division.py --objdump $LLVM_OBJDUMP --out work/udiv94/final-llvm:
+exit0; retained evidence.json reproduced exactly.
+python3 tools/u128_division.py --objdump /opt/homebrew/opt/binutils/bin/objdump --out work/udiv94/final-gnu:
+exit0; retained evidence.json reproduced exactly, identical to LLVM.
+159431 nonzero-denominator cases, 0 mismatches, all71 instructions and4returns visited.
+Six zero-divisor controls; six changed-instruction controls freshly decoded and rejected.
+
+Earlier environment failures: reference LFS checkout initially absent; later baseline
+had12 errors/4 failures with missing GNU readelf or Apple/GNU assembly differences.
+After materializing the unchanged reference and installing latest GNU tools, all431
+baseline tests passed. No repository test or validator was relaxed.
+Initial new focused-test failures identified disassembler text spellings and a GNU
+continued-byte line; final canonicalization is spelling-only, and the caller export
+uses --insn-width=16. All raw instruction bytes remain bound to the target.
+
+No captured binary execution, live networking/chain action, keys, native replay,
+Rust reconstruction, hosted CI result, universal arithmetic proof or completion gate claimed.
