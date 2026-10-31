@@ -1,0 +1,25 @@
+order	site	rule	otherwise	outcome_label	cases
+1	0x44b4fb7	leader lookup for state+0x918 through slot 0x5773628	lookup error: drop, return	leader lookup error	1
+2	0x44b5006	20 byte result equals state+0xaec	other key: return	not the leader	1
+3	0x44b501a	state+0x928 < round	else return	already proposed this round	27
+4	0x44b502f	round > state+0x988 logs validator_set.rs:78:13, does not stop	continues	-	-
+5	0x44b50da	stake snapshot exists and holds state+0xaec	else Once word 0x577ab98, return	no stake entry	4
+6	0x44b5288	state+0x8a0 None takes the state QC +0x438, else the highest QC of the stored TC	empty TC: drop, return	empty TC	1
+7	0x44b53e1	QC vector word is not None	else return	no QC	1
+8	0x44b5466	word state+0 == 1 reverifies pending txs through 0x45485a0, failures leave the map	continues	-	-
+9	0x44b56a7	0x44b9800 returns no missing hash	missing: 0x44b8050(1, 5, 0.0), tag 0xa unless answer 2, return	missing ancestor, ask	25
+10	0x44b5a71	tx tag is not 0x8000000000000001	skip tx	-	-
+11	0x44b5a8c	tx +0x50 byte is 0	skip tx	-	-
+12	0x44b5b0c	tx not in the 0x44b9800 set	skip tx	-	-
+13	0x44b5ba5	tx time + 10 s >= event time	skip tx	-	-
+14	0x44b5c3c	stable sort by time, oldest first; below 21 records 0x4913600	continues	-	-
+15	0x44b5c56	unsaturated u64 sum of all picked sizes	overflow panics	size sum overflow panic	1
+16	0x44b5d1d	running saturated size < 4000001, or list empty	stop at the first miss, no skipping	-	-
+17	0x44b5cc8	at most 100 hashes	stop	-	-
+18	0x44b5dcc	list not empty, or 0x44b95a0 true, or state+0xb00	else free, return	idle, no block	16
+19	0x44b5dd9	state+0x928 = round, before the parent lookup	continues	-	-
+20	0x44b5df7	QC block hash found in state+0x1b8	else return, round stays marked, TC stays	marked, parent block unknown	48
+21	0x44b5e70	millis(event + 0.05 s) > millis(parent): that time	else parent + 0.001 s	-	-
+22	0x44b5f9a	state+0x8a0 = None, TC moved into the block	continues	-	-
+23	0x44b5fde	sign state+0x9d0 with 0x14a2710, unwrap	panic on error	-	-
+24	0x44b6001	push record tag 2 to the Vec at state+0x4d0	return	block sent	202

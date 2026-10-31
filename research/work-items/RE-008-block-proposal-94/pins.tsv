@@ -1,0 +1,56 @@
+group	address	bytes	meaning
+select	0x203191b	498b1e	first timer pointer of the select arm, later checked to be state+0x8c0
+select	0x2031924	807b1801	armed byte of the first timer, state+0x8d8
+select	0x203192e	488b7b10	Sleep box of the first timer, state+0x8d0
+select	0x2031937	ff154bd77303	Sleep poll through slot 0x576f088
+select	0x2031945	c6431800	clears the armed byte
+select	0x2031956	48c7030e000000	result word 0xe, first timer fired
+select	0x2031970	498b5e08	second timer pointer, state+0x8e0
+select	0x203197a	807b1801	armed byte of the second timer, state+0x8f8
+select	0x20319ac	48c7030f000000	result word 0xf, second timer fired
+task	0x204430d	4d8db424980b0000	task frame holds the state at +0xb98
+task	0x2044315	ba080b0000	state moved in, 0xb08 bytes
+task	0x204521d	498dbc2458140000	first timer struct, frame+0x1458 = state+0x8c0
+task	0x2045225	4d8d842478140000	second timer struct, frame+0x1478 = state+0x8e0
+task	0x2045278	4989bc24a8170000	stored as select pointer 0
+task	0x2045280	4d898424b0170000	stored as select pointer 1
+task	0x2045323	4883e90b	select result minus 0xb indexes the table at 0x3c3c80
+task	0x204484a	48c78424c80200000c000000	event tag 0xc, from result 0xe
+task	0x2044858	48c78424c80200000d000000	event tag 0xd, from result 0xf
+task	0x2044461	41c684247014000001	task start arms the first timer
+task	0x204454c	41c684249014000001	task start arms the second timer on the leader arm
+dispatch	0x44adfee	8985d00a0000	event time nanos into state+0xad0
+dispatch	0x44ae004	4883ea0a	event tag minus 0xa indexes the table at 0x6f2a34
+dispatch	0x44ae016	488995c80a0000	event time date and secs into state+0xac8
+dispatch	0x44ae35a	488b85b0090000	tag 0xc arm reads the fired count state+0x9b0
+dispatch	0x44ae3a4	4883fb02	fired count against 2
+dispatch	0x44ae3bc	488b98d0080000	tag 0xc arm reads the first Sleep box
+dispatch	0x44ae3d5	488b8fc0080000	adds state+0x8c0 to now
+dispatch	0x44ae433	c680d808000001	rearms: armed byte state+0x8d8 = 1
+dispatch	0x44ae44d	c685000b000001	tag 0xd arm sets state+0xb00 = 1
+dispatch	0x44ae465	ff15c5512c01	tag 0xd arm calls the proposer
+advance	0x44b6af2	498b8fc0080000	round advance adds state+0x8c0 to now
+advance	0x44b6b49	41c687d808000001	round advance arms the first timer
+advance	0x44b6b51	49c787b009000000000000	round advance clears the fired count state+0x9b0
+advance	0x44b6b75	ff15adca2b01	leader of the new round
+advance	0x44b6b96	f3410f6f8fec0a0000	compares with the own 20 byte key state+0xaec
+advance	0x44b6bcb	0f8584000000	not the leader: skip the second timer
+advance	0x44b6be2	498b8fe0080000	leader: adds state+0x8e0 to now
+advance	0x44b6c39	41c687f808000001	leader: arms the second timer
+advance	0x44b6c55	41c687000b000000	every round advance clears state+0xb00
+constructor	0x44a9403	f20f1005f51ad6fb	loads 0.3
+constructor	0x44a940b	e860e26700	Duration from f64 seconds
+constructor	0x44a9413	4189d5	nanos of the first duration
+constructor	0x44a9445	44896c2418	nanos kept in stack slot +0x18
+constructor	0x44a94b8	f20f10051814d6fb	loads the f64 just under 0.1
+constructor	0x44a94c0	e8abe16700	Duration from f64 seconds
+constructor	0x44a94c5	4989c7	secs of the second duration in r15
+constructor	0x44a94e3	44896c2448	nanos kept in stack slot +0x48
+constructor	0x44a94ff	48895c2410	secs of the first duration in stack slot +0x10
+constructor	0x44a992e	498986c0080000	state+0x8c0 secs
+constructor	0x44a9939	418986c8080000	state+0x8c8 nanos
+constructor	0x44a995a	4d89bee0080000	state+0x8e0 secs
+constructor	0x44a9965	418986e8080000	state+0x8e8 nanos
+constructor	0x44a997b	6641c786000b00000000	state+0xb00 and +0xb01 start at 0
+time	0x1459cb6	f20f59056205dbfe	seconds times 1e9
+time	0x1459d11	f2480f2cc9	truncating f64 to i64 nanoseconds
