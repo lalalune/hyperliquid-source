@@ -1,0 +1,101 @@
+# capstone 5.0.7 disassembly of spot_meta body 0x232e420 0x232e420..0x232e59e; byte records are authoritative
+232e420  55                     push rbp
+232e421  53                     push rbx
+232e422  4883ec18               sub rsp, 0x18
+232e426  440fb64609             movzx r8d, byte ptr [rsi + 9]
+232e42b  4180f802               cmp r8b, 2
+232e42f  7515                   jne 0x232e446
+232e431  0fb606                 movzx eax, byte ptr [rsi]
+232e434  884708                 mov byte ptr [rdi + 8], al
+232e437  48894f09               mov qword ptr [rdi + 9], rcx
+232e43b  44884711               mov byte ptr [rdi + 0x11], r8b
+232e43f  6641b98601             mov r9w, 0x186
+232e444  eb74                   jmp 0x232e4ba
+232e446  488b8170010000         mov rax, qword ptr [rcx + 0x170]
+232e44d  4839c2                 cmp rdx, rax
+232e450  0f8325010000           jae 0x232e57b
+232e456  48c1e205               shl rdx, 5
+232e45a  4c8b9168010000         mov r10, qword ptr [rcx + 0x168]
+232e461  4c8b8988010000         mov r9, qword ptr [rcx + 0x188]
+232e468  498b441208             mov rax, qword ptr [r10 + rdx + 8]
+232e46d  4c39c8                 cmp rax, r9
+232e470  0f83f8000000           jae 0x232e56e
+232e476  498b1412               mov rdx, qword ptr [r10 + rdx]
+232e47a  4c39ca                 cmp rdx, r9
+232e47d  0f83eb000000           jae 0x232e56e
+232e483  488b8980010000         mov rcx, qword ptr [rcx + 0x180]
+232e48a  4869c0e8000000         imul rax, rax, 0xe8
+232e491  0fb6440149             movzx eax, byte ptr [rcx + rax + 0x49]
+232e496  4869d2e8000000         imul rdx, rdx, 0xe8
+232e49d  0fb6541148             movzx edx, byte ptr [rcx + rdx + 0x48]
+232e4a2  89c3                   mov ebx, eax
+232e4a4  28d3                   sub bl, dl
+232e4a6  0f82e5000000           jb 0x232e591
+232e4ac  6641b96500             mov r9w, 0x65
+232e4b1  4189db                 mov r11d, ebx
+232e4b4  4180eb08               sub r11b, 8
+232e4b8  760e                   jbe 0x232e4c8
+232e4ba  6644890f               mov word ptr [rdi], r9w
+232e4be  4889f8                 mov rax, rdi
+232e4c1  4883c418               add rsp, 0x18
+232e4c5  5b                     pop rbx
+232e4c6  5d                     pop rbp
+232e4c7  c3                     ret 
+232e4c8  440fb65608             movzx r10d, byte ptr [rsi + 8]
+232e4cd  488b0e                 mov rcx, qword ptr [rsi]
+232e4d0  be01000000             mov esi, 1
+232e4d5  744d                   je 0x232e524
+232e4d7  41f6db                 neg r11b
+232e4da  41f6c301               test r11b, 1
+232e4de  740a                   je 0x232e4ea
+232e4e0  be0a000000             mov esi, 0xa
+232e4e5  80fb07                 cmp bl, 7
+232e4e8  743a                   je 0x232e524
+232e4ea  410fb6db               movzx ebx, r11b
+232e4ee  41f6c302               test r11b, 2
+232e4f2  740e                   je 0x232e502
+232e4f4  486bf664               imul rsi, rsi, 0x64
+232e4f8  89dd                   mov ebp, ebx
+232e4fa  83e50e                 and ebp, 0xe
+232e4fd  83fd02                 cmp ebp, 2
+232e500  7422                   je 0x232e524
+232e502  41f6c304               test r11b, 4
+232e506  7506                   jne 0x232e50e
+232e508  38d0                   cmp al, dl
+232e50a  75ae                   jne 0x232e4ba
+232e50c  eb0f                   jmp 0x232e51d
+232e50e  4869f610270000         imul rsi, rsi, 0x2710
+232e515  83e30c                 and ebx, 0xc
+232e518  83fb04                 cmp ebx, 4
+232e51b  7407                   je 0x232e524
+232e51d  4869f600e1f505         imul rsi, rsi, 0x5f5e100
+232e524  4889c8                 mov rax, rcx
+232e527  4809f0                 or rax, rsi
+232e52a  48c1e820               shr rax, 0x20
+232e52e  7412                   je 0x232e542
+232e530  4889c8                 mov rax, rcx
+232e533  31d2                   xor edx, edx
+232e535  48f7f6                 div rsi
+232e538  4839ce                 cmp rsi, rcx
+232e53b  7614                   jbe 0x232e551
+232e53d  e978ffffff             jmp 0x232e4ba
+232e542  89c8                   mov eax, ecx
+232e544  31d2                   xor edx, edx
+232e546  f7f6                   div esi
+232e548  4839ce                 cmp rsi, rcx
+232e54b  0f8769ffffff           ja 0x232e4ba
+232e551  4885d2                 test rdx, rdx
+232e554  0f8560ffffff           jne 0x232e4ba
+232e55a  4488542410             mov byte ptr [rsp + 0x10], r10b
+232e55f  4889442408             mov qword ptr [rsp + 8], rax
+232e564  488b4c2409             mov rcx, qword ptr [rsp + 9]
+232e569  e9c6feffff             jmp 0x232e434
+232e56e  488d3d7b3c3c03         lea rdi, [rip + 0x33c3c7b]
+232e575  ff15f5fe4303           call qword ptr [rip + 0x343fef5]
+232e57b  488d0d563a3c03         lea rcx, [rip + 0x33c3a56]
+232e582  4889d7                 mov rdi, rdx
+232e585  4889c6                 mov rsi, rax
+232e588  4889ca                 mov rdx, rcx
+232e58b  ff1537fa4303           call qword ptr [rip + 0x343fa37]
+232e591  488d3dc03c3c03         lea rdi, [rip + 0x33c3cc0]
+232e598  ff15b2fb4303           call qword ptr [rip + 0x343fbb2]
