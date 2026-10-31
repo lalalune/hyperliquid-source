@@ -574,10 +574,10 @@ def main(argv=None):
     args = ap.parse_args(argv)
     try:
         result, funcs, grid = analyse(args.binary.read_bytes())
-    except EvidenceError as exc:
+        write(args.out, result, funcs, grid)
+    except (EvidenceError, OSError) as exc:
         print(f'error: {exc}', file=sys.stderr)
         return 1
-    write(args.out, result, funcs, grid)
     print(json.dumps(result['summary'], sort_keys=True))
     return 0
 

@@ -415,11 +415,15 @@ def main(argv=None):
     ap.add_argument("--source", default=str(SOURCE))
     ap.add_argument("--out")
     a = ap.parse_args(argv)
-    out = render(build(Path(a.binary).read_bytes(), Path(a.source)))
-    if a.out:
-        Path(a.out).write_bytes(out)
-    else:
-        sys.stdout.buffer.write(out)
+    try:
+        out = render(build(Path(a.binary).read_bytes(), Path(a.source)))
+        if a.out:
+            Path(a.out).write_bytes(out)
+        else:
+            sys.stdout.buffer.write(out)
+    except (EvidenceError, OSError) as e:
+        print(f"exchange_dispatch: {e}", file=sys.stderr)
+        return 1
     return 0
 
 

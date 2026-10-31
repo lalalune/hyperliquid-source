@@ -1,6 +1,8 @@
 """RE-010 tests: pinned output, tamper controls, boundaries, determinism, binutils cross-check."""
 import bisect
+import contextlib
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -273,6 +275,29 @@ class Binutils(unittest.TestCase):
                 self.assertEqual(fdes[c['first_call']['target']], c['first_call']['target_fde_end'])
         for r in result()['address_survey']:
             self.assertEqual(fdes[r['fde_start']], r['fde_end'])
+
+
+class MainErrorHandling(unittest.TestCase):
+    def run_main(self, argv):
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            rc = ed.main(argv)
+        return rc, err.getvalue()
+
+    def test_missing_binary_is_one_line_error(self):
+        rc, err = self.run_main(['--binary', '/nonexistent.bin'])
+        self.assertEqual(rc, 1)
+        self.assertNotIn('Traceback', err)
+        self.assertEqual(len(err.strip().splitlines()), 1)
+
+    def test_wrong_binary_is_one_line_error(self):
+        with tempfile.TemporaryDirectory() as d:
+            junk = Path(d) / 'junk.bin'
+            junk.write_bytes(b'not an elf at all, just junk bytes for the parser')
+            rc, err = self.run_main(['--binary', str(junk)])
+        self.assertEqual(rc, 1)
+        self.assertNotIn('Traceback', err)
+        self.assertEqual(len(err.strip().splitlines()), 1)
 
 
 if __name__ == '__main__':

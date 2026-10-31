@@ -123,5 +123,15 @@ class SpotTokenDecimalsTest(unittest.TestCase):
                 self.assertTrue(filecmp.cmp(Path(tmp) / name, PACKET / name, shallow=False), name)
 
 
+class MainErrorHandlingTest(unittest.TestCase):
+    def test_missing_binary_is_one_line_error(self):
+        err = io.StringIO()
+        with tempfile.TemporaryDirectory() as d, contextlib.redirect_stderr(err):
+            rc = tool.main(['--out', d, '--binary', '/nonexistent.bin'])
+        self.assertEqual(rc, 1)
+        self.assertTrue(err.getvalue().startswith('error: '))
+        self.assertNotIn('Traceback', err.getvalue())
+
+
 if __name__ == '__main__':
     unittest.main()
