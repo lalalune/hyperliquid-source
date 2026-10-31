@@ -1,0 +1,208 @@
+family	text	result
+vote	{"o":7,"d":"12.5","m":"99"}	o=7 d=12.5 m=99
+vote	{"o":7,"m":"99","d":"12.5"}	o=7 d=12.5 m=99
+vote	{"d":"12.5","o":7,"m":"99"}	o=7 d=12.5 m=99
+vote	{"d":"12.5","m":"99","o":7}	o=7 d=12.5 m=99
+vote	{"m":"99","o":7,"d":"12.5"}	o=7 d=12.5 m=99
+vote	{"m":"99","d":"12.5","o":7}	o=7 d=12.5 m=99
+vote	  { "o" : 7 , "d" : "12.5" , "m" : "99" }  	o=7 d=12.5 m=99
+vote	[7,"12.5","99"]	o=7 d=12.5 m=99
+vote	[ 7 , "12.5" , "99" ]	o=7 d=12.5 m=99
+vote	{"o":0,"d":"","m":""}	o=0 d= m=
+vote	{"o":18446744073709551615,"d":"a","m":"b"}	o=18446744073709551615 d=a m=b
+vote	{"o":18446744073709551616,"d":"a","m":"b"}	error 0: invalid type: floating point `1.8446744073709552e19`, expected u64, line 1 column 25
+vote	{"o":-1,"d":"a","m":"b"}	error 0: invalid value: integer `-1`, expected u64, line 1 column 7
+vote	{"o":1.5,"d":"a","m":"b"}	error 0: invalid type: floating point `1.5`, expected u64, line 1 column 8
+vote	{"o":"7","d":"a","m":"b"}	error 0: invalid type: string "7", expected u64, line 1 column 8
+vote	{"o":null,"d":"a","m":"b"}	error 0: invalid type: null, expected u64, line 1 column 9
+vote	{"o":1,"d":2,"m":"b"}	error 0: invalid type: integer `2`, expected a string, line 1 column 12
+vote	{"o":1,"d":"a","m":2}	error 0: invalid type: integer `2`, expected a string, line 1 column 20
+vote	{"o":1,"d":"a"}	error 0: missing field `m`, line 1 column 15
+vote	{"o":1,"m":"b"}	error 0: missing field `d`, line 1 column 15
+vote	{"d":"a","m":"b"}	error 0: missing field `o`, line 1 column 17
+vote	{}	error 0: missing field `o`, line 1 column 2
+vote	{"o":1,"o":2,"d":"a","m":"b"}	error 0: duplicate field `o`, line 1 column 10
+vote	{"o":1,"d":"a","d":"b","m":"c"}	error 0: duplicate field `d`, line 1 column 18
+vote	{"o":1,"d":"a","m":"b","m":"c"}	error 0: duplicate field `m`, line 1 column 26
+vote	{"x":[1,2],"o":1,"d":"z","m":"b"}	o=1 d=z m=b
+vote	{"order_ntl":3,"decay_duration":"q","max_px":"r","o":1,"d":"z","m":"b"}	o=1 d=z m=b
+vote	{"oo":1,"o":1,"d":"z","m":"b"}	o=1 d=z m=b
+vote	{"":1,"o":1,"d":"z","m":"b"}	o=1 d=z m=b
+vote	{"\\u006f":1,"\\u0064":"z","\\u006d":"b"}	o=1 d=z m=b
+vote	{"o":1,"d":"a\\nb","m":"\\u0041"}	o=1 d=a\nb m=A
+vote	[]	error 0: invalid length 0, expected struct variant VoteGlobalAction::SetReserveAccumulator with 3 elements, line 1 column 2
+vote	[1]	error 0: invalid length 1, expected struct variant VoteGlobalAction::SetReserveAccumulator with 3 elements, line 1 column 3
+vote	[1,"a"]	error 0: invalid length 2, expected struct variant VoteGlobalAction::SetReserveAccumulator with 3 elements, line 1 column 7
+vote	[1,"a","b","c"]	error 22: , line 1 column 12
+vote	"s"	error 0: invalid type: string "s", expected struct variant VoteGlobalAction::SetReserveAccumulator, line 1 column 3
+vote	1	error 0: invalid type: integer `1`, expected struct variant VoteGlobalAction::SetReserveAccumulator, line 1 column 1
+vote	null	error 0: invalid type: null, expected struct variant VoteGlobalAction::SetReserveAccumulator, line 1 column 4
+vote		error 5: , line 1 column 0
+vote	{	error 3: , line 1 column 1
+vote	{"o"	error 3: , line 1 column 4
+vote	{"o":	error 5: , line 1 column 5
+vote	{"o":1	error 3: , line 1 column 6
+vote	{"o":1,	error 5: , line 1 column 7
+vote	{"o":1,}	error 21: , line 1 column 8
+vote	[1,	error 5: , line 1 column 3
+vote	[1,"a",	error 5: , line 1 column 7
+vote	[1,"a","b"	error 2: , line 1 column 10
+vote	{"o":1 "d":"a"}	error 8: , line 1 column 8
+vote	{"o":1,"d":"a","m":"b"	error 3: , line 1 column 22
+vote	!	error 10: , line 1 column 1
+vote	{!"o":1}	error 17: , line 1 column 2
+vote	{"o"!:1}	error 6: , line 1 column 5
+vote	{"o":!1}	error 10: , line 1 column 6
+vote	{"o":1!}	error 8: , line 1 column 7
+vote	{"o":1,!"d":"a"}	error 17: , line 1 column 8
+vote	[!1]	error 10: , line 1 column 2
+vote	[1!]	error 7: , line 1 column 3
+vote	[1,!"a"]	error 10: , line 1 column 4
+vote	{"d"!:"a"}	error 6: , line 1 column 5
+vote	{"m"!:"a"}	error 6: , line 1 column 5
+vote	{"d":!1}	error 10: , line 1 column 6
+vote	{"m":!1}	error 10: , line 1 column 6
+vote	\x00	error 10: , line 1 column 1
+vote	{\x00"o":1}	error 17: , line 1 column 2
+vote	{"o"\x00:1}	error 6: , line 1 column 5
+vote	{"o":\x001}	error 10: , line 1 column 6
+vote	{"o":1\x00}	error 8: , line 1 column 7
+vote	{"o":1,\x00"d":"a"}	error 17: , line 1 column 8
+vote	[\x001]	error 10: , line 1 column 2
+vote	[1\x00]	error 7: , line 1 column 3
+vote	[1,\x00"a"]	error 10: , line 1 column 4
+vote	{"d"\x00:"a"}	error 6: , line 1 column 5
+vote	{"m"\x00:"a"}	error 6: , line 1 column 5
+vote	{"d":\x001}	error 10: , line 1 column 6
+vote	{"m":\x001}	error 10: , line 1 column 6
+vote	\x0b	error 10: , line 1 column 1
+vote	{\x0b"o":1}	error 17: , line 1 column 2
+vote	{"o"\x0b:1}	error 6: , line 1 column 5
+vote	{"o":\x0b1}	error 10: , line 1 column 6
+vote	{"o":1\x0b}	error 8: , line 1 column 7
+vote	{"o":1,\x0b"d":"a"}	error 17: , line 1 column 8
+vote	[\x0b1]	error 10: , line 1 column 2
+vote	[1\x0b]	error 7: , line 1 column 3
+vote	[1,\x0b"a"]	error 10: , line 1 column 4
+vote	{"d"\x0b:"a"}	error 6: , line 1 column 5
+vote	{"m"\x0b:"a"}	error 6: , line 1 column 5
+vote	{"d":\x0b1}	error 10: , line 1 column 6
+vote	{"m":\x0b1}	error 10: , line 1 column 6
+vote	\t{\n"o"\r:\t1\n,\r"d"\n:\t"a"\r,\n"m"\t:\r"b"\n}\t	o=1 d=a m=b
+vote	\t[\n1\r,\t"a"\n,\r"b"\t]\n	o=1 d=a m=b
+row	{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}	row
+row	{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":"2026-07-19T01:02:03.004","n_samples":5}}	row
+row	[9,1,0.5,[1.0,2.0,3.0,null,4]]	row
+row	{"spot":9}	error 0: missing field `order_ntl`, line 1 column 10
+row	{}	error 0: missing field `spot`, line 1 column 2
+row	[9]	error 0: invalid length 1, expected struct ReserveAccumulator with 4 elements, line 1 column 3
+row	[9,1,0.5]	error 0: invalid length 3, expected struct ReserveAccumulator with 4 elements, line 1 column 9
+row	[9,1,0.5,[1.0]]	error 0: invalid length 1, expected struct DeterministicEma with 5 elements, line 1 column 14
+row	[9,1,0.5,[1.0,2.0,3.0,null]]	error 0: invalid length 4, expected struct DeterministicEma with 5 elements, line 1 column 27
+row	[9,1,0.5,[1.0,2.0,3.0,null,4],5]	error 22: , line 1 column 31
+row	{"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5},"max_px":1,"order_ntl":2,"spot":3}	row
+row	{"spot":9,"spot":8,"order_ntl":1,"max_px":0.25,"ema":[1.0,2.0,3.0,null,4]}	error 0: duplicate field `spot`, line 1 column 16
+row	{"spot":9,"order_ntl":1,"order_ntl":2,"max_px":0.25,"ema":[1.0,2.0,3.0,null,4]}	error 0: duplicate field `order_ntl`, line 1 column 35
+row	{"spot":9,"order_ntl":1,"max_px":0.25,"max_px":0.5,"ema":[1.0,2.0,3.0,null,4]}	error 0: duplicate field `max_px`, line 1 column 46
+row	{"spot":9,"order_ntl":1,"max_px":0.25,"ema":[1.0,2.0,3.0,null,4],"ema":[1.0,2.0,3.0,null,4]}	error 0: duplicate field `ema`, line 1 column 70
+row	{"spot":9,"order_ntl":1,"max_px":0.25,"ema":[1.0,2.0,3.0,null,4],"extra":[1]}	row
+row	{"spot":-1,"order_ntl":1,"max_px":0.25,"ema":[1.0,2.0,3.0,null,4]}	error 0: invalid value: integer `-1`, expected usize, line 1 column 10
+row	{"spot":9,"order_ntl":1,"max_px":"x","ema":[1.0,2.0,3.0,null,4]}	error 0: invalid type: string "x", expected f64, line 1 column 36
+row	{"spot":9,"order_ntl":1,"max_px":7,"ema":[1,2,3,null,4]}	row
+row	{"spot":9,"order_ntl":1,"max_px":null,"ema":[1.0,2.0,3.0,null,4]}	error 0: invalid type: null, expected f64, line 1 column 37
+row	"s"	error 0: invalid type: string "s", expected struct ReserveAccumulator, line 1 column 3
+row		error 5: , line 1 column 0
+row	{	error 3: , line 1 column 1
+row	[	error 2: , line 1 column 1
+row	{"spot":9	error 3: , line 1 column 9
+row	{"spot":9,	error 5: , line 1 column 10
+row	[9,	error 5: , line 1 column 3
+row	{"spot" 9}	error 6: , line 1 column 9
+row	{"spot":9 "order_ntl":1}	error 8: , line 1 column 11
+row	!	error 10: , line 1 column 1
+row	{!"spot":1}	error 17: , line 1 column 2
+row	{"spot"!:1}	error 6: , line 1 column 8
+row	{"spot":!1}	error 10: , line 1 column 9
+row	{"spot":1!}	error 8: , line 1 column 10
+row	{"spot":1,!"max_px":1}	error 17: , line 1 column 11
+row	[!1]	error 10: , line 1 column 2
+row	[1!]	error 7: , line 1 column 3
+row	[1,!1]	error 10: , line 1 column 4
+row	{"order_ntl"!:1}	error 6: , line 1 column 13
+row	{"max_px"!:1}	error 6: , line 1 column 10
+row	{"ema"!:1}	error 6: , line 1 column 7
+row	{"order_ntl":!1}	error 10: , line 1 column 14
+row	{"max_px":!1}	error 10: , line 1 column 11
+row	\x00	error 10: , line 1 column 1
+row	{\x00"spot":1}	error 17: , line 1 column 2
+row	{"spot"\x00:1}	error 6: , line 1 column 8
+row	{"spot":\x001}	error 10: , line 1 column 9
+row	{"spot":1\x00}	error 8: , line 1 column 10
+row	{"spot":1,\x00"max_px":1}	error 17: , line 1 column 11
+row	[\x001]	error 10: , line 1 column 2
+row	[1\x00]	error 7: , line 1 column 3
+row	[1,\x001]	error 10: , line 1 column 4
+row	{"order_ntl"\x00:1}	error 6: , line 1 column 13
+row	{"max_px"\x00:1}	error 6: , line 1 column 10
+row	{"ema"\x00:1}	error 6: , line 1 column 7
+row	{"order_ntl":\x001}	error 10: , line 1 column 14
+row	{"max_px":\x001}	error 10: , line 1 column 11
+row	\x0b	error 10: , line 1 column 1
+row	{\x0b"spot":1}	error 17: , line 1 column 2
+row	{"spot"\x0b:1}	error 6: , line 1 column 8
+row	{"spot":\x0b1}	error 10: , line 1 column 9
+row	{"spot":1\x0b}	error 8: , line 1 column 10
+row	{"spot":1,\x0b"max_px":1}	error 17: , line 1 column 11
+row	[\x0b1]	error 10: , line 1 column 2
+row	[1\x0b]	error 7: , line 1 column 3
+row	[1,\x0b1]	error 10: , line 1 column 4
+row	{"order_ntl"\x0b:1}	error 6: , line 1 column 13
+row	{"max_px"\x0b:1}	error 6: , line 1 column 10
+row	{"ema"\x0b:1}	error 6: , line 1 column 7
+row	{"order_ntl":\x0b1}	error 10: , line 1 column 14
+row	{"max_px":\x0b1}	error 10: , line 1 column 11
+row	\t{\n"spot"\r:\t9\n,\r"order_ntl"\n:\t1\r,\n"max_px"\t:\r0.5\n,"ema":[1.0,2.0,3.0,null,4]}\t	row
+row	\t[\n9\r,\t1\n,\r0.5\t,[1.0,2.0,3.0,null,4]]\n	row
+pairs	[]	0 pairs
+pairs	[ ]	0 pairs
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]]	1 pairs
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}],[2,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]]	2 pairs
+pairs	[ [ 9 , {"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}} ] ]	1 pairs
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}],]	error 21: , line 1 column 141
+pairs	[[9]]	error 0: invalid length 1, expected a tuple of size 2, line 1 column 4
+pairs	[[]]	error 0: invalid length 0, expected a tuple of size 2, line 1 column 3
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}},1]]	error 22: , line 1 column 140
+pairs	[1]	error 0: invalid type: integer `1`, expected a tuple of size 2, line 1 column 2
+pairs	[[-1,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]]	error 0: invalid value: integer `-1`, expected usize, line 1 column 4
+pairs	[	error 2: , line 1 column 1
+pairs	[[	error 2: , line 1 column 2
+pairs	[[9	error 2: , line 1 column 3
+pairs	[[9,	error 5: , line 1 column 4
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}	error 2: , line 1 column 138
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]	error 2: , line 1 column 139
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}] [1]]	error 7: , line 1 column 141
+pairs	[!]	error 10: , line 1 column 2
+pairs	[!1]	error 10: , line 1 column 2
+pairs	[[!9]]	error 10: , line 1 column 3
+pairs	[[9!]]	error 7: , line 1 column 4
+pairs	[[9,!{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]]	error 10: , line 1 column 5
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}!]]	error 22: , line 1 column 139
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]!]	error 7: , line 1 column 140
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}],![2,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]]	error 10: , line 1 column 141
+pairs	[\x00]	error 10: , line 1 column 2
+pairs	[\x001]	error 10: , line 1 column 2
+pairs	[[\x009]]	error 10: , line 1 column 3
+pairs	[[9\x00]]	error 7: , line 1 column 4
+pairs	[[9,\x00{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]]	error 10: , line 1 column 5
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}\x00]]	error 22: , line 1 column 139
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]\x00]	error 7: , line 1 column 140
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}],\x00[2,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]]	error 10: , line 1 column 141
+pairs	[\x0b]	error 10: , line 1 column 2
+pairs	[\x0b1]	error 10: , line 1 column 2
+pairs	[[\x0b9]]	error 10: , line 1 column 3
+pairs	[[9\x0b]]	error 7: , line 1 column 4
+pairs	[[9,\x0b{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]]	error 10: , line 1 column 5
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}\x0b]]	error 22: , line 1 column 139
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]\x0b]	error 7: , line 1 column 140
+pairs	[[9,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}],\x0b[2,{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}]]	error 10: , line 1 column 141
+pairs	\t[\n[\r9\t,\n{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}\r]\t,\n[\r2\t,\n{"spot":9,"order_ntl":1000000,"max_px":0.25,"ema":{"num":1.5,"denom":2.5,"decay_duration":30.0,"last_sample_time":null,"n_samples":5}}\r]\t]	error 0: invalid type: sequence, expected usize, line 2 column 0
