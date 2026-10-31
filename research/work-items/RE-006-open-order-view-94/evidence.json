@@ -1,0 +1,508 @@
+{
+  "cases": {
+    "total": 600
+  },
+  "constants": {
+    "bytes": {
+      "above": "61626f7665",
+      "below": "62656c6f77",
+      "char before a spot index": "40000000",
+      "char before an outcome number": "23000000",
+      "coin template": "c0c000",
+      "first coin": "505552522f55534443",
+      "float template": "c000",
+      "price template": "06507269636520c00120c000",
+      "side letter: mov cl,0x42; sub cl,bpl": "b1424028e9"
+    },
+    "order_table": "0x581f98",
+    "order_table_rows": 10,
+    "order_type_arms": [
+      "0x327b8a7",
+      "0x327b9c1",
+      "0x327b935",
+      "0x327b964",
+      "0x327b8d0",
+      "0x327b9e9",
+      "0x327ba14",
+      "0x327b991",
+      "0x327ba40",
+      "0x327b903"
+    ]
+  },
+  "fields": {
+    "book": {
+      "+0x08/+0x10": "slab: pointer, length",
+      "+0x28/+0x30/+0x40": "oid table: control, mask, items; entry 0x10: oid, slot",
+      "+0xb0": "spot index or perp asset",
+      "+0xb8/+0xc0": "user tree: root, height"
+    },
+    "order_node": {
+      "+0x08": "u64 keys",
+      "+0x60": "values, 0xb8 each",
+      "+0x84a": "length",
+      "+0x850": "edges"
+    },
+    "perp_meta": {
+      "+0x08/+0x10": "asset rows: pointer, length; stride 0x30; +0x08/+0x10 name pointer and length, +0x2a size decimals",
+      "+0x30": "dex number, compared with asset / 10000"
+    },
+    "record_0xa8": {
+      "+0x00": "coin String",
+      "+0x18": "triggerCondition String",
+      "+0x30": "children Vec of 0xa8 records",
+      "+0x48": "orderType String",
+      "+0x94": "cloid, 17 bytes",
+      "named_by": "json_writer in this file"
+    },
+    "slab_order": {
+      "+0x00": "dword; 2 is a free slot",
+      "+0x58/+0x60": "child ids: pointer, count",
+      "+0x90": "order type word",
+      "+0x98": "second word, passed on and never read",
+      "+0xa0": "limit price",
+      "+0xa8": "timestamp",
+      "+0xb0": "reduceOnly byte",
+      "+0xb1": "cloid, 17 bytes",
+      "+0xc2": "side byte, 0 B, 1 A",
+      "+0xc8": "size",
+      "+0xd0": "original size",
+      "+0xd8": "oid",
+      "+0xe0": "user, 20 bytes",
+      "+0xf4": "isPositionTpsl byte",
+      "+0xf5": "tif byte",
+      "stride": "0xf8"
+    },
+    "spot_meta": {
+      "+0x168/+0x170": "spot rows: pointer, length; stride 0x20; +0 base token, +8 quote token",
+      "+0x180/+0x188": "token rows: pointer, length; stride 0xe8; +0x48 size decimals, +0x49 wei decimals",
+      "+0x70/+0x78/+0x88/+0x90": "token to id map: control, mask, items, hash keys; entry 0x10",
+      "+0xd0/+0xd8/+0xe8/+0xf0": "id to outcome map; entry 0x90: id, first token at +0x28, second token at +0x50"
+    },
+    "trigger_order": {
+      "+0x00/+0x08": "size option: tag, value; tag 0 is a whole position order",
+      "+0x38/+0x40": "child ids: pointer, count",
+      "+0x70": "order type word",
+      "+0x78": "second word, passed on and never read",
+      "+0x80": "limit price",
+      "+0x88": "timestamp",
+      "+0x90": "reduceOnly byte",
+      "+0x91": "cloid, 17 bytes",
+      "+0xa2": "side byte",
+      "+0xa8": "trigger price",
+      "+0xb1": "take profit or stop byte, compared with side",
+      "stride": "0xb8"
+    },
+    "user_node": {
+      "+0x378": "keys, 0x14 each",
+      "+0x38": "values, 0x50 each; value +0 and +8: order tree root, height",
+      "+0x456": "length",
+      "+0x458": "edges"
+    }
+  },
+  "first_mismatch": "",
+  "functions": [
+    {
+      "end": "0x42fc2e8",
+      "instructions": 320,
+      "instructions_stepped": 274,
+      "role": "spot resting builder",
+      "size": 1592,
+      "start": "0x42fbcb0"
+    },
+    {
+      "end": "0x42fc78a",
+      "instructions": 238,
+      "instructions_stepped": 209,
+      "role": "perp resting builder",
+      "size": 1178,
+      "start": "0x42fc2f0"
+    },
+    {
+      "end": "0x43029c9",
+      "instructions": 318,
+      "instructions_stepped": 273,
+      "role": "spot trigger builder",
+      "size": 1609,
+      "start": "0x4302380"
+    },
+    {
+      "end": "0x4302f64",
+      "instructions": 286,
+      "instructions_stepped": 252,
+      "role": "perp trigger builder",
+      "size": 1428,
+      "start": "0x43029d0"
+    },
+    {
+      "end": "0x4339192",
+      "instructions": 179,
+      "instructions_stepped": 177,
+      "role": "spot child lookup",
+      "size": 722,
+      "start": "0x4338ec0"
+    },
+    {
+      "end": "0x4339472",
+      "instructions": 179,
+      "instructions_stepped": 177,
+      "role": "perp child lookup",
+      "size": 722,
+      "start": "0x43391a0"
+    },
+    {
+      "end": "0x487b214",
+      "instructions": 122,
+      "instructions_stepped": 103,
+      "role": "spot child collector",
+      "size": 532,
+      "start": "0x487b000"
+    },
+    {
+      "end": "0x4870464",
+      "instructions": 122,
+      "instructions_stepped": 103,
+      "role": "perp child collector",
+      "size": 532,
+      "start": "0x4870250"
+    },
+    {
+      "end": "0x49e8087",
+      "instructions": 61,
+      "instructions_stepped": 53,
+      "role": "spot trigger condition text",
+      "size": 311,
+      "start": "0x49e7f50"
+    },
+    {
+      "end": "0x327baec",
+      "instructions": 124,
+      "instructions_stepped": 103,
+      "role": "order type text",
+      "size": 604,
+      "start": "0x327b890"
+    },
+    {
+      "end": "0x3729828",
+      "instructions": 125,
+      "instructions_stepped": 124,
+      "role": "outcome id of a token, helper",
+      "size": 456,
+      "start": "0x3729660"
+    },
+    {
+      "end": "0x399c5f6",
+      "instructions": 86,
+      "instructions_stepped": 86,
+      "role": "SipHash of one u64, helper",
+      "size": 342,
+      "start": "0x399c4a0"
+    },
+    {
+      "end": "0x3a008d7",
+      "instructions": 141,
+      "instructions_stepped": 56,
+      "role": "hasher write, helper",
+      "size": 471,
+      "start": "0x3a00700"
+    }
+  ],
+  "instructions_stepped": 349199,
+  "json_writer": {
+    "fields": [
+      {
+        "kind": "text",
+        "name": "coin",
+        "offset": "0x0",
+        "writer": "0x2a033e0"
+      },
+      {
+        "kind": "side",
+        "name": "side",
+        "offset": "0x90",
+        "writer": "0x29fa870"
+      },
+      {
+        "kind": "float",
+        "name": "limitPx",
+        "offset": "0x60",
+        "writer": "0x2a01350"
+      },
+      {
+        "kind": "float",
+        "name": "sz",
+        "offset": "0x68",
+        "writer": "0x2a01350"
+      },
+      {
+        "kind": "u64",
+        "name": "oid",
+        "offset": "0x70",
+        "writer": "0x29f7ef0"
+      },
+      {
+        "kind": "u64",
+        "name": "timestamp",
+        "offset": "0x78",
+        "writer": "0x29f7ef0"
+      },
+      {
+        "kind": "text or string",
+        "name": "triggerCondition",
+        "offset": "0x18",
+        "writer": "0x29f95f0"
+      },
+      {
+        "kind": "bool",
+        "name": "isTrigger",
+        "offset": "0x91",
+        "writer": "0x2a03240"
+      },
+      {
+        "kind": "float",
+        "name": "triggerPx",
+        "offset": "0x80",
+        "writer": "0x2a01350"
+      },
+      {
+        "kind": "children",
+        "name": "children",
+        "offset": "0x30",
+        "writer": "0x29f93b0"
+      },
+      {
+        "kind": "bool",
+        "name": "isPositionTpsl",
+        "offset": "0x92",
+        "writer": "0x2a03240"
+      },
+      {
+        "kind": "bool",
+        "name": "reduceOnly",
+        "offset": "0x93",
+        "writer": "0x2a03240"
+      },
+      {
+        "kind": "text or string",
+        "name": "orderType",
+        "offset": "0x48",
+        "writer": "0x29f95f0"
+      },
+      {
+        "kind": "float",
+        "name": "origSz",
+        "offset": "0x88",
+        "writer": "0x2a01350"
+      },
+      {
+        "kind": "tif",
+        "name": "tif",
+        "offset": "0xa5",
+        "writer": "0x2a06460"
+      },
+      {
+        "kind": "cloid",
+        "name": "cloid",
+        "offset": "0x94",
+        "writer": "0x2a055e0"
+      }
+    ],
+    "function": "0x2a2c240"
+  },
+  "locations": [
+    {
+      "column": 38,
+      "line": 194,
+      "name": "asset of another dex or past the list",
+      "path": "l1/src/perp_meta.rs",
+      "slot": "0x56f21c0"
+    },
+    {
+      "column": 33,
+      "line": 113,
+      "name": "token past the row list",
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x56f21f0"
+    },
+    {
+      "column": 9,
+      "line": 984,
+      "name": "wei decimals below size decimals",
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x56f2258"
+    },
+    {
+      "column": 28,
+      "line": 319,
+      "name": "size decimals above 6",
+      "path": "l1/src/perp_meta.rs",
+      "slot": "0x56f3350"
+    },
+    {
+      "column": 25,
+      "line": 565,
+      "name": "spot past the list",
+      "path": "l1/src/spot_meta.rs",
+      "slot": "0x5714c70"
+    }
+  ],
+  "mismatches": 0,
+  "mutations": {
+    "killed": 618,
+    "survived": 32,
+    "unreached": 35
+  },
+  "outcomes": {
+    "no record": 48,
+    "order type text": 10,
+    "perp resting record": 109,
+    "perp trigger record": 107,
+    "spot resting record": 137,
+    "spot trigger record": 135,
+    "stop bounds spot past the list": 4,
+    "stop overflow size decimals above 6": 10,
+    "stop overflow wei decimals below size decimals": 6,
+    "stop panic asset of another dex or past the list": 14,
+    "stop panic token past the row list": 20
+  },
+  "powers": {
+    "at": "0x6f7470",
+    "first_row_not_nearest": 25,
+    "next_word_is_a_power": false,
+    "row_25_bits": "0x45208b2a2c280290",
+    "rows": 256,
+    "rows_equal_to_the_nearest_double": 61
+  },
+  "reference_claims": [
+    {
+      "claim": "RestingOrder lists oid, user, side, px, resting_sz, orig_sz, reduce_only, is_position_tpsl, tif, cloid, timestamp with no offsets past +0x18",
+      "observed": "the slab order fields sit at the offsets in `fields` here",
+      "reference": "l1/book/book/impl_insert_order.rs:141",
+      "verdict": "names agree; offsets are new"
+    },
+    {
+      "claim": "tif raw values 0 to 4, anything else Other",
+      "observed": "resting records copy the slot byte +0xf5 and trigger records store the constant 5",
+      "reference": "l1/book/book/impl_insert_order.rs:77",
+      "verdict": "5 is outside the reference list"
+    },
+    {
+      "claim": "order_kind is a bare u64",
+      "observed": "0x327b890 names words 0 to 9 through table 0x581f98",
+      "reference": "l1/book/book/impl_insert_order.rs:124",
+      "verdict": "names absent from the reference"
+    },
+    {
+      "claim": "no text triggerCondition and no record with these 16 names",
+      "observed": "builders here and the writer 0x2a2c240",
+      "reference": "whole tree",
+      "verdict": "absent from the reference"
+    }
+  ],
+  "sites_in_functions_of_open_pr_47_not_listed": 12,
+  "slots": {
+    "0x576ea18": "0x1571d50",
+    "0x57738c8": "0x3729660",
+    "0x57739b0": "0x38033f0",
+    "0x5774800": "0x327b890"
+  },
+  "target": {
+    "file": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "twins": [
+    {
+      "call_targets_that_differ": {
+        "0x42fbcb0": "0x42fc2f0",
+        "0x4302380": "0x43029d0"
+      },
+      "instructions": 179,
+      "left": "0x4338ec0",
+      "right": "0x43391a0",
+      "rip_words_that_differ": 1
+    },
+    {
+      "call_targets_that_differ": {
+        "0x4338ec0": "0x43391a0"
+      },
+      "instructions": 122,
+      "left": "0x487b000",
+      "right": "0x4870250",
+      "rip_words_that_differ": 6
+    }
+  ],
+  "worked_examples": {
+    "outcome token trigger": {
+      "children": [],
+      "cloid": "6162636465666768696a6b6c6d6e6f7071",
+      "coin": "#30",
+      "isPositionTpsl": 0,
+      "isTrigger": 1,
+      "limitPx": 1234.5678,
+      "oid": 30583,
+      "orderType": "Take Profit Market",
+      "origSz": 15.0,
+      "reduceOnly": 0,
+      "side": "B",
+      "sz": 15.0,
+      "tif": 5,
+      "timestamp": 1700000000123,
+      "triggerCondition": "Price above 2345.6789",
+      "triggerPx": 2345.6789
+    },
+    "perp whole position stop": {
+      "children": [],
+      "cloid": "6162636465666768696a6b6c6d6e6f7071",
+      "coin": "ETH",
+      "isPositionTpsl": 1,
+      "isTrigger": 1,
+      "limitPx": 940000000.0,
+      "oid": 30583,
+      "orderType": "Stop Market",
+      "origSz": 0.0,
+      "reduceOnly": 0,
+      "side": "A",
+      "sz": 0.0,
+      "tif": 5,
+      "timestamp": 1700000000123,
+      "triggerCondition": "Price below 950000000",
+      "triggerPx": 950000000.0
+    },
+    "spot resting with a Twap Slice child": {
+      "children": [
+        {
+          "children": [],
+          "cloid": "4142434445464748494a4b4c4d4e4f5051",
+          "coin": "[at]1",
+          "isPositionTpsl": 0,
+          "isTrigger": 0,
+          "limitPx": 1234.5678,
+          "oid": 256,
+          "orderType": "Twap Slice",
+          "origSz": 0.2,
+          "reduceOnly": 0,
+          "side": "B",
+          "sz": 0.0007,
+          "tif": 1,
+          "timestamp": 1700000000123,
+          "triggerCondition": "Triggered",
+          "triggerPx": 0.0
+        }
+      ],
+      "cloid": "4142434445464748494a4b4c4d4e4f5051",
+      "coin": "[at]1",
+      "isPositionTpsl": 0,
+      "isTrigger": 0,
+      "limitPx": 1234.5678,
+      "oid": 30583,
+      "orderType": "Limit",
+      "origSz": 0.2,
+      "reduceOnly": 0,
+      "side": "A",
+      "sz": 0.15,
+      "tif": 1,
+      "timestamp": 1700000000123,
+      "triggerCondition": "N/A",
+      "triggerPx": 0.0
+    }
+  }
+}
