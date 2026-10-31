@@ -1,0 +1,90 @@
+scenario	operations	outcome
+sign_ok_first_vote	sign	0x186
+sign_at_limit_minus_one	sign	0x186
+sign_at_limit	sign	0x13f
+sign_reference_limit	sign	0x13f
+sign_u64_max	sign	0x13f
+sign_hash_error	sign	0x7a
+sign_recover_error	sign	0x7a
+sign_signer_mismatch	sign	0x11f
+sign_mismatch_last_byte	sign	0x11f
+sign_mismatch_byte_16	sign	0x11f
+sign_outsider	sign	0x2a
+sign_no_epoch	sign	0x97
+sign_empty_validators	sign	0x2a
+sign_no_row	sign	0x90
+sign_other_usd	sign	0x90
+sign_other_destination	sign	0x90
+sign_other_nonce	sign	0x90
+sign_other_user	sign	0x90
+sign_order_limit_before_hash	sign	0x13f
+sign_order_hash_before_validator	sign	0x7a
+sign_order_mismatch_before_validator	sign	0x11f
+sign_order_validator_before_row	sign	0x2a
+sign_chain_zero	sign	0x186
+sign_chain_two	sign	0x186
+quorum_three_of_four	sign sign sign sign	0x186 0x186 0x186 0x186
+repeat_vote_overwrites	sign sign sign sign	0x186 0x186 0x186 0x186
+after_quorum_vote_kept	sign sign sign sign sign	0x186 0x186 0x186 0x186 0x186
+exact_two_thirds_is_short	sign sign sign	0x186 0x186 0x186
+weighted_exact_two_thirds	sign sign	0x186 0x186
+weighted_over_two_thirds	sign	0x186
+zero_stake_voter	sign sign	0x186 0x186
+finalize_three_of_four	final final final	0x186 0x186 0x186(finished)
+finalize_without_signatures_then_gone	final final final final sign	0x186 0x186 0x186(finished) 0x90 0x90
+finalize_after_signature_quorum	sign sign sign final final final	0x186 0x186 0x186 0x186 0x186 0x186(finished)
+finalize_split_hashes	final final final final final	0x186 0x186 0x186 0x186 0x186(finished)
+finalize_repeat_voter_counts_once	final final final final final	0x186 0x186 0x186 0x186 0x186(finished)
+finalize_same_voter_two_hashes	final final final final	0x186 0x186 0x186 0x186(finished)
+finalize_at_limit_wrapper	final	0x13f
+finalize_limit_minus_one	final final final	0x186 0x186 0x186(finished)
+finalize_outsider	final	0x2a
+finalize_no_epoch	final	0x97
+finalize_no_row	final	0x90
+finalize_other_usd	final	0x90
+finalize_other_destination	final	0x90
+finalize_other_user	final	0x90
+finalize_other_nonce	final	0x90
+finalize_no_dex_panics	final final final	0x186 0x186 panic unwrap 0x141
+finalize_no_dex_not_finished	final	0x186
+core_direct_limit	final_core	0x13f
+core_direct_no_event	final_core final_core final_core	0x186/0 0x186/0 0x186/1
+core_direct_outsider	final_core	0x2a
+create_then_sign	create sign	0x186 0x186
+create_duplicate	create create	0x9a 0x9a
+create_first_row	create sign final	0x186 0x186 0x186
+create_after_finish_time_overwritten	final final final create final final final	0x186 0x186 0x186(finished) 0x186 0x186 0x186 0x186(finished)
+create_other_user_low	create create	0x186 0x186
+create_nonce_low_high	create create	0x186 0x186
+tree_two_levels_hit	sign sign sign final	0x186 0x186 0x186 0x186
+tree_two_levels_miss	sign sign final sign	0x90 0x90 0x90 0x90
+no_trim_100_rows	sign	0x186
+no_trim_101_rows	sign sign	0x186(alloc) 0x186(alloc)
+no_trim_110_rows	sign	0x186(alloc)
+final_map_100_rows	final	0x186
+final_map_101_rows	final final	0x186(alloc) 0x186(alloc)
+final_map_101_rows_finish	final final final	0x186(alloc) 0x186(alloc) 0x186(alloc+finished)
+track_sign_no_voter	track_sign	0x0
+track_sign_non_member	track_sign	0x0
+track_sign_absent_row	track_sign	0x0
+track_sign_absent_inner	track_sign track_sign track_sign	0x0 0x0 0x0
+track_sign_winner_output	track_sign track_sign track_sign track_sign	0x0 0x0 0x1 0x0
+track_sign_empty_set_row	track_sign track_sign track_sign track_sign	0x0 0x0 0x0 0x1
+track_sign_no_epoch	track_sign	0x0
+track_final_no_voter	track_final	0x0
+track_final_non_member	track_final	0x0
+track_final_winner_output	track_final track_final track_final track_final track_final	0x0 0x0 0x1 0x0 0x0
+track_final_two_rows	track_final track_final track_final track_final track_final	0x0 0x0 0x0 0x0 0x0
+track_final_hash_low_high	track_final track_final track_final	0x0 0x0 0x0
+track_final_no_epoch	track_final	0x0
+weight_boundaries	weight weight weight weight weight weight	0x0 0x1 0x0 0x0 0x0 0x0
+weight_two_to_one	weight weight weight	0x0 0x0 0x1
+weight_saturates	weight weight	0x1 0x0
+weight_total_overflow	weight	panic add overflow
+weight_zero_total	weight	0x0
+weight_no_validators	weight weight	0x0 0x0
+weight_no_epoch	weight	0x0
+wide_set_two_levels	sign sign sign final final weight weight	0x186 0x186 0x186 0x186 0x186 0x0 0x1
+wide_quorum_signatures	sign sign sign sign sign sign sign sign sign sign sign	0x186 0x186 0x186 0x186 0x186 0x186 0x186 0x186 0x186 0x186 0x186
+wide_quorum_final	final final final final final final final final final final final	0x186 0x186 0x186 0x186 0x186 0x186 0x186 0x186 0x186 0x186 0x186(finished)
+weight_high_128	weight weight	0x1 0x0
