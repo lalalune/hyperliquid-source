@@ -24,6 +24,13 @@ class ArtifactTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             a.check(p, self.item)
 
+    def test_malformed_artifact_record_rejected(self):
+        p = self.root / 'node'
+        p.write_bytes(b'good')
+        for bad in ({'size': 4}, {'sha256': self.item['sha256']}, None):
+            with self.assertRaises(ValueError):
+                a.check(p, bad)
+
     def test_failed_download_does_not_publish_partial(self):
         source = self.root / 'source'
         source.write_bytes(b'evil')

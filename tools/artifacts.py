@@ -22,6 +22,8 @@ def digest(path):
 
 def check(path, item):
     path = Path(path)
+    if type(item) is not dict or 'size' not in item or 'sha256' not in item:
+        raise ValueError(f'Invalid artifact record: {path}')
     if not path.is_file():
         raise ValueError(f'Missing artifact: {path}')
     if path.stat().st_size != item['size'] or digest(path) != item['sha256']:
