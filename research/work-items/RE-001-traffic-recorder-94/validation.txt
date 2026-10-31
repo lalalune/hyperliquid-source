@@ -1,0 +1,33 @@
+Native validation, 2026-10-31
+Base: 1f8c67c63ca4794c9689235471c60297f8a5c985
+darwin 24.6.0 (arm64), macOS Kernel Version 24.6.0
+Python 3.15.0 (/usr/local/opt/python@3.15/bin/python3.15)
+Disassembler: Homebrew llvm-objdump 22.1.8 (/usr/local/opt/llvm/bin/llvm-objdump)
+git-lfs 3.8.1 (GitHub, darwin arm64) installed to ~/.local/bin for LFS smudge
+No system/package maintainer hooks run; captured executables never launched.
+
+make doctor: exit 0, analysis_ready true, exact_rebuild_ready false.
+make verify: exit 0; all artifact SHA-256 identities accepted, signatures valid,
+37 immutable imported files and all seven pinned source repositories verified.
+make test (unittest discover -s tests): 362 tests, failures=4, errors=12,
+skipped=15. All 16 failures/errors are pre-existing on the clean base tree
+(357 tests, failures=4, errors=12, skipped=15) and are GNU-binutils cross-checks
+(readelf-dependent classes and objdump rendering) that need the Ubuntu CI
+toolchain; this darwin host has no GNU readelf. All 5 new
+test_traffic_recorder_static tests pass.
+make catalogue-check: catalogue and progress tables match pinned inputs.
+make reproduce: exit 0; both inventories and raw/refined item classifications
+reproduce; refined counts grounded822 drift60 notes116 late1 case11 partial56
+unanchored386.
+
+python3 tools/traffic_recorder_static.py --output work/traffic-recorder-94: exit 0.
+python3 tools/traffic_recorder_static.py --output work/traffic-recorder-94-rerun: exit 0.
+diff -ru research/work-items/RE-001-traffic-recorder-94/observed \
+        work/traffic-recorder-94-rerun: identical, exit 0 (deterministic).
+
+The 32 instruction byte controls, 6 string anchors, 12 FDE range decodings, and
+the 7-callee direct-call census all hold against the authenticated SHA-256
+3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f.
+Known gap: GNU objdump 2.42 rendering of observed/*.objdump.txt will differ in
+text formatting from llvm-objdump 22.1.8; records.json carries every checked
+fact renderer-independently.
