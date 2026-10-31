@@ -1,0 +1,19 @@
+function	at	bytes	operation	note
+0x374f930	0x374fa27	4939ed	cmp	action epoch against current epoch
+0x374f930	0x374fa2a	0f860a020000	jcc	not newer: leave with success
+0x374f930	0x374fac4	4d896f48	mov	store action epoch as current epoch
+0x374f930	0x374facf	488d7c2430	lea	prune output
+0x374f930	0x374fadf	e8ac2f1f00	call	prune the signature map
+0x374e620	0x374eaab	e800b3c1ff	call	set compare after recovery
+0x374e620	0x374e733	ff15f7760202	calli	amount limits before the hash
+0x374e620	0x374e8ff	c644241004	mov	request kind 4
+0x3945250	0x3945418	4d3bacdf70010000	cmp	row key is one u64
+0x3945a20	0x3945bc8	4f3ba4f770010000	cmp	row key is one u64
+0x3945250	0x394566d	6641c747180100	mov	row move: done 1, open 0
+0x3945a20	0x3945e0e	6641c747180100	mov	row move: done 1, open 0
+0x3945250	0x394550b	66c78424e80000000001	mov	new row: done 0, open 1
+0x3945a20	0x3945cb9	66c78424f80000000001	mov	new row: done 0, open 1
+0x3942a90	0x3942acf	e8ac0e67ff	call	split at the action epoch
+0x3be5020	0x3be50f4	4b896ce500	mov	removed key stored in the output
+0x3369db0	0x3369e05	483b4c2410	cmp	length compare
+0x3369db0	0x336a2de	4c3b742418	cmp	epoch echo compare
