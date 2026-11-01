@@ -145,13 +145,27 @@ optimization levels 0 and 3: empty cases, OR/AND behavior, positive groups,
 zero masks, and every one of the 2,048 bit positions (including missing-bit
 controls). Three Python tests pass, including nine evidence corruption cases.
 
-Two opt-level-3 rlib builds with identical arguments and output basenames,
-in separate directories, were raw-equal on this host:
+Two opt-level-3 rlib builds with the same flags, source path and output
+basename, in separate output directories, were raw-equal on this host:
 `f95bbdc8ab523adb0b128b72e152971c20ec5c9c5a33b41b19745cf661a6fb19`.
 This is self-build reproducibility, **not comparison to original node code**.
 There are no normalization masks, transplanted machine bytes or original
 compiled-code-equivalence claims. Build logs and gate results are summarized
 in `validation.json`.
+
+The complete official test-file inventory was also run at source commit
+`8560a4f4abd5e8acbcee0d37364eb5e96e2b133b`, partitioned by sorted file index
+modulo four across separate detached worktrees. Each file used the same fresh
+`python -m unittest discover -s <checkout>/tests -p <file> -v` command as
+`tools/run_tests.py`. All **958 files** were attempted, with **15,231 test cases
+reported and 73 skipped**. Skips include the existing captured-execution opt-in,
+optional tool and platform gates; they are not passes. Two existing modules
+initially could not find installed `llvm-objdump`. Adding LLVM 18.1.4's bin
+directory to `PATH` and rerunning just those modules produced 9 passing tests
+each. There are zero unresolved module failures. The initial failure and rerun
+statuses are preserved in `validation.json`; no hosted CI success is claimed.
+To reproduce sequentially, put GNU binutils and LLVM tools on `PATH`, use
+Python with `capstone==5.0.7` and Node 24.22.2, and run `make test`.
 
 Before this change, the base had address/source-context evidence and an
 unvalidated exclusion predicate in the reference. After it, this packet binds

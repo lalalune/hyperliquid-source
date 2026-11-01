@@ -24,7 +24,24 @@ rustc --edition=2021 --crate-name node94_bloom_prefilter --crate-type=rlib \
 rustc --edition=2021 --test -D warnings -C overflow-checks=on \
   src/node94-bloom-prefilter/lib.rs -o work/bloom-prefilter/tests
 work/bloom-prefilter/tests
+rustc --edition=2021 --test -D warnings -C overflow-checks=on -C opt-level=3 \
+  src/node94-bloom-prefilter/lib.rs -o work/bloom-prefilter/tests-opt
+work/bloom-prefilter/tests-opt
 python3 research/work-items/RE-001-evm-bloom-prefilter-94/verify.py --controls
+```
+
+The recorded self-build comparison used the same flags, source path and output
+basename, with separate output directories:
+
+```sh
+mkdir -p work/bloom-prefilter/build-a work/bloom-prefilter/build-b
+rustc --edition=2021 --crate-name node94_bloom_prefilter --crate-type=rlib \
+  -D warnings -C overflow-checks=on -C opt-level=3 \
+  src/node94-bloom-prefilter/lib.rs -o work/bloom-prefilter/build-a/libbloom.rlib
+rustc --edition=2021 --crate-name node94_bloom_prefilter --crate-type=rlib \
+  -D warnings -C overflow-checks=on -C opt-level=3 \
+  src/node94-bloom-prefilter/lib.rs -o work/bloom-prefilter/build-b/libbloom.rlib
+cmp work/bloom-prefilter/build-a/libbloom.rlib work/bloom-prefilter/build-b/libbloom.rlib
 ```
 
 The tests cover empty lists, OR within lists, AND between groups, positive
