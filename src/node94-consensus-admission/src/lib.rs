@@ -14,6 +14,7 @@ mod error;
 mod qc;
 /// Independent qualified wire-field projection; no admission/authentication integration.
 pub mod qc_recovery_byte;
+pub mod qc_row_success;
 mod stake;
 mod state;
 mod tc;
