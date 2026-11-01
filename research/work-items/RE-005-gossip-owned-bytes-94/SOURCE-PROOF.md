@@ -57,6 +57,10 @@ owned buffer lifetime, not captured pointer identity.
 The qualifier requires complete canonical raw JSONL equality at both
 optimization levels, real assertion failures for eight compiled semantic
 counterfactuals, copied-ELF rejection controls below the full target hash gate,
-and stable physical inputs/provider/host tools. Actual results are pending.
+and stable physical inputs/provider/host tools. The actual run on source
+checkpoint `b8cc0ec0547753707eaa55572513627526452d5c` passed these checks;
+`RUST-RESULT.json`, complete retained streams and `ACTUAL-REVIEW.json` bind the
+observed outputs and the independent audit. This proof's scalar/source relation
+does not depend on the finite corpus being exhaustive over all input lengths.
 No captured program or instruction evaluator is executed. Full component and
 original compiler/machine-byte gates remain false.

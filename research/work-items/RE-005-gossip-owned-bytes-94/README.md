@@ -54,9 +54,50 @@ payloads, two installer manifests and resolved compiler/linker/tools before and
 after. These narrowly scoped tools qualify this native gap; they are not a
 general framework or independent recovery credit.
 
-Current status: source/runner review pending, no compiler or tests run. The
-expanded current suite, new instruction evaluators, captured program execution
-and hosted CI are NOT_RUN. Planned invocation from the task checkout:
+The first actual compiler experiment passed on clean source checkpoint
+`b8cc0ec0547753707eaa55572513627526452d5c` at task-start main
+`56c0ec672bd8fdcfaa80f2db700a61e6240b3663`. O0 and O3 each matched all
+116,179 validator and 45,320 wire rows byte for byte. Seven ordinary relational
+tests passed per direct profile and per actual offline locked Cargo
+debug/release invocation. One additional optimized library rebuild was raw equal.
+
+| Normally compiled wrong source | Validator mismatches | Wire mismatches |
+| --- | ---: | ---: |
+| Payload charge uses low DWORD | — | 14,804 |
+| Header charge uses full QWORD | — | 6,506 |
+| Omit equal-value counter stores | — | 368 |
+| Roll back invalid payload cursor | — | 21,408 |
+| Accept surrogate encodings | 240 | 112 |
+| Incomplete sequence reports Some(1) | 8,435 | 4,748 |
+| All bad continuations report Some(1) | 22,080 | 7,168 |
+| Payload shortage consumes available bytes | — | 7,571 |
+
+Every listed stream contains its complete protocol denominator; each wrong
+library also failed ordinary assertions with normal exit 101. Thirteen static
+test methods cover the positive case and 14 altered-copy rejections (the
+three-body method has three subcases). Seven comparator controls per protocol
+check changed fields, missing/extra rows, whitespace, duplicate keys, boolean
+substitution and order. The original 10,880 physical tracked files, seven pins,
+103 provider payloads, two installer manifests, source checkpoint and resolved
+host tools were identical before/after.
+
+`ACTUAL-STREAMS.zip` losslessly retains 173 files / 180,028,460 original bytes:
+all 68 recorded outer command pairs, seven nested binutils command pairs, native
+bodies/records, actual input audits and the eight wrong sources. Its manifest
+verifies complete byte-for-byte roundtrips. The 43 compiled artifacts were
+independently hash-checked; binaries, full target ELF and provider payloads are
+excluded from public retention. Their identities remain in the actual result
+and transport manifest. Original ignored raw work is preserved.
+
+The independent peer rechecked all streams, artifacts and fresh physical/tool
+identities. Its separate presealed private replay passed 67 rows (64 novel
+complete inputs plus three duplicates) per protocol on both existing clients;
+changed neighboring answers did not affect output. Only its public-safe summary
+is retained, with no private inputs or answers. Repository static checks are
+pending on the preserved evidence checkpoint; no extra Rust rebuild is needed.
+
+The expanded current suite, new instruction evaluators, captured program
+execution and hosted CI are NOT_RUN. Exact scoped invocation:
 
 ```sh
 python3 -B research/work-items/RE-005-gossip-owned-bytes-94/run.py --out work/gossip-owned-bytes-982-run1

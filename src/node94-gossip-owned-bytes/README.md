@@ -70,7 +70,15 @@ selected and frozen before source. Private holdouts remain unread by this author
 
 The component has a real standalone manifest with the existing local dependency.
 It uses the admitted standard library for owned allocation; it is not a no_std
-or recovered whole-node workspace claim. Actual build results are pending.
+or recovered whole-node workspace claim. On clean source checkpoint
+`b8cc0ec0547753707eaa55572513627526452d5c`, O0 and O3 each matched all 116,179
+validator and 45,320 wire records byte for byte. Seven relational tests passed
+per profile and under actual offline locked Cargo debug/release. Eight normally
+compiled semantic mutants produced complete wrong outputs and failed the
+ordinary assertions. One extra optimized library build was raw-byte equal.
+The independent peer verified the retained artifacts and replayed 64 novel
+inputs plus three duplicate rows per protocol against both existing clients.
+Only public-safe holdout hashes/counts are retained; private cases remain private.
 The expanded instruction-evaluator suite, captured program execution and hosted
 CI have not run. All full component gates remain false.
 
