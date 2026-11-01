@@ -1,0 +1,97 @@
+{
+  "status": "Author checks pass; frozen for independent review, no publication claim",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "research_base": "d3af75257a396c85d20857f421c370ddb8cb40e5",
+  "environment": {
+    "python": "3.14.3",
+    "python_executable": "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+    "native_tools": {
+      "gnu": "GNU objdump (GNU Binutils) 2.47.20260726",
+      "llvm": "Apple LLVM version 21.0.0"
+    }
+  },
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "research/work-items/RE-007-impact-notional-walk-94/collect.py",
+        "--out",
+        "research/work-items/RE-007-impact-notional-walk-94/observed"
+      ],
+      "exit_code": 0,
+      "result": "2 full FDEs,2760 bytes,655 instructions"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "research/work-items/RE-007-impact-notional-walk-94/verify.py"
+      ],
+      "exit_code": 0,
+      "report": "verification.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "research/work-items/RE-007-impact-notional-walk-94/verify.py"
+      ],
+      "exit_code": 0,
+      "report_sha256": "51f9c278daf154ed35934edf43b189032a39003ae46a1fd790fc1623facc8f9b",
+      "report_byte_identical_to_normal": true
+    }
+  ],
+  "checks": {
+    "negative_controls": 129,
+    "operative_native_mutations": 17,
+    "fresh_regenerations_per_run": 2,
+    "independent_PT_LOAD_mapping": true,
+    "full_native_bytes_and_partition_agreement": true,
+    "literal_spans": 11,
+    "selected_instruction_obligations": 43,
+    "RELATIVE_symbol_zero_bindings": 13,
+    "full_FDEs": 2,
+    "bytes": 2760,
+    "instructions": 655,
+    "structural_blocks": 135,
+    "transfers": 109,
+    "calls": 15,
+    "LSDA_callsite_rows": 3,
+    "unresolved_indirect_control_transfers_in_selected_bodies": 0,
+    "plain_text_trailing_whitespace_or_extra_EOF_lines": 0
+  },
+  "source_hashes": {
+    ".gitattributes": "8411b031313fc86b537d696367989ca6f4c5ce920bdf20231a39cd4f347c62ca",
+    "PROOF.md": "afeeb3dbb578316813f08024ab083be055c0f9fcf0f85217be16c9db170d93e4",
+    "README.md": "7be4a73a5a5a246112b254d552b3b4d9ec20031cd6e266ec289899681715b587",
+    "collect.py": "c5b9d9d9f58d5aa33b517ae82ced54779be217dcdab8619ef4dcaef1f55400f4",
+    "dependencies.json": "d4b4d41eae3f653f4e518c6b8ac6aed91803da21a2ac66a6bd277934c2596d13",
+    "observed/cfg.tsv": "437d30b93e63bf02e29ffdbb984ca6321782761cd8f02c42bc4ca80f5e4c66b2",
+    "observed/impact.gnu.txt": "75402c0e24bc6285e779a5a09bbd19814da47abcf0a8048eab4f10ef3cd46d6f",
+    "observed/impact.llvm.txt.gz": "e0b0ff9414902e72856248d68a423b93463f5380cfc52cd9befeee688bf58cfa",
+    "observed/premium_context.gnu.txt": "ff1f2bac72e778dc3cc2352c6d9d39ae58fdd595d490aac3f9d914190a8d7d54",
+    "observed/premium_context.llvm.txt.gz": "f61f22636005ef94f6fc819dd883a4f9e77717267645bcea27aaba0b3cd8201e",
+    "observed/records.json": "70e4deb7ba87617b744cc0bb955c800cfc48840b4d4db545db54ade622a99ae6",
+    "observed/rip-references.tsv": "96b08fb856d4200af83e0015a36b52951c78bcbd9b523c17b03a2953b98aba52",
+    "observed/transfers.tsv": "1bf291072f1c284cffb809b0b9acb28aea7f0c1e11fcf089391e95739fd5f643",
+    "scope-check.json": "fdda5ef47d471a30dfc3943a200f6b273ca1fbeff459c9653e354a370bbf1899",
+    "spec.json": "de72a6a50e093b9021cd2d3459ecb4f2fb6e21667b9b14a02e62a092d8a8c47d",
+    "verification.json": "51f9c278daf154ed35934edf43b189032a39003ae46a1fd790fc1623facc8f9b",
+    "verify.py": "dd3fd536e1d2973404701fd637d6c4a34b591f7e2f15a891a4333ce1bc52e719"
+  },
+  "initial_setup_notes": [
+    "An initial attempt to copy an authored predecessor collector found that the coordinator had switched it out of the working tree. It created only the new empty packet directory; no verifier or target code ran. The collector was then made task-local with only shared ELF-parser imports.",
+    "The initial126-control verifier passed; independent PT_LOAD/raw-operand controls were added and the final129-control verifier passed in both Python modes. No failed semantic assertion was suppressed."
+  ],
+  "limits": [
+    "Static parsing, native disassembly and manual proof only; no captured binary or instruction evaluator executed.",
+    "Native export equality is tied to the recorded GNU/LLVM versions and unchanged pinned parser inputs.",
+    "Corruption controls validate evidence obligations, not a formal machine-checked theorem or runtime test suite.",
+    "Helper normal returns/noninterference, well-formed accessible stable tree/slab and finite chains remain premises.",
+    "No new Rust, funding sample storage, public unit/side, actual unwinding, component gate, hosted CI or broad test-suite claim.",
+    "Coordinator owns independent semantic review, final collision check, repository integration and broader checks."
+  ]
+}
