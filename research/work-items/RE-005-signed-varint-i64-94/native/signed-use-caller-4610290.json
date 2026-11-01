@@ -1,0 +1,109 @@
+{
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "retained_actual_bounded_caller": {
+    "frame": {
+      "start": 73466512,
+      "end": 73467090,
+      "bytes": 578,
+      "FDE_file_offset": 15670436,
+      "FDE_raw_hex": "3c00000090072100e4e571034202000000410e10420e18420e20410e28440e800183058e048f03860203b7010e28410e20420e18420e10410e08410e80010000",
+      "CIE_decoded": {
+        "va": 13505816,
+        "augmentation": "zR",
+        "code_align": 1,
+        "data_align": -8,
+        "fde_encoding": 27,
+        "lsda_encoding": null,
+        "personality_slot": null
+      },
+      "CIE_raw_hex": "1400000000000000017a5200017810011b0c070890010000",
+      "LSDA": null
+    },
+    "calls": [
+      {
+        "site": 73466609,
+        "target": 73841680,
+        "containing_index_FDE": {
+          "start": 73466512,
+          "end": 73467090,
+          "bytes": 578,
+          "FDE_file_offset": 15670436,
+          "FDE_raw_hex": "3c00000090072100e4e571034202000000410e10420e18420e20410e28440e800183058e048f03860203b7010e28410e20420e18420e10410e08410e80010000",
+          "CIE_decoded": {
+            "va": 13505816,
+            "augmentation": "zR",
+            "code_align": 1,
+            "data_align": -8,
+            "fde_encoding": 27,
+            "lsda_encoding": null,
+            "personality_slot": null
+          },
+          "CIE_raw_hex": "1400000000000000017a5200017810011b0c070890010000",
+          "LSDA": null
+        },
+        "instruction_at_site": "call   0x466bc10",
+        "instruction_boundary_call": true
+      }
+    ],
+    "body_sha256": "a7123b94ec386aa10bc98275c90140bc06d4a93277b2a48c8bd4558fd4c93c92",
+    "mapping": {
+      "va": 73466512,
+      "file_offset": 73462416,
+      "bytes": 578,
+      "section": {
+        "type": 1,
+        "flags": 6,
+        "address": 20200576,
+        "offset": 20196480,
+        "size": 70370352,
+        "link": 0,
+        "info": 0,
+        "align": 64,
+        "entsize": 0,
+        "index": 15,
+        "name": ".text"
+      },
+      "PT_LOAD": {
+        "type": 1,
+        "flags": 5,
+        "offset": 20196480,
+        "address": 20200576,
+        "paddr": 20200576,
+        "filesz": 70374864,
+        "memsz": 70374864,
+        "align": 4096
+      }
+    },
+    "listing_sha256": "c33b4fa3e9830bb7c61a0391994bbb6477244b08faac9c24bd5208581d195a9f",
+    "signed_transform_triage_hints": [
+      {
+        "site": "0x4610323",
+        "instruction": "sar    rdx,0xd"
+      },
+      {
+        "site": "0x461033a",
+        "instruction": "sar    rdi,0x3f"
+      },
+      {
+        "site": "0x461033e",
+        "instruction": "neg    rax"
+      }
+    ]
+  },
+  "source_raw_record_sha256": "9ea2577fa04548d655c9ed8176a2abf0a84ade6ffb5291dd0fbe36a97156e0f5",
+  "qualified_selected_call": {
+    "site": "0x46102d2",
+    "target": "0x4b6fa60",
+    "raw_hex": "e889f75500",
+    "DL": 0,
+    "RSI": "outer reader +0x10"
+  },
+  "observations": [
+    "The returned +8 word is loaded into r14 at0x46102dc after the actual call, then used by signed IMUL/SAR at0x4610314/0x4610323 on the successful path.",
+    "This preserves the original pre-Rust intake bytes/listing and frame record; no fresh target execution or caller model."
+  ],
+  "limits": [
+    "One qualified real incoming caller supports the signed-use observation, not a complete caller census.",
+    "Enclosing field meaning, units, outer budgets and full caller equivalence remain unknown."
+  ]
+}
