@@ -1,0 +1,244 @@
+{
+  "base_commit": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "captured_execution": false,
+  "commands": [
+    {
+      "argv": [
+        "make",
+        "doctor"
+      ],
+      "exit_code": 0,
+      "log": "checks/doctor.log"
+    },
+    {
+      "argv": [
+        "make",
+        "verify"
+      ],
+      "exit_code": 0,
+      "log": "checks/verify.log"
+    },
+    {
+      "argv": [
+        "make",
+        "catalogue-check"
+      ],
+      "exit_code": 0,
+      "log": "checks/catalogue.log"
+    },
+    {
+      "argv": [
+        "make",
+        "reproduce"
+      ],
+      "exit_code": 0,
+      "log": "checks/reproduce.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_foundation_chain_all_zero_predicate.py"
+      ],
+      "exit_code": 0,
+      "log": "checks/legacy-tests.log",
+      "tests": 8
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/foundation_chain_all_zero_predicate.py",
+        "--check",
+        "research/work-items/foundation-chain-all-zero-predicate-94/evidence.json"
+      ],
+      "exit_code": 0,
+      "log": "checks/legacy-evidence.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "research/work-items/RE-004-chain-all-zero-rust-94/verify_static.py"
+      ],
+      "env": {
+        "PYTHONHASHSEED": "31",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "log": "checks/static-normal.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "research/work-items/RE-004-chain-all-zero-rust-94/verify_static.py"
+      ],
+      "env": {
+        "PYTHONHASHSEED": "211",
+        "TZ": "Pacific/Kiritimati"
+      },
+      "exit_code": 0,
+      "log": "checks/static-optimized.json"
+    },
+    {
+      "argv": [
+        "<rustfmt-1.94.1>",
+        "--check",
+        "src/node94-chain-all-zero/lib.rs",
+        "src/node94-chain-all-zero/input_only_driver.rs"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "research/work-items/RE-004-chain-all-zero-rust-94/verify_rust.py",
+        "--rustc",
+        "<rustc-1.94.1>",
+        "--out",
+        "work/chain-all-zero-rust/native"
+      ],
+      "commands": "native/calls.json",
+      "exit_code": 0,
+      "log": "checks/native-summary.json"
+    }
+  ],
+  "disassembler_commands": "disassembly.json",
+  "full_suite_rerun": false,
+  "hosted_ci_claimed": false,
+  "instruction_emulation": false,
+  "logs": {
+    "catalogue.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "d154b53146de73afa6ac07cb86b790175fed3cf9eb764993fa92227491db6d80",
+      "retained_bytes": 86,
+      "retained_sha256": "d154b53146de73afa6ac07cb86b790175fed3cf9eb764993fa92227491db6d80"
+    },
+    "doctor.log": {
+      "path_redaction_only": true,
+      "raw_sha256": "ea6daac0eeaf89834b935460803e489ddf9d64faa3da7b3566a24059fd5533fe",
+      "retained_bytes": 2317,
+      "retained_sha256": "60823e073658d0c69b97130114794b93746906d0c6c1bf9ce8a8f624605a92b1"
+    },
+    "legacy-evidence.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "716b779427bece9cd258efa10d0927f352c9adcb2001ea6e77aa307574551c59",
+      "retained_bytes": 65,
+      "retained_sha256": "716b779427bece9cd258efa10d0927f352c9adcb2001ea6e77aa307574551c59"
+    },
+    "legacy-tests.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "2738968dae325ffd3126bfa2a8a72981fe406d09362e7f540f5f0ac338774b55",
+      "retained_bytes": 106,
+      "retained_sha256": "2738968dae325ffd3126bfa2a8a72981fe406d09362e7f540f5f0ac338774b55"
+    },
+    "native-summary.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "f9431ce1f173ea79def6f01dbad5752cb5c87366f68992663119e16e70f2ea83",
+      "retained_bytes": 696,
+      "retained_sha256": "f9431ce1f173ea79def6f01dbad5752cb5c87366f68992663119e16e70f2ea83"
+    },
+    "native.stderr": {
+      "path_redaction_only": false,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_bytes": 0,
+      "retained_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "oracle-freeze.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "23b87041672db54361cb2f7edd87c12b85f44def087ae24f9bba1e3dd84d3c95",
+      "retained_bytes": 1157,
+      "retained_sha256": "23b87041672db54361cb2f7edd87c12b85f44def087ae24f9bba1e3dd84d3c95"
+    },
+    "reproduce.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "e229eacd17279259b076a17aa95f96fb96d91d2ab9991363ea8c20f2243cfd0a",
+      "retained_bytes": 12538,
+      "retained_sha256": "e229eacd17279259b076a17aa95f96fb96d91d2ab9991363ea8c20f2243cfd0a"
+    },
+    "static-freeze.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "e8ca282534daa7759fc85daf1ec0b25d0e8f159d4665e9d2eba43c65ae451d38",
+      "retained_bytes": 111,
+      "retained_sha256": "e8ca282534daa7759fc85daf1ec0b25d0e8f159d4665e9d2eba43c65ae451d38"
+    },
+    "static-normal.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "e8ca282534daa7759fc85daf1ec0b25d0e8f159d4665e9d2eba43c65ae451d38",
+      "retained_bytes": 111,
+      "retained_sha256": "e8ca282534daa7759fc85daf1ec0b25d0e8f159d4665e9d2eba43c65ae451d38"
+    },
+    "static-optimized.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "e8ca282534daa7759fc85daf1ec0b25d0e8f159d4665e9d2eba43c65ae451d38",
+      "retained_bytes": 111,
+      "retained_sha256": "e8ca282534daa7759fc85daf1ec0b25d0e8f159d4665e9d2eba43c65ae451d38"
+    },
+    "verify.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "62b2bc35db2b34337f2cb5feace2b03e4faee375be93a1f0c03e8eb04654bdfb",
+      "retained_bytes": 670,
+      "retained_sha256": "62b2bc35db2b34337f2cb5feace2b03e4faee375be93a1f0c03e8eb04654bdfb"
+    }
+  },
+  "make_path_prefix": [
+    "/opt/homebrew/opt/binutils/bin",
+    "/opt/homebrew/opt/rustup/bin"
+  ],
+  "native_archive": {
+    "all_payload_and_call_hashes_verified": true,
+    "bytes": 879014,
+    "calls": 120,
+    "sha256": "fafb7a554a6b218cd41fb1d6b0b3edb2b24d378f81feba9ad71da8cd927595bb",
+    "streams": 240,
+    "unique_payloads": 23
+  },
+  "overlap": {
+    "baseline_src_matches": 0,
+    "open_pr_limit": 200,
+    "queries": [
+      {
+        "count": 106,
+        "kind": "open PRs",
+        "matches": [],
+        "raw_sha256": "6cd5bf1d1fa02f7ea5718fc225e9bb4eae95a9a6ad30438c6a1372b7cd91030e"
+      },
+      {
+        "count": 0,
+        "kind": "open issues",
+        "matches": [],
+        "raw_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+      },
+      {
+        "count": 100,
+        "kind": "recent merged PRs",
+        "matches": [],
+        "raw_sha256": "d814870e555fbabaf5839a2df28e7e76f0b9c9f8c21cc6a55d923788fbca2fbf"
+      }
+    ],
+    "recent_merge_limit": 100,
+    "reserved_other_addresses_avoided": [
+      "0x538c820",
+      "0x5422e70",
+      "0x4ff8b30",
+      "0x5632d90",
+      "0x32d8310"
+    ]
+  },
+  "path_redaction": {
+    "<home>": "operator home directory",
+    "<repo>": "repository root"
+  },
+  "python": "3.14.3",
+  "recorded_at_utc": "2026-11-01T20:50:43.918880+00:00",
+  "scope": "new Rust source and new evidence packet only; original imports/pins/evidence/gates unchanged",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "task": "RE-004 flag-gated all-zero chain normal-return reconstruction with proved cycle classification"
+}
