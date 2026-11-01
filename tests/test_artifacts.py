@@ -285,3 +285,19 @@ class ArtifactTests(unittest.TestCase):
                           side_effect=self._fake_gpg('[GNUPG:] KEYEXPIRED 1')):
             with self.assertRaises(ValueError):
                 a.verify_signatures(self.root, self.signature_manifest)
+
+    def _broken_gpg(self):
+        def run(command, **kwargs):
+            if '--import' in command:
+                return a.subprocess.CompletedProcess(command, 0, '', '')
+            raise a.subprocess.CalledProcessError(1, command, stderr='gpg: BAD signature\n')
+        return run
+
+    def test_bad_signature_failure_reported_as_one_line(self):
+        self._signature_root()
+        with patch.object(a.subprocess, 'run', side_effect=self._broken_gpg()), \
+                self.assertRaises(ValueError) as caught:
+            a.verify_signatures(self.root, self.signature_manifest)
+        message = str(caught.exception)
+        self.assertIn('GPG verification failed', message)
+        self.assertIn('BAD signature', message)
