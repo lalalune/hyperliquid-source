@@ -71,6 +71,22 @@ The crate also does not implement networking, proposal construction, commit
 walking, transaction execution, persistence, timers, or the already-existing
 timeout-transition component.
 
+## Qualified QC-row byte field
+
+The separate `qc_recovery_byte` module implements the one-byte field transition
+at node94 `0x4c7e4f3`, conditional on successful preceding row groups. Its chosen
+safe API uses charge state and a borrowed input slice; it does not recover the
+native ABI, error layout, machine store order, preceding groups or a full QC
+decoder. It is independent of the admission and authentication paths above.
+All 256 byte values are uninterpreted here; cryptographic validity is unproved.
+
+The existing manifest/lockfile builds this module without new dependencies.
+The `qc_recovery_byte_input_only` example receives inputs on stdin and contains
+no expected answers. The compiled comparison, frozen native-derived boundaries,
+source controls and exact tool identity are documented in
+`research/work-items/RE-008-qc-recovery-byte-rust-94/`. Its qualified field
+comparison advances no whole consensus gate.
+
 ## Reproduce
 
 From the repository root:

@@ -12,6 +12,8 @@ mod admission;
 mod auth;
 mod error;
 mod qc;
+/// Independent qualified wire-field projection; no admission/authentication integration.
+pub mod qc_recovery_byte;
 mod stake;
 mod state;
 mod tc;
