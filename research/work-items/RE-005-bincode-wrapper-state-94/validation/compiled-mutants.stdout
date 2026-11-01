@@ -1,0 +1,130 @@
+[rollback-limit-charge]
+
+running 4 tests
+test overflow_preserves_charge_while_exact_maximum_can_succeed ... ok
+test same_marker_changes_error_and_consumption_at_u64_threshold ... ok
+test charge_failure_precedes_empty_input_and_retains_limit_increment ... FAILED
+test frozen_wrapper_state_and_request_composition ... FAILED
+
+failures:
+
+---- charge_failure_precedes_empty_input_and_retains_limit_increment stdout ----
+
+thread 'charge_failure_precedes_empty_input_and_retains_limit_increment' (206946) panicked at /reconstruction/src/bincode-varint/tests/wrapper_vectors.rs:23:5:
+assertion `left == right` failed
+  left: 0
+ right: 4
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- frozen_wrapper_state_and_request_composition stdout ----
+
+thread 'frozen_wrapper_state_and_request_composition' (206947) panicked at /reconstruction/src/bincode-varint/tests/wrapper_vectors.rs:15:9:
+assertion `left == right` failed
+  left: "1188\tlimit\t-\t0\t0\t-"
+ right: "1188\tlimit\t-\t0\t4\t-"
+
+
+failures:
+    charge_failure_precedes_empty_input_and_retains_limit_increment
+    frozen_wrapper_state_and_request_composition
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+[always-reader]
+
+running 4 tests
+test charge_failure_precedes_empty_input_and_retains_limit_increment ... ok
+test overflow_preserves_charge_while_exact_maximum_can_succeed ... ok
+test same_marker_changes_error_and_consumption_at_u64_threshold ... FAILED
+test frozen_wrapper_state_and_request_composition ... FAILED
+
+failures:
+
+---- same_marker_changes_error_and_consumption_at_u64_threshold stdout ----
+
+thread 'same_marker_changes_error_and_consumption_at_u64_threshold' (207233) panicked at /reconstruction/src/bincode-varint/tests/wrapper_vectors.rs:54:5:
+assertion `left == right` failed
+  left: Err(Reader(InvalidIntegerType { expected_code: 3, found_code: 4 }))
+ right: Err(Reader(InvalidIntegerType { expected_code: 2, found_code: 4 }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- frozen_wrapper_state_and_request_composition stdout ----
+
+thread 'frozen_wrapper_state_and_request_composition' (207231) panicked at /reconstruction/src/bincode-varint/tests/wrapper_vectors.rs:15:9:
+assertion `left == right` failed
+  left: "1014\ttype\t2:3\t1\t42\t01020304"
+ right: "1014\ttype\t2:3\t0\t42\tfd01020304"
+
+
+failures:
+    frozen_wrapper_state_and_request_composition
+    same_marker_changes_error_and_consumption_at_u64_threshold
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+[inclusive-fast-threshold]
+
+running 4 tests
+test charge_failure_precedes_empty_input_and_retains_limit_increment ... ok
+test overflow_preserves_charge_while_exact_maximum_can_succeed ... ok
+test same_marker_changes_error_and_consumption_at_u64_threshold ... FAILED
+test frozen_wrapper_state_and_request_composition ... FAILED
+
+failures:
+
+---- same_marker_changes_error_and_consumption_at_u64_threshold stdout ----
+
+thread 'same_marker_changes_error_and_consumption_at_u64_threshold' (207314) panicked at /reconstruction/src/bincode-varint/tests/wrapper_vectors.rs:47:5:
+assertion `left == right` failed
+  left: Err(Reader(InvalidIntegerType { expected_code: 2, found_code: 4 }))
+ right: Err(Reader(InvalidIntegerType { expected_code: 3, found_code: 4 }))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- frozen_wrapper_state_and_request_composition stdout ----
+
+thread 'frozen_wrapper_state_and_request_composition' (207312) panicked at /reconstruction/src/bincode-varint/tests/wrapper_vectors.rs:15:9:
+assertion `left == right` failed
+  left: "1013\ttype\t2:3\t0\t42\tfd010203"
+ right: "1013\ttype\t2:3\t1\t42\t010203"
+
+
+failures:
+    frozen_wrapper_state_and_request_composition
+    same_marker_changes_error_and_consumption_at_u64_threshold
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+[charge-after-decode]
+
+running 4 tests
+test same_marker_changes_error_and_consumption_at_u64_threshold ... ok
+test charge_failure_precedes_empty_input_and_retains_limit_increment ... ok
+test overflow_preserves_charge_while_exact_maximum_can_succeed ... FAILED
+test frozen_wrapper_state_and_request_composition ... FAILED
+
+failures:
+
+---- overflow_preserves_charge_while_exact_maximum_can_succeed stdout ----
+
+thread 'overflow_preserves_charge_while_exact_maximum_can_succeed' (207388) panicked at /reconstruction/src/bincode-varint/tests/wrapper_vectors.rs:34:5:
+assertion `left == right` failed
+  left: []
+ right: [1]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- frozen_wrapper_state_and_request_composition stdout ----
+
+thread 'frozen_wrapper_state_and_request_composition' (207387) panicked at /reconstruction/src/bincode-varint/tests/wrapper_vectors.rs:15:9:
+assertion `left == right` failed
+  left: "1189\tlimit\t-\t1\t4\t-"
+ right: "1189\tlimit\t-\t0\t4\t01"
+
+
+failures:
+    frozen_wrapper_state_and_request_composition
+    overflow_preserves_charge_while_exact_maximum_can_succeed
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
