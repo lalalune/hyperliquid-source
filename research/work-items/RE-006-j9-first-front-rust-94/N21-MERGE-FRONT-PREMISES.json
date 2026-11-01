@@ -1,0 +1,135 @@
+{
+  "first_front_effect": {
+    "compare": "0x4918fec unsigned right<left",
+    "front_advances_after_store": "RSI advances8 iff right>=left; RAX advances8 iff right<left, outside the first-store boundary",
+    "load_left": "0x4918fe3:S[0]",
+    "load_right": "0x4918fe0:S[10]",
+    "selection": "0x4918ff7 CMOVB selects right only on strict less; equality retains left",
+    "store": "0x4919014 full-qword A[0]",
+    "value": "unsigned min(current S[0],current S[10])"
+  },
+  "first_front_envelope": {
+    "bytes": 56,
+    "dual_decoder_partitions_agree": true,
+    "end": "0x4919018",
+    "hex": "4c8b084c8b164531db4531ed4d39d1410f93c3410f92c54d0f42d14c8b09488b2a4939e9bb000000004883d3ff4939e9490f47e94d8914ff",
+    "instructions": 16,
+    "sha256": "2024c13aae617a00f3129efe7b67a9e95045f2c5c692a25cd75c3a08d92289a3",
+    "start": "0x4918fe0"
+  },
+  "h": 10,
+  "j9_freeze_sha256": "adc217c39692223e24f57ea9eb63fbd9c0a833e34ec3103c40885533f9e8d49b",
+  "kind": "Pre-generalized-Rust conditional n21 right-entry/first merge-front premises",
+  "limits": [
+    "No target execution or instruction evaluation; no generalized Rust model.",
+    "No assertion that either half is sorted or A[0] is the global scratch minimum.",
+    "Back store, subsequent merge iterations, center/crossover/failure, alias acceptance and n22..32 continuation/right/merge remain partial."
+  ],
+  "literal_front_cases": [
+    {
+      "chosen": "left",
+      "expected_A0": 1,
+      "left": 1,
+      "name": "left-front-smaller",
+      "right": 2
+    },
+    {
+      "chosen": "right",
+      "expected_A0": 1,
+      "left": 9223372036854775809,
+      "name": "right-front-smaller-unsigned",
+      "right": 1
+    },
+    {
+      "chosen": "left",
+      "expected_A0": 7,
+      "left": 7,
+      "name": "front-equality-left",
+      "right": 7
+    }
+  ],
+  "memory_premises": [
+    "Valid stable nonwrapping A[0..21) and S[0..21), disjoint from each other and callee live frames/spills/return machinery; ancestor-frame scratch is permitted.",
+    "Ordinary seed returns and arrival at j9 with recorded invariants. Scratch capacity >=n+16 remains caller/callee premise.",
+    "First merge-front block also loads current S[20] and S[9] for back-side preparation before the first A[0] store; these are readable and do not clobber the selected R10 front word."
+  ],
+  "merge_front_entry": {
+    "r12_pair_count": 10,
+    "r15_output": "A",
+    "r8_output_back": 20,
+    "rax": "S+80 right-front",
+    "rcx": "S+160 right-back",
+    "rdi_output_front": 0,
+    "rdx": "S+72 left-back",
+    "rsi": "S left-front",
+    "va": "0x4918fe0"
+  },
+  "missing_global_minimum_premise": {
+    "expected_A0": 8,
+    "left_current": [
+      9,
+      0,
+      8,
+      1,
+      7,
+      2,
+      6,
+      3,
+      5,
+      5
+    ],
+    "reason": "Front comparison alone is not a global minimum; sorted halves or an equivalent head-minimum invariant remain unproved.",
+    "right_current": [
+      8,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "scratch_global_minimum": 0
+  },
+  "n": 21,
+  "right_control_proof": {
+    "array_values": "Not reconstructed here; only count/coordinate/liveness and footprint premises.",
+    "byte_offsets": [
+      64,
+      72,
+      80
+    ],
+    "indices": [
+      8,
+      9,
+      10
+    ],
+    "maximum_shift_counts": [
+      8,
+      9,
+      10
+    ],
+    "per_step": "Offset guard8 before lower read, decrement8, so normal local step terminates without calls under memory premises.",
+    "source_indices": [
+      18,
+      19,
+      20
+    ],
+    "transition": "After each step RCX increments; equality11 at4918f80 enters4918fbd only after index10."
+  },
+  "right_entry": {
+    "next_destination": "S[18]",
+    "next_source": "A[18]",
+    "rax": "S+80",
+    "rcx": 8,
+    "rdi_byte_offset": 64,
+    "rdx": 11,
+    "rsi": "A+80",
+    "va": "0x4918f82"
+  },
+  "right_length": 11,
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}

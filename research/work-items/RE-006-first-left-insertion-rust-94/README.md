@@ -151,3 +151,16 @@ bidirectional merge, exception/failure composition, original ABI/lifetimes
 and complete sort/caller reachability. Book callers and #1455 are untouched.
 No byte-window credit, whole-node equivalence, full repository suite, hosted
 CI success or component gate is claimed. Raw compiler binaries/logs stay ignored.
+
+## Historical source snapshot and j9 follow-on
+
+The compiled results in this packet describe first-j8 head
+`4cbaf4da30051d78ee05eb2bfad641463a7f4f11`. The later j9/front follow-on
+adds another module to the same crate. The two shared files from that original
+head are archived byte for byte under
+`../RE-006-j9-first-front-rust-94/predecessor/first-j8/`; this packet’s
+manifest now points to those copies with its original SHA-256 values. The j8
+implementation, frozen inputs, driver, failed classification and compiled
+receipt remain unchanged. Fresh combined-crate checks are reported separately
+in `RE-006-j9-first-front-rust-94`; the old build is not relabeled as a
+combined-head build.

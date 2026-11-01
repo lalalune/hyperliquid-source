@@ -111,6 +111,15 @@ The module does not recover seed behavior, subsequent insertions, the right
 half, merge, a full sorting API or the original pointer/alias contract. Book
 callers are unchanged. Evidence, frozen states and compiled comparison scope
 belong to `RE-006-first-left-insertion-rust-94`.
+## Separate short-run point relations
+
+`j9_first_front` exposes two separate safe projections: exactly the entered
+native j=9 insertion over a ten-word scratch window, and the conditional
+n21 first merge-front write from two current front values. The latter is not
+composed with the former into a sorter. Seed/right-half transformations,
+global minimum, subsequent merge, original ABI and book-caller integration
+remain unresolved. Returned index/side are chosen observation metadata.
+See `RE-006-j9-first-front-rust-94` for native premises and frozen comparisons.
 
 ## Build and test
 
