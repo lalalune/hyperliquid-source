@@ -1,0 +1,39 @@
+Completed locally, 2026-11-02 KST, base 56c0ec672bd8fdcfaa80f2db700a61e6240b3663.
+
+PATH="/opt/homebrew/opt/binutils/bin:/opt/homebrew/opt/rustup/bin:$PATH" make doctor verify
+  Exit 0. analysis_ready=true; exact_rebuild_ready=false. All artifacts/pins verify.
+
+make verify catalogue-check reproduce
+  Exit 0. Captured hashes/signatures and pinned upstream binary/key/signature match.
+  Verified 38 imported files and all pinned source repositories.
+  Catalogue and progress tables match pinned inputs.
+  Inventories, raw counts and refined item classifications reproduce imported evidence.
+  Refined counts: grounded 822, drift 60, notes 116, late 1, unanchored 386, partial 56, case 11.
+
+python3 tools/foundation_mask_rounding.py --check research/work-items/foundation-mask-rounding-94/evidence.json
+  Exit 0. Foundation mask-rounding evidence reproduces exactly.
+python3 -m unittest tests.test_foundation_mask_rounding -v
+  Exit 0. 11 tests passed, no failures/errors/skips. Raw output: focused-tests.txt.
+
+python3 -B research/work-items/RE-004-mask-rounding-rust-94/verify_static.py --freeze
+  Exit 0, completed before writing the Rust source.
+  134,483 input/expected rows frozen with exact coverage and target bindings.
+  Eight structural corruptions rejected independently of full-file digest checking.
+Two subsequent static checks with PYTHONHASHSEED=7 TZ=UTC and
+  PYTHONHASHSEED=119 TZ=Pacific/Kiritimati both passed; stdout compares byte-identical.
+
+python3 -B research/work-items/RE-004-mask-rounding-rust-94/verify_rust.py --out work/mask-rounding-rust/native --rustc <actual-installed-1.94.1-rustc>
+  Exit 0. Each of opt0 and opt3: 134,483 native cases, zero mismatches, 3 unit tests pass.
+  Eight wrong implementations at each optimization: 16 native semantic controls detected.
+  Repeated rlibs and linked clients: four raw-byte-equal comparisons, no normalization.
+  Partial input of 1 or 9 bytes rejected before output at both optimization levels.
+  Exact command/tool/source/fixture identities and witnesses retained under native/.
+
+rustfmt +1.94.1 --check src/node94-mask-rounding/lib.rs src/node94-mask-rounding/input_only_driver.rs
+  Exit 0. Both Python verifier sources parse with compile(..., mode='exec').
+Archive check: all 140 streams (14 unique payloads) decompress losslessly and match
+  recorded byte counts and hashes; current source and frozen fixture hashes match results.json.
+
+Live overlap recheck before commit: 43 open PRs, no matching selected addresses/cutoff/topic.
+No full make test, hosted CI, container build, captured binary or instruction emulator
+execution is claimed. The coordinating agent owns broader test reporting separately.
