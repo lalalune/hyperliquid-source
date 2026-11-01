@@ -1,0 +1,5 @@
+# Rights and provenance
+
+The new Rust, driver and bounded evidence producers are independently authored project MIT work. Static captured node byte excerpts retain their original rights and are included only as bounded reverse-engineering evidence; this packet does not relicense the captured node or assert an original source license.
+
+The official Rust 1.94.1 libcore archive/member is authenticated solely to retain the genuine 581-byte candidate extent mismatch against the 649-byte target. No upstream executable bytes or inferred source are copied into the implementation or packet, and no positive compiled-code window is claimed. The upstream Rust MIT option is selected for this provenance material; the complete unmodified LICENSE-MIT is retained here (SHA256 b71bd43a069ca0641a9ecfe585ca7b3c53b5cc1608f8b68321168698e28b5ea1). The accepted provenance/license chain is in research/work-items/RE-002-libcore-fmt-correspondence/evidence/preparation/LICENSE-AND-PROVENANCE-REVIEW.json. Actual authored-source builds, once recorded, are separate from upstream provenance and native evidence.
