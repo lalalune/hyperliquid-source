@@ -1,0 +1,502 @@
+[
+  {
+    "label": "rustc-version",
+    "argv": [
+      "rustc",
+      "-vV"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "target-static-binding",
+    "argv": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "-B",
+      "<repo>/research/work-items/RE-001-ceil-f64-94/verify.py"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "opt0-library",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=0",
+      "--crate-name",
+      "node94_ceil",
+      "--crate-type",
+      "rlib",
+      "<repo>/src/node94-ceil/lib.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/opt0-library/libnode94_ceil.rlib"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "opt0-client-build",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=0",
+      "--extern",
+      "node94_ceil=<repo>/work/ceil-rust-research/final-run/opt0-library/libnode94_ceil.rlib",
+      "<repo>/src/node94-ceil/input_only_driver.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/opt0-client"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "opt0-client-run",
+    "argv": [
+      "<repo>/work/ceil-rust-research/final-run/opt0-client"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "opt0-partial-word",
+    "argv": [
+      "<repo>/work/ceil-rust-research/final-run/opt0-client"
+    ],
+    "returncode": 1
+  },
+  {
+    "label": "opt0-unit-build",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "opt-level=0",
+      "--test",
+      "<repo>/src/node94-ceil/lib.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/opt0-unit-tests"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "opt0-unit-run",
+    "argv": [
+      "<repo>/work/ceil-rust-research/final-run/opt0-unit-tests"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "opt3-library",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=3",
+      "--crate-name",
+      "node94_ceil",
+      "--crate-type",
+      "rlib",
+      "<repo>/src/node94-ceil/lib.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/opt3-library/libnode94_ceil.rlib"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "opt3-client-build",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=3",
+      "--extern",
+      "node94_ceil=<repo>/work/ceil-rust-research/final-run/opt3-library/libnode94_ceil.rlib",
+      "<repo>/src/node94-ceil/input_only_driver.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/opt3-client"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "opt3-client-run",
+    "argv": [
+      "<repo>/work/ceil-rust-research/final-run/opt3-client"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "opt3-partial-word",
+    "argv": [
+      "<repo>/work/ceil-rust-research/final-run/opt3-client"
+    ],
+    "returncode": 1
+  },
+  {
+    "label": "opt3-unit-build",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "opt-level=3",
+      "--test",
+      "<repo>/src/node94-ceil/lib.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/opt3-unit-tests"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "opt3-unit-run",
+    "argv": [
+      "<repo>/work/ceil-rust-research/final-run/opt3-unit-tests"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "opt3-repeat-library",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=3",
+      "--crate-name",
+      "node94_ceil",
+      "--crate-type",
+      "rlib",
+      "<repo>/src/node94-ceil/lib.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/opt3-repeat-library/libnode94_ceil.rlib"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "truncate_positive_fraction-library",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=3",
+      "--crate-name",
+      "node94_ceil",
+      "--crate-type",
+      "rlib",
+      "<repo>/work/ceil-rust-research/final-run/truncate_positive_fraction.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/truncate_positive_fraction-library/libnode94_ceil.rlib"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "truncate_positive_fraction-client-build",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=3",
+      "--extern",
+      "node94_ceil=<repo>/work/ceil-rust-research/final-run/truncate_positive_fraction-library/libnode94_ceil.rlib",
+      "<repo>/src/node94-ceil/input_only_driver.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/truncate_positive_fraction-client"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "truncate_positive_fraction-client-run",
+    "argv": [
+      "<repo>/work/ceil-rust-research/final-run/truncate_positive_fraction-client"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "lose_negative_zero-library",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=3",
+      "--crate-name",
+      "node94_ceil",
+      "--crate-type",
+      "rlib",
+      "<repo>/work/ceil-rust-research/final-run/lose_negative_zero.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/lose_negative_zero-library/libnode94_ceil.rlib"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "lose_negative_zero-client-build",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=3",
+      "--extern",
+      "node94_ceil=<repo>/work/ceil-rust-research/final-run/lose_negative_zero-library/libnode94_ceil.rlib",
+      "<repo>/src/node94-ceil/input_only_driver.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/lose_negative_zero-client"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "lose_negative_zero-client-run",
+    "argv": [
+      "<repo>/work/ceil-rust-research/final-run/lose_negative_zero-client"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "quiet_signaling_nan-library",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=3",
+      "--crate-name",
+      "node94_ceil",
+      "--crate-type",
+      "rlib",
+      "<repo>/work/ceil-rust-research/final-run/quiet_signaling_nan.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/quiet_signaling_nan-library/libnode94_ceil.rlib"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "quiet_signaling_nan-client-build",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=3",
+      "--extern",
+      "node94_ceil=<repo>/work/ceil-rust-research/final-run/quiet_signaling_nan-library/libnode94_ceil.rlib",
+      "<repo>/src/node94-ceil/input_only_driver.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/quiet_signaling_nan-client"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "quiet_signaling_nan-client-run",
+    "argv": [
+      "<repo>/work/ceil-rust-research/final-run/quiet_signaling_nan-client"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "early_large_exponent_return-library",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=3",
+      "--crate-name",
+      "node94_ceil",
+      "--crate-type",
+      "rlib",
+      "<repo>/work/ceil-rust-research/final-run/early_large_exponent_return.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/early_large_exponent_return-library/libnode94_ceil.rlib"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "early_large_exponent_return-client-build",
+    "argv": [
+      "rustc",
+      "--edition=2024",
+      "--target",
+      "aarch64-apple-darwin",
+      "-D",
+      "warnings",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=yes",
+      "--remap-path-prefix",
+      "<repo>=/source",
+      "-C",
+      "panic=abort",
+      "-C",
+      "opt-level=3",
+      "--extern",
+      "node94_ceil=<repo>/work/ceil-rust-research/final-run/early_large_exponent_return-library/libnode94_ceil.rlib",
+      "<repo>/src/node94-ceil/input_only_driver.rs",
+      "-o",
+      "<repo>/work/ceil-rust-research/final-run/early_large_exponent_return-client"
+    ],
+    "returncode": 0
+  },
+  {
+    "label": "early_large_exponent_return-client-run",
+    "argv": [
+      "<repo>/work/ceil-rust-research/final-run/early_large_exponent_return-client"
+    ],
+    "returncode": 0
+  }
+]
