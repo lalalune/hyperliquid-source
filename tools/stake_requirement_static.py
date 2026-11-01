@@ -109,6 +109,8 @@ def parse_elf_sections(data):
         sh_size = struct.unpack_from("<Q", data, sec + 32)[0]
         end_str = data.find(b"\0", shstr_offset + sh_name_idx)
         name = data[shstr_offset + sh_name_idx:end_str].decode("latin1")
+        if name in sections:
+            raise EvidenceError(f"duplicate section name {name}")
         sections[name] = {"addr": sh_addr, "offset": sh_offset, "size": sh_size}
     return sections
 
