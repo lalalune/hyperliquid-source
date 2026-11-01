@@ -1,0 +1,70 @@
+{
+  "reviewed_source_sha256": {
+    "input_only_driver.rs": "10a2eafb3eda7b4bd1f5c26455effb2b35d5f7e29e7e7f21ef6866393b21f375",
+    "lib.rs": "f757c83ccb07e0345f6c292325e6b0736a111163fbd4f94bd86128189545d6b1"
+  },
+  "peer_script_sha256": "70296a609e37138fb65e58279b14a4a87976fe9fba64850c218d968915b5c157",
+  "independent_result_sha256": "5654b4dc872eefc781b1043b1ea94fd41afe828e829602488669f6dd479e0235",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "research/work-items/RE-004-flag-set-clear-rust-94/peer/verify_independent.py"
+      ],
+      "stdout": "independent.json",
+      "stderr": "independent.stderr.txt",
+      "cwd": "/repo",
+      "returncode": 0,
+      "stdout_sha256": "5654b4dc872eefc781b1043b1ea94fd41afe828e829602488669f6dd479e0235",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "research/work-items/RE-004-flag-set-clear-rust-94/verify_static.py"
+      ],
+      "stdout": "static-recheck.stdout.txt",
+      "stderr": "static-recheck.stderr.txt",
+      "cwd": "/repo",
+      "returncode": 0,
+      "stdout_sha256": "490890f8efc3f6dead451747d1977f755cb570c29584ca480208fe8fb779c33f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/opt/homebrew/opt/binutils/bin/objdump",
+        "-d",
+        "-Mintel",
+        "--insn-width=15",
+        "--start-address=0x53cf560",
+        "--stop-address=0x53cf580",
+        "artifacts/node/94/hl-node"
+      ],
+      "stdout": "fresh.gnu.txt",
+      "stderr": "fresh.gnu.stderr.txt",
+      "cwd": "/repo",
+      "returncode": 0,
+      "stdout_sha256": "abde030adcbd8619a1d85fd5403bb16af36e6d4cedee6bbf2843300eb5d8dc08",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "fresh_gnu_bytes": 32,
+  "static_controls": 24,
+  "independent_observations": 5123,
+  "admitted": 3842,
+  "refusals": 1281,
+  "conclusion": "No source/proof blocker. Direct intervals and snapshot bytes reproduce all full images and RAX/RDX. All eight full FDEs/seven caller edges and80,300 RELAs independently authenticated. Exactly three LLVM LOCK display splits qualified; initial strict failure preserved.",
+  "limits": [
+    "No native/Rust rerun by peer",
+    "No captured execution or instruction emulator",
+    "No original partial-fault, ABI, flags, control-stack or concurrent/MMIO projection",
+    "Caller bytes/edges are context only; indirect references remain open"
+  ],
+  "nonblocking_finite_coverage_note": "No frozen case isolates missing flag span after a present pointer-source span; that safe-refusal case follows the checked interval code/proof, not a claimed native observation.",
+  "initial_failure_archive_sha256": "d4445a935378f86e6466080a1b6f8b21cd347ca2994ea408f54717e1cc956a3c",
+  "protected_source_oracle_static_edits": false,
+  "computation_failures": []
+}
