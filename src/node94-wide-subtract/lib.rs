@@ -1,6 +1,9 @@
 #![no_std]
 #![forbid(unsafe_code)]
 
+/// Ordered byte-image refinement, including overlapping operand and output ranges.
+pub mod image;
+
 /// Numeric projection of node94 VA 0x32d8310..0x32d8361.
 ///
 /// The little-endian words form unsigned 256-bit values. Return their wrapping

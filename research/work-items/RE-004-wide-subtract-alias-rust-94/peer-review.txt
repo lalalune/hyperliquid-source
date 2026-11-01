@@ -1,0 +1,18 @@
+Independent read-only reviewer: Codex worker /root/bsr, 2026-11-02 KST.
+Reviewed image.rs SHA256: 7dbeeaa83c4605c0653e851fcd86724e09f08fcf961c372b7fd4cb5d2c76af40
+Frozen oracle SHA256: 0ca2356763955e20c12f5532df2aa12667ed5d2a530723b10f91a9c2ba6f501d
+
+No blocker for the documented stable ordinary-memory domain. Independently
+recomputed all 22,809 frozen records with direct signed-integer limb differences,
+live operand reads and explicit 16/8/8 source snapshots: zero mismatches, including
+all 22,733 successful cases. Rehashed the complete target and independently
+checked full leaf/caller bytes and FDE/CIE records.
+
+The whole-prefix oracle is sound because later minuend limbs remain untouched,
+while each effective right word is fixed after lower writes. Final A<effective_B
+yields the same outgoing borrow. Original top-left-before-right and Rust's
+right-before-left are equivalent for stable loads with no intervening write.
+Copy stages and saved last RAX correctly precede flag-store aliases. Checked
+span admission bounds all index sums, and atomic Unavailable is explicitly
+additional safe policy. No source change requested. Reviewer did not execute
+captured code, an emulator or a second native build; native evidence is separate.
