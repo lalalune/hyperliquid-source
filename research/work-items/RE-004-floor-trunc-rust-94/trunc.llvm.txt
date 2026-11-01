@@ -1,0 +1,25 @@
+
+artifacts/node/94/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000004fa7e00 <_ZNKSt5ctypeIcE8do_widenEc>:
+ 565f490: 66 48 0f 7e c0               	movq	%xmm0, %rax
+ 565f495: 48 89 c2                     	movq	%rax, %rdx
+ 565f498: 48 c1 ea 34                  	shrq	$0x34, %rdx
+ 565f49c: 81 e2 ff 07 00 00            	andl	$0x7ff, %edx            # imm = 0x7FF
+ 565f4a2: 81 fa 32 04 00 00            	cmpl	$0x432, %edx            # imm = 0x432
+ 565f4a8: 77 3a                        	ja	0x565f4e4 <_ZNKSt5ctypeIcE8do_widenEc+0x6b76e4>
+ 565f4aa: 8d 8a 01 fc ff ff            	leal	-0x3ff(%rdx), %ecx
+ 565f4b0: 48 be 00 00 00 00 00 00 f0 ff	movabsq	$-0x10000000000000, %rsi # imm = 0xFFF0000000000000
+ 565f4ba: 48 d3 fe                     	sarq	%cl, %rsi
+ 565f4bd: 81 fa ff 03 00 00            	cmpl	$0x3ff, %edx            # imm = 0x3FF
+ 565f4c3: 48 b9 00 00 00 00 00 00 00 80	movabsq	$-0x8000000000000000, %rcx # imm = 0x8000000000000000
+ 565f4cd: 48 0f 43 ce                  	cmovaeq	%rsi, %rcx
+ 565f4d1: 48 89 ca                     	movq	%rcx, %rdx
+ 565f4d4: 48 f7 d2                     	notq	%rdx
+ 565f4d7: 48 85 c2                     	testq	%rax, %rdx
+ 565f4da: 74 08                        	je	0x565f4e4 <_ZNKSt5ctypeIcE8do_widenEc+0x6b76e4>
+ 565f4dc: 48 21 c1                     	andq	%rax, %rcx
+ 565f4df: 66 48 0f 6e c1               	movq	%rcx, %xmm0
+ 565f4e4: c3                           	retq
