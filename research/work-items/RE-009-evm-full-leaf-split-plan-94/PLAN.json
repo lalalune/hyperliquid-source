@@ -1,0 +1,45 @@
+{
+  "schema": "re009-evm-full-leaf-split-plan/1",
+  "frozen_before_model": true,
+  "base": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "question": "For an 11-entry leaf and insertion position 0..11, which old entry is selected for promotion, which side receives the new pair and at what local index?",
+  "primary_fde": ["0x1ab3d20", "0x1ab4a43"],
+  "selected_ranges": [
+    ["0x1ab3d31", "0x1ab3d45"],
+    ["0x1ab3d72", "0x1ab3da9"],
+    ["0x1ab3e5f", "0x1ab3fd8"],
+    ["0x28547e1", "0x2854867"]
+  ],
+  "premises": [
+    "The target and all selected native bytes are authenticated.",
+    "The count is exactly 11 and insertion index is an integer from 0 through 11; this is the model domain, not a target rejection claim.",
+    "The caller's handle has height word zero, statically stored before call 0x2854859.",
+    "Post-allocation observations are conditional on successful allocation and normal returns of unresolved byte-move calls."
+  ],
+  "case_columns": ["index", "old_pivot", "destination", "local_index", "left_after_insert", "right_after_insert"],
+  "frozen_cases": [
+    [0,4,"left",0,5,6], [1,4,"left",1,5,6], [2,4,"left",2,5,6],
+    [3,4,"left",3,5,6], [4,4,"left",4,5,6], [5,5,"left",5,6,5],
+    [6,5,"right",0,5,6], [7,6,"right",0,6,5], [8,6,"right",1,6,5],
+    [9,6,"right",2,6,5], [10,6,"right",3,6,5], [11,6,"right",4,6,5]
+  ],
+  "predeclared_mutations": [
+    {"va":"0x1ab3d42", "byte":"0a", "field":"capacity"},
+    {"va":"0x1ab3d7e", "byte":"04", "field":"first cut"},
+    {"va":"0x1ab3d9e", "byte":"05", "field":"left outer pivot"},
+    {"va":"0x1ab3e64", "byte":"07", "field":"second cut"},
+    {"va":"0x1ab3e69", "byte":"04", "field":"right central pivot"},
+    {"va":"0x1ab3e6e", "byte":"00", "field":"right central side"},
+    {"va":"0x1ab3e89", "byte":"fa", "field":"right local-index subtraction"},
+    {"va":"0x1ab3e91", "byte":"05", "field":"right outer pivot"},
+    {"va":"0x1ab3fc5", "byte":"45", "field":"side selection CMOVE"}
+  ],
+  "acceptance": [
+    "Retain the complete primary body, indexed FDE/CIE, LSDA address, selected byte windows and call/branch targets.",
+    "Extract the constants and branch structure before deriving the 12-case mathematical split plan.",
+    "Check frozen cases, promotion exclusion, local-index bounds, 5/6 balance and reassembly against independent list insertion.",
+    "Corrupt decoded fields below identity admission and separately reject whole-image mutations.",
+    "Keep complete insertion, helper closure, global ordering, nominal types, runtime execution and component gates unresolved."
+  ]
+}
