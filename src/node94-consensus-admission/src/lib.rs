@@ -2,14 +2,16 @@
 //!
 //! This crate reconstructs the stake-snapshot, QC, TC, ordered admission, and
 //! registration behavior pinned by `RE-008-block-admission-94`.  Proposer
-//! scheduling, digest construction, and signature recovery remain outside the
-//! recovered native contract.  Callers supply those operations through
+//! scheduling, other digest variants, and signature recovery remain outside the
+//! recovered native contract. [`block_preimage`] provides a separately qualified
+//! selector-0 value helper with explicit packed time. Callers supply authentication through
 //! [`AdmissionAuthenticator`]; a bare boolean cannot cross that boundary.
 //!
 //! This is not a network service or a complete consensus implementation.
 
 mod admission;
 mod auth;
+pub mod block_preimage;
 mod error;
 mod qc;
 mod stake;
