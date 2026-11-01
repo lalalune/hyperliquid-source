@@ -13,9 +13,9 @@ research/work-items/RE-001-nested-teardown-94/window.objdump.txt
   1. Recursively call this same function on the link at
      [current + 0x18] (call at 0x514bef3; a null link returns at
      once, so the recursion always terminates at the leaves).
-  2. Load the items head from [first + 0x38] -- where "first" is
-     the r12 register, which the loop body never updates (see the
-     quirk note below) -- and save the next link from
+  2. Load the items head from [current + 0x38] (r12, reloaded
+     with the current node at 0x514bef0 on every iteration --
+     see the loop note below) and save the next link from
      [current + 0x10] (loaded at 0x514befd, before any free below,
      so the walk survives the frees).
   3. Walk the items list: for each item, first tear down the
@@ -28,40 +28,26 @@ research/work-items/RE-001-nested-teardown-94/window.objdump.txt
      with size 0x30 (call at 0x514bf25) and advance to the saved
      [item + 0x10]. A null items head skips the walk (je at
      0x514bf04 to 0x514bf2f).
-  4. Delete the node in r12 with size 0x58 (call at 0x514bf37).
+  4. Delete the current node (r12, reloaded this iteration)
+     with size 0x58 (call at 0x514bf37).
   5. Advance to the saved next link; stop when it is null
      (jne at 0x514bf3f back to 0x514beec).
 - The function returns void, preserves r12, rbp and rbx, and keeps
   the stack balanced (pushes restored at 0x514bf41..0x514bf43
   before ret at 0x514bf45). It has no stack canary.
 
-QUIRK -- READ THIS BEFORE REUSING THE MODEL: the loop body updates
-rbp (the current node) at 0x514befd but never updates r12 (the
-node whose items list is read at 0x514bef8 and which is deleted
-at 0x514bf37). So, literally, on every iteration after the first:
-
-- the items head is re-read from the FIRST node's +0x38 slot,
-  which by then has already been deleted (a freed-slot read);
-- the FIRST node is deleted again with size 0x58 (a repeat free);
-- the items walked in the first iteration are walked again, so
-  their +0x18 chains are torn down again and the items are freed
-  again;
-- the subsequent nodes themselves (second, third, ...) are never
-  deleted by this loop -- only their +0x18 subtrees are torn down
-  (step 1 runs for each of them).
-
-Whether any real execution ever presents a +0x10 chain longer than
-one node is NOT established by this packet, and no claim is made
-that the multi-node path is safe: with a non-clearing allocator
-the freed slots still hold their old values, so the re-walk
-follows the same pointers, but the repeat frees are repeat frees.
-The model below reproduces the register flow faithfully, marking
-freed-slot reads and repeat frees explicitly, instead of
-smoothing the loop into the "sane" version (which would delete
-each node once and read each node's own items). For a single-node
-chain the quirk never triggers and the behavior is the clean one:
-child subtree, then items, then the node itself, each exactly
-once.
+LOOP NOTE -- READ THE ADDRESSES, NOT THE SHAPE: the loop head is
+0x514beec (mov 0x18(%rbp),%rdi) and the very next instruction,
+0x514bef0 (mov %rbp,%r12), reloads r12 with the current node on
+EVERY iteration, because the loop-back branch at 0x514bf3f
+targets 0x514beec, which precedes 0x514bef0. So each iteration
+reads its OWN node's +0x38 items list and deletes its OWN node:
+there is no stale-register quirk here. (An earlier revision of
+this packet claimed the opposite by misreading 0x514bef0 as
+outside the loop; slopbot's review of PR #1374 caught that
+error, and this revision corrects it. The raw excerpts settle
+the question either way: 0x514beec < 0x514bef0, and the loop-back
+target is 0x514beec.)
 
 The model takes the post-deref values as its input: a node is an
 ``OuterNode`` whose ``child`` and ``next`` links are already
@@ -109,7 +95,7 @@ CALLS = [
     (0x514BEF3, 0x514BEE0),  # recursive call on [current + 0x18]
     (0x514BF14, 0x514B690),  # callee on [item + 0x18]
     (0x514BF25, 0x5660440),  # operator delete: item, size 0x30
-    (0x514BF37, 0x5660440),  # operator delete: first node, 0x58
+    (0x514BF37, 0x5660440),  # operator delete: current node, 0x58
 ]
 CALLEE_BRANCHES = [
     (0x514B693, 2, 0x514B6C0),  # je: null input -> ret (no frame)
@@ -154,82 +140,53 @@ class OuterNode:
         self.items = items
 
 
-def _teardown_item(item, events, freed):
+def _teardown_item(item, events):
     """The 0x514b690 rule, as reused by the inner walk.
 
     For each item in the +0x10 chain, in order: recursively tear
     down the +0x18 link, delete the item with size 0x30, advance
     to the saved [item + 0x10]. A null head yields no events.
-    ``freed`` is the set of labels already deleted by the caller;
-    reads and frees of such labels are marked, not hidden.
     """
     cur = item
     while cur is not None:
         nxt = cur.next
-        if cur.label in freed:
-            events.append(("read_freed", cur.label, "+0x10/+0x18"))
         if cur.child is not None:
-            _teardown_item(cur.child, events, freed)
-        if cur.label in freed:
-            events.append(("free_again", "item", cur.label, ITEM_SIZE))
-        else:
-            events.append(("free", "item", cur.label, ITEM_SIZE))
-            freed.add(cur.label)
+            _teardown_item(cur.child, events)
+        events.append(("free", "item", cur.label, ITEM_SIZE))
         cur = nxt
 
 
-def teardown(node, events=None, freed=None):
-    """Simulate 0x514bee0 faithfully, including the r12 quirk.
+def teardown(node, events=None):
+    """Simulate 0x514bee0.
 
-    Each event is ("free", kind, label, size), ("free_again",
-    kind, label, size) for a repeat free of an already-deleted
-    label, or ("read_freed", label, field) for a field read from
-    an already-deleted node. A null input yields no events. The
-    returned list is the ordered observable effect sequence; the
-    quirk markers are part of the claim, not noise: for a
-    single-node chain no marker ever appears.
+    Each event is ("free", kind, label, size), in the order the
+    bytes free things. A null input yields no events. For each
+    node in the +0x10 chain, in order: (1) recursively tear down
+    the +0x18 link via the self-call, (2) walk the node's own
+    +0x38 items list (each item: tear down its +0x18 chain
+    through 0x514b690, then delete the item with size 0x30),
+    (3) delete the node itself with size 0x58, (4) advance to
+    the next link saved from [node + 0x10] before the frees.
+    Every node is deleted exactly once and every item list is
+    walked exactly once, because r12 is reloaded with the
+    current node at 0x514bef0 on every iteration (see the loop
+    note in the module docstring).
     """
     if events is None:
         events = []
-    if freed is None:
-        freed = set()
-    if node is None:
-        return events
-    first = node
     cur = node
     while cur is not None:
-        # Step 1: recurse on [current + 0x18] (self-call).
         if cur.child is not None:
-            teardown(cur.child, events, freed)
-        # Step 2: items head from [first + 0x38] (r12, invariant),
-        # next link saved from [current + 0x10] (rbp, advancing).
-        if first.label in freed:
-            events.append(("read_freed", first.label, "+0x38"))
-        items = first.items
-        nxt = cur.next
-        # Step 3: inner walk over the items list.
-        item = items
+            teardown(cur.child, events)
+        nxt = cur.next  # saved before any free, as at 0x514befd
+        item = cur.items
         while item is not None:
             item_nxt = item.next
-            if item.label in freed:
-                events.append(("read_freed", item.label, "+0x10/+0x18"))
             if item.child is not None:
-                _teardown_item(item.child, events, freed)
-            if item.label in freed:
-                events.append(("free_again", "item", item.label,
-                               ITEM_SIZE))
-            else:
-                events.append(("free", "item", item.label, ITEM_SIZE))
-                freed.add(item.label)
+                _teardown_item(item.child, events)
+            events.append(("free", "item", item.label, ITEM_SIZE))
             item = item_nxt
-        # Step 4: delete the node in r12 (always the first node).
-        if first.label in freed:
-            events.append(("free_again", "outer", first.label,
-                           OUTER_SIZE))
-        else:
-            events.append(("free", "outer", first.label, OUTER_SIZE))
-            freed.add(first.label)
-        # Step 5: advance to the saved next link.
+        events.append(("free", "outer", cur.label, OUTER_SIZE))
         cur = nxt
     return events
 

@@ -22,8 +22,9 @@
   int3 padding bytes, the complete delete-order rule, the
   operator-delete PLT stub with its GOT relocation, all 6
   external direct call sites with their argument setups, and the
-  r12 quirk (below) with a model that reproduces it faithfully
-  instead of smoothing it over.
+  corrected loop reading (below): r12 is reloaded with the
+  current node on every iteration, so every node is deleted
+  exactly once.
 - Evidence format: `records.json` holds semantic records only —
   the function carve ranges with their SHA-256 values, branch
   site→target and call site→target pairs, the caller census, the
@@ -67,7 +68,8 @@ Entry `0x514bee0`, whole function `0x514bee0..0x514bf51`
    input node. Each loop iteration, in order:
    - `rdi = [current + 0x18]`; call self at `0x514bef3`
      (recursion on the +0x18 link; a null link returns at once).
-   - `rbx = [first + 0x38]` (the items head, from r12);
+   - `rbx = [current + 0x38]` (the items head, from r12, which
+     was just reloaded with the current node at `0x514bef0`);
      `rbp = [current + 0x10]` (the next link, saved before any
      free below, so the walk survives the frees).
    - Inner walk while `rbx != 0`: `rdi = [item + 0x18]`, call
@@ -86,35 +88,30 @@ Entry `0x514bee0`, whole function `0x514bee0..0x514bf51`
 3. Pop rbx, rbp, r12 and ret at `0x514bf45`. Void return, no
    stack canary.
 
-## The r12 quirk (observed, not smoothed over)
+## The loop reading, corrected (slopbot caught an error here)
 
-The loop body updates rbp (the current node) at `0x514befd`
-but never updates r12 after the single `mov %rbp,%r12` at
-`0x514bef0`. The bytes therefore do, literally, on every
-iteration after the first:
+The loop head is `0x514beec` (`mov 0x18(%rbp),%rdi`) and the
+very next instruction, `0x514bef0` (`mov %rbp,%r12`), reloads
+r12 with the current node on EVERY iteration, because the
+loop-back branch at `0x514bf3f` targets `0x514beec`, which
+precedes `0x514bef0`. Each iteration therefore reads its OWN
+node's `+0x38` items list (step 2) and deletes its OWN node
+(step 4): every node in the `+0x10` chain is deleted exactly
+once, and every items list is walked exactly once. The model in
+`tools/foundation_nested_teardown.py` implements exactly this.
 
-- re-read the items head from `[first + 0x38]`, where `first`
-  is the already-deleted first node (a freed-slot read);
-- re-walk and re-delete that first node's items (repeat frees
-  of the items and repeat teardowns of their +0x18 chains);
-- delete the first node again with size `0x58` (a repeat free);
-- never delete the second, third, ... nodes themselves — only
-  their +0x18 subtrees are torn down (step 1 runs for each
-  current node).
-
-The model in `tools/foundation_nested_teardown.py` reproduces
-this register flow exactly, marking freed-slot reads as
-`read_freed` events and repeat frees as `free_again` events.
-For a single-node chain the quirk never triggers and the
-behavior is clean: child subtree, then items, then the node,
-each exactly once. Whether any real execution ever presents a
-+0x10 chain longer than one node is NOT established by this
-packet, and no claim is made that the multi-node path is safe:
-with a non-clearing allocator the freed slots still hold their
-old values, so the re-walk follows the same pointers, but the
-repeat frees are repeat frees. The "sane" version of this loop
-(delete each node once, read each node's own items) is NOT what
-the bytes say, and is NOT claimed.
+Correction record: the first revision of this packet (commit
+`73c0312f`, PR #1374 as first submitted) claimed the opposite
+— a stale-r12 repeat-free quirk — by misreading `0x514bef0`
+as sitting outside the loop. That claim was wrong: `0x514beec
+< 0x514bef0`, and the loop-back target is `0x514beec`, so the
+mov executes on every iteration. Slopbot's review of PR #1374
+pointed this out from the shipped excerpt, and this revision
+corrects the model, the records, the two multi-node tests, and
+this README to match the bytes. The trace in the section above
+already reflects the corrected reading; nothing else in the
+packet changed, because every other address in the trace was
+already verified against the raw encodings.
 
 ## Excluded
 

@@ -64,44 +64,34 @@ def test_single_node_item_chain_with_nested_children():
     ]
 
 
-def test_two_node_chain_exposes_r12_quirk():
-    # The loop advances rbp via +0x10 but never updates r12, so
-    # the second iteration re-reads the FIRST node's items head
-    # (a freed-slot read), re-walks and re-frees those items, and
-    # frees the first node again -- while the second node itself
-    # is never deleted by this loop. This test pins that literal
-    # register flow; it is not a claim that the path is safe.
+def test_two_node_chain_deletes_each_node_once():
+    # The loop head is 0x514beec and the mov %rbp,%r12 at
+    # 0x514bef0 sits after it, so r12 is reloaded with the
+    # current node on every iteration: each node reads its OWN
+    # items list and is deleted exactly once, in chain order.
     item0 = m.ItemNode("I0")
-    node1 = m.OuterNode("N1")
+    item1 = m.ItemNode("I1")
+    node1 = m.OuterNode("N1", items=item1)
     node0 = m.OuterNode("N0", next=node1, items=item0)
-    events = m.teardown(node0)
-    assert events == [
+    assert m.teardown(node0) == [
         ("free", "item", "I0", 0x30),
         ("free", "outer", "N0", 0x58),
-        ("read_freed", "N0", "+0x38"),
-        ("read_freed", "I0", "+0x10/+0x18"),
-        ("free_again", "item", "I0", 0x30),
-        ("free_again", "outer", "N0", 0x58),
+        ("free", "item", "I1", 0x30),
+        ("free", "outer", "N1", 0x58),
     ]
-    # In particular, N1 is never freed by this function.
-    assert not any(e[2] == "N1" for e in events if e[0] in
-                   ("free", "free_again"))
 
 
-def test_two_node_chain_second_child_still_torn_down():
-    # Even though the second node is never deleted, its +0x18
-    # subtree IS torn down on the second iteration (step 1 runs
-    # for every current node).
+def test_two_node_chain_second_child_torn_down_first():
+    # The second node's +0x18 subtree is torn down on the
+    # second iteration (step 1), before the second node itself
+    # is deleted.
     child = m.OuterNode("C1")
     node1 = m.OuterNode("N1", child=child)
     node0 = m.OuterNode("N0", next=node1)
     assert m.teardown(node0) == [
         ("free", "outer", "N0", 0x58),
         ("free", "outer", "C1", 0x58),
-        # The second iteration still executes the mov
-        # 0x38(%r12) load (step 2), even with a null items head.
-        ("read_freed", "N0", "+0x38"),
-        ("free_again", "outer", "N0", 0x58),
+        ("free", "outer", "N1", 0x58),
     ]
 
 
