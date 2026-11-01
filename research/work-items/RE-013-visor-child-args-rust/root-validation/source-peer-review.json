@@ -1,0 +1,173 @@
+{
+  "status": "PASS: independent source/harness and actual amended receipt review; no actionable findings",
+  "reviewed_utc": "2026-11-01T22:07:33.733382+00:00",
+  "reviewer": "node_scout independent read-only peer",
+  "source_freeze_sha256": "ae8116f89b316e3137fde905b08c37854b95b09b3ff8d934deeef69db0fcaa16",
+  "original_freeze_preserved": "008542842de569e0af3301e542aae9b360e79d0b6bdf9382ba554adf13a417ef",
+  "findings": [],
+  "read_files": {
+    "src/visor-child-args/src/lib.rs": "07d2e5078f380aa1d006c79a6bb1b1200de6f350e2fed85bc6bd8c76add54f68",
+    "src/visor-child-args/tests/value_contract.rs": "d19ed9b106d7ac55bf69c526841e2c6894c2bed863530b3c82d56f3fbf64dc7b",
+    "src/visor-child-args/Cargo.toml": "d1310f216427e6031755b47f50a97b4c5d220c849296067706d61bc8ee56f99b",
+    "src/visor-child-args/Cargo.lock": "56cefa1c2a5e464e8a83a96ac194cdc9de20648123008e1da11ac9f55454e1d9",
+    "src/visor-child-args/README.md": "e261cef5c9aa44ecb661fc8c06f42b7d57fb67b10badc27cb3f74507cc0fc006",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/build.py": "f858eeff7e04e2e74c1d7d615eb4a9bce567509446ce67f073ac095abbb9b98e",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/build_amended.py": "506d32bf277451a45a5e8157ca6b4331476b056960702b7aa0831ae1a0c1c567",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/input_client.rs": "5f8fe5afd87476b9da8358947ae95997617e5cd11342af4dce2e43fdfff24a85",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/verify.py": "4fc3520bc400ca786783d68251f6534493e3637b48579567464fdec053b30b1a",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/verify_amended.py": "8e6bce152304077d40892fa53f152182687a2a82a390223bceb0bedf42c09572",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/SOURCE-FREEZE.json": "008542842de569e0af3301e542aae9b360e79d0b6bdf9382ba554adf13a417ef",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/SOURCE-FREEZE-2.json": "ae8116f89b316e3137fde905b08c37854b95b09b3ff8d934deeef69db0fcaa16",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/README.md": "f93c6d4c8b9fc521e62b424f689ab045daf8fdfbd7f6f9ff7ab10e15c47ce71a",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/TOOLCHAIN-PINS.json": "75056dc115ac7a19af9e23afb60ef8929130df729e6b0218c268c713ebbfbcba",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/amendment-1/AMENDMENT.json": "aac2b5c820f2e2ca6732a1d2646879453522aec5a2c0e6b499ca0e9109355e3a",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/amendment-1/failed-build/commands.json": "469f347a4c981e7665eb917ab0f597e363ea5db75c80c2440ea4e6a919f473f7",
+    "research/work-items/RE-013-visor-child-args-rust/BRIDGE.md": "92a03efc17251ff3611e5c2740a79725149c70173c8e43b1cab5b369bde2d987",
+    "research/work-items/RE-013-visor-child-args-rust/CONTRACT.md": "8c1639ffc214ec39b5f01aa2bb67de5e815585bffc1ad80a451a41bd0d561504",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/receipts/results.json": "d27d500e58aabb24e7e02769727af88586db19c26feed3c33adf51e0a147b133",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/receipts/commands.json": "9e637593952d286a0c6264f04e8aa925b8599f754ac18d85a47e4227a1eb8d21",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/receipts/source-copies.json": "7f736560f419d6c8b6c4924f8be6b687fd8dba0883cddac843b233786b3a0736",
+    "research/work-items/RE-013-visor-child-args-rust/rust-validation/receipts/build-audit.json": "1687658823b62e123ddd3eba8bab608d1367b6087fba183def92c7a689606560",
+    "research/work-items/RE-013-visor-child-args-rust/IMPLEMENTATION.md": "1e54a8b9bf28dc677e60283558c74fa944240cbac442f9077a1c5b6c2516a688",
+    "research/work-items/RE-013-visor-child-args-rust/IMPLEMENTATION-FREEZE.json": "a7118562716b3c58b3d23069deb2447970ea603d695e179c0c5e72a5ee3fa0a9",
+    "research/work-items/RE-013-visor-child-args-rust/IMPLEMENTATION-MANIFEST.sha256": "116b6b9586f35574bf6f34d3310a2a986e231d9f2bd5c1d1a304aa4f274fdd0f"
+  },
+  "checks": [
+    {
+      "topic": "typed null-empty distinction",
+      "evidence": "src/visor-child-args/src/lib.rs:31-48; BRIDGE complete input/frame domain and induction",
+      "result": "None maps only to pointer0,length0 and stops before suffix UTF8 inspection; Some(empty) appends empty String and does not stop. Source checks the entire descriptor count before visiting prefix."
+    },
+    {
+      "topic": "UTF8 success versus opaque native errors",
+      "evidence": "lib.rs:50-65; CONTRACT canonical scalar-language connection; BRIDGE error boundary",
+      "result": "std::str::from_utf8 implements the chosen canonical-language admission; embedded NUL/whitespace/quotes are preserved. InvalidUtf8(index) is explicitly a new safe refusal, and allocation failure may precede later invalid data. No native error helper semantics are claimed."
+    },
+    {
+      "topic": "bounds and ownership",
+      "evidence": "lib.rs:20-25,39-70; BRIDGE combined stack interval[P-192,E+8)",
+      "result": "24*N bound uses checked multiplication and i64MAX; collector calls it with full count. Finite source payload borrows are copied into new Strings; vector/string allocation, layout and cleanup are distinguished from native. No giant slice or native pointer is forged."
+    },
+    {
+      "topic": "input-only client",
+      "evidence": "rust-validation/input_client.rs complete body",
+      "result": "Only canonical opaque-ID/value stdin is parsed; no expected file, oracle, answer hash or filesystem read. Comma/hex/~/-/. protocol distinguishes absent list, None and real empty string. Parent alone compares expected raw bytes."
+    },
+    {
+      "topic": "build graph/config/remap",
+      "evidence": "build_amended.py complete body; Cargo.toml/lock; source freeze2",
+      "result": "Actual dependency-free five-file MIT crate copied exactly, no fabricated workspace or executable build hook. Lexical/canonical temp Cargo config checks, explicit env, pinned97 bin/lib payloads and link targets, offline/locked metadata target census, path remapping and after-build identities are present. Host OS/full SDK hermeticity is explicitly excluded."
+    },
+    {
+      "topic": "compiled mutants and comparator",
+      "evidence": "build_amended.py mutants()/comparator_controls()/build()",
+      "result": "14 source edits are required to compile in both profiles and differ from frozen value/length bytes; compilation failure is not counted. Exact raw comparator includes12 corruptions and byte-level LF/CRLF distinctions. Clean-directory raw identity differences are recorded without masking or requiring cosmetic success."
+    },
+    {
+      "topic": "test-only amendment chronology",
+      "evidence": "amendment-1/failed-build/commands.json and all30 raw references; build/verify amended diffs",
+      "result": "Rehashed all15 failed-attempt commands: first14 exit0, final cargo-test exit101 with E0308 at repeatedSome(bempty). Production lib unchanged. Test correction is exactlySome(&bempty[..]); old test/README/harness/freeze retained. New build changes only source-freeze filename and replay entrypoint; verifier import selects amended harness."
+    },
+    {
+      "topic": "final additive documentation",
+      "evidence": "IMPLEMENTATION.md; IMPLEMENTATION-FREEZE.json;139-entry IMPLEMENTATION-MANIFEST.sha256",
+      "result": "Claims match actual receipts; initial test compilation failure and amended replay commands preserved. Debug clean-directory client inequality remains explicit; native errors, cleanup, allocator/layout and process argv remain excluded. All139 manifest entries rehashed."
+    }
+  ],
+  "receipt_checks_completed": {
+    "source_hashes": 5,
+    "amended_harness_hashes": 32,
+    "initial_failure_commands": 15,
+    "initial_failure_raw_references": 30,
+    "initial_library_compiled": true,
+    "initial_tests_passed": false,
+    "amended_commands_all_zero": 146,
+    "amended_raw_references": 292,
+    "unique_raw_archives": 67,
+    "baseline_and_rebuild_value_cases_per_profile": 108604,
+    "baseline_and_rebuild_integer_cases_per_profile": 197,
+    "compiled_mutants_both_profiles": {
+      "continue-past-none": {
+        "values": 437,
+        "lengths": 0
+      },
+      "none-becomes-empty": {
+        "values": 583,
+        "lengths": 0
+      },
+      "empty-stops": {
+        "values": 557,
+        "lengths": 0
+      },
+      "drop-empty": {
+        "values": 446,
+        "lengths": 0
+      },
+      "reject-nul": {
+        "values": 843,
+        "lengths": 0
+      },
+      "lossy-invalid": {
+        "values": 84546,
+        "lengths": 0
+      },
+      "trim-values": {
+        "values": 1901,
+        "lengths": 0
+      },
+      "reverse-values": {
+        "values": 1735,
+        "lengths": 0
+      },
+      "drop-duplicates": {
+        "values": 391,
+        "lengths": 0
+      },
+      "previous-error-index": {
+        "values": 920,
+        "lengths": 0
+      },
+      "truncate-at-nul": {
+        "values": 732,
+        "lengths": 0
+      },
+      "reject-domain-endpoint": {
+        "values": 0,
+        "lengths": 1
+      },
+      "wrap-descriptor-product": {
+        "values": 0,
+        "lengths": 7
+      },
+      "wrong-descriptor-stride": {
+        "values": 0,
+        "lengths": 180
+      }
+    },
+    "comparator_corruptions": 12,
+    "source_copies_checked": 16,
+    "clean_directory_raw_identity": {
+      "debug": {
+        "driver_raw_equal": false,
+        "masks": [],
+        "normalization": null,
+        "rlib_raw_equal": true
+      },
+      "release": {
+        "driver_raw_equal": true,
+        "masks": [],
+        "normalization": null,
+        "rlib_raw_equal": true
+      }
+    },
+    "result_sha256": "d27d500e58aabb24e7e02769727af88586db19c26feed3c33adf51e0a147b133",
+    "command_receipt_sha256": "9e637593952d286a0c6264f04e8aa925b8599f754ac18d85a47e4227a1eb8d21",
+    "final_implementation_manifest_entries": 139,
+    "final_author_freeze_sha256": "a7118562716b3c58b3d23069deb2447970ea603d695e179c0c5e72a5ee3fa0a9"
+  },
+  "limits": [
+    "No target program/instruction evaluator or Rust build was run by this reviewer.",
+    "Root had already reviewed4 nativeFDEs/503rows and108604+197 independent oracle values; this review checks source/harness correspondence and does not duplicate that native/corpus proof.",
+    "Actual amended receipts now checked; no compiler/build was rerun by this reviewer. Debug driver differs between clean directories, while both rlibs and release driver match; differences are retained without masks."
+  ]
+}
