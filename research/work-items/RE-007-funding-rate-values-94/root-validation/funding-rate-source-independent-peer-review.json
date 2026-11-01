@@ -1,0 +1,147 @@
+{
+  "reviewed_at_utc": "2026-11-01T23:43:00.676720+00:00",
+  "scope": "Independent read-only source/client/manual-arithmetic review before production build authorization. No Rust or captured execution.",
+  "source_freeze_sha256": "e4ea0b5dfd219feda46b64cb1ffc87dcfab275c9b5613905d9f33ad453f88ef9",
+  "library_sha256": "d60d644ec1b076a4c3d2f8f47fc1d05f15087f58f1947ca1803645b23a41a456",
+  "reviewed_files": {
+    "src/node94-funding-rate-values/Cargo.lock": {
+      "bytes": 170,
+      "sha256": "b977e0be30fbce4597422e047b2d5c3e9a3c77f91a4c24a73f71367169c83dbd"
+    },
+    "src/node94-funding-rate-values/Cargo.toml": {
+      "bytes": 298,
+      "sha256": "514acdc2489da9a9fe16013f6e72af4abf6c26acb88987645607cf8218ee96f9"
+    },
+    "src/node94-funding-rate-values/README.md": {
+      "bytes": 1636,
+      "sha256": "d5884160473634e345759ade5d9519ab65e1c1ba57a2dea5f844f916b0ecd509"
+    },
+    "src/node94-funding-rate-values/src/lib.rs": {
+      "bytes": 10123,
+      "sha256": "d60d644ec1b076a4c3d2f8f47fc1d05f15087f58f1947ca1803645b23a41a456"
+    },
+    "src/node94-funding-rate-values/tests/rate_values.rs": {
+      "bytes": 3686,
+      "sha256": "eff6a159943ea63b2e85a6e381ae30b641d177240ca2bd39951bba6a641e6092"
+    },
+    "research/work-items/RE-007-funding-rate-values-94/SOURCE-FREEZE.json": {
+      "bytes": 3054,
+      "sha256": "e4ea0b5dfd219feda46b64cb1ffc87dcfab275c9b5613905d9f33ad453f88ef9"
+    },
+    "research/work-items/RE-007-funding-rate-values-94/SOURCE-PROOF.md": {
+      "bytes": 9540,
+      "sha256": "24397c2a604836381d0e628fafc47d996620d1497f516b4aeab13faac7575f7b"
+    },
+    "research/work-items/RE-007-funding-rate-values-94/SOURCE-PROOF-ADDENDUM.md": {
+      "bytes": 1714,
+      "sha256": "f63b4c35b70f375bdac478b7e166a7f335c91142f16eb8c5b92d9e673e9b49f8"
+    },
+    "research/work-items/RE-007-funding-rate-values-94/SOURCE-PROOF-AMENDMENT.json": {
+      "bytes": 1178,
+      "sha256": "f8ed3c7d6e8fc5efd39ed9099b20cd7c88e8bb702e62b0a8c0004c2b6c54a10f"
+    },
+    "research/work-items/RE-007-funding-rate-values-94/CONTRACT.md": {
+      "bytes": 4082,
+      "sha256": "da5f96df65c7eec49d78e674457e2fc07cc057077cf973a7a64a99cabe204446"
+    },
+    "research/work-items/RE-007-funding-rate-values-94/PROTOCOL.md": {
+      "bytes": 2130,
+      "sha256": "b2e725b3ff24f27113fcb5426128b322b1d53b541ab8064e07ef6b4fa4d4477f"
+    },
+    "research/work-items/RE-007-funding-rate-values-94/PROOF.md": {
+      "bytes": 14418,
+      "sha256": "3c01fbd1e01c06e60a14477f5898f5681aa91660fe7cbe739817fbb32320c9c1"
+    },
+    "research/work-items/RE-007-funding-rate-values-94/driver.rs": {
+      "bytes": 3324,
+      "sha256": "47e07f97a7d50c92ed7d2653f4ce7b8ccb5a29e4df0bfd99b587a6b01d99eb1a"
+    }
+  },
+  "freeze_identity_check": {
+    "source_entries": 5,
+    "harness_entries": 9,
+    "all_unchanged": true,
+    "qualification": "All14 entries rehashed; semantic review here covers library/tests/client/sourceproof/contract/protocol/native formula, not the entire build harness or97-file installed toolchain."
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "documentation correction",
+      "location": "SOURCE-PROOF.md:97",
+      "original": "-52<=floor(log2(a/b))<=52",
+      "counterexample": {
+        "sum_bits": "0000000000000001",
+        "count": 3,
+        "a": 1,
+        "b": 6755399441055744,
+        "floor_log2_ratio": -53,
+        "public_sequence": [
+          "0000000000000001",
+          "0000000000000000",
+          "0000000000000000"
+        ]
+      },
+      "production_impact": "None found. lib.rs:174..176 already computes-53. The106-bit numerator proof remains valid.",
+      "status": "resolved additively before build",
+      "resolution": "SOURCE-PROOF-ADDENDUM.md corrects specialized range to-53..0; SOURCE-PROOF-AMENDMENT.json binds original proof/sourcefreeze unchanged. Both documents independently read and rehashed.",
+      "addendum_sha256": "f63b4c35b70f375bdac478b7e166a7f335c91142f16eb8c5b92d9e673e9b49f8",
+      "amendment_sha256": "f8ed3c7d6e8fc5efd39ed9099b20cd7c88e8bb702e62b0a8c0004c2b6c54a10f"
+    }
+  ],
+  "checks": [
+    {
+      "subject": "Dyadic representation/rounding/encoding",
+      "result": "No actionable defect found. Private callers bound magnitude to at most118 bits; exponent arithmetic fits i32. Positive shifts1..127 use exact quotient/remainder,128 handles tie-to-even zero,>128 is belowhalf, nonpositive shift yields<=53bits. encode subnormal branch implies quantum-1074; carry to minimum-normal ornextbinade and overflow midpoint are consistent."
+    },
+    {
+      "subject": "Addition gap shortcut and cancellation",
+      "result": "No actionable defect found. For gap>64 the lesser magnitude is <2^(P-12), strictly below half the smallest neighboring spacing2^(P-2), including poweroftwo predecessors. Other aligned operands fit117bits/sum118. Opposite equal finite operands yield+0; two-0 yields-0, and lonezero preserves other."
+    },
+    {
+      "subject": "Specialized positive-count division",
+      "result": "No actionable code defect. Count rounds before division; finitepositive denominator has53-bit significand. Exact quotient/remainder comparison uses denominator-remainder to avoid overflow. Publicvalidslice count<=2^60-1. Denominator-shift guard is conservative; reachable negative shifts need at most61bits. NaN/zero/infinity cases retain specified bits."
+    },
+    {
+      "subject": "Integer width certificate",
+      "result": {
+        "cases": 223236,
+        "ratio_range": [
+          -53,
+          0
+        ],
+        "max_numerator_bits": 106,
+        "max_denominator_bits": 61,
+        "basis": "All53significand widths;bothpossiblefloor-ratio endpoints;width difference domain-1082..1023, a conservative superset of captured validcount/sum exponents. This checks algebraic bounds, not source/captured instructions."
+      }
+    },
+    {
+      "subject": "NaN, infinities, signedzero and clamps",
+      "result": "No actionable defect. First-sourceNaN quieting precedes invalid rules; subtraction selectsNaN before negatingsecondoperand. Finiteonly min/max choose second on equality; native low=min(c,-c),high=max(-c,c),max(low,gap),min(high,...) order retained. Product clamp finiteguard and unconditional finalEIGHTH preserve presentnonfinite status."
+    },
+    {
+      "subject": "All-input public operation/data order",
+      "result": "No actionable defect. Missing/empty=>None; ordered sum starts-0 with oneadd/sample; optionaldefaults rawbits matchprecode; mean division then gap/correction/multiplier/finitebound/finalscale order matchesnative formula. insertion_bits changesonlyNone to+0."
+    },
+    {
+      "subject": "Input-only client/protocol",
+      "result": "No expectedfile/oracle/provenance access orIDs affectingvalue. Exactcanonicalhex,count,fieldcount,ASCII,LF,duplicate andextraarg checks; samples preflight usesisizebound. Output buffered until entireinput accepted; preservesrecordorder andexactpresentbits/absence. Hostallocation/IO failure is outside nativecontract."
+    },
+    {
+      "subject": "Focused tests and graph surface",
+      "result": "Read all3private+8publictests, manifest, lock andREADME. Boundary tests exercise >2^53lengthrounding withoutfakehuge slices, cancellation, underflow/overflowties, NaNsign, signedzeroclamp andabsence projection. Manifest/lock haveonepackage,nodependencies,nohooks; actualgraph/toolchain/fullbuildclosure remain rootreview."
+    }
+  ],
+  "prior_native_review": {
+    "path": "artifacts/funding-rate-independent-peer-review.json",
+    "sha256": "da6a587de070e2e5ef468f460b1ba39b05fc920a6bac1adac27262fc84eb4eea",
+    "relation": "Earlier full3nativebody/manualproof/Fractionoracle review remains separate; currentread reconfirms frozen native formula and source contract, not a new independent capture lineage."
+  },
+  "result": "No unresolved actionable source/client finding after additive documentation correction. This review is not build authorization or actual compilation/test success.",
+  "limits": [
+    "No Rust build/run or source translation/evaluator was executed.",
+    "No captured execution, instruction evaluator, emulator, livefunding/targetnetwork, Git orpacket/source edit.",
+    "No independent organization corroboration of nativeprogram semantics; IntelISA rules remain conditionalpremises, not measuredtargetCPU/MXCSR.",
+    "Fullbuild.py/config/toolchain audit andactualdebug/release/mutant outputs are separately owned byroot/author.",
+    "Finite corpus is not exhaustiveallbit proof; manual integerwidth/rounding/domain reasoning supplies broaderargument understatedassumptions."
+  ]
+}
