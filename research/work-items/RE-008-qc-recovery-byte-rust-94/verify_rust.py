@@ -105,10 +105,9 @@ def main():
     (output / "inputs.tsv").chmod(0o444)
     (output / "expected.tsv").chmod(0o444)
 
-    names = ["Cargo.toml", "Cargo.lock"]
+    names = ["Cargo.toml", "Cargo.lock", "examples/qc_recovery_byte_input_only.rs"]
     names += sorted(path.relative_to(COMPONENT).as_posix()
-                    for directory in ("src", "examples")
-                    for path in (COMPONENT / directory).rglob("*.rs"))
+                    for path in (COMPONENT / "src").rglob("*.rs"))
     sources = {name: (COMPONENT / name).read_bytes() for name in names}
     baseline = sources[FIELD].decode()
     source_sets = {"baseline": sources}
