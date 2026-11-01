@@ -128,7 +128,10 @@ def sections(data):
     out = {}
     for h in hdrs:
         end = data.index(b'\0', stroff + h[0])
-        out[data[stroff + h[0]:end].decode()] = {'addr': h[3], 'offset': h[4], 'size': h[5]}
+        name = data[stroff + h[0]:end].decode()
+        if name in out:
+            raise ValueError(f'duplicate section name {name}')
+        out[name] = {'addr': h[3], 'offset': h[4], 'size': h[5]}
     return out
 
 

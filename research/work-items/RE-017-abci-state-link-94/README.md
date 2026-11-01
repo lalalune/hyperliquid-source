@@ -20,7 +20,7 @@ for s in 0 7 99; do PYTHONHASHSEED=$s python3 -B tools/abci_state_link.py | sha2
 - abci-state-link.json e8e24678b2e9aa32e93a08f5ab9e469b49b40742d2839affb1c9c2295ace4548
 - verify.py 9c0b727200e9aa5058d92179a04322cd27eebb3dcaba4c19d90c46073709026f
 - independent_verify.py 261d5442f9b74a068cf9e321433f32038b6613902638ab876050477c01a5a95e
-- tools/abci_state_link.py e175c2cf67bea50e8cb7eef00e4a64e4f757439d62bde43d9a5c68450d5e59f3
+- tools/abci_state_link.py a980b126df3a76d9f80eb36e74d5ae0f767e503d8e67fa52bcf9b9df6be67905
 - tests/test_abci_state_link.py 5b7a5b0e8e9526ccfe58fdf086950b27a4b6f210727a75e1f6e680d0237b61da
 
 ## What this does not claim
