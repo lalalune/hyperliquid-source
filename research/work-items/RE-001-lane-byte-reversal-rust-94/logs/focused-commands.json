@@ -1,0 +1,51 @@
+[
+  {
+    "label": "prior-static",
+    "argv": [
+      "python3",
+      "tools/foundation_half_swap.py",
+      "--check",
+      "research/work-items/foundation-half-swap-94/evidence.json"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "focused-tests",
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "tests.test_foundation_half_swap",
+      "-v"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "cargo-check",
+    "argv": [
+      "cargo",
+      "+1.94.1",
+      "check",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "src/node94-lane-byte-reversal/Cargo.toml",
+      "--target-dir",
+      "work/lane-byte-reversal/cargo"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "rustfmt",
+    "argv": [
+      "rustfmt",
+      "+1.94.1",
+      "--check",
+      "--edition",
+      "2024",
+      "src/node94-lane-byte-reversal/lib.rs",
+      "src/node94-lane-byte-reversal/client.rs"
+    ],
+    "exit": 0
+  }
+]
