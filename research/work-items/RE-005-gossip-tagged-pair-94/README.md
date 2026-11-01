@@ -83,8 +83,13 @@ are excluded from public transport. Original raw work is preserved.
 The independent peer verified the complete actual evidence and replayed67rows
 (64novel complete inputs plus3duplicates) against each existing client; changed
 neighboring answers left output identical. Only its public-safe summary is
-retained. Repository static checks are pending on the preserved evidence
-checkpoint; no Rust or native-control rerun is needed.
+retained. `make doctor`, `make verify`, `make catalogue-check` and `make
+reproduce` all passed on clean evidence checkpoint
+`65448fdfb2d9d5b2ff9c7d567d5bf5f4e1fa42ea`. Its10,870 physical tracked
+inputs,pins,provider and host-tool identities remained unchanged. The complete
+eight raw streams and command/audit/result records are retained in
+`STATIC-CHECKS.zip`. Computational source,client,tests,collector,runner and
+frozen expectations are unchanged from the successful C1 experiment.
 
 Expanded evaluator tests,captured execution and hosted CI are NOT_RUN. All full
 component gates remain false. Exact scoped command:
