@@ -1,0 +1,142 @@
+{
+  "schema": "semantic-records",
+  "target": {
+    "artifact": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "task_id": "RE-001",
+  "function": {
+    "start": "0x514c050",
+    "end": "0x514c1b5",
+    "sha256": "de35d4d1ea71805561f47405245dbb89e6834a3b4bb7dc645355639481612c4e",
+    "byte_length": 357,
+    "padding": {
+      "bytes": "cc * 11",
+      "next_fde_start": "0x514c1c0",
+      "sha256": "3682c0a62515050101266cc639bf81f5d8c5395f49e7da93fcc22603018e0943"
+    }
+  },
+  "fde": {
+    "eh_frame_offset": "0x0029a81c",
+    "length": "0x28",
+    "pc_range": [
+      "0x514c050",
+      "0x514c1b5"
+    ]
+  },
+  "format": {
+    "address": "0x1df3ed",
+    "bytes": "%f\\x00"
+  },
+  "va_list_frame": {
+    "gp_offset": "0x20",
+    "fp_offset": "0x30",
+    "overflow_arg_area": "rbp+0x10",
+    "reg_save_area": "rbp-0xd0",
+    "note": "values stored to the stack frame at -0xf0/-0xec/-0xe8/-0xe0; register saves of r8/r9 and xmm0-xmm7 are skipped when al == 0"
+  },
+  "work_buffer": {
+    "size": "0x148",
+    "stack_probe": "0x1000-byte page loop then 0x150",
+    "alignment": "16-byte aligned buffer pointer"
+  },
+  "calls": [
+    {
+      "site": "0x514c12e",
+      "target": "0x5660a00",
+      "callee": "__vsnprintf_chk@plt",
+      "args": "buffer, 0x148, flag 2, slen 0x148, format 0x1df3ed, va_list"
+    },
+    {
+      "site": "0x514c15d",
+      "target": "0x56604d0",
+      "callee": "std::string::_M_create@plt",
+      "args": "out string, &length slot, old_capacity 0",
+      "taken_when": "vsnprintf return > 15"
+    },
+    {
+      "site": "0x514c179",
+      "target": "0x5660100",
+      "callee": "memcpy@plt",
+      "args": "destination, stack buffer, length"
+    },
+    {
+      "site": "0x514c1b0",
+      "target": "0x5660430",
+      "callee": "__stack_chk_fail@plt",
+      "taken_when": "stack canary mismatch"
+    }
+  ],
+  "string_layout": {
+    "pointer": "+0x0",
+    "length": "+0x8",
+    "union": "+0x10",
+    "sso_buffer": "own +0x10",
+    "sso_threshold": 15
+  },
+  "arms": {
+    "sso": "vsnprintf return <= 15: pointer = own +0x10, length = return, bytes copied from stack buffer, NUL at buffer+length",
+    "heap": "vsnprintf return > 15: _M_create with old_capacity 0, pointer = returned block, union slot and length slot both receive the return value (exact-fit: capacity recorded as length), bytes copied, NUL at pointer+length"
+  },
+  "canary": {
+    "slot": "rbp-0xd8",
+    "source": "fs:0x28",
+    "on_mismatch": "__stack_chk_fail, no return"
+  },
+  "return": "out string pointer in rax; non-null path of canary check only",
+  "callers": [
+    {
+      "site": "0x514cc9f",
+      "enclosing_fde": {
+        "start": "0x514cc10",
+        "end": "0x514ccf9"
+      },
+      "setup_observed": "eax=1, xmm0=double, rsi=[GOT 0x5778378], rdx=0x148, rcx=format 0x1df3ed"
+    },
+    {
+      "site": "0x5157e2e",
+      "enclosing_fde": {
+        "start": "0x5157d30",
+        "end": "0x5158ebe"
+      },
+      "setup_observed": "eax=1, xmm0=double, rsi=[GOT 0x5778378], rdx=0x148, rcx=format 0x1df3ed"
+    },
+    {
+      "site": "0x51586d1",
+      "enclosing_fde": {
+        "start": "0x5157d30",
+        "end": "0x5158ebe"
+      },
+      "setup_observed": "eax=1, xmm0=double, rsi=[GOT 0x5778378], rdx=0x148, rcx=format 0x1df3ed"
+    },
+    {
+      "site": "0x515956c",
+      "enclosing_fde": {
+        "start": "0x5159180",
+        "end": "0x515994f"
+      },
+      "setup_observed": "eax=1, xmm0=double, rsi=[GOT 0x5778378], rdx=0x148, rcx=format 0x1df3ed"
+    },
+    {
+      "site": "0x515a035",
+      "enclosing_fde": {
+        "start": "0x51599e0",
+        "end": "0x515a7f1"
+      },
+      "setup_observed": "eax=1, xmm0=double, rsi=[GOT 0x5778378], rdx=0x148, rcx=format 0x1df3ed"
+    }
+  ],
+  "got_slot": {
+    "address": "0x5778378",
+    "relocation": "000005778378  015b00000006 R_X86_64_GLOB_DAT 0000000000000000 vsnprintf@GLIBC_2.2.5 + 0"
+  },
+  "inferences": [
+    "The formatted value is the first floating-point vararg (xmm0); every sampled caller sets eax=1 and computes a double into xmm0 immediately before the call.",
+    "Heap-arm capacity equals the formatted length because _M_create is called with old_capacity 0, so no doubling adjustment applies on that path."
+  ],
+  "unknowns": [
+    "Purpose of the incoming rsi value (the vsnprintf GLOB_DAT slot contents): the body never reads rsi, so no role is claimed for it.",
+    "Behaviour for a negative vsnprintf return: the signed compare takes the SSO path, which is not modelled; %f formatting of a finite double does not produce it.",
+    "No source-level function or type name is claimed; objdump nearest-symbol annotations are not symbol names."
+  ]
+}
