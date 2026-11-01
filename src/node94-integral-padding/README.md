@@ -86,11 +86,33 @@ cover borrowed context/writer identity and live cell mutation. The full proof
 and sealed inputs are in
 `research/work-items/RE-005-integral-padding-94/`.
 
-At this source-preservation stage the new Rust has not been compiled. The scoped
-validation runner will retain actual compiler/program streams, O0/O3 results,
-one same-recipe optimized rebuild, source mutation controls, comparator controls
-and exact source/target/pin/provider/linker before/after audits. Results must be
-updated from those observed records before any implementation claim is posted.
+The first real compiler experiment passed at source checkpoint
+`255eea2cc3ae6f75b807b4f000af455c710f4b6f`, descended from current base
+`56c0ec672bd8fdcfaa80f2db700a61e6240b3663`. Both O0 and O3 input-only
+clients emit all 11,150 canonical JSONL rows byte-for-byte; both profiles pass
+the two actual Rust unit tests. One additional O3 build produces the same raw
+28,698-byte rlib and 3,980,088-byte input client. This is own-build
+reproducibility, not captured-opcode equivalence; the generic library is
+instantiated by the client.
+
+All eleven compiled source mutations are rejected by complete output comparison,
+including wrong Unicode prefix length, suppressed empty prefix, truncated sign,
+incorrect alignment/header restoration, data/table reload and status changes.
+Seven below-digest native controls and seven comparator controls pass. The
+runner retains 50 recorded compiler/program/identity commands and 100 exact raw
+streams; internal native binutils exports carry their own argv/version/listings
+separately. All 10,834 tracked physical inputs, seven actual pins, 103 provider
+payloads, target/archive/linker identities and source HEAD/status remain unchanged
+before/after. The four repository static targets also pass at that exact source
+checkpoint with those guards unchanged.
+
+Independent artifact review rechecks the full outputs and controls. After source
+review, a separate 28-case supplemental holdout also passes both existing clients,
+including a 65,537-callback case; its public summary states that later chronology.
+Private holdout inputs/answers stay outside the packet. The actual results,
+lossless raw stream pack, static checks and review receipts are retained in the
+work item. Later evidence/docs changes do not alter the compiled library, client,
+frozen corpus, native producer or measured runner.
 
 The expanded repository test suite, captured-instruction evaluators, captured
 program execution, hosted CI and a full node build have not run. The authorized

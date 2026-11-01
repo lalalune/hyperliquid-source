@@ -68,11 +68,41 @@ sealed canonical JSONL bytes. O0/O3 unit/client checks, one same-recipe optimize
 rebuild, eleven compiled source mutations, seven below-digest native controls
 and seven comparator controls are scoped checks, not a node evaluator.
 
-At source checkpoint, the padding compiler experiment has **not run**. Actual
-results will be added only after the commands complete and independent artifact
-review. Required static repository checks are `make doctor`, `make verify`,
-`make catalogue-check` and `make reproduce`; their exact-head results will be
-retained separately. Full `make test`, expanded instruction-evaluator families,
-hosted CI, captured node/visor execution and a full node build are **NOT_RUN**.
-The draft uses `[skip ci]` to preserve that scope. Existing component gates stay
-false.
+## Observed results
+
+The first actual padding build passes at clean source checkpoint
+`255eea2cc3ae6f75b807b4f000af455c710f4b6f` (tree
+`3bb7cac1bc118085688b0a9c99646e7d9ca192ab`). O0 and O3 input-only
+clients each emit all 11,150 exact sealed JSONL rows, covering 1,086,315
+individual callback observations per profile. Both profiles pass the two actual
+Rust unit tests. An additional same-recipe O3 rlib and input client are raw-equal
+to the first O3 artifacts; this is not a captured-machine-code comparison.
+
+The eleven independently recompiled source controls produce respectively
+14, 1,112, 464, 1,208, 199, 388, 2, 764, 21, 21 and 1,023 differing complete
+rows out of 11,150 (runner order). Seven below-whole-digest native controls and
+seven comparator controls pass, including noncanonical whitespace, duplicate
+JSON keys and Boolean/integer confusion. Positive output requires exact bytes.
+
+`build/RESULT.json` and `build/CALLS.json` retain 50 recorded compiler/program/
+identity commands with 100 exact streams. Internal bounded native binutils
+commands are recorded separately in the native exports and report. The raw
+stream pack preserves each distinct original content once, including full
+before/after input audits and exact mutant sources. It excludes runnable own
+executables/libraries and full captured ELFs. The small captured/official native
+body excerpts are explicitly included as static evidence with `NOTICE` and the
+full upstream `LICENSE-MIT`.
+
+`repository-checks/` retains actual `make doctor`, `make verify`,
+`make catalogue-check` and `make reproduce` results at the same clean source
+checkpoint. All four pass, with all 10,834 tracked physical inputs, seven genuine
+pins, 103 provider payloads, target/archive/linker identities and HEAD/tree/status
+unchanged. `independent-review/` retains the full artifact review and a public-safe
+summary of 28 additional holdouts, sealed after source review but before build.
+Both retained clients pass those supplemental inputs, including 65,537 callbacks
+in one case. This is later corroboration, not a second pre-source independence
+claim. Private holdout inputs/answers and runtime state are not published.
+
+Full `make test`, expanded instruction-evaluator families, hosted CI, captured
+node/visor execution and a full node build are **NOT_RUN**. The draft uses
+`[skip ci]` to preserve that scope. Existing component gates stay false.
