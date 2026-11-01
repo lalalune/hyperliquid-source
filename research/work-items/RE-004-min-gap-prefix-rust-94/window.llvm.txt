@@ -1,0 +1,36 @@
+
+artifacts/node/94/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000004fa7e00 <_ZNKSt5ctypeIcE8do_widenEc>:
+ 5430db0: f3 0f 1e fa                  	endbr64
+ 5430db4: 55                           	pushq	%rbp
+ 5430db5: 53                           	pushq	%rbx
+ 5430db6: 48 83 ec 08                  	subq	$0x8, %rsp
+ 5430dba: 48 8b 6e 08                  	movq	0x8(%rsi), %rbp
+ 5430dbe: 48 8b 5f 08                  	movq	0x8(%rdi), %rbx
+ 5430dc2: 48 39 dd                     	cmpq	%rbx, %rbp
+ 5430dc5: 48 0f 46 dd                  	cmovbeq	%rbp, %rbx
+ 5430dc9: 48 85 db                     	testq	%rbx, %rbx
+ 5430dcc: 74 16                        	je	0x5430de4 <_ZNKSt5ctypeIcE8do_widenEc+0x488fe4>
+ 5430dce: 48 8b 36                     	movq	(%rsi), %rsi
+ 5430dd1: 48 8b 3f                     	movq	(%rdi), %rdi
+ 5430dd4: 48 89 da                     	movq	%rbx, %rdx
+ 5430dd7: e8 74 f3 22 00               	callq	0x5660150 <memcmp@plt>
+ 5430ddc: 89 c2                        	movl	%eax, %edx
+ 5430dde: 31 c0                        	xorl	%eax, %eax
+ 5430de0: 85 d2                        	testl	%edx, %edx
+ 5430de2: 75 1c                        	jne	0x5430e00 <_ZNKSt5ctypeIcE8do_widenEc+0x489000>
+ 5430de4: 48 29 eb                     	subq	%rbp, %rbx
+ 5430de7: 31 c0                        	xorl	%eax, %eax
+ 5430de9: 48 81 fb ff ff ff 7f         	cmpq	$0x7fffffff, %rbx       # imm = 0x7FFFFFFF
+ 5430df0: 7f 0e                        	jg	0x5430e00 <_ZNKSt5ctypeIcE8do_widenEc+0x489000>
+ 5430df2: 48 81 fb 00 00 00 80         	cmpq	$-0x80000000, %rbx      # imm = 0x80000000
+ 5430df9: 7c 05                        	jl	0x5430e00 <_ZNKSt5ctypeIcE8do_widenEc+0x489000>
+ 5430dfb: 85 db                        	testl	%ebx, %ebx
+ 5430dfd: 0f 94 c0                     	sete	%al
+ 5430e00: 48 83 c4 08                  	addq	$0x8, %rsp
+ 5430e04: 5b                           	popq	%rbx
+ 5430e05: 5d                           	popq	%rbp
+ 5430e06: c3                           	retq
