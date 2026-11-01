@@ -53,10 +53,24 @@ state.
 
 ## Authentication boundary
 
+`qc_vote_preimage(&qc, signer)` reconstructs variant 1 of `0x454c050`: the
+29-byte prefix `Hyperliquid Consensus Payload`, byte `01`, signer20, the
+little-endian variable-width hardfork version/start round/vote round, and
+block hash32. The result is 85..109 bytes. `qc_vote_digest` applies the existing
+independent Keccak-256 component. Votes and signatures are not serialized;
+the explicit signer is part of the preimage. The source uses the real local
+`hl-bincode-varint` and `node94-action-signable` crates, with Rust 1.94.1.
+
+The [variant-1 packet](../../research/work-items/RE-008-qc-vote-preimage-94/README.md)
+retains the full writer/sizer/caller chain, frozen expected bytes and limits.
+Native digest correspondence credits the previously identified shared hash
+core, without claiming a new formal permutation proof. This addition does not
+change `AdmissionAuthenticator` or implement signature verification.
+
 The following native behavior remains unresolved in the retained evidence:
 
 - proposer scheduling at `0x4b31e70`;
-- block/QC/timeout digest construction at `0x454c050`;
+- the other four digest variants at `0x454c050`;
 - signature recovery at `0x14c6f50`.
 
 `AdmissionAuthenticator` isolates those operations. It receives typed signing
