@@ -97,6 +97,27 @@ The implementation packet records exact target coordinates, source/base pins,
 commands, limitations, and the distinction between observations and safe
 component policies.
 
+## Qualified raw-key normalization
+
+The isolated `monotone_keys` module offers `classify(&[u64])` and
+`normalize(&mut [u64])` for lengths 21..4096. Nondecreasing unsigned words,
+including ties, take a source path without input mutation. Strictly decreasing
+words are reversed in place, preserving the odd center and every qword's bits.
+These are the two complete native paths qualified by
+`RE-006-large-sort-monotone-path-94`.
+
+Its returned enums and refusal of unsupported lengths/orderings are chosen
+safe-API policies; the target's unresolved fallback may sort those inputs.
+The API does not provide general sorting or the target ABI. Book callers have
+not been migrated to this conditional helper. Source, frozen comparison inputs
+and compiled receipts are in `RE-006-monotone-keys-rust-94`.
+With official Rust 1.94.1, four local builds at optimization levels 0 and 3
+match all 76 frozen native-derived cases and five separate API-policy cases.
+The component's 30 tests pass at both levels. A native audit of the compiled
+optimization-level-3 helper also confirms no input stores on its ascending
+path. These are comparisons to static target evidence; the captured node was
+not run, and target machine-code equality is not claimed.
+
 ## Build and test
 
 ```sh
