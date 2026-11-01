@@ -1,0 +1,139 @@
+{
+ "target": {
+  "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "size": 91774280
+ },
+ "function": {
+  "start_va": "0x514bd40",
+  "end_va_exclusive": "0x514bde5",
+  "bytes": 165,
+  "sha256": "3397e545973d7ff22c3c64eecf9e3def1b1b4aff1608d082ffdca7cb7e205e4c",
+  "fde_section_offset": "0x0029a714",
+  "padding_bytes": 11,
+  "next_fde_start": "0x514bdf0",
+  "callee_saved": [
+   "r12",
+   "rbp",
+   "rbx"
+  ]
+ },
+ "branches": [
+  {
+   "site": "0x514bd52",
+   "target": "0x514bd63",
+   "encoding": "rel8",
+   "length": 2
+  },
+  {
+   "site": "0x514bd54",
+   "target": "0x514bd92",
+   "encoding": "rel8",
+   "length": 2
+  },
+  {
+   "site": "0x514bd71",
+   "target": "0x514bd80",
+   "encoding": "rel8",
+   "length": 2
+  },
+  {
+   "site": "0x514bd90",
+   "target": "0x514bd60",
+   "encoding": "rel8",
+   "length": 2
+  },
+  {
+   "site": "0x514bdcd",
+   "target": "0x514bde0",
+   "encoding": "rel8",
+   "length": 2
+  }
+ ],
+ "calls": [
+  {
+   "site": "0x514bd7b",
+   "target": "0x5660440",
+   "encoding": "rel32",
+   "note": "operator delete for a node's heap string buffer"
+  },
+  {
+   "site": "0x514bd88",
+   "target": "0x5660440",
+   "encoding": "rel32",
+   "note": "operator delete for the node itself, size 0x78"
+  },
+  {
+   "site": "0x514bda9",
+   "target": "0x5660140",
+   "encoding": "rel32",
+   "note": "memset for the array clear"
+  }
+ ],
+ "tail_jumps": [
+  {
+   "site": "0x514bdd7",
+   "target": "0x5660440",
+   "encoding": "rel32",
+   "note": "tail call to operator delete for the heap array, size count*8"
+  }
+ ],
+ "plt": {
+  "delete": {
+   "stub": "0x5660440",
+   "got_slot": "0x5778f48",
+   "rela": "R_X86_64_JUMP_SLOT _ZdlPvm@CXXABI_1.3.9",
+   "got_file_value": "0x5660446",
+   "got_file_note": "the stub's own lazy-binding resolver entry, not the resolved symbol"
+  },
+  "memset": {
+   "stub": "0x5660140",
+   "got_slot": "0x5778dc8",
+   "rela": "R_X86_64_JUMP_SLOT memset@GLIBC_2.2.5",
+   "got_file_value": "0x5660146",
+   "got_file_note": "the stub's own lazy-binding resolver entry, not the resolved symbol"
+  }
+ },
+ "caller_census": {
+  "direct_sites": [],
+  "tail_jump_sites": [],
+  "method": "full .text disassembly scan for e8 rel32 calls and e9 rel32 jumps to 0x514bd40"
+ },
+ "list_phase": {
+  "head_offset": "0x10",
+  "next_offset": "0x0",
+  "node_size": "0x78",
+  "string_at": "0x8",
+  "string_ptr_offset": "0x8",
+  "string_capacity_offset": "0x18",
+  "sso_rule": "buffer delete skipped when [node+0x8] equals node+0x18 (the address of the capacity field, which is also the inline buffer address for a string stored at node+0x8)",
+  "buffer_delete_size": "[node+0x18] + 1",
+  "order": "per node: next saved from [node+0x0] first, then the string buffer delete if heap, then the node delete, then advance to the saved next; the loop ends when the saved next is null",
+  "node_unread_fields": "node+0x10 (the string length) is never read by this function; node bytes beyond +0x28 are never read"
+ },
+ "array_phase": {
+  "array_ptr_offset": "0x0",
+  "count_offset": "0x8",
+  "memset": "memset([object+0x0], 0, [object+0x8] * 8)",
+  "cleared_offsets": [
+   "0x10",
+   "0x18"
+  ],
+  "inline_rule": "after the memset and the clears, if [object+0x0] equals object+0x30 the array storage is inline and no delete runs; otherwise operator delete([object+0x0], [object+0x8] * 8) runs as a tail call",
+  "return": "void; the ret path pops rbx, rbp, r12 in balance; the tail-delete path pops the same three registers before jumping"
+ },
+ "rule": {
+  "arguments": "rdi = object (preserved in r12 across both phases)",
+  "phase_1": "walk the list at [object+0x10]; per node dispose its string at +0x8 (heap buffers only, size capacity+1) and delete the 0x78-byte node, following saved next pointers until null; a null head skips the walk",
+  "phase_2": "memset the array at [object+0x0] with [object+0x8]*8 zero bytes, zero [object+0x10] and [object+0x18], then delete the array (size count*8) unless its pointer equals object+0x30",
+  "empty_cases": "null head still runs phase 2; count 0 still memsets 0 bytes and still deletes a heap array with size 0"
+ },
+ "notes": [
+  "Instruction-level detail lives only in the raw objdump excerpts; this JSON holds semantic records only.",
+  "The endbr64 at 0x514bd40 is a genuine instruction in the target binary, not a placeholder; the cs nopw at 0x514bd56 and the nopl at 0x514bddc are genuine alignment padding.",
+  "The string-at-+0x8 reading is inference from the byte pattern, not an established source-level name: the three qwords at node+0x8/+0x10/+0x18 behave exactly like a std::string (pointer, length, capacity-or-inline-buffer) -- the SSO test compares the pointer against the address of the capacity field, and the heap delete size is capacity+1, the allocation size of a NUL-terminated buffer. The model calls the field a string buffer on that evidence and records the length field as unread.",
+  "The qword at object+0x18 is zeroed in phase 2 but never read in this function; no role (list tail, second head, or other) is claimed for it.",
+  "The inline-array reading (pointer equals object+0x30) is the bytes' own comparison; no source-level container name is claimed for the object.",
+  "objdump's nearest-symbol annotations are explicitly not claimed as symbol names.",
+  "Distinguished from RE-001-recursive-destructor-94 (#1327, which deletes one list recursively) and RE-001-counted-ptr-dispose-94 (#1339, a vtable dispose): this function walks a list iteratively, disposes a per-node string, and then clears an array in the same object. It is the following FDE after RE-001-field-sum-94 (#1349) and shares no code with it beyond adjacency."
+ ]
+}
