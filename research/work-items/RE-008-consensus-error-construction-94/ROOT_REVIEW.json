@@ -1,0 +1,144 @@
+{
+  "reviewed_at": "2026-11-01T18:32:47.767604+00:00",
+  "integration_base": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "verdict": "No material findings within the stated conditional ordinary-return scope",
+  "coordinator_review": [
+    "Read complete proof, contract collector and verifier before rerunning static validation.",
+    "Independent PT_LOAD mapping rechecked raw FDE/CIE lengths, backreferences, PC-relative starts and ranges for all14 functions.",
+    "Checked original manifest and peer-reviewed file hashes; root verifier output exactly matches retained validation."
+  ],
+  "root_reproduction": {
+    "full_FDE_ranges": 14,
+    "compared_bytes": 12336,
+    "normalized_instruction_rows": 2584,
+    "fresh_regenerations_equal_retained": 2,
+    "negative_control_count": 281
+  },
+  "independent_peer_review": {
+    "verdict": "no_material_findings_with_stated_premises",
+    "manual_review": [
+      {
+        "topic": "Selector and all 42 construction arms",
+        "evidence": [
+          "PROOF.md:61-81",
+          "observed/constructor.gnu.txt VA0x475289e..0x47528d3",
+          "all 42 table-derived entry paths through 0x475399e"
+        ],
+        "result": "Top-bit XOR chooses indexes0..41 only under domain premise; nonnegative input selects0x27. Verified 19 direct names,12 builders,11 helper paths. Names/type associations are prior credit."
+      },
+      {
+        "topic": "Direct shared joins",
+        "evidence": [
+          "PROOF.md:83-99",
+          "constructor VA0x4753372/0x4753482/0x475353d/0x47532ba"
+        ],
+        "result": "04/05 share length15 join with0d/19;09/0a share length10;0b/11 share length11. RAX remains allocated pointer on successful direct paths. T3/len/pointer/len written at O+0,+8,+16,+24; no claim beyond32 initialized bytes."
+      },
+      {
+        "topic": "All26 ordered fields and first-error short circuit",
+        "evidence": [
+          "PROOF.md:103-145",
+          "full constructor field arms",
+          "constructor VA0x4753984..0x4753a09"
+        ],
+        "result": "Full arm inspection confirms key spans, offsets, call order and RDI=S+0x10.14 nonfinal returns test immediately and branch to4753989 on nonzero;12 final returns reach4753984. RAX payload and T5 are stored before cleanup; all-zero path copies96bytes and delegates. Opaque callee and disjointness premises remain necessary."
+      },
+      {
+        "topic": "Seven helper boundaries",
+        "evidence": [
+          "PROOF.md:154-198",
+          "all7 index-*.gnu.txt full bodies"
+        ],
+        "result": "11 outer paths passA+8 as seventh argument. String andword helpers make documented raw stores;42/66-byte converter buffers and20/32 lengths agree. Last5 helpers propagate T5 before name handoff. Local entryRSI/RDX/RCX nonuse is true but opaque prelude calls prevent global noninterference; correctly stated."
+      },
+      {
+        "topic": "72-byte handoff and returned temporary",
+        "evidence": [
+          "PROOF.md:202-215",
+          "wrapper VA0x4aa71ba..0x4aa72e2",
+          "insert-context VA0x47b0144..0x47b0195"
+        ],
+        "result": "T5 path reaches return without normal72-byte wrap-copy under cleanup preservation. NonT5 copies4x16+8 bytes, passes keytriple andvalue toinsert, conditionally cleans returnedtemporary, then copies4x16+8 containerbytes toO. Returned temporary body is offset+8 of insert result; packet avoids inferring its type or treating its leadingword as O."
+      },
+      {
+        "topic": "Upstream Ok/Err",
+        "evidence": [
+          "PROOF.md:217-236",
+          "result-field VA0x49c0f83..0x49c10b9"
+        ],
+        "result": "Equal0x800000000000002a choosesOk withA+8;unequal choosesErr withA. T5temporary returns its+8 payload after optionalkeycleanup;otherwise inserts into originalbuilder+0x18 and returnszero. No admission or wireformat theorem follows."
+      },
+      {
+        "topic": "Finalizer, allocator and cleanup bounds",
+        "evidence": [
+          "PROOF.md:147-152",
+          "PROOF.md:193-198",
+          "field-finalizer.gnu.txt",
+          "allocator.gnu.txt",
+          "builder-cleanup-context.gnu.txt"
+        ],
+        "result": "96-byte builder decomposes into24-byte nametriple and72-byte container; normalfinalizer copies72bytes. Smallnameallocator overwritesRCX beforefallback, but>4096 bypass and TLS/import closure remain unresolved. Cleanup indirectcall/tailjump are honestly listed."
+      }
+    ],
+    "counterexample_attempts": [
+      {
+        "attempt": "Treat each dispatch-entry linear slice as a self-contained arm.",
+        "outcome": "Rejected by actual shared joins; proof accounts for them."
+      },
+      {
+        "attempt": "Nonzero first/second field still reaches later field or finalizer.",
+        "outcome": "No selected path: all14 immediate JNE targets4753989;payload preserved inO before opaque cleanup."
+      },
+      {
+        "attempt": "Final field zero reaches errorstore or nonzero reaches96-byte finalizer.",
+        "outcome": "Shared test4885c07427 splits zero to47539b0;nonzero falls4753989."
+      },
+      {
+        "attempt": "Three-field selectors accidentally accumulate R14 offsets.",
+        "outcome": "0x22 firsttwo useLEA then onlyfinal ADD0xd;0x27 usesLEA+18,LEA+38,MOVRCX,R14 andnever modifiesR14."
+      },
+      {
+        "attempt": "All72 bytes are initialized because caller copies72.",
+        "outcome": "False stronger claim; direct arms onlywrite32 andword helper only24. Proof explicitly excludes this inference."
+      },
+      {
+        "attempt": "Opaque prelude can observe ECX index.",
+        "outcome": "Possible under unrestricted opaque-call behavior; proof already excludes globalindexnoninterference/wireencoding claims."
+      },
+      {
+        "attempt": "Cleanup or aliased helper output overwrites outer result.",
+        "outcome": "Possible outside stated disjointness/preservation premises; proof is explicitlyconditional and doesnotclaimownership closure."
+      },
+      {
+        "attempt": "Negative selector outside0..41 accesses another table entry.",
+        "outcome": "Outside explicit domain; no localboundscheck claimed."
+      }
+    ],
+    "native_byte_check": {
+      "bytes": 12336,
+      "instruction_rows": 2584,
+      "mapping": "Own minimal ELF64 program-header PT_LOAD mapping; no packet or repository parser imports."
+    },
+    "reviewed_file_sha256": {
+      "README.md": "e909b69547573bc98a6d362c5f1036478b4719b6f7a10d5b4f75d712897cb997",
+      "PROOF.md": "25a321d7fcf16478ec7ee5de48e54ef6d48fe3bf4413b51c3f050ca09640eff7",
+      "contract.json": "26009b4c16f15892c5459b67fb9b19456d6727a767a6e33ebdcc50d169ab9a74",
+      "collect.py": "71addfc98588cf68e527fdfb05fc1d751a4719d09314d680e02eb468575f67e3",
+      "verify.py": "d977ca6e74e36b67eeb2c47ce1073b65e2ad2bddae8b0bff3a38e589ff981dd6",
+      "observed/records.json": "417a5ecad36d0371e9eeae2399e93b113e4a38904ca5995c4785fac0b6f83cd2",
+      "observed/cfg.tsv": "00a24d02e7c6d97b66e77d68f84292a73266472907814f0f51b5611463178904"
+    }
+  },
+  "scope": "Static evidence and conditional manual dataflow only. No captured execution, instruction interpretation, wire schema or runtime ownership closure.",
+  "post_review_format_fix": {
+    "reason": "git diff --check rejected25 trailing empty TSV fields",
+    "change": "Render zero structural successor as literal - and document it; no native bytes, CFG edges or semantic claims changed",
+    "changed_files": {
+      "collect.py": "7605aea2c5a5225e958b2298d38ae3d8f0f071d04b33a1bd31bb261ab49e523d",
+      "README.md": "aecb02403d9eded9de32e3764e121f2d9d59c1f7a8505f3f4c6faccaff58775a",
+      "observed/cfg.tsv": "9c8552caa6918e3912b7ce7d3861b9f9494412aea900713f64f2eb406295b2f4"
+    },
+    "peer_review_hashes": "Preserved above as hashes of the original reviewed files",
+    "root_reverification": "281 controls and two full regenerations pass after representation change; JSON identical to retained validation"
+  }
+}
