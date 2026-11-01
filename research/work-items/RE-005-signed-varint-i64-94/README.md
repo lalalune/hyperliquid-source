@@ -114,8 +114,37 @@ pins,103 research Rust provider payloads, two installed manifests and actual
 compiler/Cargo/C-driver/selected-bfd/objdump identities are guarded before/after.
 
 Source/client and complete collector/reference/runner passed independent
-prebuild review. At this source checkpoint, actual source compilation and the
-eleven new native/static methods are still pending. No green build is inferred.
+prebuild review. The first actual run used clean source checkpoint
+`51556c6f61e1b8dba3b9d303b9d8cef655de67e7` and passed all44 recorded commands:
+
+| Actual qualification | Result |
+| --- | --- |
+| O0 and O3 input-only clients | Each89,218 observations exactly match the pre-Rust expected bytes |
+| Ordinary tests | One method with20 vectors per profile; two successful test executions |
+| Native/static controls | All11 methods pass on the actual target image |
+| Comparator controls | Altered active content detected; missing/extra rows rejected |
+| Normal wrong variants | Opposite parity66,695; unmapped found code2,515; wrong fast-error policy1,817 mismatches of89,218 each |
+| Wrong-variant ordinary tests | Each actual semantic assertion fails with exit101 |
+| Genuine Cargo recipe | Locked offline build of the two real local packages passes |
+| Signed-only O3 repeat | Raw-equal11,438-byte rlibs, SHA-256`62c915d001684e8405ef0e3a6cbc4f2eccce0ba5453467df2b4f244a8217a179`; no normalization |
+
+The complete actual result SHA-256 is
+`0316f2deead4de2cc51cc3cde137cd0b329c3250a306b35cc67c41af5f9af58d`.
+Its before/after maps are identical:10,858 actual tracked physical files,
+seven clean pinned children,103 provider payloads, two installed manifests
+and the actual compiler/Cargo/host tools. All88 raw stdout/stderr streams,
+full results, eight direct library/object/IR sets, actual Cargo artifacts,
+inputs and expectations are retained byte-for-byte in`observed/qualification.zip`.
+Executable hashes are retained; transient executable files are not archived.
+
+After the main run, an independent existing-client replay also passed each
+profile's396 observations from99 serialized stimuli including96 novel inputs
+and reordered duplicates. Root sealed these private inputs/answers before
+reading the new Rust; only its public summary is retained. No new compilation,
+captured execution or answer disclosure was involved. The finite comparisons
+qualify the independently proven relation; they do not establish original ABI
+or target-byte identity. The final four required static targets are recorded
+separately after this evidence checkpoint; the11 native methods need no repeat.
 
 ## Reproduce and limits
 

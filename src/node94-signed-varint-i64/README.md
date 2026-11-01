@@ -44,6 +44,11 @@ input data flow, not an operating-system sandbox.
 One ordinary unit method uses twenty unchanged first-call vectors extracted
 after source authoring from the independently frozen pre-Rust authority. Production
 comparison uses all27,671 independently frozen stimuli/89,218 observations.
+Actual O0/O3 clients each matched all89,218 expected observations. One20-vector
+ordinary method passed per profile; all three normal wrong variants produced
+logical mismatches and genuine failing assertions. The locked offline Cargo
+build passed using the real dependency. The signed O3 rlib alone rebuilt raw
+equal with its unchanged qualified dependency; this is not target-byte identity.
 Only independently authored Rust executes; no captured target or instruction
 interpreter is involved. New code/docs use MIT; captured evidence retains its
 original rights. Original compiler/source/ABI and target-byte identity remain open.
