@@ -121,8 +121,52 @@ normal-returning compiled semantic mutants and comparator corruption controls
 must demonstrate observable disagreements. One additional O3 build checks raw
 own-build reproducibility, which is separate from the official132-byte match.
 
-Native collection is observed; actual Rust qualification and final repository
-checks are pending at this source checkpoint. No green result is inferred.
+## Actual qualification
+
+On clean source checkpoint`2e917a7a7f448c75f107f1e25432484c2abba2b9`, all38
+recorded commands passed. The O0 and O3 clients each returned exact frozen
+transcript bytes for16,614/16,614 rows. The single ordinary unit method passed
+with its twenty vectors in each profile (two positive test executions).
+Normal-returning compiled wrong variants yielded792 midpoint-parity,9,160
+ignored-sticky and1,479 dropped-top-bit disagreements; each also produced a
+real ordinary-unit assertion failure, exit101. Actual input/expected/returned
+counterexamples and complete transcripts are retained, with no injected panic.
+
+The cast control contained actual`uitofp` IR and undefined`__floatuntidf`; the
+guard refused it before any client link or execution. The other six actual
+rlib/object/IR sets contain no prohibited conversion/arithmetic/division or
+runtime delegation. The O3 rlib and one additional identical-recipe build are
+raw-equal at14,312bytes, SHA-256
+`94111cfd903ebaea4ac13dab2b78b2e2cdeff102730112212e61e36c08f5acfc`.
+This own reproducibility is separate from the official132-byte correspondence.
+
+All10,851 physical tracked input identities and permission modes, seven actual
+clean child pins,103 provider payloads, two installed manifests, HEAD/tree/clean
+status and actual compiler/C-driver/selected-bfd/analysis-tool identities stayed
+unchanged across the experiment. The real C-driver selection was observed with
+`cc -print-prog-name=ld.bfd` and its canonical bytes matched the explicit linker.
+The source checkpoint had no registry modification. Later evidence/catalogue
+changes receive separate final static checks.
+
+`observed/qualification.zip` retains117 entries, including all76 exact raw
+command streams, complete RESULT/CALLS with both full physical/provider maps,
+original input/expectation/client/control sources and all seven actual
+rlib/object/IR sets. Its explicit file manifest checks every raw byte. The
+executables remain transient; their actual hashes and complete recipes survive.
+`observed/SUMMARY.json` gives measured counts and real mutant witnesses. Four
+comparator controls detect wrong bits, a missing row, changed ID and a partial
+encoding; positive production transcripts also require exact raw byte equality.
+
+Exactly one new published-artifact132-byte interval is registered in
+`research/byte-windows.json`; all twelve earlier intervals and their evidence
+hashes are preserved. Both official definitions add only one denominator.
+Generated catalogue tables are updated; no gate/progress record is changed.
+The three compressed original authority files were genuinely uploaded to the
+fork, then fetched again into separate previously absent `lfs.storage` and
+checked against each committed pointer and current working bytes. The exact
+fetch receipt/streams are under`preparation/`; no existing-cache assumption is used.
+
+Final repository static checks are pending at this evidence checkpoint.
 The expanded repository suite, hosted CI, captured code/instruction evaluator
 execution, full-node/whole-ELF equivalence and all full-component gates remain
 NOT RUN or unclaimed. Next question: which real callers supply the unsigned

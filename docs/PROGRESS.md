@@ -16,7 +16,7 @@ The baseline is node #94. Node #115 is a separate drift target; visor is a separ
 
 | Component | Milestones | Accepted gates | Raw matching bytes | Raw-equal windows | Raw + relocation-qualified windows |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| [Foundation utilities](COMPONENTS.md#foundation) | 0% | 0/4 | 4,583/4,675 (98.03%) | 4/9 (44.44%) | 9/9 (100.00%) |
+| [Foundation utilities](COMPONENTS.md#foundation) | 0% | 0/4 | 4,715/4,807 (98.09%) | 5/10 (50.00%) | 10/10 (100.00%) |
 | [Serialization fork](COMPONENTS.md#serialization) | 0% | 0/4 | N/A | N/A | N/A |
 | [Storage and snapshots](COMPONENTS.md#storage) | 0% | 0/4 | N/A | N/A | N/A |
 | [Network transport](COMPONENTS.md#transport) | 0% | 0/4 | N/A | N/A | N/A |
@@ -40,7 +40,7 @@ The baseline is node #94. Node #115 is a separate drift target; visor is a separ
 | [EVM JSON-RPC](COMPONENTS.md#evm-rpc) | 0% | 0/4 | N/A | N/A | N/A |
 | [Global configuration](COMPONENTS.md#constants) | 0% | 0/4 | N/A | N/A | N/A |
 | [Visor supervisor](COMPONENTS.md#visor) | 0% | 0/4 | N/A | N/A | N/A |
-| **Total measured project subset** | **0.00%** | **0/96** | 4,583/4,675 (98.03%) | 4/9 (44.44%) | 9/9 (100.00%) |
+| **Total measured project subset** | **0.00%** | **0/96** | 4,715/4,807 (98.09%) | 5/10 (50.00%) | 10/10 (100.00%) |
 
 N/A means no registered compiled-byte comparison, not zero correct bytes. Module-byte completion remains unknown; the percentages above cover selected windows only. Shared libcore/Zstandard dependencies are allocated once to the foundation research area, without asserting exclusive first-party ownership. Behavioral tests and binary disassembly are not rebuilt-byte identity.
 
@@ -48,7 +48,7 @@ N/A means no registered compiled-byte comparison, not zero correct bytes. Module
 
 | Target | Unwind-index entries | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows | Whole ELF reproduced |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Node #94 | 121,299 | 4,583/4,675 (98.03%) | 4/9 (44.44%) | 9/9 (100.00%) | No |
+| Node #94 | 121,299 | 4,715/4,807 (98.09%) | 5/10 (50.00%) | 10/10 (100.00%) | No |
 | Node #115 (separate comparison) | 135,313 | 2,773/2,808 (98.75%) | 2/3 (66.67%) | 3/3 (100.00%) | No |
 | Captured visor | 11,028 | N/A | N/A | N/A | No |
 
@@ -60,7 +60,7 @@ These denominators are the authenticated executable `.text` sections, not inferr
 
 | Target | Compared window bytes / .text | Raw matching positions / .text |
 | --- | ---: | ---: |
-| node94 | 4,675/70,370,352 (0.00664%) | 4,583/70,370,352 (0.00651%) |
+| node94 | 4,807/70,370,352 (0.00683%) | 4,715/70,370,352 (0.00670%) |
 | node115 | 2,808/83,719,936 (0.00335%) | 2,773/83,719,936 (0.00331%) |
 
 ## Registered comparison windows
@@ -81,6 +81,7 @@ Each interval is counted once per target. Raw equality includes relocation bytes
 | node115: [Zstandard HUF B](../research/work-items/RE-002-zstd-asm-correspondence/evidence/collector/REPORT.json) | `0x62e4b7d..0x62e5072` | licensed-assembly build | 1,269/1,269 (100.00%) | 1,269/1,269 (100.00%) |
 | node115: [DebugStruct field](../research/work-items/RE-014-node115-field-adapter-drift/observed/records.json) | `0x167d950..0x167dad6` | published-artifact | 355/390 (91.03%) | 354/354 (100.00%) |
 | node94: [compiler-builtins unsigned128 remainder](../research/work-items/RE-004-u128-remainder-94/native/record.json) | `0x565f7f0..0x565f8b5` | published-artifact | 197/197 (100.00%) | 197/197 (100.00%) |
+| node94: [compiler-builtins unsigned128 to binary64](../research/work-items/RE-004-u128-binary64-94/native/record.json) | `0x565ff80..0x5660004` | published-artifact | 132/132 (100.00%) | 132/132 (100.00%) |
 
 The selected adapter candidate is the reviewed ThinLTO rebuild of published LLVM bitcode, not newly recovered libcore Rust source. Its older official native candidate retains two non-relocation differences at offsets 464 and 467 (616/622 raw bytes); that original result remains in the evidence and registry. The two candidates do not add two windows.
 
