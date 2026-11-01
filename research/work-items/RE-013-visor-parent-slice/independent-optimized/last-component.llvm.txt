@@ -1,0 +1,88 @@
+
+visor.elf:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+00000000002bd180 <.text>:
+  678e70: 55                           	push	rbp
+  678e71: 48 89 e5                     	mov	rbp, rsp
+  678e74: 80 7e 38 02                  	cmp	byte ptr [rsi + 0x38], 0x2
+  678e78: 73 31                        	jae	0x678eab <.text+0x3bbd2b>
+  678e7a: 48 8b 0e                     	mov	rcx, qword ptr [rsi]
+  678e7d: 48 8b 56 08                  	mov	rdx, qword ptr [rsi + 0x8]
+  678e81: 80 7e 3a 00                  	cmp	byte ptr [rsi + 0x3a], 0x0
+  678e85: 0f 84 9c 00 00 00            	je	0x678f27 <.text+0x3bbda7>
+  678e8b: b8 01 00 00 00               	mov	eax, 0x1
+  678e90: 48 85 d2                     	test	rdx, rdx
+  678e93: 75 1f                        	jne	0x678eb4 <.text+0x3bbd34>
+  678e95: 48 8d 0d 5c 34 16 00         	lea	rcx, [rip + 0x16345c]   # 0x7dc2f8
+  678e9c: bf 01 00 00 00               	mov	edi, 0x1
+  678ea1: 31 f6                        	xor	esi, esi
+  678ea3: 31 d2                        	xor	edx, edx
+  678ea5: ff 15 d5 bd 16 00            	call	qword ptr [rip + 0x16bdd5] # 0x7e4c80
+  678eab: 48 8b 0e                     	mov	rcx, qword ptr [rsi]
+  678eae: 48 8b 56 08                  	mov	rdx, qword ptr [rsi + 0x8]
+  678eb2: 31 c0                        	xor	eax, eax
+  678eb4: 48 8d 34 01                  	lea	rsi, [rcx + rax]
+  678eb8: 49 c7 c1 ff ff ff ff         	mov	r9, -0x1
+  678ebf: 45 31 c0                     	xor	r8d, r8d
+  678ec2: 49 89 c2                     	mov	r10, rax
+  678ec5: 66 66 2e 0f 1f 84 00 00 00 00 00     	nop	word ptr cs:[rax + rax]
+  678ed0: 4c 39 d2                     	cmp	rdx, r10
+  678ed3: 74 30                        	je	0x678f05 <.text+0x3bbd85>
+  678ed5: 4c 8d 59 ff                  	lea	r11, [rcx - 0x1]
+  678ed9: 49 ff c2                     	inc	r10
+  678edc: 49 ff c1                     	inc	r9
+  678edf: 80 7c 11 ff 2f               	cmp	byte ptr [rcx + rdx - 0x1], 0x2f
+  678ee4: 4c 89 d9                     	mov	rcx, r11
+  678ee7: 75 e7                        	jne	0x678ed0 <.text+0x3bbd50>
+  678ee9: 48 89 d0                     	mov	rax, rdx
+  678eec: 4c 29 c8                     	sub	rax, r9
+  678eef: 48 39 d0                     	cmp	rax, rdx
+  678ef2: 0f 87 88 00 00 00            	ja	0x678f80 <.text+0x3bbe00>
+  678ef8: 49 8d 34 13                  	lea	rsi, [r11 + rdx]
+  678efc: 48 ff c6                     	inc	rsi
+  678eff: 41 b8 01 00 00 00            	mov	r8d, 0x1
+  678f05: b1 0a                        	mov	cl, 0xa
+  678f07: 48 29 c2                     	sub	rdx, rax
+  678f0a: 74 3c                        	je	0x678f48 <.text+0x3bbdc8>
+  678f0c: 48 83 fa 01                  	cmp	rdx, 0x1
+  678f10: 74 2f                        	je	0x678f41 <.text+0x3bbdc1>
+  678f12: 48 83 fa 02                  	cmp	rdx, 0x2
+  678f16: 75 2e                        	jne	0x678f46 <.text+0x3bbdc6>
+  678f18: 80 3e 2e                     	cmp	byte ptr [rsi], 0x2e
+  678f1b: 75 29                        	jne	0x678f46 <.text+0x3bbdc6>
+  678f1d: b1 08                        	mov	cl, 0x8
+  678f1f: 80 7e 01 2e                  	cmp	byte ptr [rsi + 0x1], 0x2e
+  678f23: 74 23                        	je	0x678f48 <.text+0x3bbdc8>
+  678f25: eb 1f                        	jmp	0x678f46 <.text+0x3bbdc6>
+  678f27: 48 85 d2                     	test	rdx, rdx
+  678f2a: 74 2f                        	je	0x678f5b <.text+0x3bbddb>
+  678f2c: 48 83 fa 01                  	cmp	rdx, 0x1
+  678f30: 75 31                        	jne	0x678f63 <.text+0x3bbde3>
+  678f32: 80 39 2e                     	cmp	byte ptr [rcx], 0x2e
+  678f35: 74 3f                        	je	0x678f76 <.text+0x3bbdf6>
+  678f37: ba 01 00 00 00               	mov	edx, 0x1
+  678f3c: e9 71 ff ff ff               	jmp	0x678eb2 <.text+0x3bbd32>
+  678f41: 80 3e 2e                     	cmp	byte ptr [rsi], 0x2e
+  678f44: 74 02                        	je	0x678f48 <.text+0x3bbdc8>
+  678f46: b1 09                        	mov	cl, 0x9
+  678f48: 49 01 d0                     	add	r8, rdx
+  678f4b: 4c 89 07                     	mov	qword ptr [rdi], r8
+  678f4e: 88 4f 08                     	mov	byte ptr [rdi + 0x8], cl
+  678f51: 48 89 77 10                  	mov	qword ptr [rdi + 0x10], rsi
+  678f55: 48 89 57 18                  	mov	qword ptr [rdi + 0x18], rdx
+  678f59: 5d                           	pop	rbp
+  678f5a: c3                           	ret
+  678f5b: 48 89 d0                     	mov	rax, rdx
+  678f5e: e9 51 ff ff ff               	jmp	0x678eb4 <.text+0x3bbd34>
+  678f63: 80 39 2e                     	cmp	byte ptr [rcx], 0x2e
+  678f66: 0f 85 46 ff ff ff            	jne	0x678eb2 <.text+0x3bbd32>
+  678f6c: 80 79 01 2f                  	cmp	byte ptr [rcx + 0x1], 0x2f
+  678f70: 0f 85 3c ff ff ff            	jne	0x678eb2 <.text+0x3bbd32>
+  678f76: b8 01 00 00 00               	mov	eax, 0x1
+  678f7b: e9 34 ff ff ff               	jmp	0x678eb4 <.text+0x3bbd34>
+  678f80: 48 8d 0d 59 33 16 00         	lea	rcx, [rip + 0x163359]   # 0x7dc2e0
+  678f87: 48 89 c7                     	mov	rdi, rax
+  678f8a: 48 89 d6                     	mov	rsi, rdx
+  678f8d: ff 15 ed bc 16 00            	call	qword ptr [rip + 0x16bced] # 0x7e4c80
