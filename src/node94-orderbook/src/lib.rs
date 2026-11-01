@@ -6,6 +6,7 @@
 //! complete exchange, matching loop, risk engine, or target-ABI replacement.
 
 mod book;
+pub mod first_left_insertion;
 mod layout;
 mod matching;
 mod snapshot;

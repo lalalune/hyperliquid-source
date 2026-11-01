@@ -97,6 +97,21 @@ The implementation packet records exact target coordinates, source/base pins,
 commands, limitations, and the distinction between observations and safe
 component policies.
 
+## One local short-run insertion
+
+`first_left_insertion::insert_loaded` represents only the native j=8 step at
+node94 `0x4918eef..0x4918f4d`, reached on the qualified n=21..32 short-run
+path. Its chosen safe API accepts a nine-qword scratch window and the already
+loaded value. It moves only the contiguous suffix of unsigned-greater words
+right, preserving earlier prefix words even when that prefix is unsorted.
+Equality stops the scan. The returned insertion index is chosen observation
+metadata, not a recovered target return value.
+
+The module does not recover seed behavior, subsequent insertions, the right
+half, merge, a full sorting API or the original pointer/alias contract. Book
+callers are unchanged. Evidence, frozen states and compiled comparison scope
+belong to `RE-006-first-left-insertion-rust-94`.
+
 ## Build and test
 
 ```sh
