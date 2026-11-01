@@ -1,0 +1,61 @@
+--- a/src/node94-consensus-admission/src/client_batch.rs
++++ b/src/node94-consensus-admission/src/client_batch.rs
+@@ -291,7 +291,7 @@
+         verify_timed(history, authenticator, &item.signed)?;
+         // Hash every tx before comparing the count or block hash vector.
+         for transaction in &item.transactions {
+-            if keccak256(&transaction.bytes) != transaction.hash.0 {
++            if *keccak256(&transaction.bytes).as_bytes() != transaction.hash.0 {
+                 return Err(ClientBatchError::TransactionHash(transaction.hash));
+             }
+         }
+--- a/driver.rs
++++ b/amendment-1/corrected/driver.rs
+@@ -264,7 +264,7 @@
+ fn fingerprints(out: &mut Vec<u8>, items: &[ClientBlock]) {
+     count(out, items.len());
+     for item in items {
+-        out.extend_from_slice(&keccak256(&item_bytes(item)));
++        out.extend_from_slice(keccak256(&item_bytes(item)).as_bytes());
+     }
+ }
+ 
+@@ -276,7 +276,7 @@
+     fn record(&self, code: u8, round: Round, message: &[u8]) {
+         self.trace
+             .borrow_mut()
+-            .push((code, round, keccak256(message)));
++            .push((code, round, *keccak256(message).as_bytes()));
+     }
+     fn recover(
+         domain: &[u8],
+@@ -287,8 +287,9 @@
+         let mut bytes = domain.to_vec();
+         bytes.extend_from_slice(message);
+         bytes.extend_from_slice(&address);
+-        (signature.0[20..52] == keccak256(&bytes) && signature.0[52..].iter().all(|&b| b == 0))
+-            .then_some(ValidatorAddress(address))
++        (signature.0[20..52] == keccak256(&bytes).as_bytes()[..]
++            && signature.0[52..].iter().all(|&b| b == 0))
++        .then_some(ValidatorAddress(address))
+     }
+     fn output_trace(&self, out: &mut Vec<u8>) {
+         let trace = self.trace.borrow();
+@@ -379,7 +380,7 @@
+         self.record(5, block.block.round, &message);
+         let mut bytes = b"fixture-block-v1".to_vec();
+         bytes.extend_from_slice(&message);
+-        BlockHash(keccak256(&bytes))
++        BlockHash(*keccak256(&bytes).as_bytes())
+     }
+ }
+ 
+@@ -491,7 +492,7 @@
+         word(&mut event, view.last_received.0);
+         word(&mut event, view.confirmed.0);
+         word(&mut event, view.pending_len as u64);
+-        event.extend_from_slice(&keccak256(&item_bytes(&item)));
++        event.extend_from_slice(keccak256(&item_bytes(&item)).as_bytes());
+         self.events.push(event);
+         if accepted {
+             self.accepted.push(item);

@@ -10,6 +10,7 @@
 
 mod admission;
 mod auth;
+mod client_batch;
 mod error;
 mod qc;
 mod stake;
@@ -19,6 +20,12 @@ mod types;
 
 pub use admission::{verify_block, VerifiedBlock};
 pub use auth::{AdmissionAuthenticator, AuthenticationError};
+pub use client_batch::{
+    verify_client_batch, ClientBatchAuthenticator, ClientBatchError, ClientBatchFailure,
+    ClientBlock, ClientBlockBuffer, ClientBlockSink, ClientBlockTime, ClientBufferError,
+    ClientBufferView, ClientCommitProof, ClientSpanError, ClientSpanField, ClientTransaction,
+    TimedSignedBlock,
+};
 pub use error::{AdmissionError, FatalAdmissionError, VerificationFailure};
 pub use qc::verify_qc;
 pub use stake::{
