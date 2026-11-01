@@ -1,0 +1,93 @@
+
+visor.elf:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+00000000002bd180 <.text>:
+  445830: 50                           	push	rax
+  445831: 44 8b 06                     	mov	r8d, dword ptr [rsi]
+  445834: 8b 76 04                     	mov	esi, dword ptr [rsi + 0x4]
+  445837: 48 85 d2                     	test	rdx, rdx
+  44583a: 0f 98 c0                     	sets	al
+  44583d: 85 c9                        	test	ecx, ecx
+  44583f: 41 0f 9f c1                  	setg	r9b
+  445843: 41 20 c1                     	and	r9b, al
+  445846: 45 0f b6 c9                  	movzx	r9d, r9b
+  44584a: 4c 01 ca                     	add	rdx, r9
+  44584d: 8d 81 00 36 65 c4            	lea	eax, [rcx - 0x3b9aca00]
+  445853: 45 84 c9                     	test	r9b, r9b
+  445856: 0f 44 c1                     	cmove	eax, ecx
+  445859: 81 fe 00 ca 9a 3b            	cmp	esi, 0x3b9aca00
+  44585f: 7c 41                        	jl	0x4458a2 <.text+0x188722>
+  445861: 48 85 d2                     	test	rdx, rdx
+  445864: 7f 36                        	jg	0x44589c <.text+0x18871c>
+  445866: 85 c0                        	test	eax, eax
+  445868: 0f 9e c1                     	setle	cl
+  44586b: 41 b9 00 94 35 77            	mov	r9d, 0x77359400
+  445871: 41 29 c1                     	sub	r9d, eax
+  445874: 44 39 ce                     	cmp	esi, r9d
+  445877: 41 0f 9c c1                  	setl	r9b
+  44587b: 41 08 c9                     	or	r9b, cl
+  44587e: 41 80 f9 01                  	cmp	r9b, 0x1
+  445882: 75 18                        	jne	0x44589c <.text+0x18871c>
+  445884: 48 85 d2                     	test	rdx, rdx
+  445887: 0f 88 a5 00 00 00            	js	0x445932 <.text+0x1887b2>
+  44588d: 01 c6                        	add	esi, eax
+  44588f: 0f 80 f0 00 00 00            	jo	0x445985 <.text+0x188805>
+  445895: 31 c0                        	xor	eax, eax
+  445897: e9 87 00 00 00               	jmp	0x445923 <.text+0x1887a3>
+  44589c: 81 c6 00 36 65 c4            	add	esi, 0xc4653600
+  4458a2: 49 01 d0                     	add	r8, rdx
+  4458a5: 0f 80 99 00 00 00            	jo	0x445944 <.text+0x1887c4>
+  4458ab: 01 c6                        	add	esi, eax
+  4458ad: 0f 80 9e 00 00 00            	jo	0x445951 <.text+0x1887d1>
+  4458b3: 78 19                        	js	0x4458ce <.text+0x18874e>
+  4458b5: 81 fe ff c9 9a 3b            	cmp	esi, 0x3b9ac9ff
+  4458bb: 76 20                        	jbe	0x4458dd <.text+0x18875d>
+  4458bd: 49 ff c0                     	inc	r8
+  4458c0: 0f 80 b2 00 00 00            	jo	0x445978 <.text+0x1887f8>
+  4458c6: 81 c6 00 36 65 c4            	add	esi, 0xc4653600
+  4458cc: eb 0f                        	jmp	0x4458dd <.text+0x18875d>
+  4458ce: 49 ff c8                     	dec	r8
+  4458d1: 0f 80 94 00 00 00            	jo	0x44596b <.text+0x1887eb>
+  4458d7: 81 c6 00 ca 9a 3b            	add	esi, 0x3b9aca00
+  4458dd: 48 b9 57 29 51 ce a0 c8 45 18	movabs	rcx, 0x1845c8a0ce512957
+  4458e7: 4c 89 c0                     	mov	rax, r8
+  4458ea: 48 f7 e9                     	imul	rcx
+  4458ed: 48 89 d0                     	mov	rax, rdx
+  4458f0: 48 c1 e8 3f                  	shr	rax, 0x3f
+  4458f4: 48 c1 fa 0d                  	sar	rdx, 0xd
+  4458f8: 48 01 c2                     	add	rdx, rax
+  4458fb: 48 69 c2 80 51 01 00         	imul	rax, rdx, 0x15180
+  445902: 4c 89 c2                     	mov	rdx, r8
+  445905: 48 29 c2                     	sub	rdx, rax
+  445908: 48 89 d1                     	mov	rcx, rdx
+  44590b: 48 c1 f9 3f                  	sar	rcx, 0x3f
+  44590f: 81 e1 80 51 01 00            	and	ecx, 0x15180
+  445915: 48 01 d1                     	add	rcx, rdx
+  445918: 49 29 c8                     	sub	r8, rcx
+  44591b: 70 41                        	jo	0x44595e <.text+0x1887de>
+  44591d: 4c 89 c0                     	mov	rax, r8
+  445920: 41 89 c8                     	mov	r8d, ecx
+  445923: 44 89 07                     	mov	dword ptr [rdi], r8d
+  445926: 89 77 04                     	mov	dword ptr [rdi + 0x4], esi
+  445929: 48 89 47 08                  	mov	qword ptr [rdi + 0x8], rax
+  44592d: 48 89 f8                     	mov	rax, rdi
+  445930: 59                           	pop	rcx
+  445931: c3                           	ret
+  445932: 81 c6 00 36 65 c4            	add	esi, 0xc4653600
+  445938: 49 ff c0                     	inc	r8
+  44593b: 49 01 d0                     	add	r8, rdx
+  44593e: 0f 81 67 ff ff ff            	jno	0x4458ab <.text+0x18872b>
+  445944: 48 8d 3d f5 f7 36 00         	lea	rdi, [rip + 0x36f7f5]   # 0x7b5140
+  44594b: ff 15 4f f3 39 00            	call	qword ptr [rip + 0x39f34f] # 0x7e4ca0
+  445951: 48 8d 3d 00 f8 36 00         	lea	rdi, [rip + 0x36f800]   # 0x7b5158
+  445958: ff 15 42 f3 39 00            	call	qword ptr [rip + 0x39f342] # 0x7e4ca0
+  44595e: 48 8d 3d 3b f8 36 00         	lea	rdi, [rip + 0x36f83b]   # 0x7b51a0
+  445965: ff 15 a5 f3 39 00            	call	qword ptr [rip + 0x39f3a5] # 0x7e4d10
+  44596b: 48 8d 3d 16 f8 36 00         	lea	rdi, [rip + 0x36f816]   # 0x7b5188
+  445972: ff 15 98 f3 39 00            	call	qword ptr [rip + 0x39f398] # 0x7e4d10
+  445978: 48 8d 3d f1 f7 36 00         	lea	rdi, [rip + 0x36f7f1]   # 0x7b5170
+  44597f: ff 15 1b f3 39 00            	call	qword ptr [rip + 0x39f31b] # 0x7e4ca0
+  445985: 48 8d 3d 9c f7 36 00         	lea	rdi, [rip + 0x36f79c]   # 0x7b5128
+  44598c: ff 15 0e f3 39 00            	call	qword ptr [rip + 0x39f30e] # 0x7e4ca0
