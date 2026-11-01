@@ -87,6 +87,16 @@ source controls and exact tool identity are documented in
 `research/work-items/RE-008-qc-recovery-byte-rust-94/`. Its qualified field
 comparison advances no whole consensus gate.
 
+## Qualified QC group projection
+
+`qc_fd_group::read_mode1_fd_group` separately reconstructs the final value,
+input suffix and charge of the mode-1 four-success FD-word path at
+`0x466bf60..0x466c13f`. It consumes 36 encoded bytes, charges 32 and writes the
+observed 40-byte helper result view. See
+`research/work-items/RE-008-qc-fd-group-success-94/` for native evidence and
+frozen vectors. Its outside-domain rejection is a chosen safe API. No complete
+QC decoder, native ABI, failure behavior or cryptographic validity is claimed.
+
 ## Reproduce
 
 From the repository root:

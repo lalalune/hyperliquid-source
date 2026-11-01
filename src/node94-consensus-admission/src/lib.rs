@@ -15,6 +15,8 @@ mod qc;
 /// Independent qualified wire-field projection; no admission/authentication integration.
 pub mod qc_recovery_byte;
 pub mod qc_row_success;
+/// Qualified mode-1, four-FD-word success projection; separate from admission.
+pub mod qc_fd_group;
 mod stake;
 mod state;
 mod tc;
