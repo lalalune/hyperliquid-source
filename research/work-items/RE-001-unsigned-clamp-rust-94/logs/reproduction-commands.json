@@ -1,0 +1,92 @@
+{
+  "initial_native": {
+    "argv": [
+      "python3",
+      "-O",
+      "research/work-items/RE-001-unsigned-clamp-rust-94/verify.py",
+      "--out",
+      "work/unsigned-clamp/native"
+    ],
+    "exit": 1,
+    "stdout_stderr": "../initial/native.log",
+    "reason": "low8-one-tag mutant survived"
+  },
+  "qualified_native": {
+    "argv": [
+      "python3",
+      "-O",
+      "research/work-items/RE-001-unsigned-clamp-rust-94/verify.py",
+      "--out",
+      "work/unsigned-clamp/native-qualified"
+    ],
+    "exit": 0,
+    "stdout_stderr": "native-qualified.log"
+  },
+  "freeze": {
+    "argv": [
+      "python3",
+      "research/work-items/RE-001-unsigned-clamp-rust-94/oracle.py",
+      "--freeze"
+    ],
+    "exit": 0,
+    "stdout": "oracle-freeze.log"
+  },
+  "supplement_freeze": {
+    "argv": [
+      "python3",
+      "research/work-items/RE-001-unsigned-clamp-rust-94/supplement.py",
+      "--freeze"
+    ],
+    "exit": 0,
+    "stdout": "supplement-freeze.log"
+  },
+  "live_query_template": [
+    [
+      "gh",
+      "pr",
+      "list",
+      "--repo",
+      "lalalune/hyperliquid-source",
+      "--state",
+      "open",
+      "--limit",
+      "200",
+      "--json",
+      "number,title,body,headRefName,url"
+    ],
+    [
+      "gh",
+      "issue",
+      "list",
+      "--repo",
+      "lalalune/hyperliquid-source",
+      "--state",
+      "open",
+      "--limit",
+      "200",
+      "--json",
+      "number,title,body,assignees,url"
+    ],
+    [
+      "gh",
+      "pr",
+      "list",
+      "--repo",
+      "lalalune/hyperliquid-source",
+      "--state",
+      "merged",
+      "--limit",
+      "30",
+      "--json",
+      "number,title,body,mergedAt,url"
+    ]
+  ],
+  "initial_and_final_live_query_exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ]
+}
