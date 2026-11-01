@@ -51,12 +51,30 @@ block, and inserts the block map row. `admit_and_register` does not mutate
 revalidates state gates so a stale admitted token cannot overwrite intervening
 state.
 
+## Block preimage helper
+
+`block_preimage::{block_preimage_len, block_preimage, block_digest}` reconstructs
+selector0 from a `SignedBlock` plus explicit `PackedBlockTime`. The separate
+time value supplies the three raw words omitted by the baseline block type;
+it does not reinterpret `EventTime` or add a calendar-validity check. The
+encoder preserves transaction/QC/TC order, encodes signed seconds with zigzag
+and emits each nested timeout signature before its body. It ignores the outer
+block signature and inactive signature padding.
+
+The conditional native proof and independent pre-Rust expectations are in
+[`RE-008-block-preimage-94`](../../research/work-items/RE-008-block-preimage-94/README.md).
+Length and native source-span bounds are checked separately before reserving
+the preimage buffer. Errors are safe API refusals, not captured ABI statuses.
+Digest correspondence retains the credited Keccak identity assumption and
+the proof's memory/callee premises. This offline helper performs no signing,
+recovery, network operation or admission-state mutation.
+
 ## Authentication boundary
 
 The following native behavior remains unresolved in the retained evidence:
 
 - proposer scheduling at `0x4b31e70`;
-- block/QC/timeout digest construction at `0x454c050`;
+- the remaining digest variants at `0x454c050` and full authenticator integration;
 - signature recovery at `0x14c6f50`.
 
 `AdmissionAuthenticator` isolates those operations. It receives typed signing
