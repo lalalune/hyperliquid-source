@@ -46,7 +46,7 @@ reading +8/+16; the other reads those fields directly. This establishes the
 forwarded pair, without assuming the target's rendering contract.
 `0x576e708` is independently bound through GLOB_DAT and dynsym to **close**.
 
-The byte-candidate census finds no E8 calls to the primary entry, one RELATIVE
+The `.text` byte-candidate census finds no E8 calls to the primary entry, one RELATIVE
 slot naming it, seven FF15 uses of that slot, and no FF25 use. Each candidate
 is checked by complete Capstone decoding from its owning FDE start. The seven
 call sites are `0x13c90ad`, `0x13c9255`, `0x144cbef`, `0x144d039`,

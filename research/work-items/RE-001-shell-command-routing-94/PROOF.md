@@ -3,7 +3,7 @@
 All addresses are ELF VAs in node94 with digest recorded in README.md. This is
 an argument from the retained complete exports, not execution or emulation of
 the capture. Assume ordinary stable readable request bytes, the caller's valid
-pointer/length layout, no address arithmetic overflow, option byte 0 or 1,
+pointer/length layout, no address/index/length arithmetic wrap, option byte 0 or 1,
 and normal returns from preparation/formatting/allocation helpers. Those
 conditions are not a recovered public Rust API or a whole-program theorem.
 

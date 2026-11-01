@@ -1,0 +1,129 @@
+{
+  "recorded_utc": "2026-11-01T20:56:38.710486+00:00",
+  "base_commit": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "tested_source_commit": "9c17c57281a3cb43ee69004bccf75571d8545b1b",
+  "target": {
+    "release": "node94",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+    "size": 91774280
+  },
+  "tools": {
+    "python": "3.14.7",
+    "capstone": "5.0.7",
+    "gnu_objdump_readelf": "2.47.20260726",
+    "llvm_objdump": "18.1.4",
+    "host": "macOS arm64"
+  },
+  "repository_gates": {
+    "command": "make PYTHON=<Python 3.14.7> doctor verify catalogue-check reproduce",
+    "environment": "GNU binutils and LLVM directories prepended to child PATH",
+    "corrected_base_returncode": 0,
+    "contribution_returncode": 0,
+    "base_and_contribution_log_bytes_equal": true,
+    "initial_base_failure": {
+      "command": "make doctor verify catalogue-check reproduce",
+      "returncode": 2,
+      "reason": "PATH chose Apple objdump and lacked GNU readelf; no test or code failure. Corrected to already-installed GNU tools."
+    }
+  },
+  "evidence": {
+    "full_fde_extents": 4,
+    "bytes": 2947,
+    "instructions": 626,
+    "gnu_llvm_byte_and_boundary_agreement": true,
+    "independent_readelf_headers": 4,
+    "retained_files_regenerated_identically": true,
+    "records_sha256": "6074ecb29fbb519ed26608625f33f813cc289ef2319fe26e3fa146a261510854",
+    "instruction_obligations": 38,
+    "relative_bindings": 13,
+    "literal_bindings": 10,
+    "qualified_incoming_call_sites": 7
+  },
+  "focused_tests": {
+    "command": "python -m unittest tests.test_shell_command_routing -v",
+    "methods": 4,
+    "returncode": 0,
+    "reported_seconds": 11.487
+  },
+  "negative_controls": {
+    "command": "python <packet>/verify.py --controls",
+    "deep_rejections": 67,
+    "survivors": 0,
+    "bypassed_guards": [
+      "whole-image digest",
+      "body digest",
+      "independent export comparison"
+    ],
+    "separate_integrity_controls": "Prologue mutation outside semantic spans rejected independently by all three guards."
+  },
+  "combinatorial_checks": {
+    "lengths_checked": 4097,
+    "distinct_length_position_pairs": 8378371,
+    "nonzero_16_bit_masks_checked": 65535,
+    "limits": "Finite checks support PROOF.md induction; not target execution or equivalence."
+  },
+  "full_suite": {
+    "status": "complete; all official test files returned zero; no reruns",
+    "tested_source_commit": "9c17c57281a3cb43ee69004bccf75571d8545b1b",
+    "modules": 972,
+    "reported_test_cases": 15472,
+    "skipped_cases": 69,
+    "failed_modules": 0,
+    "inventory_source": "tools/run_tests.py:test_files; identical complete inventories in eight isolated detached worktrees",
+    "isolation": "One fresh interpreter per module and one worktree per shard; each module assigned exactly once",
+    "command": "python -m unittest discover -s <isolated-root>/tests -p <file.py> -v",
+    "reproduce": "make test PYTHON=<Python 3.14.7 with Capstone 5.0.7>",
+    "environment": "GNU binutils and LLVM on child PATH; captured-execution authorization variables unset",
+    "scope_note": "Skips are not passes. No captured binary execution or emulator. Metadata-only edits after tested source: README, PROOF, overlap, validation, compressed suite report, archive attributes and manifest.",
+    "official_inventory_sha256": "664a9d6acbab7e39e1e405f4add9650553c83f56011f331032e10895153492e1",
+    "runner_result_sha256": "ba249f13b014009a26a3f2f2a3b82484e96a5525159089858a0f370779beb44c",
+    "per_module_result_file": "suite-results.json.gz",
+    "per_module_result_sha256": "9c5c992a03f1f13456b55e1d76e448f81009a5589f512514af8ddc865867ee93"
+  },
+  "logs": [
+    {
+      "name": "hl7-baseline-gates.log",
+      "sha256": "cf8b23c3182f2b6c6b943b40a69f0e014a550eb0ef80f6d20eaf539ebb5b62ba",
+      "retained": "local execution logs; no private host data copied into the packet"
+    },
+    {
+      "name": "hl7-baseline-gates-corrected.log",
+      "sha256": "596e1a1929db20310c11f621aff36e63b5c141be19fd87cec38f4666f3c5154e",
+      "retained": "local execution logs; no private host data copied into the packet"
+    },
+    {
+      "name": "hl7-changed-gates.log",
+      "sha256": "596e1a1929db20310c11f621aff36e63b5c141be19fd87cec38f4666f3c5154e",
+      "retained": "local execution logs; no private host data copied into the packet"
+    },
+    {
+      "name": "hl7-focused.log",
+      "sha256": "296147a687654f73552aa847e0ce57845891b0cacee58123865156c188001c33",
+      "retained": "local execution logs; no private host data copied into the packet"
+    },
+    {
+      "name": "hl7-exports.log",
+      "sha256": "14bc9a7ee8249965f7b64d6c09867638833f409871004a7711b9b33fccadd8aa",
+      "retained": "local execution logs; no private host data copied into the packet"
+    },
+    {
+      "name": "hl7-export-repeat.log",
+      "sha256": "14bc9a7ee8249965f7b64d6c09867638833f409871004a7711b9b33fccadd8aa",
+      "retained": "local execution logs; no private host data copied into the packet"
+    },
+    {
+      "name": "hl7-regenerate.log",
+      "sha256": "58e7e061c7061f207a33849b9892a5dfaee66b26112a02eeeebcd09068b6eb3a",
+      "retained": "local execution logs; no private host data copied into the packet"
+    }
+  ],
+  "execution_limits": {
+    "captured_code_executed": false,
+    "emulation": false,
+    "shell_commands_from_target_executed": false,
+    "live_node_network": false,
+    "rust_equivalence_claim": false,
+    "hosted_ci_success_claim": false,
+    "component_gates_changed": false
+  }
+}
