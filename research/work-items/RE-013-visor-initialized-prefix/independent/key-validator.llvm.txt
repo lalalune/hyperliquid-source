@@ -1,0 +1,83 @@
+
+visor.elf:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+00000000002bd180 <.text>:
+  498290: 53                           	push	rbx
+  498291: 48 89 f8                     	mov	rax, rdi
+  498294: 48 83 fa 0f                  	cmp	rdx, 0xf
+  498298: 77 2d                        	ja	0x4982c7 <.text+0x1db147>
+  49829a: 48 85 d2                     	test	rdx, rdx
+  49829d: 0f 84 bb 00 00 00            	je	0x49835e <.text+0x1db1de>
+  4982a3: 31 ff                        	xor	edi, edi
+  4982a5: 66 66 2e 0f 1f 84 00 00 00 00 00     	nop	word ptr cs:[rax + rax]
+  4982b0: 80 3c 3e 00                  	cmp	byte ptr [rsi + rdi], 0x0
+  4982b4: 0f 84 b9 00 00 00            	je	0x498373 <.text+0x1db1f3>
+  4982ba: 48 ff c7                     	inc	rdi
+  4982bd: 48 39 fa                     	cmp	rdx, rdi
+  4982c0: 75 ee                        	jne	0x4982b0 <.text+0x1db130>
+  4982c2: e9 97 00 00 00               	jmp	0x49835e <.text+0x1db1de>
+  4982c7: 48 8d 4e 07                  	lea	rcx, [rsi + 0x7]
+  4982cb: 48 83 e1 f8                  	and	rcx, -0x8
+  4982cf: 48 29 f1                     	sub	rcx, rsi
+  4982d2: 75 4d                        	jne	0x498321 <.text+0x1db1a1>
+  4982d4: 48 8d 7a f0                  	lea	rdi, [rdx - 0x10]
+  4982d8: 31 c9                        	xor	ecx, ecx
+  4982da: 49 b8 80 80 80 80 80 80 80 80	movabs	r8, -0x7f7f7f7f7f7f7f80
+  4982e4: 49 b9 00 01 01 01 01 01 01 01	movabs	r9, 0x101010101010100
+  4982ee: 66 90                        	nop
+  4982f0: 4c 8b 14 0e                  	mov	r10, qword ptr [rsi + rcx]
+  4982f4: 4c 8b 5c 0e 08               	mov	r11, qword ptr [rsi + rcx + 0x8]
+  4982f9: 4c 89 cb                     	mov	rbx, r9
+  4982fc: 4c 29 d3                     	sub	rbx, r10
+  4982ff: 4c 09 d3                     	or	rbx, r10
+  498302: 4d 89 ca                     	mov	r10, r9
+  498305: 4d 29 da                     	sub	r10, r11
+  498308: 4d 09 da                     	or	r10, r11
+  49830b: 4c 21 c3                     	and	rbx, r8
+  49830e: 4c 21 d3                     	and	rbx, r10
+  498311: 4c 39 c3                     	cmp	rbx, r8
+  498314: 75 43                        	jne	0x498359 <.text+0x1db1d9>
+  498316: 48 83 c1 10                  	add	rcx, 0x10
+  49831a: 48 39 f9                     	cmp	rcx, rdi
+  49831d: 76 d1                        	jbe	0x4982f0 <.text+0x1db170>
+  49831f: eb 38                        	jmp	0x498359 <.text+0x1db1d9>
+  498321: 31 ff                        	xor	edi, edi
+  498323: 66 66 66 66 2e 0f 1f 84 00 00 00 00 00       	nop	word ptr cs:[rax + rax]
+  498330: 80 3c 3e 00                  	cmp	byte ptr [rsi + rdi], 0x0
+  498334: 74 3d                        	je	0x498373 <.text+0x1db1f3>
+  498336: 48 ff c7                     	inc	rdi
+  498339: 48 39 f9                     	cmp	rcx, rdi
+  49833c: 75 f2                        	jne	0x498330 <.text+0x1db1b0>
+  49833e: 48 8d 7a f0                  	lea	rdi, [rdx - 0x10]
+  498342: 48 39 f9                     	cmp	rcx, rdi
+  498345: 77 12                        	ja	0x498359 <.text+0x1db1d9>
+  498347: eb 91                        	jmp	0x4982da <.text+0x1db15a>
+  498349: 0f 1f 80 00 00 00 00         	nop	dword ptr [rax]
+  498350: 80 3c 0e 00                  	cmp	byte ptr [rsi + rcx], 0x0
+  498354: 74 1a                        	je	0x498370 <.text+0x1db1f0>
+  498356: 48 ff c1                     	inc	rcx
+  498359: 48 39 ca                     	cmp	rdx, rcx
+  49835c: 75 f2                        	jne	0x498350 <.text+0x1db1d0>
+  49835e: 48 c7 40 08 01 00 00 00      	mov	qword ptr [rax + 0x8], 0x1
+  498366: b9 01 00 00 00               	mov	ecx, 0x1
+  49836b: 48 89 08                     	mov	qword ptr [rax], rcx
+  49836e: 5b                           	pop	rbx
+  49836f: c3                           	ret
+  498370: 48 89 cf                     	mov	rdi, rcx
+  498373: 48 8d 4f 01                  	lea	rcx, [rdi + 0x1]
+  498377: 48 39 d1                     	cmp	rcx, rdx
+  49837a: 75 0f                        	jne	0x49838b <.text+0x1db20b>
+  49837c: 48 89 70 08                  	mov	qword ptr [rax + 0x8], rsi
+  498380: 48 89 50 10                  	mov	qword ptr [rax + 0x10], rdx
+  498384: 31 c9                        	xor	ecx, ecx
+  498386: 48 89 08                     	mov	qword ptr [rax], rcx
+  498389: 5b                           	pop	rbx
+  49838a: c3                           	ret
+  49838b: 48 c7 40 08 00 00 00 00      	mov	qword ptr [rax + 0x8], 0x0
+  498393: 48 89 78 10                  	mov	qword ptr [rax + 0x10], rdi
+  498397: b9 01 00 00 00               	mov	ecx, 0x1
+  49839c: 48 89 08                     	mov	qword ptr [rax], rcx
+  49839f: 5b                           	pop	rbx
+  4983a0: c3                           	ret
