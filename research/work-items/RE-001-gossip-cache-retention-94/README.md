@@ -29,7 +29,11 @@ Before this contribution, the catalogue supplied an unverified seed in
 #1335 (gossip RPC **client** Location census), #999 (non-validator client-block
 admission and batch verification), and #211 (RPC timeouts) cover other questions
 and functions. The prior IPv4-translation contribution #1378 is separate.
-No unlicensed reference implementation was copied. Only its seed address was
+The supporting caller FDEs already appear in #681/#625/#1162 and the
+startup/node inventories. Their raw indirect-call bytes are not claimed as new
+function recovery: this packet adds the binding to the newly studied cache
+update. Those earlier channel, sampler, codec and Location questions are not
+repeated. No unlicensed reference implementation was copied. Only its seed address was
 used; the findings below come from authenticated binary bytes.
 
 ## Observations
