@@ -48,5 +48,13 @@ The independent29,858-input authority and native proofs were sealed before new
 Rust. The23-row ordinary fixture subset was frozen unchanged before lib.rs.
 The stdin-only example receives five TSV fields and emits16 canonical active
 JSON fields; expected records never enter it. Private holdouts remain unread by
-this author. Actual builds/tests are pending; expanded evaluator tests,
+this author. On clean source checkpoint
+`91e02c8d019aaeec403e4e1633777837d3d7f53e`, O0 and O3 each matched all29,858
+records byte for byte; seven ordinary methods passed per direct profile and
+under actual offline locked Cargo debug/release. Eight normally compiled wrong
+libraries produced complete mismatching outputs and failed ordinary assertions.
+One extra optimized own-library rebuild was raw equal. The independent peer
+verified all63command pairs and43artifact identities and replayed64novel inputs
+plus three duplicate rows on both existing clients without a rebuild. Public
+retention contains only safe private-replay counts/hashes. Expanded evaluator tests,
 captured execution and hosted CI are NOT_RUN. All full component gates are false.

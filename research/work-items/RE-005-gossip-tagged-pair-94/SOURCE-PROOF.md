@@ -43,5 +43,9 @@ suffix thresholds, fixed costs and no partial result on second truncation.
 The intended experiment uses O0/O3 full canonical byte equality, actual offline
 locked Cargo tests, one extra optimized raw library repeat, eight normally
 compiled wrong-source controls and copied-ELF guards below whole-target SHA.
-Actual results are pending. No captured binary or instruction evaluator runs,
+The actual first compiler run on clean source checkpoint
+`91e02c8d019aaeec403e4e1633777837d3d7f53e` passed those checks. The complete raw
+streams and independent actual review bind the observed outputs; the theorem
+does not assume the finite case corpus exhausts all input lengths/counters.
+No captured binary or instruction evaluator runs,
 and all full-component/original ABI/machine-byte gates remain false.

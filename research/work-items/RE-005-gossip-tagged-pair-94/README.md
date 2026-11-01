@@ -49,9 +49,45 @@ forwarded error padding, entry-register residue, native pointers/types/layout,
 faults, compiler/machine-byte identity and whole gossip grammar remain outside
 the projection. No original output-memory or full-component gate is asserted.
 
-Current status: source review passed; full runner prebuild review and actual
-builds are pending. Expanded evaluator tests,captured execution and hosted CI
-are NOT_RUN. All full component gates remain false. Planned exact command:
+The first actual compiler run passed on clean source checkpoint
+`91e02c8d019aaeec403e4e1633777837d3d7f53e`, based on task-start main
+`56c0ec672bd8fdcfaa80f2db700a61e6240b3663`. O0 and O3 each matched all29,858
+canonical output rows byte for byte. Seven ordinary test methods passed per
+direct profile and actual offline locked Cargo debug/release. One extra own
+optimized library rebuild was raw equal.
+
+| Normally compiled wrong source | Mismatching complete rows |
+| --- | ---: |
+| Full-QWORD charging predicate | 5,817 |
+| Omit selector cost | 11,488 |
+| Empty read before budget check | 258 |
+| Roll back invalid selector | 4,152 |
+| Swap first/second fields | 8,984 |
+| Roll back second error | 1,654 |
+| Continue after first error | 2,220 |
+| Accept selector2 | 816 |
+
+Each wrong source emitted the complete29,858-row protocol and failed ordinary
+assertions with normal exit101. Fifteen static test methods cover a positive
+case and18 copied-input rejections, with four-body and two-table subcases.
+Seven comparator controls cover altered content/count/order/canonical form.
+All10,861 physical tracked files,seven genuine pins,103 provider payloads,two
+installer manifests,source/head/status and resolved host tools were unchanged.
+
+`ACTUAL-STREAMS.zip` losslessly retains157files /87,564,800 original bytes,
+including all63recorded outer command pairs,five nested binutils pairs,actual
+input audits/native records and all eight wrong sources. All43 compiled
+artifacts were independently hash-checked; binaries/fulltarget/provider payloads
+are excluded from public transport. Original raw work is preserved.
+
+The independent peer verified the complete actual evidence and replayed67rows
+(64novel complete inputs plus3duplicates) against each existing client; changed
+neighboring answers left output identical. Only its public-safe summary is
+retained. Repository static checks are pending on the preserved evidence
+checkpoint; no Rust or native-control rerun is needed.
+
+Expanded evaluator tests,captured execution and hosted CI are NOT_RUN. All full
+component gates remain false. Exact scoped command:
 
 ```sh
 python3 -B research/work-items/RE-005-gossip-tagged-pair-94/run.py --out work/gossip-tagged-pair-318-run1
