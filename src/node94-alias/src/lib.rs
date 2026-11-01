@@ -1,9 +1,9 @@
-//! Pure integer contract observed in node #94's feed and alias producer.
+//! Pure integer contracts observed in node #94's alias feed and inline carrier.
 //!
 //! Evidence: `research/work-items/RE-001-short-string-alias-94/` at repository root.
 //! Target SHA-256: 3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f.
 //! Independently authored from authenticated bytes; no inferred source is copied.
-//! This crate neither recovers the constructor/cache nor exposes the target ABI.
+//! This crate does not recover the full constructor/cache or expose the target ABI.
 //! It uses no allocation, unsafe code, dependencies, target execution or I/O.
 
 #![forbid(unsafe_code)]
@@ -98,6 +98,24 @@ fn compress(v: &mut [u64; 4], word: u64) {
     v[3] ^= word;
     round(v);
     v[0] ^= word;
+}
+
+/// Packs the constructor-admitted inline bytes into a little-endian carrier.
+///
+/// The low 64 bits project native RAX and the high 64 bits project native RDX.
+/// Every byte, including embedded and trailing zeros, participates; the carrier
+/// contains no separate length. This returns `None` above 16 bytes because that
+/// constructor route uses an unimplemented cache, not because native construction
+/// rejects those inputs. No original string type, memory layout or ABI is exposed.
+pub fn inline_carrier(input: &[u8]) -> Option<u128> {
+    if input.len() > 16 {
+        return None;
+    }
+    let mut carrier = 0u128;
+    for &byte in input.iter().rev() {
+        carrier = (carrier << 8) | u128::from(byte);
+    }
+    Some(carrier)
 }
 
 /// Produces ten ASCII letters from the observed input/ff/u32-LE counter feeds.

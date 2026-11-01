@@ -1,0 +1,71 @@
+{
+  "admitted_domain": "Immutable input byte slice length0..16, initial native index0, valid protected input/stack memory; no original pointer/ABI or fault behavior claim.",
+  "all128_one_bit_positions": true,
+  "api_only_cases": 2,
+  "api_only_domain": "Length17 or greater returnsNone in the chosen API; native constructor instead takes cache/alias path, not a native rejection.",
+  "component": "src/node94-alias",
+  "credits": [
+    "RE-001-short-string-94: native constructor/packer discovery and little-endian recurrence",
+    "RE-001-short-string-alias-94: existing feed/hash/ten-letter producer; unchanged"
+  ],
+  "frozen_before_rust": true,
+  "native_cases": 156,
+  "native_controls": [
+    {
+      "effect": "16-byte constructor input takes long route instead of inline",
+      "original": "10",
+      "replacement": "0f",
+      "site": "0x1449a9e"
+    },
+    {
+      "effect": "byte load uses zeroRCX instead of indexRDX; nonuniform two-byte input differs",
+      "original": "17",
+      "replacement": "0f",
+      "site": "0x144a022"
+    },
+    {
+      "effect": "SHLDcarry shift7 disagrees with low-half shift8",
+      "original": "08",
+      "replacement": "07",
+      "site": "0x144a03c"
+    },
+    {
+      "effect": "low-half shift7 loses byte-lane alignment",
+      "original": "08",
+      "replacement": "07",
+      "site": "0x144a040"
+    },
+    {
+      "effect": "highbit127 fixture reaches overflow exit under tightened guard",
+      "original": "38",
+      "replacement": "37",
+      "site": "0x144a032"
+    }
+  ],
+  "native_expected_equations": [
+    "P(len)=(RAX=0,RDX=0)",
+    "Given recursive(lo,hi), requirehi>>56==0; nextlow=((lo<<8)|byte[index])mod2^64; nexthigh=((hi<<8)|(lo>>56))mod2^64",
+    "For len<=16 the guard succeeds and carrier=sum(byte[i]*2^(8*i))"
+  ],
+  "question": "Implement the constructor-admitted inline little-endian128-bit carrier in the existing alias component, preserving all bytes/zero padding and exact RAX/RDX halves.",
+  "schema": "re001-inline-carrier-rust-plan/1",
+  "scope_limits": [
+    "Long cache/allocation/locks/ownership/display/string identity/wire format remain open.",
+    "No original Rust ABI, accepted identifier grammar, captured execution, instruction evaluator or completion gate.",
+    "No new crate/workspace/lockfile; only existing node94-alias gains admitted inline projection."
+  ],
+  "source_base": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "source_controls_planned": [
+    "native length16 wrongly refused",
+    "byte iteration order reversed",
+    "byte shift8 changed7",
+    "byte highbit cleared",
+    "64-bit output halves exchanged",
+    "API-only long-input refusal changed toSome0"
+  ],
+  "status": "native vectors frozen before Rust inline-carrier source edit",
+  "target_bytes": 91774280,
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "vectors_file": "src/node94-alias/evidence/inline-carrier-vectors.tsv",
+  "vectors_sha256": "8f42424e6dbebe4f4d832d813f9cb88f511fa05a534556d1f8d0169fee810d68"
+}
