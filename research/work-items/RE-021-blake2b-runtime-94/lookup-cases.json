@@ -1,0 +1,161 @@
+{
+  "cases": [
+    {
+      "controls": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "count": 0,
+      "hash": "0xc1855c67d83c8d71",
+      "hit": null,
+      "keys": {},
+      "name": "zero_count",
+      "query": "0000000000000000000000000000000000000009",
+      "trace": [
+        {
+          "reason": "zero_count"
+        }
+      ]
+    },
+    {
+      "controls": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60ffffffffffffffffffffffffffff",
+      "count": 1,
+      "hash": "0xc1855c67d83c8d71",
+      "hit": 49,
+      "keys": {
+        "49": "0000000000000000000000000000000000000009"
+      },
+      "name": "hit_at_initial_bucket",
+      "query": "0000000000000000000000000000000000000009",
+      "trace": [
+        {
+          "candidates": [
+            49
+          ],
+          "equal": 49,
+          "group_start": 49
+        }
+      ]
+    },
+    {
+      "controls": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60ffffffffffffffffffffffffffff",
+      "count": 1,
+      "hash": "0xc1855c67d83c8d71",
+      "hit": null,
+      "keys": {
+        "49": "0100000000000000000000000000000000000009"
+      },
+      "name": "same_fingerprint_wrong_prefix",
+      "query": "0000000000000000000000000000000000000009",
+      "trace": [
+        {
+          "candidates": [
+            49
+          ],
+          "equal": null,
+          "group_start": 49,
+          "reason": "empty_control"
+        }
+      ]
+    },
+    {
+      "controls": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60ffffffffffffffffffffffffffff",
+      "count": 1,
+      "hash": "0xc1855c67d83c8d71",
+      "hit": null,
+      "keys": {
+        "49": "0000000000000000000000000000000000000008"
+      },
+      "name": "same_fingerprint_wrong_last_byte",
+      "query": "0000000000000000000000000000000000000009",
+      "trace": [
+        {
+          "candidates": [
+            49
+          ],
+          "equal": null,
+          "group_start": 49,
+          "reason": "empty_control"
+        }
+      ]
+    },
+    {
+      "controls": "808060808080808080808080808080808080808080808080808080808080808080ff808080808080808080808080808080808080808080808080808080808080",
+      "count": 1,
+      "hash": "0xc1855c67d83c8d71",
+      "hit": 2,
+      "keys": {
+        "2": "0000000000000000000000000000000000000009"
+      },
+      "name": "deleted_controls_do_not_terminate_second_group_hit",
+      "query": "0000000000000000000000000000000000000009",
+      "trace": [
+        {
+          "candidates": [],
+          "equal": null,
+          "group_start": 49
+        },
+        {
+          "candidates": [
+            2
+          ],
+          "equal": 2,
+          "group_start": 1
+        }
+      ]
+    },
+    {
+      "controls": "80808080808080808080808080808080808080808080808080808080808080808060ff8080808080808080808080808080808080808080808080808080808080",
+      "count": 1,
+      "hash": "0xc1855c67d83c8d71",
+      "hit": 33,
+      "keys": {
+        "33": "0000000000000000000000000000000000000009"
+      },
+      "name": "triangular_third_group_hit_before_empty",
+      "query": "0000000000000000000000000000000000000009",
+      "trace": [
+        {
+          "candidates": [],
+          "equal": null,
+          "group_start": 49
+        },
+        {
+          "candidates": [],
+          "equal": null,
+          "group_start": 1
+        },
+        {
+          "candidates": [
+            33
+          ],
+          "equal": 33,
+          "group_start": 33
+        }
+      ]
+    },
+    {
+      "controls": "60ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "count": 1,
+      "hash": "0xc1855c67d83c8d71",
+      "hit": 0,
+      "keys": {
+        "0": "0000000000000000000000000000000000000009"
+      },
+      "name": "candidate_match_precedes_empty_test",
+      "query": "0000000000000000000000000000000000000009",
+      "trace": [
+        {
+          "candidates": [
+            0
+          ],
+          "equal": 0,
+          "group_start": 49
+        }
+      ]
+    }
+  ],
+  "kind": "independent instruction-derived model; no captured execution",
+  "process_words": [
+    "0xfedcba9876543211",
+    "0x9e3779b97f4a7c15"
+  ],
+  "seed": "0x123456789abcdef"
+}
