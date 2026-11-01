@@ -11,6 +11,7 @@ mod requirements;
 mod surplus;
 mod tiers;
 mod types;
+pub mod row_selector;
 
 pub use candidate::{
     CandidateAdmission, CandidateScope, CandidateSubject, LiquidationCandidate,

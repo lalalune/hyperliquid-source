@@ -84,6 +84,28 @@ Node #94 appends records at a 48-byte stride, but the Rust type is deliberately
 not an ABI mirror or serializer: four padding bytes and the ownership of the
 isolated context word remain unresolved.
 
+### Qualified row selection after hashing
+
+`row_selector::select_row_after_hash` accepts an externally supplied hash,
+logical controls, 20-byte key slots, query and late observed state word. It
+returns an owned bucket index or shared-default marker and the state's nonzero
+predicate. It implements the bounded numeric relation from
+`0x36f57f0..0x36f5948`; native hashing, row pointers and Once remain external.
+
+For nonzero count, capacity `N` is a power of two of at least 16, native mask
+is `N-1`, and native control byte `C+j` equals `controls[j & (N-1)]` through
+the 15-byte mirrored prefix. The state argument is the word observed at native
+`0x36f58df` or `0x36f5901`; an entry snapshot requires stability through that
+late load. Synthetic fixed-hash cases establish a conditional posthash
+relation and do not prove the query's native hash result.
+
+The checked entry returns new `SelectorInputError` labels for control shape,
+key coverage and exhaustion of one complete group cycle. These are chosen
+safe-API policy, with no native fault/error claim. Count zero bypasses table
+validation and element access. The evidence packet
+`research/work-items/RE-007-row-selector-rust-94/` separates 894 qualified
+posthash cases from seven policy cases and their mutation controls.
+
 ## Evidence map
 
 The implementation is grounded in
@@ -98,6 +120,7 @@ edge, source-location record, and arithmetic vector.
 | `src/position.rs` | position margin by mode `0x3717480..0x37179c5` |
 | `src/surplus.rs` | surplus `0x37d77e0..0x37d79e0` and the consumed aggregate pair from `0x37d79e0..0x37d7f0c` |
 | `src/candidate.rs` | negative-only candidate branches and fixed record writes in `0x37d7360..0x37d77d8` |
+| `src/row_selector.rs` | conditional posthash selection at `0x36f57f0..0x36f5948`, external hash and Once excluded |
 | `tests/fixtures/*.tsv` | packet `boundaries.tsv` plus the five mode branches |
 | `tests/boundary_contract.rs` | all 24 rows from the maintained packet `boundaries.tsv` |
 | `tests/adversarial.rs`, `tests/negative_controls.rs` | bounded input mutations and formula/admission mutants |
