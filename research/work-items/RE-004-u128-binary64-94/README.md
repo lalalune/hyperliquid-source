@@ -166,7 +166,16 @@ fork, then fetched again into separate previously absent `lfs.storage` and
 checked against each committed pointer and current working bytes. The exact
 fetch receipt/streams are under`preparation/`; no existing-cache assumption is used.
 
-Final repository static checks are pending at this evidence checkpoint.
+On later clean evidence checkpoint`e72c4bcb877fcb314a4e6d2037fb97ead5fc05b1`,
+`make doctor verify catalogue-check reproduce` and all ten focused native
+controls passed (five commands,38.653seconds). All10,864 physical file identities
+and modes, seven actual clean child pins,103 provider payloads, two installed
+manifests, HEAD/tree/status and actual analysis/linker tool identities stayed
+unchanged. `observed/final-static.zip` retains all ten exact raw streams, complete
+before/after maps and the exact final wrapper; its fifteen-entry manifest checks
+every byte. A later evidence-only child retains these receipts without changing
+the seven execution inputs or registered comparison.
+
 The expanded repository suite, hosted CI, captured code/instruction evaluator
 execution, full-node/whole-ELF equivalence and all full-component gates remain
 NOT RUN or unclaimed. Next question: which real callers supply the unsigned
