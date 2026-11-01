@@ -1,0 +1,610 @@
+{
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "source_base_commit": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+  "python_version": "3.14.3",
+  "python_optimization": 1,
+  "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: aarch64-apple-darwin\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+  "coverage": {
+    "cases": 16237,
+    "categories": {
+      "witness": 14,
+      "power_and_truncation_edges": 10854,
+      "subtraction_boundary": 1072,
+      "bypass_and_refusals": 201,
+      "seeded_mixed_inputs": 4096
+    },
+    "result_classes": {
+      "ok": 16015,
+      "missing": 100,
+      "undefined": 122
+    },
+    "bypass_cases": 4617,
+    "witnesses": {
+      "bypass_absent_word_zero": {
+        "row_zero_based": 0,
+        "input": [
+          null,
+          4294967295,
+          1,
+          0
+        ],
+        "expected": "ok\t0"
+      },
+      "bypass_absent_word_nonzero": {
+        "row_zero_based": 1,
+        "input": [
+          null,
+          0,
+          1,
+          4294967295
+        ],
+        "expected": "ok\t256"
+      },
+      "bypass_max_word_zero": {
+        "row_zero_based": 2,
+        "input": [
+          4294967295,
+          4294967295,
+          1,
+          0
+        ],
+        "expected": "ok\t0"
+      },
+      "bypass_max_word_nonzero": {
+        "row_zero_based": 3,
+        "input": [
+          4294967295,
+          0,
+          1,
+          2
+        ],
+        "expected": "ok\t256"
+      },
+      "flag_two_is_main": {
+        "row_zero_based": 4,
+        "input": [
+          0,
+          1000,
+          2,
+          1
+        ],
+        "expected": "ok\t744"
+      },
+      "flag_two_requires_word": {
+        "row_zero_based": 5,
+        "input": [
+          null,
+          0,
+          2,
+          1
+        ],
+        "expected": "missing"
+      },
+      "main_max_undefined_even_without_refinement": {
+        "row_zero_based": 6,
+        "input": [
+          4294967295,
+          8192,
+          0,
+          0
+        ],
+        "expected": "undefined"
+      },
+      "discard_before_right_shift": {
+        "row_zero_based": 7,
+        "input": [
+          16777215,
+          8192,
+          0,
+          1
+        ],
+        "expected": "ok\t2048"
+      },
+      "subtraction_wrap": {
+        "row_zero_based": 8,
+        "input": [
+          255,
+          256,
+          0,
+          2
+        ],
+        "expected": "ok\t4294965248"
+      },
+      "saved_refinement_nonzero_bsr_zero": {
+        "row_zero_based": 9,
+        "input": [
+          0,
+          4096,
+          0,
+          2
+        ],
+        "expected": "ok\t3840"
+      },
+      "saved_refinement_zero_bsr_nonzero": {
+        "row_zero_based": 10,
+        "input": [
+          1,
+          4096,
+          0,
+          0
+        ],
+        "expected": "ok\t3840"
+      },
+      "top_word_logical_shift": {
+        "row_zero_based": 11,
+        "input": [
+          4294967294,
+          12288,
+          0,
+          1
+        ],
+        "expected": "ok\t4351"
+      },
+      "increment_crosses_power": {
+        "row_zero_based": 12,
+        "input": [
+          255,
+          8192,
+          0,
+          0
+        ],
+        "expected": "ok\t6144"
+      },
+      "nonzero_high_refinement": {
+        "row_zero_based": 13,
+        "input": [
+          0,
+          4096,
+          0,
+          2147483648
+        ],
+        "expected": "ok\t3840"
+      }
+    }
+  },
+  "builds": {
+    "opt0-build1": {
+      "cases": 16237,
+      "mismatches": 0,
+      "library_sha256": "58e3df80b715c5c81f2e9b108f2058d5559372057a10591fdb19bc77933dcf15",
+      "client_sha256": "12d464203841247f5cd81834de6b9460fe8adf50557f6b0757dab60328b17111",
+      "output_sha256": "e919209b3d71dd720f7b413a6901b4729ca45addd802e940a11a206b92ed4ae6",
+      "first_mismatches": []
+    },
+    "opt0-build2": {
+      "cases": 16237,
+      "mismatches": 0,
+      "library_sha256": "58e3df80b715c5c81f2e9b108f2058d5559372057a10591fdb19bc77933dcf15",
+      "client_sha256": "12d464203841247f5cd81834de6b9460fe8adf50557f6b0757dab60328b17111",
+      "output_sha256": "e919209b3d71dd720f7b413a6901b4729ca45addd802e940a11a206b92ed4ae6",
+      "first_mismatches": []
+    },
+    "opt3-build1": {
+      "cases": 16237,
+      "mismatches": 0,
+      "library_sha256": "012222fb022dd34b7b25da94fb2090378a7a24fb5c66e5e5c0e95f20c93ac75b",
+      "client_sha256": "614d44be6f1f545bb30a35599356bca47483e9bec74217675c33cfa5ebc39d95",
+      "output_sha256": "e919209b3d71dd720f7b413a6901b4729ca45addd802e940a11a206b92ed4ae6",
+      "first_mismatches": []
+    },
+    "opt3-build2": {
+      "cases": 16237,
+      "mismatches": 0,
+      "library_sha256": "012222fb022dd34b7b25da94fb2090378a7a24fb5c66e5e5c0e95f20c93ac75b",
+      "client_sha256": "614d44be6f1f545bb30a35599356bca47483e9bec74217675c33cfa5ebc39d95",
+      "output_sha256": "e919209b3d71dd720f7b413a6901b4729ca45addd802e940a11a206b92ed4ae6",
+      "first_mismatches": []
+    }
+  },
+  "compiled_controls": {
+    "widen_left_shift": {
+      "cases": 16237,
+      "mismatches": 3633,
+      "library_sha256": "109d0a3c5a8af818320751dcf3a2465e7dcb04d87565930f3bf5f023c1ccf826",
+      "client_sha256": "f06934e8a5f6dafe8ceb808e881075bb430a2ed670be20c16f4e2f8cad90e0ed",
+      "output_sha256": "255024d64162e5baeecdf6985d14d4dcd44abb1bb8d8d553ecbcbd69de8b648b",
+      "first_mismatches": [
+        {
+          "row_zero_based": 7,
+          "input": "16777215\t8192\t0\t1",
+          "expected": "ok\t2048",
+          "actual": "ok\t1792"
+        },
+        {
+          "row_zero_based": 11,
+          "input": "4294967294\t12288\t0\t1",
+          "expected": "ok\t4351",
+          "actual": "ok\t3841"
+        },
+        {
+          "row_zero_based": 7397,
+          "input": "16777215\t0\t0\t1",
+          "expected": "ok\t4294961152",
+          "actual": "ok\t4294960896"
+        },
+        {
+          "row_zero_based": 7398,
+          "input": "16777215\t0\t0\t2",
+          "expected": "ok\t4294961152",
+          "actual": "ok\t4294960896"
+        },
+        {
+          "row_zero_based": 7399,
+          "input": "16777215\t0\t0\t4294967295",
+          "expected": "ok\t4294961152",
+          "actual": "ok\t4294960896"
+        }
+      ],
+      "source_change": {
+        "before": "incremented.wrapping_shl(8) >> rank",
+        "after": "(((incremented as u64) << 8) >> rank) as u32"
+      },
+      "source_sha256": "48abfae8a807d3f92e8ec553b36a9215feacb69f4b736661ccc63b572eb8b89e"
+    },
+    "nonzero_bypass_flag": {
+      "cases": 16237,
+      "mismatches": 5826,
+      "library_sha256": "e936e54ed4ee4797bfaec61d266dae39c8dd5d85aef6a5f13287001484bddb59",
+      "client_sha256": "359e472a8b80a9da88314061388fac46029f6b2c5d73469129a04c7ed8be0c6d",
+      "output_sha256": "90baa02da38571897a16a5d86fe15dfe3855d709f7aead5d8ae9a75706f52c57",
+      "first_mismatches": [
+        {
+          "row_zero_based": 4,
+          "input": "0\t1000\t2\t1",
+          "expected": "ok\t744",
+          "actual": "ok\t256"
+        },
+        {
+          "row_zero_based": 5,
+          "input": "-\t0\t2\t1",
+          "expected": "missing",
+          "actual": "ok\t256"
+        },
+        {
+          "row_zero_based": 23,
+          "input": "0\t0\t2\t1",
+          "expected": "ok\t4294967040",
+          "actual": "ok\t256"
+        },
+        {
+          "row_zero_based": 24,
+          "input": "0\t0\t2\t2",
+          "expected": "ok\t4294967040",
+          "actual": "ok\t256"
+        },
+        {
+          "row_zero_based": 25,
+          "input": "0\t0\t2\t4294967295",
+          "expected": "ok\t4294967040",
+          "actual": "ok\t256"
+        }
+      ],
+      "source_change": {
+        "before": "if flag == 1 {",
+        "after": "if flag != 0 {"
+      },
+      "source_sha256": "72eae102d73b839aa242b2d6150ebe8557f4f8cb9565d5af2f3c4fb2b2e5a7db"
+    },
+    "exclude_max_before_bypass": {
+      "cases": 16237,
+      "mismatches": 30,
+      "library_sha256": "017e18c0c88c2e016002d44a59b941412de419bc47e8a9377a5b3189ebd1ceba",
+      "client_sha256": "32b146f97afebb39ec89df67c4c6955157e5823d9c882a1bb283f4989085b840",
+      "output_sha256": "ea5178dac4e4d84458df867db435af9379d6a54fd2b0fdee3824901eba7903d4",
+      "first_mismatches": [
+        {
+          "row_zero_based": 2,
+          "input": "4294967295\t4294967295\t1\t0",
+          "expected": "ok\t0",
+          "actual": "undefined"
+        },
+        {
+          "row_zero_based": 3,
+          "input": "4294967295\t0\t1\t2",
+          "expected": "ok\t256",
+          "actual": "undefined"
+        },
+        {
+          "row_zero_based": 11887,
+          "input": "4294967295\t0\t1\t0",
+          "expected": "ok\t0",
+          "actual": "undefined"
+        },
+        {
+          "row_zero_based": 11888,
+          "input": "4294967295\t0\t1\t1",
+          "expected": "ok\t256",
+          "actual": "undefined"
+        },
+        {
+          "row_zero_based": 11889,
+          "input": "4294967295\t0\t1\t4294967295",
+          "expected": "ok\t256",
+          "actual": "undefined"
+        }
+      ],
+      "source_change": {
+        "before": "if flag == 1 {",
+        "after": "if word == Some(u32::MAX) { return Err(Refusal::UndefinedBitScan); }\n    if flag == 1 {"
+      },
+      "source_sha256": "5f41ce06ea2c2e8615f09de6631b33e5cea02038d2ff97541ea7bed21ae85091"
+    },
+    "require_word_before_bypass": {
+      "cases": 16237,
+      "mismatches": 20,
+      "library_sha256": "798d4fc33abe790dd0e84697a5bb3dd64d6ebc3acc89c42c013d41a36f1fa5b5",
+      "client_sha256": "4766f39381861312293c4a02496eb72f4f6b86f294a1b4333a3366c2e8e67f61",
+      "output_sha256": "5706f69f239c7001e433a99c02a279403acaeaf1ae8002f9ad5dcb494e92c32b",
+      "first_mismatches": [
+        {
+          "row_zero_based": 0,
+          "input": "-\t4294967295\t1\t0",
+          "expected": "ok\t0",
+          "actual": "missing"
+        },
+        {
+          "row_zero_based": 1,
+          "input": "-\t0\t1\t4294967295",
+          "expected": "ok\t256",
+          "actual": "missing"
+        },
+        {
+          "row_zero_based": 11945,
+          "input": "-\t0\t1\t0",
+          "expected": "ok\t0",
+          "actual": "missing"
+        },
+        {
+          "row_zero_based": 11946,
+          "input": "-\t0\t1\t1",
+          "expected": "ok\t256",
+          "actual": "missing"
+        },
+        {
+          "row_zero_based": 11947,
+          "input": "-\t0\t1\t2",
+          "expected": "ok\t256",
+          "actual": "missing"
+        }
+      ],
+      "source_change": {
+        "before": "if flag == 1 {",
+        "after": "if word.is_none() { return Err(Refusal::MissingWord); }\n    if flag == 1 {"
+      },
+      "source_sha256": "8592c658074d022cbe2864c76a89b7f89a27586d6a0c40c4c7832e79183d69b3"
+    },
+    "omit_increment": {
+      "cases": 16237,
+      "mismatches": 3250,
+      "library_sha256": "d3131a598da9c5de720972eb5a9b6c7962f178155bfb3bac0f9a9a463694b0a0",
+      "client_sha256": "538ab6a0e67ec7a2ef61c51fc5ec72da5deed6b4d5067ed39df3f94f835e99cd",
+      "output_sha256": "46bcc9fb7b9bef5c3acd5711e0dde67791308b8bd3a383fb44f83221e74d6076",
+      "first_mismatches": [
+        {
+          "row_zero_based": 4,
+          "input": "0\t1000\t2\t1",
+          "expected": "ok\t744",
+          "actual": "undefined"
+        },
+        {
+          "row_zero_based": 6,
+          "input": "4294967295\t8192\t0\t0",
+          "expected": "undefined",
+          "actual": "ok\t256"
+        },
+        {
+          "row_zero_based": 7,
+          "input": "16777215\t8192\t0\t1",
+          "expected": "ok\t2048",
+          "actual": "ok\t1793"
+        },
+        {
+          "row_zero_based": 8,
+          "input": "255\t256\t0\t2",
+          "expected": "ok\t4294965248",
+          "actual": "ok\t4294965250"
+        },
+        {
+          "row_zero_based": 9,
+          "input": "0\t4096\t0\t2",
+          "expected": "ok\t3840",
+          "actual": "undefined"
+        }
+      ],
+      "source_change": {
+        "before": "word.wrapping_add(1)",
+        "after": "word"
+      },
+      "source_sha256": "e083e8da0994f0a3572468d4aa66fb54794860e0114d6f0ecd007726381f01b6"
+    },
+    "saturating_subtraction": {
+      "cases": 16237,
+      "mismatches": 4660,
+      "library_sha256": "9acde5108cf0bbcf8cf06f9c2c3c8ea8fe3305086dc797144ea29cd40478eb6d",
+      "client_sha256": "54bca0c4deb38212ac85dc4fa425a80221522b432543f9ae7671c035aac58a11",
+      "output_sha256": "b62f66ed77bea601fb2e83042ae50aafcdf8c86688f81e55c09badd17c867155",
+      "first_mismatches": [
+        {
+          "row_zero_based": 8,
+          "input": "255\t256\t0\t2",
+          "expected": "ok\t4294965248",
+          "actual": "ok\t0"
+        },
+        {
+          "row_zero_based": 15,
+          "input": "0\t0\t0\t1",
+          "expected": "ok\t4294967040",
+          "actual": "ok\t0"
+        },
+        {
+          "row_zero_based": 16,
+          "input": "0\t0\t0\t2",
+          "expected": "ok\t4294967040",
+          "actual": "ok\t0"
+        },
+        {
+          "row_zero_based": 17,
+          "input": "0\t0\t0\t4294967295",
+          "expected": "ok\t4294967040",
+          "actual": "ok\t0"
+        },
+        {
+          "row_zero_based": 23,
+          "input": "0\t0\t2\t1",
+          "expected": "ok\t4294967040",
+          "actual": "ok\t0"
+        }
+      ],
+      "source_change": {
+        "before": "value.wrapping_sub(base)",
+        "after": "value.saturating_sub(base)"
+      },
+      "source_sha256": "2e42e8cf5512150c43ac39e80a57edbbd5b4b36d58a28573c1416bf0cb56631b"
+    },
+    "arithmetic_right_shift": {
+      "cases": 16237,
+      "mismatches": 1487,
+      "library_sha256": "841f55f98e7f42c2cd3eda95595bb9821a68caf7eb612b85a59160c102c568ae",
+      "client_sha256": "aeb4507b1e79a4247373e56362c7d6d1e995044e58bd93cc25857af6b98da795",
+      "output_sha256": "366fbfe4afcad33e9326e66836f0a1fb359afd415a052cb16de6d9e085f5c1e3",
+      "first_mismatches": [
+        {
+          "row_zero_based": 11,
+          "input": "4294967294\t12288\t0\t1",
+          "expected": "ok\t4351",
+          "actual": "ok\t4353"
+        },
+        {
+          "row_zero_based": 7067,
+          "input": "8388607\t0\t0\t1",
+          "expected": "ok\t4294961152",
+          "actual": "ok\t4294961664"
+        },
+        {
+          "row_zero_based": 7068,
+          "input": "8388607\t0\t0\t2",
+          "expected": "ok\t4294961152",
+          "actual": "ok\t4294961664"
+        },
+        {
+          "row_zero_based": 7069,
+          "input": "8388607\t0\t0\t4294967295",
+          "expected": "ok\t4294961152",
+          "actual": "ok\t4294961664"
+        },
+        {
+          "row_zero_based": 7075,
+          "input": "8388607\t0\t2\t1",
+          "expected": "ok\t4294961152",
+          "actual": "ok\t4294961664"
+        }
+      ],
+      "source_change": {
+        "before": "incremented.wrapping_shl(8) >> rank",
+        "after": "((incremented.wrapping_shl(8) as i32) >> rank) as u32"
+      },
+      "source_sha256": "ed8fe06a25e2b07971b27a6fc981f22591b31a583eb84ef6b8ac455b52eadbde"
+    },
+    "refinement_equal_one": {
+      "cases": 16237,
+      "mismatches": 5582,
+      "library_sha256": "fa8ab1d2485b4d3bf07e38740c8f44d65f4e7ebc1bece00b614709c0c7d8f698",
+      "client_sha256": "e04ccad75737954b5d2dbbe3611999d013e1d9be38d2fbd46ec595646481462f",
+      "output_sha256": "db001b58eee19da34a732e33cd33a7a9d0f255a7c886bd1b1c694d708f4b8d4c",
+      "first_mismatches": [
+        {
+          "row_zero_based": 1,
+          "input": "-\t0\t1\t4294967295",
+          "expected": "ok\t256",
+          "actual": "ok\t0"
+        },
+        {
+          "row_zero_based": 3,
+          "input": "4294967295\t0\t1\t2",
+          "expected": "ok\t256",
+          "actual": "ok\t0"
+        },
+        {
+          "row_zero_based": 8,
+          "input": "255\t256\t0\t2",
+          "expected": "ok\t4294965248",
+          "actual": "ok\t4294965504"
+        },
+        {
+          "row_zero_based": 9,
+          "input": "0\t4096\t0\t2",
+          "expected": "ok\t3840",
+          "actual": "ok\t4096"
+        },
+        {
+          "row_zero_based": 13,
+          "input": "0\t4096\t0\t2147483648",
+          "expected": "ok\t3840",
+          "actual": "ok\t4096"
+        }
+      ],
+      "source_change": {
+        "before": "refinement != 0",
+        "after": "refinement == 1"
+      },
+      "source_sha256": "65593445f411f42b9c1be4ad304fee582880d7fc958a8515334a5c1107e66059"
+    },
+    "overwritten_refinement": {
+      "cases": 16237,
+      "mismatches": 2489,
+      "library_sha256": "d371252c051587ac692b12fa19150b891b33a5d1295e984f7d0b5b8b09be230c",
+      "client_sha256": "712bde1b8119284c8c6e337e1a6795d88212fe60654f48abb88d518f7c88c8ba",
+      "output_sha256": "f24fbb6088c9cb2db5aa02650c055a09c43eaba185b4c9216589a873dcd05c94",
+      "first_mismatches": [
+        {
+          "row_zero_based": 4,
+          "input": "0\t1000\t2\t1",
+          "expected": "ok\t744",
+          "actual": "ok\t1000"
+        },
+        {
+          "row_zero_based": 9,
+          "input": "0\t4096\t0\t2",
+          "expected": "ok\t3840",
+          "actual": "ok\t4096"
+        },
+        {
+          "row_zero_based": 10,
+          "input": "1\t4096\t0\t0",
+          "expected": "ok\t3840",
+          "actual": "ok\t3584"
+        },
+        {
+          "row_zero_based": 12,
+          "input": "255\t8192\t0\t0",
+          "expected": "ok\t6144",
+          "actual": "ok\t5888"
+        },
+        {
+          "row_zero_based": 13,
+          "input": "0\t4096\t0\t2147483648",
+          "expected": "ok\t3840",
+          "actual": "ok\t4096"
+        }
+      ],
+      "source_change": {
+        "before": "if refinement != 0 {\n        base",
+        "after": "if rank != 0 {\n        base"
+      },
+      "source_sha256": "41dbff55fee98f3576fe77182504630276cc12c9aa3de6c9dacaf1b0a456e1b1"
+    }
+  },
+  "corrupted_expectation_mismatches": 1,
+  "source_sha256": {
+    "lib.rs": "9e1c4c70ffbc8a89a3d2ac07cba8004255db5799d44655b42bca6a43c356aed2",
+    "input_only_driver.rs": "e7aefa72be548ea21ba869ab9356b2893dd2f3980a121ea22c0ff37fef46d4c7"
+  },
+  "oracle_freeze_sha256": "e23c3da3395bcd480312fa341303af15aa69a6cef2b2e88a424a6ca215ed95cb",
+  "validator_sha256": "5fdcc70e5c22a57c1ba74f0ac6e4894754412a4abf27032c22ba171a4dfcf06e",
+  "static_target_rechecked": true,
+  "captured_binary_executed": false,
+  "original_abi_reproduced": false,
+  "target_code_byte_comparison": "not measured",
+  "progress_gate_requested": false
+}
