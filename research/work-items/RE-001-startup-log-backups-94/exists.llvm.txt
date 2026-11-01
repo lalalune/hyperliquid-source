@@ -1,0 +1,69 @@
+# llvm: full owning FDE 0x144a2f0..0x144a3dc decoded; retained 0x144a2f0..0x144a3dc
+ 144a2f0: 41 57                        	push	r15
+ 144a2f2: 41 56                        	push	r14
+ 144a2f4: 41 54                        	push	r12
+ 144a2f6: 53                           	push	rbx
+ 144a2f7: 48 81 ec b8 00 00 00         	sub	rsp, 0xb8
+ 144a2fe: 48 89 f2                     	mov	rdx, rsi
+ 144a301: 48 89 fe                     	mov	rsi, rdi
+ 144a304: 48 8d 7c 24 08               	lea	rdi, [rsp + 0x8]
+ 144a309: ff 15 09 53 32 04            	call	qword ptr [rip + 0x4325309] # 0x576f618
+ 144a30f: 4c 8b 7c 24 08               	mov	r15, qword ptr [rsp + 0x8]
+ 144a314: 49 83 ff 02                  	cmp	r15, 0x2
+ 144a318: 75 65                        	jne	0x144a37f <.text+0x1066ff>
+ 144a31a: 48 8b 44 24 10               	mov	rax, qword ptr [rsp + 0x10]
+ 144a31f: 89 c1                        	mov	ecx, eax
+ 144a321: 83 e1 03                     	and	ecx, 0x3
+ 144a324: 83 f9 01                     	cmp	ecx, 0x1
+ 144a327: 75 56                        	jne	0x144a37f <.text+0x1066ff>
+ 144a329: 48 8d 58 ff                  	lea	rbx, [rax - 0x1]
+ 144a32d: 4c 8b 70 ff                  	mov	r14, qword ptr [rax - 0x1]
+ 144a331: 4c 8b 60 07                  	mov	r12, qword ptr [rax + 0x7]
+ 144a335: 49 8b 04 24                  	mov	rax, qword ptr [r12]
+ 144a339: 48 85 c0                     	test	rax, rax
+ 144a33c: 74 05                        	je	0x144a343 <.text+0x1066c3>
+ 144a33e: 4c 89 f7                     	mov	rdi, r14
+ 144a341: ff d0                        	call	rax
+ 144a343: 49 8b 74 24 08               	mov	rsi, qword ptr [r12 + 0x8]
+ 144a348: 48 85 f6                     	test	rsi, rsi
+ 144a34b: 74 22                        	je	0x144a36f <.text+0x1066ef>
+ 144a34d: 49 8b 44 24 10               	mov	rax, qword ptr [r12 + 0x10]
+ 144a352: f3 48 0f bc c8               	tzcnt	rcx, rax
+ 144a357: 31 d2                        	xor	edx, edx
+ 144a359: 48 39 f0                     	cmp	rax, rsi
+ 144a35c: 0f 47 d1                     	cmova	edx, ecx
+ 144a35f: 48 83 f8 11                  	cmp	rax, 0x11
+ 144a363: 0f 43 d1                     	cmovae	edx, ecx
+ 144a366: 4c 89 f7                     	mov	rdi, r14
+ 144a369: ff 15 a1 3c 32 04            	call	qword ptr [rip + 0x4323ca1] # 0x576e010
+ 144a36f: be 18 00 00 00               	mov	esi, 0x18
+ 144a374: 48 89 df                     	mov	rdi, rbx
+ 144a377: 31 d2                        	xor	edx, edx
+ 144a379: ff 15 91 3c 32 04            	call	qword ptr [rip + 0x4323c91] # 0x576e010
+ 144a37f: 41 83 ff 02                  	cmp	r15d, 0x2
+ 144a383: 0f 95 c0                     	setne	al
+ 144a386: 48 81 c4 b8 00 00 00         	add	rsp, 0xb8
+ 144a38d: 5b                           	pop	rbx
+ 144a38e: 41 5c                        	pop	r12
+ 144a390: 41 5e                        	pop	r14
+ 144a392: 41 5f                        	pop	r15
+ 144a394: c3                           	ret
+ 144a395: 49 89 c7                     	mov	r15, rax
+ 144a398: 49 8b 74 24 08               	mov	rsi, qword ptr [r12 + 0x8]
+ 144a39d: 48 85 f6                     	test	rsi, rsi
+ 144a3a0: 74 22                        	je	0x144a3c4 <.text+0x106744>
+ 144a3a2: 49 8b 44 24 10               	mov	rax, qword ptr [r12 + 0x10]
+ 144a3a7: f3 48 0f bc c8               	tzcnt	rcx, rax
+ 144a3ac: 31 d2                        	xor	edx, edx
+ 144a3ae: 48 39 f0                     	cmp	rax, rsi
+ 144a3b1: 0f 47 d1                     	cmova	edx, ecx
+ 144a3b4: 48 83 f8 11                  	cmp	rax, 0x11
+ 144a3b8: 0f 43 d1                     	cmovae	edx, ecx
+ 144a3bb: 4c 89 f7                     	mov	rdi, r14
+ 144a3be: ff 15 4c 3c 32 04            	call	qword ptr [rip + 0x4323c4c] # 0x576e010
+ 144a3c4: be 18 00 00 00               	mov	esi, 0x18
+ 144a3c9: 48 89 df                     	mov	rdi, rbx
+ 144a3cc: 31 d2                        	xor	edx, edx
+ 144a3ce: ff 15 3c 3c 32 04            	call	qword ptr [rip + 0x4323c3c] # 0x576e010
+ 144a3d4: 4c 89 ff                     	mov	rdi, r15
+ 144a3d7: e8 34 5d 21 04               	call	0x5660110 <_Unwind_Resume@plt>
