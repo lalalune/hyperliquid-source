@@ -142,8 +142,16 @@ An independent private replay also matched both existing clients:80 novel,
 per profile. These were sealed after author source creation and before that
 reviewer read the Rust. Only the public summary is included; private inputs
 and answers remain private. No new compiler or captured execution was involved.
-The final required four static targets are recorded separately after the
-evidence checkpoint; the already-passing twelve native methods need no repeat.
+Final`make doctor`,`make verify`,`make catalogue-check` and`make reproduce`
+all pass on clean C2`7e9b221170f05f4aa307252b7efb905acf2e0b10`.
+Their measured child times sum to38.371 seconds. Complete before/after maps
+match10,878 actual tracked physical inputs, seven clean pinned children,
+103 provider payloads, two installed manifests and all actual compiler/Cargo/
+host tools. The four commands, all eight raw streams, maps and exact wrapper
+are retained in`observed/final-static.zip`. No compiler or the twelve already
+passing native methods were repeated. All eleven source/driver/fixture/
+manifest/qualifier/read-only-helper input hashes remain unchanged from C1;
+later changes only retain measured evidence and its documentation.
 
 ## Reproduce and limits
 
