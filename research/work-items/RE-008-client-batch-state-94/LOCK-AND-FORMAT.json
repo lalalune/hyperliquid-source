@@ -1,0 +1,117 @@
+{
+  "stage": "source authoring; real Cargo-generated lock and parser-only rustfmt; no compilation",
+  "toolchain_pin_sha256": "63632a4aca821721b6646633c8b5bc48dca49295eb3ce23a8a66a4f470483f4f",
+  "payload_files": 97,
+  "old_lock": {
+    "bytes": 170,
+    "sha256": "042b3b2b74d1847f74ac24b78529ec1451d5849536895b653a94c3bd20268285"
+  },
+  "new_lock": {
+    "bytes": 279,
+    "sha256": "350e4eb455030c31e25851a0427e7308c8d4eb17d99f955fc049425595984562"
+  },
+  "commands": [
+    {
+      "label": "actual offline Cargo lock generation",
+      "argv": [
+        "<TOOLCHAIN>/bin/cargo",
+        "generate-lockfile",
+        "--offline"
+      ],
+      "cwd": "<LOCK>/src/node94-consensus-admission",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "     Locking 1 package to latest compatible version\n"
+    },
+    {
+      "label": "locked graph metadata",
+      "argv": [
+        "<TOOLCHAIN>/bin/cargo",
+        "metadata",
+        "--offline",
+        "--locked",
+        "--format-version",
+        "1"
+      ],
+      "cwd": "<LOCK>/src/node94-consensus-admission",
+      "exit_code": 0,
+      "stdout": "{\"packages\":[{\"name\":\"node94-action-signable\",\"version\":\"0.1.0\",\"id\":\"path+file://<LOCK>/src/node94-action-signable#0.1.0\",\"license\":\"MIT\",\"license_file\":null,\"description\":\"Evidence-bounded node #94 action-signable preimage and payload reconstruction\",\"source\":null,\"dependencies\":[],\"targets\":[{\"kind\":[\"lib\"],\"crate_types\":[\"lib\"],\"name\":\"node94_action_signable\",\"src_path\":\"<LOCK>/src/node94-action-signable/src/lib.rs\",\"edition\":\"2024\",\"doc\":true,\"doctest\":true,\"test\":true}],\"features\":{},\"manifest_path\":\"<LOCK>/src/node94-action-signable/Cargo.toml\",\"metadata\":null,\"publish\":[],\"authors\":[],\"categories\":[],\"keywords\":[],\"readme\":\"README.md\",\"repository\":null,\"homepage\":null,\"documentation\":null,\"edition\":\"2024\",\"links\":null,\"default_run\":null,\"rust_version\":\"1.94.1\"},{\"name\":\"node94-consensus-admission\",\"version\":\"0.1.0\",\"id\":\"path+file://<LOCK>/src/node94-consensus-admission#0.1.0\",\"license\":\"MIT\",\"license_file\":null,\"description\":null,\"source\":null,\"dependencies\":[{\"name\":\"node94-action-signable\",\"source\":null,\"req\":\"*\",\"kind\":null,\"rename\":null,\"optional\":false,\"uses_default_features\":true,\"features\":[],\"target\":null,\"registry\":null,\"path\":\"<LOCK>/src/node94-action-signable\"}],\"targets\":[{\"kind\":[\"lib\"],\"crate_types\":[\"lib\"],\"name\":\"node94_consensus_admission\",\"src_path\":\"<LOCK>/src/node94-consensus-admission/src/lib.rs\",\"edition\":\"2021\",\"doc\":true,\"doctest\":true,\"test\":true},{\"kind\":[\"test\"],\"crate_types\":[\"bin\"],\"name\":\"client_batch\",\"src_path\":\"<LOCK>/src/node94-consensus-admission/tests/client_batch.rs\",\"edition\":\"2021\",\"doc\":false,\"doctest\":false,\"test\":true},{\"kind\":[\"test\"],\"crate_types\":[\"bin\"],\"name\":\"evidence_contract\",\"src_path\":\"<LOCK>/src/node94-consensus-admission/tests/evidence_contract.rs\",\"edition\":\"2021\",\"doc\":false,\"doctest\":false,\"test\":true}],\"features\":{},\"manifest_path\":\"<LOCK>/src/node94-consensus-admission/Cargo.toml\",\"metadata\":null,\"publish\":[],\"authors\":[],\"categories\":[],\"keywords\":[],\"readme\":\"README.md\",\"repository\":null,\"homepage\":null,\"documentation\":null,\"edition\":\"2021\",\"links\":null,\"default_run\":null,\"rust_version\":null}],\"workspace_members\":[\"path+file://<LOCK>/src/node94-consensus-admission#0.1.0\"],\"workspace_default_members\":[\"path+file://<LOCK>/src/node94-consensus-admission#0.1.0\"],\"resolve\":{\"nodes\":[{\"id\":\"path+file://<LOCK>/src/node94-action-signable#0.1.0\",\"dependencies\":[],\"deps\":[],\"features\":[]},{\"id\":\"path+file://<LOCK>/src/node94-consensus-admission#0.1.0\",\"dependencies\":[\"path+file://<LOCK>/src/node94-action-signable#0.1.0\"],\"deps\":[{\"name\":\"node94_action_signable\",\"pkg\":\"path+file://<LOCK>/src/node94-action-signable#0.1.0\",\"dep_kinds\":[{\"kind\":null,\"target\":null}]}],\"features\":[]}],\"root\":\"path+file://<LOCK>/src/node94-consensus-admission#0.1.0\"},\"target_directory\":\"<LOCK>/src/node94-consensus-admission/target\",\"build_directory\":\"<LOCK>/src/node94-consensus-admission/target\",\"version\":1,\"workspace_root\":\"<LOCK>/src/node94-consensus-admission\",\"metadata\":null}\n",
+      "stderr": ""
+    },
+    {
+      "label": "rustfmt authored files",
+      "argv": [
+        "<TOOLCHAIN>/bin/rustfmt",
+        "--edition",
+        "2021",
+        "src/node94-consensus-admission/src/client_batch.rs",
+        "src/node94-consensus-admission/tests/client_batch.rs",
+        "research/work-items/RE-008-client-batch-state-94/driver.rs"
+      ],
+      "cwd": "<SOURCE>",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "ancestor_config_checks": [
+    {
+      "form": "lexical",
+      "path": "<LOCK-LEXICAL>/.cargo/config"
+    },
+    {
+      "form": "lexical",
+      "path": "<LOCK-LEXICAL>/.cargo/config.toml"
+    },
+    {
+      "form": "lexical",
+      "path": "/tmp/.cargo/config"
+    },
+    {
+      "form": "lexical",
+      "path": "/tmp/.cargo/config.toml"
+    },
+    {
+      "form": "lexical",
+      "path": "/.cargo/config"
+    },
+    {
+      "form": "lexical",
+      "path": "/.cargo/config.toml"
+    },
+    {
+      "form": "canonical",
+      "path": "<LOCK>/.cargo/config"
+    },
+    {
+      "form": "canonical",
+      "path": "<LOCK>/.cargo/config.toml"
+    },
+    {
+      "form": "canonical",
+      "path": "/private/tmp/.cargo/config"
+    },
+    {
+      "form": "canonical",
+      "path": "/private/tmp/.cargo/config.toml"
+    },
+    {
+      "form": "canonical",
+      "path": "/private/.cargo/config"
+    },
+    {
+      "form": "canonical",
+      "path": "/private/.cargo/config.toml"
+    },
+    {
+      "form": "canonical",
+      "path": "/.cargo/config"
+    },
+    {
+      "form": "canonical",
+      "path": "/.cargo/config.toml"
+    }
+  ],
+  "metadata_normalization": "Temporary lock-generation paths replaced with <LOCK>; no comparison/value stream exists at this stage.",
+  "compiled_rust": false
+}

@@ -1,0 +1,633 @@
+{
+  "target": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "functions": 16,
+  "bytes": 10566,
+  "instructions": 2320,
+  "instruction_obligations": 1451,
+  "data_obligations": 1,
+  "cases": 221,
+  "deterministic_trees": 2,
+  "negative_controls": 76,
+  "freeze_sha256": null,
+  "controls": [
+    {
+      "name": "changed byte under SHA admission",
+      "rejection": "target SHA-256"
+    },
+    {
+      "name": "truncated target under size admission",
+      "rejection": "target size"
+    },
+    {
+      "name": "scope wrong target",
+      "rejection": "scope target"
+    },
+    {
+      "name": "scope missing full FDE",
+      "rejection": "scope start census/order"
+    },
+    {
+      "name": "scope wrong range denominator",
+      "rejection": "scope denominator"
+    },
+    {
+      "name": "scope shortened full FDE",
+      "rejection": "range size"
+    },
+    {
+      "name": "missing decoded function",
+      "rejection": "decoded function census"
+    },
+    {
+      "name": "LLVM byte partition disagreement",
+      "rejection": "row raw bytes at 0x42c9930"
+    },
+    {
+      "name": "proof offset",
+      "rejection": "obligation bytes: P-batch/full body at 0x45476fe",
+      "va": "0x45476fe",
+      "file_offset": 72640254,
+      "before": "4939bd08010000",
+      "after": "4939bd09010000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "proof last comparison",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547708",
+      "va": "0x4547708",
+      "file_offset": 72640264,
+      "before": "4939d1",
+      "after": "4939d0",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "proof guard",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547712",
+      "va": "0x4547712",
+      "file_offset": 72640274,
+      "before": "0f8464030000",
+      "after": "0f8564030000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "QC round offset",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547718",
+      "va": "0x4547718",
+      "file_offset": 72640280,
+      "before": "498b4d50",
+      "after": "498b4d51",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "QC round comparison",
+      "rejection": "obligation bytes: P-batch/full body at 0x454771c",
+      "va": "0x454771c",
+      "file_offset": 72640284,
+      "before": "4c39f9",
+      "after": "4c39f8",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "first hash skip",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547727",
+      "va": "0x4547727",
+      "file_offset": 72640295,
+      "before": "7436",
+      "after": "7536",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "parent hash second half",
+      "rejection": "obligation bytes: P-batch/full body at 0x454772f",
+      "va": "0x454772f",
+      "file_offset": 72640303,
+      "before": "f3410f6f4d68",
+      "after": "f3410f6f4d69",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "parent full equality mask",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547754",
+      "va": "0x4547754",
+      "file_offset": 72640340,
+      "before": "3dffff0000",
+      "after": "3dfeff0000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "block verifier pointer",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547764",
+      "va": "0x4547764",
+      "file_offset": 72640356,
+      "before": "498d7510",
+      "after": "498d7511",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "block verifier callee",
+      "rejection": "direct call target",
+      "va": "0x4547773",
+      "file_offset": 72640371,
+      "before": "e8883f0000",
+      "after": "e8893f0000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "block result guard",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547780",
+      "va": "0x4547780",
+      "file_offset": 72640384,
+      "before": "0f8514030000",
+      "after": "0f8414030000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "tx count pointer",
+      "rejection": "obligation bytes: P-batch/full body at 0x45477a1",
+      "va": "0x45477a1",
+      "file_offset": 72640417,
+      "before": "488b4020",
+      "after": "488b4021",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "tx row stride",
+      "rejection": "native instruction denominator",
+      "va": "0x45477a9",
+      "file_offset": 72640425,
+      "before": "4c8d3c80",
+      "after": "4c8d3d80",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "tx byte Arc offset",
+      "rejection": "obligation bytes: P-batch/full body at 0x45477d4",
+      "va": "0x45477d4",
+      "file_offset": 72640468,
+      "before": "498b441e20",
+      "after": "498b441e21",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "hash rate",
+      "rejection": "obligation bytes: P-batch/full body at 0x454784e",
+      "va": "0x454784e",
+      "file_offset": 72640590,
+      "before": "48c784246002000088000000",
+      "after": "48c784246002000089000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "hash delimiter",
+      "rejection": "obligation bytes: P-batch/full body at 0x454785a",
+      "va": "0x454785a",
+      "file_offset": 72640602,
+      "before": "66c78424680200000100",
+      "after": "66c78424680200000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "tx bytes length offset",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547868",
+      "va": "0x4547868",
+      "file_offset": 72640616,
+      "before": "488b5020",
+      "after": "488b5021",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "hash result length",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547886",
+      "va": "0x4547886",
+      "file_offset": 72640646,
+      "before": "ba20000000",
+      "after": "ba21000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "tx row advance",
+      "rejection": "obligation bytes: P-batch/full body at 0x45478c8",
+      "va": "0x45478c8",
+      "file_offset": 72640712,
+      "before": "4883c328",
+      "after": "4883c329",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "tx count guard",
+      "rejection": "obligation bytes: P-batch/full body at 0x45478ff",
+      "va": "0x45478ff",
+      "file_offset": 72640767,
+      "before": "0f8556010000",
+      "after": "0f8456010000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "tx block list pointer",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547909",
+      "va": "0x4547909",
+      "file_offset": 72640777,
+      "before": "498b5518",
+      "after": "498b5519",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "time word0",
+      "rejection": "obligation bytes: P-batch/full body at 0x454797a",
+      "va": "0x454797a",
+      "file_offset": 72640890,
+      "before": "413b85a0000000",
+      "after": "413b85a1000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "time word1",
+      "rejection": "obligation bytes: P-batch/full body at 0x454798b",
+      "va": "0x454798b",
+      "file_offset": 72640907,
+      "before": "413b85a4000000",
+      "after": "413b85a5000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "time word2",
+      "rejection": "obligation bytes: P-batch/full body at 0x454799c",
+      "va": "0x454799c",
+      "file_offset": 72640924,
+      "before": "413b85a8000000",
+      "after": "413b85a9000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "block round load",
+      "rejection": "obligation bytes: P-batch/full body at 0x45479a9",
+      "va": "0x45479a9",
+      "file_offset": 72640937,
+      "before": "4d8bbd98000000",
+      "after": "4d8bbd99000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "block digest selector",
+      "rejection": "obligation bytes: P-batch/full body at 0x45479b0",
+      "va": "0x45479b0",
+      "file_offset": 72640944,
+      "before": "48c784249000000000000000",
+      "after": "48c784249000000001000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "missing proof guard",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547a0f",
+      "va": "0x4547a0f",
+      "file_offset": 72641039,
+      "before": "0f8523010000",
+      "after": "0f8423010000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "child pointer",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547b3b",
+      "va": "0x4547b3b",
+      "file_offset": 72641339,
+      "before": "498d9e08010000",
+      "after": "498d9e09010000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "proof QC pointer",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547b9a",
+      "va": "0x4547b9a",
+      "file_offset": 72641434,
+      "before": "498db600020000",
+      "after": "498db601020000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "child hash upper half",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547bcd",
+      "va": "0x4547bcd",
+      "file_offset": 72641485,
+      "before": "f3410f6f9660010000",
+      "after": "f3410f6f9661010000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "proof hash upper half",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547c45",
+      "va": "0x4547c45",
+      "file_offset": 72641605,
+      "before": "f3410f6f9640020000",
+      "after": "f3410f6f9641020000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "child digest repeat callee",
+      "rejection": "direct call target",
+      "va": "0x4547c8b",
+      "file_offset": 72641675,
+      "before": "e8c0430000",
+      "after": "e8c1430000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "saturation condition",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547cad",
+      "va": "0x4547cad",
+      "file_offset": 72641709,
+      "before": "490f45c7",
+      "after": "490f44c7",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "child round pointer",
+      "rejection": "obligation bytes: P-batch/full body at 0x4547cb1",
+      "va": "0x4547cb1",
+      "file_offset": 72641713,
+      "before": "49398690010000",
+      "after": "49398691010000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "buffer round offset",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x436001e",
+      "va": "0x436001e",
+      "file_offset": 70643742,
+      "before": "483b8e08010000",
+      "after": "483b8e09010000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "buffer round guard",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x4360025",
+      "va": "0x4360025",
+      "file_offset": 70643749,
+      "before": "0f85c7000000",
+      "after": "0f84c7000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "received round store",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x4360035",
+      "va": "0x4360035",
+      "file_offset": 70643765,
+      "before": "48898e08010000",
+      "after": "48898e09010000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "pending append stride",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x4360075",
+      "va": "0x4360075",
+      "file_offset": 70643829,
+      "before": "48c1e005",
+      "after": "48c1e004",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "pending length store",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x4360092",
+      "va": "0x4360092",
+      "file_offset": 70643858,
+      "before": "4d896610",
+      "after": "4d896611",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "proof flush guard",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x4360099",
+      "va": "0x4360099",
+      "file_offset": 70643865,
+      "before": "0f8597000000",
+      "after": "0f8497000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "unconfirmed100 limit",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x436009f",
+      "va": "0x436009f",
+      "file_offset": 70643871,
+      "before": "4983fc64",
+      "after": "4983fc65",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "unconfirmed inclusive boundary",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x43600a3",
+      "va": "0x43600a3",
+      "file_offset": 70643875,
+      "before": "0f866c020000",
+      "after": "0f876c020000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "confirmed start pointer",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x4360141",
+      "va": "0x4360141",
+      "file_offset": 70644033,
+      "before": "498b8e10010000",
+      "after": "498b8e11010000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "batch call target",
+      "rejection": "direct call target",
+      "va": "0x436016b",
+      "file_offset": 70644075,
+      "before": "e820751e00",
+      "after": "e821751e00",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "batch success guard",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x436017c",
+      "va": "0x436017c",
+      "file_offset": 70644092,
+      "before": "0f859f010000",
+      "after": "0f849f010000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "confirmed round store",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x4360198",
+      "va": "0x4360198",
+      "file_offset": 70644120,
+      "before": "49898610010000",
+      "after": "49898611010000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "pending empty length",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x43601b9",
+      "va": "0x43601b9",
+      "file_offset": 70644153,
+      "before": "49c7461000000000",
+      "after": "49c7461001000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "channel closed bit",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x4360250",
+      "va": "0x4360250",
+      "file_offset": 70644304,
+      "before": "a801",
+      "after": "a800",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "queue push callee",
+      "rejection": "direct call target",
+      "va": "0x4360291",
+      "file_offset": 70644369,
+      "before": "e87a787e00",
+      "after": "e87b787e00",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "closed error tag",
+      "rejection": "obligation bytes: P-buffer/full ordinary and exceptional body at 0x4360535",
+      "va": "0x4360535",
+      "file_offset": 70645045,
+      "before": "4983c535",
+      "after": "4983c534",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "empty stake root offset",
+      "rejection": "obligation bytes: P-witness/stake lookup at 0x42c9937",
+      "va": "0x42c9937",
+      "file_offset": 70027575,
+      "before": "488b7708",
+      "after": "488b7709",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "empty stake branch",
+      "rejection": "obligation bytes: P-witness/stake lookup at 0x42c993e",
+      "va": "0x42c993e",
+      "file_offset": 70027582,
+      "before": "0f84d4000000",
+      "after": "0f85d4000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "missing stake result tag",
+      "rejection": "obligation bytes: P-auth/timed full block pointer at 0x454b79f",
+      "va": "0x454b79f",
+      "file_offset": 72656799,
+      "before": "49bf2800000000000080",
+      "after": "49bf2900000000000080",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "signed block digest pointer",
+      "rejection": "obligation bytes: P-auth/timed full block pointer at 0x454b7df",
+      "va": "0x454b7df",
+      "file_offset": 72656863,
+      "before": "4c89642438",
+      "after": "4c89642439",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "queue slot shift",
+      "rejection": "obligation bytes: P-channel/slot publication at 0x4b47c91",
+      "va": "0x4b47c91",
+      "file_offset": 78933137,
+      "before": "c1e005",
+      "after": "c1e004",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "queue second copy offset",
+      "rejection": "obligation bytes: P-channel/slot publication at 0x4b47c9b",
+      "va": "0x4b47c9b",
+      "file_offset": 78933147,
+      "before": "0f114c0210",
+      "after": "0f114c0211",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "queue publish pointer",
+      "rejection": "obligation bytes: P-channel/slot publication at 0x4b47caf",
+      "va": "0x4b47caf",
+      "file_offset": 78933167,
+      "before": "f04809b210040000",
+      "after": "f04809b211040000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "hash tail offset",
+      "rejection": "obligation bytes: P-hash/update at 0x4f59db4",
+      "va": "0x4f59db4",
+      "file_offset": 83201460,
+      "before": "4c89bbc8000000",
+      "after": "4c89bbc9000000",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "hash high padding bit",
+      "rejection": "obligation bytes: P-hash/finalize at 0x4f59f0a",
+      "va": "0x4f59f0a",
+      "file_offset": 83201802,
+      "before": "80743c0880",
+      "after": "80743c0881",
+      "level": "below target/body identity; fresh GNU+LLVM"
+    },
+    {
+      "name": "data P-buffer/too many unconfirmed text",
+      "rejection": "data obligation: P-buffer/too many unconfirmed text",
+      "va": "0x6f13b5",
+      "file_offset": 7279541,
+      "level": "below identity; data obligation"
+    },
+    {
+      "name": "RELATIVE nonzero symbol",
+      "rejection": "RELATIVE requires symbol index zero",
+      "file_offset": 1887712,
+      "level": "below identity; raw ELF relocation parse"
+    },
+    {
+      "name": "RELATIVE wrong kind",
+      "rejection": "bound copy/compare import",
+      "file_offset": 1887712,
+      "level": "below identity; raw ELF relocation parse"
+    },
+    {
+      "name": "RELATIVE wrong callee",
+      "rejection": "call RELA addend",
+      "file_offset": 1887720,
+      "level": "below identity; raw ELF relocation parse"
+    },
+    {
+      "name": "memcpy wrong import symbol",
+      "rejection": "bound copy/compare import",
+      "file_offset": 1919704,
+      "level": "below identity; raw ELF relocation parse"
+    },
+    {
+      "name": "raw FDE extent byte",
+      "rejection": "FDE extent/CIE match",
+      "file_offset": 19054176,
+      "level": "below identity; raw DWARF parse"
+    },
+    {
+      "name": "CFG skips received store",
+      "rejection": "CFG dominance advance before append",
+      "va": "0x436002b",
+      "level": "CFG only; no target/body hash or instruction pins"
+    },
+    {
+      "name": "CFG skips confirmation before send",
+      "rejection": "CFG dominance confirm before queue call",
+      "va": "0x4360191",
+      "level": "CFG only; no target/body hash or instruction pins"
+    },
+    {
+      "name": "data16 hides AX write",
+      "rejection": "unreviewed non-NOP prefix 0x45479c9",
+      "va": "0x45479c9",
+      "level": "below identity; prefixed native write"
+    }
+  ],
+  "scope": "Static parsing/native disassembly and independent value arithmetic only; no captured evaluation."
+}

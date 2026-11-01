@@ -85,3 +85,40 @@ cargo +1.94.1 test --manifest-path src/node94-consensus-admission/Cargo.toml --r
 cargo +1.94.1 clippy --manifest-path src/node94-consensus-admission/Cargo.toml \
   --locked --all-targets -- -D warnings
 ```
+
+## Joined client batches and retained buffer state
+
+`verify_client_batch` and `ClientBlockBuffer` implement the separate bounded
+contract in `research/work-items/RE-008-client-batch-state-94`. A batch checks
+proof placement, QC round/hash links, real baseline block admission, every
+transaction byte digest, ordered transaction hashes, copied raw time, and the
+last child/QC proof. It preserves the extra last-block and mismatch-only child
+digest calls. Transaction Keccak comes from the existing MIT
+`node94-action-signable` path dependency; full consensus block preimages remain
+an explicit authenticator boundary. No pending preimage or bincode PR is needed.
+
+`TimedSignedBlock` retains three raw u32 time words omitted from the baseline
+`SignedBlock`. `ClientBatchAuthenticator` requires complete timed signer recovery
+and block digests, with no default that discards time. The inherited certificate
+rules execute normally; the existing TC competing-error ambiguity is not newly
+resolved. Fixture authentication in the comparison client is input-derived test
+arithmetic, not a production cryptographic implementation or target oracle.
+
+The buffer advances received round and appends before verification. Recoverable
+errors retain that state, including the 101st record without a proof. This permits
+the documented empty-stake two-call counterexample: missing validator set first,
+then unexpected earlier proof. Success advances confirmed and empties pending
+before ordered sends. A closed sink returns its current item, drops that item
+and the unattempted remainder, and preserves the accepted prefix and advanced
+state. `ClientBufferView` is an immutable safe callback observation, not a native
+channel ABI or linearizability claim.
+
+All supplied nested native spans are admitted before semantic work. Span or
+fallible-reserve refusal leaves buffer state unchanged and is a new safe API
+policy, outside native ordinary-return correspondence. Existing dependency
+allocations and callback panics are not recovered. No caller poll reset, channel
+reader, packet decode, network ordering, native failure rollback or full node
+behavior is implemented. Focused source qualification uses the actual library
+unit tests and `--test client_batch`; the old `evidence_contract` integration
+target is preserved but is not part of that focused run. See the new packet's
+source/build receipts for actual performed validation and chronological limits.
