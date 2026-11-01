@@ -35,13 +35,50 @@ The scoped command, after a clean source checkpoint, is:
 python3 research/work-items/RE-005-byte-bool-rust-94/run.py --out work/byte-bool-197-run1
 ```
 
-At this source checkpoint the experiment has **not run**. The runner retains
-each actual command and streams before checking its exit status; it compares
-complete canonical JSONL at O0/O3, runs the real dependency-free Cargo tests,
-and exercises compiled semantic controls. `collect.py` and `test_static.py`
-authenticate complete native intervals and reject copied-input corruption;
-they never execute captured instructions. Actual results will be recorded
-separately after the run, including failures if any.
+The actual experiment ran successfully on clean source checkpoint
+`56244f5c34c5ec0c2a7cab90a42d450ce757081b`, after independent source and guarded
+runner review. `actual/COMMANDS.json` retains 45 actual experiment commands
+and their 90 streams; the nested native ledger retains the GNU version and
+two disassemblies. `actual/COMPRESSION.json` binds every lossless compressed
+stream and physical-input audit to its original bytes/hash. No failed earlier
+experiment was replaced: this is the first actual run of the new component.
+
+| Actual comparison/check | Result |
+| --- | --- |
+| O0 library + separately linked input-only client | 5,628/5,628 complete canonical records identical |
+| O3 library + separately linked input-only client | 5,628/5,628 complete canonical records identical |
+| Source relational tests | 4/4 pass at each direct build |
+| Real Cargo offline/locked debug and release | 4/4 integration tests pass in each profile; zero library/doctests |
+| Clean repeat O3 library, same basename | Own raw rlib bytes identical |
+| Native collector and static tests | Complete 197B/64 rows; 13 tests pass |
+| Raw comparator controls | Altered content detected; missing and extra rows rejected |
+
+All five independently compiled source mutations emit the full 5,628 normal
+records and fail an actual relational assertion (exit 101):
+
+| Deliberate source defect | Mismatching complete records |
+| --- | ---: |
+| Charge every nonzero mode | 2,592 / 5,628 |
+| Roll back the retained counter on limit failure | 224 / 5,628 |
+| Omit the boolean budget-error word write | 144 / 5,628 |
+| Accept boolean byte 2 | 212 / 5,628 |
+| Restore the input slice after invalid boolean | 1,850 / 5,628 |
+
+The 13 static tests include ten copied-input byte/FDE/CIE/mapping/relocation
+corruptions below the whole-target digest check, plus complete identity and
+failure-preservation checks. These are structural rejection controls, not
+execution of a mutated capture. `actual/ARTIFACTS.json` records digests of
+the retained local build products; built executables and Cargo output remain
+local under ignored `work/`.
+
+Before/after audits are identical across **10,536 root physical files plus
+305 files in seven genuine pinned views**, their modes/heads/status, all 103
+official research-provider payloads and both installed component manifests,
+the owned Cargo binary and selected host tools. The compiler is research
+Rust 1.94.1 (`e408947bf`); Cargo is 1.89.0. Actual argv/environment records
+bind explicit GCC/BFD selection, a fresh owned offline Cargo home, and clean
+environment. This is own-source build repeatability and a proven normal-state
+relation, not target machine-byte identity.
 
 Original source names/types, result ABI/padding, physical pointer identity,
 aliasing, concurrent mutation, faults, unwind and target compiler provenance
@@ -51,3 +88,6 @@ expanded test/evaluator suite and hosted CI are **NOT_RUN**; every component
 completion gate remains false. Imported/reference rights and pinned revisions
 are unchanged. The older outer-wrapper finding is occupied by PR #1365 and
 is not included here.
+
+Next question: which caller-selected field sequences reach these two leaves,
+and what additional state invariants do those callers require?
