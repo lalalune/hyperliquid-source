@@ -1,0 +1,49 @@
+{
+  "checked_at_utc": "2026-11-01T18:52:26.162176+00:00",
+  "base_commit": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "static": {
+    "GNU_binutils": "2.47.20260726",
+    "LLVM_objdump": "18.1.4",
+    "body_count": 3,
+    "retained_bytes": 2336,
+    "instructions": 544,
+    "independent_decoders_agree_on_all_instruction_boundaries": true,
+    "corruption_controls_rejected": 14,
+    "digest_guards_bypassed_for_controls": true
+  },
+  "checks": [
+    {
+      "command": "make doctor",
+      "result": "pass after putting GNU binutils first on PATH"
+    },
+    {
+      "command": "make verify catalogue-check reproduce",
+      "result": "pass after materializing the pinned reference LFS object and refreshing its unchanged clean-filter index"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests -p test_node94_ip_translation.py -v",
+      "result": "4 tests passed"
+    },
+    {
+      "command": "rustc +1.94.1 --edition=2021 --test -C opt-level=0 src/node94-ip-translation/lib.rs -o work/contribution3/ip-tests-o0 && work/contribution3/ip-tests-o0",
+      "result": "5 tests passed"
+    },
+    {
+      "command": "rustc +1.94.1 --edition=2021 --test -C opt-level=3 src/node94-ip-translation/lib.rs -o work/contribution3/ip-tests-o3 && work/contribution3/ip-tests-o3",
+      "result": "5 tests passed"
+    }
+  ],
+  "rust_build": {
+    "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)",
+    "host": "aarch64-apple-darwin",
+    "command_template": "rustc +1.94.1 --edition=2021 --crate-name node94_ip_translation --crate-type=rlib -C opt-level=3 src/node94-ip-translation/lib.rs -o work/node94-ip-translation/{a,b}/libnode94_ip_translation.rlib",
+    "two_builds_raw_equal": true,
+    "rlib_sha256": "03a5952d62ae6bb23430bc23e0f7264550f291edd29049c47a99f65621ae19b8",
+    "original_binary_equivalence": false
+  },
+  "full_suite": {
+    "status": "pending"
+  },
+  "captured_execution": false,
+  "hosted_CI_claim": false
+}
