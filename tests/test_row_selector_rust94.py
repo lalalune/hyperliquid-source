@@ -28,15 +28,14 @@ class RowSelectorRust94(unittest.TestCase):
         self.assertEqual((actual['native_normal_value_mutants'], actual['chosen_api_label_mutants']), (10, 3))
         self.assertEqual(actual['component_tests_by_opt'], {'0': 40, '3': 40})
 
-    def test_exact_current_compiler_input_tree(self):
-        self.assertTrue(observed.check_current_tree(self.report))
+    def test_exact_recorded_compiler_input_snapshot(self):
+        self.assertTrue(observed.check_recorded_snapshot(self.report))
 
     def test_source_input_fixture_and_extra_file_corruption_controls(self):
         comparator = observed.module('compare_selector')
         with tempfile.TemporaryDirectory(prefix='selector-test-freeze-') as temporary:
             snapshot = Path(temporary)/'fixed'
-            with contextlib.redirect_stdout(io.StringIO()):
-                self.recipe.prepare(snapshot)
+            observed.extract_recorded_snapshot(snapshot, self.report)
             result = comparator.self_check(snapshot, self.report['freeze_sha256'])
             self.assertEqual(len(result['rejected_controls']), 14)
             self.assertIn('external-include-fixture', result['rejected_controls'])

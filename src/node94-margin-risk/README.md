@@ -90,7 +90,7 @@ isolated context word remain unresolved.
 logical controls, 20-byte key slots, query and late observed state word. It
 returns an owned bucket index or shared-default marker and the state's nonzero
 predicate. It implements the bounded numeric relation from
-`0x36f57f0..0x36f5948`; native hashing, row pointers and Once remain external.
+`0x36f57f0..0x36f5948`; hash production, row pointers and Once remain external to this selector.
 
 For nonzero count, capacity `N` is a power of two of at least 16, native mask
 is `N-1`, and native control byte `C+j` equals `controls[j & (N-1)]` through
@@ -106,6 +106,29 @@ validation and element access. The evidence packet
 `research/work-items/RE-007-row-selector-rust-94/` separates 894 qualified
 posthash cases from seven policy cases and their mutation controls.
 
+### Supplied-seed fixed20 hash
+
+`hash20::table_hash20([K0, K1], &query)` implements the fresh-state,
+exactly 20-byte arithmetic relation of the actual lookup adapter
+`0x399c7a0..0x399c8e5` and its writer `0x3a00700..0x3a008d7`.
+It returns a `u64`; the owned seeds and immutable array are chosen safe API
+inputs rather than recovered native ownership or ABI. The target initializes
+from two little-endian seed words, absorbs two little-endian 64-bit words and
+a four-byte tail with length 20 in the high byte, and uses one compression
+round and three final rounds.
+
+The actual writer differs from the credited RE-001 sibling at one R8/R11
+comparison byte. Only the proved fresh `ntail == 0` branch bypasses that
+comparison; no incremental-writer equivalence is claimed. Merged PR #1077
+established the sibling mathematics and Python model; this follow-on binds the
+actual row-lookup route and independently authors and compiles its Rust helper.
+
+The fixed20 packet freezes 990 supplied-seed outputs before the new source and
+1,980 synthetic hash-consistent table compositions before the input-only
+composition driver. These tables obey the selector's mask, mirror and late-state
+premises. Actual seed creation, table producer invariants, native lifetimes and
+Once remain unresolved: no complete runtime lookup is admitted by these vectors.
+
 ## Evidence map
 
 The implementation is grounded in
@@ -120,6 +143,7 @@ edge, source-location record, and arithmetic vector.
 | `src/position.rs` | position margin by mode `0x3717480..0x37179c5` |
 | `src/surplus.rs` | surplus `0x37d77e0..0x37d79e0` and the consumed aggregate pair from `0x37d79e0..0x37d7f0c` |
 | `src/candidate.rs` | negative-only candidate branches and fixed record writes in `0x37d7360..0x37d77d8` |
+| `src/hash20.rs`, `tests/hash20_vectors.rs` | actual fresh20 adapter `0x399c7a0..0x399c8e5` and writer `0x3a00700..0x3a008d7`, supplied seeds |
 | `src/row_selector.rs` | conditional posthash selection at `0x36f57f0..0x36f5948`, external hash and Once excluded |
 | `tests/fixtures/*.tsv` | packet `boundaries.tsv` plus the five mode branches |
 | `tests/boundary_contract.rs` | all 24 rows from the maintained packet `boundaries.tsv` |

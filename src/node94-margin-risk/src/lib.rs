@@ -12,6 +12,7 @@ mod surplus;
 mod tiers;
 mod types;
 pub mod row_selector;
+pub mod hash20;
 
 pub use candidate::{
     CandidateAdmission, CandidateScope, CandidateSubject, LiquidationCandidate,

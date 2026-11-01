@@ -97,7 +97,7 @@ It receives neither names nor expected answers. The separate Python comparator
 checks every output record. `prepare_selector.py` preserves the actual existing
 component layout and its base-pinned external integration-test fixture. Every
 compiler input, corpus byte, expected byte and source mutant is hash-bound in
-the fixed snapshot; every command/exit/stdout/stderr and tool identity is retained
+the immutable recorded snapshot; every command/exit/stdout/stderr and tool identity is retained
 in the observed report and lossless stream archive. No Cargo dependency or
 manifest change is made.
 
@@ -108,14 +108,17 @@ here downloads or installs tools. From the repository root:
 
 ```sh
 python3 -B research/work-items/RE-007-row-selector-rust-94/check_freeze.py
-python3 -B research/work-items/RE-007-row-selector-rust-94/prepare_selector.py --out work/selector-fixed
+python3 -B research/work-items/RE-007-row-selector-rust-94/observed.py --extract-snapshot work/selector-fixed
 python3 -B research/work-items/RE-007-row-selector-rust-94/compare_selector.py --snapshot work/selector-fixed --freeze-sha256 <observed-freeze-digest> --self-check
 python3 -B research/work-items/RE-007-row-selector-rust-94/run_selector.py --snapshot work/selector-fixed --freeze-sha256 <observed-freeze-digest> --out work/selector-built --rustc <approved-rustc> --cargo <approved-cargo>
 python3 -B -m unittest discover -s tests -p test_row_selector_rust94.py -v
 ```
 
 `observed/FREEZE.sha256` records the exact freeze digest. Fresh output paths
-are required. Snapshot and compiler identities are checked before success.
+are required. The archived original source/input tree is reconstructed without
+depending on current component modules or shallow Git history. Snapshot and
+compiler identities are checked before success. Later modules require their
+own explicit source-tree receipts; the original freeze and outputs are not refreshed.
 The verifier/stream replay needs Python only; it never substitutes a stored
 expected file for an actual compiled result.
 

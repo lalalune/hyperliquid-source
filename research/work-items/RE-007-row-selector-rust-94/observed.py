@@ -129,21 +129,42 @@ def audit(report, streams):
                 freeze_sha256=report['freeze_sha256'], target_executed=False)
 
 
-def check_current_tree(report):
-    recipe = module('prepare_selector')
+def recorded_snapshot(report):
+    """Preserve the original compiler inputs while this component gains modules."""
+    archive = HERE/'observed/source-snapshot.json.gz.b64'
+    raw = gzip.decompress(base64.b64decode(b''.join(archive.read_bytes().split()), validate=True))
+    records = json.loads(raw)
+    expected = report['frozen']['manifest']
+    need(set(records) == set(expected) | {'FREEZE.json'}, 'historical snapshot file set changed')
+    result = {}
+    for name, encoded in records.items():
+        path = Path(name)
+        need(not path.is_absolute() and '..' not in path.parts, 'historical snapshot path escaped')
+        payload = base64.b64decode(encoded, validate=True)
+        if name == 'FREEZE.json':
+            need(sha(payload) == report['freeze_sha256'], 'historical freeze identity changed')
+            need(json.loads(payload) == report['frozen'], 'historical freeze metadata changed')
+        else:
+            need(dict(bytes=len(payload), sha256=sha(payload)) == expected[name], 'historical compiler/input payload changed')
+        result[name] = payload
+    return result
+
+
+def extract_recorded_snapshot(destination, report):
+    need(not destination.exists(), 'choose a fresh historical snapshot directory')
+    records = recorded_snapshot(report)
+    for name, raw in records.items():
+        path = destination/name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+    return destination
+
+
+def check_recorded_snapshot(report):
     comparator = module('compare_selector')
-    root = HERE.parents[2]
-    component = root/'src/node94-margin-risk'
-    current = {str(path.relative_to(root)) for path in component.rglob('*')
-               if path.is_file() and path.relative_to(component).parts[0] != 'target'}
-    bound = {name[len('repo/'):] for name in report['frozen']['manifest']
-             if name.startswith('repo/src/node94-margin-risk/')}
-    need(current == bound, 'live component has missing/additional source inputs')
-    with tempfile.TemporaryDirectory(prefix='selector-current-tree-') as temporary:
+    with tempfile.TemporaryDirectory(prefix='selector-historical-inputs-') as temporary:
         snapshot = Path(temporary)/'fixed'
-        with contextlib.redirect_stdout(io.StringIO()):
-            recipe.prepare(snapshot)
-        need(sha((snapshot/'FREEZE.json').read_bytes()) == report['freeze_sha256'], 'current tree differs from compiled freeze')
+        extract_recorded_snapshot(snapshot, report)
         comparator.authenticate(snapshot, report['freeze_sha256'])
     return True
 
@@ -151,11 +172,16 @@ def check_current_tree(report):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--archive-from', type=Path)
+    parser.add_argument('--extract-snapshot', type=Path)
     args = parser.parse_args()
     if args.archive_from is not None:
         result = archive(args.archive_from)
+    elif args.extract_snapshot is not None:
+        report, _ = load()
+        extract_recorded_snapshot(args.extract_snapshot, report)
+        result = dict(extracted_original_snapshot=str(args.extract_snapshot), freeze_sha256=report['freeze_sha256'])
     else:
         report, streams = load()
         result = audit(report, streams)
-        result['current_compiler_input_tree_matches'] = check_current_tree(report)
+        result['recorded_compiler_input_snapshot_matches'] = check_recorded_snapshot(report)
     print(json.dumps(result, indent=2, sort_keys=True))
