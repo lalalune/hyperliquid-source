@@ -80,6 +80,14 @@ bind explicit GCC/BFD selection, a fresh owned offline Cargo home, and clean
 environment. This is own-source build repeatability and a proven normal-state
 relation, not target machine-byte identity.
 
+`static/` retains the subsequent repository checks on clean evidence
+checkpoint `30f04afefa59d2203e0d3b55bd35f4ff2539ecf3`: `make doctor`,
+`make verify`, `make catalogue-check`, and `make reproduce` all exit 0.
+Their before/after audit is identical over 10,655 root plus 305 pinned-view
+physical files (10,960 total), seven pins, 103 provider payloads and two
+installed manifests. Elapsed check time is 38.294 seconds. The measured Rust
+source at C1 is unchanged; this later packet adds retained results and reviews.
+
 Original source names/types, result ABI/padding, physical pointer identity,
 aliasing, concurrent mutation, faults, unwind and target compiler provenance
 remain unknown or excluded. This does not establish the whole serialization
