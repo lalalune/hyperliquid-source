@@ -1,0 +1,178 @@
+#!/usr/bin/env python3
+"""Run only new native Rust against independently frozen arithmetic outputs."""
+import argparse
+import base64
+import gzip
+import json
+from pathlib import Path
+import platform
+import struct
+import subprocess
+
+from verify_static import PACKET, ROOT, TARGET, encoded, require, sha, validate
+from oracle import fixtures
+
+SOURCE = ROOT / 'src/node94-strided-array-sum'
+CRATE = 'node94_strided_array_sum'
+RUSTC_SHA = 'b69cbcffa5e990057035d53ccc8163e8392ce784f6abb114c19ceb61528ba9f6'
+RUSTC_COMMIT = 'e408947bfd200af42db322daf0fadfe7e26d3bd1'
+MUTATIONS = [
+    ('wrong_stride', 'STRIDE_WORDS: usize = 6600', 'STRIDE_WORDS: usize = 6599'),
+    ('ignore_index', 'let mut position = usize::try_from(index).ok()?;', 'let mut position = 0_usize;'),
+    ('zero_iteration', 'let mut remaining = element_count(field);',
+     'let mut remaining = if field & 63 == 0 { 0 } else { element_count(field) };'),
+    ('count_mask31', '1_u64 << (field & 63)', '1_u64 << (field & 31)'),
+    ('saturating_sum', 'total.wrapping_add(table[position])', 'total.saturating_add(table[position])'),
+    ('drop_last', 'let mut remaining = element_count(field);', 'let mut remaining = element_count(field) - 1;'),
+    ('narrow_sum', 'Some(total)', 'Some(total as u32 as u64)'),
+    ('reject_exact_fit', 'table.len() < required', 'table.len() <= required'),
+    ('omit_object_limit', 'bytes > isize::MAX as usize', 'bytes == 0'),
+]
+
+
+def compare(actual, expected, inputs):
+    require(len(actual) == len(expected), 'native framing differs')
+    count, first = 0, None
+    for index, (got, want, stimulus) in enumerate(zip(struct.iter_unpack('<BQBQ', actual),
+            struct.iter_unpack('<BQBQ', expected), struct.iter_unpack('<IIQQQ', inputs))):
+        if got != want:
+            count += 1
+            if first is None:
+                first = {'index': index, 'descriptor_index_field_length_seed_step': list(stimulus),
+                         'actual_required_tag_words_sum_tag_value': list(got),
+                         'expected_required_tag_words_sum_tag_value': list(want)}
+    return {'mismatches': count, 'first_witness': first, 'stdout_sha256': sha(actual)}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--rustc', type=Path, required=True)
+    parser.add_argument('--cc', type=Path, default=Path('/usr/bin/cc'))
+    args = parser.parse_args()
+    out, rustc, cc = args.out.absolute(), args.rustc.resolve(), args.cc.resolve()
+    require(not out.exists(), 'use a new output directory')
+    static = validate()
+    inputs, expected, coverage = fixtures()
+    frozen = json.loads((PACKET / 'frozen.json').read_text())
+    require(all(frozen[k] == v for k, v in coverage.items()), 'frozen metadata drift')
+    require(frozen['oracle_sha256_at_freeze'] == sha((PACKET / 'oracle.py').read_bytes()), 'pre-Rust oracle drift')
+    require(frozen['static_sha256_at_freeze'] == sha(encoded(static)), 'pre-Rust static binding drift')
+    records = {'static.json': encoded(static)}
+    for name, raw in records.items():
+        require((PACKET / name).read_bytes() == raw, name + ' drift')
+    for name, raw in [('inputs', inputs), ('expected', expected)]:
+        require(gzip.decompress((PACKET / (name + '.bin.gz')).read_bytes()) == raw,
+                name + ' frozen fixture drift')
+    require(sha(rustc.read_bytes()) == RUSTC_SHA, 'actual research compiler differs')
+    hashed_paths = [SOURCE / 'lib.rs', SOURCE / 'input_only_driver.rs',
+                    PACKET / 'verify_static.py', PACKET / 'verify_rust.py', PACKET / 'oracle.py']
+    before = {str(p.relative_to(ROOT)): sha(p.read_bytes()) for p in hashed_paths}
+    linker_sha = sha(cc.read_bytes())
+    out.mkdir(parents=True)
+    calls, streams = [], {}
+
+    def run(label, argv, data=None, success=True):
+        process = subprocess.run(list(map(str, argv)), cwd=ROOT, input=data, capture_output=True)
+        logs = {}
+        for suffix, raw in [('stdout', process.stdout), ('stderr', process.stderr)]:
+            filename = label + '.' + suffix
+            (out / filename).write_bytes(raw)
+            logs[suffix] = {'file': filename, 'bytes': len(raw), 'sha256': sha(raw)}
+            streams[filename] = raw
+        calls.append({'label': label, 'argv': [str(v).replace(str(ROOT), '<repo>').replace(str(rustc), '<rustc>') for v in argv],
+                      'exit_code': process.returncode, 'stdin_sha256': None if data is None else sha(data),
+                      'logs': logs})
+        (out / 'calls.json').write_bytes(encoded(calls))
+        require((process.returncode == 0) == success, label + ' process failed; raw streams retained')
+        return process
+
+    version = run('compiler', [rustc, '-vV']).stdout.decode()
+    require('release: 1.94.1\n' in version and f'commit-hash: {RUSTC_COMMIT}\n' in version
+            and 'host: aarch64-apple-darwin\n' in version, 'compiler identity differs')
+    linker_version = run('linker', [cc, '--version']).stdout.decode()
+    source_text = (SOURCE / 'lib.rs').read_text()
+
+    def build(name, source, optimization):
+        directory = out / name
+        directory.mkdir()
+        library, client = directory / f'lib{CRATE}.rlib', directory / 'client'
+        flags = ['--edition=2021', '--target=aarch64-apple-darwin', '-Dwarnings',
+                 '-Ccodegen-units=1', '-Coverflow-checks=on', f'-Copt-level={optimization}',
+                 f'-Clinker={cc}', '--remap-path-prefix', f'{ROOT}=/reconstruction']
+        run(name + '-library', [rustc, '--crate-name', CRATE, '--crate-type=rlib', source,
+                               '-Cmetadata=strided_array_sum94', *flags, '-o', library])
+        run(name + '-client', [rustc, '--crate-name', 'strided_array_sum_client',
+                              SOURCE / 'input_only_driver.rs', '--extern', f'{CRATE}={library}',
+                              *flags, '-o', client])
+        raw = run(name + '-run', [client], inputs).stdout
+        return library, client, raw, flags
+
+    builds, rebuilds, controls = [], [], []
+    for opt in (0, 3):
+        name = f'opt{opt}'
+        lib, client, raw, flags = build(name, SOURCE / 'lib.rs', opt)
+        comparison = compare(raw, expected, inputs)
+        require(comparison['mismatches'] == 0, name + ' native value mismatch')
+        unit = out / name / 'unit-tests'
+        run(name + '-unit-build', [rustc, '--test', '--crate-name', CRATE, SOURCE / 'lib.rs',
+                                  *flags, '-o', unit])
+        tests = run(name + '-unit-run', [unit, '--test-threads=1']).stdout
+        require(b'3 passed; 0 failed' in tests, 'unit tests did not run')
+        lib2, client2, raw2, _ = build(name + '-repeat', SOURCE / 'lib.rs', opt)
+        require(raw2 == expected, 'repeat output differs')
+        for kind, a, b in [('rlib', lib, lib2), ('client', client, client2)]:
+            require(a.read_bytes() == b.read_bytes(), 'own repeated artifact differs')
+            rebuilds.append({'profile': name, 'artifact': kind, 'bytes': a.stat().st_size,
+                             'sha256': sha(a.read_bytes()), 'raw_equal': True, 'normalization': 'none'})
+        for malformed in [b'\0', b'\0' * 32 + b'\0']:
+            bad = run(name + '-partial-' + str(len(malformed)), [client], malformed, success=False)
+            require(not bad.stdout and b'partial table descriptor' in bad.stderr, 'malformed input leaked output')
+        oversized = run(name + '-allocation-limit', [client], struct.pack('<IIQQQ', 0, 0, 500001, 0, 1), success=False)
+        require(not oversized.stdout and b'allocation budget' in oversized.stderr, 'harness allocation bound differs')
+        builds.append({'profile': name, 'cases': len(inputs) // 32, 'unit_tests_passed': 3, **comparison})
+        for label, needle, replacement in MUTATIONS:
+            require(source_text.count(needle) == 1, label + ' mutation is not unique')
+            mutant = out / (label + '.rs')
+            mutant.write_text(source_text.replace(needle, replacement))
+            _, _, wrong, _ = build(name + '-' + label, mutant, opt)
+            result = compare(wrong, expected, inputs)
+            require(result['mismatches'] > 0, 'wrong native implementation survived: ' + label)
+            controls.append({'profile': name, 'mutation': label,
+                             'source_sha256': sha(mutant.read_bytes()), **result})
+    changed = bytes([expected[0] ^ 1]) + expected[1:]
+    require(compare(changed, expected, inputs)['mismatches'] == 1, 'changed-output control failed')
+    try:
+        compare(expected[:-18], expected, inputs)
+    except ValueError:
+        pass
+    else:
+        raise ValueError('missing-output control survived')
+    require(before == {str(p.relative_to(ROOT)): sha(p.read_bytes()) for p in hashed_paths},
+            'source changed during qualification')
+    require(sha(rustc.read_bytes()) == RUSTC_SHA and sha(cc.read_bytes()) == linker_sha,
+            'compiler/linker changed during qualification')
+    archive = {'encoding': 'base64', 'streams': {name: sha(raw) for name, raw in streams.items()},
+               'payloads': {sha(raw): base64.b64encode(raw).decode() for raw in streams.values()}}
+    archive_path = out / 'raw-streams.json.gz'
+    archive_path.write_bytes(gzip.compress(encoded(archive), mtime=0))
+    decoded = json.loads(gzip.decompress(archive_path.read_bytes()))
+    require(all(base64.b64decode(decoded['payloads'][decoded['streams'][name]], validate=True) == raw
+                for name, raw in streams.items()), 'lossless stream archive differs')
+    result = {'target_sha256': TARGET, 'source_sha256': before, 'compiler_sha256': RUSTC_SHA,
+              'compiler_version': version, 'linker_sha256': linker_sha, 'linker_version': linker_version,
+              'python': platform.python_version(), 'platform': platform.platform(),
+              'frozen_sha256': {name: sha(raw) for name, raw in records.items()},
+              'inputs_sha256': sha(inputs), 'expected_sha256': sha(expected),
+              'comparisons': builds, 'repeated_builds': rebuilds, 'native_wrong_controls': controls,
+              'comparator_controls': ['changed output record detected', 'missing output record rejected'],
+              'raw_archive_sha256': sha(archive_path.read_bytes()),
+              'captured_code_executed': False, 'instruction_emulator_executed': False,
+              'target_compiled_byte_comparison': 'not performed; host value reconstruction only'}
+    (out / 'results.json').write_bytes(encoded(result))
+    print(json.dumps({'cases': len(inputs) // 32, 'native_profiles': builds,
+                      'wrong_controls_detected': len(controls), 'repeated_artifacts_equal': len(rebuilds)}))
+
+
+if __name__ == '__main__':
+    main()
