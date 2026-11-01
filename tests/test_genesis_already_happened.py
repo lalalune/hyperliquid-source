@@ -103,7 +103,7 @@ class GenesisAlreadyHappenedStaticTests(unittest.TestCase):
         self.assertEqual(r["rules"][0]["je_found_bytes"], "741b")
         self.assertEqual(r["rules"][0]["je_found_target"], hex(tool.JE_FOUND_TARGET))
         self.assertIn("membership", r["rules"][0]["description"])
-        self.assertIn("found-equal", r["rules"][0]["proof"]["found_equal_takes_err"])
+        self.assertIn("equal key", r["rules"][0]["proof"]["found_equal_takes_err"])
 
     def test_mutation_tamper_je_found_gate(self):
         # One tamper negative on the claimed membership->Err gate.
