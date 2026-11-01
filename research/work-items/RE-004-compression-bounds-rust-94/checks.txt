@@ -1,0 +1,43 @@
+Completed locally, 2026-11-02 KST; base 56c0ec672bd8fdcfaa80f2db700a61e6240b3663.
+
+PATH="/opt/homebrew/opt/binutils/bin:/opt/homebrew/opt/rustup/bin:$PATH" make doctor
+  Exit 0. analysis_ready=true; exact_rebuild_ready=false; no captured execution.
+
+make verify catalogue-check reproduce
+  Final run exit 0.
+  All captured artifact hashes/signatures and pinned upstream binary/key/signature match.
+  Verified 38 imported files and all pinned source repositories.
+  Catalogue and progress tables match pinned inputs.
+  Inventories, raw counts and refined item classifications reproduce imported evidence.
+  Refined counts: grounded 822, drift 60, notes 116, late 1, unanchored 386, partial 56, case 11.
+
+python3 tools/foundation_compression_bounds.py --check research/work-items/foundation-compression-bounds-94/evidence.json
+  Exit 0. Foundation compression-bound evidence reproduces exactly.
+
+python3 -m unittest tests.test_foundation_compression_bounds -v
+  Exit 0. 18 tests passed, no failures/errors/skips. Raw output: focused-tests.txt.
+
+python3 research/work-items/RE-004-compression-bounds-rust-94/verify.py --out work/compression-rust/final-native --rustc <actual-installed-1.94.1-rustc>
+  Exit 0. 3,664 input-only native cases per opt level, zero mismatches.
+  Opt0 and opt3 each passed 3 Rust unit tests.
+  16/16 native wrong-implementation runs rejected by semantic output differences.
+  4/4 repeated own-artifact builds raw-equal (rlib and client, both opt levels).
+  Exact commands/versions/flags/hashes in native/calls.json and native/results.json.
+
+Two static regeneration runs: PYTHONHASHSEED=7 TZ=UTC; PYTHONHASHSEED=119 TZ=Pacific/Kiritimati.
+  Inputs, expectations, coverage and actual-ELF target binding byte-identical to frozen files.
+
+rustfmt +1.94.1 --check src/node94-compression-bounds/lib.rs src/node94-compression-bounds/input_only_driver.rs
+python3 -m py_compile research/work-items/RE-004-compression-bounds-rust-94/verify.py
+  Both exit 0 after final client formatting.
+
+Archive integrity check: all 132 recorded stdout/stderr streams decompress losslessly and match
+  their recorded byte counts and SHA-256; 13 unique payloads including the empty stream.
+  Current Rust sources and every frozen fixture match native/results.json hashes.
+
+Prerequisite setup failures were retained during the workflow and then resolved by the coordinating
+agent without pin changes: absent reference submodule, unmaterialized reference LFS binary, then
+missing local LFS filters. The final complete verify/catalogue-check/reproduce run above passed.
+
+No full make test, hosted CI, container build or captured-binary execution is claimed by this worker.
+The coordinating agent owns repository-wide test reporting separately.
