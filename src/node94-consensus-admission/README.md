@@ -53,10 +53,28 @@ state.
 
 ## Authentication boundary
 
+`message_preimages` separately implements the bounded selector-2 timeout,
+selector-3 heartbeat and selector-4 acknowledgement preimages established by
+[`RE-008-consensus-other-preimages-94`](../../research/work-items/RE-008-consensus-other-preimages-94/README.md).
+Timeout encoding includes the explicit outer signer and ordered nested QC votes;
+each nested signature contributes eight little-endian varint limbs and byte64,
+while bytes65..71 are inactive. Heartbeat options retain absent versus present-empty
+distinctions, and ordered row slices preserve the native tree's in-order projection.
+The API neither sorts nor constructs native trees. Acknowledgements serialize
+signer, random, round in that order. Checked lengths/allocation failures are safe
+API errors. Digest helpers reuse the existing MIT action-signable Keccak code;
+native permutation identity remains conditional on its credited structural proof.
+
+These offline helpers do not change `AdmissionAuthenticator`, validate signatures
+or infer a claimed signer. In particular, its existing timeout recovery method
+does not carry that explicit signer, so this addition does not silently wire a
+complete native authenticator into admission. The packet retains full native
+writer/sizer/caller evidence and the finite tree, memory and imported-call premises.
+
 The following native behavior remains unresolved in the retained evidence:
 
 - proposer scheduling at `0x4b31e70`;
-- block/QC/timeout digest construction at `0x454c050`;
+- block/QC digest construction and end-to-end authenticator integration at `0x454c050`;
 - signature recovery at `0x14c6f50`.
 
 `AdmissionAuthenticator` isolates those operations. It receives typed signing

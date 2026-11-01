@@ -1,16 +1,18 @@
 //! Evidence-bounded reconstruction of node #94 consensus block admission.
 //!
 //! This crate reconstructs the stake-snapshot, QC, TC, ordered admission, and
-//! registration behavior pinned by `RE-008-block-admission-94`.  Proposer
-//! scheduling, digest construction, and signature recovery remain outside the
-//! recovered native contract.  Callers supply those operations through
-//! [`AdmissionAuthenticator`]; a bare boolean cannot cross that boundary.
+//! registration behavior pinned by `RE-008-block-admission-94`. The separate
+//! [`message_preimages`] module reconstructs timeout, heartbeat and acknowledgement
+//! signing fields. Admission still delegates authentication and proposer
+//! scheduling through [`AdmissionAuthenticator`]; a bare boolean cannot cross
+//! that boundary.
 //!
 //! This is not a network service or a complete consensus implementation.
 
 mod admission;
 mod auth;
 mod error;
+pub mod message_preimages;
 mod qc;
 mod stake;
 mod state;
