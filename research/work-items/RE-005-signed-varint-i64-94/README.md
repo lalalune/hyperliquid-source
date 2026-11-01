@@ -34,7 +34,7 @@ manifest remain read-only. Old RE-005/w3 surveys already recorded this primary's
 dispatch/FDE, but did not establish its complete signed/error relation or Rust.
 They are credited rather than re-claimed as a new address discovery.
 
-The actual qualified call`0x46102d2`, inside complete FDE
+The retained`native/signed-use-caller-4610290.*` binds actual call`0x46102d2`, inside complete FDE
 `0x4610290..0x46104d2`, passes the inner cursor and DL0 and later uses the returned
 word in signed arithmetic. Enclosing behavior/units are not reconstructed.
 Fresh exact-address start/end and signed/zigzag ownership checks found no
@@ -143,8 +143,18 @@ and reordered duplicates. Root sealed these private inputs/answers before
 reading the new Rust; only its public summary is retained. No new compilation,
 captured execution or answer disclosure was involved. The finite comparisons
 qualify the independently proven relation; they do not establish original ABI
-or target-byte identity. The final four required static targets are recorded
-separately after this evidence checkpoint; the11 native methods need no repeat.
+or target-byte identity.
+
+Final`make doctor`,`make verify`,`make catalogue-check` and`make reproduce`
+all pass on clean evidence checkpoint`05c00af9be386b860b3982414611a65a39f13afe`.
+The four commands took39.196seconds in total. Both complete audit maps match:
+10,869 physical tracked files, seven clean pinned children,103 provider payloads,
+two manifests and the actual rustc/rustdoc/Cargo/C-driver/bfd/objdump identities.
+All eight raw streams, maps and exact wrapper are in`observed/final-static.zip`.
+The eleven native methods already passed in C1; neither compiler nor these
+methods were repeated for the four static targets. All twelve reviewed
+source/driver/fixture/manifest/helper execution files remain unchanged from C1.
+Only measured evidence and its documentation were added after these checks.
 
 ## Reproduce and limits
 
