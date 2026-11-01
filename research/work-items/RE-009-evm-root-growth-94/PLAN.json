@@ -1,0 +1,37 @@
+{
+  "schema": "re009-evm-root-growth-plan/1",
+  "frozen_before_model": true,
+  "base": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "question": "What metadata and child links does the selected zero-height root-growth branch write on an ordinary successful allocation?",
+  "owner_fde": ["0x1ab3d20", "0x1ab4a43"],
+  "complete_selected_ranges": [["0x1ab40d6","0x1ab40e6"],["0x1ab45df","0x1ab4705"]],
+  "credited_prior_work": ["#1426 comparator/caller", "#1438 split planning", "RE-001-hourly-rotation-abi-94 memcpy import binding"],
+  "premises": [
+    "Entry at 0x1ab45df follows the selected null-parent branch; the current leaf is the stable current map root and its handle height is zero.",
+    "The request through slot 0x576dfd8 returns a valid fresh 0x330-byte allocation, disjoint from both children, the map handle, result and stack buffers.",
+    "The allocator preserves SysV callee-saved registers and unrelated memory on normal return; its implementation and failure behavior are not closed.",
+    "Two valid distinct child allocations and the prepared 32-byte key/value buffers already exist; earlier memcpy calls and child insertion remain outside this contract.",
+    "All relevant pointers and stack words remain stable, valid and nonaliased; no concurrent mutation or address overflow is modeled."
+  ],
+  "expected_final_fields": {
+    "new_root": {"parent_at_0x2c0":0,"count_u16_at_0x2ca":1,"key_at_0x0":"prepared 32 bytes","value_at_0x160":"prepared 32 bytes","edge_0_at_0x2d0":"old root","edge_1_at_0x2d8":"new child"},
+    "old_child": {"parent_at_0x2c0":"new root","index_u16_at_0x2c8":0},
+    "new_child": {"parent_at_0x2c0":"new root","index_u16_at_0x2c8":1},
+    "map": {"root_qword_at_0":"new root","height_qword_at_8":1},
+    "result": {"node_qword_at_0":"previously selected child","height_qword_at_8":"saved selected height","index_qword_at_16":"saved local index"}
+  },
+  "native_mutations": [
+    {"va":"0x1ab4601","byte":"20","field":"allocation size"},
+    {"va":"0x1ab462e","byte":"d8","field":"old child edge"},
+    {"va":"0x1ab4639","byte":"85","field":"overflow branch condition"},
+    {"va":"0x1ab4642","byte":"c8","field":"old child parent"},
+    {"va":"0x1ab4657","byte":"10","field":"map height destination"},
+    {"va":"0x1ab467a","byte":"c8","field":"root count destination"},
+    {"va":"0x1ab46bb","byte":"d0","field":"new child edge"},
+    {"va":"0x1ab46ca","byte":"ca","field":"new child index destination"},
+    {"va":"0x1ab46aa","byte":"70","field":"promoted value first-half destination"}
+  ],
+  "controls": ["asymmetric full 32-byte prepared buffers", "both selected-child choices", "nonzero sentinel bytes outside written fields", "child count preservation", "new-root index-field preservation", "map count preservation", "fresh-allocation/alias premise rejection", "u64 height increment overflow boundary", "relocation type/symbol/addend corruption", "native byte/range/export corruption"],
+  "exclusions": ["No captured execution or emulation.","No novel memcpy semantics or node FDE claimed for its imported DSO implementation.","No complete insertion, preceding byte-copy closure, non-leaf propagation, allocator/fault/unwind closure, global ordering, Rust equivalence or acceptance gate."]
+}
