@@ -48,7 +48,7 @@ fields to differ. Counts and denominators are shown with every percentage.
 
 | Module | Target | Accepted gates | Milestones | Raw matching bytes | Raw-equal windows | Raw + relocation-qualified windows |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| [Foundation utilities](docs/COMPONENTS.md#foundation) | Node #94 | 0/4 | 0% | 4,583/4,675 (98.03%) | 4/9 (44.44%) | 9/9 (100.00%) |
+| [Foundation utilities](docs/COMPONENTS.md#foundation) | Node #94 | 0/4 | 0% | 5,648/5,756 (98.12%) | 4/10 (40.00%) | 10/10 (100.00%) |
 | [Serialization fork](docs/COMPONENTS.md#serialization) | Node #94 | 0/4 | 0% | N/A | N/A | N/A |
 | [Storage and snapshots](docs/COMPONENTS.md#storage) | Node #94 | 0/4 | 0% | N/A | N/A | N/A |
 | [Network transport](docs/COMPONENTS.md#transport) | Node #94 | 0/4 | 0% | N/A | N/A | N/A |
@@ -72,7 +72,7 @@ fields to differ. Counts and denominators are shown with every percentage.
 | [EVM JSON-RPC](docs/COMPONENTS.md#evm-rpc) | Node #94 | 0/4 | 0% | N/A | N/A | N/A |
 | [Global configuration](docs/COMPONENTS.md#constants) | Node #94 | 0/4 | 0% | N/A | N/A | N/A |
 | [Visor supervisor](docs/COMPONENTS.md#visor) | Visor | 0/4 | 0% | N/A | N/A | N/A |
-| **Total** | **Declared project scope; measured byte subset** | **0/96** | **0.00%** | 4,583/4,675 (98.03%) | 4/9 (44.44%) | 9/9 (100.00%) |
+| **Total** | **Declared project scope; measured byte subset** | **0/96** | **0.00%** | 5,648/5,756 (98.12%) | 4/10 (40.00%) | 10/10 (100.00%) |
 
 The total combines node #94 component gates and the separately tracked visor
 gates. Node #115 is a separate comparison/later target and is not included.
@@ -86,7 +86,7 @@ No full node build or whole-ELF equivalence is established. Partial research
 packets and imported reference files do not complete a module gate.
 See [detailed progress](docs/PROGRESS.md) and [research results](research/STATUS.md).
 
-**Scale check:** the 4,675 compared node #94 bytes cover only 0.00664% of its 70,370,352-byte `.text` section. Raw matching positions account for 0.00651%. High percentages inside these windows do not mean the node is nearly finished.
+**Scale check:** the 5,756 compared node #94 bytes cover only 0.00818% of its 70,370,352-byte `.text` section. Raw matching positions account for 0.00803%. High percentages inside these windows do not mean the node is nearly finished.
 <!-- END GENERATED PROGRESS -->
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md), [scope](docs/SCOPE.md), the
