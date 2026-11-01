@@ -1,0 +1,273 @@
+{
+  "base_commit": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "captured_execution": false,
+  "commands": [
+    {
+      "argv": [
+        "make",
+        "doctor"
+      ],
+      "exit_code": 0,
+      "log": "checks/doctor.log"
+    },
+    {
+      "argv": [
+        "make",
+        "verify"
+      ],
+      "exit_code": 0,
+      "log": "checks/verify.log"
+    },
+    {
+      "argv": [
+        "make",
+        "catalogue-check"
+      ],
+      "exit_code": 0,
+      "log": "checks/catalogue.log"
+    },
+    {
+      "argv": [
+        "make",
+        "reproduce"
+      ],
+      "exit_code": 0,
+      "log": "checks/reproduce.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_foundation_indexed_accumulator.py"
+      ],
+      "exit_code": 0,
+      "log": "checks/legacy-tests.log",
+      "tests": 13
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/foundation_indexed_accumulator.py",
+        "--check",
+        "research/work-items/foundation-indexed-accumulator-94/evidence.json",
+        "--binary",
+        "artifacts/node/94/hl-node"
+      ],
+      "exit_code": 0,
+      "log": "checks/legacy-evidence.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "research/work-items/RE-004-indexed-accumulator-rust-94/verify_static.py"
+      ],
+      "env": {
+        "PYTHONHASHSEED": "17",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "log": "checks/static-normal.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "research/work-items/RE-004-indexed-accumulator-rust-94/verify_static.py"
+      ],
+      "env": {
+        "PYTHONHASHSEED": "233",
+        "TZ": "Pacific/Kiritimati"
+      },
+      "exit_code": 0,
+      "log": "checks/static-optimized.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "research/work-items/RE-004-indexed-accumulator-rust-94/audit_coverage.py"
+      ],
+      "exit_code": 0,
+      "log": "checks/coverage-check.json"
+    },
+    {
+      "argv": [
+        "<rustfmt-1.94.1>",
+        "--check",
+        "src/node94-indexed-accumulator/lib.rs",
+        "src/node94-indexed-accumulator/input_only_driver.rs"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "research/work-items/RE-004-indexed-accumulator-rust-94/verify_rust.py",
+        "--rustc",
+        "<rustc-1.94.1>",
+        "--out",
+        "work/indexed-accumulator-rust/native"
+      ],
+      "commands": "native/calls.json",
+      "exit_code": 0,
+      "log": "checks/native-summary.json"
+    }
+  ],
+  "disassembler_commands": "disassembly.json",
+  "full_suite_rerun": false,
+  "hosted_ci_claimed": false,
+  "instruction_emulation": false,
+  "logs": {
+    "catalogue.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "d154b53146de73afa6ac07cb86b790175fed3cf9eb764993fa92227491db6d80",
+      "retained_bytes": 86,
+      "retained_sha256": "d154b53146de73afa6ac07cb86b790175fed3cf9eb764993fa92227491db6d80"
+    },
+    "coverage-check.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "63ff93af714b631a3dc96366c0dcf2be8695dc9ec832375abf9dfca2d042c2f1",
+      "retained_bytes": 84,
+      "retained_sha256": "63ff93af714b631a3dc96366c0dcf2be8695dc9ec832375abf9dfca2d042c2f1"
+    },
+    "doctor.log": {
+      "path_redaction_only": true,
+      "raw_sha256": "ea6daac0eeaf89834b935460803e489ddf9d64faa3da7b3566a24059fd5533fe",
+      "retained_bytes": 2317,
+      "retained_sha256": "60823e073658d0c69b97130114794b93746906d0c6c1bf9ce8a8f624605a92b1"
+    },
+    "legacy-evidence.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "d0620f8d0d1bc95eb3fc771379e0a2bd12f6a0833d260cc431ffe7f66cb593eb",
+      "retained_bytes": 43,
+      "retained_sha256": "d0620f8d0d1bc95eb3fc771379e0a2bd12f6a0833d260cc431ffe7f66cb593eb"
+    },
+    "legacy-tests.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "a77c6f1c970c36b07c5b39832eddb319e5b571360fe419764a40d8877e757269",
+      "retained_bytes": 112,
+      "retained_sha256": "a77c6f1c970c36b07c5b39832eddb319e5b571360fe419764a40d8877e757269"
+    },
+    "native-summary.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "59807cf1ffaf9739571536e75c420963bc468b3013a2a14be36a25862a3e0483",
+      "retained_bytes": 696,
+      "retained_sha256": "59807cf1ffaf9739571536e75c420963bc468b3013a2a14be36a25862a3e0483"
+    },
+    "native.stderr": {
+      "path_redaction_only": false,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_bytes": 0,
+      "retained_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "oracle-freeze.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "c157c576e887931a95748bb3c30645f0f7c8ceaa9a61beb2303a5eed40f07b92",
+      "retained_bytes": 1062,
+      "retained_sha256": "c157c576e887931a95748bb3c30645f0f7c8ceaa9a61beb2303a5eed40f07b92"
+    },
+    "reproduce.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "e229eacd17279259b076a17aa95f96fb96d91d2ab9991363ea8c20f2243cfd0a",
+      "retained_bytes": 12538,
+      "retained_sha256": "e229eacd17279259b076a17aa95f96fb96d91d2ab9991363ea8c20f2243cfd0a"
+    },
+    "static-freeze.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "495e0621906862b94e5110d65fece5ef0744f1c74f34fc8c677a9d57e956a96b",
+      "retained_bytes": 101,
+      "retained_sha256": "495e0621906862b94e5110d65fece5ef0744f1c74f34fc8c677a9d57e956a96b"
+    },
+    "static-normal.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "495e0621906862b94e5110d65fece5ef0744f1c74f34fc8c677a9d57e956a96b",
+      "retained_bytes": 101,
+      "retained_sha256": "495e0621906862b94e5110d65fece5ef0744f1c74f34fc8c677a9d57e956a96b"
+    },
+    "static-optimized.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "495e0621906862b94e5110d65fece5ef0744f1c74f34fc8c677a9d57e956a96b",
+      "retained_bytes": 101,
+      "retained_sha256": "495e0621906862b94e5110d65fece5ef0744f1c74f34fc8c677a9d57e956a96b"
+    },
+    "verify.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "62b2bc35db2b34337f2cb5feace2b03e4faee375be93a1f0c03e8eb04654bdfb",
+      "retained_bytes": 670,
+      "retained_sha256": "62b2bc35db2b34337f2cb5feace2b03e4faee375be93a1f0c03e8eb04654bdfb"
+    }
+  },
+  "make_path_prefix": [
+    "/opt/homebrew/opt/binutils/bin",
+    "/opt/homebrew/opt/rustup/bin"
+  ],
+  "native_archive": {
+    "all_payload_and_call_hashes_verified": true,
+    "bytes": 887741,
+    "calls": 114,
+    "sha256": "2da4f14559e32f78aba25dd16e910af400bd4523f557477e609627ca643e0007",
+    "streams": 228,
+    "unique_payloads": 22
+  },
+  "overlap": {
+    "baseline_src_matches": 0,
+    "historical_matches": "#1285 is the existing static packet explicitly leaving Rust unimplemented; #1284 is the preceding accessor pair, excluded here. Neither is an active Rust implementation.",
+    "open_pr_limit": 100,
+    "queries": [
+      {
+        "count": 96,
+        "kind": "open PRs",
+        "raw_sha256": "7de39a800fb5803953c32db70b78fd88b405a1008700856870e849d23d5d68ad",
+        "topic_matches": []
+      },
+      {
+        "count": 0,
+        "kind": "open issues",
+        "raw_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "topic_matches": []
+      },
+      {
+        "count": 100,
+        "kind": "recent merged PRs",
+        "raw_sha256": "d814870e555fbabaf5839a2df28e7e76f0b9c9f8c21cc6a55d923788fbca2fbf",
+        "topic_matches": [
+          {
+            "number": 1285,
+            "title": "foundation: bind node #94 indexed-accumulator window 0x514ac60",
+            "url": "https://github.com/lalalune/hyperliquid-source/pull/1285"
+          },
+          {
+            "number": 1284,
+            "title": "foundation: bind node #94 chained-field accessor pair 0x514ac20 and 0x514ac40",
+            "url": "https://github.com/lalalune/hyperliquid-source/pull/1284"
+          }
+        ]
+      }
+    ],
+    "recent_merge_limit": 100,
+    "reserved_other_addresses_avoided": [
+      "0x54ccfb0",
+      "0x50e69f0",
+      "0x538c820",
+      "0x5422e70"
+    ]
+  },
+  "path_redaction": {
+    "<home>": "operator home directory",
+    "<repo>": "repository root"
+  },
+  "python": "3.14.3",
+  "recorded_at_utc": "2026-11-01T20:41:44.404239+00:00",
+  "scope": "only new Rust component and new evidence packet; no old evidence, tool, import, pin or gate changes",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "task": "RE-004 indexed accumulator value reconstruction and full-RAX correction"
+}
