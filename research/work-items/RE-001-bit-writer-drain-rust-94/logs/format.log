@@ -1,0 +1,14 @@
+Initial formatting check exit 1
+Diff in /Users/shinjun/hyperliquid-contributions/mixer/src/node94-bit-writer-drain/client.rs:30:
+         let bytes = if buffer.is_empty() {
+             "-".to_owned()
+         } else {
+-            buffer.iter().map(|b| format!("{b:02x}")).collect::<String>()
++            buffer
++                .iter()
++                .map(|b| format!("{b:02x}"))
++                .collect::<String>()
+         };
+         writeln!(out, "{}\t{}\t{:02x}{:02x}\t{:08x}\t{:04x}\t{:016x}\t{:016x}\t{}\t{:08x}\t{:04x}\t{:016x}\t{}\t{}",
+             fields[0], projected.emitted_len, projected.emitted[0], projected.emitted[1],
+Applied rustfmt 1.94.1; final check exit 0
