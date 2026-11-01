@@ -151,8 +151,8 @@ class ActualByteProgressTests(unittest.TestCase):
 
     def test_actual_captures_and_retained_compiled_sources(self):
         stats = self.coverage['totals']['node94']
-        self.assertEqual((stats['raw_equal_bytes'], stats['bytes']), (4583, 4675))
-        self.assertEqual((stats['raw_equal_windows'], stats['relocation_qualified_windows'], stats['windows']), (4, 9, 9))
+        self.assertEqual((stats['raw_equal_bytes'], stats['bytes']), (5648, 5756))
+        self.assertEqual((stats['raw_equal_windows'], stats['relocation_qualified_windows'], stats['windows']), (4, 10, 10))
         self.assertEqual(self.coverage['totals']['node115']['windows'], 3)
         self.assertEqual(self.coverage['targets']['node94']['text_bytes'], 70370352)
 
@@ -162,10 +162,22 @@ class ActualByteProgressTests(unittest.TestCase):
         output = render_readme_progress(self.components, progress, self.coverage)
         self.assertEqual(progress, before)
         self.assertIn('0.00% (0/24)', output)
-        self.assertIn('4,583/4,675 (98.03%)', output)
-        self.assertIn('0.00664%', output)
+        self.assertIn('5,648/5,756 (98.12%)', output)
+        self.assertIn('0.00818%', output)
         self.assertIn('| Node #94 | 0/4 | 0% | N/A | N/A | N/A |', output)
         self.assertIn('not 0% correct', output)
+
+    def test_string_pad_primary_is_a_separate_published_artifact_window(self):
+        windows = [row for row in self.coverage['windows']
+                   if row['id'] == 'node94-formatter-string-pad']
+        self.assertEqual(len(windows), 1)
+        row = windows[0]
+        self.assertEqual((row['start'], row['end']), (0x1573450, 0x1573889))
+        self.assertEqual(row['source_kind'], 'published-artifact')
+        self.assertEqual((row['bytes'], row['raw_equal_bytes'], row['relocation_bytes']),
+                         (1081, 1065, 16))
+        self.assertFalse(row['raw_equal'])
+        self.assertTrue(row['relocation_qualified'])
 
     def test_remainder_published_artifact_counts_one_interval(self):
         windows = [row for row in self.coverage['windows']
