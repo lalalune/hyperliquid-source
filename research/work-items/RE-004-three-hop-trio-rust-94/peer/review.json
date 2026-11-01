@@ -1,0 +1,58 @@
+{
+  "source_review": "No blockers found in complete source, driver and PROOF. All paths read three full words before the sole eight-byte store; RAX=1, full incoming RDX retained.",
+  "independent_script_sha256": "9d51587e8fe042eafb57b9ed2b752265b671c6813652a0100366f679439661d2",
+  "independent_output_sha256": "66b0b56543344dc585f880836698503ca3fbe41b675db483569c467957b07d4e",
+  "fresh_gnu_bytes": 144,
+  "fresh_gnu_sha256": "063da4e4cbf0f09072d6787db3cdc34bc0843a97185a3216e411ea979a96d7c8",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "research/work-items/RE-004-three-hop-trio-rust-94/peer/verify_independent.py"
+      ],
+      "returncode": 0,
+      "stdout": "independent.json",
+      "stderr": "independent.stderr.txt",
+      "stdout_sha256": "66b0b56543344dc585f880836698503ca3fbe41b675db483569c467957b07d4e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "research/work-items/RE-004-three-hop-trio-rust-94/verify_static.py"
+      ],
+      "stdout": "static-recheck.stdout.txt",
+      "stderr": "static-recheck.stderr.txt",
+      "returncode": 0,
+      "stdout_sha256": "bb61b5c23efe360726859c6a14cb5ce705f515fa32a495594915d8cbdfb888d7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/opt/homebrew/opt/binutils/bin/objdump",
+        "-d",
+        "-Mintel",
+        "--insn-width=15",
+        "--start-address=0x514acc0",
+        "--stop-address=0x514ad50",
+        "artifacts/node/94/hl-node"
+      ],
+      "returncode": 0,
+      "stdout": "fresh.gnu.txt",
+      "stderr": "fresh.gnu.stderr.txt",
+      "stdout_sha256": "063da4e4cbf0f09072d6787db3cdc34bc0843a97185a3216e411ea979a96d7c8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "read_command_errors": [
+    "Initial requested input_client.rs did not exist; actual input_only_driver.rs was discovered and read.",
+    "One initial inventory command used the bsr worktree instead of floor-trunc and found no target files; corrected before computation."
+  ],
+  "computation_failures": [],
+  "retained_parent_failure_archive_sha256": "6dc417420e14425059901f3e27af83345f8252f26015e5f0bc8ba8fac997f15d",
+  "captured_execution": false,
+  "native_execution_by_peer": false
+}
