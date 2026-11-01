@@ -38,9 +38,25 @@ python3 -B research/work-items/RE-001-hex-pair-iterator-94/resume/replay_retaine
   --output /tmp/fresh-hex-current-replay
 ```
 
-Current-base replay and four static checks are pending at this source
-checkpoint. Their actual results will be added before the draft PR. No new
-compiler run, target execution, instruction evaluator, full-suite, hosted CI,
-original ABI, rebuilt target-byte equality or component-gate claim is made.
+Current-base checkpoint `ba9cb94bad8617cd1f8cd5565306ae37f6861f81` passed the
+actual readmission/replay: both profiles matched all 185,490 observations over
+39,850 cases and the three focused Python controls passed. `replay/` retains
+the four command records/eight raw streams and unchanged before/after
+source/provider/target/artifact identities. The historical C1 compiler and
+mutant results remain historical; this current run performs zero compiles.
+
+The four current static checks (`doctor`, `verify`, `catalogue-check`,
+`reproduce`) all exited zero on that checkpoint. `static/` retains exact
+commands, eight raw streams and 10,930 physical tracked-file records plus
+seven actual clean pins unchanged before/after. `base-static/` retains the
+same four checks on the current clean base (10,814 physical records).
+BEFORE/AFTER maps use lossless gzip containers; the source/stream bytes are
+unchanged. `static_runner.py` is the actual root-supplied inventory/check
+recipe with only the owned view/output/expected-head constants changed.
+The two current peer receipts independently verify these actual records
+without a second run. Final packaging changes only evidence/documentation.
+
+No new compiler run, target execution, instruction evaluator, full-suite,
+hosted CI, original ABI, rebuilt target-byte equality or component-gate claim is made.
 Full current `make test` and CI stay NOT_RUN: expanded evaluator families are
 not authorized. Publication commits use `[skip ci]`.
