@@ -262,7 +262,7 @@ def main():
         ]
         mutants = {}
         for label, old, new in changes:
-            need(text.count(old) == {'zero-run-method-reloaded': 2, 'error-status-not-canonical': 4}.get(label, 1), 'Ambiguous source control: ' + label)
+            need(text.count(old) == {'zero-run-method-reloaded': 2, 'error-status-not-canonical': 5}.get(label, 1), 'Ambiguous source control: ' + label)
             mutation = output / ('control-' + label + '.rs')
             mutation.write_text(text.replace(old, new))
             mutants[label] = build(output / ('mutant-' + label), 3, mutation)
