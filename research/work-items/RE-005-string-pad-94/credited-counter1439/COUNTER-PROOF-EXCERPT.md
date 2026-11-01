@@ -2,7 +2,7 @@
 
 Original source commit24167e3a452d8eda4857918245f022da487620c9.
 Original full proof SHA256 eb0eefb396a17513ec7fa6c48ce8db94e7fc97124e9adc25fd46e50a5fff4202.
-This exact section is retained for dependency closure; no new helper recovery is counted.
+The counter section is retained for dependency closure with terminal blank lines omitted; no new helper recovery is counted.
 
 
 Let q(b)=1 when b<128 or b>=192, otherwise0. Signed-byte comparison against
@@ -44,4 +44,3 @@ Prefix/tail plus all disjoint batches prove count=sum q(P[i]) for every valid
 slice length/alignment, including invalid UTF8 byte patterns as a byte relation.
 For valid UTF8, exactly one non-continuation byte starts each scalar, so this
 also equals the Unicode scalar count. No PC/register/opcode execution is used.
-
