@@ -34,9 +34,12 @@ The library is safe no_std and dependency-free. The real component manifest
 and genuine offline Cargo lock describe exactly one local package; the std
 observer/test harness are research validation tools. Selected Cargo1.89.0
 generated the lock and passed locked offline metadata with explicit authenticated
-rustc/rustdoc1.94.1 and an empty owned Cargo home. Source compilation and the
-twelve new native/static methods are pending the reviewed source checkpoint.
-No source/build success is inferred from metadata validation.
+rustc/rustdoc1.94.1 and an empty owned Cargo home. The first actual qualification
+passed: O0/O3 each matched all122,634 observations, one20-stimulus/50-observation
+unit method per profile passed, twelve native/static methods passed and the
+genuine locked offline Cargo build passed. Three normally returning wrong
+variants produced logical mismatches and actual failing unit assertions.
+The optimized rlib alone rebuilt raw equal; this is not target-byte identity.
 
 See `research/work-items/RE-005-fixed-byte-readers-94` for every native row,
 full FDE/CIE/caller/RELA closure, original mathematical seals, source proof and

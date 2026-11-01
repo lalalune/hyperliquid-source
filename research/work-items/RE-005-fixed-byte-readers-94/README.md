@@ -109,10 +109,41 @@ observer and ordinary harness use std; the library uses no allocator or unsafe.
 No registry, placeholder dependency, original object or inferred implementation
 source is substituted. The selected research compiler is not the original one.
 
-At this checkpoint source/client and native/reference/lock passed staged
-independent review. Final qualifier/document review and actual source builds,
-the twelve native/static methods and required repository checks remain pending.
-No green build is inferred from source review or metadata validation.
+Complete source/native/reference/qualifier/docs passed independent prebuild
+review. A staged whitespace check then found one excess final blank line in
+the qualifier; the original review and AST-identical correction/addendum remain
+retained. No source semantics or recipe changed. The actual run used clean C1
+`8949248669089b6c88551efcb4e32179e3f95742` and passed all40 recorded commands:
+
+| Actual check | Measured result |
+| --- | --- |
+| O0/O3 input-only clients | Each50,391 stimuli/122,634 observations exactly match pre-Rust expected bytes |
+| Ordinary tests | One20-stimulus/50-observation method per profile; two successful executions |
+| Native/static methods | All12 pass on the actual target, including11 corruption controls |
+| Comparator controls | Result-byte alteration detected; missing/extra rows rejected |
+| Normally returning wrong variants | Rollback charge33,092; clear result97,494; wrong32-byte success tag14,448 mismatches of122,634 each |
+| Wrong-variant ordinary methods | Each aborts at a genuine assertion with exit101; fixture dimensions are not completed negative executions |
+| Genuine Cargo recipe | Locked offline build of one dependency-free local package passes |
+| Optimized repeat | Raw-equal15,326-byte rlibs, SHA`9ee8f1b02d27036518636d052d79d152d2ab645cd3e2161276df7ba4cc1efe8c`, no normalization |
+
+Full result SHA-256:
+`91f04b4963d589eceb0eb342ed3ff202ea4e322063d8d52c6ac71b10bd69d334`.
+The complete before/after maps match10,866 actual tracked physical inputs,
+seven clean pinned children,103 provider payloads, two installed manifests and
+the actual compiler/Cargo/C-driver/bfd/objdump identities. All80 raw streams,
+full results, inputs/expectations, six direct rlib/object/IR sets and actual
+Cargo artifacts are retained byte-for-byte in`observed/qualification.zip`.
+Twelve real public reader definitions are bound across the six sets to the
+actual own object and IR. No original compiled-code correspondence is inferred.
+Transient executable hashes are retained; their files are not archived.
+
+An independent private replay also matched both existing clients:80 novel,
+83 serialized cases including reordered duplicates,332 full-result observations
+per profile. These were sealed after author source creation and before that
+reviewer read the Rust. Only the public summary is included; private inputs
+and answers remain private. No new compiler or captured execution was involved.
+The final required four static targets are recorded separately after the
+evidence checkpoint; the already-passing twelve native methods need no repeat.
 
 ## Reproduce and limits
 
