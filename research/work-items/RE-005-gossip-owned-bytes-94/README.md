@@ -93,8 +93,13 @@ The independent peer rechecked all streams, artifacts and fresh physical/tool
 identities. Its separate presealed private replay passed 67 rows (64 novel
 complete inputs plus three duplicates) per protocol on both existing clients;
 changed neighboring answers did not affect output. Only its public-safe summary
-is retained, with no private inputs or answers. Repository static checks are
-pending on the preserved evidence checkpoint; no extra Rust rebuild is needed.
+is retained, with no private inputs or answers. `make doctor`, `make verify`,
+`make catalogue-check` and `make reproduce` all passed on clean evidence
+checkpoint `25cba39b3b764b73d22f4d9556a1273766976bf0`. Its 10,889 physical tracked
+inputs, pins, provider and host-tool identities were identical before/after.
+`STATIC-CHECKS.zip` retains all eight raw streams plus exact command/audit/result
+records. Computational source, native collector, guarded build runner and frozen
+logical expectations are unchanged from the successful C1 experiment.
 
 The expanded current suite, new instruction evaluators, captured program
 execution and hosted CI are NOT_RUN. Exact scoped invocation:
