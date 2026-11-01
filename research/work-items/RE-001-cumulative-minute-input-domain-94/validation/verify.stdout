@@ -1,0 +1,282 @@
+{
+  "status": "PASS",
+  "regenerations": 2,
+  "retainedFiles": 10,
+  "decoderComparison": {
+    "bytes": 7309,
+    "instructionBoundariesAndBytes": "equal",
+    "normalizationMasks": [],
+    "rows": 1480,
+    "semanticProof": false
+  },
+  "rejectedControls": [
+    {
+      "control": "truncated-before-native",
+      "rejected": "Wrong complete node94 identity"
+    },
+    {
+      "control": "extended-before-native",
+      "rejected": "Wrong complete node94 identity"
+    },
+    {
+      "control": "changed-byte-before-native",
+      "rejected": "Wrong complete node94 identity"
+    },
+    {
+      "control": "producer-destination-offset",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x49255bb",
+          "before": "44",
+          "after": "45"
+        }
+      ],
+      "rejected": "Producer/consumer field offsets differ",
+      "staticCounterfactual": "The consumer remains at0x48; the new destination+4 is0x49.",
+      "targetExecution": false
+    },
+    {
+      "control": "consumer-field-offset",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x4925baf",
+          "before": "48",
+          "after": "4c"
+        }
+      ],
+      "rejected": "Producer/consumer field offsets differ",
+      "staticCounterfactual": "The consumed word changes from producer+4 to producer+8.",
+      "targetExecution": false
+    },
+    {
+      "control": "producer-call-slot",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x49255be",
+          "before": "de92e400",
+          "after": "e692e400"
+        }
+      ],
+      "rejected": "Producer call slot changed",
+      "staticCounterfactual": "The relative operand now selects the adjacent slot, not the proven producer.",
+      "targetExecution": false
+    },
+    {
+      "control": "producer-second-store-offset",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x151cc5b",
+          "before": "04",
+          "after": "08"
+        }
+      ],
+      "rejected": "Producer arithmetic/store operation changed",
+      "staticCounterfactual": "The remainder store is redirected from+4 to+8.",
+      "targetExecution": false
+    },
+    {
+      "control": "producer-reciprocal-minus-two",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x151cbf1",
+          "before": "572951cea0c84518",
+          "after": "552951cea0c84518"
+        }
+      ],
+      "rejected": "Positive approximation bound fails",
+      "staticCounterfactual": "M-2 remains odd but makes M*86400-2^77 negative; the complete-domain certificate fails.",
+      "targetExecution": false
+    },
+    {
+      "control": "minute-inclusive-guard",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x4925bed",
+          "before": "a1050000",
+          "after": "a0050000"
+        }
+      ],
+      "rejected": "Observed minute guards changed",
+      "staticCounterfactual": "The second comparison threshold changes from1441 to1440; retained local semantics no longer match.",
+      "targetExecution": false
+    },
+    {
+      "control": "intermediate-overlapping-store",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x4925b35",
+          "before": "58",
+          "after": "48"
+        }
+      ],
+      "rejected": "Explicit overlapping input write",
+      "staticCounterfactual": "The real QWORD zero store moves from[RSP+0x58] to[RSP+0x48], overwriting the consumed word.",
+      "targetExecution": false
+    },
+    {
+      "control": "entry-bypasses-producer",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x4925367",
+          "before": "3a020000",
+          "after": "41080000"
+        }
+      ],
+      "rejected": "Producer does not dominate consumer",
+      "staticCounterfactual": "The real earlier JMP now reaches the conversion without visiting the producer call.",
+      "targetExecution": false
+    },
+    {
+      "control": "dispatch-bypasses-producer",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x700454",
+          "before": "655c2204",
+          "after": "fe642204"
+        }
+      ],
+      "rejected": "Producer does not dominate consumer",
+      "staticCounterfactual": "Selected index0 now reaches the consumer directly; the completed CFG detects loss of dominance.",
+      "targetExecution": false
+    },
+    {
+      "control": "dispatch-selector-register",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x4925fdf",
+          "before": "c5",
+          "after": "c3"
+        }
+      ],
+      "rejected": "Original BPL selector load changed",
+      "staticCounterfactual": "MOVZX now reads BL instead of BPL, invalidating the documented original-selector transfer.",
+      "targetExecution": false
+    },
+    {
+      "control": "dispatch-original-selector-copy",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x4925f25",
+          "before": "f5",
+          "after": "dd"
+        }
+      ],
+      "rejected": "Original ESI-to-EBP copy changed",
+      "staticCounterfactual": "The entry MOV now saves EBX instead of the original ESI selector.",
+      "targetExecution": false
+    },
+    {
+      "control": "dispatch-selector-overwrite",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x4926044",
+          "before": "d0",
+          "after": "c0"
+        }
+      ],
+      "rejected": "Dispatch selector is overwritten",
+      "staticCounterfactual": "The real MOVZX writes EAX instead of EDX after the selector load.",
+      "targetExecution": false
+    },
+    {
+      "control": "prefixed-selector-overwrite",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x4926005",
+          "before": "66662e0f1f840000000000",
+          "after": "6666b8ffff909090909090"
+        }
+      ],
+      "rejected": "Unreviewed prefixed instruction",
+      "staticCounterfactual": "The original 11-byte NOP becomes data16 MOV AX,65535 plus padding, overwriting the selector despite a misleading leading prefix mnemonic.",
+      "targetExecution": false
+    },
+    {
+      "control": "prefixed-entry-bypasses-producer",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x492531d",
+          "before": "4e3bb4ff301a0000",
+          "after": "2ee9890800009090"
+        }
+      ],
+      "rejected": "Unreviewed prefixed instruction",
+      "staticCounterfactual": "The original comparison becomes CS-prefixed JMP to the consumer at0x4925bac plus padding, bypassing the producer.",
+      "targetExecution": false
+    },
+    {
+      "control": "producer-ret-unreachable",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x151cbed",
+          "before": "74",
+          "after": "eb"
+        }
+      ],
+      "rejected": "Expected reachable sole producer RET",
+      "staticCounterfactual": "Changing the raw-status JE to JMP removes every local entry path to the producer RET.",
+      "targetExecution": false
+    },
+    {
+      "control": "fde-extent",
+      "changes": [
+        {
+          "coordinate": "va",
+          "address": "0x12a78e8",
+          "before": "ec0c0000",
+          "after": "ed0c0000"
+        }
+      ],
+      "rejected": "Exact FDE extent differs",
+      "staticCounterfactual": "The decoded unwind extent is one byte longer than the selected complete range.",
+      "targetExecution": false
+    },
+    {
+      "control": "producer-relocation-target",
+      "changes": [
+        {
+          "coordinate": "file",
+          "address": "0x1b34f8",
+          "before": "a0cb510100000000",
+          "after": "a1cb510100000000"
+        }
+      ],
+      "rejected": "Producer relocation binding changed",
+      "staticCounterfactual": "The admitted relative slot would resolve one byte into the producer instead of its entry.",
+      "targetExecution": false
+    },
+    {
+      "control": "missing-decoder-row",
+      "rejected": "Decoded range start differs"
+    },
+    {
+      "control": "missing-independent-export",
+      "rejected": "Retained file membership differs"
+    },
+    {
+      "control": "modified-retained-record",
+      "rejected": "Retained evidence differs: records.json"
+    },
+    {
+      "control": "preserve-existing-output",
+      "rejected": "Preserve existing output"
+    }
+  ],
+  "targetExecution": false,
+  "instructionEvaluation": false
+}
