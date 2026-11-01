@@ -1,0 +1,180 @@
+"""Static mathematical expectations, authored and frozen before the new Rust.
+
+No target execution or instruction emulator is used. Output thresholds provide
+a different formulation from the four ordered min/max operations in the body.
+"""
+from bisect import bisect_right
+from collections import Counter
+import hashlib
+import json
+from pathlib import Path
+import random
+import struct
+import sys
+
+ROOT = Path(__file__).resolve().parents[3]
+PACKET = Path(__file__).resolve().parent
+SOURCE = ROOT / "src/node94-bsr-ladder/lib.rs"
+TARGET = ROOT / "artifacts/node/94/hl-node"
+U32 = (1 << 32) - 1
+POWERS = tuple(1 << exponent for exponent in range(32))
+WITNESSES = {
+    "inner_order": (7, 32, 32, 0),
+    "default_eleven": (0, 4096, 1, 0),
+    "wrapped_upper_and_unsigned_compare": (9, 32, 1, 5),
+    "subtraction_of_max_u32": (10, 65536, 1, U32),
+    "predecessor_at_power_of_two": (8, 256, 1, 0),
+    "minimum_lower_bound": (1, 256, 1, 0),
+    "outer_order": (8, 65536, 65536, 0),
+    "excluded_second_zero": (9, 0, 32, 0),
+    "excluded_second_one": (9, 1, 32, 0),
+    "excluded_third_zero": (9, 32, 0, 0),
+}
+
+
+def digest(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def admit():
+    # Reuse the existing static checker for its complete body, CIE/FDE,
+    # padding, and relocation/call-pattern checks, never its numeric model.
+    sys.path.insert(0, str(ROOT / "tools"))
+    from foundation_bsr_clamp_ladder import inspect
+    from elf_index import sections
+
+    facts = inspect(TARGET)
+    data = TARGET.read_bytes()
+    secs = {section["name"]: section for section in sections(data)}
+    text, eh = secs[".text"], secs[".eh_frame"]
+    body_offset = text["offset"] + 0x556e980 - text["address"]
+    fde_offset = eh["offset"] + 0x2d110c
+    fde = data[fde_offset:fde_offset + 20]
+    fde_start = eh["address"] + 0x2d110c + 8 + struct.unpack_from("<i", fde, 8)[0]
+    extent = struct.unpack_from("<I", fde, 12)[0]
+    assert (fde_start, extent) == (0x556e980, 88)
+    return {
+        "target_sha256": digest(TARGET),
+        "coordinate_system": "ELF virtual addresses, no runtime rebase",
+        "function_start": "0x556e980",
+        "function_end_exclusive": "0x556e9d8",
+        "function_file_offset": hex(body_offset),
+        "function_bytes": 88,
+        "body_hex": data[body_offset:body_offset + 88].hex(),
+        "body_sha256": facts["body_sha256"],
+        "fde_section_offset": "0x2d110c",
+        "fde_file_offset": hex(fde_offset),
+        "fde_hex": fde.hex(),
+        "fde_start": hex(fde_start),
+        "fde_extent": extent,
+        "cie_hex": data[eh["offset"]:eh["offset"] + 24].hex(),
+        "static_checker_sha256": digest(ROOT / "tools/foundation_bsr_clamp_ladder.py"),
+        "prior_evidence_sha256": digest(ROOT / "research/work-items/foundation-bsr-clamp-ladder-94/evidence.json"),
+        "captured_binary_executed": False,
+        "neighbor_body_included": False,
+    }
+
+
+def thresholds(value, second, third, fourth):
+    """Count attained integer thresholds 6..12; no ordered clamp evaluation.
+
+    BSR(n) is the unique k with 2**k <= n < 2**(k+1). For each
+    threshold t, max(min(v, hi), lo) >= t iff lo >= t OR both
+    v >= t and hi >= t. The outer 5..12 steps yield 5 plus the
+    number of satisfied thresholds in 6..12.
+    """
+    if second < 2 or third == 0:
+        return None  # A safe API exclusion, not an original return value.
+    upper = (bisect_right(POWERS, second - 1) - 1 - fourth) % (1 << 32)
+    lower_ge = lambda t: (bisect_right(POWERS, second) >= t
+                          and bisect_right(POWERS, third) + 1 >= t)
+    defaulted = value or 11
+    return 5 + sum(lower_ge(t) or (defaulted >= t and upper >= t)
+                   for t in range(6, 13))
+
+
+def corpus():
+    cases = dict.fromkeys(WITNESSES.values(), "witness")
+
+    def add(row, category):
+        cases.setdefault(row, category)
+
+    edges = sorted({0, 1, U32} | {
+        power + delta for power in POWERS for delta in (-1, 0, 1)
+        if 0 <= power + delta <= U32})
+    values = (0, 1, 5, 6, 9, 11, 12, 13, U32)
+    for second in edges:
+        rank = max(0, bisect_right(POWERS, max(1, second - 1)) - 1)
+        for fourth in sorted({0, max(0, rank - 1), rank, rank + 1, U32}):
+            for third in (1, 16, 128, U32):
+                for value in values:
+                    add((value, second, third, fourth), "second_power_edges")
+    for third in edges:
+        for second in (2, 32, 64, 256, 1 << 31, U32):
+            for fourth in (0, 31, 32, U32):
+                for value in (0, 5, 9, 12, U32):
+                    add((value, second, third, fourth), "third_power_edges")
+    for second in edges:
+        for value in values:
+            for fourth in (0, 31, 1 << 31, U32):
+                add((value, second, 0, fourth), "third_zero")
+    for second in (0, 1):
+        for third in edges:
+            for value in (0, 9, U32):
+                add((value, second, third, U32), "second_zero_or_one")
+    # A fixed seed supplies repeatable mixed magnitudes, not production data.
+    rng = random.Random(940556980)
+    for _ in range(4096):
+        second = rng.randrange(2, (1 << rng.randrange(2, 33)))
+        third = rng.randrange(1, (1 << rng.randrange(1, 33)))
+        value = rng.choice((0, rng.getrandbits(32), rng.randrange(1, 33)))
+        fourth = rng.choice((rng.getrandbits(32), rng.randrange(0, 34)))
+        add((value, second, third, fourth), "seeded_mixed_magnitudes")
+    return list(cases), Counter(cases.values())
+
+
+def fixture_bytes():
+    rows, counts = corpus()
+    inputs = "".join("\t".join(map(str, row)) + "\n" for row in rows).encode()
+    results = [thresholds(*row) for row in rows]
+    expected = "".join("none\n" if value is None else f"{value}\n"
+                       for value in results).encode()
+    return inputs, expected, {
+        "cases": len(rows),
+        "admitted_cases": sum(value is not None for value in results),
+        "excluded_cases": results.count(None),
+        "categories": dict(counts),
+        "outputs": dict(Counter(map(str, results))),
+        "witnesses": {name: {"row_zero_based": rows.index(row), "input": row,
+                             "expected": thresholds(*row)}
+                      for name, row in WITNESSES.items()},
+    }
+
+
+def freeze():
+    if SOURCE.exists():
+        raise ValueError("Freeze must precede the new Rust source")
+    directory = PACKET / "frozen"
+    directory.mkdir()
+    facts = admit()
+    inputs, expected, coverage = fixture_bytes()
+    (directory / "inputs.tsv").write_bytes(inputs)
+    (directory / "expected.txt").write_bytes(expected)
+    manifest = {
+        "method": "binary-grounded output-threshold counting with power-of-two rank lookup",
+        "rust_source_exists_at_freeze": False,
+        "oracle_source_sha256": digest(__file__),
+        "inputs_sha256": hashlib.sha256(inputs).hexdigest(),
+        "expected_sha256": hashlib.sha256(expected).hexdigest(),
+        "static_facts": facts,
+        "coverage": coverage,
+        "whole_input_domain_exhausted": False,
+    }
+    (directory / "ORACLE-FREEZE.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    return manifest
+
+
+if __name__ == "__main__":
+    if sys.argv[1:] != ["--freeze"]:
+        raise SystemExit("usage: oracle.py --freeze (before writing Rust only)")
+    print(json.dumps(freeze(), indent=2))
