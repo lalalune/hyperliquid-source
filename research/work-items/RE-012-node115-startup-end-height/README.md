@@ -77,8 +77,8 @@ The returned raw tag is compared with **1** at `0x2b41d42`:
 - Tag1 falls through to a register-indirect call through the returned object,
   then jumps to common continuation `0x2b41ecf`. Its normal-path behavior
   preserves the prior stored word; complete drop/unwind semantics are unclosed.
-- Other tags branch to `0x2b41eb3`, which stores returned RDX at context
-  **`+0x30`**, then compares the existing qword at the saved pointer
+- Other tags branch to `0x2b41eb3`, which stores returned RDX in the stack
+  temporary **`[rsp+0x30]`**, then compares the existing qword at the saved pointer
   (context+`0x38`) against RDX. **Unsigned JB** to `0x2b42d07` occurs if the
   existing word is smaller. Otherwise control reaches `0x2b41ecf`.
 
@@ -114,7 +114,7 @@ production key or paid dataset is executed.
 
 Six focused tests pass. Boundary permutations cover u64 values0,1,2^63-1,
 2^63 and2^64-1. Actual CMOVBE opcode counterfactuals select the minimum instead
-of the maximum. Actual caller tag/store/condition/displacement changes alter
+of the maximum. The store uses RSP, not a context field; changing its SIB byte from0x24 to0x23 is rejected. Actual caller tag/store/condition/displacement changes alter
 the recovered admission parameters. The real selector-slot displacement and
 Location line are independently corrupted. Changing the file placeholder
 does not falsely replace the RELA addend, while changing the actual RELA

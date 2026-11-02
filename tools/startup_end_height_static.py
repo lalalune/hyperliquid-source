@@ -43,7 +43,7 @@ def parameters(data):
             raise ValueError('reduction/caller opcode changed')
     return {'cmov_conditions': [read(a, 1)[1][0] for a in [0x595b3a9, 0x595b3ba, 0x595b3d8]],
             'caller_error_tag': read(0x2b41d45, 1)[1][0],
-            'caller_store_offset': read(0x2b41eb7, 1)[1][0],
+            'caller_stack_store_offset': read(0x2b41eb7, 1)[1][0],
             'caller_unsigned_condition': read(0x2b41ebc, 1)[1][0],
             'caller_unsigned_destination': 0x2b41ec1 + struct.unpack('<i', read(0x2b41ebd, 4)[1])[0]}
 

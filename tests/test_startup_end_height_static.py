@@ -56,8 +56,10 @@ class StartupEndHeightTests(unittest.TestCase):
         self.assertEqual(subject.reduce_values(self.report['parameters'], [1, 1 << 63, 3]), 1 << 63)
 
     def test_caller_gate_assignment_and_bound_branch_operands(self):
+        with self.assertRaisesRegex(ValueError, 'reduction/caller opcode changed'):
+            subject.parameters(self.mutate(0x2b41eb6, b'\x23'))
         p = self.report['parameters']
-        self.assertEqual((p['caller_error_tag'], p['caller_store_offset'], p['caller_unsigned_condition'],
+        self.assertEqual((p['caller_error_tag'], p['caller_stack_store_offset'], p['caller_unsigned_condition'],
                           p['caller_unsigned_destination']), (1, 0x30, 0x82, 0x2b42d07))
         for address, raw in [(0x2b41d45, b'\x02'), (0x2b41eb7, b'\x38'),
                              (0x2b41ebc, b'\x83'), (0x2b41ebd, struct.pack('<i', 0))]:
