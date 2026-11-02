@@ -1,0 +1,11 @@
+# Gates and evidence interpretation
+
+The coordinator authorized this scoped pre-code packet after reviewing the658-byte feasibility argument. This authorization does not permit production Rust/client construction or compilation. Save the complete immutable pre-code manifest/freeze after successful normal/optimized replay, then obtain independent root and peer native/manual/oracle review. The original prior readiness/termination packets remain unchanged.
+
+The static verifier regenerates two native-export trees, two arithmetic certificates and two corpus trees into fresh directories. It compares all44 output files per tree exactly, checks the packet manifest and reports source presence separately. Public receipts replace only command path prefixes with explicit logical placeholders; evidence contents, native bytes and value streams are never normalized.
+
+The controls reject changed/truncated capture identity; independently observe changed operand/data fields below whole-image/body identity; bind complete literals, branch/return bytes, repinned FDE/CIE/index relations, actual call displacements/relocations and complete8-byte relocation overlap; reject missing native rows/calls and vacuous/unterminated CFGs; and execute deliberately incorrect versions of authored closed-form mathematics. The13 independent false-model witnesses include both tie parities and the two large-input discontinuities. These are distinct categories, not a sum of automatic semantic proofs.
+
+The native collector is read-only. It authenticates the single capture before providers, records actual provider bytes/versions/options and reads it again afterward. All outputs are confined to the requested new directory. No captured execution, emulator, instruction-state machine, target service, Git mutation or general repository test discovery participates.
+
+After an independent pre-code gate, source authoring remains a separate phase: real dependency-free Cargo graph; private canonical return fields; input-only driver; exact source/toolchain/config/ancestor-workspace admission; source freeze and a later build gate; actual debug/release, two clean directories, frozen corpus, compiling mutants and malformed/comparator controls. Retain failures and raw differing artifacts without masks. Passing static evidence is never reported as a successful Rust build.
