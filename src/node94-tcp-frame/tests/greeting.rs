@@ -404,3 +404,181 @@ fn decoded_exchange_handles_large_record_reply_under_nonzero_first_byte() {
         assert_eq!(decoded.charged, 6216);
     });
 }
+
+fn state_reply(hash_variant: u8) -> Vec<u8> {
+    let mut payload = vec![0, 2, 0xaa, 0xbb, 42, hash_variant];
+    payload.extend([0x5a; 32]);
+    payload.push(0); // Empty first map.
+    if hash_variant == 1 {
+        payload.push(0); // Empty second map.
+    }
+    payload.push(0xfe); // The decoder permits a suffix.
+    payload
+}
+
+#[test]
+fn routed_data_reply_retains_values_and_metadata_for_required_validation() {
+    use greeting::policy::Route;
+    use greeting::reply::Reply;
+
+    run(async {
+        for first in [1, 3, 255] {
+            for hash in [0, 1] {
+                let req = request(first, 128, true);
+                let payload = state_reply(hash);
+                let expected = greeting::reply::decode(&payload, req.reply_limits().max_len())
+                    .expect("valid state reply");
+                let mut input = raw_frame(&payload);
+                input.extend(raw_frame(&[5]));
+                let mut io = Stream::new(input);
+                let (route, decoded) = greeting::exchange_routed(&mut io, req).await.unwrap();
+                assert_eq!(route, Route::ValidateState);
+                assert_eq!(decoded, expected);
+                assert_eq!(
+                    (decoded.consumed, decoded.remaining, decoded.charged),
+                    (payload.len() - 1, 1, if hash == 0 { 66 } else { 74 })
+                );
+                match decoded.reply {
+                    Reply::Variant0 { bytes, word, .. } => {
+                        assert_eq!(bytes, [0xaa, 0xbb]);
+                        assert_eq!(word, 42);
+                    }
+                    _ => panic!("state fields lost"),
+                }
+                assert_eq!(io.output, [0, 0, 0, 3, 0, first, 128, 0]);
+                assert_eq!(io.position, payload.len() + 5);
+                assert_eq!(&io.input[io.position..], raw_frame(&[5]));
+            }
+        }
+    });
+}
+
+#[test]
+fn routed_stream_only_reply_requires_an_exact_zero_first_byte() {
+    use greeting::policy::{PeerRejection, Route};
+
+    run(async {
+        let payload = [3, 0xaa, 0xbb];
+        let mut io = Stream::new(raw_frame(&payload));
+        let (route, decoded) = greeting::exchange_routed(&mut io, request(0, 255, false))
+            .await
+            .unwrap();
+        assert_eq!(route, Route::ContinueStream);
+        assert_eq!(decoded.reply, greeting::reply::Reply::Variant3);
+        assert_eq!(
+            (decoded.consumed, decoded.remaining, decoded.charged),
+            (1, 2, 4)
+        );
+        for first in [1, 2, 128, 255] {
+            let mut io = Stream::new(raw_frame(&payload));
+            assert!(matches!(
+                greeting::exchange_routed(&mut io, request(first, 255, false)).await,
+                Err(ExchangeError::Rejected(PeerRejection::InconsistentGreeting))
+            ));
+        }
+    });
+}
+
+#[test]
+fn routed_rejections_report_named_reasons_without_reading_the_following_frame() {
+    use std::error::Error;
+
+    use greeting::policy::PeerRejection;
+
+    run(async {
+        let mut records = vec![0, 0, 0, 2];
+        for index in 0..3 {
+            records.extend([index, index + 3]);
+            records.extend([index; 2048]);
+        }
+        for (first, payload, expected) in [
+            (0, vec![1, 4, 5, 6], PeerRejection::InconsistentGreeting),
+            (0, vec![2], PeerRejection::NoQuorumL1Hash),
+            (0, vec![4], PeerRejection::Full),
+            (0, vec![5], PeerRejection::RateLimited),
+            (2, state_reply(0), PeerRejection::InconsistentGreeting),
+            (1, records, PeerRejection::InconsistentGreeting),
+        ] {
+            let frame = raw_frame(&payload);
+            let mut input = frame.clone();
+            input.extend(raw_frame(&[3]));
+            let mut io = Stream::new(input);
+            let error = greeting::exchange_routed(&mut io, request(first, 0, false))
+                .await
+                .unwrap_err();
+            match &error {
+                ExchangeError::Rejected(reason) => assert_eq!(*reason, expected),
+                other => panic!("wrong error priority: {other}"),
+            }
+            assert_eq!(error.to_string(), expected.to_string());
+            assert_eq!(error.source().unwrap().to_string(), expected.to_string());
+            assert_eq!(io.position, frame.len());
+            assert_eq!(&io.input[io.position..], raw_frame(&[3]));
+            // Stream::poll_shutdown panics: borrowing I/O does not close it.
+        }
+    });
+}
+
+#[test]
+fn routed_exchange_finishes_decoding_before_rejecting_a_selector() {
+    use greeting::reply::{ErrorKind, Failure};
+
+    run(async {
+        for (payload, expected) in [
+            (
+                vec![1],
+                Failure {
+                    kind: ErrorKind::UnexpectedEnd { needed: 1 },
+                    consumed: 1,
+                    charged: 12,
+                },
+            ),
+            (
+                vec![0, 0, 0, 2],
+                Failure {
+                    kind: ErrorKind::UnexpectedEnd { needed: 1 },
+                    consumed: 4,
+                    charged: 32,
+                },
+            ),
+            (
+                vec![6],
+                Failure {
+                    kind: ErrorKind::UnexpectedVariant {
+                        type_name: "AbciStreamGreeting",
+                        found: 6,
+                        max: 5,
+                    },
+                    consumed: 1,
+                    charged: 4,
+                },
+            ),
+        ] {
+            let mut io = Stream::new(raw_frame(&payload));
+            match greeting::exchange_routed(&mut io, request(1, 0, false)).await {
+                Err(ExchangeError::Decode(actual)) => assert_eq!(actual, expected),
+                other => panic!("decoded selector routed before its payload: {other:?}"),
+            }
+        }
+    });
+}
+
+#[test]
+fn routed_transport_errors_keep_their_original_priority() {
+    run(async {
+        let mut io = Stream::new(raw_frame(&[4]));
+        io.zero_write = true;
+        assert!(matches!(
+            greeting::exchange_routed(&mut io, request(0, 0, false)).await,
+            Err(ExchangeError::Send(_))
+        ));
+        assert_eq!(io.read_polls, 0);
+
+        let mut io = Stream::new(raw_frame(&[4]));
+        io.read_error = Some(io::ErrorKind::ConnectionReset);
+        assert!(matches!(
+            greeting::exchange_routed(&mut io, request(0, 0, false)).await,
+            Err(ExchangeError::Receive(_))
+        ));
+    });
+}

@@ -1,8 +1,9 @@
 //! The established request/reply-frame boundary of node #94's initial greeting.
 //!
 //! This is called after a connection exists. `exchange_frame` preserves the
-//! reply payload; `exchange` decodes its wire fields. Neither accepts a peer.
-//! No endpoint selection, retry, authentication or reconnect is supplied.
+//! reply payload; `exchange` decodes its wire fields; `exchange_routed` applies
+//! the initial caller dispatch. None accepts a peer. No endpoint selection,
+//! retry, authentication or reconnect is supplied.
 
 use core::fmt;
 
@@ -11,6 +12,7 @@ use tokio::io::{AsyncRead, AsyncWrite};
 use crate::deadlines::{self, DeadlineError};
 use crate::{DecodedFrame, FrameLimits};
 
+pub mod policy;
 pub mod reply;
 
 /// The two original greeting bytes and the separate reader timing flag.
@@ -40,14 +42,24 @@ impl Request {
             3_000_000_000
         })
     }
+
+    /// Apply the initial reply dispatch using the first byte exactly as sent.
+    ///
+    /// Data-bearing replies test bit zero; the stream-only reply tests whether
+    /// the whole byte is zero. `ValidateState` requires further validation and
+    /// is not peer acceptance. Other request fields do not affect this step.
+    pub fn route_reply(self, reply: &reply::Reply) -> Result<policy::Route, policy::PeerRejection> {
+        policy::route(self.first, reply)
+    }
 }
 
-/// A transport failure or a rejected reply encoding.
+/// A transport failure, rejected reply encoding, or initial caller rejection.
 #[derive(Debug)]
 pub enum ExchangeError {
     Send(DeadlineError),
     Receive(DeadlineError),
     Decode(reply::Failure),
+    Rejected(policy::PeerRejection),
 }
 
 impl fmt::Display for ExchangeError {
@@ -56,6 +68,7 @@ impl fmt::Display for ExchangeError {
             Self::Send(error) => write!(f, "greeting send: {error}"),
             Self::Receive(error) => write!(f, "greeting receive: {error}"),
             Self::Decode(error) => error.fmt(f),
+            Self::Rejected(error) => error.fmt(f),
         }
     }
 }
@@ -65,6 +78,7 @@ impl std::error::Error for ExchangeError {
         match self {
             Self::Send(error) | Self::Receive(error) => Some(error),
             Self::Decode(error) => Some(error),
+            Self::Rejected(error) => Some(error),
         }
     }
 }
@@ -104,4 +118,25 @@ pub async fn exchange<S: AsyncRead + AsyncWrite + Unpin + ?Sized>(
 ) -> Result<reply::Decoded, ExchangeError> {
     let frame = exchange_frame(stream, request).await?;
     reply::decode(&frame.payload, request.reply_limits().max_len()).map_err(ExchangeError::Decode)
+}
+
+/// Exchange, decode, and apply the target caller's initial reply routing.
+///
+/// Returns the route together with unchanged decoded fields and metadata.
+/// `ValidateState` requires additional state validation; neither route accepts
+/// or authenticates a peer. Decoding completes before routing, so malformed
+/// replies remain decode errors even when their selector would be rejected.
+///
+/// The caller must discard the stream on rejection, other error, or cancellation.
+/// The target closes rejected streams, but this function borrows generic I/O
+/// and cannot close or take ownership of the caller's stream.
+pub async fn exchange_routed<S: AsyncRead + AsyncWrite + Unpin + ?Sized>(
+    stream: &mut S,
+    request: Request,
+) -> Result<(policy::Route, reply::Decoded), ExchangeError> {
+    let decoded = exchange(stream, request).await?;
+    let route = request
+        .route_reply(&decoded.reply)
+        .map_err(ExchangeError::Rejected)?;
+    Ok((route, decoded))
 }
