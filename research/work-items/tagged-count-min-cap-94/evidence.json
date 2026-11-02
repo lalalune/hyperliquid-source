@@ -1,0 +1,58 @@
+{
+  "task_id": "RE-001",
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "target_size": 91774280,
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "captured_binary_executed": false,
+  "progress_gate_requested": false,
+  "function": {
+    "start_va": "0x22c3f10",
+    "end_va_exclusive": "0x22c3f55",
+    "bytes": 69,
+    "sha256": "1b7701b64e3f85801c9ee03ff1b4f5882c2cf90f520e99d0929fc010fd9304f3",
+    "fde_section_offset": "0x62e80",
+    "next_fde_pc": "0x22c3f60",
+    "padding_bytes": 11,
+    "padding_stride_end": "0x22c3f60",
+    "inferred_label": "tagged (3-way) count with unsigned saturating subtraction, capped by a field upper bound"
+  },
+  "behavior": {
+    "arguments": "rdi = a struct pointer; the single result is returned in rax; all comparisons are unsigned",
+    "tag_offset": "0x0",
+    "field_a_offset": "0x10",
+    "field_b_offset": "0x18",
+    "cap_offset": "0x28",
+    "tag_equal_one_compare_width_bits": 32,
+    "calls_inside_window": 0,
+    "formula": "count(rdi) = umin(base, [rdi+0x28]) where base = [rdi+0x18] when [rdi]==0 (full 64-bit), base = usub_sat([rdi+0x10], [rdi+0x18]) when (low32[rdi])==1, else base = 0",
+    "tag_zero_path": "[rdi]==0 -> rax = [rdi+0x18] at 0x22c3f37, then capped by [rdi+0x28]; return umin([rdi+0x18], [rdi+0x28])",
+    "tag_one_path": "low32([rdi])==1 -> rcx = [rdi+0x10] - [rdi+0x18]; cmovae keeps it only when [rdi+0x10] >= [rdi+0x18] (unsigned), else rax stays 0 (saturating); then capped by [rdi+0x28]",
+    "default_path": "[rdi]!=0 and low32([rdi])!=1 -> rax = 0 at 0x22c3f47; the cap step (cmovb against [rdi+0x28]) can never lower 0, so the function returns 0",
+    "cap_mechanism": "each path loads [rdi+0x28] into rcx, does cmp %rax,%rcx then cmovb %rcx,%rax, i.e. rax = umin(rax, [rdi+0x28])",
+    "saturating_subtraction": "the tag-one arm uses sub + cmovae so an underflow ([rdi+0x10] < [rdi+0x18]) yields 0 rather than wrapping to a huge unsigned value",
+    "tag_compare_note": "emptiness/zero uses the full 64-bit tag (test %rax,%rax); the ==1 discriminant compares only the low 32 bits (cmp $0x1,%eax). A tag whose low 32 bits are 1 but whose high bits are set still takes the tag-one arm; a tag whose low 32 bits are 0 but nonzero overall takes the default arm.",
+    "output_shape": "single unsigned qword in rax whose contract past the cap is not claimed",
+    "meaning_of_struct_fields": "unknown, not claimed",
+    "edges": {
+      "tag0_under_cap": "tag=0, [rdi+0x18]=5, [rdi+0x28]=10 -> 5",
+      "tag0_over_cap": "tag=0, [rdi+0x18]=20, [rdi+0x28]=10 -> 10",
+      "tag1_normal": "low32tag=1, [rdi+0x10]=30, [rdi+0x18]=10, [rdi+0x28]=100 -> 20",
+      "tag1_underflow": "low32tag=1, [rdi+0x10]=10, [rdi+0x18]=30, [rdi+0x28]=100 -> 0",
+      "tag1_capped": "low32tag=1, [rdi+0x10]=50, [rdi+0x18]=10, [rdi+0x28]=5 -> 5",
+      "default_two": "tag=2 -> 0",
+      "tag_high_bits_low32_one": "tag=0x100000001 (low32=1, nonzero high) -> tag-one arm",
+      "tag_low32_zero_high_set": "tag=0x100000000 (low32=0, nonzero overall) -> default arm -> 0"
+    }
+  },
+  "incoming_pattern_scan": {
+    "section": ".text",
+    "byte_count": 70370352,
+    "complete_xref_census": false,
+    "direct_callers": ["0x227d52d"],
+    "tail_jump_callers": [],
+    "relocation_slots": [],
+    "relocation_slots_note": "no R_X86_64_RELATIVE record in .rela.dyn names this window as its addend; the window is reached only by the single direct e8 call at 0x227d52d",
+    "caller_note": "the sole caller at 0x227d52d (function head 0x227d430) forwards a pointer into rdi (mov %rsi,%rdi at 0x227d527) and stores the returned count into a stack slot [rsp+0x28] (mov %rax,0x28(%rsp) at 0x227d537) that is then consumed by an indirect call"
+  }
+}
