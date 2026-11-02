@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Node94 bounded iterator value consistency evidence; never executes target."""
-import argparse,hashlib,json,re,struct,subprocess
+import argparse,hashlib,json,re,struct,subprocess,tempfile
 from pathlib import Path
 from artifacts import ROOT,check
 from elf_index import sections
@@ -40,18 +40,24 @@ def generate(binary,output):
     identity=next(i for i in json.loads((ROOT/'provenance/artifacts.json').read_text())['files'] if i['path']=='artifacts/node/94/hl-node')
     check(binary,identity)
     data=binary.read_bytes();controls(data);rela=relocations(data)
-    frames=subprocess.check_output(['readelf','-wf',str(binary)],text=True)
-    fdes=[(int(a,16),int(b,16))for a,b in re.findall(r'FDE[^\n]*pc=([0-9a-f]+)\.\.([0-9a-f]+)',frames)]
-    output.mkdir(parents=True,exist_ok=True);ranges={}
-    for name,(start,end)in RANGES.items():
-        if fdes.count((start,end))!=1:raise ValueError('Exact iter FDE missing')
-        offset,body=read_va(data,start,end-start)
-        ranges[name]={'start_va':hex(start),'end_va':hex(end),'file_offset':hex(offset),'bytes':len(body),'sha256':hashlib.sha256(body).hexdigest()}
-        raw=subprocess.check_output(['objdump','-d',f'--start-address={start:#x}',f'--stop-address={end:#x}',str(binary)],text=True)
-        (output/(name+'.objdump.txt')).write_text(raw.replace(str(binary),'<authenticated-node94>'))
-    (output/'frames.txt').write_text('\n'.join(line for line in frames.splitlines()if 'FDE'in line and any(f'pc={a:016x}..{b:016x}'in line for a,b in RANGES.values()))+'\n')
-    raw_rela=subprocess.check_output(['readelf','-rW',str(binary)],text=True)
-    (output/'relocations.txt').write_text('\n'.join(line for line in raw_rela.splitlines()if re.match(r'^[0-9a-f]+\s',line)and int(line.split()[0],16)in RELATIVE)+'\n')
+    # Bind external decoder input to the same bytes using a private snapshot:
+    # readelf/objdump reopen their argument, so decoding the admitted path
+    # would bind this packet to whatever the path serves at decode time.
+    with tempfile.TemporaryDirectory() as temporary:
+        snapshot=Path(temporary)/'node94.elf';snapshot.write_bytes(data)
+        check(snapshot,identity)  # Authenticate the exact bytes the decoders reopen.
+        frames=subprocess.check_output(['readelf','-wf',str(snapshot)],text=True)
+        fdes=[(int(a,16),int(b,16))for a,b in re.findall(r'FDE[^\n]*pc=([0-9a-f]+)\.\.([0-9a-f]+)',frames)]
+        output.mkdir(parents=True,exist_ok=True);ranges={}
+        for name,(start,end)in RANGES.items():
+            if fdes.count((start,end))!=1:raise ValueError('Exact iter FDE missing')
+            offset,body=read_va(data,start,end-start)
+            ranges[name]={'start_va':hex(start),'end_va':hex(end),'file_offset':hex(offset),'bytes':len(body),'sha256':hashlib.sha256(body).hexdigest()}
+            raw=subprocess.check_output(['objdump','-d',f'--start-address={start:#x}',f'--stop-address={end:#x}',str(snapshot)],text=True)
+            (output/(name+'.objdump.txt')).write_text(raw.replace(str(snapshot),'<authenticated-node94>'))
+        (output/'frames.txt').write_text('\n'.join(line for line in frames.splitlines()if 'FDE'in line and any(f'pc={a:016x}..{b:016x}'in line for a,b in RANGES.values()))+'\n')
+        raw_rela=subprocess.check_output(['readelf','-rW',str(snapshot)],text=True)
+        (output/'relocations.txt').write_text('\n'.join(line for line in raw_rela.splitlines()if re.match(r'^[0-9a-f]+\s',line)and int(line.split()[0],16)in RELATIVE)+'\n')
     result={'target_sha256':identity['sha256'],'target_bytes':len(data),'ranges':ranges,'controls':{hex(a):b for a,b in CONTROLS.items()},'literal_bytes':{hex(a):b for a,b in LITERALS.items()},'relocations':rela,'captured_binary_executed':False,'limits':'One iterator-associated FDE; collection ownership/type, enclosing enum ABI, helper/panic closure and runtime equivalence unresolved.'}
     (output/'records.json').write_text(json.dumps(result,indent=2)+'\n');return result
 
