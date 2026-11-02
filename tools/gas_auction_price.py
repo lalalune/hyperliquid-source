@@ -101,6 +101,12 @@ class Image:
         # SHT_NOBITS sections have no file bytes, so they never resolve an address.
         self.mapped = sorted((s for s in self.sections if s["type"] != 8 and s["address"] and s["size"]),
                              key=lambda s: s["address"])
+        # The dict below keeps only the last section of a given name, so a
+        # duplicate would silently decide which bytes the lookups below
+        # read. Refuse the ambiguity for every name this class looks up.
+        for name in (".text", ".rela.dyn"):
+            if sum(s["name"] == name for s in self.sections) > 1:
+                raise EvidenceError(f"Duplicate section: {name}")
         self.named = {s["name"]: s for s in self.sections}
         _, fdes = eh_frame_records(blob, self.sections)
         ends = {}
