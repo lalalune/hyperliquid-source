@@ -100,10 +100,16 @@ origins restored without pin/global-config changes. The catalogue also rejected
 a stale provenance pin after command-path sanitization; refreshing that pin
 restored the check without changing source objects or comparison results.
 Absolute local prefixes in retained command records are explicitly normalized;
-original stream hashes and ignored originals remain recorded. Full repository tests are
-required for the new collector and remain pending until run on its committed
-head. No hosted-CI, integrated node, original source/build or complete network
-compatibility result is claimed. Captured binaries, instruction emulators,
+original stream hashes and ignored originals remain recorded. Full `make test`
+passed on unchanged source commit `463982631d98d782ffce7bfef4791e4e5d66b564`: 77 files,
+395 reported tests, zero failed files, three explicit skips, 1038.609 seconds.
+The skips are the optional pinned-libcore check, optional nonce-ring Rust
+qualification, and a nested-JRE host condition. Exact streams, inventory and
+result are retained under `full-suite/` in the log archive. The independent
+review of that commit found no blocker; its exact 25-member portable bundle is
+also retained as `peer/portable-review.json.gz`. This later update changes only
+README/validation evidence and the manifest. No hosted-CI, integrated node,
+original source/build or complete network compatibility result is claimed. Captured binaries, instruction emulators,
 Linux objects, socket services and chain actions were never executed.
 
 `research-sources.json`, `research-claims.jsonl` and `countersearch.json` carry
