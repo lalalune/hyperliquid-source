@@ -61,7 +61,11 @@ def scalar_identity(layout,record,key):
 
 def analyze(data):
     _,fs,_=fde_extents(data)
-    fdes={(f['start'],f['end']):f for f in fs}
+    fdes={}
+    for f in fs:
+        if (f['start'],f['end']) in fdes:
+            raise ValueError('duplicate FDE extent')
+        fdes[(f['start'],f['end'])]=f
     secs=sections(data);rs=next(s for s in secs if s['name']=='.rela.dyn')
     rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[rs['offset']:rs['offset']+rs['size']])}
     body=read(data,0x154cd10,299)[1]
