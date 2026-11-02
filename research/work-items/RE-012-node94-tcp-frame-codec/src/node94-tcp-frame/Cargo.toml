@@ -1,0 +1,24 @@
+[package]
+name = "node94-tcp-frame"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.94.1"
+license = "MIT"
+publish = false
+description = "Evidence-bounded offline codec for node #94 TCP frames"
+
+[lib]
+path = "src/lib.rs"
+
+[features]
+default = []
+stream = ["dep:tokio"]
+timed-stream = ["stream", "tokio/time", "dep:varint"]
+
+[dependencies]
+lz4_flex = "=0.11.6"
+tokio = { version = "=1.44.2", default-features = false, features = ["io-util"], optional = true }
+varint = { package = "hl-bincode-varint", path = "../bincode-varint", optional = true }
+
+[dev-dependencies]
+tokio = { version = "=1.44.2", default-features = false, features = ["rt", "time", "test-util"] }

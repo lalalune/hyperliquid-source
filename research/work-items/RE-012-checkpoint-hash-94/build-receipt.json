@@ -212,7 +212,7 @@
     "sha256": "e038a19850e1c5f90e26ce08150fe6aa14370151e382bc6708676b2ee0053af2",
     "executed": false
   },
-  "full_repository_suite": "NOT_STARTED; earlier parent sweeps still active",
+  "full_repository_suite": "RUNNING against source commit a332eefc; separate integration checks do not claim a full latest-main sweep.",
   "limits": "Successful hash-helper value semantics only, with caller-supplied canonical prefix; no full state serializer, ABI identity, quorum/checkpoint validity, integrated node, network or Docker acceptance.",
   "focused_evidence": {
     "tests": 9,
@@ -240,5 +240,57 @@
     ],
     "exit_code": 0,
     "log_sha256": "d7558d6aaa8ebcaf48561f6849f855dd35c810e583d9e00a85c8892aea20655c"
-  }
+  },
+  "source_commit": "a332eefc719978b387ca00e5b3dc09bc525e3b25",
+  "integration_base": "2c75904241b9165693d40dea8b0d0d340f8e22b3",
+  "integration_checks": [
+    {
+      "name": "native-tests",
+      "command": [
+        "/opt/miniconda3/bin/python3",
+        "tests/test_checkpoint_hash_evidence.py",
+        "-v"
+      ],
+      "passed": 9,
+      "log_sha256": "c8569a7c6126515d1ab373b3db371c228550cb862550f04871ef424778f9bab5"
+    },
+    {
+      "name": "manifest-tests",
+      "command": [
+        "/opt/miniconda3/bin/python3",
+        "tests/test_verify_packets.py",
+        "-v"
+      ],
+      "passed": 12,
+      "log_sha256": "3f3a7bd0f706191010a165f43f530371a34cd36b35fb00606695fd0ffce4fac9"
+    },
+    {
+      "name": "rust-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "checkpoint_hash"
+      ],
+      "passed": 5,
+      "log_sha256": "f94b9dd3e6f45889e3746c463908172db5a293dab6118625312b03649148b0bd"
+    },
+    {
+      "name": "repository",
+      "command": [
+        "make",
+        "verify",
+        "catalogue-check",
+        "reproduce",
+        "PYTHON=/opt/miniconda3/bin/python3"
+      ],
+      "exit_code": 0,
+      "log_sha256": "9b6af8f44ebc85401cb8cb2444ea53973b0d51034a9dfba7b76a4fccddd5213d"
+    }
+  ]
 }
