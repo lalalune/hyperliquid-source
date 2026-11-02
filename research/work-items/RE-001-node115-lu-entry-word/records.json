@@ -1,0 +1,111 @@
+{
+ "bodies": {
+  "helper": {
+   "bytes": 329,
+   "cie": "0x00000000",
+   "eh_frame_offset": "0x00330574",
+   "hi": "0x5bb68d9",
+   "instructions": 104,
+   "lo": "0x5bb6790",
+   "ret": "0x5bb68d8",
+   "role": "characterized: entry-word contention helper — bit-0 lock acquire, spin/yield backoff, FIFO waiter-chain push, futex wait",
+   "sha256": "a94378e14e8639339101729a199bd051e7795fc54c0ca9f2ff528bffcf902be8"
+  }
+ },
+ "census": {
+  "e8_lookup": [
+   "0x5bb3e61",
+   "0x5bb42f1"
+  ],
+  "e8_lookup_callers": {
+   "0x5bb3e61": "FDE 0x5bb3e50..0x5bb42d9 (1161B), sibling function immediately before park",
+   "0x5bb42f1": "park 0x5bb42e0 (first call: lookup(rdi, rsi))"
+  },
+  "got_cleanup_call_sites": 44,
+  "got_helper_call_sites": [
+   "0x5bb1c90",
+   "0x5bb221b",
+   "0x5bb286d",
+   "0x5bb2bb8",
+   "0x5bb2fd9",
+   "0x5bb4786",
+   "0x5bb4a42",
+   "0x5bb4e67",
+   "0x5bb4ed2",
+   "0x5bb5759",
+   "0x5bb5b3a",
+   "0x5bb5ede",
+   "0x5bb6123"
+  ],
+  "got_helper_callers": {
+   "0x5bb1c90": "FDE 0x5bb1a60..0x5bb210a (1706B)",
+   "0x5bb221b": "FDE 0x5bb2110..0x5bb2436 (806B)",
+   "0x5bb286d": "FDE 0x5bb2440..0x5bb35ed (4525B)",
+   "0x5bb2bb8": "FDE 0x5bb2440..0x5bb35ed (4525B)",
+   "0x5bb2fd9": "FDE 0x5bb2440..0x5bb35ed (4525B)",
+   "0x5bb4786": "FDE 0x5bb4670..0x5bb4cfd (1677B)",
+   "0x5bb4a42": "FDE 0x5bb4670..0x5bb4cfd (1677B)",
+   "0x5bb4e67": "lookup 0x5bb4d00 (contention path)",
+   "0x5bb4ed2": "lookup 0x5bb4d00 (second-claim contention path)",
+   "0x5bb5759": "FDE 0x5bb5650..0x5bb59c5 (885B)",
+   "0x5bb5b3a": "FDE 0x5bb59d0..0x5bb606d (1693B)",
+   "0x5bb5ede": "FDE 0x5bb59d0..0x5bb606d (1693B)",
+   "0x5bb6123": "FDE 0x5bb6070..0x5bb63f5 (901B)"
+  },
+  "got_park_call_sites": [
+   "0x5cf4e8e",
+   "0x5cf521b",
+   "0x5cfd965"
+  ],
+  "tblvar_load_sites": 12
+ },
+ "correction_of_188": {
+  "clarified": "packet #188's next question phrased the pointer regime as '>= 5'. The code gates on >= 4 (release condition old >= 4 with bit 1 clear; cleanup early-returns when [rdi] < 4). Installed pointers are 8-aligned stack addresses, so pointer-bearing values are >= 8 in practice; 4..7 occur only as transient flag combinations, never as installed values.",
+  "prior_claim": "entry-word lifecycle open: 'what turns the claim value 1 into a pointer-bearing word, and what raises it to >= 5'",
+  "prior_source": "PR #2190 records/README (packet #188)"
+ },
+ "fde": {
+  "helper": {
+   "cie": "0x00000000",
+   "eh_frame_offset": "0x00330574",
+   "range": [
+    "0x5bb6790",
+    "0x5bb68d9"
+   ]
+  }
+ },
+ "got": {
+  "0x64e06b8": "syscall@GLIBC_2.2.5",
+  "0x64e1558": "sched_yield@GLIBC_2.2.5",
+  "0x64ec148": "table variable 0x64fff28",
+  "0x64ec150": "0x5bb66b0",
+  "0x64ec158": "0x5bb6400",
+  "0x64ec160": "0x5bb6790",
+  "0x64ec188": "0x5bb42e0"
+ },
+ "helper": {
+  "acquire": "lock cmpxchg [rbx], rax|1 at 0x5bb67cb; returns with bit 0 held",
+  "futex_op": "0x80 (FUTEX_WAIT_PRIVATE)",
+  "futex_site": "0x5bb68a0..0x5bb68b7 (mov edi,202; mov rsi,[rsp+0x20]; mov edx,0x80; mov ecx,1; xor r8d,r8d; call syscall)",
+  "futex_word": "[rsp+0x20] (waiter node +0x18 under the rsp+0x8 framing); loop re-checks it and waits while nonzero",
+  "pause_backoff": "2^(round+1) pause instructions per round; sched_yield (GOT 0x64e1558) from round >= 3",
+  "push": "lock cmpxchg [rbx], (stack node rsp+0x8 | old low 2 bits) at 0x5bb687a; stack node +0x10 carries the previous head P (or 0)",
+  "spin_condition": "word < 4 AND rounds < 10; otherwise the futex path is taken immediately",
+  "waiter_node": "[rsp+0x0]=1 (unattributed stack slot below the node); node at rsp+0x8: +0x0=self-or-0, +0x8=0, +0x10=previous head P, +0x18=futex word (1=waiting)"
+ },
+ "prior_packets_cited_not_reclaimed": [
+  "#183 (PR #2106) lu conversion",
+  "#184 (PR #2125) tag 1 vs 3",
+  "#185 (PR #2137) context pointer",
+  "#186 (PR #2158) vtable consumers",
+  "#187 (PR #2179) Q table slot +0x8",
+  "#188 (PR #2190) park queue (lookup, park, cleanup bodies; the inviting prior packet)"
+ ],
+ "word_states": {
+  "0": "free (lookup claims with cmpxchg 0 -> 1)",
+  "1": "freshly claimed, no waiters (lookup cmpxchg target; released by xadd -1 back to 0)",
+  "bit0": "lock held (set by helper acquire cmpxchg; cleared by a release xadd -1)",
+  "bit1": "cleanup in progress (set by cleanup cmpxchg old|2; cleared on exit)",
+  "pointer": "waiter-chain head: (newest waiter node | old low 2 flag bits), installed only by the helper push; chain links via node +0x10 toward older waiters; cleanup walks to the oldest, clears its +0x18 futex word, and futex-wakes it"
+ }
+}
