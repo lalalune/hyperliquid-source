@@ -10,6 +10,7 @@ mod position;
 mod requirements;
 mod surplus;
 mod tiers;
+mod tier_cap;
 mod types;
 pub mod row_selector;
 pub mod hash20;
@@ -30,6 +31,7 @@ pub use surplus::{
     aggregate_cross_margin, assess_cross_liquidation, assess_isolated_liquidation,
 };
 pub use tiers::TierConstructionError;
+pub use tier_cap::position_leverage_cap;
 pub use types::{
     LATER_TIER_LOWER_INCLUSIVE_MAX, MAX_DESCRIPTION_BYTES, MAX_LEVERAGE, MAX_TIERS, MarginTable,
     MarginTier, RawMarginTable, RawMarginTier, WIRE_NOTIONAL_EXCLUSIVE_MAX,
