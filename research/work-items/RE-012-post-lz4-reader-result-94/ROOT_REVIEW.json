@@ -1,0 +1,78 @@
+{
+  "reviewed_at": "2026-11-01T18:50:38.924029+00:00",
+  "base": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "verdict": "No actionable defect found in the selected conditional relation",
+  "root_native_review": {
+    "method": "Own PT_LOAD mapping and byte/FDE/CIE/table/RELA parsing; no packet or repository parser imports",
+    "ranges": [
+      {
+        "name": "reader",
+        "bytes": 5317,
+        "rows": 981,
+        "fde_cie_checked": true
+      },
+      {
+        "name": "consumer",
+        "bytes": 530,
+        "rows": 126,
+        "fde_cie_checked": true
+      },
+      {
+        "name": "reader-cleanup",
+        "bytes": 207,
+        "rows": 53,
+        "fde_cie_checked": true
+      },
+      {
+        "name": "decompressor-context",
+        "bytes": 2667,
+        "rows": 625,
+        "fde_cie_checked": true
+      },
+      {
+        "name": "statistics-context",
+        "bytes": 1216,
+        "rows": 261,
+        "fde_cie_checked": true
+      },
+      {
+        "name": "difference-context",
+        "bytes": 203,
+        "rows": 60,
+        "fde_cie_checked": true
+      },
+      {
+        "name": "clock-context",
+        "bytes": 201,
+        "rows": 48,
+        "fde_cie_checked": true
+      },
+      {
+        "name": "cleanup-slot-context",
+        "bytes": 165,
+        "rows": 31,
+        "fde_cie_checked": true
+      }
+    ],
+    "bytes": 10506,
+    "rows": 2185,
+    "tables": 6,
+    "relocations": 3
+  },
+  "root_manual_review": [
+    "Read full proof and checker before rerunning. Selected reader post-call branches, state stores, caller and completed-state cleanup match native records.",
+    "Checked success cleanup flag AND capacity versus error capacity-only, decoded length statistics argument, preservation across stack temporary reuse and inactive result words.",
+    "Audited selected LSDA/landing metadata separately from ordinary flow; no actual physical free or unwind proof."
+  ],
+  "reproduction": {
+    "full_FDE_ranges": 8,
+    "compared_bytes": 10506,
+    "normalized_instruction_rows": 2185,
+    "fresh_regenerations_equal_retained": 2,
+    "negative_control_count": 79
+  },
+  "peer_review_summary": "Independent reviewer checked all native bytes and full consumer/cleanup plus selected reader ordinary and landing paths; no material findings under explicit preservation and nonalias premises.",
+  "peer_record_sha256": "a304f3b46d99a1f34096ae3ac7c05355a48b39564d2ea2e5471a4ef956ced746",
+  "format_fix": "Removed a redundant second or dash fallback before root rerun; generated evidence and validation JSON remain identical.",
+  "scope": "Static data parsing, native decoding and conditional manual relation only; no captured execution or instruction evaluator."
+}
