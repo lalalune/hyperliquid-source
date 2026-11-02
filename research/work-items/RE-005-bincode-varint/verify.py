@@ -30,10 +30,28 @@ def main():
     listed = set()
     for line in (HERE / 'MANIFEST.sha256').read_text().splitlines():
         want, name = line.split('  ', 1)
+        if name in listed:
+            fail(f'MANIFEST.sha256 lists {name} twice')
         got = hashlib.sha256((HERE / name).read_bytes()).hexdigest()
         if got != want:
             fail(f'{name} sha256 {got} != manifest {want}')
         listed.add(name)
+    # The set comparisons below cannot see two entry kinds: a symlink
+    # (is_file and read_bytes follow it, so a listed evidence file can
+    # point outside the packet) and a subdirectory (never counted as a
+    # file). The node-inventory packet verifiers reject both; mirror
+    # them, tolerating only a __pycache__ of plain bytecode files.
+    for entry in sorted(HERE.iterdir()):
+        if entry.is_symlink():
+            fail(f'packet entry is a symlink: {entry.name}')
+        if entry.is_dir():
+            if entry.name != '__pycache__':
+                fail(f'unexpected directory in packet: {entry.name}')
+            for child in sorted(entry.iterdir()):
+                if child.is_symlink() or not child.is_file() \
+                        or child.suffix != '.pyc':
+                    fail(f'unexpected __pycache__ entry in packet: '
+                         f'{child.name}')
     # This packet's manifest pins the evidence files only; README.md and
     # this script are committed unlisted. Comparing the manifest only
     # against the directory is not enough: an evidence file deleted
