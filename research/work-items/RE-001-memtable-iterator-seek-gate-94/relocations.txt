@@ -1,0 +1,11 @@
+R_X86_64_RELATIVE slots cited by this packet (verbatim readelf -r rows):
+00000575b258  000000000008 R_X86_64_RELATIVE                    5168610
+000005778400  000000000008 R_X86_64_RELATIVE                    5165f20
+GLOB_DAT slot cited by this packet (verbatim readelf -r row):
+000005777ef8  011500000006 R_X86_64_GLOB_DAT 0000000000000000 _ZTHN7rocksdb10pe[...] + 0
+Note: the 0x5777ef8 row is truncated by readelf's symbol display; the
+full symbol is the rocksdb perf_level thread-local (see the neighbouring
+packets, which cite the same slot). The runtime value of 0x5778400 is
+its RELATIVE addend 0x5165f20; the runtime value of 0x575b258 is its
+RELATIVE addend 0x5168610. Both slots live in load-applied relocation
+regions, so their on-disk qwords are not the runtime values.
