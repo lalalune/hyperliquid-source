@@ -59,8 +59,16 @@ mod tests {
 
     #[test]
     fn selected_pair_is_not_coordinatewise_maximum() {
-        let values = [Heights { initial: 10, latest: 100_000 },
-                      Heights { initial: 11, latest: 12 }];
+        let values = [
+            Heights {
+                initial: 10,
+                latest: 100_000,
+            },
+            Heights {
+                initial: 11,
+                latest: 12,
+            },
+        ];
         let selected = select_heights(2, &values).unwrap();
         assert_eq!(selected, values[1]);
         assert_eq!(classify(11, selected), HeightDecision::Continue);
@@ -68,7 +76,10 @@ mod tests {
 
     #[test]
     fn single_peer_exception_and_empty_map() {
-        let values = [Heights { initial: 1, latest: 2 }];
+        let values = [Heights {
+            initial: 1,
+            latest: 2,
+        }];
         assert_eq!(select_heights(1, &values), Some(values[0]));
         for count in [0, 2, u64::MAX] {
             assert_eq!(select_heights(count, &values), None);
@@ -78,15 +89,55 @@ mod tests {
 
     #[test]
     fn equality_saturation_and_reason_precedence() {
-        assert_eq!(classify(100, Heights { initial: 101, latest: 20_100 }),
-                   HeightDecision::TooFarBehind);
-        assert_eq!(classify(100, Heights { initial: 101, latest: 20_099 }),
-                   HeightDecision::StaleHardfork);
-        assert_eq!(classify(100, Heights { initial: 100, latest: 20_099 }),
-                   HeightDecision::Continue);
-        assert_eq!(classify(u64::MAX, Heights { initial: 0, latest: u64::MAX }),
-                   HeightDecision::TooFarBehind);
-        assert_eq!(classify(u64::MAX, Heights { initial: 0, latest: u64::MAX - 1 }),
-                   HeightDecision::Continue);
+        assert_eq!(
+            classify(
+                100,
+                Heights {
+                    initial: 101,
+                    latest: 20_100
+                }
+            ),
+            HeightDecision::TooFarBehind
+        );
+        assert_eq!(
+            classify(
+                100,
+                Heights {
+                    initial: 101,
+                    latest: 20_099
+                }
+            ),
+            HeightDecision::StaleHardfork
+        );
+        assert_eq!(
+            classify(
+                100,
+                Heights {
+                    initial: 100,
+                    latest: 20_099
+                }
+            ),
+            HeightDecision::Continue
+        );
+        assert_eq!(
+            classify(
+                u64::MAX,
+                Heights {
+                    initial: 0,
+                    latest: u64::MAX
+                }
+            ),
+            HeightDecision::TooFarBehind
+        );
+        assert_eq!(
+            classify(
+                u64::MAX,
+                Heights {
+                    initial: 0,
+                    latest: u64::MAX - 1
+                }
+            ),
+            HeightDecision::Continue
+        );
     }
 }

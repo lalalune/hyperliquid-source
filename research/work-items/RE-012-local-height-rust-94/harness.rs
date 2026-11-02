@@ -12,8 +12,13 @@ fn main() {
                 let count = words.next().unwrap().parse().unwrap();
                 let raw: Vec<u64> = words.map(|w| w.parse().unwrap()).collect();
                 assert_eq!(raw.len() % 2, 0);
-                let values: Vec<_> = raw.chunks_exact(2)
-                    .map(|p| Heights { initial: p[0], latest: p[1] }).collect();
+                let values: Vec<_> = raw
+                    .chunks_exact(2)
+                    .map(|p| Heights {
+                        initial: p[0],
+                        latest: p[1],
+                    })
+                    .collect();
                 match select_heights(count, &values) {
                     None => println!("N"),
                     Some(h) => println!("S {} {}", h.initial, h.latest),
@@ -22,7 +27,10 @@ fn main() {
             "G" => {
                 let raw: Vec<u64> = words.map(|w| w.parse().unwrap()).collect();
                 assert_eq!(raw.len(), 3);
-                let h = Heights { initial: raw[1], latest: raw[2] };
+                let h = Heights {
+                    initial: raw[1],
+                    latest: raw[2],
+                };
                 let code = match classify(raw[0], h) {
                     HeightDecision::Continue => 0,
                     HeightDecision::TooFarBehind => 1,
