@@ -10,9 +10,51 @@ The source is derived from authenticated node #94 instructions, not the
 unlicensed inferred reference. The exact target, full FDEs, equations, native
 disassembly, byte controls and remaining gaps are in
 [`RE-001-short-string-alias-94`](../../research/work-items/RE-001-short-string-alias-94/README.md).
-No constructor, cache, allocator, lock, wire format, target Rust ABI or whole
-node is implemented. Short inputs test the producer only: the constructor
-routes inputs of at most 16 bytes through a different path.
+The constructor's admitted inline route is exposed separately below. No full
+constructor, cache, allocator, lock, wire format, target Rust ABI or whole node
+is implemented. Short inputs to `alias10` still test the producer only; the
+constructor selects the inline route for those lengths.
+
+## Inline carrier
+
+`inline_carrier(input: &[u8]) -> Option<u128>` implements only the native
+constructor's length-at-most-16 route through packer `0x144a010..0x144a069`.
+It places input byte i at bits `8*i..8*i+7`. The low 64 bits project RAX and
+the high 64 bits project RDX; empty input returns zero. Embedded and trailing
+zeros are preserved as bytes, while the integer carrier has no separate length:
+`A` and `A\0` therefore produce the same carrier. This is not a string-identity,
+UTF-8 validation, display or wire-format claim.
+
+Inputs longer than 16 return `None` in this chosen API. The native constructor
+takes its unimplemented long/cache route instead; this is not a native error
+or alias-constructor implementation. The existing `alias10` hash API is unchanged.
+
+The [inline-carrier evidence packet](../../research/work-items/RE-001-inline-carrier-rust-94/README.md)
+credits the earlier native discovery, binds complete constructor/packer bodies,
+the admitted guards and the unique recursive/tail-call slot. Its 156 native
+rows, including every one-bit position, and two API-only refusal rows were
+frozen before the new Rust source. No captured instruction evaluator runs in
+this follow-on. Its input-only compiled comparison and source controls are
+separate from the older feed/alias reconstruction runner below.
+
+## Original-key hash
+
+`key_hash(seed: [u64; 2], key: &[u8]) -> u64` exposes the numeric relation
+shared by native borrowed/owned key wrappers 0x13d38c0 and 0x13d3c80. It mixes
+the supplied seed into the four logical initial words, feeds original key bytes
+and one `ff` byte, then finishes. The associated alias letters/carrier and the
+alias producer's four-byte counter do not enter this hash. Equal stable key
+bytes/seeds give the same value across source storage and capacities.
+
+This accepts supplied seed values; it does not reconstruct the runtime seed
+provider/lifetime, original owned descriptor, allocator, table probing, locking
+or cache reachability. Lengths <=16 diagnose the wrappers only: the constructor
+uses its separate inline route for those inputs. The
+[key-hash packet](../../research/work-items/RE-001-key-hash-rust-94/README.md)
+binds both full native wrappers, the shared feed/finalizer, 48 outputs frozen
+before Rust and actual opt0/3 comparisons with seven operative source mutants.
+The earlier inline comparison is independently requalified on the changed
+whole-file source; its published original receipt remains historical.
 
 ## Check
 
