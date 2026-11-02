@@ -1,0 +1,35 @@
+{
+  "base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "producer_sha256": "04fead1c1b032790fceb23ea32749a42740ee6f1a6be554bbc575615bbd0515d",
+  "test_sha256": "845915bb28197ecb960be6ba14c2db2e26d197e23fa00b9112f81df86b8ed16d",
+  "execution": "static parsing/disassembly only; no captured process/interpreter/helper",
+  "commands": [
+    {
+      "command": "python3 tools/node115_gossip_cache_static.py --write --controls",
+      "first_attempt": "timeout180,notPASS",
+      "corrected_final_exit": 0,
+      "wall_seconds": 62.741,
+      "rejected_controls": 40
+    },
+    {
+      "command": "python3 tools/node115_gossip_cache_static.py --controls; python3 -m unittest discover -s tests -p test_node115_gossip_cache_static.py -v; make doctor verify catalogue-check",
+      "exit": 0,
+      "combined_wall_seconds": 115.716,
+      "focused_tests": 4,
+      "focused_wall_seconds": 15.222
+    },
+    {
+      "command": "make catalogue; make test",
+      "exit": 124,
+      "limit_seconds": 330,
+      "files_completed": 8,
+      "files_attempted_before_timeout": 9,
+      "file_count": 77,
+      "full_suite_pass": false
+    }
+  ],
+  "duty": 0.1,
+  "priority": "unavailable,notclaimed",
+  "full_make_reproduce": "not run",
+  "hosted_ci": "not observed"
+}
