@@ -7,7 +7,7 @@ File hashes (also in MANIFEST.sha256):
 - EVIDENCE.md bed9ebc5f927dbf11e85b55b83f3998e80c1225d7ef3a3a3d1548fb6c66264b8
 - state-chain.json 6e063821c3de3ad62dc45b0af1bc28ff7cdedaf048da0fbdd3cc5e51cabead75
 - verify.py 9f48f7929400ee00e5822c81512a5e06a9023defd8e9907796636d510ed39ac9
-- independent_verify.py fc9d1532fb9654bd099c5ae6d679a916c1eed84c53483bf0bc1173f760d5be70
+- independent_verify.py f23432b6017f6088df6da89fc8e917ca8b559540bceacc5919f755dd9d674157
 - tools/state_chain.py e943f1a288d2980b420ad6a399d1b0df007c548d7624eb765ced089f27888a81
 - tests/test_state_chain.py 60a186e5789f4f365d310e5fd624d13b7c360510c026942c34839eaf1c421cd2
 

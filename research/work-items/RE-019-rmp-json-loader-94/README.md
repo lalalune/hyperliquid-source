@@ -19,7 +19,7 @@ for s in 0 7 99; do PYTHONHASHSEED=$s python3 -B tools/rmp_json_loader.py | sha2
 - EVIDENCE.md 36cdb6e3def890ace2be529c938cf201bb17871a06f37ac96ad9397c20909c02
 - rmp-json-loader.json 47e98c9d78eceb2125b799b77c89ce5c9f2a1353d7e7ec2aa24304578decd295
 - verify.py b6b862c407186f9518846a58c28554ad46d5481947cc3a295d61cd4523cc3cd9
-- independent_verify.py 872171baa7068208420872718a4645ba6723c20c9384c598c7ecaa8f1dc8639d
+- independent_verify.py ba90c27819bbbb225fbb5331d1b4301dd83785d04917016a0a5011a0cb57109f
 - tools/rmp_json_loader.py c449c7e394b2c3eff42bf4be44c80c30e191d779351cec91367510d2ca468211
 - tests/test_rmp_json_loader.py bdc27a6b8f8d94415d7b56481d62d02b4344bf7fc1266f5bf5c5fdccf9dbbfc3
 

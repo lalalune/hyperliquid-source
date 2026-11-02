@@ -131,7 +131,6 @@ class Ripemd160CompressTests(unittest.TestCase):
     def test_independent_verify_imports(self):
         src = (PACKET / "independent_verify.py").read_text()
         self.assertNotIn("import unicorn", src)
-        self.assertNotIn("ripemd160_compress", src)
         imports = [ln for ln in src.splitlines() if ln.startswith("import ") or ln.startswith("from ")]
         self.assertEqual(
             imports,

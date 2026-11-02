@@ -12,6 +12,8 @@ Checks, all against the digest-verified binary work/hl-node-94.bin
 Run from the repository root: python3 research/work-items/\\
 RE-001-wal-replay-orchestrator-94/verify.py
 """
+import re
+import tempfile
 import hashlib
 import json
 import subprocess
@@ -71,14 +73,19 @@ def main():
     # Excerpt regeneration.
     excerpt_names = ["window.txt", "cleanup.txt", "known-18.txt",
                      "caller-sites.txt"]
-    before = {n: hashlib.sha256((PACKET / n).read_bytes()).hexdigest()
-              for n in excerpt_names}
-    regen = subprocess.run(
-        [sys.executable, str(PACKET / "export_excerpts.py")],
-        cwd=ROOT, capture_output=True, text=True)
-    check("export_excerpts.py runs", regen.returncode == 0, regen.stderr[-200:])
-    after = {n: hashlib.sha256((PACKET / n).read_bytes()).hexdigest()
-             for n in excerpt_names}
+    def display(data):
+        # The byte D6 in this unaligned caller context is printed as either
+        # (bad) or udb by GNU versions. Keep addresses and raw bytes exact.
+        return re.sub(rb"(?m)^(\s*[0-9a-f]+:[ \t]+d6[ \t]+)(?:\(bad\)|udb)$",
+                      rb"\1<invalid-d6>", data)
+
+    before = {n: display((PACKET / n).read_bytes()) for n in excerpt_names}
+    with tempfile.TemporaryDirectory() as directory:
+        regen = subprocess.run(
+            [sys.executable, str(PACKET / "export_excerpts.py"), "--out", directory],
+            cwd=ROOT, capture_output=True, text=True)
+        check("export_excerpts.py runs", regen.returncode == 0, regen.stderr[-200:])
+        after = {n: display((Path(directory) / n).read_bytes()) for n in excerpt_names}
     check("excerpts regenerate identically", before == after)
     # Sampled instruction bytes.
     for addr, expected in SAMPLES:

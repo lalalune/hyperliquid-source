@@ -6,6 +6,7 @@ Run from the repository root:
 The binary path must stay relative (an absolute path changes objdump's
 header line and breaks the byte-identical regeneration check).
 """
+import argparse
 import subprocess
 from pathlib import Path
 
@@ -35,13 +36,16 @@ def dump(start, end):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--out", type=Path, default=PACKET)
+    output = parser.parse_args().out
     for name, (start, end) in RANGES.items():
-        (PACKET / name).write_text(dump(start, end))
+        (output / name).write_text(dump(start, end))
     parts = []
     for site, before, after in CALLER_SITES:
         parts.append(f"# call site {hex(site)}\n")
         parts.append(dump(site - before, site + after))
-    (PACKET / "caller-sites.txt").write_text("".join(parts))
+    (output / "caller-sites.txt").write_text("".join(parts))
     print("excerpts regenerated")
 
 
