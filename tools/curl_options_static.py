@@ -48,7 +48,12 @@ def default_fragment(body):
 
 
 def analyze(data):
-    spec=load_spec();_,fs,_=fde_extents(data);frames={(f['start'],f['end']):f for f in fs}
+    spec=load_spec();_,fs,_=fde_extents(data)
+    frames={}
+    for f in fs:
+        if (f['start'],f['end']) in frames:
+            raise ValueError('duplicate FDE extent')
+        frames[(f['start'],f['end'])]=f
     sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
     rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
     for slot,row in spec['bindings'].items():
