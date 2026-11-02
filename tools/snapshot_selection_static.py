@@ -116,7 +116,11 @@ def analyze(data):
         for site,r in o['rip_bindings'].items():
             site=int(site);prefix=bytes.fromhex(r['prefix']);code=read(data,site,len(prefix)+4)[1]
             if code[:len(prefix)]!=prefix or site+len(code)+struct.unpack_from('<i',code,len(prefix))[0]!=r['target']:raise ValueError('snapshot RIP binding changed')
-    _,fs,_=fde_extents(data);frames={(f['start'],f['end']):f for f in fs};owners=[]
+    _,fs,_=fde_extents(data);owners=[]
+    frames={}
+    for f in fs:
+        if (f['start'],f['end']) in frames:raise ValueError('duplicate FDE extent')
+        frames[(f['start'],f['end'])]=f
     for o in spec['owners']:
         a,b=o['start'],o['end']
         if (a,b) not in frames:raise ValueError('snapshot FDE changed')
