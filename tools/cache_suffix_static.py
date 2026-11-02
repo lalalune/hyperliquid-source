@@ -51,6 +51,19 @@ def matches_selector(constants,key):
     return len(key)==constants['length'] and len(key)>=10 and key[:8]==constants['prefix'] and int.from_bytes(key[8:10],'little')==constants['tail_xor']
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    rels={}
+    for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']]):
+        if a in rels:
+            raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a]=(i,v)
+    return rels
+
+
 def analyze(data):
     _,fs,_=fde_extents(data);fdes={(f['start'],f['end']):f for f in fs}
     body=read(data,0x59429e0,350)[1];constants=selector_constants(body)
@@ -61,8 +74,7 @@ def analyze(data):
     layout=suffix_layout(body)
     if layout!={'special_pointer':0x9382b9,'default_pointer':0x459f60,'base_length':3,'length_without_ten_byte_test':4}:
         raise ValueError('suffix pointer/length layout changed')
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
-    rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
+    rels=relocations(data)
     if any(rels.get(a)!=(8,v) for a,v in BINDINGS.items()):
         raise ValueError('cache formatting/global relocation changed')
     literals={0x9382b9:b'rmp',0x459f60:b'json',0x43d024:b'\xc0\x01.\xc0\0',0x44f615:b'\xc0\x12/hyperliquid_data/\xc0\0'}
