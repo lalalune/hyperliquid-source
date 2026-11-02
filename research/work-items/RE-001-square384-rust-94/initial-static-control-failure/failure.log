@@ -1,0 +1,28 @@
+PASS static: complete528-byte scalar square; four full caller contexts/four E8; full CIE/FDE/RELA binding
+Traceback (most recent call last):
+  File "/Users/shinjun/hyperliquid-contributions/mixer/research/work-items/RE-001-square384-rust-94/verify.py", line 108, in static_controls
+    try:inspect(copy,authenticate=authenticate)
+        ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/shinjun/hyperliquid-contributions/mixer/research/work-items/RE-001-square384-rust-94/static_evidence.py", line 60, in inspect
+    require(len(overlaps)==1 and (overlaps[0]['start'],overlaps[0]['end'])==(start,end),f"{name} FDE overlap")
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/shinjun/hyperliquid-contributions/mixer/research/work-items/RE-001-square384-rust-94/static_evidence.py", line 30, in require
+    if not ok: raise ValueError(message)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: caller_1 FDE overlap
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/shinjun/hyperliquid-contributions/mixer/research/work-items/RE-001-square384-rust-94/verify.py", line 193, in <module>
+    elif args.out: run(args.out.resolve(),args.rustc)
+                   ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/shinjun/hyperliquid-contributions/mixer/research/work-items/RE-001-square384-rust-94/verify.py", line 137, in run
+    controls=static_controls(TARGET.read_bytes())
+  File "/Users/shinjun/hyperliquid-contributions/mixer/research/work-items/RE-001-square384-rust-94/verify.py", line 110, in static_controls
+    require(str(exc)==message,f'unexpected rejection {label}: {exc}')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/shinjun/hyperliquid-contributions/mixer/research/work-items/RE-001-square384-rust-94/static_evidence.py", line 30, in require
+    if not ok: raise ValueError(message)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: unexpected rejection next-fde-range: caller_1 FDE overlap
