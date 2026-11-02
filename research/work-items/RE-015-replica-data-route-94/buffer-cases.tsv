@@ -1,0 +1,10 @@
+case	active	input_hex	supplied	remaining_hex	calls	result
+empty	0				0	guard_return
+already_active	1	616263646566	6:0	616263646566	0	guard_return
+complete	0	616263646566	6:0		1	finished
+short_then_complete	0	616263646566	2:0,4:0		2	finished
+eintr_then_complete	0	616263646566	-1:4,6:0		2	finished
+partial_zero	0	616263646566	2:0,0:0	63646566	2	stopped
+partial_error	0	616263646566	3:0,-1:5	646566	2	stopped
+first_error	0	616263646566	-1:5	616263646566	1	stopped
+eintr_waiting	0	616263646566	-1:4	616263646566	1	next_write_pending
