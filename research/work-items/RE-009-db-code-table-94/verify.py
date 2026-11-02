@@ -58,8 +58,16 @@ def read_manifest():
 
 
 def main():
-    # 0. no subdirectories; the packet is a flat directory of files.
+    # 0. no symlinks and no subdirectories; the packet is a flat
+    #    directory of files. is_dir/is_file and read_bytes follow
+    #    symlinks, so without the explicit check a listed file can be
+    #    replaced by a symlink to identical bytes outside the packet
+    #    and still pass the set comparisons and hash checks below.
+    #    The node-inventory packet verifiers reject symlinks outright;
+    #    mirror them.
     for p in HERE.iterdir():
+        if p.is_symlink():
+            fail(f"packet entry is a symlink: {p.name}")
         if p.is_dir():
             fail(f"unexpected subdirectory in packet: {p.name}")
 
