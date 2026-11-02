@@ -97,6 +97,13 @@ observed 40-byte helper result view. See
 frozen vectors. Its outside-domain rejection is a chosen safe API. No complete
 QC decoder, native ABI, failure behavior or cryptographic validity is claimed.
 
+`read_mode1_fd_group_outcome` additionally reconstructs the first short FD/EOF
+at each of the four positions, retaining charge and unread partial payload.
+It exposes only active incomplete-result fields, with row forwarding rendered
+by its input-only research driver. The original bool API is byte-identical.
+See `research/work-items/RE-008-qc-fd-group-short-94/`; other markers, nonadmitted
+states, inactive error bytes and full QC-row reachability remain unqualified.
+
 ## Reproduce
 
 From the repository root:
