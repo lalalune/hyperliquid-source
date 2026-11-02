@@ -43,6 +43,23 @@ def verify_manifest(here=HERE):
         check(path.is_file() and not path.is_symlink(), f'missing file or symlink: {name}')
         check(hashlib.sha256(path.read_bytes()).hexdigest() == expected,
               f'manifest hash mismatch: {name}')
+    # The rest of the admission the node-inventory verifiers spell
+    # out: the loop above never looks at the directory itself, so
+    # an unlisted file could sit in the packet unseen. Compare the
+    # packet directory against the manifest's in-packet entries
+    # (the ../../../ rows pin files outside the packet).
+    present = set()
+    for entry in sorted(here.iterdir()):
+        check(not entry.is_symlink(), f'symlink in packet directory: {entry.name}')
+        if entry.is_dir():
+            check(entry.name == '__pycache__' and all(
+                child.name.endswith('.pyc') and not child.is_symlink()
+                for child in entry.iterdir()),
+                f'unexpected directory in packet: {entry.name}')
+            continue
+        present.add(entry.name)
+    local = {name for name in entries if not name.startswith('../../../')}
+    check(present - {'MANIFEST.sha256'} == local, 'packet contents differ from manifest')
 
 
 def main():
