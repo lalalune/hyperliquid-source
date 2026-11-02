@@ -329,7 +329,11 @@ def analyse(data, check_sha=True, run_emu=False):
     for r_offset, r_info, r_addend in rela:
         if r_offset == GOT_SLOT:
             got_rela = {"r_offset": hex(r_offset), "r_info": hex(r_info), "r_addend": hex(r_addend)}
-    rela_by_off = {r[0]: r for r in rela}
+    rela_by_off = {}
+    for r in rela:
+        if r[0] in rela_by_off:
+            raise ValueError(f"duplicate relocation offset {r[0]:#x}")
+        rela_by_off[r[0]] = r
 
     locations = []
     for loc, lea, line, col in LOCATIONS:
