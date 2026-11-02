@@ -9,13 +9,15 @@
 - Six deliberately incorrect Rust implementations compile and fail the intended
   tests. Their changes, commands, source hashes and raw-log hashes are in
   `rust-mutations.json`.
-- The full 976-file repository sweep is running under
-  `work/peer-policy-94/full-suite/`. No full-suite pass is claimed.
+- Full repository sweep: all 976 files passed without restarts;
+  15,496 reported tests including 67 skips. See `full-suite.json`.
+- Independent review found no actionable issues in byte provenance, routing,
+  rejection mapping, decode-before-route ordering or caller-owned I/O disposal.
 - Repository verification, catalogue and reproduction results are recorded in
   `build-receipt.json`; an unfinished check is not a pass.
 - Hosted CI, state validation, peer authentication, reconnection, a running node
   and a Docker image are not claimed. All progress gates and byte-window counts
-  remain unchanged. The submission stays draft until the complete sweep passes.
+  remain unchanged. The required local sweep is complete.
 
 Only independently authored Rust and offline tooling execute. All native target
 inspection is static. Current-network compatibility remains unverified.
