@@ -1,0 +1,370 @@
+{
+  "rows": 2468,
+  "profiles": {
+    "0": {
+      "rows": 2468,
+      "match": true,
+      "stdout_sha256": "cfdca0e6e3ff879f9ef814fe2f30c8a44849b42b5fda528c36268277c02861a5"
+    },
+    "3": {
+      "rows": 2468,
+      "match": true,
+      "stdout_sha256": "cfdca0e6e3ff879f9ef814fe2f30c8a44849b42b5fda528c36268277c02861a5"
+    }
+  },
+  "compiled_mutants": [
+    {
+      "name": "divisor",
+      "mismatches": 1094,
+      "rows": 2468,
+      "compiled_smoke_exit": 101
+    },
+    {
+      "name": "cap",
+      "mismatches": 602,
+      "rows": 2468,
+      "compiled_smoke_exit": 101
+    },
+    {
+      "name": "correction",
+      "mismatches": 2,
+      "rows": 2468,
+      "compiled_smoke_exit": 101
+    },
+    {
+      "name": "saved-value",
+      "mismatches": 602,
+      "rows": 2468,
+      "compiled_smoke_exit": 101
+    }
+  ],
+  "raw_own_rlib_equal": true,
+  "rlib_sha256": "322c36cc5812042e041b09f4411e632bd2b681398b2ee00f6afbe938084e3668",
+  "source_sha256": "0ade0ea060e2304dff5d74be889270d940de0a07eb1348c580ed824e623fb954",
+  "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: aarch64-apple-darwin\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+  "commands": [
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node115_latency_pair",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=0",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=node115_latency_pair",
+      "-D",
+      "warnings",
+      "$REPO/src/node115-latency-pair/lib.rs",
+      "-o",
+      "$OUTPUT/o0/libnode115_latency_pair.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=0",
+      "$REPO/src/node115-latency-pair/input_only_driver.rs",
+      "--extern",
+      "node115_latency_pair=$OUTPUT/o0/libnode115_latency_pair.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/o0/driver"
+    ],
+    [
+      "$OUTPUT/o0/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node115_latency_pair",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=node115_latency_pair",
+      "-D",
+      "warnings",
+      "$REPO/src/node115-latency-pair/lib.rs",
+      "-o",
+      "$OUTPUT/o3/libnode115_latency_pair.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "$REPO/src/node115-latency-pair/input_only_driver.rs",
+      "--extern",
+      "node115_latency_pair=$OUTPUT/o3/libnode115_latency_pair.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/o3/driver"
+    ],
+    [
+      "$OUTPUT/o3/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$REPO/src/node115-latency-pair/lib.rs",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/smoke-test"
+    ],
+    [
+      "$OUTPUT/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node115_latency_pair",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=node115_latency_pair",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-divisor/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-divisor/build/libnode115_latency_pair.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "$REPO/src/node115-latency-pair/input_only_driver.rs",
+      "--extern",
+      "node115_latency_pair=$OUTPUT/mutant-divisor/build/libnode115_latency_pair.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-divisor/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-divisor/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-divisor/lib.rs",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-divisor/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-divisor/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node115_latency_pair",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=node115_latency_pair",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-cap/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-cap/build/libnode115_latency_pair.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "$REPO/src/node115-latency-pair/input_only_driver.rs",
+      "--extern",
+      "node115_latency_pair=$OUTPUT/mutant-cap/build/libnode115_latency_pair.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-cap/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-cap/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-cap/lib.rs",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-cap/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-cap/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node115_latency_pair",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=node115_latency_pair",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-correction/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-correction/build/libnode115_latency_pair.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "$REPO/src/node115-latency-pair/input_only_driver.rs",
+      "--extern",
+      "node115_latency_pair=$OUTPUT/mutant-correction/build/libnode115_latency_pair.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-correction/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-correction/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-correction/lib.rs",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-correction/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-correction/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node115_latency_pair",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=node115_latency_pair",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-saved-value/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-saved-value/build/libnode115_latency_pair.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "$REPO/src/node115-latency-pair/input_only_driver.rs",
+      "--extern",
+      "node115_latency_pair=$OUTPUT/mutant-saved-value/build/libnode115_latency_pair.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-saved-value/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-saved-value/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-saved-value/lib.rs",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-saved-value/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-saved-value/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node115_latency_pair",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=node115_latency_pair",
+      "-D",
+      "warnings",
+      "$REPO/src/node115-latency-pair/lib.rs",
+      "-o",
+      "$OUTPUT/o3-repeat/libnode115_latency_pair.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "$REPO/src/node115-latency-pair/input_only_driver.rs",
+      "--extern",
+      "node115_latency_pair=$OUTPUT/o3-repeat/libnode115_latency_pair.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/o3-repeat/driver"
+    ]
+  ],
+  "captured_process_executed": false,
+  "offline_python_instruction_evaluation_authorized": true
+}
