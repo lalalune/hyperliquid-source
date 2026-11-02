@@ -1,4 +1,4 @@
-# Node #94 offline TCP frame codec
+# Node #94 TCP frame codec
 
 This standalone Rust crate reconstructs the bounded, offline TCP frame format
 established for Linux x86-64 node #94, SHA-256
@@ -33,6 +33,47 @@ values, but the meaning of the stream field at every writer call remains an
 inference. Checked sizing helpers preserve the observed
 `len * 110 / 100 + 20` output window, `+24` allocation, 65,535-byte hash-table
 switch, and truncating little-endian u32 size prefix.
+
+## Asynchronous stream I/O
+
+Enable `stream` to read and write frames through caller-owned
+`tokio::io::AsyncRead` / `AsyncWrite` values. It pins Tokio 1.44.2, the version
+identified by the target's read-buffer evidence. The default build remains an
+offline codec without Tokio.
+
+```rust,ignore
+use node94_tcp_frame::{FrameLimits, stream};
+
+// `io` is an already-established, caller-owned async byte stream.
+stream::write_frame(&mut io, b"payload", stream_field).await?;
+let frame = stream::read_frame(&mut io, FrameLimits::new(max_payload)).await?;
+```
+
+The reader fills the five-byte header before admitting or allocating its
+payload, consumes payload chunks of at most 4,000,000 bytes, and leaves the
+next frame untouched. Only flag 1 selects decompression. An empty or truncated
+stream returns `UnexpectedEof`; a zero-progress write returns `WriteZero`.
+Partial reads/writes and `Pending` preserve progress within the same future.
+The writer chunks the entire frame including its header; it does not flush or
+close the caller's stream.
+
+These operations are **not cancellation safe**. After a cancelled or failed
+operation, discard the connection unless its frame boundary can independently
+be restored. This layer does not implement the target's timer wrapper,
+statistics, peer discovery, handshake, reconnect logic or message protocol.
+The target's 20/40-second reader and selected 20/60-second writer timing
+behavior remains separate work; an untimed frame stream is not a finished
+node transport.
+
+The [stream evidence packet](../../research/work-items/RE-012-tcp-stream-94/README.md)
+records the selected read/write loops and the tested boundary. This component's
+new lockfile is a real build lock, not a recovered node dependency graph;
+in particular its `bytes` and `pin-project-lite` versions are not claimed to
+match the target.
+
+Run `cargo test --locked --manifest-path src/node94-tcp-frame/Cargo.toml --all-features`
+to include the stream controls. They use deterministic scripted
+I/O, not public network connections or captured-node execution.
 
 ## LZ4 correspondence and limits
 
