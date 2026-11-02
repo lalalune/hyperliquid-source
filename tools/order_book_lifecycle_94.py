@@ -209,7 +209,11 @@ def scan(data, expected_sha256=SHA256):
         fde_summary, fdes, _ = fde_extents(data)
     except ValueError as exc:
         raise EvidenceError(str(exc)) from exc
-    by_start = {row["start"]: row for row in fdes}
+    by_start = {}
+    for row in fdes:
+        if row["start"] in by_start:
+            raise EvidenceError(f"duplicate FDE start {row['start']:#x}")
+        by_start[row["start"]] = row
     functions = []
     for name, start, end, caller_count in FUNCTIONS:
         row = by_start.get(start)
