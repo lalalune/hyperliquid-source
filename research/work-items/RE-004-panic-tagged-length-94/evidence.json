@@ -1,0 +1,215 @@
+{
+  "node": {
+    "digest": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+    "size": 91774280,
+    "id": 94
+  },
+  "thunks": [
+    {
+      "name": "div",
+      "thunk": "0x157b440",
+      "msg": "0x25d230",
+      "raw": 51,
+      "true": 25,
+      "message": "attempt to divide by zero",
+      "got": "0x576e1b8",
+      "got_idx": 72929
+    },
+    {
+      "name": "rem",
+      "thunk": "0x157b460",
+      "msg": "0x25d249",
+      "raw": 115,
+      "true": 57,
+      "message": "attempt to calculate the remainder with a divisor of zero",
+      "got": "0x576e528",
+      "got_idx": 73036
+    },
+    {
+      "name": "add",
+      "thunk": "0x157b480",
+      "msg": "0x252cf8",
+      "raw": 57,
+      "true": 28,
+      "message": "attempt to add with overflow",
+      "got": "0x576e118",
+      "got_idx": 72909
+    },
+    {
+      "name": "mul",
+      "thunk": "0x157b4a0",
+      "msg": "0x252d14",
+      "raw": 67,
+      "true": 33,
+      "message": "attempt to multiply with overflow",
+      "got": "0x576e1b0",
+      "got_idx": 72928
+    },
+    {
+      "name": "neg",
+      "thunk": "0x157b4c0",
+      "msg": "0x252d35",
+      "raw": 63,
+      "true": 31,
+      "message": "attempt to negate with overflow",
+      "got": "0x576eb38",
+      "got_idx": 73221
+    },
+    {
+      "name": "shl",
+      "thunk": "0x157b4e0",
+      "msg": "0x252d54",
+      "raw": 71,
+      "true": 35,
+      "message": "attempt to shift left with overflow",
+      "got": "0x576e478",
+      "got_idx": 73015
+    },
+    {
+      "name": "shr",
+      "thunk": "0x157b500",
+      "msg": "0x252d77",
+      "raw": 73,
+      "true": 36,
+      "message": "attempt to shift right with overflow",
+      "got": "0x576f128",
+      "got_idx": 73398
+    },
+    {
+      "name": "sub",
+      "thunk": "0x157b520",
+      "msg": "0x252d9b",
+      "raw": 67,
+      "true": 33,
+      "message": "attempt to subtract with overflow",
+      "got": "0x576e150",
+      "got_idx": 72916
+    },
+    {
+      "name": "async",
+      "thunk": "0x157b540",
+      "msg": "0x25d282",
+      "raw": 71,
+      "true": 35,
+      "message": "`async fn` resumed after completion",
+      "got": "0x576f040",
+      "got_idx": 73370
+    }
+  ],
+  "chain": [
+    {
+      "hop": "thunk->panic",
+      "via_got": "0x576e098",
+      "idx": 72894,
+      "to": "0x157b810"
+    },
+    {
+      "hop": "unwrap->tag",
+      "via_got": "0x576e108",
+      "idx": 72907,
+      "to": "0x157b7f0"
+    },
+    {
+      "hop": "tag->panic",
+      "via_got": "0x576e098",
+      "idx": 72894,
+      "to": "0x157b810"
+    },
+    {
+      "hop": "bounds/pair->panic",
+      "via_got": "0x576e098",
+      "idx": 72894,
+      "to": "0x157b810"
+    },
+    {
+      "hop": "panic->copy",
+      "via_got": "0x57706e0",
+      "idx": 74070,
+      "to": "0x4ecdcf0"
+    },
+    {
+      "hop": "caller2->copy",
+      "via_got": "0x57706e0",
+      "idx": 74070,
+      "to": "0x4ecdcf0"
+    },
+    {
+      "hop": "copy->thunk2",
+      "via_got": "0x57770e8",
+      "idx": 77399,
+      "to": "0x4ee9ae0"
+    },
+    {
+      "hop": "thunk2->decoder",
+      "via": "direct E8",
+      "to": "0x4eef390"
+    },
+    {
+      "hop": "decoder->next",
+      "via_got": "0x5777558",
+      "idx": 77450,
+      "to": "0x4eef596"
+    }
+  ],
+  "routes": [
+    {
+      "got": "0x576e118",
+      "helper": "thunk-add",
+      "thunk": "add",
+      "sites": 9,
+      "entries": "2,19x3,21x3,23,25"
+    },
+    {
+      "got": "0x576e150",
+      "helper": "thunk-sub",
+      "thunk": "sub",
+      "sites": 9,
+      "entries": "11,18,20x3,22x4"
+    },
+    {
+      "got": "0x576e1b0",
+      "helper": "thunk-mul",
+      "thunk": "mul",
+      "sites": 1,
+      "entries": "1"
+    },
+    {
+      "got": "0x576e2e0",
+      "helper": "helper-bounds",
+      "thunk": "-",
+      "sites": 2,
+      "entries": "3,24"
+    },
+    {
+      "got": "0x576e468",
+      "helper": "helper-pair",
+      "thunk": "-",
+      "sites": 1,
+      "entries": "0"
+    },
+    {
+      "got": "0x576e470",
+      "helper": "helper-unwrap",
+      "thunk": "-",
+      "sites": 13,
+      "entries": "continuation 4-17"
+    }
+  ],
+  "decode": {
+    "branch": "test al,1 at decoder+0x10; jne to decoder+0x4a",
+    "odd_path": "shr rax,1 at decoder+0x4d; out.len = tagged>>1",
+    "even_path": "sentinel 0x8000000000000000; different table 0x57528b0",
+    "odd_table": "0x5752878"
+  },
+  "counts": {
+    "thunks": 9,
+    "helpers": 3,
+    "adapters": 5,
+    "decoder": 1,
+    "segments": 28,
+    "claim_bytes": 1184,
+    "code_bytes": 828,
+    "message_bytes": 356,
+    "routes_sites": 35
+  }
+}
