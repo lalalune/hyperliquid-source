@@ -64,8 +64,12 @@ is built:
   followed by 16 octet bytes. It is an `IpAddr`, not a `SocketAddr`; no port is
   carried into the gate.
 - The reject log is **not** followed by any file write; the accept path boxes a
-  `0x58`-byte inner future (`call 0x27f0d50`, `mov edi,0x58`) whose vtable slot
-  `0x56c3d98` resolves to `0x2833ed0`.
+  `0x58`-byte inner future (`call 0x27f0d50`, `mov edi,0x58`) and loads its `dyn Future`
+  vtable from `0x56c3d98`. The vtable layout is bound from the captured bytes: slot 0
+  (`0x56c3d98`) is `drop_in_place` at `0x2833ed0`, slot 1 is the size `0x58` (matching the
+  allocation), slot 2 the alignment `8`, and slot 3 (`0x56c3db0`) is `poll` at `0x27f45d0`.
+  Both function slots are RELATIVE relocations to FDE starts. The box helper itself calls
+  `0x2833ed0`, consistent with a drop on its cleanup path. Pinned for #94 only.
 
 ## Reproduce
 
@@ -133,6 +137,7 @@ Function bounds, from `.eh_frame_hdr` (tool) and `objdump --dwarf=frames`
   observation, not a proof. The hub `0x24af210` owns `user_ip.rs:28:48` only as a
   panic Location.
 - No Rust reconstruction, execution, equivalence or gate is claimed.
-- Next question: bind the inner `file_snapshot` future (`0x2833ed0` vtable family) to
+- Next question: bind the inner `file_snapshot` future (its `poll` at `0x27f45d0`, slot 3 of
+  the `0x56c3d98` vtable; `0x2833ed0` is that vtable's `drop_in_place`) to
   the `outPath` write and the `includeHeightInOutput` flag, and locate the call that
   produces the 17-byte `IpAddr` for this request.

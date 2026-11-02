@@ -43,6 +43,8 @@ ANCHORS = {
         'request_table': (0x3f0c80, 0x27e927a),
         'state_table': (0x3f0bac, 0x27e91fe),
         'vtable_slot': 0x56c39b0,
+        # dyn Future vtable of the boxed inner future: [drop_in_place, size, align, poll]
+        'inner_vtable': {'va': 0x56c3d98, 'drop': 0x2833ed0, 'size': 0x58, 'align': 0x8, 'poll': 0x27f45d0},
         'display_thunk': (0x157c690, 0x157c6a7),
         'logger': (0x143d010, 0x143e888),
         'log_location': (153, 21),
@@ -246,6 +248,26 @@ def table_index(data, secs, table_va, target, limit=128):
     raise EvidenceError(f'jump table {table_va:#x} has no entry for {target:#x}')
 
 
+def check_inner_vtable(data, secs, relocs, fdes, release, vt):
+    """Bind the boxed inner future's vtable layout: slot 0 is drop_in_place, then size, align, poll."""
+    va = vt['va']
+    for slot, key in ((0, 'drop'), (3, 'poll')):
+        tgt = relocs.get(va + 8 * slot)
+        if tgt != vt[key]:
+            raise EvidenceError(f'#{release}: inner vtable slot {slot} ({va + 8 * slot:#x}) -> '
+                              f'{tgt if tgt is None else hex(tgt)} != {vt[key]:#x}')
+        if owner(fdes, tgt)[0] != tgt:
+            raise EvidenceError(f'#{release}: inner vtable {key} {tgt:#x} is not an FDE start')
+    for slot, key in ((1, 'size'), (2, 'align')):
+        if va + 8 * slot in relocs:
+            raise EvidenceError(f'#{release}: inner vtable {key} slot is relocated, expected a literal')
+        got = int.from_bytes(bytes_in_section(data, secs, va + 8 * slot, 8), 'little')
+        if got != vt[key]:
+            raise EvidenceError(f'#{release}: inner vtable {key} {got:#x} != {vt[key]:#x}')
+    return {'va': hex(va), 'slot0_drop_in_place': hex(vt['drop']), 'slot1_size': hex(vt['size']),
+            'slot2_align': hex(vt['align']), 'slot3_poll': hex(vt['poll'])}
+
+
 def analyze(data, secs, relocs, fdes, release):
     cfg = ANCHORS[release]
     hits = [m.start() for m in re.finditer(re.escape(TEMPLATE), data)]
@@ -265,6 +287,9 @@ def analyze(data, secs, relocs, fdes, release):
         raise EvidenceError(f'#{release}: owner FDE {start:#x}..{end:#x} != {cfg["future"]}')
     if relocs.get(cfg['vtable_slot']) != start:
         raise EvidenceError(f'#{release}: vtable slot {cfg["vtable_slot"]:#x} does not point at the future')
+    inner = None
+    if 'inner_vtable' in cfg:
+        inner = check_inner_vtable(data, secs, relocs, fdes, release, cfg['inner_vtable'])
     if owner(fdes, cfg['display_thunk'][0]) != cfg['display_thunk']:
         raise EvidenceError(f'#{release}: Display thunk FDE mismatch')
     if owner(fdes, cfg['logger'][0]) != cfg['logger']:
@@ -281,6 +306,7 @@ def analyze(data, secs, relocs, fdes, release):
         'future_fde': [hex(start), hex(end)],
         'future_bytes': end - start,
         'future_vtable_slot': hex(cfg['vtable_slot']),
+        **({'inner_future_vtable': inner} if inner else {}),
         'state_byte_offset': hex(cfg['state_byte']),
         'ip_addr_offset': hex(cfg['ip_offset']),
         'out_path_offsets': {k: hex(v) for k, v in cfg['out_path'].items()},
