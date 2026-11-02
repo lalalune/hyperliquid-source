@@ -126,7 +126,11 @@ def static_evidence(data):
 
 def check_structure(data):
     # Exposed for corrupt-input tests; the CLI always authenticates first.
-    summary,fdes,_=fde_extents(data);by_start={f['start']:f['end'] for f in fdes};secs=sections(data)
+    summary,fdes,_=fde_extents(data);by_start={}
+    for f in fdes:
+        require(f['start'] not in by_start,'Duplicate FDE start')
+        by_start[f['start']]=f['end']
+    secs=sections(data)
     def read(va,n):
         matching=[s for s in secs if s['type']!=8 and s['address']<=va and va+n<=s['address']+s['size']]
         require(len(matching)==1,'Unmapped VA');s=matching[0];o=s['offset']+va-s['address'];return data[o:o+n]
