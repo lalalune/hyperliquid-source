@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import struct
 import subprocess
+import tempfile
 
 from artifacts import ROOT, check
 from elf_index import sections
@@ -114,53 +115,59 @@ def generate(binary, output):
     data = binary.read_bytes()
     instructions, descriptors = controls(data)
     rela = relocations(data)
-    frames = subprocess.check_output(['readelf', '-wf', str(binary)], text=True)
-    fdes = [(int(a, 16), int(b, 16)) for a, b in
-            re.findall(r'FDE[^\n]*pc=([0-9a-fA-F]+)\.\.([0-9a-fA-F]+)', frames)]
-    for pair in RANGES.values():
-        if fdes.count(pair) != 1:
-            raise ValueError(f'Expected one decoded FDE for {pair}')
-    inbound, outgoing = [], []
-    primary = list(RANGES.values())[:3]
-    with subprocess.Popen(['objdump', '-d', '-j', '.text', str(binary)],
-                          stdout=subprocess.PIPE, text=True) as process:
-        for line in process.stdout:
-            ref = decoded_reference(line)
-            if not ref:
-                continue
-            site, kind, target = ref
-            row = {'site_va': hex(site), 'kind': kind, 'target_va': hex(target)}
-            if (kind == 'GOT' and target in {0x576EFA0, 0x576F4E0, 0x576F008}) or (
-                    kind == 'direct' and target in {a for a, _ in primary}):
-                inbound.append(row)
-            if any(begin <= site < end for begin, end in primary):
-                outgoing.append(row)
-        if process.wait() != 0:
-            raise ValueError('Complete .text disassembly failed')
-    output.mkdir(parents=True, exist_ok=True)
-    ranges = {}
-    for name, (begin, end) in RANGES.items():
-        offset, body = read_va(data, begin, end - begin)
-        ranges[name] = {'start_va': hex(begin), 'end_va': hex(end), 'file_offset': hex(offset),
-                        'bytes': len(body), 'sha256': hashlib.sha256(body).hexdigest()}
-        text = subprocess.check_output(['objdump', '-d', f'--start-address={begin:#x}',
-                                        f'--stop-address={end:#x}', str(binary)], text=True)
-        (output / f'{name}.objdump.txt').write_text(text.replace(str(binary), '<authenticated-node94>'))
-    (output / 'frames.txt').write_text('\n'.join(line for line in frames.splitlines()
-        if 'FDE' in line and any(f'pc={a:016x}..{b:016x}' in line for a, b in RANGES.values())) + '\n')
-    rela_text = subprocess.check_output(['readelf', '-rW', str(binary)], text=True)
-    rela_rows = [line for line in rela_text.splitlines() if re.match(r'^[0-9a-f]+\s', line)
-                 and int(line.split()[0], 16) in {*SLOTS, 0x576E488}]
-    (output / 'relocations.txt').write_text('\n'.join(rela_rows) + '\n')
-    records = {'target_sha256': identity['sha256'], 'target_bytes': len(data), 'ranges': ranges,
-               'decoded_fde_count': len(fdes), 'instruction_controls': instructions,
-               'descriptors_and_path': descriptors, 'relocations': rela,
-               'decoded_inbound_references': inbound, 'decoded_primary_outgoing_references': outgoing,
-               'shared_storage_va': {'atomic_byte': '0x5788318', 'table': '0x5788320'},
-               'captured_binary_executed': False,
-               'limits': 'Six bounded unwind regions; role names inferred. Format engine, word source, tree primitives, allocation, scheduling, automatic destruction and full concurrency/API semantics not closed.'}
-    (output / 'records.json').write_text(json.dumps(records, indent=2) + '\n')
-    return records
+    # Native readers see the same authenticated bytes as the Python readers.
+    # This owned snapshot is data-only and is never launched.
+    with tempfile.TemporaryDirectory(prefix='singleton-lifecycle-') as directory:
+        snapshot = Path(directory) / 'node94.elf'
+        snapshot.write_bytes(data)
+        snapshot.chmod(0o400)
+        frames = subprocess.check_output(['readelf', '-wf', str(snapshot)], text=True)
+        fdes = [(int(a, 16), int(b, 16)) for a, b in
+                re.findall(r'FDE[^\n]*pc=([0-9a-fA-F]+)\.\.([0-9a-fA-F]+)', frames)]
+        for pair in RANGES.values():
+            if fdes.count(pair) != 1:
+                raise ValueError(f'Expected one decoded FDE for {pair}')
+        inbound, outgoing = [], []
+        primary = list(RANGES.values())[:3]
+        with subprocess.Popen(['objdump', '-d', '-j', '.text', str(snapshot)],
+                              stdout=subprocess.PIPE, text=True) as process:
+            for line in process.stdout:
+                ref = decoded_reference(line)
+                if not ref:
+                    continue
+                site, kind, target = ref
+                row = {'site_va': hex(site), 'kind': kind, 'target_va': hex(target)}
+                if (kind == 'GOT' and target in {0x576EFA0, 0x576F4E0, 0x576F008}) or (
+                        kind == 'direct' and target in {a for a, _ in primary}):
+                    inbound.append(row)
+                if any(begin <= site < end for begin, end in primary):
+                    outgoing.append(row)
+            if process.wait() != 0:
+                raise ValueError('Complete .text disassembly failed')
+        output.mkdir(parents=True, exist_ok=True)
+        ranges = {}
+        for name, (begin, end) in RANGES.items():
+            offset, body = read_va(data, begin, end - begin)
+            ranges[name] = {'start_va': hex(begin), 'end_va': hex(end), 'file_offset': hex(offset),
+                            'bytes': len(body), 'sha256': hashlib.sha256(body).hexdigest()}
+            text = subprocess.check_output(['objdump', '-d', f'--start-address={begin:#x}',
+                                            f'--stop-address={end:#x}', str(snapshot)], text=True)
+            (output / f'{name}.objdump.txt').write_text(text.replace(str(snapshot), '<authenticated-node94>'))
+        (output / 'frames.txt').write_text('\n'.join(line for line in frames.splitlines()
+            if 'FDE' in line and any(f'pc={a:016x}..{b:016x}' in line for a, b in RANGES.values())) + '\n')
+        rela_text = subprocess.check_output(['readelf', '-rW', str(snapshot)], text=True)
+        rela_rows = [line for line in rela_text.splitlines() if re.match(r'^[0-9a-f]+\s', line)
+                     and int(line.split()[0], 16) in {*SLOTS, 0x576E488}]
+        (output / 'relocations.txt').write_text('\n'.join(rela_rows) + '\n')
+        records = {'target_sha256': identity['sha256'], 'target_bytes': len(data), 'ranges': ranges,
+                   'decoded_fde_count': len(fdes), 'instruction_controls': instructions,
+                   'descriptors_and_path': descriptors, 'relocations': rela,
+                   'decoded_inbound_references': inbound, 'decoded_primary_outgoing_references': outgoing,
+                   'shared_storage_va': {'atomic_byte': '0x5788318', 'table': '0x5788320'},
+                   'captured_binary_executed': False,
+                   'limits': 'Six bounded unwind regions; role names inferred. Format engine, word source, tree primitives, allocation, scheduling, automatic destruction and full concurrency/API semantics not closed.'}
+        (output / 'records.json').write_text(json.dumps(records, indent=2) + '\n')
+        return records
 
 
 if __name__ == '__main__':
