@@ -21,6 +21,33 @@ def unique_object(pairs):
     return result
 
 
+# x86-64 psABI GOTPCRELX relaxations: (start relative to the four-byte field,
+# source bytes, relaxed target bytes). mov reg,[rip] keeps its ModRM byte at -1.
+RELAXATIONS = {'gotpcrelx-mov-lea': (-2, b'\x8b', b'\x8d'), 'gotpcrelx-call': (-2, b'\xff\x15', b'\x67\xe8')}
+
+
+def relaxation_bytes(source, target, offset, kind, name):
+    """Byte positions a named GOTPCRELX relaxation rewrites, or None if the site does not fit it.
+
+    mov-lea: kind 41 (no REX) or 42 (REX.W/REX at -3), ModRM at -1 RIP-relative (mod=00, rm=101).
+    call: kind 41, ff 15 -> addr32 call (67 e8).
+    """
+    if type(kind) is not int or type(name) is not str or name not in RELAXATIONS:
+        return None
+    delta, before, after = RELAXATIONS[name]
+    start = offset + delta
+    if start < 0 or source[start:start + len(before)] != before or target[start:start + len(after)] != after:
+        return None
+    if name == 'gotpcrelx-mov-lea':
+        if kind not in (41, 42) or source[offset - 1] & 0xc7 != 0x05 or target[offset - 1] != source[offset - 1]:
+            return None
+        if kind == 42 and not (offset >= 3 and 0x40 <= source[offset - 3] <= 0x4f):
+            return None
+    elif kind != 41:
+        return None
+    return set(range(start, start + len(before)))
+
+
 def compare(source, target, relocations):
     require(len(source) == len(target) and len(target) > 0, 'Unequal/empty comparison extent')
     masks = set()
@@ -30,12 +57,19 @@ def compare(source, target, relocations):
         # PC32, PLT32, GOTPCREL and GOTPCRELX/REX_GOTPCRELX each occupy one four-byte
         # PC-relative field; the addend only selects the referenced displacement,
         # never the masked bytes. A linker-relaxed GOTPCRELX site also rewrites the
-        # opcode byte outside the field, so it can never be relocation-qualified.
+        # opcode byte(s) before the field; those are excluded only when the row names
+        # the relaxation and both captures hold exactly its source/target bytes.
         require(type(offset) is int and type(width) is int and width == 4
                 and kind in (2, 4, 9, 41, 42) and type(row['addend']) is int,
                 'Only recorded four-byte PC32/PLT32/GOTPCREL(X) fields are supported')
         field = set(range(offset, offset + width))
-        require(0 <= offset and offset + width <= len(target) and not masks & field,
+        if 'relaxation' in row:
+            require(kind in (41, 42) and type(row['relaxation']) is str and row['relaxation'] in RELAXATIONS,
+                    'Only named GOTPCRELX relaxations are supported')
+            rewritten = relaxation_bytes(source, target, offset, kind, row['relaxation'])
+            require(rewritten is not None, 'Relaxation bytes differ from the named psABI rewrite')
+            field |= rewritten
+        require(0 <= min(field) and offset + width <= len(target) and not masks & field,
                 'Overlapping/out-of-bounds relocation field')
         masks |= field
     differences = {i for i, (a, b) in enumerate(zip(source, target)) if a != b}

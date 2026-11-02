@@ -28,6 +28,7 @@ sys.path.insert(0, str(ROOT / 'research/work-items/RE-002-node115-std-census'))
 from elf_index import sections  # noqa: E402
 from fde_extents import fde_extents  # noqa: E402
 from census import ar_members, object_functions  # noqa: E402
+from byte_progress import RELAXATIONS, relaxation_bytes  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 TARGET = 'artifacts/node/115/hl-node'
@@ -42,6 +43,27 @@ VERSION_NOTES = {
 
 def sha(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def relaxed_match(src, tgt, rel, mask):
+    """Return {offset: relaxation} if src equals tgt outside masks up to exact relaxations, else None.
+
+    The rewrite rules are tools/byte_progress.py's, so the census admits exactly what
+    the comparator accepts; relaxation bytes may not overlap any other masked byte.
+    """
+    allowed, applied = set(mask), {}
+    for o, kind, _ in rel:
+        for name in RELAXATIONS:
+            rewritten = relaxation_bytes(src, tgt, o, kind, name)
+            if rewritten is not None:
+                if rewritten & allowed:
+                    return None
+                applied[o] = name
+                allowed |= rewritten
+                break
+    if not applied or any(src[i] != tgt[i] for i in range(len(src)) if i not in allowed):
+        return None
+    return applied
 
 
 def lock_versions(lock):
@@ -122,6 +144,14 @@ def main():
                 keep = [i for i in range(n) if i not in mask]
                 probe = bytes(body[i] for i in keep)
                 hits = [(va, t) for va, t in by_len[n] if bytes(t[i] for i in keep) == probe]
+                relaxed = {}
+                if not hits and any(k in (41, 42) for _, k, _ in rel):
+                    # The linker relaxed GOTPCRELX sites: accept only the exact psABI rewrites.
+                    candidates_relaxed = [(va, t, r) for va, t in by_len[n]
+                                          for r in [relaxed_match(body, t, rel, mask)] if r]
+                    if len(candidates_relaxed) == 1:
+                        va, t, relaxed = candidates_relaxed[0]
+                        hits = [(va, t)]
                 if len(hits) != 1:
                     continue
                 va, target = hits[0]
@@ -143,7 +173,9 @@ def main():
                           'crate': candidates[0]['crate'], 'versions': candidates,
                           'start': va, 'end': va + n, 'target_body_sha256': sha(target),
                           'source_body': body, 'source_body_sha256': sha(body), 'raw_equal': target == body,
-                          'relocations': [{'offset': o, 'kind': t, 'width': 4, 'addend': a} for o, t, a in rel]}
+                          'relocations': [{'offset': o, 'kind': t, 'width': 4, 'addend': a,
+                                           **({'relaxation': relaxed[o]} if o in relaxed else {})}
+                                          for o, t, a in rel]}
                 claimed[va] = record
                 records.append(record)
     # A body shared by two different crates is not attributable to one of them, and a

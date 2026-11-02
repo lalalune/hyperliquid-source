@@ -27,7 +27,7 @@ Native crates (amd64 Ubuntu 24.04 container; one build per `gcc-*` directory):
 
 ```sh
 podman build --platform linux/amd64 -t hl-native-build research/work-items/RE-002-node115-vendor-census
-for b in gcc-rocksdb0210 gcc-secp256k1sys0100 gcc-secp256k1sys0110 gcc-blst0316 gcc-jemalloc061 gcc-revm4003 gcc-forkbases; do
+for b in gcc-rocksdb0210 gcc-secp256k1sys0100 gcc-secp256k1sys0110 gcc-blst0316 gcc-jemalloc061 gcc-revm4003 gcc-forkbases gcc-reth-v2.3.0 gcc-reth-v2.4.1; do
   cp -r research/work-items/RE-002-node115-vendor-census/$b work/vendor-$b
   mkdir -p work/vendor-$b/src && : > work/vendor-$b/src/lib.rs
   podman run --rm --platform linux/amd64 -v "$PWD/work/vendor-$b:/w" hl-native-build \
@@ -51,7 +51,9 @@ python3 research/work-items/RE-002-node115-vendor-census/vendor_census.py \
   work/org-block-importer/target/release/deps work/org-block-importer/Cargo.lock \
   work/org-order_book_server/target/release/deps work/org-order_book_server/Cargo.lock \
   work/vendor-gcc-revm4003/target/release/deps work/vendor-gcc-revm4003/Cargo.lock \
-  work/vendor-gcc-forkbases/target/release/deps work/vendor-gcc-forkbases/Cargo.lock
+  work/vendor-gcc-forkbases/target/release/deps work/vendor-gcc-forkbases/Cargo.lock \
+  work/vendor-gcc-reth-v2.3.0/target/release/deps work/vendor-gcc-reth-v2.3.0/Cargo.lock \
+  work/vendor-gcc-reth-v2.4.1/target/release/deps work/vendor-gcc-reth-v2.4.1/Cargo.lock
 ```
 
 The `org-*` builds are the hyperliquid-dex repositories at the commits in each
@@ -88,8 +90,19 @@ these hold:
   (std ships private copies of crates such as memchr);
 - it does not overlap an already registered window or a std-census body.
 
-A linker-relaxed GOTPCRELX site rewrites its opcode byte, which lies outside the
-mask, so such a site can never pass.
+LLD relaxes GOTPCRELX loads of locally defined symbols, writing an opcode byte
+outside the 4-byte field. A strict match is tried first. Failing that, a body
+may match through the exact x86-64 psABI rewrites, defined once in
+`tools/byte_progress.py` and shared with the census:
+
+- `mov reg,[rip+GOT]` (`8b`) → `lea reg,[rip+sym]` (`8d`), at a type 41/42
+  site, with the same RIP-relative ModRM and, for type 42, a REX prefix;
+- `call *[rip+GOT]` (`ff 15`) → `addr32 call` (`67 e8`), at a type 41 site.
+
+Each relaxed relocation row names its rewrite. The comparator re-checks those
+bytes in both captures and counts them as relocation bytes, never as raw-equal
+credit. 1,133 windows (1,561,795 bytes) need it; every
+observed rewrite is `mov`→`lea`.
 
 Rust objects (`*.rcgu.o`) are attributed to a crate only when the mangled symbol
 names that crate. That includes core/alloc generics instantiated over the
@@ -98,7 +111,9 @@ static library that rustc bundles into the rlib. Native code is attributed to
 the `-sys` crate whose build produced it. That includes C++ template and COMDAT
 code, such as libstdc++ containers, compiled in RocksDB translation units.
 
-`symbol` is one representative name. `candidate_symbols` lists every name with
+`symbol` is one representative name. Registry labels say "one of N identical
+bodies" when several symbols build the same body, because instantiations can
+differ only through their relocation targets. `candidate_symbols` lists every name with
 an identical body, and `candidate_versions` every version that builds it.
 
 ## Verification
@@ -121,6 +136,20 @@ The review also confirmed four labelling and false-positive problems, all fixed 
 
 Separately, the comparator now rejects a census relocation pointer that names
 another window's record.
+
+A second review (20 agents) covered the relaxation rule:
+
+- two independent checkers re-derived 52 stratified relaxed windows (archive
+  members, `.rela` types, decoded `mov`/`lea` pairs, aligned instruction streams)
+  with zero unexplained bytes;
+- a semantic check found no misattribution across all 2,981 relaxed sites.
+
+Its confirmed findings are fixed here:
+
+- shape checks: RIP-relative ModRM, REX for type 42, and the call form only on
+  type 41;
+- the census and comparator share one rule, and overlapping rewrite bytes are rejected;
+- multi-candidate labels no longer present one symbol as authoritative.
 
 ## hyperliquid-dex repository sweep
 
@@ -146,22 +175,22 @@ vs aws-lc-sys). Those 6 previously credited windows are now dropped as ambiguous
 
 ## Results
 
-5,526 windows, 3,321,711 bytes, all relocation-qualified, 432 raw-equal:
+6,665 windows, 4,886,344 bytes, all relocation-qualified, 433 raw-equal:
 
 | Attribution | Windows | Bytes |
 | --- | ---: | ---: |
-| native-libraries (GCC 13.3) | 5,226 | 3,172,217 |
-| vendored-crates (rustc 1.95.0) | 300 | 149,494 |
+| native-libraries (GCC 13.3) | 6,359 | 4,734,012 |
+| vendored-crates (rustc 1.95.0) | 306 | 152,332 |
 
 | Native library | Windows | Bytes |
 | --- | ---: | ---: |
-| librocksdb-sys | 4,618 | 2,437,086 |
-| zstd-sys | 309 | 516,663 |
-| tikv-jemalloc-sys | 196 | 82,641 |
-| bzip2-sys | 14 | 44,314 |
-| secp256k1-sys | 24 | 38,103 |
-| libz-sys | 28 | 36,604 |
-| blst | 29 | 16,432 |
+| librocksdb-sys | 5,605 | 3,884,378 |
+| zstd-sys | 310 | 518,054 |
+| tikv-jemalloc-sys | 243 | 108,853 |
+| blst | 118 | 68,697 |
+| bzip2-sys | 18 | 67,607 |
+| libz-sys | 32 | 47,183 |
+| secp256k1-sys | 25 | 38,866 |
 | lz4-sys | 8 | 374 |
 
 The largest Rust contributors are h2, sha2, http, revm-precompile, tokio, rand_chacha, chrono, url, ripemd, k256. Of the eight private forks:
@@ -170,8 +199,11 @@ The largest Rust contributors are h2, sha2, http, revm-precompile, tokio, rand_c
 - `hyper-fork` matches hyper 0.14.32 in its unmodified functions;
 - `bincode-fork` and `hyper-tls-fork` (bases bincode 1.3.3 and hyper-tls 0.5.0)
   expose no unique non-generic body;
-- the four reth crates (one or two source files each) are git-only, and the reth
-  releases in the org lockfiles (v1.1.5, v1.3.0) match only 115 bytes.
+- the four reth crates (one or two source files each) are git-only. reth v2.3.0
+  pins exactly revm 40.0.3, the revm peak above, and v2.4.1 pins revm 41.0.0.
+  Building the four fork bases at both tags matches no unique non-generic body of
+  those crates; the forked files are modified or generic. These builds add
+  alloy-evm and alloy 2.x code.
 
 `census.json` has the per-crate summary and every record. `licenses.json` gives
 each matched crate version's declared license (all permissive); the compiled
@@ -193,6 +225,19 @@ bodies keep those licenses.
   inside the node's own crates. It can only be reproduced with the node's
   source, so it is first-party reconstruction work, not dependency matching.
 
-Next question: which remaining RocksDB/zstd functions differ, and why (inlining
-across TUs, flags, or a patched RocksDB)? Does a reth 2.x release (git tag)
-compatible with revm 40 reproduce the four reth fork files?
+- Unmatched RocksDB functions: every unique function in the GCC librocksdb.a
+  that is still unmatched after relaxation was classified by whether its
+  pre-relocation opening bytes occur in node115 `.text`:
+  - 2,633 functions (1.58 MB) do not occur at all. Most are presumably removed
+    by `--gc-sections` because the node never references them.
+  - 931 functions (239 KB) have openings too short to test.
+  - 37 functions (8 KB) occur only inlined.
+  - 631 functions (1.12 MB) share an opening with an FDE but differ later.
+    Sampled cases are different template instantiations with the same prologue
+    (e.g. `FindFactory<SecondaryCache>` vs `FindFactory<EventListener>`), or
+    relaxed loads; those relaxed loads are now matched.
+  - 452 functions are below the size gate or have several identical FDEs.
+
+Next question: which of the remaining 631 shared-prologue RocksDB functions are
+the same instantiation with different inlining, and which are distinct template
+instances already accounted for?

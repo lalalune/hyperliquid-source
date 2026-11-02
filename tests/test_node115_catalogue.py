@@ -60,8 +60,8 @@ class CatalogueTests(unittest.TestCase):
     def test_dependency_bytes_do_not_count_as_first_party(self):
         coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', self.components)
         self.assertEqual(set(coverage['targets']), {'node115'})
-        self.assertEqual(coverage['totals']['node115']['windows'], 5836)
-        self.assertEqual(coverage['totals']['node115']['bytes'], 3428270)
+        self.assertEqual(coverage['totals']['node115']['windows'], 6975)
+        self.assertEqual(coverage['totals']['node115']['bytes'], 4992903)
         self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
 
     def test_wrong_owner_target_and_changed_evidence_rejected(self):
@@ -109,8 +109,8 @@ class CatalogueTests(unittest.TestCase):
         rows = [r for r in coverage['windows'] if r['id'].startswith('node115-vendor-')]
         rust = [r for r in rows if r['dependency'] == 'vendored-crates']
         native = [r for r in rows if r['dependency'] == 'native-libraries']
-        self.assertEqual((len(rust), sum(r['bytes'] for r in rust)), (300, 149494))
-        self.assertEqual((len(native), sum(r['bytes'] for r in native)), (5226, 3172217))
+        self.assertEqual((len(rust), sum(r['bytes'] for r in rust)), (306, 152332))
+        self.assertEqual((len(native), sum(r['bytes'] for r in native)), (6359, 4734012))
         self.assertEqual(len(rust) + len(native), len(rows))
         self.assertTrue(all(r['relocation_qualified'] for r in rows))
         self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
@@ -136,6 +136,50 @@ class CatalogueTests(unittest.TestCase):
             (root / 'research/byte-windows.json').write_text(json.dumps(registry))
             with self.assertRaisesRegex(ValueError, 'Relocation record belongs to another window'):
                 byte_progress.load_coverage(root, 'research/byte-windows.json', self.components)
+
+    def test_gotpcrelx_relaxation_requires_the_exact_psabi_rewrite(self):
+        mov = b'\x48\x8b\x05\x00\x00\x00\x00\x90'
+        lea = b'\x48\x8d\x05\x11\x22\x33\x44\x90'
+        row = {'offset': 3, 'width': 4, 'kind': 42, 'addend': -4, 'relaxation': 'gotpcrelx-mov-lea'}
+        result = byte_progress.compare(mov, lea, [row])
+        self.assertTrue(result['relocation_qualified'])
+        self.assertFalse(result['raw_equal'])
+        self.assertEqual(result['relocation_bytes'], 5)  # field plus the rewritten opcode
+        untagged = {k: v for k, v in row.items() if k != 'relaxation'}
+        self.assertFalse(byte_progress.compare(mov, lea, [untagged])['relocation_qualified'])
+        call = b'\xff\x15\x00\x00\x00\x00\x90'
+        relaxed_call = b'\x67\xe8\x01\x02\x03\x04\x90'
+        self.assertTrue(byte_progress.compare(call, relaxed_call, [
+            {'offset': 2, 'width': 4, 'kind': 41, 'addend': -4, 'relaxation': 'gotpcrelx-call'}])['relocation_qualified'])
+        changed_modrm = b'\x48\x8d\x0d\x11\x22\x33\x44\x90'
+        for source, target, bad in ((mov, lea, {**row, 'kind': 9}),          # not a GOTPCRELX site
+                                    (mov, lea, {**row, 'relaxation': 'x'}),  # unknown rewrite
+                                    (mov, lea, {**row, 'relaxation': 'gotpcrelx-call'}),
+                                    (lea, lea, row),                          # source is not mov
+                                    (mov, mov, row)):                         # target not relaxed
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                byte_progress.compare(source, target, [bad])
+        with self.assertRaises(ValueError):  # the ModRM is not part of the rewrite
+            byte_progress.compare(mov, changed_modrm, [row])
+        not_rip = b'\x48\x8b\x44\x00\x00\x00\x00\x90'
+        with self.assertRaises(ValueError):  # mov reg,[rax+rax] is not a GOT load
+            byte_progress.compare(not_rip, b'\x48\x8d\x44\x00\x00\x00\x00\x90', [row])
+        with self.assertRaises(ValueError):  # call relaxation is a kind-41 site only
+            byte_progress.compare(call, relaxed_call, [
+                {'offset': 2, 'width': 4, 'kind': 42, 'addend': -4, 'relaxation': 'gotpcrelx-call'}])
+
+    def test_census_relaxed_match_uses_the_comparator_rule(self):
+        sys.path.insert(0, str(ROOT / 'research/work-items/RE-002-node115-std-census'))
+        sys.path.insert(0, str(ROOT / 'research/work-items/RE-002-node115-vendor-census'))
+        import vendor_census
+        self.assertIs(vendor_census.RELAXATIONS, byte_progress.RELAXATIONS)
+        mov = b'\x48\x8b\x05\x00\x00\x00\x00\x90'
+        lea = b'\x48\x8d\x05\x11\x22\x33\x44\x90'
+        mask = set(range(3, 7))
+        self.assertEqual(vendor_census.relaxed_match(mov, lea, [(3, 42, -4)], mask), {3: 'gotpcrelx-mov-lea'})
+        self.assertIsNone(vendor_census.relaxed_match(mov, lea, [(3, 9, -4)], mask))           # not GOTPCRELX
+        self.assertIsNone(vendor_census.relaxed_match(mov, lea[:-1] + b'\x91', [(3, 42, -4)], mask))
+        self.assertIsNone(vendor_census.relaxed_match(mov, lea, [(3, 42, -4)], mask | {1}))    # overlap
 
 
 if __name__ == '__main__':
