@@ -71,6 +71,28 @@ The crate also does not implement networking, proposal construction, commit
 walking, transaction execution, persistence, timers, or the already-existing
 timeout-transition component.
 
+## Client transaction join
+
+`client_transaction_join::join_transactions` reconstructs the conditional owned
+value operation at `0x4548050..0x454859e`. It preserves an opaque `Arc<B>` block
+and proof payload, all12 raw time bytes and any supplied outer rows Arc. Supplied
+rows invoke neither checked-view provider; absent empty hashes do not invoke the
+map provider. Otherwise actual `BTreeMap` lookup preserves request order,
+duplicates and shared transaction identity. The first missing hash consumes the
+block and releases the temporary prefix.
+
+The [join packet](../../research/work-items/RE-008-client-transaction-join-94/README.md)
+freezes the complete native proof and independent input/expected corpus before
+this source. Stable valid memory/map views, bounded positive native refcounts,
+successful allocation and helper frames remain premises. The source does not
+check transaction-body hashes, supplied-row agreement or block/proof validity.
+Generic view errors, checked row-span and fallible reservation refusals are new
+safe host policies; only `MissingTransaction` corresponds to native tag0x1c.
+`checked_row_bytes` is used by actual admission and describes native40-byte span
+arithmetic, not Rust layout or allocator capacity. Native atomic thresholds,
+arbitrary Drop effects, exceptional paths and whole-client equivalence are not
+claimed. Source/build qualification is retained separately in the packet.
+
 ## Reproduce
 
 From the repository root:
