@@ -10,8 +10,14 @@
   all 22,432 frozen scalar expectations. All 9 compiled semantic
   mutations are detected with normal process exit. Own unit tests and
   `rustfmt --check` pass; repeated optimized library digests agree.
-- Full flat 971-file inventory: running in the separate shared validation
-  checkout. No completed full-suite result is claimed at this revision.
+- Complete unchanged flat inventory: **971/971 files pass**, zero failed files,
+  15,468 reported cases and 72 skip records, in
+  1797.783 seconds. Six workers each invoke the same fresh-process
+  stdlib unittest discovery command used by `make test`; scheduling is the only
+  runner difference. No file or assertion is excluded or changed.
+  This is the shared run recorded in [PR #1938](https://github.com/lalalune/hyperliquid-source/pull/1938);
+  this branch has its separate component/static checks above. An independent
+  full-suite run on this PR head is not claimed.
 
 `validation-inputs.json` fingerprints the byte-identical tracked tools, tests,
 provenance, config and scope registries shared by the three independent branches.
