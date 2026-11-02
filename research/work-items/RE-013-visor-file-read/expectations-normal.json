@@ -1,0 +1,206 @@
+{
+  "state": "independent-codec-and-abstract-envelope-checks-unqualified",
+  "utf8Cases": 1198948,
+  "envelopeCases": 320,
+  "nativeWidthTableBytes": 256,
+  "corpusCompressedSha256": "6145e59e2e4477a52258fb4fadd874757a66f5c8481967e0a49a361e4b1eb2da",
+  "corpusUncompressedSha256": "d8febaff5445220dee388919e5f8bcbd2a195a811348b7d9e600260144691de6",
+  "abstractMutationWitnesses": [
+    {
+      "mutant": "metadata-is-read-error",
+      "input": {
+        "allocationError": false,
+        "initializedPrefixHex": "",
+        "metadata": "error",
+        "opened": true,
+        "readError": null
+      },
+      "expected": {
+        "bytesHex": "",
+        "closeRequests": 1,
+        "kind": "success"
+      },
+      "mutantResult": {
+        "kind": "error",
+        "payload": "metadata-error",
+        "closeRequests": 1
+      }
+    },
+    {
+      "mutant": "skip-close-on-capacity-error",
+      "input": {
+        "allocationError": true,
+        "initializedPrefixHex": "",
+        "metadata": "positive-hint",
+        "opened": true,
+        "readError": null
+      },
+      "expected": {
+        "closeRequests": 1,
+        "kind": "error",
+        "payload": "capacity-error-0x2600000003"
+      },
+      "mutantResult": {
+        "kind": "error",
+        "payload": "capacity-error-0x2600000003",
+        "closeRequests": 0
+      }
+    },
+    {
+      "mutant": "utf8-error-overrides-read-error",
+      "input": {
+        "allocationError": false,
+        "initializedPrefixHex": "ff",
+        "metadata": "error",
+        "opened": true,
+        "readError": 5
+      },
+      "expected": {
+        "closeRequests": 1,
+        "kind": "error",
+        "payload": "read-errno-5"
+      },
+      "mutantResult": {
+        "kind": "error",
+        "payload": "utf8-descriptor-7db9a8",
+        "closeRequests": 1
+      }
+    },
+    {
+      "mutant": "accept-invalid-utf8",
+      "input": {
+        "allocationError": false,
+        "initializedPrefixHex": "ff",
+        "metadata": "error",
+        "opened": true,
+        "readError": null
+      },
+      "expected": {
+        "closeRequests": 1,
+        "kind": "error",
+        "payload": "utf8-descriptor-7db9a8"
+      },
+      "mutantResult": {
+        "kind": "success",
+        "bytesHex": "ff",
+        "closeRequests": 1
+      }
+    },
+    {
+      "mutant": "reject-nul",
+      "input": {
+        "allocationError": false,
+        "initializedPrefixHex": "410042",
+        "metadata": "error",
+        "opened": true,
+        "readError": null
+      },
+      "expected": {
+        "bytesHex": "410042",
+        "closeRequests": 1,
+        "kind": "success"
+      },
+      "mutantResult": {
+        "kind": "error",
+        "payload": "utf8-descriptor-7db9a8",
+        "closeRequests": 1
+      }
+    },
+    {
+      "mutant": "strip-bom",
+      "input": {
+        "allocationError": false,
+        "initializedPrefixHex": "efbbbf",
+        "metadata": "error",
+        "opened": true,
+        "readError": null
+      },
+      "expected": {
+        "bytesHex": "efbbbf",
+        "closeRequests": 1,
+        "kind": "success"
+      },
+      "mutantResult": {
+        "kind": "success",
+        "bytesHex": "",
+        "closeRequests": 1
+      }
+    },
+    {
+      "mutant": "trim-content",
+      "input": {
+        "allocationError": false,
+        "initializedPrefixHex": "20090d0a",
+        "metadata": "error",
+        "opened": true,
+        "readError": null
+      },
+      "expected": {
+        "bytesHex": "20090d0a",
+        "closeRequests": 1,
+        "kind": "success"
+      },
+      "mutantResult": {
+        "kind": "success",
+        "bytesHex": "",
+        "closeRequests": 1
+      }
+    },
+    {
+      "mutant": "discard-zero-metadata-content",
+      "input": {
+        "allocationError": false,
+        "initializedPrefixHex": "410042",
+        "metadata": "zero-hint",
+        "opened": true,
+        "readError": null
+      },
+      "expected": {
+        "bytesHex": "410042",
+        "closeRequests": 1,
+        "kind": "success"
+      },
+      "mutantResult": {
+        "kind": "success",
+        "bytesHex": "",
+        "closeRequests": 1
+      }
+    }
+  ],
+  "selectedCodecBoundaryCases": {
+    "00": [
+      0,
+      null,
+      null
+    ],
+    "4180": [
+      1,
+      1,
+      1
+    ],
+    "c080": [
+      1,
+      0,
+      1
+    ],
+    "c2": [
+      1,
+      0,
+      null
+    ],
+    "eda08080": [
+      1,
+      0,
+      1
+    ],
+    "f4908080": [
+      1,
+      0,
+      1
+    ]
+  },
+  "scope": "Python strict UTF8 codec and independent logical envelope model versus prior frozen expectations; native table audit is data binding. No captured execution, native state/branch evaluator, target comparator or implementation equivalence.",
+  "qualified": false,
+  "capturedExecution": false,
+  "instructionEvaluation": false
+}
