@@ -93,7 +93,11 @@ def analyze(data):
     path=b'l1/src/nonce_set.rs'
     if read(data,0x4424eb,len(path))[1]!=path or read(data,0x6484000,16)[1]!=struct.pack('<QII',len(path),141,13):raise ValueError('nonce source Location changed')
     if read(data,0x7c958c,15)[1]!=b'nonce invariant':raise ValueError('nonce diagnostic anchor changed')
-    _,fs,_=fde_extents(data);frames={(f['start'],f['end']):f for f in fs};owners=[]
+    _,fs,_=fde_extents(data);owners=[]
+    frames={}
+    for f in fs:
+        if (f['start'],f['end']) in frames:raise ValueError('duplicate FDE extent')
+        frames[(f['start'],f['end'])]=f
     for o in spec['owners']:
         a,b=o['start'],o['end']
         if (a,b) not in frames:raise ValueError('nonce FDE changed')
