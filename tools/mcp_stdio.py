@@ -42,10 +42,20 @@ class JsonLineReader:
                 raise RuntimeError('REA stdio server closed; inspect work/rea-smoke/mcp-stderr.log')
             if isinstance(line, OSError):
                 raise RuntimeError('REA stdio pipe read failed') from line
-            value = json.loads(line)
+            try:
+                value = json.loads(line)
+            except ValueError as error:
+                raise RuntimeError('REA stdio server sent a malformed frame; '
+                                   'inspect work/rea-smoke/mcp-stderr.log') from error
+            if not isinstance(value, dict):
+                raise RuntimeError('REA stdio server sent a malformed frame; '
+                                   'inspect work/rea-smoke/mcp-stderr.log')
             if value.get('id') == request_id:
                 if 'error' in value:
                     raise RuntimeError(value['error'])
+                if 'result' not in value:
+                    raise RuntimeError('REA stdio server response carries neither result nor error; '
+                                       'inspect work/rea-smoke/mcp-stderr.log')
                 return value['result']
         raise RuntimeError('REA stdio handshake deadline exceeded')
 
