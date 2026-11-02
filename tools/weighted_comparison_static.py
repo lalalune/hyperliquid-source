@@ -103,7 +103,13 @@ def analyze(data):
     code=read(data,0x3bcae64,7)[1]
     if code[:3]!=b'\x48\x8d\x15' or 0x3bcae6b+struct.unpack_from('<i',code,3)[0]!=0x6475bd8:
         raise ValueError('weighted source LEA changed')
-    _,fs,_=fde_extents(data);frames={(f['start'],f['end']):f for f in fs};owners=[]
+    _,fs,_=fde_extents(data)
+    frames={}
+    for f in fs:
+        if (f['start'],f['end']) in frames:
+            raise ValueError('duplicate FDE extent')
+        frames[(f['start'],f['end'])]=f
+    owners=[]
     for role,(a,b,sha,count) in OWNERS.items():
         if (a,b) not in frames:
             raise ValueError('weighted scope FDE changed')
