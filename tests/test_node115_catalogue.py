@@ -36,7 +36,8 @@ class CatalogueTests(unittest.TestCase):
             (root / 'research').mkdir()
             components = copy.deepcopy(self.components)
             components[0]['artifact'] = 'node94'
-            (root / 'research/components.json').write_text(json.dumps({'components': components}))
+            (root / 'research/components.json').write_text(json.dumps(
+                {'components': components, 'known_first_party_crates': []}))
             (root / 'research/progress.json').write_text(json.dumps(self.progress))
             with self.assertRaisesRegex(ValueError, 'Only node115'):
                 catalogue.generate(root)

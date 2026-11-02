@@ -254,6 +254,9 @@ def render_readme_progress(components, progress, coverage=None, inventory=None):
 
 def generate(root=ROOT):
     config = json.loads((root / 'research/components.json').read_text())
+    if (not isinstance(config, dict) or not isinstance(config.get('components'), list)
+            or not isinstance(config.get('known_first_party_crates'), list)):
+        raise ValueError('Invalid components config')
     components = config['components']
     progress = json.loads((root / 'research/progress.json').read_text())
     validate_progress(components, progress, root)
@@ -263,6 +266,9 @@ def generate(root=ROOT):
     from elf_index import unwind_index
     _, index = unwind_index(data)
     inv = json.loads((root / 'research/imported/hl-node-115.inventory.json').read_text())
+    if (not isinstance(inv, dict) or 'fde_count_eh_frame_hdr' not in inv
+            or not isinstance(inv.get('first_party_files'), dict)):
+        raise ValueError('Invalid node115 inventory')
     if len(index) != inv['fde_count_eh_frame_hdr']:
         raise ValueError('Inventory unwind count differs from the authenticated node115 binary')
     paths = sorted(f'{crate}/{file}' for crate, files in inv['first_party_files'].items()
