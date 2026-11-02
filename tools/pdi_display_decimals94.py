@@ -110,7 +110,12 @@ def validate(data, check_digest=True):
         raise ValueError('node 94 SHA-256 mismatch')
     sections = elf_index.sections(data)
     _, records = fde_extents.eh_frame_records(data, sections)
-    indexed = {r['start']: r for r in records if r['start'] in FUNCTIONS}
+    indexed = {}
+    for r in records:
+        if r['start'] in FUNCTIONS:
+            if r['start'] in indexed:
+                raise ValueError('duplicate FDE')
+            indexed[r['start']] = r
     if len(indexed) != len(FUNCTIONS):
         raise ValueError('missing FDE')
     funcs = []
