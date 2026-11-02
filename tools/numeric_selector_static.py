@@ -151,10 +151,21 @@ def caller_branches(data):
     return result
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    s=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    rels={}
+    for a,i,v in struct.iter_unpack('<QQq',data[s['offset']:s['offset']+s['size']]):
+        if a in rels:raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a]=(i,v)
+    return rels
+
+
 def extract(data):
     spec=specification();ss,read=reader(data);_,fs,_=fde_extents(data)
-    sec=next(s for s in ss if s['name']=='.rela.dyn')
-    rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
+    rels=relocations(data)
     dyn=next(s for s in ss if s['name']=='.dynsym');strings_sec=next(s for s in ss if s['name']=='.dynstr');strings=data[strings_sec['offset']:strings_sec['offset']+strings_sec['size']]
     facts=[];bindings={};exports={};native_frames=[]
     with tempfile.TemporaryDirectory() as tmp:
