@@ -62,6 +62,18 @@ def numeric_projection(p,s,n):
     return {'observer_value':min(p['cap'],value),'record_value':value}
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    s=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    rels={}
+    for a,i,v in struct.iter_unpack('<QQq',data[s['offset']:s['offset']+s['size']]):
+        if a in rels:raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a]=(i,v)
+    return rels
+
+
 def analyze(data):
     p=parameters(data)
     if p!={'divisor':1e9,'positive_infinity_hex':'000000000000f07f','cap':60.0,
@@ -78,8 +90,7 @@ def analyze(data):
     for site,target in [(0x51c9aa6,0x51c9c9e),(0x51c9ac9,0x51c9b8a)]:
         code=read(data,site,6)[1]
         if code[:2]!=b'\x0f\x84' or site+6+struct.unpack_from('<i',code,2)[0]!=target:raise ValueError('latency guard transfer changed')
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
-    rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
+    rels=relocations(data)
     if any(rels.get(a)!=(8,v) for a,v in BINDINGS.items()):raise ValueError('latency relocation changed')
     path=b'node/src/abci_latency_sampler.rs'
     if read(data,0x44bf3e,len(path))[1]!=path:raise ValueError('latency source path changed')
