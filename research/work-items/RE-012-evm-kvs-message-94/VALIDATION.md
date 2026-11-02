@@ -20,3 +20,14 @@
 The tests execute only independent Rust and offline tools. Counter tests near
 100 GB/u64 boundaries use private synthetic counter seeds, not huge buffers or
 captured target execution. Native allocation/ABI identity remains unmeasured.
+
+Follow-up verification on current `main` was blocked because commit
+`2820c22c92ac1a4821499eee393f570b95dee9d4` added a component listing to
+`src/README.md`, while the earlier TCP-frame packet still attested to its
+620-byte predecessor. The original bytes from `2820c22c^`, SHA-256
+`f754fd25eb218dc1d6917d8f3c9918a8f9aa30cbad4807f92ef8fa022f2aeee0`,
+are preserved at `../RE-012-node94-tcp-frame-codec/src/README.md`. The existing
+packet-relative manifest entry resolves to that historical snapshot; the
+original manifest, current component listing and strict verifier are unchanged.
+This receipt remains for the full sweep at `d31f2bdb4efed900bc77853e10f6d4e086117144`;
+it does not claim a full-suite run on later `main` changes.
