@@ -107,10 +107,16 @@ class Image:
         fail(f"address {va:#x} is outside every section")
 
     def _fdes(self):
-        addr, off, _ = self.sections[".eh_frame_hdr"]
+        addr, off, size = self.sections[".eh_frame_hdr"]
+        if off + size > len(self.data):
+            fail("invalid .eh_frame_hdr section")
+        if size < 12:
+            fail("truncated .eh_frame_hdr")
         if self.data[off + 3] != 0x3b:
             fail("unexpected .eh_frame_hdr table encoding")
         count = struct.unpack_from("<I", self.data, off + 8)[0]
+        if 12 + count * 8 > size:
+            fail("truncated .eh_frame_hdr table")
         rows = []
         for i in range(count):
             start, fde = struct.unpack_from("<ii", self.data, off + 12 + 8 * i)
