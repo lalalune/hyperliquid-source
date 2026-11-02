@@ -99,3 +99,5 @@ unlicensed inferred source.
 Next: recover the original active-field contracts and `0x3c1ae50` input handling
 to assign units and validate an independently authored Rust conversion without
 exposing inactive bytes as initialized values.
+
+Native text exports trim trailing whitespace only; instruction bytes, operands and addresses are unchanged.
