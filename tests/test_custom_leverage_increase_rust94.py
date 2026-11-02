@@ -1,6 +1,7 @@
 """Native-bound decision/receipt controls; no captured target execution."""
 import base64,gzip,hashlib,importlib.util,json,os,posixpath,re,tempfile,unittest
 from pathlib import Path,PurePosixPath
+from unittest import mock
 ROOT=Path(__file__).resolve().parents[1];PACKET=ROOT/'research/work-items/RE-007-custom-leverage-increase-rust-94'
 def load(name,path):
     spec=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
@@ -21,12 +22,24 @@ class CustomLeverageIncreaseRust94(unittest.TestCase):
         self.assertEqual((len(rows),len(policies),len(controls)),(487,4,9))
         self.assertEqual(sum(c['different_commit_vs_refusal_cases']>0 for c in controls),7)
         self.assertEqual(hashlib.sha256((PACKET/'pre-source/PRE-RUST-FREEZE.json').read_bytes()).hexdigest(),'437595b12eb512837c97fd70bd46025e41008250e07f191758bbe5519051dadc')
-    def test_actual_streams_and_current_combined_component(self):
-        r=self.check.audit(self.archive_path,current_component=True)
+    def test_actual_streams_and_historical_component(self):
+        r=self.check.audit(self.archive_path)
         self.assertEqual((r['qualified_cases'],r['policy_cases'],r['baseline_builds'],r['snapshot_files']),(487,4,4,35))
         for c in self.report['cargo']:
             raw=base64.b64decode(self.report['records'][c['record']]['stdout_b64']).decode()
             self.assertEqual(sum(map(int,re.findall(r'test result: ok\. (\d+) passed;',raw))),48)
+    def test_original_compiled_lib_is_not_refreshed(self):
+        raw=base64.b64decode(self.archive['snapshot']['src/node94-margin-risk/src/lib.rs'],validate=True)
+        self.assertEqual(hashlib.sha256(raw).hexdigest(),'ffb0ba0d512c6158b691870b230c531fdeb137edc504e5136629322ac4820908')
+        self.assertNotIn(b'mod isolated_decrease;',raw)
+    def test_current_increase_source_remains_bound(self):
+        target=ROOT/'src/node94-margin-risk/src/leverage_increase.rs';original=Path.read_bytes
+        def read(path):
+            raw=original(path)
+            return raw+b'\n' if path==target else raw
+        with mock.patch.object(Path,'read_bytes',read):
+            with self.assertRaisesRegex(ValueError,'current bound source/input .*leverage_increase.rs'):
+                self.check.audit(self.archive_path)
     def test_changed_baseline_decision_rejects(self):
         def change(a,r):
             rec=r['records'][r['baseline'][0]['output_record']];b=bytearray(base64.b64decode(rec['stdout_b64']));b[4]^=1;rec['stdout_b64']=base64.b64encode(b).decode()

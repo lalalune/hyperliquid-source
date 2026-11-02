@@ -107,7 +107,7 @@ concrete witnesses are in
 [pre-source/planned-controls.json](pre-source/planned-controls.json). Three
 malformed-client framing cases exit2 with no output, separately classified.
 
-The exact combined component passes **48 Cargo tests per profile**, including
+The historical combined component at #1460 head `1e78e5ac` passes **48 Cargo tests per profile**, including
 four new literal API boundary tests. Ten new Python controls authenticate native
 bytes, input/output and source/mutant manifests, policy separation and compiler
 project dependencies. Historical tier-cap replay has ten tests, including two
@@ -142,7 +142,10 @@ library inputs are outside this project-source closure and remain unproved. No r
 
 The default verifier replays the immutable snapshot and bound current files,
 with current shared lib exports and the evolving auditor treated as support
-files. `--current-component` additionally checks the exact current 23-file tree.
+files. `--current-component` additionally demands that original 23-file tree.
+It intentionally rejects the later isolated-decrease extension; see
+[SNAPSHOT-HISTORY.md](SNAPSHOT-HISTORY.md). Original compiled sources and outputs
+remain unchanged, and current increase implementation bytes remain bound.
 No full build-byte determinism, hosted CI or repository-wide suite claim is made.
 
 ## Historical receipts and reproduce

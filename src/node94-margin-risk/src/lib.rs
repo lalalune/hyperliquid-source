@@ -7,6 +7,7 @@
 
 mod candidate;
 mod leverage_increase;
+mod isolated_decrease;
 mod position;
 mod requirements;
 mod surplus;
@@ -41,4 +42,8 @@ pub use types::{
 pub use leverage_increase::{
     CustomIncreaseDecision, CustomIncreaseDomainError, CustomLeverageIncrease,
     check_custom_leverage_increase,
+};
+pub use isolated_decrease::{
+    CustomIsolatedDecrease, IsolatedDecreaseDecision, IsolatedDecreaseProjectionError,
+    check_custom_isolated_decrease,
 };
