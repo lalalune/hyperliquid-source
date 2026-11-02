@@ -73,6 +73,9 @@ def manifest_item(root, relative):
 
 
 def fetch_one(root, item):
+    if (type(item) is not dict or 'path' not in item or 'size' not in item
+            or 'sha256' not in item):
+        raise ValueError('Invalid artifact record')
     path = root / item['path']
     if path.exists():
         check(path, item)
@@ -107,7 +110,8 @@ def fetch_all(root, manifest):
         try:
             fetch_one(root, item)
         except (OSError, ValueError, http.client.HTTPException) as error:
-            failures.append(f"{item['path']}: {error}")
+            label = item.get('path') if type(item) is dict else None
+            failures.append(f"{label if label is not None else repr(item)}: {error}")
     if failures:
         raise ValueError('Not recovered by fetch:\n  ' + '\n  '.join(failures))
 
