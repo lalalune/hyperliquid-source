@@ -1,0 +1,21 @@
+va	bytes_hex	condition	taken_va	fallthrough_va	taken_meaning
+0x3428025	0f84e0030000	je	0x342840b	0x342802b	empty root returns tag 33
+0x34280c3	0f8242030000	jb	0x342840b	0x34280c9	search exhausted returns tag 33
+0x34280e1	0f8424030000	je	0x342840b	0x34280e7	empty row vector returns tag 33
+0x342815e	0f84a7020000	je	0x342840b	0x3428164	row vector exhausted returns tag 33
+0x34281c0	0f8283020000	jb	0x3428449	0x34281c6	time arithmetic exceptional path
+0x34281f5	0f844e020000	je	0x3428449	0x34281fb	time conversion exceptional path
+0x3428212	0f8638ffffff	jbe	0x3428150	0x3428218	row time comparison skips row
+0x3428222	0f8428ffffff	je	0x3428150	0x3428228	row time comparison skips row
+0x342822e	0f85b2010000	jne	0x34283e6	0x3428234	populate old 32-byte cache
+0x3428253	0f85a1010000	jne	0x34283fa	0x3428259	populate new 32-byte cache
+0x342827e	0f84a1010000	je	0x3428425	0x3428284	equal 32-byte values return tag 3 payload 0
+0x34282dd	0f856dfeffff	jne	0x3428150	0x34282e3	different selected nonce skips row
+0x342831c	0f8515010000	jne	0x3428437	0x3428322	first product overflows
+0x342834e	0f82e3000000	jb	0x3428437	0x3428354	new first value is below threshold
+0x3428361	760e	jbe	0x3428371	0x3428363	old tag at most 1 gives second value zero
+0x3428375	0f82d5fdffff	jb	0x3428150	0x342837b	new tag below 2 skips second check
+0x342839d	0f85adfdffff	jne	0x3428150	0x34283a3	either second value zero skips second check
+0x34283d6	755f	jne	0x3428437	0x34283d8	second product overflows
+0x34283de	0f836cfdffff	jae	0x3428150	0x34283e4	new second value meets threshold
+0x34283e4	eb51	jmp	0x3428437		new second value is below threshold
