@@ -1,4 +1,4 @@
-use super::{alias10, inline_carrier, key_hash, AliasFeed};
+use super::{alias10, inline_carrier, key_hash, next_seed_pair, AliasFeed};
 
 fn bytes(hex: &str) -> Vec<u8> {
     if hex == "-" {
@@ -20,6 +20,30 @@ const INLINE_VECTORS: &str = include_str!("../evidence/inline-carrier-vectors.ts
 
 /// Frozen before key_hash was written, from the complete native wrappers.
 const KEY_HASH_VECTORS: &str = include_str!("../evidence/key-hash-vectors.tsv");
+
+/// Pair projection of seven native frames frozen before the factory source.
+const SEED_PAIR_VECTORS: &str = include_str!("../evidence/seed-pair-vectors.tsv");
+
+#[test]
+fn seed_factory_returns_old_pair_once_then_keeps_cache_seed_stable() {
+    let mut rows = 0;
+    for line in SEED_PAIR_VECTORS.lines().filter(|line| !line.starts_with('#')) {
+        let fields: Vec<_> = line.split('\t').collect();
+        assert_eq!(fields.len(), 8);
+        let values: Vec<_> = fields[1..].iter()
+            .map(|word| u64::from_str_radix(word, 16).unwrap()).collect();
+        let mut source = [values[0], values[1]];
+        let installed = next_seed_pair(&mut source);
+        assert_eq!(installed, [values[2], values[3]], "{} old pair", fields[0]);
+        assert_eq!(source, [values[4], values[5]], "{} next pair", fields[0]);
+        for _ in 0..2 {
+            assert_eq!(key_hash(installed, &[b'A'; 17]), values[6], "{} stable cache seed", fields[0]);
+            assert_eq!(source, [values[4], values[5]], "{} no per-key advance", fields[0]);
+        }
+        rows += 1;
+    }
+    assert_eq!(rows, 7);
+}
 
 #[test]
 fn key_hash_matches_frozen_borrowed_and_copied_key_results() {

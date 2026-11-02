@@ -24,7 +24,7 @@ not establish original machine-code identity, runtime behavior or a component ga
   fifteen wrong-source/seed/delimiter controls and three fixed20 domain controls.
   All ten legacy full counter hashes for seventeen A bytes also agree.
 
-## Actual compiled reconstruction
+## Historical compiled reconstruction at a994e34e
 
 Official rustc 1.94.1, x86_64-unknown-linux-gnu, LLVM 21.1.8, commit
 `e408947bfd200af42db322daf0fadfe7e26d3bd1`; executable SHA-256
@@ -38,7 +38,7 @@ whole-node compiler/linker/runtime provenance, including all system startup file
   `ed02aa058465664501bc6bec91da1de04053e22e8aa6ae0da092f63e57703498`.
 - Production lib SHA-256:
   `8b1d5e7913a5aa6dd588d75b62f04919c3dc7f020727d37c2a298498d20ee329`.
-- Current candidate receipt `comparison.json` SHA-256:
+- Receipt at a994e34e `comparison.json` SHA-256:
   `1100279a07b9b024aaae12b1f9b6ab9b9dc24287645273544447db4359a4b918`.
 - Baseline and seven source controls build at opt0/3: 16 builds/32 compiler
   invocations, all exit 0 with no diagnostics. Each baseline matches 48/48
@@ -66,10 +66,10 @@ No executable, rlib/object, copied source or captured artifact bytes are encoded
 
 The first verifier guard refactor had an IndentationError before compilation;
 it was corrected and the complete qualifier rerun successfully. Earlier local
-qualification receipts remain ignored; only the exact current verifier receipt
+qualification receipts remain ignored; only the exact verifier receipt at a994e34e
 above is the candidate. No failed or earlier run is relabeled as final evidence.
 
-## Existing component and inline requalification
+## Historical component/inline requalification at a994e34e
 
 Locked/offline Cargo build/test commands pass in debug/release, all exit 0;
 each profile runs five tests. Original 78 aliases/780 counter hashes/1,056 feed
@@ -85,7 +85,7 @@ The changed-source inline requalification has its OWN receipt
 products equal. See the inline packet's `historical.json` and separate current
 RESULTS section. Those 156+2 cases are not counted as new key-hash cases.
 
-## Final exact-tree checks
+## Historical exact-tree checks at a994e34e
 
 - New focused native/equation/retained-stream tests: 8/8 normally (7.681 s)
   and 8/8 under Python `-O` (4.252 s), exit 0 each. The initial `-O` pass found a stale
@@ -114,3 +114,22 @@ neither was installed or claimed.
 Runtime seed values/provider/lifetime, cache slot reachability, allocator/copy/
 free/source preservation, locking, equal-key replacement/deallocation, display,
 original ABI, faults/unwind and whole constructor/component gates remain open.
+
+## Current seed-factory source requalification
+
+The published a994e34e receipt 1100279a/source 8b1d5e79 remain separately indexed
+in `historical.json`. Fresh unchanged-corpus qualification of actual source760f
+passes all48 paired expectations/seven source controls at opt0/3 (16 builds):
+current receipt a7261c5b77583d5ff9247b0ff36e595754851ba21304f53de817a3b3f3d84c3f,
+snapshot cc5486fbdd85184d4ab72165ec9c1d17c93edc2aa06275262c1e8c2f83537ff8.
+Current raw bundle132 members/8031B compressed, payload
+0fac2eab1413dbff69a2b1d41856af801f5d2b02a347d0efa35475dd42ff5e6b.
+Actual locked/offline Cargo tests now pass6/profile; source-pin assertions remain
+unchanged. [Seed factory evidence](../RE-001-seed-pair-rust-94/README.md) separately
+records current-source integration, actual durable checkpoints, guard stop and
+cleanup logs. No old observation is relabeled as current. Current focused tests
+pass8/8 (4.490s); final optimized/static checks are recorded in the seed packet.
+
+Final seed-integration check: current focused tests pass normally and under `-O`;
+static verifier and scoped manifest15/15 pass, diff --check0. Complete current
+counts/timings and limits are in the separate seed-pair packet.

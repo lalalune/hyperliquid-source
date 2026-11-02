@@ -56,6 +56,19 @@ before Rust and actual opt0/3 comparisons with seven operative source mutants.
 The earlier inline comparison is independently requalified on the changed
 whole-file source; its published original receipt remains historical.
 
+## Ready seed-pair factory
+
+`next_seed_pair(source: &mut [u64; 2]) -> [u64; 2]` projects the native
+already-ready source: return its old pair and wrap-increment only word0. Call
+this once for a cache initialization, then keep the returned pair fixed for all
+`key_hash` calls. The API does not enforce lifecycle and is never invoked inside
+`key_hash`. It does not access TLS or implement entropy/readiness, the flag0
+provider, Once concurrency/global lifetime or a cache ABI. The
+[seed-pair packet](../../research/work-items/RE-001-seed-pair-rust-94/README.md)
+binds callback/initializer197 bytes, pre-source seven frames/four controls and
+actual opt0/3 pair/composition comparisons. Existing inline/key-hash corpora are
+freshly requalified on the changed whole library, with old receipts historical.
+
 ## Check
 
 From the repository root, with the existing Rust/Cargo toolchain and authenticated

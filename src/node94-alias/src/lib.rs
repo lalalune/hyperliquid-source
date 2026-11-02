@@ -100,6 +100,20 @@ fn compress(v: &mut [u64; 4], word: u64) {
     v[0] ^= word;
 }
 
+/// Takes one seed pair from an exclusive, already-initialized logical source.
+///
+/// The native initializer at 0x1452070 samples the old pair before incrementing
+/// only its low word, then installs that pair once for a cache initialization.
+/// This returns the old pair and wraps word 0; word 1 is preserved. Keep the
+/// returned pair stable for subsequent key_hash calls: this factory is not a
+/// per-key operation. It does not access TLS or reconstruct readiness, entropy,
+/// the flag-zero provider, Once concurrency, global lifetime or a cache ABI.
+pub fn next_seed_pair(source: &mut [u64; 2]) -> [u64; 2] {
+    let old = *source;
+    source[0] = source[0].wrapping_add(1);
+    old
+}
+
 /// Hashes original key bytes followed by one `ff` byte with a supplied seed.
 ///
 /// This numeric projection is shared by native borrowed/owned wrappers

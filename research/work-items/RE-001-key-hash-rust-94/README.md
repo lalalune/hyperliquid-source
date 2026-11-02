@@ -149,3 +149,11 @@ sha256sum -c MANIFEST.sha256
 From the repository root, required checks are `make doctor`, `make verify`,
 `make catalogue-check`, and `make reproduce`. The older alias captured-instruction
 evaluator is not part of this follow-on and is not run here.
+
+## Subsequent seed-factory source
+
+The original a994e34e key-hash receipt/source are historical in `historical.json`.
+Current `comparison.json`/raw streams freshly qualify lib760f with unchanged
+48-case/seven-mutant inputs; no source pin is relaxed. See RESULTS and the
+[separate seed-pair packet](../RE-001-seed-pair-rust-94/README.md) for checkpoint
+provenance, component6-test runs, and the limits of the one-time seed operation.

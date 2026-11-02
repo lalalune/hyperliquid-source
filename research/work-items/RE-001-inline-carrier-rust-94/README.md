@@ -108,7 +108,7 @@ before/after; every mutant derives from the same fixed source snapshot.
 commands, actual stdout hashes and first mismatch for each control. The
 authenticated TEXT bundle `raw-streams.json` contains authored inputs,
 expected/actual outputs, compiler stdout/stderr, dependency logs, source-hash
-manifest and recipes. Its current decoded payload is 7,984 bytes with an inspectable
+manifest and recipes. Its current decoded payload is 7,975 bytes with an inspectable
 156-file list. It contains no executable, rlib, object, captured artifact or
 duplicate native-body/source blob. It is decoded only as inert data. Scoped
 source text omitted from the bundle is checked against the original snapshot
@@ -117,7 +117,7 @@ See `RESULTS.md` for exact observations and remaining verification limits.
 
 ## Reproduce
 
-Use the existing official Rust1.94.1 compiler/std/Cargo, with `RUSTC` and
+Use the existing official Rust 1.94.1 compiler/std/Cargo, with `RUSTC` and
 `RUSTDOC` pointing to that installation. No installer or network dependency
 fetch is needed. From the repository root:
 
@@ -148,3 +148,19 @@ the same 156 native rows, two API refusals and six source controls on the actual
 changed source. [RESULTS.md](RESULTS.md) separates the historical comparison
 from this current-source requalification. It does not reuse the old receipt
 as evidence for the changed lib or count the new key-hash cases as inline work.
+
+## Current seed-factory source integration
+
+Published a994e34e's inline receipt 80cfc156 and source 8b1d5e79 remain historical
+in `historical-key-hash-stage.json` (original743 history also stays intact).
+The actual changed lib760f was freshly requalified using the unchanged qualifier,
+not relabeled: `comparison.json` is c727112a63adca748b3c075ca53125ec95e30979eb7c277fd19bc26c537ba61d,
+snapshot 9ee4593fcea56825e22cca3f8ebe3c7a913ab427041b49b8653c986c4194deb5.
+All original156 native/two API rows, six mutants and repeated own opt3 products
+pass. Current raw bundle156 members/7975B compressed, payload
+ac5da9e2a8ac1f209aa6ad0a24a8daeb340ff9f1e1802e36afd27870b0158b81.
+Actual component tests now pass6/profile. Current-source assertions are unchanged.
+The separate [seed-pair packet](../RE-001-seed-pair-rust-94/README.md) retains
+actual durable checkpoints, guard/cleanup audits, literal stop/success logs and
+explicit historical/current boundaries. The first stopped attempt is not a
+completed qualification. Final focused checks follow text integration.
