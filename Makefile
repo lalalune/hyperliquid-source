@@ -13,6 +13,7 @@ fetch:
 verify:
 	$(PYTHON) tools/artifacts.py verify
 	$(PYTHON) tools/verify_imports.py
+	$(PYTHON) tools/verify_packets.py
 test:
 	$(PYTHON) tools/run_tests.py
 alias-rust:

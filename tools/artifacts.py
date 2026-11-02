@@ -150,8 +150,12 @@ def verify_signatures(root, manifest):
                        check=True, capture_output=True)
         for relative, signature in pairs:
             binary = root / relative
-            result = subprocess.run(base + ['--status-fd', '1', '--verify', str(root / signature), str(binary)],
-                                    check=True, capture_output=True, text=True, encoding='utf-8')
+            try:
+                result = subprocess.run(base + ['--status-fd', '1', '--verify', str(root / signature), str(binary)],
+                                        check=True, capture_output=True, text=True, encoding='utf-8')
+            except subprocess.CalledProcessError as error:
+                detail = (error.stderr or '').strip().partition('\n')[0] or f'gpg exited {error.returncode}'
+                raise ValueError(f'GPG verification failed: {relative}: {detail}') from None
             valid = [line.split() for line in result.stdout.splitlines()
                      if line.startswith('[GNUPG:] VALIDSIG ')]
             if not any(row[2] == fingerprint or row[-1] == fingerprint for row in valid):
