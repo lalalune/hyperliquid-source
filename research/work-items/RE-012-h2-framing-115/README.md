@@ -40,8 +40,7 @@ inferred source was copied. Own ELF reader code was adapted from the earlier
 CPU115 contribution and included locally; generic active tools are reused.
 
 Eight focused methods pass both with bytecode disabled and under ordinary Python. Independent peer review rederives all28,360 cases and freshly checks all eight complete ELF bodies, 37 writers, 144 internal branches and31 LSDA rows without importing the author collector or oracle. Its exact62-member bundle and original ancillary failures are retained in the raw archive. It performs no new compiler or target run. Final repository check outcomes are in `validation.json`.
-The full repository sweep will run on the frozen contribution head; it is not
-claimed as passed before its result is recorded. Initial FDE schema-key and
+The full repository sweep passes on source head `cccf04c183363a2142b655956645ca8d9bd00d0e`: 77 files, 390 reported tests, three optional skips, exit0 in 890.510s. Test hashes are unchanged. The optional HL_RE014_LIBCORE and HYPERLIQUID_NONCE_RING_RUSTC qualifications were not supplied; the detected JDK has no separate nested JRE. Those three skips are not passed qualifications. Exact inventory and stdout/stderr are retained in the raw archive. Initial FDE schema-key and
 Rust extern library-filename failures are retained, not hidden as successful
 runs. No hosted CI, compiled-target byte match or progress-gate advance is claimed.
 
