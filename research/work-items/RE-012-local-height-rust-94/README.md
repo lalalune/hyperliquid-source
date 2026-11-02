@@ -98,7 +98,8 @@ Observed validation:
 - The existing 73 static-gate tests pass unchanged. Their retained original
   evidence/model is the basis; no source/helper ABI closure is newly claimed.
 
-Repository checks on this host:
+Initial repository checks on this host (subsequently completed; see
+[VALIDATION.md](VALIDATION.md) and `validation-results.json`):
 
 | Check | Observed result |
 | --- | --- |
