@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "author": "신준",
+  "attribution_supplied_by_coordinator": "openai/gpt-6-astra / Codex 0.166.0",
+  "scope": "Insane-research Phase 3/4 evidence handoff; coordinator owns ledger validation, evaluation and synthesis. Local findings are not external independent validation.",
+  "primary_sources": [
+    {
+      "id": "tc94-pinned-artifact",
+      "kind": "local binary primary evidence",
+      "path": "artifacts/node/94/hl-node",
+      "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+      "evidence": "static/records.json",
+      "independence_limit": "One captured artifact; GNU/LLVM/Capstone are independent decoders of the same evidence, not independent sources for private consensus behavior."
+    },
+    {
+      "id": "tc94-rayon-official",
+      "kind": "official licensed primary source",
+      "repository": "https://github.com/rayon-rs/rayon",
+      "tag": "v1.10.0",
+      "tag_object": "48c40f3cb52f8156850fc8d6d0b466b4f02b5ae3",
+      "commit": "7543ed40c9a017dee32b3dc72b3ae819820e8366",
+      "read_urls": [
+        "https://github.com/rayon-rs/rayon/blob/7543ed40c9a017dee32b3dc72b3ae819820e8366/src/iter/try_reduce.rs",
+        "https://github.com/rayon-rs/rayon/blob/7543ed40c9a017dee32b3dc72b3ae819820e8366/src/iter/plumbing/mod.rs",
+        "https://github.com/rayon-rs/rayon/blob/7543ed40c9a017dee32b3dc72b3ae819820e8366/LICENSE-MIT",
+        "https://github.com/rayon-rs/rayon/blob/7543ed40c9a017dee32b3dc72b3ae819820e8366/LICENSE-APACHE",
+        "https://github.com/rayon-rs/rayon/blob/7543ed40c9a017dee32b3dc72b3ae819820e8366/Cargo.toml"
+      ],
+      "evidence": "sources/acquisition.json",
+      "license": "MIT OR Apache-2.0",
+      "independence_limit": "One upstream publisher. These public generic algorithms do not authenticate the private target closure, crate-lock, source patches or build flags."
+    },
+    {
+      "id": "tc94-new-native-evidence",
+      "kind": "local newly authored projection experiment",
+      "evidence": "native/result.json",
+      "source_sha256": "4b9ea0b0ade0c2ac85099710300833a18a6fcf4c7e824f919d66f047bc9abffd",
+      "independence_limit": "Expected mathematical relation was derived from the same target. Host execution checks the new Rust against that frozen oracle, not the captured node or an external consensus specification."
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "tc94-local-fold-abort",
+      "text": "Conditional on supplied ordinary verifier outcomes and observed shared bytes, the leaf preserves the first local error, delegates a second error to cleanup, writes cancellation one on local error, and otherwise stops on any nonzero observed byte. It does not check cancellation before its first verifier call.",
+      "claim_type": "descriptive",
+      "risk": "high",
+      "source_ids": [
+        "tc94-pinned-artifact"
+      ],
+      "primary_source": true,
+      "counter_search": "Tested the index-order/every-item alternative against all 781 leaf bytes and 28 retained critical anchors. Compiled entry-precheck, ignore-cancellation, only-one-cancels, overwrite-success and error-retention mutants all produced real mismatches. The existing admission README explicitly calls its index-order loop a stub.",
+      "counter_refuted": false,
+      "evidence": [
+        "PROOF.md#local-fold-theorem",
+        "static/records.json",
+        "native/result.json"
+      ],
+      "external_independent_validation": null,
+      "limit": "Binary-only local finding. No independently published private-consensus specification or captured-runtime differential establishes this relation."
+    },
+    {
+      "claim_id": "tc94-conditional-merge",
+      "text": "For supplied child result records, the bridge keeps left when both fail and delegates right after output writes; both-success writes only the eight-byte tag. This does not prove which invalid vote is globally selected under cancellation.",
+      "claim_type": "descriptive",
+      "risk": "high",
+      "source_ids": [
+        "tc94-pinned-artifact"
+      ],
+      "primary_source": true,
+      "counter_search": "Checked the alternative right-error precedence at the real cmove 0x4769449 and drop 0x476947e, then compiled right-wins, wrong-drop, omitted-drop and inactive-payload-write mutants. Each failed the fixed corpus. Full task/join boundaries remain opaque rather than being assigned an invented scheduling order.",
+      "counter_refuted": false,
+      "evidence": [
+        "PROOF.md#bridge-decision-and-result-merge",
+        "static/records.json",
+        "native/result.json"
+      ],
+      "external_independent_validation": null,
+      "limit": "Global first-invalid-index, race admissibility and scheduler behavior are unresolved."
+    },
+    {
+      "claim_id": "tc94-rayon-correspondence",
+      "text": "Official Rayon 1.10.0 try_reduce and plumbing provide a licensed structural match for shared cancellation, local error retention, left/right reduction and migrated split-budget behavior. Exact compiled source identity and atomic ordering are unresolved.",
+      "claim_type": "descriptive",
+      "risk": "high",
+      "source_ids": [
+        "tc94-pinned-artifact",
+        "tc94-rayon-official"
+      ],
+      "primary_source": true,
+      "counter_search": "Compared the complete selected bodies with the pinned public files rather than inferring semantics from version strings alone. Checked stronger-source-ordering alternative: ordinary x86 byte MOVs do not distinguish Relaxed from stronger source ordering. Observed source paths do not establish Cargo.lock, patches or features. No compiled Rayon correspondence was performed.",
+      "counter_refuted": false,
+      "evidence": [
+        "PROOF.md#public-source-comparison-and-atomicity",
+        "sources/acquisition.json",
+        "sources/try_reduce.rs",
+        "sources/plumbing.rs"
+      ],
+      "external_independent_validation": null,
+      "limit": "Generic upstream source is independent context, but there are not two independent external sources for exact target provenance. Exact identity remains unresolved."
+    }
+  ],
+  "actual_experiments": {
+    "frozen_cases": 6780,
+    "native_runs": 4,
+    "native_observations": 27120,
+    "compiled_effective_mutants": 22,
+    "static_tests": 8,
+    "static_negative_controls": 36,
+    "existing_focused_tests": 53,
+    "global_checks": [
+      "doctor",
+      "verify",
+      "catalogue-check",
+      "reproduce"
+    ],
+    "full_suite_on_head": false
+  },
+  "rejected_overclaims": [
+    "Global first-invalid-vote order",
+    "Every vote verified after an error or observed cancellation",
+    "Ordinary MOV proves Relaxed source ordering",
+    "All raw enum payload bytes are defined in ordinary Rust values",
+    "Public source strings recover the exact crate lock",
+    "New host Rust runs execute or emulate the captured node"
+  ],
+  "remaining_boundaries": [
+    "Indirect/transitive scheduler and allocator effects",
+    "Native pointer aliases, faults, unwinding, MMIO and register ABI",
+    "Cryptographic validity of supplied outcomes",
+    "External independent validation of binary-only local findings"
+  ],
+  "source_acquisition_failures": "sources/acquisition.json records restricted-network failures and the approved official-API acquisition; validation/logs.json.gz retains the pre-freeze collector failure.",
+  "publishing": "No push, PR, issue, Slop registration or progress gate mutation performed by this worker."
+}

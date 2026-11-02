@@ -1,0 +1,171 @@
+{
+  "original_base": "e5c9b6436876b2a4a39daef813171f9879317699",
+  "original_commit": "db4809e4dff51dfbfa984a412d4d3646076c35ef",
+  "rebased_base": "2c75904241b9165693d40dea8b0d0d340f8e22b3",
+  "rebased_commit_before_documentation_receipt": "a9d43aa9044eb53ec71785589eab2528a3c2db84",
+  "policy_and_parser_hashes": {
+    "AGENTS.md": "5e00b746ded041d26eef83c5f4656a5fe96937c7867664a4a12e8e61858a8189",
+    "CONTRIBUTING.md": "54b588e24a336b65cdf2de1900b4f3e186b281bfc6178c67db7a6afad2a8e718",
+    "docs/SCOPE.md": "627aad2741efbb340ff8c1c96c2ce73ecdff5105644362243cd10b1d4a33318d",
+    "docs/TASKS.md": "ca69c8009c781461dad7ee377ab649493152c3b13c4649dd960fd32d4ec274c4",
+    "tools/elf_index.py": "d77a002e9b2d3dce86822f6c67169298ad0ea54f5f4cb5c0d244328cbed1774f",
+    "tools/fde_extents.py": "9ce52ed319743ecfbaaafec799f6cef20148e0d46f161091f89b7c58ffdd2345"
+  },
+  "rebase": {
+    "initial_exit": 128,
+    "cause": "Git LFS smudge tried to acquire object 59b372db1949e09979a67c67633c35ff49b47c35f104bbbfa8b192a8b0f64dd4 and failed DNS resolution for github.com.",
+    "original_failure_log_sha256": "9a6bf1dfdfe519c191974d71e1afc6fcb74aa360a0c3da79a662a982a584820f",
+    "original_failure_log_retained": "work/tc-parallel-abort-research/rebase-failure-lfs.log (ignored; runtime environment not published)",
+    "abort_exit": 0,
+    "first_skip_smudge_retry_exit": 1,
+    "first_retry_cause": "Files left untracked by the failed initial checkout would be overwritten.",
+    "quarantine": {
+      "files": 16439,
+      "bytes": 1352968855,
+      "journal_sha256": "528386eeca42343783569bd10870a2b9c3a3ec075076505dac95a0dcb14495e7",
+      "action": "Every file matched the new base Git blob or its exact LFS SHA/size, then moved without deletion into ignored quarantine. No reset/clean or global configuration change."
+    },
+    "final_skip_smudge_rebase_exit": 0,
+    "lfs_checkout_exit": 0,
+    "lfs_checkout_note": "Local shared cache hydrated 1691 files / rounded 1.2 GB; this command performed no network fetch."
+  },
+  "checks": [
+    {
+      "command": "python3 -O -B research/work-items/RE-008-tc-parallel-abort-94/verify_packet.py",
+      "exit": 0,
+      "result": "6780 frozen cases, 4 retained runs, 22 compiled-mutant streams and 176 exact retained streams replayed; no recompilation."
+    },
+    {
+      "command": "PATH=@GNU_BIN@:$PATH LLVM_OBJDUMP=/usr/bin/objdump python3 -O -B -m unittest tests.test_tc_parallel_abort94 tests.test_consensus_wire tests.test_timeout_round_transition -v",
+      "exit": 0,
+      "tests": 61,
+      "seconds": 52.934
+    },
+    {
+      "command": "PATH=@GNU_BIN@:$PATH LLVM_OBJDUMP=/usr/bin/objdump make doctor verify catalogue-check reproduce",
+      "attempt": "before LFS hydration",
+      "exit": 2,
+      "result": "doctor and artifact/import verification passed; verify_packets rejected pointer bytes for native/raw-streams.json.gz; later goals not reached."
+    },
+    {
+      "command": "PATH=@GNU_BIN@:$PATH LLVM_OBJDUMP=/usr/bin/objdump make doctor verify catalogue-check reproduce",
+      "attempt": "after local LFS hydration",
+      "exit": 0,
+      "result": "all four goals passed, including the newly introduced all-packet manifest check."
+    }
+  ],
+  "native_rerun": false,
+  "native_note": "Rust, driver, oracle, frozen inputs/expectations and frozen static collector/records are unchanged. Existing four-build evidence is retained, not represented as a new post-rebase experiment.",
+  "full_suite_on_head": false,
+  "archive_sha256": "a1ec87ac8cc23bb08648169e4e4cf987da4930917f834f3b414182dfed9d9993",
+  "logs": [
+    {
+      "name": "rebase-abort.stdout",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path_substitutions": false
+    },
+    {
+      "name": "rebase-abort.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path_substitutions": false
+    },
+    {
+      "name": "rebase-retry.stdout",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path_substitutions": false
+    },
+    {
+      "name": "rebase-retry.stderr",
+      "original_sha256": "6cc3afb4e9afafb8e5dcfdebb0244d2ce8cec8a3ac7a9219abc9703842fa4aeb",
+      "published_sha256": "6cc3afb4e9afafb8e5dcfdebb0244d2ce8cec8a3ac7a9219abc9703842fa4aeb",
+      "path_substitutions": false
+    },
+    {
+      "name": "quarantine.stdout",
+      "original_sha256": "9874b8a816ab7e3cb9593b4b96d11fe4619e58d8d6e40ceed8450ba0b945743f",
+      "published_sha256": "9874b8a816ab7e3cb9593b4b96d11fe4619e58d8d6e40ceed8450ba0b945743f",
+      "path_substitutions": false
+    },
+    {
+      "name": "quarantine.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path_substitutions": false
+    },
+    {
+      "name": "rebase-skip-smudge.stdout",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path_substitutions": false
+    },
+    {
+      "name": "rebase-skip-smudge.stderr",
+      "original_sha256": "5608aa883b6756d5e0b912119529d0c53c433bde16a63e70bfb1a2036fa4fa4b",
+      "published_sha256": "5608aa883b6756d5e0b912119529d0c53c433bde16a63e70bfb1a2036fa4fa4b",
+      "path_substitutions": false
+    },
+    {
+      "name": "new-base-packet.stdout",
+      "original_sha256": "c3eb4cb655913282299f5a8852533abbb6449097665ec5ec9cdec8c014a6c04a",
+      "published_sha256": "c3eb4cb655913282299f5a8852533abbb6449097665ec5ec9cdec8c014a6c04a",
+      "path_substitutions": false
+    },
+    {
+      "name": "new-base-packet.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path_substitutions": false
+    },
+    {
+      "name": "new-base-focused.stdout",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path_substitutions": false
+    },
+    {
+      "name": "new-base-focused.stderr",
+      "original_sha256": "76cfbe5b360350725635ed65b830235e24c9c9ba2a9fabe3116f8c59c8033dad",
+      "published_sha256": "76cfbe5b360350725635ed65b830235e24c9c9ba2a9fabe3116f8c59c8033dad",
+      "path_substitutions": false
+    },
+    {
+      "name": "new-base-global.stdout",
+      "original_sha256": "22f9ce42075fdca4deae885c8d95085c62c4bb45b089ff33e31bfc2791f49c48",
+      "published_sha256": "0996b8a4720eb808c888fb75613f8e3ce102b73bd050e4bbf43b72107e16485c",
+      "path_substitutions": true
+    },
+    {
+      "name": "new-base-global.stderr",
+      "original_sha256": "3d10d3b88f9db96da0b5bb9b5cd21034e6708677ed917a218a333446b3f6392e",
+      "published_sha256": "3d10d3b88f9db96da0b5bb9b5cd21034e6708677ed917a218a333446b3f6392e",
+      "path_substitutions": false
+    },
+    {
+      "name": "new-base-lfs-checkout.stdout",
+      "original_sha256": "c97dd153853c4de5dfec9b243f306a81d6d2ed885b4ab2e3aefe0ddf77e0b659",
+      "published_sha256": "c97dd153853c4de5dfec9b243f306a81d6d2ed885b4ab2e3aefe0ddf77e0b659",
+      "path_substitutions": false
+    },
+    {
+      "name": "new-base-lfs-checkout.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path_substitutions": false
+    },
+    {
+      "name": "new-base-global-hydrated.stdout",
+      "original_sha256": "d287f70529c8dda613b3ea61d6ab802a5cbcbb08f31593ad63399b84ff6b87a9",
+      "published_sha256": "ee6e172357bf425e6016bd2e84762814d9636b093c429f0d50dd1f6b5b532d48",
+      "path_substitutions": true
+    },
+    {
+      "name": "new-base-global-hydrated.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "path_substitutions": false
+    }
+  ]
+}
