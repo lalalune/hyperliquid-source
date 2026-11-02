@@ -43,7 +43,14 @@ def manifest_problems(here: Path) -> list:
         digest, name = parts
         names.append(name)
         p = here / name
-        if not p.is_file():
+        if p.is_symlink():
+            # is_file() and the hash below both follow symlinks, so a
+            # listed file swapped for a link to identical bytes passed
+            # this check while the packet's evidence could live
+            # anywhere on disk. The RE-005 and node-inventory
+            # verifiers reject symlinked entries outright.
+            problems.append(f"{name} is a symlink")
+        elif not p.is_file():
             problems.append(f"{name} is missing")
         elif hashlib.sha256(p.read_bytes()).hexdigest() != digest:
             problems.append(f"manifest mismatch for {name}")
