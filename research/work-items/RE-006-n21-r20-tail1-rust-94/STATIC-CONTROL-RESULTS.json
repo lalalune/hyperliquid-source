@@ -1,0 +1,323 @@
+{
+  "actual_decoder_processes": 48,
+  "captured_execution": false,
+  "control_erratum_sha256": "7024ba0d06599c2769ff14cc101a3f1f7b99addcd9467c02916c781fbc66951e",
+  "control_plan_sha256": "667fea94e953ca2f40d1e55be703576213126b630103c0bd9dd61972b1c85355",
+  "controls": [
+    {
+      "counted_as_array_output_control": false,
+      "eligible_target_execution": false,
+      "limits": "Static operand distinction only; no array control is counted here.",
+      "name": "reverse-shuffle-dwords",
+      "observations": [
+        {
+          "gnu": "pshufd xmm3,xmm3,0x4e",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "9084d25f4fb3a272f5a58f2f79d805ce9e0c745f4aec0798d5ddc2373278732f",
+          "kind": "native",
+          "llvm": "pshufd\txmm3, xmm3, 0x4e                # xmm3 = xmm3[2,3,0,1]",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "c9ef8f581bc3a71bdc34848973cdc270df0e503bf979debbc99554c9d7c3b818"
+        },
+        {
+          "gnu": "pshufd xmm3,xmm3,0x1b",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "632b725fe8b7d0562d10336cdd49e3bd3fd82d7ecb40b60adee3db56e53338d3",
+          "kind": "overlay",
+          "llvm": "pshufd\txmm3, xmm3, 0x1b                # xmm3 = xmm3[3,2,1,0]",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "091296fa6e93680618892111ee8ac36d1e30b61c3669e8a70329affb3d15dd19"
+        }
+      ]
+    },
+    {
+      "counted_as_array_output_control": false,
+      "eligible_target_execution": false,
+      "limits": "Static operand distinction only; no array control is counted here.",
+      "name": "reverse-scalar-counter",
+      "observations": [
+        {
+          "gnu": "dec    rsi",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "589817a9e777c46dbc74715b07832b1c71fdf0b81410f1bd22825be677be393b",
+          "kind": "native",
+          "llvm": "dec\trsi",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "78d00e44264d3c6903ec3749dd78e8ef61aaacbaa05d09754622df90814ce06d"
+        },
+        {
+          "gnu": "inc    rsi",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "ba0948f60c79d14d8162693823c1f3d0861198f22093f9770b950e2bc2addc80",
+          "kind": "overlay",
+          "llvm": "inc\trsi",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "a6d55cc98ffff3c7aa5e39bec6a2a954415035c80ed7c43c5acc3dff05cee92d"
+        }
+      ]
+    },
+    {
+      "counted_as_array_output_control": false,
+      "eligible_target_execution": false,
+      "limits": "Static operand distinction only; no array control is counted here.",
+      "name": "run-marker-even",
+      "observations": [
+        {
+          "gnu": "lea    r9,[rax*2+0x1]",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "9b8563d59066b8684844cce07a364839818ed0710869e3fc03df4fd8b444bc5f",
+          "kind": "native",
+          "llvm": "lea\tr9, [2*rax + 0x1]",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "58b4b9412e063e8c9d12d3c3d44d82c2403d01416d280389034a38a97fa15fa7"
+        },
+        {
+          "gnu": "lea    r9,[rax*2+0x0]",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "f27bd209feb4c87ebbc282aea6df63d0c83dfb3cd81fc96492549e409a06f54c",
+          "kind": "overlay",
+          "llvm": "lea\tr9, [2*rax]",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "05d133a48e0d0ed89f5154a388085daa535e033e3627dafd6a132c019dadacaf"
+        }
+      ]
+    },
+    {
+      "counted_as_array_output_control": false,
+      "eligible_target_execution": false,
+      "limits": "Static operand distinction only; no array control is counted here.",
+      "name": "tail1-not-early-return",
+      "observations": [
+        {
+          "gnu": "jb     0x4919082",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "616bed46f17933043ed941f4cca6be16ba5a8df6856f1265dff1fb7259d99da0",
+          "kind": "native",
+          "llvm": "jb\t0x33d",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "8174f70f4b58b84144a14f0838e8448747430a0b654fd26421ef99f08edfb842"
+        },
+        {
+          "gnu": "jae    0x4919082",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "8aed70f2cedb5d0956dd967b4026fd800527aed0884cc1ca4217906c4632a3af",
+          "kind": "overlay",
+          "llvm": "jae\t0x33d",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "210f1066210c35d4874f4c93c2f050900508ce5b634d21da781e64017af86933"
+        }
+      ]
+    },
+    {
+      "counted_as_array_output_control": false,
+      "eligible_target_execution": false,
+      "limits": "Static operand distinction only; no array control is counted here.",
+      "name": "copy-from-wrong-half",
+      "observations": [
+        {
+          "gnu": "cmova  rsi,r14",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "93b719ec8a3f9e765e7324d4bb361ca65610d9b5d9bc18dea2d1cdf0c12fbb18",
+          "kind": "native",
+          "llvm": "cmova\trsi, r14",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "f9350d871636439a3fa28a0bbdfb041a0b1f6671e90f45c8c26f3ca8cb67c60d"
+        },
+        {
+          "gnu": "cmovb  rsi,r14",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "e04b09aebad2706b27ec62e1d52fc70814737a58e48f07754bcb77e7ed80da0d",
+          "kind": "overlay",
+          "llvm": "cmovb\trsi, r14",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "59281609a1f7543372e65943efb11c9b82a36179af25fb268c0a1e1294278b8c"
+        }
+      ]
+    },
+    {
+      "counted_as_array_output_control": false,
+      "eligible_target_execution": false,
+      "limits": "Static operand distinction only; no array control is counted here.",
+      "name": "copy-four-not-eight",
+      "observations": [
+        {
+          "gnu": "lea    rdx,[r15*8+0x0]",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "9abe9c7bf84116392303aeb183e5a0c11230e21989b4120ffe02f623f8cc4021",
+          "kind": "native",
+          "llvm": "lea\trdx, [8*r15]",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "85911ba80a643264bf2a5eaa9bb999c4860305baa781438b3c5cad1bca5d1ac7"
+        },
+        {
+          "gnu": "lea    rdx,[r15*4+0x0]",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "92907369f478d3643d95f2be3bbcec33ae33bbf984ecee473e30f5a5c8923317",
+          "kind": "overlay",
+          "llvm": "lea\trdx, [4*r15]",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "f0fdd30230f1525c7158482f9e2625a78ada49c553c02645c36160e397d1ac8a"
+        }
+      ]
+    },
+    {
+      "counted_as_array_output_control": false,
+      "eligible_target_execution": false,
+      "limits": "Static operand distinction only; no array control is counted here.",
+      "name": "merge-compare-dword",
+      "observations": [
+        {
+          "gnu": "cmp    rcx,rsi",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "7c55121d338d8625d2879f96e4dcb0c9a10fda7575542b26b53c6b15d8151b3c",
+          "kind": "native",
+          "llvm": "cmp\trcx, rsi",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "cacd4beb15f2f8f994b48b2591dedaf9586885ca117623c2533c74f4048cc853"
+        },
+        {
+          "gnu": "rex cmp ecx,esi",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "8cce23b0976d102032ae5bfa01f23fe4296a4eba0d0c05b6bd897381517d1d01",
+          "kind": "overlay",
+          "llvm": "cmp\tecx, esi",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "baaaffeed1defd0662a114680bf94f96e9c5a3a86e974d03da550856c45d8e72"
+        }
+      ]
+    },
+    {
+      "counted_as_array_output_control": false,
+      "eligible_target_execution": false,
+      "limits": "Static operand distinction only; no array control is counted here.",
+      "name": "merge-select-smaller",
+      "observations": [
+        {
+          "gnu": "cmova  rsi,rcx",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "b05906b93a5750d9c8d649e8cb687c313b23f8440ff214c20d5fa1b0ea4d66f0",
+          "kind": "native",
+          "llvm": "cmova\trsi, rcx",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "49ea0abebfd18c50dac7828936d92f84124c4c134e34dd9ea8ff563ab4dbb860"
+        },
+        {
+          "gnu": "cmovb  rsi,rcx",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "55270d84e2196c51bfc4263f970ad7a80248cf6f90f87d4d00ca9487810aab8b",
+          "kind": "overlay",
+          "llvm": "cmovb\trsi, rcx",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "06de6f766c870639af3f2555976a7bd24e6ab7f7f139bf8fd24fdbd192d1c2bf"
+        }
+      ]
+    },
+    {
+      "counted_as_array_output_control": false,
+      "eligible_target_execution": false,
+      "limits": "Static operand distinction only; no array control is counted here.",
+      "name": "tie-bits-from-tail",
+      "observations": [
+        {
+          "gnu": "cmova  rsi,rcx",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "b05906b93a5750d9c8d649e8cb687c313b23f8440ff214c20d5fa1b0ea4d66f0",
+          "kind": "native",
+          "llvm": "cmova\trsi, rcx",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "49ea0abebfd18c50dac7828936d92f84124c4c134e34dd9ea8ff563ab4dbb860"
+        },
+        {
+          "gnu": "cmovae rsi,rcx",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "72cabe9ae8cfb0c5312466811ba35ea3c92cd1e2d695335b6f8c7de752c2bb41",
+          "kind": "overlay",
+          "llvm": "cmovae\trsi, rcx",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "66ad678c66efe7b67c0d98659d693d2353d242b74108e6b91ebcf2191d12193f"
+        }
+      ]
+    },
+    {
+      "counted_as_array_output_control": false,
+      "eligible_target_execution": false,
+      "limits": "Static operand distinction only; no array control is counted here.",
+      "name": "left-step-sixteen",
+      "observations": [
+        {
+          "gnu": "add    r14,0xfffffffffffffff8",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "13db5b87f2f48c4c65d92bca63abf9f0a37bde39c731280d2bdb8e359ca431ce",
+          "kind": "native",
+          "llvm": "add\tr14, -0x8",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "4bcbab751a64630d90f81a15aa2f74c7973e8664d796c9bb59359ebd6e82d389"
+        },
+        {
+          "gnu": "add    r14,0xfffffffffffffff0",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "83e739e80397de3d3a7603fad6890f2f3cfc0ef33024d7bcf40d778d4153c14d",
+          "kind": "overlay",
+          "llvm": "add\tr14, -0x10",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "ccf845d429e516ac39b3da5c1dbaa5e46115d2113f9fbcc79ae5cac8f95a5a9d"
+        }
+      ]
+    },
+    {
+      "counted_as_array_output_control": false,
+      "eligible_target_execution": false,
+      "limits": "Static operand distinction only; no array control is counted here.",
+      "name": "tail-empty-loop-inverted",
+      "observations": [
+        {
+          "gnu": "jne    0x4dbda50",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "e0f5c61d878a3554e68cdb6dac80322164be0e193b1f949d02941a1bb6ee228e",
+          "kind": "native",
+          "llvm": "jne\t-0x41",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "0bda938bc5e38dc1a693d60e3ea1df700d103678d0cabe75be79b963b832f3f8"
+        },
+        {
+          "gnu": "je     0x4dbda50",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "b4c891f20d2de60f83dec1b4f65ce66581fdae3113f19a7669d7ae398b3b213f",
+          "kind": "overlay",
+          "llvm": "je\t-0x41",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "cb628e610599242b8ee7bcc11dd4da0a2abf163f941bb600ce1da28ca2c5fd3d"
+        }
+      ]
+    },
+    {
+      "counted_as_array_output_control": false,
+      "eligible_target_execution": false,
+      "limits": "Static operand distinction only; no array control is counted here.",
+      "name": "remaining-copy-wrong-destination",
+      "observations": [
+        {
+          "gnu": "mov    r12,r14",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "06a52a7ee9f3e406855467742afa47680e8843c41f442537f9c55b706bdabb77",
+          "kind": "native",
+          "llvm": "mov\tr12, r14",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "8e4734fb4f08543269a26d03f67759ca83bedc12c5def205605f0000d2b73ab9"
+        },
+        {
+          "gnu": "mov    r12,r15",
+          "gnu_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "gnu_stdout_sha256": "df52d8837c4165818aad23c716a790ee179b462a26f8689fbfd609ea7fa2a0c2",
+          "kind": "overlay",
+          "llvm": "mov\tr12, r15",
+          "llvm_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "llvm_stdout_sha256": "354a357971fdb926acb90152bc82ae6c2773efa17768377bac9dcb59aeb70c1c"
+        }
+      ]
+    }
+  ],
+  "erratum_applied": "remaining-copy-wrong-destination selects address1 (R15=mincount), not scratch; inert decoding only, excluded from source/value controls.",
+  "instruction_evaluation": false,
+  "raw_stdout_stderr_channels": 96
+}

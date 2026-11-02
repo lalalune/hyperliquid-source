@@ -44,6 +44,28 @@ def member(entry):
     return value
 
 
+def audit_current_library(historical, current):
+    """Keep the current outer export and reject every unreviewed lib change."""
+    extension = historical.replace(b'pub mod n21_outer_admission;',
+                                   b'pub mod n21_outer_admission;\npub mod n21_run20_tail1;')
+    if current.count(b'pub mod n21_outer_admission;') != 1 or current not in (historical, extension):
+        raise ValueError('current library source differs from reviewed outer/r20 boundary')
+
+
+def historical_library():
+    pin = load('compiled-results.json')['compiler_manifest']['component/src/lib.rs']['sha256']
+    entries = [line.split('  ', 1)[1] for line in (PACKET / 'MANIFEST.sha256').read_text().splitlines()
+               if line.startswith(pin + '  ')]
+    if len(entries) != 1:
+        raise ValueError('unique historical library pin')
+    path = (PACKET / entries[0]).resolve()
+    historical = path.read_bytes()
+    if sha(historical) != pin:
+        raise ValueError('historical library hash')
+    audit_current_library(historical, (ROOT / 'src/node94-orderbook/src/lib.rs').read_bytes())
+    return path
+
+
 class OuterAdmissionEvidence(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -101,7 +123,7 @@ class OuterAdmissionEvidence(unittest.TestCase):
             archived = member(self.archive['compiled/source-snapshot/' + name])
             self.assertEqual((len(archived), sha(archived)), (pin['bytes'], pin['sha256']))
             if name.startswith('component/'):
-                live = ROOT / 'src/node94-orderbook' / name.removeprefix('component/')
+                live = historical_library() if name == 'component/src/lib.rs' else ROOT / 'src/node94-orderbook' / name.removeprefix('component/')
             elif name == 'driver/input_only_driver.rs':
                 live = PACKET / 'input_only_driver.rs'
             else:
@@ -154,7 +176,7 @@ class OuterAdmissionEvidence(unittest.TestCase):
     def test_old_fixed21_library_pin_is_preserved(self):
         old = (PACKET / 'predecessor/fixed-n21/lib.rs').read_bytes()
         self.assertEqual(sha(old), '3f8d62652dfb2d96f7bfcb7ceec96817da39a0efafaa2910d7d1821a99a4dbd9')
-        current = (ROOT / 'src/node94-orderbook/src/lib.rs').read_bytes()
+        current = historical_library().read_bytes()
         self.assertEqual(current, old.replace(b'pub mod n21_right_merge;', b'pub mod n21_right_merge;\npub mod n21_outer_admission;'))
         manifest = (ROOT / 'research/work-items/RE-006-fixed-n21-delegate-rust-94/MANIFEST.sha256').read_text()
         self.assertIn('3f8d62652dfb2d96f7bfcb7ceec96817da39a0efafaa2910d7d1821a99a4dbd9  ../RE-006-n21-outer-admission-rust-94/predecessor/fixed-n21/lib.rs\n', manifest)

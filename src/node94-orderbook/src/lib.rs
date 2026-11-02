@@ -12,6 +12,7 @@ mod layout;
 mod matching;
 pub mod n21_right_merge;
 pub mod n21_outer_admission;
+pub mod n21_run20_tail1;
 pub mod n21_seed_prepare;
 mod snapshot;
 mod types;

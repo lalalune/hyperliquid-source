@@ -1,0 +1,105 @@
+{
+  "captured_execution": false,
+  "expected_bytes": 101964,
+  "expected_sha256": "e44064ab0b2e5d2e00cf8f62d3ba990c6c220311c28e15c5b4cbadee913c90e5",
+  "freeze_sha256": "6e83dde660d28198ce140eae49b615cdae66c0ccec5e8be3fb9536d1eaabe65c",
+  "input_bytes": 11028,
+  "input_sha256": "e351101b430808fe44e51a164e3837cf16e0c58e22e0fc63cf501b818d747433",
+  "instruction_evaluation": false,
+  "native_cases": 48,
+  "original_plan_sha256": "53b8388f7725ece41a7ed597e6b54e5012ca6654f0cc4005dba8f7a46e53d885",
+  "plan_revision": "v2 before Rust; only signed-control witness corrected; original plan retained",
+  "policy": "Six r!=20 arrays are mathematical exclusions. SafeAPI refuses without changing arrays; native code is not asserted to refuse them.",
+  "rust_source_present": false,
+  "source_controls": [
+    {
+      "name": "omit-prefix-reversal",
+      "planned_kind": "array-values",
+      "semantic_change": "Do not normalize a descending prefix",
+      "status": "planned, not compiled/executed",
+      "witness": "descending-r20-position-1"
+    },
+    {
+      "name": "reverse18-not20",
+      "planned_kind": "array-values",
+      "semantic_change": "Reverse only first18 words",
+      "status": "planned, not compiled/executed",
+      "witness": "descending-r20-position-1"
+    },
+    {
+      "name": "copy-left-not-tail",
+      "planned_kind": "array-values",
+      "semantic_change": "Copy sourceA0 instead of A20 into scratch0",
+      "status": "planned, not compiled/executed",
+      "witness": "ascending-r20-position-0"
+    },
+    {
+      "name": "merge-signed-compare",
+      "planned_kind": "array-values",
+      "semantic_change": "Use signed64 compare for both choice and cursor",
+      "status": "planned, not compiled/executed",
+      "witness": "descending-r20-max-tail"
+    },
+    {
+      "name": "choose-min-at-back",
+      "planned_kind": "array-values",
+      "semantic_change": "Choose smaller output while retaining native cursor condition",
+      "status": "planned, not compiled/executed",
+      "witness": "ascending-r20-position-0"
+    },
+    {
+      "name": "truncate-tail32",
+      "planned_kind": "array-values",
+      "semantic_change": "Lose upper32 bits of copied tail",
+      "status": "planned, not compiled/executed",
+      "witness": "descending-r20-max-tail"
+    },
+    {
+      "name": "omit-left-empty-terminal-copy",
+      "planned_kind": "array-values",
+      "semantic_change": "Skip final8-byte logical copy after left exhaustion",
+      "status": "planned, not compiled/executed",
+      "witness": "ascending-r20-position-0"
+    },
+    {
+      "name": "tie-loaded-bits-tail",
+      "planned_kind": "metadata-only",
+      "semantic_change": "Use tail bits provider on equality; equal words remain equal",
+      "status": "planned, not compiled/executed",
+      "witness": "ascending-r20-equal-interior"
+    },
+    {
+      "name": "retire-left-on-tie",
+      "planned_kind": "metadata-only",
+      "semantic_change": "Consume equal left words before tail; raw sorted multiset unchanged, cursor/store observations change",
+      "status": "planned, not compiled/executed",
+      "witness": "ascending-r20-duplicate-groups"
+    },
+    {
+      "name": "omit-zero-copy-observation",
+      "planned_kind": "metadata-only",
+      "semantic_change": "Omit terminal0-byte logical call observation only",
+      "status": "planned, not compiled/executed",
+      "witness": "ascending-r20-position-1"
+    }
+  ],
+  "status": "frozen before any Rust source for this r20 route",
+  "unsafe_native_control": "remaining-copy-wrong-destination is not a source/value control; see CONTROL-ERRATUM.json",
+  "unsupported_domain_policy_cases": 6,
+  "wire": {
+    "input": "8byte tag/countu32, then idu32/A21/scratchprefix4 little-endianqwords",
+    "metadata": [
+      "natural_run",
+      "ascending",
+      "upper_bound_index",
+      "loop_store_count",
+      "reversal_word_writes",
+      "first_copy_bytes",
+      "terminal_copy_destination_index",
+      "terminal_copy_bytes",
+      "copy_call_count"
+    ],
+    "output": "8byte tag/countu32, then idu32/statusu32/235qwords: finalA21,S4,post-normalizationA21,9metadata words,20zero-padded9-word loop records",
+    "record_limits": "Chosen serialization, error status and logical observations, not native ABI/return state or physical compiler trace."
+  }
+}
