@@ -85,7 +85,9 @@ source was copied. Shared format/controller, build-mode/Once and drop-helper
 work remains credited and outside these two bodies. In particular #1678 leaves
 the worker unresolved, #233 studies a callee of the external object destructor,
 and #694 studies the shared build-mode initializer. Their bodies are not
-recovered again here. `overlap.json` records the live all-state audit and limits.
+recovered again here. `overlap.json` records the live all-state audit, a search
+of reachable merged history, and limits. `overlap-snapshots.json.gz` retains
+the complete immutable-head snapshot list separately from the readable summary.
 
 No Rust reconstruction, build/compiler provenance, new first-party byte credit,
 whole-function equivalence, component completion or progress gate is claimed.
