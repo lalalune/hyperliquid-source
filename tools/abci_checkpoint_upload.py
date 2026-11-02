@@ -189,11 +189,15 @@ class Image:
         rela = self.section('.rela.dyn')
         for pos in range(rela['offset'], rela['offset'] + rela['size'], 24):
             where, info, addend = struct.unpack_from('<QQq', data, pos)
+            if where in self.relocs:
+                raise ValueError(f'duplicate relocation at {where:#x}')
             self.relocs[where] = (info & 0xffffffff, info >> 32, addend)
         _, ordered, _ = fde_extents.fde_extents(data)
         self.extent = {}
         for fde in ordered:
-            self.extent.setdefault(fde['start'], fde['end'])
+            if fde['start'] in self.extent:
+                raise ValueError(f'duplicate FDE start {fde["start"]:#x}')
+            self.extent[fde['start']] = fde['end']
 
     def section(self, name):
         return next(s for s in self.sections if s['name'] == name)
