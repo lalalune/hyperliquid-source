@@ -1,0 +1,68 @@
+{
+  "base": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "kind": "errno-gate",
+  "cases": 2928,
+  "contract_sha256": "40a4733ec95d8271cf84a7aa4a27d0136e0daabdf8a2e158b233858fa1536055",
+  "vectors_sha256": "530358f1fc6c1912869d3bd5aa5197a1363c4385e382b68c9d623d9a45fdbcd0",
+  "new_rust_exists_at_freeze": false,
+  "equation_mismatches": 0,
+  "full_domain_formal_proof": false,
+  "admitted": {
+    "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+    "windows": [
+      [
+        89500672,
+        89500690,
+        "29b6f64d7cc152abfa782330535647f1e3fecf88c9220955671debc7ba92278d"
+      ]
+    ],
+    "facts": [
+      {
+        "checker": "foundation_negate_or_zero",
+        "checker_sha256": "96e5737ec76929a4d53fc60bd5037ce46c802b30943ce1106d722f1423c61b5c",
+        "facts": {
+          "target_release": "94",
+          "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+          "coordinate_system": "ELF virtual addresses, no runtime rebase",
+          "function": {
+            "start_va": "0x555ac00",
+            "end_va_exclusive": "0x555ac12",
+            "bytes": 18,
+            "sha256": "29b6f64d7cc152abfa782330535647f1e3fecf88c9220955671debc7ba92278d",
+            "fde_section_offset": "0x2cfa04",
+            "stride_padding_bytes": 14,
+            "next_fde_start_va": "0x555ac20",
+            "inferred_label": "negate-or-zero gate"
+          },
+          "rule": {
+            "mask": "0xffffffffffffff88",
+            "unsigned_form": "rdi <= mask -> 0, else (-low32(rdi)) & 0xffffffff",
+            "signed_form": "sign-extended rdi in [-119, -1] -> -edi, else 0",
+            "edges": {
+              "minus-1": "0x1",
+              "minus-119": "0x77",
+              "minus-120": "0x0",
+              "zero": "0x0",
+              "one": "0x0",
+              "plus-119": "0x0",
+              "mask-plus-1": "0x77",
+              "high-bits-small": "0x0"
+            }
+          },
+          "incoming_pattern_scan": {
+            "section": ".text",
+            "byte_count": 70370352,
+            "e8_candidate_count": 6,
+            "caller_fdes": [
+              "0x55d9d60..0x55dad7c"
+            ],
+            "complete_xref_census": false
+          },
+          "naming_relocation": null,
+          "captured_binary_executed": false,
+          "progress_gate_requested": false
+        }
+      }
+    ]
+  }
+}
