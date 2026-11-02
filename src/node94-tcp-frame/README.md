@@ -106,6 +106,39 @@ The [deadline evidence packet](../../research/work-items/RE-012-frame-deadlines-
 records the conditional header path, chunk reset, timer relocation and poll
 ordering, with instruction corruptions and compiled negative controls.
 
+## Initial greeting frame exchange
+
+With `timed-stream` enabled, `greeting::exchange_frame` sends the initial
+post-connect request and receives its reply frame over a caller-owned stream:
+
+```rust,ignore
+use node94_tcp_frame::greeting::{self, Request};
+
+let reply = greeting::exchange_frame(&mut io, Request {
+    first: first_greeting_byte,
+    second: second_greeting_byte,
+    time_header: time_reply_header,
+}).await?;
+// Validate reply.payload with the peer protocol decoder before accepting it.
+```
+
+The request is exactly `00 00 00 03 00 first second 00`. Both supplied bytes
+are preserved. A separate flag controls the reply header's 40-second timeout;
+it is not the third transmitted byte. The write uses 20 seconds. Reply payloads
+and LZ4 output have the observed inclusive limit of 1,000 bytes when `first`
+is zero, otherwise 3,000,000,000 bytes. This is the target caller's limit;
+callers must account for the potentially large allocation in their resource
+policy. No protocol meaning or valid configuration range is assigned to either
+request byte here.
+
+The reply's payload remains uninterpreted and includes any suffix bytes.
+Receiving this frame does not validate a greeting, authenticate a peer, or
+establish network compatibility. The complex reply decoder and caller retry
+policy remain separate reconstruction work. Send and receive failures are
+distinguished; cancellation retains the partial-I/O limitations above.
+The [greeting exchange evidence](../../research/work-items/RE-012-greeting-frame-exchange-94/README.md)
+binds this specific caller and records the remaining decoder work.
+
 ## LZ4 correspondence and limits
 
 The decoder pins the MIT-licensed crate `lz4_flex = 0.11.6` in both
