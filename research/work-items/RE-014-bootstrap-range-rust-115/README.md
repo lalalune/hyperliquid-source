@@ -38,3 +38,45 @@ Output must be new. Replaying after implementation reports source existence
 truthfully; all semantic records/hashes must match the pre-Rust freeze.
 The bounded evaluator rejects calls, unknown instructions and unqualified memory.
 No component gate, compiled machine-byte or whole-node equivalence claimed.
+
+## Independent Rust reconstruction
+
+Freeze commit94620e3b precedes new115Rust. `src/node115-bootstrap-range` is a real
+standalone no_std component built directly with pinned rustc1.94.1 e408947bfd,
+LLVM21.1.8, aarch64-apple-darwin, edition2021, codegen-units1, overflow checks on,
+opt0/3 and warnings denied. No dependencies, Cargo workspace, build script or
+lockfile is invented. Exact commands/compiler/source/ownarchive hashes are in
+build-result.json; local repo prefix is redacted as <repo>. This compiler is a
+research pin, not recovered original build provenance.
+
+Both profiles match all53038 native rows. Twelve frozen native smoke rows pass
+per profile. Five compiled mutants yield7/14067/230/613/4950 mismatches and all
+fail native smoke assertions. Own opt3 rlib repeat is raw-identical. Builder and
+fresh actual-instruction replay passed exit0,127.710wall seconds at10% duty.
+No target/source machine-byte comparison or normalization is claimed.
+
+Reproduce: `python3 tools/bootstrap_range_115_rust.py --rustc <rustc1.94.1>
+--output work/range-build-new`. The native replay checks the original frozen
+hashes before invoking Rust; the separately linked driver reads inputs only.
+Original raw generated input/output/compiler/mutant logs remain in ignored work.
+The full corpus is generated rather than duplicated in the PR; native freeze
+hashes and compact smoke data are committed for review.
+
+The enum ReversedContinuation reports only the selected route. Target's lower
+store on that route is recorded by native evidence; subsequent memory/state
+behavior is not reproduced by this scalar API. Newinterface is not original ABI.
+No helper, captured process, network, thread, wallet or signing operation ran.
+Rustfmt and Clippy library/tests passed. Four focused Python tests passed in
+4.766wall seconds. make doctor/verify passed with29importedfiles/pins, active115
+andvisor signatures,29packetmanifests/464entries and no grandfathered rows.
+The initial combined command exited2 after61.558wall because the pre-Rust packet
+changed generated inventory counts while README/banner had not been regenerated.
+After staging the new115component and running make catalogue, catalogue-check
+passed exit0 in24.408wall. Generated counts only; all gates remain false.
+Nonfatal xcrun cache permission warnings and doctor's absent optional rustup/
+Ghidra toolchains are retained; direct pinned Rust builds above actually passed.
+Final reporting/packet manifest edits are checked separately. Full make test and full
+make reproduce are not run under the operator's resource restriction; do not
+interpret bounded replay or merge as a full-suite PASS.
+Next: recover initialization/caller and remaining continuation only with fresh115
+bindings. All unfinished component gates stay false.
