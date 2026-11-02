@@ -1,0 +1,53 @@
+{
+  "task_id": "RE-001",
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "target_size": 91774280,
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "captured_binary_executed": false,
+  "progress_gate_requested": false,
+  "function": {
+    "start_va": "0x4fec800",
+    "end_va_exclusive": "0x4fec823",
+    "bytes": 35,
+    "sha256": "b6da27453a165412264e0289a3548633511967910594dccc0faf563430c74c6b",
+    "fde_section_offset": "0x28f04c",
+    "next_fde_pc": "0x4fec830",
+    "padding_bytes": 13,
+    "padding_stride_end": "0x4fec830",
+    "inferred_label": "empty-guarded 16-byte-stride indexed load"
+  },
+  "behavior": {
+    "arguments": "rdi = container, rsi = index; all comparisons unsigned pointers",
+    "begin_offset": "0x988",
+    "end_offset": "0x990",
+    "element_stride": 16,
+    "calls_inside_window": 0,
+    "formula": "load(rdi, rsi) = 0 if [rdi+0x988] == [rdi+0x990] (empty container) else qword[[rdi+0x988] + 16*rsi]",
+    "empty_path": "begin == end -> xor %eax,%eax at 0x4fec820; return 0",
+    "non_empty_path": "shl $0x4,%rsi then mov (begin,%rsi,1),%rax at 0x4fec818; return the element's first qword",
+    "index_bound_check": "none; the only guard is emptiness (begin == end). The index is scaled and dereferenced without re-checking it against the element count.",
+    "zero_result_ambiguity": "a 0 return is produced both by an empty container and by a non-empty element whose stored first qword is 0; the caller cannot distinguish the two from the return value alone",
+    "output_shape": "single qword in rax (a pointer or value whose contract is not claimed)",
+    "meaning_of_container_fields_and_element": "unknown, not claimed",
+    "edges": {
+      "empty": "empty=True -> 0 (independent of any element value)",
+      "non_empty_value": "empty=False, element_first_qword=0x1234 -> 0x1234",
+      "non_empty_zero": "empty=False, element_first_qword=0 -> 0",
+      "non_empty_u64_max": "empty=False, element_first_qword=2^64-1 -> 2^64-1",
+      "index_offset_0": "index 0 -> byte offset 0",
+      "index_offset_1": "index 1 -> byte offset 0x10",
+      "index_offset_5": "index 5 -> byte offset 0x50"
+    }
+  },
+  "incoming_pattern_scan": {
+    "section": ".text",
+    "byte_count": 70370352,
+    "complete_xref_census": false,
+    "direct_callers": ["0x4fb2546"],
+    "tail_jump_callers": [],
+    "relocation_slots": [],
+    "relocation_slots_note": "no R_X86_64_RELATIVE record in .rela.dyn names this window as its addend; the window is reached only by the single direct e8 call at 0x4fb2546",
+    "caller_note": "the sole caller at 0x4fb2546 (function head 0x4fb2530) forwards its 2nd and 3rd arguments as (rdi, rsi), then null-checks the result with test %rax,%rax ; je, exercising the empty-guard return path"
+  }
+}
