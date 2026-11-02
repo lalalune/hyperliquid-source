@@ -1,0 +1,632 @@
+{
+  "base": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "controls": [
+    {
+      "after": "7de2",
+      "before": "73e2",
+      "denominator": "array semantics",
+      "expected_failed_property": "unsigned-first-gate",
+      "name": "signed-first-gate",
+      "va": "0x4918f22",
+      "witness": "unsigned-small-before-high"
+    },
+    {
+      "after": "7ce8",
+      "before": "72e8",
+      "denominator": "array semantics",
+      "expected_failed_property": "unsigned-predecessor-gate",
+      "name": "signed-predecessor-gate",
+      "va": "0x4918f46",
+      "witness": "high-before-maximum"
+    },
+    {
+      "after": "00",
+      "before": "08",
+      "denominator": "memory-domain/guard",
+      "expected_failed_property": "front-bound-before-read",
+      "name": "front-bound-zero",
+      "va": "0x4918f37",
+      "witness": "unique-front"
+    },
+    {
+      "after": "f0",
+      "before": "f8",
+      "denominator": "array/memory progress",
+      "expected_failed_property": "one-qword-progress",
+      "name": "skip-one-predecessor",
+      "va": "0x4918f42",
+      "witness": "unique-front"
+    },
+    {
+      "after": "f8",
+      "before": "f0",
+      "denominator": "array semantics",
+      "expected_failed_property": "preceding-word-address",
+      "name": "reload-current-predecessor",
+      "va": "0x4918f3e",
+      "witness": "unique-front"
+    },
+    {
+      "after": "b7",
+      "before": "f7",
+      "denominator": "source-address relation",
+      "expected_failed_property": "source-qword-index",
+      "name": "source-four-byte-stride",
+      "va": "0x4918f15",
+      "witness": "distinct A[4] and A[8]"
+    },
+    {
+      "after": "41",
+      "before": "49",
+      "denominator": "write-width relation",
+      "expected_failed_property": "append-qword-width",
+      "name": "append-dword-width",
+      "va": "0x4918f16",
+      "witness": "all-high-front / initialized S[8] sentinel"
+    },
+    {
+      "after": "77e2",
+      "before": "73e2",
+      "denominator": "trace/index only; equal-valued arrays can remain equal",
+      "expected_failed_property": "unsigned-first-gate",
+      "name": "first-equality-shifts",
+      "va": "0x4918f22",
+      "witness": "tie-maximum"
+    },
+    {
+      "after": "76e8",
+      "before": "72e8",
+      "denominator": "trace/index only; equal-valued arrays can remain equal",
+      "expected_failed_property": "unsigned-predecessor-gate",
+      "name": "predecessor-equality-shifts",
+      "va": "0x4918f46",
+      "witness": "duplicate-middle"
+    }
+  ],
+  "entry_state": {
+    "r12": "floor(n/2)",
+    "r14": "S",
+    "r15": "A",
+    "rcx": 8,
+    "rdi": "not yet x; source load at0x4918f12 supplies A[8]"
+  },
+  "frozen_utc": "2026-11-01T21:55:51.314582+00:00",
+  "kind": "Immutable second pre-model freeze for first-left insertion; extends historical sorted-prefix fixtures to arbitrary prefix states",
+  "limits": [
+    "No captured execution or instruction evaluation.",
+    "Native mutations will test static operands/CFG, not run the mutated target.",
+    "The last two controls concern read/store/index trace boundaries; neither is claimed to change equal-valued output arrays.",
+    "No Rust insertion model or compiled implementation has been authored or run for this freeze."
+  ],
+  "premises": [
+    "Arrival at the selected first-left insertion state after ordinary seed-call returns. The values of seed outputs are inputs to this local relation; no sorted-seed premise is required.",
+    "A[8] and S[0..9) are valid, stable, nonwrapping memory, disjoint from each other and the stack; scratch capacity n+16 is a caller/callee premise.",
+    "Global ordered output needs a sorted prefix, which the seed helper has not yet been proved to produce in this work.",
+    "No claim is made about subsequent insertion steps, right half, merge, helper failure/unwind, runtime reachability or whole sort."
+  ],
+  "previous_freeze": {
+    "path": "work/re006-short-run-sort8/PRE-MODEL-FIRST-INSERTION.json",
+    "sha256": "aa467f623ad8d610d1d22e7dddde3fc01c1e66937f8996b4d08553c228dc90df",
+    "unchanged": true
+  },
+  "relation": "Move only the maximal contiguous suffix of the eight prefix qwords that is unsigned-strictly-greater than x=A[8] one slot right, then insert x. Equality stops. An arbitrary prefix need not become sorted.",
+  "scope": {
+    "array_effect_boundary": "0x4918f06",
+    "counts": [
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32
+    ],
+    "envelope_hex": "8d04cd000000004889ceeb170f1f4400004d89f049893848ffc64883c0084c39e6743b498b3cf749893cf64d8b4cf6f84c39cf73e24989c0660f1f8400000000004f890c064983f80874c64f8b4c06f04983c0f84c39cf72e84d01f0ebb6",
+    "j": 8,
+    "native_envelope": "0x4918eef..0x4918f4d",
+    "owner": "0x4918d30..0x49190b7",
+    "owner_body_sha256": "9ae5e9107aca9a7ef4fd40d9b6dccee0cfa521a205a1422ea0a84b0ff9c05ed3",
+    "scratch_capacity_minimum": "n+16 qwords; selected wrapper supplies512",
+    "step_entry": "0x4918eef"
+  },
+  "scratch_slot8_before": 1311953614875787264,
+  "sequence": "Manual native dataflow/CFG analysis and literal expected arrays before any new Rust or Python insertion consequence model. Local sequence record, not external timestamp.",
+  "source_stride_control": {
+    "A4": 6148914691236517205,
+    "A8": 12297829382473034410
+  },
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "vectors": [
+    {
+      "expected_first9": [
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80,
+        90
+      ],
+      "insertion_index": 8,
+      "name": "unique-append",
+      "prefix": [
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80
+      ],
+      "shift_count": 0,
+      "x": 90
+    },
+    {
+      "expected_first9": [
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80,
+        80
+      ],
+      "insertion_index": 8,
+      "name": "tie-maximum",
+      "prefix": [
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80
+      ],
+      "shift_count": 0,
+      "x": 80
+    },
+    {
+      "expected_first9": [
+        0,
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80
+      ],
+      "insertion_index": 0,
+      "name": "unique-front",
+      "prefix": [
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80
+      ],
+      "shift_count": 8,
+      "x": 0
+    },
+    {
+      "expected_first9": [
+        10,
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80
+      ],
+      "insertion_index": 1,
+      "name": "tie-minimum",
+      "prefix": [
+        10,
+        20,
+        30,
+        40,
+        50,
+        60,
+        70,
+        80
+      ],
+      "shift_count": 7,
+      "x": 10
+    },
+    {
+      "expected_first9": [
+        0,
+        0,
+        1,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "insertion_index": 4,
+      "name": "duplicate-middle",
+      "prefix": [
+        0,
+        0,
+        1,
+        1,
+        2,
+        2,
+        3,
+        3
+      ],
+      "shift_count": 4,
+      "x": 1
+    },
+    {
+      "expected_first9": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        4,
+        5,
+        6,
+        7
+      ],
+      "insertion_index": 5,
+      "name": "unique-middle",
+      "prefix": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "shift_count": 3,
+      "x": 4
+    },
+    {
+      "expected_first9": [
+        0,
+        1,
+        9223372036854775806,
+        9223372036854775807,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775809,
+        18446744073709551614,
+        18446744073709551615
+      ],
+      "insertion_index": 5,
+      "name": "high-bit-tie",
+      "prefix": [
+        0,
+        1,
+        9223372036854775806,
+        9223372036854775807,
+        9223372036854775808,
+        9223372036854775809,
+        18446744073709551614,
+        18446744073709551615
+      ],
+      "shift_count": 3,
+      "x": 9223372036854775808
+    },
+    {
+      "expected_first9": [
+        0,
+        1,
+        9223372036854775806,
+        9223372036854775807,
+        9223372036854775807,
+        9223372036854775808,
+        9223372036854775809,
+        18446744073709551614,
+        18446744073709551615
+      ],
+      "insertion_index": 4,
+      "name": "signed-boundary-tie",
+      "prefix": [
+        0,
+        1,
+        9223372036854775806,
+        9223372036854775807,
+        9223372036854775808,
+        9223372036854775809,
+        18446744073709551614,
+        18446744073709551615
+      ],
+      "shift_count": 4,
+      "x": 9223372036854775807
+    },
+    {
+      "expected_first9": [
+        1,
+        9223372036854775808,
+        9223372036854775809,
+        9223372036854775810,
+        9223372036854775811,
+        9223372036854775812,
+        9223372036854775813,
+        9223372036854775814,
+        18446744073709551615
+      ],
+      "insertion_index": 0,
+      "name": "unsigned-small-before-high",
+      "prefix": [
+        9223372036854775808,
+        9223372036854775809,
+        9223372036854775810,
+        9223372036854775811,
+        9223372036854775812,
+        9223372036854775813,
+        9223372036854775814,
+        18446744073709551615
+      ],
+      "shift_count": 8,
+      "x": 1
+    },
+    {
+      "expected_first9": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        9223372036854775808,
+        18446744073709551615
+      ],
+      "insertion_index": 7,
+      "name": "high-before-maximum",
+      "prefix": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        18446744073709551615
+      ],
+      "shift_count": 1,
+      "x": 9223372036854775808
+    },
+    {
+      "expected_first9": [
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615
+      ],
+      "insertion_index": 8,
+      "name": "all-max-tie",
+      "prefix": [
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615,
+        18446744073709551615
+      ],
+      "shift_count": 0,
+      "x": 18446744073709551615
+    },
+    {
+      "expected_first9": [
+        0,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775808
+      ],
+      "insertion_index": 0,
+      "name": "all-high-front",
+      "prefix": [
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775808
+      ],
+      "shift_count": 8,
+      "x": 0
+    },
+    {
+      "expected_first9": [
+        9,
+        0,
+        8,
+        1,
+        7,
+        2,
+        6,
+        3,
+        4
+      ],
+      "insertion_index": 8,
+      "name": "unsorted-append-despite-earlier-greater",
+      "prefix": [
+        9,
+        0,
+        8,
+        1,
+        7,
+        2,
+        6,
+        3
+      ],
+      "shift_count": 0,
+      "x": 4
+    },
+    {
+      "expected_first9": [
+        8,
+        0,
+        7,
+        1,
+        6,
+        2,
+        5,
+        9,
+        10
+      ],
+      "insertion_index": 6,
+      "name": "unsorted-maximal-suffix-only",
+      "prefix": [
+        8,
+        0,
+        7,
+        1,
+        6,
+        2,
+        9,
+        10
+      ],
+      "shift_count": 2,
+      "x": 5
+    },
+    {
+      "expected_first9": [
+        9,
+        0,
+        8,
+        1,
+        7,
+        2,
+        6,
+        5,
+        5
+      ],
+      "insertion_index": 8,
+      "name": "unsorted-last-equality-no-shift",
+      "prefix": [
+        9,
+        0,
+        8,
+        1,
+        7,
+        2,
+        6,
+        5
+      ],
+      "shift_count": 0,
+      "x": 5
+    },
+    {
+      "expected_first9": [
+        9,
+        0,
+        8,
+        1,
+        5,
+        5,
+        7,
+        6,
+        10
+      ],
+      "insertion_index": 5,
+      "name": "unsorted-middle-equality-stop",
+      "prefix": [
+        9,
+        0,
+        8,
+        1,
+        5,
+        7,
+        6,
+        10
+      ],
+      "shift_count": 3,
+      "x": 5
+    },
+    {
+      "expected_first9": [
+        1,
+        9,
+        3,
+        8,
+        4,
+        7,
+        5,
+        6,
+        2
+      ],
+      "insertion_index": 0,
+      "name": "unsorted-front",
+      "prefix": [
+        9,
+        3,
+        8,
+        4,
+        7,
+        5,
+        6,
+        2
+      ],
+      "shift_count": 8,
+      "x": 1
+    },
+    {
+      "expected_first9": [
+        0,
+        9223372036854775809,
+        1,
+        9223372036854775810,
+        2,
+        9223372036854775811,
+        3,
+        9223372036854775808,
+        18446744073709551615
+      ],
+      "insertion_index": 7,
+      "name": "unsorted-unsigned-boundary",
+      "prefix": [
+        0,
+        9223372036854775809,
+        1,
+        9223372036854775810,
+        2,
+        9223372036854775811,
+        3,
+        18446744073709551615
+      ],
+      "shift_count": 1,
+      "x": 9223372036854775808
+    }
+  ]
+}
