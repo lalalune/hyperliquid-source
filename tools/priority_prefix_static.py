@@ -72,11 +72,23 @@ def transfer_certificate(prefix):
     return edges
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    rels = {}
+    for a, i, v in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']]):
+        if a in rels:
+            raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a] = (i, v)
+    return rels
+
+
 def analyze(data):
     _, fs, _ = fde_extents(data)
     frames = {(f['start'], f['end']): f for f in fs}
-    relsec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
-    rels = {a: (i, v) for a, i, v in struct.iter_unpack('<QQq', data[relsec['offset']:relsec['offset']+relsec['size']])}
+    rels = relocations(data)
     owners = []
     text = b'struct PriorityRateDelayParams with 6 elements'
     for start, end, slot in OWNERS:
