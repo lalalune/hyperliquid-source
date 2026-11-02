@@ -87,7 +87,10 @@ class Image:
             if row[1] == 8:  # SHT_NOBITS occupies no file bytes; mapping its VAs would
                 continue  # return unrelated file bytes as if they lived there.
             end = data.index(b"\0", strings + row[0])
-            name = data[strings + row[0]:end].decode()
+            try:
+                name = data[strings + row[0]:end].decode()
+            except UnicodeDecodeError:
+                fail("section name is not valid UTF-8")
             if name in self.sections:
                 fail(f"duplicate section name {name}")
             self.sections[name] = (row[3], row[4], row[5])
