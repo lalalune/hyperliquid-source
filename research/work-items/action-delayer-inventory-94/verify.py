@@ -26,6 +26,24 @@ def verify_packet(here=HERE, root=ROOT):
         check(name not in entries, 'duplicate manifest entry')
         entries[name] = digest
     check(set(entries) == FILES, 'manifest file set mismatch')
+    # The checks below are the rest of the admission the
+    # node-inventory verifiers spell out: nothing checked the
+    # packet directory itself, so an unlisted file could sit in
+    # the packet unseen, and a listed file swapped for a symlink
+    # to identical bytes hashed through to its target.
+    for name in entries:
+        check(not (here / name).is_symlink(), f'symlinked manifest entry: {name}')
+    present = set()
+    for entry in sorted(here.iterdir()):
+        check(not entry.is_symlink(), f'symlink in packet directory: {entry.name}')
+        if entry.is_dir():
+            check(entry.name == '__pycache__' and all(
+                child.name.endswith('.pyc') and not child.is_symlink()
+                for child in entry.iterdir()),
+                f'unexpected directory in packet: {entry.name}')
+            continue
+        present.add(entry.name)
+    check(present - {'MANIFEST.sha256'} == set(entries), 'packet contents differ from manifest')
     for name, digest in entries.items():
         check(hashlib.sha256((here / name).read_bytes()).hexdigest() == digest, f'manifest mismatch: {name}')
     binary = (root / 'artifacts/node/94/hl-node').read_bytes()
