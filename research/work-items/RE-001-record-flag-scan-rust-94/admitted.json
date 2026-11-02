@@ -1,0 +1,254 @@
+{
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "config": {
+    "tool": "foundation_all_records_flag_scan",
+    "packet": "foundation-all-records-flag-scan-94",
+    "start": 62775472,
+    "end": 62775563,
+    "fde": 1816224,
+    "next": 62775568,
+    "call": 62775500,
+    "target": 63024544,
+    "callee_fde": 5282692,
+    "callee_end": 63025614
+  },
+  "legacy_packet": {
+    "call": {
+      "site": "0x3bde0cc",
+      "target": "0x3c1ada0",
+      "target_bytes": "e8cfcc0300",
+      "target_claimed_here": false,
+      "target_fde_extent": 1070,
+      "target_fde_section_offset": "0x00509b84",
+      "target_fde_start": true,
+      "target_note": "the callee at 0x3c1ada0 IS an FDE start (1070 bytes, .eh_frame+0x00509b84, cie 0x0022d474), but its body is excluded here and its result is ignored: on the fast path the window overwrites rax with mov al, 1 before returning, so no claim about the callee's computation is made"
+    },
+    "captured_binary_executed": false,
+    "coordinate_system": "ELF virtual addresses, no runtime rebase",
+    "function": {
+      "bytes": 91,
+      "end_va_exclusive": "0x3bde10b",
+      "fde_cie": "0x00000000",
+      "fde_section_offset": "0x001bb6a0",
+      "inferred_label": "all-records flag-scan helper",
+      "next_fde_start": "0x3bde110",
+      "padding_bytes": 5,
+      "padding_note": "five int3 bytes (0xcc) at [0x3bde10b, 0x3bde110) pad the window to the next FDE at 0x3bde110",
+      "sha256": "1e348c29397efe4983b420bd0cd74b4db701d80d6cfcae115066e1c16222751a",
+      "start_va": "0x3bde0b0"
+    },
+    "incoming": {
+      "complete_xref_census": false,
+      "direct_e8_callers": [],
+      "validated_caller_fdes": []
+    },
+    "progress_gate_requested": false,
+    "rule": {
+      "edges": [
+        {
+          "count": "0x0",
+          "flags": [],
+          "flags_summary": null,
+          "note": "zero records: vacuous all-nonzero, returns 1 without scanning",
+          "result": 1
+        },
+        {
+          "count": "0x1",
+          "flags": [
+            1
+          ],
+          "flags_summary": null,
+          "note": "single record, flag nonzero returns 1",
+          "result": 1
+        },
+        {
+          "count": "0x1",
+          "flags": [
+            0
+          ],
+          "flags_summary": null,
+          "note": "single record, flag zero returns 0",
+          "result": 0
+        },
+        {
+          "count": "0x3",
+          "flags": [
+            1,
+            255,
+            128
+          ],
+          "flags_summary": null,
+          "note": "three records, all flags nonzero returns 1",
+          "result": 1
+        },
+        {
+          "count": "0x3",
+          "flags": [
+            1,
+            0,
+            128
+          ],
+          "flags_summary": null,
+          "note": "middle record flag zero returns 0 (early exit)",
+          "result": 0
+        },
+        {
+          "count": "0x3",
+          "flags": [
+            1,
+            255,
+            0
+          ],
+          "flags_summary": null,
+          "note": "last record flag zero returns 0",
+          "result": 0
+        },
+        {
+          "count": "0x3",
+          "flags": [
+            0,
+            255,
+            128
+          ],
+          "flags_summary": null,
+          "note": "first record flag zero returns 0",
+          "result": 0
+        },
+        {
+          "count": "0x2710",
+          "flags": null,
+          "flags_summary": "all-nonzero",
+          "note": "10000 records, just below the threshold, scan path with all flags nonzero returns 1",
+          "result": 1
+        },
+        {
+          "count": "0x2710",
+          "flags": null,
+          "flags_summary": "contains-zero",
+          "note": "10000 records, just below the threshold, scan path with a zero flag returns 0",
+          "result": 0
+        },
+        {
+          "count": "0x2711",
+          "flags": null,
+          "flags_summary": "not-consulted (fast path)",
+          "note": "10001 records, exactly at the threshold: fast path, returns 1 without scanning",
+          "result": 1
+        },
+        {
+          "count": "0x2712",
+          "flags": null,
+          "flags_summary": "not-consulted (fast path)",
+          "note": "10002 records, above the threshold: fast path, returns 1 even if some flags were zero",
+          "result": 1
+        },
+        {
+          "count": "0xffffffffffffffff",
+          "flags": null,
+          "flags_summary": "not-consulted (fast path)",
+          "note": "max count: fast path, returns 1",
+          "result": 1
+        }
+      ],
+      "formula": "if count >= 10001 (unsigned): write u16 0x143 to a stack slot, call callee(stack_slot), ignore the result, return 1 in al; else: return 1 in al iff every byte at records_base + i*80 + 0x4e is nonzero for i in 0..count-1, else 0 in al (count 0 returns 1 vacuously)",
+      "formula_note": "the threshold compare is unsigned (jb); the scan checks the flag byte at offset 0x4e of each 80-byte record in forward order and exits early on the first zero byte; the verdict is delivered in al only (the upper bytes of rax are not normalized by the verdict instructions), so the rule is stated over al; the fast-path callee argument is the address of the stack slot holding 0x143, and the callee result is overwritten by mov al, 1 before the return",
+      "inputs": "count (u64 at input struct + 0x10), records_base (pointer at input struct + 0x08), flags (bytes at records_base + i*80 + 0x4e), fast-path slot value (u16 0x143 = 323)",
+      "scan": {
+        "flag_offset": 78,
+        "flag_offset_hex": "0x4e",
+        "record_size": 80,
+        "record_size_hex": "0x50",
+        "threshold": 10001,
+        "threshold_hex": "0x2711"
+      },
+      "stack_frame": 104,
+      "stack_frame_hex": "0x68"
+    },
+    "target_release": "94",
+    "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "frames": [
+    {
+      "section_offset": "0x1bb6a0",
+      "start": "0x3bde0b0",
+      "end": "0x3bde10b",
+      "cie_section_offset": "0x0",
+      "cie_hex": "1400000000000000017a5200017810011b0c070890010000"
+    },
+    {
+      "section_offset": "0x509b84",
+      "start": "0x3c1ada0",
+      "end": "0x3c1b1ce",
+      "cie_section_offset": "0x2dc714",
+      "cie_hex": "1c00000000000000017a504c5200017810079b29ca7b041b1b0c070890010000"
+    }
+  ],
+  "calls": [
+    {
+      "site": "0x3bde0cc",
+      "target": "0x3c1ada0"
+    }
+  ],
+  "external_binding": null,
+  "regions": [
+    {
+      "name": "complete function",
+      "va": "0x3bde0b0",
+      "file_offset": 62771376,
+      "bytes": 91,
+      "sha256": "1e348c29397efe4983b420bd0cd74b4db701d80d6cfcae115066e1c16222751a"
+    },
+    {
+      "name": "following alignment",
+      "va": "0x3bde10b",
+      "file_offset": 62771467,
+      "bytes": 5,
+      "sha256": "992cf51486f901aa1aa7d1f63e18c150c9156166e08e0b9e59cc3faf98177329"
+    },
+    {
+      "name": "FDE 0x3bde0b0",
+      "va": "0xe9cbb8",
+      "file_offset": 15322040,
+      "bytes": 32,
+      "sha256": "31311d83065f6f50679efc1efda2f17c9a63252342fdb3efd7f61c961d7c654f"
+    },
+    {
+      "name": "CIE for 0x3bde0b0",
+      "va": "0xce1518",
+      "file_offset": 13505816,
+      "bytes": 24,
+      "sha256": "78b6da08ece7423d48f0be866ea3d8c0b62f6b7053852a71a7672b490842354f"
+    },
+    {
+      "name": "direct call",
+      "va": "0x3bde0cc",
+      "file_offset": 62771404,
+      "bytes": 5,
+      "sha256": "51d7d27e5545016986932baa782c57f6abc632bcbb33a11884a2403372035ca9"
+    },
+    {
+      "name": "FDE 0x3c1ada0",
+      "va": "0x11eb09c",
+      "file_offset": 18788508,
+      "bytes": 232,
+      "sha256": "5898f82d2398f9ca7a322af977e49ee82ad3d2174391bc26a9df6deea1e45d90"
+    },
+    {
+      "name": "CIE for 0x3c1ada0",
+      "va": "0xfbdc2c",
+      "file_offset": 16505900,
+      "bytes": 32,
+      "sha256": "2e3ba4f0a39b71b05ba02de7b480f0bb9836f92243ee31dc6af4ddacb1098718"
+    }
+  ],
+  "source_sha256": {
+    "research/work-items/foundation-all-records-flag-scan-94/MANIFEST.sha256": "5792c871a63e7e34c0d05bb1bdaf5dbdb4cecca1bc6e22192ba56846c27fa202",
+    "research/work-items/foundation-all-records-flag-scan-94/README.md": "70f383b891d5835cb1590a83ddcafdb257378145d7b7f11e7e5525bdf9f9dd5d",
+    "research/work-items/foundation-all-records-flag-scan-94/evidence.json": "664e7b019b74c65650c839870df2a503d287d7b4cddcc7aa67dd6cea5b639703",
+    "research/work-items/foundation-all-records-flag-scan-94/frames.txt": "3e4bdf032e46321db118abc77afb479785e681d7e9f00d91ceb5fd5ca11e6399",
+    "research/work-items/foundation-all-records-flag-scan-94/window.objdump.txt": "f52b02c3a14e8b5faaa572d97cf8d415d5e1c0e67aa7766d08835be57efeccae",
+    "tools/elf_index.py": "d77a002e9b2d3dce86822f6c67169298ad0ea54f5f4cb5c0d244328cbed1774f",
+    "tools/foundation_all_records_flag_scan.py": "119c88412a25b91e5f27bc4603aac55190227f4533a7bc844af4b693e7c7545f"
+  },
+  "captured_binary_executed": false
+}
