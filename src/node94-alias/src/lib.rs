@@ -100,6 +100,27 @@ fn compress(v: &mut [u64; 4], word: u64) {
     v[0] ^= word;
 }
 
+/// Hashes original key bytes followed by one `ff` byte with a supplied seed.
+///
+/// This numeric projection is shared by native borrowed/owned wrappers
+/// 0x13d38c0 and 0x13d3c80. The seed words initialize logical lanes 0/2 and
+/// 1/3 respectively; no alias letters or counter bytes enter this hash.
+/// Equal stable key bytes and seeds give the same result regardless of source
+/// ownership. Runtime seed initialization/lifetime, allocation, table probing,
+/// cache reachability and the target's descriptor layout are not implemented.
+/// Inputs of at most 16 bytes diagnose the wrappers; the native constructor
+/// selects its separate inline route for those lengths.
+pub fn key_hash(seed: [u64; 2], key: &[u8]) -> u64 {
+    let mut state = AliasFeed::new();
+    state.words[0] ^= seed[0];
+    state.words[2] ^= seed[0];
+    state.words[1] ^= seed[1];
+    state.words[3] ^= seed[1];
+    state.write(key);
+    state.write(&[0xff]);
+    state.finish()
+}
+
 /// Packs the constructor-admitted inline bytes into a little-endian carrier.
 ///
 /// The low 64 bits project native RAX and the high 64 bits project native RDX.

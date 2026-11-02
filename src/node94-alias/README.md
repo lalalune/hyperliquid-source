@@ -37,6 +37,25 @@ frozen before the new Rust source. No captured instruction evaluator runs in
 this follow-on. Its input-only compiled comparison and source controls are
 separate from the older feed/alias reconstruction runner below.
 
+## Original-key hash
+
+`key_hash(seed: [u64; 2], key: &[u8]) -> u64` exposes the numeric relation
+shared by native borrowed/owned key wrappers 0x13d38c0 and 0x13d3c80. It mixes
+the supplied seed into the four logical initial words, feeds original key bytes
+and one `ff` byte, then finishes. The associated alias letters/carrier and the
+alias producer's four-byte counter do not enter this hash. Equal stable key
+bytes/seeds give the same value across source storage and capacities.
+
+This accepts supplied seed values; it does not reconstruct the runtime seed
+provider/lifetime, original owned descriptor, allocator, table probing, locking
+or cache reachability. Lengths <=16 diagnose the wrappers only: the constructor
+uses its separate inline route for those inputs. The
+[key-hash packet](../../research/work-items/RE-001-key-hash-rust-94/README.md)
+binds both full native wrappers, the shared feed/finalizer, 48 outputs frozen
+before Rust and actual opt0/3 comparisons with seven operative source mutants.
+The earlier inline comparison is independently requalified on the changed
+whole-file source; its published original receipt remains historical.
+
 ## Check
 
 From the repository root, with the existing Rust/Cargo toolchain and authenticated
