@@ -1,0 +1,74 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "research/work-items/RE-004-chained-field-pair-rust-94/verify_static.py"
+      ],
+      "corruption_controls": 17,
+      "exit_code": 0,
+      "members": 2,
+      "rela_records": 80300
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-"
+      ],
+      "cases": 8890,
+      "exit_code": 0,
+      "expected_sha256": "325be6dbff351193135b17bb0b8ba66cc0fdcb8ee95b7c703aa16fc769f9f618",
+      "inputs_sha256": "e9ef8af4824c05804318c80a005e72d3c52218debca5a95b386698458eb29e8f",
+      "mismatches": 0,
+      "operation": "decode frozen <BQQQH256s records; verify stream hashes; independently calculate full output image and RAX through a numeric-address dictionary, struct signed/unsigned decoding and immutable byte concatenation",
+      "outcomes": {
+        "0": 6641,
+        "1": 6,
+        "2": 401,
+        "3": 818,
+        "4": 676,
+        "5": 348
+      }
+    }
+  ],
+  "findings": [
+    "Both complete 31-byte bodies and seven instructions each match the selected Field variants.",
+    "All three reads precede the only qword store, including arbitrary partial output aliases with pointer or value fields.",
+    "Signed32 reads exactly four bytes and sign-extends bit31; Word64 preserves all bits.",
+    "All object/pointer field additions wrap before safe span admission; incoming pointer values need not themselves map.",
+    "Every new refusal leaves the full image unchanged; output is exactly eight bytes; MOV EAX,1 establishes complete RAX=1.",
+    "Safe nonwrapping image, ordinary memory, fault/access-trace/ABI exclusions and new family selector are explicit in the proof.",
+    "Final packet README reviewed: native/finite proof scope, early-output refusal-only control, complete image effects and precise shared-baseline exit2/retry/skips limitations are consistent."
+  ],
+  "independent_relation": {
+    "chain": "P=decode_u64(memory[(O+0x788)%2^64 .. +8]); R=decode_u64(memory[(P+0x30)%2^64 .. +8])",
+    "memory": "dictionary {base+j: image[j]} for j<length after nonwrapping check; source remains immutable during all reads",
+    "refusal": "same ordered safe-error tags and unchanged full 256-byte backing image; no imported oracle/library function used",
+    "value": "kind0: struct.unpack signed i32 at (R+0xb30)%2^64, reduced modulo2^64; kind1: unsigned qword at (R+0x1008)%2^64",
+    "write": "after all read/output-range checks, concatenate unchanged prefix + packed u64 value + unchanged suffix; RAX=1"
+  },
+  "limits": [
+    "No native replay, captured execution or instruction emulation.",
+    "Native qualification and shared-baseline counts remain author evidence, not independently rerun by reviewer."
+  ],
+  "reviewed_sha256": {
+    "research/work-items/RE-004-chained-field-pair-rust-94/PROOF.md": "78f4e4f3cf641da7aa4aa4f33fa13fd8d640484768232293db9d3787128dd2e2",
+    "research/work-items/RE-004-chained-field-pair-rust-94/README.md": "1297494fe00ab68f26307eaa80442e57ad10aa5f99a659d130f3f898120c1688",
+    "research/work-items/RE-004-chained-field-pair-rust-94/frozen.json": "fec7154a6bb259e19657eb2efacc7b9e8b7030d29c3a8b36b9185697d10430f5",
+    "research/work-items/RE-004-chained-field-pair-rust-94/member0.gnu.txt": "36a9427facb33d2785640f542c7e3195ae5a9894484acd6fb572f6ac0fe40f0e",
+    "research/work-items/RE-004-chained-field-pair-rust-94/member1.gnu.txt": "04988ab0702c23e248f68eeeb5ed8652daee3677b6d74d6ae7601124d0fa267a",
+    "research/work-items/RE-004-chained-field-pair-rust-94/oracle.py": "888e3fc025fa5fc130053b841b9032ab4f3fb79560a517b1f0ad8d6558c301cc",
+    "research/work-items/RE-004-chained-field-pair-rust-94/static.json": "92b81148cb3f9d573919f17bb8f5291628a7b3dd00c381b45beb1442c4aef0b8",
+    "research/work-items/RE-004-chained-field-pair-rust-94/verify_static.py": "b72badd984317c9984c732a243538eda6ca9aac6227985ff277cb7400d7c9d86",
+    "src/node94-chained-field-pair/README.md": "70655b36e27f40454b341e88dc17f2305ec084d8593dc03d472d2cdc98dec522",
+    "src/node94-chained-field-pair/input_only_driver.rs": "6d1b7537433b9e77bf246ce14b912893ff55049db6bf98ecb6c6d363d4b10304",
+    "src/node94-chained-field-pair/lib.rs": "9e710e73d1e2055b66f8e9e1612811b559fb5706066e386c73e10d22e306b3e9"
+  },
+  "reviewer": "OpenAI Codex independent compression worker; exact model unavailable",
+  "scope": "read-only review; only this requested review record written",
+  "status": "no blocker in source, proof, both READMEs and independently checked static/frozen relation",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
