@@ -1,0 +1,45 @@
+
+visor.elf:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000004ad0c0 <.text+0x1eff40>:
+  4ad0c0:	41 57                                           	push   r15
+  4ad0c2:	41 56                                           	push   r14
+  4ad0c4:	53                                              	push   rbx
+  4ad0c5:	48 89 fb                                        	mov    rbx,rdi
+  4ad0c8:	41 bf 01 00 00 00                               	mov    r15d,0x1
+  4ad0ce:	48 85 c9                                        	test   rcx,rcx
+  4ad0d1:	78 1b                                           	js     4ad0ee <__cxa_finalize@plt-0x2f9712>
+  4ad0d3:	49 89 ce                                        	mov    r14,rcx
+  4ad0d6:	48 85 f6                                        	test   rsi,rsi
+  4ad0d9:	74 1d                                           	je     4ad0f8 <__cxa_finalize@plt-0x2f9708>
+  4ad0db:	48 89 d7                                        	mov    rdi,rdx
+  4ad0de:	4c 89 f6                                        	mov    rsi,r14
+  4ad0e1:	ff 15 e1 7a 33 00                               	call   QWORD PTR [rip+0x337ae1]        # 7e4bc8 <__register_atfork@plt+0x3dfc8>
+  4ad0e7:	48 85 c0                                        	test   rax,rax
+  4ad0ea:	75 33                                           	jne    4ad11f <__cxa_finalize@plt-0x2f96e1>
+  4ad0ec:	eb 1d                                           	jmp    4ad10b <__cxa_finalize@plt-0x2f96f5>
+  4ad0ee:	b8 08 00 00 00                                  	mov    eax,0x8
+  4ad0f3:	45 31 f6                                        	xor    r14d,r14d
+  4ad0f6:	eb 33                                           	jmp    4ad12b <__cxa_finalize@plt-0x2f96d5>
+  4ad0f8:	4d 85 f6                                        	test   r14,r14
+  4ad0fb:	74 1d                                           	je     4ad11a <__cxa_finalize@plt-0x2f96e6>
+  4ad0fd:	4c 89 f7                                        	mov    rdi,r14
+  4ad100:	ff 15 5a 7a 33 00                               	call   QWORD PTR [rip+0x337a5a]        # 7e4b60 <__register_atfork@plt+0x3df60>
+  4ad106:	48 85 c0                                        	test   rax,rax
+  4ad109:	75 14                                           	jne    4ad11f <__cxa_finalize@plt-0x2f96e1>
+  4ad10b:	48 c7 43 08 01 00 00 00                         	mov    QWORD PTR [rbx+0x8],0x1
+  4ad113:	b8 10 00 00 00                                  	mov    eax,0x10
+  4ad118:	eb 11                                           	jmp    4ad12b <__cxa_finalize@plt-0x2f96d5>
+  4ad11a:	b8 01 00 00 00                                  	mov    eax,0x1
+  4ad11f:	48 89 43 08                                     	mov    QWORD PTR [rbx+0x8],rax
+  4ad123:	b8 10 00 00 00                                  	mov    eax,0x10
+  4ad128:	45 31 ff                                        	xor    r15d,r15d
+  4ad12b:	4c 89 34 03                                     	mov    QWORD PTR [rbx+rax*1],r14
+  4ad12f:	4c 89 3b                                        	mov    QWORD PTR [rbx],r15
+  4ad132:	5b                                              	pop    rbx
+  4ad133:	41 5e                                           	pop    r14
+  4ad135:	41 5f                                           	pop    r15
+  4ad137:	c3                                              	ret
