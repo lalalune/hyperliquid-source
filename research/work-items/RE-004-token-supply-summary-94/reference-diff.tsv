@@ -1,7 +1,0 @@
-subject	reference lead	bytes	case
-ModifyNonCirculatingSupply	fields token, add u64, remove u64	the action holds a token and two user lists (20 byte keys), each at most 10000 long; the body inserts all of the first list, then removes all of the second	arm a add and remove
-circulating supply	no function in the reference	0x375e4c0 builds it: max minus token_fees_collected, minus the sum over non-circulating users, then minus native_token_reserve for the native token	summary all four sources in order
-list length cap	none	both lists are refused above 10000 with tag 0x143, after the token bound	arm a bad token beats lengths
-burn users	none	the zero address and the 0x...dead address are always counted, and a set member equal to one of them counts twice	summary zero user in the set counts twice
-token 1	none	token id 1 reports max + 4e13 in the top word only; total and circulating do not move, and the add is checked with tag 0xbe	summary bonus token adds to the top word only
-native staking	none	for the native token each counted user also adds the first three words of slot 0x5774f18; the fourth word is ignored	summary native fourth word is not counted

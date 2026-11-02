@@ -63,10 +63,10 @@ class ElfIndexCliTests(unittest.TestCase):
         self.place_pointer(rel)
         self.assert_one_line_diagnostic(run_cli(self.root, 'visor'))
 
-    def test_release_94_missing_artifact(self):
-        rel = 'artifacts/node/94/hl-node'
+    def test_release_115_missing_artifact(self):
+        rel = 'artifacts/node/115/hl-node'
         self.assertIn(rel, self.pinned)
-        proc = run_cli(self.root, '94')
+        proc = run_cli(self.root, '115')
         self.assert_one_line_diagnostic(proc)
         self.assertIn('Missing artifact', proc.stderr)
 

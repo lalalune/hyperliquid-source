@@ -51,11 +51,11 @@ class FdeExtentsCliTests(unittest.TestCase):
         self.assertTrue(lines[0].startswith('fde_extents: '), lines[0])
         self.assertNotIn('Traceback', proc.stderr)
 
-    def test_release_94_pointer_artifact(self):
-        rel = 'artifacts/node/94/hl-node'
+    def test_release_115_pointer_artifact(self):
+        rel = 'artifacts/node/115/hl-node'
         self.assertIn(rel, self.pinned)
         self.place_pointer(rel)
-        self.assert_one_line_diagnostic(run_cli(self.root, '94'))
+        self.assert_one_line_diagnostic(run_cli(self.root, '115'))
 
     def test_release_115_missing_artifact(self):
         rel = 'artifacts/node/115/hl-node'

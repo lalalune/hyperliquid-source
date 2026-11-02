@@ -170,11 +170,7 @@ def verify_signatures(root, manifest):
             print(f'Valid signature: {relative}')
 
 
-PAIRS = [
-    ('artifacts/node/94/hl-node', 'references/can1357-hl/bin/hl-node-mainnet-new'),
-    ('artifacts/node/94/hl-node.asc', 'references/can1357-hl/bin/hl-node-mainnet-new.asc'),
-    ('artifacts/keys/pub_key.asc', 'upstream/node/pub_key.asc'),
-]
+PAIRS = [('artifacts/keys/pub_key.asc', 'upstream/node/pub_key.asc')]
 
 
 def verify_pinned_pairs(root):

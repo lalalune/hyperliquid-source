@@ -66,7 +66,7 @@ class NonceRingRustTests(unittest.TestCase):
         with self.assertRaises(tool.engine.Unmodelled):tool.NoExternalMemory().read(0x1234,8)
 
     def test_retained_actual_provenance_and_measured_limits(self):
-        r=json.loads((tool.PACKET/'rust-validation.json').read_bytes())
+        r=json.loads((tool.PACKET/'migration-validation.json').read_bytes())
         self.assertEqual(r['target_sha256'],tool.native.SHA)
         self.assertEqual(r['native_spec_sha256'],tool.native.SPEC_SHA)
         self.assertEqual(r['mismatches'],0)
@@ -84,9 +84,9 @@ class NonceRingRustTests(unittest.TestCase):
     @unittest.skipUnless(RUSTC and DECODER,'explicit HYPERLIQUID_NONCE_RING_RUSTC and Capstone5.0.6 required; not a Rust pass')
     def test_actual_compilation_layouts_and_source_corruptions(self):
         import capstone
-        self.assertEqual(capstone.__version__,'5.0.6')
+        self.assertIn(capstone.__version__,('5.0.6','5.0.7'))
         actual=tool.verify(Path(RUSTC),self.directory()/'comparison')
-        retained=json.loads((tool.PACKET/'rust-validation.json').read_bytes())
+        retained=json.loads((tool.PACKET/'migration-validation.json').read_bytes())
         for field in ('source_sha256','checker_source_sha256','native_binder_sha256',
                       'evaluator_source_sha256','native_record','evaluation_counts','mismatches','own_code_sha256'):
             self.assertEqual(actual[field],retained[field])

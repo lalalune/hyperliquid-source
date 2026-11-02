@@ -158,7 +158,7 @@ def main(argv=None):
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] == 'target':
         if len(args) > 2:
-            raise ValueError('Usage: rea.py target [94|115|visor]; unexpected extra arguments')
+            raise ValueError('Usage: rea.py target [115|visor]; unexpected extra arguments')
         if 'targets' not in CONFIG:
             raise ValueError('config/rea.json missing targets')
         if len(args) == 2:
@@ -168,7 +168,7 @@ def main(argv=None):
         else:
             name = CONFIG['default_target']
         if name not in CONFIG['targets']:
-            raise ValueError('Unknown target; use 94, 115 or visor')
+            raise ValueError('Unknown target; use 115 or visor')
         print(json.dumps(target(name), indent=2))
         return
     profile = None

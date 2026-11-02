@@ -1,9 +1,0 @@
-subject	reference lead	bytes	case
-input	rows arrive in source order with a target total	rows come from a user to weight tree, are stable sorted by weight, largest first, and each row is rescaled to trunc(f64(w)/f64(sum)*f64(target)) before any remainder rule	norm (7, 5, 3) to 100 floor 0
-floor	absent	a row whose amount is under the floor argument is dropped; the payout passes floor 0, so zero rows stay	norm (1, 0, 2) to 100 floor 1
-leftover	added to rows[0] in source order	added to the largest kept row; overflow gives tag 0xbe with no text	norm (7, 5, 3) to 1000 floor 0
-excess	row reduced by at most floor(row*factor)	the same limit, then the walk stops at the first row whose limit covers what is left	excess (1, 1, 1) to 18446744073709551615 factor 1.0 once 0
-bad factor	InvalidFactor error	no separate error: a NaN, negative or above 1.01 factor skips the walk and reports the remainder	excess (1, 1, 1) to 18446744073709551615 factor nan once 0
-errors	EmptyDistribution, Overflow and Underflow enum values	tag 0xfa with an owned text, five texts in all, and tag 0xbe for one overflow	sum overflows
-payout	no reference function	each row needs try_hold on the sentinel's token 0 row; the first refusal ends the loop with Ok and the users paid so far	pay stops at the fund
-notional	not stated	the payout moves total and hold only; the sentinel row's third word stays, and neither side is valued	pay onto rows

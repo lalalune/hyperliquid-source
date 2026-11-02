@@ -5,12 +5,10 @@ import argparse, hashlib, json, re, struct, subprocess, tempfile
 from pathlib import Path
 
 IDENTITIES={
- "94":(91774280,"3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"),
  "115":(105896032,"a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301")}
 RANGES={
  "adapter115":("115",0x1686bd0,0x1686e46,0x1c7cc),
- "parent115":("115",0x167d950,0x167dad6,0x1bccc),
- "adapter94":("94",0x157d000,0x157d26e,0x19de8)}
+ "parent115":("115",0x167d950,0x167dad6,0x1bccc)}
 BRANCHES={
  0x1686c24:("jmp",0x1686c74),0x1686c6e:("jne",0x1686e35),
  0x1686c76:("jne",0x1686e31),0x1686c7f:("jae",0x1686c90),
@@ -218,7 +216,7 @@ def collect(root,objdump,readelf,llvm):
  versions={name:subprocess.check_output([tool,"--version"],text=True).splitlines()[0]
            for name,tool in(("GNU",objdump),("readelf",readelf),("LLVM",llvm))}
  need("GNU" in versions["GNU"] and"GNU" in versions["readelf"],"GNU tools required")
- for release in("115","94"):
+ for release in("115",):
   image=Image(release,(root/f"artifacts/node/{release}/hl-node").read_bytes())
   images[release]=image
   with tempfile.TemporaryDirectory(prefix="node-newline-static-")as tmp:
@@ -259,5 +257,5 @@ def main():
  need(not a.output.exists(),"output exists; preserve receipts")
  files=collect(a.root,a.objdump,a.readelf,a.llvm);a.output.mkdir(parents=True)
  for name,data in files.items():(a.output/name).write_bytes(data)
- print("Three complete FDE bodies bound; GNU/LLVM byte partitions agree; target not executed.")
+ print("Two complete #115 FDE bodies bound; GNU/LLVM byte partitions agree; target not executed.")
 if __name__=="__main__":main()

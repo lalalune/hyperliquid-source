@@ -20,7 +20,7 @@ class TargetTargetsConfigTests(unittest.TestCase):
         # the bare CONFIG['targets'] subscript with a raw KeyError.
         rea.CONFIG = {k: v for k, v in self._config.items() if k != 'targets'}
         with self.assertRaisesRegex(ValueError, 'missing targets'):
-            rea.target('94')
+            rea.target('115')
 
     def test_missing_targets_fails_closed_with_check_stubbed(self):
         # The guard must fire before the artifact check so the failure is
@@ -28,13 +28,13 @@ class TargetTargetsConfigTests(unittest.TestCase):
         rea.CONFIG = {k: v for k, v in self._config.items() if k != 'targets'}
         with patch.object(rea, 'check', lambda *args: None):
             with self.assertRaises(ValueError):
-                rea.target('94')
+                rea.target('115')
 
     def test_present_targets_still_builds_row(self):
         with patch.object(rea, 'check', lambda *args: None):
-            row = rea.target('94')
+            row = rea.target('115')
         self.assertEqual(row['provider_id'], 'ghidra')
-        self.assertEqual(row['sha256'], '3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f')
+        self.assertEqual(row['sha256'], 'a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301')
 
 
 if __name__ == '__main__':

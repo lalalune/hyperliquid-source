@@ -21,7 +21,13 @@
       "depends_on": [],
       "scope": "Time, logging, wallets, collections and shared runtime utilities",
       "first_task": "Map time/quantity conversion helpers; distinguish standard-library code from private helpers.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": [
+        "src/node115-latency-pair",
+        "src/node115-nonce-ring",
+        "src/node115-u128-binary64",
+        "src/node115-tagged-count"
+      ]
     },
     {
       "id": "serialization",
@@ -34,7 +40,8 @@
       ],
       "scope": "Private bincode wire codecs and integer encodings",
       "first_task": "Recover varint boundaries and encoding mode; compare malformed, truncated and boundary inputs.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "storage",
@@ -48,7 +55,10 @@
       ],
       "scope": "RocksDB wrappers, block readers and database lifecycle",
       "first_task": "Recover key/value schemas and snapshot versioning before replay.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": [
+        "src/node115-snapshot-selectors"
+      ]
     },
     {
       "id": "transport",
@@ -62,7 +72,8 @@
       ],
       "scope": "TCP framing, LZ4, channels, rate limits and reconnects",
       "first_task": "Map frame lengths, compression boundaries and error handling without network traffic.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "consensus",
@@ -77,7 +88,10 @@
       ],
       "scope": "Votes, rounds, quorum certificates, validator sets and timers",
       "first_task": "Map signed wire types and quorum arithmetic; validate invalid signatures and timeout transitions.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": [
+        "src/node115-weighted-fastfold"
+      ]
     },
     {
       "id": "node-runtime",
@@ -92,7 +106,8 @@
       ],
       "scope": "CLI, startup, gossip, stream services and process orchestration",
       "first_task": "Trace CLI dispatch to service entrypoints and enumerate read/write side effects.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "abci",
@@ -106,8 +121,9 @@
         "serialization"
       ],
       "scope": "Block application, state roots and checkpoint handoff",
-      "first_task": "Bind begin/action/end-block call paths and state-root inputs for #94.",
-      "artifact": "node115"
+      "first_task": "Bind begin/action/end-block call paths and state-root inputs for #115.",
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "action-wire",
@@ -122,7 +138,8 @@
       ],
       "scope": "Action envelopes, signing payloads and delayed actions",
       "first_task": "Recover tags, signing domains, replay checks and error precedence.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "action-dispatch",
@@ -136,8 +153,9 @@
         "exchange"
       ],
       "scope": "Agent-created handler splits and central dispatch",
-      "first_task": "Validate each handler seed against #94; do not infer original function boundaries from these splits.",
-      "artifact": "node115"
+      "first_task": "Validate each handler seed against #115; do not infer original function boundaries from these splits.",
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "exchange",
@@ -153,7 +171,8 @@
       ],
       "scope": "Trading orchestration, block hooks, deployment and ledger updates",
       "first_task": "Trace order placement through risk checks, matching, fees and ledger writes.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "orderbook",
@@ -170,7 +189,8 @@
       ],
       "scope": "Book storage, price/time priority and order lifecycle",
       "first_task": "Recover matching and cancel/modify transitions with exact rounding and overflow behavior.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "risk",
@@ -185,7 +205,8 @@
       ],
       "scope": "Positions, margin, oracles, liquidations and spot balances",
       "first_task": "Map margin/liquidation formulas and state mutations; prove sign and unit conventions.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "assets",
@@ -202,7 +223,10 @@
       ],
       "scope": "Price, size, notional and wei arithmetic plus asset metadata",
       "first_task": "Start with bounded arithmetic helpers: recover width, rounding, scale and overflow branches.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": [
+        "src/node115-quantity-preparation"
+      ]
     },
     {
       "id": "fees",
@@ -217,7 +241,8 @@
       ],
       "scope": "Fee tiers, volume accounting and rebates",
       "first_task": "Recover maker/taker fee formulas and time-window rollover.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "vaults",
@@ -232,7 +257,8 @@
       ],
       "scope": "Vault and subaccount accounting and permissions",
       "first_task": "Recover share accounting, transfer restrictions and liquidation interaction.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "bridge",
@@ -247,7 +273,8 @@
       ],
       "scope": "Deposit/withdrawal requests and cross-chain signing",
       "first_task": "Map message hashes, nonce lifecycle and validator signing threshold.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "evm",
@@ -261,7 +288,8 @@
       ],
       "scope": "EVM state, database adapters, transaction execution and hashing",
       "first_task": "Identify reth/revm private fork boundaries and state transition inputs.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "staking",
@@ -275,8 +303,9 @@
         "consensus"
       ],
       "scope": "Stake, validator membership and jailing",
-      "first_task": "Recover stake accounting and epoch transitions separately for #94 and #115.",
-      "artifact": "node115"
+      "first_task": "Recover stake accounting and epoch transitions separately for #115.",
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "dex-registry",
@@ -290,7 +319,8 @@
       ],
       "scope": "DEX metadata and clearinghouse registry",
       "first_task": "Recover identifiers, lookup rules and deployment ownership checks.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "l1-shared",
@@ -304,7 +334,8 @@
       ],
       "scope": "Agent, system-user, nonce, timing and other cross-cutting state",
       "first_task": "Classify each remaining path by actual call graph; avoid dropping uncategorized helpers.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "info-api",
@@ -319,7 +350,8 @@
       ],
       "scope": "Read-only info requests and position responses",
       "first_task": "Recover request variants, response layouts and snapshot consistency.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "evm-rpc",
@@ -333,7 +365,8 @@
       ],
       "scope": "JSON-RPC routing, EVM reads and transaction forwarding",
       "first_task": "Map method dispatch and wire errors against the captured release.",
-      "artifact": "node115"
+      "artifact": "node115",
+      "implementation_paths": []
     },
     {
       "id": "constants",
@@ -346,16 +379,8 @@
       ],
       "scope": "Static network/build configuration and naming",
       "first_task": "Separate constants observed in binary data from illustrative source defaults.",
-      "artifact": "node115"
-    },
-    {
-      "id": "visor",
-      "name": "Visor supervisor",
-      "patterns": [],
-      "depends_on": [],
-      "scope": "Separate captured supervisor binary: artifact retrieval, verification and child lifecycle",
-      "first_task": "Identify its own compiler stamps and unwind entries; map download/verify/spawn decisions statically.",
-      "artifact": "visor"
+      "artifact": "node115",
+      "implementation_paths": []
     }
   ]
 }

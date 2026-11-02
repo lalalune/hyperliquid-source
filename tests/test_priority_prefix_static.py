@@ -96,7 +96,7 @@ class PriorityPrefixTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory);p=root/'changed';out=root/'out'
             p.write_bytes(self.mutate(subject.OWNERS[0][0]+0x65))
-            for source in [p,subject.ROOT/'artifacts/node/94/hl-node']:
+            for source in [p,subject.ROOT/'artifacts/visor/captured/hl-visor']:
                 with self.assertRaisesRegex(ValueError,'pinned node115'):
                     subject.generate(source,out)
             p.write_bytes(self.data[:4096])

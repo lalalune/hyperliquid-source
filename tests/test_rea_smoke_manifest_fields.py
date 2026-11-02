@@ -32,7 +32,7 @@ STUB = (
 )
 
 
-def stage(entry94, entry115, artifact94=b'', artifact115=b''):
+def stage(entry, artifact=b''):
     tmp = Path(tempfile.mkdtemp(prefix='rea-smoke-fields-'))
     (tmp / 'tools').mkdir()
     for name in ('artifacts.py', 'rea_smoke.py'):
@@ -41,15 +41,13 @@ def stage(entry94, entry115, artifact94=b'', artifact115=b''):
     (tmp / 'config').mkdir()
     (tmp / 'config' / 'rea.json').write_text(json.dumps({
         'version': VERSION,
-        'targets': {'94': 'artifacts/node/94/hl-node',
-                    '115': 'artifacts/node/115/hl-node'}}), encoding='utf-8')
+        'targets': {'115': 'artifacts/node/115/hl-node'}}), encoding='utf-8')
     (tmp / 'provenance').mkdir()
     (tmp / 'provenance' / 'artifacts.json').write_text(
-        json.dumps({'files': [entry94, entry115]}), encoding='utf-8')
-    for release, artifact in (('94', artifact94), ('115', artifact115)):
-        path = tmp / f'artifacts/node/{release}/hl-node'
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(artifact)
+        json.dumps({'files': [entry]}), encoding='utf-8')
+    path = tmp / 'artifacts/node/115/hl-node'
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(artifact)
     return tmp
 
 
@@ -66,8 +64,8 @@ def complete_entry(release, artifact):
 
 
 class ReaSmokeManifestFieldsTests(unittest.TestCase):
-    def assert_fails_closed(self, entry94, entry115, message):
-        tmp = stage(entry94, entry115)
+    def assert_fails_closed(self, entry, message):
+        tmp = stage(entry)
         try:
             result = run_smoke(tmp)
         finally:
@@ -78,33 +76,29 @@ class ReaSmokeManifestFieldsTests(unittest.TestCase):
 
     def test_missing_sha256_fails_closed(self):
         self.assert_fails_closed(
-            {'path': 'artifacts/node/94/hl-node', 'size': 0},
-            complete_entry('115', b''),
-            'provenance/artifacts.json entry for artifacts/node/94/hl-node'
+            {'path': 'artifacts/node/115/hl-node', 'size': 0},
+            'provenance/artifacts.json entry for artifacts/node/115/hl-node'
             ' is missing sha256')
 
     def test_missing_size_fails_closed(self):
         self.assert_fails_closed(
-            {'path': 'artifacts/node/94/hl-node', 'sha256': 'x' * 64},
-            complete_entry('115', b''),
-            'provenance/artifacts.json entry for artifacts/node/94/hl-node'
+            {'path': 'artifacts/node/115/hl-node', 'sha256': 'x' * 64},
+            'provenance/artifacts.json entry for artifacts/node/115/hl-node'
             ' is missing size')
 
     def test_missing_both_names_both_fields(self):
         self.assert_fails_closed(
-            {'path': 'artifacts/node/94/hl-node'},
-            complete_entry('115', b''),
-            'provenance/artifacts.json entry for artifacts/node/94/hl-node'
+            {'path': 'artifacts/node/115/hl-node'},
+            'provenance/artifacts.json entry for artifacts/node/115/hl-node'
             ' is missing size, sha256')
 
-    def test_complete_entries_pass_fields_to_check(self):
-        # Both entries complete: the run must get past the fields guard
+    def test_complete_entry_passes_fields_to_check(self):
+        # The entry is complete: the run must get past the fields guard
         # and fail later, at the artifact check / REA inspection stage,
         # not at a fields KeyError. The stub rea.py answers --version
         # only, so the inspect-rust-binary call is where it stops.
-        tmp = stage(complete_entry('94', b'node94-stand-in'),
-                    complete_entry('115', b'node115-stand-in'),
-                    b'node94-stand-in', b'node115-stand-in')
+        tmp = stage(complete_entry('115', b'node115-stand-in'),
+                    b'node115-stand-in')
         try:
             result = run_smoke(tmp)
         finally:
@@ -112,6 +106,7 @@ class ReaSmokeManifestFieldsTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertNotIn("KeyError: 'size'", result.stderr)
         self.assertNotIn("KeyError: 'sha256'", result.stderr)
+        self.assertIn('stub rea.py answers --version only', result.stderr)
 
 
 if __name__ == '__main__':

@@ -97,14 +97,8 @@ def inspect(binary):
  if len(data)!=105896032 or sha(data)!=native.SHA:raise ValueError('pinned node115 identity mismatch')
  record=native.analyze(data)
  if record!=json.loads((native.PACKET/'records.json').read_text()):raise ValueError('accepted static records changed')
- try:
-  cpu.Image(data)
- except KeyError as error:
-  blocker={'existing_image_constructor':'KeyError','node94_specific_missing_slot':hex(error.args[0]),
-           'remedy':'local adapter parses only actual node115 sections/FDEs/relocations; no fake slots; all calls rejected'}
- else:
-  blocker={'existing_image_constructor':'not used: binds node94-specific diagnostic slots',
-           'remedy':'local real-map adapter only; all calls rejected'}
+ shared=cpu.Image(data)
+ blocker={'shared_image':'target-independent sections and FDEs','file_backed_sections':len(shared.sections)}
  image=Image(data)
  for owner in record['owners']:
   if image.fde_of(int(owner['start'],16))!=(int(owner['start'],16),int(owner['end'],16)):

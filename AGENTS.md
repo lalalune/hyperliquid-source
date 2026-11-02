@@ -7,7 +7,9 @@
 This is the sole node implementation and acceptance target. Do not open new
 #94-only tasks, implementations or PRs. Work on older material is justified
 only when it directly advances #115 and is validated against that target.
-The focus is exclusive; reconstruction itself remains incomplete.
+Review incoming PRs against this same target: migrate reusable code only with
+#115 validation, and close obsolete #94-only changes. A release-label edit is
+not migration evidence. The focus is exclusive; reconstruction remains incomplete.
 
 All agent work, PRs and submissions must focus on reverse engineering the node's
 code. Hillclimb completion by choosing bounded work that resolves binary-backed
@@ -39,11 +41,10 @@ to deliver #115 and retains its own artifact identity. Use
 provenance/artifacts.json for full SHA-256 values; bind every result to one.
 
 This is an independent Rust reconstruction project. No full node build or
-binary-equivalence claim exists yet. The can1357 tree is inferred, unlicensed
-reference code: validate its labels, layouts, comments and tests against binary
-evidence. Do not treat it as official source or copy it into MIT implementation.
-Do not create a fake compiling workspace, invented dependency lock or stubs
-and call that recovery. New Rust components need real, documented build scope.
+binary-equivalence claim exists yet. New implementation must be independently
+authored or reused from licensed public source. Do not copy unlicensed inferred
+code, fabricate Cargo graphs, or treat a successful local build as equivalence.
+Every active component needs a documented #115 scope and real dependencies.
 
 ## Workflow and ownership
 

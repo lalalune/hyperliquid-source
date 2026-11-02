@@ -11,7 +11,9 @@ focus, not completion: the integrated node is still being reconstructed.
 All research, implementations, tests and PRs must advance #115. New #94-only
 work is out of scope. Older code may be reused only with #115-specific evidence;
 unvalidated retired implementations belong in Git history, not a second active
-target. Supervisor work is in scope only when required to deliver #115.
+target. Reviews apply the same rule to incoming PRs: reusable code needs fresh
+#115 validation, and obsolete #94-only submissions are closed. Supervisor work
+is in scope only when required to deliver #115.
 
 ## Acceptance priority: complete the node reverse engineering
 
@@ -68,8 +70,8 @@ The [packet template](research/templates/EVIDENCE.md) specifies required fields.
 
 There is intentionally no root Cargo workspace yet. Add a real component
 manifest only when its dependencies and build behavior are established. Do not
-turn the inferred reference tree into an apparently recovered workspace using
-arbitrary dependency versions or placeholder implementations.
+invent a recovered workspace using arbitrary dependency versions or placeholder
+implementations.
 
 ## Required evidence packet
 
@@ -78,7 +80,7 @@ reference revisions; original addresses plus their coordinate system; tool
 versions and analysis options; exact commands; observations with supporting
 files; clearly separated inferences; before/after build/comparison results;
 negative controls; limitations and a next step. Cite the relevant binary bytes,
-not only the can1357 narrative. An address in its comments is an unverified seed.
+not only source comments or a prior narrative. Unverified addresses are leads.
 Never publish private keys, tokens, home-directory state or live user datasets.
 
 Rust reconstruction is required for implementation claims. Hand-patched or
@@ -136,8 +138,8 @@ correct code. Keep unmeasured whole-component denominators explicit.
 ## Licensing, execution and review
 
 New code/docs use MIT. Imported sources and binaries retain upstream rights;
-can1357's unlicensed source is a research reference, not a grant to copy code
-into the MIT implementation. Attribute evidence and preserve upstream notices.
+unlicensed inferred source grants no permission to copy code into this
+implementation. Attribute evidence and preserve upstream notices.
 
 The default workflow is static. Running captured binaries, networked services,
 chain actions or signing requires explicit authorization and an isolated

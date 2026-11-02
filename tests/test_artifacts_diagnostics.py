@@ -29,19 +29,19 @@ class ArtifactsDiagnosticsTests(unittest.TestCase):
             capture_output=True, text=True, timeout=60)
 
     def test_missing_artifact_reported_as_one_line(self):
-        self._write_manifest([{'path': 'artifacts/node/94/hl-node', 'size': 4,
+        self._write_manifest([{'path': 'artifacts/node/115/hl-node', 'size': 4,
                                'sha256': hashlib.sha256(b'good').hexdigest()}])
         result = self._run_verify()
         self.assertEqual(result.returncode, 1)
         self.assertNotIn('Traceback', result.stderr)
         self.assertEqual(result.stderr.strip().splitlines(),
-                         [f'artifacts: Missing artifact: {self.root}/artifacts/node/94/hl-node'])
+                         [f'artifacts: Missing artifact: {self.root}/artifacts/node/115/hl-node'])
 
     def test_mismatched_artifact_reported_as_one_line(self):
-        target = self.root / 'artifacts/node/94/hl-node'
+        target = self.root / 'artifacts/node/115/hl-node'
         target.parent.mkdir(parents=True)
         target.write_bytes(b'evil')
-        self._write_manifest([{'path': 'artifacts/node/94/hl-node', 'size': 4,
+        self._write_manifest([{'path': 'artifacts/node/115/hl-node', 'size': 4,
                                'sha256': hashlib.sha256(b'good').hexdigest()}])
         result = self._run_verify()
         self.assertEqual(result.returncode, 1)

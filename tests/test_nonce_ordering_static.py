@@ -95,7 +95,7 @@ class NonceOrderingTests(unittest.TestCase):
     def test_public_identity_gate_precedes_outputs(self):
         with tempfile.TemporaryDirectory() as directory:
             p=Path(directory)/'bad';out=Path(directory)/'out';p.write_bytes(self.mutate(0x2923d30))
-            for path in [p,subject.ROOT/'artifacts/node/94/hl-node']:
+            for path in [p,subject.ROOT/'artifacts/visor/captured/hl-visor']:
                 with self.assertRaisesRegex(ValueError,'pinned node115'):subject.generate(path,out)
             p.write_bytes(self.data[:4096])
             with self.assertRaisesRegex(ValueError,'pinned node115'):subject.generate(p,out)

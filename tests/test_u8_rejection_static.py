@@ -114,5 +114,5 @@ class U8RejectionTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'pinned node115'):
                 subject.generate(changed, out)
             with self.assertRaisesRegex(ValueError, 'pinned node115'):
-                subject.generate(subject.ROOT / 'artifacts/node/94/hl-node', out)
+                subject.generate(subject.ROOT / 'artifacts/visor/captured/hl-visor', out)
             self.assertFalse(out.exists())

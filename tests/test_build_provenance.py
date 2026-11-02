@@ -235,7 +235,6 @@ class CapturedTargetTests(unittest.TestCase):
     def test_node_94_and_115_toolchains_differ(self):
         def commits(release):
             return {i['value'] for i in record(release)['facts'] if i['key'] == 'rustc.commit_path'}
-        self.assertEqual(commits('94'), {'e408947bfd200af42db322daf0fadfe7e26d3bd1'})
         self.assertEqual(commits('115'), {'59807616e1fa2540724bfbac14d7976d7e4a3860'})
 
 
@@ -253,7 +252,7 @@ class CheckModeTests(unittest.TestCase):
         build_provenance.record = lambda release: {'target': 'x', 'facts': []}
         self.text = json.dumps({'target': 'x', 'facts': []},
                                indent=1, sort_keys=True) + '\n'
-        self.path = build_provenance.OUT / 'provenance-94.json'
+        self.path = build_provenance.OUT / 'provenance-115.json'
         self.path.parent.mkdir(parents=True)
 
     def tearDown(self):
@@ -266,7 +265,7 @@ class CheckModeTests(unittest.TestCase):
 
     def test_lf_record_passes_check(self):
         self.path.write_bytes(self.text.encode('utf-8'))
-        self.run_main('--check', '94')
+        self.run_main('--check', '115')
 
     def test_crlf_record_fails_check(self):
         # Exactly what a Windows text-mode rewrite leaves on disk: the same
@@ -274,10 +273,10 @@ class CheckModeTests(unittest.TestCase):
         # CRLF back to LF and certifies the drifted bytes as matching.
         self.path.write_bytes(self.text.replace('\n', '\r\n').encode('utf-8'))
         with self.assertRaises(SystemExit):
-            self.run_main('--check', '94')
+            self.run_main('--check', '115')
 
     def test_write_mode_emits_canonical_lf_bytes(self):
-        self.run_main('94')
+        self.run_main('115')
         self.assertEqual(self.path.read_bytes(), self.text.encode('utf-8'))
 
 
@@ -285,7 +284,7 @@ class RecordTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
-        art = self.root / TARGETS['94']
+        art = self.root / TARGETS['115']
         art.parent.mkdir(parents=True)
         art.write_bytes(b'fake-node-bytes')
         (self.root / 'provenance').mkdir()
@@ -301,34 +300,34 @@ class RecordTests(unittest.TestCase):
         (self.root / 'provenance/artifacts.json').write_text(text)
 
     def _valid_item(self):
-        data = (self.root / TARGETS['94']).read_bytes()
-        return {'path': TARGETS['94'], 'sha256': hashlib.sha256(data).hexdigest(), 'size': len(data)}
+        data = (self.root / TARGETS['115']).read_bytes()
+        return {'path': TARGETS['115'], 'sha256': hashlib.sha256(data).hexdigest(), 'size': len(data)}
 
     def test_missing_files_key_is_rejected(self):
         self._write_manifest('{}')
         with self.assertRaises(ValueError):
-            record('94')
+            record('115')
 
     def test_non_dict_manifest_is_rejected(self):
         self._write_manifest('[]')
         with self.assertRaises(ValueError):
-            record('94')
+            record('115')
 
     def test_missing_target_entry_is_rejected(self):
         self._write_manifest(json.dumps({'files': [{'path': 'artifacts/node/115/hl-node',
                                                     'sha256': '0' * 64, 'size': 1}]}))
         with self.assertRaises(ValueError):
-            record('94')
+            record('115')
 
     def test_non_dict_files_entry_is_rejected(self):
         self._write_manifest(json.dumps({'files': ['not-a-record']}))
         with self.assertRaises(ValueError):
-            record('94')
+            record('115')
 
     def test_valid_manifest_still_records(self):
         self._write_manifest(json.dumps({'files': [self._valid_item()]}))
-        rec = record('94')
-        self.assertEqual((rec['target'], rec['sha256'], rec['size']), (TARGETS['94'], self._valid_item()['sha256'], self._valid_item()['size']))
+        rec = record('115')
+        self.assertEqual((rec['target'], rec['sha256'], rec['size']), (TARGETS['115'], self._valid_item()['sha256'], self._valid_item()['size']))
 
 
 if __name__ == '__main__':

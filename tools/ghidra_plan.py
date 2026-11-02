@@ -34,7 +34,7 @@ def render_import_plan(ghidra, project_dir, name, binary, log, *, windows):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--release', choices=['94', '115'], required=True)
+    p.add_argument('--release', choices=['115'], required=True)
     args = p.parse_args()
     ghidra = locate_ghidra()
     if not ghidra:

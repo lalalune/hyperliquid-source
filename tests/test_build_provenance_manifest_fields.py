@@ -24,21 +24,21 @@ class ManifestFieldsTests(unittest.TestCase):
         (self.root / 'provenance/artifacts.json').write_text(json.dumps(manifest))
 
     def test_entry_missing_size_or_sha256_is_value_error(self):
-        for entry in ({'path': 'artifacts/node/94/hl-node', 'sha256': 'a'},
-                      {'path': 'artifacts/node/94/hl-node', 'size': 1}):
+        for entry in ({'path': 'artifacts/node/115/hl-node', 'sha256': 'a'},
+                      {'path': 'artifacts/node/115/hl-node', 'size': 1}):
             with self.subTest(entry=entry):
-                artifact = self.root / 'artifacts/node/94/hl-node'
+                artifact = self.root / 'artifacts/node/115/hl-node'
                 artifact.parent.mkdir(parents=True, exist_ok=True)
                 artifact.write_bytes(b'x')
                 self.write_manifest({'files': [entry]})
                 with self.assertRaisesRegex(ValueError, 'is missing'):
-                    bp.record('94')
+                    bp.record('115')
 
     def test_valid_lookup_reaches_artifact_check(self):
-        self.write_manifest({'files': [{'path': 'artifacts/node/94/hl-node',
+        self.write_manifest({'files': [{'path': 'artifacts/node/115/hl-node',
                                         'sha256': 'a', 'size': 1}]})
         with self.assertRaisesRegex(ValueError, 'Missing artifact'):
-            bp.record('94')
+            bp.record('115')
 
 
 if __name__ == '__main__':

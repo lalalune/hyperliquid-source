@@ -37,16 +37,16 @@ class ConfigDuplicateKeyTests(unittest.TestCase):
 
     def test_duplicate_default_target_rejected(self):
         with self.assertRaises(ValueError):
-            _load_text('{"default_target": "visor", "default_target": "94"}')
+            _load_text('{"default_target": "visor", "default_target": "115"}')
 
     def test_duplicate_nested_key_rejected(self):
         with self.assertRaises(ValueError):
-            _load_text('{"targets": {"94": "a", "94": "b"}}')
+            _load_text('{"targets": {"115": "a", "115": "b"}}')
 
     def test_clean_config_still_loads(self):
         doc = rea.load_config(rea.ROOT / 'config/rea.json')
         self.assertEqual(doc['version'], '6.8.0')
-        self.assertEqual(doc['default_target'], '94')
+        self.assertEqual(doc['default_target'], '115')
 
 
 if __name__ == '__main__':

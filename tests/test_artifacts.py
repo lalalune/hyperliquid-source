@@ -241,7 +241,7 @@ class ArtifactTests(unittest.TestCase):
             a.main()
 
     def _signature_root(self):
-        for rel in ['node/94/hl-node', 'node/115/hl-node', 'visor/captured/hl-visor']:
+        for rel in ['node/115/hl-node', 'node/115/hl-node', 'visor/captured/hl-visor']:
             for suffix in ('', '.asc'):
                 p = self.root / 'artifacts' / rel
                 p.parent.mkdir(parents=True, exist_ok=True)
@@ -261,7 +261,7 @@ class ArtifactTests(unittest.TestCase):
             if '--import' in command:
                 return a.subprocess.CompletedProcess(command, 0, '', '')
             stdout = f'[GNUPG:] VALIDSIG {fingerprint} 2026-01-01 1 0 4 0 1 8 00 {fingerprint}\n'
-            if extra and command[-1].endswith('node/94/hl-node'):
+            if extra and command[-1].endswith('node/115/hl-node'):
                 stdout += extra + '\n'
             return a.subprocess.CompletedProcess(command, 0, stdout, '')
         return run

@@ -8,16 +8,9 @@ the newest authenticated capture retained here. Before claiming current-network
 support, authenticate the chosen current release and validate its protocol;
 the newest retained capture is not necessarily the latest published binary.
 
-Node **#94**, SHA-256
-`3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f`,
-is retained historical evidence. The pinned can1357 reference and much existing
-research target that binary. Preserve those results, but validate every reused
-address, layout and behavior against #115. A complete #94 implementation or
-#94 whole-ELF match is no longer a delivery requirement.
-
-This removes the obligation to reproduce the old executable and promise its
-version-specific behavior. It does not discard research or automatically remove
-historical-chain replay: any replay needed by #115 remains part of #115 acceptance.
+Retired-release binaries, unvalidated implementations and dedicated tools are
+not part of the active tree. They remain in Git history. Reuse is accepted only
+through a new #115-bound record; it never transfers completion credit by name.
 
 The captured **visor**, SHA-256
 `89338207c793d80ac2fba75bb0d36c659e2cabc87a94e61a57ba532b8d212e31`,
@@ -34,7 +27,7 @@ build provenance needed to compare it with captured code and behavior. Cover
 node startup, transport/gossip, consensus, block execution, order matching,
 clearinghouses/risk, assets/quantities, fees, vaults, bridge, staking, HyperEVM,
 APIs, persistence, serialization and dependencies. A supervisor is optional;
-the captured visor retains separate research and acceptance records.
+visor analysis is permitted only when it resolves a demonstrated #115 delivery blocker.
 [The component map](COMPONENTS.md) partitions the currently visible source
 paths. It is a work allocation map; cross-component calls still need recovery.
 Its 23 node work areas are inherited planning scopes, not a validated #115
@@ -47,10 +40,6 @@ without binary byte transplantation. Exact matches in isolated functions do
 not establish whole-program equivalence or safety.
 
 ## References and supporting work
-
-The can1357 tree is inferred reference code, has no Cargo manifests and has no
-declared license. Its labels, types, tests and comments are leads to verify,
-not trusted implementation or permission to copy into MIT code.
 
 The pinned hyperliquid-dex repositories provide public interfaces, packaging,
 examples, contracts and data tools. They do not supply the private native node
@@ -79,10 +68,10 @@ binary identity until the existing whole-ELF gates are also satisfied.
 | Source and license closure | Account for every runtime component and license; no required proprietary node/visor download or copied unlicensed reference code | Open: independent fragments exist, full closure not established |
 | Integrated executable | Build the actual node with pinned manifests, lockfiles, compiler and linker; exercise startup, configuration and clean shutdown | Open: no integrated node build accepted |
 | Docker delivery | Build a pinned Linux/amd64 image from source, run the node as an unprivileged user with persistent data and health reporting | Open: `.devcontainer` supplies analysis tools only; no node runtime image accepted |
-| Network compatibility | Validate the chosen network's discovery, handshake, framing, signatures and protocol version; handle disconnect/reconnect | Open: historical #94/#115 evidence does not establish current-network compatibility |
+| Network compatibility | Validate the chosen network's discovery, handshake, framing, signatures and protocol version; handle disconnect/reconnect | Open: captured #115 evidence does not establish current-network compatibility |
 | Synchronization and validation | Bootstrap from documented genesis/checkpoint inputs; verify blocks, consensus and state roots, reject corrupt inputs, catch up and resume after restart | Open: no end-to-end node acceptance run |
 | APIs and operations | Serve the required APIs from synchronized state; verify persistence, resource limits and observable failure behavior | Open: no integrated acceptance run |
-| Supervisor delivery | Supply an open-source lifecycle/update mechanism if needed; document direct container startup when the captured visor is unnecessary | Open: visor reconstruction is tracked separately and is not inherently required to run the container |
+| Supervisor delivery | Supply an open-source lifecycle/update mechanism if needed; document direct container startup when the captured visor is unnecessary | Open: investigate visor only for a demonstrated #115 delivery blocker; direct startup may suffice |
 
 Public contracts, SDKs, block importers, historical-data tools and order-book
 consumers are supporting sources, not missing native-node implementations. Do
@@ -106,7 +95,7 @@ analysis of the selected binaries are within research scope.
 
 Do not download full chain datasets or start paid/requester-pays sync as a
 setup step. Capture a small, licensed/sanitized fixture only when a concrete
-question needs it. Do not relabel #94 evidence as validated #115 functionality.
+question needs it. Do not relabel historical evidence as validated #115 functionality.
 
 ## How completion is counted
 

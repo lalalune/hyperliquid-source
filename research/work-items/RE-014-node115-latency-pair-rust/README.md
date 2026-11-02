@@ -1,5 +1,13 @@
 # RE-014: Rust for node115 signed-pair numeric projections
 
+> Current #115 migration (2026-11-02): this implementation was rebuilt and
+> compared at opt-level 0 and 3 after retiring the older node and trimming
+> its shared tooling. `migration-validation.json` records the fresh run and
+> compiled mutation controls. Historical blocker reports below describe the
+> original environment; they do not require the retired binary. Original
+> negative results and target-bound records remain unchanged.
+
+
 Component: ABCI/node instrumentation, post-provider scalar values only.
 Target node115 SHA256a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301,
 105896032bytes. Basee5c9b6436876b2a4a39daef813171f9879317699.

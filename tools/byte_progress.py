@@ -112,8 +112,7 @@ def load_coverage(root, registry_path, components):
         require(name not in seen_ids, 'Duplicate comparison id')
         seen_ids.add(name)
         require(item['component'] in component_targets and target in images, 'Unknown byte-window owner/target')
-        require(component_targets[item['component']] == target
-                or {component_targets[item['component']], target} <= {'node94', 'node115'},
+        require(component_targets[item['component']] == target,
                 'Byte-window component belongs to another target')
         start, end = item['start'], item['end']
         require(type(start) is int and type(end) is int and 0 <= start < end, 'Invalid window bounds')

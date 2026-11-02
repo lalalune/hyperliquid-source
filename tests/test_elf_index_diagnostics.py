@@ -19,7 +19,7 @@ class MissingArtifactDiagnostics(unittest.TestCase):
         # Other discovered tests may load a fresh artifacts module. Patch the
         # exact object imported by the CLI at invocation, not an earlier alias.
         with mock.patch.object(sys.modules['artifacts'], 'check', side_effect=ValueError('Missing artifact: x')), \
-                mock.patch.object(sys, 'argv', ['elf_index.py', '--release', '94']), \
+                mock.patch.object(sys, 'argv', ['elf_index.py', '--release', '115']), \
                 contextlib.redirect_stderr(stderr):
             with self.assertRaises(SystemExit) as caught:
                 runpy.run_path(str(ROOT / "tools/elf_index.py"), run_name="__main__")

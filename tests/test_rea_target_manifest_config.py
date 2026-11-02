@@ -28,9 +28,9 @@ class TargetManifestConfigTests(unittest.TestCase):
 
     def test_present_manifest_entry_still_resolves(self):
         with patch.object(rea, 'check'):
-            row = rea.target('94')
-        self.assertEqual(row['path'], str(rea.ROOT / 'artifacts/node/94/hl-node'))
-        self.assertEqual(row['sha256'], '3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f')
+            row = rea.target('115')
+        self.assertEqual(row['path'], str(rea.ROOT / 'artifacts/node/115/hl-node'))
+        self.assertEqual(row['sha256'], 'a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301')
         self.assertEqual(row['provider_id'], 'ghidra')
 
 

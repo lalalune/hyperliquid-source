@@ -1,6 +1,0 @@
-subject	reference lead	bytes	case
-0x139	STATUS_ASSET_NOT_DELISTED, `only delisted assets are eligible`	tag text is `Asset not strict isolated`; the same perp byte +0x28 == 2 also gives tag 0x4e `Cannot remove isolated margin for this asset`, so the byte means strict isolated, not delisted, for this path	top cross asset kind
-required equity	`abs(notional) as f64 / target_leverage`	rows compute `abs as f64 * (1.0 / level)`, reciprocal first; the outcome differs from the divide for real inputs	top reciprocal then product is not a divide
-post settlement refusal	returns the post status over the apply status	wrapper drops any refusal of the post step and of the pre step and always returns the move status	update a class 2 post refusal dropped
-mode test	`(margin_mode as u8) != 0`	top up tests bit 0 of the word, the move tests word == 1, so word 2 is ok in the top up and word 3 is refused by the move but counted by the top up	top mode 3 row counts as isolated
-order of the level gate	same as the bytes	the level compare runs before the dex and kind reads: `level check beats the kind`	top level check beats the kind

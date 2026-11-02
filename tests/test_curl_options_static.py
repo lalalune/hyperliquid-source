@@ -91,7 +91,7 @@ class CurlOptionsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             p=Path(directory)/'bad';out=Path(directory)/'out'
             p.write_bytes(self.mutate(subject.BUILDERS[0]+0x50))
-            for path in [p,subject.ROOT/'artifacts/node/94/hl-node']:
+            for path in [p,subject.ROOT/'artifacts/visor/captured/hl-visor']:
                 with self.assertRaisesRegex(ValueError,'pinned node115'):
                     subject.generate(path,out)
             p.write_bytes(self.data[:4096])

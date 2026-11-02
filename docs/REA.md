@@ -11,7 +11,7 @@ authoritative in provenance/artifacts.json.
 nvm install                      # .nvmrc selects Node 24.22.1
 make rea-install                 # npm ci; package lifecycle scripts disabled
 make rea-doctor                  # local provider/target checks; no target execution
-make rea-smoke                   # pinned CLI + both node identities; no Ghidra needed
+make rea-smoke                   # pinned CLI + sole #115 node identity; no Ghidra needed
 make rea-mcp-check               # owned stdio handshake and Ghidra availability check
 make rea-native-smoke            # native visor entrypoint, explicitly reduced analysis
 python3 tools/rea.py --version
@@ -88,7 +88,7 @@ reverse-engineer-anything skill for permission and recovery boundaries.
 
 With the connected REA tools, use `open_binary` with an absolute path and
 `provider_id: "ghidra"`; obtain the path and verify its hash with
-`python3 tools/rea.py target 115`. Keep #94, #115 and visor sessions separate.
+`python3 tools/rea.py target 115`. Keep the node #115 and optional visor sessions separate.
 
 1. Start with a focused question and an artifact identity check.
 2. Inspect a bounded function, instructions or xrefs. The first native query
@@ -107,18 +107,18 @@ python3 tools/rea.py inspect-rust-binary artifacts/node/115/hl-node --format jso
 ```
 
 The native setup smoke check uses the captured visor's entrypoint through a source-file-offset
-selector and Ghidra's decompiler. It does not execute the visor or node. Evidence belongs
-under research/rea/; reusable work packets belong under research/work-items/.
+selector and Ghidra's decompiler. It does not execute the visor or node. Transient output belongs under ignored work/; reusable #115 evidence packets
+belong under research/work-items/.
 No reconstruction completion credit is awarded for tool configuration.
 
-The [integration verification packet](../research/rea/setup-20261028/README.md)
-contains the successful native result, handshake and preserved failures.
+Historical provider-setup records remain in Git history; they are not active
+#115 reconstruction evidence.
 
 ## Large-binary analysis profiles
 
-The default Ghidra analysis attempt on the captured visor exceeded the default
-330-second startup budget. The original error bundle is retained under
-research/rea/setup-20261028/. This is not a successful full-binary analysis.
+A historical full Ghidra analysis attempt on the captured visor exceeded the
+330-second startup budget. Its original error bundle remains in Git history.
+That result did not establish successful full-binary analysis.
 
 The explicit `native-smoke` profile disables `Decompiler Switch Analysis` and
 `Decompiler Parameter ID`, as supported by REA's timeout remediation. It is

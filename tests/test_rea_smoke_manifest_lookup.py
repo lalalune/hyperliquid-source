@@ -24,8 +24,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 TOOLS = REPO / 'tools'
 CONFIG = {'version': '6.8.0',
-          'targets': {'94': 'artifacts/node/94/hl-node',
-                      '115': 'artifacts/node/115/hl-node'}}
+          'targets': {'115': 'artifacts/node/115/hl-node'}}
 
 
 def stage(manifest):
@@ -60,9 +59,9 @@ class ReaSmokeManifestLookupTests(unittest.TestCase):
 
     def test_missing_entry_fails_closed(self):
         self.assert_fails_closed(
-            {'files': [{'path': 'artifacts/node/115/hl-node',
+            {'files': [{'path': 'artifacts/node/other/hl-node',
                         'size': 1, 'sha256': 'x'}]},
-            'No provenance/artifacts.json entry for artifacts/node/94/hl-node')
+            'No provenance/artifacts.json entry for artifacts/node/115/hl-node')
 
     def test_manifest_without_files_list_fails_closed(self):
         self.assert_fails_closed(
@@ -71,7 +70,7 @@ class ReaSmokeManifestLookupTests(unittest.TestCase):
 
     def test_non_object_manifest_fails_closed(self):
         self.assert_fails_closed(
-            [{'path': 'artifacts/node/94/hl-node', 'size': 1, 'sha256': 'x'}],
+            [{'path': 'artifacts/node/115/hl-node', 'size': 1, 'sha256': 'x'}],
             'Invalid artifact manifest')
 
     def test_entry_without_path_fails_closed(self):
@@ -81,9 +80,7 @@ class ReaSmokeManifestLookupTests(unittest.TestCase):
 
     def test_present_entry_passes_lookup_to_artifact_check(self):
         result = run_smoke(stage(
-            {'files': [{'path': 'artifacts/node/94/hl-node',
-                        'size': 1, 'sha256': 'x'},
-                       {'path': 'artifacts/node/115/hl-node',
+            {'files': [{'path': 'artifacts/node/115/hl-node',
                         'size': 1, 'sha256': 'x'}]}))
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('Missing artifact', result.stderr)

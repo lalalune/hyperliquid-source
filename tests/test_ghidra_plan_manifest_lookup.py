@@ -39,7 +39,7 @@ def stage(manifest):
 def run_plan(tmp, ghidra):
     env = dict(os.environ, GHIDRA_HOME=str(ghidra))
     return subprocess.run(
-        [sys.executable, str(tmp / 'tools/ghidra_plan.py'), '--release', '94'],
+        [sys.executable, str(tmp / 'tools/ghidra_plan.py'), '--release', '115'],
         capture_output=True, text=True, env=env)
 
 
@@ -53,9 +53,9 @@ class GhidraPlanManifestLookupTests(unittest.TestCase):
 
     def test_missing_entry_fails_closed(self):
         self.assert_fails_closed(
-            {'files': [{'path': 'artifacts/node/115/hl-node',
+            {'files': [{'path': 'artifacts/node/other/hl-node',
                         'size': 1, 'sha256': 'x'}]},
-            'No provenance/artifacts.json entry for artifacts/node/94/hl-node')
+            'No provenance/artifacts.json entry for artifacts/node/115/hl-node')
 
     def test_manifest_without_files_list_fails_closed(self):
         self.assert_fails_closed(
@@ -64,7 +64,7 @@ class GhidraPlanManifestLookupTests(unittest.TestCase):
 
     def test_non_object_manifest_fails_closed(self):
         self.assert_fails_closed(
-            [{'path': 'artifacts/node/94/hl-node', 'size': 1, 'sha256': 'x'}],
+            [{'path': 'artifacts/node/115/hl-node', 'size': 1, 'sha256': 'x'}],
             'Invalid artifact manifest')
 
     def test_entry_without_path_fails_closed(self):
@@ -74,7 +74,7 @@ class GhidraPlanManifestLookupTests(unittest.TestCase):
 
     def test_present_entry_passes_lookup_to_artifact_check(self):
         tmp, ghidra = stage(
-            {'files': [{'path': 'artifacts/node/94/hl-node',
+            {'files': [{'path': 'artifacts/node/115/hl-node',
                         'size': 1, 'sha256': 'x'}]})
         result = run_plan(tmp, ghidra)
         self.assertNotEqual(result.returncode, 0)

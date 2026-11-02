@@ -8,7 +8,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 import fde_extents as fe
 
-REL = 'artifacts/node/94/hl-node'
+REL = 'artifacts/node/115/hl-node'
 
 
 class ManifestLookupTests(unittest.TestCase):
@@ -18,7 +18,7 @@ class ManifestLookupTests(unittest.TestCase):
         root = Path(tmp.name)
         (root / 'provenance').mkdir()
         (root / 'provenance/artifacts.json').write_text(json.dumps(manifest))
-        with patch.object(fe, 'ROOT', root), patch.object(sys, 'argv', ['fde_extents.py', '--release', '94']):
+        with patch.object(fe, 'ROOT', root), patch.object(sys, 'argv', ['fde_extents.py', '--release', '115']):
             fe.main()
 
     def test_manifest_without_files_fails_closed(self):
@@ -31,7 +31,7 @@ class ManifestLookupTests(unittest.TestCase):
 
     def test_missing_release_entry_fails_closed(self):
         with self.assertRaisesRegex(ValueError, 'No provenance/artifacts.json entry'):
-            self.run_main({'files': [{'path': 'artifacts/node/115/hl-node', 'size': 1, 'sha256': 'x'}]})
+            self.run_main({'files': [{'path': 'artifacts/node/other/hl-node', 'size': 1, 'sha256': 'x'}]})
 
     def test_valid_entry_reaches_artifact_check(self):
         # The lookup itself succeeds; the artifact is absent in the tmp root,

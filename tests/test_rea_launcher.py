@@ -25,7 +25,6 @@ class TargetSelectionTests(unittest.TestCase):
         manifest = json.loads((rea.ROOT / 'provenance/artifacts.json').read_text())
         for args, relative in [
             ((), 'artifacts/node/115/hl-node'),
-            (('94',), 'artifacts/node/94/hl-node'),
             (('115',), 'artifacts/node/115/hl-node'),
             (('visor',), 'artifacts/visor/captured/hl-visor'),
         ]:
@@ -44,7 +43,7 @@ class TargetSelectionTests(unittest.TestCase):
         for args in [
             ('115', '--format', 'json'),
             ('visor', 'extra'),
-            ('94', '115'),
+            ('115', '115'),
             ('unknown', 'extra'),
             ('--format', 'json'),
         ]:
@@ -52,7 +51,7 @@ class TargetSelectionTests(unittest.TestCase):
                 result = self.run_target(*args)
                 self.assertEqual(result.returncode, 1, result.stdout)
                 self.assertEqual(result.stdout, '')
-                self.assertIn('Usage: rea.py target [94|115|visor]', result.stderr)
+                self.assertIn('Usage: rea.py target [115|visor]', result.stderr)
                 self.assertNotIn('Traceback', result.stderr)
 
 
@@ -128,8 +127,8 @@ class RuntimeSelectionTests(unittest.TestCase):
             self.assertEqual(env['PATH'].split(os.pathsep)[0], str(Path('/chosen/node/bin')))
 
     def test_target_bound_to_artifact_manifest(self):
-        row = rea.target('94')
-        self.assertEqual(row['sha256'], '3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f')
+        row = rea.target('115')
+        self.assertEqual(row['sha256'], 'a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301')
         self.assertEqual(row['provider_id'], 'ghidra')
 
     def test_project_dependency_and_runtime_pins_agree(self):

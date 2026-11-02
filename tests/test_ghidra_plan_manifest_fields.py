@@ -23,7 +23,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RELATIVE = 'artifacts/node/94/hl-node'
+RELATIVE = 'artifacts/node/115/hl-node'
 
 
 def stage(entry, artifact=b''):
@@ -46,7 +46,7 @@ def stage(entry, artifact=b''):
 def run_plan(tmp, ghidra):
     env = dict(os.environ, GHIDRA_HOME=str(ghidra))
     return subprocess.run(
-        [sys.executable, str(tmp / 'tools/ghidra_plan.py'), '--release', '94'],
+        [sys.executable, str(tmp / 'tools/ghidra_plan.py'), '--release', '115'],
         capture_output=True, text=True, env=env)
 
 
@@ -80,7 +80,7 @@ class GhidraPlanManifestFieldsTests(unittest.TestCase):
             f'provenance/artifacts.json entry for {RELATIVE} is missing size, sha256')
 
     def test_complete_entry_still_plans(self):
-        artifact = b'node94-stand-in'
+        artifact = b'node115-stand-in'
         entry = {'path': RELATIVE, 'size': len(artifact),
                  'sha256': hashlib.sha256(artifact).hexdigest()}
         tmp, ghidra = stage(entry, artifact)

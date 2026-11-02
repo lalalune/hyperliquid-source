@@ -309,7 +309,7 @@ def load_inventory(path):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--release', choices=['94', '115'], required=True)
+    p.add_argument('--release', choices=['115'], required=True)
     p.add_argument('--output-dir', type=Path, default=ROOT / 'work/index')
     args = p.parse_args()
     from artifacts import check, manifest_item

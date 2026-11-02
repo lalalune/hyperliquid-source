@@ -1,5 +1,13 @@
 # RE-004: reconstruct the node #115 scalar quantity preparation cut
 
+> Current #115 migration (2026-11-02): this implementation was rebuilt and
+> compared at opt-level 0 and 3 after retiring the older node and trimming
+> its shared tooling. `migration-validation.json` records the fresh run and
+> compiled mutation controls. Historical blocker reports below describe the
+> original environment; they do not require the retired binary. Original
+> negative results and target-bound records remain unchanged.
+
+
 - Component: assets/foundation; established scalar preparation before formatting.
 - Target: release #115, 105,896,032 bytes, full SHA-256
   `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.

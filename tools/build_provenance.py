@@ -19,7 +19,7 @@ from elf_index import sections
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'research/work-items/RE-002-build-provenance'
-TARGETS = {'94': 'artifacts/node/94/hl-node', '115': 'artifacts/node/115/hl-node',
+TARGETS = {'115': 'artifacts/node/115/hl-node',
            'visor': 'artifacts/visor/captured/hl-visor'}
 VERSION = rb'(\d+\.\d+\.\d+(?:-[A-Za-z0-9.]+)?(?:\+[A-Za-z0-9.]+)?)'
 CRATE = rb'([A-Za-z0-9_][A-Za-z0-9_.-]*?)'

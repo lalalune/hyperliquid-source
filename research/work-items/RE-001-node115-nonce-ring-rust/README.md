@@ -1,5 +1,13 @@
 # RE-001: recover the node115 conditional nonce-ring invariant in Rust
 
+> Current #115 migration (2026-11-02): this implementation was rebuilt and
+> compared at opt-level 0 and 3 after retiring the older node and trimming
+> its shared tooling. `migration-validation.json` records the fresh run and
+> compiled mutation controls. Historical blocker reports below describe the
+> original environment; they do not require the retired binary. Original
+> negative results and target-bound records remain unchanged.
+
+
 Component: l1 nonce-container foundation. This adds a genuine dependency-free
 Rust component for the conditional adjacent-u64 ordering invariant. The earlier
 [native five-body packet](../RE-001-node115-nonce-ordering/README.md) explicitly

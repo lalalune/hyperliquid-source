@@ -1,59 +1,14 @@
-# Imported research status — 2026-10-28
+# Node #115 research status
 
-The supplied investigation identifies the can1357 reconstruction target as
-node #94 (SHA-256 3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f).
-The project verifies the reference's binary and detached signature against the
-stored #94 evidence. Captured executables are not run.
+Only node #115 is an active implementation target. Current scope, component
+gates and compared bytes are generated in [PROGRESS](../docs/PROGRESS.md).
+Retired-release artifacts, unsupported implementations and their dedicated
+research tooling have been removed from the active tree and remain in Git.
 
-## Saved classification versus supplied narrative
+The migration retains five existing #115 Rust components and adds validated
+unsigned128-to-binary64 and tagged-count migrations. Shared analysis helpers remain only because
+the #115 validators depend on them. Their old target-specific entry points have
+been removed. [Migration provenance](migration.json) records the source hashes.
 
-| Class | Saved aggregate fields | Saved items / written summary |
-| --- | ---: | ---: |
-| Grounded in #94 and #115 | 822 | 822 |
-| Drift: #94 only | 60 | 60 |
-| Agent notes | 80 | 116 |
-| Partial + case / near-miss | 57 (46 + 11) | 67 |
-| Unanchored / no trace | 432 | 386 |
-| #115 only | 1 | 1 |
-| Total | 1452 | 1452 |
-
-The saved JSON's aggregate `counts` and `per_crate` fields are stale: they
-represent the initial automated pass. Its **individual item classifications**
-match the supplied written summary exactly: 116 notes, 386 unanchored, and
-67 near-misses (56 partial + 11 case). The verbatim #94 total is 882/1452
-(60.7%) throughout.
-
-The 46 imported item refinements are now explicit in
-`provenance/literal-overrides.json`: 36 unanchored items become notes and 10
-become partial matches. `make reproduce` checks the raw pass against the stale
-aggregate counts, applies those imported refinements with preconditions,
-recomputes aggregate/per-crate fields, and checks every final item against the
-saved evidence. The refinements retain their imported provenance; the script
-does not independently establish their interpretation.
-
-The script deduplicates by (crate, literal), not globally by literal.
-
-The supplied narrative also reports 173 embedded first-party paths in #94,
-170 present in the reconstruction, 62 extra split files, and a #94-to-#115 path
-difference of 35 added / 28 absent. Treat those as imported claims until a
-path-comparison report reproduces them; missing embedded paths need not mean
-files were removed. String overlap and unwind counts are proxies, not logic
-correctness or function-identity evidence.
-
-## Consolidation
-
-- Captured #94/#115 node binaries, visor, public key and signatures are preserved.
-- Original scripts, inventory JSON, classification JSON, vendor listing,
-  visor strings/disassembly and collected upstream documentation are preserved.
-- The local can1357 source snapshot was byte-compared to pinned upstream
-  commit 999556f6e0a474b8312db96ec3149e1c44e97c23. Its only materialization
-  difference was the local LFS pointer versus the downloaded #94 binary.
-- Temporary GPG state, OS metadata and incidental command-output files were not
-  imported. No private signing keys or node credentials are needed.
-- Official companion repositories are pinned in submodules, not treated as
-  the unavailable original private node source.
-
-Remaining work: recover and validate logic, establish manifests/dependency
-versions/private forks and exact Linux toolchains, and develop a component-wise
-verification harness. This initialization does not establish buildability,
-runtime compatibility, security, or full binary equivalence.
+No full node build, current-network compatibility, whole-ELF equivalence or
+complete component gate is claimed.

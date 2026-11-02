@@ -1,9 +1,0 @@
-subject	reference lead	bytes	case
-credit of available	credit_saturating raises total and available	credit raises total only; the second word is the order hold, and only try_hold raises it	credit t 5000 a 7000 n 777 p 123456
-notional on debit	u128 notional*new/old, floor, min u64::MAX; integer path	f64: trunc(f64(n)*(f64(new)/f64(old))); n at or above 0x28f5c28f5c28f5c stays unchanged	debit t 1000 a 999 n 12345678901 p 777777 h 0
-zero notional on debit	stays 0	the remaining balance is valued with the call's price and stored	debit t 1000 a 1 n 0 p 777777 h 0
-notional on credit	credit leaves notional alone	adds the value of the amount, or of the whole new balance when notional was 0; an overflowing add is dropped	credit t 5000 a 7000 n 0 p 123456
-gate	update_notional bool and token != USDC	a price word; price 0 or token 0 skips the notional step, the price is not a bool	debit t 1000 a 999 n 1000 p 0 h 0
-user index	user_token_index updated for every entry_mut	only a credit or a hold release indexes the token; a debit or try_hold on a fresh row does not	absent row debit zero
-sweep	row.total = 0, credit the sentinel	the row is deleted from the user tree, so hold and notional go with it; the index row stays	sweep t 500 h 3 n 11 p 8
-sweep of an empty set	not stated	the sentinel still gets a credit of 0, which creates its row and index entry	sweep no users

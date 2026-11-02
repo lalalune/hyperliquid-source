@@ -36,9 +36,9 @@ class Node115SelectorRustTests(unittest.TestCase):
 
     def test_local_adapter_has_only_actual_node115_slots_and_forbids_calls(self):
         data,image,_,blocker=subject.inspect(subject.TARGET)
-        self.assertEqual(blocker['node94_specific_missing_slot'],'0x576f488')
+        self.assertEqual(blocker['shared_image'],'target-independent sections and FDEs')
         self.assertEqual(image.slots,subject.cpu.Image._slots(image))
-        self.assertNotIn(subject.cpu.SLOT_NOTE,image.slots)
+        self.assertIsNone(subject.cpu.Image(data).note_target)
         m=subject.Machine(image)
         with self.assertRaisesRegex(ValueError,'call outside'):
             m.call(0,0)

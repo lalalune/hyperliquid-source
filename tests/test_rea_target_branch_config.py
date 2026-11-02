@@ -17,7 +17,7 @@ class TargetBranchConfigTests(unittest.TestCase):
     def test_missing_targets_fails_closed(self):
         rea.CONFIG = {k: v for k, v in self._config.items() if k != 'targets'}
         with self.assertRaisesRegex(ValueError, 'missing targets'):
-            rea.main(['target', '94'])
+            rea.main(['target', '115'])
 
     def test_unknown_target_still_fails_closed(self):
         with self.assertRaisesRegex(ValueError, 'Unknown target'):

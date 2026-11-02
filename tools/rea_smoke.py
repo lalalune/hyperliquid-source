@@ -17,7 +17,7 @@ except ValueError as error:
     raise SystemExit(str(error)) from error
 out = ROOT / 'work/rea-smoke'
 out.mkdir(parents=True, exist_ok=True)
-for release in ['94', '115']:
+for release in ['115']:
     relative = config['targets'][release]
     expected = next((i for i in manifest['files'] if i['path'] == relative), None)
     if expected is None:

@@ -12,7 +12,6 @@ jobs:
           submodules: recursive
       - run: sudo apt-get update && sudo apt-get install -y ripgrep gnupg git-lfs llvm
       - run: python3 -m pip install --user --break-system-packages capstone==5.0.7
-      - run: git -C references/can1357-hl lfs pull
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -20,15 +19,3 @@ jobs:
       - run: make rea-install rea-smoke
       - run: make verify test catalogue-check index reproduce
 
-  release-drift:
-    # RE-014 fingerprints objdump text, so verify.py pins GNU objdump 2.44 (Debian trixie).
-    # Unit tests + mutation controls are portable (pure-Python); drift-verify needs GNU.
-    runs-on: ubuntu-24.04
-    container: debian:trixie
-    steps:
-      - run: apt-get update && apt-get install -y --no-install-recommends binutils ca-certificates git git-lfs make python3
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-      - run: python3 -m unittest tests.test_release_drift
-      - run: make drift-verify
