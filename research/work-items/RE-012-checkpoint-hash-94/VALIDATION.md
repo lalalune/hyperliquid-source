@@ -18,10 +18,11 @@
 - Offline dependency metadata for Linux/amd64 succeeds. Unfiltered metadata
   requires an uncached `addr2line 0.27.1`; this is not an all-platform closure
   claim and does not invalidate the completed scoped builds.
-- The full 978-file repository sweep is running against source commit
-  `a332eefc719978b387ca00e5b3dc09bc525e3b25`. A first partial attempt failed
-  because `readelf` was not on PATH; its logs remain preserved. The corrected
-  attempt uses an explicit GNU/LLVM path. No full-suite pass is claimed yet.
+- The full 978-file repository sweep passed against source commit
+  `a332eefc719978b387ca00e5b3dc09bc525e3b25`: 15,510 reported tests, including
+  67 skips, with zero failed files. See `full-suite.json`. The first partial
+  attempt failed because `readelf` was not on PATH; `prior-attempt.json` keeps
+  that negative result. The successful second attempt uses an explicit GNU/LLVM path.
 - Integration onto main preserves all six implementation/test source hashes.
   The nine native-evidence tests, five focused Rust tests, 12 strict-manifest
   tests, verification, catalogue consistency and reproduction pass. Historical
