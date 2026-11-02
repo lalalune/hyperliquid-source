@@ -73,7 +73,7 @@ def find_java_home(java):
         try:
             result = subprocess.run(['/usr/libexec/java_home'], capture_output=True,
                                     text=True, timeout=5, encoding='utf-8')
-        except (OSError, subprocess.TimeoutExpired):
+        except (OSError, subprocess.TimeoutExpired, UnicodeDecodeError):
             return None
         if result.returncode or not result.stdout.strip():
             return None
