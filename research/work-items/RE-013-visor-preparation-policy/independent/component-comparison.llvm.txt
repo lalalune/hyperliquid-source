@@ -1,0 +1,69 @@
+
+visor.elf:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+00000000002bd180 <.text>:
+  68fd90: 55                           	push	rbp
+  68fd91: 48 89 e5                     	mov	rbp, rsp
+  68fd94: 41 56                        	push	r14
+  68fd96: 53                           	push	rbx
+  68fd97: 0f b6 0f                     	movzx	ecx, byte ptr [rdi]
+  68fd9a: 4c 8d 41 fb                  	lea	r8, [rcx - 0x5]
+  68fd9e: 31 c0                        	xor	eax, eax
+  68fda0: 48 83 f9 06                  	cmp	rcx, 0x6
+  68fda4: 4c 0f 42 c0                  	cmovb	r8, rax
+  68fda8: 0f b6 16                     	movzx	edx, byte ptr [rsi]
+  68fdab: 4c 8d 4a fb                  	lea	r9, [rdx - 0x5]
+  68fdaf: 48 83 fa 06                  	cmp	rdx, 0x6
+  68fdb3: 4c 0f 42 c8                  	cmovb	r9, rax
+  68fdb7: 4d 39 c8                     	cmp	r8, r9
+  68fdba: 75 77                        	jne	0x68fe33 <.text+0x3d2cb3>
+  68fdbc: 41 83 f8 04                  	cmp	r8d, 0x4
+  68fdc0: 74 53                        	je	0x68fe15 <.text+0x3d2c95>
+  68fdc2: b0 01                        	mov	al, 0x1
+  68fdc4: 4d 85 c0                     	test	r8, r8
+  68fdc7: 75 6a                        	jne	0x68fe33 <.text+0x3d2cb3>
+  68fdc9: 38 d1                        	cmp	cl, dl
+  68fdcb: 75 64                        	jne	0x68fe31 <.text+0x3d2cb1>
+  68fdcd: 89 c8                        	mov	eax, ecx
+  68fdcf: 48 8d 0d 1e de a2 ff         	lea	rcx, [rip - 0x5d21e2]   # 0xbdbf4
+  68fdd6: 48 63 04 81                  	movsxd	rax, dword ptr [rcx + 4*rax]
+  68fdda: 48 01 c8                     	add	rax, rcx
+  68fddd: ff e0                        	jmp	rax
+  68fddf: 48 8b 57 10                  	mov	rdx, qword ptr [rdi + 0x10]
+  68fde3: 48 3b 56 10                  	cmp	rdx, qword ptr [rsi + 0x10]
+  68fde7: 75 48                        	jne	0x68fe31 <.text+0x3d2cb1>
+  68fde9: 48 89 f3                     	mov	rbx, rsi
+  68fdec: 48 8b 76 08                  	mov	rsi, qword ptr [rsi + 0x8]
+  68fdf0: 49 89 fe                     	mov	r14, rdi
+  68fdf3: 48 8b 7f 08                  	mov	rdi, qword ptr [rdi + 0x8]
+  68fdf7: ff 15 7b 4e 15 00            	call	qword ptr [rip + 0x154e7b] # 0x7e4c78
+  68fdfd: 85 c0                        	test	eax, eax
+  68fdff: 75 30                        	jne	0x68fe31 <.text+0x3d2cb1>
+  68fe01: 49 8b 56 20                  	mov	rdx, qword ptr [r14 + 0x20]
+  68fe05: 48 3b 53 20                  	cmp	rdx, qword ptr [rbx + 0x20]
+  68fe09: 75 26                        	jne	0x68fe31 <.text+0x3d2cb1>
+  68fe0b: 48 8b 73 18                  	mov	rsi, qword ptr [rbx + 0x18]
+  68fe0f: 49 8b 7e 18                  	mov	rdi, qword ptr [r14 + 0x18]
+  68fe13: eb 12                        	jmp	0x68fe27 <.text+0x3d2ca7>
+  68fe15: 48 8b 57 10                  	mov	rdx, qword ptr [rdi + 0x10]
+  68fe19: 48 3b 56 10                  	cmp	rdx, qword ptr [rsi + 0x10]
+  68fe1d: 75 12                        	jne	0x68fe31 <.text+0x3d2cb1>
+  68fe1f: 48 8b 76 08                  	mov	rsi, qword ptr [rsi + 0x8]
+  68fe23: 48 8b 7f 08                  	mov	rdi, qword ptr [rdi + 0x8]
+  68fe27: ff 15 4b 4e 15 00            	call	qword ptr [rip + 0x154e4b] # 0x7e4c78
+  68fe2d: 85 c0                        	test	eax, eax
+  68fe2f: eb 0e                        	jmp	0x68fe3f <.text+0x3d2cbf>
+  68fe31: 31 c0                        	xor	eax, eax
+  68fe33: 5b                           	pop	rbx
+  68fe34: 41 5e                        	pop	r14
+  68fe36: 5d                           	pop	rbp
+  68fe37: c3                           	ret
+  68fe38: 0f b6 47 01                  	movzx	eax, byte ptr [rdi + 0x1]
+  68fe3c: 3a 46 01                     	cmp	al, byte ptr [rsi + 0x1]
+  68fe3f: 0f 94 c0                     	sete	al
+  68fe42: 5b                           	pop	rbx
+  68fe43: 41 5e                        	pop	r14
+  68fe45: 5d                           	pop	rbp
+  68fe46: c3                           	ret
