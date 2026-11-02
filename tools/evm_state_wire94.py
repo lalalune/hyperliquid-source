@@ -160,7 +160,11 @@ def analyze(data):
     checked_digest(data)
     secs, index = unwind_index(data)
     _, fdes = eh_frame_records(data, secs)
-    fby = {f['start']: f for f in fdes}
+    fby = {}
+    for f in fdes:
+        if f['start'] in fby:
+            raise ValueError('duplicate FDE start')
+        fby[f['start']] = f
     indexed = {(e['start'], e['fde']) for e in index}
     functions = []
     for start, end, expected in FUNCTIONS:
