@@ -1,0 +1,283 @@
+{
+  "key_cases": [
+    {
+      "modeled_key_hex": "42060000000000000000",
+      "number": 0,
+      "prefix_hex": "4206"
+    },
+    {
+      "modeled_key_hex": "42060000000000000001",
+      "number": 1,
+      "prefix_hex": "4206"
+    },
+    {
+      "modeled_key_hex": "420600000000000000ff",
+      "number": 255,
+      "prefix_hex": "4206"
+    },
+    {
+      "modeled_key_hex": "42060000000000000100",
+      "number": 256,
+      "prefix_hex": "4206"
+    },
+    {
+      "modeled_key_hex": "4206ffffffffffffffff",
+      "number": 18446744073709551615,
+      "prefix_hex": "4206"
+    }
+  ],
+  "note": "Models of selected instruction paths, not target execution.",
+  "percentile_cases": [
+    {
+      "array_length": null,
+      "case": "no_option",
+      "count": 1,
+      "modeled_local_outcome": "continue",
+      "values": null
+    },
+    {
+      "array_length": 0,
+      "case": "empty",
+      "count": 1,
+      "modeled_local_outcome": "continue",
+      "values": []
+    },
+    {
+      "array_length": 1,
+      "case": "one_above_upper",
+      "count": 1,
+      "modeled_local_outcome": "continue",
+      "values": [
+        101.0
+      ]
+    },
+    {
+      "array_length": 2,
+      "case": "last_above_upper",
+      "count": 1,
+      "modeled_local_outcome": "continue",
+      "values": [
+        100.0,
+        101.0
+      ]
+    },
+    {
+      "array_length": 2,
+      "case": "previous_above_upper",
+      "count": 1,
+      "modeled_local_outcome": "invalid",
+      "values": [
+        101.0,
+        101.0
+      ]
+    },
+    {
+      "array_length": 2,
+      "case": "descending",
+      "count": 1,
+      "modeled_local_outcome": "invalid",
+      "values": [
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "array_length": 2,
+      "case": "negative_increasing",
+      "count": 1,
+      "modeled_local_outcome": "continue",
+      "values": [
+        -1.0,
+        0.0
+      ]
+    },
+    {
+      "array_length": 2,
+      "case": "unordered_first",
+      "count": 1,
+      "modeled_local_outcome": "continue",
+      "values": [
+        "nan",
+        0.0
+      ]
+    },
+    {
+      "array_length": 2,
+      "case": "unordered_last",
+      "count": 1,
+      "modeled_local_outcome": "continue",
+      "values": [
+        0.0,
+        "nan"
+      ]
+    },
+    {
+      "array_length": 100,
+      "case": "length_at_limit",
+      "count": 1,
+      "modeled_local_outcome": "continue",
+      "values": "all_zero"
+    },
+    {
+      "array_length": 101,
+      "case": "length_above_limit",
+      "count": 1,
+      "modeled_local_outcome": "invalid",
+      "values": "all_zero"
+    },
+    {
+      "array_length": 101,
+      "case": "zero_count_skips_length",
+      "count": 0,
+      "modeled_local_outcome": "zero_count",
+      "values": "all_zero"
+    }
+  ],
+  "range_cases": [
+    {
+      "count": 0,
+      "newest": 0,
+      "route": "zero_count",
+      "selector": 5
+    },
+    {
+      "count": 1,
+      "limited_count": 1,
+      "newest": 0,
+      "oldest": 0,
+      "route": "range",
+      "selector": 5
+    },
+    {
+      "count": 1,
+      "limited_count": 0,
+      "newest": 0,
+      "oldest": 1,
+      "route": "range_order_error",
+      "selector": 4
+    },
+    {
+      "count": 5,
+      "limited_count": 2,
+      "newest": 1,
+      "oldest": 0,
+      "route": "range",
+      "selector": 5
+    },
+    {
+      "count": 6,
+      "limited_count": 5,
+      "newest": 5,
+      "oldest": 1,
+      "route": "range",
+      "selector": 5
+    },
+    {
+      "count": 6,
+      "limited_count": 4,
+      "newest": 5,
+      "oldest": 2,
+      "route": "range",
+      "selector": 4
+    },
+    {
+      "count": 18446744073709551615,
+      "newest": 18446744073709551615,
+      "route": "increment_overflow",
+      "selector": 5
+    },
+    {
+      "count": 18446744073709551615,
+      "limited_count": 5,
+      "newest": 5,
+      "oldest": 1,
+      "route": "range",
+      "selector": 5
+    }
+  ],
+  "reward_selection_cases": [
+    {
+      "case": "empty_rows",
+      "modeled_payloads": [
+        0,
+        0,
+        0
+      ],
+      "percentiles": [
+        0.0,
+        50.0,
+        100.0
+      ],
+      "rows": [],
+      "total": 10
+    },
+    {
+      "case": "threshold_boundary",
+      "modeled_payloads": [
+        7,
+        7,
+        7,
+        9
+      ],
+      "percentiles": [
+        0.0,
+        10.0,
+        11.0,
+        100.0
+      ],
+      "rows": [
+        [
+          1,
+          7
+        ],
+        [
+          9,
+          9
+        ]
+      ],
+      "total": 10
+    },
+    {
+      "case": "zero_first_weight",
+      "modeled_payloads": [
+        7,
+        9,
+        9
+      ],
+      "percentiles": [
+        0.0,
+        50.0,
+        100.0
+      ],
+      "rows": [
+        [
+          0,
+          7
+        ],
+        [
+          2,
+          9
+        ]
+      ],
+      "total": 2
+    },
+    {
+      "case": "single_row",
+      "modeled_payloads": [
+        7,
+        7
+      ],
+      "percentiles": [
+        0.0,
+        100.0
+      ],
+      "rows": [
+        [
+          5,
+          7
+        ]
+      ],
+      "total": 5
+    }
+  ]
+}
