@@ -1,0 +1,195 @@
+{
+  "task": "RE-001",
+  "component": "node #94 WAL record scan loop",
+  "window": {
+    "start": "0x51628f0",
+    "end": "0x5162ec2",
+    "size": 1490,
+    "fde": "0x13168c0",
+    "cie": "0x1301ae8",
+    "lsda": "0xbd8972",
+    "artifact": "work/hl-node-94.bin",
+    "artifact_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "arguments": {
+    "reader": "rdi: WAL reader object (see reader_fields)",
+    "out_record": "rsi: caller string object receiving a completed record (pointer +0x00, length +0x08)",
+    "scratch": "rdx: caller string object used as the last-fragment assembly target, then moved into out_record"
+  },
+  "reader_fields_touched_by_this_window": {
+    "+0x40": "buffer base, read (remaining = +0x60 minus +0x40 at entry)",
+    "+0x60": "buffer end, read (same remaining computation)",
+    "+0x70": "flag, read only in the code-15 arm (setter not in this window)",
+    "+0x71": "completion flag, written 1 on full-record and last-fragment completion",
+    "+0x73": "flag, read only in the code-9 arm (setter not in this window)",
+    "+0x78": "stream object pointer, read; if non-null its virtual method at vtable +0x18 is called once in the prologue",
+    "+0xb8": "accumulator string pointer (fragment assembly buffer)",
+    "+0xc0": "accumulator string length",
+    "+0xd8": "in-fragment flag: set ONLY on first-fragment (fall-through through 0x5162af8); the compression arm clears it at 0x5162bda and its completion jump targets 0x5162aff, skipping the set, so compression never sets it; cleared on full/last completion, on error clears, and on the unknown-type arm"
+  },
+  "prologue": {
+    "out_record_init": "pointer set to 0x1e629b (an empty-string constant: the first byte there is 0), length set to 0",
+    "scratch_clear": "first byte of the scratch buffer set to 0, length set to 0",
+    "stream_finish": "if reader +0x78 is non-null, call the virtual method at vtable offset +0x18 on it",
+    "remaining_snapshot": "entry remaining = reader +0x60 minus reader +0x40, held on the stack for the whole scan; the full-record completion writes this entry slot directly to +0x58, while the last-fragment completion first reloads the entry slot from the first-fragment snapshot slot (stack +0x08) and then writes it to +0x58 — the snapshot is always a copy of the entry slot (first-fragment and compression tails both copy the entry slot into it) and the entry slot never changes mid-scan, so both completions store the entry remaining value"
+  },
+  "buffered_read_call": {
+    "callee": "0x5162510 (934 bytes, FDE 0xf7c900; internals NOT pinned here)",
+    "arguments": "rdi = reader, rsi = slice out (pointer + length), rdx = aux out word, rcx = code out (int32)",
+    "return": "status in eax: 0 ends the scan with return 0; nonzero continues to dispatch",
+    "outs_used_here": {
+      "slice_pointer": "stack word for the record fragment bytes",
+      "slice_length": "stack word for the fragment length; also the reporter value in missing-start and unknown-type arms",
+      "aux_word": "stack word; used verbatim as the reporter value only in the checksum-mismatch arm; its producer-side meaning is NOT pinned",
+      "code": "stack int32; dispatch key (see dispatch)"
+    }
+  },
+  "dispatch": {
+    "table_base": "0x7ee0c8",
+    "rule": "code is compared unsigned against 15; codes above 15 take the unknown-type arm; the table holds int32 offsets relative to the table base",
+    "table": {
+      "0": "0x5162cc0 (unknown type)",
+      "1": "0x5162b10 (full record)",
+      "2": "0x5162ac0 (first fragment)",
+      "3": "0x5162a70 (middle fragment)",
+      "4": "0x5162a40 (last fragment)",
+      "5": "0x5162b10 (full record)",
+      "6": "0x5162ac0 (first fragment)",
+      "7": "0x5162a70 (middle fragment)",
+      "8": "0x5162a40 (last fragment)",
+      "9": "0x5162b88 (compression record)",
+      "10": "0x51629fe (error arm tail)",
+      "11": "0x51629fe (error arm tail)",
+      "12": "0x51629fe (error arm tail)",
+      "13": "0x51629fe (error arm tail)",
+      "14": "0x5162cc0 (unknown type)",
+      "15": "0x51629e0 (checksum arm)"
+    }
+  },
+  "arms": {
+    "full_record_1_5": {
+      "entry": "0x5162b10",
+      "steps": [
+        "if in-fragment (+0xd8) and accumulator length is nonzero, report 'partial record without end(1)' with the accumulator length, then continue below",
+        "clear the accumulator (first byte 0, length 0)",
+        "copy the read slice (pointer + length) into out_record",
+        "write entry remaining into reader +0x58, set +0x71 to 1, clear +0xd8",
+        "return the buffered-read status (nonzero)"
+      ],
+      "report_string": {"address": "0x1e3344", "text": "partial record without end(1)"}
+    },
+    "first_fragment_2_6": {
+      "entry": "0x5162ac0",
+      "steps": [
+        "if in-fragment (+0xd8) or accumulator length is nonzero, report 'partial record without end(2)' with the accumulator length, then continue below",
+        "replace the accumulator contents (offset 0, count 0) with the read slice",
+        "set +0xd8 to 1, record the entry remaining as the first-fragment snapshot, loop"
+      ],
+      "report_string": {"address": "0x1e1e9a", "text": "partial record without end(2)"}
+    },
+    "middle_fragment_3_7": {
+      "entry": "0x5162a70",
+      "steps": [
+        "if not in-fragment, report 'missing start of fragmented record(1)' with the slice length and loop",
+        "else if slice length exceeds 0x3fffffffffffffff minus accumulator length, throw length_error (same cap as the logical reader in PR #1860)",
+        "else append the slice to the accumulator and loop"
+      ],
+      "report_string": {"address": "0x7d9558", "text": "missing start of fragmented record(1)"}
+    },
+    "last_fragment_4_8": {
+      "entry": "0x5162a40",
+      "steps": [
+        "if not in-fragment, report 'missing start of fragmented record(2)' with the slice length and loop",
+        "else append the slice to the accumulator under the same 0x3fffffffffffffff cap (length_error above the cap)",
+        "replace the scratch string (offset 0, count = scratch length) with the accumulator contents",
+        "move the scratch string (pointer + length) into out_record",
+        "clear the accumulator, reload the entry slot from the first-fragment snapshot slot and write it into reader +0x58 (value equals the entry remaining, see prologue), set +0x71 to 1, clear +0xd8",
+        "return the buffered-read status (nonzero)"
+      ],
+      "report_string": {"address": "0x7e7108", "text": "missing start of fragmented record(2)"}
+    },
+    "compression_9": {
+      "entry": "0x5162b88",
+      "warning_order": [
+        "if +0x73 is set, report 'read multiple SetCompressionType records' with the slice length (then continue to the next check, not return)",
+        "if +0x71 is set, report 'SetCompressionType not the first record' with the slice length (then continue to the body)"
+      ],
+      "body": [
+        "clear the accumulator AND clear +0xd8 at 0x5162bda; record entry remaining as the compression snapshot (copy the entry slot into the snapshot slot)",
+        "if slice length is at most 3, take the detail path with the string 'Error decoding WAL compression type' (length 35)",
+        "else read the first u32 of the slice as the tag and advance the slice past 4 bytes; if the low tag byte is 0 or 7, take the parser path; otherwise take the detail path with the string 'WAL compression type not supported' (length 34)",
+        "parser path: zero a stack struct, store the tag byte on the stack, call body parser 0x5161850 with rsi pointing at the tag byte, free the detail heap buffer if any, then jump to 0x5162aff — which SKIPS the +0xd8 set at 0x5162af8 — so +0xd8 stays cleared, record the snapshot, loop",
+        "detail path: call detail builder 0x542f040 with constant argument 2 (see detail_builder_note), then if the decision byte is nonzero report 'could not decode SetCompressionType record' with the slice length (original length on the short-slice path; length minus 4 on the other-tag path, because the slice was advanced past the 4-byte tag before the detail call), free the detail heap buffer if any, then jump to 0x5162aff as above, so +0xd8 stays cleared, loop; the decision-byte-zero branch back to the parser is present in the code but see detail_builder_note"
+      ],
+      "detail_template": "stack bytes 'CompressionTypeRecord' (16 bytes from 0x205cf0 'CompressionTypeR' plus movabs 'eRecord')",
+      "detail_builder_note": "Per PR #1860's pin of 0x542f040, the builder writes its constant argument 2 into the decision byte, so in node #94 the detail path's report branch is the one taken and the parser branch after the builder is not reached from the builder; the parser is reached directly only on the tag 0/7 path",
+      "report_strings": {
+        "multiple": {"address": "0x7d7428", "text": "read multiple SetCompressionType records"},
+        "not_first": {"address": "0x7da990", "text": "SetCompressionType not the first record"},
+        "could_not_decode": {"address": "0x7d7f60", "text": "could not decode SetCompressionType record"},
+        "unsupported": {"address": "0x7e3b88", "text": "WAL compression type not supported"},
+        "error_decoding": {"address": "0x7dd400", "text": "Error decoding WAL compression type"}
+      }
+    },
+    "error_10_13": {
+      "entry": "0x51629fe",
+      "steps": [
+        "if not in-fragment, loop silently",
+        "else report 'error in middle of record' with the accumulator length, clear the accumulator (first byte 0, length 0) and clear +0xd8, loop"
+      ],
+      "report_string": {"address": "0x1fca14", "text": "error in middle of record"}
+    },
+    "checksum_15": {
+      "entry": "0x51629e0",
+      "steps": [
+        "if +0x70 is set, clear the accumulator (first byte 0, length 0) and return 0",
+        "else report 'checksum mismatch' with the buffered-read aux out word, then run the error-arm tail (in-fragment: report 'error in middle of record', clear accumulator and +0xd8; otherwise loop silently)"
+      ],
+      "report_string": {"address": "0x1f7017", "text": "checksum mismatch"}
+    },
+    "unknown_0_14_above15": {
+      "entry": "0x5162cc0",
+      "steps": [
+        "format 'unknown record type %u' with the code into a 40-byte stack buffer via __snprintf_chk",
+        "report the formatted message with value = slice length plus accumulator length if in-fragment, else slice length alone",
+        "then join the error tail at 0x5162a15: clear the accumulator (first byte 0, length 0) and clear +0xd8, then loop"
+      ],
+      "format_string": {"address": "0x1f179e", "text": "unknown record type %u"}
+    }
+  },
+  "reporter_call": {
+    "callee": "0x5160f90 (179 bytes, FDE 0x13166bc; internals NOT pinned here)",
+    "arguments": "rdi = reader, rsi = value (per-site: aux word, accumulator length, slice length, or slice length plus accumulator length), rdx = message string"
+  },
+  "body_parser_call": {
+    "callee": "0x5161850 (82 bytes, FDE 0xf7c8e0; internals NOT pinned here)",
+    "arguments": "rdi = reader, rsi = stack address of the tag byte; a zeroed stack struct precedes the call"
+  },
+  "detail_builder_call": {
+    "callee": "0x542f040 (247 bytes, FDE 0x133e6c8; internals NOT pinned here, except the PR #1860 pin cited above)",
+    "arguments": "first argument = stack detail struct, second argument = constant 2, plus the detail string (pointer + length)"
+  },
+  "exits": [
+    "buffered-read status 0: return 0 (accumulator and flags untouched by the exit itself)",
+    "full-record completion: return the buffered-read status (nonzero), out_record holds the slice",
+    "last-fragment completion: return the buffered-read status (nonzero), out_record holds the assembled accumulator",
+    "code 15 with +0x70 set: clear accumulator, return 0"
+  ],
+  "canary": "stack canary fs:0x28 at rsp+0x98, checked on the normal epilogue and on the length_error path",
+  "exception_landing": "landing pad at 0x5162eba jumps to the cleanup region at 0x51628b6 (LSDA mapping not claimed)",
+  "census": {
+    "direct_calls": [],
+    "tail_jumps": [],
+    "rela_relative_slot": {"section": ".data.rel.ro", "slot_vaddr": "0x575b0f8", "type": "R_X86_64_RELATIVE", "addend": "0x51628f0"},
+    "note": "No E8 direct call or E9 tail jump to this window exists in .text; the window is reached only through the RELATIVE function-pointer slot above. The slot's consumer is NOT pinned."
+  },
+  "relationship_to_prior_work": {
+    "PR_1860_logical_reader": "The fragment grammar (full 1/5, first 2/6, middle 3/7, last 4/8, compression 9, the same 0x3fffffffffffffff append cap, the same SetCompressionType warnings and detail-builder report) matches PR #1860's logical reader, but this window is a DIFFERENT reader: its read callee is the buffered read 0x5162510 (not the physical decode 0x5161400), its accumulator lives in the reader object (+0xb8/+0xc0) with an internal in-fragment flag (+0xd8) instead of caller-passed strings, its completion protocol writes caller out_record/scratch strings and returns the read status, and it adds a stream-finish prologue, a checksum arm with a return-0 exit, error arms 10-13, and an unknown-type arm that #1860's reader does not have. The (1)/(2) message suffixes also differ from #1860's single-suffix messages.",
+    "buffered_reader_family": "The neighbouring windows 0x5162350/0x5162510 belong to the buffered-reader family judged dependency code in the 2026-11-02 dry cycle; they are used here by contract only and are NOT re-submitted as standalone items."
+  },
+  "observations_vs_inference_vs_unknown": {
+    "observation": "window bounds, dispatch table, all branch conditions, all report strings and their addresses, append cap, exit values, census, canary slot",
+    "inference": "the +0x71/+0x73 flag readings (completion flag / already-seen flag) from their positions in the compression warnings; the out_record/scratch string-object reading from the pointer+length moves",
+    "unknown": "aux out word producer meaning; setters of +0x70 and +0x73; body parser and detail builder internals beyond the cited PR #1860 pin; the consumer of the 0x575b0f8 slot; the reader struct type name and the +0xc8 accumulator capacity field (never touched here)"
+  }
+}

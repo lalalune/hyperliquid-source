@@ -1,0 +1,10 @@
+One .rela.dyn entry references window 0x51628f0: R_X86_64_RELATIVE
+(type 8, symbol 0) with offset 0x575b0f8 and addend 0x51628f0. The slot
+at 0x575b0f8 lies in .data.rel.ro (address 0x56632a0, size 0x10aad0):
+a function-pointer slot filled by RELATIVE relocation, not a direct
+call site. No E8 direct call and no E9 tail jump to the window exists
+in .text (see census.py). The window's own rip-relative lea targets
+(the jump table at 0x7ee0c8, the report strings, the detail template
+at 0x205cf0 and the empty-string constant at 0x1e629b) need no dynamic
+relocation in this non-PIE binary. The consumer of the 0x575b0f8 slot
+is not pinned.
