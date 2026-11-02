@@ -1,0 +1,16 @@
+R_X86_64_RELATIVE slots with addend 0x516adf0: none (census.py scans
+the whole .rela.dyn range and finds no such slot; the window is
+reached by its single direct call, not through a vtable slot).
+
+Pointer fields the window installs by plain stores (no vtable
+address points are involved in this window):
+- The slots pointer (allocation + 8) is stored to obj +0x0; the
+  shift is stored to obj +0x8.
+- The __libc_single_threaded flag is read through GLOB_DAT slot
+  0x5777ed8 (resolved at load time, not an addend); it gates the
+  plain versus locked refcount decrement in the release sequence.
+
+The window's callees (hardware_concurrency 0x5660a60, operator
+new[] 0x56604f0, destroyer 0x4f94a40, operator delete[]
+0x5660500, release helper 0x5169bac in the landing pad) are direct
+calls or a tail jump.
