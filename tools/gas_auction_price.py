@@ -140,7 +140,13 @@ class Image:
 
     def relative(self):
         if self.relative_map is None:
-            self.relative_map = {slot: addend for slot, kind, addend, _ in self.relocations() if kind == 8}
+            relative_map = {}
+            for slot, kind, addend, _ in self.relocations():
+                if kind == 8:
+                    if slot in relative_map:
+                        raise EvidenceError(f"duplicate RELATIVE relocation slot {slot:#x}")
+                    relative_map[slot] = addend
+            self.relative_map = relative_map
         return self.relative_map
 
     def location(self, slot, relative):
