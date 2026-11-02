@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import struct
 import subprocess
+import tempfile
 
 from artifacts import ROOT, check
 from elf_index import sections
@@ -250,33 +251,40 @@ def generate(binary, output):
     data = binary.read_bytes()
     byte_controls, templates = controls(data)
     relocs, locs = relevant_relocations(data), locations(data)
-    frames_text = subprocess.check_output(['readelf', '-wf', str(binary)], text=True)
-    fdes = [(int(a, 16), int(b, 16)) for a, b in
-            re.findall(r'FDE[^\n]*pc=([0-9a-fA-F]+)\.\.([0-9a-fA-F]+)', frames_text)]
-    scope = list(RANGES.values()) + [CALLER[2:]]
-    for pair in scope:
-        if fdes.count(pair) != 1:
-            raise ValueError(f'Expected one exact FDE range: {pair}')
-    references, reference_counts = census(binary)
-    output.mkdir(parents=True, exist_ok=True)
-    rela_text = subprocess.check_output(['readelf', '-rW', str(binary)], text=True)
-    rela_rows = [line for line in rela_text.splitlines()
-                 if re.match(r'^[0-9a-f]+\s', line) and int(line.split()[0], 16) in RELOCATIONS]
-    if len(rela_rows) != len(RELOCATIONS):
-        raise ValueError('Independent readelf relocation row count differs')
-    (output / 'relocations.txt').write_text('\n'.join(rela_rows) + '\n')
-    (output / 'references.tsv').write_text('site_va\tinstruction\ttarget_va\n' + ''.join(
-        f"{r['site_va']}\t{r['instruction']}\t{r['target_va']}\n" for r in references))
-    ranges = {}
-    for name, (begin, end) in [*RANGES.items(), (CALLER[0], CALLER[2:])]:
-        offset, body = read_va(data, begin, end - begin)
-        ranges[name] = {'start_va': hex(begin), 'end_va': hex(end), 'file_offset': hex(offset),
-                        'bytes': len(body), 'sha256': hashlib.sha256(body).hexdigest()}
-        text = subprocess.check_output(['objdump', '-d', f'--start-address={begin:#x}',
-                                        f'--stop-address={end:#x}', str(binary)], text=True)
-        (output / f'{name}.objdump.txt').write_text(text.replace(str(binary), '<authenticated-node94>'))
-    (output / 'frames.txt').write_text('\n'.join(line for line in frames_text.splitlines()
-        if 'FDE' in line and any(f'pc={a:016x}..{b:016x}' in line for a, b in scope)) + '\n')
+    # Bind external decoder input to the same bytes using a private snapshot:
+    # readelf/objdump reopen their argument, so decoding the admitted path
+    # would bind this packet to whatever the path serves at decode time.
+    with tempfile.TemporaryDirectory() as temporary:
+        snapshot = Path(temporary) / 'node94.elf'
+        snapshot.write_bytes(data)
+        check(snapshot, identity)  # Authenticate the exact bytes the decoders reopen.
+        frames_text = subprocess.check_output(['readelf', '-wf', str(snapshot)], text=True)
+        fdes = [(int(a, 16), int(b, 16)) for a, b in
+                re.findall(r'FDE[^\n]*pc=([0-9a-fA-F]+)\.\.([0-9a-fA-F]+)', frames_text)]
+        scope = list(RANGES.values()) + [CALLER[2:]]
+        for pair in scope:
+            if fdes.count(pair) != 1:
+                raise ValueError(f'Expected one exact FDE range: {pair}')
+        references, reference_counts = census(snapshot)
+        output.mkdir(parents=True, exist_ok=True)
+        rela_text = subprocess.check_output(['readelf', '-rW', str(snapshot)], text=True)
+        rela_rows = [line for line in rela_text.splitlines()
+                     if re.match(r'^[0-9a-f]+\s', line) and int(line.split()[0], 16) in RELOCATIONS]
+        if len(rela_rows) != len(RELOCATIONS):
+            raise ValueError('Independent readelf relocation row count differs')
+        (output / 'relocations.txt').write_text('\n'.join(rela_rows) + '\n')
+        (output / 'references.tsv').write_text('site_va\tinstruction\ttarget_va\n' + ''.join(
+            f"{r['site_va']}\t{r['instruction']}\t{r['target_va']}\n" for r in references))
+        ranges = {}
+        for name, (begin, end) in [*RANGES.items(), (CALLER[0], CALLER[2:])]:
+            offset, body = read_va(data, begin, end - begin)
+            ranges[name] = {'start_va': hex(begin), 'end_va': hex(end), 'file_offset': hex(offset),
+                            'bytes': len(body), 'sha256': hashlib.sha256(body).hexdigest()}
+            text = subprocess.check_output(['objdump', '-d', f'--start-address={begin:#x}',
+                                            f'--stop-address={end:#x}', str(snapshot)], text=True)
+            (output / f'{name}.objdump.txt').write_text(text.replace(str(snapshot), '<authenticated-node94>'))
+        (output / 'frames.txt').write_text('\n'.join(line for line in frames_text.splitlines()
+            if 'FDE' in line and any(f'pc={a:016x}..{b:016x}' in line for a, b in scope)) + '\n')
     records = {
         'target_sha256': identity['sha256'], 'target_bytes': len(data),
         'ranges': ranges, 'decoded_fde_count': len(fdes),
