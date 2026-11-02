@@ -1,0 +1,107 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "owners": [
+    {
+      "role": "context",
+      "start": "0x3bcad50",
+      "end": "0x3bcae80",
+      "bytes": 304,
+      "instructions": 78,
+      "file_offset": "0x3bc9d50",
+      "sha256": "86c352563c86053a02323db67fb1eb785292b37da7292f2af9b0361ff64244bb",
+      "frames": {
+        "fde": {
+          "va": "0xe4d49c",
+          "bytes_hex": "18000000c8651a00acd8d70230010000005f0ea0010310010e080000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "comparison",
+      "start": "0x422e280",
+      "end": "0x422e403",
+      "bytes": 387,
+      "instructions": 107,
+      "file_offset": "0x422d280",
+      "sha256": "c7ab574649057fbb00d19e8c935ccaa2cff819f9a238eeb90547dc721d3acb90",
+      "frames": {
+        "fde": {
+          "va": "0xe8cd1c",
+          "bytes_hex": "40000000485e1e005c153a038301000000420e10420e18420e20420e28410e30440e800183068c058d048e038f02036c010e30410e28420e20420e18420e10420e080000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "first_fold",
+      "start": "0x43516d0",
+      "end": "0x4351882",
+      "bytes": 434,
+      "instructions": 111,
+      "file_offset": "0x43506d0",
+      "sha256": "76cae3d3dab57b30583a31a68963a594443c8425665077c3860cdb509adff6f1",
+      "frames": {
+        "fde": {
+          "va": "0xe9e1b8",
+          "bytes_hex": "48000000e4721f0010354b03b201000000410e10420e18420e20420e28420e30410e38440e6083078c068d058e048f0386020399010e38410e30420e28420e20420e18420e10410e08000000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "next",
+      "start": "0x37c4430",
+      "end": "0x37c4644",
+      "bytes": 532,
+      "instructions": 126,
+      "file_offset": "0x37c3430",
+      "sha256": "451e2db21f3ff90c6238cf77f667b6ba8093f1ab6e2873c53991c7b3be743ca5",
+      "frames": {
+        "fde": {
+          "va": "0x1213ba4",
+          "bytes_hex": "24000000a4651d0084085b021402000004fb700bff410e1002450e08410e10039c010e08410e1000"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    }
+  ],
+  "parameters": {
+    "left_carry_shift": 63,
+    "right_factor": 3,
+    "condition_opcode": 146,
+    "required_first_status": 1,
+    "fast_weight_offset": 24,
+    "fast_stride": 32,
+    "generic_weight_offset": 24
+  },
+  "normal_comparison": "on normal second-fold completion and first returned word==1: AL1 iff unsigned128(2*S)<unsigned128(3*B)",
+  "s_definition": "checked u64 sum from second stream; fast rows use+0x18 and stride0x20, generic next supplies a word pointer",
+  "b_definition": "RDX of first checked-fold helper on its raw status1 path; key/collection meaning not fully recovered",
+  "overflow": "second checked-add carry selects AL0; first helper checked-add carry selects raw status0, which cannot pass the final status1 gate",
+  "wide_proof": "2*S=(S>>63)*2^64 + (2*S mod2^64); MUL produces both limbs of3*B. CMP low then SBB high carries the exact low borrow; SETB gives unsigned128 less-than. Both products fit66 bits; ties return0.",
+  "max_left_product": 36893488147419103230,
+  "max_right_product": 55340232221128654845,
+  "direct_bindings": {
+    "0x3bcae73": "0x422e280",
+    "0x422e290": "0x43516d0",
+    "0x422e363": "0x37c4430",
+    "0x43516e7": "0x37c5980",
+    "0x4351727": "0x37c5980",
+    "0x4351816": "0x4553fd0"
+  },
+  "captured_code_executed": false,
+  "limits": "Checked folds/strict cross-product and source-context mapping only. Full input collections, membership/duplicates, validator/total/selected roles, Rust map/iterator ABI, unmeasured lookup/next helpers, caller reachability, protocol security and reconstruction gates remain unproved."
+}
