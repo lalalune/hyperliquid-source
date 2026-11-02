@@ -59,11 +59,24 @@ def scalar_identity(layout,record,key):
                ==key[f['input_offset']:f['input_offset']+f['width']] for f in layout['fields'])
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    rels = {}
+    for a, i, v in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']]):
+        if a in rels:
+            raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a] = (i, v)
+    return rels
+
+
 def analyze(data):
     _,fs,_=fde_extents(data)
     fdes={(f['start'],f['end']):f for f in fs}
-    secs=sections(data);rs=next(s for s in secs if s['name']=='.rela.dyn')
-    rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[rs['offset']:rs['offset']+rs['size']])}
+    secs = sections(data)
+    rels = relocations(data)
     body=read(data,0x154cd10,299)[1]
     layout=probe_layout(body)
     expected={'fields':[{'record_offset':24,'input_offset':24,'width':8},{'record_offset':16,'input_offset':16,'width':4},{'record_offset':8,'input_offset':8,'width':8}],
