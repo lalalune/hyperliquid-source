@@ -70,3 +70,54 @@ def oracle(binary=cpu.TARGET):
   controls.append({'name':name,'va':hex(va),'old':old,'new':value,'inputs':args,'before':before,'after':after})
  rawin=''.join(inputs).encode();rawout=''.join(expected).encode()
  return {'inputs':rawin,'expected':rawout,'rows':len(inputs),'rows_per_owner':parts,'owners':owners,'controls':controls,'visited_instructions':len(seen),'words_u32':len(words32),'words_u64':len(words64),'counts':len(counts),'flags':flags}
+
+PACKET=ROOT/'research/work-items/RE-005-bincode-size-state-rust-94'
+SOURCE=ROOT/'src/bincode-varint/src/lib.rs'
+def need(ok,message):
+ if not ok:raise ValueError(message)
+def sha(raw):return hashlib.sha256(raw).hexdigest()
+def build(binary,rustc,output):
+ import subprocess
+ output=Path(output);need(not output.exists(),'output must be new')
+ result=oracle(binary);freeze=json.loads((PACKET/'FREEZE.json').read_text())
+ need(sha(result['inputs'])==freeze['inputs_sha256'] and sha(result['expected'])==freeze['expected_sha256'],'frozen expectations differ before compiler')
+ need(result['owners']==json.loads((PACKET/'owners.json').read_text()),'native owner records differ')
+ need(json.loads(json.dumps(result['controls']))==json.loads((PACKET/'native-controls.json').read_text()),'native controls differ')
+ version=subprocess.check_output([str(rustc),'-Vv'],text=True);need(version.startswith('rustc 1.94.1 ('),'pinned rustc1.94.1 required')
+ output.mkdir(parents=True);(output/'inputs.tsv').write_bytes(result['inputs']);(output/'expected.tsv').write_bytes(result['expected'])
+ commands=[]
+ def run(args,**kw):
+  args=list(map(str,args));commands.append(args);return subprocess.run(args,capture_output=True,text=True,**kw)
+ def library(source,folder,opt):
+  folder.mkdir();lib=folder/'libhl_bincode_varint.rlib'
+  p=run([rustc,'--edition=2024','--crate-name','hl_bincode_varint','--crate-type','rlib','-C',f'opt-level={opt}','-C','overflow-checks=on','-C','codegen-units=1','-C','metadata=bincode_size_state','-D','warnings',source,'-o',lib]);need(p.returncode==0,p.stderr)
+  exe=folder/'driver';p=run([rustc,'--edition=2024','-C',f'opt-level={opt}',PACKET/'driver.rs','--extern',f'hl_bincode_varint={lib}','-D','warnings','-o',exe]);need(p.returncode==0,p.stderr)
+  return lib,exe
+ def test(lib,source,out):
+  p=run([rustc,'--edition=2024','--test',source,'--extern',f'hl_bincode_varint={lib}','-D','warnings','-o',out]);need(p.returncode==0,p.stderr)
+  return run([out])
+ profiles={}
+ for opt in (0,3):
+  folder=output/f'o{opt}';lib,exe=library(SOURCE,folder,opt)
+  p=run([exe],input=result['inputs'].decode());need(p.returncode==0 and p.stdout.encode()==result['expected'],'compiled Rust differs')
+  (output/f'output-o{opt}.tsv').write_text(p.stdout)
+  stdout_sha=sha(p.stdout.encode())
+  tests={}
+  for source in sorted((ROOT/'src/bincode-varint/tests').glob('*.rs')):
+   p=test(lib,source,folder/source.stem);need(p.returncode==0,p.stdout+p.stderr);tests[source.name]=p.stdout
+  profiles[str(opt)]={'rows':result['rows'],'match':True,'stdout_sha256':stdout_sha,'integration_tests':tests}
+ source=SOURCE.read_text();mutants=[]
+ for name,old,new in [('atomic-counter','    *counter = marked;','    // omitted precommit'),('payload-charge','marked.checked_add(length - 1)','marked.checked_add(length)'),('marker-charge','counter.checked_add(1)','counter.checked_add(0)')]:
+  need(source.count(old)==1,'mutation binding changed');folder=output/('mutant-'+name);folder.mkdir();changed=folder/'lib.rs';changed.write_text(source.replace(old,new))
+  lib,exe=library(changed,folder/'build',3);p=run([exe],input=result['inputs'].decode());need(p.returncode==0,'mutant must emit rows')
+  actual=p.stdout.splitlines();expected=result['expected'].decode().splitlines();mismatch=sum(a!=b for a,b in zip(actual,expected));need(len(actual)==len(expected) and mismatch>0,'mutant escaped')
+  smoke=test(lib,ROOT/'src/bincode-varint/tests/size_counter.rs',folder/'smoke');need(smoke.returncode!=0,'mutant passed target fixture')
+  mutants.append({'name':name,'mismatches':mismatch,'rows':len(actual),'compiled_smoke_exit':smoke.returncode})
+ repeat,_=library(SOURCE,output/'o3-repeat',3);original=(output/'o3/libhl_bincode_varint.rlib').read_bytes();need(original==repeat.read_bytes(),'raw own archive differs')
+ report={'rows':result['rows'],'profiles':profiles,'compiled_mutants':mutants,'raw_own_rlib_equal':True,'rlib_sha256':sha(original),'source_sha256':sha(source.encode()),'compiler':version,'commands':commands,'captured_process_executed':False,'offline_python_instruction_evaluation_authorized':True}
+ (output/'build-result.json').write_text(json.dumps(report,indent=2)+'\n');return report
+
+if __name__=='__main__':
+ import argparse
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--binary',type=Path,default=cpu.TARGET);p.add_argument('--rustc',type=Path,required=True);p.add_argument('--output',type=Path,required=True);args=p.parse_args()
+ r=build(args.binary,args.rustc,args.output);print(json.dumps({k:r[k] for k in ('rows','compiled_mutants','raw_own_rlib_equal')}))

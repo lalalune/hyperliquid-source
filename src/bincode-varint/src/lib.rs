@@ -156,6 +156,37 @@ pub const fn encoded_len_u64(value: u64) -> usize {
     }
 }
 
+/// Own representation of reaching the captured size-counter overflow call.
+/// This reports the pre-call boundary, not the original panic or unwind ABI.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SizeOverflow;
+
+/// Apply the observed u32 size-counter state transition.
+/// On payload overflow, the marker's one-byte increment remains committed.
+pub fn count_u32(value: u32, counter: &mut u64) -> Result<(), SizeOverflow> {
+    count_length(encoded_len_u32(value) as u64, counter)
+}
+
+/// Apply the observed u64 size-counter state transition, including overflow state.
+pub fn count_u64(value: u64, counter: &mut u64) -> Result<(), SizeOverflow> {
+    count_length(encoded_len_u64(value) as u64, counter)
+}
+
+fn count_length(length: u64, counter: &mut u64) -> Result<(), SizeOverflow> {
+    let Some(marked) = counter.checked_add(1) else {
+        return Err(SizeOverflow);
+    };
+    *counter = marked;
+    if length == 1 {
+        return Ok(());
+    }
+    let Some(total) = marked.checked_add(length - 1) else {
+        return Err(SizeOverflow);
+    };
+    *counter = total;
+    Ok(())
+}
+
 /// Appends the observed minimal u32 representation and returns its length.
 pub fn encode_u32(value: u32, order: PayloadOrder, output: &mut Vec<u8>) -> usize {
     let encoded_len = encoded_len_u32(value);
