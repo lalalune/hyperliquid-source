@@ -60,8 +60,8 @@ class CatalogueTests(unittest.TestCase):
     def test_dependency_bytes_do_not_count_as_first_party(self):
         coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', self.components)
         self.assertEqual(set(coverage['targets']), {'node115'})
-        self.assertEqual(coverage['totals']['node115']['windows'], 526)
-        self.assertEqual(coverage['totals']['node115']['bytes'], 194947)
+        self.assertEqual(coverage['totals']['node115']['windows'], 5759)
+        self.assertEqual(coverage['totals']['node115']['bytes'], 3373032)
         self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
 
     def test_wrong_owner_target_and_changed_evidence_rejected(self):
@@ -98,7 +98,7 @@ class CatalogueTests(unittest.TestCase):
                 self.assertTrue(row['relocation_qualified'])
                 changed = byte_progress.compare(b'xbcd0000', b'abcd1234', [field])
                 self.assertFalse(changed['relocation_qualified'])
-        for field in ({'offset': 4, 'width': 4, 'kind': 41, 'addend': -4},
+        for field in ({'offset': 4, 'width': 4, 'kind': 1, 'addend': 0},
                       {'offset': 4, 'width': 4, 'kind': 2, 'addend': None},
                       {'offset': 4, 'width': 8, 'kind': 4, 'addend': -4}):
             with self.subTest(field=field), self.assertRaises(ValueError):
@@ -107,11 +107,35 @@ class CatalogueTests(unittest.TestCase):
     def test_vendored_crate_windows_are_own_crate_dependencies(self):
         coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', self.components)
         rows = [r for r in coverage['windows'] if r['id'].startswith('node115-vendor-')]
-        self.assertEqual(len(rows), 216)
-        self.assertTrue(all(r['dependency'] == 'vendored-crates' for r in rows))
+        rust = [r for r in rows if r['dependency'] == 'vendored-crates']
+        native = [r for r in rows if r['dependency'] == 'native-libraries']
+        self.assertEqual((len(rust), sum(r['bytes'] for r in rust)), (241, 125370))
+        self.assertEqual((len(native), sum(r['bytes'] for r in native)), (5208, 3141103))
+        self.assertEqual(len(rust) + len(native), len(rows))
         self.assertTrue(all(r['relocation_qualified'] for r in rows))
-        self.assertEqual(sum(r['bytes'] for r in rows), 88388)
         self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
+    def test_relocation_field_rejections_cannot_widen_credit(self):
+        field = {'offset': 4, 'width': 4, 'kind': 2, 'addend': -4}
+        cases = ([field, {**field, 'offset': 6}],          # overlapping fields
+                 [{**field, 'offset': 5}],                 # runs past the end
+                 [{**field, 'offset': -1}],                # negative offset
+                 [{**field, 'addend': True}],              # bool is not an integer addend
+                 [{**field, 'kind': 24}], [{**field, 'kind': 26}],
+                 [{**field, 'offset': 0}, field])          # every byte masked
+        for fields in cases:
+            with self.subTest(fields=fields), self.assertRaises(ValueError):
+                byte_progress.compare(b'abcd0000', b'abcd1234', fields)
+
+    def test_census_relocation_pointer_must_name_the_window_record(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root, registry = self.stage_registry(folder)
+            windows = [w for w in registry['windows'] if (w.get('relocations') or {}).get('pointer', [None])[0] == 'records']
+            first, second = windows[0], next(w for w in windows[1:]
+                                               if w['relocations']['path'] == windows[0]['relocations']['path'])
+            first['relocations'] = dict(second['relocations'])
+            (root / 'research/byte-windows.json').write_text(json.dumps(registry))
+            with self.assertRaisesRegex(ValueError, 'Relocation record belongs to another window'):
+                byte_progress.load_coverage(root, 'research/byte-windows.json', self.components)
 
 
 if __name__ == '__main__':

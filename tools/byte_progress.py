@@ -27,11 +27,13 @@ def compare(source, target, relocations):
     for row in relocations:
         offset, width = row['offset'], row.get('width', 4)
         kind = row.get('kind', row.get('type'))
-        # PC32, PLT32 and GOTPCREL each occupy one four-byte PC-relative field; the
-        # addend only selects the referenced displacement, never the masked bytes.
+        # PC32, PLT32, GOTPCREL and GOTPCRELX/REX_GOTPCRELX each occupy one four-byte
+        # PC-relative field; the addend only selects the referenced displacement,
+        # never the masked bytes. A linker-relaxed GOTPCRELX site also rewrites the
+        # opcode byte outside the field, so it can never be relocation-qualified.
         require(type(offset) is int and type(width) is int and width == 4
-                and kind in (2, 4, 9) and type(row['addend']) is int,
-                'Only recorded four-byte PC32/PLT32/GOTPCREL fields are supported')
+                and kind in (2, 4, 9, 41, 42) and type(row['addend']) is int,
+                'Only recorded four-byte PC32/PLT32/GOTPCREL(X) fields are supported')
         field = set(range(offset, offset + width))
         require(0 <= offset and offset + width <= len(target) and not masks & field,
                 'Overlapping/out-of-bounds relocation field')
@@ -109,7 +111,7 @@ def load_coverage(root, registry_path, components):
         mode = item.get('comparison_mode', 'offset-aligned')
         require(mode in ('offset-aligned', 'extent-mismatch'), 'Unknown comparison mode')
         require('dependency' not in item or item['dependency'] in
-                ('rust-core', 'rust-alloc', 'rust-std', 'compiler-builtins', 'vendored-crates', 'zstandard', 'mio'), 'Unknown dependency attribution')
+                ('rust-core', 'rust-alloc', 'rust-std', 'compiler-builtins', 'vendored-crates', 'native-libraries', 'zstandard', 'mio'), 'Unknown dependency attribution')
         require(item['evidence'] in pinned, 'Comparison evidence must be hash-pinned')
         require(name not in seen_ids, 'Duplicate comparison id')
         seen_ids.add(name)
@@ -159,6 +161,14 @@ def load_coverage(root, registry_path, components):
             continue
         reference = item.get('relocations')
         relocations = record(reference['path'], reference['pointer']) if reference else []
+        pointer = reference['pointer'] if reference else []
+        if len(pointer) == 3 and pointer[0] == 'records' and pointer[2] == 'relocations':
+            # A per-record census pointer must name this window's own record.
+            owner = record(reference['path'], pointer[:2])
+            require(owner.get('start') == start and owner.get('end') == end
+                    and owner.get('source_offset') == item['source'].get('offset', 0)
+                    and owner.get('source_body_sha256') == item['source']['body_sha256'],
+                    'Relocation record belongs to another window')
         if isinstance(relocations, dict):
             relocations = [relocations]
         rows.append({**item, **compare(source, captured, relocations)})

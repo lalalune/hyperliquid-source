@@ -1,0 +1,5 @@
+FROM docker.io/library/ubuntu:24.04
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends build-essential g++ curl ca-certificates cmake clang libclang-dev pkg-config perl && rm -rf /var/lib/apt/lists/*
+RUN curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.95.0
+ENV PATH=/root/.cargo/bin:$PATH
+RUN gcc --version | head -1 && dpkg -l gcc-13 | tail -1 && rustc --version
