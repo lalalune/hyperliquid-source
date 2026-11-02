@@ -134,6 +134,8 @@ class Image:
     def relocations(self):
         """Yield (slot, type, addend, symbol index) for .rela.dyn."""
         rela = self.named[".rela.dyn"]
+        if rela["size"] % 24:
+            raise EvidenceError(".rela.dyn truncated")
         for at in range(rela["offset"], rela["offset"] + rela["size"], 24):
             slot, info, addend = struct.unpack_from("<QQq", self.blob, at)
             yield slot, info & 0xFFFFFFFF, addend, info >> 32
