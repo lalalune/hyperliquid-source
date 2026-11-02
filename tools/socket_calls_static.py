@@ -69,7 +69,10 @@ class Image:
                 require(sym * 24 < dynsym['size'], f'symbol index {sym} out of .dynsym')
                 st_name = struct.unpack_from('<I', data, dynsym['offset'] + 24 * sym)[0]
                 start = dynstr['offset'] + st_name
-                name = data[start:data.index(b'\0', start)].decode()
+                try:
+                    name = data[start:data.index(b'\0', start)].decode()
+                except UnicodeDecodeError:
+                    raise EvidenceError('dynamic symbol name is not valid UTF-8') from None
                 self.named.setdefault(name, []).append(where)
         _, fdes = eh_frame_records(data, self.secs)
         self.fdes = sorted((f['start'], f['end']) for f in fdes)
