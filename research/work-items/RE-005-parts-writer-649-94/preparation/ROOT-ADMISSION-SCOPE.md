@@ -1,0 +1,1 @@
+The immutable joint root admission includes the separate outer602 and writer649. Only its writer649,64-byte zero literal and all-RELA facts support this contribution; outer padding semantics are not counted or implemented. A fresh task-local measured producer re-admits the full writer and literal.
