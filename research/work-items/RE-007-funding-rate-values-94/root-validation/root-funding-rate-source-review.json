@@ -1,0 +1,46 @@
+{
+  "status": "SOURCE_REVIEW_COMPLETE_PEER_PENDING",
+  "at_utc": "2026-11-01T23:39:05.412064+00:00",
+  "source_freeze_sha256": "e4ea0b5dfd219feda46b64cb1ffc87dcfab275c9b5613905d9f33ad453f88ef9",
+  "verified_source_files": 5,
+  "verified_harness_files": 9,
+  "verified_precode_files": 35,
+  "verified_toolchain_payloads": 97,
+  "preparation_commands": 3,
+  "preparation_raw_refs": 6,
+  "integer_division_width_bound_combinations_checked": 5618,
+  "files_read": [
+    "src/lib.rs",
+    "tests/rate_values.rs",
+    "Cargo.toml",
+    "Cargo.lock",
+    "README.md",
+    "driver.rs",
+    "SOURCE-PROOF.md",
+    "build.py",
+    "SOURCE-FREEZE.json",
+    "rust-validation/prebuild/results.json",
+    "rust-validation/prebuild/commands.json"
+  ],
+  "arithmetic_review": [
+    "Finite representation gives m<2^53,p in[-1074,971]. Dyadic quantum=max(top-52,-1074) makes exact left shifts at most52 and right-shift128 tie at zero even. Encoding only discards the zero low bit of a carry when width54; subnormal branch necessarily uses quantum=-1074.",
+    "Add alignment gap<=64 fits <=118bits; gap>64 implies smaller value<2^(P-12), well below half even the power-of-two predecessor spacing2^(P-1). Exact cancellation is positive zero; two negative zeros remain negative.",
+    "Multiplication fits106 significand bits. First-source NaN selection precedes sign flip for subtraction; generated invalid has specified negative indefinite bits.",
+    "Positive rounded slice count stays finite/nonzero and native signed64 conversion is admitted by length<=2^60-1. No artificial huge slice is constructed; private count conversion tests exercise large integers separately.",
+    "Division significand-width comparison yields exact ratio floor-log; chosen quantum bounds numerator<=106bits. Denominator overflow implies magnitude far below half so signedzero; complement comparison avoids doubling remainder overflow.",
+    "Finite raw sign ordering and equal-second operand min/max exactly preserve frozen zero-sign clamp order. All intermediate special values retain the presence bit; insertion replaces only absence."
+  ],
+  "harness_review": [
+    "Five actual source files, no dependency or build hook; isolated real Cargo graph and lock, exact target/workspace admission.",
+    "Lexical and canonical ancestor Cargo.toml/config checks, symlink checks and copied-source rehash, direct real rlib linkage, distinct clean directories, cleared environment except unchanged HOME.",
+    "Input-only canonical protocol checks counts before sample allocation and buffers all successful output before writes; IDs only echoed. No expectation or semantic labels enter Rust.",
+    "18 compiled faults each require full3153-row differing output in both profiles; compiler failure never counts as detection.10 comparator corruptions,12 expected-exit2 malformed/argument controls,empty valid case.",
+    "All subprocess stdout/stderr retained as raw content-addressed gzip; no masks. Full host OS/dyld/SDK remain outside hermetic scope."
+  ],
+  "limits": [
+    "No production compile or execution by root during this source review.",
+    "Independent peer is pending; this artifact is not build authorization.",
+    "Finite corpus and limb-width checks do not constitute machine-checked universal proof; manual arithmetic argument reviewed above.",
+    "A read batch requested nonexistent BUILD-GRAPH.json; that cat exited1, while other requested source/proof files printed completely. Actual graph is SOURCE-FREEZE/prebuild metadata and was inspected directly."
+  ]
+}
