@@ -93,6 +93,8 @@ def dynamic_string(table, offset, context):
 
 
 def dynamic(data, by_name):
+    if '.dynstr' not in by_name:
+        raise ValueError('.dynamic section without a .dynstr section')
     dyn, dstr = by_name['.dynamic'], section_bytes(data, by_name['.dynstr'])
     raw = section_bytes(data, dyn)
     if len(raw) % 16:
