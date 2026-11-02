@@ -475,7 +475,11 @@ def analyse(data, check_sha=True, run_emu=False):
     carved = read_va(data, segs, FN, CARVED_LEN)
     text = text_bytes(data, segs)
     rela = rela_dyn(data)
-    rela_by_off = {r[0]: r for r in rela}
+    rela_by_off = {}
+    for r in rela:
+        if r[0] in rela_by_off:
+            raise ValueError(f"duplicate relocation offset {r[0]:#x}")
+        rela_by_off[r[0]] = r
 
     def rela_of(slot):
         r = rela_by_off.get(slot)
