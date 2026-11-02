@@ -1,0 +1,27 @@
+# PLT stubs used by the window and its cleanup routine, with the GOT
+# slot each stub jumps through (verified from the stub bytes:
+# ff 25 <disp32> resolves to the GOT address).
+# Indirect dispatch calls through the +0x98 and +0xb8 slots use no
+# PLT stub and have no relocation entry cited here.
+#
+# PLT stub -> GOT slot
+0x5660110 _Unwind_Resume@plt -> 0x5778db0
+0x5660220 pthread_mutex_lock@plt -> 0x5778e38
+0x5660230 pthread_mutex_unlock@plt -> 0x5778e40
+0x5660430 __stack_chk_fail@plt -> 0x5778f40
+0x56605c0 _M_assign@plt -> 0x5779008
+0x5660650 _ZSt20__throw_system_errori@plt -> 0x5779050
+#
+# Window PLT call sites:
+#   0x514f2d2 pthread_mutex_lock@plt (mutex A, inner+0x160)
+#   0x514f534 pthread_mutex_lock@plt (mutex B, inner object)
+#   0x514f564 _M_assign@plt (published string, inner+0x48 <- inner+0x1a8)
+#   0x514f655 pthread_mutex_unlock@plt (mutex B)
+#   0x514f67b pthread_mutex_unlock@plt (mutex A, tail jump, not a call)
+#   0x514f6c2 __stack_chk_fail@plt (canary mismatch)
+#   0x514f6d9, 0x514f6f0 _ZSt20__throw_system_errori@plt (lock failures)
+# Cleanup routine PLT call sites:
+#   0x514f23e pthread_mutex_unlock@plt (mutex A)
+#   0x514f256 _Unwind_Resume@plt (exception object in rbx)
+#   0x514f261 pthread_mutex_unlock@plt (mutex B)
+#   0x514f268 __stack_chk_fail@plt (canary mismatch)
