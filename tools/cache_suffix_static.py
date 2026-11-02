@@ -52,7 +52,12 @@ def matches_selector(constants,key):
 
 
 def analyze(data):
-    _,fs,_=fde_extents(data);fdes={(f['start'],f['end']):f for f in fs}
+    _,fs,_=fde_extents(data)
+    fdes={}
+    for f in fs:
+        if (f['start'],f['end']) in fdes:
+            raise ValueError('duplicate FDE extent')
+        fdes[(f['start'],f['end'])]=f
     body=read(data,0x59429e0,350)[1];constants=selector_constants(body)
     if constants!={'length':10,'prefix':b'abci_sta','tail_xor':0x6574}:
         raise ValueError('selector key condition changed')
