@@ -113,7 +113,11 @@ class Fdes:
 
     def __init__(self, data):
         _, fdes = eh_frame_records(data)
-        self.by_start = {f['start']: f for f in fdes}
+        self.by_start = {}
+        for f in fdes:
+            if f['start'] in self.by_start:
+                raise EvidenceError(f"duplicate FDE start {f['start']:#x}")
+            self.by_start[f['start']] = f
 
     def range_of(self, start):
         fde = self.by_start.get(start)
