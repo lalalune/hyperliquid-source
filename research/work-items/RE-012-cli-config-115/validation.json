@@ -1,5 +1,5 @@
 {
-  "base_commit": "c3b77a8e84c3f2b10db7a2a69b6b66bfddea93d4",
+  "base_commit": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
   "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
   "focused": {
     "normal": {
@@ -15,12 +15,9 @@
     "additional_controls": "actual FDE-range and RELA-byte changes, duplicate/overlap writers, LSDA, dispatch table, command chunks/SIMD padding, old profile offset, wrong error predicate, bad native rows/joins, closed inventory and manifest"
   },
   "regression": {
-    "startup_inventory_tests": 31,
     "fde_tests": 18,
-    "exit_codes": [
-      0,
-      0
-    ]
+    "exit_code": 0,
+    "retired_startup_suite": "31 tests passed on c3b77a8; that historical test file was removed by upstream 8fd8db68 and was not restored or rerun."
   },
   "static_exports": {
     "complete_fdes": 18,
@@ -40,13 +37,19 @@
   "repository_checks": {
     "doctor": 0,
     "verify": 0,
-    "catalogue-check": 0,
+    "catalogue-check_initial": 2,
+    "catalogue_regenerated": 0,
+    "catalogue-check_after_regeneration": 0,
     "reproduce": 0
   },
   "known_failures": [
     {
       "failure": "Initial strict LLVM boundary mismatch",
       "recovery": "Exact two f048ff08 LOCK DEC sequences authenticated with GNU/Capstone and raw LLVM bytes. Tests reject undeclared/altered joins; qualified and repeated exports pass. Initial prototype source was not separately frozen; original stderr and the subsequent strict raw reproduction are retained."
+    },
+    {
+      "failure": "Post-rebase catalogue-check exit2: the newly generated inventory counts this packet, changing work items from28 to29.",
+      "recovery": "make catalogue regenerated only README.md and docs/assets/research-progress.svg inventory counts. make catalogue-check then passed. Original failure stdout/stderr and generated diff are archived; no gate, component completion or byte credit changed."
     }
   ],
   "native_reconstruction_builds": 0,
@@ -61,6 +64,61 @@
     "complete_fdes": 18,
     "native_exports": 36,
     "manifest_entries": 56,
-    "note": "Passed against c3b77a8-based assembled packet before this final metadata/archive addition; final reviewer can reproduce with verify.py. Hash inventory is not new semantic proof."
+    "note": "Fresh GNU/LLVM re-export and exact recorded comparison passed on8fd8db68 after refreshing the two generic-helper manifest hashes. Final metadata/archive additions are not new target analysis; final verify.py authenticates their inventory too.",
+    "final_metadata_replay_exit_code": 0,
+    "final_repository_verify_and_catalogue_exit_code": 0,
+    "final_log_archive_note": "The final replay observed134 streams; its four stdout/stderr streams are subsequently appended losslessly, making138. Manifest refreshed after this metadata-only append; no semantic source/spec/records changed."
+  },
+  "historical_qualification": {
+    "base_commit": "c3b77a8e84c3f2b10db7a2a69b6b66bfddea93d4",
+    "focused": {
+      "normal": {
+        "tests": 82,
+        "exit_code": 0
+      },
+      "python_optimized": {
+        "tests": 82,
+        "exit_code": 0
+      },
+      "anchor_corruptions": 42,
+      "literal_corruptions": 9,
+      "additional_controls": "actual FDE-range and RELA-byte changes, duplicate/overlap writers, LSDA, dispatch table, command chunks/SIMD padding, old profile offset, wrong error predicate, bad native rows/joins, closed inventory and manifest"
+    },
+    "regression": {
+      "startup_inventory_tests": 31,
+      "fde_tests": 18,
+      "exit_codes": [
+        0,
+        0
+      ]
+    },
+    "repository_checks": {
+      "doctor": 0,
+      "verify": 0,
+      "catalogue-check": 0,
+      "reproduce": 0
+    },
+    "packet_self_check": {
+      "optimized_replay_exit_code": 0,
+      "complete_fdes": 18,
+      "native_exports": 36,
+      "manifest_entries": 56,
+      "note": "Passed against c3b77a8-based assembled packet before this final metadata/archive addition; final reviewer can reproduce with verify.py. Hash inventory is not new semantic proof."
+    }
+  },
+  "rebase": {
+    "preserved_candidate": "ae2be0969e7c749b05c51314a97b7188f8056582",
+    "old_base": "c3b77a8e84c3f2b10db7a2a69b6b66bfddea93d4",
+    "new_base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+    "unchanged_semantic_inputs": {
+      "tools/node115_cli_config.py": "149b9f29d49d37dd6a4d0ef05041148568ed697a96d2acaefe9df6ca7660f26d",
+      "tests/test_node115_cli_config.py": "7d4c7a2dcf1abdba136b796d297e88fa887106662643389a6defa1bbe0d15f8f",
+      "research/work-items/RE-012-cli-config-115/spec.json": "9769571bf42c2118b62712e8a37d29cca1976aae16af748162e9b1979d0dc414",
+      "research/work-items/RE-012-cli-config-115/records.json": "993fcb5eeb5ad5095e8d805dd8000756050e8bdc0e713eff90412b985ea6b040",
+      "research/work-items/RE-012-cli-config-115/CONTRACT.md": "a114d0435c1a5a668959c8bbfae42fb7b18174384e65d4d70ed06002406c28b1",
+      "research/work-items/RE-012-cli-config-115/verify.py": "26c37cbc07429a519176ecb11296fdf6ab6b3710cbe7f112f18180a6b7da9ef0"
+    },
+    "generic_dependency_change": "The retained elf_index.py/fde_extents.py CLI choices remove release94. Their parsing functions are unchanged; manifest hashes refreshed for actual new-base files.",
+    "lfs": "Required current artifacts hydrated from the existing local LFS object cache; no node94 dependency restored."
   }
 }

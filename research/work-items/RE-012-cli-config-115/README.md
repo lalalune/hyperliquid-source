@@ -55,6 +55,14 @@ The small task-specific tool exists because historical tools fix node94
 addresses/digest and cannot validate this node115 path. It adds no general
 infrastructure or execution capability.
 
+The packet was first qualified on `c3b77a8e` and rechecked on the node115-only
+`8fd8db68` tree: 82 focused tests in both normal and optimized Python, 18 FDE
+tests, exact GNU/LLVM replay and repository checks passed. The first
+post-rebase catalogue check required regenerating the work-item inventory
+from 28 to 29; its failure and successful recheck are retained. No retired
+node94 tool, test or binary is needed for this packet's replay. The separate
+shared full-suite run and hosted CI are not claimed here.
+
 Public Clap source is an interpretive comparison under its retained MIT
 license, not first-party node source or an exact version identification.
 [sources.json](sources.json) pins official URLs, revisions and hashes;
