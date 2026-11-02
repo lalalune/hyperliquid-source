@@ -33,6 +33,16 @@ def read(data,va,n):
     s=matches[0];off=s['offset']+va-s['address'];return off,bytes(data[off:off+n])
 
 
+def rela_section(data):
+    """The .rela.dyn section, shape-checked before its entries are folded.
+    A size that is not a whole number of 24-byte entries would otherwise
+    escape the fold as a bare struct.error, not this module's ValueError:
+    the same fail-closed shape evm_amount_scale applies to this table."""
+    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    if sec['size']%24:raise ValueError('.rela.dyn truncated')
+    return sec
+
+
 def parameters(data,a):
     if a not in MAINS:raise ValueError('outside measured selector bodies')
     for site,raw in [(a+0x1f,'48f7d8'),(a+0x22,'0f'),(a+0x478,'4883f8'),(a+0x43b,'48837c2440')]:
@@ -86,6 +96,7 @@ def analyze(data):
         if code[:len(prefix)]!=prefix or va+len(code)+delta!=dst:raise ValueError('exit helper transfer changed')
     if read(data,0x2308274,8)[1]!=bytes.fromhex('4883c4085b415ec3'):
         raise ValueError('exit helper epilogue changed')
+    rela_section(data)
     for index,a in enumerate(MAINS):
         p=parameters(data,a);field=0x7c8 if index in [0,2] else 0x1338
         if p!={'condition':0x81,'threshold':101,'mode_equal':1,'all_buffer_offset':field,
