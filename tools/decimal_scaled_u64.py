@@ -116,6 +116,8 @@ class Image:
             start, fde = struct.unpack_from("<ii", self.data, off + 12 + 8 * i)
             start += addr
             fde_off = self.file_offset(fde + addr)
+            if fde_off + 16 > len(self.data):
+                fail("truncated FDE")
             begin, size = struct.unpack_from("<iI", self.data, fde_off + 8)
             if begin + fde + addr + 8 != start:
                 fail(f"FDE at {fde + addr:#x} disagrees with the search table")
