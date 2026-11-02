@@ -36,6 +36,16 @@ def read(data,va,n):
     s=matches[0];off=s['offset']+va-s['address'];return off,bytes(data[off:off+n])
 
 
+def rela_section(data):
+    """The .rela.dyn section, shape-checked before its entries are folded.
+    A size that is not a whole number of 24-byte entries would otherwise
+    escape the fold as a bare struct.error, not this module's ValueError:
+    the same fail-closed shape evm_amount_scale applies to this table."""
+    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    if sec['size']%24:raise ValueError('.rela.dyn truncated')
+    return sec
+
+
 def parameters(data):
     return {'divisor':struct.unpack('<d',read(data,0x458d50,8)[1])[0],
             'positive_infinity_hex':read(data,0x459010,8)[1].hex(),
@@ -75,6 +85,7 @@ def analyze(data):
     for site,target in DIRECT.items():
         code=read(data,site,5)[1]
         if code[0]!=0xe8 or site+5+struct.unpack_from('<i',code,1)[0]!=target:raise ValueError('latency direct call changed')
+    rela_section(data)
     for site,target in [(0x51c9aa6,0x51c9c9e),(0x51c9ac9,0x51c9b8a)]:
         code=read(data,site,6)[1]
         if code[:2]!=b'\x0f\x84' or site+6+struct.unpack_from('<i',code,2)[0]!=target:raise ValueError('latency guard transfer changed')
