@@ -162,16 +162,16 @@ class ActualByteProgressTests(unittest.TestCase):
 
     def test_actual_captures_and_retained_compiled_sources(self):
         stats = self.coverage['totals']['node94']
-        self.assertEqual((stats['raw_equal_bytes'], stats['bytes']), (4781, 4873))
-        self.assertEqual((stats['raw_equal_windows'], stats['relocation_qualified_windows'], stats['windows']), (5, 10, 10))
+        self.assertEqual((stats['raw_equal_bytes'], stats['bytes']), (5978, 6086))
+        self.assertEqual((stats['raw_equal_windows'], stats['relocation_qualified_windows'], stats['windows']), (6, 12, 12))
         self.assertEqual(self.coverage['totals']['node115']['windows'], 3)
         self.assertEqual(self.coverage['targets']['node94']['text_bytes'], 70370352)
         self.assertEqual(self.coverage['targets']['node94']['other_executable_bytes'], 4504)
         self.assertEqual(self.coverage['targets']['visor']['text_bytes'], 5150272)
         self.assertEqual(self.coverage['totals']['visor']['windows'], 0)
         self.assertTrue(all(row['windows'] == 0 for row in self.coverage['components'].values()))
-        self.assertEqual(self.coverage['dependencies']['node94']['rust-core']['bytes'], 2060)
-        self.assertEqual(sum(row['bytes'] for row in self.coverage['dependencies']['node94'].values()), 4873)
+        self.assertEqual(self.coverage['dependencies']['node94']['rust-core']['bytes'], 3141)
+        self.assertEqual(sum(row['bytes'] for row in self.coverage['dependencies']['node94'].values()), 6086)
 
     def test_byte_progress_does_not_complete_module_gates(self):
         progress = json.loads((ROOT / 'research/progress.json').read_text())
@@ -180,8 +180,8 @@ class ActualByteProgressTests(unittest.TestCase):
         self.assertEqual(progress, before)
         self.assertIn('0.00% (0/92 accepted gates; 0/23 components complete)', output)
         self.assertIn('0.00% (0/4 accepted gates; 0/1 components complete)', output)
-        self.assertIn('1,968/2,060 (95.53%)', output)
-        self.assertIn('0.00692%', output)
+        self.assertIn('3,033/3,141 (96.56%)', output)
+        self.assertIn('0.00865%', output)
         self.assertIn('| 0/4 | 0% | 0 | 0 |', output)
         self.assertIn('not 0% correct', output)
         self.assertNotIn('N/A', output)
@@ -195,6 +195,18 @@ class ActualByteProgressTests(unittest.TestCase):
         self.assertEqual(windows[0]['bytes'], 198)
         self.assertTrue(windows[0]['raw_equal'])
         self.assertEqual(windows[0]['relocation_bytes'], 0)
+
+    def test_string_pad_primary_is_a_separate_published_artifact_window(self):
+        windows = [row for row in self.coverage['windows']
+                   if row['id'] == 'node94-formatter-string-pad']
+        self.assertEqual(len(windows), 1)
+        row = windows[0]
+        self.assertEqual((row['start'], row['end']), (0x1573450, 0x1573889))
+        self.assertEqual(row['source_kind'], 'published-artifact')
+        self.assertEqual((row['bytes'], row['raw_equal_bytes'], row['relocation_bytes']),
+                         (1081, 1065, 16))
+        self.assertFalse(row['raw_equal'])
+        self.assertTrue(row['relocation_qualified'])
 
     def test_remainder_published_artifact_counts_one_interval(self):
         windows = [row for row in self.coverage['windows']
