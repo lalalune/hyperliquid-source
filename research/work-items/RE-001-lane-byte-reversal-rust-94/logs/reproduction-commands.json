@@ -1,0 +1,71 @@
+{
+  "native": {
+    "argv": [
+      "python3",
+      "-O",
+      "research/work-items/RE-001-lane-byte-reversal-rust-94/verify.py",
+      "--out",
+      "work/lane-byte-reversal/native"
+    ],
+    "exit": 0,
+    "stdout_stderr": "native.log"
+  },
+  "freeze": {
+    "argv": [
+      "python3",
+      "research/work-items/RE-001-lane-byte-reversal-rust-94/oracle.py",
+      "--freeze"
+    ],
+    "exit": 0,
+    "stdout": "oracle-freeze.log"
+  },
+  "live_query_template": [
+    [
+      "gh",
+      "pr",
+      "list",
+      "--repo",
+      "lalalune/hyperliquid-source",
+      "--state",
+      "open",
+      "--limit",
+      "200",
+      "--json",
+      "number,title,body,headRefName,url"
+    ],
+    [
+      "gh",
+      "issue",
+      "list",
+      "--repo",
+      "lalalune/hyperliquid-source",
+      "--state",
+      "open",
+      "--limit",
+      "200",
+      "--json",
+      "number,title,body,assignees,url"
+    ],
+    [
+      "gh",
+      "pr",
+      "list",
+      "--repo",
+      "lalalune/hyperliquid-source",
+      "--state",
+      "merged",
+      "--limit",
+      "50",
+      "--json",
+      "number,title,body,mergedAt,url"
+    ]
+  ],
+  "initial_and_final_live_query_exits": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ]
+}

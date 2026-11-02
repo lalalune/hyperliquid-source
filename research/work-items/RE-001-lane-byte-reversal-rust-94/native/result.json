@@ -1,0 +1,631 @@
+{
+  "build_hashes": {
+    "opt0": {
+      "client": "2826fb5e52214b17491cf0ec171aeac877952ede210128aa1b31007643c31f06",
+      "libnode94_lane_byte_reversal.rlib": "ec94f9d8ad0856f1800acf2edc21bd0e900a57d84121cda60f087665b19e0161"
+    },
+    "opt3": {
+      "client": "4260c700c7432c5aacdedb72c19a12389dbfd756029016229266d7f5f20358e6",
+      "libnode94_lane_byte_reversal.rlib": "d8ef985b3893779a3c7c82423d27048ea7ab4110613be9b86b6366e37b7aa956"
+    }
+  },
+  "captured_execution": false,
+  "comparator_controls": [
+    {
+      "name": "value",
+      "rejection": "output values"
+    },
+    {
+      "name": "missing",
+      "rejection": "output IDs/order/count"
+    },
+    {
+      "name": "duplicate",
+      "rejection": "duplicate output ID"
+    },
+    {
+      "name": "order",
+      "rejection": "output IDs/order/count"
+    }
+  ],
+  "compared_fields": "status, full preserved entry RAX, and lossless differences over every image byte; no masks",
+  "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: aarch64-apple-darwin\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+  "freeze": {
+    "cases": 8553,
+    "coverage": {
+      "disjoint": 1129,
+      "image-refusal": 50,
+      "partial-overlap": 5281,
+      "range-refusal": 1598,
+      "same-range": 495
+    },
+    "frozen_at_utc": "2026-11-01T22:04:25.852807+00:00",
+    "rust_source_absent": true,
+    "sha256": {
+      "expected.tsv": "9f20b67a9f868a1a123d782a8b0dfdf120b3899446ef5f42a4c63bc5788864e9",
+      "expected.tsv.gz": "5cb7677bce2a1bbb90a262067ce9be6502b4dea6e3e98b68cfaa0230cccce9af",
+      "inputs.tsv": "99efc3d0c49b459dd93405881b5e8ac8803354a5646e16049806040469b07d4b",
+      "inputs.tsv.gz": "b9a5dd7dc501576e980c722ba3211a3428aec3dbdc16edb6635e374520439b6c",
+      "oracle.py": "650774a949c935470871e6781b02a63695644c4806d5d33bd334c4f93af4d876"
+    },
+    "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "instruction_emulation": false,
+  "mutants": [
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "-"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6743,
+      "name": "big-endian-decode",
+      "output_sha256": "68538d3b04593533981563f666d402410688bfc73683845108a3ab50e452ded5"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "-"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6743,
+      "name": "little-endian-store",
+      "output_sha256": "68538d3b04593533981563f666d402410688bfc73683845108a3ab50e452ded5"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6207,
+      "name": "skip-last-lane",
+      "output_sha256": "c09c2f000a2eb8472289593b1f149a191ff5da8a4f28a5932d4cade25658cb00"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6207,
+      "name": "skip-first-lane",
+      "output_sha256": "2f9859f5e8a667e328d80808524b5992582c4709a929c6d165c5203e04fdaa45"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6591,
+      "name": "only-first-half",
+      "output_sha256": "d08c80cde7486e7212b4c0e81ec417d631106c30ba85cc4d839f9bbfd8f2b26b"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:00000000ffffffff",
+          "1:81,3:2b,4:00,5:3a,7:e4,8:00,9:f3,b:9d,c:00,d:ac,f:56,10:00,11:65,13:0f,14:00,15:1e,17:c8,18:00,19:d7,1b:81,1c:00,1d:90,1f:3a,20:00"
+        ],
+        "expected": [
+          "V:00000000ffffffff",
+          "1:81,3:2b,4:00,5:3a,7:e4,8:b9,9:f3,b:9d,c:72,d:ac,f:56,10:2b,11:65,13:0f,14:e4,15:1e,17:c8,18:9d,19:d7,1b:81,1c:56,1d:90,1f:3a,20:0f"
+        ],
+        "id": "case-00004"
+      },
+      "mismatches": 2361,
+      "name": "stream-live-source",
+      "output_sha256": "609a277080548cc6e5c6ee266db3543f8cb62fa2f83703a55e037c6fd37b57a5"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "0:b9,1:81,3:2b,4:72,5:3a,7:e4,8:2b,9:f3,b:9d,c:e4,d:ac,f:56,10:9d,11:65,13:0f,14:56,15:1e,17:c8,18:0f,19:d7,1b:81,1c:c8,1d:90,1f:3a"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6925,
+      "name": "source-plus-one",
+      "output_sha256": "120b96be19d8f64b577abdb0dcc4ee647afad58e17747e445b463ea232f69231"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "1:81,3:2b,4:00,5:3a,7:e4,8:b9,9:f3,b:9d,c:72,d:ac,f:56,10:2b,11:65,13:0f,14:e4,15:1e,17:c8,18:9d,19:d7,1b:81,1c:56,1d:90,1f:3a,20:0f"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6918,
+      "name": "destination-plus-one",
+      "output_sha256": "df8e9690b79c8a15739adbeec0e7f8f55703978bb584cd5bafb9cef389dccf47"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "-"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 493,
+      "name": "same-range-noop",
+      "output_sha256": "c6bc08497473b03fb9902725fbaa2fdaff6d1fdb0273f154a143a1cec5c0e93d"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "E",
+          "-"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 5776,
+      "name": "refuse-aliases",
+      "output_sha256": "0260af2d21a0703bc494857a610a67982b6f40edd53f7e722108039e7ac80414"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:00000000ffffffff",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "expected": [
+          "V:00000000ffffffff",
+          "1:81,3:2b,4:00,5:3a,7:e4,8:b9,9:f3,b:9d,c:72,d:ac,f:56,10:2b,11:65,13:0f,14:e4,15:1e,17:c8,18:9d,19:d7,1b:81,1c:56,1d:90,1f:3a,20:0f"
+        ],
+        "id": "case-00004"
+      },
+      "mismatches": 6847,
+      "name": "store-source-instead-destination",
+      "output_sha256": "5f356dec4b0a53e522a5023ae63efdc34cc868be0b00accb76c60ece755e596b"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000000",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6237,
+      "name": "return-zero",
+      "output_sha256": "4a08cbbfaad1a310d79704f72257e78610b058a39b3e651b2bb184815b65f6d5"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000001000",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6898,
+      "name": "return-source",
+      "output_sha256": "dd4c134d370e16ccc394ae0f5e3b616d39f81e56a9f4dd464f99ef133927fad3"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000001000",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6899,
+      "name": "return-destination",
+      "output_sha256": "cae0bdfaa161dd27c47f467190ccd849c1515ef07a9926f1ff746f0468fd1837"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000000",
+          "1:9e,3:48,4:1d,5:57,7:01,8:d6,9:10,b:ba,c:8f,d:c9,f:73,10:48,11:82,13:2c,14:01,15:3b,17:e5,18:ba,19:f4,1b:9e,1c:73,1d:ad,1f:57,20:2c"
+        ],
+        "expected": [
+          "V:0000000100000000",
+          "1:9e,3:48,4:1d,5:57,7:01,8:d6,9:10,b:ba,c:8f,d:c9,f:73,10:48,11:82,13:2c,14:01,15:3b,17:e5,18:ba,19:f4,1b:9e,1c:73,1d:ad,1f:57,20:2c"
+        ],
+        "id": "case-00005"
+      },
+      "mismatches": 3578,
+      "name": "truncate-rax",
+      "output_sha256": "b767106d44e7856f830fc9f179fbd5c7b686c585437ca22103b4040ae09fabf2"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f,20:c9"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6848,
+      "name": "touch-outside-destination",
+      "output_sha256": "43ef1cdf92e62247e34df9406653b1a812ac9c59c887e1c0965b2f4b183d1c92"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:00000000ffffffff",
+          "1:81,3:00,4:00,5:3a,7:e4,8:b9,9:f3,b:9d,c:72,d:ac,f:56,10:2b,11:65,13:0f,14:e4,15:1e,17:c8,18:9d,19:d7,1b:81,1c:56,1d:90,1f:3a,20:0f"
+        ],
+        "expected": [
+          "V:00000000ffffffff",
+          "1:81,3:2b,4:00,5:3a,7:e4,8:b9,9:f3,b:9d,c:72,d:ac,f:56,10:2b,11:65,13:0f,14:e4,15:1e,17:c8,18:9d,19:d7,1b:81,1c:56,1d:90,1f:3a,20:0f"
+        ],
+        "id": "case-00004"
+      },
+      "mismatches": 2354,
+      "name": "write-before-destination-admission",
+      "output_sha256": "ec556b378eee9bc15986711302dac69512bd59e4d6587ccd4bec50cb4fd0c974"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000100000000",
+          "0:84,1:59,2:2e,3:03,4:3d,5:12,6:e7,7:bc,8:f6,9:cb,a:a0,b:75,c:af,d:84,e:59,f:2e,10:68,11:3d,12:12,13:e7,14:21,15:f6,16:cb,17:a0,18:da,19:af,1a:84,1b:59,1c:93,1d:68,1e:3d,1f:12"
+        ],
+        "expected": [
+          "E",
+          "-"
+        ],
+        "id": "case-06359"
+      },
+      "mismatches": 35,
+      "name": "admit-wrapping-image",
+      "output_sha256": "5bd42c14ba1fb42fe5e7529eb18d17a3bd5caa12422b43f2fe55571fbe2fb0c3"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "E",
+          "-"
+        ],
+        "expected": [
+          "V:7fffffffffffffff",
+          "0:84,1:59,2:2e,3:03,4:3d,5:12,6:e7,7:bc,8:f6,9:cb,a:a0,b:75,c:af,d:84,e:59,f:2e,10:68,11:3d,12:12,13:e7,14:21,15:f6,16:cb,17:a0,18:da,19:af,1a:84,1b:59,1c:93,1d:68,1e:3d,1f:12"
+        ],
+        "id": "case-05802"
+      },
+      "mismatches": 86,
+      "name": "reject-exact-end",
+      "output_sha256": "55e4e0a6a395c6e0d0a21383b6110e93cb8cef822696377aa6f5bea3194cc50a"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "0:81,4:3a,8:f3,c:ac,10:65,14:1e,18:d7,1c:90"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6773,
+      "name": "byte-only-store",
+      "output_sha256": "da8b5a66132f5619bbaedaad71afd850ab979f44dac0a5323836d66f5f553f8c"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "0:81,1:00,2:2b,3:56,4:3a,5:b9,6:e4,7:0f,8:f3,9:72,a:9d,b:c8,c:ac,d:2b,e:56,f:81,10:65,11:e4,12:0f,13:3a,14:1e,15:9d,16:c8,17:f3,18:d7,19:56,1a:81,1b:ac,1c:90,1d:0f,1e:3a,1f:65"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 5847,
+      "name": "rotate-by-eight",
+      "output_sha256": "95e84fc3621473a043fc8a9c6889cb0d9f5cdee29134b2589f71c8e99f3919db"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "0:3a,1:0f,2:e4,3:b9,4:81,5:56,6:2b,7:00,8:ac,9:81,a:56,b:2b,c:f3,d:c8,e:9d,f:72,10:1e,11:f3,12:c8,13:9d,14:65,15:3a,16:0f,17:e4,18:90,19:65,1a:3a,1b:0f,1c:d7,1d:ac,1e:81,1f:56"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6662,
+      "name": "whole-qword-reversal",
+      "output_sha256": "4a1debec2e48ae695f76e0a6e1c4511258ea0fb29c339fd049cbb032ac694333"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "0:b9,1:e4,2:0f,3:3a,4:00,5:2b,6:56,7:81,8:2b,9:56,a:81,b:ac,c:72,d:9d,e:c8,f:f3,10:9d,11:c8,12:f3,13:1e,14:e4,15:0f,16:3a,17:65,18:0f,19:3a,1a:65,1b:90,1c:56,1d:81,1e:ac,1f:d7"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6743,
+      "name": "historical-half-swap",
+      "output_sha256": "0e97bab4987c6f440b2f7d7efec630721a38368fd4381ebfa48b879180853f5c"
+    },
+    {
+      "cases": 8553,
+      "first_witness": {
+        "actual": [
+          "V:0000000000000001",
+          "0:90,1:65,2:3a,3:0f,4:d7,5:ac,6:81,7:56,8:1e,9:f3,b:9d,c:65,d:3a,e:0f,f:e4,10:ac,11:81,12:56,13:2b,14:f3,16:9d,17:72,18:3a,19:0f,1a:e4,1b:b9,1c:81,1d:56,1e:2b,1f:00"
+        ],
+        "expected": [
+          "V:0000000000000001",
+          "0:81,1:56,2:2b,3:00,4:3a,5:0f,6:e4,7:b9,8:f3,9:c8,a:9d,b:72,c:ac,d:81,e:56,f:2b,10:65,11:3a,12:0f,13:e4,14:1e,15:f3,16:c8,17:9d,18:d7,19:ac,1a:81,1b:56,1c:90,1d:65,1e:3a,1f:0f"
+        ],
+        "id": "case-00001"
+      },
+      "mismatches": 6662,
+      "name": "whole-buffer-reversal",
+      "output_sha256": "4f1134b49793009181aa086dc5d31692ca4a741ef85431db91383cd53188b6e9"
+    }
+  ],
+  "native_target_differential": false,
+  "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+  "python": "3.14.3",
+  "runs": [
+    {
+      "build": 1,
+      "cases": 8553,
+      "mismatches": 0,
+      "opt": 0,
+      "output_sha256": "9f20b67a9f868a1a123d782a8b0dfdf120b3899446ef5f42a4c63bc5788864e9"
+    },
+    {
+      "build": 2,
+      "cases": 8553,
+      "mismatches": 0,
+      "opt": 0,
+      "output_sha256": "9f20b67a9f868a1a123d782a8b0dfdf120b3899446ef5f42a4c63bc5788864e9"
+    },
+    {
+      "build": 1,
+      "cases": 8553,
+      "mismatches": 0,
+      "opt": 3,
+      "output_sha256": "9f20b67a9f868a1a123d782a8b0dfdf120b3899446ef5f42a4c63bc5788864e9"
+    },
+    {
+      "build": 2,
+      "cases": 8553,
+      "mismatches": 0,
+      "opt": 3,
+      "output_sha256": "9f20b67a9f868a1a123d782a8b0dfdf120b3899446ef5f42a4c63bc5788864e9"
+    }
+  ],
+  "source_sha256": {
+    "Cargo.lock": "56f32c5e16a769aba799be737e23ce81beb99a5caf849abab42a46f541e33df8",
+    "Cargo.toml": "4583a57d3230cf1e0dfb4f8fbb880ecd01f8756608089f94ecfd91dc37dd9d02",
+    "client.rs": "c03ae6d3a75e525c8f8f13492ff7c6e3c108c665349908b6bff3cd5025eb4cd5",
+    "lib.rs": "d8033887494803e103c032542a2dc22514a8eeaa024e677fbdd84c1c970c4988",
+    "rust-toolchain.toml": "8292b79552b38f73aaa7410bd8b0226ddf9a5e2cb6516a139c0090723194e11a"
+  },
+  "static_controls": [
+    {
+      "name": "full-target",
+      "rejection": "target SHA-256"
+    },
+    {
+      "name": "instruction-56544a0",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544a4",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544a7",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544ab",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544af",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544b2",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544b6",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544b9",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544bd",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544c0",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544c4",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544c7",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544cb",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544cf",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544d3",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544d7",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544da",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544de",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544e2",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544e6",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544ea",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "instruction-56544ee",
+      "rejection": "reverse body"
+    },
+    {
+      "name": "reverse-fde-range",
+      "rejection": "reverse FDE overlap"
+    },
+    {
+      "name": "cie-ce1518",
+      "rejection": "CIE bytes"
+    },
+    {
+      "name": "adjacent-fde",
+      "rejection": "next FDE bytes"
+    },
+    {
+      "name": "extra-naming",
+      "rejection": "naming relocation"
+    },
+    {
+      "name": "code-relocation",
+      "rejection": "protected code relocation"
+    },
+    {
+      "name": "extra-call-pattern",
+      "rejection": "direct call census"
+    },
+    {
+      "name": "extra-jump-pattern",
+      "rejection": "direct jump census"
+    },
+    {
+      "name": "unselected-fde-overlap",
+      "rejection": "reverse FDE overlap"
+    }
+  ],
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
