@@ -1,0 +1,105 @@
+{
+  "task": "RE-001",
+  "artifact": "work/hl-node-115.bin",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "provenance_path": "artifacts/node/115/hl-node",
+  "windows": {
+    "main": {
+      "start": "0x605d7b0",
+      "end": "0x605d926",
+      "size_bytes": 374,
+      "fde_offset": "0x75a194",
+      "fde_length": "0x50",
+      "cie_offset": "0x730230",
+      "lsda_augmentation": "f3 dd 01 ff",
+      "lsda_call_site_table": "not decoded in this packet",
+      "landing_pad": "0x605d91a",
+      "cleanup_stub": "0x605d786"
+    },
+    "slow": {
+      "start": "0x605d6c0",
+      "end": "0x605d785",
+      "size_bytes": 197,
+      "fde_offset": "0x367694",
+      "fde_length": "0x5c",
+      "cie_offset": "0",
+      "lsda": null
+    },
+    "stub": {
+      "start": "0x605d786",
+      "end": "0x605d7ab",
+      "size_bytes": 37,
+      "fde_offset": "0x75a1e8",
+      "fde_length": "0x1c",
+      "cie_offset": "0x730230",
+      "lsda_augmentation": "ae dd 01 ff",
+      "lsda_call_site_table": "not decoded in this packet"
+    }
+  },
+  "fields": {
+    "block_hint_0x810": "value read by the slow window; shifted right by 2 for the big-path guard and passed as the block callee's second argument",
+    "big_counter_0x8b8": "incremented by 1 on the slow window's big path before the tail jump",
+    "end_0x8c0": "written by the slow window's install: block start plus hint when consume is set, block start plus remaining otherwise",
+    "cursor_0x8c8": "bump cursor read and written by the main window's fast path; written by the slow window's install",
+    "remaining_0x8d0": "remaining space read by the main window's fast path; set to hint minus size by the slow window's install",
+    "gate_0x8d8": "gate tested by the main window (zero takes the fast path) and passed as the grow callee's second argument by the slow window"
+  },
+  "main_behavior": {
+    "arguments": ["rdi = arena object", "rsi = size", "rdx = quantum (rounding unit)", "rcx = logger (report argument only)"],
+    "grow_route": "gate nonzero AND quantum nonzero AND size nonzero: rounded = ((size - 1) // quantum + 1) * quantum; block = grow(object, rounded) via 0x605d000; nonzero block is returned at once with no cursor update",
+    "grow_failure": "grow result zero: errno string built via 0x61d1f30, reported via 0x5fceda0, heap temporary freed with sized delete of size (field at +0x10) + 1 unless the data pointer equals the object's +0x10 buffer, then the fast path runs",
+    "fast_route": "gate zero OR quantum zero OR size zero, or after a failed grow: pad = (16 - (cursor & 0xf)) % 16; needed = size + pad; remaining < needed tail-jumps to the slow window with consume 1, else cursor += needed, remaining -= needed, return cursor_before + pad",
+    "landing_pad": "0x605d91a disposes the temporary string (stub 0x605d786: _M_dispose on the string at rsp, then _Unwind_Resume) when unwinding through the error-report region"
+  },
+  "slow_behavior": {
+    "arguments": ["rdi = arena object", "rsi = size", "rdx = consume flag (low byte)"],
+    "big_route": "size > (block hint >> 2): big counter (+0x8b8) += 1, then tail-jump to the block callee 0x605d3c0 with (object, size); its return is the result and no fields are installed",
+    "grow_route": "gate nonzero: block = grow(object, gate) via 0x605d000; nonzero block installs with hint = gate; zero block reloads the block hint and falls through to the block callee",
+    "block_route": "gate zero, or grow returned zero: block = block_callee(object, block hint) via 0x605d3c0; installs with hint = block hint",
+    "install": "remaining = hint - size; consume set: cursor = block + size, end = block + hint; consume clear: cursor = block, end = block + remaining; return value is the block start in both arms"
+  },
+  "report": {
+    "callee": "0x5fceda0",
+    "level": 2,
+    "logger": "fourth argument of the main window (rcx on entry)",
+    "format": "[%s:119] AllocateAligned fail to allocate huge TLB pages: %s",
+    "file": "memory/arena.cc",
+    "detail": "data of the temporary error string built from errno"
+  },
+  "callees_by_contract": {
+    "grow_0x605d000": {"start": "0x605d000", "end": "0x605d3a1", "size_bytes": 929, "fde_offset": "0x75a0ac", "fde_length": "0x4c", "cie_offset": "0x730230"},
+    "block_0x605d3c0": {"start": "0x605d3c0", "end": "0x605d6bf", "size_bytes": 767, "fde_offset": "0x75a120", "fde_length": "0x4c", "cie_offset": "0x730230"},
+    "report_0x5fceda0": {"start": "0x5fceda0", "end": "0x5fcee93", "size_bytes": 243, "fde_offset": "0x3622e4", "fde_length": "0x30", "cie_offset": "0"},
+    "string_build_0x61d1f30": {"start": "0x61d1f30", "end": "0x61d2215", "size_bytes": 741, "fde_offset": "0x76d358", "fde_length": "0x50", "cie_offset": "0x730230"}
+  },
+  "member_vtable_0x64d1fb8": {
+    "typeinfo_slot": "0x64d1fb0 (RELATIVE addend 0x64d1f90)",
+    "slots": ["0x605cc30", "0x605cf80", "0x605d930", "0x605d7b0", "0x605cc20"],
+    "note": "the main window is the fourth virtual (slot 0x64d1fd0) of the member class whose destroy is 0x605cc30, mapped by the destructor-pair packet"
+  },
+  "census": {
+    "main": {
+      "direct_calls": ["0x5dcd2f9", "0x5f11864", "0x5f11a55", "0x5f11b63", "0x5f11f0e", "0x5f9a0d4", "0x605c97b", "0x612c72e"],
+      "tail_jumps": [],
+      "qword_hits_file_offsets": ["0x11a778"],
+      "relative_slots": ["0x64d1fd0"],
+      "note": "the qword hit is the addend field of the RELATIVE entry for slot 0x64d1fd0, not a separate reference; the 0x5f11xxx sites are the two destructor-pair-class virtuals, the other four callers' internals were not read"
+    },
+    "slow": {
+      "direct_calls": ["0x5f11e39", "0x5f120c6"],
+      "tail_jumps": ["0x605d88d", "0x605d962"],
+      "qword_hits_file_offsets": [],
+      "relative_slots": [],
+      "note": "0x605d88d is the main window's slow path; 0x605d962 is inside the neighbouring member virtual 0x605d930, which tail-jumps to the slow window at its end"
+    }
+  },
+  "unknowns": [
+    "the arena class's source name (arena.cc and the AllocateAligned report string ground the file and function names; the class name itself is inference)",
+    "the internals of 0x605d000 and 0x605d3c0 (by contract only)",
+    "the exact role of the +0x810 block hint beyond the guard and the block-callee argument",
+    "the meaning of the +0x8c0 end field in the consume-clear install arm (recorded literally as block start plus remaining)",
+    "the purposes of the four direct callers outside the destructor-pair-class virtuals (0x5dcd2f9, 0x5f9a0d4, 0x605c97b, 0x612c72e)",
+    "the role of the neighbouring member virtual 0x605d930 beyond its tail jump to the slow window",
+    "the LSDA call-site tables for the main window and the stub (augmentation bytes recorded; tables not decoded)"
+  ]
+}
