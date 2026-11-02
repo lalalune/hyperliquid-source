@@ -1,0 +1,87 @@
+
+visor.elf:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000066c270 <.text+0x3af0f0>:
+  66c270:	55                                              	push   rbp
+  66c271:	48 89 e5                                        	mov    rbp,rsp
+  66c274:	41 57                                           	push   r15
+  66c276:	41 56                                           	push   r14
+  66c278:	41 54                                           	push   r12
+  66c27a:	53                                              	push   rbx
+  66c27b:	49 89 d6                                        	mov    r14,rdx
+  66c27e:	48 89 fb                                        	mov    rbx,rdi
+  66c281:	8b 05 91 1f 18 00                               	mov    eax,DWORD PTR [rip+0x181f91]        # 7ee218 <__register_atfork@plt+0x47618>
+  66c287:	3d fd ff ff 3f                                  	cmp    eax,0x3ffffffd
+  66c28c:	0f 87 a2 00 00 00                               	ja     66c334 <__cxa_finalize@plt-0x13a4cc>
+  66c292:	8d 48 01                                        	lea    ecx,[rax+0x1]
+  66c295:	f0 0f b1 0d 7b 1f 18 00                         	lock cmpxchg DWORD PTR [rip+0x181f7b],ecx        # 7ee218 <__register_atfork@plt+0x47618>
+  66c29d:	0f 85 91 00 00 00                               	jne    66c334 <__cxa_finalize@plt-0x13a4cc>
+  66c2a3:	0f b6 05 76 1f 18 00                            	movzx  eax,BYTE PTR [rip+0x181f76]        # 7ee220 <__register_atfork@plt+0x47620>
+  66c2aa:	4c 89 f7                                        	mov    rdi,r14
+  66c2ad:	ff 15 6d b9 17 00                               	call   QWORD PTR [rip+0x17b96d]        # 7e7c20 <__register_atfork@plt+0x41020>
+  66c2b3:	48 85 c0                                        	test   rax,rax
+  66c2b6:	74 36                                           	je     66c2ee <__cxa_finalize@plt-0x13a512>
+  66c2b8:	49 89 c7                                        	mov    r15,rax
+  66c2bb:	48 89 c7                                        	mov    rdi,rax
+  66c2be:	ff 15 14 89 17 00                               	call   QWORD PTR [rip+0x178914]        # 7e4bd8 <__register_atfork@plt+0x3dfd8>
+  66c2c4:	49 89 c6                                        	mov    r14,rax
+  66c2c7:	48 85 c0                                        	test   rax,rax
+  66c2ca:	74 31                                           	je     66c2fd <__cxa_finalize@plt-0x13a503>
+  66c2cc:	4c 89 f7                                        	mov    rdi,r14
+  66c2cf:	ff 15 8b 88 17 00                               	call   QWORD PTR [rip+0x17888b]        # 7e4b60 <__register_atfork@plt+0x3df60>
+  66c2d5:	48 85 c0                                        	test   rax,rax
+  66c2d8:	74 7b                                           	je     66c355 <__cxa_finalize@plt-0x13a4ab>
+  66c2da:	49 89 c4                                        	mov    r12,rax
+  66c2dd:	48 89 c7                                        	mov    rdi,rax
+  66c2e0:	4c 89 fe                                        	mov    rsi,r15
+  66c2e3:	4c 89 f2                                        	mov    rdx,r14
+  66c2e6:	ff 15 7c 88 17 00                               	call   QWORD PTR [rip+0x17887c]        # 7e4b68 <__register_atfork@plt+0x3df68>
+  66c2ec:	eb 15                                           	jmp    66c303 <__cxa_finalize@plt-0x13a4fd>
+  66c2ee:	48 b8 00 00 00 00 00 00 00 80                   	movabs rax,0x8000000000000000
+  66c2f8:	48 89 03                                        	mov    QWORD PTR [rbx],rax
+  66c2fb:	eb 11                                           	jmp    66c30e <__cxa_finalize@plt-0x13a4f2>
+  66c2fd:	41 bc 01 00 00 00                               	mov    r12d,0x1
+  66c303:	4c 89 33                                        	mov    QWORD PTR [rbx],r14
+  66c306:	4c 89 63 08                                     	mov    QWORD PTR [rbx+0x8],r12
+  66c30a:	4c 89 73 10                                     	mov    QWORD PTR [rbx+0x10],r14
+  66c30e:	be ff ff ff ff                                  	mov    esi,0xffffffff
+  66c313:	f0 0f c1 35 fd 1e 18 00                         	lock xadd DWORD PTR [rip+0x181efd],esi        # 7ee218 <__register_atfork@plt+0x47618>
+  66c31b:	ff ce                                           	dec    esi
+  66c31d:	89 f0                                           	mov    eax,esi
+  66c31f:	25 ff ff ff bf                                  	and    eax,0xbfffffff
+  66c324:	f7 d8                                           	neg    eax
+  66c326:	70 1e                                           	jo     66c346 <__cxa_finalize@plt-0x13a4ba>
+  66c328:	48 89 d8                                        	mov    rax,rbx
+  66c32b:	5b                                              	pop    rbx
+  66c32c:	41 5c                                           	pop    r12
+  66c32e:	41 5e                                           	pop    r14
+  66c330:	41 5f                                           	pop    r15
+  66c332:	5d                                              	pop    rbp
+  66c333:	c3                                              	ret
+  66c334:	48 8d 3d dd 1e 18 00                            	lea    rdi,[rip+0x181edd]        # 7ee218 <__register_atfork@plt+0x47618>
+  66c33b:	ff 15 e7 b8 17 00                               	call   QWORD PTR [rip+0x17b8e7]        # 7e7c28 <__register_atfork@plt+0x41028>
+  66c341:	e9 5d ff ff ff                                  	jmp    66c2a3 <__cxa_finalize@plt-0x13a55d>
+  66c346:	48 8d 3d cb 1e 18 00                            	lea    rdi,[rip+0x181ecb]        # 7ee218 <__register_atfork@plt+0x47618>
+  66c34d:	ff 15 bd b7 17 00                               	call   QWORD PTR [rip+0x17b7bd]        # 7e7b10 <__register_atfork@plt+0x40f10>
+  66c353:	eb d3                                           	jmp    66c328 <__cxa_finalize@plt-0x13a4d8>
+  66c355:	bf 01 00 00 00                                  	mov    edi,0x1
+  66c35a:	4c 89 f6                                        	mov    rsi,r14
+  66c35d:	ff 15 dd 87 17 00                               	call   QWORD PTR [rip+0x1787dd]        # 7e4b40 <__register_atfork@plt+0x3df40>
+  66c363:	0f 0b                                           	ud2
+  66c365:	48 89 c3                                        	mov    rbx,rax
+  66c368:	be ff ff ff ff                                  	mov    esi,0xffffffff
+  66c36d:	f0 0f c1 35 a3 1e 18 00                         	lock xadd DWORD PTR [rip+0x181ea3],esi        # 7ee218 <__register_atfork@plt+0x47618>
+  66c375:	ff ce                                           	dec    esi
+  66c377:	89 f0                                           	mov    eax,esi
+  66c379:	25 ff ff ff bf                                  	and    eax,0xbfffffff
+  66c37e:	f7 d8                                           	neg    eax
+  66c380:	70 08                                           	jo     66c38a <__cxa_finalize@plt-0x13a476>
+  66c382:	48 89 df                                        	mov    rdi,rbx
+  66c385:	e8 96 a4 13 00                                  	call   7a6820 <_Unwind_Resume@plt>
+  66c38a:	48 8d 3d 87 1e 18 00                            	lea    rdi,[rip+0x181e87]        # 7ee218 <__register_atfork@plt+0x47618>
+  66c391:	ff 15 79 b7 17 00                               	call   QWORD PTR [rip+0x17b779]        # 7e7b10 <__register_atfork@plt+0x40f10>
+  66c397:	eb e9                                           	jmp    66c382 <__cxa_finalize@plt-0x13a47e>
+  66c399:	ff 15 79 89 17 00                               	call   QWORD PTR [rip+0x178979]        # 7e4d18 <__register_atfork@plt+0x3e118>

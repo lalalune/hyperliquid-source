@@ -1,0 +1,165 @@
+
+visor.elf:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+00000000002bd180 <.text>:
+  6723e0: 55                           	push	rbp
+  6723e1: 48 89 e5                     	mov	rbp, rsp
+  6723e4: 41 57                        	push	r15
+  6723e6: 41 56                        	push	r14
+  6723e8: 41 55                        	push	r13
+  6723ea: 41 54                        	push	r12
+  6723ec: 53                           	push	rbx
+  6723ed: 48 83 ec 38                  	sub	rsp, 0x38
+  6723f1: 48 89 4d b0                  	mov	qword ptr [rbp - 0x50], rcx
+  6723f5: 48 89 55 b8                  	mov	qword ptr [rbp - 0x48], rdx
+  6723f9: 48 89 fb                     	mov	rbx, rdi
+  6723fc: 8b 07                        	mov	eax, dword ptr [rdi]
+  6723fe: 4c 8d 6d c8                  	lea	r13, [rbp - 0x38]
+  672402: 85 f6                        	test	esi, esi
+  672404: 0f 84 ff 00 00 00            	je	0x672509 <.text+0x3b5389>
+  67240a: 4c 8b 35 7f 30 17 00         	mov	r14, qword ptr [rip + 0x17307f] # 0x7e5490
+  672411: 4c 8b 3d e8 34 17 00         	mov	r15, qword ptr [rip + 0x1734e8] # 0x7e5900
+  672418: eb 13                        	jmp	0x67242d <.text+0x3b52ad>
+  67241a: 66 0f 1f 44 00 00            	nop	word ptr [rax + rax]
+  672420: 83 ca 01                     	or	edx, 0x1
+  672423: f0                           	lock
+  672424: 0f b1 13                     	cmpxchg	dword ptr [rbx], edx
+  672427: 0f 84 8b 00 00 00            	je	0x6724b8 <.text+0x3b5338>
+  67242d: 89 c1                        	mov	ecx, eax
+  67242f: 83 e1 03                     	and	ecx, 0x3
+  672432: 89 c2                        	mov	edx, eax
+  672434: 83 e2 04                     	and	edx, 0x4
+  672437: 8d 71 fe                     	lea	esi, [rcx - 0x2]
+  67243a: 83 fe 02                     	cmp	esi, 0x2
+  67243d: 72 e1                        	jb	0x672420 <.text+0x3b52a0>
+  67243f: 83 f9 01                     	cmp	ecx, 0x1
+  672442: 0f 85 b2 00 00 00            	jne	0x6724fa <.text+0x3b537a>
+  672448: 41 89 c4                     	mov	r12d, eax
+  67244b: 85 d2                        	test	edx, edx
+  67244d: 75 10                        	jne	0x67245f <.text+0x3b52df>
+  67244f: 41 83 cc 04                  	or	r12d, 0x4
+  672453: b8 01 00 00 00               	mov	eax, 0x1
+  672458: f0                           	lock
+  672459: 44 0f b1 23                  	cmpxchg	dword ptr [rbx], r12d
+  67245d: 75 ce                        	jne	0x67242d <.text+0x3b52ad>
+  67245f: 48 c7 45 c0 00 00 00 00      	mov	qword ptr [rbp - 0x40], 0x0
+  672467: 66 0f 1f 84 00 00 00 00 00   	nop	word ptr [rax + rax]
+  672470: 8b 03                        	mov	eax, dword ptr [rbx]
+  672472: 44 39 e0                     	cmp	eax, r12d
+  672475: 75 3a                        	jne	0x6724b1 <.text+0x3b5331>
+  672477: 80 7d c0 00                  	cmp	byte ptr [rbp - 0x40], 0x0
+  67247b: 41 b8 00 00 00 00            	mov	r8d, 0x0
+  672481: 4d 0f 45 c5                  	cmovne	r8, r13
+  672485: c7 04 24 ff ff ff ff         	mov	dword ptr [rsp], 0xffffffff
+  67248c: bf ca 00 00 00               	mov	edi, 0xca
+  672491: 48 89 de                     	mov	rsi, rbx
+  672494: ba 89 00 00 00               	mov	edx, 0x89
+  672499: 44 89 e1                     	mov	ecx, r12d
+  67249c: 45 31 c9                     	xor	r9d, r9d
+  67249f: 31 c0                        	xor	eax, eax
+  6724a1: 41 ff d6                     	call	r14
+  6724a4: 48 85 c0                     	test	rax, rax
+  6724a7: 79 08                        	jns	0x6724b1 <.text+0x3b5331>
+  6724a9: 41 ff d7                     	call	r15
+  6724ac: 83 38 04                     	cmp	dword ptr [rax], 0x4
+  6724af: 74 bf                        	je	0x672470 <.text+0x3b52f0>
+  6724b1: 8b 03                        	mov	eax, dword ptr [rbx]
+  6724b3: e9 75 ff ff ff               	jmp	0x67242d <.text+0x3b52ad>
+  6724b8: 83 f9 02                     	cmp	ecx, 0x2
+  6724bb: 0f 94 c2                     	sete	dl
+  6724be: c7 45 c0 00 00 00 00         	mov	dword ptr [rbp - 0x40], 0x0
+  6724c5: 88 55 c4                     	mov	byte ptr [rbp - 0x3c], dl
+  6724c8: 48 8d 75 c0                  	lea	rsi, [rbp - 0x40]
+  6724cc: 48 8b 7d b8                  	mov	rdi, qword ptr [rbp - 0x48]
+  6724d0: 48 8b 45 b0                  	mov	rax, qword ptr [rbp - 0x50]
+  6724d4: ff 50 20                     	call	qword ptr [rax + 0x20]
+  6724d7: 8b 45 c0                     	mov	eax, dword ptr [rbp - 0x40]
+  6724da: 87 03                        	xchg	dword ptr [rbx], eax
+  6724dc: a8 04                        	test	al, 0x4
+  6724de: 74 1a                        	je	0x6724fa <.text+0x3b537a>
+  6724e0: bf ca 00 00 00               	mov	edi, 0xca
+  6724e5: 48 89 de                     	mov	rsi, rbx
+  6724e8: ba 81 00 00 00               	mov	edx, 0x81
+  6724ed: b9 ff ff ff 7f               	mov	ecx, 0x7fffffff
+  6724f2: 31 c0                        	xor	eax, eax
+  6724f4: ff 15 96 2f 17 00            	call	qword ptr [rip + 0x172f96] # 0x7e5490
+  6724fa: 48 83 c4 38                  	add	rsp, 0x38
+  6724fe: 5b                           	pop	rbx
+  6724ff: 41 5c                        	pop	r12
+  672501: 41 5d                        	pop	r13
+  672503: 41 5e                        	pop	r14
+  672505: 41 5f                        	pop	r15
+  672507: 5d                           	pop	rbp
+  672508: c3                           	ret
+  672509: 4c 8d 3d 18 a9 a4 ff         	lea	r15, [rip - 0x5b56e8]   # 0xbce28
+  672510: eb 0e                        	jmp	0x672520 <.text+0x3b53a0>
+  672512: 83 c9 01                     	or	ecx, 0x1
+  672515: 31 d2                        	xor	edx, edx
+  672517: 44 89 e0                     	mov	eax, r12d
+  67251a: f0                           	lock
+  67251b: 0f b1 0b                     	cmpxchg	dword ptr [rbx], ecx
+  67251e: 74 9e                        	je	0x6724be <.text+0x3b533e>
+  672520: 89 c2                        	mov	edx, eax
+  672522: 83 e2 03                     	and	edx, 0x3
+  672525: 89 c1                        	mov	ecx, eax
+  672527: 83 e1 04                     	and	ecx, 0x4
+  67252a: 49 63 14 97                  	movsxd	rdx, dword ptr [r15 + 4*rdx]
+  67252e: 4c 01 fa                     	add	rdx, r15
+  672531: 41 89 c4                     	mov	r12d, eax
+  672534: ff e2                        	jmp	rdx
+  672536: 85 c9                        	test	ecx, ecx
+  672538: 75 10                        	jne	0x67254a <.text+0x3b53ca>
+  67253a: 41 83 cc 04                  	or	r12d, 0x4
+  67253e: b8 01 00 00 00               	mov	eax, 0x1
+  672543: f0                           	lock
+  672544: 44 0f b1 23                  	cmpxchg	dword ptr [rbx], r12d
+  672548: 75 d6                        	jne	0x672520 <.text+0x3b53a0>
+  67254a: 4d 89 c6                     	mov	r14, r8
+  67254d: 48 c7 45 c0 00 00 00 00      	mov	qword ptr [rbp - 0x40], 0x0
+  672555: 8b 03                        	mov	eax, dword ptr [rbx]
+  672557: 44 39 e0                     	cmp	eax, r12d
+  67255a: 75 40                        	jne	0x67259c <.text+0x3b541c>
+  67255c: 80 7d c0 00                  	cmp	byte ptr [rbp - 0x40], 0x0
+  672560: 41 b8 00 00 00 00            	mov	r8d, 0x0
+  672566: 4d 0f 45 c5                  	cmovne	r8, r13
+  67256a: c7 04 24 ff ff ff ff         	mov	dword ptr [rsp], 0xffffffff
+  672571: bf ca 00 00 00               	mov	edi, 0xca
+  672576: 48 89 de                     	mov	rsi, rbx
+  672579: ba 89 00 00 00               	mov	edx, 0x89
+  67257e: 44 89 e1                     	mov	ecx, r12d
+  672581: 45 31 c9                     	xor	r9d, r9d
+  672584: 31 c0                        	xor	eax, eax
+  672586: ff 15 04 2f 17 00            	call	qword ptr [rip + 0x172f04] # 0x7e5490
+  67258c: 48 85 c0                     	test	rax, rax
+  67258f: 79 0b                        	jns	0x67259c <.text+0x3b541c>
+  672591: ff 15 69 33 17 00            	call	qword ptr [rip + 0x173369] # 0x7e5900
+  672597: 83 38 04                     	cmp	dword ptr [rax], 0x4
+  67259a: 74 b9                        	je	0x672555 <.text+0x3b53d5>
+  67259c: 44 8b 23                     	mov	r12d, dword ptr [rbx]
+  67259f: 44 89 e0                     	mov	eax, r12d
+  6725a2: 83 e0 03                     	and	eax, 0x3
+  6725a5: 44 89 e1                     	mov	ecx, r12d
+  6725a8: 83 e1 04                     	and	ecx, 0x4
+  6725ab: 49 63 04 87                  	movsxd	rax, dword ptr [r15 + 4*rax]
+  6725af: 4c 01 f8                     	add	rax, r15
+  6725b2: 4d 89 f0                     	mov	r8, r14
+  6725b5: ff e0                        	jmp	rax
+  6725b7: 48 8d 3d 23 bf a4 ff         	lea	rdi, [rip - 0x5b40dd]   # 0xbe4e1
+  6725be: be 55 00 00 00               	mov	esi, 0x55
+  6725c3: 4c 89 c2                     	mov	rdx, r8
+  6725c6: ff 15 34 26 17 00            	call	qword ptr [rip + 0x172634] # 0x7e4c00
+  6725cc: 49 89 c6                     	mov	r14, rax
+  6725cf: b8 02 00 00 00               	mov	eax, 0x2
+  6725d4: 87 03                        	xchg	dword ptr [rbx], eax
+  6725d6: a8 04                        	test	al, 0x4
+  6725d8: 74 1a                        	je	0x6725f4 <.text+0x3b5474>
+  6725da: bf ca 00 00 00               	mov	edi, 0xca
+  6725df: 48 89 de                     	mov	rsi, rbx
+  6725e2: ba 81 00 00 00               	mov	edx, 0x81
+  6725e7: b9 ff ff ff 7f               	mov	ecx, 0x7fffffff
+  6725ec: 31 c0                        	xor	eax, eax
+  6725ee: ff 15 9c 2e 17 00            	call	qword ptr [rip + 0x172e9c] # 0x7e5490
+  6725f4: 4c 89 f7                     	mov	rdi, r14
+  6725f7: e8 24 42 13 00               	call	0x7a6820 <_Unwind_Resume@plt>
