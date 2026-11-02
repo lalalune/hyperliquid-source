@@ -1,0 +1,253 @@
+{
+  "baseline_commit": "e5c9b6436876b2a4a39daef813171f9879317699",
+  "callees": [],
+  "caller": {
+    "context": {
+      "bytes": 127,
+      "end_exclusive": "0x1f67407",
+      "sha256": "5ba99c5f407e561247d0b8a819b6d854fcf2603f51dba595ae83f89471457cf9",
+      "start": "0x1f67388"
+    },
+    "function": {
+      "body_sha256": "a7a6320438f81ba7feb9b15e0b1cadadf9b9c714eb999c9f971edb5120d3fd48",
+      "bytes": 5707,
+      "cie_record_bytes": 32,
+      "cie_section_offset": "0x2dc714",
+      "cie_sha256": "2e3ba4f0a39b71b05ba02de7b480f0bb9836f92243ee31dc6af4ddacb1098718",
+      "end_exclusive": "0x1f6780b",
+      "fde_raw": "50000000f8f90900988bf0004b16000004db7e94ff410e10420e18420e20420e28420e30410e38470ea01283078c068d058e048f03860203220c0e38410e30420e28420e20420e18420e10410e08410ea0120000",
+      "fde_record_bytes": 84,
+      "fde_section_offset": "0x37c108",
+      "lsda": "0x9a550c",
+      "start": "0x1f661c0"
+    },
+    "interpretation": "local consumer selects all-ones limbs on overflow, otherwise the sum",
+    "location": {
+      "address": "0x5690288",
+      "column": 53,
+      "line": 158,
+      "path_address": "0x1dd81b",
+      "path_bytes": 56,
+      "path_sha256": "f56ef638cec993e152a35cc43ca694079f5d6be7ed2c93626971ff1553eac976",
+      "path_tail": "l1/src/action/evm_raw_tx.rs",
+      "raw": "000000000000000038000000000000009e00000035000000",
+      "reference_raw": "488d0d1d8f7203",
+      "reference_site": "0x1f67364",
+      "relocation_section_offset": "0x38958",
+      "relocation_type": "R_X86_64_RELATIVE"
+    }
+  },
+  "component": "action-wire",
+  "counts": {
+    "body_bytes": 103,
+    "callees": 0,
+    "direct_calls": 1,
+    "direct_tail_jumps": 0,
+    "instructions": 31,
+    "padding_bytes": 9,
+    "vectors": 15
+  },
+  "function": {
+    "body_sha256": "28ed2bf420023763fe3224bda9f28d4a47da17f83db9085ea4fc6dc83957d071",
+    "bytes": 103,
+    "cie_record_bytes": 24,
+    "cie_section_offset": "0x0",
+    "cie_sha256": "78b6da08ece7423d48f0be866ea3d8c0b62f6b7053852a71a7672b490842354f",
+    "end_exclusive": "0x1eb3ca7",
+    "fde_raw": "10000000c438040060ee18016700000000000000",
+    "fde_record_bytes": 20,
+    "fde_section_offset": "0x438c0",
+    "lsda": null,
+    "padding": {
+      "bytes": 9,
+      "end_exclusive": "0x1eb3cb0",
+      "next_fde_section_offset": "0x438d4",
+      "raw": "cccccccccccccccccc",
+      "start": "0x1eb3ca7"
+    },
+    "start": "0x1eb3c40"
+  },
+  "incoming": {
+    "scan": "every .text byte position: e8/e9 plus signed rel32; no normalization",
+    "sites": [
+      {
+        "kind": "call",
+        "raw": "e87fc8f4ff",
+        "site": "0x1f673bc",
+        "target": "0x1eb3c40"
+      }
+    ],
+    "text_bytes": 70370352,
+    "text_end_exclusive": "0x56600b0",
+    "text_start": "0x1343c80"
+  },
+  "novelty": {
+    "checked_before_packet": true,
+    "decimal_query": "32193600",
+    "hex_query": "1eb3c40",
+    "pr_lists": [
+      "open_prs.txt",
+      "merged_prs.txt",
+      "closed_unmerged_prs.txt"
+    ],
+    "pr_title_matches": [],
+    "research_matches": [],
+    "scope": "primary start; no behavior-bound callees; baseline plus supplied local PR lists"
+  },
+  "rule": {
+    "carry_observations": [
+      {
+        "rule": "ADC propagates limb-0 carry into limb 1",
+        "site": "0x1eb3c4a"
+      },
+      {
+        "rule": "AL is 0/1; ADD AL,255 converts saved carry back to CF",
+        "site": "0x1eb3c5d"
+      },
+      {
+        "rule": "OR merges limb-2 base-add carry and carry-in overflow",
+        "site": "0x1eb3c66"
+      },
+      {
+        "rule": "OR merges limb-3 base-add carry and carry-in overflow",
+        "site": "0x1eb3c84"
+      }
+    ],
+    "equation": "T = A + B; left = T mod 2^256; output = (left, T >= 2^256)",
+    "input_left_mutated": true,
+    "integer_bits": 256,
+    "left_register": "rsi",
+    "limb_bits": 64,
+    "limb_offsets": [
+      0,
+      8,
+      16,
+      24
+    ],
+    "limbs": 4,
+    "output_bytes": 33,
+    "output_register": "rdi",
+    "overflow_bytes": 1,
+    "overflow_offset": 32,
+    "preconditions": "valid disjoint input/output regions; little-endian limbs; no concurrent mutation",
+    "return_register": "rax contains the final most-significant limb; no source-level return ABI claimed",
+    "right_register": "rdx",
+    "source_right_unchanged": true,
+    "sum_bytes": 32
+  },
+  "schema": "re001-u256-add-carry-v1",
+  "target": {
+    "bytes": 91774280,
+    "coordinate_system": "original ELF virtual addresses, before load bias",
+    "release": "94",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "task": "RE-001",
+  "vectors": [
+    {
+      "case": "zero",
+      "left": "0x0",
+      "overflow": 0,
+      "right": "0x0",
+      "sum_mod_2_256": "0x0"
+    },
+    {
+      "case": "no carry",
+      "left": "0x1234",
+      "overflow": 0,
+      "right": "0x5678",
+      "sum_mod_2_256": "0x68ac"
+    },
+    {
+      "case": "all ones plus zero",
+      "left": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "overflow": 0,
+      "right": "0x0",
+      "sum_mod_2_256": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "case": "full carry chain",
+      "left": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "overflow": 1,
+      "right": "0x1",
+      "sum_mod_2_256": "0x0"
+    },
+    {
+      "case": "high limb overflow",
+      "left": "0x8000000000000000000000000000000000000000000000000000000000000000",
+      "overflow": 1,
+      "right": "0x8000000000000000000000000000000000000000000000000000000000000000",
+      "sum_mod_2_256": "0x0"
+    },
+    {
+      "case": "both operands maximal",
+      "left": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "overflow": 1,
+      "right": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "sum_mod_2_256": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"
+    },
+    {
+      "case": "carry into limb 1",
+      "left": "0xffffffffffffffff",
+      "overflow": 0,
+      "right": "0x1",
+      "sum_mod_2_256": "0x10000000000000000"
+    },
+    {
+      "case": "carry into limb 2",
+      "left": "0xffffffffffffffffffffffffffffffff",
+      "overflow": 0,
+      "right": "0x1",
+      "sum_mod_2_256": "0x100000000000000000000000000000000"
+    },
+    {
+      "case": "carry into limb 3",
+      "left": "0xffffffffffffffffffffffffffffffffffffffffffffffff",
+      "overflow": 0,
+      "right": "0x1",
+      "sum_mod_2_256": "0x1000000000000000000000000000000000000000000000000"
+    },
+    {
+      "case": "limb 2 base-add carry",
+      "left": "0xffffffffffffffff00000000000000000000000000000000",
+      "overflow": 0,
+      "right": "0x100000000000000000000000000000000",
+      "sum_mod_2_256": "0x1000000000000000000000000000000000000000000000000"
+    },
+    {
+      "case": "limb 2 carry-in overflow",
+      "left": "0xffffffffffffffffffffffffffffffffffffffffffffffff",
+      "overflow": 0,
+      "right": "0x1",
+      "sum_mod_2_256": "0x1000000000000000000000000000000000000000000000000"
+    },
+    {
+      "case": "limb 2 base carry with carry-in",
+      "left": "0xffffffffffffffffffffffffffffffffffffffffffffffff",
+      "overflow": 0,
+      "right": "0x100000000000000000000000000000001",
+      "sum_mod_2_256": "0x1000000000000000100000000000000000000000000000000"
+    },
+    {
+      "case": "limb 3 base-add carry",
+      "left": "0xffffffffffffffff000000000000000000000000000000000000000000000000",
+      "overflow": 1,
+      "right": "0x1000000000000000000000000000000000000000000000000",
+      "sum_mod_2_256": "0x0"
+    },
+    {
+      "case": "limb 3 carry-in overflow",
+      "left": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "overflow": 1,
+      "right": "0x1",
+      "sum_mod_2_256": "0x0"
+    },
+    {
+      "case": "limb 3 base carry with carry-in",
+      "left": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "overflow": 1,
+      "right": "0x1000000000000000000000000000000000000000000000001",
+      "sum_mod_2_256": "0x1000000000000000000000000000000000000000000000000"
+    }
+  ]
+}
