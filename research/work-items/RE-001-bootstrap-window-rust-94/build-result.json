@@ -1,0 +1,307 @@
+{
+  "rows": 106649,
+  "distinct_inputs": 106649,
+  "profiles": {
+    "0": {
+      "rows": 106649,
+      "match": true,
+      "stdout_sha256": "bb582f9b2ea2ab06905bb1dc2c99f115039e23b024be8f844dc59de618fc37bb"
+    },
+    "3": {
+      "rows": 106649,
+      "match": true,
+      "stdout_sha256": "bb582f9b2ea2ab06905bb1dc2c99f115039e23b024be8f844dc59de618fc37bb"
+    }
+  },
+  "compiled_mutants": [
+    {
+      "name": "window-size",
+      "rows": 106649,
+      "mismatches": 31174,
+      "compiled_smoke_exit": 101
+    },
+    {
+      "name": "wrap",
+      "rows": 106649,
+      "mismatches": 4950,
+      "compiled_smoke_exit": 101
+    },
+    {
+      "name": "equal",
+      "rows": 106649,
+      "mismatches": 325,
+      "compiled_smoke_exit": 101
+    }
+  ],
+  "raw_own_rlib_equal": true,
+  "rlib_sha256": "cf09df2863fa4eee61ade890973352a67e19290d75d309dd978ce04d7cd43a87",
+  "source_sha256": "180b2e27076f4066dbe8dfbb78c08c7a4b94aa5343ab3ad0bff3d77aa30173a4",
+  "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: aarch64-apple-darwin\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+  "commands": [
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_bootstrap_window",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=0",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_bootstrap_window",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-bootstrap-window/lib.rs",
+      "-o",
+      "$OUTPUT/o0/libnode94_bootstrap_window.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=0",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-bootstrap-window/input_only_driver.rs",
+      "--extern",
+      "node94_bootstrap_window=$OUTPUT/o0/libnode94_bootstrap_window.rlib",
+      "-o",
+      "$OUTPUT/o0/driver"
+    ],
+    [
+      "$OUTPUT/o0/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_bootstrap_window",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_bootstrap_window",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-bootstrap-window/lib.rs",
+      "-o",
+      "$OUTPUT/o3/libnode94_bootstrap_window.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-bootstrap-window/input_only_driver.rs",
+      "--extern",
+      "node94_bootstrap_window=$OUTPUT/o3/libnode94_bootstrap_window.rlib",
+      "-o",
+      "$OUTPUT/o3/driver"
+    ],
+    [
+      "$OUTPUT/o3/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$REPO/src/node94-bootstrap-window/lib.rs",
+      "-o",
+      "$OUTPUT/smoke-test"
+    ],
+    [
+      "$OUTPUT/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_bootstrap_window",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_bootstrap_window",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-window-size/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-window-size/build/libnode94_bootstrap_window.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-bootstrap-window/input_only_driver.rs",
+      "--extern",
+      "node94_bootstrap_window=$OUTPUT/mutant-window-size/build/libnode94_bootstrap_window.rlib",
+      "-o",
+      "$OUTPUT/mutant-window-size/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-window-size/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-window-size/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-window-size/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-window-size/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_bootstrap_window",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_bootstrap_window",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-wrap/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-wrap/build/libnode94_bootstrap_window.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-bootstrap-window/input_only_driver.rs",
+      "--extern",
+      "node94_bootstrap_window=$OUTPUT/mutant-wrap/build/libnode94_bootstrap_window.rlib",
+      "-o",
+      "$OUTPUT/mutant-wrap/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-wrap/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-wrap/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-wrap/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-wrap/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_bootstrap_window",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_bootstrap_window",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-equal/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-equal/build/libnode94_bootstrap_window.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-bootstrap-window/input_only_driver.rs",
+      "--extern",
+      "node94_bootstrap_window=$OUTPUT/mutant-equal/build/libnode94_bootstrap_window.rlib",
+      "-o",
+      "$OUTPUT/mutant-equal/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-equal/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-equal/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-equal/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-equal/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_bootstrap_window",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_bootstrap_window",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-bootstrap-window/lib.rs",
+      "-o",
+      "$OUTPUT/o3-repeat/libnode94_bootstrap_window.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-bootstrap-window/input_only_driver.rs",
+      "--extern",
+      "node94_bootstrap_window=$OUTPUT/o3-repeat/libnode94_bootstrap_window.rlib",
+      "-o",
+      "$OUTPUT/o3-repeat/driver"
+    ]
+  ],
+  "authorized_offline_python_instruction_evaluation": true,
+  "native_capture_executed": false
+}
