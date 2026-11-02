@@ -1,0 +1,18 @@
+Own compiled Rust, function-relative offsets; not captured target code.
+0x0 b001                           mov al, 1
+0x2 4883f902                       cmp rcx, 2
+0x6 7226                           jb 0x10002e
+0x8 4c8b0cd7                       mov r9, qword ptr [rdi + rdx*8]
+0xc 4531c0                         xor r8d, r8d
+0xf 90                             nop
+0x10 48ffc9                         dec rcx
+0x13 0f94c0                         sete al
+0x16 7416                           je 0x10002e
+0x18 48ffc2                         inc rdx
+0x1b 4839f2                         cmp rdx, rsi
+0x1e 490f44d0                       cmove rdx, r8
+0x22 4c8b14d7                       mov r10, qword ptr [rdi + rdx*8]
+0x26 4d39d1                         cmp r9, r10
+0x29 4d89d1                         mov r9, r10
+0x2c 72e2                           jb 0x100010
+0x2e c3                             ret
