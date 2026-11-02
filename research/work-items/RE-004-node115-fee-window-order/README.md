@@ -92,3 +92,5 @@ inferred implementation was read or copied.
 Next: trace the originating table and all caller guards to establish whether
 nonfinite entries are excluded, then qualify a Rust predicate with an explicit
 floating environment and caller-owned contracts.
+
+Native text exports trim trailing whitespace only; instruction bytes, operands and addresses are unchanged.

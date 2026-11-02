@@ -22,7 +22,7 @@ from fde_extents import fde_extents
 from foundation_millis import decode_export
 
 SHA = 'a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
-CONFIG = {'ranges': [['0x36e1b10', '0x36e1b81'], ['0x36a1c20', '0x36a31ff']], 'locations': [['0x6468b98', 'l1/src/fees/fees.rs', 259, 57]], 'scope': 'Adjacent binary64 strict-increase scan and size-two caller rejection; no global fee-table validity or NaN admission claim', 'facts': {'caller_window_size': 2, 'comparison': 'next > previous (ordered binary64)', 'unordered_pair_continues': True, 'equal_pair_continues': True, 'caller_rejects_true': True, 'short_input_returns_false': True, 'invalid_window_nonempty_panics': True}, 'anchors': {'0x36e1b1c': '4883fe027231', '0x36e1b30': '4839ce0f96c07719', '0x36e1b38': '48ffc948891748894f08', '0x36e1b42': 'f20f1002660f2e42f8488d520876df', '0x36e1b53': '4885c9750431c059c3', '0x36e1b6a': '488d152770d802bf01000000be01000000', '0x36a2826': '48c784245001000002000000', '0x36a2832': '488dbc2440010000', '0x36a283a': 'e8d1f2030084c00f858f020000'}}
+CONFIG = {'ranges': [['0x36e1b10', '0x36e1b81'], ['0x36a1c20', '0x36a31ff']], 'locations': [['0x6468b98', 'l1/src/fees/fees.rs', 259, 57]], 'scope': 'Adjacent binary64 strict-increase scan and size-two caller rejection; no global fee-table validity or NaN admission claim', 'facts': {'caller_window_size': 2, 'comparison': 'next > previous (ordered binary64)', 'unordered_pair_continues': True, 'equal_pair_continues': True, 'caller_rejects_true': True, 'short_input_returns_false': True, 'invalid_window_nonempty_calls_error_helper': True}, 'anchors': {'0x36e1b1c': '4883fe027231', '0x36e1b30': '4839ce0f96c07719', '0x36e1b38': '48ffc948891748894f08', '0x36e1b42': 'f20f1002660f2e42f8488d520876df', '0x36e1b53': '4885c9750431c059c3', '0x36e1b6a': '488d152770d802bf01000000be01000000', '0x36a2826': '48c784245001000002000000', '0x36a2832': '488dbc2440010000', '0x36a283a': 'e8d1f2030084c00f858f020000'}}
 
 
 def require(condition, message):
@@ -89,6 +89,8 @@ def collect(data, output):
                 f'--start-address={start}', f'--stop-address={end}', str(native)],
                 text=True, env=env).replace(str(native), 'artifacts/node/115/hl-node')
             ins = decode_export(raw, start, end, body)
+            raw = '\n'.join(line.rstrip() for line in raw.splitlines()) + '\n'
+
             decoded.update(ins)
             calls = []
             for pc, code in ins.items():
