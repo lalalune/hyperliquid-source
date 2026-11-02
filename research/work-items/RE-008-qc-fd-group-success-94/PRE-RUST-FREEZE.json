@@ -1,0 +1,199 @@
+{
+  "baseline": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "call_sites": [
+    "0x466bfbe",
+    "0x466c001",
+    "0x466c044",
+    "0x466c083"
+  ],
+  "charge_writes_relative_to_C": [
+    32,
+    24,
+    32,
+    24,
+    32,
+    24,
+    32,
+    24,
+    32
+  ],
+  "consumed": 36,
+  "domain_excludes": [
+    "all failure outcomes, panics and unwind",
+    "modes other than1",
+    "all other integer markers and slow Reader",
+    "native ABI/lifetimes/cryptographic validity",
+    "full QC decode and later recovery-byte effects"
+  ],
+  "field_stores": {
+    "tag": "G+0 qword",
+    "words": [
+      "G+8 qword",
+      "G+0x10 qword",
+      "G+0x18 qword",
+      "G+0x20 qword"
+    ]
+  },
+  "fixtures": {
+    "expected.tsv": {
+      "rows": 8,
+      "sha256": "5478a322a78b060ae8915a1de6ee344f4dee205192c29c9669fd52227551cb82"
+    },
+    "inputs.tsv": {
+      "rows": 8,
+      "sha256": "85a8eaf0bd17f8a15315cf739d353f3a4e51dc7141c25d3923f7906149c533ec"
+    }
+  },
+  "functions": [
+    {
+      "body_sha256": "aa484554c9abb65bea26e5450e6cda287fc037cc7c53a47ed5e04e2069ab44a0",
+      "end": "0x466c13f",
+      "fde": {
+        "cie": "0xce1518",
+        "end": "0x466c13f",
+        "fde": "0xef1f28",
+        "lsda": null,
+        "start": "0x466bf60"
+      },
+      "fde_hex": "48000000140a210030a07703df01000000410e10420e18420e20420e28420e30410e38440e6083078c068d058e048f03860203ac010e38410e30420e28420e20420e18420e10410e08410e60",
+      "name": "group",
+      "size": 479,
+      "start": "0x466bf60"
+    },
+    {
+      "body_sha256": "fca33a99b93d22ee7cde15b995c1faf05b6fc7f4967c1489ecaf77030d0f6f5e",
+      "end": "0x466bdf5",
+      "fde": {
+        "cie": "0xce1518",
+        "end": "0x466bdf5",
+        "fde": "0xef1eac",
+        "lsda": null,
+        "start": "0x466bd10"
+      },
+      "fde_hex": "30000000980921005c9e7703e500000000410e108302670e08410e1002770e08410e10530e08410e10570e08410e10570e080000",
+      "name": "u64-wrapper-context",
+      "size": 229,
+      "start": "0x466bd10"
+    },
+    {
+      "body_sha256": "691aada3f78a0a84acaa2b4e75ce3c58fe68b1e852aa29a98e464287e1ebf512",
+      "end": "0x4c7e60d",
+      "fde": {
+        "cie": "0xce1518",
+        "end": "0x4c7e60d",
+        "fde": "0xf443ac",
+        "lsda": null,
+        "start": "0x4c7e340"
+      },
+      "fde_hex": "3c000000982e26008c9fd303cd02000000410e10420e18420e20410e28470ea00283058e048f038602039f010e28410e20420e18420e10410e08410ea0020000",
+      "name": "QC-row-context",
+      "size": 717,
+      "start": "0x4c7e340"
+    }
+  ],
+  "helper_result_bytes": 40,
+  "native_controls": [
+    {
+      "after": "10",
+      "before": "08",
+      "classification": "normal-domain static semantic counterexample; inert opcode edit, never executed",
+      "name": "word0-shift-16",
+      "predicted_effect": "word0 loses its original top byte and shifts bytes1..7 down one extra byte",
+      "va": "0x466c0a4"
+    },
+    {
+      "after": "18",
+      "before": "10",
+      "classification": "normal-domain static semantic counterexample; inert opcode edit, never executed",
+      "name": "word1-to-word2-slot",
+      "predicted_effect": "word1 slot remains prefilled; word2 later overwrites the misplaced word1",
+      "va": "0x466c10d"
+    },
+    {
+      "after": "10",
+      "before": "18",
+      "classification": "normal-domain static semantic counterexample; inert opcode edit, never executed",
+      "name": "word2-to-word1-slot",
+      "predicted_effect": "word2 overwrites word1 and its own slot remains prefilled",
+      "va": "0x466c111"
+    },
+    {
+      "after": "18",
+      "before": "20",
+      "classification": "normal-domain static semantic counterexample; inert opcode edit, never executed",
+      "name": "word3-to-word2-slot",
+      "predicted_effect": "word3 overwrites word2 and its own slot remains prefilled",
+      "va": "0x466c115"
+    },
+    {
+      "after": "f0",
+      "before": "f8",
+      "classification": "normal-domain static semantic counterexample; inert opcode edit, never executed",
+      "name": "second-refund-16",
+      "predicted_effect": "all four scalar successes remain possible, final charge is C+24",
+      "va": "0x466c037"
+    },
+    {
+      "after": "6b",
+      "before": "4b",
+      "classification": "normal-domain static semantic counterexample; inert opcode edit, never executed",
+      "name": "word3-uses-word2",
+      "predicted_effect": "last qword receives word2 rather than word3",
+      "va": "0x466c114"
+    }
+  ],
+  "native_exports": {
+    "instructions_per_range": [
+      130,
+      69,
+      13
+    ],
+    "ranges": [
+      {
+        "end": "0x466c13f",
+        "name": "group",
+        "sha256": "aa484554c9abb65bea26e5450e6cda287fc037cc7c53a47ed5e04e2069ab44a0",
+        "start": "0x466bf60"
+      },
+      {
+        "end": "0x466bdf5",
+        "name": "u64-wrapper",
+        "sha256": "fca33a99b93d22ee7cde15b995c1faf05b6fc7f4967c1489ecaf77030d0f6f5e",
+        "start": "0x466bd10"
+      },
+      {
+        "end": "0x4c7e456",
+        "name": "second-QC-call",
+        "sha256": "8030737a178d64f5380dd15f98c678c1e5acbfd9e5e90732eda9453440e4bd75",
+        "start": "0x4c7e41a"
+      }
+    ]
+  },
+  "pre_rust": true,
+  "prior_work": {
+    "first_failure": "separate sibling lane; no claim here",
+    "recovery_and_assembly": "draft PR1509 head63e4ac61f9aee72b59e00b14cd4745746dff47bf; predecessor/successor are context only",
+    "scalar_wrapper": "open PR1365 head4d33431de9eb9c5c9c8d145d1e61b75a9634d57f, primitive state/value relation; independently bind selected fast path here"
+  },
+  "schema": 1,
+  "scope": "mode1, C+32 representable and <=L, four consecutive FD+8-byte little-endian payloads, N>=36; final value/state only",
+  "success_tags": {
+    "group": 0,
+    "primitive": 18
+  },
+  "target": {
+    "release": 94,
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+    "size": 91774280
+  },
+  "wrapper_table": {
+    "hex": "ce4ef703e64ef703da4ef7031d4ff703",
+    "targets": [
+      "0x466bd76",
+      "0x466bd8e",
+      "0x466bd82",
+      "0x466bdc5"
+    ],
+    "va": "0x6f6ea8"
+  }
+}

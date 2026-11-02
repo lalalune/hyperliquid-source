@@ -12,6 +12,15 @@ mod admission;
 mod auth;
 mod error;
 mod qc;
+/// Independent qualified wire-field projection; no admission/authentication integration.
+pub mod qc_recovery_byte;
+pub mod qc_row_success;
+/// Qualified mode-1, four-FD-word success projection; separate from admission.
+pub mod qc_fd_group;
+/// Qualified full-word-zero, accepted-marker group projection; separate from admission.
+pub mod qc_mode0_group;
+/// Qualified mode-one reservation/accepted-marker group projection.
+pub mod qc_mode1_group;
 mod stake;
 mod state;
 mod tc;

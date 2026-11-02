@@ -1,0 +1,122 @@
+{
+  "schema": "re008-qc-row-success-assembly-94/freeze-1",
+  "vectors_and_site_mutations_frozen_before_rust_model": true,
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "baseline_main": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "owner_fde": {
+    "start": "0x4c7e340",
+    "end": "0x4c7e60d",
+    "fde": "0xf443ac",
+    "body_sha256": "691aada3f78a0a84acaa2b4e75ce3c58fe68b1e852aa29a98e464287e1ebf512"
+  },
+  "scoped_window": {
+    "start": "0x4c7e546",
+    "end": "0x4c7e5f7",
+    "bytes": 177,
+    "file_offset": "0x4c7d546",
+    "sha256": "c5bea9581a0c7b6f0a3386333ba73df42a8d89702d59b8ccd9236e59b56a1ef4"
+  },
+  "source_preconditions": [
+    "raw20 reader at 0x4c7e358 returned required success tag",
+    "both 0x466bf60 group calls at 0x4c7e395 and 0x4c7e422 returned zero success tags",
+    "final one-byte reader at 0x4c7e4f3..0x4c7e542 succeeded",
+    "ordinary native register/stack preservation; valid decoder/input/output and live-frame ranges with no destructive external overlap; the raw20 and group output sources below are immutable logical snapshots of stack-backed helper results, not buffers disjoint from the stack"
+  ],
+  "expected_map": [
+    {
+      "source": "raw20 20 bytes, saved from helper output stack+0x29",
+      "destination": "O+0x08..O+0x1c"
+    },
+    {
+      "source": "first group 32 data bytes from stack+0x30..+0x50 at first call",
+      "destination": "O+0x20..O+0x40"
+    },
+    {
+      "source": "second group 32 data bytes from stack+0x30..+0x50 at second call",
+      "destination": "O+0x40..O+0x60"
+    },
+    {
+      "source": "prior one-byte field",
+      "destination": "O+0x60",
+      "scope": "context, excluded from 177-byte window"
+    }
+  ],
+  "untouched_corridor_ranges": [
+    "O+0x1c..O+0x20",
+    "O+0x61..O+0x68"
+  ],
+  "vectors": [
+    {
+      "id": "distinct-low-high",
+      "source_raw20_hex": "101112131415161718191a1b1c1d1e1f20212223",
+      "source_group1_hex": "303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f",
+      "source_group2_hex": "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f",
+      "source_recovery_hex": "e7",
+      "prefill_byte_hex": "cc",
+      "expected_output_104_hex": "0000000000000000101112131415161718191a1b1c1d1e1f20212223cccccccc303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fe7cccccccccccccc",
+      "premise": "raw20, both groups and final byte already succeeded; source fields are immutable snapshots of the native stack-backed helper results"
+    },
+    {
+      "id": "zero-and-high-bit",
+      "source_raw20_hex": "e0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3",
+      "source_group1_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "source_group2_hex": "a0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebf",
+      "source_recovery_hex": "00",
+      "prefill_byte_hex": "5a",
+      "expected_output_104_hex": "0000000000000000e0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f35a5a5a5a000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebf005a5a5a5a5a5a5a",
+      "premise": "raw20, both groups and final byte already succeeded; source fields are immutable snapshots of the native stack-backed helper results"
+    },
+    {
+      "id": "reverse-fields",
+      "source_raw20_hex": "404142434445464748494a4b4c4d4e4f50515253",
+      "source_group1_hex": "fffefdfcfbfaf9f8f7f6f5f4f3f2f1f0efeeedecebeae9e8e7e6e5e4e3e2e1e0",
+      "source_group2_hex": "7f7e7d7c7b7a797877767574737271706f6e6d6c6b6a69686766656463626160",
+      "source_recovery_hex": "ff",
+      "prefill_byte_hex": "00",
+      "expected_output_104_hex": "0000000000000000404142434445464748494a4b4c4d4e4f5051525300000000fffefdfcfbfaf9f8f7f6f5f4f3f2f1f0efeeedecebeae9e8e7e6e5e4e3e2e1e07f7e7d7c7b7a797877767574737271706f6e6d6c6b6a69686766656463626160ff00000000000000",
+      "premise": "raw20, both groups and final byte already succeeded; source fields are immutable snapshots of the native stack-backed helper results"
+    }
+  ],
+  "negative_native_controls": [
+    {
+      "id": "second-group-source-alias",
+      "va": "0x4c7e569",
+      "original": "20",
+      "mutation": "18",
+      "witness": "distinct-low-high: O+0x41..+0x44 takes first-group saved bytes instead of second-group bytes; the later O+0x41 store overwrites the earlier O+0x44 store"
+    },
+    {
+      "id": "raw16-destination",
+      "va": "0x4c7e5dd",
+      "original": "08",
+      "mutation": "10",
+      "witness": "distinct-low-high: O+0x08..+0x0f retains prefill, O+0x10..+0x17 gets the raw prefix, O+0x18..+0x1b is restored by the later four-byte store, and the usual O+0x1c..+0x1f hole receives raw bytes12..15"
+    },
+    {
+      "id": "first-group-qword-destination",
+      "va": "0x4c7e5ef",
+      "original": "28",
+      "mutation": "30",
+      "witness": "distinct-low-high: O+0x28..+0x2f retains prefill and O+0x30..+0x37 is overwritten with first-group middle qword"
+    },
+    {
+      "id": "second-group-first-byte-destination",
+      "va": "0x4c7e5f2",
+      "original": "40",
+      "mutation": "41",
+      "witness": "distinct-low-high: O+0x40 retains prefill and O+0x41 becomes group2 first byte"
+    },
+    {
+      "id": "second-group-qword-destination",
+      "va": "0x4c7e5f6",
+      "original": "48",
+      "mutation": "50",
+      "witness": "distinct-low-high: O+0x48..+0x4f retains prefill; O+0x50..+0x57 becomes second-group middle qword"
+    }
+  ],
+  "limits": [
+    "synthetic helper outputs are conditional field-entry states, not proven reachable wire messages",
+    "no values or initialization of group source bytes inferred from successful tags alone; actual helper outputs reuse stack+0x28 and the first group is staged before the second call",
+    "no complete QC decoder, ABI, vector allocation, error corridor, cryptographic validity or whole-component gate"
+  ]
+}
