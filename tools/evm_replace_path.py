@@ -124,7 +124,12 @@ def generate(data):
     sec = sections(data)
     pins = check_pins(data,sec)
     summary, fdes, _ = fde_extents(data)
-    fde_by_start = {r['start']:r for r in fdes if r['start'] in STARTS}
+    fde_by_start = {}
+    for r in fdes:
+        if r['start'] in STARTS:
+            if r['start'] in fde_by_start:
+                raise ValueError('duplicate FDE')
+            fde_by_start[r['start']] = r
     if set(fde_by_start) != set(STARTS):
         raise ValueError('missing FDE')
     functions=[]
