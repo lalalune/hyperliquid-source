@@ -1,0 +1,127 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "caller_sha256": "45568f355844c8f90a4946e95dc2be74d014377b5745225cdf31f5e2c205a697",
+  "chain_iterator": {
+    "start": "0x36e1b90",
+    "end": "0x36e1bff",
+    "bytes": 111,
+    "sha256": "20096664afc8fb5a678d43e991059fd068ed120ae1a2f9c0045c384bdf7ed713",
+    "frames": {
+      "fde": {
+        "va": "0xe05514",
+        "bytes_hex": "1000000040e6150074c68d026f00000000000000"
+      },
+      "cie": {
+        "va": "0xca6ed8",
+        "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+      }
+    }
+  },
+  "depends_on_packets": [
+    "RE-001-node115-fee-schedule-gate",
+    "RE-001-node115-fee-schedule-sources",
+    "RE-001-node115-fee-schedule-finite"
+  ],
+  "certificate": {
+    "map_sum": {
+      "iterator_init": "0x3c6d100",
+      "iterator_next": "0x4504fe0",
+      "iterator_source": "[rsp+0x8] = &input+0x48 (0x36a247d)",
+      "value": "f64 at returned rdx",
+      "start": -0.0,
+      "start_bits": "8000000000000000",
+      "fail_if": "sum ja 1.0",
+      "limit_va": "0x4592b0"
+    },
+    "discount_range": {
+      "value": "[rsp+0x10]",
+      "fail_if": [
+        "value ja 1.0",
+        "0.0 ja value"
+      ],
+      "upper_va": "0x4592b0",
+      "value_origin": "0x36a2a31 stores +0.0; 0x36a2a41 stores the last stake pair second when the list is nonempty"
+    },
+    "floor_calls": [
+      {
+        "call": "0x36a2e1c",
+        "callee": "0x36a58d0",
+        "record_at": "rsp+0x140",
+        "fields": {
+          "0x0": "&[rsp+0xa0]",
+          "0x8": "&[rsp+0x18]",
+          "0x10": "r12 (=&[rsp+0x88], 0x36a2576)",
+          "0x18": "[rsp+0x80]",
+          "0x20": "[rsp+0x130]",
+          "0x28": "[rsp+0x100]",
+          "0x30": "[rsp+0x10]",
+          "0x38": "[rsp+0x110]",
+          "0x40": "[rsp+0x110]"
+        },
+        "fails_if": "AL == 0"
+      },
+      {
+        "call": "0x36a2eba",
+        "callee": "0x36a58d0",
+        "record_at": "rsp+0x140",
+        "fields": {
+          "0x0": "&[rsp+0xd0]",
+          "0x8": "&[rsp+0x30]",
+          "0x10": "&[rsp+0xb8]",
+          "0x18": "[rsp+0x78]",
+          "0x20": "[rsp+0x128]",
+          "0x28": "[rsp+0x100]",
+          "0x30": "[rsp+0x10]",
+          "0x38": "[rsp+0x110]",
+          "0x40": "[rsp+0x110]"
+        },
+        "fails_if": "AL == 0"
+      }
+    ],
+    "cross_range": {
+      "slices": [
+        "rsp+0x90 / rsp+0x98 (slice 1)",
+        "rsp+0xc0 / rsp+0xc8 (slice 3)"
+      ],
+      "fail_if": [
+        "0.0 ja x",
+        "x ja 0.001"
+      ],
+      "positive_test": "continue if x jbe 0.0",
+      "positive_minimum": "continue if 0.0001 jbe x, else fail",
+      "max_va": "0x459af0",
+      "min_va": "0x459b50"
+    },
+    "add_range": {
+      "slices": [
+        "A rsp+0xa8/0xb0 (slice 2)",
+        "B rsp+0x20/0x28 (slice 5)",
+        "C rsp+0xd8/0xe0 (slice 4)",
+        "D rsp+0x38/0x40 (slice 6, inline tail)"
+      ],
+      "chain_iterator": {
+        "start": "0x36e1b90",
+        "end": "0x36e1bff",
+        "tag1": "A then B, then tag 0",
+        "tag0": "C, then tag 2",
+        "tag2": "exhausted"
+      },
+      "abs_mask": "ffffffffffffff7fffffffffffffff7f",
+      "fail_if": [
+        "|x| ja 0.001"
+      ],
+      "positive_test": "continue if x jbe 0.0",
+      "positive_minimum": "continue if 0.0001 jbe x, else fail",
+      "max_va": "0x459af0",
+      "min_va": "0x459b50"
+    },
+    "success": {
+      "sets": "BPL=1 (0x36a30cb), BL=1 (0x36a30ce); epilogue mov eax,ebx (0x36a2bfe)",
+      "result": "AL=1; upper bits of EAX are not defined by these writes"
+    }
+  },
+  "validator_result": "AL=1 only after: finiteness gate (0x3d3b6c0), ordering/pair/range chain, map sum <= 1.0, last stake discount in [0,1], both 0x36a58d0 calls true, cross range over slices 1 and 3, add range over slices 2, 5, 4, 6. Every failure returns EAX=0.",
+  "redundant_on_normal_path": "discount range: the gate packet already requires the stake list second components to be strictly increasing from +0.0 with the last at most 0.5, so [rsp+0x10] is +0.0 (empty list) or in (0, 0.5]",
+  "captured_code_executed": false,
+  "limits": "0x36a58d0 (1,136-byte floor helper), 0x3c6d100/0x4504fe0 (map iterator) are opaque; normal-path ABI-preserving returns assumed. No panic/unwind/allocator-failure claims."
+}
