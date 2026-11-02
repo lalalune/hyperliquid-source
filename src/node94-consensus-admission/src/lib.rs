@@ -2,14 +2,17 @@
 //!
 //! This crate reconstructs the stake-snapshot, QC, TC, ordered admission, and
 //! registration behavior pinned by `RE-008-block-admission-94`.  Proposer
-//! scheduling, digest construction, and signature recovery remain outside the
-//! recovered native contract.  Callers supply those operations through
+//! scheduling, other digest variants, and signature recovery remain outside the
+//! recovered native contract. The variant-1 QC-vote preimage is available through
+//! [`qc_vote_preimage`], with a shared Keccak wrapper in [`qc_vote_digest`].
+//! Callers still supply authentication operations through
 //! [`AdmissionAuthenticator`]; a bare boolean cannot cross that boundary.
 //!
 //! This is not a network service or a complete consensus implementation.
 
 mod admission;
 mod auth;
+mod digest;
 mod error;
 mod qc;
 mod stake;
@@ -19,6 +22,7 @@ mod types;
 
 pub use admission::{verify_block, VerifiedBlock};
 pub use auth::{AdmissionAuthenticator, AuthenticationError};
+pub use digest::{qc_vote_digest, qc_vote_preimage};
 pub use error::{AdmissionError, FatalAdmissionError, VerificationFailure};
 pub use qc::verify_qc;
 pub use stake::{

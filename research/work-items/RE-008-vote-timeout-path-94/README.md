@@ -49,7 +49,7 @@ Coordinates are ELF virtual addresses in `.text`, `.rodata` and `.rela.dyn`. Fun
 - Otherwise `direct`, or `tc round + 1 == block round` and `qc round >= top`, where `top` is the highest QC round over every TC row.
 - Block round over `state+0x920`.
 
-The vote is 0x98 bytes: block digest variant 0, version pair copied from the block's QC, round, this node, signature over digest variant 1 of the first 0x38 bytes. The signer address is outside the signed bytes.
+The vote is 0x98 bytes: block digest variant 0, version pair copied from the block's QC, round, this node, and a signature through `0x454b020`. This packet stubs digest construction, so its earlier claim that variant 1 signs only the first `0x38` bytes and excludes the signer was not established. The later [full variant-1 writer proof](../RE-008-qc-vote-preimage-94/PROOF.md) includes the 20 signer bytes at payload `+0x38` before the version pair, round and block hash. The old `gates.tsv`/tool fixture wording is retained as historical model metadata, not a native digest oracle.
 
 ### Observations: receiving a vote
 
