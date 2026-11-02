@@ -1,0 +1,308 @@
+{
+  "rows": 240480,
+  "distinct_inputs": 80160,
+  "profiles": {
+    "0": {
+      "rows": 240480,
+      "match": true,
+      "stdout_sha256": "082d88f260f8299afac45f6284abb35e5f8ab2a34e7dbb2b5329247b1e2be575"
+    },
+    "3": {
+      "rows": 240480,
+      "match": true,
+      "stdout_sha256": "082d88f260f8299afac45f6284abb35e5f8ab2a34e7dbb2b5329247b1e2be575"
+    }
+  },
+  "compiled_mutants": [
+    {
+      "name": "period",
+      "rows": 240480,
+      "mismatches": 216,
+      "compiled_smoke_exit": 101
+    },
+    {
+      "name": "past-freeze",
+      "rows": 240480,
+      "mismatches": 51,
+      "compiled_smoke_exit": 101
+    },
+    {
+      "name": "tag",
+      "rows": 240480,
+      "mismatches": 162,
+      "compiled_smoke_exit": 101
+    }
+  ],
+  "raw_own_rlib_equal": true,
+  "rlib_sha256": "0569b9dd88e36031de6971c80c35466cf086eb991de7fda25fae02979fb28ce4",
+  "source_sha256": "3c85627e631ecad6b10c5bbc42a004aef1c509007243faa6c4ce1a2e2601874a",
+  "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: aarch64-apple-darwin\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+  "commands": [
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_snapshot_admission",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=0",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_snapshot_admission",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-snapshot-admission/lib.rs",
+      "-o",
+      "$OUTPUT/o0/libnode94_snapshot_admission.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=0",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-snapshot-admission/input_only_driver.rs",
+      "--extern",
+      "node94_snapshot_admission=$OUTPUT/o0/libnode94_snapshot_admission.rlib",
+      "-o",
+      "$OUTPUT/o0/driver"
+    ],
+    [
+      "$OUTPUT/o0/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_snapshot_admission",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_snapshot_admission",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-snapshot-admission/lib.rs",
+      "-o",
+      "$OUTPUT/o3/libnode94_snapshot_admission.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-snapshot-admission/input_only_driver.rs",
+      "--extern",
+      "node94_snapshot_admission=$OUTPUT/o3/libnode94_snapshot_admission.rlib",
+      "-o",
+      "$OUTPUT/o3/driver"
+    ],
+    [
+      "$OUTPUT/o3/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$REPO/src/node94-snapshot-admission/lib.rs",
+      "-o",
+      "$OUTPUT/smoke-test"
+    ],
+    [
+      "$OUTPUT/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_snapshot_admission",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_snapshot_admission",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-period/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-period/build/libnode94_snapshot_admission.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-snapshot-admission/input_only_driver.rs",
+      "--extern",
+      "node94_snapshot_admission=$OUTPUT/mutant-period/build/libnode94_snapshot_admission.rlib",
+      "-o",
+      "$OUTPUT/mutant-period/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-period/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-period/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-period/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-period/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_snapshot_admission",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_snapshot_admission",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-past-freeze/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-past-freeze/build/libnode94_snapshot_admission.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-snapshot-admission/input_only_driver.rs",
+      "--extern",
+      "node94_snapshot_admission=$OUTPUT/mutant-past-freeze/build/libnode94_snapshot_admission.rlib",
+      "-o",
+      "$OUTPUT/mutant-past-freeze/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-past-freeze/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-past-freeze/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-past-freeze/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-past-freeze/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_snapshot_admission",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_snapshot_admission",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-tag/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-tag/build/libnode94_snapshot_admission.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-snapshot-admission/input_only_driver.rs",
+      "--extern",
+      "node94_snapshot_admission=$OUTPUT/mutant-tag/build/libnode94_snapshot_admission.rlib",
+      "-o",
+      "$OUTPUT/mutant-tag/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-tag/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-tag/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-tag/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-tag/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_snapshot_admission",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_snapshot_admission",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-snapshot-admission/lib.rs",
+      "-o",
+      "$OUTPUT/o3-repeat/libnode94_snapshot_admission.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-snapshot-admission/input_only_driver.rs",
+      "--extern",
+      "node94_snapshot_admission=$OUTPUT/o3-repeat/libnode94_snapshot_admission.rlib",
+      "-o",
+      "$OUTPUT/o3-repeat/driver"
+    ]
+  ],
+  "authorized_offline_python_instruction_evaluation": true,
+  "native_capture_executed": false,
+  "supervisor_note": "Build comparisons completed and final report/output printed. Outer duty supervisor then hit an EPERM exit race and exited1. The build command wrapper is not claimed to exit0. The helper outside this PR was fixed, verified with bounded probes, then focused/style checks completed normally. Both saved profile outputs and source hash were rechecked."
+}
