@@ -53,6 +53,19 @@ def read(data, va, size):
     return off, bytes(data[off:off + size])
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    rels = {}
+    for a, i, v in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']]):
+        if a in rels:
+            raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a] = (i, v)
+    return rels
+
+
 def limb_comparison(entry_low, entry_high, query_low, query_high):
     """Conditional CMP/SBB borrow reduction for two unsigned 64-bit limbs."""
     borrow_entry = entry_high - query_high - int(entry_low < query_low) < 0
@@ -76,8 +89,7 @@ def analyze(data):
     descriptor = b'\x0cmissing cid \xc0\x07 chain=\xc0\0'
     if read(data, 0x1edfe6, len(descriptor))[1] != descriptor:
         raise ValueError('missing-CID descriptor changed')
-    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
-    rels = {a: (i, v) for a, i, v in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']])}
+    rels = relocations(data)
     if any(rels.get(a) != (8, v) for a, v in RELATIVE.items()):
         raise ValueError('lookup source/helper/callback relocation changed')
     sources = []
