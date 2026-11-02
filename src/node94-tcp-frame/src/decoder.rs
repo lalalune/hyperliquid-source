@@ -148,7 +148,7 @@ pub fn decode_frame(input: &[u8], limits: FrameLimits) -> Result<DecodedFrame, D
     })
 }
 
-fn decode_lz4_payload(
+pub(crate) fn decode_lz4_payload(
     payload: &[u8],
     compressed_payload_len: u32,
     limits: FrameLimits,

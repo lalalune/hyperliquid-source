@@ -8,5 +8,6 @@ Current standalone components include:
 
 - `node94-tcp-frame/`: an independently authored, offline codec for the
   evidence-qualified node #94 TCP frame header, bounds, compression policy,
-  LZ4 decode path, writer, and chunk calculations. It contains no sockets or
+  LZ4 decode path, writer, chunk calculations, and optional asynchronous frame
+  I/O over caller-owned Tokio streams. It contains no sockets or
   live peer transport.
