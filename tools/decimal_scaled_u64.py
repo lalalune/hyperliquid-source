@@ -77,9 +77,13 @@ class Image:
     def __init__(self, data):
         if data[:5] != b"\x7fELF\x02":
             fail("not ELF64")
+        if len(data) < 64:
+            fail("truncated ELF header")
         self.data = data
         shoff = struct.unpack_from("<Q", data, 0x28)[0]
         entsize, count, strndx = struct.unpack_from("<HHH", data, 0x3a)
+        if entsize < 64 or not count or strndx >= count or shoff + entsize * count > len(data):
+            fail("invalid section table")
         rows = [struct.unpack_from("<IIQQQQIIQQ", data, shoff + i * entsize) for i in range(count)]
         strings = rows[strndx][4]
         self.sections = {}
