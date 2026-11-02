@@ -1,0 +1,93 @@
+
+artifacts/node/94/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001343c80 <.text>:
+ 36f57f0: 41 56                        	push	r14
+ 36f57f2: 53                           	push	rbx
+ 36f57f3: 48 83 ec 18                  	sub	rsp, 0x18
+ 36f57f7: 48 83 7f 18 00               	cmp	qword ptr [rdi + 0x18], 0x0
+ 36f57fc: 0f 84 fd 00 00 00            	je	0x36f58ff <.text+0x23b1c7f>
+ 36f5802: 48 89 f3                     	mov	rbx, rsi
+ 36f5805: 48 8d 47 20                  	lea	rax, [rdi + 0x20]
+ 36f5809: 49 89 fe                     	mov	r14, rdi
+ 36f580c: 48 89 c7                     	mov	rdi, rax
+ 36f580f: e8 8c 6f 2a 00               	call	0x399c7a0 <.text+0x2658b20>
+ 36f5814: 48 89 c2                     	mov	rdx, rax
+ 36f5817: 48 c1 ea 39                  	shr	rdx, 0x39
+ 36f581b: 49 8b 0e                     	mov	rcx, qword ptr [r14]
+ 36f581e: 49 8b 76 08                  	mov	rsi, qword ptr [r14 + 0x8]
+ 36f5822: 66 0f 6e c2                  	movd	xmm0, edx
+ 36f5826: 66 0f 60 c0                  	punpcklbw	xmm0, xmm0      # xmm0 = xmm0[0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7]
+ 36f582a: f2 0f 70 c0 00               	pshuflw	xmm0, xmm0, 0x0         # xmm0 = xmm0[0,0,0,0,4,5,6,7]
+ 36f582f: 66 0f 70 c0 44               	pshufd	xmm0, xmm0, 0x44        # xmm0 = xmm0[0,1,0,1]
+ 36f5834: 48 8d 79 88                  	lea	rdi, [rcx - 0x78]
+ 36f5838: 31 d2                        	xor	edx, edx
+ 36f583a: 66 0f 76 c9                  	pcmpeqd	xmm1, xmm1
+ 36f583e: 45 31 c0                     	xor	r8d, r8d
+ 36f5841: 48 21 f0                     	and	rax, rsi
+ 36f5844: f3 0f 6f 14 01               	movdqu	xmm2, xmmword ptr [rcx + rax]
+ 36f5849: 66 0f 6f da                  	movdqa	xmm3, xmm2
+ 36f584d: 66 0f 74 d8                  	pcmpeqb	xmm3, xmm0
+ 36f5851: 66 44 0f d7 cb               	pmovmskb	r9d, xmm3
+ 36f5856: 45 85 c9                     	test	r9d, r9d
+ 36f5859: 74 55                        	je	0x36f58b0 <.text+0x23b1c30>
+ 36f585b: f3 45 0f bc d1               	tzcnt	r10d, r9d
+ 36f5860: 49 01 c2                     	add	r10, rax
+ 36f5863: 49 21 f2                     	and	r10, rsi
+ 36f5866: 49 f7 da                     	neg	r10
+ 36f5869: 4d 6b d2 78                  	imul	r10, r10, 0x78
+ 36f586d: f3 0f 6f 1b                  	movdqu	xmm3, xmmword ptr [rbx]
+ 36f5871: f3 42 0f 6f 24 17            	movdqu	xmm4, xmmword ptr [rdi + r10]
+ 36f5877: 66 0f 74 e3                  	pcmpeqb	xmm4, xmm3
+ 36f587b: 66 0f 6e 5b 10               	movd	xmm3, dword ptr [rbx + 0x10]
+ 36f5880: 66 42 0f 6e 6c 17 10         	movd	xmm5, dword ptr [rdi + r10 + 0x10]
+ 36f5887: 66 0f 74 eb                  	pcmpeqb	xmm5, xmm3
+ 36f588b: 66 0f db ec                  	pand	xmm5, xmm4
+ 36f588f: 66 44 0f d7 dd               	pmovmskb	r11d, xmm5
+ 36f5894: 41 81 fb ff ff 00 00         	cmp	r11d, 0xffff
+ 36f589b: 74 31                        	je	0x36f58ce <.text+0x23b1c4e>
+ 36f589d: 45 8d 51 ff                  	lea	r10d, [r9 - 0x1]
+ 36f58a1: 66 45 21 ca                  	and	r10w, r9w
+ 36f58a5: 45 89 d1                     	mov	r9d, r10d
+ 36f58a8: 75 b1                        	jne	0x36f585b <.text+0x23b1bdb>
+ 36f58aa: 66 0f 1f 44 00 00            	nop	word ptr [rax + rax]
+ 36f58b0: 66 0f 74 d1                  	pcmpeqb	xmm2, xmm1
+ 36f58b4: 66 44 0f d7 ca               	pmovmskb	r9d, xmm2
+ 36f58b9: 45 85 c9                     	test	r9d, r9d
+ 36f58bc: 75 16                        	jne	0x36f58d4 <.text+0x23b1c54>
+ 36f58be: 4c 01 c0                     	add	rax, r8
+ 36f58c1: 48 83 c0 10                  	add	rax, 0x10
+ 36f58c5: 49 83 c0 10                  	add	r8, 0x10
+ 36f58c9: e9 73 ff ff ff               	jmp	0x36f5841 <.text+0x23b1bc1>
+ 36f58ce: 4c 01 d1                     	add	rcx, r10
+ 36f58d1: 48 89 ca                     	mov	rdx, rcx
+ 36f58d4: 48 8d 5a a0                  	lea	rbx, [rdx - 0x60]
+ 36f58d8: 48 85 d2                     	test	rdx, rdx
+ 36f58db: 48 0f 44 da                  	cmove	rbx, rdx
+ 36f58df: 8b 05 1b 0a 09 02            	mov	eax, dword ptr [rip + 0x2090a1b] # 0x5786300
+ 36f58e5: 85 c0                        	test	eax, eax
+ 36f58e7: 75 22                        	jne	0x36f590b <.text+0x23b1c8b>
+ 36f58e9: 48 85 db                     	test	rbx, rbx
+ 36f58ec: 48 8d 05 ad 09 09 02         	lea	rax, [rip + 0x20909ad]  # 0x57862a0
+ 36f58f3: 48 0f 45 c3                  	cmovne	rax, rbx
+ 36f58f7: 48 83 c4 18                  	add	rsp, 0x18
+ 36f58fb: 5b                           	pop	rbx
+ 36f58fc: 41 5e                        	pop	r14
+ 36f58fe: c3                           	ret
+ 36f58ff: 31 db                        	xor	ebx, ebx
+ 36f5901: 8b 05 f9 09 09 02            	mov	eax, dword ptr [rip + 0x20909f9] # 0x5786300
+ 36f5907: 85 c0                        	test	eax, eax
+ 36f5909: 74 de                        	je	0x36f58e9 <.text+0x23b1c69>
+ 36f590b: 48 8d 05 8e 09 09 02         	lea	rax, [rip + 0x209098e]  # 0x57862a0
+ 36f5912: 48 89 44 24 08               	mov	qword ptr [rsp + 0x8], rax
+ 36f5917: 48 8d 44 24 08               	lea	rax, [rsp + 0x8]
+ 36f591c: 48 89 44 24 10               	mov	qword ptr [rsp + 0x10], rax
+ 36f5921: 48 8d 3d d8 09 09 02         	lea	rdi, [rip + 0x20909d8]  # 0x5786300
+ 36f5928: 48 8d 0d 59 c9 ff 01         	lea	rcx, [rip + 0x1ffc959]  # 0x56f2288
+ 36f592f: 4c 8d 05 7a c9 ff 01         	lea	r8, [rip + 0x1ffc97a]   # 0x56f22b0
+ 36f5936: 48 8d 54 24 10               	lea	rdx, [rsp + 0x10]
+ 36f593b: be 01 00 00 00               	mov	esi, 0x1
+ 36f5940: ff 15 72 8f 07 02            	call	qword ptr [rip + 0x2078f72] # 0x576e8b8
+ 36f5946: eb a1                        	jmp	0x36f58e9 <.text+0x23b1c69>

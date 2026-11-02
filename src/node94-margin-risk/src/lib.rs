@@ -6,11 +6,16 @@
 #![forbid(unsafe_code)]
 
 mod candidate;
+mod leverage_increase;
+mod isolated_decrease;
 mod position;
 mod requirements;
 mod surplus;
 mod tiers;
+mod tier_cap;
 mod types;
+pub mod row_selector;
+pub mod hash20;
 
 pub use candidate::{
     CandidateAdmission, CandidateScope, CandidateSubject, LiquidationCandidate,
@@ -28,7 +33,17 @@ pub use surplus::{
     aggregate_cross_margin, assess_cross_liquidation, assess_isolated_liquidation,
 };
 pub use tiers::TierConstructionError;
+pub use tier_cap::position_leverage_cap;
 pub use types::{
     LATER_TIER_LOWER_INCLUSIVE_MAX, MAX_DESCRIPTION_BYTES, MAX_LEVERAGE, MAX_TIERS, MarginTable,
     MarginTier, RawMarginTable, RawMarginTier, WIRE_NOTIONAL_EXCLUSIVE_MAX,
+};
+
+pub use leverage_increase::{
+    CustomIncreaseDecision, CustomIncreaseDomainError, CustomLeverageIncrease,
+    check_custom_leverage_increase,
+};
+pub use isolated_decrease::{
+    CustomIsolatedDecrease, IsolatedDecreaseDecision, IsolatedDecreaseProjectionError,
+    check_custom_isolated_decrease,
 };
