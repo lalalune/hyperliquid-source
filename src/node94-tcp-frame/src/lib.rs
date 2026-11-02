@@ -1,11 +1,14 @@
 //! Codec and optional asynchronous I/O for the verified node #94 frame format.
 //!
-//! The `stream` feature accepts caller-owned Tokio I/O. It does not select peers,
-//! open sockets, impose timeouts, or implement a complete node protocol.
+//! The `stream` feature accepts caller-owned Tokio I/O; `timed-stream` adds the
+//! qualified header and per-chunk deadlines. Neither feature selects peers,
+//! opens sockets, or implements a complete node protocol.
 
 #![forbid(unsafe_code)]
 
 mod compression;
+#[cfg(feature = "timed-stream")]
+pub mod deadlines;
 mod decoder;
 mod encoder;
 mod header;
