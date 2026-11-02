@@ -59,7 +59,7 @@ def find_node():
             result = subprocess.run([item, '--version'], capture_output=True, text=True, timeout=5, encoding='utf-8')
             if result.returncode == 0 and supported_node(result.stdout):
                 return Path(item).resolve()
-        except (OSError, subprocess.TimeoutExpired):
+        except (OSError, subprocess.TimeoutExpired, UnicodeDecodeError):
             continue
     raise ValueError('REA 6.8.0 needs Node ^22.23.4, ^24.22.1 or >=26.12.1. Install the .nvmrc version or set REA_NODE to a supported executable.')
 
