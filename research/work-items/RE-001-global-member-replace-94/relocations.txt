@@ -1,0 +1,12 @@
+No R_X86_64_RELATIVE slot has addend 0x5169da0 (the replace is
+reached by its 3 direct calls, not through a vtable slot), and no
+GOT slot is referenced anywhere in the window. The three vtable
+address points the construction installs are immediate lea targets,
+not relocations:
+
+- member +0x00 = 0x575b220 + 0x10 = 0x575b230 (0x5169e1e)
+- member +0x38 = 0x575b1e8 + 0x10 = 0x575b1f8 (0x5169e5e)
+- member +0x40 = 0x5757bd0 + 0x10 = 0x5757be0 (0x5169e6d)
+
+The cleanup region resets a member's vtable to 0x57593e8 + 0x10 =
+0x57593f8 (0x5169cf3), again an immediate lea target.
