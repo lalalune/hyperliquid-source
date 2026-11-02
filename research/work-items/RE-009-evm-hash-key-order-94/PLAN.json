@@ -1,0 +1,38 @@
+{
+  "schema": "re009-evm-hash-key-order-plan/1",
+  "frozen_before_verifier": true,
+  "source_commit": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "primary_extent": ["0x28546c0", "0x2854930"],
+  "question": "Which unsigned key word decides a local node search, and what does equality do before returning to the row reader?",
+  "acceptance": [
+    "Authenticate the entire target and retain the complete primary FDE body, FDE, CIE, file offset and indexed membership.",
+    "Decode candidate and stored-key word offsets, 64-bit operand widths, unsigned SETA/SBB and mismatch branches from original bytes.",
+    "Bind greater to next-slot scanning, less to child descent, and all-equal to the replacement block.",
+    "Bind the equal path's old-value output, new-value stores and tag 1; retain unresolved insertion and indirect calls.",
+    "Compare the decoded mathematical relation with an independent whole-integer oracle, including every first-differing word and sign-bit boundaries.",
+    "Use below-identity mutations of word offsets, signedness, branch destinations, replacement addresses and return tag; separately reject wrong target identity."
+  ],
+  "boundary_cases": [
+    "equal zero and equal all-ones keys",
+    "candidate less and greater at each of offsets 24, 16, 8 and 0 with adversarial lower words",
+    "0x7fffffffffffffff versus 0x8000000000000000 at each deciding word",
+    "one set bit at all 256 positions against zero and against the preceding integer",
+    "deterministic random 256-bit pairs",
+    "invalid operand lengths"
+  ],
+  "native_mutations": [
+    {"va": "0x28546e7", "replacement": "10", "meaning": "candidate highest word source"},
+    {"va": "0x2854734", "replacement": "10", "meaning": "stored highest word source"},
+    {"va": "0x2854715", "replacement": "9f", "meaning": "SETA to SETG"},
+    {"va": "0x285473c", "replacement": "d4", "meaning": "mismatch branch destination"},
+    {"va": "0x28547a4", "replacement": "60", "meaning": "old-value second-half source"},
+    {"va": "0x28547bc", "replacement": "70", "meaning": "new-value first-half destination"},
+    {"va": "0x28547ca", "replacement": "00", "meaning": "equal-path tag"}
+  ],
+  "exclusions": [
+    "No captured code execution or emulation.",
+    "No row codec, full tree mutation, global iteration order, production configuration, nominal source type or complete error precedence.",
+    "No component acceptance gate, Rust reconstruction or binary-equivalence claim."
+  ]
+}
