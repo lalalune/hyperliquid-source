@@ -1,0 +1,445 @@
+{
+  "base": "e5c9b6436876b2a4a39daef813171f9879317699",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "kind": "record-flag-scan",
+  "cases": 422,
+  "frozen_sha256": "3138873e12d9318099f85f795bb598210fdd3a7d944aae705969f97428f4fea4",
+  "source_sha256": {
+    "lib.rs": "6ae302dbc961c1a95c5286fb24dc058e0ecc219168cbaece093cc720c988c937",
+    "client.rs": "5630ee717197683379f83fb84b6fa109e7cdbaf730d21fd6cd9074c9e8511802"
+  },
+  "qualifier_sha256": "041e589f4fa2603b5beb586a1523d186ba1bccbbb39a117eef35d1d9d60d5216",
+  "profiles": [
+    {
+      "opt_level": 0,
+      "cases_per_execution": 422,
+      "repeat_artifacts_byte_identical": true,
+      "artifact_sha256": {
+        "client": "1ae1b0904dc3e0022b195fb91cd486dcb1ead975a3971cd17ef65e62839992f0",
+        "libnode94_leaf.rlib": "a48e65183b250b8c541fd84851de626fa52bbe711bd9b549087637b012bf5870"
+      }
+    },
+    {
+      "opt_level": 3,
+      "cases_per_execution": 422,
+      "repeat_artifacts_byte_identical": true,
+      "artifact_sha256": {
+        "client": "0134d6ee9ef1f5d29fc8046f2d96609c4a0c0097eecea02c5bbf3bc5f51e59ec",
+        "libnode94_leaf.rlib": "ced7822f45a59173e86255d66f9f81f6fa64e4b9396fc6c3af6d018c5e0afd31"
+      }
+    }
+  ],
+  "compiled_controls": [
+    {
+      "name": "lose-slow-rax-prefix",
+      "mismatches": 107,
+      "cases": 422,
+      "process_exit": 0,
+      "first_witness": {
+        "case": 96,
+        "input": "4096,1048576,16,1,18446744073709551615,1311768467463790320,0",
+        "first_different_output_column": 1,
+        "actual": "1",
+        "expected": "257"
+      }
+    },
+    {
+      "name": "lose-fast-rax-prefix",
+      "mismatches": 18,
+      "cases": 422,
+      "process_exit": 0,
+      "first_witness": {
+        "case": 230,
+        "input": "4096,1048576,10001,1,0,1311768467463790320,0",
+        "first_different_output_column": 1,
+        "actual": "1",
+        "expected": "1311768467463790081"
+      }
+    },
+    {
+      "name": "wrong-fast-threshold",
+      "mismatches": 3,
+      "cases": 422,
+      "process_exit": 0,
+      "first_witness": {
+        "case": 219,
+        "input": "4096,1048576,10000,255,18446744073709551615,0,0",
+        "first_different_output_column": 1,
+        "actual": "1",
+        "expected": "160001"
+      }
+    },
+    {
+      "name": "skip-empty-pointer-read",
+      "mismatches": 24,
+      "cases": 422,
+      "process_exit": 0,
+      "first_witness": {
+        "case": 0,
+        "input": "4096,1048576,0,1,18446744073709551615,1311768467463790320,0",
+        "first_different_output_column": 2,
+        "actual": "1",
+        "expected": "2"
+      }
+    }
+  ],
+  "structural_controls": [
+    {
+      "region": "complete function",
+      "changed_file_offset": 62771376,
+      "rejected_below_whole_digest": true
+    },
+    {
+      "region": "following alignment",
+      "changed_file_offset": 62771467,
+      "rejected_below_whole_digest": true
+    },
+    {
+      "region": "FDE 0x3bde0b0",
+      "changed_file_offset": 15322040,
+      "rejected_below_whole_digest": true
+    },
+    {
+      "region": "CIE for 0x3bde0b0",
+      "changed_file_offset": 13505816,
+      "rejected_below_whole_digest": true
+    },
+    {
+      "region": "direct call",
+      "changed_file_offset": 62771404,
+      "rejected_below_whole_digest": true
+    },
+    {
+      "region": "FDE 0x3c1ada0",
+      "changed_file_offset": 18788508,
+      "rejected_below_whole_digest": true
+    },
+    {
+      "region": "CIE for 0x3c1ada0",
+      "changed_file_offset": 16505900,
+      "rejected_below_whole_digest": true
+    }
+  ],
+  "outside_selected_regions_control": {
+    "selected_region_check_passed": true,
+    "whole_capture_check_rejected": true
+  },
+  "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: x86_64-unknown-linux-gnu\nrelease: 1.94.1\nLLVM version: 21.1.8",
+  "commands": [
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=0",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "--crate-name=node94_leaf",
+        "--crate-type=rlib",
+        "<REPO>/src/node94-record-flag-scan/lib.rs",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/O0-1/libnode94_leaf.rlib"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=0",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "<REPO>/src/node94-record-flag-scan/client.rs",
+        "--extern",
+        "node94_leaf=<REPO>/work/RE-001-record-flag-scan-rust-94/O0-1/libnode94_leaf.rlib",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/O0-1/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/O0-1/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=0",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "--crate-name=node94_leaf",
+        "--crate-type=rlib",
+        "<REPO>/src/node94-record-flag-scan/lib.rs",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/O0-2/libnode94_leaf.rlib"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=0",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "<REPO>/src/node94-record-flag-scan/client.rs",
+        "--extern",
+        "node94_leaf=<REPO>/work/RE-001-record-flag-scan-rust-94/O0-2/libnode94_leaf.rlib",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/O0-2/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/O0-2/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "--crate-name=node94_leaf",
+        "--crate-type=rlib",
+        "<REPO>/src/node94-record-flag-scan/lib.rs",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/O3-1/libnode94_leaf.rlib"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "<REPO>/src/node94-record-flag-scan/client.rs",
+        "--extern",
+        "node94_leaf=<REPO>/work/RE-001-record-flag-scan-rust-94/O3-1/libnode94_leaf.rlib",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/O3-1/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/O3-1/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "--crate-name=node94_leaf",
+        "--crate-type=rlib",
+        "<REPO>/src/node94-record-flag-scan/lib.rs",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/O3-2/libnode94_leaf.rlib"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "<REPO>/src/node94-record-flag-scan/client.rs",
+        "--extern",
+        "node94_leaf=<REPO>/work/RE-001-record-flag-scan-rust-94/O3-2/libnode94_leaf.rlib",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/O3-2/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/O3-2/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "--crate-name=node94_leaf",
+        "--crate-type=rlib",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/lose-slow-rax-prefix.rs",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/lose-slow-rax-prefix/libnode94_leaf.rlib"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "<REPO>/src/node94-record-flag-scan/client.rs",
+        "--extern",
+        "node94_leaf=<REPO>/work/RE-001-record-flag-scan-rust-94/lose-slow-rax-prefix/libnode94_leaf.rlib",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/lose-slow-rax-prefix/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/lose-slow-rax-prefix/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "--crate-name=node94_leaf",
+        "--crate-type=rlib",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/lose-fast-rax-prefix.rs",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/lose-fast-rax-prefix/libnode94_leaf.rlib"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "<REPO>/src/node94-record-flag-scan/client.rs",
+        "--extern",
+        "node94_leaf=<REPO>/work/RE-001-record-flag-scan-rust-94/lose-fast-rax-prefix/libnode94_leaf.rlib",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/lose-fast-rax-prefix/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/lose-fast-rax-prefix/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "--crate-name=node94_leaf",
+        "--crate-type=rlib",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/wrong-fast-threshold.rs",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/wrong-fast-threshold/libnode94_leaf.rlib"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "<REPO>/src/node94-record-flag-scan/client.rs",
+        "--extern",
+        "node94_leaf=<REPO>/work/RE-001-record-flag-scan-rust-94/wrong-fast-threshold/libnode94_leaf.rlib",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/wrong-fast-threshold/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/wrong-fast-threshold/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "--crate-name=node94_leaf",
+        "--crate-type=rlib",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/skip-empty-pointer-read.rs",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/skip-empty-pointer-read/libnode94_leaf.rlib"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "--remap-path-prefix",
+        "<REPO>=<REPO>",
+        "<REPO>/src/node94-record-flag-scan/client.rs",
+        "--extern",
+        "node94_leaf=<REPO>/work/RE-001-record-flag-scan-rust-94/skip-empty-pointer-read/libnode94_leaf.rlib",
+        "-o",
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/skip-empty-pointer-read/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<REPO>/work/RE-001-record-flag-scan-rust-94/skip-empty-pointer-read/client"
+      ],
+      "exit": 0
+    },
+    {
+      "argv": [
+        "<RUSTC>",
+        "-Vv"
+      ],
+      "exit": 0
+    }
+  ],
+  "captured_program_executed": false,
+  "instruction_emulator_used": false,
+  "full_component_gate_requested": false,
+  "native_abi_or_fault_equivalence_claimed": false
+}
