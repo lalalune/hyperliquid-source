@@ -6,6 +6,8 @@
 
 #![forbid(unsafe_code)]
 
+#[cfg(feature = "checkpoint-hash")]
+pub mod checkpoint_hash;
 mod compression;
 #[cfg(feature = "timed-stream")]
 pub mod deadlines;

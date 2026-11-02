@@ -1,0 +1,253 @@
+{
+  "scope": "Only independent Rust executes; no captured target execution.",
+  "results": [
+    {
+      "name": "outer-array",
+      "source_file": "src/checkpoint_hash.rs",
+      "before": "out.push(0x83);",
+      "after": "out.push(0x93);",
+      "extra_edit": null,
+      "source_sha256": "01c34c561d5eeceddef63978acb1176dfa3a00e2c39c60cb49af9f2c796739ae",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-checkpoint-hash/work/checkpoint-hash-94/mutants/outer-array/src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "checkpoint_hash"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "independently_frozen_messagepack_and_blake3_corpus",
+      "failed_tests": [
+        "complete_wire_bytes_cover_integer_boundaries_and_all_hash_bytes",
+        "independently_frozen_messagepack_and_blake3_corpus"
+      ],
+      "log_sha256": "723ba6ad42a1a30a90d14e2c149b4c4f2b6e00f271b2c68956358f6f3a6540a8"
+    },
+    {
+      "name": "inner-array",
+      "source_file": "src/checkpoint_hash.rs",
+      "before": "\\x83\\xaan_elements",
+      "after": "\\x93\\xaan_elements",
+      "extra_edit": null,
+      "source_sha256": "d12f7ab3875c93bf69251cc1473b0abba1f716f10795ec9512b39e05dcea27e9",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-checkpoint-hash/work/checkpoint-hash-94/mutants/inner-array/src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "checkpoint_hash"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "independently_frozen_messagepack_and_blake3_corpus",
+      "failed_tests": [
+        "complete_wire_bytes_cover_integer_boundaries_and_all_hash_bytes",
+        "independently_frozen_messagepack_and_blake3_corpus"
+      ],
+      "log_sha256": "c3d78576247b62e92eb66291760ab153485e4d6bc97735da8994982594169b9a"
+    },
+    {
+      "name": "wrong-outer-key",
+      "source_file": "src/checkpoint_hash.rs",
+      "before": "accounts_hash",
+      "after": "accountx_hash",
+      "extra_edit": null,
+      "source_sha256": "ac07d80e6e7acc139ab9a63e97c8097e0145820e42eaa0a27954ff1f58beede2",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-checkpoint-hash/work/checkpoint-hash-94/mutants/wrong-outer-key/src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "checkpoint_hash"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "independently_frozen_messagepack_and_blake3_corpus",
+      "failed_tests": [
+        "complete_wire_bytes_cover_integer_boundaries_and_all_hash_bytes",
+        "independently_frozen_messagepack_and_blake3_corpus"
+      ],
+      "log_sha256": "9bebf27af9f0918772a286246d746212a1f79607315bb574d63efc3303dff4d0"
+    },
+    {
+      "name": "swap-counters",
+      "source_file": "src/checkpoint_hash.rs",
+      "before": "encode_u64(record.first, &mut out);",
+      "after": "encode_u64(record.second, &mut out);",
+      "extra_edit": {
+        "before": "encode_u64(record.second, &mut out);\n        out.extend_from_slice(b\"\\xa4hash",
+        "after": "encode_u64(record.first, &mut out);\n        out.extend_from_slice(b\"\\xa4hash"
+      },
+      "source_sha256": "1288a547eba04db92dac98898f7843a0eee7dc0e881f3d75068098cb14306fd1",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-checkpoint-hash/work/checkpoint-hash-94/mutants/swap-counters/src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "checkpoint_hash"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "independently_frozen_messagepack_and_blake3_corpus",
+      "failed_tests": [
+        "independently_frozen_messagepack_and_blake3_corpus",
+        "complete_wire_bytes_cover_integer_boundaries_and_all_hash_bytes"
+      ],
+      "log_sha256": "ec9795fe75050550f1714d0d5cd05c8f2eac3cf1e153facd9c680dfa7f899cc7"
+    },
+    {
+      "name": "little-endian",
+      "source_file": "src/checkpoint_hash.rs",
+      "before": ".to_be_bytes()",
+      "after": ".to_le_bytes()",
+      "extra_edit": null,
+      "source_sha256": "2baf5d961dffa05b67b15dabc3646696c596a36c5bd749229344c6fd57fe97cc",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-checkpoint-hash/work/checkpoint-hash-94/mutants/little-endian/src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "checkpoint_hash"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "independently_frozen_messagepack_and_blake3_corpus",
+      "failed_tests": [
+        "complete_wire_bytes_cover_integer_boundaries_and_all_hash_bytes",
+        "independently_frozen_messagepack_and_blake3_corpus"
+      ],
+      "log_sha256": "6f2b032072c1e6e49213f1e8d3b6b6ea341c6dea77459922ffbd027e46158081"
+    },
+    {
+      "name": "wrong-bin-length",
+      "source_file": "src/checkpoint_hash.rs",
+      "before": "\\xa4hash\\xc5\\x08\\x00",
+      "after": "\\xa4hash\\xc5\\x07\\xff",
+      "extra_edit": null,
+      "source_sha256": "b90792e39ffd52ae5e362e0f74154a72371c4956afed9eaa062927eb7989ba32",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-checkpoint-hash/work/checkpoint-hash-94/mutants/wrong-bin-length/src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "checkpoint_hash"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "independently_frozen_messagepack_and_blake3_corpus",
+      "failed_tests": [
+        "complete_wire_bytes_cover_integer_boundaries_and_all_hash_bytes",
+        "independently_frozen_messagepack_and_blake3_corpus"
+      ],
+      "log_sha256": "71e962a9c7c2493074fc0a2d083e5272421444a566d0292dc7c5d2761f95da31"
+    },
+    {
+      "name": "short-record",
+      "source_file": "src/checkpoint_hash.rs",
+      "before": "out.extend_from_slice(&record.bytes);",
+      "after": "out.extend_from_slice(&record.bytes[..2047]);",
+      "extra_edit": null,
+      "source_sha256": "6b5c21d584f0bb7eb43b76468f5ec4cf57d6b4a17209e462ee544940751e8dd4",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-checkpoint-hash/work/checkpoint-hash-94/mutants/short-record/src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "checkpoint_hash"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "independently_frozen_messagepack_and_blake3_corpus",
+      "failed_tests": [
+        "complete_wire_bytes_cover_integer_boundaries_and_all_hash_bytes",
+        "records_keep_their_assigned_outer_key_order",
+        "independently_frozen_messagepack_and_blake3_corpus",
+        "zero_counters_do_not_shorten_the_raw_hash",
+        "prefix_and_every_record_component_affect_the_digest"
+      ],
+      "log_sha256": "54574174f6408cfcab75713e201d3f51031a6cfd233c75be049471241ca60b2e"
+    },
+    {
+      "name": "omit-prefix",
+      "source_file": "src/checkpoint_hash.rs",
+      "before": "hasher.update(serialized_state);",
+      "after": "let _ = serialized_state; hasher.update(&[]);",
+      "extra_edit": null,
+      "source_sha256": "76ad9f0e34f0e9d159821fb98b771ec84e577419a51802a2f74fc572887164f6",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-checkpoint-hash/work/checkpoint-hash-94/mutants/omit-prefix/src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "checkpoint_hash"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "independently_frozen_messagepack_and_blake3_corpus",
+      "failed_tests": [
+        "independently_frozen_messagepack_and_blake3_corpus",
+        "prefix_and_every_record_component_affect_the_digest"
+      ],
+      "log_sha256": "eb696390880118e19eeefee62b6947ca962a9e14cf3195523a8b60829c6f3330"
+    },
+    {
+      "name": "reverse-input-order",
+      "source_file": "src/checkpoint_hash.rs",
+      "before": "hasher.update(serialized_state);\n    hasher.update(&encode_records(records));",
+      "after": "hasher.update(&encode_records(records));\n    hasher.update(serialized_state);",
+      "extra_edit": null,
+      "source_sha256": "5b74ced0120855967474a27f963e83537f3191abd83dd493e476e30c3597a43a",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-checkpoint-hash/work/checkpoint-hash-94/mutants/reverse-input-order/src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "checkpoint_hash"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "independently_frozen_messagepack_and_blake3_corpus",
+      "failed_tests": [
+        "independently_frozen_messagepack_and_blake3_corpus"
+      ],
+      "log_sha256": "19a1ad2b36749a56760abe1da4c8c7505a113a44a6b3889f974ab9a2b9f1c7e7"
+    }
+  ]
+}
