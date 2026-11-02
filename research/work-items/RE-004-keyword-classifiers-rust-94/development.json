@@ -1,0 +1,42 @@
+{
+  "archive": {
+    "bytes": 18360,
+    "sha256": "01b06fc4d5644f4bb1ac6ac189891fe16a1e10ff609b1c309bfd85451c8d3a99",
+    "streams": 16,
+    "unique_payloads": 12
+  },
+  "attempts": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "research/work-items/RE-004-keyword-classifiers-rust-94/verify_static.py",
+        "--freeze"
+      ],
+      "cause": "Incorrect handwritten PCMPEQB byte selector used a prose target as displacement; corrected to actual GNU/LLVM bytes 660f74054acfdcfe. No frozen files existed yet.",
+      "exit_code": 1,
+      "source": "initial-static.py",
+      "stage": "static freeze before Rust/oracle freeze",
+      "stderr": "initial-static.stderr",
+      "stdout": "initial-static.stdout"
+    },
+    {
+      "cause": "Literal selectors also matched unit-test strings; made selectors contextual. Product and oracle unchanged.",
+      "exit_code": 1,
+      "library_source": "initial-lib.rs",
+      "stage": "native mutation preflight before compilation",
+      "stderr": "initial-native.stderr",
+      "stdout": "initial-native.stdout",
+      "verifier_source": "initial-native-verifier.py"
+    },
+    {
+      "cause": "Range moved from a pattern guard (E0507); clone the two-usize range when indexing. No native executable ran. Oracle unchanged; complete final matrix reran in a fresh directory.",
+      "commands": "native/calls.json",
+      "exit_code": 1,
+      "library_source": "initial-lib.rs",
+      "stage": "first base Rust library compile",
+      "verifier_source": "compile-failed-verifier.py",
+      "wrapper_stderr": "compile-failed.stderr"
+    }
+  ]
+}
