@@ -25,7 +25,7 @@ the CIE, FDE and four retained direct calls. `.eh_frame+0x2d3cec` has
 file offset `0xfb5204`, CIE offset zero and pcrel sdata4 encoding `0x1b`.
 The decoded initial location is `0x55c9800`, extent `0x30`. The body has
 returns at `0x55c9823` and `0x55c982f`; there is no padding before the next
-FDE at `0x55c9830`. Its first instruction is `mov ecx,eax`, not `endbr64`.
+FDE at `0x55c9830`. Its first instruction is `mov eax,ecx`, not `endbr64`.
 The next FDE's existing boundary check is retained only by the old checker;
 no neighboring body, behavior or implementation is claimed here.
 
@@ -53,7 +53,7 @@ The application meanings of all four inputs are unknown.
 
 | Original ELF VA | Instruction relation | Consequence |
 | --- | --- | --- |
-| `0x55c9800` | `mov ecx,eax` | Save the original refinement selector before BSR overwrites ECX |
+| `0x55c9800` | `mov eax,ecx` | Save the original refinement selector before BSR overwrites ECX |
 | `0x55c9802..0x55c9807` | Compare EDX with exactly 1; branch to `0x55c9824` | All other flag values take the main path |
 | `0x55c9807..0x55c980f` | Load u32 `[RDI]`, add 1 in EDX, BSR into ECX | `n = (a+1) mod 2^32`; `k = floor(log2(n))` when `n != 0` |
 | `0x55c980f..0x55c9818` | `EDI = k << 8`; test saved EAX | Start `base = 256*k`; original `r == 0` skips refinement |
