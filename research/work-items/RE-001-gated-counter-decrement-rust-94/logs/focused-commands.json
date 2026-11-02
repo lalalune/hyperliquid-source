@@ -1,0 +1,51 @@
+[
+  {
+    "label": "prior-static",
+    "argv": [
+      "python3",
+      "tools/foundation_all_empty_gate.py",
+      "--check",
+      "research/work-items/foundation-all-empty-gate-94/evidence.json"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "focused-tests",
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "tests.test_foundation_all_empty_gate",
+      "-v"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "cargo-check",
+    "argv": [
+      "cargo",
+      "+1.94.1",
+      "check",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "src/node94-gated-counter-decrement/Cargo.toml",
+      "--target-dir",
+      "work/gated-counter-decrement/cargo"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "rustfmt",
+    "argv": [
+      "rustfmt",
+      "+1.94.1",
+      "--check",
+      "--edition",
+      "2024",
+      "src/node94-gated-counter-decrement/lib.rs",
+      "src/node94-gated-counter-decrement/client.rs"
+    ],
+    "exit": 0
+  }
+]
