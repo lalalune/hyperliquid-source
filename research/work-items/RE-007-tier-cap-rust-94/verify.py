@@ -154,7 +154,7 @@ def run_build(out,rust_bin):
     print(json.dumps({'output':str(out),'source_freeze_sha256':report['source_freeze_sha256'],'report_sha256':sha((out/'REPORT.json').read_bytes()),'archive_payload_sha256':sha(raw),'archive_text_sha256':sha(encoded+b'\n'),'commands':len(records),'cases_per_baseline':len(rows),'native_normal_result_mutants':len(mutations),'framing_policy':len(policy),'seconds':report['elapsed_seconds']},sort_keys=True))
     return report
 
-def audit(archive_path,current=True):
+def audit(archive_path,current=True,current_component=False):
     # Strict base64 and compressed trailing-data rejection.
     import zlib
     encoded=archive_path.read_bytes();compressed=base64.b64decode(encoded.rstrip(b'\n'),validate=True);d=zlib.decompressobj(16+zlib.MAX_WBITS);payload=d.decompress(compressed)+d.flush();need(d.eof and not d.unused_data and not d.unconsumed_tail,'gzip framing')
@@ -163,7 +163,16 @@ def audit(archive_path,current=True):
     files={n:base64.b64decode(b,validate=True) for n,b in archive['snapshot'].items()};need(set(files)==set(freeze['files']),'snapshot file set')
     for n,b in files.items():
         need(sha(b)==freeze['files'][n],'snapshot '+n)
-        if current:need((ROOT/n).read_bytes()==b,'current source/input '+n)
+        # The historical lib export surface and this evolving replay auditor
+        # are current support files, not refreshed original compiler inputs.
+        if current and n not in {str(COMPONENT/'src/lib.rs'),str(HERE.relative_to(ROOT)/'verify.py')}:
+            need((ROOT/n).read_bytes()==b,'current source/input '+n)
+    if current:
+        need('pub use tier_cap::position_leverage_cap;' in (ROOT/COMPONENT/'src/lib.rs').read_text(),'public tier-cap export missing')
+    if current_component:
+        actual={str(p.relative_to(ROOT)):sha(p.read_bytes()) for p in sorted((ROOT/COMPONENT).rglob('*')) if p.is_file() and 'target' not in p.parts and '__pycache__' not in p.parts}
+        wanted={n:d for n,d in freeze['files'].items() if n.startswith(str(COMPONENT)+'/')}
+        need(actual==wanted,'current component differs from historical compiler tree')
     pre=HERE/'pre-source';rows,inputs,expected,controls,oracle=corpus(pre)
     def channel(idx,kind):return base64.b64decode(report['records'][idx][kind+'_b64'],validate=True)
     def output(idx,want,code=0,stdin=inputs):
@@ -191,6 +200,6 @@ def audit(archive_path,current=True):
     return {'source_freeze_sha256':sha(freeze_raw),'report_sha256':sha(report_raw),'archive_payload_sha256':sha(payload),'snapshot_files':len(files),'cases_per_baseline':len(rows),'baseline_builds':4,'normal_cap_mutants':10,'framing_policy_controls':3,'commands':len(report['records']),'raw_channels':2*len(report['records']),'captured_execution':False}
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--build',type=Path);parser.add_argument('--rust-bin',type=Path,default=RUST_DEFAULT);parser.add_argument('--archive',type=Path,default=HERE/'compiled.json.gz.b64');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--current-component',action='store_true');parser.add_argument('--build',type=Path);parser.add_argument('--rust-bin',type=Path,default=RUST_DEFAULT);parser.add_argument('--archive',type=Path,default=HERE/'compiled.json.gz.b64');args=parser.parse_args()
     if args.build:run_build(args.build.resolve(),args.rust_bin.resolve())
-    else:print(json.dumps(audit(args.archive),sort_keys=True))
+    else:print(json.dumps(audit(args.archive,current_component=args.current_component),sort_keys=True))

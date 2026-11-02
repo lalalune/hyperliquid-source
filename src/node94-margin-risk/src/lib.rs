@@ -6,6 +6,7 @@
 #![forbid(unsafe_code)]
 
 mod candidate;
+mod leverage_increase;
 mod position;
 mod requirements;
 mod surplus;
@@ -35,4 +36,9 @@ pub use tier_cap::position_leverage_cap;
 pub use types::{
     LATER_TIER_LOWER_INCLUSIVE_MAX, MAX_DESCRIPTION_BYTES, MAX_LEVERAGE, MAX_TIERS, MarginTable,
     MarginTier, RawMarginTable, RawMarginTier, WIRE_NOTIONAL_EXCLUSIVE_MAX,
+};
+
+pub use leverage_increase::{
+    CustomIncreaseDecision, CustomIncreaseDomainError, CustomLeverageIncrease,
+    check_custom_leverage_increase,
 };

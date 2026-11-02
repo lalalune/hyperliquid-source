@@ -187,8 +187,12 @@ python3 -B -m unittest discover -s tests -p test_margin_path_static.py -v
 (cd research/work-items/RE-007-tier-cap-rust-94 && sha256sum -c MANIFEST.sha256)
 ```
 
-The default verifier replays receipts and authenticates the exact current source
-snapshot; it does not compile. A fresh optional build uses a nonexistent ignored
+The default verifier replays the immutable historical compiler/input snapshot.
+It checks current bound inputs except the evolving shared lib-export file and
+replay auditor, and separately requires the tier-cap export. It does not compile.
+`--current-component` optionally demands the original exact component tree; that
+historical check is expected to fail after adding another independent module.
+See [SNAPSHOT-HISTORY.md](SNAPSHOT-HISTORY.md). A fresh optional build uses a nonexistent ignored
 output path and the separately installed official compiler, without downloads:
 
 ```sh

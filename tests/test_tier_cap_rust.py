@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT=Path(__file__).resolve().parents[1]
 PACKET=ROOT/'research/work-items/RE-007-tier-cap-rust-94'
@@ -45,9 +46,25 @@ class TierCapRustEvidence(unittest.TestCase):
         self.assertTrue(all(c['witness']['expected_cap']!=c['witness']['wrong_cap'] for c in controls))
         self.assertEqual(hashlib.sha256((PACKET/'pre-source/PRE-RUST-FREEZE.json').read_bytes()).hexdigest(),'70b67fdbf4c71988a658c52a36b0d01962d14941369e601dda14bba41b5906f9')
 
-    def test_actual_streams_and_exact_current_source_tree(self):
+    def test_actual_streams_and_historical_source_tree(self):
         result=self.check.audit(self.archive_path)
         self.assertEqual((result['baseline_builds'],result['cases_per_baseline'],result['normal_cap_mutants'],result['framing_policy_controls']),(4,925,10,3))
+
+    def test_original_compiled_lib_is_not_refreshed(self):
+        name='src/node94-margin-risk/src/lib.rs'
+        original=base64.b64decode(self.archive['snapshot'][name],validate=True)
+        self.assertEqual(hashlib.sha256(original).hexdigest(),'ed8ec35b55cd5d4576b7d6935c0bf731aa86b8d3304369da2605746fef8f05b4')
+        self.assertNotIn(b'mod leverage_increase;',original)
+
+    def test_changed_current_cap_source_still_rejects(self):
+        target=ROOT/'src/node94-margin-risk/src/tier_cap.rs'
+        original=Path.read_bytes
+        def read(path):
+            raw=original(path)
+            return raw+b'\n' if path==target else raw
+        with mock.patch.object(Path,'read_bytes',read):
+            with self.assertRaisesRegex(ValueError,'current source/input .*tier_cap.rs'):
+                self.check.audit(self.archive_path)
 
     def test_changed_baseline_output_rejects(self):
         def change(report):
