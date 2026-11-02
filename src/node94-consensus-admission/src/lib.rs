@@ -12,6 +12,7 @@ mod admission;
 mod auth;
 mod error;
 mod qc;
+pub mod request_throttle;
 mod stake;
 mod state;
 mod tc;
