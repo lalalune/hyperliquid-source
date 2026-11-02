@@ -1,0 +1,12 @@
+caller	caller_fde_start	caller_fde_end	callee	call_va	dest_object	stale_span_1	stale_span_2	verdict	read_block_va	propagation_target	basis
+orchestrator	0x4e6fef0	0x4e713bd	trioA	0x4e6ff83	rdi=[rsp+0xe0] local buffer	[obj+0x1..0x8]	[obj+0x11..0x20]	READ	0x4e700fc	[rbx+0x9..0x10]+[rbx+0x19..0x28]	tag-check jne directly to read block; no writes to buffer between call and reads
+orchestrator	0x4e6fef0	0x4e713bd	trioA	0x4e707b9	rdi=[rsp+0xe0] local buffer	[obj+0x1..0x8]	[obj+0x11..0x20]	READ	0x4e70827	[rbx+0x9..0x10]+[rbx+0x19..0x28]	tag-check jne directly to read block; no writes to buffer between call and reads
+orchestrator	0x4e6fef0	0x4e713bd	trioA	0x4e70e2a	rdi=[rsp+0xe0] local buffer	[obj+0x1..0x8]	[obj+0x11..0x20]	READ	0x4e70f21	[rbx+0x9..0x10]+[rbx+0x19..0x28]	tag-check jne directly to read block; no writes to buffer between call and reads
+dg1	0x4e64730	0x4e64d9e	double-gate	0x4e64a0b	rdi=r14=entry rsi	[obj+0xb9..0xc0]	[obj+0xc9..0xd8]	NO-READ	-	-	dest register r14 never dereferenced anywhere in the caller FDE
+dg2	0x4e65140	0x4e656e4	double-gate	0x4e653e8	rdi=r14=entry rsi	[obj+0xb9..0xc0]	[obj+0xc9..0xd8]	NO-READ	-	-	dest register r14 never dereferenced anywhere in the caller FDE
+dg3	0x4e66660	0x4e6680c	double-gate	0x4e66671	rdi=entry rsi (arg-shifted wrapper)	[obj+0xb9..0xc0]	[obj+0xc9..0xd8]	NO-READ	-	-	dest pointer not retained after the call; rsi reused for size math and later calls
+dg4	0x4e66810	0x4e66f9b	double-gate	0x4e66baa	rdi=rbx=entry rsi	[obj+0xb9..0xc0]	[obj+0xc9..0xd8]	NO-READ	-	-	dest read post-call via saved-rsi alias rcx only at 0x80/0x90/0x1e0/0x1f3, never at stale offsets
+dg5	0x4e67d30	0x4e6839f	double-gate	0x4e68040	rdi=rbx=entry rsi	[obj+0xb9..0xc0]	[obj+0xc9..0xd8]	NO-READ	-	-	dest read post-call via saved-rsi alias rcx only at 0x80/0x90/0x1e0/0x1f3, never at stale offsets
+tb1	0x4e69150	0x4e69425	trioB	0x4e6927c	D=decoder-derived (trioB r14)	[D+0xb9..0xc0]	[D+0xc9..0xd8]	NO-READ	-	-	caller holds only rdi=[rsp+0x80]; all post-call reads target the rdi object, never D
+tb2	0x4e69580	0x4e696ff	trioB	0x4e6961b	D=decoder-derived (trioB r14)	[D+0xb9..0xc0]	[D+0xc9..0xd8]	NO-READ	-	-	caller holds only rdi=[rsp+0x48]; all post-call reads target the rdi object, never D
+gl1	0x4e69430	0x4e69573	gate-like	0x4e694cb	D=decoder-derived (gate-like r14)	[D+0xb9..0xc0]	[D+0xc9..0xd8]	NO-READ	-	-	caller holds only rdi=[rsp+0xf]; all post-call reads target the rdi object, never D
