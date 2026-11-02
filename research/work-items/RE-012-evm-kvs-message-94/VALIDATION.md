@@ -9,14 +9,13 @@
 - Ten incorrect Rust implementations compile and fail intended tests. Exact
   changes, commands, source hashes and log hashes are in `rust-mutations.json`.
 - Artifact verification, catalogue consistency and reproduction checks pass.
-- The full 977-file repository sweep is running under
-  `work/evm-kvs-message-94/full-suite/`. No full-suite pass is claimed.
+- Full repository sweep: all 977 files passed without restarts;
+  15,501 reported tests including 67 skips. See `full-suite.json`.
 - An independent read-only review found no actionable decoder issues. The
   transfer guard was separately checked against its native counter/store path.
 - Hosted CI, database apply/compaction, full state validation, network operation
   and node/Docker acceptance are not claimed. All milestone gates and compared
-  byte-window counts remain unchanged. The submission is draft pending the
-  full required sweep.
+  byte-window counts remain unchanged. The required local sweep is complete.
 
 The tests execute only independent Rust and offline tools. Counter tests near
 100 GB/u64 boundaries use private synthetic counter seeds, not huge buffers or
