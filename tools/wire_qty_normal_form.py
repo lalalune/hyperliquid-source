@@ -43,6 +43,16 @@ def read(data,va,n):
     return off,bytes(data[off:off+n])
 
 
+def rela_section(data):
+    """The .rela.dyn section, shape-checked before its entries are folded.
+    A size that is not a whole number of 24-byte entries would otherwise
+    escape the fold as a bare struct.error, not this module's ValueError:
+    the same fail-closed shape evm_amount_scale applies to this table."""
+    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    if sec['size']%24:raise ValueError('.rela.dyn truncated')
+    return sec
+
+
 def reciprocal(c,shift,d,maximum):
     """Two-endpoint proof for all n in [0,N], not a sampled input test."""
     scale=1<<shift;error=c*d-scale
@@ -139,6 +149,7 @@ def analyze(data):
         code=read(data,site,5)[1]
         if code[0]!=0xbf or struct.unpack_from('<I',code,1)[0]!=(8-k)<<16:
             raise ValueError('scale-selection immediate changed')
+    rela_section(data)
     for site in TEST_BRANCHES:
         if read(data,site,1)[1]!=b'\x76':
             raise ValueError('divisibility JBE polarity changed')
