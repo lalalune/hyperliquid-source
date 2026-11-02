@@ -75,6 +75,18 @@ def exit_helper_projection(p,tag):
     return 'unclosed-other-tag-route'
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    s=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    rels={}
+    for a,i,v in struct.iter_unpack('<QQq',data[s['offset']:s['offset']+s['size']]):
+        if a in rels:raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a]=(i,v)
+    return rels
+
+
 def analyze(data):
     spec=specification();params={}
     helper=exit_helper_parameters(data)
@@ -101,8 +113,7 @@ def analyze(data):
                         (0x90,'48b80000000000000080'),(0x9a,'48ffc0')]:
             b=bytes.fromhex(raw)
             if read(data,a+off,len(b))[1]!=b:raise ValueError('wrapper selector/normalization changed')
-    s=next(s for s in sections(data) if s['name']=='.rela.dyn')
-    rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[s['offset']:s['offset']+s['size']])}
+    rels=relocations(data)
     for a,row in spec['relocations'].items():
         if rels.get(int(a))!=tuple(row):raise ValueError('snapshot relocation changed')
     path=b'info_server/src/save_l4_snapshots.rs'
