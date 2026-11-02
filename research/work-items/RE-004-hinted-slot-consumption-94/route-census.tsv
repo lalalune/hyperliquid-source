@@ -1,0 +1,11 @@
+candidate site object_coord access verdict
+vec-teardown 0x3bc8560 dtor object (rdi) reads [rdi+0x8] (array base) and [rdi+0x10] (count) only; loop reads array pairs, never [rdi+0x90] no
+vector-free 0x37f70f6 dtor object (rbx) reads [rbx] (count) and [rbx+0x8] (data pointer) only no
+sub-dtor-18 0x37f59f0 dtor+0x18 (rdi) direct reads [sub+0x0,0x10,0x20]; helper [rdi+0x8] = dtor+0x20 no
+sub-dtor-48 0x37f5bb0 dtor+0x48 (rdi) direct reads [sub+0x0,0x10,0x20,0x30]; helper [rdi+0x8] = dtor+0x50 no
+sub-dtor-88 0x37f5c80 dtor+0x88 (rdi) direct reads [sub+0x0,0x10,0x20,0x30,0x40,0x50] (0x10 stride, skips +8); helper [rdi+0x8] = dtor+0x90, gated on the first member refcount reaching zero YES-conditional
+final-jmp 0x37f57c0 dtor+0xe8 (rdi after add rbx,0xe8) no [rdi-0x58] read anywhere in the 556B FDE no
+forward 0x37fb9e0 orig object (rbx) no [rbx+0x198] read anywhere in the 7782B FDE (marker read at [rbx+0x12a0] only) no
+c3-stores 0x326e908/0x326f115 NOT the builder object two [r12+0x198] stores, but r12 was rebased ([rsp+0x368] at 0x326e8c3; popped caller r12 at 0x326efdc) — same displacement, different base; no read of the hinted slot no
+guard-test 0x37f707e dtor object (rdi) reads [rdi+0x198] = orig+0x2a0 (the guard), not orig+0x198 no
+helper-direct 0x4e79840 n/a (GOT-indirect only) zero direct E8 callers; zero RIP-relative references; reached only via the 10 GOT RELATIVE slots above n/a
