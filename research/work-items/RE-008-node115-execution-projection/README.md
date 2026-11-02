@@ -60,3 +60,5 @@ The default command checks exact evidence replay; `--write` regenerates it. Only
 No compiled source/target comparisons have been measured: raw-equal, normalized-only and unmatched fields remain unset. The raw export denominator is one FDE / 1,694 bytes / 336 instructions, not whole-component coverage. Gates remain false and the shared catalogue is untouched. Complete callers, producer rows' semantic types, comparator closure, exceptional exits, source-level ownership and downstream effects remain open.
 
 Next: close the result producer and comparator contracts, then trace the two downstream arguments separately. This prevents a reconstruction from erasing old state on empty output or replacing the full result with the compact five-byte projection.
+
+Native text exports trim trailing whitespace only; instruction bytes, operands and addresses are unchanged.
