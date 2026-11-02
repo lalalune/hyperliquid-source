@@ -1,0 +1,46 @@
+# PLT call sites in the window 0x5160dd0..0x5160ebd, its callee
+# 0x5160c10..0x5160dbf, that callee's callee 0x5160ad0..0x5160c0d,
+# and the cleanup stub 0x5160dc0..0x5160dd0, and their relocations.
+# PLT addresses are objdump's; GOT slots are readelf -r entries.
+# window call sites:
+#   0x5160de9  call 0x5660220 <pthread_mutex_lock@plt>   (mutex, outer+0x78)
+#   0x5160e26  call 0x5660230 <pthread_mutex_unlock@plt> (mutex, epilogue)
+#   0x5160e99  call 0x5160c10                            (find-or-insert callee, direct)
+#   0x5160eac  call 0x5660650 <_ZSt20__throw_system_errori@plt> (lock failure)
+# cleanup 0x5160dc0..0x5160dd0 call sites:
+#   0x5160dc3  call 0x5660230 <pthread_mutex_unlock@plt> (mutex)
+#   0x5160dcb  call 0x5660110 <_Unwind_Resume@plt>
+# insert 0x5160c10..0x5160dbf call sites:
+#   0x5160cc5  call 0x5660490 <_Znwm@plt>                (0x18-byte node)
+#   0x5160cfc  call 0x56605b0 <_ZNKSt8__detail20_Prime_rehash_policy14_M_need_rehashEmmm@plt>
+#   0x5160d3e  call 0x5160ad0                            (rehash aux, direct)
+#   0x5160d94  call 0x5660440 <_ZdlPvm@plt>               (node free, exception pad)
+#   0x5160da9  call 0x5660430 <__stack_chk_fail@plt>      (canary failure)
+#   0x5160dba  call 0x5660110 <_Unwind_Resume@plt>
+# rehash 0x5160ad0..0x5160c0d call sites:
+#   0x5160b09  call 0x5660490 <_Znwm@plt>                (count*8 bucket array)
+#   0x5160b19  call 0x5660140 <memset@plt>                (zero the new array)
+#   0x5160b9d  call 0x5660440 <_ZdlPvm@plt>               (old array free)
+#   0x5160bd6  call 0x5660580 <_ZSt28__throw_bad_array_new_lengthv@plt>
+#   0x5160bdb  call 0x5660590 <_ZSt17__throw_bad_allocv@plt>
+#   0x5160be7  call 0x5660520 <__cxa_begin_catch@plt>     (catch pad)
+#   0x5160bf4  call 0x5660530 <__cxa_rethrow@plt>         (catch pad)
+#   0x5160c00  call 0x5660540 <__cxa_end_catch@plt>       (cleanup pad)
+#   0x5160c08  call 0x5660110 <_Unwind_Resume@plt>
+# readelf -r entries (GLOB_DAT/JUMP_SLOT):
+#   0x5770a28  pthread_mutex_lock@GLIBC_2.2.5
+#   0x5770a30  pthread_mutex_unlock@GLIBC_2.2.5
+#   0x5778db0  _Unwind_Resume@GCC_3.0
+#   0x5778dc8  memset@GLIBC_2.2.5
+#   0x5778e38  pthread_mutex_lock@GLIBC_2.2.5 (JUMP_SLOT)
+#   0x5778e40  pthread_mutex_unlock@GLIBC_2.2.5 (JUMP_SLOT)
+#   0x5778f40  __stack_chk_fail@GLIBC_2.4 (JUMP_SLOT)
+#   0x5778f48  _ZdlPvm@CXXABI_1.3.9 (JUMP_SLOT)
+#   0x5778f70  _Znwm@GLIBCXX_3.4 (JUMP_SLOT)
+#   0x5778fb8  __cxa_begin_catch@CXXABI_1.3 (JUMP_SLOT)
+#   0x5778fc0  __cxa_rethrow@CXXABI_1.3 (JUMP_SLOT)
+#   0x5778fc8  __cxa_end_catch@CXXABI_1.3 (JUMP_SLOT)
+#   0x5778fe8  _ZSt28__throw_bad_array_new_lengthv@GLIBCXX_3.4.29 (JUMP_SLOT)
+#   0x5778ff0  _ZSt17__throw_bad_allocv@GLIBCXX_3.4 (JUMP_SLOT)
+#   0x5779000  _ZNKSt8__detail20_Prime_rehash_policy14_M_need_rehashEmmm@GLIBCXX_3.4.18 (JUMP_SLOT)
+#   0x5779050  _ZSt20__throw_system_errori@GLIBCXX_3.4.11 (JUMP_SLOT)
