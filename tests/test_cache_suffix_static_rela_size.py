@@ -6,6 +6,13 @@ the .rela.dyn section size. A size that is not a multiple of the 24-byte
 RELA entry must fail closed as ValueError ('truncated .rela.dyn'), the
 contract every other malformed case in analyze() raises; on the base it
 escapes as a bare struct.error, which is not a ValueError subclass.
+
+A second truncation shape reaches the same unpack: elf_index.sections()
+exempts SHT_NOBITS (type 8) rows from its outside-file check, so a header
+typed 8 whose declared range runs past the end of the file hands
+iter_unpack a short buffer even when the declared size is a whole
+multiple of 24. The guard therefore also bounds-checks the declared
+range at the read site, like evm_amount_scale's unpack guards.
 """
 import struct
 import sys
@@ -71,6 +78,20 @@ def build_elf(rela_size):
     return bytes(blob)
 
 
+def patch_rela_header(blob, rela_type=None, offset=None, size=None):
+    """Rewrite fields of the .rela.dyn section header (index 4)."""
+    blob = bytearray(blob)
+    shoff = struct.unpack_from('<Q', blob, 40)[0]
+    hdr = shoff + 4 * 64
+    if rela_type is not None:
+        struct.pack_into('<I', blob, hdr + 4, rela_type)
+    if offset is not None:
+        struct.pack_into('<Q', blob, hdr + 24, offset)
+    if size is not None:
+        struct.pack_into('<Q', blob, hdr + 32, size)
+    return bytes(blob)
+
+
 class CacheSuffixRelaSizeTests(unittest.TestCase):
     def test_truncated_rela_dyn_fails_closed(self):
         with self.assertRaisesRegex(ValueError, 'truncated .rela.dyn'):
@@ -79,6 +100,27 @@ class CacheSuffixRelaSizeTests(unittest.TestCase):
     def test_rela_dyn_with_trailing_partial_entry_fails_closed(self):
         with self.assertRaisesRegex(ValueError, 'truncated .rela.dyn'):
             subject.analyze(build_elf(26))
+
+    def test_nobits_rela_dyn_past_eof_fails_closed(self):
+        # SHT_NOBITS exempts .rela.dyn from sections()' outside-file
+        # check, so a declared 48-byte range with only 25/30 bytes left
+        # in the file reaches iter_unpack as a short buffer; it must
+        # fail closed with the same ValueError, not a bare struct.error.
+        blob = build_elf(48)
+        for left in (25, 30):
+            patched = patch_rela_header(
+                blob, rela_type=8, offset=len(blob) - left)
+            with self.assertRaisesRegex(ValueError, 'truncated .rela.dyn'):
+                subject.analyze(patched)
+
+    def test_nobits_rela_dyn_fully_present_reaches_bindings_check(self):
+        # Negative control: a type-8 header whose declared range is
+        # fully inside the file still parses and fails at the bindings
+        # check, proving the bounds guard is not a blanket type refusal.
+        patched = patch_rela_header(build_elf(48), rela_type=8)
+        with self.assertRaisesRegex(
+                ValueError, 'cache formatting/global relocation changed'):
+            subject.analyze(patched)
 
     def test_whole_entry_sizes_still_reach_bindings_check(self):
         # Negative controls: sizes 0/24/48 parse and fail at the very next
