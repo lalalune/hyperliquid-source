@@ -89,6 +89,8 @@ def collect(data, output):
                 f'--start-address={start}', f'--stop-address={end}', str(native)],
                 text=True, env=env).replace(str(native), 'artifacts/node/115/hl-node')
             ins = decode_export(raw, start, end, body)
+            raw = '\n'.join(line.rstrip() for line in raw.splitlines()) + '\n'
+
             decoded.update(ins)
             calls = []
             for pc, code in ins.items():

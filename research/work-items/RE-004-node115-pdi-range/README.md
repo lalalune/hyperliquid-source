@@ -21,11 +21,11 @@ export boundary, not a proof that every semantic function is recovered.
 The input at RSI supplies raw words `O=[RSI]`, `a=[RSI+8]`, `b=[RSI+16]`.
 At `0x22b3175`, unsigned subtraction plus CMOVB forms `n=max(b-a,0)`.
 The allocation request is `8*n`. The separate shift-by-61 and unsigned compare
-against `0x7ffffffffffffff8` reject a wrapped or overlarge allocation size.
-Together they admit exactly `n <= 2^60-1`, before invoking the allocation
-helper via `0x64df480 -> 0x6355830`. An empty range uses raw pointer word 8,
+against `0x7ffffffffffffff8` select the allocation-error call for a wrapped or overlarge allocation size.
+The path without that error call is selected exactly when `n <= 2^60-1`,
+before invoking the allocation helper via `0x64df480 -> 0x6355830`. An empty range uses raw pointer word 8,
 zero capacity/count and no read through O. The allocation-failure path calls
-`0x64df498 -> 0x141e264`; its internal behavior is not reconstructed here.
+`0x64df498 -> 0x141e264`; its internal behavior and nonreturn guarantee are not reconstructed here. A returning error helper would fall through; the bounded claim describes branch selection, not a closed rejection guarantee.
 
 For a nonempty admitted allocation, the loop at `0x22b31f0` reloads `[O+0x50]`
 on each iteration, multiplies that unsigned word by **10,000**, and branches
@@ -98,3 +98,5 @@ the root MIT license; no inferred reference implementation was read or copied.
 Next: establish what the object word at +0x50 means, its source of truth and
 stability, and the input/output contracts of `0x2bee760` before assigning asset
 semantics or writing a source-compatible quantity component.
+
+Native text exports trim trailing whitespace only; instruction bytes, operands and addresses are unchanged.
