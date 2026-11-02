@@ -163,6 +163,24 @@ def ref_modexp(base, exp, mod):
     return r.to_bytes(len(mod), "big")
 
 
+# The manifest pins the packet's own files plus the
+# ../..-relative tool and test files the packet binds.
+PACKET_FILES = frozenset({
+    "../../../tests/test_crypto_emulation_guard.py",
+    "../../../tests/test_modexp.py",
+    "../../../tests/test_modexp_review.py",
+    "../../../tools/crypto_emulation_guard.py",
+    "../../../tools/modexp.py",
+    "README.md",
+    "REVIEW.md",
+    "independent_verify.py",
+    "modexp.json",
+    "pr-body.md",
+    "review-static.json",
+    "verify.py",
+})
+
+
 def main():
     errors = []
     data = BINARY.read_bytes()
@@ -255,12 +273,47 @@ def main():
         if not m["broke_expectation"]:
             errors.append(label + " mutation did not break")
 
-    # MANIFEST
-    man = (HERE / "MANIFEST.sha256").read_text().splitlines()
-    for line in man:
-        digest, name = line.split()
-        body = (HERE / name).read_bytes()
-        if hashlib.sha256(body).hexdigest() != digest:
+    # MANIFEST. Admission first: hashing each listed row is not
+    # enough. It cannot see a duplicated row, a listed file replaced
+    # by a symlink (read_bytes follows it, so the evidence can point
+    # outside the packet), an unlisted file in the packet directory,
+    # or an evidence file deleted together with its row. Pin the
+    # listed set and compare it against the packet contents,
+    # mirroring the RE-005 verifier and the node-inventory verifiers.
+    listed = {}
+    for line in (HERE / "MANIFEST.sha256").read_text().splitlines():
+        if not line.strip():
+            continue
+        digest, sep, name = line.partition("  ")
+        if not sep or len(digest) != 64:
+            errors.append("MANIFEST malformed line: " + line.strip())
+            continue
+        if name in listed:
+            errors.append("MANIFEST lists " + name + " twice")
+            continue
+        listed[name] = digest
+    if set(listed) != PACKET_FILES:
+        errors.append("MANIFEST file set differs from pinned packet files")
+    present = set()
+    for entry in sorted(HERE.iterdir()):
+        if entry.is_symlink():
+            errors.append("packet entry is a symlink: " + entry.name)
+        elif entry.is_dir():
+            if entry.name != "__pycache__" or not all(
+                    child.name.endswith(".pyc") and not child.is_symlink()
+                    for child in entry.iterdir()):
+                errors.append("unexpected directory in packet: " + entry.name)
+        else:
+            present.add(entry.name)
+    in_packet = {name for name in listed if not name.startswith("..")}
+    if present - {"MANIFEST.sha256"} != in_packet:
+        errors.append("packet contents differ from MANIFEST")
+    for name, digest in listed.items():
+        path = HERE / name
+        if path.is_symlink() or not path.is_file():
+            errors.append("MANIFEST entry is a symlink or not a file: " + name)
+            continue
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             errors.append("MANIFEST mismatch " + name)
 
     # path string must not appear in committed packet files (needles assembled)
