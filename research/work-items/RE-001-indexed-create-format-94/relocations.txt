@@ -1,0 +1,16 @@
+# PLT stubs used by the window, with the GOT slot each stub jumps through
+# (verified from the stub bytes: ff 25 <disp32> resolves to the GOT address).
+# Direct rel32 calls (parser, lookup, formatter, string constructor,
+# move-assign, control release) use no GOT slot and have no relocation
+# entry cited here.
+#
+# PLT stub -> GOT slot
+0x5660430 __stack_chk_fail@plt -> 0x5778f40
+0x5660470 _M_dispose@plt -> 0x5778f60
+0x5660480 _ZdaPv@plt -> 0x5778f68
+#
+# Window PLT call sites:
+#   0x514ec2b _ZdaPv@plt (status struct array pointer, when nonzero)
+#   0x514eccc, 0x514ecd4, 0x514ecdc _M_dispose@plt (formatter temporary,
+#     separator string, equals string, in that order)
+#   0x514ece6 __stack_chk_fail@plt (canary mismatch)
