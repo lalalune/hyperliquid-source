@@ -33,6 +33,12 @@ pub fn encode_account(account: &AccountRecord) -> Result<SerializedValue, Encode
 /// Requiring writer order and rejecting explicit defaults is this crate's strict policy;
 /// the retained packet does not establish those native reader rejection rules.
 pub fn decode_account(input: &[u8]) -> Result<AccountRecord, DecodeError> {
+    if !matches!(input.first(), Some(0x80..=0x83)) {
+        return Err(match input.first() {
+            Some(marker) => DecodeError::InvalidMarker(*marker),
+            None => DecodeError::UnexpectedEof,
+        });
+    }
     let mut cursor = Cursor::new(input);
     let len = cursor.map_len()?;
     if len > 3 {
@@ -148,6 +154,27 @@ mod tests {
         assert_eq!(&bytes[37..40], &[0xa1, b'n', 0xcd]);
         assert_eq!(&bytes[42..45], &[0xa1, b'c', 0xc4]);
         assert_eq!(decode_account(bytes), Ok(account));
+    }
+
+    #[test]
+    fn nonce_uses_minimal_unsigned_integer_markers() {
+        let cases: &[(u64, &[u8])] = &[
+            (0x7f, &[0x7f]),
+            (0x80, &[0xcc, 0x80]),
+            (0xff, &[0xcc, 0xff]),
+            (0x100, &[0xcd, 0x01, 0x00]),
+            (0xffff, &[0xcd, 0xff, 0xff]),
+            (0x1_0000, &[0xce, 0x00, 0x01, 0x00, 0x00]),
+            (0x1_0000_0000, &[0xcf, 0, 0, 0, 1, 0, 0, 0, 0]),
+        ];
+        for (nonce, suffix) in cases {
+            let encoded = encode_account(&AccountRecord {
+                nonce: *nonce,
+                ..AccountRecord::default()
+            })
+            .unwrap();
+            assert_eq!(&encoded.as_bytes()[3..], *suffix);
+        }
     }
 
     #[test]

@@ -85,6 +85,8 @@ applicable. The repository's manifest-integrity and false-summary controls remai
 
 No compiled-byte comparison is claimed: this is a standalone component, not a recovered target
 Cargo graph, and the target's compiler/dependency/link closure for this component is incomplete.
+The prepared replacement API is limited to the observed account and code paths; it rejects storage
+replacement rather than extrapolating the separate storage lattice-add evidence.
 
 ## Results and limitations
 

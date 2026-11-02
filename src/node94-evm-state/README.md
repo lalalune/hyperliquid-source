@@ -41,10 +41,11 @@ It accepts the outer fixmap/map16/map32 marker families observed in the target, 
 established field order. A nonzero jump-table head is rejected because its writer-domain selector
 and reader checks are not completely recovered.
 
-`OfflineState::prepare_replacement` reads the old value and computes old-before-new accounting,
-but does not write the database. `apply_database_update` is separate so callers must select their
-own commit/rollback policy. The deterministic `MemoryStore` is compiled only for tests or the
-`test-fixtures` feature and is not presented as RocksDB.
+`OfflineState::prepare_replacement` admits the evidenced account and code paths, reads the old
+value, and computes old-before-new accounting, but does not write the database. Storage replacement
+is rejected because its matching removal path is not established. `apply_database_update` is
+separate so callers must select their own commit/rollback policy. The deterministic `MemoryStore`
+is compiled only for tests or the `test-fixtures` feature and is not presented as RocksDB.
 
 ## Unresolved contract
 

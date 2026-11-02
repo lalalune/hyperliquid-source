@@ -127,6 +127,11 @@ impl<S: RecordStore> OfflineState<S> {
     ) -> Result<PreparedReplacement, OfflineError> {
         let key_kind = decode_key(replacement.key.as_bytes())?;
         ensure_value_matches_key(&key_kind, &replacement.value)?;
+        if matches!(key_kind, StateKey::Storage { .. }) {
+            return Err(
+                DecodeError::UnsupportedVariant("storage replacement path".to_owned()).into(),
+            );
+        }
 
         let previous = self
             .store
@@ -299,11 +304,9 @@ mod tests {
     }
 
     #[test]
-    fn independent_entries_and_storage_length_are_checked() {
-        let address = AccountAddress::new([3; 20]);
-        let slot = StorageSlot::from_be_bytes([4; 32]);
-        let key = OfflineState::<MemoryStore>::storage_key(address, slot);
-        let value = encode_storage_value(StorageValue::from_be_bytes([5; 32]));
+    fn independent_code_entry_is_added() {
+        let key = OfflineState::<MemoryStore>::code_key(CodeHash::new([4; 32]));
+        let value = encode_code(&StoredCode::LegacyRaw(vec![5; 32])).unwrap();
         let state = OfflineState::new(MemoryStore::default());
         let prepared = state
             .prepare_replacement(
@@ -314,5 +317,23 @@ mod tests {
             .unwrap();
         assert_eq!(prepared.accumulator_after.record_count(), 1);
         assert_eq!(prepared.delta.before_record_count, 0);
+    }
+
+    #[test]
+    fn unresolved_storage_replacement_is_rejected() {
+        let address = AccountAddress::new([3; 20]);
+        let key =
+            OfflineState::<MemoryStore>::storage_key(address, StorageSlot::from_be_bytes([4; 32]));
+        let value = encode_storage_value(StorageValue::from_be_bytes([5; 32]));
+        let state = OfflineState::new(MemoryStore::default());
+        assert!(matches!(
+            state.prepare_replacement(
+                &LatticeAccumulator::default(),
+                RawStateRecord { key, value },
+                &KeyValueMaterializer,
+            ),
+            Err(OfflineError::Decode(DecodeError::UnsupportedVariant(variant)))
+                if variant == "storage replacement path"
+        ));
     }
 }
