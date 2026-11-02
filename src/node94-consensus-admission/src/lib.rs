@@ -29,6 +29,8 @@ pub mod qc_fd_group;
 pub mod qc_mode0_group;
 /// Qualified mode-one reservation/accepted-marker group projection.
 pub mod qc_mode1_group;
+
+pub mod request_throttle;
 mod stake;
 mod state;
 mod tc;
