@@ -60,8 +60,8 @@ class CatalogueTests(unittest.TestCase):
     def test_dependency_bytes_do_not_count_as_first_party(self):
         coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', self.components)
         self.assertEqual(set(coverage['targets']), {'node115'})
-        self.assertEqual(coverage['totals']['node115']['windows'], 6975)
-        self.assertEqual(coverage['totals']['node115']['bytes'], 4992903)
+        self.assertEqual(coverage['totals']['node115']['windows'], 7884)
+        self.assertEqual(coverage['totals']['node115']['bytes'], 5313802)
         self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
 
     def test_wrong_owner_target_and_changed_evidence_rejected(self):
@@ -109,8 +109,8 @@ class CatalogueTests(unittest.TestCase):
         rows = [r for r in coverage['windows'] if r['id'].startswith('node115-vendor-')]
         rust = [r for r in rows if r['dependency'] == 'vendored-crates']
         native = [r for r in rows if r['dependency'] == 'native-libraries']
-        self.assertEqual((len(rust), sum(r['bytes'] for r in rust)), (306, 152332))
-        self.assertEqual((len(native), sum(r['bytes'] for r in native)), (6359, 4734012))
+        self.assertEqual((len(rust), sum(r['bytes'] for r in rust)), (309, 153433))
+        self.assertEqual((len(native), sum(r['bytes'] for r in native)), (7265, 5053810))
         self.assertEqual(len(rust) + len(native), len(rows))
         self.assertTrue(all(r['relocation_qualified'] for r in rows))
         self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
@@ -180,6 +180,18 @@ class CatalogueTests(unittest.TestCase):
         self.assertIsNone(vendor_census.relaxed_match(mov, lea, [(3, 9, -4)], mask))           # not GOTPCRELX
         self.assertIsNone(vendor_census.relaxed_match(mov, lea[:-1] + b'\x91', [(3, 42, -4)], mask))
         self.assertIsNone(vendor_census.relaxed_match(mov, lea, [(3, 42, -4)], mask | {1}))    # overlap
+
+    def test_multi_copy_windows_are_native_and_fully_explained(self):
+        census = json.loads((ROOT / 'research/work-items/RE-002-node115-vendor-census/census.json').read_text())
+        multi = [r for r in census['records'] if r.get('identical_copies')]
+        self.assertTrue(multi)
+        self.assertTrue(all(r['native'] for r in multi))
+        self.assertTrue(all(r['distinct_functions_explaining_copies'] >= r['identical_copies'] for r in multi))
+        self.assertTrue(all(r['end'] - r['start'] >= 64 and r['identical_copies'] <= 32 for r in multi))
+        by_body = {}
+        for r in multi:
+            by_body.setdefault(r['source_body_sha256'], set()).add(r['start'])
+        self.assertTrue(all(len(v) >= 2 for v in by_body.values()))
 
 
 if __name__ == '__main__':

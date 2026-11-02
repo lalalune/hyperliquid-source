@@ -27,7 +27,7 @@ Native crates (amd64 Ubuntu 24.04 container; one build per `gcc-*` directory):
 
 ```sh
 podman build --platform linux/amd64 -t hl-native-build research/work-items/RE-002-node115-vendor-census
-for b in gcc-rocksdb0210 gcc-secp256k1sys0100 gcc-secp256k1sys0110 gcc-blst0316 gcc-jemalloc061 gcc-revm4003 gcc-forkbases gcc-reth-v2.3.0 gcc-reth-v2.4.1; do
+for b in gcc-rocksdb0210 gcc-secp256k1sys0100 gcc-secp256k1sys0110 gcc-blst0316 gcc-jemalloc061 gcc-revm4003 gcc-forkbases; do
   cp -r research/work-items/RE-002-node115-vendor-census/$b work/vendor-$b
   mkdir -p work/vendor-$b/src && : > work/vendor-$b/src/lib.rs
   podman run --rm --platform linux/amd64 -v "$PWD/work/vendor-$b:/w" hl-native-build \
@@ -52,9 +52,14 @@ python3 research/work-items/RE-002-node115-vendor-census/vendor_census.py \
   work/org-order_book_server/target/release/deps work/org-order_book_server/Cargo.lock \
   work/vendor-gcc-revm4003/target/release/deps work/vendor-gcc-revm4003/Cargo.lock \
   work/vendor-gcc-forkbases/target/release/deps work/vendor-gcc-forkbases/Cargo.lock \
-  work/vendor-gcc-reth-v2.3.0/target/release/deps work/vendor-gcc-reth-v2.3.0/Cargo.lock \
-  work/vendor-gcc-reth-v2.4.1/target/release/deps work/vendor-gcc-reth-v2.4.1/Cargo.lock
+  reth-2.3.0/target-nolto/release/deps research/work-items/RE-002-node115-vendor-census/reth-workspace-v2.3.0/Cargo.lock \
+  reth-2.4.1/target-nolto/release/deps research/work-items/RE-002-node115-vendor-census/reth-workspace-v2.4.1/Cargo.lock
 ```
+
+The `reth-workspace-v*` builds are reth's own workspace at each tag, built
+`--locked` as recorded in each `SOURCE`. reth's release profile sets
+`lto = "thin"`, which leaves dependency rlibs as LLVM bitcode with no machine
+code, so these builds override it to the plain profile used everywhere else.
 
 The `org-*` builds are the hyperliquid-dex repositories at the commits in each
 `org-*/SOURCE`, built unchanged with `cargo build --release --locked` in the
@@ -98,6 +103,21 @@ may match through the exact x86-64 psABI rewrites, defined once in
 - `mov reg,[rip+GOT]` (`8b`) → `lea reg,[rip+sym]` (`8d`), at a type 41/42
   site, with the same RIP-relative ModRM and, for type 42, a REX prefix;
 - `call *[rip+GOT]` (`ff 15`) → `addr32 call` (`67 e8`), at a type 41 site.
+
+A body that matches several complete FDEs (C/C++ template or COMDAT code that
+compiles to the same bytes) is credited at every copy only under these limits:
+
+- native code only, at least 64 bytes, at most 32 copies;
+- the builds must emit at least as many distinct functions with that masked body
+  as node115 has copies. Distinct functions are counted within one build, after
+  removing build hashes and `.llvm.<n>` suffixes. Builds are added together only
+  across semver-incompatible versions that can be linked together (secp256k1-sys
+  0.10 and 0.11 both are);
+- every copy lists all those functions as candidates.
+
+Rust bodies are excluded from this rule: generic drop glue and similar code is
+re-emitted in downstream codegen units, so identical copies need not be the
+crate's own functions. 904 windows (317,491 bytes) use it.
 
 Each relaxed relocation row names its rewrite. The comparator re-checks those
 bytes in both captures and counts them as relocation bytes, never as raw-equal
@@ -151,6 +171,17 @@ Its confirmed findings are fixed here:
 - the census and comparator share one rule, and overlapping rewrite bytes are rejected;
 - multi-candidate labels no longer present one symbol as authoritative.
 
+A third review (16 agents) covered the multi-copy rule. It re-derived 299 groups
+and confirmed all native groups. It rejected the first draft's Rust groups for
+three reasons:
+
+- `.llvm.<n>`-suffixed names were counted once per build;
+- semver-compatible serde generations were pooled;
+- drop glue was re-emitted in other crates.
+
+That led to the native-only, per-build count above. The same review fixed
+candidate-symbol and per-source version bookkeeping.
+
 ## hyperliquid-dex repository sweep
 
 All 11 public hyperliquid-dex repositories were checked for build inputs that
@@ -175,22 +206,22 @@ vs aws-lc-sys). Those 6 previously credited windows are now dropped as ambiguous
 
 ## Results
 
-6,665 windows, 4,886,344 bytes, all relocation-qualified, 433 raw-equal:
+7,574 windows, 5,207,243 bytes, all relocation-qualified, 479 raw-equal:
 
 | Attribution | Windows | Bytes |
 | --- | ---: | ---: |
-| native-libraries (GCC 13.3) | 6,359 | 4,734,012 |
-| vendored-crates (rustc 1.95.0) | 306 | 152,332 |
+| native-libraries (GCC 13.3) | 7,265 | 5,053,810 |
+| vendored-crates (rustc 1.95.0) | 309 | 153,433 |
 
 | Native library | Windows | Bytes |
 | --- | ---: | ---: |
-| librocksdb-sys | 5,605 | 3,884,378 |
-| zstd-sys | 310 | 518,054 |
-| tikv-jemalloc-sys | 243 | 108,853 |
-| blst | 118 | 68,697 |
+| librocksdb-sys | 6,406 | 4,123,044 |
+| zstd-sys | 334 | 527,818 |
+| tikv-jemalloc-sys | 262 | 112,324 |
+| secp256k1-sys | 85 | 106,271 |
+| blst | 120 | 69,189 |
 | bzip2-sys | 18 | 67,607 |
 | libz-sys | 32 | 47,183 |
-| secp256k1-sys | 25 | 38,866 |
 | lz4-sys | 8 | 374 |
 
 The largest Rust contributors are h2, sha2, http, revm-precompile, tokio, rand_chacha, chrono, url, ripemd, k256. Of the eight private forks:
@@ -201,9 +232,12 @@ The largest Rust contributors are h2, sha2, http, revm-precompile, tokio, rand_c
   expose no unique non-generic body;
 - the four reth crates (one or two source files each) are git-only. reth v2.3.0
   pins exactly revm 40.0.3, the revm peak above, and v2.4.1 pins revm 41.0.0.
-  Building the four fork bases at both tags matches no unique non-generic body of
-  those crates; the forked files are modified or generic. These builds add
-  alloy-evm and alloy 2.x code.
+  Built in reth's own workspace at both tags, without LTO, the four fork bases
+  contain about 110 own-crate functions of 32 bytes or more. Almost all have a
+  same-length node115 FDE, and none matches, so node115's copies of those files
+  are modified. (A first attempt compiled none of them, because the release
+  profile leaves bitcode-only rlibs.) Only reth-ethereum-primitives matches
+  (115 bytes).
 
 `census.json` has the per-crate summary and every record. `licenses.json` gives
 each matched crate version's declared license (all permissive); the compiled
@@ -238,13 +272,15 @@ bodies keep those licenses.
       real address (e.g. `FindFactory<SecondaryCache>` vs `FindFactory<EventListener>`);
     - 108 sit at an FDE already credited to the sibling instantiation that
       really occupies it;
-    - 17 (5.4 KB) are unexplained. 14 of these are libstdc++ `std::function`,
-      hashtable and red-black-tree instantiations with generic prologues. The
-      other three are `port::Mutex::TryLock`,
-      `ReverseBytewiseComparatorImpl::Compare` and
-      `cassandra::ExpiringColumn::Expired`, whose prefix hit is a
-      different-length function.
-  - 452 functions are below the size gate or have several identical FDEs.
+    - 17 (5.4 KB) remained. Searching their masked bodies across all of `.text`:
+      - 12 occur byte-identically at 2–14 complete FDEs each (identical
+        template instances), which the multi-copy rule now credits when enough
+        distinct build functions explain them;
+      - `port::Mutex::TryLock`, `cassandra::ExpiringColumn::Expired` and three
+        libstdc++ tree/hashtable instantiations occur nowhere, i.e. they are
+        dropped or inlined in node115.
+  - 452 functions are below the size gate or have several identical FDEs (the
+    latter now credited where the multi-copy rule explains every copy).
 
 So no shared-prologue case shows a patched RocksDB or a different flag set. The
 unmatched remainder is dead code the linker dropped (presumably), code too

@@ -34,6 +34,9 @@ HERE = Path(__file__).resolve().parent
 TARGET = 'artifacts/node/115/hl-node'
 MIN_BYTES = 32
 MIN_UNMASKED = 16
+# Bodies that occur at several node115 FDEs are admitted only under these tighter limits.
+MULTI_MIN_BYTES = 64
+MULTI_MAX_COPIES = 32
 # Version evidence beyond the lockfile, recorded with the affected records.
 VERSION_NOTES = {
     'libz-sys': 'node115 embeds ZLIB_VERSION "1.3.1"; these bodies are identical in the zlib 1.3.2 bundled '
@@ -105,23 +108,23 @@ def main():
     registry = json.loads((ROOT / 'research/byte-windows.json').read_text())
     taken = [(w['start'], w['end']) for w in registry['windows'] if w['target'] == 'node115'
              and not w['id'].startswith('node115-vendor-')]
-    claimed, records, inputs, locks = {}, [], [], []
+    claimed, records, inputs, locks, multi = {}, [], [], [], {}
     archives = []
-    for deps, lock in builds:
+    for build, (deps, lock) in enumerate(builds):
         versions = lock_versions(lock)
         locks.append(sha(Path(lock).read_bytes()))
         for rlib in sorted(deps.glob('lib*.rlib')):
             candidates = [c for c in versions.get(rlib.name[3:rlib.name.rindex('-')], []) if c['source']]
             if candidates:  # only registry/git dependencies; never a build's own workspace crates
-                archives.append((rlib, rlib.name, candidates, False))
+                archives.append((rlib, rlib.name, candidates, False, build))
         # Native static libraries built by -sys crate build scripts (C has no
         # cross-crate generic instantiation, so the building crate owns them).
         for archive in sorted((deps.parent / 'build').glob('*/out/**/*.a')):
             package = archive.relative_to(deps.parent / 'build').parts[0]
             candidates = [c for c in versions.get(package[:package.rindex('-')].replace('-', '_'), []) if c['source']]
             if candidates:
-                archives.append((archive, f'{package}/{archive.name}', candidates, True))
-    for path, name, candidates, native in archives:
+                archives.append((archive, f'{package}/{archive.name}', candidates, True, build))
+    for path, name, candidates, native, build in archives:
         raw = path.read_bytes()
         inputs.append({'file': name, 'bytes': len(raw), 'sha256': sha(raw)})
         for member, obj in ar_members(raw):
@@ -152,6 +155,10 @@ def main():
                     if len(candidates_relaxed) == 1:
                         va, t, relaxed = candidates_relaxed[0]
                         hits = [(va, t)]
+                if 1 < len(hits) <= MULTI_MAX_COPIES and n >= MULTI_MIN_BYTES and not relaxed:
+                    group = multi.setdefault((n, probe), {'hits': [va for va, _ in hits], 'sources': {}})
+                    group['sources'].setdefault((build, symbols[0]),
+                                                (symbols, body, rel, name, member, native_object, candidates))
                 if len(hits) != 1:
                     continue
                 va, target = hits[0]
@@ -178,6 +185,53 @@ def main():
                                           for o, t, a in rel]}
                 claimed[va] = record
                 records.append(record)
+    # Identical native bodies at several node115 FDEs (C/C++ template or COMDAT code that
+    # compiles to the same bytes). Every copy is credited only when the builds really emit
+    # that many distinct functions: within one build, distinct names (build hashes and
+    # .llvm.<n> suffixes removed); across builds, only semver-incompatible versions of
+    # the crate add up (they can be linked together, e.g. secp256k1-sys 0.10 and 0.11).
+    # Rust bodies are excluded: generic drop glue and similar code is re-emitted in
+    # downstream codegen units, so identical copies need not be the crate's own functions.
+    def normalised(symbol):
+        symbol = re.sub(r'\.llvm\.\d+$', '', symbol)
+        return re.sub(r'17h[0-9a-f]{16}E', '', re.sub(r'Cs[0-9A-Za-z]+_', 'Cs_', symbol))
+
+    def compat(version):
+        parts = version.split('+')[0].split('.')
+        return (parts[0], parts[1]) if parts[0] == '0' else (parts[0],)
+
+    for (n, _), group in multi.items():
+        sources = group['sources']
+        vas = group['hits']
+        if not all(v[5] for v in sources.values()):
+            continue
+        if len({v[6][0]['crate'] for v in sources.values()}) != 1:
+            continue
+        per_build = {}
+        for (build, symbol), v in sources.items():
+            key = compat(v[6][0]['version'])
+            per_build.setdefault(key, {}).setdefault(build, set()).add(normalised(symbol))
+        explained = sum(max(len(names) for names in builds_.values()) for builds_ in per_build.values())
+        if explained < len(vas):
+            continue
+        if any(va in claimed or va in std_vas or any(not (va + n <= a or va >= b) for a, b in taken) for va in vas):
+            continue
+        ordered = sorted(sources.items(), key=lambda kv: (kv[0][0], kv[0][1]))
+        (_, _), (symbols, body, rel, name, member, native_object, candidates) = ordered[0]
+        others = [{'symbol': key[1], 'rlib': v[3], 'crate': v[6][0]['crate'],
+                   'versions': [c['version'] for c in v[6]]} for key, v in ordered[1:]]
+        for va in vas:
+            off = text['offset'] + va - text['address']
+            target = data[off:off + n]
+            record = {'symbol': symbols[0], 'member': member, 'rlib': name, 'native': native_object,
+                      'crate': candidates[0]['crate'], 'versions': candidates,
+                      'start': va, 'end': va + n, 'target_body_sha256': sha(target),
+                      'source_body': body, 'source_body_sha256': sha(body), 'raw_equal': target == body,
+                      'relocations': [{'offset': o, 'kind': t, 'width': 4, 'addend': a} for o, t, a in rel],
+                      'identical_copies': len(vas), 'distinct_functions_explaining_copies': explained,
+                      'identical_sources': others}
+            claimed[va] = record
+            records.append(record)
     # A body shared by two different crates is not attributable to one of them, and a
     # generic instantiation emitted in this crate's codegen unit for another crate's
     # item (e.g. core::ptr::drop_in_place<Option<Waker>>) is not this crate's code.
@@ -226,6 +280,7 @@ def main():
            'lockfile_sha256': locks, 'lock_packages': dict(sorted(lock_packages.items())),
            'inputs': inputs, 'bodies': {'path': 'bodies.bin', 'bytes': len(blob), 'sha256': sha(blob)},
            'minimum_bytes': MIN_BYTES, 'minimum_unmasked_bytes': MIN_UNMASKED,
+           'multi_copy_rule': {'minimum_bytes': MULTI_MIN_BYTES, 'maximum_copies': MULTI_MAX_COPIES},
            'summary': dict(sorted(summary.items(), key=lambda kv: -kv[1]['bytes'])), 'records': records,
            'limits': ['Rust symbols are kept only when their mangled path names the producing crate (this '
                       'includes core/alloc generics instantiated over that crate\'s own types). Native objects '

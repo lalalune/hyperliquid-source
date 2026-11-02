@@ -68,16 +68,16 @@ Their equality does not establish first-party or whole-node completion.
 
 | Comparison | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows |
 | --- | ---: | ---: | ---: |
-| **Node #115 total** | 4,664,372/4,992,903 (93.42%) | 461/6,975 (6.61%) | 6,975/6,975 (100.00%) |
+| **Node #115 total** | 4,964,007/5,313,802 (93.42%) | 507/7,884 (6.43%) | 7,884/7,884 (100.00%) |
 | compiler-builtins | 2,769/2,874 (96.35%) | 5/13 (38.46%) | 13/13 (100.00%) |
-| native-libraries | 4,418,305/4,734,012 (93.33%) | 399/6,359 (6.27%) | 6,359/6,359 (100.00%) |
+| native-libraries | 4,716,864/5,053,810 (93.33%) | 445/7,265 (6.13%) | 7,265/7,265 (100.00%) |
 | rust-alloc | 759/838 (90.57%) | 0/9 (0.00%) | 9/9 (100.00%) |
 | rust-core | 37,344/39,873 (93.66%) | 5/112 (4.46%) | 112/112 (100.00%) |
 | rust-std | 57,583/60,556 (95.09%) | 16/174 (9.20%) | 174/174 (100.00%) |
-| vendored-crates | 145,194/152,332 (95.31%) | 34/306 (11.11%) | 306/306 (100.00%) |
+| vendored-crates | 146,270/153,433 (95.33%) | 34/309 (11.00%) | 309/309 (100.00%) |
 | zstandard | 2,418/2,418 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
 
-Compared code: **4,992,903/83,719,936 .text bytes (5.96382%)**.
+Compared code: **5,313,802/83,719,936 .text bytes (6.34712%)**.
 
 All active findings bind to node #115. See [detailed progress](docs/PROGRESS.md)
 and [source-built node acceptance](docs/SCOPE.md#source-built-network-node).
