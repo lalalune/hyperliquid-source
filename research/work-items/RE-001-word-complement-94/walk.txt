@@ -1,0 +1,22 @@
+0x243cd00  488b87e0010000    mov rax, qword [rdi+0x1e0]
+0x243cd07  4883f802          cmp rax, 2
+0x243cd0b  7647              jbe 0x243cd54
+0x243cd0d  4883c0fd          add rax, -3
+0x243cd11  488987e0010000    mov qword [rdi+0x1e0], rax
+0x243cd18  488b8728010000    mov rax, qword [rdi+0x128]
+0x243cd1f  4885c0            test rax, rax
+0x243cd22  7438              je 0x243cd5c
+0x243cd24  488b8f20010000    mov rcx, qword [rdi+0x120]
+0x243cd2b  48c1e005          shl rax, 5
+0x243cd2f  660f76c0          pcmpeqd xmm0, xmm0
+0x243cd33  f30f6f4c01e0      movdqu xmm1, [rcx+rax-0x20]
+0x243cd39  f30f6f5401f0      movdqu xmm2, [rcx+rax-0x10]
+0x243cd3f  660fefc8          pxor xmm1, xmm0
+0x243cd43  f30f7f4c01e0      movdqu [rcx+rax-0x20], xmm1
+0x243cd49  660fefd0          pxor xmm2, xmm0
+0x243cd4d  f30f7f5401f0      movdqu [rcx+rax-0x10], xmm2
+0x243cd53  c3                ret
+0x243cd54  c687f301000050    mov byte [rdi+0x1f3], 0x50
+0x243cd5b  c3                ret
+0x243cd5c  c687f30100005b    mov byte [rdi+0x1f3], 0x5b
+0x243cd63  c3                ret
