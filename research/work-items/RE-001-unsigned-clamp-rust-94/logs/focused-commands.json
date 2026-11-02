@@ -1,0 +1,51 @@
+[
+  {
+    "label": "prior-static",
+    "argv": [
+      "python3",
+      "tools/foundation_unsigned_clamp.py",
+      "--check",
+      "research/work-items/foundation-unsigned-clamp-94/evidence.json"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "focused-tests",
+    "argv": [
+      "python3",
+      "-m",
+      "unittest",
+      "tests.test_foundation_unsigned_clamp",
+      "-v"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "cargo-check",
+    "argv": [
+      "cargo",
+      "+1.94.1",
+      "check",
+      "--offline",
+      "--locked",
+      "--manifest-path",
+      "src/node94-unsigned-clamp/Cargo.toml",
+      "--target-dir",
+      "work/unsigned-clamp/cargo"
+    ],
+    "exit": 0
+  },
+  {
+    "label": "rustfmt",
+    "argv": [
+      "rustfmt",
+      "+1.94.1",
+      "--check",
+      "--edition",
+      "2024",
+      "src/node94-unsigned-clamp/lib.rs",
+      "src/node94-unsigned-clamp/client.rs"
+    ],
+    "exit": 0
+  }
+]
