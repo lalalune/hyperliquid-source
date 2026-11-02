@@ -75,6 +75,18 @@ def checked_sum(values):
     return total
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    s=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    rels={}
+    for a,i,v in struct.iter_unpack('<QQq',data[s['offset']:s['offset']+s['size']]):
+        if a in rels:raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a]=(i,v)
+    return rels
+
+
 def analyze(data):
     p=parameters(data)
     if p!={'left_carry_shift':63,'right_factor':3,'condition_opcode':0x92,'required_first_status':1,
@@ -93,8 +105,7 @@ def analyze(data):
         code=read(data,site,5)[1]
         if code[0]!=0xe8 or site+5+struct.unpack_from('<i',code,1)[0]!=target:
             raise ValueError('weighted fold/context call changed')
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
-    rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
+    rels=relocations(data)
     if rels.get(0x6475bd8)!=(8,0x449efc) or rels.get(0x64dfb50)!=((12<<32)|6,0):
         raise ValueError('weighted source/comparator relocation changed')
     path=b'base/src/quorum_policy.rs'
