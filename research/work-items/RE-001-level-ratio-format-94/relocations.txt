@@ -1,0 +1,7 @@
+PLT stubs called directly by the window function 0x514cc10 (readelf --relocs):
+000005778f40  00e800000007 R_X86_64_JUMP_SLOT 0000000000000000 __stack_chk_fail@GLIBC_2.4 + 0  -> stub 0x5660430
+000005778f48  00e900000007 R_X86_64_JUMP_SLOT 0000000000000000 _ZdlPvm@CXXABI_1.3.9 + 0  -> stub 0x5660440
+The parser, ratio, formatter and move-assign callees are reached by direct
+e8 calls, not through PLT stubs. The formatter's incoming rsi (GOT 0x5778378,
+R_X86_64_GLOB_DAT vsnprintf) is recorded by its own bind and is not re-derived
+here; the window function itself passes that value through unchanged.
