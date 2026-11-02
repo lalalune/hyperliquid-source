@@ -1,0 +1,126 @@
+{
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "legacy": {
+    "target_release": "94",
+    "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+    "coordinate_system": "ELF virtual addresses, no runtime rebase",
+    "function": {
+      "start_va": "0x5172e20",
+      "end_va_exclusive": "0x5172e49",
+      "bytes": 41,
+      "sha256": "0c9edb4f5acef848cffbc2b6f29add7516cbf0c31a73ce8112c9feebeadbcff1",
+      "fde_section_offset": "0x29c4f0",
+      "padding_bytes": 7,
+      "padding_stride_end": "0x5172e50",
+      "inferred_label": "cached-pointer-refresh helper"
+    },
+    "rule": {
+      "inputs": "callee result rax (u64, from call to 0x5172b00 with the input second field), second field (u64 at input + 0x08), link field (u64 at second + 0x18)",
+      "cache": "callee result stored verbatim at input + 0x20",
+      "flag": "byte at input + 0x28 is 1 iff link != (second + 0x18) mod 2**64, else 0 (self-referential link)",
+      "formula": "cache = callee_result; flag = 0 if link == (second + 0x18) mod 2**64 else 1",
+      "return_caveat": "no meaningful return value is claimed: after setne, rax still carries the high bytes of the second-field pointer, so only the two stores are the window outputs",
+      "edges": [
+        {
+          "callee_result": "0x0",
+          "second": "0x1000",
+          "link": "0x1018",
+          "cache": "0x0",
+          "flag": 0
+        },
+        {
+          "callee_result": "0x1234",
+          "second": "0x1000",
+          "link": "0x2000",
+          "cache": "0x1234",
+          "flag": 1
+        },
+        {
+          "callee_result": "0xffffffffffffffff",
+          "second": "0x1000",
+          "link": "0x0",
+          "cache": "0xffffffffffffffff",
+          "flag": 1
+        },
+        {
+          "callee_result": "0x0",
+          "second": "0x0",
+          "link": "0x18",
+          "cache": "0x0",
+          "flag": 0
+        },
+        {
+          "callee_result": "0xabcd",
+          "second": "0xffffffffffffffe8",
+          "link": "0x0",
+          "cache": "0xabcd",
+          "flag": 0
+        },
+        {
+          "callee_result": "0x0",
+          "second": "0x5000",
+          "link": "0x5017",
+          "cache": "0x0",
+          "flag": 1
+        },
+        {
+          "callee_result": "0x0",
+          "second": "0x5000",
+          "link": "0x5019",
+          "cache": "0x0",
+          "flag": 1
+        },
+        {
+          "callee_result": "0xdeadbeef",
+          "second": "0x5000",
+          "link": "0x5018",
+          "cache": "0xdeadbeef",
+          "flag": 0
+        }
+      ]
+    },
+    "call": {
+      "site": "0x5172e2c",
+      "target": "0x5172b00",
+      "target_bytes": 257,
+      "target_claimed_here": false
+    },
+    "incoming": {
+      "direct_e8_callers": [
+        "0x5173afd",
+        "0x5173b8e",
+        "0x5173f15",
+        "0x5173f9f",
+        "0x5174190",
+        "0x5175e42",
+        "0x5175f8f"
+      ],
+      "validated_caller_fdes": [
+        "0x5173a90"
+      ],
+      "complete_xref_census": false
+    },
+    "captured_binary_executed": false,
+    "progress_gate_requested": false
+  },
+  "raw_frame_records": [
+    {
+      "offset": "0x29c4f0",
+      "cie_offset": "0x0",
+      "start": "0x5172e20",
+      "end": "0x5172e49",
+      "raw_fde": "18000000f4c4290010541f042900000000450e108302630e08000000",
+      "raw_cie": "1400000000000000017a5200017810011b0c070890010000"
+    },
+    {
+      "offset": "0x29c50c",
+      "cie_offset": "0x0",
+      "start": "0x5172e50",
+      "end": "0x5172e77",
+      "raw_fde": "1000000010c5290024541f042700000000000000",
+      "raw_cie": "1400000000000000017a5200017810011b0c070890010000"
+    }
+  ],
+  "captured_binary_executed": false,
+  "instruction_emulator_used": false
+}
