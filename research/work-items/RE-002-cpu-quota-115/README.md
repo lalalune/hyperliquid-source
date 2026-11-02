@@ -42,8 +42,10 @@ python3 -B -m unittest discover -s tests -p test_cpu_quota_115_static.py -v
 
 Ten focused methods pass under normal and optimized Python; standalone Cargo
 unit tests and native qualification pass. Current doctor/verify/catalogue-check/
-reproduce pass. The full repository sweep will run on the committed head; no
-full-suite or hosted CI success is claimed yet. Initial unavailable cargo PATH
+reproduce pass. The completed fixed-head full repository sweep is recorded below; no
+hosted CI success is claimed. Initial unavailable cargo PATH
 and one ineffective same-byte mutation control are preserved with their fixes.
 Generated inventory counts add one real Rust area, Cargo manifest and work item;
 no completed gate or byte-comparison credit changes.
+
+Full `make test` passed on `f56495a0d0a33840a75a66a02301090dfc53fb24`: all 77 files, 392 reported tests, 3 explicit skips, exit0 in 1013.992s. The exact test-file hashes were unchanged throughout the run. The raw archive retains inventory, stdout, stderr and completion result. This follow-up changes only evidence metadata, not source, tests or fixtures. The skips are optional pinned libcore, optional nonce-ring Rust and a separate nested JRE; those checks and hosted CI are not claimed as passed.
