@@ -222,3 +222,12 @@ cargo fmt --manifest-path src/node94-tcp-frame/Cargo.toml -- --check
 This component is a partial transport reconstruction. Passing its offline tests
 does not establish TCP runtime compatibility, target binary identity, complete
 transport recovery, or a repository progress gate.
+
+The initial caller routing is available as `Request::route_reply` and
+`greeting::exchange_routed`. It distinguishes continuation of the existing
+stream, a data reply requiring further state validation, and four named peer
+rejections. The first request byte is kept raw: data replies test bit zero,
+while the empty-success reply requires the whole byte to be zero. The routed
+exchange preserves decoded metadata. Dispose of the borrowed stream on any
+error; these routes do not establish peer authentication or state validity.
+See [the routing evidence](../../research/work-items/RE-012-greeting-policy-94/README.md).

@@ -1,0 +1,137 @@
+{
+  "scope": "Only independently authored Rust is compiled/executed; no captured target execution.",
+  "results": [
+    {
+      "name": "nonzero-instead-of-bit",
+      "file": "src/greeting/policy.rs",
+      "before": "first & 1 != 0",
+      "after": "first != 0",
+      "source_sha256": "a3a16e85caf3fc1b96a460b051fee9c593319e7cd7791deb620363c45bbf9a39",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-scope-accounting/work/peer-policy-94/mutants/nonzero-instead-of-bit/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "greeting_policy"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_failing_test": "all_raw_flag_bytes",
+      "log_sha256": "dc2a8ff260493ffbac50f3a5adb1936d7e349f19738aeff8c75d4ab99fb46313"
+    },
+    {
+      "name": "low-bit-instead-of-zero",
+      "file": "src/greeting/policy.rs",
+      "before": "Reply::Variant3 if first == 0",
+      "after": "Reply::Variant3 if first & 1 == 0",
+      "source_sha256": "05975ff7503c92926593c4bbda01e5713a471174ab9fbc4b458e00028eac5cbb",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-scope-accounting/work/peer-policy-94/mutants/low-bit-instead-of-zero/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "greeting_policy"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_failing_test": "all_raw_flag_bytes",
+      "log_sha256": "66912330cc1725a330dbb9fdf9079b1712887e9c7509ec3969dd2f18db1e7fd0"
+    },
+    {
+      "name": "admit-records",
+      "file": "src/greeting/policy.rs",
+      "before": "HashReply::Variant0 { .. } | HashReply::Variant1 { .. }",
+      "after": "HashReply::Variant0 { .. } | HashReply::Variant1 { .. } | HashReply::Variant2(_)",
+      "source_sha256": "559dbd0a52ebdab24da939f3eaf24e24529b4e6c56194fd63f40752711a3a9cf",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-scope-accounting/work/peer-policy-94/mutants/admit-records/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "greeting_policy"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_failing_test": "all_raw_flag_bytes",
+      "log_sha256": "c67370ce376ed78dedccccf08cd60899ab3c05e7e6cbc9b3e4a9322b8ce2f3cc"
+    },
+    {
+      "name": "wrong-full-reason",
+      "file": "src/greeting/policy.rs",
+      "before": "Reply::Variant4 => Err(PeerRejection::Full)",
+      "after": "Reply::Variant4 => Err(PeerRejection::RateLimited)",
+      "source_sha256": "c95ed8612b995a2f7cb0469d9e2f869ebc79e065ad481a0aacbc6fd954934725",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-scope-accounting/work/peer-policy-94/mutants/wrong-full-reason/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "greeting_policy"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_failing_test": "all_raw_flag_bytes",
+      "log_sha256": "e2c20d193c6373cb009d3e11675fafe04cc7d71e77fba786022bea08d119075e"
+    },
+    {
+      "name": "admit-three-words",
+      "file": "src/greeting/policy.rs",
+      "before": "Reply::Variant0 { .. } | Reply::Variant1(_) => Err(PeerRejection::InconsistentGreeting),",
+      "after": "Reply::Variant0 { .. } => Err(PeerRejection::InconsistentGreeting),\n        Reply::Variant1(_) => Ok(Route::ContinueStream),",
+      "source_sha256": "a0088ae75ccf1f5d7f650935e9368a5dc3f2d663e679bee6f67826d702de5608",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-scope-accounting/work/peer-policy-94/mutants/admit-three-words/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "greeting_policy"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_failing_test": "all_raw_flag_bytes",
+      "log_sha256": "503d971afc0b8e2d775f29894c6b9b878fc8610d650f2b5689741cca4d54494d"
+    },
+    {
+      "name": "skip-routing",
+      "file": "src/greeting.rs",
+      "before": "let route = request\n        .route_reply(&decoded.reply)\n        .map_err(ExchangeError::Rejected)?;",
+      "after": "let route = policy::Route::ContinueStream;",
+      "source_sha256": "6918972e781e7fa70520f8d582976d436d556cf4ada14eeaf2f9810f9355694d",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-scope-accounting/work/peer-policy-94/mutants/skip-routing/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--test",
+        "greeting"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_failing_test": "routed_rejections_report_named_reasons",
+      "log_sha256": "c1225ee1653c2ba0f5234b0c0cad3dca00c40bedd5d89cd2d84c2064ef03c6d5"
+    }
+  ]
+}
