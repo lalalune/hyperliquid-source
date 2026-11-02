@@ -1,0 +1,39 @@
+--- original/build.py
++++ amended/build-amended.py
+@@ -4,7 +4,8 @@
+ MIT orchestration adapted from RE-013-visor-readiness-value-rust/rust-validation/
+ build.py SHA256 b915190ee597ba6f88a0f703aa8a752367b7479bbc7aaf34910f297acdb00558.
+ No readiness semantics, oracle, dependency or expected data is reused.
+-This script must not run until the later root source/build gate authorizes it.
++Amendment 1 corrects one mutant expression and admits the additive phase freeze.
++This script must not run until the later root amendment/build gate authorizes it.
+ """
+ import argparse
+ import gzip
+@@ -66,8 +67,15 @@
+     require(identity(PACKET / 'PRE-RUST-FREEZE.json')['sha256'] == PRE_FREEZE, 'pre-code freeze identity')
+     require(identity(PACKET / 'MANIFEST.json')['sha256'] == PRE_MANIFEST, 'pre-code manifest identity')
+     require(check_precode() == 61, 'original pre-code entries')
+-    require(identity(HERE / 'SOURCE-FREEZE.json')['sha256'] == expected_source_freeze, 'source freeze identity')
+-    freeze = json.loads((HERE / 'SOURCE-FREEZE.json').read_text())
++    require(identity(HERE / 'SOURCE-FREEZE-2.json')['sha256'] == expected_source_freeze, 'source freeze identity')
++    freeze = json.loads((HERE / 'SOURCE-FREEZE-2.json').read_text())
++    require(identity(HERE / 'SOURCE-FREEZE.json')['sha256'] ==
++            'cbe99314c5a52927653f7c5e1aa47d70a9d4ca12c792cac474c48f9a4c800753',
++            'original source freeze preserved')
++    original = json.loads((HERE / 'SOURCE-FREEZE.json').read_text())
++    require(inventory(SOURCE) == original['source'], 'original production source unchanged')
++    for name, expected in original['harness'].items():
++        require(identity(HERE / name) == expected, 'original harness unchanged: ' + name)
+     require(not SOURCE.is_symlink() and not any(p.is_symlink() for p in SOURCE.rglob('*')), 'source symlink')
+     require(sorted(inventory(SOURCE)) == SOURCE_FILES, 'unexpected source file/hook')
+     require(inventory(SOURCE) == freeze['source'], 'actual source differs from freeze')
+@@ -130,7 +138,7 @@
+     definitions = [
+         ('negative-absolute', [('bits >> 63 != 0 || ', '')]),
+         ('tiny-cutoff-too-large', [('exponent < 992', 'exponent < 993')]),
+-        ('implicit-leading-bit-missing', [(' | (1_u64 << 52)', '')]),
++        ('implicit-leading-bit-missing', [('u128::from((bits & 0x000f_ffff_ffff_ffff) | (1_u64 << 52))', 'u128::from(bits & 0x000f_ffff_ffff_ffff)')]),
+         ('fraction-low-bit-lost', [('0x000f_ffff_ffff_ffff', '0x000f_ffff_ffff_fffe')]),
+         ('truncate-nanoseconds', [('remainder > halfway || (remainder == halfway && quotient & 1 == 1)', 'false && (remainder > halfway || (remainder == halfway && quotient & 1 == 1))')]),
+         ('half-up-even-tie', [('quotient & 1 == 1', 'quotient & 1 <= 1')]),

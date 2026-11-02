@@ -1,0 +1,308 @@
+{
+  "reviewer": "installer_review, independent read-only amendment audit",
+  "recorded_at_utc": "2026-11-02T00:37:53.655064+00:00",
+  "status": "PASS_NO_UNRESOLVED_ACTIONABLE_FINDING",
+  "scope": "Narrow additive harness amendment and preserved failure. No packet/source/Git edits, imports/execution of harness, compilation, rerun, native verifier or target evaluation. This review does not itself authorize execution.",
+  "read_hashes": {
+    "source": {
+      "Cargo.lock": {
+        "bytes": 164,
+        "sha256": "b6c15d805e04c17f94e6f04aee518d6b5e4c3a25700e770d46ab794b4f1f4aa6"
+      },
+      "Cargo.toml": {
+        "bytes": 254,
+        "sha256": "2cc5fb3c91d57dfb9856188bd0cbe40164251a442b268dd983a6092557296ad6"
+      },
+      "README.md": {
+        "bytes": 1626,
+        "sha256": "4a431ec8a0a49165000a8e57e2d8a45bd70a9787ad6b9957815a8638a960392a"
+      },
+      "src/lib.rs": {
+        "bytes": 2767,
+        "sha256": "dd369e385cdf31b74dee04b15fd85ee567a0fdf6fb6b7709b9844dd1ad80e9b4"
+      },
+      "tests/value_contract.rs": {
+        "bytes": 2903,
+        "sha256": "01e91fdef41a467640f87af0e0774e836002517b86b7b40c018793369642e95f"
+      }
+    },
+    "harness": {
+      "BRIDGE.md": {
+        "bytes": 4204,
+        "sha256": "3599e07507b3171cd0c00464cd55538c45af575a55f160f254d902e324a7a851"
+      },
+      "LOCK-ADMISSION.json": {
+        "bytes": 7106,
+        "sha256": "7e2230dd48a8edc46fa7a634a3f94b5f8f8c12696e635be7bb61c2807b0f262f"
+      },
+      "SOURCE-AMENDMENT.json": {
+        "bytes": 1426,
+        "sha256": "f2f5977db60f7800dc220daa3b0999b53b1aef7e4273b1bdb452b28fd07b6ca2"
+      },
+      "SOURCE-FREEZE.json": {
+        "bytes": 2633,
+        "sha256": "cbe99314c5a52927653f7c5e1aa47d70a9d4ca12c792cac474c48f9a4c800753"
+      },
+      "SOURCE-PROOF.md": {
+        "bytes": 3123,
+        "sha256": "fc4f5887ce930c92d91d59dd6eedd6f235f88ca3e0254a6c13179a2d9235858f"
+      },
+      "TOOLCHAIN-PINS.json": {
+        "bytes": 15015,
+        "sha256": "aa3656a64ab8714c76d109917911fb86278b15427ab6686718ce72d50a59b98c"
+      },
+      "amendment-1/README.md": {
+        "bytes": 2357,
+        "sha256": "a96ae4c4050258ba98d83bf45ed102372d6491ad1999a689b0e980305a910d81"
+      },
+      "amendment-1/build.patch": {
+        "bytes": 2803,
+        "sha256": "0f40824ab2e9e94af76fc3bce5c93a9cf0b628a9ff0fcbfb112512dcf85e1121"
+      },
+      "build-amended.py": {
+        "bytes": 28017,
+        "sha256": "2428f7a0433c551e34999b778ba3476cbc333974f7263b6c3cf0e331f3723633"
+      },
+      "build.py": {
+        "bytes": 27349,
+        "sha256": "51dbaf7652cfd5a0309385ec2533cf97afef31c391d4cdb214cbaed5b208cd43"
+      },
+      "failed-initial/MANIFEST.json": {
+        "bytes": 7043,
+        "sha256": "d2ef3e349722545f44d6e03fa91beabd4382549e93e35fdb18b2c58a6ba6b16e"
+      },
+      "input_client.rs": {
+        "bytes": 1621,
+        "sha256": "b80f66ebf7f84fad765d0e35a2abc462150f4ac7ec09614c6747af10c33bb2c7"
+      }
+    },
+    "SOURCE-FREEZE-2.json": {
+      "bytes": 3425,
+      "sha256": "124103cce3fa160760b833630ef47a51d56f7a24edc3a3cca51bb11175a5d5d9"
+    },
+    "PRE-RUST-FREEZE.json": {
+      "bytes": 9832,
+      "sha256": "b3bbc7257864d14a4315599352c7d70b7616646a49d6c996186abedd57430857"
+    },
+    "MANIFEST.json": {
+      "bytes": 7448,
+      "sha256": "073affe57c93084521d6e793a04847df4c649dcb35f35cc1b9d86a17bf9acf7c"
+    },
+    "prior_source_peer": {
+      "bytes": 4714,
+      "sha256": "b070369202652f5c39b3f9b1988d6abfc10489504504f54286fabc44bd476e49"
+    }
+  },
+  "verified_inventory": {
+    "source_files": 5,
+    "amended_harness_files": 12,
+    "original_harness_files_unchanged": 6,
+    "original_precode_files_unchanged": 61,
+    "toolchain_pin_entries": 97,
+    "actual_toolchain_payload_rehashed_this_review": false
+  },
+  "patch_audit": {
+    "exact_unified_diff_matches": true,
+    "changed_functions": [
+      "admit_sources",
+      "mutants"
+    ],
+    "other_top_level_change": "Module docstring describes amendment and separate gate.",
+    "semantic_delta": "Only implicit-leading-bit mutant replacement changes from deleting the OR term to replacing the complete from(...) expression, eliminating redundant parentheses. The erroneous removal of the leading bit itself is unchanged. Compiler flags, corpus, production/client, other19mutants and all build/control paths remain byte-identical.",
+    "admission_delta": "Select exact SOURCE-FREEZE-2; additionally pin original freeze and recheck its5source+6harness before usual source/harness admission.",
+    "mutants": [
+      {
+        "name": "negative-absolute",
+        "original_sha256": "39c1b6e97802541b58f700d958da18d25749827b4ba73071cea70e8b98fdecf8",
+        "amended_sha256": "39c1b6e97802541b58f700d958da18d25749827b4ba73071cea70e8b98fdecf8",
+        "byte_identical": true
+      },
+      {
+        "name": "tiny-cutoff-too-large",
+        "original_sha256": "527c0a2b6d1ec474c641056894bddcbf7160670c44ad7892364af0709f4b9890",
+        "amended_sha256": "527c0a2b6d1ec474c641056894bddcbf7160670c44ad7892364af0709f4b9890",
+        "byte_identical": true
+      },
+      {
+        "name": "implicit-leading-bit-missing",
+        "original_sha256": "8250766b62de094f104d9115a1be230ca5c62f421e0c8ca0da17455971d7040d",
+        "amended_sha256": "fab76f2b48abc3bb80c4609c478889c3767531906a1f20c5f27dfb819416a5d9",
+        "byte_identical": false
+      },
+      {
+        "name": "fraction-low-bit-lost",
+        "original_sha256": "0844126d4e0ff8e02bd016e155fbe103e83202e27d5ee90302a3577a6e7e9282",
+        "amended_sha256": "0844126d4e0ff8e02bd016e155fbe103e83202e27d5ee90302a3577a6e7e9282",
+        "byte_identical": true
+      },
+      {
+        "name": "truncate-nanoseconds",
+        "original_sha256": "5e9f6fc96bb7a3fcfada3ba8ab208b0cf19f59383bed3d99aeaa52a1e015a5f8",
+        "amended_sha256": "5e9f6fc96bb7a3fcfada3ba8ab208b0cf19f59383bed3d99aeaa52a1e015a5f8",
+        "byte_identical": true
+      },
+      {
+        "name": "half-up-even-tie",
+        "original_sha256": "f68d9e392e9e14d88af38dfdb3ac8975f283f5723d44631c785062caa0f20ff5",
+        "amended_sha256": "f68d9e392e9e14d88af38dfdb3ac8975f283f5723d44631c785062caa0f20ff5",
+        "byte_identical": true
+      },
+      {
+        "name": "half-down-odd-tie",
+        "original_sha256": "9e1a082d4fb9ae939c45d9f71d7eaabd77939bd20a8eaf4d29a627ebf332909d",
+        "amended_sha256": "9e1a082d4fb9ae939c45d9f71d7eaabd77939bd20a8eaf4d29a627ebf332909d",
+        "byte_identical": true
+      },
+      {
+        "name": "round-to-odd",
+        "original_sha256": "3a320288310712761218f2ab32dc70317f117ba844d83199465e03d19efb0eec",
+        "amended_sha256": "3a320288310712761218f2ab32dc70317f117ba844d83199465e03d19efb0eec",
+        "byte_identical": true
+      },
+      {
+        "name": "omit-billion-carry",
+        "original_sha256": "558e0e0240f2eb731044e0e461c82320b5b640d94a847e49f63345955663ca19",
+        "amended_sha256": "558e0e0240f2eb731044e0e461c82320b5b640d94a847e49f63345955663ca19",
+        "byte_identical": true
+      },
+      {
+        "name": "microsecond-ordinary-rounding",
+        "original_sha256": "d4cee65e51200d3b419220932266ada1516e0bda380a65ca1284efc6618c85b8",
+        "amended_sha256": "d4cee65e51200d3b419220932266ada1516e0bda380a65ca1284efc6618c85b8",
+        "byte_identical": true
+      },
+      {
+        "name": "integral-scale-double",
+        "original_sha256": "0d354b049ec6f0fd7c48bb6a7771578fdc9e4688ee38c2e4766c261651cf2455",
+        "amended_sha256": "0d354b049ec6f0fd7c48bb6a7771578fdc9e4688ee38c2e4766c261651cf2455",
+        "byte_identical": true
+      },
+      {
+        "name": "fraction-scale-half",
+        "original_sha256": "483f8db8676179a966d4b615fbbcf2b669efdcfffbda37a4ccd8198a269e4005",
+        "amended_sha256": "483f8db8676179a966d4b615fbbcf2b669efdcfffbda37a4ccd8198a269e4005",
+        "byte_identical": true
+      },
+      {
+        "name": "fallback-before-two-to-64",
+        "original_sha256": "38fda34108898307ca40e35fae2ab426ed8b68aaf51e19bc0b554a1b28e06846",
+        "amended_sha256": "38fda34108898307ca40e35fae2ab426ed8b68aaf51e19bc0b554a1b28e06846",
+        "byte_identical": true
+      },
+      {
+        "name": "fallback-after-two-to-64",
+        "original_sha256": "e7b9615c01c82f1b5aaa1203be7888a19acbdf7f6ec3883606e133992b322cf1",
+        "amended_sha256": "e7b9615c01c82f1b5aaa1203be7888a19acbdf7f6ec3883606e133992b322cf1",
+        "byte_identical": true
+      },
+      {
+        "name": "infinity-and-nan-saturate",
+        "original_sha256": "1dbbd89928b5d63554a3d0f10c831fc2e17f3b05ebdcfa812675226b72f27207",
+        "amended_sha256": "1dbbd89928b5d63554a3d0f10c831fc2e17f3b05ebdcfa812675226b72f27207",
+        "byte_identical": true
+      },
+      {
+        "name": "fallback-is-u64-seconds",
+        "original_sha256": "6e0b2df360073bb4555522f46633f3771c0a06ea95e9401fd0dfde4d9abdf701",
+        "amended_sha256": "6e0b2df360073bb4555522f46633f3771c0a06ea95e9401fd0dfde4d9abdf701",
+        "byte_identical": true
+      },
+      {
+        "name": "fallback-remainder-is-nanoseconds",
+        "original_sha256": "62ec90681742d54faa2551a6f887e0b9ef30552b4d44c19e6571380cb964e1b6",
+        "amended_sha256": "62ec90681742d54faa2551a6f887e0b9ef30552b4d44c19e6571380cb964e1b6",
+        "byte_identical": true
+      },
+      {
+        "name": "overflow-one-early",
+        "original_sha256": "f936dda461080d9fb7afd4f0e5b4608a4f80f1ac2f58a1963cca9912348c2d79",
+        "amended_sha256": "f936dda461080d9fb7afd4f0e5b4608a4f80f1ac2f58a1963cca9912348c2d79",
+        "byte_identical": true
+      },
+      {
+        "name": "overflow-one-late",
+        "original_sha256": "7c9b0af654ce5af02cb944ce50f9e0091a74de077aaac26f7faedd22bb27743c",
+        "amended_sha256": "7c9b0af654ce5af02cb944ce50f9e0091a74de077aaac26f7faedd22bb27743c",
+        "byte_identical": true
+      },
+      {
+        "name": "binary64-rounded-total-nanoseconds",
+        "original_sha256": "8ebf75d571270cb8e4cf06303c2a520623124f280f28ea93bb6ed244989d1363",
+        "amended_sha256": "8ebf75d571270cb8e4cf06303c2a520623124f280f28ea93bb6ed244989d1363",
+        "byte_identical": true
+      }
+    ]
+  },
+  "failure_audit": {
+    "manifest_entries_rehashed": 43,
+    "commands": 58,
+    "exit_code_counts": {
+      "0": 43,
+      "2": 14,
+      "101": 1
+    },
+    "raw_references_rehashed": 116,
+    "unique_raw_streams": 37,
+    "unique_raw_bytes": 4625480,
+    "last_exit": 101,
+    "outer_exit_recorded": 1,
+    "unused_parens_failure_confirmed": true,
+    "partial_value_streams": [
+      {
+        "label": "clean-one-debug-values",
+        "different_rows": 0,
+        "sha256": "01c9afc37098b8bf2e0fdd6a8383639d1b8546ace58b2fbdf5326eab926e9a61"
+      },
+      {
+        "label": "clean-one-release-values",
+        "different_rows": 0,
+        "sha256": "01c9afc37098b8bf2e0fdd6a8383639d1b8546ace58b2fbdf5326eab926e9a61"
+      },
+      {
+        "label": "clean-two-debug-values",
+        "different_rows": 0,
+        "sha256": "01c9afc37098b8bf2e0fdd6a8383639d1b8546ace58b2fbdf5326eab926e9a61"
+      },
+      {
+        "label": "clean-two-release-values",
+        "different_rows": 0,
+        "sha256": "01c9afc37098b8bf2e0fdd6a8383639d1b8546ace58b2fbdf5326eab926e9a61"
+      },
+      {
+        "label": "mutant-negative-absolute-debug-values",
+        "different_rows": 1991,
+        "sha256": "5c5c2a95cbd30bf1f8cb72cef29ef3ca010c0ff1d6b02a170283e4e5993b6547"
+      },
+      {
+        "label": "mutant-negative-absolute-release-values",
+        "different_rows": 1991,
+        "sha256": "5c5c2a95cbd30bf1f8cb72cef29ef3ca010c0ff1d6b02a170283e4e5993b6547"
+      },
+      {
+        "label": "mutant-tiny-cutoff-too-large-debug-values",
+        "different_rows": 10,
+        "sha256": "455651da535a05cc4ca0398abc08b6a52abf64144d080ce4bd05056739625f83"
+      },
+      {
+        "label": "mutant-tiny-cutoff-too-large-release-values",
+        "different_rows": 10,
+        "sha256": "455651da535a05cc4ca0398abc08b6a52abf64144d080ce4bd05056739625f83"
+      }
+    ],
+    "not_a_semantic_kill": true,
+    "not_a_whole_run_pass": true
+  },
+  "findings": [],
+  "counterhypotheses": [
+    "Complete difflib and AST comparison rejected unrelated harness changes; all actual source and precode identities independently matched.",
+    "All20mutant literals were parsed without executing the builder; each replacement coordinate is unique. Other19generated source hashes are identical and the changed source differs only by redundant parentheses.",
+    "Every116command stream reference was decompressed/rehashed; the failed variant has no value-run receipt. Four baseline streams match59159frozen rows and only two mutants completed both profiles.",
+    "New admission retains old source/freeze/harness rather than rewriting history; it does not weaken -Dwarnings or offline/locked flags."
+  ],
+  "limits": [
+    "No claim amended mutant compiles or is detected until the separately gated actual run.",
+    "The pre-existing subprocess launch/timeout receipt limitation is unchanged, explicitly documented and not exercised by this completed exit101.",
+    "Public compiled-artifact identities are retained, but private binaries were not read/rehashed by this review; no public-byte-availability claim is inferred.",
+    "Prior source semantic review is separately identified; this amendment audit does not rerun all-bit native/formula proofs or toolchain payload qualification."
+  ]
+}

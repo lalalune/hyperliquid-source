@@ -1,0 +1,10 @@
+--- build.py
++++ build-amended.py
+@@ -68,2 +68,2 @@
+-    require(identity(HERE/'SOURCE-FREEZE.json')['sha256']==expected,'source freeze identity')
+-    f=json.loads((HERE/'SOURCE-FREEZE.json').read_text())
++    require(identity(HERE/'SOURCE-FREEZE-2.json')['sha256']==expected,'source freeze identity')
++    f=json.loads((HERE/'SOURCE-FREEZE-2.json').read_text())
+@@ -359 +359 @@
+-                run(record+'-'+profile+'-dependency-test',[toolchain/'bin/cargo','test','--offline','--locked','--manifest-path',dependency/'Cargo.toml','--lib','--test','value_contract',*release],component,env)
++                run(record+'-'+profile+'-dependency-test',[toolchain/'bin/cargo','test','--offline','--locked','--manifest-path',dependency/'Cargo.toml','--target-dir',phase/'dependency-test-target','--lib','--test','value_contract',*release],component,env)
