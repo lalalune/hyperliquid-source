@@ -16,6 +16,11 @@ class ObjdumpDisplayTests(unittest.TestCase):
         b = b'artifacts/node/94/hl-node:     file format elf64-x86-64\n'
         self.assertEqual(self.verify.canonical_objdump_display(a), self.verify.canonical_objdump_display(b))
 
+    def test_architecture_label_is_not_normalized(self):
+        x = b"node:     file format elf64-x86-64\n"
+        y = b"node:     file format elf32-i386\n"
+        self.assertNotEqual(self.verify.canonical_objdump_display(x), self.verify.canonical_objdump_display(y))
+
     def test_default_segment_spelling_for_exact_string_encodings(self):
         for opcode, before, after in [
             (b'a5', b'rep movsq %ds:(%rsi),%es:(%rdi)', b'rep movsq (%rsi),(%rdi)'),
@@ -56,3 +61,7 @@ class SnapshotDisplayTests(ObjdumpDisplayTests):
 
 class TimedSnapshotDisplayTests(ObjdumpDisplayTests):
     verify = load_verifier("RE-001-timed-snapshot-94")
+
+
+class UnconditionalDisplayTests(ObjdumpDisplayTests):
+    verify = load_verifier("RE-001-unconditional-create-format-94")

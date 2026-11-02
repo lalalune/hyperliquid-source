@@ -103,3 +103,10 @@ above is static objdump/FDE evidence against the digest-verified work
 binary plus a Python model and tests; `make verify` / `make test` /
 `make catalogue-check` were not run in this environment, and no execution
 of the target binary is claimed.
+
+## Reproduction display compatibility
+
+The verifier preserves recorded instruction bytes and addresses. Only the
+objdump input label and implicit DS/ES spelling on exact F3 48 A5/AB encodings
+normalize across GNU versions. Original records and the original verifier are
+retained in the integration review packet.

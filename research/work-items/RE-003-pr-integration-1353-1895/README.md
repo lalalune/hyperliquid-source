@@ -27,9 +27,9 @@ node #115 and visor keep the separate identities in provenance/artifacts.json.
   Its complete static verifier and negative controls pass again with the documented
   Apple LLVM provider.
 - Permit only input-label and implicit DS/ES display differences for exact
-  F3 48 A5/AB instructions in three excerpt verifiers. Original verifiers and
+  F3 48 A5/AB instructions in four excerpt verifiers. Original verifiers and
   manifests are archived; all instruction bytes and addresses remain exact.
-  Fifteen positive/negative display checks pass.
+  Twenty-four positive/negative display checks pass.
 
 ## Completed validation
 

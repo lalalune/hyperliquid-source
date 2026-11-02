@@ -22,6 +22,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import struct
 import subprocess
 import sys
@@ -39,6 +40,22 @@ RANGES = {
     "moveassign.objdump.txt": ("0x514b4f0", "0x514b5d0"),
     "control.objdump.txt": ("0x4f94a90", "0x4f94b20"),
 }
+
+
+def canonical_objdump_display(data):
+    """Normalize only the input label and two GNU default-segment displays.
+
+    Addresses and every instruction byte remain exact. GNU versions differ
+    on spelling implicit DS/ES for the exact F3 48 A5/AB string operations.
+    Explicit prefixes and other operands are not normalized.
+    """
+    data = re.sub(rb"(?m)^[^\r\n]+(?=:     file format elf64-x86-64$)",
+                  b"<node94>", data)
+    return re.sub(
+        rb"(?m)^(\s*[0-9a-f]+:[ \t]+f3 48 (?:a5|ab)[ \t]+)([^\r\n]*)$",
+        lambda match: match[1] + match[2].replace(b"%ds:", b"").replace(b"%es:", b""),
+        data,
+    )
 
 
 class Elf:
@@ -252,17 +269,7 @@ def main(argv=None):
     check(qhits == rec["censuses"]["qword_references"],
           "qword references mismatch: %s" % qhits)
 
-    # Excerpt regeneration byte-for-byte, except the objdump header line
-    # which embeds the binary path spelling used for that run (absolute
-    # here, repo-relative when the packet was authored). Everything after
-    # the header must match exactly.
-    def normalized(blob):
-        lines = blob.split(b"\n")
-        for i, line in enumerate(lines):
-            if b"file format" in line:
-                lines[i] = b"file format elf64-x86-64"
-        return b"\n".join(lines)
-
+    # Exact bytes and addresses; only the documented display fields normalize.
     sys.path.insert(0, PACKET_DIR)
     import export_excerpts
     with tempfile.TemporaryDirectory() as tmp:
@@ -270,7 +277,7 @@ def main(argv=None):
         for name in RANGES:
             fresh = open(os.path.join(tmp, name), "rb").read()
             committed = open(os.path.join(PACKET_DIR, name), "rb").read()
-            check(normalized(fresh) == normalized(committed),
+            check(canonical_objdump_display(fresh) == canonical_objdump_display(committed),
                   "excerpt mismatch: %s" % name)
 
     # Manifest hashes.
