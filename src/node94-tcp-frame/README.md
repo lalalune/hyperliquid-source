@@ -59,11 +59,9 @@ close the caller's stream.
 
 These operations are **not cancellation safe**. After a cancelled or failed
 operation, discard the connection unless its frame boundary can independently
-be restored. This layer does not implement the target's timer wrapper,
-statistics, peer discovery, handshake, reconnect logic or message protocol.
-The target's 20/40-second reader and selected 20/60-second writer timing
-behavior remains separate work; an untimed frame stream is not a finished
-node transport.
+be restored. This layer does not implement statistics, peer discovery,
+handshake, reconnect logic or message protocol. The `stream` functions are
+untimed; deadline-aware operations are available separately below.
 
 The [stream evidence packet](../../research/work-items/RE-012-tcp-stream-94/README.md)
 records the selected read/write loops and the tested boundary. This component's
@@ -72,8 +70,41 @@ in particular its `bytes` and `pin-project-lite` versions are not claimed to
 match the target.
 
 Run `cargo test --locked --manifest-path src/node94-tcp-frame/Cargo.toml --all-features`
-to include the stream controls. They use deterministic scripted
+to include the stream and deadline controls. They use deterministic scripted
 I/O, not public network connections or captured-node execution.
+
+## Header and chunk deadlines
+
+Enable `timed-stream` to use `deadlines::read_frame` and
+`deadlines::write_frame`. This also enables `stream` and Tokio's time feature.
+An active Tokio runtime with its time driver enabled is required.
+
+```rust,ignore
+use node94_tcp_frame::{FrameLimits, deadlines};
+
+// The header flag and write override are explicit caller decisions.
+deadlines::write_frame(&mut io, b"payload", stream_field, None).await?;
+let frame = deadlines::read_frame(&mut io, FrameLimits::new(max_payload), true).await?;
+```
+
+With header timing enabled, the five-byte header has 40 seconds. Disabling
+that flag leaves only the header untimed. Every payload chunk has a fresh
+20-second deadline. Writes use a fresh 20-second deadline per complete-frame
+chunk unless the caller supplies a `Duration` override; the observed
+60-second override is tested. Partial I/O within a chunk does not reset its
+deadline. Completed I/O, including an I/O error, wins over an elapsed timer on
+the same poll, matching the selected target branches and Tokio 1.44.2.
+
+`DeadlineError::Elapsed` reports the header or chunk and configured limit.
+This is a new Rust API, not the target's error ABI. Caller defaults for the
+header flag, arbitrary floating-point duration conversion, timer-driver
+internals, target cleanup and logging remain unqualified. Timeout can leave a
+partially consumed or transmitted frame; the cancellation rule above still
+applies. These operations do not constitute a network-compatible transport.
+
+The [deadline evidence packet](../../research/work-items/RE-012-frame-deadlines-94/README.md)
+records the conditional header path, chunk reset, timer relocation and poll
+ordering, with instruction corruptions and compiled negative controls.
 
 ## LZ4 correspondence and limits
 

@@ -13,7 +13,11 @@ path = "src/lib.rs"
 [features]
 default = []
 stream = ["dep:tokio"]
+timed-stream = ["stream", "tokio/time"]
 
 [dependencies]
 lz4_flex = "=0.11.6"
 tokio = { version = "=1.44.2", default-features = false, features = ["io-util"], optional = true }
+
+[dev-dependencies]
+tokio = { version = "=1.44.2", default-features = false, features = ["rt", "time", "test-util"] }

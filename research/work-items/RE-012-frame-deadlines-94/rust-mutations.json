@@ -1,0 +1,149 @@
+{
+  "result": "ALL_SEVEN_COMPILED_MUTANTS_REJECTED",
+  "source_sha256": "eb5559a9855772de73dd46c5fab54e19aa0ad4c01ec1db53ae2c8b1d278835bb",
+  "tests_sha256": "ee1cacd74ea5f34bb50d12e1cc8be1510e7960da31348d342a2389aa86068237",
+  "rows": [
+    {
+      "case": "header-twenty",
+      "source_sha256": "59918caa0a076612a8b3dcef6f998c09b18fe2770fc5270b4960316fdf9eb7bb",
+      "command": [
+        "cargo",
+        "test",
+        "--quiet",
+        "--offline",
+        "--locked",
+        "--all-features",
+        "--test",
+        "deadlines",
+        "--manifest-path",
+        "work/frame-deadlines-94/mutants/header-twenty/Cargo.toml"
+      ],
+      "returncode": 101,
+      "stdout": "\nrunning 12 tests\n........ 8/12\npartial_header_does_not_reset_its_deadline --- FAILED\nheader_deadline_is_forty_seconds --- FAILED\n..\nfailures:\n\n---- partial_header_does_not_reset_its_deadline stdout ----\n\nthread 'partial_header_does_not_reset_its_deadline' (37700777) panicked at tests/deadlines.rs:126:13:\nassertion `left == right` failed\n  left: 20s\n right: 40s\n\n---- header_deadline_is_forty_seconds stdout ----\n\nthread 'header_deadline_is_forty_seconds' (37700774) panicked at tests/deadlines.rs:139:9:\nassertion failed: poll(future.as_mut()).is_pending()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    header_deadline_is_forty_seconds\n    partial_header_does_not_reset_its_deadline\n\ntest result: FAILED. 10 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s\n\n",
+      "stderr": "error: test failed, to rerun pass `--test deadlines`\n",
+      "diff": "--- a/src/deadlines.rs\n+++ b/src/deadlines.rs\n@@ -19,7 +19,7 @@\n use crate::stream::StreamError;\n use crate::{ChunkPlan, DecodeError, DecodedFrame, FrameLimits, HEADER_LEN, Header, encode_frame};\n \n-pub const HEADER_TIMEOUT: Duration = Duration::from_secs(40);\n+pub const HEADER_TIMEOUT: Duration = Duration::from_secs(20);\n pub const CHUNK_TIMEOUT: Duration = Duration::from_secs(20);\n \n /// The exact I/O boundary whose deadline expired.\n"
+    },
+    {
+      "case": "chunks-sixty",
+      "source_sha256": "a595aab5ead126e7b0b87b16d8c8991403ba4c01d382a3b4e996c492ecfc56c9",
+      "command": [
+        "cargo",
+        "test",
+        "--quiet",
+        "--offline",
+        "--locked",
+        "--all-features",
+        "--test",
+        "deadlines",
+        "--manifest-path",
+        "work/frame-deadlines-94/mutants/chunks-sixty/Cargo.toml"
+      ],
+      "returncode": 101,
+      "stdout": "\nrunning 12 tests\n....... 7/12\nwriter_default_and_override_are_per_chunk --- FAILED\npartial_writes_share_one_deadline_and_are_not_rolled_back --- FAILED\ndisabling_header_deadline_does_not_disable_payload_deadlines --- FAILED\n..\nfailures:\n\n---- writer_default_and_override_are_per_chunk stdout ----\n\nthread 'writer_default_and_override_are_per_chunk' (37701082) panicked at tests/deadlines.rs:128:18:\nexpected deadline error, got Pending\n\n---- partial_writes_share_one_deadline_and_are_not_rolled_back stdout ----\n\nthread 'partial_writes_share_one_deadline_and_are_not_rolled_back' (37701080) panicked at tests/deadlines.rs:128:18:\nexpected deadline error, got Pending\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n---- disabling_header_deadline_does_not_disable_payload_deadlines stdout ----\n\nthread 'disabling_header_deadline_does_not_disable_payload_deadlines' (37701072) panicked at tests/deadlines.rs:128:18:\nexpected deadline error, got Pending\n\n\nfailures:\n    disabling_header_deadline_does_not_disable_payload_deadlines\n    partial_writes_share_one_deadline_and_are_not_rolled_back\n    writer_default_and_override_are_per_chunk\n\ntest result: FAILED. 9 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s\n\n",
+      "stderr": "error: test failed, to rerun pass `--test deadlines`\n",
+      "diff": "--- a/src/deadlines.rs\n+++ b/src/deadlines.rs\n@@ -20,7 +20,7 @@\n use crate::{ChunkPlan, DecodeError, DecodedFrame, FrameLimits, HEADER_LEN, Header, encode_frame};\n \n pub const HEADER_TIMEOUT: Duration = Duration::from_secs(40);\n-pub const CHUNK_TIMEOUT: Duration = Duration::from_secs(20);\n+pub const CHUNK_TIMEOUT: Duration = Duration::from_secs(60);\n \n /// The exact I/O boundary whose deadline expired.\n #[derive(Clone, Copy, Debug, Eq, PartialEq)]\n"
+    },
+    {
+      "case": "ignore-header-flag",
+      "source_sha256": "b792bacb1a4181494c1ae99aaff30586687f822502dc4fe4a6e983175f3c2c62",
+      "command": [
+        "cargo",
+        "test",
+        "--quiet",
+        "--offline",
+        "--locked",
+        "--all-features",
+        "--test",
+        "deadlines",
+        "--manifest-path",
+        "work/frame-deadlines-94/mutants/ignore-header-flag/Cargo.toml"
+      ],
+      "returncode": 101,
+      "stdout": "\nrunning 12 tests\n........ 8/12\nheader_deadline_is_forty_seconds --- FAILED\npartial_header_does_not_reset_its_deadline --- FAILED\n..\nfailures:\n\n---- header_deadline_is_forty_seconds stdout ----\n\nthread 'header_deadline_is_forty_seconds' (37701332) panicked at tests/deadlines.rs:128:18:\nexpected deadline error, got Pending\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n---- partial_header_does_not_reset_its_deadline stdout ----\n\nthread 'partial_header_does_not_reset_its_deadline' (37701335) panicked at tests/deadlines.rs:128:18:\nexpected deadline error, got Pending\n\n\nfailures:\n    header_deadline_is_forty_seconds\n    partial_header_does_not_reset_its_deadline\n\ntest result: FAILED. 10 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s\n\n",
+      "stderr": "warning: unused variable: `time_header`\n  --> src/deadlines.rs:82:5\n   |\n82 |     time_header: bool,\n   |     ^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_time_header`\n   |\n   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default\n\nerror: test failed, to rerun pass `--test deadlines`\n",
+      "diff": "--- a/src/deadlines.rs\n+++ b/src/deadlines.rs\n@@ -82,7 +82,7 @@\n     time_header: bool,\n ) -> Result<DecodedFrame, DeadlineError> {\n     let mut header_bytes = [0; HEADER_LEN];\n-    if time_header {\n+    if false {\n         within(\n             Phase::Header,\n             HEADER_TIMEOUT,\n"
+    },
+    {
+      "case": "ignore-write-override",
+      "source_sha256": "559d9aa31d02de90d055ad71916ef7adfb6c5d950a0cb59fbff32703959abe4f",
+      "command": [
+        "cargo",
+        "test",
+        "--quiet",
+        "--offline",
+        "--locked",
+        "--all-features",
+        "--test",
+        "deadlines",
+        "--manifest-path",
+        "work/frame-deadlines-94/mutants/ignore-write-override/Cargo.toml"
+      ],
+      "returncode": 101,
+      "stdout": "\nrunning 12 tests\n......... 9/12\nwriter_default_and_override_are_per_chunk --- FAILED\n..\nfailures:\n\n---- writer_default_and_override_are_per_chunk stdout ----\n\nthread 'writer_default_and_override_are_per_chunk' (37701611) panicked at tests/deadlines.rs:222:13:\nassertion failed: poll(future.as_mut()).is_pending()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    writer_default_and_override_are_per_chunk\n\ntest result: FAILED. 11 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s\n\n",
+      "stderr": "warning: unused variable: `override_timeout`\n   --> src/deadlines.rs:141:5\n    |\n141 |     override_timeout: Option<Duration>,\n    |     ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_override_timeout`\n    |\n    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default\n\nerror: test failed, to rerun pass `--test deadlines`\n",
+      "diff": "--- a/src/deadlines.rs\n+++ b/src/deadlines.rs\n@@ -141,7 +141,7 @@\n     override_timeout: Option<Duration>,\n ) -> Result<(), DeadlineError> {\n     let frame = encode_frame(payload, stream_field).map_err(StreamError::from)?;\n-    let limit = override_timeout.unwrap_or(CHUNK_TIMEOUT);\n+    let limit = CHUNK_TIMEOUT;\n     for chunk in frame.chunks() {\n         let start = chunk.offset as usize;\n         let end = start + chunk.len as usize;\n"
+    },
+    {
+      "case": "timer-before-io",
+      "source_sha256": "b4f5f617b2ec12272ae13dc7cac2cf59b873f81b97f95d3f9ab3f376ca504b5b",
+      "command": [
+        "cargo",
+        "test",
+        "--quiet",
+        "--offline",
+        "--locked",
+        "--all-features",
+        "--test",
+        "deadlines",
+        "--manifest-path",
+        "work/frame-deadlines-94/mutants/timer-before-io/Cargo.toml"
+      ],
+      "returncode": 101,
+      "stdout": "\nrunning 12 tests\n....... 7/12\ncompleted_header_beats_elapsed_timer_on_the_same_poll --- FAILED\nready_write_and_zero_write_beat_elapsed_timer --- FAILED\nio_error_beats_elapsed_header_timer_on_the_same_poll --- FAILED\n..\nfailures:\n\n---- completed_header_beats_elapsed_timer_on_the_same_poll stdout ----\n\nthread 'completed_header_beats_elapsed_timer_on_the_same_poll' (37701879) panicked at tests/deadlines.rs:177:9:\nassertion failed: matches!(poll(future.as_mut()), Poll::Ready(Ok(frame)) if\n    frame.payload.is_empty())\n\n---- ready_write_and_zero_write_beat_elapsed_timer stdout ----\n\nthread 'ready_write_and_zero_write_beat_elapsed_timer' (37701889) panicked at tests/deadlines.rs:251:17:\nassertion failed: matches!(result, Poll::Ready(Ok(())))\n\n---- io_error_beats_elapsed_header_timer_on_the_same_poll stdout ----\n\nthread 'io_error_beats_elapsed_header_timer_on_the_same_poll' (37701885) panicked at tests/deadlines.rs:193:9:\nassertion failed: matches!(poll(future.as_mut()),\n    Poll::Ready(Err(DeadlineError::Stream(StreamError::Io(e)))) if e.kind() ==\n    io::ErrorKind::ConnectionReset)\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    completed_header_beats_elapsed_timer_on_the_same_poll\n    io_error_beats_elapsed_header_timer_on_the_same_poll\n    ready_write_and_zero_write_beat_elapsed_timer\n\ntest result: FAILED. 9 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s\n\n",
+      "stderr": "error: test failed, to rerun pass `--test deadlines`\n",
+      "diff": "--- a/src/deadlines.rs\n+++ b/src/deadlines.rs\n@@ -61,15 +61,18 @@\n     }\n }\n \n-async fn within<T>(\n-    phase: Phase,\n-    limit: Duration,\n-    operation: impl Future<Output = io::Result<T>>,\n-) -> Result<T, DeadlineError> {\n-    tokio::time::timeout(limit, operation)\n-        .await\n-        .map_err(|_| DeadlineError::Elapsed { phase, limit })?\n-        .map_err(|error| DeadlineError::Stream(StreamError::Io(error)))\n+async fn within<T>(phase: Phase, limit: Duration, operation: impl Future<Output = io::Result<T>>) -> Result<T, DeadlineError> {\n+    let mut timer = Box::pin(tokio::time::sleep(limit));\n+    let mut operation = Box::pin(operation);\n+    std::future::poll_fn(move |cx| {\n+        if timer.as_mut().poll(cx).is_ready() {\n+            return std::task::Poll::Ready(Err(DeadlineError::Elapsed { phase, limit }));\n+        }\n+        match operation.as_mut().poll(cx) {\n+            std::task::Poll::Pending => std::task::Poll::Pending,\n+            std::task::Poll::Ready(value) => std::task::Poll::Ready(value.map_err(|e| DeadlineError::Stream(StreamError::Io(e)))),\n+        }\n+    }).await\n }\n \n /// Reads one frame with optional header timing and a deadline per payload chunk.\n"
+    },
+    {
+      "case": "one-payload-budget",
+      "source_sha256": "cf9002a25100bd494502cae15c0e6522d796c68057f45a5454ccdcc2193e618c",
+      "command": [
+        "cargo",
+        "test",
+        "--quiet",
+        "--offline",
+        "--locked",
+        "--all-features",
+        "--test",
+        "deadlines",
+        "--manifest-path",
+        "work/frame-deadlines-94/mutants/one-payload-budget/Cargo.toml"
+      ],
+      "returncode": 101,
+      "stdout": "\nrunning 12 tests\n........... 11/12\neach_payload_chunk_gets_a_fresh_twenty_seconds --- FAILED\n\nfailures:\n\n---- each_payload_chunk_gets_a_fresh_twenty_seconds stdout ----\n\nthread 'each_payload_chunk_gets_a_fresh_twenty_seconds' (37702194) panicked at tests/deadlines.rs:368:9:\nassertion failed: poll(future.as_mut()).is_pending()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    each_payload_chunk_gets_a_fresh_twenty_seconds\n\ntest result: FAILED. 11 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s\n\n",
+      "stderr": "error: test failed, to rerun pass `--test deadlines`\n",
+      "diff": "--- a/src/deadlines.rs\n+++ b/src/deadlines.rs\n@@ -105,6 +105,7 @@\n     let consumed = usize::try_from(u64::from(header.payload_len) + HEADER_LEN as u64)\n         .map_err(|_| StreamError::AddressSpace)?;\n     let mut payload = vec![0; header.payload_len as usize];\n+    let payload_started = tokio::time::Instant::now();\n     for chunk in ChunkPlan::new(u64::from(header.payload_len)) {\n         let start = chunk.offset as usize;\n         let end = start + chunk.len as usize;\n@@ -113,7 +114,7 @@\n                 offset: chunk.offset,\n                 len: chunk.len,\n             },\n-            CHUNK_TIMEOUT,\n+            CHUNK_TIMEOUT.saturating_sub(payload_started.elapsed()),\n             reader.read_exact(&mut payload[start..end]),\n         )\n         .await?;\n"
+    },
+    {
+      "case": "whole-frame-header-deadline",
+      "source_sha256": "fe9cf2f06a16b65ac600092a542ece076afa653c86f9e0f1a078fe90dfff1f8b",
+      "command": [
+        "cargo",
+        "test",
+        "--quiet",
+        "--offline",
+        "--locked",
+        "--all-features",
+        "--test",
+        "deadlines",
+        "--manifest-path",
+        "work/frame-deadlines-94/mutants/whole-frame-header-deadline/Cargo.toml"
+      ],
+      "returncode": 101,
+      "stdout": "\nrunning 12 tests\n........ 8/12\nheader_deadline_does_not_cover_later_payload_io --- FAILED\ndisabling_header_deadline_does_not_disable_payload_deadlines --- FAILED\n..\nfailures:\n\n---- header_deadline_does_not_cover_later_payload_io stdout ----\n\nthread 'header_deadline_does_not_cover_later_payload_io' (37702461) panicked at tests/deadlines.rs:425:9:\nassertion failed: poll(future.as_mut()).is_pending()\n\n---- disabling_header_deadline_does_not_disable_payload_deadlines stdout ----\n\nthread 'disabling_header_deadline_does_not_disable_payload_deadlines' (37702458) panicked at tests/deadlines.rs:154:9:\nassertion failed: poll(future.as_mut()).is_pending()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    disabling_header_deadline_does_not_disable_payload_deadlines\n    header_deadline_does_not_cover_later_payload_io\n\ntest result: FAILED. 10 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s\n\n",
+      "stderr": "error: test failed, to rerun pass `--test deadlines`\n",
+      "diff": "--- a/src/deadlines.rs\n+++ b/src/deadlines.rs\n@@ -76,7 +76,7 @@\n ///\n /// `time_header` represents the observed caller flag. Disabling it does not\n /// disable payload deadlines. No global default for that caller flag is claimed.\n-pub async fn read_frame<R: AsyncRead + Unpin + ?Sized>(\n+async fn read_inner<R: AsyncRead + Unpin + ?Sized>(\n     reader: &mut R,\n     limits: FrameLimits,\n     time_header: bool,\n@@ -157,3 +157,8 @@\n     }\n     Ok(())\n }\n+\n+pub async fn read_frame<R: AsyncRead + Unpin + ?Sized>(reader: &mut R, limits: FrameLimits, time_header: bool) -> Result<DecodedFrame, DeadlineError> {\n+    tokio::time::timeout(HEADER_TIMEOUT, read_inner(reader, limits, time_header)).await\n+        .map_err(|_| DeadlineError::Elapsed { phase: Phase::Header, limit: HEADER_TIMEOUT })?\n+}\n"
+    }
+  ],
+  "limits": "Only independent Rust with paused local time and scripted I/O executes. No captured node, network or signer.",
+  "reproduction": "Copy the standalone component, apply each independent diff at its root, and run the retained cargo command against that copy. Reject compiler-only failures; require the test binary to run and report FAILED."
+}
