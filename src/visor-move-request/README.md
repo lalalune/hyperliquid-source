@@ -1,0 +1,15 @@
+# Visor admitted move-request bytes
+
+This real, dependency-free Rust component reconstructs the bounded byte-value relation of six complete Visor bodies. It accepts two valid UTF-8 strings **after external admission of the opaque preflight**. It does not perform preflight, shell, process, filesystem or network operations.
+
+`encode_admitted_move(source, destination)` returns owned command bytes and raw option byte **1**. It starts with `mv`, omits empty/all-W inputs, encodes each retained original input with the proved quote/chunk grammar, and joins with one ASCII space in source/destination order. W is the exact 25-scalar captured set. Surrounding whitespace on nonblank inputs is preserved. `&str` gives a stronger safe input domain than arbitrary native pointers; NUL is explicitly rejected.
+
+`EmbeddedNul` models only the native construction-error condition, not an error object's ABI/value. `LengthOutsideProofDomain` is a newly chosen safe refusal. `AllocationFailure` is a host Rust fallible allocation result, with no target allocator or error-order equivalence. The pure `admitted_output_bound(u64,u64)` checks the mathematical combined input bound `2^61-2` and returns `4*sum+4`; it is a chosen helper API, not another recovered native function. Its integer-only boundary cases allocate nothing.
+
+Option 1 does not guarantee quiet wrapping. The downstream shell helper has an earlier raw substring branch for `2>&1`, which can remain inside a quoted operand. This component does not parse shell syntax, validate `mv` arguments/options or promise a filesystem effect.
+
+The [combined evidence packet](../../research/work-items/RE-013-visor-move-argument-encoding/README.md) retains the complete 4,067-byte native scope, manual proof, exact target SHA, independent decoders and explicit physical-storage/allocator limits. Its [pre-Rust contract and freeze](../../research/work-items/RE-013-visor-move-argument-encoding/pre-rust/CONTRACT.md) preceded this source. The independent longest-prefix-per-language oracle supplied 44,679 input pairs and 211 integer length cases; production uses one-pass shrinking admission masks. Expected files never enter the production library or input-only client.
+
+Build scope is this Cargo component only, with no root workspace, registry dependencies, build script or foreign source. The research toolchain is Rust 1.94.1 on aarch64-apple-darwin, not the original Linux x86-64 Visor compiler. Use offline/locked Cargo in the inspected build environment; [rust-validation](../../research/work-items/RE-013-visor-move-argument-encoding/rust-validation/) records exact pinned commands, actual results and limitations. Reproduction compiles and runs only this newly authored Rust and its client, never the captured target or an instruction evaluator.
+
+No original pointer/tag/capacity layout, borrowed-storage identity, allocator lifetime, runtime call trace, original compiled-byte equality or component gate is claimed. The new code is independently authored under the repository's MIT license.
