@@ -93,7 +93,7 @@ reconstruction. Published artifacts and bitcode alone do not prove a source buil
 
 | Target | Dependency | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows |
 | --- | --- | ---: | ---: | ---: |
-| node94 | compiler-builtins | 395/395 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
+| node94 | compiler-builtins | 527/527 (100.00%) | 3/3 (100.00%) | 3/3 (100.00%) |
 | node94 | rust-core | 1,968/2,060 (95.53%) | 1/6 (16.67%) | 6/6 (100.00%) |
 | node94 | zstandard | 2,418/2,418 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
 | node115 | rust-core | 355/390 (91.03%) | 0/1 (0.00%) | 1/1 (100.00%) |
@@ -107,7 +107,7 @@ windows allow only recorded relocation fields to differ. No whole ELF is reprodu
 
 | Target | Compared bytes / all .text bytes | Raw matching positions / all .text bytes |
 | --- | ---: | ---: |
-| node94 | 4,873/70,370,352 (0.00692%) | 4,781/70,370,352 (0.00679%) |
+| node94 | 5,005/70,370,352 (0.00711%) | 4,913/70,370,352 (0.00698%) |
 | node115 | 2,808/83,719,936 (0.00335%) | 2,773/83,719,936 (0.00331%) |
 | visor | 0/5,150,272 (0.00000%) | 0/5,150,272 (0.00000%) |
 

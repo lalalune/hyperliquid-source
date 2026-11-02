@@ -52,7 +52,7 @@ reconstruction. Published artifacts and bitcode alone do not prove a source buil
 
 | Target | Dependency | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows |
 | --- | --- | ---: | ---: | ---: |
-| node94 | compiler-builtins | 395/395 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
+| node94 | compiler-builtins | 527/527 (100.00%) | 3/3 (100.00%) | 3/3 (100.00%) |
 | node94 | rust-core | 1,968/2,060 (95.53%) | 1/6 (16.67%) | 6/6 (100.00%) |
 | node94 | zstandard | 2,418/2,418 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
 | node115 | rust-core | 355/390 (91.03%) | 0/1 (0.00%) | 1/1 (100.00%) |
@@ -62,7 +62,7 @@ reconstruction. Published artifacts and bitcode alone do not prove a source buil
 
 | Target | Unwind-index entries | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows | Whole ELF reproduced |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Node #94 | 121,299 | 4,781/4,873 (98.11%) | 5/10 (50.00%) | 10/10 (100.00%) | No |
+| Node #94 | 121,299 | 4,913/5,005 (98.16%) | 6/11 (54.55%) | 11/11 (100.00%) | No |
 | Node #115 (separate comparison) | 135,313 | 2,773/2,808 (98.75%) | 2/3 (66.67%) | 3/3 (100.00%) | No |
 | Captured visor | 11,028 | 0 compared | 0 registered | 0 registered | No |
 
@@ -74,7 +74,7 @@ These denominators are the authenticated executable `.text` sections, not inferr
 
 | Target | Compared window bytes / .text | Raw matching positions / .text |
 | --- | ---: | ---: |
-| node94 | 4,873/70,370,352 (0.00692%) | 4,781/70,370,352 (0.00679%) |
+| node94 | 5,005/70,370,352 (0.00711%) | 4,913/70,370,352 (0.00698%) |
 | node115 | 2,808/83,719,936 (0.00335%) | 2,773/83,719,936 (0.00331%) |
 | visor | 0/5,150,272 (0.00000%) | 0/5,150,272 (0.00000%) |
 
@@ -107,6 +107,7 @@ Each interval is counted once per target. Raw equality includes relocation bytes
 | node115: [DebugStruct field](../research/work-items/RE-014-node115-field-adapter-drift/observed/records.json) | `0x167d950..0x167dad6` | published-artifact | 355/390 (91.03%) | 354/354 (100.00%) |
 | node94: [compiler-builtins unsigned128 remainder](../research/work-items/RE-004-u128-remainder-94/native/record.json) | `0x565f7f0..0x565f8b5` | published-artifact | 197/197 (100.00%) | 197/197 (100.00%) |
 | node94: [compiler-builtins unsigned128 division](../research/work-items/RE-002-u128-division-leaf-94/observed/record.json) | `0x565f5a0..0x565f666` | published-artifact | 198/198 (100.00%) | 198/198 (100.00%) |
+| node94: [compiler-builtins unsigned128 to binary64](../research/work-items/RE-004-u128-binary64-94/native/record.json) | `0x565ff80..0x5660004` | published-artifact | 132/132 (100.00%) | 132/132 (100.00%) |
 
 The selected adapter candidate is the reviewed ThinLTO rebuild of published LLVM bitcode, not newly recovered libcore Rust source. Its older official native candidate retains two non-relocation differences at offsets 464 and 467 (616/622 raw bytes); that original result remains in the evidence and registry. The two candidates do not add two windows.
 

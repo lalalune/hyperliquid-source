@@ -1,0 +1,340 @@
+{
+  "status": "PASS",
+  "source_commit": "2e917a7a7f448c75f107f1e25432484c2abba2b9",
+  "source_tree": "2f2174c77a97e5f33709b2125239ee7cb63f75c7",
+  "source_condition": "Clean C1 before and after; no registry edit existed during the experiment.",
+  "result_sha256": "b8a5a25192b65994ad23921fec79cf83b9904265edb6413a1861fff39418949b",
+  "commands": 38,
+  "raw_streams": 76,
+  "actual_command_seconds": 1.939,
+  "oracle": {
+    "rows": 16614,
+    "unique_u128": 16610,
+    "pre_Rust_freeze_sha256": "46fcb655e66a84595ac8786ab5c7a4ba67b4912ca7ce0a2329f51f34719b9230",
+    "independent_native_proof_sha256": "d4fbdabeb04e2ec746508acd123b347cd11d990d1689588c282d7f9ef33985d6",
+    "fresh_recheck_method": "Integer binary search of ordered finite IEEE encodings, exact rational distances and tie parity",
+    "original_authority_method": "Exact integer binade/significand/remainder half-even theorem, independently corroborated by CPython integer-to-binary64 conversion for every stimulus",
+    "primary_expected_sha256": "d4eb7f3e4ea63b60e5e0108fad91836d08b53ed07c4f064488f82057cc8989af",
+    "primary_inputs_sha256": "7e5c0d7e97202d6b5af78ad7b4a00b95798541b173cc79e72c444acaf7bc647a",
+    "fixture_sha256": "1a03105a179ea780da85fa2e10ca160fb79d4a4d64ad2a8ed84883bd81fe0251",
+    "ordinary_unit_methods": 1,
+    "ordinary_unit_fixture_rows": 20,
+    "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+    "captured_execution": false,
+    "instruction_evaluator": false
+  },
+  "profiles": [
+    {
+      "name": "debug",
+      "opt_level": 0,
+      "ordinary_tests": {
+        "program": "/tmp/hl-resume-20261101/arithmetic-56c/work/u128-binary64-c1/debug/ordinary-tests",
+        "actual_tests": 1,
+        "expected_exit": 0
+      },
+      "production": "/tmp/hl-resume-20261101/arithmetic-56c/work/u128-binary64-c1/debug/production",
+      "production_sha256": "9b07ae1c25ba77573e33d0b3536faf76a94746289a67d62eb19c0b1f0075a4a2",
+      "production_cases": 16614,
+      "actual_sha256": "d4eb7f3e4ea63b60e5e0108fad91836d08b53ed07c4f064488f82057cc8989af",
+      "expected_sha256": "d4eb7f3e4ea63b60e5e0108fad91836d08b53ed07c4f064488f82057cc8989af",
+      "library_sha256": "78279f1a5653268ad46ceb089c03293a64a7944f1c95056f455b08ebdf05c2bf"
+    },
+    {
+      "name": "optimized",
+      "opt_level": 3,
+      "ordinary_tests": {
+        "program": "/tmp/hl-resume-20261101/arithmetic-56c/work/u128-binary64-c1/optimized/ordinary-tests",
+        "actual_tests": 1,
+        "expected_exit": 0
+      },
+      "production": "/tmp/hl-resume-20261101/arithmetic-56c/work/u128-binary64-c1/optimized/production",
+      "production_sha256": "2ef500c8be4a1263fe0acb7bc334a5299c37446ce1f0d97e607217ba7a6c4c03",
+      "production_cases": 16614,
+      "actual_sha256": "d4eb7f3e4ea63b60e5e0108fad91836d08b53ed07c4f064488f82057cc8989af",
+      "expected_sha256": "d4eb7f3e4ea63b60e5e0108fad91836d08b53ed07c4f064488f82057cc8989af",
+      "library_sha256": "94111cfd903ebaea4ac13dab2b78b2e2cdeff102730112212e61e36c08f5acfc"
+    }
+  ],
+  "semantic_mutants": [
+    {
+      "name": "ties-away-from-even",
+      "relation": "Incorrectly increment even retained significands at an exact midpoint.",
+      "source_sha256": "2ec7e00636c701d5e539fa3378410e43f909e54b4c71d74bf84a68f520f234d9",
+      "production_exit": 0,
+      "production_cases": 16614,
+      "different_transcripts": 792,
+      "sample_mismatch_ids": [
+        "f01240",
+        "f01244",
+        "f01248",
+        "f01252",
+        "f01256",
+        "f01258",
+        "f01260",
+        "f01262"
+      ],
+      "actual_witnesses": [
+        {
+          "id": "f01240",
+          "n_hex": "00000000000000000020000000000001",
+          "expected_bits": "4340000000000000",
+          "actual_bits": "4340000000000001"
+        },
+        {
+          "id": "f01244",
+          "n_hex": "00000000000000000020000000000005",
+          "expected_bits": "4340000000000002",
+          "actual_bits": "4340000000000003"
+        },
+        {
+          "id": "f01248",
+          "n_hex": "00000000000000000020000000000009",
+          "expected_bits": "4340000000000004",
+          "actual_bits": "4340000000000005"
+        },
+        {
+          "id": "f01252",
+          "n_hex": "00000000000000000020000000000011",
+          "expected_bits": "4340000000000008",
+          "actual_bits": "4340000000000009"
+        },
+        {
+          "id": "f01256",
+          "n_hex": "00000000000000000020000000000021",
+          "expected_bits": "4340000000000010",
+          "actual_bits": "4340000000000011"
+        }
+      ],
+      "ordinary_tests": {
+        "program": "/tmp/hl-resume-20261101/arithmetic-56c/work/u128-binary64-c1/mutant-ties-away-from-even/ordinary-tests",
+        "expected_exit": 101,
+        "semantic_failure_observed": true
+      }
+    },
+    {
+      "name": "ignore-above-half-sticky",
+      "relation": "Ignore residues strictly greater than the midpoint, including every sticky-bit position.",
+      "source_sha256": "a50670e97557a19046d6065e7080f80ad70a5dce7a138ac61cf0e46c4b95b48c",
+      "production_exit": 0,
+      "production_cases": 16614,
+      "different_transcripts": 9160,
+      "sample_mismatch_ids": [
+        "f01370",
+        "f01374",
+        "f01378",
+        "f01382",
+        "f01386",
+        "f01390",
+        "f01394",
+        "f01398"
+      ],
+      "actual_witnesses": [
+        {
+          "id": "f01370",
+          "n_hex": "00000000000000000040000000000003",
+          "expected_bits": "4350000000000001",
+          "actual_bits": "4350000000000000"
+        },
+        {
+          "id": "f01374",
+          "n_hex": "00000000000000000040000000000007",
+          "expected_bits": "4350000000000002",
+          "actual_bits": "4350000000000001"
+        },
+        {
+          "id": "f01378",
+          "n_hex": "0000000000000000004000000000000b",
+          "expected_bits": "4350000000000003",
+          "actual_bits": "4350000000000002"
+        },
+        {
+          "id": "f01382",
+          "n_hex": "0000000000000000004000000000000f",
+          "expected_bits": "4350000000000004",
+          "actual_bits": "4350000000000003"
+        },
+        {
+          "id": "f01386",
+          "n_hex": "0000000000000000004000000000001f",
+          "expected_bits": "4350000000000008",
+          "actual_bits": "4350000000000007"
+        }
+      ],
+      "ordinary_tests": {
+        "program": "/tmp/hl-resume-20261101/arithmetic-56c/work/u128-binary64-c1/mutant-ignore-above-half-sticky/ordinary-tests",
+        "expected_exit": 101,
+        "semantic_failure_observed": true
+      }
+    },
+    {
+      "name": "drop-top-input-bit",
+      "relation": "Discard input bit127 and incorrectly convert the lower127-bit word.",
+      "source_sha256": "8c2b80fd8f4ab60862aa630a77810238e857885798449394bcd0fe0d7f79349c",
+      "production_exit": 0,
+      "production_cases": 16614,
+      "different_transcripts": 1479,
+      "sample_mismatch_ids": [
+        "f15132",
+        "f15133",
+        "f15134",
+        "f15135",
+        "f15136",
+        "f15137",
+        "f15138",
+        "f15139"
+      ],
+      "actual_witnesses": [
+        {
+          "id": "f15132",
+          "n_hex": "80000000000000000000000000000000",
+          "expected_bits": "47e0000000000000",
+          "actual_bits": "0000000000000000"
+        },
+        {
+          "id": "f15133",
+          "n_hex": "80000000000000000000000000000001",
+          "expected_bits": "47e0000000000000",
+          "actual_bits": "3ff0000000000000"
+        },
+        {
+          "id": "f15134",
+          "n_hex": "80000000000000000000000000000002",
+          "expected_bits": "47e0000000000000",
+          "actual_bits": "4000000000000000"
+        },
+        {
+          "id": "f15135",
+          "n_hex": "80000000000003ffffffffffffffffff",
+          "expected_bits": "47e0000000000000",
+          "actual_bits": "4490000000000000"
+        },
+        {
+          "id": "f15136",
+          "n_hex": "80000000000004000000000000000000",
+          "expected_bits": "47e0000000000000",
+          "actual_bits": "4490000000000000"
+        }
+      ],
+      "ordinary_tests": {
+        "program": "/tmp/hl-resume-20261101/arithmetic-56c/work/u128-binary64-c1/mutant-drop-top-input-bit/ordinary-tests",
+        "expected_exit": 101,
+        "semantic_failure_observed": true
+      }
+    }
+  ],
+  "own_reproducibility": {
+    "a_bytes": 14312,
+    "b_bytes": 14312,
+    "a_sha256": "94111cfd903ebaea4ac13dab2b78b2e2cdeff102730112212e61e36c08f5acfc",
+    "b_sha256": "94111cfd903ebaea4ac13dab2b78b2e2cdeff102730112212e61e36c08f5acfc",
+    "raw_equal": true,
+    "normalization": "none",
+    "original_target_match_claimed": false
+  },
+  "physical_input_count": 10851,
+  "physical_inputs_unchanged": true,
+  "physical_modes_recorded": true,
+  "provider_payload_count": 103,
+  "installed_manifest_count": 2,
+  "provider_unchanged": true,
+  "actual_pins": " 999556f6e0a474b8312db96ec3149e1c44e97c23 references/can1357-hl (heads/main)\n 703f10ed0d49193161a53be7e34086c2117858e8 upstream/block-importer (heads/main)\n d7e66aa751ffbd19bfd2b90fd5d9a3d8f32d99ee upstream/contracts (heads/master)\n 984357d36a46c95d1426f042e30a3adf2f48e388 upstream/historical_data (heads/master)\n d0945c699d9d4774417f4355b10744e7cd420df8 upstream/hyper-evm-sync (heads/main)\n 405cc08b17a727ee51b0f9128918955a84439915 upstream/node (heads/main)\n 8b4f237904f683aca2dba21a07d87e831ead2a97 upstream/order_book_server (heads/main)\n",
+  "canonical_tool_paths": {
+    "/tmp/hl-resume-20261101/toolchain/prefix/bin/rustc": "/tmp/hl-resume-20261101/toolchain/prefix/bin/rustc",
+    "/usr/bin/cc": "/usr/bin/x86_64-linux-gnu-gcc-14",
+    "/usr/bin/ld.bfd": "/usr/bin/x86_64-linux-gnu-ld.bfd",
+    "/usr/bin/objdump": "/usr/bin/x86_64-linux-gnu-objdump"
+  },
+  "cc_selected_ld_bfd": {
+    "reported_path": "ld.bfd",
+    "canonical_path": "/usr/bin/x86_64-linux-gnu-ld.bfd",
+    "sha256": "d2766988b6a1b1d1518cdc09242e726d1f24e151e16410ada3092b11ffd9081b"
+  },
+  "library_verdicts": [
+    {
+      "label": "build-only-delegation-wrapper",
+      "verdict": "REJECTED_BEFORE_CLIENT_LINK_OR_EXECUTION",
+      "forbidden_symbols": [
+        "__floatuntidf"
+      ],
+      "IR_floating_operations": [
+        "uitofp"
+      ],
+      "machine_floating_or_division_instructions": []
+    },
+    {
+      "label": "debug-library",
+      "verdict": "PRODUCTION_INTEGER_ONLY_NO_FLOAT_CONVERSION",
+      "forbidden_symbols": [],
+      "IR_floating_operations": [],
+      "machine_floating_or_division_instructions": []
+    },
+    {
+      "label": "optimized-library",
+      "verdict": "PRODUCTION_INTEGER_ONLY_NO_FLOAT_CONVERSION",
+      "forbidden_symbols": [],
+      "IR_floating_operations": [],
+      "machine_floating_or_division_instructions": []
+    },
+    {
+      "label": "repro-b",
+      "verdict": "PRODUCTION_INTEGER_ONLY_NO_FLOAT_CONVERSION",
+      "forbidden_symbols": [],
+      "IR_floating_operations": [],
+      "machine_floating_or_division_instructions": []
+    },
+    {
+      "label": "mutant-ties-away-from-even-library",
+      "verdict": "PRODUCTION_INTEGER_ONLY_NO_FLOAT_CONVERSION",
+      "forbidden_symbols": [],
+      "IR_floating_operations": [],
+      "machine_floating_or_division_instructions": []
+    },
+    {
+      "label": "mutant-ignore-above-half-sticky-library",
+      "verdict": "PRODUCTION_INTEGER_ONLY_NO_FLOAT_CONVERSION",
+      "forbidden_symbols": [],
+      "IR_floating_operations": [],
+      "machine_floating_or_division_instructions": []
+    },
+    {
+      "label": "mutant-drop-top-input-bit-library",
+      "verdict": "PRODUCTION_INTEGER_ONLY_NO_FLOAT_CONVERSION",
+      "forbidden_symbols": [],
+      "IR_floating_operations": [],
+      "machine_floating_or_division_instructions": []
+    }
+  ],
+  "comparator_controls": [
+    {
+      "name": "wrong-bits",
+      "actual_mismatch_ids": [
+        "f00000"
+      ]
+    },
+    {
+      "name": "missing-row",
+      "refusal": "Production row count differs, not a normal semantic control"
+    },
+    {
+      "name": "wrong-id",
+      "refusal": "Production case identities/order differ"
+    },
+    {
+      "name": "partial-word",
+      "refusal": "Production row is not a complete normal64-bit encoding"
+    }
+  ],
+  "qualification_zip": {
+    "bytes": 1807582,
+    "sha256": "3ff01beb4e5c72b96be1df34e153a099c79fefb27c7c0f334d620295ca288baa",
+    "entries": 117
+  },
+  "limits": [
+    "Every u128 integer as a returned-bits numerical projection under the explicit native ordinary-call/frame domain.",
+    "Input-only production data flow, not a filesystem sandbox.",
+    "Finite16614 vectors support the separately complete native and integer-rounding source proofs.",
+    "Only independently authored Rust executes; captured code and instruction interpreters never execute.",
+    "No original ABI/type/compiler/runtime/byte identity, caller-wide or recovery gate claim.",
+    "Original target execution, instruction evaluation, expanded/full test suite and hosted CI NOT RUN."
+  ]
+}
