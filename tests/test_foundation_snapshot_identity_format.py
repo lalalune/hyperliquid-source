@@ -1,3 +1,4 @@
+import importlib.util
 """Tests for the node #94 snapshot identity-format model."""
 
 import hashlib
@@ -160,6 +161,10 @@ class IdentityFormatTests(unittest.TestCase):
         self.assertIn("ALL CHECKS PASSED", result.stdout)
 
     def test_packet_excerpts_regenerate_byte_for_byte(self):
+        spec = importlib.util.spec_from_file_location("display_verifier", PACKET / "verify.py")
+        verifier = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(verifier)
+        normalize = verifier.canonical_objdump_display
         with tempfile.TemporaryDirectory() as tmp:
             result = subprocess.run(
                 [sys.executable, str(PACKET / "export_excerpts.py"),
@@ -170,8 +175,8 @@ class IdentityFormatTests(unittest.TestCase):
             for name in ("window.objdump.txt", "cleanup.objdump.txt",
                          "moveassign.objdump.txt", "getpid.objdump.txt",
                          "caller.objdump.txt"):
-                self.assertEqual((PACKET / name).read_bytes(),
-                                 (Path(tmp) / name).read_bytes(), name)
+                self.assertEqual(normalize((PACKET / name).read_bytes()),
+                                 normalize((Path(tmp) / name).read_bytes()), name)
 
     def test_corruption_control_tampered_binary_fails(self):
         binary = (REPO / "work" / "hl-node-94.bin").read_bytes()

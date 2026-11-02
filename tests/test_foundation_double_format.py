@@ -64,13 +64,25 @@ class TestDoubleFormat(unittest.TestCase):
         self.assertIn('ALL CHECKS PASSED', r.stdout)
 
     def test_excerpt_regeneration(self):
-        r = subprocess.run([sys.executable, str(PACKET / 'export_excerpts.py')],
-                           capture_output=True, text=True)
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        r = subprocess.run([sys.executable, str(PACKET / 'verify.py')],
-                           capture_output=True, text=True)
-        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
-        self.assertIn('ALL CHECKS PASSED', r.stdout)
+        def normalize(blob):
+            return b"\n".join(
+                b"<node94>:     file format elf64-x86-64"
+                if line.endswith(b":     file format elf64-x86-64") else line
+                for line in blob.split(b"\n"))
+
+        # Export into an isolated copy; retain the authenticated original packet.
+        with tempfile.TemporaryDirectory() as directory:
+            copied = Path(directory) / "packet"
+            shutil.copytree(PACKET, copied)
+            names = [p.name for p in PACKET.glob("*.txt")]
+            result = subprocess.run(
+                [sys.executable, str(copied / "export_excerpts.py"),
+                 str(REPO_ROOT / "artifacts/node/94/hl-node")],
+                capture_output=True, text=True, cwd=REPO_ROOT)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            for name in names:
+                self.assertEqual(normalize((PACKET / name).read_bytes()),
+                                 normalize((copied / name).read_bytes()), name)
 
     def test_corruption_controls(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -1,3 +1,4 @@
+import importlib.util
 """Tests for the node #94 unconditional create-and-format model."""
 
 import os
@@ -131,6 +132,10 @@ class CreateFormatTests(unittest.TestCase):
         self.assertIn("ALL CHECKS PASSED", result.stdout)
 
     def test_packet_excerpts_regenerate_byte_for_byte(self):
+        spec = importlib.util.spec_from_file_location("display_verifier", PACKET / "verify.py")
+        verifier = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(verifier)
+        normalize = verifier.canonical_objdump_display
         binary = REPO / "work" / "hl-node-94.bin"
         if not binary.exists():
             self.skipTest("digest-verified work binary not present")
@@ -153,7 +158,7 @@ class CreateFormatTests(unittest.TestCase):
                          "moveassign.objdump.txt", "control.objdump.txt"):
                 fresh = (Path(tmp) / name).read_bytes()
                 committed = (PACKET / name).read_bytes()
-                self.assertEqual(normalized(fresh), normalized(committed),
+                self.assertEqual(normalize(fresh), normalize(committed),
                                  name)
 
 

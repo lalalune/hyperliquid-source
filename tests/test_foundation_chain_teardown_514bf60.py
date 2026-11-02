@@ -121,7 +121,7 @@ class PacketTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable,
              os.path.join(PACKET_DIR, "verify.py"),
-             "--binary", BINARY],
+             "--binary", os.path.join("work", "hl-node-94.bin")],
             capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("ALL CHECKS PASSED", result.stdout)
@@ -163,7 +163,7 @@ class PacketTests(unittest.TestCase):
             result = subprocess.run(
                 [sys.executable,
                  os.path.join(copy, "export_excerpts.py"),
-                 "--binary", BINARY],
+                 "--binary", os.path.join("work", "hl-node-94.bin")],
                 capture_output=True, text=True)
             self.assertEqual(result.returncode, 0,
                              result.stdout + result.stderr)

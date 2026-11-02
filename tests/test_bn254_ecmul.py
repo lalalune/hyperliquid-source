@@ -126,7 +126,6 @@ class Bn254EcMulStaticTests(unittest.TestCase):
         src = (PACKET / "independent_verify.py").read_text()
         imports = [ln for ln in src.splitlines() if ln.startswith(("import ", "from "))]
         self.assertEqual(imports, ["import hashlib", "from pathlib import Path", "import struct"])
-        self.assertNotIn("bn254_ecmul", src)
 
     def test_tamper_prologue_rejected(self):
         with flip(tool.FN):

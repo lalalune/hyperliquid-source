@@ -9,6 +9,7 @@ failure), plus the evidence packet: its verify script, excerpt
 regeneration, and corruption controls.
 """
 
+import os
 import shutil
 import subprocess
 import sys
@@ -116,7 +117,7 @@ class PacketTests(unittest.TestCase):
                 [sys.executable, str(PACKET / "export_excerpts.py"),
                  "--out", str(outdir)],
                 capture_output=True, text=True, cwd=str(REPO),
-                env={"PATH": "/usr/bin:/bin",
+                env={**os.environ,
                      "HL_NODE94_BIN": str(REPO / "work" / "hl-node-94.bin")})
             self.assertEqual(result.returncode, 0, result.stderr)
             for name in ("window.objdump.txt", "parser.objdump.txt",

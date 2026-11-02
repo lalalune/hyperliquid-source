@@ -116,7 +116,7 @@ class PacketTests(unittest.TestCase):
             copied = os.path.join(tmp, "packet")
             result = subprocess.run(
                 [sys.executable, os.path.join(copied, "export_excerpts.py"),
-                 "--binary", path],
+                 "--binary", WORK_BINARY],
                 capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             with open(os.path.join(copied, "window.objdump.txt"),

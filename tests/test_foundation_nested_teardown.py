@@ -9,6 +9,7 @@ Stdlib only. Run from the repository root:
 import hashlib
 import os
 import sys
+import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 
@@ -144,3 +145,12 @@ def test_corruption_controls():
         with open(os.path.join(pdir, "records.json"), "w") as f:
             json.dump(records, f)
         assert m.check_packet(pdir, BINARY) != []
+
+
+def load_tests(loader, suite, pattern):
+    """Include the existing function tests in the repository's unittest runner."""
+    return unittest.TestSuite(
+        unittest.FunctionTestCase(function)
+        for name, function in globals().items()
+        if name.startswith("test_") and callable(function)
+    )
