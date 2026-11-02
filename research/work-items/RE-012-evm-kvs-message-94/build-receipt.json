@@ -1,0 +1,130 @@
+{
+  "source_base": "536bee4033075a1d18be048de249c1d6bbc2c779",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "host": "macOS arm64",
+  "versions": {
+    "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)",
+    "cargo": "cargo 1.94.1 (29ea6fb6a 2026-03-24)",
+    "GNU": "GNU objdump (GNU Binutils) 2.47.20260726",
+    "LLVM": "Homebrew LLVM version 22.1.4"
+  },
+  "source_sha256": {
+    "src/node94-tcp-frame/Cargo.toml": "9979554ae7bdfad20ee7decf6fdc638a6b281a25a9eb8d40592061109ff46f93",
+    "src/node94-tcp-frame/Cargo.lock": "ad823aa29006b9b9cafd0989c0cea7419bf20c32347c7a29d00d6569ffb36ee1",
+    "src/node94-tcp-frame/src/lib.rs": "cc971bbc1dde6772f37027616f8406c37724790d3338e5948bdeec972095fb6b",
+    "src/node94-tcp-frame/src/evm_kvs.rs": "59c65b35c8aac6e23f9da00c55f63f88c4a79fe8dcda5fc0e6fc8800569eab27",
+    "src/node94-tcp-frame/tests/evm_kvs.rs": "17994599d6235fd3944cdf2e18f0f84e11b8e9017cb40b0f6d50c9d85f8d51e1",
+    "tests/test_evm_kvs_message_evidence.py": "b6a2c91744f5a12df97eb6f4c9a91003a4d07c0d36e8e8aa81fa47cbd904fe16"
+  },
+  "checks": [
+    {
+      "check": "rust-all",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "src/node94-tcp-frame/Cargo.toml",
+        "--all-features"
+      ],
+      "exit_code": 0,
+      "log_sha256": "d45eeaa40a73dc0b9531ed6280f356a58d0d0ce84d7fd7f4d05fc6deba525758"
+    },
+    {
+      "check": "rust-release",
+      "command": [
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--release"
+      ],
+      "exit_code": 0,
+      "log_sha256": "4be020b34b41082e950c133a75658d4cc7aef3c94ce3772f7a3c08a2d2f8c3b2"
+    },
+    {
+      "check": "linux-library",
+      "command": [
+        "cargo",
+        "build",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--release",
+        "--target",
+        "x86_64-unknown-linux-gnu"
+      ],
+      "exit_code": 0,
+      "log_sha256": "7256e0b9b6e820bfda6fb2502ad309c1a8c1a3f309af6cf684c958cb460fded2"
+    },
+    {
+      "check": "clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "src/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "log_sha256": "99f71393b9903dca098310bb446022a4bdee195ea9996f351a787195555210a6"
+    },
+    {
+      "check": "fmt",
+      "command": [
+        "cargo",
+        "fmt",
+        "--manifest-path",
+        "src/node94-tcp-frame/Cargo.toml",
+        "--",
+        "--check"
+      ],
+      "exit_code": 0,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "check": "repository-checks",
+      "command": [
+        "make",
+        "verify",
+        "catalogue-check",
+        "reproduce",
+        "PYTHON=/opt/miniconda3/bin/python3"
+      ],
+      "exit_code": 0,
+      "log_sha256": "d7558d6aaa8ebcaf48561f6849f855dd35c810e583d9e00a85c8892aea20655c"
+    }
+  ],
+  "rust_tests": {
+    "rust-all": 147,
+    "rust-release": 147
+  },
+  "focused_evidence": {
+    "tests": 5,
+    "result": "PASSED",
+    "log_sha256": "2051b44a6873be68325a84eee6f8c1b9ce090dd7477ec1d2ef3e7f784928d0ce"
+  },
+  "mutants": {
+    "compiled_and_rejected": 10,
+    "receipt_sha256": "5bc9bcdfac3af94bb061e0db62db1b33867e415aea24ca4d29eeb4f1f16fe426"
+  },
+  "linux_library": {
+    "path": "src/node94-tcp-frame/target/x86_64-unknown-linux-gnu/release/libnode94_tcp_frame.rlib",
+    "sha256": "7aeac87e6159ee6b7052a4f760f3c13e1406eedea73f17b639c1c00822ad00fd",
+    "executed": false
+  },
+  "full_repository_suite": "RUNNING; no full-suite pass claimed",
+  "limits": "Wire/value decoder and cumulative byte guard only; no state validation, database write implementation, complete peer acceptance, network or node/Docker claim."
+}
