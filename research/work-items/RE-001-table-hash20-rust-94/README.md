@@ -40,6 +40,19 @@ credential, wallet material, address state or live dataset is retrieved. The
 result is the table-hash relation only, never address derivation, signing or a
 claim about production seed selection or cryptographic safety.
 
+### Shared-dependency attribution
+
+The established mathematics is SipHash-1-3, also implemented by Rust's public
+`SipHasher13`. The standard-library source describes its default table-hashing
+use: https://github.com/rust-lang/rust/blob/main/library/core/src/hash/sip.rs .
+This public-source comparison is attribution context, not proof of the captured
+node's exact Rust std revision, crate ownership or original build graph. Treat
+these windows as candidate shared standard-library/dependency behavior; do not
+count this bounded implementation as recovered first-party node code. No
+first-party byte credit or completion gate is requested. This clarification was
+added after independent implementation and does not copy public implementation
+code into the Rust source.
+
 ## Established math and Rust implementation
 
 The four initial state words XOR the two supplied words with the four captured
