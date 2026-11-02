@@ -23,6 +23,29 @@ def verify(directory=HERE, binary=evidence.TARGET):
         entries[name] = digest
     if set(entries) != FILES:
         raise ValueError('incomplete manifest')
+    # The manifest checks above never enumerate the packet directory, so
+    # three entry kinds are admitted silently: an extra unlisted file, a
+    # subdirectory, and a listed file replaced by a symlink (read_bytes
+    # follows it, so the hash check passes on bytes outside the packet).
+    # The node-inventory packet verifiers reject all three and compare
+    # the present file set against the pinned set; mirror them,
+    # tolerating only a __pycache__ of plain bytecode files.
+    present = set()
+    for entry in sorted(directory.iterdir()):
+        if entry.is_symlink():
+            raise ValueError(f'packet entry is a symlink: {entry.name}')
+        if entry.is_dir():
+            if entry.name != '__pycache__':
+                raise ValueError(f'unexpected directory in packet: {entry.name}')
+            for child in sorted(entry.iterdir()):
+                if child.is_symlink() or not child.is_file() \
+                        or child.suffix != '.pyc':
+                    raise ValueError(
+                        f'unexpected __pycache__ entry in packet: {child.name}')
+            continue
+        present.add(entry.name)
+    if present != FILES | {'MANIFEST.sha256'}:
+        raise ValueError(f'packet contents differ: {sorted(present)}')
     for name, digest in entries.items():
         if hashlib.sha256((directory / name).read_bytes()).hexdigest() != digest:
             raise ValueError(f'manifest mismatch: {name}')
