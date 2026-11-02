@@ -130,3 +130,15 @@ the documented GNU tool environment, and official regeneration of the new
 29-work-item inventory. Initial environment/pointer/stale-inventory failures
 are retained in `validation/integration/`. No full-suite-on-this-head claim
 is made. The native source, driver, oracle and fixtures did not change on rebase.
+
+Independent review reproduced a packaging-verifier gap at commit `638695d4`: a
+full replay still passed with unlisted files/directories and same-content or
+dangling symlinks in the packet fixture. Exact prior verifier and result streams
+are preserved in `validation/manifest-review/`. The corrected checker requires
+a unique, closed file/directory inventory and ordinary path components beneath
+the repository, including the two task-owned external tool/test paths. Six new
+temporary-tree control methods cover the gap and malformed/missing rows. This
+assumes the filesystem remains stable during verification; it is not a defense
+against concurrent path replacement. Rust, oracle, client and frozen/native
+results are unchanged. A full repository suite on the fixed head is recorded
+separately when complete; earlier 55-test results remain scoped to their head.

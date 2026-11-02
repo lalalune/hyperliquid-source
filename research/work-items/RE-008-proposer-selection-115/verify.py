@@ -4,7 +4,10 @@ import base64
 import gzip
 import importlib.util
 import json
+import os
 from pathlib import Path
+import re
+import stat
 import sys
 
 HERE = Path(__file__).resolve().parent
@@ -36,14 +39,81 @@ def archive(path):
     return archive_rows(json.loads(gzip.decompress(path.read_bytes())))
 
 
-def main():
-    count = 0
-    for line in (HERE / 'MANIFEST.sha256').read_text().splitlines():
-        wanted, name = line.split('  ', 1)
-        path = ROOT / name
-        if not path.is_file() or p.digest(path.read_bytes()) != wanted:
+def verify_manifest(root, packet):
+    """Closed task inventory; paths must stay ordinary throughout this check."""
+    root, packet = Path(root), Path(packet)
+    if not root.is_absolute() or not packet.is_relative_to(root):
+        raise ValueError('manifest root/packet coordinate mismatch')
+    external = {'tools/proposer_selection115.py', 'tests/test_proposer_selection115.py'}
+    prefix = packet.relative_to(root).as_posix() + '/'
+
+    def ordinary(path, directory=False):
+        current = path
+        while current != root:
+            if not current.is_relative_to(root):
+                raise ValueError('manifest path outside root')
+            mode = current.lstat().st_mode
+            if stat.S_ISLNK(mode):
+                raise ValueError('manifest symlink: ' + str(current))
+            want_dir = current != path or directory
+            if not (stat.S_ISDIR(mode) if want_dir else stat.S_ISREG(mode)):
+                raise ValueError('manifest nonordinary path: ' + str(current))
+            current = current.parent
+        if not stat.S_ISDIR(root.lstat().st_mode):
+            raise ValueError('manifest root is not an ordinary directory')
+
+    ordinary(packet, directory=True)
+    manifest = packet / 'MANIFEST.sha256'
+    ordinary(manifest)
+    records = {}
+    for line in manifest.read_text().splitlines():
+        match = re.fullmatch(r'([0-9a-f]{64})  (.+)', line)
+        if not match:
+            raise ValueError('malformed manifest row')
+        wanted, name = match.groups()
+        relative = Path(name)
+        if relative.is_absolute() or '..' in relative.parts or relative.as_posix() != name:
+            raise ValueError('noncanonical manifest path')
+        if name in records:
+            raise ValueError('duplicate manifest path')
+        if name not in external and not name.startswith(prefix):
+            raise ValueError('manifest path outside task inventory')
+        if root / name == manifest:
+            raise ValueError('manifest cannot hash itself')
+        ordinary(root / name)
+        if p.digest((root / name).read_bytes()) != wanted:
             raise ValueError('manifest mismatch: ' + name)
-        count += 1
+        records[name] = wanted
+    if not external <= records.keys():
+        raise ValueError('manifest omits task tool/test')
+    expected_files = {root / name for name in records if name.startswith(prefix)} | {manifest}
+    expected_dirs = {packet}
+    for path in expected_files:
+        parent = path.parent
+        while parent != packet:
+            expected_dirs.add(parent)
+            parent = parent.parent
+    actual_files, actual_dirs = set(), {packet}
+
+    def walk_error(error):
+        raise error
+
+    for directory, dirs, files in os.walk(packet, followlinks=False, onerror=walk_error):
+        for name in dirs:
+            path = Path(directory) / name
+            ordinary(path, directory=True)
+            actual_dirs.add(path)
+        for name in files:
+            path = Path(directory) / name
+            ordinary(path)
+            actual_files.add(path)
+    if actual_files != expected_files or actual_dirs != expected_dirs:
+        raise ValueError('manifest inventory differs: unlisted file or directory')
+    return len(records)
+
+
+def main():
+    count = verify_manifest(ROOT, HERE)
     expected_binding = json.loads(gzip.decompress((HERE / 'bindings.json.gz').read_bytes()))
     result = p.verify(p.TARGET.read_bytes(), expected_binding)
     freeze = json.loads((HERE / 'freeze.json').read_text())

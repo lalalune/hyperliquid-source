@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import struct
 import sys
+import tempfile
 import unittest
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -190,6 +191,68 @@ class ProposerOracle(unittest.TestCase):
             v.archive_rows([wrong])
         with self.assertRaisesRegex(ValueError,'duplicate'):
             v.archive_rows([row,row])
+
+
+class ProposerManifest(unittest.TestCase):
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root=Path(self.temp.name).resolve()
+        self.packet=self.root/'research/work-items/RE-008-proposer-selection-115'
+        self.v=module('proposer_manifest_controls',p.PACKET/'verify.py')
+        self.paths=[self.packet/'data/payload',self.root/'tools/proposer_selection115.py',self.root/'tests/test_proposer_selection115.py']
+        for path in self.paths:
+            path.parent.mkdir(parents=True,exist_ok=True)
+            path.write_bytes(b'known exact bytes')
+        self.manifest=self.packet/'MANIFEST.sha256'
+        self.manifest.write_text(''.join(p.digest(path.read_bytes())+'  '+path.relative_to(self.root).as_posix()+'\n' for path in self.paths))
+
+    def test_closed_manifest_accepts_exact_inventory(self):
+        self.assertEqual(self.v.verify_manifest(self.root,self.packet),3)
+
+    def test_unlisted_file_and_empty_directory_rejected(self):
+        for name,directory in [('extra',False),('empty',True)]:
+            with self.subTest(name=name):
+                path=self.packet/name
+                path.mkdir() if directory else path.write_bytes(b'unlisted')
+                with self.assertRaisesRegex(ValueError,'inventory differs'):
+                    self.v.verify_manifest(self.root,self.packet)
+                path.rmdir() if directory else path.unlink()
+        (self.packet/'dangling').symlink_to(self.root/'absent')
+        with self.assertRaisesRegex(ValueError,'symlink'):
+            self.v.verify_manifest(self.root,self.packet)
+
+    def test_same_content_file_symlinks_rejected(self):
+        for path in [*self.paths,self.manifest]:
+            with self.subTest(path=str(path.relative_to(self.root))):
+                raw=path.read_bytes();saved=self.root/'saved';saved.write_bytes(raw)
+                path.unlink();path.symlink_to(saved)
+                with self.assertRaisesRegex(ValueError,'symlink'):
+                    self.v.verify_manifest(self.root,self.packet)
+                path.unlink();path.write_bytes(raw);saved.unlink()
+
+    def test_parent_directory_symlinks_rejected(self):
+        for parent in [self.packet/'data',self.root/'tools',self.packet]:
+            with self.subTest(parent=str(parent.relative_to(self.root))):
+                saved=self.root/'saved-directory';parent.rename(saved);parent.symlink_to(saved,target_is_directory=True)
+                with self.assertRaisesRegex(ValueError,'symlink'):
+                    self.v.verify_manifest(self.root,self.packet)
+                parent.unlink();saved.rename(parent)
+
+    def test_duplicate_missing_and_escape_rows_rejected(self):
+        original=self.manifest.read_text();rows=original.splitlines(keepends=True)
+        corruptions=[original+rows[0],''.join(rows[:-1]),original+p.digest(b'x')+'  ../outside\n',original+p.digest(b'x')+'  unexpected.txt\n']
+        for value in corruptions:
+            with self.subTest(value=value[-90:]):
+                self.manifest.write_text(value)
+                with self.assertRaises(ValueError):
+                    self.v.verify_manifest(self.root,self.packet)
+        self.manifest.write_text(original)
+
+    def test_hash_mismatch_rejected(self):
+        self.paths[0].write_bytes(b'changed')
+        with self.assertRaisesRegex(ValueError,'manifest mismatch'):
+            self.v.verify_manifest(self.root,self.packet)
 
 
 if __name__=='__main__':unittest.main()
