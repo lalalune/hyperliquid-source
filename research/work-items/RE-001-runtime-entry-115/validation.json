@@ -65,6 +65,17 @@
       "seconds": 3.895,
       "log": "focused-optimized-8fd.log",
       "base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86"
+    },
+    {
+      "name": "test",
+      "argv": [
+        "make",
+        "test"
+      ],
+      "exit_code": 0,
+      "seconds": 736.735,
+      "log": "test-8fd.log",
+      "base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86"
     }
   ],
   "current_focused_normal": {
@@ -103,6 +114,13 @@
       "reason": "New upstream node115 fixtures remained LFS pointers after skip-smudge checkout. Local shared LFS hydration authenticated both full objects; current verify passes."
     }
   ],
+  "post_suite_loader_fix": {
+    "initial_log": "full-result-replay-initial.log",
+    "cause": "Python unittest imported the verifier and created its own bytecode cache before the module body could disable writes. This cache correctly failed strict packet inventory.",
+    "recovery": "Test helper disables bytecode writes before import and restores the prior setting; removed only the generated verify.cpython-314.pyc. All13 focused methods rerun under ordinary Python; no cache recreated.",
+    "full_suite_source_head": "0386aaffa4d3d71ad5bd06e0214cf4ddb1d7a478",
+    "full_suite_repeated_after_test_loader_only_fix": false
+  },
   "peer_review": "peer-review.json; independent ELF/RELA/PT_LOAD and GNU bytes with packet-supplied FDE extents",
   "native_replay": {
     "log": "replay-8fd.log",
@@ -116,9 +134,9 @@
   "full_repository_suite": {
     "base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
     "test_files": 77,
-    "state": "running",
-    "exit_code": null,
-    "pass_claimed": false
+    "state": "passed",
+    "exit_code": 0,
+    "pass_claimed": true
   },
   "historical_full_suite": "Interrupted at2c759042 after upstream retired historical active tree; no full pass.",
   "hosted_ci_pass_claimed": false

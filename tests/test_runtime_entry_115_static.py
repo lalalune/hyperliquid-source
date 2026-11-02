@@ -16,7 +16,12 @@ import runtime_entry_115_static as r
 def verifier():
     spec = importlib.util.spec_from_file_location('runtime115_packet', r.PACKET / 'verify.py')
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    previous = sys.dont_write_bytecode
+    sys.dont_write_bytecode = True
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.dont_write_bytecode = previous
     return module
 
 
