@@ -47,7 +47,9 @@ These are observed numeric states and branches. Provider ABI/type names, real so
 
 ## Reproduce and controls
 
-From the repository root, after the standard pinned-input setup:
+Observed environment: Ubuntu 24.04 under WSL, Python 3.12.3 and GNU binutils 2.42. The full repository suite also uses Capstone 5.0.7, as pinned in `.github/workflows/verify.yml`; the packet collector itself uses only Python's standard library, existing repository parsers and GNU binutils.
+
+From the repository root, after the standard pinned-input setup and the CI analysis dependencies:
 
 ```sh
 python3 research/work-items/RE-012-node115-tcp-prefix/collect.py --check
