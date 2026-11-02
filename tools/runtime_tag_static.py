@@ -93,7 +93,11 @@ def analyze(data):
     if any(rels.get(int(a))!=tuple(row) for a,row in spec['relocations'].items()):raise ValueError('runtime relocation changed')
     path=b'l1/src/utils.rs'
     if read(data,0x44ada0,len(path))[1]!=path or read(data,0x646e9b0,16)[1]!=struct.pack('<QII',len(path),28,43):raise ValueError('runtime caller source Location changed')
-    _,fs,_=fde_extents(data);frames={(f['start'],f['end']):f for f in fs};owners=[]
+    _,fs,_=fde_extents(data);owners=[]
+    frames={}
+    for f in fs:
+        if (f['start'],f['end']) in frames:raise ValueError('duplicate FDE extent')
+        frames[(f['start'],f['end'])]=f
     for o in spec['owners']:
         a,b=o['start'],o['end']
         if (a,b) not in frames:raise ValueError('runtime FDE changed')
