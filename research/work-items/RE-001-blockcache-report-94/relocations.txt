@@ -1,0 +1,25 @@
+# PLT stubs used by the window (0x514f770) and the helper (0x5430570).
+# GOT addresses from the objdump excerpts; the helper's snprintf/strlen
+# uses are listed under the helper only.
+#
+# Window:
+#   56607a0 basic_ostringstream ctor
+#   56607b0 __ostream_insert (string insert)
+#   5660800 _M_insert<unsigned long> / _M_insert<double>
+#   5660470 _M_dispose
+#   56605c0 _M_assign (out-string assignment path)
+#   5660450 _M_replace (out-string assignment path)
+#   56607c0 locale dtor (ostringstream teardown)
+#   56607d0 ios_base dtor (ostringstream teardown)
+#   5660430 __stack_chk_fail (GOT 0x5778f40)
+#   5660110 _Unwind_Resume (GOT 0x5778db0, via the cleanup block)
+# Helper (0x5430570):
+#   56605f0 __snprintf_chk (%.2f %s formatting)
+#   5660120 strlen
+#   56604d0 _M_create (long formatted strings)
+#   5660430 __stack_chk_fail
+# Direct (non-PLT) calls in the window:
+#   514df50 saturating accessor (once, 0x514f8f8)
+#   5430570 scaled-value helper (three sites: 0x514f7f7, 0x514f835, 0x514fa6c)
+# Indirect calls in the window: the clock-chain dispatch slots (*0x98(%rax)
+# family at 0x514f96b, 0x514fcd8, 0x514fce8).

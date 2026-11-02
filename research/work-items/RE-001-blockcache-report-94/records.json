@@ -1,0 +1,273 @@
+{
+  "accessor": {
+    "bytes": 37,
+    "callers_in_window": "called once at 0x514f8f8 with rdi = the snapshot object",
+    "end_va_exclusive": "0x514df75",
+    "fde_length": "0x10",
+    "fde_section_offset": "0x0029ac44",
+    "negative_arm_note": "the js arm at 0x514f900 jumps to the unsigned-to-double conversion at 0x514fca0; it is unreachable for the accessor's own range (a saturating difference is never negative as a signed value unless the difference exceeds 2^63, which the conversion handles), and the model uses a plain unsigned-to-double conversion covering both arms",
+    "padding_to_next_fde": "11 int3 bytes to next FDE 0x514df80",
+    "rule": "returns max(0, [rdi+0x130] - [rdi+0x128]) as an unsigned 64-bit value: the difference is computed, then the zero is selected when [rdi+0x128] >= [rdi+0x130] (cmovae after cmp %rdx,%rcx)",
+    "start_va": "0x514df50"
+  },
+  "artifact": {
+    "path": "work/hl-node-94.bin",
+    "provenance": "provenance/artifacts.json, artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "bounded_question": "What does node #94 function 0x514f770 render from a snapshot object, which fields feed each line, and how are the saturating window, the clock chain and the per-entry ratios computed?",
+  "caller_census": {
+    "direct_callers": [
+      {
+        "enclosing": "0x514fd60..0x514ffd8",
+        "site": "0x514ff28"
+      },
+      {
+        "enclosing": "0x51560b0..0x5157a19",
+        "site": "0x515747d"
+      }
+    ],
+    "method": "full .text e8 scan, e9 scan, whole-file qword scan",
+    "note": "callers are census only; their argument objects are not modelled here (the 0x514fd60 enclosing function is the same one that calls the timed-snapshot refresh at 0x514fda5)",
+    "qword_references": [],
+    "tail_jumps": []
+  },
+  "cleanup": {
+    "fde": "none of its own; covered by the window FDE's LSDA",
+    "note": "the exception cleanup block sits immediately BEFORE the window (not in its own FDE): it disposes the rsp+0x40 temp string, the rbp temp string and the r14 ostringstream, then checks the canary and calls _Unwind_Resume. The window's own tail stubs (0x514fcf4, 0x514fd00, 0x514fd0c, 0x514fd18, 0x514fd24) jump into its staged entries; which stub serves which call site is not claimed (LSDA mapping)",
+    "range": "0x514f71a..0x514f770"
+  },
+  "clock_chain": {
+    "link_offset": "0x20",
+    "max_nodes": 3,
+    "result_use": "secs_since = (chain value - snapshot+0x130) // 1000000",
+    "rule": "node 0: inner = [holder], slot = [inner+0x98]; if slot != sentinel cell, call slot with rdi = holder. Node 1: wrapper = [holder+0x20], inner = [wrapper], slot = [inner+0x98]; if slot != node 0 slot value, call slot with rdi = wrapper. Node 2: wrapper = [previous wrapper+0x20], inner = [wrapper], call [inner+0x98] unconditionally with rdi = wrapper. A chain that runs out of nodes before the unconditional call would dereference a null link; the model raises ChainExhausted",
+    "sentinel_cell": "0x5777bc8",
+    "shared_note": "the sentinel cell 0x5777bc8 and the +0x98 slot are shared with the timed-snapshot clock chain (RE-001-timed-snapshot-94), but this walk is a distinct 3-node walk with +0x20 wrapper links, not the 4-node walk there",
+    "slot_offset": "0x98"
+  },
+  "composed_rule": [
+    "the window renders one BlockCache report into the destination string: a header line naming the snapshot identity and its capacity, usage, table size, occupancy, collection counters, last_secs ratio and secs_since value, then an entry-stats section listing every nonzero entry with its count, scaled size and portion ratio, terminated by a newline",
+    "the snapshot object is 0x138 bytes and shares its layout with the timed-snapshot packet: +0x120/+0x124 counters, +0x128 raw clock value, +0x130 commit value, +0x20 identity string",
+    "last_secs is the saturating accessor window (commit minus snapshot clock, floored at zero) divided by 1,000,000.0 as a double; secs_since is the fresh clock-chain value minus the commit value, divided by 1,000,000 as an unsigned integer via the magic multiply",
+    "each entry ratio is its value times 100.0 divided by the snapshot+0x00 field, as doubles; the entry names come from the runtime-populated .bss table at 0x578c2e0 and are parameters to the model, not claims from the binary"
+  ],
+  "constants": {
+    "helper_scale": {
+      "address": "0x20a600",
+      "value": 0.0009765625
+    },
+    "helper_threshold": {
+      "address": "0x20aeb8",
+      "value": 1024.0
+    },
+    "last_secs_divisor": {
+      "address": "0x20ae60",
+      "value": 1000000.0
+    },
+    "ratio_multiplier": {
+      "address": "0x20a960",
+      "value": 100.0
+    },
+    "secs_since_magic": {
+      "divisor": 1000000,
+      "shift": "18 after the 128-bit multiply (total shift 82)",
+      "value": "0x431bde82d7b634db",
+      "verified": "checked against integer //1000000 for 0, 1, 999, 1000, 10^12, 2^64-1 and 2000 random 64-bit values; equals floor division by 1,000,000, the same divisor as last_secs"
+    }
+  },
+  "entry_loop": {
+    "counter_base": "snapshot+0xb0",
+    "end": "snapshot+0x120",
+    "entry_count": 14,
+    "name_table": {
+      "base": "0x578c2e0",
+      "note": "the table lives in .bss, so its entries are populated at runtime and are NOT retained in the binary; the model takes the 14 names as parameters and claims nothing about their runtime contents",
+      "record_layout": "pointer at record+0x00, length at record+0x08; remaining 16 bytes unused by this function",
+      "record_size": "0x20",
+      "section": ".bss"
+    },
+    "per_entry": [
+      {
+        "address": "0x1e0a14",
+        "length": 1,
+        "literal": " "
+      },
+      {
+        "field": "name string from the table record (pointer, length)"
+      },
+      {
+        "address": "0x1efffa",
+        "length": 1,
+        "literal": "("
+      },
+      {
+        "field": "counter at snapshot+0xb0 + i*8 as unsigned decimal"
+      },
+      {
+        "address": "0x1ea0d2",
+        "length": 1,
+        "literal": ","
+      },
+      {
+        "helper": "0x5430570 on the value at snapshot+0x40 + i*8"
+      },
+      {
+        "address": "0x1ea0d2",
+        "length": 1,
+        "literal": ","
+      },
+      {
+        "computed": "ratio = (value * 100.0) / snapshot+0x00, both operands converted as unsigned 64-bit values (js arms at 0x514fc60 and 0x514fc80 handle the sign-bit case), inserted with default ostream formatting; a zero denominator yields inf (nan when the value is also zero), as in C++ double division"
+      },
+      {
+        "address": "0x1eb2a8",
+        "length": 2,
+        "literal": "%)"
+      }
+    ],
+    "skip_rule": "an entry whose counter is zero is skipped entirely (no name, no separators)",
+    "trailer": {
+      "address": "0x1f5e2a",
+      "length": 1,
+      "literal": "\\n"
+    },
+    "value_base": "snapshot+0x40"
+  },
+  "header_sequence": [
+    {
+      "address": "0x1f5f31",
+      "length": 12,
+      "literal": "Block cache "
+    },
+    {
+      "field": "identity string at snapshot+0x20 (pointer +0x20, length +0x28)"
+    },
+    {
+      "address": "0x1e3308",
+      "length": 11,
+      "literal": " capacity: "
+    },
+    {
+      "helper": "0x5430570 on snapshot+0x00"
+    },
+    {
+      "address": "0x1de0fd",
+      "length": 8,
+      "literal": " usage: "
+    },
+    {
+      "helper": "0x5430570 on snapshot+0x08"
+    },
+    {
+      "address": "0x1e5b0e",
+      "length": 13,
+      "literal": " table_size: "
+    },
+    {
+      "field": "snapshot+0x10 as unsigned decimal"
+    },
+    {
+      "address": "0x1edb43",
+      "length": 12,
+      "literal": " occupancy: "
+    },
+    {
+      "field": "snapshot+0x18 as unsigned decimal"
+    },
+    {
+      "address": "0x1fffc8",
+      "length": 14,
+      "literal": " collections: "
+    },
+    {
+      "field": "snapshot+0x120 as 32-bit unsigned decimal"
+    },
+    {
+      "address": "0x1feed8",
+      "length": 14,
+      "literal": " last_copies: "
+    },
+    {
+      "field": "snapshot+0x124 as 32-bit unsigned decimal"
+    },
+    {
+      "address": "0x1e6de1",
+      "length": 12,
+      "literal": " last_secs: "
+    },
+    {
+      "computed": "accessor 0x514df50(snapshot) as a double divided by 1,000,000.0 (double at 0x20ae60), inserted with default ostream formatting"
+    },
+    {
+      "address": "0x1edb50",
+      "length": 13,
+      "literal": " secs_since: "
+    },
+    {
+      "computed": "(clock_chain_value - snapshot+0x130) divided by 1,000,000 with the unsigned magic multiply (constant 0x431bde82d7b634db, shift 18 after the 128-bit multiply), inserted as unsigned decimal"
+    },
+    {
+      "address": "0x1f5e2a",
+      "length": 1,
+      "literal": "\\n"
+    },
+    {
+      "address": "0x7d7f00",
+      "length": 44,
+      "literal": "Block cache entry stats(count,size,portion):"
+    }
+  ],
+  "helper": {
+    "arguments": "rdi = destination string, rsi = value (signed entry with a js arm at 0x5430680 that converts it as unsigned, so the model treats the input as an unsigned 64-bit value)",
+    "bytes": 500,
+    "end_va_exclusive": "0x5430766",
+    "fde_length": "0x38",
+    "fde_section_offset": "0x002bad84",
+    "padding_to_next_fde": "26 int3 bytes to next FDE 0x5430780",
+    "rule": "value is converted to a double, multiplied by 1/1024 (double at 0x20a600), and while the scaled value is >= 1024.0 (double at 0x20aeb8) it is multiplied by 1/1024 again, stepping the unit KB -> MB -> GB -> TB (TB is terminal, no further compare). The result is formatted with snprintf format '%.2f %s' (at 0x1de3ae) using unit strings 'KB' (0x1ea2c0), 'MB' (0x1e5f2d), 'GB' (0x1e4a27), 'TB' (0x1e920c)",
+    "scope_note": "bound here as a callee only; the full 500-byte helper body is excerpted verbatim, but this item does not re-claim its internal string handling",
+    "start_va": "0x5430570"
+  },
+  "snapshot_layout": {
+    "fields": {
+      "+0x00": "8-byte value, formatted by helper 0x5430570 as capacity, and used as the denominator of every per-entry ratio",
+      "+0x08": "8-byte value, formatted by helper 0x5430570 as usage",
+      "+0x10": "8-byte unsigned, inserted as table_size",
+      "+0x120": "32-bit counter, inserted as collections (read as 32-bit mov)",
+      "+0x124": "32-bit counter, inserted as last_copies (read as 32-bit mov)",
+      "+0x128": "raw clock value stored at snapshot build time (see the RE-001-timed-snapshot-94 correction: the builder receives the raw clock value in rcx, not the elapsed value)",
+      "+0x130": "commit-time clock value, used by the accessor and by the secs_since subtraction",
+      "+0x18": "8-byte unsigned, inserted as occupancy",
+      "+0x20": "identity string object (pointer at +0x20, length at +0x28), inserted after 'Block cache '",
+      "+0x40": "14 x 8-byte values, one per entry, formatted by helper 0x5430570 (entry index i at +0x40 + i*8)",
+      "+0xb0": "14 x 8-byte counters, one per entry (entry index i at +0xb0 + i*8); a zero counter skips its entry"
+    },
+    "size": "0x138"
+  },
+  "target": "node #94",
+  "task_id": "RE-001",
+  "unknowns": [
+    "the identities of the snapshot, clock-holder and wrapper objects and what the report means to its readers",
+    "the clock values' time unit (the labels say secs, but the divisor 1,000,000 (and 1,000,000.0 for last_secs) does not pin a unit from the bytes alone)",
+    "the runtime contents of the .bss entry-name table and of the sentinel cell 0x5777bc8",
+    "which landing stub serves which call site (LSDA mapping not claimed)",
+    "the reaching path: the two direct callers are census only"
+  ],
+  "window": {
+    "arguments": {
+      "rdi": "destination string (saved at rsp+0x18; the rendered report is assigned into it at the end; the function returns void)",
+      "rdx": "clock-holder object (kept in rbx)",
+      "rsi": "snapshot object (kept in r13)"
+    },
+    "bytes": 1504,
+    "canary": "fs:0x28 at rsp+0x1d8, __stack_chk_fail@plt 0x5660430 (GOT 0x5778f40)",
+    "end_va_exclusive": "0x514fd30",
+    "fde_cie_offset": "0x006205d0",
+    "fde_length": "0x50",
+    "fde_section_offset": "0x00634138",
+    "next_fde_start": "0x514fd30",
+    "padding_bytes": 0,
+    "start_va": "0x514f770"
+  }
+}
