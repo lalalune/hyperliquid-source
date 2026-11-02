@@ -2,15 +2,22 @@
 
 ## Target artifacts
 
-The first reconstruction target is Linux x86-64 **hl-node #94**, SHA-256
-`3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f`.
-The pinned can1357 reference targets this exact binary. All initial addresses,
-wire formats, source mappings and comparisons bind to that digest.
-
-Node **#115**, SHA-256
+The sole node implementation target is Linux x86-64 **hl-node #115**, SHA-256
 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`,
-is a separately tracked drift and later reconstruction target. Never reuse
-#94 addresses, data layouts or source labels for #115 without validation.
+the newest authenticated capture retained here. Before claiming current-network
+support, authenticate the chosen current release and validate its protocol;
+the newest retained capture is not necessarily the latest published binary.
+
+Node **#94**, SHA-256
+`3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f`,
+is retained historical evidence. The pinned can1357 reference and much existing
+research target that binary. Preserve those results, but validate every reused
+address, layout and behavior against #115. A complete #94 implementation or
+#94 whole-ELF match is no longer a delivery requirement.
+
+This removes the obligation to reproduce the old executable and promise its
+version-specific behavior. It does not discard research or automatically remove
+historical-chain replay: any replay needed by #115 remains part of #115 acceptance.
 
 The captured **visor**, SHA-256
 `89338207c793d80ac2fba75bb0d36c659e2cabc87a94e61a57ba532b8d212e31`,
@@ -26,9 +33,12 @@ Recover an independently authored, buildable Rust implementation and the
 build provenance needed to compare it with captured code and behavior. Cover
 node startup, transport/gossip, consensus, block execution, order matching,
 clearinghouses/risk, assets/quantities, fees, vaults, bridge, staking, HyperEVM,
-APIs, persistence, serialization, dependencies and the visor separately.
+APIs, persistence, serialization and dependencies. A supervisor is optional;
+the captured visor retains separate research and acceptance records.
 [The component map](COMPONENTS.md) partitions the currently visible source
 paths. It is a work allocation map; cross-component calls still need recovery.
+Its 23 node work areas are inherited planning scopes, not a validated #115
+function inventory. All component gates remain false after the target change.
 
 A final node claim requires matching the complete target ELF and its loadable
 segments, code/data, symbol/relocation relationships, exception metadata and
@@ -96,7 +106,7 @@ analysis of the selected binaries are within research scope.
 
 Do not download full chain datasets or start paid/requester-pays sync as a
 setup step. Capture a small, licensed/sanitized fixture only when a concrete
-question needs it. Do not relabel a #115 feature as missing #94 functionality.
+question needs it. Do not relabel #94 evidence as validated #115 functionality.
 
 ## How completion is counted
 

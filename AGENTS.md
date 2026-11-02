@@ -2,6 +2,13 @@
 
 ## Primary objective: complete the node reverse engineering
 
+**100% of active reconstruction work targets Linux x86-64 node #115**, SHA-256
+`a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
+This is the sole node implementation and acceptance target. Do not open new
+#94-only tasks, implementations or PRs. Work on older material is justified
+only when it directly advances #115 and is validated against that target.
+The focus is exclusive; reconstruction itself remains incomplete.
+
 All agent work, PRs and submissions must focus on reverse engineering the node's
 code. Hillclimb completion by choosing bounded work that resolves binary-backed
 unknowns, reconstructs established semantics or validates the reconstruction
@@ -23,8 +30,12 @@ blocker. Preserve useful documentation of new binary findings in evidence packet
 ## Read first and preserve scope
 
 Read CONTRIBUTING.md, docs/SCOPE.md, docs/PROGRESS.md, docs/TASKS.md and docs/REA.md.
-Node #94 is the initial Linux x86-64 baseline. #115 is a separate comparison
-and later target. Visor has its own artifact identity. Use
+Node #115 is the sole Linux x86-64 node implementation target. Older material
+is migration input, not a maintained target or a prerequisite to finish.
+Validate reused code, addresses, layouts and behavior against #115 before
+crediting them. Retired code that cannot be validated belongs in Git history,
+not a parallel active implementation. Visor work is justified only when needed
+to deliver #115 and retains its own artifact identity. Use
 provenance/artifacts.json for full SHA-256 values; bind every result to one.
 
 This is an independent Rust reconstruction project. No full node build or

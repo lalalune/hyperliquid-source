@@ -3,8 +3,15 @@
 Start with [scope](docs/SCOPE.md), [current progress](docs/PROGRESS.md),
 [component map](docs/COMPONENTS.md), and [ready tasks](docs/TASKS.md).
 For REA CLI/MCP configuration and supported Node versions, see [REA.md](docs/REA.md).
-The project reconstructs Linux x86-64 Hyperliquid binaries from evidence.
-Node #94 is the initial baseline; #115 and visor remain separate targets.
+**We are 100% focused on reconstructing Linux x86-64 node #115**, SHA-256
+`a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
+It is the sole node implementation and acceptance target. This describes our
+focus, not completion: the integrated node is still being reconstructed.
+
+All research, implementations, tests and PRs must advance #115. New #94-only
+work is out of scope. Older code may be reused only with #115-specific evidence;
+unvalidated retired implementations belong in Git history, not a second active
+target. Supervisor work is in scope only when required to deliver #115.
 
 ## Acceptance priority: complete the node reverse engineering
 

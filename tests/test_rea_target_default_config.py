@@ -27,7 +27,7 @@ class TargetDefaultConfigTests(unittest.TestCase):
         seen = []
         with patch.object(rea, 'target', side_effect=lambda name: seen.append(name) or {'path': 'x', 'sha256': 'y', 'provider_id': 'z'}):
             rea.main(['target'])
-        self.assertEqual(seen, ['94'])
+        self.assertEqual(seen, ['115'])
 
 
 if __name__ == '__main__':

@@ -9,7 +9,7 @@ make verify test
 make catalogue-check
 make index
 make fde-index
-python3 tools/ghidra_plan.py --release 94
+python3 tools/ghidra_plan.py --release 115
 ```
 
 `make doctor` reads tool versions and installation paths; it does not launch
@@ -39,7 +39,7 @@ The wrapper refuses an existing project so a repeat import cannot overwrite it.
 Inspect a short interval before requesting whole-program pseudocode:
 
 ```sh
-# Example address is only a can1357 lead, not a validated function boundary.
+# Historical #94 example only; relocate and validate separately before #115 use.
 LLVM_OBJDUMP="$(brew --prefix llvm)/bin/llvm-objdump"
 "$LLVM_OBJDUMP" --disassemble --start-address=0x2209d40 --stop-address=0x2209e40 \
   artifacts/node/94/hl-node > work/abci-seed.asm

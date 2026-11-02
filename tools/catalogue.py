@@ -5,8 +5,10 @@ import collections
 import fnmatch
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
+import subprocess
 from source_files import rust_files
 from byte_progress import fraction, load_coverage, summarize
 
@@ -29,6 +31,49 @@ def byte_cells(stats):
     return ' | '.join((fraction(stats['raw_equal_bytes'], stats['bytes']),
                        fraction(stats['raw_equal_windows'], stats['windows']),
                        fraction(stats['relocation_qualified_windows'], stats['windows'])))
+
+
+def implementation_inventory(root):
+    """Count committed work, without treating files or manifests as acceptance."""
+    if not (root / '.git').exists():
+        return None
+    names = subprocess.check_output(
+        ['git', '-C', str(root), 'ls-tree', '-r', '--name-only', '-z', 'HEAD',
+         '--', 'src', 'research/work-items'],
+        env=dict(os.environ, GIT_OPTIONAL_LOCKS='0'),
+    )
+    paths = [os.fsdecode(name).split('/') for name in names.split(b'\0') if name]
+    return {
+        'rust_areas': len({p[1] for p in paths if p[0] == 'src' and len(p) >= 3 and p[-1].endswith('.rs')}),
+        'cargo_manifests': sum(p[0] == 'src' and len(p) == 3 and p[-1] == 'Cargo.toml' for p in paths),
+        'work_items': sum(p[:2] == ['research', 'work-items'] and len(p) == 4 and p[-1] == 'README.md' for p in paths),
+    }
+
+
+def render_progress_banner(inventory, coverage):
+    windows = coverage['totals'].get('node115', {}).get('windows', 0) if coverage else 0
+    cards = [(inventory['rust_areas'], 'RUST IMPLEMENTATION AREAS', 'Independent, bounded source work'),
+             (inventory['cargo_manifests'], 'STANDALONE CARGO MANIFESTS', 'Build scopes recorded in source'),
+             (inventory['work_items'], 'DOCUMENTED WORK ITEMS', 'Research, evidence and limitations'),
+             (windows, '#115 BYTE COMPARISON WINDOWS', 'Historical #94 comparisons retained')]
+    lines = ['<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="280" viewBox="0 0 1200 280" role="img" aria-labelledby="title desc">',
+             '<title id="title">Hyperliquid Source research progress</title>',
+             '<desc id="desc">Committed source and research inventory, not a completion percentage. Full node integration remains open.</desc>',
+             '<rect width="1200" height="280" rx="20" fill="#071b22"/>',
+             '<path d="M900 0 1060 160H1200M1030 0 1190 160M1130 0 1200 70" fill="none" stroke="#16383f" stroke-width="2"/>',
+             '<g font-family="Arial, Helvetica, sans-serif">',
+             '<text x="32" y="38" fill="#71f1c6" font-size="12" font-weight="700" letter-spacing="2">BINARY EVIDENCE → INDEPENDENT RUST</text>',
+             '<text x="32" y="76" fill="#f0faf7" font-size="28" font-weight="700">Reconstruction in progress</text>',
+             '<text x="1168" y="42" text-anchor="end" fill="#b0c9cb" font-size="12">IMPLEMENTATION TARGET · #115</text>']
+    for index, (value, label, detail) in enumerate(cards):
+        x = 32 + index * 288
+        lines += [f'<rect x="{x}" y="103" width="272" height="121" rx="10" fill="#102c33" stroke="#21434a"/>',
+                  f'<text x="{x + 18}" y="151" fill="#f0faf7" font-size="38" font-weight="700">{value:,}</text>',
+                  f'<text x="{x + 18}" y="180" fill="#71f1c6" font-size="11" font-weight="700" letter-spacing=".6">{label}</text>',
+                  f'<text x="{x + 18}" y="204" fill="#b0c9cb" font-size="11">{detail}</text>']
+    lines += ['<text x="32" y="254" fill="#b0c9cb" font-size="12">Inventory counts describe work produced. Full-component acceptance and whole-node integration remain open.</text>',
+              '</g>', '</svg>', '']
+    return '\n'.join(lines)
 
 
 def project_bytes(components, coverage):
@@ -68,31 +113,40 @@ def render_byte_details(coverage):
                      f"{fraction(row['equal_non_relocation_bytes'], row['non_relocation_bytes'])} |")
     lines += ['', 'The selected adapter candidate is the reviewed ThinLTO rebuild of published LLVM bitcode, not newly recovered libcore Rust source. Its older official native candidate retains two non-relocation differences at offsets 464 and 467 (616/622 raw bytes); that original result remains in the evidence and registry. The two candidates do not add two windows.', '',
               'The Zstandard windows use source labels and a complete compiled section endpoint; their symbols have no function sizes and there are no FDEs. Supporting callee windows are counted once here, without changing the original packets’ distinct primary/supporting denominators.', '',
-              'Node #115 remains separate. Its 630-byte adapter has an extent mismatch and no admitted byte comparison, so it contributes no compared bytes. Cross-release duplicates, repeated builds, negative controls, data/vtable bytes and semantic-only Rust reconstructions are excluded from the code-window denominator.', '',
+              'Node #115 is the implementation target; #94 comparisons are historical evidence. Its 630-byte adapter has an extent mismatch and no admitted byte comparison, so it contributes no compared bytes. Cross-release duplicates, repeated builds, negative controls, data/vtable bytes and semantic-only Rust reconstructions are excluded from the code-window denominator.', '',
               'Inputs: [reviewed byte-window registry](../research/byte-windows.json), [generated byte counts](../research/catalogue/byte-coverage.json). Source excerpts, evidence records and full targets are hash-checked on every catalogue generation. Full-component helper/data/ABI/call/relocation closure remains open.', '']
     return lines
 
 
-def render_component_progress(components, progress, coverage, link_prefix=''):
+def render_component_progress(components, progress, coverage, link_prefix='', combined=False):
     lines = []
+    rows = []
     gate_count = len(progress['gates'])
-    for artifact, label in [('node94', 'Node #94 reconstruction'), ('visor', 'Separate supervisor')]:
+    for artifact, label in [('node115', 'Node #115 reconstruction'),
+                            ('node94', 'Historical node #94 scope'), ('visor', 'Optional supervisor')]:
         selected = [c for c in components if c['artifact'] == artifact]
         if not selected:
             continue
         accepted, total = progress_totals(selected, progress)
         complete = sum(all(progress['components'][c['id']]['gates'].values()) for c in selected)
         lines += [f"**{label}: {100 * accepted / total:.2f}% ({accepted}/{total} accepted gates; "
-                  f"{complete}/{len(selected)} components complete).**", '',
-                  f"| {'Required node component' if artifact == 'node94' else 'Tracked supervisor component'} | Accepted gates | Milestones | Compared implementation bytes | Registered implementation windows |",
-                  '| --- | ---: | ---: | ---: | ---: |']
+                  f"{complete}/{len(selected)} components complete).**", '']
+        if not combined:
+            lines += [f"| {'Required node component' if artifact.startswith('node') else 'Tracked supervisor component'} | Accepted gates | Milestones | Compared implementation bytes | Registered implementation windows |",
+                      '| --- | ---: | ---: | ---: | ---: |']
         for c in selected:
             n = sum(progress['components'][c['id']]['gates'].values())
             stats = coverage['components'].get(c['id']) if coverage else None
-            lines.append(f"| [{c['name']}]({link_prefix}COMPONENTS.md#{c['id']}) | {n}/{gate_count} | "
-                         f"{100 * n / gate_count:.0f}% | {stats['bytes'] if stats else 0:,} | "
-                         f"{stats['windows'] if stats else 0:,} |")
-        lines += ['']
+            target = {'node94': 'Node #94', 'node115': 'Node #115', 'visor': 'Visor (optional)'}[artifact] + ' | ' if combined else ''
+            row = (f"| [{c['name']}]({link_prefix}COMPONENTS.md#{c['id']}) | {target}{n}/{gate_count} | "
+                   f"{100 * n / gate_count:.0f}% | {stats['bytes'] if stats else 0:,} | "
+                   f"{stats['windows'] if stats else 0:,} |")
+            (rows if combined else lines).append(row)
+        if not combined:
+            lines += ['']
+    if combined:
+        lines += ['| Component | Target | Accepted gates | Milestones | Compared implementation bytes | Registered implementation windows |',
+                  '| --- | --- | ---: | ---: | ---: | ---: |', *rows, '']
     return lines
 
 
@@ -120,42 +174,81 @@ def render_dependency_progress(coverage):
     return lines + ['']
 
 
-def render_readme_progress(components, progress, coverage=None):
+def render_readme_progress(components, progress, coverage=None, inventory=None):
     accepted, total = progress_totals(components, progress)
     lines = [
-        '<!-- Generated by make catalogue from research/components.json, research/progress.json and research/byte-windows.json. -->', '',
-        'The node components below require reconstruction or target-specific integration.',
-        'The captured supervisor is tracked separately; a direct container may replace it.',
-        'Each has four full-scope gates: mapped, reproducibly built, behavior validated,',
-        'and code/data/call identity validated. Milestones are not an estimate of effort.', '',
-        *render_component_progress(components, progress, coverage, 'docs/'),
+        '<!-- Generated by make catalogue from committed source inventory, research/components.json, research/progress.json and research/byte-windows.json. -->', '',
+    ]
+    if inventory:
+        lines += ['![Research inventory and registered comparisons](docs/assets/research-progress.svg)', '',
+                  f"**{inventory['rust_areas']:,} Rust implementation areas · "
+                  f"{inventory['cargo_manifests']:,} standalone Cargo manifests · "
+                  f"{inventory['work_items']:,} documented research work items.**", '',
+                  'These retained inventory counts include historical #94 work, not just #115',
+                  'implementations. Areas may overlap; manifests alone do not prove an integrated build.', '']
+    lines += [
+        'Existing #115 work includes [quantity preparation](src/node115-quantity-preparation/README.md),',
+        '[weighted comparisons](src/node115-weighted-fastfold/README.md),',
+        'and a [nonce-ring invariant](src/node115-nonce-ring/README.md).',
+        'Each retains its own target, tested boundaries and limitations.', '',
+        'The [integration audit](research/work-items/RE-003-pr-integration-1353-1895/README.md)',
+        'records 48 Cargo component checks and 27,466 instruction-byte rows checked',
+        'across 178 excerpts, with zero excerpt-byte mismatches. Those are bounded',
+        'results; the audit also retains four non-green historical/provider checks.', '',
+        '**Release status: partial implementations; no accepted integrated node build.**',
+        'The full-scope gates below measure mapped scope, reproducible build, validated',
+        'behavior and code/data/call identity. Their zero accepted total does not erase',
+        'the partial work above, and inventory counts do not advance those gates.', '',
+        '<details>',
+        '<summary><strong>Full-component acceptance — #115 and optional supervisor</strong></summary>', '',
+        *render_component_progress(components, progress, coverage, 'docs/', combined=True),
         f'Project gate total, including the separate supervisor: **{accepted}/{total}**.', '',
         '**0 compared bytes means no registered implementation comparison, not 0% correct.**',
         'Whole-component byte sizes and remaining function counts are still unmeasured.',
         'The path taxonomy covers observed source paths; it does not establish all code',
         'ownership. Unassigned code, private dependency changes, data, ABI, relocations',
         'and build provenance remain required work. No component has been accepted as finished.', '',
-        *render_dependency_progress(coverage),
-        '### Whole-target comparison coverage', '',
-        'These are measured `.text` sizes, including dependencies. Selected matching',
-        'positions are not a completed function or a source-rebuilt node. Relocation-qualified',
-        'windows allow only recorded relocation fields to differ. No whole ELF is reproduced.', '',
-        '| Target | Compared bytes / all .text bytes | Raw matching positions / all .text bytes |',
-        '| --- | ---: | ---: |',
+        '</details>', '',
+        '<details>',
+        '<summary><strong>Node #115 binary comparisons</strong></summary>', '',
+        'Total rows count each registered code window once against the measured `.text`',
+        'section. Dependency rows break down those same totals; do not add them again.',
+        'They measure reuse/build validation, separately from the component gates above.',
+        'Raw equality includes every byte; relocation-qualified windows allow only',
+        'recorded relocation fields to differ. Neither result establishes full-component',
+        'or whole-ELF equivalence, and published artifacts/bitcode do not prove a source build.', '',
+        '| Target / comparison scope | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows | Compared bytes / all .text bytes |',
+        '| --- | ---: | ---: | ---: | ---: |',
     ]
     if coverage:
-        for target, inventory in coverage['targets'].items():
+        for target in ['node115'] if 'node115' in coverage['targets'] else []:
+            target_inventory = coverage['targets'][target]
             stats = coverage['totals'][target]
-            size = inventory['text_bytes']
-            cells = [f"{stats[k]:,}/{size:,} ({100 * stats[k] / size:.5f}%)"
-                     for k in ('bytes', 'raw_equal_bytes')]
-            lines.append(f"| {target} | {' | '.join(cells)} |")
+            size = target_inventory['text_bytes']
+            label = {'node94': 'Node #94', 'node115': 'Node #115', 'visor': 'Visor'}[target]
+            lines.append(f"| **{label} total** | {byte_cells(stats)} | "
+                         f"{stats['bytes']:,}/{size:,} ({100 * stats['bytes'] / size:.5f}%) |")
+            for dependency, dependency_stats in coverage['dependencies'].get(target, {}).items():
+                lines.append(f"| {label} / {dependency} | {byte_cells(dependency_stats)} | Included in total |")
+        for row in coverage.get('extent_mismatches', []):
+            if row['target'] != 'node115':
+                continue
+            lines += ['', f"Unmatched candidate: **{row['target']} / {row['label']}** "
+                      f"({row.get('dependency', row['component'])}), {row['target_bytes']:,} target bytes "
+                      f"versus {row['source_bytes']:,} source bytes. Both complete extents are authenticated, "
+                      'but unequal lengths prevent an aligned-byte comparison; this candidate contributes '
+                      'no byte-equality credit or aligned-window denominator. '
+                      f"See [the retained evidence]({row['evidence']})."]
     lines += ['',
-        'Node #94 is the reconstruction baseline. #115 is a separate later comparison;',
-        'neither historical target establishes compatibility with the current network.',
+        'Node #115 is the sole node implementation target. The component scopes are',
+        'an inherited work allocation, not a completed #115 function map. Historical',
+        '#94 evidence and comparisons remain in the detailed records and earn no',
+        '#115 credit without target-specific validation. Current-network compatibility',
+        'still requires a versioned acceptance run.',
         'Full target hashes are in [the artifact manifest](provenance/artifacts.json).',
         'See [detailed progress](docs/PROGRESS.md), including non-code sections,',
         'and the [source-built network node acceptance criteria](docs/SCOPE.md#source-built-network-node).',
+        '', '</details>',
     ]
     return '\n'.join(lines)
 
@@ -319,14 +412,17 @@ def generate(root=ROOT):
                      'missing_reference_paths_94': sorted(set(old) - source_paths),
                      'extra_reference_paths_94': sorted(set(source) - paths['94']),
                      'literal_counts': dict(sorted(counts.items()))})
-    output = {'schema_version': 1, 'baseline': 'node94', 'excluded_inventory_candidates': excluded,
+    output = {'schema_version': 1, 'baseline': progress.get('baseline', 'node94'), 'excluded_inventory_candidates': excluded,
               'limitations': 'Path and literal observations do not prove module ABI, function ownership or logic. The ordered component taxonomy is a research partition, not a recovered Cargo dependency graph.',
               'path_totals': {'node94': len(paths['94']), 'node115': len(paths['115']), 'reference': len(source_paths), 'reference_first_party': len(first_party_source), 'reference_forks': len(source_paths - first_party_source), 'extra_first_party94': len(first_party_source - paths['94']),
                               'present94': len(paths['94'] & source_paths), 'extra_reference94': len(source_paths - paths['94']),
                               'added115': sorted(paths['115'] - paths['94']), 'absent115': sorted(paths['94'] - paths['115'])},
               'components': rows}
+    inventory = implementation_inventory(root)
     result = {'research/catalogue/components.json': json.dumps(output, indent=2) + '\n',
-              'README.md': update_readme_progress((root / 'README.md').read_text(), render_readme_progress(components, progress, coverage))}
+              'README.md': update_readme_progress((root / 'README.md').read_text(), render_readme_progress(components, progress, coverage, inventory))}
+    if inventory:
+        result['docs/assets/research-progress.svg'] = render_progress_banner(inventory, coverage)
     if coverage:
         result['research/catalogue/byte-coverage.json'] = json.dumps(coverage, indent=2) + '\n'
     # Addresses in imported prose are leads only. Executable-section membership is not validation.
@@ -357,7 +453,7 @@ def generate(root=ROOT):
              'Zero compared implementation bytes/windows means no registered comparison, not zero correct code. Whole-component byte sizes and function counts remain unmeasured. Source paths and unwind starts cannot supply those denominators. Shared dependency comparisons are excluded from component totals and shown below.', '',
              *render_dependency_progress(coverage),
              '## Binary coverage', '', '| Target | Unwind-index entries | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows | Whole ELF reproduced |', '| --- | ---: | ---: | ---: | ---: | --- |']
-    for name, label in [('node94', 'Node #94'), ('node115', 'Node #115 (separate comparison)'), ('visor', 'Captured visor')]:
+    for name, label in [('node115', 'Node #115 (implementation target)'), ('node94', 'Node #94 (historical reference)'), ('visor', 'Captured visor')]:
         stats = coverage['totals'].get(name) if coverage else None
         inventory = inventories[name.removeprefix('node')]
         lines.append(f"| {label} | {inventory['fde_count_eh_frame_hdr']:,} | {byte_cells(stats)} | No |")

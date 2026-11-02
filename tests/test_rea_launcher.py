@@ -24,7 +24,7 @@ class TargetSelectionTests(unittest.TestCase):
     def test_cli_preserves_default_and_explicit_artifact_identities(self):
         manifest = json.loads((rea.ROOT / 'provenance/artifacts.json').read_text())
         for args, relative in [
-            ((), 'artifacts/node/94/hl-node'),
+            ((), 'artifacts/node/115/hl-node'),
             (('94',), 'artifacts/node/94/hl-node'),
             (('115',), 'artifacts/node/115/hl-node'),
             (('visor',), 'artifacts/visor/captured/hl-visor'),

@@ -13,7 +13,7 @@ The machine-readable catalogue lists every path and missing/extra reference. Lit
 
 Time, logging, wallets, collections and shared runtime utilities.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `base/*`.
 - Suggested prerequisites: none.
 - First task: Map time/quantity conversion helpers; distinguish standard-library code from private helpers.
@@ -24,7 +24,7 @@ Time, logging, wallets, collections and shared runtime utilities.
 
 Private bincode wire codecs and integer encodings.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `bincode_fork/*`.
 - Suggested prerequisites: foundation.
 - First task: Recover varint boundaries and encoding mode; compare malformed, truncated and boundary inputs.
@@ -35,7 +35,7 @@ Private bincode wire codecs and integer encodings.
 
 RocksDB wrappers, block readers and database lifecycle.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `db/*`.
 - Suggested prerequisites: foundation, serialization.
 - First task: Recover key/value schemas and snapshot versioning before replay.
@@ -46,7 +46,7 @@ RocksDB wrappers, block readers and database lifecycle.
 
 TCP framing, LZ4, channels, rate limits and reconnects.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `net_utils/*`.
 - Suggested prerequisites: foundation, serialization.
 - First task: Map frame lengths, compression boundaries and error handling without network traffic.
@@ -57,7 +57,7 @@ TCP framing, LZ4, channels, rate limits and reconnects.
 
 Votes, rounds, quorum certificates, validator sets and timers.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `node/consensus/*`.
 - Suggested prerequisites: transport, serialization, abci.
 - First task: Map signed wire types and quorum arithmetic; validate invalid signatures and timeout transitions.
@@ -68,7 +68,7 @@ Votes, rounds, quorum certificates, validator sets and timers.
 
 CLI, startup, gossip, stream services and process orchestration.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `node/*`.
 - Suggested prerequisites: transport, storage, abci.
 - First task: Trace CLI dispatch to service entrypoints and enumerate read/write side effects.
@@ -79,7 +79,7 @@ CLI, startup, gossip, stream services and process orchestration.
 
 Block application, state roots and checkpoint handoff.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/abci/*`.
 - Suggested prerequisites: exchange, storage, serialization.
 - First task: Bind begin/action/end-block call paths and state-root inputs for #94.
@@ -90,7 +90,7 @@ Block application, state roots and checkpoint handoff.
 
 Action envelopes, signing payloads and delayed actions.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/action/*`, `l1/action_delayer.rs`.
 - Suggested prerequisites: serialization, foundation.
 - First task: Recover tags, signing domains, replay checks and error precedence.
@@ -101,7 +101,7 @@ Action envelopes, signing payloads and delayed actions.
 
 Agent-created handler splits and central dispatch.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/exchange/handlers/*`, `l1/exchange/impl_execute_action.rs`.
 - Suggested prerequisites: action-wire, exchange.
 - First task: Validate each handler seed against #94; do not infer original function boundaries from these splits.
@@ -112,7 +112,7 @@ Agent-created handler splits and central dispatch.
 
 Trading orchestration, block hooks, deployment and ledger updates.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/exchange/*`.
 - Suggested prerequisites: orderbook, risk, assets, fees.
 - First task: Trace order placement through risk checks, matching, fees and ledger writes.
@@ -123,7 +123,7 @@ Trading orchestration, block hooks, deployment and ledger updates.
 
 Book storage, price/time priority and order lifecycle.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/book/*`, `l1/slab/*`, `l1/books.rs`, `l1/order_wire.rs`.
 - Suggested prerequisites: assets, fees.
 - First task: Recover matching and cancel/modify transitions with exact rounding and overflow behavior.
@@ -134,7 +134,7 @@ Book storage, price/time priority and order lifecycle.
 
 Positions, margin, oracles, liquidations and spot balances.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/clearinghouse/*`, `l1/spot_clearinghouse/*`.
 - Suggested prerequisites: assets, fees.
 - First task: Map margin/liquidation formulas and state mutations; prove sign and unit conventions.
@@ -145,7 +145,7 @@ Positions, margin, oracles, liquidations and spot balances.
 
 Price, size, notional and wei arithmetic plus asset metadata.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/asset/*`, `l1/qtys/*`, `l1/perp_meta.rs`, `l1/spot_meta.rs`, `l1/wire_qty.rs`.
 - Suggested prerequisites: foundation.
 - First task: Start with bounded arithmetic helpers: recover width, rounding, scale and overflow branches.
@@ -156,7 +156,7 @@ Price, size, notional and wei arithmetic plus asset metadata.
 
 Fee tiers, volume accounting and rebates.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/fees/*`, `l1/raw_vlm.rs`, `l1/scaled_vlm.rs`.
 - Suggested prerequisites: assets.
 - First task: Recover maker/taker fee formulas and time-window rollover.
@@ -167,7 +167,7 @@ Fee tiers, volume accounting and rebates.
 
 Vault and subaccount accounting and permissions.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/vault/*`, `l1/sub_account.rs`.
 - Suggested prerequisites: risk, exchange.
 - First task: Recover share accounting, transfer restrictions and liquidation interaction.
@@ -178,7 +178,7 @@ Vault and subaccount accounting and permissions.
 
 Deposit/withdrawal requests and cross-chain signing.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/bridge2.rs`, `l1/bridge_request.rs`.
 - Suggested prerequisites: action-wire, assets.
 - First task: Map message hashes, nonce lifecycle and validator signing threshold.
@@ -189,7 +189,7 @@ Deposit/withdrawal requests and cross-chain signing.
 
 EVM state, database adapters, transaction execution and hashing.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/evm/*`.
 - Suggested prerequisites: storage, assets.
 - First task: Identify reth/revm private fork boundaries and state transition inputs.
@@ -200,7 +200,7 @@ EVM state, database adapters, transaction execution and hashing.
 
 Stake, validator membership and jailing.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/staking.rs`, `l1/c_staking/*`.
 - Suggested prerequisites: assets, consensus.
 - First task: Recover stake accounting and epoch transitions separately for #94 and #115.
@@ -211,7 +211,7 @@ Stake, validator membership and jailing.
 
 DEX metadata and clearinghouse registry.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/dex_registry/*`.
 - Suggested prerequisites: risk, assets.
 - First task: Recover identifiers, lookup rules and deployment ownership checks.
@@ -222,7 +222,7 @@ DEX metadata and clearinghouse registry.
 
 Agent, system-user, nonce, timing and other cross-cutting state.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `l1/*`.
 - Suggested prerequisites: foundation, assets.
 - First task: Classify each remaining path by actual call graph; avoid dropping uncategorized helpers.
@@ -233,7 +233,7 @@ Agent, system-user, nonce, timing and other cross-cutting state.
 
 Read-only info requests and position responses.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `info_server/*`.
 - Suggested prerequisites: risk, orderbook, storage.
 - First task: Recover request variants, response layouts and snapshot consistency.
@@ -246,7 +246,7 @@ Missing reference paths observed in #94: `info_server/handler.rs`, `info_server/
 
 JSON-RPC routing, EVM reads and transaction forwarding.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `evm_rpc/*`.
 - Suggested prerequisites: evm, storage.
 - First task: Map method dispatch and wire errors against the captured release.
@@ -257,7 +257,7 @@ JSON-RPC routing, EVM reads and transaction forwarding.
 
 Static network/build configuration and naming.
 
-- Target: `node94`.
+- Target: `node115`.
 - Path rules (ordered first-match): `global_constants/*`.
 - Suggested prerequisites: foundation.
 - First task: Separate constants observed in binary data from illustrative source defaults.

@@ -15,7 +15,7 @@ make rea-smoke                   # pinned CLI + both node identities; no Ghidra 
 make rea-mcp-check               # owned stdio handshake and Ghidra availability check
 make rea-native-smoke            # native visor entrypoint, explicitly reduced analysis
 python3 tools/rea.py --version
-python3 tools/rea.py target 94    # verified input and provider for MCP open_binary
+python3 tools/rea.py target 115    # verified input and provider for MCP open_binary
 ```
 
 The launcher selects a supported installed Node rather than inheriting an
@@ -88,7 +88,7 @@ reverse-engineer-anything skill for permission and recovery boundaries.
 
 With the connected REA tools, use `open_binary` with an absolute path and
 `provider_id: "ghidra"`; obtain the path and verify its hash with
-`python3 tools/rea.py target 94`. Keep #94, #115 and visor sessions separate.
+`python3 tools/rea.py target 115`. Keep #94, #115 and visor sessions separate.
 
 1. Start with a focused question and an artifact identity check.
 2. Inspect a bounded function, instructions or xrefs. The first native query
@@ -102,8 +102,8 @@ With the connected REA tools, use `open_binary` with an absolute path and
 For lightweight, target-free static inspection:
 
 ```sh
-python3 tools/rea.py inspect-rust-binary artifacts/node/94/hl-node --format json \
-  > work/rea-node94-rust.json
+python3 tools/rea.py inspect-rust-binary artifacts/node/115/hl-node --format json \
+  > work/rea-node115-rust.json
 ```
 
 The native setup smoke check uses the captured visor's entrypoint through a source-file-offset

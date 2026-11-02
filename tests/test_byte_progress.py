@@ -81,6 +81,17 @@ class ByteRegistryTests(unittest.TestCase):
         self.assertEqual(project_bytes(self.components, result)['bytes'], 8)
         self.assertEqual(result['components']['visor']['windows'], 0)
 
+    def test_retargeting_keeps_old_evidence_without_transferring_credit(self):
+        self.components[0]['artifact'] = 'node115'
+        result = self.load()
+        self.assertEqual(result['totals']['node94']['bytes'], 8)
+        self.assertEqual(result['components']['foundation']['bytes'], 0)
+        self.assertEqual(project_bytes(self.components, result)['bytes'], 0)
+        self.registry['windows'].append({**self.window, 'id': 'new-target', 'target': 'node115'})
+        result = self.load()
+        self.assertEqual(result['components']['foundation']['bytes'], 8)
+        self.assertEqual(project_bytes(self.components, result)['bytes'], 8)
+
     def test_overlapping_windows_and_duplicate_ids_rejected(self):
         for second in [{**self.window}, {**self.window, 'id': 'overlap', 'start': 260, 'end': 268}]:
             self.registry['windows'] = [self.window, second]
@@ -286,8 +297,10 @@ class ActualByteProgressTests(unittest.TestCase):
         self.assertEqual(progress, before)
         self.assertIn('0.00% (0/92 accepted gates; 0/23 components complete)', output)
         self.assertIn('0.00% (0/4 accepted gates; 0/1 components complete)', output)
-        self.assertIn('3,033/3,141 (96.56%)', output)
-        self.assertIn('0.00865%', output)
+        self.assertIn('Node #115 reconstruction:', output)
+        self.assertIn('355/390 (91.03%)', output)
+        self.assertIn('0.00335%', output)
+        self.assertNotIn('Node #94 total', output)
         self.assertIn('| 0/4 | 0% | 0 | 0 |', output)
         self.assertIn('not 0% correct', output)
         self.assertNotIn('N/A', output)

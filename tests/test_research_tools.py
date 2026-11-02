@@ -291,7 +291,7 @@ class CatalogueTests(unittest.TestCase):
     def test_inventory_unwind_counts_recounted(self):
         root = self.fde_root({'hl-node-94': 1, 'hl-node-115': 1, 'hl-visor': 1})
         out = generate(root)
-        self.assertIn('| Node #94 | 1 |', out['docs/PROGRESS.md'])
+        self.assertIn('| Node #94 (historical reference) | 1 |', out['docs/PROGRESS.md'])
 
     def test_inflated_unwind_count_rejected(self):
         root = self.fde_root({'hl-node-94': 2, 'hl-node-115': 1, 'hl-visor': 1})

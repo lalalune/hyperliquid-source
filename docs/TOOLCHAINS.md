@@ -8,9 +8,9 @@
 Source: preserved binary inventories; `make reproduce` regenerates them.
 Unwind entry counts are a proxy for function counts, not a complete function census.
 
-The root rust-toolchain.toml selects #94's Rust version for future development.
-Setup also installs #115's Rust version. Use `cargo +1.95.0 ...` for release #115
-experiments. Neither command currently builds a node: manifests, dependency lock,
+The root rust-toolchain.toml retains Rust 1.94.1 for existing historical components.
+Setup also installs Rust 1.95.0. New #115 build work should explicitly select
+`cargo +1.95.0 ...`; preserve each existing component's evidenced compiler. Neither command currently builds a node: manifests, dependency lock,
 private forks, exact build flags and recovered logic are incomplete.
 
 The .devcontainer uses Linux/amd64 on Ubuntu 24.04 and installs both Rust
