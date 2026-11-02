@@ -49,11 +49,7 @@ reviewers should run qualification, not regenerate preparation.
 
 The implementation is a standalone safe `no_std` Rust library plus an actual
 stdlib stdin client. There is no Cargo workspace, lockfile, external dependency,
-runtime application stub or imported machine-code implementation. Callback
-load primitives model address arithmetic and successful observed values.
-They are not native pointer dereferences, fault delivery, speculation, flags,
-atomicity or architecture memory-model emulation. Noncanonical/wrapping test
-addresses are algebraic view controls, not executed process addresses.
+runtime application stub or imported machine-code implementation. This register-only window has no callbacks, memory-view admission, missing-view refusals or native pointer dereferences. Only the documented input/output registers are modeled; flags, native calling ABI and other registers are excluded.
 
 On a normally prepared checkout (read setup and manifests first):
 
@@ -81,7 +77,6 @@ LLVM definitions establish compiled function presence, not target byte identity.
 
 - 2,928 frozen rows; O0: 0/2,928 mismatches; O3: 0/2,928 mismatches.
 - Two Rust unit-test invocations passed (one whole-corpus test at each level).
-- Checked missing-view refusals: 0; these are included in the fixture denominator but are not successful native executions.
 - 2 body-boundary byte corruptions and the wrong-capture control were rejected.
 - `signed-low-word`: 1,458/2,928 differing observations; normal process exit.
 - `boundary-120`: 1/2,928 differing observations; normal process exit.
