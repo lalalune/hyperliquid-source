@@ -1,0 +1,21 @@
+R_X86_64_RELATIVE slots with addend 0x516ca20: none (census.py scans
+the whole .rela.dyn range and finds no such slot; the window is
+reached by its 9 direct calls, not through a vtable slot).
+
+Whole-file qword hits for 0x516ca20: none.
+
+Pointer fields and GOT slots referenced by this packet:
+- The perf_level slot 0x5777ef8 (GLOB_DAT, resolved at load time,
+  not an addend) gates the perf getter calls in the window.
+- The transform's comparator dispatch compares the member +0x40
+  object +0xd0 virtual against the GOT slot 0x5777bf8 value
+  0x4fa7de0 (R_X86_64_RELATIVE addend, pinned from .rela.dyn).
+- The driver compares a +0x98 field against the GOT slot
+  0x57783c0 value 0x5164750 (R_X86_64_RELATIVE addend, pinned
+  from .rela.dyn); the compared function itself is not decoded
+  here.
+
+The window's callees are direct calls (thunk 0x516aa20, transform
+0x51922d0, hash 0x5422e70, move helper 0x5164ce0, timer destructor
+0x5165320, driver 0x516c7e0) or virtual calls (probe virtuals
++0xa0/+0x98, member release +0x8, timer start +0xa0).
