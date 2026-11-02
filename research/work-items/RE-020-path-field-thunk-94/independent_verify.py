@@ -237,23 +237,65 @@ def check_keys(data, check_sha=True, census=True, locations=True, extent=True):
     return errs
 
 
+# The manifest pins the packet's own files plus the
+# ../..-relative tool and test files the packet binds.
+PACKET_FILES = frozenset({
+    "../../../tests/test_path_field_thunk.py",
+    "../../../tools/path_field_thunk.py",
+    "EVIDENCE.md",
+    "README.md",
+    "independent_verify.py",
+    "path-field-thunk.json",
+    "verify.py",
+})
+
+
 def check_packet():
     errs = []
     man = HERE / "MANIFEST.sha256"
     if not man.exists():
         return ["no MANIFEST"]
+    # Admission: hashing each listed row is not enough. It cannot
+    # see a duplicated row, a listed file replaced by a symlink (the
+    # .resolve() fallback follows it, so the evidence can point
+    # outside the packet), an unlisted file in the packet directory,
+    # or an evidence file deleted together with its row. Pin the
+    # listed set and compare it against the packet contents,
+    # mirroring the RE-005 verifier and the node-inventory
+    # verifiers.
+    listed = {}
     for line in man.read_text().splitlines():
         if not line.strip():
             continue
-        hx, name = line.split(None, 1)
+        hx, sep, name = line.partition("  ")
+        if not sep or len(hx) != 64:
+            errs.append("malformed manifest line: " + line.strip())
+            continue
+        if name in listed:
+            errs.append("manifest lists " + name + " twice")
+            continue
+        listed[name] = hx
+    if set(listed) != PACKET_FILES:
+        errs.append("manifest file set differs from pinned packet files")
+    present = set()
+    for entry in sorted(HERE.iterdir()):
+        if entry.is_symlink():
+            errs.append("packet entry is a symlink: " + entry.name)
+        elif entry.is_dir():
+            if entry.name != "__pycache__" or not all(
+                    child.name.endswith(".pyc") and not child.is_symlink()
+                    for child in entry.iterdir()):
+                errs.append("unexpected directory in packet: " + entry.name)
+        else:
+            present.add(entry.name)
+    in_packet = {n for n in listed if not n.startswith("..")}
+    if present - {"MANIFEST.sha256"} != in_packet:
+        errs.append("packet contents differ from manifest")
+    for name, hx in listed.items():
         p = HERE / name
-        if not p.exists():
-            # allow ../../../ relative
-            p2 = (HERE / name).resolve()
-            if not p2.exists():
-                errs.append("missing " + name)
-                continue
-            p = p2
+        if p.is_symlink() or not p.is_file():
+            errs.append("manifest entry is a symlink or not a file: " + name)
+            continue
         if hashlib.sha256(p.read_bytes()).hexdigest() != hx:
             errs.append("manifest " + name)
     return errs
