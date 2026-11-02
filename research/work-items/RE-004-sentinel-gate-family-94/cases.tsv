@@ -1,0 +1,23 @@
+case	class_or_feature	gate_or_fde	polarity	vectors_match	vectors_all_zero	difference_all_zero	counter_zero	outcome
+A-je-match	A	je-gate	je	1				branch taken: match path
+A-je-nonmatch	A	je-gate	je	0				fall-through: non-match path
+A-jne-match	A	jne-gate	jne	1				fall-through: match path
+A-jne-nonmatch	A	jne-gate	jne	0				branch taken: non-match path
+B-jne-match	B	jne-gate	jne	1				fall-through: match path
+B-jne-nonmatch	B	jne-gate	jne	0				branch taken: non-match path
+C-setne-match	C	setne-gate	setne	1				boolean 0
+C-setne-nonmatch	C	setne-gate	setne	0				boolean 1
+DG-flag-low	double-gate	0x4e852a0	je					gate 2 skipped: flag byte <= 4
+DG-g1-match-flag-high	double-gate	0x4e852a0	je	1				gate 1 match path, then gate 2 runs
+DG-g1-nonmatch-flag-high	double-gate	0x4e852a0	je	0				gate 1 transform path, then gate 2 runs
+DG-g2-match	double-gate	0x4e852a0	je	1				difference check runs
+DG-g2-nonmatch-vectors-nonzero	double-gate	0x4e852a0	je	0	0			0x4e853ca outcome: live-vectors path
+DG-g2-vectors-zero	double-gate	0x4e852a0	je	0	1			difference check runs
+DG-difference-zero	double-gate	0x4e852a0	je			1		counter test runs: sete r15b = (counter == 0)
+DG-difference-nonzero	double-gate	0x4e852a0	je			0		0x4e853ca outcome: live-difference path
+CC-match-counter-zero	counter-coupled	jne-gate	jne	1			1	match path, then je taken on counter == 0
+CC-match-counter-nonzero	counter-coupled	jne-gate	jne	1			0	match path, counter test falls through
+VZ-nonmatch-vectors-zero	vectors-zero-rejoin	je-gate	je	0	1			rejoins match path difference check
+VZ-nonmatch-vectors-nonzero	vectors-zero-rejoin	je-gate	je	0	0			diverges from match path
+FA-match	flag-anchor	0x3272190	je	1				flag byte 0 at output+0x28
+FA-nonmatch	flag-anchor	0x3272190	je	0				flag byte 1 at output+0x28
