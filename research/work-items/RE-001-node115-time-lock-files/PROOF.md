@@ -20,7 +20,9 @@ The path component helper at `0x5cab560`, conversion helper `0x16815e0`, provide
 bound call dependencies, not recovered implementations. The dynamic symbol is
 **bcmp**, through `0x64df9f8` (GLOB_DAT symbol index 11). Suffix equality below
 assumes its usual zero-for-equal contract; this packet does not reconstruct libc.
-Do not infer that every input string is first reduced to a basename: the helper
+“Release” is a role label for slot `0x64df4a0 -> 0x635de30`; its allocator
+contract is assumed, not closed here. Do not infer that every input string is
+first reduced to a basename: the helper
 results decide whether the original slice is replaced.
 
 ## Input and candidate projection
@@ -146,8 +148,10 @@ expiration policy, clock relation, or actual filesystem state is established.
 The name builder at `0x5a69c10` selects exact bytes `visor_time_lock`/length15
 when incoming SIL is zero, and `publisher_visor_time_lock`/length25 otherwise.
 It binds them to a format program containing `/hyperliquid_data/` and a shared
-root object. It also requests a path check and conditional directory creation
-before returning the formatted three-word object. These are statically visible
+root object. It also calls a path-check-shaped helper and conditionally passes options
+0x1ff/1 to a creation-shaped helper before returning the formatted three-word
+object. These role labels are inferred from the arguments and the retained
+`could not create directory` diagnostic. These are statically visible
 call requests; their contracts and the rendered path are not closed. No live
 home directory, user configuration or filesystem is accessed by this research.
 
