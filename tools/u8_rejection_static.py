@@ -111,7 +111,11 @@ def has_path(edges, start, end, blocked=None):
 
 def analyze(data):
     _, frames, _ = fde_extents(data)
-    mapping = {(f['start'], f['end']): f for f in frames}
+    mapping = {}
+    for f in frames:
+        if (f['start'], f['end']) in mapping:
+            raise ValueError('duplicate FDE extent')
+        mapping[(f['start'], f['end'])] = f
     if any(pair not in mapping for pair in RANGES.values()):
         raise ValueError('rejection scope FDE changed')
     tag, comparisons = tag_constants(data)
