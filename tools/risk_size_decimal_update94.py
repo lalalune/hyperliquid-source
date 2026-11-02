@@ -163,7 +163,10 @@ def collect(data):
     img = Image(data)
     controls = control_bytes(img)
     _, fdes, _ = fde_extents(data)
-    by_start = {f['start']: f for f in fdes}
+    by_start = {}
+    for f in fdes:
+        checked(f['start'] not in by_start, 'duplicate FDE')
+        by_start[f['start']] = f
     functions = []
     for start in FUNCTIONS:
         checked(start in by_start, 'missing FDE')
