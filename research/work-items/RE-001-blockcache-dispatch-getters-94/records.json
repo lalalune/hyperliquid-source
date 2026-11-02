@@ -1,0 +1,194 @@
+{
+ "bounded_question": "What do node #94 functions 0x514e7e0, 0x514e870 and 0x514e900 do with their outer argument: how does each combine the BlockCache chain lookup 0x514e550 with a sentinel-compared wrapper-chain dispatch walk, and which callers consume them?",
+ "callee": {
+  "bytes": 646,
+  "end_va_exclusive": "0x514e7d6",
+  "fde_cie_offset": "0x006205d0",
+  "fde_length": "0x3c",
+  "fde_section_offset": "0x00633efc",
+  "next_fde_start": "0x514e7e0",
+  "padding_byte": "0xcc",
+  "padding_bytes": 10,
+  "return_convention": "the matching record's +0x20 first qword, or 0 on a miss",
+  "scope_note": "bound by RE-001-blockcache-chain-lookup-94; cited here as a callee only, not re-claimed",
+  "sha256": "87a84e1b281a967bb2b898d38d690e7f0748323146898c870fe1ee8de1be0e2d",
+  "start_va": "0x514e550"
+ },
+ "censuses": {
+  "getter_direct_callers": {
+   "0x514e7e0": [],
+   "0x514e870": [],
+   "0x514e900": []
+  },
+  "getter_direct_callers_note": "full .text direct-rel32 scan; no direct caller exists for any of the three getters",
+  "getter_qword_references": {
+   "0x514e7e0": [],
+   "0x514e870": [],
+   "0x514e900": []
+  },
+  "getter_qword_references_note": "whole-file qword scan (every byte offset, C-speed find loop); no absolute pointer to any getter exists, so the reaching path is left unclaimed, as with the current-head getters of RE-001-chain-dispatch-94",
+  "getter_tail_jumps": {
+   "0x514e7e0": [],
+   "0x514e870": [],
+   "0x514e900": []
+  },
+  "getter_tail_jumps_note": "full .text rel32 tail-jump scan; no tail jump targets any of the three getters",
+  "lookup_call_sites_from_getters": [
+   "0x514e7e8",
+   "0x514e878",
+   "0x514e908"
+  ],
+  "lookup_call_sites_note": "these three sites are the getters' own calls into the lookup; the lookup's fourth caller (0x515336c, enclosing 0x5152f10) is census-only here"
+ },
+ "composed_rule": [
+  "head = BlockCache lookup 0x514e550(outer): the matching record's +0x20 first qword, or 0 on a miss; the outer argument is passed unchanged",
+  "a null lookup result returns 0 with *out untouched",
+  "otherwise node = head; wrapper layout: inner pointer at +0x00, next wrapper at +0x38; dispatch slot = [inner + slot] where slot is 0x70, 0x78 or 0x98 per getter",
+  "the walk compares each visited node's dispatch slot against the contents of the getter's sentinel cell (0x5777a28 / 0x5777a78 / 0x5777a38); the first comparison reads the cell, later comparisons compare against the first dispatch value, which provably equals the cell contents on those paths",
+  "while the slot equals the sentinel, advance to the next wrapper, at most four times; the first non-sentinel slot is called with the wrapper, its result is stored at *out, and the getter returns 1",
+  "the fifth node is called unconditionally, without a sentinel comparison",
+  "the getters contain no PLT calls and no stack canary: the only call in each getter body besides the indirect dispatch calls is the direct rel32 call to the lookup"
+ ],
+ "getters": [
+  {
+   "arguments": {
+    "rdi": "outer object, passed unchanged to the lookup",
+    "rsi": "output pointer, preserved in rbx"
+   },
+   "bytes": 132,
+   "dispatch_call_sites": [
+    "0x514e83b",
+    "0x514e853",
+    "0x514e860"
+   ],
+   "end_va_exclusive": "0x514e864",
+   "fde_cie_offset": "0x00000000",
+   "fde_length": "0x1c",
+   "fde_section_offset": "0x0029ad40",
+   "lookup_call_site": "0x514e7e8",
+   "lookup_target": "0x514e550",
+   "next_fde_start": "0x514e870",
+   "null_lookup_site": "0x514e7f2",
+   "null_lookup_target": "0x514e846",
+   "padding_byte": "0xcc",
+   "padding_bytes": 12,
+   "return_one_site": "0x514e841",
+   "sentinel_cell": "0x5777a28",
+   "sentinel_check_sites": [
+    "0x514e7fb",
+    "0x514e80f",
+    "0x514e81f",
+    "0x514e82f"
+   ],
+   "sha256": "1b8f7982b39834e02c533a2d48a306fb4c2c17fcff9df95101472c12044dc683",
+   "slot_offset": "0x70",
+   "start_va": "0x514e7e0",
+   "store_site": "0x514e83e",
+   "unconditional_call_site": "0x514e83b"
+  },
+  {
+   "arguments": {
+    "rdi": "outer object, passed unchanged to the lookup",
+    "rsi": "output pointer, preserved in rbx"
+   },
+   "bytes": 132,
+   "dispatch_call_sites": [
+    "0x514e8cb",
+    "0x514e8e3",
+    "0x514e8f0"
+   ],
+   "end_va_exclusive": "0x514e8f4",
+   "fde_cie_offset": "0x00000000",
+   "fde_length": "0x1c",
+   "fde_section_offset": "0x0029ad60",
+   "lookup_call_site": "0x514e878",
+   "lookup_target": "0x514e550",
+   "next_fde_start": "0x514e900",
+   "null_lookup_site": "0x514e882",
+   "null_lookup_target": "0x514e8d6",
+   "padding_byte": "0xcc",
+   "padding_bytes": 12,
+   "return_one_site": "0x514e8d1",
+   "sentinel_cell": "0x5777a78",
+   "sentinel_check_sites": [
+    "0x514e88b",
+    "0x514e89f",
+    "0x514e8af",
+    "0x514e8bf"
+   ],
+   "sha256": "0386d3e26a72d1aae3ee2e181a6ec735eec7e72418843917c87230b7cc6b03f1",
+   "slot_offset": "0x78",
+   "start_va": "0x514e870",
+   "store_site": "0x514e8ce",
+   "unconditional_call_site": "0x514e8cb"
+  },
+  {
+   "arguments": {
+    "rdi": "outer object, passed unchanged to the lookup",
+    "rsi": "output pointer, preserved in rbx"
+   },
+   "bytes": 148,
+   "dispatch_call_sites": [
+    "0x514e967",
+    "0x514e983",
+    "0x514e990"
+   ],
+   "end_va_exclusive": "0x514e994",
+   "fde_cie_offset": "0x00000000",
+   "fde_length": "0x1c",
+   "fde_section_offset": "0x0029ad80",
+   "lookup_call_site": "0x514e908",
+   "lookup_target": "0x514e550",
+   "next_fde_start": "0x514e994",
+   "null_lookup_site": "0x514e912",
+   "null_lookup_target": "0x514e975",
+   "padding_byte": "0xcc",
+   "padding_bytes": 0,
+   "return_one_site": "0x514e970",
+   "sentinel_cell": "0x5777a38",
+   "sentinel_check_sites": [
+    "0x514e91e",
+    "0x514e935",
+    "0x514e948",
+    "0x514e95b"
+   ],
+   "sha256": "731f32d725111cbe09e597a379acd68cd4ed0df25928c099728d24f809b45cfa",
+   "slot_offset": "0x98",
+   "start_va": "0x514e900",
+   "store_site": "0x514e96d",
+   "unconditional_call_site": "0x514e967"
+  }
+ ],
+ "observations_vs_inferences": {
+  "inferred": [
+   "the names 'wrapper' for the chain nodes and 'dispatch' for the slot values, from their roles (the slot is called with the wrapper; the +0x38 link advances the walk); no source-level class or function name is claimed",
+   "that the fifth node is called unconditionally, because its call site has no preceding sentinel comparison in any of the three getters",
+   "that the later sentinel comparisons are equivalent to re-reading the cell, because each compares against the first dispatch value, which equalled the cell contents on that path"
+  ],
+  "observed": [
+   "every branch target, call target, slot offset, sentinel cell address, FDE range, carve SHA and census in this file, each re-derived from the binary by verify.py",
+   "the three getters agree instruction for instruction apart from the slot offset, the sentinel cell, and their call-site addresses",
+   "the lookup call in each getter passes the getter's own outer argument unchanged, and the null-lookup arm returns 0 without touching *out"
+  ],
+  "unknowns": [
+   "the source-level identity of the outer object, the wrappers, the inner objects and the dispatched values",
+   "what a dispatched result means to a getter's caller; it is stored verbatim at *out, not interpreted",
+   "the reaching path of the three getters: no direct call, tail jump or absolute qword reference exists, so no caller is claimed (relative-relocation tables, if any, were not scanned)",
+   "the behavior when a chain ends before the fifth node while every slot still equals the sentinel: the binary would dereference the null +0x38 link, so no return value is claimed for that case; the model raises ChainExhausted instead"
+  ]
+ },
+ "plt": [],
+ "sentinel_cells": {
+  "cells": {
+   "0x70": "0x5777a28",
+   "0x78": "0x5777a78",
+   "0x98": "0x5777a38"
+  },
+  "note": "the same three cells the current-head getters of RE-001-chain-dispatch-94 compare against, shared here, not re-claimed; the runtime contents of the cells are not pinned, so the model takes the sentinel as an identity-compared parameter"
+ },
+ "target": {
+  "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "size": 91774280
+ },
+ "task": "RE-001"
+}
