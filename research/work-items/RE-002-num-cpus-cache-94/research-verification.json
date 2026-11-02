@@ -1,0 +1,132 @@
+{
+  "plugin": "insane-research",
+  "skill": "insane-research-main",
+  "claim_verification": {
+    "passed": true,
+    "signature": "16fb68436b7a8e7ddd96341995fea364aaaaf67242873c5998c1798b55f5bba5",
+    "verified_count": 3,
+    "unresolved_count": 1,
+    "refuted_count": 1,
+    "checked_at": "2026-11-02T16:03:59.870529+00:00",
+    "checker": "validate_ledger.py"
+  },
+  "report_evaluation": {
+    "verdict": "PASS",
+    "metrics": {
+      "citation_resolution_rate": 1.0,
+      "orphan_source_rate": 0.0,
+      "leak_rate": 0.0,
+      "verified_coverage_rate": 1.0
+    },
+    "counts": {
+      "citations_total": 5,
+      "citations_dangling": 0,
+      "sources_total": 5,
+      "orphan_sources": 0,
+      "verified": 3,
+      "unresolved": 1,
+      "refuted": 1,
+      "leaks": 0
+    },
+    "dangling_citations": [],
+    "orphan_sources": [],
+    "leaks": []
+  },
+  "verified_claims": [
+    {
+      "claim_id": "clm_cpu_float",
+      "text": "The selected node94 quota stage separately rounds unsigned quota and period to binary64 before division and ceil; this agrees with the published num_cpus calculation under the stated floating-environment assumption.",
+      "risk": "high",
+      "claim_type": "descriptive",
+      "source_ids": [
+        "src_node94",
+        "src_numcpus",
+        "src_rust_cast"
+      ],
+      "counter_search": "Inspected complete FDE, input conversion constants and ceil relocation; tested q=2^53+1,p=2^53. Integer ceildiv gives2 whereas the observed float relation gives1, so an integer-only replacement is rejected.",
+      "counter_refuted": false,
+      "conflicting": false,
+      "primary_source": true,
+      "status": "verified",
+      "status_reason": "ok"
+    },
+    {
+      "claim_id": "clm_cpu_publish",
+      "text": "The selected node94 initializer skips publication for a missing or zero quota result, otherwise caps it by the logical count and performs an atomic publication; public num_cpus source corroborates this ordering.",
+      "risk": "high",
+      "claim_type": "descriptive",
+      "source_ids": [
+        "src_node94",
+        "src_numcpus"
+      ],
+      "counter_search": "Traced zero guard before affinity/sysconf and min/XCHG. A synthetic logical count0 with positive quota writes0, unlike quota0 which performs no write. Cgroup parsing and the once state machine remain excluded.",
+      "counter_refuted": false,
+      "conflicting": false,
+      "primary_source": true,
+      "status": "verified",
+      "status_reason": "ok"
+    },
+    {
+      "claim_id": "clm_cpu_interface",
+      "text": "The cpu.max filename used by the selected node94 V2 path is consistent with the Linux quota-period interface and the public num_cpus V2 implementation.",
+      "risk": "normal",
+      "claim_type": "descriptive",
+      "source_ids": [
+        "src_node94",
+        "src_numcpus",
+        "src_cgroup"
+      ],
+      "counter_search": "Checked bound literal and distinct V1 quota/period filenames. Similar interface use does not establish complete parser equivalence.",
+      "counter_refuted": false,
+      "conflicting": false,
+      "primary_source": true,
+      "status": "verified",
+      "status_reason": "ok"
+    }
+  ],
+  "source_registry": [
+    {
+      "id": "src_node94",
+      "url": "https://media.githubusercontent.com/media/can1357/hl/999556f6e0a474b8312db96ec3149e1c44e97c23/bin/hl-node-mainnet-new",
+      "domain": "githubusercontent.com",
+      "quality_rating": "A",
+      "type": "authenticated primary artifact",
+      "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+      "notes": "Historical node capture, not the inferred unlicensed source tree. Primary machine-code evidence; local analysis is not external replication."
+    },
+    {
+      "id": "src_numcpus",
+      "url": "https://docs.rs/num_cpus/1.17.0/src/num_cpus/linux.rs.html",
+      "domain": "docs.rs",
+      "quality_rating": "A",
+      "type": "licensed author-published crate source",
+      "via_fallback": true,
+      "pin": "seanmonstar/num_cpus@342af76b486335e5a955c7314fc96cd104e7a17b src/linux.rs",
+      "sha256": "378ea174d00d560e16fda4b09fb523dda5f4c6f420e46af7d317393a39d88dd1",
+      "notes": "Docs.rs source and pinned GitHub file are the same source, counted once."
+    },
+    {
+      "id": "src_rust_cast",
+      "url": "https://doc.rust-lang.org/reference/expressions/operator-expr.html#numeric-cast",
+      "domain": "rust-lang.org",
+      "quality_rating": "A",
+      "type": "primary language specification"
+    },
+    {
+      "id": "src_cgroup",
+      "url": "https://docs.kernel.org/admin-guide/cgroup-v2.html",
+      "domain": "kernel.org",
+      "quality_rating": "A",
+      "type": "primary operating-system interface specification"
+    },
+    {
+      "id": "src_cpu_local",
+      "url": "local:RE-002-num-cpus-cache-94/validation.json",
+      "domain": "local-experiment",
+      "quality_rating": "B",
+      "type": "local experiment receipt",
+      "notes": "New independently authored Rust only; no captured execution and no external independent replication."
+    }
+  ],
+  "limits": "Plugin triangulation supports only the three stated source-compatible relations. Local experiment receipts are not an external replication; full reconstruction remains unresolved."
+}

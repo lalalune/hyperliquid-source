@@ -13,7 +13,8 @@ derivation, assumptions and explicit gaps.
 
 Target SHA-256:
 `3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f`.
-Base revision: `e5c9b6436876b2a4a39daef813171f9879317699`.
+Initial base: `e5c9b6436876b2a4a39daef813171f9879317699`.
+Rebased and rechecked on `2c75904241b9165693d40dea8b0d0d340f8e22b3`.
 
 ## Retained evidence
 
@@ -25,7 +26,11 @@ Base revision: `e5c9b6436876b2a4a39daef813171f9879317699`.
   integer-only expected values frozen before the Rust implementation.
 - `rust/`: real standalone Rust 1.94.1 crate with no external dependencies,
   native tests and a vector driver. It is not a node workspace or original ABI.
-- `validation.json`: actual native/focused results and their limits.
+- `validation.json` and `validation-new-main.json`: actual checks before and
+  after the upstream merge, with their limits.
+- `peer-review.py` and `peer-review.json`: independent binary64 bit-space
+  search, without the author oracle or host float arithmetic; all frozen
+  values agree. The receipt pins the reviewed pre-clarification files.
 
 The small static collector is required to bind the producer's full FDEs,
 numeric constants and actual relocation targets together; existing generic
