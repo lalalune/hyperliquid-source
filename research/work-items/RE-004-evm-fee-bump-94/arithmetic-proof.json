@@ -1,0 +1,23 @@
+{
+  "statement": "For every unsigned 128-bit x, the checked product fits iff x is at most the recorded bound. When it fits, the quotient is x + floor(x/10).",
+  "assumptions": [
+    "The selected FDE bytes have passed their hashes and fixed instruction checks.",
+    "The relocated unsigned 128-bit division helper obeys its independently established nonzero-divisor contract.",
+    "Memory and enum values satisfy the ordinary valid-call domain."
+  ],
+  "limb_proof": "Let B=2^64 and x=h*B+l with 0<=h,l<B. Write m*h=a*B+b and m*l=c*B+d, with b,d<B. Then m*x=a*B^2+(b+c)*B+d. The high MUL overflow flag is a!=0 and the ADD carry is b+c>=B; their OR is exactly m*x>=B^2.",
+  "quotient_proof": "For arbitrary nonnegative x, write x=period*q+r with 0<=r<period. The verified coefficient equality gives m*x=divisor*advance*q+m*r. The finite residue rows give floor(m*r/divisor)=r, so the quotient is advance*q+r=x+q.",
+  "multiplier": 110,
+  "divisor": 100,
+  "gcd": 10,
+  "period": 10,
+  "advance": 11,
+  "coefficient_left": 1100,
+  "coefficient_right": 1100,
+  "residue_obligations": 10,
+  "largest_nonoverflow_input": "3093476062917622395121587340288801922",
+  "last_fitting_product": "340282366920938463463374607431768211420",
+  "first_overflow_product": "340282366920938463463374607431768211530",
+  "maximum_u128": "340282366920938463463374607431768211455",
+  "limits": "The identities are a static arithmetic proof, not an observation of node execution or a proof of surrounding object identity."
+}
