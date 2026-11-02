@@ -1,0 +1,9 @@
+step site_va instruction effect
+load-P 0x4e79845 mov rbx,QWORD PTR [rdi] rbx = [rdi] (first field of the object the helper receives)
+load-H 0x4e79848 mov r14,QWORD PTR [rdi+0x8] r14 = [rdi+0x8] — on the 0x37f5c80 route this IS the hinted slot [dtor+0x90] = 0x574d2c0
+load-H0 0x4e7984c mov rax,QWORD PTR [r14] rax = [H+0x0] = [0x574d2c0] = 0 (indirect-call function pointer)
+load-H2 0x4e7984f mov r15,QWORD PTR [r14+0x10] r15 = [H+0x10] = [0x574d2d0] = 1 (length)
+call-gate 0x4e79853 test rax,rax; je; lea rcx,[r15-1]; and rcx,~0xf; lea rdi,[rbx+rcx]; add rdi,0x10; call rax calls H[0] iff nonzero; skipped here because H[0] = 0
+P-counter 0x4e79870 lock dec QWORD PTR [rbx+0x8] decrements the second refcount at [P+0x8]; returns unless zero
+load-H1 0x4e79877 mov rcx,QWORD PTR [r14+0x8] rcx = [H+0x8] = [0x574d2c8] = 0 (size base)
+delete 0x4e798ae mov rdi,rbx; pops; jmp QWORD PTR [0x576e010] operator delete on P with the aligned size from H[1]/H[2]
