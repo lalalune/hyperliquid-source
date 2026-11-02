@@ -118,6 +118,10 @@ class WalRecordScan:
                     self.report("SetCompressionType not the first record",
                                 len(fragment))
                 self._clear_accumulator()
+                # 0x5162bda clears the in-fragment flag, and the
+                # completion jump targets 0x5162aff, skipping the set
+                # at 0x5162af8: compression never sets in-fragment.
+                self.in_fragment = False
                 if len(fragment) <= 3:
                     self.report("could not decode SetCompressionType record",
                                 len(fragment))
@@ -135,7 +139,6 @@ class WalRecordScan:
                         self.report(
                             "could not decode SetCompressionType record",
                             len(rest))
-                self.in_fragment = True
                 continue
             if code in ERROR_CODES:
                 if self.in_fragment:
@@ -156,8 +159,12 @@ class WalRecordScan:
                     self.in_fragment = False
                 continue
             # Unknown: code 0, 14, above 15, or negative (unsigned compare).
+            # The arm joins the error tail at 0x5162a15, so after the
+            # report the accumulator and the in-fragment flag are cleared.
             value = len(fragment)
             if self.in_fragment:
                 value += len(self.accumulator)
             self.report("unknown record type %u" % (code & 0xFFFFFFFF), value)
+            self._clear_accumulator()
+            self.in_fragment = False
             continue

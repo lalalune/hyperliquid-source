@@ -84,14 +84,22 @@ the body parser 0x5161850, while any other tag or a slice of at most
 3 bytes goes through the detail builder 0x542f040 (constant argument
 2; per PR #1860's pin the builder writes 2 into the decision byte,
 so the `could not decode SetCompressionType record` report is the
-branch taken); either way the flag is set and scanning loops. Error
+branch taken); either way the arm clears the in-fragment flag at
+0x5162bda and its completion jump to 0x5162aff skips the flag set at
+0x5162af8, so compression never leaves the scan in-fragment, and
+scanning loops. Error
 codes 10-13 loop silently when not in-fragment, else report `error
 in middle of record`, clear the accumulator and the flag, and loop.
 Checksum code 15 clears the accumulator and returns 0 when +0x70 is
 set, else reports `checksum mismatch` with the aux word and then
 runs the error-arm tail. Unknown codes format `unknown record type
 %u` into a 40-byte stack buffer and report it with the slice length
-plus the accumulator length when in-fragment, then loop.
+plus the accumulator length when in-fragment, then joins the error
+tail, which clears the accumulator and the flag before looping. The
+last-fragment completion writes +0x58 from the first-fragment
+snapshot slot, which always equals the entry remaining (the snapshot
+is copied from the entry slot and the entry slot never changes
+mid-scan); the full-record completion writes the entry slot directly.
 
 The Python model in tools/wal_record_scan.py implements exactly this
 state machine with an injectable buffered read, reporter and parser;

@@ -176,20 +176,33 @@ def test_middle_append_at_cap_boundary_ok():
         wal_record_scan.APPEND_CAP = old
 
 
-def test_compression_tag_zero_parses_then_last_completes():
+def test_compression_tag_zero_parses_but_does_not_set_in_fragment():
+    # Regression control for slopbot's low_quality note on #1948: the
+    # compression completion jumps to 0x5162aff, skipping the flag set
+    # at 0x5162af8, so a following last fragment reports missing start.
     parsed = []
     scan = WalRecordScan(entry_remaining=55)
     scan.scan(scripted([
         (1, 9, b"\x00\x00\x00\x00BODY", 0),
         (1, 4, b"tail", 0),
+        (1, 1, b"done", 0),
     ]), parser=lambda tag, rest: parsed.append((tag, rest)))
     assert parsed == [(0, b"BODY")]
     assert scan.parser_calls == [(0, b"BODY")]
-    # Only post-compression fragments are in the assembled record:
-    # the compression record itself set in-fragment, the last fragment
-    # appended to an empty accumulator.
-    assert scan.out_record == b"tail"
-    assert scan.reports == []
+    assert scan.in_fragment is False
+    assert scan.reports == [("missing start of fragmented record(2)", 4)]
+    assert scan.out_record == b"done"
+
+
+def test_compression_then_middle_reports_missing_start():
+    scan = WalRecordScan(entry_remaining=55)
+    scan.scan(scripted([
+        (1, 9, b"\x00\x00\x00\x00BODY", 0),
+        (1, 3, b"mid", 0),
+        (1, 1, b"done", 0),
+    ]))
+    assert scan.reports == [("missing start of fragmented record(1)", 3)]
+    assert scan.in_fragment is False
 
 
 def test_compression_tag_seven_parses():
@@ -298,12 +311,26 @@ def test_unknown_code_in_fragment_adds_accumulator_length():
         (1, 0, b"cde", 0),
         (1, 1, b"ok", 0),
     ]))
-    # The closing full record also reports partial(1): the scan was
-    # still in-fragment with a nonempty accumulator.
+    # Regression control for slopbot's low_quality note on #1948: the
+    # unknown arm joins the error tail at 0x5162a15, which clears the
+    # accumulator and the flag, so the closing full record reports
+    # nothing.
+    assert scan.reports == [("unknown record type 0", 5)]
+
+
+def test_unknown_clears_accumulator_and_flag():
+    scan = WalRecordScan(entry_remaining=10)
+    scan.scan(scripted([
+        (1, 2, b"ab", 0),
+        (1, 99, b"cde", 0),
+        (1, 3, b"mid", 0),
+        (1, 1, b"ok", 0),
+    ]))
     assert scan.reports == [
-        ("unknown record type 0", 5),
-        ("partial record without end(1)", 2),
+        ("unknown record type 99", 5),
+        ("missing start of fragmented record(1)", 3),
     ]
+    assert scan.out_record == b"ok"
 
 
 def test_unknown_code_14():

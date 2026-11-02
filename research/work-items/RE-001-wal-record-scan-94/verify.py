@@ -129,6 +129,21 @@ def main():
                         "0x5162a40", "0x5162b88", "0x51629fe", "0x51629fe",
                         "0x51629fe", "0x51629fe", "0x5162cc0", "0x51629e0"]
     check("jump table", targets == expected_targets, str(targets))
+    window_lines = (PACKET / "window.txt").read_text().splitlines()
+
+    def line_has(addr, *parts):
+        for line in window_lines:
+            if line.strip().startswith(addr + ":") and all(p in line for p in parts):
+                return True
+        return False
+
+    check("compression clears flag at 0x5162bda",
+          line_has("5162bda", "movb", "0xd8(%rbx)"))
+    check("flag set lives at 0x5162af8, skipped by compression jump",
+          line_has("5162af8", "movb", "0xd8(%rbx)")
+          and line_has("5162c94", "jmp", "5162aff"))
+    check("unknown arm joins error tail at 0x5162a15",
+          line_has("5162d04", "jmp", "5162a15"))
     census = json.loads(subprocess.run(
         [sys.executable, str(PACKET / "census.py")],
         cwd=ROOT, capture_output=True, text=True, check=True).stdout)

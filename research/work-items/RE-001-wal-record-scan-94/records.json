@@ -25,13 +25,13 @@
     "+0x78": "stream object pointer, read; if non-null its virtual method at vtable +0x18 is called once in the prologue",
     "+0xb8": "accumulator string pointer (fragment assembly buffer)",
     "+0xc0": "accumulator string length",
-    "+0xd8": "in-fragment flag: set on first-fragment and on compression-parse completion, cleared on full/last completion and on error clears"
+    "+0xd8": "in-fragment flag: set ONLY on first-fragment (fall-through through 0x5162af8); the compression arm clears it at 0x5162bda and its completion jump targets 0x5162aff, skipping the set, so compression never sets it; cleared on full/last completion, on error clears, and on the unknown-type arm"
   },
   "prologue": {
     "out_record_init": "pointer set to 0x1e629b (an empty-string constant: the first byte there is 0), length set to 0",
     "scratch_clear": "first byte of the scratch buffer set to 0, length set to 0",
     "stream_finish": "if reader +0x78 is non-null, call the virtual method at vtable offset +0x18 on it",
-    "remaining_snapshot": "entry remaining = reader +0x60 minus reader +0x40, held on the stack for the whole scan; the +0x58 write on completion stores this entry value, not a per-iteration value"
+    "remaining_snapshot": "entry remaining = reader +0x60 minus reader +0x40, held on the stack for the whole scan; the full-record completion writes this entry slot directly to +0x58, while the last-fragment completion first reloads the entry slot from the first-fragment snapshot slot (stack +0x08) and then writes it to +0x58 — the snapshot is always a copy of the entry slot (first-fragment and compression tails both copy the entry slot into it) and the entry slot never changes mid-scan, so both completions store the entry remaining value"
   },
   "buffered_read_call": {
     "callee": "0x5162510 (934 bytes, FDE 0xf7c900; internals NOT pinned here)",
@@ -103,7 +103,7 @@
         "else append the slice to the accumulator under the same 0x3fffffffffffffff cap (length_error above the cap)",
         "replace the scratch string (offset 0, count = scratch length) with the accumulator contents",
         "move the scratch string (pointer + length) into out_record",
-        "clear the accumulator, write entry remaining into reader +0x58, set +0x71 to 1, clear +0xd8",
+        "clear the accumulator, reload the entry slot from the first-fragment snapshot slot and write it into reader +0x58 (value equals the entry remaining, see prologue), set +0x71 to 1, clear +0xd8",
         "return the buffered-read status (nonzero)"
       ],
       "report_string": {"address": "0x7e7108", "text": "missing start of fragmented record(2)"}
@@ -115,11 +115,11 @@
         "if +0x71 is set, report 'SetCompressionType not the first record' with the slice length (then continue to the body)"
       ],
       "body": [
-        "clear the accumulator; record entry remaining as the compression snapshot",
+        "clear the accumulator AND clear +0xd8 at 0x5162bda; record entry remaining as the compression snapshot (copy the entry slot into the snapshot slot)",
         "if slice length is at most 3, take the detail path with the string 'Error decoding WAL compression type' (length 35)",
         "else read the first u32 of the slice as the tag and advance the slice past 4 bytes; if the low tag byte is 0 or 7, take the parser path; otherwise take the detail path with the string 'WAL compression type not supported' (length 34)",
-        "parser path: zero a stack struct, store the tag byte on the stack, call body parser 0x5161850 with rsi pointing at the tag byte, free the detail heap buffer if any, set +0xd8 to 1, record the entry remaining as snapshot, loop",
-        "detail path: call detail builder 0x542f040 with constant argument 2 (see detail_builder_note), then if the decision byte is nonzero report 'could not decode SetCompressionType record' with the slice length (original length on the short-slice path; length minus 4 on the other-tag path, because the slice was advanced past the 4-byte tag before the detail call), free the detail heap buffer if any, set +0xd8 to 1, record the entry remaining as snapshot, loop; the decision-byte-zero branch back to the parser is present in the code but see detail_builder_note"
+        "parser path: zero a stack struct, store the tag byte on the stack, call body parser 0x5161850 with rsi pointing at the tag byte, free the detail heap buffer if any, then jump to 0x5162aff — which SKIPS the +0xd8 set at 0x5162af8 — so +0xd8 stays cleared, record the snapshot, loop",
+        "detail path: call detail builder 0x542f040 with constant argument 2 (see detail_builder_note), then if the decision byte is nonzero report 'could not decode SetCompressionType record' with the slice length (original length on the short-slice path; length minus 4 on the other-tag path, because the slice was advanced past the 4-byte tag before the detail call), free the detail heap buffer if any, then jump to 0x5162aff as above, so +0xd8 stays cleared, loop; the decision-byte-zero branch back to the parser is present in the code but see detail_builder_note"
       ],
       "detail_template": "stack bytes 'CompressionTypeRecord' (16 bytes from 0x205cf0 'CompressionTypeR' plus movabs 'eRecord')",
       "detail_builder_note": "Per PR #1860's pin of 0x542f040, the builder writes its constant argument 2 into the decision byte, so in node #94 the detail path's report branch is the one taken and the parser branch after the builder is not reached from the builder; the parser is reached directly only on the tag 0/7 path",
@@ -151,7 +151,8 @@
       "entry": "0x5162cc0",
       "steps": [
         "format 'unknown record type %u' with the code into a 40-byte stack buffer via __snprintf_chk",
-        "report the formatted message with value = slice length plus accumulator length if in-fragment, else slice length alone, then loop"
+        "report the formatted message with value = slice length plus accumulator length if in-fragment, else slice length alone",
+        "then join the error tail at 0x5162a15: clear the accumulator (first byte 0, length 0) and clear +0xd8, then loop"
       ],
       "format_string": {"address": "0x1f179e", "text": "unknown record type %u"}
     }
