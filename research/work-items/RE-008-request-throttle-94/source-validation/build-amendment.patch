@@ -1,0 +1,69 @@
+--- build.py
++++ build-amended.py
+@@ -200,12 +200,36 @@
+     return first,values
+ 
+ 
++def admit_amendment(expected_amendment_sha, supplied_source_freeze):
++    """Bind this additive entrypoint and immutable original admission before/after work."""
++    original_freeze = '054552ab23d80266b7ed7d6d13344d7b14cff6bb239bb8b6f6a40fc9d0b0deed'
++    original_build = '43974fae650e4ab6f33d99c1853fc443cbec52d19f615ce3ac20dd70430e7a98'
++    path = HERE / 'AMENDMENT.json'
++    require(not path.is_symlink() and not any(parent.is_symlink() for parent in path.parents), 'amendment symlink')
++    require(identity(path)['sha256'] == expected_amendment_sha, 'exact amendment identity')
++    record = json.loads(path.read_text())
++    require(record['original_source_freeze_sha256'] == supplied_source_freeze == original_freeze,
++            'amendment original source freeze')
++    require(identity(HERE / 'SOURCE-FREEZE.json')['sha256'] == original_freeze, 'original source freeze changed')
++    require(record['original_build_sha256'] == original_build == identity(HERE / 'build.py')['sha256'],
++            'original build changed')
++    require(record['amended_entrypoint'] == 'build-amended.py' and Path(__file__).name == 'build-amended.py',
++            'amendment entrypoint')
++    require(record['amended_build_sha256'] == identity(Path(__file__))['sha256'], 'amended build changed')
++    for name, expected in record['supporting_files'].items():
++        relative = Path(name)
++        require(not relative.is_absolute() and '..' not in relative.parts, 'amendment supporting path')
++        require(not (HERE / name).is_symlink() and identity(HERE / name) == expected,
++                'amendment supporting file changed: ' + name)
++
++
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+     parser.add_argument('--toolchain', type=Path, required=True)
+     parser.add_argument('--out', type=Path, required=True, help='fresh direct child of canonical /tmp')
+     parser.add_argument('--private-map', type=Path, required=True, help='fresh path outside public packet')
+     parser.add_argument('--source-freeze-sha', required=True)
++    parser.add_argument('--amendment-sha', required=True)
+     args = parser.parse_args()
+     require(Path(__file__).absolute() == Path(__file__).resolve() and not Path(__file__).is_symlink(),
+             'harness invocation must use its canonical nonsymlink path')
+@@ -217,10 +241,11 @@
+     require(out.parent == Path('/tmp').resolve() and not out.exists(), 'fresh canonical /tmp output required')
+     require(out != SOURCE.resolve() and out != HERE.resolve(), 'isolated build root')
+     require(not private_map.exists() and not private_map.is_relative_to(PACKET), 'private mapping path')
++    admit_amendment(args.amendment_sha, args.source_freeze_sha)
+     freeze, manifest, lock = admit_sources(args.source_freeze_sha)
+     original_source = (SOURCE / 'src/request_throttle.rs').read_text()
+     variations = mutants(original_source)
+-    require([details for _,_,details in variations] == json.loads((HERE / 'MUTANTS.json').read_text()), 'exact frozen mutant matrix')
++    require(json.dumps([details for _,_,details in variations], sort_keys=True, separators=(',', ':')) == json.dumps(json.loads((HERE / 'MUTANTS.json').read_text()), sort_keys=True, separators=(',', ':')), 'exact frozen mutant matrix')
+     pins = json.loads((HERE / 'TOOLCHAIN-PINS.json').read_text())
+     tools_before = {directory + '/' + name: value for directory in ['bin', 'lib']
+                     for name, value in inventory(toolchain / directory).items()}
+@@ -500,6 +525,7 @@
+     for name, expected in sdk_pins.items():
+         require(identity(Path(sdk) / name) == expected, 'selected SDK input changed')
+     admit_sources(args.source_freeze_sha)
++    admit_amendment(args.amendment_sha, args.source_freeze_sha)
+     write_json(receipts / 'source-copies.json', snapshots)
+     write_json(receipts / 'build-audit.json', {
+         'source_freeze_sha256': args.source_freeze_sha, 'source': freeze['source'],
+@@ -510,7 +536,7 @@
+         'toolchain_payload_unchanged': True, 'external_tools': external_tools, 'SDKROOT': sdk,
+         'sdk_inputs': sdk_pins, 'python_version': sys.version,
+         'limit': 'Toolchain bin/lib and selected linker/SDK bytes are pinned; host OS/dyld and all SDK files are not a hermetic or captured-target toolchain claim.'})
+-    result = {'source_freeze_sha256': args.source_freeze_sha, 'corpus_cases': corpus['case_count'], 'new_tests_per_profile': {'private':2,'integration':8}, 'baseline_library_tests':36,
++    result = {'source_freeze_sha256': args.source_freeze_sha, 'amendment_sha256': args.amendment_sha, 'amended_build_sha256': identity(Path(__file__))['sha256'], 'corpus_cases': corpus['case_count'], 'new_tests_per_profile': {'private':2,'integration':8}, 'baseline_library_tests':36,
+               'baseline': baseline, 'independent_clean_directory_rebuild': rebuild,
+               'own_build_byte_comparisons': own_byte_comparisons,
+               'compiled_two_profile_mutants': mutation_results, 'comparator_controls': controls, 'input_driver_controls': driver_controls,

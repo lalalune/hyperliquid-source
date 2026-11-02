@@ -51,6 +51,27 @@ block, and inserts the block map row. `admit_and_register` does not mutate
 revalidates state gates so a stale admitted token cannot overwrite intervening
 state.
 
+## Retained request rows
+
+`request_throttle::RequestThrottle` implements the separately bounded tag-one
+request-row operation from `RE-008-request-throttle-94`: exact round/hash keys,
+original timestamps, reason-set union before suppression, and one-shot emission
+at or after the computed deadline. It owns supplied state and returns values;
+it does not send requests or implement the native log/lock helpers. This map is
+separate from the tag-zero removal context in `ConsensusState`.
+
+Delay bits use integer binary64 rounding followed by the captured nonfinite
+product-to-zero and signed saturation rules. Canonical Gregorian timestamp
+validation and deadline range refusal are explicit safe policies; range refusal
+preserves registration/reason changes. Rust allocation must succeed, with no
+rollback or native allocation/exception equivalence promised. The packet's
+CONTRACT, PROOF and additive source-validation/SOURCE-PROOF state the limits.
+
+The focused qualification selects `cargo test --lib` and
+`cargo test --test request_throttle`, in debug and release, offline and locked.
+The existing `evidence_contract` target and broad repository verification are
+outside this operation's source qualification.
+
 ## Authentication boundary
 
 The following native behavior remains unresolved in the retained evidence:
