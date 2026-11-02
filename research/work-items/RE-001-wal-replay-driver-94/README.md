@@ -149,3 +149,16 @@ struct and the out-pointer slot?
   status, cache hit/miss/insert rules, both post-replay sequences
   (including the byte-1 zeroing arm and the type-1 retry), and
   packet agreement plus corruption controls.
+
+## Tool versions and analysis options
+
+- objdump: GNU objdump (GNU Binutils for Ubuntu) 2.42, invoked as
+  `objdump -d --start-address=<lo> --stop-address=<hi>
+  work/hl-node-94.bin` from the repo root (repo-relative binary
+  path, so the header spelling matches the committed excerpts).
+- Python: 3.12.3; the packet checker uses numpy 1.26.4 for the
+  vectorized census scans. Tests run under unittest (pytest is not
+  installed on this VM).
+- No cargo/rustc, no git-lfs, no Ghidra/Java on this VM; all
+  analysis is static objdump/readelf work on the digest-verified
+  binary above.
