@@ -1,0 +1,19 @@
+case	quantity	root_present	balance	count	key_present	row_exists	preflight	status	outcome	outer_row_inserted_before_value_check
+zero_remove	0	0	0	12	1	1	pass	0x1a2	remove	0
+zero_absent	0	0	0	0	0	1	pass	0x1a2	remove_absent	0
+zero_missing_row	0	0	0	0	0	0	pass	0x1a2	remove_absent	1
+cap_below	922337203685477579	1	100000000	10	0	1	pass	0x1a2	insert	0
+cap_equal	922337203685477580	1	100000000	0	0	1	pass	0x154	number_error	0
+cap_over	922337203685477581	1	100000000	0	0	1	pass	0x154	number_error	0
+no_root	1	0	100000000	0	0	1	pass		panic_missing_root	0
+negative_balance	1	1	-1	0	0	1	pass	0x138	balance_error	0
+balance_equal	1	1	99999999	0	0	1	pass	0x138	balance_error	0
+balance_above	1	1	100000000	0	0	1	pass	0x1a2	insert	0
+count_equal	1	1	100000000	10	0	1	pass	0x1a2	insert	0
+count_over_insert	1	1	100000000	11	0	1	pass	0x13c	count_error	0
+count_over_replace	1	1	100000000	11	1	1	pass	0x13c	count_error	0
+replace	1	1	100000000	10	1	1	pass	0x1a2	replace	0
+new_row	1	1	100000000	0	0	0	pass	0x1a2	insert	1
+balance_precedes_count	1	1	99999999	11	1	1	pass	0x138	balance_error	0
+identity_precedes_limit	922337203685477580	0	0	0	0	1	identity_equal	0x120	identity_error	0
+gate_precedes_limit	922337203685477580	0	0	0	0	1	gate_failure		preflight_error	0
