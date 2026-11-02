@@ -37,6 +37,19 @@ def ripple(raw, va, prefix):
     return va + len(prefix) + 4 + struct.unpack_from('<i', raw, len(prefix))[0]
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    rels = {}
+    for a, i, v in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']]):
+        if a in rels:
+            raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a] = (i, v)
+    return rels
+
+
 def arithmetic_constants(raw):
     # Admission below pins each complete selected instruction window. These
     # immediates then supply the proof, rather than separately invented values.
@@ -62,8 +75,7 @@ def analyze(data, spec=None):
         raise ValueError('diagnostic/path changed')
     if read(data, 0x566cb58, 16)[1] != struct.pack('<QII', 46, 21, 13):
         raise ValueError('source Location changed')
-    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
-    rels = {a: (i, v) for a, i, v in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']])}
+    rels = relocations(data)
     if rels.get(0x566cb50) != (8, 0x1e3851) or rels.get(0x576e108) != (8, 0x157b7f0):
         raise ValueError('Location/helper binding changed')
     blocks, ranges, constants = [], [], []
