@@ -1,0 +1,234 @@
+{
+  "borrowCaseCount": 15,
+  "borrowCases": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      1,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      2,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      2,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      3,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      3,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      4,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      4,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      5,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      5,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      6,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      6,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      7,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      7,
+      1,
+      0,
+      0,
+      0
+    ]
+  ],
+  "borrowColumns": [
+    "lane",
+    "incomingBorrow",
+    "subtractionByte",
+    "firstWordHigh",
+    "secondWordHigh"
+  ],
+  "callbackExecution": false,
+  "constantMutationWitnesses": [
+    {
+      "baselineSkip": false,
+      "change": "LFWORD",
+      "mutantSkip": true,
+      "name": "wrong-LF-word",
+      "value": "0xb0b0b0b0b0b0b0b",
+      "w0": "0xa0a0a0a0a0a0a0a",
+      "w1": "0xa0a0a0a0a0a0a0a"
+    },
+    {
+      "baselineSkip": false,
+      "change": "C",
+      "mutantSkip": true,
+      "name": "zeroed-C-lane1",
+      "value": "0x101010101010000",
+      "w0": "0xb0b0b0b0b0b0a0b",
+      "w1": "0xb0b0b0b0b0b0b0b"
+    },
+    {
+      "baselineSkip": false,
+      "change": "HI",
+      "mutantSkip": true,
+      "name": "missing-high-lane7",
+      "value": "0x80808080808080",
+      "w0": "0xa0b0b0b0b0b0b0b",
+      "w1": "0xb0b0b0b0b0b0b0b"
+    }
+  ],
+  "constants": {
+    "C": "0x101010101010100",
+    "HI": "0x8080808080808080",
+    "LFWORD": "0xa0a0a0a0a0a0a0a",
+    "restoredLFWORD": "0xa0a0a0a0a0a0a0a"
+  },
+  "instructionEvaluation": false,
+  "intervalBoundaryChecks": {
+    "cases": 320,
+    "formula": "prefix=alignmentDelta; blocks=max(0,1+floor((m-16-prefix)/16)); suffix=prefix+16*blocks",
+    "lengths": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      63,
+      64,
+      65,
+      127,
+      128,
+      129
+    ],
+    "positionsPartitioned": 9096,
+    "residues": 8
+  },
+  "intervalCounterexamples": [
+    {
+      "admittedRead": [
+        0,
+        16
+      ],
+      "alignmentDelta": 0,
+      "change": "wide threshold15->14",
+      "overreadBytes": 1,
+      "remaining": 15,
+      "validInput": [
+        0,
+        15
+      ]
+    },
+    {
+      "LFAt": 16,
+      "change": "wide stride16->32",
+      "firstChecked": [
+        0,
+        16
+      ],
+      "nextStart": 32,
+      "remaining": 33,
+      "unchecked": [
+        16,
+        32
+      ]
+    }
+  ],
+  "kind": "scalar byte-borrow and interval mathematics",
+  "limits": "The general first-LF/progress/callback proof is manual. These checks do not execute a scanner, target instructions, or real callbacks."
+}
