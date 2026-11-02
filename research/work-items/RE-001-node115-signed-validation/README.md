@@ -43,3 +43,5 @@ The first command regenerates the static packet, the second checks exact replay.
 The measured denominator is one raw exported FDE / 1,323 bytes / 257 instructions. No Rust source has been reconstructed here. Raw-equal, normalized-only and unmatched compiled-comparison counts are **unmeasured**, not zero-percent completion. All gates remain false. Direct validator/collection/cleanup FDE leads and imported-slot relocations are retained without adopting their behaviors. No complete caller census, helper cryptography, error-tag global names, wire encoding or whole-consensus equivalence is claimed.
 
 Next: close `0x595cb30` and bind its result payload to a cryptographic operation, then measure the two downstream validators against the native fields identified here. The decision order above can constrain that reconstruction without pretending those dependencies are already correct.
+
+Native text exports trim trailing whitespace only; instruction bytes, operands and addresses are unchanged.
