@@ -1,0 +1,11 @@
+case	status_in	length	first_byte	gas_in	size_limit	depth_in	outcome	status_out	gas_out	depth_out
+empty	0x2	0		0	24576	1	conditional-install	0x2	0	0
+normal-64	0x2	64	0x7	19991	24576	1	conditional-install	0x2	7191	0
+gas-exact	0x2	64	0x7	12800	24576	1	conditional-install	0x2	0	0
+gas-short	0x2	64	0x7	12799	24576	1	rollback-gas	0x50	12799	1
+prefix-rejected-first	0x2	1	0xef	0	0	1	rollback-prefix	0x63	0	1
+maximum-default-size	0x2	24576	0x1	4915200	24576	1	conditional-install	0x2	0	0
+default-size-too-large	0x2	24577	0x1	18446744073709551615	24576	1	rollback-size	0x62	18446744073709551615	1
+status-before-prefix	0x5	1	0xef	0	0	1	rollback-original-status	0x5	0	1
+product-overflow	0x2	92233720368547759	0x1	18446744073709551615	18446744073709551615	1	product-overflow		18446744073709551615	1
+depth-zero	0x2	1	0x1	200	24576	0	depth-failure-after-charge		0	0
