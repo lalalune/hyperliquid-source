@@ -1,0 +1,272 @@
+{
+  "base_commit": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "captured_execution": false,
+  "commands": [
+    {
+      "argv": [
+        "make",
+        "doctor"
+      ],
+      "exit_code": 0,
+      "log": "checks/doctor.log"
+    },
+    {
+      "argv": [
+        "make",
+        "verify"
+      ],
+      "exit_code": 0,
+      "log": "checks/verify.log"
+    },
+    {
+      "argv": [
+        "make",
+        "catalogue-check"
+      ],
+      "exit_code": 0,
+      "log": "checks/catalogue.log"
+    },
+    {
+      "argv": [
+        "make",
+        "reproduce"
+      ],
+      "exit_code": 0,
+      "log": "checks/reproduce.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_foundation_simd_byte_reversed_copy.py"
+      ],
+      "exit_code": 0,
+      "log": "checks/legacy-tests.log",
+      "tests": 10
+    },
+    {
+      "argv": [
+        "python3",
+        "tools/foundation_simd_byte_reversed_copy.py",
+        "--check",
+        "research/work-items/foundation-simd-byte-reversed-copy-94/evidence.json"
+      ],
+      "exit_code": 0,
+      "log": "checks/legacy-evidence.log"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "research/work-items/RE-004-reversed-record-copy-rust-94/verify_static.py"
+      ],
+      "env": {
+        "PYTHONHASHSEED": "7",
+        "TZ": "UTC"
+      },
+      "exit_code": 0,
+      "log": "checks/static-normal.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "research/work-items/RE-004-reversed-record-copy-rust-94/verify_static.py"
+      ],
+      "env": {
+        "PYTHONHASHSEED": "119",
+        "TZ": "Pacific/Kiritimati"
+      },
+      "exit_code": 0,
+      "log": "checks/static-optimized.json"
+    },
+    {
+      "argv": [
+        "<rustfmt-1.94.1>",
+        "--check",
+        "src/node94-reversed-record-copy/lib.rs",
+        "src/node94-reversed-record-copy/input_only_driver.rs"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "research/work-items/RE-004-reversed-record-copy-rust-94/verify_rust.py",
+        "--rustc",
+        "<rustc-1.94.1>",
+        "--out",
+        "work/reversed-record-copy-rust/native-qualified"
+      ],
+      "exit_code": 0,
+      "log": "checks/native-summary.json",
+      "raw_commands": "native/calls.json"
+    }
+  ],
+  "full_suite_rerun": false,
+  "hosted_ci_claimed": false,
+  "initial_failed_archive": {
+    "all_payload_and_call_hashes_verified": true,
+    "bytes": 412530,
+    "calls": 38,
+    "sha256": "23de6de90518ed927e4a22fcfe961cb3f540d33028d05ac394815cc3a008340c",
+    "streams": 76,
+    "unique_payloads": 16
+  },
+  "initial_native_attempt": {
+    "argv": [
+      "python3",
+      "research/work-items/RE-004-reversed-record-copy-rust-94/verify_rust.py",
+      "--rustc",
+      "<rustc-1.94.1>",
+      "--out",
+      "work/reversed-record-copy-rust/native"
+    ],
+    "calls": "checks/initial-native-calls.json",
+    "correction": "Select the newline-delimited Some(destination) statement; validate all selectors before building. No Rust source or frozen oracle changed. Complete qualification rerun in fresh directory.",
+    "error": "returned_source mutation selector matched both code and documentation",
+    "exit_code": 1,
+    "old_verifier_sha256": "691edec4d52f710166f5ddc988b7db93a326afd4899f0e62ef147bcd99a0e5c5",
+    "raw_stderr": "checks/native.stderr"
+  },
+  "instruction_emulation": false,
+  "logs": {
+    "catalogue.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "d154b53146de73afa6ac07cb86b790175fed3cf9eb764993fa92227491db6d80",
+      "retained_bytes": 86,
+      "retained_sha256": "d154b53146de73afa6ac07cb86b790175fed3cf9eb764993fa92227491db6d80"
+    },
+    "doctor.log": {
+      "path_redaction_only": true,
+      "raw_sha256": "ea6daac0eeaf89834b935460803e489ddf9d64faa3da7b3566a24059fd5533fe",
+      "retained_bytes": 2317,
+      "retained_sha256": "60823e073658d0c69b97130114794b93746906d0c6c1bf9ce8a8f624605a92b1"
+    },
+    "legacy-evidence.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "0c83609132c3becf699c446d94ec61178b08ef95680109544c16873873010ada",
+      "retained_bytes": 64,
+      "retained_sha256": "0c83609132c3becf699c446d94ec61178b08ef95680109544c16873873010ada"
+    },
+    "legacy-tests.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "d6115f04a5f677030044a1dee7f2656e06b25e5bec30d6d6ca57b602174a6ca7",
+      "retained_bytes": 109,
+      "retained_sha256": "d6115f04a5f677030044a1dee7f2656e06b25e5bec30d6d6ca57b602174a6ca7"
+    },
+    "native-qualified.stderr": {
+      "path_redaction_only": false,
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained_bytes": 0,
+      "retained_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native-summary.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "38943d2fc60f7ab73b21c3643fc3372e4f4ac1b525eb9dca9326b2e1aa0dd3c6",
+      "retained_bytes": 663,
+      "retained_sha256": "38943d2fc60f7ab73b21c3643fc3372e4f4ac1b525eb9dca9326b2e1aa0dd3c6"
+    },
+    "native.stderr": {
+      "path_redaction_only": true,
+      "raw_sha256": "fcc02e5a7533cd2b7703e0d6787e1b6eea28504d72b0f4996a884ccf29cf4e7a",
+      "retained_bytes": 622,
+      "retained_sha256": "6f056241594e4318e0f5a3083678a7db31ce7db0911de2043a6bb5d369332e74"
+    },
+    "oracle-freeze.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "c6cff07e1d66fa942ea2ab55826bb839df44a9740c91e27032384a95ce3d891f",
+      "retained_bytes": 1067,
+      "retained_sha256": "c6cff07e1d66fa942ea2ab55826bb839df44a9740c91e27032384a95ce3d891f"
+    },
+    "reproduce.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "e229eacd17279259b076a17aa95f96fb96d91d2ab9991363ea8c20f2243cfd0a",
+      "retained_bytes": 12538,
+      "retained_sha256": "e229eacd17279259b076a17aa95f96fb96d91d2ab9991363ea8c20f2243cfd0a"
+    },
+    "static-freeze.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "0890266cfc6da34627a7fd71f5b49ea8d42cc068729427cc5000370f69b70e94",
+      "retained_bytes": 90,
+      "retained_sha256": "0890266cfc6da34627a7fd71f5b49ea8d42cc068729427cc5000370f69b70e94"
+    },
+    "static-normal.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "0890266cfc6da34627a7fd71f5b49ea8d42cc068729427cc5000370f69b70e94",
+      "retained_bytes": 90,
+      "retained_sha256": "0890266cfc6da34627a7fd71f5b49ea8d42cc068729427cc5000370f69b70e94"
+    },
+    "static-optimized.json": {
+      "path_redaction_only": false,
+      "raw_sha256": "0890266cfc6da34627a7fd71f5b49ea8d42cc068729427cc5000370f69b70e94",
+      "retained_bytes": 90,
+      "retained_sha256": "0890266cfc6da34627a7fd71f5b49ea8d42cc068729427cc5000370f69b70e94"
+    },
+    "verify.log": {
+      "path_redaction_only": false,
+      "raw_sha256": "62b2bc35db2b34337f2cb5feace2b03e4faee375be93a1f0c03e8eb04654bdfb",
+      "retained_bytes": 670,
+      "retained_sha256": "62b2bc35db2b34337f2cb5feace2b03e4faee375be93a1f0c03e8eb04654bdfb"
+    }
+  },
+  "make_path_prefix": [
+    "/opt/homebrew/opt/binutils/bin",
+    "/opt/homebrew/opt/rustup/bin"
+  ],
+  "overlap": {
+    "baseline_src_matches": 0,
+    "bounded_recent_merge_limit": 100,
+    "checked_at_utc": "2026-11-01T20:31:13.715055+00:00",
+    "parent_reservations_avoided": [
+      "0x151a4a0",
+      "0x1b26100",
+      "0x47d6b90"
+    ],
+    "queries": [
+      {
+        "kind": "open PRs",
+        "overlaps": [],
+        "raw_sha256": "ba8bce5ff0a70bd31338bf5695097d301c072e97161cdbb545665b958e6a0a90",
+        "results": 84
+      },
+      {
+        "kind": "open issues",
+        "overlaps": [],
+        "raw_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "results": 0
+      },
+      {
+        "kind": "recent merged PRs",
+        "overlaps": [],
+        "raw_sha256": "d814870e555fbabaf5839a2df28e7e76f0b9c9f8c21cc6a55d923788fbca2fbf",
+        "results": 100
+      }
+    ],
+    "search": "3818d40|3818dc4|reversed.record|simd.byte.reversed"
+  },
+  "path_redaction": {
+    "<home>": "operator home directory",
+    "<repo>": "repository root"
+  },
+  "python": "3.14.3",
+  "qualified_archive": {
+    "all_payload_and_call_hashes_verified": true,
+    "bytes": 537733,
+    "calls": 92,
+    "sha256": "66dc5a478716e22d19f0a99fe0d7d38c40a6965ad1f4a506a5923a89b305964e",
+    "streams": 184,
+    "unique_payloads": 19
+  },
+  "recorded_at_utc": "2026-11-01T20:31:13.714877+00:00",
+  "scope": "new source and new evidence packet only; original ABI/compiler byte identity and whole-node equivalence unclaimed",
+  "static_exports": "checks/disassembly.json",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "task": "RE-004 independent value reconstruction from foundation-simd-byte-reversed-copy-94"
+}
