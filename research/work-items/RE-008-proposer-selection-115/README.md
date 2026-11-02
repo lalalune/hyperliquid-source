@@ -128,8 +128,9 @@ base, 55 focused tests and optimized packet replay passed. `make doctor`,
 `verify`, `catalogue-check` and `reproduce` passed after local LFS materialization,
 the documented GNU tool environment, and official regeneration of the new
 29-work-item inventory. Initial environment/pointer/stale-inventory failures
-are retained in `validation/integration/`. No full-suite-on-this-head claim
-is made. The native source, driver, oracle and fixtures did not change on rebase.
+are retained in `validation/integration/`. These checks precede the separately
+recorded full suite below. The native source, driver, oracle and fixtures did
+not change on rebase.
 
 Independent review reproduced a packaging-verifier gap at commit `638695d4`: a
 full replay still passed with unlisted files/directories and same-content or
@@ -140,5 +141,16 @@ the repository, including the two task-owned external tool/test paths. Six new
 temporary-tree control methods cover the gap and malformed/missing rows. This
 assumes the filesystem remains stable during verification; it is not a defense
 against concurrent path replacement. Rust, oracle, client and frozen/native
-results are unchanged. A full repository suite on the fixed head is recorded
-separately when complete; earlier 55-test results remain scoped to their head.
+results are unchanged. The full repository `make test` passed on fixed commit
+`a309180b11d94539885d60318d5a64d4ddbd1f01`: 77 test files, 409 reported tests,
+three reported skips, exit 0 in 1,077.721 seconds. `validation/full-suite/` keeps
+the complete hashed inventory and exact logs. Later additions are evidence and
+documentation only; earlier 55-test results remain scoped to their head.
+
+The independent review in `peer/review.json` authenticates all 34 bound bodies,
+38,606 bytes / 8,103 instructions, all 61,001 RELA records and eight incoming
+call sites. A different CPython/Fraction computation matches all 9,243 frozen
+expectations. The fixed manifest function also rejects five independent
+corruptions. These peer checks do not reexecute native builds or prove the
+explicit generic-helper/runtime premises. Portable scripts and publication
+hashes preserve their exact scope.
