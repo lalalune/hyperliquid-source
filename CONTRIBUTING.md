@@ -112,10 +112,18 @@ actual relocation records. `make catalogue` rechecks the bytes and generates
 alternative candidates once per target. These selected-window percentages do
 not supply a whole-module denominator or advance any acceptance gate.
 
+When complete source and target extents differ, register
+`comparison_mode: "extent-mismatch"` and the full `source.length`. Keep both
+body hashes and the comparison evidence; do not truncate or pad a candidate to
+fit. The catalogue lists these unmatched candidates separately, without an
+aligned-byte comparison or credit in aligned-window totals. Shared relocation
+masks and aligned-byte metric fields are not accepted for this mode.
+
 Tag shared upstream windows with their `dependency` identity. The `component`
-field then records the research allocation only: dependency windows count in
-target totals and the dependency table, never as reconstructed first-party
-component bytes. Zero registered comparisons is a count, not a claim of zero
+field then records the research allocation only: aligned dependency windows
+count in target totals and the dependency table, never as reconstructed
+first-party component bytes. Unequal-extent candidates remain separate.
+Zero registered comparisons is a count, not a claim of zero
 correct code. Keep unmeasured whole-component denominators explicit.
 
 ## Licensing, execution and review

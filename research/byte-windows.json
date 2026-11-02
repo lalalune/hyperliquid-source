@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "reviewed_on": "2026-11-01",
+  "reviewed_on": "2026-11-02",
   "scope": "Selected compiled-code comparison windows; no full-module byte denominator or whole-node equivalence.",
-  "attribution": "The component field is a research allocation only. Dependency-tagged windows are reported separately and excluded from first-party component comparisons; their target bytes remain counted once in target totals.",
+  "attribution": "The component field is a research allocation only. Dependency-tagged aligned windows are reported separately and excluded from first-party component comparisons; their target bytes remain counted once in target totals. Unequal-extent candidates are retained separately and contribute no aligned-byte or aligned-window denominator.",
   "canonical_candidates": "One candidate per target interval; the reviewed ThinLTO adapter supersedes the older native artifact for that interval. Old non-relocation differences remain in prior_candidate and original evidence. Rebuild repetitions, negative controls, cross-release duplicates and overlapping semantic packets add no denominator credit.",
   "targets": {
     "node94": {
@@ -37,7 +37,12 @@
     "research/work-items/RE-002-u128-division-leaf-94/observed/record.json": "7a53e3320cdef2f8bcf1cbc41146ad94ca7df30886a43f5d64a37c85829a7fb8",
     "research/work-items/RE-002-u128-division-leaf-94/observed/official-unmangled-198.bin": "45f632dd0c1fc0915e680ad7ad98cabda1fcf34ba7835c2e73e3569b570a288d",
     "research/work-items/RE-002-u128-division-leaf-94/SOURCE-PROVENANCE.json": "8dcd19dcaba14f66264391708ddf6dfcc3623345c8d3d4411a96a43a4c972d06",
-    "research/work-items/RE-002-u128-division-leaf-94/VALIDATION.json": "67977f3e6c6a228ace30b30ca9d2e3379d3c37cdd1330bad468c5404fde8c10b"
+    "research/work-items/RE-002-u128-division-leaf-94/VALIDATION.json": "67977f3e6c6a228ace30b30ca9d2e3379d3c37cdd1330bad468c5404fde8c10b",
+    "research/work-items/RE-012-listener-source-94/source-build/candidate-body.bin": "fb9209bee137855616ee171dd6372b5273fa154ecb30aa17a3dc21eb9a232313",
+    "research/work-items/RE-012-listener-source-94/source-build/comparison.json": "2c41902de4260a0ff94fa55cfcec062341cd2d790807d470db0244c76a25dcf3",
+    "research/work-items/RE-012-listener-source-94/source-build/acquisition.json": "91da1d33b179b996117eba164dde664e4d27daf1c38b0fbc2efa6ddc8574d3ee",
+    "research/work-items/RE-012-listener-source-94/source-build/build-summary.json": "7a8cf5a42c5e6d46665667d31300d66576bf4fb2a1a3c8b3351f7032f3e16741",
+    "research/work-items/RE-012-listener-source-94/source-build/source-manifest.json": "7bf5fd7085d2bad78a3027c8db368eb7e3db80872bc95da378e3195c85daee26"
   },
   "windows": [
     {
@@ -353,6 +358,27 @@
       "boundary_basis": "Unique complete FDE; both official FUNC definitions cover complete 198-byte executable sections; no code relocation. One candidate counted.",
       "evidence": "research/work-items/RE-002-u128-division-leaf-94/observed/record.json",
       "dependency": "compiler-builtins"
+    },
+    {
+      "id": "node94-mio-listener-bind",
+      "label": "Mio TcpListener bind (unequal source extent)",
+      "component": "transport",
+      "target": "node94",
+      "start": 63792784,
+      "end": 63793089,
+      "target_body_sha256": "24d7900c67f2422e24bba67ba1067d4ea8faa0a9760a5e7856ab819ab269f7c5",
+      "source": {
+        "path": "research/work-items/RE-012-listener-source-94/source-build/candidate-body.bin",
+        "encoding": "binary",
+        "offset": 0,
+        "length": 364,
+        "body_sha256": "fb9209bee137855616ee171dd6372b5273fa154ecb30aa17a3dc21eb9a232313"
+      },
+      "source_kind": "licensed-source build",
+      "boundary_basis": "Unique complete target FDE and complete source FUNC symbol; unequal extents have no aligned-byte comparison.",
+      "evidence": "research/work-items/RE-012-listener-source-94/source-build/comparison.json",
+      "comparison_mode": "extent-mismatch",
+      "dependency": "mio"
     }
   ]
 }
