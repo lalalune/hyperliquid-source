@@ -171,6 +171,8 @@ def analyse(data):
     for j in range(r_sz // 24):
         ro, ri, ra = struct.unpack_from("<QQq", data, r_off + j * 24)
         if 0x5732f60 <= ro < 0x5732f60 + 32:
+            if ro in relocs:
+                raise EvidenceError(f'duplicate relocation in perp table window at {ro:#x}')
             relocs[ro] = ra
 
     perp_matrix = []
