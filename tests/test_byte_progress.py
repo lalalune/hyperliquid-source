@@ -41,7 +41,7 @@ class ByteArithmeticTests(unittest.TestCase):
         result = summarize(rows)
         self.assertEqual(fraction(result['raw_equal_bytes'], result['bytes']), '1/10 (10.00%)')
         self.assertEqual(fraction(result['raw_equal_windows'], result['windows']), '1/2 (50.00%)')
-        self.assertEqual(fraction(0, 0), 'N/A')
+        self.assertEqual(fraction(0, 0), 'Unmeasured')
 
 
 class ByteRegistryTests(unittest.TestCase):
@@ -86,6 +86,17 @@ class ByteRegistryTests(unittest.TestCase):
             self.registry['windows'] = [self.window, second]
             with self.assertRaises(ValueError):
                 self.load()
+
+    def test_dependency_window_is_counted_once_outside_component_progress(self):
+        self.window['dependency'] = 'rust-core'
+        result = self.load()
+        self.assertEqual(result['components']['foundation']['bytes'], 0)
+        self.assertEqual(result['totals']['node94']['bytes'], 8)
+        self.assertEqual(result['dependencies']['node94']['rust-core']['bytes'], 8)
+        self.assertEqual(project_bytes(self.components, result)['bytes'], 8)
+        self.window['dependency'] = 'unreviewed-library'
+        with self.assertRaisesRegex(ValueError, 'dependency attribution'):
+            self.load()
 
     def test_changed_target_and_evidence_are_rejected(self):
         (self.root / 'node94').write_bytes(self.data[:-1])
@@ -151,21 +162,39 @@ class ActualByteProgressTests(unittest.TestCase):
 
     def test_actual_captures_and_retained_compiled_sources(self):
         stats = self.coverage['totals']['node94']
-        self.assertEqual((stats['raw_equal_bytes'], stats['bytes']), (4583, 4675))
-        self.assertEqual((stats['raw_equal_windows'], stats['relocation_qualified_windows'], stats['windows']), (4, 9, 9))
+        self.assertEqual((stats['raw_equal_bytes'], stats['bytes']), (4781, 4873))
+        self.assertEqual((stats['raw_equal_windows'], stats['relocation_qualified_windows'], stats['windows']), (5, 10, 10))
         self.assertEqual(self.coverage['totals']['node115']['windows'], 3)
         self.assertEqual(self.coverage['targets']['node94']['text_bytes'], 70370352)
+        self.assertEqual(self.coverage['targets']['node94']['other_executable_bytes'], 4504)
+        self.assertEqual(self.coverage['targets']['visor']['text_bytes'], 5150272)
+        self.assertEqual(self.coverage['totals']['visor']['windows'], 0)
+        self.assertTrue(all(row['windows'] == 0 for row in self.coverage['components'].values()))
+        self.assertEqual(self.coverage['dependencies']['node94']['rust-core']['bytes'], 2060)
+        self.assertEqual(sum(row['bytes'] for row in self.coverage['dependencies']['node94'].values()), 4873)
 
     def test_byte_progress_does_not_complete_module_gates(self):
         progress = json.loads((ROOT / 'research/progress.json').read_text())
         before = copy.deepcopy(progress)
         output = render_readme_progress(self.components, progress, self.coverage)
         self.assertEqual(progress, before)
-        self.assertIn('0.00% (0/24)', output)
-        self.assertIn('4,583/4,675 (98.03%)', output)
-        self.assertIn('0.00664%', output)
-        self.assertIn('| Node #94 | 0/4 | 0% | N/A | N/A | N/A |', output)
+        self.assertIn('0.00% (0/92 accepted gates; 0/23 components complete)', output)
+        self.assertIn('0.00% (0/4 accepted gates; 0/1 components complete)', output)
+        self.assertIn('1,968/2,060 (95.53%)', output)
+        self.assertIn('0.00692%', output)
+        self.assertIn('| 0/4 | 0% | 0 | 0 |', output)
         self.assertIn('not 0% correct', output)
+        self.assertNotIn('N/A', output)
+
+    def test_division_two_published_candidates_count_one_interval(self):
+        windows = [row for row in self.coverage['windows']
+                   if row['id'] == 'node94-u128-division']
+        self.assertEqual(len(windows), 1)
+        self.assertEqual(windows[0]['source_kind'], 'published-artifact')
+        self.assertEqual(windows[0]['dependency'], 'compiler-builtins')
+        self.assertEqual(windows[0]['bytes'], 198)
+        self.assertTrue(windows[0]['raw_equal'])
+        self.assertEqual(windows[0]['relocation_bytes'], 0)
 
     def test_remainder_published_artifact_counts_one_interval(self):
         windows = [row for row in self.coverage['windows']

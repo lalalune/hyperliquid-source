@@ -53,7 +53,7 @@ def summarize(rows):
 
 
 def fraction(numerator, denominator):
-    return f'{numerator:,}/{denominator:,} ({100 * numerator / denominator:.2f}%)' if denominator else 'N/A'
+    return f'{numerator:,}/{denominator:,} ({100 * numerator / denominator:.2f}%)' if denominator else 'Unmeasured'
 
 
 def load_coverage(root, registry_path, components):
@@ -94,10 +94,18 @@ def load_coverage(root, registry_path, components):
         code_sections[name] = [s for s in sections(data) if s['type'] == 1 and s['flags'] & 4]
         text = [s for s in code_sections[name] if s['name'] == '.text']
         require(len(text) == 1, 'Expected one executable .text section')
-        targets[name] = {**target, 'text_bytes': text[0]['size']}
+        all_sections = sections(data)
+        executable = [s for s in all_sections if s['flags'] & 2 and s['flags'] & 4 and s['type'] != 8]
+        targets[name] = {**target, 'file_bytes': len(data), 'text_bytes': text[0]['size'],
+                         'other_executable_bytes': sum(s['size'] for s in executable if s['name'] != '.text'),
+                         'allocated_data_bytes': sum(s['size'] for s in all_sections
+                                                     if s['flags'] & 2 and not s['flags'] & 4 and s['type'] != 8),
+                         'zero_fill_bytes': sum(s['size'] for s in all_sections if s['flags'] & 2 and s['type'] == 8)}
     rows, seen_ids, intervals = [], set(), {}
     for item in registry['windows']:
         name, target = item['id'], item['target']
+        require('dependency' not in item or item['dependency'] in
+                ('rust-core', 'compiler-builtins', 'zstandard'), 'Unknown dependency attribution')
         require(item['evidence'] in pinned, 'Comparison evidence must be hash-pinned')
         require(name not in seen_ids, 'Duplicate comparison id')
         seen_ids.add(name)
@@ -132,6 +140,9 @@ def load_coverage(root, registry_path, components):
             relocations = [relocations]
         rows.append({**item, **compare(source, captured, relocations)})
     return {'targets': targets, 'windows': rows, 'components': {
-        c['id']: summarize([r for r in rows if r['component'] == c['id'] and r['target'] == c['artifact']])
+        c['id']: summarize([r for r in rows if r['component'] == c['id'] and r['target'] == c['artifact'] and 'dependency' not in r])
         for c in components}, 'totals': {name: summarize([r for r in rows if r['target'] == name])
-                                        for name in targets}}
+                                        for name in targets},
+        'dependencies': {name: {dep: summarize([r for r in rows if r['target'] == name and r.get('dependency') == dep])
+                               for dep in sorted({r['dependency'] for r in rows if r['target'] == name and 'dependency' in r})}
+                         for name in targets}}

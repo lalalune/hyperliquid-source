@@ -130,10 +130,11 @@ class CatalogueTests(unittest.TestCase):
         d['components']['foundation']['gates'] = dict.fromkeys(d['gates'], True)
         d['components']['visor']['gates']['mapped'] = True
         block = render_readme_progress(self.parts, d)
-        self.assertIn('5.21% (5/96 accepted gates; 1/24 modules complete)', block)
-        self.assertIn('| Node #94 | 4/4 | 100% |', block)
-        self.assertIn('| Visor | 1/4 | 25% |', block)
-        self.assertIn('| **5/96** | **5.21%** |', block)
+        self.assertIn('4.35% (4/92 accepted gates; 1/23 components complete)', block)
+        self.assertIn('25.00% (1/4 accepted gates; 0/1 components complete)', block)
+        self.assertIn('| 4/4 | 100% |', block)
+        self.assertIn('| 1/4 | 25% |', block)
+        self.assertIn('**5/96**', block)
 
     def test_readme_regeneration_preserves_surrounding_text(self):
         readme = f'User introduction\n{PROGRESS_START}\nStale numbers\n{PROGRESS_END}\nUser setup\n'

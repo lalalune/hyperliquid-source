@@ -112,6 +112,12 @@ actual relocation records. `make catalogue` rechecks the bytes and generates
 alternative candidates once per target. These selected-window percentages do
 not supply a whole-module denominator or advance any acceptance gate.
 
+Tag shared upstream windows with their `dependency` identity. The `component`
+field then records the research allocation only: dependency windows count in
+target totals and the dependency table, never as reconstructed first-party
+component bytes. Zero registered comparisons is a count, not a claim of zero
+correct code. Keep unmeasured whole-component denominators explicit.
+
 ## Licensing, execution and review
 
 New code/docs use MIT. Imported sources and binaries retain upstream rights;

@@ -4,6 +4,12 @@ All work is initially unclaimed. Record a claim in a GitHub issue or your PR
 before overlapping changes; there is no automatic ownership allocator. Each
 row is a bounded starting task, not a claim that its subsystem is recovered.
 
+The delivery target is the [source-built network node](SCOPE.md#source-built-network-node).
+Prioritize the existing RE-001/002/005/012 work that establishes startup, build
+closure and peer protocol, followed by RE-009/008 state synchronization and
+validation. A container around a captured proprietary executable does not meet
+that target. Keep #94 baseline recovery separate from current-network drift.
+
 | ID | Priority | Scope | First evidence | Deliverable / acceptance | Depends on |
 | --- | --- | --- | --- | --- | --- |
 | RE-001 | P0 | #94 function map | `make index`; catalogue comment seeds | Decode FDE ranges, account for duplicates/missing functions, validate initial entrypoints and xrefs with digest-bound records | None |
