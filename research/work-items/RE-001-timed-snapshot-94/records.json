@@ -1,0 +1,239 @@
+{
+  "bounded_question": "What does node #94 function 0x514f270 do with its outer object and flag byte: under which two mutexes, with which thresholds, when does it rebuild the snapshot at inner+0x188 via 0x514ed50 versus only incrementing its +0x124 field, how are its clock (+0x98) and consumer (+0xb8) dispatch chains walked, and what does it publish under the second lock?",
+  "callees": {
+    "counter_inc": {
+      "bytes": 12,
+      "contract_at_call_site": "adds 1 (32-bit) to [rdi+0x124]; called only on the skip path with rdi = the snapshot destination (inner+0x188)",
+      "end_va_exclusive": "0x514df4c",
+      "fde_cie_offset": "0x00000000",
+      "fde_length": "0x10",
+      "fde_section_offset": "0x0029ac30",
+      "next_fde_start": "0x514df50",
+      "padding_byte": "0xcc",
+      "padding_bytes": 4,
+      "scope_note": "cited as a callee only; the accessor trio 0x514df30/0x514df40/0x514df50 is not otherwise modelled here",
+      "sha256": "3949ffd40c4100c6cec2ea08a61291b654e21c3974a0cb465f5670401f466840",
+      "start_va": "0x514df40"
+    },
+    "ctor": {
+      "bytes": 50,
+      "contract_at_call_site": "builds the consumer-call struct at rdi = rsp+0x10 from rsi = the snapshot destination: +0x00 = snapshot pointer, +0x08 = 0, +0x10 = 0x514b120, +0x18 = 0x514ac60; a separate qword 0x100 is stored at rsp+0x08 before the call and is passed by pointer as the consumer call's third argument",
+      "end_va_exclusive": "0x514df22",
+      "fde_cie_offset": "0x00000000",
+      "fde_length": "0x10",
+      "fde_section_offset": "0x0029ac08",
+      "next_fde_start": "0x514df30",
+      "padding_byte": "0xcc",
+      "padding_bytes": 14,
+      "scope_note": "cited as a callee only; the two code addresses it stores are recorded verbatim, not interpreted",
+      "sha256": "a7d2112f2a3ceabc30e3653769f10ddf98eca62d8bf414752007aa71d9a61ebe",
+      "start_va": "0x514def0"
+    },
+    "snapshot_callee": {
+      "bytes": 1235,
+      "contract_at_call_site": "the snapshot builder bound by the RE-001-snapshot-identity-format-94 packet (same SHA); called at 0x514f381 with (destination = inner+0x188, source wrapper = [inner+0x2d0] in rsi, clock object = [inner+0x2d8] in rdx, value = the RAW clock value in rcx), which it stores verbatim to destination+0x128 and formats into destination+0x20. CORRECTION (2026-11-02, after slopbot review of this PR): the value in rcx is the raw clock value, NOT the elapsed value: at 0x514f34f the dispatch result in rax is copied to rcx BEFORE the subtraction at 0x514f352 (elapsed = rax - inner+0x2c8), and rcx is not rewritten before the call at 0x514f381. The builder's use of the rdx clock object is not pinned by this window.",
+      "end_va_exclusive": "0x514f223",
+      "fde_cie_offset": "0x006205d0",
+      "fde_length": "0x50",
+      "fde_section_offset": "0x00634030",
+      "next_fde_start": "0x514f224",
+      "padding_byte": "0xcc",
+      "padding_bytes": 1,
+      "scope_note": "bound by the snapshot-identity-format item; cited here as a callee only, not re-claimed",
+      "sha256": "7ac5ba1c6e072e7e5be47a01bbccb15b091052c8e8de5d2419d58b416bae5cab",
+      "start_va": "0x514ed50"
+    },
+    "timestamp_set": {
+      "bytes": 12,
+      "contract_at_call_site": "stores rcx to [rdi+0x130]; called on the commit path with rdi = the snapshot destination and rcx = the fresh clock value, so snapshot+0x130 is the commit-time clock value",
+      "end_va_exclusive": "0x514df3c",
+      "fde_cie_offset": "0x00000000",
+      "fde_length": "0x10",
+      "fde_section_offset": "0x0029ac1c",
+      "next_fde_start": "0x514df40",
+      "padding_byte": "0xcc",
+      "padding_bytes": 4,
+      "scope_note": "cited as a callee only",
+      "sha256": "b2ae527b7e6c5422b6673d46a002ac90c9cb37c526a7c53329c25b54543284d3",
+      "start_va": "0x514df30"
+    }
+  },
+  "caller_census": {
+    "direct_callers": [
+      "0x4fddaa7",
+      "0x514fda5",
+      "0x5158f35"
+    ],
+    "direct_callers_note": "full executable-segment direct-rel32 scan; three call sites, each verified instruction-by-instruction in the disassembly. 0x4fddaa7 passes esi = 0; 0x514fda5 and 0x5158f35 pass esi = movzbl %dl (the caller's flag byte). Enclosing FDEs: 0x4fdd990..0x4fddff7, 0x514fd60..0x514ffd8, 0x5158ef0..0x5159130; the 0x514fda5 site is excerpted as the caller sample",
+    "qword_references": [],
+    "qword_references_note": "whole-file qword scan; no absolute pointer to 0x514f270 exists",
+    "tail_jumps": [],
+    "tail_jumps_note": "full executable-segment rel32 tail-jump scan; no tail jump targets 0x514f270"
+  },
+  "cleanup_routine": {
+    "bytes": 73,
+    "end_va_exclusive": "0x514f26d",
+    "entries": {
+      "a_unlock_entry": "0x514f23b",
+      "a_unlock_entry_action": "unlocks mutex A (r13) via pthread_mutex_unlock, checks the canary, then _Unwind_Resume with the exception object in rbx",
+      "both_unlock_entry": "0x514f25b",
+      "both_unlock_entry_action": "unlocks mutex B (rbx, the inner object) via pthread_mutex_unlock, restores the exception object from rbp into rbx, then falls into the A-unlock entry",
+      "full_entry": "0x514f224",
+      "full_entry_action": "if [rsp+0x20] (the consumer struct's +0x10 field) is nonzero, calls it with (r14, r14, 3); then falls into the A-unlock entry"
+    },
+    "fde_cie_offset": "0x006205d0",
+    "fde_length": "0x20",
+    "fde_section_offset": "0x00634114",
+    "next_fde_start": "0x514f270",
+    "padding_byte": "0xcc",
+    "padding_bytes": 3,
+    "scope_note": "the FDE immediately preceding the window (0x514f224..0x514f26d); it is the window's exception consumer, not claimed as a standalone function window",
+    "sha256": "79892fcc04e82898aaedfa0cd4e75a4272761ca207fbbd7aa8a53bb2f0903995",
+    "start_va": "0x514f224"
+  },
+  "clock_chain": {
+    "call_sites": {
+      "head_slot_differs": "0x514f4b8",
+      "node2_slot_differs": "0x514f6a0",
+      "node3_slot_differs": "0x514f4b8",
+      "node4_unconditional": "0x514f349"
+    },
+    "first_compare": "0x514f307",
+    "head_object": "[inner+0x2d8]",
+    "links": "+0x20 from each wrapper to the next wrapper",
+    "max_nodes": 4,
+    "node2_continuation": "0x514f34f",
+    "rule": "the head wrapper's inner +0x98 slot is compared against cell 0x5777bc8; while it equals the cell the walk advances via +0x20, comparing each further slot against the first slot value (which provably equals the cell on skipped paths); at most three comparisons, and the fourth node is called unconditionally; the result is the clock value",
+    "sentinel_cell": "0x5777bc8",
+    "slot": "+0x98"
+  },
+  "composed_rule": [
+    "the window takes (outer rdi, flag byte sil); inner = [outer+0x128]; a null inner returns immediately with no lock taken",
+    "mutex A is inner+0x160 (locked first, unlocked last via a tail jump) and mutex B is the inner object itself (locked after the snapshot/skip decision, unlocked before A); a nonzero lock result throws a system error via _ZSt20__throw_system_errori@plt after the canary check",
+    "thresholds depend on the flag byte: flag 0 gives count limit 500 and time limit 180000000; any nonzero flag gives count limit 10 and time limit 10000000; the limits are built with the sbb/and/add sequence (count mask 0x1ea + 10, time mask 0xa21fe80 + 0x989680)",
+    "stale adjustment, before the clock dispatch: when inner+0x2c0 < inner+0x2c8, the time limit becomes max(time limit, (inner+0x2c8 - inner+0x2c0) * count limit), then control re-enters the dispatch check",
+    "clock dispatch: the +0x98 chain (head [inner+0x2d8], sentinel cell 0x5777bc8, +0x20 links, at most 4 nodes, fourth unconditional) yields the clock value; elapsed = clock value - inner+0x2c8 (unsigned wrap as written)",
+    "decision: the snapshot is rebuilt exactly when elapsed > time limit; otherwise the skip path runs",
+    "snapshot path: inner+0x2c0 is set to the clock value, then 0x514ed50 builds the snapshot at inner+0x188 from source wrapper [inner+0x2d0], clock object [inner+0x2d8] in rdx, and the raw clock value in rcx (see the callee contract correction: rcx holds the pre-subtraction dispatch result, not the elapsed value); the consumer struct is then built at rsp+0x10 by 0x514def0 (snapshot pointer, 0, 0x514b120, 0x514ac60) with a qword 0x100 at rsp+0x08",
+    "consumer dispatch: the +0xb8 chain (head inner [[inner+0x2d0]], sentinel cell 0x5777a50, +0x38 links, at most 11 nodes, eleventh unconditional) is called with (wrapper, struct rsp+0x10, pointer rsp+0x08); after the call, if the struct's +0x10 field ([rsp+0x20]) is nonzero it is called with (struct, struct, 3)",
+    "commit path (snapshot path only): the clock head's +0x98 slot is called directly with no chain walk; the fresh value is stored to inner+0x2c8 and, via 0x514df30, to snapshot+0x130",
+    "skip path: 0x514df40 adds 1 (32-bit) to snapshot+0x124, then control jumps straight to the publish section, skipping the fresh clock call and the snapshot+0x130 store",
+    "publish (under mutex B): the 0x138 bytes at inner+0x188 are copied to inner+0x28, except the string slot at snapshot+0x20 which is copied by _M_assign into inner+0x48 instead of a raw copy; the copy therefore covers snapshot+0x00..+0x138 including the +0x120 counter, the +0x124 field, the +0x128 elapsed value and, on the snapshot path, the +0x130 commit-time value",
+    "unlock order: mutex B is unlocked, the canary is checked, then mutex A is unlocked via a tail jump to pthread_mutex_unlock",
+    "the function is stack-canary protected (canary slot rsp+0x38, __stack_chk_fail on mismatch) and its exception entries are the three landing stubs at the tail of its own range, jumping into the shared cleanup routine at 0x514f224"
+  ],
+  "consumer_chain": {
+    "call_sites": {
+      "compared_node_differs": "0x514f4e0",
+      "head_slot_differs": "0x514f6b0",
+      "node11_unconditional": "0x514f493"
+    },
+    "first_compare": "0x514f3b0",
+    "head_inner": "[[inner+0x2d0]]",
+    "links": "+0x38 from each wrapper to the next wrapper",
+    "max_nodes": 11,
+    "rule": "the head inner's +0xb8 slot is compared against cell 0x5777a50; while it equals the cell the walk advances via +0x38, comparing each further slot against the first slot value (which provably equals the cell on skipped paths); at most ten comparisons, and the eleventh node is called unconditionally; every call passes (wrapper, struct rsp+0x10, pointer rsp+0x08)",
+    "sentinel_cell": "0x5777a50",
+    "slot": "+0xb8"
+  },
+  "excerpts": [
+    "window.objdump.txt",
+    "cleanup.objdump.txt",
+    "ctor.objdump.txt",
+    "timestamp_set.objdump.txt",
+    "counter_inc.objdump.txt",
+    "snapshot_callee.objdump.txt",
+    "caller.objdump.txt"
+  ],
+  "landing_stubs": {
+    "0x514f6f5": "0x514f224",
+    "0x514f701": "0x514f23b",
+    "0x514f70d": "0x514f25b",
+    "note": "each stub is endbr64, then moves the exception object rax to rbx (0x514f6f5, 0x514f701) or to rbp (0x514f70d), then a direct jump into the cleanup routine; the packet does not claim which call site each stub serves, since that mapping lives in the LSDA, not in the window bytes"
+  },
+  "post_call_callback": {
+    "arguments": "(rdi = struct rsp+0x10, rsi = struct rsp+0x10, edx = 3)",
+    "call_site": "0x514f4ff",
+    "condition": "[rsp+0x20] (the consumer struct's +0x10 field) nonzero after the consumer dispatch returns",
+    "note": "the same call appears in the cleanup routine's full entry, so it runs on the exception path too when the field is nonzero"
+  },
+  "publish": {
+    "destination_base": "inner+0x28",
+    "source_base": "inner+0x188",
+    "string_slot": "snapshot+0x20 copied by _M_assign@plt (0x56605c0, GOT 0x5779008) from inner+0x1a8 into inner+0x48; all other 16-byte chunks are raw vector copies",
+    "total_bytes": "0x138"
+  },
+  "target": {
+    "path": "artifacts/node/94/hl-node",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+    "size": 91774280,
+    "work_copy": "work/hl-node-94.bin"
+  },
+  "thresholds": {
+    "flag_nonzero": {
+      "count_limit": 10,
+      "time_limit": 10000000
+    },
+    "flag_zero": {
+      "count_limit": 500,
+      "time_limit": 180000000
+    },
+    "stale_rule": "when inner+0x2c0 < inner+0x2c8, time limit becomes max(time limit, (inner+0x2c8 - inner+0x2c0) * count limit) before the clock dispatch"
+  },
+  "unknowns": [
+    "the identity and contents of the outer object, the inner object, the wrappers, the clock object and the consumer chain, and what the published snapshot means to its readers (all values are stored verbatim)",
+    "why the flag byte selects (500, 180000000) versus (10, 10000000), and what the flag byte means to the three direct callers (one passes 0, two pass a caller flag byte)",
+    "why the stale path inflates the time limit by the timestamp gap times the count limit, and what inner+0x2c0 / inner+0x2c8 measure beyond the observed clock-value arithmetic",
+    "what the consumer struct's +0x10 field means when the consumer dispatch leaves it nonzero, and what the (struct, struct, 3) callback does",
+    "what the qword 0x100 at rsp+0x08 means to the consumer dispatch",
+    "why the commit clock call uses the head's +0x98 slot directly with no chain walk, unlike the decision clock dispatch",
+    "which call site each landing stub serves (LSDA mapping, not pinned from the window bytes)",
+    "the reaching path beyond the three direct callers: no tail jump or absolute pointer to 0x514f270 exists, so indirect reaching paths are left unclaimed"
+  ],
+  "window": {
+    "arguments": {
+      "rdi": "outer object; inner = [rdi+0x128]",
+      "rsi_low_byte": "flag byte selecting the threshold pair"
+    },
+    "bytes": 1193,
+    "call_sites": {
+      "0x514f2d2": "0x5660220",
+      "0x514f381": "0x514ed50",
+      "0x514f3ab": "0x514def0",
+      "0x514f4d4": "0x514df40",
+      "0x514f52c": "0x514df30",
+      "0x514f534": "0x5660220",
+      "0x514f564": "0x56605c0",
+      "0x514f655": "0x5660230"
+    },
+    "canary_fail_target": "0x514f6c2",
+    "canary_load": "0x514f289",
+    "canary_slot": "rsp+0x38",
+    "canary_store": "0x514f292",
+    "decision": {
+      "elapsed": "clock value minus inner+0x2c8",
+      "skip_when": "elapsed <= time limit",
+      "snapshot_when": "elapsed > time limit"
+    },
+    "end_va_exclusive": "0x514f719",
+    "fde_cie_offset": "0x006205d0",
+    "fde_length": "0x68",
+    "fde_section_offset": "0x006340a8",
+    "mutex_a": "inner+0x160, locked at 0x514f2d2, unlocked by tail jump at 0x514f67b",
+    "mutex_b": "inner object itself, locked at 0x514f534, unlocked at 0x514f655",
+    "next_fde_start": "0x514f71a",
+    "padding_byte": "0xcc",
+    "padding_bytes": 1,
+    "plt_got": {
+      "0x5660110": "0x5778db0",
+      "0x5660220": "0x5778e38",
+      "0x5660230": "0x5778e40",
+      "0x5660430": "0x5778f40",
+      "0x56605c0": "0x5779008",
+      "0x5660650": "0x5779050"
+    },
+    "return_value": "none (void); the published snapshot at inner+0x28 and the timestamp fields are the outputs",
+    "sha256": "4181d6d49ea9367290753bc70c9133e5765b53b0acd8594fbaef220966a3108c",
+    "start_va": "0x514f270"
+  }
+}
