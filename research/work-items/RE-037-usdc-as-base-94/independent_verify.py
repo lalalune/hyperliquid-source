@@ -110,6 +110,16 @@ def count_direct_e8(data, segs, target):
     return sorted(sites)
 
 
+# The manifest pins every packet file except MANIFEST.sha256 itself.
+PACKET_FILES = frozenset({
+    "README.md",
+    "independent_verify.py",
+    "pr-body.md",
+    "usdc_as_base_guard.json",
+    "verify.py",
+})
+
+
 def main():
     errs = []
     data = BINARY.read_bytes()
@@ -177,10 +187,50 @@ def main():
     # exclusive je target and sits after the fall-through continue path.
     if not (JE_TARGET == ERR_DF_VA and JE_TARGET > JE_VA + 6):
         errs.append("rule proof geometry")
+    # MANIFEST admission, then the packet-json pin below. Building
+    # the dict used to be the whole check: duplicate rows silently
+    # overwrote each other, only the JSON's row was ever compared,
+    # and the other listed files (README.md, pr-body.md, verify.py,
+    # independent_verify.py itself) were pinned against nothing — a
+    # listed file replaced by a symlink, an unlisted file, or a file
+    # deleted together with its row all passed. Enforce the full
+    # admission, mirroring the RE-005 verifier and the
+    # node-inventory verifiers.
     manifest = {}
     for line in (HERE / "MANIFEST.sha256").read_text().splitlines():
-        digest, name = line.split(None, 1)
-        manifest[name.strip()] = digest
+        if not line.strip():
+            continue
+        digest, sep, name = line.partition("  ")
+        name = name.strip()
+        if not sep or len(digest) != 64 or not name:
+            errs.append("malformed manifest line: " + line.strip())
+            continue
+        if name in manifest:
+            errs.append("manifest lists " + name + " twice")
+            continue
+        manifest[name] = digest
+    if set(manifest) != PACKET_FILES:
+        errs.append("manifest file set differs from pinned packet files")
+    present = set()
+    for entry in sorted(HERE.iterdir()):
+        if entry.is_symlink():
+            errs.append("packet entry is a symlink: " + entry.name)
+        elif entry.is_dir():
+            if entry.name != "__pycache__" or not all(
+                    child.name.endswith(".pyc") and not child.is_symlink()
+                    for child in entry.iterdir()):
+                errs.append("unexpected directory in packet: " + entry.name)
+        else:
+            present.add(entry.name)
+    if present - {"MANIFEST.sha256"} != set(manifest):
+        errs.append("packet contents differ from manifest")
+    for name, digest in manifest.items():
+        path = HERE / name
+        if path.is_symlink() or not path.is_file():
+            errs.append("manifest entry is a symlink or not a file: " + name)
+            continue
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            errs.append("manifest " + name)
     pkt = PACKET_JSON.read_bytes()
     if hashlib.sha256(pkt).hexdigest() != manifest.get("usdc_as_base_guard.json"):
         errs.append("packet json sha256")
