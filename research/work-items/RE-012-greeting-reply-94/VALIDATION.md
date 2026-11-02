@@ -18,13 +18,12 @@
   `replay-initial-result.json`, and `fixtures/sources.json`.
 - Baseline make doctor/verify and final make verify/catalogue-check/reproduce
   pass. No imported evidence or submodule revision changed.
-- The complete 975-file isolated repository sweep is still running under
-  `work/greeting-reply-94/full-suite/`. It is not a full-suite pass. The host
-  was heavily loaded (observed load average above 100), and its existing
-  analysis tests remained live and progressing. They were not restarted.
+- Full repository sweep: all 975 files passed without restarts; 15,491 reported
+  tests including 67 skips. See `full-suite.json`; raw logs remain under ignored
+  `work/greeting-reply-94/full-suite/`.
 - Hosted CI, peer acceptance, real-network operation, a source-built node and
   Docker acceptance are not claimed. All milestone gates and byte counts are
-  unchanged. This submission remains draft pending the full required sweep.
+  unchanged. The required local sweep is complete; hosted CI remains separate.
 
 Build/source/artifact hashes are in `build-receipt.json`. New Rust validation
 executes only the independent code with synthetic input and scripted I/O.

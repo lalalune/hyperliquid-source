@@ -222,3 +222,24 @@ cargo fmt --manifest-path src/node94-tcp-frame/Cargo.toml -- --check
 This component is a partial transport reconstruction. Passing its offline tests
 does not establish TCP runtime compatibility, target binary identity, complete
 transport recovery, or a repository progress gate.
+
+The initial caller routing is available as `Request::route_reply` and
+`greeting::exchange_routed`. It distinguishes continuation of the existing
+stream, a data reply requiring further state validation, and four named peer
+rejections. The first request byte is kept raw: data replies test bit zero,
+while the empty-success reply requires the whole byte to be zero. The routed
+exchange preserves decoded metadata. Dispose of the borrowed stream on any
+error; these routes do not establish peer authentication or state validity.
+See [the routing evidence](../../research/work-items/RE-012-greeting-policy-94/README.md).
+
+`evm_kvs::decode` (with `timed-stream`) decodes the subsequent EVM KVS message
+payloads: ordered raw byte-array pairs or the unit message. It preserves row
+order, duplicate keys, logical charging, cursor errors and suffix metadata.
+It does not write a database or validate received state. The binary evidence
+and checkpoint context are in
+[RE-012 EVM KVS messages](../../research/work-items/RE-012-evm-kvs-message-94/README.md).
+
+The separate `evm_kvs::TransferSize` guard counts cumulative raw row bytes and
+rejects a transfer at 100,000,000,000 bytes. It preserves the updated count on
+rejection. Call it before applying a decoded batch, and abandon the transfer
+on error; it does not write to a database.

@@ -1,0 +1,311 @@
+{
+  "scope": "Only independently authored Rust executes; no captured target execution.",
+  "results": [
+    {
+      "name": "half-reservation",
+      "source_file": "src/evm_kvs.rs",
+      "before": "checked_mul(32)",
+      "after": "checked_mul(16)",
+      "extra_edit": null,
+      "source_sha256": "a7fdbc6cd455d3b4c905982a2d86387b752c907a9a5bc78e25a3582604159f8a",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-evm-kvs/work/evm-kvs-message-94/mutants/half-reservation/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--lib",
+        "--test",
+        "evm_kvs"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "budgets_check_peak_reservation",
+      "log_sha256": "58def1b410c5fa515fea43f07c9cac27b2b924efd2f21bd472817b66fb6743c4",
+      "failed_tests": [
+        "budgets_check_peak_reservation_before_final_smaller_charge",
+        "each_array_checks_its_own_declared_length_after_charging",
+        "all_count_and_array_length_widths_allow_nonminimal_encodings",
+        "every_truncated_extension_at_each_integer_position_keeps_the_marker_only",
+        "array_budget_failure_precedes_payload_availability_failure",
+        "cumulative_transfer_bytes_exclude_wire_and_logical_overhead",
+        "later_array_cost_can_exceed_the_initial_reservation",
+        "overflow_never_stores_the_failed_increment",
+        "invalid_u64_markers_cover_count_and_both_array_positions",
+        "raw_rows_preserve_order_duplicates_empty_values_and_non_utf8",
+        "sequence_count_is_not_prechecked_against_remaining_bytes",
+        "short_integer_extensions_consume_only_the_marker",
+        "truncating_every_wire_position_preserves_reached_cursor_and_charge"
+      ]
+    },
+    {
+      "name": "no-refund",
+      "source_file": "src/evm_kvs.rs",
+      "before": "self.charged -= 32;",
+      "after": "self.charged -= 0;",
+      "extra_edit": null,
+      "source_sha256": "388441edd46c087c6c007eaf9a0317978278ee4a830baf8c1eab58f0e8338712",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-evm-kvs/work/evm-kvs-message-94/mutants/no-refund/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--lib",
+        "--test",
+        "evm_kvs"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "truncating_every_wire_position",
+      "log_sha256": "89a1e7f5f6381b0b8f9b3bd83423a66ff2ff37f00ae864d49ea95b50d5a671d0",
+      "failed_tests": [
+        "budgets_check_peak_reservation_before_final_smaller_charge",
+        "array_budget_failure_precedes_payload_availability_failure",
+        "each_array_checks_its_own_declared_length_after_charging",
+        "all_count_and_array_length_widths_allow_nonminimal_encodings",
+        "cumulative_transfer_bytes_exclude_wire_and_logical_overhead",
+        "every_truncated_extension_at_each_integer_position_keeps_the_marker_only",
+        "invalid_u64_markers_cover_count_and_both_array_positions",
+        "later_array_cost_can_exceed_the_initial_reservation",
+        "overflow_never_stores_the_failed_increment",
+        "raw_rows_preserve_order_duplicates_empty_values_and_non_utf8",
+        "sequence_count_is_not_prechecked_against_remaining_bytes",
+        "short_integer_extensions_consume_only_the_marker",
+        "truncating_every_wire_position_preserves_reached_cursor_and_charge"
+      ]
+    },
+    {
+      "name": "swap-arrays",
+      "source_file": "src/evm_kvs.rs",
+      "before": "rows.push((self.bytes()?, self.bytes()?));",
+      "after": "let first = self.bytes()?; let second = self.bytes()?; rows.push((second, first));",
+      "extra_edit": null,
+      "source_sha256": "635d8aa2363e2869470e6125ce6e3317c184e5aa176ad865516cef8098bdb7d8",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-evm-kvs/work/evm-kvs-message-94/mutants/swap-arrays/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--lib",
+        "--test",
+        "evm_kvs"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "raw_rows_preserve_order",
+      "log_sha256": "d32b3888bdb6ca12d68cfa43aafb46fb40eb0edce646ca5cc1d925bfe67f8109",
+      "failed_tests": [
+        "raw_rows_preserve_order_duplicates_empty_values_and_non_utf8"
+      ]
+    },
+    {
+      "name": "deduplicate-rows",
+      "source_file": "src/evm_kvs.rs",
+      "before": "Ok(Message::Batch(rows))",
+      "after": "rows.sort(); rows.dedup(); Ok(Message::Batch(rows))",
+      "extra_edit": null,
+      "source_sha256": "7933b5551f0e675c0e7d6727829ede1bfaf3fb2bfb19a9a7ac3a537ba1a93625",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-evm-kvs/work/evm-kvs-message-94/mutants/deduplicate-rows/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--lib",
+        "--test",
+        "evm_kvs"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "raw_rows_preserve_order",
+      "log_sha256": "899a4043599799bcd11e26e19073d3d03c45e291d738365e83ea78ec69670de2",
+      "failed_tests": [
+        "raw_rows_preserve_order_duplicates_empty_values_and_non_utf8"
+      ]
+    },
+    {
+      "name": "admit-selector-two",
+      "source_file": "src/evm_kvs.rs",
+      "before": "if self.selector()? == 1",
+      "after": "if self.selector()? >= 1",
+      "extra_edit": "tag bound 1 ->2",
+      "source_sha256": "9c6d44802b04e84d06376f9ee3f709af3ba3e23520094877465a3f3e052a37c2",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-evm-kvs/work/evm-kvs-message-94/mutants/admit-selector-two/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--lib",
+        "--test",
+        "evm_kvs"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "invalid_selectors",
+      "log_sha256": "e6dc945618f6dfe9bde4f300eb915112f03be5c5eaca1d004ac3d28a5b67c5de",
+      "failed_tests": [
+        "invalid_selectors_are_decoded_before_variant_rejection"
+      ]
+    },
+    {
+      "name": "omit-array-charge",
+      "source_file": "src/evm_kvs.rs",
+      "before": "self.charge(count)?;",
+      "after": "self.charge(0)?;",
+      "extra_edit": null,
+      "source_sha256": "4e221e6341417c8e260849fb98594877747eb831bfcb1aaabd9c87e0d2733c23",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-evm-kvs/work/evm-kvs-message-94/mutants/omit-array-charge/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--lib",
+        "--test",
+        "evm_kvs"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "truncating_every_wire_position",
+      "log_sha256": "4768ba9f8e3a07f86ff9f1f620193bca37d487e0659b1e0904fed30dd5998a52",
+      "failed_tests": [
+        "cumulative_transfer_bytes_exclude_wire_and_logical_overhead",
+        "budgets_check_peak_reservation_before_final_smaller_charge",
+        "array_budget_failure_precedes_payload_availability_failure",
+        "each_array_checks_its_own_declared_length_after_charging",
+        "later_array_cost_can_exceed_the_initial_reservation",
+        "raw_rows_preserve_order_duplicates_empty_values_and_non_utf8",
+        "overflow_never_stores_the_failed_increment",
+        "truncating_every_wire_position_preserves_reached_cursor_and_charge"
+      ]
+    },
+    {
+      "name": "admit-transfer-limit",
+      "source_file": "src/evm_kvs.rs",
+      "before": "if self.total >= TRANSFER_SIZE_LIMIT",
+      "after": "if self.total > TRANSFER_SIZE_LIMIT",
+      "extra_edit": null,
+      "source_sha256": "d1dc92c29630e3878f765baef62c7c78c100bbd68960607319be69ab646a11de",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-evm-kvs/work/evm-kvs-message-94/mutants/admit-transfer-limit/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--lib",
+        "--test",
+        "evm_kvs"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "exclusive_limit",
+      "log_sha256": "3db880727933d5f1d1ffd1af5fc078a01037ecee8d6771b2f88516b4a38039ac",
+      "failed_tests": [
+        "evm_kvs::transfer_tests::exclusive_limit_accepts_one_less_and_rejects_equality",
+        "evm_kvs::transfer_tests::an_empty_batch_does_not_reset_a_rejected_total"
+      ]
+    },
+    {
+      "name": "wrap-transfer-size",
+      "source_file": "src/evm_kvs.rs",
+      "before": "self.total.saturating_add(row_bytes)",
+      "after": "self.total.wrapping_add(row_bytes)",
+      "extra_edit": null,
+      "source_sha256": "b146d59d61d8d53126cf865e2623d4a9cbea1c1fa84552bb129fe5ad5f0bfe9f",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-evm-kvs/work/evm-kvs-message-94/mutants/wrap-transfer-size/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--lib",
+        "--test",
+        "evm_kvs"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "overflowing_cumulative_count",
+      "log_sha256": "e8c6fcb709c06bc1b7055e829d9f791cd0d875894b75cd31b96841a6f5bc46b1",
+      "failed_tests": [
+        "evm_kvs::transfer_tests::overflowing_cumulative_count_saturates_and_stays_saturated"
+      ]
+    },
+    {
+      "name": "reset-transfer-size",
+      "source_file": "src/evm_kvs.rs",
+      "before": "for (first, second) in rows {",
+      "after": "self.total = 0; for (first, second) in rows {",
+      "extra_edit": null,
+      "source_sha256": "58f4a2fccb2bcc3f018b5f5410406abe78de2a3c6404c1bd28a217a81d58978a",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-evm-kvs/work/evm-kvs-message-94/mutants/reset-transfer-size/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--lib",
+        "--test",
+        "evm_kvs"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "duplicates_and_empty_arrays",
+      "log_sha256": "7aa335100e43fb46189bb0e10fbb9e4e7f0bf71354819ef3366b32c325120b76",
+      "failed_tests": [
+        "evm_kvs::transfer_tests::an_empty_batch_does_not_reset_a_rejected_total",
+        "evm_kvs::transfer_tests::exclusive_limit_accepts_one_less_and_rejects_equality",
+        "evm_kvs::transfer_tests::duplicates_and_empty_arrays_are_counted_across_batches",
+        "evm_kvs::transfer_tests::all_rows_are_counted_before_a_limit_error",
+        "evm_kvs::transfer_tests::overflowing_cumulative_count_saturates_and_stays_saturated"
+      ]
+    },
+    {
+      "name": "stop-counting-on-error",
+      "source_file": "src/evm_kvs.rs",
+      "before": "self.total = self.total.saturating_add(row_bytes);",
+      "after": "self.total = self.total.saturating_add(row_bytes); if self.total >= TRANSFER_SIZE_LIMIT { return Err(TransferTooLarge { total: self.total }); }",
+      "extra_edit": null,
+      "source_sha256": "90b967080ca6a399d1005d7c16cd933d98464f66e67c60c8c0928259e2c9563e",
+      "command": [
+        "cargo",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/Users/shawwalters/hlsource/node-evm-kvs/work/evm-kvs-message-94/mutants/stop-counting-on-error/node94-tcp-frame/Cargo.toml",
+        "--all-features",
+        "--lib",
+        "--test",
+        "evm_kvs"
+      ],
+      "exit_code": 101,
+      "compiled_and_rejected": true,
+      "required_test": "all_rows_are_counted",
+      "log_sha256": "5badc32e71925e8edb667c1d9978bfe785cd70deeeb09c3454d165563dd1d11f",
+      "failed_tests": [
+        "evm_kvs::transfer_tests::all_rows_are_counted_before_a_limit_error"
+      ]
+    }
+  ]
+}

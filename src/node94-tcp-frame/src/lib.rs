@@ -12,6 +12,8 @@ pub mod deadlines;
 mod decoder;
 mod encoder;
 #[cfg(feature = "timed-stream")]
+pub mod evm_kvs;
+#[cfg(feature = "timed-stream")]
 pub mod greeting;
 mod header;
 mod limits;
