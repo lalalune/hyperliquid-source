@@ -1,0 +1,83 @@
+--- original/build
++++ amended/build
+@@ -1,6 +1,7 @@
+ #!/usr/bin/env python3
+ """Qualify only the real authored dependency-free Rust package after a source gate.
+ 
++Additive amendment1 preserves the original frozen driver/harness and source graph.
+ No captured execution, emulator, fake workspace, expected-file client input or
+ unmerged runtime dependency. Every compiled command stream is retained exactly.
+ """
+@@ -46,9 +47,17 @@
+     for name,digest in pre['files'].items():
+         relative=Path(name);need(not relative.is_absolute() and '..' not in relative.parts,'pre-Rust path')
+         no_symlinks(HERE/name,HERE);need(identity(HERE/name)['sha256']==digest,'frozen pre-Rust file '+name)
+-    need(identity(HERE/'SOURCE-FREEZE.json')['sha256']==source_freeze_sha,'source freeze identity')
+-    freeze=json.loads((HERE/'SOURCE-FREEZE.json').read_text())
++    need(identity(HERE/'SOURCE-FREEZE-2.json')['sha256']==source_freeze_sha,'source freeze identity')
++    freeze=json.loads((HERE/'SOURCE-FREEZE-2.json').read_text())
+     source=source_inventory(ROOT);need(source==freeze['source'],'actual source graph changed')
++    need(identity(HERE/'SOURCE-FREEZE.json')['sha256']=='07930faa65af0a5d8b59fddca522cc711656e9e2bd9c3279b6e12dbe3b5f48b6','original source freeze preserved')
++    prior=json.loads((HERE/'SOURCE-FREEZE.json').read_text())
++    for name,expected in prior['source'].items():
++        path=HERE/'rust-validation/amendment-1/original-test.rs' if name=='src/node94-consensus-admission/tests/client_transaction_join.rs' else ROOT/name
++        need(identity(path)==expected,'original source graph reconstructs exactly '+name)
++    for name,expected in prior['harness'].items():
++        need(identity(HERE/name)==expected,'original harness preserved '+name)
++
+     base=json.loads((HERE/'BASELINE-SOURCE-PLAN.json').read_text())
+     need(set(source)==set(base['files'])|NEW,'exact actual graph files')
+     for name,digest in base['files'].items():
+@@ -204,7 +213,15 @@
+     for name in ['/usr/bin/clang','/usr/bin/ld','/usr/bin/ar','/usr/bin/xcrun',sys.executable]:external[logical(name)]=identity(Path(name))
+     sdk_pins={name:identity(Path(sdk)/name) for name in ['SDKSettings.json','usr/lib/libSystem.tbd']}
+     inputs=gzip.decompress((HERE/'fixtures/vectors.tsv.gz').read_bytes());expected=gzip.decompress((HERE/'fixtures/expected.tsv.gz').read_bytes());need(len(rows(inputs))==len(rows(expected))==361,'frozen corpus count')
+-    controls=comparator_controls(expected);environments={};copies={}
++    controls=comparator_controls(expected);environments={};copies={};compiled_archives=[]
++    def archive_compiled(path,label,profile,kind):
++        raw=path.read_bytes();digest=sha(raw);name='compiled-artifacts/'+digest+'.gz';destination=receipts/name
++        destination.parent.mkdir(exist_ok=True)
++        if not destination.exists():destination.write_bytes(gzip.compress(raw,mtime=0))
++        reference=dict(bytes=len(raw),sha256=digest,gzip_ref=name)
++        compiled_archives.append(dict(sequence=len(compiled_archives),label=label,profile=profile,kind=kind,artifact=reference))
++        write_json(receipts/'compiled-artifacts.json',compiled_archives)
++        return reference
+     def build(label,profiles,test=False,altered=None):
+         phase=(out/label).resolve();phase.mkdir();tree=phase/'repo';tree.mkdir()
+         for name in freeze['source']:
+@@ -212,8 +229,8 @@
+         if altered is not None:(tree/MODULE).write_text(altered)
+         expected_copy=dict(freeze['source'])
+         if altered is not None:expected_copy[MODULE]=dict(bytes=len(altered.encode()),sha256=sha(altered.encode()))
+-        need(source_inventory(tree)==expected_copy,'copied real source graph');driver=phase/'driver.rs';shutil.copyfile(HERE/'rust-validation/driver.rs',driver)
+-        need(identity(driver)==freeze['harness']['rust-validation/driver.rs'],'copied driver identity');no_symlinks(driver,phase)
++        need(source_inventory(tree)==expected_copy,'copied real source graph');driver=phase/'driver.rs';shutil.copyfile(HERE/'rust-validation/driver_amended.rs',driver)
++        need(identity(driver)==freeze['harness']['rust-validation/driver_amended.rs'],'copied driver identity');no_symlinks(driver,phase)
+         component=tree/'src'/CRATES[0];audit(requested_out/label/'repo/src'/CRATES[0],'lexical');audit(component,'canonical')
+         flags=['-Dwarnings','-C','overflow-checks=on','-C','linker=/usr/bin/clang',
+                '--remap-path-prefix='+str(phase)+'=/transaction-join-build',
+@@ -234,10 +251,13 @@
+             if test:run(label+'-'+profile+'-cargo-test',[toolchain/'bin/cargo','test','--offline','--locked','--lib','--test','client_transaction_join',*release],component,env)
+             rlib=phase/'target'/profile/'libnode94_consensus_admission.rlib';client=phase/('client-'+profile)
+             run(label+'-'+profile+'-link-driver',[toolchain/'bin/rustc','--edition=2021','--crate-name','client_transaction_join_input_client',driver,'--extern','node94_consensus_admission='+str(rlib),'-L','dependency='+str(phase/'target'/profile/'deps'),'-C','opt-level='+('3' if profile=='release' else '0'),'-C','debuginfo='+('0' if profile=='release' else '2'),*flags,'-o',client],component,env)
++            archived=None
++            if altered is None:
++                archived={kind:archive_compiled(path,label,profile,kind) for kind,path in [('rlib',rlib),('client',client)]}
+             actual=run(label+'-'+profile+'-values',[client],component,env,inputs);comparison=compare(actual,expected);need(comparison['actual_rows']==361,'all actual case outputs')
+-            observations[profile]=dict(comparison=comparison,rlib=identity(rlib),client=identity(client),canonical_build_prefix_absent_in_rlib=str(phase).encode() not in rlib.read_bytes(),canonical_build_prefix_absent_in_client=str(phase).encode() not in client.read_bytes())
++            observations[profile]=dict(comparison=comparison,rlib=identity(rlib),client=identity(client),archived_compiled_bytes=archived,canonical_build_prefix_absent_in_rlib=str(phase).encode() not in rlib.read_bytes(),canonical_build_prefix_absent_in_client=str(phase).encode() not in client.read_bytes())
+         if test:run(label+'-clippy',[toolchain/'bin/cargo','clippy','--offline','--locked','--all-targets','--','-D','warnings'],component,env)
+-        need(source_inventory(tree)==expected_copy,'copied source changed');need(identity(driver)==freeze['harness']['rust-validation/driver.rs'],'copied driver changed');copies[label]=expected_copy;return observations
++        need(source_inventory(tree)==expected_copy,'copied source changed');need(identity(driver)==freeze['harness']['rust-validation/driver_amended.rs'],'copied driver changed');copies[label]=expected_copy;return observations
+     baseline=build('clean-one',('debug','release'),test=True);need(all(x['comparison']['equal'] for x in baseline.values()),'production mismatch')
+     parser={};client=out/'clean-one/client-release'
+     for name,raw in malformed_inputs(inputs).items():
+@@ -262,7 +282,7 @@
+     admit(a.source_freeze_sha)
+     write_json(receipts/'source-copies.json',copies)
+     write_json(receipts/'build-audit.json',dict(source_freeze_sha256=a.source_freeze_sha,actual_source=freeze['source'],ancestor_config_checks=sorted(configs),ancestor_workspace_checks=sorted(workspace_ancestors),source_ancestor_context_excluded=source_ancestors,fresh_CARGO_HOME=True,toolchain_payload_sha256=identity(HERE/'rust-validation/TOOLCHAIN-PINS.json')['sha256'],toolchain_payload_unchanged=True,external_tools=external,SDKROOT=sdk,sdk_inputs=sdk_pins,limit='Actual graph and97 toolchain files plus selected linker/SDK bytes pinned; host OS/dyld and entire SDK are not hermetic.'))
+-    result=dict(source_freeze_sha256=a.source_freeze_sha,corpus_cases=361,baseline=baseline,same_path_clean_repeat=repeat,raw_same_path_artifact_equality=own_bytes,compiled_mutants=mutation_results,comparator_controls=controls,parser_controls=parser,commands=len(commands),actual_and_copied_source_unchanged=True,precode_unchanged=True,scope='Authored Rust value/state execution only; conditional native memory/map/ownership and helper-frame limits preserved; no captured execution, emulator, full suite or cross-directory byte identity claim.')
++    result=dict(source_freeze_sha256=a.source_freeze_sha,corpus_cases=361,baseline=baseline,same_path_clean_repeat=repeat,raw_same_path_artifact_equality=own_bytes,compiled_artifact_archives=compiled_archives,compiled_mutants=mutation_results,comparator_controls=controls,parser_controls=parser,commands=len(commands),actual_and_copied_source_unchanged=True,precode_unchanged=True,scope='Authored Rust value/state execution only; conditional native memory/map/ownership and helper-frame limits preserved; no captured execution, emulator, full suite or cross-directory byte identity claim.')
+     write_json(receipts/'results.json',result);print(json.dumps(dict(cases=361,mutants=len(mutation_results),profiles=2,commands=len(commands),raw_same_path_artifact_equality=own_bytes)))
+ 
+ if __name__=='__main__':

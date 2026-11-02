@@ -15,6 +15,8 @@ mod auth;
 pub mod block_preimage;
 mod digest;
 mod client_batch;
+
+pub mod client_transaction_join;
 mod error;
 pub mod message_preimages;
 mod qc;

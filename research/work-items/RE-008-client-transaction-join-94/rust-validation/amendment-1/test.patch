@@ -1,0 +1,24 @@
+--- original/test
++++ amended/test
+@@ -242,3 +242,21 @@
+     assert_eq!(checked_row_bytes(host_limit + 1), None);
+     assert_eq!(checked_row_bytes(u64::MAX), None);
+ }
++
++#[test]
++fn new_rows_preserve_the_original_opaque_block_pointer() {
++    let block = Arc::new((vec![7, 0, 255], Some(vec![2, 3, 4])));
++    let weak = Arc::downgrade(&block);
++    let values = BTreeMap::from([(hash(3), Arc::new(vec![8, 9]))]);
++    let hashes = [hash(3)];
++    let result =
++        join_transactions(input(block), || Ok::<_, ()>(&hashes[..]), || Ok(&values)).unwrap();
++    assert!(std::ptr::eq(weak.as_ptr(), Arc::as_ptr(&result.block)));
++    assert_eq!(
++        result.block.as_ref(),
++        &(vec![7, 0, 255], Some(vec![2, 3, 4]))
++    );
++    assert_eq!(Arc::strong_count(&result.block), 1);
++    drop(result);
++    assert!(weak.upgrade().is_none());
++}
