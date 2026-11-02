@@ -1,0 +1,314 @@
+{
+  "rows": 8312,
+  "profiles": {
+    "0": {
+      "rows": 8312,
+      "match": true,
+      "stdout_sha256": "ea0748d95961e02765e043cb5757e5c9f95388e06cd682de611e00a6150f021b"
+    },
+    "3": {
+      "rows": 8312,
+      "match": true,
+      "stdout_sha256": "ea0748d95961e02765e043cb5757e5c9f95388e06cd682de611e00a6150f021b"
+    }
+  },
+  "compiled_mutants": [
+    {
+      "name": "infinity",
+      "mismatches": 63,
+      "rows": 8312,
+      "compiled_smoke_exit": 101
+    },
+    {
+      "name": "wrapped-add",
+      "mismatches": 310,
+      "rows": 8312,
+      "compiled_smoke_exit": 101
+    },
+    {
+      "name": "span-rounding",
+      "mismatches": 451,
+      "rows": 8312,
+      "compiled_smoke_exit": 101
+    }
+  ],
+  "raw_own_rlib_equal": true,
+  "rlib_sha256": "986fc55b5e5c29d1304d538f9c483e36907466606e06265f81bffefcb1f5906e",
+  "source_sha256": "d328a3fa1da0859fdfd31d0686514e48d06dd3c9a824194491d9762a1b39dded",
+  "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: aarch64-apple-darwin\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+  "commands": [
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gas_auction_price_core",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=0",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=gas_auction_price_core",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gas-auction-price-core/lib.rs",
+      "-o",
+      "$OUTPUT/o0/libnode94_gas_auction_price_core.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=0",
+      "$REPO/src/node94-gas-auction-price-core/input_only_driver.rs",
+      "--extern",
+      "node94_gas_auction_price_core=$OUTPUT/o0/libnode94_gas_auction_price_core.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/o0/driver"
+    ],
+    [
+      "$OUTPUT/o0/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gas_auction_price_core",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=gas_auction_price_core",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gas-auction-price-core/lib.rs",
+      "-o",
+      "$OUTPUT/o3/libnode94_gas_auction_price_core.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "$REPO/src/node94-gas-auction-price-core/input_only_driver.rs",
+      "--extern",
+      "node94_gas_auction_price_core=$OUTPUT/o3/libnode94_gas_auction_price_core.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/o3/driver"
+    ],
+    [
+      "$OUTPUT/o3/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$REPO/src/node94-gas-auction-price-core/lib.rs",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/smoke-test"
+    ],
+    [
+      "$OUTPUT/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gas_auction_price_core",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=gas_auction_price_core",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-infinity/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-infinity/build/libnode94_gas_auction_price_core.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "$REPO/src/node94-gas-auction-price-core/input_only_driver.rs",
+      "--extern",
+      "node94_gas_auction_price_core=$OUTPUT/mutant-infinity/build/libnode94_gas_auction_price_core.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-infinity/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-infinity/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-infinity/lib.rs",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-infinity/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-infinity/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gas_auction_price_core",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=gas_auction_price_core",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-wrapped-add/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-wrapped-add/build/libnode94_gas_auction_price_core.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "$REPO/src/node94-gas-auction-price-core/input_only_driver.rs",
+      "--extern",
+      "node94_gas_auction_price_core=$OUTPUT/mutant-wrapped-add/build/libnode94_gas_auction_price_core.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-wrapped-add/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-wrapped-add/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-wrapped-add/lib.rs",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-wrapped-add/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-wrapped-add/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gas_auction_price_core",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=gas_auction_price_core",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-span-rounding/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-span-rounding/build/libnode94_gas_auction_price_core.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "$REPO/src/node94-gas-auction-price-core/input_only_driver.rs",
+      "--extern",
+      "node94_gas_auction_price_core=$OUTPUT/mutant-span-rounding/build/libnode94_gas_auction_price_core.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-span-rounding/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-span-rounding/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-span-rounding/lib.rs",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/mutant-span-rounding/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-span-rounding/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gas_auction_price_core",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "metadata=gas_auction_price_core",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gas-auction-price-core/lib.rs",
+      "-o",
+      "$OUTPUT/o3-repeat/libnode94_gas_auction_price_core.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "$REPO/src/node94-gas-auction-price-core/input_only_driver.rs",
+      "--extern",
+      "node94_gas_auction_price_core=$OUTPUT/o3-repeat/libnode94_gas_auction_price_core.rlib",
+      "-D",
+      "warnings",
+      "-o",
+      "$OUTPUT/o3-repeat/driver"
+    ]
+  ],
+  "captured_process_executed": false,
+  "offline_python_instruction_evaluation_authorized": true
+}
