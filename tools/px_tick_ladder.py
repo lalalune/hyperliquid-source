@@ -167,8 +167,13 @@ class Image:
     def relative_relocs_cached(self):
         if self.relocs is None:
             _, off, size = self.sec['.rela.dyn']
-            self.relocs = {where: addend for where, info, addend in
-                           struct.iter_unpack('<QQq', self.data[off:off + size]) if info & 0xffffffff == 8}
+            out = {}
+            for where, info, addend in struct.iter_unpack('<QQq', self.data[off:off + size]):
+                if info & 0xffffffff == 8:
+                    if where in out:
+                        raise EvidenceError(f'duplicate RELATIVE relocation slot {where:#x}')
+                    out[where] = addend
+            self.relocs = out
         return self.relocs
 
 
