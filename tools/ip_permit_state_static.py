@@ -31,6 +31,16 @@ def read(data,va,n):
     return off,bytes(data[off:off+n])
 
 
+def rela_section(data):
+    """The .rela.dyn section, shape-checked before its entries are folded.
+    A size that is not a whole number of 24-byte entries would otherwise
+    escape the fold as a bare struct.error, not this module's ValueError:
+    the same fail-closed shape evm_amount_scale applies to this table."""
+    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    if sec['size']%24:raise ValueError('.rela.dyn truncated')
+    return sec
+
+
 def parameters(data):
     for va,raw in [(0x47710fe,'48c1e8'),(0x4771128,'4d01e4'),(0x4770f62,'498b47'),
                    (0x4770f70,'a8'),(0x4770f78,'4883f8'),(0x4770f82,'488d48'),
@@ -76,6 +86,7 @@ def analyze(data):
         code=read(data,site,6)[1]
         if code[:2]!=opcode or site+6+struct.unpack_from('<i',code,2)[0]!=target:
             raise ValueError('permit guard transfer changed')
+    rela_section(data)
     code=read(data,0x4770f8c,2)[1]
     if code[0]!=0x75 or 0x4770f8e+struct.unpack('<b',code[1:])[0]!=0x4770f70:
         raise ValueError('CAS retry transfer changed')
