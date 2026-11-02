@@ -1,0 +1,91 @@
+{
+  "all_slots_single_writer": true,
+  "captured_execution": false,
+  "cases": 76240,
+  "complete_low_tag_old_byte_pairs": 65536,
+  "conclusion": "No blocking defect in library, full-register proof, isolated value oracle, relocation closure, or explicit finite concurrency/IR qualification scope.",
+  "final_prose_and_harness_followup": {
+    "IR_only_controls": {
+      "split_atomic_load_store": {
+        "ir_rejection": "one byte SeqCst atomic exchange",
+        "isolated_value_mismatches": 0
+      },
+      "weakened_order": {
+        "ir_rejection": "one byte SeqCst atomic exchange",
+        "isolated_value_mismatches": 0
+      }
+    },
+    "all_value_mutants_mismatch": true,
+    "archive_streams_verified": 169,
+    "assessment": "Final README accurately distinguishes 17 value controls, two IR-only controls, finite concurrency checks and two retained control-compilation failures. Current control fixes do not alter library or oracle. No blocker.",
+    "current_library_matches_prior_review": true,
+    "native_rerun_by_reviewer": false,
+    "native_value_mutants": 17,
+    "prior_reviewed_hashes_preserved": true,
+    "reviewed_hashes": {
+      "research/work-items/RE-004-tag-exchange-rust-94/README.md": "08824ad2bf720b31ac6b37491433c19c55576736d73cded46290a50511961f41",
+      "research/work-items/RE-004-tag-exchange-rust-94/native-commands.json": "10bb7ac4224f30057396ad4187bd1c708c273607a6be438c81779beaef0d5e45",
+      "research/work-items/RE-004-tag-exchange-rust-94/native-result.json": "f8a904071eb34ccf40a6edba91dccaa99798c817c989e4823aff6fdedf89de5c",
+      "research/work-items/RE-004-tag-exchange-rust-94/native-streams.json.gz": "7c63401129ea4b73cdff9077b0576a26797864c16798f3ee3335d193b140a02e",
+      "research/work-items/RE-004-tag-exchange-rust-94/verify_rust.py": "2501a7e05c767592dbe31e850ffd09f0103e98411c1bfc1ceddf35e696ff5a46"
+    },
+    "source_and_verification_hash_bindings_match": true
+  },
+  "fixture_mismatches": 0,
+  "independent_ELF_parser": "struct-only ELF64 section and RELA parsing, no packet parser import",
+  "independent_fixture_relation": "Literal 256-byte normalization table, oldbyte identity, RCX literal zero, unbounded object+16 modulo64; no oracle import or Rust execution",
+  "independent_relation_command": {
+    "argv": [
+      "python3",
+      "work/two-table-lookup-rust/review-tag-exchange.py"
+    ],
+    "cwd": "/Users/shinjun/hyperliquid-contributions/compression",
+    "exit_code": 0
+  },
+  "native_replay": false,
+  "primary_sources": [
+    {
+      "finding": "Memory XCHG invokes locking regardless of LOCK prefix; opcode86 is byte exchange.",
+      "pages": "6-28 through 6-29",
+      "url": "https://cdrdv2-public.intel.com/671143/334569-sdm-vol-2d.pdf"
+    },
+    {
+      "finding": "Reviewed atomic access discipline and byte swap/SeqCst contract.",
+      "url": "https://raw.githubusercontent.com/rust-lang/rust/1.94.1/library/core/src/sync/atomic.rs"
+    }
+  ],
+  "raw_body_hex": "4080fe020f94c0fec031c94084f60fb6c00f44c1864710c3",
+  "raw_body_sha256": "af60a00486bebb91daba8ee6d2acd342291703c6e759edb3278a35aa4ace87eb",
+  "recalculated_counts": {
+    "high_old_bit": 37319,
+    "high_tag_bits": 10704,
+    "stored_one": 74346,
+    "stored_two": 946,
+    "stored_zero": 948,
+    "wrapped_field_address": 26340
+  },
+  "rela_records": 80300,
+  "reviewed_hashes": {
+    "research/work-items/RE-004-tag-exchange-rust-94/PROOF.md": "522207b0de5c2a0aff8def12787b918045c52677852a15ee5db0ee875b83b1f3",
+    "research/work-items/RE-004-tag-exchange-rust-94/frozen.json": "add7f698e591f4ac5ac606621bed58e9da74ce7eb6305d53ebfa5eae1fa0c849",
+    "research/work-items/RE-004-tag-exchange-rust-94/oracle.py": "b6c3a009b6029130caa5571d8f8c17b4513c47b95dff6769be8cb5b7e1166347",
+    "research/work-items/RE-004-tag-exchange-rust-94/static.json": "3bdb14b113cc223e1ea698636621bb631e55fc6b29d72b6c4afd7f603a645b8a",
+    "research/work-items/RE-004-tag-exchange-rust-94/verify_rust.py": "625687cc22f7a071b8b9d2dae19a75e7738820fd33595eff98bb822c9b1d7b44",
+    "research/work-items/RE-004-tag-exchange-rust-94/verify_static.py": "c9cfde0e2c5509ff5bf842baa92bc5b84444e8994d547564084275dbc6ae021f",
+    "src/node94-tag-exchange/README.md": "27faa4c6a0d867a21f4ee7adc08f81ca9717cb05fa09110eaeb9b06f8d989a91",
+    "src/node94-tag-exchange/input_only_driver.rs": "ed5b1ddf88af7dc293b1097c9f45620367e74da3a5854b6710a299fa438d75ce",
+    "src/node94-tag-exchange/lib.rs": "728119fad783be45b03aeaeb6fa25fe9bc9e6eb1cdef878e5433777d1aee54a5"
+  },
+  "static_optimized_python": {
+    "argv": [
+      "python3",
+      "-O",
+      "-B",
+      "research/work-items/RE-004-tag-exchange-rust-94/verify_static.py"
+    ],
+    "cwd": "/Users/shinjun/hyperliquid-contributions/floor-trunc",
+    "exit_code": 0,
+    "stdout": "{\"members\": 1, \"controls\": 21, \"rela_records\": 80300}\n"
+  },
+  "unique_entry_slots": 36
+}
