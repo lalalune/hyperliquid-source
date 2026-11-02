@@ -1,0 +1,58 @@
+node #94; original ELF virtual addresses; Intel-style operands
+Strict Python decoder; no normalized operands
+
+PRIMARY FUNCTION
+0x4d8c270  8b4760                   mov eax, dword [rdi+0x60]
+0x4d8c273  488b4f28                 mov rcx, qword [rdi+0x28]
+0x4d8c277  3b8724450000             cmp eax, dword [rdi+0x4524]
+0x4d8c27d  0f9cc0                   setl al
+0x4d8c280  751b                     jne 0x4d8c29d
+0x4d8c282  8b4764                   mov eax, dword [rdi+0x64]
+0x4d8c285  3b8728450000             cmp eax, dword [rdi+0x4528]
+0x4d8c28b  0f92c0                   setb al
+0x4d8c28e  750d                     jne 0x4d8c29d
+0x4d8c290  8b4768                   mov eax, dword [rdi+0x68]
+0x4d8c293  3b872c450000             cmp eax, dword [rdi+0x452c]
+0x4d8c299  7306                     jae 0x4d8c2a1
+0x4d8c29b  eb0f                     jmp 0x4d8c2ac
+0x4d8c29d  84c0                     test al, al
+0x4d8c29f  750b                     jne 0x4d8c2ac
+0x4d8c2a1  b002                     mov al, 0x2
+0x4d8c2a3  483b8f08440000           cmp rcx, qword [rdi+0x4408]
+0x4d8c2aa  732b                     jae 0x4d8c2d7
+0x4d8c2ac  488b4710                 mov rax, qword [rdi+0x10]
+0x4d8c2b0  483d78ecffff             cmp rax, 0xffffffffffffec78
+0x4d8c2b6  7213                     jb 0x4d8c2cb
+0x4d8c2b8  480588130000             add rax, 0x1388
+0x4d8c2be  48c7c2ffffffff           mov rdx, 0xffffffffffffffff
+0x4d8c2c5  480f42c2                 cmovb rax, rdx
+0x4d8c2c9  eb06                     jmp 0x4d8c2d1
+0x4d8c2cb  480588130000             add rax, 0x1388
+0x4d8c2d1  4839c1                   cmp rcx, rax
+0x4d8c2d4  0f93c0                   setae al
+0x4d8c2d7  c3                       ret
+0x4d8c2d8  cccccccccccccccc  INT3 padding (outside FDE)
+
+BOUNDED CALLER / LOCATION EXCERPTS (not whole caller functions)
+[0x4adf594, 0x4adf59e)
+0x4adf594  4889ef                   mov rdi, rbp
+0x4adf597  e8d4cc2a00               call 0x4d8c270
+0x4adf59c  3c02                     cmp al, 0x2
+[0x4ae041a, 0x4ae0424)
+0x4ae041a  4c89f7                   mov rdi, r14
+0x4ae041d  e84ebe2a00               call 0x4d8c270
+0x4ae0422  3c02                     cmp al, 0x2
+[0x4c1926f, 0x4c19279)
+0x4c1926f  4889ef                   mov rdi, rbp
+0x4c19272  e8f92f1700               call 0x4d8c270
+0x4c19277  3c02                     cmp al, 0x2
+[0x4c19a2c, 0x4c19a3e)
+0x4c19a2c  4c89ef                   mov rdi, r13
+0x4c19a2f  e83c281700               call 0x4d8c270
+0x4c19a34  400a6c240c               or bpl, byte [rsp+0xc]
+0x4c19a39  0f94c1                   sete cl
+0x4c19a3c  3c02                     cmp al, 0x2
+[0x4c19b52, 0x4c19b62)
+0x4c19b52  488d15c787b200           lea rdx, [rip -> 0x5742320]
+0x4c19b59  4c89e7                   mov rdi, r12
+0x4c19b5c  ff156644b500             call qword [rip -> 0x576dfc8]
