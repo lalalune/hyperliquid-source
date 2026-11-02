@@ -1,0 +1,179 @@
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 1686bd0: 55                           	push	rbp
+ 1686bd1: 48 89 e5                     	mov	rbp, rsp
+ 1686bd4: 41 57                        	push	r15
+ 1686bd6: 41 56                        	push	r14
+ 1686bd8: 41 55                        	push	r13
+ 1686bda: 41 54                        	push	r12
+ 1686bdc: 53                           	push	rbx
+ 1686bdd: 48 83 ec 38                  	sub	rsp, 0x38
+ 1686be1: 48 bb 80 80 80 80 80 80 80 80	movabs	rbx, -0x7f7f7f7f7f7f7f80
+ 1686beb: 49 bc 0a 0a 0a 0a 0a 0a 0a 0a	movabs	r12, 0xa0a0a0a0a0a0a0a
+ 1686bf5: 48 8b 47 10                  	mov	rax, qword ptr [rdi + 0x10]
+ 1686bf9: 48 89 45 b0                  	mov	qword ptr [rbp - 0x50], rax
+ 1686bfd: 48 8b 07                     	mov	rax, qword ptr [rdi]
+ 1686c00: 48 89 45 b8                  	mov	qword ptr [rbp - 0x48], rax
+ 1686c04: 48 8b 47 08                  	mov	rax, qword ptr [rdi + 0x8]
+ 1686c08: 48 89 45 c0                  	mov	qword ptr [rbp - 0x40], rax
+ 1686c0c: 48 89 75 d0                  	mov	qword ptr [rbp - 0x30], rsi
+ 1686c10: 48 8d 46 08                  	lea	rax, [rsi + 0x8]
+ 1686c14: 48 89 45 a8                  	mov	qword ptr [rbp - 0x58], rax
+ 1686c18: 45 31 f6                     	xor	r14d, r14d
+ 1686c1b: 45 31 ff                     	xor	r15d, r15d
+ 1686c1e: 31 c0                        	xor	eax, eax
+ 1686c20: 48 89 55 a0                  	mov	qword ptr [rbp - 0x60], rdx
+ 1686c24: eb 4e                        	jmp	0x1686c74 <.text+0x26d974>
+ 1686c26: 66 2e 0f 1f 84 00 00 00 00 00	nop	word ptr cs:[rax + rax]
+ 1686c30: 80 7c 1f ff 0a               	cmp	byte ptr [rdi + rbx - 0x1], 0xa
+ 1686c35: 0f 94 c0                     	sete	al
+ 1686c38: 4c 29 fb                     	sub	rbx, r15
+ 1686c3b: 49 01 ff                     	add	r15, rdi
+ 1686c3e: 48 8b 4d b0                  	mov	rcx, qword ptr [rbp - 0x50]
+ 1686c42: 88 01                        	mov	byte ptr [rcx], al
+ 1686c44: 48 8b 7d b8                  	mov	rdi, qword ptr [rbp - 0x48]
+ 1686c48: 4c 89 fe                     	mov	rsi, r15
+ 1686c4b: 48 89 da                     	mov	rdx, rbx
+ 1686c4e: 48 8b 45 c0                  	mov	rax, qword ptr [rbp - 0x40]
+ 1686c52: ff 50 18                     	call	qword ptr [rax + 0x18]
+ 1686c55: 4d 89 ef                     	mov	r15, r13
+ 1686c58: 84 c0                        	test	al, al
+ 1686c5a: 48 8b 55 a0                  	mov	rdx, qword ptr [rbp - 0x60]
+ 1686c5e: 4c 89 e3                     	mov	rbx, r12
+ 1686c61: 49 bc 0a 0a 0a 0a 0a 0a 0a 0a	movabs	r12, 0xa0a0a0a0a0a0a0a
+ 1686c6b: 8b 45 cc                     	mov	eax, dword ptr [rbp - 0x34]
+ 1686c6e: 0f 85 c1 01 00 00            	jne	0x1686e35 <.text+0x26db35>
+ 1686c74: a8 01                        	test	al, 0x1
+ 1686c76: 0f 85 b5 01 00 00            	jne	0x1686e31 <.text+0x26db31>
+ 1686c7c: 4c 39 f2                     	cmp	rdx, r14
+ 1686c7f: 73 0f                        	jae	0x1686c90 <.text+0x26d990>
+ 1686c81: 4d 89 f5                     	mov	r13, r14
+ 1686c84: 48 8b 7d d0                  	mov	rdi, qword ptr [rbp - 0x30]
+ 1686c88: e9 56 01 00 00               	jmp	0x1686de3 <.text+0x26dae3>
+ 1686c8d: 0f 1f 00                     	nop	dword ptr [rax]
+ 1686c90: 48 8b 7d d0                  	mov	rdi, qword ptr [rbp - 0x30]
+ 1686c94: eb 16                        	jmp	0x1686cac <.text+0x26d9ac>
+ 1686c96: 66 2e 0f 1f 84 00 00 00 00 00	nop	word ptr cs:[rax + rax]
+ 1686ca0: 4d 89 ee                     	mov	r14, r13
+ 1686ca3: 4c 39 ea                     	cmp	rdx, r13
+ 1686ca6: 0f 82 37 01 00 00            	jb	0x1686de3 <.text+0x26dae3>
+ 1686cac: 48 89 d1                     	mov	rcx, rdx
+ 1686caf: 4c 29 f1                     	sub	rcx, r14
+ 1686cb2: 4a 8d 04 37                  	lea	rax, [rdi + r14]
+ 1686cb6: 48 83 f9 0f                  	cmp	rcx, 0xf
+ 1686cba: 77 34                        	ja	0x1686cf0 <.text+0x26d9f0>
+ 1686cbc: 4c 39 f2                     	cmp	rdx, r14
+ 1686cbf: 0f 84 1b 01 00 00            	je	0x1686de0 <.text+0x26dae0>
+ 1686cc5: 31 f6                        	xor	esi, esi
+ 1686cc7: 66 0f 1f 84 00 00 00 00 00   	nop	word ptr [rax + rax]
+ 1686cd0: 80 3c 30 0a                  	cmp	byte ptr [rax + rsi], 0xa
+ 1686cd4: 0f 84 d6 00 00 00            	je	0x1686db0 <.text+0x26dab0>
+ 1686cda: 48 ff c6                     	inc	rsi
+ 1686cdd: 48 39 f1                     	cmp	rcx, rsi
+ 1686ce0: 75 ee                        	jne	0x1686cd0 <.text+0x26d9d0>
+ 1686ce2: e9 f9 00 00 00               	jmp	0x1686de0 <.text+0x26dae0>
+ 1686ce7: 66 0f 1f 84 00 00 00 00 00   	nop	word ptr [rax + rax]
+ 1686cf0: 4c 8d 58 07                  	lea	r11, [rax + 0x7]
+ 1686cf4: 49 83 e3 f8                  	and	r11, -0x8
+ 1686cf8: 49 29 c3                     	sub	r11, rax
+ 1686cfb: 49 bd 00 01 01 01 01 01 01 01	movabs	r13, 0x101010101010100
+ 1686d05: 75 59                        	jne	0x1686d60 <.text+0x26da60>
+ 1686d07: 48 8d 71 f0                  	lea	rsi, [rcx - 0x10]
+ 1686d0b: 45 31 db                     	xor	r11d, r11d
+ 1686d0e: 48 8b 7d a8                  	mov	rdi, qword ptr [rbp - 0x58]
+ 1686d12: 4c 01 f7                     	add	rdi, r14
+ 1686d15: 66 66 2e 0f 1f 84 00 00 00 00 00     	nop	word ptr cs:[rax + rax]
+ 1686d20: 4e 8b 44 1f f8               	mov	r8, qword ptr [rdi + r11 - 0x8]
+ 1686d25: 4d 89 c1                     	mov	r9, r8
+ 1686d28: 4d 31 e1                     	xor	r9, r12
+ 1686d2b: 4d 89 ea                     	mov	r10, r13
+ 1686d2e: 4d 29 ca                     	sub	r10, r9
+ 1686d31: 4d 09 c2                     	or	r10, r8
+ 1686d34: 4e 8b 04 1f                  	mov	r8, qword ptr [rdi + r11]
+ 1686d38: 4d 31 e0                     	xor	r8, r12
+ 1686d3b: 4d 89 e9                     	mov	r9, r13
+ 1686d3e: 4d 29 c1                     	sub	r9, r8
+ 1686d41: 4d 09 c1                     	or	r9, r8
+ 1686d44: 49 21 da                     	and	r10, rbx
+ 1686d47: 4d 21 ca                     	and	r10, r9
+ 1686d4a: 49 39 da                     	cmp	r10, rbx
+ 1686d4d: 75 41                        	jne	0x1686d90 <.text+0x26da90>
+ 1686d4f: 49 83 c3 10                  	add	r11, 0x10
+ 1686d53: 49 39 f3                     	cmp	r11, rsi
+ 1686d56: 76 c8                        	jbe	0x1686d20 <.text+0x26da20>
+ 1686d58: eb 36                        	jmp	0x1686d90 <.text+0x26da90>
+ 1686d5a: 66 0f 1f 44 00 00            	nop	word ptr [rax + rax]
+ 1686d60: 31 f6                        	xor	esi, esi
+ 1686d62: 66 66 66 66 66 2e 0f 1f 84 00 00 00 00 00    	nop	word ptr cs:[rax + rax]
+ 1686d70: 80 3c 30 0a                  	cmp	byte ptr [rax + rsi], 0xa
+ 1686d74: 74 3a                        	je	0x1686db0 <.text+0x26dab0>
+ 1686d76: 48 ff c6                     	inc	rsi
+ 1686d79: 49 39 f3                     	cmp	r11, rsi
+ 1686d7c: 75 f2                        	jne	0x1686d70 <.text+0x26da70>
+ 1686d7e: 48 8d 71 f0                  	lea	rsi, [rcx - 0x10]
+ 1686d82: 49 39 f3                     	cmp	r11, rsi
+ 1686d85: 76 87                        	jbe	0x1686d0e <.text+0x26da0e>
+ 1686d87: 66 0f 1f 84 00 00 00 00 00   	nop	word ptr [rax + rax]
+ 1686d90: 4c 89 de                     	mov	rsi, r11
+ 1686d93: 4c 39 d9                     	cmp	rcx, r11
+ 1686d96: 48 8b 7d d0                  	mov	rdi, qword ptr [rbp - 0x30]
+ 1686d9a: 74 44                        	je	0x1686de0 <.text+0x26dae0>
+ 1686d9c: 0f 1f 40 00                  	nop	dword ptr [rax]
+ 1686da0: 80 3c 30 0a                  	cmp	byte ptr [rax + rsi], 0xa
+ 1686da4: 74 0a                        	je	0x1686db0 <.text+0x26dab0>
+ 1686da6: 48 ff c6                     	inc	rsi
+ 1686da9: 48 39 f1                     	cmp	rcx, rsi
+ 1686dac: 75 f2                        	jne	0x1686da0 <.text+0x26daa0>
+ 1686dae: eb 30                        	jmp	0x1686de0 <.text+0x26dae0>
+ 1686db0: 4e 8d 2c 36                  	lea	r13, [rsi + r14]
+ 1686db4: 49 ff c5                     	inc	r13
+ 1686db7: 49 01 f6                     	add	r14, rsi
+ 1686dba: 49 39 d6                     	cmp	r14, rdx
+ 1686dbd: 0f 83 dd fe ff ff            	jae	0x1686ca0 <.text+0x26d9a0>
+ 1686dc3: 80 3c 30 0a                  	cmp	byte ptr [rax + rsi], 0xa
+ 1686dc7: 0f 85 d3 fe ff ff            	jne	0x1686ca0 <.text+0x26d9a0>
+ 1686dcd: 49 89 dc                     	mov	r12, rbx
+ 1686dd0: 31 c0                        	xor	eax, eax
+ 1686dd2: 4d 89 ee                     	mov	r14, r13
+ 1686dd5: 4c 89 eb                     	mov	rbx, r13
+ 1686dd8: eb 1c                        	jmp	0x1686df6 <.text+0x26daf6>
+ 1686dda: 66 0f 1f 44 00 00            	nop	word ptr [rax + rax]
+ 1686de0: 49 89 d5                     	mov	r13, rdx
+ 1686de3: 49 89 dc                     	mov	r12, rbx
+ 1686de6: b0 01                        	mov	al, 0x1
+ 1686de8: 4d 89 ee                     	mov	r14, r13
+ 1686deb: 4d 89 fd                     	mov	r13, r15
+ 1686dee: 48 89 d3                     	mov	rbx, rdx
+ 1686df1: 4c 39 fa                     	cmp	rdx, r15
+ 1686df4: 74 3b                        	je	0x1686e31 <.text+0x26db31>
+ 1686df6: 89 45 cc                     	mov	dword ptr [rbp - 0x34], eax
+ 1686df9: 48 8b 45 b0                  	mov	rax, qword ptr [rbp - 0x50]
+ 1686dfd: 80 38 00                     	cmp	byte ptr [rax], 0x0
+ 1686e00: 74 1f                        	je	0x1686e21 <.text+0x26db21>
+ 1686e02: ba 04 00 00 00               	mov	edx, 0x4
+ 1686e07: 48 8b 7d b8                  	mov	rdi, qword ptr [rbp - 0x48]
+ 1686e0b: 48 8d 35 16 33 dd fe         	lea	rsi, [rip - 0x122ccea]  # 0x45a128
+ 1686e12: 48 8b 45 c0                  	mov	rax, qword ptr [rbp - 0x40]
+ 1686e16: ff 50 18                     	call	qword ptr [rax + 0x18]
+ 1686e19: 48 8b 7d d0                  	mov	rdi, qword ptr [rbp - 0x30]
+ 1686e1d: 84 c0                        	test	al, al
+ 1686e1f: 75 14                        	jne	0x1686e35 <.text+0x26db35>
+ 1686e21: 4c 39 fb                     	cmp	rbx, r15
+ 1686e24: 0f 85 06 fe ff ff            	jne	0x1686c30 <.text+0x26d930>
+ 1686e2a: 31 c0                        	xor	eax, eax
+ 1686e2c: e9 07 fe ff ff               	jmp	0x1686c38 <.text+0x26d938>
+ 1686e31: 31 c0                        	xor	eax, eax
+ 1686e33: eb 02                        	jmp	0x1686e37 <.text+0x26db37>
+ 1686e35: b0 01                        	mov	al, 0x1
+ 1686e37: 48 83 c4 38                  	add	rsp, 0x38
+ 1686e3b: 5b                           	pop	rbx
+ 1686e3c: 41 5c                        	pop	r12
+ 1686e3e: 41 5d                        	pop	r13
+ 1686e40: 41 5e                        	pop	r14
+ 1686e42: 41 5f                        	pop	r15
+ 1686e44: 5d                           	pop	rbp
+ 1686e45: c3                           	ret
