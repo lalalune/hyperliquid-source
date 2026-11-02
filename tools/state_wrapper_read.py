@@ -74,7 +74,11 @@ def classify(key, seen, expected):
 def extract(data):
     verified(data)
     _, fdes, _ = fde_extents(data)
-    selected = {f['start']: f for f in fdes if f['start'] in (*PARSERS, 0x28e96b0, 0x432fe50)}
+    selected = {}
+    for f in fdes:
+        if f['start'] in (*PARSERS, 0x28e96b0, 0x432fe50):
+            require(f['start'] not in selected, 'duplicate FDE')
+            selected[f['start']] = f
     require(len(selected) == 4, 'missing or duplicate FDE')
     bodies = []
     for start in (*PARSERS, 0x28e96b0, 0x432fe50):
