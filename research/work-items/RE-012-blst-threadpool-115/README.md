@@ -27,7 +27,8 @@ Official BLST 0.3.15/0.3.16 and threadpool 1.8.0/1.8.1 selected source functions
 are equal, so these findings do not identify exact original revisions. Full
 licensed sources, notices, pins and counterchecks are retained in
 [sources.json](sources.json), [source-comparison.json](source-comparison.json)
-and `source-archive.json.gz`.
+and `source-archive.json.gz`. Each function slice ends at its closing brace,
+excluding the final LF; the complete source files retain their original bytes.
 
 ## Reproduce
 
@@ -53,6 +54,15 @@ failures and their recovery. `validation/raw-streams.json.gz` binds retained
 output bytes to their labels and hashes. The packet verifier rejects unknown
 files/directories, duplicate/missing manifest rows, symlinks (including parent
 components), damaged source archives and altered target evidence.
+
+Full `make test` on fixed head `ab5a9b9d062b55db897f6cffabe2759735c123a0`
+passed: 77 files, 394 reported tests and 3 skips. The runner recorded every
+test-file hash and confirmed that all qualified sources stayed unchanged.
+The independent review of that same head found no semantic blocker; its exact
+36-file bundle, including the reviewer's initial LF-boundary failure and
+correction, is retained as `peer/portable-review.json.gz` inside the raw archive
+(SHA-256 `af19108eb7614183b74f496b9de301ad26f6c2afe933893b264563dcb0581a02`).
+These are local results; no hosted-CI success is claimed.
 
 The new task-specific collector is needed because existing generic ELF/FDE
 helpers do not establish this construction's byte-bound call/argument/store,
