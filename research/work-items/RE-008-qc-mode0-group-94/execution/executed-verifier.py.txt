@@ -1,0 +1,232 @@
+#!/usr/bin/env python3
+"""Compile the mode-zero group against independently frozen native-derived TSVs."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[2]
+COMPONENT = ROOT / "src/node94-consensus-admission"
+FIELD = "src/qc_mode0_group.rs"
+EXAMPLE = "qc_mode0_group_input_only"
+DRIVER = f"examples/{EXAMPLE}.rs"
+RESERVE = 300 * 1024 * 1024
+FREEZE = "9b8c4f16ec0b483a8cef6b30c383df3fb7f04e66701a374168e53d95c2bac1c4"
+
+
+def need(ok, message):
+    if not ok:
+        raise ValueError(message)
+
+
+def sha(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def corpus():
+    folder = HERE / "pre-rust"
+    frozen = (folder / "PRE-RUST-FREEZE.json").read_bytes()
+    need(sha(frozen) == FREEZE, "pre-Rust identity")
+    pins = json.loads(frozen)["fixtures"]
+    result = {name: (folder / name).read_bytes() for name in ("inputs.tsv", "expected.tsv")}
+    need(all(sha(v) == pins[n] for n, v in result.items()), "pre-Rust fixture identity")
+    return result
+
+
+def recipes():
+    consume = "        *input = &input[total..];"
+    result = {
+        "first-refund-not-skipped": (
+            "        words[index] = value;",
+            "        words[index] = value;\n        if index == 0 && *_charge >= 8 { *_charge -= 8; }"),
+    }
+    widths = [
+        ("inline-fast-width2", "marker <= 0xfa && input.len() > 8", 2),
+        ("FB-fast-width2", "marker == 0xfb && input.len() > 8", 2),
+        ("FC-fast-width4", "marker == 0xfc && input.len() > 8", 4),
+        ("FD-fast-width8", "marker == 0xfd && input.len() > 8", 8),
+        ("FB-Reader-width2", "marker == 0xfb && input.len() <= 8", 2),
+        ("FC-Reader-width4", "marker == 0xfc && input.len() <= 8", 4),
+    ]
+    for name, condition, width in widths:
+        result[name] = (consume, f"        let consumed = if {condition} {{ {width} }} else {{ total }};\n        *input = &input[consumed..];")
+    result["FB-Reader-sign-extend"] = (
+        "        words[index] = value;",
+        "        words[index] = if marker == 0xfb && input.len() <= 8 { (value as u16 as i16 as i32 as u32) as u64 } else { value };")
+    # Only qualified initialized-temporary witnesses are projected: a previous
+    # successful scalar supplies the high word. Initial stack bytes stay unknown.
+    result["Reader-stores-only32"] = (
+        "        words[index] = value;",
+        "        words[index] = if input.len() <= 8 && index > 0 { (words[index - 1] & 0xffff_ffff_0000_0000) | (value & 0xffff_ffff) } else { value };")
+    for name, marker in (("FB", "fb"), ("FC", "fc"), ("FD", "fd")):
+        result[f"short-{name}-base{dict(FB=2, FC=4, FD=8)[name]}"] = (
+            "            let needed = (total - input.len()) as u64;",
+            f"            let needed = (total - input.len() - usize::from(marker == 0x{marker})) as u64;")
+    return result
+
+
+def command(argv, cwd, stem, *, env=None, stdin=None):
+    p = subprocess.run(list(map(str, argv)), cwd=cwd, env=env, input=stdin, capture_output=True, timeout=90)
+    stem.with_suffix(".stdout").write_bytes(p.stdout)
+    stem.with_suffix(".stderr").write_bytes(p.stderr)
+    record = {"argv": list(map(str, argv)), "exit": p.returncode,
+              "stdout_sha256": sha(p.stdout), "stderr_sha256": sha(p.stderr)}
+    need(p.returncode == 0, f"command failed: {record}; {p.stderr.decode(errors='replace')}")
+    return p, record
+
+
+def read_result(line):
+    f = line.decode("ascii").split("\t")
+    need(len(f) == 12, "active-result shape")
+    for i in (1, 2, 3, 5, 6, 7, 8, 9, 10):
+        need(f[i] == "-" or 0 <= int(f[i]) < 1 << (8 if i in (6, 9) else 64), "field width")
+    suffix = b"" if f[4] == "-" else bytes.fromhex(f[4])
+    words = None if f[11] == "-" else bytes.fromhex(f[11])
+    need(words is None or len(words) == 32, "complete value bytes")
+    return f, suffix, words
+
+
+def verify_control(control, actual):
+    f, _, words = actual
+    prediction = control["predicted_difference"]
+    fields = {"charge_after": 1, "pointer_advance": 2, "remaining": 3,
+              "group_tag": 5, "group_need": 7, "row_need": 10}
+    for key, index in fields.items():
+        if key in prediction:
+            need(int(f[index]) == prediction[key], "frozen native witness " + key)
+    if words is not None:
+        values = [int.from_bytes(words[at:at + 8], "little") for at in range(0, 32, 8)]
+        for key, index in (("first_word", 0), ("second_word", 1)):
+            if key in prediction:
+                need(values[index] == prediction[key], "frozen native witness " + key)
+        if "words" in prediction:
+            need(values == prediction["words"], "frozen native witness words")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--rustc", type=Path, required=True)
+    parser.add_argument("--cargo", type=Path)
+    parser.add_argument("--out", type=Path, required=True)
+    args = parser.parse_args()
+    rustc = args.rustc.resolve(strict=True)
+    cargo = (args.cargo or rustc.with_name("cargo")).resolve(strict=True)
+    output = args.out.resolve()
+    need(not output.exists(), "refuse existing output")
+    need(shutil.disk_usage(output.parent).free >= RESERVE, "disk reserve before writes")
+    output.mkdir(parents=True)
+    tools = {str(p): sha(p.read_bytes()) for p in (rustc, cargo)}
+    comparator = {Path(__file__).name: sha(Path(__file__).read_bytes())}
+    version, version_run = command([rustc, "-vV"], output, output / "rustc-version")
+    need(b"release: 1.94.1\n" in version.stdout and b"host: x86_64-unknown-linux-gnu\n" in version.stdout, "reviewed compiler/host")
+    cargo_version, cargo_version_run = command([cargo, "-vV"], output, output / "cargo-version")
+    fixtures = corpus()
+    inputs, expected = fixtures["inputs.tsv"], fixtures["expected.tsv"]
+    wanted = [read_result(line) for line in expected.splitlines()[1:]]
+    need(len(wanted) == 96, "frozen case count")
+    for name, content in fixtures.items():
+        (output / name).write_bytes(content)
+        (output / name).chmod(0o444)
+    names = ["Cargo.toml", "Cargo.lock", DRIVER]
+    names += sorted(p.relative_to(COMPONENT).as_posix() for p in (COMPONENT / "src").rglob("*.rs"))
+    sources = {name: (COMPONENT / name).read_bytes() for name in names}
+    variants = {"baseline": sources}
+    for name, (old, new) in recipes().items():
+        original = sources[FIELD].decode()
+        need(original.count(old) == 1 and old != new, "unique source site " + name)
+        variants[name] = sources | {FIELD: original.replace(old, new, 1).encode()}
+    controls = {c["name"]: c for c in json.loads((HERE / "pre-rust/PRE-RUST-FREEZE.json").read_text())["native_controls"]}
+    need(set(controls) == set(variants) - {"baseline"}, "native/source control correspondence")
+    snapshots = {}
+    for name, contents in variants.items():
+        for relative, content in contents.items():
+            p = output / "sources" / name / relative
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_bytes(content)
+            p.chmod(0o444)
+        snapshots[name] = {relative: sha(content) for relative, content in contents.items()}
+    freeze = {"source_snapshots": snapshots, "fixtures": {n: sha(v) for n, v in fixtures.items()}, "comparator_pins": comparator}
+    frozen = (json.dumps(freeze, indent=2, sort_keys=True) + "\n").encode()
+    (output / "freeze.json").write_bytes(frozen)
+    results = []
+    for name, contents in variants.items():
+        location = output / "sources" / name
+        for opt in (0, 3):
+            free = shutil.disk_usage(output).free
+            need(free >= RESERVE, "disk reserve before build")
+            run = output / f"{name}-opt{opt}"
+            run.mkdir()
+            env = os.environ.copy()
+            env.update({"RUSTC": str(rustc), "RUSTDOC": str(rustc.with_name("rustdoc")),
+                        "RUSTC_WRAPPER": "", "RUSTC_WORKSPACE_WRAPPER": "", "CARGO_HOME": str(output / "cargo-home"),
+                        "CARGO_TARGET_DIR": str(run / "target"), "CARGO_NET_OFFLINE": "true",
+                        "CARGO_INCREMENTAL": "0", "RUSTFLAGS": "-D warnings -C overflow-checks=yes -C debuginfo=0"})
+            argv = [cargo, "build", "--offline", "--locked", "--manifest-path", location / "Cargo.toml", "--example", EXAMPLE]
+            if opt == 3:
+                argv.append("--release")
+            _, build = command(argv, run, run / "compile", env=env)
+            diagnostic = (run / "compile.stderr").read_text()
+            need("Compiling node94-consensus-admission v0.1.0 (" + str(location) + ")" in diagnostic,
+                 "fresh rustc compilation of selected source root")
+            built = run / "target" / ("release" if opt == 3 else "debug") / "examples" / EXAMPLE
+            binary = run / EXAMPLE
+            shutil.copy2(built, binary)
+            executable = sha(binary.read_bytes())
+            project, dep_info = set(), {}
+            pattern = re.escape(str(location)) + r"/[^\s\\:]+"
+            for p in (run / "target").rglob("*.d"):
+                matched = re.findall(pattern, p.read_text())
+                if not matched:
+                    continue
+                project.update(matched)
+                relative = p.relative_to(run / "target")
+                saved = run / "dep-info" / relative
+                saved.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(p, saved)
+                dep_info[relative.as_posix()] = sha(saved.read_bytes())
+            need(project == {str(location / p) for p in contents if p.endswith(".rs")}, "exact compiler-read project closure")
+            actual, executed = command([binary], run, run / "run", env=env, stdin=inputs)
+            need(not actual.stderr and sha(binary.read_bytes()) == executable, "run diagnostics/executable drift")
+            got = [read_result(line) for line in actual.stdout.splitlines()]
+            need(len(got) == 96, "actual output count")
+            different = [i for i, (a, b) in enumerate(zip(got, wanted, strict=True)) if a != b]
+            need(bool(different) == (name != "baseline"), "semantic comparison " + name)
+            if name != "baseline":
+                control = controls[name]
+                index = next(i for i, row in enumerate(wanted) if row[0][0] == control["witness"])
+                need(index in different, "frozen witness must differ")
+                verify_control(control, got[index])
+            need(all(sha((location / p).read_bytes()) == h for p, h in snapshots[name].items()), "compiled source drift")
+            results.append({"source": name, "opt": opt, "compile": build, "run": executed,
+                            "binary_sha256": executable, "dep_info": dep_info, "compiler_project_sources": len(project),
+                            "matched": 96 - len(different), "different": len(different),
+                            "witness": None if name == "baseline" else controls[name]["witness"],
+                            "free_before": free, "free_after": shutil.disk_usage(output).free})
+            # Only this terminal build's reproducible Cargo cache is removed.
+            # Exact binary, .d files, sources and raw streams have been retained.
+            target = run / "target"
+            need(not target.is_symlink() and target.parent == run, "owned target cleanup")
+            shutil.rmtree(target)
+            results[-1]["cache_removed_after_archival"] = str(target)
+            results[-1]["free_after_cache_cleanup"] = shutil.disk_usage(output).free
+            print(f"{name} opt{opt}: compile/run0; {len(different)}/96 different; free={results[-1]['free_after']}", flush=True)
+    need(all(sha((COMPONENT / p).read_bytes()) == sha(v) for p, v in sources.items()), "working source drift")
+    need(all(sha(Path(p).read_bytes()) == h for p, h in tools.items()), "tool drift")
+    need(sha(Path(__file__).read_bytes()) == comparator[Path(__file__).name], "comparator drift")
+    need(corpus() == fixtures, "fixture drift")
+    report = {"rustc": version.stdout.decode(), "cargo": cargo_version.stdout.decode(), "version_runs": [version_run, cargo_version_run],
+              "tools": tools, "source_pins": snapshots["baseline"], "source_freeze_sha256": sha(frozen), "comparator_pins": comparator,
+              "fixture_pins": {n: sha(v) for n, v in fixtures.items()}, "pre_rust_freeze": FREEZE,
+              "cases": 96, "success_cases": 36, "short_or_eof_cases": 60, "compiled_mutants": 12,
+              "results": results, "captured_execution": False,
+              "limits": "Qualified mode0 group final state/active fields; driver-only row forwarding; no inactive error image, native ABI or full QC reachability"}
+    (output / "results.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+
+
+if __name__ == "__main__":
+    main()

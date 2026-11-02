@@ -1,0 +1,82 @@
+{
+  "baseline": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "captured_execution": false,
+  "checks": [
+    {
+      "command": [
+        "make",
+        "doctor"
+      ],
+      "exit_code": 0,
+      "name": "doctor",
+      "raw_output_sha256": "2bce4e007979e8a9c2afb7a3c8db3a0978054610e255cad04b2d31303eddf28c",
+      "result_excerpt": "analysis_ready=True; exact_rebuild_ready=False"
+    },
+    {
+      "command": [
+        "make",
+        "verify"
+      ],
+      "exit_code": 0,
+      "name": "verify",
+      "raw_output_sha256": "62b2bc35db2b34337f2cb5feace2b03e4faee375be93a1f0c03e8eb04654bdfb",
+      "result_excerpt": "python3 tools/verify_imports.py\nVerified 38 imported files and all pinned source repositories."
+    },
+    {
+      "command": [
+        "make",
+        "catalogue-check"
+      ],
+      "exit_code": 0,
+      "name": "catalogue-check",
+      "raw_output_sha256": "d154b53146de73afa6ac07cb86b790175fed3cf9eb764993fa92227491db6d80",
+      "result_excerpt": "python3 tools/catalogue.py --check\nCatalogue and progress tables match pinned inputs."
+    },
+    {
+      "command": [
+        "make",
+        "reproduce"
+      ],
+      "exit_code": 0,
+      "name": "reproduce",
+      "raw_output_sha256": "08ec436df402ddae68cd72a53774ca9a7d2fcb5487171fa908a0c6bdf49d45ba",
+      "result_excerpt": "Inventories, raw counts and refined item classifications reproduce the imported evidence.\nRefined counts: {'grounded': 822, 'drift': 60, 'notes': 116, 'late': 1, 'partial': 56, 'unanchored': 386, 'case': 11}"
+    },
+    {
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_qc_recovery_byte94.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "name": "focused-tests",
+      "raw_output_sha256": "cbe778df4d8091d65de2ed8215d7927c96689d68e77e3821419562e09784490b",
+      "result_excerpt": "\nOK"
+    }
+  ],
+  "inputs": "Seven exact local submodule pins checked against sources.json and gitlinks; LFS pointer size/SHA-256 checked before copying original bytes/modes. Command-local standard LFS filters used.",
+  "instruction_evaluation": false,
+  "make_test": "Deferred to coordinator integration; opt-in captured emulation flags unset",
+  "persistent_configuration_changed": false,
+  "root_test_sha256": "c9d16f8ce730e0175634507f14819b311c58774dd93930ec0af4df9337ccec02",
+  "rust": "Not compiled; pinned rustc1.94.1 unavailable; design remains ignored work; no durable Rust file or gate claim.",
+  "static_validator_profiles": {
+    "normal_command": "python3 research/work-items/RE-008-qc-recovery-byte-94/verify.py --llvm /workspace/.tools/llvm19/usr/lib/llvm-19/bin/llvm-objdump --report work/re008-signature-reader/normal-validation.json",
+    "normal_exit": 0,
+    "optimized_command": "python3 -O research/work-items/RE-008-qc-recovery-byte-94/verify.py --llvm /workspace/.tools/llvm19/usr/lib/llvm-19/bin/llvm-objdump --report research/work-items/RE-008-qc-recovery-byte-94/validation.json",
+    "optimized_exit": 0,
+    "raw_report_sha256": "0338e897f5dd4cae2950403d02283e3e53441867730b5a15c28e79338d8ea45a",
+    "reports_byte_identical": true
+  },
+  "support_tool_sha256": {
+    "tools/elf_index.py": "d77a002e9b2d3dce86822f6c67169298ad0ea54f5f4cb5c0d244328cbed1774f",
+    "tools/fde_extents.py": "9ce52ed319743ecfbaaafec799f6cef20148e0d46f161091f89b7c58ffdd2345"
+  },
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
