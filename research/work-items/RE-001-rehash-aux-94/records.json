@@ -1,0 +1,116 @@
+{
+  "task": "RE-001",
+  "window": {
+    "start": "0x515a820",
+    "end": "0x515a95d",
+    "size_bytes": 317,
+    "padding_bytes": 3,
+    "next_fde": "0x515a960",
+    "fde_record": "0x00634ce8",
+    "canary": null,
+    "returns": "void"
+  },
+  "artifact": {
+    "path": "artifacts/node/94/hl-node",
+    "work_copy": "work/hl-node-94.bin",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "arguments": {
+    "table": "rdi",
+    "new_bucket_count": "rsi",
+    "saved_next_resize_ptr": "rdx"
+  },
+  "table_layout": {
+    "buckets_ptr": "+0x00",
+    "bucket_count": "+0x08",
+    "before_begin_next": "+0x10",
+    "element_count": "+0x18",
+    "rehash_policy": "+0x20",
+    "max_load_factor_float": "+0x20",
+    "next_resize": "+0x28",
+    "single_bucket_storage": "+0x30"
+  },
+  "node_layout": {
+    "next": "+0x00",
+    "cached_hash": "+0x70"
+  },
+  "arms": {
+    "single_bucket": {
+      "condition": "new_bucket_count == 1",
+      "new_base": "table+0x30",
+      "single_storage_zeroed": true,
+      "allocation": "none",
+      "overflow_check": "skipped"
+    },
+    "heap_buckets": {
+      "condition": "new_bucket_count != 1",
+      "allocation_bytes": "new_bucket_count * 8",
+      "zeroed": "memset to zero over the whole array"
+    },
+    "overflow": {
+      "bad_alloc_range": "2**60 <= new_bucket_count < 2**61",
+      "bad_array_new_length_range": "new_bucket_count >= 2**61",
+      "note": "the count==1 arm bypasses both checks"
+    },
+    "allocation_failure": {
+      "restore": "table+0x28 = [saved_next_resize_ptr]",
+      "then": "rethrow, table otherwise untouched"
+    },
+    "zero_count": {
+      "note": "not a guarded arm: the migration divides by the new count, so 0 would fault; the model raises instead of modelling a fault"
+    }
+  },
+  "migration": {
+    "old_head": "table+0x10 before the loop, then table+0x10 reset to null",
+    "bucket_index": "cached_hash at node+0x70, unsigned modulo new_bucket_count",
+    "empty_bucket": "node next = current head; head = node; bucket entry = sentinel address (table+0x10 field)",
+    "nonempty_bucket": "node next = before-node next; before-node next = node; fixup and previous-bucket update NOT touched on this path",
+    "last_node_fixup": "empty-bucket path only: when the inserted node's next is non-null, bucket entry at the previous bucket index = the node",
+    "previous_bucket_initial": 0,
+    "previous_bucket_update": "previous bucket index = current bucket index after each node, on the empty-bucket path only",
+    "order_note": "the old chain is walked in its existing order; nodes are not re-sorted by bucket"
+  },
+  "epilogue": {
+    "old_array_free": "operator delete[] over old count * 8 bytes, skipped when the old buckets pointer equals table+0x30",
+    "commit": "table+0x08 = new_bucket_count, table+0x00 = new base",
+    "untouched": [
+      "table+0x18 element count",
+      "table+0x20 policy float"
+    ]
+  },
+  "caller": {
+    "site": "0x515acf8",
+    "enclosing": "0x515a960..0x515ae14",
+    "saved_slot": "caller rsp+0x20 holds a copy of table+0x28 taken before the call",
+    "count_source": "the rsi argument comes from the rehash-policy need-rehash result in rdx",
+    "post_call": "the caller divides the element value by the new table+0x08 to get a bucket index"
+  },
+  "sites": {
+    "0x515a820": "window entry",
+    "0x515a834": "new count == 1 comparison",
+    "0x515a844": "new count >> 60 overflow test",
+    "0x515a859": "operator new call for count * 8 bytes",
+    "0x515a869": "memset call zeroing the new array",
+    "0x515a872": "old head load and head reset",
+    "0x515a8a9": "cached hash load at node+0x70",
+    "0x515a8ad": "unsigned divide by the new count",
+    "0x515a8b4": "new bucket entry load",
+    "0x515a890": "nonempty bucket insert-after-before-node",
+    "0x515a8bc": "empty bucket head prepend and sentinel entry",
+    "0x515a8ca": "fixup test: node next == 0 skips the store (conditional jump to the previous-index update)",
+    "0x515a8d0": "fixup store at the previous bucket index (empty path only, node next non-null)",
+    "0x515a8e4": "old buckets pointer compared against table+0x30",
+    "0x515a8ed": "operator delete[] call for the old array",
+    "0x515a8f2": "new count commit to table+0x08",
+    "0x515a8f6": "new base commit to table+0x00",
+    "0x515a920": "new count >> 61 second overflow test",
+    "0x515a926": "bad array new length throw call",
+    "0x515a92b": "bad alloc throw call",
+    "0x515a930": "allocation-failure catch entry",
+    "0x515a93c": "next-resize restore load from the saved pointer",
+    "0x515a940": "next-resize restore store to table+0x28",
+    "0x515a944": "rethrow call",
+    "0x515a949": "unwind-resume entry",
+    "0x515acf8": "sole direct caller call site"
+  }
+}
