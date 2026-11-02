@@ -47,7 +47,7 @@ def probe(name, command):
         p = subprocess.run(command, text=True, capture_output=True, timeout=10, encoding='utf-8')
         lines = (p.stdout + p.stderr).splitlines()
         return {'name': name, 'available': p.returncode == 0, 'version': lines[0] if lines else '', 'executable': command[0]}
-    except (OSError, subprocess.TimeoutExpired) as exc:
+    except (OSError, subprocess.TimeoutExpired, UnicodeDecodeError) as exc:
         return {'name': name, 'available': False, 'error': str(exc)}
 
 
