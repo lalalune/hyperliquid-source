@@ -1,0 +1,687 @@
+{
+  "status": "PASS",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: aarch64-apple-darwin\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+  "linker_version": "Apple clang version 15.0.0 (clang-1500.3.9.4)\nTarget: arm64-apple-darwin25.4.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin\n",
+  "sdkroot": "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+  "case_count": 20756,
+  "distinct_seed_message_pairs": 20676,
+  "input_sha256": "232d56181a636284a620bb049ab24f6dba97ca22eefac842ed8af8dd0de3020c",
+  "expected_sha256": "3276c6f3d0f19fc50d228fa65b241516fe24c540b1607bcc67fa0ff39bfc9308",
+  "source_compiler_linker_sha256": [
+    "e973649f490657bbe29d6ff37b4712a558f231521189a76fb5075bd5b6ad671d",
+    "816292904d7da7ae312d69e337187973de0ed24c81f03867b21ef4b929799af5",
+    "46cf39be6cc95d0a8c2fdd060a6bee42eae1a8366421c37b31f2bdfa746ca38f",
+    "b69cbcffa5e990057035d53ccc8163e8392ce784f6abb114c19ceb61528ba9f6",
+    "693d5d0ba3e939d5bb32b62e253c443f8997c5bb118b9398844d0cbd47e890a4"
+  ],
+  "profiles": [
+    {
+      "name": "debug",
+      "opt_level": 0,
+      "matches": true,
+      "mismatches": 0,
+      "actual_sha256": "3276c6f3d0f19fc50d228fa65b241516fe24c540b1607bcc67fa0ff39bfc9308",
+      "library_sha256": "4a56a250c66a2fcc1a65cfd7daa94c2b53cbfe8445867d9d3489d57359c0bcac"
+    },
+    {
+      "name": "optimized",
+      "opt_level": 3,
+      "matches": true,
+      "mismatches": 0,
+      "actual_sha256": "3276c6f3d0f19fc50d228fa65b241516fe24c540b1607bcc67fa0ff39bfc9308",
+      "library_sha256": "55a5bfa6c2a61e7c0e3b27b6387dd4240b85e18cd6f7b758a76816dea2a64a25"
+    }
+  ],
+  "own_optimized_rlib_raw_reproducible": true,
+  "rust_mutants": [
+    {
+      "name": "mutant-rotation13-to12",
+      "opt_level": 0,
+      "matches": false,
+      "mismatches": 20756,
+      "actual_sha256": "a2dfb036ec55eb06fae919fd16ae60dc45f802b80b549d5815c1eff94ff4c80f",
+      "library_sha256": "cbb69ff7a48d642f1b54ce4ef11428dc9d2e92ee2a1ee2469037b094e4999dca"
+    },
+    {
+      "name": "mutant-length-in-wrong-byte",
+      "opt_level": 0,
+      "matches": false,
+      "mismatches": 20756,
+      "actual_sha256": "bc304763fc0871874d6a53811b73d5c80743656817db98c60f8bec659987596d",
+      "library_sha256": "53a6dd2f305efd7551815ef73c0245585b4e04b634a6e4606a47c811c03ff476"
+    },
+    {
+      "name": "mutant-two-final-rounds",
+      "opt_level": 0,
+      "matches": false,
+      "mismatches": 20756,
+      "actual_sha256": "7b3e8c01e8ea401bf79b93e2991a40a0884412378cf3b7c1090fed1abf58839b",
+      "library_sha256": "9240bba9abc88bd3cee26fa90b12430bf3059c275403878a901258facfbbcd6e"
+    }
+  ],
+  "target_controls": [
+    {
+      "name": "compression-rotation",
+      "address": "0x288e3ad",
+      "synthetic_seed": [
+        0,
+        0
+      ],
+      "message_hex": "000102030405060708090a0b0c0d0e0f10111213",
+      "expected": "639e355ae68c0100",
+      "mutated": "8ba47209f7e5c1ea",
+      "rejected": "Hash owner body changed",
+      "authorized_offline_Python_instruction_evaluation": true,
+      "native_capture_launched": false
+    },
+    {
+      "name": "finalization-rotation",
+      "address": "0x284106a",
+      "synthetic_seed": [
+        0,
+        0
+      ],
+      "message_hex": "000102030405060708090a0b0c0d0e0f10111213",
+      "expected": "639e355ae68c0100",
+      "mutated": "ec1746b89e4f4ab6",
+      "rejected": "Hash owner body changed",
+      "authorized_offline_Python_instruction_evaluation": true,
+      "native_capture_launched": false
+    },
+    {
+      "name": "initialization-constant",
+      "address": "0x204ec0",
+      "synthetic_seed": [
+        0,
+        0
+      ],
+      "message_hex": "000102030405060708090a0b0c0d0e0f10111213",
+      "expected": "639e355ae68c0100",
+      "mutated": "76190f77e036bd6c",
+      "rejected": "Hash initializer/path changed at 0x204ec0",
+      "authorized_offline_Python_instruction_evaluation": true,
+      "native_capture_launched": false
+    }
+  ],
+  "commands": [
+    {
+      "label": "debug-library",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "--crate-name",
+        "node94_table_hash20",
+        "--crate-type=rlib",
+        "$REPO/src/node94-table-hash20/lib.rs",
+        "-o",
+        "$OUTPUT/debug/libnode94_table_hash20.rlib",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "debug-link",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "$OUTPUT/driver.rs",
+        "--extern",
+        "node94_table_hash20=$OUTPUT/debug/libnode94_table_hash20.rlib",
+        "-o",
+        "$OUTPUT/debug/driver",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "debug-run",
+      "exit": 0,
+      "argv": [
+        "$OUTPUT/debug/driver",
+        "$OUTPUT/inputs.tsv"
+      ],
+      "stdout_sha256": "3276c6f3d0f19fc50d228fa65b241516fe24c540b1607bcc67fa0ff39bfc9308",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "debug-test-build",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "--crate-name",
+        "node94_table_hash20",
+        "--test",
+        "$REPO/src/node94-table-hash20/lib.rs",
+        "-o",
+        "$OUTPUT/debug/tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "debug-tests",
+      "exit": 0,
+      "argv": [
+        "$OUTPUT/debug/tests"
+      ],
+      "stdout_sha256": "a2bc4c7b2490e9747a1080bf7c7acb50baccf412c476d7e18c87a15af67a6580",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "optimized-library",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "--crate-name",
+        "node94_table_hash20",
+        "--crate-type=rlib",
+        "$REPO/src/node94-table-hash20/lib.rs",
+        "-o",
+        "$OUTPUT/optimized/libnode94_table_hash20.rlib",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "optimized-link",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "$OUTPUT/driver.rs",
+        "--extern",
+        "node94_table_hash20=$OUTPUT/optimized/libnode94_table_hash20.rlib",
+        "-o",
+        "$OUTPUT/optimized/driver",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "optimized-run",
+      "exit": 0,
+      "argv": [
+        "$OUTPUT/optimized/driver",
+        "$OUTPUT/inputs.tsv"
+      ],
+      "stdout_sha256": "3276c6f3d0f19fc50d228fa65b241516fe24c540b1607bcc67fa0ff39bfc9308",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "optimized-test-build",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "--crate-name",
+        "node94_table_hash20",
+        "--test",
+        "$REPO/src/node94-table-hash20/lib.rs",
+        "-o",
+        "$OUTPUT/optimized/tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "optimized-tests",
+      "exit": 0,
+      "argv": [
+        "$OUTPUT/optimized/tests"
+      ],
+      "stdout_sha256": "a2bc4c7b2490e9747a1080bf7c7acb50baccf412c476d7e18c87a15af67a6580",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "optimized-repeat-library",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "--crate-name",
+        "node94_table_hash20",
+        "--crate-type=rlib",
+        "$REPO/src/node94-table-hash20/lib.rs",
+        "-o",
+        "$OUTPUT/optimized-repeat/libnode94_table_hash20.rlib",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "optimized-repeat-link",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "$OUTPUT/driver.rs",
+        "--extern",
+        "node94_table_hash20=$OUTPUT/optimized-repeat/libnode94_table_hash20.rlib",
+        "-o",
+        "$OUTPUT/optimized-repeat/driver",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=3",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "optimized-repeat-run",
+      "exit": 0,
+      "argv": [
+        "$OUTPUT/optimized-repeat/driver",
+        "$OUTPUT/inputs.tsv"
+      ],
+      "stdout_sha256": "3276c6f3d0f19fc50d228fa65b241516fe24c540b1607bcc67fa0ff39bfc9308",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "mutant-rotation13-to12-library",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "--crate-name",
+        "node94_table_hash20",
+        "--crate-type=rlib",
+        "$OUTPUT/source-rotation13-to12/lib.rs",
+        "-o",
+        "$OUTPUT/mutant-rotation13-to12/libnode94_table_hash20.rlib",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "mutant-rotation13-to12-link",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "$OUTPUT/driver.rs",
+        "--extern",
+        "node94_table_hash20=$OUTPUT/mutant-rotation13-to12/libnode94_table_hash20.rlib",
+        "-o",
+        "$OUTPUT/mutant-rotation13-to12/driver",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "mutant-rotation13-to12-run",
+      "exit": 0,
+      "argv": [
+        "$OUTPUT/mutant-rotation13-to12/driver",
+        "$OUTPUT/inputs.tsv"
+      ],
+      "stdout_sha256": "a2dfb036ec55eb06fae919fd16ae60dc45f802b80b549d5815c1eff94ff4c80f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "rotation13-to12-test-build",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "--crate-name",
+        "node94_table_hash20",
+        "--test",
+        "$OUTPUT/source-rotation13-to12/lib.rs",
+        "-o",
+        "$OUTPUT/mutant-rotation13-to12/tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "rotation13-to12-tests",
+      "exit": 101,
+      "argv": [
+        "$OUTPUT/mutant-rotation13-to12/tests"
+      ],
+      "stdout_sha256": "cb301d1e01da56936830ee2c6dd4931192844b5bfce46430c187bd7dad8d7af5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "mutant-length-in-wrong-byte-library",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "--crate-name",
+        "node94_table_hash20",
+        "--crate-type=rlib",
+        "$OUTPUT/source-length-in-wrong-byte/lib.rs",
+        "-o",
+        "$OUTPUT/mutant-length-in-wrong-byte/libnode94_table_hash20.rlib",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "mutant-length-in-wrong-byte-link",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "$OUTPUT/driver.rs",
+        "--extern",
+        "node94_table_hash20=$OUTPUT/mutant-length-in-wrong-byte/libnode94_table_hash20.rlib",
+        "-o",
+        "$OUTPUT/mutant-length-in-wrong-byte/driver",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "mutant-length-in-wrong-byte-run",
+      "exit": 0,
+      "argv": [
+        "$OUTPUT/mutant-length-in-wrong-byte/driver",
+        "$OUTPUT/inputs.tsv"
+      ],
+      "stdout_sha256": "bc304763fc0871874d6a53811b73d5c80743656817db98c60f8bec659987596d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "length-in-wrong-byte-test-build",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "--crate-name",
+        "node94_table_hash20",
+        "--test",
+        "$OUTPUT/source-length-in-wrong-byte/lib.rs",
+        "-o",
+        "$OUTPUT/mutant-length-in-wrong-byte/tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "length-in-wrong-byte-tests",
+      "exit": 101,
+      "argv": [
+        "$OUTPUT/mutant-length-in-wrong-byte/tests"
+      ],
+      "stdout_sha256": "2f978f51c39294604b097b8ae63a8b33c48e5e352e78129b842f13e5176c3f40",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "mutant-two-final-rounds-library",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "--crate-name",
+        "node94_table_hash20",
+        "--crate-type=rlib",
+        "$OUTPUT/source-two-final-rounds/lib.rs",
+        "-o",
+        "$OUTPUT/mutant-two-final-rounds/libnode94_table_hash20.rlib",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "mutant-two-final-rounds-link",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "$OUTPUT/driver.rs",
+        "--extern",
+        "node94_table_hash20=$OUTPUT/mutant-two-final-rounds/libnode94_table_hash20.rlib",
+        "-o",
+        "$OUTPUT/mutant-two-final-rounds/driver",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "mutant-two-final-rounds-run",
+      "exit": 0,
+      "argv": [
+        "$OUTPUT/mutant-two-final-rounds/driver",
+        "$OUTPUT/inputs.tsv"
+      ],
+      "stdout_sha256": "7b3e8c01e8ea401bf79b93e2991a40a0884412378cf3b7c1090fed1abf58839b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "two-final-rounds-test-build",
+      "exit": 0,
+      "argv": [
+        "$REPO/../host-tools/rust-1.94.1/bin/rustc",
+        "--crate-name",
+        "node94_table_hash20",
+        "--test",
+        "$OUTPUT/source-two-final-rounds/lib.rs",
+        "-o",
+        "$OUTPUT/mutant-two-final-rounds/tests",
+        "--edition=2021",
+        "-D",
+        "warnings",
+        "-C",
+        "opt-level=0",
+        "-C",
+        "overflow-checks=on",
+        "-C",
+        "codegen-units=1",
+        "-C",
+        "linker=$LINKER",
+        "--remap-path-prefix",
+        "$REPO=/reconstruction"
+      ],
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "two-final-rounds-tests",
+      "exit": 101,
+      "argv": [
+        "$OUTPUT/mutant-two-final-rounds/tests"
+      ],
+      "stdout_sha256": "b5144a5088b77304140212111c07179b5678ffb7f42c37113632c0ffd0f65e5e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "authorized_offline_Python_captured_arithmetic_interpretation": true,
+  "native_capture_launched": false,
+  "limits": "Fresh fixed20byte math only; byte-bound init/loop/tail lowerings, not whole generic writer interpretation; no runtime seed/ABI/address derivation/whole function/target byte claim."
+}
