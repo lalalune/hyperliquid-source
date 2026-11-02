@@ -69,6 +69,18 @@ def ordered(params,physical,head,count):
     return all(relation(params[kind],physical[a],physical[b]) for kind,a,b in obligations(len(physical),head,count))
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    s=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    rels={}
+    for a,i,v in struct.iter_unpack('<QQq',data[s['offset']:s['offset']+s['size']]):
+        if a in rels:raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a]=(i,v)
+    return rels
+
+
 def analyze(data):
     spec=specification();params={}
     for a,(first,second) in BRANCHES.items():
@@ -87,8 +99,7 @@ def analyze(data):
         for site,row in o['rip_bindings'].items():
             site=int(site);prefix=bytes.fromhex(row['prefix']);code=read(data,site,len(prefix)+4)[1]
             if code[:len(prefix)]!=prefix or site+len(code)+struct.unpack_from('<i',code,len(prefix))[0]!=row['target']:raise ValueError('nonce RIP binding changed')
-    s=next(s for s in sections(data) if s['name']=='.rela.dyn')
-    rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[s['offset']:s['offset']+s['size']])}
+    rels=relocations(data)
     if any(rels.get(int(a))!=tuple(row) for a,row in spec['relocations'].items()):raise ValueError('nonce relocation changed')
     path=b'l1/src/nonce_set.rs'
     if read(data,0x4424eb,len(path))[1]!=path or read(data,0x6484000,16)[1]!=struct.pack('<QII',len(path),141,13):raise ValueError('nonce source Location changed')
