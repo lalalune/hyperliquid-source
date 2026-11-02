@@ -164,6 +164,8 @@ class Image:
             if not got[0] <= where < got[0] + got[2]:
                 continue
             if typ == 8:
+                if where in out:
+                    raise EvidenceError(f'duplicate RELATIVE relocation slot {where:#x}')
                 out[where] = addend & MASK
             elif typ == 6:
                 if sym * 24 + 24 > sym_size:
@@ -178,6 +180,8 @@ class Image:
                     raise EvidenceError('unterminated dynamic symbol name')
                 name = self.data[str_off + n:end]
                 if name in stubs:
+                    if where in out:
+                        raise EvidenceError(f'duplicate GLOB_DAT relocation slot {where:#x}')
                     out[where] = stubs[name]
         return out
 
