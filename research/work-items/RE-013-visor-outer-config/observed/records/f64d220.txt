@@ -1,0 +1,99 @@
+
+visor.elf:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000064d220 <.text+0x3900a0>:
+  64d220:	53                                              	push   rbx
+  64d221:	48 83 ec 20                                     	sub    rsp,0x20
+  64d225:	48 8b 46 20                                     	mov    rax,QWORD PTR [rsi+0x20]
+  64d229:	4c 8b 4e 28                                     	mov    r9,QWORD PTR [rsi+0x28]
+  64d22d:	49 39 c1                                        	cmp    r9,rax
+  64d230:	73 51                                           	jae    64d283 <__cxa_finalize@plt-0x15957d>
+  64d232:	4c 8b 56 18                                     	mov    r10,QWORD PTR [rsi+0x18]
+  64d236:	48 f7 d8                                        	neg    rax
+  64d239:	49 ff c1                                        	inc    r9
+  64d23c:	0f 1f 40 00                                     	nop    DWORD PTR [rax+0x0]
+  64d240:	47 0f b6 5c 0a ff                               	movzx  r11d,BYTE PTR [r10+r9*1-0x1]
+  64d246:	41 8d 5b d0                                     	lea    ebx,[r11-0x30]
+  64d24a:	80 fb 09                                        	cmp    bl,0x9
+  64d24d:	77 16                                           	ja     64d265 <__cxa_finalize@plt-0x15959b>
+  64d24f:	4c 89 4e 28                                     	mov    QWORD PTR [rsi+0x28],r9
+  64d253:	4e 8d 1c 08                                     	lea    r11,[rax+r9*1]
+  64d257:	49 ff c3                                        	inc    r11
+  64d25a:	49 ff c1                                        	inc    r9
+  64d25d:	49 83 fb 01                                     	cmp    r11,0x1
+  64d261:	75 dd                                           	jne    64d240 <__cxa_finalize@plt-0x1595c0>
+  64d263:	eb 1e                                           	jmp    64d283 <__cxa_finalize@plt-0x15957d>
+  64d265:	41 83 cb 20                                     	or     r11d,0x20
+  64d269:	41 83 fb 65                                     	cmp    r11d,0x65
+  64d26d:	75 14                                           	jne    64d283 <__cxa_finalize@plt-0x15957d>
+  64d26f:	0f b6 d2                                        	movzx  edx,dl
+  64d272:	48 89 fb                                        	mov    rbx,rdi
+  64d275:	e8 36 f9 ff ff                                  	call   64cbb0 <__cxa_finalize@plt-0x159c50>
+  64d27a:	48 89 d8                                        	mov    rax,rbx
+  64d27d:	48 83 c4 20                                     	add    rsp,0x20
+  64d281:	5b                                              	pop    rbx
+  64d282:	c3                                              	ret
+  64d283:	66 48 0f 6e c9                                  	movq   xmm1,rcx
+  64d288:	66 0f 62 0d 50 fd a1 ff                         	punpckldq xmm1,XMMWORD PTR [rip+0xffffffffffa1fd50]        # 6cfe0 <__cxa_finalize@plt-0x739820>
+  64d290:	66 0f 5c 0d 28 fa a1 ff                         	subpd  xmm1,XMMWORD PTR [rip+0xffffffffffa1fa28]        # 6ccc0 <__cxa_finalize@plt-0x739b40>
+  64d298:	66 0f 28 c1                                     	movapd xmm0,xmm1
+  64d29c:	66 0f 15 c1                                     	unpckhpd xmm0,xmm1
+  64d2a0:	f2 0f 58 c1                                     	addsd  xmm0,xmm1
+  64d2a4:	44 89 c0                                        	mov    eax,r8d
+  64d2a7:	f7 d8                                           	neg    eax
+  64d2a9:	41 0f 48 c0                                     	cmovs  eax,r8d
+  64d2ad:	3d 35 01 00 00                                  	cmp    eax,0x135
+  64d2b2:	72 34                                           	jb     64d2e8 <__cxa_finalize@plt-0x159518>
+  64d2b4:	66 0f 57 c9                                     	xorpd  xmm1,xmm1
+  64d2b8:	f2 0f 10 15 e8 11 a2 ff                         	movsd  xmm2,QWORD PTR [rip+0xffffffffffa211e8]        # 6e4a8 <__cxa_finalize@plt-0x738358>
+  64d2c0:	66 0f 2e c1                                     	ucomisd xmm0,xmm1
+  64d2c4:	75 02                                           	jne    64d2c8 <__cxa_finalize@plt-0x159538>
+  64d2c6:	7b 58                                           	jnp    64d320 <__cxa_finalize@plt-0x1594e0>
+  64d2c8:	45 85 c0                                        	test   r8d,r8d
+  64d2cb:	79 7c                                           	jns    64d349 <__cxa_finalize@plt-0x1594b7>
+  64d2cd:	41 81 c0 34 01 00 00                            	add    r8d,0x134
+  64d2d4:	f2 0f 5e c2                                     	divsd  xmm0,xmm2
+  64d2d8:	44 89 c0                                        	mov    eax,r8d
+  64d2db:	f7 d8                                           	neg    eax
+  64d2dd:	41 0f 48 c0                                     	cmovs  eax,r8d
+  64d2e1:	3d 35 01 00 00                                  	cmp    eax,0x135
+  64d2e6:	73 d8                                           	jae    64d2c0 <__cxa_finalize@plt-0x159540>
+  64d2e8:	89 c0                                           	mov    eax,eax
+  64d2ea:	48 8b 0d 6f 8d 19 00                            	mov    rcx,QWORD PTR [rip+0x198d6f]        # 7e6060 <__register_atfork@plt+0x3f460>
+  64d2f1:	f2 0f 10 0c c1                                  	movsd  xmm1,QWORD PTR [rcx+rax*8]
+  64d2f6:	45 85 c0                                        	test   r8d,r8d
+  64d2f9:	78 44                                           	js     64d33f <__cxa_finalize@plt-0x1594c1>
+  64d2fb:	f2 0f 59 c1                                     	mulsd  xmm0,xmm1
+  64d2ff:	66 48 0f 7e c0                                  	movq   rax,xmm0
+  64d304:	48 b9 ff ff ff ff ff ff ff 7f                   	movabs rcx,0x7fffffffffffffff
+  64d30e:	48 21 c1                                        	and    rcx,rax
+  64d311:	48 b8 00 00 00 00 00 00 f0 7f                   	movabs rax,0x7ff0000000000000
+  64d31b:	48 39 c1                                        	cmp    rcx,rax
+  64d31e:	74 29                                           	je     64d349 <__cxa_finalize@plt-0x1594b7>
+  64d320:	84 d2                                           	test   dl,dl
+  64d322:	75 08                                           	jne    64d32c <__cxa_finalize@plt-0x1594d4>
+  64d324:	66 0f 57 05 f4 09 a2 ff                         	xorpd  xmm0,XMMWORD PTR [rip+0xffffffffffa209f4]        # 6dd20 <__cxa_finalize@plt-0x738ae0>
+  64d32c:	f2 0f 11 47 08                                  	movsd  QWORD PTR [rdi+0x8],xmm0
+  64d331:	31 c0                                           	xor    eax,eax
+  64d333:	48 89 07                                        	mov    QWORD PTR [rdi],rax
+  64d336:	48 89 f8                                        	mov    rax,rdi
+  64d339:	48 83 c4 20                                     	add    rsp,0x20
+  64d33d:	5b                                              	pop    rbx
+  64d33e:	c3                                              	ret
+  64d33f:	f2 0f 5e c1                                     	divsd  xmm0,xmm1
+  64d343:	84 d2                                           	test   dl,dl
+  64d345:	74 dd                                           	je     64d324 <__cxa_finalize@plt-0x1594dc>
+  64d347:	eb e3                                           	jmp    64d32c <__cxa_finalize@plt-0x1594d4>
+  64d349:	48 c7 44 24 08 0e 00 00 00                      	mov    QWORD PTR [rsp+0x8],0xe
+  64d352:	48 8d 44 24 08                                  	lea    rax,[rsp+0x8]
+  64d357:	48 89 fb                                        	mov    rbx,rdi
+  64d35a:	48 89 f7                                        	mov    rdi,rsi
+  64d35d:	48 89 c6                                        	mov    rsi,rax
+  64d360:	e8 cb 00 00 00                                  	call   64d430 <__cxa_finalize@plt-0x1593d0>
+  64d365:	48 89 df                                        	mov    rdi,rbx
+  64d368:	48 89 43 08                                     	mov    QWORD PTR [rbx+0x8],rax
+  64d36c:	b8 01 00 00 00                                  	mov    eax,0x1
+  64d371:	eb c0                                           	jmp    64d333 <__cxa_finalize@plt-0x1594cd>

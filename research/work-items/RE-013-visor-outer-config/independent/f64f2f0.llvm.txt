@@ -1,0 +1,28 @@
+
+visor.elf:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+00000000002bd180 <.text>:
+  64f2f0: 48 8b 47 08                  	mov	rax, qword ptr [rdi + 0x8]
+  64f2f4: 48 8b 4f 10                  	mov	rcx, qword ptr [rdi + 0x10]
+  64f2f8: 48 39 c1                     	cmp	rcx, rax
+  64f2fb: 73 3c                        	jae	0x64f339 <.text+0x3921b9>
+  64f2fd: 48 8b 17                     	mov	rdx, qword ptr [rdi]
+  64f300: 48 f7 d8                     	neg	rax
+  64f303: 48 ff c1                     	inc	rcx
+  64f306: 66 2e 0f 1f 84 00 00 00 00 00	nop	word ptr cs:[rax + rax]
+  64f310: 0f b6 74 0a ff               	movzx	esi, byte ptr [rdx + rcx - 0x1]
+  64f315: 83 fe 22                     	cmp	esi, 0x22
+  64f318: 74 1f                        	je	0x64f339 <.text+0x3921b9>
+  64f31a: 83 fe 5c                     	cmp	esi, 0x5c
+  64f31d: 74 1a                        	je	0x64f339 <.text+0x3921b9>
+  64f31f: 40 80 fe 20                  	cmp	sil, 0x20
+  64f323: 72 14                        	jb	0x64f339 <.text+0x3921b9>
+  64f325: 48 89 4f 10                  	mov	qword ptr [rdi + 0x10], rcx
+  64f329: 48 8d 34 08                  	lea	rsi, [rax + rcx]
+  64f32d: 48 ff c6                     	inc	rsi
+  64f330: 48 ff c1                     	inc	rcx
+  64f333: 48 83 fe 01                  	cmp	rsi, 0x1
+  64f337: 75 d7                        	jne	0x64f310 <.text+0x392190>
+  64f339: c3                           	ret
