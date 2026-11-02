@@ -25,10 +25,68 @@ def verdict(v, ev):
     return {'PASS': 0, 'FAIL': 1, 'INCONCLUSIVE': 2}[v]
 
 
+HERE = Path(__file__).resolve().parent
+
+# The manifest pins every packet file except MANIFEST.sha256 itself.
+PACKET_FILES = frozenset({
+    'README.md', 'evm-db-blake3.json', 'independent_verify.py',
+    'verify.py',
+})
+
+
+def manifest_failures():
+    # Neither verifier in this packet read MANIFEST.sha256 before:
+    # verify.py pins the packet JSON inline and regenerates it, and
+    # this checker re-derives the JSON's claims from the binary, so
+    # the manifest's rows for README.md and the two verifier scripts
+    # were pinned against nothing — tamper with one, replace it with
+    # a symlink, or delete it together with its row and both
+    # verifiers still passed. Enforce the admission the RE-005
+    # verifier and the node-inventory verifiers spell out.
+    manifest = HERE / 'MANIFEST.sha256'
+    if not manifest.is_file():
+        return ['MANIFEST.sha256 missing']
+    listed = {}
+    for line in manifest.read_text().splitlines():
+        if not line.strip():
+            continue
+        digest, sep, name = line.partition('  ')
+        if not sep or len(digest) != 64:
+            return ['malformed manifest line: ' + line.strip()]
+        if name in listed:
+            return ['manifest lists ' + name + ' twice']
+        listed[name] = digest
+    if set(listed) != PACKET_FILES:
+        return ['manifest file set differs from pinned packet files']
+    present = set()
+    for entry in sorted(HERE.iterdir()):
+        if entry.is_symlink():
+            return ['packet entry is a symlink: ' + entry.name]
+        if entry.is_dir():
+            if entry.name != '__pycache__' or not all(
+                    child.name.endswith('.pyc') and not child.is_symlink()
+                    for child in entry.iterdir()):
+                return ['unexpected directory in packet: ' + entry.name]
+            continue
+        present.add(entry.name)
+    if present - {'MANIFEST.sha256'} != set(listed):
+        return ['packet contents differ from manifest']
+    for name, digest in listed.items():
+        path = HERE / name
+        if path.is_symlink() or not path.is_file():
+            return ['manifest entry is a symlink or not a file: ' + name]
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            return ['manifest mismatch ' + name]
+    return []
+
+
 def main():
     ev = []
     if not BIN.exists() or not JSON_PATH.exists():
         return verdict('INCONCLUSIVE', [f'missing: {BIN if not BIN.exists() else JSON_PATH}'])
+    mf = manifest_failures()
+    if mf:
+        return verdict('FAIL', ev + ['manifest: ' + f for f in mf])
     b = BIN.read_bytes()
     h = hashlib.sha256(b).hexdigest()
     ev.append(f'binary sha256 {h}')
