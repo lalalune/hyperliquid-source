@@ -1,0 +1,23 @@
+# PLT stubs used by the window and its cleanup routine, with the GOT slot
+# each stub jumps through (verified from the stub bytes: ff 25 <disp32>
+# resolves to the GOT address).
+# Direct rel32 calls (lookup, formatter, move-assign, control release) use
+# no GOT slot and have no relocation entry cited here.
+#
+# PLT stub -> GOT slot
+0x5660430 __stack_chk_fail@plt -> 0x5778f40
+0x5660470 _M_dispose@plt -> 0x5778f60
+0x5660480 _ZdaPv@plt -> 0x5778f68
+0x5660110 _Unwind_Resume@plt -> 0x5778db0
+#
+# Window PLT call sites:
+#   0x514ea52 _ZdaPv@plt (status struct array pointer, when nonzero)
+#   0x514eb03, 0x514eb0b, 0x514eb13 _M_dispose@plt (formatter temporary,
+#     separator string, equals string, in that order)
+#   0x514eb1d __stack_chk_fail@plt (canary mismatch)
+# Cleanup routine PLT call sites:
+#   0x514e997, 0x514e99f _M_dispose@plt (separator, equals)
+#   0x514e9ae _ZdaPv@plt (status struct array pointer, when nonzero)
+#   0x514e9bd direct rel32 call to 0x4f94a90 (control release, no PLT stub)
+#   0x514e9d8 _Unwind_Resume@plt (exception object in rbx)
+#   0x514e9dd __stack_chk_fail@plt (canary mismatch)
