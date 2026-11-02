@@ -154,7 +154,9 @@ def verify_signatures(root, manifest):
                 result = subprocess.run(base + ['--status-fd', '1', '--verify', str(root / signature), str(binary)],
                                         check=True, capture_output=True, text=True, encoding='utf-8')
             except subprocess.CalledProcessError as error:
-                detail = (error.stderr or '').strip().partition('\n')[0] or f'gpg exited {error.returncode}'
+                lines = [line for line in (error.stderr or '').strip().splitlines() if line.strip()]
+                detail = next((line for line in lines if 'BADSIG' in line or 'BAD signature' in line),
+                              lines[0] if lines else f'gpg exited {error.returncode}')
                 raise ValueError(f'GPG verification failed: {relative}: {detail}') from None
             valid = [line.split() for line in result.stdout.splitlines()
                      if line.startswith('[GNUPG:] VALIDSIG ')]

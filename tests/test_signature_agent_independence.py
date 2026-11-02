@@ -74,9 +74,9 @@ class SignatureAgentTests(unittest.TestCase):
                     'artifacts/node/94/hl-node.asc'}
         manifest = {**self.manifest, 'files': [item for item in self.manifest['files']
                                             if item['path'] in retained]}
-        with self.assertRaises(subprocess.CalledProcessError) as failure:
+        with self.assertRaises(ValueError) as failure:
             artifacts.verify_signatures(root, manifest)
-        self.assertIn('BADSIG', failure.exception.stdout)
+        self.assertIn('BAD signature', str(failure.exception))
 
 
 if __name__ == '__main__':
