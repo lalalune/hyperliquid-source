@@ -114,6 +114,16 @@ build it with standard-library conversions and no new dependencies. Its chosen
 safe outcome type, atomic outside-domain rejection and driver-only row error
 projection do not recover native ABI, inactive error storage or full QC decoding.
 
+`qc_mode1_group::read_mode1_group` adds the full-word-one reservation domain:
+overflow leaves C unchanged, an exceeded limit retains C+32, and both denials
+precede marker qualification. Admitted accepted-marker reads reuse the mode0
+value/cursor kernel while retaining the independently proved final C+32. Its
+BudgetDenied outcome has no need value. The raw view method covers complete
+success or initial denial over supplied40-byte memory; other error memory is
+unqualified. See `research/work-items/RE-008-qc-mode1-group-94/` for the128-case
+pre-source freeze. The original mode0 and FD APIs and Cargo dependencies are
+unchanged; no full QC, original ABI or store-trace equivalence is implied.
+
 ## Reproduce
 
 From the repository root:

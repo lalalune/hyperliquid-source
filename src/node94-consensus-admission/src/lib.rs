@@ -19,6 +19,8 @@ pub mod qc_row_success;
 pub mod qc_fd_group;
 /// Qualified full-word-zero, accepted-marker group projection; separate from admission.
 pub mod qc_mode0_group;
+/// Qualified mode-one reservation/accepted-marker group projection.
+pub mod qc_mode1_group;
 mod stake;
 mod state;
 mod tc;
