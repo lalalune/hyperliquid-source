@@ -1,0 +1,196 @@
+//! Complete six-word single-correction addition core and ordered wrappers.
+//! Safe value/image projections; original control state and pointer ABI excluded.
+#![no_std]
+#![forbid(unsafe_code)]
+
+pub type Words = [u64; 6];
+
+/// Six result words R8..R13 and the other seven written core GP observations.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Core {
+    pub words: Words,
+    pub rax: u64,
+    pub rdx: u64,
+    pub rsi: u64,
+    pub rbx: u64,
+    pub rbp: u64,
+    pub r14: u64,
+    pub r15: u64,
+}
+
+/// Arbitrary operands: subtract the correction at most once, without a reduced-input premise.
+pub fn combine(a: Words, b: Words, correction: Words) -> Core {
+    let mut sum = [0; 6];
+    let mut carry = 0u128;
+    for i in 0..6 {
+        let total = a[i] as u128 + b[i] as u128 + carry;
+        sum[i] = total as u64;
+        carry = total >> 64;
+    }
+    let mut reduced = [0; 6];
+    let mut borrow = false;
+    for i in 0..6 {
+        let (v, first) = sum[i].overflowing_sub(correction[i]);
+        let (v, second) = v.overflowing_sub(borrow as u64);
+        reduced[i] = v;
+        borrow = first || second;
+    }
+    let words = if carry != 0 || !borrow { reduced } else { sum };
+    Core {
+        words,
+        rax: sum[2],
+        rdx: 0u64.wrapping_sub(carry as u64 + borrow as u64),
+        rsi: sum[5],
+        rbx: sum[3],
+        rbp: sum[4],
+        r14: sum[0],
+        r15: sum[1],
+    }
+}
+
+/// Full entry reads 48 bytes; actual interior entry 0x565699b takes arbitrary R8..R13.
+/// At the interior entry RSI is unused and incoming carry is overwritten by ADD.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Input {
+    Memory(u64),
+    Registers(Words),
+}
+
+/// Selected wrapper observations. Restored RBX/RBP/R12..R15 are not represented.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Registers {
+    pub rax: u64,
+    pub rdx: u64,
+    pub rsi: u64,
+    pub rcx: u64,
+    pub rdi: u64,
+    pub r8: u64,
+    pub r9: u64,
+    pub r10: u64,
+    pub r11: u64,
+}
+
+fn offset(image: &[u8], base: u64, address: u64, width: usize) -> Option<usize> {
+    let start = usize::try_from(address.checked_sub(base)?).ok()?;
+    if start.checked_add(width)? > image.len() {
+        return None;
+    }
+    Some(start)
+}
+fn mapped(image: &[u8], base: u64) -> bool {
+    base as u128 + image.len() as u128 <= (1u128 << 64)
+}
+fn load(image: &[u8], start: usize) -> Words {
+    let mut words = [0; 6];
+    for i in 0..6 {
+        let mut bytes = [0; 8];
+        bytes.copy_from_slice(&image[start + i * 8..start + i * 8 + 8]);
+        words[i] = u64::from_le_bytes(bytes);
+    }
+    words
+}
+fn store(image: &mut [u8], destination: usize, words: Words) {
+    for i in 0..6 {
+        image[destination + i * 8..destination + i * 8 + 8]
+            .copy_from_slice(&words[i].to_le_bytes());
+    }
+}
+fn observe(core: Core, destination: u64, correction: u64) -> Registers {
+    Registers {
+        rax: core.rax,
+        rdx: core.rdx,
+        rsi: core.rsi,
+        rcx: destination,
+        rdi: destination,
+        r8: core.words[0],
+        r9: core.words[1],
+        r10: core.words[2],
+        r11: core.words[3],
+    }
+}
+
+/// Full [0x5656980,0x5656a13) body or its actual interior entry at 0x565699b.
+/// Stable data spans may alias arbitrarily and must exclude original control state.
+/// None refuses invalid safe-image spans without mutation; it is not native fault behavior.
+pub fn apply_core(
+    image: &mut [u8],
+    base: u64,
+    destination: u64,
+    input: Input,
+    right: u64,
+    correction: u64,
+) -> Option<Core> {
+    if !mapped(image, base) {
+        return None;
+    }
+    let dest = offset(image, base, destination, 48)?;
+    let rhs = offset(image, base, right, 48)?;
+    let fix = offset(image, base, correction, 48)?;
+    let a = match input {
+        Input::Memory(address) => load(image, offset(image, base, address, 48)?),
+        Input::Registers(words) => words,
+    };
+    let b = load(image, rhs);
+    let c = load(image, fix);
+    let result = combine(a, b, c);
+    store(image, dest, result.words);
+    Some(result)
+}
+
+/// Complete single wrapper [0x5656940,0x565697c), including its core call.
+pub fn apply_single(
+    image: &mut [u8],
+    base: u64,
+    destination: u64,
+    left: u64,
+    right: u64,
+    correction: u64,
+) -> Option<Registers> {
+    let result = apply_core(
+        image,
+        base,
+        destination,
+        Input::Memory(left),
+        right,
+        correction,
+    )?;
+    Some(observe(result, destination, correction))
+}
+
+fn stage(
+    image: &mut [u8],
+    destination: usize,
+    left: usize,
+    right: usize,
+    correction: usize,
+) -> Core {
+    let a = load(image, left);
+    let b = load(image, right);
+    let c = load(image, correction);
+    let result = combine(a, b, c);
+    store(image, destination, result.words);
+    result
+}
+
+/// Complete [0x5656a20,0x5656a83) wrapper: high 48-byte block before low block.
+/// The first stores are visible to every second-stage operand, including correction.
+/// All fixed spans are admitted before either stage, so every refusal leaves the image intact.
+pub fn apply_pair(
+    image: &mut [u8],
+    base: u64,
+    destination: u64,
+    left: u64,
+    right: u64,
+    correction: u64,
+) -> Option<Registers> {
+    if !mapped(image, base) {
+        return None;
+    }
+    let dest = offset(image, base, destination, 96)?;
+    let lhs = offset(image, base, left, 96)?;
+    let rhs = offset(image, base, right, 96)?;
+    let fix = offset(image, base, correction, 48)?;
+    stage(image, dest + 48, lhs + 48, rhs + 48, fix);
+    let result = stage(image, dest, lhs, rhs, fix);
+    Some(observe(result, destination, correction))
+}

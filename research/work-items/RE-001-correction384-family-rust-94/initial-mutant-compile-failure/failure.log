@@ -1,0 +1,26 @@
+PASS static: 306-byte correction family including actual interior entry; 41 external caller FDEs; 146 E8 and one E9; full CIE/FDE/RELA binding
+Traceback (most recent call last):
+  File "/Users/shinjun/hyperliquid-contributions/mixer/research/work-items/RE-001-correction384-family-rust-94/verify.py", line 194, in <module>
+    elif args.out: run(args.out.resolve(),args.rustc)
+                   ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/shinjun/hyperliquid-contributions/mixer/research/work-items/RE-001-correction384-family-rust-94/verify.py", line 156, in run
+    directory=out/('mutant-'+name);build(source.replace(old,new),directory,3,rustc,commands)
+                                   ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/shinjun/hyperliquid-contributions/mixer/research/work-items/RE-001-correction384-family-rust-94/verify.py", line 129, in build
+    require(p.returncode==0,f'Rust build failed: {p.stdout}')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/shinjun/hyperliquid-contributions/mixer/research/work-items/RE-001-correction384-family-rust-94/static_evidence.py", line 30, in require
+    if not ok: raise ValueError(message)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Rust build failed: error: unused variable: `correction`
+  --> lib.rs:98:42
+   |
+98 | fn observe(core: Core, destination: u64, correction: u64) -> Registers {
+   |                                          ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_correction`
+   |
+   = note: `-D unused-variables` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(unused_variables)]`
+
+error: aborting due to 1 previous error
+
+
