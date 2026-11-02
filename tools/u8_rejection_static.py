@@ -109,6 +109,19 @@ def has_path(edges, start, end, blocked=None):
     return False
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair the binding check reads
+    would otherwise depend on record order in the table."""
+    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    rels = {}
+    for a, i, v in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']]):
+        if a in rels:
+            raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a] = (i, v)
+    return rels
+
+
 def analyze(data):
     _, frames, _ = fde_extents(data)
     mapping = {(f['start'], f['end']): f for f in frames}
@@ -128,8 +141,7 @@ def analyze(data):
         raw = read(data, site, 5)[1]
         if raw[0] != 0xe8 or site + 5 + struct.unpack_from('<i', raw, 1)[0] != target:
             raise ValueError('rejection direct call changed')
-    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
-    rels = {a: (i, v) for a, i, v in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']])}
+    rels = relocations(data)
     if any(rels.get(a) != (8, v) for a, v in RELATIVE.items()):
         raise ValueError('rejection type/format relocation changed')
     literals = [(0x7c86dc, b'enum ReferenceOracleMode'), (0x5f44d6, b'option'),
