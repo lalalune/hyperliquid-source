@@ -146,3 +146,14 @@ following independently verified node #94 instructions:
 
 `research/work-items/RE-005-bincode-varint/verify.py` authenticates those bytes
 against the captured artifact before the Rust test results are interpreted.
+
+## Size-writer counter state
+
+`count_u32(value, &mut u64)` and `count_u64(value, &mut u64)` extend the
+existing length selection with the target's counter commit order. On multibyte
+payload overflow, the already-written marker increment remains in the counter.
+At an initially maximal counter, no update occurs. `SizeOverflow` represents
+the measured pre-panic-call boundary; it returns normally and does not claim
+the original panic or result-object ABI. The source-derived state and actual
+instruction comparisons are in
+[the counter packet](../../research/work-items/RE-005-bincode-size-state-rust-94/README.md).
