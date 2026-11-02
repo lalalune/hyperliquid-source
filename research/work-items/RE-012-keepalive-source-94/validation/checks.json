@@ -1,0 +1,73 @@
+{
+  "commands": [
+    {
+      "command": "LLVM_OBJDUMP=/usr/bin/objdump PATH=/opt/homebrew/opt/binutils/bin:$PATH make doctor",
+      "exit": 0,
+      "log": "doctor.log"
+    },
+    {
+      "command": "LLVM_OBJDUMP=/usr/bin/objdump PATH=/opt/homebrew/opt/binutils/bin:$PATH make verify",
+      "exit": 0,
+      "log": "verify-initial.log"
+    },
+    {
+      "command": "python3 -B -m unittest tests.test_keepalive_source94 -v",
+      "exit": 0,
+      "tests": 7,
+      "seconds": 42.491,
+      "log": "focused-initial.stderr"
+    },
+    {
+      "command": "LLVM_OBJDUMP=/usr/bin/objdump PATH=/opt/homebrew/opt/binutils/bin:$PATH python3 -B -m unittest tests.test_socket_calls_static tests.test_connections_accept_metrics_static tests.test_fde_extents -v",
+      "exit": 0,
+      "tests": 62,
+      "seconds": 52.838,
+      "log": "legacy-focused.stderr"
+    },
+    {
+      "command": "LLVM_OBJDUMP=/usr/bin/objdump PATH=/opt/homebrew/opt/binutils/bin:$PATH make verify catalogue-check reproduce",
+      "exit": 0,
+      "log": "global-final.log"
+    }
+  ],
+  "full_suite_on_this_head": false,
+  "hosted_ci_claimed": false,
+  "target_execution": false,
+  "global_byte_registration": true,
+  "initial_research_base": "e5c9b6436876b2a4a39daef813171f9879317699",
+  "integration_base": "2c75904241b9165693d40dea8b0d0d340f8e22b3",
+  "registry_mode": "Two unique target intervals; four alternative candidate records; unequal extents excluded from aligned-byte totals.",
+  "rebased_commands": [
+    {
+      "command": "LLVM_OBJDUMP=/usr/bin/objdump PATH=/opt/homebrew/opt/binutils/bin:$PATH make catalogue",
+      "exit": 0,
+      "seconds": 10.819,
+      "stdout": "rebased-catalogue.stdout",
+      "stderr": "rebased-catalogue.stderr"
+    },
+    {
+      "command": "LLVM_OBJDUMP=/usr/bin/objdump PATH=/opt/homebrew/opt/binutils/bin:$PATH make doctor verify catalogue-check reproduce",
+      "exit": 0,
+      "seconds": 112.462,
+      "stdout": "rebased-global.stdout",
+      "stderr": "rebased-global.stderr"
+    },
+    {
+      "command": "LLVM_OBJDUMP=/usr/bin/objdump PATH=/opt/homebrew/opt/binutils/bin:$PATH python3 -B -m unittest tests.test_keepalive_source94 tests.test_byte_progress tests.test_socket_calls_static tests.test_connections_accept_metrics_static tests.test_fde_extents -v",
+      "exit": 1,
+      "seconds": 117.71,
+      "stdout": "rebased-focused.stdout",
+      "stderr": "rebased-focused.stderr"
+    },
+    {
+      "command": "PYTHONPATH=tests LLVM_OBJDUMP=/usr/bin/objdump PATH=/opt/homebrew/opt/binutils/bin:$PATH python3 -B -m unittest tests.test_keepalive_source94 tests.test_byte_progress tests.test_socket_calls_static tests.test_connections_accept_metrics_static tests.test_fde_extents -v",
+      "exit": 0,
+      "seconds": 94.286,
+      "stdout": "rebased-focused-qualified.stdout",
+      "stderr": "rebased-focused-qualified.stderr",
+      "tests": 99,
+      "test_seconds": 93.838
+    }
+  ],
+  "retained_recovered_failure": "rebased-focused.stderr: absent tests import path produced 70 passing tests and one loader error; qualified invocation adds PYTHONPATH=tests and passes all 99."
+}

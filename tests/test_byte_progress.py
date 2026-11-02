@@ -148,6 +148,18 @@ class ByteRegistryTests(unittest.TestCase):
                 self.assertIn('Unmatched candidates with different extents', text)
                 self.assertIn(f'| 8 | {len(source)} | Unmatched; no aligned-byte comparison |', text)
 
+    def test_socket2_unequal_candidate_remains_outside_aligned_totals(self):
+        self.unequal_candidate()
+        self.window['dependency'] = 'socket2'
+        result = self.load()
+        self.assertEqual(result['totals']['node94'], summarize([]))
+        self.assertEqual(result['components']['foundation'], summarize([]))
+        self.assertEqual(result['dependencies']['node94'], {})
+        row, = result['extent_mismatches']
+        self.assertEqual(row['dependency'], 'socket2')
+        self.assertEqual(row['status'], 'unmatched-extent')
+        self.assertIsNone(row['aligned_byte_comparison'])
+
     def test_unequal_candidate_does_not_change_existing_aligned_totals(self):
         self.unequal_candidate()
         aligned = {**self.window, 'id': 'aligned', 'start': 264, 'end': 272,

@@ -65,6 +65,8 @@ Both complete source and target extents are authenticated. These candidates have
 | Target / candidate | Attribution | Target bytes | Source bytes | Result |
 | --- | --- | ---: | ---: | --- |
 | node94: Mio TcpListener bind (unequal source extent) | mio | 305 | 364 | Unmatched; no aligned-byte comparison |
+| node94: socket2 internal keepalive at 0x4ecd970 (unequal source extent) | socket2 | 227 | 418 | Unmatched; no aligned-byte comparison |
+| node94: socket2 internal keepalive at 0x4ecda60 (unequal source extent) | socket2 | 227 | 418 | Unmatched; no aligned-byte comparison |
 
 ## Binary coverage
 

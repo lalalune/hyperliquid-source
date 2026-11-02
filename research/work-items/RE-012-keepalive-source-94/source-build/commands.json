@@ -1,0 +1,661 @@
+[
+  {
+    "label": "rustc-version",
+    "argv": [
+      "<rustc>",
+      "-vV"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 192,
+        "sha256": "a323109dfabfd30645bdf92aa834b93f71294c582ab67b977485d7f355ceba9a",
+        "normalized_sha256": "a323109dfabfd30645bdf92aa834b93f71294c582ab67b977485d7f355ceba9a"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.4.10-config-build",
+    "argv": [
+      "<rustc>",
+      "<build>/vendor/libc-0.2.149/build.rs",
+      "--edition=2015",
+      "-o",
+      "<build>/socket2-0.4.10/libc-build-config"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.4.10-config-run",
+    "argv": [
+      "<build>/socket2-0.4.10/libc-build-config"
+    ],
+    "cwd": "<build>/vendor/libc-0.2.149",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 491,
+        "sha256": "43e19b28963bfd82f37568c39f9372485d4b50cf2c7e768af5d79c9051733807",
+        "normalized_sha256": "43e19b28963bfd82f37568c39f9372485d4b50cf2c7e768af5d79c9051733807"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.4.10-libc-build",
+    "argv": [
+      "<rustc>",
+      "<build>/vendor/libc-0.2.149/src/lib.rs",
+      "--crate-name=libc",
+      "--crate-type=rlib",
+      "--edition=2015",
+      "--cfg",
+      "feature=\"default\"",
+      "--cfg",
+      "feature=\"std\"",
+      "--cfg",
+      "freebsd11",
+      "--cfg",
+      "libc_priv_mod_use",
+      "--cfg",
+      "libc_union",
+      "--cfg",
+      "libc_const_size_of",
+      "--cfg",
+      "libc_align",
+      "--cfg",
+      "libc_int128",
+      "--cfg",
+      "libc_core_cvoid",
+      "--cfg",
+      "libc_packedN",
+      "--cfg",
+      "libc_cfg_target_vendor",
+      "--cfg",
+      "libc_non_exhaustive",
+      "--cfg",
+      "libc_long_array",
+      "--cfg",
+      "libc_ptr_addr_of",
+      "--cfg",
+      "libc_underscore_const_names",
+      "--cfg",
+      "libc_const_extern_fn",
+      "--target=x86_64-unknown-linux-gnu",
+      "--sysroot",
+      "<build>/official/rust-std-1.94.1-x86_64-unknown-linux-gnu/rust-std-x86_64-unknown-linux-gnu",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "panic=unwind",
+      "-C",
+      "debug-assertions=no",
+      "-C",
+      "overflow-checks=no",
+      "-C",
+      "debuginfo=0",
+      "--remap-path-prefix",
+      "<build>=/keepalive-source-candidate",
+      "-o",
+      "<build>/socket2-0.4.10/liblibc.rlib"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 4380,
+        "sha256": "66cd3288716be3080097aea0f1aa20c62605aac2813c88c759b0e606aefbe8d4",
+        "normalized_sha256": "66cd3288716be3080097aea0f1aa20c62605aac2813c88c759b0e606aefbe8d4"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.4.10-build",
+    "argv": [
+      "<rustc>",
+      "<build>/vendor/socket2-0.4.10/src/lib.rs",
+      "--crate-name=socket2",
+      "--crate-type=rlib",
+      "--edition=2018",
+      "--cfg",
+      "feature=\"all\"",
+      "--extern",
+      "libc=<build>/socket2-0.4.10/liblibc.rlib",
+      "--target=x86_64-unknown-linux-gnu",
+      "--sysroot",
+      "<build>/official/rust-std-1.94.1-x86_64-unknown-linux-gnu/rust-std-x86_64-unknown-linux-gnu",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "panic=unwind",
+      "-C",
+      "debug-assertions=no",
+      "-C",
+      "overflow-checks=no",
+      "-C",
+      "debuginfo=0",
+      "--remap-path-prefix",
+      "<build>=/keepalive-source-candidate",
+      "--emit=link,obj",
+      "--cap-lints",
+      "allow",
+      "--out-dir",
+      "<build>/socket2-0.4.10"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.4.10-opt0-build",
+    "argv": [
+      "<rustc>",
+      "<build>/vendor/socket2-0.4.10/src/lib.rs",
+      "--crate-name=socket2",
+      "--crate-type=rlib",
+      "--edition=2018",
+      "--cfg",
+      "feature=\"all\"",
+      "--extern",
+      "libc=<build>/socket2-0.4.10/liblibc.rlib",
+      "--target=x86_64-unknown-linux-gnu",
+      "--sysroot",
+      "<build>/official/rust-std-1.94.1-x86_64-unknown-linux-gnu/rust-std-x86_64-unknown-linux-gnu",
+      "-C",
+      "opt-level=0",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "panic=unwind",
+      "-C",
+      "debug-assertions=no",
+      "-C",
+      "overflow-checks=no",
+      "-C",
+      "debuginfo=0",
+      "--remap-path-prefix",
+      "<build>=/keepalive-source-candidate",
+      "--emit=link,obj",
+      "--cap-lints",
+      "allow",
+      "--out-dir",
+      "<build>/socket2-0.4.10/opt0"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.4.10-opt0-repeat",
+    "argv": [
+      "<rustc>",
+      "<build>/vendor/socket2-0.4.10/src/lib.rs",
+      "--crate-name=socket2",
+      "--crate-type=rlib",
+      "--edition=2018",
+      "--cfg",
+      "feature=\"all\"",
+      "--extern",
+      "libc=<build>/socket2-0.4.10/liblibc.rlib",
+      "--target=x86_64-unknown-linux-gnu",
+      "--sysroot",
+      "<build>/official/rust-std-1.94.1-x86_64-unknown-linux-gnu/rust-std-x86_64-unknown-linux-gnu",
+      "-C",
+      "opt-level=0",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "panic=unwind",
+      "-C",
+      "debug-assertions=no",
+      "-C",
+      "overflow-checks=no",
+      "-C",
+      "debuginfo=0",
+      "--remap-path-prefix",
+      "<build>=/keepalive-source-candidate",
+      "--emit=link,obj",
+      "--cap-lints",
+      "allow",
+      "--out-dir",
+      "<build>/socket2-0.4.10/opt0/repeat"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.4.10-repeat",
+    "argv": [
+      "<rustc>",
+      "<build>/vendor/socket2-0.4.10/src/lib.rs",
+      "--crate-name=socket2",
+      "--crate-type=rlib",
+      "--edition=2018",
+      "--cfg",
+      "feature=\"all\"",
+      "--extern",
+      "libc=<build>/socket2-0.4.10/liblibc.rlib",
+      "--target=x86_64-unknown-linux-gnu",
+      "--sysroot",
+      "<build>/official/rust-std-1.94.1-x86_64-unknown-linux-gnu/rust-std-x86_64-unknown-linux-gnu",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "panic=unwind",
+      "-C",
+      "debug-assertions=no",
+      "-C",
+      "overflow-checks=no",
+      "-C",
+      "debuginfo=0",
+      "--remap-path-prefix",
+      "<build>=/keepalive-source-candidate",
+      "--emit=link,obj",
+      "--cap-lints",
+      "allow",
+      "--out-dir",
+      "<build>/socket2-0.4.10/repeat"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.5.7-config-build",
+    "argv": [
+      "<rustc>",
+      "<build>/vendor/libc-0.2.150/build.rs",
+      "--edition=2015",
+      "-o",
+      "<build>/socket2-0.5.7/libc-build-config"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.5.7-config-run",
+    "argv": [
+      "<build>/socket2-0.5.7/libc-build-config"
+    ],
+    "cwd": "<build>/vendor/libc-0.2.150",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 491,
+        "sha256": "43e19b28963bfd82f37568c39f9372485d4b50cf2c7e768af5d79c9051733807",
+        "normalized_sha256": "43e19b28963bfd82f37568c39f9372485d4b50cf2c7e768af5d79c9051733807"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.5.7-libc-build",
+    "argv": [
+      "<rustc>",
+      "<build>/vendor/libc-0.2.150/src/lib.rs",
+      "--crate-name=libc",
+      "--crate-type=rlib",
+      "--edition=2015",
+      "--cfg",
+      "feature=\"default\"",
+      "--cfg",
+      "feature=\"std\"",
+      "--cfg",
+      "freebsd11",
+      "--cfg",
+      "libc_priv_mod_use",
+      "--cfg",
+      "libc_union",
+      "--cfg",
+      "libc_const_size_of",
+      "--cfg",
+      "libc_align",
+      "--cfg",
+      "libc_int128",
+      "--cfg",
+      "libc_core_cvoid",
+      "--cfg",
+      "libc_packedN",
+      "--cfg",
+      "libc_cfg_target_vendor",
+      "--cfg",
+      "libc_non_exhaustive",
+      "--cfg",
+      "libc_long_array",
+      "--cfg",
+      "libc_ptr_addr_of",
+      "--cfg",
+      "libc_underscore_const_names",
+      "--cfg",
+      "libc_const_extern_fn",
+      "--target=x86_64-unknown-linux-gnu",
+      "--sysroot",
+      "<build>/official/rust-std-1.94.1-x86_64-unknown-linux-gnu/rust-std-x86_64-unknown-linux-gnu",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "panic=unwind",
+      "-C",
+      "debug-assertions=no",
+      "-C",
+      "overflow-checks=no",
+      "-C",
+      "debuginfo=0",
+      "--remap-path-prefix",
+      "<build>=/keepalive-source-candidate",
+      "-o",
+      "<build>/socket2-0.5.7/liblibc.rlib"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 4380,
+        "sha256": "686d19abd2378bee267ae9ca08c139c0ae15e2ea5ba0610a2876a5bcbe7f94eb",
+        "normalized_sha256": "686d19abd2378bee267ae9ca08c139c0ae15e2ea5ba0610a2876a5bcbe7f94eb"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.5.7-build",
+    "argv": [
+      "<rustc>",
+      "<build>/vendor/socket2-0.5.7/src/lib.rs",
+      "--crate-name=socket2",
+      "--crate-type=rlib",
+      "--edition=2021",
+      "--cfg",
+      "feature=\"all\"",
+      "--extern",
+      "libc=<build>/socket2-0.5.7/liblibc.rlib",
+      "--target=x86_64-unknown-linux-gnu",
+      "--sysroot",
+      "<build>/official/rust-std-1.94.1-x86_64-unknown-linux-gnu/rust-std-x86_64-unknown-linux-gnu",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "panic=unwind",
+      "-C",
+      "debug-assertions=no",
+      "-C",
+      "overflow-checks=no",
+      "-C",
+      "debuginfo=0",
+      "--remap-path-prefix",
+      "<build>=/keepalive-source-candidate",
+      "--emit=link,obj",
+      "--cap-lints",
+      "allow",
+      "--out-dir",
+      "<build>/socket2-0.5.7"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.5.7-opt0-build",
+    "argv": [
+      "<rustc>",
+      "<build>/vendor/socket2-0.5.7/src/lib.rs",
+      "--crate-name=socket2",
+      "--crate-type=rlib",
+      "--edition=2021",
+      "--cfg",
+      "feature=\"all\"",
+      "--extern",
+      "libc=<build>/socket2-0.5.7/liblibc.rlib",
+      "--target=x86_64-unknown-linux-gnu",
+      "--sysroot",
+      "<build>/official/rust-std-1.94.1-x86_64-unknown-linux-gnu/rust-std-x86_64-unknown-linux-gnu",
+      "-C",
+      "opt-level=0",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "panic=unwind",
+      "-C",
+      "debug-assertions=no",
+      "-C",
+      "overflow-checks=no",
+      "-C",
+      "debuginfo=0",
+      "--remap-path-prefix",
+      "<build>=/keepalive-source-candidate",
+      "--emit=link,obj",
+      "--cap-lints",
+      "allow",
+      "--out-dir",
+      "<build>/socket2-0.5.7/opt0"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.5.7-opt0-repeat",
+    "argv": [
+      "<rustc>",
+      "<build>/vendor/socket2-0.5.7/src/lib.rs",
+      "--crate-name=socket2",
+      "--crate-type=rlib",
+      "--edition=2021",
+      "--cfg",
+      "feature=\"all\"",
+      "--extern",
+      "libc=<build>/socket2-0.5.7/liblibc.rlib",
+      "--target=x86_64-unknown-linux-gnu",
+      "--sysroot",
+      "<build>/official/rust-std-1.94.1-x86_64-unknown-linux-gnu/rust-std-x86_64-unknown-linux-gnu",
+      "-C",
+      "opt-level=0",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "panic=unwind",
+      "-C",
+      "debug-assertions=no",
+      "-C",
+      "overflow-checks=no",
+      "-C",
+      "debuginfo=0",
+      "--remap-path-prefix",
+      "<build>=/keepalive-source-candidate",
+      "--emit=link,obj",
+      "--cap-lints",
+      "allow",
+      "--out-dir",
+      "<build>/socket2-0.5.7/opt0/repeat"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  {
+    "label": "socket2-0.5.7-repeat",
+    "argv": [
+      "<rustc>",
+      "<build>/vendor/socket2-0.5.7/src/lib.rs",
+      "--crate-name=socket2",
+      "--crate-type=rlib",
+      "--edition=2021",
+      "--cfg",
+      "feature=\"all\"",
+      "--extern",
+      "libc=<build>/socket2-0.5.7/liblibc.rlib",
+      "--target=x86_64-unknown-linux-gnu",
+      "--sysroot",
+      "<build>/official/rust-std-1.94.1-x86_64-unknown-linux-gnu/rust-std-x86_64-unknown-linux-gnu",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "panic=unwind",
+      "-C",
+      "debug-assertions=no",
+      "-C",
+      "overflow-checks=no",
+      "-C",
+      "debuginfo=0",
+      "--remap-path-prefix",
+      "<build>=/keepalive-source-candidate",
+      "--emit=link,obj",
+      "--cap-lints",
+      "allow",
+      "--out-dir",
+      "<build>/socket2-0.5.7/repeat"
+    ],
+    "cwd": "<build>",
+    "exit": 0,
+    "streams": {
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "normalized_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  }
+]
