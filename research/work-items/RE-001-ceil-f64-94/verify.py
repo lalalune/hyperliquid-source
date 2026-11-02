@@ -32,6 +32,63 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+# The manifest pins every packet file except MANIFEST.sha256 itself.
+PACKET_FILES = frozenset({
+    'PROOF.md', 'README.md', 'VALIDATION.md', 'caller.objdump.txt',
+    'ceil.llvm.txt', 'ceil.objdump.txt', 'evidence.json', 'samples.tsv',
+    'verify.py',
+})
+
+
+def check_manifest():
+    # Nothing in this verifier read MANIFEST.sha256 before: the packet
+    # carried a full-pin manifest that no check enforced, so a tampered
+    # or co-deleted evidence file was invisible as long as the two
+    # files the verifier happens to read (evidence.json, samples.tsv)
+    # stayed consistent with the binary. Enforce the admission check
+    # the RE-001 sibling packet verifiers spell out: strict parse, no
+    # duplicate rows, no symlinked or subdirectory entries (tolerating
+    # only a __pycache__ of plain bytecode files), and the listed set
+    # equal to both the pinned packet files and the files present.
+    manifest = PACKET / 'MANIFEST.sha256'
+    require(manifest.is_file(), 'MANIFEST.sha256 missing')
+    listed = {}
+    for line in manifest.read_text(encoding='utf-8').splitlines():
+        if not line.strip():
+            continue
+        parts = line.split()
+        require(len(parts) == 2, 'malformed manifest line: %r' % line.strip())
+        digest_hex, name = parts
+        require(name not in listed, 'manifest lists %s twice' % name)
+        listed[name] = digest_hex
+    present = set()
+    for entry in sorted(PACKET.iterdir()):
+        if entry.is_symlink():
+            raise ValueError('packet entry is a symlink: %s' % entry.name)
+        if entry.is_dir():
+            if entry.name != '__pycache__' or not all(
+                    child.name.endswith('.pyc') and not child.is_symlink()
+                    for child in entry.iterdir()):
+                raise ValueError('unexpected directory in packet: %s' % entry.name)
+            continue
+        present.add(entry.name)
+    present.discard('MANIFEST.sha256')
+    require(set(listed) == PACKET_FILES,
+            'manifest file set differs from the pinned packet files: '
+            'missing rows %s, unexpected rows %s'
+            % (sorted(PACKET_FILES - set(listed)),
+               sorted(set(listed) - PACKET_FILES)))
+    require(set(listed) == present,
+            'manifest file set differs from packet contents: '
+            'unlisted %s, missing %s'
+            % (sorted(present - set(listed)),
+               sorted(set(listed) - present)))
+    for name, digest_hex in sorted(listed.items()):
+        if name in present:
+            require(digest((PACKET / name).read_bytes()) == digest_hex,
+                    'manifest hash mismatch: %s' % name)
+
+
 def listing_rows(path, image, begin, end):
     """Validate retained row bytes and contiguous coverage, not their mnemonics."""
     rows, cursor = [], begin
@@ -220,6 +277,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--write', type=Path, help='write a new evidence record instead of comparing')
     args = parser.parse_args()
+    check_manifest()
     data = (ROOT / 'artifacts/node/94/hl-node').read_bytes()
     require(digest(data) == TARGET, 'full target SHA-256 differs')
     result = inspect(data)
