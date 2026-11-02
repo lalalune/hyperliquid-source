@@ -144,6 +144,8 @@ class Fdes:
         pairs = [struct.unpack_from('<ii', table, i * 8) for i in range(count)]
         self.starts = [hdr + a for a, _ in pairs]
         self.fde = [hdr + b for _, b in pairs]
+        if any(b <= a for a, b in zip(self.starts, self.starts[1:])):
+            raise EvidenceError('.eh_frame_hdr table not strictly increasing')
         self.count = count
 
     def range_of(self, va):
