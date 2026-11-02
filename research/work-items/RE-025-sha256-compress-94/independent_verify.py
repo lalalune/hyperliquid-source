@@ -133,6 +133,21 @@ def rela_dyn(data):
     return {}
 
 
+# The manifest pins the packet's own files plus the
+# ../..-relative tool and test files the packet binds.
+PACKET_FILES = frozenset({
+    "../../../tests/test_crypto_emulation_guard.py",
+    "../../../tests/test_crypto_static_scan_bounds.py",
+    "../../../tools/crypto_emulation_guard.py",
+    "README.md",
+    "REVIEW.md",
+    "independent_verify.py",
+    "pr-body.md",
+    "sha256-compress.json",
+    "verify.py",
+})
+
+
 def main():
     failures = []
     data = BINARY.read_bytes()
@@ -182,11 +197,47 @@ def main():
             failures.append("packet emulated digest " + hx[:8])
     if hashlib.sha256(PACKET_JSON.read_bytes()).hexdigest() != JSON_SHA256:
         failures.append("json sha256")
+    # Admission: hashing each listed row is not enough. It cannot see
+    # a duplicated row, a listed file replaced by a symlink
+    # (read_bytes follows it, so the evidence can point outside the
+    # packet), an unlisted file in the packet directory, or an
+    # evidence file deleted together with its row. Pin the listed set
+    # and compare it against the packet contents, mirroring the RE-005
+    # verifier and the node-inventory verifiers.
+    listed = {}
     for line in (HERE / "MANIFEST.sha256").read_text().splitlines():
         if not line.strip():
             continue
-        digest, rel = line.split("  ", 1)
-        if hashlib.sha256((HERE / rel).read_bytes()).hexdigest() != digest:
+        digest, sep, rel = line.partition("  ")
+        if not sep or len(digest) != 64:
+            failures.append("malformed manifest line: " + line.strip())
+            continue
+        if rel in listed:
+            failures.append("manifest lists " + rel + " twice")
+            continue
+        listed[rel] = digest
+    if set(listed) != PACKET_FILES:
+        failures.append("manifest file set differs from pinned packet files")
+    present = set()
+    for entry in sorted(HERE.iterdir()):
+        if entry.is_symlink():
+            failures.append("packet entry is a symlink: " + entry.name)
+        elif entry.is_dir():
+            if entry.name != "__pycache__" or not all(
+                    child.name.endswith(".pyc") and not child.is_symlink()
+                    for child in entry.iterdir()):
+                failures.append("unexpected directory in packet: " + entry.name)
+        else:
+            present.add(entry.name)
+    in_packet = {rel for rel in listed if not rel.startswith("..")}
+    if present - {"MANIFEST.sha256"} != in_packet:
+        failures.append("packet contents differ from manifest")
+    for rel, digest in listed.items():
+        path = HERE / rel
+        if path.is_symlink() or not path.is_file():
+            failures.append("manifest entry is a symlink or not a file: " + rel)
+            continue
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             failures.append("manifest " + rel)
     if failures:
         print("FAIL:", ", ".join(failures))
