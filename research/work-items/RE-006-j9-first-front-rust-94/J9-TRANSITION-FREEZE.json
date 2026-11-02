@@ -1,0 +1,319 @@
+{
+  "after_j9": {
+    "left_exit": "JE at4918f10 iff h10; within n21..32 this is n21 only",
+    "rax_byte_offset": 80,
+    "rsi": 10
+  },
+  "count_boundaries": [
+    {
+      "after_j9": "right-entry",
+      "h": 10,
+      "merge_back_index": 20,
+      "n": 21,
+      "next_right_source_index": 18,
+      "right_length": 11
+    },
+    {
+      "after_j9": "left-j10",
+      "h": 11,
+      "merge_back_index": 21,
+      "n": 22,
+      "next_right_source_index": 19,
+      "right_length": 11
+    },
+    {
+      "after_j9": "left-j10",
+      "h": 11,
+      "merge_back_index": 22,
+      "n": 23,
+      "next_right_source_index": 19,
+      "right_length": 12
+    },
+    {
+      "after_j9": "left-j10",
+      "h": 15,
+      "merge_back_index": 30,
+      "n": 31,
+      "next_right_source_index": 23,
+      "right_length": 16
+    },
+    {
+      "after_j9": "left-j10",
+      "h": 16,
+      "merge_back_index": 31,
+      "n": 32,
+      "next_right_source_index": 24,
+      "right_length": 16
+    }
+  ],
+  "frozen_utc": "2026-11-01T22:30:57.764164+00:00",
+  "j9_effect": "Same qword unsigned-greater suffix shift, now over nine prefix words; sourceA[9], initialS[9], previousS[8], up to9shifts, writesS[0..10).",
+  "j9_entry": {
+    "r12": "h=floor(n/2)",
+    "r14": "scratch S",
+    "r15": "post-seed input A",
+    "rax_byte_offset": 72,
+    "rcx": 8,
+    "rdx": "n-h",
+    "rsi": 9
+  },
+  "kind": "Read-only pre-generalization j9/phase transition intake",
+  "limits": [
+    "All point states are conditional after ordinary seed returns; seed values and full-call reachability are not proved.",
+    "Memory must be valid/stable/nonwrapping and disjoint from callee live frame/spills/return machinery; ancestor-frame scratch is permitted.",
+    "Right-loop count/coordinate and merge-entry setup are traced; no completed right/merge array transformation is claimed.",
+    "No new Rust, public packet, tooling installation, captured execution or gate change."
+  ],
+  "merge_entry_before_first_load": {
+    "array_effect": "Not claimed; only entry coordinates",
+    "r12_pair_count": "h",
+    "r15_output": "A",
+    "r8_output_back_index": "n-1",
+    "rax": "S+8*h right-front",
+    "rcx": "S+8*(n-1) right-back",
+    "rdi_output_front_index": 0,
+    "rdx": "S+8*(h-1) left-back",
+    "rsi": "S left-front",
+    "va": "0x4918fe0"
+  },
+  "native_envelope": {
+    "bytes": 224,
+    "dual_decoder_partitions_agree": true,
+    "end": "0x4918fe0",
+    "hex": "4d89f049893848ffc64883c0084c39e6743b498b3cf749893cf64d8b4cf6f84c39cf73e24989c0660f1f8400000000004f890c064983f80874c64f8b4c06f04983c0f84c39cf72e84d01f0ebb64b8d04e64839d173674b8d34e78d3ccd00000000eb1f666666662e0f1f8400000000004989c14d890148ffc14883c7084839d1743b4c8b04ce4c8904c84c8b54c8f84d39d073e24989f9660f1f8400000000004e8914084983f90874c64e8b5408f04983c1f84d39d072e84901c1ebb64c8d43ff48891c24498d0cde4883c1f8488d50f831ff4c89f6662e0f1f840000000000",
+    "instructions": 59,
+    "sha256": "ef59801598d7c81205567f80944b3125b1db00ad013b05fde209d3735694944a",
+    "start": "0x4918f00"
+  },
+  "owner": {
+    "body_sha256": "9ae5e9107aca9a7ef4fd40d9b6dccee0cfa521a205a1422ea0a84b0ff9c05ed3",
+    "cie": "0xfbdc2c",
+    "end": "0x49190b7",
+    "fde": "0x12a6ee4",
+    "lsda": "0xb8638c",
+    "start": "0x4918d30"
+  },
+  "ownership": {
+    "credited_predecessors": [
+      1455,
+      1524
+    ],
+    "latest_open_pr": 1525,
+    "open_pr_bodies_checked": 173,
+    "other_j9_owner_found": false
+  },
+  "proposed_static_controls": [
+    {
+      "after": "4839d6",
+      "before": "4c39e6",
+      "distinguished_property": "n21: jnext10==h10 must exit left, not compare with right_length11",
+      "name": "left-compares-right-length",
+      "va": "0x4918f0d"
+    },
+    {
+      "after": "75",
+      "before": "74",
+      "distinguished_property": "n21 vs n22 branch distinction",
+      "name": "left-exit-inverted",
+      "va": "0x4918f10"
+    },
+    {
+      "after": "10",
+      "before": "08",
+      "distinguished_property": "RSI9 must pair with RAX72, not80",
+      "name": "left-byte-offset-plus16",
+      "va": "0x4918f0c"
+    },
+    {
+      "after": "a6",
+      "before": "e6",
+      "distinguished_property": "n21 right scratch base S+80, not S+40",
+      "name": "right-scratch-base-scale4",
+      "va": "0x4918f50"
+    },
+    {
+      "after": "76",
+      "before": "73",
+      "distinguished_property": "seeded right index8<right_length11..16 must enter right loop",
+      "name": "right-count-gate-JBE",
+      "va": "0x4918f54"
+    },
+    {
+      "after": "00",
+      "before": "ff",
+      "distinguished_property": "merge output-back index n-1, not n",
+      "name": "merge-back-index-n",
+      "va": "0x4918fc0"
+    }
+  ],
+  "right_entry": {
+    "byte_offset_rdi": 64,
+    "first_source_and_destination_index": "h+8",
+    "right_index_rcx": 8,
+    "right_length_rdx": "n-h >=11",
+    "scratch_base_rax": "S+8*h",
+    "skip_right_gate": "JAE at4918f54 tests8>=right_length, false for all21..32",
+    "source_base_rsi": "A+8*h"
+  },
+  "sequence": "Literal native-derived state/count/control expectations before any generalized Rust; no captured execution or instruction evaluation.",
+  "state_boundaries": [
+    {
+      "expected_first10": [
+        8,
+        0,
+        7,
+        1,
+        6,
+        2,
+        5,
+        9,
+        10,
+        10
+      ],
+      "index": 9,
+      "loaded_A9": 10,
+      "name": "j9-append-equality",
+      "prefix": [
+        8,
+        0,
+        7,
+        1,
+        6,
+        2,
+        5,
+        9,
+        10
+      ],
+      "shifts": 0
+    },
+    {
+      "expected_first10": [
+        8,
+        0,
+        7,
+        1,
+        6,
+        2,
+        4,
+        5,
+        9,
+        10
+      ],
+      "index": 6,
+      "loaded_A9": 4,
+      "name": "j9-maximal-suffix",
+      "prefix": [
+        8,
+        0,
+        7,
+        1,
+        6,
+        2,
+        5,
+        9,
+        10
+      ],
+      "shifts": 3
+    },
+    {
+      "expected_first10": [
+        9,
+        0,
+        8,
+        1,
+        7,
+        2,
+        6,
+        5,
+        5,
+        5
+      ],
+      "index": 9,
+      "loaded_A9": 5,
+      "name": "j9-equality-exposes-earlier-greater",
+      "prefix": [
+        9,
+        0,
+        8,
+        1,
+        7,
+        2,
+        6,
+        5,
+        5
+      ],
+      "shifts": 0,
+      "wrong_equality_shift_first10": [
+        9,
+        0,
+        8,
+        1,
+        7,
+        2,
+        5,
+        6,
+        5,
+        5
+      ]
+    },
+    {
+      "expected_first10": [
+        0,
+        1,
+        2,
+        9223372036854775807,
+        9223372036854775808,
+        9223372036854775808,
+        9223372036854775809,
+        18446744073709551613,
+        18446744073709551614,
+        18446744073709551615
+      ],
+      "index": 5,
+      "loaded_A9": 9223372036854775808,
+      "name": "j9-unsigned-middle-tie",
+      "prefix": [
+        0,
+        1,
+        2,
+        9223372036854775807,
+        9223372036854775808,
+        9223372036854775809,
+        18446744073709551613,
+        18446744073709551614,
+        18446744073709551615
+      ],
+      "shifts": 4
+    },
+    {
+      "expected_first10": [
+        0,
+        9223372036854775808,
+        9223372036854775809,
+        9223372036854775810,
+        9223372036854775811,
+        9223372036854775812,
+        9223372036854775813,
+        9223372036854775814,
+        9223372036854775815,
+        18446744073709551615
+      ],
+      "index": 0,
+      "loaded_A9": 0,
+      "name": "j9-nine-shifts-front",
+      "prefix": [
+        9223372036854775808,
+        9223372036854775809,
+        9223372036854775810,
+        9223372036854775811,
+        9223372036854775812,
+        9223372036854775813,
+        9223372036854775814,
+        9223372036854775815,
+        18446744073709551615
+      ],
+      "shifts": 9
+    }
+  ],
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
