@@ -25,7 +25,7 @@ not establish an original function name or a public Rust ABI.
 - Initial entry at `0x4781d17` writes two binary64 values30.0 to +0xb0/+0xb8
   and loads another30.0 for +0xc0. The backing16-byte and8-byte constants
   are retained and checked. Thus this initial path requests a30-second value;
-  this is not a claim about wall-clock precision or every later interval.
+  after a normally returning consumer, fallthrough at 0x4781d17 resets the same30-second constants and restarts the delay path. This is not a wall-clock precision or helper-progress guarantee.
 - At `0x47818d6`, +0xb0 is copied to +0xb8 and compared with binary64 zero.
   JNE followed by JNP makes either signed zero bypass the sleep path to
   `0x4781c3b`; unordered (NaN) does not take that bypass. The nonzero path
@@ -45,7 +45,7 @@ not establish an original function name or a public Rust ABI.
 - A second CMPXCHG at `0x4781cb7` attempts1→0 BEFORE handing the result to
   direct consumer `0x476f920` at `0x4781d12`. The failed-release path first
   calls its helper and rejoins. The local normal-return ordering is therefore
-  snapshot helper, unlock attempt, consumer, reset/restart. No guarantee of
+  snapshot helper, unlock attempt, result preparation, consumer, reset/restart. Between unlock and consumer, result counts from2 through20 invoke 0x4768f00, and counts at least21 invoke the relocated slot0x64eb178. These preparation helpers are unclosed. No guarantee of
   atomic whole-system snapshots, helper success or progress is inferred.
 - Unwinding cleanup writes outer state2 before `_Unwind_Resume`. Raw call
   targets and all measured RIP-call relocation records remain in records;
@@ -68,7 +68,9 @@ private bytearray to ensure structural observations reject corrupted code.
 They do not execute original or altered instructions or prove runtime behavior.
 
 All component gates remain false. No Rust reconstruction, captured-node run,
-network, chain, external command, full traffic counters, helper body closure,
+network, chain, target-originated external command, full traffic counters, helper body closure,
 compiled comparison or whole-node equivalence is claimed. Exported bytes are
 an evidence denominator, not recovered implementation coverage. Next: measure
-snapshot/consumer helper ownership and the post-consumer delay update path.
+snapshot/consumer helper ownership and the result-preparation contracts.
+
+Native text exports trim trailing whitespace only; instruction bytes, operands and addresses are unchanged.
