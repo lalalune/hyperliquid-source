@@ -339,3 +339,68 @@ fn cancelling_after_the_request_preserves_the_partial_exchange() {
         assert_eq!(io.position, 0);
     });
 }
+
+#[test]
+fn decoded_exchange_uses_reply_parser_and_preserves_suffix_metadata() {
+    run(async {
+        let mut io = Stream::new(raw_frame(&[2, 0xaa, 0xbb]));
+        let decoded = greeting::exchange(&mut io, request(0, 1, true))
+            .await
+            .unwrap();
+        assert_eq!(decoded.reply, greeting::reply::Reply::Variant2);
+        assert_eq!(
+            (decoded.consumed, decoded.remaining, decoded.charged),
+            (1, 2, 4)
+        );
+        assert_eq!(io.output, [0, 0, 0, 3, 0, 0, 1, 0]);
+    });
+}
+
+#[test]
+fn decoded_exchange_rejects_invalid_protocol_after_receiving_frame() {
+    run(async {
+        let mut io = Stream::new(raw_frame(&[6]));
+        let result = greeting::exchange(&mut io, request(0, 0, false)).await;
+        assert!(matches!(
+            result,
+            Err(ExchangeError::Decode(greeting::reply::Failure {
+                kind: greeting::reply::ErrorKind::UnexpectedVariant {
+                    found: 6,
+                    max: 5,
+                    ..
+                },
+                consumed: 1,
+                charged: 4,
+            }))
+        ));
+        assert_eq!(io.position, 6);
+    });
+}
+
+#[test]
+fn decoded_exchange_handles_large_record_reply_under_nonzero_first_byte() {
+    run(async {
+        let mut payload = vec![0, 0, 0, 2];
+        for record in 0..3 {
+            payload.extend([record, record + 3]);
+            payload.extend(vec![record; 2048]);
+        }
+        let mut io = Stream::new(raw_frame(&payload));
+        let decoded = greeting::exchange(&mut io, request(1, 0, false))
+            .await
+            .unwrap();
+        match decoded.reply {
+            greeting::reply::Reply::Variant0 {
+                hash: greeting::reply::HashReply::Variant2(records),
+                ..
+            } => {
+                for (index, record) in records.iter().enumerate() {
+                    assert_eq!(record.first, index as u64);
+                    assert!(record.bytes.iter().all(|byte| *byte == index as u8));
+                }
+            }
+            _ => panic!("wrong decoded reply"),
+        }
+        assert_eq!(decoded.charged, 6216);
+    });
+}

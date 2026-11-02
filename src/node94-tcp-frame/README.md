@@ -131,13 +131,47 @@ callers must account for the potentially large allocation in their resource
 policy. No protocol meaning or valid configuration range is assigned to either
 request byte here.
 
-The reply's payload remains uninterpreted and includes any suffix bytes.
-Receiving this frame does not validate a greeting, authenticate a peer, or
-establish network compatibility. The complex reply decoder and caller retry
-policy remain separate reconstruction work. Send and receive failures are
-distinguished; cancellation retains the partial-I/O limitations above.
+`exchange_frame` leaves the reply payload uninterpreted. `greeting::exchange`
+also runs the mode-1 wire decoder and returns `greeting::reply::Decoded`.
+Neither operation authenticates or accepts a peer. Caller retry and acceptance
+policy remain separate work. Send, receive and decode failures are distinguished;
+cancellation retains the partial-I/O limitations above.
 The [greeting exchange evidence](../../research/work-items/RE-012-greeting-frame-exchange-94/README.md)
-binds this specific caller and records the remaining decoder work.
+binds this specific caller and records its frame-only scope.
+
+## Greeting reply decoding
+
+`greeting::reply::decode(payload, logical_limit)` handles all six outer wire
+variants, including all three nested hash variants:
+
+| Wire selector | Decoded fields |
+| --- | --- |
+| Outer 0 | Byte vector, u64, nested hash variant |
+| Outer 1 | Three u64 values in wire order |
+| Outer 2–5 | Unit variants |
+| Nested 0 | 32 raw bytes and one map |
+| Nested 1 | 32 raw bytes and two maps |
+| Nested 2 | Three records, each containing two variable-width integers and 2,048 raw bytes |
+
+Map keys are 20 raw bytes. Values contain eight variable-width u64s and one
+raw byte. Maps return keys in lexicographic order and keep the last value for
+a repeated key. The decoder tracks the target's logical charge independently
+of byte consumption, including count reservations, per-row refunds and fixed
+field charges. A short field or rejected integer retains the reached cursor
+and charge. Nonminimal integer encodings and trailing bytes are accepted.
+
+`Decoded` reports consumed bytes, remaining bytes and logical charge. `Failure`
+reports the actual cursor and charge, rather than the target wrapper's separate
+zero consumed-count diagnostic on error. Field names describe wire positions;
+the original Rust types, enum layout, B-tree nodes, allocation behavior and
+error text are not reproduced. The parser reuses this repository's independent
+`hl-bincode-varint` component. The default codec build still enables neither
+that dependency nor Tokio.
+
+The [reply evidence packet](../../research/work-items/RE-012-greeting-reply-94/README.md)
+retains native bindings, independent frozen-fixture comparisons and compiled
+negative controls. Valid decoding supplies data for future peer checks; it does
+not establish current-network compatibility or a runnable node.
 
 ## LZ4 correspondence and limits
 
