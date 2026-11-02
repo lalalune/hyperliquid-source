@@ -62,6 +62,19 @@ def explicit_attempt_trace(schedule_length, outcomes):
     return trace, 'exhausted'
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    rels = {}
+    for a, i, v in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']]):
+        if a in rels:
+            raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a] = (i, v)
+    return rels
+
+
 def analyze(data):
     _, frames, _ = fde_extents(data)
     if not set(RANGES) <= {(f['start'], f['end']) for f in frames}:
@@ -88,8 +101,7 @@ def analyze(data):
     if read(data, 0x1fceaf, len(descriptor))[1] != descriptor:
         raise ValueError('retry diagnostic descriptor changed')
     secs = sections(data)
-    rela = next(s for s in secs if s['name'] == '.rela.dyn')
-    rels = {a: (i, v) for a, i, v in struct.iter_unpack('<QQq', data[rela['offset']:rela['offset'] + rela['size']])}
+    rels = relocations(data)
     if any(rels.get(a) != (8, v) for a, v in RELATIVE.items()):
         raise ValueError('wait/source/format/helper binding changed')
     sym = next(s for s in secs if s['name'] == '.dynsym')
