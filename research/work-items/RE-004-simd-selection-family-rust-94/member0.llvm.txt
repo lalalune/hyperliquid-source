@@ -1,0 +1,28 @@
+
+artifacts/node/94/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000004fa7e00 <_ZNKSt5ctypeIcE8do_widenEc>:
+ 5657540: f3 0f 1e fa                  	endbr64
+ 5657544: 66 0f 6e e9                  	movd	xmm5, ecx
+ 5657548: 66 0f ef e4                  	pxor	xmm4, xmm4
+ 565754c: 66 0f 70 ed 00               	pshufd	xmm5, xmm5, 0x0         # xmm5 = xmm5[0,0,0,0]
+ 5657551: f3 0f 6f 06                  	movdqu	xmm0, xmmword ptr [rsi]
+ 5657555: 48 8d 76 10                  	lea	rsi, [rsi + 0x10]
+ 5657559: 66 0f 76 ec                  	pcmpeqd	xmm5, xmm4
+ 565755d: f3 0f 6f 0a                  	movdqu	xmm1, xmmword ptr [rdx]
+ 5657561: 48 8d 52 10                  	lea	rdx, [rdx + 0x10]
+ 5657565: 66 0f 76 e5                  	pcmpeqd	xmm4, xmm5
+ 5657569: 48 8d 7f 10                  	lea	rdi, [rdi + 0x10]
+ 565756d: 66 0f db c4                  	pand	xmm0, xmm4
+ 5657571: f3 0f 6f 16                  	movdqu	xmm2, xmmword ptr [rsi]
+ 5657575: 66 0f db cd                  	pand	xmm1, xmm5
+ 5657579: f3 0f 6f 1a                  	movdqu	xmm3, xmmword ptr [rdx]
+ 565757d: 66 0f eb c1                  	por	xmm0, xmm1
+ 5657581: f3 0f 7f 47 f0               	movdqu	xmmword ptr [rdi - 0x10], xmm0
+ 5657586: 66 0f db d4                  	pand	xmm2, xmm4
+ 565758a: 66 0f db dd                  	pand	xmm3, xmm5
+ 565758e: 66 0f eb d3                  	por	xmm2, xmm3
+ 5657592: f3 0f 7f 17                  	movdqu	xmmword ptr [rdi], xmm2
+ 5657596: f3 c3                        	rep		ret
