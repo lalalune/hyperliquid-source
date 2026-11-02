@@ -61,6 +61,18 @@ def stable_tag(p,mask):
     return (((mask&0xffffffff)>>p['fallback_shift'])&p['fallback_mask'])+1
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    s=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    rels={}
+    for a,i,v in struct.iter_unpack('<QQq',data[s['offset']:s['offset']+s['size']]):
+        if a in rels:raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a]=(i,v)
+    return rels
+
+
 def analyze(data):
     p=parameters(data)
     if p!={'first_mask':1<<19,'second_mask':1<<25,'word_sign_condition':0x78,
@@ -88,8 +100,7 @@ def analyze(data):
         for site,row in o['rip_bindings'].items():
             site=int(site);prefix=bytes.fromhex(row['prefix']);code=read(data,site,len(prefix)+4)[1]
             if code[:len(prefix)]!=prefix or site+len(code)+struct.unpack_from('<i',code,len(prefix))[0]!=row['target']:raise ValueError('runtime RIP binding changed')
-    s=next(s for s in sections(data) if s['name']=='.rela.dyn')
-    rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[s['offset']:s['offset']+s['size']])}
+    rels=relocations(data)
     if any(rels.get(int(a))!=tuple(row) for a,row in spec['relocations'].items()):raise ValueError('runtime relocation changed')
     path=b'l1/src/utils.rs'
     if read(data,0x44ada0,len(path))[1]!=path or read(data,0x646e9b0,16)[1]!=struct.pack('<QII',len(path),28,43):raise ValueError('runtime caller source Location changed')
