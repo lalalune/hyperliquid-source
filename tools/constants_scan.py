@@ -128,6 +128,8 @@ def relocations(data):
     for index in range(sec['size'] // 24):
         offset, info, addend = struct.unpack_from('<QQq', data, sec['offset'] + index * 24)
         if info & 0xFFFFFFFF == 8:  # R_X86_64_RELATIVE
+            if offset in out:
+                raise ScanError(f'duplicate RELATIVE relocation slot {offset:#x}')
             out[offset] = addend
     return out
 
