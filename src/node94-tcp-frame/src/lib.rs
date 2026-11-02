@@ -1,6 +1,7 @@
-//! Offline codec for the statically verified node #94 TCP frame format.
+//! Codec and optional asynchronous I/O for the verified node #94 frame format.
 //!
-//! This crate deliberately contains no socket or peer-networking behavior.
+//! The `stream` feature accepts caller-owned Tokio I/O. It does not select peers,
+//! open sockets, impose timeouts, or implement a complete node protocol.
 
 #![forbid(unsafe_code)]
 
@@ -9,6 +10,8 @@ mod decoder;
 mod encoder;
 mod header;
 mod limits;
+#[cfg(feature = "stream")]
+pub mod stream;
 
 pub use compression::{
     COMPRESSION_THRESHOLD, CompressionSizeError, HashTableWidth, compressed_allocation_len,

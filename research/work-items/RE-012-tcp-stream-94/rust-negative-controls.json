@@ -1,0 +1,107 @@
+{
+  "original_stream_sha256": "868f1a0c7779780238b9e37bcdadc0ffe7cd31835639d0a15e287a39e6b9f2d0",
+  "result": "ALL_FOUR_COMPILED_MUTANTS_REJECTED_BY_STREAM_TESTS",
+  "results": [
+    {
+      "name": "omit-length-admission",
+      "replace_once": {
+        "old": "limits.admit(header).map_err(DecodeError::from)?;",
+        "new": "// length admission removed",
+        "scope": "file"
+      },
+      "mutant_sha256": "8f75047c694fd54d6ab7f3d74c14d76c4fb191d615cf3f499edcebc2c222420e",
+      "command": [
+        "cargo",
+        "test",
+        "--quiet",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "work/tcp-stream-94/mutants/omit-length-admission/Cargo.toml",
+        "--features",
+        "stream",
+        "--test",
+        "stream"
+      ],
+      "exit_code": 101,
+      "stdout": "\nrunning 16 tests\n............ 12/16\nover_limit_header_is_rejected_before_any_payload_read --- FAILED\n...\nfailures:\n\n---- over_limit_header_is_rejected_before_any_payload_read stdout ----\n\nthread 'over_limit_header_is_rejected_before_any_payload_read' (37459912) panicked at tests/stream.rs:196:5:\nassertion failed: matches!(error,\n    StreamError::Decode(DecodeError::Length(LengthError::FrameTooLarge\n    { declared: 5, max: 4 })))\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    over_limit_header_is_rejected_before_any_payload_read\n\ntest result: FAILED. 15 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s\n\n",
+      "stderr": "error: test failed, to rerun pass `--test stream`\n"
+    },
+    {
+      "name": "compressed-as-raw",
+      "replace_once": {
+        "old": "if header.is_compressed() {",
+        "new": "if false {",
+        "scope": "file"
+      },
+      "mutant_sha256": "68166f50feb6e2a6ab9636ffb13aa94b109c78d377333e9651d810be3c73b1d9",
+      "command": [
+        "cargo",
+        "test",
+        "--quiet",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "work/tcp-stream-94/mutants/compressed-as-raw/Cargo.toml",
+        "--features",
+        "stream",
+        "--test",
+        "stream"
+      ],
+      "exit_code": 101,
+      "stdout": "\nrunning 16 tests\n......... 9/16\nhuge_decoded_size_is_rejected_without_attempting_a_huge_output --- FAILED\nindependent_literal_lz4_fixture_decodes_after_fragmented_io --- FAILED\n.....\nfailures:\n\n---- huge_decoded_size_is_rejected_without_attempting_a_huge_output stdout ----\n\nthread 'huge_decoded_size_is_rejected_without_attempting_a_huge_output' (37460304) panicked at tests/stream.rs:231:5:\nassertion failed: matches!(finish(read_frame(&mut reader, FrameLimits::new(4))),\n    Err(StreamError::Decode(DecodeError::Length(LengthError::DecompressedTooLarge\n    { uncompressed_size: u32::MAX, .. }))))\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n---- independent_literal_lz4_fixture_decodes_after_fragmented_io stdout ----\n\nthread 'independent_literal_lz4_fixture_decodes_after_fragmented_io' (37460305) panicked at tests/stream.rs:224:5:\nassertion `left == right` failed\n  left: [3, 0, 0, 0, 48, 97, 98, 99]\n right: [97, 98, 99]\n\n\nfailures:\n    huge_decoded_size_is_rejected_without_attempting_a_huge_output\n    independent_literal_lz4_fixture_decodes_after_fragmented_io\n\ntest result: FAILED. 14 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s\n\n",
+      "stderr": "error: test failed, to rerun pass `--test stream`\n"
+    },
+    {
+      "name": "short-read-chunk",
+      "replace_once": {
+        "old": "let end = start + chunk.len as usize;",
+        "new": "let end = start + chunk.len as usize - 1;",
+        "scope": "file"
+      },
+      "mutant_sha256": "0e4c00bdc9275f155349be7e7025f10f8b1bb80d7b84d8c2c68baa620ec1dd48",
+      "command": [
+        "cargo",
+        "test",
+        "--quiet",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "work/tcp-stream-94/mutants/short-read-chunk/Cargo.toml",
+        "--features",
+        "stream",
+        "--test",
+        "stream"
+      ],
+      "exit_code": 101,
+      "stdout": "\nrunning 16 tests\n.. 2/16\nconcatenated_frames_are_read_individually --- FAILED\nindependent_literal_lz4_fixture_decodes_after_fragmented_io --- FAILED\nfragmented_pending_reads_preserve_every_header_and_payload_byte --- FAILED\n. 6/16\nhuge_decoded_size_is_rejected_without_attempting_a_huge_output --- FAILED\n.... 11/16\ncaller_owned_trait_objects_work_without_a_runtime_or_socket --- FAILED\neach_header_or_payload_truncation_is_unexpected_eof --- FAILED\n.. 15/16\npayload_chunks_exclude_the_header_and_use_decimal_four_million --- FAILED\n\nfailures:\n\n---- concatenated_frames_are_read_individually stdout ----\n\nthread 'concatenated_frames_are_read_individually' (37460719) panicked at tests/stream.rs:245:5:\nassertion `left == right` failed\n  left: [0]\n right: [97]\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n---- independent_literal_lz4_fixture_decodes_after_fragmented_io stdout ----\n\nthread 'independent_literal_lz4_fixture_decodes_after_fragmented_io' (37460724) panicked at tests/stream.rs:224:5:\nassertion `left == right` failed\n  left: [97, 98, 0]\n right: [97, 98, 99]\n\n---- fragmented_pending_reads_preserve_every_header_and_payload_byte stdout ----\n\nthread 'fragmented_pending_reads_preserve_every_header_and_payload_byte' (37460722) panicked at tests/stream.rs:165:5:\nassertion `left == right` failed\n  left: [97, 98, 0]\n right: [97, 98, 99]\n\n---- huge_decoded_size_is_rejected_without_attempting_a_huge_output stdout ----\n\nthread 'huge_decoded_size_is_rejected_without_attempting_a_huge_output' (37460723) panicked at tests/stream.rs:231:5:\nassertion failed: matches!(finish(read_frame(&mut reader, FrameLimits::new(4))),\n    Err(StreamError::Decode(DecodeError::Length(LengthError::DecompressedTooLarge\n    { uncompressed_size: u32::MAX, .. }))))\n\n---- caller_owned_trait_objects_work_without_a_runtime_or_socket stdout ----\n\nthread 'caller_owned_trait_objects_work_without_a_runtime_or_socket' (37460718) panicked at tests/stream.rs:358:5:\nassertion `left == right` failed\n  left: [0]\n right: [120]\n\n---- each_header_or_payload_truncation_is_unexpected_eof stdout ----\n\nthread 'each_header_or_payload_truncation_is_unexpected_eof' (37460720) panicked at tests/stream.rs:176:74:\ncalled `Result::unwrap_err()` on an `Ok` value: DecodedFrame { header: Header { payload_len: 3, compression_flag: 0 }, payload: [97, 98, 0], consumed: 8 }\n\n---- payload_chunks_exclude_the_header_and_use_decimal_four_million stdout ----\n\nthread 'payload_chunks_exclude_the_header_and_use_decimal_four_million' (37460726) panicked at tests/stream.rs:270:5:\nassertion failed: frame.payload.iter().all(|&byte| byte == 0x5a)\n\n\nfailures:\n    caller_owned_trait_objects_work_without_a_runtime_or_socket\n    concatenated_frames_are_read_individually\n    each_header_or_payload_truncation_is_unexpected_eof\n    fragmented_pending_reads_preserve_every_header_and_payload_byte\n    huge_decoded_size_is_rejected_without_attempting_a_huge_output\n    independent_literal_lz4_fixture_decodes_after_fragmented_io\n    payload_chunks_exclude_the_header_and_use_decimal_four_million\n\ntest result: FAILED. 9 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s\n\n",
+      "stderr": "error: test failed, to rerun pass `--test stream`\n"
+    },
+    {
+      "name": "omit-written-header",
+      "replace_once": {
+        "old": "let start = chunk.offset as usize;",
+        "new": "let start = chunk.offset as usize + usize::from(chunk.offset == 0) * HEADER_LEN;",
+        "scope": "write_frame"
+      },
+      "mutant_sha256": "f932b5b4d62005bf2183ed80f8a2b4f2be9f6e678d2250009fa79152af35f8e4",
+      "command": [
+        "cargo",
+        "test",
+        "--quiet",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "work/tcp-stream-94/mutants/omit-written-header/Cargo.toml",
+        "--features",
+        "stream",
+        "--test",
+        "stream"
+      ],
+      "exit_code": 101,
+      "stdout": "\nrunning 16 tests\n...... 6/16\nshort_pending_writes_emit_the_hand_encoded_frame_once --- FAILED\n.. 9/16\ncaller_owned_trait_objects_work_without_a_runtime_or_socket --- FAILED\n. 11/16\nempty_write_still_emits_the_five_byte_header --- FAILED\n. 13/16\nwrite_zero_and_io_errors_preserve_partial_output --- FAILED\nwrite_chunks_include_the_header --- FAILED\n.\nfailures:\n\n---- short_pending_writes_emit_the_hand_encoded_frame_once stdout ----\n\nthread 'short_pending_writes_emit_the_hand_encoded_frame_once' (37461148) panicked at src/stream.rs:123:43:\nrange end index 13 out of range for slice of length 8\n\n---- caller_owned_trait_objects_work_without_a_runtime_or_socket stdout ----\n\nthread 'caller_owned_trait_objects_work_without_a_runtime_or_socket' (37461139) panicked at src/stream.rs:123:43:\nrange end index 11 out of range for slice of length 6\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n---- empty_write_still_emits_the_five_byte_header stdout ----\n\nthread 'empty_write_still_emits_the_five_byte_header' (37461142) panicked at src/stream.rs:123:43:\nrange end index 10 out of range for slice of length 5\n\n---- write_zero_and_io_errors_preserve_partial_output stdout ----\n\nthread 'write_zero_and_io_errors_preserve_partial_output' (37461151) panicked at src/stream.rs:123:43:\nrange end index 13 out of range for slice of length 8\n\n---- write_chunks_include_the_header stdout ----\n\nthread 'write_chunks_include_the_header' (37461150) panicked at tests/stream.rs:319:5:\nassertion `left == right` failed\n  left: [90, 90, 90, 90, 90]\n right: [0, 61, 9, 7, 0]\n\n\nfailures:\n    caller_owned_trait_objects_work_without_a_runtime_or_socket\n    empty_write_still_emits_the_five_byte_header\n    short_pending_writes_emit_the_hand_encoded_frame_once\n    write_chunks_include_the_header\n    write_zero_and_io_errors_preserve_partial_output\n\ntest result: FAILED. 11 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s\n\n",
+      "stderr": "error: test failed, to rerun pass `--test stream`\n"
+    }
+  ],
+  "limits": "Negative controls execute only independent Rust and scripted I/O, never the captured node."
+}
