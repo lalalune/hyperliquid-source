@@ -63,6 +63,16 @@ def read(data, va, n):
     return off, bytes(data[off:off + n])
 
 
+def rela_section(data):
+    """The .rela.dyn section, shape-checked before its entries are folded.
+    A size that is not a whole number of 24-byte entries would otherwise
+    escape the fold as a bare struct.error, not this module's ValueError:
+    the same fail-closed shape evm_amount_scale applies to this table."""
+    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    if sec['size']%24:raise ValueError('.rela.dyn truncated')
+    return sec
+
+
 def tag_constants(data):
     raw = read(data, 0x18be19d, 3)[1]
     if raw[:2] != b'\xc6\x03':
@@ -124,6 +134,7 @@ def analyze(data):
         expected = bytes.fromhex(value)
         if read(data, va, len(expected))[1] != expected:
             raise ValueError(f'rejection instruction changed at {va:#x}')
+    rela_section(data)
     for site, target in CALLS.items():
         raw = read(data, site, 5)[1]
         if raw[0] != 0xe8 or site + 5 + struct.unpack_from('<i', raw, 1)[0] != target:
