@@ -13,11 +13,12 @@ path = "src/lib.rs"
 [features]
 default = []
 stream = ["dep:tokio"]
-timed-stream = ["stream", "tokio/time"]
+timed-stream = ["stream", "tokio/time", "dep:varint"]
 
 [dependencies]
 lz4_flex = "=0.11.6"
 tokio = { version = "=1.44.2", default-features = false, features = ["io-util"], optional = true }
+varint = { package = "hl-bincode-varint", path = "../bincode-varint", optional = true }
 
 [dev-dependencies]
 tokio = { version = "=1.44.2", default-features = false, features = ["rt", "time", "test-util"] }

@@ -1,8 +1,8 @@
 //! The established request/reply-frame boundary of node #94's initial greeting.
 //!
-//! This is called after a connection exists. It preserves the reply payload for
-//! the still-incomplete semantic decoder; receiving a frame is not accepting a
-//! peer. No endpoint selection, retry, authentication or reconnect is supplied.
+//! This is called after a connection exists. `exchange_frame` preserves the
+//! reply payload; `exchange` decodes its wire fields. Neither accepts a peer.
+//! No endpoint selection, retry, authentication or reconnect is supplied.
 
 use core::fmt;
 
@@ -10,6 +10,8 @@ use tokio::io::{AsyncRead, AsyncWrite};
 
 use crate::deadlines::{self, DeadlineError};
 use crate::{DecodedFrame, FrameLimits};
+
+pub mod reply;
 
 /// The two original greeting bytes and the separate reader timing flag.
 ///
@@ -40,11 +42,12 @@ impl Request {
     }
 }
 
-/// Which side of the request/reply-frame exchange failed.
+/// A transport failure or a rejected reply encoding.
 #[derive(Debug)]
 pub enum ExchangeError {
     Send(DeadlineError),
     Receive(DeadlineError),
+    Decode(reply::Failure),
 }
 
 impl fmt::Display for ExchangeError {
@@ -52,6 +55,7 @@ impl fmt::Display for ExchangeError {
         match self {
             Self::Send(error) => write!(f, "greeting send: {error}"),
             Self::Receive(error) => write!(f, "greeting receive: {error}"),
+            Self::Decode(error) => error.fmt(f),
         }
     }
 }
@@ -60,6 +64,7 @@ impl std::error::Error for ExchangeError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
             Self::Send(error) | Self::Receive(error) => Some(error),
+            Self::Decode(error) => Some(error),
         }
     }
 }
@@ -86,4 +91,17 @@ pub async fn exchange_frame<S: AsyncRead + AsyncWrite + Unpin + ?Sized>(
     deadlines::read_frame(stream, request.reply_limits(), request.time_header)
         .await
         .map_err(ExchangeError::Receive)
+}
+
+/// Exchanges and decodes a complete greeting reply using the same logical limit.
+///
+/// A valid wire reply is not peer authentication or acceptance. Those policies
+/// depend on the caller and the decoded fields. Trailing bytes are permitted by
+/// the target wrapper and reported in the returned metadata.
+pub async fn exchange<S: AsyncRead + AsyncWrite + Unpin + ?Sized>(
+    stream: &mut S,
+    request: Request,
+) -> Result<reply::Decoded, ExchangeError> {
+    let frame = exchange_frame(stream, request).await?;
+    reply::decode(&frame.payload, request.reply_limits().max_len()).map_err(ExchangeError::Decode)
 }
