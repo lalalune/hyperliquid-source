@@ -11,6 +11,8 @@ mod compression;
 pub mod deadlines;
 mod decoder;
 mod encoder;
+#[cfg(feature = "timed-stream")]
+pub mod greeting;
 mod header;
 mod limits;
 #[cfg(feature = "stream")]
