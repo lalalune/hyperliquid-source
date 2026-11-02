@@ -177,10 +177,17 @@ teardown as PR #1964 step 8, re-verified here):
   successive vtable resets are recorded as observed; whether they are
   nested destructor stages is not pinned.
 
-Callers (census only, not modelled): exactly 18 direct call sites, no
+Callers (census only, not modelled): exactly 20 direct call sites, no
 tail jumps, no qword references to the window address anywhere in the
 file. Both sampled sites free the 0x58-byte handle shell themselves
 after the release returns: `0x4fb0e87` in `0x4fb0b80..0x4fb0f7e` (in
 a loop over an array of handles) and `0x50eadb0` in
 `0x50ea260..0x50ebee8` (a guarded single release inside the WAL flush
 per-item handler). The remaining sites are listed in records.json.
+Correction note: the first revision of this packet reported 18 sites
+because its census used a regex scan whose 5-byte match windows
+silently skipped call opcodes starting inside a previous match; a
+per-byte rescan found the two missed sites `0x50bd9c9` (in
+`0x50bd8e0..0x50bda67`) and `0x50be260` (in `0x50bda70..0x50be7eb`),
+both confirmed as real call instructions in objdump's disassembly,
+and the packet census and checker now use the per-byte scan.

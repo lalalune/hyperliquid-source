@@ -6,7 +6,6 @@ for qword references to the window address.
 """
 
 import os
-import re
 import struct
 import sys
 
@@ -22,11 +21,19 @@ def main():
         data = handle.read()
     text = data[TEXT_OFF:TEXT_OFF + TEXT_SIZE]
     calls, jumps = [], []
-    for match in re.finditer(rb"[\xe8\xe9]....", text):
-        i = match.start()
+    # Per-byte scan, not a regex scan: a regex match window consumes
+    # its 5 bytes, so a call opcode starting inside a previous match
+    # (e.g. inside an operand) is silently skipped. The per-byte loop
+    # found two such sites (0x50bd9c9, 0x50be260) that the regex scan
+    # missed; both were confirmed as real call instructions in
+    # objdump's disassembly before this correction.
+    for i in range(len(text) - 5):
+        opcode = text[i]
+        if opcode not in (0xE8, 0xE9):
+            continue
         rel = struct.unpack_from("<i", text, i + 1)[0]
         if TEXT_VADDR + i + 5 + rel == TARGET:
-            (calls if text[i] == 0xE8 else jumps).append(TEXT_VADDR + i)
+            (calls if opcode == 0xE8 else jumps).append(TEXT_VADDR + i)
     print("release", hex(TARGET), "calls:", [hex(c) for c in calls],
           "tail jumps:", [hex(j) for j in jumps])
     qword = struct.pack("<Q", TARGET)

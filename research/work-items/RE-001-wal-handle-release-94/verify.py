@@ -24,7 +24,6 @@ Run from the repository root: python3 research/work-items/RE-001-wal-handle-rele
 import hashlib
 import json
 import os
-import re
 import struct
 import subprocess
 import sys
@@ -111,11 +110,16 @@ def main():
         check("relocation row " + addr, addr in relocs)
 
     calls, jumps = [], []
-    for match in re.finditer(rb"[\xe8\xe9]....", text):
-        i = match.start()
+    # Per-byte scan: a regex scan consumes each 5-byte match window
+    # and silently skips call opcodes starting inside one (this
+    # correction found 0x50bd9c9 and 0x50be260 that way).
+    for i in range(len(text) - 5):
+        opcode = text[i]
+        if opcode not in (0xE8, 0xE9):
+            continue
         rel = struct.unpack_from("<i", text, i + 1)[0]
         if TEXT_VADDR + i + 5 + rel == 0x51641D0:
-            (calls if text[i] == 0xE8 else jumps).append(TEXT_VADDR + i)
+            (calls if opcode == 0xE8 else jumps).append(TEXT_VADDR + i)
     check("census calls", [hex(c) for c in calls] == records["callers"]["direct_calls"],
           str([hex(c) for c in calls]))
     check("census tail jumps", jumps == [])
