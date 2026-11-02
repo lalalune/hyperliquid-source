@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "reviewed_at": "2026-11-01T18:14:38.170644+00:00",
+  "source_base": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "reviewer": "independent coordinator",
+  "status": "conditional proof checked; static reproduction passed",
+  "manual_review": [
+    "Read all date/time/duration native rows and the selected source-copy, fixed-duration, call, carry-guard and comparison corridor.",
+    "Checked finite input bounds, year400 floor correction, year-start no-borrow path, max-year zero return, ordinary saturation and the extended-current counterexample.",
+    "Canonicality, stable memory, normal instruction/call behavior and constructor/current-clock provenance remain explicit premises."
+  ],
+  "independent_mapping": {
+    "capture_sha256": "89338207c793d80ac2fba75bb0d36c659e2cabc87a94e61a57ba532b8d212e31",
+    "ranges": {
+      "date": {
+        "bytes": 556,
+        "rows": 145
+      },
+      "duration": {
+        "bytes": 545,
+        "rows": 140
+      },
+      "readiness": {
+        "bytes": 1373,
+        "rows": 276
+      },
+      "time": {
+        "bytes": 354,
+        "rows": 87
+      }
+    },
+    "total_bytes": 2828,
+    "total_rows": 648,
+    "fde_and_cie_raw_bytes_and_backrefs": true,
+    "fde_pcrel_starts_and_extents": true,
+    "table_check": "Closed-form counts of multiples of4/100/400 independently reproduce all401 leap-prefix bytes; all400 flags checked."
+  },
+  "reproduction": {
+    "regenerated_files": 14,
+    "controls": 46,
+    "source_sha256": {
+      "arithmetic.py": "1824dc5d7fe1774368a48d08dd16bbfff8bf850fa5524a0b67c4811ac914416d",
+      "collect.py": "a58346bd097396a38d735ccef43d4ca3ec33723e75bf908b07c2ffb100210992",
+      "verify.py": "952388063590f76a3f78760372d3e4734f86ce71e3a760d4a5d08f764bc1f23b"
+    },
+    "receipt": "ROOT_VERIFY.json"
+  },
+  "documentation_correction": {
+    "original_proof_sha256": "e71acc047e32cbff9186e361123f695185c78ca7bedc9b64ca653f87856e2f98",
+    "current_proof_sha256": "5f755d9ff2e8c5c7162cf807b1ca2a1e18c6a1b53f5a698baa100caa834c6414",
+    "change": "Correct decimal rendering of0x23a4f from146000 to145999;145732 remains below it. All executable sources and author validation receipts unchanged.",
+    "author_validation_scope": "VALIDATION.json and author receipts preserve pre-integration hashes. Root fixes one decimal transcription and extra blank lines; all three script ASTs are identical."
+  },
+  "not_claimed": [
+    "captured execution or instruction emulation",
+    "unconditional calendar provenance",
+    "complete helper or readiness runtime equivalence",
+    "hosted CI or component gate completion"
+  ],
+  "integration_formatting": [
+    {
+      "file": "PROOF.md",
+      "prior_sha256": "d91716d24c0947cfc84edebe81dcae6f5edb2883995a8b1cd3c4f71749f328a6",
+      "current_sha256": "5f755d9ff2e8c5c7162cf807b1ca2a1e18c6a1b53f5a698baa100caa834c6414",
+      "change": "Remove extra blank line at EOF",
+      "ast_equal": null
+    },
+    {
+      "file": "README.md",
+      "prior_sha256": "29db774dc85300cc866d5cd747afd85426ba727b9714e72e7379dafd09a8a5ad",
+      "current_sha256": "9d47b61a22298cdad19fbdfa123a1493982a2e931a5429ea34c7041dff28503f",
+      "change": "Remove extra blank line at EOF",
+      "ast_equal": null
+    },
+    {
+      "file": "arithmetic.py",
+      "prior_sha256": "678fc43f68256ba811dfeaf76ca50ff39db4b4e7a03fe3af4a72a7b69bdcaffe",
+      "current_sha256": "1824dc5d7fe1774368a48d08dd16bbfff8bf850fa5524a0b67c4811ac914416d",
+      "change": "Remove extra blank line at EOF",
+      "ast_equal": true
+    },
+    {
+      "file": "collect.py",
+      "prior_sha256": "c7be3526da07d9d34cc6b385b95129d6e791a1938799f4db48525d1943f1a916",
+      "current_sha256": "a58346bd097396a38d735ccef43d4ca3ec33723e75bf908b07c2ffb100210992",
+      "change": "Remove extra blank line at EOF",
+      "ast_equal": true
+    },
+    {
+      "file": "verify.py",
+      "prior_sha256": "2837451a77544b7d8dfc207269259811d0c9b6ad95eaa908d52b2eb0bb43e3ff",
+      "current_sha256": "952388063590f76a3f78760372d3e4734f86ce71e3a760d4a5d08f764bc1f23b",
+      "change": "Remove extra blank line at EOF",
+      "ast_equal": true
+    }
+  ],
+  "integration_checks": {
+    "command": "make -j1 doctor verify catalogue-check reproduce",
+    "scope": "static repository checks in integration workspace; no full test discovery",
+    "log_sha256": "3b732026e05e720ede7deb050ef1b4d9eb2413a6a36dff75c2c59f6705b81601"
+  }
+}

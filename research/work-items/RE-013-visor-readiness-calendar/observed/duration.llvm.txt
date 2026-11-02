@@ -1,0 +1,146 @@
+
+visor.elf:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+00000000002bd180 <.text>:
+  330360: 66 0f 57 c9                  	xorpd	xmm1, xmm1
+  330364: 66 0f 2e c8                  	ucomisd	xmm1, xmm0
+  330368: 0f 86 cb 00 00 00            	jbe	0x330439 <.text+0x732b9>
+  33036e: 50                           	push	rax
+  33036f: f2 0f 59 05 89 e4 d3 ff      	mulsd	xmm0, qword ptr [rip - 0x2c1b77] # 0x6e800
+  330377: ff 15 d3 50 4b 00            	call	qword ptr [rip + 0x4b50d3] # 0x7e5450
+  33037d: 66 0f 57 d2                  	xorpd	xmm2, xmm2
+  330381: 66 48 0f 7e c0               	movq	rax, xmm0
+  330386: 48 b9 ff ff ff ff ff ff ff 7f	movabs	rcx, 0x7fffffffffffffff
+  330390: 48 21 c1                     	and	rcx, rax
+  330393: 48 b8 ff ff ff ff ff ff ef 7f	movabs	rax, 0x7fefffffffffffff
+  33039d: 48 39 c1                     	cmp	rcx, rax
+  3303a0: 48 8d 64 24 08               	lea	rsp, [rsp + 0x8]
+  3303a5: 7f 28                        	jg	0x3303cf <.text+0x7324f>
+  3303a7: 66 0f 57 c9                  	xorpd	xmm1, xmm1
+  3303ab: 66 0f 2e c8                  	ucomisd	xmm1, xmm0
+  3303af: 77 0e                        	ja	0x3303bf <.text+0x7323f>
+  3303b1: 66 0f 2e 05 9f e1 d3 ff      	ucomisd	xmm0, qword ptr [rip - 0x2c1e61] # 0x6e558
+  3303b9: 66 0f 28 d0                  	movapd	xmm2, xmm0
+  3303bd: 76 10                        	jbe	0x3303cf <.text+0x7324f>
+  3303bf: f2 0f 5f c8                  	maxsd	xmm1, xmm0
+  3303c3: f2 0f 10 15 8d e1 d3 ff      	movsd	xmm2, qword ptr [rip - 0x2c1e73] # 0x6e558
+  3303cb: f2 0f 5d d1                  	minsd	xmm2, xmm1
+  3303cf: f2 48 0f 2c c2               	cvttsd2si	rax, xmm2
+  3303d4: 48 89 c1                     	mov	rcx, rax
+  3303d7: 48 c1 f9 3f                  	sar	rcx, 0x3f
+  3303db: 66 0f 28 c2                  	movapd	xmm0, xmm2
+  3303df: f2 0f 5c 05 21 e2 d3 ff      	subsd	xmm0, qword ptr [rip - 0x2c1ddf] # 0x6e608
+  3303e7: f2 48 0f 2c d0               	cvttsd2si	rdx, xmm0
+  3303ec: 48 21 ca                     	and	rdx, rcx
+  3303ef: 48 09 c2                     	or	rdx, rax
+  3303f2: 31 c0                        	xor	eax, eax
+  3303f4: 66 0f 57 c0                  	xorpd	xmm0, xmm0
+  3303f8: 66 0f 2e d0                  	ucomisd	xmm2, xmm0
+  3303fc: 48 0f 43 c2                  	cmovae	rax, rdx
+  330400: 66 0f 2e 15 38 e0 d3 ff      	ucomisd	xmm2, qword ptr [rip - 0x2c1fc8] # 0x6e440
+  330408: 48 c7 c1 ff ff ff ff         	mov	rcx, -0x1
+  33040f: 48 0f 46 c8                  	cmovbe	rcx, rax
+  330413: 48 ba db 34 b6 d7 82 de 1b 43	movabs	rdx, 0x431bde82d7b634db
+  33041d: 48 89 c8                     	mov	rax, rcx
+  330420: 48 f7 e2                     	mul	rdx
+  330423: 48 89 d0                     	mov	rax, rdx
+  330426: 48 c1 e8 12                  	shr	rax, 0x12
+  33042a: 69 d0 40 42 0f 00            	imul	edx, eax, 0xf4240
+  330430: 29 d1                        	sub	ecx, edx
+  330432: 69 d1 e8 03 00 00            	imul	edx, ecx, 0x3e8
+  330438: c3                           	ret
+  330439: 66 48 0f 7e c6               	movq	rsi, xmm0
+  33043e: 48 89 f1                     	mov	rcx, rsi
+  330441: 48 c1 e9 34                  	shr	rcx, 0x34
+  330445: 81 e1 ff 07 00 00            	and	ecx, 0x7ff
+  33044b: 31 d2                        	xor	edx, edx
+  33044d: 81 f9 e0 03 00 00            	cmp	ecx, 0x3e0
+  330453: 73 03                        	jae	0x330458 <.text+0x732d8>
+  330455: 31 c0                        	xor	eax, eax
+  330457: c3                           	ret
+  330458: 49 b8 ff ff ff ff ff ff 0f 00	movabs	r8, 0xfffffffffffff
+  330462: 48 89 f0                     	mov	rax, rsi
+  330465: 4c 21 c0                     	and	rax, r8
+  330468: 4c 01 c0                     	add	rax, r8
+  33046b: 48 ff c0                     	inc	rax
+  33046e: 0f b7 f9                     	movzx	edi, cx
+  330471: 81 ff ff 03 00 00            	cmp	edi, 0x3ff
+  330477: 73 6e                        	jae	0x3304e7 <.text+0x73367>
+  330479: 80 c1 2d                     	add	cl, 0x2d
+  33047c: 31 ff                        	xor	edi, edi
+  33047e: 48 0f a5 c7                  	shld	rdi, rax, cl
+  330482: 31 f6                        	xor	esi, esi
+  330484: 48 d3 e0                     	shl	rax, cl
+  330487: f6 c1 40                     	test	cl, 0x40
+  33048a: 48 0f 45 f8                  	cmovne	rdi, rax
+  33048e: 48 0f 45 c6                  	cmovne	rax, rsi
+  330492: b9 00 ca 9a 3b               	mov	ecx, 0x3b9aca00
+  330497: 48 f7 e1                     	mul	rcx
+  33049a: 48 89 d1                     	mov	rcx, rdx
+  33049d: 48 69 d7 00 ca 9a 3b         	imul	rdx, rdi, 0x3b9aca00
+  3304a4: 48 01 d1                     	add	rcx, rdx
+  3304a7: 48 89 cf                     	mov	rdi, rcx
+  3304aa: 48 c1 ef 20                  	shr	rdi, 0x20
+  3304ae: ba 00 00 00 00               	mov	edx, 0x0
+  3304b3: 85 c9                        	test	ecx, ecx
+  3304b5: 79 1f                        	jns	0x3304d6 <.text+0x73356>
+  3304b7: 48 25 00 fe ff ff            	and	rax, -0x200
+  3304bd: 89 c9                        	mov	ecx, ecx
+  3304bf: ba 00 00 00 80               	mov	edx, 0x80000000
+  3304c4: 48 31 ca                     	xor	rdx, rcx
+  3304c7: 48 09 c2                     	or	rdx, rax
+  3304ca: 0f 95 c0                     	setne	al
+  3304cd: 40 08 f8                     	or	al, dil
+  3304d0: 0f b6 d0                     	movzx	edx, al
+  3304d3: 83 e2 01                     	and	edx, 0x1
+  3304d6: 01 fa                        	add	edx, edi
+  3304d8: 31 c0                        	xor	eax, eax
+  3304da: 81 fa 00 ca 9a 3b            	cmp	edx, 0x3b9aca00
+  3304e0: 0f 94 c0                     	sete	al
+  3304e3: 0f 44 d6                     	cmove	edx, esi
+  3304e6: c3                           	ret
+  3304e7: 81 ff 33 04 00 00            	cmp	edi, 0x433
+  3304ed: 73 7f                        	jae	0x33056e <.text+0x733ee>
+  3304ef: 8d 91 01 fc ff ff            	lea	edx, [rcx - 0x3ff]
+  3304f5: 40 b7 33                     	mov	dil, 0x33
+  3304f8: 40 28 cf                     	sub	dil, cl
+  3304fb: 89 f9                        	mov	ecx, edi
+  3304fd: 48 d3 e8                     	shr	rax, cl
+  330500: 48 89 c7                     	mov	rdi, rax
+  330503: 89 d1                        	mov	ecx, edx
+  330505: 48 d3 e6                     	shl	rsi, cl
+  330508: 4c 21 c6                     	and	rsi, r8
+  33050b: b9 00 ca 9a 3b               	mov	ecx, 0x3b9aca00
+  330510: 48 89 f0                     	mov	rax, rsi
+  330513: 48 f7 e1                     	mul	rcx
+  330516: c1 e2 0c                     	shl	edx, 0xc
+  330519: 48 89 c6                     	mov	rsi, rax
+  33051c: 48 c1 ee 34                  	shr	rsi, 0x34
+  330520: 09 d6                        	or	esi, edx
+  330522: 31 c9                        	xor	ecx, ecx
+  330524: 48 0f ba e0 33               	bt	rax, 0x33
+  330529: ba 00 00 00 00               	mov	edx, 0x0
+  33052e: 73 26                        	jae	0x330556 <.text+0x733d6>
+  330530: 48 ba 00 fe ff ff ff ff 0f 00	movabs	rdx, 0xffffffffffe00
+  33053a: 48 21 d0                     	and	rax, rdx
+  33053d: 48 ba 00 00 00 00 00 00 08 00	movabs	rdx, 0x8000000000000
+  330547: 48 39 d0                     	cmp	rax, rdx
+  33054a: 0f 95 c0                     	setne	al
+  33054d: 40 08 f0                     	or	al, sil
+  330550: 0f b6 d0                     	movzx	edx, al
+  330553: 83 e2 01                     	and	edx, 0x1
+  330556: 01 f2                        	add	edx, esi
+  330558: 31 f6                        	xor	esi, esi
+  33055a: 81 fa 00 ca 9a 3b            	cmp	edx, 0x3b9aca00
+  330560: 40 0f 94 c6                  	sete	sil
+  330564: 0f 44 d1                     	cmove	edx, ecx
+  330567: 48 89 f8                     	mov	rax, rdi
+  33056a: 48 01 f0                     	add	rax, rsi
+  33056d: c3                           	ret
+  33056e: 81 ff 3f 04 00 00            	cmp	edi, 0x43f
+  330574: 0f 83 f4 fd ff ff            	jae	0x33036e <.text+0x731ee>
+  33057a: 80 c1 cd                     	add	cl, -0x33
+  33057d: 48 d3 e0                     	shl	rax, cl
+  330580: c3                           	ret
