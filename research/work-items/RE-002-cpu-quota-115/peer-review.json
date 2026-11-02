@@ -1,0 +1,79 @@
+{
+  "status": "no blocker under the documented selected value projection",
+  "source_sha256": "fb4339da1049282f741cd6527c212bd6a2638dd3b0a3bdd8f03f0ff09c1b66a3",
+  "proof_review": [
+    "PUNPCKLDQ forms 2^52+lo32 and 2^84+hi32*2^32; SUBPD subtracts exactly representable powers and ADDSD performs the single final integer-to-binary64 rounding. Thus both input conversions match RN separately; replacing by exact rational ceildiv is wrong.",
+    "For quota in u64 and positive period, the ratio is zero or a normal finite value in [2^-64,2^64]. No negative/NaN/inf/subnormal input reaches ceil from this admitted path.",
+    "Ceil preserves exponents >=52, maps positive values below1 to1 and zero tozero, and clears fractional bits after adding their mask at intermediate exponents. Mask shifts stay in0..51 on the entered path.",
+    "CVTTSD2SI combines ordinary low signed conversion and shifted2^63 branch. For rounded values below2^64 it recovers the integer; the final compare against0x43efffffffffffff selectsMAX for2^64. This assumes masked invalid/precision exceptions and excludes floating status outputs.",
+    "At5ba95f6 quota0 OR missing flag skips any publication. At5ba96e0 unsigned minimum allows successful empty affinity mask to publish0. MemoryXCHG effect is atomic exchange; new SeqCst store models the selected value publication without original source-ordering/old-register proof.",
+    "Both affinity loops enumerate even i=0..1022. Word i>>6 and pair (i&62,i&62+1) partition1024bits; u32 count<=1024 means checked counter-overflow paths are unreachable.",
+    "sysconf compare uses signed>=2 thenCMOVGE, exactly max(result,1). Successful empty affinity remains0 rather than falling back. Getter reads actual cache after opaque once and returns any nonzero u64 before logical fallback.",
+    "Initializer parsing, imported Linux execution, cleanup/LSDA actions, Once state machine and concurrency are explicitly outside the Rust API."
+  ],
+  "provenance_review": {
+    "historical_quota_rows": 2317,
+    "new_affinity_rows": 1318,
+    "ancestry_disclosed": true,
+    "oracle_independence_limit": "Historical own Rust predates reused quota oracle; not a blind new oracle. Fresh affinity freeze is author-recorded before new Rust, and later replay generator is explicitly retrospective.",
+    "public_source": "Pinned official num_cpus source is an interpretive comparator; no exact115version or build identity claimed."
+  },
+  "actual_checks": {
+    "fresh_GNU_bodies": 4,
+    "fresh_GNU_bytes": 6915,
+    "fresh_GNU_instructions": 1449,
+    "manual_ELF_RELA_records": 61001,
+    "unique_selected_writer_slots": 6,
+    "constant_windows": 7,
+    "independently_recomputed_rows": 3635,
+    "mismatches": 0
+  },
+  "recorded_native_only": {
+    "four_builds": true,
+    "each_cases": 3635,
+    "eight_mutants": "Author result inspected; no new native rebuild by reviewer.",
+    "concurrency_proven": false
+  },
+  "counterchecks": [
+    "Distinct integer-ceildiv witness q=2^53+1,p=2^53 yields1 after separatefloat rounding vs2 exactrational.",
+    "Empty successful128-byte mask returns0; absent mask withsysconf0 returns1.",
+    "CacheMAX returnsMAX without logical fallback.",
+    "Nonzero quota withlogical0 stores0; missing/zero quota skipsstore.",
+    "All retained fullbody ranges/FDE fields, constants and six RELA slot writers authenticated against exactELF, including partial-writer overlap scan."
+  ],
+  "limitations": [
+    "No captured execution or instruction emulation",
+    "No independent native rebuild: existing result authenticated against current source, its execution remains author evidence",
+    "Selected FDE fields and exact CIE bytes checked, not independent full DWARF/LSDA semantics",
+    "No original num_cpus version or complete initializer/parser/Once/concurrency proof",
+    "Float review assumes ordinary RN binary64 and masked exceptions; no exception flags modeled"
+  ],
+  "blockers": [],
+  "artifacts": {
+    "results/ceil_context.gnu.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/ceil_context.gnu.stdout": "75e1c3d92b2692ee7c13ab2e1a32ced15b9318f6f2ded4b0ad3c2ae9bf8e0ab0",
+    "results/commands.json": "d7b6b969daaccc74f17bf96beae87a5edf1ac3e0756dfcfeb8012f101b62f1c4",
+    "results/initializer.gnu.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/initializer.gnu.stdout": "2ea8e6989b493309c28b8198eac9edeca6e9427b6bfe2253e493c1004444b7b6",
+    "results/logical_getter.gnu.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/logical_getter.gnu.stdout": "bbce85b07e4209c62f292d7d4e6116d49b42d1eb8bac792a49d822ddd707682c",
+    "results/once_adapter.gnu.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "results/once_adapter.gnu.stdout": "6d272f75d33f4a65abe02484a51dd24a376190c8938a3a6082d5fb64396ad38a",
+    "results/result.json": "43a96e344a87bc43cd9526f07df16588ac32fe1f43591f7d781af1acc64cb38b",
+    "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.log": "43a96e344a87bc43cd9526f07df16588ac32fe1f43591f7d781af1acc64cb38b",
+    "verify_independent.py": "31acd19a41bf3398260827039bea61647c60a96fc63aca4ebaece3fcc7540051"
+  },
+  "publication": {
+    "original_review_sha256": "65fc8cceb7e4cc4c5a28d2d3b283aec140791f55e43a8f3de91d42f22b430de4",
+    "original_script_sha256": "31acd19a41bf3398260827039bea61647c60a96fc63aca4ebaece3fcc7540051",
+    "portable_script_sha256": "e0671290ea35f07c731ff5b27eaaeae7f30698947219544b5d00d4a3030f5ec5",
+    "changes": [
+      "GNU_OBJDUMP environment/default executable",
+      "Normalize authenticated target filename in exports and recorded argv",
+      "Use retained native/result.json with identical bytes instead of ignored author work directory"
+    ],
+    "original_artifact_hashes": "Describe reviewer original private working files; portable rerun outputs are separately retained in peer-streams.json.gz and peer-result.json",
+    "semantic_algorithm_changed": false
+  }
+}
