@@ -68,12 +68,14 @@ Their equality does not establish first-party or whole-node completion.
 
 | Comparison | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows |
 | --- | ---: | ---: | ---: |
-| **Node #115 total** | 2,905/2,940 (98.81%) | 3/4 (75.00%) | 4/4 (100.00%) |
-| compiler-builtins | 132/132 (100.00%) | 1/1 (100.00%) | 1/1 (100.00%) |
-| rust-core | 355/390 (91.03%) | 0/1 (0.00%) | 1/1 (100.00%) |
+| **Node #115 total** | 100,873/106,559 (94.66%) | 28/310 (9.03%) | 310/310 (100.00%) |
+| compiler-builtins | 2,769/2,874 (96.35%) | 5/13 (38.46%) | 13/13 (100.00%) |
+| rust-alloc | 759/838 (90.57%) | 0/9 (0.00%) | 9/9 (100.00%) |
+| rust-core | 37,344/39,873 (93.66%) | 5/112 (4.46%) | 112/112 (100.00%) |
+| rust-std | 57,583/60,556 (95.09%) | 16/174 (9.20%) | 174/174 (100.00%) |
 | zstandard | 2,418/2,418 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
 
-Compared code: **2,940/83,719,936 .text bytes (0.00351%)**.
+Compared code: **106,559/83,719,936 .text bytes (0.12728%)**.
 
 All active findings bind to node #115. See [detailed progress](docs/PROGRESS.md)
 and [source-built node acceptance](docs/SCOPE.md#source-built-network-node).

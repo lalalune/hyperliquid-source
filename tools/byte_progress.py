@@ -27,9 +27,11 @@ def compare(source, target, relocations):
     for row in relocations:
         offset, width = row['offset'], row.get('width', 4)
         kind = row.get('kind', row.get('type'))
+        # PC32, PLT32 and GOTPCREL each occupy one four-byte PC-relative field; the
+        # addend only selects the referenced displacement, never the masked bytes.
         require(type(offset) is int and type(width) is int and width == 4
-                and kind in (2, 9) and row['addend'] == -4,
-                'Only recorded four-byte PC32/GOTPCREL fields are supported')
+                and kind in (2, 4, 9) and type(row['addend']) is int,
+                'Only recorded four-byte PC32/PLT32/GOTPCREL fields are supported')
         field = set(range(offset, offset + width))
         require(0 <= offset and offset + width <= len(target) and not masks & field,
                 'Overlapping/out-of-bounds relocation field')
@@ -107,7 +109,7 @@ def load_coverage(root, registry_path, components):
         mode = item.get('comparison_mode', 'offset-aligned')
         require(mode in ('offset-aligned', 'extent-mismatch'), 'Unknown comparison mode')
         require('dependency' not in item or item['dependency'] in
-                ('rust-core', 'compiler-builtins', 'zstandard', 'mio'), 'Unknown dependency attribution')
+                ('rust-core', 'rust-alloc', 'rust-std', 'compiler-builtins', 'zstandard', 'mio'), 'Unknown dependency attribution')
         require(item['evidence'] in pinned, 'Comparison evidence must be hash-pinned')
         require(name not in seen_ids, 'Duplicate comparison id')
         seen_ids.add(name)

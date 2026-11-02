@@ -60,8 +60,8 @@ class CatalogueTests(unittest.TestCase):
     def test_dependency_bytes_do_not_count_as_first_party(self):
         coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', self.components)
         self.assertEqual(set(coverage['targets']), {'node115'})
-        self.assertEqual(coverage['totals']['node115']['windows'], 4)
-        self.assertEqual(coverage['totals']['node115']['bytes'], 2940)
+        self.assertEqual(coverage['totals']['node115']['windows'], 310)
+        self.assertEqual(coverage['totals']['node115']['bytes'], 106559)
         self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
 
     def test_wrong_owner_target_and_changed_evidence_rejected(self):
@@ -77,6 +77,32 @@ class CatalogueTests(unittest.TestCase):
                 stream.write(b'corruption')
             with self.assertRaisesRegex(ValueError, 'Byte evidence digest changed'):
                 byte_progress.load_coverage(root, 'research/byte-windows.json', self.components)
+
+    def test_rustc_195_std_windows_are_relocation_qualified_dependencies(self):
+        coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', self.components)
+        rows = [r for r in coverage['windows'] if r['id'].startswith('node115-std-')]
+        self.assertEqual(len(rows), 306)
+        self.assertTrue(all(r['relocation_qualified'] for r in rows))
+        self.assertEqual({r['dependency'] for r in rows},
+                         {'rust-core', 'rust-std', 'rust-alloc', 'compiler-builtins'})
+        remainder, = [r for r in rows if r['start'] == 0x63efd70]
+        self.assertTrue(remainder['raw_equal'])
+        self.assertEqual(remainder['bytes'], 197)
+
+    def test_plt32_and_displaced_pc32_fields_mask_only_their_four_bytes(self):
+        for field in ({'offset': 4, 'width': 4, 'kind': 4, 'addend': -4},
+                      {'offset': 4, 'width': 4, 'kind': 2, 'addend': 52}):
+            with self.subTest(field=field):
+                row = byte_progress.compare(b'abcd0000', b'abcd1234', [field])
+                self.assertEqual(row['relocation_bytes'], 4)
+                self.assertTrue(row['relocation_qualified'])
+                changed = byte_progress.compare(b'xbcd0000', b'abcd1234', [field])
+                self.assertFalse(changed['relocation_qualified'])
+        for field in ({'offset': 4, 'width': 4, 'kind': 41, 'addend': -4},
+                      {'offset': 4, 'width': 4, 'kind': 2, 'addend': None},
+                      {'offset': 4, 'width': 8, 'kind': 4, 'addend': -4}):
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                byte_progress.compare(b'abcd0000', b'abcd1234', [field])
 
 
 if __name__ == '__main__':
