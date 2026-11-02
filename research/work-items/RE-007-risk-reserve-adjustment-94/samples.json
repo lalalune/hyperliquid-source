@@ -1,0 +1,272 @@
+{
+  "binary64_scaling": [
+    {
+      "adjustment": 0,
+      "exact_101_over_100": 0,
+      "reserve": 0
+    },
+    {
+      "adjustment": 1,
+      "exact_101_over_100": 1,
+      "reserve": 1
+    },
+    {
+      "adjustment": 2,
+      "exact_101_over_100": 2,
+      "reserve": 2
+    },
+    {
+      "adjustment": 99,
+      "exact_101_over_100": 99,
+      "reserve": 99
+    },
+    {
+      "adjustment": 101,
+      "exact_101_over_100": 101,
+      "reserve": 100
+    },
+    {
+      "adjustment": 102,
+      "exact_101_over_100": 102,
+      "reserve": 101
+    },
+    {
+      "adjustment": 4548635623644200,
+      "exact_101_over_100": 4548635623644199,
+      "reserve": 4503599627370495
+    },
+    {
+      "adjustment": 4548635623644201,
+      "exact_101_over_100": 4548635623644200,
+      "reserve": 4503599627370496
+    },
+    {
+      "adjustment": 4548635623644202,
+      "exact_101_over_100": 4548635623644201,
+      "reserve": 4503599627370497
+    },
+    {
+      "adjustment": 9097271247288400,
+      "exact_101_over_100": 9097271247288400,
+      "reserve": 9007199254740991
+    },
+    {
+      "adjustment": 9097271247288402,
+      "exact_101_over_100": 9097271247288401,
+      "reserve": 9007199254740992
+    },
+    {
+      "adjustment": 9097271247288402,
+      "exact_101_over_100": 9097271247288402,
+      "reserve": 9007199254740993
+    },
+    {
+      "adjustment": 9097271247288404,
+      "exact_101_over_100": 9097271247288403,
+      "reserve": 9007199254740994
+    },
+    {
+      "adjustment": 9223372036854775807,
+      "exact_101_over_100": 9223372036854775724,
+      "reserve": 9132051521638391806
+    },
+    {
+      "adjustment": 9223372036854775807,
+      "exact_101_over_100": 9223372036854775725,
+      "reserve": 9132051521638391807
+    },
+    {
+      "adjustment": 9223372036854775807,
+      "exact_101_over_100": 9223372036854775726,
+      "reserve": 9132051521638391808
+    },
+    {
+      "adjustment": 9223372036854775807,
+      "exact_101_over_100": 9315605757223323564,
+      "reserve": 9223372036854775806
+    },
+    {
+      "adjustment": 9223372036854775807,
+      "exact_101_over_100": 9315605757223323565,
+      "reserve": 9223372036854775807
+    }
+  ],
+  "note": "Synthetic conditional model cases; no captured binary or instruction execution.",
+  "scalar_cases": [
+    {
+      "input": {
+        "equity": 1000,
+        "requirement": 100,
+        "reserve": 100
+      },
+      "output": {
+        "adjustment": 101,
+        "amount": 799,
+        "flag": 0,
+        "recorder_events": [],
+        "status": "return"
+      }
+    },
+    {
+      "input": {
+        "equity": 1000,
+        "requirement": 100,
+        "reserve": 99
+      },
+      "output": {
+        "adjustment": 99,
+        "amount": 801,
+        "flag": 0,
+        "recorder_events": [],
+        "status": "return"
+      }
+    },
+    {
+      "input": {
+        "equity": 0,
+        "requirement": 0,
+        "reserve": 1
+      },
+      "output": {
+        "adjustment": 1,
+        "amount": -1,
+        "flag": 0,
+        "recorder_events": [],
+        "status": "return"
+      }
+    },
+    {
+      "input": {
+        "equity": -9223372036854775808,
+        "requirement": 9223372036854775807,
+        "reserve": 9223372036854775807
+      },
+      "output": {
+        "adjustment": 9223372036854775807,
+        "amount": -9223372036854775808,
+        "flag": 0,
+        "recorder_events": [
+          "first_subtraction",
+          "second_subtraction"
+        ],
+        "status": "return"
+      }
+    },
+    {
+      "input": {
+        "equity": -9223372036854775798,
+        "requirement": 9,
+        "reserve": 2
+      },
+      "output": {
+        "adjustment": 2,
+        "amount": -9223372036854775808,
+        "flag": 0,
+        "recorder_events": [
+          "second_subtraction"
+        ],
+        "status": "return"
+      }
+    },
+    {
+      "input": {
+        "equity": 9223372036854775807,
+        "requirement": 0,
+        "reserve": 9223372036854775807
+      },
+      "output": {
+        "adjustment": 9223372036854775807,
+        "amount": 0,
+        "flag": 0,
+        "recorder_events": [],
+        "status": "return"
+      }
+    },
+    {
+      "input": {
+        "equity": 100,
+        "requirement": -1,
+        "reserve": 0
+      },
+      "output": {
+        "status": "requirement_unwrap_error"
+      }
+    },
+    {
+      "input": {
+        "equity": 100,
+        "requirement": 1,
+        "reserve": -1
+      },
+      "output": {
+        "recorder_events": [],
+        "status": "reserve_unwrap_error"
+      }
+    },
+    {
+      "input": {
+        "equity": 100,
+        "exempt": true,
+        "requirement": 1,
+        "reserve": -1
+      },
+      "output": {
+        "adjustment": 0,
+        "amount": 99,
+        "flag": 0,
+        "recorder_events": [],
+        "status": "return"
+      }
+    },
+    {
+      "input": {
+        "equity": 100,
+        "found": false,
+        "requirement": 1,
+        "reserve": -1
+      },
+      "output": {
+        "adjustment": 0,
+        "amount": 99,
+        "flag": 0,
+        "recorder_events": [],
+        "status": "return"
+      }
+    },
+    {
+      "input": {
+        "equity": 9223372036854775807,
+        "requirement": 9223372036854775807,
+        "reserve": 0,
+        "row_word": 1
+      },
+      "output": {
+        "adjustment": 0,
+        "amount": 0,
+        "flag": 1,
+        "recorder_events": [],
+        "status": "return"
+      }
+    },
+    {
+      "input": {
+        "equity": 0,
+        "requirement": 0,
+        "reserve": 0,
+        "row_word": 9223372036854775807
+      },
+      "output": {
+        "adjustment": 0,
+        "amount": 0,
+        "flag": 1,
+        "recorder_events": [],
+        "status": "return"
+      }
+    }
+  ],
+  "sweep_summary": {
+    "comparisons": 1300,
+    "model_mismatches": 0,
+    "wrong_exact_ratio_mismatches": 66
+  }
+}
