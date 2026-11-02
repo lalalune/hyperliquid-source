@@ -98,7 +98,13 @@ and its vtable +0x10 then +0x18 virtuals are called with the
 control block as argument. Otherwise the +0x8 word is decremented
 (plain when the __libc_single_threaded flag at GOT 0x5777ed8 is
 nonzero, locked xadd otherwise) and the destroyer 0x4f94a40 is
-called when the old value is 1. After the walk, the old allocation
+called when the old low 32-bit value is 1. The sentinel comparison
+uses the full packed 64-bit strong/weak count word, but the ordinary
+decrement updates only the low strong-count DWORD and preserves the
+upper weak-count DWORD (`0x5169c1a..0x5169c2e` in the helper and
+`0x516aeb8..0x516aefd` in construction). The model and a regression
+test cover this distinction for both single-threaded flag values.
+After the walk, the old allocation
 is freed with operator delete[] on `old - 8` with size
 `count * 16 + 8`.
 

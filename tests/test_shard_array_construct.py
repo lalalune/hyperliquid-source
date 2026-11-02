@@ -96,6 +96,24 @@ def test_release_old_gt_one_keeps_alive():
     check(block.count == 2 and log == [], "old 3 -> 2, no destroyer")
 
 
+def test_release_packed_weak_count_preserved():
+    # 0x5169c1a..0x5169c2e and 0x516aeb8..0x516aefd update/test
+    # only the low DWORD. A weak count of two avoids the 1/1 sentinel.
+    for single_threaded in (False, True):
+        log = []
+        last = ControlBlock((2 << 32) | 1, log)
+        release_array([[None, last]], single_threaded=single_threaded,
+                      destroyer_log=log)
+        check(last.count == 2 << 32, "upper weak-count DWORD is preserved")
+        check(log == [last], "last strong reference invokes destroyer")
+        log.clear()
+        live = ControlBlock((2 << 32) | 3, log)
+        release_array([[None, live]], single_threaded=single_threaded,
+                      destroyer_log=log)
+        check(live.count == (2 << 32) | 2, "only strong count decrements")
+        check(log == [], "remaining strong references keep block alive")
+
+
 def test_release_null_array():
     check(release_array(None) == 0, "null array releases nothing")
 

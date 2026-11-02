@@ -48,7 +48,7 @@ def allocation_size(count):
 
 
 class ControlBlock:
-    """A shared_ptr control block: a count word plus a vtable pair."""
+    """A control block with a packed 64-bit strong/weak count word."""
 
     def __init__(self, count, log):
         self.count = count
@@ -101,8 +101,10 @@ def release_slot(control, single_threaded, destroyer_log):
     if control.count == SENTINEL:
         control.destroy_virtuals()
         return
-    old = control.count
-    control.count = old - 1  # plain or locked xadd: same observable step
+    # Both native paths update a DWORD at control-block +8. The upper
+    # (weak-count) DWORD survives; the destroyer tests the old low DWORD.
+    old = control.count & 0xffffffff
+    control.count = (control.count & 0xffffffff00000000) | ((old - 1) & 0xffffffff)
     if old == 1:
         destroyer_log.append(control)
 
