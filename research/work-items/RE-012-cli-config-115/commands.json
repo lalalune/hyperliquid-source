@@ -1,0 +1,174 @@
+{
+  "working_directory": "repository root",
+  "environment": {
+    "PATH": "/opt/homebrew/opt/binutils/bin:$PATH",
+    "LLVM_OBJDUMP": "/usr/bin/objdump",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "checks": [
+    {
+      "label": "focused",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_node115_cli_config.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "1db6a56675a924063dacde0f4275e5d4726eb5ca93005f85193a5ec822a557e6"
+    },
+    {
+      "label": "focused-optimized",
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_node115_cli_config.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "seconds": 5.909,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "9f523fbb932409cf296ada871ea06e21fe75d33cb986f91e8f0e767c3b0cac74"
+    },
+    {
+      "label": "legacy-startup",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_hl_node_startup_inventory.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "seconds": 34.938,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "1142debe86f34ed3a31f9d7d096a73ef23c7ada490272e63090ef4c272a4288d"
+    },
+    {
+      "label": "legacy-fde",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_fde_extents.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "seconds": 0.122,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e86247b98360fc3fef744be4e92e02d91004c07239b0404b1bf0a54ea5b970b1"
+    },
+    {
+      "label": "repeat-export",
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "tools/node115_cli_config.py",
+        "--output",
+        "work/node115-cli-research/repeat-export"
+      ],
+      "exit_code": 0,
+      "seconds": 2.133,
+      "stdout_sha256": "dbf59f4758be0a8872775042cfcd62262d6493e2d67b91a0f0de703b3af359dc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "doctor",
+      "argv": [
+        "make",
+        "doctor"
+      ],
+      "exit_code": 0,
+      "seconds": 0.759,
+      "stdout_sha256": "6b033dc297d7d3dd43cb694fb04782a961c5c481d725c06bc905ee85f1b47bbe",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "verify",
+      "argv": [
+        "make",
+        "verify"
+      ],
+      "exit_code": 0,
+      "seconds": 12.015,
+      "stdout_sha256": "c436074981adc60f091fa210010debd3b8f238304d17008bcae1027b833414cd",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "catalogue-check",
+      "argv": [
+        "make",
+        "catalogue-check"
+      ],
+      "exit_code": 0,
+      "seconds": 2.983,
+      "stdout_sha256": "d154b53146de73afa6ac07cb86b790175fed3cf9eb764993fa92227491db6d80",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "reproduce",
+      "argv": [
+        "make",
+        "reproduce"
+      ],
+      "exit_code": 0,
+      "seconds": 68.832,
+      "stdout_sha256": "e229eacd17279259b076a17aa95f96fb96d91d2ab9991363ea8c20f2243cfd0a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "disassembly_commands": "native-commands.json",
+  "captured_binary_execution_commands": [],
+  "original_scoping_sources": "open-prs.json, merged-prs.json and open-issues.json in raw-streams.json.gz; read-only gh requests",
+  "initial_strict_failures": [
+    {
+      "label": "initial-export",
+      "argv": [
+        "python3",
+        "-B",
+        "tools/node115_cli_config.py",
+        "--output",
+        "work/node115-cli-research/initial-export"
+      ],
+      "exit_code": 1,
+      "cause": "LLVM caller_large split two standalone LOCK prefixes; first prototype did not retain individual disassembler streams on failure. stderr retained."
+    },
+    {
+      "label": "strict-export",
+      "argv": [
+        "python3",
+        "-B",
+        "tools/node115_cli_config.py",
+        "--output",
+        "work/node115-cli-research/strict-export"
+      ],
+      "exit_code": 1,
+      "cause": "Same two display-boundary differences reproduced with all disassembler raw streams retained; no captured execution."
+    }
+  ]
+}
