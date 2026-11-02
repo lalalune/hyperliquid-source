@@ -1,0 +1,239 @@
+{
+  "method": "power-interval rank, low-24-bit remainder and integer quotient",
+  "rust_source_existed_at_freeze": false,
+  "oracle_source_sha256": "55ec555f6e7f14cf6cc2c624f7eb6c81e80bedfde2752dce88c923a63b36fc5b",
+  "inputs_sha256": "d1644fab9832ef27e174ce2a0df462059c4666e3d98a21e2dd97404517966249",
+  "expected_sha256": "e919209b3d71dd720f7b413a6901b4729ca45addd802e940a11a206b92ed4ae6",
+  "fixture_hashes_cover": "decompressed byte streams",
+  "coverage": {
+    "cases": 16237,
+    "categories": {
+      "witness": 14,
+      "power_and_truncation_edges": 10854,
+      "subtraction_boundary": 1072,
+      "bypass_and_refusals": 201,
+      "seeded_mixed_inputs": 4096
+    },
+    "result_classes": {
+      "ok": 16015,
+      "missing": 100,
+      "undefined": 122
+    },
+    "bypass_cases": 4617,
+    "witnesses": {
+      "bypass_absent_word_zero": {
+        "row_zero_based": 0,
+        "input": [
+          null,
+          4294967295,
+          1,
+          0
+        ],
+        "expected": "ok\t0"
+      },
+      "bypass_absent_word_nonzero": {
+        "row_zero_based": 1,
+        "input": [
+          null,
+          0,
+          1,
+          4294967295
+        ],
+        "expected": "ok\t256"
+      },
+      "bypass_max_word_zero": {
+        "row_zero_based": 2,
+        "input": [
+          4294967295,
+          4294967295,
+          1,
+          0
+        ],
+        "expected": "ok\t0"
+      },
+      "bypass_max_word_nonzero": {
+        "row_zero_based": 3,
+        "input": [
+          4294967295,
+          0,
+          1,
+          2
+        ],
+        "expected": "ok\t256"
+      },
+      "flag_two_is_main": {
+        "row_zero_based": 4,
+        "input": [
+          0,
+          1000,
+          2,
+          1
+        ],
+        "expected": "ok\t744"
+      },
+      "flag_two_requires_word": {
+        "row_zero_based": 5,
+        "input": [
+          null,
+          0,
+          2,
+          1
+        ],
+        "expected": "missing"
+      },
+      "main_max_undefined_even_without_refinement": {
+        "row_zero_based": 6,
+        "input": [
+          4294967295,
+          8192,
+          0,
+          0
+        ],
+        "expected": "undefined"
+      },
+      "discard_before_right_shift": {
+        "row_zero_based": 7,
+        "input": [
+          16777215,
+          8192,
+          0,
+          1
+        ],
+        "expected": "ok\t2048"
+      },
+      "subtraction_wrap": {
+        "row_zero_based": 8,
+        "input": [
+          255,
+          256,
+          0,
+          2
+        ],
+        "expected": "ok\t4294965248"
+      },
+      "saved_refinement_nonzero_bsr_zero": {
+        "row_zero_based": 9,
+        "input": [
+          0,
+          4096,
+          0,
+          2
+        ],
+        "expected": "ok\t3840"
+      },
+      "saved_refinement_zero_bsr_nonzero": {
+        "row_zero_based": 10,
+        "input": [
+          1,
+          4096,
+          0,
+          0
+        ],
+        "expected": "ok\t3840"
+      },
+      "top_word_logical_shift": {
+        "row_zero_based": 11,
+        "input": [
+          4294967294,
+          12288,
+          0,
+          1
+        ],
+        "expected": "ok\t4351"
+      },
+      "increment_crosses_power": {
+        "row_zero_based": 12,
+        "input": [
+          255,
+          8192,
+          0,
+          0
+        ],
+        "expected": "ok\t6144"
+      },
+      "nonzero_high_refinement": {
+        "row_zero_based": 13,
+        "input": [
+          0,
+          4096,
+          0,
+          2147483648
+        ],
+        "expected": "ok\t3840"
+      }
+    }
+  },
+  "static_facts": {
+    "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+    "coordinate_system": "ELF virtual addresses, no runtime rebase",
+    "start": "0x55c9800",
+    "end_exclusive": "0x55c9830",
+    "body_bytes": 48,
+    "body_file_offset": "0x55c8800",
+    "body_sha256": "5bd76530f7723cbf290d223bf5f62aa610256481f3f9a641e1fbff58733f5bb2",
+    "body_hex": "89c883fa01741d8b1783c2010fbdca89cfc1e70885c07407c1e208d3ea01d789f029f8c385c90f95c00fb6c0c1e008c3",
+    "cie_hex": "1400000000000000017a5200017810011b0c070890010000",
+    "frames": [
+      {
+        "section_offset": "0x2d3cec",
+        "file_offset": "0xfb5204",
+        "start": "0x55c9800",
+        "end_exclusive": "0x55c9830",
+        "raw_hex": "10000000f03c2d00f44561043000000000000000"
+      },
+      {
+        "section_offset": "0x2d3dfc",
+        "file_offset": "0xfb5314",
+        "start": "0x55caf70",
+        "end_exclusive": "0x55cc408",
+        "raw_hex": "70000000003e2d00545c61049814000000420e108f02460e188e03420e208d044a0e288c05410e308606410e3883074a0e900303dc010e98034c0ea003730e9803410e90030354060e98034d0ea0036a0e9803410e90030334050a0e38410e30410e28420e20420e18420e10420e084a0b000000"
+      }
+    ],
+    "caller_body_sha256": "c4560f9b8c422e97fec89b60105310d9bd99aa0a367959ace760f8f5b66cf730",
+    "caller_bytes": 5272,
+    "caller_linear_instructions": 1201,
+    "call_sites": [
+      {
+        "va": "0x55cb6fb",
+        "bytes": "e800e1ffff",
+        "decoded": "call 0x55c9800"
+      },
+      {
+        "va": "0x55cb7f0",
+        "bytes": "e80be0ffff",
+        "decoded": "call 0x55c9800"
+      },
+      {
+        "va": "0x55cbde5",
+        "bytes": "e816daffff",
+        "decoded": "call 0x55c9800"
+      },
+      {
+        "va": "0x55cc00a",
+        "bytes": "e8f1d7ffff",
+        "decoded": "call 0x55c9800"
+      }
+    ],
+    "capstone_version": "5.0.7",
+    "prior_static_result": {
+      "window": "0x55c9800",
+      "fde_end": "0x55c9830",
+      "next_fde": "0x55c9830",
+      "caller_fde_end": "0x55cc408",
+      "direct_callers": [
+        "0x55cb6fb",
+        "0x55cb7f0",
+        "0x55cbde5",
+        "0x55cc00a"
+      ],
+      "body_sha256": "5bd76530f7723cbf290d223bf5f62aa610256481f3f9a641e1fbff58733f5bb2",
+      "padding": "none"
+    },
+    "prior_checker_sha256": "7b869f6903926ef40e4334ab7c974d01d590ff11bd137ee8294e00de46c7f496",
+    "prior_evidence_sha256": "637f3a6f3cea9420b5d990bafc27ea77b036e47a0fc2e85068842b0d08df9e55",
+    "neighbor_semantics_included": false,
+    "complete_xref_census": false,
+    "captured_binary_executed": false
+  },
+  "full_input_domain_exhausted": false
+}
