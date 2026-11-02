@@ -104,11 +104,21 @@ Nine focused test methods pass, including real target/FDE/relocation/operand
 corruptions, decoder agreement, native/independent-oracle replay, comparator and
 archive controls, and closed manifest inventory/symlink controls. Initial base
 `doctor/verify/catalogue-check/reproduce` passes after local pinned-submodule
-initialization; the original missing-module failure is retained. The final precommit focused replay, locked/offline Cargo all-target check, and
+initialization; the original missing-module failure is retained. The final
+precommit focused replay, locked/offline Cargo all-target check, and
 `doctor/verify/catalogue-check/reproduce` pass; logs are retained in
-`validation/precommit-checks.json.gz`. The full repository run is pending on the fixed contribution head; its result
-and exact tested head will be retained separately under `validation/`.
-No full-suite-on-head claim is made before that run completes.
+`validation/precommit-checks.json.gz`. Full `make test` passed on fixed head
+`2b0e3087ea11904aa9fa45a8f058f4fa76e4d523`: 77 files, 391 reported tests,
+3 skips, exit0. Exact inventory, commands and streams are retained under
+`validation/full-suite/`. Subsequent changes only add these records and peer
+evidence/documentation; no semantic source or fixture changed. Optimized packet
+replay and `make verify catalogue-check` pass after incorporation, recorded in
+`validation/final-evidence-checks.json.gz`.
+
+Independent peer review rederived all15,412 expected rows, freshly checked all
+35 FDEs/26,297 bytes and selected writers, and audited the retained native
+streams. `peer/` preserves its scripts, exact records, reviewer failures and
+independence limits. It did not run captured code or repeat native builds.
 
 ## Reproduction
 
