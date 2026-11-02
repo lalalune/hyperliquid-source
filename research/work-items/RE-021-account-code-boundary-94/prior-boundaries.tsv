@@ -1,0 +1,29 @@
+site_va	bytes	kind	direct_target_va	rip_va	prior_boundary
+0x4e6ff01	4989d6	plain			retain the original call-input pointer
+0x4e6ff0b	4881bea800000000040000	plain			call-depth comparison before account access
+0x4e6ff16	7647	jcc	0x4e6ff5f		call-depth accepted branch
+0x4e6ff62	418b4670	plain			pre-lookup address last four bytes
+0x4e6ff66	89442430	plain			copy address last four bytes to stack
+0x4e6ff6a	f3410f6f4660	plain			pre-lookup address first sixteen bytes
+0x4e6ff70	660f7f442420	plain			copy address first sixteen bytes to stack
+0x4e6ff7e	488d542420	plain			pass the copied address to account preparation
+0x4e6ff83	e8c8fdffff	call	0x4e6fd50		pre-lookup account-code preparation
+0x4e6ffd0	e88bf3ffff	call	0x4e6f360		optional second account access
+0x4e7001a	ff15084e9000	indirect-call		0x5774e28	journal frame growth slot
+0x4e70049	498d4501	plain			compute the next journal frame count
+0x4e7004d	48894528	plain			publish the next journal frame count
+0x4e70051	41803e00	plain			call-input transfer-variant test
+0x4e70055	0f843a010000	jcc	0x4e70195		transfer-variant bypass branch
+0x4e7005b	498d7660	plain			use the original address as registry lookup key
+0x4e70067	4180fc06	plain			call scheme test
+0x4e7006b	0f8419070000	jcc	0x4e7078a		call scheme bypass branch
+0x4e7007e	4883bde000000000	plain			context owned or borrowed registry test
+0x4e70096	e835cf0100	call	0x4e8cfd0		owned precompile lookup
+0x4e707b9	e892f5ffff	call	0x4e6fd50		registry-miss account-code preparation
+0x4e70927	ff1503459000	indirect-call		0x5774e30	borrowed registry hit dispatch slot
+0x4e70fb6	e8c5260000	call	0x4e73680		registry-miss code-value clone
+0x4e711c0	e8abbaffff	call	0x4e6cc70		registry-miss fallback input assembly
+0x4e711ea	ff15503c9000	indirect-call		0x5774e40	fallback interpreter initialization slot
+0x4e7120e	ff15343c9000	indirect-call		0x5774e48	fallback interpreter ownership slot
+0x4e79c64	e807310100	call	0x4e8cd70		reverse journal account lookup
+0x4e79c79	8088b000000010	plain			reverse journal flag restoration
