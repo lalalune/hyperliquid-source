@@ -1,0 +1,10 @@
+name	kind	gate_mode	gate_word	payload_hex	outcome	env_tag	key_hex	matches_nine	conditional_error_code
+present-nine	some	0	0	0000000000000000000000000000000000000009	address-preserved	1	0000000000000000000000000000000000000009	true	
+present-neighbor	some	0	0	0000000000000000000000000000000000000008	address-preserved	1	0000000000000000000000000000000000000008	false	
+explicit-null	null	0	0		address-absent	0		false	
+absent-field	absent	0	0		address-absent	0		false	
+duplicate-field	duplicate	0	0		field-error			false	
+decoder-error	decode-error	0	0		field-error			false	
+limit-equal	some	1	30000000	0000000000000000000000000000000000000009	address-preserved	1	0000000000000000000000000000000000000009	true	
+limit-plus-one	some	1	30000001	0000000000000000000000000000000000000009	early-limit-error			false	-32000
+other-mode-plus-one	some	0	30000001	0000000000000000000000000000000000000009	address-preserved	1	0000000000000000000000000000000000000009	true	
