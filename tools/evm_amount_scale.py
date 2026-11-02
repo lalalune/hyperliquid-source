@@ -114,6 +114,11 @@ def sections(data):
             decoded = table[name:end].decode()
         except UnicodeDecodeError:
             raise EvidenceError('Non-UTF8 section name') from None
+        # The map keeps only the last section of a given name, so a
+        # duplicate would silently decide which bytes section() reads.
+        # Refuse the ambiguity instead of folding it away.
+        if decoded in out:
+            raise EvidenceError(f'Duplicate section: {decoded}')
         out[decoded] = (addr, off, size)
     return out
 
