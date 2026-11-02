@@ -108,6 +108,18 @@ def limb_relation(n,params):
     return (highs[8]<<32)|low,0
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    s=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    rels={}
+    for a,i,v in struct.iter_unpack('<QQq',data[s['offset']:s['offset']+s['size']]):
+        if a in rels:raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a]=(i,v)
+    return rels
+
+
 def analyze(data):
     _,fs,_=fde_extents(data);f=next((f for f in fs if (f['start'],f['end'])==(START,END)),None)
     if f is None:
@@ -142,8 +154,7 @@ def analyze(data):
     for site in TEST_BRANCHES:
         if read(data,site,1)[1]!=b'\x76':
             raise ValueError('divisibility JBE polarity changed')
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
-    rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
+    rels=relocations(data)
     if any(rels.get(a)!=(8,v) for a,v in BINDINGS.items()):
         raise ValueError('WireQty code/source relocation changed')
     path=b'l1/src/wire_qty.rs'
