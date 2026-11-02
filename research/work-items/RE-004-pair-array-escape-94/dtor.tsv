@@ -1,0 +1,11 @@
+item	va_start	va_end	desc
+guard	0x37f707e	0x37f7088	if [rdi+0x198] == 0 skip the loop (value not statically determined for this object; see Limitations)
+loop_bounds	0x37f70a0	0x37f70ab	r12 starts 0x1b0, steps 0x10, exits at 0x11b0
+pair_load_cell	0x37f70ad	0x37f70b2	r15 = [rbx+r12-0x18] (pair first qword: cell)
+pair_load_elem	0x37f70b2	0x37f70b7	r13 = [rbx+r12-0x10] (pair second qword: element)
+elem_slot0	0x37f70b7	0x37f70bb	rax = [r13+0x0]; if nonzero, call rax with rdi=cell
+elem_slot8	0x37f70c5	0x37f70c9	rsi = [r13+0x8]; if nonzero, call free (GOT 0x576e010) with rdi=cell
+elem_slot10	0x37f70ce	0x37f70d2	rax = [r13+0x10]; read only when [r13+0x8] != 0
+oc_pair_iteration	r12=0x228	-	reads [rbx+0x210] (cell C3) and [rbx+0x218] (element 0x574bd30)
+table_element_verdict	-	-	for table elements [element+0x0]=0 and [element+0x8]=0, so both guarded actions are skipped; slots [element+0x18/0x20/0x28] (oc3/oc2/oc1) are never loaded by this loop (full-FDE operand census; see Limitations)
+pair_coverage	0x198	0x11a8	loop reads [rbx+0x198..0x11a8], which fully contains the pair array [rbx+0x1f0..0x2a0]
