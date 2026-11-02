@@ -125,6 +125,8 @@ class Image:
         for pos in range(rela['offset'], rela['offset'] + rela['size'], 24):
             where, info, addend = struct.unpack_from('<QQq', self.data, pos)
             if info & 0xffffffff == 8:
+                if where in relocs:
+                    fail('duplicate RELATIVE relocation')
                 relocs[where] = addend
         return relocs
 
