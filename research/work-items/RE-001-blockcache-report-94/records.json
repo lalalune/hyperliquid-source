@@ -40,7 +40,7 @@
   "clock_chain": {
     "link_offset": "0x20",
     "max_nodes": 3,
-    "result_use": "secs_since = (chain value - snapshot+0x130) // 1000",
+    "result_use": "secs_since = (chain value - snapshot+0x130) // 1000000",
     "rule": "node 0: inner = [holder], slot = [inner+0x98]; if slot != sentinel cell, call slot with rdi = holder. Node 1: wrapper = [holder+0x20], inner = [wrapper], slot = [inner+0x98]; if slot != node 0 slot value, call slot with rdi = wrapper. Node 2: wrapper = [previous wrapper+0x20], inner = [wrapper], call [inner+0x98] unconditionally with rdi = wrapper. A chain that runs out of nodes before the unconditional call would dereference a null link; the model raises ChainExhausted",
     "sentinel_cell": "0x5777bc8",
     "shared_note": "the sentinel cell 0x5777bc8 and the +0x98 slot are shared with the timed-snapshot clock chain (RE-001-timed-snapshot-94), but this walk is a distinct 3-node walk with +0x20 wrapper links, not the 4-node walk there",
@@ -249,7 +249,7 @@
   "task_id": "RE-001",
   "unknowns": [
     "the identities of the snapshot, clock-holder and wrapper objects and what the report means to its readers",
-    "the clock values' time unit (the labels say secs, but the divisors 1,000,000.0 and 1000 do not pin a unit from the bytes alone)",
+    "the clock values' time unit (the labels say secs, but the divisor 1,000,000 (and 1,000,000.0 for last_secs) does not pin a unit from the bytes alone)",
     "the runtime contents of the .bss entry-name table and of the sentinel cell 0x5777bc8",
     "which landing stub serves which call site (LSDA mapping not claimed)",
     "the reaching path: the two direct callers are census only"
