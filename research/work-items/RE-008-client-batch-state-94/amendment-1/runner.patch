@@ -1,0 +1,98 @@
+--- a/build.py
++++ b/build_amended.py
+@@ -39,7 +39,7 @@
+         no_symlinks(root/name,root);result[name]=identity(root/name)
+     return dict(sorted(result.items()))
+ 
+-def admit(source_freeze_sha):
++def admit_original(source_freeze_sha):
+     need(identity(HERE/'PRE-RUST-FREEZE.json')['sha256']==PRE_FREEZE,'pre-Rust freeze')
+     pre=json.loads((HERE/'PRE-RUST-FREEZE.json').read_text());need(len(pre['files'])==53,'pre-Rust file census')
+     for name,digest in pre['files'].items():
+@@ -47,7 +47,10 @@
+         no_symlinks(HERE/name,HERE);need(identity(HERE/name)['sha256']==digest,'frozen pre-Rust file '+name)
+     need(identity(HERE/'SOURCE-FREEZE.json')['sha256']==source_freeze_sha,'source freeze identity')
+     freeze=json.loads((HERE/'SOURCE-FREEZE.json').read_text())
+-    source=source_inventory(ROOT);need(source==freeze['source'],'actual source graph changed')
++    source=source_inventory(ROOT)
++    need(source[MODULE] in [identity(HERE/'amendment-1/original/client_batch.rs'),identity(HERE/'amendment-1/corrected/client_batch.rs')],'only exact original or declared public source patch')
++    source[MODULE]=identity(HERE/'amendment-1/original/client_batch.rs')
++    need(source==freeze['source'],'reconstructed original source graph changed')
+     base=json.loads((HERE/'BASELINE-SOURCE-PLAN.json').read_text())
+     need(set(source)==set(base['files'])|NEW,'exact actual graph files')
+     for name,digest in base['files'].items():
+@@ -66,6 +69,29 @@
+                           {'name':'node94-consensus-admission','version':'0.1.0','dependencies':['node94-action-signable']}], 'real Cargo-generated two-package lock')
+     return freeze
+ 
++def corrected(name):
++    edits=json.loads((HERE/'amendment-1/type-edits.json').read_text())[name]
++    result=(HERE/'amendment-1/original'/name).read_text()
++    for before,after in edits:
++        need(result.count(before)==1,'exact type-adapter coordinate '+name)
++        result=result.replace(before,after,1)
++    need(result==(HERE/'amendment-1/corrected'/name).read_text(),'declared type projection '+name)
++    return result
++
++def admit(source_freeze_sha):
++    path=HERE/'SOURCE-FREEZE-2.json'
++    need(identity(path)['sha256']==source_freeze_sha,'amended source freeze identity')
++    amendment=json.loads(path.read_text())
++    for name,expected in amendment['files'].items():
++        relative=Path(name);need(not relative.is_absolute() and '..' not in relative.parts,'amendment path')
++        no_symlinks(HERE/name,HERE);need(identity(HERE/name)==expected,'amendment changed '+name)
++    original=admit_original('fd33cfb20eadc9b643266dce91496196354b352b8127b4fd19cae309c2b0b4c4')
++    for name in ['client_batch.rs','driver.rs']:corrected(name)
++    source=dict(original['source']);source[MODULE]=identity(HERE/'amendment-1/corrected/client_batch.rs')
++    effective={'source':source,'harness':{'driver.rs':identity(HERE/'amendment-1/corrected/driver.rs')}}
++    need(effective==amendment['effective'],'effective corrected source graph')
++    return effective
++
+ def rows(raw):
+     need(raw==b'' or raw.endswith(b'\n'),'missing final line ending')
+     out=[];seen=set()
+@@ -108,7 +134,7 @@
+         ('one-sided-qc-round',[('if block.qc.round != expected_round {','if block.qc.round < expected_round {')]),
+         ('invent-first-parent-anchor',[('        if let Some(expected) = previous_hash {','        if index == 0 && block.qc.block_hash != BlockHash([0; 32]) {\n            return Err(ClientBatchError::QcHash { hash: block.qc.block_hash, expected: BlockHash([0; 32]) });\n        }\n        if let Some(expected) = previous_hash {')]),
+         ('invent-consecutive-batch-rounds',[('        verify_timed(history, authenticator, &item.signed)?;','        if block.round.0 != expected_round.0.saturating_add(1) { return Err(ClientBatchError::NonconsecutiveChild); }\n        verify_timed(history, authenticator, &item.signed)?;')]),
+-        ('tx-hash-only31',[('keccak256(&transaction.bytes) != transaction.hash.0','keccak256(&transaction.bytes)[..31] != transaction.hash.0[..31]')]),
++        ('tx-hash-only31',[('*keccak256(&transaction.bytes).as_bytes() != transaction.hash.0','keccak256(&transaction.bytes).as_bytes()[..31] != transaction.hash.0[..31]')]),
+         ('count-before-tx-hash',[('        // Hash every tx before comparing the count or block hash vector.','        if item.transactions.len() != block.transaction_hashes.len() { return Err(ClientBatchError::TransactionHashes); }\n        // Hash every tx before comparing the count or block hash vector.')]),
+         ('ignore-tx-order',[('transaction.hash != *hash','!block.transaction_hashes.contains(&transaction.hash) && transaction.hash != *hash')]),
+         ('time-only-first-word',[('if item.copied_time != item.signed.time {','if item.copied_time.0[0] != item.signed.time.0[0] {')]),
+@@ -142,7 +168,7 @@
+     requested_out=Path(os.path.abspath(a.out));out=a.out.resolve();toolchain=a.toolchain.resolve();private=a.private_map.resolve()
+     need(out.parent==Path('/tmp').resolve() and not out.exists(),'fresh direct canonical /tmp child')
+     need(not private.exists() and not private.is_relative_to(HERE),'fresh private map outside packet')
+-    freeze=admit(a.source_freeze_sha);original=(ROOT/MODULE).read_text();variants=mutants(original)
++    freeze=admit(a.source_freeze_sha);original=corrected('client_batch.rs');variants=mutants(original)
+     pins=json.loads((HERE/'TOOLCHAIN-PINS.json').read_text());before_tools=payload_inventory(toolchain);need(before_tools==pins['payload_files'],'97-file toolchain admission')
+     out.mkdir(mode=0o700);receipts=out/'receipts';(receipts/'raw').mkdir(parents=True);cargo_home=out/'cargo-home';cargo_home.mkdir()
+     mapping={'<BUILD>':str(out),'<TOOLCHAIN>':str(toolchain),'<SOURCE_ROOT>':str(ROOT),'<PACKET>':str(HERE)}
+@@ -190,10 +216,15 @@
+         phase=(out/label).resolve();phase.mkdir();tree=phase/'repo';tree.mkdir()
+         for name in freeze['source']:
+             dest=tree/name;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/name,dest)
+-        if altered is not None:(tree/MODULE).write_text(altered)
++        # Admit the real graph, then reconstruct the exact original module even
++        # when a public checkout already contains the declared corrected source.
++        (tree/MODULE).write_bytes((HERE/'amendment-1/original/client_batch.rs').read_bytes())
++        original_graph=json.loads((HERE/'SOURCE-FREEZE.json').read_text())['source']
++        need(source_inventory(tree)==original_graph,'copied original actual graph')
++        (tree/MODULE).write_text(corrected('client_batch.rs') if altered is None else altered)
+         expected_copy=dict(freeze['source'])
+         if altered is not None:expected_copy[MODULE]=dict(bytes=len(altered.encode()),sha256=sha(altered.encode()))
+-        need(source_inventory(tree)==expected_copy,'copied real source graph');driver=phase/'driver.rs';shutil.copyfile(HERE/'driver.rs',driver)
++        need(source_inventory(tree)==expected_copy,'copied real source graph');driver=phase/'driver.rs';driver.write_text(corrected('driver.rs'))
+         need(identity(driver)==freeze['harness']['driver.rs'],'copied driver identity');no_symlinks(driver,phase)
+         component=tree/'src'/CRATES[0];audit(requested_out/label/'repo/src'/CRATES[0],'lexical');audit(component,'canonical')
+         flags=['-Dwarnings','-C','overflow-checks=on','-C','linker=/usr/bin/clang',
+@@ -243,7 +274,7 @@
+     for name,expected_identity in sdk_pins.items():need(identity(Path(sdk)/name)==expected_identity,'selected SDK input changed')
+     admit(a.source_freeze_sha)
+     write_json(receipts/'source-copies.json',copies)
+-    write_json(receipts/'build-audit.json',dict(source_freeze_sha256=a.source_freeze_sha,actual_source=freeze['source'],ancestor_config_checks=sorted(configs),ancestor_workspace_checks=sorted(workspace_ancestors),source_ancestor_context_excluded=source_ancestors,fresh_CARGO_HOME=True,toolchain_payload_sha256=identity(HERE/'TOOLCHAIN-PINS.json')['sha256'],toolchain_payload_unchanged=True,external_tools=external,SDKROOT=sdk,sdk_inputs=sdk_pins,limit='Actual graph and97 toolchain files plus selected linker/SDK bytes pinned; host OS/dyld and entire SDK are not hermetic.'))
++    write_json(receipts/'build-audit.json',dict(source_freeze_sha256=a.source_freeze_sha,original_source_freeze_sha256='fd33cfb20eadc9b643266dce91496196354b352b8127b4fd19cae309c2b0b4c4',production_route='exact original-or-declared public patch admitted; copy original graph then apply pinned projection',actual_source=freeze['source'],ancestor_config_checks=sorted(configs),ancestor_workspace_checks=sorted(workspace_ancestors),source_ancestor_context_excluded=source_ancestors,fresh_CARGO_HOME=True,toolchain_payload_sha256=identity(HERE/'TOOLCHAIN-PINS.json')['sha256'],toolchain_payload_unchanged=True,external_tools=external,SDKROOT=sdk,sdk_inputs=sdk_pins,limit='Actual graph and97 toolchain files plus selected linker/SDK bytes pinned; host OS/dyld and entire SDK are not hermetic.'))
+     result=dict(source_freeze_sha256=a.source_freeze_sha,corpus_cases=221,baseline=baseline,same_path_clean_repeat=repeat,raw_same_path_artifact_equality=own_bytes,compiled_mutants=mutation_results,comparator_controls=controls,parser_controls=parser,commands=len(commands),actual_and_copied_source_unchanged=True,precode_unchanged=True,scope='Authored Rust value/state execution only; conditional native/authenticator and TC limits preserved; no captured execution, emulator, full suite or cross-directory byte identity claim.')
+     write_json(receipts/'results.json',result);print(json.dumps(dict(cases=221,mutants=len(mutation_results),profiles=2,commands=len(commands),raw_same_path_artifact_equality=own_bytes)))
+ 

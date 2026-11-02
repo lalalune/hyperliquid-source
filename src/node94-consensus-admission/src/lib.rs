@@ -14,6 +14,7 @@ mod admission;
 mod auth;
 pub mod block_preimage;
 mod digest;
+mod client_batch;
 mod error;
 pub mod message_preimages;
 mod qc;
@@ -34,6 +35,12 @@ mod types;
 pub use admission::{verify_block, VerifiedBlock};
 pub use auth::{AdmissionAuthenticator, AuthenticationError};
 pub use digest::{qc_vote_digest, qc_vote_preimage};
+pub use client_batch::{
+    verify_client_batch, ClientBatchAuthenticator, ClientBatchError, ClientBatchFailure,
+    ClientBlock, ClientBlockBuffer, ClientBlockSink, ClientBlockTime, ClientBufferError,
+    ClientBufferView, ClientCommitProof, ClientSpanError, ClientSpanField, ClientTransaction,
+    TimedSignedBlock,
+};
 pub use error::{AdmissionError, FatalAdmissionError, VerificationFailure};
 pub use qc::verify_qc;
 pub use stake::{
