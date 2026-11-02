@@ -1,0 +1,114 @@
+{
+  "binary_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "caller_anchor": {
+    "call_va": "0x3bb8460",
+    "constant_va": "0x2036a0",
+    "constant_words": [
+      0,
+      0,
+      2,
+      0
+    ],
+    "indirect_slot_va": "0x57762d0",
+    "pow10_table_va": "0x7c62ec",
+    "pow10_u32": [
+      1,
+      10,
+      100,
+      1000,
+      10000,
+      100000,
+      1000000,
+      10000000,
+      100000000,
+      1000000000
+    ],
+    "slot_target_va": "0x4eafb60",
+    "window_bytes": "0f28055bb264fc0f298424f00000004889e7488db42420010000488d9424f0000000ff156adebb01833c2400",
+    "window_end_va": "0x3bb846a",
+    "window_start_va": "0x3bb843e"
+  },
+  "coordinates": "ELF virtual addresses before load bias",
+  "functions": [
+    {
+      "conditional_branches": 16,
+      "conditional_edges_reached": 18,
+      "end_va": "0x4eae3f3",
+      "fde_va": "0xf5efac",
+      "file_offset": "0x4ead280",
+      "instructions": 106,
+      "instructions_reached": 80,
+      "sha256": "a0fa97239d263ab2e1ea55d59bba1ad1fef7006987bc2d5f4087610041133560",
+      "start_va": "0x4eae280"
+    },
+    {
+      "conditional_branches": 14,
+      "conditional_edges_reached": 18,
+      "end_va": "0x4eae52b",
+      "fde_va": "0xf5efd4",
+      "file_offset": "0x4ead400",
+      "instructions": 80,
+      "instructions_reached": 61,
+      "sha256": "b9abf48605d6c7b9f99e730f6f309129f3bff0a36fcab5d70056595ef41d17d7",
+      "start_va": "0x4eae400"
+    },
+    {
+      "conditional_branches": 116,
+      "conditional_edges_reached": 176,
+      "end_va": "0x4eb08a6",
+      "fde_va": "0xf5f1c0",
+      "file_offset": "0x4eaeb60",
+      "instructions": 901,
+      "instructions_reached": 793,
+      "sha256": "0177fc517efc4b2eb6125d0e5cfb99e4964c7da7c86df8ebb8ba48b664b59c67",
+      "start_va": "0x4eafb60"
+    }
+  ],
+  "guard_proof": {
+    "bytes": "554157415641554154534883ec684989fe8b4a04448b6a088b7a0c4489e809f809c8750c41c70602000000e9060c00008b4604448b6608448b7e0c4589e04509f84109c075140f57c0410f110641c7461000000000e9dc0b0000",
+    "denominator_test": "OR of all three u32 limbs; zero returns tag 2 first",
+    "domain_argument": "A bitwise OR of three 32-bit words is zero if and only if each word is zero.",
+    "end_va": "0x4eafbba",
+    "numerator_test": "OR of all three u32 limbs; zero with nonzero denominator returns 20 zero bytes",
+    "return_bytes": "4c89f04883c4685b415c415d415e415f5dc3",
+    "return_va": "0x4eb0796",
+    "start_va": "0x4eafb60"
+  },
+  "limits": "Grid comparison is not exhaustive outside the zero-test proof. Inputs assume valid Decimal flags and scale 0..28. The rational model compares numerical value, not result representation.",
+  "numeric_model_mismatches": 0,
+  "rounding_lemma": {
+    "domain": "0 <= remainder < divisor < 2^w, parity in {0,1}, w in {32,64,96}; fragment-entry registers and limbs must hold these values",
+    "exhaustive_8bit_remainder_divisor_parity_cases": 65280,
+    "increment": "2*remainder > divisor or (2*remainder == divisor and parity == 1)",
+    "proof": "If the top remainder bit is set then 2*remainder >= 2^w > divisor. Otherwise doubling is exact in w bits. The 32- and 64-bit fragments compare the doubled remainder directly; the 96-bit fragment shifts its three limbs and compares high then low limbs. Equality tests the quotient parity bit.",
+    "windows": [
+      {
+        "bytes": "85db781201db4439eb72704439eb77064183e401746548ff442408755e",
+        "end_va": "0x4eb0483",
+        "start_va": "0x4eb0466"
+      },
+      {
+        "bytes": "48c1e020781e8b4c24184809c84801c04839f0770f0f852002000083e5010f841702000048ff442408",
+        "end_va": "0x4eb02cf",
+        "start_va": "0x4eb02a6"
+      },
+      {
+        "bytes": "4585c00f88650200008b4c241c488d041b48c1eb1f895c241c89442418410fa4c80144894424204539d00f97c180d9000f842a0200000fb6c183f8010f842c020000e962020000",
+        "end_va": "0x4eb027f",
+        "start_va": "0x4eb0238"
+      },
+      {
+        "bytes": "483b4424307707754083e501743b48ff442408",
+        "end_va": "0x4eb04ab",
+        "start_va": "0x4eb0498"
+      }
+    ]
+  },
+  "status_counts": {
+    "0": 6427,
+    "1": 721,
+    "2": 76
+  },
+  "tie_cases": 24,
+  "vectors": 7224
+}
