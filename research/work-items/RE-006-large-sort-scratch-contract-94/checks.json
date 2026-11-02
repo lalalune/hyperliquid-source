@@ -1,0 +1,91 @@
+{
+  "captured_execution_or_evaluation": false,
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "research/work-items/RE-006-large-sort-scratch-contract-94/verify.py",
+        "--llvm",
+        "/workspace/.tools/llvm19/usr/lib/llvm-19/bin/llvm-objdump"
+      ],
+      "exit_code": 0,
+      "output": "Static replay passed: 10 exports, 24 local corruption controls, 4889 synthetic counts. No target execution/evaluation.\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "research/work-items/RE-006-large-sort-scratch-contract-94/verify.py",
+        "--llvm",
+        "/workspace/.tools/llvm19/usr/lib/llvm-19/bin/llvm-objdump"
+      ],
+      "exit_code": 0,
+      "output": "Static replay passed: 10 exports, 24 local corruption controls, 4889 synthetic counts. No target execution/evaluation.\n"
+    },
+    {
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_large_sort_scratch_contract94.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "output": "test_independent_piecewise_oracle (test_large_sort_scratch_contract94.ScratchContractTests.test_independent_piecewise_oracle) ... ok\ntest_invalid_count_is_only_model_api_rejection (test_large_sort_scratch_contract94.ScratchContractTests.test_invalid_count_is_only_model_api_rejection) ... ok\ntest_last_valid_count_and_wrapping_refusals (test_large_sort_scratch_contract94.ScratchContractTests.test_last_valid_count_and_wrapping_refusals) ... ok\ntest_plateau_and_odd_half (test_large_sort_scratch_contract94.ScratchContractTests.test_plateau_and_odd_half) ... ok\ntest_small_flag_64_65 (test_large_sort_scratch_contract94.ScratchContractTests.test_small_flag_64_65) ... ok\ntest_stack_heap_512_513 (test_large_sort_scratch_contract94.ScratchContractTests.test_stack_heap_512_513) ... ok\ntest_target_operand_and_lsda_controls_below_digest_gate (test_large_sort_scratch_contract94.ScratchContractTests.test_target_operand_and_lsda_controls_below_digest_gate) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 1.951s\n\nOK\n"
+    },
+    {
+      "argv": [
+        "make",
+        "doctor",
+        "verify",
+        "catalogue-check"
+      ],
+      "exit_code": 0,
+      "invocation_environment": {
+        "GIT_CONFIG_COUNT": "3",
+        "GIT_CONFIG_KEY_0": "filter.lfs.process",
+        "GIT_CONFIG_KEY_1": "filter.lfs.clean",
+        "GIT_CONFIG_KEY_2": "filter.lfs.smudge",
+        "GIT_CONFIG_VALUE_0": "git-lfs filter-process",
+        "GIT_CONFIG_VALUE_1": "git-lfs clean -- %f",
+        "GIT_CONFIG_VALUE_2": "git-lfs smudge -- %f",
+        "LLVM_OBJDUMP": "/workspace/.tools/llvm19/usr/lib/llvm-19/bin/llvm-objdump"
+      },
+      "local_log": "work/re006-large-sort-scratch/setup-checks.log",
+      "log_sha256": "da5b8780eb41d94d70f1d499b374fc01346cb6e09da46416a903c165131aa2a3",
+      "output_tail": [
+        "python3 tools/verify_imports.py",
+        "Verified 38 imported files and all pinned source repositories.",
+        "python3 tools/catalogue.py --check",
+        "Catalogue and progress tables match pinned inputs."
+      ]
+    },
+    {
+      "argv": [
+        "make",
+        "reproduce"
+      ],
+      "exit_code": 0,
+      "invocation_environment": {},
+      "local_log": "work/re006-large-sort-scratch/reproduce.log",
+      "log_sha256": "08ec436df402ddae68cd72a53774ca9a7d2fcb5487171fa908a0c6bdf49d45ba",
+      "output_tail": [
+        "    l1/exchange/impl_execute_action.rs: 'sub_22BE610'",
+        "    l1/exchange/impl_execute_action.rs: 'sub_21DFF60'",
+        "Inventories, raw counts and refined item classifications reproduce the imported evidence.",
+        "Refined counts: {'grounded': 822, 'drift': 60, 'notes': 116, 'late': 1, 'partial': 56, 'unanchored': 386, 'case': 11}"
+      ]
+    }
+  ],
+  "full_suite": "Deferred to coordinating integration; no full-suite result claimed.",
+  "root_test_source": {
+    "path": "tests/test_large_sort_scratch_contract94.py",
+    "sha256": "417d862185bed561f686c1863853fbb8cadd59f4750dbc49a153e60d47b21b4d"
+  }
+}

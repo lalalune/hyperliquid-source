@@ -8,6 +8,7 @@
 mod book;
 mod layout;
 mod matching;
+pub mod monotone_keys;
 mod snapshot;
 mod types;
 
