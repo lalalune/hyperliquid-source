@@ -17,6 +17,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))  # also under python -I
@@ -383,12 +384,18 @@ def load_release(release):
     objdump, version_or_reason = gnu_objdump()
     if not objdump:
         raise RuntimeError(version_or_reason)
-    proc = subprocess.Popen([objdump, *OBJDUMP_ARGS, str(ROOT / rel)], stdout=subprocess.PIPE, text=True,
-                            env={'LC_ALL': 'C', 'PATH': '/usr/bin:/bin'})
-    rows = fingerprint(spans, read, proc.stdout, (plt['address'], plt['address'] + plt['size']))
-    proc.stdout.close()
-    if proc.wait() != 0:
-        raise RuntimeError('objdump failed')
+    # The disassembler sees the same authenticated bytes as the in-memory
+    # readers. This owned snapshot is data-only and is never launched.
+    with tempfile.TemporaryDirectory(prefix='release-drift-') as directory:
+        snapshot = Path(directory) / 'hl-node'
+        snapshot.write_bytes(data)
+        snapshot.chmod(0o400)
+        proc = subprocess.Popen([objdump, *OBJDUMP_ARGS, str(snapshot)], stdout=subprocess.PIPE, text=True,
+                                env={'LC_ALL': 'C', 'PATH': '/usr/bin:/bin'})
+        rows = fingerprint(spans, read, proc.stdout, (plt['address'], plt['address'] + plt['size']))
+        proc.stdout.close()
+        if proc.wait() != 0:
+            raise RuntimeError('objdump failed')
     return item['sha256'], data, rows
 
 
