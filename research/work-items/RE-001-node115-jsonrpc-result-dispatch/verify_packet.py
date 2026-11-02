@@ -338,6 +338,157 @@ def verify_completion(data, packet):
         limits='Static instruction/evidence checks, not parser execution, accepted input schemas, opaque error-helper closure or whole-input trailing-data validation.')
 
 
+def extract_variant_data(data):
+    assert hashlib.sha256(data).hexdigest()=='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+    off=struct.unpack_from('<Q',data,40)[0];size,count,namesidx=struct.unpack_from('<HHH',data,58);assert size==64
+    rows=[struct.unpack_from('<IIQQQQIIQQ',data,off+i*size) for i in range(count)]
+    namesrow=rows[namesidx];names=data[namesrow[4]:namesrow[4]+namesrow[5]]
+    def at(va,length):
+        hits=[r for r in rows if r[1]!=8 and r[2]&2 and r[3]<=va and va+length<=r[3]+r[5]]
+        assert len(hits)==1
+        row=hits[0];assert not row[2]&5
+        pos=row[4]+va-row[3];raw=data[pos:pos+length]
+        return dict(va=hex(va),file_offset=hex(pos),bytes=length,section=names[row[0]:names.find(b'\0',row[0])].decode(),
+            data_hex=raw.hex(),sha256=hashlib.sha256(raw).hexdigest())
+    result={'target_sha256':hashlib.sha256(data).hexdigest(),'tables':{},'literals':{}}
+    for label,va,n in [('outer-selected',0x47dd9c,22),('key-bounded',0x47ddf4,15)]:
+        record=at(va,n*4);raw=bytes.fromhex(record['data_hex'])
+        record['entries']=[dict(index=i,displacement=struct.unpack_from('<i',raw,4*i)[0],target=hex(va+struct.unpack_from('<i',raw,4*i)[0])) for i in range(n)]
+        record['limits']='22 selected entries, no local outer tag-bound proved' if n==22 else '15 entries bounded by raw-key-minus-one <=14 in native code'
+        result['tables'][label]=record
+    for label,va,n in [('result-field',0x47e529,6),('missing-format-window',0x4325c4,32),('duplicate-format-window',0x43351a,32)]:
+        record=at(va,n);record['ascii_preview']=bytes.fromhex(record['data_hex']).decode('ascii',errors='backslashreplace');result['literals'][label]=record
+    return result
+
+def verify_first_variant(data, packet):
+    folder=packet/'first-variant'
+    current=probe(data,extra_vas=(0x16fdba0,0x175140e))
+    require(current==json.loads((folder/'candidates.json').read_text()),'variant candidate drift')
+    require(current==json.loads((folder/'receipts/full-input-replay.json').read_text()),'variant hosted full-input drift')
+    native=json.loads((folder/'receipts/decode-result.json').read_text())
+    require(native['target_sha256']==TARGET and native['whole_elf_reauthenticated_in_job'] and native['input_hashes_unchanged'],'variant target/input binding')
+    bodies={};rowmaps={}
+    for label,key in [('variant-candidate','0x16fdba0'),('constructor-candidate','0x175140e')]:
+        record=current['selected_fde_candidates'][key];start=int(record['start_va'],16);off=int(record['file_offset'],16)
+        body=data[off:off+record['bytes']];require(hashlib.sha256(body).hexdigest()==record['body_sha256'],'variant body identity')
+        cursor=start;rows=[]
+        for line in (folder/'receipts'/(label+'.stdout')).read_text().splitlines():
+            if not re.match(r'^\s*[0-9a-f]+:',line):continue
+            pieces=line.split('\t');require(len(pieces)>=3,'variant native syntax')
+            va=int(pieces[0].strip().rstrip(':'),16);tokens=pieces[1].split()
+            require(tokens and all(re.fullmatch('[0-9a-f]{2}',t) for t in tokens),'variant native byte syntax')
+            raw=bytes.fromhex(' '.join(tokens));text=' '.join(pieces[2:]).strip()
+            require(va==cursor and body[va-start:va-start+len(raw)]==raw,'variant native/input bytes')
+            require(text and '(bad)' not in text and not text.startswith('.byte'),'variant native undecoded row')
+            rows.append(dict(va=hex(va),bytes=raw.hex(),text=text));cursor+=len(raw)
+        saved=next(r for r in native['regions'] if r['label']==label)
+        require(rows==saved['instruction_rows'] and len(rows)==saved['instructions'] and cursor==int(record['end_va'],16),'variant native rows/extent')
+        bodies[label]=(start,body);rowmaps[label]={int(r['va'],16):r for r in rows}
+    old=json.loads((packet/'receipts/decode-result.json').read_text())
+    require(next(r['instruction_rows'] for r in old['regions'] if r['label']=='constructor-candidate')==
+            next(r['instruction_rows'] for r in native['regions'] if r['label']=='constructor-candidate'),'renewed constructor drift')
+    edge=json.loads((folder/'receipts/qualified-candidate-edges.json').read_text())
+    call=rowmaps['constructor-candidate'][0x175140e];raw=bytes.fromhex(call['bytes'])
+    require(len(edge)==1 and edge[0]['native_instruction_boundary_validated'] and edge[0]['bytes']==call['bytes'],'variant edge qualification')
+    require(raw[0]==0xe8 and 0x175140e+5+struct.unpack_from('<i',raw,1)[0]==0x16fdba0,'variant direct call target')
+    fields=json.loads((folder/'field-bindings.json').read_text())
+    def check_fields(active):
+        for f in fields:
+            label=f['region'];va=int(f['va'],16);raw=bytes.fromhex(f['bytes']);start,body=active[label]
+            require(rowmaps[label].get(va,{}).get('bytes')==f['bytes'],'variant field boundary')
+            require(body[va-start:va-start+len(raw)]==raw,'variant field corruption: '+f['label'])
+    check_fields(bodies);controls=[]
+    for f in fields:
+        active=dict(bodies);start,body=bodies[f['region']];changed=bytearray(body)
+        changed[int(f['va'],16)-start+len(bytes.fromhex(f['bytes']))-1]^=1;active[f['region']]=(start,changed)
+        try:check_fields(active)
+        except ValueError as error:controls.append(dict(control='first variant '+f['label'],rejection=str(error)))
+        else:raise ValueError('variant field mutation escaped')
+    for record in current['selected_fde_candidates'].values():
+        raw=bytes.fromhex(record['fde_hex'])
+        def extent(candidate):
+            delta,length=struct.unpack_from('<ii',candidate,8)
+            require(int(record['fde_va'],16)+8+delta==int(record['start_va'],16),'variant FDE location')
+            require(length==record['bytes'] and int(record['start_va'],16)+length==int(record['end_va'],16),'variant FDE extent')
+        extent(raw);changed=bytearray(raw);changed[12]^=1
+        try:extent(changed)
+        except ValueError as error:controls.append(dict(control='first variant FDE '+record['start_va'],rejection=str(error)))
+        else:raise ValueError('variant FDE mutation escaped')
+    computed=extract_variant_data(data);saved=json.loads((folder/'referenced-data.json').read_text())
+    require(computed==saved,'variant readonly data drift')
+    active={group+'/'+name:bytes.fromhex(r['data_hex']) for group in ['tables','literals'] for name,r in computed[group].items()}
+    def check_data(values):
+        for name,raw in values.items():
+            group,key=name.split('/',1);require(raw.hex()==saved[group][key]['data_hex'],'variant referenced data corruption: '+name)
+    check_data(active)
+    for name,body in active.items():
+        count=len(body)//4 if name.startswith('tables/') else 1
+        for i in range(count):
+            values=dict(active);changed=bytearray(body);changed[4*i if name.startswith('tables/') else len(body)//2]^=1;values[name]=changed
+            try:check_data(values)
+            except ValueError as error:controls.append(dict(control=name+' entry '+str(i),rejection=str(error)))
+            else:raise ValueError('variant referenced data mutation escaped')
+    rows=rowmaps['variant-candidate'];instruction=lambda va:bytes.fromhex(rows[va]['bytes'])
+    for site,target in [(0x16fdbb4,0x47dd9c),(0x16fdbe0,0x47ddf4),(0x16fdd45,0x47e529),
+                        (0x16fdf35,0x47e529),(0x16fdd70,0x4325c4),(0x16fdf60,0x43351a)]:
+        raw=instruction(site)
+        require(raw[:2]==bytes.fromhex('488d') and site+len(raw)+struct.unpack_from('<i',raw,3)[0]==target,'variant RIP-relative data binding')
+    for table in computed['tables'].values():
+        require(all(int(r['target'],16) in rows for r in table['entries']),'variant table target is not a native instruction boundary')
+    require(instruction(0x16fdc14)==bytes.fromhex('83fa0e') and instruction(0x16fdc12)==bytes.fromhex('ffca'),'key table index bound')
+    outer=computed['tables']['outer-selected'];keys=computed['tables']['key-bounded']
+    require(outer['entries'][21]['target']=='0x16fdbc4' and len(outer['entries'])==22,'selected outer map-like path')
+    require(len(keys['entries'])==15,'bounded key table length')
+    routes=[dict(raw_key_tag=tag,target=keys['entries'][(tag-1)&0xffffffff]['target'] if (tag-1)&0xffffffff<=14 else '0x16fdf6c') for tag in range(256)]
+    name=bytes.fromhex(computed['literals']['result-field']['data_hex']);require(name==b'result','result name literal')
+    wide=instruction(0x16fdc90)[1:5]+instruction(0x16fdc9b)[2:4]
+    bytewise=bytes([instruction(va)[-1] for va in [0x16fdc48,0x16fdc5f,0x16fdc65,0x16fdc6b,0x16fdc71,0x16fdc77]])
+    require(wide==bytewise==name and instruction(0x16fdc5a)[-1]==name[0],'independent key comparison constants')
+    for va in [0x16fdc30,0x16fdc3d,0x16fdc4f,0x16fdc7f]:require(instruction(va)[-1]==6,'six-byte key length guard')
+    def matches(key):
+        wide_ok=len(key)==6 and ((int.from_bytes(key[:4],'little')^int.from_bytes(wide[:4],'little')) |
+            (int.from_bytes(key[4:],'little')^int.from_bytes(wide[4:],'little')))==0
+        byte_ok=len(key)==6 and all(key[i]==bytewise[i] for i in range(6))
+        require(wide_ok==byte_ok,'wide/bytewise key predicate disagreement');return wide_ok
+    require(matches(name),'baseline field name rejected');key_mutations=0
+    for i in range(6):
+        for v in range(256):
+            if v==name[i]:continue
+            changed=bytearray(name);changed[i]=v;require(not matches(changed),'mutated field name accepted');key_mutations+=1
+    require(key_mutations==1530,'field-name mutation denominator')
+    direct_calls=[];branches=[]
+    for va,row in rows.items():
+        raw=bytes.fromhex(row['bytes']);target=None
+        if raw[0]==0xe8:
+            target=va+5+struct.unpack_from('<i',raw,1)[0]
+            require(target in [0x16fd8b0,0x1742090,0x1704de0],'variant direct callee inventory')
+            direct_calls.append(dict(va=hex(va),target=hex(target)));continue
+        if raw[0] in [0xeb] or 0x70<=raw[0]<=0x7f:target=va+len(raw)+struct.unpack_from('<b',raw,1)[0]
+        elif raw[0]==0xe9:target=va+len(raw)+struct.unpack_from('<i',raw,1)[0]
+        elif raw[:1]==b'\x0f' and len(raw)>1 and 0x80<=raw[1]<=0x8f:target=va+len(raw)+struct.unpack_from('<i',raw,2)[0]
+        if target is not None:
+            require(target in rows,'variant direct branch target boundary');branches.append(dict(va=hex(va),target=hex(target)))
+    require(len(direct_calls)==3,'variant direct callee count')
+    # These six observed stores cover 40 bytes, not the constructor's 104-byte total.
+    stores=[(0x16fdd01,11,4),(0x16fdd04,8,4),(0x16fdd0c,23,16),(0x16fdd15,39,1),(0x16fdd25,0,8),(0x16fdd28,15,8)]
+    store_bytes=['89530b','894b08','0f114317','884b27','48890b','4889430f']
+    coverage=set()
+    for (va,offset,size),encoding in zip(stores,store_bytes):
+        require(instruction(va).hex()==encoding,'variant output store encoding');coverage.update(range(offset,offset+size))
+    require(coverage==set(range(40)),'observed ordinary store coverage')
+    sentinel=int.from_bytes(instruction(0x16fdd18)[2:],'little')
+    require(sentinel==0x8000000000000001 and instruction(0x16fdd22)==bytes.fromhex('48ffc9'),'ordinary tag construction')
+    variant=next(r for r in native['regions'] if r['label']=='variant-candidate')
+    return dict(status='FIRST_VARIANT_LOCAL_FIELD_EVIDENCE_REPRODUCED',variant_instructions=variant['instructions'],variant_bytes=variant['bytes'],
+        field_bindings=len(fields),evidence_corruptions_rejected=len(controls),controls=controls,
+        field_name=name.decode(),selected_outer_entries=22,bounded_key_entries=15,key_tag_values_enumerated=256,
+        nonfallback_key_tags=[r['raw_key_tag'] for r in routes if r['target']!='0x16fdf6c'],
+        baseline_field_name_cases=1,distinct_single_byte_key_mutations_rejected=key_mutations,
+        direct_calls=direct_calls,direct_branches=branches,ordinary_observed_store_bytes=40,ordinary_first_word=hex(sentinel-1),
+        limits='Local result-field recognition/presence/duplicate paths on raw internal records. Value converter, complete accepted JSON/value domain, outer tag validity, source/type ownership and exception closure remain unresolved.')
+
+
+
 def main():
     parser=argparse.ArgumentParser(description='Owned stdlib complete-input/native evidence verifier; no subprocess or captured execution.')
     parser.add_argument('--binary',type=Path,required=True)
@@ -353,6 +504,13 @@ def main():
     result['evidence_corruptions_rejected']+=completion['evidence_corruptions_rejected']
     result['controls']+=completion['controls']
     result['completion']=completion
+    variant=verify_first_variant(data,args.packet)
+    result['regions']+=1;result['region_bytes']+=variant['variant_bytes']
+    result['native_instruction_rows']+=variant['variant_instructions']
+    result['instruction_counts']['variant-candidate']=variant['variant_instructions']
+    result['field_bindings']+=variant['field_bindings']
+    result['evidence_corruptions_rejected']+=variant['evidence_corruptions_rejected']
+    result['controls']+=variant['controls'];result['first_variant']=variant
     print(json.dumps(result,indent=2))
 
 
