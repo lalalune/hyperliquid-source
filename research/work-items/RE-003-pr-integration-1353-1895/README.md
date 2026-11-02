@@ -1,60 +1,79 @@
-# PR integration review: 1353–1895
+# PR integration review
 
-Status: local integration and validation in progress. No component completion gate advances.
+Status: local integration validation in progress. No component completion gate advances.
 
-This review assembles 540 open PR heads recorded in `pr-heads.json`, preserving
-all original commits. Initial main was `e5c9b6436876b2a4a39daef813171f9879317699`.
+This packet began with 540 PRs (#1353–#1895). `pr-heads.json` preserves that
+snapshot; `followup-pr-heads.json` records subsequent heads, including amended
+#1889 and #1895. All original commits remain parents of the integration history.
+Initial main was `e5c9b6436876b2a4a39daef813171f9879317699`.
 Node #94 remains bound to SHA-256
 `3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f`;
-node #115 and visor keep the separate identities in provenance/artifacts.json.
+node #115 and visor retain their separate identities in provenance/artifacts.json.
 
 ## Integration repairs
 
-- PRs 1363 and 1381 used the same paths for distinct teardown functions.
-  PR 1381 is retained under `RE-001-chain-teardown-514bf60-94` and the matching
-  uniquely named tool/test. `path-collision-1381.json` records the mapping.
+- PRs #1363 and #1381 used the same paths for distinct teardown functions.
+  Retain #1381 under `RE-001-chain-teardown-514bf60-94` and a uniquely named tool/test.
+  `path-collision-1381.json` records the mapping.
 - Combine independent consensus and order-book exports/documentation. Generate
   the consensus Cargo lockfile from its real combined local dependency graph.
 - Combine registered comparison windows, retain dependency attribution, and
   regenerate the catalogue rather than editing generated progress tables.
-- Preserve every original checksum manifest affected by PR 1415 and by later
-  combined-source rebinding in the two manifest JSON records. Rebinding applies
-  to current tool/source references and checksum metadata, not captured node
-  bytes or original instruction records. It is not a new proof of source identity.
-
-- Rebind the cumulative-minute packet to the reviewed GPG-diagnostic-only
-  artifacts helper change, preserving the original packet in `original-context-1355.json`.
-  Its complete static verifier and negative controls pass again with the documented
-  Apple LLVM provider.
+- Preserve original manifests affected by combined-source checksum rebinding.
+  Rebinding applies to current source/tool references, not captured target bytes.
+  The original and follow-up manifest records retain old and new hashes.
+- Rebind the cumulative-minute packet to the GPG-diagnostic-only helper change;
+  its complete static verifier and negative controls pass with Apple LLVM.
 - Permit only input-label and implicit DS/ES display differences for exact
   F3 48 A5/AB instructions in four excerpt verifiers. Original verifiers and
-  manifests are archived; all instruction bytes and addresses remain exact.
-  Twenty-four positive/negative display checks pass.
+  manifests are retained. Twenty-four positive/negative display checks pass.
+- Correct the ABCI state-link README's stale verifier hash.
+- Use a wide intermediate for WAL rel32 sign extension: NumPy 2 otherwise
+  rejects subtracting 2**32 from the int32 array and blocks the binary census.
+  All 27 replay-driver tests pass; the original verifier/manifest are retained.
+- Check ChaCha verifier imports independently of manifest path strings. The
+  former substring check rejected a legitimate bound-tool filename; exact
+  permitted imports remain checked. Original test/manifest and retry are retained.
 
-## Completed validation
+## Validation
 
-All 44 affected Cargo components pass `cargo +1.94.1 test --offline --locked`
-with separate target directories (`cargo-results.json`). The combined consensus
-crate and byte-progress tests also pass independently.
+The first snapshot passed all 48 affected Cargo components with Rust 1.94.1,
+offline and locked dependencies. Follow-up bincode and consensus tests pass;
+TCP frame tests pass in debug and release with all features. Sixteen additional
+standalone Rust qualification harnesses pass with the installed pinned rustc.
+Their documented standalone scope does not imply a recovered whole-node graph.
 
-`raw-excerpt-audit.json` checks 27,466 instruction-byte rows across 178 newly
-contributed top-level objdump excerpts directly against the authenticated
-file-backed target bytes. It reports zero mismatches. This audit does not
-establish function completeness, runtime behavior, or whole-component coverage.
+All 209 tests across 48 static-validator modules and 24 display-comparison tests
+pass. `raw-excerpt-audit.json` directly checks 27,466 instruction-byte rows in
+178 contributed top-level objdump excerpts against authenticated target bytes,
+with zero mismatches. This is not a function-completeness or runtime claim.
 
-The artifact/import/packet checks pass after the recorded checksum rebinding:
-1,073 pre-audit manifests, 17,796 pre-audit resolvable entries, and 48 explicitly reported historical
-rows whose payload does not exist in the committed tree. The verifier retains
-its pre-existing unresolved-row limitation.
+Artifact hashes/signatures, 38 imported files, submodule pins, catalogue
+consistency and inventory/literal reproduction pass. The packet verifier
+explicitly retains 48 grandfathered rows whose referenced historical files are
+absent; this existing limitation is not silently converted into evidence.
 
-## Remaining validation
+`test-review.json` records the broad isolated unittest inventory, completion
+state, original failures and replacements by focused reruns. Early runner
+import failures were repaired in the external runner. Unwind-index tests use
+the digest-matched local index. Python bytecode writes are disabled so importing
+archived compiler inputs cannot add undeclared files to a frozen snapshot.
+The user authorized bounded offline instruction evaluation on synthetic local
+fixtures. No full captured node/visor executable, live service, signing key,
+public-network fixture or chain action was used.
 
-All 209 tests in 48 static validator regression modules pass after the
-recorded checksum repair; the original failure and successful retry are retained
-in `static-test-results.json`. Artifact hashes/signatures, import pins, catalogue consistency and full inventory/literal
-reproduction pass. Additional isolated packet reproductions are running. The broad instruction-
-evaluation test suite has not been run in this review. Captured executable
-launches, live services, signing and chain actions have not been performed.
+## Reproduction limits
+
+The additional packet replay records retain original successes and failures.
+Twenty strict scripts require GNU 2.42, which is unavailable here. Independent
+bindings/relations and available-provider checks are reported separately.
+Historical pre-source packets were replayed in their original source contexts;
+the fixed20 current-source build and source freeze are retained separately.
+Provider-only comparisons require all non-provider fields and exports to match.
+For the RPC lookup packet, GNU 2.44 versus 2.47 changes the recorded provider
+version: the strict retained-record test therefore fails, while all eight
+non-provider exports match and all 27 corruption controls pass with the current
+provider. The original receipt and strict verifier remain intact.
 
 No integrated node build, whole-node behavioral equivalence, hosted CI success,
-or new reconstruction milestone is claimed by this integration.
+or new reconstruction milestone is claimed by this merge review.
