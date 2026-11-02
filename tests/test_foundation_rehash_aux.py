@@ -84,7 +84,8 @@ class TestMigrationOrder(unittest.TestCase):
     def test_three_nodes_empty_path_fixup_repoints_previous(self):
         # Old chain A(5%3=2), B(4%3=1), C(8%3=2), walked in order:
         # A starts bucket 2 (next null, so no fixup; previous
-        # stays 0). B starts bucket 1: its next is A (non-null),
+        # becomes 2 on the empty path). B starts bucket 1: its
+        # next is A (non-null),
         # so the fixup overwrites bucket entry 2 — the previous
         # bucket — with B, then previous becomes 1. C finds
         # bucket 2 nonempty with before-node B, so C inserts
