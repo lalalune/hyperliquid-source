@@ -1,7 +1,7 @@
 # RE-008: second QC group's first short-input failure
 
-Native expectations were frozen before the Rust extension below. This packet
-is uncommitted and unpublished. Target node94 SHA-256
+Native expectations were frozen before the Rust extension below. Independent
+source/receipt review is required before publication. Target node94 SHA-256
 `3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f`.
 All coordinates are linked ELF virtual addresses; ends are exclusive. Source
 base is draft #1509 head `35d44f7130bc029b30723e7464ac7d8ff3644a40`.
