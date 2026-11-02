@@ -30,6 +30,12 @@ import sys
 DEFAULT_BINARY = os.path.join("artifacts", "node", "94", "hl-node")
 PACKET_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# The manifest pins every packet file except MANIFEST.sha256 itself.
+PACKET_FILES = frozenset({
+    "README.md", "callee.objdump.txt", "export_excerpts.py",
+    "frames.txt", "records.json", "verify.py", "window.objdump.txt",
+})
+
 
 class Elf:
     """Minimal ELF64 reader: PT_LOAD mapping only."""
@@ -148,20 +154,72 @@ def check(records_path, binary_path, packet_dir=None):
         if found != want:
             errors.append("caller census mismatch: found %s, want %s" % (
                 sorted(hex(v) for v in found), sorted(hex(v) for v in want)))
+    # The manifest pins every packet file except itself, so the listed
+    # set must equal the pinned packet files and the files actually
+    # present (the admission check the RE-012/RE-009 packet verifiers
+    # spell out). Hashing only the listed rows admits an unlisted
+    # payload, a duplicated row, a symlinked entry, or an evidence file
+    # deleted together with its row.
+    manifest = os.path.join(packet_dir, "MANIFEST.sha256")
+    if not os.path.exists(manifest):
+        errors.append("MANIFEST.sha256 missing")
+        return errors
+    listed = {}
     try:
-        with open(os.path.join(packet_dir, "MANIFEST.sha256")) as f:
+        with open(manifest) as f:
             for line in f:
-                line = line.strip()
-                if not line:
+                if not line.strip():
                     continue
-                digest, name = line.split(None, 1)
-                path = os.path.join(packet_dir, name.strip())
-                with open(path, "rb") as pf:
-                    actual = hashlib.sha256(pf.read()).hexdigest()
-                if actual != digest:
-                    errors.append("MANIFEST mismatch for %s" % name)
+                parts = line.split()
+                if len(parts) != 2:
+                    errors.append(
+                        "malformed manifest line: %r" % line.strip())
+                    continue
+                digest, name = parts
+                if name in listed:
+                    errors.append("manifest lists %s twice" % name)
+                    continue
+                listed[name] = digest
     except OSError as exc:
         errors.append("cannot verify MANIFEST: %s" % exc)
+        return errors
+    present = set()
+    for entry in sorted(os.listdir(packet_dir)):
+        path = os.path.join(packet_dir, entry)
+        if os.path.islink(path):
+            errors.append("packet entry is a symlink: %s" % entry)
+        elif os.path.isdir(path):
+            if entry != "__pycache__" or not all(
+                    name.endswith(".pyc")
+                    and not os.path.islink(os.path.join(path, name))
+                    for name in os.listdir(path)):
+                errors.append("unexpected directory in packet: %s" % entry)
+        else:
+            present.add(entry)
+    present.discard("MANIFEST.sha256")
+    if set(listed) != PACKET_FILES:
+        errors.append(
+            "manifest file set differs from the pinned packet files: "
+            "missing rows %s, unexpected rows %s"
+            % (sorted(PACKET_FILES - set(listed)),
+               sorted(set(listed) - PACKET_FILES)))
+    if set(listed) != present:
+        errors.append(
+            "manifest file set differs from packet contents: "
+            "unlisted %s, missing %s"
+            % (sorted(present - set(listed)),
+               sorted(set(listed) - present)))
+    for name, digest in sorted(listed.items()):
+        if name not in present:
+            continue
+        try:
+            with open(os.path.join(packet_dir, name), "rb") as pf:
+                actual = hashlib.sha256(pf.read()).hexdigest()
+        except OSError as exc:
+            errors.append("cannot verify MANIFEST: %s" % exc)
+            continue
+        if actual != digest:
+            errors.append("MANIFEST mismatch for %s" % name)
     return errors
 
 
