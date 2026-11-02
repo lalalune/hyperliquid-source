@@ -98,7 +98,13 @@ def analyze(data):
         code=read(data,site,5)[1]
         if code[0]!=0xe8 or site+5+struct.unpack_from('<i',code,1)[0]!=target:
             raise ValueError('permit provider/cleanup call changed')
-    _,fs,_=fde_extents(data);fdes={(f['start'],f['end']):f for f in fs};owners=[]
+    _,fs,_=fde_extents(data)
+    fdes={}
+    for f in fs:
+        if (f['start'],f['end']) in fdes:
+            raise ValueError('duplicate FDE extent')
+        fdes[(f['start'],f['end'])]=f
+    owners=[]
     for role,(a,b,sha) in OWNERS.items():
         if (a,b) not in fdes:
             raise ValueError('permit FDE extent changed')
