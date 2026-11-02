@@ -66,6 +66,19 @@ def abstract_gate_reason(flag12, raw_tag_after_initialization, flag13, global_by
     return 'continue_past_entry_gates'
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    rels = {}
+    for a, i, v in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']]):
+        if a in rels:
+            raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a] = (i, v)
+    return rels
+
+
 def analyze(data):
     _, frames, _ = fde_extents(data)
     if not set(RANGES) <= {(f['start'], f['end']) for f in frames}:
@@ -79,8 +92,7 @@ def analyze(data):
         raw = read(data, va, len(prefix) + 4)[1]
         if not raw.startswith(prefix) or va + len(raw) + struct.unpack_from('<i', raw, len(prefix))[0] != target:
             raise ValueError('RIP target changed')
-    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
-    rels = {a: (i, v) for a, i, v in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']])}
+    rels = relocations(data)
     if any(rels.get(a) != (8, v) for a, v in RELATIVE.items()):
         raise ValueError('helper/global/Location relocation changed')
     locations = [(0x566a278, 0x1fcf88, '/home/ubuntu/hl/code_Mainnet/base/src/crit_msg.rs', 291, 19),
