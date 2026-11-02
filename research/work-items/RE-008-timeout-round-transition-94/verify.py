@@ -30,13 +30,52 @@ def load_tool():
     return module
 
 
-def main():
+# The manifest pins every packet file except MANIFEST.sha256 itself.
+PACKET_FILES = frozenset({
+    "README.md", "VALIDATION.md", "bounded-disassembly.txt",
+    "timeout-round-transition.json", "verify.py",
+})
+
+
+def check_packet():
+    # The manifest loop this replaces hashed the listed files and
+    # nothing else: a duplicated row passed silently, a listed file
+    # replaced by a symlink was hashed through to its target, and
+    # files could be added to — or deleted from — the packet unseen
+    # as long as the JSON stayed intact. Enforce the admission the
+    # RE-005 verifier and the node-inventory verifiers spell out.
     manifest = HERE / "MANIFEST.sha256"
-    check(manifest.exists(), "missing MANIFEST.sha256")
+    check(manifest.is_file(), "missing MANIFEST.sha256")
+    listed = {}
     for line in manifest.read_text().splitlines():
-        digest, name = line.split("  ", 1)
-        check(hashlib.sha256((HERE / name).read_bytes()).hexdigest() == digest,
+        if not line.strip():
+            continue
+        digest, sep, name = line.partition("  ")
+        check(sep == "  " and len(digest) == 64, f"malformed manifest line: {line!r}")
+        check(name not in listed, f"manifest lists {name} twice")
+        listed[name] = digest
+    check(set(listed) == PACKET_FILES, "manifest file set differs from pinned packet files")
+    present = set()
+    for entry in sorted(HERE.iterdir()):
+        check(not entry.is_symlink(), f"packet entry is a symlink: {entry.name}")
+        if entry.is_dir():
+            check(entry.name == "__pycache__" and all(
+                child.name.endswith(".pyc") and not child.is_symlink()
+                for child in entry.iterdir()),
+                f"unexpected directory in packet: {entry.name}")
+            continue
+        present.add(entry.name)
+    check(present - {"MANIFEST.sha256"} == set(listed), "packet contents differ from manifest")
+    for name, digest in listed.items():
+        path = HERE / name
+        check(path.is_file() and not path.is_symlink(),
+              f"manifest entry is a symlink or not a file: {name}")
+        check(hashlib.sha256(path.read_bytes()).hexdigest() == digest,
               f"manifest mismatch for {name}")
+
+
+def main():
+    check_packet()
 
     binary = (ROOT / "artifacts/node/94/hl-node").read_bytes()
     check(hashlib.sha256(binary).hexdigest() == BINARY_SHA256, "binary sha256")
