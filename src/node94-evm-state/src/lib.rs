@@ -9,6 +9,7 @@ mod error;
 mod key;
 mod lattice;
 mod msgpack;
+mod offline;
 mod storage;
 mod types;
 
@@ -17,9 +18,15 @@ pub use code::{decode_supported_code, encode_code};
 pub use error::{DecodeError, EncodeError, OfflineError, StoreError};
 pub use key::{decode_key, decode_key_for_table, encode_key};
 pub use lattice::{AccumulatorDelta, LatticeAccumulator, LatticeContribution, VerifiedEntryBytes};
+pub use offline::{
+    DatabaseUpdate, EntryMaterializer, OfflineState, PreparedReplacement, RecordStore,
+};
 pub use storage::{decode_storage_value, encode_storage_value};
 pub use types::{
     AccountAddress, AccountRecord, CodeHash, Eip7702Code, JumpTable, RawStateRecord,
     SerializedDatabaseKey, SerializedValue, StateKey, StateTable, StorageSlot, StorageValue,
     StoredCode,
 };
+
+#[cfg(any(test, feature = "test-fixtures"))]
+pub mod test_fixtures;
