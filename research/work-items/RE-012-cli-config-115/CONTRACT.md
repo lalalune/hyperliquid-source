@@ -8,8 +8,9 @@ these private functions. Historical node94 records are migration leads only.
 
 ## Domain and unresolved boundaries
 
-`out` means entry RDI; `builder` receives a 600-byte App-like value in RSI,
-`config` a parsed-state pointer, and `commands` a descriptor of three qwords:
+`out` means entry RDI; `builder` receives an App-like value pointer in RSI,
+with an observed 592-byte (`0x250`) copy span. `config` receives a parsed-state
+pointer, and `commands` a descriptor of three qwords:
 name pointer, byte length, child-argument pointer. These are observed register
 and storage relations, not a recovered stable Rust ABI.
 
@@ -231,7 +232,8 @@ would reject successful nonzero payloads.
 | +0x5f..+0x72 | signer 20-byte payload when present; inactive scratch otherwise |
 | +0x73 | disable-delegations byte true1/false0/absent2 |
 
-Profile tag/payload writes start at 0x56559dc. Node-IP absent explicitly stores
+Profile payload writes begin at 0x565599f; its first-word tag is written at
+0x56559dc. Node-IP absent explicitly stores
 RAX=0 to its saved payload, unlike other absent fields; do not generalize that
 zeroing to absent names, description, commission or signer. The old node94
 +0x6e node-IP and +0x58 unjailed layout is incompatible. For both two-string
