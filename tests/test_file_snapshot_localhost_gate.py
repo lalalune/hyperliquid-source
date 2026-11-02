@@ -71,6 +71,19 @@ class SnapshotGateTests(unittest.TestCase):
             with self.assertRaises(mod.EvidenceError):
                 mod.analyze(data, secs, relocs, fdes, release)
 
+    def test_inner_future_vtable_layout(self):
+        vt = self.result['targets']['94']['inner_future_vtable']
+        self.assertEqual(vt, {'va': '0x56c3d98', 'slot0_drop_in_place': '0x2833ed0', 'slot1_size': '0x58',
+                              'slot2_align': '0x8', 'slot3_poll': '0x27f45d0'})
+        self.assertEqual(int(vt['slot1_size'], 16), 0x58)          # the same size the box helper allocates
+        self.assertNotIn('inner_future_vtable', self.result['targets']['115'])   # not pinned for #115
+
+    def test_inner_vtable_size_or_align_corruption_rejected(self):
+        for va in (0x56c3da0, 0x56c3da8):
+            data, secs, relocs, fdes = self._mutated('94', va, b'\x10')
+            with self.assertRaises(mod.EvidenceError):
+                mod.analyze(data, secs, relocs, fdes, '94')
+
     def test_missing_template_lea_rejected(self):
         for release, va in (('94', 0x27ec5d6), ('115', 0x2976afe)):
             data, secs, relocs, fdes = self._mutated(release, va + 3, b'\x00\x00\x00\x00')
