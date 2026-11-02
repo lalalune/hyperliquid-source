@@ -1,4 +1,4 @@
-"""Compare bounded independently authored Rust with accepted node94 window bytes."""
+"""Compare independently authored Rust with node94 selected branch outcomes."""
 import argparse
 import hashlib
 import json
