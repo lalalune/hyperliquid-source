@@ -7,11 +7,13 @@ mod account;
 mod error;
 mod key;
 mod msgpack;
+mod storage;
 mod types;
 
 pub use account::{decode_account, encode_account};
 pub use error::{DecodeError, EncodeError, OfflineError, StoreError};
 pub use key::{decode_key, decode_key_for_table, encode_key};
+pub use storage::{decode_storage_value, encode_storage_value};
 pub use types::{
     AccountAddress, AccountRecord, CodeHash, Eip7702Code, JumpTable, RawStateRecord,
     SerializedDatabaseKey, SerializedValue, StateKey, StateTable, StorageSlot, StorageValue,
