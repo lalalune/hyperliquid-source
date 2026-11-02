@@ -1,0 +1,9 @@
+# Visor seeded key value
+
+`hash_key(seed: [u64; 2], input: &[u8]) -> u64` computes the captured Visor's complete arithmetic value for the original input bytes followed by exactly one FF byte. Both seed qwords are explicit. Empty input, embedded NUL, existing FF and invalid UTF-8 are byte data. The safe dependency-free `no_std` library allocates nothing and exposes no streaming interface.
+
+The [evidence packet](../../research/work-items/RE-013-visor-key-hash-rust/README.md) binds the complete outer/feed bodies at `0x626760..0x6268c0` and `0x628d00..0x628ed7` to Visor SHA-256 `89338207c793d80ac2fba75bb0d36c659e2cabc87a94e61a57ba532b8d212e31`. Its independent mathematical expectations were frozen before this source. The public API is newly chosen Rust; correspondence is conditional on the native valid-span/frame/ordinary-execution premises. All word additions explicitly wrap, complete words are little-endian, the implicit FF may finish a word, and the final block uses the low byte of the total length including that FF.
+
+This component closes the hash value consumed by the existing lookup evidence. It does not implement table membership, cache consistency, control mirroring, probe reachability, seed generation, target ABI, source-library identity or a cryptographic security guarantee. No original compiler or machine-code equivalence is claimed. The pinned qualification host is Rust/Cargo 1.94.1 aarch64-apple-darwin; actual build results belong to the packet's implementation validation records.
+
+The Cargo package stands alone, with no root workspace, dependencies or build script. From this directory, `cargo test --offline --locked` exercises the literal pre-source witnesses. The packet's separately frozen build harness additionally links an input-only client to the actual library and compares its outputs with the independent corpus in both profiles and clean build roots. New code is MIT; no inferred unlicensed source is copied.
