@@ -1,0 +1,70 @@
+{
+  "target_release": "94",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses, no runtime rebase",
+  "function": {
+    "start_va": "0x51c96d0",
+    "end_va_exclusive": "0x51c9701",
+    "bytes": 49,
+    "sha256": "e9d8a8f8a9b90d43634d352c02086277f3925ec495c685ed7576bc042b182a29",
+    "fde_section_offset": "0x2a0eac",
+    "padding_bytes": 15,
+    "padding_stride_end": "0x51c9710",
+    "inferred_label": "scaled-count helper"
+  },
+  "arithmetic": {
+    "input": "u32 count at [rsi], base pointer at [rsi + 8], callee result in rax",
+    "stride": 80,
+    "stride_formula": "base + count * 80 (lea [rax + rax*4], shl 4)",
+    "result_shift": 4,
+    "magic": "0xcccccccd",
+    "formula": "low32(((callee_result - base) >> 4) * 0xcccccccd)",
+    "aligned_identity": "difference a multiple of 80 -> (difference / 80) mod 2**32",
+    "aligned_identity_proof": "5 * 0xcccccccd = 0x400000001 = 2**34 + 1",
+    "aligned_edges": {
+      "0": 0,
+      "1": 1,
+      "3": 3,
+      "7": 7,
+      "10": 10,
+      "255": 255,
+      "4096": 4096,
+      "4294967295": 4294967295
+    },
+    "raw_edges": {
+      "1": 0,
+      "16": 3435973837,
+      "79": 858993460,
+      "81": 1,
+      "-80": 4294967295,
+      "800": 10
+    },
+    "pointer_edges": {
+      "0": "0x100000",
+      "1": "0x100050",
+      "10": "0x100320",
+      "4096": "0x150000"
+    }
+  },
+  "call": {
+    "site": "0x51c96ec",
+    "target": "0x51c4000",
+    "target_bytes": 359,
+    "target_claimed_here": false
+  },
+  "incoming": {
+    "direct_e8_callers": [
+      "0x51c976d",
+      "0x51c9d4d",
+      "0x51ca374"
+    ],
+    "validated_caller_fdes": [
+      "0x51c9710",
+      "0x51c9d10",
+      "0x51ca1f0"
+    ],
+    "complete_xref_census": false
+  },
+  "captured_binary_executed": false,
+  "progress_gate_requested": false
+}
