@@ -10,8 +10,12 @@
   all 21,233 frozen scalar expectations. All 5 compiled semantic
   mutations are detected with normal process exit. Own unit tests and
   `rustfmt --check` pass; repeated optimized library digests agree.
-- Full flat 971-file inventory: running in the separate shared validation
-  checkout. No completed full-suite result is claimed at this revision.
+- Complete unchanged flat inventory: **971/971 files pass**, zero failed files,
+  15,468 reported cases and 72 skip records, in
+  1797.783 seconds. Six workers each invoke the same fresh-process
+  stdlib unittest discovery command used by `make test`; scheduling is the only
+  runner difference. No file or assertion is excluded or changed.
+  `validation-results.json` retains every file exit/count/log digest.
 
 `validation-inputs.json` fingerprints the byte-identical tracked tools, tests,
 provenance, config and scope registries shared by the three independent branches.
