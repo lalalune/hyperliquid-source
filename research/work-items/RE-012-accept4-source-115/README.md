@@ -90,8 +90,9 @@ independent runtime oracle or production networking implementation. Synthetic
 raw observations are not claims about valid kernel or public Rust values.
 
 [validation.json](validation.json) and lossless raw logs report actual checks.
-Full `make test` is required and will run on the final committed head; it is
-pending at packet freeze. No full-suite or hosted-CI success is claimed here. The collector and comparator are bounded
+Full `make test` passed on commit `41a4259b1dbfb2f55827edb991e4c0bb77afd92e`:77 files,401 reported tests,3 skips,0 failed files,exit0 in1,108.987 seconds.
+The complete inventory and exact streams are retained. This later metadata-only
+recording did not rerun the unchanged source/tests. Hosted-CI success is not claimed. The collector and comparator are bounded
 analysis tools needed to retain/replay this task's new target evidence; shared
 tooling and submodule pins are unchanged.
 
