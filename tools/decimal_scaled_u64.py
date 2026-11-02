@@ -125,6 +125,8 @@ class Image:
 
     def _slots(self):
         _, off, size = self.sections[".rela.dyn"]
+        if off + size > len(self.data) or size % 24:
+            fail(".rela.dyn is truncated")
         slots = {}
         for addr, info, add in struct.iter_unpack("<QQq", self.data[off:off + size]):
             if info & 0xffffffff == 8:
