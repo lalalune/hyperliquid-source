@@ -60,8 +60,8 @@ class CatalogueTests(unittest.TestCase):
     def test_dependency_bytes_do_not_count_as_first_party(self):
         coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', self.components)
         self.assertEqual(set(coverage['targets']), {'node115'})
-        self.assertEqual(coverage['totals']['node115']['windows'], 310)
-        self.assertEqual(coverage['totals']['node115']['bytes'], 106559)
+        self.assertEqual(coverage['totals']['node115']['windows'], 526)
+        self.assertEqual(coverage['totals']['node115']['bytes'], 194947)
         self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
 
     def test_wrong_owner_target_and_changed_evidence_rejected(self):
@@ -103,6 +103,15 @@ class CatalogueTests(unittest.TestCase):
                       {'offset': 4, 'width': 8, 'kind': 4, 'addend': -4}):
             with self.subTest(field=field), self.assertRaises(ValueError):
                 byte_progress.compare(b'abcd0000', b'abcd1234', [field])
+
+    def test_vendored_crate_windows_are_own_crate_dependencies(self):
+        coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', self.components)
+        rows = [r for r in coverage['windows'] if r['id'].startswith('node115-vendor-')]
+        self.assertEqual(len(rows), 216)
+        self.assertTrue(all(r['dependency'] == 'vendored-crates' for r in rows))
+        self.assertTrue(all(r['relocation_qualified'] for r in rows))
+        self.assertEqual(sum(r['bytes'] for r in rows), 88388)
+        self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
 
 
 if __name__ == '__main__':

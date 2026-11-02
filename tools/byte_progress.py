@@ -109,7 +109,7 @@ def load_coverage(root, registry_path, components):
         mode = item.get('comparison_mode', 'offset-aligned')
         require(mode in ('offset-aligned', 'extent-mismatch'), 'Unknown comparison mode')
         require('dependency' not in item or item['dependency'] in
-                ('rust-core', 'rust-alloc', 'rust-std', 'compiler-builtins', 'zstandard', 'mio'), 'Unknown dependency attribution')
+                ('rust-core', 'rust-alloc', 'rust-std', 'compiler-builtins', 'vendored-crates', 'zstandard', 'mio'), 'Unknown dependency attribution')
         require(item['evidence'] in pinned, 'Comparison evidence must be hash-pinned')
         require(name not in seen_ids, 'Duplicate comparison id')
         seen_ids.add(name)
