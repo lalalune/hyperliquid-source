@@ -29,6 +29,12 @@ import sys
 DEFAULT_BINARY = os.path.join("artifacts", "node", "94", "hl-node")
 PACKET_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# The manifest pins every packet file except MANIFEST.sha256 itself.
+PACKET_FILES = frozenset({
+    "README.md", "callers.objdump.txt", "frames.txt", "plt.objdump.txt",
+    "records.json", "verify.py", "window.objdump.txt",
+})
+
 FUNC_START = 0x514B690
 FUNC_END = 0x514B6C1
 FUNC_NEXT_FDE = 0x514B6D0
@@ -197,23 +203,62 @@ def check(records_path, binary_path):
             int(fn["enclosing_start"], 16), int(fn["enclosing_end"], 16))
         need(rng in frames, "caller FDE missing: %s" % rng)
 
+    # The manifest pins every packet file except itself, so the listed
+    # set must equal the pinned packet files and the files actually
+    # present (the admission check the RE-012/RE-009 packet verifiers
+    # spell out). Hashing only the listed rows admits an unlisted
+    # payload, a duplicated row, a symlinked entry, or an evidence file
+    # deleted together with its row.
     manifest = os.path.join(PACKET_DIR, "MANIFEST.sha256")
-    if os.path.exists(manifest):
-        with open(manifest) as f:
-            for line in f:
-                parts = line.split()
-                if len(parts) != 2:
-                    continue
-                digest, name = parts
-                path = os.path.join(PACKET_DIR, name)
-                if not os.path.exists(path):
-                    failures.append("manifest file missing: %s" % name)
-                    continue
-                with open(path, "rb") as pf:
-                    need(hashlib.sha256(pf.read()).hexdigest() == digest,
-                         "manifest hash mismatch: %s" % name)
-    else:
+    if not os.path.exists(manifest):
         failures.append("MANIFEST.sha256 missing")
+        return failures
+    listed = {}
+    with open(manifest) as f:
+        for line in f:
+            if not line.strip():
+                continue
+            parts = line.split()
+            if len(parts) != 2:
+                failures.append("malformed manifest line: %r" % line.strip())
+                continue
+            digest, name = parts
+            if name in listed:
+                failures.append("manifest lists %s twice" % name)
+                continue
+            listed[name] = digest
+    present = set()
+    for entry in sorted(os.listdir(PACKET_DIR)):
+        path = os.path.join(PACKET_DIR, entry)
+        if os.path.islink(path):
+            failures.append("packet entry is a symlink: %s" % entry)
+        elif os.path.isdir(path):
+            if entry != "__pycache__" or not all(
+                    name.endswith(".pyc")
+                    and not os.path.islink(os.path.join(path, name))
+                    for name in os.listdir(path)):
+                failures.append("unexpected directory in packet: %s" % entry)
+        else:
+            present.add(entry)
+    present.discard("MANIFEST.sha256")
+    if set(listed) != PACKET_FILES:
+        failures.append(
+            "manifest file set differs from the pinned packet files: "
+            "missing rows %s, unexpected rows %s"
+            % (sorted(PACKET_FILES - set(listed)),
+               sorted(set(listed) - PACKET_FILES)))
+    if set(listed) != present:
+        failures.append(
+            "manifest file set differs from packet contents: "
+            "unlisted %s, missing %s"
+            % (sorted(present - set(listed)),
+               sorted(set(listed) - present)))
+    for name, digest in sorted(listed.items()):
+        if name not in present:
+            continue
+        with open(os.path.join(PACKET_DIR, name), "rb") as pf:
+            need(hashlib.sha256(pf.read()).hexdigest() == digest,
+                 "manifest hash mismatch: %s" % name)
     return failures
 
 
