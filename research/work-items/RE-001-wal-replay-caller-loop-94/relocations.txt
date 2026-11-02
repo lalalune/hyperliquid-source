@@ -1,0 +1,28 @@
+# Relocations / call targets in window 0x520d3a0..0x520e12e and cleanup 0x520d31e..0x520d3a0
+# PLT calls (symbol names as objdump prints them; addresses are PLT stubs):
+#   0x5660430 __stack_chk_fail@plt (canary failure, window + cleanup)
+#   0x5660440 _ZdlPvm@plt (operator delete with size: record-slot destroy checks, file-list array free, filename dispose)
+#   0x5660480 _ZdaPv@plt (operator delete[]: status message pointers, file-list element buffers)
+#   0x5660490 _Znwm@plt (operator new: 0x28-byte record allocation)
+#   0x5660470 _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE10_M_disposeEv@plt (cleanup region only)
+#   0x5660110 _Unwind_Resume@plt (cleanup region only)
+# Direct (non-PLT) calls in the window:
+#   0x520a830 vector reserve (0x520d52f)
+#   0x529f350 element predicate (0x520d580)
+#   0x520c120 WAL replay driver (0x520d5a9)
+#   0x529ca20 type-1 filename builder (0x520d602)
+#   0x542efe0 string copy-assign (0x520d771, 0x520da60)
+#   0x5209430 output-vector destroy range call (0x520d9f2)
+#   0x52092a0 output-vector destroy range step (0x520da12, 0x520daf6)
+#   0x52091d0 output-vector per-slot destroy step (0x520da23)
+#   0x520a990 vector reallocating append (0x520da78)
+#   0x529d060 type-0 filename builder (0x520db88, retry arm)
+#   0x4f95600 file-list vector destroy (cleanup region 0x520d349 only)
+# Indirect calls (targets held in registers or memory, not relocations):
+#   *0xf0(%rax) entry-chain handler (0x520d504 and mismatch stubs)
+#   *0x128(%rax) chain-B handler (0x520d713 and mismatch stubs)
+#   *0xe8(%rax) retry-chain handler (0x520dc85, 0x520df72 and mismatch stubs)
+#   *0x8(%rax) leftover-slot destructor (0x520da91)
+#   *%rax / *%r8 mismatch-handler calls (0x520d738, 0x520d87c, 0x520da..., 0x520dc97, 0x520e04f, 0x520e00f, 0x520e025)
+# Caller sites of this window (census only, enclosing functions not pinned):
+#   0x520e22c, 0x520e4f3, 0x520f60f (all e8 direct calls; no tail jumps, no qword references)
