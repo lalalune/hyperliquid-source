@@ -56,7 +56,10 @@ def grouped(data, pattern):
     """Map each distinct match tuple to (first file offset, occurrence count)."""
     seen = {}
     for m in re.finditer(pattern, data):
-        key = tuple(g.decode() for g in m.groups())
+        try:
+            key = tuple(g.decode() for g in m.groups())
+        except UnicodeDecodeError:
+            raise ValueError('Invalid encoding in matched binary string')
         first, n = seen.get(key, (m.start(), 0))
         seen[key] = (first, n + 1)
     return dict(sorted(seen.items()))
