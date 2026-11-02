@@ -128,6 +128,8 @@ class Image:
         slots = {}
         for addr, info, add in struct.iter_unpack("<QQq", self.data[off:off + size]):
             if info & 0xffffffff == 8:
+                if addr in slots:
+                    fail(f"duplicate RELATIVE relocation slot {addr:#x}")
                 slots[addr] = add
         return slots
 
