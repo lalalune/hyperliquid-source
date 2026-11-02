@@ -49,7 +49,7 @@ paths established by the merged `RE-005-bincode-slow-widths` packet, as describe
 below; they do not silently change the older API's domain or error protocol.
 
 The component does not implement u16/u128 decoding, signed/zigzag encoding,
-fixed-width mode, serde integration, automatic slice-wrapper dispatch, the
+fixed-width mode, serde integration, the
 target error enum's Rust layout or caller/type mappings. It makes no binary-identity or
 full-serialization-recovery claim and does not advance a progress gate.
 
@@ -82,6 +82,31 @@ python3 tools/bincode_reader_rust.py --rustc /path/to/rust-1.94.1/bin/rustc \
   --output /new/output/directory --controls
 ```
 
+## Qualified slice-wrapper state
+
+`SliceDecoder::from_state(input, mode, limit, charge)` is an own safe state
+representation for the complete little-endian u32/u64 wrapper relation.
+Its `read_u32` and `read_u64` methods preserve the observed error, remaining
+slice and charge effects; `remaining()` and `charge()` expose the resulting
+state. This does not recover the original state constructor or enum layout.
+
+Raw mode 1 charges 4 or 8 before reading input. Overflow leaves charge unchanged;
+exceeding the limit retains the increment. Both fail without consuming input.
+Other raw modes bypass charging. Decoding errors do not roll charge back.
+The counter is not a consumed-byte count.
+
+More than 4/8 remaining bytes selects the u32/u64 fast relation. Rejected fast
+markers remain unread; an available marker on the short Reader path is consumed.
+Both fast wrappers report expected code 2, whereas the u64 Reader reports 3.
+Successful fast inputs have the same value/suffix relation as the existing
+little-endian Reader, which the safe implementation reuses after handling the
+fast rejection distinction. No call-trace or target ABI identity is implied.
+
+The [wrapper packet](../../research/work-items/RE-005-bincode-wrapper-state-94/README.md)
+qualifies the charge prefix, full dispatch/error state and one existing request
+caller's composition. Its 4,726 expectations were frozen before implementation.
+The comparison adapter's request mode is not a public network decoder API.
+
 ## Intended API and build scope
 
 The component is a standalone, dependency-free library crate rather than a
@@ -92,6 +117,7 @@ root workspace. Its public surface is limited to:
 - `decode_u64_slice_fast`, returning the decoded value and consumed length;
 - explicit `PayloadOrder` and `DecodeError` types.
 - direct `read_u32` and `read_u64` Reader relations with a separate `ReaderError`.
+- `SliceDecoder` methods and `SliceError` for the qualified wrapper state relation.
 
 The crate uses the repository-pinned Rust toolchain. Once the implementation
 is present, build it from the repository root with:

@@ -1,0 +1,34 @@
+error[E0432]: unresolved imports `hl_bincode_varint::SliceDecoder`, `hl_bincode_varint::SliceError`
+ --> /reconstruction/research/work-items/RE-005-bincode-wrapper-state-94/protocol.rs:3:38
+  |
+3 | use hl_bincode_varint::{ReaderError, SliceDecoder, SliceError};
+  |                                      ^^^^^^^^^^^^  ^^^^^^^^^^ no `SliceError` in the root
+  |                                      |
+  |                                      no `SliceDecoder` in the root
+
+error[E0282]: type annotations needed
+  --> /reconstruction/research/work-items/RE-005-bincode-wrapper-state-94/protocol.rs:50:19
+   |
+50 |             .map(|value| ("ok".to_owned(), value.to_string())),
+   |                   ^^^^^                    ----- type must be known at this point
+   |
+help: consider giving this closure parameter an explicit type
+   |
+50 |             .map(|value: /* Type */| ("ok".to_owned(), value.to_string())),
+   |                        ++++++++++++
+
+error[E0282]: type annotations needed
+  --> /reconstruction/research/work-items/RE-005-bincode-wrapper-state-94/protocol.rs:53:19
+   |
+53 |             .map(|value| ("ok".to_owned(), value.to_string())),
+   |                   ^^^^^                    ----- type must be known at this point
+   |
+help: consider giving this closure parameter an explicit type
+   |
+53 |             .map(|value: /* Type */| ("ok".to_owned(), value.to_string())),
+   |                        ++++++++++++
+
+error: aborting due to 3 previous errors
+
+Some errors have detailed explanations: E0282, E0432.
+For more information about an error, try `rustc --explain E0282`.

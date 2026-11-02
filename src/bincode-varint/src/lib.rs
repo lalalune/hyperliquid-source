@@ -2,7 +2,8 @@
 //!
 //! The encode and size operations cover the observed u32/u64 paths. Decoding
 //! includes the original u64 slice fast-path API and the separately qualified
-//! u32/u64 Reader value/cursor relation. Their error paths remain distinct.
+//! u32/u64 Reader value/cursor relation and slice-wrapper charge/state relation.
+//! Their error paths remain distinct.
 
 #![forbid(unsafe_code)]
 
@@ -41,6 +42,105 @@ pub enum ReaderError {
     UnexpectedEnd { needed: usize },
     /// Raw expected/found code bytes passed to the captured error builder.
     InvalidIntegerType { expected_code: u8, found_code: u8 },
+}
+
+/// Active errors of the observed little-endian slice wrappers.
+/// This representation does not reproduce the captured enum's memory layout.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SliceError {
+    /// The fixed-width charge would overflow or exceeds the configured limit.
+    LimitExceeded,
+    /// Active payload of an integer decoding error.
+    Reader(ReaderError),
+}
+
+/// Own safe representation of the qualified slice-wrapper state.
+///
+/// Mode 1 enables a fixed charge of 4 or 8 before decoding; other raw modes
+/// bypass charging. Charge overflow leaves the counter unchanged. Exceeding
+/// the limit retains the increment. Neither rejection consumes input.
+/// This is a research state constructor, not a recovered original constructor.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SliceDecoder<'a> {
+    input: &'a [u8],
+    mode: u32,
+    limit: u64,
+    charge: u64,
+}
+
+impl<'a> SliceDecoder<'a> {
+    /// Supply the observed raw state fields without inferring enum variants.
+    #[must_use]
+    pub const fn from_state(input: &'a [u8], mode: u32, limit: u64, charge: u64) -> Self {
+        Self {
+            input,
+            mode,
+            limit,
+            charge,
+        }
+    }
+
+    /// The complete unread input suffix, including any retained error marker.
+    #[must_use]
+    pub const fn remaining(&self) -> &'a [u8] {
+        self.input
+    }
+
+    /// Current fixed-width charge; it is not a count of consumed wire bytes.
+    #[must_use]
+    pub const fn charge(&self) -> u64 {
+        self.charge
+    }
+
+    /// Decode the qualified u32 wrapper relation, including failure state.
+    pub fn read_u32(&mut self) -> Result<u32, SliceError> {
+        self.read_wrapper(4, 2).map(|value| value as u32)
+    }
+
+    /// Decode the qualified u64 wrapper relation, including failure state.
+    pub fn read_u64(&mut self) -> Result<u64, SliceError> {
+        self.read_wrapper(8, 3)
+    }
+
+    fn claim(&mut self, width: u64) -> Result<(), SliceError> {
+        if self.mode == 1 {
+            let next = self
+                .charge
+                .checked_add(width)
+                .ok_or(SliceError::LimitExceeded)?;
+            self.charge = next;
+            if next > self.limit {
+                return Err(SliceError::LimitExceeded);
+            }
+        }
+        Ok(())
+    }
+
+    fn read_wrapper(&mut self, width: u64, expected: u8) -> Result<u64, SliceError> {
+        self.claim(width)?;
+        self.read_value(width, expected)
+    }
+
+    fn read_value(&mut self, width: u64, expected: u8) -> Result<u64, SliceError> {
+        if self.input.len() > width as usize {
+            let found = match self.input[0] {
+                U64_MARKER if width == 4 => Some(3),
+                U128_MARKER => Some(4),
+                0xff => Some(12),
+                _ => None,
+            };
+            if let Some(found_code) = found {
+                // Both fast wrappers use expected code 2 and retain the marker.
+                return Err(SliceError::Reader(ReaderError::InvalidIntegerType {
+                    expected_code: 2,
+                    found_code,
+                }));
+            }
+        }
+        // For successful fast tags the existing Reader has the same value and
+        // suffix relation. Only rejected fast tags need the distinction above.
+        read_integer(&mut self.input, PayloadOrder::Little, expected).map_err(SliceError::Reader)
+    }
 }
 
 /// Read the established u32 Reader path, advancing the slice on all outcomes.
@@ -200,7 +300,7 @@ pub fn encode_u64(value: u64, order: PayloadOrder, output: &mut Vec<u8>) -> usiz
 ///
 /// The target enters this path only when more than eight bytes remain. Shorter
 /// inputs are returned as [`DecodeError::FastPathUnavailable`] without reading
-/// their tag because the separate reader slow path is unresolved.
+/// their tag; the separately qualified Reader and wrapper APIs cover that domain.
 pub fn decode_u64_slice_fast(input: &[u8]) -> Result<DecodedU64, DecodeError> {
     if input.len() < FAST_PATH_MINIMUM_REMAINING {
         return Err(DecodeError::FastPathUnavailable {

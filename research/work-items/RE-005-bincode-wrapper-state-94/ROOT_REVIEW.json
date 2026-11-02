@@ -1,0 +1,127 @@
+{
+  "reviewed_at": "2026-11-01T18:25:54.414759+00:00",
+  "reviewer": "independent coordinator",
+  "status": "manual relation checked; static and own-Rust reproduction passed",
+  "base": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "manual_review": [
+    "Read complete wrapper/Reader/request native exports and the closed-form piecewise corpus before final implementation review.",
+    "Checked charge overflow versus stored over-limit increment, n>4/8 selection, rejected-marker consumption, expected-code2/3 split and successive caller charges.",
+    "Reviewed source reuse of Reader after fast rejection handling, active-field representation, input-only driver and compiled-mutant assertions."
+  ],
+  "independent_byte_audit": {
+    "bytes": 1374,
+    "rows": 406,
+    "fde_cie_backrefs_and_extents": true,
+    "tables": 4,
+    "relocations_type8_symbol0_and_mapped_slots": 3,
+    "original_source_and_frozen_fixture_hashes": true
+  },
+  "reproduction": {
+    "static_controls": 39,
+    "static_regenerations": 2,
+    "cases_per_rust_profile": 4726,
+    "profiles": [
+      {
+        "librarySha256": "f3fb33a6c441cf05c698720403420b3704c45b085d3b830bfc96e378672b47e8",
+        "mismatches": 0,
+        "name": "debug",
+        "optLevel": 0,
+        "outputSha256": "25fb5aab0f397bd2dfdcc7c95992db1a4acd60f5420aff5895869906729866ef"
+      },
+      {
+        "librarySha256": "a911985404f8f76bef5794ea2510d935f3a9e128412f10b58ee0c523ea3a63e3",
+        "mismatches": 0,
+        "name": "optimized",
+        "optLevel": 3,
+        "outputSha256": "25fb5aab0f397bd2dfdcc7c95992db1a4acd60f5420aff5895869906729866ef"
+      }
+    ],
+    "compiled_mutants": [
+      {
+        "librarySha256": "f02e7d9eac35c49d8fbb8e601ca261ad31190572280e11182e5b61d49ad2ddd8",
+        "mismatches": 600,
+        "name": "mutant-rollback-limit-charge",
+        "optLevel": 0,
+        "outputSha256": "7bfdb546c01fe0593c940d60b76c27f35da8ae0dac5fcee5db79fec77383a2d4"
+      },
+      {
+        "librarySha256": "ed29e7f0eca65f4c9acf8453c3d2f4e71bd2a13429827350406df569d7b4fd75",
+        "mismatches": 392,
+        "name": "mutant-always-reader",
+        "optLevel": 0,
+        "outputSha256": "333a20903da53c228f5fc9f82b19cd35f25603422f57619a85517a5ef1ce8a0d"
+      },
+      {
+        "librarySha256": "212950a3b202f88ddc8209490ee7fd55cd9eb9e678a78befa9fde7abe512353d",
+        "mismatches": 83,
+        "name": "mutant-inclusive-fast-threshold",
+        "optLevel": 0,
+        "outputSha256": "4f860ced852bc807e9faa25f5fa7a809dc23c877ab0a8c2ee93c8e9544b07dbe"
+      },
+      {
+        "librarySha256": "45597ffdcb3905d599bab2a21f05d6c38a34aac84d26bbeb6e344d865bf75ab7",
+        "mismatches": 755,
+        "name": "mutant-charge-after-decode",
+        "optLevel": 0,
+        "outputSha256": "c34a3239846d0dde7c50e1762d83727ee4ff69069528c9fd2dfad34e50ed3b8c"
+      }
+    ],
+    "test_exits": [
+      {
+        "label": "debug-evidence_vectors-test",
+        "exit": 0
+      },
+      {
+        "label": "debug-reader_vectors-test",
+        "exit": 0
+      },
+      {
+        "label": "debug-wrapper_vectors-test",
+        "exit": 0
+      },
+      {
+        "label": "optimized-evidence_vectors-test",
+        "exit": 0
+      },
+      {
+        "label": "optimized-reader_vectors-test",
+        "exit": 0
+      },
+      {
+        "label": "optimized-wrapper_vectors-test",
+        "exit": 0
+      },
+      {
+        "label": "rollback-limit-charge-assertions",
+        "exit": 101
+      },
+      {
+        "label": "always-reader-assertions",
+        "exit": 101
+      },
+      {
+        "label": "inclusive-fast-threshold-assertions",
+        "exit": 101
+      },
+      {
+        "label": "charge-after-decode-assertions",
+        "exit": 101
+      }
+    ],
+    "own_optimized_rlib_repeat_equal": true,
+    "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: aarch64-apple-darwin\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+    "source_hashes": {
+      "$REPO/research/work-items/RE-005-bincode-wrapper-state-94/driver.rs": "6d6600fa96c8d88d5c979271e2395fb8dd36ba76abe0a7f13d2456846300aa91",
+      "$REPO/research/work-items/RE-005-bincode-wrapper-state-94/protocol.rs": "6faa1f8a9a51334b316203c32a986ff3570fe0427e2a7784005142b9bded9cfb",
+      "$REPO/src/bincode-varint/Cargo.lock": "963f32e54bf1d7ba345e383184b5516162a6cb3b1063c91bf61f7b5c2815345c",
+      "$REPO/src/bincode-varint/Cargo.toml": "fc634395ea9e215282c5662b66a03cd128cebae4bf4f238482e213adbf95eefb",
+      "$REPO/src/bincode-varint/src/lib.rs": "84830be0df996b0a7cb260db29b9fdf6fcce885a8771003d9e1405a48e609591",
+      "$REPO/src/bincode-varint/tests/evidence_vectors.rs": "2fc1ee50bb8a03b31bc87d1c0cd834dbad7e387b03c3aae38f9d161612e0f037",
+      "$REPO/src/bincode-varint/tests/reader_vectors.rs": "0350d56ac13b415f32f1916fbc9b283e411bdd0736f90d1457002f245f4b0b8b",
+      "$REPO/src/bincode-varint/tests/wrapper_vectors.rs": "9dfaf07d7b1bc6d4ccd69f5522b39f764cb8dcbcdb6cd185f93e23f59a88dcf9",
+      "$RUSTC": "b69cbcffa5e990057035d53ccc8163e8392ce784f6abb114c19ceb61528ba9f6",
+      "/usr/bin/cc": "34129c71a01a74f7f3b2443521519b2e5447553fa187f5fcafaaf8c42cc192e2"
+    }
+  },
+  "scope": "Only independent host Rust and static native-data checks ran. No captured instructions, target ABI, network schema or full component gate is qualified."
+}
