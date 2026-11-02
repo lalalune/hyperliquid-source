@@ -60,8 +60,11 @@ The packet was first qualified on `c3b77a8e` and rechecked on the node115-only
 tests, exact GNU/LLVM replay and repository checks passed. The first
 post-rebase catalogue check required regenerating the work-item inventory
 from 28 to 29; its failure and successful recheck are retained. No retired
-node94 tool, test or binary is needed for this packet's replay. The separate
-shared full-suite run and hosted CI are not claimed here.
+node94 tool, test or binary is needed for this packet's replay. A complete local `make test` run attempted all 77 files with zero failed files
+(464 reported tests, 3 skips). Its invocation was `6a37eaad`; tool/test
+sources remained unchanged through the peer documentation corrections.
+The exact invocation inventory and raw results are archived. Skipped tests,
+Linux runtime qualification and hosted CI are not claimed as passed.
 
 Public Clap source is an interpretive comparison under its retained MIT
 license, not first-party node source or an exact version identification.
