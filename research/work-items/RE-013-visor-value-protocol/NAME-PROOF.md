@@ -1,0 +1,30 @@
+# Result-name conversion: addressed conditional proof
+
+This is a manual argument for `4a8d80..4a9861` in Visor SHA-256 `89338207c793d80ac2fba75bb0d36c659e2cabc87a94e61a57ba532b8d212e31`. Read it with MANUAL-PROOF.md and the independent native/control results in VALIDATION.json. Prior1550 proves a different low-AL leaf; similarity alone is not used as a proof of this leaf.
+
+Premises: stable admitted code/table bytes; valid disjoint input/output storage; input length/cursor arithmetic fits64 bits as stated; normal well-formed preserving opaque diagnostic calls. No original Rust ABI, allocator, invalid-pointer, unwind or application fallback claim is made.
+
+`4a8d80` saves the output pointer in RAX. `4a8d83..4a8d8b` computes `(length-2) mod2^64` and sends indices>11 to the error corridor. Thus only lengths2..13 index the12 signed dword-relative offsets at `87cf0`. Lengths5/6 also dispatch directly to the error corridor. The whole table is retained independently from the native listing; its raw digest is in `observed/summary.json`.
+
+The conservative full-body CFG audit keeps all direct byte reads within the selected length. RSI remains the input pointer throughout the comparison region; it is reassigned only at `4a95d6`, after transfer to the diagnostic corridor. RDX keeps the length for that corridor. All comparison paths test literal equality, either by a direct CMP, or by XOR differences joined with OR. The zero flag at each selected edge is therefore equality of all required fragments. Overlapping fragments agree and cover the entire input; zero-extended partial reads prevent unexamined register bits from contributing.
+
+The independently frozen79-name map supplies expectations. Its134 fixed literal fragments are rebound to this leaf's123 exact constant operands, including the four ordinary MOV immediates in the seven-byte bucket. The fresh audit binds101 literal base operands and22 adjustment sites,134 fragments, every actual result store and all12 length groups to the retained native identity. The historical annotation audit also compared the123 ordered operand pairs with the earlier raw leaf; similarity alone is not used as the proof. This audit supports the following direct reading; it does not infer equivalence from the operand sequence alone.
+
+| Length | Native comparison region | Whole-input equality and liveness |
+| --- | --- | --- |
+| 2 | `4a8da1..4a8dfe` | Nine direct16-bit compares; no input byte is omitted. |
+| 3 | `4a905d..4a9089` | A zero-extended16-bit prefix and zero-extended byte at+2 are XORed with fixed values and ORed. The16-bit OR contains every potentially nonzero bit. |
+| 4 | `4a8e0d..4a8e1f` | Two direct32-bit compares. |
+| 7 | `4a93a1..4a93c9` | Two32-bit XOR differences at offsets0 and3, ORed; overlap byte3 agrees. Both constant registers are freshly loaded for the second case. |
+| 8 | `4a93d8..4a94a5` | Whole-qword CMPs. RDI holds the first base until its final+9 change at9438. RCX is loaded at93eb and remains the second base through the LEAs at944e/945e/946e/947e/948e; it changes only for the final+fe compare. Temporary R8/RDI comparisons do not destroy those bases early. |
+| 9 | `4a8e2e..4a904e` | Qword at0 plus byte at8. GaOnchain's RCX survives the first scratch XOR and is incremented only for the second case. FBinSpot's RCX survives successive scratch RDI/R8 differences and is destroyed only by the last+8-byte case at8f41. The new GaHlPerp base at8f55 survives temporary literal/scratch loads, including the reused base+100 at9008, until the final+300 change at9039. |
+| 10 | `4a9098..4a9217` | Qword at0 plus zero-extended16 bits at8. The WebSandbox RCX base survives the LEA and unrelated RDI case, then is consumed at9125. NvMainnet's RCX survives the first RDI/R8 differences and is consumed at9182 for its last suffix. Other cases freshly materialize their bases. |
+| 11 | `4a9226..4a9392` | Qwords at0 and3 cover11 bytes. NodeTestnet's RCX/RDI literal pair survives the first R8/R9 comparisons; only then are the fixed adjustments applied at9274/927e. JoinMainnet's RCX/RDI pair at928f/9299 survives the adjusted temporary R8/R9 case and two independent later literal pairs, then is consumed at9306/9309. FHuobiSpot's RCX survives two scratch comparisons and is consumed at935a for its final suffix. |
+| 12 | `4a950d..4a95bb` | Qword at0 plus zero-extended32 bits at8. NodeTestnet's RCX survives two RDI/R8 cases and is consumed at954b for the third; subsequent bases are fresh. |
+| 13 | `4a94b4..4a94fe` | Qwords at0 and5 cover13 bytes. Both cases materialize fresh RCX/RDI constants before the annotated fixed suffix adjustment and overlapping XORs. |
+
+Every successful edge reaches an immediate code store at output+1, followed by `xor ecx,ecx; mov byte [rax],cl; ret`. There are79 such returns and the code set is exactly0..78. For code22 at the last13-byte case, the earlier raw leaf uses JE-success/fallthrough-reject while this leaf uses JNE-error/fallthrough-success. Both require ZF=1; the exact two edges and fallthroughs are explicitly checked. The original strict branch-polarity audit failure is retained. No arbitrary branch normalization or byte mask is used.
+
+Failure of all comparisons, or an excluded length, reaches `4a95c6`. That block saves the output pointer in RBX, arranges original input pointer/length plus a79-entry diagnostic descriptor, and calls `4ac5b0` at95df. On its normal return, the returned payload goes to output+8, CL is assigned1, and tag1 is written at95f1. The error payload's numerical value does not determine this tag. Nonreturning/unwinding diagnostics are outside this normal-return relation.
+
+Consequently the conditional intended relation is tag0 plus the same79 exact names/codes, otherwise tag1 on the diagnostic normal-return path. In particular NvTestnet is code33. This establishes the caller's0..78 index premise for normal non-error results only after the addressed proof, raw bytes and controls are jointly qualified. It does not establish full JSON value parsing, heap behavior, formatted diagnostic contents, whole-program success or a recovered-byte gate.

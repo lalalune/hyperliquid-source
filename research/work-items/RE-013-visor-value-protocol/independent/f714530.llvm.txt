@@ -1,0 +1,37 @@
+
+visor.elf:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+00000000002bd180 <.text>:
+  714530: f3 0f 1e fa                  	endbr64
+  714534: 48 81 fe 00 10 00 00         	cmp	rsi, 0x1000
+  71453b: 0f 87 8f 00 00 00            	ja	0x7145d0 <.text+0x457450>
+  714541: 85 d2                        	test	edx, edx
+  714543: 0f 85 87 00 00 00            	jne	0x7145d0 <.text+0x457450>
+  714549: f7 c7 ff 0f 00 00            	test	edi, 0xfff
+  71454f: 74 7f                        	je	0x7145d0 <.text+0x457450>
+  714551: 48 8d 0d 68 7f 2f 00         	lea	rcx, [rip + 0x2f7f68]   # 0xa0c4c0
+  714558: 48 8d 46 07                  	lea	rax, [rsi + 0x7]
+  71455c: 49 c7 c0 80 f3 ff ff         	mov	r8, -0xc80
+  714563: 48 c1 e8 03                  	shr	rax, 0x3
+  714567: 4c 8d 15 92 81 2f 00         	lea	r10, [rip + 0x2f8192]   # 0xa0c700
+  71456e: 44 0f b6 0c 01               	movzx	r9d, byte ptr [rcx + rax]
+  714573: 4f 8b 1c ca                  	mov	r11, qword ptr [r10 + 8*r9]
+  714577: 64 4d 03 98 48 03 00 00      	add	r11, qword ptr fs:[r8 + 0x348]
+  71457f: 64 4d 3b 98 50 03 00 00      	cmp	r11, qword ptr fs:[r8 + 0x350]
+  714587: 73 47                        	jae	0x7145d0 <.text+0x457450>
+  714589: 64 48 8b 04 25 00 00 00 00   	mov	rax, qword ptr fs:[0x0]
+  714592: 4b 8d 0c 49                  	lea	rcx, [r9 + 2*r9]
+  714596: 4c 8d 14 c8                  	lea	r10, [rax + 8*rcx]
+  71459a: 4d 01 c2                     	add	r10, r8
+  71459d: 4d 8b 8a 60 03 00 00         	mov	r9, qword ptr [r10 + 0x360]
+  7145a4: 66 45 39 8a 72 03 00 00      	cmp	word ptr [r10 + 0x372], r9w
+  7145ac: 74 22                        	je	0x7145d0 <.text+0x457450>
+  7145ae: 49 8d 51 f8                  	lea	rdx, [r9 - 0x8]
+  7145b2: 49 89 92 60 03 00 00         	mov	qword ptr [r10 + 0x360], rdx
+  7145b9: 49 89 79 f8                  	mov	qword ptr [r9 - 0x8], rdi
+  7145bd: 64 4d 89 98 48 03 00 00      	mov	qword ptr fs:[r8 + 0x348], r11
+  7145c5: c3                           	ret
+  7145c6: 66 2e 0f 1f 84 00 00 00 00 00	nop	word ptr cs:[rax + rax]
+  7145d0: e9 fb e7 ff ff               	jmp	0x712dd0 <.text+0x455c50>
