@@ -1,0 +1,78 @@
+{
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "reviewed_sha256": {
+    "research/work-items/RE-002-num-cpus-cache-94/README.md": "8bb49776e060e75c36fa00010570ef12d160b7da63895e4a68a49573e8397111",
+    "research/work-items/RE-002-num-cpus-cache-94/PROOF.md": "69b40ba141c7a73ce6807f7e28d218585bc065bca62b7213462c82a471a7082a",
+    "research/work-items/RE-002-num-cpus-cache-94/rust/src/lib.rs": "b9e293115b1e142815046e10009651b777ff773d2449243b0fa507773ba4e65b",
+    "research/work-items/RE-002-num-cpus-cache-94/rust/src/main.rs": "8e6a38d2fc250dc40d488fc465251aeb4ea36305dc65bbcfc7703f28fe28d4bc",
+    "research/work-items/RE-002-num-cpus-cache-94/preparation/build_oracle.py": "79dd9e9c51a612329023b0f20ea18b1544cd3e075551914027488025258ab2ab",
+    "research/work-items/RE-002-num-cpus-cache-94/oracle/vectors.json": "9d9a37523e8dd83f82ea66f27d7acddf42438b9c3a057574e179b674bdedaa5c",
+    "research/work-items/RE-002-num-cpus-cache-94/oracle/FREEZE.json": "0c7a365ccac5f838b1917fe496660e9d9dc980981c27359c1dd58f0ffa59f829",
+    "tools/cpu_cache_static.py": "ba99c116d619a2611d3203a8d6e35724a89b7727cfbb1f1f79d0506ce224297d",
+    "tests/test_cpu_cache_static.py": "0906f9b09daccd04046df1a652d32bdf3d47c1df30fc70e4a85d64c3635923ee"
+  },
+  "independent_oracle": "Monotone positive-binary64 bit-space search; exact rational nearest-neighbor distances and parity ties. No import of author oracle or host float arithmetic.",
+  "vectors": 2317,
+  "mismatches": [],
+  "fresh_ranges": [
+    {
+      "start": "0x4e04830",
+      "end": "0x4e061bd",
+      "bytes": 6541,
+      "instructions": 1320,
+      "sha256": "e7617cb1a72162d8081d70bc591de29d92d329a6adb2800ca3dda0fc4f9b4795",
+      "gnu_stdout_sha256": "c0e511619404843e88f679670fad6d71c6200cc45bbd96067f2e1b0eb69b69d4"
+    },
+    {
+      "start": "0x4e061c0",
+      "end": "0x4e061d2",
+      "bytes": 18,
+      "instructions": 7,
+      "sha256": "c93fa4181e746b55528819ba2d5c531393fe7fe1370afa124b6753507f530606",
+      "gnu_stdout_sha256": "09f2cfb7adaf4e37e3cd354bea0aaf7e7cc85dfb26efc0e095b912101cc11e14"
+    },
+    {
+      "start": "0x4e06870",
+      "end": "0x4e069a8",
+      "bytes": 312,
+      "instructions": 79,
+      "sha256": "886a281a54aed07199e96fe211121a454f18406820dc3fbf22432c66415e7554",
+      "gnu_stdout_sha256": "74e3c44bdf90ec2854ae713f557d928071773fbcc9bd904c5a29b764ee438448"
+    },
+    {
+      "start": "0x565f670",
+      "end": "0x565f6e7",
+      "bytes": 119,
+      "instructions": 30,
+      "sha256": "305266cf1728cbf73813d37f53ff4f144253a377fc9258c8732b1f4b3bf5eaeb",
+      "gnu_stdout_sha256": "44893e4600602eec15b8ac7f8daa97a2965accb674e852588392d9c19672353f"
+    }
+  ],
+  "loader_zero_tail": {
+    "pt_load": [
+      1,
+      6,
+      91715152,
+      91727440,
+      91727440,
+      56480,
+      2320432,
+      4096
+    ],
+    "file_va_end": "0x57882f0",
+    "memory_va_end": "0x59b0e80",
+    "cache": "0x57883f8..0x5788400"
+  },
+  "static_optimized_verify_exit": 0,
+  "semantic_findings": [],
+  "documentation_notes": [
+    "Default floating environment should explicitly include masked invalid/precision exceptions: initial CVTTSD2SI is out of signed range for high admitted quota ratios. Values match under the stated default, not arbitrary MXCSR masks.",
+    "Loader zero initialization is supported by actual writable PT_LOAD zero-fill tail, not SHT_NOBITS alone. Target map independently checked here."
+  ],
+  "limits": [
+    "No target or emulator execution.",
+    "No independent native rerun; parent recorded native results were reviewed.",
+    "No exact num_cpus release/source-build provenance inferred from the dependency API match.",
+    "Initial narrow GNU window started midinstruction at4e05820 and was not used; complete FDE GNU/Capstone decodes above replace it."
+  ]
+}
