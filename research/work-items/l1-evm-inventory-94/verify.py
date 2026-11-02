@@ -27,6 +27,22 @@ def check_packet(here=HERE):
         path = here / name
         if path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
             raise ValueError(f'manifest mismatch: {name}')
+    # The rest of the admission the node-inventory verifiers spell
+    # out: the manifest loop above never looks at the directory
+    # itself, so an unlisted file could sit in the packet unseen.
+    present = set()
+    for entry in sorted(here.iterdir()):
+        if entry.is_symlink():
+            raise ValueError(f'symlink in packet directory: {entry.name}')
+        if entry.is_dir():
+            if entry.name != '__pycache__' or not all(
+                    child.name.endswith('.pyc') and not child.is_symlink()
+                    for child in entry.iterdir()):
+                raise ValueError(f'unexpected directory in packet: {entry.name}')
+            continue
+        present.add(entry.name)
+    if present - {'MANIFEST.sha256'} != set(entries):
+        raise ValueError('packet contents differ from manifest')
     sys.path.insert(0, str(ROOT / 'tools'))
     spec = importlib.util.spec_from_file_location('l1_evm_inventory', ROOT / 'tools/l1_evm_inventory.py')
     module = importlib.util.module_from_spec(spec)
