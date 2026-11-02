@@ -1,0 +1,84 @@
+{
+  "scope": "Independent read-only source/protocol/harness peer review; no edits, builds, captured binary execution or instruction evaluation.",
+  "source_freeze_sha256": "89d7df78abf6bd9c54efa6685a9a1c1b9d65c829e5fd32e2747d8256e1bf5464",
+  "verdict": "No actionable production-source defect found. Original corpus qualification gap remains explicitly recorded and a separate post-source supplement is pending.",
+  "findings": [],
+  "read_files": {
+    "research/work-items/RE-007-funding-worker-values-94/SOURCE-FREEZE.json": "89d7df78abf6bd9c54efa6685a9a1c1b9d65c829e5fd32e2747d8256e1bf5464",
+    "research/work-items/RE-007-funding-worker-values-94/SOURCE-PROOF.md": "14145796007745320f06ce5453b506de9f3cdd6912e07cc192368826d0e01bba",
+    "research/work-items/RE-007-funding-worker-values-94/PROOF.md": "13c3bad3f3e6fdfeb8c65f3b74a9c8501f3045494169c259ff5f2a621bde4183",
+    "research/work-items/RE-007-funding-worker-values-94/driver.rs": "4db6f06488a2d26988b42b219da48d5a10779f49445df871095fece6baed1d42",
+    "research/work-items/RE-007-funding-worker-values-94/build.py": "57b9a9d1f96f173e655571aa3a1798817a935f1cbc0c1504d30ee5d84e6a8da8",
+    "research/work-items/RE-007-funding-worker-values-94/pre-rust/PROTOCOL.md": "35904876bf365eeaf11b8d48b04e04985b561277e69f1f80b5b3c652b3510c50",
+    "research/work-items/RE-007-funding-worker-values-94/pre-rust/oracle.py": "091ebec4b2a573cfbe9e74d5be4f49560d673dca6474bca569257b868a724d83",
+    "research/work-items/RE-007-funding-worker-values-94/pre-rust/PRE-RUST-FREEZE.json": "e6555491429b7327c5b78c6f71d57f005c629bd5464ca9ed4b03fa5cfdc733b6",
+    "research/work-items/RE-007-funding-worker-values-94/pre-rust/fixtures/corpus.json": "de4fd98822b999e842a5e0bb4a4c74838fbaa2c47bfb05fb0a4091b96019800e",
+    "src/node94-funding-worker-values/src/lib.rs": "fd462d90b2a5e9ec0340a797bd35c4f9466ea2bd06ced3fa83dfee2b86387b70",
+    "src/node94-funding-worker-values/tests/worker_values.rs": "dad164a996c027eee97d8e2baf93b0f97a4511097159cff03e44c6b63ba455fd",
+    "src/node94-funding-worker-values/Cargo.toml": "d3ee47ede0f554b54ee8fd49acf876108b88f4da1ffd473bf5d8a8c12d2ff3a9",
+    "src/node94-funding-worker-values/Cargo.lock": "550518d79a8515bee3f58371fc62431c8708e8ca9f0a8e5329a17a18f00bae56",
+    "src/node94-funding-worker-values/README.md": "a7213f208dc95e0ae20b3be15d507f47a932786c922c8481444797b370010c5d"
+  },
+  "source_harness_frozen_entries_verified": 10,
+  "independent_checks": {
+    "input_frames": 10945,
+    "expected_frames": 10945,
+    "all_frame_ids_equal": true,
+    "active_rate_zero_size_out_of_bounds_metadata_cases": 0,
+    "case1804": {
+      "position": [
+        0,
+        0,
+        7,
+        -18014398509481986,
+        0,
+        0,
+        0
+      ],
+      "rate": 4368491638549381119,
+      "price": 1,
+      "expected_payload": "010100000000000000010000000000000000000000000000000700000000000000feffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffff0100000000000000000000000100000000000000feffffffffffbfffffffffffffff9f3cfeffffffffffbfff000102030405060708090a0b0c0d0e0f101112130100000000000080ffffffff01000000000000000100000000000000000200000000004000000102030405060708090a0b0c0d0e0f1011121300000000"
+    },
+    "input_raw_sha256": "4e9f0100c57f6c3a8444c2da54f2264f5579eadf86fd861432bb5a3aec56b07e",
+    "expected_raw_sha256": "234f90c71df3eda148c9465c71af9e0ca5455bb96790c0d42efe16b5972bc2c3"
+  },
+  "reasoning": [
+    {
+      "topic": "u128 rounding boundaries",
+      "evidence": "src/node94-funding-worker-values/src/lib.rs:114 and SOURCE-PROOF.md; independent oracle.py Fraction/adjacent-neighbor algorithm",
+      "assessment": "Both callers bound the exact significand product below2^106. q=max(top-52,-1074) yields valid shift widths; shift128 ties to even zero, normal/subnormal crossover and overflow carry retain correct binary64 class. The two successive roundings are distinct. finite_parts is used only after finite admission."
+    },
+    {
+      "topic": "finite/nonfinite/minimum distinction",
+      "evidence": "src/node94-funding-worker-values/src/lib.rs:164; PROOF.md:111",
+      "assessment": "Nonfinite rates and overflowed binary64 products yield amount0; finite magnitude>=2^63 maps positive toMAX and negative to refusal. Below that magnitude, truncation fits i64; signed zero and raw rate bits are not conflated."
+    },
+    {
+      "topic": "guard/state/request order",
+      "evidence": "src/node94-funding-worker-values/src/lib.rs:217,232,238,270,284,290; PROOF.md:101,205",
+      "assessment": "Membership/rate precede metadata; index precedes zero-size; negative-price/product/minimum precede time. Fullu32 tag chooses local only for1. Requests precede saturating writes; summary requests follow all position requests. Strict unsigned product magnitude retains first maximum, includingMIN magnitude2^63."
+    },
+    {
+      "topic": "driver and expectation isolation",
+      "evidence": "driver.rs:72,178; build.py:309,310,367,368",
+      "assessment": "Client accepts onlystdin and noarguments, checks remaining-byte counts/strict ordered maps/unique IDs/trailing bytes, invokes real crate and serializes active fields. Expected bytes are read only by parent comparison; stdin is the separate frozen input stream. Frame IDs do not select behavior."
+    },
+    {
+      "topic": "actual graph/build admission",
+      "evidence": "build.py:69..105,205..260,317..381; SOURCE-FREEZE.json",
+      "assessment": "Real5-file dependency-free crate and lock are hash-admitted; source/harness copy identities, freshCARGO_HOME, allowlisted env, lexical/canonical ancestor config absence,97 toolchain payload pins and post-run checks are enforced. This is source/harness review, not a duplicate build or hermetic-host claim."
+    }
+  ],
+  "qualification": {
+    "status": "known original qualification failure, not a production bug",
+    "receipt": "artifacts/root-funding-worker-initial-build-failure.json",
+    "receipt_sha256": "48aaf63834706a512492c4f9475b92c82155527244d478c0cdca8f2e1d6184bb",
+    "details": "Root original build stopped exit1 after size-before-index compiled mutant emitted all10945 outputs equal to expected. Independent raw-frame parse found zero admitted active-rate/zero-size/out-of-bounds metadata cases. Handwritten integration test already states the correct index-before-size behavior. Any supplement must remain separately frozen after source, preserving original corpus/source/build failure; no completed supplement verdict claimed here."
+  },
+  "limits": [
+    "No broad test suite or duplicate build run.",
+    "No new proof that real callers establish MXCSR controls; native theorem remains conditional.",
+    "No target panic/failure-state rollback, native ABI/allocator/scheduler or logging-delivery claim.",
+    "No proof from coverage counts alone; compiled mutation completion is pending the separately qualified supplement."
+  ]
+}
