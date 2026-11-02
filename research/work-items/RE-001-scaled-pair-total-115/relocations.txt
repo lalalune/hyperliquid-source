@@ -1,0 +1,12 @@
+Relocations and references for node #115 0x5f09a50 (from readelf and objdump):
+
+- No GOT/RELATIVE slot is read in-window: the window contains no
+  PLT call and no stack-canary check. Its only rip-relative
+  instruction is the lea at 0x5f09a66 computing the sentinel
+  constant 0x5f04d70 itself (an address, not a data load).
+- Indirect calls in-window (2 sites, virtual, by contract only):
+  0x5f09aa9 call *%rax (first subobject's + 0x68 slot) and
+  0x5f09b00 call *%rcx (second subobject's + 0x68 slot).
+- No landing pad: the FDE has CIE 0 and no LSDA, and the window
+  contains no _Unwind_Resume call.
+- Caller census: see records.json (census section) and census.py.
