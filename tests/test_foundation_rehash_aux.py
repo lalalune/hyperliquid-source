@@ -69,7 +69,9 @@ class TestEmptyAndSingleNode(unittest.TestCase):
         # the head and its bucket entry becomes the sentinel.
         # The fixup store is skipped because the inserted node's
         # next pointer is null (the head was null), so bucket
-        # entry 0 stays empty and the previous index stays 0.
+        # entry 0 stays empty; the previous index still becomes
+        # the node's bucket (2) on the empty path, which has no
+        # observable effect with a single node.
         node = Node("A", 10)
         table = chain_table([node], bucket_count=3)
         rehash_aux(table, 4, saved_next_resize=99)
@@ -154,7 +156,7 @@ class TestMigrationOrder(unittest.TestCase):
 
 
 class TestSingleBucketArm(unittest.TestCase):
-    def test_single_bucket_preserves_chain_order(self):
+    def test_single_bucket_chain_reverses_two_nodes(self):
         # Count 1: every node hashes to bucket 0. The first node
         # starts the bucket (entry = sentinel, fixup skipped:
         # its next is null). Every later node finds the entry
