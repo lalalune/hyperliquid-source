@@ -34,6 +34,16 @@ def read(data,va,n):
     s=matches[0];off=s['offset']+va-s['address'];return off,bytes(data[off:off+n])
 
 
+def rela_section(data):
+    """The .rela.dyn section, shape-checked before its entries are folded.
+    A size that is not a whole number of 24-byte entries would otherwise
+    escape the fold as a bare struct.error, not this module's ValueError:
+    the same fail-closed shape evm_amount_scale applies to this table."""
+    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    if sec['size']%24:raise ValueError('.rela.dyn truncated')
+    return sec
+
+
 def parameters(data,a):
     first,second=BRANCHES[a]
     for site,raw in [(first-11,'4c8b4af84c3b0a488d5208'),(second-13,'488b12483b164889f2488d7608')]:
@@ -80,6 +90,7 @@ def analyze(data):
             if site+2+struct.unpack('<b',code[1:])[0]!=target:raise ValueError('nonce comparison backedge changed')
         code=read(data,first+2,2)[1]
         if code[0]!=0xeb or first+4+struct.unpack('<b',code[1:])[0]!=second+2:raise ValueError('nonce failure convergence changed')
+    rela_section(data)
     for o in spec['owners']:
         for site,target in o['direct_calls'].items():
             site=int(site);code=read(data,site,5)[1]
