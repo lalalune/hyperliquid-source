@@ -1,0 +1,306 @@
+{
+  "abi": {
+    "err_note": "Err 0xdf is a movw STORE at 0x2750700 reached by fall-through when the privilege word is 1 and the frozen-users count is non-zero. Claimed with the string only.",
+    "err_tag": "0xdf",
+    "err_tag_bytes": "66c703df00",
+    "err_tag_kind": "movw_store",
+    "err_tag_va": "0x2750700",
+    "ok_186_claimed": false,
+    "ok_186_kind": "movw_store",
+    "ok_186_tag": "0x186"
+  },
+  "adjacent_prior_work": {
+    "inventory_only": [
+      {
+        "component": "spot-meta-inventory-94",
+        "entry": "0x27506c0",
+        "note": "Merged #650 lists 0x27506c0 as an inventory start/owner only. It does not read the privilege/frozen-users gate, Err 0xdf, or string 0x5999c1.",
+        "pr": 650
+      }
+    ],
+    "sibling": null
+  },
+  "binary": "artifacts/node/94/hl-node",
+  "binary_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "carve": {
+    "end": "0x27507ce",
+    "len": 270,
+    "sha256": "0fbf9cf933af697d974cfde82054ba4bb70d6fdb8e18d5acc1b4786390d8fe4f",
+    "sha256_expected": "0fbf9cf933af697d974cfde82054ba4bb70d6fdb8e18d5acc1b4786390d8fe4f",
+    "sha256_match": true,
+    "start": "0x27506c0"
+  },
+  "claim": "cannot_revoke_token_freeze_err_only",
+  "component": "RE-040",
+  "direct_call_sites": [
+    "0x23e804f"
+  ],
+  "direct_calls": 1,
+  "direct_e9_calls": 0,
+  "error_strings": [
+    {
+      "bytes_hex": "63616e6e6f74207265766f6b6520746f6b656e20667265657a652070726976696c656765207768656e207468657265206172652066726f7a656e207573657273",
+      "expected_hex": "63616e6e6f74207265766f6b6520746f6b656e20667265657a652070726976696c656765207768656e207468657265206172652066726f7a656e207573657273",
+      "lea_in_carve": {
+        "bytes": "488d05b592e4fd",
+        "target": "0x5999c1",
+        "targets_string": true,
+        "va": "0x2750705"
+      },
+      "lea_rip_refs_primary": [
+        "0x2750705",
+        "0x4d74065",
+        "0x4d74175"
+      ],
+      "len": 64,
+      "len_expected": 64,
+      "match": true,
+      "name": "cannot_revoke_token_freeze",
+      "not_claimed_leas_same_string": [
+        "0x4d74065",
+        "0x4d74175"
+      ],
+      "occurrence_count": 1,
+      "occurrences": [
+        {
+          "file_offset": "0x5999c1",
+          "va": "0x5999c1"
+        }
+      ],
+      "sha256": "f2ad5057034d6fec797811f9716cad4e3b84a0c2d5694c29535f957db15043a4",
+      "text": "cannot revoke token freeze privilege when there are frozen users",
+      "va": "0x5999c1"
+    }
+  ],
+  "extent": {
+    "carve_note": "Exclusive end 0x27507ce is the first int3 after the landing-pad tail; 2-byte int3 pad then next function begins at push-rbp 0x27507d0.",
+    "fde_end_exclusive": "0x27507ce",
+    "fde_start": "0x27506c0",
+    "int3_pad_len": 2,
+    "int3_padding_at_fde_end": true,
+    "next_fn_bytes": "5541",
+    "next_fn_is_push_rbp": true,
+    "next_fn_va": "0x27507d0"
+  },
+  "got_relative_to_entry": [],
+  "key_insns": [
+    {
+      "bytes": "4157",
+      "expected": "4157",
+      "match": true,
+      "note": "push r15 (prologue)",
+      "va": "0x27506c0"
+    },
+    {
+      "bytes": "483b9618020000",
+      "expected": "483b9618020000",
+      "match": true,
+      "note": "cmp rdx, [rsi+0x218] (OOB bound)",
+      "va": "0x27506cb"
+    },
+    {
+      "bytes": "0f83d8000000",
+      "expected": "0f83d8000000",
+      "match": true,
+      "note": "jae 0x27507b0 (OOB -> bounds panic, not claimed)",
+      "va": "0x27506d2"
+    },
+    {
+      "bytes": "4869cae8000000",
+      "expected": "4869cae8000000",
+      "match": true,
+      "note": "imul rcx, rdx, 0xe8 (entry stride)",
+      "va": "0x27506e2"
+    },
+    {
+      "bytes": "837c081001",
+      "expected": "837c081001",
+      "match": true,
+      "note": "cmp dword [rax+rcx+0x10], 1 (freeze privilege set)",
+      "va": "0x27506ed"
+    },
+    {
+      "bytes": "0f859b000000",
+      "expected": "0f859b000000",
+      "match": true,
+      "note": "jne 0x2750793 (privilege not set -> clear + Ok)",
+      "va": "0x27506f2"
+    },
+    {
+      "bytes": "49837c242800",
+      "expected": "49837c242800",
+      "match": true,
+      "note": "cmp qword [r12+0x28], 0 (frozen-users count)",
+      "va": "0x27506f8"
+    },
+    {
+      "bytes": "741d",
+      "expected": "741d",
+      "match": true,
+      "note": "je 0x275071d (no frozen users -> drain + revoke)",
+      "va": "0x27506fe"
+    },
+    {
+      "bytes": "66c703df00",
+      "expected": "66c703df00",
+      "match": true,
+      "note": "movw [rbx], 0xdf Err STORE (claimed)",
+      "va": "0x2750700"
+    },
+    {
+      "bytes": "488d05b592e4fd",
+      "expected": "488d05b592e4fd",
+      "match": true,
+      "note": "lea rax, [rip+ string 0x5999c1]",
+      "va": "0x2750705"
+    },
+    {
+      "bytes": "48894308",
+      "expected": "48894308",
+      "match": true,
+      "note": "mov [rbx+0x8], rax (string ptr)",
+      "va": "0x275070c"
+    },
+    {
+      "bytes": "48c7431040000000",
+      "expected": "48c7431040000000",
+      "match": true,
+      "note": "mov qword [rbx+0x10], 0x40 (len 64)",
+      "va": "0x2750710"
+    },
+    {
+      "bytes": "e984000000",
+      "expected": "e984000000",
+      "match": true,
+      "note": "jmp 0x27507a1 (return Err)",
+      "va": "0x2750718"
+    },
+    {
+      "bytes": "e8f516c600",
+      "expected": "e8f516c600",
+      "match": true,
+      "note": "call 0x33b1e80 (collection drain, not claimed)",
+      "va": "0x2750786"
+    },
+    {
+      "bytes": "49c744241000000000",
+      "expected": "49c744241000000000",
+      "match": true,
+      "note": "mov qword [r12+0x10], 0 (revoke, not claimed)",
+      "va": "0x2750793"
+    },
+    {
+      "bytes": "66c7038601",
+      "expected": "66c7038601",
+      "match": true,
+      "note": "movw [rbx], 0x186 Ok STORE (not claimed)",
+      "va": "0x275079c"
+    },
+    {
+      "bytes": "ff15b3dc0103",
+      "expected": "ff15b3dc0103",
+      "match": true,
+      "note": "ff15 bounds panic via GOT 0x576e470 (not claimed)",
+      "va": "0x27507b7"
+    },
+    {
+      "bytes": "e86c863600",
+      "expected": "e86c863600",
+      "match": true,
+      "note": "e8 inbound direct call",
+      "va": "0x23e804f"
+    }
+  ],
+  "key_insns_all_match": true,
+  "negatives": {
+    "clear_priv_store_observed": true,
+    "cmp_frozen_bytes_match": true,
+    "cmp_priv_bytes_match": true,
+    "direct_e8_is_1": true,
+    "drain_call_target": true,
+    "err_df_movw_store": true,
+    "err_jmp_to_epilogue": true,
+    "fallthrough_to_err": true,
+    "je_frozen_bytes_match": true,
+    "je_frozen_targets_drain": true,
+    "jne_priv_bytes_match": true,
+    "jne_priv_targets_clear": true,
+    "lea_targets_string": true,
+    "no_direct_e9": true,
+    "no_relative_to_entry": true,
+    "not_claimed_lea_list_matches": true,
+    "not_claimed_leas_are_outside_carve": true,
+    "occurrence_count_is_1": true,
+    "ok_186_store_observed": true,
+    "oob_jae_targets_panic": true,
+    "string_exact": true,
+    "string_len_imm_0x40": true,
+    "string_sha256_pin": true
+  },
+  "oob_path_observed": {
+    "claimed": false,
+    "cmp_bytes": "483b9618020000",
+    "cmp_va": "0x27506cb",
+    "jae_bytes": "0f83d8000000",
+    "jae_target": "0x27507b0",
+    "jae_va": "0x27506d2",
+    "panic_got": "0x576e470"
+  },
+  "rules": [
+    {
+      "claimed": true,
+      "cmp_frozen_bytes": "49837c242800",
+      "cmp_frozen_va": "0x27506f8",
+      "cmp_priv_bytes": "837c081001",
+      "cmp_priv_va": "0x27506ed",
+      "description": "refuse to revoke the token freeze privilege while users are frozen: privilege word == 1 and frozen-users count != 0 falls through to Err 0xdf + string cannot revoke token freeze privilege when there are frozen users",
+      "err_string": "cannot_revoke_token_freeze",
+      "fallthrough_to_err": true,
+      "je_frozen_bytes": "741d",
+      "je_frozen_target": "0x275071d",
+      "je_frozen_va": "0x27506fe",
+      "jne_priv_bytes": "0f859b000000",
+      "jne_priv_target": "0x2750793",
+      "jne_priv_va": "0x27506f2",
+      "match": true,
+      "name": "cannot_revoke_token_freeze_err",
+      "negative": "tamper jne_priv / je_frozen / cmp bytes -> rule pin fails",
+      "proof": {
+        "frozen_users_takes_err": "dword [entry+0x10]==1 so jne @ 0x27506f2 not taken; qword [entry+0x28]!=0 so je @ 0x27506fe not taken; falls to 0x2750700 Err 0xdf + lea string + len 0x40, jmp to epilogue 0x27507a1",
+        "no_frozen_users": "je -> 0x275071d drains the collection via e8 0x33b1e80 then clears and stores Ok 0x186 (observed, not claimed)",
+        "oob_panic": "cmp [rsi+0x218],rdx / jae -> bounds panic via ff15 (observed, not claimed)",
+        "privilege_not_set": "jne -> 0x2750793 clears [entry+0x10] and stores Ok 0x186 (observed, not claimed)"
+      }
+    }
+  ],
+  "string_len_immediate": {
+    "bytes": "48c7431040000000",
+    "match": true,
+    "va": "0x2750710",
+    "value": 64
+  },
+  "unclaimed_observations": [
+    {
+      "name": "collection_drain_loop",
+      "note": "e8 0x33b1e80 loop at 0x2750786 drains the frozen-users collection; not claimed"
+    },
+    {
+      "name": "not_claimed_leas_same_string",
+      "note": "LEA sites 0x4d74065 and 0x4d74175 also target the same string; outside this carve; not claimed"
+    },
+    {
+      "name": "oob_bounds_panic",
+      "note": "jae 0x27507b0 -> ff15 bounds panic via GOT 0x576e470; not claimed"
+    }
+  ],
+  "unclaimed_ok_tags": [
+    {
+      "bytes": "66c7038601",
+      "claimed": false,
+      "kind": "movw_store",
+      "note": "revoke Ok 0x186 STORE after clearing [entry+0x10]; not claimed",
+      "tag": "0x186",
+      "va": "0x275079c"
+    }
+  ]
+}
