@@ -1,0 +1,279 @@
+{
+ "arguments": {
+  "a_rdx": "opaque argument; passed as rcx to helper 0x520a260 and as r9 to constructor callee 0x52144c0; its type and meaning are not pinned",
+  "b_rcx": "pointer to an object slot; the old object there is destroyed via its +0x8 virtual call when non-null, then replaced with the new 0xd0-byte object",
+  "c_r8": "pointer; the constructor callee reads its first byte (stored at new object +0x18); its type is not pinned",
+  "ctx_rsi": "context struct; fields used by this window: +0x140 (gate flag byte, also passed as a stack argument to the constructor callee), +0x08 (passed as a register argument to the constructor callee), +0x158 (passed by address as a stack argument to the constructor callee); other ctx fields are read by the callees, not by this window",
+  "d_r9": "opaque argument; passed as the 8th argument (second stack argument) to the constructor callee; its type and meaning are not pinned",
+  "out_rdi": "caller out status struct, returned in rax; written by the gate path, by a status copy, or by the new object's +0x20 virtual call, depending on the phase reached"
+ },
+ "callees": {
+  "0x520a260": "helper, 388 bytes; contract: (status_out, ctx, heap_vector, a_rdx); returns a status in status_out; internals not pinned",
+  "0x520a900": "heap-vector destroy helper, 133 bytes; contract: takes a pointer to a slot holding a heap-vector pointer, destroys each non-null element via its +0x8 virtual call, frees the array with sized delete, frees the 0x18-byte vector struct; used by the cleanup function only",
+  "0x520e1b0": "WAL replay orchestrator (own packet, PR #1932); contract: (status_out, ctx, pending_vector); internals not pinned here",
+  "0x52144c0": "constructor-like callee, 298 bytes; contract below (see constructor_call); internals beyond its prologue stores are not pinned; it makes one internal call to 0x5213d10, whose behavior is not pinned"
+ },
+ "caller_census": {
+  "direct_callers": [
+   {
+    "arg_mapping_at_site": {
+     "a_rdx": "r12 of the caller",
+     "b_rcx": "r13 of the caller",
+     "c_r8": "r14 of the caller",
+     "ctx_rsi": "rbx+0x1518",
+     "d_r9": "rbx+0x68",
+     "out_rdi": "rbp of the caller"
+    },
+    "enclosing": "0x4fa87a0..0x4fa88de",
+    "site": "0x4fa88cf"
+   }
+  ],
+  "method": "numpy-vectorized .text e8/e9 scan plus whole-file qword scan (see census.py); a plain byte scan agrees",
+  "qword_refs": 0,
+  "tail_jumps": 0
+ },
+ "cleanup": {
+  "cie": "0x1301ae8",
+  "end": "0x520e830",
+  "entries": {
+   "0x520e7e4": "destroy the heap vector through helper 0x520a900, with rdi equal to the value stored at -0x88 (the address of the -0x50 slot, whose content at that point is the heap-vector pointer)",
+   "0x520e7f0": "free the 0xd0-byte object in r12 with sized delete (part of the 0x520e7e4 entry sequence)",
+   "0x520e7fd": "free the status1 message at -0x58 with delete[] when non-null",
+   "0x520e80b": "destroy the heap vector through helper 0x520a900, with rdi equal to lea -0x68 (the address of the heap-vector slot)"
+  },
+  "epilogue": "canary check, then _Unwind_Resume with rdi equal to rbx (the exception object saved by the landing stubs)",
+  "fde": "0x131d460",
+  "landing_stubs_in_window": {
+   "0x520eaf8": "save the exception object into rbx, jump to 0x520e80b",
+   "0x520eb04": "save the exception object into rbx, jump to 0x520e7e4",
+   "0x520eb10": "save the exception object into rbx, jump to 0x520e7fd"
+  },
+  "lsda": "0xbdce63",
+  "size": 76,
+  "start": "0x520e7e4"
+ },
+ "constructor_call": {
+  "args": {
+   "register": [
+    "new 0xd0-byte object (rdi)",
+    "ctx (rsi)",
+    "heap vector pointer (rdx)",
+    "c_r8 pointer (rcx)",
+    "ctx+0x08 (r8)",
+    "a_rdx (r9)"
+   ],
+   "stack_in_order": [
+    "pointer to the -0x50 slot (7th argument; that slot holds the heap-vector pointer at call time)",
+    "d_r9 (8th argument)",
+    "ctx+0x140 flag byte, zero-extended (9th argument)",
+    "ctx+0x158 by address (10th argument)"
+   ]
+  },
+  "call_site": "0x520ea49 (see phases)",
+  "prologue_stores_observed": {
+   " +0x08": "ctx",
+   " +0x10": "heap vector pointer (rdx at entry)",
+   " +0x18": "first byte read through c_r8 (rcx at entry)",
+   " +0x20": "r8 at entry (ctx+0x08)",
+   " +0x28": "r9 at entry (a_rdx)",
+   " +0x30": "content of the slot pointed to by the 7th stack argument (the heap-vector pointer at call time)",
+   "+0x00": "0x575bee0 (lea 0x575bed0, plus 0x10)"
+  },
+  "site": "0x520ea49",
+  "stack_cleanup": "add $0x20 to rsp after the call"
+ },
+ "inferences": [
+  "The component reading is 'WAL replay gate-and-replace caller': the window wraps the WAL replay orchestrator (PR #1932) with a ctx+0x140 gate, a helper-status check, and an object replacement whose +0x20 virtual call finishes the out status; source-level names for the ctx fields, the arguments and the 0xd0-byte object are not pinned",
+  "The status copy (phases 4 and 7) and the status move (phase 6) are distinct: the copy leaves the source intact, while the move frees the old destination message and zeroes the source",
+  "The second delete[] check in the move sequence reads the source message slot after that slot was zeroed, with no intervening write to it, so on a consistent move it never fires; it is recorded as an observed dead check, not as a live path"
+ ],
+ "phases": [
+  {
+   "name": "gate",
+   "order": 1,
+   "rule": "if the byte at ctx+0x140 is nonzero, out is set to code 3, flags 0, message null, and the function returns through the canary check; no allocation and no callee call happen on this path, and a pre-existing out message is not freed",
+   "sites": [
+    "0x520e85f",
+    "0x520e86a",
+    "0x520e87c"
+   ]
+  },
+  {
+   "name": "heap vector allocation",
+   "order": 2,
+   "rule": "operator new allocates 0x18 bytes; all 24 bytes are zeroed, forming an empty vector (begin, end, capacity all null); the pointer is kept in r12 and in the -0x68 slot",
+   "sites": [
+    "0x520e8a8",
+    "0x520e8bb",
+    "0x520e8d8"
+   ]
+  },
+  {
+   "args": [
+    "status1 at -0x60 (rdi)",
+    "ctx (rsi)",
+    "heap vector (rdx)"
+   ],
+   "call": "WAL replay orchestrator 0x520e1b0",
+   "name": "orchestrator replay",
+   "order": 3,
+   "sites": [
+    "0x520e8dc"
+   ]
+  },
+  {
+   "name": "nonzero orchestrator status",
+   "order": 4,
+   "rule": "if status1 byte 0 is nonzero, status1 is copied into out (code bytes +0..+5 and the message pointer; the old out message is not freed), the heap vector is torn down (see teardown), and the function returns",
+   "sites": [
+    "0x520e8e1",
+    "0x520e9d0",
+    "0x520e972"
+   ]
+  },
+  {
+   "args": [
+    "status2 at -0x50 (rdi)",
+    "ctx (rsi)",
+    "heap vector (rdx)",
+    "a_rdx (rcx)"
+   ],
+   "call": "helper 0x520a260",
+   "name": "helper call",
+   "order": 5,
+   "sites": [
+    "0x520e903"
+   ]
+  },
+  {
+   "name": "status move",
+   "order": 6,
+   "rule": "status2 is moved into status1: the old status1 message is freed with delete[] when non-null, then status2 code, flags and message are stored into status1 and status2 is zeroed; a second delete[] check then reads the already-zeroed status2 message slot and never fires on a consistent move",
+   "sites": [
+    "0x520e908",
+    "0x520e913",
+    "0x520e921",
+    "0x520e927",
+    "0x520e92f",
+    "0x520e937",
+    "0x520e940",
+    "0x520e945"
+   ]
+  },
+  {
+   "name": "nonzero helper status",
+   "order": 7,
+   "rule": "if the new status1 byte 0 is nonzero, status1 is copied into out exactly as in phase 4, the heap vector is torn down, and the function returns",
+   "sites": [
+    "0x520e953",
+    "0x520e95f",
+    "0x520e972"
+   ]
+  },
+  {
+   "name": "object construction",
+   "order": 8,
+   "rule": "operator new allocates 0xd0 bytes into r12; the -0x68 heap-vector slot is cleared to null and the heap-vector pointer is stashed in the -0x50 slot (dead after the phase 6 move); constructor callee 0x52144c0 is called with the register and stack arguments listed under constructor_call; rsp is restored by 0x20 after the call",
+   "sites": [
+    "0x520e9f8",
+    "0x520ea06",
+    "0x520ea10",
+    "0x520ea1f",
+    "0x520ea49",
+    "0x520ea52"
+   ]
+  },
+  {
+   "name": "object replacement",
+   "order": 9,
+   "rule": "the old object at *b_rcx is loaded; when non-null, its +0x8 virtual call runs; then *b_rcx is set to the new 0xd0-byte object",
+   "sites": [
+    "0x520ea4e",
+    "0x520ea56",
+    "0x520ea5a",
+    "0x520ea62"
+   ]
+  },
+  {
+   "name": "heap vector teardown (stash)",
+   "order": 10,
+   "rule": "the heap vector found through the -0x50 stash is torn down exactly as in teardown, using the stash pointer in r14",
+   "sites": [
+    "0x520ea65",
+    "0x520ea80",
+    "0x520ea9d",
+    "0x520eab4"
+   ]
+  },
+  {
+   "name": "virtual finish",
+   "order": 11,
+   "rule": "the new object at *b_rcx is loaded into rsi and its +0x20 virtual call runs with (out in rdi, object in rsi); the callee's behavior is not pinned, but this call is the final writer of out on this path",
+   "sites": [
+    "0x520eac1",
+    "0x520eac8",
+    "0x520eacb"
+   ]
+  },
+  {
+   "name": "final free and return",
+   "order": 12,
+   "rule": "the status1 message at -0x58 is freed with delete[] when non-null (it is not transferred to out on this path); the function returns out through the canary check",
+   "sites": [
+    "0x520eace",
+    "0x520eadb",
+    "0x520e87c",
+    "0x520e8a0"
+   ]
+  }
+ ],
+ "slug": "RE-001-wal-replay-caller-94",
+ "stack_layout": {
+  "canary": "fs:0x28 at -0x38(%rbp)",
+  "frame": "rbp frame, sub $0x68 after pushing rbp, r15, r14, r13, r12, rbx",
+  "slots": {
+   "-0x38": "canary",
+   "-0x50": "status2: code at -0x50, flags at -0x4c, message at -0x48; reused after the phase 6 move as the heap-vector stash",
+   "-0x60": "status1: code at -0x60, flags at -0x5c, message at -0x58",
+   "-0x68": "heap-vector pointer (cleared to null before the constructor call)",
+   "-0x78": "ctx (rsi at entry)",
+   "-0x80": "c_r8 (r8 at entry)",
+   "-0x88": "pointer to the -0x50 slot (set before the helper call; read by the cleanup entry at 0x520e7e4 and passed as the constructor callee's 7th stack argument)"
+  }
+ },
+ "status_layout": {
+  "code_u32": "+0x00; only its low byte is ever tested (the gate at phases 4 and 7); a code such as 0x100 passes the gate",
+  "flags_u16": "+0x04; copied verbatim on every transfer, never tested by this function",
+  "message_ptr": "+0x08, owning raw char pointer: moved (source cleared) in phase 6, copied in phases 4 and 7, freed with delete[] in phase 6 (old destination) and phase 12"
+ },
+ "task": "RE-001",
+ "teardown": {
+  "array_free": "when the vector begin pointer is non-null, sized delete frees it with size equal to vector+0x10 minus begin",
+  "element_loop": "walk slots from begin to end in 8-byte steps; each slot's element pointer, when non-null, gets its +0x8 virtual call; null slots are skipped",
+  "rule": "the heap vector is destroyed without resetting its fields; the vector struct itself is then freed with sized delete of 0x18 bytes",
+  "sites_shared": "0x520e972..0x520e9cb (phases 4 and 7, holder in r12); 0x520ea65..0x520eabc (phase 10, holder in r14)"
+ },
+ "tool_versions": {
+  "census": "numpy 1.26.4 vectorized scan; plain byte scan agrees",
+  "invocation": "objdump -d --start-address=<start> --stop-address=<end> work/hl-node-94.bin from the repository root with the relative binary path; objdump --dwarf=frames is not used for frames.txt (rows are verbatim from work/fde94/node-94-fde.tsv)",
+  "objdump": "GNU objdump (GNU Binutils for Ubuntu) 2.42",
+  "python": "3.12.3"
+ },
+ "unknowns": [
+  "The source-level names and types of the ctx fields, the a/b/c/d arguments, the heap-vector elements and the 0xd0-byte object",
+  "The internals of helper 0x520a260, of constructor callee 0x52144c0 beyond its prologue stores, and of the +0x8 and +0x20 virtual calls (they are per-object and not pinned from this window)",
+  "Why the gate code is exactly 3, and why phase 12 frees the status1 message instead of transferring it to out",
+  "Which landing stub serves which protected region (the LSDA mapping is not claimed); the cleanup entries are recorded in the order they appear, not as a per-region map",
+  "Whether the sole caller passes an empty out, as the copy paths assume (the caller is recorded by census only, its out state is not examined here)"
+ ],
+ "window": {
+  "artifact_path": "work/hl-node-94.bin",
+  "artifact_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "cie": "0x1301ae8",
+  "end": "0x520eb1c",
+  "fde": "0x131d424",
+  "lsda": "0xbdce41",
+  "size": 748,
+  "start": "0x520e830"
+ }
+}
