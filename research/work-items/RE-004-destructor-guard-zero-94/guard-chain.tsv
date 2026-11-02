@@ -1,0 +1,20 @@
+link site_va instruction effect
+prologue-zero 0x4e7d36c mov QWORD PTR [rsp],0x0 [final rsp+0x1440] = 0 (first prologue store; final rsp sits 0x1440 below this store)
+hash-store-1440 0x4e7d3dd mov QWORD PTR [rsp+0x1440],r14 [rsp+0x1440] = hash (transient)
+zero-store-1440 0x4e7d454 mov QWORD PTR [rsp+0x1440],0x0 [rsp+0x1440] = 0 (final normal-path value; no later store to this slot in the builder-caller FDE)
+buf-memcpy 0x4e7d4a8 memcpy([rsp+0x438],[rsp+0x1440],0x1000) [rsp+0x438] = [rsp+0x1440] = 0
+movups-load-88 0x4e7d554 movups xmm0,[rsp+0x88] load [rsp+0x88] sub-object head
+movups-store-328 0x4e7d58c movups [rsp+0x328],xmm0 [rsp+0x330] = [rsp+0x88]+8 (the hinted slot; maps to orig+0x198)
+ctor88-lea-tag 0x4e8a97a lea rcx,[0x574d2c0] rcx = tag pointer 0x574d2c0
+ctor88-slot8 0x4e8a981 mov QWORD PTR [rbx+0x8],rcx [rsp+0x88]+8 = 0x574d2c0 (nonzero, but not the guard)
+sweep 0x4e7d5bf memcpy([rbx+0x108],[rsp+0x2a0],0x1198) [rbx+0x2a0] = [rsp+0x438] = 0
+c3-got-call 0x326e592 call QWORD PTR [rip+...] # 5773ff8 c3 calls builder-caller via GOT slot 0x5773ff8 (RELATIVE addend 0x4e7d360); rdi = [rsp+0x1540] output buffer
+c3-fwd-setup-call 0x326e5a0 mov rsi,r12; mov rdx,r15; call 0x37fb9e0 c3 forwards the builder-caller output object (rsi) to forward
+fwd-rbx-rsi 0x37fba12 mov rbx,rsi forward rbx = builder-caller output object
+join-add 0x37fd237 add rbx,0x108 forward join shifts to the +0x108 sub-object
+fwd-dtor-call 0x37fd26f mov rdi,rbx; call 0x37f7070 normal path passes (orig+0x108) to the destructor
+unwind-add 0x37fd829 add rbx,0x108 unwind path shifts to the same +0x108 sub-object
+unwind-dtor-call 0x37fd830 mov rdi,rbx; call 0x37f7070 unwind path passes (orig+0x108) to the destructor
+guard-cmp-je 0x37f707e cmp QWORD PTR [rdi+0x198],0x0; je 0x37f70ee guard = [dtor+0x198] = [orig+0x2a0] = 0, so je skips the loop
+loop-head-loads 0x37f70ad mov r15,[rbx+r12-0x18]; mov r13,[rbx+r12-0x10] loop head (skipped): first loads would be [dtor+0x198]/[dtor+0x1a0] = [orig+0x2a0]/[orig+0x2a8], past the pair array
+skip-path-head 0x37f70ee mov rdi,rbx; call 0x3bc8560 skip path: vector teardown head, then sub-destructors at [rbx+0x18]/[rbx+0x48]/[rbx+0x88] (dtor coords)
