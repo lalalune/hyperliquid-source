@@ -129,3 +129,10 @@ checkout. The full `make verify` / `make test` suites were not run
 in this environment; the packet's own `verify.py` and the new
 `tests/test_foundation_indexed_create_format.py` suite were run
 and pass.
+
+## Reproduction display compatibility
+
+The integration verifier preserves all recorded addresses and instruction bytes.
+It normalizes only the objdump input filename and GNU implicit DS/ES display
+for the exact `f3 48 a5` and `f3 48 ab` encodings. The original excerpts remain
+unchanged. Original verifier and manifest are retained in the integration audit.

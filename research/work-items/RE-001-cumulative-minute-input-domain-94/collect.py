@@ -20,7 +20,7 @@ DEPENDENCIES = {
     'tools/fde_extents.py': '9ce52ed319743ecfbaaafec799f6cef20148e0d46f161091f89b7c58ffdd2345',
     'tools/foundation_millis.py': '77e9dc23e2db38e09953ca6792c18f85ce39a33f8b84c0b6f2c2b212e4c5bead',
     'tools/state_dump_result_projection_static.py': '4a5ddb8991011b16b391718987d8abffa81a0cd40beeec189b71e123520d396d',
-    'tools/artifacts.py': 'e69b7e1f35ad460fc9f0bcd2e568900b9b7420a3d71cf15f9e6c44a3b3463abf',
+    'tools/artifacts.py': 'bbf4d7f36052bf340fefb06d268753af737eb39ad607d589d1298eb0aaaf17cd',
 }
 
 

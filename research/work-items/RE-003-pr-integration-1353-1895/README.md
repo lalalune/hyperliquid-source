@@ -22,6 +22,15 @@ node #115 and visor keep the separate identities in provenance/artifacts.json.
   to current tool/source references and checksum metadata, not captured node
   bytes or original instruction records. It is not a new proof of source identity.
 
+- Rebind the cumulative-minute packet to the reviewed GPG-diagnostic-only
+  artifacts helper change, preserving the original packet in `original-context-1355.json`.
+  Its complete static verifier and negative controls pass again with the documented
+  Apple LLVM provider.
+- Permit only input-label and implicit DS/ES display differences for exact
+  F3 48 A5/AB instructions in three excerpt verifiers. Original verifiers and
+  manifests are archived; all instruction bytes and addresses remain exact.
+  Fifteen positive/negative display checks pass.
+
 ## Completed validation
 
 All 44 affected Cargo components pass `cargo +1.94.1 test --offline --locked`

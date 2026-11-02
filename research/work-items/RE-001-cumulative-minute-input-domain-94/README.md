@@ -85,3 +85,12 @@ No captured execution, emulator, live node service, signing or chain action is
 part of this packet. A next bounded question is whether the relevant helper
 memory effects can discharge the no-clobber premise, or which constructors supply
 the other twelve pointer-based minute inputs. Neither is silently assumed here.
+
+## Combined-source validation
+
+The PR integration updates the pinned `tools/artifacts.py` digest after its
+GPG-failure diagnostic fix. Successful authentication, target bytes and static
+analysis are unchanged. Original source, record and manifest are preserved in
+`RE-003-pr-integration-1353-1895/original-context-1355.json`; earlier review receipts
+remain historical. The integration reruns the complete static verifier and its
+negative controls against the updated dependency.

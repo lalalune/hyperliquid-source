@@ -21,6 +21,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import struct
 import subprocess
 import sys
@@ -29,6 +30,22 @@ import tempfile
 DEFAULT_BINARY = os.path.join("artifacts", "node", "94", "hl-node")
 WORK_BINARY = os.path.join("work", "hl-node-94.bin")
 PACKET_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+def canonical_objdump_display(data):
+    """Normalize only the input label and two GNU default-segment displays.
+
+    Addresses and every instruction byte remain exact. GNU versions differ
+    on spelling implicit DS/ES for the exact F3 48 A5/AB string operations.
+    Explicit prefixes and other operands are not normalized.
+    """
+    data = re.sub(rb"(?m)^[^\r\n]+(?=:     file format elf64-x86-64$)",
+                  b"<node94>", data)
+    return re.sub(
+        rb"(?m)^(\s*[0-9a-f]+:[ \t]+f3 48 (?:a5|ab)[ \t]+)([^\r\n]*)$",
+        lambda match: match[1] + match[2].replace(b"%ds:", b"").replace(b"%es:", b""),
+        data,
+    )
 
 
 class Elf:
@@ -257,7 +274,7 @@ def main(argv=None):
     if qhits != rec["censuses"]["qword_references"]:
         errors.append("window qword references mismatch: %s" % qhits)
 
-    # Excerpt regeneration byte-for-byte.
+    # Exact bytes/addresses and text, apart from the documented display fields.
     with tempfile.TemporaryDirectory() as tmp:
         subprocess.run([sys.executable,
                         os.path.join(PACKET_DIR, "export_excerpts.py"),
@@ -268,7 +285,7 @@ def main(argv=None):
                 have = f.read()
             with open(os.path.join(tmp, name), "rb") as f:
                 want = f.read()
-            if have != want:
+            if canonical_objdump_display(have) != canonical_objdump_display(want):
                 errors.append("excerpt %s regeneration mismatch" % name)
 
     # Packet manifest hashes.

@@ -151,3 +151,10 @@ suites were not re-run for this change: they fail on pre-existing
 LFS-pointer baselines in this environment, and this change adds only
 new files (a Python model, its tests and an evidence packet) that do
 not touch existing code.
+
+## Reproduction display compatibility
+
+The integration verifier preserves recorded bytes and addresses. It accepts
+only the documented objdump input-label difference and implicit DS/ES spelling
+for exact F3 48 A5/AB encodings. Original records remain unchanged; the original
+verifier and manifest are archived in the integration review packet.

@@ -81,3 +81,10 @@ the reason the stale path inflates the threshold; the meaning of the
 consumer struct's +0x10 callback and of the qword 0x100 passed beside
 it; why the commit clock call skips the chain walk; which call site
 each landing stub serves. See `unknowns` in `records.json`.
+
+## Reproduction display compatibility
+
+The integration verifier preserves recorded bytes and addresses. It accepts
+only the documented objdump input-label difference and implicit DS/ES spelling
+for exact F3 48 A5/AB encodings. Original records remain unchanged; the original
+verifier and manifest are archived in the integration review packet.

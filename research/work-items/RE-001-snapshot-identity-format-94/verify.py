@@ -25,6 +25,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import struct
 import subprocess
 import sys
@@ -41,6 +42,22 @@ RANGES = {
     "getpid.objdump.txt": ("0x5335850", "0x5335864"),
     "caller.objdump.txt": ("0x514f342", "0x514f3b0"),
 }
+
+def canonical_objdump_display(data):
+    """Normalize only the input label and two GNU default-segment displays.
+
+    Addresses and every instruction byte remain exact. GNU versions differ
+    on spelling implicit DS/ES for the exact F3 48 A5/AB string operations.
+    Explicit prefixes and other operands are not normalized.
+    """
+    data = re.sub(rb"(?m)^[^\r\n]+(?=:     file format elf64-x86-64$)",
+                  b"<node94>", data)
+    return re.sub(
+        rb"(?m)^(\s*[0-9a-f]+:[ \t]+f3 48 (?:a5|ab)[ \t]+)([^\r\n]*)$",
+        lambda match: match[1] + match[2].replace(b"%ds:", b"").replace(b"%es:", b""),
+        data,
+    )
+
 
 class Elf:
     """Minimal ELF64 reader: PT_LOAD mapping only."""
@@ -262,7 +279,7 @@ def main(argv=None):
                 old = f.read()
             with open(os.path.join(tmp, name), "rb") as f:
                 new = f.read()
-            check(old == new, "excerpt mismatch for %s" % name)
+            check(canonical_objdump_display(old) == canonical_objdump_display(new), "excerpt mismatch for %s" % name)
 
     # Packet manifest hashes.
     manifest = open(os.path.join(PACKET_DIR, "MANIFEST.sha256")).read()
