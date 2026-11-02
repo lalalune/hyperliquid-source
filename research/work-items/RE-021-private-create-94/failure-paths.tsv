@@ -1,0 +1,28 @@
+branch	branch_va	branch_bytes	branch_target_va	failure_condition	failure_edge	outcome_kind	outcome	observed_order
+f0_static_continue	0x24f0425	750c	0x24f0433	static flag equals one	fallthrough	status_byte	0x57	before stack access
+f0_stack_continue	0x24f043e	730c	0x24f044c	fewer than three stack words	fallthrough	status_byte	0x5b	before stack consumption
+f0_size_limb_continue	0x24f04a2	740c	0x24f04b0	nonzero high size limb	fallthrough	status_byte	0x54	three words removed
+f0_length_exceeds_cap	0x24f0509	0f87f8010000	0x24f0707	nonzero length exceeds selected cap	taken	status_byte	0x64	three words removed
+f0_word_charge_borrow	0x24f0536	0f82cb010000	0x24f0707	insufficient gas for word charge	taken	status_byte	0x50	three words removed
+f0_offset_high	0x24f054c	0f85b5010000	0x24f0707	nonzero high offset limb	taken	status_byte	0x54	word charge stored
+f0_memory_grow_success	0x24f0701	0f8579feffff	0x24f0580	memory growth helper returns zero	fallthrough	status_byte	0x51	word charge stored
+f0_base_gas_borrow	0x24f05f9	0f8208010000	0x24f0707	insufficient gas for base charge	taken	status_byte	0x50	word charge stored
+f5_static_continue	0x24f07f5	750c	0x24f0803	static flag equals one	fallthrough	status_byte	0x57	before stack access
+f5_stack_continue	0x24f080e	730c	0x24f081c	fewer than three stack words	fallthrough	status_byte	0x5b	before stack consumption
+f5_size_limb_continue	0x24f087b	740c	0x24f0889	nonzero high size limb	fallthrough	status_byte	0x54	three words removed
+f5_length_exceeds_cap	0x24f08e1	0f8707020000	0x24f0aee	nonzero length exceeds selected cap	taken	status_byte	0x64	three words removed
+f5_word_charge_borrow	0x24f090e	0f82da010000	0x24f0aee	insufficient gas for word charge	taken	status_byte	0x50	three words removed
+f5_offset_high	0x24f0924	0f85c4010000	0x24f0aee	nonzero high offset limb	taken	status_byte	0x54	word charge stored
+f5_memory_grow_success	0x24f0b3a	0f8518feffff	0x24f0958	memory growth helper returns zero	fallthrough	status_byte	0x51	word charge stored
+f5_missing_fourth_stack_word	0x24f09cf	0f8416010000	0x24f0aeb	salt stack word absent	taken	status_byte	0x5b	three words removed; memory path may have run
+f5_base_and_hash_gas_borrow	0x24f0a0b	0f82dd000000	0x24f0aee	insufficient gas for base and hash charge	taken	status_byte	0x50	salt removed and word charge stored
+depth_continue	0x278b432	7642	0x278b476	context depth greater than limit	fallthrough	status_byte	0x11	before caller load
+caller_load_error	0x278b4e0	0f8587000000	0x278b56d	caller load result byte differs from five	taken	outer_tag	0x4	before balance comparison and nonce update
+funds_sufficient	0x278b529	7368	0x278b593	caller four-limb value below requested value	fallthrough	status_byte	0x12	after caller load; before nonce update
+nonce_rejected	0x278b5c2	0f8408030000	0x278b8d0	nonce helper returns zero	taken	status_byte	0x2	before preimage and membership
+owned_miss	0x278b888	0f8467020000	0x278baf5	owned membership returns nonzero	fallthrough	status_byte	0x5e	after nonce update; before new checkpoint
+borrowed_hit	0x278baef	0f8599fdffff	0x278b88e	borrowed membership returns nonzero	taken	status_byte	0x5e	after nonce update; before new checkpoint
+created_account_error	0x278bb1b	0f85b2000000	0x278bbd3	candidate account load result byte differs from five	taken	outer_tag	0x4	after nonce update and membership miss
+checkpoint_hash_mismatch	0x2787d72	7507	0x2787d7b	account hash differs from selected constant	taken	status_byte	0x5e	checkpoint opened and rollback called
+checkpoint_nonce_zero	0x2787d79	742a	0x2787da5	matching account hash and nonzero account nonce	fallthrough	status_byte	0x5e	checkpoint opened and rollback called
+checkpoint_carry_first	0x2787ed8	0f8217010000	0x2787ff5	target value addition carries beyond 256 bits	taken	status_byte	0x5f	checkpoint opened; selected journal writes precede rollback
