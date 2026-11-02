@@ -32,6 +32,14 @@ import sys
 DEFAULT_BINARY = os.path.join("artifacts", "node", "94", "hl-node")
 PACKET_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# The manifest pins every packet file except MANIFEST.sha256 itself.
+PACKET_FILES = frozenset({
+    "README.md", "callers.objdump.txt", "export_excerpts.py",
+    "frames.txt", "landing.objdump.txt", "plt.objdump.txt",
+    "records.json", "relocations.txt", "verify.py",
+    "window.objdump.txt",
+})
+
 
 class Elf:
     """Minimal ELF64 reader: PT_LOAD mapping and RELA sections."""
@@ -273,24 +281,75 @@ def main(argv=None):
     if got_sites != want:
         errors.append("caller census mismatch: got %s want %s"
                       % ([hex(x) for x in got_sites], want))
-    # Manifest hashes.
+    # Manifest hashes. The manifest pins every packet file except
+    # itself, so the listed set must equal the pinned packet files and
+    # the files actually present (the admission check the RE-012/RE-009
+    # packet verifiers spell out). Hashing only the listed rows admits
+    # an unlisted payload, a duplicated row, a symlinked entry, or an
+    # evidence file deleted together with its row.
     manifest = os.path.join(PACKET_DIR, "MANIFEST.sha256")
-    try:
-        with open(manifest) as f:
-            for line in f:
-                parts = line.split()
-                if len(parts) != 2:
-                    errors.append("malformed manifest line: %r"
-                                  % line.strip())
-                    continue
-                digest, name = parts
-                path = os.path.join(PACKET_DIR, name)
-                with open(path, "rb") as pf:
+    listed = {}
+    if not os.path.exists(manifest):
+        errors.append("MANIFEST.sha256 missing")
+        listed = None
+    else:
+        try:
+            with open(manifest) as f:
+                for line in f:
+                    if not line.strip():
+                        continue
+                    parts = line.split()
+                    if len(parts) != 2:
+                        errors.append(
+                            "malformed manifest line: %r" % line.strip())
+                        continue
+                    digest, name = parts
+                    if name in listed:
+                        errors.append("manifest lists %s twice" % name)
+                        continue
+                    listed[name] = digest
+        except OSError as e:
+            errors.append("manifest unreadable: %s" % e)
+            listed = None
+    if listed is not None:
+        present = set()
+        for entry in sorted(os.listdir(PACKET_DIR)):
+            path = os.path.join(PACKET_DIR, entry)
+            if os.path.islink(path):
+                errors.append("packet entry is a symlink: %s" % entry)
+            elif os.path.isdir(path):
+                if entry != "__pycache__" or not all(
+                        name.endswith(".pyc")
+                        and not os.path.islink(os.path.join(path, name))
+                        for name in os.listdir(path)):
+                    errors.append(
+                        "unexpected directory in packet: %s" % entry)
+            else:
+                present.add(entry)
+        present.discard("MANIFEST.sha256")
+        if set(listed) != PACKET_FILES:
+            errors.append(
+                "manifest file set differs from the pinned packet "
+                "files: missing rows %s, unexpected rows %s"
+                % (sorted(PACKET_FILES - set(listed)),
+                   sorted(set(listed) - PACKET_FILES)))
+        if set(listed) != present:
+            errors.append(
+                "manifest file set differs from packet contents: "
+                "unlisted %s, missing %s"
+                % (sorted(present - set(listed)),
+                   sorted(set(listed) - present)))
+        for name, digest in sorted(listed.items()):
+            if name not in present:
+                continue
+            try:
+                with open(os.path.join(PACKET_DIR, name), "rb") as pf:
                     actual = hashlib.sha256(pf.read()).hexdigest()
-                if actual != digest:
-                    errors.append("manifest mismatch for %s" % name)
-    except OSError as e:
-        errors.append("manifest unreadable: %s" % e)
+            except OSError as e:
+                errors.append("manifest unreadable: %s" % e)
+                continue
+            if actual != digest:
+                errors.append("manifest mismatch for %s" % name)
     if errors:
         print("FAILED")
         for e in errors:
