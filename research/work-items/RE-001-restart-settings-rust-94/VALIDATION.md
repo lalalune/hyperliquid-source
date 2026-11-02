@@ -8,8 +8,11 @@
 - Own Rust: three 28,780-row debug/optimized/repeated comparisons,
   7 compiled semantic mutants, unit tests and repeated optimized-library
   digests pass. `rustfmt --check` passes. Source/qualifier hashes are recorded.
-- A fresh full 971-file inventory is running in one shared checkout; this
-  revision does not claim that pending run passed.
+- Complete shared unchanged inventory: **971/971 files pass**, zero failed files,
+  15,468 reported cases, 72 skip records, 1010.982 seconds.
+  Six workers run the same fresh-process unittest discovery commands as
+  `make test`; only scheduling differs. No test file or assertion is omitted.
+  Per-file exits, counts and raw-log digests are in `validation-results.json`.
 
 `validation-inputs.json` fingerprints the unchanged tracked tools/tests and
 registry/provenance/config inputs shared by the three branches. New components
