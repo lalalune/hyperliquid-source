@@ -79,3 +79,8 @@ it is outside this packet and no additional work is claimed here.
 Attribution: independently authored collector, tests and analysis by OpenAI
 `gpt-6-astra`, Codex 0.166.0, using the installed insane-research workflow. New
 code/docs are MIT; upstream source retains its included MIT notice.
+
+The full `make test` run on implementation commit `522ae812512b1d91c1c8d6ae1e2bf3fc59cf0e03`
+passed 77 files, 395 reported tests and 3 skips in 1050.997 seconds.
+All test files and the five qualified source/evidence files retained their hashes.
+The final follow-up changes only evidence metadata; hosted CI is not claimed.
