@@ -1,0 +1,135 @@
+
+artifacts/node/94/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001343c80 <.text>:
+ 370e6a0: 41 57                        	push	r15
+ 370e6a2: 41 56                        	push	r14
+ 370e6a4: 41 55                        	push	r13
+ 370e6a6: 41 54                        	push	r12
+ 370e6a8: 53                           	push	rbx
+ 370e6a9: 48 83 ec 10                  	sub	rsp, 0x10
+ 370e6ad: 48 89 54 24 08               	mov	qword ptr [rsp + 0x8], rdx
+ 370e6b2: 48 83 7f 18 00               	cmp	qword ptr [rdi + 0x18], 0x0
+ 370e6b7: 0f 84 7a 01 00 00            	je	0x370e837 <.text+0x23cabb7>
+ 370e6bd: 89 cb                        	mov	ebx, ecx
+ 370e6bf: 49 89 d6                     	mov	r14, rdx
+ 370e6c2: 49 89 f4                     	mov	r12, rsi
+ 370e6c5: 48 8d 47 20                  	lea	rax, [rdi + 0x20]
+ 370e6c9: 49 89 fd                     	mov	r13, rdi
+ 370e6cc: 48 89 c7                     	mov	rdi, rax
+ 370e6cf: e8 cc e0 28 00               	call	0x399c7a0 <.text+0x2658b20>
+ 370e6d4: 48 89 c2                     	mov	rdx, rax
+ 370e6d7: 48 c1 ea 39                  	shr	rdx, 0x39
+ 370e6db: 4d 8b 7d 00                  	mov	r15, qword ptr [r13]
+ 370e6df: 49 8b 4d 08                  	mov	rcx, qword ptr [r13 + 0x8]
+ 370e6e3: 66 0f 6e c2                  	movd	xmm0, edx
+ 370e6e7: 66 0f 60 c0                  	punpcklbw	xmm0, xmm0      # xmm0 = xmm0[0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7]
+ 370e6eb: f2 0f 70 c0 00               	pshuflw	xmm0, xmm0, 0x0         # xmm0 = xmm0[0,0,0,0,4,5,6,7]
+ 370e6f0: 66 0f 70 c0 44               	pshufd	xmm0, xmm0, 0x44        # xmm0 = xmm0[0,1,0,1]
+ 370e6f5: 49 8d 57 b0                  	lea	rdx, [r15 - 0x50]
+ 370e6f9: 31 f6                        	xor	esi, esi
+ 370e6fb: 66 0f 76 c9                  	pcmpeqd	xmm1, xmm1
+ 370e6ff: 48 21 c8                     	and	rax, rcx
+ 370e702: f3 41 0f 6f 14 07            	movdqu	xmm2, xmmword ptr [r15 + rax]
+ 370e708: 66 0f 6f da                  	movdqa	xmm3, xmm2
+ 370e70c: 66 0f 74 d8                  	pcmpeqb	xmm3, xmm0
+ 370e710: 66 0f d7 fb                  	pmovmskb	edi, xmm3
+ 370e714: 85 ff                        	test	edi, edi
+ 370e716: 74 58                        	je	0x370e770 <.text+0x23caaf0>
+ 370e718: f3 44 0f bc c7               	tzcnt	r8d, edi
+ 370e71d: 49 01 c0                     	add	r8, rax
+ 370e720: 49 21 c8                     	and	r8, rcx
+ 370e723: 49 f7 d8                     	neg	r8
+ 370e726: 4f 8d 04 80                  	lea	r8, [r8 + 4*r8]
+ 370e72a: 49 c1 e0 04                  	shl	r8, 0x4
+ 370e72e: f3 41 0f 6f 1c 24            	movdqu	xmm3, xmmword ptr [r12]
+ 370e734: f3 42 0f 6f 24 02            	movdqu	xmm4, xmmword ptr [rdx + r8]
+ 370e73a: 66 0f 74 e3                  	pcmpeqb	xmm4, xmm3
+ 370e73e: 66 41 0f 6e 5c 24 10         	movd	xmm3, dword ptr [r12 + 0x10]
+ 370e745: 66 42 0f 6e 6c 02 10         	movd	xmm5, dword ptr [rdx + r8 + 0x10]
+ 370e74c: 66 0f 74 eb                  	pcmpeqb	xmm5, xmm3
+ 370e750: 66 0f db ec                  	pand	xmm5, xmm4
+ 370e754: 66 44 0f d7 cd               	pmovmskb	r9d, xmm5
+ 370e759: 41 81 f9 ff ff 00 00         	cmp	r9d, 0xffff
+ 370e760: 74 2e                        	je	0x370e790 <.text+0x23cab10>
+ 370e762: 44 8d 47 ff                  	lea	r8d, [rdi - 0x1]
+ 370e766: 66 41 21 f8                  	and	r8w, di
+ 370e76a: 44 89 c7                     	mov	edi, r8d
+ 370e76d: 75 a9                        	jne	0x370e718 <.text+0x23caa98>
+ 370e76f: 90                           	nop
+ 370e770: 66 0f 74 d1                  	pcmpeqb	xmm2, xmm1
+ 370e774: 66 0f d7 fa                  	pmovmskb	edi, xmm2
+ 370e778: 85 ff                        	test	edi, edi
+ 370e77a: 0f 85 b7 00 00 00            	jne	0x370e837 <.text+0x23cabb7>
+ 370e780: 48 01 f0                     	add	rax, rsi
+ 370e783: 48 83 c0 10                  	add	rax, 0x10
+ 370e787: 48 83 c6 10                  	add	rsi, 0x10
+ 370e78b: e9 6f ff ff ff               	jmp	0x370e6ff <.text+0x23caa7f>
+ 370e790: 4b 83 7c 07 e0 00            	cmp	qword ptr [r15 + r8 - 0x20], 0x0
+ 370e796: 0f 84 9b 00 00 00            	je	0x370e837 <.text+0x23cabb7>
+ 370e79c: 4d 01 c7                     	add	r15, r8
+ 370e79f: 49 8d 7f e8                  	lea	rdi, [r15 - 0x18]
+ 370e7a3: 48 8d 74 24 08               	lea	rsi, [rsp + 0x8]
+ 370e7a8: e8 f3 dc 28 00               	call	0x399c4a0 <.text+0x2658820>
+ 370e7ad: 48 89 c6                     	mov	rsi, rax
+ 370e7b0: 48 c1 ee 39                  	shr	rsi, 0x39
+ 370e7b4: 49 8b 4f c8                  	mov	rcx, qword ptr [r15 - 0x38]
+ 370e7b8: 49 8b 57 d0                  	mov	rdx, qword ptr [r15 - 0x30]
+ 370e7bc: 66 0f 6e c6                  	movd	xmm0, esi
+ 370e7c0: 66 0f 60 c0                  	punpcklbw	xmm0, xmm0      # xmm0 = xmm0[0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7]
+ 370e7c4: f2 0f 70 c0 00               	pshuflw	xmm0, xmm0, 0x0         # xmm0 = xmm0[0,0,0,0,4,5,6,7]
+ 370e7c9: 66 0f 70 c0 44               	pshufd	xmm0, xmm0, 0x44        # xmm0 = xmm0[0,1,0,1]
+ 370e7ce: 48 8d 71 c0                  	lea	rsi, [rcx - 0x40]
+ 370e7d2: 31 ff                        	xor	edi, edi
+ 370e7d4: 66 0f 76 c9                  	pcmpeqd	xmm1, xmm1
+ 370e7d8: 48 21 d0                     	and	rax, rdx
+ 370e7db: f3 0f 6f 14 01               	movdqu	xmm2, xmmword ptr [rcx + rax]
+ 370e7e0: 66 0f 6f da                  	movdqa	xmm3, xmm2
+ 370e7e4: 66 0f 74 d8                  	pcmpeqb	xmm3, xmm0
+ 370e7e8: 66 44 0f d7 c3               	pmovmskb	r8d, xmm3
+ 370e7ed: 45 85 c0                     	test	r8d, r8d
+ 370e7f0: 74 2a                        	je	0x370e81c <.text+0x23cab9c>
+ 370e7f2: f3 45 0f bc c8               	tzcnt	r9d, r8d
+ 370e7f7: 49 01 c1                     	add	r9, rax
+ 370e7fa: 49 21 d1                     	and	r9, rdx
+ 370e7fd: 4d 89 ca                     	mov	r10, r9
+ 370e800: 49 c1 e2 06                  	shl	r10, 0x6
+ 370e804: 49 89 f3                     	mov	r11, rsi
+ 370e807: 4d 29 d3                     	sub	r11, r10
+ 370e80a: 4d 3b 33                     	cmp	r14, qword ptr [r11]
+ 370e80d: 74 36                        	je	0x370e845 <.text+0x23cabc5>
+ 370e80f: 45 8d 48 ff                  	lea	r9d, [r8 - 0x1]
+ 370e813: 66 45 21 c1                  	and	r9w, r8w
+ 370e817: 45 89 c8                     	mov	r8d, r9d
+ 370e81a: 75 d6                        	jne	0x370e7f2 <.text+0x23cab72>
+ 370e81c: 66 0f 74 d1                  	pcmpeqb	xmm2, xmm1
+ 370e820: 66 44 0f d7 c2               	pmovmskb	r8d, xmm2
+ 370e825: 45 85 c0                     	test	r8d, r8d
+ 370e828: 75 0d                        	jne	0x370e837 <.text+0x23cabb7>
+ 370e82a: 48 01 f8                     	add	rax, rdi
+ 370e82d: 48 83 c0 10                  	add	rax, 0x10
+ 370e831: 48 83 c7 10                  	add	rdi, 0x10
+ 370e835: eb a1                        	jmp	0x370e7d8 <.text+0x23cab58>
+ 370e837: 48 83 c4 10                  	add	rsp, 0x10
+ 370e83b: 5b                           	pop	rbx
+ 370e83c: 41 5c                        	pop	r12
+ 370e83e: 41 5d                        	pop	r13
+ 370e840: 41 5e                        	pop	r14
+ 370e842: 41 5f                        	pop	r15
+ 370e844: c3                           	ret
+ 370e845: 49 f7 d9                     	neg	r9
+ 370e848: 49 c1 e1 06                  	shl	r9, 0x6
+ 370e84c: 4a 8d 34 09                  	lea	rsi, [rcx + r9]
+ 370e850: 48 83 c6 c8                  	add	rsi, -0x38
+ 370e854: 49 83 c7 f8                  	add	r15, -0x8
+ 370e858: 4c 89 ff                     	mov	rdi, r15
+ 370e85b: 89 da                        	mov	edx, ebx
+ 370e85d: 48 83 c4 10                  	add	rsp, 0x10
+ 370e861: 5b                           	pop	rbx
+ 370e862: 41 5c                        	pop	r12
+ 370e864: 41 5d                        	pop	r13
+ 370e866: 41 5e                        	pop	r14
+ 370e868: 41 5f                        	pop	r15
+ 370e86a: e9 31 fa ff ff               	jmp	0x370e2a0 <.text+0x23ca620>
