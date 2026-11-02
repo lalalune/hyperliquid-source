@@ -1,0 +1,11 @@
+No RELATIVE relocation value is read by the window or its cleanup
+function: neither range contains a RIP-relative data load (the only
+special loads are the fs:0x28 stack canary). The window and cleanup
+therefore bind no relocated qword.
+
+PLT symbols called from the window and cleanup (objdump annotations):
+0x5660490 _Znwm (operator new, 0x18-byte heap vector and 0xd0-byte object)
+0x5660480 _ZdaPv (operator delete[], owning message frees)
+0x5660440 _ZdlPvm (sized operator delete, heap array and heap struct frees)
+0x5660430 __stack_chk_fail
+0x5660110 _Unwind_Resume (cleanup only)
