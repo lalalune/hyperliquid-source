@@ -1,0 +1,143 @@
+{
+  "artifact_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "coordinate_system": "ELF virtual addresses",
+  "functions": [
+    {
+      "name": "positive",
+      "start_va": "0x3c06160",
+      "end_va_exclusive": "0x3c0620a",
+      "file_offset": "0x3c05160",
+      "size": 170,
+      "sha256": "7182f118bff4cdbae8c62b2fc452ff2f04d503c0bdd56166dd43ec2b87684593",
+      "bytes_hex": "4885ff787ff2480f2acff20f59c166480f7ec048b9ffffffffffffff7f4821c8660f57c948baffffffffffffef7f4839d07f2ef20f10151d4b60fc660f2ed07710660f2e05474660fc7706660f28c8eb10f20f5fd0f20f100d334660fcf20f5dcaf2480f2cc1660f2e0dfa4060fc480f47c131c9660f2ec9480f4ac14885c0480f4ec1c350488d3d76369bfc488d0d3dedb0014c8d0516eab001488d542407be2b000000ff153e7eb601"
+    },
+    {
+      "name": "complement",
+      "start_va": "0x4cda1a0",
+      "end_va_exclusive": "0x4cda253",
+      "file_offset": "0x4cd91a0",
+      "size": 179,
+      "sha256": "85be9531efd115b8f651d4093f2e6d7da03e0ae582f3a11aedf510bfd1901784",
+      "bytes_hex": "4885ff0f8884000000f20f10157f0553fbf2480f2acff20f5cd0f20f59ca66480f7ec948b8ffffffffffffff7f4821c1660f57c048baffffffffffffef7f4839d17f2ef20f1015cd0a53fb660f2ed17710660f2e0df70553fb7706660f28c1eb10f20f5fd1f20f1005e30553fbf20f5dc2f2480f2cc8660f2e05aa0053fb480f47c831c0660f2ec0480f4bc1c350488d3d3bb4a3fb488d0dd4aaa6004c8d05ada2a600488d542407be2b000000ff15f53da900"
+    }
+  ],
+  "constants": [
+    {
+      "va": "0x20a2c8",
+      "file_offset": "0x20a2c8",
+      "bits": "43dfffffffffffff"
+    },
+    {
+      "va": "0x20a730",
+      "file_offset": "0x20a730",
+      "bits": "3ff0000000000000"
+    },
+    {
+      "va": "0x20a7f0",
+      "file_offset": "0x20a7f0",
+      "bits": "43e0000000000000"
+    },
+    {
+      "va": "0x20acb8",
+      "file_offset": "0x20acb8",
+      "bits": "c3e0000000000000"
+    }
+  ],
+  "locations": [
+    {
+      "va": "0x5714c10",
+      "source_suffix": "l1/src/qtys/mod.rs",
+      "line": 843,
+      "column": 1
+    },
+    {
+      "va": "0x57444f0",
+      "source_suffix": "l1/src/qtys/mod.rs",
+      "line": 843,
+      "column": 1
+    }
+  ],
+  "branches": [
+    {
+      "function": "positive",
+      "va": "0x3c06163",
+      "opcode": "js",
+      "destination_va": "0x3c061e4",
+      "meaning": "input sign -> panic"
+    },
+    {
+      "function": "positive",
+      "va": "0x3c06191",
+      "opcode": "jg",
+      "destination_va": "0x3c061c1",
+      "meaning": "nonfinite -> zero"
+    },
+    {
+      "function": "positive",
+      "va": "0x3c0619f",
+      "opcode": "ja",
+      "destination_va": "0x3c061b1",
+      "meaning": "below lower clamp"
+    },
+    {
+      "function": "positive",
+      "va": "0x3c061a9",
+      "opcode": "ja",
+      "destination_va": "0x3c061b1",
+      "meaning": "above upper clamp"
+    },
+    {
+      "function": "positive",
+      "va": "0x3c061af",
+      "opcode": "jmp",
+      "destination_va": "0x3c061c1",
+      "meaning": "within bounds"
+    },
+    {
+      "function": "complement",
+      "va": "0x4cda1a3",
+      "opcode": "js",
+      "destination_va": "0x4cda22d",
+      "meaning": "input sign -> panic"
+    },
+    {
+      "function": "complement",
+      "va": "0x4cda1e1",
+      "opcode": "jg",
+      "destination_va": "0x4cda211",
+      "meaning": "nonfinite -> zero"
+    },
+    {
+      "function": "complement",
+      "va": "0x4cda1ef",
+      "opcode": "ja",
+      "destination_va": "0x4cda201",
+      "meaning": "below lower clamp"
+    },
+    {
+      "function": "complement",
+      "va": "0x4cda1f9",
+      "opcode": "ja",
+      "destination_va": "0x4cda201",
+      "meaning": "above upper clamp"
+    },
+    {
+      "function": "complement",
+      "va": "0x4cda1ff",
+      "opcode": "jmp",
+      "destination_va": "0x4cda211",
+      "meaning": "within bounds"
+    }
+  ],
+  "finite_mask_control": {
+    "representatives": {
+      "finite": 12282,
+      "nonfinite": 6
+    },
+    "finite_bit_patterns": 18437736874454810624,
+    "nonfinite_bit_patterns": 9007199254740992,
+    "argument": "Magnitude is exponent concatenated with 52-bit fraction; exponent 2047 is exactly the range above 0x7fefffffffffffff."
+  },
+  "model_vector_count": 494,
+  "model_notice": "Vectors compare a mathematical model with manually lifted blocks. This is not target execution or a general x86 emulator."
+}
