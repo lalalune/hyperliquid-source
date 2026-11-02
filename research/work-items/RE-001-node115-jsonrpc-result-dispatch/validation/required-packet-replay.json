@@ -2,16 +2,17 @@
   "status": "COMPLETE_INPUT_AND_RETAINED_NATIVE_BYTES_REPRODUCED",
   "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
   "target_bytes": 105896032,
-  "regions": 2,
-  "region_bytes": 2296,
-  "native_instruction_rows": 489,
+  "regions": 3,
+  "region_bytes": 2475,
+  "native_instruction_rows": 536,
   "instruction_counts": {
     "constructor-candidate": 79,
-    "delegate-candidate": 410
+    "delegate-candidate": 410,
+    "completion-candidate": 47
   },
   "unwind_rows_checked": 135313,
-  "field_bindings": 38,
-  "evidence_corruptions_rejected": 40,
+  "field_bindings": 57,
+  "evidence_corruptions_rejected": 61,
   "controls": [
     {
       "control": "constructor-candidate: 64-byte input stride",
@@ -172,11 +173,246 @@
     {
       "control": "FDE extent 0x1707010",
       "rejection": "FDE actual extent drift"
+    },
+    {
+      "control": "completion-candidate: length load",
+      "rejection": "completion field corruption: completion-candidate: length load"
+    },
+    {
+      "control": "completion-candidate: cursor load",
+      "rejection": "completion field corruption: completion-candidate: cursor load"
+    },
+    {
+      "control": "completion-candidate: initial cursor/length comparison",
+      "rejection": "completion field corruption: completion-candidate: initial cursor/length comparison"
+    },
+    {
+      "control": "completion-candidate: initial end branch",
+      "rejection": "completion field corruption: completion-candidate: initial end branch"
+    },
+    {
+      "control": "completion-candidate: one-past candidate cursor",
+      "rejection": "completion field corruption: completion-candidate: one-past candidate cursor"
+    },
+    {
+      "control": "completion-candidate: whitespace mask",
+      "rejection": "completion field corruption: completion-candidate: whitespace mask"
+    },
+    {
+      "control": "completion-candidate: unsigned byte upper bound",
+      "rejection": "completion field corruption: completion-candidate: unsigned byte upper bound"
+    },
+    {
+      "control": "completion-candidate: whitespace bit test",
+      "rejection": "completion field corruption: completion-candidate: whitespace bit test"
+    },
+    {
+      "control": "completion-candidate: whitespace cursor store",
+      "rejection": "completion field corruption: completion-candidate: whitespace cursor store"
+    },
+    {
+      "control": "completion-candidate: end raw tag",
+      "rejection": "completion field corruption: completion-candidate: end raw tag"
+    },
+    {
+      "control": "completion-candidate: comma predicate",
+      "rejection": "completion field corruption: completion-candidate: comma predicate"
+    },
+    {
+      "control": "completion-candidate: comma raw tag",
+      "rejection": "completion field corruption: completion-candidate: comma raw tag"
+    },
+    {
+      "control": "completion-candidate: closing brace predicate",
+      "rejection": "completion field corruption: completion-candidate: closing brace predicate"
+    },
+    {
+      "control": "completion-candidate: zero cursor guard",
+      "rejection": "completion field corruption: completion-candidate: zero cursor guard"
+    },
+    {
+      "control": "completion-candidate: closing brace cursor store",
+      "rejection": "completion field corruption: completion-candidate: closing brace cursor store"
+    },
+    {
+      "control": "completion-candidate: zero return register",
+      "rejection": "completion field corruption: completion-candidate: zero return register"
+    },
+    {
+      "control": "completion-candidate: other-byte raw tag",
+      "rejection": "completion field corruption: completion-candidate: other-byte raw tag"
+    },
+    {
+      "control": "completion-candidate: guarded indirect call",
+      "rejection": "completion field corruption: completion-candidate: guarded indirect call"
+    },
+    {
+      "control": "delegate-candidate: caller passes retained state",
+      "rejection": "completion field corruption: delegate-candidate: caller passes retained state"
+    },
+    {
+      "control": "completion FDE 0x1700a10",
+      "rejection": "completion FDE extent"
+    },
+    {
+      "control": "completion FDE 0x1707010",
+      "rejection": "completion FDE extent"
     }
   ],
   "python": "3.12.3",
   "native_decoder_run": false,
   "captured_execution": false,
   "repository_imports": false,
-  "limits": "Authenticates retained static observations; controls corrupt evidence fields, not runtime parser inputs. No helper/schema/exception closure, Rust build, repository-suite pass or completion gate."
+  "limits": "Authenticates retained static observations; controls corrupt evidence fields, not runtime parser inputs. No helper/schema/exception closure, Rust build, repository-suite pass or completion gate.",
+  "completion": {
+    "status": "COMPLETION_HELPER_STATIC_EVIDENCE_REPRODUCED",
+    "helper_instructions": 47,
+    "helper_bytes": 179,
+    "renewed_caller_rows": 410,
+    "field_bindings": 19,
+    "evidence_corruptions_rejected": 21,
+    "controls": [
+      {
+        "control": "completion-candidate: length load",
+        "rejection": "completion field corruption: completion-candidate: length load"
+      },
+      {
+        "control": "completion-candidate: cursor load",
+        "rejection": "completion field corruption: completion-candidate: cursor load"
+      },
+      {
+        "control": "completion-candidate: initial cursor/length comparison",
+        "rejection": "completion field corruption: completion-candidate: initial cursor/length comparison"
+      },
+      {
+        "control": "completion-candidate: initial end branch",
+        "rejection": "completion field corruption: completion-candidate: initial end branch"
+      },
+      {
+        "control": "completion-candidate: one-past candidate cursor",
+        "rejection": "completion field corruption: completion-candidate: one-past candidate cursor"
+      },
+      {
+        "control": "completion-candidate: whitespace mask",
+        "rejection": "completion field corruption: completion-candidate: whitespace mask"
+      },
+      {
+        "control": "completion-candidate: unsigned byte upper bound",
+        "rejection": "completion field corruption: completion-candidate: unsigned byte upper bound"
+      },
+      {
+        "control": "completion-candidate: whitespace bit test",
+        "rejection": "completion field corruption: completion-candidate: whitespace bit test"
+      },
+      {
+        "control": "completion-candidate: whitespace cursor store",
+        "rejection": "completion field corruption: completion-candidate: whitespace cursor store"
+      },
+      {
+        "control": "completion-candidate: end raw tag",
+        "rejection": "completion field corruption: completion-candidate: end raw tag"
+      },
+      {
+        "control": "completion-candidate: comma predicate",
+        "rejection": "completion field corruption: completion-candidate: comma predicate"
+      },
+      {
+        "control": "completion-candidate: comma raw tag",
+        "rejection": "completion field corruption: completion-candidate: comma raw tag"
+      },
+      {
+        "control": "completion-candidate: closing brace predicate",
+        "rejection": "completion field corruption: completion-candidate: closing brace predicate"
+      },
+      {
+        "control": "completion-candidate: zero cursor guard",
+        "rejection": "completion field corruption: completion-candidate: zero cursor guard"
+      },
+      {
+        "control": "completion-candidate: closing brace cursor store",
+        "rejection": "completion field corruption: completion-candidate: closing brace cursor store"
+      },
+      {
+        "control": "completion-candidate: zero return register",
+        "rejection": "completion field corruption: completion-candidate: zero return register"
+      },
+      {
+        "control": "completion-candidate: other-byte raw tag",
+        "rejection": "completion field corruption: completion-candidate: other-byte raw tag"
+      },
+      {
+        "control": "completion-candidate: guarded indirect call",
+        "rejection": "completion field corruption: completion-candidate: guarded indirect call"
+      },
+      {
+        "control": "delegate-candidate: caller passes retained state",
+        "rejection": "completion field corruption: delegate-candidate: caller passes retained state"
+      },
+      {
+        "control": "completion FDE 0x1700a10",
+        "rejection": "completion FDE extent"
+      },
+      {
+        "control": "completion FDE 0x1707010",
+        "rejection": "completion FDE extent"
+      }
+    ],
+    "whitespace_byte_domain": [
+      9,
+      10,
+      13,
+      32
+    ],
+    "predicate_values_enumerated": 256,
+    "raw_error_tags": {
+      "at_or_after_end": 3,
+      "comma": 21,
+      "other_unexpected_byte": 22
+    },
+    "direct_error_calls": [
+      {
+        "va": "0x1700a66",
+        "target": "0x16ffc80"
+      },
+      {
+        "va": "0x1700a81",
+        "target": "0x16ffc80"
+      },
+      {
+        "va": "0x1700aac",
+        "target": "0x16ffc80"
+      }
+    ],
+    "conditional_branches": [
+      {
+        "va": "0x1700a1f",
+        "target": "0x1700a5b"
+      },
+      {
+        "va": "0x1700a3f",
+        "target": "0x1700a8b"
+      },
+      {
+        "va": "0x1700a45",
+        "target": "0x1700a70"
+      },
+      {
+        "va": "0x1700a59",
+        "target": "0x1700a35"
+      },
+      {
+        "va": "0x1700a74",
+        "target": "0x1700a8b"
+      },
+      {
+        "va": "0x1700a8f",
+        "target": "0x1700aa1"
+      },
+      {
+        "va": "0x1700a94",
+        "target": "0x1700ab6"
+      }
+    ],
+    "limits": "Static instruction/evidence checks, not parser execution, accepted input schemas, opaque error-helper closure or whole-input trailing-data validation."
+  }
 }

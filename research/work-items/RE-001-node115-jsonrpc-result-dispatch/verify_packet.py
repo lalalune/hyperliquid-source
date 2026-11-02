@@ -71,7 +71,7 @@ def cie_encoding(cie):
     return fields
 
 
-def probe(data):
+def probe(data, extra_vas=()):
     require(len(data) == 105896032 and hashlib.sha256(data).hexdigest() == TARGET, 'Target identity mismatch')
     require(data[:7] == b'\x7fELF\x02\x01\x01' and struct.unpack_from('<H', data, 18)[0] == 62, 'Not supported ELF64 x86-64')
     shoff = struct.unpack_from('<Q', data, 40)[0]
@@ -165,12 +165,16 @@ def probe(data):
                               'destination_va': hex(destination), 'instruction_boundary_validated': False,
                               'fde': fde_candidate(va)})
         pos += 1
-    return {'status': 'DATA_ONLY_REMAP_CANDIDATES_NOT_NATIVE_VALIDATED', 'target_sha256': TARGET,
+    result = {'status': 'DATA_ONLY_REMAP_CANDIDATES_NOT_NATIVE_VALIDATED', 'target_sha256': TARGET,
             'target_bytes': len(data), 'literal': literals[0], 'diagnostic': NEEDLE.decode(),
             'text_bytes': text[5], 'unwind_index_rows': n, 'encoded_lea_candidates': xrefs,
             'encoded_direct_call_candidates': calls, 'repository_imports': False,
             'native_decoder_run': False, 'captured_execution': False,
             'limits': 'Encoded patterns can occur inside other instructions or data; hosted native decoding must qualify every edge and semantic claim.'}
+    if extra_vas:
+        result['selected_fde_candidates']={hex(va): fde_candidate(va) for va in extra_vas}
+    return result
+
 
 
 import sys
@@ -241,12 +245,115 @@ def verify_retained_packet(data, packet):
             'limits':'Authenticates retained static observations; controls corrupt evidence fields, not runtime parser inputs. No helper/schema/exception closure, Rust build, repository-suite pass or completion gate.'}
 
 
+def verify_completion(data, packet):
+    directory=packet/'completion'
+    current=probe(data, extra_vas=(0x1700a10,0x17073f9))
+    require(current==json.loads((directory/'candidates.json').read_text()),'completion candidate drift')
+    require(current==json.loads((directory/'receipts/full-input-replay.json').read_text()),'completion hosted replay drift')
+    native=json.loads((directory/'receipts/decode-result.json').read_text())
+    require(native['target_sha256']==TARGET and native['whole_elf_reauthenticated_in_job'],'completion target binding')
+    require(native['input_hashes_unchanged'] and not native['captured_program_executed'],'completion input/execution claim')
+    bodies={};native_rows={}
+    for label,key in [('completion-candidate','0x1700a10'),('delegate-candidate','0x17073f9')]:
+        record=current['selected_fde_candidates'][key];start=int(record['start_va'],16);off=int(record['file_offset'],16)
+        body=data[off:off+record['bytes']]
+        require(hashlib.sha256(body).hexdigest()==record['body_sha256'],'completion body identity')
+        cursor=start;rows=[]
+        for line in (directory/'receipts'/(label+'.stdout')).read_text().splitlines():
+            if not re.match(r'^\s*[0-9a-f]+:',line):continue
+            pieces=line.split('\t');require(len(pieces)>=3,'completion native syntax')
+            va=int(pieces[0].strip().rstrip(':'),16);tokens=pieces[1].split()
+            require(tokens and all(re.fullmatch('[0-9a-f]{2}',t) for t in tokens),'completion native byte syntax')
+            raw=bytes.fromhex(' '.join(tokens));text=' '.join(pieces[2:]).strip()
+            require(va==cursor and body[va-start:va-start+len(raw)]==raw,'completion native/input byte mismatch')
+            require(text and '(bad)' not in text and not text.startswith('.byte'),'completion undecoded row')
+            rows.append(dict(va=hex(va),bytes=raw.hex(),text=text));cursor+=len(raw)
+        saved=next(r for r in native['regions'] if r['label']==label)
+        require(rows==saved['instruction_rows'] and len(rows)==saved['instructions'],'completion instruction rows drift')
+        require(cursor==int(record['end_va'],16),'completion native extent drift')
+        bodies[label]=(start,body);native_rows[label]={int(r['va'],16):r for r in rows}
+    old=json.loads((packet/'receipts/decode-result.json').read_text())
+    original=next(r for r in old['regions'] if r['label']=='delegate-candidate')
+    renewed=next(r for r in native['regions'] if r['label']=='delegate-candidate')
+    require(original['instruction_rows']==renewed['instruction_rows'],'renewed caller differs from original native evidence')
+    edges=json.loads((directory/'receipts/qualified-candidate-edges.json').read_text())
+    require(len(edges)==1 and edges[0]['native_instruction_boundary_validated'],'completion edge qualification')
+    call=native_rows['delegate-candidate'][0x17073f9];raw=bytes.fromhex(call['bytes'])
+    require(raw[0]==0xe8 and 0x17073f9+5+struct.unpack_from('<i',raw,1)[0]==0x1700a10,'completion direct call target')
+    require(edges[0]['candidate_va']==call['va'] and edges[0]['bytes']==call['bytes'],'completion edge bytes')
+    fields=json.loads((directory/'field-bindings.json').read_text())
+    def check_fields(active):
+        for field in fields:
+            label=field['region'];va=int(field['va'],16);raw=bytes.fromhex(field['bytes']);start,body=active[label]
+            require(native_rows[label].get(va,{}).get('bytes')==field['bytes'],'completion field native boundary')
+            require(body[va-start:va-start+len(raw)]==raw,'completion field corruption: '+field['label'])
+    check_fields(bodies);controls=[]
+    for field in fields:
+        active=dict(bodies);start,body=bodies[field['region']];changed=bytearray(body)
+        changed[int(field['va'],16)-start+len(bytes.fromhex(field['bytes']))-1]^=1
+        active[field['region']]=(start,changed)
+        try:check_fields(active)
+        except ValueError as error:controls.append(dict(control=field['label'],rejection=str(error)))
+        else:raise ValueError('completion field corruption escaped')
+    for record in current['selected_fde_candidates'].values():
+        raw=bytes.fromhex(record['fde_hex'])
+        def extent(candidate):
+            delta,length=struct.unpack_from('<ii',candidate,8)
+            require(int(record['fde_va'],16)+8+delta==int(record['start_va'],16),'completion FDE location')
+            require(length==record['bytes'] and int(record['start_va'],16)+length==int(record['end_va'],16),'completion FDE extent')
+        extent(raw);changed=bytearray(raw);changed[12]^=1
+        try:extent(changed)
+        except ValueError as error:controls.append(dict(control='completion FDE '+record['start_va'],rejection=str(error)))
+        else:raise ValueError('completion FDE corruption escaped')
+    rows=native_rows['completion-candidate']
+    def instruction(va):return bytes.fromhex(rows[va]['bytes'])
+    mask_raw=instruction(0x1700a2b);bound_raw=instruction(0x1700a3b)
+    require(mask_raw[:2]==b'\x48\xbe' and bound_raw[:3]==b'\x49\x83\xf8','predicate operand encoding')
+    mask=int.from_bytes(mask_raw[2:],'little');upper=bound_raw[3]
+    whitespace=[v for v in range(256) if v<=upper and mask & (1<<v)]
+    require(whitespace==[9,10,13,32] and upper==44,'whitespace predicate domain')
+    require(instruction(0x1700a70)==bytes.fromhex('4983f82c'),'comma predicate')
+    require(instruction(0x1700a8b)==bytes.fromhex('4183f87d'),'closing brace predicate')
+    raw_tags={}
+    for label,va in [('at_or_after_end',0x1700a5b),('comma',0x1700a76),('other_unexpected_byte',0x1700aa1)]:
+        raw=instruction(va);require(raw[:4]==bytes.fromhex('48c70424'),'raw tag store encoding')
+        raw_tags[label]=int.from_bytes(raw[4:],'little')
+    require(raw_tags=={'at_or_after_end':3,'comma':21,'other_unexpected_byte':22},'raw error tag operands')
+    calls=[];branches=[]
+    for va,row in rows.items():
+        raw=bytes.fromhex(row['bytes'])
+        if raw[0]==0xe8:
+            target=va+len(raw)+struct.unpack_from('<i',raw,1)[0]
+            require(target==0x16ffc80,'completion opaque error callee target');calls.append(dict(va=hex(va),target=hex(target)))
+        elif 0x70<=raw[0]<=0x7f:
+            target=va+len(raw)+struct.unpack_from('<b',raw,1)[0]
+            require(target in rows,'completion conditional branch target boundary');branches.append(dict(va=hex(va),target=hex(target)))
+    require(len(calls)==3 and len(branches)==7,'completion direct control-transfer inventory')
+    helper=next(r for r in native['regions'] if r['label']=='completion-candidate')
+    return dict(status='COMPLETION_HELPER_STATIC_EVIDENCE_REPRODUCED',helper_instructions=helper['instructions'],
+        helper_bytes=helper['bytes'],renewed_caller_rows=len(native_rows['delegate-candidate']),
+        field_bindings=len(fields),evidence_corruptions_rejected=len(controls),controls=controls,
+        whitespace_byte_domain=whitespace,predicate_values_enumerated=256,raw_error_tags=raw_tags,
+        direct_error_calls=calls,conditional_branches=branches,
+        limits='Static instruction/evidence checks, not parser execution, accepted input schemas, opaque error-helper closure or whole-input trailing-data validation.')
+
+
 def main():
     parser=argparse.ArgumentParser(description='Owned stdlib complete-input/native evidence verifier; no subprocess or captured execution.')
     parser.add_argument('--binary',type=Path,required=True)
     parser.add_argument('--packet',type=Path,default=Path(__file__).resolve().parent)
     args=parser.parse_args()
-    print(json.dumps(verify_retained_packet(args.binary.read_bytes(),args.packet),indent=2))
+    data=args.binary.read_bytes()
+    result=verify_retained_packet(data,args.packet)
+    completion=verify_completion(data,args.packet)
+    result['regions']=3;result['region_bytes']+=completion['helper_bytes']
+    result['native_instruction_rows']+=completion['helper_instructions']
+    result['instruction_counts']['completion-candidate']=completion['helper_instructions']
+    result['field_bindings']+=completion['field_bindings']
+    result['evidence_corruptions_rejected']+=completion['evidence_corruptions_rejected']
+    result['controls']+=completion['controls']
+    result['completion']=completion
+    print(json.dumps(result,indent=2))
 
 
 if __name__=='__main__':main()
