@@ -1,0 +1,150 @@
+{
+  "task": "RE-012",
+  "component": "node-runtime",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "base_commit": "2c75904241b9165693d40dea8b0d0d340f8e22b3",
+  "contribution_kind": "partial static reconstruction, not Rust implementation",
+  "sources": [
+    {
+      "id": "S1",
+      "kind": "primary captured artifact",
+      "path": "artifacts/node/94/hl-node",
+      "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+      "bytes": 91774280,
+      "license_note": "Captured artifact retains existing rights; no private source is copied. Artifact authenticity is checked through repository make verify; immutable recovery URL recorded in provenance/artifacts.json."
+    },
+    {
+      "id": "S2",
+      "kind": "existing target-derived evidence, not independent origin",
+      "path": "research/work-items/hl-node-startup-inventory-94/README.md",
+      "sha256": "0bd43042a2c7d2d9cb8090238ffa251fa8da9c5007549f355d9a6c0c79fd2071"
+    },
+    {
+      "id": "S3",
+      "kind": "independent decode methods of S1, not independent source provenance",
+      "paths": [
+        "records.json",
+        "chain.gnu.txt",
+        "chain.llvm.txt",
+        "commands.gnu.txt",
+        "commands.llvm.txt"
+      ],
+      "methods": [
+        "Capstone 5.0.7",
+        "GNU objdump 2.47.20260726",
+        "Apple LLVM 17.0.0"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "CLI-C1",
+      "status": "observed",
+      "claim": "The complete chain function accepts exact supplied values Local/Sandbox/Testnet/Mainnet and stores chain bytes 0/1/2/3 after successful command construction.",
+      "evidence": [
+        "records.json:chain_values",
+        "chain.gnu.txt:0x4578c04..0x4578c9c",
+        "chain.gnu.txt:0x4578da9"
+      ],
+      "qualification": "The preceding parser may supply defaults; raw argv grammar remains unknown."
+    },
+    {
+      "id": "CLI-C2",
+      "status": "observed",
+      "claim": "Exactly fourteen selected names appear in the complete length-table dispatch; unmatched names or null child argument pointers store first qword 16.",
+      "evidence": [
+        "records.json:length_dispatch",
+        "records.json:commands",
+        "commands.gnu.txt:0x4583580"
+      ],
+      "qualification": "Successful helper returns and valid mapped descriptor/name memory are premises, not arbitrary-state totality."
+    },
+    {
+      "id": "CLI-C3",
+      "status": "observed",
+      "claim": "Profile first qword is commission-bps presence 0/1, not a fixed command tag; no success path writes 14.",
+      "evidence": [
+        "commands.gnu.txt:0x4583b90..0x4583bac",
+        "commands.gnu.txt:0x4583c42",
+        "records.json:semantic_anchors"
+      ],
+      "qualification": "An exact original Rust enum/type is not recovered."
+    },
+    {
+      "id": "CLI-C4",
+      "status": "observed",
+      "claim": "Caller copies 152B; chain copies 120B command scratch then chain byte/key triple, including inactive/uninitialized payload and padding.",
+      "evidence": [
+        "caller_context.gnu.txt:0x21dfd3d",
+        "chain.gnu.txt:0x4578d5c..0x4578dc2",
+        "commands.gnu.txt:0x4583bf5..0x4583c80"
+      ],
+      "qualification": "No deterministic serialized full-image output or whole ABI contract is claimed."
+    },
+    {
+      "id": "CLI-C5",
+      "status": "conditional inference",
+      "claim": "Options are consumed in the documented order, distinguishing AL presence from optional textual bool conversion and required values.",
+      "evidence": [
+        "CONTRACT.md",
+        "records.json:options",
+        "presence_lookup_context.gnu.txt",
+        "value_lookup_context.gnu.txt"
+      ],
+      "qualification": "Requires well-formed caller/table state, ordinary equality/import behavior and successful conversion helpers. Hash/table construction, UTF8 conversion and defaults remain open."
+    },
+    {
+      "id": "CLI-C6",
+      "status": "observed",
+      "claim": "The two primary entries each have one actual naming RELATIVE writer; recorded caller sites bind through those slots.",
+      "evidence": [
+        "records.json:entry_relocations",
+        "records.json:calls_and_jumps"
+      ],
+      "qualification": "All 80,300 RELA destinations are checked for duplicates; runtime-indirect callers are not exhaustively enumerated."
+    }
+  ],
+  "counterchecks": [
+    {
+      "challenge": "Could profile be fixed tag 14 or any nonzero optional flag?",
+      "resolution": "Full EBP zero/one setting and qword store reject fixed-tag interpretation; absent payload remains inactive."
+    },
+    {
+      "challenge": "Do name tests admit suffix/prefix mismatches or unchecked middle bytes?",
+      "resolution": "Exact length table plus interval union of all split comparison loads covers every name byte, including overlapping and zero-extended SIMD tails; one-bit mismatch controls exercise each byte."
+    },
+    {
+      "challenge": "Could constants or RELA naming alone establish a callable body?",
+      "resolution": "Complete FDE/CIE decode, full GNU/LLVM/Capstone instruction-byte agreement, internal target checks and actual call instructions are retained."
+    },
+    {
+      "challenge": "Could a second different-addend relocation silently overwrite a selected slot?",
+      "resolution": "All RELA records are keyed by destination with duplicate rejection; both-order corruption controls pass."
+    },
+    {
+      "challenge": "Is this a duplicate of CLI output-config PR #1748?",
+      "resolution": "That entire output-config body is excluded; only its two actual call edges are bound. See scope-review.json."
+    },
+    {
+      "challenge": "Can static green checks establish native CLI behavior?",
+      "resolution": "No. No target, emulator or new Rust executable was run. Dynamic behavior/whole node/CI gates remain unproved."
+    }
+  ],
+  "unresolved": [
+    "CLI builder and parser defaults/accepted argv grammar",
+    "hash and first-value conversion closure",
+    "precise node-ip and signer accepted grammar",
+    "allocator failure and runtime callbacks",
+    "LSDA action graph and panic/unwind side effects",
+    "arbitrary memory aliases and inactive byte values",
+    "source version/compiler/whole-node rebuild"
+  ],
+  "progress_gates_changed": false,
+  "public_network_actions": false,
+  "captured_execution": false,
+  "native_behavioral_corpus": false,
+  "new_byte_comparison_registry_rows": 0,
+  "registry_reason": "No selected compiled-source comparison exists; disassembler agreement is not compiled-source byte equality.",
+  "initial_base_commit": "e5c9b6436876b2a4a39daef813171f9879317699",
+  "postmerge_review": "scope-review.json:postmerge_review"
+}
