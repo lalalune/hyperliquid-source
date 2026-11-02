@@ -1,0 +1,37 @@
+site_va	hex	condition	fallthrough_va	target_va	taken_interpretation
+0x2517574	7510	jne	0x2517576	0x2517586	queue has spare capacity: skip growth
+0x3438fe2	7649	jbe	0x3438fe4	0x343902d	queue data is not wrapped in old allocation
+0x343900b	7526	jne	0x343900d	0x3439033	copy the shorter front segment into appended capacity
+0x25a774f	0f84ad000000	je	0x25a7755	0x25a7802	null root enters vacant-entry construction
+0x25a779c	7442	je	0x25a779e	0x25a77e0	all live keys examined
+0x25a77ca	74c4	je	0x25a77cc	0x25a7790	search key greater than node key: advance
+0x25a77d1	0f84ea000000	je	0x25a77d7	0x25a78c1	equal key returns existing value
+0x25a77ee	7215	jb	0x25a77f0	0x25a7805	height exhausted: create a vacant entry
+0x287ae3c	745c	je	0x287ae3e	0x287ae9a	no node: allocate first leaf
+0x287aeab	0f84e4000000	je	0x287aeb1	0x287af95	first-leaf allocation returned null
+0x287af0e	0f8393000000	jae	0x287af14	0x287afa7	first-leaf count not below capacity
+0x1a9a862	7220	jb	0x1a9a864	0x1a9a884	leaf has room
+0x1a9a86c	0f8386000000	jae	0x1a9a872	0x1a9a8f8	full leaf insertion position at least midpoint
+0x1a9a8a3	767a	jbe	0x1a9a8a5	0x1a9a91f	non-full leaf insertion shifts existing entries
+0x1a9a8f8	0f846c010000	je	0x1a9a8fe	0x1a9aa6a	full leaf insertion position equals midpoint
+0x1a9a902	0f856b010000	jne	0x1a9a908	0x1a9aa73	full leaf insertion position differs from midpoint plus one
+0x1a9aa9c	0f8423100000	je	0x1a9aaa2	0x1a9bac5	new right-leaf allocation returned null
+0x1a9ab4c	0f835a0f0000	jae	0x1a9ab52	0x1a9baac	split right length is outside expected range
+0x1a9ac65	0f86b1000000	jbe	0x1a9ac6b	0x1a9ad1c	selected split leaf insertion at or after end
+0x1a9aedc	0f8463090000	je	0x1a9aee2	0x1a9b845	split node has no parent: install root
+0x1a9af48	0f85d50a0000	jne	0x1a9af4e	0x1a9ba23	ancestor edge height assertion
+0x1a9af5f	0f832b010000	jae	0x1a9af65	0x1a9b090	ancestor is full: split
+0x1a9af7c	0f833e010000	jae	0x1a9af82	0x1a9b0c0	ancestor insertion is at end
+0x1a9b09a	0f8380010000	jae	0x1a9b0a0	0x1a9b220	full ancestor insertion position at least midpoint
+0x1a9b224	7418	je	0x1a9b226	0x1a9b23e	full ancestor insertion position equals midpoint
+0x1a9b22a	751d	jne	0x1a9b22c	0x1a9b249	full ancestor insertion position differs from midpoint plus one
+0x1a9b26e	0f8405080000	je	0x1a9b274	0x1a9ba79	right internal-node allocation returned null
+0x1a9b312	0f8329070000	jae	0x1a9b318	0x1a9ba41	internal split right length outside key range
+0x1a9b3e2	0f8375060000	jae	0x1a9b3e8	0x1a9ba5d	internal split edge length outside range
+0x1a9b3f1	0f8597060000	jne	0x1a9b3f7	0x1a9ba8e	internal edge copy lengths disagree
+0x1a9b83d	0f85adf6ffff	jne	0x1a9b843	0x1a9aef0	parent exists: propagate another split
+0x1a9b8f9	0f84d8010000	je	0x1a9b8ff	0x1a9bad7	root expected during split is null
+0x1a9b911	0f84cf010000	je	0x1a9b917	0x1a9bae6	new-root allocation returned null
+0x1a9b93b	0f84b7010000	je	0x1a9b941	0x1a9baf8	root height increment wraps
+0x1a9b95c	0f85a5010000	jne	0x1a9b962	0x1a9bb07	root edge height assertion
+0x1a9b96e	0f83a8010000	jae	0x1a9b974	0x1a9bb1c	new-root key count is not below capacity
