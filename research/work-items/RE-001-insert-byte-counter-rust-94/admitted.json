@@ -1,0 +1,270 @@
+{
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "config": {
+    "tool": "foundation_byte_gate_counter",
+    "packet": "foundation-byte-gate-counter-94",
+    "start": 83714096,
+    "end": 83714172,
+    "fde": 2679604,
+    "next": 83714176,
+    "call": 83714129,
+    "target": 90572112
+  },
+  "legacy_packet": {
+    "call": {
+      "site": "0x4fd6051",
+      "target": "0x5660550",
+      "target_bytes": "e8faa46800",
+      "target_claimed_here": false,
+      "target_fde_extent": null,
+      "target_fde_section_offset": null,
+      "target_fde_start": false,
+      "target_note": "the callee at 0x5660550 is not an FDE start in the GNU --dwarf=frames dump, so no body size is claimed for it; its body is excluded here, only the call encoding is retained, and its result is ignored by the window"
+    },
+    "captured_binary_executed": false,
+    "coordinate_system": "ELF virtual addresses, no runtime rebase",
+    "function": {
+      "bytes": 76,
+      "end_va_exclusive": "0x4fd607c",
+      "fde_cie": "0x00000000",
+      "fde_section_offset": "0x0028e334",
+      "inferred_label": "byte-gate counter helper",
+      "next_fde_start": "0x4fd6080",
+      "padding_bytes": 4,
+      "padding_note": "four int3 bytes (0xcc) at [0x4fd607c, 0x4fd6080) pad the window to the next FDE at 0x4fd6080",
+      "sha256": "9bfb7d0882b1bbd4245a0c7d41aa57fc33fa5dcfc7a622548c12e742dbd8eda1",
+      "start_va": "0x4fd6030"
+    },
+    "incoming": {
+      "complete_xref_census": false,
+      "direct_e8_callers": [
+        "0x4fe680e",
+        "0x4fe68c7",
+        "0x4fe69d0",
+        "0x4fe6b54"
+      ],
+      "validated_caller_fdes": [
+        "0x4fe4e50"
+      ],
+      "validated_note": "all four call sites fall inside the single caller FDE 0x4fe4e50..0x4fe72b2 and each appears as an instruction start in the linear disassembly from that FDE start"
+    },
+    "progress_gate_requested": false,
+    "rule": {
+      "edges": [
+        {
+          "byte_fourth": "0x00",
+          "byte_third": "0x00",
+          "counter_after": "1",
+          "counter_before": "0",
+          "fourth": "0x1000",
+          "input_plus8": "0x2008",
+          "note": "nonzero second selects flag 1 regardless of pointers and bytes",
+          "result_flag": 1,
+          "return_value": "0x1000",
+          "second": "0x1",
+          "third": "0x3000"
+        },
+        {
+          "byte_fourth": "0xff",
+          "byte_third": "0x00",
+          "counter_after": "42",
+          "counter_before": "41",
+          "fourth": "0x1000",
+          "input_plus8": "0x2008",
+          "note": "zero second with input+8 equal to third selects flag 1 without consulting bytes",
+          "result_flag": 1,
+          "return_value": "0x1000",
+          "second": "0x0",
+          "third": "0x2008"
+        },
+        {
+          "byte_fourth": "0x10",
+          "byte_third": "0x20",
+          "counter_after": "7",
+          "counter_before": "6",
+          "fourth": "0x1000",
+          "input_plus8": "0x2008",
+          "note": "zero second, pointers differ, fourth byte below third byte (unsigned) selects flag 1",
+          "result_flag": 1,
+          "return_value": "0x1000",
+          "second": "0x0",
+          "third": "0x3000"
+        },
+        {
+          "byte_fourth": "0x20",
+          "byte_third": "0x20",
+          "counter_after": "1",
+          "counter_before": "0",
+          "fourth": "0x1000",
+          "input_plus8": "0x2008",
+          "note": "zero second, pointers differ, equal bytes select flag 0 (setb needs strictly below)",
+          "result_flag": 0,
+          "return_value": "0x1000",
+          "second": "0x0",
+          "third": "0x3000"
+        },
+        {
+          "byte_fourth": "0x30",
+          "byte_third": "0x20",
+          "counter_after": "1",
+          "counter_before": "0",
+          "fourth": "0x1000",
+          "input_plus8": "0x2008",
+          "note": "zero second, pointers differ, fourth byte above third byte selects flag 0",
+          "result_flag": 0,
+          "return_value": "0x1000",
+          "second": "0x0",
+          "third": "0x3000"
+        },
+        {
+          "byte_fourth": "0xff",
+          "byte_third": "0x00",
+          "counter_after": "1",
+          "counter_before": "0",
+          "fourth": "0x1000",
+          "input_plus8": "0x2008",
+          "note": "unsigned comparison: 0xff is NOT below 0x00, so flag 0 (a signed reading would say 1)",
+          "result_flag": 0,
+          "return_value": "0x1000",
+          "second": "0x0",
+          "third": "0x3000"
+        },
+        {
+          "byte_fourth": "0x00",
+          "byte_third": "0xff",
+          "counter_after": "1",
+          "counter_before": "0",
+          "fourth": "0x1000",
+          "input_plus8": "0x2008",
+          "note": "unsigned comparison: 0x00 IS below 0xff, so flag 1 (a signed reading would say 0)",
+          "result_flag": 1,
+          "return_value": "0x1000",
+          "second": "0x0",
+          "third": "0x3000"
+        },
+        {
+          "byte_fourth": "0x00",
+          "byte_third": "0x00",
+          "counter_after": "0",
+          "counter_before": "0xffffffffffffffff",
+          "fourth": "0x1000",
+          "input_plus8": "0x2008",
+          "note": "counter increment wraps mod 2**64: max counter becomes 0",
+          "result_flag": 1,
+          "return_value": "0x1000",
+          "second": "0x5",
+          "third": "0x3000"
+        }
+      ],
+      "formula": "flag = 1 if second != 0 else (1 if input+8 == third else (1 if byte[fourth+0x20] < byte[third+0x20] (unsigned) else 0)); call callee(flag, fourth, third, input+8) and ignore its result; counter at input+0x28 += 1 (mod 2**64); return fourth",
+      "formula_note": "the callee is called with rdi = flag, rsi = fourth (entry rcx, saved in rbp), rdx = third (entry rdx, unchanged), rcx = input+8; the return value is the fourth input (entry rcx), NOT the input struct pointer; the counter increment happens on every path, after the call",
+      "inputs": "input (rdi, struct pointer), second (rsi, u64), third (rdx, pointer), fourth (rcx, pointer); counter at input+0x28 (u64); flag bytes at fourth+0x20 and third+0x20"
+    },
+    "target_release": "94",
+    "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+  },
+  "frames": [
+    {
+      "section_offset": "0x28e334",
+      "start": "0x4fd6030",
+      "end": "0x4fd607c",
+      "cie_section_offset": "0x0",
+      "cie_hex": "1400000000000000017a5200017810011b0c070890010000"
+    }
+  ],
+  "calls": [
+    {
+      "site": "0x4fd6051",
+      "target": "0x5660550"
+    }
+  ],
+  "external_binding": {
+    "slot": "0x5778fd0",
+    "symbol": "_ZSt29_Rb_tree_insert_and_rebalancebPSt18_Rb_tree_node_baseS0_RS_",
+    "relocation_type": "R_X86_64_JUMP_SLOT",
+    "runtime_implementation_unresolved": true
+  },
+  "regions": [
+    {
+      "name": "complete function",
+      "va": "0x4fd6030",
+      "file_offset": 83710000,
+      "bytes": 76,
+      "sha256": "9bfb7d0882b1bbd4245a0c7d41aa57fc33fa5dcfc7a622548c12e742dbd8eda1"
+    },
+    {
+      "name": "following alignment",
+      "va": "0x4fd607c",
+      "file_offset": 83710076,
+      "bytes": 4,
+      "sha256": "8843b54d2df63ca265cf4a05d27dd2b29a74fb476d296dd44a0e171d74b441ca"
+    },
+    {
+      "name": "FDE 0x4fd6030",
+      "va": "0xf6f84c",
+      "file_offset": 16185420,
+      "bytes": 44,
+      "sha256": "df58987d455aa5794d38b026907659677ee98240b04625ff9825e8eec8804545"
+    },
+    {
+      "name": "CIE for 0x4fd6030",
+      "va": "0xce1518",
+      "file_offset": 13505816,
+      "bytes": 24,
+      "sha256": "78b6da08ece7423d48f0be866ea3d8c0b62f6b7053852a71a7672b490842354f"
+    },
+    {
+      "name": "direct call",
+      "va": "0x4fd6051",
+      "file_offset": 83710033,
+      "bytes": 5,
+      "sha256": "8056182e72dc0d0e53e38a1cb564a8c13bb8dc7166a009439b31093c275552ca"
+    },
+    {
+      "name": "PLT insert-and-rebalance",
+      "va": "0x5660550",
+      "file_offset": 90568016,
+      "bytes": 16,
+      "sha256": "6bcb9a662a43b5189bde851e3958ea2353c4246ed00d7696748ae5356ac8e774"
+    },
+    {
+      "name": "PLT slot initial value",
+      "va": "0x5778fd0",
+      "file_offset": 91713488,
+      "bytes": 8,
+      "sha256": "f8e719e321a08dec486b052843754022d78219f4ccaf80fdbfeb66acda7b54ac"
+    },
+    {
+      "name": "insert-and-rebalance JUMP_SLOT",
+      "va": "0x1dc060",
+      "file_offset": 1949792,
+      "bytes": 24,
+      "sha256": "a27c92cc0ffe39089ae2e48ce0a6f6bb42c163ec75b7bdf66e874ce159ab834c"
+    },
+    {
+      "name": "bound dynamic symbol",
+      "va": "0x1ae0",
+      "file_offset": 6880,
+      "bytes": 24,
+      "sha256": "e2484483d26975c10913443ca1f9d3e86c5b0fea764dd07afbf56906ebfac85f"
+    },
+    {
+      "name": "bound dynamic symbol name",
+      "va": "0x490f",
+      "file_offset": 18703,
+      "bytes": 66,
+      "sha256": "b71bfc25dca77cdbdb1ba005576ef7376ab62704ff908d7152f1087d7e671ab8"
+    }
+  ],
+  "source_sha256": {
+    "research/work-items/foundation-byte-gate-counter-94/MANIFEST.sha256": "cd8f21f935819967cf59532b03cd4e0c362ffe2654fc204d7eca4ffbaaaa517f",
+    "research/work-items/foundation-byte-gate-counter-94/README.md": "7bad9d31af806d7073c8450bdbce3215683e0285045aa0831a1613587034d354",
+    "research/work-items/foundation-byte-gate-counter-94/caller.objdump.txt": "13620c6f684951a509649f6a4617c5d483720cb955044b3f61e41ba982090e5a",
+    "research/work-items/foundation-byte-gate-counter-94/evidence.json": "6212cce23f0e3f73926d4706e25689e93099fec244bd34199fe3ca8c7e07027c",
+    "research/work-items/foundation-byte-gate-counter-94/frames.txt": "89b6a42505ea851a9e52a1d52fc10415564b318843d60d0e3371230873f5caff",
+    "research/work-items/foundation-byte-gate-counter-94/window.objdump.txt": "9e2b49698d550174663b17a143d6cd312d11301cc5824641e075c32868109576",
+    "tools/elf_index.py": "d77a002e9b2d3dce86822f6c67169298ad0ea54f5f4cb5c0d244328cbed1774f",
+    "tools/foundation_byte_gate_counter.py": "c96cebf74dc10567f267775583dd362c6a7627cb803766f96576cd9ebdfb1f2c"
+  },
+  "captured_binary_executed": false
+}
