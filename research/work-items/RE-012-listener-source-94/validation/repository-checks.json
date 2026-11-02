@@ -1,0 +1,258 @@
+{
+  "schema": 1,
+  "tested_implementation_commit": "b9e9115f25f3787c7c2ea865566cd77ba8149caa",
+  "base_commit": "e5c9b6436876b2a4a39daef813171f9879317699",
+  "scope": "Local repository checks; the following evidence-only commit does not modify implementation or test code.",
+  "initial_sweep": {
+    "command": "PATH=/opt/homebrew/opt/binutils/bin:$PATH make verify test catalogue-check reproduce",
+    "exit_code": 2,
+    "exit_code_source": "Observed process completion from the command runner.",
+    "files_attempted": 971,
+    "reported_tests": 15455,
+    "reported_skips": 73,
+    "failed_files": [
+      "test_short_string_alias.py",
+      "test_visor_rust_unwind.py"
+    ],
+    "completed_make_goals": [
+      "verify"
+    ],
+    "failed_make_goal": "test",
+    "unreached_make_goals": [
+      "catalogue-check",
+      "reproduce"
+    ],
+    "raw_log": {
+      "local_name": "listener-integration-checks.log",
+      "bytes": 1947508,
+      "sha256": "5280781e2b6e3135ace26d4887c9423f6a5688cf0181e8f3d42347e27be38a62",
+      "published": false
+    },
+    "per_file_results": "repository-test-files.json",
+    "complete_failed_module_excerpts": "repository-initial-errors.json"
+  },
+  "environment_remedy": {
+    "cause": "The initial command omitted LLVM_OBJDUMP and llvm-objdump was not on PATH. Two modules raised FileNotFoundError in setUpClass; four more reported an LLVM-related skip.",
+    "change": "Set LLVM_OBJDUMP=/usr/bin/objdump (installed Apple LLVM 17.0.0) for the affected files and follow-up checks.",
+    "repository_code_changed": false,
+    "short_string_files_verified_identical_to_base": [
+      "tools/short_string_alias.py",
+      "tests/test_short_string_alias.py"
+    ]
+  },
+  "corrected_file_retries": [
+    {
+      "file": "test_short_string_alias.py",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_short_string_alias.py",
+        "-v"
+      ],
+      "environment_overrides": {
+        "LLVM_OBJDUMP": "/usr/bin/objdump",
+        "PATH_prefix": "/opt/homebrew/opt/binutils/bin"
+      },
+      "exit_code": 0,
+      "tests": 9,
+      "seconds": 15.5,
+      "skips": 0,
+      "status": "OK",
+      "log": {
+        "file": "retry-test_short_string_alias.log",
+        "raw_bytes": 1540,
+        "raw_sha256": "c7f5524024f4d809a590f88983cb0c86f28e31d73521d79cb933c98259b8f956",
+        "published_sha256": "c7f5524024f4d809a590f88983cb0c86f28e31d73521d79cb933c98259b8f956",
+        "normalization": "Exact local repository path replaced by <repo>; other contents preserved."
+      }
+    },
+    {
+      "file": "test_action_signable.py",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_action_signable.py",
+        "-v"
+      ],
+      "environment_overrides": {
+        "LLVM_OBJDUMP": "/usr/bin/objdump",
+        "PATH_prefix": "/opt/homebrew/opt/binutils/bin"
+      },
+      "exit_code": 0,
+      "tests": 29,
+      "seconds": 5.216,
+      "skips": 0,
+      "status": "OK",
+      "log": {
+        "file": "retry-test_action_signable.log",
+        "raw_bytes": 3521,
+        "raw_sha256": "c689fd31bedb68681e8b7d06c7b590dbddcd5d4f063c33f4fc7d20166091c83e",
+        "published_sha256": "c689fd31bedb68681e8b7d06c7b590dbddcd5d4f063c33f4fc7d20166091c83e",
+        "normalization": "Exact local repository path replaced by <repo>; other contents preserved."
+      }
+    },
+    {
+      "file": "test_compact_string_unwind.py",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_compact_string_unwind.py",
+        "-v"
+      ],
+      "environment_overrides": {
+        "LLVM_OBJDUMP": "/usr/bin/objdump",
+        "PATH_prefix": "/opt/homebrew/opt/binutils/bin"
+      },
+      "exit_code": 0,
+      "tests": 9,
+      "seconds": 3.363,
+      "skips": 0,
+      "status": "OK",
+      "log": {
+        "file": "retry-test_compact_string_unwind.log",
+        "raw_bytes": 1713,
+        "raw_sha256": "a854a955215b33593daf5256f3ffb2ff69ef78d086eaf5ecdf77b34ce026fd15",
+        "published_sha256": "a854a955215b33593daf5256f3ffb2ff69ef78d086eaf5ecdf77b34ce026fd15",
+        "normalization": "Exact local repository path replaced by <repo>; other contents preserved."
+      }
+    },
+    {
+      "file": "test_kind5_reader.py",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_kind5_reader.py",
+        "-v"
+      ],
+      "environment_overrides": {
+        "LLVM_OBJDUMP": "/usr/bin/objdump",
+        "PATH_prefix": "/opt/homebrew/opt/binutils/bin"
+      },
+      "exit_code": 0,
+      "tests": 9,
+      "seconds": 22.449,
+      "skips": 0,
+      "status": "OK",
+      "log": {
+        "file": "retry-test_kind5_reader.log",
+        "raw_bytes": 1220,
+        "raw_sha256": "fae575d7342122bbaaa18c4c650bf0a25f04a633419906dbd11402509243122d",
+        "published_sha256": "fae575d7342122bbaaa18c4c650bf0a25f04a633419906dbd11402509243122d",
+        "normalization": "Exact local repository path replaced by <repo>; other contents preserved."
+      }
+    },
+    {
+      "file": "test_kind5_release_drift.py",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_kind5_release_drift.py",
+        "-v"
+      ],
+      "environment_overrides": {
+        "LLVM_OBJDUMP": "/usr/bin/objdump",
+        "PATH_prefix": "/opt/homebrew/opt/binutils/bin"
+      },
+      "exit_code": 0,
+      "tests": 6,
+      "seconds": 4.498,
+      "skips": 0,
+      "status": "OK",
+      "log": {
+        "file": "retry-test_kind5_release_drift.log",
+        "raw_bytes": 984,
+        "raw_sha256": "22700a6783b9295155a7329ea9cabf562accd99399887fc26b8ec302718a3d94",
+        "published_sha256": "22700a6783b9295155a7329ea9cabf562accd99399887fc26b8ec302718a3d94",
+        "normalization": "Exact local repository path replaced by <repo>; other contents preserved."
+      }
+    },
+    {
+      "file": "test_visor_rust_unwind.py",
+      "argv": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_visor_rust_unwind.py",
+        "-v"
+      ],
+      "environment_overrides": {
+        "LLVM_OBJDUMP": "/usr/bin/objdump",
+        "PATH_prefix": "/opt/homebrew/opt/binutils/bin"
+      },
+      "exit_code": 0,
+      "tests": 9,
+      "seconds": 3.382,
+      "skips": 0,
+      "status": "OK",
+      "log": {
+        "file": "retry-test_visor_rust_unwind.log",
+        "raw_bytes": 1659,
+        "raw_sha256": "6ceda593a116ab2122b47de27a3d06ebac6d44ecb99dafaf1a908cd2672f4bfa",
+        "published_sha256": "6ceda593a116ab2122b47de27a3d06ebac6d44ecb99dafaf1a908cd2672f4bfa",
+        "normalization": "Exact local repository path replaced by <repo>; other contents preserved."
+      }
+    }
+  ],
+  "effective_result_after_file_replacement": {
+    "calculation": "Replace each of the six initial per-file records with its corrected retry; do not add all 71 retry tests to the initial total.",
+    "files": 971,
+    "reported_tests": 15480,
+    "reported_skips": 69,
+    "unresolved_failed_files": [],
+    "remaining_skip_details": "See skip_reasons in repository-test-files.json, excluding the six replaced files. They include optional artifacts/providers, native-platform requirements, optional Z3/JDK dependencies and captured-execution/emulation opt-ins.",
+    "full_second_sweep_performed": false,
+    "initial_command_was_successful": false
+  },
+  "post_sweep_checks": {
+    "command": "LLVM_OBJDUMP=/usr/bin/objdump PATH=/opt/homebrew/opt/binutils/bin:$PATH make verify catalogue-check reproduce",
+    "exit_code": 0,
+    "exit_code_source": "Observed process completion from the command runner.",
+    "log": {
+      "file": "repository-post-sweep-checks.log",
+      "raw_bytes": 13294,
+      "raw_sha256": "8acab0f4bbee5d57ccf5b758331bb7352530dda6cd78bdd76d588c46fee5a53d",
+      "published_sha256": "8acab0f4bbee5d57ccf5b758331bb7352530dda6cd78bdd76d588c46fee5a53d",
+      "normalization": "Exact local repository path replaced by <repo>; other contents preserved."
+    }
+  },
+  "limits": [
+    "Reported unittest totals include its skip accounting; class-level skips are not a count of every unavailable test method.",
+    "This records a completed initial sweep plus successful retries, not a second full sweep or a hosted-CI pass.",
+    "No optional captured-execution opt-in or extra artifact download was enabled to eliminate remaining skips."
+  ]
+}

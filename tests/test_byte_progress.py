@@ -11,7 +11,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from byte_progress import compare, fraction, load_coverage, summarize
-from catalogue import project_bytes, render_readme_progress
+from catalogue import project_bytes, render_dependency_progress, render_readme_progress
 from test_research_tools import fixture
 
 
@@ -122,6 +122,112 @@ class ByteRegistryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'comparison extent'):
             self.load()
 
+    def unequal_candidate(self, source=b'abcdefghXY'):
+        (self.root / 'source.bin').write_bytes(source)
+        self.registry['evidence_sha256']['source.bin'] = self.sha(source)
+        self.window.update(comparison_mode='extent-mismatch', dependency='mio',
+                           label='Source-built listener candidate', source_kind='licensed-source build')
+        self.window['source'].update(length=len(source), body_sha256=self.sha(source))
+
+    def test_unequal_complete_extents_are_registered_without_aligned_byte_credit(self):
+        for source in (b'abcdefghXY', b'abc'):
+            with self.subTest(source=source):
+                self.unequal_candidate(source)
+                result = self.load()
+                self.assertEqual(result['windows'], [])
+                self.assertEqual(result['totals']['node94'], summarize([]))
+                self.assertEqual(project_bytes(self.components, result), summarize([]))
+                row, = result['extent_mismatches']
+                self.assertEqual((row['target_bytes'], row['source_bytes']), (8, len(source)))
+                self.assertEqual(row['status'], 'unmatched-extent')
+                self.assertIsNone(row['aligned_byte_comparison'])
+                self.assertNotIn('raw_equal_bytes', row)
+                self.assertNotIn('equal_non_relocation_bytes', row)
+                self.assertEqual(row['source']['body_sha256'], self.sha(source))
+                text = '\n'.join(render_dependency_progress(result))
+                self.assertIn('Unmatched candidates with different extents', text)
+                self.assertIn(f'| 8 | {len(source)} | Unmatched; no aligned-byte comparison |', text)
+
+    def test_unequal_candidate_does_not_change_existing_aligned_totals(self):
+        self.unequal_candidate()
+        aligned = {**self.window, 'id': 'aligned', 'start': 264, 'end': 272,
+                   'comparison_mode': 'offset-aligned', 'dependency': 'rust-core',
+                   'source': {**self.window['source'], 'length': 8, 'body_sha256': self.sha(b'abcdefgh')}}
+        self.registry['windows'].append(aligned)
+        result = self.load()
+        self.assertEqual(result['totals']['node94'], summarize([compare(b'abcdefgh', b'abcdefgh', [])]))
+        self.assertEqual(len(result['windows']), 1)
+        self.assertEqual(len(result['extent_mismatches']), 1)
+        self.assertEqual(set(result['dependencies']['node94']), {'rust-core'})
+
+    def test_unequal_source_tail_is_authenticated_even_if_prefix_matches(self):
+        self.unequal_candidate()
+        changed = b'abcdefghXZ'
+        (self.root / 'source.bin').write_bytes(changed)
+        self.registry['evidence_sha256']['source.bin'] = self.sha(changed)
+        with self.assertRaisesRegex(ValueError, 'Source body digest'):
+            self.load()
+
+    def test_unequal_candidate_cannot_inject_unmeasured_aligned_metrics(self):
+        self.unequal_candidate()
+        for key, value in {'bytes': 8, 'raw_equal_bytes': 8, 'relocation_bytes': 0,
+                           'non_relocation_bytes': 8, 'equal_non_relocation_bytes': 8,
+                           'raw_difference_offsets': [], 'non_relocation_difference_offsets': []}.items():
+            self.window[key] = value
+            with self.subTest(key=key), self.assertRaisesRegex(ValueError, 'cannot supply aligned-byte metrics'):
+                self.load()
+            del self.window[key]
+
+    def test_unequal_mode_requires_explicit_positive_in_bounds_extent(self):
+        self.unequal_candidate()
+        del self.window['source']['length']
+        with self.assertRaisesRegex(ValueError, 'explicit source length'):
+            self.load()
+        for length in (0, -1, True, 10.0, '10', 11):
+            self.window['source']['length'] = length
+            with self.subTest(length=length), self.assertRaisesRegex(ValueError, 'source comparison extent'):
+                self.load()
+        self.window['source']['length'] = 10
+        self.window['source']['offset'] = 1
+        with self.assertRaisesRegex(ValueError, 'source comparison extent'):
+            self.load()
+
+    def test_mode_cannot_hide_equal_lengths_or_unapproved_relocation_masks(self):
+        self.unequal_candidate(b'abcdefgh')
+        with self.assertRaisesRegex(ValueError, 'requires unequal extents'):
+            self.load()
+        self.unequal_candidate()
+        self.window['relocations'] = {'path': 'source.bin', 'pointer': []}
+        with self.assertRaisesRegex(ValueError, 'no shared relocation mask'):
+            self.load()
+        del self.window['relocations']
+        self.window['comparison_mode'] = 'unreviewed-mode'
+        with self.assertRaisesRegex(ValueError, 'comparison mode'):
+            self.load()
+        del self.window['comparison_mode']
+        with self.assertRaisesRegex(ValueError, 'comparison extent'):
+            self.load()
+
+    def test_unequal_hex_source_extent_uses_decoded_bytes_and_offset(self):
+        self.unequal_candidate()
+        source = b'XXabcdefghYYY'
+        encoded = source.hex().encode('ascii')
+        (self.root / 'source.bin').write_bytes(encoded)
+        self.registry['evidence_sha256']['source.bin'] = self.sha(encoded)
+        self.window['source'].update(encoding='hex', offset=2, length=11,
+                                     body_sha256=self.sha(source[2:]))
+        result = self.load()
+        self.assertEqual(result['extent_mismatches'][0]['source_bytes'], 11)
+
+    def test_unequal_candidates_still_reject_duplicate_target_intervals(self):
+        self.unequal_candidate()
+        self.registry['windows'].append({**self.window, 'id': 'second-candidate'})
+        with self.assertRaisesRegex(ValueError, 'Overlapping target windows'):
+            self.load()
+
+    def test_equal_length_legacy_output_does_not_gain_extent_mismatch_records(self):
+        self.assertNotIn('extent_mismatches', self.load())
+
     def test_external_registry_or_evidence_is_not_read(self):
         self.registry['evidence_sha256']['../outside.bin'] = '0' * 64
         with self.assertRaisesRegex(ValueError, 'external byte evidence'):
@@ -216,6 +322,20 @@ class ActualByteProgressTests(unittest.TestCase):
         self.assertEqual(windows[0]['bytes'], 197)
         self.assertTrue(windows[0]['raw_equal'])
         self.assertEqual(windows[0]['relocation_bytes'], 0)
+
+    def test_actual_mio_candidate_preserves_full_unequal_extents_without_credit(self):
+        row, = [r for r in self.coverage['extent_mismatches']
+                if r['id'] == 'node94-mio-listener-bind']
+        self.assertEqual((row['target_bytes'], row['source_bytes']), (305, 364))
+        self.assertEqual((row['start'], row['end']), (0x3cd6690, 0x3cd67c1))
+        self.assertEqual(row['source']['length'], 364)
+        self.assertEqual(row['dependency'], 'mio')
+        self.assertFalse(row['raw_equal'])
+        self.assertFalse(row['relocation_qualified'])
+        self.assertIsNone(row['aligned_byte_comparison'])
+        self.assertNotIn(row['id'], {r['id'] for r in self.coverage['windows']})
+        self.assertEqual(self.coverage['components']['transport'], summarize([]))
+        self.assertNotIn('mio', self.coverage['dependencies']['node94'])
 
 
 if __name__ == '__main__':

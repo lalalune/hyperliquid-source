@@ -99,6 +99,14 @@ reconstruction. Published artifacts and bitcode alone do not prove a source buil
 | node115 | rust-core | 355/390 (91.03%) | 0/1 (0.00%) | 1/1 (100.00%) |
 | node115 | zstandard | 2,418/2,418 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
 
+### Unmatched candidates with different extents
+
+Both complete source and target extents are authenticated. These candidates have no aligned-byte comparison and contribute no byte-equality credit or aligned-window denominator. Their full hashes, bounds and evidence remain in the byte registry and generated records.
+
+| Target / candidate | Attribution | Target bytes | Source bytes | Result |
+| --- | --- | ---: | ---: | --- |
+| node94: Mio TcpListener bind (unequal source extent) | mio | 305 | 364 | Unmatched; no aligned-byte comparison |
+
 ### Whole-target comparison coverage
 
 These are measured `.text` sizes, including dependencies. Selected matching

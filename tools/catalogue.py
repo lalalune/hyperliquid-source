@@ -107,6 +107,16 @@ def render_dependency_progress(coverage):
         for target, dependencies in coverage['dependencies'].items():
             for dependency, stats in dependencies.items():
                 lines.append(f"| {target} | {dependency} | {byte_cells(stats)} |")
+        if coverage.get('extent_mismatches'):
+            lines += ['', '### Unmatched candidates with different extents', '',
+                      'Both complete source and target extents are authenticated. These candidates have no aligned-byte comparison and contribute no byte-equality credit or aligned-window denominator. Their full hashes, bounds and evidence remain in the byte registry and generated records.', '',
+                      '| Target / candidate | Attribution | Target bytes | Source bytes | Result |',
+                      '| --- | --- | ---: | ---: | --- |']
+            for row in coverage['extent_mismatches']:
+                lines.append(f"| {row['target']}: {row['label']} | "
+                             f"{row.get('dependency', row['component'])} | "
+                             f"{row['target_bytes']:,} | {row['source_bytes']:,} | "
+                             'Unmatched; no aligned-byte comparison |')
     return lines + ['']
 
 

@@ -101,11 +101,13 @@ def load_coverage(root, registry_path, components):
                          'allocated_data_bytes': sum(s['size'] for s in all_sections
                                                      if s['flags'] & 2 and not s['flags'] & 4 and s['type'] != 8),
                          'zero_fill_bytes': sum(s['size'] for s in all_sections if s['flags'] & 2 and s['type'] == 8)}
-    rows, seen_ids, intervals = [], set(), {}
+    rows, extent_mismatches, seen_ids, intervals = [], [], set(), {}
     for item in registry['windows']:
         name, target = item['id'], item['target']
+        mode = item.get('comparison_mode', 'offset-aligned')
+        require(mode in ('offset-aligned', 'extent-mismatch'), 'Unknown comparison mode')
         require('dependency' not in item or item['dependency'] in
-                ('rust-core', 'compiler-builtins', 'zstandard'), 'Unknown dependency attribution')
+                ('rust-core', 'compiler-builtins', 'zstandard', 'mio'), 'Unknown dependency attribution')
         require(item['evidence'] in pinned, 'Comparison evidence must be hash-pinned')
         require(name not in seen_ids, 'Duplicate comparison id')
         seen_ids.add(name)
@@ -132,14 +134,35 @@ def load_coverage(root, registry_path, components):
             source = bytes.fromhex(source.decode('ascii'))
         begin = item['source'].get('offset', 0)
         require(type(begin) is int and begin >= 0, 'Invalid source excerpt offset')
-        source = source[begin:begin + end - start]
+        require(mode != 'extent-mismatch' or 'length' in item['source'],
+                'Extent mismatch requires explicit source length')
+        length = item['source'].get('length', end - start)
+        require(type(length) is int and length > 0 and begin + length <= len(source),
+                'Invalid source comparison extent')
+        source = source[begin:begin + length]
         require(digest(source) == item['source']['body_sha256'], 'Source body digest changed')
+        if mode == 'extent-mismatch':
+            require(len(source) != len(captured), 'Extent-mismatch mode requires unequal extents')
+            require(item.get('relocations') is None, 'Extent mismatch has no shared relocation mask')
+            require(not any(key in item for key in
+                            ('bytes', 'raw_equal_bytes', 'relocation_bytes', 'non_relocation_bytes',
+                             'equal_non_relocation_bytes', 'raw_difference_offsets',
+                             'non_relocation_difference_offsets')),
+                    'Extent mismatch cannot supply aligned-byte metrics')
+            # Preserve both complete authenticated extents without inventing an
+            # offset alignment, byte denominator, prefix comparison or padding.
+            extent_mismatches.append({**item, 'status': 'unmatched-extent',
+                                      'target_bytes': len(captured), 'source_bytes': len(source),
+                                      'raw_equal': False, 'relocation_qualified': False,
+                                      'aligned_byte_comparison': None})
+            continue
         reference = item.get('relocations')
         relocations = record(reference['path'], reference['pointer']) if reference else []
         if isinstance(relocations, dict):
             relocations = [relocations]
         rows.append({**item, **compare(source, captured, relocations)})
-    return {'targets': targets, 'windows': rows, 'components': {
+    return {**({'extent_mismatches': extent_mismatches} if extent_mismatches else {}),
+        'targets': targets, 'windows': rows, 'components': {
         c['id']: summarize([r for r in rows if r['component'] == c['id'] and r['target'] == c['artifact'] and 'dependency' not in r])
         for c in components}, 'totals': {name: summarize([r for r in rows if r['target'] == name])
                                         for name in targets},
