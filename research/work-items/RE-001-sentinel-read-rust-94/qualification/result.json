@@ -1,0 +1,88 @@
+{
+  "kind": "sentinel-read",
+  "freeze_sha256": "fc189f275e6ae794379482b7f73506b8d58eebbae5e3fdf064b2adf9ed1e8d42",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "cases": 2788,
+  "toolchain": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: x86_64-unknown-linux-gnu\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+  "target_executed": false,
+  "target_emulated": false,
+  "native_byte_comparison": false,
+  "full_domain_formal_proof": false,
+  "source_sha256": {
+    "client.rs": "9c9169c5c4089e6b8bb9b155166a7e68ee92f6c0bed6835806333f3fad022251",
+    "client_support.rs": "97401a2d3a02effc232fb1cef390255f9c78e517820f21dc86b22dc28457e1d8",
+    "lib.rs": "ea86c3d722d1114a8e50ed1419a34e833f72529123c1ad4d9e0be932314c0637",
+    "vectors.tsv": "b10e6f3ecdeea072eb4e574db57a7bf9ef702bc76b78106f4af2ef0100583e0d"
+  },
+  "compiled": [
+    {
+      "optimization": 0,
+      "cases": 2788,
+      "mismatches": 0,
+      "observed_sha256": "27a50ab3545f83593c17b7055596e3213c7c446ee34b2c3d97e29866b97ea4ac",
+      "llvm_definitions": [
+        "define internal void @_ZN11node94_leaf19sentinel_field_read17h2e3e5741723349b8E(ptr sret([32 x i8]) align 8 %_0, ptr align 8 %memory, i64 %object, i64 %output) unnamed_addr #3 {"
+      ]
+    },
+    {
+      "optimization": 3,
+      "cases": 2788,
+      "mismatches": 0,
+      "observed_sha256": "27a50ab3545f83593c17b7055596e3213c7c446ee34b2c3d97e29866b97ea4ac",
+      "llvm_definitions": [
+        "define internal fastcc void @_ZN11node94_leaf19sentinel_field_read17h2e3e5741723349b8E(ptr dead_on_unwind noalias noundef nonnull writable writeonly align 8 captures(none) dereferenceable(32) %_0, ptr noalias noundef nonnull align 8 dereferenceable(48) %memory, i64 noundef %object, i64 noundef %output) unnamed_addr #1 personality ptr @rust_eh_personality {"
+      ]
+    }
+  ],
+  "mutants": [
+    {
+      "name": "null-instead-of-self-sentinel",
+      "mismatches": 376,
+      "cases": 2788,
+      "observed_sha256": "98c7513fcfec081ced657ae98453699a579f6e56970a0a52e65452ddb03663b6"
+    },
+    {
+      "name": "eager-field-read",
+      "mismatches": 376,
+      "cases": 2788,
+      "observed_sha256": "f96596b63805edd0bd7c9ed7fb7760b4db4a0bd76784ee8521a04ed0564f1f19"
+    },
+    {
+      "name": "wrong-field-offset",
+      "mismatches": 1393,
+      "cases": 2788,
+      "observed_sha256": "1600b39b3236b2f99d6e742455d315bc6f5cd3aa87e271a466e2270e5cc22615"
+    },
+    {
+      "name": "truncated-store",
+      "mismatches": 746,
+      "cases": 2788,
+      "observed_sha256": "0179f5be4a009f96925af616f60aa5f4999d27fecbc174db332cfb4c329f8f14"
+    }
+  ],
+  "body_corruptions_rejected": [
+    "0x514abb0",
+    "0x514abe2"
+  ],
+  "frame_corruptions_rejected": [
+    [
+      "0x29a100",
+      8
+    ],
+    [
+      "0x29a100",
+      12
+    ],
+    [
+      "0x29a114",
+      8
+    ],
+    [
+      "0x29a114",
+      12
+    ]
+  ],
+  "cie_corruption_rejected": true,
+  "qualifier_sha256": "b60811cc1c2eb1e81b0251ab6aa271e6acf5b59aadd9ad57ee7090eff5b22aab",
+  "wrong_capture_rejected": true
+}
