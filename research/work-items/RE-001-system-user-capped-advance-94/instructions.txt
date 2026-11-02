@@ -1,0 +1,27 @@
+ELF VAs; strict Python decoder; complete function, no normalization.
+call_slot names a RIP-relative pointer slot, resolved separately via RELA.
+
+0x003b9d9b0  50                      push rax
+0x003b9d9b1  480337                  add rsi, qword [rdi]
+0x003b9d9b4  7234                    jb 0x3b9d9ea
+0x003b9d9b6  4889f0                  mov rax, rsi
+0x003b9d9b9  48ffc0                  inc rax
+0x003b9d9bc  742c                    je 0x3b9d9ea
+0x003b9d9be  488b4f08                mov rcx, qword [rdi+0x8]
+0x003b9d9c2  4801c1                  add rcx, rax
+0x003b9d9c5  7223                    jb 0x3b9d9ea
+0x003b9d9c7  4883f91e                cmp rcx, 0x1e
+0x003b9d9cb  760b                    jbe 0x3b9d9d8
+0x003b9d9cd  48c7071e000000          mov qword [rdi], 0x1e
+0x003b9d9d4  b01e                    mov al, 0x1e
+0x003b9d9d6  59                      pop rcx
+0x003b9d9d7  c3                      ret
+0x003b9d9d8  488907                  mov qword [rdi], rax
+0x003b9d9db  4883fe1e                cmp rsi, 0x1e
+0x003b9d9df  b81e000000              mov eax, 0x1e
+0x003b9d9e4  480f42c6                cmovb rax, rsi
+0x003b9d9e8  59                      pop rcx
+0x003b9d9e9  c3                      ret
+0x003b9d9ea  488d3dff55b701          lea rdi, 0x5712ff0
+0x003b9d9f1  ff152107bd01            call_slot 0x576e118
+0x003b9d9f7..0x003b9da00  cccccccccccccccccc  int3 padding (outside FDE)
