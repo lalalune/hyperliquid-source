@@ -160,6 +160,61 @@ def json_str(text, key, after):
     return text[i : text.index('"', i)]
 
 
+# The manifest pins the packet's own files plus the
+# ../..-relative tool and test files the packet binds.
+PACKET_FILES = frozenset({
+    "README.md",
+    "REVIEW.md",
+    "bn254-ecmul.json",
+    "independent_verify.py",
+    "pr-body.md",
+    "review-evidence/ancestry.json",
+    "review-evidence/corrected-independent.log",
+    "review-evidence/corrected-normal.log",
+    "review-evidence/corrected-optimized.log",
+    "review-evidence/corrected-python310.log",
+    "review-evidence/corrected-verify.log",
+    "review-evidence/current-static.json",
+    "review-evidence/final-live-head.json",
+    "review-evidence/light-gates.log",
+    "review-evidence/log-normalization.json",
+    "review-evidence/native-4e961e0.txt",
+    "review-evidence/native-4e96cf0.txt",
+    "review-evidence/native-4e98a70.txt",
+    "review-evidence/native-4e98b00.txt",
+    "review-evidence/native-4f15b60.txt",
+    "review-evidence/native-4f160c0.txt",
+    "review-evidence/native-4f168d0.txt",
+    "review-evidence/native-4f1b0f0.txt",
+    "review-evidence/native-4f1dea0.txt",
+    "review-evidence/native-4f1f8e0.txt",
+    "review-evidence/native-4f1f9c0.txt",
+    "review-evidence/native-4f20020.txt",
+    "review-evidence/native-4f200f0.txt",
+    "review-evidence/native-54c06b0.txt",
+    "review-evidence/native-final.log",
+    "review-evidence/native-review.json",
+    "review-evidence/original-independent.log",
+    "review-evidence/original-static-tests.log",
+    "review-evidence/safe-controls-final-optimized.log",
+    "review-evidence/safe-controls-final-python310.log",
+    "review-evidence/safe-controls-final.log",
+    "review-evidence/safe-controls.log",
+    "review-evidence/validation.json",
+    "review-original/SOURCE.json",
+    "review-original/research/work-items/RE-027-bn254-ecmul-94/MANIFEST.sha256",
+    "review-original/research/work-items/RE-027-bn254-ecmul-94/README.md",
+    "review-original/research/work-items/RE-027-bn254-ecmul-94/bn254-ecmul.json",
+    "review-original/research/work-items/RE-027-bn254-ecmul-94/independent_verify.py",
+    "review-original/research/work-items/RE-027-bn254-ecmul-94/pr-body.md",
+    "review-original/research/work-items/RE-027-bn254-ecmul-94/verify.py",
+    "review-original/tests/test_bn254_ecmul.py",
+    "review-original/tools/bn254_ecmul.py",
+    "review_native.py",
+    "verify.py",
+})
+
+
 def main():
     failures = []
     data = BINARY.read_bytes()
@@ -266,11 +321,53 @@ def main():
         failures.append("ok vector count %d" % oks)
     if hashlib.sha256(PACKET_JSON.read_bytes()).hexdigest() != JSON_SHA256:
         failures.append("json sha256")
+    # Admission: hashing each listed row is not enough. It cannot see
+    # a duplicated row, a listed file replaced by a symlink
+    # (read_bytes follows it, so the evidence can point outside the
+    # packet), an unlisted file in the packet directory, or an
+    # evidence file deleted together with its row. Pin the listed set
+    # and compare it against the packet contents, mirroring the RE-005
+    # verifier and the node-inventory verifiers.
+    listed = {}
     for line in (HERE / "MANIFEST.sha256").read_text().splitlines():
         if not line.strip():
             continue
-        digest, rel = line.split("  ", 1)
-        if hashlib.sha256((HERE / rel).read_bytes()).hexdigest() != digest:
+        digest, sep, rel = line.partition("  ")
+        if not sep or len(digest) != 64:
+            failures.append("malformed manifest line: " + line.strip())
+            continue
+        if rel in listed:
+            failures.append("manifest lists " + rel + " twice")
+            continue
+        listed[rel] = digest
+    if set(listed) != PACKET_FILES:
+        failures.append("manifest file set differs from pinned packet files")
+    # This packet legitimately keeps evidence in subdirectories
+    # (review-evidence/, review-original/), so instead of rejecting
+    # directories the contents comparison walks the whole tree:
+    # every file under the packet must be listed, and no entry
+    # anywhere in the tree may be a symlink.
+    present = set()
+    for path in sorted(HERE.rglob("*")):
+        rel = path.relative_to(HERE).as_posix()
+        if path.is_symlink():
+            failures.append("packet entry is a symlink: " + rel)
+        elif path.is_file():
+            if "__pycache__" in path.parts:
+                if path.suffix != ".pyc":
+                    failures.append(
+                        "unexpected __pycache__ entry in packet: " + rel)
+                continue
+            present.add(rel)
+    in_packet = {rel for rel in listed if not rel.startswith("..")}
+    if present - {"MANIFEST.sha256"} != in_packet:
+        failures.append("packet contents differ from manifest")
+    for rel, digest in listed.items():
+        path = HERE / rel
+        if path.is_symlink() or not path.is_file():
+            failures.append("manifest entry is a symlink or not a file: " + rel)
+            continue
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             failures.append("manifest " + rel)
     if failures:
         print("FAIL:", ", ".join(failures))
