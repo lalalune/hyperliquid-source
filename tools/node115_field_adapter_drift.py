@@ -133,7 +133,11 @@ class Image:
         need(table['link'] < len(self.sections), 'invalid symbol string table')
         strings = self.content(self.sections[table['link']]); end = strings.find(b'\0', name)
         need(0 <= name < len(strings) and end >= name, 'invalid symbol name')
-        return {'name': strings[name:end].decode('utf-8'), 'info': info, 'other': other,
+        try:
+            decoded = strings[name:end].decode('utf-8')
+        except UnicodeDecodeError as error:
+            raise EvidenceError('invalid symbol name encoding') from error
+        return {'name': decoded, 'info': info, 'other': other,
                 'section_index': section, 'value': value, 'size': size,
                 'file_offset': offset, 'symbol_index': index, 'symbol_table_index': table_index}
 
