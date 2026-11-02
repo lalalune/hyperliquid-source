@@ -1,0 +1,168 @@
+{
+  "recorded_utc": "2026-11-02T03:11:38.883635+00:00",
+  "base_commit": "966865f1637a29ce75b019e1bf11d5529cc6f519",
+  "tested_source_commit": "612c5a0963411deba9d642a6f95d1463adfcdecb",
+  "target": {
+    "release": "node94",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+    "size": 91774280
+  },
+  "tools": {
+    "python": "3.14.7",
+    "capstone": "5.0.7",
+    "gnu_objdump_readelf": "2.47.20260726",
+    "llvm_objdump": "18.1.4",
+    "host": "macOS arm64"
+  },
+  "repository_gates": {
+    "command": "make PYTHON=<Python 3.14.7 with Capstone 5.0.7> doctor verify catalogue-check reproduce",
+    "environment": "GNU binutils and LLVM directories prepended to child PATH",
+    "base_returncode": 0,
+    "contribution_returncode": 0,
+    "base_and_contribution_log_bytes_equal": true
+  },
+  "evidence": {
+    "full_fde_extents": 2,
+    "bytes": 1805,
+    "instructions": 442,
+    "gnu_llvm_byte_and_boundary_agreement": true,
+    "independent_readelf_headers": 2,
+    "repeated_exports_byte_identical": true,
+    "records_sha256": "98d1af277164118f088ea0a40646034cc405fc6236fd8f97b976e23b52926f8e",
+    "instruction_obligations": 35,
+    "relative_bindings": 19,
+    "dynamic_imports": 1,
+    "literal_bindings": 2,
+    "qualified_incoming_call_sites": 2
+  },
+  "focused_tests": {
+    "command": "python -m unittest tests.test_thread_stack_policy -v",
+    "methods": 4,
+    "returncode": 0,
+    "reported_seconds": 11.156
+  },
+  "negative_controls": {
+    "command": "python <packet>/verify.py --controls",
+    "deep_rejections": 62,
+    "survivors": 0,
+    "bypassed_guards": [
+      "whole-image digest",
+      "body digest",
+      "independent export comparison"
+    ],
+    "separate_integrity_controls": "Prologue mutation outside semantic spans rejected independently by each of the three guards."
+  },
+  "arithmetic_checks": {
+    "byte_classifier_cases": 256,
+    "unchecked_digit_lengths": 16,
+    "checked_prefix_digit_pairs": 60,
+    "cache_values_checked": 4101,
+    "decimal_boundaries": [
+      {
+        "digits": "0",
+        "fits_u64": true,
+        "encoded_cache": "0x1"
+      },
+      {
+        "digits": "0000",
+        "fits_u64": true,
+        "encoded_cache": "0x1"
+      },
+      {
+        "digits": "9999999999999999",
+        "fits_u64": true,
+        "encoded_cache": "0x2386f26fc10000"
+      },
+      {
+        "digits": "10000000000000000",
+        "fits_u64": true,
+        "encoded_cache": "0x2386f26fc10001"
+      },
+      {
+        "digits": "18446744073709551614",
+        "fits_u64": true,
+        "encoded_cache": "0xffffffffffffffff"
+      },
+      {
+        "digits": "18446744073709551615",
+        "fits_u64": true,
+        "encoded_cache": "0x0"
+      },
+      {
+        "digits": "18446744073709551616",
+        "fits_u64": false,
+        "encoded_cache": null
+      },
+      {
+        "digits": "99999999999999999999",
+        "fits_u64": false,
+        "encoded_cache": null
+      },
+      {
+        "digits": "000000000000000000000000000000001",
+        "fits_u64": true,
+        "encoded_cache": "0x2"
+      }
+    ],
+    "scope": "Arithmetic lemmas supporting the static proof; no target execution, emulation, parser implementation or runtime-equivalence claim"
+  },
+  "full_suite": {
+    "status": "complete; all official test files returned zero; no reruns",
+    "tested_source_commit": "612c5a0963411deba9d642a6f95d1463adfcdecb",
+    "modules": 972,
+    "reported_test_cases": 15474,
+    "skipped_cases": 69,
+    "failed_modules": 0,
+    "inventory_source": "tools/run_tests.py:test_files; identical complete inventories in eight isolated detached worktrees",
+    "isolation": "One fresh interpreter per module and one worktree per shard; each module assigned exactly once",
+    "command": "python -m unittest discover -s <isolated-root>/tests -p <file.py> -v",
+    "reproduce": "make test PYTHON=<Python 3.14.7 with Capstone 5.0.7>",
+    "environment": "GNU binutils and LLVM on child PATH; captured-execution authorization variables unset",
+    "post_run_identity": "All eight worktrees retain the tested commit and have no tracked changes",
+    "scope_note": "Skips are not passes. No captured binary execution or emulator. Metadata-only edits after tested source: README, PROOF, overlap, validation, compressed suite report and manifest.",
+    "official_inventory_sha256": "7a6433654991860c064f48da73d60909dff89fe3db32422a14ab086e3feaf7ae",
+    "runner_result_sha256": "f148f8f382ba956365ec122ff867711124ef67aa78e4a0d8de1b81ce8ab74a0f",
+    "per_module_result_file": "suite-results.json.gz",
+    "per_module_result_sha256": "bfd4426ecf33aff02da00beb3a6cc88fe1715335f65c2b0265bf2439218ed6b2"
+  },
+  "logs": [
+    {
+      "name": "hl9-baseline-gates.log",
+      "sha256": "596e1a1929db20310c11f621aff36e63b5c141be19fd87cec38f4666f3c5154e",
+      "retained": "local execution log; no private host data copied into packet"
+    },
+    {
+      "name": "hl9-contribution-gates.log",
+      "sha256": "596e1a1929db20310c11f621aff36e63b5c141be19fd87cec38f4666f3c5154e",
+      "retained": "local execution log; no private host data copied into packet"
+    },
+    {
+      "name": "hl9-focused.log",
+      "sha256": "56ccfca952bff0402555335b327606c8c6bea99cc5e6c04a64ade07f6a5ff729",
+      "retained": "local execution log; no private host data copied into packet"
+    },
+    {
+      "name": "hl9-exports.log",
+      "sha256": "fe7a3bc7209044377dc0b6b3e8ab9fad18f8f6263cf384dd0af19de3f2521cfc",
+      "retained": "local execution log; no private host data copied into packet"
+    },
+    {
+      "name": "hl9-second-exports.log",
+      "sha256": "da8cc1ccbaab8fedce8944c7652eeada82e634b26858d0b89a3d48220734ffb1",
+      "retained": "local execution log; no private host data copied into packet"
+    },
+    {
+      "name": "hl9-verify.log",
+      "sha256": "4616e9c4b9eb52d40111424d46d2866096f5f8ac56c66e47789f21d5c913de7d",
+      "retained": "local execution log; no private host data copied into packet"
+    }
+  ],
+  "execution_limits": {
+    "captured_code_executed": false,
+    "emulation": false,
+    "live_node_network": false,
+    "rust_equivalence_claim": false,
+    "hosted_ci_success_claim": false,
+    "component_gates_changed": false
+  }
+}
