@@ -145,13 +145,67 @@ def check_keys(data, check_sha=True, callers=True):
     return fails + (check_callers(data) if callers else [])
 
 
+# The manifest pins the packet's own files plus the
+# ../..-relative tool and test files the packet binds.
+PACKET_FILES = frozenset({
+    '../../../tests/test_abci_state_link.py',
+    '../../../tools/abci_state_link.py',
+    'EVIDENCE.md',
+    'README.md',
+    'abci-state-link.json',
+    'independent_verify.py',
+    'verify.py',
+})
+
+
 def check_packet():
     manifest = HERE / 'MANIFEST.sha256'
     if not manifest.exists() or not PACKET_JSON.exists():
         return ['packet json or MANIFEST.sha256 missing']
-    pins = dict(reversed(line.split('  ', 1)) for line in manifest.read_text().splitlines() if line)
-    if hashlib.sha256(PACKET_JSON.read_bytes()).hexdigest() != pins.get('abci-state-link.json'):
-        return ['abci-state-link.json does not match MANIFEST.sha256']
+    # Admission: the manifest used to be consulted only for the
+    # packet JSON's row (via a dict that silently collapses
+    # duplicate rows), so every other listed file was pinned against
+    # nothing the verifier enforces — a duplicated row, a listed
+    # file replaced by a symlink, an unlisted file in the packet
+    # directory, or a non-JSON file deleted together with its row
+    # all passed. Enforce the full admission, mirroring the RE-005
+    # verifier and the node-inventory verifiers: strict parse, no
+    # duplicate rows, the listed set pinned and equal to the
+    # manifest, no symlinked entries, the packet's own files equal
+    # to the in-packet listed set, and every row hashed (the JSON
+    # row included, which subsumes the old single-row check).
+    listed = {}
+    for line in manifest.read_text().splitlines():
+        if not line.strip():
+            continue
+        digest, sep, name = line.partition('  ')
+        if not sep or len(digest) != 64:
+            return ['malformed MANIFEST.sha256 line: ' + line.strip()]
+        if name in listed:
+            return ['MANIFEST.sha256 lists ' + name + ' twice']
+        listed[name] = digest
+    if set(listed) != PACKET_FILES:
+        return ['manifest file set differs from pinned packet files']
+    present = set()
+    for entry in sorted(HERE.iterdir()):
+        if entry.is_symlink():
+            return ['packet entry is a symlink: ' + entry.name]
+        if entry.is_dir():
+            if entry.name != '__pycache__' or not all(
+                    child.name.endswith('.pyc') and not child.is_symlink()
+                    for child in entry.iterdir()):
+                return ['unexpected directory in packet: ' + entry.name]
+            continue
+        present.add(entry.name)
+    in_packet = {n for n in listed if not n.startswith('..')}
+    if present - {'MANIFEST.sha256'} != in_packet:
+        return ['packet contents differ from manifest']
+    for name, digest in listed.items():
+        path = HERE / name
+        if path.is_symlink() or not path.is_file():
+            return ['manifest entry is a symlink or not a file: ' + name]
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            return ['manifest mismatch ' + name]
     return []
 
 
