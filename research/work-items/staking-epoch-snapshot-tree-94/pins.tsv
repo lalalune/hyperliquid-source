@@ -1,0 +1,68 @@
+name	address	file_offset	bytes	meaning
+context_clone_call	0x3369889	0x3368889	e832d90700	caller passes root and height to clone
+context_insert_call	0x3369906	0x3368906	e885dd0300	caller passes epoch and snapshot to map
+context_remove_call	0x3369bad	0x3368bad	e80ef0c6ff	caller removes oldest epoch after its guard
+guard_epoch_count	0x3369a1b	0x3368a1b	48817b40e9030000	pruning starts when count is at least 1001
+guard_active_compare	0x3369af0	0x3368af0	483b5348	oldest key compared to active epoch
+guard_active_stop	0x3369af4	0x3368af4	0f8348020000	oldest key at or above active epoch stops
+guard_dispose_date	0x3369c1a	0x3368c1a	837c247000	zero date suppresses old snapshot disposal
+clone_outer_height_test	0x33e71d7	0x33e61d7	4885d2	zero height selects leaf
+clone_outer_height_branch	0x33e71da	0x33e61da	0f84f6020000	leaf branch
+clone_outer_child	0x33e71e3	0x33e61e3	498bb630040000	first child pointer
+clone_outer_recursive	0x33e71f5	0x33e61f5	e8c6ffffff	recursive first child
+clone_outer_inner_size	0x33e720d	0x33e620d	bf90040000	inner allocation size
+clone_outer_leaf_size	0x33e74d6	0x33e64d6	bf30040000	leaf allocation size
+clone_outer_nested_count	0x33e72c2	0x33e62c2	4b837c7e1000	nested map length controls cloning
+clone_outer_nested_null	0x33e72ce	0x33e62ce	4885f6	nonempty nested map requires a root
+clone_outer_nested_call	0x33e72e4	0x33e62e4	e8475f0000	clone nested map
+clone_outer_next_child	0x33e7379	0x33e6379	e842feffff	recursive next child
+clone_outer_max	0x33e73f1	0x33e63f1	4883f90b	capacity check
+clone_outer_parent	0x33e7471	0x33e6471	4c89a020040000	write child parent
+clone_outer_parent_index	0x33e7478	0x33e6478	66899028040000	write child parent index
+clone_nested_height_test	0x33ed244	0x33ec244	4885d2	zero height selects leaf
+clone_nested_height_branch	0x33ed24c	0x33ec24c	0f84ec010000	leaf branch
+clone_nested_recursive	0x33ed265	0x33ec265	e8c6ffffff	recursive first child
+clone_nested_inner_size	0x33ed27c	0x33ec27c	bfa0010000	inner allocation size
+clone_nested_leaf_size	0x33ed43e	0x33ec43e	bf40010000	leaf allocation size
+clone_nested_next_child	0x33ed33c	0x33ec33c	e8effeffff	recursive next child
+clone_nested_max	0x33ed3af	0x33ec3af	4883f90b	capacity check
+clone_nested_parent	0x33ed3f1	0x33ec3f1	4c8920	write child parent
+clone_nested_parent_index	0x33ed3f4	0x33ec3f4	6689903c010000	write child parent index
+map_root_test	0x33a76a4	0x33a66a4	4885c0	empty root allocation
+map_count	0x33a76b1	0x33a66b1	440fb7881a020000	u16 count in node
+map_search_cmp	0x33a76d5	0x33a66d5	483b54f810	unsigned key compare
+map_search_relation	0x33a76da	0x33a66da	410f97c3	set above
+map_existing_out	0x33a7717	0x33a6717	4a8b4c0058	existing value tail loaded
+map_empty_leaf_size	0x33a7765	0x33a6765	bf20020000	new leaf allocation
+map_empty_leaf_capacity	0x33a779d	0x33a679d	4883fa0b	u16 node count below capacity
+map_key_store	0x33a77b4	0x33a67b4	4c897cd008	write u64 key
+map_count_increment	0x33a77da	0x33a67da	48ff4110	increase map length on new key
+map_insert_call	0x33a7842	0x33a6842	e8b9a0beff	insert into nonempty leaf
+insert_full_limit	0x2f91923	0x2f90923	4883fb0b	full leaf at eleven
+insert_not_full	0x2f91927	0x2f90927	722f	nonfull branch
+insert_pivot_cmp5	0x2f91932	0x2f90932	4983ff05	compare insertion index to five
+insert_pivot_branch5	0x2f91943	0x2f90943	7350	index at least five
+insert_pivot4	0x2f9194a	0x2f9094a	41bf04000000	old pivot four
+insert_pivot_cmp6	0x2f9199b	0x2f9099b	4983ff06	compare insertion index to six
+insert_pivot_branch6	0x2f9199f	0x2f9099f	0f85ef000000	index other than six
+insert_pivot5	0x2f919a5	0x2f909a5	41bf05000000	old pivot five
+insert_pivot6	0x2f91a9d	0x2f90a9d	41bf06000000	old pivot six
+insert_leaf_alloc	0x2f91aaa	0x2f90aaa	bf20020000	split leaf allocation size
+insert_leaf_alloc_test	0x2f91ab5	0x2f90ab5	4885c0	allocation check
+insert_leaf_alloc_failure	0x2f91ab8	0x2f90ab8	0f84e00a0000	allocation failure branch
+insert_promote_key	0x2f91af9	0x2f90af9	4b8b44fc08	read promoted key
+insert_left_count	0x2f91b8d	0x2f90b8d	664589bc241a020000	set left count to pivot index
+remove_leaf_call_a	0x2fd8ce3	0x2fd7ce3	e848d7feff	remove replacement leaf entry
+remove_leaf_call_b	0x2fd8dfd	0x2fd7dfd	e82ed6feff	remove direct leaf entry
+remove_key_base	0x2fc6463	0x2fc5463	498d7cdf08	u64 key array
+remove_value_base	0x2fc649c	0x2fc549c	498d3cc7	40-byte value slot calculation
+remove_count_store	0x2fc64e5	0x2fc54e5	664189bf1a020000	decrement count
+remove_underfull_cmp	0x2fc64fe	0x2fc54fe	6683ff04	compare remaining count to four
+remove_underfull_branch	0x2fc6502	0x2fc5502	0f8705050000	more than four skips repair
+remove_root_test	0x2fc650b	0x2fc550b	4885db	parent pointer check
+remove_root_branch	0x2fc650e	0x2fc550e	0f84f9040000	root skips repair
+remove_sibling_edge	0x2fc6521	0x2fc5521	4885f6	parent edge index check
+remove_sibling_branch	0x2fc6529	0x2fc5529	0f84f7030000	zero edge uses other sibling
+remove_merge_sum	0x2fc657e	0x2fc557e	4501c5	old count plus sibling count
+remove_merge_cmp	0x2fc6581	0x2fc5581	4183fd0c	compare sum to twelve
+remove_merge_branch	0x2fc6585	0x2fc5585	0f833f040000	sum at least twelve selects alternative
