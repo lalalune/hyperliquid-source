@@ -1,0 +1,122 @@
+{
+  "recorded_utc": "2026-11-01T22:56:28.585201+00:00",
+  "base_commit": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "tested_source_commit": "f228bb45009009f491a31ab84b0aeafbc7df0f0f",
+  "target": {
+    "release": "node94",
+    "sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+    "size": 91774280
+  },
+  "tools": {
+    "python": "3.14.7",
+    "capstone": "5.0.7",
+    "gnu_objdump_readelf": "2.47.20260726",
+    "llvm_objdump": "18.1.4",
+    "host": "macOS arm64"
+  },
+  "repository_gates": {
+    "command": "make PYTHON=<Python 3.14.7 with Capstone 5.0.7> doctor verify catalogue-check reproduce",
+    "environment": "GNU binutils and LLVM directories prepended to child PATH",
+    "base_returncode": 0,
+    "contribution_returncode": 0,
+    "base_and_contribution_log_bytes_equal": true
+  },
+  "evidence": {
+    "full_fde_extents": 3,
+    "bytes": 1095,
+    "instructions": 278,
+    "gnu_llvm_byte_and_boundary_agreement": true,
+    "independent_readelf_headers": 3,
+    "repeated_exports_byte_identical": true,
+    "records_sha256": "5da600020f9ef417f77f2356d45181cbc2f38dfd700a5335f6195dd3d74058ef",
+    "instruction_obligations": 33,
+    "relative_bindings": 16,
+    "literal_bindings": 5,
+    "qualified_incoming_call_sites": 4
+  },
+  "focused_tests": {
+    "command": "python -m unittest tests.test_generated_name -v",
+    "methods": 4,
+    "returncode": 0,
+    "reported_seconds": 9.766
+  },
+  "negative_controls": {
+    "command": "python <packet>/verify.py --controls",
+    "deep_rejections": 57,
+    "survivors": 0,
+    "bypassed_guards": [
+      "whole-image digest",
+      "body digest",
+      "independent export comparison"
+    ],
+    "separate_integrity_controls": "Prologue mutation outside semantic spans rejected independently by all three guards."
+  },
+  "combinatorial_checks": {
+    "byte_values_checked": 256,
+    "lengths_checked": 4097,
+    "partition_configurations": 8194,
+    "covered_positions": 16781312,
+    "subtraction_boundary_pairs": 64,
+    "SF_differs_from_signed_less_than_pairs": 12,
+    "scope": "Finite arithmetic checks supporting PROOF.md; no captured execution, emulation or runtime equivalence"
+  },
+  "full_suite": {
+    "status": "complete; all official test files returned zero; no reruns",
+    "tested_source_commit": "f228bb45009009f491a31ab84b0aeafbc7df0f0f",
+    "modules": 972,
+    "reported_test_cases": 15472,
+    "skipped_cases": 69,
+    "failed_modules": 0,
+    "inventory_source": "tools/run_tests.py:test_files; identical complete inventories in eight isolated detached worktrees",
+    "isolation": "One fresh interpreter per module and one worktree per shard; each module assigned exactly once",
+    "command": "python -m unittest discover -s <isolated-root>/tests -p <file.py> -v",
+    "reproduce": "make test PYTHON=<Python 3.14.7 with Capstone 5.0.7>",
+    "environment": "GNU binutils and LLVM on child PATH; captured-execution authorization variables unset",
+    "post_run_identity": "All eight worktrees retain the tested commit and have no tracked changes",
+    "scope_note": "Skips are not passes. No captured binary execution or emulator. Metadata-only edits after tested source: README, overlap, validation, compressed suite report and manifest.",
+    "official_inventory_sha256": "66485558e1422fc213729f9c546a88c951e47ecc9f88684a500611872798644c",
+    "runner_result_sha256": "9171f6247d1f61fdb03f81a93687764d3cf4619601310e33df3c51dd8da8f710",
+    "per_module_result_file": "suite-results.json.gz",
+    "per_module_result_sha256": "a146d282d7a4043eda800225736115d11350d2148dcd57559764f6c9333e135d"
+  },
+  "logs": [
+    {
+      "name": "hl8-baseline-gates.log",
+      "sha256": "596e1a1929db20310c11f621aff36e63b5c141be19fd87cec38f4666f3c5154e",
+      "retained": "local execution log; no private host data copied into packet"
+    },
+    {
+      "name": "hl8-contribution-gates.log",
+      "sha256": "596e1a1929db20310c11f621aff36e63b5c141be19fd87cec38f4666f3c5154e",
+      "retained": "local execution log; no private host data copied into packet"
+    },
+    {
+      "name": "hl8-focused.log",
+      "sha256": "26c48c09cff764c01ea591d0403723d3d320fd7913d87a41ea781655c433d64f",
+      "retained": "local execution log; no private host data copied into packet"
+    },
+    {
+      "name": "hl8-exports.log",
+      "sha256": "27bfb0ce517e878386745be856802516008ed265a7f1b48ee63fe084a5248ba7",
+      "retained": "local execution log; no private host data copied into packet"
+    },
+    {
+      "name": "hl8-second-exports.log",
+      "sha256": "3b35e20882114d9065647a2d32bc2252b2d3d16154ad0124d2c4d8731d5cf450",
+      "retained": "local execution log; no private host data copied into packet"
+    },
+    {
+      "name": "hl8-verify.log",
+      "sha256": "179da3e4b71fc1bd3acba6c99b591e076ae34e86bc06e6e2511ba46a2c0cd156",
+      "retained": "local execution log; no private host data copied into packet"
+    }
+  ],
+  "execution_limits": {
+    "captured_code_executed": false,
+    "emulation": false,
+    "live_node_network": false,
+    "rust_equivalence_claim": false,
+    "hosted_ci_success_claim": false,
+    "component_gates_changed": false
+  }
+}
