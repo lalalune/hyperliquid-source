@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 import struct
 import subprocess
+import tempfile
 
 from artifacts import ROOT, check
 from short_string_static import read_va
@@ -419,7 +420,13 @@ def generate(binary, output):
         raise ValueError('Unexpected pinned target')
     check(binary, identity)
     data = binary.read_bytes()
-    code, raw = decode(binary, data)
+    # Native readers see the same authenticated bytes as the Python readers.
+    # This owned snapshot is data-only and is never launched.
+    with tempfile.TemporaryDirectory(prefix='short-string-alias-') as directory:
+        snapshot = Path(directory) / 'node94.elf'
+        snapshot.write_bytes(data)
+        snapshot.chmod(0o400)
+        code, raw = decode(snapshot, data)
     result = evaluate(code)
     ranges = {}
     for name, (begin, end) in RANGES.items():
