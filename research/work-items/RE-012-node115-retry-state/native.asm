@@ -13,7 +13,7 @@ Disassembly of section .text:
  2a64139:	53                   	push   rbx
  2a6413a:	48 81 ec f8 00 00 00 	sub    rsp,0xf8
  2a64141:	48 89 94 24 90 00 00 	mov    QWORD PTR [rsp+0x90],rdx
- 2a64148:	00 
+ 2a64148:	00
  2a64149:	48 89 f3             	mov    rbx,rsi
  2a6414c:	0f b6 86 95 01 00 00 	movzx  eax,BYTE PTR [rsi+0x195]
  2a64153:	48 8d 0d fe ee b9 fd 	lea    rcx,[rip+0xfffffffffdb9eefe]        # 603058 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x57453d8>
@@ -23,7 +23,7 @@ Disassembly of section .text:
  2a64166:	ff e0                	jmp    rax
  2a64168:	0f b6 83 94 01 00 00 	movzx  eax,BYTE PTR [rbx+0x194]
  2a6416f:	c7 83 90 01 00 00 00 	mov    DWORD PTR [rbx+0x190],0x0
- 2a64176:	00 00 00 
+ 2a64176:	00 00 00
  2a64179:	48 8d 0d 98 2e ba fd 	lea    rcx,[rip+0xfffffffffdba2e98]        # 607018 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x5741418>
  2a64180:	0f b7 04 41          	movzx  eax,WORD PTR [rcx+rax*2]
  2a64184:	c7 43 02 00 00 00 00 	mov    DWORD PTR [rbx+0x2],0x0
@@ -37,11 +37,11 @@ Disassembly of section .text:
  2a641aa:	48 8d 05 bf 29 9f fd 	lea    rax,[rip+0xfffffffffd9f29bf]        # 456b70 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x58f18c0>
  2a641b1:	48 89 43 28          	mov    QWORD PTR [rbx+0x28],rax
  2a641b5:	48 c7 43 30 10 00 00 	mov    QWORD PTR [rbx+0x30],0x10
- 2a641bc:	00 
+ 2a641bc:	00
  2a641bd:	48 c7 43 38 0b 00 00 	mov    QWORD PTR [rbx+0x38],0xb
- 2a641c4:	00 
+ 2a641c4:	00
  2a641c5:	48 b8 00 00 00 00 00 	movabs rax,0x4000000000000000
- 2a641cc:	00 00 40 
+ 2a641cc:	00 00 40
  2a641cf:	48 89 43 40          	mov    QWORD PTR [rbx+0x40],rax
  2a641d3:	48 89 4b 48          	mov    QWORD PTR [rbx+0x48],rcx
  2a641d7:	48 8d 93 88 01 00 00 	lea    rdx,[rbx+0x188]
@@ -56,7 +56,7 @@ Disassembly of section .text:
  2a64205:	48 8b 4b 48          	mov    rcx,QWORD PTR [rbx+0x48]
  2a64209:	48 89 54 24 18       	mov    QWORD PTR [rsp+0x18],rdx
  2a6420e:	48 c7 43 60 ff ff ff 	mov    QWORD PTR [rbx+0x60],0xffffffffffffffff
- 2a64215:	ff 
+ 2a64215:	ff
  2a64216:	48 89 8b c0 00 00 00 	mov    QWORD PTR [rbx+0xc0],rcx
  2a6421d:	48 8d 83 ca 00 00 00 	lea    rax,[rbx+0xca]
  2a64224:	48 89 44 24 60       	mov    QWORD PTR [rsp+0x60],rax
@@ -65,16 +65,16 @@ Disassembly of section .text:
  2a64234:	48 89 44 24 58       	mov    QWORD PTR [rsp+0x58],rax
  2a64239:	48 c7 c0 ff ff ff ff 	mov    rax,0xffffffffffffffff
  2a64240:	66 c7 83 c8 00 00 00 	mov    WORD PTR [rbx+0xc8],0x100
- 2a64247:	00 01 
+ 2a64247:	00 01
  2a64249:	48 89 4b 68          	mov    QWORD PTR [rbx+0x68],rcx
  2a6424d:	48 89 43 70          	mov    QWORD PTR [rbx+0x70],rax
  2a64251:	48 83 f8 01          	cmp    rax,0x1
  2a64255:	48 83 d0 00          	adc    rax,0x0
  2a64259:	48 b9 00 00 00 00 00 	movabs rcx,0x8000000000000000
- 2a64260:	00 00 80 
+ 2a64260:	00 00 80
  2a64263:	48 89 4b 78          	mov    QWORD PTR [rbx+0x78],rcx
  2a64267:	48 c7 43 50 00 00 00 	mov    QWORD PTR [rbx+0x50],0x0
- 2a6426e:	00 
+ 2a6426e:	00
  2a6426f:	48 89 43 58          	mov    QWORD PTR [rbx+0x58],rax
  2a64273:	31 c9                	xor    ecx,ecx
  2a64275:	48 39 c1             	cmp    rcx,rax
@@ -82,13 +82,13 @@ Disassembly of section .text:
  2a6427e:	c6 83 c9 00 00 00 00 	mov    BYTE PTR [rbx+0xc9],0x0
  2a64285:	48 8b 43 78          	mov    rax,QWORD PTR [rbx+0x78]
  2a64289:	48 b9 00 00 00 00 00 	movabs rcx,0x8000000000000000
- 2a64290:	00 00 80 
+ 2a64290:	00 00 80
  2a64293:	48 39 c8             	cmp    rax,rcx
  2a64296:	75 57                	jne    2a642ef <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e4141>
  2a64298:	48 c7 44 24 08 01 00 	mov    QWORD PTR [rsp+0x8],0x1
- 2a6429f:	00 00 
+ 2a6429f:	00 00
  2a642a1:	48 c7 44 24 10 00 00 	mov    QWORD PTR [rsp+0x10],0x0
- 2a642a8:	00 00 
+ 2a642a8:	00 00
  2a642aa:	31 c0                	xor    eax,eax
  2a642ac:	eb 50                	jmp    2a642fe <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e4132>
  2a642ae:	4c 8d 83 ca 00 00 00 	lea    r8,[rbx+0xca]
@@ -110,27 +110,27 @@ Disassembly of section .text:
  2a642fe:	48 89 04 24          	mov    QWORD PTR [rsp],rax
  2a64302:	48 89 e0             	mov    rax,rsp
  2a64305:	48 89 84 24 b0 00 00 	mov    QWORD PTR [rsp+0xb0],rax
- 2a6430c:	00 
+ 2a6430c:	00
  2a6430d:	48 8d 05 fc 9f ff ff 	lea    rax,[rip+0xffffffffffff9ffc]        # 2a5e310 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32ea120>
  2a64314:	48 89 84 24 b8 00 00 	mov    QWORD PTR [rsp+0xb8],rax
- 2a6431b:	00 
+ 2a6431b:	00
  2a6431c:	48 8d 05 22 0a 9e fd 	lea    rax,[rip+0xfffffffffd9e0a22]        # 444d45 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x59036eb>
  2a64323:	48 89 84 24 a0 00 00 	mov    QWORD PTR [rsp+0xa0],rax
- 2a6432a:	00 
+ 2a6432a:	00
  2a6432b:	48 8d 84 24 b0 00 00 	lea    rax,[rsp+0xb0]
- 2a64332:	00 
+ 2a64332:	00
  2a64333:	48 89 84 24 a8 00 00 	mov    QWORD PTR [rsp+0xa8],rax
- 2a6433a:	00 
+ 2a6433a:	00
  2a6433b:	48 8d 43 70          	lea    rax,[rbx+0x70]
  2a6433f:	48 89 84 24 98 00 00 	mov    QWORD PTR [rsp+0x98],rax
- 2a64346:	00 
+ 2a64346:	00
  2a64347:	48 8d 84 24 a0 00 00 	lea    rax,[rsp+0xa0]
- 2a6434e:	00 
+ 2a6434e:	00
  2a6434f:	48 89 44 24 20       	mov    QWORD PTR [rsp+0x20],rax
  2a64354:	48 8d 05 b5 c2 b9 ff 	lea    rax,[rip+0xffffffffffb9c2b5]        # 2600610 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x3747e20>
  2a6435b:	48 89 44 24 28       	mov    QWORD PTR [rsp+0x28],rax
  2a64360:	48 8d 84 24 98 00 00 	lea    rax,[rsp+0x98]
- 2a64367:	00 
+ 2a64367:	00
  2a64368:	48 89 44 24 30       	mov    QWORD PTR [rsp+0x30],rax
  2a6436d:	48 8d 05 1c bd b9 ff 	lea    rax,[rip+0xffffffffffb9bd1c]        # 2600090 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x37483a0>
  2a64374:	48 89 44 24 38       	mov    QWORD PTR [rsp+0x38],rax
@@ -146,13 +146,13 @@ Disassembly of section .text:
  2a643a0:	ff 15 fa b0 a7 03    	call   QWORD PTR [rip+0x3a7b0fa]        # 64df4a0 <__register_atfork@plt+0xed910>
  2a643a6:	0f 10 44 24 78       	movups xmm0,XMMWORD PTR [rsp+0x78]
  2a643ab:	0f 29 84 24 e0 00 00 	movaps XMMWORD PTR [rsp+0xe0],xmm0
- 2a643b2:	00 
+ 2a643b2:	00
  2a643b3:	48 8b 84 24 88 00 00 	mov    rax,QWORD PTR [rsp+0x88]
- 2a643ba:	00 
+ 2a643ba:	00
  2a643bb:	48 89 84 24 f0 00 00 	mov    QWORD PTR [rsp+0xf0],rax
- 2a643c2:	00 
+ 2a643c2:	00
  2a643c3:	48 8d bc 24 e0 00 00 	lea    rdi,[rsp+0xe0]
- 2a643ca:	00 
+ 2a643ca:	00
  2a643cb:	e8 30 dc f9 ff       	call   2a02000 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x3346430>
  2a643d0:	49 89 c6             	mov    r14,rax
  2a643d3:	c6 83 c9 00 00 00 00 	mov    BYTE PTR [rbx+0xc9],0x0
@@ -176,7 +176,7 @@ Disassembly of section .text:
  2a64431:	e9 6a 03 00 00       	jmp    2a647a0 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e3c90>
  2a64436:	0f b7 83 30 01 00 00 	movzx  eax,WORD PTR [rbx+0x130]
  2a6443d:	66 c7 83 30 01 00 00 	mov    WORD PTR [rbx+0x130],0x4
- 2a64444:	04 00 
+ 2a64444:	04 00
  2a64446:	83 f8 04             	cmp    eax,0x4
  2a64449:	0f 85 86 03 00 00    	jne    2a647d5 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e3c5b>
  2a6444f:	48 8d 3d 86 28 ba fd 	lea    rdi,[rip+0xfffffffffdba2886]        # 606cdc <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x5741754>
@@ -233,7 +233,7 @@ Disassembly of section .text:
  2a6456f:	41 80 3f 03          	cmp    BYTE PTR [r15],0x3
  2a64573:	0f 85 93 00 00 00    	jne    2a6460c <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e3e24>
  2a64579:	66 83 bb 30 01 00 00 	cmp    WORD PTR [rbx+0x130],0x3
- 2a64580:	03 
+ 2a64580:	03
  2a64581:	0f 85 85 00 00 00    	jne    2a6460c <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e3e24>
  2a64587:	48 8d bb 38 01 00 00 	lea    rdi,[rbx+0x138]
  2a6458e:	e8 ed c1 04 00       	call   2ab0780 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x3297cb0>
@@ -263,7 +263,7 @@ Disassembly of section .text:
  2a645e9:	ff 15 d1 ae a7 03    	call   QWORD PTR [rip+0x3a7aed1]        # 64df4c0 <__register_atfork@plt+0xed930>
  2a645ef:	49 89 c6             	mov    r14,rax
  2a645f2:	66 83 bb 30 01 00 00 	cmp    WORD PTR [rbx+0x130],0x3
- 2a645f9:	03 
+ 2a645f9:	03
  2a645fa:	75 0c                	jne    2a64608 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e3e28>
  2a645fc:	48 8d bb 38 01 00 00 	lea    rdi,[rbx+0x138]
  2a64603:	e8 78 c1 04 00       	call   2ab0780 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x3297cb0>
@@ -275,7 +275,7 @@ Disassembly of section .text:
  2a64620:	74 27                	je     2a64649 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e3de7>
  2a64622:	48 8b 73 78          	mov    rsi,QWORD PTR [rbx+0x78]
  2a64626:	48 b8 00 00 00 00 00 	movabs rax,0x8000000000000000
- 2a6462d:	00 00 80 
+ 2a6462d:	00 00 80
  2a64630:	48 39 c6             	cmp    rsi,rax
  2a64633:	74 14                	je     2a64649 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e3de7>
  2a64635:	48 85 f6             	test   rsi,rsi
@@ -284,7 +284,7 @@ Disassembly of section .text:
  2a64641:	31 d2                	xor    edx,edx
  2a64643:	ff 15 57 ae a7 03    	call   QWORD PTR [rip+0x3a7ae57]        # 64df4a0 <__register_atfork@plt+0xed910>
  2a64649:	66 c7 83 c9 00 00 00 	mov    WORD PTR [rbx+0xc9],0x200
- 2a64650:	00 02 
+ 2a64650:	00 02
  2a64652:	48 8b 7c 24 58       	mov    rdi,QWORD PTR [rsp+0x58]
  2a64657:	e8 14 bd 04 00       	call   2ab0370 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32980c0>
  2a6465c:	48 8b 44 24 18       	mov    rax,QWORD PTR [rsp+0x18]
@@ -302,7 +302,7 @@ Disassembly of section .text:
  2a64691:	4c 8d ab f0 00 00 00 	lea    r13,[rbx+0xf0]
  2a64698:	4c 89 ef             	mov    rdi,r13
  2a6469b:	48 8b b4 24 90 00 00 	mov    rsi,QWORD PTR [rsp+0x90]
- 2a646a2:	00 
+ 2a646a2:	00
  2a646a3:	e8 a8 c3 02 00       	call   2a90a50 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32b79e0>
  2a646a8:	84 c0                	test   al,al
  2a646aa:	0f 85 62 03 00 00    	jne    2a64a12 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e3a1e>
@@ -360,7 +360,7 @@ Disassembly of section .text:
  2a647b5:	0f 11 83 30 01 00 00 	movups XMMWORD PTR [rbx+0x130],xmm0
  2a647bc:	0f b7 83 30 01 00 00 	movzx  eax,WORD PTR [rbx+0x130]
  2a647c3:	66 c7 83 30 01 00 00 	mov    WORD PTR [rbx+0x130],0x4
- 2a647ca:	04 00 
+ 2a647ca:	04 00
  2a647cc:	83 f8 04             	cmp    eax,0x4
  2a647cf:	0f 84 7a fc ff ff    	je     2a6444f <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e3fe1>
  2a647d5:	83 f8 02             	cmp    eax,0x2
@@ -429,7 +429,7 @@ Disassembly of section .text:
  2a64924:	4c 8d 7b 78          	lea    r15,[rbx+0x78]
  2a64928:	48 8b 73 78          	mov    rsi,QWORD PTR [rbx+0x78]
  2a6492c:	48 b8 00 00 00 00 00 	movabs rax,0x8000000000000000
- 2a64933:	00 00 80 
+ 2a64933:	00 00 80
  2a64936:	48 39 c6             	cmp    rsi,rax
  2a64939:	74 14                	je     2a6494f <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e3ae1>
  2a6493b:	48 85 f6             	test   rsi,rsi
@@ -445,7 +445,7 @@ Disassembly of section .text:
  2a64968:	48 8b 43 68          	mov    rax,QWORD PTR [rbx+0x68]
  2a6496c:	f2 0f 10 40 20       	movsd  xmm0,QWORD PTR [rax+0x20]
  2a64971:	f2 0f 11 83 f0 00 00 	movsd  QWORD PTR [rbx+0xf0],xmm0
- 2a64978:	00 
+ 2a64978:	00
  2a64979:	c6 83 80 01 00 00 00 	mov    BYTE PTR [rbx+0x180],0x0
  2a64980:	e9 0c fd ff ff       	jmp    2a64691 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e3d9f>
  2a64985:	8b 6c 24 04          	mov    ebp,DWORD PTR [rsp+0x4]
@@ -489,13 +489,13 @@ Disassembly of section .text:
  2a64a35:	48 8d 8b a8 00 00 00 	lea    rcx,[rbx+0xa8]
  2a64a3c:	48 8b 51 10          	mov    rdx,QWORD PTR [rcx+0x10]
  2a64a40:	48 89 94 24 d0 00 00 	mov    QWORD PTR [rsp+0xd0],rdx
- 2a64a47:	00 
+ 2a64a47:	00
  2a64a48:	0f 10 01             	movups xmm0,XMMWORD PTR [rcx]
  2a64a4b:	0f 29 84 24 c0 00 00 	movaps XMMWORD PTR [rsp+0xc0],xmm0
- 2a64a52:	00 
+ 2a64a52:	00
  2a64a53:	48 8b 73 78          	mov    rsi,QWORD PTR [rbx+0x78]
  2a64a57:	48 b9 00 00 00 00 00 	movabs rcx,0x8000000000000000
- 2a64a5e:	00 00 80 
+ 2a64a5e:	00 00 80
  2a64a61:	48 39 ce             	cmp    rsi,rcx
  2a64a64:	49 89 c6             	mov    r14,rax
  2a64a67:	74 14                	je     2a64a7d <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e39b3>
@@ -512,11 +512,11 @@ Disassembly of section .text:
  2a64a96:	83 fd 02             	cmp    ebp,0x2
  2a64a99:	74 46                	je     2a64ae1 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x32e394f>
  2a64a9b:	48 8b 84 24 d0 00 00 	mov    rax,QWORD PTR [rsp+0xd0]
- 2a64aa2:	00 
+ 2a64aa2:	00
  2a64aa3:	48 8b 4c 24 70       	mov    rcx,QWORD PTR [rsp+0x70]
  2a64aa8:	48 89 41 20          	mov    QWORD PTR [rcx+0x20],rax
  2a64aac:	0f 28 84 24 c0 00 00 	movaps xmm0,XMMWORD PTR [rsp+0xc0]
- 2a64ab3:	00 
+ 2a64ab3:	00
  2a64ab4:	0f 11 41 10          	movups XMMWORD PTR [rcx+0x10],xmm0
  2a64ab8:	48 89 29             	mov    QWORD PTR [rcx],rbp
  2a64abb:	4c 89 71 08          	mov    QWORD PTR [rcx+0x8],r14

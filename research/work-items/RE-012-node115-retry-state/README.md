@@ -67,3 +67,5 @@ Only `--write` regenerates retained static records/exports; the default checks e
 The captured executable is only read. No original execution, instruction emulator, socket, live network, signing, private key or chain operation occurs. No Rust source or compiled comparison has been produced; raw-equal, normalized-only and unmatched comparison counts remain **unmeasured**. Raw export counts are not reconstruction coverage. Every component gate remains false; shared catalogues are untouched.
 
 Next: close the operation-conversion and wait helpers, then validate cancellation and drop behavior against the concrete caller. The current packet constrains retry/control-flow and retained-data ownership without substituting a generic timer implementation for that work.
+
+Native text exports trim trailing whitespace only; instruction bytes, operands and addresses are unchanged.
