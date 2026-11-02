@@ -6,6 +6,7 @@ import json
 import re
 import struct
 import subprocess
+import tempfile
 from pathlib import Path
 from artifacts import ROOT, check
 from elf_index import sections
@@ -119,20 +120,26 @@ def generate(binary, output):
     identity = next(x for x in json.loads((ROOT/'provenance/artifacts.json').read_text())['files'] if x['path'] == 'artifacts/node/94/hl-node')
     check(binary, identity)
     data = binary.read_bytes()
-    frames = subprocess.check_output(['readelf', '-wf', str(binary)], text=True)
-    fdes = [(int(a, 16), int(b, 16)) for a, b in re.findall(r'FDE[^\n]*pc=([0-9a-f]+)\.\.([0-9a-f]+)', frames)]
-    result = validate(data, fdes)
-    output.mkdir(parents=True, exist_ok=True)
-    assembly = []
-    for a, b in RANGES:
-        assembly.append(subprocess.check_output(['objdump', '-d', f'--start-address={a:#x}', f'--stop-address={b:#x}', str(binary)], text=True).replace(str(binary), '<authenticated-node94>'))
-    # Two observed call sites only; this is deliberately not a caller census.
-    for a, b in ((0x13ce24e, 0x13ce260), (0x13ce95b, 0x13ce96f)):
-        assembly.append(subprocess.check_output(['objdump', '-d', f'--start-address={a:#x}', f'--stop-address={b:#x}', str(binary)], text=True).replace(str(binary), '<authenticated-node94>'))
-    (output/'wrappers.objdump.txt').write_text('\n'.join(assembly))
-    (output/'frames.txt').write_text('\n\n'.join(block for block in frames.split('\n\n') if any(f'pc={a:016x}..{b:016x}' in block for a,b in RANGES)) + '\n')
-    relas = subprocess.check_output(['readelf', '-rW', str(binary)], text=True)
-    (output/'relocations.txt').write_text('\n'.join(line for line in relas.splitlines() if re.match(r'^[0-9a-f]+\s', line) and hex(int(line.split()[0],16)) in result['relocations']) + '\n')
+    # Bind external decoder input to the same bytes using a private snapshot:
+    # readelf/objdump reopen their argument, so decoding the admitted path
+    # would bind this packet to whatever the path serves at decode time.
+    with tempfile.TemporaryDirectory() as temporary:
+        snapshot = Path(temporary)/'node94.elf'; snapshot.write_bytes(data)
+        check(snapshot, identity)  # Authenticate the exact bytes the decoders reopen.
+        frames = subprocess.check_output(['readelf', '-wf', str(snapshot)], text=True)
+        fdes = [(int(a, 16), int(b, 16)) for a, b in re.findall(r'FDE[^\n]*pc=([0-9a-f]+)\.\.([0-9a-f]+)', frames)]
+        result = validate(data, fdes)
+        output.mkdir(parents=True, exist_ok=True)
+        assembly = []
+        for a, b in RANGES:
+            assembly.append(subprocess.check_output(['objdump', '-d', f'--start-address={a:#x}', f'--stop-address={b:#x}', str(snapshot)], text=True).replace(str(snapshot), '<authenticated-node94>'))
+        # Two observed call sites only; this is deliberately not a caller census.
+        for a, b in ((0x13ce24e, 0x13ce260), (0x13ce95b, 0x13ce96f)):
+            assembly.append(subprocess.check_output(['objdump', '-d', f'--start-address={a:#x}', f'--stop-address={b:#x}', str(snapshot)], text=True).replace(str(snapshot), '<authenticated-node94>'))
+        (output/'wrappers.objdump.txt').write_text('\n'.join(assembly))
+        (output/'frames.txt').write_text('\n\n'.join(block for block in frames.split('\n\n') if any(f'pc={a:016x}..{b:016x}' in block for a,b in RANGES)) + '\n')
+        relas = subprocess.check_output(['readelf', '-rW', str(snapshot)], text=True)
+        (output/'relocations.txt').write_text('\n'.join(line for line in relas.splitlines() if re.match(r'^[0-9a-f]+\s', line) and hex(int(line.split()[0],16)) in result['relocations']) + '\n')
     result.update({'target_sha256': identity['sha256'], 'target_bytes': len(data), 'selected_windows': 2, 'selected_bytes': sum(r['bytes'] for r in result['ranges']), 'fde_records_parsed': len(fdes), 'captured_binary_executed': False, 'source_path_va': hex(PATH_VA), 'scope': 'Two FDE-described nonreturning formatting wrappers; source identity is a relocated Location, names and types remain inferred. No whole-component or equivalence claim.'})
     (output/'records.json').write_text(json.dumps(result, indent=2) + '\n')
     return result
