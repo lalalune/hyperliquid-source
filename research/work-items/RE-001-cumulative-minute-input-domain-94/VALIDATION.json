@@ -1,0 +1,71 @@
+{
+  "targetSha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f",
+  "sourceBase": "d3af75257a396c85d20857f421c370ddb8cb40e5",
+  "host": {
+    "system": "Darwin",
+    "release": "27.0.0",
+    "machine": "arm64",
+    "python": "3.14.3"
+  },
+  "environment": {
+    "PATHPrefix": "/opt/homebrew/opt/binutils/bin"
+  },
+  "commands": [
+    {
+      "label": "collect",
+      "command": "python3 -B research/work-items/RE-001-cumulative-minute-input-domain-94/collect.py --output research/work-items/RE-001-cumulative-minute-input-domain-94/observed",
+      "exitCode": 0,
+      "elapsedSeconds": 1.959,
+      "stdout": "validation/collect.stdout",
+      "stderr": "validation/collect.stderr"
+    },
+    {
+      "label": "verify",
+      "command": "python3 -B research/work-items/RE-001-cumulative-minute-input-domain-94/verify.py",
+      "exitCode": 0,
+      "elapsedSeconds": 7.87,
+      "stdout": "validation/verify.stdout",
+      "stderr": "validation/verify.stderr"
+    },
+    {
+      "label": "verify-optimized",
+      "command": "python3 -O -B research/work-items/RE-001-cumulative-minute-input-domain-94/verify.py",
+      "exitCode": 0,
+      "elapsedSeconds": 8.225,
+      "stdout": "validation/verify-optimized.stdout",
+      "stderr": "validation/verify-optimized.stderr"
+    }
+  ],
+  "earlierDevelopmentCheck": {
+    "command": "PATH=/opt/homebrew/opt/binutils/bin:$PATH python3 -B research/work-items/RE-001-cumulative-minute-input-domain-94/verify.py --retained ../RESEARCH/hyperliquid_deep_campaign_20261102/artifacts/node_scout/first-export",
+    "exitCode": 1,
+    "verifySha256": "153302f76ef9f944d3f7a3af2a31273f8dc5a43ea870217a8cae77ad27d61956",
+    "error": "Control failed for an unintended reason: Multiplier/divisor proof domain changed",
+    "cause": "M-1 is even; the existing arithmetic helper rejects its odd-multiplier premise before the intended negative approximation-bound check. Control changed to M-2, which retains oddness and violates the approximation inequality."
+  },
+  "sourceHashes": {
+    "collect.py": "c40479baa093644358474821d9205e14177671a588befad5fd849e0884e7dfad",
+    "verify.py": "a6b0049280f968106fd516085cf0196e9e8080d415ff40abd249d8a15c5d08ac",
+    "README.md": "885758c51bb969a4680391af4d6446fcd41fa240322cd69d40f8037c4bbd2d17",
+    "PROOF.md": "1472e0e129c5627d2603f127d5b3347bb6dbc0845772cc4b51d54993d619f2fc"
+  },
+  "scope": {
+    "targetExecution": false,
+    "instructionEvaluation": false,
+    "fullMakeTestRun": false,
+    "hostedCIPassClaimed": false,
+    "rootChecks": "Recorded by coordinating reviewer separately; not claimed by this file."
+  },
+  "independentReviewCorrections": [
+    {
+      "finding": "Four RIP-relative CALL operands per corridor were incorrectly counted as explicit writes.",
+      "correction": "Exclude CALL from explicit memory-destination inventory; calls and implicit stack effects remain separate.",
+      "semanticConclusionChanged": false
+    },
+    {
+      "finding": "A prefixed MOV AX and a CS-prefixed JMP could evade first-mnemonic register/CFG checks below the identity gate.",
+      "correction": "Reject all prefix-led native rows except exact observed NOP forms; add both reported native-decoded byte controls.",
+      "semanticConclusionChanged": false
+    }
+  ]
+}
