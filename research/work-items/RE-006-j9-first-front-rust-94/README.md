@@ -190,3 +190,14 @@ SHA-256 `fe12475bfdb259763b0364b6082f0d25d9d9b07ea1a6752cf958076234ad697a`
 are preserved. The warning is recorded rather than hidden with attributes or
 rewriting the old bytes. The current component source and focused-test diff
 passes the check. Whole-commit whitespace cleanliness is not claimed.
+
+## Historical combined-source boundary
+
+The compiled receipt in this packet describes the j8+j9 source closure at
+`49877d8280fa82f164c9203507d510f6a928aed3`. A later fixed-n21 follow-on adds
+modules to the same crate. Exact old shared `lib.rs` and component README bytes
+are archived under `../RE-006-fixed-n21-delegate-rust-94/predecessor/j9-first-front/`;
+only those two manifest paths move, retaining their original hashes. The old
+j8/j9 modules, drivers, frozen cases and compiled receipts remain unchanged.
+This packet’s33-test results are historical; fresh full combined-source checks
+are recorded separately by the fixed-n21 packet.

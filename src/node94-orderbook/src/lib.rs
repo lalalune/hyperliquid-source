@@ -10,6 +10,8 @@ pub mod first_left_insertion;
 pub mod j9_first_front;
 mod layout;
 mod matching;
+pub mod n21_right_merge;
+pub mod n21_seed_prepare;
 mod snapshot;
 mod types;
 

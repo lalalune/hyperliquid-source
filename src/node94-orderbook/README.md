@@ -123,6 +123,15 @@ See `RE-006-j9-first-front-rust-94` for native premises and frozen comparisons.
 
 ## Build and test
 
+`n21_seed_prepare::sort_delegate21` reconstructs one complete fixed-count
+normal-value route for21 raw unsigned words with disjoint37-word scratch.
+The native eight-word producers establish the left/right sorted seed premises;
+the existing j8/j9 steps and new n21 continuation finish the array. Full scratch
+quartet images and preparation cutpoints are retained. This is the delegate's
+n21 value domain, not generic counts, outer-core reachability, original pointer
+ABI, failure/unwind behavior or a whole-component gate. Cutpoint/provenance and
+logical write records are chosen observations, not physical compiled traces.
+
 ```sh
 cargo test --manifest-path src/node94-orderbook/Cargo.toml
 cargo clippy --manifest-path src/node94-orderbook/Cargo.toml --all-targets -- -D warnings
