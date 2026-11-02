@@ -73,7 +73,10 @@ def archive_member(data):
         elif name.startswith('/') and name[1:].isdigit():
             index = int(name[1:]); end = names.find(b'/\n', index)
             need(0 <= index < len(names) and end >= index, 'invalid ar long name')
-            name = names[index:end].decode('ascii')
+            try:
+                name = names[index:end].decode('ascii')
+            except UnicodeDecodeError as error:
+                raise EvidenceError('invalid ar long name encoding') from error
         else:
             name = name.rstrip('/')
         if name == MEMBER:
