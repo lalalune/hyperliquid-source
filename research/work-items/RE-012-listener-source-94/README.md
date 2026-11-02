@@ -106,9 +106,20 @@ Target SHA-256:
 `make doctor`, `make verify catalogue-check reproduce`, and all 56 focused
 `tests.test_socket_calls_static`, `tests.test_node_port_static`, and
 `tests.test_fde_extents` tests passed; retained logs are in `validation/`.
-The full repository suite is running after the registration fix; no completed
-full-suite or hosted-CI result is claimed in this revision. Initial setup
-checks exposed an unmaterialized pinned reference LFS file and a stale Git LFS
+The repository sweep at `b9e9115f25f3787c7c2ea865566cd77ba8149caa`
+attempted all 971 test files: 15,455 reported tests, 73 skips, and two file
+failures because `LLVM_OBJDUMP` was unset (`llvm-objdump` was not on PATH).
+The original `make verify test catalogue-check reproduce` exited 2 at `test`.
+Setting `LLVM_OBJDUMP=/usr/bin/objdump` resolved both errors and four related
+LLVM skips: all 71 tests across those six files passed. Replacing their
+initial results gives 15,480 reported tests, 69 remaining skips, and no
+unresolved failed files; this is not a second full-suite run. The remaining
+skips include optional artifacts/providers, native-platform requirements and
+captured-execution opt-ins. `make verify catalogue-check reproduce` then
+passed separately. [The validation record](validation/repository-checks.json)
+retains per-file results, original failure traces, retry logs and hashes.
+No hosted-CI pass is claimed. Initial setup checks exposed an unmaterialized
+pinned reference LFS file and a stale Git LFS
 stat cache; materializing the authenticated payload and refreshing unchanged
 filtered index entries resolved them. Reference commits and contents stayed
 unchanged.
@@ -119,9 +130,10 @@ reviewable evidence; plugin status is not proof of binary equivalence.
 
 The original crate graph, features, compiler options, ABI and integration remain
 unresolved. Runtime registration, peer transport, full networking, component
-completion and a source-built node are not established. No captured binary,
-listener or socket was executed; the reviewed libc host configuration helper
-ran only to emit build cfgs. No milestone or completion gate is changed.
+completion and a source-built node are not established. In this listener
+experiment, no captured binary, listener or socket was executed; the reviewed
+libc host configuration helper ran only to emit build cfgs. No milestone or
+completion gate is changed.
 
 New analysis and scripts are MIT. Copied Mio, libc and Rust materials retain the
 license notices under `source-build/`. Captured target bytes retain their
