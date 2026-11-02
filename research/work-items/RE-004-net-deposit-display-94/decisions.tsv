@@ -1,0 +1,10 @@
+stage	condition	local_consequence
+lookup	status == 0x186	read signed word +0x238; round to binary64; divide by 1000000; retain success tag
+lookup	status != 0x186	copy the 96-byte lookup error record; do not read the word or divide
+cleanup	input allocation length == 0	skip deallocation
+cleanup	input allocation length != 0	call deallocator before returning
+wrapper	sum of two timing values > 3.0	conditional logging path; copy the same 96-byte result
+wrapper	sum of two timing values <= 3.0 or unordered	skip logging path; copy the same 96-byte result
+response dispatch	tag == 41	load binary64 at input +8; call keyed object builder
+object builder	field helper returns nonzero	return tagged error and drop temporary object
+object builder	field helper returns zero	pass temporary object to finalization helper
