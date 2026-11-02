@@ -64,16 +64,19 @@
     "old_head": "table+0x10 before the loop, then table+0x10 reset to null",
     "bucket_index": "cached_hash at node+0x70, unsigned modulo new_bucket_count",
     "empty_bucket": "node next = current head; head = node; bucket entry = sentinel address (table+0x10 field)",
-    "nonempty_bucket": "node next = before-node next; before-node next = node",
-    "last_node_fixup": "when the inserted node's next is null, bucket entry at the previous bucket index = the node",
+    "nonempty_bucket": "node next = before-node next; before-node next = node; fixup and previous-bucket update NOT touched on this path",
+    "last_node_fixup": "empty-bucket path only: when the inserted node's next is non-null, bucket entry at the previous bucket index = the node",
     "previous_bucket_initial": 0,
-    "previous_bucket_update": "previous bucket index = current bucket index after each node",
+    "previous_bucket_update": "previous bucket index = current bucket index after each node, on the empty-bucket path only",
     "order_note": "the old chain is walked in its existing order; nodes are not re-sorted by bucket"
   },
   "epilogue": {
     "old_array_free": "operator delete[] over old count * 8 bytes, skipped when the old buckets pointer equals table+0x30",
     "commit": "table+0x08 = new_bucket_count, table+0x00 = new base",
-    "untouched": ["table+0x18 element count", "table+0x20 policy float"]
+    "untouched": [
+      "table+0x18 element count",
+      "table+0x20 policy float"
+    ]
   },
   "caller": {
     "site": "0x515acf8",
@@ -94,8 +97,8 @@
     "0x515a8b4": "new bucket entry load",
     "0x515a890": "nonempty bucket insert-after-before-node",
     "0x515a8bc": "empty bucket head prepend and sentinel entry",
-    "0x515a8ca": "last-node fixup test (node next == 0)",
-    "0x515a8d0": "last-node fixup store at the previous bucket index",
+    "0x515a8ca": "fixup test: node next == 0 skips the store (conditional jump to the previous-index update)",
+    "0x515a8d0": "fixup store at the previous bucket index (empty path only, node next non-null)",
     "0x515a8e4": "old buckets pointer compared against table+0x30",
     "0x515a8ed": "operator delete[] call for the old array",
     "0x515a8f2": "new count commit to table+0x08",

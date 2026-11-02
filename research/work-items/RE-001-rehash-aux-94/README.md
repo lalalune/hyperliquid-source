@@ -58,23 +58,29 @@ result. There is no stack canary in this window.
   of the table+0x10 field itself. When the target bucket entry
   is already set, the node is inserted after that entry's
   before-node (node next = before-node next, before-node
-  next = node). After each insertion, when the inserted node's
-  next pointer is null, the bucket entry at the *previous*
-  bucket index is overwritten with the node itself; the
-  previous index starts at 0 and becomes the current bucket
-  index after each node. The next pointer is null exactly when
-  the node lands at the tail of the chain as it stands: always
-  for the first node walked (the head was reset to null), and
-  again for any later node inserted after the current tail
-  node — for example successive nodes of a bucket whose
-  before-node is the tail, or every node after the first in
-  the single-bucket arm, where each insertion appends at the
-  tail. Each firing overwrites the previous-bucket entry with
-  the new node, so in the single-bucket arm bucket 0 ends up
-  holding the last node, not the first. The model implements
-  the condition literally rather than special-casing the first
-  node, so the recorded behaviour is the algorithm's own, not
-  a simplification of it.
+  next = node), and neither the fixup below nor the previous
+  index is touched on that path. Only on the empty-bucket path,
+  after the prepend, the window tests the inserted node's next
+  pointer: when it is non-null, the bucket entry at the
+  *previous* bucket index is overwritten with the node itself,
+  and the previous index then becomes the current bucket
+  index. The conditional jump skips the store exactly when the
+  next pointer is null, so the first node walked never
+  triggers the fixup (the head was reset to null), while a
+  later node that starts a new bucket does: its next pointer
+  is the previous head, and the previous bucket's entry must
+  be repointed at it, because that entry's chain now starts
+  behind the new head node. In the single-bucket arm every
+  node after the first takes the nonempty path (bucket 0's
+  entry is already the sentinel), so each inserts after the
+  sentinel — prepending to the head — and the chain reverses,
+  with bucket 0's entry staying the sentinel. The model
+  implements the branch placement and the condition literally,
+  so the recorded behaviour is the algorithm's own, not a
+  simplification of it. (An earlier version of this packet had
+  the condition inverted and the fixup on both paths; a
+  reviewer caught it and this packet was corrected to the
+  bytes before submission of the fix.)
 - Epilogue: the old bucket array is freed with operator
   delete[] over old-count * 8 bytes, unless the old buckets
   pointer equals the table+0x30 single-bucket address, in which
@@ -125,10 +131,15 @@ logic is not modelled here.
   beyond it being untouched here.
 - What the caller does with the table after rehashing, beyond
   the post-call bucket-index division noted above.
-- The reaching path beyond the single caller, and the reason
-  the first-node fixup writes bucket index 0 rather than the
-  first node's own bucket: recorded as the algorithm's literal
-  behaviour, not explained.
+- The reaching path beyond the single caller.
+- Whether this routine counts as first-party node code: its
+  shape matches the standard library's unordered-container
+  rehash auxiliary (the bucket-entry, before-node and
+  previous-bucket fixup structure), instantiated here in the
+  node binary. This packet maps the binary's instance, as
+  earlier packets mapped other standard-library helpers, and
+  leaves the first-party-versus-dependency judgement to the
+  maintainer; it is not claimed as first-party node code.
 
 ## Evidence format note
 

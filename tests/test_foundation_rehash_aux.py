@@ -64,56 +64,65 @@ class TestEmptyAndSingleNode(unittest.TestCase):
         self.assertTrue(table.buckets_is_single)
         self.assertEqual(table.freed, [True])
 
-    def test_single_node_fixup_writes_bucket_zero(self):
-        # Hash 10 % 4 = bucket 2. The first (only) node is
-        # prepended to the head, its bucket entry becomes the
-        # sentinel, and the fixup then overwrites bucket entry 0
-        # (the previous index, initially 0) with the node itself.
+    def test_single_node_no_fixup_when_next_is_null(self):
+        # Hash 10 % 4 = bucket 2. The only node is prepended to
+        # the head and its bucket entry becomes the sentinel.
+        # The fixup store is skipped because the inserted node's
+        # next pointer is null (the head was null), so bucket
+        # entry 0 stays empty and the previous index stays 0.
         node = Node("A", 10)
         table = chain_table([node], bucket_count=3)
         rehash_aux(table, 4, saved_next_resize=99)
         self.assertEqual(table.chain(), ["A"])
-        self.assertEqual(table.bucket_entries(), ["A", None, "S", None])
+        self.assertEqual(table.bucket_entries(), [None, None, "S", None])
         self.assertEqual(table.freed, [True])
 
 
 class TestMigrationOrder(unittest.TestCase):
-    def test_three_nodes_interleaved_buckets(self):
+    def test_three_nodes_empty_path_fixup_repoints_previous(self):
         # Old chain A(5%3=2), B(4%3=1), C(8%3=2), walked in order:
-        # A starts bucket 2 and triggers the fixup at index 0;
-        # B starts bucket 1; C inserts after bucket 2's
-        # before-node (the sentinel), so the head becomes C and
-        # the chain runs C -> B -> A.
+        # A starts bucket 2 (next null, so no fixup; previous
+        # stays 0). B starts bucket 1: its next is A (non-null),
+        # so the fixup overwrites bucket entry 2 — the previous
+        # bucket — with B, then previous becomes 1. C finds
+        # bucket 2 nonempty with before-node B, so C inserts
+        # after B (C next = A, B next = C); the nonempty path
+        # touches neither the fixup nor the previous index.
+        # Final chain B -> C -> A; bucket 2's before-node is B,
+        # whose next is C, bucket 2's first node.
         a, b, c = Node("A", 5), Node("B", 4), Node("C", 8)
         table = chain_table([a, b, c], bucket_count=3)
         rehash_aux(table, 3, saved_next_resize=99)
-        self.assertEqual(table.chain(), ["C", "B", "A"])
-        self.assertEqual(table.bucket_entries(), ["A", "S", "S"])
+        self.assertEqual(table.chain(), ["B", "C", "A"])
+        self.assertEqual(table.bucket_entries(), [None, "S", "B"])
 
     def test_same_bucket_second_node_inserts_after_before_node(self):
         # X then Y, both bucket 1 (hashes 4 and 7, count 3):
-        # X starts the bucket and the fixup writes bucket 0;
+        # X starts the bucket (its next is null, so the fixup
+        # is skipped, but the previous index still becomes 1);
         # Y inserts after the sentinel, so the head becomes Y
-        # and the chain runs Y -> X.
+        # and the chain runs Y -> X. The nonempty path touches
+        # neither the fixup nor the previous index, so bucket
+        # entry 0 stays empty.
         x, y = Node("X", 4), Node("Y", 7)
         table = chain_table([x, y], bucket_count=3)
         rehash_aux(table, 3, saved_next_resize=99)
         self.assertEqual(table.chain(), ["Y", "X"])
-        self.assertEqual(table.bucket_entries(), ["X", "S", None])
+        self.assertEqual(table.bucket_entries(), [None, "S", None])
 
-    def test_bucket_zero_fixup_fires_at_each_tail_insertion(self):
+    def test_bucket_zero_second_node_uses_nonempty_path(self):
         # First node A hashes to bucket 0 (hash 6 % 3): its
-        # empty-bucket entry is the sentinel, then the fixup
-        # overwrites bucket entry 0 with A itself. A second
-        # bucket-0 node B inserts after A (the before-node);
-        # B's next is null too (A was the tail), so the fixup
-        # fires again and bucket entry 0 ends up holding B,
-        # with chain A -> B.
+        # empty-bucket entry is the sentinel, and the fixup is
+        # skipped because A's next is null. The second bucket-0
+        # node B finds the entry set, so it inserts after the
+        # sentinel (B next = A, head = B); the nonempty path
+        # touches neither the fixup nor the previous index.
+        # Final chain B -> A with bucket 0 entry the sentinel.
         a, b = Node("A", 6), Node("B", 9)
         table = chain_table([a, b], bucket_count=3)
         rehash_aux(table, 3, saved_next_resize=99)
-        self.assertEqual(table.chain(), ["A", "B"])
-        self.assertEqual(table.bucket_entries(), ["B", None, None])
+        self.assertEqual(table.chain(), ["B", "A"])
+        self.assertEqual(table.bucket_entries(), ["S", None, None])
 
     def test_every_node_survives_exactly_once(self):
         nodes = [Node("n%d" % i, 1000 + i * 7) for i in range(20)]
@@ -122,9 +131,6 @@ class TestMigrationOrder(unittest.TestCase):
         self.assertEqual(sorted(table.chain()),
                          sorted(n.id for n in nodes))
         self.assertEqual(len(table.chain()), 20)
-        for node in nodes:
-            self.assertEqual(node.cached_hash % 11,
-                             node.cached_hash % 11)  # bucket rule
         # Each bucket entry's chain segment is reachable from the
         # head: every node is on the single global chain.
         seen = set()
@@ -139,36 +145,36 @@ class TestMigrationOrder(unittest.TestCase):
         node = Node("big", (1 << 64) - 1)
         table = chain_table([node], bucket_count=3)
         rehash_aux(table, 7, saved_next_resize=99)
-        # (2**64 - 1) % 7 == 1, so the node lands in bucket 1;
-        # the first-node fixup writes bucket entry 0 with the
-        # node as well.
+        # (2**64 - 1) % 7 == 1, so the single node lands in
+        # bucket 1; its next is null, so the fixup is skipped
+        # and bucket entry 0 stays empty.
         self.assertEqual(node.cached_hash % 7, 1)
         self.assertEqual(table.bucket_entries(),
-                         ["big", "S", None, None, None, None, None])
+                         [None, "S", None, None, None, None, None])
 
 
 class TestSingleBucketArm(unittest.TestCase):
     def test_single_bucket_preserves_chain_order(self):
         # Count 1: every node hashes to bucket 0. The first node
-        # starts the bucket and the fixup writes bucket 0 = A;
-        # the second node inserts after A (the tail), so the
-        # chain stays A -> B, unlike the heap arm's head
-        # prepends — but the fixup fires again for B, so bucket
-        # 0 ends up holding B, the last node.
+        # starts the bucket (entry = sentinel, fixup skipped:
+        # its next is null). Every later node finds the entry
+        # set and inserts after the sentinel, i.e. prepends to
+        # the head, so the chain reverses: B -> A with bucket 0
+        # entry still the sentinel.
         a, b = Node("A", 5), Node("B", 9)
         table = chain_table([a, b], bucket_count=3)
         rehash_aux(table, 1, saved_next_resize=99)
-        self.assertEqual(table.chain(), ["A", "B"])
-        self.assertEqual(table.bucket_entries(), ["B"])
+        self.assertEqual(table.chain(), ["B", "A"])
+        self.assertEqual(table.bucket_entries(), ["S"])
         self.assertTrue(table.buckets_is_single)
         self.assertEqual(table.freed, [True])
 
-    def test_single_bucket_three_nodes_entry_is_last(self):
+    def test_single_bucket_three_nodes_chain_reverses(self):
         a, b, c = Node("A", 5), Node("B", 9), Node("C", 13)
         table = chain_table([a, b, c], bucket_count=3)
         rehash_aux(table, 1, saved_next_resize=99)
-        self.assertEqual(table.chain(), ["A", "B", "C"])
-        self.assertEqual(table.bucket_entries(), ["C"])
+        self.assertEqual(table.chain(), ["C", "B", "A"])
+        self.assertEqual(table.bucket_entries(), ["S"])
 
     def test_single_bucket_from_single_is_not_freed(self):
         a = Node("A", 5)

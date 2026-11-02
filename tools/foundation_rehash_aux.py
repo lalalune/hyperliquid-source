@@ -157,6 +157,12 @@ def rehash_aux(table, new_count, saved_next_resize, alloc_fail=False):
     old_is_single = table.buckets_is_single
 
     # Migration: walk the old chain in its existing order.
+    # The fixup and the previous-bucket update live ONLY on the
+    # empty-bucket path: the store at the previous index runs
+    # when the inserted node's next pointer is non-null (the
+    # head was non-null before this insertion), and the previous
+    # index then becomes the current bucket. The nonempty path
+    # inserts after the before-node and touches neither.
     node = table.head
     table.head = None
     prev_bucket = 0
@@ -171,9 +177,9 @@ def rehash_aux(table, new_count, saved_next_resize, alloc_fail=False):
             node.next = table.head
             table.head = node
             new_buckets[bucket] = SENTINEL
-        if node.next is None:
-            new_buckets[prev_bucket] = node
-        prev_bucket = bucket
+            if node.next is not None:
+                new_buckets[prev_bucket] = node
+            prev_bucket = bucket
         node = nxt
 
     # Epilogue: free the old array unless it was the single slot,

@@ -48,8 +48,8 @@ SITES = [
     (0x515A8B4, 0x48),  # new bucket entry load
     (0x515A890, 0x48),  # nonempty bucket insert-after-before-node
     (0x515A8BC, 0x48),  # empty bucket head prepend and sentinel entry
-    (0x515A8CA, 0x48),  # last-node fixup test (node next == 0)
-    (0x515A8D0, 0x4B),  # last-node fixup store at previous index
+    (0x515A8CA, 0x48),  # fixup test (node next == 0 skips store)
+    (0x515A8D0, 0x4B),  # fixup store at previous index, empty path only
     (0x515A8E4, 0x4C),  # old buckets pointer vs table+0x30
     (0x515A8ED, 0xE8),  # call to operator delete[]
     (0x515A8F2, 0x48),  # new count commit to table+0x08
