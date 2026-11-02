@@ -17,6 +17,8 @@ pub mod qc_recovery_byte;
 pub mod qc_row_success;
 /// Qualified mode-1, four-FD-word success projection; separate from admission.
 pub mod qc_fd_group;
+/// Qualified full-word-zero, accepted-marker group projection; separate from admission.
+pub mod qc_mode0_group;
 mod stake;
 mod state;
 mod tc;

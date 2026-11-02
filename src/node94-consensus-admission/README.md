@@ -104,6 +104,16 @@ by its input-only research driver. The original bool API is byte-identical.
 See `research/work-items/RE-008-qc-fd-group-short-94/`; other markers, nonadmitted
 states, inactive error bytes and full QC-row reachability remain unqualified.
 
+`qc_mode0_group::read_mode0_group` separately covers the complete eight-byte
+mode word being zero. It composes four accepted 0..FA/FB/FC/FD scalar reads,
+including nonminimal little-endian encodings and the first short/empty input.
+Charge and limit are unused under that premise. Its independent 96-vector
+compiled comparison and native/negative-control evidence are in
+`research/work-items/RE-008-qc-mode0-group-94/`. The existing manifest and lockfile
+build it with standard-library conversions and no new dependencies. Its chosen
+safe outcome type, atomic outside-domain rejection and driver-only row error
+projection do not recover native ABI, inactive error storage or full QC decoding.
+
 ## Reproduce
 
 From the repository root:
