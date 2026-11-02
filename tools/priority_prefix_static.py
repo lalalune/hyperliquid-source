@@ -74,7 +74,11 @@ def transfer_certificate(prefix):
 
 def analyze(data):
     _, fs, _ = fde_extents(data)
-    frames = {(f['start'], f['end']): f for f in fs}
+    frames = {}
+    for f in fs:
+        if (f['start'], f['end']) in frames:
+            raise ValueError('duplicate FDE extent')
+        frames[(f['start'], f['end'])] = f
     relsec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
     rels = {a: (i, v) for a, i, v in struct.iter_unpack('<QQq', data[relsec['offset']:relsec['offset']+relsec['size']])}
     owners = []
