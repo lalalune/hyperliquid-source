@@ -60,8 +60,8 @@ class CatalogueTests(unittest.TestCase):
     def test_dependency_bytes_do_not_count_as_first_party(self):
         coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', self.components)
         self.assertEqual(set(coverage['targets']), {'node115'})
-        self.assertEqual(coverage['totals']['node115']['windows'], 5759)
-        self.assertEqual(coverage['totals']['node115']['bytes'], 3373032)
+        self.assertEqual(coverage['totals']['node115']['windows'], 5836)
+        self.assertEqual(coverage['totals']['node115']['bytes'], 3428270)
         self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
 
     def test_wrong_owner_target_and_changed_evidence_rejected(self):
@@ -109,8 +109,8 @@ class CatalogueTests(unittest.TestCase):
         rows = [r for r in coverage['windows'] if r['id'].startswith('node115-vendor-')]
         rust = [r for r in rows if r['dependency'] == 'vendored-crates']
         native = [r for r in rows if r['dependency'] == 'native-libraries']
-        self.assertEqual((len(rust), sum(r['bytes'] for r in rust)), (241, 125370))
-        self.assertEqual((len(native), sum(r['bytes'] for r in native)), (5208, 3141103))
+        self.assertEqual((len(rust), sum(r['bytes'] for r in rust)), (300, 149494))
+        self.assertEqual((len(native), sum(r['bytes'] for r in native)), (5226, 3172217))
         self.assertEqual(len(rust) + len(native), len(rows))
         self.assertTrue(all(r['relocation_qualified'] for r in rows))
         self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))

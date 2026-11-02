@@ -89,14 +89,14 @@ def main():
         versions = lock_versions(lock)
         locks.append(sha(Path(lock).read_bytes()))
         for rlib in sorted(deps.glob('lib*.rlib')):
-            candidates = versions.get(rlib.name[3:rlib.name.rindex('-')])
-            if candidates:  # skips the empty build-root crate
+            candidates = [c for c in versions.get(rlib.name[3:rlib.name.rindex('-')], []) if c['source']]
+            if candidates:  # only registry/git dependencies; never a build's own workspace crates
                 archives.append((rlib, rlib.name, candidates, False))
         # Native static libraries built by -sys crate build scripts (C has no
         # cross-crate generic instantiation, so the building crate owns them).
         for archive in sorted((deps.parent / 'build').glob('*/out/**/*.a')):
             package = archive.relative_to(deps.parent / 'build').parts[0]
-            candidates = versions.get(package[:package.rindex('-')].replace('-', '_'))
+            candidates = [c for c in versions.get(package[:package.rindex('-')].replace('-', '_'), []) if c['source']]
             if candidates:
                 archives.append((archive, f'{package}/{archive.name}', candidates, True))
     for path, name, candidates, native in archives:
@@ -129,7 +129,10 @@ def main():
                     continue
                 if va in claimed:
                     prior = claimed[va]
-                    if prior['source_body_sha256'] != sha(body):
+                    # Another body of the same crate (e.g. a neighbouring version whose
+                    # relocation addends differ) also matches outside its own masked fields:
+                    # a further candidate, not ambiguity. A different crate is ambiguous.
+                    if prior['source_body_sha256'] != sha(body) and prior['crate'] != candidates[0]['crate']:
                         prior['ambiguous_sources'] = True
                     elif prior['rlib'] != name or prior['symbol'] != symbols[0]:
                         prior.setdefault('identical_sources', []).append(

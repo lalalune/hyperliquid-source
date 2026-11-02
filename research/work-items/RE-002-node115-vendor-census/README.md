@@ -27,7 +27,7 @@ Native crates (amd64 Ubuntu 24.04 container; one build per `gcc-*` directory):
 
 ```sh
 podman build --platform linux/amd64 -t hl-native-build research/work-items/RE-002-node115-vendor-census
-for b in gcc-rocksdb0210 gcc-secp256k1sys0100 gcc-secp256k1sys0110 gcc-blst0316 gcc-jemalloc061; do
+for b in gcc-rocksdb0210 gcc-secp256k1sys0100 gcc-secp256k1sys0110 gcc-blst0316 gcc-jemalloc061 gcc-revm4003 gcc-forkbases; do
   cp -r research/work-items/RE-002-node115-vendor-census/$b work/vendor-$b
   mkdir -p work/vendor-$b/src && : > work/vendor-$b/src/lib.rs
   podman run --rm --platform linux/amd64 -v "$PWD/work/vendor-$b:/w" hl-native-build \
@@ -46,8 +46,17 @@ python3 research/work-items/RE-002-node115-vendor-census/vendor_census.py \
   work/vendor-gcc-secp256k1sys0100/target/release/deps work/vendor-gcc-secp256k1sys0100/Cargo.lock \
   work/vendor-gcc-secp256k1sys0110/target/release/deps work/vendor-gcc-secp256k1sys0110/Cargo.lock \
   work/vendor-gcc-blst0316/target/release/deps work/vendor-gcc-blst0316/Cargo.lock \
-  work/vendor-gcc-jemalloc061/target/release/deps work/vendor-gcc-jemalloc061/Cargo.lock
+  work/vendor-gcc-jemalloc061/target/release/deps work/vendor-gcc-jemalloc061/Cargo.lock \
+  work/org-hyper-evm-sync/target/release/deps work/org-hyper-evm-sync/Cargo.lock \
+  work/org-block-importer/target/release/deps work/org-block-importer/Cargo.lock \
+  work/org-order_book_server/target/release/deps work/org-order_book_server/Cargo.lock \
+  work/vendor-gcc-revm4003/target/release/deps work/vendor-gcc-revm4003/Cargo.lock \
+  work/vendor-gcc-forkbases/target/release/deps work/vendor-gcc-forkbases/Cargo.lock
 ```
+
+The `org-*` builds are the hyperliquid-dex repositories at the commits in each
+`org-*/SOURCE`, built unchanged with `cargo build --release --locked` in the
+same container (their lockfiles are retained here).
 
 How the version candidates were chosen:
 
@@ -113,28 +122,57 @@ The review also confirmed four labelling and false-positive problems, all fixed 
 Separately, the comparator now rejects a census relocation pointer that names
 another window's record.
 
+## hyperliquid-dex repository sweep
+
+All 11 public hyperliquid-dex repositories were checked for build inputs that
+pin node dependencies. The six pinned upstream submodules are at their latest
+commits.
+
+| Repository | Use here |
+| --- | --- |
+| `node` | `Dockerfile` is `FROM ubuntu:24.04`, consistent with the Ubuntu GCC 13.3 toolchain in node115's `.comment` |
+| `block-importer` | Imports data into hl-node; its lock pins `rocksdb 0.21.0`, independently confirming `rocksdb_build_git_tag:v8.1.1`; also reth v1.3.0 and revm 20-alpha |
+| `hyper-evm-sync` | Lock pins alloy 0.9.2, revm 19.2.0, reth v1.1.5, hyper 0.14.32 (the base of node115's private `hyper-fork`) and the zlib 1.3.1 era of libz-sys |
+| `order_book_server` | Lock pins alloy 1.0.23, secp256k1 0.30.0 / secp256k1-sys 0.10.1 |
+| `hyperliquid-rust-sdk`, `hyperliquid-python-sdk`, `ts-examples`, `contracts`, `hyperliquid-stats(-web)`, `historical_data` | No lockfile or no native-node dependency information |
+
+Building the three Rust repositories exactly as locked supplies internally
+consistent dependency generations that a free-standing resolver could not build.
+A sweep of revm 24.0.1 to 42.0.1 found the node's revm family closest to
+revm 40.0.0–41.0.0 (revm-precompile 36.x): 13.9 KB match there, versus 0.6 KB
+at revm 24–36 and 10.5 KB at 42.0.1. The org builds also exposed identical machine
+code in different crates (hyper vs aws-smithy, bytes vs rustls, a RocksDB method
+vs aws-lc-sys). Those 6 previously credited windows are now dropped as ambiguous.
+
 ## Results
 
-5,449 windows, 3,266,473 bytes, all relocation-qualified, 430 raw-equal:
+5,526 windows, 3,321,711 bytes, all relocation-qualified, 432 raw-equal:
 
 | Attribution | Windows | Bytes |
 | --- | ---: | ---: |
-| native-libraries (GCC 13.3) | 5,208 | 3,141,103 |
-| vendored-crates (rustc 1.95.0) | 241 | 125,370 |
+| native-libraries (GCC 13.3) | 5,226 | 3,172,217 |
+| vendored-crates (rustc 1.95.0) | 300 | 149,494 |
 
 | Native library | Windows | Bytes |
 | --- | ---: | ---: |
-| librocksdb-sys | 4,619 | 2,437,124 |
+| librocksdb-sys | 4,618 | 2,437,086 |
 | zstd-sys | 309 | 516,663 |
 | tikv-jemalloc-sys | 196 | 82,641 |
 | bzip2-sys | 14 | 44,314 |
-| secp256k1-sys | 21 | 32,096 |
-| libz-sys | 14 | 14,727 |
-| blst | 27 | 13,164 |
+| secp256k1-sys | 24 | 38,103 |
+| libz-sys | 28 | 36,604 |
+| blst | 29 | 16,432 |
 | lz4-sys | 8 | 374 |
 
-The largest Rust contributors are sha2, h2, http, rand_chacha, chrono, url, ripemd, k256, revm-precompile, primitive-types. `revm-precompile` is a private fork in node115
-(`z_forks/revm-precompile`); some published functions are unchanged in it.
+The largest Rust contributors are h2, sha2, http, revm-precompile, tokio, rand_chacha, chrono, url, ripemd, k256. Of the eight private forks:
+
+- `revm-precompile` matches 12.8 KB of revm-precompile 36.x;
+- `hyper-fork` matches hyper 0.14.32 in its unmodified functions;
+- `bincode-fork` and `hyper-tls-fork` (bases bincode 1.3.3 and hyper-tls 0.5.0)
+  expose no unique non-generic body;
+- the four reth crates (one or two source files each) are git-only, and the reth
+  releases in the org lockfiles (v1.1.5, v1.3.0) match only 115 bytes.
+
 `census.json` has the per-crate summary and every record. `licenses.json` gives
 each matched crate version's declared license (all permissive); the compiled
 bodies keep those licenses.
@@ -151,6 +189,10 @@ bodies keep those licenses.
   found no such case in its sample, but the risk is not zero.
 - Relocation fields are masked, not resolved. No component gate claim.
 
+- Generic Rust code (serde, futures, tokio, hashbrown and similar) is compiled
+  inside the node's own crates. It can only be reproduced with the node's
+  source, so it is first-party reconstruction work, not dependency matching.
+
 Next question: which remaining RocksDB/zstd functions differ, and why (inlining
-across TUs, flags, or a patched RocksDB)? Which versions and profiles reproduce
-the unmatched non-generic Rust crates?
+across TUs, flags, or a patched RocksDB)? Does a reth 2.x release (git tag)
+compatible with revm 40 reproduce the four reth fork files?
