@@ -78,7 +78,7 @@ section sizes do not assign individual instructions or data to a component.
 From the repository root, with its pinned submodules and LFS artifacts:
 
 ```sh
-export PATH="$(brew --prefix binutils)/bin:$PATH" # macOS GNU tools already installed
+export PATH="$(brew --prefix binutils)/bin:$(brew --prefix llvm)/bin:$PATH"
 make doctor verify
 readelf --wide --section-headers artifacts/node/94/hl-node
 readelf --wide --section-headers artifacts/node/115/hl-node

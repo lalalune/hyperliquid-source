@@ -9,13 +9,19 @@
 - Independent GNU `readelf --wide --section-headers` output agrees with the
   catalogue's code, allocated-data and zero-fill counts for all three targets.
 - Focused byte-accounting tests: 17 passed. Catalogue/research tests: 50 passed.
-- Full offline test-file inventory: running; final result must be recorded
-  before this change is considered validated. The sequential `make test` run
-  was interrupted and replaced with six workers, each launching the same
-  isolated `unittest discover` invocation per file. No test is excluded or
-  changed by the runner. Transient commands and per-file logs remain under
-  ignored `work/node-scope-accounting/`.
-- `make catalogue-check`: pending final full-suite completion.
+- Full offline test-file inventory: **957/957 files passed after environment
+  retries**; 15,230 reported test cases, including 71 skips. The primary run
+  passed 954 files. The Capstone test then passed under existing Python
+  3.13.2 / Capstone 5.0.7; two dual-disassembler tests passed after adding the
+  installed LLVM 22.1.4 to PATH. Other tests used Python 3.14.6. No remaining
+  failures. See [machine-readable results](validation-results.json).
+- The sequential `make test` run was interrupted and replaced with six
+  workers, each launching the same isolated `unittest discover` invocation
+  per file. No test was excluded or changed by the runner. The initial
+  parallel attempt also lacked GNU tools on PATH and was restarted; it is
+  not counted as a passing run. Transient commands and per-file logs remain
+  under ignored `work/node-scope-accounting/`.
+- `make catalogue-check` and `git diff --check`: passed.
 - Captured node/visor execution, full-node build, Docker runtime and network
   acceptance: not performed; no corresponding success is claimed.
 
