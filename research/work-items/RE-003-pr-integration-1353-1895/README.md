@@ -1,6 +1,6 @@
 # PR integration review
 
-Status: local integration validation in progress. No component completion gate advances.
+Status: integrated locally; full test inventory and follow-up validation complete. No component completion gate advances.
 
 This packet began with 540 PRs (#1353–#1895). `pr-heads.json` preserves that
 snapshot; `followup-pr-heads.json` records subsequent heads, including amended
@@ -39,7 +39,7 @@ node #115 and visor retain their separate identities in provenance/artifacts.jso
 
 The first snapshot passed all 48 affected Cargo components with Rust 1.94.1,
 offline and locked dependencies. Follow-up bincode and consensus tests pass;
-TCP frame tests pass in debug and release with all features. Sixteen additional
+TCP frame tests pass in debug and release with all features. Thirty additional
 standalone Rust qualification harnesses pass with the installed pinned rustc.
 Their documented standalone scope does not imply a recovered whole-node graph.
 
@@ -77,3 +77,12 @@ provider. The original receipt and strict verifier remain intact.
 
 No integrated node build, whole-node behavioral equivalence, hosted CI success,
 or new reconstruction milestone is claimed by this merge review.
+
+The full initial 1,307-module unittest inventory completed. Function-style
+tests were run with pytest. Four strict current-tree reproduction checks remain
+non-green: the RPC provider-version check described above, both n21 historical
+source-snapshot checks, and the nonce-ring historical checker-hash check. The
+three historical tests pass at their original PR heads (#1524 and #1694), while
+the combined source components pass their separate Cargo checks. These results
+do not turn the strict current-tree tests into passing checks. See
+`historical-test-replays.json`, `test-review.json`, and the provider control record.
