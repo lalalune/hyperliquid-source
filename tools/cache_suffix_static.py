@@ -62,6 +62,8 @@ def analyze(data):
     if layout!={'special_pointer':0x9382b9,'default_pointer':0x459f60,'base_length':3,'length_without_ten_byte_test':4}:
         raise ValueError('suffix pointer/length layout changed')
     sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    if sec['size']%24:
+        raise ValueError('truncated .rela.dyn')
     rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
     if any(rels.get(a)!=(8,v) for a,v in BINDINGS.items()):
         raise ValueError('cache formatting/global relocation changed')
