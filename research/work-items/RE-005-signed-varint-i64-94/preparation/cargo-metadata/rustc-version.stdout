@@ -1,0 +1,7 @@
+rustc 1.94.1 (e408947bf 2026-03-25)
+binary: rustc
+commit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1
+commit-date: 2026-03-25
+host: x86_64-unknown-linux-gnu
+release: 1.94.1
+LLVM version: 21.1.8
