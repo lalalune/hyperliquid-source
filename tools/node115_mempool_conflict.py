@@ -120,6 +120,10 @@ def produce(data=None):
                 unmatched=None, implementation='not implemented', gates_changed=False)
 
 
+def canonical_export(raw):
+    # Text-only trailing whitespace; original instruction bytes remain unchanged.
+    return b'\n'.join(line.rstrip() for line in raw.splitlines()) + b'\n'
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--write', action='store_true')
@@ -129,9 +133,9 @@ def main():
     if args.write:
         PACKET.mkdir(parents=True, exist_ok=True)
         (PACKET / 'records.json').write_text(expected)
-        (PACKET / 'native.asm').write_bytes(subprocess.check_output([
+        (PACKET / 'native.asm').write_bytes(canonical_export(subprocess.check_output([
             'objdump', '-d', '-M', 'intel', f'--start-address={START}',
-            f'--stop-address={END}', str(TARGET.relative_to(ROOT))], cwd=ROOT))
+            f'--stop-address={END}', str(TARGET.relative_to(ROOT))], cwd=ROOT)))
     elif (PACKET / 'records.json').read_text() != expected:
         raise ValueError('Retained records differ from authenticated input')
     print(json.dumps({k: result[k] for k in ('start', 'end', 'native_instructions', 'body_sha256')}))

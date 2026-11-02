@@ -40,3 +40,5 @@ Only `--write` updates the retained static exports. The default verifies exact r
 `records.json` also preserves direct-helper FDE boundaries and relocation records for the diagnostic/format callback slots. These are dependency leads, **not** measured helper bodies. No closed-caller census, runtime behavior, independently authored Rust, compiled source/target comparison or raw-equal/normalized-only/unmatched comparison denominator is claimed. The raw export denominator is one FDE / 535 bytes / 117 instructions. All component gates remain false; no progress counters are edited.
 
 Next question: measure `0x2cacdb0` and its mutation/error closure to determine exactly what the locally missed key does, while preserving the found-entry early exits established here.
+
+Native text exports trim trailing whitespace only; instruction bytes, operands and addresses are unchanged.
