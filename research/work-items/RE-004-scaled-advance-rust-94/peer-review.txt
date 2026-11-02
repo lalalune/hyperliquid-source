@@ -1,0 +1,17 @@
+Independent read-only reviewer: Codex worker /root/mixer, 2026-11-02 KST.
+Reviewed lib.rs SHA256: 0ed69fbf12c1576763f14a87ff6616ac1c3c2afb65e7675da8eb15c470fd8b90
+Frozen oracle SHA256: 3ca9902a5eccea876dcf2ef359a83281aea2f26390f0e2abe6a1e08d73e0ea75
+
+No source/algebra blocker. Independently verified 11F=2B+1, B mod11=5,
+inverse5=9, uniqueness/range of quotient s; canonical E-C=88m implies n=11m,
+s=m and no advance beyond E. Actual CMP/CMOVB is unsigned min, SHR logical,
+and both IMUL results use low halves. Source preserves all u64 triples.
+Input-only driver receives no expectations.
+
+Ran static verifier under Python -O -B: 14 instructions and all16 corruption
+controls pass. Independently derived pow(11,-1,B) and checked all70,066 frozen
+input/output records including4,903 canonical cases. Fresh FDE decode confirms
+next range[0x4ea4220,0x4ea4269). No native replay or root edits by reviewer.
+Requested proof wording 'the low three span bits (remainder0..7)' in place of
+'fewer than eight extra low bits'; applied as documentation clarification with
+no source/oracle change.
