@@ -64,6 +64,13 @@ def load_coverage(root, registry_path, components):
         require(candidate.is_relative_to(root) and candidate.is_file(), 'Missing/external byte evidence')
         return candidate.read_bytes()
     registry = json.loads(read(registry_path), object_pairs_hook=unique_object)
+    require(isinstance(registry, dict) and 'schema_version' in registry
+            and isinstance(registry.get('evidence_sha256'), dict)
+            and isinstance(registry.get('targets'), dict)
+            and isinstance(registry.get('windows'), list)
+            and all(isinstance(target, dict) and 'path' in target and 'sha256' in target
+                    for target in registry['targets'].values()),
+            'Invalid byte registry')
     require(type(registry['schema_version']) is int and registry['schema_version'] == 1,
             'Unknown byte registry schema')
     pinned = registry['evidence_sha256']
@@ -82,11 +89,20 @@ def load_coverage(root, registry_path, components):
     for path in pinned:
         evidence(path)
     component_targets = {c['id']: c['artifact'] for c in components}
-    manifest = {x['path']: x for x in json.loads(read('provenance/artifacts.json'),
-                                                object_pairs_hook=unique_object)['files']}
+    manifest_records = json.loads(read('provenance/artifacts.json'),
+                                  object_pairs_hook=unique_object)
+    require(isinstance(manifest_records, dict)
+            and isinstance(manifest_records.get('files'), list)
+            and all(isinstance(item, dict) and 'path' in item
+                    and 'sha256' in item and 'size' in item
+                    for item in manifest_records['files']),
+            'Invalid artifact manifest')
+    manifest = {x['path']: x for x in manifest_records['files']}
     targets, images, code_sections = {}, {}, {}
     for name, target in registry['targets'].items():
         data = read(target['path'])
+        require(target['path'] in manifest,
+                'Byte coverage target missing from the artifact manifest')
         expected = manifest[target['path']]
         require(target['sha256'] == expected['sha256'] == digest(data)
                 and len(data) == expected['size'], 'Byte coverage target identity differs')
