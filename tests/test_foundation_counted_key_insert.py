@@ -32,13 +32,13 @@ def growing_table(capacity, pairs):
 
     def grow(tbl, key):
         tbl.capacity += 1
-        # Same descending-order scan the window performs.
+        # Same ascending-order scan the window performs.
         position = 0
         for index in range(len(tbl.pairs) - 1, -1, -1):
             other = tbl.pairs[index][0]
             if key == other:
                 raise AssertionError("grow called for a present key")
-            if key < other:
+            if key > other:
                 position = index + 1
                 break
         tbl.pairs.insert(position, [key, 1])
@@ -54,25 +54,25 @@ class CountedKeyInsertTests(unittest.TestCase):
         self.assertEqual(table.pairs, [[10, 1]])
         self.assertFalse(table.locked)
 
-    def test_append_when_key_less_than_last(self):
-        table = CountedKeyTable(4, [[10, 2], [7, 1], [5, 3]])
-        self.assertEqual(table.insert_or_increment(3), ("inserted", 3))
-        self.assertEqual(table.keys(), [10, 7, 5, 3])
+    def test_append_when_key_greater_than_last(self):
+        table = CountedKeyTable(4, [[5, 3], [7, 1], [10, 2]])
+        self.assertEqual(table.insert_or_increment(12), ("inserted", 3))
+        self.assertEqual(table.keys(), [5, 7, 10, 12])
 
-    def test_middle_insert_keeps_descending_order(self):
-        table = CountedKeyTable(8, [[10, 1], [7, 1], [5, 1]])
-        self.assertEqual(table.insert_or_increment(8), ("inserted", 1))
-        self.assertEqual(table.keys(), [10, 8, 7, 5])
+    def test_middle_insert_keeps_ascending_order(self):
+        table = CountedKeyTable(8, [[5, 1], [7, 1], [10, 1]])
+        self.assertEqual(table.insert_or_increment(8), ("inserted", 2))
+        self.assertEqual(table.keys(), [5, 7, 8, 10])
 
-    def test_begin_insert_when_key_greater_than_all(self):
-        table = CountedKeyTable(8, [[10, 1], [7, 1], [5, 1]])
-        self.assertEqual(table.insert_or_increment(12), ("inserted", 0))
-        self.assertEqual(table.keys(), [12, 10, 7, 5])
+    def test_begin_insert_when_key_less_than_all(self):
+        table = CountedKeyTable(8, [[5, 1], [7, 1], [10, 1]])
+        self.assertEqual(table.insert_or_increment(3), ("inserted", 0))
+        self.assertEqual(table.keys(), [3, 5, 7, 10])
 
     def test_increment_on_match(self):
-        table = CountedKeyTable(8, [[10, 1], [7, 4], [5, 1]])
+        table = CountedKeyTable(8, [[5, 1], [7, 4], [10, 1]])
         self.assertEqual(table.insert_or_increment(7), ("incremented", 1))
-        self.assertEqual(table.pairs, [[10, 1], [7, 5], [5, 1]])
+        self.assertEqual(table.pairs, [[5, 1], [7, 5], [10, 1]])
         self.assertFalse(table.locked)
 
     def test_increment_wraps_modulo_2_to_64(self):
@@ -82,29 +82,29 @@ class CountedKeyInsertTests(unittest.TestCase):
 
     def test_unsigned_comparison(self):
         # A key with the high bit set sorts above every small key.
-        table = CountedKeyTable(8, [[10, 1], [7, 1]])
-        self.assertEqual(table.insert_or_increment(1 << 63), ("inserted", 0))
-        self.assertEqual(table.keys(), [1 << 63, 10, 7])
+        table = CountedKeyTable(8, [[7, 1], [10, 1]])
+        self.assertEqual(table.insert_or_increment(1 << 63), ("inserted", 2))
+        self.assertEqual(table.keys(), [7, 10, 1 << 63])
 
     def test_end_to_end_sequence(self):
         table = CountedKeyTable(16)
         for key in (10, 5, 7, 5, 12, 3, 7):
             table.insert_or_increment(key)
         self.assertEqual(table.pairs,
-                         [[12, 1], [10, 1], [7, 2], [5, 2], [3, 1]])
+                         [[3, 1], [5, 2], [7, 2], [10, 1], [12, 1]])
 
     def test_full_vector_without_grow_raises_and_unlocks(self):
-        table = CountedKeyTable(2, [[10, 1], [5, 1]])
+        table = CountedKeyTable(2, [[5, 1], [10, 1]])
         with self.assertRaises(NeedsGrowth):
             table.insert_or_increment(7)
-        self.assertEqual(table.pairs, [[10, 1], [5, 1]])
+        self.assertEqual(table.pairs, [[5, 1], [10, 1]])
         self.assertFalse(table.locked)
 
     def test_full_vector_growth_contract(self):
-        table, grow = growing_table(2, [[10, 1], [5, 1]])
+        table, grow = growing_table(2, [[5, 1], [10, 1]])
         self.assertEqual(table.insert_or_increment(7, grow=grow),
                          ("grown", 1))
-        self.assertEqual(table.keys(), [10, 7, 5])
+        self.assertEqual(table.keys(), [5, 7, 10])
         self.assertEqual(table.capacity, 3)
         self.assertFalse(table.locked)
 

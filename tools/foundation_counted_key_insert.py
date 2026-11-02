@@ -1,5 +1,5 @@
 """Python model of node #94 0x5160940: mutex-guarded counted-key
-insert-or-increment over a descending-order vector of (key, count)
+insert-or-increment over an ascending-order vector of (key, count)
 pairs.
 
 Bound to work/hl-node-94.bin (node #94, SHA-256
@@ -11,11 +11,17 @@ The window (0x5160940..0x5160aca) holds a vector at outer +0x00
 +0x00, count +0x08) and a mutex at +0x18. Keys are compared
 unsigned. On a match the count is incremented by 1 (addq, wrapping
 modulo 2^64). On a miss a (key, 1) pair is inserted so the vector
-stays in descending key order. When end equals capacity the
+stays in ascending key order. When end equals capacity the
 window calls the growth helper 0x5160790 with (outer, pair
 pointer) instead of inserting itself; that contract is exposed
 here as the caller-supplied ``grow`` callback, which must insert
 the pair and return its position.
+
+Comparison direction (AT&T syntax): ``cmp %rbx,-0x10(%rax)``
+computes element minus key, so ``jae`` is taken while the element
+is greater than or equal to the key. The scan therefore steps
+toward the begin while elements exceed the key, and inserts after
+the first element smaller than the key — ascending order.
 """
 
 MASK64 = (1 << 64) - 1
@@ -66,21 +72,21 @@ class CountedKeyTable:
         self._lock()
         try:
             # Walk from the end toward the begin, as the window does.
+            # AT&T cmp %rbx,mem computes mem - key: jae (taken) means
+            # the element is >= the key, so step down; jae not taken
+            # means the element is < the key, so insert after it.
             for index in range(len(self.pairs) - 1, -1, -1):
                 other = self.pairs[index][0]
                 if key == other:
                     count = self.pairs[index][1]
                     self.pairs[index][1] = (count + 1) & MASK64
                     return ("incremented", index)
-                if key < other:
+                if key > other:
                     # Insert immediately after this element.
                     position = index + 1
                     break
             else:
-                # Greater than every element (or the vector is empty
-                # in the loop's terms): insert at the begin, except
-                # that an empty vector appends, which is position 0
-                # either way.
+                # Smaller than every element: insert at the begin.
                 position = 0
             if len(self.pairs) == 0:
                 position = 0

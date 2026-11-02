@@ -38,18 +38,22 @@ key's semantic type is not claimed.
   cleanup below unlocks it on the throwing path.
 - Search. The vector is walked from the end toward the begin.
   Each step compares the key against the element at the current
-  position minus 0x10. Equal means the key is present.
+  position minus 0x10. In AT&T syntax `cmp %rbx,-0x10(%rax)`
+  computes element minus key, so `jae` is taken while the element
+  is greater than or equal to the key: the scan steps toward the
+  begin while elements exceed the key. Equal means the key is
+  present.
 - Increment. On a match, the element's count field (+0x08) is
   increased by 1 (addq, so it wraps modulo 2^64), the mutex is
   unlocked, and the window returns.
 - Insert. On a miss, a new (key, 1) pair is inserted so the
-  vector stays in descending key order: if the key is less than
-  the last element (or the vector is empty) it is appended at the
-  end; if it is less than some element while greater than the
-  ones after it, it is inserted immediately after that element,
-  shifting the tail right by 16 bytes (a single 16-byte copy for
-  a one-element tail, memmove otherwise); if it is greater than
-  every element, it is inserted at the begin.
+  vector stays in ascending key order: if the key is greater
+  than the last element (or the vector is empty) it is appended
+  at the end; if it is greater than some element while smaller
+  than the ones after it, it is inserted immediately after that
+  element, shifting the tail right by 16 bytes (a single 16-byte
+  copy for a one-element tail, memmove otherwise); if it is
+  smaller than every element, it is inserted at the begin.
 - Growth. When end equals capacity, the window does not insert
   itself: it calls the growth helper 0x5160790 (388 bytes, FDE
   0x0029b2cc, callee only) with (outer, pair pointer), which
