@@ -65,6 +65,19 @@ def attempt_projection(p,word):
     return 'eligible',(word+p['delta'])&U64
 
 
+def relocations(data):
+    """Index .rela.dyn by slot. A duplicate slot record must be refused,
+    not folded last-wins: which (info, addend) pair a binding check reads
+    would otherwise depend on record order in the table."""
+    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    rels={}
+    for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']]):
+        if a in rels:
+            raise ValueError(f'duplicate relocation slot {a:#x}')
+        rels[a]=(i,v)
+    return rels
+
+
 def analyze(data):
     p=parameters(data)
     if p!={'capacity_shift':61,'state_read_offset':48,'state_init_offset':48,'cas_offset':48,'closed_mask':1,'threshold':2,'delta':-2}:
@@ -79,8 +92,7 @@ def analyze(data):
     code=read(data,0x4770f8c,2)[1]
     if code[0]!=0x75 or 0x4770f8e+struct.unpack('<b',code[1:])[0]!=0x4770f70:
         raise ValueError('CAS retry transfer changed')
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
-    rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
+    rels=relocations(data)
     if any(rels.get(a)!=(8,v) for a,v in BINDINGS.items()):
         raise ValueError('permit source/code relocation changed')
     path=b'net_utils/src/ip_semaphore.rs'
