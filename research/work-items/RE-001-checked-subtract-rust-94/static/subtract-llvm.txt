@@ -1,0 +1,33 @@
+
+artifacts/node/94/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001343c80 <.text>:
+ 2760a10: 48 8b 06                     	movq	(%rsi), %rax
+ 2760a13: 48 29 02                     	subq	%rax, (%rdx)
+ 2760a16: 48 8b 46 08                  	movq	0x8(%rsi), %rax
+ 2760a1a: 48 19 42 08                  	sbbq	%rax, 0x8(%rdx)
+ 2760a1e: 48 8b 46 10                  	movq	0x10(%rsi), %rax
+ 2760a22: 48 19 42 10                  	sbbq	%rax, 0x10(%rdx)
+ 2760a26: 4c 8b 42 18                  	movq	0x18(%rdx), %r8
+ 2760a2a: 0f 92 c0                     	setb	%al
+ 2760a2d: 48 8b 76 18                  	movq	0x18(%rsi), %rsi
+ 2760a31: 4d 89 c1                     	movq	%r8, %r9
+ 2760a34: 49 29 f1                     	subq	%rsi, %r9
+ 2760a37: 04 ff                        	addb	$-0x1, %al
+ 2760a39: 49 83 d9 00                  	sbbq	$0x0, %r9
+ 2760a3d: 0f 92 c1                     	setb	%cl
+ 2760a40: 31 c0                        	xorl	%eax, %eax
+ 2760a42: 4c 89 4a 18                  	movq	%r9, 0x18(%rdx)
+ 2760a46: 49 39 f0                     	cmpq	%rsi, %r8
+ 2760a49: 72 18                        	jb	0x2760a63 <.text+0x141cde3>
+ 2760a4b: 84 c9                        	testb	%cl, %cl
+ 2760a4d: 75 14                        	jne	0x2760a63 <.text+0x141cde3>
+ 2760a4f: 0f 10 02                     	movups	(%rdx), %xmm0
+ 2760a52: 0f 10 4a 10                  	movups	0x10(%rdx), %xmm1
+ 2760a56: 0f 11 4f 18                  	movups	%xmm1, 0x18(%rdi)
+ 2760a5a: 0f 11 47 08                  	movups	%xmm0, 0x8(%rdi)
+ 2760a5e: b8 01 00 00 00               	movl	$0x1, %eax
+ 2760a63: 48 89 07                     	movq	%rax, (%rdi)
+ 2760a66: c3                           	retq
