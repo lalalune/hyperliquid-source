@@ -24,7 +24,7 @@ Working-snapshot layout (offsets from the snapshot base):
 
     +0x120  32-bit counter (incremented by the snapshot builder)
     +0x124  32-bit field incremented on the skip path only
-    +0x128  elapsed clock value (snapshot path) / preserved otherwise
+    +0x128  raw clock value (snapshot path) / preserved otherwise
     +0x130  commit-time clock value (snapshot path only)
     +0x20   identity string (copied by assign on publish)
 
@@ -50,7 +50,7 @@ SNAPSHOT_SIZE = 0x138
 STRING_SLOT = 0x20
 COUNTER_SLOT = 0x120
 SKIP_COUNTER_SLOT = 0x124
-ELAPSED_SLOT = 0x128
+CLOCK_VALUE_SLOT = 0x128
 COMMIT_SLOT = 0x130
 
 # Dispatch-chain limits pinned by the window bytes.
@@ -128,10 +128,14 @@ class TimedSnapshot:
         """Run one refresh of the window.
 
         ``clock_nodes`` / ``consumer_nodes`` are the dispatch chains;
-        ``snapshot_builder`` is called as ``builder(snapshot, elapsed)``
+        ``snapshot_builder`` is called as ``builder(snapshot, clock_value)``
         where ``snapshot`` is a dict with ``bytes`` (bytearray),
         ``string`` (str, read/write) and ``counter`` helpers, and must
-        store the elapsed value at +0x128 and the identity string.
+        store the raw clock value at +0x128 and the identity string.
+        The binary copies the dispatch result to rcx at 0x514f34f
+        before subtracting inner+0x2c8, so rcx carries the raw clock
+        value, not the elapsed value; rdx carries the clock object
+        [inner+0x2d8], whose use inside the builder is not pinned here.
         Returns ``"snapshot"``, ``"skip"`` or ``"noop"``.
         """
         if self.inner is None:
@@ -155,7 +159,7 @@ class TimedSnapshot:
         }
         if elapsed > time_limit:
             self._set_field(0x2C0, clock_value)
-            snapshot_builder(snapshot, elapsed)
+            snapshot_builder(snapshot, clock_value)
             self.working_string = snapshot["string"]
             # Consumer struct: (snapshot, 0, 0x514b120, 0x514ac60) with
             # a qword 0x100 beside it; the consumer chain is called

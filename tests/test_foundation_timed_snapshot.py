@@ -16,9 +16,13 @@ CLOCK_CELL = "clock-sentinel"
 CONSUMER_CELL = "consumer-sentinel"
 
 
-def builder(snapshot, elapsed):
-    """Stand-in for the 0x514ed50 snapshot builder."""
-    snapshot["bytes"][0x128:0x130] = (elapsed & subject.MASK64).to_bytes(
+def builder(snapshot, clock_value):
+    """Stand-in for the 0x514ed50 snapshot builder.
+
+    The binary passes the RAW clock value in rcx (copied at 0x514f34f
+    before the elapsed subtraction), so +0x128 holds the clock value,
+    not the elapsed value (regression: slopbot review of PR #1665)."""
+    snapshot["bytes"][0x128:0x130] = (clock_value & subject.MASK64).to_bytes(
         8, "little")
     snapshot["bytes"][0x120:0x124] = (41).to_bytes(4, "little")
     snapshot["string"] = "name@0x1234#99"
@@ -64,9 +68,10 @@ class RefreshTests(unittest.TestCase):
         self.assertEqual(snap.inner[0x2C0], 200000000)
         # Commit calls the clock head directly again: same value.
         self.assertEqual(snap.inner[0x2C8], 200000000)
+        # +0x128 holds the RAW clock value, not elapsed (200000000 - 1000).
         self.assertEqual(
             int.from_bytes(snap.working[0x128:0x130], "little"),
-            200000000 - 1000)
+            200000000)
         self.assertEqual(
             int.from_bytes(snap.working[0x130:0x138], "little"),
             200000000)
@@ -153,8 +158,8 @@ class RefreshTests(unittest.TestCase):
     def test_post_call_callback_arm(self):
         snap = fresh_state()
 
-        def cb_builder(snapshot, elapsed):
-            builder(snapshot, elapsed)
+        def cb_builder(snapshot, clock_value):
+            builder(snapshot, clock_value)
             snapshot["callback"] = 1
 
         clock = [subject.make_node("clock-value", 200000000)]
