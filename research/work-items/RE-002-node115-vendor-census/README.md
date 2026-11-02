@@ -232,12 +232,20 @@ bodies keep those licenses.
     by `--gc-sections` because the node never references them.
   - 931 functions (239 KB) have openings too short to test.
   - 37 functions (8 KB) occur only inlined.
-  - 631 functions (1.12 MB) share an opening with an FDE but differ later.
-    Sampled cases are different template instantiations with the same prologue
-    (e.g. `FindFactory<SecondaryCache>` vs `FindFactory<EventListener>`), or
-    relaxed loads; those relaxed loads are now matched.
+  - 631 functions (1.12 MB) shared an opening with an FDE but differed later.
+    After relaxation, 357 remain:
+    - 232 are distinct template instances whose own symbol is credited at its
+      real address (e.g. `FindFactory<SecondaryCache>` vs `FindFactory<EventListener>`);
+    - 108 sit at an FDE already credited to the sibling instantiation that
+      really occupies it;
+    - 17 (5.4 KB) are unexplained. 14 of these are libstdc++ `std::function`,
+      hashtable and red-black-tree instantiations with generic prologues. The
+      other three are `port::Mutex::TryLock`,
+      `ReverseBytewiseComparatorImpl::Compare` and
+      `cassandra::ExpiringColumn::Expired`, whose prefix hit is a
+      different-length function.
   - 452 functions are below the size gate or have several identical FDEs.
 
-Next question: which of the remaining 631 shared-prologue RocksDB functions are
-the same instantiation with different inlining, and which are distinct template
-instances already accounted for?
+So no shared-prologue case shows a patched RocksDB or a different flag set. The
+unmatched remainder is dead code the linker dropped (presumably), code too
+short to test, inlined copies, or non-unique bodies.
