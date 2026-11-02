@@ -1,0 +1,153 @@
+{
+  "checked_at_utc": "2026-11-01T19:07:10.090674+00:00",
+  "base_commit": "56c0ec672bd8fdcfaa80f2db700a61e6240b3663",
+  "static": {
+    "GNU_binutils": "2.47.20260726",
+    "LLVM_objdump": "18.1.4",
+    "body_count": 3,
+    "retained_bytes": 2336,
+    "instructions": 544,
+    "independent_decoders_agree_on_all_instruction_boundaries": true,
+    "corruption_controls_rejected": 14,
+    "digest_guards_bypassed_for_controls": true
+  },
+  "checks": [
+    {
+      "command": "make doctor",
+      "result": "pass after putting GNU binutils first on PATH"
+    },
+    {
+      "command": "make verify catalogue-check reproduce",
+      "result": "pass after materializing the pinned reference LFS object and refreshing its unchanged clean-filter index"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests -p test_node94_ip_translation.py -v",
+      "result": "4 tests passed"
+    },
+    {
+      "command": "rustc +1.94.1 --edition=2021 --test -C opt-level=0 src/node94-ip-translation/lib.rs -o work/contribution3/ip-tests-o0 && work/contribution3/ip-tests-o0",
+      "result": "5 tests passed"
+    },
+    {
+      "command": "rustc +1.94.1 --edition=2021 --test -C opt-level=3 src/node94-ip-translation/lib.rs -o work/contribution3/ip-tests-o3 && work/contribution3/ip-tests-o3",
+      "result": "5 tests passed"
+    },
+    {
+      "command": "make doctor verify catalogue-check reproduce on contribution snapshot",
+      "result": "passed"
+    },
+    {
+      "command": "rustfmt +1.94.1 --check src/node94-ip-translation/lib.rs",
+      "result": "passed"
+    }
+  ],
+  "rust_build": {
+    "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)",
+    "host": "aarch64-apple-darwin",
+    "command_template": "rustc +1.94.1 --edition=2021 --crate-name node94_ip_translation --crate-type=rlib -C opt-level=3 src/node94-ip-translation/lib.rs -o work/node94-ip-translation/{a,b}/libnode94_ip_translation.rlib",
+    "two_builds_raw_equal": true,
+    "rlib_sha256": "03a5952d62ae6bb23430bc23e0f7264550f291edd29049c47a99f65621ae19b8",
+    "original_binary_equivalence": false
+  },
+  "full_suite": {
+    "status": "complete; every module returned zero without reruns",
+    "tested_source_commit": "0863148aa915a1194ca6c7b9293d89889dc8d179",
+    "files_attempted": 972,
+    "test_cases_reported": 15472,
+    "skipped_cases": 69,
+    "module_failures": 0,
+    "inventory_source": "tools/run_tests.py:test_files; full inventory checked equal in all eight detached worktrees",
+    "module_command": "python -m unittest discover -s <isolated-worktree>/tests -p <test-file.py> -v",
+    "python": "3.14.7 with capstone 5.0.7",
+    "isolation": "Eight separate worktrees; one fresh child interpreter per file. Deterministic weighted assignment runs slow files first; each official file appears exactly once.",
+    "environment": "GNU binutils 2.47.20260726 and LLVM 18.1.4 on PATH; captured-execution authorization variables unset; default platform/optional-tool skips preserved.",
+    "skip_note": "Skipped cases are not passes. No captured binary was executed or emulated.",
+    "skipped_by_module": [
+      {
+        "file": "test_modexp.py",
+        "skipped": 5
+      },
+      {
+        "file": "test_bn254_ecadd.py",
+        "skipped": 8
+      },
+      {
+        "file": "test_rea_java_home.py",
+        "skipped": 1
+      },
+      {
+        "file": "test_foundation_sentinel_field_read.py",
+        "skipped": 3
+      },
+      {
+        "file": "test_zstd_asm_correspondence.py",
+        "skipped": 1
+      },
+      {
+        "file": "test_bn254_ecmul.py",
+        "skipped": 10
+      },
+      {
+        "file": "test_sha256_compress.py",
+        "skipped": 7
+      },
+      {
+        "file": "test_ripemd160_compress.py",
+        "skipped": 5
+      },
+      {
+        "file": "test_limb_fold_rust_contract.py",
+        "skipped": 1
+      },
+      {
+        "file": "test_pad_character_protocol_static.py",
+        "skipped": 1
+      },
+      {
+        "file": "test_foundation_string_ctor_cstr.py",
+        "skipped": 4
+      },
+      {
+        "file": "test_libcore_fmt_correspondence.py",
+        "skipped": 1
+      },
+      {
+        "file": "test_node115_field_adapter_drift.py",
+        "skipped": 1
+      },
+      {
+        "file": "test_chacha12_guts.py",
+        "skipped": 3
+      },
+      {
+        "file": "test_sha512_compress.py",
+        "skipped": 3
+      },
+      {
+        "file": "test_blake2b_compress.py",
+        "skipped": 4
+      },
+      {
+        "file": "test_fse_weight_table.py",
+        "skipped": 5
+      },
+      {
+        "file": "test_huf_fast_state_init.py",
+        "skipped": 2
+      },
+      {
+        "file": "test_wide_subtract_rust_contract.py",
+        "skipped": 1
+      },
+      {
+        "file": "test_libcore_write_fmt_leaf.py",
+        "skipped": 3
+      }
+    ],
+    "inventory_sha256": "611eeeab4589793d21b1aac3369faec6ef2b04ddc01364fc3d98a795d55e5560",
+    "result_record_sha256": "951b61fbe50a56c10dd46bae30a8a5f521c42dc8b5607ef6a044536bc30cc38b",
+    "reproduce_all": "make test PYTHON=<Python 3.14.7 with capstone 5.0.7>"
+  },
+  "captured_execution": false,
+  "hosted_CI_claim": false
+}
