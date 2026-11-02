@@ -1,0 +1,16 @@
+Relocations and references for node #115 0x5f13130 (from readelf and objdump):
+
+- No GOT/RELATIVE slot is read in-window: the window contains no
+  rip-relative reference, no PLT call and no stack-canary check.
+  The census finds no RELATIVE slot whose addend is 0x5f13130,
+  no whole-file qword hit, and no tail jump. The window is reached
+  only by the two direct calls at 0x5f1327b and 0x5f1345c.
+- Indirect calls in-window (6 sites, all the same virtual slot):
+  *0x78(%rax) at 0x5f1315e and 0x5f1316e (first-list loop),
+  0x5f131ae and 0x5f131be (second-list loop),
+  0x5f131f7 and 0x5f13208 (distinguished-element block).
+  The callees are the subobjects at payload + 0xa50 and
+  payload + 0xa58; their slot-0x78 results are taken by contract
+  only and are not modelled here.
+- No landing pad: the FDE has CIE 0 and no LSDA, and the window
+  contains no _Unwind_Resume call.
