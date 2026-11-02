@@ -1,0 +1,44 @@
+# PLT stubs used by the window, its cleanup routine and its getpid
+# callee, with the GOT slot each stub jumps through (verified from the
+# stub bytes: ff 25 <disp32> resolves to the GOT address).
+# Direct rel32 calls (move-assign, getpid helper) use no GOT slot and
+# have no relocation entry cited here.
+#
+# PLT stub -> GOT slot
+0x5660110 _Unwind_Resume@plt -> 0x5778db0
+0x5660120 strlen@plt -> 0x5778db8
+0x5660290 getpid@plt -> 0x5778e70
+0x5660430 __stack_chk_fail@plt -> 0x5778f40
+0x5660450 _M_replace@plt -> 0x5778f50
+0x5660470 _M_dispose@plt -> 0x5778f60
+0x56605c0 _M_assign@plt -> 0x5779008
+0x56607a0 basic_ostringstream C1@plt -> 0x57790f8
+0x56607b0 __ostream_insert@plt -> 0x5779100
+0x56607c0 locale D1@plt -> 0x5779108
+0x56607d0 ios_base D2@plt -> 0x5779110
+0x56607e0 basic_ostringstream D1@plt -> 0x5779118
+0x5660920 basic_ios::clear@plt -> 0x57791b8
+0x5660940 _M_insert<long>@plt -> 0x57791c8
+0x5660a10 _M_insert<PKv>@plt -> 0x5779230
+#
+# Window PLT call sites:
+#   0x514eeb9 _M_dispose@plt (argument register not reloaded at site)
+#   0x514eed7 basic_ostringstream C1@plt (rsp+0x30)
+#   0x514eef5 strlen@plt (name string)
+#   0x514ef03, 0x514ef17, 0x514ef39 __ostream_insert@plt (name, "@", "#")
+#   0x514ef22 _M_insert<PKv>@plt (wrapper pointer)
+#   0x514ef49 _M_insert<long>@plt (pid)
+#   0x514ef9e _M_replace@plt (stream content into rsp+0x10 string)
+#   0x514efb1, 0x514f0ed _M_dispose@plt (rsp+0x10 string, rsp+0x80 string)
+#   0x514f107 locale D1@plt (rsp+0x70)
+#   0x514f144 ios_base D2@plt (rsp+0xa0)
+#   0x514f1b2 basic_ios::clear@plt (null-name arm)
+#   0x514f1db _M_assign@plt (empty-content arm)
+#   0x514f206 __stack_chk_fail@plt (canary mismatch)
+# Cleanup routine PLT call sites:
+#   0x514ed1f _M_dispose@plt (r13 string)
+#   0x514ed27 basic_ostringstream D1@plt (r12 stream)
+#   0x514ed42 _Unwind_Resume@plt (exception object in rbx)
+#   0x514ed47 __stack_chk_fail@plt (canary mismatch)
+# Getpid callee PLT call site:
+#   0x5335858 getpid@plt
