@@ -1,0 +1,14 @@
+--- original/driver
++++ amended/driver
+@@ -175,6 +175,11 @@
+             map.as_ref().map_err(|_| InvalidView)
+         },
+     );
++    if let Ok(value) = &result {
++        if !std::ptr::eq(weak.as_ptr(), Arc::as_ptr(&value.block)) {
++            return Err("returned block identity changed".into());
++        }
++    }
+     let status = match &result {
+         Ok(_) => 0,
+         Err(JoinError::MissingTransaction(_)) => 1,

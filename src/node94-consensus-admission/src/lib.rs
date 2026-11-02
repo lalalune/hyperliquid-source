@@ -10,6 +10,7 @@
 
 mod admission;
 mod auth;
+pub mod client_transaction_join;
 mod error;
 mod qc;
 mod stake;
