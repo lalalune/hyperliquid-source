@@ -1,0 +1,32 @@
+PLT targets called from the window (objdump annotations; direct internal
+targets are resolved by the e8 displacement, not by relocations):
+  _ZdlPvm (sized operator delete) — teardown frees
+  _ZdaPv (operator delete[]) — buffer frees
+  _Znwm (operator new) — 0xa8 state allocation
+  _Znam (operator new[]) — string copy helper 0x542efe0
+  memcpy, memset — string/vector copies
+  _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE9_M_createERmm
+    — heap arms of the filename/basename string copies
+  _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE12find_last_ofEPKcmm
+    — basename split, charset "/\\" at 0x1f3693, count 2
+  _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE7reserveEm
+  _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE6resizeEmc
+    — record-state constructor 0x5219960 string setup
+  _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE10_M_replaceEmmPKcm
+    — record apply 0x521cbf0 string replace
+  _ZSt24__throw_out_of_range_fmtPKcz — substr throw when pos+1 > length
+    (format at 0x7d66e0: "%s: __pos (which is %zu) > this->size() (which is %zu)")
+  __stack_chk_fail — canary failure path
+  __cxa_guard_* — singleton getter 0x5242050 only (callee, not the window)
+
+Rodata strings pinned by lea targets in the window (read from the binary
+at file offset == vaddr for the first LOAD segment):
+  0x1f3693 "/\\" — find_last_of charset (2 chars)
+  0x1e32ac "log record too small" (20 bytes, 0x14) — short-record detail
+  0x1f989e "db/wal_manager.cc" — log call file argument
+  0x1f831a "(ignoring error) " — log prefix when the inverted flag is set
+  0x1e629b "" (first byte NUL; the bytes after it are a cargo path, not
+    part of this string) — log prefix when the inverted flag is clear
+  0x7e1a98 "[%s:461] [WalManager] %s%s: dropping %d bytes; %s" — log format
+  0x7d66e0 "%s: __pos (which is %zu) > this->size() (which is %zu)"
+    — substr out-of-range format
