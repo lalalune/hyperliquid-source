@@ -1,0 +1,361 @@
+{
+  "rows": 17133,
+  "distinct_inputs": 17133,
+  "profiles": {
+    "0": {
+      "rows": 17133,
+      "match": true,
+      "stdout_sha256": "f038ee37b8835406f6749d5a6a2cb53142d7d64e58f281c635c92e1cb9197544"
+    },
+    "3": {
+      "rows": 17133,
+      "match": true,
+      "stdout_sha256": "f038ee37b8835406f6749d5a6a2cb53142d7d64e58f281c635c92e1cb9197544"
+    }
+  },
+  "compiled_mutants": [
+    {
+      "name": "signedness",
+      "rows": 17133,
+      "mismatches": 8000,
+      "compiled_smoke_exit": 101
+    },
+    {
+      "name": "metadata-strictness",
+      "rows": 17133,
+      "mismatches": 125,
+      "compiled_smoke_exit": 101
+    },
+    {
+      "name": "throttle-strictness",
+      "rows": 17133,
+      "mismatches": 30,
+      "compiled_smoke_exit": 101
+    },
+    {
+      "name": "zero-bypass",
+      "rows": 17133,
+      "mismatches": 376,
+      "compiled_smoke_exit": 101
+    }
+  ],
+  "raw_own_rlib_equal": true,
+  "rlib_sha256": "75ff2c9e64e6c8e201d6a70ad86de42f21805314414b42bdb0cf497ea0e1605b",
+  "source_sha256": "f7ad077f7b283fedd910a7082a94c6ec70e8a09797e79990077beed9dfcdbea3",
+  "rustc": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: aarch64-apple-darwin\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+  "commands": [
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gossip_reload_gates",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=0",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_gossip_reload_gates",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gossip-reload-gates/lib.rs",
+      "-o",
+      "$OUTPUT/o0/libnode94_gossip_reload_gates.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=0",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gossip-reload-gates/input_only_driver.rs",
+      "--extern",
+      "node94_gossip_reload_gates=$OUTPUT/o0/libnode94_gossip_reload_gates.rlib",
+      "-o",
+      "$OUTPUT/o0/driver"
+    ],
+    [
+      "$OUTPUT/o0/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gossip_reload_gates",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_gossip_reload_gates",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gossip-reload-gates/lib.rs",
+      "-o",
+      "$OUTPUT/o3/libnode94_gossip_reload_gates.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gossip-reload-gates/input_only_driver.rs",
+      "--extern",
+      "node94_gossip_reload_gates=$OUTPUT/o3/libnode94_gossip_reload_gates.rlib",
+      "-o",
+      "$OUTPUT/o3/driver"
+    ],
+    [
+      "$OUTPUT/o3/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$REPO/src/node94-gossip-reload-gates/lib.rs",
+      "-o",
+      "$OUTPUT/smoke-test"
+    ],
+    [
+      "$OUTPUT/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gossip_reload_gates",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_gossip_reload_gates",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-signedness/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-signedness/build/libnode94_gossip_reload_gates.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gossip-reload-gates/input_only_driver.rs",
+      "--extern",
+      "node94_gossip_reload_gates=$OUTPUT/mutant-signedness/build/libnode94_gossip_reload_gates.rlib",
+      "-o",
+      "$OUTPUT/mutant-signedness/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-signedness/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-signedness/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-signedness/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-signedness/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gossip_reload_gates",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_gossip_reload_gates",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-metadata-strictness/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-metadata-strictness/build/libnode94_gossip_reload_gates.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gossip-reload-gates/input_only_driver.rs",
+      "--extern",
+      "node94_gossip_reload_gates=$OUTPUT/mutant-metadata-strictness/build/libnode94_gossip_reload_gates.rlib",
+      "-o",
+      "$OUTPUT/mutant-metadata-strictness/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-metadata-strictness/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-metadata-strictness/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-metadata-strictness/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-metadata-strictness/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gossip_reload_gates",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_gossip_reload_gates",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-throttle-strictness/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-throttle-strictness/build/libnode94_gossip_reload_gates.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gossip-reload-gates/input_only_driver.rs",
+      "--extern",
+      "node94_gossip_reload_gates=$OUTPUT/mutant-throttle-strictness/build/libnode94_gossip_reload_gates.rlib",
+      "-o",
+      "$OUTPUT/mutant-throttle-strictness/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-throttle-strictness/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-throttle-strictness/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-throttle-strictness/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-throttle-strictness/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gossip_reload_gates",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_gossip_reload_gates",
+      "-D",
+      "warnings",
+      "$OUTPUT/mutant-zero-bypass/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-zero-bypass/build/libnode94_gossip_reload_gates.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gossip-reload-gates/input_only_driver.rs",
+      "--extern",
+      "node94_gossip_reload_gates=$OUTPUT/mutant-zero-bypass/build/libnode94_gossip_reload_gates.rlib",
+      "-o",
+      "$OUTPUT/mutant-zero-bypass/build/driver"
+    ],
+    [
+      "$OUTPUT/mutant-zero-bypass/build/driver"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--test",
+      "$OUTPUT/mutant-zero-bypass/lib.rs",
+      "-o",
+      "$OUTPUT/mutant-zero-bypass/smoke-test"
+    ],
+    [
+      "$OUTPUT/mutant-zero-bypass/smoke-test"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "--crate-name",
+      "node94_gossip_reload_gates",
+      "--crate-type",
+      "rlib",
+      "-C",
+      "opt-level=3",
+      "-C",
+      "codegen-units=1",
+      "-C",
+      "overflow-checks=on",
+      "-C",
+      "metadata=node94_gossip_reload_gates",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gossip-reload-gates/lib.rs",
+      "-o",
+      "$OUTPUT/o3-repeat/libnode94_gossip_reload_gates.rlib"
+    ],
+    [
+      "$RUSTC",
+      "--edition=2021",
+      "-C",
+      "opt-level=3",
+      "-D",
+      "warnings",
+      "$REPO/src/node94-gossip-reload-gates/input_only_driver.rs",
+      "--extern",
+      "node94_gossip_reload_gates=$OUTPUT/o3-repeat/libnode94_gossip_reload_gates.rlib",
+      "-o",
+      "$OUTPUT/o3-repeat/driver"
+    ]
+  ],
+  "authorized_offline_python_instruction_evaluation": true,
+  "native_capture_executed": false
+}
