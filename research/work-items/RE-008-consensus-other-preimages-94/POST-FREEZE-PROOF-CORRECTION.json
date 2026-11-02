@@ -1,0 +1,13 @@
+{
+  "kind": "post-freeze proof-premise correction",
+  "original_freeze_sha256": "3a8039ee9831f3689db29e44f0f65812cac83eef1aced36e62d17993842399b3",
+  "old_proof_sha256": "1dea5fdc0e344cdc34c053d00e05e5236e555d06a864df0e2caf156d104f9219",
+  "new_proof_sha256": "49b65418080ddfec0a574bc3fbf7e9c2999ee20b089fe6399b71b781ed75fbee",
+  "inserted_text": "\nThe imported `memcpy` at slot0x576dfe0 is assumed to implement ordinary exact-copy/frame semantics: for valid readable source and writable destination spans of n bytes that do not overlap, it copies exactly source[0:n] into destination[0:n], leaves source and all memory outside the destination unchanged, and returns normally under the ABI. This applies to concat at48455dd and finalizer context/output copies at4f59e65/4f5a02b. Binding the import name does not prove its implementation; normal return and register preservation alone are insufficient.\n\n",
+  "inserted_before": "## Multiblock absorb/finalize relation\n",
+  "reconstruct_original": "Remove inserted_text exactly once immediately before inserted_before; resulting bytes must match old_proof_sha256.",
+  "reason": "Independent peer review identified that import binding and ordinary return do not imply memcpy exact-copy/frame behavior. Explicitly add the ordinary memcpy semantics premise; no formula changes.",
+  "timing": "After first Rust module draft, before driver/tests/build execution. This corrected proof is not represented as pre-Rust.",
+  "rust_module_sha256_at_correction": "b91b0600e5bed1752dbbbae6ecadc63a0ef702c13bbe609c9648c6726b6f5ba3",
+  "unchanged": "All seven other frozen files, including the entire corpus and expected bytes/digests, retain their original freeze hashes."
+}

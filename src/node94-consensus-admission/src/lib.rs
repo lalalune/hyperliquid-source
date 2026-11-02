@@ -1,12 +1,11 @@
 //! Evidence-bounded reconstruction of node #94 consensus block admission.
 //!
 //! This crate reconstructs the stake-snapshot, QC, TC, ordered admission, and
-//! registration behavior pinned by `RE-008-block-admission-94`.  Proposer
-//! scheduling, other digest variants, and signature recovery remain outside the
-//! recovered native contract. The variant-1 QC-vote preimage is available through
-//! [`qc_vote_preimage`], with a shared Keccak wrapper in [`qc_vote_digest`].
-//! Callers still supply authentication operations through
-//! [`AdmissionAuthenticator`]; a bare boolean cannot cross that boundary.
+//! registration behavior pinned by `RE-008-block-admission-94`. QC-vote, timeout,
+//! heartbeat and acknowledgement preimages are available through the digest
+//! helpers and [`message_preimages`]. Proposer scheduling and signature recovery
+//! remain outside the recovered contract. Admission delegates authentication
+//! through [`AdmissionAuthenticator`]; a bare boolean cannot cross that boundary.
 //!
 //! This is not a network service or a complete consensus implementation.
 
@@ -14,6 +13,7 @@ mod admission;
 mod auth;
 mod digest;
 mod error;
+pub mod message_preimages;
 mod qc;
 mod stake;
 mod state;
