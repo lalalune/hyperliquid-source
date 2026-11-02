@@ -1,0 +1,96 @@
+{
+  "plugin": "insane-research",
+  "plugin_version_source": "installed insane-research-main",
+  "global_verification": {
+    "passed": true,
+    "signature": "c5e4bec440d306e8cd8df2df18fe169b111f528bae7bbe0a0299e064e4335e4a",
+    "verified_count": 8,
+    "unresolved_count": 12,
+    "refuted_count": 3,
+    "checked_at": "2026-11-02T16:49:21.363756+00:00",
+    "checker": "validate_ledger.py"
+  },
+  "current_packet_claims": [
+    {
+      "claim_id": "clm_runtime115_sigpipe",
+      "text": "The actual node115 main passes raw zero; its runtime table selects signal13 handler1 without setting the explicit-option byte. Official compiler constants and Unix initialization corroborate SIGPIPE-ignore interpretation.",
+      "risk": "high",
+      "claim_type": "descriptive",
+      "source_ids": [
+        "src_node115",
+        "src_rust195_runtime"
+      ],
+      "counter_search": "Inspected all four signed table entries, invalid-value boundary, actual main R8D zero and exact signal return-1 error branch. Zero is not inherited signal behavior.",
+      "counter_refuted": false,
+      "conflicting": false,
+      "primary_source": true,
+      "status": "verified",
+      "status_reason": "ok"
+    },
+    {
+      "claim_id": "clm_runtime115_exit",
+      "text": "The node115 local exit guard uses errno-address CAS with a success return, same-pointer diagnostic and different-pointer pause loop; official Linux unique_thread_exit corroborates this structure.",
+      "risk": "high",
+      "claim_type": "descriptive",
+      "source_ids": [
+        "src_node115",
+        "src_rust195_exit"
+      ],
+      "counter_search": "Inspected complete runtime and actual import slots. The local guard has no libc exit call; public source orderings and whole-process shutdown safety are not inferred from x86.",
+      "counter_refuted": false,
+      "conflicting": false,
+      "primary_source": true,
+      "status": "verified",
+      "status_reason": "ok"
+    },
+    {
+      "claim_id": "clm_runtime115_callback",
+      "text": "The private callback handoff uses the selected closure table and adapters that overwrite the returned value on ordinary control flow.",
+      "risk": "high",
+      "claim_type": "descriptive",
+      "source_ids": [
+        "src_runtime115_local"
+      ],
+      "counter_search": "Unique RELATIVE writers, all three full adapter bodies and indirect method offset checked. No public independent specification of private ABI exists; abnormal paths excluded.",
+      "counter_refuted": false,
+      "conflicting": false,
+      "primary_source": true,
+      "status": "unresolved",
+      "status_reason": "독립 출처(도메인) 1개 < 2"
+    },
+    {
+      "claim_id": "clm_runtime115_full_rebuild",
+      "text": "The entire private executable and every exceptional interaction have been recovered as reproducible independent source.",
+      "risk": "high",
+      "claim_type": "descriptive",
+      "source_ids": [
+        "src_runtime115_local"
+      ],
+      "counter_search": "No full build, action-table closure, alternate-stack helper proof or complete cleanup closure exists. Selected static relations only.",
+      "counter_refuted": false,
+      "conflicting": false,
+      "primary_source": true,
+      "status": "unresolved",
+      "status_reason": "독립 출처(도메인) 1개 < 2"
+    },
+    {
+      "claim_id": "clm_runtime115_unchanged_layout",
+      "text": "과거 실행 파일의 TLS 변위와 인자 보관 위치가 새 대상에서도 모두 그대로다.",
+      "risk": "high",
+      "claim_type": "descriptive",
+      "source_ids": [
+        "src_node94",
+        "src_node115"
+      ],
+      "counter_search": "Actual node94FS:-0x448 versus node115FS:-0x420; savedargc stack-0x48 versus-0x50. Actual byte observations refute unchanged layout.",
+      "counter_refuted": true,
+      "conflicting": false,
+      "primary_source": true,
+      "status": "refuted",
+      "status_reason": "counter-search로 반박됨"
+    }
+  ],
+  "scope_note": "Global signature also covers historical firstbatch. Current packet subset is two source-supported claims, two externally unresolved claims and one refuted migration assumption. Local decoders are not external source replication.",
+  "report_evaluation": "PASS; citation resolution100%,leak0%,orphan0%,verifiedcoverage100%",
+  "evaluator_limit": "Initial common runtime substring falsely matched refuted unchanged-layout claim; original ledger retained, same refutation rephrased in Korean, no classifications changed."
+}
