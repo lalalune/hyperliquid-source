@@ -140,7 +140,9 @@ def check_census(binary_bytes):
     found = {}
     for op, name in ((0xE8, "call"), (0xE9, "jmp")):
         idx = np.flatnonzero(text[:-5] == op)
-        b = text.astype(np.int32)
+        # Keep the assembled unsigned rel32 wide until explicit sign extension.
+        # NumPy 2 rejects subtracting 2**32 from an int32 array.
+        b = text.astype(np.int64)
         rel = b[idx + 1] | (b[idx + 2] << 8) | (b[idx + 3] << 16) | (b[idx + 4] << 24)
         rel = np.where(rel >= 2**31, rel - 2**32, rel)
         src = tvaddr + idx
