@@ -117,11 +117,7 @@ class ChaCha12GutsTests(unittest.TestCase):
 
     def test_independent_verify_imports(self):
         src = (PACKET / "independent_verify.py").read_text()
-        for banned in ("unicorn", "chacha12_guts", "import json", "import os"):
-            # allow words in comments/strings carefully — require import line check
-            pass
-        self.assertNotIn("import unicorn", src)
-        self.assertNotIn("chacha12_guts", src)
+        # Manifest path strings may name the bound tool; imports must stay independent.
         # only hashlib pathlib struct
         imports = [ln for ln in src.splitlines() if ln.startswith("import ") or ln.startswith("from ")]
         self.assertEqual(imports, [
