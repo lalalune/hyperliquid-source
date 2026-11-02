@@ -47,9 +47,9 @@ The full repo test suite (one `unittest discover` over about 5,000 tests) needs 
 
 ### Targeted checks (commands + output)
 
-All checks below ran at head `bba3924f`. Output is verbatim; the full repository suite was not run (see above).
+All checks below ran at head `87a62868`. Output is verbatim; the full repository suite was not run (see above).
 
-head `bba3924f`:
+head `87a62868`:
 
 ```text
 $ .venv/bin/python -I -B research/work-items/RE-039-genesis-already-happened-94/verify.py
@@ -57,7 +57,7 @@ verify: key_insns=22 strings=1 direct_calls=0 errors=0
 [exit 0]
 ```
 
-head `bba3924f`:
+head `87a62868`:
 
 ```text
 $ .venv/bin/python -O -B research/work-items/RE-039-genesis-already-happened-94/verify.py
@@ -65,7 +65,7 @@ verify: key_insns=22 strings=1 direct_calls=0 errors=0
 [exit 0]
 ```
 
-head `bba3924f`:
+head `87a62868`:
 
 ```text
 $ .venv/bin/python -I -B research/work-items/RE-039-genesis-already-happened-94/independent_verify.py
@@ -73,7 +73,7 @@ PASS carve=d4ff8c4365267de0 ff15=6 strings=1 key_insns=22
 [exit 0]
 ```
 
-head `bba3924f`:
+head `87a62868`:
 
 ```text
 $ .venv/bin/python -O -B research/work-items/RE-039-genesis-already-happened-94/independent_verify.py
@@ -81,7 +81,7 @@ PASS carve=d4ff8c4365267de0 ff15=6 strings=1 key_insns=22
 [exit 0]
 ```
 
-head `bba3924f`:
+head `87a62868`:
 
 ```text
 $ .venv/bin/python -m unittest tests.test_genesis_already_happened -v
@@ -94,13 +94,13 @@ test_negative_controls_per_rule (tests.test_genesis_already_happened.GenesisAlre
 test_static_output_pin_and_expectations (tests.test_genesis_already_happened.GenesisAlreadyHappenedStaticTests.test_static_output_pin_and_expectations) ... ok
 
 ----------------------------------------------------------------------
-Ran 7 tests in 82.052s
+Ran 7 tests in 81.691s
 
 OK
 [exit 0]
 ```
 
-head `bba3924f`:
+head `87a62868`:
 
 ```text
 $ .venv/bin/python tools/catalogue.py --check
@@ -108,7 +108,7 @@ Stale catalogue: research/catalogue/components.json; run make catalogue
 [exit 1]
 ```
 
-head `bba3924f`:
+head `87a62868`:
 
 ```text
 $ .venv/bin/python -m unittest tests.test_work_item_manifest_completeness -v
@@ -116,13 +116,13 @@ test_re008_manifest_completeness (tests.test_work_item_manifest_completeness.Man
 test_re010_manifest_completeness (tests.test_work_item_manifest_completeness.ManifestCompletenessTests.test_re010_manifest_completeness) ... ok
 
 ----------------------------------------------------------------------
-Ran 2 tests in 0.135s
+Ran 2 tests in 0.129s
 
 OK
 [exit 0]
 ```
 
-head `bba3924f`:
+head `87a62868`:
 
 ```text
 $ pr-guard/scan.sh . --range $(git merge-base origin/main HEAD)..HEAD
@@ -130,7 +130,7 @@ pr-guard: clean
 [exit 0]
 ```
 
-head `bba3924f` (packet manifest, before this documentation commit):
+head `87a62868` (packet manifest, before this documentation commit):
 
 ```text
 $ sha256sum -c MANIFEST.sha256
