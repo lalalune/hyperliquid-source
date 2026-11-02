@@ -1,0 +1,66 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-B",
+        "research/work-items/RE-004-global-clamp-rust-94/verify_static.py"
+      ],
+      "corruption_controls_rejected": 25,
+      "exit_code": 0,
+      "instructions": {
+        "caller": 205,
+        "helper": 5,
+        "offset": 20
+      }
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-"
+      ],
+      "cases": 19267,
+      "exit_code": 0,
+      "expected_sha256": "62e61c7aa8f3806e391eb99cdf708c5f91d39c6bf944c0a5d6c526b54d892bfa",
+      "inputs_sha256": "ff07825b11c12f9e57ebd66ad9b6fcd180828a42063719ed946fb6555f371b9b",
+      "mismatches": 0,
+      "operation": "decompress frozen input/output; verify both frozen SHA256 values; unpack <4Q; independently calculate and compare every full output record; independently inspect ELF input section and PT_LOAD"
+    }
+  ],
+  "findings": [
+    "Complete 86-byte main and 18-byte tail agree with source; TEST flags survive MOV into CMOVLE, SHR flags select lower clamp.",
+    "Tail establishes full RAX zero, clears middle qword and stores unshifted normalized RSI last.",
+    "Input .data has FF x8; all output qwords lie in writable .bss and the writable PT_LOAD zero-fill interval.",
+    "Input/output storage is disjoint; stable ordinary memory and numeric projection limits are explicit.",
+    "Complete proof and both READMEs read; full-i64/previous-state domain and RDX exclusion consistent."
+  ],
+  "independent_relation": {
+    "high_bit_clear": "(0,min(2**22,1+max(0,u-64)//64),0,u+int(u==0))",
+    "high_bit_set": "(RAX,state0,state1,state2) = (0,0,0,0)",
+    "implementation": "Python unbounded integers; no oracle/source function imported",
+    "input": "u = raw first u64; previous three words ignored"
+  },
+  "limits": [
+    "No native replay performed by reviewer.",
+    "No captured execution or instruction emulation.",
+    "Native qualification counts and repository checks were reviewed as retained author results, not independently rerun.",
+    "Runtime global lifecycle, intermediate access observations and original compiled-byte identity remain outside scope."
+  ],
+  "read_only_scope": "source/oracle/static/proof review; only this requested review record written",
+  "reviewed_sha256": {
+    "research/work-items/RE-004-global-clamp-rust-94/PROOF.md": "3f29c0843065528b9e15ddd6397c59cba0a2cf93eb853b66f45721bceb254271",
+    "research/work-items/RE-004-global-clamp-rust-94/README.md": "864d297068a8b51895dc15cea549e9de7fdfe4a14668f6f814b2a062543b0695",
+    "research/work-items/RE-004-global-clamp-rust-94/frozen.json": "5b60d2937ebdc4e654b196cb2d0e609d01113fe1a5232a51b7db0670bf0274b3",
+    "research/work-items/RE-004-global-clamp-rust-94/oracle.py": "7ea86d00f6b568960ac56b37fb099f07b8dd63eef6381c7e1db728f93cacedc0",
+    "research/work-items/RE-004-global-clamp-rust-94/static.json": "1c1f419d9617ea4070f3e6738b0ba413057ca21357468c7b6322cc6251370440",
+    "research/work-items/RE-004-global-clamp-rust-94/verify_static.py": "539677faebe790adbadee778ca5a0b9715263ec932338fc190cc122604e05df6",
+    "src/node94-global-clamp/README.md": "4a703cc054d963d6b11869926dc48a96f5be1d20af5b6c153e630ad74b4ef56a",
+    "src/node94-global-clamp/input_only_driver.rs": "6f6aa475df9bb9fd098bd946acedd882fc3bd6f394620981c7d3cbf3704195d6",
+    "src/node94-global-clamp/lib.rs": "cf6a449fb271200c86d620d449af75def0a0192b4cb7b34b4dc48aa09d93a373"
+  },
+  "reviewer": "OpenAI Codex independent compression worker; exact model unavailable",
+  "status": "no blocker",
+  "target_sha256": "3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f"
+}
