@@ -65,6 +65,12 @@ def fail(message):
     raise ToolError(message)
 
 
+def required_section(sections, name):
+    if name not in sections:
+        fail(f"missing required section {name}")
+    return sections[name]
+
+
 class Done(Exception):
     def __init__(self, how, where):
         super().__init__(how)
@@ -91,8 +97,8 @@ class Image:
             if name in self.sections:
                 fail(f"duplicate section name {name}")
             self.sections[name] = (row[3], row[4], row[5])
-        self.text_va, self.text_off, self.text_size = self.sections[".text"]
-        self.rodata = self.sections[".rodata"]
+        self.text_va, self.text_off, self.text_size = required_section(self.sections, ".text")
+        self.rodata = required_section(self.sections, ".rodata")
         self.fdes = self._fdes()
         self.starts = [row[0] for row in self.fdes]
         self.slots = self._slots()
@@ -107,7 +113,7 @@ class Image:
         fail(f"address {va:#x} is outside every section")
 
     def _fdes(self):
-        addr, off, _ = self.sections[".eh_frame_hdr"]
+        addr, off, _ = required_section(self.sections, ".eh_frame_hdr")
         if self.data[off + 3] != 0x3b:
             fail("unexpected .eh_frame_hdr table encoding")
         count = struct.unpack_from("<I", self.data, off + 8)[0]
@@ -124,7 +130,7 @@ class Image:
         return rows
 
     def _slots(self):
-        _, off, size = self.sections[".rela.dyn"]
+        _, off, size = required_section(self.sections, ".rela.dyn")
         slots = {}
         for addr, info, add in struct.iter_unpack("<QQq", self.data[off:off + size]):
             if info & 0xffffffff == 8:
