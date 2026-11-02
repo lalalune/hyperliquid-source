@@ -33,6 +33,16 @@ def read(data,va,n):
     return off,bytes(data[off:off+n])
 
 
+def rela_section(data):
+    """The .rela.dyn section, shape-checked before its entries are folded.
+    A size that is not a whole number of 24-byte entries would otherwise
+    escape the fold as a bare struct.error, not this module's ValueError:
+    the same fail-closed shape evm_amount_scale applies to this table."""
+    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    if sec['size']%24:raise ValueError('.rela.dyn truncated')
+    return sec
+
+
 def parameters(data):
     for site,raw in [(0x422e3d6,'48c1e9'),(0x422e3da,'4d01e4'),(0x422e3dd,'ba'),
                      (0x422e3e5,'48f7e2'),(0x422e3e8,'4939c44819d1'),(0x422e3ee,'0f')]:
@@ -89,6 +99,7 @@ def analyze(data):
     code=read(data,0x422e3b4,2)[1]
     if code[0]!=0x72 or 0x422e3b6+struct.unpack('<b',code[1:])[0]!=0x422e3f3:
         raise ValueError('generic checked-add carry transfer changed')
+    rela_section(data)
     for site,target in CALLS.items():
         code=read(data,site,5)[1]
         if code[0]!=0xe8 or site+5+struct.unpack_from('<i',code,1)[0]!=target:
