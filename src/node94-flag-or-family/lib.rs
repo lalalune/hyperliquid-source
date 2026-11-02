@@ -1,0 +1,148 @@
+#![no_std]
+#![forbid(unsafe_code)]
+//! Full reachable data-window projection of three node94 indexed-OR leaves.
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Family {
+    Entry15625e0,
+    Entry1566100,
+    Entry1568bb0,
+}
+
+/// The RAX/RCX values and numeric destination of the four-byte update.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Effects {
+    pub rax: u64,
+    pub rcx: u64,
+    pub store_address: u64,
+}
+
+// Measured little-endian words in the union [0x2516ec,0x251c94).
+// A reachable read window is not a recovered logical table extent.
+const READ_WORDS: [u32; 362] = [
+    0x00000001, 0x00000002, 0x00000004, 0x00000008, 0x00000010, 0x00000020, 0x00000040, 0x00000080,
+    0x00000200, 0x00000800, 0x00001000, 0x00002000, 0x00004000, 0x00008000, 0x00010000, 0x00020000,
+    0x00040000, 0x00080000, 0x00000100, 0x00000400, 0x01314a6c, 0x013149fe, 0x01314a27, 0x01314a33,
+    0x01314a15, 0x01314a45, 0x01314a51, 0x01314a39, 0x01314a63, 0x01314a21, 0x01314a5d, 0x01314a0f,
+    0x01314a1b, 0x01314a4b, 0x01314a09, 0x01314a2d, 0x01314a03, 0x01314a3f, 0x01314a57, 0x01314a69,
+    0x00000001, 0x00000002, 0x00000004, 0x00000008, 0x00000010, 0x00000020, 0x00000040, 0x00000080,
+    0x00000200, 0x00000800, 0x00001000, 0x00002000, 0x00004000, 0x00008000, 0x00010000, 0x00020000,
+    0x00040000, 0x00080000, 0x00000100, 0x00000400, 0x0131747c, 0x0131740e, 0x01317437, 0x01317443,
+    0x01317425, 0x01317455, 0x01317461, 0x01317449, 0x01317473, 0x01317431, 0x0131746d, 0x0131741f,
+    0x0131742b, 0x0131745b, 0x01317419, 0x0131743d, 0x01317413, 0x0131744f, 0x01317467, 0x01317479,
+    0x61746146, 0x6e69206c, 0x6e726574, 0x65206c61, 0x726f7272, 0x6c50202e, 0x65736165, 0x6e6f6320,
+    0x65646973, 0x69662072, 0x676e696c, 0x62206120, 0x72206775, 0x726f7065, 0x74612074, 0x74746820,
+    0x2f3a7370, 0x7469672f, 0x2e627568, 0x2f6d6f63, 0x70616c63, 0x2f73722d, 0x70616c63, 0x7373692f,
+    0x2e736575, 0x00002e2e, 0x00000001, 0x00000002, 0x00000004, 0x00000008, 0x00000010, 0x00000020,
+    0x00000040, 0x00000080, 0x00000200, 0x00000800, 0x00001000, 0x00002000, 0x00004000, 0x00008000,
+    0x00010000, 0x00020000, 0x00040000, 0x00080000, 0x00000100, 0x00000400, 0x69442061, 0x616c7073,
+    0x6d692079, 0x6d656c70, 0x61746e65, 0x6e6f6974, 0x74657220, 0x656e7275, 0x6e612064, 0x72726520,
+    0x7520726f, 0x7078656e, 0x65746365, 0x65796c64, 0x726f7272, 0x682d2d3a, 0x2c706c65, 0x65736120,
+    0x6e6f6572, 0x726f2065, 0x726f6d20, 0x666f2065, 0x65687420, 0x68746f20, 0x73207265, 0x69636570,
+    0x64656966, 0x67726120, 0x6e656d75, 0x53557374, 0x3a454741, 0x6f727245, 0x73656472, 0x70697263,
+    0x6e6f6974, 0x69202928, 0x65642073, 0x63657270, 0x64657461, 0x7375203b, 0x69442065, 0x616c7073,
+    0x00ff0079, 0x000f0009, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+    0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0x03020100, 0x07060504,
+    0xffff0908, 0xffffffff, 0x0c0b0aff, 0xff0f0e0d, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+    0xffffffff, 0xffffffff, 0x0c0b0aff, 0xff0f0e0d, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+    0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+    0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+    0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+    0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+    0xffffffff, 0xffffffff, 0x0131d6d4, 0x0131d817, 0x0131d747, 0x0131d765, 0x0131d729, 0x0131d835,
+    0x0131d853, 0x0131d7d9, 0x49637241, 0x6c61766e, 0x72616469, 0x63724163, 0x426f6f54, 0x61426769,
+    0x32316573, 0x67694438, 0x78457469, 0x74636570, 0x63616465, 0x6c617574, 0x74706d45, 0x6e654c79,
+    0x4e687467, 0x6e45746f, 0x6867756f, 0x73637241, 0x69617254, 0x676e696c, 0x2e746f44, 0x2044494f,
+    0x666c616d, 0x656d726f, 0x00000064, 0x0131f742, 0x0131f793, 0x0131f779, 0x0131f77d, 0x0131f746,
+    0x0131fb47, 0x0131fb9a, 0x0131fb7e, 0x0131fb83, 0x0131fb4c, 0x0131fe63, 0x0131feb4, 0x0131fe9a,
+    0x0131fe9e, 0x0131fe67, 0x01320c9d, 0x01320c0c, 0x01320ca1, 0x01320c0c, 0x01320efb, 0x01320ee1,
+    0x01320eff, 0x01320ee1, 0x01321c49, 0x01321c6e, 0x01321c72, 0x01321c49, 0x01328900, 0x01328919,
+    0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x01328a04,
+    0x013289de, 0x01328919, 0x01328919, 0x013289fa, 0x01328919, 0x01328919, 0x01328919, 0x01328919,
+    0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x01328919,
+    0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x01328919,
+    0x01328a0e, 0x01328919, 0x01328919, 0x01328919, 0x01328919, 0x013289e8, 0x0132a1ec, 0x0132a212,
+    0x0132a217, 0x0132a1ec, 0x010a01aa, 0x17050104, 0x00011f01, 0x050e0c04, 0x01010107, 0x121d0156,
+    0x04020201, 0x01060101, 0x01010301, 0x53011401, 0xa6088b01, 0x01022601, 0x0e272906, 0x02010101,
+    0x01010201, 0x04041b08, 0x38050b1d, 0x660e0701, 0x08040801, 0x030a0304, 0x30100102, 0x2118650d,
+    0x01040209, 0x13021805,
+];
+
+/// Select by the low byte, OR the selected word into the field, and return effects.
+///
+/// `index_bits` represents full incoming RSI; its upper56 bits are ignored.
+/// `object` is incoming RDI. `load_bias` relocates the code and readonly data.
+/// `field` is the u32 value at object plus the member's field displacement;
+/// its actual Rust address is unrelated to `store_address`. Numeric addresses
+/// wrap and are never dereferenced. Original correspondence requires valid
+/// ordinary writable field storage, stable bound readonly tables/code and return
+/// control. Original ABI, MMIO, concurrency, faults and access traces are excluded.
+pub fn apply(
+    family: Family,
+    index_bits: u64,
+    load_bias: u64,
+    object: u64,
+    field: &mut u32,
+) -> Effects {
+    let (word_offset, table_va, field_offset) = match family {
+        Family::Entry15625e0 => (0, 0x2516ec, 0x1a0),
+        Family::Entry1566100 => (40, 0x25178c, 0xa8),
+        Family::Entry1568bb0 => (106, 0x251894, 0x1a0),
+    };
+    let mask = READ_WORDS[word_offset + index_bits as u8 as usize];
+    *field |= mask;
+    Effects {
+        rax: u64::from(mask),
+        rcx: load_bias.wrapping_add(table_va),
+        store_address: object.wrapping_add(field_offset),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn selected_word_is_returned_instead_of_updated_field() {
+        let mut field = 2;
+        let r = apply(Family::Entry15625e0, 0, 0, 0, &mut field);
+        assert_eq!(field, 3);
+        assert_eq!(
+            r,
+            Effects {
+                rax: 1,
+                rcx: 0x2516ec,
+                store_address: 0x1a0
+            }
+        );
+    }
+
+    #[test]
+    fn index_twenty_reads_actual_multibit_word() {
+        let mut field = 0;
+        let r = apply(Family::Entry15625e0, 20, 0, 0, &mut field);
+        assert_eq!(field, 0x01314a6c);
+        assert_eq!(r.rax, 0x01314a6c);
+    }
+
+    #[test]
+    fn high_index_bits_are_ignored_and_both_addresses_wrap() {
+        let mut field = 0;
+        let r = apply(
+            Family::Entry1566100,
+            0x80000000000000ff,
+            0_u64.wrapping_sub(0x25178c),
+            0_u64.wrapping_sub(0xa8),
+            &mut field,
+        );
+        assert_eq!(field, 0x01328919);
+        assert_eq!(
+            r,
+            Effects {
+                rax: 0x01328919,
+                rcx: 0,
+                store_address: 0
+            }
+        );
+    }
+}
