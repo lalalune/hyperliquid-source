@@ -6,11 +6,13 @@
 //! helpers and [`message_preimages`]. Proposer scheduling and signature recovery
 //! remain outside the recovered contract. Admission delegates authentication
 //! through [`AdmissionAuthenticator`]; a bare boolean cannot cross that boundary.
+//! [`block_preimage`] additionally supplies selector 0 with explicit packed time.
 //!
 //! This is not a network service or a complete consensus implementation.
 
 mod admission;
 mod auth;
+pub mod block_preimage;
 mod digest;
 mod error;
 pub mod message_preimages;
