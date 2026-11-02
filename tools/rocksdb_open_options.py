@@ -101,6 +101,8 @@ class Image:
         for off in range(sec['offset'], sec['offset'] + sec['size'], 24):
             where, info, addend = struct.unpack_from('<QQq', self.data, off)
             if info & 0xffffffff == R_X86_64_RELATIVE:
+                if where in rows:
+                    raise ValueError(f'duplicate RELATIVE relocation slot {where:#x}')
                 rows[where] = addend
         return rows
 
