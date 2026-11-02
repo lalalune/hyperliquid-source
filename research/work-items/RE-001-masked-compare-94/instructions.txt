@@ -1,0 +1,65 @@
+0x1407ec0  85c9                             test rcx:32, rcx:32
+0x1407ec2  7403                             je 0x1407ec7
+0x1407ec4  31c0                             xor rax:32, rax:32
+0x1407ec6  c3                               ret
+0x1407ec7  488b07                           mov rax:64, [rdi]:64
+0x1407eca  4c8b4710                         mov r8:64, [rdi+16]:64
+0x1407ece  4801c6                           add rsi:64, rax:64
+0x1407ed1  48ffc6                           inc rsi:64
+0x1407ed4  488b7f18                         mov rdi:64, [rdi+24]:64
+0x1407ed8  4883ff04                         cmp rdi:64, 0x4
+0x1407edc  731b                             jae 0x1407ef9
+0x1407ede  eb70                             jmp 0x1407f50
+0x1407ee0  8b00                             mov rax:32, [rax]:32
+0x1407ee2  413b4438fc                       cmp rax:32, [r8+rdi-4]:32
+0x1407ee7  0f84c0000000                     je 0x1407fad
+0x1407eed  66b8feff                         mov rax:16, 0xfffe
+0x1407ef1  66d3c0                           rol rax:16, rcx:8
+0x1407ef4  6621c2                           and rdx:16, rax:16
+0x1407ef7  74cb                             je 0x1407ec4
+0x1407ef9  f30fbcca                         tzcnt rcx:32, rdx:32
+0x1407efd  4c8d0c0e                         lea r9:64, [rsi+rcx]:64
+0x1407f01  4a8d040f                         lea rax:64, [rdi+r9]:64
+0x1407f05  4883c0fc                         add rax:64, -0x4
+0x1407f09  4939c1                           cmp r9:64, rax:64
+0x1407f0c  73d2                             jae 0x1407ee0
+0x1407f0e  4d89c2                           mov r10:64, r8:64
+0x1407f11  6666666666662e0f1f840000000000   nop
+0x1407f20  458b19                           mov r11:32, [r9]:32
+0x1407f23  453b1a                           cmp r11:32, [r10]:32
+0x1407f26  75c5                             jne 0x1407eed
+0x1407f28  4983c104                         add r9:64, 0x4
+0x1407f2c  4983c204                         add r10:64, 0x4
+0x1407f30  4939c1                           cmp r9:64, rax:64
+0x1407f33  72eb                             jb 0x1407f20
+0x1407f35  eba9                             jmp 0x1407ee0
+0x1407f37  660f1f840000000000               nop
+0x1407f40  66b8feff                         mov rax:16, 0xfffe
+0x1407f44  66d3c0                           rol rax:16, rcx:8
+0x1407f47  6621c2                           and rdx:16, rax:16
+0x1407f4a  0f8474ffffff                     je 0x1407ec4
+0x1407f50  b001                             mov rax:8, 0x1
+0x1407f52  4885ff                           test rdi:64, rdi:64
+0x1407f55  0f846bffffff                     je 0x1407ec6
+0x1407f5b  f30fbcca                         tzcnt rcx:32, rdx:32
+0x1407f5f  440fb60c0e                       movzx r9:32, [rsi+rcx]:8
+0x1407f64  453a08                           cmp r9:8, [r8]:8
+0x1407f67  75d7                             jne 0x1407f40
+0x1407f69  4883ff01                         cmp rdi:64, 0x1
+0x1407f6d  0f8453ffffff                     je 0x1407ec6
+0x1407f73  440fb64c0e01                     movzx r9:32, [rsi+rcx+1]:8
+0x1407f79  453a4801                         cmp r9:8, [r8+1]:8
+0x1407f7d  75c1                             jne 0x1407f40
+0x1407f7f  4883ff02                         cmp rdi:64, 0x2
+0x1407f83  0f843dffffff                     je 0x1407ec6
+0x1407f89  4883ff03                         cmp rdi:64, 0x3
+0x1407f8d  410f95c1                         setne r9:8
+0x1407f91  440fb6540e02                     movzx r10:32, [rsi+rcx+2]:8
+0x1407f97  453a5002                         cmp r10:8, [r8+2]:8
+0x1407f9b  410f95c2                         setne r10:8
+0x1407f9f  4508ca                           or r10:8, r9:8
+0x1407fa2  4180fa01                         cmp r10:8, 0x1
+0x1407fa6  7498                             je 0x1407f40
+0x1407fa8  e919ffffff                       jmp 0x1407ec6
+0x1407fad  b001                             mov rax:8, 0x1
+0x1407faf  c3                               ret
