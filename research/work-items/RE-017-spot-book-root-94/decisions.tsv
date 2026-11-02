@@ -1,0 +1,60 @@
+label	owner_va	site_va	bytes_hex	fallthrough_va	target_va	taken_when	taken_effect
+level_buffering	0x1dd94f0	0x1dd9519	0f818b000000	0x1dd951f	0x1dd95aa	zero minus buffer word does not set signed overflow	delegate to buffered level writer
+level_pair_header_error	0x1dd94f0	0x1dd9543	0f8597000000	0x1dd9549	0x1dd95e0	pair header result is not 2	return failure
+level_price_error	0x1dd94f0	0x1dd9562	757c	0x1dd9564	0x1dd95e0	price result is not 2	return failure
+level_counter	0x1dd94f0	0x1dd95cc	0f842b030000	0x1dd95d2	0x1dd98fd	buffered count equals 0xffffffff	diagnostic then ud2
+level_orders_header_error	0x1dd94f0	0x1dd962f	755a	0x1dd9631	0x1dd968b	order-list header result is not 2	return failure
+level_order_error	0x1dd94f0	0x1dd975e	0f8532010000	0x1dd9764	0x1dd9896	order result differs from success sentinel	return failure
+side_header_error_a	0x1e4fe30	0x1e4fe97	0f85be000000	0x1e4fe9d	0x1e4ff5b	two-side header result is not 2	return header failure
+side_header_error_b	0x1e4fe30	0x1e4fee6	0f85ac000000	0x1e4feec	0x1e4ff98	two-side header result is not 2	return header failure
+first_side_header_error	0x1e4fe30	0x1e4ffde	0f8550020000	0x1e4ffe4	0x1e50234	first side header result is not 2	return failure
+first_side_level_error	0x1e4fe30	0x1e50115	0f8560020000	0x1e5011b	0x1e5037b	first-side level result differs from success sentinel	return child failure
+first_side_more	0x1e4fe30	0x1e50122	75dc	0x1e50124	0x1e50100	first-side current pointer differs from end	visit next level
+first_side_finish_error	0x1e4fe30	0x1e50161	0f8565020000	0x1e50167	0x1e503cc	first-side finalizer result differs from success sentinel	return failure
+second_side_header_error	0x1e4fe30	0x1e501d1	7561	0x1e501d3	0x1e50234	second side header result is not 2	return failure
+second_side_level_error	0x1e4fe30	0x1e502f5	0f8580000000	0x1e502fb	0x1e5037b	second-side level result differs from success sentinel	return child failure
+second_side_more	0x1e4fe30	0x1e50302	75dc	0x1e50304	0x1e502e0	second-side current pointer differs from end	visit next level
+second_side_finish_error	0x1e4fe30	0x1e50333	0f8593000000	0x1e50339	0x1e503cc	second-side finalizer result differs from success sentinel	return failure
+outer_high_count	0x1e5d350	0x1e5d392	0f85e5000000	0x1e5d398	0x1e5d47d	vector count has a nonzero high 32-bit half	enter buffered path
+outer_header_error	0x1e5d350	0x1e5d3c0	0f8539020000	0x1e5d3c6	0x1e5d5ff	array header result is not 2	return header failure payload
+outer_empty	0x1e5d350	0x1e5d3e0	744f	0x1e5d3e2	0x1e5d431	vector count is zero	finish without a side-map call
+outer_child_error	0x1e5d350	0x1e5d421	0f85f2010000	0x1e5d427	0x1e5d619	side-map result differs from success sentinel	return child failure
+outer_more	0x1e5d350	0x1e5d42f	75cf	0x1e5d431	0x1e5d400	remaining byte count is nonzero	advance to next side-map record
+outer_allocate	0x1e5d350	0x1e5d490	0f84c5010000	0x1e5d496	0x1e5d65b	allocation returns zero	allocation failure path
+outer_counter	0x1e5d350	0x1e5d558	0f84ee000000	0x1e5d55e	0x1e5d64c	buffered count equals 0xffffffff	diagnostic then ud2
+core_generic_t_absent	0x2332010	0x23320ed	7444	0x23320ef	0x2332133	core word at +0x88 is zero	omit t
+core_generic_S_absent	0x2332010	0x2332140	7445	0x2332142	0x2332187	low byte of core word at +0 is zero	omit S
+core_generic_r_absent	0x2332010	0x233218a	7462	0x233218c	0x23321ee	core byte at +0x90 is zero	omit r
+core_generic_R_absent	0x2332010	0x23321f1	7421	0x23321f3	0x2332214	combined flag low bit is zero	omit R
+core_generic_d_absent	0x2332010	0x233221c	7421	0x233221e	0x233223f	core word at +0x70 is zero	omit d
+core_generic_c_absent	0x2332010	0x2332244	742c	0x2332246	0x2332272	core byte at +0x91 is zero	omit c
+core_generic_b_absent	0x2332010	0x2332277	741d	0x2332279	0x2332296	low byte of core word at +0x48 is zero	omit b
+core_generic_side_zero	0x2332010	0x23322c6	743b	0x23322c8	0x2332303	bit zero of core byte at +0xa2 is clear	emit B rather than A
+core_t_absent	0x23328c0	0x2332984	7459	0x2332986	0x23329df	core word at +0x88 is zero	omit t
+core_S_absent	0x23328c0	0x23329ec	745a	0x23329ee	0x2332a48	low byte of core word at +0 is zero	omit S
+core_r_absent	0x23328c0	0x2332a4b	0f8492000000	0x2332a51	0x2332ae3	core byte at +0x90 is zero	omit r
+core_R_absent	0x23328c0	0x2332aeb	7421	0x2332aed	0x2332b0e	combined flag low bit is zero	omit R
+core_d_absent	0x23328c0	0x2332b11	7424	0x2332b13	0x2332b37	core word at +0x70 is zero	omit d
+core_c_absent	0x23328c0	0x2332b3c	0f8482000000	0x2332b42	0x2332bc4	core byte at +0x91 is zero	omit c
+core_b_absent	0x23328c0	0x2332bc9	745b	0x2332bcb	0x2332c26	low byte of core word at +0x48 is zero	omit b
+record_no_capacity	0x23337e0	0x233380c	0f8489020000	0x2333812	0x2333a9b	output length equals capacity	request buffer growth
+record_names_mode	0x23337e0	0x233382e	7539	0x2333830	0x2333869	name mode byte is not 1	skip first field name
+resting_size_error	0x23337e0	0x23338fb	0f85df000000	0x2333901	0x23339e0	size writer result is not 2	return failure
+original_size_error	0x23337e0	0x2333965	7579	0x2333967	0x23339e0	size writer result is not 2	return failure
+user_error	0x23337e0	0x233399e	7569	0x23339a0	0x2333a09	user writer result differs from success sentinel	return failure
+tif_variant	0x23337e0	0x23339c8	7569	0x23339ca	0x2333a33	tif byte differs from 5	call alternate tif writer
+core_error	0x23337e0	0x2333a5d	7529	0x2333a5f	0x2333a88	core writer result differs from success sentinel	return failure
+oid_error	0x23337e0	0x2333a81	7505	0x2333a83	0x2333a88	oid writer result differs from success sentinel	return failure
+head_tag	0x25681d0	0x25681e4	7520	0x25681e6	0x2568206	head dword is not the present tag	return empty record vector
+head_bounds	0x25681d0	0x25681f2	7312	0x25681f4	0x2568206	head index is at or above slab length	return empty record vector
+head_vacancy	0x25681d0	0x2568204	7529	0x2568206	0x256822f	slot dword is not the vacant tag	enter first record construction
+first_allocation	0x25681d0	0x256828e	0f848c010000	0x2568294	0x2568420	allocator returns zero	allocation failure path
+first_next_tag	0x25681d0	0x25682e2	0f8419010000	0x25682e8	0x2568401	first slot next word is zero	return one-record vector
+next_tag	0x25681d0	0x2568353	0f84a8000000	0x2568359	0x2568401	next word is zero	return accumulated prefix
+next_bounds	0x25681d0	0x256835d	0f839e000000	0x2568363	0x2568401	next index is at or above slab length	return accumulated prefix
+next_vacancy	0x25681d0	0x2568374	0f8487000000	0x256837a	0x2568401	next slot dword equals vacant tag	return accumulated prefix
+vector_capacity	0x25681d0	0x25683d4	0f8526ffffff	0x25683da	0x2568300	record count differs from capacity	append without growth
+tree_empty	0x26b0930	0x26b0950	0f845c020000	0x26b0956	0x26b0bb2	remaining selected tree entries are zero	return current output length
+tree_invalid_iterator	0x26b0930	0x26b0983	0f844e020000	0x26b0989	0x26b0bd7	iterator flag bit zero is clear	diagnostic then ud2
+tree_missing_parent	0x26b0930	0x26b0a6a	0f8458010000	0x26b0a70	0x26b0bc8	parent pointer is zero during ascent	diagnostic then ud2
+tree_more	0x26b0930	0x26b0b90	0f85eafdffff	0x26b0b96	0x26b0980	remaining entry count is nonzero	continue traversal
