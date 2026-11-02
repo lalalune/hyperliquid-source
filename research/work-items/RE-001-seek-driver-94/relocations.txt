@@ -1,0 +1,10 @@
+GOT slot 0x57783c0, R_X86_64_RELATIVE, addend 0x5164750 (parsed
+from .rela.dyn). The driver (0x516c8f8..0x516c911) and the generic
+loop (0x51651e0..0x5165218) both compare the +0xa50 object's
+vtable +0x98 field against this slot: equal takes the +0x90
+virtual, unequal calls the +0x98 field value directly.
+
+No R_X86_64_RELATIVE slot has addend 0x516c7e0 (the driver is
+reached by its 2 direct calls, not through a vtable slot) and none
+has addend 0x51651e0 (the generic loop is pinned only by the
+driver's identity comparison against its +0x60 slot; see README).
