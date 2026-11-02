@@ -1,0 +1,55 @@
+
+visor.elf:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+00000000002bd180 <.text>:
+  64f7f0: 48 83 ec 18                  	sub	rsp, 0x18
+  64f7f4: 48 8b 56 08                  	mov	rdx, qword ptr [rsi + 0x8]
+  64f7f8: 48 8b 46 10                  	mov	rax, qword ptr [rsi + 0x10]
+  64f7fc: 48 89 d1                     	mov	rcx, rdx
+  64f7ff: 48 29 c1                     	sub	rcx, rax
+  64f802: 0f 82 9d 00 00 00            	jb	0x64f8a5 <.text+0x392725>
+  64f808: 48 83 f9 03                  	cmp	rcx, 0x3
+  64f80c: 76 69                        	jbe	0x64f877 <.text+0x3926f7>
+  64f80e: 48 83 f8 fb                  	cmp	rax, -0x5
+  64f812: 0f 87 a0 00 00 00            	ja	0x64f8b8 <.text+0x392738>
+  64f818: 48 8d 48 04                  	lea	rcx, [rax + 0x4]
+  64f81c: 48 8b 16                     	mov	rdx, qword ptr [rsi]
+  64f81f: 44 0f b6 44 02 03            	movzx	r8d, byte ptr [rdx + rax + 0x3]
+  64f825: 44 0f b6 4c 02 02            	movzx	r9d, byte ptr [rdx + rax + 0x2]
+  64f82b: 44 0f b6 54 02 01            	movzx	r10d, byte ptr [rdx + rax + 0x1]
+  64f831: 0f b6 04 02                  	movzx	eax, byte ptr [rdx + rax]
+  64f835: 48 89 4e 10                  	mov	qword ptr [rsi + 0x10], rcx
+  64f839: 48 8b 0d 08 82 19 00         	mov	rcx, qword ptr [rip + 0x198208] # 0x7e7a48
+  64f840: 48 8b 15 09 82 19 00         	mov	rdx, qword ptr [rip + 0x198209] # 0x7e7a50
+  64f847: 46 0f b7 14 52               	movzx	r10d, word ptr [rdx + 2*r10]
+  64f84c: 46 0f bf 0c 49               	movsx	r9d, word ptr [rcx + 2*r9]
+  64f851: 42 0f bf 14 42               	movsx	edx, word ptr [rdx + 2*r8]
+  64f856: 66 44 0b 14 41               	or	r10w, word ptr [rcx + 2*rax]
+  64f85b: 41 0f bf c2                  	movsx	eax, r10w
+  64f85f: c1 e0 08                     	shl	eax, 0x8
+  64f862: 44 09 c8                     	or	eax, r9d
+  64f865: 09 d0                        	or	eax, edx
+  64f867: 78 27                        	js	0x64f890 <.text+0x392710>
+  64f869: 66 89 47 02                  	mov	word ptr [rdi + 0x2], ax
+  64f86d: 66 c7 07 00 00               	mov	word ptr [rdi], 0x0
+  64f872: 48 83 c4 18                  	add	rsp, 0x18
+  64f876: c3                           	ret
+  64f877: 48 89 56 10                  	mov	qword ptr [rsi + 0x10], rdx
+  64f87b: 48 c7 04 24 04 00 00 00      	mov	qword ptr [rsp], 0x4
+  64f883: 48 89 e2                     	mov	rdx, rsp
+  64f886: e8 e5 f7 ff ff               	call	0x64f070 <.text+0x391ef0>
+  64f88b: 48 83 c4 18                  	add	rsp, 0x18
+  64f88f: c3                           	ret
+  64f890: 48 c7 04 24 0c 00 00 00      	mov	qword ptr [rsp], 0xc
+  64f898: 48 89 e2                     	mov	rdx, rsp
+  64f89b: e8 d0 f7 ff ff               	call	0x64f070 <.text+0x391ef0>
+  64f8a0: 48 83 c4 18                  	add	rsp, 0x18
+  64f8a4: c3                           	ret
+  64f8a5: 48 8d 0d bc ba 18 00         	lea	rcx, [rip + 0x18babc]   # 0x7db368
+  64f8ac: 48 89 c7                     	mov	rdi, rax
+  64f8af: 48 89 d6                     	mov	rsi, rdx
+  64f8b2: ff 15 c8 53 19 00            	call	qword ptr [rip + 0x1953c8] # 0x7e4c80
+  64f8b8: 48 8d 3d 91 ba 18 00         	lea	rdi, [rip + 0x18ba91]   # 0x7db350
+  64f8bf: ff 15 db 53 19 00            	call	qword ptr [rip + 0x1953db] # 0x7e4ca0

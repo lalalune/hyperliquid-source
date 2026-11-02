@@ -1,0 +1,78 @@
+
+visor.elf:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+00000000002bd180 <.text>:
+  4ab660: 41 56                        	push	r14
+  4ab662: 53                           	push	rbx
+  4ab663: 48 83 ec 38                  	sub	rsp, 0x38
+  4ab667: 49 89 f6                     	mov	r14, rsi
+  4ab66a: 48 89 fb                     	mov	rbx, rdi
+  4ab66d: 48 8b 4e 20                  	mov	rcx, qword ptr [rsi + 0x20]
+  4ab671: 48 8b 46 28                  	mov	rax, qword ptr [rsi + 0x28]
+  4ab675: 48 39 c8                     	cmp	rax, rcx
+  4ab678: 73 4c                        	jae	0x4ab6c6 <.text+0x1ee546>
+  4ab67a: 49 8d 76 18                  	lea	rsi, [r14 + 0x18]
+  4ab67e: 49 8b 56 18                  	mov	rdx, qword ptr [r14 + 0x18]
+  4ab682: 48 ff c0                     	inc	rax
+  4ab685: 48 f7 d9                     	neg	rcx
+  4ab688: 48 bf 00 26 00 00 01 00 00 00	movabs	rdi, 0x100002600
+  4ab692: 66 66 66 66 66 2e 0f 1f 84 00 00 00 00 00    	nop	word ptr cs:[rax + rax]
+  4ab6a0: 44 0f b6 44 02 ff            	movzx	r8d, byte ptr [rdx + rax - 0x1]
+  4ab6a6: 49 83 f8 20                  	cmp	r8, 0x20
+  4ab6aa: 77 35                        	ja	0x4ab6e1 <.text+0x1ee561>
+  4ab6ac: 4c 0f a3 c7                  	bt	rdi, r8
+  4ab6b0: 73 2f                        	jae	0x4ab6e1 <.text+0x1ee561>
+  4ab6b2: 49 89 46 28                  	mov	qword ptr [r14 + 0x28], rax
+  4ab6b6: 4c 8d 04 01                  	lea	r8, [rcx + rax]
+  4ab6ba: 49 ff c0                     	inc	r8
+  4ab6bd: 48 ff c0                     	inc	rax
+  4ab6c0: 49 83 f8 01                  	cmp	r8, 0x1
+  4ab6c4: 75 da                        	jne	0x4ab6a0 <.text+0x1ee520>
+  4ab6c6: 48 c7 44 24 20 05 00 00 00   	mov	qword ptr [rsp + 0x20], 0x5
+  4ab6cf: 48 8d 74 24 20               	lea	rsi, [rsp + 0x20]
+  4ab6d4: 4c 89 f7                     	mov	rdi, r14
+  4ab6d7: e8 e4 ed ff ff               	call	0x4aa4c0 <.text+0x1ed340>
+  4ab6dc: 48 89 c6                     	mov	rsi, rax
+  4ab6df: eb 35                        	jmp	0x4ab716 <.text+0x1ee596>
+  4ab6e1: 41 80 f8 22                  	cmp	r8b, 0x22
+  4ab6e5: 75 64                        	jne	0x4ab74b <.text+0x1ee5cb>
+  4ab6e7: 48 85 c0                     	test	rax, rax
+  4ab6ea: 0f 84 86 00 00 00            	je	0x4ab776 <.text+0x1ee5f6>
+  4ab6f0: 49 89 46 28                  	mov	qword ptr [r14 + 0x28], rax
+  4ab6f4: 49 c7 46 10 00 00 00 00      	mov	qword ptr [r14 + 0x10], 0x0
+  4ab6fc: 48 8d 7c 24 20               	lea	rdi, [rsp + 0x20]
+  4ab701: 4c 89 f2                     	mov	rdx, r14
+  4ab704: ff 15 46 a9 33 00            	call	qword ptr [rip + 0x33a946] # 0x7e6050
+  4ab70a: 83 7c 24 20 02               	cmp	dword ptr [rsp + 0x20], 0x2
+  4ab70f: 48 8b 74 24 28               	mov	rsi, qword ptr [rsp + 0x28]
+  4ab714: 75 09                        	jne	0x4ab71f <.text+0x1ee59f>
+  4ab716: 48 89 73 08                  	mov	qword ptr [rbx + 0x8], rsi
+  4ab71a: c6 03 4f                     	mov	byte ptr [rbx], 0x4f
+  4ab71d: eb 21                        	jmp	0x4ab740 <.text+0x1ee5c0>
+  4ab71f: 48 8b 54 24 30               	mov	rdx, qword ptr [rsp + 0x30]
+  4ab724: 48 8d 7c 24 10               	lea	rdi, [rsp + 0x10]
+  4ab729: e8 52 d6 ff ff               	call	0x4a8d80 <.text+0x1ebc00>
+  4ab72e: 80 7c 24 10 01               	cmp	byte ptr [rsp + 0x10], 0x1
+  4ab733: 74 2f                        	je	0x4ab764 <.text+0x1ee5e4>
+  4ab735: 0f b6 44 24 11               	movzx	eax, byte ptr [rsp + 0x11]
+  4ab73a: 88 03                        	mov	byte ptr [rbx], al
+  4ab73c: 4c 89 73 08                  	mov	qword ptr [rbx + 0x8], r14
+  4ab740: 48 89 d8                     	mov	rax, rbx
+  4ab743: 48 83 c4 38                  	add	rsp, 0x38
+  4ab747: 5b                           	pop	rbx
+  4ab748: 41 5e                        	pop	r14
+  4ab74a: c3                           	ret
+  4ab74b: 48 8d 15 7e cb 30 00         	lea	rdx, [rip + 0x30cb7e]   # 0x7b82d0
+  4ab752: 48 8d 74 24 0f               	lea	rsi, [rsp + 0xf]
+  4ab757: 4c 89 f7                     	mov	rdi, r14
+  4ab75a: e8 91 f7 ff ff               	call	0x4aaef0 <.text+0x1edd70>
+  4ab75f: 48 89 c7                     	mov	rdi, rax
+  4ab762: eb 05                        	jmp	0x4ab769 <.text+0x1ee5e9>
+  4ab764: 48 8b 7c 24 18               	mov	rdi, qword ptr [rsp + 0x18]
+  4ab769: 4c 89 f6                     	mov	rsi, r14
+  4ab76c: e8 cf 0e 00 00               	call	0x4ac640 <.text+0x1ef4c0>
+  4ab771: e9 66 ff ff ff               	jmp	0x4ab6dc <.text+0x1ee55c>
+  4ab776: 48 8d 3d 3b cb 30 00         	lea	rdi, [rip + 0x30cb3b]   # 0x7b82b8
+  4ab77d: ff 15 1d 95 33 00            	call	qword ptr [rip + 0x33951d] # 0x7e4ca0
