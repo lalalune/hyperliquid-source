@@ -75,6 +75,14 @@ objects. Native export text is retained without semantic normalization.
 
 ## Validation scope and remaining work
 
+The unchanged base passed the full required command (76 modules / 382 reported
+cases). The contribution ran all 77 modules / 386 cases with the same three
+skips. One manifest test caught an audit archive refreshed after its checksum;
+regenerating the manifest fixed it, and all 12 tests in that affected module
+passed. The other 76 modules, including the four new tests, had passed unchanged.
+Post-repair doctor, verification, catalogue and reproduction checks passed;
+no second full-suite pass is claimed. Raw results are retained in `validation.json`.
+
 The controls reject 47 altered instruction/data/relocation/FDE inputs while
 bypassing image, body-digest and export-byte guards, plus eight actual operand
 counterfacts that change the extracted relation before rejection. Independent

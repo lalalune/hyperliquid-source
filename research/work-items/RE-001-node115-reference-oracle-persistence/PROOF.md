@@ -157,7 +157,7 @@ The selected caller `0x53811a0` invokes the primary decision twice on distinct
 branches: selector 1 at `0x538141e` and selector 0 at `0x5381496`, through
 RELATIVE slot `0x64e64a8`. Both pass the state at outer-object `+0x160` and the
 current record at caller-base `+0x60`. The proposed qword is passed in XMM0;
-XMM1 carries a previous converted value. TEST AL/JNE skips the proposed qword
+XMM1 carries the previous stored qword interpreted as a double. TEST AL/JNE skips the proposed qword
 store when AL is nonzero. AL == 0 writes the field at caller-base `+0x7a8`
 (selector 1) or `+0x7a0` (selector 0). Both branches then write output tag
 `0x1a2`. Price-field terminology is inferred from this native caller context;
