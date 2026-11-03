@@ -1,0 +1,191 @@
+{
+  "counterfactuals": [
+    {
+      "helper_results": [
+        8,
+        0,
+        24
+      ],
+      "mutated": {
+        "flag": 1,
+        "lookup_byte_offsets": [
+          0
+        ],
+        "prefix": []
+      },
+      "new_byte": 133,
+      "operand": "first zero stop",
+      "original": {
+        "flag": 1,
+        "lookup_byte_offsets": [
+          0,
+          32
+        ],
+        "prefix": [
+          8
+        ]
+      },
+      "va": "0x5b9cb30"
+    },
+    {
+      "helper_results": [
+        8,
+        0,
+        24
+      ],
+      "mutated": {
+        "flag": 1,
+        "lookup_byte_offsets": [
+          0,
+          32,
+          64
+        ],
+        "prefix": [
+          8,
+          0
+        ]
+      },
+      "new_byte": 117,
+      "operand": "later zero stop",
+      "original": {
+        "flag": 1,
+        "lookup_byte_offsets": [
+          0,
+          32
+        ],
+        "prefix": [
+          8
+        ]
+      },
+      "va": "0x5b9cbfb"
+    },
+    {
+      "helper_results": [
+        8,
+        0
+      ],
+      "mutated": {
+        "flag": 2,
+        "lookup_byte_offsets": [
+          0,
+          32
+        ],
+        "prefix": [
+          8
+        ]
+      },
+      "new_byte": 2,
+      "operand": "later failure value",
+      "original": {
+        "flag": 1,
+        "lookup_byte_offsets": [
+          0,
+          32
+        ],
+        "prefix": [
+          8
+        ]
+      },
+      "va": "0x5b9cc56"
+    },
+    {
+      "helper_results": [
+        8,
+        24,
+        8
+      ],
+      "mutated": {
+        "flag": 0,
+        "lookup_byte_offsets": [
+          0,
+          32,
+          63
+        ],
+        "prefix": [
+          8,
+          24,
+          8
+        ]
+      },
+      "new_byte": 31,
+      "operand": "input stride",
+      "original": {
+        "flag": 0,
+        "lookup_byte_offsets": [
+          0,
+          32,
+          64
+        ],
+        "prefix": [
+          8,
+          24,
+          8
+        ]
+      },
+      "va": "0x5b9cb93"
+    }
+  ],
+  "flat_slot_cases": 53040,
+  "limits": "Normal helper/allocator returns and valid collection/iterator layouts only. Flat search helper, public request types, timing/locks, concurrency, malformed input and full unwind ownership remain outside the relation. No target execution or emulation.",
+  "lookup": {
+    "flat_row_bytes": 40,
+    "flat_value_offset": 32,
+    "hit": "load handle, LOCK INC at handle+0, then JLE to UD2 (ZF or SF != OF); this rejects signed-negative pre-increment words",
+    "miss": "return zero after lock/timing cleanup",
+    "tree_children_offset": 456,
+    "tree_count_offset": 450,
+    "tree_key_bytes": 32
+  },
+  "native_operands": {
+    "failure_values": [
+      1,
+      1
+    ],
+    "first_allocation_bytes": 32,
+    "first_stop": "0f84",
+    "input_strides": [
+      32,
+      32
+    ],
+    "later_stop": "74",
+    "tree_compare_bytes": 32
+  },
+  "prefix_cases": 13120,
+  "reference_increment_cases": [
+    {
+      "new": "0x1",
+      "old": "0x0",
+      "trap": false
+    },
+    {
+      "new": "0x2",
+      "old": "0x1",
+      "trap": false
+    },
+    {
+      "new": "0x7fffffffffffffff",
+      "old": "0x7ffffffffffffffe",
+      "trap": false
+    },
+    {
+      "new": "0x8000000000000000",
+      "old": "0x7fffffffffffffff",
+      "trap": false
+    },
+    {
+      "new": "0x8000000000000001",
+      "old": "0x8000000000000000",
+      "trap": true
+    },
+    {
+      "new": "0xffffffffffffffff",
+      "old": "0xfffffffffffffffe",
+      "trap": true
+    },
+    {
+      "new": "0x0",
+      "old": "0xffffffffffffffff",
+      "trap": true
+    }
+  ]
+}
