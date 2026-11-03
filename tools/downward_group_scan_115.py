@@ -15,9 +15,11 @@ base is [sub + 0x58]:
         count_i = (entry_i.end - entry_i.begin) >> 3   (arithmetic shift
             on the wrapped 64-bit difference; for a well-formed range
             this is the number of 8-byte pointers in group i's range)
-        if count_i > 0:
-            i -= 1
-            return 1 if i == 0 else continue
+        the native test is `test %eax,%eax` on the low 32 bits, so the
+        model tests signed32(count_i) > 0, which coincides with the
+        range length for every list-representable range
+        if count_i > 0 (32-bit test):
+            return i + 1              # fall-through to the epilogue
         a = index_array[i]            # 0x5f6c740: [[sub + 0x58] + i * 8],
                                       # i sign-extended from 32 bits
         b = group_sum(n)              # 0x5f6c300 selects entry n and
@@ -27,7 +29,7 @@ base is [sub + 0x58]:
                                       # element pointers in group n's
                                       # range, wrapping at 64 bits, and
                                       # stops at the first null pointer
-        if b < a (unsigned):
+        if a < b (unsigned):          # cmp %rax,%r15; jb: a below b
             return i + 1
         i -= 1
         return 1 if i == 0 else continue
@@ -109,15 +111,15 @@ def downward_scan(n, groups, index_array):
     i = _signed32(n - 1)
     while True:
         group = groups[i]
-        count_i = len(group["pointers"])
-        if count_i > 0:
-            i = _signed32(i - 1)
-            if i == 0:
-                return 1
-            continue
+        # Native: sar $0x3 then `test %eax,%eax; jle` — the fall-through
+        # (count > 0) goes straight to the epilogue returning i + 1.
+        if _signed32(len(group["pointers"])) > 0:
+            return _signed32(i + 1)
         a = index_leaf(index_array, i)
         b = group_sum(groups, n)
-        if (b & _MASK64) < (a & _MASK64):
+        # Native: cmp %rax,%r15; jb — jump (return i + 1) when a < b
+        # unsigned, where r15 = a (index value) and rax = b (group sum).
+        if (a & _MASK64) < (b & _MASK64):
             return _signed32(i + 1)
         i = _signed32(i - 1)
         if i == 0:

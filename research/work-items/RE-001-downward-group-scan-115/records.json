@@ -224,7 +224,7 @@
     }
   },
   "observations": {
-    "scan_rule": "return n when n - 1 <= 0 (signed 32-bit); else scan i from n - 1 downward: count_i = (entry_i.end - entry_i.begin) >> 3 (arithmetic shift on the wrapped 64-bit difference); if count_i > 0, step to i - 1 (return 1 when i reaches 0); if count_i <= 0, a = index_leaf(i) = [[sub + 0x58] + i * 8] with i sign-extended, b = group_sum(n) = leaf sum over group n's leading non-null run of [element + 0x10] (wrapping at 64 bits, stopping at the first null, 0 for an empty range); if b < a (unsigned) return i + 1, else step to i - 1 (return 1 when i reaches 0).",
+    "scan_rule": "return n when n - 1 <= 0 (signed 32-bit); else scan i from n - 1 downward: count_i = (entry_i.end - entry_i.begin) >> 3 (arithmetic shift on the wrapped 64-bit difference); the native test is test %eax,%eax on the low 32 bits with jle to the callee branch, so count_i > 0 (32-bit test) falls through to the epilogue returning i + 1 at once; if count_i <= 0, a = index_leaf(i) = [[sub + 0x58] + i * 8] with i sign-extended, b = group_sum(n) = leaf sum over group n's leading non-null run of [element + 0x10] (wrapping at 64 bits, stopping at the first null, 0 for an empty range); cmp %rax,%r15; jb returns i + 1 when a < b (unsigned), else step to i - 1 (return 1 when i reaches 0, else continue).",
     "stub_note": "0x60d5390 is endbr64 followed by ret (raw bytes f30f1efac3); the scanner's opening call to it has no observable effect.",
     "index_leaf_note": "0x5f6c740 reads [rdi + 0x18] as the array base and indexes it by sign-extended esi * 8; in the scanner, rdi = sub + 0x40, so the base is [sub + 0x58]."
   }

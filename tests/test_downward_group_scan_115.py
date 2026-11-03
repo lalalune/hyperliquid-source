@@ -26,49 +26,48 @@ def test_small_counts_return_n():
         assert downward_scan(n, groups, [0, 0]) == n
 
 
-def test_all_nonempty_scans_down_to_one():
+def test_first_nonempty_from_top_returns_i_plus_one():
+    # The scan returns at the first non-empty group met from the top:
+    # a positive count falls through to the epilogue returning i + 1.
     groups = [group(1), group(2), group(3)]
-    assert downward_scan(3, groups, [0, 0, 0, 0]) == 1
+    assert downward_scan(3, groups, [0, 0, 0, 0]) == 3
+    groups4 = [group(1), group(2), group(3), group(4)]
+    assert downward_scan(4, groups4, [0, 0, 0, 0, 0]) == 4
 
-
-def test_empty_top_group_below_threshold_returns_i_plus_one():
-    # n = 3: group 2 empty, index_array[2] = 10, group 3's leading sum 5.
+def test_empty_top_group_below_index_returns_i_plus_one():
+    # n = 3: group 2 empty, index_array[2] = 4, group 3's leading sum 5.
+    # cmp %rax,%r15; jb: 4 < 5 unsigned, so return i + 1 = 3.
     groups = [group(1), group(2), {"pointers": []}, group(5)]
-    assert downward_scan(3, groups, [0, 0, 10, 0]) == 3
+    assert downward_scan(3, groups, [0, 0, 4, 0]) == 3
 
-
-def test_empty_top_group_at_or_above_threshold_continues_down():
-    # group 2 empty, index_array[2] = 4, group 3's sum 5: not below, so
-    # the scan continues to group 1 (non-empty) and then returns 1.
+def test_empty_top_group_at_or_above_index_continues_down():
+    # group 2 empty, index_array[2] = 10, group 3's sum 5: 10 < 5 is
+    # false, so the scan steps to group 1 (non-empty) and returns 2.
     groups = [group(1), group(2), {"pointers": []}, group(5)]
-    assert downward_scan(3, groups, [0, 0, 4, 0]) == 1
+    assert downward_scan(3, groups, [0, 0, 10, 0]) == 2
 
-
-def test_empty_middle_group_returns_its_i_plus_one():
-    # n = 4: group 3 non-empty, group 2 empty with index 7, group 4 sum 3.
+def test_nonempty_group_above_empty_group_wins_first():
+    # n = 4: group 3 is non-empty, so the scan returns 4 at once; the
+    # empty group 2 below it is never reached.
     groups = [group(1), group(2), {"pointers": []}, group(9), group(3)]
-    assert downward_scan(4, groups, [0, 0, 7, 0, 0]) == 3
-
+    assert downward_scan(4, groups, [0, 0, 7, 0, 0]) == 4
 
 def test_comparison_uses_group_n_not_group_i():
-    # Same empty group 2, but group 4's sum differs from group 2's own
-    # (empty) sum: the native code compares group n's sum, so the
-    # result follows group 4, not group 2.
-    # a = 2, group n's sum = 3: 3 < 2 is false, so the scan continues
-    # and returns 1. A model that wrongly used group i's own (empty)
-    # sum of 0 would return 3 here instead.
-    groups = [group(1), group(2), {"pointers": []}, group(9), group(3)]
-    assert downward_scan(4, groups, [0, 0, 2, 0, 0]) == 1
-    groups2 = [group(1), group(2), {"pointers": []}, group(9), group(8)]
-    assert downward_scan(4, groups2, [0, 0, 2, 0, 0]) == 1
-
+    # n = 4, group 3 empty, a = index_array[3] = 2, group 4's sum = 3:
+    # 2 < 3, so return i + 1 = 4. A model that wrongly used group i's
+    # own (empty) sum of 0 would give 2 < 0 false and continue to 3.
+    groups = [group(1), group(2), group(3), {"pointers": []}, group(3)]
+    assert downward_scan(4, groups, [0, 0, 0, 2, 0]) == 4
+    # a = 5, group 4's sum = 3: 5 < 3 is false, so step to group 2
+    # (non-empty) and return 3.
+    assert downward_scan(4, groups, [0, 0, 0, 5, 0]) == 3
 
 def test_single_null_pointer_counts_as_nonempty():
-    # Range length is 1, so the count test passes even though the leaf
-    # sum over that group would be 0; the scan skips the callee branch.
-    groups = [group(1), {"pointers": [None]}, group(3)]
-    assert downward_scan(3, groups, [0, 0, 0, 0]) == 1
-
+    # Range length is 1, so the count test passes and the scan returns
+    # i + 1 at once, even though the leaf sum over that group would
+    # be 0; the callee branch is never taken for this group.
+    groups = [group(1), group(2), {"pointers": [None]}]
+    assert downward_scan(3, groups, [0, 0, 0]) == 3
 
 def test_leaf_sum_stops_at_first_null():
     assert leaf_sum({"pointers": [{"size_field": 4}, None,
@@ -78,12 +77,13 @@ def test_leaf_sum_stops_at_first_null():
 
 
 def test_unsigned_comparison():
-    # Wrapped sum 2**64 - 1 is huge unsigned, so it is not below 5.
+    # Wrapped sum 2**64 - 1 is huge unsigned, so 5 < huge holds.
     big = {"pointers": [{"size_field": -1}]}
     groups = [group(1), {"pointers": []}, big]
     assert group_sum(groups, 2) == -1
-    assert downward_scan(2, groups, [0, 5, 0]) == 1
-
+    # n = 2: group 1 empty, a = index_array[1] = 5, b = 2**64 - 1:
+    # 5 < b, so return i + 1 = 2.
+    assert downward_scan(2, groups, [0, 5, 0]) == 2
 
 def test_wrapped_leaf_sum():
     total = leaf_sum({"pointers": [{"size_field": (1 << 63)},

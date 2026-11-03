@@ -32,19 +32,22 @@ group sum) compute the values it compares end to end?
   n. Otherwise it scans i from n - 1 downward: count_i is
   (entry_i.end - entry_i.begin) >> 3, an arithmetic shift on the
   wrapped 64-bit difference, i.e. the number of 8-byte pointers in
-  group i's range. If count_i > 0 it steps to i - 1, returning 1 when
-  i reaches 0, and otherwise continues. If count_i <= 0 it calls the
-  index leaf 0x5f6c740 with (sub + 0x40, i), which returns
-  [[sub + 0x58] + i * 8] with i sign-extended from 32 bits, and the
-  group sum 0x5f6c300 with (sub + 0x40, n) — note the original n, not
-  i — which selects entry n and tail-jumps to the leaf 0x5da4de0,
-  which sums [element + 0x10] over the leading run of non-null
-  element pointers in group n's range, wrapping at 64 bits and
-  stopping at the first null pointer (which ends the sum rather than
-  being skipped), returning 0 for an empty range. If that group-n sum
-  is below the index value as an unsigned compare, the scanner
-  returns i + 1; otherwise it steps to i - 1, returning 1 when i
-  reaches 0, and otherwise continues.
+  group i's range. The native test is `test %eax,%eax` on the low 32
+  bits of that count followed by `jle` to the callee branch, so a
+  positive count falls through to the epilogue and returns i + 1 at
+  once — the scan stops at the first non-empty group met from the
+  top. If count_i <= 0 it calls the index leaf 0x5f6c740 with
+  (sub + 0x40, i), which returns [[sub + 0x58] + i * 8] with i
+  sign-extended from 32 bits, and the group sum 0x5f6c300 with
+  (sub + 0x40, n) — note the original n, not i — which selects entry n
+  and tail-jumps to the leaf 0x5da4de0, which sums [element + 0x10]
+  over the leading run of non-null element pointers in group n's
+  range, wrapping at 64 bits and stopping at the first null pointer
+  (which ends the sum rather than being skipped), returning 0 for an
+  empty range. The compare is `cmp %rax,%r15; jb`, where r15 holds the
+  index value a and rax holds the group-n sum b: if a < b as an
+  unsigned compare, the scanner returns i + 1; otherwise it steps to
+  i - 1, returning 1 when i reaches 0, and otherwise continues.
 - Census (whole-file scan, reproduced by the packet's census.py):
   the scanner has exactly 1 direct call (site 0x5ded3c7, site only)
   and no tail jump; the stub has exactly 116 direct calls (including
@@ -72,12 +75,12 @@ group sum) compute the values it compares end to end?
   + 3 gate instructions byte-for-byte vs fresh objdump and raw binary,
   frames, census, model tests.
 - 14 model tests pass (tools/downward_group_scan_115.py,
-  tests/test_downward_group_scan_115.py): small counts, all-nonempty
-  scan to 1, empty-group return of i + 1, at/above-threshold
-  continuation, the group-n (not group-i) comparison distinguished,
-  single-null-pointer range counting as non-empty, leaf leading-run
-  stop at the first null, unsigned comparison, wrapped sum, missing
-  group/field guards, packet checks.
+  tests/test_downward_group_scan_115.py): small counts,
+  first-nonempty-from-top return of i + 1, empty-group index
+  comparison returns and continuations, the group-n (not group-i)
+  comparison distinguished, single-null-pointer range counting as
+  non-empty, leaf leading-run stop at the first null, unsigned
+  comparison, wrapped sum, missing group/field guards, packet checks.
 - Environment limits, stated honestly: this VM has no cargo/rustc, no
   git-lfs, and no Ghidra/Java, so no Rust reconstruction is claimed.
   `make doctor` reports analysis_ready false on missing providers
