@@ -10,6 +10,9 @@ SITES=[0x2d1d600,0x5185200,0x5185480]
 class Image:
  def __init__(self):
   self.view=View(TARGET);self.data=self.view.b;self.text_va,self.text_off,self.text_size=self.view.sections['.text'];self.rodata=self.view.sections['.rodata'];self.slots={};self.cache={}
+ def close(self):
+  if self.data is not self.view.b:self.data.close()
+  self.view.b.close();self.view.file.close()
  def fetch(self,va):
   if va not in self.cache:self.cache[va]=cpu.decode(self.data,self.view.offset(va),va)
   return self.cache[va]
@@ -20,6 +23,8 @@ class Machine(cpu.Machine):
   if not any(a<=at and at+n<=a+size for a,size in allow):raise ValueError('outside bounded footprint')
  def load(self,at,n):self.address_bounds(at,n);return super().load(at,n)
  def store(self,at,n,value):self.address_bounds(at,n,True);return super().store(at,n,value)
+ def reload(self,reg,at,n):self.address_bounds(at,n);return super().reload(reg,at,n)
+ def spill(self,at,reg,n):self.address_bounds(at,n,True);return super().spill(at,reg,n)
  def call(self,*args):raise ValueError('helper calls excluded')
 def evaluate(image,which,raw,divisor,previous):
  if not all(type(x) is int and 0<=x<=cpu.U64 for x in (raw,divisor,previous)):raise ValueError('raw u64 inputs required')
@@ -89,4 +94,5 @@ def verify():
  for raw,key in [(inputs,'input_sha256'),(full,'expected_sha256'),(semantic,'semantic_projection_sha256')]:
   if hashlib.sha256(raw).hexdigest()!=record[key]:raise ValueError('frozen native stream changed')
  if len(inputs.splitlines())!=record['rows'] or sorted(seen)!=record['visited_addresses']:raise ValueError('native denominator changed')
+ image.close()
  return inputs,semantic
