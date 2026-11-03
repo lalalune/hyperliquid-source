@@ -40,7 +40,8 @@ returned count, under both zero and5a00+index initialization. This catches
 unintended clearing/writes that a zero-only output buffer would hide. Pointer
 offset and remaining length are read independently. Only DLbit0 is compared,
 because that is the actual wrapper's TEST; other return-register bits are not
-asserted ABI payload. No aliasing/concurrency/whole-node equality is claimed.
+asserted ABI payload. Only final descriptor/output snapshots are compared; intermediate cursor-write
+traces and ordering are not. No aliasing/concurrency/whole-node equality is claimed.
 
 ## Evidence and checks
 
