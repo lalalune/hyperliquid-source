@@ -1,0 +1,119 @@
+node #115 dynamic symbol-version requirements (DT_VERNEED)
+
+Every value below was derived from the pinned capture artifacts/node/115/hl-node
+by the packet verifier (test-results/slop-workbench/packet-33b51122bfdc.py),
+which reads that file in place. The captured target was never executed, copied
+or written.
+
+target path      artifacts/node/115/hl-node
+target sha256    a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+target size      105896032 bytes
+
+Section geometry derived from the ELF section header table:
+  .dynsym          addr 0x340     offset 0x340     size 0x2fd0
+  .dynstr          addr 0x3af0    offset 0x3af0    size 0x30f5
+  .dynamic         addr 0x64df248 offset 0x64dd248 size 0x210
+  .gnu.version     addr 0x3310    offset 0x3310    size 0x3fc
+  .gnu.version_r   addr 0x370c    offset 0x370c    size 0x3c0
+  .text            addr 0x1419300 offset 0x1418300 size 0x4fd7700
+
+Dynamic table entries:
+  DT_VERNEED     0x370c
+  DT_VERNEEDNUM  7
+  DT_VERSYM      0x3310
+
+DT_NEEDED order:
+  libstdc++.so.6
+  libssl.so.3
+  libcrypto.so.3
+  libgcc_s.so.1
+  libm.so.6
+  libc.so.6
+  ld-linux-x86-64.so.2
+
+Dynamic-symbol counts derived from .dynsym and .gnu.version:
+  symbols                          510
+  version_indices                  510
+  version_carriers                 498
+  defined_non_empty_versioned      0
+  version-need indices             53
+
+Observation: all 498 dynamic symbols carrying a version-need index have
+st_shndx == 0, so every versioned symbol in this capture is an undefined
+import from an external shared library. No defined .text symbol carries a
+GLIBCXX_ / CXXABI_ version index, so a versioned window must be located
+through the relocations that bind the import, not through a defined symbol.
+
+Version-need records, in .gnu.version_r chain order:
+
+verneed file libstdc++.so.6 revision 1 entries 20
+  index 35 GLIBCXX_3.4
+  index 47 GLIBCXX_3.4.9
+  index 41 GLIBCXX_3.4.11
+  index 40 GLIBCXX_3.4.14
+  index 45 GLIBCXX_3.4.15
+  index 50 GLIBCXX_3.4.17
+  index 39 GLIBCXX_3.4.18
+  index 48 GLIBCXX_3.4.19
+  index 43 GLIBCXX_3.4.20
+  index 33 GLIBCXX_3.4.21
+  index 49 GLIBCXX_3.4.22
+  index 46 GLIBCXX_3.4.26
+  index 37 GLIBCXX_3.4.29
+  index 44 GLIBCXX_3.4.30
+  index 34 CXXABI_1.3
+  index 38 CXXABI_1.3.5
+  index 52 CXXABI_1.3.7
+  index 36 CXXABI_1.3.8
+  index 32 CXXABI_1.3.9
+  index 42 CXXABI_1.3.11
+
+verneed file libssl.so.3 revision 1 entries 1
+  index 6 OPENSSL_3.0.0
+
+verneed file libcrypto.so.3 revision 1 entries 1
+  index 7 OPENSSL_3.0.0
+
+verneed file libgcc_s.so.1 revision 1 entries 3
+  index 4 GCC_3.0
+  index 19 GCC_3.3
+  index 31 GCC_4.2.0
+
+verneed file libm.so.6 revision 1 entries 2
+  index 53 GLIBC_2.2.5
+  index 8 GLIBC_2.29
+
+verneed file libc.so.6 revision 1 entries 25
+  index 3 GLIBC_2.2.5
+  index 24 GLIBC_2.3
+  index 10 GLIBC_2.3.2
+  index 12 GLIBC_2.3.4
+  index 18 GLIBC_2.4
+  index 28 GLIBC_2.5
+  index 54 GLIBC_2.6
+  index 14 GLIBC_2.7
+  index 15 GLIBC_2.9
+  index 16 GLIBC_2.10
+  index 5 GLIBC_2.14
+  index 22 GLIBC_2.15
+  index 30 GLIBC_2.16
+  index 9 GLIBC_2.17
+  index 27 GLIBC_2.18
+  index 26 GLIBC_2.25
+  index 29 GLIBC_2.27
+  index 25 GLIBC_2.28
+  index 21 GLIBC_2.29
+  index 17 GLIBC_2.30
+  index 23 GLIBC_2.32
+  index 11 GLIBC_2.33
+  index 2 GLIBC_2.34
+  index 51 GLIBC_2.38
+  index 20 GLIBC_2.39
+
+verneed file ld-linux-x86-64.so.2 revision 1 entries 1
+  index 13 GLIBC_2.3
+
+Limits: this record states what the pinned capture declares and requires from
+its external C and C++ runtime libraries. It is dependency identity, not
+reconstructed first-party node bytes, and it makes no claim about a source
+build, a runtime library version actually loaded, or execution behaviour.

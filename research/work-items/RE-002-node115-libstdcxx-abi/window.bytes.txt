@@ -1,0 +1,40 @@
+node #115 bounded libstdc++ PLT window
+
+Derived from the pinned capture artifacts/node/115/hl-node
+(105,896,032 bytes,
+SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301)
+by the packet verifier, which reads that file in place. The captured target was
+never executed, copied or written.
+
+window kind      plt-thunk
+section          .plt
+addr             0x63f0d80
+file offset      0x63efd80
+size             16 bytes
+instruction      ff 25 8a d5 0f 00   jmp QWORD PTR [rip+0xfd58a]
+jmp va           0x63f0d80
+target slot      0x64ee310
+relocation       .rela.plt
+symbol           _ZdlPvm
+version          CXXABI_1.3.9
+library          libstdc++.so.6
+body sha256      1600e1cb5479b4da18c28654fb07a433caeb4671da6ed2d04e73f435ca915c9e
+body hex         ff258ad50f006834000000e9a0fcffff
+
+Raw bytes, one hex byte per two characters, exactly the 16 bytes at file offset
+0x63efd80:
+
+  ff 25 8a d5 0f 00   jmp    QWORD PTR [rip+0xfd58a]   # 0x64ee310 (slot)
+  68 34 00 00 00      push   0x34
+  e9 a0 fc ff ff      jmp    rel32
+
+Verified relation: the instruction byte pair ff 25 selects a RIP-relative
+indirect jump; the signed displacement 0x000fd58a, added to the address of the
+next instruction (0x63f0d86), yields the slot address 0x64ee310 recorded above,
+and that slot is the versioned libstdc++.so.6 import bound by the .rela.plt
+record for _ZdlPvm / CXXABI_1.3.9.
+
+Limits: this is a dependency stub shared with libstdc++.so.6, not first-party
+reconstructed node code, and it earns no first-party byte credit. Nothing here
+establishes which libstdc++ build is loaded at run time, and no execution,
+emulation or differential run was performed.
