@@ -318,7 +318,8 @@ def main():
     prefix = f'node-{args.release}-fde'
     item = manifest_item(ROOT, rel)
     check(ROOT / rel, item)
-    expected = load_inventory(ROOT / inventory)['fde_count_eh_frame_hdr']
+    inventory_doc = load_inventory(ROOT / inventory)
+    expected = inventory_doc.get('fde_count_eh_frame_hdr') if isinstance(inventory_doc, dict) else None
     if type(expected) is not int or expected < 0:
         raise ValueError('Invalid retained unwind count')
     summary = generate(ROOT / rel, args.output_dir / prefix,
