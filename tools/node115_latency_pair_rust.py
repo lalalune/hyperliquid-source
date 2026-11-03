@@ -11,8 +11,8 @@ class Memory(generic.Memory):
  def allowed(self,a,n,write=False):
   if generic.STACK_TOP-0x100+0x48<=a and a+n<=generic.STACK_TOP-0x100+0x50:return
   if not write:
-   sec=self.image.named['.rodata']
-   if sec['address']<=a and a+n<=sec['address']+sec['size']:return
+   sec=self.image.named.get('.rodata')
+   if sec is not None and sec['address']<=a and a+n<=sec['address']+sec['size']:return
   raise ValueError('outside qualified pair projection memory')
  def bytes_at(self,a,n):self.allowed(a,n);return super().bytes_at(a,n)
  def write(self,a,n,v):self.allowed(a,n,True);return super().write(a,n,v)
