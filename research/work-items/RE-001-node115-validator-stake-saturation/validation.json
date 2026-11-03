@@ -1,0 +1,97 @@
+{
+  "base_commit": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "platform": "macOS arm64; static analysis of Linux x86-64 ELF",
+  "tools": {
+    "python": [
+      "Python 3.14.7"
+    ],
+    "capstone": [
+      "5.0.7"
+    ],
+    "gnu": [
+      "GNU objdump (GNU Binutils) 2.47.20260726",
+      "Copyright (C) 2026 Free Software Foundation, Inc."
+    ],
+    "llvm": [
+      "Homebrew LLVM version 18.1.4",
+      "  Optimized build."
+    ]
+  },
+  "baseline": {
+    "command": "make doctor verify test catalogue-check reproduce",
+    "result": "PASS",
+    "test_modules": 76,
+    "reported_cases": 382,
+    "skips": 3,
+    "provenance": "Reused the completed baseline from the exact unchanged base commit and same tools/environment, as retained in contribution #2200. Fresh make doctor verify also passed in this worktree before research. No new full baseline run claimed.",
+    "log": "baseline.log.gz"
+  },
+  "contribution_checks": {
+    "initial_command": "make doctor verify test catalogue-check reproduce",
+    "initial_exit_code": 2,
+    "test_modules": 77,
+    "reported_cases": 386,
+    "skips": 3,
+    "initial_failed_modules": 1,
+    "initial_log": "validation-initial.log.gz",
+    "failure": "test_every_committed_manifest_passes reported a stale validation.json digest: metadata was finalized while the suite ran. All other 76 modules, including the new research module, passed. Catalogue/reproduce were not reached in this invocation.",
+    "repair": "Finalize metadata and refresh manifest, then rerun all 12 manifest tests and make doctor verify catalogue-check reproduce. No analysis/test code changes.",
+    "repair_status": "PASS",
+    "tested_code_sha256": {
+      "research/work-items/RE-001-node115-validator-stake-saturation/verify.py": "a9630a2edb6d8794fda9c4d5087a2b11edd2000058686016e8645c762fb4df5c",
+      "research/work-items/RE-001-node115-validator-stake-saturation/export_disassembly.py": "019a88eb9e96a6ac719fba551049c7a9563f602f1b9abb87958b769708e458b4",
+      "research/work-items/RE-001-node115-validator-stake-saturation/relations.py": "d519a337d83efbbef9ce06da72678b966ad69356313f44d3534d81a7b6d84ed0",
+      "research/work-items/RE-001-node115-validator-stake-saturation/obligations.json": "df8b786205a2161bbcfc98c7ea239055934a3748af80271076f39e02b61a3108",
+      "tests/test_node115_validator_stake_saturation.py": "e78c5f072151d0540444432314192ec9f329680285a573d8e5de8aefd96b83cd"
+    },
+    "first_recheck": {
+      "manifest_tests": "12 passed",
+      "command": "make doctor verify catalogue-check reproduce",
+      "exit_code": 2,
+      "failure": "Staging the new packet makes the generated research inventory count stale (28 -> 29). make catalogue refreshes the root README and progress image counts; no component/gate changes. Reproduce was not reached.",
+      "log": "validation-first-recheck.log.gz"
+    },
+    "remaining_failures": 0,
+    "manifest_test_recheck": {
+      "command": "python3 -m unittest discover -s tests -p test_verify_packets.py -v",
+      "cases": 12,
+      "exit_code": 0
+    },
+    "final_required_checks": {
+      "command": "make doctor verify catalogue-check reproduce",
+      "exit_code": 0,
+      "log": "validation-recheck.log.gz"
+    },
+    "qualification": "The full suite was not silently relabeled a clean run: it had one metadata-manifest error. All other 76 modules passed unchanged. The affected 12-test manifest module passed after repair; final integrity/catalogue/reproduction checks passed. No analysis or test implementation was changed."
+  },
+  "packet_checks": {
+    "export_command": "python3 research/work-items/RE-001-node115-validator-stake-saturation/export_disassembly.py",
+    "static_command": "python3 research/work-items/RE-001-node115-validator-stake-saturation/verify.py --controls",
+    "relations_command": "python3 research/work-items/RE-001-node115-validator-stake-saturation/relations.py",
+    "bodies": 3,
+    "bytes": 1549,
+    "instructions": 380,
+    "deep_corruption_rejections": 42,
+    "actual_carry_counterfactuals": 3,
+    "fold_cases": 2801,
+    "wide_comparisons": 4166,
+    "flat_spans": 10400,
+    "flat_lookup_cases": 124800
+  },
+  "captured_code_executed_or_emulated": false,
+  "hosted_ci": "not yet observed",
+  "container_validation": "not performed",
+  "progress_gates": "unchanged",
+  "documented_skips": [
+    "Pinned official libcore archive not supplied (HL_RE014_LIBCORE).",
+    "Nonce-ring test requires explicit Rust compiler and Capstone 5.0.6; host static checker uses Capstone 5.0.7.",
+    "Native JDK does not have a separate nested JRE."
+  ],
+  "agent_metadata": {
+    "provider": "OpenAI",
+    "model": "gpt-6-astra",
+    "client": "codex-desktop",
+    "client_version": "26.1027.61615",
+    "client_version_source": "CFBundleShortVersionString of the current desktop host application"
+  }
+}
