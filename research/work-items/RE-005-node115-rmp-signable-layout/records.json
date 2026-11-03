@@ -1,0 +1,171 @@
+{
+  "captured_code_executed": false,
+  "direct_callers": [
+    {
+      "caller": "caller_a",
+      "caller_start": "0x36aadf0",
+      "site": "0x36aae0d"
+    },
+    {
+      "caller": "caller_b",
+      "caller_start": "0x36aaf10",
+      "site": "0x36aaf2a"
+    }
+  ],
+  "limits": "Static byte pins and one FDE extent census only. The packet names the serializer by its own panic location inside l1/src/action/rmp_signable.rs; it does not name the action type the source record encodes, does not claim the 32 result bytes are any particular hash, does not decode the 0x01000400 writer spec dword, and does not follow the two callers' own callers. The tag argument is forwarded by both callers, so which tags occur at runtime is a separate question.",
+  "owners": [
+    {
+      "bytes": 1094,
+      "end": "0x36aade6",
+      "file_offset": "0x36a99a0",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "4800000084241b0014af4b02460400000487b20cff410e10420e18420e20420e28410e30470eb00483068c058e048f03860203d9020e30410e28420e20420e18420e10410e08410eb0040000",
+          "va": "0x11efa84"
+        }
+      },
+      "role": "serializer",
+      "sha256": "18c066ea3b97c2de167b8e7557d1e3e3cdbbd2f757dd83a00eafc827718eca9d",
+      "start": "0x36aa9a0"
+    },
+    {
+      "bytes": 286,
+      "end": "0x36aaf0e",
+      "file_offset": "0x36a9df0",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "38000000d0241b0018b34b021e010000047fb20cff420e10420e18410e20470e900283048e038f0202be0e20410e18420e10420e08410e9002000000",
+          "va": "0x11efad0"
+        }
+      },
+      "role": "caller_a",
+      "sha256": "d334db07754d3444527141f0c43ec5316b25cef9dac35cfdb48a6728d6052127",
+      "start": "0x36aadf0"
+    },
+    {
+      "bytes": 230,
+      "end": "0x36aaff6",
+      "file_offset": "0x36a9f10",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "380000000c251b00fcb34b02e60000000457b20cff420e10420e18410e20470ec00183048e038f0202670e20410e18420e10420e08410ec001000000",
+          "va": "0x11efb0c"
+        }
+      },
+      "role": "caller_b",
+      "sha256": "98513eb74d9449bf469425940d4ae673921f4494e34133e938a9f4f37f324582",
+      "start": "0x36aaf10"
+    }
+  ],
+  "payload_bytes": {
+    "variant_delta": 9,
+    "variant_one": 38,
+    "variant_other": 29
+  },
+  "result_record": {
+    "bytes_at_0x18": "32 bytes assembled from the 0xe0-byte record and the 0x20-byte record",
+    "mark_at_0x38": "0x539",
+    "string_length_at_0x10": 1,
+    "string_pointer_at_0x08": "fresh 1-byte allocation",
+    "word_at_0x00": 1,
+    "zero_at_0x40_to_0x58": true
+  },
+  "tag_byte": {
+    "allocation_bytes": 1,
+    "argument": "third argument (edx)",
+    "byte_if_equal": "0x61",
+    "byte_otherwise": "0x62",
+    "compared_against": 3
+  },
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "unwrap_site": {
+    "column": 55,
+    "file": "l1/src/action/rmp_signable.rs",
+    "line": 14,
+    "location_struct": "0x6468c58",
+    "meaning": "constructing the writer is unwrapped at this source site; a failed construction reaches the panic path instead of returning an error",
+    "message": "called `Result::unwrap()` on an `Err` value"
+  },
+  "write_order": [
+    {
+      "evidence": [
+        "0x36aaa26",
+        "0x36aaa3e",
+        "0x36aaa46"
+      ],
+      "rule": "u64 stored big-endian (bswap before the store)",
+      "source_offset": "0x10",
+      "step": 1,
+      "width": 8
+    },
+    {
+      "evidence": [
+        "0x36aaa53",
+        "0x36aaa6d",
+        "0x36aaaca"
+      ],
+      "rule": "payload byte 0x01 iff the stored byte equals 1, else 0x00",
+      "source_offset": "0x18",
+      "step": 2,
+      "width": 1
+    },
+    {
+      "evidence": [
+        "0x36aaa8d",
+        "0x36aaa96",
+        "0x36aaa99",
+        "0x36aaa9e",
+        "0x36aaaa1",
+        "0x36aaaa6"
+      ],
+      "rule": "20 bytes copied verbatim",
+      "source_offset": "0x19",
+      "step": 3,
+      "width": 20
+    },
+    {
+      "evidence": [
+        "0x36aaaaf",
+        "0x36aaaf3"
+      ],
+      "rule": "single 0x00 byte, only when the dword at source +0x00 equals 1",
+      "source_offset": null,
+      "step": 4,
+      "width": 1
+    },
+    {
+      "evidence": [
+        "0x36aaaaf",
+        "0x36aab00",
+        "0x36aab15"
+      ],
+      "rule": "u64 stored big-endian, only when the dword at source +0x00 equals 1",
+      "source_offset": "0x08",
+      "step": 5,
+      "width": 8
+    }
+  ],
+  "writer": {
+    "constructor": "0x36b1600",
+    "error_sentinel": "0x8000000000000004",
+    "grow_helper": "0x43bd910",
+    "grow_sizes": [
+      8,
+      20,
+      8
+    ],
+    "spec_dword": "0x01000400"
+  }
+}
