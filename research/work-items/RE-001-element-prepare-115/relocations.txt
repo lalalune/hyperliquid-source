@@ -1,0 +1,17 @@
+RELA scan (whole file, .rela.dyn file range 0x6be8+0x163cc8, .rela.plt 0x16a8b0+0x1a10):
+rela.dyn: addend hits for the window starts 0x5f13310 and 0x5f132e6: none
+rela.plt: addend hits for the window starts 0x5f13310 and 0x5f132e6: none
+
+In-window rip-relative references: none in 0x5f13310 or 0x5f132e6
+(no rip-relative operand appears in either excerpt; the %fs:0x28
+references are the stack canary, not rip-relative addressing).
+PLT calls in-window: exactly one in 0x5f13310, to
+__stack_chk_fail@plt at 0x5f133c9, taken only when the canary check
+fails; exactly two in 0x5f132e6, to _Unwind_Resume@plt at 0x5f13301
+and to __stack_chk_fail@plt at 0x5f13306.
+Direct calls in-window: 0x5f13310 calls 0x607c700 (guard acquire),
+0x5f54ee0 (per-element prepare, once per element), and 0x607c720
+(guard release); 0x5f132e6 calls 0x607c720 (guard release on unwind).
+Stack canaries in-window: yes, both windows use %fs:0x28: 0x5f13310
+saves the canary at rsp+8 on entry and checks it before returning,
+and 0x5f132e6 checks the same saved value before resuming the unwind.
