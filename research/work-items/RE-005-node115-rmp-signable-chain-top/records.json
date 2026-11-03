@@ -1,0 +1,363 @@
+{
+  "boundary_callers": {
+    "grand_b_caller": {
+      "direct_call_sites": [],
+      "relocation": {
+        "addend": "0x38d9c60",
+        "slot": "0x64e6c60",
+        "type": 8
+      },
+      "slot_references": [
+        {
+          "encoding": "ff15",
+          "kind": "call",
+          "site": "0x294b0a2"
+        },
+        {
+          "encoding": "ff15",
+          "kind": "call",
+          "site": "0x2ae4d64"
+        },
+        {
+          "encoding": "ff15",
+          "kind": "call",
+          "site": "0x2ae51d0"
+        },
+        {
+          "encoding": "ff15",
+          "kind": "call",
+          "site": "0x2ae579f"
+        },
+        {
+          "encoding": "ff15",
+          "kind": "call",
+          "site": "0x2cdee4f"
+        },
+        {
+          "encoding": "ff15",
+          "kind": "call",
+          "site": "0x2cdf2b5"
+        },
+        {
+          "encoding": "ff15",
+          "kind": "call",
+          "site": "0x2cdf899"
+        },
+        {
+          "encoding": "ff15",
+          "kind": "call",
+          "site": "0x2e09c09"
+        },
+        {
+          "encoding": "ff15",
+          "kind": "call",
+          "site": "0x2e0a08f"
+        },
+        {
+          "encoding": "ff15",
+          "kind": "call",
+          "site": "0x5a70c9e"
+        },
+        {
+          "encoding": "ff15",
+          "kind": "call",
+          "site": "0x5a70d3e"
+        },
+        {
+          "encoding": "ff15",
+          "kind": "call",
+          "site": "0x5a70e01"
+        }
+      ]
+    },
+    "top_caller": {
+      "container": "the three-qword container the top FDE receives is assembled on this FDE stack at [rsp+0x68] immediately before the call (fields stored at 0x3ebdd80, 0x3ebdd85, 0x3ebdd8a); its own arguments are not traced",
+      "direct_call_sites": [
+        {
+          "kind": "call",
+          "owner": null,
+          "owner_start": "0x35c57e0",
+          "site": "0x35c5834"
+        },
+        {
+          "kind": "call",
+          "owner": null,
+          "owner_start": "0x35c9c80",
+          "site": "0x35c9e56"
+        },
+        {
+          "kind": "call",
+          "owner": null,
+          "owner_start": "0x3719a90",
+          "site": "0x3719afa"
+        },
+        {
+          "kind": "call",
+          "owner": null,
+          "owner_start": "0x3b87c20",
+          "site": "0x3b87de3"
+        },
+        {
+          "kind": "call",
+          "owner": null,
+          "owner_start": "0x4301ce0",
+          "site": "0x4301da7"
+        }
+      ]
+    }
+  },
+  "caller_forwarding": {
+    "caller_a": {
+      "call_site": "0x36aae0d",
+      "tag": "its own third argument (edx), forwarded unchanged; only rdi is replaced"
+    },
+    "caller_b": {
+      "call_site": "0x36aaf2a",
+      "tag": "its own third argument (edx), forwarded unchanged; only rdi is replaced"
+    }
+  },
+  "captured_code_executed": false,
+  "dispatcher_call_sites": {
+    "caller_a": [
+      {
+        "kind": "call",
+        "owner": "grand_a",
+        "owner_start": "0x36c2050",
+        "site": "0x36c208b"
+      }
+    ],
+    "caller_b": [
+      {
+        "kind": "call",
+        "owner": "grand_b",
+        "owner_start": "0x36c5350",
+        "site": "0x36c5388"
+      }
+    ]
+  },
+  "grand_a_call_sites": [
+    {
+      "kind": "call",
+      "owner": "top",
+      "owner_start": "0x3713300",
+      "site": "0x37133b3"
+    }
+  ],
+  "grand_a_references": {
+    "raw_occurrences_4byte": 0,
+    "raw_occurrences_8byte": 0,
+    "relocations": 0
+  },
+  "grand_b_references": {
+    "direct_call_sites": [],
+    "direct_jump_sites": [],
+    "raw_occurrences": {
+      "eight_byte_file_offsets": [
+        "0x151258"
+      ],
+      "four_byte_file_offsets": [
+        "0x151258"
+      ],
+      "identity": "the addend field of the single relocation entry above; the VA occurs nowhere else in the file"
+    },
+    "relocations": [
+      {
+        "addend": "0x36c5350",
+        "slot": "0x64e8ed0",
+        "slot_file_content": "zero; filled by the dynamic linker from the relocation",
+        "slot_section": ".got",
+        "type": 8,
+        "type_name": "R_X86_64_RELATIVE"
+      }
+    ],
+    "rip_relative_references": [],
+    "slot_references": [
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "grand_b_caller",
+        "owner_start": "0x38d9c60",
+        "site": "0x38d9e07"
+      }
+    ]
+  },
+  "grand_b_tag_provenance": {
+    "argument": "third argument (edx)",
+    "call_site": "0x38d9e07",
+    "delivers": "tag 3 (emitted byte 0x61) exactly when that record byte equals 3; any other byte value delivers a non-3 tag (byte 0x62)",
+    "owner": "grand_b_caller",
+    "slot": "0x64e8ed0",
+    "source": "the byte at [arg2+0x11d] of the calling FDE entry, captured into ebp at entry (0x38d9c77), stored to the frame slot +0xf (0x38d9cc5) before the entry path split (0x38d9ccf), and reloaded into edx immediately before the indirect call (0x38d9df0); both entry paths converge at 0x38d9daa above the call"
+  },
+  "limits": "Static byte pins, FDE extent censuses, one .text call census, one RIP-relative reference census over the ff 15 / ff 25 / REX.W mov/lea encodings, the .rela.dyn addend census and a raw VA occurrence census only. Runtime byte values are not observed: which of the two tag bytes the node emits for a given record depends on the source bytes above, whose contents are data. The packet does not name the record or object types the pointers denote, does not trace the top_caller FDE own arguments (the origins of the values it stores into the container), and does not follow the grand_b_caller FDE twelve indirect callers. The dispatcher-internal behaviour is the caller-tag packet claim, re-anchored here only through the caller census, the forwarding prefixes and the body hashes.",
+  "owners": [
+    {
+      "bytes": 1094,
+      "end": "0x36aade6",
+      "file_offset": "0x36a99a0",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "4800000084241b0014af4b02460400000487b20cff410e10420e18420e20420e28410e30470eb00483068c058e048f03860203d9020e30410e28420e20420e18420e10410e08410eb0040000",
+          "va": "0x11efa84"
+        }
+      },
+      "role": "serializer",
+      "sha256": "18c066ea3b97c2de167b8e7557d1e3e3cdbbd2f757dd83a00eafc827718eca9d",
+      "start": "0x36aa9a0"
+    },
+    {
+      "bytes": 286,
+      "end": "0x36aaf0e",
+      "file_offset": "0x36a9df0",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "38000000d0241b0018b34b021e010000047fb20cff420e10420e18410e20470e900283048e038f0202be0e20410e18420e10420e08410e9002000000",
+          "va": "0x11efad0"
+        }
+      },
+      "role": "caller_a",
+      "sha256": "d334db07754d3444527141f0c43ec5316b25cef9dac35cfdb48a6728d6052127",
+      "start": "0x36aadf0"
+    },
+    {
+      "bytes": 230,
+      "end": "0x36aaff6",
+      "file_offset": "0x36a9f10",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "380000000c251b00fcb34b02e60000000457b20cff420e10420e18410e20470ec00183048e038f0202670e20410e18420e10420e08410ec001000000",
+          "va": "0x11efb0c"
+        }
+      },
+      "role": "caller_b",
+      "sha256": "98513eb74d9449bf469425940d4ae673921f4494e34133e938a9f4f37f324582",
+      "start": "0x36aaf10"
+    },
+    {
+      "bytes": 3913,
+      "end": "0x36c2f99",
+      "file_offset": "0x36c1050",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+          "va": "0xca6ed8"
+        },
+        "fde": {
+          "bytes_hex": "4000000074b5150000fc8b02490f000000410e10420e18420e20420e28410e30470ec00683068c058e048f0386027b0e30410e28420e20420e18420e10410e08410ec006",
+          "va": "0xe02448"
+        }
+      },
+      "role": "grand_a",
+      "sha256": "eaa2515d051afca85d5136bd3c53c7a6423abdb86d6832ef7b4d6132df182514",
+      "start": "0x36c2050"
+    },
+    {
+      "bytes": 806,
+      "end": "0x36c5676",
+      "file_offset": "0x36c4350",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+          "va": "0xca6ed8"
+        },
+        "fde": {
+          "bytes_hex": "4000000074b61500002e8c022603000000410e10420e18420e20420e28410e30440e800183068c058e048f038602780e30410e28420e20420e18420e10410e08410e8001",
+          "va": "0xe02548"
+        }
+      },
+      "role": "grand_b",
+      "sha256": "19f158b96c98c1a4622032b450f29f35a8226cd2c17dea6fdd80ccc0a8f12662",
+      "start": "0x36c5350"
+    },
+    {
+      "bytes": 547,
+      "end": "0x3713523",
+      "file_offset": "0x3712300",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "50000000082b1c00f031510223020000049f0c0cff410e10420e18420e20420e28420e30410e38470ef00283078c068d058e048f038602039f010e38410e30420e28420e20420e18420e10410e08410ef0020000",
+          "va": "0x1200108"
+        }
+      },
+      "role": "top",
+      "sha256": "823b4167a13a0cdd666fb07f12958004b36e0a3505083ff7a3550bcc425d743c",
+      "start": "0x3713300"
+    },
+    {
+      "bytes": 596,
+      "end": "0x3ebdf64",
+      "file_offset": "0x3ebcd10",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+          "va": "0xca6ed8"
+        },
+        "fde": {
+          "bytes_hex": "4c000000b8601c007c0d05035402000000410e10420e18420e20420e28420e30410e38470ed00283078c068d058e048f0386020306020e38410e30420e28420e20420e18420e10410e08410ed0020000",
+          "va": "0xe6cf8c"
+        }
+      },
+      "role": "top_caller",
+      "sha256": "450e90e2bbec1aaa4fd870446538c06ae1f658b267176b89f5fc7ef7c62dd62e",
+      "start": "0x3ebdd10"
+    },
+    {
+      "bytes": 636,
+      "end": "0x38d9edc",
+      "file_offset": "0x38d8c60",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "50000000241a1e0034ac6b027c020000046b1c0bff410e10420e18420e20420e28420e30410e38470eb00583078c068d058e048f038602032a020e38410e30420e28420e20420e18420e10410e08410eb0050000",
+          "va": "0x121f024"
+        }
+      },
+      "role": "grand_b_caller",
+      "sha256": "ce1931ed60cdd5707c385cc7341cf8ae64ae6f1f6baed83abb69116e6c1e156b",
+      "start": "0x38d9c60"
+    }
+  ],
+  "serializer_tag_rule": {
+    "argument": "third argument (edx)",
+    "byte_if_equal": "0x61",
+    "byte_otherwise": "0x62",
+    "compared_against": 3
+  },
+  "tag_provenance": "the chain is now grounded at both dispatcher entries. grand_a path: the tag is a byte loaded from memory through the top FDE third argument pointer chain. grand_b path: the tag is a byte copied from offset +0x11d of the calling FDE second argument record. Neither path materialises a constant tag; on each path the emitted byte is 0x61 exactly when the respective source byte equals 3, and 0x62 otherwise",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "top_call_sites": [
+    {
+      "kind": "call",
+      "owner": "top_caller",
+      "owner_start": "0x3ebdd10",
+      "site": "0x3ebdd9e"
+    }
+  ],
+  "top_tag_provenance": {
+    "argument": "third argument (edx)",
+    "call_site": "0x37133b3",
+    "delivers": "tag 3 (emitted byte 0x61) exactly when that memory byte equals 3 at the call; any other byte value delivers a non-3 tag (byte 0x62)",
+    "execution": "the call runs once per element of the range [arg3]..[arg3+0x8] with stride 0x168; an empty range branches to the epilogue and never calls; the byte load re-executes every iteration",
+    "owner": "top",
+    "source": "a byte loaded through two dereferences of the top entry third argument: the qword at [arg3+0x10] is loaded at entry (0x3713329) and saved to the frame (0x371332d); at the loop head it is reloaded (0x3713360), dereferenced (0x3713365), and its first byte is loaded into edx (0x371336c)"
+  }
+}
