@@ -631,6 +631,176 @@ def verify_value_helper(data, packet):
 
 
 
+def extract_text_data(data):
+    assert len(data)==105896032 and hashlib.sha256(data).hexdigest()=='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+    shoff=struct.unpack_from('<Q',data,40)[0];size,count,nameidx=struct.unpack_from('<HHH',data,58);assert size==64
+    rows=[struct.unpack_from('<IIQQQQIIQQ',data,shoff+64*i) for i in range(count)]
+    sr=rows[nameidx];names=data[sr[4]:sr[4]+sr[5]]
+    sections={names[r[0]:names.find(b'\0',r[0])].decode():r for r in rows}
+    def at(va,n):
+        hits=[(name,r) for name,r in sections.items() if r[1]!=8 and r[2]&2 and r[3]<=va and va+n<=r[3]+r[5]];assert len(hits)==1
+        name,row=hits[0];off=row[4]+va-row[3];raw=data[off:off+n]
+        return dict(va=hex(va),file_offset=hex(off),section=name,section_flags=row[2],bytes=n,data_hex=raw.hex(),sha256=hashlib.sha256(raw).hexdigest())
+    table=at(0x46d50c,256)
+    table['accepted_bytes']=[i for i,v in enumerate(bytes.fromhex(table['data_hex'])) if v!=255]
+    table['decoded_values']={str(i):v for i,v in enumerate(bytes.fromhex(table['data_hex'])) if v!=255}
+    rela=sections['.rela.dyn'];records={}
+    for off in range(rela[4],rela[4]+rela[5],24):
+        slot,info,addend=struct.unpack_from('<QQq',data,off)
+        if slot in [0x64e1e48,0x64dfa60,0x64dfa68]:
+            assert slot not in records
+            records[slot]=dict(slot=hex(slot),info=info,addend=hex(addend),relocation_file_offset=hex(off),relocation_hex=data[off:off+24].hex(),stored_pointer=at(slot,8))
+    assert len(records)==3
+    feature_va=int(records[0x64dfa60]['addend'],16)
+    hits=[(name,r) for name,r in sections.items() if r[2]&2 and r[3]<=feature_va and feature_va+8<=r[3]+r[5]];assert len(hits)==1
+    feature_name,feature_section=hits[0];assert feature_section[1]==8
+    feature=dict(va=hex(feature_va),bytes=8,section=feature_name,section_type=feature_section[1],initialization='ELF NOBITS zero-fill; runtime value is not inferred')
+    return dict(target_sha256=hashlib.sha256(data).hexdigest(),table=table,relocations=list(records.values()),
+        vector_constants=[at(va,16) for va in [0x455d80,0x455a20,0x4536c0,0x453ac0,0x4566a0]],
+        feature_word=feature,
+        limits='Local decoder data and relocation bindings only. Feature initialization, invalid-byte reporter and vector conversion helper behavior remain delegated.')
+
+def verify_text_decoder(data, packet):
+    folder=packet/'text-decoder'
+    current=probe(data,extra_vas=(0x167a9c0,0x16fd96c))
+    require(current==json.loads((folder/'candidates.json').read_text()),'text decoder FDE candidate drift')
+    require(current==json.loads((folder/'receipts/full-input-replay.json').read_text()),'text decoder hosted full-input replay drift')
+    native=json.loads((folder/'receipts/decode-result.json').read_text())
+    require(native['target_sha256']==TARGET and native['whole_elf_reauthenticated_in_job'] and native['input_hashes_unchanged'],'text decoder full input binding')
+    require(not native['captured_program_executed'] and native['native_invocations']==3,'text decoder execution record')
+    bodies={};rowmaps={}
+    for label,key in [('text-candidate','0x167a9c0'),('value-candidate','0x16fd96c')]:
+        record=current['selected_fde_candidates'][key];start=int(record['start_va'],16);off=int(record['file_offset'],16)
+        body=data[off:off+record['bytes']]
+        require(hashlib.sha256(body).hexdigest()==record['body_sha256'],'text decoder body identity')
+        cursor=start;rows=[]
+        for line in (folder/'receipts'/(label+'.stdout')).read_text().splitlines():
+            if not re.match(r'^\s*[0-9a-f]+:',line):continue
+            parts=line.split('\t');require(len(parts)>=3,'text decoder native syntax')
+            va=int(parts[0].strip().rstrip(':'),16);tokens=parts[1].split()
+            require(tokens and all(re.fullmatch('[0-9a-f]{2}',t) for t in tokens),'text decoder native byte syntax')
+            raw=bytes.fromhex(' '.join(tokens));text=' '.join(parts[2:]).strip()
+            require(va==cursor and body[va-start:va-start+len(raw)]==raw,'text decoder native/full-image binding')
+            require(text and '(bad)' not in text and not text.startswith('.byte'),'text decoder undecoded row')
+            rows.append(dict(va=hex(va),bytes=raw.hex(),text=text));cursor+=len(raw)
+        saved=next(r for r in native['regions'] if r['label']==label)
+        require(rows==saved['instruction_rows'] and len(rows)==saved['instructions'] and cursor==int(record['end_va'],16),'text decoder complete rows/extent')
+        bodies[label]=(start,body);rowmaps[label]={int(r['va'],16):r for r in rows}
+    earlier=json.loads((packet/'value-helper/receipts/decode-result.json').read_text())
+    require(next(r['instruction_rows'] for r in earlier['regions'] if r['label']=='value-candidate')==
+            next(r['instruction_rows'] for r in native['regions'] if r['label']=='value-candidate'),'renewed value helper drift')
+    edge=json.loads((folder/'receipts/qualified-candidate-edges.json').read_text())
+    call=rowmaps['value-candidate'][0x16fd96c];raw=bytes.fromhex(call['bytes'])
+    require(len(edge)==1 and edge[0]['native_instruction_boundary_validated'] and edge[0]['candidate_va']==call['va'] and edge[0]['bytes']==call['bytes'],'text decoder caller boundary')
+    require(raw[:2]==bytes.fromhex('ff15') and 0x16fd96c+6+struct.unpack_from('<i',raw,2)[0]==0x64e1e48,'text decoder caller RIP slot')
+    fields=json.loads((folder/'field-bindings.json').read_text())
+    def check_fields(active):
+        for field in fields:
+            va=int(field['va'],16);raw=bytes.fromhex(field['bytes']);start,body=active[field['region']]
+            require(rowmaps[field['region']].get(va,{}).get('bytes')==field['bytes'],'text decoder field boundary')
+            require(body[va-start:va-start+len(raw)]==raw,'text decoder field corruption: '+field['label'])
+    check_fields(bodies);controls=[]
+    for field in fields:
+        active=dict(bodies);start,body=bodies[field['region']];changed=bytearray(body)
+        changed[int(field['va'],16)-start+len(bytes.fromhex(field['bytes']))-1]^=1
+        active[field['region']]=(start,changed)
+        try:check_fields(active)
+        except ValueError as error:controls.append(dict(control='text decoder '+field['label'],rejection=str(error)))
+        else:raise ValueError('text decoder field corruption escaped')
+    record=current['selected_fde_candidates']['0x167a9c0'];fde=bytes.fromhex(record['fde_hex'])
+    def check_extent(raw):
+        delta,length=struct.unpack_from('<ii',raw,8)
+        require(int(record['fde_va'],16)+8+delta==0x167a9c0 and length==571 and 0x167a9c0+length==int(record['end_va'],16),'text decoder actual FDE extent')
+    check_extent(fde);changed=bytearray(fde);changed[12]^=1
+    try:check_extent(changed)
+    except ValueError as error:controls.append(dict(control='text decoder FDE extent',rejection=str(error)))
+    else:raise ValueError('text decoder FDE corruption escaped')
+    computed=extract_text_data(data);saved=json.loads((folder/'referenced-data.json').read_text())
+    require(computed==saved,'text decoder referenced data drift')
+    active={'nibble table':bytes.fromhex(saved['table']['data_hex'])}
+    active.update({'relocation '+r['slot']:bytes.fromhex(r['relocation_hex']) for r in saved['relocations']})
+    active.update({'vector '+r['va']:bytes.fromhex(r['data_hex']) for r in saved['vector_constants']})
+    expected={k:bytes(v) for k,v in active.items()}
+    def check_data(values):
+        require(set(values)==set(expected),'text decoder data inventory')
+        for key,raw in values.items():require(bytes(raw)==expected[key],'text decoder data corruption: '+key)
+    check_data(active)
+    for key,raw in active.items():
+        changed=bytearray(raw);changed[16 if key.startswith('relocation ') else 0]^=1;values=dict(active);values[key]=changed
+        try:check_data(values)
+        except ValueError as error:controls.append(dict(control='text decoder '+key,rejection=str(error)))
+        else:raise ValueError('text decoder data corruption escaped')
+    rows=rowmaps['text-candidate'];instruction=lambda va:bytes.fromhex(rows[va]['bytes'])
+    for site,target in [(0x167aa1a,0x455d80),(0x167aa22,0x455a20),(0x167aa2a,0x4536c0),
+                        (0x167aa32,0x453ac0),(0x167aa3a,0x4566a0),(0x167aaae,0x46d50c),
+                        (0x167aae4,0x64dfa60),(0x167abad,0x64dfa68)]:
+        raw=instruction(site);require(site+len(raw)+struct.unpack_from('<i',raw,len(raw)-4)[0]==target,'text decoder RIP data/call binding')
+    require([(r['slot'],r['info'],r['addend']) for r in computed['relocations']]==[
+        ('0x64dfa60',8,'0x6500098'),('0x64dfa68',8,'0x5cadd50'),('0x64e1e48',8,'0x167a9c0')],'text decoder actual RELATIVE bindings')
+    for site,raw in [(0x167a9cb,'f6c201'),(0x167a9d4,'4883fa01'),(0x167a9da,'803e30'),(0x167a9df,'807e0178'),
+                     (0x167a9e5,'4883c602'),(0x167a9e9,'4883c2fe'),(0x167a9f0,'48d1e8'),(0x167a9f3,'4939c0'),
+                     (0x167aa95,'c70701000000'),(0x167aaa0,'c70702000000'),(0x167ab95,'c70703000000'),
+                     (0x167aa5f,'660ffcf0'),(0x167aa67,'660fdaf9'),(0x167aa6b,'660f74fe'),
+                     (0x167aa6f,'660fdbea'),(0x167aa73,'660ffceb'),(0x167aa7b,'660fdaf4'),
+                     (0x167aa7f,'660f74f5'),(0x167aa83,'660fdbf7'),(0x167aa87,'660fd7ee'),
+                     (0x167ab3b,'41c0e104'),(0x167ab44,'470a0c32'),(0x167ab48,'44880c01'),
+                     (0x167ab57,'41c0e104'),(0x167ab61,'470a0c32'),(0x167ab65,'44884c0101'),
+                     (0x167ab86,'c0e204'),(0x167ab8e,'420a1436'),(0x167ab92,'881401')]:
+        require(instruction(site)==bytes.fromhex(raw),'text decoder semantic instruction binding')
+    calls=[];branches=[]
+    for va,row in rows.items():
+        raw=bytes.fromhex(row['bytes']);target=None
+        if raw[0]==0xe8:
+            target=va+5+struct.unpack_from('<i',raw,1)[0];calls.append(dict(va=hex(va),target=hex(target)));continue
+        if raw[0]==0xeb or 0x70<=raw[0]<=0x7f:target=va+len(raw)+struct.unpack_from('<b',raw,1)[0]
+        elif raw[0]==0xe9:target=va+len(raw)+struct.unpack_from('<i',raw,1)[0]
+        elif raw[0]==0x0f and len(raw)>1 and 0x80<=raw[1]<=0x8f:target=va+len(raw)+struct.unpack_from('<i',raw,2)[0]
+        if target is not None:require(target in rows,'text decoder local branch boundary');branches.append(dict(va=hex(va),target=hex(target)))
+    require(calls==[dict(va='0x167aad7',target='0x167a940'),dict(va='0x167abdb',target='0x167ac00')],'text decoder direct callees')
+    alphabet=b'0123456789ABCDEFabcdef';table=bytes.fromhex(saved['table']['data_hex'])
+    require(saved['table']['accepted_bytes']==sorted(alphabet),'text decoder 22-byte alphabet')
+    require(all(table[c]==int(chr(c),16) if c in alphabet else table[c]==255 for c in range(256)),'text decoder complete nibble lookup')
+    vectors=[bytes.fromhex(r['data_hex']) for r in saved['vector_constants']]
+    lane_cases=0
+    # Arithmetic interpretation of the pinned byte operations/constants only.
+    # This is not a target execution, emulator, SIMD provider or runtime proof.
+    for lane in range(16):
+        k0,k1,k2,k3,k4=(v[lane] for v in vectors)
+        for c in range(256):
+            a=(c+k0)&255;b=((c&k2)+k3)&255
+            bad=(min(a,k1)==a) and (min(b,k4)==b)
+            require(bad==(table[c]==255),'text decoder vector/table alphabet disagreement');lane_cases+=1
+    pairs=0
+    for high in alphabet:
+        for low in alphabet:
+            require((table[high]<<4)|table[low]==int(bytes([high,low]),16),'text decoder scalar pair arithmetic');pairs+=1
+    def local_policy(raw,requested):
+        if len(raw)&1:return 'code1',None
+        tail=raw[2:] if len(raw)>1 and raw[:2]==b'0x' else raw
+        if len(tail)//2!=requested:return 'code2',None
+        if any(table[c]==255 for c in tail):return 'invalid-helper',None
+        return 'local-gates-pass',bytes((table[tail[i]]<<4)|table[tail[i+1]] for i in range(0,len(tail),2))
+    cases=[(b'00'*32,'local-gates-pass'),(b'0x'+b'00'*32,'local-gates-pass'),
+        (b'aF'*32,'local-gates-pass'),(b'0x'+b'aF'*32,'local-gates-pass'),
+        (b'0X'+b'00'*32,'code2'),(b'0X'+b'00'*31,'invalid-helper'),
+        (b'0'*63,'code1'),(b'0x'+b'0'*63,'code1'),(b'0'*62,'code2'),
+        (b'0'*66,'code2'),(b'0x','code2'),(b' '*64,'invalid-helper'),
+        (b'g'*64,'invalid-helper'),(b'\xff'*64,'invalid-helper')]
+    for raw,expected_kind in cases:require(local_policy(raw,32)[0]==expected_kind,'text decoder static policy boundary')
+    require(local_policy(b'00'*32,32)[1]==bytes(32) and local_policy(b'aF'*32,32)[1]==bytes([175])*32,'text decoder scalar output arithmetic')
+    # The prior full-input stage pins the caller's 1..4-byte scalar-text paths.
+    for length in range(1,5):
+        require(local_policy(b'0'*length,32)[0] in ['code1','code2'],'short scalar text cannot satisfy32 requested bytes')
+    return dict(status='TEXT_DECODER_LOCAL_FORMAT_REPRODUCED',helper_bytes=571,helper_instructions=143,
+        field_bindings=len(fields),evidence_corruptions_rejected=len(controls),controls=controls,
+        local_branches=branches,direct_callees=calls,relocation_bindings=3,vector_constant_spans=5,
+        alphabet_bytes=list(alphabet),classifier_lane_cases=lane_cases,scalar_pair_cases=pairs,
+        static_policy_cases=len(cases),caller_requested_bytes=32,bare_payload_bytes=64,prefixed_payload_bytes=66,
+        optional_prefix_hex='3078',odd_length_code=1,length_mismatch_code=2,normal_local_success_code=3,
+        tag11_short_text_cannot_satisfy_requested_length=True,renewed_value_rows=185,
+        limits='Static local checks and scalar arithmetic only. Invalid-byte reporting, CPU-feature initialization, vector conversion, valid pointer/raw-record domains, complete JSON/null grammar, ABI/exception and runtime equivalence remain unresolved. Code3 follows a normal return from the opaque vector helper; its output is not proved here.')
+
+
 def main():
     parser=argparse.ArgumentParser(description='Owned stdlib complete-input/native evidence verifier; no subprocess or captured execution.')
     parser.add_argument('--binary',type=Path,required=True)
@@ -662,6 +832,15 @@ def main():
     result['controls']+=value['controls'];result['value_helper']=value
     require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(5,4209,966),'unique range denominator')
     result['limits']='Five digest-bound native ranges and selected raw-record paths. Delegated text/sequence helpers, raw JSON/null mapping, source/type identity, second alternative, complete ABI/exception and runtime equivalence remain unresolved.'
+    text=verify_text_decoder(data,args.packet)
+    result['regions']+=1;result['region_bytes']+=text['helper_bytes']
+    result['native_instruction_rows']+=text['helper_instructions']
+    result['instruction_counts']['text-candidate']=text['helper_instructions']
+    result['field_bindings']+=text['field_bindings']
+    result['evidence_corruptions_rejected']+=text['evidence_corruptions_rejected']
+    result['controls']+=text['controls'];result['text_decoder']=text
+    require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(6,4780,1109),'six unique ranges')
+    result['limits']='Six digest-bound native ranges and local fixed-size text format. Invalid reporting, CPU-feature/vector helpers, sequence conversion, JSON/null mapping, raw-record domain, second alternative, initialized ABI/exception and runtime equivalence remain unresolved.'
     print(json.dumps(result,indent=2))
 
 

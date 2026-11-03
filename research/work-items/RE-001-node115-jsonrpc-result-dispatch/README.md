@@ -9,7 +9,8 @@ Task RE-001; `foundation` remains a tentative research allocation. Target: Linux
 | Completion `[0x1700a10,0x1700ac3)` | 179 | 47 |
 | First alternative `[0x16fdba0,0x16fdf82)` | 994 | 245 |
 | Value helper `[0x16fd8b0,0x16fdb94)` | 740 | 185 |
-| Unique total | 4,209 | 966 |
+| Text decoder `[0x167a9c0,0x167abfb)` | 571 | 143 |
+| Unique total | 4,780 | 1,109 |
 
 The constructor tries two alternatives and copies 104 bytes on its ordinary arm. The caller additionally requires a local completion helper to return zero. Its whitespace/closing-brace path does not establish a whole-input trailing-data rule. The first alternative recognizes exact six-byte `result`, tracks presence and treats missing/repeated recognized fields separately.
 
@@ -23,7 +24,7 @@ From repository root with the full pinned capture materialized:
 python3 -I -B research/work-items/RE-001-node115-jsonrpc-result-dispatch/verify_packet.py --binary artifacts/node/115/hl-node
 ```
 
-The standard-library reader authenticates the full image, all 135,313 ordered unwind starts, supported actual CIE/FDE records and all 966 unique native rows. It checks prior diagnostic/field/completion evidence, selected direct edges, instruction boundaries, 37 prior table entries and 22 new value-table entries, three new RELATIVE bindings and three unidentified descriptor spans.
+The standard-library reader authenticates the full image, all 135,313 ordered unwind starts, supported actual CIE/FDE records and all 1,109 unique native rows. It checks prior diagnostic/field/completion evidence, selected direct edges, instruction boundaries, 37 prior table entries and 22 new value-table entries, three new RELATIVE bindings and three unidentified descriptor spans.
 
 New evidence controls mutate 74 selected helper instructions, 22 table entries, three relocation records, three descriptor records and one helper FDE extent: 103 new checks, alongside 158 historical-stage checks. The 1,530 field-name byte mutations remain. These are static evidence controls, not captured parser execution. Direct/text helper stores cover 33 bytes; first-alternative stores cover 40; the constructor later copies 104. Complete initialized layout is unproved.
 
@@ -42,4 +43,13 @@ The exact candidate commit and current observed required-check results are recor
 
 The latest historical four-range run, 41544793824, passed eight commands: 76 test files, 382 reported cases, four skips and zero failed files. Its immutable published packet is `01d91ad7058a586abd33bb280f2d3e4d7f2f2cd5`. It is not validation of the new helper reader.
 
-The shared decoder `0x167a9c0` and sequence helper `0x173fe30`, raw JSON/null mapping, complete tag domain, source/type identity, second alternative, initialized ABI and exception semantics remain open. No component gate or compiled-comparison metric advances; no Points or payment is claimed.
+The shared decoder’s invalid-byte, feature and vector helpers, sequence helper `0x173fe30`, raw JSON/null mapping, complete tag domain, source/type identity, second alternative, initialized ABI and exception semantics remain open. No component gate or compiled-comparison metric advances; no Points or payment is claimed.
+
+
+## Fixed-size text findings
+
+The new 571-byte / 143-row decoder resolves local text guards for the existing 32-byte request: 64 ASCII hex digits with optional exact lowercase `0x` prefix (66 total bytes). Hex digits accept either case. Odd original length produces code 1 before prefix handling; wrong remaining length produces code 2 before alphabet scanning. Other bytes delegate to an unresolved invalid-byte helper. The caller’s one-to-four-byte raw-tag-11 text cannot reach its local code-3 copy arm.
+
+The new stage adds 87 selected instruction bindings and 97 evidence-corruption controls, bringing the cumulative total to 358. Five vector constants and the complete nibble table agree over 4,096 static byte/lane cases. Scalar nibble arithmetic agrees on 484 accepted character pairs. Fourteen static policy examples check local length/prefix/error precedence. These are data and arithmetic checks, not target execution. Runtime CPU-feature initialization and vector output remain delegated; code 3 after that call is conditional on its normal return. See the latest chapter of [observations](observations.md) and [bound data](text-decoder/referenced-data.json).
+
+Native run [41571968425](https://github.com/clutchpbcfo/hyperliquid-source/actions/runs/41571968425), execution `ecd4b9cef519055e13e7c843761e2b0a23388cdd`, authenticated the complete capture and renewed the byte-identical value helper. Its 20,254-byte archive SHA-256 is `05bb338d6c4b71e9d0e2652b402bc37c8d7fc8b025d95145eef35870edc15a3d`. All prior receipts remain unchanged. The six-range candidate is frozen before its required validation, whose exact commit/tree and actual outcomes are recorded on PR #2127. Historical validation does not assert a pass for this addition. Full-schema and component gates remain false.
