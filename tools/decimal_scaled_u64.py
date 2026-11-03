@@ -201,6 +201,16 @@ class Insn:
 
 def decode(data, off, va):
     """Decode the length of one 64-bit instruction, or raise on an unknown form."""
+    try:
+        insn = _decode(data, off, va)
+    except (IndexError, struct.error):
+        fail("truncated instruction encoding")
+    if off + insn.size > len(data):
+        fail("truncated instruction encoding")
+    return insn
+
+
+def _decode(data, off, va):
     p = off
     wide16 = False
     rep = 0
