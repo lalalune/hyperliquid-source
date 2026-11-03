@@ -1,0 +1,18 @@
+# NEGATIVE CONTROL 1: cmovs eax,edi (0f 48 c7) @0x63f0088 -> 3x nop (90)
+# Removes the neg/cmovs magnitude(abs) step. Decode below confirms the three
+# nop bytes replace the conditional move; base VA shown is blob-relative.
+
+work/powi/_p.bin:     file format binary
+
+
+Disassembly of section .data:
+
+00000000063ef084 <.data+0x63ef084>:
+ 63ef084:	89 f8                	mov    eax,edi
+ 63ef086:	f7 d8                	neg    eax
+ 63ef088:	90                   	nop
+ 63ef089:	90                   	nop
+ 63ef08a:	90                   	nop
+ 63ef08b:	a8 01                	test   al,0x1
+ 63ef08d:	74 06                	je     0x63ef095
+ 63ef08f:	66 0f 28           	movapd xmm0,xmm1
