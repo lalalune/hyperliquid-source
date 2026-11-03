@@ -21,7 +21,8 @@ are checked instruction-for-instruction, not merely counted.
 
 ## Observations
 
-The leaf parses four decimal octets separated by periods. Out-of-range
+The leaf's original crate/source identity is not established; the parser label
+describes behavior, not first-party source attribution. The leaf parses four decimal octets separated by periods. Out-of-range
 values and multi-digit leading zeroes fail. Failure restores the original
 cursor. Success publishes the four octets and independently updates cursor
 pointer and remaining length; trailing non-digit bytes can remain.
@@ -60,7 +61,9 @@ IPv4; ignored unspecified payload on failure. Cursor pointer is normalized
 to byte-buffer offset and remaining length is read separately. Caller B is
 pre-parser length bypass, otherwise A/R plus the same parser observation.
 This is semantic projection, not ABI, instruction-byte or whole-node equality.
-Native corruptions change actual bytes in a private COW mmap only. Originals,
+The frozen parser corpus visits278/278 leaf instructions and12 caller instructions;
+the separate raw-gate corpus visits9 selected instruction addresses, with
+overlap rather than an additive coverage claim. Native corruptions change actual bytes in a private COW mmap only. Originals,
 raw failed logs and every imported pin remain unchanged.
 
 ## Reproduce and acceptance

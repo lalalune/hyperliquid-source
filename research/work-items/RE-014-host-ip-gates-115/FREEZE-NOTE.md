@@ -23,3 +23,10 @@ The pure parser has no calls. The composed interpreter permits only the
 actual call at 0x1562c17 to 0x167ccb0. All command/process/service, override
 reader, diagnostic, allocation, collection, and whole-caller return behavior
 remain outside the interpreted scope. Command strings are data, never run.
+
+First owned build: native replay and both original opt0/3 clients matched all
+12,901 rows; the first length-limit mutant then exposed a research-client
+precheck hardcoded to15, leading to its unreachable branch (exit101).
+The corrected client uses the candidate's actual pre-parser admission gate
+instead. Its v2 run is separate; initial logs and binaries remain preserved.
+No native expectations or owned library semantics were changed for this fix.

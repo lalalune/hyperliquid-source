@@ -14,6 +14,9 @@ class Image:
  def read_only(self,va):return None
  def __init__(self):
   self.view=View(TARGET);self.data=self.view.b;self.text_va,self.text_off,self.text_size=self.view.sections['.text'];self.cache={}
+ def close(self):
+  if self.data is not self.view.b:self.data.close()
+  self.view.b.close();self.view.file.close()
  def fetch(self,va):
   if va not in self.cache:self.cache[va]=cpu.decode(self.data,self.view.offset(va),va)
   return self.cache[va]

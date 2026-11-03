@@ -65,3 +65,11 @@ def corpus(image):
    result,trace=evaluate(image,data,op=='C');seen|=trace
    inputs.append(op+'\t'+data.hex()+'\n');expected.append(result+'\n')
  return ''.join(inputs).encode(),''.join(expected).encode(),seen
+
+def verify():
+ import hashlib,json
+ image=Image();record=json.loads((PACKET/'PARSER-FREEZE.json').read_text())
+ if hashlib.sha256(image.data).hexdigest()!=SHA:raise ValueError('node115 identity mismatch')
+ inputs,expected,seen=corpus(image)
+ if hashlib.sha256(inputs).hexdigest()!=record['input_sha256'] or hashlib.sha256(expected).hexdigest()!=record['expected_sha256'] or sorted(seen)!=record['visited_addresses']:raise ValueError('parser frozen corpus changed')
+ return inputs,expected
