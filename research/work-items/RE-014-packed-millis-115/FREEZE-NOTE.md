@@ -18,3 +18,9 @@ division, state writes, activity and later helper calls are not reimplemented.
 All larger caller behaviors and optional floating-point setup remain outside
 scope. Shared FDE context bytes are not credited as newly recovered whole
 functions or additive first-party byte coverage.
+
+Commit9b78e718 contains the producer and derivation only: the packaging
+helper had an unmatched-parenthesis SyntaxError before copying records.
+The original completed native freeze/logs/streams were untouched; the next
+commit copies those actual outputs and smoke rows before any new Rust exists.
+No successful packaging result is claimed for that failed helper.
