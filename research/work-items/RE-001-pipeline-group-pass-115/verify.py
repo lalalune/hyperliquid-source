@@ -2,7 +2,7 @@
 """Verification for the RE-001 pipeline group-pass packet.
 
 Run from the clone root:
-  python3 research/work-items/RE-001-qword-insert-grow-115/verify.py
+  python3 research/work-items/RE-001-pipeline-group-pass-115/verify.py
 
 Checks, all against the real binary work/hl-node-115.bin:
   1. SHA-256 digest and its provenance/artifacts.json binding.

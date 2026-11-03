@@ -4,8 +4,7 @@
 Run from the clone root: python3 research/work-items/\\
 RE-001-pipeline-group-pass-115/export_excerpts.py
 
-Writes excerpts/grow.txt (0x5d9ee20..0x5d9efa5) and
- excerpts/caller.txt (0x5f78060..0x5f780bf) by invoking objdump
+Writes excerpts/step.txt (0x5f801f0..0x5f8037d) by invoking objdump
 with the fixed relative binary path work/hl-node-115.bin, so
 regeneration from the clone root is byte-for-byte reproducible.
 """
