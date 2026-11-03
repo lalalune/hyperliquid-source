@@ -1376,6 +1376,222 @@ def verify_second_alternative(data, packet):
         limits='Conditional raw-map/helper-word and store-coverage models only. A is first ordinary marker but second absent/child-failure test; B is constructor failure marker. Admitted child-word domain, initialization of its104-byte carrier, first tail active/inactive/padding classification, cleanup/exception/serialized input/type and runtime equivalence remain unresolved. Local copying does not prove all copied bytes initialized or semantically active.')
 
 
+def extract_error_data(data):
+    assert len(data)==105896032 and hashlib.sha256(data).hexdigest()=='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+    shoff=struct.unpack_from('<Q',data,40)[0];size,count,nameidx=struct.unpack_from('<HHH',data,58);assert size==64
+    rows=[struct.unpack_from('<IIQQQQIIQQ',data,shoff+64*i) for i in range(count)]
+    sr=rows[nameidx];names=data[sr[4]:sr[4]+sr[5]]
+    sections={names[r[0]:names.find(b'\0',r[0])].decode():r for r in rows}
+    def at(va,n):
+        hits=[(name,r) for name,r in sections.items() if r[1]!=8 and r[2]&2 and r[3]<=va and va+n<=r[3]+r[5]];assert len(hits)==1
+        name,row=hits[0];off=row[4]+va-row[3];raw=data[off:off+n]
+        return dict(va=hex(va),file_offset=hex(off),section=name,section_flags=row[2],bytes=n,data_hex=raw.hex(),sha256=hashlib.sha256(raw).hexdigest())
+    tables=[]
+    for label,va,count,first in [('keys',0x47def4,15,1),('numeric-fields',0x47df30,4,0)]:
+        table=at(va,count*4);raw=bytes.fromhex(table['data_hex']);table['label']=label
+        table['entries']=[dict(raw_tag=i+first,displacement=struct.unpack_from('<i',raw,4*i)[0],target=hex(va+struct.unpack_from('<i',raw,4*i)[0])) for i in range(count)]
+        tables.append(table)
+    rela=sections['.rela.dyn'];records=[]
+    for off in range(rela[4],rela[4]+rela[5],24):
+        slot,info,addend=struct.unpack_from('<QQq',data,off)
+        if slot in [0x64df4a0,0x64df4c0]:
+            records.append(dict(slot=hex(slot),info=info,addend=hex(addend),relocation_file_offset=hex(off),relocation_hex=data[off:off+24].hex(),stored_pointer=at(slot,8)))
+    assert len(records)==2 and all(r['info']==8 for r in records)
+    return dict(target_sha256=hashlib.sha256(data).hexdigest(),tables=tables,relocations=records,
+        key_literals=[at(va,n) for va,n in [(0x459e80,4),(0x47e4d1,7),(0x45a158,4)]],
+        descriptors=[at(va,32) for va in [0x640bef8,0x640bf08,0x640bd30,0x640bcd0,0x640c008]],
+        formatter_pool_spans=[at(va,32) for va in [0x4325c4,0x43351a]],
+        limits='Selected key/numeric tables, RELATIVE records and allocated spans. Source enum types, descriptor/formatter layouts, dependent helper result domains, active-field definedness, ownership and exception contracts remain unproved.')
+
+def verify_error_value(data, packet):
+    folder=packet/'error-value'
+    current=probe(data,extra_vas=(0x16fe920,0x16fe0cf))
+    require(current==json.loads((folder/'candidates.json').read_text()),'error value FDE candidate drift')
+    require(current==json.loads((folder/'receipts/full-input-replay.json').read_text()),'error value hosted full-input replay drift')
+    native=json.loads((folder/'receipts/decode-result.json').read_text())
+    require(native['target_sha256']==TARGET and native['whole_elf_reauthenticated_in_job'] and native['input_hashes_unchanged'],'error value full input binding')
+    require(not native['captured_program_executed'] and native['native_invocations']==3,'error value execution record')
+    bodies={};rowmaps={}
+    for label,key in [('error-candidate','0x16fe920'),('second-candidate','0x16fe0cf')]:
+        record=current['selected_fde_candidates'][key];start=int(record['start_va'],16);off=int(record['file_offset'],16)
+        body=data[off:off+record['bytes']]
+        require(hashlib.sha256(body).hexdigest()==record['body_sha256'],'error value body identity')
+        cursor=start;rows=[]
+        for line in (folder/'receipts'/(label+'.stdout')).read_text().splitlines():
+            if not re.match(r'^\s*[0-9a-f]+:',line):continue
+            parts=line.split('\t');require(len(parts)>=3,'error value native syntax')
+            va=int(parts[0].strip().rstrip(':'),16);tokens=parts[1].split()
+            require(tokens and all(re.fullmatch('[0-9a-f]{2}',t) for t in tokens),'error value native byte syntax')
+            raw=bytes.fromhex(' '.join(tokens));text=' '.join(parts[2:]).strip()
+            require(va==cursor and body[va-start:va-start+len(raw)]==raw,'error value native/full-image binding')
+            require(text and '(bad)' not in text and not text.startswith('.byte'),'error value undecoded row')
+            rows.append(dict(va=hex(va),bytes=raw.hex(),text=text));cursor+=len(raw)
+        saved=next(r for r in native['regions'] if r['label']==label)
+        require(rows==saved['instruction_rows'] and len(rows)==saved['instructions'] and cursor==int(record['end_va'],16),'error value complete rows/extent')
+        bodies[label]=(start,body);rowmaps[label]={int(r['va'],16):r for r in rows}
+    earlier=json.loads((packet/'second-alternative/receipts/decode-result.json').read_text())
+    require(next(r['instruction_rows'] for r in earlier['regions'] if r['label']=='second-candidate')==
+            next(r['instruction_rows'] for r in native['regions'] if r['label']=='second-candidate'),'renewed second alternative drift')
+    edge=json.loads((folder/'receipts/qualified-candidate-edges.json').read_text())
+    call=rowmaps['second-candidate'][0x16fe0cf];raw=bytes.fromhex(call['bytes'])
+    require(len(edge)==1 and edge[0]['native_instruction_boundary_validated'] and edge[0]['candidate_va']==call['va'] and edge[0]['bytes']==call['bytes'],'error value caller boundary')
+    require(raw[0]==0xe8 and 0x16fe0cf+5+struct.unpack_from('<i',raw,1)[0]==0x16fe920,'error value caller direct target')
+    fields=json.loads((folder/'field-bindings.json').read_text())
+    def check_fields(active):
+        for field in fields:
+            va=int(field['va'],16);raw=bytes.fromhex(field['bytes']);start,body=active[field['region']]
+            require(rowmaps[field['region']].get(va,{}).get('bytes')==field['bytes'],'error value field boundary')
+            require(body[va-start:va-start+len(raw)]==raw,'error value field corruption: '+field['label'])
+    check_fields(bodies);controls=[]
+    for field in fields:
+        active=dict(bodies);start,body=bodies[field['region']];changed=bytearray(body)
+        changed[int(field['va'],16)-start+len(bytes.fromhex(field['bytes']))-1]^=1
+        active[field['region']]=(start,changed)
+        try:check_fields(active)
+        except ValueError as error:controls.append(dict(control='error value '+field['label'],rejection=str(error)))
+        else:raise ValueError('error value field corruption escaped')
+    record=current['selected_fde_candidates']['0x16fe920'];fde=bytes.fromhex(record['fde_hex'])
+    def check_extent(raw):
+        delta,length=struct.unpack_from('<ii',raw,8)
+        require(int(record['fde_va'],16)+8+delta==0x16fe920 and length==2706 and 0x16fe920+length==int(record['end_va'],16),'error value actual FDE extent')
+    check_extent(fde);changed=bytearray(fde);changed[12]^=1
+    try:check_extent(changed)
+    except ValueError as error:controls.append(dict(control='error value FDE extent',rejection=str(error)))
+    else:raise ValueError('error value FDE corruption escaped')
+    computed=extract_error_data(data);saved=json.loads((folder/'referenced-data.json').read_text())
+    require(computed==saved,'error value data drift')
+    active={r['label']+' table':bytes.fromhex(r['data_hex']) for r in saved['tables']}
+    active.update({'relocation '+r['slot']:bytes.fromhex(r['relocation_hex']) for r in saved['relocations']})
+    for group in ['key_literals','descriptors','formatter_pool_spans']:
+        active.update({group+' '+r['va']:bytes.fromhex(r['data_hex']) for r in saved[group]})
+    expected={k:bytes(v) for k,v in active.items()}
+    def check_data(values):
+        require(set(values)==set(expected),'error value data inventory')
+        for key,raw in values.items():require(bytes(raw)==expected[key],'error value data corruption '+key)
+    check_data(active)
+    for key,raw in active.items():
+        for offset in (range(0,len(raw),4) if key.endswith(' table') else [16 if key.startswith('relocation ') else 0]):
+            values=dict(active);changed=bytearray(raw);changed[offset]^=1;values[key]=changed
+            try:check_data(values)
+            except ValueError as error:controls.append(dict(control='error value '+key+' '+str(offset),rejection=str(error)))
+            else:raise ValueError('error value data corruption escaped')
+    rows=rowmaps['error-candidate'];instruction=lambda va:bytes.fromhex(rows[va]['bytes'])
+    key_targets=[0x16fead8,0x16ff17d,0x16ff17d,0x16febd7]+[0x16ff17d]*7+[0x16fec34,0x16feafb,0x16feb7d,0x16feb2e]
+    number_targets=[0x16febfc,0x16fec63,0x16fecc7,0x16feab0]
+    for table,targets in zip(computed['tables'],[key_targets,number_targets]):
+        require([int(r['target'],16) for r in table['entries']]==targets and all(t in rows for t in targets),'error value table/boundaries')
+    require([(r['slot'],r['info'],r['addend']) for r in computed['relocations']]==[
+        ('0x64df4a0',8,'0x635de30'),('0x64df4c0',8,'0x1680cab')],'error value actual relocation records')
+    require([bytes.fromhex(r['data_hex']) for r in computed['key_literals']]==[b'code',b'message',b'data'],'error field literals')
+    for site,target in [(0x16fe985,0x47def4),(0x16feaeb,0x47df30),(0x16febec,0x47df30),
+        (0x16fed50,0x47e4d1),(0x16feda0,0x459e80),(0x16ff262,0x45a158),
+        (0x16fed84,0x4325c4),(0x16ff1e8,0x43351a),(0x16fed78,0x16c7ba0),
+        (0x16fefaa,0x640bef8),(0x16fefb1,0x640bf08),(0x16ff18e,0x640bd30),
+        (0x16ff2ac,0x640bcd0),(0x16ff2e6,0x640c008),(0x16fef07,0x64df4a0),(0x16ff3ac,0x64df4c0)]:
+        raw=instruction(site);require(site+len(raw)+struct.unpack_from('<i',raw,len(raw)-4)[0]==target,'error value RIP binding')
+    semantic=[(0x16fe937,'83f814'),(0x16fe941,'48bd0000000000000080'),(0x16fe94b,'83f815'),
+        (0x16fe971,'49c1e506'),(0x16fe975,'4983c420'),(0x16fe97d,'c744242000000000'),
+        (0x16feab0,'4983c440'),(0x16feab4,'4983c5c0'),(0x16feac6,'83f80e'),
+        (0x16feade,'3c03'),(0x16feae5,'0f43c1'),(0x16febdc,'4883f803'),(0x16febe5,'480f43c1'),
+        (0x16feb15,'8138636f6465'),(0x16feb21,'813864617461'),(0x16fec4a,'ba6d657373'),(0x16fec54,'ba73616765'),
+        (0x16febfc,'837c242001'),(0x16fec14,'837c243001'),(0x16fec27,'c744242001000000'),
+        (0x16fec63,'4939ef'),(0x16fec86,'4939ef'),(0x16feccb,'4939c6'),(0x16fecd9,'4c8d7505'),
+        (0x16fecdd,'83f910'),(0x16fece6,'83f911'),(0x16feceb,'83f912'),
+        (0x16fed21,'4939c6'),(0x16fed2a,'4c8d7506'),(0x16fed40,'f644242001'),
+        (0x16fedf3,'4983fd02'),(0x16fee02,'b902000000'),(0x16fee19,'4883c505'),
+        (0x16fee5c,'4839c8'),(0x16fefe4,'488d4306'),(0x16feff1,'4839c8'),
+        (0x16ff05b,'b903000000'),(0x16ff060,'49c1e505'),(0x16ff119,'4929f6')]
+    map_stores=[(0x16fef5a,'4c897d00'),(0x16fef66,'48894508'),(0x16fef6a,'48895510'),(0x16fef6e,'4c897518'),
+        (0x16fef92,'0f114520'),(0x16fef96,'0f114d30'),(0x16fef9a,'0f115540'),(0x16fef9e,'0f115d50'),(0x16fefa2,'894d60')]
+    sequence_stores=[(0x16ff06c,'4c8927'),(0x16ff06f,'4c897f08'),(0x16ff078,'4c894710'),(0x16ff07c,'48894718'),
+        (0x16ff080,'48895720'),(0x16ff09c,'0f114728'),(0x16ff0a0,'0f114f38'),(0x16ff0a4,'0f115748'),(0x16ff0b0,'48894758'),(0x16ff0b4,'896f60')]
+    for site,raw in semantic+map_stores+sequence_stores:require(instruction(site)==bytes.fromhex(raw),'error value semantic/store instruction')
+    calls=[];branches=[]
+    for va,row in rows.items():
+        raw=bytes.fromhex(row['bytes']);target=None
+        if raw[0]==0xe8:
+            calls.append(dict(va=hex(va),target=hex(va+5+struct.unpack_from('<i',raw,1)[0])));continue
+        if raw[0]==0xeb or 0x70<=raw[0]<=0x7f:target=va+len(raw)+struct.unpack_from('<b',raw,1)[0]
+        elif raw[0]==0xe9:target=va+len(raw)+struct.unpack_from('<i',raw,1)[0]
+        elif raw[0]==0x0f and len(raw)>1 and 0x80<=raw[1]<=0x8f:target=va+len(raw)+struct.unpack_from('<i',raw,2)[0]
+        if target is not None:require(target in rows,'error value local branch boundary');branches.append(dict(va=hex(va),target=hex(target)))
+    expected_calls=[(0x16fe9b7,0x1705900),(0x16fe9f1,0x16fe790),(0x16fec0f,0x1705900),(0x16fec77,0x16fe790),
+        (0x16fecff,0x16fd260),(0x16fed13,0x16fd260),(0x16fed93,0x1742090),(0x16fede0,0x1742090),(0x16fee4e,0x16fd260),
+        (0x16feedf,0x17044a0),(0x16fefba,0x173d830),(0x16fefcd,0x16fd260),(0x16ff14a,0x173d830),
+        (0x16ff19d,0x1704de0),(0x16ff1f4,0x1742090),(0x16ff24b,0x1742090),(0x16ff2a2,0x1742090),
+        (0x16ff2be,0x1704de0),(0x16ff2f8,0x173d830),(0x16ff30f,0x17048c0),(0x16ff321,0x17048c0),
+        (0x16ff347,0x63f0a50),(0x16ff377,0x17044a0),(0x16ff38c,0x63f0a50),(0x16ff3a7,0x63f0a50)]
+    require(calls==[dict(va=hex(a),target=hex(b)) for a,b in expected_calls],'error value complete direct callees')
+    def key_class(tag,payload=b'',number=0):
+        if tag in [1,4]:
+            value=number&((1<<(8 if tag==1 else 64))-1)
+            return ['code','message','data','ignored'][min(value,3)]
+        if tag not in [12,13,14,15]:return 'opaque-key-error'
+        if len(payload) not in [4,7]:return 'ignored'
+        if tag in [12,13]:
+            if len(payload)==7:same=((int.from_bytes(payload[:4],'little')^0x7373656d)|(int.from_bytes(payload[3:7],'little')^0x65676173))==0;return 'message' if same else 'ignored'
+            word=int.from_bytes(payload,'little');return 'code' if word==0x65646f63 else 'data' if word==0x61746164 else 'ignored'
+        return next((name for name in ['code','message','data'] if len(payload)==len(name) and all(a==b for a,b in zip(payload,name.encode()))),'ignored')
+    mutations=0
+    for name in [b'code',b'message',b'data']:
+        for tag in [12,13,14,15]:require(key_class(tag,name)==name.decode(),'exact nested field identifier')
+        for offset in range(len(name)):
+            for byte in range(256):
+                if byte==name[offset]:continue
+                changed=bytearray(name);changed[offset]=byte
+                require(all(key_class(tag,changed)=='ignored' for tag in [12,13,14,15]),'nested field mutation escaped');mutations+=1
+    numeric_cases=0
+    for tag in [1,4]:
+        for value in ([0,1,2,3,255] if tag==1 else [0,1,2,3,255,256,(1<<63),(1<<64)-1]):
+            require(key_class(tag,number=value)==(['code','message','data'][value] if value<3 else 'ignored'),'numeric nested field identifier');numeric_cases+=1
+    A=1<<63;B=A+1;NONE=A+5;MISSING=A+6
+    def map_model(entries):
+        present={'code':False,'message':False,'data':False};calls_seen=[]
+        for name,returned in entries:
+            if name=='ignored':continue
+            if name=='opaque-key-error':return name,calls_seen
+            if present[name]:return 'duplicate-'+name,calls_seen
+            calls_seen.append(name)
+            if name=='code' and returned==1:return 'code-child-failure',calls_seen
+            if name=='message' and returned==A:return 'message-child-failure',calls_seen
+            if name=='data' and returned in [NONE,MISSING]:return 'data-child-failure',calls_seen
+            present[name]=True
+        return ('missing-code' if not present['code'] else 'missing-message' if not present['message'] else 'ordinary'),calls_seen
+    scenarios=[([], 'missing-code'),([('message',0)],'missing-code'),([('code',0)],'missing-message'),
+        ([('code',1)],'code-child-failure'),([('code',0),('message',A)],'message-child-failure'),
+        ([('code',0),('message',0),('data',NONE)],'data-child-failure'),
+        ([('code',0),('message',0),('data',MISSING)],'data-child-failure'),
+        ([('code',0),('message',0)],'ordinary'),([('message',B),('code',0)],'ordinary'),
+        ([('ignored',0),('code',0),('message',0),('data',0)],'ordinary'),([('opaque-key-error',0)],'opaque-key-error')]
+    for name in ['code','message','data']:
+        scenarios.append(([(name,0),(name,0)],'duplicate-'+name))
+    for entries,wanted in scenarios:
+        kind,seen=map_model(entries);require(kind==wanted,'nested local map model')
+        if wanted.startswith('duplicate-'):require(len(seen)==1,'duplicate precedes repeated conversion')
+    # Both raw-null tags are present data, so a following data key is a duplicate.
+    for raw_tag in [16,18]:
+        require(instruction(0x16fecd9)==bytes.fromhex('4c8d7505'),'raw null marker A+5')
+        kind,seen=map_model([('data',0),('data',0)]);require(kind=='duplicate-data' and len(seen)==1,'null data duplicate still rejected')
+    def sequence_shape(count):return ('short-0',0) if count==0 else ('short-1',1) if count==1 else ('ordinary',2) if count==2 else ('ordinary',3) if count==3 else ('trailing-elements',3)
+    for count,wanted in [(0,('short-0',0)),(1,('short-1',1)),(2,('ordinary',2)),(3,('ordinary',3)),(4,('trailing-elements',3)),(100,('trailing-elements',3))]:
+        require(sequence_shape(count)==wanted,'conditional nested sequence count model')
+    coverage=lambda spans:sorted({i for offset,size in spans for i in range(offset,offset+size)})
+    map_spans=[(0,8),(8,8),(16,8),(24,8),(32,16),(48,16),(64,16),(80,16),(96,4)]
+    seq_spans=[(0,8),(8,8),(16,8),(24,8),(32,8),(40,16),(56,16),(72,16),(88,8),(96,4)]
+    require(coverage(map_spans)==coverage(seq_spans)==list(range(100)),'nested ordinary carrier store coverage')
+    require(set(range(104))-set(coverage(map_spans))==set(range(100,104)),'four copied tail bytes unclassified')
+    return dict(status='ERROR_VALUE_FIELDS_AND_LOCAL_CARRIER_REPRODUCED',helper_bytes=2706,helper_instructions=553,
+        field_bindings=len(fields),evidence_corruptions_rejected=len(controls),controls=controls,direct_callees=calls,local_branches=branches,
+        key_table_entries=15,numeric_field_entries=4,numeric_identifier_cases=numeric_cases,distinct_nested_key_mutations_rejected=mutations,
+        local_map_model_cases=len(scenarios)+2,conditional_sequence_shape_cases=6,recognized_fields=['code','message','data'],
+        message_words_offsets=[0,8,16],data_word_and_carrier_offsets=[24,32,40,48,56,64,72,80,88],code_dword_offset=96,
+        marker_A=hex(A),marker_B=hex(B),data_none_marker=hex(NONE),data_missing_tracker=hex(MISSING),
+        ordinary_map_store_offsets=coverage(map_spans),ordinary_sequence_store_offsets=coverage(seq_spans),unclassified_copy_tail=list(range(100,104)),
+        message_helper='0x16fe790',code_helper='0x1705900',data_helper='0x16fd260',renewed_second_rows=303,
+        complete_first_word_domain_proved=False,complete_104_byte_initialization_proved=False,
+        limits='Conditional static map/sequence models and instruction-backed stores. Source JSON/enum types, message first-word domain (including B), dependent field initialization, default-data inactive bytes, copied tail100..103, first-form tail40..103, ownership/cleanup/exception and runtime equivalence remain unproved. No captured program execution or source-language undefined-behavior claim.')
+
+
 def main():
     parser=argparse.ArgumentParser(description='Owned stdlib complete-input/native evidence verifier; no subprocess or captured execution.')
     parser.add_argument('--binary',type=Path,required=True)
@@ -1443,6 +1659,15 @@ def main():
     result['controls']+=second['controls'];result['second_alternative']=second
     require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(9,6676,1567),'nine unique ranges')
     result['limits']='Nine digest-bound native ranges and local result/error alternatives, value conversion and store coverage. Marker contexts are distinct. Helper0x16fe920 word domain and104-byte initialization, first-form tail classification, cleanup/exception, serialized input/type and runtime equivalence remain unresolved.'
+    error_value=verify_error_value(data,args.packet)
+    result['regions']+=1;result['region_bytes']+=error_value['helper_bytes']
+    result['native_instruction_rows']+=error_value['helper_instructions']
+    result['instruction_counts']['error-candidate']=error_value['helper_instructions']
+    result['field_bindings']+=error_value['field_bindings']
+    result['evidence_corruptions_rejected']+=error_value['evidence_corruptions_rejected']
+    result['controls']+=error_value['controls'];result['error_value']=error_value
+    require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(10,9382,2120),'ten unique ranges')
+    result['limits']='Ten digest-bound native ranges and local field/result store coverage. Error-value ordinary stores cover100bytes, caller copies104; tail100..103 and dependent field definedness remain unclassified. Message first-word domain including B, first-form tail40..103, source types/ABI, cleanup/exception, serialized input and runtime equivalence remain unresolved.'
     print(json.dumps(result,indent=2))
 
 
