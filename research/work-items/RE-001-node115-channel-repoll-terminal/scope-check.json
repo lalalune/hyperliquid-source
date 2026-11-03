@@ -1,0 +1,641 @@
+{
+  "checked_at": "2026-11-03T19:34:53.174598+00:00",
+  "base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "pull_requests": 2528,
+  "highest_number": 2533,
+  "open": 507,
+  "merged": 1774,
+  "changed_file_records": 42912,
+  "without_patch": 5680,
+  "method": "All-state paginated pulls plus title/body/changed-path/patch search. Cache reused only with unchanged head AND base. Semantic near-matches read and distinguished; final live recheck recorded before submission.",
+  "prior_work": [
+    30,
+    681,
+    2060
+  ],
+  "conclusion": "No overlapping semantic claim found within stated audit limits.",
+  "limits": [
+    "Unpublished or undeclared work cannot be ruled out.",
+    "Some file records omit patches; #1151 hits GitHub 3000-file limit.",
+    "Address/text matching is not an exhaustive semantic-equivalence proof."
+  ],
+  "closed_unmerged": 247,
+  "search_pattern": "2ced6b0|2ccf230|net_utils/src/channel|re.?poll|register.{0,30}waker",
+  "matching_pull_requests": [
+    {
+      "number": 2161,
+      "title": "RE-011: Trace node 115 raw-transaction RPC forwarding and failures",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-011-evm-raw-forward-115/relocations.tsv",
+            "matches": 2,
+            "sample": [
+              "+outer_future_poll\t0x6409168\t0x22e00\t0x8\t0x16b3dd0\t68914006000000000800000000000000d03d6b0100000000",
+              "+forward_future_poll\t0x640e958\t0x2a930\t0x8\t0x17480e0\t58e94006000000000800000000000000e080740100000000"
+            ]
+          },
+          {
+            "path": "tools/node115_evm_raw_forward.py",
+            "matches": 3,
+            "sample": [
+              "+    ('outer_future_poll', 0x6409168, 0x16b3dd0),",
+              "+    ('forward_future_poll', 0x640e958, 0x17480e0),",
+              "+        raise EvidenceError('future poll slot mismatch')"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2129,
+      "title": "RE-011: trace the node 115 fee-history-shaped RPC path",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-011-evm-fee-history-115/windows.json",
+            "matches": 1,
+            "sample": [
+              "+    \"label\": \"range_future_poll\","
+            ]
+          },
+          {
+            "path": "tools/evm_fee_history115.py",
+            "matches": 1,
+            "sample": [
+              "+    ('range_future_poll', 0x2a20442, '4d8db5d8010000488dbc24b00000004c89f64c89fae864a8feff0fb6ac24b00000004080fd297537488b442460c60003488b8424a0010000c6000348b9000000000000008048ffc1488b8424d8010000488908b103488b5c2408e954060000'),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2114,
+      "title": "RE-011: Trace node 115 eth_call input, limiter, and bounded worker path",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-011-eth-call-path-115/path-evidence.json",
+            "matches": 2,
+            "sample": [
+              "+      \"role\": \"outer_future_poll\",",
+              "+      \"role\": \"handler_future_poll\","
+            ]
+          },
+          {
+            "path": "tools/node115_eth_call_path.py",
+            "matches": 2,
+            "sample": [
+              "+    ('outer_future_poll', 0x6450a40, 0x2d087e0),",
+              "+    ('handler_future_poll', 0x6445880, 0x2a2a0e0),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2080,
+      "title": "RE-011: trace node 115 EVM RPC permit routing and asynchronous outcomes",
+      "matches": {
+        "metadata": [
+          "| Acquire poll 0 | 0 and a pointer | `0x28` when nonzero | hand off fields and poll the following object |",
+          "| Acquire poll 1 | 0 and null | `0x26` | non-success arm |",
+          "| Acquire poll 2, timer returns zero | 1 | `0x26` | non-success arm |",
+          "| Acquire poll 2, timer returns nonzero | 2 | `0x29` | pending, with resumption state saved |"
+        ],
+        "files": [
+          {
+            "path": "research/work-items/RE-011-evm-permit-routing-115/README.md",
+            "matches": 5,
+            "sample": [
+              "+| Method literal | Registration call / FDE | Descriptor table | Tag-one callback slot / target | Returned future poll | Inner poll | Initial selector |",
+              "+| Acquire poll returns 0 | 0, with nonzero pointer on the observed normal arm | `0x28` | copy permit fields and poll the following object |",
+              "+| Acquire poll returns 1 | 0, with null pointer | `0x26` | take the non-`0x28` arm |",
+              "+| Acquire poll returns 2; timer poll returns zero | 1 | `0x26` | take the non-`0x28` arm |",
+              "+| Acquire poll returns 2; timer poll returns nonzero | 2 | `0x29` | propagate pending and save resumption state |"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-permit-routing-115/branches.tsv",
+            "matches": 1,
+            "sample": [
+              "+inner_not_pending\t0x2b69be8\t0x2b68be8\t752f\tnot equal\t0x2b69bea\t0x2b69c19\tacquire poll byte differs from two"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-permit-routing-115/calls.tsv",
+            "matches": 1,
+            "sample": [
+              "+acquire_poll\t0x2b69bde\t0x2b68bde\tff154cdb9703\t0x2b69af0\tcall_rip_slot\t0x64e7730\t0x5ce6940\t0x5ce6940"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-permit-routing-115/evidence.json",
+            "matches": 12,
+            "sample": [
+              "+      \"label\": \"request_future_poll\",",
+              "+      \"label\": \"call_future_poll\",",
+              "+      \"label\": \"gas_future_poll\",",
+              "+      \"label\": \"acquire_poll\",",
+              "+      \"future_poll_slot_va\": \"0x6450a40\","
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-permit-routing-115/methods.tsv",
+            "matches": 1,
+            "sample": [
+              "+method\tliteral_va\tlength\tregistration_call_va\tregistration_target\tdescriptor_vtable_va\tcallback_slot_va\tcallback_target\tfuture_vtable_va\tfuture_poll_target\tinner_vtable_va\tinner_poll_target\tselector"
+            ]
+          },
+          {
+            "path": "tests/test_evm_permit_routing115.py",
+            "matches": 3,
+            "sample": [
+              "+                          rows['eth_call']['callback_target'], rows['eth_call']['future_poll_target'],",
+              "+                          rows['eth_estimateGas']['callback_target'], rows['eth_estimateGas']['future_poll_target'],",
+              "+            'router_state_clone': '0x2e332e0', 'request_future_poll': '0x2e3cb60',"
+            ]
+          },
+          {
+            "path": "tools/evm_permit_routing115.py",
+            "matches": 17,
+            "sample": [
+              "+    ('router_future_poll', 0x2e386ff, '488bb3c0000000488b83c8000000488d7c24204c89faff5018837c242002750e49c70602000000b003e927080000'),",
+              "+    ('future_poll', 0x2a04351, '4c8dab08010000488dbc24e80000004c89ee4c89e2e885571600488bac24e80000004883fd02751741c60703488b442410c6000341c60629b003'),",
+              "+    ('future_poll_not_pending', 0x2a04390, '4c8ba424f0000000448bbc24f80000004c89efe88800feff83fd010f85b2000000'),",
+              "+    ('inner_not_pending', 0x2b69be8, 'acquire poll byte differs from two'),",
+              "+    ('timeout_poll', 0x2a04366), ('acquire_poll', 0x2b69bde),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2060,
+      "title": "RE-012: trace node115 worker completion through notification to conditional exit",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-012-worker-completion-115/CONTRACT.md",
+            "matches": 1,
+            "sample": [
+              "+are not allowed to be repolled as normal active futures. Their actual diagnostic,"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-012-worker-completion-115/spec.json",
+            "matches": 1,
+            "sample": [
+              "+    \"delay_future_poll\": {"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2032,
+      "title": "RE-012: recover node115 accept4 result and caller boundaries",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-012-accept4-source-115/PROOF.md",
+            "matches": 1,
+            "sample": [
+              "+retry termination, later future polls and opaque callbacks remain unproved."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1925,
+      "title": "RE-012: decode EVM checkpoint batches and enforce transfer size",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "src/node94-tcp-frame/tests/deadlines.rs",
+            "matches": 1,
+            "sample": [
+              "+    future.poll(&mut Context::from_waker(Waker::noop()))"
+            ]
+          },
+          {
+            "path": "src/node94-tcp-frame/tests/greeting.rs",
+            "matches": 1,
+            "sample": [
+              "+    future.poll(&mut Context::from_waker(Waker::noop()))"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1912,
+      "title": "RE-012: apply node94 initial greeting reply routing",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "src/node94-tcp-frame/tests/deadlines.rs",
+            "matches": 1,
+            "sample": [
+              "+    future.poll(&mut Context::from_waker(Waker::noop()))"
+            ]
+          },
+          {
+            "path": "src/node94-tcp-frame/tests/greeting.rs",
+            "matches": 1,
+            "sample": [
+              "+    future.poll(&mut Context::from_waker(Waker::noop()))"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1889,
+      "title": "RE-012: decode all greeting reply wire variants",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "src/node94-tcp-frame/tests/deadlines.rs",
+            "matches": 1,
+            "sample": [
+              "+    future.poll(&mut Context::from_waker(Waker::noop()))"
+            ]
+          },
+          {
+            "path": "src/node94-tcp-frame/tests/greeting.rs",
+            "matches": 1,
+            "sample": [
+              "+    future.poll(&mut Context::from_waker(Waker::noop()))"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1818,
+      "title": "RE-012: reconstruct initial greeting frame exchange",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "src/node94-tcp-frame/tests/deadlines.rs",
+            "matches": 1,
+            "sample": [
+              "+    future.poll(&mut Context::from_waker(Waker::noop()))"
+            ]
+          },
+          {
+            "path": "src/node94-tcp-frame/tests/greeting.rs",
+            "matches": 1,
+            "sample": [
+              "+    future.poll(&mut Context::from_waker(Waker::noop()))"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1778,
+      "title": "RE-012: reconstruct node94 frame deadlines",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "src/node94-tcp-frame/tests/deadlines.rs",
+            "matches": 1,
+            "sample": [
+              "+    future.poll(&mut Context::from_waker(Waker::noop()))"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1685,
+      "title": "[skip ci] RE-012: bind connect readiness and fd cleanup",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-012-node94-connect-readiness/PROOF.md",
+            "matches": 1,
+            "sample": [
+              "+phase 1/2 is diagnosed rather than repolled. Registration and reference-counted"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1671,
+      "title": "RE-017: trace node 94 post-loader snapshot and status result handoff",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-017-loader-snapshot-handoff-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+One conditional arithmetic example, checked by the focused tests, starts with the constructor's `0xcc` word and assumes the scheduler sees it unchanged, successful compare-exchanges, and no intervening state changes or callbacks: the pre-poll transition selects table entry 0 and produces `0xc9`; finish produces `0xca` and preserves the slot; the l"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-017-loader-snapshot-handoff-94/jump-tables.tsv",
+            "matches": 4,
+            "sample": [
+              "+scheduler_before_poll\t0\t0x3bce8c\t0x3bce8c\tbb969d01\t27104955\t0x1d96547",
+              "+scheduler_before_poll\t1\t0x3bce8c\t0x3bce90\tc7979d01\t27105223\t0x1d96653",
+              "+scheduler_before_poll\t2\t0x3bce8c\t0x3bce94\t3a989d01\t27105338\t0x1d966c6",
+              "+scheduler_before_poll\t3\t0x3bce8c\t0x3bce98\tbd979d01\t27105213\t0x1d96649"
+            ]
+          },
+          {
+            "path": "tests/test_abci_loader_snapshot94.py",
+            "matches": 6,
+            "sample": [
+              "+        first = next(r for r in table if r['table'] == 'scheduler_before_poll' and r['index'] == 0)",
+              "+        word, index = subject.select_before_poll(0xcc)",
+              "+        self.assertEqual(subject.select_before_poll(0x24), (0x21, 1))",
+              "+        self.assertEqual(subject.select_before_poll(0x45), (5, 3))",
+              "+        self.assertEqual(subject.select_before_poll(0x85), (0x45, 2))"
+            ]
+          },
+          {
+            "path": "tools/abci_loader_snapshot94.py",
+            "matches": 2,
+            "sample": [
+              "+    ('scheduler_before_poll', 0x3bce8c,",
+              "+def select_before_poll(word):"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1585,
+      "title": "RE-017: trace node 94 state-location future spawn and completion handoff",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-017-abci-async-handoff-94/README.md",
+            "matches": 4,
+            "sample": [
+              "+| Before poll | `W & 4 == 0` | Assertion branch. |",
+              "+| Before poll | `W & 4 != 0` and `W & 3 == 0` | `N = (W & ~7) + 1`; index `(W >> 5) & 1`. |",
+              "+| Before poll | `W & 3 != 0` and `W <= 63` | Reference-count assertion branch. |",
+              "+| Before poll | Otherwise | `N = W - 64`; index `2 + (N < 64)`. |"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-017-abci-async-handoff-94/jump-tables.tsv",
+            "matches": 8,
+            "sample": [
+              "+scheduler_a_before_poll\t0x1d8e997\t488d0d2ee162fe\t0x3bcacc\t0\tdb1e9d01\t0x1d8e9a7",
+              "+scheduler_a_before_poll\t0x1d8e997\t488d0d2ee162fe\t0x3bcacc\t1\t19209d01\t0x1d8eae5",
+              "+scheduler_a_before_poll\t0x1d8e997\t488d0d2ee162fe\t0x3bcacc\t2\t8b209d01\t0x1d8eb57",
+              "+scheduler_a_before_poll\t0x1d8e997\t488d0d2ee162fe\t0x3bcacc\t3\t0f209d01\t0x1d8eadb",
+              "+scheduler_b_before_poll\t0x1d7c957\t488d0daef863fe\t0x3bc20c\t0\t5b079c01\t0x1d7c967"
+            ]
+          },
+          {
+            "path": "tests/test_abci_async_handoff94.py",
+            "matches": 1,
+            "sample": [
+              "+        self.assertEqual([r[-1] for r in tables if r[0] == 'scheduler_a_before_poll'],"
+            ]
+          },
+          {
+            "path": "tools/abci_async_handoff94.py",
+            "matches": 4,
+            "sample": [
+              "+    ('scheduler_a_before_poll', 0x1d8e997, 0x3bcacc, (0x1d8e9a7, 0x1d8eae5, 0x1d8eb57, 0x1d8eadb)),",
+              "+    ('scheduler_b_before_poll', 0x1d7c957, 0x3bc20c, (0x1d7c967, 0x1d7cac1, 0x1d7cb30, 0x1d7cab7)),",
+              "+        frame_owner = owner.removesuffix('_before_poll').removesuffix('_after_poll')",
+              "+                          address('scheduler_a_before_poll', pre_idx), address('scheduler_b_before_poll', pre_idx),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1566,
+      "title": "RE-017: trace node 94 state-loader task construction and result handoff",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tests/test_abci_loader_task94.py",
+            "matches": 4,
+            "sample": [
+              "+            kind,new,index = evidence.before_poll_case(word)",
+              "+        self.assertEqual(evidence.before_poll_case(0xfffffffffffffffc),",
+              "+        self.assertEqual(evidence.before_poll_case(0x8000000000000005),",
+              "+            evidence.before_poll_case(1 << 64)"
+            ]
+          },
+          {
+            "path": "tools/abci_loader_task94.py",
+            "matches": 1,
+            "sample": [
+              "+def before_poll_case(word):"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1220,
+      "title": "transport: node #94 traffic-recorder seed 0x3d13cd0 is tokio-metrics 0.3.1 Instrumented<F>::poll (the xchg(0) word is woke_at in ns, not a byte count; 0x3d21670 is the same future out of line)",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/traffic-recorder-instrumented-poll-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+7. **Register.** `AtomicWaker::register`: `cmpxchg(0 -> 1)` on `r13+0x28`,"
+            ]
+          },
+          {
+            "path": "tools/tokio_metrics_poll_static.py",
+            "matches": 1,
+            "sample": [
+              "+    # AtomicWaker::register, then the instrumented waker (State ArcInner + 0x10, vtable 0x5718a40)"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1151,
+      "title": "Integrate 203 reviewed research and tooling PRs",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-w3-static-review-20261031/historical-controls/262/hashers.json",
+            "matches": 2,
+            "sample": [
+              "+    \"net_utils/src/channel.rs\",",
+              "+    \"net_utils/src/channel.rs\","
+            ]
+          },
+          {
+            "path": "research/work-items/RE-001-w3-static-review-20261031/historical-controls/285/hashers.json",
+            "matches": 2,
+            "sample": [
+              "+    \"net_utils/src/channel.rs\",",
+              "+    \"net_utils/src/channel.rs\","
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1140,
+      "title": "Integrate 265 validated static research and tooling PR heads",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/channel-locations-94/README.md",
+            "matches": 3,
+            "sample": [
+              "+# transport: node #94 `net_utils/src/channel.rs` panic Locations (93:47 is an `async fn` resume Location in 21 FDEs, not an unwrap; 117:30 is the caller Location of Tokio's blocking path in four FDEs)",
+              "+The file holds `/net_utils/src/channel.rs` once, inside",
+              "+`/home/ubuntu/hl/code_Mainnet/net_utils/src/channel.rs` at `0x1e9781`"
+            ]
+          },
+          {
+            "path": "research/work-items/channel-locations-94/records.json",
+            "matches": 1,
+            "sample": [
+              "+    \"text\": \"/home/ubuntu/hl/code_Mainnet/net_utils/src/channel.rs\","
+            ]
+          },
+          {
+            "path": "tests/test_channel_locations_static.py",
+            "matches": 2,
+            "sample": [
+              "+\"\"\"Controls for tools/channel_locations_static.py (node #94 net_utils/src/channel.rs panic Locations).\"\"\"",
+              "+        self.refuses(patched((ch.PATH_VA + 0x200, b'/net_utils/src/channel.rs')), 'path is not unique')"
+            ]
+          },
+          {
+            "path": "tools/channel_locations_static.py",
+            "matches": 2,
+            "sample": [
+              "+\"\"\"Static node #94 `net_utils/src/channel.rs` panic Locations, checked from authenticated bytes.",
+              "+PATH = b'/home/ubuntu/hl/code_Mainnet/net_utils/src/channel.rs'"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 975,
+      "title": "RE-008: map node #94 block admission 0x44b8410: verify_block order, strict 2/3 stake, QC version pair, TC highest QC, 200 round stake lag, run",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-008-block-admission-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+14. If `state+0x230` is clear the block is cloned, boxed and pushed to the channel at `state+0x158` with hash and row word `0x8000000000000000`. On a closed channel (word `+0x1c0` bit 0) the row is dropped and the block still registers. A waker at `+0x100` fires once."
+            ]
+          },
+          {
+            "path": "research/work-items/RE-008-block-admission-94/cases.tsv",
+            "matches": 1,
+            "sample": [
+              "+register with waker\tregistered\t1000\t999\t3\t-\t1\t2"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-008-block-admission-94/mutations.tsv",
+            "matches": 2,
+            "sample": [
+              "+0x44b8410\t0x44b8fa0\tcondition\tkilled\tregister with waker",
+              "+0x44b8410\t0x44b8fa5\tcondition\tkilled\tregister with waker"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 681,
+      "title": "transport: node #94 net_utils/src/channel.rs panic Locations (93:47 is an async fn resume Location in 21 FDEs, not an unwrap; 117:30 is Tokio's blocking-path caller Location)",
+      "matches": {
+        "metadata": [
+          "transport: node #94 net_utils/src/channel.rs panic Locations (93:47 is an async fn resume Location in 21 FDEs, not an unwrap; 117:30 is Tokio's blocking-path caller Location)",
+          "Static evidence packet for the `net_utils/src/channel.rs` seeds in `artifacts/node/94/hl-node` (`transport`). No earlier packet or PR covers this file. It answers one question from the bytes: what do the channel.rs source Locations in these functions actually mark?"
+        ],
+        "files": [
+          {
+            "path": "research/work-items/channel-locations-94/README.md",
+            "matches": 3,
+            "sample": [
+              "+# transport: node #94 `net_utils/src/channel.rs` panic Locations (93:47 is an `async fn` resume Location in 21 FDEs, not an unwrap; 117:30 is the caller Location of Tokio's blocking path in four FDEs)",
+              "+The file holds `/net_utils/src/channel.rs` once, inside",
+              "+`/home/ubuntu/hl/code_Mainnet/net_utils/src/channel.rs` at `0x1e9781`"
+            ]
+          },
+          {
+            "path": "research/work-items/channel-locations-94/records.json",
+            "matches": 1,
+            "sample": [
+              "+    \"text\": \"/home/ubuntu/hl/code_Mainnet/net_utils/src/channel.rs\","
+            ]
+          },
+          {
+            "path": "tests/test_channel_locations_static.py",
+            "matches": 2,
+            "sample": [
+              "+\"\"\"Controls for tools/channel_locations_static.py (node #94 net_utils/src/channel.rs panic Locations).\"\"\"",
+              "+        self.refuses(patched((ch.PATH_VA + 0x200, b'/net_utils/src/channel.rs')), 'path is not unique')"
+            ]
+          },
+          {
+            "path": "tools/channel_locations_static.py",
+            "matches": 2,
+            "sample": [
+              "+\"\"\"Static node #94 `net_utils/src/channel.rs` panic Locations, checked from authenticated bytes.",
+              "+PATH = b'/home/ubuntu/hl/code_Mainnet/net_utils/src/channel.rs'"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 23,
+      "title": "RE-009: storage/state-root ownership evidence and snapshot fixture schema (node #94)",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-009-storage-state-roots/hashers.json",
+            "matches": 2,
+            "sample": [
+              "+    \"net_utils/src/channel.rs\",",
+              "+    \"net_utils/src/channel.rs\","
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "primary_address_and_literal_main_history_matches": [],
+  "closest_semantic_boundary": "See the explicit prior-work distinctions in README.md. Address-only novelty was insufficient: candidate HTTP-client, volume-fold, margin-table, oracle-total and latency-sampler questions were discarded because earlier PRs covered their semantics."
+}
