@@ -36,16 +36,33 @@ def test_each_later_need_nonzero_returns_1():
 
 
 def test_wrapped_need_summing_to_zero_does_not_trigger():
-    # diff = -16, >> 4 = -1, + base 1 wraps to 0: the jne sees zero.
-    assert predicate(obj(needs=[(16, 0, 1)] + [(0, 0, 0)] * 4,
+    # Native order is first minus second: (0 - 16) >> 4 = -1, + base 1
+    # wraps to 0: the jne sees zero.
+    assert predicate(obj(needs=[(0, 16, 1)] + [(0, 0, 0)] * 4,
                          flag=0, count=1, scores=[])) == 0
 
 
 def test_need_shift_is_arithmetic_not_logical():
-    # A negative span shifts arithmetically: -32 >> 4 = -2, + 2 = 0.
-    assert need_sum(32, 0, 2) == 0
-    # A positive span: (48 - 0) >> 4 = 3.
-    assert need_sum(0, 48, 0) == 3
+    # A negative difference shifts arithmetically: (0 - 32) >> 4 = -2,
+    # + 2 = 0.
+    assert need_sum(0, 32, 2) == 0
+    # A positive difference: (48 - 0) >> 4 = 3.
+    assert need_sum(48, 0, 0) == 3
+
+
+def test_operand_order_matches_native():
+    # Cases where first-minus-second and second-minus-first disagree
+    # on the zero test, read straight off the native operand order
+    # (mov first, sub second): both must fall through to the scan and
+    # then return 0 via the negative bound, while the flipped order
+    # would return 1 from the need sum.
+    assert predicate(obj(needs=[(0, 16, 1)] + [(0, 0, 0)] * 4,
+                         flag=0, count=1, scores=[])) == 0
+    assert predicate(obj(needs=[(16, 0, -1)] + [(0, 0, 0)] * 4,
+                         flag=0, count=1, scores=[])) == 0
+    # And the same sums with a base that does not cancel must trigger.
+    assert predicate(obj(needs=[(0, 16, 2)] + [(0, 0, 0)] * 4)) == 1
+    assert predicate(obj(needs=[(16, 0, 0)] + [(0, 0, 0)] * 4)) == 1
 
 
 def test_flag_set_bound_zero_scans_only_first_score():

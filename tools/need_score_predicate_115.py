@@ -6,8 +6,10 @@ a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301).
 
 The predicate takes one object (rsi; rdi is never read) and returns 1 or 0.
 It first checks five "need" sums, each of the shape
-((end - begin) >> 4 arithmetic on the wrapped 64-bit difference) + base,
-and returns 1 as soon as any sum is nonzero. When all five sums are zero
+((first - second) >> 4 arithmetic on the wrapped 64-bit difference)
++ base, where first/second are the operands in native instruction
+order (mov first, sub second), and returns 1 as soon as any sum is
+nonzero. When all five sums are zero
 it scans the double array at [obj+0xf38] under a bound recomputed on
 every iteration by the level gate at 0x5f6b720 (already pinned by #2330):
 the gate returns 0 when the flag byte at obj+0xa90 is set, else
@@ -20,10 +22,10 @@ Otherwise it returns 0.
 State is plain data so the model runs without the binary:
 
     obj = {
-        "needs": [(begin, end, base), ...],  # exactly five ranges, in
-            # native order: (0xc78, 0xc70, 0xbe0), (0xd20, 0xd18, 0xc88),
-            # (0xe70, 0xe68, 0xdd8), (0xbd0, 0xbc8, 0xb38),
-            # (0xf18, 0xf10, 0xe80) -- begin/end/base are raw qwords
+        "needs": [(first, second, base), ...],  # exactly five ranges,
+            # in native instruction order: (0xc78, 0xc70, 0xbe0),
+            # (0xd20, 0xd18, 0xc88), (0xe70, 0xe68, 0xdd8),
+            # (0xbd0, 0xbc8, 0xb38), (0xf18, 0xf10, 0xe80) -- raw qwords
         "flag": 0 or 1,        # byte at obj+0xa90
         "count": int,          # signed 32-bit at obj+0x10
         "scores": [float, ...] # doubles at [obj+0xf38]
@@ -65,9 +67,13 @@ def _s32(value):
     return value - (1 << 32) if value >= (1 << 31) else value
 
 
-def need_sum(begin, end, base):
-    """One need sum: ((end - begin) >> 4 arithmetic) + base, wrapping."""
-    diff = _s64(end - begin)
+def need_sum(first, second, base):
+    """One need sum: ((first - second) >> 4 arithmetic) + base, wrapping.
+
+    The native block does mov first, sub second, so the difference is
+    first minus second, not the reverse.
+    """
+    diff = _s64(first - second)
     return ((diff >> 4) + base) & MASK64
 
 
@@ -87,8 +93,8 @@ def predicate(obj):
         raise ValueError("missing object field: %s" % exc.args[0])
     if len(needs) != 5:
         raise ValueError("needs must hold exactly five ranges")
-    for begin, end, base in needs:
-        if need_sum(begin, end, base) != 0:
+    for first, second, base in needs:
+        if need_sum(first, second, base) != 0:
             return 1
     index = 0
     while True:

@@ -43,9 +43,10 @@ The function takes the object in `rsi` (`rdi` is never read) and
 returns 1 or 0.
 
 1. Five "need" sums, in this order, each of the shape
-   `((end - begin) >> 4 arithmetic on the wrapped 64-bit difference)
-   + base` (wrapping at 64 bits), with the `jne` testing the wrapped
-   sum against zero:
+   `((first - second) >> 4 arithmetic on the wrapped 64-bit
+   difference) + base` (wrapping at 64 bits), where first/second are
+   the operands in native instruction order (`mov` first, `sub`
+   second), with the `jne` testing the wrapped sum against zero:
    - (0xc78, 0xc70, 0xbe0): nonzero returns 1 at once.
    - (0xd20, 0xd18, 0xc88): nonzero returns 1 at once.
    - (0xe70, 0xe68, 0xdd8): nonzero returns 1 at once.
@@ -83,9 +84,20 @@ returns 1 or 0.
   (`need_sum`, `level_gate`, `predicate`).
 - `tests/test_need_score_predicate_115.py` covers every need position,
   the wrapped-to-zero need arm, arithmetic (not logical) shifting,
-  the threshold boundary, the flag-set bound, negative bounds reading
-  no score, NaN handling, the 32-bit gate wrap, missing-field guards,
-  and the packet checks.
+  the native operand order (cases where first-minus-second and the
+  reverse disagree on the zero test), the threshold boundary, the
+  flag-set bound, negative bounds reading no score, NaN handling,
+  the 32-bit gate wrap, missing-field guards, and the packet checks.
+
+## Correction note (same cycle, after slopbot's first review)
+
+Slopbot's first review of this PR was correct: the first version
+computed each need sum as second-minus-first, but the native blocks
+do `mov` first, `sub` second, i.e. first-minus-second. The model,
+records, README, and tests were corrected to the native operand order
+in the fix commit on this branch, and the checker and the tests were
+re-run (see Verification). No new slopbot comment on the fix commit
+yet at the time of the correction.
 
 ## Assumptions
 
