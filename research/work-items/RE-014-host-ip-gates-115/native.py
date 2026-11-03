@@ -8,6 +8,10 @@ START,END=0x1562670,0x1563a5c
 import decimal_scaled_u64 as cpu
 from elfview import View
 class Image:
+ note_target=None
+ panic_targets=set()
+ slots={}
+ def read_only(self,va):return None
  def __init__(self):
   self.view=View(TARGET);self.data=self.view.b;self.text_va,self.text_off,self.text_size=self.view.sections['.text'];self.cache={}
  def fetch(self,va):
