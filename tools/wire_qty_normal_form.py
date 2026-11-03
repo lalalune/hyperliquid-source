@@ -142,7 +142,9 @@ def analyze(data):
     for site in TEST_BRANCHES:
         if read(data,site,1)[1]!=b'\x76':
             raise ValueError('divisibility JBE polarity changed')
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    sec=next((s for s in sections(data) if s['name']=='.rela.dyn'), None)
+    if sec is None:
+        raise ValueError('missing .rela.dyn section')
     rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
     if any(rels.get(a)!=(8,v) for a,v in BINDINGS.items()):
         raise ValueError('WireQty code/source relocation changed')
