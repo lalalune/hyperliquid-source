@@ -75,8 +75,13 @@ def transfer_certificate(prefix):
 def analyze(data):
     _, fs, _ = fde_extents(data)
     frames = {(f['start'], f['end']): f for f in fs}
-    relsec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
-    rels = {a: (i, v) for a, i, v in struct.iter_unpack('<QQq', data[relsec['offset']:relsec['offset']+relsec['size']])}
+    relsec = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    if relsec is None:
+        raise ValueError('missing .rela.dyn section')
+    try:
+        rels = {a: (i, v) for a, i, v in struct.iter_unpack('<QQq', data[relsec['offset']:relsec['offset']+relsec['size']])}
+    except struct.error:
+        raise ValueError('truncated .rela.dyn section') from None
     owners = []
     text = b'struct PriorityRateDelayParams with 6 elements'
     for start, end, slot in OWNERS:
