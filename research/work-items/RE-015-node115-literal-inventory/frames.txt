@@ -1,0 +1,26 @@
+# node #115 unwind frames for the RE-015 literal inventory
+# target: artifacts/node/115/hl-node
+# sha256: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+#
+# This packet records no function boundary and no FDE/CIE record.
+#
+# The RE-015 question is a data question: which allocated sections of the pinned
+# image contain the ASCII token hl-node, at which virtual addresses and file
+# offsets, and whether any R_X86_64_RELATIVE addend in .rela.dyn equals one of
+# those addresses. Answering it needs the ELF section table and .rela.dyn only.
+# tools/foundation_literal_inventory.py parses no unwind data, and the recorded
+# scratch verification run printed no frame lines.
+#
+# A function extent is therefore not asserted here. An FDE extent must come from
+# an authenticated .eh_frame_hdr FDE record and be stored together with its raw
+# CIE/FDE bytes and body hash, as other packets do. No such record has been
+# derived for this packet, so none is written rather than invented.
+#
+# Authenticated facts recorded elsewhere in this packet (not frame data):
+#   .rodata        0x430400..0xb9ea40   file_offset 0x430400  size 7792192
+#   .data.rel.ro   0x63f3c20..0x64df248  file_offset 0x63f1c20  size 964136
+#   .data          0x64efa20..0x64ffe08  file_offset 0x64eca20  size 66536
+#   hl-node occurrences at 0x434a3e, 0x440f36, 0x605ccd, relative_slots 0
+#
+# Next question: which instruction site actually consumes those bytes, recorded
+# from the authenticated FDE extent and objdump of the enclosing function.
