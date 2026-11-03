@@ -1,0 +1,668 @@
+{
+  "checked_at": "2026-11-03T19:34:53.174598+00:00",
+  "base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "pull_requests": 2528,
+  "highest_number": 2533,
+  "open": 507,
+  "merged": 1774,
+  "changed_file_records": 42912,
+  "without_patch": 5680,
+  "method": "All-state paginated pulls plus title/body/changed-path/patch search. Cache reused only with unchanged head AND base. Semantic near-matches read and distinguished; final live recheck recorded before submission.",
+  "prior_work": [
+    2240,
+    131
+  ],
+  "conclusion": "No overlapping semantic claim found within stated audit limits.",
+  "limits": [
+    "Unpublished or undeclared work cannot be ruled out.",
+    "Some file records omit patches; #1151 hits GitHub 3000-file limit.",
+    "Address/text matching is not an exhaustive semantic-equivalence proof."
+  ],
+  "closed_unmerged": 247,
+  "search_pattern": "22b5990|237eb90|2cfa1e0|registry.{0,40}(label|name|flatten|materializ)|empty.{0,25}(label|symbol)|pdi.{0,30}(label|name)",
+  "matching_pull_requests": [
+    {
+      "number": 2413,
+      "title": "RE-002: node #115 dynamic symbol-version requirements and one bounded libstdc++ PLT window",
+      "matches": {
+        "metadata": [
+          "      \"excerpt\": \"target artifacts/node/115/hl-node\\nDERIVED {\\\"dynsym\\\":{\\\"defined_nonempty_versioned\\\":0,\\\"symbols\\\":510,\\\"version_carriers\\\":498,\\\"version_indices\\\":510},\\\"needed\\\":[\\\"libstdc++.so.6\\\",\\\"libssl.so.3\\\",\\\"libcrypto.so.3\\\",\\\"libgcc_s.so.1\\\",\\\"libm.so.6\\\",\\\"libc.so.6\\\",\\\"ld-linux-x86-64.so.2\\\"],\\\"sections\\\":{\\\".dynamic\\\":{\\\"addr\\\":\\\"",
+          "      \"excerpt\": \"target artifacts/node/115/hl-node\\nDERIVED {\\\"dynsym\\\":{\\\"defined_nonempty_versioned\\\":0,\\\"symbols\\\":510,\\\"version_carriers\\\":498,\\\"version_indices\\\":510},\\\"needed\\\":[\\\"libstdc++.so.6\\\",\\\"libssl.so.3\\\",\\\"libcrypto.so.3\\\",\\\"libgcc_s.so.1\\\",\\\"libm.so.6\\\",\\\"libc.so.6\\\",\\\"ld-linux-x86-64.so.2\\\"],\\\"sections\\\":{\\\".dynamic\\\":{\\\"addr\\\":\\\""
+        ],
+        "files": [
+          {
+            "path": "research/work-items/RE-002-node115-libstdcxx-abi/README.md",
+            "matches": 1,
+            "sample": [
+              "+carry a version-need index, and 0 defined non-empty versioned symbols."
+            ]
+          },
+          {
+            "path": "research/work-items/RE-002-node115-libstdcxx-abi/evidence.json",
+            "matches": 1,
+            "sample": [
+              "+    \"dynsym\": {\"defined_nonempty_versioned\": 0, \"symbols\": 510, \"version_carriers\": 498, \"version_indices\": 510},"
+            ]
+          },
+          {
+            "path": "tools/foundation_libstdcxx_abi.py",
+            "matches": 1,
+            "sample": [
+              "+    print(\"defined non-empty versioned symbols %d\" % symbols[\"defined_nonempty_versioned\"])"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2157,
+      "title": "RE-010: trace node 115 claim rewards dispatch and state updates",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tools/re010_claim_rewards_115.py",
+            "matches": 1,
+            "sample": [
+              "+    require(name != '', 'empty dynamic symbol')"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2050,
+      "title": "RE-002: reconstruct node115 dependencies \u2014 std, vendored crates and native libraries (5.31 MB)",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-002-node115-vendor-census/README.md",
+            "matches": 1,
+            "sample": [
+              "+`symbol` is one representative name. Registry labels say \"one of N identical"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2044,
+      "title": "research: recover node115 keepalive failures and caller continuation",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-012-keepalive-source-115/verify.py",
+            "matches": 1,
+            "sample": [
+              "+                 == registry['evidence_sha256'][name], 'registry source evidence hash')"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2018,
+      "title": "RE-012: bind node94 keepalive source and caller error policy",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-012-keepalive-source-94/verify.py",
+            "matches": 1,
+            "sample": [
+              "+                 == registry['evidence_sha256'][name], 'registry source evidence hash')"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1914,
+      "title": "RE-009: map node 94 state-hash address and kind collection codecs",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-009-state-kind-collection-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+| 3 | `Pdi` | map, name, unsigned integer | reject | numeric helper |"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-009-state-kind-collection-94/anchors.tsv",
+            "matches": 2,
+            "sample": [
+              "+pdi_name_prefix\t0x28e54e4\t0x28e44e4\tc60407a3",
+              "+pdi_name\t0x28e54fc\t0x28e44fc\tc64407026966c704075064"
+            ]
+          },
+          {
+            "path": "tools/re009_state_kinds94.py",
+            "matches": 2,
+            "sample": [
+              "+ ('pdi_name_prefix',0x28e54e4,'c60407a3'),",
+              "+ ('pdi_name',0x28e54fc,'c64407026966c704075064'),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1874,
+      "title": "[skip ci] RE-005: bind nested enum admission and ownership",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-005-node94-nested-enum/PROOF.md",
+            "matches": 1,
+            "sample": [
+              "+Empty root0/len0 has inactive height; nonempty map height0 and one symbolic"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-005-node94-nested-enum/README.md",
+            "matches": 1,
+            "sample": [
+              "+movement includes65active value bytes. Each nonempty map owns one symbolic"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1779,
+      "title": "[skip ci] RE-005: bind small-limit greeting map state",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-005-node94-small-limit-greeting-map/PROOF-ADDENDUM.md",
+            "matches": 1,
+            "sample": [
+              "+requests. Successful nonempty root is a symbolic fresh leaf, not a numeric"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-005-node94-small-limit-greeting-map/README.md",
+            "matches": 1,
+            "sample": [
+              "+the empty root0/len0 has no active height. Nonempty root is a symbolic fresh"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1713,
+      "title": "RE-021: trace alternate borrowed registry and post-call account updates on node 94",
+      "matches": {
+        "metadata": [
+          "The descriptor and copy relations support the conditional interpretation that the selected executor installs a borrowed registry whose prior mode-2 lineage contains address 09. Account, registry, callback and refund-like names are inferred from field use. The two new entry points compose only when a caller supplies the constructed engine to the exe"
+        ],
+        "files": [
+          {
+            "path": "research/work-items/RE-021-borrowed-family-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+- Claim status: bytes, FDE and exception records, relocations, and selected branch destinations are **observations**. Handler, registry, account and callback names, and composition across normal calls, are **inferences**. Runtime selection, the unselected lookup's result, complete helper behavior, and behavioral equivalence remain **unresolved**."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1676,
+      "title": "RE-021: trace revision 12 registry publication and creation-time lookup",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-021-revision12-standard-lookup-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+- Claim status: byte windows, FDE/LSDA records, relocations, selected displacements and branch targets are observations. Registry, callback, address-set and hash-table names, and the cross-function composition under normal returns, are inferences. A complete lookup through the borrowed arm, live revision selection and runtime execution remain unre"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1612,
+      "title": "RE-021: trace node 94 inspected precompile handoff and snapshot",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-021-inspected-precompile-path-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+- Scope included and excluded: the 15 FDE starts in `functions.tsv` are this packet's selected bodies. Existing standard registry lookup, provider B materialization, frame construction, the compression wrapper and the separately exported B-runtime body are dependencies and are not selected again. Node #115, visor, execution, emulation, chain state"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1589,
+      "title": "RE-021: map node #94 private EVM account, code and storage input caches",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-021-db-input-cache-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+The test-only integer and branch models use synthetic values and explicit seeds; they neither execute nor emulate target code. Controls cover all single-bit changes of the synthetic 20- and 32-byte lookup keys, fingerprint collisions, group wrap, deleted/empty controls, state-byte low-bit cases, the two account-read predicates, code-tag defaults, "
+            ]
+          },
+          {
+            "path": "tools/evm_db_cache_path94.py",
+            "matches": 1,
+            "sample": [
+              "+        require(name, 'empty dynamic symbol name')"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1413,
+      "title": "RE-021: connect node94 private precompile providers to BLAKE2b lookup, context state and failure handling",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-021-precompile-provider-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+This packet establishes that the private EVM provider preserves the standard `0x09` callback while adding `0x0800..0x0813`, and connects one raw-spec-18 builder path through registry materialization, context installation, address lookup, precompile result handling and journal rollback; an independent reconstruction can now separate private provide"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1373,
+      "title": "RE-021: trace node #94 BLAKE2b registry construction, hash lookup, dispatch and checkpoint outcomes",
+      "matches": {
+        "metadata": [
+          "Registry modes are numeric; historical fork names are not assigned. Membership is inferred from observed clone/extend/replace semantics, not captured memory. Container roles, journal field names and result meanings are explicitly separated from bytes and branch destinations. Process hash words are mutable state, so this packet cannot prescribe an a"
+        ],
+        "files": []
+      }
+    },
+    {
+      "number": 1348,
+      "title": "RE-004: recover PDI decimal-byte display scaling in node 94",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-004-pdi-display-decimals-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+- Claim status: byte and FDE observations below; shared row role and PDI name are inferences; reachability of decimal indices is unresolved."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1267,
+      "title": "foundation: bind node #94 all-empty-gate helper 0x50a90a0 \u2014 five equality gates, then no-op call and counter decrement",
+      "matches": {
+        "metadata": [
+          "- No stdlib type, source-level function, field meaning, or caller purpose is claimed anywhere. The \"all-empty-gate helper\" label is an inference, kept separate from the observed rule."
+        ],
+        "files": []
+      }
+    },
+    {
+      "number": 1140,
+      "title": "Integrate 265 validated static research and tooling PR heads",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-004-hip3-liquidator-amount-gate-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+- The registry lookup is stubbed. Which names it accepts was not read."
+            ]
+          },
+          {
+            "path": "research/work-items/fees-fee-scale-94/reference-diff.tsv",
+            "matches": 2,
+            "sample": [
+              "+differs\tasset/pdi.rs find_by_dex_name_or_first_mut\tempty name takes the first lookup-visible dex, none gives UnknownDex\tan empty name takes row 0 with no status test at 0x3332406, and panics by unwrap at 0x333245e on an empty table",
+              "+differs\tasset/pdi.rs find_by_dex_name_or_first_mut\tname length bound is inside the lookup\t0x3332380 has no length test; the arm tests name length after the text and its parser, and tests text length first"
+            ]
+          },
+          {
+            "path": "tests/test_zstd_asm_correspondence.py",
+            "matches": 1,
+            "sample": [
+              "+    struct.pack_into('<IIQQ', changed, empty['header'] + 40, symbols['index'], text['index'], 8, 24)"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1073,
+      "title": "Integrate 96 reviewed parser, bincode, and research PRs",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/dex-registry-inventory-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+The JSON inventories all 4 `DexStatus` and 18 `RegistryError` variant names in the specified lead and reports exact byte-substring occurrences in `.rodata`, with context and counts. `Live`, `Locked`, `Delisted`, `Deleted`, and `LengthMismatch` occur as substrings, but contexts include unrelated words, fields, or diagnostic text. No listed occurren"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1065,
+      "title": "RE-002: reproduce two capture spans from licensed zstd assembly",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tests/test_zstd_asm_correspondence.py",
+            "matches": 1,
+            "sample": [
+              "+    struct.pack_into('<IIQQ', changed, empty['header'] + 40, symbols['index'], text['index'], 8, 24)"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1057,
+      "title": "staking: map node #94 withdrawal drain: strict time split, pending totals first, balance filter, credit and ledger row, 3 copies",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tools/staking_withdrawal_drain.py",
+            "matches": 1,
+            "sample": [
+              "+    out.extend((single(\"name_empty\", symbol=b\"\"), single(\"name_long\", symbol=b\"LONGERTOKEN\"), single(\"fail_user_list\", fail=0x14), single(\"fail_name_copy\", fail=4), single(\"fail_second_row\", fail=0x14, queue=(row_at(-1, ((7, 1), (8, 1))),), totals=((1, 15, 2),), users=((1, 15),))))"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 958,
+      "title": "l1: bind node94 pdi body 0x3be6420",
+      "matches": {
+        "metadata": [
+          "Bounded static validation of a pdi body newly mapped by the path-evidence reservoir (l1/asset/pdi.rs, l1/clearinghouse/oracle/oracle.rs). Body 0x3be6420 (564 bytes): 28 verified branch destinations, 0 direct call sites, 3 GOT-mediated call sites, 2 panic Locations (asset/pdi.rs:30, clearinghouse/oracle/oracle.rs:197), whole-.text census. Observatio"
+        ],
+        "files": []
+      }
+    },
+    {
+      "number": 952,
+      "title": "l1: bind node94 pdi body 0x2a22520",
+      "matches": {
+        "metadata": [
+          "Bounded static validation of a pdi body newly mapped by the path-evidence reservoir (l1/asset/pdi.rs). Body 0x2a22520 (538 bytes): 15 verified branch destinations, 2 direct call sites, 6 GOT-mediated call sites, 2 panic Locations (asset/pdi.rs:30, iter/adapters/enumerate.rs:141), whole-.text census. Observations only; the pdi label is file-derived."
+        ],
+        "files": []
+      }
+    },
+    {
+      "number": 935,
+      "title": "l1: bind node94 pdi body 0x3be6660",
+      "matches": {
+        "metadata": [
+          "Bounded static validation of a pdi body newly mapped by the path-evidence reservoir (l1/asset/pdi.rs, l1/clearinghouse/oracle/oracle.rs). Body 0x3be6660 (409 bytes): 18 verified branch destinations, 0 direct call sites, 3 GOT-mediated call sites, 2 panic Locations (asset/pdi.rs:30, clearinghouse/oracle/oracle.rs:197), whole-.text census. Observatio"
+        ],
+        "files": []
+      }
+    },
+    {
+      "number": 934,
+      "title": "l1: bind node94 pdi body 0x21bc7c0",
+      "matches": {
+        "metadata": [
+          "Bounded static validation of a pdi body newly mapped by the path-evidence reservoir (l1/asset/pdi.rs, l1/perp_meta.rs). Body 0x21bc7c0 (398 bytes): 14 verified branch destinations, 0 direct call sites, 4 GOT-mediated call sites, 2 panic Locations (asset/pdi.rs:30, perp_meta.rs:194), whole-.text census. Observations only; the pdi label is file-deriv"
+        ],
+        "files": []
+      }
+    },
+    {
+      "number": 795,
+      "title": "l1: bind node94 pdi body 0x3bb7280",
+      "matches": {
+        "metadata": [
+          "Bounded static validation of a pdi body newly mapped by the path-evidence reservoir (l1/asset/pdi.rs, l1/perp_meta.rs). Body 0x3bb7280 (1009 bytes): 23 verified branch destinations, 7 direct call sites, 5 GOT-mediated call sites, 3 panic Locations (asset/pdi.rs:30, perp_meta.rs:194, perp_meta.rs:319), whole-.text census. Observations only; the pdi "
+        ],
+        "files": []
+      }
+    },
+    {
+      "number": 699,
+      "title": "l1: bind node94 pdi body 0x26f8d50",
+      "matches": {
+        "metadata": [
+          "Bounded static validation of a pdi body newly mapped by the path-evidence reservoir (l1/asset/pdi.rs, l1/books.rs). Body 0x26f8d50 (2167 bytes): 66 verified branch destinations, 16 direct call sites, 18 GOT-mediated call sites, 5 panic Locations (clearinghouse/oracle/oracle.rs:197, perp_meta.rs:194, perp_meta.rs:319, spot_meta.rs:113, spot_meta.rs:"
+        ],
+        "files": []
+      }
+    },
+    {
+      "number": 684,
+      "title": "l1: bind node94 pdi body 0x3261520",
+      "matches": {
+        "metadata": [
+          "Bounded static validation of a pdi body newly mapped by the path-evidence reservoir (l1/asset/pdi.rs, l1/clearinghouse/oracle/oracle.rs). Body 0x3261520 (1539 bytes): 30 verified branch destinations, 7 direct call sites, 16 GOT-mediated call sites, 6 panic Locations (asset/pdi.rs:30, clearinghouse/oracle/oracle.rs:197, perp_meta.rs:194, perp_meta.r"
+        ],
+        "files": []
+      }
+    },
+    {
+      "number": 657,
+      "title": "fees: evaluate node #94 growth mode setter from bytes: true stores 0 (fee factor 0.1), 2 passes, 30-day or 60 s wait, 3 copies",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/fees-growth-modes-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+`reference-diff.tsv` has 8 rows. The reference has no action or setter for growth modes. It names the three values `normal`, `allowHip3`, `frozen` where the serializer prints `enabled`, `disabled`, `blocked`, and treats byte +0x29 as a bool `growth_mode_allowed` in `asset/pdi.rs`, a name that does not fit a 3-valued byte whose zero value turns on "
+            ]
+          },
+          {
+            "path": "research/work-items/fees-growth-modes-94/reference-diff.tsv",
+            "matches": 1,
+            "sample": [
+              "+same\tasset/pdi.rs find_by_dex_name_or_first_mut\tempty name takes a row with no name\t0x3332270 takes row 0 for an empty name with no status test; 0x273b78b then skips the scale test for a status 3 row"
+            ]
+          },
+          {
+            "path": "tools/fees_growth_modes.py",
+            "matches": 1,
+            "sample": [
+              "+    ('same', 'asset/pdi.rs find_by_dex_name_or_first_mut', 'empty name takes a row with no name', '0x3332270 takes row 0 for an empty name with no status test; 0x273b78b then skips the scale test for a status 3 row'),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 548,
+      "title": "fees: evaluate node #94 deployer fee scale setter from bytes: mode 3 waits 30 days, others 60 s, range, asset gate, 3 action arms",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/fees-fee-scale-94/reference-diff.tsv",
+            "matches": 2,
+            "sample": [
+              "+differs\tasset/pdi.rs find_by_dex_name_or_first_mut\tempty name takes the first lookup-visible dex, none gives UnknownDex\tan empty name takes row 0 with no status test at 0x3332406, and panics by unwrap at 0x333245e on an empty table",
+              "+differs\tasset/pdi.rs find_by_dex_name_or_first_mut\tname length bound is inside the lookup\t0x3332380 has no length test; the arm tests name length after the text and its parser, and tests text length first"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 311,
+      "title": "RE-004: pin node #94 hip3LiquidatorTransfer ntl gate in 3 copies: cap, zero by flag, exact multiple of 1e9, shown for all u64",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-004-hip3-liquidator-amount-gate-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+- The registry lookup is stubbed. Which names it accepts was not read."
+            ]
+          },
+          {
+            "path": "tools/hip3_liquidator_gate.py",
+            "matches": 1,
+            "sample": [
+              "+        if regs[RSI] != STATE + self.copy[\"registry\"] or regs[RDX] != self.name or regs[RCX] != self.case.size:"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 131,
+      "title": "dex-registry: inventory node #94 reserved names, Locations, and count thresholds",
+      "matches": {
+        "metadata": [
+          "dex-registry: inventory node #94 reserved names, Locations, and count thresholds"
+        ],
+        "files": [
+          {
+            "path": "research/work-items/dex-registry-inventory-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+The JSON inventories all 4 `DexStatus` and 18 `RegistryError` variant names in the specified lead and reports exact byte-substring occurrences in `.rodata`, with context and counts. `Live`, `Locked`, `Delisted`, `Deleted`, and `LengthMismatch` occur as substrings, but contexts include unrelated words, fields, or diagnostic text. No listed occurren"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 11,
+      "title": "RE-002: provenance facts, git dependency source and override version bounds",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-002-build-provenance/README.md",
+            "matches": 1,
+            "sample": [
+              "+| crates.io crates | `/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/<name>-<version>/`, 809 path occurrences, 118 name-version pairs over 114 names | none |"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-002-build-provenance/provenance-115.json",
+            "matches": 1,
+            "sample": [
+              "+    \"reasoning\": \"bundled jemalloc version string present; crate (likely tikv-jemalloc-sys) version is not visible unless a registry/vendor path names it\""
+            ]
+          },
+          {
+            "path": "research/work-items/RE-002-build-provenance/provenance-94.json",
+            "matches": 1,
+            "sample": [
+              "+    \"reasoning\": \"bundled jemalloc version string present; crate (likely tikv-jemalloc-sys) version is not visible unless a registry/vendor path names it\""
+            ]
+          },
+          {
+            "path": "research/work-items/RE-002-build-provenance/provenance-visor.json",
+            "matches": 1,
+            "sample": [
+              "+    \"reasoning\": \"bundled jemalloc version string present; crate (likely tikv-jemalloc-sys) version is not visible unless a registry/vendor path names it\""
+            ]
+          },
+          {
+            "path": "tests/test_build_provenance.py",
+            "matches": 1,
+            "sample": [
+              "+        self.assertEqual(by_key(self.items, 'crate.registry')[0]['value'], {'name': 'tokio', 'version': '1.44.2'})"
+            ]
+          },
+          {
+            "path": "tools/build_provenance.py",
+            "matches": 2,
+            "sample": [
+              "+        f.exact('crate.registry', {'name': name, 'version': ver}, off, n)",
+              "+                   'is not visible unless a registry/vendor path names it')"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1,
+      "title": "RE-002: Build provenance for hl-node #94, #115 and the visor",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-002-build-provenance/README.md",
+            "matches": 1,
+            "sample": [
+              "+| crates.io crates | `/home/ubuntu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/<name>-<version>/`, 809 path occurrences, 118 name-version pairs over 114 names | none |"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-002-build-provenance/provenance-115.json",
+            "matches": 1,
+            "sample": [
+              "+    \"reasoning\": \"bundled jemalloc version string present; crate (likely tikv-jemalloc-sys) version is not visible unless a registry/vendor path names it\""
+            ]
+          },
+          {
+            "path": "research/work-items/RE-002-build-provenance/provenance-94.json",
+            "matches": 1,
+            "sample": [
+              "+    \"reasoning\": \"bundled jemalloc version string present; crate (likely tikv-jemalloc-sys) version is not visible unless a registry/vendor path names it\""
+            ]
+          },
+          {
+            "path": "research/work-items/RE-002-build-provenance/provenance-visor.json",
+            "matches": 1,
+            "sample": [
+              "+    \"reasoning\": \"bundled jemalloc version string present; crate (likely tikv-jemalloc-sys) version is not visible unless a registry/vendor path names it\""
+            ]
+          },
+          {
+            "path": "tests/test_build_provenance.py",
+            "matches": 1,
+            "sample": [
+              "+        self.assertEqual(by_key(self.items, 'crate.registry')[0]['value'], {'name': 'tokio', 'version': '1.44.2'})"
+            ]
+          },
+          {
+            "path": "tools/build_provenance.py",
+            "matches": 2,
+            "sample": [
+              "+        f.exact('crate.registry', {'name': name, 'version': ver}, off, n)",
+              "+                   'is not visible unless a registry/vendor path names it')"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "primary_address_and_literal_main_history_matches": [],
+  "closest_semantic_boundary": "See the explicit prior-work distinctions in README.md. Address-only novelty was insufficient: candidate HTTP-client, volume-fold, margin-table, oracle-total and latency-sampler questions were discarded because earlier PRs covered their semantics."
+}
