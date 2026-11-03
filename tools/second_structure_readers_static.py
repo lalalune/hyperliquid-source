@@ -540,22 +540,36 @@ def rip_ref_census(data):
     instruction map by the caller.  Absolute imm64 occurrences are
     counted separately.
     """
-    import numpy as np
     sec = next(s for s in sections(data) if s['name'] == '.text')
     base, off, size = sec['address'], sec['offset'], sec['size']
-    body = np.frombuffer(data, dtype=np.uint8, count=size, offset=off)
-    b = body.astype(np.int32)
-    disp = b[:-3] + (b[1:-2] << 8) + (b[2:-1] << 16) + (b[3:] << 24)
-    pos = np.arange(len(disp), dtype=np.int32)
-    out = {}
     raw = bytes(data[off:off + size])
-    for tag in (TAG_A, TAG_B, TAG_REC):
+    tags = (TAG_A, TAG_B, TAG_REC)
+    tag_set = frozenset(tags)
+    by_key = {(tag, delta): [] for tag in tags for delta in (0, 1, 4)}
+    unpack_from = struct.unpack_from
+    # Standard-library-only scan: the disp32 at each position is read
+    # as a signed little-endian word, exactly as the previous
+    # vectorised computation did (its int32 arithmetic wraps to the signed value,
+    # and a wrapped sum can never equal one of the small positive tags
+    # unless the unwrapped sum does, so plain integer comparison here
+    # yields the same candidate set).
+    for i in range(max(size - 3, 0)):
+        disp = unpack_from('<i', raw, i)[0]
+        target = base + i + 4 + disp
+        if target in tag_set:
+            by_key[(target, 0)].append({'disp_field': hex(base + i),
+                                        'end_delta': 0})
+        if target + 1 in tag_set:
+            by_key[(target + 1, 1)].append({'disp_field': hex(base + i),
+                                            'end_delta': 1})
+        if target + 4 in tag_set:
+            by_key[(target + 4, 4)].append({'disp_field': hex(base + i),
+                                            'end_delta': 4})
+    out = {}
+    for tag in tags:
         rows = []
         for delta in (0, 1, 4):
-            cand = np.nonzero(base + pos + 4 + delta + disp == tag)[0]
-            for c in cand:
-                rows.append({'disp_field': hex(base + int(c)),
-                             'end_delta': delta})
+            rows.extend(by_key[(tag, delta)])
         imm = []
         pat = struct.pack('<Q', tag)
         i = raw.find(pat)
