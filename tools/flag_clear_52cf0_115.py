@@ -16,9 +16,12 @@ threshold in rsi. End to end, in order:
    slot at +0xb48 (the next chunk is taken from the following
    slot, +8 at a time). For each entry, in order:
    - if the cursor equals the end cursor, stop;
-   - if the entry's first qword (its key) is unsigned-less
+   - if the entry's first qword (its key) is unsigned-greater
      than the threshold, stop at once -- later entries, in this
-     and later chunks, are untouched;
+     and later chunks, are untouched. (AT&T `cmp (%rax),%rbx`
+     computes rbx minus the key, so `jb` exits exactly when
+     the threshold is unsigned-less than the key; keys equal
+     to the threshold are cleared, not stopped on);
    - otherwise write 0 to the byte at entry +0x10 and advance
      the cursor by 0x20;
    - when the cursor reaches the current chunk end, take the
@@ -113,8 +116,8 @@ def flag_clear(owner, threshold, events):
         if chunk is None:
             raise ValueError("no chunk for slot %#x" % slots[slot_index])
         entry = chunk.entry_at(cursor)
-        if entry.key < threshold:
-            events.append("stop: key %#x below threshold %#x"
+        if entry.key > threshold:
+            events.append("stop: key %#x above threshold %#x"
                           % (entry.key, threshold))
             break
         entry.flag = 0

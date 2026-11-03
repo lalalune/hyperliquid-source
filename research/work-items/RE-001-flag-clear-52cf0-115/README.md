@@ -24,9 +24,16 @@ not a `ret`. End to end, in order:
    chunk's map slot at `+0xb48` (the next chunk is taken from
    the following slot, +8 at a time). For each entry, in order:
    - if the cursor equals the end cursor, stop;
-   - if the entry's first qword (its key) is unsigned-less
+   - if the entry's first qword (its key) is unsigned-greater
      than the threshold, stop at once -- later entries, in this
-     and later chunks, are untouched;
+     and later chunks, are untouched. (AT&T `cmp (%rax),%rbx`
+     at `0x5d52d35` computes rbx minus the key, so the `jb` at
+     `0x5d52d38` exits exactly when the threshold is
+     unsigned-less than the key; a key equal to the threshold
+     is cleared, not stopped on. An earlier revision of this
+     packet had the direction inverted; slopbot's limited
+     review of the PR caught it and this revision corrects
+     the model, the tests, and the records to match the bytes);
    - otherwise write 0 to the byte at entry `+0x10` and advance
      the cursor by 0x20;
    - when the cursor reaches the current chunk end, take the
@@ -75,7 +82,7 @@ claimed; wider caller semantics are not.
 
 What the owner, the entries, the keys, or the `+0x10` flag byte
 denote; the order the entries are stored in beyond the
-below-threshold stop rule; what the acquire stub or the
+above-threshold stop rule; what the acquire stub or the
 broadcast callee do beyond the pinned body and first action
 noted above; caller semantics beyond the sites, FDE ranges,
 and pinned moves; or behaviour on dangling pointers, a null

@@ -1,10 +1,13 @@
 """Tests for the node #115 threshold flag-clear model (0x5d52cf0).
 
 Target-grounded expectations: the no-op acquire stub, the
-end-cursor stop, the unsigned below-threshold stop, the
-+0x10-only writes in walk order, the 0x200-byte chunk switch
-through the next map slot, and the closing broadcast, plus
-input guards. Run from the repository root:
+end-cursor stop, the unsigned above-threshold stop (AT&T
+`cmp (%rax),%rbx` + `jb` exits when the threshold is
+unsigned-less than the key, so a key equal to the threshold
+is cleared), the +0x10-only writes in walk order, the
+0x200-byte chunk switch through the next map slot, and the
+closing broadcast, plus input guards. Run from the repository
+root:
 
     python3 tests/test_flag_clear_52cf0_115.py
 """
@@ -71,10 +74,12 @@ def main():
     check("empty clears nothing",
           all(e.flag == 1 for e in c0.entries))
 
-    # 2. One full chunk, all keys at or above the threshold:
+    # 2. One full chunk, all keys at or below the threshold:
     # all 16 flags cleared in order, then the next map slot
-    # equals the end cursor and the walk stops.
-    c0 = chunk(0x1000, [9, 8, 7] + [20] * 13)
+    # equals the end cursor and the walk stops. The key equal
+    # to the threshold (7) is cleared, not stopped on -- the
+    # boundary that catches an inverted comparison.
+    c0 = chunk(0x1000, [7, 6, 5] + [7] * 13)
     own = owner(0x1000, 0x1200, 0x1200, [0x1000, 0x1200],
                 {0x1000: c0})
     result, events = run(own, 7)
@@ -86,26 +91,35 @@ def main():
     check("full chunk ends with broadcast",
           events[-1] == "broadcast called (0x60d57c0, owner +0xb70)")
 
-    # 3. Below-threshold stop: the first key below the
+    # 3. Above-threshold stop: the first key above the
     # threshold stops the walk at once; later entries, in the
     # same chunk, keep their flags, but the broadcast still runs.
-    c0 = chunk(0x1000, [10, 5, 20] + [30] * 13)
+    # The head key 5 (at or below 7) clears; the key 8 stops.
+    c0 = chunk(0x1000, [5, 8, 20] + [30] * 13)
     own = owner(0x1000, 0x1200, 0x1200, [0x1000, 0x1200],
                 {0x1000: c0})
     _r, events = run(own, 7)
     check("stop clears only the head",
           [e.flag for e in c0.entries[:4]] == [0, 1, 1, 1])
     check("stop event names the key",
-          any("below threshold" in e and "0x5" in e for e in events))
+          any("above threshold" in e and "0x8" in e for e in events))
     check("stop still broadcasts",
           events[-1] == "broadcast called (0x60d57c0, owner +0xb70)")
 
+    # 3b. One above the threshold stops; exactly at it clears.
+    c0 = chunk(0x1000, [7, 8] + [7] * 14)
+    own = owner(0x1000, 0x1200, 0x1200, [0x1000, 0x1200],
+                {0x1000: c0})
+    _r, _e = run(own, 7)
+    check("threshold-equal clears, threshold-plus-one stops",
+          [e.flag for e in c0.entries[:3]] == [0, 1, 1])
+
     # 4. Multi-chunk: the first chunk clears fully, the walk
     # switches through the next map slot (chunk end becomes
-    # base + 0x200), and the second chunk's first below-threshold
+    # base + 0x200), and the second chunk's first above-threshold
     # key stops it there.
-    c0 = chunk(0x1000, [50] * 16)
-    c1 = chunk(0x2000, [3, 60] + [60] * 14)
+    c0 = chunk(0x1000, [5] * 16)
+    c1 = chunk(0x2000, [9, 5] + [5] * 14)
     own = owner(0x1000, 0x1200, 0x2200, [0x1000, 0x2000],
                 {0x1000: c0, 0x2000: c1})
     _r, events = run(own, 7)
@@ -121,28 +135,35 @@ def main():
     c0 = chunk(0x1000, [99] * 4 + [8, 9] + [99] * 10)
     own = owner(0x1080, 0x1200, 0x1200, [0x1000, 0x1200],
                 {0x1000: c0})
-    _r, events = run(own, 1)
+    _r, events = run(own, 100)
     check("partial start keeps the head entries",
           all(e.flag == 1 for e in c0.entries[:4]))
     check("partial start clears from the cursor",
           all(e.flag == 0 for e in c0.entries[4:]))
 
-    # 6. Unsigned comparison: the maximum key is not below a
-    # small threshold; a zero key is below any nonzero one.
+    # 6. Unsigned comparison: the maximum key is above any
+    # small threshold and stops at once; a zero key is at or
+    # below any threshold and clears.
     c0 = chunk(0x1000, [0xFFFFFFFFFFFFFFFF, 0] + [5] * 14)
     own = owner(0x1000, 0x1200, 0x1200, [0x1000, 0x1200],
                 {0x1000: c0})
     _r, _e = run(own, 1)
-    check("unsigned max key clears",
+    check("unsigned max key stops",
+          c0.entries[0].flag == 1)
+    c0 = chunk(0x1000, [0, 0xFFFFFFFFFFFFFFFF] + [5] * 14)
+    own = owner(0x1000, 0x1200, 0x1200, [0x1000, 0x1200],
+                {0x1000: c0})
+    _r, _e = run(own, 1)
+    check("unsigned zero key clears",
           c0.entries[0].flag == 0)
-    check("unsigned zero key stops",
+    check("unsigned max key stops after zero",
           c0.entries[1].flag == 1)
 
     # 7. Only the +0x10 byte is written: keys are unchanged.
     c0 = chunk(0x1000, [42] * 16)
     own = owner(0x1000, 0x1200, 0x1200, [0x1000, 0x1200],
                 {0x1000: c0})
-    run(own, 1)
+    run(own, 100)
     check("keys unchanged",
           all(e.key == 42 for e in c0.entries))
 
@@ -158,7 +179,7 @@ def main():
     own = owner(0x1000, 0x1200, 0x1200, [0x1000],
                 {0x1000: c0})
     try:
-        run(own, 1)
+        run(own, 100)
         check("slot exhaustion raises", False)
     except ValueError:
         check("slot exhaustion raises", True)
