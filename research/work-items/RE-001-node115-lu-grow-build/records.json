@@ -1,0 +1,427 @@
+{
+ "base_commit": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+ "binary": {
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "build": {
+  "body_bytes": 1201,
+  "body_sha256": "f22415432c1f16a1dbf5fa678c9da1c96d0ce22bbda8586da1632452c75d24a3",
+  "bytes": 1408,
+  "cie": "0039672c",
+  "end": "0x4cbdcb0",
+  "full_sha256": "b5f3e07d7c0da9d0fa6ec9e7e0973f768fce220a279cbf386c1fe9a368996bbc",
+  "instructions": 292,
+  "nops": 5,
+  "ret": "0x4cbdbe0",
+  "start": "0x4cbd730",
+  "tail_bytes": 207
+ },
+ "caller_contract": {
+  "flag_helper_call_site": "0x4dcd0bd",
+  "flag_helper_call_bytes": "e8 fe 8d 38 00",
+  "grow_args": "f(out: *mut Tree24, table_copy: *const Table32)",
+  "out_installed_as_table_tree_mode": {
+   "count_field": "[table+0x18] = grow out count",
+   "height_field": "[table+0x10] = grow out height",
+   "root_field": "[table+0x8] = grow out root",
+   "sentinel_field": "[table] = 0x8000000000000000 (marks tree mode)",
+   "sites": [
+    "0x4dcd193 (sentinel store)",
+    "0x4dcd19f (count store)",
+    "0x4dcd1a3 (root+height 16-byte store)"
+   ]
+  },
+  "table_reset_before_call": {
+   "buffer_field": "[table+0x8] = 8 (capacity 8)",
+   "head_and_length_zeroed": "[table+0x10..0x20] = 0 (16 bytes)",
+   "root_field": "[table] = 0",
+   "sites": [
+    "0x4dcd098",
+    "0x4dcd0a3",
+    "0x4dcd0ae"
+   ]
+  }
+ },
+ "coordinate_system": ".text file offset = VA - 0x1000; .data.rel.ro/.got file offset = VA - 0x2000; .rodata file offset = VA",
+ "direct_e8_callers": {
+  "build": [
+   {
+    "address": "0x5155f89",
+    "bytes": "e8 a2 77 b6 ff",
+    "in": "grow 0x5155ec0"
+   },
+   {
+    "address": "0x515d223",
+    "bytes": "e8 08 05 b6 ff",
+    "in": "FDE 0x515d170 (second build caller, not decoded)"
+   }
+  ],
+  "drain": [
+   {
+    "address": "0x5155ee9",
+    "bytes": "e8 02 98 a4 00",
+    "in": "grow 0x5155ec0"
+   }
+  ],
+  "grow": [
+   {
+    "address": "0x4dcd0bd",
+    "bytes": "e8 fe 8d 38 00",
+    "in": "flag helper 0x4dccf20"
+   }
+  ],
+  "iter": [
+   {
+    "address": "0x4cbd88b",
+    "bytes": "e8 90 aa 09 00",
+    "in": "build 0x4cbd730"
+   }
+  ],
+  "redistribute_left": [
+   {
+    "address": "0x4cbdbcb",
+    "bytes": "e8 50 60 fd ff",
+    "in": "build 0x4cbd730 post-pass"
+   },
+   {
+    "address": "0x4d2497b",
+    "bytes": "e8 a0 f2 f6 ff",
+    "in": "leaf op 0x4d24790"
+   },
+   {
+    "address": "0x4d24f12",
+    "bytes": "e8 09 ed f6 ff",
+    "in": "leaf op 0x4d24790"
+   }
+  ],
+  "sort_inner": [
+   {
+    "address": "0x4f3fe21",
+    "bytes": "e8 ba d3 02 00",
+    "in": "large-sort wrapper 0x4f3fd80"
+   },
+   {
+    "address": "0x4e6c40d",
+    "bytes": "e8 ce 0d 10 00",
+    "in": "FDE 0x4e6bf30 (not decoded)"
+   }
+  ],
+  "sort_small": [
+   {
+    "address": "0x5155ff4",
+    "bytes": "e8 87 96 29 00",
+    "in": "grow 0x5155ec0"
+   },
+   {
+    "address": "0x4de6306",
+    "bytes": "e8 75 93 60 00",
+    "in": "FDE 0x4de6210 (not decoded)"
+   },
+   {
+    "address": "0x515d28e",
+    "bytes": "e8 ed 23 29 00",
+    "in": "FDE 0x515d170 (not decoded)"
+   }
+  ]
+ },
+ "drain": {
+  "bytes": 424,
+  "end": "0x5b9f898",
+  "full_sha256": "df31a2f3aa27f8d54c6a49a055670b67ec3b00a85e93788c6b4c180c5ce1bfc7",
+  "instructions": 121,
+  "nops": 1,
+  "out_layout": [
+   "[0] length (table+0x18)",
+   " [+0x8] new buffer (exact length*24 bytes; 8 when empty, never dereferenced on the empty path)",
+   "[0x10] copied count (== length when the ring is consistent)"
+  ],
+  "out_writes": [
+   "0x5b9f823 ([rbx] = length)",
+   "0x5b9f826 ([rbx+0x8] = buffer)",
+   "0x5b9f82a ([rbx+0x10] = copied count)"
+  ],
+  "ring_copy": {
+   "first_chunk": "head..min(head+length, capacity), 24-byte verbatim copies",
+   "second_chunk": "buffer start..remainder, 24-byte verbatim copies",
+   "sites": [
+    "0x5b9f7b0 (first-chunk copy loop)",
+    "0x5b9f7f0 (second-chunk copy loop)"
+   ]
+  },
+  "start": "0x5b9f6f0"
+ },
+ "entry_layout_24": {
+  "fields": [
+   "key u32 @+0",
+   "pad u32 @+4 (alignment)",
+   "value u64 @+8",
+   "flag u8 @+0x10",
+   "pad 7 bytes @+0x11..0x18"
+  ],
+  "size": 24
+ },
+ "got_sites": {
+  "large_sort_wrapper": {
+   "call_site": "0x515601b",
+   "call_site_bytes": "ff 15 bf 5a 39 01",
+   "slot": "0x64ebae0",
+   "target": "0x4f3fd80"
+  },
+  "slots": {
+   "0x64df480": "0x6355830 (alloc, size in rdi)",
+   "0x64df490": "0x141e251 (alloc error, align in rdi, size in rsi)",
+   "0x64df498": "0x141e264 (alloc error variant, size in rsi)",
+   "0x64df4a0": "0x635de30 (free, ptr in rdi, size in rsi)",
+   "0x64df730": "0x1680e60 (panic, message ptr in rdi, message len in rsi, location ptr in rdx)",
+   "0x64df830": "0x1680c10 (location-only panic, location ptr in rdi)"
+  }
+ },
+ "got_sites_for_claimed_bodies": {
+  "build": 0,
+  "drain": 0,
+  "grow": 0,
+  "iter": 0
+ },
+ "grow": {
+  "alloc_fail": {
+   "site": "0x5155ffe",
+   "sites_bytes": "bf 08 00 00 00 / be e8 00 00 00 (align 8, size 0xe8) then ud2"
+  },
+  "alloc_leaf": {
+   "site": "0x5155f1a",
+   "size": 232,
+   "size_hex": "0xe8",
+   "site_bytes": "bf e8 00 00 00"
+  },
+  "body_bytes": 286,
+  "body_sha256": "d39f3dda5f79e649a6f8b57065675f2467d9611f17e407bf553386067b7c74d8",
+  "bytes": 403,
+  "cie": "0039672c",
+  "drain_call": "0x5155ee9",
+  "empty_path": {
+   "free_check": "0x5155fb0 (skip free when [rsp+0x18] == 0)",
+   "free_size": "[rsp+0x18]*24 at 0x5155fbf-0x5155fc3",
+   "out_zero_sites": [
+    "0x5155fa1 ([rbx] = 0)",
+    "0x5155fa8 ([rbx+0x10] = 0, height field untouched)"
+   ],
+   "site": "0x5155ef6 (je when count == 0)"
+  },
+  "end": "0x5156053",
+  "full_sha256": "3ed34fc96c72a81a93bbc728b4c59dd56086fa7e2b31295e276175b79674fe58",
+  "instructions": 94,
+  "nops": 0,
+  "range_struct": {
+   "fields": [
+    "[0x40] begin = entries buffer",
+    "[0x48] begin again (iterator cursor init)",
+    "[0x50] length (drain out+0)",
+    "[0x58] end = begin + count*24",
+    "[0x60..0x70] iterator stash area (filled by first peek, not by grow)",
+    "[0x70] flag byte 3 (iterator cursor mode)"
+   ],
+   "sites": [
+    "0x5155f61 ([rsp+0x40] = begin)",
+    "0x5155f66 ([rsp+0x48] = begin)",
+    "0x5155f6b ([rsp+0x50] = drain cap/length)",
+    "0x5155f70 ([rsp+0x58] = end)",
+    "0x5155f75 ([rsp+0x70] = 3)"
+   ]
+  },
+  "ret": "0x5155fdd",
+  "sort_dispatch": {
+   "large_call": "0x515601b (GOT 0x64ebae0 -> 0x4f3fd80)",
+   "large_threshold": "len >= 21 (0x15)",
+   "site": "0x5155fde (cmp r15,0x15; jae large)",
+   "small_call": "0x5155ff4 (0x53ef680, start index rdx = 1)",
+   "small_threshold": "2 <= len <= 20",
+   "single_skip": "len == 1 bypasses sort (0x5155f0b cmp r15,0x1; jne sort)"
+  },
+  "start": "0x5155ec0",
+  "tail_bytes": 117,
+  "tree_out": {
+   "fields": [
+    "[0] root",
+    "[0x8] height",
+    "[0x10] inserted count"
+   ],
+   "sites": [
+    "0x5155f8e (16-byte copy from build out [rsp+0x30])",
+    "0x5155f98 ([rbx] = root+height)",
+    "0x5155f9b ([rbx+0x10] = count)"
+   ]
+  },
+  "tree_out_init": {
+   "height_zero": "0x5155f50 ([rsp+0x38] = 0)",
+   "node_ptr": "0x5155f4b ([rsp+0x30] = new leaf)",
+   "node_parent_zero": "0x5155f2e ([rax+0xb0] = 0)",
+   "node_count_zero": "0x5155f39 ([rax+0xe6] = 0)"
+  }
+ },
+ "inviting_prior": "#196 (PR #2314)",
+ "iter": {
+  "bytes": 314,
+  "cie": "00000000",
+  "dedup": "consecutive equal keys collapse to the LAST entry of the run (earlier entries dropped without output)",
+  "end_signal": "out flag byte == 2 (yielded once as terminator, never inserted)",
+  "end_sites": [
+   "0x4d58384 (current flag == 2 -> end)",
+   "0x4d5841c (state byte = 2 after next flag == 2)",
+   "0x4d58422 (out flag = 2, state byte = 3)"
+  ],
+  "end": "0x4d5845a",
+  "flag3_quirk": "a peeked entry with flag 3 is skipped, not yielded: the state byte doubles as the pending entry's flag, and value 3 selects cursor mode, so the next call reads past the stashed flag-3 entry; whether flag 3 occurs in real drained streams is not established",
+  "full_sha256": "b14162b03a5aaa422626b6e82e239daa1377f9b9d32cf4033e8a4d693d4f3b88",
+  "instructions": 93,
+  "mode_select": "0x4d58342 (cmp dl,0x3; jne stash mode)",
+  "nops": 1,
+  "out_layout": [
+   "[0] key u32",
+   "[0x4] value qword (entry+4, verbatim)",
+   "[0xc] dword (entry+0xc, verbatim)",
+   "[0x10] flag byte",
+   "[0x11] dword (entry+0x11, verbatim)",
+   "[0x14] dword (entry+0x14, verbatim)"
+  ],
+  "rets": [
+   "0x4d5842e (end path)",
+   "0x4d58459 (normal path)"
+  ],
+  "start": "0x4d58320",
+  "state_layout": [
+   "[+0] begin",
+   "[+8] cursor (advanced 0x18 per entry)",
+   "[+0x10] length (used only by build's end-of-stream free)",
+   "[+0x18] end",
+   "[+0x20..+0x38] stash: next entry copy (16 bytes + tail dwords; flag at +0x30 doubles as state byte)"
+  ]
+ },
+ "limitations": [
+  "Large-sort inner 0x4f6d1e0 (1694 bytes, FDE 0x4f6d1e0..0x4f6d87e) is not decoded; only the wrapper's buffer policy is pinned.",
+  "Merge helper 0x4ca2500 and redistribute helpers 0x4c93c20 / 0x4c9b3b0 internals are not decoded; only the build post-pass dispatch (borrow = 5 - count, left redistribute) is pinned.",
+  "Drain out length vs copied count coincide only when the ring is consistent; the two fields are pinned separately and the iterator bounds by end (count-based) while the end-of-stream free uses length.",
+  "The iterator's flag-3 stash-skip behavior is observed mechanically; whether flag 3 occurs in real drained streams, and what it means, is not established.",
+  "Second build caller (FDE 0x515d170, call site 0x515d223) is not decoded; the packet claims the grow path only.",
+  "Build's out-struct fields for non-grow callers (prologue descent with nonzero height) are traced only for the grow path (height 0, prologue skipped); the prologue descent itself is decoded (last-child links, mod-8 + unrolled-8 steps) but no non-grow caller is traced end to end.",
+  "Static analysis only; the node binary was never executed."
+ ],
+ "merge_helper_not_called_by_build": "build calls only redistribute-left 0x4c93c20 in its post-pass; the merge helper 0x4ca2500 is called only from the leaf op (0x4d24967), not from build",
+ "node_layouts": {
+  "internal_328": {
+   "children": "pointers at +0xe8 + 8*i (12 slots)",
+   "key_array": "u32 keys at +0xb8 + 4*i",
+   "key_count_u16": "+0xe6",
+   "parent": "+0xb0",
+   "size": 328,
+   "value_slots": "16 bytes each at +16*i ([0] u64 value, [8] flag byte)"
+  },
+  "leaf_232": {
+   "note": "the 328-byte layout truncated before the children array; a leaf's children region is never read or written by the builder (descents land ON the leaf and stop; inserts write only keys/values/counts/parent/index)",
+   "size": 232
+  }
+ },
+ "panics": [
+  {
+   "col": 9,
+   "from": "build post-pass descent: current node key count == 0",
+   "line": 367,
+   "location_file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/alloc/src/collections/btree/node.rs",
+   "location_file_len": 91,
+   "location_file_va": "0x4344f8",
+   "location_struct": "0x649a468",
+   "message": "assertion failed: len > 0",
+   "message_len": 25,
+   "message_va": "0x913338",
+   "raised_from": "0x4cbdc05"
+  },
+  {
+   "col": 9,
+   "from": "build chain insert: ancestor key count still >= 11 (defensive; walk-up guarantees < 11)",
+   "line": 698,
+   "location_file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/alloc/src/collections/btree/node.rs",
+   "location_file_len": 91,
+   "location_file_va": "0x4344f8",
+   "location_struct": "0x649a4e0",
+   "message": "assertion failed: idx < CAPACITY",
+   "message_len": 32,
+   "message_va": "0x4585c0",
+   "raised_from": "0x4cbdc30"
+  },
+  {
+   "col": 77,
+   "from": "build new-root height wraparound guard (inc height == 0; practically dead)",
+   "line": 240,
+   "location_file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/alloc/src/collections/btree/node.rs",
+   "location_file_len": 91,
+   "location_file_va": "0x4344f8",
+   "location_struct": "0x649a4f8",
+   "message": "location-only panic call (no message argument)",
+   "raised_from": "0x4cbdc5d"
+  }
+ ],
+ "post_pass": {
+  "borrow": "5 - last_child_count (esi)",
+  "call_site": "0x4cbdbcb",
+  "callee": "0x4c93c20 (left redistribute)",
+  "descent": "rightmost path only, via last-child links, while height remains",
+  "sites": [
+   "0x4cbdb46 (height = [out+8]; 0 -> done)",
+   "0x4cbdb68 (count == 0 -> panic)",
+   "0x4cbdb84 (last child = children[count])",
+   "0x4cbdb7c (left sibling = children[count-1])",
+   "0x4cbdbb2 (last child count >= 5 -> descend)",
+   "0x4cbdbc0 (esi = 5 - count)"
+  ]
+ },
+ "sort_large_wrap": {
+  "buffer_count": "r12 = min(len, 333333 (0x51615), ceil(len/2))",
+  "bytes": 272,
+  "end": "0x4f3fe90",
+  "full_sha256": "d5bb2e20816db3d19088314d4c1445e22c81e78a5695e4796a51654b20e0d9d4",
+  "heap_threshold": "r12 > 170 (0xaa) -> heap buffer via alloc wrapper; else stack buffer (sub rsp,0x1000)",
+  "inner_call": "0x4f3fe21 (0x4f6d1e0, args: ptr, len, temp buffer, count, small-flag = (len < 65))",
+  "inner_not_decoded": "0x4f6d1e0 (1694 bytes)",
+  "instructions": 74,
+  "nops": 0,
+  "ret": "0x4f3fe52",
+  "small_flag": "r8 = 1 iff len < 65 (0x41)",
+  "start": "0x4f3fd80"
+ },
+ "sort_small": {
+  "bswap_sites": [
+   "0x53ef6d7 / 0x53ef6da (outer compare, bswap both keys)",
+   "0x53ef71e / 0x53ef726 (inner compare, bswap both keys)"
+  ],
+  "bytes": 188,
+  "early_ret": "0x53ef692 (len == 1)",
+  "end": "0x53ef73c",
+  "full_sha256": "f3e884289978335f149eab5415e89aad3b37193d7a40426a402e0d4e78aba985",
+  "guard": "0x53ef680 (start index rdx = 1; len <= 0 -> ud2)",
+  "instructions": 50,
+  "key": "u32 at entry+0, compared after bswap, ascending (same comparison as the flag-helper walk)",
+  "nops": 1,
+  "shape": "insertion sort over 24-byte entries (16-byte + 8-byte moves)",
+  "start": "0x53ef680"
+ },
+ "task": "RE-001-node115-lu-grow-build",
+ "thresholds": {
+  "grow_called_when": "table length > 63 (caller-side, #195)",
+  "insert_append": "current node count < 11 (0xb) -> append at index count",
+  "leaf_capacity": 11,
+  "min_fill": 5,
+  "new_root_when": "walk-up reaches a null parent (old root full)",
+  "sort_large_at": "len >= 21 (0x15)",
+  "sort_small_range": "2 <= len <= 20",
+  "walk_up_while": "ancestor count == 11"
+ },
+ "tree_out_24": {
+  "fields": [
+   "[0] root pointer",
+   "[0x8] height (levels from root to leaf)",
+   "[0x10] inserted count (unique keys; duplicates dropped by the iterator)"
+  ],
+  "note": "empty path zeroes root and count but leaves height untouched (dead for the flag-helper caller, whose drained count is always > 63)"
+ }
+}
