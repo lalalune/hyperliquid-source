@@ -1,0 +1,97 @@
+{
+  "artifact": "work/hl-node-115.bin",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "call_sites": [
+    {
+      "arguments": [
+        "rdi = qword at [r15 + 0x2c0] plus 0x18"
+      ],
+      "caller_function": "0x5f75b10..0x5f763fe",
+      "kind": "call",
+      "post_call": [
+        "caller jumps at once to 0x5f75fc7; no result is read because the routine returns void"
+      ],
+      "pre_call": [
+        "caller loads rdi from [r15 + 0x2c0]; a zero pointer jumps away at 0x5f76377 and never reaches the call",
+        "caller stores byte 0 at [rdi + 0x321] on the unshifted pointer, then adds 0x18 to rdi"
+      ],
+      "site": "0x5f76388"
+    },
+    {
+      "arguments": [
+        "rdi = qword at [rsp + 0x30], the same object the 0x5f6ea90 predicate received"
+      ],
+      "caller_function": "0x5fa0e40..0x5fa1d4a",
+      "kind": "call",
+      "post_call": [
+        "caller jumps at once to the shared cleanup block 0x5fa129c; no result is read because the routine returns void"
+      ],
+      "pre_call": [
+        "reached from the empty-range arm 0x5fa1786 when the stack byte at [rsp + 0x70] is zero, and from the loop-exit edge 0x5fa1791"
+      ],
+      "site": "0x5fa1796"
+    }
+  ],
+  "census": {
+    "routine_0x5f6eac0": {
+      "direct_calls": [
+        "0x5f76388",
+        "0x5fa1796"
+      ],
+      "relative_addends": 0,
+      "stored_qwords": [],
+      "tail_jumps": []
+    }
+  },
+  "distinct_from": [
+    "no open PR title or code search hit for 0x5f6eac0",
+    "open PR #2380 (span-count predicate 0x5f6ea90): the predicate reads the same three fields but is a different function with a different rule; this routine is the follow-up its site calls, not the predicate",
+    "open PRs #2236/#2242/#2244 (other drain drivers at 0x5f14000/0x5f14180/0x5f140c0): different functions and addresses"
+  ],
+  "node": 115,
+  "routine": {
+    "address": "0x5f6eac0",
+    "calls": [
+      {
+        "arguments": [
+          "rdi = cursor element pointer"
+        ],
+        "callee": "0x5d516f0",
+        "return_discarded": true,
+        "site": "0x5f6eafa"
+      }
+    ],
+    "fde": "0x5f6eac0..0x5f6eb13",
+    "loop": {
+      "assumption": "the range is 0x180-step-aligned: end minus begin is a non-negative multiple of 0x180; an unaligned or inverted range is not modelled by the tool",
+      "back_edge": "0x5f6eb02",
+      "empty_arm": "begin == end -> jump at 0x5f6eae0 straight to the epilogue at 0x5f6eb08, no visit call",
+      "exit": "cursor == end -> 0x5f6eb04, then epilogue",
+      "head": "0x5f6eaf0",
+      "step": "0x180",
+      "visit_call": {
+        "arguments": [
+          "rdi = cursor element pointer"
+        ],
+        "callee": "0x5d516f0",
+        "callee_fde": "0x5d516f0..0x5d519c5",
+        "return": "discarded",
+        "site": "0x5f6eafa"
+      }
+    },
+    "reads": [
+      "qword at obj + 0x08 (begin)",
+      "qword at obj + 0x10 (end)"
+    ],
+    "returns": "void",
+    "signature_registers": [
+      "rdi=obj"
+    ],
+    "writes": [
+      "qword at obj + 0x00 set to 0 before any visit call",
+      "qword at obj + 0x10 set to the original begin after the loop",
+      "qword at obj + 0x08 never written"
+    ]
+  },
+  "task": "RE-001"
+}
