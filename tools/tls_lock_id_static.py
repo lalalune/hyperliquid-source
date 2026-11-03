@@ -62,8 +62,13 @@ def scalar_identity(layout,record,key):
 def analyze(data):
     _,fs,_=fde_extents(data)
     fdes={(f['start'],f['end']):f for f in fs}
-    secs=sections(data);rs=next(s for s in secs if s['name']=='.rela.dyn')
-    rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[rs['offset']:rs['offset']+rs['size']])}
+    secs=sections(data);rs=next((s for s in secs if s['name']=='.rela.dyn'),None)
+    if rs is None:
+        raise ValueError('missing .rela.dyn section')
+    try:
+        rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[rs['offset']:rs['offset']+rs['size']])}
+    except struct.error:
+        raise ValueError('truncated .rela.dyn section') from None
     body=read(data,0x154cd10,299)[1]
     layout=probe_layout(body)
     expected={'fields':[{'record_offset':24,'input_offset':24,'width':8},{'record_offset':16,'input_offset':16,'width':4},{'record_offset':8,'input_offset':8,'width':8}],
@@ -75,7 +80,11 @@ def analyze(data):
     # Resolve the imported comparison through actual ELF symbol metadata.
     if rels.get(0x64df9f8)!=((11<<32)|6,0):
         raise ValueError('bcmp dynamic relocation changed')
-    syms=next(s for s in secs if s['name']=='.dynsym');strings=next(s for s in secs if s['name']=='.dynstr')
+    syms=next((s for s in secs if s['name']=='.dynsym'),None);strings=next((s for s in secs if s['name']=='.dynstr'),None)
+    if syms is None:
+        raise ValueError('missing .dynsym section')
+    if strings is None:
+        raise ValueError('missing .dynstr section')
     sym=read(data,syms['address']+11*24,24)[1]
     if sym!=bytes.fromhex('930000001200000000000000000000000000000000000000') or read(data,strings['address']+0x93,5)[1]!=b'bcmp\0':
         raise ValueError('bcmp dynamic symbol changed')
