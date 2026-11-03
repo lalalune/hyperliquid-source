@@ -1,0 +1,14 @@
+Relocation scan for RE-001-teardown-pair-115.
+
+Method (reproduced by census.py in this packet):
+  * Whole-file scan for an 8-byte little-endian qword equal to
+    either leaf address (0x5f78000, 0x5f78030).
+  * Parse `readelf -r` output for RELATIVE records mentioning
+    either leaf address.
+
+Result for the digest-verified node #115 work binary:
+  * release leaf 0x5f78000: 0 stored qwords, 0 RELATIVE addends.
+  * clear leaf 0x5f78030: 0 stored qwords, 0 RELATIVE addends.
+Neither leaf address is referenced by a stored pointer or a
+RELATIVE relocation anywhere in the binary; every reference is one
+of the direct call sites listed in callers.tsv.
