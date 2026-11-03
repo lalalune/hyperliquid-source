@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Owned stdlib data probe. No imports from the repository, subprocess or network.
+"""Authenticate retained node115 native evidence against the complete capture.
 
-Encoded xref/call candidates are not validated instruction boundaries. This is
-preparation for a bounded hosted decode, not a semantic equivalence claim.
+Standard-library data checks only: no repository imports, subprocess, network,
+native decoder or captured-program execution. Observations remain scoped.
 """
 import argparse
 import bisect
@@ -485,7 +485,149 @@ def verify_first_variant(data, packet):
         nonfallback_key_tags=[r['raw_key_tag'] for r in routes if r['target']!='0x16fdf6c'],
         baseline_field_name_cases=1,distinct_single_byte_key_mutations_rejected=key_mutations,
         direct_calls=direct_calls,direct_branches=branches,ordinary_observed_store_bytes=40,ordinary_first_word=hex(sentinel-1),
-        limits='Local result-field recognition/presence/duplicate paths on raw internal records. Value converter, complete accepted JSON/value domain, outer tag validity, source/type ownership and exception closure remain unresolved.')
+        limits='Local result-field recognition/presence/duplicate paths on raw internal records. Delegated value conversion contracts, complete JSON/value domain, outer tag validity, source/type ownership and exception closure remain unresolved.')
+
+
+
+def extract_value_data(data):
+    assert len(data)==105896032 and hashlib.sha256(data).hexdigest()=='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+    shoff=struct.unpack_from('<Q',data,40)[0];size,count,nameidx=struct.unpack_from('<HHH',data,58);assert size==64
+    rows=[struct.unpack_from('<IIQQQQIIQQ',data,shoff+64*i) for i in range(count)]
+    sr=rows[nameidx];names=data[sr[4]:sr[4]+sr[5]]
+    sections={names[r[0]:names.find(b'\0',r[0])].decode():r for r in rows}
+    def at(va,n):
+        hits=[(name,r) for name,r in sections.items() if r[1]!=8 and r[2]&2 and r[3]<=va and va+n<=r[3]+r[5]];assert len(hits)==1
+        name,row=hits[0];off=row[4]+va-row[3];raw=data[off:off+n]
+        return dict(va=hex(va),file_offset=hex(off),section=name,section_flags=row[2],bytes=n,data_hex=raw.hex(),sha256=hashlib.sha256(raw).hexdigest())
+    table=at(0x47dd44,22*4);raw=bytes.fromhex(table['data_hex'])
+    table['entries']=[dict(raw_tag=i,displacement=struct.unpack_from('<i',raw,4*i)[0],target=hex(0x47dd44+struct.unpack_from('<i',raw,4*i)[0])) for i in range(22)]
+    table['limits']='22 retained entries; no local tag bound or complete raw/JSON tag-domain proof'
+    rela=sections['.rela.dyn'];records={}
+    for off in range(rela[4],rela[4]+rela[5],24):
+        slot,info,addend=struct.unpack_from('<QQq',data,off)
+        if slot in [0x64e1e48,0x64e0900,0x64df520]:
+            assert slot not in records
+            records[slot]=dict(slot=hex(slot),info=info,addend=hex(addend),relocation_file_offset=hex(off),relocation_hex=data[off:off+24].hex(),stored_pointer=at(slot,8))
+    assert len(records)==3
+    return dict(target_sha256=hashlib.sha256(data).hexdigest(),table=table,relocations=list(records.values()),
+        descriptors=[at(va,32) for va in [0x640e390,0x640c008,0x640bff0]],
+        limits='Allocated descriptor bytes are unidentified data, not recovered source types or vtable layouts. Relocations identify targets without establishing their contracts.')
+
+def verify_value_helper(data, packet):
+    folder=packet/'value-helper'
+    current=probe(data,extra_vas=(0x16fd8b0,0x16fdcb9))
+    require(current==json.loads((folder/'candidates.json').read_text()),'value helper candidate drift')
+    require(current==json.loads((folder/'receipts/full-input-replay.json').read_text()),'value helper hosted replay drift')
+    native=json.loads((folder/'receipts/decode-result.json').read_text())
+    require(native['target_sha256']==TARGET and native['whole_elf_reauthenticated_in_job'] and native['input_hashes_unchanged'],'value helper input binding')
+    require(not native['captured_program_executed'] and native['native_invocations']==3,'value helper execution record')
+    bodies={};rowmaps={}
+    for label,key in [('value-candidate','0x16fd8b0'),('variant-candidate','0x16fdcb9')]:
+        record=current['selected_fde_candidates'][key];start=int(record['start_va'],16);off=int(record['file_offset'],16)
+        body=data[off:off+record['bytes']]
+        require(hashlib.sha256(body).hexdigest()==record['body_sha256'],'value helper body identity')
+        cursor=start;rows=[]
+        for line in (folder/'receipts'/(label+'.stdout')).read_text().splitlines():
+            if not re.match(r'^\s*[0-9a-f]+:',line):continue
+            parts=line.split('\t');require(len(parts)>=3,'value helper native syntax')
+            va=int(parts[0].strip().rstrip(':'),16);tokens=parts[1].split()
+            require(tokens and all(re.fullmatch('[0-9a-f]{2}',t) for t in tokens),'value helper byte syntax')
+            raw=bytes.fromhex(' '.join(tokens));text=' '.join(parts[2:]).strip()
+            require(va==cursor and body[va-start:va-start+len(raw)]==raw,'value helper native/full-image bytes')
+            require(text and '(bad)' not in text and not text.startswith('.byte'),'value helper undecoded row')
+            rows.append(dict(va=hex(va),bytes=raw.hex(),text=text));cursor+=len(raw)
+        saved=next(r for r in native['regions'] if r['label']==label)
+        require(rows==saved['instruction_rows'] and len(rows)==saved['instructions'] and cursor==int(record['end_va'],16),'value helper native rows/extent')
+        bodies[label]=(start,body);rowmaps[label]={int(r['va'],16):r for r in rows}
+    earlier=json.loads((packet/'first-variant/receipts/decode-result.json').read_text())
+    require(next(r['instruction_rows'] for r in earlier['regions'] if r['label']=='variant-candidate')==
+            next(r['instruction_rows'] for r in native['regions'] if r['label']=='variant-candidate'),'renewed first alternative differs')
+    edge=json.loads((folder/'receipts/qualified-candidate-edges.json').read_text())
+    call=rowmaps['variant-candidate'][0x16fdcb9];raw=bytes.fromhex(call['bytes'])
+    require(len(edge)==1 and edge[0]['native_instruction_boundary_validated'] and edge[0]['candidate_va']==call['va'] and edge[0]['bytes']==call['bytes'],'value helper direct edge qualification')
+    require(raw[0]==0xe8 and 0x16fdcb9+5+struct.unpack_from('<i',raw,1)[0]==0x16fd8b0,'value helper direct edge target')
+    fields=json.loads((folder/'field-bindings.json').read_text())
+    def check_fields(active):
+        for field in fields:
+            label=field['region'];va=int(field['va'],16);raw=bytes.fromhex(field['bytes']);start,body=active[label]
+            require(rowmaps[label].get(va,{}).get('bytes')==field['bytes'],'value helper field boundary')
+            require(body[va-start:va-start+len(raw)]==raw,'value helper field corruption: '+field['label'])
+    check_fields(bodies);controls=[]
+    for field in fields:
+        active=dict(bodies);start,body=bodies[field['region']];changed=bytearray(body)
+        changed[int(field['va'],16)-start+len(bytes.fromhex(field['bytes']))-1]^=1
+        active[field['region']]=(start,changed)
+        try:check_fields(active)
+        except ValueError as error:controls.append(dict(control='value helper '+field['label'],rejection=str(error)))
+        else:raise ValueError('value helper field corruption escaped')
+    record=current['selected_fde_candidates']['0x16fd8b0'];fde=bytes.fromhex(record['fde_hex'])
+    def check_extent(raw):
+        delta,length=struct.unpack_from('<ii',raw,8)
+        require(int(record['fde_va'],16)+8+delta==int(record['start_va'],16),'value helper FDE location')
+        require(length==740 and int(record['start_va'],16)+length==int(record['end_va'],16),'value helper FDE extent')
+    check_extent(fde);changed=bytearray(fde);changed[12]^=1
+    try:check_extent(changed)
+    except ValueError as error:controls.append(dict(control='value helper FDE extent',rejection=str(error)))
+    else:raise ValueError('value helper FDE corruption escaped')
+    computed=extract_value_data(data);saved=json.loads((folder/'referenced-data.json').read_text())
+    require(computed==saved,'value helper referenced data drift')
+    active={'table':bytes.fromhex(saved['table']['data_hex'])}
+    active.update({'relocation '+r['slot']:bytes.fromhex(r['relocation_hex']) for r in saved['relocations']})
+    active.update({'descriptor '+r['va']:bytes.fromhex(r['data_hex']) for r in saved['descriptors']})
+    expected={key:value.hex() for key,value in active.items()}
+    def check_data(values):
+        for key,raw in values.items():require(raw.hex()==expected[key],'value helper referenced data corruption: '+key)
+    check_data(active)
+    for key,raw in active.items():
+        offsets=range(0,len(raw),4) if key=='table' else [16 if key.startswith('relocation ') else 0]
+        for offset in offsets:
+            values=dict(active);changed=bytearray(raw);changed[offset]^=1;values[key]=changed
+            try:check_data(values)
+            except ValueError as error:controls.append(dict(control='value helper '+key+' '+str(offset),rejection=str(error)))
+            else:raise ValueError('value helper data corruption escaped')
+    rows=rowmaps['value-candidate'];instruction=lambda va:bytes.fromhex(rows[va]['bytes'])
+    targets=[0x16fdada,0x16fdae9,0x16fdac9,0x16fdacf,0x16fdab8,0x16fdaf9,0x16fdb00,0x16fdad4,
+             0x16fdb19,0x16fdabe,0x16fdb07,0x16fd8ce,0x16fd947,0x16fd951,0x16fd993,0x16fd9a4,
+             0x16fda87,0x16fda87,0x16fdaaa,0x16fdab1,0x16fd8f3,0x16fdb51]
+    require([int(r['target'],16) for r in computed['table']['entries']]==targets and all(t in rows for t in targets),'value helper selected dispatch table')
+    for site,target in [(0x16fd8be,0x47dd44),(0x16fd96c,0x64e1e48),(0x16fda5b,0x64e1e48),
+                        (0x16fdb38,0x64e0900),(0x16fdb8e,0x64df520),(0x16fdb27,0x640e390),
+                        (0x16fdb6b,0x640c008),(0x16fdb87,0x640bff0)]:
+        raw=instruction(site)
+        require(site+len(raw)+struct.unpack_from('<i',raw,len(raw)-4)[0]==target,'value helper RIP binding')
+    require([(r['slot'],r['info'],r['addend']) for r in computed['relocations']]==[
+        ('0x64df520',8,'0x1681da0'),('0x64e0900',8,'0x5c54bd0'),('0x64e1e48',8,'0x167a9c0')],'value helper actual relocation targets')
+    require(instruction(0x16fd993)==bytes.fromhex('48837e1820') and instruction(0x16fd9a4)==bytes.fromhex('48837e1020'),'two direct-byte length guards')
+    require(instruction(0x16fd963)==instruction(0x16fda55)==bytes.fromhex('41b820000000'),'text decoder requested output bytes')
+    require(instruction(0x16fd972)==instruction(0x16fda61)==bytes.fromhex('837c243003'),'text decoder success-code guards')
+    require(instruction(0x16fd9ba)==bytes.fromhex('0f114b11') and instruction(0x16fd9be)==bytes.fromhex('0f114301'),'32-byte ordinary output stores')
+    require(instruction(0x16fd9c2)==bytes.fromhex('31c0') and instruction(0x16fd9c4)==bytes.fromhex('8803'),'ordinary zero status byte')
+    require(instruction(0x16fda9a)==bytes.fromhex('b001') and instruction(0x16fda9c)==bytes.fromhex('8803') and instruction(0x16fdb42)==bytes.fromhex('c60301'),'local error status byte')
+    require(instruction(0x16fd8fb)==bytes.fromhex('48c1e105') and instruction(0x16fd922)==bytes.fromhex('803b00'),'sequence cursor stride and delegated status guard')
+    require(instruction(0x16fd92c)==bytes.fromhex('482b7c2410') and instruction(0x16fdb5d)==bytes.fromhex('48c1ef05') and instruction(0x16fdb61)==bytes.fromhex('4801c7'),'remaining-record length calculation')
+    calls=[];branches=[]
+    for va,row in rows.items():
+        raw=bytes.fromhex(row['bytes']);target=None
+        if raw[0]==0xe8:
+            target=va+5+struct.unpack_from('<i',raw,1)[0]
+            require(target in [0x173fe30,0x1742410,0x1742120,0x173d830],'value helper direct callees')
+            calls.append(dict(va=hex(va),target=hex(target)));continue
+        if raw[0]==0xeb or 0x70<=raw[0]<=0x7f:target=va+len(raw)+struct.unpack_from('<b',raw,1)[0]
+        elif raw[0]==0xe9:target=va+len(raw)+struct.unpack_from('<i',raw,1)[0]
+        elif raw[0]==0x0f and 0x80<=raw[1]<=0x8f:target=va+len(raw)+struct.unpack_from('<i',raw,2)[0]
+        if target is not None:
+            require(target in rows,'value helper local branch boundary');branches.append(dict(va=hex(va),target=hex(target)))
+    require(len(calls)==4,'value helper direct call count')
+    value=next(r for r in native['regions'] if r['label']=='value-candidate')
+    return dict(status='VALUE_HELPER_LOCAL_PATHS_REPRODUCED',helper_bytes=value['bytes'],helper_instructions=value['instructions'],
+        field_bindings=len(fields),evidence_corruptions_rejected=len(controls),controls=controls,
+        selected_raw_tags=22,local_tag_domain_bound_proved=False,direct_byte_record_tags=[14,15],direct_byte_required_length=32,
+        shared_decoder_input_tags=[11,12,13],shared_decoder_requested_bytes=32,shared_decoder_success_code=3,
+        sequence_record_tag=20,sequence_record_stride=32,locally_error_preparation_tags=list(range(11))+[16,17,18,19,21],
+        ordinary_local_output_byte_offsets=list(range(33)),direct_callees=calls,local_branches=branches,
+        relocation_bindings=len(computed['relocations']),unidentified_descriptor_spans=len(computed['descriptors']),
+        renewed_variant_rows=len(rowmaps['variant-candidate']),
+        limits='Selected raw-record paths only. Ordinary direct/text success writes one status byte plus32 data bytes. Sequence output is delegated; nonzero delegated tags are forwarded. No full text/sequence contract, raw JSON/null mapping, source/type identity, complete tag domain, ABI/initialization, exception closure or runtime equivalence is established.')
 
 
 
@@ -511,6 +653,15 @@ def main():
     result['field_bindings']+=variant['field_bindings']
     result['evidence_corruptions_rejected']+=variant['evidence_corruptions_rejected']
     result['controls']+=variant['controls'];result['first_variant']=variant
+    value=verify_value_helper(data,args.packet)
+    result['regions']+=1;result['region_bytes']+=value['helper_bytes']
+    result['native_instruction_rows']+=value['helper_instructions']
+    result['instruction_counts']['value-candidate']=value['helper_instructions']
+    result['field_bindings']+=value['field_bindings']
+    result['evidence_corruptions_rejected']+=value['evidence_corruptions_rejected']
+    result['controls']+=value['controls'];result['value_helper']=value
+    require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(5,4209,966),'unique range denominator')
+    result['limits']='Five digest-bound native ranges and selected raw-record paths. Delegated text/sequence helpers, raw JSON/null mapping, source/type identity, second alternative, complete ABI/exception and runtime equivalence remain unresolved.'
     print(json.dumps(result,indent=2))
 
 
