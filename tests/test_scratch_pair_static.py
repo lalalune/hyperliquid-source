@@ -85,6 +85,26 @@ class ScratchPairTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'FDE'):
             subject.analyze(self.mutate(fde+12))
 
+    def test_consumer_flag_trace_pinned(self):
+        flag=self.report['consumer_flag']
+        self.assertEqual(flag['consumer'],'consumer_large')
+        self.assertEqual(flag['flag_load'],{'cmp':'0x15a3bc5','setne':'0x15a3bcc','and':'0x15a3bcf'})
+        self.assertEqual(flag['flag_stack_offset'],'0x16')
+        self.assertEqual([b['target'] for b in flag['branches']],['0x15a5afb','0x15a5b17'])
+        self.assertEqual(flag['emit']['string'],'assertion failed: !is_live')
+        self.assertEqual(flag['emit']['call_slot'],'0x64df730')
+
+    def test_consumer_flag_counterfactuals(self):
+        # The assertion string lives outside every hash-pinned body, so its
+        # mutation reaches the flag trace's own string pin. Mutations inside
+        # the large consumer body are stopped earlier by its body hash.
+        with self.assertRaisesRegex(ValueError,'consumer flag'):
+            subject.analyze(self.mutate(0x468b0f))
+        for va in [0x15a3f87,0x15a3bcf]:
+            with self.subTest(va=hex(va)):
+                with self.assertRaisesRegex(ValueError,'body changed'):
+                    subject.analyze(self.mutate(va))
+
     def test_public_identity_rejection_precedes_output(self):
         with tempfile.TemporaryDirectory() as directory:
             p=Path(directory)/'changed';out=Path(directory)/'out'

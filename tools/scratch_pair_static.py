@@ -42,10 +42,14 @@ NAMES=['Ec','DummyTokyo','DummyTokyo2','GaOnchain','GbOnchain',
  'GbHlPerp2','GbHlPerp3','GcHlPerp','GcHlPerp2','GdHlPerp',
  'GdHlPerp2','GsHlPerp','EaHlPerp','EbHlPerp']
 ANCHORS={5:'NodeTestnet',18:'Ee',32:'SoloSandbox',33:'NvTestnet',62:'ScratchDummy',63:'ScratchCron'}
-LIMITS=('Pair result and its static boundaries only. The pair\'s downstream semantic label '
- '(what the constant 2 counts or limits and what the boolean enables) is NOT established '
- 'by these bytes; both consumers are recorded as boundaries only (existence and body hash), '
- 'not semantics. The configured-name-to-tag classifier stage is context owned by open PRs '
+FLAG_STRING_VA=0x468b0f
+FLAG_STRING=b'assertion failed: !is_live'
+FLAG_EMIT_SLOT=0x64df730
+LIMITS=('Pair result, its static boundaries, and the large consumer\'s first branch on the '
+ 'cached flag byte only. The pair\'s downstream semantic label '
+ '(what the constant 2 counts or limits and what the boolean means beyond that branch) is NOT established '
+ 'by these bytes; the defaults consumer is recorded as a boundary for the first component only. '
+ 'The configured-name-to-tag classifier stage is context owned by open PRs '
  '#2042/#2054 and is cited here, not re-derived beyond the descriptor order and its anchors. '
  'No captured code executed, no runtime value, complete caller recovery (the accessor is '
  'reached through its lazy-static cell, not direct calls), #94 correspondence, or '
@@ -96,6 +100,62 @@ def accessor_constants(body):
     if (constants['mask'],constants['compare'],constants['first'])!=(0x7e,62,2):
         raise ValueError('accessor mask/compare/result constant changed')
     return constants
+
+
+def _pin(body,base,va,hexbytes,what):
+    off=va-base;want=bytes.fromhex(hexbytes)
+    if body[off:off+len(want)]!=want:
+        raise ValueError(f'consumer flag {what} changed')
+
+
+def consumer_flag_trace(data):
+    """Pin the large consumer's use of the cached flag byte (cell+1).
+
+    Byte-level pins only: the load of both cell bytes, the stack flag byte,
+    the two branch sites on it, and the assertion-string emit block the
+    flag-1 route reaches. No semantic label is attached.
+    """
+    start,end,_=OWNERS['consumer_large']
+    _,body=read(data,start,end-start)
+    def at(va,n):
+        return body[va-start:va-start+n]
+    def rip_target(va,insn_len,disp_at):
+        return va+insn_len+struct.unpack_from('<i',body,disp_at-start)[0]
+    # Load: cmp byte [cell+0],0 / setne al / and al,[cell+1].
+    _pin(body,start,0x15a3bc5,'803d','flag load cmp opcode')
+    if rip_target(0x15a3bc5,7,0x15a3bc5+2)!=ACCESSOR_CELL or at(0x15a3bc5+6,1)!=b'\x00':
+        raise ValueError('consumer flag load cmp target changed')
+    _pin(body,start,0x15a3bcc,'0f95c0','flag load setne')
+    _pin(body,start,0x15a3bcf,'2205','flag load and opcode')
+    if rip_target(0x15a3bcf,6,0x15a3bcf+2)!=ACCESSOR_CELL+1:
+        raise ValueError('consumer flag load and target changed')
+    # Flag byte stored at [rsp+0x16]; derived (NOT flag OR input byte) at +0x15.
+    _pin(body,start,0x15a3c55,'88442416','flag store')
+    _pin(body,start,0x15a3c59,'3401','flag negate')
+    _pin(body,start,0x15a3c5b,'0a464d','flag derived or')
+    _pin(body,start,0x15a3c5e,'88442415','flag derived store')
+    # Branch sites on the flag byte.
+    branches=[]
+    for site,jne in [(0x15a3f80,0x15a3f85),(0x15a4276,0x15a427b)]:
+        _pin(body,start,site,'807c241600','branch cmp')
+        _pin(body,start,jne,'0f85','branch jne opcode')
+        branches.append({'site':hex(site),'target':hex(rip_target(jne,6,jne+2))})
+    if [b['target'] for b in branches]!=['0x15a5afb','0x15a5b17']:
+        raise ValueError('consumer flag branch target changed')
+    # Emit block: lea rdi,string / mov esi,26 / call [emit slot].
+    _pin(body,start,0x15a5b22,'488d3d','emit lea opcode')
+    if rip_target(0x15a5b22,7,0x15a5b22+3)!=FLAG_STRING_VA:
+        raise ValueError('consumer flag emit string target changed')
+    _pin(body,start,0x15a5b30,'be1a000000','emit length')
+    _pin(body,start,0x15a5b35,'ff15','emit call opcode')
+    if rip_target(0x15a5b35,6,0x15a5b35+2)!=FLAG_EMIT_SLOT:
+        raise ValueError('consumer flag emit slot changed')
+    if read(data,FLAG_STRING_VA,len(FLAG_STRING))[1]!=FLAG_STRING:
+        raise ValueError('consumer flag assertion string changed')
+    return {'consumer':'consumer_large','flag_load':{'cmp':'0x15a3bc5','setne':'0x15a3bcc','and':'0x15a3bcf'},
+            'flag_stack_offset':'0x16','derived_stack_offset':'0x15','branches':branches,
+            'emit':{'string_va':hex(FLAG_STRING_VA),'string':FLAG_STRING.decode('ascii'),
+                    'call_site':'0x15a5b35','call_slot':hex(FLAG_EMIT_SLOT)}}
 
 
 def pair_for_tag(tag):
@@ -163,7 +223,8 @@ def analyze(data):
     for entry in entries:
         first,flag=pair_for_tag(entry['tag'])
         table.append({'tag':entry['tag'],'name':entry['name'],'first':first,'flag':flag})
-    return {'target_sha256':SHA,'owners':owners,
+    flag_trace=consumer_flag_trace(data)
+    return {'target_sha256':SHA,'owners':owners,'consumer_flag':flag_trace,
             'accessor':{'fde':'0x1568d80..0x1568dd6','config_slot':hex(CONFIG_SLOT),
                         'config_object':hex(CONFIG_OBJECT),'guard_offset':hex(constants['guard_offset']),
                         'tag_offset':hex(constants['tag_offset']),'mask':hex(constants['mask']),
@@ -190,8 +251,14 @@ def generate(binary,output):
                 raise ValueError('native scratch FDE disagreement')
             lines.extend(rows)
             if role=='consumer_large':
-                # Boundary only: retain the frames line and the body hash in
-                # records.json; no 10,617-byte objdump export is retained.
+                # No 10,617-byte objdump export is retained, but the flag
+                # trace sites are validated as native instruction starts.
+                asm=subprocess.check_output(['objdump','-d','-M','intel','--insn-width=16',f'--start-address={a:#x}',f'--stop-address={b:#x}',str(snapshot)],text=True)
+                ins=decode_export(asm,a,b,read(data,a,b-a)[1])
+                required=[0x15a3bc5,0x15a3bcc,0x15a3bcf,0x15a3c55,0x15a3c59,0x15a3c5b,0x15a3c5e,
+                          0x15a3f80,0x15a3f85,0x15a4276,0x15a427b,0x15a5b22,0x15a5b30,0x15a5b35]
+                if not set(required)<=set(ins):
+                    raise ValueError('scratch flag trace site not native instruction start')
                 continue
             asm=subprocess.check_output(['objdump','-d','-M','intel','--insn-width=16',f'--start-address={a:#x}',f'--stop-address={b:#x}',str(snapshot)],text=True)
             ins=decode_export(asm,a,b,read(data,a,b-a)[1])

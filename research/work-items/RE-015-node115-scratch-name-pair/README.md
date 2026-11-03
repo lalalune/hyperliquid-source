@@ -11,8 +11,10 @@
   `(2, false)` for exactly the two scratch chains, `ScratchDummy` (tag 62)
   and `ScratchCron` (tag 63). The first component is the constant 2 for
   every name; only the boolean is name-dependent.
-- No downstream semantic label for the pair, consumer semantics, complete
-  caller recovery, #94 compatibility or reconstruction-gate claim.
+- Follow-up: the large consumer's first branch on the cached flag byte is
+  pinned (stage 5). No downstream semantic label for the pair beyond that
+  branch, complete caller recovery, #94 compatibility or
+  reconstruction-gate claim.
 
 ## Why this item, in one paragraph
 
@@ -40,12 +42,15 @@ key 3, otherwise a missing sentinel); neither produces the
 | --- | --- | ---: | ---: |
 | config-name accessor | `0x1568d80..0x1568dd6` | 86 | 24 |
 | defaults consumer (boundary) | `0x1506840..0x15069f2` | 434 | 85 |
-| large consumer (boundary) | `0x15a3b90..0x15a6509` | 10,617 | not retained |
+| large consumer (flag trace pinned) | `0x15a3b90..0x15a6509` | 10,617 | not retained |
 
 The measured denominator is **three complete FDEs, 11,137 bytes**. The
 accessor and the small consumer have complete native exports retained; the
 large consumer is retained only as its `frames.txt` line and its body hash
 in `records.json` — a deliberate boundary choice, not a partial export.
+Its flag-trace sites (stage 5) are byte-pinned in `records.json` and
+validated as native instruction starts during generation, without
+retaining the 10,617-byte export.
 Each retained export starts at its actual FDE entry and covers the complete
 body. Native readelf confirmations, raw FDE/CIE records, file offsets and
 body hashes are retained. All bodies are hash-pinned without normalization.
@@ -80,6 +85,32 @@ equivalence claim.
    reference in `.rela.dyn`: cell **`0x64f01b0`** stores its address — a
    lazy-static slot, so the value is produced once through the generic
    lazy/once machinery and cached.
+5. **Consumer: cached bytes → flag → branch (follow-up).** The large
+   consumer `0x15a3b90..0x15a6509` reads both cell bytes on its initialized
+   fast path (state dword at cell+8 zero; the nonzero route runs the
+   generic once helper at slot `0x64df9f0` with `&[cell+8]` and rejoins):
+   `cmp BYTE PTR [0x64f01b0],0` / `setne al` at `0x15a3bc5`, then
+   `and al,BYTE PTR [0x64f01b1]` at `0x15a3bcf`, storing the result at
+   `[rsp+0x16]` at `0x15a3c55` and its negation OR'd with an input byte
+   (`[rsi+0x4d]`) at `[rsp+0x15]`. A full-`.text` objdump scan shows cell+1
+   is read at this one site only, cell bytes +2..+7 and +9..+0xf are read
+   nowhere, and no rip-relative store to the cell exists (the write runs
+   through the once helper's closure pointer). At `0x15a3f80`,
+   `cmp BYTE PTR [rsp+0x16],0` / `jne 0x15a5afb`: with the flag byte 1 —
+   every name except the two scratch chains — control jumps to a block
+   that hands the 26-byte string at `0x468b0f`,
+   `assertion failed: !is_live`, to the call through slot `0x64df730` at
+   `0x15a5b35` and exits to the common tail, skipping the inline work from
+   `0x15a3f8b`; with the flag byte 0 — `ScratchDummy` and `ScratchCron` —
+   execution falls through to that inline work. The same test repeats at
+   `0x15a4276` (`jne 0x15a5b17`, same emit block) for the next input
+   field. The defaults consumer `0x1506840..0x15069f2` never reads cell+1
+   (verifiable in its retained export): it compares cell+0 to exactly 2 at
+   `0x150686e` and ORs the resulting bit into a synthesized default record
+   field — a use of the first component only. Four further readers of the
+   same shape (state dword, then cell+0 compared to 2) sit outside the
+   stage-4 census band, at `0x2ae4225`, `0x2aeb276`, `0x2cb6886` and
+   `0x2cde4c6`; none reads cell+1, and only their read sites are recorded.
 
 ## Result summary
 
@@ -93,20 +124,22 @@ producible by the classifier.
 ## Explicit boundary and next question
 
 The semantic label of the pair — what the constant 2 counts or limits, and
-what the boolean enables — is **not** established by these bytes. The two
-consumers are recorded as boundaries only (existence + body hash): FDE
-`0x1506840..0x15069f2` reads the cell's state byte (compared to 2) and the
-value dword at cell+8 on its input-absent route, and FDE
-`0x15a3b90..0x15a6509` reads the cell's state bytes; both are large
-multipurpose functions whose downstream use of the value is not closed
-here. The consumer census behind this boundary covered FDEs in
-`0x1400000–0x1800000`; a consumer outside that band referencing the cell
-indirectly through a copied pointer would not appear. The classifier stage
-itself remains the context of open PRs #2042/#2054. No gate is claimed.
+what the boolean means beyond the stage-5 branch — is **not** established
+by these bytes. What is now closed is the boolean's first downstream
+effect: in the large consumer it is the flag byte at `[rsp+0x16]`, and at
+`0x15a3f80` the two scratch chains fall through to inline processing while
+every other name routes to the `assertion failed: !is_live` emit block.
+The defaults consumer remains a boundary for the first component only.
+The consumer census behind stage 4 covered FDEs in `0x1400000–0x1800000`;
+the four out-of-band readers in stage 5 were found by the full-`.text`
+cell scan, and a consumer referencing the cell indirectly through a copied
+pointer would still not appear. The classifier stage itself remains the
+context of open PRs #2042/#2054. No gate is claimed.
 
-Next question: resolve what the cached pair means downstream — what the
-constant 2 counts or limits and what the boolean enables — by closing one
-consumer's use of the cell+8 value.
+Next question: what produces the input fields that reach the stage-5
+branch (the `!is_live` condition's source), what the derived byte at
+`[rsp+0x15]` does inside callee `0x15ae430`, and what the constant 2
+counts or limits.
 
 ## Reproduce and validation
 
