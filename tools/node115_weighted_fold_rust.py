@@ -16,6 +16,8 @@ class Image:
  def __init__(self,data):
   parsed=generic.Image(data);self.data=data
   self.sections={s['name']:(s['address'],s['offset'],s['size']) for s in parsed.sections if s['type']!=8}
+  for name in ('.text','.rodata'):
+   if name not in self.sections:raise ValueError('missing required section '+name)
   self.text_va,self.text_off,self.text_size=self.sections['.text'];self.rodata=self.sections['.rodata']
   self.fdes=sorted(parsed.fde_ends.items());self.starts=[a for a,b in self.fdes];self.slots=parsed.relative();self.cache={}
 SECOND=cpu.INPUT+0x1000
