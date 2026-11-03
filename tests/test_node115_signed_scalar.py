@@ -38,7 +38,7 @@ class SignedScalarEvidenceTests(unittest.TestCase):
 
     def test_gnu_tail_loss_cannot_satisfy_the_extent(self):
         start, size, _ = native.FUNCTIONS[2]
-        rows = native.gnu_rows((native.PACKET / f"{start:x}.gnu.txt").read_text())
+        rows = native.gnu_rows((native.PACKET / f"{start:x}.objdump").read_text())
         with self.assertRaises(ValueError):
             native.verify_rows(type(self).read(start, size), start, rows[:-1])
 

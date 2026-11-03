@@ -119,3 +119,7 @@ Rust-to-original byte identity, integrated node, network compatibility claim,
 or completed component. The next integration question is the caller-owned
 limit/error context and aggregate field schema. Preserve the fast/short
 error and cursor relation when composing these primitives.
+
+Raw GNU stdout is retained byte-for-byte as .objdump under the existing
+repository -text rule. TSV, JSON and Markdown use canonical LF bytes.
+This storage distinction is not a code-byte or relocation normalization mask.

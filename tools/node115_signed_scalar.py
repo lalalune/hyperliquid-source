@@ -109,7 +109,7 @@ def verify(binary, packet=PACKET):
     counts = []
     for start, size, _ in FUNCTIONS:
         cap = capstone_rows((packet / f"{start:x}.capstone.tsv").read_text())
-        gnu = gnu_rows((packet / f"{start:x}.gnu.txt").read_text())
+        gnu = gnu_rows((packet / f"{start:x}.objdump").read_text())
         verify_rows(read(start, size), start, cap)
         verify_rows(read(start, size), start, gnu)
         need(cap == gnu, "independent decoder rows differ")
@@ -134,7 +134,7 @@ def collect(binary, packet, objdump):
                                  f"--start-address={start}", f"--stop-address={start+size}",
                                  str(binary)], capture_output=True, timeout=40)
         need(result.returncode == 0, "GNU disassembler failed")
-        (packet / f"{start:x}.gnu.txt").write_bytes(result.stdout)
+        (packet / f"{start:x}.objdump").write_bytes(result.stdout)
         (packet / f"{start:x}.capstone.tsv").write_text(text, encoding="utf-8")
     (packet / "records.json").write_text(json.dumps(records, indent=2) + "\n", encoding="utf-8")
     return verify(binary, packet)
