@@ -1592,6 +1592,205 @@ def verify_error_value(data, packet):
         limits='Conditional static map/sequence models and instruction-backed stores. Source JSON/enum types, message first-word domain (including B), dependent field initialization, default-data inactive bytes, copied tail100..103, first-form tail40..103, ownership/cleanup/exception and runtime equivalence remain unproved. No captured program execution or source-language undefined-behavior claim.')
 
 
+def extract_message_data(data):
+    assert len(data)==105896032 and hashlib.sha256(data).hexdigest()=='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+    shoff=struct.unpack_from('<Q',data,40)[0];size,count,nameidx=struct.unpack_from('<HHH',data,58);assert size==64
+    rows=[struct.unpack_from('<IIQQQQIIQQ',data,shoff+64*i) for i in range(count)]
+    sr=rows[nameidx];names=data[sr[4]:sr[4]+sr[5]]
+    sections={names[r[0]:names.find(b'\0',r[0])].decode():r for r in rows}
+    def at(va,n):
+        hits=[(name,r) for name,r in sections.items() if r[1]!=8 and r[2]&2 and r[3]<=va and va+n<=r[3]+r[5]];assert len(hits)==1
+        name,row=hits[0];off=row[4]+va-row[3];raw=data[off:off+n]
+        return dict(va=hex(va),file_offset=hex(off),section=name,section_flags=row[2],bytes=n,data_hex=raw.hex(),sha256=hashlib.sha256(raw).hexdigest())
+    tables=[]
+    for label,va,count,first in [('message-tags',0x47dee4,4,12)]:
+        table=at(va,count*4);raw=bytes.fromhex(table['data_hex']);table['label']=label
+        table['entries']=[dict(raw_tag=i+first,displacement=struct.unpack_from('<i',raw,4*i)[0],target=hex(va+struct.unpack_from('<i',raw,4*i)[0])) for i in range(count)]
+        tables.append(table)
+    rela=sections['.rela.dyn'];records=[]
+    for off in range(rela[4],rela[4]+rela[5],24):
+        slot,info,addend=struct.unpack_from('<QQq',data,off)
+        if slot in [0x64df480,0x64df498,0x64df508,0x64dfca8,0x64e0910]:
+            records.append(dict(slot=hex(slot),info=info,addend=hex(addend),relocation_file_offset=hex(off),relocation_hex=data[off:off+24].hex(),stored_pointer=at(slot,8)))
+    assert len(records)==5
+    for record in records:
+        record['relocation_type']=record['info']&0xffffffff
+        record['symbol_index']=record['info']>>32
+        if record['relocation_type']==8:
+            assert record['symbol_index']==0
+        else:
+            assert record['relocation_type']==6 and record['symbol_index']==7
+            symbols=sections['.dynsym'];strings=sections['.dynstr'];assert symbols[9]==24
+            symbol=at(symbols[3]+24*record['symbol_index'],24)
+            name,info,other,shndx,value,size=struct.unpack('<IBBHQQ',bytes.fromhex(symbol['data_hex']))
+            assert 0<=name<strings[5]
+            remaining=at(strings[3]+name,strings[5]-name)
+            raw=bytes.fromhex(remaining['data_hex']);end=raw.index(0)
+            record.update(symbol_record=symbol,symbol_name_record=at(strings[3]+name,end+1),symbol_name=raw[:end].decode(),symbol_info=info,symbol_other=other,symbol_section_index=shndx,symbol_value=hex(value),symbol_size=size)
+    return dict(target_sha256=hashlib.sha256(data).hexdigest(),tables=tables,relocations=records,
+        descriptors=[at(va,32) for va in [0x640bb50,0x640bcb0]],
+        limits='Four raw-tag table entries, four RELATIVE records and one GLOB_DAT record with its dynamic symbol and two descriptor spans. Allocator/copy/validation/error labels are inferred from call use; helper contracts, nonreturn behavior, raw record domains, source types and ownership remain unproved.')
+
+def verify_message_helper(data, packet):
+    folder=packet/'message-helper'
+    current=probe(data,extra_vas=(0x16fe790,0x16fec77))
+    require(current==json.loads((folder/'candidates.json').read_text()),'message helper FDE candidate drift')
+    require(current==json.loads((folder/'receipts/full-input-replay.json').read_text()),'message helper hosted full-input replay drift')
+    native=json.loads((folder/'receipts/decode-result.json').read_text())
+    require(native['target_sha256']==TARGET and native['whole_elf_reauthenticated_in_job'] and native['input_hashes_unchanged'],'message helper full input binding')
+    require(not native['captured_program_executed'] and native['native_invocations']==3,'message helper execution record')
+    bodies={};rowmaps={}
+    for label,key in [('message-candidate','0x16fe790'),('error-candidate','0x16fec77')]:
+        record=current['selected_fde_candidates'][key];start=int(record['start_va'],16);off=int(record['file_offset'],16)
+        body=data[off:off+record['bytes']]
+        require(hashlib.sha256(body).hexdigest()==record['body_sha256'],'message helper body identity')
+        cursor=start;rows=[]
+        for line in (folder/'receipts'/(label+'.stdout')).read_text().splitlines():
+            if not re.match(r'^\s*[0-9a-f]+:',line):continue
+            parts=line.split('\t');require(len(parts)>=3,'message helper native syntax')
+            va=int(parts[0].strip().rstrip(':'),16);tokens=parts[1].split()
+            require(tokens and all(re.fullmatch('[0-9a-f]{2}',t) for t in tokens),'message helper native byte syntax')
+            raw=bytes.fromhex(' '.join(tokens));text=' '.join(parts[2:]).strip()
+            require(va==cursor and body[va-start:va-start+len(raw)]==raw,'message helper native/full-image binding')
+            require(text and '(bad)' not in text and not text.startswith('.byte'),'message helper undecoded row')
+            rows.append(dict(va=hex(va),bytes=raw.hex(),text=text));cursor+=len(raw)
+        saved=next(r for r in native['regions'] if r['label']==label)
+        require(rows==saved['instruction_rows'] and len(rows)==saved['instructions'] and cursor==int(record['end_va'],16),'message helper complete rows/extent')
+        bodies[label]=(start,body);rowmaps[label]={int(r['va'],16):r for r in rows}
+    earlier=json.loads((packet/'error-value/receipts/decode-result.json').read_text())
+    require(next(r['instruction_rows'] for r in earlier['regions'] if r['label']=='error-candidate')==
+            next(r['instruction_rows'] for r in native['regions'] if r['label']=='error-candidate'),'renewed error helper drift')
+    edge=json.loads((folder/'receipts/qualified-candidate-edges.json').read_text())
+    call=rowmaps['error-candidate'][0x16fec77];raw=bytes.fromhex(call['bytes'])
+    require(len(edge)==1 and edge[0]['native_instruction_boundary_validated'] and edge[0]['candidate_va']==call['va'] and edge[0]['bytes']==call['bytes'],'message helper caller boundary')
+    require(raw[0]==0xe8 and 0x16fec77+5+struct.unpack_from('<i',raw,1)[0]==0x16fe790,'message helper caller direct target')
+    fields=json.loads((folder/'field-bindings.json').read_text())
+    def check_fields(active):
+        for field in fields:
+            va=int(field['va'],16);raw=bytes.fromhex(field['bytes']);start,body=active[field['region']]
+            require(rowmaps[field['region']].get(va,{}).get('bytes')==field['bytes'],'message helper field boundary')
+            require(body[va-start:va-start+len(raw)]==raw,'message helper field corruption: '+field['label'])
+    check_fields(bodies);controls=[]
+    for field in fields:
+        active=dict(bodies);start,body=bodies[field['region']];changed=bytearray(body)
+        changed[int(field['va'],16)-start+len(bytes.fromhex(field['bytes']))-1]^=1
+        active[field['region']]=(start,changed)
+        try:check_fields(active)
+        except ValueError as error:controls.append(dict(control='message helper '+field['label'],rejection=str(error)))
+        else:raise ValueError('message helper field corruption escaped')
+    record=current['selected_fde_candidates']['0x16fe790'];fde=bytes.fromhex(record['fde_hex'])
+    def check_extent(raw):
+        delta,length=struct.unpack_from('<ii',raw,8)
+        require(int(record['fde_va'],16)+8+delta==0x16fe790 and length==395 and 0x16fe790+length==int(record['end_va'],16),'message helper actual FDE extent')
+    check_extent(fde);changed=bytearray(fde);changed[12]^=1
+    try:check_extent(changed)
+    except ValueError as error:controls.append(dict(control='message helper FDE extent',rejection=str(error)))
+    else:raise ValueError('message helper FDE corruption escaped')
+    computed=extract_message_data(data);saved=json.loads((folder/'referenced-data.json').read_text())
+    require(computed==saved,'message helper referenced data drift')
+    active={'tag table':bytes.fromhex(saved['tables'][0]['data_hex'])}
+    active.update({'relocation '+r['slot']:bytes.fromhex(r['relocation_hex']) for r in saved['relocations']})
+    external=next(r for r in saved['relocations'] if r['relocation_type']==6)
+    active['dynamic symbol']=bytes.fromhex(external['symbol_record']['data_hex'])
+    active['dynamic symbol name']=bytes.fromhex(external['symbol_name_record']['data_hex'])
+    active.update({'descriptor '+r['va']:bytes.fromhex(r['data_hex']) for r in saved['descriptors']})
+    expected={k:bytes(v) for k,v in active.items()}
+    def check_data(values):
+        require(set(values)==set(expected),'message helper data inventory')
+        for key,raw in values.items():require(bytes(raw)==expected[key],'message helper data corruption '+key)
+    check_data(active)
+    for key,raw in active.items():
+        for offset in (range(0,len(raw),4) if key=='tag table' else [16 if key.startswith('relocation ') else 0]):
+            values=dict(active);changed=bytearray(raw);changed[offset]^=1;values[key]=changed
+            try:check_data(values)
+            except ValueError as error:controls.append(dict(control='message helper '+key+' '+str(offset),rejection=str(error)))
+            else:raise ValueError('message helper data corruption escaped')
+    rows=rowmaps['message-candidate'];instruction=lambda va:bytes.fromhex(rows[va]['bytes'])
+    targets=[0x16fe7bd,0x16fe873,0x16fe7e7,0x16fe81c]
+    require([int(r['target'],16) for r in saved['tables'][0]['entries']]==targets and all(t in rows for t in targets),'message helper tag-table targets')
+    require([(r['slot'],r['info'],r['addend']) for r in saved['relocations']]==[
+        ('0x64df480',8,'0x6355830'),('0x64df498',8,'0x141e264'),('0x64dfca8',8,'0x16815e0'),
+        ('0x64e0910',8,'0x5c54c30'),('0x64df508',(7<<32)|6,'0x0')],'message helper relocation kinds and targets')
+    require(external['symbol_name']=='memcpy' and external['symbol_index']==7 and external['symbol_info']==18 and external['symbol_section_index']==0,'message helper undefined memcpy dynamic symbol')
+    for site,target in [(0x16fe7ad,0x47dee4),(0x16fe7d7,0x64df480),(0x16fe7fa,0x64dfca8),
+        (0x16fe82f,0x64dfca8),(0x16fe854,0x64df480),(0x16fe86b,0x64df508),(0x16fe881,0x64df498),
+        (0x16fe890,0x64df480),(0x16fe8a3,0x64df498),(0x16fe8d8,0x640bb50),(0x16fe8e9,0x64e0910),(0x16fe8f1,0x640bcb0)]:
+        raw=instruction(site);require(site+len(raw)+struct.unpack_from('<i',raw,len(raw)-4)[0]==target,'message helper RIP binding')
+    semantics=[(0x16fe79e,'0fb606'),(0x16fe7a1,'83c0f4'),(0x16fe7a4,'83f803'),
+        (0x16fe7bd,'4c8b7618'),(0x16fe7c1,'4d85f6'),(0x16fe7d0,'4c8b6610'),
+        (0x16fe7e7,'4c8b7610'),(0x16fe7eb,'4c8b7e18'),(0x16fe800,'837c240801'),
+        (0x16fe80b,'4c8b742418'),(0x16fe810,'4d85f6'),(0x16fe81c,'4c8b7608'),(0x16fe820,'4c8b7e10'),
+        (0x16fe835,'837c240801'),(0x16fe840,'4c8b742418'),(0x16fe845,'4d85f6'),(0x16fe84c,'4c8b642410'),
+        (0x16fe85f,'4989c7'),(0x16fe862,'4889c7'),(0x16fe865,'4c89e6'),(0x16fe868,'4c89f2'),
+        (0x16fe873,'4c8b7610'),(0x16fe877,'4d85f6'),(0x16fe87c,'31ff'),(0x16fe87e,'4c89f6'),
+        (0x16fe889,'4c8b6608'),(0x16fe89b,'bf01000000'),(0x16fe8a0,'4c89f6'),(0x16fe8a9,'41bf01000000'),
+        (0x16fe8af,'4c8933'),(0x16fe8b2,'4c897b08'),(0x16fe8b6,'4c897310'),
+        (0x16fe8d3,'c644242006'),(0x16fe908,'48894308'),(0x16fe90c,'48b80000000000000080'),(0x16fe916,'488903')]
+    for site,raw in semantics:require(instruction(site)==bytes.fromhex(raw),'message helper semantic instruction')
+    branches=[];calls=[];indirect=[]
+    for va,row in rows.items():
+        raw=bytes.fromhex(row['bytes']);target=None
+        if raw[0]==0xe8:
+            calls.append(dict(va=hex(va),target=hex(va+5+struct.unpack_from('<i',raw,1)[0])));continue
+        if raw[:2]==b'\xff\x15':
+            indirect.append(dict(va=hex(va),slot=hex(va+6+struct.unpack_from('<i',raw,2)[0])));continue
+        if raw[0]==0xeb or 0x70<=raw[0]<=0x7f:target=va+len(raw)+struct.unpack_from('<b',raw,1)[0]
+        elif raw[0]==0xe9:target=va+len(raw)+struct.unpack_from('<i',raw,1)[0]
+        elif raw[0]==0x0f and len(raw)>1 and 0x80<=raw[1]<=0x8f:target=va+len(raw)+struct.unpack_from('<i',raw,2)[0]
+        if target is not None:require(target in rows,'message helper local branch target');branches.append(dict(va=hex(va),target=hex(target)))
+    require(calls==[dict(va='0x16fe903',target='0x1704de0')],'message helper direct call binding')
+    require(indirect==[dict(va=hex(a),slot=hex(b)) for a,b in [(0x16fe7d7,0x64df480),(0x16fe7fa,0x64dfca8),
+        (0x16fe82f,0x64dfca8),(0x16fe854,0x64df480),(0x16fe86b,0x64df508),(0x16fe881,0x64df498),
+        (0x16fe890,0x64df480),(0x16fe8a3,0x64df498),(0x16fe8e9,0x64e0910)]],'message helper indirect call inventory')
+    caller=rowmaps['error-candidate'];ci=lambda va:bytes.fromhex(caller[va]['bytes'])
+    for site in [0x16fe9f1,0x16fec77]:
+        raw=ci(site);require(raw[0]==0xe8 and site+5+struct.unpack_from('<i',raw,1)[0]==0x16fe790,'message helper both caller boundaries')
+    for site,raw in [(0x16fe9f6,'4c8b642430'),(0x16fea00,'4939dc'),(0x16fec7c,'4c8b7c2430'),
+        (0x16fec86,'4939ef'),(0x16fec8f,'488b4c2440'),(0x16fef5a,'4c897d00'),(0x16fef66,'48894508'),(0x16fef6a,'48895510')]:
+        require(ci(site)==bytes.fromhex(raw),'message helper leading-word and triple-store bridge')
+    A=1<<63;B=A+1
+    def route(tag,n,validation_status=0,allocation_nonzero=True):
+        if ((tag-12)&0xffffffff)>3:return dict(kind='unsupported-tag-error',first=A,stores=16,validation=0,allocation=0,copy=0)
+        validation=int(tag in [14,15])
+        if validation and validation_status==1:return dict(kind='validation-error',first=A,stores=16,validation=1,allocation=0,copy=0)
+        if n>=A:return dict(kind='failure-helper-frontier',argument0=0,validation=validation,allocation=0,copy=0)
+        if n==0:return dict(kind='ordinary',first=0,second=1,third=0,stores=24,validation=validation,allocation=0,copy=0)
+        if not allocation_nonzero:return dict(kind='failure-helper-frontier',argument0=1,validation=validation,allocation=1,copy=0)
+        return dict(kind='ordinary',first=n,second='returned-allocation',third=n,stores=24,validation=validation,allocation=1,copy=1)
+    dispatch_cases=0
+    for tag in range(256):
+        require(route(tag,0)['kind']==('ordinary' if tag in [12,13,14,15] else 'unsupported-tag-error'),'message helper raw-byte dispatch model');dispatch_cases+=1
+    boundary_cases=0;ordinary_boundary_cases=0
+    for tag in [12,13,14,15]:
+        for n in [0,1,255,A-1,A,B,(1<<64)-1]:
+            r=route(tag,n);require(r['kind']==('ordinary' if n<A else 'failure-helper-frontier'),'message signed-length boundary')
+            if n<A:
+                require(r['first']==r['third']==n and r['first']!=B and r['stores']==24,'ordinary no-frontier leading word bound')
+                require((r['allocation'],r['copy'])==((0,0) if n==0 else (1,1)),'message empty/positive effects');ordinary_boundary_cases+=1
+            else:require(r['argument0']==0 and r['allocation']==r['copy']==0,'negative-length helper frontier')
+            boundary_cases+=1
+        r=route(tag,1,allocation_nonzero=False);require(r['kind']=='failure-helper-frontier' and r['argument0']==1 and r['copy']==0,'allocation-null helper frontier');boundary_cases+=1
+    for tag in [14,15]:
+        r=route(tag,B,validation_status=1);require(r['kind']=='validation-error' and r['allocation']==0,'validator failure precedes length guard');boundary_cases+=1
+        r=route(tag,1,validation_status=2);require(r['kind']=='ordinary','local validator check rejects exactly DWORD1, admitted status domain unproved');boundary_cases+=1
+    # The model stops at the call frontier. No nonreturn/flags/helper-output
+    # assumption is converted into a proof about paths after that call returns.
+    require(B>=A and A-1<B,'conditional marker B exclusion is the signed nonnegative domain')
+    coverage=lambda spans:sorted({i for offset,size in spans for i in range(offset,offset+size)})
+    ordinary=coverage([(0,8),(8,8),(16,8)]);failed=coverage([(0,8),(8,8)])
+    require(ordinary==list(range(24)) and failed==list(range(16)),'message local stores')
+    return dict(status='MESSAGE_HELPER_LOCAL_STORES_AND_CONDITIONAL_WORD_DOMAIN_REPRODUCED',helper_bytes=395,helper_instructions=103,
+        field_bindings=len(fields),evidence_corruptions_rejected=len(controls),controls=controls,direct_callees=calls,indirect_calls=indirect,local_branches=branches,
+        raw_tag_cases=dispatch_cases,supported_raw_tags=[12,13,14,15],conditional_boundary_cases=boundary_cases,ordinary_boundary_cases=ordinary_boundary_cases,
+        direct_text_length_offsets={'12':24,'13':16},validation_input_pointer_offsets={'14':16,'15':8},validation_input_length_offsets={'14':24,'15':16},
+        ordinary_store_offsets=ordinary,error_store_offsets=failed,ordinary_words=['n','allocated-pointer-or-empty1','n'],empty_words=[0,1,0],
+        conditional_ordinary_first_word_unsigned_range=[0,hex(A-1)],conditional_marker_B_excluded=True,global_marker_B_exclusion_proved=False,
+        allocation_helper='0x6355830',failure_helper='0x141e264',validation_helper='0x16815e0',failure_helper_nonreturn_proved=False,
+        memcpy_dynamic_symbol='memcpy',relative_relocations=4,glob_dat_relocations=1,renewed_error_rows=553,
+        complete_104_byte_initialization_proved=False,
+        limits='Instruction/data-backed stores and conditional normal-helper/memory models, not capture execution. Leading word n is signed-nonnegative on paths that avoid failure helper0x141e264; nonreturn and post-call flag contracts of that helper remain open, so global B exclusion is unproved. Validation/allocation/memcpy contracts, pointer validity/ownership, source types/ABI, error-tail100..103, first-form tail40..103 and runtime equivalence remain unresolved.')
+
+
 def main():
     parser=argparse.ArgumentParser(description='Owned stdlib complete-input/native evidence verifier; no subprocess or captured execution.')
     parser.add_argument('--binary',type=Path,required=True)
@@ -1668,6 +1867,15 @@ def main():
     result['controls']+=error_value['controls'];result['error_value']=error_value
     require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(10,9382,2120),'ten unique ranges')
     result['limits']='Ten digest-bound native ranges and local field/result store coverage. Error-value ordinary stores cover100bytes, caller copies104; tail100..103 and dependent field definedness remain unclassified. Message first-word domain including B, first-form tail40..103, source types/ABI, cleanup/exception, serialized input and runtime equivalence remain unresolved.'
+    message_helper=verify_message_helper(data,args.packet)
+    result['regions']+=1;result['region_bytes']+=message_helper['helper_bytes']
+    result['native_instruction_rows']+=message_helper['helper_instructions']
+    result['instruction_counts']['message-candidate']=message_helper['helper_instructions']
+    result['field_bindings']+=message_helper['field_bindings']
+    result['evidence_corruptions_rejected']+=message_helper['evidence_corruptions_rejected']
+    result['controls']+=message_helper['controls'];result['message_helper']=message_helper
+    require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(11,9777,2223),'eleven unique ranges')
+    result['limits']='Eleven digest-bound native ranges. Message ordinary stores are [n,pointer-or1,n], and n is signed-nonnegative on paths avoiding failure helper0x141e264. Global B exclusion requires that helper contract and remains unproved. Dependent field definedness, default-data storage, error tail100..103, first-form tail40..103, source types/ABI, cleanup/exception, wire inputs and runtime equivalence remain unresolved.'
     print(json.dumps(result,indent=2))
 
 
