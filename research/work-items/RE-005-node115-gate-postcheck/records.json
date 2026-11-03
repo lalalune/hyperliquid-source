@@ -1,0 +1,3763 @@
+{
+ "artifact": {
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "exported_bodies": [
+  "checker_a",
+  "checker_b",
+  "drop_pair",
+  "drop_ad0",
+  "builder_11c",
+  "phase90_call"
+ ],
+ "findings": [
+  "the gates are multi-entry state machines: the prologue dispatches on byte [rbx+0x71] through the relative table at 0x60bb44 in gate_c (0x6041ec in gate_a), exactly five arms, and three more dispatches live inside - byte [rbx+0xd0] (table 0x60bb58, 9 arms), byte [rbx+0xad0] (table 0x60bb7c, 32 arms in gate_c against 28 at 0x604224 in gate_a) and byte [rbx+0x120] (table 0x60bbfc, 5 arms).  Every exit writes the next outer state back to +0x71 (3 or 4 on the checker exits, 4 on the wide-phase exit, 1 on the return-0 exit, 2 on the unwind path), so one call advances the machine and the caller re-invokes it",
+  "the late pair loads are the unwind path's free, not a second consumption: gate_c loads [rbx+0x78] at 0x2cbb0ba and [rbx+0x80] at 0x2cbb0c3 exactly once more, inside a landing-pad block, guarded by flag byte [rbx+0x74] != 0 and length > 0, and calls the dealloc slot 0x64df4a0 on (pointer, length).  The flag is set on the normal path at 0x2cb6bc7 (word [rbx+0x73] = 0x100) immediately before the pair is (re)built at +0x78 and cleared after the free; gate_a mirrors the free at 0x2aefb11/0x2aefb29 with a sentinel-and-zero test in place of the signed test.  The full rbx census shows these are the only loads of +0x78/+0x80 besides the lookup arguments at 0x2cb68f6/0x2cb68fa",
+  "the +0x90 address-takes set up the +0xd0 sub-machine: at entry state 4 (0x2cb6b40) and again inside its state-0 arm (0x2cb715f) the gate loads the state byte [rbx+0xd0], takes r15 = &[rbx+0xd0] and r13 = &[rbx+0x90] and dispatches through the +0xd0 table; the arms process the +0x90 sub-object through r13 - a direct call 0x26e11f0 (rsi = r15, rdx = r13, r8 = 1) at 0x2cb6ac0, an insert through slot 0x64e0ec0 into &[rbx+0xc0] at 0x2cb6adf, and an element free loop - while the state-3 arm (0x2cb6b65) instead spills &[rbx+0xad0] to [rsp+0x50] and &[rbx+0xd8] to [rsp+0x78] and dispatches the 32-state +0xad0 machine",
+  "after the key lookup the gate dispatches on the outcome byte [rbx+0x11c]: the == 2 arm (tag nonzero) and every != 1 arm land at 0x2cb6ba0, which writes outcome 1 to the record byte at +0x120 - through the &[rbx+0x120] pointer both merge paths spill to [rsp+0x18] (0x2cb67b8, 0x2cb67e4) - destroys the +0xad0 sub-object (direct call 0x2c901a0 at 0x2cb6bad), sets the +0x74 ownership flag and rebuilds the +0x78 pair from the +0x48 triple (movdqu [rbx+0x48] -> [rbx+0x78] at 0x2cb6bd6, [rbx+0x88] = [rbx+0x58] at 0x2cb6bdf).  The == 1 arm instead allocates a 0x30-byte refcounted block (alloc slot 0x64df480 at 0x2cb6939), stores it at [rbx+0xa0], calls builder 0x2d47710 on a stack descriptor (0x2cb69b2) and writes the double bits 0x403e000000000000 (30.0) at [rbx+0xa8] with [rbx+0xb0..+0xc0] zeroed",
+  "the returned byte is decided by an exit funnel over the single ret (gate_c 0x2cbb7e8): (i) the +0x120 state-4 arm enters at 0x2cbb708 and calls checker 0x2c7f360 on &[rbx+0x150] with the saved context pointer as rsi; nonzero writes outcome 4 to +0x120, sets +0x71 = 3 and returns 1, while zero continues through the [rbx+0x1e0]/[rbx+0x1d8] tag checks, the +0x168/+0x170 refcount drop, destructor 0x2ca0790 on &[rbx+0x178], the +0x138 pair free and the +0xd8 pair free into the global-state phase at 0x2cbb0e6; a second flow reaches the same call after copying [rbx+0x130] to [rbx+0x150] and zeroing [rbx+0x1e0] (0x2cbb6f1).  (ii) the +0x120 state-3 arm calls checker 0x2c7fa40 on &[rbx+0x128] (0x2cbb481) with the context pointer; bit 0 set writes outcome 3 to +0x120, +0x71 = 3, returns 1",
+  "the remaining funnel entries: (iii) a wide phase (record fields up to +0x2a1f, stack copies of 0x138 and 0x7f0 bytes) exits when its r12 == 2, writing byte 4 through the [rsp+0x50] spill and byte 3 through the [rsp+0x20] spill, setting +0x71 = 4 and returning 1 (0x2cb801d-0x2cb8034); the r14 checker phase's nonzero arm enters the same tail mid-way at 0x2cb802d (byte 4 through the [rsp+0x20] spill it just loaded, after writing byte 3 through its own r15 at 0x2cb992c).  (iv) the return-0 exit is that same phase's zero arm: after the +0xf8/+0x100 group is dropped (0x2ca0790 on &[rbx+0x100], call 0x2ca3ab0) it writes byte 1 through r15 (0x2cb998a), sets [rbx+0xd0] = 1, clears the word at +0x73, sets +0x71 = 1 and returns 0 (0x2cb99a7) - the only zero return in the body; the shaper then drops the record",
+  "precise negative: which record bytes the [rsp+0x50] and [rsp+0x20] spills name on funnel entries (iii) is not statically decidable from the gate body - both slots are redefined with unrelated values in other phases ([rsp+0x50] holds &[rbx+0x78] at 0x2cb67d6 and 0x2cb67f4 and stack-copy addresses in the wide phase; [rsp+0x20] holds r15 saves at 0x2cb7014/0x2cb746f and an xmm spill at 0x2cb6c02).  The values written (4 and 3), the guards, the +0x71 writes and the return bytes are pinned; the two store targets are not.  The unwind pad's byte-2 store through [rsp+0x20] at 0x2cbb07f has the same boundary",
+  "the unwind path writes outcome 2 and +0x71 = 2: the landing pads set the +0xad0 state byte ([rbx+0xad0] = 2 at 0x2cbb069), free the +0x118/+0x120 pair, destroy the +0xd8 object (0x2ca1ca0) and the +0x120 object (0x2ca14a0 at 0x2cbb087), free the manufactured pair under its +0x74 flag, and the shared tail at 0x2cbbba8 frees the +0x48 pair under its +0x73 flag, writes byte 2 to +0x120 (0x2cbbb9b), sets +0x71 = 2 (0x2cbbbc7) and resumes the unwind (_Unwind_Resume at 0x2cbbbce) - it never reaches the ret",
+  "the global-state phase at 0x2cbb0e6 (entered from 0x2cb707a, 0x2cbb7a9 and 0x2cbb7be) is the same lazy-init machinery as the early phase: it loads the global through slot 0x64e0918, tests [global+0x50], and on the unset arm completes the initialisation through slot 0x64df9f0 with the .data.rel.ro descriptor statics at 0x644da18/0x644da30 as arguments.  The post-check phases also contain date/time conversion blocks whose failure paths reference the .rodata messages at 0x465ab7 and 0x4676bb",
+  "gate_a mirrors the funnel with the same values: its epilogue (0x2af0229-0x2af024e) is entered from 0x2aefefd (checker 0x2a91280, bit-0 test, outcome 3), 0x2af0184 (checker 0x2a90a50, zero test, outcome 4), 0x2aeca14 (wide-phase entry, +0x71 = 4) and 0x2aee477 (return 0, +0x71 = 1).  The clones swap two spill slots: gate_a's &[rbx+0x120] spill lives at [rsp+0x20] and its context pointer at [rsp+0x18], where gate_c uses the reverse assignment"
+ ],
+ "funnel": {
+  "gate_a": {
+   "entries": [
+    {
+     "kind": "jmp",
+     "site": "0x2aeca14",
+     "target": "0x2af023a"
+    },
+    {
+     "kind": "jmp",
+     "site": "0x2aee477",
+     "target": "0x2af023a"
+    },
+    {
+     "kind": "jne",
+     "site": "0x2aefefd",
+     "target": "0x2af0229"
+    },
+    {
+     "kind": "jne",
+     "site": "0x2af0184",
+     "target": "0x2af022d"
+    },
+    {
+     "kind": "jmp",
+     "site": "0x2af022b",
+     "target": "0x2af022f"
+    }
+   ],
+   "ret": "0x2af024e"
+  },
+  "gate_c": {
+   "entries": [
+    {
+     "kind": "jmp",
+     "site": "0x2cb8034",
+     "target": "0x2cbb7d4"
+    },
+    {
+     "kind": "jmp",
+     "site": "0x2cb99a7",
+     "target": "0x2cbb7d4"
+    },
+    {
+     "kind": "jne",
+     "site": "0x2cbb497",
+     "target": "0x2cbb7c3"
+    },
+    {
+     "kind": "jne",
+     "site": "0x2cbb71e",
+     "target": "0x2cbb7c7"
+    },
+    {
+     "kind": "jmp",
+     "site": "0x2cbb7c5",
+     "target": "0x2cbb7c9"
+    }
+   ],
+   "ret": "0x2cbb7e8",
+   "shared_tail_entries": [
+    {
+     "kind": "jmp",
+     "site": "0x2cb9937",
+     "target": "0x2cb802d"
+    }
+   ]
+  }
+ },
+ "gate_census": {
+  "gate_a": {
+   "leas": {
+    "rbx": {
+     "0x10": [
+      "0x2aefd94"
+     ],
+     "0x100": [
+      "0x2aee44e",
+      "0x2aeecfe"
+     ],
+     "0x120": [
+      "0x2aeb1a1",
+      "0x2aeb1cd"
+     ],
+     "0x128": [
+      "0x2aefee7"
+     ],
+     "0x130": [
+      "0x2af005f"
+     ],
+     "0x13d9": [
+      "0x2aed7f6",
+      "0x2aede37"
+     ],
+     "0x13e0": [
+      "0x2aed850",
+      "0x2aedc17",
+      "0x2aee48f",
+      "0x2aeed49"
+     ],
+     "0x13f8": [
+      "0x2aed863",
+      "0x2aee481"
+     ],
+     "0x150": [
+      "0x2af016e"
+     ],
+     "0x168": [
+      "0x2aefa75"
+     ],
+     "0x16a0": [
+      "0x2aef95a"
+     ],
+     "0x170": [
+      "0x2aeb9f9",
+      "0x2aee3be",
+      "0x2aefa3b",
+      "0x2af019c"
+     ],
+     "0x1718": [
+      "0x2aec0e8",
+      "0x2aef941"
+     ],
+     "0x1720": [
+      "0x2aef917"
+     ],
+     "0x1728": [
+      "0x2aec13a"
+     ],
+     "0x1740": [
+      "0x2aec1e0"
+     ],
+     "0x1750": [
+      "0x2aec1ef",
+      "0x2aec1fd"
+     ],
+     "0x178": [
+      "0x2af01cc",
+      "0x2af0460"
+     ],
+     "0x18": [
+      "0x2af02ec"
+     ],
+     "0x198": [
+      "0x2aed353",
+      "0x2aee27a",
+      "0x2aef6a6"
+     ],
+     "0x1a0": [
+      "0x2aeca4f"
+     ],
+     "0x1ab0": [
+      "0x2aed9ba"
+     ],
+     "0x1ae2": [
+      "0x2aed7a1",
+      "0x2aeda06"
+     ],
+     "0x1aea": [
+      "0x2aed3e3",
+      "0x2aed59f"
+     ],
+     "0x2a18": [
+      "0x2aebf51",
+      "0x2aed5f3"
+     ],
+     "0x38": [
+      "0x2aebb0a"
+     ],
+     "0x50": [
+      "0x2aee563",
+      "0x2aee704"
+     ],
+     "0x78": [
+      "0x2aeb175",
+      "0x2aeb1e0",
+      "0x2aeb5ad"
+     ],
+     "0x7e8": [
+      "0x2aecd5c"
+     ],
+     "0x810": [
+      "0x2aed21e"
+     ],
+     "0x858": [
+      "0x2aeca65",
+      "0x2aef658"
+     ],
+     "0x8d0": [
+      "0x2aef680"
+     ],
+     "0x8f8": [
+      "0x2aef620"
+     ],
+     "0x90": [
+      "0x2aeb52e",
+      "0x2aebb3f"
+     ],
+     "0x970": [
+      "0x2aef60b"
+     ],
+     "0x990": [
+      "0x2aef642"
+     ],
+     "0x9b0": [
+      "0x2aef5ef"
+     ],
+     "0x9d0": [
+      "0x2aed259",
+      "0x2aef5d3"
+     ],
+     "0x9d1": [
+      "0x2aeccab",
+      "0x2aed181"
+     ],
+     "0xa0": [
+      "0x2af05ef"
+     ],
+     "0xa48": [
+      "0x2aef5b6"
+     ],
+     "0xa50": [
+      "0x2aef58d"
+     ],
+     "0xad0": [
+      "0x2aeb545",
+      "0x2aebbe1"
+     ],
+     "0xadd": [
+      "0x2aef68c"
+     ],
+     "0xae8": [
+      "0x2aebde4",
+      "0x2aed601",
+      "0x2aef51d",
+      "0x2aef571"
+     ],
+     "0xaf0": [
+      "0x2aecf7e",
+      "0x2aef4de"
+     ],
+     "0xb18": [
+      "0x2aecd73",
+      "0x2aed5b2"
+     ],
+     "0xb30": [
+      "0x2aec013",
+      "0x2aef974"
+     ],
+     "0xb38": [
+      "0x2aebe5f",
+      "0x2aef2cb"
+     ],
+     "0xb68": [
+      "0x2aecdf5"
+     ],
+     "0xb98": [
+      "0x2aef44d"
+     ],
+     "0xc0": [
+      "0x2aeb4c2",
+      "0x2aefe1a"
+     ],
+     "0xc10": [
+      "0x2aed69c",
+      "0x2aedecc",
+      "0x2aedf7d",
+      "0x2aef41c"
+     ],
+     "0xc18": [
+      "0x2aed62e",
+      "0x2aede61"
+     ],
+     "0xcb0": [
+      "0x2aee07f"
+     ],
+     "0xcc8": [
+      "0x2aef7a3"
+     ],
+     "0xcd0": [
+      "0x2aed7b4",
+      "0x2aeda19"
+     ],
+     "0xcd8": [
+      "0x2aed829",
+      "0x2aedbf6"
+     ],
+     "0xd0": [
+      "0x2aeb520",
+      "0x2aebb9c"
+     ],
+     "0xd8": [
+      "0x2aeb558",
+      "0x2aeb574",
+      "0x2aeba07",
+      "0x2aebbaa",
+      "0x2aee3cc",
+      "0x2aefd5e",
+      "0x2af007e"
+     ],
+     "0xf8": [
+      "0x2aee41e"
+     ]
+    }
+   },
+   "loads": {
+    "rbx": {
+     "-0x8": [
+      "0x2aeb50d"
+     ],
+     "0x0": [
+      "0x2aeaf73",
+      "0x2aeb516",
+      "0x2aececf",
+      "0x2aed91d",
+      "0x2aedac4",
+      "0x2aefebc"
+     ],
+     "0x10": [
+      "0x2aeaf77",
+      "0x2aecec5",
+      "0x2aed933",
+      "0x2aedada",
+      "0x2aeecae",
+      "0x2aeed91",
+      "0x2aefec9"
+     ],
+     "0x108": [
+      "0x2aeb225"
+     ],
+     "0x110": [
+      "0x2aeff44"
+     ],
+     "0x118": [
+      "0x2aebe97",
+      "0x2aefa9e",
+      "0x2aeff37"
+     ],
+     "0x11d": [
+      "0x2aeb2c0"
+     ],
+     "0x120": [
+      "0x2aeb1d9",
+      "0x2aefaaa"
+     ],
+     "0x121": [
+      "0x2aeb1f9"
+     ],
+     "0x122": [
+      "0x2aeb200"
+     ],
+     "0x123": [
+      "0x2aeb208"
+     ],
+     "0x124": [
+      "0x2aeb20f"
+     ],
+     "0x128": [
+      "0x2aebe9f"
+     ],
+     "0x130": [
+      "0x2af0157"
+     ],
+     "0x138": [
+      "0x2aebea7",
+      "0x2af0131",
+      "0x2af01e1"
+     ],
+     "0x13d0": [
+      "0x2aede55"
+     ],
+     "0x13d9": [
+      "0x2aede3e"
+     ],
+     "0x13e8": [
+      "0x2aed90f",
+      "0x2aee4ec",
+      "0x2aeeefe"
+     ],
+     "0x13f0": [
+      "0x2aed916",
+      "0x2aee4f3",
+      "0x2aeef05"
+     ],
+     "0x13f8": [
+      "0x2aee488"
+     ],
+     "0x140": [
+      "0x2af013d",
+      "0x2af01ed"
+     ],
+     "0x148": [
+      "0x2aebeaf"
+     ],
+     "0x158": [
+      "0x2aebe6b"
+     ],
+     "0x160": [
+      "0x2aebe72"
+     ],
+     "0x168": [
+      "0x2aebedb",
+      "0x2aed2e3"
+     ],
+     "0x16a0": [
+      "0x2aec942"
+     ],
+     "0x16b0": [
+      "0x2aec949"
+     ],
+     "0x16c0": [
+      "0x2aec950"
+     ],
+     "0x16d0": [
+      "0x2aec958"
+     ],
+     "0x16e0": [
+      "0x2aec933"
+     ],
+     "0x16f0": [
+      "0x2aec924"
+     ],
+     "0x170": [
+      "0x2aeba00",
+      "0x2aed091"
+     ],
+     "0x1700": [
+      "0x2aec915"
+     ],
+     "0x1710": [
+      "0x2aec906"
+     ],
+     "0x1718": [
+      "0x2aec36c",
+      "0x2aef934"
+     ],
+     "0x1720": [
+      "0x2aec794",
+      "0x2aef90a"
+     ],
+     "0x1740": [
+      "0x2aec1d3"
+     ],
+     "0x1749": [
+      "0x2aec1be"
+     ],
+     "0x18": [
+      "0x2aefdbd"
+     ],
+     "0x180": [
+      "0x2aed099"
+     ],
+     "0x190": [
+      "0x2aed082"
+     ],
+     "0x1ad0": [
+      "0x2aed7de",
+      "0x2aedd68",
+      "0x2aee943"
+     ],
+     "0x1ad8": [
+      "0x2aeda35"
+     ],
+     "0x1ae2": [
+      "0x2aeda12"
+     ],
+     "0x1ae8": [
+      "0x2aed5dc"
+     ],
+     "0x1ae9": [
+      "0x2aed5d5"
+     ],
+     "0x1aea": [
+      "0x2aed5ab"
+     ],
+     "0x20": [
+      "0x2aeaf86",
+      "0x2aefdcf"
+     ],
+     "0x28": [
+      "0x2aeaf65",
+      "0x2af02fa"
+     ],
+     "0x2a18": [
+      "0x2aed5fa"
+     ],
+     "0x2a19": [
+      "0x2aec339",
+      "0x2aec6aa"
+     ],
+     "0x48": [
+      "0x2aeb5b1",
+      "0x2af0614"
+     ],
+     "0x50": [
+      "0x2aeaf9d",
+      "0x2aec46a",
+      "0x2af062c"
+     ],
+     "0x58": [
+      "0x2aeb5bb"
+     ],
+     "0x60": [
+      "0x2aeb5c6",
+      "0x2aeb5ee"
+     ],
+     "0x68": [
+      "0x2aeb5cf"
+     ],
+     "0x6c": [
+      "0x2aeb5d4"
+     ],
+     "0x70": [
+      "0x2aeaf5e"
+     ],
+     "0x72": [
+      "0x2aeb170",
+      "0x2aebb0e"
+     ],
+     "0x78": [
+      "0x2aeb2e6",
+      "0x2aefb11"
+     ],
+     "0x8": [
+      "0x2aed92a",
+      "0x2aedad1",
+      "0x2aeeca1",
+      "0x2aeed84"
+     ],
+     "0x80": [
+      "0x2aeb2ea",
+      "0x2aefb29"
+     ],
+     "0x838": [
+      "0x2aecd3a",
+      "0x2aee269"
+     ],
+     "0x840": [
+      "0x2aece08",
+      "0x2aecf99",
+      "0x2aed243",
+      "0x2aed302"
+     ],
+     "0x848": [
+      "0x2aed0c4"
+     ],
+     "0x88": [
+      "0x2aeb217"
+     ],
+     "0x90": [
+      "0x2aeb21e"
+     ],
+     "0x990": [
+      "0x2aef635"
+     ],
+     "0x9a0": [
+      "0x2aecf62",
+      "0x2aee380"
+     ],
+     "0x9a8": [
+      "0x2aee30e"
+     ],
+     "0x9b0": [
+      "0x2aee2bf"
+     ],
+     "0x9c0": [
+      "0x2aee2c6"
+     ],
+     "0x9e8": [
+      "0x2aecc26",
+      "0x2aece28",
+      "0x2aed0f2"
+     ],
+     "0x9f0": [
+      "0x2aecc37",
+      "0x2aece39",
+      "0x2aed103"
+     ],
+     "0x9f8": [
+      "0x2aecc48",
+      "0x2aece4a",
+      "0x2aed114"
+     ],
+     "0xa0": [
+      "0x2aefd8d",
+      "0x2af05e2"
+     ],
+     "0xa00": [
+      "0x2aecc61",
+      "0x2aece63",
+      "0x2aed12d"
+     ],
+     "0xa08": [
+      "0x2aecc72",
+      "0x2aece74",
+      "0x2aed142"
+     ],
+     "0xa10": [
+      "0x2aecc79",
+      "0x2aece7b",
+      "0x2aed149"
+     ],
+     "0xa20": [
+      "0x2aecc81",
+      "0x2aece83",
+      "0x2aed151"
+     ],
+     "0xa28": [
+      "0x2aecc9a",
+      "0x2aece9c",
+      "0x2aed16f"
+     ],
+     "0xa30": [
+      "0x2aeccb2",
+      "0x2aed188"
+     ],
+     "0xa38": [
+      "0x2aecd20",
+      "0x2aecf2a",
+      "0x2aed1f4"
+     ],
+     "0xa48": [
+      "0x2aed0dc",
+      "0x2aef5a9"
+     ],
+     "0xa50": [
+      "0x2aed39f"
+     ],
+     "0xa60": [
+      "0x2aed3a6"
+     ],
+     "0xa70": [
+      "0x2aed3ad"
+     ],
+     "0xa8": [
+      "0x2af0013"
+     ],
+     "0xa80": [
+      "0x2aed3b4"
+     ],
+     "0xa90": [
+      "0x2aed393"
+     ],
+     "0xaa0": [
+      "0x2aed387"
+     ],
+     "0xab0": [
+      "0x2aed37b"
+     ],
+     "0xac0": [
+      "0x2aed370"
+     ],
+     "0xad0": [
+      "0x2aeb551"
+     ],
+     "0xad1": [
+      "0x2aebe83",
+      "0x2aece01",
+      "0x2aecfa4",
+      "0x2aed0b3",
+      "0x2aed35a",
+      "0x2aee2b1"
+     ],
+     "0xad2": [
+      "0x2aed368"
+     ],
+     "0xae8": [
+      "0x2aebf93",
+      "0x2aecf69",
+      "0x2aed267"
+     ],
+     "0xaf0": [
+      "0x2aebf9a",
+      "0x2aee2dd"
+     ],
+     "0xb0": [
+      "0x2aeffcc"
+     ],
+     "0xb00": [
+      "0x2aebfa6",
+      "0x2aee2e5"
+     ],
+     "0xb10": [
+      "0x2aebfb3",
+      "0x2aecf44",
+      "0x2aee2ff"
+     ],
+     "0xb20": [
+      "0x2aebf6f"
+     ],
+     "0xb21": [
+      "0x2aebf76"
+     ],
+     "0xb28": [
+      "0x2aed618"
+     ],
+     "0xb8": [
+      "0x2aeffe8",
+      "0x2af0113"
+     ],
+     "0xb90": [
+      "0x2aed5ce"
+     ],
+     "0xc0": [
+      "0x2af05c7"
+     ],
+     "0xc10": [
+      "0x2aed57c",
+      "0x2aede1b"
+     ],
+     "0xc8": [
+      "0x2af05d3"
+     ],
+     "0xcb0": [
+      "0x2aee22b"
+     ],
+     "0xcb8": [
+      "0x2aee237"
+     ],
+     "0xcc0": [
+      "0x2aedf08"
+     ],
+     "0xcd0": [
+      "0x2aedcbf"
+     ],
+     "0xd0": [
+      "0x2aeb527"
+     ],
+     "0xd8": [
+      "0x2af0205",
+      "0x2af0587"
+     ],
+     "0xe0": [
+      "0x2aefdfd",
+      "0x2af0215",
+      "0x2af0593"
+     ],
+     "0xe8": [
+      "0x2aefe04"
+     ]
+    }
+   },
+   "other_dst": {
+    "rbx": {
+     "0x0": [
+      "0x2aed309",
+      "0x2aef2fa",
+      "0x2aef4b0",
+      "0x2aef839"
+     ],
+     "0x10": [
+      "0x2aefd9c",
+      "0x2aefded"
+     ],
+     "0x11c": [
+      "0x2aeb302",
+      "0x2aeb317"
+     ],
+     "0x11e": [
+      "0x2af01d8"
+     ],
+     "0x160": [
+      "0x2aee415"
+     ],
+     "0x168": [
+      "0x2aee40c",
+      "0x2af01a3"
+     ],
+     "0x1ac8": [
+      "0x2aeda9e"
+     ],
+     "0x1aed": [
+      "0x2aef401"
+     ],
+     "0x1aee": [
+      "0x2aef413"
+     ],
+     "0x1aef": [
+      "0x2aef444"
+     ],
+     "0x1d8": [
+      "0x2af0193"
+     ],
+     "0x1e0": [
+      "0x2af018a"
+     ],
+     "0x2a1b": [
+      "0x2aef901"
+     ],
+     "0x2a1c": [
+      "0x2aef92b"
+     ],
+     "0x2a1d": [
+      "0x2aef966"
+     ],
+     "0x2a1e": [
+      "0x2aef9c0"
+     ],
+     "0x2a1f": [
+      "0x2aef9ed"
+     ],
+     "0x38": [
+      "0x2aeb5d8"
+     ],
+     "0x72": [
+      "0x2aeb90a"
+     ],
+     "0x73": [
+      "0x2af060e"
+     ],
+     "0x74": [
+      "0x2aefb0b"
+     ],
+     "0x8d0": [
+      "0x2aef677"
+     ],
+     "0x9d0": [
+      "0x2aecc14",
+      "0x2aece1b",
+      "0x2aed0e5"
+     ],
+     "0xad3": [
+      "0x2aef555"
+     ],
+     "0xad4": [
+      "0x2aef584"
+     ],
+     "0xad5": [
+      "0x2aef5a0"
+     ],
+     "0xad6": [
+      "0x2aef5ca"
+     ],
+     "0xad8": [
+      "0x2aefa55"
+     ],
+     "0xad9": [
+      "0x2aefa95"
+     ],
+     "0xada": [
+      "0x2aef4d0"
+     ],
+     "0xadc": [
+      "0x2aef5e6"
+     ],
+     "0xadd": [
+      "0x2aef664"
+     ],
+     "0xade": [
+      "0x2aef64f"
+     ],
+     "0xadf": [
+      "0x2aef62c"
+     ],
+     "0xae0": [
+      "0x2aef617"
+     ],
+     "0xae1": [
+      "0x2aef602"
+     ],
+     "0xae2": [
+      "0x2aef69d"
+     ],
+     "0xae8": [
+      "0x2aef568"
+     ],
+     "0xb30": [
+      "0x2aec032"
+     ],
+     "0xb98": [
+      "0x2aed49c",
+      "0x2aef43b"
+     ],
+     "0xc10": [
+      "0x2aed8f3",
+      "0x2aedf6b",
+      "0x2aef40a"
+     ],
+     "0xc70": [
+      "0x2aebe56"
+     ],
+     "0xc7d": [
+      "0x2aebe48",
+      "0x2aef2a7"
+     ],
+     "0xca0": [
+      "0x2aecdec"
+     ],
+     "0xcad": [
+      "0x2aecdd9",
+      "0x2aeefd1"
+     ],
+     "0xf0": [
+      "0x2aee425"
+     ]
+    }
+   },
+   "stores": {
+    "rbx": {
+     "0x108": [
+      "0x2aeb19a",
+      "0x2aebbc5"
+     ],
+     "0x118": [
+      "0x2aebc1d"
+     ],
+     "0x11c": [
+      "0x2aeb24b"
+     ],
+     "0x11d": [
+      "0x2aeb252"
+     ],
+     "0x11e": [
+      "0x2aeb230",
+      "0x2af010c",
+      "0x2af012a",
+      "0x2af01fc"
+     ],
+     "0x11f": [
+      "0x2af0561"
+     ],
+     "0x120": [
+      "0x2aeb1ad"
+     ],
+     "0x121": [
+      "0x2aeb1b4"
+     ],
+     "0x128": [
+      "0x2aebc25",
+      "0x2aeffb8"
+     ],
+     "0x130": [
+      "0x2af0076"
+     ],
+     "0x138": [
+      "0x2aebc2d",
+      "0x2af0104"
+     ],
+     "0x13d0": [
+      "0x2aed7ef"
+     ],
+     "0x13d8": [
+      "0x2aed804",
+      "0x2aedcb0",
+      "0x2aedd4b"
+     ],
+     "0x13d9": [
+      "0x2aed7fd"
+     ],
+     "0x13e0": [
+      "0x2aed85c"
+     ],
+     "0x13e8": [
+      "0x2aed8aa"
+     ],
+     "0x13f0": [
+      "0x2aed8b8"
+     ],
+     "0x13f8": [
+      "0x2aed86a"
+     ],
+     "0x148": [
+      "0x2aebc35",
+      "0x2af00f4"
+     ],
+     "0x150": [
+      "0x2af015f"
+     ],
+     "0x160": [
+      "0x2aebdc0"
+     ],
+     "0x168": [
+      "0x2aebdcd",
+      "0x2aee3e4"
+     ],
+     "0x16a0": [
+      "0x2aec0c7",
+      "0x2aec0db"
+     ],
+     "0x16b0": [
+      "0x2aec0bf"
+     ],
+     "0x16c0": [
+      "0x2aec0b7"
+     ],
+     "0x16d0": [
+      "0x2aec0af"
+     ],
+     "0x16e0": [
+      "0x2aec084"
+     ],
+     "0x16f0": [
+      "0x2aec075"
+     ],
+     "0x170": [
+      "0x2aebe29",
+      "0x2aee3c5"
+     ],
+     "0x1700": [
+      "0x2aec066"
+     ],
+     "0x1710": [
+      "0x2aec057"
+     ],
+     "0x1718": [
+      "0x2aec0ef"
+     ],
+     "0x1720": [
+      "0x2aec0ff"
+     ],
+     "0x1728": [
+      "0x2aec116"
+     ],
+     "0x1738": [
+      "0x2aec11e"
+     ],
+     "0x1740": [
+      "0x2aec125"
+     ],
+     "0x1748": [
+      "0x2aec12c"
+     ],
+     "0x1749": [
+      "0x2aec133"
+     ],
+     "0x174b": [
+      "0x2aec209",
+      "0x2aeeecd"
+     ],
+     "0x180": [
+      "0x2aebe31"
+     ],
+     "0x190": [
+      "0x2aebe41"
+     ],
+     "0x198": [
+      "0x2aeca48"
+     ],
+     "0x1ab0": [
+      "0x2aed9a7"
+     ],
+     "0x1ac8": [
+      "0x2aed9ae"
+     ],
+     "0x1ad0": [
+      "0x2aed7c0"
+     ],
+     "0x1ad8": [
+      "0x2aed79a"
+     ],
+     "0x1ae0": [
+      "0x2aed7c7"
+     ],
+     "0x1ae1": [
+      "0x2aedd5e"
+     ],
+     "0x1ae2": [
+      "0x2aed7ad"
+     ],
+     "0x1ae8": [
+      "0x2aed3d5"
+     ],
+     "0x1ae9": [
+      "0x2aed3dc"
+     ],
+     "0x1aea": [
+      "0x2aed3ef",
+      "0x2aee25a",
+      "0x2aef460"
+     ],
+     "0x1aeb": [
+      "0x2aed781"
+     ],
+     "0x1aec": [
+      "0x2aed3f6",
+      "0x2aed77a",
+      "0x2aef3cc"
+     ],
+     "0x1aed": [
+      "0x2aed573",
+      "0x2aede12",
+      "0x2aedeee",
+      "0x2aee24a",
+      "0x2aef428"
+     ],
+     "0x1aee": [
+      "0x2aedf84"
+     ],
+     "0x1aef": [
+      "0x2aed4a9",
+      "0x2aee253",
+      "0x2aef459"
+     ],
+     "0x1e0": [
+      "0x2af0167"
+     ],
+     "0x28": [
+      "0x2aefdb5",
+      "0x2aefde5"
+     ],
+     "0x2a18": [
+      "0x2aebf58",
+      "0x2aec9f0",
+      "0x2aefa19"
+     ],
+     "0x2a19": [
+      "0x2aebfad"
+     ],
+     "0x2a1a": [
+      "0x2aebfdc"
+     ],
+     "0x2a1b": [
+      "0x2aebf66",
+      "0x2aec0f6",
+      "0x2aec78d",
+      "0x2aec9cd",
+      "0x2aef924"
+     ],
+     "0x2a1c": [
+      "0x2aec362",
+      "0x2aef94e"
+     ],
+     "0x2a1d": [
+      "0x2aebf5f",
+      "0x2aec02b",
+      "0x2aef987"
+     ],
+     "0x2a1e": [
+      "0x2aebf8c",
+      "0x2aebfe2",
+      "0x2aef9e6"
+     ],
+     "0x2a1f": [
+      "0x2aebf7d",
+      "0x2aec106",
+      "0x2aec9d7",
+      "0x2aefa12"
+     ],
+     "0x38": [
+      "0x2aeaf69"
+     ],
+     "0x48": [
+      "0x2aeaf7c"
+     ],
+     "0x58": [
+      "0x2aeaf81"
+     ],
+     "0x68": [
+      "0x2aeaf8a"
+     ],
+     "0x71": [
+      "0x2af023a",
+      "0x2af063c"
+     ],
+     "0x72": [
+      "0x2aeaf62"
+     ],
+     "0x73": [
+      "0x2aeaf6d",
+      "0x2aeb5a7",
+      "0x2aee46d",
+      "0x2af0638"
+     ],
+     "0x74": [
+      "0x2aebb12",
+      "0x2aefb38"
+     ],
+     "0x78": [
+      "0x2aeb239",
+      "0x2aeb5b6"
+     ],
+     "0x80": [
+      "0x2aeb23d"
+     ],
+     "0x88": [
+      "0x2aeb188",
+      "0x2aeb5bf"
+     ],
+     "0x90": [
+      "0x2aeb18f",
+      "0x2aebb55"
+     ],
+     "0x98": [
+      "0x2aeb244"
+     ],
+     "0x990": [
+      "0x2aeca83"
+     ],
+     "0x998": [
+      "0x2aeca97"
+     ],
+     "0x99c": [
+      "0x2aeca91"
+     ],
+     "0x9a0": [
+      "0x2aecaa6"
+     ],
+     "0x9b0": [
+      "0x2aecac4"
+     ],
+     "0x9c0": [
+      "0x2aecacb"
+     ],
+     "0x9d0": [
+      "0x2aecaf9"
+     ],
+     "0x9e0": [
+      "0x2aecb00"
+     ],
+     "0x9f0": [
+      "0x2aecb07"
+     ],
+     "0xa0": [
+      "0x2aeb363",
+      "0x2aebb4a"
+     ],
+     "0xa00": [
+      "0x2aecb0e"
+     ],
+     "0xa10": [
+      "0x2aecb1d"
+     ],
+     "0xa20": [
+      "0x2aecb2c"
+     ],
+     "0xa30": [
+      "0x2aecb3b"
+     ],
+     "0xa40": [
+      "0x2aecb4a"
+     ],
+     "0xa48": [
+      "0x2aecb51"
+     ],
+     "0xa50": [
+      "0x2aecb7a"
+     ],
+     "0xa60": [
+      "0x2aecb81"
+     ],
+     "0xa70": [
+      "0x2aecb88"
+     ],
+     "0xa8": [
+      "0x2aeb428",
+      "0x2aebb5c"
+     ],
+     "0xa80": [
+      "0x2aecb90"
+     ],
+     "0xa9": [
+      "0x2aebb63"
+     ],
+     "0xa90": [
+      "0x2aecba0"
+     ],
+     "0xaa0": [
+      "0x2aecbaf"
+     ],
+     "0xab0": [
+      "0x2aecbbe"
+     ],
+     "0xac0": [
+      "0x2aecbcd"
+     ],
+     "0xac8": [
+      "0x2aecf70"
+     ],
+     "0xad0": [
+      "0x2aebbed",
+      "0x2aee388",
+      "0x2aefac0"
+     ],
+     "0xad2": [
+      "0x2aebe7d"
+     ],
+     "0xad3": [
+      "0x2aebbf7",
+      "0x2aecbde",
+      "0x2aecf77",
+      "0x2aee378",
+      "0x2aef57d"
+     ],
+     "0xad4": [
+      "0x2aed361",
+      "0x2aef599"
+     ],
+     "0xad5": [
+      "0x2aed0d5",
+      "0x2aef5c3"
+     ],
+     "0xad6": [
+      "0x2aed26e",
+      "0x2aef5df"
+     ],
+     "0xad7": [
+      "0x2aebe10",
+      "0x2aed07b",
+      "0x2aefa4e"
+     ],
+     "0xad8": [
+      "0x2aebdd4",
+      "0x2aed2dc",
+      "0x2aefa89"
+     ],
+     "0xad9": [
+      "0x2aebbfe",
+      "0x2aebe90",
+      "0x2aefab9"
+     ],
+     "0xada": [
+      "0x2aed2fb",
+      "0x2aee297",
+      "0x2aef4f1"
+     ],
+     "0xadb": [
+      "0x2aed074",
+      "0x2aed260",
+      "0x2aef549"
+     ],
+     "0xadc": [
+      "0x2aecbd4",
+      "0x2aee290",
+      "0x2aef5fb"
+     ],
+     "0xae0": [
+      "0x2aecad2"
+     ],
+     "0xae1": [
+      "0x2aecaad"
+     ],
+     "0xae2": [
+      "0x2aeca41",
+      "0x2aee289",
+      "0x2aef6b2"
+     ],
+     "0xae8": [
+      "0x2aed06d"
+     ],
+     "0xb0": [
+      "0x2aeb433",
+      "0x2aeffe1"
+     ],
+     "0xb1": [
+      "0x2aebb6b"
+     ],
+     "0xb10": [
+      "0x2aecd63"
+     ],
+     "0xb28": [
+      "0x2aebf4a"
+     ],
+     "0xb5": [
+      "0x2aebb7b"
+     ],
+     "0xb8": [
+      "0x2aefffd",
+      "0x2af014c"
+     ],
+     "0xb90": [
+      "0x2aed3ce"
+     ],
+     "0xb98": [
+      "0x2aed416"
+     ],
+     "0xba8": [
+      "0x2aed41d"
+     ],
+     "0xbb8": [
+      "0x2aed425"
+     ],
+     "0xbc8": [
+      "0x2aed42d"
+     ],
+     "0xbd8": [
+      "0x2aed43a"
+     ],
+     "0xbe8": [
+      "0x2aed446"
+     ],
+     "0xbf8": [
+      "0x2aed453"
+     ],
+     "0xc08": [
+      "0x2aed45f"
+     ],
+     "0xc10": [
+      "0x2aed466"
+     ],
+     "0xc4": [
+      "0x2aebb89"
+     ],
+     "0xc7c": [
+      "0x2aebddb"
+     ],
+     "0xc8": [
+      "0x2aebb8f"
+     ],
+     "0xc9": [
+      "0x2aebb96"
+     ],
+     "0xcac": [
+      "0x2aecd6a"
+     ],
+     "0xcb0": [
+      "0x2aed471"
+     ],
+     "0xcb8": [
+      "0x2aed47c"
+     ],
+     "0xcc0": [
+      "0x2aed487"
+     ],
+     "0xcc8": [
+      "0x2aed773"
+     ],
+     "0xcd0": [
+      "0x2aed80b"
+     ],
+     "0xd0": [
+      "0x2aebba3",
+      "0x2aee466"
+     ],
+     "0xd8": [
+      "0x2aebbda",
+      "0x2aee3dd",
+      "0x2aefd82"
+     ],
+     "0xe8": [
+      "0x2aebbd3",
+      "0x2aefd72"
+     ],
+     "0xf8": [
+      "0x2aebbcc"
+     ]
+    }
+   }
+  },
+  "gate_c": {
+   "leas": {
+    "rbx": {
+     "0x10": [
+      "0x2cbb32e"
+     ],
+     "0x100": [
+      "0x2cb997e",
+      "0x2cba276"
+     ],
+     "0x120": [
+      "0x2cb67b1",
+      "0x2cb67dd"
+     ],
+     "0x128": [
+      "0x2cbb481"
+     ],
+     "0x130": [
+      "0x2cbb5f9"
+     ],
+     "0x13d9": [
+      "0x2cb8e16",
+      "0x2cb93c5"
+     ],
+     "0x13e0": [
+      "0x2cb8e70",
+      "0x2cb9201",
+      "0x2cb99bf",
+      "0x2cba2d9"
+     ],
+     "0x13f8": [
+      "0x2cb8e83",
+      "0x2cb99b1"
+     ],
+     "0x150": [
+      "0x2cbb708"
+     ],
+     "0x168": [
+      "0x2cbb01e"
+     ],
+     "0x16a0": [
+      "0x2cbaf34"
+     ],
+     "0x170": [
+      "0x2cb7019",
+      "0x2cb98ee",
+      "0x2cbafeb",
+      "0x2cbb736"
+     ],
+     "0x1718": [
+      "0x2cb7708",
+      "0x2cbaf1b"
+     ],
+     "0x1720": [
+      "0x2cbaef1"
+     ],
+     "0x1728": [
+      "0x2cb775a"
+     ],
+     "0x1740": [
+      "0x2cb7800"
+     ],
+     "0x1750": [
+      "0x2cb780f",
+      "0x2cb781d"
+     ],
+     "0x178": [
+      "0x2cbb766",
+      "0x2cbb9fa"
+     ],
+     "0x18": [
+      "0x2cbb886"
+     ],
+     "0x198": [
+      "0x2cb8973",
+      "0x2cb97aa",
+      "0x2cbad82"
+     ],
+     "0x1a0": [
+      "0x2cb806f"
+     ],
+     "0x1ab0": [
+      "0x2cb8fc2",
+      "0x2cb9a1f"
+     ],
+     "0x1ac8": [
+      "0x2cb8fd5",
+      "0x2cb9a11"
+     ],
+     "0x1ae2": [
+      "0x2cb8dc1",
+      "0x2cb9052"
+     ],
+     "0x1aea": [
+      "0x2cb8a03",
+      "0x2cb8bbf"
+     ],
+     "0x2a18": [
+      "0x2cb7571",
+      "0x2cb8c13"
+     ],
+     "0x38": [
+      "0x2cb712a"
+     ],
+     "0x50": [
+      "0x2cb9ac8",
+      "0x2cb9c93"
+     ],
+     "0x78": [
+      "0x2cb6785",
+      "0x2cb67f0",
+      "0x2cb6bcd"
+     ],
+     "0x7e8": [
+      "0x2cb837c"
+     ],
+     "0x810": [
+      "0x2cb883e"
+     ],
+     "0x858": [
+      "0x2cb8085",
+      "0x2cbad34"
+     ],
+     "0x8d0": [
+      "0x2cbad5c"
+     ],
+     "0x8f8": [
+      "0x2cbacfc"
+     ],
+     "0x90": [
+      "0x2cb6b4e",
+      "0x2cb715f"
+     ],
+     "0x970": [
+      "0x2cbace7"
+     ],
+     "0x990": [
+      "0x2cbad1e"
+     ],
+     "0x9b0": [
+      "0x2cbaccb"
+     ],
+     "0x9d0": [
+      "0x2cb8879",
+      "0x2cbacaf"
+     ],
+     "0x9d1": [
+      "0x2cb82cb",
+      "0x2cb87a1"
+     ],
+     "0xa0": [
+      "0x2cbbb89"
+     ],
+     "0xa48": [
+      "0x2cbac92"
+     ],
+     "0xa50": [
+      "0x2cbac69"
+     ],
+     "0xad0": [
+      "0x2cb6b65",
+      "0x2cb7201"
+     ],
+     "0xadd": [
+      "0x2cbad68"
+     ],
+     "0xae8": [
+      "0x2cb7404",
+      "0x2cb8c21",
+      "0x2cbaad6",
+      "0x2cbac4d"
+     ],
+     "0xaf0": [
+      "0x2cb859e",
+      "0x2cbaa8f"
+     ],
+     "0xb18": [
+      "0x2cb8393",
+      "0x2cb8bd2"
+     ],
+     "0xb30": [
+      "0x2cb7633",
+      "0x2cbaf4e"
+     ],
+     "0xb38": [
+      "0x2cb747f",
+      "0x2cba8ba"
+     ],
+     "0xb68": [
+      "0x2cb8415"
+     ],
+     "0xb98": [
+      "0x2cbaa31"
+     ],
+     "0xc0": [
+      "0x2cb6ad5",
+      "0x2cbb3b4"
+     ],
+     "0xc10": [
+      "0x2cb8cbc",
+      "0x2cb945a",
+      "0x2cb950b",
+      "0x2cbaa00"
+     ],
+     "0xc18": [
+      "0x2cb8c4e",
+      "0x2cb93ef"
+     ],
+     "0xcb0": [
+      "0x2cb960d"
+     ],
+     "0xcc8": [
+      "0x2cbabcd"
+     ],
+     "0xcd0": [
+      "0x2cb8dd4",
+      "0x2cb9065"
+     ],
+     "0xcd8": [
+      "0x2cb8e49",
+      "0x2cb91e0"
+     ],
+     "0xd0": [
+      "0x2cb6b40",
+      "0x2cb71bc"
+     ],
+     "0xd8": [
+      "0x2cb6b78",
+      "0x2cb6b94",
+      "0x2cb7027",
+      "0x2cb71ca",
+      "0x2cb98fc",
+      "0x2cbb2f8",
+      "0x2cbb618"
+     ],
+     "0xf8": [
+      "0x2cb994e"
+     ]
+    }
+   },
+   "loads": {
+    "rbx": {
+     "-0x8": [
+      "0x2cb6b2d"
+     ],
+     "0x0": [
+      "0x2cb6583",
+      "0x2cb6b36",
+      "0x2cb84ef",
+      "0x2cb8f3d",
+      "0x2cb90a5",
+      "0x2cbb456"
+     ],
+     "0x10": [
+      "0x2cb6587",
+      "0x2cb84e5",
+      "0x2cb8f53",
+      "0x2cb90c0",
+      "0x2cba246",
+      "0x2cba321",
+      "0x2cbb463"
+     ],
+     "0x108": [
+      "0x2cb6835"
+     ],
+     "0x110": [
+      "0x2cbb4de"
+     ],
+     "0x118": [
+      "0x2cb74b7",
+      "0x2cbb047",
+      "0x2cbb4d1"
+     ],
+     "0x11d": [
+      "0x2cb68d0"
+     ],
+     "0x120": [
+      "0x2cb67e9",
+      "0x2cbb053"
+     ],
+     "0x121": [
+      "0x2cb6809"
+     ],
+     "0x122": [
+      "0x2cb6810"
+     ],
+     "0x123": [
+      "0x2cb6818"
+     ],
+     "0x124": [
+      "0x2cb681f"
+     ],
+     "0x128": [
+      "0x2cb74bf"
+     ],
+     "0x130": [
+      "0x2cbb6f1"
+     ],
+     "0x138": [
+      "0x2cb74c7",
+      "0x2cbb6cb",
+      "0x2cbb77b"
+     ],
+     "0x13d0": [
+      "0x2cb93e3"
+     ],
+     "0x13d9": [
+      "0x2cb93cc"
+     ],
+     "0x13e8": [
+      "0x2cb8f2f",
+      "0x2cb9a3e",
+      "0x2cba4c4"
+     ],
+     "0x13f0": [
+      "0x2cb8f36",
+      "0x2cb9a45",
+      "0x2cba4cb"
+     ],
+     "0x13f8": [
+      "0x2cb99b8"
+     ],
+     "0x140": [
+      "0x2cbb6d7",
+      "0x2cbb787"
+     ],
+     "0x148": [
+      "0x2cb74cf"
+     ],
+     "0x158": [
+      "0x2cb748b"
+     ],
+     "0x160": [
+      "0x2cb7492"
+     ],
+     "0x168": [
+      "0x2cb74fb",
+      "0x2cb8903"
+     ],
+     "0x16a0": [
+      "0x2cb7f62"
+     ],
+     "0x16b0": [
+      "0x2cb7f69"
+     ],
+     "0x16c0": [
+      "0x2cb7f70"
+     ],
+     "0x16d0": [
+      "0x2cb7f78"
+     ],
+     "0x16e0": [
+      "0x2cb7f53"
+     ],
+     "0x16f0": [
+      "0x2cb7f44"
+     ],
+     "0x170": [
+      "0x2cb7020",
+      "0x2cb86b1"
+     ],
+     "0x1700": [
+      "0x2cb7f35"
+     ],
+     "0x1710": [
+      "0x2cb7f26"
+     ],
+     "0x1718": [
+      "0x2cb798c",
+      "0x2cbaf0e"
+     ],
+     "0x1720": [
+      "0x2cb7db4",
+      "0x2cbaee4"
+     ],
+     "0x1740": [
+      "0x2cb77f3"
+     ],
+     "0x1749": [
+      "0x2cb77de"
+     ],
+     "0x18": [
+      "0x2cbb357"
+     ],
+     "0x180": [
+      "0x2cb86b9"
+     ],
+     "0x190": [
+      "0x2cb86a2"
+     ],
+     "0x1ab8": [
+      "0x2cb9097",
+      "0x2cb9a51",
+      "0x2cba40d"
+     ],
+     "0x1ac0": [
+      "0x2cb909e",
+      "0x2cb9a58",
+      "0x2cba414"
+     ],
+     "0x1ac8": [
+      "0x2cb9a18"
+     ],
+     "0x1ad0": [
+      "0x2cb8dfe",
+      "0x2cb92f6",
+      "0x2cb9ec7"
+     ],
+     "0x1ad8": [
+      "0x2cb9081"
+     ],
+     "0x1ae2": [
+      "0x2cb905e"
+     ],
+     "0x1ae8": [
+      "0x2cb8bfc"
+     ],
+     "0x1ae9": [
+      "0x2cb8bf5"
+     ],
+     "0x1aea": [
+      "0x2cb8bcb"
+     ],
+     "0x20": [
+      "0x2cb6596",
+      "0x2cbb369"
+     ],
+     "0x28": [
+      "0x2cb6575",
+      "0x2cbb894"
+     ],
+     "0x2a18": [
+      "0x2cb8c1a"
+     ],
+     "0x2a19": [
+      "0x2cb7959",
+      "0x2cb7cca"
+     ],
+     "0x48": [
+      "0x2cb6bd1",
+      "0x2cbbbae"
+     ],
+     "0x50": [
+      "0x2cb65ad",
+      "0x2cb7a8a",
+      "0x2cbbbb7"
+     ],
+     "0x58": [
+      "0x2cb6bdb"
+     ],
+     "0x60": [
+      "0x2cb6be6",
+      "0x2cb6c0e"
+     ],
+     "0x68": [
+      "0x2cb6bef"
+     ],
+     "0x6c": [
+      "0x2cb6bf4"
+     ],
+     "0x70": [
+      "0x2cb656e"
+     ],
+     "0x72": [
+      "0x2cb6780",
+      "0x2cb712e"
+     ],
+     "0x78": [
+      "0x2cb68f6",
+      "0x2cbb0ba"
+     ],
+     "0x8": [
+      "0x2cb8f4a",
+      "0x2cb90b7",
+      "0x2cba239",
+      "0x2cba314"
+     ],
+     "0x80": [
+      "0x2cb68fa",
+      "0x2cbb0c3"
+     ],
+     "0x838": [
+      "0x2cb835a",
+      "0x2cb9799"
+     ],
+     "0x840": [
+      "0x2cb8428",
+      "0x2cb85b9",
+      "0x2cb8863",
+      "0x2cb8922"
+     ],
+     "0x848": [
+      "0x2cb86e4"
+     ],
+     "0x88": [
+      "0x2cb6827"
+     ],
+     "0x90": [
+      "0x2cb682e"
+     ],
+     "0x990": [
+      "0x2cbad11"
+     ],
+     "0x9a0": [
+      "0x2cb8582",
+      "0x2cb98b0"
+     ],
+     "0x9a8": [
+      "0x2cb983e"
+     ],
+     "0x9b0": [
+      "0x2cb97ef"
+     ],
+     "0x9c0": [
+      "0x2cb97f6"
+     ],
+     "0x9e8": [
+      "0x2cb8246",
+      "0x2cb8448",
+      "0x2cb8712"
+     ],
+     "0x9f0": [
+      "0x2cb8257",
+      "0x2cb8459",
+      "0x2cb8723"
+     ],
+     "0x9f8": [
+      "0x2cb8268",
+      "0x2cb846a",
+      "0x2cb8734"
+     ],
+     "0xa0": [
+      "0x2cbb327",
+      "0x2cbbb7c"
+     ],
+     "0xa00": [
+      "0x2cb8281",
+      "0x2cb8483",
+      "0x2cb874d"
+     ],
+     "0xa08": [
+      "0x2cb8292",
+      "0x2cb8494",
+      "0x2cb8762"
+     ],
+     "0xa10": [
+      "0x2cb8299",
+      "0x2cb849b",
+      "0x2cb8769"
+     ],
+     "0xa20": [
+      "0x2cb82a1",
+      "0x2cb84a3",
+      "0x2cb8771"
+     ],
+     "0xa28": [
+      "0x2cb82ba",
+      "0x2cb84bc",
+      "0x2cb878f"
+     ],
+     "0xa30": [
+      "0x2cb82d2",
+      "0x2cb87a8"
+     ],
+     "0xa38": [
+      "0x2cb8340",
+      "0x2cb854a",
+      "0x2cb8814"
+     ],
+     "0xa48": [
+      "0x2cb86fc",
+      "0x2cbac85"
+     ],
+     "0xa50": [
+      "0x2cb89bf"
+     ],
+     "0xa60": [
+      "0x2cb89c6"
+     ],
+     "0xa70": [
+      "0x2cb89cd"
+     ],
+     "0xa8": [
+      "0x2cbb5ad"
+     ],
+     "0xa80": [
+      "0x2cb89d4"
+     ],
+     "0xa90": [
+      "0x2cb89b3"
+     ],
+     "0xaa0": [
+      "0x2cb89a7"
+     ],
+     "0xab0": [
+      "0x2cb899b"
+     ],
+     "0xac0": [
+      "0x2cb8990"
+     ],
+     "0xad0": [
+      "0x2cb6b71"
+     ],
+     "0xad1": [
+      "0x2cb74a3",
+      "0x2cb8421",
+      "0x2cb85c4",
+      "0x2cb86d3",
+      "0x2cb897a",
+      "0x2cb97e1"
+     ],
+     "0xad2": [
+      "0x2cb8988"
+     ],
+     "0xae8": [
+      "0x2cb75b3",
+      "0x2cb8589",
+      "0x2cb8887"
+     ],
+     "0xaf0": [
+      "0x2cb75ba",
+      "0x2cb980d"
+     ],
+     "0xb0": [
+      "0x2cbb566"
+     ],
+     "0xb00": [
+      "0x2cb75c6",
+      "0x2cb9815"
+     ],
+     "0xb10": [
+      "0x2cb75d3",
+      "0x2cb8564",
+      "0x2cb982f"
+     ],
+     "0xb20": [
+      "0x2cb758f"
+     ],
+     "0xb21": [
+      "0x2cb7596"
+     ],
+     "0xb28": [
+      "0x2cb8c38"
+     ],
+     "0xb8": [
+      "0x2cbb582",
+      "0x2cbb6ad"
+     ],
+     "0xb90": [
+      "0x2cb8bee"
+     ],
+     "0xc0": [
+      "0x2cbbb61"
+     ],
+     "0xc10": [
+      "0x2cb8b9c",
+      "0x2cb93a9"
+     ],
+     "0xc8": [
+      "0x2cbbb6d"
+     ],
+     "0xcb0": [
+      "0x2cb975b"
+     ],
+     "0xcb8": [
+      "0x2cb9767"
+     ],
+     "0xcc0": [
+      "0x2cb9496"
+     ],
+     "0xcd0": [
+      "0x2cb92a9"
+     ],
+     "0xd0": [
+      "0x2cb6b47"
+     ],
+     "0xd8": [
+      "0x2cbb79f",
+      "0x2cbbb21"
+     ],
+     "0xe0": [
+      "0x2cbb397",
+      "0x2cbb7af",
+      "0x2cbbb2d"
+     ],
+     "0xe8": [
+      "0x2cbb39e"
+     ]
+    }
+   },
+   "other_dst": {
+    "rbx": {
+     "0x0": [
+      "0x2cb8929",
+      "0x2cba8f3",
+      "0x2cbaa61",
+      "0x2cbae13"
+     ],
+     "0x10": [
+      "0x2cbb336",
+      "0x2cbb387"
+     ],
+     "0x11c": [
+      "0x2cb6912",
+      "0x2cb6927"
+     ],
+     "0x11e": [
+      "0x2cbb772"
+     ],
+     "0x160": [
+      "0x2cb9945"
+     ],
+     "0x168": [
+      "0x2cb993c",
+      "0x2cbb73d"
+     ],
+     "0x1aed": [
+      "0x2cba9e5"
+     ],
+     "0x1aee": [
+      "0x2cba9f7"
+     ],
+     "0x1aef": [
+      "0x2cbaa28"
+     ],
+     "0x1d8": [
+      "0x2cbb72d"
+     ],
+     "0x1e0": [
+      "0x2cbb724"
+     ],
+     "0x2a1b": [
+      "0x2cbaedb"
+     ],
+     "0x2a1c": [
+      "0x2cbaf05"
+     ],
+     "0x2a1d": [
+      "0x2cbaf40"
+     ],
+     "0x2a1e": [
+      "0x2cbaf7a"
+     ],
+     "0x2a1f": [
+      "0x2cbafa7"
+     ],
+     "0x38": [
+      "0x2cb6bf8"
+     ],
+     "0x72": [
+      "0x2cb6f2a"
+     ],
+     "0x73": [
+      "0x2cbbba8"
+     ],
+     "0x74": [
+      "0x2cbb0b4"
+     ],
+     "0x8d0": [
+      "0x2cbad53"
+     ],
+     "0x9d0": [
+      "0x2cb8234",
+      "0x2cb843b",
+      "0x2cb8705"
+     ],
+     "0xad3": [
+      "0x2cbac31"
+     ],
+     "0xad4": [
+      "0x2cbac60"
+     ],
+     "0xad5": [
+      "0x2cbac7c"
+     ],
+     "0xad6": [
+      "0x2cbaca6"
+     ],
+     "0xad7": [
+      "0x2cbafe2"
+     ],
+     "0xad8": [
+      "0x2cbaffe"
+     ],
+     "0xad9": [
+      "0x2cbb03e"
+     ],
+     "0xada": [
+      "0x2cbaa81"
+     ],
+     "0xadc": [
+      "0x2cbacc2"
+     ],
+     "0xadd": [
+      "0x2cbad40"
+     ],
+     "0xade": [
+      "0x2cbad2b"
+     ],
+     "0xadf": [
+      "0x2cbad08"
+     ],
+     "0xae0": [
+      "0x2cbacf3"
+     ],
+     "0xae1": [
+      "0x2cbacde"
+     ],
+     "0xae2": [
+      "0x2cbad79"
+     ],
+     "0xae8": [
+      "0x2cbac44"
+     ],
+     "0xb30": [
+      "0x2cb7652"
+     ],
+     "0xb98": [
+      "0x2cb8abc",
+      "0x2cbaa1f"
+     ],
+     "0xc10": [
+      "0x2cb8f13",
+      "0x2cb94f9",
+      "0x2cba9ee"
+     ],
+     "0xc70": [
+      "0x2cb7476"
+     ],
+     "0xc7d": [
+      "0x2cb7468",
+      "0x2cba89e"
+     ],
+     "0xca0": [
+      "0x2cb840c"
+     ],
+     "0xcad": [
+      "0x2cb83f9",
+      "0x2cba5c0"
+     ],
+     "0xf0": [
+      "0x2cb9955"
+     ]
+    }
+   },
+   "stores": {
+    "rbx": {
+     "0x108": [
+      "0x2cb67aa",
+      "0x2cb71e5"
+     ],
+     "0x118": [
+      "0x2cb723d"
+     ],
+     "0x11c": [
+      "0x2cb685b"
+     ],
+     "0x11d": [
+      "0x2cb6862"
+     ],
+     "0x11e": [
+      "0x2cb6840",
+      "0x2cbb6a6",
+      "0x2cbb6c4",
+      "0x2cbb796"
+     ],
+     "0x11f": [
+      "0x2cbbafb"
+     ],
+     "0x120": [
+      "0x2cb67bd"
+     ],
+     "0x121": [
+      "0x2cb67c4"
+     ],
+     "0x128": [
+      "0x2cb7245",
+      "0x2cbb552"
+     ],
+     "0x130": [
+      "0x2cbb610"
+     ],
+     "0x138": [
+      "0x2cb724d",
+      "0x2cbb69e"
+     ],
+     "0x13d0": [
+      "0x2cb8e0f"
+     ],
+     "0x13d8": [
+      "0x2cb8e24",
+      "0x2cb929a",
+      "0x2cb92d9"
+     ],
+     "0x13d9": [
+      "0x2cb8e1d"
+     ],
+     "0x13e0": [
+      "0x2cb8e7c"
+     ],
+     "0x13e8": [
+      "0x2cb8eca"
+     ],
+     "0x13f0": [
+      "0x2cb8ed8"
+     ],
+     "0x13f8": [
+      "0x2cb8e8a"
+     ],
+     "0x148": [
+      "0x2cb7255",
+      "0x2cbb68e"
+     ],
+     "0x150": [
+      "0x2cbb6f9"
+     ],
+     "0x160": [
+      "0x2cb73e0"
+     ],
+     "0x168": [
+      "0x2cb73ed",
+      "0x2cb9914"
+     ],
+     "0x16a0": [
+      "0x2cb76e7",
+      "0x2cb76fb"
+     ],
+     "0x16b0": [
+      "0x2cb76df"
+     ],
+     "0x16c0": [
+      "0x2cb76d7"
+     ],
+     "0x16d0": [
+      "0x2cb76cf"
+     ],
+     "0x16e0": [
+      "0x2cb76a4"
+     ],
+     "0x16f0": [
+      "0x2cb7695"
+     ],
+     "0x170": [
+      "0x2cb7449",
+      "0x2cb98f5"
+     ],
+     "0x1700": [
+      "0x2cb7686"
+     ],
+     "0x1710": [
+      "0x2cb7677"
+     ],
+     "0x1718": [
+      "0x2cb770f"
+     ],
+     "0x1720": [
+      "0x2cb771f"
+     ],
+     "0x1728": [
+      "0x2cb7736"
+     ],
+     "0x1738": [
+      "0x2cb773e"
+     ],
+     "0x1740": [
+      "0x2cb7745"
+     ],
+     "0x1748": [
+      "0x2cb774c"
+     ],
+     "0x1749": [
+      "0x2cb7753"
+     ],
+     "0x174b": [
+      "0x2cb7829",
+      "0x2cba493"
+     ],
+     "0x180": [
+      "0x2cb7451"
+     ],
+     "0x190": [
+      "0x2cb7461"
+     ],
+     "0x198": [
+      "0x2cb8068"
+     ],
+     "0x1ab0": [
+      "0x2cb8fce"
+     ],
+     "0x1ab8": [
+      "0x2cb8fff"
+     ],
+     "0x1ac0": [
+      "0x2cb9006"
+     ],
+     "0x1ac8": [
+      "0x2cb8fdc"
+     ],
+     "0x1ad0": [
+      "0x2cb8de0"
+     ],
+     "0x1ad8": [
+      "0x2cb8dba"
+     ],
+     "0x1ae0": [
+      "0x2cb8de7"
+     ],
+     "0x1ae1": [
+      "0x2cb92ec"
+     ],
+     "0x1ae2": [
+      "0x2cb8dcd"
+     ],
+     "0x1ae8": [
+      "0x2cb89f5"
+     ],
+     "0x1ae9": [
+      "0x2cb89fc"
+     ],
+     "0x1aea": [
+      "0x2cb8a0f",
+      "0x2cb978a",
+      "0x2cbaa44"
+     ],
+     "0x1aeb": [
+      "0x2cb8da1"
+     ],
+     "0x1aec": [
+      "0x2cb8a16",
+      "0x2cb8d9a",
+      "0x2cba9b0"
+     ],
+     "0x1aed": [
+      "0x2cb8b93",
+      "0x2cb93a0",
+      "0x2cb947c",
+      "0x2cb977a",
+      "0x2cbaa0c"
+     ],
+     "0x1aee": [
+      "0x2cb9512"
+     ],
+     "0x1aef": [
+      "0x2cb8ac9",
+      "0x2cb9783",
+      "0x2cbaa3d"
+     ],
+     "0x1e0": [
+      "0x2cbb701"
+     ],
+     "0x28": [
+      "0x2cbb34f",
+      "0x2cbb37f"
+     ],
+     "0x2a18": [
+      "0x2cb7578",
+      "0x2cb8010",
+      "0x2cbafd3"
+     ],
+     "0x2a19": [
+      "0x2cb75cd"
+     ],
+     "0x2a1a": [
+      "0x2cb75fc"
+     ],
+     "0x2a1b": [
+      "0x2cb7586",
+      "0x2cb7716",
+      "0x2cb7dad",
+      "0x2cb7fed",
+      "0x2cbaefe"
+     ],
+     "0x2a1c": [
+      "0x2cb7982",
+      "0x2cbaf28"
+     ],
+     "0x2a1d": [
+      "0x2cb757f",
+      "0x2cb764b",
+      "0x2cbaf61"
+     ],
+     "0x2a1e": [
+      "0x2cb75ac",
+      "0x2cb7602",
+      "0x2cbafa0"
+     ],
+     "0x2a1f": [
+      "0x2cb759d",
+      "0x2cb7726",
+      "0x2cb7ff7",
+      "0x2cbafcc"
+     ],
+     "0x38": [
+      "0x2cb6579"
+     ],
+     "0x48": [
+      "0x2cb658c"
+     ],
+     "0x58": [
+      "0x2cb6591"
+     ],
+     "0x68": [
+      "0x2cb659a"
+     ],
+     "0x71": [
+      "0x2cbb7d4",
+      "0x2cbbbc7"
+     ],
+     "0x72": [
+      "0x2cb6572"
+     ],
+     "0x73": [
+      "0x2cb657d",
+      "0x2cb6bc7",
+      "0x2cb999d",
+      "0x2cbbbc3"
+     ],
+     "0x74": [
+      "0x2cb7132",
+      "0x2cbb0d2"
+     ],
+     "0x78": [
+      "0x2cb6849",
+      "0x2cb6bd6"
+     ],
+     "0x80": [
+      "0x2cb684d"
+     ],
+     "0x88": [
+      "0x2cb6798",
+      "0x2cb6bdf"
+     ],
+     "0x90": [
+      "0x2cb679f",
+      "0x2cb7175"
+     ],
+     "0x98": [
+      "0x2cb6854"
+     ],
+     "0x990": [
+      "0x2cb80a3"
+     ],
+     "0x998": [
+      "0x2cb80b7"
+     ],
+     "0x99c": [
+      "0x2cb80b1"
+     ],
+     "0x9a0": [
+      "0x2cb80c6"
+     ],
+     "0x9b0": [
+      "0x2cb80e4"
+     ],
+     "0x9c0": [
+      "0x2cb80eb"
+     ],
+     "0x9d0": [
+      "0x2cb8119"
+     ],
+     "0x9e0": [
+      "0x2cb8120"
+     ],
+     "0x9f0": [
+      "0x2cb8127"
+     ],
+     "0xa0": [
+      "0x2cb6973",
+      "0x2cb716a"
+     ],
+     "0xa00": [
+      "0x2cb812e"
+     ],
+     "0xa10": [
+      "0x2cb813d"
+     ],
+     "0xa20": [
+      "0x2cb814c"
+     ],
+     "0xa30": [
+      "0x2cb815b"
+     ],
+     "0xa40": [
+      "0x2cb816a"
+     ],
+     "0xa48": [
+      "0x2cb8171"
+     ],
+     "0xa50": [
+      "0x2cb819a"
+     ],
+     "0xa60": [
+      "0x2cb81a1"
+     ],
+     "0xa70": [
+      "0x2cb81a8"
+     ],
+     "0xa8": [
+      "0x2cb6a3b",
+      "0x2cb717c"
+     ],
+     "0xa80": [
+      "0x2cb81b0"
+     ],
+     "0xa9": [
+      "0x2cb7183"
+     ],
+     "0xa90": [
+      "0x2cb81c0"
+     ],
+     "0xaa0": [
+      "0x2cb81cf"
+     ],
+     "0xab0": [
+      "0x2cb81de"
+     ],
+     "0xac0": [
+      "0x2cb81ed"
+     ],
+     "0xac8": [
+      "0x2cb8590"
+     ],
+     "0xad0": [
+      "0x2cb720d",
+      "0x2cb98b8",
+      "0x2cbb069"
+     ],
+     "0xad2": [
+      "0x2cb749d"
+     ],
+     "0xad3": [
+      "0x2cb7217",
+      "0x2cb81fe",
+      "0x2cb8597",
+      "0x2cb98a8",
+      "0x2cbac59"
+     ],
+     "0xad4": [
+      "0x2cb8981",
+      "0x2cbac75"
+     ],
+     "0xad5": [
+      "0x2cb86f5",
+      "0x2cbac9f"
+     ],
+     "0xad6": [
+      "0x2cb888e",
+      "0x2cbacbb"
+     ],
+     "0xad7": [
+      "0x2cb7430",
+      "0x2cb869b",
+      "0x2cbaff7"
+     ],
+     "0xad8": [
+      "0x2cb73f4",
+      "0x2cb88fc",
+      "0x2cbb032"
+     ],
+     "0xad9": [
+      "0x2cb721e",
+      "0x2cb74b0",
+      "0x2cbb062"
+     ],
+     "0xada": [
+      "0x2cb891b",
+      "0x2cb97c7",
+      "0x2cbaaa2"
+     ],
+     "0xadb": [
+      "0x2cb8694",
+      "0x2cb8880",
+      "0x2cbac25"
+     ],
+     "0xadc": [
+      "0x2cb81f4",
+      "0x2cb97c0",
+      "0x2cbacd7"
+     ],
+     "0xae0": [
+      "0x2cb80f2"
+     ],
+     "0xae1": [
+      "0x2cb80cd"
+     ],
+     "0xae2": [
+      "0x2cb8061",
+      "0x2cb97b9",
+      "0x2cbad8e"
+     ],
+     "0xae8": [
+      "0x2cb868d"
+     ],
+     "0xb0": [
+      "0x2cb6a46",
+      "0x2cbb57b"
+     ],
+     "0xb1": [
+      "0x2cb718b"
+     ],
+     "0xb10": [
+      "0x2cb8383"
+     ],
+     "0xb28": [
+      "0x2cb756a"
+     ],
+     "0xb5": [
+      "0x2cb719b"
+     ],
+     "0xb8": [
+      "0x2cbb597",
+      "0x2cbb6e6"
+     ],
+     "0xb90": [
+      "0x2cb89ee"
+     ],
+     "0xb98": [
+      "0x2cb8a36"
+     ],
+     "0xba8": [
+      "0x2cb8a3d"
+     ],
+     "0xbb8": [
+      "0x2cb8a45"
+     ],
+     "0xbc8": [
+      "0x2cb8a4d"
+     ],
+     "0xbd8": [
+      "0x2cb8a5a"
+     ],
+     "0xbe8": [
+      "0x2cb8a66"
+     ],
+     "0xbf8": [
+      "0x2cb8a73"
+     ],
+     "0xc08": [
+      "0x2cb8a7f"
+     ],
+     "0xc10": [
+      "0x2cb8a86"
+     ],
+     "0xc4": [
+      "0x2cb71a9"
+     ],
+     "0xc7c": [
+      "0x2cb73fb"
+     ],
+     "0xc8": [
+      "0x2cb71af"
+     ],
+     "0xc9": [
+      "0x2cb71b6"
+     ],
+     "0xcac": [
+      "0x2cb838a"
+     ],
+     "0xcb0": [
+      "0x2cb8a91"
+     ],
+     "0xcb8": [
+      "0x2cb8a9c"
+     ],
+     "0xcc0": [
+      "0x2cb8aa7"
+     ],
+     "0xcc8": [
+      "0x2cb8d93"
+     ],
+     "0xcd0": [
+      "0x2cb8e2b"
+     ],
+     "0xd0": [
+      "0x2cb71c3",
+      "0x2cb9996"
+     ],
+     "0xd8": [
+      "0x2cb71fa",
+      "0x2cb990d",
+      "0x2cbb31c"
+     ],
+     "0xe8": [
+      "0x2cb71f3",
+      "0x2cbb30c"
+     ],
+     "0xf8": [
+      "0x2cb71ec"
+     ]
+    }
+   }
+  }
+ },
+ "owners": {
+  "builder_11c": {
+   "bytes": 1820,
+   "end": "0x2d47e2c",
+   "file_offset": "0x2d46710",
+   "sha256": "65d0f8b4c398983ab6c076e052b826b2b88b8b266289b5b56de797dcf204997f",
+   "start": "0x2d47710"
+  },
+  "checker_a": {
+   "bytes": 955,
+   "end": "0x2c7f71b",
+   "file_offset": "0x2c7e360",
+   "sha256": "ff59e02e9d3e078985ba6e3b58d8f64f3a6ed5171f2120d314cbb5a3c744daed",
+   "start": "0x2c7f360"
+  },
+  "checker_b": {
+   "bytes": 832,
+   "end": "0x2c7fd80",
+   "file_offset": "0x2c7ea40",
+   "sha256": "c2dd071311e360249b28d2cacda998b6727b2e1d57a74ebde965c96325b6c6fa",
+   "start": "0x2c7fa40"
+  },
+  "drop_ad0": {
+   "bytes": 471,
+   "end": "0x2c90377",
+   "file_offset": "0x2c8f1a0",
+   "sha256": "dc731c80a04136974157e79d914b0ff4cb92b0a727e09fba107ed5b5a825cfd1",
+   "start": "0x2c901a0"
+  },
+  "drop_pair": {
+   "bytes": 136,
+   "end": "0x2ca0818",
+   "file_offset": "0x2c9f790",
+   "sha256": "822e344d7f1a38846b7da399bcf1728c8358ece0d2a2f8865ab7ad5b4b395dff",
+   "start": "0x2ca0790"
+  },
+  "gate_a": {
+   "bytes": 22372,
+   "end": "0x2af0654",
+   "file_offset": "0x2ae9ef0",
+   "sha256": "d1b4e3ecb40fb4027b69240f48eacf2de2cf5f7e8c3ae5c0e6910a784fdcce29",
+   "start": "0x2aeaef0"
+  },
+  "gate_c": {
+   "bytes": 22239,
+   "end": "0x2cbbbdf",
+   "file_offset": "0x2cb5500",
+   "sha256": "62835f8a447ea034c30a4fa0663abad74226444817882c469f883d7d92e4a8d0",
+   "start": "0x2cb6500"
+  },
+  "phase90_call": {
+   "bytes": 1136,
+   "end": "0x26e1660",
+   "file_offset": "0x26e01f0",
+   "sha256": "3a81c61eebd3b384556fad90d718eabb5047a7eaf5968c34e807c62f626733d9",
+   "start": "0x26e11f0"
+  }
+ },
+ "phase_map": {
+  "entry_dispatch": {
+   "arms": 5,
+   "byte": "+0x71",
+   "gate_a_table": "0x6041ec",
+   "gate_c_table": "0x60bb44"
+  },
+  "gate_a_ret": "0x2af024e",
+  "gate_c_ret": "0x2cbb7e8",
+  "next_state_byte": "+0x71",
+  "outcome_byte": "+0x120",
+  "sub_dispatches": {
+   "+0x120": {
+    "arms": 5,
+    "gate_a_table": "0x604294",
+    "gate_c_table": "0x60bbfc"
+   },
+   "+0xad0": {
+    "gate_a_arms": 28,
+    "gate_a_table": "0x604224",
+    "gate_c_arms": 32,
+    "gate_c_table": "0x60bb7c"
+   },
+   "+0xd0": {
+    "arms": 9,
+    "gate_a_table": "0x604200",
+    "gate_c_table": "0x60bb58"
+   }
+  }
+ },
+ "pins": {
+  "gate_a": {
+   "0x2aeb52e": "4c8dab90000000",
+   "0x2aebb3f": "4c8dab90000000",
+   "0x2aeca14": "e921380000",
+   "0x2aee466": "c683d000000001",
+   "0x2aee46d": "66c743730000",
+   "0x2aee477": "e9be1d0000",
+   "0x2aefade": "e81ddbfcff",
+   "0x2aefb11": "488b7378",
+   "0x2aefb1f": "4839c6",
+   "0x2aefb29": "488bbb80000000",
+   "0x2aefb32": "ff1568f99e03",
+   "0x2aefb38": "c6437400",
+   "0x2aefb41": "e9c80a0000",
+   "0x2aefef6": "e88513faff",
+   "0x2af017d": "e8ce08faff",
+   "0x2af0184": "0f85a3000000",
+   "0x2af01d3": "e808c6fcff",
+   "0x2af0229": "b003",
+   "0x2af022d": "b004",
+   "0x2af022f": "488b4c2420",
+   "0x2af0234": "8801",
+   "0x2af023a": "884b71"
+  },
+  "gate_c": {
+   "0x2cb654d": "4889742408",
+   "0x2cb6555": "0fb64771",
+   "0x2cb6567": "48897c2410",
+   "0x2cb67b8": "4889742418",
+   "0x2cb67e4": "4889442418",
+   "0x2cb6912": "80bb1c01000002",
+   "0x2cb6927": "80bb1c01000001",
+   "0x2cb6939": "ff15418b8203",
+   "0x2cb6973": "488983a0000000",
+   "0x2cb6a3b": "488983a8000000",
+   "0x2cb6ac0": "e82ba7a2ff",
+   "0x2cb6b47": "0fb683d0000000",
+   "0x2cb6b4e": "4c8dab90000000",
+   "0x2cb6b6c": "4889442450",
+   "0x2cb6ba0": "488b442418",
+   "0x2cb6ba5": "c60001",
+   "0x2cb6ba8": "488b7c2450",
+   "0x2cb6bad": "e8ee95fdff",
+   "0x2cb6bc7": "66c743730001",
+   "0x2cb6bd6": "f30f7f4378",
+   "0x2cb6bdf": "48898388000000",
+   "0x2cb715f": "4c8dab90000000",
+   "0x2cb802b": "b003",
+   "0x2cb802d": "418807",
+   "0x2cb8034": "e99b370000",
+   "0x2cb9923": "e8385afcff",
+   "0x2cb992c": "41c60703",
+   "0x2cb9937": "e9f1e6ffff",
+   "0x2cb9985": "e8066efeff",
+   "0x2cb9996": "c683d000000001",
+   "0x2cb99a5": "31c0",
+   "0x2cb99a7": "e9281e0000",
+   "0x2cbb069": "c683d00a000002",
+   "0x2cbb07f": "c60002",
+   "0x2cbb0b4": "807b7400",
+   "0x2cbb0ba": "488b7378",
+   "0x2cbb0c3": "488bbb80000000",
+   "0x2cbb0cc": "ff15ce438203",
+   "0x2cbb0d2": "c6437400",
+   "0x2cbb0db": "e9c80a0000",
+   "0x2cbb0e6": "4c8b3d2b588203",
+   "0x2cbb0ed": "418b4750",
+   "0x2cbb490": "e8ab45fcff",
+   "0x2cbb495": "a8010f",
+   "0x2cbb497": "0f8526030000",
+   "0x2cbb6f1": "f20f108330010000",
+   "0x2cbb701": "c683e001000000",
+   "0x2cbb717": "e8443cfcff",
+   "0x2cbb71c": "84c0",
+   "0x2cbb71e": "0f85a3000000",
+   "0x2cbb76d": "e81e50feff",
+   "0x2cbb7c3": "b003",
+   "0x2cbb7c7": "b004",
+   "0x2cbb7c9": "488b4c2418",
+   "0x2cbb7ce": "8801",
+   "0x2cbb7d0": "b001",
+   "0x2cbb7d4": "884b71",
+   "0x2cbb837": "488d3d79a27afd",
+   "0x2cbb849": "488d3d6bbe7afd",
+   "0x2cbbb9b": "c60002",
+   "0x2cbbbc7": "c6437102",
+   "0x2cbbbce": "e87d4e7303"
+  }
+ },
+ "postcheck_calls": {
+  "gate_a": {
+   "0x2aefade": "0x2abd600",
+   "0x2aefef6": "0x2a91280",
+   "0x2af017d": "0x2a90a50",
+   "0x2af01d3": "0x2abc7e0"
+  },
+  "gate_c": {
+   "0x2cb69b2": "0x2d47710",
+   "0x2cb6ac0": "0x26e11f0",
+   "0x2cb6bad": "0x2c901a0",
+   "0x2cb9923": "0x2c7f360",
+   "0x2cb9985": "0x2ca0790",
+   "0x2cbb490": "0x2c7fa40",
+   "0x2cbb717": "0x2c7f360",
+   "0x2cbb76d": "0x2ca0790",
+   "0x2cbbba3": "0x2c901a0"
+  }
+ },
+ "slots": {
+  "alloc_slot": {
+   "callee": "0x6355830",
+   "relocation": "R_X86_64_RELATIVE",
+   "slot": "0x64df480"
+  },
+  "copy_slot": {
+   "relocation": "R_X86_64_GLOB_DAT",
+   "slot": "0x64df508",
+   "symbol": "memcpy"
+  },
+  "dealloc_slot": {
+   "callee": "0x635de30",
+   "relocation": "R_X86_64_RELATIVE",
+   "slot": "0x64df4a0"
+  },
+  "state_slot": {
+   "addend": "0x64f06c0",
+   "relocation_type": 8,
+   "slot": "0x64e0918"
+  }
+ },
+ "small_maps": {
+  "builder_11c": {
+   "direct_calls": {
+    "0x2d477f1": "0x5c81950",
+    "0x2d47817": "0x5c74b90",
+    "0x2d47b3f": "0x5ca4480",
+    "0x2d47c5e": "0x5c82d40",
+    "0x2d47d08": "0x2df41c0",
+    "0x2d47d1e": "0x2dfbec0",
+    "0x2d47d3a": "0x2df41c0",
+    "0x2d47d6e": "0x2e04fd0",
+    "0x2d47d7c": "0x2dfd590",
+    "0x2d47e0d": "0x63f0a50",
+    "0x2d47e21": "0x63f0a50"
+   },
+   "rip_targets": {
+    "0x2d4775d": {
+     "kind": "use",
+     "target": "0x64e1560"
+    },
+    "0x2d477b5": {
+     "kind": "call",
+     "target": "0x64e0a30"
+    },
+    "0x2d477c7": {
+     "kind": "lea",
+     "target": "0x64c2fb8"
+    },
+    "0x2d47833": {
+     "kind": "use",
+     "target": "0x6500050"
+    },
+    "0x2d4784e": {
+     "kind": "use",
+     "target": "0x6500050"
+    },
+    "0x2d47869": {
+     "kind": "call",
+     "target": "0x64e1568"
+    },
+    "0x2d4787a": {
+     "kind": "call",
+     "target": "0x64e1570"
+    },
+    "0x2d478f4": {
+     "kind": "call",
+     "target": "0x64e1578"
+    },
+    "0x2d47933": {
+     "kind": "call",
+     "target": "0x64df480"
+    },
+    "0x2d479e4": {
+     "kind": "call",
+     "target": "0x64df480"
+    },
+    "0x2d47a28": {
+     "kind": "lea",
+     "target": "0x64512c0"
+    },
+    "0x2d47a3c": {
+     "kind": "call",
+     "target": "0x64df480"
+    },
+    "0x2d47a68": {
+     "kind": "call",
+     "target": "0x64e1580"
+    },
+    "0x2d47a8f": {
+     "kind": "call",
+     "target": "0x64e7410"
+    },
+    "0x2d47aa1": {
+     "kind": "call",
+     "target": "0x64dfe58"
+    },
+    "0x2d47af2": {
+     "kind": "call",
+     "target": "0x64dfca8"
+    },
+    "0x2d47c19": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    },
+    "0x2d47c2e": {
+     "kind": "call",
+     "target": "0x64df490"
+    },
+    "0x2d47c40": {
+     "kind": "call",
+     "target": "0x64df490"
+    },
+    "0x2d47c52": {
+     "kind": "call",
+     "target": "0x64df490"
+    },
+    "0x2d47c6f": {
+     "kind": "call",
+     "target": "0x64df490"
+    },
+    "0x2d47c9d": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    },
+    "0x2d47cbb": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    },
+    "0x2d47d29": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    },
+    "0x2d47d53": {
+     "kind": "call",
+     "target": "0x64e7410"
+    },
+    "0x2d47d5d": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    },
+    "0x2d47d92": {
+     "kind": "call",
+     "target": "0x64dfe58"
+    },
+    "0x2d47da1": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    },
+    "0x2d47dd1": {
+     "kind": "call",
+     "target": "0x64e7288"
+    },
+    "0x2d47df1": {
+     "kind": "call",
+     "target": "0x64e1588"
+    },
+    "0x2d47e18": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    },
+    "0x2d47e26": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    }
+   }
+  },
+  "checker_a": {
+   "direct_calls": {
+    "0x2c7f633": "0x2ca0790",
+    "0x2c7f6cd": "0x2ca0790",
+    "0x2c7f6ee": "0x2c8b730",
+    "0x2c7f6fb": "0x2ca4700",
+    "0x2c7f70a": "0x63f0a50"
+   },
+   "rip_targets": {
+    "0x2c7f37e": {
+     "kind": "lea",
+     "target": "0x60af90"
+    },
+    "0x2c7f3bf": {
+     "kind": "lea",
+     "target": "0x60afa0"
+    },
+    "0x2c7f555": {
+     "kind": "lea",
+     "target": "0x644dc28"
+    },
+    "0x2c7f561": {
+     "kind": "call",
+     "target": "0x64e13a0"
+    },
+    "0x2c7f5f1": {
+     "kind": "call",
+     "target": "0x64e0858"
+    },
+    "0x2c7f613": {
+     "kind": "call",
+     "target": "0x64dfdc8"
+    },
+    "0x2c7f626": {
+     "kind": "call",
+     "target": "0x64dfdb8"
+    },
+    "0x2c7f657": {
+     "kind": "lea",
+     "target": "0x644db98"
+    },
+    "0x2c7f65e": {
+     "kind": "call",
+     "target": "0x64e1360"
+    },
+    "0x2c7f664": {
+     "kind": "lea",
+     "target": "0x644db98"
+    },
+    "0x2c7f66b": {
+     "kind": "call",
+     "target": "0x64e1368"
+    },
+    "0x2c7f671": {
+     "kind": "lea",
+     "target": "0x644dc40"
+    },
+    "0x2c7f678": {
+     "kind": "call",
+     "target": "0x64e1360"
+    },
+    "0x2c7f680": {
+     "kind": "lea",
+     "target": "0x644dc40"
+    },
+    "0x2c7f687": {
+     "kind": "call",
+     "target": "0x64e1368"
+    },
+    "0x2c7f69f": {
+     "kind": "use",
+     "target": "0x64e13a8"
+    },
+    "0x2c7f6ab": {
+     "kind": "lea",
+     "target": "0x43b857"
+    },
+    "0x2c7f6b2": {
+     "kind": "lea",
+     "target": "0x644b108"
+    },
+    "0x2c7f6be": {
+     "kind": "call",
+     "target": "0x64df6b8"
+    },
+    "0x2c7f6d4": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    },
+    "0x2c7f70f": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    },
+    "0x2c7f715": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    }
+   }
+  },
+  "checker_b": {
+   "direct_calls": {
+    "0x2c7fb66": "0x2b3c9d0",
+    "0x2c7fb84": "0x2e4adb0",
+    "0x2c7fbf3": "0x2c7f720",
+    "0x2c7fd33": "0x2c93260",
+    "0x2c7fd45": "0x2ca6960",
+    "0x2c7fd69": "0x63f0a50"
+   },
+   "rip_targets": {
+    "0x2c7fa5b": {
+     "kind": "lea",
+     "target": "0x60afb0"
+    },
+    "0x2c7faa8": {
+     "kind": "lea",
+     "target": "0x60afc0"
+    },
+    "0x2c7fada": {
+     "kind": "call",
+     "target": "0x64df480"
+    },
+    "0x2c7faf5": {
+     "kind": "call",
+     "target": "0x64df508"
+    },
+    "0x2c7fb16": {
+     "kind": "lea",
+     "target": "0x451330"
+    },
+    "0x2c7fb5a": {
+     "kind": "lea",
+     "target": "0x644dbe0"
+    },
+    "0x2c7fc1d": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    },
+    "0x2c7fc5a": {
+     "kind": "lea",
+     "target": "0x60afd0"
+    },
+    "0x2c7fc77": {
+     "kind": "lea",
+     "target": "0x644dc70"
+    },
+    "0x2c7fc7e": {
+     "kind": "call",
+     "target": "0x64e1360"
+    },
+    "0x2c7fc84": {
+     "kind": "lea",
+     "target": "0x644dc70"
+    },
+    "0x2c7fc8b": {
+     "kind": "call",
+     "target": "0x64e1368"
+    },
+    "0x2c7fc99": {
+     "kind": "call",
+     "target": "0x64df498"
+    },
+    "0x2c7fca6": {
+     "kind": "lea",
+     "target": "0x644dc88"
+    },
+    "0x2c7fcad": {
+     "kind": "call",
+     "target": "0x64e1360"
+    },
+    "0x2c7fcba": {
+     "kind": "lea",
+     "target": "0x644dc88"
+    },
+    "0x2c7fcc1": {
+     "kind": "call",
+     "target": "0x64e1368"
+    },
+    "0x2c7fcc9": {
+     "kind": "lea",
+     "target": "0x644dbf8"
+    },
+    "0x2c7fcd0": {
+     "kind": "call",
+     "target": "0x64e1360"
+    },
+    "0x2c7fcd8": {
+     "kind": "lea",
+     "target": "0x644dbf8"
+    },
+    "0x2c7fcdf": {
+     "kind": "call",
+     "target": "0x64e1368"
+    },
+    "0x2c7fd59": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    },
+    "0x2c7fd6e": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    },
+    "0x2c7fd74": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    },
+    "0x2c7fd7a": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    }
+   }
+  },
+  "drop_ad0": {
+   "direct_calls": {
+    "0x2c901fe": "0x2ca3cd0",
+    "0x2c90270": "0x2ca0790",
+    "0x2c902c3": "0x2ca0790",
+    "0x2c9036c": "0x63f0a50"
+   },
+   "rip_targets": {
+    "0x2c901ef": {
+     "kind": "call",
+     "target": "0x64dfdc8"
+    },
+    "0x2c90219": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    },
+    "0x2c9022e": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    },
+    "0x2c9024c": {
+     "kind": "use",
+     "target": "0x64e7288"
+    },
+    "0x2c90263": {
+     "kind": "call",
+     "target": "0x64dfdb8"
+    },
+    "0x2c90293": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    },
+    "0x2c902ca": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    },
+    "0x2c902fa": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    },
+    "0x2c90337": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    },
+    "0x2c9034c": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    },
+    "0x2c90363": {
+     "kind": "call",
+     "target": "0x64e7288"
+    },
+    "0x2c90371": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    }
+   }
+  },
+  "drop_pair": {
+   "direct_calls": {
+    "0x2ca07f5": "0x2c9bdc0",
+    "0x2ca080d": "0x63f0a50"
+   },
+   "rip_targets": {
+    "0x2ca079c": {
+     "kind": "call",
+     "target": "0x64dfe40"
+    },
+    "0x2ca07b4": {
+     "kind": "call",
+     "target": "0x64dfdc8"
+    },
+    "0x2ca07c5": {
+     "kind": "call",
+     "target": "0x64dfdb8"
+    },
+    "0x2ca0812": {
+     "kind": "call",
+     "target": "0x64df4c0"
+    }
+   }
+  },
+  "phase90_call": {
+   "direct_calls": {
+    "0x26e161c": "0x231e050",
+    "0x26e165b": "0x63f0a50"
+   },
+   "rip_targets": {
+    "0x26e1263": {
+     "kind": "lea",
+     "target": "0x5f4423"
+    },
+    "0x26e126a": {
+     "kind": "lea",
+     "target": "0x6437730"
+    },
+    "0x26e1276": {
+     "kind": "call",
+     "target": "0x64df770"
+    },
+    "0x26e1286": {
+     "kind": "call",
+     "target": "0x64df498"
+    },
+    "0x26e12ad": {
+     "kind": "call",
+     "target": "0x64df480"
+    },
+    "0x26e130e": {
+     "kind": "call",
+     "target": "0x64df508"
+    },
+    "0x26e1330": {
+     "kind": "lea",
+     "target": "0x5f34dc"
+    },
+    "0x26e134c": {
+     "kind": "use",
+     "target": "0x64df508"
+    },
+    "0x26e13a1": {
+     "kind": "use",
+     "target": "0x64df508"
+    },
+    "0x26e140c": {
+     "kind": "use",
+     "target": "0x64df508"
+    },
+    "0x26e147e": {
+     "kind": "use",
+     "target": "0x64df508"
+    },
+    "0x26e14f5": {
+     "kind": "use",
+     "target": "0x64df508"
+    },
+    "0x26e1553": {
+     "kind": "use",
+     "target": "0x64df508"
+    },
+    "0x26e15ec": {
+     "kind": "lea",
+     "target": "0x5f4314"
+    },
+    "0x26e15f3": {
+     "kind": "lea",
+     "target": "0x6437718"
+    },
+    "0x26e15ff": {
+     "kind": "call",
+     "target": "0x64df6b8"
+    },
+    "0x26e1638": {
+     "kind": "call",
+     "target": "0x64df498"
+    },
+    "0x26e1652": {
+     "kind": "call",
+     "target": "0x64df4a0"
+    }
+   }
+  }
+ },
+ "strings": {
+  "display_panic": {
+   "bytes": 55,
+   "section": ".rodata",
+   "va": "0x4676bb",
+   "value": "a Display implementation returned an error unexpectedly"
+  },
+  "naive_dt_panic": {
+   "bytes": 43,
+   "section": ".rodata",
+   "va": "0x465ab7",
+   "value": "Local time out of range for `NaiveDateTime`"
+  }
+ },
+ "tables": {
+  "gate_a": {
+   "entry": {
+    "base": "0x6041ec",
+    "byte": "+0x71",
+    "entries": {
+     "0x0": "0x2aeaf5e",
+     "0x1": "0x2aee9de",
+     "0x2": "0x2aee9d1",
+     "0x3": "0x2aeb1cd",
+     "0x4": "0x2aeb520"
+    }
+   },
+   "sub_120": {
+    "base": "0x604294",
+    "byte": "+0x120",
+    "entries": {
+     "0x0": "0x2aeb1f9",
+     "0x1": "0x2aeea90",
+     "0x2": "0x2aeea7e",
+     "0x3": "0x2aefee7",
+     "0x4": "0x2af016e"
+    }
+   },
+   "sub_ad0": {
+    "base": "0x604224",
+    "byte": "+0xad0",
+    "entries": {
+     "0x0": "0x2aeb574",
+     "0x1": "0x2aeeb0a",
+     "0x10": "0x2aeebb3",
+     "0x11": "0x2aeeb92",
+     "0x12": "0x2aee440",
+     "0x13": "0x2aee4a3",
+     "0x14": "0x2aee456",
+     "0x15": "0x2aeebdf",
+     "0x16": "0x2aeebc0",
+     "0x17": "0x2aee499",
+     "0x18": "0x2aed5b8",
+     "0x19": "0x2aeeb1a",
+     "0x1a": "0x2aeeae7",
+     "0x1b": "0x2aed9e1",
+     "0x2": "0x2aeeaee",
+     "0x3": "0x2aed624",
+     "0x4": "0x2aed5e9",
+     "0x5": "0x2aecd73",
+     "0x6": "0x2aed59f",
+     "0x7": "0x2aed5ad",
+     "0x8": "0x2aeeb3d",
+     "0x9": "0x2aeeb0a",
+     "0xa": "0x2aed9ea",
+     "0xb": "0x2aeda09",
+     "0xc": "0x2aeeb81",
+     "0xd": "0x2aeeb60",
+     "0xe": "0x2aede0b",
+     "0xf": "0x2aede19"
+    }
+   },
+   "sub_d0": {
+    "base": "0x604200",
+    "byte": "+0xd0",
+    "entries": {
+     "0x0": "0x2aebbaa",
+     "0x1": "0x2aeea67",
+     "0x2": "0x2aeea50",
+     "0x3": "0x2aeb545",
+     "0x4": "0x2aeb9f4",
+     "0x5": "0x2aee3bf",
+     "0x6": "0x2aeba0a",
+     "0x7": "0x2aeeac3",
+     "0x8": "0x2aee3d7"
+    }
+   }
+  },
+  "gate_c": {
+   "entry": {
+    "base": "0x60bb44",
+    "byte": "+0x71",
+    "entries": {
+     "0x0": "0x2cb656e",
+     "0x1": "0x2cb9f1d",
+     "0x2": "0x2cb9f10",
+     "0x3": "0x2cb67dd",
+     "0x4": "0x2cb6b40"
+    }
+   },
+   "sub_120": {
+    "base": "0x60bbfc",
+    "byte": "+0x120",
+    "entries": {
+     "0x0": "0x2cb6809",
+     "0x1": "0x2cb9fcc",
+     "0x2": "0x2cb9fba",
+     "0x3": "0x2cbb481",
+     "0x4": "0x2cbb708"
+    }
+   },
+   "sub_ad0": {
+    "base": "0x60bb7c",
+    "byte": "+0xad0",
+    "entries": {
+     "0x0": "0x2cb6b94",
+     "0x1": "0x2cba046",
+     "0x10": "0x2cba0ef",
+     "0x11": "0x2cba0ce",
+     "0x12": "0x2cb9970",
+     "0x13": "0x2cb99d0",
+     "0x14": "0x2cb99e6",
+     "0x15": "0x2cba150",
+     "0x16": "0x2cba118",
+     "0x17": "0x2cb9a01",
+     "0x18": "0x2cb9976",
+     "0x19": "0x2cba124",
+     "0x1a": "0x2cba0ec",
+     "0x1b": "0x2cb99de",
+     "0x1c": "0x2cb8bc8",
+     "0x1d": "0x2cba046",
+     "0x1e": "0x2cba013",
+     "0x1f": "0x2cb901d",
+     "0x2": "0x2cba02a",
+     "0x3": "0x2cb8c44",
+     "0x4": "0x2cb8c09",
+     "0x5": "0x2cb8393",
+     "0x6": "0x2cb8bbf",
+     "0x7": "0x2cb8bcd",
+     "0x8": "0x2cba079",
+     "0x9": "0x2cba046",
+     "0xa": "0x2cb9036",
+     "0xb": "0x2cb9055",
+     "0xc": "0x2cba0bd",
+     "0xd": "0x2cba09c",
+     "0xe": "0x2cb9399",
+     "0xf": "0x2cb93a7"
+    }
+   },
+   "sub_d0": {
+    "base": "0x60bb58",
+    "byte": "+0xd0",
+    "entries": {
+     "0x0": "0x2cb71ca",
+     "0x1": "0x2cb9fa3",
+     "0x2": "0x2cb9f8c",
+     "0x3": "0x2cb6b65",
+     "0x4": "0x2cb7014",
+     "0x5": "0x2cb98ef",
+     "0x6": "0x2cb702a",
+     "0x7": "0x2cb9fff",
+     "0x8": "0x2cb9907"
+    }
+   }
+  }
+ },
+ "work_item": "RE-005-node115-gate-postcheck"
+}
