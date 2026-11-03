@@ -56,11 +56,12 @@ continue without reading rax after the call):
    exactly one element; afterwards the index advances while it stays
    below count (unsigned). For each element, in order:
    a. Call the allocator with size = first segment length + second
-      segment length (mod 2**64) and trailing arguments (previous
-      element pointer, 0) — the previous element pointer is 0 on the
-      first fill call, and the element pointer just processed on
-      later calls. Whether the allocator reads its trailing
-      arguments is its own business and is not pinned.
+      segment length (mod 2**64) and trailing arguments (0, 0) —
+      the native code clears both registers before every fill call
+      (xor %edx at 0x5f6a734, xor %ecx at 0x5f6a756, inside the loop),
+      so no previous-element pointer is passed. Whether the allocator
+      reads its trailing arguments is its own business and is not
+      pinned.
    b. Copy the first segment bytes, then the second segment bytes,
       into the fresh buffer, in order (two memcpy calls).
    c. Fill the 80-byte slot at buffer + 80 * index: +0x00 =

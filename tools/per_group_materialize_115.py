@@ -39,7 +39,7 @@ bound to provenance/artifacts.json digest a6e2897c...5301):
         elt = group.elements[i]
         seg1 = elt.seg1; seg2 = elt.seg2
         concat = allocator(owner, len(seg1) + len(seg2) mod 2**64,
-                           previous element pointer or 0, 0)
+                           0, 0)
         concat[0:len(seg1)] = seg1       (memcpy)
         concat[len(seg1):] = seg2        (memcpy)
         slot = buffer + 80 * i
@@ -77,7 +77,10 @@ bound to provenance/artifacts.json digest a6e2897c...5301):
 The allocator is a virtual method (offset 0x18 of the owner's table)
 and stays an oracle: the model passes it (size, rdx, rcx) exactly as
 the native code does -- rdx is 0 on the first call of each phase
-and the previous element pointer on later fill calls, rcx is 0 --
+rdx is 0 and rcx is 0 on every allocator call -- the bulk call
+clears them at 0x5f6a659 (xor %edx) and 0x5f6a636 (xor %ecx), and
+the fill call clears them inside each loop iteration at 0x5f6a734
+(xor %edx) and 0x5f6a756 (xor %ecx) --
 and takes the returned opaque buffer token. Whether the allocator
 reads the trailing arguments is its own business and is not pinned.
 memcpy is the libc routine; the model copies the segment bytes.
@@ -191,14 +194,13 @@ def materialize(out, group, allocator):
         raise ValueError(
             "group supplies %d elements, fill phase reads %d"
             % (len(elements), iterations))
-    previous = 0
     for index in range(iterations):
         elt = elements[index]
         seg1 = elt["seg1"]
         seg2 = elt["seg2"]
         size = u64(len(seg1) + len(seg2))
-        concat = alloc(size, previous, 0)
-        calls["allocator"].append((size, previous, 0))
+        concat = alloc(size, 0, 0)
+        calls["allocator"].append((size, 0, 0))
         calls["memcpy"].append((concat, "seg1", len(seg1)))
         calls["memcpy"].append((concat, "seg2", len(seg2)))
         concats.append(seg1 + seg2)
@@ -215,6 +217,5 @@ def materialize(out, group, allocator):
             0x48: len(seg2),
         }
         slots.append(slot)
-        previous = ("element", index)
     return {"out": out, "slots": slots, "init_slots": init_slots,
             "concats": concats, "calls": calls}

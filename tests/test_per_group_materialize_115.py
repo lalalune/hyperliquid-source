@@ -103,12 +103,13 @@ class MaterializeTests(unittest.TestCase):
         self.assertEqual(slot1[0x48], 3)
         self.assertEqual(result["concats"][1], b"WXYZ")
         # Allocator call order: bulk buffer, then one concat per
-        # element; the second fill call carries the previous element
-        # pointer as its trailing argument, the first carries 0.
+        # element; every fill call carries trailing arguments (0, 0)
+        # (xor %edx at 0x5f6a734 and xor %ecx at 0x5f6a756 each
+        # iteration), not a previous-element pointer.
         self.assertEqual(allocator.calls, [
             (160, 0, 0),
             (5, 0, 0),
-            (4, ("element", 0), 0),
+            (4, 0, 0),
         ])
 
     def test_partial_span_materializes_one_element(self):
