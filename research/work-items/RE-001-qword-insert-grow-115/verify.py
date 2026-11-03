@@ -30,12 +30,15 @@ BIN = os.path.join(ROOT, "work", "hl-node-115.bin")
 DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 WINDOWS = {
     "grow": (0x5D9EE20, 0x5D9EFA5, "grow.txt"),
+    "caller": (0x5F78060, 0x5F780BF, "caller.txt"),
 }
 GATE = {
     "grow": [0x5D9EE20, 0x5D9EE3F, 0x5D9EE4C, 0x5D9EE84, 0x5D9EE93],
+    "caller": [0x5F78060, 0x5F7806F, 0x5F78083, 0x5F7808D, 0x5F780AD],
 }
 EXTRA = {
     "grow": [0x5D9EE6E, 0x5D9EEBC, 0x5D9EFA0],
+    "caller": [0x5F78098, 0x5F780B2, 0x5F78065],
 }
 EH_OFF, EH_SIZE = 0xCA6ED8, 0x77137C
 ADDR_RE = re.compile(r"^\s*([0-9a-f]+):\t(.*)$")
@@ -160,7 +163,7 @@ def check_census():
             continue
         for field, val in re.findall(r"(\w+)=(\[[^\]]*\])", m.group(2)):
             got[(m.group(1), field)] = json.loads(val.replace("'", '"'))
-    for name in ("grow",):
+    for name in ("grow", "caller"):
         rec = records["census"][name]
         for field in ("direct_calls", "tail_jumps", "qword_file_offsets",
                       "relative_reloc_offsets"):

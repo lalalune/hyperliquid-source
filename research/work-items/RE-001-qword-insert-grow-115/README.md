@@ -98,3 +98,33 @@ providers and `make verify` / `make catalogue-check` fail on the
 LFS-pointer artifact here; both are pre-existing and unrelated to
 this item. This packet binds to the materialized work/hl-node-115.bin
 instead, whose hash matches provenance/artifacts.json exactly.
+
+## Correction: the node-specific caller (added after slopbot's review)
+
+Slopbot's first review of this PR called it `low_quality` on the
+ground that the window is a standard-library helper rather than
+node-specific logic, and suggested characterizing one of its 26
+node-specific callers. That suggestion is taken up here: the packet
+now also maps the whole 95-byte caller at 0x5f78060, a node-specific
+group append.
+
+The caller takes the object in rdi (24-byte group entries at +0xa98),
+the group index in esi (sign-extended) and the element value pointer
+in rdx. It stores the value to a stack slot, selects the group entry
+at index * 24, and reads that entry's element container (begin +0,
+end +8, capacity end +0x10). When end != capacity end it stores the
+value at end, advances end by 8, and increments the 32-bit field at
+value + 0xb0 by 1. When end == capacity end it calls the
+realloc-insert helper with (container, end, address of the stack slot
+holding the value) and then increments the same +0xb0 field by 1.
+The +0xb0 increment happens on both arms. The caller is reached
+through 3 direct calls (0x5f539e4, 0x5f53a84, 0x5f53b24) and 1 tail
+jump (0x5f45dcd), sites only, per the packet census.
+
+Evidence for the caller: `excerpts/caller.txt` (whole-function
+verbatim, 0x5f78060..0x5f780bf, FDE file offset 0x10057c0, length
+field 0x24), the caller window and semantics in `records.json`, and
+the caller model `append_group_element` in
+`tools/qword_insert_grow_115.py` with its tests (in-place arm,
+grow arm, empty-group grow, both-arms refcount bumps, group-index
+guard, caller census).

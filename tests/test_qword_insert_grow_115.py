@@ -11,7 +11,8 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 from qword_insert_grow_115 import (  # noqa: E402
     LengthError, QwordInsertGrowError,
-    allocation_bytes, insert_grow, new_capacity_for_size)
+    allocation_bytes, append_group_element, insert_grow,
+    new_capacity_for_size)
 
 CHECKS = []
 
@@ -95,6 +96,51 @@ def test_packet_census():
           "1 element" in rec["capacity_rule"]["empty_container"])
 
 
+def test_group_append_caller():
+    groups = [[10, 20], [30]]
+    caps = [4, 1]
+    refs = {}
+    arm, cap = append_group_element(groups, caps, 0, 99, refs)
+    check("caller inplace arm", arm == "inplace")
+    check("caller inplace contents", groups[0] == [10, 20, 99])
+    check("caller inplace capacity unchanged", cap == 4)
+    check("caller inplace refcount bump", refs[99] == 1)
+    arm, cap = append_group_element(groups, caps, 1, 77, refs)
+    check("caller grow arm", arm == "grow")
+    check("caller grow contents", groups[1] == [30, 77])
+    check("caller grow capacity 2", cap == 2)
+    check("caller grow refcount bump", refs[77] == 1)
+    arm, cap = append_group_element(groups, caps, 1, 77, refs)
+    check("caller second append grows again (capacity 2 full)", arm == "grow")
+    check("caller second grow contents", groups[1] == [30, 77, 77])
+    check("caller second grow capacity 4", cap == 4)
+    check("caller refcount bumps on both arms", refs[77] == 2)
+    groups = [[]]
+    caps = [0]
+    refs = {}
+    arm, cap = append_group_element(groups, caps, 0, 5, refs)
+    check("caller empty group grow arm", arm == "grow")
+    check("caller empty group contents", groups[0] == [5])
+    check("caller empty group capacity 1", cap == 1)
+    try:
+        append_group_element(groups, caps, 3, 1, refs)
+        check("caller bad group index raises", False)
+    except QwordInsertGrowError:
+        check("caller bad group index raises", True)
+    rec_caps = None
+    import json as _json
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    rec = _json.load(open(os.path.join(
+        root, "research", "work-items", "RE-001-qword-insert-grow-115",
+        "records.json")))
+    check("caller census 3 direct calls",
+          len(rec["census"]["caller"]["direct_calls"]) == 3)
+    check("caller census 1 tail jump",
+          rec["census"]["caller"]["tail_jumps"] == ["0x5f45dcd"])
+    check("caller window start",
+          rec["windows"]["caller"]["start"] == "0x5f78060")
+
+
 def main():
     test_empty_insert()
     test_empty_allocated_begin_freed()
@@ -102,6 +148,7 @@ def main():
     test_capacity_arithmetic()
     test_qword_truncation_and_guards()
     test_packet_census()
+    test_group_append_caller()
     print("%d checks passed" % len(CHECKS))
 
 

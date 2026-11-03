@@ -13,6 +13,7 @@ import sys
 
 WINDOWS = {
     "grow 0x5d9ee20": 0x5D9EE20,
+    "caller 0x5f78060": 0x5F78060,
 }
 
 TEXT_OFF, TEXT_SIZE = 0x1418300, 0x4FD7700

@@ -90,3 +90,34 @@ def insert_grow(elements, index, value, old_begin_null=True):
 def allocation_bytes(new_capacity_elements):
     """Allocation byte count for a capacity (capacity * 8)."""
     return new_capacity_elements * 8
+
+
+def append_group_element(groups, capacities, index, value, refcounts):
+    """Node-specific group append caller at 0x5f78060 (RE-001).
+
+    `groups` is a list of element lists (one per 24-byte group entry),
+    `capacities` the parallel element capacities, `index` the group
+    index (sign-extended in the native code), `value` the element
+    value pointer to append, and `refcounts` a dict mapping a value
+    to its +0xb0 counter, incremented by 1 on both arms.
+
+    Returns (arm, new_capacity_of_group) where arm is "inplace" when
+    the group had spare capacity and "grow" when the realloc-insert
+    helper ran. The helper's capacity rule applies on the grow arm.
+    """
+    if not isinstance(index, int) or isinstance(index, bool):
+        raise QwordInsertGrowError("group index must be an integer")
+    if index < 0 or index >= len(groups):
+        raise QwordInsertGrowError("group index outside the entry array")
+    elements = groups[index]
+    capacity = capacities[index]
+    if len(elements) < capacity:
+        elements.append(value & QWORD_MASK)
+        refcounts[value] = refcounts.get(value, 0) + 1
+        return "inplace", capacity
+    new_elements, new_capacity, _ = insert_grow(
+        elements, len(elements), value, old_begin_null=(len(elements) == 0 and capacity == 0))
+    groups[index] = new_elements
+    capacities[index] = new_capacity
+    refcounts[value] = refcounts.get(value, 0) + 1
+    return "grow", new_capacity

@@ -13,6 +13,16 @@
       "cie_augmentation": "zR",
       "lsda": null,
       "identity": "std::vector::_M_realloc_insert (length-error string at 0x43d55a)"
+    },
+    "caller": {
+      "start": "0x5f78060",
+      "stop": "0x5f780bf",
+      "size_bytes": 95,
+      "fde_file_offset": "0x10057c0",
+      "fde_length_field": "0x24",
+      "cie_augmentation": "zR",
+      "lsda": null,
+      "identity": "node-specific group append caller of the realloc-insert helper"
     }
   },
   "container_layout": {
@@ -114,6 +124,18 @@
       "tail_jumps": [],
       "qword_file_offsets": [],
       "relative_reloc_offsets": []
+    },
+    "caller": {
+      "direct_calls": [
+        "0x5f539e4",
+        "0x5f53a84",
+        "0x5f53b24"
+      ],
+      "tail_jumps": [
+        "0x5f45dcd"
+      ],
+      "qword_file_offsets": [],
+      "relative_reloc_offsets": []
     }
   },
   "caller_shape": {
@@ -122,5 +144,21 @@
       "0x5f780ad (append at end: rsi = end, rdx = stack slot holding the value; caller test at 0x5f7808b)",
       "0x5d9f0c0 (rdi = container, rsi = end, rdx = computed element pointer)"
     ]
+  },
+  "caller_semantics": {
+    "arguments": {
+      "rdi": "object holding the 24-byte group entries at +0xa98",
+      "esi": "group index, sign-extended to 64 bits",
+      "rdx": "element value pointer to append"
+    },
+    "group_entry": "24-byte record at [object + 0xa98] + index * 24; its first three qwords are the element container (begin +0, end +8, capacity end +0x10)",
+    "steps_in_order": [
+      "store the value argument to a stack slot (that slot's address is the helper's value pointer on the full path)",
+      "container = group entry at index",
+      "when end != capacity end (signed compare of pointers as addresses): store the value at end, advance end by 8, then increment the 32-bit field at value + 0xb0 by 1, return void",
+      "when end == capacity end: call the realloc-insert helper with (container, end, address of the stack slot holding the value), then increment the 32-bit field at value + 0xb0 by 1, return void"
+    ],
+    "note": "The +0xb0 increment happens on both arms, after the store in either arm; the helper's own store is what places the value on the full path, and the caller never touches the element list again after the call.",
+    "callers_of_the_caller": "3 direct calls and 1 tail jump, sites only (see census)"
   }
 }
