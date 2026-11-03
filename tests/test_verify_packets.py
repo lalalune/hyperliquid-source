@@ -132,6 +132,25 @@ class VerifyPacketsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'digest mismatch'):
             self.run_all()
 
+    def pointer(self, directory, name, payload):
+        body = (f'version https://git-lfs.github.com/spec/v1\n'
+                f'oid sha256:{sha(payload)}\nsize {len(payload)}\n')
+        (directory / name).write_text(body)
+        return f'{sha(payload)}  {name}\n'
+
+    def test_lfs_pointer_with_attested_digest_reports_pointer(self):
+        room = self.packet()
+        self.manifest(room, self.pointer(room, 'payload.tsv.gz', b'payload'))
+        with self.assertRaisesRegex(ValueError, 'Git LFS pointer'):
+            self.run_all()
+
+    def test_lfs_pointer_with_other_digest_is_mismatch(self):
+        room = self.packet()
+        self.pointer(room, 'payload.tsv.gz', b'other')
+        self.manifest(room, f'{sha(b"expected")}  payload.tsv.gz\n')
+        with self.assertRaisesRegex(ValueError, 'digest mismatch'):
+            self.run_all()
+
     def test_missing_packet_tree_rejected(self):
         (self.root / 'research/work-items').rmdir()
         with self.assertRaisesRegex(ValueError, 'Missing packet tree'):

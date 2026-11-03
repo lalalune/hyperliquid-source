@@ -34,6 +34,26 @@ def digest(path):
     return hasher.hexdigest()
 
 
+def lfs_pointer_digest(path):
+    """SHA-256 a Git LFS v1 pointer file attests, or None when not a pointer.
+
+    A checkout without the LFS payloads materialised (no git-lfs, skipped
+    smudge, an archive download) leaves pointer files in place of the real
+    bytes. The pointer's oid line carries exactly the digest the manifest
+    attests, so that state is not packet drift; tools/artifacts.py already
+    reports it with its own error in the same `make verify` chain.
+    """
+    if path.stat().st_size > 1024:
+        return None
+    lines = path.read_bytes().decode('ascii', 'replace').splitlines()
+    if lines[:1] != ['version https://git-lfs.github.com/spec/v1']:
+        return None
+    for line in lines:
+        if line.startswith('oid sha256:'):
+            return line.removeprefix('oid sha256:')
+    return None
+
+
 def manifests_under(root):
     packets = root / PACKETS
     if not packets.is_dir():
@@ -103,6 +123,10 @@ def verify(root):
             if not target.is_file():
                 raise ValueError(f'Manifest lists a missing file: {relative}')
             if digest(target) != want:
+                if lfs_pointer_digest(target) == want:
+                    raise ValueError(
+                        f'Git LFS pointer, not the packet file: {relative}; '
+                        'run git lfs pull')
                 raise ValueError(f'Packet file digest mismatch: {relative}')
             total += 1
     print(f'Verified {checked} evidence-packet manifests and {total} entries '
