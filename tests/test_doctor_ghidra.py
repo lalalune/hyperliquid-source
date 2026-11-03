@@ -57,6 +57,18 @@ class DoctorGhidraSelectionTests(unittest.TestCase):
             self.assertFalse(result['available'])
             self.assertIsNone(result['home'])
 
+    def test_newest_automatic_install_wins(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.installation(root / '.local/share/rea-tools/ghidra_9.2_PUBLIC', 'fixture-older')
+            newer = self.installation(root / '.local/share/rea-tools/ghidra_11.4.2_PUBLIC', 'fixture-newer')
+            # An unparseable install name must not outrank a real version.
+            self.installation(root / '.local/share/rea-tools/ghidra_zzz_PUBLIC', 'fixture-unparsed')
+            result = self.invoke(root)
+            self.assertTrue(result['available'])
+            self.assertEqual(result['home'], str(newer))
+            self.assertEqual(result['version'], 'fixture-newer')
+
     def test_legacy_and_automatic_discovery_remain_available(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

@@ -8,6 +8,17 @@ import subprocess
 import sys
 
 
+def _ghidra_version(directory):
+    """Numeric dotted version of a rea-tools install dir, or () when unparseable."""
+    stem = directory.name
+    if stem.startswith('ghidra_') and stem.endswith('_PUBLIC'):
+        try:
+            return tuple(int(part) for part in stem[len('ghidra_'):-len('_PUBLIC')].split('.'))
+        except ValueError:
+            pass
+    return ()
+
+
 def locate_ghidra():
     explicit = os.environ.get('GHIDRA_INSTALL_DIR')
     if explicit:
@@ -17,7 +28,8 @@ def locate_ghidra():
     candidates = []
     if os.environ.get('GHIDRA_HOME'):
         candidates.append(Path(os.environ['GHIDRA_HOME']))
-    candidates.extend(sorted((Path.home() / '.local/share/rea-tools').glob('ghidra_*_PUBLIC'), reverse=True))
+    candidates.extend(sorted((Path.home() / '.local/share/rea-tools').glob('ghidra_*_PUBLIC'),
+                             key=_ghidra_version, reverse=True))
     for directory in candidates:
         for script_name in ['support/analyzeHeadless', 'support/analyzeHeadless.bat']:
             if (directory / script_name).is_file():
