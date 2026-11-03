@@ -1160,6 +1160,222 @@ def verify_element_reader(data, packet):
         limits='Static numeric/cursor and conditional raw-record traces only. Valid nonaliased record/header/output memory is required. Error/default/overflow and cleanup helper effects and returns remain opaque. Ordinary byte/end paths have no opaque calls and their local stores fit the16-byte response carrier; error paths retain a memory-frame premise. Serialized JSON/wire reachability, security impact, source ABI/type, second alternative, exception closure and runtime equivalence remain unproved.')
 
 
+def extract_second_data(data):
+    assert len(data)==105896032 and hashlib.sha256(data).hexdigest()=='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+    shoff=struct.unpack_from('<Q',data,40)[0];size,count,nameidx=struct.unpack_from('<HHH',data,58);assert size==64
+    rows=[struct.unpack_from('<IIQQQQIIQQ',data,shoff+64*i) for i in range(count)]
+    sr=rows[nameidx];names=data[sr[4]:sr[4]+sr[5]]
+    sections={names[r[0]:names.find(b'\0',r[0])].decode():r for r in rows}
+    def at(va,n):
+        hits=[(name,r) for name,r in sections.items() if r[1]!=8 and r[2]&2 and r[3]<=va and va+n<=r[3]+r[5]];assert len(hits)==1
+        name,row=hits[0];off=row[4]+va-row[3];raw=data[off:off+n]
+        return dict(va=hex(va),file_offset=hex(off),section=name,section_flags=row[2],bytes=n,data_hex=raw.hex(),sha256=hashlib.sha256(raw).hexdigest())
+    tables=[]
+    for label,va,count,first in [('outer',0x47de30,22,0),('keys',0x47de88,15,1)]:
+        table=at(va,count*4);raw=bytes.fromhex(table['data_hex']);table['label']=label
+        table['entries']=[dict(raw_tag=i+first,displacement=struct.unpack_from('<i',raw,4*i)[0],target=hex(va+struct.unpack_from('<i',raw,4*i)[0])) for i in range(count)]
+        tables.append(table)
+    rela=sections['.rela.dyn'];records=[]
+    for off in range(rela[4],rela[4]+rela[5],24):
+        slot,info,addend=struct.unpack_from('<QQq',data,off)
+        if slot in [0x64e0900,0x64df4a0,0x64df4c0]:
+            records.append(dict(slot=hex(slot),info=info,addend=hex(addend),relocation_file_offset=hex(off),relocation_hex=data[off:off+24].hex(),stored_pointer=at(slot,8)))
+    assert len(records)==3 and all(r['info']==8 for r in records)
+    return dict(target_sha256=hashlib.sha256(data).hexdigest(),tables=tables,relocations=records,
+        prior_first_sites=[at(va,n) for va,n in [(0x16fdd01,3),(0x16fdd04,3),(0x16fdd0c,4),(0x16fdd15,3),(0x16fdd18,10),(0x16fdd22,3),(0x16fdd25,3),(0x16fdd28,4)]],
+        key_literal=at(0x47e524,5),descriptors=[at(va,32) for va in [0x640e8e8,0x640bd10]],
+        formatter_pool_spans=[at(va,32) for va in [0x4325c4,0x43351a]],
+        limits='Selected outer/key tables, actual relocation records and allocated data spans. Outer raw-tag domain, descriptor/formatter layout, source types, helper initialization/ownership and exception contracts remain unproved.')
+
+def verify_second_alternative(data, packet):
+    folder=packet/'second-alternative'
+    current=probe(data,extra_vas=(0x16fdf90,0x1751436))
+    require(current==json.loads((folder/'candidates.json').read_text()),'second alternative FDE candidate drift')
+    require(current==json.loads((folder/'receipts/full-input-replay.json').read_text()),'second alternative hosted full-input replay drift')
+    native=json.loads((folder/'receipts/decode-result.json').read_text())
+    require(native['target_sha256']==TARGET and native['whole_elf_reauthenticated_in_job'] and native['input_hashes_unchanged'],'second alternative full input binding')
+    require(not native['captured_program_executed'] and native['native_invocations']==3,'second alternative execution record')
+    bodies={};rowmaps={}
+    for label,key in [('second-candidate','0x16fdf90'),('constructor-candidate','0x1751436')]:
+        record=current['selected_fde_candidates'][key];start=int(record['start_va'],16);off=int(record['file_offset'],16)
+        body=data[off:off+record['bytes']]
+        require(hashlib.sha256(body).hexdigest()==record['body_sha256'],'second alternative body identity')
+        cursor=start;rows=[]
+        for line in (folder/'receipts'/(label+'.stdout')).read_text().splitlines():
+            if not re.match(r'^\s*[0-9a-f]+:',line):continue
+            parts=line.split('\t');require(len(parts)>=3,'second alternative native syntax')
+            va=int(parts[0].strip().rstrip(':'),16);tokens=parts[1].split()
+            require(tokens and all(re.fullmatch('[0-9a-f]{2}',t) for t in tokens),'second alternative native byte syntax')
+            raw=bytes.fromhex(' '.join(tokens));text=' '.join(parts[2:]).strip()
+            require(va==cursor and body[va-start:va-start+len(raw)]==raw,'second alternative native/full-image binding')
+            require(text and '(bad)' not in text and not text.startswith('.byte'),'second alternative undecoded row')
+            rows.append(dict(va=hex(va),bytes=raw.hex(),text=text));cursor+=len(raw)
+        saved=next(r for r in native['regions'] if r['label']==label)
+        require(rows==saved['instruction_rows'] and len(rows)==saved['instructions'] and cursor==int(record['end_va'],16),'second alternative complete rows/extent')
+        bodies[label]=(start,body);rowmaps[label]={int(r['va'],16):r for r in rows}
+    earlier=json.loads((packet/'receipts/decode-result.json').read_text())
+    require(next(r['instruction_rows'] for r in earlier['regions'] if r['label']=='constructor-candidate')==
+            next(r['instruction_rows'] for r in native['regions'] if r['label']=='constructor-candidate'),'renewed constructor drift')
+    edge=json.loads((folder/'receipts/qualified-candidate-edges.json').read_text())
+    call=rowmaps['constructor-candidate'][0x1751436];raw=bytes.fromhex(call['bytes'])
+    require(len(edge)==1 and edge[0]['native_instruction_boundary_validated'] and edge[0]['candidate_va']==call['va'] and edge[0]['bytes']==call['bytes'],'second alternative caller boundary')
+    require(raw[0]==0xe8 and 0x1751436+5+struct.unpack_from('<i',raw,1)[0]==0x16fdf90,'second alternative caller direct target')
+    fields=json.loads((folder/'field-bindings.json').read_text())
+    def check_fields(active):
+        for field in fields:
+            va=int(field['va'],16);raw=bytes.fromhex(field['bytes']);start,body=active[field['region']]
+            require(rowmaps[field['region']].get(va,{}).get('bytes')==field['bytes'],'second alternative field boundary')
+            require(body[va-start:va-start+len(raw)]==raw,'second alternative field corruption: '+field['label'])
+    check_fields(bodies);controls=[]
+    for field in fields:
+        active=dict(bodies);start,body=bodies[field['region']];changed=bytearray(body)
+        changed[int(field['va'],16)-start+len(bytes.fromhex(field['bytes']))-1]^=1
+        active[field['region']]=(start,changed)
+        try:check_fields(active)
+        except ValueError as error:controls.append(dict(control='second alternative '+field['label'],rejection=str(error)))
+        else:raise ValueError('second alternative field corruption escaped')
+    record=current['selected_fde_candidates']['0x16fdf90'];fde=bytes.fromhex(record['fde_hex'])
+    def check_extent(raw):
+        delta,length=struct.unpack_from('<ii',raw,8)
+        require(int(record['fde_va'],16)+8+delta==0x16fdf90 and length==1346 and 0x16fdf90+length==int(record['end_va'],16),'second alternative actual FDE extent')
+    check_extent(fde);changed=bytearray(fde);changed[12]^=1
+    try:check_extent(changed)
+    except ValueError as error:controls.append(dict(control='second alternative FDE extent',rejection=str(error)))
+    else:raise ValueError('second alternative FDE corruption escaped')
+    computed=extract_second_data(data);saved=json.loads((folder/'referenced-data.json').read_text())
+    require(computed==saved,'second alternative data drift')
+    active={r['label']+' table':bytes.fromhex(r['data_hex']) for r in saved['tables']}
+    active.update({'relocation '+r['slot']:bytes.fromhex(r['relocation_hex']) for r in saved['relocations']})
+    active.update({'descriptor '+r['va']:bytes.fromhex(r['data_hex']) for r in saved['descriptors']})
+    active.update({'formatter '+r['va']:bytes.fromhex(r['data_hex']) for r in saved['formatter_pool_spans']})
+    active.update({'prior first '+r['va']:bytes.fromhex(r['data_hex']) for r in saved['prior_first_sites']})
+    active['key literal']=bytes.fromhex(saved['key_literal']['data_hex']);expected={k:bytes(v) for k,v in active.items()}
+    def check_data(values):
+        require(set(values)==set(expected),'second alternative data inventory')
+        for key,raw in values.items():require(bytes(raw)==expected[key],'second alternative data corruption: '+key)
+    check_data(active)
+    for key,raw in active.items():
+        for offset in (range(0,len(raw),4) if key.endswith(' table') else [16 if key.startswith('relocation ') else 0]):
+            values=dict(active);changed=bytearray(raw);changed[offset]^=1;values[key]=changed
+            try:check_data(values)
+            except ValueError as error:controls.append(dict(control='second alternative '+key+' '+str(offset),rejection=str(error)))
+            else:raise ValueError('second alternative data corruption escaped')
+    rows=rowmaps['second-candidate'];instruction=lambda va:bytes.fromhex(rows[va]['bytes'])
+    outer=[0x16fe24f,0x16fe261,0x16fe22b,0x16fe244,0x16fe214,0x16fe274,0x16fe289,0x16fe249,0x16fe2a5,
+        0x16fe220,0x16fe290,0x16fe1e9,0x16fe21a,0x16fe27b,0x16fe1e3,0x16fe231,0x16fe188,0x16fe188,0x16fe2c2,0x16fe2cc,0x16fe2b8,0x16fdfb7]
+    keys=[0x16fe037,0x16fe424,0x16fe424,0x16fe000,0x16fe424,0x16fe424,0x16fe424,0x16fe424,0x16fe424,0x16fe424,0x16fe424,0x16fe090,0x16fe041,0x16fe064,0x16fe050]
+    require([int(r['target'],16) for r in computed['tables'][0]['entries']]==outer and all(t in rows for t in outer),'second outer table boundaries')
+    require([int(r['target'],16) for r in computed['tables'][1]['entries']]==keys and all(t in rows for t in keys),'second key table boundaries')
+    require([(r['slot'],r['info'],r['addend']) for r in computed['relocations']]==[
+        ('0x64df4a0',8,'0x635de30'),('0x64df4c0',8,'0x1680cab'),('0x64e0900',8,'0x5c54bd0')],'second actual RELATIVE bindings')
+    for site,target in [(0x16fdfa7,0x47de30),(0x16fdff4,0x47de88),(0x16fe192,0x47e524),(0x16fe3c4,0x47e524),
+        (0x16fe1ba,0x16c7ba0),(0x16fe3ec,0x16c7ba0),(0x16fe1c6,0x4325c4),(0x16fe3f8,0x43351a),
+        (0x16fe37c,0x640e8e8),(0x16fe42f,0x640bd10),(0x16fe38d,0x64e0900),(0x16fe473,0x64df4a0),(0x16fe4cc,0x64df4c0)]:
+        raw=instruction(site);require(site+len(raw)+struct.unpack_from('<i',raw,len(raw)-4)[0]==target,'second RIP binding')
+    for site,raw in [(0x16fdfb7,'49bf0100000000000080'),(0x16fdfc1,'4c8b6610'),(0x16fdfc5,'4c8b6e18'),(0x16fdfc9,'498d77ff'),
+        (0x16fdfe3,'49c1e506'),(0x16fe010,'4983c440'),(0x16fe014,'4983c5c0'),(0x16fe01e,'410fb60424'),
+        (0x16fe023,'ffc8'),(0x16fe025,'83f80e'),(0x16fe000,'49837c240800'),(0x16fe037,'41807c240100'),
+        (0x16fe041,'49837c241005'),(0x16fe050,'49837c241005'),(0x16fe064,'49837c241805'),(0x16fe090,'49837c241805'),
+        (0x16fe05d,'803865'),(0x16fe071,'803865'),(0x16fe076,'80780172'),(0x16fe07c,'80780272'),(0x16fe082,'8078036f'),(0x16fe088,'80780472'),
+        (0x16fe0a1,'8b08'),(0x16fe0a3,'bf6572726f'),(0x16fe0aa,'0fb64004'),(0x16fe0ae,'83f072'),(0x16fe0b9,'4939f6'),
+        (0x16fe0c5,'498d742420'),(0x16fe0ca,'488d7c2410'),(0x16fe0d7,'4c8b742410'),(0x16fe0dc,'488b542418'),(0x16fe0e1,'4939f6'),
+        (0x16fe126,'49bf0100000000000080'),(0x16fe130,'498d47ff'),(0x16fe134,'4939c6'),
+        (0x16fe142,'48894360'),(0x16fe14a,'0f114350'),(0x16fe15e,'0f115b40'),(0x16fe162,'0f115330'),(0x16fe166,'0f114b20'),(0x16fe16a,'0f114310'),
+        (0x16fe16e,'4c8933'),(0x16fe171,'48895308'),(0x16fe1a1,'48c784248800000005000000'),
+        (0x16fe1d7,'48894308'),(0x16fe1db,'4c893b'),(0x16fe397,'48b80100000000000080'),(0x16fe3a1,'488903')]:
+        require(instruction(site)==bytes.fromhex(raw),'second semantic instruction binding')
+    calls=[];branches=[]
+    for va,row in rows.items():
+        raw=bytes.fromhex(row['bytes']);target=None
+        if raw[0]==0xe8:
+            target=va+5+struct.unpack_from('<i',raw,1)[0];calls.append(dict(va=hex(va),target=hex(target)));continue
+        if raw[0]==0xeb or 0x70<=raw[0]<=0x7f:target=va+len(raw)+struct.unpack_from('<b',raw,1)[0]
+        elif raw[0]==0xe9:target=va+len(raw)+struct.unpack_from('<i',raw,1)[0]
+        elif raw[0]==0x0f and len(raw)>1 and 0x80<=raw[1]<=0x8f:target=va+len(raw)+struct.unpack_from('<i',raw,2)[0]
+        if target is not None:require(target in rows,'second local branch boundary');branches.append(dict(va=hex(va),target=hex(target)))
+    require(calls==[dict(va=hex(a),target=hex(b)) for a,b in [(0x16fe0cf,0x16fe920),(0x16fe1d2,0x1742090),
+        (0x16fe404,0x1742090),(0x16fe43e,0x1704de0),(0x16fe493,0x17044a0),(0x16fe4bf,0x17048c0),(0x16fe4c7,0x63f0a50)]],'second direct callee bindings')
+    first_native=json.loads((packet/'first-variant/receipts/decode-result.json').read_text())
+    first_rows={r['va']:r for r in next(r for r in first_native['regions'] if r['label']=='variant-candidate')['instruction_rows']}
+    for r in saved['prior_first_sites']:require(first_rows[r['va']]['bytes']==r['data_hex'],'first alternative bridge row binding')
+    first_byva={int(k,16):bytes.fromhex(r['bytes']) for k,r in first_rows.items()}
+    require(first_byva[0x16fdd18]==bytes.fromhex('48b90100000000000080') and first_byva[0x16fdd22]==bytes.fromhex('48ffc9') and first_byva[0x16fdd25]==bytes.fromhex('48890b'),'first ordinary marker A')
+    constructor=rowmaps['constructor-candidate'];ci=lambda va:bytes.fromhex(constructor[va]['bytes'])
+    require(ci(0x1751413)==bytes.fromhex('49be0100000000000080') and ci(0x175141d)==ci(0x175143b)==bytes.fromhex('4c39742420'),'constructor rejects only marker B locally')
+    for site,target in [(0x175140e,0x16fdba0),(0x1751436,0x16fdf90)]:
+        raw=ci(site);require(raw[0]==0xe8 and site+5+struct.unpack_from('<i',raw,1)[0]==target,'constructor alternative order')
+    for site,raw in [(0x175146e,'48894360'),(0x1751477,'0f114350'),(0x1751480,'0f114340'),(0x1751498,'0f115b30'),
+        (0x175149c,'0f115320'),(0x17514a0,'0f114b10'),(0x17514a4,'0f1103')]:require(ci(site)==bytes.fromhex(raw),'constructor copy store binding')
+    def coverage(spans):return sorted({i for offset,length in spans for i in range(offset,offset+length)})
+    first_spans=[(0,8),(8,4),(11,4),(15,8),(23,16),(39,1)]
+    second_spans=[(0,8),(8,8),(16,16),(32,16),(48,16),(64,16),(80,16),(96,8)]
+    constructor_spans=[(0,16),(16,16),(32,16),(48,16),(64,16),(80,16),(96,8)]
+    require(coverage(first_spans)==list(range(40)) and coverage(second_spans)==coverage(constructor_spans)==list(range(104)),'alternative/constructor store coverage')
+    require(bytes.fromhex(saved['key_literal']['data_hex'])==b'error','error field pool bytes')
+    def key_class(tag,payload=b'',number=0):
+        if tag==1:return 'recognized' if number&255==0 else 'ignored'
+        if tag==4:return 'recognized' if number&((1<<64)-1)==0 else 'ignored'
+        if tag in [12,13,14,15]:
+            if len(payload)!=5:return 'ignored'
+            if tag in [12,13]:same=(int.from_bytes(payload[:4],'little')^0x6f727265)|(payload[4]^0x72)==0
+            else:same=all(a==b for a,b in zip(payload,b'error'))
+            return 'recognized' if same else 'ignored'
+        return 'opaque-key-error'
+    mutations=0
+    for offset in range(5):
+        for byte in range(256):
+            if byte==b'error'[offset]:continue
+            changed=bytearray(b'error');changed[offset]=byte
+            require(all(key_class(tag,bytes(changed))=='ignored' for tag in [12,13,14,15]),'five-byte key mutation escaped');mutations+=1
+    for tag in [12,13,14,15]:
+        require(key_class(tag,b'error')=='recognized','exact error key')
+        for payload in [b'',b'erro',b'errors',b'Error',b'ERROR',b'result']:require(key_class(tag,payload)=='ignored','error key length/case/prefix policy')
+    key_cases=0
+    for tag in range(256):
+        wanted='recognized' if tag in [1,4,12,13,14,15] else 'opaque-key-error'
+        require(key_class(tag,b'error',0)==wanted,'raw-key dispatch classes');key_cases+=1
+    A=1<<63;B=A+1
+    def second_model(entries):
+        word=A;retained=None;converted=0
+        for tag,key,number,child_word,child_payload in entries:
+            kind=key_class(tag,key,number)
+            if kind=='opaque-key-error':return dict(kind=kind,word=B,converted=converted,stores=16)
+            if kind=='ignored':continue
+            if word!=A:return dict(kind='duplicate',word=B,converted=converted,stores=16)
+            converted+=1
+            if child_word==A:return dict(kind='child-marker-A',word=B,converted=converted,stores=16)
+            word=child_word;retained=child_payload
+        if word==A:return dict(kind='missing',word=B,converted=converted,stores=16)
+        return dict(kind='wide-local-return',word=word,converted=converted,stores=104,retained=retained)
+    words=[0,1,2,255,A-1,A,B,A+2,(1<<64)-1];model_cases=0
+    for word in words:
+        r=second_model([(12,b'error',0,word,'opaque104')]);require(r['word']==(B if word==A else word) and r['converted']==1 and r['stores']==(16 if word==A else 104),'second child-word transport');model_cases+=1
+        if word!=A:
+            d=second_model([(12,b'error',0,word,'first'),(13,b'error',0,0,'never-converted')]);require(d['kind']=='duplicate' and d['converted']==1,'duplicate before second conversion, including word0/B');model_cases+=1
+    for entries,kind,count in [([], 'missing',0), ([(12,b'unknown',0,0,'unused')],'missing',0),
+        ([(2,b'',0,0,'unused')],'opaque-key-error',0), ([(1,b'',0,0,'first'),(12,b'error',0,0,'unused')],'duplicate',1),
+        ([(4,b'',0,0,'numeric-zero')],'wide-local-return',1), ([(1,b'',1,0,'ignored'),(12,b'error',0,0,'used')],'wide-local-return',1)]:
+        r=second_model(entries);require(r['kind']==kind and r['converted']==count,'second local map-state scenario');model_cases+=1
+    def constructor_choice(first_word,second_word):return 'first-copy104' if first_word!=B else 'generic-failure' if second_word==B else 'second-copy104'
+    constructor_cases=0
+    for first_word in words:
+        for second_word in words:
+            wanted='first-copy104' if first_word!=B else 'generic-failure' if second_word==B else 'second-copy104'
+            require(constructor_choice(first_word,second_word)==wanted,'constructor local whole-word choice');constructor_cases+=1
+    require(constructor_choice(A,B)=='first-copy104' and constructor_choice(B,0)=='second-copy104' and constructor_choice(B,B)=='generic-failure','distinct marker namespaces')
+    # Store coverage is not source definedness or a recovered active-field mask.
+    require(set(coverage(constructor_spans))-set(coverage(first_spans))==set(range(40,104)),'64 first-alternative tail bytes remain unclassified')
+    return dict(status='SECOND_ALTERNATIVE_AND_LOCAL_LAYOUT_REPRODUCED',helper_bytes=1346,helper_instructions=303,
+        field_bindings=len(fields),evidence_corruptions_rejected=len(controls),controls=controls,direct_callees=calls,local_branches=branches,
+        selected_outer_entries=22,outer_tag_domain_bound_proved=False,key_table_entries=15,key_byte_classes=key_cases,distinct_error_key_mutations_rejected=mutations,
+        map_pair_stride=64,numeric_zero_identifier_tags=[1,4],five_byte_identifier_tags=[12,13,14,15],marker_A=hex(A),marker_B=hex(B),
+        local_map_model_cases=model_cases,constructor_word_choice_cases=constructor_cases,first_observed_store_offsets=coverage(first_spans),
+        second_observed_store_offsets=coverage(second_spans),constructor_copy_offsets=coverage(constructor_spans),first_unclassified_copy_tail=list(range(40,104)),
+        second_payload_after_first_two_words=88,second_child_helper='0x16fe920',second_child_full_initialization_proved=False,
+        relocation_bindings=3,unidentified_descriptors=2,unclassified_formatter_pool_spans=2,renewed_constructor_rows=79,
+        limits='Conditional raw-map/helper-word and store-coverage models only. A is first ordinary marker but second absent/child-failure test; B is constructor failure marker. Admitted child-word domain, initialization of its104-byte carrier, first tail active/inactive/padding classification, cleanup/exception/serialized input/type and runtime equivalence remain unresolved. Local copying does not prove all copied bytes initialized or semantically active.')
+
+
 def main():
     parser=argparse.ArgumentParser(description='Owned stdlib complete-input/native evidence verifier; no subprocess or captured execution.')
     parser.add_argument('--binary',type=Path,required=True)
@@ -1218,6 +1434,15 @@ def main():
     result['controls']+=element['controls'];result['element_reader']=element
     require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(8,5330,1264),'eight unique ranges')
     result['limits']='Eight digest-bound native ranges and local byte/text/sequence/numeric-record paths. Normal element byte/end paths close their local store frame under valid nonaliasing memory; error/default/overflow, cleanup, text feature/vector, serialized JSON mapping, source ABI/type, second alternative, exception and runtime equivalence remain unresolved.'
+    second=verify_second_alternative(data,args.packet)
+    result['regions']+=1;result['region_bytes']+=second['helper_bytes']
+    result['native_instruction_rows']+=second['helper_instructions']
+    result['instruction_counts']['second-candidate']=second['helper_instructions']
+    result['field_bindings']+=second['field_bindings']
+    result['evidence_corruptions_rejected']+=second['evidence_corruptions_rejected']
+    result['controls']+=second['controls'];result['second_alternative']=second
+    require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(9,6676,1567),'nine unique ranges')
+    result['limits']='Nine digest-bound native ranges and local result/error alternatives, value conversion and store coverage. Marker contexts are distinct. Helper0x16fe920 word domain and104-byte initialization, first-form tail classification, cleanup/exception, serialized input/type and runtime equivalence remain unresolved.'
     print(json.dumps(result,indent=2))
 
 
