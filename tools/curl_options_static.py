@@ -49,8 +49,13 @@ def default_fragment(body):
 
 def analyze(data):
     spec=load_spec();_,fs,_=fde_extents(data);frames={(f['start'],f['end']):f for f in fs}
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
-    rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
+    sec=next((s for s in sections(data) if s['name']=='.rela.dyn'),None)
+    if sec is None:
+        raise ValueError('missing .rela.dyn section')
+    try:
+        rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
+    except struct.error:
+        raise ValueError('truncated .rela.dyn section') from None
     for slot,row in spec['bindings'].items():
         if rels.get(int(slot,16))!=(row['info'],int(row['addend'],16)):
             raise ValueError('curl code/source/format relocation changed')
