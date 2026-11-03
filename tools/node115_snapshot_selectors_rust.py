@@ -28,7 +28,11 @@ class Image:
  read_only=cpu.Image.read_only
  def __init__(self,data):
   self.data=data
-  self.sections={s['name']:(s['address'],s['offset'],s['size']) for s in sections(data) if s['type']!=8}
+  self.sections={}
+  for s in sections(data):
+   if s['type']==8:continue
+   need(s['name'] not in self.sections,'Duplicate section: '+s['name'])
+   self.sections[s['name']]=(s['address'],s['offset'],s['size'])
   self.text_va,self.text_off,self.text_size=self.sections['.text']
   self.rodata=self.sections['.rodata']
   self.fdes=self._fdes();self.starts=[r[0] for r in self.fdes]
