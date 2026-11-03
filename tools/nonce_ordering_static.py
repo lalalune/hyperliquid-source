@@ -87,7 +87,9 @@ def analyze(data):
         for site,row in o['rip_bindings'].items():
             site=int(site);prefix=bytes.fromhex(row['prefix']);code=read(data,site,len(prefix)+4)[1]
             if code[:len(prefix)]!=prefix or site+len(code)+struct.unpack_from('<i',code,len(prefix))[0]!=row['target']:raise ValueError('nonce RIP binding changed')
-    s=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    s=next((s for s in sections(data) if s['name']=='.rela.dyn'), None)
+    if s is None:
+        raise ValueError('missing .rela.dyn section')
     rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[s['offset']:s['offset']+s['size']])}
     if any(rels.get(int(a))!=tuple(row) for a,row in spec['relocations'].items()):raise ValueError('nonce relocation changed')
     path=b'l1/src/nonce_set.rs'
