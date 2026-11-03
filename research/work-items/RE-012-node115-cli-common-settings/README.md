@@ -53,8 +53,8 @@ the observed copy span is 0x250 bytes. The normal return copies ranges 0..0x90 a
 storage evidence, not a stable Rust ABI or authenticated build version.
 
 At 0x5658d67 and 0x5658dc6, both storage branches point to the same thirteen bytes
-serve-eth-rpc. Their entries store length13 and a zero trailing byte; one branch
-allocates24 bytes and initializes a one-entry vector, the other appends a
+serve-eth-rpc. Their entries store length 13 and a zero trailing byte; one branch
+allocates 24 bytes and initializes a one-entry vector, the other appends a
 24-byte entry. Official MIT [Clap alias source](https://github.com/clap-rs/clap/blob/d51ae89656fda527ef1bccf53fca0ad78ecb8c29/src/args/arg.rs), alias()
 pushes a name with false, whereas visible_alias() pushes true. This is a hidden
 alias structural correspondence. Exact vendored version, parser handling and
@@ -63,23 +63,23 @@ current-network behavior remain unknown.
 The last declaration initially uses replica-cmds-style, then stores the
 seven-byte actions internal name while retaining the eighteen-byte long name.
 Its table 0x64aa908 has actual RELATIVE methods 0x5620110, 0x5659830, 0x5659830.
-The five-byte once adapter tail-jumps to the complete369-byte validator.
+The five-byte once adapter tail-jumps to the complete 369-byte validator.
 
-The validator compares exact lengths7,14,21. Complete overlapping immediate/SIMD
+The validator compares exact lengths 7, 14, 21. Complete overlapping immediate/SIMD
 operands reconstruct actions, recent-actions and actions-and-responses.
 Success writes only MIN64 to the first output qword, not a parsed enum value.
-Other input writes the26-byte Matching variant not found error through the
+Other input writes the 26-byte Matching variant not found error through the
 shared reserve helper. Both normal paths release the original owned input when
 its reloaded capacity is nonzero. The reserve-call landing pad releases temporary
 error storage and then the original input before UnwindResume. This contract
 assumes valid owned storage, disjoint input/output and ordinary helper behavior.
 
-The clearinghouse-state option instead uses table0x64aacf8 with methods
+The clearinghouse-state option instead uses table 0x64aacf8 with methods
 0x561fb30,0x564e0f0,0x564e0f0: the already studied owned-string callback, not this
 style predicate. A numeric interpretation cannot be inferred from its option name.
 
-The sole RELATIVE writer naming the constructor is slot0x64ebcc8. Two qualified
-FF15 sites, 0x564e250 and0x564e336, lie in prior PR2497's command factory
+The sole RELATIVE writer naming the constructor is slot 0x64ebcc8. Two qualified
+FF15 sites, 0x564e250 and 0x564e336, lie in prior PR2497's command factory
 0x564e1a0..0x56544a9. They remain credited context. The original static scan found
 two unprefixed RIP-relative candidates and no unprefixed E8 direct candidate in
 executable sections, then checked each against complete containing-FDE instruction
@@ -97,8 +97,8 @@ From the repository root, with the pinned capture materialized:
     python -B research/work-items/RE-012-node115-cli-common-settings/verify.py --native-output work/common-native --objdump /absolute/path/to/GNU/objdump
 
 No target execution or emulation is used. Python requires no added package.
-Original GNU and Capstone5.0.7/core5.0.1280 observations cover three complete FDEs:
-11,696 bytes and1,575 instructions, with no byte masks. Native replay compares
+Original GNU and Capstone5.0.7/core 5.0.1280 observations cover three complete FDEs:
+11,696 bytes and 1,575 instructions, with no byte masks. Native replay compares
 addresses and original bytes, not operand-text equivalence. CLI filename/header
 format is not code coverage. Exception headers and call-site tables are decoded;
 action/type chains and arbitrary helper unwinding remain open.
@@ -115,15 +115,15 @@ The original operands establish actions-and-responses. The rejected run is
 preserved separately; no actual predicate, assertion or accepted target changed.
 Thirteen controls passed in normal and optimized Python after that correction,
 including actual native-row corruption and omission. Fresh native replay matched
-all1,575 rows. Seeds1/314159 with UTC/Pacific-Honolulu produced byte-identical
-records SHA256e450563d6dedf0bc233f659de0dea73b85015cdf42611d89af3d7e559ef5058b.
+all 1,575 rows. Seeds 1/314159 with UTC/Pacific-Honolulu produced byte-identical
+records SHA256 e450563d6dedf0bc233f659de0dea73b85015cdf42611d89af3d7e559ef5058b.
 These focused results precede the final-head repository checks recorded in the PR.
 
 No Rust implementation, captured execution, stable ABI, parser equivalence,
 source-built node, byte-progress registration or component gate is claimed.
 Allocator/memcpy/drop implementations, transitive argument grammar, all runtime
 callers, defaults and full startup/service side effects remain separate boundaries.
-All92 accepted component gates stay false.
+All 92 accepted component gates stay false.
 
 Next question: connect these declarations and alias/key relations through the
 actual parser to the already established output consumer without inheriting a

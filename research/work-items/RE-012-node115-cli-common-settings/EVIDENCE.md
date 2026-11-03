@@ -11,8 +11,8 @@
 
 Use README commands. Python3.12.1, GNU objdump2.47, native Windows.
 The collector uses only the standard library and unchanged main ELF/FDE readers.
-Initial independent instruction observations use Capstone binding5.0.7,
-core5.0.1280. No target execution/emulation, network, keys or external service.
+Initial independent instruction observations use Capstone binding 5.0.7,
+core 5.0.1280. No target execution/emulation, network, keys or external service.
 
 Inputs are the pinned artifact, spec.json and closed manifest. records.json has
 no timestamps or local environment values; byte-level output must repeat under
@@ -25,7 +25,7 @@ the durable packet.
 Addresses are linked ELF virtual addresses; file offsets, FDE/CIE records,
 complete code bytes and bounded LSDA call-site tables are re-derived from the
 original ELF. The three original GNU exports and independent instruction rows
-cover11,696 bytes/1,575 rows. No instruction-byte normalization is allowed.
+cover 11,696 bytes/1,575 rows. No instruction-byte normalization is allowed.
 
 Two original FF15 instructions in the previously owned command factory bind
 the sole RELATIVE constructor writer. Shared register/allocator/memcpy/drop
@@ -54,10 +54,10 @@ is claimed from that run. The first collector refused an operator's unverified
 third style spelling; original operands establish actions-and-responses.
 Thirteen focused tests passed under normal and optimized Python after correcting
 that transcription, including two native-output corruption controls. Fresh GNU
-replay matched all1,575 address/byte rows. Final-head mandatory repository results
+replay matched all 1,575 address/byte rows. Final-head mandatory repository results
 are recorded separately in the pull request.
 
-No gate requested. All92 existing component gates remain false.
+No gate requested. All 92 existing component gates remain false.
 Next semantic question: connect the producer to the actual parser and output
 consumer under an explicit helper/ABI contract. Final-head required checks and
 submission status are reported in the pull request.
