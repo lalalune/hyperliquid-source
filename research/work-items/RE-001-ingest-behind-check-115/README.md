@@ -68,10 +68,27 @@ slice. The previous message buffer is released when non-null. Status
 bytes 6-7 are written by neither the clean path nor the builder and
 are outside this model.
 
+## Attribution split: what is node-side and what is shared
+
+* The gate (wrapper consultation, group-record scan with the last
+  record skipped, outcome-to-message mapping) is the node-side claim
+  of this item: the wrapper, the selector and the group-record array
+  are the node's own structures.
+* The reporter is shared code of dependency style, not node-specific
+  logic: one constructor used by 847 direct call sites across the
+  binary. It is tagged as such in records.json and modelled in full
+  only because the gate's observable output is the Status contents.
+  Its exact upstream provenance is not verified here and is not
+  claimed.
+* The two diagnostic strings are worded as the public RocksDB
+  ingest_behind diagnostics. The exact upstream revision is not
+  verified here and is not claimed; this item claims the gate logic
+  that selects between them, not the strings on their own.
+
 ## Why this is node-side work, not a library claim
 
-The two diagnostic strings are the familiar ingest_behind wordings,
-but the gate logic around them is node-side: the wrapper, the
+The strings and the Status layout resemble shared storage-engine
+wording, but the gate logic around them is node-side: the wrapper, the
 selector, the group-record array and the count field are the node's
 own structures (the same object graph the earlier RE-001 group,
 predicate and filter-pass items map). This item claims that gate
