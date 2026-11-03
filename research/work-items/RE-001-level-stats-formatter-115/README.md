@@ -33,9 +33,11 @@ numbers computed end to end?
   arithmetic shift on the wrapped 64-bit difference. The group sum
   0x5f6c300 reads the group array base as [sub + 0xad8] (via its
   argument (sub + 0x40) + 0xa98), selects entry i, and tail-jumps to
-  the leaf 0x5da4de0, which sums [element + 0x10] over the non-null
-  8-byte element pointers in [entry.begin, entry.end), wrapping at 64
-  bits, and returns 0 for an empty range. size_mb(i) is the unsigned
+  the leaf 0x5da4de0, which sums [element + 0x10] over the leading run
+  of non-null 8-byte element pointers in [entry.begin, entry.end),
+  wrapping at 64 bits, stopping at the first null pointer (which ends
+  the sum rather than being skipped), and returns 0 for an empty range.
+  size_mb(i) is the unsigned
   reading of that wrapped sum converted to double and multiplied by
   the rodata double at 0x459638, exactly 2**-20 (1 MiB). The getter
   returns 1 unconditionally, including for a non-positive count, which
@@ -60,10 +62,10 @@ numbers computed end to end?
   excerpt regeneration byte-for-byte from a fresh objdump run, sampled
   + 3 gate instructions byte-for-byte vs fresh objdump and raw binary,
   frames, census, model tests.
-- 12 model tests pass (tools/level_stats_formatter_115.py,
+- 13 model tests pass (tools/level_stats_formatter_115.py,
   tests/test_level_stats_formatter_115.py): header constant, zero and
-  negative counts, single-level and empty-group lines, null-pointer
-  skipping, multi-level end-to-end output, fractional-megabyte rounding,
+  negative counts, single-level and empty-group lines, the leading-run
+  stop at the first null pointer, multi-level end-to-end output, fractional-megabyte rounding,
   wrapped-sum unsigned reading, wide level index, missing-group and
   missing-field guards, packet checks.
 - Environment limits, stated honestly: this VM has no cargo/rustc, no

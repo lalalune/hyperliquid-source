@@ -35,10 +35,20 @@ def test_zero_and_negative_count_yield_header_only():
 
 
 def test_single_level_line():
-    # Two elements of 1048576 bytes each plus a null pointer (skipped):
-    # count is the pointer count (3), sum is 2 MiB, size prints as 2.
+    # A null pointer ends the leaf walk: only the leading 1048576-byte
+    # element counts toward the sum (1 MiB), while the printed count is
+    # still the full pointer count (3).
     line = level_line(0, group([1048576, None, 1048576]))
-    assert line == "%3d %8d %8.0f\n" % (0, 3, 2)
+    assert line == "%3d %8d %8.0f\n" % (0, 3, 1)
+
+
+def test_leading_run_stops_at_first_null():
+    # Two leading elements sum to 2 MiB; the trailing element after the
+    # null is never reached.
+    assert leaf_sum(group([1048576, 1048576, None, 1048576])) == 2 * 1048576
+    assert level_line(0, group([1048576, 1048576, None, 1048576])) == (
+        "%3d %8d %8.0f\n" % (0, 4, 2)
+    )
 
 
 def test_empty_group_line():

@@ -18,10 +18,11 @@ where, for level i, the group entry is the 24-byte record at
     element_count(i) = (entry.end - entry.begin) >> 3   (arithmetic shift
         on the wrapped 64-bit difference; for a well-formed range this is
         the number of 8-byte element pointers in the range)
-    group_sum(i) = sum of [element + 0x10] over the non-null element
-        pointers in that range, wrapping at 64 bits (0x5f6c300 selects
-        the entry and tail-jumps to the leaf 0x5da4de0, which does the
-        walk; null pointers are skipped, not added)
+    group_sum(i) = sum of [element + 0x10] over the leading run of
+        non-null element pointers in that range, wrapping at 64 bits
+        (0x5f6c300 selects the entry and tail-jumps to the leaf
+        0x5da4de0, which does the walk; the walk stops at the first
+        null pointer, which ends the sum rather than being skipped)
     size_mb(i) = (double)(unsigned group_sum(i)) * 2**-20
 
 The double constant at rodata 0x459638 is exactly 2**-20 (1 MiB), and
@@ -58,15 +59,19 @@ def _wrap_signed(value):
 
 
 def leaf_sum(group):
-    """The leaf 0x5da4de0: sum [element + 0x10] over non-null pointers.
+    """The leaf 0x5da4de0: sum [element + 0x10] over the leading run.
 
-    `group` is {"elements": [...]}; None entries are skipped. The
-    result wraps at 64 bits, exactly like the native add loop.
+    `group` is {"elements": [...]}. The native loop loads each pointer
+    in turn and jumps back to add only when it is non-null; a null
+    pointer falls through to the return, so the sum covers the leading
+    non-null run and stops at the first null. The result wraps at 64
+    bits, exactly like the native add loop.
     """
     total = 0
     for element in group["elements"]:
-        if element is not None:
-            total = _wrap_signed(total + element["size_field"])
+        if element is None:
+            break
+        total = _wrap_signed(total + element["size_field"])
     return total
 
 
