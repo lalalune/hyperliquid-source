@@ -1,0 +1,140 @@
+{
+  "task": "RE-001",
+  "target": {
+    "node": 115,
+    "artifact": "artifacts/node/115/hl-node",
+    "work_file": "work/hl-node-115.bin",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "windows": [
+    {
+      "name": "main",
+      "role": "per-group materialize step; the node-side claim of this item",
+      "range": "0x5f6a630..0x5f6a7f7",
+      "start": 100050480,
+      "end": 100050935,
+      "size": 455,
+      "fde": {
+        "offset": "0x35dc20",
+        "length_field": 72,
+        "cie": "00000000",
+        "lsda": null
+      }
+    },
+    {
+      "name": "factory",
+      "role": "15-byte bit-packing leaf used by the init phase; referenced, not a node-side claim on its own",
+      "range": "0x5f54680..0x5f5468f",
+      "start": 99960448,
+      "end": 99960463,
+      "size": 15,
+      "fde": {
+        "offset": "0x35c7d4",
+        "length_field": 16,
+        "cie": "00000000",
+        "lsda": null
+      }
+    }
+  ],
+  "census": {
+    "main": {
+      "direct_calls": [
+        "0x5da98b8",
+        "0x5f8029a"
+      ],
+      "tail_jumps": [],
+      "stored_qwords": [],
+      "relative_addends": []
+    },
+    "factory": {
+      "direct_calls_count": 35,
+      "direct_calls_file": "callers.tsv",
+      "this_item_site": "0x5f6a6bf",
+      "tail_jumps": [],
+      "stored_qwords": [],
+      "relative_addends": []
+    }
+  },
+  "main_semantics": {
+    "args": "output record pointer, group entry pointer, allocator owner pointer (third argument, at the caller's obj+0x1a0)",
+    "count": "signed 64-bit value of the byte span (group end minus group begin, wrapping) arithmetic-shifted right by 3",
+    "output_record": "count stored at +0x00 before the allocator call; allocator result stored at +0x08 after the init phase; fields past +0x08 are not written here",
+    "bulk_allocation": "allocator called once with size count * 80 mod 2**64 and trailing arguments 0, 0",
+    "span_limit": "byte span (unsigned) strictly greater than 0xcccccccccccccc8 throws bad_array_new_length, after the bulk allocator call",
+    "init_phase": {
+      "iterations": "exactly count, skipped when count is 0",
+      "slot_stride": 80,
+      "slot_fields": {
+        "+0x00": 0,
+        "+0x08": "factory leaf result for (0, 0), which is 0",
+        "+0x10": 0,
+        "+0x18": "0x00FFFFFFFFFFFFFF",
+        "+0x20": 0,
+        "+0x28": 0,
+        "+0x30": "0x4376FD (literal constant; referent not claimed)",
+        "+0x38": 0,
+        "+0x40": "0x4376FD (literal constant; referent not claimed)",
+        "+0x48": 0
+      },
+      "observable": "the init pattern is fully overwritten by the fill phase when count > 0, so it appears only in the call log (one factory call per slot)"
+    },
+    "fill_phase": {
+      "entry": "skipped entirely when the byte span is 0",
+      "loop_form": "do-while: at least one iteration when the span is nonzero, so a 1..7-byte span materializes exactly one element; afterwards index advances while index < count (unsigned)",
+      "per_element": {
+        "allocator_call": "size is the sum of the two segment lengths mod 2**64; trailing arguments are the previous element pointer (0 on the first fill call) and 0",
+        "copies": "first segment bytes then second segment bytes into the fresh buffer, in order",
+        "slot_fields": {
+          "+0x00": "element +0x00",
+          "+0x08": "element +0x08",
+          "+0x10": "element +0x10",
+          "+0x18": "element +0x18",
+          "+0x20": "element +0x20",
+          "+0x28": "element pointer",
+          "+0x30": "concatenation buffer pointer",
+          "+0x38": "first segment length",
+          "+0x40": "concatenation buffer pointer plus first segment length",
+          "+0x48": "second segment length"
+        },
+        "element_fields_read": [
+          "+0x00",
+          "+0x08",
+          "+0x10",
+          "+0x18",
+          "+0x20",
+          "+0x28 (first segment pointer)",
+          "+0x30 (first segment length)",
+          "+0x48 (second segment pointer)",
+          "+0x50 (second segment length)"
+        ],
+        "element_fields_not_read": [
+          "+0x38",
+          "+0x40",
+          "anything past +0x50"
+        ],
+        "group_entry_fields": "only the begin and end pointers; the third qword (+0x10) is never read"
+      }
+    },
+    "callers": {
+      "0x5f8029a": "inside the pipeline group pass 0x5f801f0 (pinned by the earlier RE-001 pipeline item; that item records this call, this item models the callee)",
+      "0x5da98b8": "inside the 5417-byte function 0x5da8870..0x5da9d99; recorded site-only, its surrounding logic is not claimed"
+    }
+  },
+  "factory_semantics": {
+    "form": "returns (first argument | (second argument << 62)) mod 2**64",
+    "call_site_use": "called with (0, 0) once per init slot, so the stored value is always 0; the general form is recorded because the leaf is only 15 bytes and fully read"
+  },
+  "assumptions": [
+    "The caller supplies at least as many elements as the fill phase reads; a shorter list would read out of bounds natively and is rejected by the model.",
+    "Segment byte strings are the bytes the native code would copy; a null segment pointer with a nonzero length would fault natively and is rejected by the model.",
+    "The allocator is a virtual method at offset 0x18 of the owner's table and stays an oracle; whether it reads its trailing arguments is not pinned.",
+    "No return value is claimed: the known callers continue without reading rax after the call.",
+    "A negative byte span always trips the span limit (its unsigned value is at least 2**63, above the limit), so the length throw fires before any loop and a negative count never reaches the init loop."
+  ],
+  "not_claimed": [
+    "The allocator's own implementation (virtual method at offset 0x18).",
+    "What the literal constant 0x4376FD points to.",
+    "The surrounding logic of the second call site's function 0x5da8870..0x5da9d99 beyond the site address.",
+    "The output record's fields past +0x08, which this function does not write."
+  ]
+}
