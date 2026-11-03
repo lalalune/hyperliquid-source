@@ -1,0 +1,60 @@
+"""Fail-closed control: weighted_comparison_static on a missing .rela.dyn.
+
+analyze() looked the section up with bare next(), so a well-formed ELF
+without .rela.dyn escaped as StopIteration instead of the module's
+ValueError refusal. The mutant renames the section header only; no
+instruction bytes change.
+"""
+import hashlib
+import struct
+import sys
+import unittest
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+import weighted_comparison_static as subject
+from elf_index import sections
+
+
+def section_headers(data):
+    shoff = struct.unpack_from('<Q', data, 40)[0]
+    entsize, count, strndx = struct.unpack_from('<HHH', data, 58)
+    rows = [struct.unpack_from('<IIQQQQIIQQ', data, shoff + i * entsize) for i in range(count)]
+    strtab = rows[strndx]
+    table = data[strtab[4]:strtab[4] + strtab[5]]
+    named = {}
+    for i, row in enumerate(rows):
+        end = table.find(b'\0', row[0])
+        named[table[row[0]:end].decode()] = (shoff + i * entsize, row)
+    return named
+
+
+class WeightedComparisonRelaDynTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        if not subject.TARGET.is_file() or subject.TARGET.stat().st_size != 105896032:
+            raise unittest.SkipTest('materialized node115 required')
+        cls.data = subject.TARGET.read_bytes()
+        if hashlib.sha256(cls.data).hexdigest() != subject.SHA:
+            raise ValueError('wrong node115 fixture')
+
+    def rename_section(self, name):
+        mutant = bytearray(self.data)
+        named = section_headers(bytes(mutant))
+        shoff, row = named[name]
+        secs = sections(bytes(mutant))
+        shstr = next(s for s in secs if s['name'] == '.shstrtab')
+        mutant[shstr['offset'] + row[0]] = ord('X')
+        return bytes(mutant)
+
+    def test_missing_rela_dyn_refuses(self):
+        with self.assertRaisesRegex(ValueError, 'missing .rela.dyn section'):
+            subject.analyze(self.rename_section('.rela.dyn'))
+
+    def test_unrelated_section_rename_is_not_a_refusal(self):
+        # Renaming a section no check looks up must not change the verdict;
+        # this proves the rename helper targets one name string only.
+        self.assertEqual(subject.analyze(self.rename_section('.shstrtab'))['target_sha256'], subject.SHA)
+
+
+if __name__ == '__main__':
+    unittest.main()
