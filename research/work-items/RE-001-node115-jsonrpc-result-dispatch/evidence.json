@@ -14,7 +14,8 @@
     "element-candidate": 73,
     "second-candidate": 303,
     "error-candidate": 553,
-    "message-candidate": 103
+    "message-candidate": 103,
+    "failure-candidate": 6
   },
   "regions": [
     {
@@ -104,6 +105,14 @@
       "bytes": 395,
       "body_sha256": "9575a1d545a7d24464fbf3c023af45ac6f5716f3749d4b5c0eba05a4ef0bb6ae",
       "instructions": 103
+    },
+    {
+      "label": "failure-candidate",
+      "start_va": "0x141e264",
+      "end_va": "0x141e279",
+      "bytes": 21,
+      "body_sha256": "0ebfd9ba496f95eb3b50668da6bdfb6f60cdfea033bc8736545f457d87a46af0",
+      "instructions": 6
     }
   ],
   "native_candidate_edges": [
@@ -166,7 +175,7 @@
       "native_text": "call   0x1751380"
     }
   ],
-  "scope": "Eleven node115 FDE ranges: JsonRpcResult alternatives, nested error fields and local message allocation/copy/word stores. Leading-word bound is conditional on avoiding the failure-helper frontier; full source types, field definedness and gate closure remain unproved.",
+  "scope": "Twelve node115 FDE ranges: JsonRpcResult alternatives, nested error/message paths and two-callee failure dispatch. The global leading-word and return contracts remain open; no gate closes.",
   "prior_work": "Historical #94 packet supplies the question only; no #94 address, acceptance credit or semantics transferred",
   "repository_checks_run": true,
   "compiled_code_comparison": false,
@@ -202,8 +211,8 @@
     "native_instruction_boundary_validated": true,
     "native_text": "call   0x1700a10"
   },
-  "unique_native_rows": 2223,
-  "unique_native_bytes": 9777,
+  "unique_native_rows": 2229,
+  "unique_native_bytes": 9798,
   "renewed_caller_counted_once": true,
   "first_variant_native_run": 41543424275,
   "first_variant_execution_commit": "27e83067013d617b1f7c40073ed1689009baecfc",
@@ -223,7 +232,7 @@
   "renewed_first_variant_counted_once": true,
   "historical_required_repository_run": 41544793824,
   "historical_required_execution_commit": "055c4cbcfb0643376a33cbab1d05aad137e4874a",
-  "repository_checks_scope": "Historical checks apply to earlier immutable snapshots. Current exact eleven-range candidate and actual required outcomes are recorded on PR2127.",
+  "repository_checks_scope": "Historical checks apply to earlier immutable snapshots. Exact twelve-range candidate and actual required outcomes are recorded on PR2127.",
   "text_decoder_native_run": 41571968425,
   "text_decoder_execution_commit": "ecd4b9cef519055e13e7c843761e2b0a23388cdd",
   "renewed_value_helper_counted_once": true,
@@ -258,5 +267,13 @@
   "renewed_error_helper_counted_once": true,
   "message_local_three_word_stores_recovered": true,
   "message_conditional_marker_B_excluded": true,
-  "message_global_marker_B_exclusion_proved": false
+  "message_global_marker_B_exclusion_proved": false,
+  "failure_helper_native_run": 41726809941,
+  "failure_helper_execution_commit": "4d54bc950c79e93e214a7bfb9fbb6483cff4a228",
+  "renewed_message_helper_counted_once": true,
+  "failure_dispatcher_callees": [
+    "0x141e280",
+    "0x141e251"
+  ],
+  "failure_dispatcher_nonreturn_proved": false
 }

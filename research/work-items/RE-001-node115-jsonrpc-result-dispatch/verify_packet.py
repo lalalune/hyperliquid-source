@@ -1791,6 +1791,122 @@ def verify_message_helper(data, packet):
         limits='Instruction/data-backed stores and conditional normal-helper/memory models, not capture execution. Leading word n is signed-nonnegative on paths that avoid failure helper0x141e264; nonreturn and post-call flag contracts of that helper remain open, so global B exclusion is unproved. Validation/allocation/memcpy contracts, pointer validity/ownership, source types/ABI, error-tail100..103, first-form tail40..103 and runtime equivalence remain unresolved.')
 
 
+def extract_failure_data(data):
+    assert len(data)==105896032 and hashlib.sha256(data).hexdigest()=='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+    shoff=struct.unpack_from('<Q',data,40)[0];size,count,nameidx=struct.unpack_from('<HHH',data,58);assert size==64
+    rows=[struct.unpack_from('<IIQQQQIIQQ',data,shoff+64*i) for i in range(count)]
+    sr=rows[nameidx];names=data[sr[4]:sr[4]+sr[5]]
+    sections={names[r[0]:names.find(b'\0',r[0])].decode():r for r in rows}
+    def at(va,n):
+        hits=[(name,r) for name,r in sections.items() if r[1]!=8 and r[2]&2 and r[3]<=va and va+n<=r[3]+r[5]];assert len(hits)==1
+        name,row=hits[0];off=row[4]+va-row[3];raw=data[off:off+n]
+        return dict(va=hex(va),file_offset=hex(off),section=name,section_flags=row[2],bytes=n,data_hex=raw.hex(),sha256=hashlib.sha256(raw).hexdigest())
+    rela=sections['.rela.dyn'];records=[]
+    for off in range(rela[4],rela[4]+rela[5],24):
+        slot,info,addend=struct.unpack_from('<QQq',data,off)
+        if slot in [0x64df498,0x64df6b0,0x64df490]:
+            records.append(dict(slot=hex(slot),info=info,addend=hex(addend),relocation_file_offset=hex(off),relocation_hex=data[off:off+24].hex(),stored_pointer=at(slot,8)))
+    assert len(records)==3 and all(r['info']==8 for r in records)
+    return dict(target_sha256=hashlib.sha256(data).hexdigest(),relocations=records,
+        limits='Three actual RELATIVE records for caller and dispatcher slots. No dynamic runtime binding, callee contract, nonreturn, post-call fallthrough, caller-saved flags/registers or source type/ABI closure is established.')
+
+def verify_failure_helper(data, packet):
+    folder=packet/'failure-helper'
+    current=probe(data,extra_vas=(0x141e264,0x16fe881))
+    require(current==json.loads((folder/'candidates.json').read_text()),'failure helper FDE candidate drift')
+    require(current==json.loads((folder/'receipts/full-input-replay.json').read_text()),'failure helper hosted full-input replay drift')
+    native=json.loads((folder/'receipts/decode-result.json').read_text())
+    require(native['target_sha256']==TARGET and native['whole_elf_reauthenticated_in_job'] and native['input_hashes_unchanged'],'failure helper full input binding')
+    require(not native['captured_program_executed'] and native['native_invocations']==3,'failure helper execution record')
+    bodies={};rowmaps={}
+    for label,key in [('failure-candidate','0x141e264'),('message-candidate','0x16fe881')]:
+        record=current['selected_fde_candidates'][key];start=int(record['start_va'],16);off=int(record['file_offset'],16)
+        body=data[off:off+record['bytes']]
+        require(hashlib.sha256(body).hexdigest()==record['body_sha256'],'failure helper body identity')
+        cursor=start;rows=[]
+        for line in (folder/'receipts'/(label+'.stdout')).read_text().splitlines():
+            if not re.match(r'^\s*[0-9a-f]+:',line):continue
+            parts=line.split('\t');require(len(parts)>=3,'failure helper native syntax')
+            va=int(parts[0].strip().rstrip(':'),16);tokens=parts[1].split()
+            require(tokens and all(re.fullmatch('[0-9a-f]{2}',t) for t in tokens),'failure helper native byte syntax')
+            raw=bytes.fromhex(' '.join(tokens));text=' '.join(parts[2:]).strip()
+            require(va==cursor and body[va-start:va-start+len(raw)]==raw,'failure helper native/full-image binding')
+            require(text and '(bad)' not in text and not text.startswith('.byte'),'failure helper undecoded row')
+            rows.append(dict(va=hex(va),bytes=raw.hex(),text=text));cursor+=len(raw)
+        saved=next(r for r in native['regions'] if r['label']==label)
+        require(rows==saved['instruction_rows'] and len(rows)==saved['instructions'] and cursor==int(record['end_va'],16),'failure helper complete rows/extent')
+        bodies[label]=(start,body);rowmaps[label]={int(r['va'],16):r for r in rows}
+    earlier=json.loads((packet/'message-helper/receipts/decode-result.json').read_text())
+    require(next(r['instruction_rows'] for r in earlier['regions'] if r['label']=='message-candidate')==
+            next(r['instruction_rows'] for r in native['regions'] if r['label']=='message-candidate'),'renewed message helper drift')
+    edge=json.loads((folder/'receipts/qualified-candidate-edges.json').read_text())
+    call=rowmaps['message-candidate'][0x16fe881];raw=bytes.fromhex(call['bytes'])
+    require(len(edge)==1 and edge[0]['native_instruction_boundary_validated'] and edge[0]['candidate_va']==call['va'] and edge[0]['bytes']==call['bytes'],'failure helper caller boundary')
+    require(raw[:2]==b'\xff\x15' and 0x16fe881+6+struct.unpack_from('<i',raw,2)[0]==0x64df498,'failure helper indirect caller RIP slot')
+    fields=json.loads((folder/'field-bindings.json').read_text())
+    def check_fields(active):
+        for field in fields:
+            va=int(field['va'],16);raw=bytes.fromhex(field['bytes']);start,body=active[field['region']]
+            require(rowmaps[field['region']].get(va,{}).get('bytes')==field['bytes'],'failure helper field boundary')
+            require(body[va-start:va-start+len(raw)]==raw,'failure helper field corruption: '+field['label'])
+    check_fields(bodies);controls=[]
+    for field in fields:
+        active=dict(bodies);start,body=bodies[field['region']];changed=bytearray(body)
+        changed[int(field['va'],16)-start+len(bytes.fromhex(field['bytes']))-1]^=1
+        active[field['region']]=(start,changed)
+        try:check_fields(active)
+        except ValueError as error:controls.append(dict(control='failure helper '+field['label'],rejection=str(error)))
+        else:raise ValueError('failure helper field corruption escaped')
+    record=current['selected_fde_candidates']['0x141e264'];fde=bytes.fromhex(record['fde_hex'])
+    def check_extent(raw):
+        delta,length=struct.unpack_from('<ii',raw,8)
+        require(int(record['fde_va'],16)+8+delta==0x141e264 and length==21 and 0x141e264+length==int(record['end_va'],16),'failure helper actual FDE extent')
+    check_extent(fde);changed=bytearray(fde);changed[12]^=1
+    try:check_extent(changed)
+    except ValueError as error:controls.append(dict(control='failure helper FDE extent',rejection=str(error)))
+    else:raise ValueError('failure helper FDE corruption escaped')
+    computed=extract_failure_data(data);saved=json.loads((folder/'referenced-data.json').read_text())
+    require(computed==saved,'failure dispatcher relocation drift')
+    require([(r['slot'],r['info'],r['addend']) for r in computed['relocations']]==[
+        ('0x64df490',8,'0x141e251'),('0x64df498',8,'0x141e264'),('0x64df6b0',8,'0x141e280')],'failure dispatcher actual RELATIVE bindings')
+    expected={r['slot']:bytes.fromhex(r['relocation_hex']) for r in saved['relocations']}
+    def check_relocations(values):
+        require(set(values)==set(expected),'failure dispatcher relocation inventory')
+        for slot,raw in values.items():require(bytes(raw)==expected[slot],'failure dispatcher relocation corruption '+slot)
+    check_relocations(expected)
+    for slot,raw in expected.items():
+        values=dict(expected);changed=bytearray(raw);changed[16]^=1;values[slot]=changed
+        try:check_relocations(values)
+        except ValueError as error:controls.append(dict(control='failure dispatcher relocation '+slot,rejection=str(error)))
+        else:raise ValueError('failure dispatcher relocation corruption escaped')
+    rows=rowmaps['failure-candidate'];ri=lambda va:bytes.fromhex(rows[va]['bytes'])
+    wanted=[(0x141e264,'55'),(0x141e265,'4889e5'),(0x141e268,'4885ff'),(0x141e26b,'7506'),(0x141e26d,'ff153d140c05'),(0x141e273,'ff1517120c05')]
+    require([(va,row['bytes']) for va,row in rows.items()]==wanted,'failure dispatcher complete six-instruction sequence')
+    raw=ri(0x141e26b);require(0x141e26b+len(raw)+struct.unpack_from('<b',raw,1)[0]==0x141e273,'failure dispatcher nonzero branch target')
+    calls=[]
+    for site,slot in [(0x141e26d,0x64df6b0),(0x141e273,0x64df490)]:
+        raw=ri(site);require(raw[:2]==b'\xff\x15' and site+len(raw)+struct.unpack_from('<i',raw,2)[0]==slot,'failure dispatcher RIP call slot')
+        calls.append(dict(va=hex(site),slot=hex(slot),target=next(r['addend'] for r in saved['relocations'] if int(r['slot'],16)==slot)))
+    require(0x141e273+len(ri(0x141e273))==int(record['end_va'],16)==0x141e279,'last-call return continuation is outside measured FDE')
+    require(not any(bytes.fromhex(r['bytes'])[0] in [0xc2,0xc3,0xca,0xcb] for r in rows.values()),'no local decoded RET')
+    caller=rowmaps['message-candidate'];ci=lambda va:bytes.fromhex(caller[va]['bytes'])
+    for site,raw in [(0x16fe87c,'31ff'),(0x16fe87e,'4c89f6'),(0x16fe887,'7420'),(0x16fe89b,'bf01000000'),(0x16fe8a0,'4c89f6'),(0x16fe8a9,'41bf01000000')]:
+        require(ci(site)==bytes.fromhex(raw),'failure dispatcher caller selector/continuation binding')
+    for site in [0x16fe881,0x16fe8a3]:
+        raw=ci(site);require(raw[:2]==b'\xff\x15' and site+len(raw)+struct.unpack_from('<i',raw,2)[0]==0x64df498,'both caller sites use actual dispatcher slot')
+    # A bounded graph, with unknown call-return edges. An FDE endpoint and
+    # absence of RET are not converted into a nonreturn proof.
+    routes=[dict(selector='zero',first_target='0x141e280',if_first_returns='0x141e251',second_call_arguments='caller-saved-registers-unproved',if_last_returns='0x141e279-outside-FDE'),
+            dict(selector='nonzero',first_target='0x141e251',first_call_arguments='incoming-RDI-RSI',if_last_returns='0x141e279-outside-FDE')]
+    require(calls[0]['target']==routes[0]['first_target'] and calls[1]['target']==routes[1]['first_target'],'selector-route actual callee binding')
+    return dict(status='FAILURE_DISPATCH_AND_INDIRECT_CALL_CHAIN_REPRODUCED',helper_bytes=21,helper_instructions=6,
+        field_bindings=len(fields),evidence_corruptions_rejected=len(controls),controls=controls,indirect_calls=calls,relative_relocations=3,
+        selector_routes=routes,selector_routes_count=2,local_ret_instructions=0,final_call_return_pc='0x141e279',final_call_return_pc_outside_measured_FDE=True,
+        caller_dispatch_slot='0x64df498',caller_selectors=[0,1],renewed_message_rows=103,
+        dispatcher_nonreturn_proved=False,global_marker_B_exclusion_proved=False,
+        limits='Six instruction/data-backed rows recover a two-callee dispatch, not nonreturn. Callees0x141e280 and0x141e251, continuation outside the FDE, caller-saved arguments/flags after calls, exception/signal/ownership/source ABI and runtime behavior remain unproved. No RET inside an unwind extent does not establish no normal return.')
+
+
 def main():
     parser=argparse.ArgumentParser(description='Owned stdlib complete-input/native evidence verifier; no subprocess or captured execution.')
     parser.add_argument('--binary',type=Path,required=True)
@@ -1876,6 +1992,15 @@ def main():
     result['controls']+=message_helper['controls'];result['message_helper']=message_helper
     require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(11,9777,2223),'eleven unique ranges')
     result['limits']='Eleven digest-bound native ranges. Message ordinary stores are [n,pointer-or1,n], and n is signed-nonnegative on paths avoiding failure helper0x141e264. Global B exclusion requires that helper contract and remains unproved. Dependent field definedness, default-data storage, error tail100..103, first-form tail40..103, source types/ABI, cleanup/exception, wire inputs and runtime equivalence remain unresolved.'
+    failure_helper=verify_failure_helper(data,args.packet)
+    result['regions']+=1;result['region_bytes']+=failure_helper['helper_bytes']
+    result['native_instruction_rows']+=failure_helper['helper_instructions']
+    result['instruction_counts']['failure-candidate']=failure_helper['helper_instructions']
+    result['field_bindings']+=failure_helper['field_bindings']
+    result['evidence_corruptions_rejected']+=failure_helper['evidence_corruptions_rejected']
+    result['controls']+=failure_helper['controls'];result['failure_helper']=failure_helper
+    require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(12,9798,2229),'twelve unique ranges')
+    result['limits']='Twelve digest-bound native ranges. Failure dispatcher0x141e264 selects two opaque callees0x141e280/0x141e251. Lack of local RET and an FDE end do not prove nonreturn. Global B exclusion, dependent field definedness, default-data storage, copied tails, source ABI/types, ownership, exception/continuation and runtime equivalence remain unresolved.'
     print(json.dumps(result,indent=2))
 
 
