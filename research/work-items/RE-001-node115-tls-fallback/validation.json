@@ -1,0 +1,277 @@
+{
+  "authoring_rejections_retained": [
+    "Prior decoder rejected the ffff LSDA header; observed omitted-type-table layout handled explicitly.",
+    "Raw zero Location pointer could not be read as a VA; unique RELATIVE addend and actual path independently bound.",
+    "Seven initially guessed anchor PCs were not instruction starts; final 120-anchor set uses actual decoded starts."
+  ],
+  "base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "claims": {
+    "acceptance_gates_changed": 0,
+    "captured_execution": false,
+    "cpu_emulation": false,
+    "hosted_ci_success": false,
+    "new_byte_credit": 0,
+    "rust_reconstruction": false,
+    "source_equivalence": false
+  },
+  "commands": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "tests.test_node115_tls_fallback",
+        "-v"
+      ],
+      "exit": 0,
+      "log": "scope-focused.log",
+      "name": "scope-focused",
+      "seconds": 7.054
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "-B",
+        "-m",
+        "unittest",
+        "tests.test_node115_tls_fallback",
+        "-v"
+      ],
+      "exit": 0,
+      "log": "scope-focused-O.log",
+      "name": "scope-focused-O",
+      "seconds": 7.588
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "research/work-items/RE-001-node115-tls-fallback/export.py",
+        "--output",
+        "work/tls-fallback-final-recapture"
+      ],
+      "exit": 0,
+      "log": "scope-export.log",
+      "name": "scope-export",
+      "seconds": 1.017
+    },
+    {
+      "command": [
+        "diff",
+        "-r",
+        "research/work-items/RE-001-node115-tls-fallback/native",
+        "work/tls-fallback-final-recapture/native"
+      ],
+      "exit": 0,
+      "log": "scope-native-diff.log",
+      "name": "scope-native-diff",
+      "seconds": 0.001
+    },
+    {
+      "command": [
+        "cmp",
+        "research/work-items/RE-001-node115-tls-fallback/records.json",
+        "work/tls-fallback-final-recapture/records.json"
+      ],
+      "exit": 0,
+      "log": "scope-records-cmp.log",
+      "name": "scope-records-cmp",
+      "seconds": 0.001
+    },
+    {
+      "command": [
+        "make",
+        "doctor"
+      ],
+      "exit": 0,
+      "log": "scope-doctor.log",
+      "name": "scope-doctor",
+      "seconds": 0.077
+    },
+    {
+      "command": [
+        "make",
+        "verify"
+      ],
+      "exit": 0,
+      "log": "scope-verify.log",
+      "name": "scope-verify",
+      "seconds": 0.387
+    },
+    {
+      "command": [
+        "make",
+        "test"
+      ],
+      "exit": 0,
+      "log": "scope-test.log",
+      "name": "scope-test",
+      "seconds": 467.198
+    },
+    {
+      "command": [
+        "make",
+        "catalogue-check"
+      ],
+      "exit": 0,
+      "log": "scope-catalogue-check.log",
+      "name": "scope-catalogue-check",
+      "seconds": 0.535
+    },
+    {
+      "command": [
+        "make",
+        "reproduce"
+      ],
+      "exit": 0,
+      "log": "scope-reproduce.log",
+      "name": "scope-reproduce",
+      "seconds": 3.773
+    }
+  ],
+  "environment": {
+    "capstone": [
+      "5.0.7",
+      "5.0.6"
+    ],
+    "gnu_binutils": "2.42",
+    "llvm": "18.1.3",
+    "platform": "Linux x86-64",
+    "python": "3.12.3"
+  },
+  "final_seal_checks": {
+    "focused_14_exit": 0,
+    "raw_logs": [
+      {
+        "name": "seal-check.log",
+        "sha256": "49f6accba461092d4d0780c4e680fd9127a72965e6a455935702339aaceb9cf3"
+      },
+      {
+        "name": "seal-focused.log",
+        "sha256": "5f97c5ec8ae600a27c5e0c786fa704943ffda060d0044f75e5aa5489ec76f93d"
+      }
+    ],
+    "verify_catalogue_exit": 0
+  },
+  "focused": {
+    "methods": 14,
+    "normal_capstone_5_0_7": 0,
+    "optimized_capstone_5_0_6": 0,
+    "optimized_capstone_5_0_7": 0
+  },
+  "native_replay": {
+    "packet_comparison_exit": 0,
+    "two_explicit_seed_and_timezone_exports": [
+      {
+        "command": [
+          "python3",
+          "-B",
+          "research/work-items/RE-001-node115-tls-fallback/export.py",
+          "--output",
+          "work/tls-fallback-final-seed1"
+        ],
+        "exit": 0,
+        "seed": "1",
+        "tz": "UTC"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "research/work-items/RE-001-node115-tls-fallback/export.py",
+          "--output",
+          "work/tls-fallback-final-seed91"
+        ],
+        "exit": 0,
+        "seed": "91",
+        "tz": "Asia/Seoul"
+      },
+      {
+        "comparison": "seed1-UTC versus seed91-Asia/Seoul, all exports and records",
+        "exit": 0
+      }
+    ]
+  },
+  "observed_at": "2026-11-03T14:37:56.342124+00:00",
+  "ownership_correction": "Three complete bodies are peer PR2050 dependency context, not new function/byte claims. Only drain FDE 288 bytes is new primary scope; own2266 registration is additional context.",
+  "post_sweep_metadata": "Only result metadata/manifest and the README expression [FS:0]-0x1148 changed after the sweep; code hashes remain identical. Subsequent verify, catalogue-check and all 14 focused tests passed.",
+  "producer": {
+    "client": "Codex",
+    "model": "gpt-6.1-sol",
+    "provider": "OpenAI",
+    "subagents": 0
+  },
+  "raw_logs": [
+    {
+      "bytes": 69553,
+      "file": "scope-test.log",
+      "retained": "private validation archive",
+      "sha256": "f2c28dabd5d176d448113a12ae5e43d7430d531c3561eeb2b5b9b80dd2760df1"
+    },
+    {
+      "bytes": 2129,
+      "file": "scope-focused.log",
+      "retained": "private validation archive",
+      "sha256": "4966fb41a101f8ad4d6df3a51968f2e724e5d9a1855d1a37ae044bb14df6ee5c"
+    },
+    {
+      "bytes": 2129,
+      "file": "scope-focused-O.log",
+      "retained": "private validation archive",
+      "sha256": "b12f8402c12f951bc16617ea70a35cdde9563a03946f91dcc148901eb786fa50"
+    },
+    {
+      "bytes": 2129,
+      "file": "scope-final-506-O.log",
+      "retained": "private validation archive",
+      "sha256": "9684077859a56f451bc66f7d25e80642f6bfcbea2638d61e4394143505f32cb8"
+    },
+    {
+      "bytes": 685,
+      "file": "scope-verify.log",
+      "retained": "private validation archive",
+      "sha256": "e70ac47bf2479d4c027f747ff0ed17c538c41b2df5c9e9cbfea0c98f526176a8"
+    },
+    {
+      "bytes": 86,
+      "file": "scope-catalogue-check.log",
+      "retained": "private validation archive",
+      "sha256": "d154b53146de73afa6ac07cb86b790175fed3cf9eb764993fa92227491db6d80"
+    },
+    {
+      "bytes": 510,
+      "file": "scope-reproduce.log",
+      "retained": "private validation archive",
+      "sha256": "8df90fc43ec45df589cd9c1f2d1b192e53acdec5ff861ebaa259582102ac20af"
+    }
+  ],
+  "required": {
+    "all_exit_codes": 0,
+    "failed_files": 0,
+    "optional_skips": 4,
+    "raw_test_tail": "Isolated unittest discovery: 77 files attempted; 0 failed.",
+    "reported_cases": 396,
+    "targets": [
+      "doctor",
+      "verify",
+      "test",
+      "catalogue-check",
+      "reproduce"
+    ],
+    "test_files": 77
+  },
+  "skip_reasons": [
+    "setUpClass (test_node115_field_adapter_drift.ActualNode115Bindings) ... skipped 'Set HL_RE014_LIBCORE to the explicitly supplied pinned official archive; no download or qualification is implied.'",
+    "test_actual_compilation_layouts_and_source_corruptions (test_nonce_ring_rust.NonceRingRustTests.test_actual_compilation_layouts_and_source_corruptions) ... skipped 'explicit HYPERLIQUID_NONCE_RING_RUSTC and Capstone5.0.6 required; not a Rust pass'",
+    "test_real_nested_jre_uses_enclosing_jdk (test_rea_java_home.NativeJavaHomeTests.test_real_nested_jre_uses_enclosing_jdk) ... skipped 'native macOS resolver required'",
+    "test_system_launcher_uses_registered_jdk_root (test_rea_java_home.NativeJavaHomeTests.test_system_launcher_uses_registered_jdk_root) ... skipped 'native macOS resolver required'"
+  ],
+  "source_hashes": {
+    "research/work-items/RE-001-node115-tls-fallback/collect.py": "a34771ffa510b624fb91593169dd3ffbde0a93675e9cb876799c7780cd6d5ece",
+    "research/work-items/RE-001-node115-tls-fallback/export.py": "640824d967402246a6910908ed175cc22e33663bd465ce52f34605dcaafed764",
+    "tests/test_node115_tls_fallback.py": "39cdf38702d8f52d97de18c1d21571834f729f9ff0254b2fbfe540c2ca3f9349"
+  },
+  "status": "required-gates-pass"
+}
