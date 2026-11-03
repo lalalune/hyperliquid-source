@@ -2,6 +2,8 @@
 from pathlib import Path
 import sys,math,struct
 ROOT=Path(__file__).resolve().parents[3]
+PACKET=Path(__file__).resolve().parent
+SHA='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
 sys.path.insert(0,str(ROOT/'tools'));sys.path.insert(0,str(ROOT.parent))
 import gas_auction_price as cpu
 from elfview import View
@@ -63,6 +65,7 @@ class Machine(cpu.Machine):
   return result
 
 def evaluate(image,bits,bucket,start,floor,patch=None):
+ if not all(type(x) is int and 0<=x<=U64 for x in (bits,bucket,start,floor)):raise ValueError('raw u64 inputs required')
  m=Machine(image);m.patches=patch or {};m.set_reg(cpu.RBX,OUT);m.set_reg(cpu.R15,FIELDS);m.set_reg(cpu.R14,FIELDS+16)
  m.xmm[0]=bits|(cpu.POISON<<64);m.xknown[0]=U64
  for off,value in [(16,bucket),(40,start),(56,floor)]:cpu.Memory.write(m.memory,FIELDS+off,8,value)
