@@ -86,7 +86,11 @@ class Image:
         for row in rows:
             if row[1] == 8:  # SHT_NOBITS occupies no file bytes; mapping its VAs would
                 continue  # return unrelated file bytes as if they lived there.
-            end = data.index(b"\0", strings + row[0])
+            if row[4] + row[5] > len(data):
+                fail("section extends past end of file")
+            end = data.find(b"\0", strings + row[0])
+            if end < 0:
+                fail("unterminated section name")
             name = data[strings + row[0]:end].decode()
             if name in self.sections:
                 fail(f"duplicate section name {name}")
