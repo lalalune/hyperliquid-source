@@ -1,6 +1,6 @@
-# RE-001: node #115 JsonRpcResult alternatives and failure dispatch
+# RE-001: node #115 JsonRpcResult fields and failure-handler operands
 
-Task RE-001; foundation remains tentative. Target: Linux x86-64 node #115, 105,896,032 bytes, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. Reference revision `8fd8db680ec4bfef40996e5616bce3d5156d0b86`. New prose/checkers are independently authored; captured evidence retains upstream rights. Partial static research; source types/ABI, runtime equivalence and component completion remain unproved.
+Task RE-001;foundation remains tentative. Target:Linux x86-64 node#115,105,896,032 bytes,SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. Reference revision `8fd8db680ec4bfef40996e5616bce3d5156d0b86`. New prose/checkers are independently authored;captured evidence retains upstream rights. Partial static research;source types/ABI,runtime equivalence and component completion remain unproved.
 
 | Actual FDE range, ELF VA | Bytes | Native rows |
 | --- | ---: | ---: |
@@ -16,35 +16,38 @@ Task RE-001; foundation remains tentative. Target: Linux x86-64 node #115, 105,8
 | Nested error value `[0x16fe920,0x16ff3b2)` |2706|553|
 | Message helper `[0x16fe790,0x16fe91b)` |395|103|
 | Failure dispatcher `[0x141e264,0x141e279)` |21|6|
-| Unique total |9798|2229|
+| Nonzero-route handler `[0x141e251,0x141e264)` |19|6|
+| Zero-route handler `[0x141e280,0x141e29d)` |29|6|
+| Unique total |9846|2241|
+
 
 
 
 
 ## Current findings
 
-Earlier evidence binds the constructor's result/error alternatives, selected 32-byte value conversions, nested code/message/data fields, marker contexts and local stores. The message helper writes [n,pointer-or-empty1,n]. Its ordinary first word is signed-nonnegative on paths avoiding failure helper 0x141e264; that conditional bound excludes B=0x8000000000000001 there.
+Earlier evidence binds constructor result/error alternatives,selected32-byte value conversions,nested code/message/data fields,marker contexts and local stores. The message helper writes[n,pointer-or-empty1,n];n is signed-nonnegative on ordinary paths avoiding its failure helper. That conditional bound excludes B=0x8000000000000001 there. Global exclusion remains unproved.
 
-The new failure dispatcher selects two callees through actual relocation-bound slots: selector zero first calls 0x141e280; selector nonzero goes directly to 0x141e251. If the zero-selector call returns, the second call follows with caller-saved registers unclassified. If the last call returns, its next PC is outside the 21-byte FDE. No RET is inside that extent, but this does not prove nonreturn. Global B exclusion remains open. See [observations](observations.md) and [failure-helper bindings](failure-helper/referenced-data.json).
+The dispatcher selects two handlers. The nonzero handler swaps incoming RDI/RSI and calls0x5c827a0;the message null-allocation route supplies(n,1) after that swap. The zero handler passes literal-pointer0x456d73,scalar35 and descriptor-pointer0x63f3cf0 to0x1680e80. Referenced data begins with `capacity overflow`;scalar35 is not established as a byte length or message boundary. The descriptor has a relocation-bound80-byte raw_vec/mod.rs path and line-like28/column-like5 fields;Source Location is an inferred layout,not exact-source/type attestation. See[observations](observations.md) and[bound data](failure-handlers/referenced-data.json).
 
-The first alternative locally stores 40 bytes; nested error-value ordinary paths store 100; the second alternative and constructor copy 104. Message words occupy +0..23, data carrier +24..95 and code DWORD +96..99. Copied tails 100..103 and 40..103, default-data and dependent field definedness remain unclassified. Store coverage is not initialization, padding, a source ABI or undefined-behavior proof.
+No RET appears in the two new extents. A normal return from the nonzero handler's child enters the known dispatcher;the zero handler's continuation lies outside the decoded ranges. Neither fact proves nonreturn. Callee ABI/continuation,global word domain,validation/allocation/copy/ownership,default-data storage,source types and runtime behavior remain open. First alternative stores40bytes,nested error ordinary stores100,while second/constructor copies104;copied tails40..103 and100..103 remain unclassified. Store coverage is not initialization,padding or undefined-behavior proof.
 
 ## Reproduce and controls
 
-With the complete pinned capture, from repository root:
+With the complete pinned capture,from repository root:
 
 ```sh
 python3 -I -B research/work-items/RE-001-node115-jsonrpc-result-dispatch/verify_packet.py --binary artifacts/node/115/hl-node
 ```
 
-The standard-library reader authenticates the whole image, 135,313 ordered unwind starts, actual supported CIE/FDE records and all 2,229 unique native rows. New selected instruction bindings: 14; new evidence-corruption controls: 18, cumulative 1,191. Three RELATIVE records bind both caller sites and two outgoing slots. The two selector routes retain unknown call-return edges. All earlier controls remain, including field/key mutations and conditional length/status/allocation models. No target instructions or reconstructed parser are executed.
+The standard-library reader authenticates the whole image,135,313 ordered unwind starts,actual supported CIE/FDE records and all2,241 unique native rows. New selected bindings:14;new evidence-corruption controls:26,cumulative1,217. It checks two new FDEs,five actual RELATIVE records,the fixed operands,register swap,referenced window,descriptor/path fields and two retained dispatcher boundaries. All earlier controls remain. No target instructions,reconstructed parser or invented callee behavior are executed.
 
 ## Native evidence and validation
 
-All prior paths/receipts remain. Latest native run [41726809941](https://github.com/clutchpbcfo/hyperliquid-source/actions/runs/41726809941), execution `4d54bc950c79e93e214a7bfb9fbb6483cff4a228`: one job/attempt 1, GNU objdump 2.42 version query and two static decodes capped at 45 seconds each. The renewed message helper counts once. Full capture authentication and rootless/zero-capability/no-new-privileges/isolated-loopback/read-only-noexec qualifications are retained. The 11,072-byte archive SHA-256 is `5258ab944aea1aeaef78a6d8cd88d3e121743a094c470fb9175c5a5f4ebcbb84`.
+All prior paths/receipts remain. Latest native run[41735408655](https://github.com/clutchpbcfo/hyperliquid-source/actions/runs/41735408655),execution `2e4446a01413b193487948f8e559205fd0896c56`:one job/attempt1,GNU objdump2.42 version query and two static decodes capped45seconds each. New ranges total48bytes/12rows. The dispatcher has no fresh GNU decode in this run;its prior six native rows and actual FDE are replayed against the complete target,with both RIP/RELATIVE edges qualified. Rootless/zero-capability/no-new-privileges/isolated-loopback/read-only-noexec qualifications remain. The7,476-byte archive SHA-256 is `390dc36dc9303eb4fecfa04e482ad5b3fbe0de58809200b03b2fd9310af9474d`.
 
-This packet freezes before required validation; exact candidate commit/tree and actual current outcomes live on [PR #2127](https://github.com/lalalune/hyperliquid-source/pull/2127), preserving identical tested/published bytes. [Historical validation](validation/history.json) applies only to immutable snapshots. Prior eleven-range run 41717470972 passed 10 checks (76 modules, 382 reported cases, four optional skips), not this addition. No captured program/emulator, compiler or VM was invoked by this analysis. No repository/native code ran on the Mac.
+This packet freezes before required validation;exact commit/tree and actual current outcomes live on[PR#2127](https://github.com/lalalune/hyperliquid-source/pull/2127),preserving tested/published bytes. [Historical validation](validation/history.json) applies only to immutable snapshots. Prior twelve-range run41728155064 passed10checks(76modules,382reported cases,four optional skips),not this addition. No captured program/emulator,compiler or VM was invoked by this analysis. No repository/native decoder ran on the Mac.
 
 ## Limits and next step
 
-Callees 0x141e280 and 0x141e251 and continuation outside the FDE remain the return-contract frontiers. Global message leading-word domain, validation/allocation/copy contracts, pointer validity/ownership, default-data storage, copied tails, source types/ABI, formatter/cleanup/exception/signal contracts, wire inputs and runtime equivalence remain unresolved. No gate, compiled comparison, Points, payment or security impact is claimed. Next: inspect both outgoing callees before asserting global nonreturn or B exclusion.
+Further targets0x5c827a0/0x1680e80 and the zero handler's continuation remain unproved. Scalar35/message encoding and boundary,Source Location/type/source ownership,nonreturn/global B,dependent memory/ownership,copied tails,exception/signal and runtime equivalence remain open. No gate,compiled reconstruction,Points,payment or security impact is claimed. Next:inspect the further callees and establish the fixed-operand interpretation before stronger return/schema claims.

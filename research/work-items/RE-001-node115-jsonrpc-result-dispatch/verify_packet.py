@@ -1907,6 +1907,139 @@ def verify_failure_helper(data, packet):
         limits='Six instruction/data-backed rows recover a two-callee dispatch, not nonreturn. Callees0x141e280 and0x141e251, continuation outside the FDE, caller-saved arguments/flags after calls, exception/signal/ownership/source ABI and runtime behavior remain unproved. No RET inside an unwind extent does not establish no normal return.')
 
 
+def extract_pair_data(data):
+    assert len(data)==105896032 and hashlib.sha256(data).hexdigest()=='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+    shoff=struct.unpack_from('<Q',data,40)[0];size,count,nameidx=struct.unpack_from('<HHH',data,58);assert size==64
+    rows=[struct.unpack_from('<IIQQQQIIQQ',data,shoff+64*i) for i in range(count)]
+    sr=rows[nameidx];names=data[sr[4]:sr[4]+sr[5]]
+    sections={names[r[0]:names.find(b'\0',r[0])].decode():r for r in rows}
+    def at(va,n):
+        hits=[(name,r) for name,r in sections.items() if r[1]!=8 and r[2]&2 and r[3]<=va and va+n<=r[3]+r[5]];assert len(hits)==1
+        name,row=hits[0];off=row[4]+va-row[3];raw=data[off:off+n]
+        return dict(va=hex(va),file_offset=hex(off),section=name,section_flags=row[2],bytes=n,data_hex=raw.hex(),sha256=hashlib.sha256(raw).hexdigest())
+    rela=sections['.rela.dyn'];records=[]
+    for off in range(rela[4],rela[4]+rela[5],24):
+        slot,info,addend=struct.unpack_from('<QQq',data,off)
+        if slot in [0x64df490,0x64df6b0,0x64df6a8,0x64df6b8,0x63f3cf0]:
+            records.append(dict(slot=hex(slot),info=info,addend=hex(addend),relocation_file_offset=hex(off),relocation_hex=data[off:off+24].hex(),stored_pointer=at(slot,8)))
+    assert len(records)==5 and all(r['info']==8 for r in records)
+    descriptor=at(0x63f3cf0,24);_,size,line,column=struct.unpack('<QQII',bytes.fromhex(descriptor['data_hex']))
+    pointer=next(int(r['addend'],16) for r in records if r['slot']=='0x63f3cf0');assert 0<size<=512
+    path=at(pointer,size);name=bytes.fromhex(path['data_hex']).decode('utf-8');assert name.endswith('.rs')
+    literal=at(0x456d73,35);assert bytes.fromhex(literal['data_hex']).startswith(b'capacity overflow')
+    return dict(target_sha256=hashlib.sha256(data).hexdigest(),relocations=records,referenced_text_window=literal,observed_scalar_argument=35,capacity_overflow_prefix_bytes=17,descriptor=descriptor,
+        source_location_candidate=dict(path=path,path_text=name,path_length=size,line=line,column=column,layout_inferred=True),
+        limits='Five actual RELATIVE records, exact35-byte referenced data window, observed scalar35 and descriptor/path spans; scalar meaning and actual message boundary remain unproved. Source Location layout is inferred from data/use; function/source ownership, global nonreturn, post-call continuation, exception/signal and runtime behavior remain unproved.')
+
+def verify_handler_pair(data,packet):
+    folder=packet/'failure-handlers'
+    current=probe(data,extra_vas=(0x141e251,0x141e280,0x141e264))
+    require(current==json.loads((folder/'candidates.json').read_text())==json.loads((folder/'receipts/full-input-replay.json').read_text()),'handler pair full-image/FDE replay drift')
+    native=json.loads((folder/'receipts/decode-result.json').read_text())
+    require(native['target_sha256']==TARGET and native['whole_elf_reauthenticated_in_job'] and native['input_hashes_unchanged'],'handler pair complete input identity')
+    require(not native['captured_program_executed'] and native['native_invocations']==3 and len(native['regions'])==2,'handler pair actual execution record')
+    bodies={};rowmaps={}
+    for label,key in [('nonzero-handler','0x141e251'),('zero-handler','0x141e280')]:
+        record=current['selected_fde_candidates'][key];start=int(record['start_va'],16);off=int(record['file_offset'],16);body=data[off:off+record['bytes']]
+        require(hashlib.sha256(body).hexdigest()==record['body_sha256'],'handler pair body identity')
+        cursor=start;rows=[]
+        for line in (folder/'receipts'/(label+'.stdout')).read_text().splitlines():
+            if not re.match(r'^\s*[0-9a-f]+:',line):continue
+            parts=line.split('\t');require(len(parts)>=3,'handler pair native syntax')
+            va=int(parts[0].strip().rstrip(':'),16);tokens=parts[1].split();require(tokens and all(re.fullmatch('[0-9a-f]{2}',t) for t in tokens),'handler pair native byte syntax')
+            raw=bytes.fromhex(' '.join(tokens));text=' '.join(parts[2:]).strip()
+            require(va==cursor and body[va-start:va-start+len(raw)]==raw,'handler pair native/full-image binding')
+            require(text and '(bad)' not in text and not text.startswith('.byte'),'handler pair undecoded row')
+            rows.append(dict(va=hex(va),bytes=raw.hex(),text=text));cursor+=len(raw)
+        saved=next(r for r in native['regions'] if r['label']==label)
+        require(rows==saved['instruction_rows'] and len(rows)==saved['instructions'] and cursor==int(record['end_va'],16),'handler pair complete rows/extent')
+        bodies[label]=(start,body);rowmaps[label]={int(r['va'],16):r for r in rows}
+    prior=json.loads((packet/'failure-helper/receipts/decode-result.json').read_text())
+    dispatcher=next(r for r in prior['regions'] if r['label']=='failure-candidate');replay=native['retained_dispatcher_replay']
+    require(replay['region']==dispatcher and replay['prior_native_run']==41726809941 and replay['prior_execution_commit']=='4d54bc950c79e93e214a7bfb9fbb6483cff4a228','retained dispatcher provenance')
+    require(replay['prior_archive_sha256']=='5258ab944aea1aeaef78a6d8cd88d3e121743a094c470fb9175c5a5f4ebcbb84' and replay['full_image_and_FDE_reauthenticated'] and replay['all_prior_native_bytes_and_boundaries_replayed'] and not replay['fresh_GNU_dispatcher_decode'],'dispatcher reuse scope')
+    record=current['selected_fde_candidates']['0x141e264'];start=int(record['start_va'],16);off=int(record['file_offset'],16);body=data[off:off+record['bytes']];cursor=start
+    require(hashlib.sha256(body).hexdigest()==dispatcher['body_sha256']==record['body_sha256'],'retained dispatcher full-image identity')
+    for row in dispatcher['instruction_rows']:
+        va=int(row['va'],16);raw=bytes.fromhex(row['bytes']);require(va==cursor and body[va-start:va-start+len(raw)]==raw,'retained dispatcher GNU boundary bytes');cursor+=len(raw)
+    require(cursor==int(record['end_va'],16),'retained dispatcher extent')
+    bodies['retained-dispatcher']=(start,body);rowmaps['retained-dispatcher']={int(r['va'],16):r for r in dispatcher['instruction_rows']}
+    edges=json.loads((folder/'receipts/qualified-candidate-edges.json').read_text())
+    require(len(edges)==2,'handler pair edge inventory')
+    for edge,site,slot,target in zip(edges,[0x141e273,0x141e26d],[0x64df490,0x64df6b0],[0x141e251,0x141e280]):
+        raw=bytes.fromhex(rowmaps['retained-dispatcher'][site]['bytes'])
+        require(edge['candidate_va']==hex(site) and edge['bytes']==raw.hex() and edge['slot_va']==hex(slot) and edge['destination_va']==hex(target),'handler pair retained edge identity')
+        require(edge['native_instruction_boundary_validated'] and not edge['fresh_native_boundary_decode'] and edge['full_capture_replay_checked'],'handler pair retained qualification scope')
+        require(raw[:2]==b'\xff\x15' and site+6+struct.unpack_from('<i',raw,2)[0]==slot,'handler pair indirect caller RIP slot')
+        rel=data[int(edge['relocation_file_offset'],16):int(edge['relocation_file_offset'],16)+24]
+        require(rel.hex()==edge['relocation_hex'] and struct.unpack('<QQq',rel)==(slot,8,target),'handler pair incoming actual RELATIVE record')
+    fields=json.loads((folder/'field-bindings.json').read_text());controls=[]
+    def check_fields(active):
+        for field in fields:
+            va=int(field['va'],16);start,body=active[field['region']];raw=bytes.fromhex(field['bytes'])
+            require(rowmaps[field['region']].get(va,{}).get('bytes')==field['bytes'],'handler pair field boundary')
+            require(body[va-start:va-start+len(raw)]==raw,'handler pair field corruption '+field['label'])
+    check_fields(bodies)
+    for field in fields:
+        active=dict(bodies);start,body=bodies[field['region']];changed=bytearray(body);changed[int(field['va'],16)-start+len(bytes.fromhex(field['bytes']))-1]^=1;active[field['region']]=(start,changed)
+        try:check_fields(active)
+        except ValueError as error:controls.append(dict(control='handler pair '+field['label'],rejection=str(error)))
+        else:raise ValueError('handler pair field corruption escaped')
+    for key,length in [('0x141e251',19),('0x141e280',29)]:
+        record=current['selected_fde_candidates'][key];fde=bytes.fromhex(record['fde_hex'])
+        def check_extent(raw):
+            delta,size=struct.unpack_from('<ii',raw,8)
+            require(int(record['fde_va'],16)+8+delta==int(key,16) and size==length and int(key,16)+size==int(record['end_va'],16),'handler pair actual FDE extent')
+        check_extent(fde);changed=bytearray(fde);changed[12]^=1
+        try:check_extent(changed)
+        except ValueError as error:controls.append(dict(control='handler pair FDE '+key,rejection=str(error)))
+        else:raise ValueError('handler pair FDE corruption escaped')
+    computed=extract_pair_data(data);saved=json.loads((folder/'referenced-data.json').read_text());require(computed==saved,'handler pair referenced data drift')
+    require([(r['slot'],r['info'],r['addend']) for r in saved['relocations']]==[
+        ('0x63f3cf0',8,'0x44a7ae'),('0x64df490',8,'0x141e251'),('0x64df6a8',8,'0x5c827a0'),('0x64df6b0',8,'0x141e280'),('0x64df6b8',8,'0x1680e80')],'handler pair actual RELATIVE records')
+    active={'relocation '+r['slot']:bytes.fromhex(r['relocation_hex']) for r in saved['relocations']}
+    active['referenced data window']=bytes.fromhex(saved['referenced_text_window']['data_hex'])
+    active['descriptor']=bytes.fromhex(saved['descriptor']['data_hex'])
+    active['source path']=bytes.fromhex(saved['source_location_candidate']['path']['data_hex']);expected={k:bytes(v) for k,v in active.items()}
+    def check_data(values):
+        require(set(values)==set(expected),'handler pair data inventory')
+        for key,raw in values.items():require(bytes(raw)==expected[key],'handler pair data corruption '+key)
+    check_data(active)
+    for key,raw in active.items():
+        offsets=[8,16,20] if key=='descriptor' else [16] if key.startswith('relocation ') else [0]
+        for offset in offsets:
+            values=dict(active);changed=bytearray(raw);changed[offset]^=1;values[key]=changed
+            try:check_data(values)
+            except ValueError as error:controls.append(dict(control='handler pair '+key+' '+str(offset),rejection=str(error)))
+            else:raise ValueError('handler pair data corruption escaped')
+    nonzero=rowmaps['nonzero-handler'];zero=rowmaps['zero-handler'];ni=lambda va:bytes.fromhex(nonzero[va]['bytes']);zi=lambda va:bytes.fromhex(zero[va]['bytes'])
+    require([(va,row['bytes']) for va,row in nonzero.items()]==[(0x141e251,'55'),(0x141e252,'4889e5'),(0x141e255,'4889f8'),(0x141e258,'4889f7'),(0x141e25b,'4889c6'),(0x141e25e,'ff1544140c05')],'nonzero complete six-row sequence')
+    require([(va,row['bytes']) for va,row in zero.items()]==[(0x141e280,'55'),(0x141e281,'4889e5'),(0x141e284,'488d3de88a03ff'),(0x141e28b,'488d155e5afd04'),(0x141e292,'be23000000'),(0x141e297,'ff151b140c05')],'zero complete six-row sequence')
+    for rows,site,target in [(nonzero,0x141e25e,0x64df6a8),(zero,0x141e284,0x456d73),(zero,0x141e28b,0x63f3cf0),(zero,0x141e297,0x64df6b8)]:
+        raw=bytes.fromhex(rows[site]['bytes']);require(site+len(raw)+struct.unpack_from('<i',raw,len(raw)-4)[0]==target,'handler pair RIP operand')
+    require(active['referenced data window']==b'capacity overflowa formatting trait' and saved['observed_scalar_argument']==35 and saved['capacity_overflow_prefix_bytes']==17,'raw referenced window and scalar kept distinct')
+    location=saved['source_location_candidate'];require(location['path_length']==80 and location['line']==28 and location['column']==5 and location['layout_inferred'],'handler descriptor fields')
+    require(active['source path']==b'/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/alloc/src/raw_vec/mod.rs','handler source-path bytes')
+    require(struct.unpack('<QQII',active['descriptor'])==(0,80,28,5),'raw descriptor shape')
+    # Register permutation derived from the three bound MOV instructions.
+    before={'rdi':'incoming-rdi','rsi':'incoming-rsi'};rax=before['rdi'];rdi=before['rsi'];rsi=rax
+    require((rdi,rsi)==('incoming-rsi','incoming-rdi'),'nonzero register permutation')
+    require(0x141e25e+len(ni(0x141e25e))==0x141e264 and 0x141e264 in rowmaps['retained-dispatcher'],'nonzero return PC is known dispatcher entry')
+    require(0x141e297+len(zi(0x141e297))==0x141e29d,'zero return PC is FDE endpoint')
+    require(not any(start<=0x141e29d<start+len(body) for start,body in bodies.values()),'zero return PC outside measured handler/dispatcher extents')
+    require(not any(bytes.fromhex(row['bytes'])[0] in [0xc2,0xc3,0xca,0xcb] for rows in [nonzero,zero] for row in rows.values()),'no local RET in either handler')
+    return dict(status='HANDLER_PAIR_ARGUMENTS_AND_DATA_LINKS_REPRODUCED',helper_bytes=48,helper_instructions=12,region_count_added=2,
+        field_bindings=len(fields),evidence_corruptions_rejected=len(controls),controls=controls,
+        instruction_counts={'nonzero-handler':6,'zero-handler':6},retained_dispatcher_rows_replayed=6,fresh_GNU_dispatcher_decode=False,
+        indirect_callees=[dict(site='0x141e25e',slot='0x64df6a8',target='0x5c827a0'),dict(site='0x141e297',slot='0x64df6b8',target='0x1680e80')],
+        relative_relocations=5,nonzero_argument_permutation=['incoming-RSI','incoming-RDI'],nonzero_message_allocation_arguments=['n',1],
+        zero_argument_values=dict(rdi='0x456d73',rsi=35,rdx='0x63f3cf0'),observed_text_prefix='capacity overflow',observed_prefix_bytes=17,referenced_data_window_bytes=35,scalar35_semantics_proved=False,message_boundary_proved=False,
+        location_candidate=dict(path=location['path_text'],line=28,column=5,layout_inferred=True),
+        nonzero_return_pc='0x141e264',nonzero_return_pc_is_known_dispatcher_entry=True,zero_return_pc='0x141e29d',zero_return_pc_outside_measured_handler_dispatcher_ranges=True,
+        local_ret_instructions=0,handlers_nonreturn_proved=False,global_marker_B_exclusion_proved=False,
+        limits='Twelve fresh rows plus retained native-dispatcher replay. Argument permutation, fixed operands and referenced data are bound to the capture. Scalar35 is not established as a byte length; pool-adjacent text is not asserted to be emitted. Source Location layout is inferred, path is not exact-source ownership proof. Callees0x5c827a0/0x1680e80, zero-handler continuation, nonreturn/global B, caller-saved state, source ABI/ownership, copied tails, exceptions/signals and runtime equivalence remain unproved.')
+
+
 def main():
     parser=argparse.ArgumentParser(description='Owned stdlib complete-input/native evidence verifier; no subprocess or captured execution.')
     parser.add_argument('--binary',type=Path,required=True)
@@ -2001,6 +2134,15 @@ def main():
     result['controls']+=failure_helper['controls'];result['failure_helper']=failure_helper
     require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(12,9798,2229),'twelve unique ranges')
     result['limits']='Twelve digest-bound native ranges. Failure dispatcher0x141e264 selects two opaque callees0x141e280/0x141e251. Lack of local RET and an FDE end do not prove nonreturn. Global B exclusion, dependent field definedness, default-data storage, copied tails, source ABI/types, ownership, exception/continuation and runtime equivalence remain unresolved.'
+    handler_pair=verify_handler_pair(data,args.packet)
+    result['regions']+=2;result['region_bytes']+=handler_pair['helper_bytes']
+    result['native_instruction_rows']+=handler_pair['helper_instructions']
+    result['instruction_counts'].update(handler_pair['instruction_counts'])
+    result['field_bindings']+=handler_pair['field_bindings']
+    result['evidence_corruptions_rejected']+=handler_pair['evidence_corruptions_rejected']
+    result['controls']+=handler_pair['controls'];result['handler_pair']=handler_pair
+    require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(14,9846,2241),'fourteen unique ranges')
+    result['limits']='Fourteen digest-bound native ranges. Two handlers swap argument words or pass fixed pointer/scalar35/descriptor operands to further callees. Scalar meaning/message boundary and Source Location layout remain unproved/inferred; no nonreturn/global B proof follows from FDE endpoints. Callee/continuation, source ABI/ownership, copied tails, exceptions/signals and runtime equivalence remain open.'
     print(json.dumps(result,indent=2))
 
 

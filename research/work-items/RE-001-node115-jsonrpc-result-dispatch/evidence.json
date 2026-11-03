@@ -15,7 +15,9 @@
     "second-candidate": 303,
     "error-candidate": 553,
     "message-candidate": 103,
-    "failure-candidate": 6
+    "failure-candidate": 6,
+    "nonzero-handler": 6,
+    "zero-handler": 6
   },
   "regions": [
     {
@@ -113,6 +115,22 @@
       "bytes": 21,
       "body_sha256": "0ebfd9ba496f95eb3b50668da6bdfb6f60cdfea033bc8736545f457d87a46af0",
       "instructions": 6
+    },
+    {
+      "label": "nonzero-handler",
+      "start_va": "0x141e251",
+      "end_va": "0x141e264",
+      "bytes": 19,
+      "body_sha256": "8443a2a6c5074055f5abdf1b4b2041c6434ff00ba23ebfcb33a91176170035b9",
+      "instructions": 6
+    },
+    {
+      "label": "zero-handler",
+      "start_va": "0x141e280",
+      "end_va": "0x141e29d",
+      "bytes": 29,
+      "body_sha256": "c4fe38d0a9a537a5e54f13c759da6082e0f29b5952c078c86ebce3ed2686f4d1",
+      "instructions": 6
     }
   ],
   "native_candidate_edges": [
@@ -175,7 +193,7 @@
       "native_text": "call   0x1751380"
     }
   ],
-  "scope": "Twelve node115 FDE ranges: JsonRpcResult alternatives, nested error/message paths and two-callee failure dispatch. The global leading-word and return contracts remain open; no gate closes.",
+  "scope": "Fourteen node115 FDE ranges: JsonRpcResult alternatives,error/message fields,failure dispatcher and two forwarding/data handlers. Exact operands/data are observed; source types, global return/word domain and gate closure remain unproved.",
   "prior_work": "Historical #94 packet supplies the question only; no #94 address, acceptance credit or semantics transferred",
   "repository_checks_run": true,
   "compiled_code_comparison": false,
@@ -211,8 +229,8 @@
     "native_instruction_boundary_validated": true,
     "native_text": "call   0x1700a10"
   },
-  "unique_native_rows": 2229,
-  "unique_native_bytes": 9798,
+  "unique_native_rows": 2241,
+  "unique_native_bytes": 9846,
   "renewed_caller_counted_once": true,
   "first_variant_native_run": 41543424275,
   "first_variant_execution_commit": "27e83067013d617b1f7c40073ed1689009baecfc",
@@ -232,7 +250,7 @@
   "renewed_first_variant_counted_once": true,
   "historical_required_repository_run": 41544793824,
   "historical_required_execution_commit": "055c4cbcfb0643376a33cbab1d05aad137e4874a",
-  "repository_checks_scope": "Historical checks apply to earlier immutable snapshots. Exact twelve-range candidate and actual required outcomes are recorded on PR2127.",
+  "repository_checks_scope": "Historical checks apply only to immutable snapshots. Exact fourteen-range candidate and actual current outcomes live on PR2127.",
   "text_decoder_native_run": 41571968425,
   "text_decoder_execution_commit": "ecd4b9cef519055e13e7c843761e2b0a23388cdd",
   "renewed_value_helper_counted_once": true,
@@ -275,5 +293,15 @@
     "0x141e280",
     "0x141e251"
   ],
-  "failure_dispatcher_nonreturn_proved": false
+  "failure_dispatcher_nonreturn_proved": false,
+  "handler_pair_native_run": 41735408655,
+  "handler_pair_execution_commit": "2e4446a01413b193487948f8e559205fd0896c56",
+  "retained_dispatcher_fresh_GNU_decode": false,
+  "retained_dispatcher_rows_replayed": 6,
+  "new_handler_rows": 12,
+  "new_handler_bytes": 48,
+  "handler_pair_argument_permutation_recovered": true,
+  "scalar35_semantics_proved": false,
+  "message_boundary_proved": false,
+  "handler_pair_nonreturn_proved": false
 }
