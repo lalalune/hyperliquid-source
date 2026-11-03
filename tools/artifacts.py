@@ -57,7 +57,7 @@ def load_manifest(root=ROOT):
     manifest = json.loads((root / 'provenance/artifacts.json').read_text(encoding='utf-8'), object_pairs_hook=_unique_object)
     if not isinstance(manifest, dict) or not isinstance(manifest.get('files'), list):
         raise ValueError('Invalid artifact manifest')
-    if any(not isinstance(item, dict) or 'path' not in item for item in manifest['files']):
+    if any(not isinstance(item, dict) or not isinstance(item.get('path'), str) for item in manifest['files']):
         raise ValueError('Invalid artifact record')
     paths = [item['path'] for item in manifest['files']]
     if len(set(paths)) != len(paths):
