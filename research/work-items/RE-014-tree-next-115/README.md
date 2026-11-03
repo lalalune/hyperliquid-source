@@ -69,3 +69,21 @@ receipt is not exact-head or hosted CI for this different packet.
 
 Next: compose this next helper with independently closed lookup/first-provider
 semantics before claiming the complete generic weighted-policy path.
+
+All layout offsets above are hexadecimal. The actual core visited denominator
+is121/126. Unvisited: normal jump0x37c4621, calls0x37c462d/0x37c463c and
+UD2s0x37c4633/0x37c4642. The jump remains an explicit path gap, not padding.
+The normal return RAX/RDX and final state are compared; panic boundaries stop
+before the calls and do not assert unwind or native error-return equivalence.
+
+## Independent implementation and reproduction
+
+`src/node115-tree-next/lib.rs` is an owned safe arena projection, not byte
+transplantation or an inferred original Rust layout. `client_fixture.rs` is an
+input-only synthetic layout adapter; it never accepts expected answers.
+`rust-results.json` binds source, adapter, driver, compiler and frozen stream
+hashes. See the source README for build/replay commands and preconditions.
+`audit.py` authenticates complete three-FDE bytes, unwind records, both actual
+caller transfers and the source Location; context-only owners stay unexecuted.
+The pre-Rust freeze is Git commit01f02902. Neither source labels nor static
+call relationships imply runtime reachability or full consensus semantics.
