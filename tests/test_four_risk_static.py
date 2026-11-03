@@ -34,7 +34,7 @@ class StaticPacketTests(unittest.TestCase):
                 mutated[offset] ^= 1
 
     def test_actual_semantic_sites_reject_counterfactuals(self):
-        for address, value in [(71874577, 137), (71874594, 129), (71874676, 67), (71874774, 78), (71874656, 2), (59463062, 41), (59462642, 77), (59462652, 129), (59462689, 9), (62830851, 208)]:
+        for address, value in [(71874612, 1), (71874577, 137), (71874594, 129), (71874676, 67), (71874774, 78), (71874656, 2), (59463062, 41), (59462642, 77), (59462652, 129), (59462689, 9), (62830851, 208)]:
             offset, old = collector.read(self.data, address, 1)
             changed = bytearray(self.data)
             changed[offset] = value

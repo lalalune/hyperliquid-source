@@ -34,7 +34,8 @@ CONFIG = {'ranges': [['0x448b800', '0x448b967'],
  'facts': {'input_nonnegative_guard': True,
            'product': 'signed checked multiplication',
            'magnitude': 'unsigned magnitude of signed product, including bitpattern 2^63',
-           'raw_modes': [0, 1, 2, 3],
+           'raw_modes': [0, 1, 2, 3, 4],
+           'mode0_initial_word': 0,
            'direct_divisor': 'stored u32, or min(stored u32,u8 argument)',
            'active_input_tag': 1,
            'active_output': 'positive part of signed saturating(product+offset)',
@@ -67,8 +68,8 @@ CONFIG = {'ranges': [['0x448b800', '0x448b967'],
              '0x3beb8ed': '0fb6c9450fb6c0488d7c2458488d7424104d89e9ff15d1dc8f02',
              '0x3beb907': '807c245800743b488b5c2460488b8c24800000004885c9'},
  'tables': [{'va': '0x7cf4cc',
-             'raw': 'e4c3cb037bc3cb03c4c3cb0313c4cb03',
-             'targets': ['0x448b8b0', '0x448b847', '0x448b890', '0x448b8df']}]}
+             'raw': 'e4c3cb037bc3cb03c4c3cb0313c4cb039cc3cb03',
+             'targets': ['0x448b8b0', '0x448b847', '0x448b890', '0x448b8df', '0x448b868']}]}
 
 
 def require(condition, message):
@@ -90,7 +91,11 @@ def anchors(data):
         require(read(data, int(address, 16), len(wanted))[1] == wanted,
                 'changed native anchor at ' + address)
     for table in CONFIG['tables']:
-        require(read(data, int(table['va'], 16), len(bytes.fromhex(table['raw'])))[1].hex() == table['raw'], 'changed dispatch data')
+        base = int(table['va'], 16)
+        raw = read(data, base, len(bytes.fromhex(table['raw'])))[1]
+        require(raw.hex() == table['raw'], 'changed dispatch data')
+        targets = [hex(base + offset) for (offset,) in struct.iter_unpack('<i', raw)]
+        require(targets == table['targets'], 'inconsistent relative dispatch targets')
     return dict(CONFIG['facts'])
 
 
