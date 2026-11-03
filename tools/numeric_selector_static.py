@@ -176,7 +176,11 @@ def extract(data):
                     if target in rels:
                         info,value=rels[target];index=info>>32;name=None
                         if index:
-                            o=struct.unpack_from('<I',data,dyn['offset']+24*index)[0];name=strings[o:strings.index(0,o)].decode()
+                            o=struct.unpack_from('<I',data,dyn['offset']+24*index)[0]
+                            try:
+                                name=strings[o:strings.index(0,o)].decode()
+                            except UnicodeDecodeError:
+                                require(False,'dynamic symbol name is not valid UTF-8')
                         bindings[str(target)]={'kind':info&0xffffffff,'symbol_index':index,'addend':value,'symbol':name}
             matched=[l for l in frames.splitlines() if f'pc={a:016x}..{b:016x}' in l];require(len(matched)==1,'native FDE disagreement')
             meta={k:f[k] for k in ['start','end','fde','cie']};meta.update(body_sha256=hashlib.sha256(body).hexdigest(),instructions=len(rows),direct_calls=calls,rip_bindings=rip)
