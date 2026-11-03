@@ -9,8 +9,11 @@ Target: Linux x86-64 node115,
 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
 Base: `8fd8db680ec4bfef40996e5616bce3d5156d0b86`.
 Frozen expectations commit: `e19631325a3518f950ae3e011e1323e3e0bf590b`,
-created before any Rust in this component. CONTRACT.md, spec.json, cases.tsv,
-and native bindings from that commit remain byte-identical.
+created before any Rust in this component. cases.tsv remains byte-identical
+to that Git commit. Contract/native binding content is unchanged; scoped
+.gitattributes now retains the actual Windows output line endings so committed
+packet/source bytes match the bytes used by the local proofs. No global Git
+setting changes. Original raw disassembly is preserved without text conversion.
 
 ## Evidence and limits
 
