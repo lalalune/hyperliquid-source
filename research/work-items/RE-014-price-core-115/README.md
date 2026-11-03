@@ -98,3 +98,21 @@ first9completed. This is incomplete and never a full-suite PASS. Applicable
 focused/build/reproduction results are recorded separately, with actual scope.
 Next: establish caller field ownership and close the round/time helpers before
 composing a complete price API. No full-component acceptance is requested.
+
+Post-submit reproduction review: corrected the producer absence guard from
+`src/node115-gas-price-core` to the actual `src/node115-price-core`. Git tree
+bc8bee97 contains neither path, independently preserving the actual pre-Rust
+freeze chronology; the original freeze/streams are unchanged. Removed the
+unneeded ROOT.parent sys.path entry. The decoder now resolves solely to the
+repository tools module. MOVAPD is an actual native instruction, not a
+placeholder:0x3be5871 bytes660f28c8 encode `movapd xmm1,xmm0`; full GNU/Capstone
+exports independently agree. Fresh canonical-import corpus/focused results are
+recorded separately below after observation. Rust source/client unchanged.
+
+Canonical-import native replay retained both8312-row stream hashes; replay plus
+initial4focused tests passed82.574wall seconds. The corrected explicit guard
+also refuses post-Rust invocation under Python -O; final5focused tests passed
+11.161s (12.245s limited command). Guard subprocess bound30s accommodates the
+10%duty workflow. review-followup.json records the canonical decoder hash,
+actual freeze-tree absence and an unchanged Rust source hash. No recompilation
+or full-suite PASS is inferred from this follow-up.

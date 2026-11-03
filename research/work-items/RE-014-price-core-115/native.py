@@ -4,7 +4,7 @@ import sys,math,struct
 ROOT=Path(__file__).resolve().parents[3]
 PACKET=Path(__file__).resolve().parent
 SHA='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
-sys.path.insert(0,str(ROOT/'tools'));sys.path.insert(0,str(ROOT.parent))
+sys.path.insert(0,str(ROOT/'tools'))
 import gas_auction_price as cpu
 from elfview import View
 U64=(1<<64)-1;U128=(1<<128)-1

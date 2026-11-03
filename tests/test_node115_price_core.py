@@ -1,6 +1,6 @@
 """Native scalar suffix, corruption controls and unknown-input boundary checks."""
 from pathlib import Path
-import hashlib,importlib.util,json,sys,unittest
+import hashlib,importlib.util,json,sys,unittest,subprocess
 ROOT=Path(__file__).resolve().parents[1];P=ROOT/'research/work-items/RE-014-price-core-115';sys.path.insert(0,str(P))
 spec=importlib.util.spec_from_file_location('price115_native',P/'native.py');native=importlib.util.module_from_spec(spec);spec.loader.exec_module(native)
 class Price115(unittest.TestCase):
@@ -26,6 +26,12 @@ class Price115(unittest.TestCase):
   with self.assertRaisesRegex(ValueError,'unknown packed lane'):m.vector(('x',0))
   with self.assertRaisesRegex(ValueError,'footprint'):m.memory.read(native.FIELDS+128,8)
   with self.assertRaisesRegex(ValueError,'footprint'):m.memory.write(native.FIELDS+16,8,1)
+ def test_freeze_refuses_existing_component_even_optimized(self):
+  before=(P/'frozen').exists()
+  result=subprocess.run([sys.executable,'-B','-O',str(P/'freeze-producer.py')],cwd=ROOT,capture_output=True,text=True,timeout=30)
+  self.assertNotEqual(result.returncode,0)
+  self.assertIn('freeze refuses existing Rust component',result.stderr)
+  self.assertEqual((P/'frozen').exists(),before)
  def test_owner_and_rip_constants_remain_bound(self):
   audit=json.loads((P/'audit.json').read_text());owner=json.loads((P/'owner.json').read_text())
   lo,hi=self.image.view.fde(int(owner['start'],16));self.assertEqual((hi-lo,owner['instructions']),(617,147));self.assertEqual(hashlib.sha256(self.image.view.read(lo,hi-lo)).hexdigest(),owner['sha256'])

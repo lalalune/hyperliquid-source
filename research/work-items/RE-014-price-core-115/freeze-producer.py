@@ -1,8 +1,10 @@
-"""Pre-Rust freeze producer; run only after the active serial validation job ends."""
+"""One-time native producer; refuses an existing node115 Rust component."""
 from native import *
 import hashlib,json,capstone,itertools
-image=Image();assert hashlib.sha256(image.blob).hexdigest()=='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
-assert not (ROOT/'src/node115-gas-price-core/lib.rs').exists()
+if (ROOT/'src/node115-price-core/lib.rs').exists():
+ raise RuntimeError('freeze refuses existing Rust component')
+image=Image()
+if hashlib.sha256(image.blob).hexdigest()!=SHA:raise ValueError('wrong node115 capture')
 bits={0,1,1<<63,(1<<63)+1,0x7fefffffffffffff,0xffefffffffffffff,0x7ff0000000000000,0xfff0000000000000,0x7ff8000000000001,0xfff8000000000042}
 for x in [0.5,1.0,999.0,15000.0,59999.0,60000.0,60001.0,float(1<<53),float(1<<63),float(1<<64)]:
  word=cpu.to_bits(x);bits.update(word+d for d in [-2,-1,0,1,2])
