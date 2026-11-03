@@ -801,6 +801,155 @@ def verify_text_decoder(data, packet):
         limits='Static local checks and scalar arithmetic only. Invalid-byte reporting, CPU-feature initialization, vector conversion, valid pointer/raw-record domains, complete JSON/null grammar, ABI/exception and runtime equivalence remain unresolved. Code3 follows a normal return from the opaque vector helper; its output is not proved here.')
 
 
+def extract_sequence_data(data):
+    assert len(data)==105896032 and hashlib.sha256(data).hexdigest()=='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+    shoff=struct.unpack_from('<Q',data,40)[0];size,count,nameidx=struct.unpack_from('<HHH',data,58);assert size==64
+    rows=[struct.unpack_from('<IIQQQQIIQQ',data,shoff+64*i) for i in range(count)]
+    sr=rows[nameidx];names=data[sr[4]:sr[4]+sr[5]]
+    sections={names[r[0]:names.find(b'\0',r[0])].decode():r for r in rows}
+    def at(va,n):
+        hits=[(name,r) for name,r in sections.items() if r[1]!=8 and r[2]&2 and r[3]<=va and va+n<=r[3]+r[5]];assert len(hits)==1
+        name,row=hits[0];off=row[4]+va-row[3];raw=data[off:off+n]
+        return dict(va=hex(va),file_offset=hex(off),section=name,section_flags=row[2],bytes=n,data_hex=raw.hex(),sha256=hashlib.sha256(raw).hexdigest())
+    rela=sections['.rela.dyn'];records=[]
+    for off in range(rela[4],rela[4]+rela[5],24):
+        slot,info,addend=struct.unpack_from('<QQq',data,off)
+        if slot==0x64df4a0:
+            records.append(dict(slot=hex(slot),info=info,addend=hex(addend),relocation_file_offset=hex(off),relocation_hex=data[off:off+24].hex(),stored_pointer=at(slot,8)))
+    assert len(records)==1 and records[0]['info']==8
+    return dict(target_sha256=hashlib.sha256(data).hexdigest(),relocations=records,
+        indirect_sites=['0x173fecf','0x173fef8','0x173ff40'],
+        direct_callees=['0x16fce10','0x1740fe0','0x173ff50','0x63f0a50'],
+        limits='Actual indirect binding only; direct callee contracts, opaque error record ownership, memory validity and exception tables remain unrecovered. Cleanup/element-reader/length-error are inferred roles, not source identities.')
+
+def verify_sequence_helper(data, packet):
+    folder=packet/'sequence-helper'
+    current=probe(data,extra_vas=(0x173fe30,0x16fd91d))
+    require(current==json.loads((folder/'candidates.json').read_text()),'sequence helper FDE candidate drift')
+    require(current==json.loads((folder/'receipts/full-input-replay.json').read_text()),'sequence helper hosted full-input replay drift')
+    native=json.loads((folder/'receipts/decode-result.json').read_text())
+    require(native['target_sha256']==TARGET and native['whole_elf_reauthenticated_in_job'] and native['input_hashes_unchanged'],'sequence helper full input binding')
+    require(not native['captured_program_executed'] and native['native_invocations']==3,'sequence helper execution record')
+    bodies={};rowmaps={}
+    for label,key in [('sequence-candidate','0x173fe30'),('value-candidate','0x16fd91d')]:
+        record=current['selected_fde_candidates'][key];start=int(record['start_va'],16);off=int(record['file_offset'],16)
+        body=data[off:off+record['bytes']]
+        require(hashlib.sha256(body).hexdigest()==record['body_sha256'],'sequence helper body identity')
+        cursor=start;rows=[]
+        for line in (folder/'receipts'/(label+'.stdout')).read_text().splitlines():
+            if not re.match(r'^\s*[0-9a-f]+:',line):continue
+            parts=line.split('\t');require(len(parts)>=3,'sequence helper native syntax')
+            va=int(parts[0].strip().rstrip(':'),16);tokens=parts[1].split()
+            require(tokens and all(re.fullmatch('[0-9a-f]{2}',t) for t in tokens),'sequence helper native byte syntax')
+            raw=bytes.fromhex(' '.join(tokens));text=' '.join(parts[2:]).strip()
+            require(va==cursor and body[va-start:va-start+len(raw)]==raw,'sequence helper native/full-image binding')
+            require(text and '(bad)' not in text and not text.startswith('.byte'),'sequence helper undecoded row')
+            rows.append(dict(va=hex(va),bytes=raw.hex(),text=text));cursor+=len(raw)
+        saved=next(r for r in native['regions'] if r['label']==label)
+        require(rows==saved['instruction_rows'] and len(rows)==saved['instructions'] and cursor==int(record['end_va'],16),'sequence helper complete rows/extent')
+        bodies[label]=(start,body);rowmaps[label]={int(r['va'],16):r for r in rows}
+    earlier=json.loads((packet/'value-helper/receipts/decode-result.json').read_text())
+    require(next(r['instruction_rows'] for r in earlier['regions'] if r['label']=='value-candidate')==
+            next(r['instruction_rows'] for r in native['regions'] if r['label']=='value-candidate'),'renewed value helper drift')
+    edge=json.loads((folder/'receipts/qualified-candidate-edges.json').read_text())
+    call=rowmaps['value-candidate'][0x16fd91d];raw=bytes.fromhex(call['bytes'])
+    require(len(edge)==1 and edge[0]['native_instruction_boundary_validated'] and edge[0]['candidate_va']==call['va'] and edge[0]['bytes']==call['bytes'],'sequence helper caller boundary')
+    require(raw[0]==0xe8 and 0x16fd91d+5+struct.unpack_from('<i',raw,1)[0]==0x173fe30,'sequence helper caller direct target')
+    fields=json.loads((folder/'field-bindings.json').read_text())
+    def check_fields(active):
+        for field in fields:
+            va=int(field['va'],16);raw=bytes.fromhex(field['bytes']);start,body=active[field['region']]
+            require(rowmaps[field['region']].get(va,{}).get('bytes')==field['bytes'],'sequence helper field boundary')
+            require(body[va-start:va-start+len(raw)]==raw,'sequence helper field corruption: '+field['label'])
+    check_fields(bodies);controls=[]
+    for field in fields:
+        active=dict(bodies);start,body=bodies[field['region']];changed=bytearray(body)
+        changed[int(field['va'],16)-start+len(bytes.fromhex(field['bytes']))-1]^=1
+        active[field['region']]=(start,changed)
+        try:check_fields(active)
+        except ValueError as error:controls.append(dict(control='sequence helper '+field['label'],rejection=str(error)))
+        else:raise ValueError('sequence helper field corruption escaped')
+    record=current['selected_fde_candidates']['0x173fe30'];fde=bytes.fromhex(record['fde_hex'])
+    def check_extent(raw):
+        delta,length=struct.unpack_from('<ii',raw,8)
+        require(int(record['fde_va'],16)+8+delta==0x173fe30 and length==286 and 0x173fe30+length==int(record['end_va'],16),'sequence helper actual FDE extent')
+    check_extent(fde);changed=bytearray(fde);changed[12]^=1
+    try:check_extent(changed)
+    except ValueError as error:controls.append(dict(control='sequence helper FDE extent',rejection=str(error)))
+    else:raise ValueError('sequence helper FDE corruption escaped')
+    computed=extract_sequence_data(data);saved=json.loads((folder/'referenced-data.json').read_text())
+    require(computed==saved,'sequence helper relocation/data drift')
+    record=saved['relocations'][0];raw_relocation=bytes.fromhex(record['relocation_hex'])
+    require((record['slot'],record['info'],record['addend'])==('0x64df4a0',8,'0x635de30'),'sequence helper actual RELATIVE target')
+    def check_relocation(raw):require(bytes(raw)==raw_relocation,'sequence helper relocation corruption')
+    check_relocation(raw_relocation);changed=bytearray(raw_relocation);changed[16]^=1
+    try:check_relocation(changed)
+    except ValueError as error:controls.append(dict(control='sequence helper cleanup-slot relocation',rejection=str(error)))
+    else:raise ValueError('sequence helper relocation corruption escaped')
+    rows=rowmaps['sequence-candidate'];instruction=lambda va:bytes.fromhex(rows[va]['bytes'])
+    for site in [0x173fecf,0x173fef8,0x173ff40]:
+        raw=instruction(site)
+        require(raw[:2]==bytes.fromhex('ff15') and site+6+struct.unpack_from('<i',raw,2)[0]==0x64df4a0,'sequence helper indirect slot binding')
+    for site,raw in [(0x173fe41,'0f57c0'),(0x173fe44,'0f29442420'),(0x173fe49,'0f29442410'),(0x173fe4e,'4531ff'),
+        (0x173fe6b,'803c2400'),(0x173fe71,'807c240101'),(0x173fe7c,'0fb6442402'),(0x173fe81,'4288443c10'),
+        (0x173fe86,'49ffc7'),(0x173fe89,'4983ff20'),(0x173fe9a,'0fb60424'),(0x173fe9e,'84c0'),
+        (0x173fea2,'807c240100'),(0x173fea9,'84c0'),(0x173fead,'4c8b742408'),(0x173feb2,'498b06'),
+        (0x173feb5,'4883f801'),(0x173febb,'4885c0'),(0x173fec0,'498b7610'),(0x173fec4,'4885f6'),
+        (0x173fec9,'498b7e08'),(0x173fecd,'31d2'),(0x173fed7,'488b442408'),(0x173fedc,'48894308'),
+        (0x173fee0,'c60301'),(0x173fee5,'498d7e08'),(0x173feee,'be28000000'),(0x173fef6,'31d2'),
+        (0x173fefe,'0f28442410'),(0x173ff03,'0f284c2420'),(0x173ff08,'0f114b11'),(0x173ff0c,'0f114301'),
+        (0x173ff10,'c60300'),(0x173ff22,'4c89ff'),(0x173ff27,'bf21000000'),
+        (0x173ff36,'be28000000'),(0x173ff3e,'31d2')]:
+        require(instruction(site)==bytes.fromhex(raw),'sequence helper semantic instruction binding')
+    calls=[];branches=[]
+    for va,row in rows.items():
+        raw=bytes.fromhex(row['bytes']);target=None
+        if raw[0]==0xe8:
+            target=va+5+struct.unpack_from('<i',raw,1)[0];calls.append(dict(va=hex(va),target=hex(target)));continue
+        if raw[0]==0xeb or 0x70<=raw[0]<=0x7f:target=va+len(raw)+struct.unpack_from('<b',raw,1)[0]
+        elif raw[0]==0xe9:target=va+len(raw)+struct.unpack_from('<i',raw,1)[0]
+        elif raw[0]==0x0f and len(raw)>1 and 0x80<=raw[1]<=0x8f:target=va+len(raw)+struct.unpack_from('<i',raw,2)[0]
+        if target is not None:require(target in rows,'sequence helper local branch boundary');branches.append(dict(va=hex(va),target=hex(target)))
+    require(calls==[dict(va='0x173fe66',target='0x16fce10'),dict(va='0x173fe95',target='0x16fce10'),
+        dict(va='0x173fee9',target='0x1740fe0'),dict(va='0x173ff2c',target='0x173ff50'),
+        dict(va='0x173ff49',target='0x63f0a50')],'sequence helper direct callee bindings')
+    def trace(responses):
+        # Abstract opaque-helper responses, not source-record or JSON inputs.
+        # Cleanup and error-constructor calls are normal-return premises.
+        out=[];reads=0
+        for index in range(32):
+            outer,present,payload=responses[reads];reads+=1
+            if outer!=0:return dict(kind='forward-error-pointer',status=1,count=index,reads=reads,pointer=payload)
+            if present!=1:return dict(kind='length-helper',status=1,count=index,reads=reads)
+            out.append(payload)
+        outer,present,_=responses[reads];reads+=1
+        if outer==0 and present!=0:return dict(kind='length-helper',status=1,count=33,reads=reads)
+        return dict(kind='cleanup-then-success' if outer!=0 else 'end-then-success',status=0,count=32,reads=reads,output=bytes(out))
+    prefix=[(0,1,i) for i in range(32)];scenarios=[]
+    for count in range(32):
+        r=trace(prefix[:count]+[(1,0,'opaque-pointer')]);require(r==dict(kind='forward-error-pointer',status=1,count=count,reads=count+1,pointer='opaque-pointer'),'early helper-error forwarding')
+        scenarios.append(dict(case='early-error',count=count,reads=r['reads']))
+        r=trace(prefix[:count]+[(0,0,0)]);require(r==dict(kind='length-helper',status=1,count=count,reads=count+1),'short sequence reports successful-response count')
+        scenarios.append(dict(case='short',count=count,reads=r['reads']))
+    for outer in [1,2,128,255]:
+        r=trace(prefix+[(outer,255,'opaque-pointer')]);require(r['kind']=='cleanup-then-success' and r['status']==0 and r['reads']==33 and r['output']==bytes(range(32)),'boundary helper-error cleanup reaches local success')
+        scenarios.append(dict(case='boundary-error',outer=outer,status=r['status']))
+    r=trace(prefix+[(0,0,0)]);require(r['kind']=='end-then-success' and r['output']==bytes(range(32)) and r['reads']==33,'boundary end local success')
+    scenarios.append(dict(case='boundary-end',status=r['status']))
+    for flag in [1,2,128,255]:
+        r=trace(prefix+[(0,flag,0)]);require(r==dict(kind='length-helper',status=1,count=33,reads=33),'nonzero boundary presence reports33')
+        scenarios.append(dict(case='boundary-present',flag=flag,count=r['count']))
+    for flag in [2,128,255]:
+        r=trace([(0,flag,0)]);require(r==dict(kind='length-helper',status=1,count=0,reads=1),'first-stage presence requires exact1')
+        scenarios.append(dict(case='first-stage-other-flag',flag=flag,count=r['count']))
+    return dict(status='SEQUENCE_HELPER_LOCAL_RESPONSE_PATHS_REPRODUCED',helper_bytes=286,helper_instructions=82,
+        field_bindings=len(fields),evidence_corruptions_rejected=len(controls),controls=controls,direct_callees=calls,local_branches=branches,
+        successful_element_responses_required=32,boundary_probe_ordinal=33,short_length_arguments=list(range(32)),excess_length_argument=33,
+        first_stage_outer_error_status=1,boundary_outer_error_local_status_after_cleanup=0,ordinary_local_output_byte_offsets=list(range(33)),
+        relocation_bindings=1,static_response_scenarios=len(scenarios),response_scenarios=scenarios,renewed_value_rows=185,
+        limits='Abstract opaque-helper response traces only. Element acceptance, cursor/counter effects, error construction, cleanup ownership, validity of record/pointer domains and exception mapping remain unresolved. Boundary-error local success assumes all cleanup calls return normally; it does not establish accepted real inputs or a vulnerability. Outer remainder validation still applies. No runtime equivalence or component closure.')
+
+
 def main():
     parser=argparse.ArgumentParser(description='Owned stdlib complete-input/native evidence verifier; no subprocess or captured execution.')
     parser.add_argument('--binary',type=Path,required=True)
@@ -841,6 +990,15 @@ def main():
     result['controls']+=text['controls'];result['text_decoder']=text
     require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(6,4780,1109),'six unique ranges')
     result['limits']='Six digest-bound native ranges and local fixed-size text format. Invalid reporting, CPU-feature/vector helpers, sequence conversion, JSON/null mapping, raw-record domain, second alternative, initialized ABI/exception and runtime equivalence remain unresolved.'
+    sequence=verify_sequence_helper(data,args.packet)
+    result['regions']+=1;result['region_bytes']+=sequence['helper_bytes']
+    result['native_instruction_rows']+=sequence['helper_instructions']
+    result['instruction_counts']['sequence-candidate']=sequence['helper_instructions']
+    result['field_bindings']+=sequence['field_bindings']
+    result['evidence_corruptions_rejected']+=sequence['evidence_corruptions_rejected']
+    result['controls']+=sequence['controls'];result['sequence_helper']=sequence
+    require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(7,5066,1191),'seven unique ranges')
+    result['limits']='Seven digest-bound native ranges and local value/text/sequence-response paths. Opaque element-reader cursor/counter behavior, error/cleanup and text feature/vector helpers, JSON mapping, second alternative, complete ABI/exception and runtime equivalence remain unresolved.'
     print(json.dumps(result,indent=2))
 
 
