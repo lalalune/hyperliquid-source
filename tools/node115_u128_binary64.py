@@ -27,6 +27,9 @@ def verify():
     if digest(data) != SHA:
         raise ValueError('Node #115 digest mismatch')
     record = json.loads((PACKET / 'records.json').read_text())
+    if not isinstance(record, dict) \
+            or not {'start', 'end', 'fde', 'body_sha256', 'inputs_sha256', 'expected_sha256'} <= record.keys():
+        raise ValueError('Invalid u128 record')
     if (record['start'], record['end']) != (START, END):
         raise ValueError('Migration bounds changed')
     _, fdes = eh_frame_records(data)
