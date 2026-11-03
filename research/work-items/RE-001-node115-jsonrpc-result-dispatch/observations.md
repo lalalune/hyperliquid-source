@@ -92,3 +92,33 @@ The slot's actual RELATIVE record has addend 0x635de30. Cleanup, element-reader 
 Success visibly writes payload bytes to output offsets 1..32 and status byte 0. These stores cover 33 bytes. The existing outer value helper still checks residual cursor bytes after status 0; complete accepted sequence behavior depends on the unresolved element reader's cursor/counter effects, valid raw-record producers and error/cleanup behavior. In particular, local boundary-error success alone does not establish that a real malformed input is accepted or that a vulnerability exists.
 
 The new replay checks all 82 rows, 60 selected instruction bindings, the actual FDE extent, five direct call sites, local branch boundaries and all three RIP-relative references to the single cleanup-like slot. Sixty-two new evidence-corruption controls bring the cumulative total to 420. Seventy-six abstract response scenarios cover each early error/short position and selected boundary/flag cases. They are opaque-helper response traces, not target execution, source-record fixtures or end-to-end parser tests. The next question is 0x16fce10's element acceptance and cursor/count behavior, especially the boundary-probe error path. JSON/null mapping, complete raw domains, second alternative, initialized ABI, error/cleanup/exception closure and runtime equivalence remain open; no gate advances.
+
+
+## Numeric element reader 0x16fce10..0x16fcf18
+
+The actual 264-byte FDE adds 73 native rows. Its renewed 286-byte sequence caller is byte-identical and counted once: eight unique ranges, 5,330 bytes / 1,264 rows. Both sequence call instructions at 0x173fe66 and 0x173fe95 reach this entry. This closes the previously opaque local element-dispatch and cursor/count gap, with error/helper and serialized-input limits retained.
+
+Empty current==end writes result bytes +1=0 and +0=0 without reading/updating the processed counter, consuming a record or writing payload +2. Otherwise the reader first stores current+32, then loads the counter. Counter u64::MAX reaches slot 0x64df520 (actual RELATIVE addend 0x1681da0) after that cursor store; no ordinary return or rollback is established for that opaque overflow edge. Nonoverflowing paths increment/store the counter before reading the record's tag or checking its numeric value. The end pointer is not locally modified.
+
+The raw tag byte is zero-extended, decremented as a 32-bit value, and checked unsigned against 7. Tags 1..8 select all eight retained relative entries at 0x47db78; other byte tags take the default helper. This is a bounded raw-tag domain, not a recovered JSON/source enum.
+
+| Raw tag | Payload offset/width | Extension and acceptance |
+| --- | --- | --- |
+| 1 | +1, 8 bits | zero-extend; all 0..255 |
+| 2 | +2, 16 bits | zero-extend; unsigned <=255 |
+| 3 | +4, 32 bits | zero-extend; unsigned <=255 |
+| 4 | +8, 64 bits | unsigned <=255 |
+| 5 | +1, 8 bits | sign-extend; nonnegative |
+| 6 | +2, 16 bits | sign-extend; unsigned 64-bit <256 |
+| 7 | +4, 32 bits | sign-extend; unsigned 64-bit <256 |
+| 8 | +8, 64 bits | unsigned 64-bit <256, rejecting negative two's-complement values |
+
+Thus the selected numeric paths represent values in 0..255, without truncating wider out-of-range values. Valid numeric paths write +1=1, +2=the low byte and +0=0. Together with the end path, they make no opaque calls and their output stores fit offsets 0..2 of the sequence caller's 16-byte response area. They update only the cursor/header fields +0..7 and +16..23. This closes ordinary local write framing under valid nonaliased input/header/output memory; full source ABI/layout remains unproved.
+
+Rejected unsigned numeric values stage diagnostic byte 1 plus a 64-bit value; rejected signed values stage diagnostic byte 2. Slot 0x64e0910 relocates to 0x5c54c30 and receives that staged record, a scratch address and descriptor 0x640be00. Other raw tags call 0x1704de0 with the record pointer and the same descriptor. Under normal-return premises, the returned pointer is stored at output +8 and status 1 is stored at +0. The descriptors at 0x640be00 and 0x640bc40 are unidentified allocated data, not recovered vtables/types. Error/default/overflow effects, exception behavior and normal-return validity remain opaque.
+
+The independently authored static model checks all 256 tag bytes, exhausts both signed/unsigned 8- and 16-bit payload spaces (131,584 cases), and checks 48 selected 32-/64-bit boundary patterns. Twenty-three cursor/frame cases include empty-before-overflow, reject-after-consumption and maximum nonoverflowing count. These are arithmetic/predicate checks, not executed target instructions or a target emulator.
+
+Forty-one composed raw-record traces join this reader to the previously retained sequence and outer remainder paths. Thirty-two numeric records plus an end reach ordinary local success with count 32; short and extra ordinary records take the respective error-helper paths. A 33rd rejected numeric/default record advances cursor/count before returning a conditional error response; if the unresolved error and cleanup helpers return normally and preserve the caller's payload frame, the prior boundary-error path reaches local success and the outer remainder check sees no leftover records. A further record instead leaves one 32-byte record and the outer error path reports count 34. These are conditional internal-record traces, not evidence that a serialized JSON/wire input reaches that state or that any security impact exists.
+
+The new reader preserves the earlier response-only models as historical abstractions. Ordinary byte/end frame assumptions are now locally resolved; error-path frame/return assumptions remain explicit. Full initialized ABI still differs by observed store coverage (33-byte value output, 40-byte first alternative, 104-byte constructor copy). Second alternative, serialized input construction, error/cleanup/exception closure, source/type ownership and runtime equivalence remain open; no component gate advances.

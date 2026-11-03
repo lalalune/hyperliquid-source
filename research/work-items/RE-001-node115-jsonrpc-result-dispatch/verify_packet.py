@@ -950,6 +950,216 @@ def verify_sequence_helper(data, packet):
         limits='Abstract opaque-helper response traces only. Element acceptance, cursor/counter effects, error construction, cleanup ownership, validity of record/pointer domains and exception mapping remain unresolved. Boundary-error local success assumes all cleanup calls return normally; it does not establish accepted real inputs or a vulnerability. Outer remainder validation still applies. No runtime equivalence or component closure.')
 
 
+def extract_element_data(data):
+    assert len(data)==105896032 and hashlib.sha256(data).hexdigest()=='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+    shoff=struct.unpack_from('<Q',data,40)[0];size,count,nameidx=struct.unpack_from('<HHH',data,58);assert size==64
+    rows=[struct.unpack_from('<IIQQQQIIQQ',data,shoff+64*i) for i in range(count)]
+    sr=rows[nameidx];names=data[sr[4]:sr[4]+sr[5]]
+    sections={names[r[0]:names.find(b'\0',r[0])].decode():r for r in rows}
+    def at(va,n):
+        hits=[(name,r) for name,r in sections.items() if r[1]!=8 and r[2]&2 and r[3]<=va and va+n<=r[3]+r[5]];assert len(hits)==1
+        name,row=hits[0];off=row[4]+va-row[3];raw=data[off:off+n]
+        return dict(va=hex(va),file_offset=hex(off),section=name,section_flags=row[2],bytes=n,data_hex=raw.hex(),sha256=hashlib.sha256(raw).hexdigest())
+    table=at(0x47db78,8*4);raw=bytes.fromhex(table['data_hex'])
+    table['entries']=[dict(raw_tag=i+1,displacement=struct.unpack_from('<i',raw,4*i)[0],target=hex(0x47db78+struct.unpack_from('<i',raw,4*i)[0])) for i in range(8)]
+    rela=sections['.rela.dyn'];records=[]
+    for off in range(rela[4],rela[4]+rela[5],24):
+        slot,info,addend=struct.unpack_from('<QQq',data,off)
+        if slot in [0x64e0910,0x64df520]:
+            records.append(dict(slot=hex(slot),info=info,addend=hex(addend),relocation_file_offset=hex(off),relocation_hex=data[off:off+24].hex(),stored_pointer=at(slot,8)))
+    assert len(records)==2 and all(r['info']==8 for r in records)
+    return dict(target_sha256=hashlib.sha256(data).hexdigest(),table=table,relocations=records,
+        descriptors=[at(va,32) for va in [0x640be00,0x640bc40]],
+        limits='Eight raw-tag dispatch entries and allocated unidentified descriptors; no recovered source enum/type or vtable. Error/default/overflow callees and their memory effects remain opaque.')
+
+def verify_element_reader(data, packet):
+    folder=packet/'element-reader'
+    current=probe(data,extra_vas=(0x16fce10,0x173fe66))
+    require(current==json.loads((folder/'candidates.json').read_text()),'element reader FDE candidate drift')
+    require(current==json.loads((folder/'receipts/full-input-replay.json').read_text()),'element reader hosted full-input replay drift')
+    native=json.loads((folder/'receipts/decode-result.json').read_text())
+    require(native['target_sha256']==TARGET and native['whole_elf_reauthenticated_in_job'] and native['input_hashes_unchanged'],'element reader full input binding')
+    require(not native['captured_program_executed'] and native['native_invocations']==3,'element reader execution record')
+    bodies={};rowmaps={}
+    for label,key in [('element-candidate','0x16fce10'),('sequence-candidate','0x173fe66')]:
+        record=current['selected_fde_candidates'][key];start=int(record['start_va'],16);off=int(record['file_offset'],16)
+        body=data[off:off+record['bytes']]
+        require(hashlib.sha256(body).hexdigest()==record['body_sha256'],'element reader body identity')
+        cursor=start;rows=[]
+        for line in (folder/'receipts'/(label+'.stdout')).read_text().splitlines():
+            if not re.match(r'^\s*[0-9a-f]+:',line):continue
+            parts=line.split('\t');require(len(parts)>=3,'element reader native syntax')
+            va=int(parts[0].strip().rstrip(':'),16);tokens=parts[1].split()
+            require(tokens and all(re.fullmatch('[0-9a-f]{2}',t) for t in tokens),'element reader native byte syntax')
+            raw=bytes.fromhex(' '.join(tokens));text=' '.join(parts[2:]).strip()
+            require(va==cursor and body[va-start:va-start+len(raw)]==raw,'element reader native/full-image binding')
+            require(text and '(bad)' not in text and not text.startswith('.byte'),'element reader undecoded row')
+            rows.append(dict(va=hex(va),bytes=raw.hex(),text=text));cursor+=len(raw)
+        saved=next(r for r in native['regions'] if r['label']==label)
+        require(rows==saved['instruction_rows'] and len(rows)==saved['instructions'] and cursor==int(record['end_va'],16),'element reader complete rows/extent')
+        bodies[label]=(start,body);rowmaps[label]={int(r['va'],16):r for r in rows}
+    earlier=json.loads((packet/'sequence-helper/receipts/decode-result.json').read_text())
+    require(next(r['instruction_rows'] for r in earlier['regions'] if r['label']=='sequence-candidate')==
+            next(r['instruction_rows'] for r in native['regions'] if r['label']=='sequence-candidate'),'renewed sequence helper drift')
+    edge=json.loads((folder/'receipts/qualified-candidate-edges.json').read_text())
+    call=rowmaps['sequence-candidate'][0x173fe66];raw=bytes.fromhex(call['bytes'])
+    require(len(edge)==1 and edge[0]['native_instruction_boundary_validated'] and edge[0]['candidate_va']==call['va'] and edge[0]['bytes']==call['bytes'],'element reader caller boundary')
+    require(raw[0]==0xe8 and 0x173fe66+5+struct.unpack_from('<i',raw,1)[0]==0x16fce10,'element reader caller direct target')
+    fields=json.loads((folder/'field-bindings.json').read_text())
+    def check_fields(active):
+        for field in fields:
+            va=int(field['va'],16);raw=bytes.fromhex(field['bytes']);start,body=active[field['region']]
+            require(rowmaps[field['region']].get(va,{}).get('bytes')==field['bytes'],'element reader field boundary')
+            require(body[va-start:va-start+len(raw)]==raw,'element reader field corruption: '+field['label'])
+    check_fields(bodies);controls=[]
+    for field in fields:
+        active=dict(bodies);start,body=bodies[field['region']];changed=bytearray(body)
+        changed[int(field['va'],16)-start+len(bytes.fromhex(field['bytes']))-1]^=1
+        active[field['region']]=(start,changed)
+        try:check_fields(active)
+        except ValueError as error:controls.append(dict(control='element reader '+field['label'],rejection=str(error)))
+        else:raise ValueError('element reader field corruption escaped')
+    record=current['selected_fde_candidates']['0x16fce10'];fde=bytes.fromhex(record['fde_hex'])
+    def check_extent(raw):
+        delta,length=struct.unpack_from('<ii',raw,8)
+        require(int(record['fde_va'],16)+8+delta==0x16fce10 and length==264 and 0x16fce10+length==int(record['end_va'],16),'element reader actual FDE extent')
+    check_extent(fde);changed=bytearray(fde);changed[12]^=1
+    try:check_extent(changed)
+    except ValueError as error:controls.append(dict(control='element reader FDE extent',rejection=str(error)))
+    else:raise ValueError('element reader FDE corruption escaped')
+    computed=extract_element_data(data);saved=json.loads((folder/'referenced-data.json').read_text())
+    require(computed==saved,'element reader referenced data drift')
+    active={'table':bytes.fromhex(saved['table']['data_hex'])}
+    active.update({'relocation '+r['slot']:bytes.fromhex(r['relocation_hex']) for r in saved['relocations']})
+    active.update({'descriptor '+r['va']:bytes.fromhex(r['data_hex']) for r in saved['descriptors']})
+    expected={k:bytes(v) for k,v in active.items()}
+    def check_data(values):
+        require(set(values)==set(expected),'element reader data inventory')
+        for key,raw in values.items():require(bytes(raw)==expected[key],'element reader data corruption: '+key)
+    check_data(active)
+    for key,raw in active.items():
+        for offset in (range(0,len(raw),4) if key=='table' else [16 if key.startswith('relocation ') else 0]):
+            values=dict(active);changed=bytearray(raw);changed[offset]^=1;values[key]=changed
+            try:check_data(values)
+            except ValueError as error:controls.append(dict(control='element reader '+key+' '+str(offset),rejection=str(error)))
+            else:raise ValueError('element reader data corruption escaped')
+    rows=rowmaps['element-candidate'];instruction=lambda va:bytes.fromhex(rows[va]['bytes'])
+    for site,target in [(0x16fce48,0x47db78),(0x16fced0,0x640be00),(0x16fcef5,0x640be00),
+                        (0x16fcee1,0x64e0910),(0x16fcf0b,0x640bc40),(0x16fcf12,0x64df520)]:
+        raw=instruction(site);require(site+len(raw)+struct.unpack_from('<i',raw,len(raw)-4)[0]==target,'element reader RIP binding')
+    require([(r['slot'],r['info'],r['addend']) for r in computed['relocations']]==[
+        ('0x64df520',8,'0x1681da0'),('0x64e0910',8,'0x5c54c30')],'element reader actual RELATIVE targets')
+    targets=[0x16fce58,0x16fce81,0x16fce70,0x16fce75,0x16fce64,0x16fce9c,0x16fcea3,0x16fce7b]
+    require([int(r['target'],16) for r in computed['table']['entries']]==targets and all(t in rows for t in targets),'element reader eight-tag table')
+    for site,raw in [(0x16fce15,'488b06'),(0x16fce18,'483b4608'),(0x16fce1e,'488d4820'),(0x16fce22,'48890e'),
+        (0x16fce25,'488b4e10'),(0x16fce29,'4883f9ff'),(0x16fce33,'48ffc1'),(0x16fce36,'48894e10'),
+        (0x16fce3a,'0fb608'),(0x16fce3d,'ffc9'),(0x16fce3f,'83f907'),(0x16fce4f,'48630c8a'),
+        (0x16fce58,'0fb64001'),(0x16fce5e,'c6470100'),(0x16fce64,'480fbe4001'),(0x16fce69,'4885c0'),
+        (0x16fce70,'8b4004'),(0x16fce75,'488b4008'),(0x16fce7b,'488b4008'),(0x16fce81,'0fb74002'),
+        (0x16fce85,'483dff000000'),(0x16fce90,'4889442410'),(0x16fce95,'c644240801'),
+        (0x16fce9c,'480fbf4002'),(0x16fcea3,'48634004'),(0x16fcea7,'483d00010000'),
+        (0x16fceaf,'c6470101'),(0x16fceb3,'884702'),(0x16fceb6,'31c0'),(0x16fceb8,'8807'),
+        (0x16fcec6,'4889442410'),(0x16fcecb,'c644240802'),(0x16fceea,'48894308'),(0x16fceee,'b001')]:
+        require(instruction(site)==bytes.fromhex(raw),'element reader semantic instruction binding')
+    calls=[];branches=[]
+    for va,row in rows.items():
+        raw=bytes.fromhex(row['bytes']);target=None
+        if raw[0]==0xe8:
+            target=va+5+struct.unpack_from('<i',raw,1)[0];calls.append(dict(va=hex(va),target=hex(target)));continue
+        if raw[0]==0xeb or 0x70<=raw[0]<=0x7f:target=va+len(raw)+struct.unpack_from('<b',raw,1)[0]
+        elif raw[0]==0xe9:target=va+len(raw)+struct.unpack_from('<i',raw,1)[0]
+        elif raw[0]==0x0f and len(raw)>1 and 0x80<=raw[1]<=0x8f:target=va+len(raw)+struct.unpack_from('<i',raw,2)[0]
+        if target is not None:require(target in rows,'element reader local branch boundary');branches.append(dict(va=hex(va),target=hex(target)))
+    require(calls==[dict(va='0x16fcf04',target='0x1704de0')],'element reader direct default helper')
+    for site in [0x173fe66,0x173fe95]:
+        raw=bytes.fromhex(rowmaps['sequence-candidate'][site]['bytes'])
+        require(raw[0]==0xe8 and site+5+struct.unpack_from('<i',raw,1)[0]==0x16fce10,'both sequence reader calls')
+    widths={1:8,2:16,3:32,4:64,5:8,6:16,7:32,8:64};signed_tags={5,6,7,8};mask64=(1<<64)-1
+    for tag in range(256):require((((tag-1)&0xffffffff)<=7)==(1<=tag<=8),'bounded raw-tag dispatch')
+    def numeric(tag,raw):
+        width=widths[tag];word=raw&((1<<width)-1)
+        extended=(word-(1<<width) if tag in signed_tags and word>>(width-1) else word)&mask64
+        if tag==1:accepted=True
+        elif tag==5:accepted=extended<(1<<63)
+        elif tag in [2,3,4]:accepted=extended<=255
+        else:accepted=extended<256
+        return accepted,extended&255,extended
+    def reference(tag,raw):
+        width=widths[tag];value=raw&((1<<width)-1)
+        if tag in signed_tags and value>=(1<<(width-1)):value-=1<<width
+        return 0<=value<=255,value
+    exhaustive=0;wide=0
+    for tag in [1,5,2,6]:
+        for raw in range(1<<widths[tag]):
+            accepted,byte,extended=numeric(tag,raw);wanted,value=reference(tag,raw)
+            require(accepted==wanted and (not accepted or byte==value),'element reader exhaustive byte/word predicate');exhaustive+=1
+    for tag in [3,7,4,8]:
+        width=widths[tag]
+        values={0,1,127,128,255,256,257,(1<<(width-1))-1,1<<(width-1),(1<<width)-1,(1<<width)-128,(1<<width)-256}
+        for raw in sorted(values):
+            accepted,byte,extended=numeric(tag,raw);wanted,value=reference(tag,raw)
+            require(accepted==wanted and (not accepted or byte==value),'element reader wide boundary predicate');wide+=1
+    def step(current,end,count,tag=1,raw=0):
+        if current==end:return dict(kind='end',current=current,count=count,pair=[0,0],result_write_offsets=[0,1],header_write_offsets=[])
+        advanced=(current+32)&mask64
+        if count==mask64:return dict(kind='overflow-edge',current=advanced,count=count,header_write_offsets=list(range(8)))
+        count+=1
+        header=list(range(8))+list(range(16,24))
+        if tag not in widths:return dict(kind='conditional-default-error',current=advanced,count=count,pair=[1,None],header_write_offsets=header)
+        accepted,byte,extended=numeric(tag,raw)
+        if not accepted:return dict(kind='conditional-numeric-error',current=advanced,count=count,pair=[1,None],diagnostic_code=2 if tag in signed_tags else 1,header_write_offsets=header)
+        return dict(kind='byte',current=advanced,count=count,pair=[0,1],byte=byte,result_write_offsets=[0,1,2],header_write_offsets=header)
+    cursor_cases=0
+    for count in [0,mask64]:
+        r=step(4096,4096,count);require(r['kind']=='end' and r['current']==4096 and r['count']==count and not r['header_write_offsets'],'empty before counter guard');cursor_cases+=1
+    for tag in range(1,9):
+        r=step(4096,4128,7,tag,127);require(r['kind']=='byte' and (r['current'],r['count'])==(4128,8) and r['result_write_offsets']==[0,1,2],'ordinary write/advance frame');cursor_cases+=1
+    for tag,raw in [(2,256),(3,256),(4,256),(5,255),(6,65535),(7,(1<<32)-1),(8,mask64)]:
+        r=step(4096,4128,7,tag,raw);require(r['kind']=='conditional-numeric-error' and (r['current'],r['count'])==(4128,8),'rejected numeric consumes record before opaque call');cursor_cases+=1
+    for tag in [0,9,22,255]:
+        r=step(4096,4128,7,tag,0);require(r['kind']=='conditional-default-error' and (r['current'],r['count'])==(4128,8),'default raw tag consumes record');cursor_cases+=1
+    r=step(4096,4128,mask64);require(r['kind']=='overflow-edge' and r['current']==4128 and r['count']==mask64,'cursor advances before overflow edge');cursor_cases+=1
+    r=step(4096,4128,mask64-1);require(r['kind']=='byte' and r['count']==mask64,'maximum nonoverflowing increment');cursor_cases+=1
+    def composed(records):
+        current=0;count=0;end=len(records)*32;out=[]
+        def read():
+            nonlocal current,count
+            tag,raw=records[current//32] if current!=end else (1,0)
+            r=step(current,end,count,tag,raw);current,count=r['current'],r['count'];return r
+        for index in range(32):
+            r=read()
+            if r['kind'].startswith('conditional-'):return dict(outcome='conditional-early-error',count=count,current=current)
+            if r['kind']=='end':return dict(outcome='conditional-short-error',reported=index,count=count,current=current)
+            require(r['kind']=='byte','bounded composition cannot overflow');out.append(r['byte'])
+        r=read()
+        if r['kind']=='byte':return dict(outcome='conditional-excess-error',reported=33,count=count,current=current)
+        require(r['kind']=='end' or r['kind'].startswith('conditional-'),'bounded boundary response')
+        if current!=end:return dict(outcome='conditional-outer-remainder-error',reported=count+(end-current)//32,count=count,current=current)
+        return dict(outcome='ordinary-local-success' if r['kind']=='end' else 'conditional-boundary-error-local-success',count=count,current=current,output=bytes(out))
+    compositions=0
+    for length in range(35):
+        r=composed([(1,i) for i in range(length)])
+        expected='conditional-short-error' if length<32 else 'ordinary-local-success' if length==32 else 'conditional-excess-error'
+        require(r['outcome']==expected,'composed raw-record length path')
+        if length==32:require(r['output']==bytes(range(32)) and r['count']==32 and r['current']==1024,'ordinary numeric32 frame')
+        compositions+=1
+    for bad in [(2,256),(6,65535),(22,0)]:
+        for trailing in [0,1]:
+            r=composed([(1,i) for i in range(32)]+[bad]+[(1,1)]*trailing)
+            wanted='conditional-outer-remainder-error' if trailing else 'conditional-boundary-error-local-success'
+            require(r['outcome']==wanted and r['count']==33 and r['current']==1056,'conditional boundary-record/outer remainder path')
+            if trailing:require(r['reported']==34,'remaining count adds processed33 plus one')
+            else:require(r['output']==bytes(range(32)),'conditional cleanup frame premise')
+            compositions+=1
+    return dict(status='ELEMENT_READER_LOCAL_RECORD_PATHS_REPRODUCED',helper_bytes=264,helper_instructions=73,
+        field_bindings=len(fields),evidence_corruptions_rejected=len(controls),controls=controls,direct_callees=calls,local_branches=branches,
+        raw_integer_tags=list(range(1,9)),dispatch_byte_cases=256,numeric_8_16_payload_cases=exhaustive,numeric_32_64_boundary_cases=wide,
+        cursor_cases=cursor_cases,composed_raw_record_cases=compositions,record_stride=32,empty_result_write_offsets=[0,1],
+        byte_result_write_offsets=[0,1,2],ordinary_header_write_offsets=list(range(8))+list(range(16,24)),normal_byte_and_end_paths_call_helpers=False,
+        error_result_write_offsets=list(range(8,16))+[0],overflow_after_cursor_advance=True,relocation_bindings=2,unidentified_descriptors=2,renewed_sequence_rows=82,
+        limits='Static numeric/cursor and conditional raw-record traces only. Valid nonaliased record/header/output memory is required. Error/default/overflow and cleanup helper effects and returns remain opaque. Ordinary byte/end paths have no opaque calls and their local stores fit the16-byte response carrier; error paths retain a memory-frame premise. Serialized JSON/wire reachability, security impact, source ABI/type, second alternative, exception closure and runtime equivalence remain unproved.')
+
+
 def main():
     parser=argparse.ArgumentParser(description='Owned stdlib complete-input/native evidence verifier; no subprocess or captured execution.')
     parser.add_argument('--binary',type=Path,required=True)
@@ -999,6 +1209,15 @@ def main():
     result['controls']+=sequence['controls'];result['sequence_helper']=sequence
     require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(7,5066,1191),'seven unique ranges')
     result['limits']='Seven digest-bound native ranges and local value/text/sequence-response paths. Opaque element-reader cursor/counter behavior, error/cleanup and text feature/vector helpers, JSON mapping, second alternative, complete ABI/exception and runtime equivalence remain unresolved.'
+    element=verify_element_reader(data,args.packet)
+    result['regions']+=1;result['region_bytes']+=element['helper_bytes']
+    result['native_instruction_rows']+=element['helper_instructions']
+    result['instruction_counts']['element-candidate']=element['helper_instructions']
+    result['field_bindings']+=element['field_bindings']
+    result['evidence_corruptions_rejected']+=element['evidence_corruptions_rejected']
+    result['controls']+=element['controls'];result['element_reader']=element
+    require((result['regions'],result['region_bytes'],result['native_instruction_rows'])==(8,5330,1264),'eight unique ranges')
+    result['limits']='Eight digest-bound native ranges and local byte/text/sequence/numeric-record paths. Normal element byte/end paths close their local store frame under valid nonaliasing memory; error/default/overflow, cleanup, text feature/vector, serialized JSON mapping, source ABI/type, second alternative, exception and runtime equivalence remain unresolved.'
     print(json.dumps(result,indent=2))
 
 
