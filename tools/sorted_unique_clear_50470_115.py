@@ -13,9 +13,13 @@ is cleared first, then the pair array is sorted ascending by unsigned
 (first, second), adjacent duplicates are removed leaving one copy of
 each distinct pair, each kept pair is disposed in sorted order by
 calling its disposer with its argument, the array end is reset to
-begin, the head (when non-null) is called with (+0x08, +0x10), the
-+0x18 chain is walked (each node called with its +0x08/+0x10, then
-deleted with size 0x20), +0x00 and +0x18 are zeroed, the buffer is
+begin, then the virtual phase: the head (+0x00) is called with
+(+0x08, +0x10) only when non-null, and only after a non-null head
+call is the +0x18 chain walked (each node called with its
++0x08/+0x10, then deleted with size 0x20). A null head jumps
+straight to zeroing +0x00 and +0x18: the chain is NOT walked, its
+nodes are neither called nor deleted (abandoned under the zeroed
+pointer). Afterwards +0x00 and +0x18 are zeroed, the buffer is
 freed with size (+0x38 minus +0x28) when non-null, and the routine
 tail-jumps. Duplicate copies beyond the new end are never disposed.
 The sort-phase callees (0x5d4a3f0, 0x5d497e0) and the tail callee
@@ -61,10 +65,14 @@ def clear_container(obj, tracker):
         if obj["head"] is not None:
             a, b = obj["head_args"]
             tracker["head_calls"].append((obj["head"], a, b))
-        for node in obj["chain"]:
-            a, b = node["args"]
-            tracker["chain_calls"].append((node["func"], a, b))
-            tracker["chain_deleted"].append(32)  # 0x20 per node
+            # The chain walk runs only after a non-null head call.
+            for node in obj["chain"]:
+                a, b = node["args"]
+                tracker["chain_calls"].append((node["func"], a, b))
+                tracker["chain_deleted"].append(32)  # 0x20 per node
+        # +0x00 and +0x18 are zeroed on both paths; on the null-head
+        # path the chain nodes are abandoned, never called or deleted,
+        # so no chain_calls/chain_deleted entries are recorded for them.
         obj["head"] = None
         obj["chain"] = []
     freed = obj["capacity_bytes"] if obj["buffer_present"] else None

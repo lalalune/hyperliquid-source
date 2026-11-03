@@ -58,11 +58,13 @@ for line in manifest:
     if sha256(HERE / name) != digest:
         fail(f"manifest mismatch for {name}")
 
-# 3. Excerpt regeneration.
+# 3. Excerpt regeneration (header normalized to the bare binary name,
+# matching export_excerpts.py, so the check is not machine-specific).
 fresh = subprocess.run(
     ["objdump", "-d", f"--start-address={hex(START)}",
      f"--stop-address={hex(END)}", str(BIN)],
     capture_output=True, text=True, check=True).stdout
+fresh = fresh.replace(str(BIN), BIN.name)
 if fresh != (HERE / "main.txt").read_text():
     fail("main.txt does not regenerate byte-for-byte")
 

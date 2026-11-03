@@ -97,13 +97,18 @@ class SortedUniqueClearTest(unittest.TestCase):
                          [("c1", 3, 4), ("c2", 5, 6)])
         self.assertEqual(tracker["chain_deleted"], [32, 32])
 
-    def test_null_head_skips_head_call(self):
+    def test_null_head_skips_head_and_chain(self):
+        # 0x5d505a4: a null head jumps straight to 0x5d505e4, which
+        # zeroes +0x00 and +0x18 without walking the +0x18 chain, so
+        # the chain nodes are abandoned, never called or deleted.
         tracker = new_tracker()
         o = obj(pairs=[], head=None,
                 chain=[{"func": "c1", "args": (3, 4)}])
         clear_container(o, tracker)
         self.assertEqual(tracker["head_calls"], [])
-        self.assertEqual(tracker["chain_calls"], [("c1", 3, 4)])
+        self.assertEqual(tracker["chain_calls"], [])
+        self.assertEqual(tracker["chain_deleted"], [])
+        self.assertEqual(o["chain"], [])  # pointer zeroed, nodes abandoned
 
     def test_no_buffer_nothing_freed(self):
         tracker = new_tracker()

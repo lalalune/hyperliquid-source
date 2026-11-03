@@ -90,11 +90,14 @@ capacity end. Each array element is 16 bytes: +0x00 argument qword,
    abandoned with the freed buffer.
 5. Reset and virtual phase. The array end (+0x30) is set to begin
    when it differs. Then, when +0x00 is non-null, it is called with
-   (+0x08, +0x10); then the +0x18 chain is walked — each node is
-   called with (node +0x08, node +0x10) and deleted with size
-   0x20 — and afterwards +0x00 and +0x18 are zeroed. This phase
-   runs on the empty-range path too, but never on the flag-clear
-   path.
+   (+0x08, +0x10), and only then is the +0x18 chain walked — each
+   node is called with (node +0x08, node +0x10) and deleted with
+   size 0x20 — and afterwards +0x00 and +0x18 are zeroed. When
+   +0x00 is null, the test at 0x5d505a4 jumps straight to
+   0x5d505e4, which zeroes +0x00 and +0x18 WITHOUT walking the
+   chain: the chain nodes are neither called nor deleted, they are
+   abandoned under the zeroed pointer. This phase runs on the
+   empty-range path too, but never on the flag-clear path.
 6. Free phase. When +0x28 is non-null, operator delete is called
    with (+0x28, +0x38 minus +0x28). The routine never writes +0x28,
    +0x30 or +0x38 afterwards; the buffer pointer is left dangling.
