@@ -54,6 +54,7 @@ From the repository root, after the standard pinned-input setup and the CI analy
 ```sh
 python3 research/work-items/RE-012-node115-tcp-prefix/collect.py --check
 python3 -m unittest discover -s tests -p test_node115_tcp_prefix.py -v
+(cd research/work-items/RE-012-node115-tcp-prefix && sha256sum -c MANIFEST.sha256)
 make doctor verify test catalogue-check
 make reproduce
 ```
