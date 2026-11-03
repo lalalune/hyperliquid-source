@@ -27,7 +27,8 @@ cleanup jump and does not claim a completed return or original enum ABI.
 Other outer tags encounter a second tag1/past-target check. Thus a fixed
 counter with an already-past target can reach sentinel handoff for outer2,
 while another outer tag reaches the second cold boundary. This differs from
-the retired94admission rule that tested the freeze target before periodicity.
+the retired94scalar admission interface, which tested a target before periodicity.
+No one-to-one mapping of original source functions is asserted.
 At a fixed counter and outer2, the selected code needs neither freeze field;
 a native missing-memory experiment confirms that ordering in all three lanes.
 The scalar Rust interface will not reproduce memory/argument evaluation order.
@@ -83,3 +84,46 @@ native smoke rows will accompany the Rust component. Native expected results
 come from selected instructions, not production Rust or a helper stub.
 No captured process, helper, networking, chain or wallet execution. No code-byte
 normalization, identity/whole-node claim, byte credit or component gate change.
+
+## Independent Rust and comparisons
+
+Freeze commit15b4cfe8 predates new115Rust. The standalone no_std component
+src/node115-exchange-freeze-prelude exposes two selected logical classes. Own
+enum names are branch labels, not original ABI. The secondary API explicitly
+requires NonZeroU64. A scalar API cannot reproduce skipped input loads, pointer
+aliases, original frame layout or argument-evaluation order. Low-byte flags
+are the declared projection; the freeze's term padding describes excluded
+bits only, not proof of original types or their later use.
+
+Actual rustc1.94.1 e408947bfd/LLVM21.1.8,macOSarm64,edition2021,overflow checks,
+codegen-units1,opt0/3,warnings denied. There are no dependencies, fabricated
+Cargo graph or lockfile. This is a research compiler pin, not a recovered
+original115build recipe. Commands/source/ownarchive hashes are in build-result.json
+(local repository prefix redacted as <repo>).
+
+Both library profiles match all81646physical rows/51668two-class inputs.
+The default compiled smoke checks23already-frozen native rows. Five actual
+compiled mutants yield102/9723/54/306/1968mismatches and all fail smoke checks.
+Own opt3 rlib repeat is raw-identical. Builder/native replay PASS198.485wall
+seconds at10% duty. Initial fixture setup selected a cadence7 row outside the
+frozen matrix, raising KeyError before compilation. It was replaced with an
+already-frozen cadence2 row; no native expectation was added after Rust.
+Original generated TSVs/compiler/mutant logs and failed attempts remain in ignored work.
+
+Reproduce: `python3 tools/exchange_freeze_115_rust.py --rustc <rustc1.94.1>
+--output work/exchange-prelude-new`. The separately linked client reads inputs
+only; target records and pre-Rust stream hashes must match before compiling.
+No target/source machine-byte comparison or operand normalization claimed.
+Rustfmt, Clippy library/test, initial four focused Python tests, make catalogue,
+make doctor/verify/catalogue-check passed exit0 in78.378wall seconds. Active
+signatures,29imports/pins,29packetmanifests/464entries passed before final report
+additions. A final five-test run including direct RIP label/selector binding
+passed5.022wall seconds (limited command6.133s). The test binds6-byte freeze and
+8-byte periodic data plus the post-helper selector in both secondary owners;
+this is conditional static support, not helper or filesystem behavior.
+Final report/manifest edits receive separate packet verification. Full make test remains
+incomplete after the earlier same-base sibling attempt; no PASS is inferred.
+Shared inventory reproduction may be reused only for its unchanged dependency
+closure, never as exact-head/full-suite validation. Hosted CI is unobserved.
+Next: close callers/continuations and the preparation helpers before composing
+whole exchange execution or snapshot behavior. All component gates stay false.
