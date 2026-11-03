@@ -8,6 +8,7 @@ counts=list(range(12))+[cpu.U64-j for j in range(16)]+[(1<<63)-1,1<<63]
 inputs=[];outputs=[];owners=[];parts=[];logical=set();seen=set()
 for which,(a,b,width,abi) in enumerate(SITES):
  assert image.fde_of(a)==(a,b);raw=blob[image.file_offset(a):image.file_offset(b)];decoded=list(cs.disasm(raw,a));assert sum(x.size for x in decoded)==b-a
+ for x in decoded:assert image.fetch(x.address).size==x.size
  lea=blob[image.file_offset(b-13):image.file_offset(b-13)+7];assert lea[:3]==bytes.fromhex('488d3d');location=b-6+struct.unpack_from('<i',lea,3)[0]
  ptr_raw,n,line,col=struct.unpack_from('<QQII',blob,image.file_offset(location));ptr=image.slots[location];path=blob[image.file_offset(ptr):image.file_offset(ptr)+n].decode();assert path=='z_forks/bincode-fork/src/enc/write.rs' and (line,col)==(78,9)
  call=blob[image.file_offset(b-6):image.file_offset(b-6)+6];assert call[:2]==b'\xff\x15';slot=b+struct.unpack_from('<i',call,2)[0]
@@ -18,6 +19,7 @@ for which,(a,b,width,abi) in enumerate(SITES):
    for flag in [0,1,2,128,255] if abi=='direct-rcx' else [0]:
     result,trace=evaluate(image,which,value,count,flag);assert result==model(value,count),(which,value,count,flag,result);seen.update(trace);logical.add((width,value,count));inputs.append(f'{which}\t{value}\t{count}\t{flag}\n');outputs.append(result+'\n')
  parts.append(len(inputs)-before)
+assert seen=={int(x['va'],16) for o in owners for x in o['instructions']} - {b-6 for a,b,w,abi in SITES}
 controls=[]
 for name,va,new,args in [('u64-threshold',0x29360e4,252,(0,251,0,0)),('inline-u32-precommit',0x582210d,2,(1,251,cpu.U64-1,0)),('indirect-u32-threshold',0x5822169,252,(2,251,0,0)),('u64-overflow',0x58228e4,0xf8,(3,1<<32,cpu.U64-8,0)),('u64-sibling-precommit',0x5822bcf+3,0xfe,(4,251,cpu.U64-2,0))]:
  private=bytearray(blob);off=image.file_offset(va);old=private[off];private[off]=new;original,_=evaluate(image,*args);changed,_=evaluate(cpu.Image(bytes(private)),*args);assert changed!=original,(name,original,changed)
