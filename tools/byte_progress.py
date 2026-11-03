@@ -25,6 +25,8 @@ def compare(source, target, relocations):
     require(len(source) == len(target) and len(target) > 0, 'Unequal/empty comparison extent')
     masks = set()
     for row in relocations:
+        require(isinstance(row, dict) and 'offset' in row and 'addend' in row,
+                'Only recorded four-byte PC32/GOTPCREL fields are supported')
         offset, width = row['offset'], row.get('width', 4)
         kind = row.get('kind', row.get('type'))
         require(type(offset) is int and type(width) is int and width == 4
