@@ -11,15 +11,22 @@ Object model (all addresses are offsets into the pass's object):
   cursor: obj+0x30, number of inline group slots in use (0..8 in the
       pipeline invariant; the native loop just adds it to the heap
       slot count, so the model does the same literally).
-  inline_slots: 8 group slots at obj+0xb8, 16 bytes each:
-      (limit, element_base). limit is the first qword, compared
-      UNSIGNED against the per-group true/false counter.
-  heap_slots: group slots at obj+0xc0, 16 bytes each, same shape.
+  inline_slots: 8 group slots in the array pointed to by the qword at
+      obj+0xb8, 16 bytes each: (limit, element_base). limit is the
+      first qword, compared UNSIGNED against the per-group
+      true/false counter. (The native code loads the qword at
+      obj+0xb8 as a base pointer; the array itself is not inline
+      storage at obj+0xb8.)
+  heap_slots: group slots in the heap vector whose begin pointer is
+      the qword at obj+0xc0, 16 bytes each, same shape.
   elements: mapping (element_base, index) -> element record with raw
       qwords f28, f30, f38, f40, f48 (the fields at element+0x28,
       +0x30, +0x38, +0x40, +0x48).
-  scan_inline: scan-list records stored inline at obj+0xdb8 (at most 8).
-  scan_heap: scan-list records stored in the heap vector at obj+0xdc0.
+  scan_inline: scan-list records stored in the array pointed to by
+      the qword at obj+0xdb8 (at most 8).
+  scan_heap: scan-list records stored in the heap vector whose
+      begin/end/capacity-end pointers are the qwords at
+      obj+0xdc0/+0xdc8/+0xdd0.
   scan_heap_capacity: heap vector capacity in records (obj+0xdd0 minus
       obj+0xdc0, in records).
 

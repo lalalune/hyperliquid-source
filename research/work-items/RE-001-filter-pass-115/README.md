@@ -17,8 +17,13 @@ predicate item).
   heap group-slot count (obj+0xc8 minus obj+0xc0, shifted right by 4),
   recomputed from the object at every outer advance; a total of 0
   returns at once with no predicate call. Group i uses inline slot i
-  at obj+0xb8 + i*16 when i <= 7 (unsigned), else heap slot i - 8 at
-  obj+0xc0 + (i-8)*16. Each slot is 16 bytes: (limit, element base).
+  in the array pointed to by the qword at obj+0xb8, at that base +
+  i*16, when i <= 7 (unsigned), else heap slot i - 8 at the heap
+  begin pointer (qword at obj+0xc0) + (i-8)*16. Each slot is 16 bytes:
+  (limit, element base). The native code loads the qwords at obj+0xb8
+  and obj+0xdb8 as base pointers (add 0xb8(%rbp),%rax at 0x5f6d7fd
+  and add 0xdb8(%rbp),%rax at 0x5f6d835); those fields are pointers
+  to the arrays, not inline storage at those offsets.
 - Inner loop: inside group i the counter r12 starts at 0 and the
   element offset starts at 0; each consultation advances both
   (r12 += 1, offset += 0x50) whether the predicate returns true or
@@ -33,7 +38,8 @@ predicate item).
   element appends.
 - Append: the record is (group index i as a 32-bit value,
   element+0x28), 16 bytes. While the scan count at obj+0xd30 is <= 7
-  it goes inline at obj+0xdb8 + count*16; otherwise it goes to the
+  it goes to the first scan array, at the base pointer (qword at
+  obj+0xdb8) + count*16; otherwise it goes to the
   heap vector (obj+0xdc0 begin / +0xdc8 end / +0xdd0 capacity end),
   growing it when end == capacity end: capacity 1 when empty, else
   twice the size, capped at 0x7ffffffffffffff records; growing at the
