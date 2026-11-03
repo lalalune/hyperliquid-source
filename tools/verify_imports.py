@@ -40,7 +40,8 @@ def verify(root):
     manifest = _load(root, 'imports.json')
     if not isinstance(manifest, dict) or not isinstance(manifest.get('files'), list):
         raise ValueError('Invalid import manifest')
-    if any(not isinstance(item, dict) or 'path' not in item for item in manifest['files']):
+    if any(not isinstance(item, dict) or not isinstance(item.get('path'), str)
+           for item in manifest['files']):
         raise ValueError('Invalid import manifest record')
     paths = [item['path'] for item in manifest['files']]
     if len(set(paths)) != len(paths):
@@ -51,7 +52,7 @@ def verify(root):
     if not isinstance(sources, dict) or not isinstance(sources.get('repositories'), list):
         raise ValueError('Invalid sources manifest')
     for repo in sources['repositories']:
-        if not isinstance(repo, dict) or 'path' not in repo or 'commit' not in repo:
+        if not isinstance(repo, dict) or not isinstance(repo.get('path'), str) or 'commit' not in repo:
             raise ValueError('Invalid source repository record')
         if not (root / repo['path'] / '.git').exists():
             raise ValueError(f'Missing pinned source: {repo["path"]}; {SETUP}')
