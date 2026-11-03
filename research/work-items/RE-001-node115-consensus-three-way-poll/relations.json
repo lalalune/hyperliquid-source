@@ -1,0 +1,93 @@
+{
+  "choice_cases": 49152,
+  "counterfactuals": [
+    {
+      "mutated": {
+        "copy": 184,
+        "mask": 1,
+        "polled": [
+          0
+        ],
+        "tag": 0
+      },
+      "new_byte": 3,
+      "original": {
+        "copy": 184,
+        "mask": 2,
+        "polled": [
+          0,
+          1
+        ],
+        "tag": 1
+      },
+      "va": "0x2cde256"
+    },
+    {
+      "mutated": {
+        "copy": 184,
+        "mask": 2,
+        "polled": [
+          0
+        ],
+        "tag": 0
+      },
+      "new_byte": 2,
+      "original": {
+        "copy": 184,
+        "mask": 1,
+        "polled": [
+          0
+        ],
+        "tag": 0
+      },
+      "va": "0x2cde3b9"
+    },
+    {
+      "mutated": 1,
+      "new_byte": 2,
+      "original": 2,
+      "va": "0x2cde1fc"
+    }
+  ],
+  "limits": "Valid descriptor/mask and normally returning queue helpers. Pending=2 is the selected helper output word only. No queue payload interpretation, original Rust ABI, entropy/uniformity/fairness or runtime progress claim.",
+  "native_operands": {
+    "bound": 3,
+    "first_mask": 1,
+    "no_enabled": 3,
+    "payload_bytes": 184,
+    "pending": 2,
+    "pending_result": 4,
+    "shift": 32
+  },
+  "proof": "The seed helper forms a u32 sum x, then returns (x*3)>>32. For 0<=x<2^32 this is 0,1,2. Therefore seed+2 cannot overflow, all three residues are visited once, and the seed==-2 trap is unreachable on this normal helper-return path.",
+  "seed_boundaries": [
+    {
+      "seed": 0,
+      "word": "0x0"
+    },
+    {
+      "seed": 0,
+      "word": "0x1"
+    },
+    {
+      "seed": 0,
+      "word": "0x55555555"
+    },
+    {
+      "seed": 1,
+      "word": "0x55555556"
+    },
+    {
+      "seed": 1,
+      "word": "0xaaaaaaaa"
+    },
+    {
+      "seed": 2,
+      "word": "0xaaaaaaab"
+    },
+    {
+      "seed": 2,
+      "word": "0xffffffff"
+    }
+  ]
+}

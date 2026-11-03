@@ -1,0 +1,1133 @@
+{
+  "checked_at": "2026-11-03T19:34:53.174598+00:00",
+  "base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "pull_requests": 2528,
+  "highest_number": 2533,
+  "open": 507,
+  "merged": 1774,
+  "changed_file_records": 42912,
+  "without_patch": 5680,
+  "method": "All-state paginated pulls plus title/body/changed-path/patch search. Cache reused only with unchanged head AND base. Semantic near-matches read and distinguished; final live recheck recorded before submission.",
+  "prior_work": [
+    890,
+    970
+  ],
+  "conclusion": "No overlapping semantic claim found within stated audit limits.",
+  "limits": [
+    "Unpublished or undeclared work cannot be ruled out.",
+    "Some file records omit patches; #1151 hits GitHub 3000-file limit.",
+    "Address/text matching is not an exhaustive semantic-equivalence proof."
+  ],
+  "closed_unmerged": 247,
+  "search_pattern": "2cde180|5ce2080|three.way.{0,30}(select|poll)|select.{0,30}(channel|mask)",
+  "matching_pull_requests": [
+    {
+      "number": 2496,
+      "title": "RE-002: map the node #115 cache readback \u2014 102 consumers read only the first published word; C1 and C2 have no reader",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tools/cache_readback_static.py",
+            "matches": 1,
+            "sample": [
+              "+    \"\"\"Original bit positions selected by an immediate mask applied"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2484,
+      "title": "RE-002: complete the node #115 A/B field map \u2014 attribute the refresh helper's early CPUID compositions bit by bit",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-002-node115-cpuid-field-map/README.md",
+            "matches": 1,
+            "sample": [
+              "+`C2 = (B >> 62) | H = H` on every path. The selection mask clears A bits"
+            ]
+          },
+          {
+            "path": "tests/test_cpuid_field_map_static.py",
+            "matches": 1,
+            "sample": [
+              "+        self.assertEqual(selection[\"a_mask\"], \"0xf9ffffffffffbfff\")"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2474,
+      "title": "RE-002: pin which cache-word fields the node #115 XCR0 terms drive",
+      "matches": {
+        "metadata": [
+          "The complemented `(XCR0 & 0xe0) ^ 0xe0` field drives **no cache field**: its value is dead after the OR at `0x5cae157` (RAX is written before read on every successor path \u2014 `0x5cae165`, `0x5cae278`, `0x5cae2fd`), and only the OR's zero flag reaches `jne 0x5cae23c`. **C2 has no XCR0-driven field**: B's only XCR0 connection is the leaf `0xd` gate in "
+        ],
+        "files": [
+          {
+            "path": "research/work-items/RE-002-node115-xcr0-composition/README.md",
+            "matches": 2,
+            "sample": [
+              "+     selection mask of stage 5 keeps bit 63. Hence **A bit 63 = 1 iff",
+              "+movabs, the bit-19 test immediate, the selection mask constant, the"
+            ]
+          },
+          {
+            "path": "tests/test_xcr0_composition_static.py",
+            "matches": 1,
+            "sample": [
+              "+        self.assertEqual(selection[\"a_mask\"], \"0xf9ffffffffffbfff\")"
+            ]
+          },
+          {
+            "path": "tools/xcr0_composition_static.py",
+            "matches": 3,
+            "sample": [
+              "+ # A/B selection: vendor compare and the mask/cmov chain.",
+              "+ (0x5cae37a,'81e100400000','selection bit14 mask'),",
+              "+ (0x5cae380,'49bdffbffffffffffff9','selection a mask'),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2225,
+      "title": "RE-010: map node 115 validator subtype removal and follow-up state writes",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-010-cvalidator-unregister-115/README.md",
+            "matches": 1,
+            "sample": [
+              "+| State routine | `0x3c3d480` | `0x3c3f412` | A matching three-way selector and the selected state path. |"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2202,
+      "title": "RE-010: map node 115 TWAP cancellation decoding and state removal",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-010-twap-cancel-path-115/README.md",
+            "matches": 1,
+            "sample": [
+              "+Each row is one equal-length pair of complete selected FDE bodies. All unmasked byte positions match after masking only the listed four-byte PC-relative displacements in instructions whose opcodes are checked in both bodies. `pair-diffs.tsv` preserves all 91 raw differences, and `pair-operands.tsv` records every masked operand and its computed tar"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2194,
+      "title": "RE-017: trace scheduled-cancel state from loader to root input",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tools/abci_cancel_state115.py",
+            "matches": 1,
+            "sample": [
+              "+# Selected, unmasked bytes; ctx_ and root_map_ are connecting context in"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2192,
+      "title": "RE-021: map node 115 alternate CALL dispatch and account-host handoff",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tools/re21_call_host115.py",
+            "matches": 1,
+            "sample": [
+              "+# comparison observes only their selected unwind extents and operand masks."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2187,
+      "title": "RE-011: trace node 115 balance reads and conditional state updates",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tools/re011_balance_read115.py",
+            "matches": 1,
+            "sample": [
+              "+    require(mask == 0x100002600, 'selected whitespace mask changed')"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2155,
+      "title": "RE-015: trace node 115 DB-root validation through per-key open",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tools/re015_db_root_open_115.py",
+            "matches": 2,
+            "sample": [
+              "+    selected = ((value << left) & mask) if flag & 1 else default",
+              "+    return mask if saturated else (selected << final) & mask"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2149,
+      "title": "RE-009: Trace node 115 state read and nested height materialization",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-009-abci-state-read-115/README.md",
+            "matches": 2,
+            "sample": [
+              "+For these two loops only, the original `0x3f22186..0x3f2222d` and `0x3007996..0x3007a3d` windows are both 167 bytes. They differ in 16 raw bytes, exactly four relative displacement fields. `cleanup-pair.json` lists the four 4-byte masks at offsets `0x2b`, `0x4f`, `0x7b`, and `0xa3`; the extractor verifies each opcode and resolves each pair to the ",
+              "+The earlier RE-017 state-link and RE-009 wrapper reports are bound to node #94 SHA-256 `3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f`; their historical records can be read from repository commit `c3b77a8e84c3f2b10db7a2a69b6b66bfddea93d4`. The optional authenticated comparison reads the #94 bytes at `0x2fe307d`, `0x2fe3047` and "
+            ]
+          },
+          {
+            "path": "tools/abci_state_read115.py",
+            "matches": 1,
+            "sample": [
+              "+            'conclusion': 'same selected mask; result-test instructions and selected copy/release operands differ; no complete layout equivalence implied'}"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2106,
+      "title": "RE-001: the node #115 lu.rs f64 conversion \u2014 two 4-entry dispatch tables, 10^9 scaling with carry guard, and a 4-member skeleton family",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-node115-lu-f64-scaling/README.md",
+            "matches": 1,
+            "sample": [
+              "+- Exponent extract: the f64 bits are shifted right by 0x34 (52) and masked with 0x7ff, yielding the biased exponent. Four thresholds partition the range: `0x3e0` (992), `0x3ff` (1023, the bias), `0x433` (1075), `0x43f` (1087). The bands select different shift/mask sequences for the mantissa."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2095,
+      "title": "RE-001: bind node #94 masked byte comparison 0x1407ec0 with its caller context",
+      "matches": {
+        "metadata": [
+          "Bounded question: does this leaf find an exact byte-string match at positions selected by its input mask? Pre-packet hex and decimal searches found no occurrences in `research/` or the supplied open, merged and closed-unmerged PR title lists. Commands, empty results and list hashes are retained in the packet."
+        ],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-masked-compare-94/README.md",
+            "matches": 2,
+            "sample": [
+              "+source implementation or a completion gate. Bounded question: Does this leaf find an exact byte-string match at positions selected by an input mask?",
+              "+otherwise TZCNT selects the next bit. The high mask word is therefore ignored"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-001-masked-compare-94/records.json",
+            "matches": 1,
+            "sample": [
+              "+  \"question\": \"Does this leaf find an exact byte-string match at positions selected by an input mask?\","
+            ]
+          },
+          {
+            "path": "tools/foundation_masked_compare.py",
+            "matches": 2,
+            "sample": [
+              "+        'question': 'Does this leaf find an exact byte-string match at positions selected by an input mask?',",
+              "+otherwise TZCNT selects the next bit. The high mask word is therefore ignored"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2079,
+      "title": "RE-010: Trace node 115 display-name dispatch and storage transitions",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-010-display-name-path-115/README.md",
+            "matches": 1,
+            "sample": [
+              "+Independent Rust implementation: **not yet implemented**. Compiler and linker settings, two-build comparison, normalization masks, helper and relocation closure, and whole-ELF comparison: **not yet measured**. The selected windows are raw and unmasked. The tool verifies 23 indexed FDE records, 77 pinned windows, 73 selected direct edges, 16 select"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2040,
+      "title": "RE-002: reconstruct node115 CPU quota and logical-count cache",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-002-cpu-quota-115/peer-review.json",
+            "matches": 1,
+            "sample": [
+              "+    \"CVTTSD2SI combines ordinary low signed conversion and shifted2^63 branch. For rounded values below2^64 it recovers the integer; the final compare against0x43efffffffffffff selectsMAX for2^64. This assumes masked invalid/precision exceptions and excludes floating status outputs.\","
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2005,
+      "title": "RE-021: map node 94 call input bytes and fee gates before precompile lookup",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-021-call-input-decoding-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+`0x258cbf0` skips bytes selected by the mask `0x100002600` within its bounded whitespace loop, recognizes the literal `null`, and otherwise calls `0x28fc450`. For its three raw output variants, null uses tag 0, a successful quantity uses tag 1, and an error uses tag 2. The bounded mask selects byte values 9, 10, 13 and 32. The quoted-text branch i"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1973,
+      "title": "RE-001: reconstruct node94 database directory guard predicate",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-db-dir-guard-rust-94/search_evidence.py",
+            "matches": 1,
+            "sample": [
+              "+ 0x158ef5d: '66b8feff66d3c06621c274cb',  # remove selected candidate; zero mask returns false"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1950,
+      "title": "RE-017: map spot-book capture through the node 94 state-root job",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tests/test_abci_spot_book_root94.py",
+            "matches": 1,
+            "sample": [
+              "+    def test_all_selected_fdes_and_unmasked_hashes(self):"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1944,
+      "title": "runtime: reconstruct node115 signed-pair numeric projections in Rust",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-014-node115-latency-pair-rust/README.md",
+            "matches": 1,
+            "sample": [
+              "+step override handles only these selected F2[48]0F2A encodings, masks to the"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1931,
+      "title": "RE-017: map node 94 JSON state tail rejection and temporary cleanup",
+      "matches": {
+        "metadata": [
+          "The two item bodies differ at 35 raw byte positions. Their 345-byte extents become equal after masking 14 explicitly listed four-byte relative operands; every masked operand is independently checked to resolve to the same pinned target. The output retains the raw byte differences, complete selected bodies and mask list. Selected LSDA rows also bind"
+        ],
+        "files": [
+          {
+            "path": "research/work-items/RE-017-abci-json-trailing-cleanup-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+The length and cursor are compared unsigned. A cursor at or above length bypasses the selected scan. Otherwise, the mask loaded at `0x2fe307d` is `0x100002600`; a byte must be at most `0x20` and have its mask bit set. The 256 synthetic one-byte cases generated from that instruction admit exactly `0x09`, `0x0a`, `0x0d` and `0x20`. Accepted bytes ad"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1904,
+      "title": "RE-001: reconstruct node94 snapshot copy with overlapping views",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-remaining-nine-copy16-rust-94/EVIDENCE.md",
+            "matches": 1,
+            "sample": [
+              "+Selected mask bits then remove spans or individual source/destination bytes."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1898,
+      "title": "RE-001: reconstruct node94 insert wrapper and post-call counter",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-insert-byte-counter-rust-94/oracle.py",
+            "matches": 3,
+            "sample": [
+              "+        for selector in [0,1,1<<63,MASK]:",
+              "+            out.append([0x1000,selector,third,0x8000,0xff,0x80,MASK,0,0,missing])",
+              "+        if selector or third==(obj+8)&MASK:flag=1"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1896,
+      "title": "RE-006: trace node 94 fill-user set insertion and split failure paths",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-006-fill-user-set-splits-94/comparison-differences.tsv",
+            "matches": 1,
+            "sample": [
+              "+relative_offset\tselected_byte\tcontext_byte\tmasked"
+            ]
+          },
+          {
+            "path": "tools/book_fill_user_set94.py",
+            "matches": 1,
+            "sample": [
+              "+    write_tsv(out,'comparison-differences.tsv',('relative_offset','selected_byte','context_byte','masked'),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1887,
+      "title": "RE-015: map a name-gated node 94 vault-record query",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-015-vault-leader-gate-94/descriptors.tsv",
+            "matches": 1,
+            "sample": [
+              "+index\tslot_va\tpointer_va\tlength\tbytes\tname\tselected_by_mask"
+            ]
+          },
+          {
+            "path": "tools/config_vault_leader94.py",
+            "matches": 1,
+            "sample": [
+              "+    write_tsv(output / 'descriptors.tsv', ('index','slot_va','pointer_va','length','bytes','name','selected_by_mask'),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1886,
+      "title": "staking: recover node 94 profile-signer long sort and fallback",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/staking-profile-signer-sort-94/README.md",
+            "matches": 2,
+            "sample": [
+              "+| Pivot stride count at least 8 | Three recursive selections feed the same three-way selection; direct probes cover stride counts 8 and 64. |",
+              "+Independent Rust implementation: not yet implemented. Cargo lock, compiler and linker settings, two-build comparison, raw and normalized byte matches, normalization masks, and whole-ELF comparison are not yet measured. The Python ordering rule is an independent fixture oracle, not a Rust reconstruction or evidence from running the captured executa"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1871,
+      "title": "RE-017: trace display-name loading, mutation and hash input on node 94",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-017-display-name-loader-root-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+Independent Rust implementation: **not yet implemented**. Cargo build scope, compiler/linker flags, two-build comparison, target execution, raw/normalized binary comparisons, complete helper and call-target closure, vtable/data closure, relocation closure and whole-ELF comparison: **not yet measured**. The selected raw bytes are unmasked; there ar"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1866,
+      "title": "RE-015: trace an address-keyed boolean callback and its configuration-name gate",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tests/test_config_address_query94.py",
+            "matches": 6,
+            "sample": [
+              "+        self.assertEqual({n for n in range(256) if m.name_selected(n, mask)}, expected)",
+              "+        self.assertTrue(m.name_selected(31, mask))",
+              "+        self.assertFalse(m.name_selected(32, mask))",
+              "+        self.assertFalse(m.name_selected(45, mask))",
+              "+        self.assertFalse(m.name_selected(255, mask))"
+            ]
+          },
+          {
+            "path": "tools/config_address_query94.py",
+            "matches": 3,
+            "sample": [
+              "+def name_selected(value, mask):",
+              "+    values = [i for i in range(32) if name_selected(i, mask)] + [32]",
+              "+                      'length': length, 'name': name, 'mask_selected': name_selected(i, mask)})"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1856,
+      "title": "RE-017: trace node 94 scheduled-cancel loading to state-root writers",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-017-cancel-root-94/README.md",
+            "matches": 2,
+            "sample": [
+              "+Addresses are linked ELF virtual addresses, with load base zero. Files record file offsets separately; for example `0x30b8fe0` maps to file offset `0x30b7fe0`. `functions.tsv` gives exclusive FDE ends, CIE/FDE/LSDA addresses and raw FDE-range hashes. An FDE is an unwind-described range, not proof of complete function boundaries. Selected windows a",
+              "+Independent Rust implementation: **not yet implemented**. Cargo build scope, compiler/linker flags, two-build comparison, raw and normalized binary comparison, helper and call-target closure, vtable/data closure and whole-ELF comparison: **not yet measured**. The type-formatter relocation, two Time-helper relocations and prefixed-hex relocation ar"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1853,
+      "title": "[skip ci] RE-005: bind two-map admission and cleanup",
+      "matches": {
+        "metadata": [
+          "Only `research/work-items/RE-005-node94-fixed32-two-maps/` changes, based on `e5c9b6436876b2a4a39daef813171f9879317699`. Node94 is91774280bytes, SHA256`3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f`. Retained identity includes **16completeFDEs/14953bytes/3277GNUrows**,26initialRELA,27direct transfers and28data extents953bytes. Ra"
+        ],
+        "files": []
+      }
+    },
+    {
+      "number": 1844,
+      "title": "staking: recover node 94 validator vote snapshot long-sort path",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/staking-vote-snapshot-sort-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+All addresses are linked ELF virtual addresses; the selected file offsets and unmasked body hashes are in `functions.tsv`. Ends are exclusive unwind FDE ends. Calls and relocation slots corroborate selected entries, but an FDE is not proof of a complete function census. Linear decode covers the selected windows only, and branch targets inside a se"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1836,
+      "title": "RE-006: trace node 94 long cancellation-ID sorting and its failure edges",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-006-cancel-id-long-sort-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+For the checked first four-key network in the small sorter, the independent projection agrees with ordinary unsigned sorting for 256 combinations of four small values. A deliberately changed middle selection differs on 92 combinations. For the pivot leaf's three-way selection, a separate model selects a median value in all 64 combinations; a chang"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-006-cancel-id-long-sort-94/anchors.tsv",
+            "matches": 1,
+            "sample": [
+              "+pivot three-way selection\t0x45c3634\t498b06488b0b4839c80f92c2498b374839f00f92c030d04839f10f92c130d1490f45df84c0490f45de4889d8"
+            ]
+          },
+          {
+            "path": "tools/book_cancel_sort94.py",
+            "matches": 1,
+            "sample": [
+              "+    ('pivot three-way selection', 0x45c3634, '498b06488b0b4839c80f92c2498b374839f00f92c030d04839f10f92c130d1490f45df84c0490f45de4889d8'),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1816,
+      "title": "[skip ci] RE-005: bind nested three-record decoding",
+      "matches": {
+        "metadata": [
+          "Base:`e5c9b6436876b2a4a39daef813171f9879317699`. Target node94:91774280bytes,SHA-256`3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f`. Only`research/work-items/RE-005-node94-three-records/`changes. The primary2352byte/432GNUrow FDE plus four credited word/array/Reader/error dependencies retain **5completeFDEs/3052bytes/642GNUrows**"
+        ],
+        "files": []
+      }
+    },
+    {
+      "number": 1752,
+      "title": "RE-017: trace node 94 post-block retention and checkpoint handoff",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-017-quorum-retention-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+All addresses are link-time ELF virtual addresses; tables separately give file offsets. Ends are exclusive. `functions.tsv` retains the original bytes, SHA-256, FDE and CIE identities for each selected range. FDEs are unwind ranges, not proof of source-function boundaries. `windows.tsv` contains selected unmasked bytes, including the connecting in"
+            ]
+          },
+          {
+            "path": "tests/test_abci_retention94.py",
+            "matches": 1,
+            "sample": [
+              "+    def test_selected_fdes_and_unmasked_comparisons(self):"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1713,
+      "title": "RE-021: trace alternate borrowed registry and post-call account updates on node 94",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tests/test_re21_borrowed_family94.py",
+            "matches": 2,
+            "sample": [
+              "+        self.assertEqual(subject.project_credit_selection(1, mask, mask, 1), 0)",
+              "+        self.assertEqual(subject.project_credit_selection(2, mask, mask, 1), mask)"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1708,
+      "title": "RE-006: map node 94 resting-order index growth and tracker handoff",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tests/test_rest_index_growth94.py",
+            "matches": 1,
+            "sample": [
+              "+    def test_selected_extents_and_unmasked_bytes(self):"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1652,
+      "title": "RE-009: recover node 94 ActionDelayer snapshot field and default decisions",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-009-delayer-snapshot-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+The reader's key classifier calls `0x22ecd20` or `0x22ed250` on the selected string routes. The first uses 128 explicit byte-compare instructions plus a three-way first-byte selector. The second uses two overlapping-word cases, three overlapping SIMD cases, and three 12-byte word cases. Their length dispatches each cover the 15 lengths from 11 thr"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1547,
+      "title": "RE-001: recover node94 generated-name word consumption and normalization",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-generated-name-94/coverage.py",
+            "matches": 1,
+            "sample": [
+              "+        selected = ((~mask & 255) & byte) | (mask & 95)"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1530,
+      "title": "Reconstruct node94 normalization and packed-coefficient loop for all counts",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-004-node94-packed-coefficient-rust/README.md",
+            "matches": 1,
+            "sample": [
+              "+high-limb selection, preserved low 31 bits, masked double-word shifts, arbitrary"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1499,
+      "title": "RE-004: reconstruct all byte indices of the node94 flag-OR family",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-004-flag-or-family-rust-94/PROOF.md",
+            "matches": 1,
+            "sample": [
+              "+bits, 23,170 selections with the mask's high bit set, 83,138 selections"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-004-flag-or-family-rust-94/frozen.json",
+            "matches": 1,
+            "sample": [
+              "+  \"selected_high_bit_masks\": 23170,"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-004-flag-or-family-rust-94/native-result.json",
+            "matches": 1,
+            "sample": [
+              "+    \"selected_high_bit_masks\": 23170,"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-004-flag-or-family-rust-94/oracle.py",
+            "matches": 1,
+            "sample": [
+              "+    record={'cases':len(rows),'members':3,'indices_per_member':256,'high_index_bits_cases':high_index,'selected_high_bit_masks':high_mask,'selected_multi_bit_words':multi,'wrapped_table_base':wrapped_base,'wrapped_store_address':wrapped_store,'inputs_sha256':sha(inputs),'expected_sha256':sha(expected),'oracle_sha256_at_freeze':sha(Path(__file__).r"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1489,
+      "title": "RE-001: reconstruct byte-class selector and close all direct caller boundaries",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-byte-class-selector-rust-94/logs/focused-tests.log",
+            "matches": 1,
+            "sample": [
+              "+test_a0_mask_lock (tests.test_foundation_byte_range_select.ByteRangeSelectEvidenceTests.test_a0_mask_lock) ... ok"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1472,
+      "title": "RE-004: reconstruct node94 dual load with complete relocated windows",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-004-dual-load-rust-94/PROOF.md",
+            "matches": 1,
+            "sample": [
+              "+Four u64 mask words encode exactly R. Dividing i by 64 selects the mask"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1460,
+      "title": "RE-007: reconstruct node94 row selection and leverage gates",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "src/node94-margin-risk/README.md",
+            "matches": 1,
+            "sample": [
+              "+composition driver. These tables obey the selector's mask, mirror and late-state"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1455,
+      "title": "RE-006: recover node94 monotone-key ordering and sort scratch contract",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-006-large-sort-scratch-contract-94/verify.py",
+            "matches": 1,
+            "sample": [
+              "+    wrapped = (selected * 8) & MASK"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1445,
+      "title": "RE-004: reconstruct node94 indexed table offset with store-load aliases",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-004-table-offset-alias-rust-94/oracle.py",
+            "matches": 1,
+            "sample": [
+              "+                    make(selector,MASK,index,bias,out,raw_high=0x87654321)"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1405,
+      "title": "RE-004: reconstruct node94 BSR shift-mask for every u64 input",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-004-node94-bsr-shift-mask-rust/README.md",
+            "matches": 1,
+            "sample": [
+              "+Thus the exact selected-mask relation is"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1392,
+      "title": "RE-004: reconstruct node94 floor and truncation with explicit DAZ",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-004-floor-trunc-rust-94/PROOF.md",
+            "matches": 2,
+            "sample": [
+              "+and selects just the sign mask. For `1023 <= E <= 1074`, its count is",
+              "+`E - 1023`, between 0 and 51, so the selected mask is"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1384,
+      "title": "RE-009: map node 94 nonempty EVM snapshot block-hash JSON rows",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-009-evm-hash-json-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+| Second item | `0x2806390..0x28064d4`, `0x1f69970..0x1f69aaf` | Prefix `0x` and 32 input bytes become 64 lowercase hex characters in input order; `0x42` bytes are enclosed in quotes. The scalar path indexes the captured alphabet, and the selected vector path masks nibbles, shuffles through the same alphabet and interleaves high and low nibbles. |"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1367,
+      "title": "RE-001: recover node94 bloom prefilter's positive mask groups",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-evm-bloom-prefilter-94/README.md",
+            "matches": 2,
+            "sample": [
+              "+   The selected mask loops read 256 bytes at stack `+0x770`, hence offset",
+              "+FDE and two selected 16-lane mask loops, not EVM or whole-node coverage."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1359,
+      "title": "RE-009: map node 94 app hash grouped input serializers",
+      "matches": {
+        "metadata": [
+          "The packet binds three newly analyzed writers to the prior grouped-input call sites. In unrelocated ELF virtual addresses, `0x1e5e450`, `0x1e5ed40`, and `0x1e5d9b0` pass header counts 15, 16, and 8 to the same serializer helper. It extracts 35 child calls with pointer offsets and local error branches, four first-group jump-table names, and the thir"
+        ],
+        "files": []
+      }
+    },
+    {
+      "number": 1340,
+      "title": "RE-001: qualify node94 binary64 ceiling leaf and caller binding",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-ceil-f64-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+selected fraction/mask boundaries and deterministic hash samples. Input and"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1298,
+      "title": "RE-014: qualify conditional EMA fused rounding across releases",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tools/ema_fused_release_drift.py",
+            "matches": 1,
+            "sample": [
+              "+def selected_target(p,mask):"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1151,
+      "title": "Integrate 203 reviewed research and tooling PRs",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-happysonny-review-20261031/review.json",
+            "matches": 1,
+            "sample": [
+              "+      \"reason\": \"Stable nonzero cache word theorem follows native bits19/25 then signed bit15 then bit10 selection;10016 independent mask controls pass. Two initializer callers retain AL unchanged at stack+0xcb, equivalent context+0x6b. Cold initializer, concurrent cache mutation and named CPU features excluded.\","
+            ]
+          },
+          {
+            "path": "research/work-items/RE-005-integer-digit-span-94/NATIVE-CONTROL-LEDGER.json",
+            "matches": 1,
+            "sample": [
+              "+      \"control\": \"selector-lower-nibble-mask7\","
+            ]
+          },
+          {
+            "path": "research/work-items/RE-005-integer-digit-span-94/independent-cases/NATIVE-CONTROL-DESIGN.json",
+            "matches": 1,
+            "sample": [
+              "+      \"label\": \"selector-lower-nibble-mask7\","
+            ]
+          },
+          {
+            "path": "research/work-items/RE-005-integer-digit-span-94/independent-cases/freeze_native_controls.py",
+            "matches": 1,
+            "sample": [
+              "+ ('selector-lower-nibble-mask7',0x14f7660,0x14f76d4,'0f','07','Nibble15 must selectf, not7'),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1140,
+      "title": "Integrate 265 validated static research and tooling PR heads",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-fod-age-selection-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+NaN. Compared NaNs select the panic path **assuming masked FP invalid"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-013-visor-cli-fields/README.md",
+            "matches": 1,
+            "sample": [
+              "+   selected nonzero-mask branch at `0x5b91dc`. The sequence is recorded as"
+            ]
+          },
+          {
+            "path": "research/work-items/foundation-unsigned-clamp-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+- **Inferred:** this is a three-way unsigned clamp: the tag-selected minimum/saturating-subtraction shape supports that label. The binary has no recovered symbol name here. Neither the source-level function name, the struct layout, the meaning of the tag, nor the meaning of any field is proven."
+            ]
+          },
+          {
+            "path": "tools/gap_candidate_release_mapping.py",
+            "matches": 1,
+            "sample": [
+              "+        raise ValueError('Raw selected code differs; no byte masks are permitted')"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1128,
+      "title": "RE-005: reconstruct node #94's capacity-20 decimal digit span",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-005-integer-digit-span-94/NATIVE-CONTROL-LEDGER.json",
+            "matches": 1,
+            "sample": [
+              "+      \"control\": \"selector-lower-nibble-mask7\","
+            ]
+          },
+          {
+            "path": "research/work-items/RE-005-integer-digit-span-94/independent-cases/NATIVE-CONTROL-DESIGN.json",
+            "matches": 1,
+            "sample": [
+              "+      \"label\": \"selector-lower-nibble-mask7\","
+            ]
+          },
+          {
+            "path": "research/work-items/RE-005-integer-digit-span-94/independent-cases/freeze_native_controls.py",
+            "matches": 1,
+            "sample": [
+              "+ ('selector-lower-nibble-mask7',0x14f7660,0x14f76d4,'0f','07','Nibble15 must selectf, not7'),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1048,
+      "title": "RE-014: map two unwindless code candidates across node captures",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "tools/gap_candidate_release_mapping.py",
+            "matches": 1,
+            "sample": [
+              "+        raise ValueError('Raw selected code differs; no byte masks are permitted')"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 988,
+      "title": "RE-013: bind visor argument declarations and raw extraction fields",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-013-visor-cli-fields/README.md",
+            "matches": 1,
+            "sample": [
+              "+   selected nonzero-mask branch at `0x5b91dc`. The sequence is recorded as"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 360,
+      "title": "RE-001: bind FodName age fallback, callback results and minimum reduction",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-fod-age-selection-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+NaN. Compared NaNs select the panic path **assuming masked FP invalid"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 255,
+      "title": "foundation: bind node #94 three-way unsigned clamp 0x15e4f70 \u2014 tag-selected min and saturating subtraction, single direct caller",
+      "matches": {
+        "metadata": [
+          "The foundation component map asks to map time/quantity conversion helpers and distinguish standard-library code from private helpers. A reference label or a matching string cannot establish that mapping. This packet binds one small, previously unclaimed window in node #94: a three-way unsigned clamp whose tag-selected min and saturating subtraction"
+        ],
+        "files": [
+          {
+            "path": "research/work-items/foundation-unsigned-clamp-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+- **Inferred:** this is a three-way unsigned clamp: the tag-selected minimum/saturating-subtraction shape supports that label. The binary has no recovered symbol name here. Neither the source-level function name, the struct layout, the meaning of the tag, nor the meaning of any field is proven."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 33,
+      "title": "RE-001: map node94 guarded maintenance and table resets",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-rate-maintenance-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+- if unsigned mask<8, select mask instead."
+            ]
+          },
+          {
+            "path": "tests/test_rate_maintenance_static.py",
+            "matches": 1,
+            "sample": [
+              "+        # An architectural integer-fragment model for these selected masks."
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "primary_address_and_literal_main_history_matches": [],
+  "closest_semantic_boundary": "See the explicit prior-work distinctions in README.md. Address-only novelty was insufficient: candidate HTTP-client, volume-fold, margin-table, oracle-total and latency-sampler questions were discarded because earlier PRs covered their semantics."
+}

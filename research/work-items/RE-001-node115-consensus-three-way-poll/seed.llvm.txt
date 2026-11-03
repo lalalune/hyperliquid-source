@@ -1,0 +1,65 @@
+# llvm: full owning FDE 0x5ce2080..0x5ce2148 decoded; retained 0x5ce2080..0x5ce2148
+ 5ce2080: 55                           	push	rbp
+ 5ce2081: 41 57                        	push	r15
+ 5ce2083: 41 56                        	push	r14
+ 5ce2085: 53                           	push	rbx
+ 5ce2086: 48 83 ec 18                  	sub	rsp, 0x18
+ 5ce208a: 48 89 f8                     	mov	rax, rdi
+ 5ce208d: 44 8b 36                     	mov	r14d, dword ptr [rsi]
+ 5ce2090: 31 ff                        	xor	edi, edi
+ 5ce2092: ff 10                        	call	qword ptr [rax]
+ 5ce2094: 48 85 c0                     	test	rax, rax
+ 5ce2097: 0f 84 9e 00 00 00            	je	0x5ce213b <.text+0x48c8e3b>
+ 5ce209d: 48 89 c3                     	mov	rbx, rax
+ 5ce20a0: f6 40 38 01                  	test	byte ptr [rax + 0x38], 0x1
+ 5ce20a4: 74 09                        	je	0x5ce20af <.text+0x48c8daf>
+ 5ce20a6: 44 8b 7b 3c                  	mov	r15d, dword ptr [rbx + 0x3c]
+ 5ce20aa: 8b 43 40                     	mov	eax, dword ptr [rbx + 0x40]
+ 5ce20ad: eb 50                        	jmp	0x5ce20ff <.text+0x48c8dff>
+ 5ce20af: 45 31 ff                     	xor	r15d, r15d
+ 5ce20b2: 31 ff                        	xor	edi, edi
+ 5ce20b4: e8 57 12 01 00               	call	0x5cf3310 <.text+0x48da010>
+ 5ce20b9: 48 85 c0                     	test	rax, rax
+ 5ce20bc: 74 7d                        	je	0x5ce213b <.text+0x48c8e3b>
+ 5ce20be: 0f 10 00                     	movups	xmm0, xmmword ptr [rax]
+ 5ce20c1: 48 ff 00                     	inc	qword ptr [rax]
+ 5ce20c4: 0f 29 04 24                  	movaps	xmmword ptr [rsp], xmm0
+ 5ce20c8: bd 01 00 00 00               	mov	ebp, 0x1
+ 5ce20cd: be 01 00 00 00               	mov	esi, 0x1
+ 5ce20d2: f0                           	lock
+ 5ce20d3: 0f c1 35 3e cd 81 00         	xadd	dword ptr [rip + 0x81cd3e], esi # 0x64fee18
+ 5ce20da: 48 89 e7                     	mov	rdi, rsp
+ 5ce20dd: e8 0e 2e 00 00               	call	0x5ce4ef0 <.text+0x48cbbf0>
+ 5ce20e2: 48 89 c1                     	mov	rcx, rax
+ 5ce20e5: 48 c1 e9 20                  	shr	rcx, 0x20
+ 5ce20e9: 39 c1                        	cmp	ecx, eax
+ 5ce20eb: 0f 94 c2                     	sete	dl
+ 5ce20ee: 48 85 c9                     	test	rcx, rcx
+ 5ce20f1: 40 0f 94 c6                  	sete	sil
+ 5ce20f5: 40 84 d6                     	test	sil, dl
+ 5ce20f8: 0f 45 c5                     	cmovne	eax, ebp
+ 5ce20fb: 44 0f 44 f9                  	cmove	r15d, ecx
+ 5ce20ff: 44 89 fa                     	mov	edx, r15d
+ 5ce2102: c1 e2 11                     	shl	edx, 0x11
+ 5ce2105: 44 31 fa                     	xor	edx, r15d
+ 5ce2108: 89 c1                        	mov	ecx, eax
+ 5ce210a: c1 e9 10                     	shr	ecx, 0x10
+ 5ce210d: 31 c1                        	xor	ecx, eax
+ 5ce210f: 31 d1                        	xor	ecx, edx
+ 5ce2111: c1 ea 07                     	shr	edx, 0x7
+ 5ce2114: 31 ca                        	xor	edx, ecx
+ 5ce2116: 8d 0c 02                     	lea	ecx, [rdx + rax]
+ 5ce2119: 49 0f af ce                  	imul	rcx, r14
+ 5ce211d: 48 c1 e9 20                  	shr	rcx, 0x20
+ 5ce2121: c7 43 38 01 00 00 00         	mov	dword ptr [rbx + 0x38], 0x1
+ 5ce2128: 89 43 3c                     	mov	dword ptr [rbx + 0x3c], eax
+ 5ce212b: 89 53 40                     	mov	dword ptr [rbx + 0x40], edx
+ 5ce212e: 89 c8                        	mov	eax, ecx
+ 5ce2130: 48 83 c4 18                  	add	rsp, 0x18
+ 5ce2134: 5b                           	pop	rbx
+ 5ce2135: 41 5e                        	pop	r14
+ 5ce2137: 41 5f                        	pop	r15
+ 5ce2139: 5d                           	pop	rbp
+ 5ce213a: c3                           	ret
+ 5ce213b: 48 8d 3d 8e 37 7e 00         	lea	rdi, [rip + 0x7e378e]   # 0x64c58d0
+ 5ce2142: ff 15 60 e8 7f 00            	call	qword ptr [rip + 0x7fe860] # 0x64e09a8
