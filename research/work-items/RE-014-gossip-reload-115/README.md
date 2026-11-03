@@ -90,6 +90,9 @@ machine-byte comparison, normalization mask or original build recipe claimed.
 Shared inventory reproduction has an explicit unchanged-dependency receipt;
 this is not an exact-head make reproduce run. Earlier same-base global make test
 attempt timed out at9/77files; it remains incomplete, never a full-suite PASS.
-Hosted CI is unobserved. Final scoped validation is recorded in validation.txt.
+Hosted CI is unobserved. Final scoped validation is recorded in validation.txt. The exact-branch full
+make test attempt subsequently reached its1800s limit (exit124) in file10/77;
+first9 files completed, with3tests completed in file10 before termination.
+This is incomplete, not a full-suite PASS.
 Next: close early predicate/metadata/parser callees before composing reload and
 startup behavior. No acceptance gate advances for this bounded result.
