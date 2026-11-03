@@ -21,6 +21,12 @@ def verify(data=None):
     if hashlib.sha256(data).hexdigest() != SHA:
         raise ValueError('Node #115 digest mismatch')
     record = json.loads((PACKET / 'records.json').read_text())
+    if not isinstance(record, dict) \
+            or not {'target_sha256', 'body_sha256', 'windows', 'fixture_sha256', 'cases'} <= record.keys() \
+            or not isinstance(record['windows'], list) \
+            or not all(isinstance(row, dict) and {'start', 'end', 'fde', 'file_offset'} <= row.keys()
+                       for row in record['windows']):
+        raise ValueError('Invalid tagged-count record')
     if record['target_sha256'] != SHA:
         raise ValueError('Record target changed')
     body = bytes.fromhex((PACKET / 'body.hex').read_text())
