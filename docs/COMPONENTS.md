@@ -40,7 +40,7 @@ RocksDB wrappers, block readers and database lifecycle.
 TCP framing, LZ4, channels, rate limits and reconnects.
 
 - Target: node115.
-- Implementation paths: `src/node115-lz4-decode`, `src/node115-ipv6-groups`.
+- Implementation paths: `src/node115-lz4-decode`, `src/node115-ipv6-groups`, `src/node115-tcp-compression-plan`.
 - Observed diagnostic paths: 12.
 - First task: Map frame lengths, compression boundaries and error handling without network traffic.
 
