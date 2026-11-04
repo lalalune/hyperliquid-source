@@ -112,7 +112,11 @@ def section_of(data, va):
 
 def relocations(data):
     """All .rela.dyn entries as (slot, type, addend, addend file offset)."""
-    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    sec = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    if sec is None:
+        raise ValueError('missing.rela.dyn section')
+    if sec['size'] % 24:
+        raise ValueError('truncated.rela.dyn section')
     out = []
     for i, (off, info, add) in enumerate(
             struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']])):
@@ -148,7 +152,9 @@ def tag_byte(tag):
 def call_census(data, targets):
     """Every direct call/jump site in .text for each target VA, with the
     containing FDE start for each site. targets maps role -> VA."""
-    text = next(s for s in sections(data) if s['name'] == '.text')
+    text = next((s for s in sections(data) if s['name'] == '.text'), None)
+    if text is None:
+        raise ValueError('missing.text section')
     blob = data[text['offset']:text['offset'] + text['size']]
     base = text['address']
     _summary, extents, _records = fde_extents(data)
@@ -183,7 +189,9 @@ def rip_relative_refs(data, target):
     qword ptr [rip+disp32] (ff 15 / ff 25) and REX.W mov/lea with a
     RIP-relative ModRM. Sites are raw byte-pattern hits; callers must
     validate kept sites as native instruction starts."""
-    text = next(s for s in sections(data) if s['name'] == '.text')
+    text = next((s for s in sections(data) if s['name'] == '.text'), None)
+    if text is None:
+        raise ValueError('missing.text section')
     blob = data[text['offset']:text['offset'] + text['size']]
     base = text['address']
     found = []
@@ -229,7 +237,9 @@ def analyze(data):
         raise ValueError('expected pinned node115')
     _summary, extents, _records = fde_extents(data)
     by_start = {e['start']: e for e in extents}
-    text_sec = next(s for s in sections(data) if s['name'] == '.text')
+    text_sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    if text_sec is None:
+        raise ValueError('missing.text section')
     owners = {}
     bodies = {}
     for role, (start, end) in OWNERS.items():
