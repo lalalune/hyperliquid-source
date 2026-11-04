@@ -1,5 +1,15 @@
 # RE-012: node115 permit-provider wrapper and conditional instrumentation
 
+## Current repository validation
+
+The user explicitly authorized the disclosed isolated offline evaluator tests. The original repository `make test` command exercised **583 modules**, 5409 reported unittest cases, 899 pytest passes and 9 recorded built-in skips. Script modules may not report an assertion count; no count is invented. Optional compiler/version skips are listed in `repository-tests.json`, not presented as compiler-comparison passes.
+
+The original full command's exit code was 2: one pure-static catalogue fixture hit macOS sandbox hardlink policy. Its unmodified13-test module then passed with a stronger TMPDIR process-exec deny; network and artifact execution restrictions were not relaxed. Original failures/logs remain preserved, and all583 final module results are successful.
+
+ The full suite actually ran on PR2829 head `196bb08453803749319890a91ee2e640cc772283`. All eight PRs have byte-identical tools/tests/src/provenance/artifacts/build-rule trees and differ only in their independent evidence packet plus generated inventory. Shared results are combined with fresh per-packet controls/native regeneration and per-head doctor/verify/catalogue-check/reproduce. This follow-up changes only this README, the test receipt and its manifest; it does not alter target evidence or testing logic.
+
+Execution used an OS network-denying sandbox, isolated HOME/TMPDIR, no inherited auth/proxy state, explicit `HL_ALLOW_CAPTURED_INSTRUCTION_EVAL=1`, offline Cargo and disabled automatic toolchain installation. Captured native binaries, real services, signing and private runtime data were not used. Raw logs and checksums are preserved in the operator findings; this compact receipt pins their identities. The earlier static collection metadata remains historical rather than rewritten. Repository test success does not recover opaque helpers, prove target equivalence or advance any reconstruction/component gate. Hosted CI success is not claimed.
+
 Task/component: RE-012 / node-runtime, one missing provider boundary from the retained IP-permit state packet. Target node115: 105,896,032 bytes, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. Base `05bc2de303c05525b71e7e257426e741bc66a390`. No imported source implementation is used. New analysis/code is MIT; captured bytes retain upstream rights.
 
 Before this packet, `RE-001-node115-ip-permit-state` named `0x4774c50` as an opaque provider. The newly recorded owner is a conditional-instrumentation wrapper around a different callee, `0x47849c0`, and forwards a 16-byte local result. This resolves that local ownership boundary without attributing per-IP storage or admission semantics to the wrapper.
@@ -38,7 +48,7 @@ The listed order corresponds to RDI, RSI, RDX, RCX, R8, R9. `base+0x70` is obser
 
 These statements are conditional on the opaque calls returning normally with the expected ABI and without unclosed aliases invalidating saved storage. They establish explicit local copying and argument construction, not identical runtime outcomes across instrumentation states. The retained tail includes cleanup and `_Unwind_Resume` calls; LSDA actions, exceptional reachability and helper nonreturn contracts are not reconstructed.
 
-## Reproduce, controls and draft gate
+## Reproduce, controls and repository validation
 
 From repository root with installed Python3.11, LLVM objdump and GNU readelf, use a new output directory:
 
@@ -51,6 +61,4 @@ Observed macOS arm64, Python3.11.15, Apple LLVM21.0.0 and GNU readelf2.45. Exact
 
 **27 real below-identity controls** ran: 17 instruction pins, three selected-data locks, one FDE-extent check and six parsed relocation-binding locks. The relocation mutations invoke the same actual parsed binding checker used on the original; these remain static binding controls, not helper-semantic proofs. The first exploratory collector used a weaker relocation inequality check; it was replaced before the two retained final collections. No arbitrary-byte completeness claim is made. Public identity rejection and independent cross-review are recorded in the operator findings.
 
-**DRAFT: the required full test suite has not run and its gate remains unmet.** Existing default tests evaluate captured instructions, outside this task's static-only authorization. Allowed static checks do not replace that gate; a maintainer must arrange compliant validation or obtain additional authorization before readiness. Base doctor/verify passed, base catalogue-check already reported stale README before this packet, and separate reproduce passed. Integration regeneration/check outcomes belong in the PR/operator findings. No workflow or tests are modified to avoid requirements.
-
-No target instruction evaluator, captured execution, native provider/allocator call, network/chain action, independent Rust reconstruction, byte-equivalence or full-node claim is made. Next: recover `0x47849c0` and a caller's raw output consumption before assigning a provider state/result type or admission behavior.
+The packet producer uses no target instruction evaluator, captured execution, native provider/allocator call or network/chain action. No independent Rust reconstruction, byte-equivalence or full-node claim is made. Next: recover `0x47849c0` and a caller's raw output consumption before assigning a provider state/result type or admission behavior.
