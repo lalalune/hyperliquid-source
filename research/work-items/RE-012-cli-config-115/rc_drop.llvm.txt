@@ -1,0 +1,55 @@
+
+<authenticated-node115>:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 1660100: 41 57                        	push	r15
+ 1660102: 41 56                        	push	r14
+ 1660104: 53                           	push	rbx
+ 1660105: 48 8b 1f                     	mov	rbx, qword ptr [rdi]
+ 1660108: 4c 8b 77 08                  	mov	r14, qword ptr [rdi + 0x8]
+ 166010c: 49 8b 06                     	mov	rax, qword ptr [r14]
+ 166010f: 4d 8b 7e 10                  	mov	r15, qword ptr [r14 + 0x10]
+ 1660113: 48 85 c0                     	test	rax, rax
+ 1660116: 74 12                        	je	0x166012a <.text+0x246e2a>
+ 1660118: 49 8d 4f ff                  	lea	rcx, [r15 - 0x1]
+ 166011c: 48 83 e1 f0                  	and	rcx, -0x10
+ 1660120: 48 8d 3c 0b                  	lea	rdi, [rbx + rcx]
+ 1660124: 48 83 c7 10                  	add	rdi, 0x10
+ 1660128: ff d0                        	call	rax
+ 166012a: 48 83 fb ff                  	cmp	rbx, -0x1
+ 166012e: 74 06                        	je	0x1660136 <.text+0x246e36>
+ 1660130: 48 ff 4b 08                  	dec	qword ptr [rbx + 0x8]
+ 1660134: 74 06                        	je	0x166013c <.text+0x246e3c>
+ 1660136: 5b                           	pop	rbx
+ 1660137: 41 5e                        	pop	r14
+ 1660139: 41 5f                        	pop	r15
+ 166013b: c3                           	ret
+ 166013c: 49 8b 4e 08                  	mov	rcx, qword ptr [r14 + 0x8]
+ 1660140: 49 83 ff 09                  	cmp	r15, 0x9
+ 1660144: b8 08 00 00 00               	mov	eax, 0x8
+ 1660149: 49 0f 43 c7                  	cmovae	rax, r15
+ 166014d: 48 01 c1                     	add	rcx, rax
+ 1660150: 48 83 c1 0f                  	add	rcx, 0xf
+ 1660154: 48 89 c6                     	mov	rsi, rax
+ 1660157: 48 f7 de                     	neg	rsi
+ 166015a: 48 21 ce                     	and	rsi, rcx
+ 166015d: 74 d7                        	je	0x1660136 <.text+0x246e36>
+ 166015f: f3 48 0f bc c8               	tzcnt	rcx, rax
+ 1660164: 31 d2                        	xor	edx, edx
+ 1660166: 48 39 f0                     	cmp	rax, rsi
+ 1660169: 0f 47 d1                     	cmova	edx, ecx
+ 166016c: 41 83 ff 11                  	cmp	r15d, 0x11
+ 1660170: 0f 43 d1                     	cmovae	edx, ecx
+ 1660173: 48 89 df                     	mov	rdi, rbx
+ 1660176: 5b                           	pop	rbx
+ 1660177: 41 5e                        	pop	r14
+ 1660179: 41 5f                        	pop	r15
+ 166017b: ff 25 1f f3 e7 04            	jmp	qword ptr [rip + 0x4e7f31f] # 0x64df4a0
+ 1660181: 49 89 c7                     	mov	r15, rax
+ 1660184: 48 89 df                     	mov	rdi, rbx
+ 1660187: 4c 89 f6                     	mov	rsi, r14
+ 166018a: e8 91 e3 ff ff               	call	0x165e520 <.text+0x245220>
+ 166018f: 4c 89 ff                     	mov	rdi, r15
+ 1660192: e8 b9 08 d9 04               	call	0x63f0a50 <_Unwind_Resume@plt>
