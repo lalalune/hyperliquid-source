@@ -1,5 +1,15 @@
 # RE-001: node115 raw-tag text dispatch and structured tag10 formatting
 
+## Current repository validation
+
+The user explicitly authorized the disclosed isolated offline evaluator tests. The original repository `make test` command exercised **583 modules**, 5409 reported unittest cases, 899 pytest passes and 9 recorded built-in skips. Script modules may not report an assertion count; no count is invented. Optional compiler/version skips are listed in `repository-tests.json`, not presented as compiler-comparison passes.
+
+The original full command's exit code was 2: one pure-static catalogue fixture hit macOS sandbox hardlink policy. Its unmodified13-test module then passed with a stronger TMPDIR process-exec deny; network and artifact execution restrictions were not relaxed. Original failures/logs remain preserved, and all583 final module results are successful.
+
+The full suite actually ran on PR2829 head `196bb08453803749319890a91ee2e640cc772283`. All eight PRs have byte-identical tools/tests/src/provenance/artifacts/build-rule trees and differ only in their independent evidence packet plus generated inventory. Shared results are combined with fresh per-packet controls/native regeneration and per-head doctor/verify/catalogue-check/reproduce. This follow-up changes only this README, the test receipt and its manifest; it does not alter target evidence or testing logic.
+
+Execution used an OS network-denying sandbox, isolated HOME/TMPDIR, no inherited auth/proxy state, explicit `HL_ALLOW_CAPTURED_INSTRUCTION_EVAL=1`, offline Cargo and disabled automatic toolchain installation. Captured native binaries, real services, signing and private runtime data were not used. Raw logs and checksums are preserved in the operator findings; this compact receipt pins their identities. The earlier static collection metadata remains historical rather than rewritten. Repository test success does not recover opaque helpers, prove target equivalence or advance any reconstruction/component gate. Hosted CI success is not claimed.
+
 Component: foundation. Base `05bc2de303c05525b71e7e257426e741bc66a390`.
 Target: Linux x86-64 node #115, `artifacts/node/115/hl-node`, 105896032 bytes,
 SHA256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
@@ -122,9 +132,5 @@ No native or source behavior was run to produce that before/after statement.
 
 ## Acceptance boundary
 
-No node/library/crypto operation, formatter callback, instruction interpreter,
-network service or source reference was executed. All92 acceptance gates remain
-false; no whole-function source match or module coverage is claimed. **Required
-full suite was not run** because its default oracle producer exceeds static
-authorization. This packet is for a **DRAFT PR** pending maintainer-arranged
-compliant full validation, not ready/full-gate or hosted-CI success.
+The static packet collector executed no node/library/crypto operation, formatter callback, instruction interpreter, network service or source reference. All92 acceptance gates remain
+false; no whole-function source match or module coverage is claimed.
