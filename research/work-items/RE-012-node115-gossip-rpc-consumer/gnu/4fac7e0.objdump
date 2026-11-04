@@ -1,0 +1,103 @@
+ 4fac7e0:	41 56                                           	push   r14
+ 4fac7e2:	53                                              	push   rbx
+ 4fac7e3:	50                                              	push   rax
+ 4fac7e4:	89 74 24 04                                     	mov    DWORD PTR [rsp+0x4],esi
+ 4fac7e8:	4c 8b 37                                        	mov    r14,QWORD PTR [rdi]
+ 4fac7eb:	49 8d 5e 10                                     	lea    rbx,[r14+0x10]
+ 4fac7ef:	49 8b 46 10                                     	mov    rax,QWORD PTR [r14+0x10]
+ 4fac7f3:	89 c1                                           	mov    ecx,eax
+ 4fac7f5:	83 e1 08                                        	and    ecx,0x8
+ 4fac7f8:	c1 e9 03                                        	shr    ecx,0x3
+ 4fac7fb:	48 83 f8 f0                                     	cmp    rax,0xfffffffffffffff0
+ 4fac7ff:	0f 93 c2                                        	setae  dl
+ 4fac802:	08 ca                                           	or     dl,cl
+ 4fac804:	74 12                                           	je     4fac818 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bc18>
+ 4fac806:	48 89 df                                        	mov    rdi,rbx
+ 4fac809:	31 f6                                           	xor    esi,esi
+ 4fac80b:	b9 00 ca 9a 3b                                  	mov    ecx,0x3b9aca00
+ 4fac810:	ff 15 c2 47 53 01                               	call   QWORD PTR [rip+0x15347c2]        # 64e0fd8 <__register_atfork@plt+0xef448>
+ 4fac816:	eb 0b                                           	jmp    4fac823 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bc0d>
+ 4fac818:	48 8d 48 10                                     	lea    rcx,[rax+0x10]
+ 4fac81c:	f0 48 0f b1 0b                                  	lock cmpxchg QWORD PTR [rbx],rcx
+ 4fac821:	75 e3                                           	jne    4fac806 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bc2a>
+ 4fac823:	31 c0                                           	xor    eax,eax
+ 4fac825:	49 3b 46 18                                     	cmp    rax,QWORD PTR [r14+0x18]
+ 4fac829:	0f 81 97 00 00 00                               	jno    4fac8c6 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bb6a>
+ 4fac82f:	49 8b 46 20                                     	mov    rax,QWORD PTR [r14+0x20]
+ 4fac833:	48 85 c0                                        	test   rax,rax
+ 4fac836:	0f 84 a7 00 00 00                               	je     4fac8e3 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bb4d>
+ 4fac83c:	49 8b 4e 28                                     	mov    rcx,QWORD PTR [r14+0x28]
+ 4fac840:	48 8d b8 b8 00 00 00                            	lea    rdi,[rax+0xb8]
+ 4fac847:	0f b7 b0 e6 00 00 00                            	movzx  esi,WORD PTR [rax+0xe6]
+ 4fac84e:	41 89 f0                                        	mov    r8d,esi
+ 4fac851:	41 c1 e0 02                                     	shl    r8d,0x2
+ 4fac855:	48 c7 c2 ff ff ff ff                            	mov    rdx,0xffffffffffffffff
+ 4fac85c:	0f 1f 40 00                                     	nop    DWORD PTR [rax+0x0]
+ 4fac860:	4d 85 c0                                        	test   r8,r8
+ 4fac863:	74 4b                                           	je     4fac8b0 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bb80>
+ 4fac865:	44 8b 4c 24 04                                  	mov    r9d,DWORD PTR [rsp+0x4]
+ 4fac86a:	44 8b 17                                        	mov    r10d,DWORD PTR [rdi]
+ 4fac86d:	48 83 c7 04                                     	add    rdi,0x4
+ 4fac871:	41 0f c9                                        	bswap  r9d
+ 4fac874:	41 0f ca                                        	bswap  r10d
+ 4fac877:	45 39 d1                                        	cmp    r9d,r10d
+ 4fac87a:	41 0f 97 c1                                     	seta   r9b
+ 4fac87e:	41 80 d9 00                                     	sbb    r9b,0x0
+ 4fac882:	4d 0f be c9                                     	movsx  r9,r9b
+ 4fac886:	4d 85 c9                                        	test   r9,r9
+ 4fac889:	41 0f 98 c2                                     	sets   r10b
+ 4fac88d:	41 0f 9f c1                                     	setg   r9b
+ 4fac891:	45 28 d1                                        	sub    r9b,r10b
+ 4fac894:	48 ff c2                                        	inc    rdx
+ 4fac897:	49 83 c0 fc                                     	add    r8,0xfffffffffffffffc
+ 4fac89b:	41 80 f9 01                                     	cmp    r9b,0x1
+ 4fac89f:	74 bf                                           	je     4fac860 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bbd0>
+ 4fac8a1:	41 0f b6 f1                                     	movzx  esi,r9b
+ 4fac8a5:	85 f6                                           	test   esi,esi
+ 4fac8a7:	75 0a                                           	jne    4fac8b3 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bb7d>
+ 4fac8a9:	eb 34                                           	jmp    4fac8df <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bb51>
+ 4fac8ab:	0f 1f 44 00 00                                  	nop    DWORD PTR [rax+rax*1+0x0]
+ 4fac8b0:	48 89 f2                                        	mov    rdx,rsi
+ 4fac8b3:	48 83 e9 01                                     	sub    rcx,0x1
+ 4fac8b7:	72 2a                                           	jb     4fac8e3 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bb4d>
+ 4fac8b9:	48 8b 84 d0 e8 00 00 00                         	mov    rax,QWORD PTR [rax+rdx*8+0xe8]
+ 4fac8c1:	e9 7a ff ff ff                                  	jmp    4fac840 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bbf0>
+ 4fac8c6:	49 83 c6 18                                     	add    r14,0x18
+ 4fac8ca:	48 8d 74 24 04                                  	lea    rsi,[rsp+0x4]
+ 4fac8cf:	4c 89 f7                                        	mov    rdi,r14
+ 4fac8d2:	e8 f9 e6 84 00                                  	call   57fafd0 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x54d460>
+ 4fac8d7:	48 85 c0                                        	test   rax,rax
+ 4fac8da:	0f 94 c0                                        	sete   al
+ 4fac8dd:	eb 06                                           	jmp    4fac8e5 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bb4b>
+ 4fac8df:	b0 01                                           	mov    al,0x1
+ 4fac8e1:	eb 02                                           	jmp    4fac8e5 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bb4b>
+ 4fac8e3:	31 c0                                           	xor    eax,eax
+ 4fac8e5:	48 c7 c1 f0 ff ff ff                            	mov    rcx,0xfffffffffffffff0
+ 4fac8ec:	f0 48 0f c1 0b                                  	lock xadd QWORD PTR [rbx],rcx
+ 4fac8f1:	48 83 e1 f2                                     	and    rcx,0xfffffffffffffff2
+ 4fac8f5:	48 83 f9 12                                     	cmp    rcx,0x12
+ 4fac8f9:	74 08                                           	je     4fac903 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9bb2d>
+ 4fac8fb:	48 83 c4 08                                     	add    rsp,0x8
+ 4fac8ff:	5b                                              	pop    rbx
+ 4fac900:	41 5e                                           	pop    r14
+ 4fac902:	c3                                              	ret
+ 4fac903:	48 89 df                                        	mov    rdi,rbx
+ 4fac906:	89 c3                                           	mov    ebx,eax
+ 4fac908:	ff 15 da 46 53 01                               	call   QWORD PTR [rip+0x15346da]        # 64e0fe8 <__register_atfork@plt+0xef458>
+ 4fac90e:	89 d8                                           	mov    eax,ebx
+ 4fac910:	48 83 c4 08                                     	add    rsp,0x8
+ 4fac914:	5b                                              	pop    rbx
+ 4fac915:	41 5e                                           	pop    r14
+ 4fac917:	c3                                              	ret
+ 4fac918:	48 c7 c1 f0 ff ff ff                            	mov    rcx,0xfffffffffffffff0
+ 4fac91f:	f0 48 0f c1 0b                                  	lock xadd QWORD PTR [rbx],rcx
+ 4fac924:	49 89 c6                                        	mov    r14,rax
+ 4fac927:	48 83 e1 f2                                     	and    rcx,0xfffffffffffffff2
+ 4fac92b:	48 83 f9 12                                     	cmp    rcx,0x12
+ 4fac92f:	74 08                                           	je     4fac939 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9baf7>
+ 4fac931:	4c 89 f7                                        	mov    rdi,r14
+ 4fac934:	e8 17 41 44 01                                  	call   63f0a50 <_Unwind_Resume@plt>
+ 4fac939:	48 89 df                                        	mov    rdi,rbx
+ 4fac93c:	ff 15 a6 46 53 01                               	call   QWORD PTR [rip+0x15346a6]        # 64e0fe8 <__register_atfork@plt+0xef458>
+ 4fac942:	eb ed                                           	jmp    4fac931 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd9baff>
+ 4fac944:	ff 15 76 2b 53 01                               	call   QWORD PTR [rip+0x1532b76]        # 64df4c0 <__register_atfork@plt+0xed930>
