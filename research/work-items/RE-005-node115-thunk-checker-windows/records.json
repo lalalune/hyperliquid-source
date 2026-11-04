@@ -1,0 +1,446 @@
+{
+ "absolute_refs": {
+  "dispatcher_qword": [],
+  "dispatcher_u32": [],
+  "interior_aligned": [],
+  "thunk_qword": [],
+  "thunk_u32": []
+ },
+ "artifact": {
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "branch_censuses": {
+  "0x2ae1690": [
+   {
+    "kind": "call",
+    "site": "0x2cd83a2"
+   }
+  ],
+  "0x2b9087e": [],
+  "0x2b90af3": [
+   {
+    "kind": "jmp",
+    "site": "0x2b9087e"
+   },
+   {
+    "kind": "jmp",
+    "site": "0x2b90de2"
+   }
+  ],
+  "0x2cc7fa6": [
+   {
+    "kind": "jmp",
+    "site": "0x2cc92c6"
+   }
+  ],
+  "0x2cd8370": []
+ },
+ "dispatcher_loop": {
+  "backedge_site": "0x2ae21ff",
+  "driver_calls_inside_span": {
+   "driver_a": true,
+   "driver_c": true
+  },
+  "loop_head": "0x2ae1974",
+  "tail_accessor": "0x5cdf300",
+  "tail_accessor_call": "0x2ae21f7"
+ },
+ "findings": {
+  "thunk_frequency_bound": "The entry mechanism fires exactly once, so it imposes no rate bound. Re-invocation is bounded only by the dispatcher body itself: the backward span with head 0x2ae1974 and back-edge jne at 0x2ae21ff (taken while the body 0x5cdf300 called at 0x2ae21f7 returns non-null) encloses both driver call sites (driver_a 0x2ae1a47, driver_c 0x2ae1eeb), so per dispatcher-loop iteration each driver runs once and, per #2741, each gate is called twice by its driver.",
+  "thunk_mechanism": "SETTLED. _start (0x1419300) passes main 0x2cef8f0 to __libc_start_main (GOT 0x64df458). The main shim (0x2cef8f0..0x2cef917, exported) builds a stack closure whose first word is the thunk: lea 0x2cd8370 at 0x2cef8f7, store (%rsp) at 0x2cef8fe; it then calls the runtime entry body 0x5c99970 via GOT slot 0x64e6c30 (RELATIVE -> 0x5c99970) with rdi=&closure, rsi=static table 0x6440b48, rdx=argc, rcx=argv, r8=0. After runtime initialisation the entry body loads the table pointer it saved and calls the function pointer at [table+0x28] at 0x5c99e21; that slot (0x6440b70, RELATIVE) holds trampoline 0x292c5c0 (exported), which loads closure[0] into rdi (0x292c5c1) and calls the 5-byte indirect caller 0x2c7bb70 (exported), whose `call *%rdi` at 0x2c7bb71 invokes the thunk. So the thunk is invoked once per process, on the main thread, by program entry -- not via a registered table slot in a data segment, and not via runtime start-up registration: all 168 .init_array entries and the single .fini_array entry resolve elsewhere, and no direct branch, RELATIVE addend/offset, absolute qword/u32 or aligned interior word anywhere in the artifact names the thunk or the dispatcher. (The runtime entry body is the one body in the chain a relocation does name: GOT slot 0x64e6c30, the very slot the shim calls through.)",
+  "window_a_2b90b05": "The call at 0x2b90b05 uses instance rbx+0xf0 (lea at 0x2b90af3); the checker entry byte is [rbx+0x180] (instance+0x90), tested ==3 right after the call at 0x2b90b12. The setup block 0x2b90af3 has exactly two inbound edges in the whole .text: jmp at 0x2b90de2, immediately after the zero store movb $0,[rbx+0x180] at 0x2b90ddb; and jmp at 0x2b9087e, which is case 4 of jump table 0x607328 (dispatched on byte [rbx+0xca], loaded at 0x2b90725, indirect jump at 0x2b9074d) with no store to the entry byte on its path. The only store to [rbx+0x180] in the whole body is the zero store at 0x2b90ddb (store census). On the table edge the checker therefore receives the byte as last written -- by checker_a itself (3 on its predicate-nonzero arm) or by code outside this body -- and the zero-before-call invariant of #2741 does NOT hold for this window.",
+  "window_b_2cc7fb5": "The call at 0x2cc7fb5 uses instance r15+0x240 (lea at 0x2cc7fa6); the checker entry byte is [r15+0x2d0] (instance+0x90), tested ==3 right after the call at 0x2cc7fc6. The setup block 0x2cc7fa6 has exactly two inbound edges in the whole .text: jmp at 0x2cc92c6, immediately after the zero store movb $0,[r15+0x2d0] at 0x2cc92be; and case 4 of jump table 0x60bdb8 (dispatched on byte [r15+0x1da], loaded at 0x2cc21d0, indirect jump at 0x2cc21f2) with no zeroing store on its path. The entry byte has exactly two stores in the body (store census): the zero store at 0x2cc92be and, at 0x2cc5125, a non-constant store mov %cl,[r15+0x2d0] in a record-duplication phase, where cl is the byte copied from [r15+0x10d] (loaded at 0x2cc5031). The zero-before-call invariant of #2741 does NOT hold for this window either."
+ },
+ "init_arrays": {
+  "fini_array": {
+   "contains_dispatcher": false,
+   "contains_thunk": false,
+   "count": 1,
+   "entries": [
+    "0x14193a0"
+   ]
+  },
+  "init_array": {
+   "contains_dispatcher": false,
+   "contains_thunk": false,
+   "count": 168,
+   "entries": [
+    "0x5ca55c0",
+    "0x14193e0",
+    "0x5d20090",
+    "0x5d41fa0",
+    "0x5d483b0",
+    "0x5d83f80",
+    "0x5d979f0",
+    "0x5da48f0",
+    "0x5da8610",
+    "0x5daf1b0",
+    "0x5db5ee0",
+    "0x5dc23d0",
+    "0x5dc9020",
+    "0x5dcb800",
+    "0x5dcd200",
+    "0x5dd3530",
+    "0x5def610",
+    "0x5e11680",
+    "0x5e13220",
+    "0x5e13990",
+    "0x5e19480",
+    "0x5e20620",
+    "0x5e26060",
+    "0x5e278f0",
+    "0x5e2fe20",
+    "0x5e30610",
+    "0x5e448a0",
+    "0x5e49690",
+    "0x5e57290",
+    "0x5e61a10",
+    "0x5e74110",
+    "0x5e7a4b0",
+    "0x5e82af0",
+    "0x5e89c10",
+    "0x5eaa000",
+    "0x5eab1f0",
+    "0x5eae9b0",
+    "0x5eba650",
+    "0x5eba690",
+    "0x5ec8e60",
+    "0x5ecf980",
+    "0x5ed89c0",
+    "0x5ee0ec0",
+    "0x5eeb110",
+    "0x5effdc0",
+    "0x5f007f0",
+    "0x5f04ca0",
+    "0x5f10140",
+    "0x5f178f0",
+    "0x5f1e990",
+    "0x5f23140",
+    "0x5f2e750",
+    "0x5f38420",
+    "0x5f3c800",
+    "0x5f44310",
+    "0x5f44e60",
+    "0x5f53f10",
+    "0x5f5f850",
+    "0x5f93610",
+    "0x5f9ce50",
+    "0x5fa65e0",
+    "0x5fab170",
+    "0x5fb4f20",
+    "0x5fb6240",
+    "0x5fc9420",
+    "0x5fca5d0",
+    "0x5fcc010",
+    "0x5fd4cd0",
+    "0x5fe0fc0",
+    "0x5fe48d0",
+    "0x5fedca0",
+    "0x5fef260",
+    "0x5ffbe80",
+    "0x6006fd0",
+    "0x602e4c0",
+    "0x60343b0",
+    "0x603ca20",
+    "0x6042ac0",
+    "0x604c620",
+    "0x6055190",
+    "0x605e800",
+    "0x6061740",
+    "0x6062f60",
+    "0x6067450",
+    "0x6069d60",
+    "0x606af00",
+    "0x606c140",
+    "0x606c6e0",
+    "0x606d2f0",
+    "0x606f950",
+    "0x60781b0",
+    "0x607b8b0",
+    "0x607c8e0",
+    "0x6093030",
+    "0x60956e0",
+    "0x60b1d80",
+    "0x60c8710",
+    "0x60d4bd0",
+    "0x60d6220",
+    "0x60e1e20",
+    "0x60f35c0",
+    "0x6123280",
+    "0x6128fd0",
+    "0x61299b0",
+    "0x612acb0",
+    "0x612be40",
+    "0x613b7f0",
+    "0x613deb0",
+    "0x613ffe0",
+    "0x6142300",
+    "0x6143d10",
+    "0x6147ed0",
+    "0x6148420",
+    "0x614e150",
+    "0x6151650",
+    "0x61535b0",
+    "0x6156850",
+    "0x615aaa0",
+    "0x615ca00",
+    "0x6164090",
+    "0x6167c80",
+    "0x616f700",
+    "0x6171af0",
+    "0x617db60",
+    "0x6182960",
+    "0x618abc0",
+    "0x618b1a0",
+    "0x618fbc0",
+    "0x61927a0",
+    "0x61980a0",
+    "0x6198860",
+    "0x619bb20",
+    "0x61a3c80",
+    "0x61a4e50",
+    "0x61aca00",
+    "0x61b7020",
+    "0x61bc1c0",
+    "0x61bd080",
+    "0x61c26d0",
+    "0x61c27b0",
+    "0x61cf5d0",
+    "0x61d2970",
+    "0x61d76c0",
+    "0x61df840",
+    "0x61dfc50",
+    "0x61e7c70",
+    "0x61f0520",
+    "0x61f72d0",
+    "0x61f7a60",
+    "0x61f97c0",
+    "0x61fdd60",
+    "0x6200510",
+    "0x6200550",
+    "0x6200590",
+    "0x62005d0",
+    "0x6200610",
+    "0x6200720",
+    "0x6200760",
+    "0x62007a0",
+    "0x62007e0",
+    "0x6200820",
+    "0x6200860",
+    "0x62008a0",
+    "0x6208b00",
+    "0x620a480",
+    "0x620a4c0",
+    "0x620b470",
+    "0x635f320"
+   ]
+  }
+ },
+ "jump_tables": {
+  "0x607328": {
+   "dispatch_byte": "[rbx+0xca]",
+   "dispatch_jump": "0x2b9074d",
+   "dispatch_load": "0x2b90725",
+   "entries": [
+    "0x2b9074f",
+    "0x2b90970",
+    "0x2b9095e",
+    "0x2b90854",
+    "0x2b9087e"
+   ],
+   "next_table_base": "0x60733c",
+   "setup_index": 4
+  },
+  "0x60bdb8": {
+   "dispatch_byte": "[r15+0x1da]",
+   "dispatch_jump": "0x2cc21f2",
+   "dispatch_load": "0x2cc21d0",
+   "entries": [
+    "0x2cc21f4",
+    "0x2cc4004",
+    "0x2cc4049",
+    "0x2cc2e79",
+    "0x2cc7fa6"
+   ],
+   "next_table_base": "0x60bdcc",
+   "setup_index": 4
+  }
+ },
+ "lea_census": {
+  "checker_a": [],
+  "dispatcher": [],
+  "driver_a": [],
+  "driver_c": [],
+  "gate_a": [],
+  "gate_c": [],
+  "thunk": [
+   "0x2cef8f7"
+  ]
+ },
+ "open_edges": [
+  "Whether the un-zeroed table edges (0x607328 case 4, 0x60bdb8 case 4) are exercised with a nonzero entry byte at runtime is a dynamic question: statically the byte can be 3 (left by a previous checker_a call) or a copied value (window B), but which object states actually reach those cases is not decidable from these two bodies alone.",
+  "The two checker_a clone callers of the gate_a mirror family (census in #2741 records.json, checker_a_clone sites) were not re-traced here; their zero-before-call status stays as #2741 left it.",
+  "The dispatcher loop tail callee 0x5cdf300 is identified only as the body whose non-null return keeps the loop running (it sits in the TLS accessor cluster next to the destructor 0x5cdf410 of #2741); its own body is not traced in this packet."
+ ],
+ "owners": {
+  "indirect_caller": {
+   "bytes": 5,
+   "end": "0x2c7bb75",
+   "file_offset": "0x2c7ab70",
+   "sha256": "dfa92fdb18d3efd032329f2235d028649db70c80c85efbf1934b940879949131",
+   "start": "0x2c7bb70"
+  },
+  "main_shim": {
+   "bytes": 39,
+   "end": "0x2cef917",
+   "file_offset": "0x2cee8f0",
+   "sha256": "c0621248d6ec3fd7ae1ee2df6b09bdd79541219362b313e5567717eb8f59a5c9",
+   "start": "0x2cef8f0"
+  },
+  "thunk": {
+   "bytes": 63,
+   "end": "0x2cd83af",
+   "file_offset": "0x2cd7370",
+   "sha256": "ed23bc89640a43b1a5f373d5cb18929d79ce5b47923e58ba0565f592ba2b60d6",
+   "start": "0x2cd8370"
+  },
+  "trampoline": {
+   "bytes": 13,
+   "end": "0x292c5cd",
+   "file_offset": "0x292b5c0",
+   "sha256": "db5dda988668ccd38fdd5497478b4debb42cef10df0ff03b88cff2b65343976c",
+   "start": "0x292c5c0"
+  }
+ },
+ "pinned_bodies": {
+  "caller_a": {
+   "bytes": 2722,
+   "end": "0x2b91042",
+   "file_offset": "0x2b8f5a0",
+   "note": "extent/digest only; not exported",
+   "sha256": "1211adcc8256be7e443381a98b92f2078c58730332bcd2efc1837eddfe29939f",
+   "start": "0x2b905a0"
+  },
+  "caller_b": {
+   "bytes": 34299,
+   "end": "0x2cc971b",
+   "file_offset": "0x2cc0120",
+   "note": "extent/digest only; not exported",
+   "sha256": "3efcb009eaf0ab2e2a477d73edbf7834894109e9fdcd943460d2bce59b9a0c57",
+   "start": "0x2cc1120"
+  },
+  "checker_a": {
+   "bytes": 955,
+   "end": "0x2c7f71b",
+   "file_offset": "0x2c7e360",
+   "note": "extent/digest only; not exported",
+   "sha256": "ff59e02e9d3e078985ba6e3b58d8f64f3a6ed5171f2120d314cbb5a3c744daed",
+   "start": "0x2c7f360"
+  },
+  "dispatcher": {
+   "bytes": 4386,
+   "end": "0x2ae27b2",
+   "file_offset": "0x2ae0690",
+   "note": "extent/digest only; not exported",
+   "sha256": "6ca0595c13836bca0cb0173bd591a09d6da6791532e23a5a71c63715380727d9",
+   "start": "0x2ae1690"
+  },
+  "rt_entry": {
+   "bytes": 1749,
+   "end": "0x5c9a045",
+   "file_offset": "0x5c98970",
+   "note": "extent/digest only; not exported",
+   "sha256": "85c321c5ef4dd64cd999ac133e97a170ffa7d088eab3fe7fcb64f31768181111",
+   "start": "0x5c99970"
+  }
+ },
+ "rela_refs": {
+  "dispatcher": {
+   "addend_hits": [],
+   "offset_hits": []
+  },
+  "indirect_caller": {
+   "addend_hits": [],
+   "offset_hits": []
+  },
+  "main_shim": {
+   "addend_hits": [],
+   "offset_hits": []
+  },
+  "rt_entry": {
+   "addend_hits": [
+    "0x64e6c30"
+   ],
+   "offset_hits": []
+  },
+  "thunk": {
+   "addend_hits": [],
+   "offset_hits": []
+  },
+  "trampoline": {
+   "addend_hits": [
+    "0x6440b68",
+    "0x6440b70"
+   ],
+   "offset_hits": []
+  }
+ },
+ "slots": {
+  "0x6440b60": "0x292e230",
+  "0x6440b68": "0x292c5c0",
+  "0x6440b70": "0x292c5c0",
+  "0x6440b78": "0x4480d1",
+  "0x64df458": "__libc_start_main",
+  "0x64e6c30": "0x5c99970"
+ },
+ "windows": {
+  "caller_a": {
+   "body": "0x2b905a0",
+   "call": "0x2b90b05",
+   "entry_byte": "[rbx+0x180]",
+   "instance": "[rbx+0xf0]",
+   "instance_lea": "0x2b90af3",
+   "post_call_test": "0x2b90b12",
+   "stores_covering_entry_byte": [
+    {
+     "disp": 384,
+     "mnem": "movb",
+     "site": "0x2b90ddb",
+     "src": "$0x0",
+     "width": 1
+    }
+   ]
+  },
+  "caller_b": {
+   "body": "0x2cc1120",
+   "call": "0x2cc7fb5",
+   "copied_byte_source": {
+    "from": "[r15+0x10d]",
+    "load": "0x2cc5031",
+    "reg": "cl"
+   },
+   "entry_byte": "[r15+0x2d0]",
+   "instance": "[r15+0x240]",
+   "instance_lea": "0x2cc7fa6",
+   "post_call_test": "0x2cc7fc6",
+   "stores_covering_entry_byte": [
+    {
+     "disp": 720,
+     "mnem": "mov",
+     "site": "0x2cc5125",
+     "src": "%cl",
+     "width": 1
+    },
+    {
+     "disp": 720,
+     "mnem": "movb",
+     "site": "0x2cc92be",
+     "src": "$0x0",
+     "width": 1
+    }
+   ]
+  }
+ },
+ "work_item": "RE-005-node115-thunk-checker-windows"
+}
