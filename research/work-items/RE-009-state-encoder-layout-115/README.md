@@ -48,9 +48,12 @@ make verify test catalogue-check
 make reproduce
 ```
 
-The second command rewrites the selected GNU transcripts and
-static-validation.json with the observed tool versions. It invokes only GNU
-analysis tools, never the captured artifact. The extractor validates the
+The second command invokes only GNU analysis tools, never the captured artifact.
+It rewrites the selected GNU transcripts and static-validation.json with observed
+tool versions. Selected text transcripts use canonical LF for repository storage;
+instruction bytes, operands and frame extents are unchanged. The hash of complete
+raw readelf stdout is retained separately with its original line endings.
+The extractor validates the
 **entire** target size/hash before parsing. It uses actual .eh_frame FDEs and
 file-backed PT_LOAD mappings; no address rebasing or normalization masks.
 A local Windows run used explicit D Python/GNU paths and native Git Bash under

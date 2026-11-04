@@ -57,7 +57,8 @@ def main():
     print("$ GNU readelf independently checks selected actual FDE extents", flush=True)
     p = subprocess.run([args.readelf, "--debug-dump=frames", str(args.binary)],
                        capture_output=True, timeout=120, check=True)
-    frames = p.stdout.decode("utf-8")
+    # Canonical LF storage matches Git; the complete raw stdout hash stays below.
+    frames = p.stdout.decode("utf-8").replace("\r\n", "\n")
     wanted = {(int(x["start"], 16), int(x["end"], 16)) for x in contexts}
     retained = []
     found = set()
