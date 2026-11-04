@@ -1,0 +1,61 @@
+{
+  "blockedTask": "RE-005 Node115 RLP flag/two-word reconstruction; mandatory make test stopped at41/584",
+  "reasonExistingToolsInsufficient": "The unmodified relocation mutation test copies105896032bytes for each of52495loop iterations. The default180second no-output guard expires before its assertion. Raising or removing the guard is unnecessary.",
+  "minimalCorrection": "struct.unpack_from reads the unchanged local bytearray directly; the mutation and all assertions remain.",
+  "baseHead": "05bc2de303c05525b71e7e257426e741bc66a390",
+  "candidateCommitBeforeCorrection": "292e0eaade827375bd76d19919360d1c1bd5e8f6",
+  "equivalenceProofPreparedBeforeChange": {
+    "sourceBase": "05bc2de303c05525b71e7e257426e741bc66a390",
+    "path": "tests/test_assembled_record_readers_static.py",
+    "beforeSha256": "6eb5b06f04a8d5701d71712b32528a1b516d387960f67fd216a3664f92242138",
+    "afterSha256": "fac10e9a3dbf3f8441a4c8bd5170c36409ebed61657e97d82f1897df7d999176",
+    "exactReplacement": {
+      "before": "struct.unpack_from('<QQq', bytes(b), off)",
+      "after": "struct.unpack_from('<QQq', b, off)"
+    },
+    "assertionCallsIdentical": true,
+    "assertionCalls": 27,
+    "testMethodsIdentical": true,
+    "testMethods": [
+      "test_analysis_shape",
+      "test_censuses",
+      "test_delegate_sentinel_mutation_rejected",
+      "test_disc_cmp_mutation_rejected",
+      "test_exit_slot_mutation_rejected",
+      "test_map1_child_mutation_rejected",
+      "test_owner_body_mutation_rejected",
+      "test_pair_drop_step_mutation_rejected",
+      "test_regeneration",
+      "test_stack_census",
+      "test_tagged_size_mutation_rejected"
+    ],
+    "allRelocationTuplesEqualBeforeMutation": true,
+    "tupleComparisons": 60723,
+    "sourceNotYetModified": true,
+    "targetExecuted": false,
+    "domain": "The local bytearray is unchanged through the selected relocation read; mutation occurs only after its match and immediately breaks the loop. No snapshots are used after mutation."
+  },
+  "base": {
+    "status": "failed-no-progress",
+    "exitCode": 124,
+    "idleSeconds": 180,
+    "rawStdoutSha256": "f74638b9a42ecadc060bdfddb2ff1836897208f1d62f84d098919be8bd87c83a",
+    "rawStdoutUtf8": "test_analysis_shape (test_assembled_record_readers_static.AssembledRecordReadersTests.test_analysis_shape) ... ok\r\ntest_censuses (test_assembled_record_readers_static.AssembledRecordReadersTests.test_censuses) ... ok\r\ntest_delegate_sentinel_mutation_rejected (test_assembled_record_readers_static.AssembledRecordReadersTests.test_delegate_sentinel_mutation_rejected) ... ok\r\ntest_disc_cmp_mutation_rejected (test_assembled_record_readers_static.AssembledRecordReadersTests.test_disc_cmp_mutation_rejected) ... ok\r\ntest_exit_slot_mutation_rejected (test_assembled_record_readers_static.AssembledRecordReadersTests.test_exit_slot_mutation_rejected) ... ",
+    "ownedProcessesAfterCleanup": 0,
+    "lockReleased": true
+  },
+  "corrected": {
+    "status": "passed",
+    "exitCode": 0,
+    "idleSeconds": 180,
+    "rawStdoutSha256": "462847d27bd8202e1d274e31d6400f4ce5027c9fe59a931ee39f8f1fd72b244c",
+    "rawStdoutUtf8": "test_analysis_shape (test_assembled_record_readers_static.AssembledRecordReadersTests.test_analysis_shape) ... ok\r\ntest_censuses (test_assembled_record_readers_static.AssembledRecordReadersTests.test_censuses) ... ok\r\ntest_delegate_sentinel_mutation_rejected (test_assembled_record_readers_static.AssembledRecordReadersTests.test_delegate_sentinel_mutation_rejected) ... ok\r\ntest_disc_cmp_mutation_rejected (test_assembled_record_readers_static.AssembledRecordReadersTests.test_disc_cmp_mutation_rejected) ... ok\r\ntest_exit_slot_mutation_rejected (test_assembled_record_readers_static.AssembledRecordReadersTests.test_exit_slot_mutation_rejected) ... ok\r\ntest_map1_child_mutation_rejected (test_assembled_record_readers_static.AssembledRecordReadersTests.test_map1_child_mutation_rejected) ... ok\r\ntest_owner_body_mutation_rejected (test_assembled_record_readers_static.AssembledRecordReadersTests.test_owner_body_mutation_rejected) ... ok\r\ntest_pair_drop_step_mutation_rejected (test_assembled_record_readers_static.AssembledRecordReadersTests.test_pair_drop_step_mutation_rejected) ... ok\r\ntest_regeneration (test_assembled_record_readers_static.AssembledRecordReadersTests.test_regeneration) ... ok\r\ntest_stack_census (test_assembled_record_readers_static.AssembledRecordReadersTests.test_stack_census) ... ok\r\ntest_tagged_size_mutation_rejected (test_assembled_record_readers_static.AssembledRecordReadersTests.test_tagged_size_mutation_rejected) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 11 tests in 62.618s\r\n\r\nOK\r\n",
+    "ownedProcessesAfterCleanup": 0,
+    "lockReleased": true
+  },
+  "correctedTests": 11,
+  "correctedUnittestSeconds": 62.618,
+  "scope": "Focused correction evidence before final commit; no full-suite pass claimed",
+  "targetExecuted": false,
+  "noTestSelectedOutOrAssertionRemoved": true
+}
