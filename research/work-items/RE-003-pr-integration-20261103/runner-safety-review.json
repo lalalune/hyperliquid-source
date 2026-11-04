@@ -1,0 +1,32 @@
+{
+  "files_scanned": 553,
+  "unauthorized_default_execution": [
+    {
+      "file": "tests/test_node115_snapshot_selectors_rust.py",
+      "trigger": "Node115SelectorRustTests.setUpClass -> subject.oracle -> worker/wrapper/mode_gate/exit_gate -> drive -> Machine.step on captured .text"
+    },
+    {
+      "file": "tests/test_node115_weighted_fold_rust.py",
+      "trigger": "WeightedFoldRustTests.setUpClass -> subject.oracle -> evaluate -> Machine.step on captured .text"
+    },
+    {
+      "file": "tests/test_node115_latency_pair_rust.py",
+      "trigger": "LatencyPairRustTests.setUpClass -> subject.oracle -> Engine.run -> generic.decode/read_code/Machine.step on captured .text"
+    }
+  ],
+  "safe_model_notes": [
+    "wire_qty_rust.oracle uses extracted constants and native.limb_relation arithmetic, not instruction stepping.",
+    "nonce_ring_rust.own_machine rejects captured ET_DYN target; only an explicitly supplied independently built ET_REL Rust object is interpreted.",
+    "Most mmap calls are ACCESS_READ or ACCESS_COPY; they are static input reading/corruption fixtures.",
+    "referrer_action selected gates use bounded extracted constants/branches with explicit synthetic lookup results; no process/general CPU emulator found."
+  ],
+  "runner_review": [
+    "AST dispatch addresses top-level pytest functions and main-only scripts that unittest silently missed.",
+    "Pytest class detection is conservative; pytest still collects unittest subclasses so aliased TestCase bases are not lost.",
+    "PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 prevents external plugin side effects but async/third-party fixtures need explicit plugins if ever present.",
+    "Keep exact __name__ == __main__ AST comparison instead of substring test if strengthening inference; substring can match unrelated guards.",
+    "Files with only module-level test calls still execute under unittest import; errors propagate.",
+    "A successful zero-test import for an unrecognized suite style remains possible; add result count auditing or manifest classification for completeness."
+  ],
+  "limits": "Read-only pattern/AST and selected subject-body review of current merge snapshot; not a guarantee against arbitrary obfuscated execution. No captured code or test suite was executed."
+}

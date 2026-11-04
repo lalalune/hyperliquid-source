@@ -1,5 +1,6 @@
 import hashlib
 import json
+import re
 import struct
 import sys
 import tempfile
@@ -53,8 +54,12 @@ class ChainOriginWritersTest(unittest.TestCase):
                          'tls_registry_disassembly.txt',
                          'chain_class_writer_disassembly.txt',
                          'spec_builder_disassembly.txt'):
-                self.assertEqual((out / name).read_bytes(),
-                                 (PACKET / name).read_bytes(), name)
+                fresh, retained = (out / name).read_bytes(), (PACKET / name).read_bytes()
+                # Normalize only the filename GNU embeds in its header.
+                normalize = lambda raw: re.sub(
+                    rb'^.*hl-node:\s+file format', b'hl-node:     file format',
+                    raw, flags=re.M)
+                self.assertEqual(normalize(fresh), normalize(retained), name)
 
     def test_owners_and_references(self):
         owners = {o['role']: o for o in self.records['owners']}
@@ -120,7 +125,7 @@ class ChainOriginWritersTest(unittest.TestCase):
         # Decode the two lu.rs FDE exports and confirm every lea site in
         # the census is a native instruction start there.
         text = pkt.executable(
-            '/usr/bin/objdump',
+            'objdump',
             ['-d', '-M', 'intel', '--insn-width=16',
              '--start-address=0x2accee0', '--stop-address=0x2ad0db0',
              str(ARTIFACT)])
@@ -130,7 +135,7 @@ class ChainOriginWritersTest(unittest.TestCase):
         for site in (0x2acf71a, 0x2acf743, 0x2acf755, 0x2acf767):
             self.assertIn(site, starts)
         text = pkt.executable(
-            '/usr/bin/objdump',
+            'objdump',
             ['-d', '-M', 'intel', '--insn-width=16',
              '--start-address=0x2ad0db0', '--stop-address=0x2ad4db7',
              str(ARTIFACT)])

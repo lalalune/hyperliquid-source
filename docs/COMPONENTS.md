@@ -10,7 +10,7 @@ The authenticated inventory contains 180 allowlisted source-path observations. D
 Time, logging, wallets, collections and shared runtime utilities.
 
 - Target: node115.
-- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`.
+- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`, `src/node115-host-ip-gates`, `src/node115-packed-millis`.
 - Observed diagnostic paths: 33.
 - First task: Map time/quantity conversion helpers; distinguish standard-library code from private helpers.
 
@@ -40,7 +40,7 @@ RocksDB wrappers, block readers and database lifecycle.
 TCP framing, LZ4, channels, rate limits and reconnects.
 
 - Target: node115.
-- Implementation paths: `src/node115-lz4-decode`.
+- Implementation paths: `src/node115-lz4-decode`, `src/node115-ipv6-groups`.
 - Observed diagnostic paths: 12.
 - First task: Map frame lengths, compression boundaries and error handling without network traffic.
 

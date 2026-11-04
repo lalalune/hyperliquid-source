@@ -1,4 +1,5 @@
 """Selected node115 instruction routes, constructor closure and compiler admission."""
+import os
 import json
 from pathlib import Path
 import sys
@@ -10,6 +11,8 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 import node115_snapshot_selectors_rust as subject
 
 
+@unittest.skipUnless(os.environ.get('HL_ALLOW_CAPTURED_INSTRUCTION_EVAL') == '1',
+                     'captured instruction evaluation requires explicit authorization')
 class Node115SelectorRustTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

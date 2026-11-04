@@ -1,5 +1,6 @@
 import hashlib
 import json
+import re
 import struct
 import sys
 import tempfile
@@ -49,8 +50,13 @@ class ChainEntryInsertStaticTests(unittest.TestCase):
                          'worker_map_ops_window.txt',
                          'worker_assembly_window.txt',
                          'worker_result_stores_b_window.txt'):
-                self.assertEqual((out / name).read_bytes(),
-                                 (PACKET / name).read_bytes(), name)
+                fresh, retained = (out / name).read_bytes(), (PACKET / name).read_bytes()
+                # GNU embeds the input filename in its header; paths differ
+                # across worktrees. Preserve all remaining bytes verbatim.
+                normalize = lambda raw: re.sub(
+                    rb'^.*hl-node:\s+file format', b'hl-node:     file format',
+                    raw, flags=re.M)
+                self.assertEqual(normalize(fresh), normalize(retained), name)
 
     def test_owner_hashes(self):
         owners = {o['role']: o for o in self.records['owners']}
@@ -158,7 +164,7 @@ class ChainEntryInsertStaticTests(unittest.TestCase):
         body = pkt.read(self.data, pkt.WORKER[0],
                         pkt.WORKER[1] - pkt.WORKER[0])
         text = pkt.executable(
-            '/usr/bin/objdump',
+            'objdump',
             ['-d', '-M', 'intel', '--insn-width=16',
              f'--start-address={pkt.WORKER[0]:#x}',
              f'--stop-address={pkt.WORKER[1]:#x}', str(BINARY)])

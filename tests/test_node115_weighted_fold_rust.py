@@ -1,4 +1,5 @@
 """Actual two-span fold, carry controls and explicit post-provider boundary."""
+import os
 import json
 from pathlib import Path
 import subprocess
@@ -8,6 +9,8 @@ import unittest
 from unittest import mock
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 import node115_weighted_fold_rust as subject
+@unittest.skipUnless(os.environ.get('HL_ALLOW_CAPTURED_INSTRUCTION_EVAL') == '1',
+                     'captured instruction evaluation requires explicit authorization')
 class WeightedFoldRustTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):cls.result=subject.oracle()

@@ -54,7 +54,8 @@ Both complete source and target extents are authenticated. These candidates have
 
 | Target / candidate | Attribution | Target bytes | Source bytes | Result |
 | --- | --- | ---: | ---: | --- |
-| node115: Mio accept address/ownership boundary (unequal source extent) | mio | 260 | 239 | Unmatched; no aligned-byte comparison |
+| node115: socket2 internal keepalive at 0x5c68520 (unequal source extent) | socket2 | 227 | 418 | Unmatched; no aligned-byte comparison |
+| node115: socket2 internal keepalive at 0x5c68610 (unequal source extent) | socket2 | 227 | 418 | Unmatched; no aligned-byte comparison |
 
 ## Full target coverage
 

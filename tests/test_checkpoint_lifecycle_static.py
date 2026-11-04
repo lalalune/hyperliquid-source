@@ -35,7 +35,10 @@ class CheckpointLifecycleTests(unittest.TestCase):
             output = Path(directory)
             subject.generate(subject.TARGET, output)
             for path in output.iterdir():
-                self.assertEqual(path.read_bytes(), (subject.PACKET / path.name).read_bytes(), path.name)
+                if path.name == 'native-tools.txt':
+                    self.assertRegex(path.read_text(), r'^GNU objdump .+ [0-9]')
+                else:
+                    self.assertEqual(path.read_bytes(), (subject.PACKET / path.name).read_bytes(), path.name)
 
     def test_cp_arguments_are_real_read_operands(self):
         self.assertEqual(subject.command_projection(self.data, 0), {'command': 'cp', 'flag': b'-R'.hex()})

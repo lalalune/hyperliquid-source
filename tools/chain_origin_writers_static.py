@@ -951,6 +951,7 @@ def analyze(data):
 def executable(path, args, marker=None):
     out = subprocess.run([str(path), *args], capture_output=True, text=True,
                          check=False)
+    require(out.returncode == 0, f'{path} failed: {out.stderr.strip()}')
     if marker is not None:
         require(marker in out.stdout, f'{path} output changed')
     return out.stdout
@@ -970,7 +971,7 @@ def generate(binary, output):
                     'tls_registry', 'chain_class_writer', 'spec_builder')
     for role in export_roles:
         body, start, end = bodies[role]
-        text = executable('/usr/bin/objdump',
+        text = executable('objdump',
                           ['-d', '-M', 'intel', '--insn-width=16',
                            f'--start-address={start:#x}',
                            f'--stop-address={end:#x}', str(binary)])
@@ -982,12 +983,12 @@ def generate(binary, output):
     # both bodies with the same pins validated there.
     for role in ('gb_b2', 'b4_caller_stager'):
         body, start, end = bodies[role]
-        text = executable('/usr/bin/objdump',
+        text = executable('objdump',
                           ['-d', '-M', 'intel', '--insn-width=16',
                            f'--start-address={start:#x}',
                            f'--stop-address={end:#x}', str(binary)])
         decode_export(text, start, end, body)
-    readelf = executable('/usr/bin/readelf',
+    readelf = executable('readelf',
                          ['--debug-dump=frames', str(binary)]).splitlines()
     cie_lines = {}
     for line in readelf:

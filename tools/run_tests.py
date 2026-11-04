@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the complete flat unittest file set with fresh imports for every file.
+"""Run the complete flat test file set with fresh imports for every file.
 
 Some tests retain full captured images in module globals. Sequential children
 release that memory after each file without changing any tests or suppressing
@@ -7,6 +7,8 @@ their ordinary unittest output. Packages need a separate discovery design;
 refuse them instead of silently omitting their tests or load_tests hooks.
 """
 import argparse
+import ast
+import os
 import fnmatch
 from pathlib import Path
 import re
@@ -30,6 +32,45 @@ def test_files(start):
     return sorted(matching)
 
 
+
+def test_command(python, start, path):
+    """Keep unittest isolation while admitting function and script test suites."""
+    if path is not None:
+        try:
+            tree = ast.parse(path.read_text())
+        except (SyntaxError, UnicodeError):
+            tree = None  # Let normal discovery report the original import error.
+        if tree is not None:
+            functions = any(isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                            and node.name.startswith('test_') for node in tree.body)
+            pytest_classes = any(isinstance(node, ast.ClassDef)
+                                 and node.name.startswith('Test')
+                                 and not any(isinstance(base, ast.Attribute)
+                                             and base.attr == 'TestCase'
+                                             or isinstance(base, ast.Name)
+                                             and base.id == 'TestCase'
+                                             for base in node.bases)
+                                 for node in tree.body)
+            if functions or pytest_classes:
+                return [*python, '-m', 'pytest', '-q', str(path.resolve())]
+            methods = any(isinstance(node, ast.ClassDef)
+                          and any(isinstance(child, ast.FunctionDef)
+                                  and child.name.startswith('test_')
+                                  for child in node.body) for node in tree.body)
+            script = any(isinstance(node, ast.If)
+                         and isinstance(node.test, ast.Compare)
+                         and len(node.test.ops) == 1
+                         and isinstance(node.test.ops[0], ast.Eq)
+                         and {ast.unparse(node.test.left),
+                              ast.unparse(node.test.comparators[0])}
+                             in ({"__name__", "'__main__'"}, {"__name__", '"__main__"'})
+                         for node in tree.body)
+            if not methods and (script or any(isinstance(node, ast.Assert) for node in tree.body)):
+                return [*python, str(path.resolve())]
+    return [*python, '-m', 'unittest', 'discover', '-s', str(start.resolve()),
+            '-p', path.name if path is not None else 'test*.py', '-v']
+
+
 def run(start):
     files = test_files(start)
     # The stdlib helper also preserves -O/-B/-W/-X, as for multiprocessing.
@@ -39,10 +80,10 @@ def run(start):
     for ordinal, path in enumerate(files or [None], 1):
         if path is not None:
             print(f'\n[{ordinal}/{len(files)}] {path.name}', file=sys.stderr, flush=True)
-        command = [*python, '-m', 'unittest', 'discover', '-s', str(start.resolve()),
-                   '-p', path.name if path is not None else 'test*.py', '-v']
+        command = test_command(python, start, path)
         try:
-            child = subprocess.Popen(command)
+            env = dict(os.environ, PYTEST_DISABLE_PLUGIN_AUTOLOAD='1')
+            child = subprocess.Popen(command, env=env)
             try:
                 returncode = child.wait()
             except BaseException:

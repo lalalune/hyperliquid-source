@@ -1,0 +1,170 @@
+{
+  "head": "4d5cf11678d417d412801c4fac48ae7e7526fdd4",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "review_scope": [
+    "tools/byte_progress.py",
+    "tests/test_node115_catalogue.py",
+    "registry and per-record relocation ownership metadata"
+  ],
+  "tool_sha256": "9e464480106fd014e5fabe19e1dab93e83aa7024d7c99aa759c3d26a3f193f2a",
+  "disposition": "no blocker in submitted comparisons; minor type guard recommended",
+  "findings": [
+    {
+      "severity": "low",
+      "file": "tools/byte_progress.py",
+      "line": 68,
+      "issue": "kind is tested by numeric membership without strict integer type; JSON 4.0 is accepted as ELF relocation kind4.",
+      "repro": "compare(b\"abcd0000\", b\"abcd1234\", [{\"offset\":4,\"width\":4,\"kind\":4.0,\"addend\":52}]) returns relocation_qualified=True",
+      "fix": "Add type(kind) is int beside existing field type checks; extend rejection cases.",
+      "impact_on_current_rows": "None observed: all102605 submitted relocation rows have strict integer kinds."
+    }
+  ],
+  "confirmed": [
+    "Only four-byte relocation fields are admitted; out-of-bounds, overlaps and all-byte masking reject.",
+    "Named relaxations constrain opcode byte changes and retain ModRM/prefix bytes outside masks.",
+    "Per-census pointer checks bind target range, source offset and source body digest to the same record.",
+    "All7884 registry windows are dependency-tagged; source kinds published-artifact, licensed-assembly build or published-crate rebuild.",
+    "No change to research/progress.json; component summaries omit dependency-tagged rows."
+  ],
+  "metadata_audit": {
+    "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "head": "4d5cf11678d417d412801c4fac48ae7e7526fdd4",
+    "windows": 7884,
+    "dependencies": {
+      "zstandard": 2,
+      "rust-core": 112,
+      "compiler-builtins": 13,
+      "rust-alloc": 9,
+      "rust-std": 174,
+      "vendored-crates": 309,
+      "native-libraries": 7265
+    },
+    "source_kinds": {
+      "licensed-assembly build": 2,
+      "published-artifact": 308,
+      "published-crate rebuild": 7574
+    },
+    "relocation_kind_counts": {
+      "2": 29904,
+      "9": 1685,
+      "4": 65157,
+      "42": 5859
+    },
+    "relaxation_counts": {
+      "gotpcrelx-mov-lea": 2981
+    },
+    "ownership_or_type_errors": [],
+    "source_records": "Every per-census pointer binds source offset/body digest and target range; pinned document resolution uses duplicate-key rejecting JSON. Independent source-body bytes/build checks assigned to other agent.",
+    "progress_changed": false,
+    "limits": "No claim that masked target call/data destinations are equivalent; accepted category is relocation-qualified dependency text only."
+  },
+  "probe_results": [
+    {
+      "name": "kind-2",
+      "accepted": true,
+      "qualified": true,
+      "mask_bytes": 4
+    },
+    {
+      "name": "kind-4",
+      "accepted": true,
+      "qualified": true,
+      "mask_bytes": 4
+    },
+    {
+      "name": "kind-9",
+      "accepted": true,
+      "qualified": true,
+      "mask_bytes": 4
+    },
+    {
+      "name": "kind-41",
+      "accepted": true,
+      "qualified": true,
+      "mask_bytes": 4
+    },
+    {
+      "name": "kind-42",
+      "accepted": true,
+      "qualified": true,
+      "mask_bytes": 4
+    },
+    {
+      "name": "kind-1",
+      "accepted": false,
+      "error_type": "ValueError",
+      "message": "Only recorded four-byte PC32/PLT32/GOTPCREL(X) fields are supported"
+    },
+    {
+      "name": "kind-24",
+      "accepted": false,
+      "error_type": "ValueError",
+      "message": "Only recorded four-byte PC32/PLT32/GOTPCREL(X) fields are supported"
+    },
+    {
+      "name": "kind-26",
+      "accepted": false,
+      "error_type": "ValueError",
+      "message": "Only recorded four-byte PC32/PLT32/GOTPCREL(X) fields are supported"
+    },
+    {
+      "name": "kind-4.0",
+      "accepted": true,
+      "qualified": true,
+      "mask_bytes": 4
+    },
+    {
+      "name": "overlap",
+      "accepted": false,
+      "error_type": "ValueError",
+      "message": "Overlapping/out-of-bounds relocation field"
+    },
+    {
+      "name": "off-end",
+      "accepted": false,
+      "error_type": "ValueError",
+      "message": "Overlapping/out-of-bounds relocation field"
+    },
+    {
+      "name": "all-masked",
+      "accepted": false,
+      "error_type": "ValueError",
+      "message": "No comparable non-relocation bytes"
+    },
+    {
+      "name": "bool-addend",
+      "accepted": false,
+      "error_type": "ValueError",
+      "message": "Only recorded four-byte PC32/PLT32/GOTPCREL(X) fields are supported"
+    },
+    {
+      "name": "mov-lea-correct",
+      "accepted": true,
+      "qualified": true,
+      "mask_bytes": 5
+    },
+    {
+      "name": "mov-lea-wrong-modrm",
+      "accepted": false,
+      "error_type": "ValueError",
+      "message": "Relaxation bytes differ from the named psABI rewrite"
+    },
+    {
+      "name": "mov-lea-untagged",
+      "accepted": true,
+      "qualified": false,
+      "mask_bytes": 4
+    },
+    {
+      "name": "mov-lea-kind41-rex",
+      "accepted": true,
+      "qualified": true,
+      "mask_bytes": 5
+    }
+  ],
+  "limits": [
+    "Current masks/source bodies separately checked by another reviewer.",
+    "Comparator deliberately does not resolve masked call/data targets; this remains a relocation-qualified text comparison rather than equivalence.",
+    "No captured code was executed. No files in integration modified."
+  ]
+}

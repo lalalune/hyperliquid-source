@@ -21,10 +21,10 @@ known. A source-path string in a binary is a Location record, not semantics.
 
 ## Reproduce
 
-Exact scratch verifier command (host-assigned):
+From the repository root:
 
 ```sh
-python3 test-results/slop-workbench/packet-c7673693d897.py
+python3 tools/rmp_signable_window.py
 ```
 
 The saved committed checker for this packet is `tools/rmp_signable_window.py`.
@@ -62,13 +62,12 @@ pinned target and are re-derived by the checker rather than copied.
 
 What the bytes show: exactly one maximal printable-ASCII run in these two
 sections contains `rmp_signable`, and that run is the action-signing source
-path record. What is **not** yet established by a recorded derivation: the
-exact VA and length of that run as re-derived by the checker, the
-`.rela.dyn` RELATIVE slot whose addend points at it, the neighbouring words of
-the surrounding record, the one native instruction that references that slot
-or string, and the FDE half-open extent that actually contains that
-instruction. Those fields stay **unresolved** until the verifier output for the
-current saved source is recorded; they are not guessed here.
+path record. The checker derives the run at VA/file offset `0x4470c4`, length 29, and
+`evidence.json` retains that result together with the census and section geometry.
+The `.rela.dyn` RELATIVE slot whose addend points at it, neighbouring words of
+the surrounding record, native code references and their containing FDEs remain
+**unresolved**. A path string and printable-run census do not establish signing
+semantics or first-party ownership.
 
 Negative control already on record: an earlier hypothesis that scanned for
 guessed action-wire prefixes (`l1/action/rmp_signable.rs`, `l1/action/`,
@@ -95,3 +94,10 @@ recovered, and no byte-window comparison against reconstructed code is claimed.
 - Next question: for the single recorded `rmp_signable` run, which `.rela.dyn`
   RELATIVE slot holds its VA, which instruction reads that slot or string, and
   which authenticated FDE half-open extent contains that instruction?
+
+## Integration validation
+
+The original submission omitted `evidence.json`, so the committed checker failed
+after deriving the pinned observations. The record is now saved from that same
+checker against the authenticated #115 target. The complete checker, including
+all three corruption controls, passes; no additional semantic claim is made.

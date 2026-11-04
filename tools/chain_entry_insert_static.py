@@ -944,6 +944,7 @@ def analyze(data):
 def executable(path, args, marker=None):
     out = subprocess.run([str(path), *args], capture_output=True, text=True,
                          check=False)
+    require(out.returncode == 0, f'{path} failed: {out.stderr.strip()}')
     if marker is not None:
         require(marker in out.stdout, f'{path} output changed')
     return out.stdout
@@ -961,7 +962,7 @@ def generate(binary, output):
             bodies[role] = (read(data, start, end - start), start, end)
 
     def export(role, start, end, body, name):
-        text = executable('/usr/bin/objdump',
+        text = executable('objdump',
                           ['-d', '-M', 'intel', '--insn-width=16',
                            f'--start-address={start:#x}',
                            f'--stop-address={end:#x}', str(binary)])
@@ -982,7 +983,7 @@ def generate(binary, output):
     # worker body (pins and census sites): decode the full body here
     # without committing the export.
     wbody, wstart, wend = bodies['registry_worker']
-    text = executable('/usr/bin/objdump',
+    text = executable('objdump',
                       ['-d', '-M', 'intel', '--insn-width=16',
                        f'--start-address={wstart:#x}',
                        f'--stop-address={wend:#x}', str(binary)])
@@ -994,7 +995,7 @@ def generate(binary, output):
     for site in asserted:
         require(site in starts, f'worker site {site:#x} is not an instruction start')
 
-    readelf = executable('/usr/bin/readelf',
+    readelf = executable('readelf',
                          ['--debug-dump=frames', str(binary)]).splitlines()
     cie_lines = {}
     for line in readelf:
