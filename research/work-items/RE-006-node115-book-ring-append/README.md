@@ -18,12 +18,12 @@ instantiations of one insert-path helper. Each one:
    `length == capacity`. The other arm never appends; it only calls
    the shared insert routine and, when the level byte at `+0x20` is
    clear, sets that byte and caches the routine result at `+0x28` —
-   the same `+0x28` qword the append arm later writes as element
-   field 0.
+   the cached argument on the derivation-zero path. The append
+   record instead starts with the saved order `+0xf0` qword.
 
 Both arms return the shared insert routine's result. The twins differ
 only in rip-relative displacements and in three per-twin callees (key
-construction, level lookup, shared routine); all 63 pinned exact
+construction, level lookup, shared routine); all 66 pinned exact
 instruction sites and all branch targets are identical.
 
 ## Scope
@@ -54,7 +54,7 @@ ranges and all four caller ranges from the FDE extents, re-derives
 every body hash, scans the whole `.text` for direct `E8` callers,
 confirms no relative relocation reaches any of the six bodies, parses
 both `core::panic::Location` records from their relative relocations,
-and pins 85 instruction sites per owner (63 exact instruction byte
+and pins 88 instruction sites per owner (66 exact instruction byte
 strings plus 22 resolved branch/call/slot/lea targets), each validated
 as a native instruction start during generation.
 
@@ -90,7 +90,8 @@ as a native instruction start during generation.
    `0x4e188f0`. The arm flag qword is 1 when the second callee returns
    nonzero, else the qword already at level `+0x20`. The order is
    copied again (0x110 bytes) and the shared routine is called with
-   the cached qword at level `+0x28` and the flag qword as stack
+   the selected qword (post-call RDX pointee on the nonzero derivation
+   arm; level `+0x28` on the zero arm) and the flag qword as stack
    arguments. A `#[track_caller]` call to `0x4dbe910` follows with
    `level + 0x50`, the qword at order `+0xf0`, the dword at order
    `+0xdc`, and the routine result, attributed to
@@ -104,8 +105,7 @@ as a native instruction start during generation.
    `head + length` reduced by one conditional subtraction of capacity
    (`cmovae`), i.e. `(head + length) mod capacity` under the ring
    invariant `head, length < capacity`. The 32-byte element written
-   at `[level+0x38] + index * 32` is: the cached qword from level
-   `+0x28` at `+0`, the dword from order `+0xdc` at `+8`, and the 16
+   at `[level+0x38] + index * 32` is: the saved order qword from `+0xf0` at `+0`, the dword from order `+0xdc` at `+8`, and the 16
    patched copy bytes at `+12`. The arm returns the shared routine
    result, forwarded in `rbx`.
 
@@ -123,10 +123,10 @@ traced in this packet.
 
 ## Next question
 
-What does the shared insert routine (`0x58df360` / `0x58df790`)
-return, given that the registration arm caches that value at level
-`+0x28` and the append arm later writes the cached value as element
-field 0 of every appended record?
+Close the growth/lookup helper effects and caller-owned record invariants
+before composing a complete insert path. The cached shared-routine argument
+and the saved order word written to ring field 0 are distinct carriers; no
+equality between them is established by these bodies.
 
 ## Validation
 
@@ -145,3 +145,22 @@ records — the guarded field displacement, the `cmovne` opcode, the
 arm split immediate, the order copy size, the element size shift, the
 panic message, the panic location line, and one caller `E8` opcode —
 requiring `analyze` to reject each mutation.
+
+## Corrected first-field attribution
+
+The original packet incorrectly called element field0 the cached level+0x28
+qword. On the derivation-zero arm, that cached value is passed as a shared-
+routine argument. The nonzero arm instead reads through RDX after the derivation
+call; that pointee is unclosed here. In both twins, R15 is later overwritten
+from stack+0x30 before the ring store. The stack
+word was saved from RBX, loaded from order+0xf0. Actual instruction sites are
+retained in owners_detail.element0_origin and independently pinned by the
+producer. This data-flow claim assumes ordinary callee-saved-register and
+caller-stack behavior; it does not implement opaque helpers.
+
+A qualified post-callback original-instruction replay with saved order word17
+and cached word900 stores17 in both twins, contradicting the earlier source
+prediction900. See ../RE-006-book-ring-source-fix-115 for the retained before/after
+reproducer and actual byte controls. The ordinary tail writes28 of each32-byte
+slot; bytes28..31 are untouched, not initialized padding. This correction does
+not change the observed ring stride, shared-routine return or helper boundaries.
