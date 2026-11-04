@@ -1,0 +1,728 @@
+{
+ "artifact": {
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "clone_equivalence": {
+  "checker_a__checker_a_clone": {
+   "equal": true,
+   "normalised_lines": 235
+  },
+  "checker_b__checker_b_clone": {
+   "equal": true,
+   "normalised_lines": 199
+  },
+  "helper_b720__helper_b720_clone": {
+   "equal": true,
+   "normalised_lines": 64
+  }
+ },
+ "exported_bodies": [
+  "checker_a",
+  "checker_b",
+  "checker_a_clone",
+  "checker_b_clone",
+  "builder_a",
+  "predicate_a",
+  "keyhash_b",
+  "lookup_b",
+  "method_b",
+  "helper_b720",
+  "helper_b720_clone"
+ ],
+ "findings": {
+  "builder_a_rule": "builder 0x5cf2150 (409 B, shared by both gates) calls the descriptor accessor 0x5cf2b50 (slot 0x64e0848) and base-value callee 0x5c842e0(1), performs checked 1e9 / 946684800 arithmetic, asserts through slot 0x64df770 when a handle dword equals 1000000000, and writes only S+0x00 (accessor rax), S+0x08 (accessor rdx), S+0x10 := 2, S+0x60 (computed value) and S+0x68 (dword). The rest of S is initialised by the predicate normalisation.",
+  "checker_a_layout": "arg+0x00 f64 value v (read); arg+0x08 f64 copy of v (written by the state-0 arm); arg+0x10 f64 copy of v / re-entry value source; arg+0x18..0x88 the 0x70-byte built struct S (builder output, then predicate input); arg+0x88 sub-state byte; arg+0x90 state byte.",
+  "checker_a_question": "checker_a is a resumable state machine over a 0x98-byte sub-object (arg = rdi). In gate_c it runs on two instances of the same kind: arg = record+0x150 (state-4 arm call at gate_c 0x2cbb717) and arg = record+0xd8 (r14-phase call at 0x2cb9923).",
+  "checker_a_return_rule": "State byte [arg+0x90]: 0 = fresh, 3 = resume, 1 and 2 are trap arms (location-static shims 0x1681e80 / 0x1681e60 from base/src/lu.rs statics, then ud2). Fresh arm: v := [arg+0x00]; [arg+0x08] := v. If v == +-0.0: [arg+0x90] := 1 and return 0 (the [arg+0x88] byte is NOT written on this path). If v < 0: panic through slot 0x64df6b8 with the base/src/bucket_guard.rs format pieces at 0x43b857 and dl = 0; NaN reaches the same panic with dl = 1. If v > 0 finite: v is decomposed (biased exponent, 1e9-unit scaling) into the (rsi, rdx) inputs of builder 0x5cf2150 (slot 0x64e13a0, descriptor static 0x644dc28); the 0x70-byte result is copied into S = [arg+0x18..0x88) and predicate 0x5cf2d30 (slot 0x64e0858) runs on S with the caller context. Predicate nonzero: [arg+0x88] := 3, [arg+0x90] := 3, return the predicate eax (nonzero). Predicate zero: the handle pair is dropped (refcount dec on [arg+0x20]; drop fn chosen by byte [arg+0x18] between slots 0x64dfdc8 / 0x64dfdb8; drop_pair 0x2ca0790 on &[arg+0x28]), [arg+0x88] := 1, [arg+0x90] := 1, return 0. Resume arm ([arg+0x90] == 3) dispatches on [arg+0x88]: 0 re-runs builder+predicate from v = [arg+0x10] (no copy, no state zeroing), 3 calls the predicate directly on the existing S, 1 and 2 trap. EH pads drop &[arg+0x28] and the bodies at &[arg+0x18] / &[arg+0x10], write state 2 to [arg+0x88] and [arg+0x90], and _Unwind_Resume.",
+  "checker_b_layout": "arg+0x00..0x20 source descriptor D {cap +0x00, ptr +0x08, len +0x10, tag byte +0x18}; arg+0x20..0x40 the working copy of D; arg+0x40 pointer slot holding &[arg+0x20]; arg+0x48..0x68 built key struct B {len +0x48, buffer +0x50, len +0x58, tag +0x60}; arg+0x68 / +0x78 the constant &str pair (0x451330, 16) written twice (\"async_wait_inner\"); arg+0x88 the handle object pointer written by keyhash_b; arg+0x90 / +0x98 / +0xa0 state bytes.",
+  "checker_b_question": "checker_b is a resumable state machine over a 0xa8-byte sub-object (arg = record+0x128 in gate_c). It turns the source byte string at arg+0x00 into a registry-backed handle and polls it once per call.",
+  "checker_b_return_rule": "Entry dispatch on [arg+0xa0]; states 1 and 2 trap. The fresh arm copies D to [arg+0x20..0x40), stores [arg+0x40] := &[arg+0x20] and [arg+0x98] := 0; the resume arm dispatches on [arg+0x98], whose state-0 arm reloads the descriptor through [arg+0x40]. The string bytes are copied to a fresh allocation (allocator slot 0x64df480, memcpy slot 0x64df508; len 0 uses sentinel buffer 1), B is built, the constant name pair is written, [arg+0x90] := 0, and keyhash_b 0x2b3c9d0 (direct call at 0x2c7fb66) stores a heap handle at [arg+0x88]. lookup_b 0x2e4adb0 (0x2c7fb84) then polls: it presets the result tag qword to 1 and calls the vtable method [handle+0x10]+0x18 = 0x2b15630. The method returns without writing when its readiness callee (slot 0x64dfe80 -> 0x5cdb250, on &[obj+0x60]) returns 0, leaving tag 1; when ready it requires [obj+0x38] == 1 (else the \"JoinHandle polled after completion\" panic at 0x6068d2), sets [obj+0x38] := 2 and writes result {tag 0, payload triple from obj+0x40..0x58}. lookup_b also forces tag 1 on its TLS fast path. checker_b returns 1 (bit 0 set, all three state bytes := 3, second return value = the caller context) when the result tag byte != 0, and returns 0 when the tag is 0: it then CAS-transitions the handle state word 0xcc -> 0x84 (contention calls the vtable drop 0x2b19230), consumes the payload triple through helper 0x2c7f720 (callback fn 0x24a7c50; its rax becomes checker_b second return value in rdx), sets all state bytes := 1 and frees the source descriptor buffer when [arg+0x20] != 0. EH pads drop B (0x2c93260) and the [arg+0x40] descriptor (0x2ca6960), free the source buffer, write state 2 to all three state bytes and _Unwind_Resume. Re-entry through sub-state [arg+0x98] == 3 dispatches on [arg+0x90]: state 0 reloads the constant pair from [arg+0x68] / [arg+0x70] and rejoins the keyhash phase with the previously built B.",
+  "clone_verdict": "The gate_a clones are logic-identical to the gate_c originals. All five relative jump tables reproduce the original arm offsets exactly (checker_a +0x2e/+0x304/+0x2f7/+0x4d and +0x6f/+0x320/+0x311/+0x287; checker_b +0x2b/+0x244/+0x237/+0x56, +0x78/+0x275/+0x261/+0x1fe, +0x22a/+0x298/+0x289/+0x132), the normalised instruction streams are equal, and the decision callees are shared bodies (builder 0x5cf2150 and predicate 0x5cf2d30 via the same slots; keyhash_b 0x2b3c9d0 and lookup_b 0x2e4adb0 by the same direct calls). The only per-family differences are family-local drop glue: checker_b payload helper 0x2c7f720 vs clone 0x2a90e10 (both 227 B, normalised-equal), drop_pair 0x2ca0790 vs 0x2abc7e0, and the EH drop bodies (gate_c 0x2c8b730 96 B / 0x2ca4700 114 B / 0x2c93260 62 B / 0x2ca6960 69 B; gate_a analogues 0x2a9e950 96 B / 0x2ac0e00 114 B / 0x2aaab40 62 B / 0x2ac30e0 69 B), plus each clone its own jump tables and location statics.",
+  "keyhash_b_rule": "keyhash_b 0x2b3c9d0 (742 B, shared) resolves the location descriptor (static 0x644dbe0) through accessor 0x5cf2b50, takes the spinlock on global word 0x64fee40 (pointer from slot 0x64e16c0), builds a 0x100-byte object on the stack {state 0xcc at +0x00, vtable 0x6449b00 at +0x10, registry refcount/value at +0x20/+0x28, B copied in}, allocates it via slot 0x64df590 -> 0x63577f0, inserts it into one of two registry slots through slot 0x64e7718 -> 0x5cf5100 (a duplicate insert panics with the \"OS can't spawn worker thread: \" pieces at 0x431a60) and returns the heap object pointer.",
+  "precise_negatives": "Not statically decidable from these bodies: (1) which callee inside the predicate post-check chain overwrites the -1 sentinel at S+0x38 (the conversion 0x5cead40 and the slot-0x64e0518 callee 0x5ce91b0 both run between the sentinel store and the decision read; their internals are not pinned here). (2) The semantic identity of method_b readiness callee 0x5cdb250 beyond its (obj, &[obj+0x60]) -> al contract. (3) The producer of the caller-supplied struct that gate_c copies into rec+0x118..0x158 at 0x2cb7225 (outside the gate body). (4) The pre-first-call value of [rec+0x1d8] (no writer inside the gates or the shapers).",
+  "predicate_a_rule": "predicate 0x5cf2d30 (703 B, shared) first consults a TLS cache (TLS-0x1130; guard slot 0x64e0510): if the TLS u16 low bit is set and its high byte is 0 it calls slot 0x64e0520 -> 0x5cf3b90 (context, static 0x64c6648) and returns 1. Otherwise, when [S+0x10] == 2, it normalises S: refcount-inc on [S+0x08], conversion 0x5cf1d70 on &[S+0x10], [S+0x18] := handle, [S+0x20..0x38) := 0, [S+0x38] := -1, [S+0x40] := 0, [S+0x50] := 0, byte [S+0x58] := 0, then conversion 0x5cead40(&[S+0x10], [S+0x60], dword [S+0x68]). Decision: if dword [handle + (tag&1 ? 0x160 : 0x240) + 0x90] == 1000000000 -> assert-fail (slot 0x64df770) and ud2; else if byte [handle + base + 0x80] != 0 -> panic with the bucket_guard \"$min > max\" pieces and ud2; else call slot 0x64e0518 -> 0x5ce91b0 on &[S+0x40] (result unused), then return 1 iff [S+0x38] != -1; return 0 iff [S+0x38] == -1 and byte [S+0x58] == 0; [S+0x38] == -1 with [S+0x58] != 0 unwinds through the \"timer error: \" format piece at 0x433ed3 (not a normal return). So checker_a returns nonzero exactly when the predicate fast path fires or the normalised struct carries a converted value at S+0x38 after the post-check call.",
+  "producer_census": "gate_c writes the tested fields itself, in the phases that immediately precede the calls; the shapers write none of them (the #2604 bracket census records no shaper access at the phase offsets of record+0x128 / +0x150 / +0x1d8 / +0x1e0). Per field: (a) checker_b source triple [rec+0x130 ptr / +0x138 len / +0x140 tag byte] - on entry rounds it arrives through the verbatim 0x40-byte copy at gate_c 0x2cb7225..0x2cb7255 that fills rec+0x118..0x158 from a caller-supplied struct (*rax): gate-copied, not gate-computed; its producer outside the gate is the boundary. In the funnel round the gate overwrites +0x128 (f64 store 0x2cbb552), +0x130 (f64 store 0x2cbb610), +0x138..+0x148 and +0x148 (0x2cbb69e / 0x2cbb68e, from the slot-0x64df6e8 descriptor call) - but those stores land AFTER the 0x2cbb490 checker_b call of the same arm. (b) checker_a f64 [rec+0x150]: exactly one gate store, 0x2cbb6f9, copying the gate-computed double at [rec+0x130] (clamped computation from [rec+0xa8] via slot 0x64e7460, constants 2.0 / -1.0 / 600.0) - gate-built. (c) checker_a state bytes: [rec+0x1e0] zeroed by the gate at 0x2cbb701 immediately before the call; [rec+0x1d8] has NO gate store - it is written only by checker_a itself, so its pre-first-call value is incoming record residue. (d) the +0xd8 instance: the gate stores the f64 constant 86400000000.0 (bits 0x42341dd760000000) at [rec+0xd8] at 0x2cb990d and zeroes its state byte [rec+0x168] at 0x2cb9914 - gate-built; its [arg+0x88] byte at rec+0x160 is written by checker_a itself and, in one other phase, by the gate store at 0x2cb73e0 (paired with [rec+0x168] at 0x2cb73ed). The two checker_a instances are staggered by 0x78 bytes, so instance fields alias: rec+0x160 / +0x168 are both the +0xd8 instance state bytes and the +0x150 instance [arg+0x10] / S+0x00.",
+  "r14_phase_call": "At gate_c 0x2cb98fc, r14 := lea [rbx+0xd8]; the gate stores the f64 constant 86400000000.0 at [rbx+0xd8] (0x2cb9903 / 0x2cb990d), zeroes [rbx+0x170] (r15 target) and [rbx+0x168], then calls checker_a at 0x2cb9923 with rdi = r14 and rsi = the context spill [rsp+0x8]. It is the same sub-object kind as the +0x150 instance: the zero path tests [rbx+0x168] == 3 and [rbx+0x160] == 3 (its [arg+0x90] / [arg+0x88]), drops the handle pair at [rbx+0xf8] with the tag byte at [rbx+0xf0] (its S+0x00 / S+0x08) and calls drop_pair 0x2ca0790 on &[rbx+0x100] (its &[arg+0x28]) at 0x2cb9985, exactly mirroring checker_a internal layout; a nonzero return sets [rbx+0x170] := 3 and joins the funnel mid-tail at 0x2cb802d with outcome 4; a zero return sets [rbx+0x170] := 1, calls cleanup 0x2ca3ab0 on &[rbx+0xd8] and reaches the return-0 arm at 0x2cb99a7."
+ },
+ "gate_census": {
+  "gate_c": {
+   "0x120": {
+    "leas": [
+     "0x2cb67b1",
+     "0x2cb67dd"
+    ],
+    "loads": [
+     "0x2cb67e9",
+     "0x2cbb053"
+    ],
+    "stores": [
+     "0x2cb67bd"
+    ]
+   },
+   "0x121": {
+    "loads": [
+     "0x2cb6809"
+    ],
+    "stores": [
+     "0x2cb67c4"
+    ]
+   },
+   "0x122": {
+    "loads": [
+     "0x2cb6810"
+    ]
+   },
+   "0x123": {
+    "loads": [
+     "0x2cb6818"
+    ]
+   },
+   "0x124": {
+    "loads": [
+     "0x2cb681f"
+    ]
+   },
+   "0x128": {
+    "leas": [
+     "0x2cbb481"
+    ],
+    "loads": [
+     "0x2cb74bf"
+    ],
+    "stores": [
+     "0x2cb7245",
+     "0x2cbb552"
+    ]
+   },
+   "0x130": {
+    "leas": [
+     "0x2cbb5f9"
+    ],
+    "loads": [
+     "0x2cbb6f1"
+    ],
+    "stores": [
+     "0x2cbb610"
+    ]
+   },
+   "0x138": {
+    "loads": [
+     "0x2cb74c7",
+     "0x2cbb6cb",
+     "0x2cbb77b"
+    ],
+    "stores": [
+     "0x2cb724d",
+     "0x2cbb69e"
+    ]
+   },
+   "0x140": {
+    "loads": [
+     "0x2cbb6d7",
+     "0x2cbb787"
+    ]
+   },
+   "0x148": {
+    "loads": [
+     "0x2cb74cf"
+    ],
+    "stores": [
+     "0x2cb7255",
+     "0x2cbb68e"
+    ]
+   },
+   "0x150": {
+    "leas": [
+     "0x2cbb708"
+    ],
+    "stores": [
+     "0x2cbb6f9"
+    ]
+   },
+   "0x158": {
+    "loads": [
+     "0x2cb748b"
+    ]
+   },
+   "0x160": {
+    "loads": [
+     "0x2cb7492",
+     "0x2cb9945"
+    ],
+    "stores": [
+     "0x2cb73e0"
+    ]
+   },
+   "0x168": {
+    "leas": [
+     "0x2cbb01e"
+    ],
+    "loads": [
+     "0x2cb74fb",
+     "0x2cb8903",
+     "0x2cb993c",
+     "0x2cbb73d"
+    ],
+    "stores": [
+     "0x2cb73ed",
+     "0x2cb9914"
+    ]
+   },
+   "0x170": {
+    "leas": [
+     "0x2cb7019",
+     "0x2cb98ee",
+     "0x2cbafeb",
+     "0x2cbb736"
+    ],
+    "loads": [
+     "0x2cb7020",
+     "0x2cb86b1"
+    ],
+    "stores": [
+     "0x2cb7449",
+     "0x2cb98f5"
+    ]
+   },
+   "0x178": {
+    "leas": [
+     "0x2cbb766",
+     "0x2cbb9fa"
+    ]
+   },
+   "0x180": {
+    "loads": [
+     "0x2cb86b9"
+    ],
+    "stores": [
+     "0x2cb7451"
+    ]
+   },
+   "0x190": {
+    "loads": [
+     "0x2cb86a2"
+    ],
+    "stores": [
+     "0x2cb7461"
+    ]
+   },
+   "0x198": {
+    "leas": [
+     "0x2cb8973",
+     "0x2cb97aa",
+     "0x2cbad82"
+    ],
+    "stores": [
+     "0x2cb8068"
+    ]
+   },
+   "0x1a0": {
+    "leas": [
+     "0x2cb806f"
+    ]
+   },
+   "0x1d8": {
+    "loads": [
+     "0x2cbb72d"
+    ]
+   },
+   "0x1e0": {
+    "loads": [
+     "0x2cbb724"
+    ],
+    "stores": [
+     "0x2cbb701"
+    ]
+   }
+  }
+ },
+ "owners": {
+  "builder_a": {
+   "bytes": 409,
+   "end": "0x5cf22e9",
+   "file_offset": "0x5cf1150",
+   "sha256": "63364fa5c7e4158629d264ba1afefeb9e1353840a2bfae7d34266cc38d7dcade",
+   "start": "0x5cf2150"
+  },
+  "checker_a": {
+   "bytes": 955,
+   "end": "0x2c7f71b",
+   "file_offset": "0x2c7e360",
+   "sha256": "ff59e02e9d3e078985ba6e3b58d8f64f3a6ed5171f2120d314cbb5a3c744daed",
+   "start": "0x2c7f360"
+  },
+  "checker_a_clone": {
+   "bytes": 955,
+   "end": "0x2a90e0b",
+   "file_offset": "0x2a8fa50",
+   "sha256": "90fee1bcb70f92349f72110532387ae5bb776b8f9008a8571a183ed9cf57a408",
+   "start": "0x2a90a50"
+  },
+  "checker_b": {
+   "bytes": 832,
+   "end": "0x2c7fd80",
+   "file_offset": "0x2c7ea40",
+   "sha256": "c2dd071311e360249b28d2cacda998b6727b2e1d57a74ebde965c96325b6c6fa",
+   "start": "0x2c7fa40"
+  },
+  "checker_b_clone": {
+   "bytes": 832,
+   "end": "0x2a915c0",
+   "file_offset": "0x2a90280",
+   "sha256": "670fc5536cbea0417be82ae30b48b921c666ed77bd0e9957d6e75bb2bf2a7955",
+   "start": "0x2a91280"
+  },
+  "drop_pair": {
+   "bytes": 136,
+   "end": "0x2ca0818",
+   "file_offset": "0x2c9f790",
+   "sha256": "822e344d7f1a38846b7da399bcf1728c8358ece0d2a2f8865ab7ad5b4b395dff",
+   "start": "0x2ca0790"
+  },
+  "drop_pair_a": {
+   "bytes": 136,
+   "end": "0x2abc868",
+   "file_offset": "0x2abb7e0",
+   "sha256": "705c05cbdbaed614864a7ca96cd0a9a69be32f3179f0191b58e09a4494e07f02",
+   "start": "0x2abc7e0"
+  },
+  "gate_a": {
+   "bytes": 22372,
+   "end": "0x2af0654",
+   "file_offset": "0x2ae9ef0",
+   "sha256": "d1b4e3ecb40fb4027b69240f48eacf2de2cf5f7e8c3ae5c0e6910a784fdcce29",
+   "start": "0x2aeaef0"
+  },
+  "gate_c": {
+   "bytes": 22239,
+   "end": "0x2cbbbdf",
+   "file_offset": "0x2cb5500",
+   "sha256": "62835f8a447ea034c30a4fa0663abad74226444817882c469f883d7d92e4a8d0",
+   "start": "0x2cb6500"
+  },
+  "helper_b720": {
+   "bytes": 227,
+   "end": "0x2c7f803",
+   "file_offset": "0x2c7e720",
+   "sha256": "2659efb0e8163a0a0082bb1feed80250f5ef08f5697edd044c151a5063e302bd",
+   "start": "0x2c7f720"
+  },
+  "helper_b720_clone": {
+   "bytes": 227,
+   "end": "0x2a90ef3",
+   "file_offset": "0x2a8fe10",
+   "sha256": "35fb5fd082da56d0f98fe9ff41b79e8e2b50b8efd0e295df5c418bb1de3f7556",
+   "start": "0x2a90e10"
+  },
+  "keyhash_b": {
+   "bytes": 742,
+   "end": "0x2b3ccb6",
+   "file_offset": "0x2b3b9d0",
+   "sha256": "7cd872d3ced0fadd2a0a51bf5016c058dee1ca7e533463f87c66ba3d43384a04",
+   "start": "0x2b3c9d0"
+  },
+  "lookup_b": {
+   "bytes": 327,
+   "end": "0x2e4aef7",
+   "file_offset": "0x2e49db0",
+   "sha256": "2abbeabba442b83ccaa7aab6e706c0f13f594098333829fa22647ef74c3fdfec",
+   "start": "0x2e4adb0"
+  },
+  "method_b": {
+   "bytes": 377,
+   "end": "0x2b157a9",
+   "file_offset": "0x2b14630",
+   "sha256": "f9020e7b0771945423359b0851bb8f78085898184bbe8b1c9bbfb22bdc2373b0",
+   "start": "0x2b15630"
+  },
+  "predicate_a": {
+   "bytes": 703,
+   "end": "0x5cf2fef",
+   "file_offset": "0x5cf1d30",
+   "sha256": "fb3fb193f0b14f251e01da509c670d299323482419d1edef4170d948604cbbb2",
+   "start": "0x5cf2d30"
+  }
+ },
+ "pins": {
+  "bytes": {
+   "0x2cb98f5": "c6837001000000",
+   "0x2cb98fc": "4c8db3d8000000",
+   "0x2cb9903": "48b800000060d71d3442",
+   "0x2cb990d": "488983d8000000c6",
+   "0x2cb9914": "c6836801000000",
+   "0x2cbb495": "a801",
+   "0x2cbb552": "f20f118b28010000",
+   "0x2cbb610": "f20f118b30010000",
+   "0x2cbb6f1": "f20f108330010000",
+   "0x2cbb6f9": "f20f118350010000",
+   "0x2cbb701": "c683e001000000",
+   "0x2cbb71c": "84c0",
+   "0x2cbb724": "80bbe001000003",
+   "0x2cbb72d": "80bbd801000003"
+  },
+  "calls": {
+   "0x2c7f633": "0x2ca0790",
+   "0x2c7fb66": "0x2b3c9d0",
+   "0x2c7fb84": "0x2e4adb0",
+   "0x2c7fbf3": "0x2c7f720",
+   "0x2cb9923": "0x2c7f360",
+   "0x2cb9985": "0x2ca0790",
+   "0x2cb9991": "0x2ca3ab0",
+   "0x2cbb490": "0x2c7fa40",
+   "0x2cbb4a3": "0x2ca3cd0",
+   "0x2cbb717": "0x2c7f360"
+  },
+  "r14_f64": {
+   "bits": "0x42341dd760000000",
+   "value": 86400000000.0
+  }
+ },
+ "slots": {
+  "0x64df490": {
+   "addend": "0x141e251",
+   "relocation_type": 8
+  },
+  "0x64df4c0": {
+   "addend": "0x1680cab",
+   "relocation_type": 8
+  },
+  "0x64df508": {
+   "relocation_type": 6,
+   "symbol": "memcpy"
+  },
+  "0x64df590": {
+   "addend": "0x63577f0",
+   "relocation_type": 8
+  },
+  "0x64df6b8": {
+   "addend": "0x1680e80",
+   "relocation_type": 8
+  },
+  "0x64df6e8": {
+   "addend": "0x141e3a0",
+   "relocation_type": 8
+  },
+  "0x64df770": {
+   "addend": "0x1680bd0",
+   "relocation_type": 8
+  },
+  "0x64dfdb8": {
+   "addend": "0x5ce86d0",
+   "relocation_type": 8
+  },
+  "0x64dfdc8": {
+   "addend": "0x5ce8da0",
+   "relocation_type": 8
+  },
+  "0x64dfe80": {
+   "addend": "0x5cdb250",
+   "relocation_type": 8
+  },
+  "0x64e0510": {
+   "addend": "0x5ca0d20",
+   "relocation_type": 8
+  },
+  "0x64e0518": {
+   "addend": "0x5ce91b0",
+   "relocation_type": 8
+  },
+  "0x64e0520": {
+   "addend": "0x5cf3b90",
+   "relocation_type": 8
+  },
+  "0x64e0848": {
+   "addend": "0x5cf2b50",
+   "relocation_type": 8
+  },
+  "0x64e0858": {
+   "addend": "0x5cf2d30",
+   "relocation_type": 8
+  },
+  "0x64e0990": {
+   "addend": "0x1629690",
+   "relocation_type": 8
+  },
+  "0x64e0fc0": {
+   "addend": "0x162a290",
+   "relocation_type": 8
+  },
+  "0x64e1200": {
+   "addend": "0x1562300",
+   "relocation_type": 8
+  },
+  "0x64e1360": {
+   "addend": "0x1681e80",
+   "relocation_type": 8
+  },
+  "0x64e1368": {
+   "addend": "0x1681e60",
+   "relocation_type": 8
+  },
+  "0x64e13a0": {
+   "addend": "0x5cf2150",
+   "relocation_type": 8
+  },
+  "0x64e13a8": {
+   "addend": "0x1689370",
+   "relocation_type": 8
+  },
+  "0x64e16c0": {
+   "addend": "0x64fee40",
+   "relocation_type": 8
+  },
+  "0x64e1880": {
+   "addend": "0x5ce1860",
+   "relocation_type": 8
+  },
+  "0x64e7460": {
+   "addend": "0x63f0080",
+   "relocation_type": 8
+  },
+  "0x64e7718": {
+   "addend": "0x5cf5100",
+   "relocation_type": 8
+  },
+  "lu_statics": {
+   "0x644db98": {
+    "file": "0x4326c1",
+    "len": "0xe",
+    "packed": "0x2e0000003f"
+   },
+   "0x644dbe0": {
+    "file": "0x4326c1",
+    "len": "0xe",
+    "packed": "0x500000074"
+   },
+   "0x644dc28": {
+    "file": "0x4326c1",
+    "len": "0xe",
+    "packed": "0x50000004b"
+   },
+   "0x644dc40": {
+    "file": "0x4326c1",
+    "len": "0xe",
+    "packed": "0x390000004a"
+   }
+  },
+  "vtable_b": {
+   "base": "0x6449b00",
+   "entries": {
+    "0x0": "0x2b1d460",
+    "0x10": "0x2b2d580",
+    "0x18": "0x2b15630",
+    "0x20": "0x2b19230",
+    "0x28": "0x2b17ab0",
+    "0x8": "0x2b2d620"
+   }
+  }
+ },
+ "strings": {
+  "async_wait_inner": {
+   "section": ".rodata",
+   "va": "0x451330",
+   "value": "async_wait_inner"
+  },
+  "bucket_guard_fmt": {
+   "bytes_hex": "c000246d696e203e206d61782c206f722065697468657220776173204e614e2e206d696e203d20c0082c206d6178203d20c000626173652f7372632f6275636b65745f67756172642e7273001a666f7263655f696f5f726561643b20696f206572726f72203d20c00011696e636f6d696e6720626f647920697320c000285468",
+   "section": ".rodata",
+   "va": "0x43b857"
+  },
+  "gate_doubles": {
+   "0x458d50": 1000000000.0,
+   "0x458dc8": -1.0,
+   "0x458eb0": 2.0,
+   "0x459010": "inf",
+   "0x459568": 600.0
+  },
+  "joinhandle_panic": {
+   "section": ".rodata",
+   "va": "0x6068d2",
+   "value": "JoinHandle polled after completion"
+  },
+  "lu_rs": {
+   "section": ".rodata",
+   "va": "0x4326c1",
+   "value": "base/src/lu.rs"
+  },
+  "spawn_fmt": {
+   "bytes_hex": "1e4f532063616e277420737061776e20776f726b6572207468726561643a20c00010496e76616c69",
+   "va": "0x431a60"
+  },
+  "timer_error_fmt": {
+   "bytes_hex": "0d74696d6572206572726f723a20c0",
+   "va": "0x433ed3"
+  }
+ },
+ "tables": {
+  "checker_a": {
+   "state_90": {
+    "base": "0x60af90",
+    "entries": {
+     "0x0": "0x2c7f38e",
+     "0x1": "0x2c7f664",
+     "0x2": "0x2c7f657",
+     "0x3": "0x2c7f3ad"
+    },
+    "offsets": [
+     "0x2e",
+     "0x304",
+     "0x2f7",
+     "0x4d"
+    ],
+    "section": ".rodata"
+   },
+   "substate_88": {
+    "base": "0x60afa0",
+    "entries": {
+     "0x0": "0x2c7f3cf",
+     "0x1": "0x2c7f680",
+     "0x2": "0x2c7f671",
+     "0x3": "0x2c7f5e7"
+    },
+    "offsets": [
+     "0x6f",
+     "0x320",
+     "0x311",
+     "0x287"
+    ],
+    "section": ".rodata"
+   }
+  },
+  "checker_a_clone": {
+   "state_90": {
+    "base": "0x603368",
+    "entries": {
+     "0x0": "0x2a90a7e",
+     "0x1": "0x2a90d54",
+     "0x2": "0x2a90d47",
+     "0x3": "0x2a90a9d"
+    },
+    "offsets": [
+     "0x2e",
+     "0x304",
+     "0x2f7",
+     "0x4d"
+    ],
+    "section": ".rodata"
+   },
+   "substate_88": {
+    "base": "0x603378",
+    "entries": {
+     "0x0": "0x2a90abf",
+     "0x1": "0x2a90d70",
+     "0x2": "0x2a90d61",
+     "0x3": "0x2a90cd7"
+    },
+    "offsets": [
+     "0x6f",
+     "0x320",
+     "0x311",
+     "0x287"
+    ],
+    "section": ".rodata"
+   }
+  },
+  "checker_b": {
+   "state_a0": {
+    "base": "0x60afb0",
+    "entries": {
+     "0x0": "0x2c7fa6b",
+     "0x1": "0x2c7fc84",
+     "0x2": "0x2c7fc77",
+     "0x3": "0x2c7fa96"
+    },
+    "offsets": [
+     "0x2b",
+     "0x244",
+     "0x237",
+     "0x56"
+    ],
+    "section": ".rodata"
+   },
+   "substate_90": {
+    "base": "0x60afd0",
+    "entries": {
+     "0x0": "0x2c7fc6a",
+     "0x1": "0x2c7fcd8",
+     "0x2": "0x2c7fcc9",
+     "0x3": "0x2c7fb72"
+    },
+    "offsets": [
+     "0x22a",
+     "0x298",
+     "0x289",
+     "0x132"
+    ],
+    "section": ".rodata"
+   },
+   "substate_98": {
+    "base": "0x60afc0",
+    "entries": {
+     "0x0": "0x2c7fab8",
+     "0x1": "0x2c7fcb5",
+     "0x2": "0x2c7fca1",
+     "0x3": "0x2c7fc3e"
+    },
+    "offsets": [
+     "0x78",
+     "0x275",
+     "0x261",
+     "0x1fe"
+    ],
+    "section": ".rodata"
+   }
+  },
+  "checker_b_clone": {
+   "state_a0": {
+    "base": "0x603388",
+    "entries": {
+     "0x0": "0x2a912ab",
+     "0x1": "0x2a914c4",
+     "0x2": "0x2a914b7",
+     "0x3": "0x2a912d6"
+    },
+    "offsets": [
+     "0x2b",
+     "0x244",
+     "0x237",
+     "0x56"
+    ],
+    "section": ".rodata"
+   },
+   "substate_90": {
+    "base": "0x6033a8",
+    "entries": {
+     "0x0": "0x2a914aa",
+     "0x1": "0x2a91518",
+     "0x2": "0x2a91509",
+     "0x3": "0x2a913b2"
+    },
+    "offsets": [
+     "0x22a",
+     "0x298",
+     "0x289",
+     "0x132"
+    ],
+    "section": ".rodata"
+   },
+   "substate_98": {
+    "base": "0x603398",
+    "entries": {
+     "0x0": "0x2a912f8",
+     "0x1": "0x2a914f5",
+     "0x2": "0x2a914e1",
+     "0x3": "0x2a9147e"
+    },
+    "offsets": [
+     "0x78",
+     "0x275",
+     "0x261",
+     "0x1fe"
+    ],
+    "section": ".rodata"
+   }
+  }
+ },
+ "work_item": "RE-005-node115-gate-checkers"
+}
