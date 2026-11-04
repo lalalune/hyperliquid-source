@@ -1,0 +1,65 @@
+{
+  "targetSHA256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "targetSize": 105896032,
+  "base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "coordinateSystem": "ELF virtual addresses, not file offsets/runtime addresses",
+  "ranges": [
+    {
+      "name": "caller",
+      "startELFVA": "0x2764c10",
+      "endELFVA": "0x2764f54",
+      "length": 836,
+      "rawSHA256": "906be18d7f91d2756d32cef099959eec2f3e6fe35aaab27e4ca2b81f87056c0e"
+    },
+    {
+      "name": "encoder",
+      "startELFVA": "0x2276490",
+      "endELFVA": "0x2276794",
+      "length": 772,
+      "rawSHA256": "1c1037e967305acaa11c034277fd09d971dd0a8269bbe0f04aa102a6feae88fa"
+    },
+    {
+      "name": "float-writer",
+      "startELFVA": "0x25e84f0",
+      "endELFVA": "0x25e8599",
+      "length": 169,
+      "rawSHA256": "fe6e42c860e39e0bbb377f0fb8189d7e0c0cc0ac8f3db605583e271b54d4b3c2"
+    },
+    {
+      "name": "tuple-finalizer",
+      "startELFVA": "0x22999e0",
+      "endELFVA": "0x2299b24",
+      "length": 324,
+      "rawSHA256": "1055a8dae969fc0f274f5dd44752eacf7a851d58512bf48fe1a20dd417762f8f"
+    }
+  ],
+  "observations": [
+    "Caller copies32 bytes from two consecutive16-byte input loads to the stack; supplies FeeRateMapSerde literal length15 and calls2276490.",
+    "Name length15 excludes helper special _ExtStruct name-length10 branch. Both ordinary mode branches write array4.",
+    "First3 words load at offsets0/8/16, write markerCB and byte-swapped u64; fourth loads at24 and helper25e84f0 writesCB then byte-swapped raw XMM bits.",
+    "After writing values, state first word is i64::MIN. Finalizer22999e0 negates it and JO takes the direct return block2299aa2, without buffer writes or further calls on that branch."
+  ],
+  "inferences": [
+    "37-byte MessagePack encoding of four positional binary64 values on this concrete caller path with sufficient output capacity."
+  ],
+  "unresolved": [
+    "Decoder accepted forms and errors",
+    "Fee units and semantic labels/order",
+    "Native serializer ABI, allocation/unwind and error propagation",
+    "Source-build/whole-ELF equivalence"
+  ],
+  "normalPathClosure": {
+    "stateSentinel": "0x8000000000000000",
+    "writerInitELFVA": "0x22764a3",
+    "stateStoreELFVA": "0x22765d8",
+    "finalizerEntry": "0x22999e0",
+    "negELFVA": "0x2299a01",
+    "overflowBranchELFVA": "0x2299a04",
+    "directReturnBlock": "0x2299aa2"
+  },
+  "nativeTool": "GNU objdump2.47 -d -M intel (full ranges)",
+  "normalization": "None; original native CRLF bytes and misleading nearest-export labels retained. Labels are not original source names.",
+  "capturedExecutedOrEmulated": false,
+  "originalMakeVerifyStatus": "Failed at original MSYS GPG native-path public-key import; no source workaround copied from separate PR2340. Independently converted public-key/signature arguments authenticated exact retained inputs.",
+  "implementationScope": "Source-built encoder only; no decoder/native ABI/whole-function equivalence or progress gate."
+}
