@@ -199,7 +199,9 @@ def read(data,va,n):
 
 
 def relocations(data):
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    sec=next((s for s in sections(data) if s['name']=='.rela.dyn'),None)
+    if sec is None:raise ValueError('missing.rela.dyn section')
+    if sec['size']%24:raise ValueError('truncated.rela.dyn section')
     by_offset={}
     for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']]):
         by_offset.setdefault(a,[]).append((i&0xffffffff,i>>32,v))
@@ -207,11 +209,14 @@ def relocations(data):
 
 
 def dynsym_name(data,index):
-    ds=next(s for s in sections(data) if s['name']=='.dynsym')
-    st=next(s for s in sections(data) if s['name']=='.dynstr')
+    ds=next((s for s in sections(data) if s['name']=='.dynsym'),None)
+    st=next((s for s in sections(data) if s['name']=='.dynstr'),None)
+    if ds is None:raise ValueError('missing.dynsym section')
+    if st is None:raise ValueError('missing.dynstr section')
     name_off=struct.unpack_from('<I',data,ds['offset']+24*index)[0]
     end=data.find(b'\0',st['offset']+name_off)
-    return data[st['offset']+name_off:end].decode('ascii')
+    try:return data[st['offset']+name_off:end].decode('ascii')
+    except UnicodeDecodeError:raise ValueError('dynamic symbol name is not valid ASCII')
 
 
 def slot_bindings(data):
@@ -321,7 +326,8 @@ def handle_census(data):
 def direct_call_census(data):
     """One pass over .text: every E8 rel32 site for the four
     traced targets, each attributed to its containing FDE."""
-    sec=next(s for s in sections(data) if s['name']=='.text')
+    sec=next((s for s in sections(data) if s['name']=='.text'),None)
+    if sec is None:raise ValueError('missing.text section')
     body=bytes(data[sec['offset']:sec['offset']+sec['size']])
     base=sec['address']
     targets={CONSUMER:'large_consumer',INSERT:'map_insert',
