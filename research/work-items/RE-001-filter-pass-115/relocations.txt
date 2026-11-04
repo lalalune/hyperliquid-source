@@ -1,0 +1,13 @@
+Relocations for the filter pass window (from .rela.dyn and .rela.plt):
+
+pass 0x5f6d700: no R_X86_64_RELATIVE record carries it as addend;
+  no whole-file stored qword equals it
+
+The pass is reached only through its single direct call (the pipeline
+prologue 0x5f884b0's site 0x5f88533, in the flag-clear arm that runs the
+pass before tail-jumping to the wrapper at 0x5f88550); it is never
+tail-jumped to and never referenced through a function-pointer slot.
+The pass itself makes exactly one direct call, to the later-group
+predicate 0x5f6d600 at site 0x5f6d7e1, plus PLT calls to operator new,
+operator delete, the length-error throw and the stack check; it makes
+no tail jumps.
