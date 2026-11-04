@@ -1,0 +1,600 @@
+{
+ "artifact": {
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "call_censuses": {
+  "advance": [
+   {
+    "kind": "call",
+    "site": "0x5ce0950"
+   },
+   {
+    "kind": "jmp",
+    "site": "0x5cfe088"
+   }
+  ],
+  "bucket": [
+   {
+    "kind": "call",
+    "site": "0x5cea839"
+   },
+   {
+    "kind": "call",
+    "site": "0x5ceb06e"
+   }
+  ],
+  "checker_a": [
+   {
+    "kind": "call",
+    "site": "0x2b90b05"
+   },
+   {
+    "kind": "call",
+    "site": "0x2cb9923"
+   },
+   {
+    "kind": "call",
+    "site": "0x2cbb717"
+   },
+   {
+    "kind": "call",
+    "site": "0x2cc05ab"
+   },
+   {
+    "kind": "call",
+    "site": "0x2cc6cb5"
+   },
+   {
+    "kind": "call",
+    "site": "0x2cc7fb5"
+   },
+   {
+    "kind": "call",
+    "site": "0x2cdfe4f"
+   }
+  ],
+  "checker_a_clone": [
+   {
+    "kind": "call",
+    "site": "0x2a646a3"
+   },
+   {
+    "kind": "call",
+    "site": "0x2a6a9d9"
+   },
+   {
+    "kind": "call",
+    "site": "0x2adbca9"
+   },
+   {
+    "kind": "call",
+    "site": "0x2adeb5d"
+   },
+   {
+    "kind": "call",
+    "site": "0x2ae5d8e"
+   },
+   {
+    "kind": "call",
+    "site": "0x2aee3f3"
+   },
+   {
+    "kind": "call",
+    "site": "0x2af017d"
+   },
+   {
+    "kind": "call",
+    "site": "0x2afb0fe"
+   },
+   {
+    "kind": "call",
+    "site": "0x2b68b4b"
+   },
+   {
+    "kind": "call",
+    "site": "0x2b6a2d2"
+   }
+  ],
+  "checker_b": [
+   {
+    "kind": "call",
+    "site": "0x2cb33b3"
+   },
+   {
+    "kind": "call",
+    "site": "0x2cbb490"
+   }
+  ],
+  "conversion": [
+   {
+    "kind": "jmp",
+    "site": "0x5cf2089"
+   },
+   {
+    "kind": "call",
+    "site": "0x5cf2e46"
+   }
+  ],
+  "dispatcher": [
+   {
+    "kind": "call",
+    "site": "0x2cd83a2"
+   }
+  ],
+  "driver_a": [
+   {
+    "kind": "call",
+    "site": "0x2ae1a47"
+   },
+   {
+    "kind": "call",
+    "site": "0x2b40577"
+   }
+  ],
+  "driver_c": [
+   {
+    "kind": "call",
+    "site": "0x2ae1eeb"
+   }
+  ],
+  "flag_writer": [
+   {
+    "kind": "call",
+    "site": "0x5ceb47e"
+   },
+   {
+    "kind": "call",
+    "site": "0x5cfc20d"
+   }
+  ],
+  "gate_a": [
+   {
+    "kind": "call",
+    "site": "0x2ae4627"
+   },
+   {
+    "kind": "call",
+    "site": "0x2ae548c"
+   }
+  ],
+  "gate_c": [
+   {
+    "kind": "call",
+    "site": "0x2cde6f4"
+   },
+   {
+    "kind": "call",
+    "site": "0x2cdf58b"
+   }
+  ],
+  "insert": [
+   {
+    "kind": "call",
+    "site": "0x5cea8d0"
+   }
+  ],
+  "poll": [],
+  "setter": [
+   {
+    "kind": "jmp",
+    "site": "0x5ceae3e"
+   },
+   {
+    "kind": "jmp",
+    "site": "0x5ceaf91"
+   }
+  ],
+  "thunk": []
+ },
+ "exported_bodies": [
+  "flag_writer",
+  "advance",
+  "accessor",
+  "tls_dtor"
+ ],
+ "findings": {
+  "edge1_completeness": "Writer completeness is bounded by three censuses: (a) the whole timer cluster 0x5ce0000..0x5cf8000 contains exactly three byte-sized stores to [reg+0x30] from a non-stack base - lock-acquire cmpxchg sites at 0x5cf4842/0x5cf48d7/0x5cf4a52 in body 0x5cf47f0, whose base is a first-argument object with map fields at +0xc0/+0xc8 and a refcount at +0xf8 (lock dec [r14+0xf8]), a shape no wheel has: traced wheel fields end at +0x30 and wheel bases always derive from a handle+selector field or the +0x50 sub-object base; (b) the direct callers of every wheel body (bucket 2, insert 1, setter 2, poll 0 direct / slot 0x64dfe40 only, advance 2) are fully enumerated; (c) the flag writer, advance and poll have no RELATIVE references except poll's single table slot.  A writer that reaches the byte only through a computed pointer or a bulk copy over the whole wheel struct is outside these censuses and is recorded as a boundary, not a finding.",
+  "edge1_flag_callers": "The flag writer has exactly two direct callers and no RELATIVE references: 0x5ceb47e in body 0x5ceb330 (506 B), which calls it under the wheel lock byte (lock cmpxchg [r15+0x50] at 0x5ceb468) after a refcounted registry-removal phase, passing &[obj+0x10] and ctx+0x150; and 0x5cfc20d in body 0x5cfbfd0 (718 B), a state-machine step that calls it when the task state dword != 3, after draining its queue.  Both are handle/task teardown paths: the flag means \"this timer driver is closed\", set at teardown, after which the setter can no longer take its direct-store arm.",
+  "edge1_flag_writer": "The wheel flag byte at [wheel+0x30] (read by the setter at 0x5cea881) is written by exactly one traced body: 0x5ce08e0.  Its argument rsi is the driver sub-object base; it loads the byte at [rsi+0x80] (0x5ce0926) and, only when it is 0, xchg-stores 1 there at 0x5ce093d - [rsi+0x80] is [wheel+0x30] for wheel = [rsi+0x50], the same base it forms at 0x5ce0934 (lea rax,[rsi+0x50]) to call the advance body 0x5ceaa20 at 0x5ce0950 with target u64::MAX, firing every pending entry.  Before the store it asserts dword [rsi+0x90] != 1_000_000_000 through the shared assert callee (slot 0x64df770) with the Location static 0x64c6fa8 (tokio runtime/time/mod.rs, line 190, col 32) and the timers-disabled message. If the byte is already nonzero it returns without storing or advancing: the write is the 0->1 shutdown transition, taken once.",
+  "edge1_horizon_writer": "The horizon field [wheel+0x28] the insert linked arm compares against has exactly one writer in the traced set: the advance body 0x5ceaa20 stores it at 0x5ceabc4, on its no-more-due arm, with the value derived from the next-deadline body 0x5cf6390 (result at [rsp+0x28]: cmp 1 / adc 0, forced to 0 when the arm flag byte [rsp+0x10] is 0).  The advance body never accesses [wheel+0x30] at all.",
+  "edge2_handle_pair": "BOUNDED NEGATIVE.  The stored (sec, nsec) pair at [handle+sel+0x88]/[handle+sel+0x90] is only ever loaded in the traced set: the builder 0x5cf2150 (timers-enabled assert), the conversion 0x5cead40 (two asserts and the difference against the deadline), its twin 0x5ceae80 (loads at 0x5ceae9d/0x5ceaecf and a second assert), the flag writer 0x5ce08e0 (cmp at 0x5ce091a) and the two handle drop bodies 0x5ce7f40/0x5cea100 (cmp [obj+0x90] vs 1e9 before freeing the 0x1860-byte levels array).  No body in the chain, its callers or its callees stores to either field from a handle base.  The pair is the runtime clock epoch the handle was built with: runtime data, written by runtime construction outside the traced chain.",
+  "edge2_tls_cell": "BOUNDED NEGATIVE.  The accessor 0x5cf2b50 reads the thread-local cell at fs:-0x1130 (anchor loaded at 0x5cf2b5a): counter at +0x0, tag at +0x8, handle pointer at +0x10 (0x5cf2be7, then lock xadd +1 on the handle's first word at 0x5cf2bf6), init-state byte at +0x48 (0x5cf2b61).  The PT_TLS template (filesz 0xb20, memsz 0x1180) initialises the cell to {counter 0, tag 2, handle 0, state 0} - tag 2 is the no-live-context state the accessor's reset arm handles.  The only other traced body that writes the cell is its destructor 0x5cdf410, registered through the guard slot 0x64e0510 -> 0x5ca0d20: it stores state byte 2 at 0x5cdf411 and drops the old handle.  A live handle pointer is installed by runtime context entry code that no traced body calls.",
+  "edge4_record_1d8": "[record+0x1d8] - the &[record+0x150] checker_a instance's sub-state byte [arg+0x88] - has no store anywhere in gate_c (access census over the whole gate body), and before the first funnel call its value is never read: checker_a entry dispatch reads only [arg+0x90], the byte the gate just zeroed; [arg+0x88] is read only on the state-3 re-dispatch, which the zeroed entry byte makes unreachable on a first call, and by the gate only after the call returns.  Its writers are checker_a itself (every fresh-arm outcome that can be observed later writes it) and driver_c's big-endian block copy at 0x2cdf724 (one of four bswap qword stores to record+0x1c0..0x1e0 in a later phase).  The pre-first-call contents are construction leftovers in the driver task object and are functionally dead.",
+  "edge4_reinvokers": "The gates' only direct re-invokers are two driver bodies: gate_c is called only from driver_c 0x2cde430 (0x2cde6f4 with record mode byte 2, 0x2cdf58b with mode byte 1; in both cases rdi = &[r13+0x220], a record sub-struct of the driver task object, refilled from the driver's own fields before the call), and gate_a only from driver_a 0x2ae41e0 (0x2ae4627 / 0x2ae548c, same shape).  Neither gate nor driver has any RELATIVE reference.  Both drivers are called by one dispatcher body 0x2ae1690 (driver_a at 0x2ae1a47, driver_c at 0x2ae1eeb; driver_a also from 0x2b404b0), and the dispatcher's only direct caller is the stack-context thunk 0x2cd8370 at 0x2cd83a2.",
+  "edge4_state3_is_output": "Through the gate path, checker state 3 is never a resumed input: gate_c zeroes the checker_a instance state byte [record+0x1e0] at 0x2cbb701 immediately before the funnel call at 0x2cbb717, zeroes the r14-phase instance byte [rbx+0x168] at 0x2cb9914 before the call at 0x2cb9923, and zeroes checker_b's dispatch byte [record+0x1c8] at 0x2cbb476 before the call at 0x2cbb490; gate_a mirrors this.  The same zero-before-call holds at driver_c's own direct checker_a call ([r13+0x2c8] := 0 at 0x2cdfe3a, call at 0x2cdfe4f on &[r13+0x238]) and at the other censused checker_a callers (0x2cc0592, 0x2cc6c9e).  State 3 is written by the checkers during a call (checker_a: [arg+0x88] := 3 and [arg+0x90] := 3 on the predicate-nonzero arm) and consumed by the callers after it: gate_c tests [record+0x1e0] == 3 at 0x2cbb724, and caller 0x2b905a0 tests [rbx+0x180] == 3 at 0x2b90b12 right after its call at 0x2b90b05."
+ },
+ "locations": {
+  "0x64c6fa8": {
+   "col": 32,
+   "file_ptr": "0x43e4fe",
+   "len": 67,
+   "line": 190,
+   "qwords": [
+    "0x0",
+    "0x43",
+    "0x20000000be"
+   ]
+  }
+ },
+ "open_edges": [
+  "Two checker_a call windows (0x2b90b05 in body 0x2b905a0, whose zero store to [rbx+0x180] sits at 0x2b90ddb with untraced ordering, and 0x2cc7fb5 in body 0x2cc1120) and the gate_a-clone callers were not traced far enough to confirm the zero-before-call store; the checker resume arm's reachability through those callers stays open.",
+  "The stack-context thunk 0x2cd8370 has no direct caller and no RELATIVE reference in the artifact; the mechanism that invokes it (and thus how often the dispatcher re-invokes the drivers) is outside the two censused reference forms.",
+  "A writer of the wheel flag byte that works only through a computed pointer or a bulk copy over the whole wheel struct would be invisible to this packet's censuses (see edge1_completeness).",
+  "The two carried edges of the bucket-second-caller packet (#2701) - the owning object of the 0x64dfe40 method table and the wheel list's poll-side consumer - are different objects from this packet's three edges and are NOT folded in; the advance body was checked and does not touch the wheel list head/tail fields [wheel+0x18] / [wheel+0x20] (its list-shaped accesses are on entry fields), so it is not that consumer either."
+ ],
+ "owners": {
+  "accessor": {
+   "bytes": 228,
+   "end": "0x5cf2c34",
+   "file_offset": "0x5cf1b50",
+   "sha256": "e367d0fd93829f39d7bf17c0645ea453b07f47e6dc71a9172bac94e70d47d05e",
+   "start": "0x5cf2b50"
+  },
+  "advance": {
+   "bytes": 791,
+   "end": "0x5cead37",
+   "file_offset": "0x5ce9a20",
+   "sha256": "3e07106e25d72afaf2baf4307e7d4efefce68c56b04d2a8db9ee1ea67b38b8af",
+   "start": "0x5ceaa20"
+  },
+  "flag_writer": {
+   "bytes": 184,
+   "end": "0x5ce0998",
+   "file_offset": "0x5cdf8e0",
+   "sha256": "9fa7b5de24e9817753cf9f25131869c1a866d55bfda45a9ea3eeb5c1e22214ac",
+   "start": "0x5ce08e0"
+  },
+  "tls_dtor": {
+   "bytes": 71,
+   "end": "0x5cdf457",
+   "file_offset": "0x5cde410",
+   "sha256": "83808b635c9c4571afcf4b915c2803f2707f64b0a4fc4c43fd5cbe88465c302c",
+   "start": "0x5cdf410"
+  }
+ },
+ "pinned_bodies": {
+  "builder": {
+   "bytes": 409,
+   "end": "0x5cf22e9",
+   "file_offset": "0x5cf1150",
+   "note": "extent/digest only; not exported",
+   "sha256": "63364fa5c7e4158629d264ba1afefeb9e1353840a2bfae7d34266cc38d7dcade",
+   "start": "0x5cf2150"
+  },
+  "checker_a": {
+   "bytes": 955,
+   "end": "0x2c7f71b",
+   "file_offset": "0x2c7e360",
+   "note": "extent/digest only; not exported",
+   "sha256": "ff59e02e9d3e078985ba6e3b58d8f64f3a6ed5171f2120d314cbb5a3c744daed",
+   "start": "0x2c7f360"
+  },
+  "checker_b": {
+   "bytes": 832,
+   "end": "0x2c7fd80",
+   "file_offset": "0x2c7ea40",
+   "note": "extent/digest only; not exported",
+   "sha256": "c2dd071311e360249b28d2cacda998b6727b2e1d57a74ebde965c96325b6c6fa",
+   "start": "0x2c7fa40"
+  },
+  "conv_twin": {
+   "bytes": 328,
+   "end": "0x5ceafc8",
+   "file_offset": "0x5ce9e80",
+   "note": "extent/digest only; not exported",
+   "sha256": "0498488dbd7b217f33b3871fdc08e2fa762056c8b7cc3771a53878ba8a2d9f14",
+   "start": "0x5ceae80"
+  },
+  "conversion": {
+   "bytes": 309,
+   "end": "0x5ceae75",
+   "file_offset": "0x5ce9d40",
+   "note": "extent/digest only; not exported",
+   "sha256": "a6069a107a631c0f5efdb0f22e5b4a623ad077389b6b09225b8a5ca31de923dd",
+   "start": "0x5cead40"
+  },
+  "dispatcher": {
+   "bytes": 4386,
+   "end": "0x2ae27b2",
+   "file_offset": "0x2ae0690",
+   "note": "extent/digest only; not exported",
+   "sha256": "6ca0595c13836bca0cb0173bd591a09d6da6791532e23a5a71c63715380727d9",
+   "start": "0x2ae1690"
+  },
+  "driver_a": {
+   "bytes": 11142,
+   "end": "0x2ae6d66",
+   "file_offset": "0x2ae31e0",
+   "note": "extent/digest only; not exported",
+   "sha256": "90ae09003ca680bd4b5f32fec22ee1f7146cc1f67b758f8e2f2ac880545b730b",
+   "start": "0x2ae41e0"
+  },
+  "driver_a_caller_2": {
+   "bytes": 438,
+   "end": "0x2b40666",
+   "file_offset": "0x2b3f4b0",
+   "note": "extent/digest only; not exported",
+   "sha256": "05ef87dc8cdf209d34d246b129dfe209764fe409efda8ee0ad73ceebb54fedac",
+   "start": "0x2b404b0"
+  },
+  "driver_c": {
+   "bytes": 10657,
+   "end": "0x2ce0dd1",
+   "file_offset": "0x2cdd430",
+   "note": "extent/digest only; not exported",
+   "sha256": "99c49a3e20f63cf199f2a160ba9560e439acb2b49a66968623aa9607acfa417b",
+   "start": "0x2cde430"
+  },
+  "driver_poll": {
+   "bytes": 1001,
+   "end": "0x5cfe0e9",
+   "file_offset": "0x5cfcd00",
+   "note": "extent/digest only; not exported",
+   "sha256": "2d8ea94341d17a31bd755de9d3226f6911a337d3a6c97134ed1721c6a097c647",
+   "start": "0x5cfdd00"
+  },
+  "flag_caller_1": {
+   "bytes": 506,
+   "end": "0x5ceb52a",
+   "file_offset": "0x5cea330",
+   "note": "extent/digest only; not exported",
+   "sha256": "40a140f7bfbdb9681add88cc8beb66765c6ca3d84820569d584c6a0a737f4ab2",
+   "start": "0x5ceb330"
+  },
+  "flag_caller_2": {
+   "bytes": 718,
+   "end": "0x5cfc29e",
+   "file_offset": "0x5cfafd0",
+   "note": "extent/digest only; not exported",
+   "sha256": "00b892b1338b7e9e86719ad234b0f62b3e7ae8490d707201dadcab3dcf2a612c",
+   "start": "0x5cfbfd0"
+  },
+  "gate_a": {
+   "bytes": 22372,
+   "end": "0x2af0654",
+   "file_offset": "0x2ae9ef0",
+   "note": "extent/digest only; not exported",
+   "sha256": "d1b4e3ecb40fb4027b69240f48eacf2de2cf5f7e8c3ae5c0e6910a784fdcce29",
+   "start": "0x2aeaef0"
+  },
+  "gate_c": {
+   "bytes": 22239,
+   "end": "0x2cbbbdf",
+   "file_offset": "0x2cb5500",
+   "note": "extent/digest only; not exported",
+   "sha256": "62835f8a447ea034c30a4fa0663abad74226444817882c469f883d7d92e4a8d0",
+   "start": "0x2cb6500"
+  },
+  "lock_body": {
+   "bytes": 2306,
+   "end": "0x5cf50f2",
+   "file_offset": "0x5cf37f0",
+   "note": "extent/digest only; not exported",
+   "sha256": "172b33905a2455009ebec2e18ec7a98537b5acf341755ed237f76b0446a8249e",
+   "start": "0x5cf47f0"
+  },
+  "next_deadline": {
+   "bytes": 237,
+   "end": "0x5cf647d",
+   "file_offset": "0x5cf5390",
+   "note": "extent/digest only; not exported",
+   "sha256": "7f576d12868e201a625c9ff780d4816c77d80f50d55c1666485a8f5c957bd1ac",
+   "start": "0x5cf6390"
+  },
+  "next_expiry": {
+   "bytes": 870,
+   "end": "0x5cf6876",
+   "file_offset": "0x5cf5510",
+   "note": "extent/digest only; not exported",
+   "sha256": "b7480df660b1983837d9b7b52af3a5359c9d4b51e6667f7f1d272eebafec7649",
+   "start": "0x5cf6510"
+  },
+  "poll": {
+   "bytes": 468,
+   "end": "0x5ceb1a4",
+   "file_offset": "0x5ce9fd0",
+   "note": "extent/digest only; not exported",
+   "sha256": "5b1addcef08123e292e9e2110d74cdf9516ac713d91a19fb6a988b9bee7c52a3",
+   "start": "0x5ceafd0"
+  },
+  "predicate": {
+   "bytes": 703,
+   "end": "0x5cf2fef",
+   "file_offset": "0x5cf1d30",
+   "note": "extent/digest only; not exported",
+   "sha256": "fb3fb193f0b14f251e01da509c670d299323482419d1edef4170d948604cbbb2",
+   "start": "0x5cf2d30"
+  },
+  "setter": {
+   "bytes": 599,
+   "end": "0x5ceaa17",
+   "file_offset": "0x5ce97c0",
+   "note": "extent/digest only; not exported",
+   "sha256": "5fbfddaf7831cf129e1dc6734e16b7aa37d5e51b3355c96a8da582d905f4d8e2",
+   "start": "0x5cea7c0"
+  },
+  "thunk": {
+   "bytes": 63,
+   "end": "0x2cd83af",
+   "file_offset": "0x2cd7370",
+   "note": "extent/digest only; not exported",
+   "sha256": "ed23bc89640a43b1a5f373d5cb18929d79ce5b47923e58ba0565f592ba2b60d6",
+   "start": "0x2cd8370"
+  }
+ },
+ "pins": {
+  "0x2ae1a47": "e894270000",
+  "0x2ae1eeb": "e840c51f00",
+  "0x2ae4627": "e8c4680000",
+  "0x2ae548c": "e85f5a0000",
+  "0x2b90b12": "80bb8001000003",
+  "0x2cb9914": "c6836801000000",
+  "0x2cbb476": "41c686c801000000",
+  "0x2cbb490": "e8ab45fcff",
+  "0x2cbb701": "c683e001000000",
+  "0x2cbb717": "e8443cfcff",
+  "0x2cbb724": "80bbe001000003",
+  "0x2cc0592": "c6838801000000",
+  "0x2cc6c9e": "41c687a801000000",
+  "0x2cd83a2": "e8e992e0ff",
+  "0x2cde6f4": "e8077efdff",
+  "0x2cdf58b": "e8706ffdff",
+  "0x2cdf724": "498995f8030000",
+  "0x2cdfe3a": "41c685c802000000",
+  "0x2cdfe4f": "e80cf5f9ff",
+  "0x5cdf411": "c6474802",
+  "0x5ce091a": "81be9000000000ca9a3b",
+  "0x5ce0926": "0fb68e80000000",
+  "0x5ce0934": "488d4650",
+  "0x5ce093d": "868e80000000",
+  "0x5ce0950": "e8cba00000",
+  "0x5cea881": "0fb64330",
+  "0x5ceaa76": "e895ba0000",
+  "0x5ceabc4": "48894328",
+  "0x5ceae9d": "8b8c3890000000",
+  "0x5ceaecf": "488b843888000000",
+  "0x5ceb468": "f0410fb04f50",
+  "0x5ceb47e": "e85d54ffff",
+  "0x5cf2b5a": "49c7c6d0eeffff",
+  "0x5cf2b61": "64410fb64e48",
+  "0x5cf2be7": "64498b5610",
+  "0x5cf2bf6": "f0480fc132",
+  "0x5cfc20d": "e8ce46feff"
+ },
+ "relative_refs": {
+  "advance": [],
+  "bucket": [],
+  "checker_a": [],
+  "checker_a_clone": [],
+  "checker_b": [],
+  "conversion": [],
+  "dispatcher": [],
+  "driver_a": [],
+  "driver_c": [],
+  "flag_writer": [],
+  "gate_a": [],
+  "gate_c": [],
+  "insert": [],
+  "poll": [
+   "0x64dfe40"
+  ],
+  "setter": [],
+  "thunk": []
+ },
+ "slots": {
+  "0x64df770": "0x1680bd0",
+  "0x64dfe40": "0x5ceafd0",
+  "0x64e0510": "0x5ca0d20",
+  "0x64e0518": "0x5ce91b0"
+ },
+ "store_censuses": {
+  "advance_flag_accesses": [],
+  "advance_horizon_stores": [
+   {
+    "base": "rbx",
+    "disp": 40,
+    "site": "0x5ceabc4"
+   }
+  ],
+  "advance_rbx_stores": [
+   {
+    "base": "rbx",
+    "disp": 0,
+    "site": "0x5ceaa66"
+   },
+   {
+    "base": "rbx",
+    "disp": 0,
+    "site": "0x5ceab27"
+   },
+   {
+    "base": "rbx",
+    "disp": 40,
+    "site": "0x5ceabc4"
+   },
+   {
+    "base": "rbx",
+    "disp": 0,
+    "site": "0x5ceabca"
+   },
+   {
+    "base": "rbx",
+    "disp": 0,
+    "site": "0x5ceacf0"
+   }
+  ],
+  "cluster_disp30_nonstack_byte_stores": [
+   {
+    "base": "r14",
+    "disp": 48,
+    "site": "0x5cf4842"
+   },
+   {
+    "base": "r14",
+    "disp": 48,
+    "site": "0x5cf48d7"
+   },
+   {
+    "base": "r14",
+    "disp": 48,
+    "site": "0x5cf4a52"
+   }
+  ],
+  "driver_c_record_1d8_stores": [
+   {
+    "base": "r13",
+    "disp": 1016,
+    "mnem": "mov",
+    "site": "0x2cdf724",
+    "store": true
+   }
+  ],
+  "flag_writer_flag_writes": [
+   {
+    "base": "rsi",
+    "disp": 128,
+    "site": "0x5ce093d"
+   }
+  ],
+  "flag_writer_rsi_stores": [
+   {
+    "base": "rsi",
+    "disp": 128,
+    "site": "0x5ce093d"
+   }
+  ],
+  "gate_c_record_1d8_accesses": [
+   {
+    "base": "rbx",
+    "disp": 472,
+    "mnem": "cmpb",
+    "site": "0x2cbb72d",
+    "store": false
+   }
+  ],
+  "gate_c_record_1d8_stores": []
+ },
+ "strings": {
+  "time_mod_path": {
+   "bytes": 67,
+   "text": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/time/mod.rs",
+   "va": "0x43e4fe"
+  },
+  "timers_disabled_msg": {
+   "bytes": 115,
+   "text": "A Tokio 1.x context was found, but timers are disabled. Call `enable_time` on the runtime builder to enable timers.",
+   "va": "0x94ca6b"
+  }
+ },
+ "tls": {
+  "cell_block_offset": "0x50",
+  "pt_tls_filesz": "0xb20",
+  "pt_tls_memsz": "0x1180",
+  "template_counter": "0x0",
+  "template_handle": "0x0",
+  "template_state_byte": 0,
+  "template_tag": "0x2"
+ },
+ "work_item": "RE-005-node115-remaining-edges"
+}
