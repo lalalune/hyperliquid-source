@@ -1,0 +1,9 @@
+Node #115 work binary work/hl-node-115.bin, SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301.
+FDE extents decoded from the binary's own .eh_frame (readelf --debug-dump=frames;
+file offsets below are the .eh_frame file offset 0xca6ed8 plus the readelf
+section offset of each record; record lengths verified against the length
+field stored at each file offset):
+- predicate 0x5f6c4e0..0x5f6c53c (92 bytes): FDE record at file offset 0x1004e30, record length 0x10, CIE is the first CIE record at .eh_frame start (file offset 0xca6ed8). The range ends at the byte after the final return path; the following bytes are int3 padding / the next function.
+- maximum 0x5f6c540..0x5f6c59d (93 bytes): FDE record at file offset 0x1004e44, record length 0x10, CIE as above.
+- caller 0x5f6c5a0..0x5f6c734 (436 bytes): FDE record at file offset 0x1004e58, record length 0x34, CIE as above.
+Each window's FDE end equals the byte after its last normal-path instruction. readelf's frames dump prints no separate LSDA line for these FDEs, so no LSDA address is claimed here.
