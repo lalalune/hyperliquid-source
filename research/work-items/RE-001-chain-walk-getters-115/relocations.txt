@@ -1,0 +1,14 @@
+Node #115 work binary work/hl-node-115.bin, SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301.
+Relocation findings (readelf -r, whole-file RELA scan in census.py):
+- The three sentinel globals are R_X86_64_RELATIVE slots whose addends are
+  the sentinel function addresses:
+  - 0x64ecde0 -> 0x5d2efc0 (getter slot 0x70)
+  - 0x64ece30 -> 0x5d2ef10 (getter slot 0x78)
+  - 0x64ecdf0 -> 0x5d2f070 (getter slot 0x98)
+  At runtime each global therefore holds its sentinel function address;
+  the file bytes at those slots are zero (resolved by the loader).
+- None of the four windows (head, three getters) appears as a RELATIVE
+  addend, and none appears as an 8-byte qword anywhere in the file
+  (see records.json census), so the getters are not referenced through a
+  vtable slot, a .got slot, or a stored absolute address in this binary.
+  The head helper's only references are the three getters' direct calls.
