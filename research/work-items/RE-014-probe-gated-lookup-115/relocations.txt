@@ -1,0 +1,25 @@
+Node #115 relocations relevant to window 0x5f0d050..0x5f0d704
+(target SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301).
+
+RIP-relative data reference inside the window (from the verbatim excerpt):
+- 0x5f0d128 mov 0x5e0181(%rip),%r15 -> 0x64ed2b0
+
+.rela.dyn entry for that slot (readelf -rW):
+- 00000000064ed2b0  0000011500000006 R_X86_64_GLOB_DAT  0000000000000000 _ZTHN7rocksdb10perf_levelE + 0
+  Role: the perf_level guard. The window tests the loaded value for
+  null; when non-null it calls the perf_level PLT stub 0x63f0fe0
+  before reading the TLS perf byte. Same role as node #94's
+  perf_level slot 0x5777ef8 in the #94 packet.
+
+Window census (census.py): 0 R_X86_64_RELATIVE slots with addend
+0x5f0d050, 0 whole-file qword hits for 0x5f0d050, 0 tail jumps to
+0x5f0d050, 9 direct calls (each confirmed as a real call
+instruction in objdump output).
+
+PLT stubs called from the window (targets resolved through .plt, not
+data relocations in this window):
+- 0x63f0fe0 _ZTHN7rocksdb10perf_levelE (perf_level getter)
+- 0x63f0d90 _M_replace (string replace for the pair install)
+- 0x63f0dc0 _ZdaPv (array delete for the dead temporary free)
+- 0x63f0d70 __stack_chk_fail (canary failure)
+- 0x606dd10 (perf counter helper, called on the perf paths)
