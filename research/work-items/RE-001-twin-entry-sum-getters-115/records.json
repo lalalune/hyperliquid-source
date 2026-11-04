@@ -1,0 +1,71 @@
+{
+  "task_id": "RE-001",
+  "node": 115,
+  "artifact": "work/hl-node-115.bin",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "windows": [
+    {
+      "name": "getter_a",
+      "address": "0x5eec290",
+      "end": "0x5eec2f3",
+      "size_bytes": 99,
+      "fde_eh_frame_offset": "0x35735c",
+      "fde_record_length": "0x34",
+      "cie_eh_frame_offset": "0x0",
+      "lsda": null,
+      "role": "sum leaf results over the entry range",
+      "returns": "1 unconditionally; *out = total",
+      "calls": [{"site": "0x5eec2d2", "target": "0x5dd3570", "kind": "direct_call"}]
+    },
+    {
+      "name": "getter_b",
+      "address": "0x5eec300",
+      "end": "0x5eec368",
+      "size_bytes": 104,
+      "fde_eh_frame_offset": "0x357394",
+      "fde_record_length": "0x34",
+      "cie_eh_frame_offset": "0x0",
+      "lsda": null,
+      "role": "sum [E + 0x50] over the entry range; leaf call result discarded",
+      "returns": "1 unconditionally; *out = total",
+      "calls": [{"site": "0x5eec342", "target": "0x5dd3570", "kind": "direct_call"}]
+    },
+    {
+      "name": "leaf",
+      "address": "0x5dd3570",
+      "end": "0x5dd357d",
+      "size_bytes": 13,
+      "fde_eh_frame_offset": "0x34e3e0",
+      "fde_record_length": "0x10",
+      "cie_eh_frame_offset": "0x0",
+      "lsda": null,
+      "role": "return [F + 0x10] + 62 with 64-bit wrapping",
+      "returns": "[F + 0x10] + 62",
+      "calls": []
+    }
+  ],
+  "shared_walk": {
+    "member": "[outer + 0x788]",
+    "sub_object": "[member + 0x30]",
+    "entry_range": {"begin": "[sub + 0xb18]", "end": "[sub + 0xb20]", "entry_size_bytes": 16},
+    "entry_first_qword": "E = [entry]",
+    "element_first_qword": "F = [E]",
+    "second_qword_of_entry": "never read",
+    "empty_range_total": 0,
+    "null_checks": "none anywhere; all dereferences unchecked",
+    "arithmetic": "64-bit wrapping"
+  },
+  "getter_a_semantics": "total = sum over entries of ([F + 0x10] + 62); *out = total; return 1",
+  "getter_b_semantics": "per entry: call leaf(F), discard its return; total += [E + 0x50]; *out = total; return 1",
+  "getter_b_quirk": "B's result is independent of [F + 0x10]; the leaf call in B is present in the binary but its return value is overwritten before use (mov -0x10(%rbx),%rax at 0x5eec347)",
+  "census": {
+    "getter_a": {"direct_calls": [], "tail_jumps": [], "qword_hits": [], "relative_addends": []},
+    "getter_b": {"direct_calls": [], "tail_jumps": [], "qword_hits": [], "relative_addends": []},
+    "leaf": {"direct_calls": ["0x5dd1694", "0x5eec2d2", "0x5eec342", "0x5ef06ca", "0x5ef7376", "0x5f70b12", "0x5f7f67b", "0x5f8ee20", "0x5f8ee8b", "0x5f90fa7"], "tail_jumps": [], "qword_hits": [], "relative_addends": []}
+  },
+  "left_by_contract": [
+    "The leaf's other 8 call sites (sites only, not modelled or claimed).",
+    "What the entry range's owning object is beyond the [outer + 0x788] + 0x30 path; no Rust type is claimed.",
+    "The callers of these virtual-shaped getters; none exist as direct calls in the file."
+  ]
+}
