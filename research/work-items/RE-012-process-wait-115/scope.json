@@ -1,0 +1,232 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "base_commit": "05bc2de303c05525b71e7e257426e741bc66a390",
+  "component": "foundation",
+  "task": "RE-012",
+  "question": "Complete static cache/waitpid retry/pidfd waitid and ioctl fallback result policy, with one real node reader. No syscall or captured execution.",
+  "pins": [
+    {
+      "name": "cache-before-any-syscall",
+      "va": "0x5c94a97",
+      "bytes": "833e017509418b4604e9b1000000",
+      "role": "process_wait"
+    },
+    {
+      "name": "pidfd-sentinel-and-options",
+      "va": "0x5c94aa5",
+      "bytes": "418b760c83feff742c488d7dc0ba04000000e8342bffff",
+      "role": "process_wait"
+    },
+    {
+      "name": "pidfd-error-forward",
+      "va": "0x5c94abc",
+      "bytes": "807dc0000f84a8000000488b45c848894308b8010000008903e985000000",
+      "role": "process_wait"
+    },
+    {
+      "name": "waitpid-status-zero-pid-options",
+      "va": "0x5c94ada",
+      "bytes": "c745d400000000458b7e08488d75d44489ff31d2ff15ac7d850083f8ff754fff15c9b48400",
+      "role": "process_wait"
+    },
+    {
+      "name": "waitpid-failure-only-minus-one",
+      "va": "0x5c94af4",
+      "bytes": "83f8ff754fff15c9b484004989c54c8b25977d8500",
+      "role": "process_wait"
+    },
+    {
+      "name": "errno-encoding-and-eintr-only",
+      "va": "0x5c94b10",
+      "bytes": "418b450089c148c1e0204883c802488945c8c745c00100000083f904755d",
+      "role": "process_wait"
+    },
+    {
+      "name": "retry-same-pid-options-status",
+      "va": "0x5c94b2e",
+      "bytes": "488d7dc8e85900feff4489ff488d75d431d241ffd483f8ff74c8",
+      "role": "process_wait"
+    },
+    {
+      "name": "success-cache-and-output",
+      "va": "0x5c94b48",
+      "bytes": "8b45d441c7060100000041894604894304c70300000000",
+      "role": "process_wait"
+    },
+    {
+      "name": "pidfd-none-and-cache",
+      "va": "0x5c94b6e",
+      "bytes": "807dc40074238b45c841c706010000004189460489430431c08903ebd4",
+      "role": "process_wait"
+    },
+    {
+      "name": "waitpid-error-no-cache-store",
+      "va": "0x5c94b8b",
+      "bytes": "48894308c70301000000ebc8",
+      "role": "process_wait"
+    },
+    {
+      "name": "pidfd-none-diagnostic-boundary",
+      "va": "0x5c94b97",
+      "bytes": "488d3d6149cbfa488d15fbe88200bea9000000ff1508ab8400",
+      "role": "process_wait"
+    },
+    {
+      "name": "pidfd-arguments",
+      "va": "0x5c87602",
+      "bytes": "89d14189f64889fb",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "siginfo-full-zeroing-and-waitid",
+      "va": "0x5c8760a",
+      "bytes": "0f57c00f298570ffffff0f298560ffffff0f298550ffffff0f298540ffffff0f298530ffffff0f298520ffffff0f298510ffffff0f298500ffffff488d9500ffffffbf03000000ff15c9518600",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "siginfo-pid-before-code",
+      "va": "0x5c87657",
+      "bytes": "83f8ff743f83bd10ffffff000f84a80000008b8d08ffffffffc983f9050f8711010000",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "siginfo-status-and-relative-table",
+      "va": "0x5c8767a",
+      "bytes": "8b8518ffffff488d15f507ccfa48630c8a4801d1ffe1",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "stopped-status-transform",
+      "va": "0x5c87690",
+      "bytes": "c1e00883c87fe9c1000000",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "waitid-error-echild-only",
+      "va": "0x5c8769b",
+      "bytes": "ff1527898500448b384489f949c1e7204983cf0283f90a7566",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "ioctl-buffer-zeros",
+      "va": "0x5c876bb",
+      "bytes": "0f57c00f1145b00f1145a00f11459048c745c00000000048c7458808000000",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "ioctl-mask-request-and-fd",
+      "va": "0x5c876d2",
+      "bytes": "48c7458808000000488d5588be0bff40c04489f731c0ff15ea128600",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "ioctl-success-raw-status-and-presence",
+      "va": "0x5c876ee",
+      "bytes": "83f8ff74338b45c489430848b80000000001000000488903488d7dd8e881d4feff",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "waitid-no-event",
+      "va": "0x5c87711",
+      "bytes": "31c0b904000000eb58",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "waitid-original-error",
+      "va": "0x5c8771a",
+      "bytes": "4c897b08c70301000000eb55",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "ioctl-failure-retains-original",
+      "va": "0x5c87726",
+      "bytes": "418b042448c1e0204883c802488d7dd0488945d0c745c8010000004c897b08c70301000000e840d4feff",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "signal-exit-continued-pack",
+      "va": "0x5c87752",
+      "bytes": "0d80000000eb0dc1e0080fb7c0eb05b8ffff0000c7430401000000b90800000089040bc70300000000",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "invalid-code-diagnostic",
+      "va": "0x5c8778b",
+      "bytes": "488d3db11eccfa488d159fbe8300beab000000ff15147f8500",
+      "role": "pidfd_waitid_ioctl"
+    },
+    {
+      "name": "caller-process-layout-transfer",
+      "va": "0x15362b5",
+      "bytes": "8b442424488b4c24288b5424308b7c2434488b7424388944245448894c2458895424604889742468c7442464ffffffff",
+      "role": "selected_node_caller_context"
+    },
+    {
+      "name": "caller-wait-call-and-result-branch",
+      "va": "0x15362f0",
+      "bytes": "488d7c2420488d742454e881e77504807c2420000f84ac000000",
+      "role": "selected_node_caller_context"
+    },
+    {
+      "name": "caller-raw-status-read",
+      "va": "0x15363b6",
+      "bytes": "8b5c2424",
+      "role": "selected_node_caller_context"
+    },
+    {
+      "name": "caller-nonzero-raw-status-branch",
+      "va": "0x1536403",
+      "bytes": "85db0f85ea000000",
+      "role": "selected_node_caller_context"
+    },
+    {
+      "name": "caller-nonzero-status-error",
+      "va": "0x15364f5",
+      "bytes": "488d44244848898424a0000000488d0557a4fcff48898424a8000000488d3db1e0effe488db424a0000000e8eb770000",
+      "role": "selected_node_caller_context"
+    },
+    {
+      "name": "drop-low-tag-classification",
+      "va": "0x5c74b90",
+      "bytes": "554889e541574156415453488b0789c183e1038d51fe83fa0272054885c9",
+      "role": "error_disposal_context"
+    }
+  ],
+  "data_pins": [
+    {
+      "name": "waitid-six-code-dispatch",
+      "va": "0x947e7c",
+      "bytes": "ddf83305eaf83305d6f8330514f8330514f83305e5f83305"
+    },
+    {
+      "name": "wait-none-diagnostic-pool-argument",
+      "va": "0x9494ff",
+      "bytes": "696e7465726e616c206572726f723a20656e746572656420756e726561636861626c6520636f64653a20776169746964207769746820574558495445442073686f756c64206e6f742072657475726e204e6f6e65696e76616c696420737461636b2073697a654f6e636520696e7374616e6365206861732070726576696f75736c79206265656e20706f69736f6e6564617373657274696f6e206661696c65643a206f6c645f726967"
+    },
+    {
+      "name": "invalid-code-diagnostic-pool-argument",
+      "va": "0x949643",
+      "bytes": "696e7465726e616c206572726f723a20656e746572656420756e726561636861626c6520636f64653a2077616974696428292073686f756c64206f6e6c792072657475726e207468652061626f766520636f646573525553545f4c49425f4241434b54524143457065726d697373696f6e2064656e696564636f6e6e656374696f6e20726566757365646e6574776f726b20756e726561636861626c65636f6e6e656374696f6e2061626f"
+    },
+    {
+      "name": "wait-none-location-layout",
+      "va": "0x64c34a8",
+      "bytes": "5b000000000000006600000015000000"
+    },
+    {
+      "name": "invalid-code-location-layout",
+      "va": "0x64c3640",
+      "bytes": "58000000000000003104000012000000"
+    },
+    {
+      "name": "wait-location-path",
+      "va": "0x433e5d",
+      "bytes": "2f72757374632f353938303736313665316661323534303732346266626163313464373937366437653461333836302f6c6962726172792f7374642f7372632f7379732f70616c2f756e69782f6c696e75782f70696466642e7273"
+    },
+    {
+      "name": "waitid-location-path",
+      "va": "0x43a229",
+      "bytes": "2f72757374632f353938303736313665316661323534303732346266626163313464373937366437653461333836302f6c6962726172792f7374642f7372632f7379732f70726f636573732f756e69782f756e69782e7273"
+    }
+  ]
+}
