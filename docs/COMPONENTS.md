@@ -210,7 +210,7 @@ Agent, system-user, nonce, timing and other cross-cutting state.
 Read-only info requests and position responses.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-position-integer`.
 - Observed diagnostic paths: 7.
 - First task: Recover request variants, response layouts and snapshot consistency.
 
