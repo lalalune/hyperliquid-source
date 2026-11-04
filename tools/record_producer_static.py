@@ -1218,7 +1218,8 @@ def caller_census(data):
             return f'{ordered[i][0]:#x}..{ordered[i][1]:#x}'
         return None
 
-    text_sec = next(s for s in sections(data) if s['name'] == '.text')
+    text_sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    check(text_sec is not None, 'missing.text section')
     base, off, size = (text_sec['address'], text_sec['offset'],
                        text_sec['size'])
     body = bytes(data[off:off + size])
@@ -1269,7 +1270,8 @@ RIP_OPS = (0x8D, 0x8B, 0x89, 0x88, 0x39, 0x3B)
 
 def rip_references(data, target):
     """Rip-relative references to an exact address anywhere in .text."""
-    text_sec = next(s for s in sections(data) if s['name'] == '.text')
+    text_sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    check(text_sec is not None, 'missing.text section')
     base = text_sec['address']
     body = bytes(data[text_sec['offset']:
                       text_sec['offset'] + text_sec['size']])
@@ -1298,7 +1300,9 @@ def rip_references(data, target):
 
 def slot_census(data):
     """The six indirect-invocation boundaries, from the relocations."""
-    rela = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    rela = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    check(rela is not None, 'missing.rela.dyn section')
+    check(rela['size'] % 24 == 0, 'truncated.rela.dyn section')
     entries = {}
     for i in range(rela['size'] // 24):
         off, typ, add = struct.unpack_from('<QQq', data,
