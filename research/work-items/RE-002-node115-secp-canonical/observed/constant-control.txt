@@ -1,0 +1,74 @@
+0000000000000000: 49bbd003000001000000     movabs r11, 0x1000003d0
+000000000000000a: 55                       push rbp
+000000000000000b: 4889f9                   mov rcx, rdi
+000000000000000e: 48beffffffffffff0f00     movabs rsi, 0xfffffffffffff
+0000000000000018: 49b8ffffffffffff0000     movabs r8, 0xffffffffffff
+0000000000000022: 53                       push rbx
+0000000000000023: 488b5720                 mov rdx, qword ptr [rdi + 0x20]
+0000000000000027: 4889d0                   mov rax, rdx
+000000000000002a: 48c1ea30                 shr rdx, 0x30
+000000000000002e: 490fafd3                 imul rdx, r11
+0000000000000032: 480317                   add rdx, qword ptr [rdi]
+0000000000000035: 4c21c0                   and rax, r8
+0000000000000038: 4989d2                   mov r10, rdx
+000000000000003b: 4821f2                   and rdx, rsi
+000000000000003e: 49c1ea34                 shr r10, 0x34
+0000000000000042: 4c035708                 add r10, qword ptr [rdi + 8]
+0000000000000046: 4d89d1                   mov r9, r10
+0000000000000049: 4921f2                   and r10, rsi
+000000000000004c: 49c1e934                 shr r9, 0x34
+0000000000000050: 4c034f10                 add r9, qword ptr [rdi + 0x10]
+0000000000000054: 4c89d5                   mov rbp, r10
+0000000000000057: 4c89cf                   mov rdi, r9
+000000000000005a: 4921f1                   and r9, rsi
+000000000000005d: 48c1ef34                 shr rdi, 0x34
+0000000000000061: 48037918                 add rdi, qword ptr [rcx + 0x18]
+0000000000000065: 4c21cd                   and rbp, r9
+0000000000000068: 4889fb                   mov rbx, rdi
+000000000000006b: 4821f7                   and rdi, rsi
+000000000000006e: 48c1eb34                 shr rbx, 0x34
+0000000000000072: 4801c3                   add rbx, rax
+0000000000000075: 4889e8                   mov rax, rbp
+0000000000000078: 4821f8                   and rax, rdi
+000000000000007b: 4839f0                   cmp rax, rsi
+000000000000007e: 400f94c5                 sete bpl
+0000000000000082: 4c39c3                   cmp rbx, r8
+0000000000000085: 0f94c0                   sete al
+0000000000000088: 21c5                     and ebp, eax
+000000000000008a: 48b82efcfffffeff0f00     movabs rax, 0xffffefffffc2e
+0000000000000094: 4839d0                   cmp rax, rdx
+0000000000000097: 0f92c0                   setb al
+000000000000009a: 0fb6c0                   movzx eax, al
+000000000000009d: 4821e8                   and rax, rbp
+00000000000000a0: 4889dd                   mov rbp, rbx
+00000000000000a3: 48c1ed30                 shr rbp, 0x30
+00000000000000a7: 4809e8                   or rax, rbp
+00000000000000aa: 48f7d8                   neg rax
+00000000000000ad: 4c21d8                   and rax, r11
+00000000000000b0: 4801d0                   add rax, rdx
+00000000000000b3: 4889c2                   mov rdx, rax
+00000000000000b6: 4821f0                   and rax, rsi
+00000000000000b9: 48c1ea34                 shr rdx, 0x34
+00000000000000bd: 488901                   mov qword ptr [rcx], rax
+00000000000000c0: 4901d2                   add r10, rdx
+00000000000000c3: 4c89d2                   mov rdx, r10
+00000000000000c6: 4921f2                   and r10, rsi
+00000000000000c9: 48c1ea34                 shr rdx, 0x34
+00000000000000cd: 4c895108                 mov qword ptr [rcx + 8], r10
+00000000000000d1: 4901d1                   add r9, rdx
+00000000000000d4: 4c89ca                   mov rdx, r9
+00000000000000d7: 4921f1                   and r9, rsi
+00000000000000da: 48c1ea34                 shr rdx, 0x34
+00000000000000de: 4c894910                 mov qword ptr [rcx + 0x10], r9
+00000000000000e2: 4801fa                   add rdx, rdi
+00000000000000e5: 4889d7                   mov rdi, rdx
+00000000000000e8: 4821f2                   and rdx, rsi
+00000000000000eb: 48c1ef34                 shr rdi, 0x34
+00000000000000ef: 48895118                 mov qword ptr [rcx + 0x18], rdx
+00000000000000f3: 4801df                   add rdi, rbx
+00000000000000f6: 5b                       pop rbx
+00000000000000f7: 5d                       pop rbp
+00000000000000f8: 4889f8                   mov rax, rdi
+00000000000000fb: 4c21c0                   and rax, r8
+00000000000000fe: 48894120                 mov qword ptr [rcx + 0x20], rax
+0000000000000102: c3                       ret 
