@@ -1,0 +1,16 @@
+Relocation and stored-pointer scan for RE-001-two-phase-filtered-accum-115.
+
+Method (reproduced by census.py in this packet):
+  * Whole-file scan for an 8-byte little-endian qword equal to each
+    window address.
+  * Parse of `readelf -r` output for R_X86_64_RELATIVE records whose
+    addend equals each window address.
+
+Result for the digest-verified node #115 work binary
+(SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301):
+  * Scan 0x5f77330: 0 stored qwords, 0 RELATIVE addends.
+  * Leaf 0x5f6b590: 0 stored qwords, 0 RELATIVE addends.
+
+Neither window is reached through a stored pointer or a
+relocation addend; every reference is a direct call site listed in
+callers.tsv.
