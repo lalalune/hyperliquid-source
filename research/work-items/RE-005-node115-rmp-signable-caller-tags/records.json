@@ -1,0 +1,225 @@
+{
+  "caller_call_sites": {
+    "caller_a": [
+      {
+        "kind": "call",
+        "owner": "grand_a",
+        "owner_start": "0x36c2050",
+        "site": "0x36c208b"
+      }
+    ],
+    "caller_b": [
+      {
+        "kind": "call",
+        "owner": "grand_b",
+        "owner_start": "0x36c5350",
+        "site": "0x36c5388"
+      }
+    ]
+  },
+  "caller_forwarding": {
+    "caller_a": {
+      "call_site": "0x36aae0d",
+      "tag": "its own third argument (edx), forwarded unchanged; only rdi is replaced"
+    },
+    "caller_b": {
+      "call_site": "0x36aaf2a",
+      "tag": "its own third argument (edx), forwarded unchanged; only rdi is replaced"
+    }
+  },
+  "captured_code_executed": false,
+  "dispatchers": {
+    "grand_a": {
+      "arms": {
+        "count": 21,
+        "discriminants": [
+          "0x87",
+          "0x91",
+          "0xa3",
+          "0xa8",
+          "0xae",
+          "0xb6",
+          "0xb7",
+          "0xb8",
+          "0xb9",
+          "0xba",
+          "0xbb",
+          "0xbc",
+          "0xc3",
+          "0xc4",
+          "0xc5",
+          "0xcb",
+          "0xcf",
+          "0xd1",
+          "0xd2",
+          "0xd3",
+          "0xdb"
+        ],
+        "fallback": "0x36c2931",
+        "tag_at_fallback": "mov edx,ebp in the fallback block, which jumps straight to the call site",
+        "tag_capture": "movzx ebp,dl at every arm head, before the per-variant helper call"
+      },
+      "default_index": "0x14",
+      "direct_pad": {
+        "call_site": "0x36c208b",
+        "site": "0x36c2085",
+        "table_entries": 70,
+        "tag": "movzx edx,dl at the pad: the low byte of the dispatcher entry edx, upper bytes cleared"
+      },
+      "discriminant_base": "0x86",
+      "equality_gate": {
+        "discriminant": "0xd7",
+        "rule": "entered from the table with the entry registers untouched; when [rcx+0x10] equals [rsi+0x98] it jumps to the direct pad (tag is again the entry low byte), otherwise it writes word 0x60 to the out record and returns without calling",
+        "site": "0x36c28a6"
+      },
+      "inspection": "each arm inspects the helper-produced record: word 0x1a2 and byte 1 select the success block, which copies the record out and returns; any other byte reaches the fallback and calls the caller",
+      "table": "0x79a9f0",
+      "table_entries": 92,
+      "tag_rule": "on every reaching path the tag handed to the caller is the zero-extended low byte of the dispatcher entry edx"
+    },
+    "grand_b": {
+      "arms": {
+        "count": 21,
+        "discriminants": [
+          "0x87",
+          "0x91",
+          "0xa3",
+          "0xa8",
+          "0xae",
+          "0xb6",
+          "0xb7",
+          "0xb8",
+          "0xb9",
+          "0xba",
+          "0xbb",
+          "0xbc",
+          "0xc3",
+          "0xc4",
+          "0xc5",
+          "0xcb",
+          "0xcf",
+          "0xd1",
+          "0xd2",
+          "0xd3",
+          "0xdb"
+        ],
+        "fallback": "0x36c5663",
+        "tag_at_fallback": "mov edx,ebp in the fallback block, which jumps straight to the call site",
+        "tag_capture": "movzx ebp,dl at every arm head, before the per-variant helper call"
+      },
+      "default_index": "0x14",
+      "direct_pad": {
+        "call_site": "0x36c5388",
+        "site": "0x36c5382",
+        "table_entries": 71,
+        "tag": "movzx edx,dl at the pad: the low byte of the dispatcher entry edx, upper bytes cleared"
+      },
+      "discriminant_base": "0x86",
+      "inspection": "all arms converge on one inspection block: a zero first byte in the helper-produced record reaches the fallback and calls the caller; any other byte copies the record out and returns",
+      "table": "0x79b290",
+      "table_entries": 92,
+      "tag_rule": "on every reaching path the tag handed to the caller is the zero-extended low byte of the dispatcher entry edx"
+    }
+  },
+  "limits": "Static byte pins, one FDE extent census, one .text call census and the two jump tables only. The table length (92 entries) is bounded by the next referenced table base in .rodata (0x170 bytes later for both dispatchers in this family); no stored length field exists. Discriminants above the table span are not claimed: the dispatch head applies no upper bound check. The packet does not name the enum or action types the discriminants denote, does not trace the per-variant helper calls the arms make through their relocation slots, and does not follow the dispatchers own callers: grand_a has exactly one direct call site (0x37133b3) and grand_b none in .text, so which entry edx values occur at runtime remains open one level up.",
+  "owners": [
+    {
+      "bytes": 1094,
+      "end": "0x36aade6",
+      "file_offset": "0x36a99a0",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "4800000084241b0014af4b02460400000487b20cff410e10420e18420e20420e28410e30470eb00483068c058e048f03860203d9020e30410e28420e20420e18420e10410e08410eb0040000",
+          "va": "0x11efa84"
+        }
+      },
+      "role": "serializer",
+      "sha256": "18c066ea3b97c2de167b8e7557d1e3e3cdbbd2f757dd83a00eafc827718eca9d",
+      "start": "0x36aa9a0"
+    },
+    {
+      "bytes": 286,
+      "end": "0x36aaf0e",
+      "file_offset": "0x36a9df0",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "38000000d0241b0018b34b021e010000047fb20cff420e10420e18410e20470e900283048e038f0202be0e20410e18420e10420e08410e9002000000",
+          "va": "0x11efad0"
+        }
+      },
+      "role": "caller_a",
+      "sha256": "d334db07754d3444527141f0c43ec5316b25cef9dac35cfdb48a6728d6052127",
+      "start": "0x36aadf0"
+    },
+    {
+      "bytes": 230,
+      "end": "0x36aaff6",
+      "file_offset": "0x36a9f10",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "380000000c251b00fcb34b02e60000000457b20cff420e10420e18410e20470ec00183048e038f0202670e20410e18420e10420e08410ec001000000",
+          "va": "0x11efb0c"
+        }
+      },
+      "role": "caller_b",
+      "sha256": "98513eb74d9449bf469425940d4ae673921f4494e34133e938a9f4f37f324582",
+      "start": "0x36aaf10"
+    },
+    {
+      "bytes": 3913,
+      "end": "0x36c2f99",
+      "file_offset": "0x36c1050",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+          "va": "0xca6ed8"
+        },
+        "fde": {
+          "bytes_hex": "4000000074b5150000fc8b02490f000000410e10420e18420e20420e28410e30470ec00683068c058e048f0386027b0e30410e28420e20420e18420e10410e08410ec006",
+          "va": "0xe02448"
+        }
+      },
+      "role": "grand_a",
+      "sha256": "eaa2515d051afca85d5136bd3c53c7a6423abdb86d6832ef7b4d6132df182514",
+      "start": "0x36c2050"
+    },
+    {
+      "bytes": 806,
+      "end": "0x36c5676",
+      "file_offset": "0x36c4350",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+          "va": "0xca6ed8"
+        },
+        "fde": {
+          "bytes_hex": "4000000074b61500002e8c022603000000410e10420e18420e20420e28410e30440e800183068c058e048f038602780e30410e28420e20420e18420e10410e08410e8001",
+          "va": "0xe02548"
+        }
+      },
+      "role": "grand_b",
+      "sha256": "19f158b96c98c1a4622032b450f29f35a8226cd2c17dea6fdd80ccc0a8f12662",
+      "start": "0x36c5350"
+    }
+  ],
+  "serializer_tag_rule": {
+    "argument": "third argument (edx)",
+    "byte_if_equal": "0x61",
+    "byte_otherwise": "0x62",
+    "compared_against": 3
+  },
+  "tag_provenance": "both dispatchers pass the zero-extended low byte of their own entry edx on every reaching path; no reaching path materialises a constant tag or loads the tag from memory, so the emitted tag byte is 0x61 exactly when the dispatcher entry edx has low byte 3, and 0x62 otherwise",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+}
