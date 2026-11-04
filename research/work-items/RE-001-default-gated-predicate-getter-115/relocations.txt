@@ -1,0 +1,9 @@
+RELA scan (whole file, .rela.dyn file range 0x6be8+0x163cc8, .rela.plt 0x16a8b0+0x1a10):
+- Window start 0x5eeb7a0: no RELATIVE addend hits.
+- Window start 0x5d89610: two RELATIVE addend hits. The entry at file offset 0x15cf18 targets file offset 0x64ed2d0 (the .got slot the getter at 0x5eeb7bf compares against); the entry at file offset 0x1051f8 targets file offset 0x64c9b50, a second slot carrying the same default implementation whose consumers are not traced in this packet and are not claimed here.
+- The two whole-file qword occurrences of 0x5d89610 (file offsets 0x105208 and 0x15cf28) are exactly those two RELA addend fields, not vtable entries.
+
+In-window rip-relative references: the getter at 0x5eeb7bf compares against the .got slot at 0x64ed2d0 (displacement 0x601b0a from the end of the cmp instruction at 0x5eeb7c6); the default implementation has none.
+Stack canary: neither window uses %fs:0x28.
+PLT calls in-window: none in either window. Direct calls in-window: none in the getter except the indirect virtual call at 0x5eeb7e0 (call *%rdx); the default implementation has no call.
+Whole-file qword scan for 0x5eeb7a0 (8-byte little-endian): no occurrence.
