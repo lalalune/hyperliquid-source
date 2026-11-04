@@ -1012,7 +1012,8 @@ def caller_census(data):
             return f'{ordered[i][0]:#x}..{ordered[i][1]:#x}'
         return None
 
-    text_sec = next(s for s in sections(data) if s['name'] == '.text')
+    text_sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    check(text_sec is not None, 'missing.text section')
     base, off, size = (text_sec['address'], text_sec['offset'],
                        text_sec['size'])
     body = bytes(data[off:off + size])
@@ -1061,6 +1062,7 @@ def rela_entries(data):
     for section in sections(data):
         if section['name'] != '.rela.dyn':
             continue
+        check(section['size'] % 24 == 0, 'truncated.rela.dyn section')
         for i in range(section['offset'],
                        section['offset'] + section['size'], 24):
             off, info, addend = struct.unpack_from('<QQq', data, i)
@@ -1071,7 +1073,8 @@ def rela_entries(data):
 def rip_references(data, target):
     """Every rip-relative reference to target in .text (the
     record-producer census: REX-prefixed modrm-checked scan)."""
-    text_sec = next(s for s in sections(data) if s['name'] == '.text')
+    text_sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    check(text_sec is not None, 'missing.text section')
     base, off, size = (text_sec['address'], text_sec['offset'],
                        text_sec['size'])
     body = bytes(data[off:off + size])
@@ -1093,13 +1096,18 @@ def rip_references(data, target):
 
 
 def dynsym_name(data, index):
-    dynsym = next(s for s in sections(data) if s['name'] == '.dynsym')
-    dynstr = next(s for s in sections(data) if s['name'] == '.dynstr')
+    dynsym = next((s for s in sections(data) if s['name'] == '.dynsym'), None)
+    check(dynsym is not None, 'missing.dynsym section')
+    dynstr = next((s for s in sections(data) if s['name'] == '.dynstr'), None)
+    check(dynstr is not None, 'missing.dynstr section')
     name_off = struct.unpack_from(
         '<I', data, dynsym['offset'] + index * 24)[0]
     start = dynstr['offset'] + name_off
     end = data.index(b'\0', start)
-    return data[start:end].decode('ascii')
+    try:
+        return data[start:end].decode('ascii')
+    except UnicodeDecodeError:
+        raise ValueError('dynamic symbol name is not valid ASCII')
 
 
 def ff15_sites_in_body(data, role, slot):
