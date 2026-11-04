@@ -527,7 +527,10 @@ def read_string(va, data, size):
     """Exactly size bytes at a VA, resolved through the
     section table like every other read in this tool."""
     _, raw = read(va, data, size)
-    return raw.decode('ascii')
+    try:
+        return raw.decode('ascii')
+    except UnicodeDecodeError:
+        raise ValueError('string is not valid ASCII')
 
 
 def section_name(va, data):
@@ -746,6 +749,7 @@ def rela_entries(data):
     for section in sections(data):
         if section['name'] != '.rela.dyn':
             continue
+        check(section['size'] % 24 == 0, 'truncated.rela.dyn section')
         for i in range(section['offset'],
                        section['offset'] + section['size'], 24):
             off, info, addend = struct.unpack_from('<QQq', data, i)
@@ -757,7 +761,8 @@ def rip_references(data, target):
     """Every rip-relative reference to target in .text (the
     series census: REX-prefixed modrm-checked scan plus the
     FF 15/FF 25 forms)."""
-    text_sec = next(s for s in sections(data) if s['name'] == '.text')
+    text_sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    check(text_sec is not None, 'missing.text section')
     base, off, size = (text_sec['address'], text_sec['offset'],
                        text_sec['size'])
     body = bytes(data[off:off + size])
@@ -779,13 +784,18 @@ def rip_references(data, target):
 
 
 def dynsym_name(data, index):
-    dynsym = next(s for s in sections(data) if s['name'] == '.dynsym')
-    dynstr = next(s for s in sections(data) if s['name'] == '.dynstr')
+    dynsym = next((s for s in sections(data) if s['name'] == '.dynsym'), None)
+    check(dynsym is not None, 'missing.dynsym section')
+    dynstr = next((s for s in sections(data) if s['name'] == '.dynstr'), None)
+    check(dynstr is not None, 'missing.dynstr section')
     name_off = struct.unpack_from(
         '<I', data, dynsym['offset'] + index * 24)[0]
     start = dynstr['offset'] + name_off
     end = data.index(b'\0', start)
-    return data[start:end].decode('ascii')
+    try:
+        return data[start:end].decode('ascii')
+    except UnicodeDecodeError:
+        raise ValueError('dynamic symbol name is not valid ASCII')
 
 
 def slot_census(data):
@@ -821,7 +831,8 @@ def slot_census(data):
 def gate_call_census(data):
     """Direct E8/E9 callers of both gates across .text, plus
     the (empty) set of relocation addends naming a gate."""
-    text_sec = next(s for s in sections(data) if s['name'] == '.text')
+    text_sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    check(text_sec is not None, 'missing.text section')
     base, off, size = (text_sec['address'], text_sec['offset'],
                        text_sec['size'])
     body = bytes(data[off:off + size])
@@ -997,7 +1008,10 @@ def strings_census(data):
     va = int(CRIT_MESSAGE['va'], 16)
     raw = read(va, data, int(CRIT_MESSAGE['descriptor_length'],
                              16))[1]
-    prefix = raw[:CRIT_MESSAGE['prefix_bytes']].decode('ascii')
+    try:
+        prefix = raw[:CRIT_MESSAGE['prefix_bytes']].decode('ascii')
+    except UnicodeDecodeError:
+        raise ValueError('crit message prefix is not valid ASCII')
     check(prefix == CRIT_MESSAGE['prefix'],
           f'crit message prefix mismatch: {prefix!r}')
     records['crit_message'] = {
