@@ -90,7 +90,7 @@ Action envelopes, signing payloads and delayed actions.
 Agent-created handler splits and central dispatch.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-display-name-decision`.
 - Observed diagnostic paths: 0.
 - First task: Validate each handler seed against #115; do not infer original function boundaries from these splits.
 
