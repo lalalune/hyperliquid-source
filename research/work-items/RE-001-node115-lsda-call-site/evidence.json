@@ -1,0 +1,128 @@
+{
+  "task": "RE-001",
+  "component": "foundation",
+  "claim_status": "observation",
+  "question": "Which LSDA header fields and call-site table does the pinned node #115 FDE for 0x14193f0..0x1419618 reference, and do the corruption controls reject altered inputs?",
+  "tool": "tools/foundation_lsda_call_site.py",
+  "target": {
+    "release": 115,
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "size": 105896032
+  },
+  "derived": {
+    "sections": {
+      ".eh_frame": {
+        "file_offset": "0xca6ed8",
+        "size": 7803772,
+        "va": "0xca6ed8"
+      },
+      ".gcc_except_table": {
+        "file_offset": "0x16c2c0",
+        "size": 2900276,
+        "va": "0x16c2c0"
+      },
+      ".text": {
+        "file_offset": "0x1418300",
+        "size": 83719936,
+        "va": "0x1419300"
+      }
+    },
+    "eh_frame_census": {
+      "cie_count": 3,
+      "eligible_call_site_fdes": 41899,
+      "fde_count": 135313,
+      "fdes_with_lsda": 52682
+    },
+    "cie": {
+      "augmentation": "zPLR",
+      "code_alignment": 1,
+      "data_alignment": -8,
+      "fde_encoding": "0x1b",
+      "lsda_encoding": "0x1b",
+      "personality": {
+        "encoding": 155,
+        "indirect": true,
+        "value": 105839144
+      },
+      "record_bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+      "record_offset": "0x39672c",
+      "return_address_register": 16,
+      "version": 1
+    },
+    "fde": {
+      "augmentation_data_length": 4,
+      "end": "0x1419618",
+      "entry": "0x14193f0",
+      "initial_location_encoding": "0x1b",
+      "range": 552,
+      "record_bytes_hex": "3800000024000000c4bd3d0028020000048bec12ff410e10420e18410e20470ec00383048e03860203db010e20410e18420e10410e08410ec0030000",
+      "record_offset": "0x39674c"
+    },
+    "lsda": {
+      "call_site_table_bytes_hex": "22098d04002bd0030000fb03108d04008b041d0000",
+      "call_sites": [
+        {
+          "action": 0,
+          "byte_length": 9,
+          "index": 0,
+          "landing_pad": "0x20d",
+          "start_offset": 34
+        },
+        {
+          "action": 0,
+          "byte_length": 464,
+          "index": 1,
+          "landing_pad": "0x0",
+          "start_offset": 43
+        },
+        {
+          "action": 0,
+          "byte_length": 16,
+          "index": 2,
+          "landing_pad": "0x20d",
+          "start_offset": 507
+        },
+        {
+          "action": 0,
+          "byte_length": 29,
+          "index": 3,
+          "landing_pad": "0x0",
+          "start_offset": 523
+        }
+      ],
+      "encoding": "0x1b",
+      "file_offset": "0x16c2c0",
+      "header": {
+        "call_site_encoding": 1,
+        "call_site_table_length": 21,
+        "call_site_table_length_offset": 3,
+        "call_site_table_offset": 4,
+        "header_bytes_hex": "ffff0115",
+        "lpstart_encoding": 255,
+        "lpstart_value": null,
+        "ttype_encoding": 255,
+        "ttype_offset": null
+      },
+      "va": "0x16c2c0"
+    },
+    "negative_controls": [
+      {
+        "control": "eh-frame-record-length-overflow",
+        "outcome": "rejected"
+      },
+      {
+        "control": "lsda-pointer-outside-section",
+        "outcome": "rejected"
+      },
+      {
+        "control": "call-site-table-truncated",
+        "outcome": "rejected"
+      },
+      {
+        "control": "declared-table-length-shortened",
+        "outcome": "rejected"
+      }
+    ]
+  }
+}
