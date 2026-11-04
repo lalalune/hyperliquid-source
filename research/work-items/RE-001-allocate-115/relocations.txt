@@ -1,0 +1,25 @@
+Relocation / PLT notes for the RE-001 outer allocation window (node #115).
+
+Window 0x5f11c40:
+- One rip-relative GOT read in-window: cmpq $0 against GOT slot
+  0x64ed7e8 at 0x5f11c8a gates the TLS getter call below.
+- PLT calls: sched_yield 0x63f0b20 (spin-loop yield sites 0x5f11e15,
+  0x5f11e55, 0x5f11f90), TLS getter 0x63f13b0
+  (_ZTHN7rocksdb15ConcurrentArena9tls_cpuidE, site 0x5f11c94),
+  __throw_system_error 0x63f0f90 (code 0x23 at 0x5f12120, code 1 at
+  0x5f1213a), __stack_chk_fail 0x63f0d70, _Unwind_Resume 0x63f0a50.
+- Internal calls: slow allocator 0x605d6c0 (sites 0x5f11e39 global
+  path, 0x5f120c6 direct-refill short path), AllocateAligned
+  0x605d7b0 (site 0x5f11f0e grow path), shard refresh 0x605e170
+  (site 0x5f11cf7), post-direct 0x5f07200 (site 0x5f12083),
+  guard release 0x5f0b5e0 (cleanup sites 0x5f120e0 and 0x5f120f1).
+- No .rodata string reference in-window; the window reads no other
+  GOT slot.
+
+Vtable / RELATIVE notes:
+- The window is reached through the outer class vtable (see the
+  destructor-pair packet: vtable 0x64cc5d8 holds 0x5f10180,
+  0x5f10d00, 0x5f11c40, 0x5f117a0, 0x5f04da0). The slots themselves
+  are zero in the file and resolve only through their RELATIVE
+  entries; see census.py output and records.json for this window's
+  slot and any qword hit.
