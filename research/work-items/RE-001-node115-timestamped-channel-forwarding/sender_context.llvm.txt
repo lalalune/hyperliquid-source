@@ -1,0 +1,75 @@
+# llvm: full owning FDE 0x2ced920..0x2ceda34 decoded; retained 0x2ced920..0x2ceda34
+ 2ced920: 41 57                        	push	r15
+ 2ced922: 41 56                        	push	r14
+ 2ced924: 53                           	push	rbx
+ 2ced925: 48 83 ec 10                  	sub	rsp, 0x10
+ 2ced929: 48 8b 5f 08                  	mov	rbx, qword ptr [rdi + 0x8]
+ 2ced92d: f0                           	lock
+ 2ced92e: 48 ff 43 10                  	inc	qword ptr [rbx + 0x10]
+ 2ced932: 4c 8b 37                     	mov	r14, qword ptr [rdi]
+ 2ced935: 49 8b 86 c0 01 00 00         	mov	rax, qword ptr [r14 + 0x1c0]
+ 2ced93c: 0f 1f 40 00                  	nop	dword ptr [rax]
+ 2ced940: a8 01                        	test	al, 0x1
+ 2ced942: 0f 85 ad 00 00 00            	jne	0x2ced9f5 <.text+0x18d46f5>
+ 2ced948: 48 83 f8 fe                  	cmp	rax, -0x2
+ 2ced94c: 0f 84 c3 00 00 00            	je	0x2ceda15 <.text+0x18d4715>
+ 2ced952: 48 8d 48 02                  	lea	rcx, [rax + 0x2]
+ 2ced956: f0                           	lock
+ 2ced957: 49 0f b1 8e c0 01 00 00      	cmpxchg	qword ptr [r14 + 0x1c0], rcx
+ 2ced95f: 75 df                        	jne	0x2ced940 <.text+0x18d4640>
+ 2ced961: 0f 10 06                     	movups	xmm0, xmmword ptr [rsi]
+ 2ced964: 0f 29 04 24                  	movaps	xmmword ptr [rsp], xmm0
+ 2ced968: 49 8d be 80 00 00 00         	lea	rdi, [r14 + 0x80]
+ 2ced96f: 41 bf 01 00 00 00            	mov	r15d, 0x1
+ 2ced975: bb 01 00 00 00               	mov	ebx, 0x1
+ 2ced97a: f0                           	lock
+ 2ced97b: 49 0f c1 9e 88 00 00 00      	xadd	qword ptr [r14 + 0x88], rbx
+ 2ced983: 48 89 de                     	mov	rsi, rbx
+ 2ced986: e8 c5 24 fe ff               	call	0x2ccfe50 <.text+0x18b6b50>
+ 2ced98b: 83 e3 1f                     	and	ebx, 0x1f
+ 2ced98e: 89 d9                        	mov	ecx, ebx
+ 2ced990: c1 e1 04                     	shl	ecx, 0x4
+ 2ced993: 0f 28 04 24                  	movaps	xmm0, xmmword ptr [rsp]
+ 2ced997: 0f 11 04 08                  	movups	xmmword ptr [rax + rcx], xmm0
+ 2ced99b: 89 d9                        	mov	ecx, ebx
+ 2ced99d: 49 d3 e7                     	shl	r15, cl
+ 2ced9a0: f0                           	lock
+ 2ced9a1: 4c 09 b8 10 02 00 00         	or	qword ptr [rax + 0x210], r15
+ 2ced9a8: 49 8b 86 10 01 00 00         	mov	rax, qword ptr [r14 + 0x110]
+ 2ced9af: 90                           	nop
+ 2ced9b0: 48 89 c1                     	mov	rcx, rax
+ 2ced9b3: 48 83 c9 02                  	or	rcx, 0x2
+ 2ced9b7: f0                           	lock
+ 2ced9b8: 49 0f b1 8e 10 01 00 00      	cmpxchg	qword ptr [r14 + 0x110], rcx
+ 2ced9c0: 75 ee                        	jne	0x2ced9b0 <.text+0x18d46b0>
+ 2ced9c2: 48 85 c0                     	test	rax, rax
+ 2ced9c5: 75 2a                        	jne	0x2ced9f1 <.text+0x18d46f1>
+ 2ced9c7: 49 8b 86 00 01 00 00         	mov	rax, qword ptr [r14 + 0x100]
+ 2ced9ce: 49 8b be 08 01 00 00         	mov	rdi, qword ptr [r14 + 0x108]
+ 2ced9d5: 49 c7 86 00 01 00 00 00 00 00 00     	mov	qword ptr [r14 + 0x100], 0x0
+ 2ced9e0: 31 c9                        	xor	ecx, ecx
+ 2ced9e2: 49 87 8e 10 01 00 00         	xchg	qword ptr [r14 + 0x110], rcx
+ 2ced9e9: 48 85 c0                     	test	rax, rax
+ 2ced9ec: 74 03                        	je	0x2ced9f1 <.text+0x18d46f1>
+ 2ced9ee: ff 50 08                     	call	qword ptr [rax + 0x8]
+ 2ced9f1: b0 05                        	mov	al, 0x5
+ 2ced9f3: eb 16                        	jmp	0x2ceda0b <.text+0x18d470b>
+ 2ced9f5: 0f 10 06                     	movups	xmm0, xmmword ptr [rsi]
+ 2ced9f8: 0f 29 04 24                  	movaps	xmmword ptr [rsp], xmm0
+ 2ced9fc: 48 89 e7                     	mov	rdi, rsp
+ 2ced9ff: e8 fc 1b fb ff               	call	0x2c9f600 <.text+0x1886300>
+ 2ceda04: f0                           	lock
+ 2ceda05: 48 ff 4b 10                  	dec	qword ptr [rbx + 0x10]
+ 2ceda09: 31 c0                        	xor	eax, eax
+ 2ceda0b: 48 83 c4 10                  	add	rsp, 0x10
+ 2ceda0f: 5b                           	pop	rbx
+ 2ceda10: 41 5e                        	pop	r14
+ 2ceda12: 41 5f                        	pop	r15
+ 2ceda14: c3                           	ret
+ 2ceda15: ff 15 cd 28 7f 03            	call	qword ptr [rip + 0x37f28cd] # 0x64e02e8
+ 2ceda1b: 48 89 c3                     	mov	rbx, rax
+ 2ceda1e: 48 89 e7                     	mov	rdi, rsp
+ 2ceda21: e8 da 1b fb ff               	call	0x2c9f600 <.text+0x1886300>
+ 2ceda26: 48 89 df                     	mov	rdi, rbx
+ 2ceda29: e8 22 30 70 03               	call	0x63f0a50 <_Unwind_Resume@plt>
+ 2ceda2e: ff 15 8c 1a 7f 03            	call	qword ptr [rip + 0x37f1a8c] # 0x64df4c0
