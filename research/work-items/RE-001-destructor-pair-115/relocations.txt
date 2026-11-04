@@ -1,0 +1,42 @@
+Relocations and PLT references for node #115 0x5f10180 / 0x5f10d00
+(from readelf and objdump; .rela.dyn entries are R_X86_64_RELATIVE,
+type 8, unless noted):
+
+- Vtable 0x64cc5d8 (installed by both destructor windows at
+  object + 0x00; the address is formed by lea of 0x64cc5c8 plus
+  0x10, not read from a GOT slot):
+  - slot 0x64cc5c8: offset-to-top, zero, no RELATIVE entry.
+  - slot 0x64cc5d0: typeinfo pointer, RELATIVE addend 0x64cc550.
+  - slot 0x64cc5d8: first virtual, RELATIVE addend 0x5f10180
+    (the base destructor itself).
+  - slot 0x64cc5e0: second virtual, RELATIVE addend 0x5f10d00
+    (the deleting destructor).
+  - slot 0x64cc5e8: third virtual, RELATIVE addend 0x5f11c40.
+  - slot 0x64cc5f0: fourth virtual, RELATIVE addend 0x5f117a0.
+  - slot 0x64cc5f8: fifth virtual, RELATIVE addend 0x5f04da0.
+  All six slots read as zero in the file; their values exist only
+  through these RELATIVE entries. The next table starts at
+  0x64cc610 (its typeinfo slot 0x64cc608 has RELATIVE addend
+  0x64cc568), so this table holds exactly five virtuals.
+- PLT calls in the base window 0x5f10180: operator delete[]
+  _ZdaPv (PLT 0x63f0dc0, tail jump at 0x5f101aa). Direct non-PLT
+  call: member destroy 0x605cc30 (site 0x5f1019b).
+- PLT calls in the deleting window 0x5f10d00: operator delete[]
+  _ZdaPv (PLT 0x63f0dc0, call at 0x5f10d29) and sized operator
+  delete _ZdlPvm (PLT 0x63f0d80, tail jump at 0x5f10d37, size
+  argument 0x9b0). Direct non-PLT call: member destroy 0x605cc30
+  (site 0x5f10d1b).
+- PLT calls in the member window 0x605cc30: operator delete[]
+  _ZdaPv (PLT 0x63f0dc0, four call sites), sized operator delete
+  _ZdlPvm (PLT 0x63f0d80, three call sites plus the tail jump at
+  0x605ced6). Direct non-PLT calls: 0x605e8a0 (site 0x605cc5f,
+  the +0x8e8 subobject destroy) and element destroy 0x60d4f70
+  (sites 0x605ccc7, 0x605cd07, 0x605cd27, 0x605cee7).
+- Member vtable 0x64d1fb8 (installed by the member window at
+  member + 0x00): offset-to-top slot 0x64d1fa8 (zero, no RELATIVE
+  entry), typeinfo slot 0x64d1fb0 (RELATIVE addend 0x64d1f90),
+  first virtual slot 0x64d1fb8 (RELATIVE addend 0x605cc30, the
+  member destroy itself), then 0x64d1fc0 (0x605cf80), 0x64d1fc8
+  (0x605d930), 0x64d1fd0 (0x605d7b0) and 0x64d1fd8 (0x605cc20).
+- No GOT slot is read by either destructor window: the vtable
+  address is an lea of a link-time constant, not a GOT load.
