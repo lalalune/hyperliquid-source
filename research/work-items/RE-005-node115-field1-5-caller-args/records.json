@@ -1,0 +1,383 @@
+{
+ "boundaries": {
+  "bulk_helper": {
+   "bytes": 141,
+   "fde": "0x58214b0..0x582153d",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+     "va": "0xca6ed8"
+    },
+    "fde": {
+     "bytes_hex": "18000000e4552f00f04f88048d0000000002550e108302750e08c300",
+     "va": "0xf9c4b8"
+    }
+   },
+   "role": "shared fixed-record charge helper: performs the mode-1 charge of 0x800 and, when the charge and the remaining width allow, copies 0x800 bytes from the cursor into its result at +0x1. Its result byte at +0x0 is 0 on success and 1 on failure, with +0x8 holding 2 for a charge refusal and 0 for a shortfall (the additional count then at +0x10). Recorded as a called boundary of bulk_b, not a traced owner.",
+   "sha256": "6000169db178838a7a44122d479531046f4969600ae59171272f7af03f6ab575"
+  },
+  "field1_5_readers": "copies 0x2cd7bb0/0x5821340 and the slow reader 0x5822710 are the owners of the open field1-5 reader packet (#2422); recorded here only as call targets",
+  "memcpy_slot": "GOT slot 0x64df508, R_X86_64_GLOB_DAT against the dynamic symbol memcpy (glibc); bulk_a and the helper call through the slot, bulk_b loads the pointer from the slot and calls it four times",
+  "twin_helpers": "the helpers at 0x232cd90 and 0x58251a0 that receive the twin addresses are not traced; whether they forward a state unchanged is outside this packet",
+  "u32_readers": "copies 0x2cd79c0/0x5821150 are the owners of the open u32 reader packet (#2412); recorded here only as call targets",
+  "u64_readers": "copies 0x2cd7ac0/0x5821250 are owned by the open u64 reader packet (#2300); no call to either occurs in the traced functions"
+ },
+ "call_sites": {
+  "bulk_a": {
+   "field1_5_calls": [
+    {
+     "result": "rsp+0x8",
+     "site": "0x2cd9726",
+     "state": "entry rsi, not yet reloaded",
+     "target": "0x2cd7bb0"
+    },
+    {
+     "result": "rsp+0x8",
+     "site": "0x2cd9741",
+     "state": "r14 (the saved entry rsi)",
+     "target": "0x2cd7bb0"
+    }
+   ],
+   "memcpy_slot": "0x64df508",
+   "payload_copy_length": "0x7e9",
+   "record_header_bytes": "0x17 bytes copied field by field from the cursor before the payload copy (0x17 + 0x7e9 = 0x800)"
+  },
+  "bulk_b": {
+   "bulk_copies": "four staged copies of 0x800 bytes: result +0x1 to rsp+0x1808 to rsp+0x1008 to rsp+0x808 to output +0x8",
+   "bulk_copy_length": "0x800",
+   "field1_5_calls": [
+    {
+     "result": "rsp",
+     "site": "0x5968872",
+     "state": "entry rsi, not yet reloaded",
+     "target": "0x5821340"
+    },
+    {
+     "result": "rsp",
+     "site": "0x596888a",
+     "state": "r14 (the saved entry rsi)",
+     "target": "0x5821340"
+    }
+   ],
+   "helper_call": {
+    "result": "rsp",
+    "site": "0x59688a2",
+    "state": "r14 (the saved entry rsi)",
+    "target": "0x58214b0"
+   },
+   "memcpy_slot": "0x64df508"
+  },
+  "field1_5_census": {
+   "copy_a": [
+    {
+     "containing_fde": "0x26e5710..0x26e58d8",
+     "site": "0x26e583f"
+    },
+    {
+     "containing_fde": "0x2cd9710..0x2cd9844",
+     "site": "0x2cd9726"
+    },
+    {
+     "containing_fde": "0x2cd9710..0x2cd9844",
+     "site": "0x2cd9741"
+    }
+   ],
+   "copy_b": [
+    {
+     "containing_fde": "0x5968840..0x5968980",
+     "site": "0x5968872"
+    },
+    {
+     "containing_fde": "0x5968840..0x5968980",
+     "site": "0x596888a"
+    },
+    {
+     "containing_fde": "0x5aaa460..0x5aaa628",
+     "site": "0x5aaa58f"
+    }
+   ],
+   "slow": []
+  },
+  "twin_a": {
+   "field1_5_call": {
+    "result": "rsp+0x18",
+    "site": "0x26e583f",
+    "state": "r14 (the saved entry rsi)",
+    "target": "0x2cd7bb0"
+   },
+   "named_string": {
+    "bytes": "NodeIp",
+    "length": 6,
+    "va": "0x5f430e"
+   },
+   "shared_string": "0x4553c0",
+   "u32_call": {
+    "result": "rsp+0x18",
+    "site": "0x26e5725",
+    "state": "entry rsi, not yet reloaded",
+    "target": "0x2cd79c0"
+   }
+  },
+  "twin_b": {
+   "field1_5_call": {
+    "result": "rsp+0x18",
+    "site": "0x5aaa58f",
+    "state": "r14 (the saved entry rsi)",
+    "target": "0x5821340"
+   },
+   "named_string": {
+    "bytes": "NodeIp",
+    "length": 6,
+    "va": "0x93a9f1"
+   },
+   "shared_string": "0x4553c0",
+   "u32_call": {
+    "result": "rsp+0x18",
+    "site": "0x5aaa475",
+    "state": "entry rsi, not yet reloaded",
+    "target": "0x5821150"
+   }
+  }
+ },
+ "captured_code_executed": false,
+ "cross_family": {
+  "finding": "each twin calls the u32 reader first and the field1-5 reader later in the same invocation, both times with the identical state pointer (its entry argument) and the identical result buffer (rsp+0x18): one input stream through one state can therefore produce a field1 2 error from the first read and a field1 5 error from the second. No u64-family call occurs in any of the four owners, so the field1 2/3 results of that family are not produced on these states inside the traced functions. bulk_a is also called by a function (0x2ce1dc0) that first reads a u32 discriminant on the same state it passes on.",
+  "u32_inside_owners": [
+   {
+    "containing_fde": "0x26e5710..0x26e58d8",
+    "site": "0x26e5725"
+   },
+   {
+    "containing_fde": "0x5aaa460..0x5aaa628",
+    "site": "0x5aaa475"
+   }
+  ],
+  "u64_inside_owners": []
+ },
+ "direct_callers": {
+  "bulk_a": {
+   "direct_calls": [
+    {
+     "containing_fde": "0x2ce1dc0..0x2ce2a32",
+     "site": "0x2ce1e4d"
+    },
+    {
+     "containing_fde": "0x2ce1dc0..0x2ce2a32",
+     "site": "0x2ce20e6"
+    },
+    {
+     "containing_fde": "0x2ce1dc0..0x2ce2a32",
+     "site": "0x2ce230b"
+    }
+   ],
+   "note": "all three sites sit in FDE 0x2ce1dc0..0x2ce2a32 and pass that function's own entry state argument (r14); the same function first calls the u32 copy-a reader at 0x2ce1e0c on that state"
+  },
+  "bulk_b": {
+   "direct_calls": [
+    {
+     "containing_fde": "0x4e05c10..0x4e05dd8",
+     "site": "0x4e05c56"
+    },
+    {
+     "containing_fde": "0x4e05c10..0x4e05dd8",
+     "site": "0x4e05ca0"
+    },
+    {
+     "containing_fde": "0x4e05c10..0x4e05dd8",
+     "site": "0x4e05ce5"
+    }
+   ],
+   "note": "all three sites sit in FDE 0x4e05c10..0x4e05dd8 and pass that function's own entry state argument (r15); the function repeats the call, copying each non-terminal result out, until a result with first dword 1 arrives"
+  },
+  "twin_a": {
+   "direct_calls": [],
+   "lea_fde": "0x2dd2980..0x2dd2bd7",
+   "lea_references": [
+    "0x2dd298e"
+   ],
+   "note": "the referencing function passes the twin address in rdx, with a stack result buffer in rdi, to a helper call at 0x2dd299a (target 0x232cd90); the helper is a boundary, its forwarding is not traced"
+  },
+  "twin_b": {
+   "direct_calls": [],
+   "lea_fde": "0x4de6210..0x4de6467",
+   "lea_references": [
+    "0x4de621e"
+   ],
+   "note": "same shape as twin_a: helper call at 0x4de622a (target 0x58251a0), a boundary"
+  }
+ },
+ "inline_charges": {
+  "bulk_a_inline": {
+   "amount": "0x800",
+   "overflow": "charged > u64::MAX - 0x800 refuses (tag 2)",
+   "rule": "charged + 0x800 is stored before the compare; refusal iff the NEW charged count > limit, i.e. success iff charged + 0x800 <= limit",
+   "subject": "the fixed 0x800-byte record"
+  },
+  "bulk_helper": {
+   "amount": "0x800",
+   "overflow": "charged > u64::MAX - 0x800 refuses (result +0x8 tag 2)",
+   "rule": "same store-before-compare rule as the bulk_a inline block: refusal iff the new charged count > limit",
+   "subject": "the fixed 0x800-byte record"
+  },
+  "twin_inline": {
+   "amount": 1,
+   "committed_before_charge": "the read itself: cursor +4 and remaining -4 are stored before the mode test, so a charge refusal still leaves the state advanced by four bytes; the flag byte that follows is charge-gated",
+   "overflow": "charged == u64::MAX refuses (tag 2)",
+   "rule": "charged + 1 is stored before the compare; refusal iff the OLD charged count >= limit, i.e. success iff charged + 1 <= limit",
+   "subject": "the inline four-byte read"
+  },
+  "uniform_bound": "every charge traced here and in the reader packets (#2412 charge 4, #2422/#2300 charge 8) succeeds under the same bound: new charged count <= limit"
+ },
+ "limits": "Static trace only: no pinned bytes were executed and no live node, network, signer, or exchange state was used. The reader state is the five-field layout of the field1-5 reader packet (mode +0x0, limit +0x8, cursor +0x10, remaining +0x18, charged count +0x20); field names are that packet record, re-validated here only where these bytes touch the fields. Who first writes the mode and limit fields is not established: every traced function forwards a state it received, and the two twins are reached only through a helper call whose forwarding is recorded as a boundary, not traced. Rawtag and result values are raw bytes; which Rust enum variants they name is not established. No Rust reconstruction is included or claimed.",
+ "owners": [
+  {
+   "bytes": 456,
+   "end": "0x26e58d8",
+   "file_offset": "0x26e4710",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+     "va": "0xca6ed8"
+    },
+    "fde": {
+     "bytes_hex": "3800000068ee0900ccf99901c801000000410e10420e18420e20410e28440e6083058e048f03860202950e28410e20420e18420e10410e08410e6000",
+     "va": "0xd45d3c"
+    }
+   },
+   "role": "twin_a",
+   "sha256": "2e266f10c206f37fedfd9b7da720ef871409dbb56605d16fa6a9b76c7dbccb0e",
+   "start": "0x26e5710"
+  },
+  {
+   "bytes": 456,
+   "end": "0x5aaa628",
+   "file_offset": "0x5aa9460",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+     "va": "0xca6ed8"
+    },
+    "fde": {
+     "bytes_hex": "3800000008ee31007c47ae04c801000000410e10420e18420e20410e28440e6083058e048f03860202950e28410e20420e18420e10410e08410e6000",
+     "va": "0xfc5cdc"
+    }
+   },
+   "role": "twin_b",
+   "sha256": "acc58bb5d8410ed2ef670dba68b4351f3a860a0e9fad3cc891a1a9293aa7eba4",
+   "start": "0x5aaa460"
+  },
+  {
+   "bytes": 308,
+   "end": "0x2cd9844",
+   "file_offset": "0x2cd8710",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+     "va": "0xca6ed8"
+    },
+    "fde": {
+     "bytes_hex": "38000000f84f0e003cd8f4013401000000420e10420e18420e20410e28440e5083058c048e038f0202b90e28410e20420e18420e10420e08410e5000",
+     "va": "0xd8becc"
+    }
+   },
+   "role": "bulk_a",
+   "sha256": "e63eb1e52fa5eb5aa819e29e8347e84e0ae6674e44f700bea5f97fcc877c41c3",
+   "start": "0x2cd9710"
+  },
+  {
+   "bytes": 320,
+   "end": "0x5968980",
+   "file_offset": "0x5967840",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+     "va": "0xca6ed8"
+    },
+    "fde": {
+     "bytes_hex": "54000000844c3100e0cc9a044001000000410e10420e18420e20420e28420e30410e38470eb8204f0eb840490ec04083078c068d058e048f038602029c0e38410e30420e28420e20420e18420e10410e08410ec040000000",
+     "va": "0xfbbb58"
+    }
+   },
+   "role": "bulk_b",
+   "sha256": "0c2c5b75b9ab949f169bd4ba08335209461a5b7db6c06397ce9a85e7ab6cbc78",
+   "start": "0x5968840"
+  }
+ ],
+ "reader_state": {
+  "charged_count": "state +0x20, u64; the mode-1 charge ledger the inline blocks and the helper add to",
+  "cursor": "state +0x10, pointer; advanced by the readers, by the twin inline read and by the bulk record reads",
+  "limit": "state +0x8, u64; read by the same charge blocks; written by none of the traced functions",
+  "mode": "state +0x0, dword; read by the twin and bulk_a inline charge blocks and by the helper (== 1 test); written by none of the traced functions",
+  "remaining": "state +0x18, u64; decremented alongside the cursor"
+ },
+ "relocations": {
+  "0x64df508": {
+   "addend": 0,
+   "symbol": "memcpy",
+   "type": 6
+  }
+ },
+ "state_field_access": {
+  "bulk_a": {
+   "reads": [
+    "+0x0",
+    "+0x8",
+    "+0x10",
+    "+0x18",
+    "+0x20"
+   ],
+   "stores": [
+    "+0x10",
+    "+0x18",
+    "+0x20"
+   ]
+  },
+  "bulk_b": {
+   "reads": [],
+   "stores": []
+  },
+  "bulk_helper": {
+   "reads": [
+    "+0x0",
+    "+0x8",
+    "+0x10",
+    "+0x18",
+    "+0x20"
+   ],
+   "stores": [
+    "+0x10",
+    "+0x18",
+    "+0x20"
+   ]
+  },
+  "twin_a": {
+   "reads": [
+    "+0x0",
+    "+0x8",
+    "+0x10",
+    "+0x18",
+    "+0x20"
+   ],
+   "stores": [
+    "+0x10",
+    "+0x18",
+    "+0x20"
+   ]
+  },
+  "twin_b": {
+   "reads": [
+    "+0x0",
+    "+0x8",
+    "+0x10",
+    "+0x18",
+    "+0x20"
+   ],
+   "stores": [
+    "+0x10",
+    "+0x18",
+    "+0x20"
+   ]
+  }
+ },
+ "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+}
