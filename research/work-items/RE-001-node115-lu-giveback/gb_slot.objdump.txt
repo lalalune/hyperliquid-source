@@ -1,0 +1,18 @@
+ 63d8f05:	44 0f b6 5b 10       	movzbl 0x10(%rbx),%r11d
+ 63d8f0a:	48 8b 43 68          	mov    0x68(%rbx),%rax
+ 63d8f0e:	48 c7 c2 ff ff ff ff 	mov    $0xffffffffffffffff,%rdx
+ 63d8f15:	66 48 0f 6e c2       	movq   %rdx,%xmm0
+ 63d8f1a:	49 f7 db             	neg    %r11
+ 63d8f1d:	66 48 0f 6e d8       	movq   %rax,%xmm3
+ 63d8f22:	41 83 e3 18          	and    $0x18,%r11d
+ 63d8f26:	66 0f 6c c3          	punpcklqdq %xmm3,%xmm0
+ 63d8f2a:	4d 01 d3             	add    %r10,%r11
+ 63d8f2d:	49 01 eb             	add    %rbp,%r11
+ 63d8f30:	f3 41 0f 6f 13       	movdqu (%r11),%xmm2
+ 63d8f35:	f3 41 0f 6f 0b       	movdqu (%r11),%xmm1
+ 63d8f3a:	66 0f d4 d0          	paddq  %xmm0,%xmm2
+ 63d8f3e:	66 0f fb c8          	psubq  %xmm0,%xmm1
+ 63d8f42:	f2 0f 10 ca          	movsd  %xmm2,%xmm1
+ 63d8f46:	41 0f 11 0b          	movups %xmm1,(%r11)
+ 63d8f4a:	48 2b 83 b0 00 00 00 	sub    0xb0(%rbx),%rax
+ 63d8f51:	49 01 43 10          	add    %rax,0x10(%r11)
