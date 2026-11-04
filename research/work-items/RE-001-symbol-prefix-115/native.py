@@ -4,7 +4,7 @@ Fresh lane selection/frame are premises. No split/metadata/helper result is
 supplied, no original helper is called and no complete resolution is claimed.
 """
 from pathlib import Path
-import hashlib,sys
+import hashlib,json,sys
 ROOT=Path(__file__).resolve().parents[3];PACKET=Path(__file__).resolve().parent
 sys.path.insert(0,str(ROOT/'tools'))
 import decimal_scaled_u64 as cpu
@@ -100,6 +100,22 @@ def corpus(im):
  for raw in stimuli():
   value,trace=evaluate(im,raw);inputs.append(raw.hex()+'\n');expected.append(value+'\n');seen|=trace
  return ''.join(inputs).encode(),''.join(expected).encode(),seen
+def verify():
+ im=Image()
+ try:
+  proof=json.loads((PACKET/'FREEZE.json').read_text())
+  if hashlib.sha256(im.data).hexdigest()!=SHA:raise ValueError('wrong115target')
+  owner=proof['owner'];lo,hi=int(owner['start'],16),int(owner['end'],16)
+  if im.view.fde(lo)!=(lo,hi) or hashlib.sha256(im.view.read(lo,hi-lo)).hexdigest()!=owner['sha256']:raise ValueError('owner mismatch')
+  table=proof['digit_pair_table']
+  if im.view.read(TABLE,200).hex()!=table['hex']:raise ValueError('digit-pair table mismatch')
+  inputs,expected,seen=corpus(im)
+  if len(set(inputs.splitlines()))!=proof['rows'] or len(expected.splitlines())!=proof['rows']:raise ValueError('input denominator changed')
+  if hashlib.sha256(inputs).hexdigest()!=proof['input_sha256'] or hashlib.sha256(expected).hexdigest()!=proof['expected_sha256']:raise ValueError('original stream changed')
+  if sorted(seen)!=proof['visited_addresses']:raise ValueError('visitation changed')
+  if hashlib.sha256(im.data).hexdigest()!=SHA:raise ValueError('capture changed')
+  return inputs,expected
+ finally:im.close()
 if __name__=='__main__':
  im=Image()
  try:
