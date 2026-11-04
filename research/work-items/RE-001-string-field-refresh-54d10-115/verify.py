@@ -1,0 +1,163 @@
+#!/usr/bin/env python3
+"""Verify the RE-001 string-field refresh 0x5d54d10 packet.
+
+Checks, in order:
+ 1. Target binary digest matches provenance/artifacts.json.
+ 2. MANIFEST.sha256 entries match the packet files.
+ 3. main.txt and accessor.txt regenerate byte-for-byte from fresh
+    objdump runs.
+ 4. Every excerpt line's bytes match the raw binary at the file
+    offset (virtual address minus 0x1000).
+ 5. The routine, accessor and caller FDE ranges are present in
+    readelf output.
+ 6. Both censuses are reproduced: routine exactly 1 direct call and
+    0 tail jumps at 0x5d86d02; accessor exactly 1 direct call and
+    0 tail jumps at 0x5d54d36.
+ 7. No stored qword / relocation for either routine address, and
+    relocations.txt is empty.
+ 8. records.json holds semantic records only (no per-line detail
+    list).
+ 9. Model spot checks (move, copy, old-buffer free, null-pointer).
+"""
+import importlib.util
+import json
+import re
+import struct
+import subprocess
+import sys
+from hashlib import sha256
+from pathlib import Path
+
+HERE = Path(__file__).parent
+ROOT = HERE.parents[2]
+BIN = ROOT / "work/hl-node-115.bin"
+MAIN_START, MAIN_END = 0x5D54D10, 0x5D54EE3
+ACC_START, ACC_END = 0x5D54C30, 0x5D54D06
+
+
+def fail(msg):
+    print(f"FAIL: {msg}")
+    sys.exit(1)
+
+
+def fresh_excerpt(start, end):
+    text = subprocess.run(
+        ["objdump", "-d", f"--start-address={hex(start)}",
+         f"--stop-address={hex(end)}", str(BIN)],
+        capture_output=True, text=True, check=True).stdout
+    return text.replace(str(BIN), BIN.name)
+
+
+# 1. Target digest.
+artifacts = json.loads((ROOT / "provenance/artifacts.json").read_text())
+want = next(f["sha256"] for f in artifacts["files"]
+            if f["path"] == "artifacts/node/115/hl-node")
+if sha256(BIN.read_bytes()).hexdigest() != want:
+    fail("binary digest mismatch")
+
+# 2. Manifest.
+for line in (HERE / "MANIFEST.sha256").read_text().splitlines():
+    digest, name = line.split("  ", 1)
+    if sha256((HERE / name).read_bytes()).hexdigest() != digest:
+        fail(f"manifest mismatch for {name}")
+
+# 3. Excerpt regeneration (header normalized to the bare binary name,
+# matching export_excerpts.py, so the check is not machine-specific).
+if fresh_excerpt(MAIN_START, MAIN_END) != (HERE / "main.txt").read_text():
+    fail("main.txt does not regenerate byte-for-byte")
+if fresh_excerpt(ACC_START, ACC_END) != (HERE / "accessor.txt").read_text():
+    fail("accessor.txt does not regenerate byte-for-byte")
+
+# 4. Line bytes vs raw binary.
+data = BIN.read_bytes()
+for name, minimum in (("main.txt", 30), ("accessor.txt", 30)):
+    checked = 0
+    for line in (HERE / name).read_text().splitlines():
+        m = re.match(r"\s*([0-9a-f]+):\t([0-9a-f ]+?)(?:\t|$)", line)
+        if not m:
+            continue
+        va = int(m.group(1), 16)
+        raw = bytes(int(b, 16) for b in m.group(2).split())
+        if data[va - 0x1000:va - 0x1000 + len(raw)] != raw:
+            fail(f"byte mismatch at {hex(va)} in {name}")
+        checked += 1
+    if checked < minimum:
+        fail(f"too few lines checked in {name}: {checked}")
+    print(f"lines checked in {name}: {checked}")
+
+# 5. FDE ranges.
+frames = subprocess.run(
+    ["readelf", "--debug-dump=frames-interp", str(BIN)],
+    capture_output=True, text=True, check=True).stdout
+for want_range in ("pc=0000000005d54d10..0000000005d54ee3",
+                   "pc=0000000005d54c30..0000000005d54d06",
+                   "pc=0000000005d85480..0000000005d878e2"):
+    if want_range not in frames:
+        fail(f"FDE not found: {want_range}")
+
+# 6. Census reproduction.
+census = subprocess.run(
+    [sys.executable, str(HERE / "census.py"), "--sites"],
+    capture_output=True, text=True, check=True).stdout
+counts = json.loads(census)
+main = counts["main"]
+if (main["direct_calls"], main["tail_jumps"]) != (1, 0):
+    fail(f"routine census counts changed: {main}")
+acc = counts["accessor"]
+if (acc["direct_calls"], acc["tail_jumps"]) != (1, 0):
+    fail(f"accessor census counts changed: {acc}")
+sites = set()
+for line in (HERE / "callers.tsv").read_text().splitlines()[1:]:
+    site, kind, _, _ = line.split("\t")
+    sites.add((int(site, 16), kind))
+fresh_sites = {(int(va, 16), kind) for va, kind in main["sites"]}
+if sites != fresh_sites:
+    fail("callers.tsv site list changed")
+if {(int(va, 16), kind) for va, kind in acc["sites"]} != {(0x5D54D36, "call")}:
+    fail("accessor site list changed")
+
+# 7. No stored qword / relocation for either routine address.
+for addr in (MAIN_START, ACC_START):
+    if struct.pack("<Q", addr) in data:
+        fail(f"stored qword found for {hex(addr)}")
+relocs = subprocess.run(
+    ["readelf", "--relocs", str(BIN)],
+    capture_output=True, text=True, check=True).stdout
+for needle in ("5d54d10", "5d54c30"):
+    if needle in relocs:
+        fail(f"relocation found for {needle}")
+if (HERE / "relocations.txt").read_text() != "":
+    fail("relocations.txt is not empty")
+
+# 8. Semantic records only.
+records = json.loads((HERE / "records.json").read_text())
+blob = json.dumps(records)
+if "mnemonic" in blob or "instructions" in blob:
+    fail("records.json carries line-level detail")
+for key in ("target", "routines", "census", "consumers", "algorithm"):
+    if key not in records:
+        fail(f"records.json missing key {key}")
+
+# 9. Model spot checks.
+spec = importlib.util.spec_from_file_location(
+    "refresh_model", ROOT / "tools/string_field_refresh_54d10_115.py")
+model = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(model)
+sso = {"data": b"old", "heap": False, "capacity": None}
+assert model.refresh_string_field(
+    sso, {"data": b"new", "heap": True, "capacity": 32}) == (
+        {"data": b"new", "heap": True, "capacity": 32}, [])
+assert model.refresh_string_field(
+    {"data": b"old-value", "heap": True, "capacity": 16},
+    {"data": b"new", "heap": True, "capacity": 64}) == (
+        {"data": b"new", "heap": True, "capacity": 64}, [("old", 17)])
+assert model.refresh_string_field(
+    {"data": b"old-value", "heap": True, "capacity": 48},
+    {"data": b"new", "heap": False, "capacity": None}) == (
+        {"data": b"new", "heap": True, "capacity": 48}, [])
+assert model.refresh_string_field(
+    {"data": None, "heap": True, "capacity": 16},
+    {"data": b"new", "heap": True, "capacity": 32}) == (
+        {"data": b"new", "heap": True, "capacity": 32}, [])
+
+print("ALL CHECKS PASSED")
