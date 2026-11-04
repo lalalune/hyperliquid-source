@@ -1,0 +1,120 @@
+{
+ "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "binary": "artifacts/node/115/hl-node",
+ "binary_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "binary_size": 105896032,
+ "disjointness": "range-only collector over the merged tree plus packets #183-#265 worktrees, deduplicated by real packet slug, census/cited-only subtrees excluded; explicit checks against packet #232 FDE 0x63b8820..0x63b8d85, packet #252 r28_wait 0x63ec890..0x63ec8a3, packet #215 handler FDE 0x63d9700..0x63d987b",
+ "exhibits": [
+  {
+   "end": 104269453,
+   "hex": "metadata_thp.hex",
+   "name": "metadata_thp",
+   "objdump": "metadata_thp.objdump.txt",
+   "range": "0x6370480..0x637068d",
+   "size": 525,
+   "start": 104268928,
+   "strict_instructions": 149
+  },
+  {
+   "end": 104269590,
+   "hex": "retain.hex",
+   "name": "retain",
+   "objdump": "retain.objdump.txt",
+   "range": "0x6370690..0x6370716",
+   "size": 134,
+   "start": 104269456,
+   "strict_instructions": 36
+  },
+  {
+   "end": 104270135,
+   "hex": "dss.hex",
+   "name": "dss",
+   "objdump": "dss.objdump.txt",
+   "range": "0x6370720..0x6370937",
+   "size": 535,
+   "start": 104269600,
+   "strict_instructions": 147
+  },
+  {
+   "end": 104270579,
+   "hex": "narenas.hex",
+   "name": "narenas",
+   "objdump": "narenas.objdump.txt",
+   "range": "0x6370940..0x6370af3",
+   "size": 435,
+   "start": 104270144,
+   "strict_instructions": 116
+  },
+  {
+   "end": 104271117,
+   "hex": "percpu_arena.hex",
+   "name": "percpu_arena",
+   "objdump": "percpu_arena.objdump.txt",
+   "range": "0x6370b00..0x6370d0d",
+   "size": 525,
+   "start": 104270592,
+   "strict_instructions": 149
+  }
+ ],
+ "format": ".hex exhibits contain raw binary bytes, not hex text",
+ "leaves": [
+  {
+   "direct_e8_entries": 0,
+   "file_value": null,
+   "handler": "0x6370480..0x637068d",
+   "leaf": "opt/metadata_thp",
+   "node": "0x64de560",
+   "opt_children_group": 16,
+   "value": "u64 at .data 0x64ffbd0 + dword at .bss 0x6711b34 * 8"
+  },
+  {
+   "direct_e8_entries": 0,
+   "file_value": "0x1",
+   "handler": "0x6370690..0x6370716",
+   "leaf": "opt/retain",
+   "node": "0x64de588",
+   "opt_children_group": 17,
+   "value": "byte at .data 0x64ffc28"
+  },
+  {
+   "direct_e8_entries": 0,
+   "file_value": "0x0",
+   "handler": "0x6370720..0x6370937",
+   "leaf": "opt/dss",
+   "node": "0x64de5b0",
+   "opt_children_group": 18,
+   "value": "u64 at .data 0x64ffc20"
+  },
+  {
+   "direct_e8_entries": 0,
+   "file_value": null,
+   "handler": "0x6370940..0x6370af3",
+   "leaf": "opt/narenas",
+   "node": "0x64de5d8",
+   "opt_children_group": 19,
+   "value": "u32 at .bss 0x6511734"
+  },
+  {
+   "direct_e8_entries": 0,
+   "file_value": "0x2",
+   "handler": "0x6370b00..0x6370d0d",
+   "leaf": "opt/percpu_arena",
+   "node": "0x64de600",
+   "opt_children_group": 20,
+   "value": "u64 at .data 0x64ffba0 + dword at .data 0x64ffb80 * 8"
+  }
+ ],
+ "leaves_remaining_after": 146,
+ "next_question": "Classify the next five leaves in tree order (opt children groups 21+, starting with the FDE at 0x6370d10); or decode the largest bin_table_init caller FDE 0x63cba10 (10 sites). Packet #267 should pick one of these, not both, to stay light.",
+ "not_covered": [
+  "The remaining 146 static leaves.",
+  "The getter family and dispatcher internals beyond the leaf contract.",
+  "Runtime values of .bss globals 0x6711b34 and 0x6511734, and runtime values of .data globals 0x64ffc28, 0x64ffc20, 0x64ffb80 (only file-initial values are reported).",
+  "The largest bin_table_init caller FDE 0x63cba10 (10 sites): not decoded (packet #265 other option, explicitly not taken here)."
+ ],
+ "packet": "RE-001-node115-lu-opt-groups16-20-leaves",
+ "packet_number": 266,
+ "strict_count_rule": "address + bytes field + tab + mnemonic starting with a lowercase letter; objdump byte-continuation lines excluded",
+ "total_claimed_bytes": 2154,
+ "total_strict_instructions": 597
+}
