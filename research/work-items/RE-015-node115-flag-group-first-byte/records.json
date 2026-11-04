@@ -1,0 +1,410 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "owners": [
+    {
+      "role": "consumer_large",
+      "start": "0x15a3b90",
+      "end": "0x15a6509",
+      "file_offset": "0x15a2b90",
+      "bytes": 10617,
+      "sha256": "7995f7af57e2be27ca6ed1e307d9bcce9d6140f72b0ff0cf0804d7f09e5505fb",
+      "frames": {
+        "fde": {
+          "va": "0x105530c",
+          "bytes_hex": "500000000c7d01007ce854007929000004a38612ff410e10420e18420e20420e28420e30410e38470e800783078c068d058e048f03860203d51d0e38410e30420e28420e20420e18420e10410e08410e80070000"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    }
+  ],
+  "boundaries": [
+    {
+      "role": "callee",
+      "start": "0x15ae430",
+      "end": "0x15ae5ae",
+      "file_offset": "0x15ad430",
+      "bytes": 382,
+      "sha256": "4cfb1633d772df3d0e75abf5864ea242a85e7732e479b5351ae80c97842d7acf",
+      "frames": {
+        "fde": {
+          "va": "0x1056f3c",
+          "bytes_hex": "480000003c990100ec7455007e01000004937d12ff420e10420e18420e20420e28410e30440ea00183068c058d048e038f020315010e30410e28420e20420e18420e10420e08410ea0010000"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "pointer_formatter",
+      "start": "0x15eadd0",
+      "end": "0x15eadff",
+      "file_offset": "0x15e9dd0",
+      "bytes": 47,
+      "sha256": "4e4d3a1a67401cbceb6f4bdb72d100eca0676a13fa66f9c82f73f1a6d8d8aec3",
+      "frames": {
+        "fde": {
+          "va": "0xcbc6d0",
+          "bytes_hex": "10000000fc570100f8e692002f00000000000000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    }
+  ],
+  "consumer": {
+    "group": {
+      "stack_base": "0x14",
+      "bytes": {
+        "+0x0": {
+          "stack_offset": "0x14",
+          "role": "first byte (formatter index)"
+        },
+        "+0x1": {
+          "stack_offset": "0x15",
+          "role": "derived byte (#2396)"
+        },
+        "+0x2": {
+          "stack_offset": "0x16",
+          "role": "cached flag byte (#2317)"
+        },
+        "+0x3": {
+          "stack_offset": "0x17",
+          "role": "loop counter byte"
+        }
+      }
+    },
+    "population": {
+      "flag_byte": {
+        "store": "0x15a3c55",
+        "loads": [
+          "0x15a3bc5",
+          "0x15a3bcc",
+          "0x15a3bcf"
+        ]
+      },
+      "derived_byte": {
+        "store": "0x15a3c5e",
+        "negate": "0x15a3c59",
+        "or": "0x15a3c5b"
+      },
+      "counter_byte": {
+        "store": "0x15a3d14",
+        "reload": "0x15a3cf0",
+        "increment": "0x15a3cf8",
+        "store_back": "0x15a3d1c",
+        "initial": "0x15a3cc4"
+      }
+    },
+    "first_byte_writes": {
+      "A": {
+        "site": "0x15a3f10",
+        "instruction": "mov BYTE PTR [rsp+0x14],0x1",
+        "value": 1
+      },
+      "B": {
+        "site": "0x15a420c",
+        "instruction": "mov BYTE PTR [rsp+0x14],0x0",
+        "value": 0
+      }
+    },
+    "segment_gates": {
+      "A": {
+        "load": "0x15a3dbf",
+        "loads_from": "[rsp+0xc0]",
+        "cmp": "0x15a3edf",
+        "entry_jne": "0x15a3ee2",
+        "entry": "branch on r14 != sentinel (rbp)",
+        "skip_exit_je": "0x15a3ef8",
+        "predecessor_jmp": "0x15a3f0b",
+        "skip_target": "0x15a44e0"
+      },
+      "B": {
+        "load": "0x15a4159",
+        "load_again": "0x15a41fe",
+        "loads_from": "[rsp+0x68]",
+        "cmp": "0x15a415e",
+        "cmp_again": "0x15a4203",
+        "entry_jne": "0x15a4161",
+        "entry": "branch on r14 != sentinel (rbp), or fall-through past the repeated gate's je at 0x15a4206 on r14 != sentinel",
+        "skip_exit_je": "0x15a4206",
+        "skip_target": "0x15a44e0"
+      }
+    },
+    "segment_internals": {
+      "A": {
+        "field_cmp": "0x15a3f15",
+        "field_jne": "0x15a3f1d",
+        "derived_test": "0x15a3f1f",
+        "derived_je": "0x15a3f24"
+      },
+      "B": {
+        "field_cmp": "0x15a4216",
+        "field_jne": "0x15a421e",
+        "derived_test": "0x15a4220",
+        "derived_je": "0x15a4225"
+      }
+    },
+    "group_lea_sites": [
+      "0x15a3f52",
+      "0x15a400a",
+      "0x15a4256",
+      "0x15a4308"
+    ],
+    "callee_call_sites": [
+      "0x15a3f5f",
+      "0x15a401e",
+      "0x15a4263",
+      "0x15a431c"
+    ]
+  },
+  "store_census": {
+    "group": {
+      "0x14": [
+        [
+          "0x15a3f10",
+          "0x1"
+        ],
+        [
+          "0x15a420c",
+          "0x0"
+        ]
+      ],
+      "0x15": [
+        [
+          "0x15a3c5e",
+          "al"
+        ]
+      ],
+      "0x16": [
+        [
+          "0x15a3c55",
+          "al"
+        ]
+      ],
+      "0x17": [
+        [
+          "0x15a3d14",
+          "cl"
+        ]
+      ]
+    },
+    "rsp_store_count": 267,
+    "indirect_store_sites": [
+      "0x15a3e6f",
+      "0x15a3e7b",
+      "0x15a3eb4",
+      "0x15a3eb8",
+      "0x15a411f",
+      "0x15a412b",
+      "0x15a4415",
+      "0x15a4421",
+      "0x15a4643",
+      "0x15a464e",
+      "0x15a4659",
+      "0x15a46c5",
+      "0x15a46c9",
+      "0x15a46cd",
+      "0x15a4725",
+      "0x15a4729",
+      "0x15a472d",
+      "0x15a47e7",
+      "0x15a47eb",
+      "0x15a489a",
+      "0x15a48a5",
+      "0x15a48b0",
+      "0x15a491f",
+      "0x15a4923",
+      "0x15a4927",
+      "0x15a4a15",
+      "0x15a4a2c",
+      "0x15a4a37",
+      "0x15a4a43",
+      "0x15a4a83",
+      "0x15a4a87",
+      "0x15a4b44",
+      "0x15a4b50",
+      "0x15a4b5c",
+      "0x15a4b80",
+      "0x15a4b84",
+      "0x15a4b88",
+      "0x15a4b8c",
+      "0x15a4bbc",
+      "0x15a4be1",
+      "0x15a4c00",
+      "0x15a4c09",
+      "0x15a4c10",
+      "0x15a4c13",
+      "0x15a4c17",
+      "0x15a4c99",
+      "0x15a5054",
+      "0x15a508a",
+      "0x15a5095",
+      "0x15a5102",
+      "0x15a510e",
+      "0x15a517e",
+      "0x15a5183",
+      "0x15a5188",
+      "0x15a518d",
+      "0x15a5242",
+      "0x15a524e",
+      "0x15a52be",
+      "0x15a52c3",
+      "0x15a52c8",
+      "0x15a52cd",
+      "0x15a535e",
+      "0x15a5369",
+      "0x15a536d",
+      "0x15a53e1",
+      "0x15a53ea",
+      "0x15a53ef",
+      "0x15a5404",
+      "0x15a5410",
+      "0x15a5496",
+      "0x15a549b",
+      "0x15a54a0",
+      "0x15a54a5",
+      "0x15a5694",
+      "0x15a56ea",
+      "0x15a56ee",
+      "0x15a5948",
+      "0x15a5960",
+      "0x15a5964",
+      "0x15a5968",
+      "0x15a596c"
+    ]
+  },
+  "segments": {
+    "A": {
+      "entry_branches": [
+        "0x15a3ee2"
+      ],
+      "interior_branches": [
+        [
+          "0x15a3f1d",
+          "0x15a3f80"
+        ],
+        [
+          "0x15a3f24",
+          "0x15a3fd2"
+        ]
+      ],
+      "interior_origins_inside": true,
+      "window_store_sites": [
+        "0x15a3f10",
+        "0x15a3f2a",
+        "0x15a3fd2",
+        "0x15a3fda",
+        "0x15a3fe2"
+      ],
+      "window_indirect_stores": [],
+      "window_push_pop": [],
+      "predecessor": {
+        "site": "0x15a3f0b",
+        "mnemonic": "jmp",
+        "target": "0x15a44e0"
+      },
+      "fallthrough_entry": false
+    },
+    "B": {
+      "entry_branches": [
+        "0x15a4161"
+      ],
+      "interior_branches": [
+        [
+          "0x15a421e",
+          "0x15a4276"
+        ],
+        [
+          "0x15a4225",
+          "0x15a42c8"
+        ]
+      ],
+      "interior_origins_inside": true,
+      "window_store_sites": [
+        "0x15a420c",
+        "0x15a422b",
+        "0x15a42cd",
+        "0x15a42d5",
+        "0x15a42dd"
+      ],
+      "window_indirect_stores": [],
+      "window_push_pop": [],
+      "predecessor": {
+        "site": "0x15a4206",
+        "mnemonic": "je",
+        "target": "0x15a44e0"
+      },
+      "fallthrough_entry": true
+    }
+  },
+  "callee_call_census": {
+    "direct_e8_sites": [
+      "0x15a3f5f",
+      "0x15a401e",
+      "0x15a4263",
+      "0x15a431c"
+    ],
+    "all_inside_consumer": true,
+    "binary_wide": true
+  },
+  "formatter_selections": [
+    {
+      "index": 0,
+      "pointer": "0x46a5c4",
+      "length": 5,
+      "bytes_hex": "4572726f72",
+      "sha256": "54a0e8c17ebb21a11f8a25b8042786ef7efe52441e6cc87e92c67e0c4c0c6e78",
+      "text": "Error"
+    },
+    {
+      "index": 1,
+      "pointer": "0x459e50",
+      "length": 4,
+      "bytes_hex": "5761726e",
+      "sha256": "8448814dc5caff5ce9443cc7f2e82be582fd362afb5cb8d759f66bb58d8b3fae",
+      "text": "Warn"
+    },
+    {
+      "index": 2,
+      "pointer": "0x45a19c",
+      "length": 4,
+      "bytes_hex": "496e666f",
+      "sha256": "170322a32f3c35b2c61576a5553d352d7b3c8ae7086dab78f15fc891a28c067c",
+      "text": "Info"
+    },
+    {
+      "index": 3,
+      "pointer": "0x46a5c9",
+      "length": 5,
+      "bytes_hex": "4465627567",
+      "sha256": "1a03bd2fd107c453f3183e30b9716f82200671e8270fbbefbe602f5a48705527",
+      "text": "Debug"
+    }
+  ],
+  "chain_selections": [
+    {
+      "block": "A",
+      "flag_byte": 1,
+      "pointer": "0x459e50",
+      "length": 4,
+      "text": "Warn"
+    },
+    {
+      "block": "B",
+      "flag_byte": 0,
+      "pointer": "0x46a5c4",
+      "length": 5,
+      "text": "Error"
+    }
+  ],
+  "chain_verdict": "The flag group's first byte is written by the large consumer itself, at exactly two immediate store sites, and every callee call is gated behind one of them: field block A stores 1 before its two callee calls and field block B stores 0 before its two. No other direct store in the body touches the byte, and no store inside either segment window overwrites it. Composed with the pointer formatter's established table, a chain call from block A selects \"Warn\" and a chain call from block B selects \"Error\"; \"Info\" (2) and \"Debug\" (3) are unreachable through this chain, and the formatter's unchecked index is provably in range for this chain because the only stored values are 0 and 1.",
+  "captured_code_executed": false,
+  "limits": "Flag-group first byte only, in the large consumer 0x15a3b90..0x15a6509: the direct rsp-relative store census over the whole body (exactly one store site per group byte; exactly two immediate stores for the first byte, values 1 and 0), the two field segment gates and their entry modes, the branch/store scans of the two segment windows, and the composition of the two values with the pointer formatter's established selection table. The store census covers direct rsp-relative stores over the whole body and all stores (direct or indirect) inside the two segment windows; the 81 indirect stores elsewhere in the body write through heap, map and allocation pointers outside the segment windows and are not claimed alias-free in general -- the group address itself is materialised only at the four lea sites inside the segments, each after its segment's write, and is passed only as the callee's rcx argument. Downstream, no function before the pointer formatter dereferences the group pointer at all (pointer formatter packet, #2440), so no downstream write through the pointer can intervene. The callee's entry split (its format path requires the consumer's rsi argument to be nonzero) is owned by the derived-byte-callee packet (#2396) and cited, not re-derived: this packet's selection claim holds for every callee call, and reaches the formatter exactly on those calls where the callee takes its format path. What the two field blocks mean, what the gate words at [rsp+0xc0] and [rsp+0x68] represent beyond the sentinel comparison, and what the table method at descriptor +0x18 computes with the selected name are NOT established. No captured code executed, no runtime value, indirect-call recovery, #94 correspondence, or reconstruction gate is claimed."
+}
