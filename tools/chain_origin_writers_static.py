@@ -359,6 +359,7 @@ def relocations(data):
         sec = next((s for s in sections(data) if s['name'] == name), None)
         if sec is None:
             continue
+        require(sec['size'] % 24 == 0, f'truncated{name} section')
         for i, (off, info, add) in enumerate(
                 struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']])):
             out.append({'slot': off, 'type': info & 0xffffffff, 'sym': info >> 32,
@@ -368,11 +369,16 @@ def relocations(data):
 
 
 def dynsym_name(data, index):
-    sym = next(s for s in sections(data) if s['name'] == '.dynsym')
-    strs = next(s for s in sections(data) if s['name'] == '.dynstr')
+    sym = next((s for s in sections(data) if s['name'] == '.dynsym'), None)
+    strs = next((s for s in sections(data) if s['name'] == '.dynstr'), None)
+    require(sym is not None, 'missing.dynsym section')
+    require(strs is not None, 'missing.dynstr section')
     st_name = struct.unpack_from('<I', data, sym['offset'] + 24 * index)[0]
     start = strs['offset'] + st_name
-    return data[start:data.index(b'\0', start)].decode()
+    try:
+        return data[start:data.index(b'\0', start)].decode()
+    except UnicodeDecodeError:
+        require(False, 'dynamic symbol name is not valid UTF-8')
 
 
 def _pin(body, base, va, hexbytes, what):
@@ -421,7 +427,8 @@ def call_census(data, targets):
     containing FDE for each site. Raw byte-pattern hits; sites inside
     packet owners are additionally validated as instruction starts by
     generate()."""
-    text = next(s for s in sections(data) if s['name'] == '.text')
+    text = next((s for s in sections(data) if s['name'] == '.text'), None)
+    require(text is not None, 'missing.text section')
     blob = data[text['offset']:text['offset'] + text['size']]
     base = text['address']
     owner = _fde_owner(data)
@@ -445,7 +452,8 @@ def call_census(data, targets):
 def slot_census(data, slot):
     """Every ff 15 / ff 25 RIP-relative reference to a slot in .text,
     with the containing FDE for each site."""
-    text = next(s for s in sections(data) if s['name'] == '.text')
+    text = next((s for s in sections(data) if s['name'] == '.text'), None)
+    require(text is not None, 'missing.text section')
     blob = data[text['offset']:text['offset'] + text['size']]
     base = text['address']
     owner = _fde_owner(data)
@@ -474,7 +482,8 @@ def rip_relative_census(data, target):
     non-REX ModRM disp32 forms and the ff 15/25 forms; every candidate
     for a non-empty result is additionally validated as an instruction
     start (see generate()/the packet tests)."""
-    text = next(s for s in sections(data) if s['name'] == '.text')
+    text = next((s for s in sections(data) if s['name'] == '.text'), None)
+    require(text is not None, 'missing.text section')
     blob = data[text['offset']:text['offset'] + text['size']]
     base = text['address']
     owner = _fde_owner(data)
@@ -569,8 +578,10 @@ def registration_census(data, rels):
     {8, fn ptr in .text, .rs file ptr, file len, packed line/col}
     with relocation-applied words."""
     secs = sections(data)
-    dr = next(s for s in secs if s['name'] == '.data.rel.ro')
-    text = next(s for s in secs if s['name'] == '.text')
+    dr = next((s for s in secs if s['name'] == '.data.rel.ro'), None)
+    require(dr is not None, 'missing.data.rel.ro section')
+    text = next((s for s in secs if s['name'] == '.text'), None)
+    require(text is not None, 'missing.text section')
     rel = {r['slot']: r for r in rels if r['type'] == 8}
 
     def eff(va):
