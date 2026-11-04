@@ -1,0 +1,131 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "owners": [
+    {
+      "role": "pointer_formatter",
+      "start": "0x15eadd0",
+      "end": "0x15eadff",
+      "file_offset": "0x15e9dd0",
+      "bytes": 47,
+      "sha256": "4e4d3a1a67401cbceb6f4bdb72d100eca0676a13fa66f9c82f73f1a6d8d8aec3",
+      "frames": {
+        "fde": {
+          "va": "0xcbc6d0",
+          "bytes_hex": "10000000fc570100f8e692002f00000000000000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    }
+  ],
+  "formatter": {
+    "arguments": {
+      "value": "rdi",
+      "descriptor": "rsi"
+    },
+    "value_load": {
+      "site": "0x15eadd0",
+      "loads": "the flag-group pointer from [rdi]"
+    },
+    "first_byte_load": {
+      "site": "0x15eadd3",
+      "offset": 0,
+      "reads": "the first byte of the flag group",
+      "first_dereference_in_chain": true
+    },
+    "length_table": {
+      "base": "0x457fc0",
+      "lea": "0x15eadd6",
+      "load": "0x15eaddd",
+      "index": "flag byte, unchecked"
+    },
+    "pointer_table": {
+      "base": "0x46a838",
+      "lea": "0x15eade1",
+      "load": "0x15eade8",
+      "add": "0x15eadec",
+      "index": "flag byte, unchecked",
+      "entry": "sign-extended dword, added to the table base"
+    },
+    "selections": [
+      {
+        "index": 0,
+        "pointer": "0x46a5c4",
+        "length": 5,
+        "bytes_hex": "4572726f72",
+        "sha256": "54a0e8c17ebb21a11f8a25b8042786ef7efe52441e6cc87e92c67e0c4c0c6e78",
+        "text": "Error"
+      },
+      {
+        "index": 1,
+        "pointer": "0x459e50",
+        "length": 4,
+        "bytes_hex": "5761726e",
+        "sha256": "8448814dc5caff5ce9443cc7f2e82be582fd362afb5cb8d759f66bb58d8b3fae",
+        "text": "Warn"
+      },
+      {
+        "index": 2,
+        "pointer": "0x45a19c",
+        "length": 4,
+        "bytes_hex": "496e666f",
+        "sha256": "170322a32f3c35b2c61576a5553d352d7b3c8ae7086dab78f15fc891a28c067c",
+        "text": "Info"
+      },
+      {
+        "index": 3,
+        "pointer": "0x46a5c9",
+        "length": 5,
+        "bytes_hex": "4465627567",
+        "sha256": "1a03bd2fd107c453f3183e30b9716f82200671e8270fbbefbe602f5a48705527",
+        "text": "Debug"
+      }
+    ],
+    "descriptor_reads": {
+      "out_load": "0x15eadef",
+      "table_load": "0x15eadf2",
+      "method_load": "0x15eadf6",
+      "spec_dword": null,
+      "field_a": null,
+      "field_b": null
+    },
+    "tail_call": {
+      "site": "0x15eadfd",
+      "form": "jmp rcx (tail call)",
+      "target": "the method word at descriptor table +0x18",
+      "arguments": {
+        "rdi": "descriptor out",
+        "rsi": "selected string pointer",
+        "rdx": "selected string length"
+      },
+      "return": "the method's AL is the function's result"
+    },
+    "writes_to_out": "none directly; the tail-called table method performs the write",
+    "builds_records": false,
+    "dispatches_formatter": false
+  },
+  "chain_method_binding": {
+    "table": "0x63f3d50",
+    "slot": "0x63f3d68",
+    "method": "0x141e8f0"
+  },
+  "reference_census": {
+    "direct": 0,
+    "via_formatter_slot": 0,
+    "relocation_references": [],
+    "rip_relative_refs": [
+      "0x16035f0"
+    ],
+    "lea_site": "0x16035f0",
+    "lea_fde": [
+      "0x16035e0",
+      "0x160361a"
+    ],
+    "address_as_data": 0
+  },
+  "chain_verdict": "The pointer formatter is where the flag-group pointer is first dereferenced in the chain: it loads the flag-group pointer from its value argument and reads the flag group's first byte, then uses that byte as an unchecked index into two .rodata tables \u2014 a qword length table at 0x457fc0 and a relative-pointer table at 0x46a838 \u2014 whose four established entries select the byte strings Error (5), Warn (4), Info (4) and Debug (5). It reads only the descriptor's out and table words, loads the method word at table +0x18, and tail-jumps to it with (out, selected pointer, selected length); the spec dword and fields are never read. It builds no record and dispatches no further formatter.",
+  "captured_code_executed": false,
+  "limits": "Pointer formatter 0x15eadd0 only: the two loads that dereference the pointer-to-pointer value argument (the flag-group pointer loaded from [rdi] at 0x15eadd0 and the flag group's first byte loaded at 0x15eadd3 \u2014 the first dereference of the flag-group pointer itself in the chain), the unchecked indexing of the two .rodata tables (the qword length table at 0x457fc0 and the relative-pointer table at 0x46a838) whose four established entries select the byte strings Error/Warn/Info/Debug, the two descriptor words it reads (out at +0x0 and table at +0x8; the spec dword and field A/B are never read), the method word it loads from table +0x18, and the tail jump through that method with (out, selected pointer, selected length). Which byte value the flag group's first byte actually holds on the chain call \u2014 who writes that byte of the block the derived-byte callee's pair record points at \u2014 and what the table method at +0x18 computes are NOT established by these bytes: the descriptor construction is owned by the RE-015 flag-group-write-target packet, the pair-block construction by the RE-015 derived-byte-callee packet, and the method binding for the chain's consumer table (slot 0x63f3d68 -> 0x141e8f0) is cited from the write-target packet, not re-derived. Entries of either table past index 3 are NOT established: the body performs no bounds check, and the bytes that follow the length table's fourth entry are an unrelated string constant. No captured code executed, no runtime value, indirect-call recovery, #94 correspondence, or reconstruction gate is claimed."
+}
