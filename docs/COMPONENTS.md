@@ -10,7 +10,7 @@ The authenticated inventory contains 180 allowlisted source-path observations. D
 Time, logging, wallets, collections and shared runtime utilities.
 
 - Target: node115.
-- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-u128-binary64`, `src/node115-tagged-count`.
+- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`.
 - Observed diagnostic paths: 33.
 - First task: Map time/quantity conversion helpers; distinguish standard-library code from private helpers.
 
@@ -40,7 +40,7 @@ RocksDB wrappers, block readers and database lifecycle.
 TCP framing, LZ4, channels, rate limits and reconnects.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-lz4-decode`.
 - Observed diagnostic paths: 12.
 - First task: Map frame lengths, compression boundaries and error handling without network traffic.
 
@@ -50,7 +50,7 @@ TCP framing, LZ4, channels, rate limits and reconnects.
 Votes, rounds, quorum certificates, validator sets and timers.
 
 - Target: node115.
-- Implementation paths: `src/node115-weighted-fastfold`.
+- Implementation paths: `src/node115-weighted-fastfold`, `src/node115-tree-next`.
 - Observed diagnostic paths: 17.
 - First task: Map signed wire types and quorum arithmetic; validate invalid signatures and timeout transitions.
 
@@ -60,7 +60,7 @@ Votes, rounds, quorum certificates, validator sets and timers.
 CLI, startup, gossip, stream services and process orchestration.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-gossip-reload`.
 - Observed diagnostic paths: 21.
 - First task: Trace CLI dispatch to service entrypoints and enumerate read/write side effects.
 
@@ -130,7 +130,7 @@ Positions, margin, oracles, liquidations and spot balances.
 Price, size, notional and wei arithmetic plus asset metadata.
 
 - Target: node115.
-- Implementation paths: `src/node115-quantity-preparation`.
+- Implementation paths: `src/node115-quantity-preparation`, `src/node115-price-core`.
 - Observed diagnostic paths: 8.
 - First task: Start with bounded arithmetic helpers: recover width, rounding, scale and overflow branches.
 

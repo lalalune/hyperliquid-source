@@ -12,6 +12,8 @@ packet for supported behavior, build commands and remaining gaps.
 - `node115-tagged-count`: capped unsigned count over three observed tag branches.
 - `node115-u128-binary64`: migrated unsigned128 to binary64 value projection.
 
+- `node115-signed-scalar`: signed scalar values, diagnostics and retained input cursor.
+
 The default development toolchain is Rust 1.95.0. Existing evidence runners that
 explicitly pin research Rust 1.94.1 retain that compiler for reproducibility; this
 does not change their node #115 target identity. Retired implementations remain
