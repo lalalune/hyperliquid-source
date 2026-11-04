@@ -1,0 +1,23 @@
+# node #115 section bounds for the RE-015 literal inventory
+# target: artifacts/node/115/hl-node
+# sha256: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+# size_bytes: 105896032
+# captured code executed: false (the pinned file is read in place only)
+#
+# Values are derived from the ELF section table of the pinned file by
+# tools/foundation_literal_inventory.py and recorded in evidence.json under
+# "sections" and "rela_dyn"; the same values were re-derived and compared
+# during the recorded scratch verification run.
+#
+# section          va_start    va_end      file_offset   size
+.rodata            0x430400    0xb9ea40    0x430400      7792192
+.data.rel.ro       0x63f3c20   0x64df248   0x63f1c20     964136
+.data              0x64efa20   0x64ffe08   0x64eca20     66536
+#
+# .rela.dyn, same derivation:
+# entries               60723
+# relative_relocations  59534   (r_info low 32 bits == R_X86_64_RELATIVE, i.e. 8)
+#
+# The VA intervals are half-open: [va_start, va_end). Sizes are section sizes
+# in bytes. Only .rodata, .data.rel.ro and .data are in scope for this
+# inventory; other sections and the string tables are excluded.
