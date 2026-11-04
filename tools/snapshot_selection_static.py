@@ -101,7 +101,9 @@ def analyze(data):
                         (0x90,'48b80000000000000080'),(0x9a,'48ffc0')]:
             b=bytes.fromhex(raw)
             if read(data,a+off,len(b))[1]!=b:raise ValueError('wrapper selector/normalization changed')
-    s=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    s=next((s for s in sections(data) if s['name']=='.rela.dyn'),None)
+    if s is None:raise ValueError('missing.rela.dyn section')
+    if s['size']%24:raise ValueError('truncated.rela.dyn section')
     rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[s['offset']:s['offset']+s['size']])}
     for a,row in spec['relocations'].items():
         if rels.get(int(a))!=tuple(row):raise ValueError('snapshot relocation changed')
