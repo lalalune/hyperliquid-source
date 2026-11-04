@@ -1,0 +1,602 @@
+{
+  "schema": "fee-reference-primitive-cases-v1",
+  "provenance": "Manually derived exact mathematical expectations, written before any reference execution. These are own primitive fixtures; independent node-scout candidate cases remain separate and immutable.",
+  "native_execution": false,
+  "cases": [
+    {
+      "id": "ratio-tenth",
+      "operation": "round_ratio",
+      "arguments": [
+        "1",
+        "10"
+      ],
+      "expected": "3fb999999999999a",
+      "justification": "1/10 rounds to the known nearest binary64, above the exact rational."
+    },
+    {
+      "id": "ratio-fifth",
+      "operation": "round_ratio",
+      "arguments": [
+        "1",
+        "5"
+      ],
+      "expected": "3fc999999999999a",
+      "justification": "1/5 rounds to the known nearest binary64, above the exact rational."
+    },
+    {
+      "id": "ratio-third",
+      "operation": "round_ratio",
+      "arguments": [
+        "1",
+        "3"
+      ],
+      "expected": "3fd5555555555555",
+      "justification": "The repeating binary expansion of1/3 rounds down at53 significant bits."
+    },
+    {
+      "id": "ratio-negative-third",
+      "operation": "round_ratio",
+      "arguments": [
+        "-1",
+        "3"
+      ],
+      "expected": "bfd5555555555555",
+      "justification": "RN-even is symmetric under sign."
+    },
+    {
+      "id": "minimum-subnormal",
+      "operation": "round_dyadic",
+      "arguments": [
+        "1",
+        "-1074"
+      ],
+      "expected": "0000000000000001",
+      "justification": "Exactly the least positive subnormal."
+    },
+    {
+      "id": "half-minimum-subnormal",
+      "operation": "round_dyadic",
+      "arguments": [
+        "1",
+        "-1075"
+      ],
+      "expected": "0000000000000000",
+      "justification": "Tie between0 and1 subnormal unit selects even0."
+    },
+    {
+      "id": "negative-half-minimum-subnormal",
+      "operation": "round_dyadic",
+      "arguments": [
+        "-1",
+        "-1075"
+      ],
+      "expected": "8000000000000000",
+      "justification": "A negative underflow tie rounds to negative zero."
+    },
+    {
+      "id": "one-and-half-subnormal-units",
+      "operation": "round_dyadic",
+      "arguments": [
+        "3",
+        "-1075"
+      ],
+      "expected": "0000000000000002",
+      "justification": "Tie between1 and2 units selects even2."
+    },
+    {
+      "id": "two-and-half-subnormal-units",
+      "operation": "round_dyadic",
+      "arguments": [
+        "5",
+        "-1075"
+      ],
+      "expected": "0000000000000002",
+      "justification": "Tie between2 and3 units selects even2."
+    },
+    {
+      "id": "minimum-normal-midpoint",
+      "operation": "round_dyadic",
+      "arguments": [
+        "9007199254740991",
+        "-1075"
+      ],
+      "expected": "0010000000000000",
+      "justification": "Tie between max-subnormal and min-normal selects even min-normal."
+    },
+    {
+      "id": "below-minimum-normal-midpoint",
+      "operation": "round_dyadic",
+      "arguments": [
+        "9007199254740989",
+        "-1075"
+      ],
+      "expected": "000ffffffffffffe",
+      "justification": "Tie between subnormal significands2^52-2 and2^52-1 selects the even first."
+    },
+    {
+      "id": "one-half-ulp-up",
+      "operation": "round_dyadic",
+      "arguments": [
+        "9007199254740993",
+        "-53"
+      ],
+      "expected": "3ff0000000000000",
+      "justification": "1+2^-53 is halfway to the next float and rounds to even1."
+    },
+    {
+      "id": "one-one-and-half-ulps-up",
+      "operation": "round_dyadic",
+      "arguments": [
+        "9007199254740995",
+        "-53"
+      ],
+      "expected": "3ff0000000000002",
+      "justification": "1+3*2^-53 is halfway between odd1ulp and even2ulp."
+    },
+    {
+      "id": "one-half-ulp-down",
+      "operation": "round_dyadic",
+      "arguments": [
+        "18014398509481983",
+        "-54"
+      ],
+      "expected": "3ff0000000000000",
+      "justification": "The lower spacing is2^-53; the half-step below1 ties to1."
+    },
+    {
+      "id": "maximum-finite-exact",
+      "operation": "round_dyadic",
+      "arguments": [
+        "9007199254740991",
+        "971"
+      ],
+      "expected": "7fefffffffffffff",
+      "justification": "(2^53-1)*2^971 is maximum finite binary64."
+    },
+    {
+      "id": "overflow-midpoint",
+      "operation": "round_dyadic",
+      "arguments": [
+        "18014398509481983",
+        "970"
+      ],
+      "expected": "7ff0000000000000",
+      "justification": "Halfway from max finite toward2^1024 rounds outward to infinity."
+    },
+    {
+      "id": "below-overflow-midpoint",
+      "operation": "round_dyadic",
+      "arguments": [
+        "36028797018963965",
+        "969"
+      ],
+      "expected": "7fefffffffffffff",
+      "justification": "2^1024-3*2^969 lies below the overflow midpoint."
+    },
+    {
+      "id": "above-overflow-midpoint",
+      "operation": "round_dyadic",
+      "arguments": [
+        "36028797018963967",
+        "969"
+      ],
+      "expected": "7ff0000000000000",
+      "justification": "2^1024-2^969 lies above the overflow midpoint."
+    },
+    {
+      "id": "negative-overflow-midpoint",
+      "operation": "round_dyadic",
+      "arguments": [
+        "-18014398509481983",
+        "970"
+      ],
+      "expected": "fff0000000000000",
+      "justification": "Negative counterpart of the overflow tie."
+    },
+    {
+      "id": "sub-equal-one",
+      "operation": "sub",
+      "arguments": [
+        "3ff0000000000000",
+        "3ff0000000000000"
+      ],
+      "expected": "0000000000000000",
+      "justification": "Exact cancellation under RN-even produces positive zero."
+    },
+    {
+      "id": "sub-negative-zero-positive-zero",
+      "operation": "sub",
+      "arguments": [
+        "8000000000000000",
+        "0000000000000000"
+      ],
+      "expected": "8000000000000000",
+      "justification": "-0 minus+0 preserves negative zero."
+    },
+    {
+      "id": "sub-negative-zero-negative-zero",
+      "operation": "sub",
+      "arguments": [
+        "8000000000000000",
+        "8000000000000000"
+      ],
+      "expected": "0000000000000000",
+      "justification": "-0 minus-0 is exact cancellation with positive-zero result."
+    },
+    {
+      "id": "sub-positive-zero-negative-zero",
+      "operation": "sub",
+      "arguments": [
+        "0000000000000000",
+        "8000000000000000"
+      ],
+      "expected": "0000000000000000",
+      "justification": "+0 minus-0 remains positive zero."
+    },
+    {
+      "id": "sub-positive-infinities",
+      "operation": "sub",
+      "arguments": [
+        "7ff0000000000000",
+        "7ff0000000000000"
+      ],
+      "expected": "7ff8000000000000",
+      "justification": "Infinity minus itself is a canonicalized NaN in this projection."
+    },
+    {
+      "id": "sub-one-positive-infinity",
+      "operation": "sub",
+      "arguments": [
+        "3ff0000000000000",
+        "7ff0000000000000"
+      ],
+      "expected": "fff0000000000000",
+      "justification": "Finite minus positive infinity is negative infinity."
+    },
+    {
+      "id": "sub-opposite-infinities",
+      "operation": "sub",
+      "arguments": [
+        "7ff0000000000000",
+        "fff0000000000000"
+      ],
+      "expected": "7ff0000000000000",
+      "justification": "Positive infinity minus negative infinity is positive infinity."
+    },
+    {
+      "id": "sub-signaling-nan",
+      "operation": "sub",
+      "arguments": [
+        "7ff0000000000001",
+        "3ff0000000000000"
+      ],
+      "expected": "7ff8000000000000",
+      "justification": "Masked NaN arithmetic is represented by canonical NaN; payload is outside output scope."
+    },
+    {
+      "id": "mul-half-minimum-subnormal",
+      "operation": "mul",
+      "arguments": [
+        "0000000000000001",
+        "3fe0000000000000"
+      ],
+      "expected": "0000000000000000",
+      "justification": "Least subnormal times1/2 is the zero tie."
+    },
+    {
+      "id": "mul-negative-half-minimum-subnormal",
+      "operation": "mul",
+      "arguments": [
+        "8000000000000001",
+        "3fe0000000000000"
+      ],
+      "expected": "8000000000000000",
+      "justification": "Negative underflow preserves sign on zero."
+    },
+    {
+      "id": "mul-one-and-half-subnormal",
+      "operation": "mul",
+      "arguments": [
+        "0000000000000001",
+        "3ff8000000000000"
+      ],
+      "expected": "0000000000000002",
+      "justification": "Least subnormal times3/2 ties to even2 units."
+    },
+    {
+      "id": "mul-overflow",
+      "operation": "mul",
+      "arguments": [
+        "7fefffffffffffff",
+        "4000000000000000"
+      ],
+      "expected": "7ff0000000000000",
+      "justification": "Maximum finite times2 exceeds the RN-even overflow threshold."
+    },
+    {
+      "id": "mul-zero-infinity",
+      "operation": "mul",
+      "arguments": [
+        "0000000000000000",
+        "7ff0000000000000"
+      ],
+      "expected": "7ff8000000000000",
+      "justification": "Zero times infinity is an invalid masked result represented as canonical NaN."
+    },
+    {
+      "id": "mul-negative-zero-negative-three",
+      "operation": "mul",
+      "arguments": [
+        "8000000000000000",
+        "c008000000000000"
+      ],
+      "expected": "0000000000000000",
+      "justification": "Product sign is XOR, giving positive zero."
+    },
+    {
+      "id": "mul-negative-zero-positive-three",
+      "operation": "mul",
+      "arguments": [
+        "8000000000000000",
+        "4008000000000000"
+      ],
+      "expected": "8000000000000000",
+      "justification": "Product sign is XOR, giving negative zero."
+    },
+    {
+      "id": "mul-infinity-negative-two",
+      "operation": "mul",
+      "arguments": [
+        "7ff0000000000000",
+        "c000000000000000"
+      ],
+      "expected": "fff0000000000000",
+      "justification": "Infinity product sign is XOR."
+    },
+    {
+      "id": "mul-signaling-nan",
+      "operation": "mul",
+      "arguments": [
+        "fff0000000000001",
+        "3ff0000000000000"
+      ],
+      "expected": "7ff8000000000000",
+      "justification": "NaN payload/sign are intentionally canonicalized after masked arithmetic."
+    },
+    {
+      "id": "mul-neighbor-cancellation",
+      "operation": "mul",
+      "arguments": [
+        "3ff0000000000001",
+        "3feffffffffffffe"
+      ],
+      "expected": "3ff0000000000000",
+      "justification": "(1+2^-52)*(1-2^-52)=1-2^-104, nearest binary64 is1."
+    },
+    {
+      "id": "integer-zero",
+      "operation": "rounded_i64",
+      "arguments": [
+        "0"
+      ],
+      "expected": "0000000000000000",
+      "justification": "Integer zero converts to positive zero."
+    },
+    {
+      "id": "integer-minimum",
+      "operation": "rounded_i64",
+      "arguments": [
+        "-9223372036854775808"
+      ],
+      "expected": "c3e0000000000000",
+      "justification": "-2^63 is exactly representable."
+    },
+    {
+      "id": "integer-maximum",
+      "operation": "rounded_i64",
+      "arguments": [
+        "9223372036854775807"
+      ],
+      "expected": "43e0000000000000",
+      "justification": "2^63-1 rounds to2^63, not to the previous binary64."
+    },
+    {
+      "id": "integer-below-two53",
+      "operation": "rounded_i64",
+      "arguments": [
+        "9007199254740991"
+      ],
+      "expected": "433fffffffffffff",
+      "justification": "2^53-1 is exactly representable."
+    },
+    {
+      "id": "integer-two53-plus-one",
+      "operation": "rounded_i64",
+      "arguments": [
+        "9007199254740993"
+      ],
+      "expected": "4340000000000000",
+      "justification": "2^53+1 is an even tie down."
+    },
+    {
+      "id": "integer-two53-plus-three",
+      "operation": "rounded_i64",
+      "arguments": [
+        "9007199254740995"
+      ],
+      "expected": "4340000000000002",
+      "justification": "2^53+3 is an even tie up to2^53+4."
+    },
+    {
+      "id": "integer-negative-two53-plus-three",
+      "operation": "rounded_i64",
+      "arguments": [
+        "-9007199254740995"
+      ],
+      "expected": "c340000000000002",
+      "justification": "Sign symmetry of the positive integer tie."
+    },
+    {
+      "id": "integer-quantity-maximum",
+      "operation": "rounded_i64",
+      "arguments": [
+        "10000000"
+      ],
+      "expected": "416312d000000000",
+      "justification": "The admitted maximum quantity is exactly representable."
+    },
+    {
+      "id": "convert-positive-infinity",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "7ff0000000000000"
+      ],
+      "expected": "0",
+      "justification": "All nonfinite inputs map to0, not an integer endpoint."
+    },
+    {
+      "id": "convert-negative-infinity",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "fff0000000000000"
+      ],
+      "expected": "0",
+      "justification": "The finite filter strips the sign before the nonfinite test."
+    },
+    {
+      "id": "convert-quiet-nan",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "7ff8000000000123"
+      ],
+      "expected": "0",
+      "justification": "NaN payload does not change the nonfinite-zero result."
+    },
+    {
+      "id": "convert-negative-signaling-nan",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "fff0000000000001"
+      ],
+      "expected": "0",
+      "justification": "Signaling-NaN bits bypass to0 in the conversion primitive."
+    },
+    {
+      "id": "convert-positive-zero",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "0000000000000000"
+      ],
+      "expected": "0",
+      "justification": "Positive zero truncates to0."
+    },
+    {
+      "id": "convert-negative-zero",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "8000000000000000"
+      ],
+      "expected": "0",
+      "justification": "Integer output has no signed zero."
+    },
+    {
+      "id": "convert-positive-fraction",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "3ff8000000000000"
+      ],
+      "expected": "1",
+      "justification": "1.5 truncates toward zero to1."
+    },
+    {
+      "id": "convert-negative-fraction",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "bff8000000000000"
+      ],
+      "expected": "-1",
+      "justification": "-1.5 truncates toward zero, not floor."
+    },
+    {
+      "id": "convert-below-one",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "3fefffffffffffff"
+      ],
+      "expected": "0",
+      "justification": "Largest binary64 below1 truncates to0."
+    },
+    {
+      "id": "convert-negative-subnormal",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "8000000000000001"
+      ],
+      "expected": "0",
+      "justification": "A tiny negative finite input truncates to0."
+    },
+    {
+      "id": "convert-upper-endpoint",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "43e0000000000000"
+      ],
+      "expected": "9223372036854775807",
+      "justification": "Finite+2^63 saturates toMAX after the masked-invalid native conversion boundary."
+    },
+    {
+      "id": "convert-below-upper-endpoint",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "43dfffffffffffff"
+      ],
+      "expected": "9223372036854774784",
+      "justification": "Largest float below2^63 is2^63-1024 and is an exact integer."
+    },
+    {
+      "id": "convert-lower-endpoint",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "c3e0000000000000"
+      ],
+      "expected": "-9223372036854775808",
+      "justification": "Finite-2^63 maps toMIN."
+    },
+    {
+      "id": "convert-below-lower-endpoint",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "c3e0000000000001"
+      ],
+      "expected": "-9223372036854775808",
+      "justification": "Finite below-2^63 clamps toMIN."
+    },
+    {
+      "id": "convert-above-lower-endpoint",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "c3dfffffffffffff"
+      ],
+      "expected": "-9223372036854774784",
+      "justification": "Float toward zero from-2^63 is-2^63+1024."
+    },
+    {
+      "id": "convert-maximum-finite",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "7fefffffffffffff"
+      ],
+      "expected": "9223372036854775807",
+      "justification": "Finite maximum saturates toMAX; it is distinct from infinity."
+    },
+    {
+      "id": "convert-negative-maximum-finite",
+      "operation": "nonfinite_zero_integer",
+      "arguments": [
+        "ffefffffffffffff"
+      ],
+      "expected": "-9223372036854775808",
+      "justification": "Finite negative maximum magnitude saturates toMIN."
+    }
+  ]
+}
