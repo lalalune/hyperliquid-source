@@ -3546,6 +3546,8 @@ def _rela_entries(data, secs):
     for sec in secs:
         if sec['type'] != 4:
             continue
+        if sec['size'] % 24 != 0:
+            raise AssertionError(f"truncated.{sec['name'][1:]} section")
         blob = _section_bytes(data, secs, sec['address'],
                               sec['address'] + sec['size'])
         for off in range(0, len(blob) - 23, 24):
@@ -3559,8 +3561,12 @@ def _dynsym_name(data, secs, index):
     """Resolve a .dynsym index to its symbol name via sh_link."""
     shoff = struct.unpack_from('<Q', data, 40)[0]
     entsize = struct.unpack_from('<H', data, 58)[0]
-    dynsym_idx = next(i for i, s in enumerate(secs) if s['type'] == 11)
+    dynsym_idx = next((i for i, s in enumerate(secs) if s['type'] == 11), None)
+    if dynsym_idx is None:
+        raise AssertionError('missing.dynsym section')
     link = struct.unpack_from('<I', data, shoff + dynsym_idx * entsize + 40)[0]
+    if link >= len(secs):
+        raise AssertionError('dynamic symbol table link out of range')
     dynsym = secs[dynsym_idx]
     dynstr = secs[link]
     st_name = struct.unpack_from(
@@ -3568,7 +3574,10 @@ def _dynsym_name(data, secs, index):
     table = _section_bytes(data, secs, dynstr['address'],
                            dynstr['address'] + dynstr['size'])
     end = table.find(b'\0', st_name)
-    return table[st_name:end].decode('utf-8')
+    try:
+        return table[st_name:end].decode('utf-8')
+    except UnicodeDecodeError:
+        raise AssertionError('dynamic symbol name is not valid UTF-8')
 
 
 def _slot_fact(data, secs, relas, slot, want_type, want_addend=None,
@@ -3789,7 +3798,9 @@ def _value_writes(rows, reg, before):
 
 def _e8_callers(data, secs, ordered, targets):
     """Binary-wide E8 census: target -> [(site, (fde_start, fde_end))]."""
-    text_sec = next(s for s in secs if s['name'] == '.text')
+    text_sec = next((s for s in secs if s['name'] == '.text'), None)
+    if text_sec is None:
+        raise AssertionError('missing.text section')
     tbody = _section_bytes(data, secs, text_sec['address'],
                            text_sec['address'] + text_sec['size'])
     tva = text_sec['address']
