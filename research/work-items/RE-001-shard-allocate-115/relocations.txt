@@ -1,0 +1,25 @@
+Relocation / PLT notes for the RE-001 shard allocation window (node #115).
+
+Window 0x5f117a0:
+- One rip-relative GOT read in-window: cmpq $0 against GOT slot
+  0x64ed7e8 at 0x5f118c8 gates the TLS getter call below.
+- PLT calls: sched_yield 0x63f0b20 (spin-loop yield sites 0x5f11848,
+  0x5f11ad5, 0x5f11aed), TLS getter 0x63f13b0
+  (_ZTHN7rocksdb15ConcurrentArena9tls_cpuidE, site 0x5f118d2),
+  __throw_system_error 0x63f0f90 (code 0x23 at 0x5f11bf3, code 1 at
+  0x5f11c0d), __stack_chk_fail 0x63f0d70, _Unwind_Resume 0x63f0a50.
+- Internal calls: AllocateAligned 0x605d7b0 at three sites
+  (0x5f11864 global path, 0x5f11a55 grow path, 0x5f11b63 direct
+  path), shard refresh 0x605e170 (site 0x5f11931), post-direct
+  0x5f07200 (site 0x5f11b70), guard release 0x5f0b5e0 (cleanup
+  sites 0x5f11bb3 and 0x5f11bc4).
+- No .rodata string reference in-window; the window reads no other
+  GOT slot.
+
+Vtable / RELATIVE notes:
+- The window is reached through the outer class vtable (see the
+  destructor-pair packet: vtable 0x64cc5d8 holds 0x5f10180,
+  0x5f10d00, 0x5f11c40, 0x5f117a0, 0x5f04da0). The slots themselves
+  are zero in the file and resolve only through their RELATIVE
+  entries; see census.py output and records.json for this window's
+  slot and any qword hit.
