@@ -102,17 +102,28 @@ def anchors_ok(data, anchors):
 
 
 def relocations(data):
-    s = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    s = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    if s is None:
+        raise ValueError('missing.rela.dyn section')
+    if s['size'] % 24 != 0:
+        raise ValueError('truncated.rela.dyn section')
     return {o: (i, v) for o, i, v in struct.iter_unpack('<QQq', data[s['offset']:s['offset'] + s['size']])}
 
 
 def dynsym_name(data, index):
-    syms = next(s for s in sections(data) if s['name'] == '.dynsym')
-    strs = next(s for s in sections(data) if s['name'] == '.dynstr')
+    syms = next((s for s in sections(data) if s['name'] == '.dynsym'), None)
+    if syms is None:
+        raise ValueError('missing.dynsym section')
+    strs = next((s for s in sections(data) if s['name'] == '.dynstr'), None)
+    if strs is None:
+        raise ValueError('missing.dynstr section')
     name_off = struct.unpack_from('<I', data, syms['offset'] + index * 24)[0]
     base = strs['offset'] + name_off
     end = data.find(b'\0', base)
-    return data[base:end].decode('ascii')
+    try:
+        return data[base:end].decode('ascii')
+    except UnicodeDecodeError:
+        raise ValueError('dynamic symbol name is not valid ASCII') from None
 
 
 def analyze(data):
