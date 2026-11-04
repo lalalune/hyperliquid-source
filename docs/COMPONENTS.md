@@ -60,7 +60,7 @@ Votes, rounds, quorum certificates, validator sets and timers.
 CLI, startup, gossip, stream services and process orchestration.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-gossip-reload`.
 - Observed diagnostic paths: 21.
 - First task: Trace CLI dispatch to service entrypoints and enumerate read/write side effects.
 
