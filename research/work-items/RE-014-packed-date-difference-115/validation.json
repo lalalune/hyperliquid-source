@@ -1,0 +1,48 @@
+{
+  "scope": "Pre-commit source-hash-qualified checks; final committed-head checks are separately reported in PR and D handoff.",
+  "passed": {
+    "staticDerive": {
+      "runId": "6743179593d84c31bd4b0fe2d4969e7f",
+      "rows": 1071744,
+      "vectorSha256": "6a8671ad7d0188c6529135f4395d5b1957d306a243fc0413aad7921f4f791eaf"
+    },
+    "focusedCargoAndRust": {
+      "runId": "bf14034bd30b41d5ba0271fcfd5ec646",
+      "cargoFmt": 0,
+      "cargoTest": 0,
+      "cargoClippyAllTargetsDenyWarnings": 0,
+      "unitTests": 3,
+      "rowsPerOptimization": 1071744,
+      "optimizations": [
+        0,
+        3
+      ],
+      "compiledMutantsRejected": 5,
+      "hostAndLinuxRepeatedLibrariesEqual": true
+    }
+  },
+  "preservedFailures": [
+    {
+      "runId": "58e66896bbc34076b5c7fc847682d8ed",
+      "result": "failed",
+      "cause": "Static evidence packaging initially treated a relocation-backed zero raw Location pointer as a direct VA.",
+      "resolution": "Resolve and bind actual .rela.dyn 0x1d640 before reading path; changed evidence input qualified in next run."
+    },
+    {
+      "runId": "6743179593d84c31bd4b0fe2d4969e7f",
+      "result": "failed at optional Clippy; preceding static/Cargo checks passed",
+      "cause": "New probe used manual_is_multiple_of in progress logging.",
+      "resolution": "Changed one progress condition; focused source-hash-qualified replay and Clippy passed."
+    }
+  ],
+  "wholeMakeTest": {
+    "status": "NOT_RUN_UNRESOLVED_REQUIRED_CHECK",
+    "previousBaseRun": "c28314c7b86e4170b13fac05ad19e316",
+    "exitCode": 124,
+    "reason": "Unchanged tests/test_assembled_record_readers_static.py test_exit_slot_mutation_rejected repeatedly copies the full 105896032-byte capture for relocation mutations; prior same Windows input hit 180-second no-progress deadline. Other prior native-Windows suite failures also remain unresolved. No new full-suite pass, failure exemption or CI success claimed.",
+    "testFileSha256": "6eb5b06f04a8d5701d71712b32528a1b516d387960f67fd216a3664f92242138",
+    "retryPolicy": "No identical whole-suite rerun without verified resolution; disclose this unmet check."
+  },
+  "capturedTargetExecuted": false,
+  "gatesAdvanced": false
+}
