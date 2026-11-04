@@ -93,7 +93,9 @@ def analyze(data):
         code=read(data,site,5)[1]
         if code[0]!=0xe8 or site+5+struct.unpack_from('<i',code,1)[0]!=target:
             raise ValueError('weighted fold/context call changed')
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    sec=next((s for s in sections(data) if s['name']=='.rela.dyn'),None)
+    if sec is None:raise ValueError('missing.rela.dyn section')
+    if sec['size']%24:raise ValueError('truncated.rela.dyn section')
     rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
     if rels.get(0x6475bd8)!=(8,0x449efc) or rels.get(0x64dfb50)!=((12<<32)|6,0):
         raise ValueError('weighted source/comparator relocation changed')
