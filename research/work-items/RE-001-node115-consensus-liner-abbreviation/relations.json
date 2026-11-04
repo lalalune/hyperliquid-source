@@ -1,0 +1,250 @@
+{
+  "actual_byte_counterfacts": [
+    {
+      "after": {
+        "prefix_end": 6,
+        "prefix_hex": "307861616161",
+        "route": "format_request",
+        "suffix_hex": "61616161",
+        "suffix_start": 16
+      },
+      "before": {
+        "bytes": 20,
+        "route": "transfer"
+      },
+      "name": "minimum length",
+      "original_byte": "15",
+      "rejection": "instruction obligation: admission",
+      "replacement_byte": "14",
+      "va": "0x4ec8003"
+    },
+    {
+      "after": {
+        "bytes": 27,
+        "route": "transfer"
+      },
+      "before": {
+        "prefix_end": 6,
+        "prefix_hex": "307861616161",
+        "route": "format_request",
+        "suffix_hex": "61616161",
+        "suffix_start": 23
+      },
+      "name": "lowercase prefix",
+      "original_byte": "78",
+      "rejection": "instruction obligation: admission",
+      "replacement_byte": "58",
+      "va": "0x4ec800e"
+    },
+    {
+      "after": {
+        "prefix_end": 5,
+        "prefix_hex": "3078616161",
+        "route": "format_request",
+        "suffix_hex": "61616161",
+        "suffix_start": 23
+      },
+      "before": {
+        "prefix_end": 6,
+        "prefix_hex": "307861616161",
+        "route": "format_request",
+        "suffix_hex": "61616161",
+        "suffix_start": 23
+      },
+      "name": "six-byte prefix budget",
+      "original_byte": "06",
+      "rejection": "instruction obligation: prefix_candidates",
+      "replacement_byte": "05",
+      "va": "0x4ec802e"
+    },
+    {
+      "after": {
+        "prefix_end": 5,
+        "prefix_hex": "3078616161",
+        "route": "format_request",
+        "suffix_hex": "61616161",
+        "suffix_start": 23
+      },
+      "before": {
+        "prefix_end": 6,
+        "prefix_hex": "307861616161",
+        "route": "format_request",
+        "suffix_hex": "61616161",
+        "suffix_start": 23
+      },
+      "name": "signed prefix boundary",
+      "original_byte": "7f",
+      "rejection": "instruction obligation: prefix_candidates",
+      "replacement_byte": "77",
+      "va": "0x4ec8036"
+    },
+    {
+      "after": {
+        "prefix_end": 6,
+        "prefix_hex": "307861616161",
+        "route": "format_request",
+        "suffix_hex": "6161616161",
+        "suffix_start": 22
+      },
+      "before": {
+        "prefix_end": 6,
+        "prefix_hex": "307861616161",
+        "route": "format_request",
+        "suffix_hex": "61616161",
+        "suffix_start": 23
+      },
+      "name": "four-byte suffix budget",
+      "original_byte": "fc",
+      "rejection": "instruction obligation: suffix_candidates",
+      "replacement_byte": "fb",
+      "va": "0x4ec8077"
+    },
+    {
+      "after": {
+        "prefix_end": 6,
+        "prefix_hex": "307861616161",
+        "route": "format_request",
+        "suffix_hex": "616161",
+        "suffix_start": 24
+      },
+      "before": {
+        "prefix_end": 6,
+        "prefix_hex": "307861616161",
+        "route": "format_request",
+        "suffix_hex": "61616161",
+        "suffix_start": 23
+      },
+      "name": "signed suffix boundary",
+      "original_byte": "7e",
+      "rejection": "instruction obligation: suffix_candidates",
+      "replacement_byte": "72",
+      "va": "0x4ec8072"
+    },
+    {
+      "after": false,
+      "before": true,
+      "name": "nonzero capacity release",
+      "original_byte": "74",
+      "rejection": "instruction obligation: normal_release_request",
+      "replacement_byte": "75",
+      "va": "0x4ec8120"
+    }
+  ],
+  "admission_cases": 156,
+  "byte_predicates": 256,
+  "examples": [
+    {
+      "byte_length": 20,
+      "bytes": 20,
+      "input": "0xaaaaaaaaaaaaaaaaaa",
+      "route": "transfer"
+    },
+    {
+      "byte_length": 21,
+      "input": "0xaaaaaaaaaaaaaaaaaaa",
+      "prefix_end": 6,
+      "prefix_hex": "307861616161",
+      "route": "format_request",
+      "suffix_hex": "61616161",
+      "suffix_start": 17
+    },
+    {
+      "byte_length": 27,
+      "bytes": 27,
+      "input": "0Xaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "route": "transfer"
+    },
+    {
+      "byte_length": 35,
+      "bytes": 35,
+      "input": "validator-aaaaaaaaaaaaaaaaaaaaaaaaa",
+      "route": "transfer"
+    },
+    {
+      "byte_length": 27,
+      "input": "0xzzzzzzzzzzzzzzzzzzzzzzzzz",
+      "prefix_end": 6,
+      "prefix_hex": "30787a7a7a7a",
+      "route": "format_request",
+      "suffix_hex": "7a7a7a7a",
+      "suffix_start": 23
+    },
+    {
+      "byte_length": 25,
+      "input": "0xabc\u00e9aaaaaaaaaaaaaaaaaa",
+      "prefix_end": 5,
+      "prefix_hex": "3078616263",
+      "route": "format_request",
+      "suffix_hex": "61616161",
+      "suffix_start": 21
+    },
+    {
+      "byte_length": 26,
+      "input": "0xabc\u20acaaaaaaaaaaaaaaaaaa",
+      "prefix_end": 5,
+      "prefix_hex": "3078616263",
+      "route": "format_request",
+      "suffix_hex": "61616161",
+      "suffix_start": 22
+    },
+    {
+      "byte_length": 27,
+      "input": "0xabc\ud83d\ude00aaaaaaaaaaaaaaaaaa",
+      "prefix_end": 5,
+      "prefix_hex": "3078616263",
+      "route": "format_request",
+      "suffix_hex": "61616161",
+      "suffix_start": 23
+    },
+    {
+      "byte_length": 24,
+      "input": "0xaaaaaaaaaaaaaaaaaa\u20acx",
+      "prefix_end": 6,
+      "prefix_hex": "307861616161",
+      "route": "format_request",
+      "suffix_hex": "e282ac78",
+      "suffix_start": 20
+    },
+    {
+      "byte_length": 25,
+      "input": "0xaaaaaaaaaaaaaaaaaa\ud83d\ude00x",
+      "prefix_end": 6,
+      "prefix_hex": "307861616161",
+      "route": "format_request",
+      "suffix_hex": "78",
+      "suffix_start": 24
+    },
+    {
+      "byte_length": 24,
+      "input": "0xaaaaaaaaaaaaaaaaaa\ud83d\ude00",
+      "prefix_end": 6,
+      "prefix_hex": "307861616161",
+      "route": "format_request",
+      "suffix_hex": "f09f9880",
+      "suffix_start": 20
+    },
+    {
+      "byte_length": 27,
+      "input": "0x\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+      "prefix_end": 6,
+      "prefix_hex": "307800000000",
+      "route": "format_request",
+      "suffix_hex": "00000000",
+      "suffix_start": 23
+    }
+  ],
+  "parameters": {
+    "first_prefix_condition": 127,
+    "first_suffix_condition": 126,
+    "minimum_length": 21,
+    "prefix_cut": 6,
+    "prefix_word": 30768,
+    "release_condition": 116,
+    "suffix_distance": 4
+  },
+  "scalar_endpoint_cases": 420,
+  "schema": 1,
+  "scope": "Static branch algebra and independent Unicode boundary reference, not native execution or full formatting equivalence.",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "width_compositions": 16384
+}
