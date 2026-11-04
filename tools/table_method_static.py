@@ -77,7 +77,9 @@ def read(data,va,n):
 
 
 def relocations(data):
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    sec=next((s for s in sections(data) if s['name']=='.rela.dyn'),None)
+    if sec is None:raise ValueError('missing.rela.dyn section')
+    if sec['size']%24:raise ValueError('truncated.rela.dyn section')
     by_offset={}
     for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']]):
         by_offset.setdefault(a,[]).append((i&0xffffffff,i>>32,v))
@@ -85,11 +87,14 @@ def relocations(data):
 
 
 def dynsym_name(data,index):
-    ds=next(s for s in sections(data) if s['name']=='.dynsym')
-    st=next(s for s in sections(data) if s['name']=='.dynstr')
+    ds=next((s for s in sections(data) if s['name']=='.dynsym'),None)
+    st=next((s for s in sections(data) if s['name']=='.dynstr'),None)
+    if ds is None:raise ValueError('missing.dynsym section')
+    if st is None:raise ValueError('missing.dynstr section')
     name_off=struct.unpack_from('<I',data,ds['offset']+24*index)[0]
     end=data.find(b'\0',st['offset']+name_off)
-    return data[st['offset']+name_off:end].decode('ascii')
+    try:return data[st['offset']+name_off:end].decode('ascii')
+    except UnicodeDecodeError:raise ValueError('dynamic symbol name is not valid ASCII')
 
 
 def table_binding(data):
@@ -143,7 +148,8 @@ def memcpy_binding(data):
 
 
 def address_as_data_count(data,va):
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    sec=next((s for s in sections(data) if s['name']=='.rela.dyn'),None)
+    if sec is None:raise ValueError('missing.rela.dyn section')
     needle=struct.pack('<Q',va);count=0;index=data.find(needle)
     while index!=-1:
         if not (sec['offset']<=index<sec['offset']+sec['size']):
@@ -153,7 +159,8 @@ def address_as_data_count(data,va):
 
 
 def rip_refs(data,target):
-    text=next(s for s in sections(data) if s['name']=='.text')
+    text=next((s for s in sections(data) if s['name']=='.text'),None)
+    if text is None:raise ValueError('missing.text section')
     body=data[text['offset']:text['offset']+text['size']];base=text['address']
     refs=[]
     pats=[]
@@ -176,7 +183,8 @@ def rip_refs(data,target):
 
 
 def reference_census(data):
-    text=next(s for s in sections(data) if s['name']=='.text')
+    text=next((s for s in sections(data) if s['name']=='.text'),None)
+    if text is None:raise ValueError('missing.text section')
     body=data[text['offset']:text['offset']+text['size']];base=text['address']
     direct=[]
     for op in (b'\xe8',b'\xe9'):
