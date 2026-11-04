@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "packet": "RE-002-node115-elf-note-properties",
+  "task": "RE-002",
+  "component": "constants",
+  "claim_status": "observation",
+  "question": "Which program-identity notes does the retained Linux x86-64 node #115 ELF declare in its SHT_NOTE sections, and what do those pinned bytes constrain for a deterministic source rebuild?",
+  "target": {
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "bytes": 105896032,
+    "executed": false,
+    "copied": false
+  },
+  "elf": {
+    "class": "ELFCLASS64",
+    "data_encoding": "little-endian",
+    "section_header_entry_size": 64,
+    "section_count": 33,
+    "note_section_type": 7,
+    "note_section_count": 2
+  },
+  "note_sections": [
+    {
+      "name": ".note.ABI-tag",
+      "index": 2,
+      "type": 7,
+      "flags": "0x2",
+      "addr": "0x2fc",
+      "offset": "0x2fc",
+      "size": 32,
+      "bytes_hex": "040000001000000001000000474e550000000000030000000200000000000000",
+      "note_count": 1,
+      "notes": [
+        {
+          "name": "GNU",
+          "namesz": 4,
+          "descsz": 16,
+          "type": 1,
+          "desc_hex": "00000000030000000200000000000000"
+        }
+      ]
+    },
+    {
+      "name": ".note.gnu.build-id",
+      "index": 3,
+      "type": 7,
+      "flags": "0x2",
+      "addr": "0x31c",
+      "offset": "0x31c",
+      "size": 36,
+      "bytes_hex": "040000001400000003000000474e5500ac2880fcda5e49007a8e4fb1ea6aa7dd1b2eae01",
+      "note_count": 1,
+      "notes": [
+        {
+          "name": "GNU",
+          "namesz": 4,
+          "descsz": 20,
+          "type": 3,
+          "desc_hex": "ac2880fcda5e49007a8e4fb1ea6aa7dd1b2eae01"
+        }
+      ]
+    }
+  ],
+  "derived_sections": [
+    ".note.ABI-tag",
+    ".note.gnu.build-id"
+  ],
+  "build_id": "ac2880fcda5e49007a8e4fb1ea6aa7dd1b2eae01",
+  "build_id_desc_bytes": 20,
+  "gnu_property_note_present": false,
+  "gnu_property_note_basis": "The checker selected every section header whose sh_type is 7 (SHT_NOTE) across the 33 recorded sections and found exactly two. No .note.gnu.property section header and no note of type 5 (NT_GNU_PROPERTY_TYPE_0) appears in the recorded output, so no property record is recorded for this target.",
+  "observations": [
+    "The two note sections are the only SHT_NOTE sections in the recorded 33-section table.",
+    "Both note sections record flags 0x2 and have file offset equal to virtual address (0x2fc and 0x31c).",
+    ".note.ABI-tag holds one note: name GNU, namesz 4, descsz 16, type 1.",
+    ".note.gnu.build-id holds one note: name GNU, namesz 4, descsz 20, type 3.",
+    "No note of type 5 was observed, so no NT_GNU_PROPERTY_TYPE_0 record is recorded for this target."
+  ],
+  "inferences": [
+    "Flags 0x2 is the ELF SHF_ALLOC bit, so both note sections belong to the loaded image.",
+    "Note type 1 with the four little-endian words 0, 3, 2, 0 reads as the GNU ABI tag for OS Linux with a minimum kernel of 3.2.0 under the documented NT_GNU_ABI_TAG layout. This is an inference from the recorded descriptor bytes, not an executed check.",
+    "Note type 3 with a 20-byte descriptor is NT_GNU_BUILD_ID. Those 20 bytes are link-time output, so an independent rebuild is not expected to reproduce them byte for byte."
+  ],
+  "build_plan_constraint": "A rebuild compared against this target must reproduce the absence of any property note and the Linux 3.2.0 ABI-tag claim. The 20-byte build-id descriptor is a link-time value and is expected to differ unless the entire link is bit-identical.",
+  "reproduce": {
+    "command": [
+      "python3",
+      "-B",
+      "test-results/slop-workbench/foundation_elf_note_properties.py"
+    ],
+    "working_directory": "repository root",
+    "recorded_status": "exit 1 while the remaining packet files were absent; the values recorded above are that run's stdout",
+    "target_read_in_place": true,
+    "network": false
+  },
+  "limits": "Static read of two SHT_NOTE sections of artifacts/node/115/hl-node. The target was never executed or copied. No program headers, PT_NOTE segment count, compiler identity, linker flags or .comment records are claimed here, and no byte sequence outside the two note sections was searched. The absence of a property note is bounded to the section headers recorded here.",
+  "next_question": "Which PT_NOTE program-header segment covers these two note sections, and does any other loaded segment carry a note-shaped record?"
+}

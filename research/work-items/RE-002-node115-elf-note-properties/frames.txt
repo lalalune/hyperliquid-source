@@ -1,0 +1,40 @@
+RE-002 node #115 ELF note-section record
+
+The retained verifier output this file copies (proof 0, command
+python3 -B test-results/slop-workbench/foundation_elf_note_properties.py,
+exit 1 only because the packet files were still missing):
+
+target_path=artifacts/node/115/hl-node
+target_sha256=a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+target_bytes=105896032
+section_count=33
+note_section_count=2
+
+Frames note: this packet claims no .text window, so no FDE/CIE range is
+recorded here. The frames of this question are the two SHT_NOTE sections
+below, identified by section index; their virtual address and file offset
+are equal in both cases as read.
+
+| index | name | type | flags | addr | offset | size | note count |
+| ---: | --- | ---: | --- | --- | --- | ---: | ---: |
+| 2 | .note.ABI-tag | 7 | 0x2 | 0x2fc | 0x2fc | 32 | 1 |
+| 3 | .note.gnu.build-id | 7 | 0x2 | 0x31c | 0x31c | 36 | 1 |
+
+section .note.ABI-tag index=2
+  addr=0x2fc offset=0x2fc size=32 flags=0x2
+  bytes=040000001000000001000000474e550000000000030000000200000000000000
+  note_count=1
+  note name=GNU namesz=4 descsz=16 type=1
+  desc=00000000030000000200000000000000
+section .note.gnu.build-id index=3
+  addr=0x31c offset=0x31c size=36 flags=0x2
+  bytes=040000001400000003000000474e5500ac2880fcda5e49007a8e4fb1ea6aa7dd1b2eae01
+  note_count=1
+  note name=GNU namesz=4 descsz=20 type=3
+  desc=ac2880fcda5e49007a8e4fb1ea6aa7dd1b2eae01
+derived_sections=.note.ABI-tag,.note.gnu.build-id
+build_id=ac2880fcda5e49007a8e4fb1ea6aa7dd1b2eae01
+
+These are observations from the pinned bytes. No section outside the two
+SHT_NOTE sections of the recorded 33-section table is claimed here, and no
+behaviour of the node was executed.
