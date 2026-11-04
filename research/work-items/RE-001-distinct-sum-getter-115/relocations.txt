@@ -1,0 +1,8 @@
+RELA scan (whole file, .rela.dyn file range 0x6be8+0x163cc8, .rela.plt 0x16a8b0+0x1a10):
+rela.dyn: addend hits for the window starts 0x5eeb630, 0x5d8c9b0 and 0x5f91010: none
+rela.plt: addend hits for the same starts: none
+
+In-window rip-relative references: none in any window.
+Stack canary: the distinct sum uses %fs:0x28 (loaded at 0x5f91035, checked at 0x5f9118d, mismatch calls __stack_chk_fail at 0x5f91242); the getter and the stub do not.
+PLT calls in-window: in 0x5f91010, operator delete at 0x5f91136 and 0x5f91183, memset at 0x5f91154, __stack_chk_fail at 0x5f91242. Direct calls in-window: in 0x5eeb630, 0x5d8c9b0 at 0x5eeb63f; the stub has no call (tail jump to 0x5f91010 at 0x5d8c9b8); the distinct sum calls the insert callee 0x5f90bb0 at 0x5f91217 (by contract, not read).
+Whole-file qword scan for all three window starts (8-byte little-endian): no occurrence of any.
