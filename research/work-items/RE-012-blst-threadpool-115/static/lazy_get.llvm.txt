@@ -1,0 +1,126 @@
+
+<authenticated-node115>:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 161a100: 41 57                        	push	r15
+ 161a102: 41 56                        	push	r14
+ 161a104: 53                           	push	rbx
+ 161a105: 48 83 ec 20                  	sub	rsp, 0x20
+ 161a109: 8b 05 89 65 ed 04            	mov	eax, dword ptr [rip + 0x4ed6589] # 0x64f0698
+ 161a10f: 85 c0                        	test	eax, eax
+ 161a111: 0f 85 c6 00 00 00            	jne	0x161a1dd <.text+0x200edd>
+ 161a117: 48 8b 1d 6a 5d ee 04         	mov	rbx, qword ptr [rip + 0x4ee5d6a] # 0x64ffe88
+ 161a11e: b9 01 00 00 00               	mov	ecx, 0x1
+ 161a123: 31 c0                        	xor	eax, eax
+ 161a125: f0                           	lock
+ 161a126: 0f b1 0b                     	cmpxchg	dword ptr [rbx], ecx
+ 161a129: 0f 85 ed 00 00 00            	jne	0x161a21c <.text+0x200f1c>
+ 161a12f: 4c 8b 35 5a 5d ec 04         	mov	r14, qword ptr [rip + 0x4ec5d5a] # 0x64dfe90
+ 161a136: 49 8b 06                     	mov	rax, qword ptr [r14]
+ 161a139: 48 d1 e0                     	shl	rax
+ 161a13c: 48 85 c0                     	test	rax, rax
+ 161a13f: 0f 85 eb 00 00 00            	jne	0x161a230 <.text+0x200f30>
+ 161a145: 31 c0                        	xor	eax, eax
+ 161a147: 0f b6 4b 04                  	movzx	ecx, byte ptr [rbx + 0x4]
+ 161a14b: 84 c9                        	test	cl, cl
+ 161a14d: 0f 85 f7 00 00 00            	jne	0x161a24a <.text+0x200f4a>
+ 161a153: 48 8b 4b 08                  	mov	rcx, qword ptr [rbx + 0x8]
+ 161a157: 48 85 c9                     	test	rcx, rcx
+ 161a15a: 74 60                        	je	0x161a1bc <.text+0x200ebc>
+ 161a15c: 83 f9 01                     	cmp	ecx, 0x1
+ 161a15f: 75 6f                        	jne	0x161a1d0 <.text+0x200ed0>
+ 161a161: 48 8b 53 10                  	mov	rdx, qword ptr [rbx + 0x10]
+ 161a165: f0                           	lock
+ 161a166: 48 ff 82 80 01 00 00         	inc	qword ptr [rdx + 0x180]
+ 161a16d: 7e 5b                        	jle	0x161a1ca <.text+0x200eca>
+ 161a16f: 48 8b 73 18                  	mov	rsi, qword ptr [rbx + 0x18]
+ 161a173: f0                           	lock
+ 161a174: 48 ff 06                     	inc	qword ptr [rsi]
+ 161a177: 0f 8e fb 00 00 00            	jle	0x161a278 <.text+0x200f78>
+ 161a17d: 48 89 0f                     	mov	qword ptr [rdi], rcx
+ 161a180: 48 89 57 08                  	mov	qword ptr [rdi + 0x8], rdx
+ 161a184: 48 89 77 10                  	mov	qword ptr [rdi + 0x10], rsi
+ 161a188: 84 c0                        	test	al, al
+ 161a18a: 75 16                        	jne	0x161a1a2 <.text+0x200ea2>
+ 161a18c: 48 b8 ff ff ff ff ff ff ff 7f	movabs	rax, 0x7fffffffffffffff
+ 161a196: 49 8b 0e                     	mov	rcx, qword ptr [r14]
+ 161a199: 48 85 c1                     	test	rcx, rax
+ 161a19c: 0f 85 fd 00 00 00            	jne	0x161a29f <.text+0x200f9f>
+ 161a1a2: 31 c0                        	xor	eax, eax
+ 161a1a4: 87 03                        	xchg	dword ptr [rbx], eax
+ 161a1a6: 83 f8 02                     	cmp	eax, 0x2
+ 161a1a9: 0f 84 cb 00 00 00            	je	0x161a27a <.text+0x200f7a>
+ 161a1af: 48 89 f8                     	mov	rax, rdi
+ 161a1b2: 48 83 c4 20                  	add	rsp, 0x20
+ 161a1b6: 5b                           	pop	rbx
+ 161a1b7: 41 5e                        	pop	r14
+ 161a1b9: 41 5f                        	pop	r15
+ 161a1bb: c3                           	ret
+ 161a1bc: 48 8b 53 10                  	mov	rdx, qword ptr [rbx + 0x10]
+ 161a1c0: f0                           	lock
+ 161a1c1: 48 ff 82 00 02 00 00         	inc	qword ptr [rdx + 0x200]
+ 161a1c8: 7f a5                        	jg	0x161a16f <.text+0x200e6f>
+ 161a1ca: ff 15 18 61 ec 04            	call	qword ptr [rip + 0x4ec6118] # 0x64e02e8
+ 161a1d0: 48 8b 53 10                  	mov	rdx, qword ptr [rbx + 0x10]
+ 161a1d4: f0                           	lock
+ 161a1d5: 48 ff 42 70                  	inc	qword ptr [rdx + 0x70]
+ 161a1d9: 7f 94                        	jg	0x161a16f <.text+0x200e6f>
+ 161a1db: eb ed                        	jmp	0x161a1ca <.text+0x200eca>
+ 161a1dd: c6 44 24 0f 01               	mov	byte ptr [rsp + 0xf], 0x1
+ 161a1e2: 48 8d 44 24 0f               	lea	rax, [rsp + 0xf]
+ 161a1e7: 48 89 44 24 10               	mov	qword ptr [rsp + 0x10], rax
+ 161a1ec: 48 8d 05 a5 64 ed 04         	lea	rax, [rip + 0x4ed64a5]  # 0x64f0698
+ 161a1f3: 48 8d 0d ce 9c de 04         	lea	rcx, [rip + 0x4de9cce]  # 0x6403ec8
+ 161a1fa: 4c 8d 05 07 9d de 04         	lea	r8, [rip + 0x4de9d07]   # 0x6403f08
+ 161a201: 48 8d 54 24 10               	lea	rdx, [rsp + 0x10]
+ 161a206: 48 89 fb                     	mov	rbx, rdi
+ 161a209: 48 89 c7                     	mov	rdi, rax
+ 161a20c: 31 f6                        	xor	esi, esi
+ 161a20e: ff 15 dc 57 ec 04            	call	qword ptr [rip + 0x4ec57dc] # 0x64df9f0
+ 161a214: 48 89 df                     	mov	rdi, rbx
+ 161a217: e9 fb fe ff ff               	jmp	0x161a117 <.text+0x200e17>
+ 161a21c: 49 89 fe                     	mov	r14, rdi
+ 161a21f: 48 89 df                     	mov	rdi, rbx
+ 161a222: ff 15 80 64 ec 04            	call	qword ptr [rip + 0x4ec6480] # 0x64e06a8
+ 161a228: 4c 89 f7                     	mov	rdi, r14
+ 161a22b: e9 ff fe ff ff               	jmp	0x161a12f <.text+0x200e2f>
+ 161a230: 49 89 ff                     	mov	r15, rdi
+ 161a233: ff 15 77 64 ec 04            	call	qword ptr [rip + 0x4ec6477] # 0x64e06b0
+ 161a239: 4c 89 ff                     	mov	rdi, r15
+ 161a23c: 34 01                        	xor	al, 0x1
+ 161a23e: 0f b6 4b 04                  	movzx	ecx, byte ptr [rbx + 0x4]
+ 161a242: 84 c9                        	test	cl, cl
+ 161a244: 0f 84 09 ff ff ff            	je	0x161a153 <.text+0x200e53>
+ 161a24a: 48 89 5c 24 10               	mov	qword ptr [rsp + 0x10], rbx
+ 161a24f: 88 44 24 18                  	mov	byte ptr [rsp + 0x18], al
+ 161a253: 48 8d 3d 13 0c e5 fe         	lea	rdi, [rip - 0x11af3ed]  # 0x46ae6d
+ 161a25a: 48 8d 0d f7 9c de 04         	lea	rcx, [rip + 0x4de9cf7]  # 0x6403f58
+ 161a261: 4c 8d 05 b8 9c de 04         	lea	r8, [rip + 0x4de9cb8]   # 0x6403f20
+ 161a268: 48 8d 54 24 10               	lea	rdx, [rsp + 0x10]
+ 161a26d: be 2b 00 00 00               	mov	esi, 0x2b
+ 161a272: ff 15 28 54 ec 04            	call	qword ptr [rip + 0x4ec5428] # 0x64df6a0
+ 161a278: 0f 0b                        	ud2
+ 161a27a: 49 89 fe                     	mov	r14, rdi
+ 161a27d: bf ca 00 00 00               	mov	edi, 0xca
+ 161a282: 48 89 de                     	mov	rsi, rbx
+ 161a285: ba 81 00 00 00               	mov	edx, 0x81
+ 161a28a: b9 01 00 00 00               	mov	ecx, 0x1
+ 161a28f: 31 c0                        	xor	eax, eax
+ 161a291: ff 15 21 64 ec 04            	call	qword ptr [rip + 0x4ec6421] # 0x64e06b8
+ 161a297: 4c 89 f7                     	mov	rdi, r14
+ 161a29a: e9 10 ff ff ff               	jmp	0x161a1af <.text+0x200eaf>
+ 161a29f: 49 89 fe                     	mov	r14, rdi
+ 161a2a2: ff 15 08 64 ec 04            	call	qword ptr [rip + 0x4ec6408] # 0x64e06b0
+ 161a2a8: 4c 89 f7                     	mov	rdi, r14
+ 161a2ab: 84 c0                        	test	al, al
+ 161a2ad: 0f 85 ef fe ff ff            	jne	0x161a1a2 <.text+0x200ea2>
+ 161a2b3: c6 43 04 01                  	mov	byte ptr [rbx + 0x4], 0x1
+ 161a2b7: e9 e6 fe ff ff               	jmp	0x161a1a2 <.text+0x200ea2>
+ 161a2bc: 48 89 c3                     	mov	rbx, rax
+ 161a2bf: 48 8d 7c 24 10               	lea	rdi, [rsp + 0x10]
+ 161a2c4: e8 07 01 00 00               	call	0x161a3d0 <.text+0x2010d0>
+ 161a2c9: 48 89 df                     	mov	rdi, rbx
+ 161a2cc: e8 7f 67 dd 04               	call	0x63f0a50 <_Unwind_Resume@plt>
+ 161a2d1: ff 15 e9 51 ec 04            	call	qword ptr [rip + 0x4ec51e9] # 0x64df4c0
