@@ -386,7 +386,9 @@ def _slot_call(data, site, slot, label):
 
 
 def _relocations(data):
-    s = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    s = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    require(s is not None, 'missing.rela.dyn section')
+    require(s['size'] % 24 == 0, 'truncated.rela.dyn section')
     out = {}
     for off in range(s['offset'], s['offset'] + s['size'], 24):
         offset, info, addend = struct.unpack_from('<QQq', data, off)
@@ -396,11 +398,16 @@ def _relocations(data):
 
 
 def _dynsym_name(data, index):
-    ds = next(s for s in sections(data) if s['name'] == '.dynsym')
-    dstr = next(s for s in sections(data) if s['name'] == '.dynstr')
+    ds = next((s for s in sections(data) if s['name'] == '.dynsym'), None)
+    dstr = next((s for s in sections(data) if s['name'] == '.dynstr'), None)
+    require(ds is not None, 'missing.dynsym section')
+    require(dstr is not None, 'missing.dynstr section')
     name_off = struct.unpack_from('<I', data, ds['offset'] + index * 24)[0]
     start = dstr['offset'] + name_off
-    return data[start:data.index(b'\0', start)].decode()
+    try:
+        return data[start:data.index(b'\0', start)].decode()
+    except UnicodeDecodeError:
+        require(False, 'dynamic symbol name is not valid UTF-8')
 
 
 def slot_bindings(data):
@@ -415,6 +422,7 @@ def slot_bindings(data):
     }
     out = {}
     for name, slot in wanted.items():
+        require(slot in rel, f'missing relocation for slot {slot:#x}')
         entry = rel[slot]
         row = {'slot': hex(slot), 'type': entry['type'],
                'addend': hex(entry['addend'])}
@@ -504,7 +512,8 @@ def stack_census(textmap):
 
 
 def direct_call_census(data):
-    sec = next(s for s in sections(data) if s['name'] == '.text')
+    sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    require(sec is not None, 'missing.text section')
     base, raw = sec['address'], data[sec['offset']:sec['offset'] + sec['size']]
     _, fs, _ = fde_extents(data)
     starts = sorted(f['start'] for f in fs)
@@ -540,7 +549,8 @@ def rip_ref_census(data):
     instruction map by the caller.  Absolute imm64 occurrences are
     counted separately.
     """
-    sec = next(s for s in sections(data) if s['name'] == '.text')
+    sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    require(sec is not None, 'missing.text section')
     base, off, size = sec['address'], sec['offset'], sec['size']
     raw = bytes(data[off:off + size])
     tags = (TAG_A, TAG_B, TAG_REC)
