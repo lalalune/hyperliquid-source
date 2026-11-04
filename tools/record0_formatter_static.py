@@ -55,11 +55,15 @@ def read(data,va,n):
 
 
 def relocations(data):
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
-    by_offset={}
-    fmt_hits=[]
-    write_hits=[]
-    for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']]):
+    sec = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    if sec is None:
+        raise ValueError('missing.rela.dyn section')
+    if sec['size'] % 24 != 0:
+        raise ValueError('truncated.rela.dyn section')
+    by_offset = {}
+    fmt_hits = []
+    write_hits = []
+    for a, i, v in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']]):
         by_offset.setdefault(a,[]).append((i,v))
         if v==FORMATTER:
             fmt_hits.append(a)
@@ -80,7 +84,9 @@ def slot_bindings(data):
 
 
 def address_as_data_count(data):
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    sec = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    if sec is None:
+        raise ValueError('missing.rela.dyn section')
     needle=struct.pack('<Q',FORMATTER);count=0;index=data.find(needle)
     while index!=-1:
         if not (sec['offset']<=index<sec['offset']+sec['size']):
@@ -90,7 +96,9 @@ def address_as_data_count(data):
 
 
 def reference_census(data):
-    text=next(s for s in sections(data) if s['name']=='.text')
+    text = next((s for s in sections(data) if s['name'] == '.text'), None)
+    if text is None:
+        raise ValueError('missing.text section')
     body=data[text['offset']:text['offset']+text['size']];base=text['address']
     direct=[]
     for op in (b'\xe8',b'\xe9'):
