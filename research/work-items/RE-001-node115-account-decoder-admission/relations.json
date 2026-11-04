@@ -1,0 +1,223 @@
+{
+  "counterfactuals": [
+    {
+      "byte": 100,
+      "input": [
+        [
+          "c",
+          "0202020202020202020202020202020202020202020202020202020202020202",
+          true
+        ]
+      ],
+      "kind": "map",
+      "mutated": {
+        "events": [
+          "skip unknown value"
+        ],
+        "value": {
+          "balance": "0000000000000000000000000000000000000000000000000000000000000000",
+          "code_hash": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "nonce": 0
+        }
+      },
+      "original": {
+        "events": [
+          "decode code_hash"
+        ],
+        "value": {
+          "balance": "0000000000000000000000000000000000000000000000000000000000000000",
+          "code_hash": "0202020202020202020202020202020202020202020202020202020202020202",
+          "nonce": 0
+        }
+      },
+      "va": "0x3263251"
+    },
+    {
+      "byte": 0,
+      "input": [
+        [
+          "b",
+          "0101010101010101010101010101010101010101010101010101010101010101",
+          true
+        ]
+      ],
+      "kind": "map",
+      "mutated": {
+        "error": "duplicate balance",
+        "events": []
+      },
+      "original": {
+        "events": [
+          "decode balance"
+        ],
+        "value": {
+          "balance": "0101010101010101010101010101010101010101010101010101010101010101",
+          "code_hash": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "nonce": 0
+        }
+      },
+      "va": "0x3262e6c"
+    },
+    {
+      "byte": 196,
+      "input": [],
+      "kind": "map",
+      "mutated": {
+        "events": [],
+        "value": {
+          "balance": "0000000000000000000000000000000000000000000000000000000000000000",
+          "code_hash": "c4d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "nonce": 0
+        }
+      },
+      "original": {
+        "events": [],
+        "value": {
+          "balance": "0000000000000000000000000000000000000000000000000000000000000000",
+          "code_hash": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "nonce": 0
+        }
+      },
+      "va": "0x4585a0"
+    },
+    {
+      "byte": 252,
+      "input": [
+        "0101010101010101010101010101010101010101010101010101010101010101",
+        7,
+        "0202020202020202020202020202020202020202020202020202020202020202",
+        "unread extra"
+      ],
+      "kind": "sequence",
+      "mutated": {
+        "decoded_fields": 3,
+        "value": {
+          "balance": "0101010101010101010101010101010101010101010101010101010101010101",
+          "code_hash": "0202020202020202020202020202020202020202020202020202020202020202",
+          "nonce": 7
+        }
+      },
+      "original": {
+        "decoded_fields": 3,
+        "error": "declared extra element"
+      },
+      "va": "0x3264104"
+    }
+  ],
+  "duplicate_cases": 12,
+  "examples": [
+    {
+      "entries": [],
+      "result": {
+        "events": [],
+        "value": {
+          "balance": "0000000000000000000000000000000000000000000000000000000000000000",
+          "code_hash": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "nonce": 0
+        }
+      }
+    },
+    {
+      "entries": [
+        [
+          "extra",
+          null,
+          true
+        ]
+      ],
+      "result": {
+        "events": [
+          "skip unknown value"
+        ],
+        "value": {
+          "balance": "0000000000000000000000000000000000000000000000000000000000000000",
+          "code_hash": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "nonce": 0
+        }
+      }
+    },
+    {
+      "entries": [
+        [
+          "extra",
+          null,
+          false
+        ]
+      ],
+      "result": {
+        "error": "skip helper failure",
+        "events": [
+          "skip unknown value"
+        ]
+      }
+    },
+    {
+      "entries": [
+        [
+          "b",
+          "0101010101010101010101010101010101010101010101010101010101010101",
+          true
+        ],
+        [
+          "extra",
+          null,
+          true
+        ],
+        [
+          "nonce",
+          7,
+          true
+        ]
+      ],
+      "result": {
+        "events": [
+          "decode balance",
+          "skip unknown value",
+          "decode nonce"
+        ],
+        "value": {
+          "balance": "0101010101010101010101010101010101010101010101010101010101010101",
+          "code_hash": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "nonce": 7
+        }
+      }
+    },
+    {
+      "entries": [
+        [
+          "b",
+          "0101010101010101010101010101010101010101010101010101010101010101",
+          true
+        ],
+        [
+          "balance",
+          null,
+          false
+        ]
+      ],
+      "result": {
+        "error": "duplicate balance",
+        "events": [
+          "decode balance"
+        ]
+      }
+    }
+  ],
+  "limits": "Inputs here are already identified string keys and already decoded field values, with explicit success/failure supplied for opaque value and skip helpers. This is a native-operand admission projection, not a complete MessagePack parser, target execution, emulation, or wire-equivalence test. Fixed map/array control flow and the wrapper absence of a remaining-byte check are established by the retained native bodies. Alternative marker families and accepted balance/hash/nonce value encodings remain unresolved.",
+  "map_order_alias_cases": 48,
+  "native_operands": {
+    "balance_duplicate_value": 1,
+    "balance_long": "balance",
+    "code_hash_long": "code_hash",
+    "default_code_hash": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+    "nonce_long": "nonce",
+    "sequence_limit": 3,
+    "short_keys": [
+      "b",
+      "n",
+      "c"
+    ]
+  },
+  "omission_cases": 8,
+  "sequence_arity_cases": 16
+}
