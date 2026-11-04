@@ -1,0 +1,12 @@
+--- a/src/node115-nonce-text/src/lib.rs
++++ b/src/node115-nonce-text/src/lib.rs
+@@ -130,6 +130,9 @@
+     } else {
+         loop {
+             let value = integer(input, &mut cursor)?;
++            if value > i64::MAX as u64 {
++                return Err(Failure::NotAdmitted);
++            }
+             append(&mut values, value)?;
+             skip_whitespace(input, &mut cursor);
+             match input.get(cursor) {

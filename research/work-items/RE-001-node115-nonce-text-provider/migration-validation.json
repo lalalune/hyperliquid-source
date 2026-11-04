@@ -1,0 +1,449 @@
+{
+  "schema": "node115-nonce-provider-current-migration-v1",
+  "validated_at": "2026-11-04T00:59:07.408673+00:00",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "validation_base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "original_packet_commit": "c9c70e5b551bee5a303677e7afe74ac8be65e7a6",
+  "original_research_base": "d3af75257a396c85d20857f421c370ddb8cb40e5",
+  "reason": "Retired #94 CLI choices and manifest rows changed dependency-file digests, while imported parser functions and #115 identities remained unchanged.",
+  "before": {
+    "argv": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "-B",
+      "research/work-items/RE-001-node115-nonce-text-provider/verify.py",
+      "--gnu",
+      "/opt/homebrew/opt/binutils/bin/objdump",
+      "--llvm",
+      "/Library/Developer/CommandLineTools/usr/bin/llvm-objdump"
+    ],
+    "exit_code": 1,
+    "error": "ValueError: credited dependency changed: tools/elf_index.py",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "raw_stderr_sha256": "cb20703902cc064c8644801c176c41708ff3b1a583c22500f150b13504896b56",
+    "traceback_note": "Local absolute checkout paths are not embedded."
+  },
+  "dependency_changes": [
+    {
+      "path": "tools/elf_index.py",
+      "old_sha256": "d77a002e9b2d3dce86822f6c67169298ad0ea54f5f4cb5c0d244328cbed1774f",
+      "new_sha256": "f142a7c03b0c2aee07d547cf93b0f6ef4b330b43ec61909d9388f340d0cdd70e"
+    },
+    {
+      "path": "tools/fde_extents.py",
+      "old_sha256": "9ce52ed319743ecfbaaafec799f6cef20148e0d46f161091f89b7c58ffdd2345",
+      "new_sha256": "69798abfa12273bf8e3fa0be6e46dcb0a7807f2803287bbaa0916143ae527714"
+    },
+    {
+      "path": "provenance/artifacts.json",
+      "old_sha256": "3aae7a3d901200af3b4ebccd84609035562ce702a3faad7b6e1541f0e8fbc480",
+      "new_sha256": "db95f74aaa8ceb6a1c36d3073d8a3e8073f2cfc9dfb445a4ffb2449e68da4309"
+    }
+  ],
+  "exact_dependency_diffs": {
+    "tools/elf_index.py": "--- d3af75257a396c85d20857f421c370ddb8cb40e5:tools/elf_index.py\n+++ 8fd8db680ec4bfef40996e5616bce3d5156d0b86:tools/elf_index.py\n@@ -148,7 +148,7 @@\n \n def main():\n     p = argparse.ArgumentParser(description=__doc__)\n-    p.add_argument('--release', choices=['94', '115', 'visor'], required=True)\n+    p.add_argument('--release', choices=['115', 'visor'], required=True)\n     p.add_argument('--output-dir', type=Path, default=ROOT / 'work/index')\n     args = p.parse_args()\n     from artifacts import check, manifest_item\n",
+    "tools/fde_extents.py": "--- d3af75257a396c85d20857f421c370ddb8cb40e5:tools/fde_extents.py\n+++ 8fd8db680ec4bfef40996e5616bce3d5156d0b86:tools/fde_extents.py\n@@ -309,7 +309,7 @@\n \n def main():\n     p = argparse.ArgumentParser(description=__doc__)\n-    p.add_argument('--release', choices=['94', '115'], required=True)\n+    p.add_argument('--release', choices=['115'], required=True)\n     p.add_argument('--output-dir', type=Path, default=ROOT / 'work/index')\n     args = p.parse_args()\n     from artifacts import check, manifest_item\n",
+    "provenance/artifacts.json": "--- d3af75257a396c85d20857f421c370ddb8cb40e5:provenance/artifacts.json\n+++ 8fd8db680ec4bfef40996e5616bce3d5156d0b86:provenance/artifacts.json\n@@ -29,18 +29,6 @@\n       \"recovery_url\": null\n     },\n     {\n-      \"path\": \"artifacts/node/94/hl-node\",\n-      \"size\": 91774280,\n-      \"sha256\": \"3b7179cd967d1b13b683e05debfc685ad4c750e918226402d5d575eff1c0459f\",\n-      \"recovery_url\": \"https://media.githubusercontent.com/media/can1357/hl/999556f6e0a474b8312db96ec3149e1c44e97c23/bin/hl-node-mainnet-new\"\n-    },\n-    {\n-      \"path\": \"artifacts/node/94/hl-node.asc\",\n-      \"size\": 228,\n-      \"sha256\": \"4c6a68fc0c6fc88f1059d414855235aa58e61dda742886fd0af5399b31aec376\",\n-      \"recovery_url\": \"https://raw.githubusercontent.com/can1357/hl/999556f6e0a474b8312db96ec3149e1c44e97c23/bin/hl-node-mainnet-new.asc\"\n-    },\n-    {\n       \"path\": \"artifacts/visor/captured/hl-visor\",\n       \"size\": 8305392,\n       \"sha256\": \"89338207c793d80ac2fba75bb0d36c659e2cabc87a94e61a57ba532b8d212e31\",\n"
+  },
+  "fresh_collection": {
+    "argv": [
+      "/opt/homebrew/opt/python@3.14/bin/python3.14",
+      "-B",
+      "research/work-items/RE-001-node115-nonce-text-provider/collect.py",
+      "--out",
+      "work/nonce-text-values-migration/native-fresh",
+      "--gnu",
+      "/opt/homebrew/opt/binutils/bin/objdump",
+      "--llvm",
+      "/Library/Developer/CommandLineTools/usr/bin/llvm-objdump"
+    ],
+    "exit_code": 0,
+    "seconds": 1.133321041000272,
+    "python": "3.14.3 (main, Feb  3 2026, 15:32:20) [Clang 17.0.0 (clang-1700.6.3.2)]",
+    "output": "work/nonce-text-values-migration/native-fresh",
+    "stdout_sha256": "d103f441d07edcd688b25354bf8d64d754778c2679cc7ad4a2b5518ffd445b2e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "fresh_comparison": {
+    "at": "2026-11-04T00:54:22.473956+00:00",
+    "original_file_count": 28,
+    "exact_byte_equal_files": 27,
+    "files": [
+      {
+        "file": "allocation-adapter.gnu.txt",
+        "old_sha256": "ad60abae52d0f15c54591d93c037a160d6db5cb3f7f8e72eba522c4e4dc6849e",
+        "new_sha256": "ad60abae52d0f15c54591d93c037a160d6db5cb3f7f8e72eba522c4e4dc6849e",
+        "byte_equal": true
+      },
+      {
+        "file": "allocation-adapter.llvm.txt.gz",
+        "old_sha256": "aa97fe0d6f7e67994ae9290cf497c60f6cdf6f1daf35a5972928cc8f88463424",
+        "new_sha256": "aa97fe0d6f7e67994ae9290cf497c60f6cdf6f1daf35a5972928cc8f88463424",
+        "byte_equal": true
+      },
+      {
+        "file": "caller.gnu.txt",
+        "old_sha256": "b6fd2c562d0425006677f3da7909b6048461fa323a9f4cff357341a214a2c7c5",
+        "new_sha256": "b6fd2c562d0425006677f3da7909b6048461fa323a9f4cff357341a214a2c7c5",
+        "byte_equal": true
+      },
+      {
+        "file": "caller.llvm.txt.gz",
+        "old_sha256": "521d1e85569a8b65aa290fa59a1164a392c0120e6ca30a3f70551543d1742f47",
+        "new_sha256": "521d1e85569a8b65aa290fa59a1164a392c0120e6ca30a3f70551543d1742f47",
+        "byte_equal": true
+      },
+      {
+        "file": "cfg.tsv",
+        "old_sha256": "1d7803e5d89073ba86472cd7c44a8d90de688dae1e5b230e9eb1fd6f107fec75",
+        "new_sha256": "1d7803e5d89073ba86472cd7c44a8d90de688dae1e5b230e9eb1fd6f107fec75",
+        "byte_equal": true
+      },
+      {
+        "file": "close.gnu.txt",
+        "old_sha256": "ff3f94e0f3ea726e89eede5b68f290b490842433fb0f3805ca50501f9846670e",
+        "new_sha256": "ff3f94e0f3ea726e89eede5b68f290b490842433fb0f3805ca50501f9846670e",
+        "byte_equal": true
+      },
+      {
+        "file": "close.llvm.txt.gz",
+        "old_sha256": "027d17239673be2c76076d8be96a7d31064e59e905f3ac8fe6a6dcd540eebcf9",
+        "new_sha256": "027d17239673be2c76076d8be96a7d31064e59e905f3ac8fe6a6dcd540eebcf9",
+        "byte_equal": true
+      },
+      {
+        "file": "element.gnu.txt",
+        "old_sha256": "2d39a19d8e7a1974081753bf37c94fc09473db12f37afa119c2437c598e47f54",
+        "new_sha256": "2d39a19d8e7a1974081753bf37c94fc09473db12f37afa119c2437c598e47f54",
+        "byte_equal": true
+      },
+      {
+        "file": "element.llvm.txt.gz",
+        "old_sha256": "fc87196e7383382c61918e4416c9c587d31b20e9cee9f3b95959cce1f199c3d4",
+        "new_sha256": "fc87196e7383382c61918e4416c9c587d31b20e9cee9f3b95959cce1f199c3d4",
+        "byte_equal": true
+      },
+      {
+        "file": "error-decoration.gnu.txt",
+        "old_sha256": "f213c7545089fd6deeb49259e6667041a0cdcc594a6fb04553f256a0306c64d5",
+        "new_sha256": "f213c7545089fd6deeb49259e6667041a0cdcc594a6fb04553f256a0306c64d5",
+        "byte_equal": true
+      },
+      {
+        "file": "error-decoration.llvm.txt.gz",
+        "old_sha256": "2242ccdff96646b8daf2d6130bc3d4d08f580a4e5b2c02a757b8ff2ddef2adef",
+        "new_sha256": "2242ccdff96646b8daf2d6130bc3d4d08f580a4e5b2c02a757b8ff2ddef2adef",
+        "byte_equal": true
+      },
+      {
+        "file": "growth.gnu.txt",
+        "old_sha256": "b3a0a0fb4331073b4388e4dfb6a4ec17c49886cf2cc00a17e9f2fa182b20dda8",
+        "new_sha256": "b3a0a0fb4331073b4388e4dfb6a4ec17c49886cf2cc00a17e9f2fa182b20dda8",
+        "byte_equal": true
+      },
+      {
+        "file": "growth.llvm.txt.gz",
+        "old_sha256": "8b58f6c58743dfafedbd6758f090da839743d270ef6b23415fcd0ee4971d9e83",
+        "new_sha256": "8b58f6c58743dfafedbd6758f090da839743d270ef6b23415fcd0ee4971d9e83",
+        "byte_equal": true
+      },
+      {
+        "file": "integer.gnu.txt",
+        "old_sha256": "a5b8f0bf0acd2bd4862c0cec658c9946b521507f58fee28f9d186f5022f5999f",
+        "new_sha256": "a5b8f0bf0acd2bd4862c0cec658c9946b521507f58fee28f9d186f5022f5999f",
+        "byte_equal": true
+      },
+      {
+        "file": "integer.llvm.txt.gz",
+        "old_sha256": "d9c1767094ef8ffbf3ebde027853caaed24e1f0c9943aeb2df0438ada88a0df4",
+        "new_sha256": "d9c1767094ef8ffbf3ebde027853caaed24e1f0c9943aeb2df0438ada88a0df4",
+        "byte_equal": true
+      },
+      {
+        "file": "number-classification.gnu.txt",
+        "old_sha256": "9e5763889e3ef9193e9e165279ad463ab790cd7dd30fb23c1ce748f5f275f35d",
+        "new_sha256": "9e5763889e3ef9193e9e165279ad463ab790cd7dd30fb23c1ce748f5f275f35d",
+        "byte_equal": true
+      },
+      {
+        "file": "number-classification.llvm.txt.gz",
+        "old_sha256": "8ee11b0e3700043873a0703f71605e39353fe7d9b9dc39eafefdf40bee5a2dd6",
+        "new_sha256": "8ee11b0e3700043873a0703f71605e39353fe7d9b9dc39eafefdf40bee5a2dd6",
+        "byte_equal": true
+      },
+      {
+        "file": "ordering-context.gnu.txt",
+        "old_sha256": "72a79db9d847d4fbd8911c7079bfaf9ecab929770d34a48b3e9b555df1260cda",
+        "new_sha256": "72a79db9d847d4fbd8911c7079bfaf9ecab929770d34a48b3e9b555df1260cda",
+        "byte_equal": true
+      },
+      {
+        "file": "ordering-context.llvm.txt.gz",
+        "old_sha256": "329e12ff2202c81d42ba400878a0a06c155dbaf336eed54d4619cb6958d4a773",
+        "new_sha256": "329e12ff2202c81d42ba400878a0a06c155dbaf336eed54d4619cb6958d4a773",
+        "byte_equal": true
+      },
+      {
+        "file": "provider.gnu.txt",
+        "old_sha256": "c300708e70dabe431c3f4056c80949fd129d78738fdc60bf9a4f2d4af80c2997",
+        "new_sha256": "c300708e70dabe431c3f4056c80949fd129d78738fdc60bf9a4f2d4af80c2997",
+        "byte_equal": true
+      },
+      {
+        "file": "provider.llvm.txt.gz",
+        "old_sha256": "4e49f8c67e6c42ad0204fc34a696869fad9d6dabca58f66ed25cd06d20deae1a",
+        "new_sha256": "4e49f8c67e6c42ad0204fc34a696869fad9d6dabca58f66ed25cd06d20deae1a",
+        "byte_equal": true
+      },
+      {
+        "file": "records.json",
+        "old_sha256": "f86c9130c67f7850710ee7fbd209f1bb7d5edbce42511ece2bae77aa5854a1f1",
+        "new_sha256": "0cb2772db8e30e5f86c2b59489f144ba8090fc0d0cf8e6a2e7c689c764611b89",
+        "byte_equal": false
+      },
+      {
+        "file": "reserve.gnu.txt",
+        "old_sha256": "2467556ed5408dbe8a7772e88ec9be0b01e183994ee80d2fb64f1f31034d55c4",
+        "new_sha256": "2467556ed5408dbe8a7772e88ec9be0b01e183994ee80d2fb64f1f31034d55c4",
+        "byte_equal": true
+      },
+      {
+        "file": "reserve.llvm.txt.gz",
+        "old_sha256": "dad6a24584915cebad32560b5286eba10a27127e93f94359995b84aa05d34d34",
+        "new_sha256": "dad6a24584915cebad32560b5286eba10a27127e93f94359995b84aa05d34d34",
+        "byte_equal": true
+      },
+      {
+        "file": "rip-references.tsv",
+        "old_sha256": "06fa939a05c4c141c6667369b07238158a0c26ead2063755284b473f8b3dafa9",
+        "new_sha256": "06fa939a05c4c141c6667369b07238158a0c26ead2063755284b473f8b3dafa9",
+        "byte_equal": true
+      },
+      {
+        "file": "sequence.gnu.txt",
+        "old_sha256": "5c67f538a45fb296bd41a4e80143e388faa8630fa73dc9fd9d85e26b07e8ac01",
+        "new_sha256": "5c67f538a45fb296bd41a4e80143e388faa8630fa73dc9fd9d85e26b07e8ac01",
+        "byte_equal": true
+      },
+      {
+        "file": "sequence.llvm.txt.gz",
+        "old_sha256": "a766b7be31ff49e542879bb600bd7e2e60636212272547b68025752fc6a4a3f9",
+        "new_sha256": "a766b7be31ff49e542879bb600bd7e2e60636212272547b68025752fc6a4a3f9",
+        "byte_equal": true
+      },
+      {
+        "file": "transfers.tsv",
+        "old_sha256": "fdc5f21ae08be10b119b557e1e7731be5105bc85565e9a7e6208aa083b058d9a",
+        "new_sha256": "fdc5f21ae08be10b119b557e1e7731be5105bc85565e9a7e6208aa083b058d9a",
+        "byte_equal": true
+      }
+    ],
+    "complete_structural_differences": [
+      {
+        "path": "/parser_hashes/tools/elf_index.py",
+        "old": "d77a002e9b2d3dce86822f6c67169298ad0ea54f5f4cb5c0d244328cbed1774f",
+        "new": "f142a7c03b0c2aee07d547cf93b0f6ef4b330b43ec61909d9388f340d0cdd70e"
+      },
+      {
+        "path": "/parser_hashes/tools/fde_extents.py",
+        "old": "9ce52ed319743ecfbaaafec799f6cef20148e0d46f161091f89b7c58ffdd2345",
+        "new": "69798abfa12273bf8e3fa0be6e46dcb0a7807f2803287bbaa0916143ae527714"
+      }
+    ],
+    "declared_two_hash_text_replacement_equals_entire_new_record": true,
+    "target_or_instruction_normalization": false,
+    "all_other_record_bytes_preserved": true,
+    "raw_source_outputs_unchanged": true
+  },
+  "python": "3.14.3 (main, Feb  3 2026, 15:32:20) [Clang 17.0.0 (clang-1700.6.3.2)]",
+  "validation": [
+    {
+      "mode": "normal",
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "research/work-items/RE-001-node115-nonce-text-provider/verify.py",
+        "--gnu",
+        "/opt/homebrew/opt/binutils/bin/objdump",
+        "--llvm",
+        "/Library/Developer/CommandLineTools/usr/bin/llvm-objdump"
+      ],
+      "exit_code": 0,
+      "seconds": 7.325601624999763,
+      "stdout_sha256": "fa3f49722c430e902360a5cbc8b0cc2b563066e865f882044d9ea5163df42b58",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "{\n  \"target_sha256\": \"a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301\",\n  \"full_FDE_ranges\": 12,\n  \"compared_bytes\": 4917,\n  \"normalized_instruction_rows\": 1273,\n  \"fresh_regenerations_equal_retained\": 2,\n  \"negative_controls\": [\n    {\n      \"control\": \"anchor/provider-context\",\n      \"rejection\": \"anchor provider-context\"\n    },\n    {\n      \"control\": \"anchor/provider-whitespace\",\n      \"rejection\": \"anchor provider-whitespace\"\n    },\n    {\n      \"control\": \"anchor/provider-opening\",\n      \"rejection\": \"anchor provider-opening\"\n    },\n    {\n      \"control\": \"anchor/provider-initialize\",\n      \"rejection\": \"anchor provider-initialize\"\n    },\n    {\n      \"control\": \"anchor/provider-append\",\n      \"rejection\": \"anchor provider-append\"\n    },\n    {\n      \"control\": \"anchor/provider-next-element\",\n      \"rejection\": \"anchor provider-next-element\"\n    },\n    {\n      \"control\": \"anchor/provider-error-cleanup\",\n      \"rejection\": \"anchor provider-error-cleanup\"\n    },\n    {\n      \"control\": \"anchor/provider-depth-close\",\n      \"rejection\": \"anchor provider-depth-close\"\n    },\n    {\n      \"control\": \"anchor/provider-success\",\n      \"rejection\": \"anchor provider-success\"\n    },\n    {\n      \"control\": \"anchor/provider-first-error\",\n      \"rejection\": \"anchor provider-first-error\"\n    },\n    {\n      \"control\": \"anchor/provider-close-error\",\n      \"rejection\": \"anchor provider-close-error\"\n    },\n    {\n      \"control\": \"anchor/provider-depth-one\",\n      \"rejection\": \"anchor provider-depth-one\"\n    },\n    {\n      \"control\": \"anchor/sequence-close-first\",\n      \"rejection\": \"anchor sequence-close-first\"\n    },\n    {\n      \"control\": \"anchor/sequence-comma\",\n      \"rejection\": \"anchor sequence-comma\"\n    },\n    {\n      \"control\": \"anchor/sequence-post-comma\",\n      \"rejection\": \"anchor sequence-post-comma\"\n    },\n    {\n      \"control\": \"anchor/sequence-errors\",\n      \"rejection\": \"anchor sequence-errors\"\n    },\n    {\n      \"control\": \"anchor/element-minus\",\n      \"rejection\": \"anchor element-minus\"\n    },\n    {\n      \"control\": \"anchor/element-digit\",\n      \"rejection\": \"anchor element-digit\"\n    },\n    {\n      \"control\": \"anchor/element-tag-sign\",\n      \"rejection\": \"anchor element-tag-sign\"\n    },\n    {\n      \"control\": \"anchor/element-noninteger\",\n      \"rejection\": \"anchor element-noninteger\"\n    },\n    {\n      \"control\": \"anchor/element-negative\",\n      \"rejection\": \"anchor element-negative\"\n    },\n    {\n      \"control\": \"anchor/integer-initial-read\",\n      \"rejection\": \"anchor integer-initial-read\"\n    },\n    {\n      \"control\": \"anchor/integer-leading-zero\",\n      \"rejection\": \"anchor integer-leading-zero\"\n    },\n    {\n      \"control\": \"anchor/integer-first-digit\",\n      \"rejection\": \"anchor integer-first-digit\"\n    },\n    {\n      \"control\": \"anchor/integer-accumulate\",\n      \"rejection\": \"anchor integer-accumulate\"\n    },\n    {\n      \"control\": \"anchor/integer-overflow-bound\",\n      \"rejection\": \"anchor integer-overflow-bound\"\n    },\n    {\n      \"control\": \"anchor/integer-overflow-envelope\",\n      \"rejection\": \"anchor integer-overflow-envelope\"\n    },\n    {\n      \"control\": \"anchor/integer-finalize\",\n      \"rejection\": \"anchor integer-finalize\"\n    },\n    {\n      \"control\": \"anchor/integer-overflow-float\",\n      \"rejection\": \"anchor integer-overflow-float\"\n    },\n    {\n      \"control\": \"anchor/number-suffix\",\n      \"rejection\": \"anchor number-suffix\"\n    },\n    {\n      \"control\": \"anchor/number-exponent-envelope\",\n      \"rejection\": \"anchor number-exponent-envelope\"\n    },\n    {\n      \"control\": \"anchor/number-sign-result\",\n      \"rejection\": \"anchor number-sign-result\"\n    },\n    {\n      \"control\": \"anchor/number-negative-float-result\",\n      \"rejection\": \"anchor number-negative-float-result\"\n    },\n    {\n      \"control\": \"anchor/number-negative-integer-tag\",\n      \"rejection\": \"anchor number-negative-integer-tag\"\n    },\n    {\n      \"control\": \"anchor/number-fraction-exponent-envelope\",\n      \"rejection\": \"anchor number-fraction-exponent-envelope\"\n    },\n    {\n      \"control\": \"anchor/number-float-local-result\",\n      \"rejection\": \"anchor number-float-local-result\"\n    },\n    {\n      \"control\": \"anchor/number-error-envelope\",\n      \"rejection\": \"anchor number-error-envelope\"\n    },\n    {\n      \"control\": \"anchor/number-shared-result\",\n      \"rejection\": \"anchor number-shared-result\"\n    },\n    {\n      \"control\": \"anchor/number-fraction-overflow-envelope\",\n      \"rejection\": \"anchor number-fraction-overflow-envelope\"\n    },\n    {\n      \"control\": \"anchor/number-float-overflow-error\",\n      \"rejection\": \"anchor number-float-overflow-error\"\n    },\n    {\n      \"control\": \"anchor/close-comma\",\n      \"rejection\": \"anchor close-comma\"\n    },\n    {\n      \"control\": \"anchor/close-success\",\n      \"rejection\": \"anchor close-success\"\n    },\n    {\n      \"control\": \"anchor/close-errors\",\n      \"rejection\": \"anchor close-errors\"\n    },\n    {\n      \"control\": \"anchor/growth-load-call\",\n      \"rejection\": \"anchor growth-load-call\"\n    },\n    {\n      \"control\": \"anchor/growth-no-move\",\n      \"rejection\": \"anchor growth-no-move\"\n    },\n    {\n      \"control\": \"anchor/growth-other-head-store\",\n      \"rejection\": \"anchor growth-other-head-store\"\n    },\n    {\n      \"control\": \"anchor/reserve-capacity\",\n      \"rejection\": \"anchor reserve-capacity\"\n    },\n    {\n      \"control\": \"anchor/reserve-arguments\",\n      \"rejection\": \"anchor reserve-arguments\"\n    },\n    {\n      \"control\": \"anchor/reserve-status-stores\",\n      \"rejection\": \"anchor reserve-status-stores\"\n    },\n    {\n      \"control\": \"anchor/reserve-failure\",\n      \"rejection\": \"anchor reserve-failure\"\n    },\n    {\n      \"control\": \"anchor/allocation-size-bound\",\n      \"rejection\": \"anchor allocation-size-bound\"\n    },\n    {\n      \"control\": \"anchor/allocation-selected-imports\",\n      \"rejection\": \"anchor allocation-selected-imports\"\n    },\n    {\n      \"control\": \"anchor/allocation-zero-old\",\n      \"rejection\": \"anchor allocation-zero-old\"\n    },\n    {\n      \"control\": \"anchor/allocation-result\",\n      \"rejection\": \"anchor allocation-result\"\n    },\n    {\n      \"control\": \"anchor/ordering-provider\",\n      \"rejection\": \"anchor ordering-provider\"\n    },\n    {\n      \"control\": \"anchor/ordering-error\",\n      \"rejection\": \"anchor ordering-error\"\n    },\n    {\n      \"control\": \"anchor/ordering-result\",\n      \"rejection\": \"anchor ordering-result\"\n    },\n    {\n      \"control\": \"anchor/ordering-first-JB\",\n      \"rejection\": \"anchor ordering-first-JB\"\n    },\n    {\n      \"control\": \"anchor/ordering-second-JB\",\n      \"rejection\": \"anchor ordering-second-JB\"\n    },\n    {\n      \"control\": \"anchor/ordering-failure\",\n      \"rejection\": \"anchor ordering-failure\"\n    },\n    {\n      \"control\": \"anchor/caller-iterator-result\",\n      \"rejection\": \"anchor caller-iterator-result\"\n    },\n    {\n      \"control\": \"anchor/caller-depth\",\n      \"rejection\": \"anchor caller-depth\"\n    },\n    {\n      \"control\": \"anchor/caller-first-field\",\n      \"rejection\": \"anchor caller-first-field\"\n    },\n    {\n      \"control\": \"anchor/caller-error-save\",\n      \"rejection\": \"anchor caller-error-save\"\n    },\n    {\n      \"control\": \"anchor/caller-depth-close\",\n      \"rejection\": \"anchor caller-depth-close\"\n    },\n    {\n      \"control\": \"anchor/caller-success-output\",\n      \"rejection\": \"anchor caller-success-output\"\n    },\n    {\n      \"control\": \"anchor/caller-second-item\",\n      \"rejection\": \"anchor caller-second-item\"\n    },\n    {\n      \"control\": \"anchor/caller-ring-save\",\n      \"rejection\": \"anchor caller-ring-save\"\n    },\n    {\n      \"control\": \"anchor/caller-prefix-ring-layout\",\n      \"rejection\": \"anchor caller-prefix-ring-layout\"\n    },\n    {\n      \"control\": \"anchor/caller-first-error\",\n      \"rejection\": \"anchor caller-first-error\"\n    },\n    {\n      \"control\": \"anchor/caller-close-error\",\n      \"rejection\": \"anchor caller-close-error\"\n    },\n    {\n      \"control\": \"anchor/caller-sentinels\",\n      \"rejection\": \"anchor caller-sentinels\"\n    },\n    {\n      \"control\": \"anchor/caller-missing-elements\",\n      \"rejection\": \"anchor caller-missing-elements\"\n    },\n    {\n      \"control\": \"anchor/caller-depth-one\",\n      \"rejection\": \"anchor caller-depth-one\"\n    },\n    {\n      \"control\": \"anchor/decoration-field-test\",\n      \"rejection\": \"anchor decoration-field-test\"\n    },\n    {\n      \"control\": \"literal/ordering-source-location\",\n      \"rejection\": \"literal ordering-source-location\"\n    },\n    {\n      \"control\": \"literal/ordering-source-path\",\n      \"rejection\": \"literal ordering-source-path\"\n    },\n    {\n      \"control\": \"literal/ordering-diagnostic-prefix\",\n      \"rejection\": \"literal ordering-diagnostic-prefix\"\n    },\n    {\n      \"control\": \"relocation/0x6483ff8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x6483ff8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x6483ff8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df480\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df480\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df480\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df498\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df498\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df498\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df4a0\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df4a0\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df4a0\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df520\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df520\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df520\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df580\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df580\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df580\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df588\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df588\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df588\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df590\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df590\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df590\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df6b8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df6b8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df6b8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df848\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df848\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df848\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64e0900\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64e0900\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64e0900\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64e0910\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64e0910\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64e0910\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64e1330\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64e1330\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64e1330\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64e1338\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64e1338\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64e1338\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64e1340\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64e1340\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64e1340\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64e2620\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64e2620\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64e2620\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64ea7b8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64ea7b8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64ea7b8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"FDE-range/provider\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/sequence\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/element\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/integer\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/number-classification\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/close\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/growth\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/reserve\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/allocation-adapter\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/ordering-context\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/caller\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/error-decoration\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"unwind-header-encoding\",\n      \"rejection\": \"unsupported unwind index encoding\"\n    },\n    {\n      \"control\": \"unwind-index-link\",\n      \"rejection\": \"FDE/index disagreement\"\n    },\n    {\n      \"control\": \"LSDA-callsite/provider\",\n      \"rejection\": \"LSDA retained facts differ\"\n    },\n    {\n      \"control\": \"LSDA-callsite/ordering-context\",\n      \"rejection\": \"LSDA retained facts differ\"\n    },\n    {\n      \"control\": \"LSDA-callsite/caller\",\n      \"rejection\": \"LSDA retained facts differ\"\n    },\n    {\n      \"control\": \"LSDA-callsite/error-decoration\",\n      \"rejection\": \"LSDA retained facts differ\"\n    },\n    {\n      \"control\": \"native-missing-first-row\",\n      \"rejection\": \"non-contiguous native decode\"\n    },\n    {\n      \"control\": \"native-wrong-byte\",\n      \"rejection\": \"native bytes disagree with target\"\n    },\n    {\n      \"control\": \"native-dangling-lock\",\n      \"rejection\": \"dangling LOCK prefix\"\n    },\n    {\n      \"control\": \"native-versus-unselected-target-byte\",\n      \"rejection\": \"native bytes disagree with target\"\n    },\n    {\n      \"control\": \"operative/opening-byte\",\n      \"rejection\": \"anchor provider-opening\"\n    },\n    {\n      \"control\": \"operative/closing-byte\",\n      \"rejection\": \"anchor sequence-close-first\"\n    },\n    {\n      \"control\": \"operative/comma-byte\",\n      \"rejection\": \"anchor sequence-comma\"\n    },\n    {\n      \"control\": \"operative/depth-increment-for-decrement\",\n      \"rejection\": \"anchor provider-opening\"\n    },\n    {\n      \"control\": \"operative/accepted-tag-one-to-zero\",\n      \"rejection\": \"anchor element-tag-sign\"\n    },\n    {\n      \"control\": \"operative/accepted-tag-two-to-three\",\n      \"rejection\": \"anchor element-tag-sign\"\n    },\n    {\n      \"control\": \"operative/decimal-threshold\",\n      \"rejection\": \"anchor integer-first-digit\"\n    },\n    {\n      \"control\": \"operative/decimal-last-digit-six\",\n      \"rejection\": \"anchor integer-overflow-bound\"\n    },\n    {\n      \"control\": \"operative/growth-minimum-three\",\n      \"rejection\": \"anchor reserve-capacity\"\n    },\n    {\n      \"control\": \"operative/element-width-four\",\n      \"rejection\": \"anchor reserve-arguments\"\n    },\n    {\n      \"control\": \"operative/alignment-four\",\n      \"rejection\": \"anchor reserve-arguments\"\n    },\n    {\n      \"control\": \"operative/allocation-range-high-bit\",\n      \"rejection\": \"anchor allocation-size-bound\"\n    },\n    {\n      \"control\": \"operative/negative-integer-tag-one\",\n      \"rejection\": \"anchor number-negative-integer-tag\"\n    },\n    {\n      \"control\": \"operative/ordering-first-JBE\",\n      \"rejection\": \"anchor ordering-first-JB\"\n    },\n    {\n      \"control\": \"operative/ordering-second-JL\",\n      \"rejection\": \"anchor ordering-second-JB\"\n    },\n    {\n      \"control\": \"wrong-digest-before-output\",\n      \"rejection\": \"wrong target digest\"\n    },\n    {\n      \"control\": \"existing-output-preserved\",\n      \"rejection\": \"existing output refused\"\n    }\n  ],\n  \"negative_control_count\": 168,\n  \"operative_native_controls\": [\n    {\n      \"control\": \"opening-byte\",\n      \"address\": \"0x1e29fd1\",\n      \"field\": \"opening_byte\",\n      \"before\": 91,\n      \"after\": 123,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"closing-byte\",\n      \"address\": \"0x1dbe780\",\n      \"field\": \"closing_byte\",\n      \"before\": 93,\n      \"after\": 125,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"comma-byte\",\n      \"address\": \"0x1dbe79c\",\n      \"field\": \"comma_byte\",\n      \"before\": 44,\n      \"after\": 59,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"depth-increment-for-decrement\",\n      \"address\": \"0x1e29fed\",\n      \"field\": \"depth_decrement_opcode\",\n      \"before\": 51710,\n      \"after\": 49662,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"accepted-tag-one-to-zero\",\n      \"address\": \"0x1d773c4\",\n      \"field\": \"accepted_first_tag\",\n      \"before\": 1,\n      \"after\": 0,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"accepted-tag-two-to-three\",\n      \"address\": \"0x1d773c9\",\n      \"field\": \"accepted_second_tag\",\n      \"before\": 2,\n      \"after\": 3,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"decimal-threshold\",\n      \"address\": \"0x1d763f4\",\n      \"field\": \"decimal_safe_quotient_minus_one\",\n      \"before\": 1844674407370955160,\n      \"after\": 1844674407370955161,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"decimal-last-digit-six\",\n      \"address\": \"0x1d76462\",\n      \"field\": \"decimal_last_digit_bound\",\n      \"before\": 5,\n      \"after\": 6,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"growth-minimum-three\",\n      \"address\": \"0x43bbce7\",\n      \"field\": \"growth_minimum\",\n      \"before\": 4,\n      \"after\": 3,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"element-width-four\",\n      \"address\": \"0x43bbcfe\",\n      \"field\": \"element_width\",\n      \"before\": 8,\n      \"after\": 4,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"alignment-four\",\n      \"address\": \"0x43bbcf8\",\n      \"field\": \"element_alignment\",\n      \"before\": 8,\n      \"after\": 4,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"allocation-range-high-bit\",\n      \"address\": \"0x43bd576\",\n      \"field\": \"allocation_half_range\",\n      \"before\": 9223372036854775808,\n      \"after\": 4611686018427387904,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"negative-integer-tag-one\",\n      \"address\": \"0x1d76009\",\n      \"field\": \"negative_integer_output_tag\",\n      \"before\": 2,\n      \"after\": 1,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"ordering-first-JBE\",\n      \"address\": \"0x2923e80\",\n      \"field\": \"ordering_first_condition\",\n      \"before\": 114,\n      \"after\": 118,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"ordering-second-JL\",\n      \"address\": \"0x2923ea2\",\n      \"field\": \"ordering_second_condition\",\n      \"before\": 114,\n      \"after\": 124,\n      \"native_partition_agreement\": true\n    }\n  ],\n  \"positive_sensitivity\": \"A mutated unselected provider byte passes anchor/table/relocation checks but fails full native byte comparison.\",\n  \"scope\": \"Static parsing and native disassembly only; no captured execution, instruction interpreter, ABI equivalence, timing or liveness test.\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "mode": "optimized",
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "-B",
+        "-O",
+        "research/work-items/RE-001-node115-nonce-text-provider/verify.py",
+        "--gnu",
+        "/opt/homebrew/opt/binutils/bin/objdump",
+        "--llvm",
+        "/Library/Developer/CommandLineTools/usr/bin/llvm-objdump"
+      ],
+      "exit_code": 0,
+      "seconds": 6.791935249999369,
+      "stdout_sha256": "fa3f49722c430e902360a5cbc8b0cc2b563066e865f882044d9ea5163df42b58",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "{\n  \"target_sha256\": \"a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301\",\n  \"full_FDE_ranges\": 12,\n  \"compared_bytes\": 4917,\n  \"normalized_instruction_rows\": 1273,\n  \"fresh_regenerations_equal_retained\": 2,\n  \"negative_controls\": [\n    {\n      \"control\": \"anchor/provider-context\",\n      \"rejection\": \"anchor provider-context\"\n    },\n    {\n      \"control\": \"anchor/provider-whitespace\",\n      \"rejection\": \"anchor provider-whitespace\"\n    },\n    {\n      \"control\": \"anchor/provider-opening\",\n      \"rejection\": \"anchor provider-opening\"\n    },\n    {\n      \"control\": \"anchor/provider-initialize\",\n      \"rejection\": \"anchor provider-initialize\"\n    },\n    {\n      \"control\": \"anchor/provider-append\",\n      \"rejection\": \"anchor provider-append\"\n    },\n    {\n      \"control\": \"anchor/provider-next-element\",\n      \"rejection\": \"anchor provider-next-element\"\n    },\n    {\n      \"control\": \"anchor/provider-error-cleanup\",\n      \"rejection\": \"anchor provider-error-cleanup\"\n    },\n    {\n      \"control\": \"anchor/provider-depth-close\",\n      \"rejection\": \"anchor provider-depth-close\"\n    },\n    {\n      \"control\": \"anchor/provider-success\",\n      \"rejection\": \"anchor provider-success\"\n    },\n    {\n      \"control\": \"anchor/provider-first-error\",\n      \"rejection\": \"anchor provider-first-error\"\n    },\n    {\n      \"control\": \"anchor/provider-close-error\",\n      \"rejection\": \"anchor provider-close-error\"\n    },\n    {\n      \"control\": \"anchor/provider-depth-one\",\n      \"rejection\": \"anchor provider-depth-one\"\n    },\n    {\n      \"control\": \"anchor/sequence-close-first\",\n      \"rejection\": \"anchor sequence-close-first\"\n    },\n    {\n      \"control\": \"anchor/sequence-comma\",\n      \"rejection\": \"anchor sequence-comma\"\n    },\n    {\n      \"control\": \"anchor/sequence-post-comma\",\n      \"rejection\": \"anchor sequence-post-comma\"\n    },\n    {\n      \"control\": \"anchor/sequence-errors\",\n      \"rejection\": \"anchor sequence-errors\"\n    },\n    {\n      \"control\": \"anchor/element-minus\",\n      \"rejection\": \"anchor element-minus\"\n    },\n    {\n      \"control\": \"anchor/element-digit\",\n      \"rejection\": \"anchor element-digit\"\n    },\n    {\n      \"control\": \"anchor/element-tag-sign\",\n      \"rejection\": \"anchor element-tag-sign\"\n    },\n    {\n      \"control\": \"anchor/element-noninteger\",\n      \"rejection\": \"anchor element-noninteger\"\n    },\n    {\n      \"control\": \"anchor/element-negative\",\n      \"rejection\": \"anchor element-negative\"\n    },\n    {\n      \"control\": \"anchor/integer-initial-read\",\n      \"rejection\": \"anchor integer-initial-read\"\n    },\n    {\n      \"control\": \"anchor/integer-leading-zero\",\n      \"rejection\": \"anchor integer-leading-zero\"\n    },\n    {\n      \"control\": \"anchor/integer-first-digit\",\n      \"rejection\": \"anchor integer-first-digit\"\n    },\n    {\n      \"control\": \"anchor/integer-accumulate\",\n      \"rejection\": \"anchor integer-accumulate\"\n    },\n    {\n      \"control\": \"anchor/integer-overflow-bound\",\n      \"rejection\": \"anchor integer-overflow-bound\"\n    },\n    {\n      \"control\": \"anchor/integer-overflow-envelope\",\n      \"rejection\": \"anchor integer-overflow-envelope\"\n    },\n    {\n      \"control\": \"anchor/integer-finalize\",\n      \"rejection\": \"anchor integer-finalize\"\n    },\n    {\n      \"control\": \"anchor/integer-overflow-float\",\n      \"rejection\": \"anchor integer-overflow-float\"\n    },\n    {\n      \"control\": \"anchor/number-suffix\",\n      \"rejection\": \"anchor number-suffix\"\n    },\n    {\n      \"control\": \"anchor/number-exponent-envelope\",\n      \"rejection\": \"anchor number-exponent-envelope\"\n    },\n    {\n      \"control\": \"anchor/number-sign-result\",\n      \"rejection\": \"anchor number-sign-result\"\n    },\n    {\n      \"control\": \"anchor/number-negative-float-result\",\n      \"rejection\": \"anchor number-negative-float-result\"\n    },\n    {\n      \"control\": \"anchor/number-negative-integer-tag\",\n      \"rejection\": \"anchor number-negative-integer-tag\"\n    },\n    {\n      \"control\": \"anchor/number-fraction-exponent-envelope\",\n      \"rejection\": \"anchor number-fraction-exponent-envelope\"\n    },\n    {\n      \"control\": \"anchor/number-float-local-result\",\n      \"rejection\": \"anchor number-float-local-result\"\n    },\n    {\n      \"control\": \"anchor/number-error-envelope\",\n      \"rejection\": \"anchor number-error-envelope\"\n    },\n    {\n      \"control\": \"anchor/number-shared-result\",\n      \"rejection\": \"anchor number-shared-result\"\n    },\n    {\n      \"control\": \"anchor/number-fraction-overflow-envelope\",\n      \"rejection\": \"anchor number-fraction-overflow-envelope\"\n    },\n    {\n      \"control\": \"anchor/number-float-overflow-error\",\n      \"rejection\": \"anchor number-float-overflow-error\"\n    },\n    {\n      \"control\": \"anchor/close-comma\",\n      \"rejection\": \"anchor close-comma\"\n    },\n    {\n      \"control\": \"anchor/close-success\",\n      \"rejection\": \"anchor close-success\"\n    },\n    {\n      \"control\": \"anchor/close-errors\",\n      \"rejection\": \"anchor close-errors\"\n    },\n    {\n      \"control\": \"anchor/growth-load-call\",\n      \"rejection\": \"anchor growth-load-call\"\n    },\n    {\n      \"control\": \"anchor/growth-no-move\",\n      \"rejection\": \"anchor growth-no-move\"\n    },\n    {\n      \"control\": \"anchor/growth-other-head-store\",\n      \"rejection\": \"anchor growth-other-head-store\"\n    },\n    {\n      \"control\": \"anchor/reserve-capacity\",\n      \"rejection\": \"anchor reserve-capacity\"\n    },\n    {\n      \"control\": \"anchor/reserve-arguments\",\n      \"rejection\": \"anchor reserve-arguments\"\n    },\n    {\n      \"control\": \"anchor/reserve-status-stores\",\n      \"rejection\": \"anchor reserve-status-stores\"\n    },\n    {\n      \"control\": \"anchor/reserve-failure\",\n      \"rejection\": \"anchor reserve-failure\"\n    },\n    {\n      \"control\": \"anchor/allocation-size-bound\",\n      \"rejection\": \"anchor allocation-size-bound\"\n    },\n    {\n      \"control\": \"anchor/allocation-selected-imports\",\n      \"rejection\": \"anchor allocation-selected-imports\"\n    },\n    {\n      \"control\": \"anchor/allocation-zero-old\",\n      \"rejection\": \"anchor allocation-zero-old\"\n    },\n    {\n      \"control\": \"anchor/allocation-result\",\n      \"rejection\": \"anchor allocation-result\"\n    },\n    {\n      \"control\": \"anchor/ordering-provider\",\n      \"rejection\": \"anchor ordering-provider\"\n    },\n    {\n      \"control\": \"anchor/ordering-error\",\n      \"rejection\": \"anchor ordering-error\"\n    },\n    {\n      \"control\": \"anchor/ordering-result\",\n      \"rejection\": \"anchor ordering-result\"\n    },\n    {\n      \"control\": \"anchor/ordering-first-JB\",\n      \"rejection\": \"anchor ordering-first-JB\"\n    },\n    {\n      \"control\": \"anchor/ordering-second-JB\",\n      \"rejection\": \"anchor ordering-second-JB\"\n    },\n    {\n      \"control\": \"anchor/ordering-failure\",\n      \"rejection\": \"anchor ordering-failure\"\n    },\n    {\n      \"control\": \"anchor/caller-iterator-result\",\n      \"rejection\": \"anchor caller-iterator-result\"\n    },\n    {\n      \"control\": \"anchor/caller-depth\",\n      \"rejection\": \"anchor caller-depth\"\n    },\n    {\n      \"control\": \"anchor/caller-first-field\",\n      \"rejection\": \"anchor caller-first-field\"\n    },\n    {\n      \"control\": \"anchor/caller-error-save\",\n      \"rejection\": \"anchor caller-error-save\"\n    },\n    {\n      \"control\": \"anchor/caller-depth-close\",\n      \"rejection\": \"anchor caller-depth-close\"\n    },\n    {\n      \"control\": \"anchor/caller-success-output\",\n      \"rejection\": \"anchor caller-success-output\"\n    },\n    {\n      \"control\": \"anchor/caller-second-item\",\n      \"rejection\": \"anchor caller-second-item\"\n    },\n    {\n      \"control\": \"anchor/caller-ring-save\",\n      \"rejection\": \"anchor caller-ring-save\"\n    },\n    {\n      \"control\": \"anchor/caller-prefix-ring-layout\",\n      \"rejection\": \"anchor caller-prefix-ring-layout\"\n    },\n    {\n      \"control\": \"anchor/caller-first-error\",\n      \"rejection\": \"anchor caller-first-error\"\n    },\n    {\n      \"control\": \"anchor/caller-close-error\",\n      \"rejection\": \"anchor caller-close-error\"\n    },\n    {\n      \"control\": \"anchor/caller-sentinels\",\n      \"rejection\": \"anchor caller-sentinels\"\n    },\n    {\n      \"control\": \"anchor/caller-missing-elements\",\n      \"rejection\": \"anchor caller-missing-elements\"\n    },\n    {\n      \"control\": \"anchor/caller-depth-one\",\n      \"rejection\": \"anchor caller-depth-one\"\n    },\n    {\n      \"control\": \"anchor/decoration-field-test\",\n      \"rejection\": \"anchor decoration-field-test\"\n    },\n    {\n      \"control\": \"literal/ordering-source-location\",\n      \"rejection\": \"literal ordering-source-location\"\n    },\n    {\n      \"control\": \"literal/ordering-source-path\",\n      \"rejection\": \"literal ordering-source-path\"\n    },\n    {\n      \"control\": \"literal/ordering-diagnostic-prefix\",\n      \"rejection\": \"literal ordering-diagnostic-prefix\"\n    },\n    {\n      \"control\": \"relocation/0x6483ff8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x6483ff8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x6483ff8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df480\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df480\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df480\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df498\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df498\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df498\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df4a0\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df4a0\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df4a0\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df520\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df520\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df520\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df580\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df580\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df580\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df588\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df588\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df588\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df590\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df590\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df590\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df6b8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df6b8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df6b8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64df848\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64df848\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64df848\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64e0900\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64e0900\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64e0900\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64e0910\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64e0910\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64e0910\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64e1330\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64e1330\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64e1330\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64e1338\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64e1338\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64e1338\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64e1340\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64e1340\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64e1340\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64e2620\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64e2620\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64e2620\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation/0x64ea7b8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-kind/0x64ea7b8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"relocation-symbol-index/0x64ea7b8\",\n      \"rejection\": \"selected relocation binding\"\n    },\n    {\n      \"control\": \"FDE-range/provider\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/sequence\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/element\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/integer\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/number-classification\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/close\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/growth\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/reserve\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/allocation-adapter\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/ordering-context\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/caller\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"FDE-range/error-decoration\",\n      \"rejection\": \"FDE extent\"\n    },\n    {\n      \"control\": \"unwind-header-encoding\",\n      \"rejection\": \"unsupported unwind index encoding\"\n    },\n    {\n      \"control\": \"unwind-index-link\",\n      \"rejection\": \"FDE/index disagreement\"\n    },\n    {\n      \"control\": \"LSDA-callsite/provider\",\n      \"rejection\": \"LSDA retained facts differ\"\n    },\n    {\n      \"control\": \"LSDA-callsite/ordering-context\",\n      \"rejection\": \"LSDA retained facts differ\"\n    },\n    {\n      \"control\": \"LSDA-callsite/caller\",\n      \"rejection\": \"LSDA retained facts differ\"\n    },\n    {\n      \"control\": \"LSDA-callsite/error-decoration\",\n      \"rejection\": \"LSDA retained facts differ\"\n    },\n    {\n      \"control\": \"native-missing-first-row\",\n      \"rejection\": \"non-contiguous native decode\"\n    },\n    {\n      \"control\": \"native-wrong-byte\",\n      \"rejection\": \"native bytes disagree with target\"\n    },\n    {\n      \"control\": \"native-dangling-lock\",\n      \"rejection\": \"dangling LOCK prefix\"\n    },\n    {\n      \"control\": \"native-versus-unselected-target-byte\",\n      \"rejection\": \"native bytes disagree with target\"\n    },\n    {\n      \"control\": \"operative/opening-byte\",\n      \"rejection\": \"anchor provider-opening\"\n    },\n    {\n      \"control\": \"operative/closing-byte\",\n      \"rejection\": \"anchor sequence-close-first\"\n    },\n    {\n      \"control\": \"operative/comma-byte\",\n      \"rejection\": \"anchor sequence-comma\"\n    },\n    {\n      \"control\": \"operative/depth-increment-for-decrement\",\n      \"rejection\": \"anchor provider-opening\"\n    },\n    {\n      \"control\": \"operative/accepted-tag-one-to-zero\",\n      \"rejection\": \"anchor element-tag-sign\"\n    },\n    {\n      \"control\": \"operative/accepted-tag-two-to-three\",\n      \"rejection\": \"anchor element-tag-sign\"\n    },\n    {\n      \"control\": \"operative/decimal-threshold\",\n      \"rejection\": \"anchor integer-first-digit\"\n    },\n    {\n      \"control\": \"operative/decimal-last-digit-six\",\n      \"rejection\": \"anchor integer-overflow-bound\"\n    },\n    {\n      \"control\": \"operative/growth-minimum-three\",\n      \"rejection\": \"anchor reserve-capacity\"\n    },\n    {\n      \"control\": \"operative/element-width-four\",\n      \"rejection\": \"anchor reserve-arguments\"\n    },\n    {\n      \"control\": \"operative/alignment-four\",\n      \"rejection\": \"anchor reserve-arguments\"\n    },\n    {\n      \"control\": \"operative/allocation-range-high-bit\",\n      \"rejection\": \"anchor allocation-size-bound\"\n    },\n    {\n      \"control\": \"operative/negative-integer-tag-one\",\n      \"rejection\": \"anchor number-negative-integer-tag\"\n    },\n    {\n      \"control\": \"operative/ordering-first-JBE\",\n      \"rejection\": \"anchor ordering-first-JB\"\n    },\n    {\n      \"control\": \"operative/ordering-second-JL\",\n      \"rejection\": \"anchor ordering-second-JB\"\n    },\n    {\n      \"control\": \"wrong-digest-before-output\",\n      \"rejection\": \"wrong target digest\"\n    },\n    {\n      \"control\": \"existing-output-preserved\",\n      \"rejection\": \"existing output refused\"\n    }\n  ],\n  \"negative_control_count\": 168,\n  \"operative_native_controls\": [\n    {\n      \"control\": \"opening-byte\",\n      \"address\": \"0x1e29fd1\",\n      \"field\": \"opening_byte\",\n      \"before\": 91,\n      \"after\": 123,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"closing-byte\",\n      \"address\": \"0x1dbe780\",\n      \"field\": \"closing_byte\",\n      \"before\": 93,\n      \"after\": 125,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"comma-byte\",\n      \"address\": \"0x1dbe79c\",\n      \"field\": \"comma_byte\",\n      \"before\": 44,\n      \"after\": 59,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"depth-increment-for-decrement\",\n      \"address\": \"0x1e29fed\",\n      \"field\": \"depth_decrement_opcode\",\n      \"before\": 51710,\n      \"after\": 49662,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"accepted-tag-one-to-zero\",\n      \"address\": \"0x1d773c4\",\n      \"field\": \"accepted_first_tag\",\n      \"before\": 1,\n      \"after\": 0,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"accepted-tag-two-to-three\",\n      \"address\": \"0x1d773c9\",\n      \"field\": \"accepted_second_tag\",\n      \"before\": 2,\n      \"after\": 3,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"decimal-threshold\",\n      \"address\": \"0x1d763f4\",\n      \"field\": \"decimal_safe_quotient_minus_one\",\n      \"before\": 1844674407370955160,\n      \"after\": 1844674407370955161,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"decimal-last-digit-six\",\n      \"address\": \"0x1d76462\",\n      \"field\": \"decimal_last_digit_bound\",\n      \"before\": 5,\n      \"after\": 6,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"growth-minimum-three\",\n      \"address\": \"0x43bbce7\",\n      \"field\": \"growth_minimum\",\n      \"before\": 4,\n      \"after\": 3,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"element-width-four\",\n      \"address\": \"0x43bbcfe\",\n      \"field\": \"element_width\",\n      \"before\": 8,\n      \"after\": 4,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"alignment-four\",\n      \"address\": \"0x43bbcf8\",\n      \"field\": \"element_alignment\",\n      \"before\": 8,\n      \"after\": 4,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"allocation-range-high-bit\",\n      \"address\": \"0x43bd576\",\n      \"field\": \"allocation_half_range\",\n      \"before\": 9223372036854775808,\n      \"after\": 4611686018427387904,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"negative-integer-tag-one\",\n      \"address\": \"0x1d76009\",\n      \"field\": \"negative_integer_output_tag\",\n      \"before\": 2,\n      \"after\": 1,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"ordering-first-JBE\",\n      \"address\": \"0x2923e80\",\n      \"field\": \"ordering_first_condition\",\n      \"before\": 114,\n      \"after\": 118,\n      \"native_partition_agreement\": true\n    },\n    {\n      \"control\": \"ordering-second-JL\",\n      \"address\": \"0x2923ea2\",\n      \"field\": \"ordering_second_condition\",\n      \"before\": 114,\n      \"after\": 124,\n      \"native_partition_agreement\": true\n    }\n  ],\n  \"positive_sensitivity\": \"A mutated unselected provider byte passes anchor/table/relocation checks but fails full native byte comparison.\",\n  \"scope\": \"Static parsing and native disassembly only; no captured execution, instruction interpreter, ABI equivalence, timing or liveness test.\"\n}\n",
+      "stderr": ""
+    }
+  ],
+  "unchanged_original_manifest_entries": [
+    {
+      "path": ".gitattributes",
+      "sha256": "b753158d13aebf5e36cd670c232c9b4e1e91eaeebb8370f242d78127aa0a755c"
+    },
+    {
+      "path": "OFFLINE_EVIDENCE.md",
+      "sha256": "dc3a01eb727a6ba88d6c788bcb26acc7f1d81dec7a3048eda6d98708ff686814"
+    },
+    {
+      "path": "PROOF.md",
+      "sha256": "3ee98f270016795d20be159c140aba1ea0d1b3914ed4e08fb673b38026bdf403"
+    },
+    {
+      "path": "ROOT_REVIEW.md",
+      "sha256": "8570cefcb5059b02577b5cc7462e5cb5dfafc08ac2565fb9d0eecdd64fcbd0ac"
+    },
+    {
+      "path": "VALIDATION.json",
+      "sha256": "4efcd6f88eaed72481c0ef0d97de809b101eba190ff71e0c60e83bfae3f3cc67"
+    },
+    {
+      "path": "collect.py",
+      "sha256": "f0a4f5fa7912382ef56c249ef44ff083c324b8ebf8aeb086d74320fbc0972845"
+    },
+    {
+      "path": "observed/allocation-adapter.gnu.txt",
+      "sha256": "ad60abae52d0f15c54591d93c037a160d6db5cb3f7f8e72eba522c4e4dc6849e"
+    },
+    {
+      "path": "observed/allocation-adapter.llvm.txt.gz",
+      "sha256": "aa97fe0d6f7e67994ae9290cf497c60f6cdf6f1daf35a5972928cc8f88463424"
+    },
+    {
+      "path": "observed/caller.gnu.txt",
+      "sha256": "b6fd2c562d0425006677f3da7909b6048461fa323a9f4cff357341a214a2c7c5"
+    },
+    {
+      "path": "observed/caller.llvm.txt.gz",
+      "sha256": "521d1e85569a8b65aa290fa59a1164a392c0120e6ca30a3f70551543d1742f47"
+    },
+    {
+      "path": "observed/cfg.tsv",
+      "sha256": "1d7803e5d89073ba86472cd7c44a8d90de688dae1e5b230e9eb1fd6f107fec75"
+    },
+    {
+      "path": "observed/close.gnu.txt",
+      "sha256": "ff3f94e0f3ea726e89eede5b68f290b490842433fb0f3805ca50501f9846670e"
+    },
+    {
+      "path": "observed/close.llvm.txt.gz",
+      "sha256": "027d17239673be2c76076d8be96a7d31064e59e905f3ac8fe6a6dcd540eebcf9"
+    },
+    {
+      "path": "observed/element.gnu.txt",
+      "sha256": "2d39a19d8e7a1974081753bf37c94fc09473db12f37afa119c2437c598e47f54"
+    },
+    {
+      "path": "observed/element.llvm.txt.gz",
+      "sha256": "fc87196e7383382c61918e4416c9c587d31b20e9cee9f3b95959cce1f199c3d4"
+    },
+    {
+      "path": "observed/error-decoration.gnu.txt",
+      "sha256": "f213c7545089fd6deeb49259e6667041a0cdcc594a6fb04553f256a0306c64d5"
+    },
+    {
+      "path": "observed/error-decoration.llvm.txt.gz",
+      "sha256": "2242ccdff96646b8daf2d6130bc3d4d08f580a4e5b2c02a757b8ff2ddef2adef"
+    },
+    {
+      "path": "observed/growth.gnu.txt",
+      "sha256": "b3a0a0fb4331073b4388e4dfb6a4ec17c49886cf2cc00a17e9f2fa182b20dda8"
+    },
+    {
+      "path": "observed/growth.llvm.txt.gz",
+      "sha256": "8b58f6c58743dfafedbd6758f090da839743d270ef6b23415fcd0ee4971d9e83"
+    },
+    {
+      "path": "observed/integer.gnu.txt",
+      "sha256": "a5b8f0bf0acd2bd4862c0cec658c9946b521507f58fee28f9d186f5022f5999f"
+    },
+    {
+      "path": "observed/integer.llvm.txt.gz",
+      "sha256": "d9c1767094ef8ffbf3ebde027853caaed24e1f0c9943aeb2df0438ada88a0df4"
+    },
+    {
+      "path": "observed/number-classification.gnu.txt",
+      "sha256": "9e5763889e3ef9193e9e165279ad463ab790cd7dd30fb23c1ce748f5f275f35d"
+    },
+    {
+      "path": "observed/number-classification.llvm.txt.gz",
+      "sha256": "8ee11b0e3700043873a0703f71605e39353fe7d9b9dc39eafefdf40bee5a2dd6"
+    },
+    {
+      "path": "observed/ordering-context.gnu.txt",
+      "sha256": "72a79db9d847d4fbd8911c7079bfaf9ecab929770d34a48b3e9b555df1260cda"
+    },
+    {
+      "path": "observed/ordering-context.llvm.txt.gz",
+      "sha256": "329e12ff2202c81d42ba400878a0a06c155dbaf336eed54d4619cb6958d4a773"
+    },
+    {
+      "path": "observed/provider.gnu.txt",
+      "sha256": "c300708e70dabe431c3f4056c80949fd129d78738fdc60bf9a4f2d4af80c2997"
+    },
+    {
+      "path": "observed/provider.llvm.txt.gz",
+      "sha256": "4e49f8c67e6c42ad0204fc34a696869fad9d6dabca58f66ed25cd06d20deae1a"
+    },
+    {
+      "path": "observed/reserve.gnu.txt",
+      "sha256": "2467556ed5408dbe8a7772e88ec9be0b01e183994ee80d2fb64f1f31034d55c4"
+    },
+    {
+      "path": "observed/reserve.llvm.txt.gz",
+      "sha256": "dad6a24584915cebad32560b5286eba10a27127e93f94359995b84aa05d34d34"
+    },
+    {
+      "path": "observed/rip-references.tsv",
+      "sha256": "06fa939a05c4c141c6667369b07238158a0c26ead2063755284b473f8b3dafa9"
+    },
+    {
+      "path": "observed/sequence.gnu.txt",
+      "sha256": "5c67f538a45fb296bd41a4e80143e388faa8630fa73dc9fd9d85e26b07e8ac01"
+    },
+    {
+      "path": "observed/sequence.llvm.txt.gz",
+      "sha256": "a766b7be31ff49e542879bb600bd7e2e60636212272547b68025752fc6a4a3f9"
+    },
+    {
+      "path": "observed/transfers.tsv",
+      "sha256": "fdc5f21ae08be10b119b557e1e7731be5105bc85565e9a7e6208aa083b058d9a"
+    },
+    {
+      "path": "scope-check.json",
+      "sha256": "0a8ace7ce21cd4619f5ec8180ee6186b672dd57c38a2198ff26f228a41eccdec"
+    },
+    {
+      "path": "spec.json",
+      "sha256": "21c2134a47c2299c15682005d6230d8920e2aaf769ec8aee71241b61b51e8705"
+    },
+    {
+      "path": "verification.json",
+      "sha256": "fa3f49722c430e902360a5cbc8b0cc2b563066e865f882044d9ea5163df42b58"
+    },
+    {
+      "path": "verify.py",
+      "sha256": "230d91ad906cbeff707b2f453b03eecf8406c35d618557a35315aebec213b05f"
+    }
+  ],
+  "path_notation": "Commands run from repository root; task-specific absolute repository prefixes in the collection argv/output are represented as relative paths. Native provider paths are unchanged.",
+  "scope": "Static parsing and GNU/LLVM disassembly only. No captured execution, instruction emulation, new recovery credit, binary normalization, original ABI equivalence, or complete component gate. Original proof/checker/collector/spec/native exports and historical receipts remain unchanged."
+}

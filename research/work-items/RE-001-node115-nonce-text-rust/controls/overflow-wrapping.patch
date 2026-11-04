@@ -1,0 +1,14 @@
+--- a/src/node115-nonce-text/src/lib.rs
++++ b/src/node115-nonce-text/src/lib.rs
+@@ -76,9 +76,8 @@
+             let mut value = 0_u64;
+             while let Some(&digit @ b'0'..=b'9') = input.get(*cursor) {
+                 value = value
+-                    .checked_mul(10)
+-                    .and_then(|v| v.checked_add(u64::from(digit - b'0')))
+-                    .ok_or(Failure::NotAdmitted)?;
++                    .wrapping_mul(10)
++                    .wrapping_add(u64::from(digit - b'0'));
+                 *cursor += 1;
+             }
+             Ok(value)

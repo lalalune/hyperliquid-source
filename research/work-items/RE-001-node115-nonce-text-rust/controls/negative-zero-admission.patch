@@ -1,0 +1,13 @@
+--- a/src/node115-nonce-text/src/lib.rs
++++ b/src/node115-nonce-text/src/lib.rs
+@@ -67,6 +67,10 @@
+ 
+ fn integer(input: &[u8], cursor: &mut usize) -> Result<u64, Failure> {
+     match input.get(*cursor) {
++        Some(b'-') if input.get(*cursor + 1) == Some(&b'0') => {
++            *cursor += 2;
++            Ok(0)
++        }
+         Some(b'0') => {
+             *cursor += 1;
+             // A following digit cannot be a comma or closing delimiter.

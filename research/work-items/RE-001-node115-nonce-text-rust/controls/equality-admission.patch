@@ -1,0 +1,11 @@
+--- a/src/node115-nonce-text/src/lib.rs
++++ b/src/node115-nonce-text/src/lib.rs
+@@ -147,7 +147,7 @@
+     }
+ 
+     // In particular, malformed [2,1,] must not become OrderingInvariant.
+-    if !ordered(&values) {
++    if !ordered(&values) && values.windows(2).any(|pair| pair[0] > pair[1]) {
+         return Err(Failure::OrderingInvariant);
+     }
+     Ok(Parsed {
