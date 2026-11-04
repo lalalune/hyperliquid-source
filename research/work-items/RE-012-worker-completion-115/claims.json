@@ -1,0 +1,55 @@
+{
+  "component": "node-runtime",
+  "task": "RE-012",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "claims": [
+    {
+      "id": "worker-completion",
+      "status": "observation with opaque helper premises",
+      "statement": "Thread exact1 completion and Tokio ready poll paths invoke message send/callback on both zero/nonzero helper result classes.",
+      "evidence": [
+        "CONTRACT.md",
+        "static/thread_monitor.gnu.txt",
+        "static/tokio_monitor_a.gnu.txt",
+        "static/tokio_monitor_b.gnu.txt"
+      ]
+    },
+    {
+      "id": "oneshot-transition",
+      "status": "observation",
+      "statement": "Sender checks closed bit4, sets complete bit2 via CAS, wakes only old&5==1; success firstwordMIN64 does not guarantee receipt.",
+      "evidence": [
+        "static/notification_send.gnu.txt",
+        "spec.json"
+      ]
+    },
+    {
+      "id": "receiver-exit",
+      "status": "conditional control-flow observation",
+      "statement": "Ready or closed receiver outcomes reach diagnostic then20.0 conversion/poll; ready delay and normally returning cleanup reach actual exit import withEDI1.",
+      "evidence": [
+        "CONTRACT.md",
+        "static/receiver_monitor.gnu.txt",
+        "static/delay_context.gnu.txt",
+        "static/termination_request.gnu.txt",
+        "static/runtime_exit.gnu.txt",
+        "static/system_exit.gnu.txt"
+      ]
+    },
+    {
+      "id": "source-interpretation",
+      "status": "inference, version unresolved",
+      "statement": "Licensed Tokio source explains oneshot flags/ownership; two releases share selected sender/completion slices, preventing exact original version attribution.",
+      "evidence": [
+        "sources.json",
+        "source-comparison.json",
+        "source-archive.json.gz"
+      ]
+    },
+    {
+      "id": "unclosed",
+      "status": "unresolved",
+      "statement": "No whole scheduler/weak-memory/cleanup/whole-node reconstruction, dynamic progress guarantee, arbitrary raw tag/alias ABI, native behavior corpus or byte equality credit."
+    }
+  ]
+}
