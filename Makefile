@@ -42,3 +42,7 @@ rea-mcp-check:
 	$(PYTHON) tools/rea_mcp_check.py --require-ghidra
 rea-native-smoke:
 	$(PYTHON) tools/rea_mcp_check.py --require-ghidra --native-smoke
+
+.PHONY: fde-gaps
+fde-gaps:
+	$(PYTHON) tools/fde_gap_classes.py --release 115
