@@ -78,7 +78,9 @@ def analyze(data):
     for site,target in [(0x51c9aa6,0x51c9c9e),(0x51c9ac9,0x51c9b8a)]:
         code=read(data,site,6)[1]
         if code[:2]!=b'\x0f\x84' or site+6+struct.unpack_from('<i',code,2)[0]!=target:raise ValueError('latency guard transfer changed')
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    sec=next((s for s in sections(data) if s['name']=='.rela.dyn'),None)
+    if sec is None:raise ValueError('missing.rela.dyn section')
+    if sec['size']%24:raise ValueError('truncated.rela.dyn section')
     rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
     if any(rels.get(a)!=(8,v) for a,v in BINDINGS.items()):raise ValueError('latency relocation changed')
     path=b'node/src/abci_latency_sampler.rs'
