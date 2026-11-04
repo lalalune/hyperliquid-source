@@ -1,0 +1,218 @@
+{
+  "schema": "rpc-manual-handcases-v1",
+  "status": "provisional correspondence to ROOT-RPC-CONTRACT.v3.md; independently authored manual expectations, no execution",
+  "key_catalogue_encoding": "Each catalogue value is exactly 32 bytes in hexadecimal. Every row and query names one of these complete byte strings; there is no implicit padding, native address, or payload-derived key.",
+  "key_catalogue": {
+    "K00": "0000000000000000000000000000000000000000000000000000000000000000",
+    "K01": "0000000000000000000000000000000000000000000000000000000000000001",
+    "K02": "0000000000000000000000000000000000000000000000000000000000000002",
+    "K03": "0000000000000000000000000000000000000000000000000000000000000003",
+    "K04": "0000000000000000000000000000000000000000000000000000000000000004",
+    "K05": "0000000000000000000000000000000000000000000000000000000000000005",
+    "K06": "0000000000000000000000000000000000000000000000000000000000000006",
+    "K07": "0000000000000000000000000000000000000000000000000000000000000007",
+    "K08": "0000000000000000000000000000000000000000000000000000000000000008",
+    "K09": "0000000000000000000000000000000000000000000000000000000000000009",
+    "E01": "0001000000000000000000000000000000000000000000000000000000000000",
+    "E10": "0100000000000000000000000000000000000000000000000000000000000000",
+    "U7f": "7f00000000000000000000000000000000000000000000000000000000000000",
+    "U80": "8000000000000000000000000000000000000000000000000000000000000000",
+    "Uff": "ff00000000000000000000000000000000000000000000000000000000000000",
+    "P7f": "111111111111111111111111111111111111111111111111111111111111117f",
+    "P80": "1111111111111111111111111111111111111111111111111111111111111180",
+    "Pff": "11111111111111111111111111111111111111111111111111111111111111ff"
+  },
+  "row_encoding": "physical_rows lists EVERY allocated slot in physical-index order as [key_catalogue_id, opaque_nonzero_u64_decimal_string]. These strings are values, never native reference counts.",
+  "search_encoding": "Each search expectation is a separate mathematical lookup for the corresponding query. hit has tag=0, logical_index, physical_index, value_u64. miss has tag=1 and insertion_index. Later standalone lookups after a materializer miss are not asserted to be reached by that materializer.",
+  "materializer_encoding": "result null means None; [] means Some(empty). reached_queries and temporary_prefix explain first-miss order only; temporary_prefix is NOT the successful public result and makes no lifetime/drop-effect assertion.",
+  "cases": [
+    {
+      "id": "H01", "purpose": "zero capacity, zero queries",
+      "capacity": 0, "head": 0, "live_len": 0,
+      "physical_rows": [], "queries": [], "searches": [],
+      "materializer": {"result": [], "reached_queries": 0, "temporary_prefix": []}
+    },
+    {
+      "id": "H02", "purpose": "zero capacity with a query",
+      "capacity": 0, "head": 0, "live_len": 0,
+      "physical_rows": [], "queries": ["K01"],
+      "searches": [{"tag": 1, "insertion_index": 0}],
+      "materializer": {"result": null, "reached_queries": 1, "temporary_prefix": []}
+    },
+    {
+      "id": "H03", "purpose": "empty live window ignores allocated rows",
+      "capacity": 4, "head": 2, "live_len": 0,
+      "physical_rows": [["K09", "91"], ["K01", "11"], ["K07", "71"], ["K03", "31"]],
+      "queries": ["K01", "K09"],
+      "searches": [{"tag": 1, "insertion_index": 0}, {"tag": 1, "insertion_index": 0}],
+      "materializer": {"result": null, "reached_queries": 1, "temporary_prefix": []}
+    },
+    {
+      "id": "H04", "purpose": "singleton below, equal, above",
+      "capacity": 1, "head": 0, "live_len": 1,
+      "physical_rows": [["K04", "400"]], "queries": ["K03", "K04", "K05"],
+      "searches": [{"tag": 1, "insertion_index": 0}, {"tag": 0, "logical_index": 0, "physical_index": 0, "value_u64": "400"}, {"tag": 1, "insertion_index": 1}],
+      "materializer": {"result": null, "reached_queries": 1, "temporary_prefix": []}
+    },
+    {
+      "id": "H05", "purpose": "last physical slot singleton and repeated acquisitions",
+      "capacity": 4, "head": 3, "live_len": 1,
+      "physical_rows": [["K09", "900"], ["K00", "99"], ["K08", "800"], ["K04", "401"]],
+      "queries": ["K04", "K04", "K04"],
+      "searches": [{"tag": 0, "logical_index": 0, "physical_index": 3, "value_u64": "401"}, {"tag": 0, "logical_index": 0, "physical_index": 3, "value_u64": "401"}, {"tag": 0, "logical_index": 0, "physical_index": 3, "value_u64": "401"}],
+      "materializer": {"result": ["401", "401", "401"], "reached_queries": 3, "temporary_prefix": ["401", "401", "401"]}
+    },
+    {
+      "id": "H06", "purpose": "full contiguous ring insertion positions",
+      "capacity": 4, "head": 0, "live_len": 4,
+      "physical_rows": [["K01", "11"], ["K03", "33"], ["K05", "55"], ["K07", "77"]],
+      "queries": ["K00", "K01", "K02", "K03", "K06", "K07", "K08"],
+      "searches": [{"tag": 1, "insertion_index": 0}, {"tag": 0, "logical_index": 0, "physical_index": 0, "value_u64": "11"}, {"tag": 1, "insertion_index": 1}, {"tag": 0, "logical_index": 1, "physical_index": 1, "value_u64": "33"}, {"tag": 1, "insertion_index": 3}, {"tag": 0, "logical_index": 3, "physical_index": 3, "value_u64": "77"}, {"tag": 1, "insertion_index": 4}],
+      "materializer": {"result": null, "reached_queries": 1, "temporary_prefix": []}
+    },
+    {
+      "id": "H07", "purpose": "contiguous duplicates choose the final equal row",
+      "capacity": 5, "head": 0, "live_len": 5,
+      "physical_rows": [["K01", "10"], ["K02", "20"], ["K02", "21"], ["K02", "22"], ["K04", "40"]],
+      "queries": ["K02"],
+      "searches": [{"tag": 0, "logical_index": 3, "physical_index": 3, "value_u64": "22"}],
+      "materializer": {"result": ["22"], "reached_queries": 1, "temporary_prefix": ["22"]}
+    },
+    {
+      "id": "H08", "purpose": "nonzero head without wrapping",
+      "capacity": 6, "head": 1, "live_len": 4,
+      "physical_rows": [["K09", "90"], ["K01", "10"], ["K02", "20"], ["K02", "21"], ["K04", "40"], ["K00", "99"]],
+      "queries": ["K02", "K01", "K04"],
+      "searches": [{"tag": 0, "logical_index": 2, "physical_index": 3, "value_u64": "21"}, {"tag": 0, "logical_index": 0, "physical_index": 1, "value_u64": "10"}, {"tag": 0, "logical_index": 3, "physical_index": 4, "value_u64": "40"}],
+      "materializer": {"result": ["21", "10", "40"], "reached_queries": 3, "temporary_prefix": ["21", "10", "40"]}
+    },
+    {
+      "id": "H09", "purpose": "all equal full wrapped ring returns seam, not final equal",
+      "capacity": 4, "head": 3, "live_len": 4,
+      "physical_rows": [["K02", "20"], ["K02", "21"], ["K02", "22"], ["K02", "23"]],
+      "queries": ["K02", "K02"],
+      "searches": [{"tag": 0, "logical_index": 1, "physical_index": 0, "value_u64": "20"}, {"tag": 0, "logical_index": 1, "physical_index": 0, "value_u64": "20"}],
+      "materializer": {"result": ["20", "20"], "reached_queries": 2, "temporary_prefix": ["20", "20"]}
+    },
+    {
+      "id": "H10", "purpose": "same physical rows as H09 but contiguous",
+      "capacity": 4, "head": 0, "live_len": 4,
+      "physical_rows": [["K02", "20"], ["K02", "21"], ["K02", "22"], ["K02", "23"]],
+      "queries": ["K02"],
+      "searches": [{"tag": 0, "logical_index": 3, "physical_index": 3, "value_u64": "23"}],
+      "materializer": {"result": ["23"], "reached_queries": 1, "temporary_prefix": ["23"]}
+    },
+    {
+      "id": "H11", "purpose": "duplicates straddling seam and continuing after it",
+      "capacity": 6, "head": 4, "live_len": 5,
+      "physical_rows": [["K02", "20"], ["K02", "21"], ["K04", "42"], ["K09", "93"], ["K01", "14"], ["K02", "25"]],
+      "queries": ["K02"],
+      "searches": [{"tag": 0, "logical_index": 2, "physical_index": 0, "value_u64": "20"}],
+      "materializer": {"result": ["20"], "reached_queries": 1, "temporary_prefix": ["20"]}
+    },
+    {
+      "id": "H12", "purpose": "duplicate search before a strictly larger seam",
+      "capacity": 6, "head": 3, "live_len": 5,
+      "physical_rows": [["K04", "40"], ["K06", "61"], ["K00", "2"], ["K01", "13"], ["K02", "24"], ["K02", "25"]],
+      "queries": ["K02", "K01", "K04"],
+      "searches": [{"tag": 0, "logical_index": 2, "physical_index": 5, "value_u64": "25"}, {"tag": 0, "logical_index": 0, "physical_index": 3, "value_u64": "13"}, {"tag": 0, "logical_index": 3, "physical_index": 0, "value_u64": "40"}],
+      "materializer": {"result": ["25", "13", "40"], "reached_queries": 3, "temporary_prefix": ["25", "13", "40"]}
+    },
+    {
+      "id": "H13", "purpose": "duplicate search after a strictly smaller seam",
+      "capacity": 6, "head": 4, "live_len": 5,
+      "physical_rows": [["K04", "40"], ["K05", "51"], ["K05", "52"], ["K09", "93"], ["K01", "14"], ["K02", "25"]],
+      "queries": ["K05", "K02", "K04"],
+      "searches": [{"tag": 0, "logical_index": 4, "physical_index": 2, "value_u64": "52"}, {"tag": 0, "logical_index": 1, "physical_index": 5, "value_u64": "25"}, {"tag": 0, "logical_index": 2, "physical_index": 0, "value_u64": "40"}],
+      "materializer": {"result": ["52", "25", "40"], "reached_queries": 3, "temporary_prefix": ["52", "25", "40"]}
+    },
+    {
+      "id": "H14", "purpose": "wrapped misses at seam gap, interior, end and start",
+      "capacity": 6, "head": 4, "live_len": 5,
+      "physical_rows": [["K04", "40"], ["K06", "61"], ["K08", "82"], ["K09", "93"], ["K01", "14"], ["K02", "25"]],
+      "queries": ["K03", "K05", "K09", "K00"],
+      "searches": [{"tag": 1, "insertion_index": 2}, {"tag": 1, "insertion_index": 3}, {"tag": 1, "insertion_index": 5}, {"tag": 1, "insertion_index": 0}],
+      "materializer": {"result": null, "reached_queries": 1, "temporary_prefix": []}
+    },
+    {
+      "id": "H15", "purpose": "one row on either side of seam",
+      "capacity": 5, "head": 4, "live_len": 2,
+      "physical_rows": [["K05", "50"], ["K09", "91"], ["K00", "2"], ["K08", "83"], ["K02", "24"]],
+      "queries": ["K05", "K02"],
+      "searches": [{"tag": 0, "logical_index": 1, "physical_index": 0, "value_u64": "50"}, {"tag": 0, "logical_index": 0, "physical_index": 4, "value_u64": "24"}],
+      "materializer": {"result": ["50", "24"], "reached_queries": 2, "temporary_prefix": ["50", "24"]}
+    },
+    {
+      "id": "H16", "purpose": "head plus length equals capacity, so no wrapped seam",
+      "capacity": 5, "head": 2, "live_len": 3,
+      "physical_rows": [["K02", "999"], ["K04", "888"], ["K01", "12"], ["K02", "23"], ["K04", "44"]],
+      "queries": ["K02", "K04"],
+      "searches": [{"tag": 0, "logical_index": 1, "physical_index": 3, "value_u64": "23"}, {"tag": 0, "logical_index": 2, "physical_index": 4, "value_u64": "44"}],
+      "materializer": {"result": ["23", "44"], "reached_queries": 2, "temporary_prefix": ["23", "44"]}
+    },
+    {
+      "id": "H17", "purpose": "full ring with nonzero head and seam at final logical row",
+      "capacity": 5, "head": 1, "live_len": 5,
+      "physical_rows": [["K09", "90"], ["K01", "11"], ["K03", "32"], ["K05", "53"], ["K07", "74"]],
+      "queries": ["K01", "K09", "K07"],
+      "searches": [{"tag": 0, "logical_index": 0, "physical_index": 1, "value_u64": "11"}, {"tag": 0, "logical_index": 4, "physical_index": 0, "value_u64": "90"}, {"tag": 0, "logical_index": 3, "physical_index": 4, "value_u64": "74"}],
+      "materializer": {"result": ["11", "90", "74"], "reached_queries": 3, "temporary_prefix": ["11", "90", "74"]}
+    },
+    {
+      "id": "H18", "purpose": "first query miss, later standalone hits not reached",
+      "capacity": 3, "head": 0, "live_len": 3,
+      "physical_rows": [["K01", "11"], ["K03", "33"], ["K05", "55"]],
+      "queries": ["K02", "K01", "K05"],
+      "searches": [{"tag": 1, "insertion_index": 1}, {"tag": 0, "logical_index": 0, "physical_index": 0, "value_u64": "11"}, {"tag": 0, "logical_index": 2, "physical_index": 2, "value_u64": "55"}],
+      "materializer": {"result": null, "reached_queries": 1, "temporary_prefix": []}
+    },
+    {
+      "id": "H19", "purpose": "middle miss discards a nonempty prefix",
+      "capacity": 3, "head": 0, "live_len": 3,
+      "physical_rows": [["K01", "11"], ["K03", "33"], ["K05", "55"]],
+      "queries": ["K01", "K02", "K05"],
+      "searches": [{"tag": 0, "logical_index": 0, "physical_index": 0, "value_u64": "11"}, {"tag": 1, "insertion_index": 1}, {"tag": 0, "logical_index": 2, "physical_index": 2, "value_u64": "55"}],
+      "materializer": {"result": null, "reached_queries": 2, "temporary_prefix": ["11"]}
+    },
+    {
+      "id": "H20", "purpose": "last miss discards two successful handles",
+      "capacity": 3, "head": 0, "live_len": 3,
+      "physical_rows": [["K01", "11"], ["K03", "33"], ["K05", "55"]],
+      "queries": ["K01", "K05", "K06"],
+      "searches": [{"tag": 0, "logical_index": 0, "physical_index": 0, "value_u64": "11"}, {"tag": 0, "logical_index": 2, "physical_index": 2, "value_u64": "55"}, {"tag": 1, "insertion_index": 3}],
+      "materializer": {"result": null, "reached_queries": 3, "temporary_prefix": ["11", "55"]}
+    },
+    {
+      "id": "H21", "purpose": "query order and repeated values are preserved",
+      "capacity": 3, "head": 0, "live_len": 3,
+      "physical_rows": [["K01", "11"], ["K03", "33"], ["K05", "55"]],
+      "queries": ["K05", "K01", "K05", "K03", "K01"],
+      "searches": [{"tag": 0, "logical_index": 2, "physical_index": 2, "value_u64": "55"}, {"tag": 0, "logical_index": 0, "physical_index": 0, "value_u64": "11"}, {"tag": 0, "logical_index": 2, "physical_index": 2, "value_u64": "55"}, {"tag": 0, "logical_index": 1, "physical_index": 1, "value_u64": "33"}, {"tag": 0, "logical_index": 0, "physical_index": 0, "value_u64": "11"}],
+      "materializer": {"result": ["55", "11", "55", "33", "11"], "reached_queries": 5, "temporary_prefix": ["55", "11", "55", "33", "11"]}
+    },
+    {
+      "id": "H22", "purpose": "unsigned-byte lexicographic order, not signed bytes or little-endian integer order",
+      "capacity": 6, "head": 0, "live_len": 6,
+      "physical_rows": [["K01", "1"], ["E01", "2"], ["E10", "3"], ["U7f", "4"], ["U80", "5"], ["Uff", "6"]],
+      "queries": ["U80", "E10", "E01", "Uff"],
+      "searches": [{"tag": 0, "logical_index": 4, "physical_index": 4, "value_u64": "5"}, {"tag": 0, "logical_index": 2, "physical_index": 2, "value_u64": "3"}, {"tag": 0, "logical_index": 1, "physical_index": 1, "value_u64": "2"}, {"tag": 0, "logical_index": 5, "physical_index": 5, "value_u64": "6"}],
+      "materializer": {"result": ["5", "3", "2", "6"], "reached_queries": 4, "temporary_prefix": ["5", "3", "2", "6"]}
+    },
+    {
+      "id": "H23", "purpose": "last key byte matters; payload does not; high opaque values are not signed counts",
+      "capacity": 4, "head": 0, "live_len": 4,
+      "physical_rows": [["P7f", "18446744073709551615"], ["P80", "1"], ["P80", "9223372036854775808"], ["Pff", "2"]],
+      "queries": ["P80", "P7f"],
+      "searches": [{"tag": 0, "logical_index": 2, "physical_index": 2, "value_u64": "9223372036854775808"}, {"tag": 0, "logical_index": 0, "physical_index": 0, "value_u64": "18446744073709551615"}],
+      "materializer": {"result": ["9223372036854775808", "18446744073709551615"], "reached_queries": 2, "temporary_prefix": ["9223372036854775808", "18446744073709551615"]}
+    },
+    {
+      "id": "H24", "purpose": "inactive duplicate keys cannot steal wrapped live hits before a miss",
+      "capacity": 7, "head": 5, "live_len": 3,
+      "physical_rows": [["K06", "60"], ["K04", "999"], ["K00", "2"], ["K09", "93"], ["K06", "998"], ["K02", "25"], ["K04", "46"]],
+      "queries": ["K04", "K06", "K03"],
+      "searches": [{"tag": 0, "logical_index": 1, "physical_index": 6, "value_u64": "46"}, {"tag": 0, "logical_index": 2, "physical_index": 0, "value_u64": "60"}, {"tag": 1, "insertion_index": 1}],
+      "materializer": {"result": null, "reached_queries": 3, "temporary_prefix": ["46", "60"]}
+    }
+  ]
+}

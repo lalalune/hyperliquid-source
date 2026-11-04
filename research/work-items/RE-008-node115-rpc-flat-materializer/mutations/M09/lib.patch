@@ -1,0 +1,11 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -108,7 +108,7 @@
+         match result {
+             Ok(local) => self.found(offset + local),
+             Err(local) => SearchResult::Missing {
+-                insertion_index: offset + local,
++                insertion_index: (offset + local).saturating_add(1).min(self.live_length),
+             },
+         }
+     }

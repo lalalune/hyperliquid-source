@@ -1,0 +1,19 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -94,7 +94,15 @@
+             )
+         } else {
+             match self.rows[0].key.cmp(query) {
+-                Ordering::Equal => return self.found(first_length),
++                Ordering::Equal => {
++                    let mut selected = first_length;
++                    for logical in first_length + 1..self.live_length {
++                        if self.rows[self.physical_index(logical)].key == *query {
++                            selected = logical;
++                        }
++                    }
++                    return self.found(selected);
++                }
+                 Ordering::Greater => (
+                     0,
+                     segment_search(&self.rows[self.head..self.head + first_length], query),

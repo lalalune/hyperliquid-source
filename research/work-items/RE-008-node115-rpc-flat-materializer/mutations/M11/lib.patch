@@ -1,0 +1,15 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -121,7 +121,11 @@
+         let mut values = Vec::new();
+         for query in queries {
+             match self.search(query) {
+-                SearchResult::Found { value, .. } => values.push(value),
++                SearchResult::Found { value, .. } => {
++                    if !values.contains(&value) {
++                        values.push(value);
++                    }
++                }
+                 SearchResult::Missing { .. } => return None,
+             }
+         }

@@ -1,0 +1,14 @@
+{
+  "schema": "rpc-host-domain-examples-v1",
+  "status": "illustrative host admission refusals only; no native error tag, cursor, termination or allocation-failure expectation",
+  "key_catalogue": "The complete 32-byte keys are defined in handcases.json.",
+  "cases": [
+    {"id": "X01", "capacity": 0, "head": 1, "live_len": 0, "physical_rows": [], "queries": [], "violated_premise": "capacity zero requires head zero"},
+    {"id": "X02", "capacity": 0, "head": 0, "live_len": 1, "physical_rows": [], "queries": ["K01"], "violated_premise": "live length cannot exceed capacity"},
+    {"id": "X03", "capacity": 3, "head": 0, "live_len": 4, "physical_rows": [["K01", "1"], ["K02", "2"], ["K03", "3"]], "queries": ["K01"], "violated_premise": "live length cannot exceed capacity"},
+    {"id": "X04", "capacity": 3, "head": 3, "live_len": 1, "physical_rows": [["K01", "1"], ["K02", "2"], ["K03", "3"]], "queries": ["K01"], "violated_premise": "head must be strictly below positive capacity"},
+    {"id": "X05", "capacity": 3, "head": 0, "live_len": 1, "physical_rows": [["K01", "1"], ["K02", "2"]], "queries": ["K01"], "violated_premise": "fixture lacks one of the declared physical slots; no valid complete supplied allocation is represented"},
+    {"id": "X06", "capacity": 2, "head": 0, "live_len": 2, "physical_rows": [["K02", "2"], ["K01", "1"]], "queries": ["K01"], "violated_premise": "live logical keys are not nondecreasing"},
+    {"id": "X07", "capacity": 1, "head": 0, "live_len": 1, "physical_rows": [["K01", "0"]], "queries": ["K01"], "violated_premise": "a successful stored handle must be nonzero; the handle word is not a reference count"}
+  ]
+}
