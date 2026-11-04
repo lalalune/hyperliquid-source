@@ -1,0 +1,1063 @@
+python3 tools/doctor.py
+{
+  "analysis_ready": true,
+  "exact_rebuild_ready": false,
+  "missing_rebuild_evidence": [
+    "Recovered Cargo manifests and dependency locks",
+    "Target Linux build flags and exact LLVM/fork provenance",
+    "Accepted reconstructed implementation and comparison harness"
+  ],
+  "required_tools": [
+    {
+      "name": "python",
+      "available": true,
+      "version": "Python 3.12.3",
+      "executable": "/usr/bin/python3"
+    },
+    {
+      "name": "git",
+      "available": true,
+      "version": "git version 2.43.0",
+      "executable": "/usr/bin/git"
+    },
+    {
+      "name": "gpg",
+      "available": true,
+      "version": "gpg (GnuPG) 2.4.4",
+      "executable": "/usr/bin/gpg"
+    },
+    {
+      "name": "rg",
+      "available": true,
+      "version": "ripgrep 15.2.0 (rev e89fff89ac)",
+      "executable": "/tmp/slop-hyperliquid-m_j8r_s9/tools/ripgrep-15.2.0-x86_64-unknown-linux-musl/rg"
+    },
+    {
+      "name": "git-lfs",
+      "available": true,
+      "version": "git-lfs/3.7.1 (GitHub; linux amd64; go 1.25.3; git b84b3384)",
+      "executable": "/tmp/slop-hyperliquid-m_j8r_s9/tools/git-lfs-3.7.1/git-lfs"
+    },
+    {
+      "name": "objdump",
+      "available": true,
+      "version": "GNU objdump (GNU Binutils for Ubuntu) 2.42",
+      "executable": "/usr/bin/objdump"
+    },
+    {
+      "name": "readelf",
+      "available": true,
+      "version": "GNU readelf (GNU Binutils for Ubuntu) 2.42",
+      "executable": "/usr/bin/readelf"
+    }
+  ],
+  "optional_tools": [
+    {
+      "name": "llvm-objdump",
+      "available": true,
+      "version": "Ubuntu LLVM version 18.1.3",
+      "executable": "/usr/bin/llvm-objdump"
+    },
+    {
+      "name": "java",
+      "available": false
+    },
+    {
+      "name": "rust-1.94.1",
+      "available": false,
+      "version": "error: toolchain '1.94.1-x86_64-unknown-linux-gnu' is not installed",
+      "executable": "/home/na_dev/.cargo/bin/rustup"
+    },
+    {
+      "name": "rust-1.95.0",
+      "available": true,
+      "version": "rustc 1.95.0 (59807616e 2026-04-14)",
+      "executable": "/home/na_dev/.cargo/bin/rustup"
+    }
+  ],
+  "ghidra": {
+    "available": false,
+    "home": null,
+    "version": null,
+    "started": false
+  },
+  "captured_binaries_executed": false
+}
+python3 tools/artifacts.py verify
+SHA-256 OK: artifacts/keys/pub_key.asc
+SHA-256 OK: artifacts/node/115/hl-node
+SHA-256 OK: artifacts/node/115/hl-node.asc
+SHA-256 OK: artifacts/node/115/node_metadata.json
+SHA-256 OK: artifacts/visor/captured/hl-visor
+SHA-256 OK: artifacts/visor/captured/hl-visor.asc
+Valid signature: artifacts/node/115/hl-node
+Valid signature: artifacts/visor/captured/hl-visor
+Pinned upstream binary, signature and public key match.
+python3 tools/verify_imports.py
+Verified 29 imported files and all pinned source repositories.
+python3 tools/verify_packets.py
+Verified 29 evidence-packet manifests and 473 entries (0 grandfathered rows reference no committed file).
+python3 tools/run_tests.py
+
+[1/77] test_artifacts.py
+test_bad_signature_failure_reported_as_one_line (test_artifacts.ArtifactTests.test_bad_signature_failure_reported_as_one_line) ... ok
+test_corrupt_existing_file_not_overwritten (test_artifacts.ArtifactTests.test_corrupt_existing_file_not_overwritten) ... ok
+test_expired_key_signature_rejected (test_artifacts.ArtifactTests.test_expired_key_signature_rejected) ... ok
+test_failed_download_does_not_publish_partial (test_artifacts.ArtifactTests.test_failed_download_does_not_publish_partial) ... ok
+test_fetch_continues_past_download_errors (test_artifacts.ArtifactTests.test_fetch_continues_past_download_errors) ... ok
+test_fetch_continues_past_unrecoverable_item (test_artifacts.ArtifactTests.test_fetch_continues_past_unrecoverable_item) ... ok
+test_lfs_pointer_is_named_and_not_overwritten (test_artifacts.ArtifactTests.test_lfs_pointer_is_named_and_not_overwritten) ... ok
+test_main_empty_files_list_passes_guard (test_artifacts.ArtifactTests.test_main_empty_files_list_passes_guard) ... ok
+test_main_files_and_fingerprint_pass_guard (test_artifacts.ArtifactTests.test_main_files_and_fingerprint_pass_guard) ... ok
+test_main_missing_files_key_rejected (test_artifacts.ArtifactTests.test_main_missing_files_key_rejected) ... ok
+test_main_missing_signing_fingerprint_rejected (test_artifacts.ArtifactTests.test_main_missing_signing_fingerprint_rejected) ... ok
+test_malformed_artifact_record_rejected (test_artifacts.ArtifactTests.test_malformed_artifact_record_rejected) ... ok
+test_manifest_duplicate_key_rejected (test_artifacts.ArtifactTests.test_manifest_duplicate_key_rejected) ... ok
+test_manifest_duplicate_path_rejected (test_artifacts.ArtifactTests.test_manifest_duplicate_path_rejected) ... ok
+test_manifest_entry_missing_path_rejected (test_artifacts.ArtifactTests.test_manifest_entry_missing_path_rejected) ... ok
+test_manifest_loads_and_item_lookup (test_artifacts.ArtifactTests.test_manifest_loads_and_item_lookup) ... ok
+test_missing_pinned_reference_names_the_fix (test_artifacts.ArtifactTests.test_missing_pinned_reference_names_the_fix) ... ok
+test_pinned_reference_mismatch_rejected (test_artifacts.ArtifactTests.test_pinned_reference_mismatch_rejected) ... ok
+test_revoked_key_signature_rejected (test_artifacts.ArtifactTests.test_revoked_key_signature_rejected) ... ok
+test_tamper_same_size_rejected (test_artifacts.ArtifactTests.test_tamper_same_size_rejected) ... ok
+test_valid_download_and_existing_file_no_network (test_artifacts.ArtifactTests.test_valid_download_and_existing_file_no_network) ... ok
+test_valid_signature_accepted (test_artifacts.ArtifactTests.test_valid_signature_accepted) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.034s
+
+OK
+Pinned upstream binary, signature and public key match.
+Pinned upstream binary, signature and public key match.
+Valid signature: artifacts/node/115/hl-node
+Valid signature: artifacts/visor/captured/hl-visor
+
+[2/77] test_artifacts_diagnostics.py
+test_mismatched_artifact_reported_as_one_line (test_artifacts_diagnostics.ArtifactsDiagnosticsTests.test_mismatched_artifact_reported_as_one_line) ... ok
+test_missing_artifact_reported_as_one_line (test_artifacts_diagnostics.ArtifactsDiagnosticsTests.test_missing_artifact_reported_as_one_line) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.081s
+
+OK
+
+[3/77] test_artifacts_manifest_files_type.py
+test_non_list_files_value_rejected (test_artifacts_manifest_files_type.ArtifactsManifestFilesTypeTests.test_non_list_files_value_rejected) ... ok
+test_valid_manifest_passes (test_artifacts_manifest_files_type.ArtifactsManifestFilesTypeTests.test_valid_manifest_passes) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.012s
+
+OK
+SHA-256 OK: node
+Pinned upstream binary, signature and public key match.
+
+[4/77] test_build_provenance.py
+test_committed_records_reproduce_from_verified_targets (test_build_provenance.CapturedTargetTests.test_committed_records_reproduce_from_verified_targets) ... ok
+test_node_94_and_115_toolchains_differ (test_build_provenance.CapturedTargetTests.test_node_94_and_115_toolchains_differ) ... ok
+test_crlf_record_fails_check (test_build_provenance.CheckModeTests.test_crlf_record_fails_check) ... ok
+test_lf_record_passes_check (test_build_provenance.CheckModeTests.test_lf_record_passes_check) ... ok
+test_write_mode_emits_canonical_lf_bytes (test_build_provenance.CheckModeTests.test_write_mode_emits_canonical_lf_bytes) ... ok
+test_bind_now_accepts_every_abi_encoding (test_build_provenance.DeriveTests.test_bind_now_accepts_every_abi_encoding) ... ok
+test_comment_stamps_are_exact_with_their_offsets (test_build_provenance.DeriveTests.test_comment_stamps_are_exact_with_their_offsets) ... ok
+test_dependency_paths_keep_versions_only_where_present (test_build_provenance.DeriveTests.test_dependency_paths_keep_versions_only_where_present) ... ok
+test_diff_ignores_offsets_and_reports_changed_values (test_build_provenance.DeriveTests.test_diff_ignores_offsets_and_reports_changed_values) ... ok
+test_duplicate_comment_section_rejected (test_build_provenance.DeriveTests.test_duplicate_comment_section_rejected) ... ok
+test_duplicate_interp_section_rejected (test_build_provenance.DeriveTests.test_duplicate_interp_section_rejected) ... ok
+test_dynamic_entries_after_dt_null_are_ignored (test_build_provenance.DeriveTests.test_dynamic_entries_after_dt_null_are_ignored) ... ok
+test_dynamic_string_must_stay_inside_dynstr (test_build_provenance.DeriveTests.test_dynamic_string_must_stay_inside_dynstr) ... ok
+test_non_elf_input_is_rejected (test_build_provenance.DeriveTests.test_non_elf_input_is_rejected) ... ok
+test_stripping_inference_preserves_retained_debug_sections (test_build_provenance.DeriveTests.test_stripping_inference_preserves_retained_debug_sections) ... ok
+test_unrecorded_settings_stay_unknown (test_build_provenance.DeriveTests.test_unrecorded_settings_stay_unknown) ... ok
+test_unstripped_reasoning_matches_the_present_symbol_table (test_build_provenance.DeriveTests.test_unstripped_reasoning_matches_the_present_symbol_table) ... ok
+test_missing_files_key_is_rejected (test_build_provenance.RecordTests.test_missing_files_key_is_rejected) ... ok
+test_missing_target_entry_is_rejected (test_build_provenance.RecordTests.test_missing_target_entry_is_rejected) ... ok
+test_non_dict_files_entry_is_rejected (test_build_provenance.RecordTests.test_non_dict_files_entry_is_rejected) ... ok
+test_non_dict_manifest_is_rejected (test_build_provenance.RecordTests.test_non_dict_manifest_is_rejected) ... ok
+test_valid_manifest_still_records (test_build_provenance.RecordTests.test_valid_manifest_still_records) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 1.079s
+
+OK
+Provenance records match the verified targets.
+wrote out/provenance-115.json
+
+[5/77] test_build_provenance_comment_encoding.py
+test_non_utf8_comment_rejected (test_build_provenance_comment_encoding.CommentEncodingTests.test_non_utf8_comment_rejected) ... ok
+test_valid_comment_accepted (test_build_provenance_comment_encoding.CommentEncodingTests.test_valid_comment_accepted) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+OK
+
+[6/77] test_build_provenance_interp_encoding.py
+test_non_utf8_interp_rejected (test_build_provenance_interp_encoding.InterpEncodingTests.test_non_utf8_interp_rejected) ... ok
+test_valid_interp_accepted (test_build_provenance_interp_encoding.InterpEncodingTests.test_valid_interp_accepted) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+OK
+
+[7/77] test_build_provenance_manifest_fields.py
+test_entry_missing_size_or_sha256_is_value_error (test_build_provenance_manifest_fields.ManifestFieldsTests.test_entry_missing_size_or_sha256_is_value_error) ... ok
+test_valid_lookup_reaches_artifact_check (test_build_provenance_manifest_fields.ManifestFieldsTests.test_valid_lookup_reaches_artifact_check) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.011s
+
+OK
+
+[8/77] test_build_provenance_symtab_type.py
+test_absent_symtab_is_reported_absent (test_build_provenance_symtab_type.SymtabTypeTests.test_absent_symtab_is_reported_absent) ... ok
+test_progbits_named_symtab_is_not_a_symbol_table (test_build_provenance_symtab_type.SymtabTypeTests.test_progbits_named_symtab_is_not_a_symbol_table) ... ok
+test_real_symtab_is_reported (test_build_provenance_symtab_type.SymtabTypeTests.test_real_symtab_is_reported) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+
+[9/77] test_cache_suffix_static.py
+test_actual_key_and_selected_pointer_counterfactuals (test_cache_suffix_static.CacheSuffixTests.test_actual_key_and_selected_pointer_counterfactuals) ... ok
+test_actual_literal_equality_has_one_special_ten_byte_key (test_cache_suffix_static.CacheSuffixTests.test_actual_literal_equality_has_one_special_ten_byte_key) ... ok
+test_native_regeneration_matches_retained_packet (test_cache_suffix_static.CacheSuffixTests.test_native_regeneration_matches_retained_packet) ... ok
+test_public_identity_rejection_precedes_output (test_cache_suffix_static.CacheSuffixTests.test_public_identity_rejection_precedes_output) ... ok
+test_real_argument_callbacks_caller_condition_and_descriptor_controls (test_cache_suffix_static.CacheSuffixTests.test_real_argument_callbacks_caller_condition_and_descriptor_controls) ... ok
+test_real_relocation_location_and_fde_controls (test_cache_suffix_static.CacheSuffixTests.test_real_relocation_location_and_fde_controls) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 38.306s
+
+OK
+
+[10/77] test_curl_options_static.py
+test_actual_overlapping_literal_and_numeric_counterfactual_all_four (test_curl_options_static.CurlOptionsTests.test_actual_overlapping_literal_and_numeric_counterfactual_all_four) ... ok
+test_native_regeneration_and_scoped_denominator (test_curl_options_static.CurlOptionsTests.test_native_regeneration_and_scoped_denominator) ... ok
+test_public_identity_rejection_precedes_output (test_curl_options_static.CurlOptionsTests.test_public_identity_rejection_precedes_output) ... ok
+test_real_input_default_sizes_and_presence_gate_controls (test_curl_options_static.CurlOptionsTests.test_real_input_default_sizes_and_presence_gate_controls) ... ok
+test_real_relocations_formatter_objects_and_fde_extents (test_curl_options_static.CurlOptionsTests.test_real_relocations_formatter_objects_and_fde_extents) ... ok
+test_real_templates_references_callbacks_and_calls (test_curl_options_static.CurlOptionsTests.test_real_templates_references_callbacks_and_calls) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 66.914s
+
+OK
+
+[11/77] test_doctor_ghidra.py
+test_documented_install_directory_is_selected_over_legacy (test_doctor_ghidra.DoctorGhidraSelectionTests.test_documented_install_directory_is_selected_over_legacy) ... ok
+test_invalid_explicit_install_is_not_replaced_by_another_provider (test_doctor_ghidra.DoctorGhidraSelectionTests.test_invalid_explicit_install_is_not_replaced_by_another_provider) ... ok
+test_legacy_and_automatic_discovery_remain_available (test_doctor_ghidra.DoctorGhidraSelectionTests.test_legacy_and_automatic_discovery_remain_available) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.137s
+
+OK
+
+[12/77] test_doctor_gnu_binutils.py
+test_gnu_tools_are_available (test_doctor_gnu_binutils.GnuBinutilsProbe.test_gnu_tools_are_available) ... ok
+test_llvm_tools_under_gnu_names_are_rejected (test_doctor_gnu_binutils.GnuBinutilsProbe.test_llvm_tools_under_gnu_names_are_rejected) ... ok
+test_missing_tools_are_rejected (test_doctor_gnu_binutils.GnuBinutilsProbe.test_missing_tools_are_rejected) ... ok
+test_report_requires_both_gnu_tools (test_doctor_gnu_binutils.GnuBinutilsProbe.test_report_requires_both_gnu_tools) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.007s
+
+OK
+
+[13/77] test_elf_index.py
+test_duplicate_starts_rejected (test_elf_index.UnwindIndexOrderingTests.test_duplicate_starts_rejected) ... ok
+test_duplicate_starts_rejected_by_generate (test_elf_index.UnwindIndexOrderingTests.test_duplicate_starts_rejected_by_generate) ... ok
+test_strictly_increasing_starts_accepted (test_elf_index.UnwindIndexOrderingTests.test_strictly_increasing_starts_accepted) ... ok
+test_unsorted_starts_still_rejected (test_elf_index.UnwindIndexOrderingTests.test_unsorted_starts_still_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK
+
+[14/77] test_elf_index_cli.py
+test_release_115_missing_artifact (test_elf_index_cli.ElfIndexCliTests.test_release_115_missing_artifact) ... ok
+test_release_115_pointer_artifact (test_elf_index_cli.ElfIndexCliTests.test_release_115_pointer_artifact) ... ok
+test_release_visor_pointer_artifact (test_elf_index_cli.ElfIndexCliTests.test_release_visor_pointer_artifact) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.125s
+
+OK
+
+[15/77] test_elf_index_diagnostics.py
+test_missing_artifact_is_one_line (test_elf_index_diagnostics.MissingArtifactDiagnostics.test_missing_artifact_is_one_line) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+OK
+
+[16/77] test_elf_index_inventory_dup_keys.py
+test_clean_inventory_still_loads (test_elf_index_inventory_dup_keys.InventoryDuplicateKeyTests.test_clean_inventory_still_loads) ... ok
+test_duplicate_fde_count_rejected (test_elf_index_inventory_dup_keys.InventoryDuplicateKeyTests.test_duplicate_fde_count_rejected) ... ok
+test_duplicate_nested_key_rejected (test_elf_index_inventory_dup_keys.InventoryDuplicateKeyTests.test_duplicate_nested_key_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+
+[17/77] test_elf_index_manifest_lookup.py
+test_entry_without_path_fails_closed (test_elf_index_manifest_lookup.ManifestLookupTests.test_entry_without_path_fails_closed) ... ok
+test_manifest_without_files_fails_closed (test_elf_index_manifest_lookup.ManifestLookupTests.test_manifest_without_files_fails_closed) ... ok
+test_missing_release_entry_fails_closed (test_elf_index_manifest_lookup.ManifestLookupTests.test_missing_release_entry_fails_closed) ... ok
+test_valid_entry_reaches_artifact_check (test_elf_index_manifest_lookup.ManifestLookupTests.test_valid_entry_reaches_artifact_check) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.010s
+
+OK
+
+[18/77] test_elf_index_section_name_encoding.py
+test_non_utf8_section_name_rejected (test_elf_index_section_name_encoding.SectionNameEncodingTests.test_non_utf8_section_name_rejected) ... ok
+test_valid_names_accepted (test_elf_index_section_name_encoding.SectionNameEncodingTests.test_valid_names_accepted) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+OK
+
+[19/77] test_elf_index_shstrtab.py
+test_nobits_shstrtab_rejected (test_elf_index_shstrtab.ShstrtabTypeTests.test_nobits_shstrtab_rejected) ... ok
+test_strtab_shstrtab_accepted (test_elf_index_shstrtab.ShstrtabTypeTests.test_strtab_shstrtab_accepted) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+OK
+
+[20/77] test_fde_extents.py
+test_counts_fde_missing_from_table (test_fde_extents.FdeExtentTests.test_counts_fde_missing_from_table) ... ok
+test_counts_overlap_instead_of_hiding_it (test_fde_extents.FdeExtentTests.test_counts_overlap_instead_of_hiding_it) ... ok
+test_counts_table_start_that_differs_from_fde (test_fde_extents.FdeExtentTests.test_counts_table_start_that_differs_from_fde) ... ok
+test_decodes_extents_lsda_and_gaps (test_fde_extents.FdeExtentTests.test_decodes_extents_lsda_and_gaps) ... ok
+test_gap_and_tail_measured_from_running_end (test_fde_extents.FdeExtentTests.test_gap_and_tail_measured_from_running_end) ... ok
+test_nested_extents_leave_no_false_gap (test_fde_extents.FdeExtentTests.test_nested_extents_leave_no_false_gap) ... ok
+test_rejects_64_bit_record (test_fde_extents.FdeExtentTests.test_rejects_64_bit_record) ... ok
+test_rejects_augmentation_length_mismatch (test_fde_extents.FdeExtentTests.test_rejects_augmentation_length_mismatch) ... ok
+test_rejects_bad_cie_pointer (test_fde_extents.FdeExtentTests.test_rejects_bad_cie_pointer) ... ok
+test_rejects_bytes_after_terminator (test_fde_extents.FdeExtentTests.test_rejects_bytes_after_terminator) ... ok
+test_rejects_header_frame_pointer_mismatch (test_fde_extents.FdeExtentTests.test_rejects_header_frame_pointer_mismatch) ... ok
+test_rejects_length_four_cie (test_fde_extents.FdeExtentTests.test_rejects_length_four_cie) ... ok
+test_rejects_missing_terminator (test_fde_extents.FdeExtentTests.test_rejects_missing_terminator) ... ok
+test_rejects_negative_range (test_fde_extents.FdeExtentTests.test_rejects_negative_range) ... ok
+test_rejects_table_entry_that_is_not_an_fde (test_fde_extents.FdeExtentTests.test_rejects_table_entry_that_is_not_an_fde) ... ok
+test_rejects_unsupported_augmentation (test_fde_extents.FdeExtentTests.test_rejects_unsupported_augmentation) ... ok
+test_rejects_unsupported_pointer_encoding (test_fde_extents.FdeExtentTests.test_rejects_unsupported_pointer_encoding) ... ok
+test_zero_lsda_is_null_not_a_pointer (test_fde_extents.FdeExtentTests.test_zero_lsda_is_null_not_a_pointer) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.002s
+
+OK
+
+[21/77] test_fde_extents_cie_aug_encoding.py
+test_non_ascii_augmentation_fails_closed (test_fde_extents_cie_aug_encoding.CieAugmentationEncodingTests.test_non_ascii_augmentation_fails_closed) ... ok
+test_valid_augmentation_unchanged (test_fde_extents_cie_aug_encoding.CieAugmentationEncodingTests.test_valid_augmentation_unchanged) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+OK
+
+[22/77] test_fde_extents_cli.py
+test_release_115_missing_artifact (test_fde_extents_cli.FdeExtentsCliTests.test_release_115_missing_artifact) ... ok
+test_release_115_pointer_artifact (test_fde_extents_cli.FdeExtentsCliTests.test_release_115_pointer_artifact) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.086s
+
+OK
+
+[23/77] test_fde_extents_duplicate_except.py
+test_rejects_duplicate_gcc_except_table (test_fde_extents_duplicate_except.DuplicateExceptTableTests.test_rejects_duplicate_gcc_except_table) ... ok
+test_single_except_table_still_passes (test_fde_extents_duplicate_except.DuplicateExceptTableTests.test_single_except_table_still_passes) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+OK
+
+[24/77] test_fde_extents_duplicate_frame.py
+test_rejects_duplicate_eh_frame_section (test_fde_extents_duplicate_frame.DuplicateFrameTests.test_rejects_duplicate_eh_frame_section) ... ok
+test_single_eh_frame_still_passes (test_fde_extents_duplicate_frame.DuplicateFrameTests.test_single_eh_frame_still_passes) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+OK
+
+[25/77] test_fde_extents_inventory_dup_keys.py
+test_clean_inventory_still_loads (test_fde_extents_inventory_dup_keys.InventoryDuplicateKeyTests.test_clean_inventory_still_loads) ... ok
+test_duplicate_fde_count_rejected (test_fde_extents_inventory_dup_keys.InventoryDuplicateKeyTests.test_duplicate_fde_count_rejected) ... ok
+test_duplicate_nested_key_rejected (test_fde_extents_inventory_dup_keys.InventoryDuplicateKeyTests.test_duplicate_nested_key_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+
+[26/77] test_fde_extents_manifest_lookup.py
+test_entry_without_path_fails_closed (test_fde_extents_manifest_lookup.ManifestLookupTests.test_entry_without_path_fails_closed) ... ok
+test_manifest_without_files_fails_closed (test_fde_extents_manifest_lookup.ManifestLookupTests.test_manifest_without_files_fails_closed) ... ok
+test_missing_release_entry_fails_closed (test_fde_extents_manifest_lookup.ManifestLookupTests.test_missing_release_entry_fails_closed) ... ok
+test_valid_entry_reaches_artifact_check (test_fde_extents_manifest_lookup.ManifestLookupTests.test_valid_entry_reaches_artifact_check) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.008s
+
+OK
+
+[27/77] test_ghidra_plan_manifest_fields.py
+test_complete_entry_still_plans (test_ghidra_plan_manifest_fields.GhidraPlanManifestFieldsTests.test_complete_entry_still_plans) ... ok
+test_missing_both_names_both_fields (test_ghidra_plan_manifest_fields.GhidraPlanManifestFieldsTests.test_missing_both_names_both_fields) ... ok
+test_missing_sha256_fails_closed (test_ghidra_plan_manifest_fields.GhidraPlanManifestFieldsTests.test_missing_sha256_fails_closed) ... ok
+test_missing_size_fails_closed (test_ghidra_plan_manifest_fields.GhidraPlanManifestFieldsTests.test_missing_size_fails_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.167s
+
+OK
+
+[28/77] test_ghidra_plan_manifest_lookup.py
+test_entry_without_path_fails_closed (test_ghidra_plan_manifest_lookup.GhidraPlanManifestLookupTests.test_entry_without_path_fails_closed) ... ok
+test_manifest_without_files_list_fails_closed (test_ghidra_plan_manifest_lookup.GhidraPlanManifestLookupTests.test_manifest_without_files_list_fails_closed) ... ok
+test_missing_entry_fails_closed (test_ghidra_plan_manifest_lookup.GhidraPlanManifestLookupTests.test_missing_entry_fails_closed) ... ok
+test_non_object_manifest_fails_closed (test_ghidra_plan_manifest_lookup.GhidraPlanManifestLookupTests.test_non_object_manifest_fails_closed) ... ok
+test_present_entry_passes_lookup_to_artifact_check (test_ghidra_plan_manifest_lookup.GhidraPlanManifestLookupTests.test_present_entry_passes_lookup_to_artifact_check) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.203s
+
+OK
+
+[29/77] test_ghidra_plan_shell.py
+test_missing_native_launcher_is_not_printed_as_a_verified_plan (test_ghidra_plan_shell.GhidraPlanShellTests.test_missing_native_launcher_is_not_printed_as_a_verified_plan) ... ok
+test_native_plan_executes_only_the_marker_and_preserves_arguments (test_ghidra_plan_shell.GhidraPlanShellTests.test_native_plan_executes_only_the_marker_and_preserves_arguments) ... ok
+test_posix_output_round_trips_and_keeps_the_existing_command (test_ghidra_plan_shell.GhidraPlanShellTests.test_posix_output_round_trips_and_keeps_the_existing_command) ... ok
+test_windows_plan_selects_batch_and_escapes_powershell_literals (test_ghidra_plan_shell.GhidraPlanShellTests.test_windows_plan_selects_batch_and_escapes_powershell_literals) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.019s
+
+OK
+
+[30/77] test_ip_permit_state_static.py
+test_actual_guard_retry_init_output_and_followup_operands (test_ip_permit_state_static.IPPermitStateTests.test_actual_guard_retry_init_output_and_followup_operands) ... ok
+test_guard_encoding_and_winning_step_boundary_relations (test_ip_permit_state_static.IPPermitStateTests.test_guard_encoding_and_winning_step_boundary_relations) ... ok
+test_native_regeneration_and_retained_records (test_ip_permit_state_static.IPPermitStateTests.test_native_regeneration_and_retained_records) ... ok
+test_public_identity_gate_rejects_modified_truncated_and_other_release (test_ip_permit_state_static.IPPermitStateTests.test_public_identity_gate_rejects_modified_truncated_and_other_release) ... ok
+test_real_shift_mask_threshold_and_step_counterfactuals (test_ip_permit_state_static.IPPermitStateTests.test_real_shift_mask_threshold_and_step_counterfactuals) ... ok
+test_real_source_code_relocations_and_fde_extents (test_ip_permit_state_static.IPPermitStateTests.test_real_source_code_relocations_and_fde_extents) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 14.387s
+
+OK
+
+[31/77] test_latency_projection_static.py
+test_actual_guards_signed_normalization_observer_and_record_operands (test_latency_projection_static.LatencyProjectionTests.test_actual_guards_signed_normalization_observer_and_record_operands) ... ok
+test_actual_source_relocations_and_unwind_extent (test_latency_projection_static.LatencyProjectionTests.test_actual_source_relocations_and_unwind_extent) ... ok
+test_normalization_exact_rational_identity_and_finite_projection (test_latency_projection_static.LatencyProjectionTests.test_normalization_exact_rational_identity_and_finite_projection) ... ok
+test_public_identity_gate_precedes_output (test_latency_projection_static.LatencyProjectionTests.test_public_identity_gate_precedes_output) ... ok
+test_real_cap_and_divisor_counterfactuals (test_latency_projection_static.LatencyProjectionTests.test_real_cap_and_divisor_counterfactuals) ... ok
+test_retained_native_full_fde_and_argument_records (test_latency_projection_static.LatencyProjectionTests.test_retained_native_full_fde_and_argument_records) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 16.418s
+
+OK
+
+[32/77] test_mcp_stdio.py
+test_eof_is_not_a_timeout (test_mcp_stdio.PipeTests.test_eof_is_not_a_timeout) ... ok
+test_large_utf8_frame_across_pipe_writes (test_mcp_stdio.PipeTests.test_large_utf8_frame_across_pipe_writes) ... ok
+test_real_pipe_frames_and_response_selection (test_mcp_stdio.PipeTests.test_real_pipe_frames_and_response_selection) ... ok
+test_server_error_is_not_a_success (test_mcp_stdio.PipeTests.test_server_error_is_not_a_success) ... ok
+test_timeout_keeps_partial_frame_for_next_receive (test_mcp_stdio.PipeTests.test_timeout_keeps_partial_frame_for_next_receive) ... ok
+test_truncated_frame_is_not_an_accepted_response (test_mcp_stdio.PipeTests.test_truncated_frame_is_not_an_accepted_response) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.180s
+
+OK
+
+[33/77] test_node115_catalogue.py
+test_all_scope_is_node115_with_no_unearned_gates (test_node115_catalogue.CatalogueTests.test_all_scope_is_node115_with_no_unearned_gates) ... ok
+test_completed_gate_requires_evidence (test_node115_catalogue.CatalogueTests.test_completed_gate_requires_evidence) ... ok
+test_dependency_bytes_do_not_count_as_first_party (test_node115_catalogue.CatalogueTests.test_dependency_bytes_do_not_count_as_first_party) ... ok
+test_old_target_cannot_enter_generated_scope (test_node115_catalogue.CatalogueTests.test_old_target_cannot_enter_generated_scope) ... ok
+test_wrong_owner_target_and_changed_evidence_rejected (test_node115_catalogue.CatalogueTests.test_wrong_owner_target_and_changed_evidence_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.204s
+
+OK
+
+[34/77] test_node115_field_adapter_drift.py
+setUpClass (test_node115_field_adapter_drift.ActualNode115Bindings) ... skipped 'Set HL_RE014_LIBCORE to the explicitly supplied pinned official archive; no download or qualification is implied.'
+test_existing_output_precedes_input_reads_and_failures_export_nothing (test_node115_field_adapter_drift.AdmissionAndPublicationControls.test_existing_output_precedes_input_reads_and_failures_export_nothing) ... ok
+test_wrong_full_input_identities_are_not_evidence (test_node115_field_adapter_drift.AdmissionAndPublicationControls.test_wrong_full_input_identities_are_not_evidence) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+OK (skipped=1)
+
+[35/77] test_node115_latency_pair_rust.py
+test_exact_instruction_widths_and_signed32_regression (test_node115_latency_pair_rust.LatencyPairRustTests.test_exact_instruction_widths_and_signed32_regression) ... ok
+test_full_native_records_and_pre_rust_finite_population (test_node115_latency_pair_rust.LatencyPairRustTests.test_full_native_records_and_pre_rust_finite_population) ... ok
+test_real_divisor_cap_and_correction_controls (test_node115_latency_pair_rust.LatencyPairRustTests.test_real_divisor_cap_and_correction_controls) ... ok
+test_smoke_keeps_uncapped_saved_value_and_raw_bit_results (test_node115_latency_pair_rust.LatencyPairRustTests.test_smoke_keeps_uncapped_saved_value_and_raw_bit_results) ... ok
+test_wrong_capture_stops_before_compiler_or_output (test_node115_latency_pair_rust.LatencyPairRustTests.test_wrong_capture_stops_before_compiler_or_output) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 3.147s
+
+OK
+
+[36/77] test_node115_snapshot_selectors_rust.py
+test_expected_corpus_precedes_production_and_keeps_release_and_denominators (test_node115_snapshot_selectors_rust.Node115SelectorRustTests.test_expected_corpus_precedes_production_and_keeps_release_and_denominators) ... ok
+test_known_exit_is_a_selected_guard_and_other_does_not_mean_a_call (test_node115_snapshot_selectors_rust.Node115SelectorRustTests.test_known_exit_is_a_selected_guard_and_other_does_not_mean_a_call) ... ok
+test_local_adapter_has_only_actual_node115_slots_and_forbids_calls (test_node115_snapshot_selectors_rust.Node115SelectorRustTests.test_local_adapter_has_only_actual_node115_slots_and_forbids_calls) ... ok
+test_raw_instruction_partition_and_actual_byte_controls_regenerate (test_node115_snapshot_selectors_rust.Node115SelectorRustTests.test_raw_instruction_partition_and_actual_byte_controls_regenerate) ... ok
+test_smoke_fixtures_are_exact_native_rows_including_raw_width_boundaries (test_node115_snapshot_selectors_rust.Node115SelectorRustTests.test_smoke_fixtures_are_exact_native_rows_including_raw_width_boundaries) ... ok
+test_wrong_identity_and_wrong_expectations_stop_before_compiler (test_node115_snapshot_selectors_rust.Node115SelectorRustTests.test_wrong_identity_and_wrong_expectations_stop_before_compiler) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 6.678s
+
+OK
+
+[37/77] test_node115_tagged_count.py
+test_corrupt_bounds_body_and_fixture_rejected (test_node115_tagged_count.TaggedCountTests.test_corrupt_bounds_body_and_fixture_rejected) ... ok
+test_other_capture_rejected (test_node115_tagged_count.TaggedCountTests.test_other_capture_rejected) ... ok
+test_three_complete_target_functions (test_node115_tagged_count.TaggedCountTests.test_three_complete_target_functions) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.006s
+
+OK
+
+[38/77] test_node115_u128_binary64.py
+test_changed_bounds_and_reference_rejected (test_node115_u128_binary64.MigrationTests.test_changed_bounds_and_reference_rejected) ... ok
+test_target_and_complete_extent (test_node115_u128_binary64.MigrationTests.test_target_and_complete_extent) ... ok
+test_wrong_capture_rejected (test_node115_u128_binary64.MigrationTests.test_wrong_capture_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.591s
+
+OK
+
+[39/77] test_node115_weighted_fold_rust.py
+test_bad_capture_stops_before_compiler_or_outputs (test_node115_weighted_fold_rust.WeightedFoldRustTests.test_bad_capture_stops_before_compiler_or_outputs) ... ok
+test_frozen_population_and_full_static_bindings (test_node115_weighted_fold_rust.WeightedFoldRustTests.test_frozen_population_and_full_static_bindings) ... ok
+test_native_carry_factor_status_and_condition_controls (test_node115_weighted_fold_rust.WeightedFoldRustTests.test_native_carry_factor_status_and_condition_controls) ... ok
+test_smoke_rows_are_frozen_native_results (test_node115_weighted_fold_rust.WeightedFoldRustTests.test_smoke_rows_are_frozen_native_results) ... ok
+test_status_gate_follows_processing_and_memory_is_qualified (test_node115_weighted_fold_rust.WeightedFoldRustTests.test_status_gate_follows_processing_and_memory_is_qualified) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 3.535s
+
+OK
+
+[40/77] test_node_padadapter_semantic_comparison.py
+test_changed_semantic_sites_reject_below_full_identity (test_node_padadapter_semantic_comparison.PadAdapterSemanticComparison.test_changed_semantic_sites_reject_below_full_identity) ... ok
+test_frozen_synthetic_callback_traces (test_node_padadapter_semantic_comparison.PadAdapterSemanticComparison.test_frozen_synthetic_callback_traces) ... ok
+test_full_identity_selected_unwind_and_sites (test_node_padadapter_semantic_comparison.PadAdapterSemanticComparison.test_full_identity_selected_unwind_and_sites) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.146s
+
+OK
+
+[41/77] test_nonce_ordering_static.py
+test_actual_backedges_cross_boundary_loads_and_provider_bindings (test_nonce_ordering_static.NonceOrderingTests.test_actual_backedges_cross_boundary_loads_and_provider_bindings) ... ok
+test_full_native_regeneration_and_retained_records (test_nonce_ordering_static.NonceOrderingTests.test_full_native_regeneration_and_retained_records) ... ok
+test_public_identity_gate_precedes_outputs (test_nonce_ordering_static.NonceOrderingTests.test_public_identity_gate_precedes_outputs) ... ok
+test_real_strictness_and_signedness_counterfactuals_all_five_bodies (test_nonce_ordering_static.NonceOrderingTests.test_real_strictness_and_signedness_counterfactuals_all_five_bodies) ... ok
+test_source_diagnostic_relocations_fde_and_raw_metadata_controls (test_nonce_ordering_static.NonceOrderingTests.test_source_diagnostic_relocations_fde_and_raw_metadata_controls) ... ok
+test_two_span_obligations_equal_every_logical_neighbor (test_nonce_ordering_static.NonceOrderingTests.test_two_span_obligations_equal_every_logical_neighbor) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 21.137s
+
+OK
+
+[42/77] test_nonce_ring_rust.py
+test_actual_compilation_layouts_and_source_corruptions (test_nonce_ring_rust.NonceRingRustTests.test_actual_compilation_layouts_and_source_corruptions) ... skipped 'explicit HYPERLIQUID_NONCE_RING_RUSTC and Capstone5.0.6 required; not a Rust pass'
+test_invalid_metadata_and_non_u64_values_never_reach_unsafe_code (test_nonce_ring_rust.NonceRingRustTests.test_invalid_metadata_and_non_u64_values_never_reach_unsafe_code) ... ok
+test_native_wrap_boundary_and_unsigned_equality (test_nonce_ring_rust.NonceRingRustTests.test_native_wrap_boundary_and_unsigned_equality) ... ok
+test_own_object_entry_rejects_capture_and_malformed_inputs (test_nonce_ring_rust.NonceRingRustTests.test_own_object_entry_rejects_capture_and_malformed_inputs) ... ok
+test_pinned_target_and_all_five_native_predicates (test_nonce_ring_rust.NonceRingRustTests.test_pinned_target_and_all_five_native_predicates) ... ok
+test_retained_actual_provenance_and_measured_limits (test_nonce_ring_rust.NonceRingRustTests.test_retained_actual_provenance_and_measured_limits) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 1.063s
+
+OK (skipped=1)
+
+[43/77] test_numeric_selector_static.py
+test_actual_caller_zero_branch_and_direct_call_bindings (test_numeric_selector_static.NumericSelectorTests.test_actual_caller_zero_branch_and_direct_call_bindings) ... ok
+test_actual_import_fde_and_executable_section_controls (test_numeric_selector_static.NumericSelectorTests.test_actual_import_fde_and_executable_section_controls) ... ok
+test_actual_lookup_multiplier_remainder_and_decimal_data_change_facts (test_numeric_selector_static.NumericSelectorTests.test_actual_lookup_multiplier_remainder_and_decimal_data_change_facts) ... ok
+test_actual_prefix_bound_offset_and_tag_operands_change_projected_facts (test_numeric_selector_static.NumericSelectorTests.test_actual_prefix_bound_offset_and_tag_operands_change_projected_facts) ... ok
+test_all_domain_division_certificates_and_independent_decimal_boundaries (test_numeric_selector_static.NumericSelectorTests.test_all_domain_division_certificates_and_independent_decimal_boundaries) ... ok
+test_full_four_fdes_native_regeneration_and_imports (test_numeric_selector_static.NumericSelectorTests.test_full_four_fdes_native_regeneration_and_imports) ... ok
+test_namespace_residues_and_saturating_tail_reach_only_the_selected_zero_branch (test_numeric_selector_static.NumericSelectorTests.test_namespace_residues_and_saturating_tail_reach_only_the_selected_zero_branch) ... ok
+test_numeric_and_copied_string_states_are_not_assigned_error_types (test_numeric_selector_static.NumericSelectorTests.test_numeric_and_copied_string_states_are_not_assigned_error_types) ... ok
+test_public_input_identity_precedes_native_calls_and_output (test_numeric_selector_static.NumericSelectorTests.test_public_input_identity_precedes_native_calls_and_output) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 39.292s
+
+OK
+
+[44/77] test_poll_tls_gate_115.py
+test_changed_lsda_landing_and_action_rejected (test_poll_tls_gate_115.PollTlsGate115.test_changed_lsda_landing_and_action_rejected) ... ok
+test_changed_semantic_operands_rejected (test_poll_tls_gate_115.PollTlsGate115.test_changed_semantic_operands_rejected) ... ok
+test_duplicate_and_redirected_relocation_rejected (test_poll_tls_gate_115.PollTlsGate115.test_duplicate_and_redirected_relocation_rejected) ... ok
+test_import_name_rejected (test_poll_tls_gate_115.PollTlsGate115.test_import_name_rejected) ... ok
+test_lock_prefix_join_is_explicit (test_poll_tls_gate_115.PollTlsGate115.test_lock_prefix_join_is_explicit) ... ok
+test_malformed_lsda_bounds_and_encoding_rejected (test_poll_tls_gate_115.PollTlsGate115.test_malformed_lsda_bounds_and_encoding_rejected) ... ok
+test_native_gap_and_byte_corruption_rejected (test_poll_tls_gate_115.PollTlsGate115.test_native_gap_and_byte_corruption_rejected) ... ok
+test_reproduce_packet (test_poll_tls_gate_115.PollTlsGate115.test_reproduce_packet) ... ok
+test_wrong_cie_personality_rejected (test_poll_tls_gate_115.PollTlsGate115.test_wrong_cie_personality_rejected) ... ok
+test_wrong_fde_lsda_pointer_rejected (test_poll_tls_gate_115.PollTlsGate115.test_wrong_fde_lsda_pointer_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.894s
+
+OK
+
+[45/77] test_priority_prefix_static.py
+test_native_regeneration_and_packet (test_priority_prefix_static.PriorityPrefixTests.test_native_regeneration_and_packet) ... ok
+test_public_identity_gate_precedes_output (test_priority_prefix_static.PriorityPrefixTests.test_public_identity_gate_precedes_output) ... ok
+test_real_dataflow_boundary_and_state_controls_all_three_owners (test_priority_prefix_static.PriorityPrefixTests.test_real_dataflow_boundary_and_state_controls_all_three_owners) ... ok
+test_real_relocations_fde_bounds_and_diagnostic_xrefs (test_priority_prefix_static.PriorityPrefixTests.test_real_relocations_fde_bounds_and_diagnostic_xrefs) ... ok
+test_real_semantic_counterfactuals (test_priority_prefix_static.PriorityPrefixTests.test_real_semantic_counterfactuals) ... ok
+test_two_extracted_numeric_predicates_cover_every_unsigned_byte (test_priority_prefix_static.PriorityPrefixTests.test_two_extracted_numeric_predicates_cover_every_unsigned_byte) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 48.070s
+
+OK
+
+[46/77] test_rea_config_dup_keys.py
+test_clean_config_still_loads (test_rea_config_dup_keys.ConfigDuplicateKeyTests.test_clean_config_still_loads) ... ok
+test_duplicate_default_target_rejected (test_rea_config_dup_keys.ConfigDuplicateKeyTests.test_duplicate_default_target_rejected) ... ok
+test_duplicate_nested_key_rejected (test_rea_config_dup_keys.ConfigDuplicateKeyTests.test_duplicate_nested_key_rejected) ... ok
+test_duplicate_version_rejected (test_rea_config_dup_keys.ConfigDuplicateKeyTests.test_duplicate_version_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK
+
+[47/77] test_rea_find_node_config.py
+test_explicit_node_ignores_missing_preferred_node (test_rea_find_node_config.FindNodeConfigTests.test_explicit_node_ignores_missing_preferred_node) ... ok
+test_missing_preferred_node_fails_closed (test_rea_find_node_config.FindNodeConfigTests.test_missing_preferred_node_fails_closed) ... ok
+test_present_preferred_node_still_fails_closed_without_node (test_rea_find_node_config.FindNodeConfigTests.test_present_preferred_node_still_fails_closed_without_node) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+OK
+
+[48/77] test_rea_java_home.py
+test_direct_selected_jdk_and_nested_jre_do_not_query_default (test_rea_java_home.JavaHomeDiscoveryTests.test_direct_selected_jdk_and_nested_jre_do_not_query_default) ... ok
+test_explicit_home_preserved_without_discovery (test_rea_java_home.JavaHomeDiscoveryTests.test_explicit_home_preserved_without_discovery) ... ok
+test_failed_resolver_does_not_advertise_usr (test_rea_java_home.JavaHomeDiscoveryTests.test_failed_resolver_does_not_advertise_usr) ... ok
+test_no_java_leaves_home_unset (test_rea_java_home.JavaHomeDiscoveryTests.test_no_java_leaves_home_unset) ... ok
+test_reported_home_must_be_absolute_and_have_full_jdk (test_rea_java_home.JavaHomeDiscoveryTests.test_reported_home_must_be_absolute_and_have_full_jdk) ... ok
+test_system_stub_uses_macos_resolver (test_rea_java_home.JavaHomeDiscoveryTests.test_system_stub_uses_macos_resolver) ... ok
+test_real_nested_jre_uses_enclosing_jdk (test_rea_java_home.NativeJavaHomeTests.test_real_nested_jre_uses_enclosing_jdk) ... skipped 'native macOS resolver required'
+test_system_launcher_uses_registered_jdk_root (test_rea_java_home.NativeJavaHomeTests.test_system_launcher_uses_registered_jdk_root) ... skipped 'native macOS resolver required'
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.004s
+
+OK (skipped=2)
+
+[49/77] test_rea_launcher.py
+test_first_supported_path_runtime_keeps_priority (test_rea_launcher.PathRuntimeSelectionTests.test_first_supported_path_runtime_keeps_priority) ... ok
+test_later_supported_path_runtime_is_selected (test_rea_launcher.PathRuntimeSelectionTests.test_later_supported_path_runtime_is_selected) ... ok
+test_exact_supported_version_boundaries (test_rea_launcher.RuntimeSelectionTests.test_exact_supported_version_boundaries) ... ok
+test_explicit_incompatible_runtime_not_silently_replaced (test_rea_launcher.RuntimeSelectionTests.test_explicit_incompatible_runtime_not_silently_replaced) ... ok
+test_explicit_provider_environment_preserved (test_rea_launcher.RuntimeSelectionTests.test_explicit_provider_environment_preserved) ... ok
+test_project_dependency_and_runtime_pins_agree (test_rea_launcher.RuntimeSelectionTests.test_project_dependency_and_runtime_pins_agree) ... ok
+test_target_bound_to_artifact_manifest (test_rea_launcher.RuntimeSelectionTests.test_target_bound_to_artifact_manifest) ... ok
+test_windows_launcher_preserves_command_exit_status (test_rea_launcher.RuntimeSelectionTests.test_windows_launcher_preserves_command_exit_status) ... ok
+test_cli_preserves_default_and_explicit_artifact_identities (test_rea_launcher.TargetSelectionTests.test_cli_preserves_default_and_explicit_artifact_identities) ... ok
+test_cli_rejects_surplus_arguments_without_emitting_a_target (test_rea_launcher.TargetSelectionTests.test_cli_rejects_surplus_arguments_without_emitting_a_target) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.451s
+
+OK
+
+[50/77] test_rea_main_version_config.py
+test_missing_version_does_not_block_install (test_rea_main_version_config.MainVersionConfigTests.test_missing_version_does_not_block_install) ... ok
+test_missing_version_fails_closed (test_rea_main_version_config.MainVersionConfigTests.test_missing_version_fails_closed) ... ok
+test_present_version_still_launches (test_rea_main_version_config.MainVersionConfigTests.test_present_version_still_launches) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.002s
+
+OK
+
+[51/77] test_rea_npm_install.py
+test_posix_replaces_the_launcher_process (test_rea_npm_install.InstallTests.test_posix_replaces_the_launcher_process) ... ok
+test_windows_runs_the_shim_and_returns_its_status (test_rea_npm_install.InstallTests.test_windows_runs_the_shim_and_returns_its_status) ... ok
+test_posix_does_not_execute_a_windows_shim (test_rea_npm_install.NpmShimTests.test_posix_does_not_execute_a_windows_shim) ... ok
+test_posix_selects_extensionless_npm (test_rea_npm_install.NpmShimTests.test_posix_selects_extensionless_npm) ... ok
+test_windows_accepts_batch_shim_when_cmd_is_absent (test_rea_npm_install.NpmShimTests.test_windows_accepts_batch_shim_when_cmd_is_absent) ... ok
+test_windows_rejects_a_posix_only_runtime (test_rea_npm_install.NpmShimTests.test_windows_rejects_a_posix_only_runtime) ... ok
+test_windows_selects_cmd_shim_first (test_rea_npm_install.NpmShimTests.test_windows_selects_cmd_shim_first) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.002s
+
+OK
+
+[52/77] test_rea_profile_disabled_analyzers_config.py
+test_missing_disabled_analyzers_fails_closed (test_rea_profile_disabled_analyzers_config.ProfileDisabledAnalyzersConfigTests.test_missing_disabled_analyzers_fails_closed) ... ok
+test_present_disabled_analyzers_still_applied (test_rea_profile_disabled_analyzers_config.ProfileDisabledAnalyzersConfigTests.test_present_disabled_analyzers_still_applied) ... ok
+test_unknown_profile_still_fails_closed (test_rea_profile_disabled_analyzers_config.ProfileDisabledAnalyzersConfigTests.test_unknown_profile_still_fails_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+
+[53/77] test_rea_smoke_manifest_fields.py
+test_complete_entry_passes_fields_to_check (test_rea_smoke_manifest_fields.ReaSmokeManifestFieldsTests.test_complete_entry_passes_fields_to_check) ... ok
+test_missing_both_names_both_fields (test_rea_smoke_manifest_fields.ReaSmokeManifestFieldsTests.test_missing_both_names_both_fields) ... ok
+test_missing_sha256_fails_closed (test_rea_smoke_manifest_fields.ReaSmokeManifestFieldsTests.test_missing_sha256_fails_closed) ... ok
+test_missing_size_fails_closed (test_rea_smoke_manifest_fields.ReaSmokeManifestFieldsTests.test_missing_size_fails_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.262s
+
+OK
+
+[54/77] test_rea_smoke_manifest_lookup.py
+test_entry_without_path_fails_closed (test_rea_smoke_manifest_lookup.ReaSmokeManifestLookupTests.test_entry_without_path_fails_closed) ... ok
+test_manifest_without_files_list_fails_closed (test_rea_smoke_manifest_lookup.ReaSmokeManifestLookupTests.test_manifest_without_files_list_fails_closed) ... ok
+test_missing_entry_fails_closed (test_rea_smoke_manifest_lookup.ReaSmokeManifestLookupTests.test_missing_entry_fails_closed) ... ok
+test_non_object_manifest_fails_closed (test_rea_smoke_manifest_lookup.ReaSmokeManifestLookupTests.test_non_object_manifest_fails_closed) ... ok
+test_present_entry_passes_lookup_to_artifact_check (test_rea_smoke_manifest_lookup.ReaSmokeManifestLookupTests.test_present_entry_passes_lookup_to_artifact_check) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.298s
+
+OK
+
+[55/77] test_rea_target_branch_config.py
+test_missing_targets_fails_closed (test_rea_target_branch_config.TargetBranchConfigTests.test_missing_targets_fails_closed) ... ok
+test_unknown_target_still_fails_closed (test_rea_target_branch_config.TargetBranchConfigTests.test_unknown_target_still_fails_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+OK
+
+[56/77] test_rea_target_default_config.py
+test_explicit_target_still_fails_closed (test_rea_target_default_config.TargetDefaultConfigTests.test_explicit_target_still_fails_closed) ... ok
+test_missing_default_target_fails_closed (test_rea_target_default_config.TargetDefaultConfigTests.test_missing_default_target_fails_closed) ... ok
+test_present_default_target_resolves (test_rea_target_default_config.TargetDefaultConfigTests.test_present_default_target_resolves) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+{
+  "path": "x",
+  "sha256": "y",
+  "provider_id": "z"
+}
+
+[57/77] test_rea_target_manifest_config.py
+test_present_manifest_entry_still_resolves (test_rea_target_manifest_config.TargetManifestConfigTests.test_present_manifest_entry_still_resolves) ... ok
+test_target_without_manifest_entry_fails_closed (test_rea_target_manifest_config.TargetManifestConfigTests.test_target_without_manifest_entry_fails_closed) ... ok
+test_target_without_manifest_entry_fails_closed_via_main (test_rea_target_manifest_config.TargetManifestConfigTests.test_target_without_manifest_entry_fails_closed_via_main) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+
+[58/77] test_rea_target_manifest_fields.py
+test_complete_manifest_entry_still_resolves (test_rea_target_manifest_fields.TargetManifestFieldTests.test_complete_manifest_entry_still_resolves) ... ok
+test_target_with_manifest_entry_missing_sha256_fails_closed (test_rea_target_manifest_fields.TargetManifestFieldTests.test_target_with_manifest_entry_missing_sha256_fails_closed) ... ok
+test_target_with_manifest_entry_missing_sha256_fails_closed_via_main (test_rea_target_manifest_fields.TargetManifestFieldTests.test_target_with_manifest_entry_missing_sha256_fails_closed_via_main) ... ok
+test_target_with_manifest_entry_missing_size_fails_closed (test_rea_target_manifest_fields.TargetManifestFieldTests.test_target_with_manifest_entry_missing_size_fails_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.002s
+
+OK
+
+[59/77] test_rea_target_provider_config.py
+test_missing_provider_fails_closed (test_rea_target_provider_config.TargetProviderConfigTests.test_missing_provider_fails_closed) ... ok
+test_missing_provider_fails_closed_with_check_stubbed (test_rea_target_provider_config.TargetProviderConfigTests.test_missing_provider_fails_closed_with_check_stubbed) ... ok
+test_present_provider_still_builds_row (test_rea_target_provider_config.TargetProviderConfigTests.test_present_provider_still_builds_row) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+
+[60/77] test_rea_target_targets_config.py
+test_missing_targets_fails_closed (test_rea_target_targets_config.TargetTargetsConfigTests.test_missing_targets_fails_closed) ... ok
+test_missing_targets_fails_closed_with_check_stubbed (test_rea_target_targets_config.TargetTargetsConfigTests.test_missing_targets_fails_closed_with_check_stubbed) ... ok
+test_present_targets_still_builds_row (test_rea_target_targets_config.TargetTargetsConfigTests.test_present_targets_still_builds_row) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+OK
+
+[61/77] test_run_tests.py
+test_actual_makefile_delegates_to_real_runner (test_run_tests.ProcessIsolationTests.test_actual_makefile_delegates_to_real_runner) ... ok
+test_failures_import_errors_skips_and_output_are_not_hidden (test_run_tests.ProcessIsolationTests.test_failures_import_errors_skips_and_output_are_not_hidden) ... ok
+test_interrupt_is_incomplete_nonzero_and_owned_child_is_reaped (test_run_tests.ProcessIsolationTests.test_interrupt_is_incomplete_nonzero_and_owned_child_is_reaped) ... ok
+test_missing_directory_fails_and_empty_directory_keeps_standard_result (test_run_tests.ProcessIsolationTests.test_missing_directory_fails_and_empty_directory_keeps_standard_result) ... ok
+test_real_children_isolate_import_globals_and_run_every_valid_file (test_run_tests.ProcessIsolationTests.test_real_children_isolate_import_globals_and_run_every_valid_file) ... ok
+test_real_launch_oserror_is_nonzero_and_every_file_is_attempted (test_run_tests.ProcessIsolationTests.test_real_launch_oserror_is_nonzero_and_every_file_is_attempted) ... ok
+test_same_interpreter_optimization_and_bytecode_flags (test_run_tests.ProcessIsolationTests.test_same_interpreter_optimization_and_bytecode_flags) ... ok
+test_signaled_child_does_not_hide_failure_or_stop_later_files (test_run_tests.ProcessIsolationTests.test_signaled_child_does_not_hide_failure_or_stop_later_files) ... ok
+test_unsupported_packages_or_nested_files_fail_before_partial_run (test_run_tests.ProcessIsolationTests.test_unsupported_packages_or_nested_files_fail_before_partial_run) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 1.054s
+
+OK
+
+[62/77] test_runtime_tag_static.py
+test_full_native_regeneration_and_retained_records (test_runtime_tag_static.RuntimeTagTests.test_full_native_regeneration_and_retained_records) ... ok
+test_public_identity_gate_precedes_outputs (test_runtime_tag_static.RuntimeTagTests.test_public_identity_gate_precedes_outputs) ... ok
+test_real_branch_cold_return_and_caller_tag_field_controls (test_runtime_tag_static.RuntimeTagTests.test_real_branch_cold_return_and_caller_tag_field_controls) ... ok
+test_real_mask_shift_and_word_sign_counterfactuals (test_runtime_tag_static.RuntimeTagTests.test_real_mask_shift_and_word_sign_counterfactuals) ... ok
+test_real_source_relocations_and_three_fde_bounds (test_runtime_tag_static.RuntimeTagTests.test_real_source_relocations_and_three_fde_bounds) ... ok
+test_stable_cache_all_bit_classes_precedence_and_unrelated_bits (test_runtime_tag_static.RuntimeTagTests.test_stable_cache_all_bit_classes_precedence_and_unrelated_bits) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 12.090s
+
+OK
+
+[63/77] test_snapshot_selection_static.py
+test_actual_branch_wrapper_context_and_call_binding_controls (test_snapshot_selection_static.SnapshotSelectionTests.test_actual_branch_wrapper_context_and_call_binding_controls) ... ok
+test_full_native_regeneration_and_retained_records (test_snapshot_selection_static.SnapshotSelectionTests.test_full_native_regeneration_and_retained_records) ... ok
+test_neg_overflow_selector_and_unsigned_count_boundaries (test_snapshot_selection_static.SnapshotSelectionTests.test_neg_overflow_selector_and_unsigned_count_boundaries) ... ok
+test_public_identity_gate_precedes_outputs (test_snapshot_selection_static.SnapshotSelectionTests.test_public_identity_gate_precedes_outputs) ... ok
+test_real_source_relocations_and_seven_fde_bounds (test_snapshot_selection_static.SnapshotSelectionTests.test_real_source_relocations_and_seven_fde_bounds) ... ok
+test_real_threshold_overflow_condition_and_mode_counterfactuals (test_snapshot_selection_static.SnapshotSelectionTests.test_real_threshold_overflow_condition_and_mode_counterfactuals) ... ok
+test_selected_exit_helper_returns_without_internal_calls (test_snapshot_selection_static.SnapshotSelectionTests.test_selected_exit_helper_returns_without_internal_calls) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 27.207s
+
+OK
+
+[64/77] test_tls_lock_id_static.py
+test_actual_import_call_relocation_and_fde_controls (test_tls_lock_id_static.TLSLockIdTests.test_actual_import_call_relocation_and_fde_controls) ... ok
+test_actual_layout_projection_and_uncompared_scalar_bytes (test_tls_lock_id_static.TLSLockIdTests.test_actual_layout_projection_and_uncompared_scalar_bytes) ... ok
+test_real_comparator_displacement_counterfactuals_change_projection (test_tls_lock_id_static.TLSLockIdTests.test_real_comparator_displacement_counterfactuals_change_projection) ... ok
+test_real_counter_restore_and_caller_outcome_controls (test_tls_lock_id_static.TLSLockIdTests.test_real_counter_restore_and_caller_outcome_controls) ... ok
+test_retained_and_native_regeneration (test_tls_lock_id_static.TLSLockIdTests.test_retained_and_native_regeneration) ... ok
+test_wrong_modified_truncated_public_inputs_fail_before_output (test_tls_lock_id_static.TLSLockIdTests.test_wrong_modified_truncated_public_inputs_fail_before_output) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 38.845s
+
+OK
+
+[65/77] test_u8_rejection_static.py
+test_actual_semantic_counterfactuals_change_the_certificate (test_u8_rejection_static.U8RejectionTests.test_actual_semantic_counterfactuals_change_the_certificate) ... ok
+test_complete_native_regeneration_and_retained_record (test_u8_rejection_static.U8RejectionTests.test_complete_native_regeneration_and_retained_record) ... ok
+test_public_identity_rejects_changed_truncated_and_other_release (test_u8_rejection_static.U8RejectionTests.test_public_identity_rejects_changed_truncated_and_other_release) ... ok
+test_real_entry_propagation_and_call_controls (test_u8_rejection_static.U8RejectionTests.test_real_entry_propagation_and_call_controls) ... ok
+test_real_expectation_relocations_and_fde_controls (test_u8_rejection_static.U8RejectionTests.test_real_expectation_relocations_and_fde_controls) ... ok
+test_three_local_return_paths_require_tag_store (test_u8_rejection_static.U8RejectionTests.test_three_local_return_paths_require_tag_store) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 37.430s
+
+OK
+
+[66/77] test_verify_imports.py
+test_every_retained_import_is_pinned (test_verify_imports.RepositoryManifestCoverageTests.test_every_retained_import_is_pinned) ... ok
+test_assume_unchanged_does_not_hide_modified_source (test_verify_imports.VerifyImportsTests.test_assume_unchanged_does_not_hide_modified_source) ... ok
+test_clean_pin_passes (test_verify_imports.VerifyImportsTests.test_clean_pin_passes) ... ok
+test_commit_mismatch_rejected (test_verify_imports.VerifyImportsTests.test_commit_mismatch_rejected) ... ok
+test_duplicate_key_in_imports_rejected (test_verify_imports.VerifyImportsTests.test_duplicate_key_in_imports_rejected) ... ok
+test_duplicate_key_in_sources_rejected (test_verify_imports.VerifyImportsTests.test_duplicate_key_in_sources_rejected) ... ok
+test_duplicate_path_entries_rejected (test_verify_imports.VerifyImportsTests.test_duplicate_path_entries_rejected) ... ok
+test_empty_repository_list_passes (test_verify_imports.VerifyImportsTests.test_empty_repository_list_passes) ... ok
+test_hidden_untracked_source_is_rejected (test_verify_imports.VerifyImportsTests.test_hidden_untracked_source_is_rejected) ... ok
+test_missing_git_binary_is_a_message (test_verify_imports.VerifyImportsTests.test_missing_git_binary_is_a_message) ... ok
+test_missing_submodule_names_the_fix (test_verify_imports.VerifyImportsTests.test_missing_submodule_names_the_fix) ... ok
+test_modified_reference_rejected (test_verify_imports.VerifyImportsTests.test_modified_reference_rejected) ... ok
+test_skip_worktree_does_not_hide_modified_source (test_verify_imports.VerifyImportsTests.test_skip_worktree_does_not_hide_modified_source) ... ok
+test_sources_manifest_must_list_repositories (test_verify_imports.VerifyImportsTests.test_sources_manifest_must_list_repositories) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.249s
+
+OK
+
+[67/77] test_verify_imports_diagnostics.py
+test_clean_pin_still_passes (test_verify_imports_diagnostics.VerifyImportsDiagnosticsTests.test_clean_pin_still_passes) ... ok
+test_missing_artifact_is_one_line (test_verify_imports_diagnostics.VerifyImportsDiagnosticsTests.test_missing_artifact_is_one_line) ... ok
+test_missing_provenance_is_one_line (test_verify_imports_diagnostics.VerifyImportsDiagnosticsTests.test_missing_provenance_is_one_line) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.123s
+
+OK
+
+[68/77] test_verify_imports_manifest_entry_path.py
+test_entry_missing_path_rejected (test_verify_imports_manifest_entry_path.VerifyImportsTests.test_entry_missing_path_rejected) ... ok
+test_non_dict_entry_rejected (test_verify_imports_manifest_entry_path.VerifyImportsTests.test_non_dict_entry_rejected) ... ok
+test_valid_entry_still_verifies (test_verify_imports_manifest_entry_path.VerifyImportsTests.test_valid_entry_still_verifies) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+Verified 1 imported files and all pinned source repositories.
+
+[69/77] test_verify_imports_manifest_file.py
+test_both_manifests_present_passes (test_verify_imports_manifest_file.VerifyImportsManifestFileTests.test_both_manifests_present_passes) ... ok
+test_missing_imports_manifest_rejected (test_verify_imports_manifest_file.VerifyImportsManifestFileTests.test_missing_imports_manifest_rejected) ... ok
+test_missing_sources_manifest_rejected (test_verify_imports_manifest_file.VerifyImportsManifestFileTests.test_missing_sources_manifest_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.053s
+
+OK
+
+[70/77] test_verify_imports_manifest_files_key.py
+test_manifest_missing_files_rejected (test_verify_imports_manifest_files_key.VerifyImportsFilesKeyTests.test_manifest_missing_files_rejected) ... ok
+test_manifest_with_files_still_verifies (test_verify_imports_manifest_files_key.VerifyImportsFilesKeyTests.test_manifest_with_files_still_verifies) ... ok
+test_non_dict_manifest_rejected (test_verify_imports_manifest_files_key.VerifyImportsFilesKeyTests.test_non_dict_manifest_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+Verified 1 imported files and all pinned source repositories.
+
+[71/77] test_verify_imports_manifest_files_type.py
+test_dict_files_rejected (test_verify_imports_manifest_files_type.VerifyImportsFilesTypeTests.test_dict_files_rejected) ... ok
+test_int_files_rejected (test_verify_imports_manifest_files_type.VerifyImportsFilesTypeTests.test_int_files_rejected) ... ok
+test_list_files_passes (test_verify_imports_manifest_files_type.VerifyImportsFilesTypeTests.test_list_files_passes) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.042s
+
+OK
+
+[72/77] test_verify_imports_source_repo_record.py
+test_non_dict_repo_rejected (test_verify_imports_source_repo_record.VerifyImportsRepoRecordTests.test_non_dict_repo_rejected) ... ok
+test_repo_missing_commit_rejected (test_verify_imports_source_repo_record.VerifyImportsRepoRecordTests.test_repo_missing_commit_rejected) ... ok
+test_repo_missing_path_rejected (test_verify_imports_source_repo_record.VerifyImportsRepoRecordTests.test_repo_missing_path_rejected) ... ok
+test_valid_repo_still_verifies (test_verify_imports_source_repo_record.VerifyImportsRepoRecordTests.test_valid_repo_still_verifies) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.030s
+
+OK
+Verified 0 imported files and all pinned source repositories.
+
+[73/77] test_verify_imports_sources_repositories_key.py
+test_non_dict_sources_rejected (test_verify_imports_sources_repositories_key.VerifyImportsSourcesKeyTests.test_non_dict_sources_rejected) ... ok
+test_sources_missing_repositories_rejected (test_verify_imports_sources_repositories_key.VerifyImportsSourcesKeyTests.test_sources_missing_repositories_rejected) ... ok
+test_sources_with_repositories_still_verifies (test_verify_imports_sources_repositories_key.VerifyImportsSourcesKeyTests.test_sources_with_repositories_still_verifies) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+OK
+Verified 0 imported files and all pinned source repositories.
+
+[74/77] test_verify_packets.py
+test_every_committed_manifest_passes (test_verify_packets.RepositoryPacketCoverageTests.test_every_committed_manifest_passes) ... ERROR
+test_duplicate_entry_rejected (test_verify_packets.VerifyPacketsTests.test_duplicate_entry_rejected) ... ok
+test_empty_manifest_rejected (test_verify_packets.VerifyPacketsTests.test_empty_manifest_rejected) ... ok
+test_generator_and_review_spellings_are_both_checked (test_verify_packets.VerifyPacketsTests.test_generator_and_review_spellings_are_both_checked) ... ok
+test_malformed_line_rejected (test_verify_packets.VerifyPacketsTests.test_malformed_line_rejected) ... ok
+test_missing_packet_tree_rejected (test_verify_packets.VerifyPacketsTests.test_missing_packet_tree_rejected) ... ok
+test_path_outside_repository_rejected (test_verify_packets.VerifyPacketsTests.test_path_outside_repository_rejected) ... ok
+test_repository_relative_entry_resolves (test_verify_packets.VerifyPacketsTests.test_repository_relative_entry_resolves) ... ok
+test_tampered_bytes_rejected (test_verify_packets.VerifyPacketsTests.test_tampered_bytes_rejected) ... ok
+test_unresolvable_row_grandfathered (test_verify_packets.VerifyPacketsTests.test_unresolvable_row_grandfathered) ... ok
+test_uppercase_digest_rejected (test_verify_packets.VerifyPacketsTests.test_uppercase_digest_rejected) ... ok
+test_valid_packet_passes (test_verify_packets.VerifyPacketsTests.test_valid_packet_passes) ... ok
+
+======================================================================
+ERROR: test_every_committed_manifest_passes (test_verify_packets.RepositoryPacketCoverageTests.test_every_committed_manifest_passes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/slop-node115-tls-gate-fo4s40zk/repository/tests/test_verify_packets.py", line 143, in test_every_committed_manifest_passes
+    verify_packets.verify(Path(__file__).resolve().parents[1])
+  File "/tmp/slop-node115-tls-gate-fo4s40zk/repository/tools/verify_packets.py", line 106, in verify
+    raise ValueError(f'Packet file digest mismatch: {relative}')
+ValueError: Packet file digest mismatch: README.md
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.035s
+
+FAILED (errors=1)
+Unittest child exited with status 1
+
+[75/77] test_weighted_comparison_static.py
+test_actual_carry_branches_status_row_operands_and_calls (test_weighted_comparison_static.WeightedComparisonTests.test_actual_carry_branches_status_row_operands_and_calls) ... ok
+test_actual_factor_shift_and_carry_condition_counterfactuals (test_weighted_comparison_static.WeightedComparisonTests.test_actual_factor_shift_and_carry_condition_counterfactuals) ... ok
+test_limb_borrow_identity_and_checked_fold_boundaries (test_weighted_comparison_static.WeightedComparisonTests.test_limb_borrow_identity_and_checked_fold_boundaries) ... ok
+test_native_regeneration_and_retained_records (test_weighted_comparison_static.WeightedComparisonTests.test_native_regeneration_and_retained_records) ... ok
+test_public_identity_gate_precedes_output (test_weighted_comparison_static.WeightedComparisonTests.test_public_identity_gate_precedes_output) ... ok
+test_real_source_relocations_and_fde_bounds (test_weighted_comparison_static.WeightedComparisonTests.test_real_source_relocations_and_fde_bounds) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 14.762s
+
+OK
+
+[76/77] test_wire_qty_normal_form.py
+test_actual_inverse_reciprocal_and_shift_counterfactuals (test_wire_qty_normal_form.WireQtyNormalFormTests.test_actual_inverse_reciprocal_and_shift_counterfactuals) ... ok
+test_actual_relocations_source_diagnostics_and_fde (test_wire_qty_normal_form.WireQtyNormalFormTests.test_actual_relocations_source_diagnostics_and_fde) ... ok
+test_actual_scale_masks_pack_and_input_path_controls (test_wire_qty_normal_form.WireQtyNormalFormTests.test_actual_scale_masks_pack_and_input_path_controls) ... ok
+test_fraction_identity_and_minimality_at_decimal_limb_and_domain_edges (test_wire_qty_normal_form.WireQtyNormalFormTests.test_fraction_identity_and_minimality_at_decimal_limb_and_domain_edges) ... ok
+test_native_regeneration_and_retained_domain_certificates (test_wire_qty_normal_form.WireQtyNormalFormTests.test_native_regeneration_and_retained_domain_certificates) ... ok
+test_public_identity_rejects_modified_truncated_and_other_release (test_wire_qty_normal_form.WireQtyNormalFormTests.test_public_identity_rejects_modified_truncated_and_other_release) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 33.409s
+
+OK
+
+[77/77] test_wire_qty_rust.py
+test_actual_operand_mutations_change_the_scalar_result (test_wire_qty_rust.WireQtyRustTests.test_actual_operand_mutations_change_the_scalar_result) ... ok
+test_all_exit_scales_zero_cap_and_limb_carries_have_witnesses (test_wire_qty_rust.WireQtyRustTests.test_all_exit_scales_zero_cap_and_limb_carries_have_witnesses) ... ok
+test_existing_evidence_and_modified_fixture_precede_compiler (test_wire_qty_rust.WireQtyRustTests.test_existing_evidence_and_modified_fixture_precede_compiler) ... ok
+test_frozen_expectations_regenerate_from_authenticated_operands (test_wire_qty_rust.WireQtyRustTests.test_frozen_expectations_regenerate_from_authenticated_operands) ... ok
+test_wrong_identity_precedes_compiler_or_output_creation (test_wire_qty_rust.WireQtyRustTests.test_wrong_identity_precedes_compiler_or_output_creation) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 2.662s
+
+OK
+
+Isolated unittest discovery: 77 files attempted; 1 failed.
+make: *** [Makefile:16: test] Error 1
