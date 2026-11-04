@@ -11,3 +11,9 @@ fork contents, Cargo locks and release flags remain incomplete.
 
 Run `python3 tools/build_provenance.py --check` to reproduce both retained records.
 Older release comparisons are recoverable through Git history.
+
+The [node #115 CFA frame-policy packet](../RE-002-node115-cfa-frame-policy/README.md)
+adds a two-native-tool census of 135,313 FDE records and complete selected
+instruction evidence. It distinguishes saved RBP from RBP-based CFA; source/object
+ownership and the build-wide frame-pointer setting remain unresolved, so the
+generated `frame_pointers` field intentionally stays unknown.
