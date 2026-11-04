@@ -1,0 +1,33 @@
+{
+  "scope": "CLI framing checks aligned to the parent's declared source transport policy, separate from native admission; execution still awaits review.",
+  "policy": "Each single malformed first frame must exit2 and emit no stdout; stderr is retained without an asserted message. Named valid transport variants require exit0, empty stderr and the exact given stdout. Signals/timeouts do not pass.",
+  "cases": [
+    {"id": "empty-line", "input_hex": "0a"},
+    {"id": "missing-field", "input_hex": "61093109300a"},
+    {"id": "extra-field", "input_hex": "6109310930093562356409780a"},
+    {"id": "empty-id", "input_hex": "0931093009356235640a"},
+    {"id": "id-with-space", "input_hex": "6120620931093009356235640a"},
+    {"id": "negative-mode", "input_hex": "61092d31093009356235640a"},
+    {"id": "mode-overflow", "input_hex": "6109323536093009356235640a"},
+    {"id": "depth-overflow", "input_hex": "6109310932353609356235640a"},
+    {"id": "nonnumeric-mode", "input_hex": "610978093009356235640a"},
+    {"id": "nonnumeric-depth", "input_hex": "610931097809356235640a"},
+    {"id": "empty-mode", "input_hex": "6109093009356235640a"},
+    {"id": "empty-depth", "input_hex": "6109310909356235640a"},
+    {"id": "odd-hex", "input_hex": "610931093009300a"},
+    {"id": "invalid-hex", "input_hex": "6109310930097a7a0a"},
+    {"id": "bad-empty-marker", "input_hex": "6109310930092d2d0a"},
+    {"id": "empty-hex-field", "input_hex": "6109310930090a"},
+    {"id": "nul-id", "input_hex": "61000931093009356235640a"},
+    {"id": "non-ascii-id", "input_hex": "ff0931093009356235640a"},
+    {"id": "non-ascii-hex", "input_hex": "610931093009ff0a"},
+    {"id": "unterminated-line", "input_hex": "61093109300935623564"},
+    {"id": "carriage-return-only", "input_hex": "610931093009356235640d"},
+    {"id": "plus-mode", "input_hex": "61092b31093009356235640a"},
+    {"id": "negative-depth", "input_hex": "610931092d3109356235640a"},
+    {"id": "dot-id", "input_hex": "612e620931093009356235640a"},
+    {"id": "valid-crlf", "input_hex": "63726c660931093009356235640d0a", "expected_stdout_hex": "63726c66097061727365640932092d0a"},
+    {"id": "valid-uppercase-hex", "input_hex": "757070657209310930093542333035440a", "expected_stdout_hex": "757070657209706172736564093309300a"},
+    {"id": "valid-leading-decimal-zeros", "input_hex": "7a65726f73093030310930303009356235640a", "expected_stdout_hex": "7a65726f73097061727365640932092d0a"}
+  ]
+}
