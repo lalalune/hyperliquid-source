@@ -61,3 +61,36 @@ python3 research/work-items/RE-004-signed-bound-kernel-115/native.py
 
 Only offline Python interpretation of original instructions; no captured
 executable or Unicorn process, networking, wallet or chain operation.
+
+## Independently authored Rust
+
+`src/node115-signed-bound-kernel` is a no_std safe value API, written after
+original freeze commit e8014ebc1deed1420cbe278e7241f733eb673fec. Direct rustc
+1.94.1/edition2021, no invented original Cargo graph or external dependency.
+The input-only client receives six raw words and cannot read expected results.
+Optimization levels0 and3 both match all6452 original observations; the
+optimized own-library repeat is byte-identical. Both compiled smoke tests
+check 52 frozen rows. Eight compiled mutations each differ on the original
+corpus and fail their smoke assertion. Exact denominators, raw-stream hashes
+and compiler identity are retained in rust-results.json.
+
+```
+python3 research/work-items/RE-004-signed-bound-kernel-115/build.py --rustc <rustc1.94.1> --output <new-directory>
+python3 -m unittest discover -s tests -p test_node115_signed_bound_kernel.py -v
+```
+
+The host is macOSarm64; this is a research build, not the original Linux
+recipe or a compiled-body comparison. Full original FDE184 instructions and
+selected interior59 instructions are separate denominators. No other original
+helper is executed or replaced. All92 component gates remain false.
+
+The interpreted denominator is193 bytes /59 instructions, separate from the
+650-byte containing export. No selected instruction calls an external helper
+or reads a global/relocation. Source-path leads and the outer diagnostic, lookup
+and caller-context records remain attributed to the unchanged accepted parent
+packet; its records/frames/relocations are hash-pinned as supporting context.
+They do not establish economic units or an original Rust row type.
+
+Packet integrity uses the repository resolver, which accepts packet-local and
+repository-relative entries: `python3 tools/verify_packets.py`. A plain
+`sha256sum -c` from inside this packet is not that resolver.
