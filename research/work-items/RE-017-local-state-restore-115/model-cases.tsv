@@ -1,0 +1,22 @@
+model	inputs	result
+freeze	tag=0;height=0;freeze=0	skip_tag
+freeze	tag=1;height=5;freeze=4	past_assert
+freeze	tag=1;height=5;freeze=6	future_skip
+freeze	tag=1;height=5;freeze=5	equal_reset
+freeze	tag=0x100000001;height=0;freeze=0	equal_reset
+increment	0xffffffffffffffff	0xffffffffffffffff
+suffix	abci_state	rmp
+suffix	abci_StATe	json
+json_tail	0x09,0x0a,0x0d,0x20	0x9,0xa,0xd,0x20
+selection	0x8000000000000001	other
+selection	0x8000000000000003	context_fallback
+selection	0x8000000000000004	other
+time_gate	0x0	conversion_call
+time_gate	0x20c49ba5e353f8	default_first
+time_gate	0xa8bfffffffff	conversion_call
+time_gate	0xa8c000000000	default_second
+time_gate	0xffff573ffffeae80	default_second
+time_gate	0xffff573ffffeae81	conversion_call
+ordering	0xffffffff,0,0 >= 0,0,0	false
+ordering	1,0xffffffff,0 >= 1,0,0	true
+ordering	1,2,3 >= 1,2,3	true
