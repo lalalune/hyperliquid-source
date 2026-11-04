@@ -130,7 +130,7 @@ Positions, margin, oracles, liquidations and spot balances.
 Price, size, notional and wei arithmetic plus asset metadata.
 
 - Target: node115.
-- Implementation paths: `src/node115-quantity-preparation`, `src/node115-price-core`.
+- Implementation paths: `src/node115-quantity-preparation`, `src/node115-price-core`, `src/node115-spot-decimal`.
 - Observed diagnostic paths: 8.
 - First task: Start with bounded arithmetic helpers: recover width, rounding, scale and overflow branches.
 

@@ -1,0 +1,110 @@
+[
+  {
+    "name": "focused",
+    "command": [
+      "<work>/onchain-venv/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_node115_spot_decimal.py",
+      "-v"
+    ],
+    "exit": 0,
+    "wall_seconds": 20.328
+  },
+  {
+    "name": "fmt",
+    "command": [
+      "<work>/host-tools/rust-1.94.1/bin/rustfmt",
+      "--check",
+      "--edition",
+      "2021",
+      "src/node115-spot-decimal/lib.rs",
+      "src/node115-spot-decimal/input_only_driver.rs"
+    ],
+    "exit": 0,
+    "wall_seconds": 2.607
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "<work>/host-tools/rust-1.94.1/bin/clippy-driver",
+      "--edition=2021",
+      "--crate-name",
+      "node115_spot_decimal",
+      "--crate-type",
+      "rlib",
+      "-D",
+      "warnings",
+      "src/node115-spot-decimal/lib.rs",
+      "-o",
+      "<work>/hl-spot115-checks/liblint.rlib"
+    ],
+    "exit": 0,
+    "wall_seconds": 5.584
+  },
+  {
+    "name": "scope-gates",
+    "command": [
+      "<work>/onchain-venv/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_verify_packets.py",
+      "-v"
+    ],
+    "exit": 0,
+    "wall_seconds": 45.879
+  },
+  {
+    "name": "doctor",
+    "command": [
+      "make",
+      "doctor"
+    ],
+    "exit": 0,
+    "wall_seconds": 7.642
+  },
+  {
+    "name": "verify",
+    "command": [
+      "make",
+      "verify"
+    ],
+    "exit": 0,
+    "wall_seconds": 62.463
+  },
+  {
+    "name": "catalogue",
+    "command": [
+      "make",
+      "catalogue"
+    ],
+    "exit": 0,
+    "wall_seconds": 56.053
+  },
+  {
+    "name": "catalogue-check",
+    "command": [
+      "make",
+      "catalogue-check"
+    ],
+    "exit": 0,
+    "wall_seconds": 57.946
+  },
+  {
+    "name": "reproduce",
+    "command": [
+      "make",
+      "reproduce"
+    ],
+    "exit": 0,
+    "wall_seconds": 106.069
+  }
+]
