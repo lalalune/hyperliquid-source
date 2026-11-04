@@ -1,0 +1,91 @@
+{
+  "task": "RE-014",
+  "component": "foundation / network-client dependency support",
+  "sourceBase": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "release": 115,
+  "targetSHA256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "targetBytes": 105896032,
+  "coordinates": "ELF link-time virtual addresses; ASLR/load bias not applied",
+  "scope": "Four complete unwind-described ranges; not validated whole-function extents or reconstruction comparisons",
+  "ranges": [
+    {
+      "start": "0x2b018e0",
+      "end": "0x2b05403",
+      "fde": "0x117d288",
+      "cieVA": "0x103d604",
+      "lsda": 2492524,
+      "bytes": 15139,
+      "instructions": 2714,
+      "sha256": "9792b2ef1312bb6494db7bfc397ee016d28504741d45d1be5bd237539c84556c"
+    },
+    {
+      "start": "0x5ce0b30",
+      "end": "0x5ce0b83",
+      "fde": "0xfe5bb4",
+      "cieVA": "0xca6ed8",
+      "lsda": null,
+      "bytes": 83,
+      "instructions": 25,
+      "sha256": "cc5da831152f3de7121e3b37ffde2d4c7b5821495bed255041a260ff2f7ac75f"
+    },
+    {
+      "start": "0x5cdf1b0",
+      "end": "0x5cdf270",
+      "fde": "0xfe5830",
+      "cieVA": "0xca6ed8",
+      "lsda": null,
+      "bytes": 192,
+      "instructions": 99,
+      "sha256": "e758390109ee25add42b3477791c42c1a3906444b1b2dc737dedf6a17faa8257"
+    },
+    {
+      "start": "0x5cdf710",
+      "end": "0x5cdf7de",
+      "fde": "0x13d2024",
+      "cieVA": "0x103d604",
+      "lsda": 4204952,
+      "bytes": 206,
+      "instructions": 66,
+      "sha256": "0b01d2525baf04cc4a770a55b55a8e0740458fba6ca4e334522af2c79b574fae"
+    }
+  ],
+  "totalBytes": 15620,
+  "totalInstructions": 2904,
+  "normalizations": [],
+  "targetExecutedOrEmulated": false,
+  "gatesChanged": false,
+  "sharedContext": "https://github.com/lalalune/hyperliquid-source/pull/2032 at 499a60329a205d6cc61de669f420227d5c41a608 already studies classifier0x5cdf1b0; no independent classifier-recovery credit",
+  "historicalLead": "https://github.com/lalalune/hyperliquid-source/pull/1804 (node94 only); no old target bytes, offsets or test result used as115 evidence",
+  "tools": {
+    "python": "3.12.1",
+    "capstoneDistribution": "5.0.9",
+    "capstoneWrapper": "5.0.7",
+    "capstoneAPI": [
+      5,
+      0,
+      1280
+    ],
+    "GNUobjdump": "2.47",
+    "options": "-d --wide --insn-width=16 -M intel --start-address=<start> --stop-address=<end>"
+  },
+  "comparison": "Each exported instruction address/raw byte pair agrees with GNU objdump, no masks; not a source-to-binary comparison",
+  "errorCFG": {
+    "entry": "0x2b046f5",
+    "retainedFieldClear": "0x2b04564",
+    "clearReachableInConservativeDirectCFG": true,
+    "reachableInstructionCount": 89,
+    "unknownExits": [],
+    "normalReturns": [
+      "0x2b0492f"
+    ],
+    "callModel": "Opaque calls follow fallthrough only on ordinary return; no call effects or unwind behavior claimed",
+    "staticGraphOnly": true,
+    "targetExecutedOrEmulated": false
+  },
+  "limitations": [
+    "Opaque calls are not interpreted; no unwind/callback side-effect model",
+    "R15 offsets local to selected driver branch, no entry-object ABI recovered",
+    "No full application success or Rust enum ABI claim",
+    "Classifier shared with PR2032; no progress gate requested"
+  ]
+}
