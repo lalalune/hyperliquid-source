@@ -1,8 +1,10 @@
 """Controls for target exclusivity and honest progress accounting."""
 import copy
+import errno
 import json
 import os
 from pathlib import Path
+import shutil
 import sys
 import tempfile
 import unittest
@@ -51,8 +53,15 @@ class CatalogueTests(unittest.TestCase):
             dest.parent.mkdir(parents=True, exist_ok=True)
             # Copies of small records can be mutated without changing originals;
             # the large, immutable input is linked and never written here.
+            # A hard link fails when the staging directory is on another
+            # filesystem (EXDEV, e.g. a tmpfs TMPDIR); copy in that case.
             if path.startswith('artifacts/'):
-                os.link(ROOT / path, dest)
+                try:
+                    os.link(ROOT / path, dest)
+                except OSError as error:
+                    if error.errno != errno.EXDEV:
+                        raise
+                    shutil.copyfile(ROOT / path, dest)
             else:
                 dest.write_bytes((ROOT / path).read_bytes())
         return root, registry
