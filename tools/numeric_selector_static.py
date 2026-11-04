@@ -153,9 +153,12 @@ def caller_branches(data):
 
 def extract(data):
     spec=specification();ss,read=reader(data);_,fs,_=fde_extents(data)
-    sec=next(s for s in ss if s['name']=='.rela.dyn')
+    sec=next((s for s in ss if s['name']=='.rela.dyn'),None)
+    require(sec is not None,'missing.rela.dyn section')
+    require(sec['size']%24==0,'truncated.rela.dyn section')
     rels={a:(i,v) for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']])}
-    dyn=next(s for s in ss if s['name']=='.dynsym');strings_sec=next(s for s in ss if s['name']=='.dynstr');strings=data[strings_sec['offset']:strings_sec['offset']+strings_sec['size']]
+    dyn=next((s for s in ss if s['name']=='.dynsym'),None);strings_sec=next((s for s in ss if s['name']=='.dynstr'),None)
+    require(dyn is not None,'missing.dynsym section');require(strings_sec is not None,'missing.dynstr section');strings=data[strings_sec['offset']:strings_sec['offset']+strings_sec['size']]
     facts=[];bindings={};exports={};native_frames=[]
     with tempfile.TemporaryDirectory() as tmp:
         path=Path(tmp)/'node115.elf';path.write_bytes(data)
@@ -176,7 +179,9 @@ def extract(data):
                     if target in rels:
                         info,value=rels[target];index=info>>32;name=None
                         if index:
-                            o=struct.unpack_from('<I',data,dyn['offset']+24*index)[0];name=strings[o:strings.index(0,o)].decode()
+                            o=struct.unpack_from('<I',data,dyn['offset']+24*index)[0]
+                            try:name=strings[o:strings.index(0,o)].decode()
+                            except UnicodeDecodeError:require(False,'dynamic symbol name is not valid UTF-8')
                         bindings[str(target)]={'kind':info&0xffffffff,'symbol_index':index,'addend':value,'symbol':name}
             matched=[l for l in frames.splitlines() if f'pc={a:016x}..{b:016x}' in l];require(len(matched)==1,'native FDE disagreement')
             meta={k:f[k] for k in ['start','end','fde','cie']};meta.update(body_sha256=hashlib.sha256(body).hexdigest(),instructions=len(rows),direct_calls=calls,rip_bindings=rip)
