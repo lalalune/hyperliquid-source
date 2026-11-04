@@ -1,0 +1,373 @@
+{
+ "artifact": {
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "constants": {
+  "bucket_header_offset": 1024,
+  "bucket_shift_limit": 64,
+  "bucket_shift_mul": 6,
+  "bucket_slot_bytes": 16,
+  "bucket_stride": 1040,
+  "level_clamp": "0xffffffffe",
+  "level_magic_mul": 43,
+  "level_magic_shift": 8,
+  "level_trap_threshold": 35,
+  "occupancy_mask_offset": 1032,
+  "slots_per_bucket": 64
+ },
+ "exported_bodies": [
+  "insert",
+  "setter",
+  "notify"
+ ],
+ "findings": {
+  "caller_census": "A whole-.text scan for relative call/jump sites finds exactly one direct caller of 0x5cf6880 - the setter at 0x5cea8d0 - and no direct tail-jumps, so the producer conditions above are the complete direct-call picture.  Calls through data-held pointers are not decidable from the artifact; none is known for this body, which sits on the conversion's tail-jump chain.",
+  "due_arm": "Producer condition for the hand-back: v <= [wheel+0x10] (unsigned, jbe at 0x5cf689f).  The body links nothing and returns (rax = 1, rdx = rsi = the entry pointer, both unchanged since entry).  The complete store census of the body shows the due arm performs exactly one store - the [entry+0x10] := v write at 0x5cf688f that precedes the comparison - so an already-due entry comes back with its +0x10 field refreshed and every link field untouched.",
+  "insert_contract": "0x5cf6880(rdi = &[wheel+0x8], rsi = entry).  The entry layout as this body sees it: +0x00 previous link, +0x08 next link, +0x10 last-written value, +0x18 value slot.  It loads v = [entry+0x18] at 0x5cf6881 and traps if v == -1 through the assert-fail callee behind slot 0x64df770 (0x1680bd0) with the 19-byte message at 0x94d3b8 (\"Timer already fired\") and the entry.rs Location static 0x64c6170 (line 417, col 27).  It then stores [entry+0x10] := v at 0x5cf688f - on every non-trapping path, before any return - and compares v unsigned against the wheel elapsed field [wheel+0x10], read as [rdi+0x8] because the sole caller passes &[wheel+0x8]; [wheel+0x10] is the same field the setter's level computation XORs the entry value against.",
+  "link_arm": "v > [wheel+0x10]: level = ((bsr((v xor elapsed) | 0x3f) ^ 1) * 0x2b) >> 8, with the pre-bsr input clamped to 0xffffffffe; if the bsr-derived index exceeds 0x23 (a level of 6 or more) the body traps through slot 0x64df620 (0x1680cbf) with the computed level and the wheel/mod.rs Location static 0x64c6a30 (line 102, col 13).  The bucket is [wheel+0x8] + level * 0x410; the slot index is (v >> shift) & 0x3f with shift = 6 * [bucket + 0x400], and the header word is trapped on multiplication overflow (slot 0x64df870, 0x1681dc0, level.rs Location 0x64c5900, line 173 col 19) and on shift >= 0x40 (slot 0x64e0820, 0x1681e20, Location 0x64c5918, line 173 col 6).  If the computed slot's head already is the entry itself the body calls the linked-list guard shim behind slot 0x64ecbd8 (0x5ce82b8, 51 B) with r9 = the linked_list.rs Location static 0x64c5d70 (line 125, col 9) and does not return - a double-link guard, not a second return path.  Otherwise it links the entry at the slot head (stores: [entry+0x8] := old head, [entry+0x0] := 0, [old head+0x0] := entry when non-null, [slot+0x0] := entry, [slot+0x8] := entry when the tail was empty), sets the occupancy bit [bucket+0x408] |= 1 << slot index at 0x5cf694c, and returns (rax = 0, rdx = v).",
+  "notify_contract": "0x5ce09a0(rdi = object).  If dword [obj+0x44] != -1 it calls 0x475aea0 on &[obj+0x44] at 0x5ce09af, returns when that returns null, and panic-formats through slot 0x64df6a0 (0x1680c30) with the 25-byte message at 0x94d466 (\"failed to wake I/O driver\") when it returns non-null.  Otherwise rbx = [obj+0x0] and it xchg's [rbx+0x10] := 2 at 0x5ce09c7: old 0 or 2 returns at once; old 1 claims the byte at [rbx+0x20] (lock cmpxchg pair 0x5ce09f9/0x5ce0a04, contention waiting via slot 0x64e01f8 with a 1000000000 timeout) and, when [rbx+0x18] is non-null, tail-jumps through slot 0x64ec188 (0x5bb42e0) with rdi = &[rbx+0x18]; any other old value panic-formats through slot 0x64df6b8 (0x1680e80) with the park.rs Location static 0x64c6f60 (line 187, col 18).  Its complete through-rbx store census is four stores: the +0x10 xchg and the +0x20 cmpxchg at 0x5ce09f9, 0x5ce0a04 and the contention retry 0x5ce0a65.",
+  "return_shape": "rdx is typed by rax: an entry pointer iff rax == 1, and the deadline value v itself iff rax == 0.  The predicate-chain packet's \"returned (rax, rdx) object\" phrasing is exact only on the rax == 1 arm; on the link arm the setter rebinds r14 to an integer and never dereferences it (see setter_linked_consumption).",
+  "setter_due_consumption": "Continuation of the predicate-chain setter census, which stopped at the rebind 0x5cea8d5: over [0x5cea8d5, 0x5ceaa17) the setter performs exactly five stores through r14 - byte [r14+0x38] := 0 at 0x5cea8ec, [r14+0x18] := -1 at 0x5cea8f1, lock cmpxchg [r14+0x30] |= 2 at 0x5cea907, [r14+0x20] := 0 at 0x5cea93e and xchg [r14+0x30] at 0x5cea948.  On the rax == 1 arm the handed-back pointer is the setter's own entry (insert returns rsi unchanged and its sole direct call site, 0x5cea8d0, passes the entry the setter just stored into), so these stores land on the same S+0x20-based entry: byte [S+0x58] := 0 (fired as due, where the timer-error arm writes 1), the value slot [S+0x38] := -1 (consumed), and [S+0x50] |= 2.  The shared tail at 0x5cea90f then tests the cmpxchg's old [S+0x50]: if it was 0 the setter takes the pair ([S+0x40] -> rdx, [S+0x48] -> wake argument, [S+0x40] := 0, [S+0x50] taken by xchg), unlocks the wheel and, when the taken head is non-null, tail-calls [head+0x8] with the argument; if it was non-zero the setter only unlocks - the pair was already claimed, the race the postcall body 0x5ce91b0's swap on the same state word arbitrates (predicate-chain packet).  The -1 re-check at 0x5cea8e2 cannot fire on this call path (insert traps on v == -1 and the due arm does not rewrite [entry+0x18]); the shared tail is also the timer-error arm's continuation, which reaches it without the fire block and with the byte set to 1.",
+  "setter_linked_consumption": "On the rax == 0 arm r14 holds the integer v: the setter compares [wheel+0x28] - 1 against it unsigned (0x5cea96e..0x5cea978) and, iff v < [wheel+0x28], calls the notify body 0x5ce09a0 on its rsi object at 0x5cea97d.  It then unlocks the wheel (lock cmpxchg at 0x5cea986; contention takes the release tail through slot 0x64e0f38 -> 0x5bb5650) and returns.  No store through the entry occurs on this arm after the insert call.  (The one rbx store in the address-range census, [wheel+0x20] at 0x5cea99b, sits in the pre-flag unlink fixup block at tail addresses and is reached only from 0x5cea87b, before the insert call.)"
+ },
+ "insert_call_sites": [
+  {
+   "kind": "call",
+   "site": "0x5cea8d0"
+  }
+ ],
+ "locations": {
+  "0x64c5900": {
+   "col": 19,
+   "file_ptr": "0x43a333",
+   "len": 75,
+   "line": 173,
+   "qwords": [
+    "0x0",
+    "0x4b",
+    "0x13000000ad"
+   ]
+  },
+  "0x64c5918": {
+   "col": 6,
+   "file_ptr": "0x43a333",
+   "len": 75,
+   "line": 173,
+   "qwords": [
+    "0x0",
+    "0x4b",
+    "0x6000000ad"
+   ]
+  },
+  "0x64c5d70": {
+   "col": 9,
+   "file_ptr": "0x44aa38",
+   "len": 67,
+   "line": 125,
+   "qwords": [
+    "0x0",
+    "0x43",
+    "0x90000007d"
+   ]
+  },
+  "0x64c6170": {
+   "col": 27,
+   "file_ptr": "0x44cef5",
+   "len": 69,
+   "line": 417,
+   "qwords": [
+    "0x0",
+    "0x45",
+    "0x1b000001a1"
+   ]
+  },
+  "0x64c6a30": {
+   "col": 13,
+   "file_ptr": "0x446310",
+   "len": 73,
+   "line": 102,
+   "qwords": [
+    "0x0",
+    "0x49",
+    "0xd00000066"
+   ]
+  },
+  "0x64c6f60": {
+   "col": 18,
+   "file_ptr": "0x447492",
+   "len": 63,
+   "line": 187,
+   "qwords": [
+    "0x0",
+    "0x3f",
+    "0x12000000bb"
+   ]
+  }
+ },
+ "open_edges": [
+  "The writer identities of the two wheel fields this chain reads but never writes - the flag byte at [wheel+0x30] the setter tests at 0x5cea881 (open edge 1 of #2617) and the horizon field at [wheel+0x28] the linked arm compares the new deadline against - remain untraced; this packet pins only their read sites, conditions and effects.",
+  "The bucket body 0x5ce29a0's second direct caller at 0x5ceb06e and the poll-side conditions under which entries are unlinked or bucket-inserted before the setter's flag test are not censused here; the pre-flag phase is pinned only at the setter's own call site (0x5cea839) by the predicate-chain packet.",
+  "The runtime contents of the handle fields and of the notify object's fields ([obj+0x44], the [obj+0x0] state object) - runtime data, not statically decidable from the artifact (open edge 2 of #2617, restated for the notify path).",
+  "Who re-invokes the gates to reach checker state 3 and the provenance of [record+0x1d8] before its first checker_a call (open edge 4 of #2613) remain open."
+ ],
+ "owners": {
+  "guard_shim": {
+   "bytes": 51,
+   "end": "0x5ce82eb",
+   "note": "extent/digest only; not exported",
+   "sha256": "250c6658ebf21ec1e6fb4cab7c9d9e96c965a30e794bcb1eca6e9b8db6b098cb",
+   "start": "0x5ce82b8"
+  },
+  "insert": {
+   "bytes": 319,
+   "end": "0x5cf69bf",
+   "file_offset": "0x5cf5880",
+   "sha256": "9b9b96ad18568130435d9442cbc897deef1bd531a6b2bab71e050997e87ef6ef",
+   "start": "0x5cf6880"
+  },
+  "notify": {
+   "bytes": 258,
+   "end": "0x5ce0aa2",
+   "file_offset": "0x5cdf9a0",
+   "sha256": "c7efc9b1071af6d1e1a162ccdff36175ffd1fe4a7dbfaa9628965f187d18b8e7",
+   "start": "0x5ce09a0"
+  },
+  "setter": {
+   "bytes": 599,
+   "end": "0x5ceaa17",
+   "file_offset": "0x5ce97c0",
+   "sha256": "5fbfddaf7831cf129e1dc6734e16b7aa37d5e51b3355c96a8da582d905f4d8e2",
+   "start": "0x5cea7c0"
+  }
+ },
+ "pins": {
+  "0x5ce09a5": "837f44ff",
+  "0x5ce09af": "e8eca4a7fe",
+  "0x5ce09c7": "48874310",
+  "0x5cea8d0": "e8abbf0000",
+  "0x5cea8d5": "4989d6",
+  "0x5cea8d8": "4883f801",
+  "0x5cea8ec": "41c6463800",
+  "0x5cea8f1": "49c74618ffffffff",
+  "0x5cea936": "498b5620",
+  "0x5cea97d": "e81e60ffff",
+  "0x5cf6881": "4c8b4618",
+  "0x5cf6889": "0f84ce000000",
+  "0x5cf688f": "4c894610",
+  "0x5cf689f": "0f86b3000000",
+  "0x5cf691c": "4839f1",
+  "0x5cf694c": "49098108040000",
+  "0x5cf6953": "31c0"
+ },
+ "return_table": {
+  "rows": [
+   {
+    "condition": "v == -1",
+    "outcome": "no return: assert-fail trap via slot 0x64df770 (0x1680bd0), message \"Timer already fired\" (0x94d3b8), Location entry.rs 417:27 (static 0x64c6170)",
+    "stores": "none"
+   },
+   {
+    "condition": "v <= elapsed (unsigned)",
+    "outcome": "return (rax = 1, rdx = entry): the entry is handed back unlinked, already due",
+    "stores": "[entry+0x10] := v at 0x5cf688f only"
+   },
+   {
+    "condition": "v > elapsed, bsr-derived level index > 0x23 (level >= 6)",
+    "outcome": "no return: level assert via slot 0x64df620 (0x1680cbf), rdi = computed level, Location wheel/mod.rs 102:13 (static 0x64c6a30)",
+    "stores": "[entry+0x10] := v only"
+   },
+   {
+    "condition": "v > elapsed, 6 * [bucket+0x400] overflows or >= 0x40",
+    "outcome": "no return: panic shim via slot 0x64df870 (0x1681dc0), Location level.rs 173:19 (static 0x64c5900), or via slot 0x64e0820 (0x1681e20), Location level.rs 173:6 (static 0x64c5918)",
+    "stores": "[entry+0x10] := v only"
+   },
+   {
+    "condition": "v > elapsed, computed slot head == entry",
+    "outcome": "no return: linked-list guard shim via slot 0x64ecbd8 (0x5ce82b8), Location linked_list.rs 125:9 (static 0x64c5d70)",
+    "stores": "[entry+0x10] := v and the stack scratch at 0x5cf6914 only"
+   },
+   {
+    "condition": "v > elapsed, otherwise",
+    "outcome": "return (rax = 0, rdx = v): the entry is linked at the head of its level bucket slot",
+    "stores": "[entry+0x10] := v, [entry+0x8] := old head, [entry+0x0] := 0, [old head+0x0] := entry if non-null, [slot+0x0] := entry, [slot+0x8] := entry if tail was empty, [bucket+0x408] |= 1 << slot index"
+   }
+  ],
+  "scope": "insert 0x5cf6880(rdi = &[wheel+0x8], rsi = entry); v = [entry+0x18]; elapsed = [wheel+0x10], read as [rdi+0x8]",
+  "setter_consumption": {
+   "rax == 0": "rdx is the deadline value v; iff v < [wheel+0x28] the setter calls notify 0x5ce09a0 on its rsi object, then unlocks and returns (see findings.setter_linked_consumption)",
+   "rax == 1": "fire block and shared take-pair tail on the returned entry (see findings.setter_due_consumption)"
+  },
+  "testable_statement": "The setter's insert call hands the entry back (rax = 1, rdx = the entry) iff the converted value v satisfies v <= [wheel+0x10] unsigned; it links the entry and returns (rax = 0, rdx = v) in every other non-trapping case, and v == -1, an out-of-range level, a corrupt bucket header word, or an already-linked entry each trap through the pinned Location statics instead of returning."
+ },
+ "slots": {
+  "0x64df620": "0x1680cbf",
+  "0x64df6a0": "0x1680c30",
+  "0x64df6b8": "0x1680e80",
+  "0x64df770": "0x1680bd0",
+  "0x64df870": "0x1681dc0",
+  "0x64e01f8": "0x5bb59d0",
+  "0x64e0820": "0x1681e20",
+  "0x64e0f38": "0x5bb5650",
+  "0x64ec188": "0x5bb42e0",
+  "0x64ecbd8": "0x5ce82b8"
+ },
+ "store_censuses": {
+  "insert_all_stores": [
+   {
+    "base": "rsi",
+    "disp": 16,
+    "site": "0x5cf688f"
+   },
+   {
+    "base": "rsp",
+    "disp": 0,
+    "site": "0x5cf6914"
+   },
+   {
+    "base": "rsi",
+    "disp": 8,
+    "site": "0x5cf6921"
+   },
+   {
+    "base": "rsi",
+    "disp": 0,
+    "site": "0x5cf6925"
+   },
+   {
+    "base": "rcx",
+    "disp": 0,
+    "site": "0x5cf6931"
+   },
+   {
+    "base": "rax",
+    "disp": 0,
+    "site": "0x5cf6934"
+   },
+   {
+    "base": "rax",
+    "disp": 8,
+    "site": "0x5cf693e"
+   },
+   {
+    "base": "r9",
+    "disp": 1032,
+    "site": "0x5cf694c"
+   }
+  ],
+  "notify_rbx_stores": [
+   {
+    "base": "rbx",
+    "disp": 16,
+    "site": "0x5ce09c7"
+   },
+   {
+    "base": "rbx",
+    "disp": 32,
+    "site": "0x5ce09f9"
+   },
+   {
+    "base": "rbx",
+    "disp": 32,
+    "site": "0x5ce0a04"
+   },
+   {
+    "base": "rbx",
+    "disp": 32,
+    "site": "0x5ce0a65"
+   }
+  ],
+  "setter_post_rebind_r14_stores": [
+   {
+    "base": "r14",
+    "disp": 56,
+    "site": "0x5cea8ec"
+   },
+   {
+    "base": "r14",
+    "disp": 24,
+    "site": "0x5cea8f1"
+   },
+   {
+    "base": "r14",
+    "disp": 48,
+    "site": "0x5cea907"
+   },
+   {
+    "base": "r14",
+    "disp": 32,
+    "site": "0x5cea93e"
+   },
+   {
+    "base": "r14",
+    "disp": 48,
+    "site": "0x5cea948"
+   }
+  ],
+  "setter_post_rebind_rbx_stores": [
+   {
+    "base": "rbx",
+    "disp": 0,
+    "site": "0x5cea91a"
+   },
+   {
+    "base": "rbx",
+    "disp": 0,
+    "site": "0x5cea950"
+   },
+   {
+    "base": "rbx",
+    "disp": 0,
+    "site": "0x5cea986"
+   },
+   {
+    "base": "rbx",
+    "disp": 32,
+    "site": "0x5cea99b"
+   },
+   {
+    "base": "rbx",
+    "disp": 0,
+    "site": "0x5cea9f6"
+   }
+  ]
+ },
+ "strings": {
+  "entry_rs": {
+   "bytes": 69,
+   "text": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/time/entry.rs",
+   "va": "0x44cef5"
+  },
+  "level_rs": {
+   "bytes": 75,
+   "text": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/time/wheel/level.rs",
+   "va": "0x43a333"
+  },
+  "linked_list_rs": {
+   "bytes": 67,
+   "text": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/util/linked_list.rs",
+   "va": "0x44aa38"
+  },
+  "park_rs": {
+   "bytes": 63,
+   "text": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/park.rs",
+   "va": "0x447492"
+  },
+  "timer_already_fired": {
+   "bytes": 19,
+   "text": "Timer already fired",
+   "va": "0x94d3b8"
+  },
+  "wake_io_driver": {
+   "bytes": 25,
+   "text": "failed to wake I/O driver",
+   "va": "0x94d466"
+  },
+  "wheel_rs": {
+   "bytes": 73,
+   "text": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/time/wheel/mod.rs",
+   "va": "0x446310"
+  }
+ },
+ "work_item": "RE-005-node115-insert-return"
+}
