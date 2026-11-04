@@ -805,7 +805,10 @@ def read_string(va, data):
     """The NUL-terminated ASCII string at a VA, resolved through
     the section table like every other read in this tool."""
     _, raw = read(va, data, 256)
-    return raw.split(b'\0', 1)[0].decode('ascii')
+    try:
+        return raw.split(b'\0', 1)[0].decode('ascii')
+    except UnicodeDecodeError:
+        raise ValueError('string is not valid ASCII')
 
 
 def check(condition, message):
@@ -1077,7 +1080,8 @@ def caller_census(data):
             return f'{ordered[i][0]:#x}..{ordered[i][1]:#x}'
         return None
 
-    text_sec = next(s for s in sections(data) if s['name'] == '.text')
+    text_sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    check(text_sec is not None, 'missing.text section')
     base, off, size = (text_sec['address'], text_sec['offset'],
                        text_sec['size'])
     body = bytes(data[off:off + size])
@@ -1126,6 +1130,7 @@ def rela_entries(data):
     for section in sections(data):
         if section['name'] != '.rela.dyn':
             continue
+        check(section['size'] % 24 == 0, 'truncated.rela.dyn section')
         for i in range(section['offset'],
                        section['offset'] + section['size'], 24):
             off, info, addend = struct.unpack_from('<QQq', data, i)
@@ -1136,7 +1141,8 @@ def rela_entries(data):
 def rip_references(data, target):
     """Every rip-relative reference to target in .text (the
     record-producer census: REX-prefixed modrm-checked scan)."""
-    text_sec = next(s for s in sections(data) if s['name'] == '.text')
+    text_sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    check(text_sec is not None, 'missing.text section')
     base, off, size = (text_sec['address'], text_sec['offset'],
                        text_sec['size'])
     body = bytes(data[off:off + size])
@@ -1179,7 +1185,8 @@ def _window_raw_scan(data):
     """Raw rip-relative candidate sites whose computed target
     lands in the handler-table window, without instruction-
     boundary verification."""
-    text_sec = next(s for s in sections(data) if s['name'] == '.text')
+    text_sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    check(text_sec is not None, 'missing.text section')
     base, off, size = (text_sec['address'], text_sec['offset'],
                        text_sec['size'])
     body = bytes(data[off:off + size])
