@@ -1,0 +1,366 @@
+{
+ "artifact": {
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "bucket_call_sites": [
+  {
+   "kind": "call",
+   "site": "0x5cea839"
+  },
+  {
+   "kind": "call",
+   "site": "0x5ceb06e"
+  }
+ ],
+ "call_table": {
+  "consume_phase": {
+   "callback": "when the claim wins and the taken head is non-null: call [head+0x18] with the taken argument [S+0x48]",
+   "condition": "value slot still != -1 after the unlink phase",
+   "stores": "byte [S+0x58] := 0, [S+0x38] := -1, [S+0x50] |= 2 (cmpxchg), [S+0x40] := 0 and [S+0x50] taken by xchg when the claim wins"
+  },
+  "rows": [
+   {
+    "condition": "dword [handle+sel+0x90] == 1000000000",
+    "outcome": "no return: assert-fail trap via slot 0x64df770 (0x1680bd0), timers-disabled message (0x94ca6b), Location entry.rs 549:30 (static 0x64c6158); before any lock",
+    "stores": "none"
+   },
+   {
+    "condition": "[entry+0x18] == -1 (value slot unset)",
+    "outcome": "no unlink and no consumption: lock, test, unlock, return",
+    "stores": "the wheel lock cmpxchg pair only"
+   },
+   {
+    "condition": "[entry+0x18] != -1 and [entry+0x10] == -1",
+    "outcome": "inline splice of the entry out of the wheel list ([wheel+0x18] head, [wheel+0x20] tail), then the consume phase",
+    "stores": "splice stores at 0x5ceb081, 0x5ceb08d, 0x5ceb093, 0x5ceb0a2, 0x5ceb115; then the consume stores"
+   },
+   {
+    "condition": "[entry+0x18] != -1, [entry+0x10] != -1, bsr-derived level index > 0x23",
+    "outcome": "no return: level assert via slot 0x64df620 (0x1680cbf), esi = computed level, Location wheel/mod.rs 130:17 (static 0x64c6a48)",
+    "stores": "the wheel lock cmpxchg only"
+   },
+   {
+    "condition": "[entry+0x18] != -1, [entry+0x10] != -1, level in range",
+    "outcome": "call bucket body 0x5ce29a0 at 0x5ceb06e (rdi = level bucket, rsi = entry); its own traps are level.rs 173:19 / 173:6 and linked_list.rs 188:9; return value ignored; then the consume phase",
+    "stores": "the bucket body's six stores; then the consume stores"
+   }
+  ],
+  "scope": "second caller 0x5ceafd0(rdi = C = &[S+0x10]); entry = &[C+0x10] = &[S+0x20]; wheel = [C+0x8] + sel + 0x50 with sel from byte [C+0x0]",
+  "testable_statement": "The bucket body 0x5ce29a0 has exactly two direct callers and no data-held references.  Its second caller - reachable only through the code-pointer slot 0x64dfe40 - removes the same &[S+0x20] entry from the same wheel under the same gating as the setter's pre-flag call (value slot set, level from the stored [entry+0x10], the inline wheel-list arm when that field is -1), and then consumes the entry: fired byte cleared, value slot := -1, wake pair claimed with a [head+0x18] callback.  Nothing in either caller inserts into a bucket: the shared body only unlinks."
+ },
+ "caller_references": {
+  "bucket_addend_refs": [],
+  "bucket_rip_relative_refs": {},
+  "caller_addend_refs": [
+   "0x64dfe40"
+  ],
+  "caller_direct_refs": [],
+  "caller_rip_relative_refs": {},
+  "table_neighbourhood": {
+   "0x64dfe30": "0x5cf31f0",
+   "0x64dfe38": "0x5ce88e0",
+   "0x64dfe40": "0x5ceafd0",
+   "0x64dfe48": "0x15c2d00"
+  }
+ },
+ "constants": {
+  "bucket_header_offset": 1024,
+  "bucket_shift_limit": 64,
+  "bucket_shift_mul": 6,
+  "bucket_slot_bytes": 16,
+  "bucket_stride": 1040,
+  "level_clamp": "0xffffffffe",
+  "level_magic_mul": 43,
+  "level_magic_shift": 8,
+  "level_trap_threshold": 35,
+  "lock_timeout": 1000000000,
+  "occupancy_mask_offset": 1032,
+  "slots_per_bucket": 64,
+  "timers_sentinel": 1000000000
+ },
+ "exported_bodies": [
+  "caller",
+  "bucket"
+ ],
+ "findings": {
+  "bucket_contract": "0x5ce29a0(rdi = bucket, rsi = entry) removes the entry from its level-bucket slot list; it is the body both callers share.  It computes shift = 6 * [bucket+0x400] (multiplication overflow traps through slot 0x64df870 (0x1681dc0) with the level.rs Location static 0x64c5900, line 173 col 19; shift >= 0x40 traps through slot 0x64e0820 (0x1681e20) with Location 0x64c5918, line 173 col 6), slot index = ([entry+0x10] >> shift) & 0x3f, and slot = bucket + index * 16 with {head +0x0, tail +0x8}.  The unlink: if [entry+0x0] (prev) is non-null it writes [prev+0x8] := [entry+0x8] and, when the next pointer is non-null, [next+0x0] := prev; if prev is null it replaces the slot head with [entry+0x8] when the head is the entry, and returns unchanged when the head is a different non-null entry (the entry is not in this slot).  When the entry was the tail, [slot+0x8] := [entry+0x0].  The entry link pair is zeroed (movups at 0x5ce29f1).  Only when the slot is then empty (head null) does it finish: a non-null tail with a null head panic-formats through slot 0x64df730 (0x1680e60) with the 37-byte message at 0x94cb3f (\"assertion failed: self.tail.is_none()\") and the linked_list.rs Location static 0x64c5930 (line 188, col 9); otherwise it toggles the occupancy bit [bucket+0x408] ^= 1 << slot index at 0x5ce2a31 (the bit was set for the occupied slot, so the toggle clears it).  Its complete store census is six stores; it returns no meaningful value.  This settles the predicate-chain packet's \"unlinks or bucket-inserts\" hedge: the body only unlinks - no path stores the entry into a list it was not already in.",
+  "call_site": "The call at 0x5ceb06e is reached iff the value slot [C+0x28] ([entry+0x18]) is not -1 and the stored value [C+0x20] ([entry+0x10]) is not -1.  The level is ((bsr(([C+0x20] xor [wheel+0x10]) | 0x3f) ^ 1) * 0x2b) >> 8 with the pre-bsr input clamped to 0xffffffffe; a bsr-derived index above 0x23 traps at 0x5ceb168 through slot 0x64df620 (0x1680cbf) with esi = the computed level and the wheel/mod.rs Location static 0x64c6a48 (line 130, col 17).  Argument setup: rdi = [wheel+0x8] + level * 0x410 (imul at 0x5ceb063, add at 0x5ceb06a), rsi = &[C+0x10] (loaded at 0x5ceb024 and never rewritten before the call).  The bucket body's return value is ignored: rax is not read on any path out of the call, and control falls to the consume phase at 0x5ceb0b1.",
+  "caller_contract": "0x5ceafd0(rdi = C), where C = &[S+0x10] for the same S the predicate-chain builder fills: the handle is [C+0x8] (= [S+0x18]), the selector byte is [C+0x0] (= [S+0x10], sel 0x160 if non-zero else 0x240), and the entry the bucket call receives is &[C+0x10] = &[S+0x20] - the setter's entry.  Prologue: if dword [handle+sel+0x90] == 1000000000 the body traps through slot 0x64df770 (0x1680bd0) with the 115-byte timers-disabled message at 0x94ca6b and the entry.rs Location static 0x64c6158 (line 549, col 30), before any lock.  It then byte-locks the wheel (lock cmpxchg [wheel+0x0], 1 at 0x5ceb00a; contention waits via slot 0x64e01f8 (0x5bb59d0) with a 1000000000 timeout and re-reads the value slot).  Wheel here is handle+sel+0x50, so [wheel+0x8] is read as [r15+0x58], the elapsed field [wheel+0x10] as [r15+0x60], and the wheel list pair as [r15+0x68]/[r15+0x70].",
+  "comparison": "Same: the entry object (&[S+0x20]); the value-slot gate ([entry+0x18] == -1 skips the unlink); the [entry+0x10] == -1 inline arm against the wheel list pair; the level formula and clamp; the level trap through slot 0x64df620 with the wheel/mod.rs Location static 0x64c6a48 (130:17); the argument shape (rdi = [wheel+0x8] + level * 0x410, rsi = entry); the bucket body's return ignored.  Different: (1) the setter reaches its call already holding the wheel lock it took at 0x5cea7d8, as a pre-flag preliminary inside a larger operation that goes on to test [wheel+0x30] and may store a new value and call the insert body 0x5cf6880; the second caller takes the lock itself and removal plus consumption is its whole operation.  (2) The setter receives the wheel in rdi and the entry in rcx; the second caller receives a self pointer at &[S+0x10] and derives handle, selector and wheel itself.  (3) Only the second caller performs the entry.rs 549:30 timers guard before locking (the setter's path is guarded by the conversion body instead, per the predicate-chain packet).  (4) After the call the setter falls through to its flag test with the entry untouched by the consume idiom; the second caller clears the fired byte, sets the value slot to -1 and claims the wake pair, invoking [head+0x18] where the setter's tail uses [head+0x8].",
+  "consume_phase": "After the unlink (either arm), if the value slot is still not -1 the caller consumes the entry in place - exactly five stores through r14 (= C): byte [C+0x48] := 0 at 0x5ceb0bb, [C+0x28] := -1 at 0x5ceb0c0, lock cmpxchg [C+0x40] |= 2 in the retry loop at 0x5ceb0d7, [C+0x30] := 0 at 0x5ceb0ec and xchg [C+0x40] at 0x5ceb0f6.  In S offsets these are the fired byte [S+0x58] := 0 (the byte the setter's due arm also clears, and its timer-error arm sets to 1), the value slot [S+0x38] := -1, the state word [S+0x50] and the wake pair [S+0x40]/[S+0x48].  The pair is taken only when the cmpxchg's old [C+0x40] was 0; then, when the taken head [C+0x30] is non-null, the caller invokes [head+0x18] at 0x5ceb0ff with rdi = the taken argument [C+0x38] - a plain call, where the setter's shared tail tail-calls [head+0x8].  An old value other than 0 means the pair was already claimed; the caller only unlocks.  Unlock is lock cmpxchg [wheel+0x0], 0 at 0x5ceb106; contention takes the release tail through slot 0x64e0f38 (0x5bb5650) with esi = 0 at 0x5ceb158.  The landing pad at 0x5ceb17c repeats the unlock (contention via a call through the same slot) before _Unwind_Resume; a second pad at 0x5ceb19e calls through slot 0x64df4c0 (0x1680cab).",
+  "dispatch_context": "The second caller has no direct callers: a whole-.text scan finds no relative call/jump site to 0x5ceafd0 and no rip-relative slot or lea reference, and .rela.dyn holds exactly one RELATIVE addend for it, at 0x64dfe40 - one slot in a run of four code-pointer addends in .data.rel.ro (neighbours pinned in records: 0x5cf31f0, 0x5ce88e0, this body, 0x15c2d00; the run ends at 0x64dfe50, a GLOB_DAT slot).  It is therefore invoked through a data-held pointer, consistent with a vtable or trait-method slot; which object the table belongs to is not traced here.  The bucket body, by contrast, has no data-held references at all: its two direct call sites are the complete reference set.",
+  "inline_arm": "When the value slot is set but [entry+0x10] == -1, the entry is not in a level bucket and the caller splices it out inline (0x5ceb075..0x5ceb119) from the wheel list whose head is [wheel+0x18] and tail is [wheel+0x20] - the same splice shape as the bucket body (prev/next fixups at 0x5ceb081/0x5ceb08d, head fixup at 0x5ceb0a2, tail fixup at 0x5ceb115, links zeroed at 0x5ceb093), with no occupancy bit to toggle.  The setter has the identical arm at 0x5cea840 against the same wheel list pair ([rbx+0x18]/[rbx+0x20])."
+ },
+ "locations": {
+  "0x64c5900": {
+   "col": 19,
+   "file_ptr": "0x43a333",
+   "len": 75,
+   "line": 173,
+   "qwords": [
+    "0x0",
+    "0x4b",
+    "0x13000000ad"
+   ]
+  },
+  "0x64c5918": {
+   "col": 6,
+   "file_ptr": "0x43a333",
+   "len": 75,
+   "line": 173,
+   "qwords": [
+    "0x0",
+    "0x4b",
+    "0x6000000ad"
+   ]
+  },
+  "0x64c5930": {
+   "col": 9,
+   "file_ptr": "0x44aa38",
+   "len": 67,
+   "line": 188,
+   "qwords": [
+    "0x0",
+    "0x43",
+    "0x9000000bc"
+   ]
+  },
+  "0x64c6158": {
+   "col": 30,
+   "file_ptr": "0x44cef5",
+   "len": 69,
+   "line": 549,
+   "qwords": [
+    "0x0",
+    "0x45",
+    "0x1e00000225"
+   ]
+  },
+  "0x64c6a48": {
+   "col": 17,
+   "file_ptr": "0x446310",
+   "len": 73,
+   "line": 130,
+   "qwords": [
+    "0x0",
+    "0x49",
+    "0x1100000082"
+   ]
+  }
+ },
+ "open_edges": [
+  "The writer identity of the wheel flag byte at [wheel+0x30] the setter tests at 0x5cea881 (open edge 1 of #2617) remains untraced; this packet does not touch it.",
+  "The runtime contents of the handle fields and of the entry fields - runtime data, not statically decidable (open edge 2 of #2617) - remain open; this packet pins only the second caller's static conditions and effects.",
+  "Who re-invokes the gates to reach checker state 3 and the provenance of [record+0x1d8] before its first checker_a call (open edge 4 of #2613) remain open.",
+  "New: the dispatch context of the second caller - which object's code-pointer table holds the slot at 0x64dfe40 and on what runtime event the body is invoked through it - is not established here; only the slot and its immediate neighbourhood are pinned.",
+  "New: the consumers of the wheel list ([wheel+0x18] head / [wheel+0x20] tail) that both callers' inline arms maintain - the poll-side bodies that walk that list - are not traced here."
+ ],
+ "owners": {
+  "bucket": {
+   "bytes": 214,
+   "end": "0x5ce2a76",
+   "file_offset": "0x5ce19a0",
+   "sha256": "7f1bf0ac13bf0df1287b21da22e231bf1b29ea287ea2182aa5b8433b1fef89d8",
+   "start": "0x5ce29a0"
+  },
+  "caller": {
+   "bytes": 468,
+   "end": "0x5ceb1a4",
+   "file_offset": "0x5ce9fd0",
+   "sha256": "5b1addcef08123e292e9e2110d74cdf9516ac713d91a19fb6a988b9bee7c52a3",
+   "start": "0x5ceafd0"
+  }
+ },
+ "pins": {
+  "0x5ce29a1": "4c8b4610",
+  "0x5ce29aa": "48f7a700040000",
+  "0x5ce29c3": "49d3e8",
+  "0x5ce2a31": "48318708040000",
+  "0x5ce2a43": "488d3df5a0c6fa",
+  "0x5cea7d8": "f00fb00f",
+  "0x5cea839": "e86281ffff",
+  "0x5ceb00a": "f0410fb04f50",
+  "0x5ceb016": "498b4628",
+  "0x5ceb030": "7443",
+  "0x5ceb05d": "0f8705010000",
+  "0x5ceb063": "4869ff10040000",
+  "0x5ceb06a": "49037f58",
+  "0x5ceb06e": "e82d79ffff",
+  "0x5ceb0bb": "41c6464800",
+  "0x5ceb0c0": "49c74628ffffffff",
+  "0x5ceb0ff": "ff5018",
+  "0x5ceb106": "f00fb00b"
+ },
+ "slots": {
+  "0x64df4c0": "0x1680cab",
+  "0x64df620": "0x1680cbf",
+  "0x64df730": "0x1680e60",
+  "0x64df770": "0x1680bd0",
+  "0x64df870": "0x1681dc0",
+  "0x64e01f8": "0x5bb59d0",
+  "0x64e0820": "0x1681e20",
+  "0x64e0f38": "0x5bb5650"
+ },
+ "store_censuses": {
+  "bucket_all_stores": [
+   {
+    "base": "rdx",
+    "disp": 8,
+    "site": "0x5ce29df"
+   },
+   {
+    "base": "rcx",
+    "disp": 0,
+    "site": "0x5ce29eb"
+   },
+   {
+    "base": "rsi",
+    "disp": 0,
+    "site": "0x5ce29f1"
+   },
+   {
+    "base": "rax",
+    "disp": 0,
+    "site": "0x5ce2a09"
+   },
+   {
+    "base": "rdi",
+    "disp": 1032,
+    "site": "0x5ce2a31"
+   },
+   {
+    "base": "rax",
+    "disp": 8,
+    "site": "0x5ce2a3d"
+   }
+  ],
+  "caller_all_stores": [
+   {
+    "base": "r15",
+    "disp": 80,
+    "site": "0x5ceb00a"
+   },
+   {
+    "base": "rcx",
+    "disp": 8,
+    "site": "0x5ceb081"
+   },
+   {
+    "base": "rax",
+    "disp": 0,
+    "site": "0x5ceb08d"
+   },
+   {
+    "base": "rsi",
+    "disp": 0,
+    "site": "0x5ceb093"
+   },
+   {
+    "base": "r15",
+    "disp": 104,
+    "site": "0x5ceb0a2"
+   },
+   {
+    "base": "r14",
+    "disp": 72,
+    "site": "0x5ceb0bb"
+   },
+   {
+    "base": "r14",
+    "disp": 40,
+    "site": "0x5ceb0c0"
+   },
+   {
+    "base": "r14",
+    "disp": 64,
+    "site": "0x5ceb0d7"
+   },
+   {
+    "base": "r14",
+    "disp": 48,
+    "site": "0x5ceb0ec"
+   },
+   {
+    "base": "r14",
+    "disp": 64,
+    "site": "0x5ceb0f6"
+   },
+   {
+    "base": "rbx",
+    "disp": 0,
+    "site": "0x5ceb106"
+   },
+   {
+    "base": "r15",
+    "disp": 112,
+    "site": "0x5ceb115"
+   },
+   {
+    "base": "rbx",
+    "disp": 0,
+    "site": "0x5ceb183"
+   }
+  ],
+  "caller_r14_stores": [
+   {
+    "base": "r14",
+    "disp": 72,
+    "site": "0x5ceb0bb"
+   },
+   {
+    "base": "r14",
+    "disp": 40,
+    "site": "0x5ceb0c0"
+   },
+   {
+    "base": "r14",
+    "disp": 64,
+    "site": "0x5ceb0d7"
+   },
+   {
+    "base": "r14",
+    "disp": 48,
+    "site": "0x5ceb0ec"
+   },
+   {
+    "base": "r14",
+    "disp": 64,
+    "site": "0x5ceb0f6"
+   }
+  ]
+ },
+ "strings": {
+  "entry_rs": {
+   "bytes": 69,
+   "text": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/time/entry.rs",
+   "va": "0x44cef5"
+  },
+  "level_rs": {
+   "bytes": 75,
+   "text": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/time/wheel/level.rs",
+   "va": "0x43a333"
+  },
+  "linked_list_rs": {
+   "bytes": 67,
+   "text": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/util/linked_list.rs",
+   "va": "0x44aa38"
+  },
+  "tail_assert": {
+   "bytes": 37,
+   "text": "assertion failed: self.tail.is_none()",
+   "va": "0x94cb3f"
+  },
+  "timers_disabled": {
+   "bytes": 115,
+   "text": "A Tokio 1.x context was found, but timers are disabled. Call `enable_time` on the runtime builder to enable timers.",
+   "va": "0x94ca6b"
+  },
+  "wheel_rs": {
+   "bytes": 73,
+   "text": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/time/wheel/mod.rs",
+   "va": "0x446310"
+  }
+ },
+ "work_item": "RE-005-node115-bucket-second-caller"
+}
