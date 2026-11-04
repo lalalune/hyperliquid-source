@@ -83,8 +83,10 @@ class Image:
         return rows
 
     def symbol(self, index):
-        sym = next(s for s in self.sections if s['name'] == '.dynsym')
-        strings = next(s for s in self.sections if s['name'] == '.dynstr')
+        sym = next((s for s in self.sections if s['name'] == '.dynsym'), None)
+        need(sym is not None, 'missing.dynsym section')
+        strings = next((s for s in self.sections if s['name'] == '.dynstr'), None)
+        need(strings is not None, 'missing.dynstr section')
         need(index * 24 + 24 <= sym['size'], 'Symbol index outside table')
         pos = sym['offset'] + index * 24
         name = struct.unpack_from('<I', self.data, pos)[0]
@@ -92,7 +94,10 @@ class Image:
         lo = strings['offset'] + name
         hi = self.data.find(b'\0', lo, strings['offset'] + strings['size'])
         need(hi >= lo, 'Unterminated symbol')
-        return self.data[lo:hi].decode('ascii')
+        try:
+            return self.data[lo:hi].decode('ascii')
+        except UnicodeDecodeError:
+            raise ValueError('dynamic symbol name is not valid ASCII') from None
 
 
 def instructions(image, start, end):
@@ -145,7 +150,8 @@ def lsda(image, function, address):
         rows.append({'start': hex(function + a), 'end': hex(function + a + b),
                      'landing': hex(function + landing) if landing else None,
                      'action_offset': action})
-    section = next(s for s in image.sections if s['name'] == '.gcc_except_table')
+    section = next((s for s in image.sections if s['name'] == '.gcc_except_table'), None)
+    need(section is not None, 'missing.gcc_except_table section')
     need(pos == end and end <= section['offset'] + section['size']
          and (type_base is None or end <= type_base <= section['offset'] + section['size']),
          'Invalid LSDA bounds')
@@ -204,10 +210,14 @@ def observe(image):
         length = next(x.operands[1].imm for x in prefix
                       if x.mnemonic == 'mov' and x.op_str.startswith('edx,'))
         va = lea.address + lea.size + lea.operands[1].mem.disp
+        try:
+            name = image.read(va, length).decode('ascii')
+        except UnicodeDecodeError:
+            raise ValueError('query name is not valid ASCII') from None
         queries.append({'call': hex(i.address), 'target': hex(target),
                         'kind': 'presence' if target == 0x4e4c8e0 else 'value',
                         'literal_va': hex(va), 'length': length,
-                        'name': image.read(va, length).decode('ascii'),
+                        'name': name,
                         'saved_result': row(primary[index + 1])})
     need(len(queries) == 14 and sum(q['kind'] == 'presence' for q in queries) == 12,
          'Changed output query inventory')
