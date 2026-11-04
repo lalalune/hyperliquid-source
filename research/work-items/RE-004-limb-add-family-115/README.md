@@ -63,3 +63,29 @@ network service, chain/signing or wallet action runs. A safe source API is not
 the native Rust layout/ABI or proof of invalid descriptor behavior. Full-node
 closure and all92 gates remain open. Next: identify the relocation consumers
 and actual callers' ownership before assigning application meaning.
+
+## Independently authored Rust and actual comparisons
+
+Original freeze2311463613149d7f590895dacd6de1087e863ee8 predates all new
+Rust. The no_std value/state API has no external dependencies or invented
+original Cargo graph. Direct rustc1.94.1/edition2021 is a macOSarm64 research
+build, not the original Linux recipe. The fixture adapter contains inputs and
+synthetic layout only; the production client cannot read expected answers.
+
+Both optimization levels0/3 match all2383 original observations, with an
+identical optimized own-library repeat and both compiled56-row smoke tests.
+Nine separately compiled corruptions differ on891/845/813/1728/1266/221/682/649/435
+rows and each fails its frozen smoke assertion. Two ordinary source tests cover
+the frozen state relation and the separately labelled safe-domain refusal.
+The input-only adapter observes all424 fixture bytes, not the native Rust ABI.
+
+```
+python3 research/work-items/RE-004-limb-add-family-115/build.py --rustc <rustc1.94.1> --output <new-directory>
+python3 -m unittest discover -s tests -p test_node115_limb_add_family.py -v
+python3 tools/verify_packets.py
+```
+
+The repository manifest resolver handles packet-local and repository-relative
+entries; plain sha256sum from this packet directory is not that resolver.
+No byte-window comparison, private-library identity, EVM/VM attribution or
+whole-node claim follows from the value relation. Every gate stays false.
