@@ -1,0 +1,106 @@
+{
+  "targetSha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "checks": [
+    {
+      "label": "cargo-lock",
+      "command": [
+        "${ROOT}\\new-pr\\tools\\rust-1.95.0-gnullvm\\bin\\cargo.exe",
+        "generate-lockfile",
+        "--offline",
+        "--manifest-path",
+        "${ROOT}\\new-pr\\work\\hyperliquid\\node115-context-encoder-closure\\src\\node115-context-encoder\\Cargo.toml"
+      ],
+      "cwd": "${ROOT}\\new-pr\\work\\hyperliquid\\node115-context-encoder-closure",
+      "exitCode": 0
+    },
+    {
+      "label": "rustfmt",
+      "command": [
+        "${ROOT}\\new-pr\\tools\\rust-1.95.0-gnullvm\\bin\\rustfmt.exe",
+        "--edition",
+        "2024",
+        "${ROOT}\\new-pr\\work\\hyperliquid\\node115-context-encoder-closure\\src\\node115-context-encoder\\src\\lib.rs",
+        "${ROOT}\\new-pr\\work\\hyperliquid\\node115-context-encoder-closure\\src\\node115-context-encoder\\tests\\frozen_cases.rs"
+      ],
+      "cwd": "${ROOT}\\new-pr\\work\\hyperliquid\\node115-context-encoder-closure",
+      "exitCode": 0
+    },
+    {
+      "label": "assembled-original-controls",
+      "command": [
+        "${ROOT}\\new-pr\\tools\\slop-validation-python\\Scripts\\python.exe",
+        "-B",
+        "-u",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_assembled_record_readers_static.py",
+        "-v"
+      ],
+      "cwd": "${ROOT}\\new-pr\\work\\hyperliquid\\node115-context-encoder-closure",
+      "exitCode": 0
+    },
+    {
+      "label": "rust-frozen-cases",
+      "command": [
+        "${ROOT}\\new-pr\\tools\\rust-1.95.0-gnullvm\\bin\\cargo.exe",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "${ROOT}\\new-pr\\work\\hyperliquid\\node115-context-encoder-closure\\src\\node115-context-encoder\\Cargo.toml",
+        "--target-dir",
+        "${ROOT}\\outputs\\new-pr\\hyperliquid\\node115-context-encoder-closure\\rust-test-target"
+      ],
+      "cwd": "${ROOT}\\new-pr\\work\\hyperliquid\\node115-context-encoder-closure",
+      "exitCode": 0
+    },
+    {
+      "label": "rust-release-1",
+      "command": [
+        "${ROOT}\\new-pr\\tools\\rust-1.95.0-gnullvm\\bin\\cargo.exe",
+        "build",
+        "--release",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "${ROOT}\\new-pr\\work\\hyperliquid\\node115-context-encoder-closure\\src\\node115-context-encoder\\Cargo.toml",
+        "--target-dir",
+        "${ROOT}\\outputs\\new-pr\\hyperliquid\\node115-context-encoder-closure\\rust-release-1"
+      ],
+      "cwd": "${ROOT}\\new-pr\\work\\hyperliquid\\node115-context-encoder-closure",
+      "exitCode": 0
+    },
+    {
+      "label": "rust-release-2",
+      "command": [
+        "${ROOT}\\new-pr\\tools\\rust-1.95.0-gnullvm\\bin\\cargo.exe",
+        "build",
+        "--release",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "${ROOT}\\new-pr\\work\\hyperliquid\\node115-context-encoder-closure\\src\\node115-context-encoder\\Cargo.toml",
+        "--target-dir",
+        "${ROOT}\\outputs\\new-pr\\hyperliquid\\node115-context-encoder-closure\\rust-release-2"
+      ],
+      "cwd": "${ROOT}\\new-pr\\work\\hyperliquid\\node115-context-encoder-closure",
+      "exitCode": 0
+    }
+  ],
+  "releaseRlibHashes": [
+    "80c58bf17b402713816b0f17fc34b6b6e5f86fc96ca1c69063e455087259c7ac",
+    "80c58bf17b402713816b0f17fc34b6b6e5f86fc96ca1c69063e455087259c7ac"
+  ],
+  "twoBuildsEqual": true,
+  "hostTarget": "x86_64-pc-windows-gnullvm",
+  "capturedCodeExecuted": false,
+  "capturedCodeEmulated": false,
+  "comparison": "success wire cases derived statically; no Linux code-byte/ABI equivalence",
+  "sourceHeadInterpretation": "Precommit implementation checks, not final-head official repository results",
+  "sourceSha256": "7d6c0163cb05082bc5858cbe8f8eac64439334321bcd225d2a456fe6de8f419e",
+  "fixtureSha256": "2c6c20be919e243915524a211804ddd5b1c8abc4c9cf2b97ff4f875113922d71"
+}
