@@ -1,0 +1,28 @@
+RELA scan (whole file, .rela.dyn file range 0x6be8+0x163cc8, .rela.plt 0x16a8b0+0x1a10):
+rela.dyn: addend hits for the window starts 0x5f140c0, 0x5f14090, 0x5f127b0 and 0x605e860: none
+rela.plt: addend hits for the same window starts: none
+
+The driver's dispatch comparison is the one rip-relative reference in
+these windows: at 0x5f14107 the driver compares the slot at
+[object + 0x50] against the qword at 0x64ed768. That address is a .got
+slot with a R_X86_64_RELATIVE relocation (addend 0x5f04d50), so at
+runtime it holds the loaded address of the function at 0x5f04d50; the
+static file holds 0 there. The packet therefore models the dispatch
+as "slot == default (0x5f04d50) skips the indirect call, any other
+slot value is called", without claiming the runtime base address.
+
+In-window rip-relative references: only the dispatch comparison above
+in 0x5f140c0; none in 0x5f14090, 0x5f127b0, 0x5f127f6 or 0x605e860.
+The driver uses %fs:0x28 for its stack canary only.
+PLT calls in-window: in 0x5f140c0, __stack_chk_fail at 0x5f14174 only;
+in 0x5f127b0, operator new at 0x5f127c6, _M_hook at 0x5f127d5; in the
+cold block 0x5f127f6, operator delete at 0x5f12807 and 0x5f12821 and
+_Unwind_Resume at 0x5f1282e; no PLT call in 0x5f14090 or 0x605e860.
+Direct calls in-window: in 0x5f140c0, prepare 0x5f13f90 at 0x5f140e5,
+wrapper 0x5f14090 at 0x5f140f4, lazy-init 0x605e860 at 0x5f14117,
+refresh 0x5f13450 at 0x5f1412d, plus the indirect call *%rax at
+0x5f14170; in 0x5f14090, pre-call 0x5f127b0 at 0x5f140a0 plus the tail
+jump to drain 0x5f14000 at 0x5f140b3; in 0x5f127b0, aggregate 0x5f0e2d0
+at 0x5f127e2; in 0x605e860, callback 0x606a110 at 0x605e893.
+Whole-file qword scan for 0x5f140c0, 0x5f14090, 0x5f127b0 and 0x605e860
+(8-byte little-endian): no occurrence of any.
