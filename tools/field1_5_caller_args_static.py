@@ -89,7 +89,9 @@ def require(condition, message):
 
 
 def relocations(data):
-    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    sec = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    require(sec is not None, 'missing.rela.dyn section')
+    require(sec['size'] % 24 == 0, 'truncated.rela.dyn section')
     by_offset = {}
     for off in range(sec['offset'], sec['offset'] + sec['size'], 24):
         r_offset, r_info, r_addend = struct.unpack_from('<QQq', data, off)
@@ -99,13 +101,18 @@ def relocations(data):
 
 
 def dynsym_name(data, index):
-    sym = next(s for s in sections(data) if s['name'] == '.dynsym')
-    strs = next(s for s in sections(data) if s['name'] == '.dynstr')
+    sym = next((s for s in sections(data) if s['name'] == '.dynsym'), None)
+    require(sym is not None, 'missing.dynsym section')
+    strs = next((s for s in sections(data) if s['name'] == '.dynstr'), None)
+    require(strs is not None, 'missing.dynstr section')
     off = sym['offset'] + index * 24
     name_off = struct.unpack_from('<I', data, off)[0]
     start = strs['offset'] + name_off
     end = data.index(b'\0', start)
-    return data[start:end].decode()
+    try:
+        return data[start:end].decode()
+    except UnicodeDecodeError:
+        require(False, 'dynamic symbol name is not valid UTF-8')
 
 
 def pin(body, rel, expected, message):
@@ -552,7 +559,8 @@ def access_inventory(role, asm):
 def census(data):
     """Direct E8 call sites for the reader families and the owners,
     plus the rip-relative lea references to the twins."""
-    sec = next(s for s in sections(data) if s['name'] == '.text')
+    sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    require(sec is not None, 'missing.text section')
     base, off, size = sec['address'], sec['offset'], sec['size']
     body = data[off:off + size]
     _, fs, _ = fde_extents(data)
