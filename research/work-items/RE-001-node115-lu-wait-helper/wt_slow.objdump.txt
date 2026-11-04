@@ -1,0 +1,22 @@
+63bf720:	49 89 e5             	mov    %rsp,%r13
+63bf723:	4c 8d 74 24 08       	lea    0x8(%rsp),%r14
+63bf728:	bb 01 00 00 00       	mov    $0x1,%ebx
+63bf72d:	4c 89 ef             	mov    %r13,%rdi
+63bf730:	e8 bb 05 00 00       	call   63bfcf0 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x6778c0>
+63bf735:	4c 89 ee             	mov    %r13,%rsi
+63bf738:	4c 89 f7             	mov    %r14,%rdi
+63bf73b:	e8 b0 04 00 00       	call   63bfbf0 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x6777c0>
+63bf740:	4d 8d 44 24 24       	lea    0x24(%r12),%r8
+63bf745:	f0 41 0f c1 18       	lock xadd %ebx,(%r8)
+63bf74a:	48 89 ef             	mov    %rbp,%rdi
+63bf74d:	83 c3 01             	add    $0x1,%ebx
+63bf750:	e8 5b 20 03 00       	call   63f17b0 <pthread_mutex_trylock@plt>
+63bf755:	85 c0                	test   %eax,%eax
+63bf757:	74 77                	je     63bf7d0 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x6773a0>
+63bf759:	48 89 ef             	mov    %rbp,%rdi
+63bf75c:	e8 ff 13 03 00       	call   63f0b60 <pthread_mutex_lock@plt>
+63bf761:	41 c6 44 24 68 01    	movb   $0x1,0x68(%r12)
+63bf767:	f0 41 83 6c 24 24 01 	lock subl $0x1,0x24(%r12)
+63bf76e:	4c 8d 0d 73 fa 11 00 	lea    0x11fa73(%rip),%r9        # 64df1e8 <__register_atfork@plt+0xed658>
+63bf775:	48 8d 6c 24 10       	lea    0x10(%rsp),%rbp
+63bf77a:	4c 89 f7             	mov    %r14,%rdi
