@@ -1,0 +1,546 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "owners": [
+    {
+      "role": "refresh_helper",
+      "start": "0x5cadd50",
+      "end": "0x5cae3da",
+      "file_offset": "0x5cacd50",
+      "bytes": 1674,
+      "sha256": "f4cc818ee02b994599bfc53910323d3edf8420d0b404c2e5060faab72524c349",
+      "frames": {
+        "fde": {
+          "va": "0xfe3804",
+          "bytes_hex": "2800000030c9330044a5cc048a06000000410e108602430d064d83078c068d058e048f030378060c07080000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "xcr0_leaf",
+      "start": "0x5cae3e0",
+      "end": "0x5cae3ed",
+      "file_offset": "0x5cad3e0",
+      "bytes": 13,
+      "sha256": "f347a1395ba474e85f6c71330ca7f30e1d067cc6af42548744b6310ae2dbf0be",
+      "frames": {
+        "fde": {
+          "va": "0xfe3830",
+          "bytes_hex": "100000005cc93300a8abcc040d00000000000000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    }
+  ],
+  "call_census": {
+    "direct_call_sites": [
+      "0x5cae04c"
+    ],
+    "relocation_references": 0
+  },
+  "intake": {
+    "call_site": "0x5cae04c",
+    "leaf": "0x5cae3e0..0x5cae3ed",
+    "result": "rax = xcr0 (RE-002 xcr0-leaf packet)",
+    "result_register": "r14",
+    "pre_call_r14": {
+      "definition": "0x5cadeb6",
+      "value": "cpuid leaf 7 subleaf 0 ecx, via the [rbp-0x58] slot",
+      "reads": [
+        "0x5cadeba",
+        "0x5cadfa6"
+      ]
+    },
+    "post_call_reads": {
+      "gate_field": [
+        "0x5cae054",
+        "0x5cae057"
+      ],
+      "mask_field_and_branch": [
+        "0x5cae067",
+        "0x5cae05d"
+      ],
+      "bit_19_test": "0x5cae300"
+    }
+  },
+  "field_map": [
+    {
+      "cache_word": "C1",
+      "bit": 0,
+      "a_bit": 63,
+      "driver": "xcr0 bits 1 and 2 both set (fall-through at 0x5cae061)",
+      "mechanism": "the movabs/or at 0x5cae071/0x5cae07b sets A bit 63; the suffix shld carries A bit 63 into C1 bit 0; the raw return (A) carries it as bit 63 too. C0 bit 63 is the suffix's own H on every path and is not driven by this term",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 52,
+      "a_bit": 52,
+      "driver": "xcr0 bit 19 AND cpuid leaf 7 subleaf 1 edx bit 21 ([rbp-0x60] slot)",
+      "mechanism": "test/sete at 0x5cae300 and 0x5cae30a, combined at 0x5cae313, insert the 2^52 constant at 0x5cae315..0x5cae324 only when both bits are set",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C1",
+      "bit": 1,
+      "b_bit": 0,
+      "driver": "cpuid leaf 0xd subleaf 1 eax bit 0, gated by xcr0 bits 1,2 and max leaf > 0xc",
+      "mechanism": "0x5cae096..0x5cae0ba ORs the bit into B bit 0",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C1",
+      "bit": 2,
+      "b_bit": 1,
+      "driver": "cpuid leaf 0xd subleaf 1 eax bit 3, gated by xcr0 bits 1,2 and max leaf > 0xc",
+      "mechanism": "0x5cae0ae..0x5cae0b4 ORs the bit into B bit 1",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C1",
+      "bit": 3,
+      "b_bit": 2,
+      "driver": "cpuid leaf 0xd subleaf 1 eax bit 1, gated by xcr0 bits 1,2 and max leaf > 0xc",
+      "mechanism": "0x5cae0a7..0x5cae0b4 ORs the bit into B bit 2",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 43,
+      "a_bit": 43,
+      "driver": "cpuid leaf 7 subleaf 0 edx ([rbp-0x50] slot), gated by xcr0 bits 17,18 both set (shared block 0x5cae274)",
+      "mechanism": "shared block carries cpuid leaf 7 subleaf 0 edx ([rbp-0x50] slot) bit 24 into A bit 43",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 44,
+      "a_bit": 44,
+      "driver": "cpuid leaf 7 subleaf 0 edx ([rbp-0x50] slot), gated by xcr0 bits 17,18 both set (shared block 0x5cae274)",
+      "mechanism": "shared block carries cpuid leaf 7 subleaf 0 edx ([rbp-0x50] slot) bit 25 into A bit 44",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 45,
+      "a_bit": 45,
+      "driver": "cpuid leaf 7 subleaf 0 edx ([rbp-0x50] slot), gated by xcr0 bits 17,18 both set (shared block 0x5cae274)",
+      "mechanism": "shared block carries cpuid leaf 7 subleaf 0 edx ([rbp-0x50] slot) bit 22 into A bit 45",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 46,
+      "a_bit": 46,
+      "driver": "cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot), gated by xcr0 bits 17,18 both set (shared block 0x5cae274)",
+      "mechanism": "shared block carries cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot) bit 21 into A bit 46",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 47,
+      "a_bit": 47,
+      "driver": "cpuid leaf 7 subleaf 1 edx ([rbp-0x60] slot, reloaded into rbx on both arms), gated by xcr0 bits 17,18 both set (shared block 0x5cae274)",
+      "mechanism": "shared block carries cpuid leaf 7 subleaf 1 edx ([rbp-0x60] slot, reloaded into rbx on both arms) bit 8 into A bit 47",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 48,
+      "a_bit": 48,
+      "driver": "cpuid leaf 0x1e subleaf 1 eax bit 7, gated by xcr0 bits 17,18 and max leaf >= 0x1e",
+      "mechanism": "leaf 0x1e block at 0x5cae2b8..0x5cae2f0 carries the bit into A bit 48",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 49,
+      "a_bit": 49,
+      "driver": "cpuid leaf 0x1e subleaf 1 eax bit 4, gated by xcr0 bits 17,18 and max leaf >= 0x1e",
+      "mechanism": "leaf 0x1e block at 0x5cae2b8..0x5cae2f0 carries the bit into A bit 49",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 50,
+      "a_bit": 50,
+      "driver": "cpuid leaf 0x1e subleaf 1 eax bit 8, gated by xcr0 bits 17,18 and max leaf >= 0x1e",
+      "mechanism": "leaf 0x1e block at 0x5cae2b8..0x5cae2f0 carries the bit into A bit 50",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 51,
+      "a_bit": 51,
+      "driver": "cpuid leaf 0x1e subleaf 1 eax bit 6, gated by xcr0 bits 17,18 and max leaf >= 0x1e",
+      "mechanism": "leaf 0x1e block at 0x5cae2b8..0x5cae2f0 carries the bit into A bit 51",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 14,
+      "a_bit": 14,
+      "driver": "cpuid leaf 1 ecx, gated by xcr0 bits 1,2 fall-through (composition at 0x5cae0bd..0x5cae14f)",
+      "mechanism": "fall-through rebuild carries cpuid leaf 1 ecx bit 28 into A bit 14",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 15,
+      "a_bit": 15,
+      "driver": "cpuid leaf 7 subleaf 0 ebx (r13d), gated by xcr0 bits 1,2 fall-through (composition at 0x5cae0bd..0x5cae14f)",
+      "mechanism": "fall-through rebuild carries cpuid leaf 7 subleaf 0 ebx (r13d) bit 5 into A bit 15",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 16,
+      "a_bit": 16,
+      "driver": "cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot), gated by xcr0 bits 1,2 fall-through (composition at 0x5cae0bd..0x5cae14f)",
+      "mechanism": "fall-through rebuild carries cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot) bit 0 into A bit 16",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 17,
+      "a_bit": 17,
+      "driver": "cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot), gated by xcr0 bits 1,2 fall-through (composition at 0x5cae0bd..0x5cae14f)",
+      "mechanism": "fall-through rebuild carries cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot) bit 1 into A bit 17",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 18,
+      "a_bit": 18,
+      "driver": "cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot), gated by xcr0 bits 1,2 fall-through (composition at 0x5cae0bd..0x5cae14f)",
+      "mechanism": "fall-through rebuild carries cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot) bit 2 into A bit 18",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 38,
+      "a_bit": 38,
+      "driver": "cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot), gated by xcr0 bits 1,2 fall-through (composition at 0x5cae0bd..0x5cae14f)",
+      "mechanism": "fall-through rebuild carries cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot) bit 23 into A bit 38",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 39,
+      "a_bit": 39,
+      "driver": "cpuid leaf 7 subleaf 1 edx ([rbp-0x60] slot), gated by xcr0 bits 1,2 fall-through (composition at 0x5cae0bd..0x5cae14f)",
+      "mechanism": "fall-through rebuild carries cpuid leaf 7 subleaf 1 edx ([rbp-0x60] slot) bit 5 into A bit 39",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 40,
+      "a_bit": 40,
+      "driver": "cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot), gated by xcr0 bits 1,2 fall-through (composition at 0x5cae0bd..0x5cae14f)",
+      "mechanism": "fall-through rebuild carries cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot) bit 4 into A bit 40",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 41,
+      "a_bit": 41,
+      "driver": "cpuid leaf 7 subleaf 1 edx ([rbp-0x60] slot), gated by xcr0 bits 1,2 fall-through (composition at 0x5cae0bd..0x5cae14f)",
+      "mechanism": "fall-through rebuild carries cpuid leaf 7 subleaf 1 edx ([rbp-0x60] slot) bit 10 into A bit 41",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 42,
+      "a_bit": 42,
+      "driver": "cpuid leaf 7 subleaf 1 edx ([rbp-0x60] slot), gated by xcr0 bits 1,2 fall-through (composition at 0x5cae0bd..0x5cae14f)",
+      "mechanism": "fall-through rebuild carries cpuid leaf 7 subleaf 1 edx ([rbp-0x60] slot) bit 4 into A bit 42",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 44,
+      "a_bit": 44,
+      "driver": "cpuid leaf 1 ecx, gated by xcr0 bits 1,2 fall-through (composition at 0x5cae0bd..0x5cae14f)",
+      "mechanism": "fall-through rebuild carries cpuid leaf 1 ecx bit 12 into A bit 44",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 19,
+      "a_bit": 19,
+      "driver": "cpuid leaf 7 subleaf 0 ebx (r13d), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 ebx (r13d) bit 16 into A bit 19",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 20,
+      "a_bit": 20,
+      "driver": "cpuid leaf 7 subleaf 0 ebx (r13d), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 ebx (r13d) bit 28 into A bit 20",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 21,
+      "a_bit": 21,
+      "driver": "cpuid leaf 7 subleaf 0 ebx (r13d), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 ebx (r13d) bit 27 into A bit 21",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 22,
+      "a_bit": 22,
+      "driver": "cpuid leaf 7 subleaf 0 ebx (r13d), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 ebx (r13d) bit 26 into A bit 22",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 24,
+      "a_bit": 24,
+      "driver": "cpuid leaf 7 subleaf 0 ebx (r13d), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 ebx (r13d) bit 17 into A bit 24",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 26,
+      "a_bit": 26,
+      "driver": "cpuid leaf 7 subleaf 0 ebx (r13d), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 ebx (r13d) bit 21 into A bit 26",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 25,
+      "a_bit": 25,
+      "driver": "unsigned compare of cpuid leaf 7 subleaf 0 ebx (r13) against the saved composed word (rcx) at 0x5cae1cc, gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set",
+      "mechanism": "extra block sets A bit 25 unless r13 <u rcx (cmovb at 0x5cae1cf)",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 27,
+      "a_bit": 27,
+      "driver": "cpuid leaf 7 subleaf 0 ecx ([rbp-0x58] slot), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 ecx ([rbp-0x58] slot) bit 1 into A bit 27",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 28,
+      "a_bit": 28,
+      "driver": "cpuid leaf 7 subleaf 0 ecx ([rbp-0x58] slot), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 ecx ([rbp-0x58] slot) bit 14 into A bit 28",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 29,
+      "a_bit": 29,
+      "driver": "cpuid leaf 7 subleaf 0 ecx ([rbp-0x58] slot), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 ecx ([rbp-0x58] slot) bit 6 into A bit 29",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 33,
+      "a_bit": 33,
+      "driver": "cpuid leaf 7 subleaf 0 ecx ([rbp-0x58] slot, via [rbp-0x68] = slot << 0x16 and the 0x600000000 mask), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 ecx ([rbp-0x58] slot, via [rbp-0x68] = slot << 0x16 and the 0x600000000 mask) bit 11 into A bit 33",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 34,
+      "a_bit": 34,
+      "driver": "cpuid leaf 7 subleaf 0 ecx ([rbp-0x58] slot, via [rbp-0x68] = slot << 0x16 and the 0x600000000 mask), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 ecx ([rbp-0x58] slot, via [rbp-0x68] = slot << 0x16 and the 0x600000000 mask) bit 12 into A bit 34",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 35,
+      "a_bit": 35,
+      "driver": "cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot, in rsi), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 1 eax ([rbp-0x38] slot, in rsi) bit 5 into A bit 35",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 36,
+      "a_bit": 36,
+      "driver": "cpuid leaf 7 subleaf 0 edx ([rbp-0x50] slot), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 edx ([rbp-0x50] slot) bit 8 into A bit 36",
+      "value_bits_from_xcr0": false
+    },
+    {
+      "cache_word": "C0",
+      "bit": 37,
+      "a_bit": 37,
+      "driver": "cpuid leaf 7 subleaf 0 edx ([rbp-0x50] slot), gated by (xcr0 & 0xe0) == 0xe0 and cpuid leaf 1 ecx bits 12,29 both set (extra block 0x5cae160..0x5cae239)",
+      "mechanism": "extra block carries cpuid leaf 7 subleaf 0 edx ([rbp-0x50] slot) bit 23 into A bit 37",
+      "value_bits_from_xcr0": false
+    }
+  ],
+  "dead_field": {
+    "term": "(xcr0 & 0xe0) ^ 0xe0 in r8, OR'd into rax at 0x5cae157",
+    "value_use": "only the ZF of the or is consumed, by the jne at 0x5cae15a",
+    "first_rax_writes": {
+      "extra_block": "0x5cae165",
+      "shared_block": "0x5cae278",
+      "convergence": "0x5cae2fd"
+    },
+    "cache_fields": []
+  },
+  "selection": {
+    "site": "0x5cae35e..0x5cae39b",
+    "a_mask": "0xf9ffffffffffbfff",
+    "cleared_bits": [
+      14,
+      57,
+      58
+    ],
+    "condition": "rcx = (r12 bit 14) | (vendor != \"GenuineIntel\" compare residue) is nonzero",
+    "a_rule": "A = r12 if the condition holds, else r12 & 0xf9ffffffffffbfff",
+    "b_rule": "B = r15 if the condition holds, else zero-extended low 32 bits of r15",
+    "xcr0_fields_cleared": []
+  },
+  "suffix": {
+    "entry": "0x5cae39b",
+    "cache_slot": "0x64dfa60",
+    "equations": "C0 = A | H; C1 = ((B << 1) | (A >> 63)) | H; C2 = (B >> 62) | H; raw rax return = A (merged RE-002 cache-publication packet)",
+    "h_assignments": [
+      "0x5cadd70",
+      "0x5cae251",
+      "0x5cae2f3"
+    ]
+  },
+  "early_paths": {
+    "max_leaf_zero": "0x5caddf3 jumps to the suffix with A = 0 and B = 0; the leaf is never called",
+    "region_gate": "unless cpuid leaf 1 ecx bits 26,27 are both set, 0x5cae042 jumps to 0x5cae251 and then to the selection at 0x5cae35e; the leaf is never called and none of the xcr0 terms executes"
+  },
+  "captured_code_executed": false,
+  "limits": "XCR0 composition of the refresh helper only: the value-flow taint verdict, the three post-call reads of the leaf result, the four XCR0 control gates and the cache fields they drive, the A/B selection at 0x5cae35e and the suffix store sites. The publication equations themselves are the merged RE-002 cache-publication packet's and are cited, not re-derived; the leaf result rule is the RE-002 xcr0-leaf packet's. The field-by-field CPUID attribution of the always-on early compositions of R12 and R15 outside the XCR0-gated regions, feature/ISA names for any bit, runtime XCR0/CPUID values, and any gate are not claimed. Taint tracks value flow only: flag-mediated selection (test, sete, cmov) propagates the taint of the selected values, never of the condition. No captured code executed.",
+  "censuses": {
+    "r14_mentions": [
+      "0x5cadeb6",
+      "0x5cadeba",
+      "0x5cadfa6",
+      "0x5cae051",
+      "0x5cae054",
+      "0x5cae067",
+      "0x5cae300"
+    ],
+    "r12_writes": [
+      "0x5cadd99",
+      "0x5cadf4b",
+      "0x5cadf4f",
+      "0x5cadf56",
+      "0x5cadf62",
+      "0x5cadf70",
+      "0x5cadf7d",
+      "0x5cadf80",
+      "0x5cadf83",
+      "0x5cadfdc",
+      "0x5cae036",
+      "0x5cae07b",
+      "0x5cae09f",
+      "0x5cae13b",
+      "0x5cae13e",
+      "0x5cae142",
+      "0x5cae146",
+      "0x5cae149",
+      "0x5cae14c",
+      "0x5cae14f",
+      "0x5cae1c0",
+      "0x5cae223",
+      "0x5cae227",
+      "0x5cae22a",
+      "0x5cae22d",
+      "0x5cae230",
+      "0x5cae233",
+      "0x5cae236",
+      "0x5cae239",
+      "0x5cae2af",
+      "0x5cae2f0",
+      "0x5cae315",
+      "0x5cae31f",
+      "0x5cae324",
+      "0x5cae35b"
+    ],
+    "r15_writes": [
+      "0x5cadeba",
+      "0x5cadebd",
+      "0x5cadf91",
+      "0x5cadf94",
+      "0x5cadfa2",
+      "0x5cadfcc",
+      "0x5cae033",
+      "0x5cae0ba"
+    ],
+    "r13_writes": [
+      "0x5cadd6d",
+      "0x5caddd8",
+      "0x5cae380",
+      "0x5cae38a",
+      "0x5cae393"
+    ],
+    "rdi_mentions_after_intake": [
+      "0x5cae054",
+      "0x5cae057",
+      "0x5cae244",
+      "0x5cae251",
+      "0x5cae26c",
+      "0x5cae2c2",
+      "0x5cae2c7",
+      "0x5cae2f3"
+    ],
+    "rax_dead_ranges": [
+      [
+        "0x5cae157",
+        "0x5cae165"
+      ],
+      [
+        "0x5cae23c",
+        "0x5cae278"
+      ],
+      [
+        "0x5cae2f3",
+        "0x5cae2fd"
+      ]
+    ]
+  },
+  "value_taint": {
+    "method": "forward may-taint over decoded blocks; taint enters only as the leaf call result in rax and the conservative caller-saved set; cpuid outputs and immediates are untainted; flag-mediated selection propagates selected values only",
+    "suffix_entry": {
+      "rax": false,
+      "rbx": false,
+      "rcx": false,
+      "rdx": false,
+      "rsi": true,
+      "rdi": false,
+      "rbp": false,
+      "rsp": false,
+      "r8": false,
+      "r9": true,
+      "r10": true,
+      "r11": false,
+      "r12": false,
+      "r13": false,
+      "r14": true,
+      "r15": false
+    },
+    "r12_tainted_blocks": [],
+    "r15_tainted_blocks": [],
+    "mask_field_block_r14_tainted": true
+  }
+}
