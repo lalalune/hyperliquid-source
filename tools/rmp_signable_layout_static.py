@@ -50,7 +50,11 @@ def read(data, va, n):
 
 
 def relocations(data):
-    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    sec = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    if sec is None:
+        raise ValueError('missing.rela.dyn section')
+    if sec['size'] % 24:
+        raise ValueError('truncated.rela.dyn section')
     out = {}
     for off, info, add in struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']]):
         if info & 0xffffffff == 8:
@@ -152,7 +156,9 @@ def analyze(data):
     _summary, extents, _records = fde_extents(data)
     by_start = {e['start']: e for e in extents}
     owners = {}
-    text_sec = next(s for s in sections(data) if s['name'] == '.text')
+    text_sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    if text_sec is None:
+        raise ValueError('missing.text section')
     for role, (start, end) in OWNERS.items():
         ext = by_start.get(start)
         if ext is None or ext['end'] != end:
@@ -227,7 +233,9 @@ def unwrap_site(data):
 
 
 def direct_callers(data):
-    text = next(s for s in sections(data) if s['name'] == '.text')
+    text = next((s for s in sections(data) if s['name'] == '.text'), None)
+    if text is None:
+        raise ValueError('missing.text section')
     blob = data[text['offset']:text['offset'] + text['size']]
     base = text['address']
     _summary, extents, _records = fde_extents(data)
