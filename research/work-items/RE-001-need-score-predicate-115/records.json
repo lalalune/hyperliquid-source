@@ -1,0 +1,135 @@
+{
+ "assumptions": [
+  "The caller guarantees the scores array holds an entry for every index the scan reaches; the native code reads scores[i] without a length check, so running past the end is a model guard error, not a native behavior.",
+  "Nothing in this function mutates the object, so the gate bound recomputed each iteration is constant for a fixed object.",
+  "The native function reads only rsi; rdi is never read before the gate call, where rdi is set to the object."
+ ],
+ "binary": "work/hl-node-115.bin",
+ "branch_sites": {
+  "0x5dbd6ed": {
+   "rule": "need 1 nonzero -> return 1",
+   "target": "0x5dbd7b0"
+  },
+  "0x5dbd715": {
+   "rule": "need 2 nonzero -> return 1",
+   "target": "0x5dbd7a0"
+  },
+  "0x5dbd734": {
+   "rule": "need 3 nonzero -> return 1",
+   "target": "0x5dbd7a0"
+  },
+  "0x5dbd74f": {
+   "rule": "need 4 nonzero -> return 1",
+   "target": "0x5dbd7a0"
+  },
+  "0x5dbd76a": {
+   "rule": "need 5 zero -> score-scan path; nonzero falls through to return 1",
+   "target": "0x5dbd78a"
+  },
+  "0x5dbd788": {
+   "rule": "score >= 1.0 (rodata 0x4592b0) -> return 1; NaN does not take the branch",
+   "target": "0x5dbd7a0"
+  },
+  "0x5dbd794": {
+   "rule": "gate bound >= index (signed 32-bit) -> next score; else return 0",
+   "target": "0x5dbd770"
+  },
+  "0x5f6b72d": {
+   "rule": "flag byte at obj+0xa90 nonzero -> gate returns 0",
+   "target": "0x5f6b735"
+  }
+ },
+ "census": {
+  "gate": {
+   "direct_calls": [
+    "0x5dbd78d",
+    "0x5f6c859",
+    "0x5f7e45e",
+    "0x5f7e5a7"
+   ],
+   "qword_file_offsets": [],
+   "relative_reloc_offsets": [],
+   "tail_jumps": [],
+   "this_item_call_site": "0x5dbd78d"
+  },
+  "predicate": {
+   "direct_calls": [],
+   "qword_file_offsets": [
+    "0x106660"
+   ],
+   "qword_note": "the single qword hit is the addend field of the RELATIVE relocation entry at file offset 0x106650, not a separate stored pointer",
+   "relative_reloc_offsets": [
+    "0x64ca460"
+   ],
+   "relative_note": "exactly one R_X86_64_RELATIVE record carries the predicate as addend, a function-pointer slot at vaddr 0x64ca460; the owning table is not identified in this item",
+   "tail_jumps": []
+  }
+ },
+ "gate_rule": "gate returns 0 when the flag byte at obj+0xa90 is set, else signed32(obj+0x10) - 2 with 32-bit wrap",
+ "need_sums": [
+  {
+   "base_offset": "0xbe0",
+   "order": 1,
+   "rule": "((first - second) >> 4 arithmetic on the wrapped 64-bit difference) + base, operands in native instruction order (mov first, sub second); nonzero returns 1 at once",
+   "first_offset": "0xc78",
+   "second_offset": "0xc70"
+  },
+  {
+   "base_offset": "0xc88",
+   "order": 2,
+   "rule": "((first - second) >> 4 arithmetic on the wrapped 64-bit difference) + base, operands in native instruction order (mov first, sub second); nonzero returns 1 at once",
+   "first_offset": "0xd20",
+   "second_offset": "0xd18"
+  },
+  {
+   "base_offset": "0xdd8",
+   "order": 3,
+   "rule": "((first - second) >> 4 arithmetic on the wrapped 64-bit difference) + base, operands in native instruction order (mov first, sub second); nonzero returns 1 at once",
+   "first_offset": "0xe70",
+   "second_offset": "0xe68"
+  },
+  {
+   "base_offset": "0xb38",
+   "order": 4,
+   "rule": "same shape as the #2326 formatter's need, operands in native instruction order; nonzero returns 1 at once",
+   "first_offset": "0xbd0",
+   "second_offset": "0xbc8"
+  },
+  {
+   "base_offset": "0xe80",
+   "order": 5,
+   "rule": "same shape, operands in native instruction order; nonzero returns 1 at once, zero enters the score scan",
+   "first_offset": "0xf18",
+   "second_offset": "0xf10"
+  }
+ ],
+ "score_scan": {
+  "array": "doubles at [obj+0xf38], indexed by the running index",
+  "bound_recomputed": "the gate is called again after every score that does not satisfy the threshold",
+  "first_index": 0,
+  "index_note": "the fifth need sum is 0 on entry to the scan, so the running index starts at 0",
+  "threshold_rodata": "0x4592b0",
+  "threshold_value": 1.0
+ },
+ "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "target": "node #115",
+ "task": "RE-001",
+ "windows": {
+  "gate": {
+   "end": "0x5f6b736",
+   "fde_file_offset": "0x1004c8c",
+   "fde_length_field": "0x10",
+   "role": "level gate callee, already pinned by #2330; referenced here, not re-claimed",
+   "size": 22,
+   "start": "0x5f6b720"
+  },
+  "predicate": {
+   "end": "0x5dbd7b6",
+   "fde_file_offset": "0xff4a68",
+   "fde_length_field": "0x28",
+   "role": "need-score predicate; takes the object in rsi, returns 1 or 0",
+   "size": 230,
+   "start": "0x5dbd6d0"
+  }
+ }
+}
