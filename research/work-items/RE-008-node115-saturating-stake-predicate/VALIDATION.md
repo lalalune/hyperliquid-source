@@ -13,12 +13,25 @@ Base: `05bc2de303c05525b71e7e257426e741bc66a390`.
 
 | Historical input | SHA-256 |
 |---|---|
-| Private native contract freeze | `7f2402818199ebcfe283e66b06a51af5d0eb062342c310591bd8f8f66c3eaecd` |
+| [Original native-contract metadata](validation/ORIGINAL-NATIVE-FREEZE.json) (historical) | `7f2402818199ebcfe283e66b06a51af5d0eb062342c310591bd8f8f66c3eaecd` |
 | Host contract | `4bb6a164423609b2310b7952351be5e88f8583d205b1ec144e9393cfde92a28e` |
 | Forty manual cases freeze | `eec1e900dd60abb77deda2d5aaabcf54ee87fb1f1d790ea5013aedce77a4f40f` |
 | Reference/generator source freeze | `08e1d02c3efb930a8f5717e072685682197c437a1db5f398941cb5ddd1690fad` |
 | Eight-file corpus freeze | `e97921cc0b00648319b053a661860cd3dc7ba5f10626dc355a0b1bd6d4070133` |
 | Initial five-file Rust source freeze | `4203e5cbe053b143b5c012926371bc1b3bdf8462869d447ad8b5e2e06b119fd7` |
+
+The first digest hashes the exact 3,256-byte historical JSON metadata linked
+above. It contains twelve relative evidence filenames, byte sizes, SHA-256
+values and scope notes. The value is reproducible from these published bytes
+and does not encode an authentication credential. From the repository root:
+
+```sh
+shasum -a 256 research/work-items/RE-008-node115-saturating-stake-predicate/validation/ORIGINAL-NATIVE-FREEZE.json
+```
+
+This historical metadata retains the original file identities. Three of those
+files later received the declared path projections; the current public native
+inventory is the separate `native/INDEPENDENT-FREEZE.json`, as explained below.
 
 The corpus freeze timestamp is 2026-11-04 06:50:04 UTC; the initial Rust source
 freeze is 06:52:55 UTC. Original frozen records and earlier draft wording remain
