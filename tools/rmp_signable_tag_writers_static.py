@@ -102,7 +102,9 @@ def read(data, va, n):
 
 def relocations(data):
     """All .rela.dyn entries as (slot, type, addend, addend file offset)."""
-    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    sec = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    require(sec is not None, 'missing.rela.dyn section')
+    require(sec['size'] % 24 == 0, 'truncated.rela.dyn section')
     out = []
     for i, (off, info, add) in enumerate(
             struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']])):
@@ -111,11 +113,16 @@ def relocations(data):
 
 
 def dynsym_name(data, index):
-    sym = next(s for s in sections(data) if s['name'] == '.dynsym')
-    strs = next(s for s in sections(data) if s['name'] == '.dynstr')
+    sym = next((s for s in sections(data) if s['name'] == '.dynsym'), None)
+    strs = next((s for s in sections(data) if s['name'] == '.dynstr'), None)
+    require(sym is not None, 'missing.dynsym section')
+    require(strs is not None, 'missing.dynstr section')
     st_name = struct.unpack_from('<I', data, sym['offset'] + 24 * index)[0]
     start = strs['offset'] + st_name
-    return data[start:data.index(b'\0', start)].decode()
+    try:
+        return data[start:data.index(b'\0', start)].decode()
+    except UnicodeDecodeError:
+        require(False, 'dynamic symbol name is not valid UTF-8')
 
 
 def _pin(body, base, va, hexbytes, what):
@@ -144,7 +151,8 @@ def call_census(data, targets):
     containing FDE for each site. targets maps role -> VA. Sites are raw
     byte-pattern hits; sites inside packet owners are additionally
     validated as instruction starts by generate()."""
-    text = next(s for s in sections(data) if s['name'] == '.text')
+    text = next((s for s in sections(data) if s['name'] == '.text'), None)
+    require(text is not None, 'missing.text section')
     blob = data[text['offset']:text['offset'] + text['size']]
     base = text['address']
     _summary, extents, _records = fde_extents(data)
@@ -177,7 +185,8 @@ def call_census(data, targets):
 def slot_census(data, slot):
     """Every ff 15 / ff 25 RIP-relative reference to a slot in .text,
     with the containing FDE for each site."""
-    text = next(s for s in sections(data) if s['name'] == '.text')
+    text = next((s for s in sections(data) if s['name'] == '.text'), None)
+    require(text is not None, 'missing.text section')
     blob = data[text['offset']:text['offset'] + text['size']]
     base = text['address']
     _summary, extents, _records = fde_extents(data)
@@ -379,6 +388,8 @@ def analyze(data):
 
     # --- relocation bindings for every slot this packet reasons about ---
     by_slot = {off: (typ, add, sym) for off, typ, add, _o, sym in relocations(data)}
+    for slot in list(SLOTS) + [MEMCPY_SLOT]:
+        require(slot in by_slot, f'missing relocation for slot {slot:#x}')
     bindings = {}
     for slot, (target, name) in SLOTS.items():
         typ, add, _sym = by_slot[slot]
