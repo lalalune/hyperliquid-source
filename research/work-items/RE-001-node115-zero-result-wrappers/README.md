@@ -1,5 +1,15 @@
 # RE-001: node115 payload wrappers with an unconditional normal zero result
 
+## Current repository validation
+
+The user explicitly authorized the disclosed isolated offline evaluator tests. The original repository `make test` command exercised **583 modules**, 5409 reported unittest cases, 899 pytest passes and 9 recorded built-in skips. Script modules may not report an assertion count; no count is invented. Optional compiler/version skips are listed in `repository-tests.json`, not presented as compiler-comparison passes.
+
+The original full command's exit code was 2: one pure-static catalogue fixture hit macOS sandbox hardlink policy. Its unmodified13-test module then passed with a stronger TMPDIR process-exec deny; network and artifact execution restrictions were not relaxed. Original failures/logs remain preserved, and all583 final module results are successful.
+
+ The full suite actually ran on PR2829 head `196bb08453803749319890a91ee2e640cc772283`. All eight PRs have byte-identical tools/tests/src/provenance/artifacts/build-rule trees and differ only in their independent evidence packet plus generated inventory. Shared results are combined with fresh per-packet controls/native regeneration and per-head doctor/verify/catalogue-check/reproduce. This follow-up changes only this README, the test receipt and its manifest; it does not alter target evidence or testing logic.
+
+Execution used an OS network-denying sandbox, isolated HOME/TMPDIR, no inherited auth/proxy state, explicit `HL_ALLOW_CAPTURED_INSTRUCTION_EVAL=1`, offline Cargo and disabled automatic toolchain installation. Captured native binaries, real services, signing and private runtime data were not used. Raw logs and checksums are preserved in the operator findings; this compact receipt pins their identities. The earlier static collection metadata remains historical rather than rewritten. Repository test success does not recover opaque helpers, prove target equivalence or advance any reconstruction/component gate. Hosted CI success is not claimed.
+
 Component: foundation / lazy-call instrumentation. Question: what do `0x154c2c0` and `0x154c4e0` actually return along their local normal exits, and which payload calls do they wrap?
 
 ## New observations
@@ -36,7 +46,5 @@ The output directory must be absent. Without `--output`, the collector verifies 
 Every owner is decoded from its FDE entry, with no resynchronization: each row's original bytes, contiguous addresses, exact final extent and all selected anchor boundaries are checked. CIE/FDE bytes and the unwind-index binding are retained; LLVM dwarfdump independently confirms the decoded unwind range. Direct relative transfers are recomputed from original encodings; in-owner branches must land on decoded boundaries. Each RIP call slot is uniquely resolved to an original relocation record. All exports preserve instructions and data verbatim, with only surplus final newlines normalized. No operand or relocation normalization is used.
 
 The selected operand/data controls flip a real byte in the validator's read view, deliberately bypassing both full-image and body hashes, and require rejection by the intended named byte obligation. Separate FDE-range and relocation-record corruptions exercise exact metadata admission, not runtime semantic equivalence. Truncated and same-size-modified inputs separately fail the public pre-parser identity gate. Repeated captures agree exactly; `validation.json` retains output identities. These are static evidence-admission controls, not target execution or instruction evaluation.
-
-Full required repository tests have not been run for this contribution: the default suite includes captured-instruction evaluators outside the granted static-only scope. This packet remains **Draft**, with the full test gate explicitly unmet. Integration records doctor/verify/catalogue/reproduce and any approved pure-static subset separately; neither packet controls nor a historical suite are substituted for a new full-suite pass. No hosted CI success is claimed.
 
 No captured program, allocator, callback, thread-local state, filesystem operation or network service is executed. No Rust reconstruction, behavior comparison, complete ABI/helper closure, byte-equivalence credit or component gate is claimed; all gates remain false.
