@@ -1,0 +1,105 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "owners": [
+    {
+      "role": "xcr0_leaf",
+      "start": "0x5cae3e0",
+      "end": "0x5cae3ed",
+      "file_offset": "0x5cad3e0",
+      "bytes": 13,
+      "sha256": "f347a1395ba474e85f6c71330ca7f30e1d067cc6af42548744b6310ae2dbf0be",
+      "frames": {
+        "fde": {
+          "va": "0xfe3830",
+          "bytes_hex": "100000005cc93300a8abcc040d00000000000000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "consumer_refresh",
+      "start": "0x5cadd50",
+      "end": "0x5cae3da",
+      "file_offset": "0x5cacd50",
+      "bytes": 1674,
+      "sha256": "f4cc818ee02b994599bfc53910323d3edf8420d0b404c2e5060faab72524c349",
+      "frames": {
+        "fde": {
+          "va": "0xfe3804",
+          "bytes_hex": "2800000030c9330044a5cc048a06000000410e108602430d064d83078c068d058e048f030378060c07080000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    }
+  ],
+  "leaf": {
+    "index_register": "ecx",
+    "index_value": 0,
+    "shift": 32,
+    "result": "rax = xgetbv(ecx=0), the full XCR0 value (edx:eax recomposed)",
+    "fde": "0x5cae3e0..0x5cae3ed"
+  },
+  "call_census": {
+    "direct_call_sites": [
+      "0x5cae04c"
+    ],
+    "relocation_references": 0
+  },
+  "consumer_trace": {
+    "consumer": "consumer_refresh",
+    "call_site": "0x5cae04c",
+    "result_register": "r14",
+    "high_field": {
+      "move": "0x5cae054",
+      "mask_site": "0x5cae057",
+      "mask": "0x60000",
+      "bits": [
+        17,
+        18
+      ]
+    },
+    "first_branch": {
+      "not": "0x5cae05d",
+      "test": "0x5cae05f",
+      "mask": "0x6",
+      "bits": [
+        1,
+        2
+      ],
+      "jne": "0x5cae061",
+      "target": "0x5cae260",
+      "taken_when": "(xcr0 & 0x6) != 0x6"
+    },
+    "mask_field": {
+      "move": "0x5cae067",
+      "and": "0x5cae06a",
+      "mask": "0xe0",
+      "bits": [
+        5,
+        6,
+        7
+      ],
+      "h_set": {
+        "movabs": "0x5cae071",
+        "or": "0x5cae07b",
+        "value": "0x8000000000000000",
+        "into": "r12"
+      },
+      "complement_xor": "0x5cae0c4",
+      "composed_or": "0x5cae157"
+    },
+    "convergence": {
+      "shared_block": "0x5cae274",
+      "site": "0x5cae2f3"
+    }
+  },
+  "direct_callers": 1,
+  "captured_code_executed": false,
+  "limits": "XCR0 probe leaf result, its static boundaries, and its sole consumer's first branch and pinned field extractions only. The leaf returns the full XCR0 value its XGETBV instruction produces; no captured runtime XCR0 value is observed or claimed. What the composed feature word means downstream, the consumer prefix's ten CPUID instructions and their composition, feature/ISA names for the tested bits, cache synchronization, and the publication equations are the scope of the merged RE-002 cache-publication packet and are not re-derived or re-claimed here. No captured code executed, no complete caller recovery beyond the full-.text direct-call census and .rela.dyn scan, no #94 correspondence, or reconstruction gate is claimed."
+}
