@@ -1,0 +1,672 @@
+{
+ "boundaries": {
+  "error_constructor": {
+   "fde": "0x5822700..0x582270e",
+   "role": "shared raw constructor: writes rawtag 3, field1 from esi, field2 from edx; owned by the open u64-reader packet (#2300), recorded here as a called boundary"
+  },
+  "field1_5_sibling": {
+   "role": "a second scalar-reader family with the same payload widths but constructor field1 5 (copies include 0x5821340; slow reader 0x5822710 via slot 0x64e7f80); excluded, not traced"
+  },
+  "size_state": "the encode-side varint size functions are open PR #2257; disjoint role",
+  "u64_reader_family": {
+   "role": "copies 0x2cd7ac0/0x5821250, slow reader 0x58225c0, raw constructor and 4x aggregates; owned by open PR #2300. On marker 253 the widths disagree: the u64 copies read an 8-byte payload (consume 9), this reader returns error field2 3 (consume 0 fast, 1 slow). Charge 8 vs 4; fast threshold remaining > 8 vs > 4."
+  }
+ },
+ "call_sites": {
+  "copy_a": [
+   {
+    "containing_fde": "0x26e2c30..0x26e2e73",
+    "site": "0x26e2c91"
+   },
+   {
+    "containing_fde": "0x26e5710..0x26e58d8",
+    "site": "0x26e5725"
+   },
+   {
+    "containing_fde": "0x26ff830..0x270000c",
+    "site": "0x26ff91b"
+   },
+   {
+    "containing_fde": "0x26ff830..0x270000c",
+    "site": "0x26ff9b3"
+   },
+   {
+    "containing_fde": "0x26ff830..0x270000c",
+    "site": "0x26ffd7d"
+   },
+   {
+    "containing_fde": "0x2706b60..0x2706f91",
+    "site": "0x2706c85"
+   },
+   {
+    "containing_fde": "0x2706fa0..0x27073de",
+    "site": "0x27071da"
+   },
+   {
+    "containing_fde": "0x2b6aea0..0x2b6bae9",
+    "site": "0x2b6af16"
+   },
+   {
+    "containing_fde": "0x2cdc130..0x2cdc7d1",
+    "site": "0x2cdc230"
+   },
+   {
+    "containing_fde": "0x2ce1590..0x2ce172e",
+    "site": "0x2ce15ef"
+   },
+   {
+    "containing_fde": "0x2ce1590..0x2ce172e",
+    "site": "0x2ce1662"
+   },
+   {
+    "containing_fde": "0x2ce1dc0..0x2ce2a32",
+    "site": "0x2ce1e0c"
+   },
+   {
+    "containing_fde": "0x2ceaf00..0x2ceb298",
+    "site": "0x2ceaf1a"
+   },
+   {
+    "containing_fde": "0x2e464f0..0x2e466a7",
+    "site": "0x2e46502"
+   },
+   {
+    "containing_fde": "0x2e466b0..0x2e469a9",
+    "site": "0x2e466c0"
+   },
+   {
+    "containing_fde": "0x2e466b0..0x2e469a9",
+    "site": "0x2e46827"
+   }
+  ],
+  "copy_b": [
+   {
+    "containing_fde": "0x4ece880..0x4eceac3",
+    "site": "0x4ece8e1"
+   },
+   {
+    "containing_fde": "0x4eff5f0..0x4eff946",
+    "site": "0x4eff60c"
+   },
+   {
+    "containing_fde": "0x5821940..0x5821a96",
+    "site": "0x5821974"
+   },
+   {
+    "containing_fde": "0x5821aa0..0x5821f27",
+    "site": "0x5821ae8"
+   },
+   {
+    "containing_fde": "0x582b520..0x582bce8",
+    "site": "0x582b546"
+   },
+   {
+    "containing_fde": "0x59d5ea0..0x59d6516",
+    "site": "0x59d5f80"
+   },
+   {
+    "containing_fde": "0x5aaa460..0x5aaa628",
+    "site": "0x5aaa475"
+   },
+   {
+    "containing_fde": "0x5aac6a0..0x5aac7b7",
+    "site": "0x5aac6b2"
+   },
+   {
+    "containing_fde": "0x5aac7c0..0x5aacc22",
+    "site": "0x5aac7d5"
+   },
+   {
+    "containing_fde": "0x5aac7c0..0x5aacc22",
+    "site": "0x5aac941"
+   },
+   {
+    "containing_fde": "0x5aac7c0..0x5aacc22",
+    "site": "0x5aac9f2"
+   }
+  ],
+  "slow_path": []
+ },
+ "captured_code_executed": false,
+ "charge": {
+  "amount": 4,
+  "over_limit": "charged + 4 > limit returns rawtag 2; the +4 charge is retained and no input is consumed",
+  "overflow": "charged > u64::MAX - 4 returns rawtag 2 with the charged count unchanged",
+  "stored_before_limit_compare": true,
+  "uncharged_modes": "every mode value other than 1 takes the uncharged route in these bytes"
+ },
+ "fast_route": {
+  "fallback": "remaining <= 4 calls the slow reader through slot 0x64e7f70 with state +0x10 and endianness 0",
+  "marker_classes": [
+   {
+    "consumed": 1,
+    "markers": "0..250",
+    "outcome": "value",
+    "payload": "marker itself"
+   },
+   {
+    "consumed": 3,
+    "marker": 251,
+    "outcome": "value",
+    "payload": "u16 little-endian"
+   },
+   {
+    "consumed": 5,
+    "marker": 252,
+    "outcome": "value",
+    "payload": "u32 little-endian"
+   },
+   {
+    "consumed": 0,
+    "field1": 2,
+    "field2": 3,
+    "marker": 253,
+    "outcome": "error"
+   },
+   {
+    "consumed": 0,
+    "field1": 2,
+    "field2": 4,
+    "marker": 254,
+    "outcome": "error"
+   },
+   {
+    "consumed": 0,
+    "field1": 2,
+    "field2": 12,
+    "marker": 255,
+    "outcome": "error"
+   }
+  ],
+  "minimality": "no marker-value comparison exists in either copy: non-minimal 251/252 encodings of small values are accepted",
+  "requires": "remaining > 4"
+ },
+ "limits": "Static trace only: no pinned bytes were executed and no live node, network, signer, or exchange state was used. The bytes test only mode == 1; the canonical mode values 0 and 1 are the domain record of the open u64-reader packet (#2300), not re-derived here. Rawtag and error-field values are reported as raw result bytes; which Rust enum variants they name is not established from these bytes. The slow-path endianness argument is 0 (little-endian) at both in-family call sites; behaviour for the big-endian setting is traced from the slow reader bytes but no in-family caller uses it. No Rust reconstruction is included or claimed.",
+ "owners": [
+  {
+   "bytes": 243,
+   "dispatch_table": {
+    "entries": [
+     "0x26cbbad",
+     "0x26cbbb9",
+     "0x26cbc07",
+     "0x26cbbef"
+    ],
+    "targets": {
+     "251": "0x2cd7a29",
+     "252": "0x2cd7a35",
+     "253": "0x2cd7a83",
+     "254": "0x2cd7a6b"
+    },
+    "va": "0x60be7c"
+   },
+   "end": "0x2cd7ab3",
+   "file_offset": "0x2cd69c0",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+     "va": "0xca6ed8"
+    },
+    "fde": {
+     "bytes_hex": "34000000584d0e008cbdf401f300000000410e108302670e08410e10026d0e08410e10530e08410e10570e08410e10570e08410e10570e08",
+     "va": "0xd8bc2c"
+    }
+   },
+   "role": "copy_a",
+   "sha256": "a5c3798993adf6685060aa2cb82a5088b005a52b2e9b68086e5a6147ad0e2269",
+   "start": "0x2cd79c0"
+  },
+  {
+   "bytes": 243,
+   "dispatch_table": {
+    "entries": [
+     "0x4eeb5ed",
+     "0x4eeb5f9",
+     "0x4eeb647",
+     "0x4eeb62f"
+    ],
+    "targets": {
+     "251": "0x58211b9",
+     "252": "0x58211c5",
+     "253": "0x5821213",
+     "254": "0x58211fb"
+    },
+    "va": "0x935bcc"
+   },
+   "end": "0x5821243",
+   "file_offset": "0x5820150",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+     "va": "0xca6ed8"
+    },
+    "fde": {
+     "bytes_hex": "3400000030552f00444d8804f300000000410e108302670e08410e10026d0e08410e10530e08410e10570e08410e10570e08410e10570e08",
+     "va": "0xf9c404"
+    }
+   },
+   "role": "copy_b",
+   "sha256": "d9cbd093b853222eb99cc7f535e1ba275ee2ed6d0fb20cd42ab1d09226c31f10",
+   "start": "0x5821150"
+  },
+  {
+   "bytes": 293,
+   "end": "0x58225b5",
+   "file_offset": "0x5821490",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+     "va": "0xca6ed8"
+    },
+    "fde": {
+     "bytes_hex": "3c000000d8572f00dc5d88042501000000410e108302730e08410e104f0e08410e1002480e08410e10024e0e08410e10570e08410e10570e08410e10570e0800",
+     "va": "0xf9c6ac"
+    }
+   },
+   "role": "slow_path",
+   "sha256": "01255fd93b48bc057b05509c8aefd2ae286c27b62431f3159813a8b398b816f8",
+   "start": "0x5822490"
+  }
+ ],
+ "reader_state": {
+  "charged_count": "state +0x20, u64; mode-1 charge ledger",
+  "cursor": "state +0x10, pointer; advanced only on success",
+  "limit": "state +0x8, u64; mode-1 bound for the charged count",
+  "mode": "state +0x0, dword; the charged route is taken iff == 1",
+  "remaining": "state +0x18, u64; decremented only on success"
+ },
+ "relocations": {
+  "0x64e7f70": "0x5822490",
+  "0x64e7f78": "0x5822700",
+  "0x64e7f80": "0x5822710"
+ },
+ "result_layout": {
+  "additional": "result +0x8, u64, written on rawtag 0x00",
+  "error_fields": "result +0x1 (field1) and +0x2 (field2), written by the shared constructor on rawtag 0x03",
+  "rawtag": "result +0x0, byte: 0x12 value, 0x02 charge refusal, 0x00 slow shortfall, 0x03 error (via the constructor)",
+  "value": "result +0x4, u32, written on rawtag 0x12"
+ },
+ "slow_path": {
+  "argument": "pointer to the (cursor, remaining) pair at state +0x10, plus an endianness flag in dl that both copies set to 0 (little-endian)",
+  "dispatch_table": {
+   "targets": {
+    "251": "0x58224f7",
+    "252": "0x5822504",
+    "253": "0x5822585",
+    "254": "0x582256d"
+   },
+   "va": "0x935c14"
+  },
+  "empty": "remaining == 0 returns rawtag 0 with additional 1 and consumes nothing",
+  "fde": "0x5822490..0x58225b5",
+  "grid": [
+   {
+    "additional": 1,
+    "consumed": 0,
+    "marker": 0,
+    "outcome": "need",
+    "total_remaining": 0
+   },
+   {
+    "consumed": 1,
+    "marker": 0,
+    "outcome": "value",
+    "payload": "marker itself",
+    "total_remaining": 1
+   },
+   {
+    "consumed": 1,
+    "marker": 0,
+    "outcome": "value",
+    "payload": "marker itself",
+    "total_remaining": 2
+   },
+   {
+    "consumed": 1,
+    "marker": 0,
+    "outcome": "value",
+    "payload": "marker itself",
+    "total_remaining": 3
+   },
+   {
+    "consumed": 1,
+    "marker": 0,
+    "outcome": "value",
+    "payload": "marker itself",
+    "total_remaining": 4
+   },
+   {
+    "consumed": 1,
+    "marker": 0,
+    "outcome": "value",
+    "payload": "marker itself",
+    "total_remaining": 5
+   },
+   {
+    "consumed": 1,
+    "marker": 0,
+    "outcome": "value",
+    "payload": "marker itself",
+    "total_remaining": 6
+   },
+   {
+    "additional": 1,
+    "consumed": 0,
+    "marker": 250,
+    "outcome": "need",
+    "total_remaining": 0
+   },
+   {
+    "consumed": 1,
+    "marker": 250,
+    "outcome": "value",
+    "payload": "marker itself",
+    "total_remaining": 1
+   },
+   {
+    "consumed": 1,
+    "marker": 250,
+    "outcome": "value",
+    "payload": "marker itself",
+    "total_remaining": 2
+   },
+   {
+    "consumed": 1,
+    "marker": 250,
+    "outcome": "value",
+    "payload": "marker itself",
+    "total_remaining": 3
+   },
+   {
+    "consumed": 1,
+    "marker": 250,
+    "outcome": "value",
+    "payload": "marker itself",
+    "total_remaining": 4
+   },
+   {
+    "consumed": 1,
+    "marker": 250,
+    "outcome": "value",
+    "payload": "marker itself",
+    "total_remaining": 5
+   },
+   {
+    "consumed": 1,
+    "marker": 250,
+    "outcome": "value",
+    "payload": "marker itself",
+    "total_remaining": 6
+   },
+   {
+    "additional": 1,
+    "consumed": 0,
+    "marker": 251,
+    "outcome": "need",
+    "total_remaining": 0
+   },
+   {
+    "additional": 2,
+    "consumed": 1,
+    "marker": 251,
+    "outcome": "need",
+    "total_remaining": 1
+   },
+   {
+    "additional": 1,
+    "consumed": 1,
+    "marker": 251,
+    "outcome": "need",
+    "total_remaining": 2
+   },
+   {
+    "consumed": 3,
+    "marker": 251,
+    "outcome": "value",
+    "payload": "u16",
+    "total_remaining": 3
+   },
+   {
+    "consumed": 3,
+    "marker": 251,
+    "outcome": "value",
+    "payload": "u16",
+    "total_remaining": 4
+   },
+   {
+    "consumed": 3,
+    "marker": 251,
+    "outcome": "value",
+    "payload": "u16",
+    "total_remaining": 5
+   },
+   {
+    "consumed": 3,
+    "marker": 251,
+    "outcome": "value",
+    "payload": "u16",
+    "total_remaining": 6
+   },
+   {
+    "additional": 1,
+    "consumed": 0,
+    "marker": 252,
+    "outcome": "need",
+    "total_remaining": 0
+   },
+   {
+    "additional": 4,
+    "consumed": 1,
+    "marker": 252,
+    "outcome": "need",
+    "total_remaining": 1
+   },
+   {
+    "additional": 3,
+    "consumed": 1,
+    "marker": 252,
+    "outcome": "need",
+    "total_remaining": 2
+   },
+   {
+    "additional": 2,
+    "consumed": 1,
+    "marker": 252,
+    "outcome": "need",
+    "total_remaining": 3
+   },
+   {
+    "additional": 1,
+    "consumed": 1,
+    "marker": 252,
+    "outcome": "need",
+    "total_remaining": 4
+   },
+   {
+    "consumed": 5,
+    "marker": 252,
+    "outcome": "value",
+    "payload": "u32",
+    "total_remaining": 5
+   },
+   {
+    "consumed": 5,
+    "marker": 252,
+    "outcome": "value",
+    "payload": "u32",
+    "total_remaining": 6
+   },
+   {
+    "additional": 1,
+    "consumed": 0,
+    "marker": 253,
+    "outcome": "need",
+    "total_remaining": 0
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 3,
+    "marker": 253,
+    "outcome": "error",
+    "total_remaining": 1
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 3,
+    "marker": 253,
+    "outcome": "error",
+    "total_remaining": 2
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 3,
+    "marker": 253,
+    "outcome": "error",
+    "total_remaining": 3
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 3,
+    "marker": 253,
+    "outcome": "error",
+    "total_remaining": 4
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 3,
+    "marker": 253,
+    "outcome": "error",
+    "total_remaining": 5
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 3,
+    "marker": 253,
+    "outcome": "error",
+    "total_remaining": 6
+   },
+   {
+    "additional": 1,
+    "consumed": 0,
+    "marker": 254,
+    "outcome": "need",
+    "total_remaining": 0
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 4,
+    "marker": 254,
+    "outcome": "error",
+    "total_remaining": 1
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 4,
+    "marker": 254,
+    "outcome": "error",
+    "total_remaining": 2
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 4,
+    "marker": 254,
+    "outcome": "error",
+    "total_remaining": 3
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 4,
+    "marker": 254,
+    "outcome": "error",
+    "total_remaining": 4
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 4,
+    "marker": 254,
+    "outcome": "error",
+    "total_remaining": 5
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 4,
+    "marker": 254,
+    "outcome": "error",
+    "total_remaining": 6
+   },
+   {
+    "additional": 1,
+    "consumed": 0,
+    "marker": 255,
+    "outcome": "need",
+    "total_remaining": 0
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 12,
+    "marker": 255,
+    "outcome": "error",
+    "total_remaining": 1
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 12,
+    "marker": 255,
+    "outcome": "error",
+    "total_remaining": 2
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 12,
+    "marker": 255,
+    "outcome": "error",
+    "total_remaining": 3
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 12,
+    "marker": 255,
+    "outcome": "error",
+    "total_remaining": 4
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 12,
+    "marker": 255,
+    "outcome": "error",
+    "total_remaining": 5
+   },
+   {
+    "consumed": 1,
+    "field1": 2,
+    "field2": 12,
+    "marker": 255,
+    "outcome": "error",
+    "total_remaining": 6
+   }
+  ],
+  "marker_consumed_before_classification": true
+ },
+ "slow_slot_references": [
+  "0x2cd7a60",
+  "0x58211f0"
+ ],
+ "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+}
