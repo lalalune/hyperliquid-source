@@ -1,0 +1,119 @@
+{
+  "target_release": 115,
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "base_commit": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "checks": [
+    {
+      "command": "make doctor",
+      "exit_code": 0,
+      "analysis_ready": true,
+      "exact_rebuild_ready": false,
+      "limits": "Ghidra and named Rust rebuild toolchains unavailable; not needed for static symbolic analysis."
+    },
+    {
+      "command": "python3 research/work-items/RE-001-node115-secp-storage/analyze.py --output work/secp-storage-validation/reviewed/analysis.json",
+      "exit_code": 0,
+      "positive_unsat_queries": 20,
+      "controls": 4,
+      "integer_oracle_caller_checks": 528
+    },
+    {
+      "command": "python3 -O research/work-items/RE-001-node115-secp-storage/analyze.py --output work/secp-storage-validation/optimized-final/analysis.json",
+      "exit_code": 0,
+      "analysis_json_and_boundary_tsv_equal_to_retained": true
+    },
+    {
+      "command": "python3 research/work-items/RE-001-node115-secp-storage/disassemble.py --output work/secp-storage-validation/decoder-repeat",
+      "exit_code": 0,
+      "instruction_address_bytes_mnemonic_agreements": 418,
+      "fresh_exports_equal_to_retained": true
+    },
+    {
+      "command": "TMPDIR=\"$PWD/work/secp-storage-validation/tmp\" make test",
+      "exit_code": 0,
+      "modules": 76,
+      "reported_cases": 382,
+      "failed_modules": 0,
+      "skipped_outcomes": [
+        "setUpClass (test_node115_field_adapter_drift.ActualNode115Bindings) ... skipped 'Set HL_RE014_LIBCORE to the explicitly supplied pinned official archive; no download or qualification is implied.'",
+        "test_actual_compilation_layouts_and_source_corruptions (test_nonce_ring_rust.NonceRingRustTests.test_actual_compilation_layouts_and_source_corruptions) ... skipped 'explicit HYPERLIQUID_NONCE_RING_RUSTC and Capstone5.0.6 required; not a Rust pass'",
+        "test_real_nested_jre_uses_enclosing_jdk (test_rea_java_home.NativeJavaHomeTests.test_real_nested_jre_uses_enclosing_jdk) ... skipped 'native macOS resolver required'",
+        "test_system_launcher_uses_registered_jdk_root (test_rea_java_home.NativeJavaHomeTests.test_system_launcher_uses_registered_jdk_root) ... skipped 'native macOS resolver required'"
+      ]
+    },
+    {
+      "command": "make reproduce",
+      "exit_code": 0,
+      "inventories": [
+        "node115",
+        "visor"
+      ]
+    },
+    {
+      "command": "make verify catalogue-check",
+      "exit_code": 0,
+      "authenticated_artifacts": 6,
+      "valid_signatures": 2,
+      "imported_files": 29,
+      "evidence_packet_manifests": 29,
+      "manifest_entries": 469,
+      "generated_catalogue_matches": true
+    },
+    {
+      "command": "git diff --cached --check",
+      "exit_code": 0
+    }
+  ],
+  "raw_logs": {
+    "work/secp-storage-validation/doctor-final.log": {
+      "sha256": "91871ce04ca0cf5482ec82a0854ff24b2873bd0c1b55f396a06f85598c3962af",
+      "bytes": 2406
+    },
+    "work/secp-storage-validation/test.stdout": {
+      "sha256": "4551d0b885b4afca1cc834c2965569d89170f9cda93505cece17dfd76ba144a1",
+      "bytes": 795
+    },
+    "work/secp-storage-validation/test.stderr": {
+      "sha256": "072493def6a2e712786ea27a7748556647622978752d39e06d052e67db3d8cb5",
+      "bytes": 66675
+    },
+    "work/secp-storage-validation/reproduce.log": {
+      "sha256": "8df90fc43ec45df589cd9c1f2d1b192e53acdec5ff861ebaa259582102ac20af",
+      "bytes": 510
+    },
+    "work/secp-storage-validation/analysis-final.stdout": {
+      "sha256": "a48f356bafbef19c725a945355e3e2661363a5176d2c0f333619a3bd36081d3a",
+      "bytes": 114
+    },
+    "work/secp-storage-validation/optimized-final.stdout": {
+      "sha256": "5fead128e1fa0f375684cde1a2a98e63865356169904b2f3c6cbdfa762142e40",
+      "bytes": 102
+    },
+    "work/secp-storage-validation/reviewed.stdout": {
+      "sha256": "5dc2c5bd2bc5295346addd41decedaacec1a95f8a1586b760fa2ba0a33ff9123",
+      "bytes": 95
+    },
+    "work/secp-storage-validation/decoder-repeat.stdout": {
+      "sha256": "ffee85992f996ac152812b1035484192e0df23307920232a32bfaf715651803a",
+      "bytes": 489
+    },
+    "work/secp-storage-validation/catalogue-check.log": {
+      "sha256": "d154b53146de73afa6ac07cb86b790175fed3cf9eb764993fa92227491db6d80",
+      "bytes": 86
+    },
+    "work/secp-storage-validation/final-check.log": {
+      "sha256": "7ac7aaccc8c566eecff557d5411c8ae62fcbd0b067da8b7391aa2b479150abb1",
+      "bytes": 771
+    }
+  },
+  "unclaimed": [
+    "hosted CI",
+    "container build",
+    "captured execution",
+    "Rust reconstruction",
+    "source-built byte equivalence",
+    "caller magnitude invariants",
+    "whole-node equivalence"
+  ],
+  "workspace_note": "A rustc version query triggered rustup automatic installation; it was stopped and the newly created incomplete 1.95.0 toolchain was removed. No Rust build or pass is claimed."
+}
