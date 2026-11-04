@@ -1,0 +1,122 @@
+{
+ "artifact": {
+  "local_path": "work/hl-node-115.bin",
+  "node": 115,
+  "provenance_path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "sha256_match": true
+ },
+ "call_sites": [
+  {
+   "containing_function": "caller at 0x5de6e58 (containing function 0x5de44c0..0x5de7ed0; internals not read beyond the call-site setup)",
+   "note": "holder argument is an element pointer plus 0x8f0, collection argument is another element pointer plus 0x570; only the call site and those two offsets are claimed",
+   "sites": [
+    "0x5de6e58"
+   ],
+   "target": "0x5f13310"
+  },
+  {
+   "containing_function": "caller at 0x5ed6895 (containing function 0x5ed5df0..0x5ed88be; internals not read beyond the call-site setup)",
+   "note": "holder argument is the qword at object + 0x48 plus 0x8f0, collection argument is the object plus 0x570; only the call site and those two offsets are claimed",
+   "sites": [
+    "0x5ed6895"
+   ],
+   "target": "0x5f13310"
+  },
+  {
+   "containing_function": "0x5f13310..0x5f133da (excerpted whole in this packet)",
+   "note": "called once per element with the element pointer plus 0xa98; the callee's internals are by contract only",
+   "sites": [
+    "0x5f1337c"
+   ],
+   "target": "0x5f54ee0"
+  },
+  {
+   "containing_function": "0x5f13310..0x5f133da (excerpted whole in this packet)",
+   "note": "guard acquire at entry with the constant argument 9, guard release at normal exit; the guard helpers' underlying mechanism is by contract only",
+   "sites": [
+    "0x5f13343",
+    "0x5f133a7"
+   ],
+   "target": "0x607c700/0x607c720"
+  }
+ ],
+ "census": {
+  "direct_calls_to_0x5f13310": 2,
+  "direct_calls_to_0x5f54ee0": 5,
+  "direct_calls_to_guard_acquire_0x607c700": 11,
+  "direct_calls_to_guard_release_0x607c720": 22,
+  "qword_hits_for_window_starts": 0,
+  "relative_relocation_addends_equal_to_window_starts": 0,
+  "tail_jumps_to_0x5f13310": 0,
+  "tail_jumps_to_0x5f54ee0": 0
+ },
+ "collection": {
+  "array_first": "pointer at collection + 0x48; element index i < 8 is read from this array at index i",
+  "array_second_begin": "pointer at collection + 0x50",
+  "array_second_end": "pointer at collection + 0x58",
+  "count_rule": "total = arithmetic_shift_right(second_end - second_begin, 3) + qword_at(collection + 0x00), computed in 64-bit wrapping arithmetic with the subtraction and shift as written; the loop runs exactly total times, or zero times when total == 0",
+  "element_selection": "index i < 8: element = array_first[i]; index i >= 8: element = array_second[i - 8] (computed as second_begin + i * 8 - 0x40)",
+  "field_0x00_note": "the domain meaning of the qword at collection + 0x00 is not claimed; only its literal role in the count formula is recorded, and a value other than 8 would shift which second-array slots the loop reaches, exactly as the code is written"
+ },
+ "guard": {
+  "acquire": "call 0x607c700 with (guard_slot, 9) at entry, where guard_slot is the 4-byte slot at rsp + 4",
+  "note": "the guard helpers themselves call a further helper at 0x607c3b0; that helper's target at 0x6078810 was not read, so the guard's underlying mechanism is by contract only",
+  "release": "call 0x607c720 with (guard_slot) at normal exit, and again from the unwind cleanup at 0x5f132e6",
+  "unwind_cleanup": "the in-function landing pad at 0x5f133ce moves the exception value to rbx and jumps to 0x5f132e6, which releases the guard, checks the saved canary, and resumes the unwind with the original exception value"
+ },
+ "holder": {
+  "counter": "signed 32-bit counter at holder + 0x10, incremented by 1 after each element's prepare call",
+  "ready_flag": "byte at holder + 0x00, set to 1 after the loop (or at once when total == 0), before the guard release"
+ },
+ "per_element": {
+  "function": "0x5f54ee0",
+  "note": "by contract only: called once per element with the element pointer plus 0xa98, after the two zero bytes at element + 0xa88; its internals were not modelled this cycle (a first read shows a large reset/clear body with several subobject clears)",
+  "other_call_sites": [
+   "0x5f1442c",
+   "0x5f160d5",
+   "0x5f161fd",
+   "0x5f5c1f6"
+  ],
+  "other_call_sites_note": "internals of those callers were not read; only their sites are listed",
+  "zero_before_call": "two zero bytes stored at element + 0xa88 (a 16-bit zero store) immediately before the prepare call"
+ },
+ "semantics": {
+  "empty_total": "total == 0 skips the loop entirely, sets the ready byte, releases the guard, and returns",
+  "loop": "for each index in order: zero element + 0xa88 (16-bit), call 0x5f54ee0 with element + 0xa98, increment holder + 0x10 by 1; the loop ends exactly when the index reaches total",
+  "return": "the function returns void; its observable effects are the per-element zero stores and prepare calls, the holder counter, and the holder ready byte"
+ },
+ "task": "RE-001",
+ "title": "map node #115 element prepare 0x5f13310 with its two callers and per-element callee",
+ "unknowns": [
+  "The domain meaning of the collection fields (the qword at + 0x00, the two element arrays, and what an element is) is not claimed; only the count formula and the selection rule are.",
+  "The internals of 0x5f54ee0 are NOT claimed: it is modelled by contract only (called once per element with element + 0xa98 after the 0xa88 zero store).",
+  "The internals of the guard helpers 0x607c700/0x607c720 and their helper at 0x607c3b0/0x6078810 are NOT claimed; only the acquire-with-9 / release pairing and the unwind release are.",
+  "Whether 0x5f13310 is reached through indirect branches beyond the scanned census is not claimed; the census covers direct calls, tail jumps, qword references, and RELATIVE relocations only.",
+  "A negative total never equals a rising non-negative index, so the binary would not terminate that loop; the model raises instead of looping forever, which is a stated boundary control, not a binary behavior."
+ ],
+ "windows": [
+  {
+   "cie": "0x730230",
+   "end": "0x5f133da",
+   "excerpt": "function_0x5f13310.txt",
+   "fde_length": "0x44",
+   "fde_offset": "0x745ed4",
+   "lsda": "augmentation present (CIE 0x730230); call-site table not decoded",
+   "name": "element prepare loop with guard and holder counter",
+   "size_bytes": 202,
+   "start": "0x5f13310"
+  },
+  {
+   "cie": "0x730230",
+   "end": "0x5f1330b",
+   "excerpt": "function_0x5f132e6.txt",
+   "fde_length": "0x20",
+   "fde_offset": "0x745f1c",
+   "lsda": "augmentation present (CIE 0x730230); call-site table not decoded",
+   "name": "unwind cleanup: guard release and unwind resume",
+   "size_bytes": 37,
+   "start": "0x5f132e6"
+  }
+ ]
+}
