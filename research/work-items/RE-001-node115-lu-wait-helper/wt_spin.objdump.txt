@@ -1,0 +1,18 @@
+63bf6b9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+63bf6c0:	48 8b 0d d1 05 14 00 	mov    0x1405d1(%rip),%rcx        # 64ffc98 <__register_atfork@plt+0x10e108>
+63bf6c7:	48 83 f9 ff          	cmp    $0xffffffffffffffff,%rcx
+63bf6cb:	40 0f 94 c6          	sete   %sil
+63bf6cf:	48 39 d9             	cmp    %rbx,%rcx
+63bf6d2:	40 0f 9f c7          	setg   %dil
+63bf6d6:	48 83 c3 01          	add    $0x1,%rbx
+63bf6da:	40 08 fe             	or     %dil,%sil
+63bf6dd:	74 41                	je     63bf720 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x6772f0>
+63bf6df:	f3 90                	pause
+63bf6e1:	41 0f b6 54 24 68    	movzbl 0x68(%r12),%edx
+63bf6e7:	84 d2                	test   %dl,%dl
+63bf6e9:	75 d5                	jne    63bf6c0 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x677290>
+63bf6eb:	48 89 ef             	mov    %rbp,%rdi
+63bf6ee:	e8 bd 20 03 00       	call   63f17b0 <pthread_mutex_trylock@plt>
+63bf6f3:	85 c0                	test   %eax,%eax
+63bf6f5:	75 c9                	jne    63bf6c0 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x677290>
+63bf6f7:	49 83 44 24 18 01    	addq   $0x1,0x18(%r12)
