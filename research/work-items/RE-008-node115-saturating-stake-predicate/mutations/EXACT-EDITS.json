@@ -1,0 +1,109 @@
+{
+  "schema": "stake-semantic-mutation-edits-v1",
+  "status": "authored, not compiled or executed",
+  "baseline_relative_path": "src/lib.rs",
+  "baseline_sha256": "2bc380ec6b23c593aee66d3356e7157c956edb80bb94e72b9f183905c6133b89",
+  "unchanged_driver_sha256": "8e03f6de50b324f7c10ea6dfd6faf4e34715075b4d517580df7f3fd9cdefc285",
+  "application_rule": "Each variant starts from the same exact baseline. Each before string must occur exactly once. Apply all edits of that variant in listed order, and no other edit. No edits are applied to the real source checkout by this authoring stage.",
+  "variants": [
+    {
+      "id": "M01",
+      "fault": "Replace seam-equality override with the last equal row of the second segment",
+      "witness_id": "H18",
+      "edits": [
+        {"before": "            Ordering::Equal => Some(seam),", "after": "            Ordering::Equal => last_equal(second, key),"}
+      ]
+    },
+    {
+      "id": "M02",
+      "fault": "Select the first equal row within a contiguous segment instead of the last",
+      "witness_id": "H16",
+      "edits": [
+        {"before": "        if rows[middle].key <= *key {", "after": "        if rows[middle].key < *key {"},
+        {"before": "    let row = rows.get(low.checked_sub(1)?)?;", "after": "    let row = rows.get(low)?;"}
+      ]
+    },
+    {
+      "id": "M03",
+      "fault": "Compare only the first nineteen bytes during lookup; retain full-key view admission",
+      "witness_id": "H38",
+      "edits": [
+        {"before": "        match key.cmp(&seam.key) {", "after": "        match key[..19].cmp(&seam.key[..19]) {"},
+        {"before": "        if rows[middle].key <= *key {", "after": "        if rows[middle].key[..19] <= key[..19] {"},
+        {"before": "    (row.key == *key).then_some(row)", "after": "    (row.key[..19] == key[..19]).then_some(row)"}
+      ]
+    },
+    {
+      "id": "M04",
+      "fault": "Drop repeated selected-key occurrences",
+      "witness_id": "H16",
+      "edits": [
+        {"before": "    for key in selected {", "after": "    for (position, key) in selected.iter().enumerate() {\n        if selected[..position].contains(key) {\n            continue;\n        }"}
+      ]
+    },
+    {
+      "id": "M05",
+      "fault": "Contribute the first live row's weight on a missing key",
+      "witness_id": "H12",
+      "edits": [
+        {"before": "        if let Some(row) = lookup(first, second, key) {", "after": "        if let Some(row) = lookup(first, second, key).or_else(|| first.first().or_else(|| second.first())) {"}
+      ]
+    },
+    {
+      "id": "M06",
+      "fault": "Ignore a nonzero head for a nonwrapped view after validating the original view",
+      "witness_id": "H23",
+      "edits": [
+        {"before": "    let first = &rows[head..head + first_len];", "after": "    let first = if live <= tail {\n        &rows[..first_len]\n    } else {\n        &rows[head..head + first_len]\n    };"}
+      ]
+    },
+    {
+      "id": "M07",
+      "fault": "Omit the wrapped second span from the all-live total only",
+      "witness_id": "H20",
+      "edits": [
+        {"before": "    for row in first.iter().chain(second.iter()) {", "after": "    for row in first.iter() {"}
+      ]
+    },
+    {
+      "id": "M08",
+      "fault": "Include inactive physical rows in the total",
+      "witness_id": "H08",
+      "edits": [
+        {"before": "    for row in first.iter().chain(second.iter()) {", "after": "    for row in rows.iter() {"}
+      ]
+    },
+    {
+      "id": "M09",
+      "fault": "Wrap selected accumulation instead of saturating it",
+      "witness_id": "H26",
+      "edits": [
+        {"before": "            selected_sum = selected_sum.saturating_add(row.weight);", "after": "            selected_sum = selected_sum.wrapping_add(row.weight);"}
+      ]
+    },
+    {
+      "id": "M10",
+      "fault": "Wrap total accumulation instead of saturating it",
+      "witness_id": "H25",
+      "edits": [
+        {"before": "        total_sum = total_sum.saturating_add(row.weight);", "after": "        total_sum = total_sum.wrapping_add(row.weight);"}
+      ]
+    },
+    {
+      "id": "M11",
+      "fault": "Admit equality in the final comparison",
+      "witness_id": "H29",
+      "edits": [
+        {"before": "    let passes = 2u128 * u128::from(total_sum) < 3u128 * u128::from(selected_sum);", "after": "    let passes = 2u128 * u128::from(total_sum) <= 3u128 * u128::from(selected_sum);"}
+      ]
+    },
+    {
+      "id": "M12",
+      "fault": "Compare products truncated modulo 2^64",
+      "witness_id": "H33",
+      "edits": [
+        {"before": "    let passes = 2u128 * u128::from(total_sum) < 3u128 * u128::from(selected_sum);", "after": "    let passes = total_sum.wrapping_mul(2) < selected_sum.wrapping_mul(3);"}
+      ]
+    }
+  ]
+}

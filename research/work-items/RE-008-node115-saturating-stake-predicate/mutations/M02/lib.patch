@@ -1,0 +1,17 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -115,12 +115,12 @@
+     let mut high = rows.len();
+     while low < high {
+         let middle = low + (high - low) / 2;
+-        if rows[middle].key <= *key {
++        if rows[middle].key < *key {
+             low = middle + 1;
+         } else {
+             high = middle;
+         }
+     }
+-    let row = rows.get(low.checked_sub(1)?)?;
++    let row = rows.get(low)?;
+     (row.key == *key).then_some(row)
+ }

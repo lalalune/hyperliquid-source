@@ -1,0 +1,26 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -98,7 +98,7 @@
+ 
+ fn lookup<'a>(first: &'a [Row], second: &'a [Row], key: &[u8; 20]) -> Option<&'a Row> {
+     if let Some(seam) = second.first() {
+-        match key.cmp(&seam.key) {
++        match key[..19].cmp(&seam.key[..19]) {
+             Ordering::Equal => Some(seam),
+             Ordering::Less => last_equal(first, key),
+             Ordering::Greater => last_equal(second, key),
+@@ -115,12 +115,12 @@
+     let mut high = rows.len();
+     while low < high {
+         let middle = low + (high - low) / 2;
+-        if rows[middle].key <= *key {
++        if rows[middle].key[..19] <= key[..19] {
+             low = middle + 1;
+         } else {
+             high = middle;
+         }
+     }
+     let row = rows.get(low.checked_sub(1)?)?;
+-    (row.key == *key).then_some(row)
++    (row.key[..19] == key[..19]).then_some(row)
+ }

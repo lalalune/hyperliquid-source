@@ -1,0 +1,11 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -86,7 +86,7 @@
+     // not establish native read/call effects or distinguish every early stop.
+     let mut total_sum = 0u64;
+     for row in first.iter().chain(second.iter()) {
+-        total_sum = total_sum.saturating_add(row.weight);
++        total_sum = total_sum.wrapping_add(row.weight);
+     }
+     let passes = 2u128 * u128::from(total_sum) < 3u128 * u128::from(selected_sum);
+     Ok(Observation {
