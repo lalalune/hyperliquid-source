@@ -1,0 +1,16 @@
+--- a/src/node115-nonce-text/src/lib.rs
++++ b/src/node115-nonce-text/src/lib.rs
+@@ -109,6 +109,13 @@
+ /// Correspondence requires the provider proof's native preservation/ordinary-
+ /// flow premises and successful own-host capacity admission and reservation.
+ pub fn decode_nonce_text(input: &[u8], mode: u8, depth: u8) -> Result<Parsed, Failure> {
++    if mode == 0 {
++        match depth {
++            0 => return Err(Failure::DepthZero),
++            1 => return Err(Failure::DepthOne),
++            _ => {}
++        }
++    }
+     let mut cursor = 0;
+     skip_whitespace(input, &mut cursor);
+     if input.get(cursor) != Some(&b'[') {

@@ -1,0 +1,13 @@
+--- a/src/node115-nonce-text/src/lib.rs
++++ b/src/node115-nonce-text/src/lib.rs
+@@ -146,6 +146,10 @@
+         }
+     }
+ 
++    if cursor != input.len() {
++        return Err(Failure::NotAdmitted);
++    }
++
+     // In particular, malformed [2,1,] must not become OrderingInvariant.
+     if !ordered(&values) {
+         return Err(Failure::OrderingInvariant);

@@ -8,8 +8,9 @@ strict-order theorem remains credited prior work.
 
 Under the memory, allocator and normal-return premises in [PROOF.md](PROOF.md),
 provider `0x1e29f50` reads a bracketed sequence of canonical unsigned decimal
-integers in `0..u64::MAX`, builds a contiguous ring with head0, and passes it
-to ordering body `0x2923da0`. Parse errors return raw sentinel `T=2^63`.
+integers in `0..u64::MAX` and builds a contiguous ring with head0. Ordering
+wrapper `0x2923da0` calls the provider and then checks its returned ring.
+Ordinary parse errors return raw sentinel `T=2^63`.
 Duplicate or descending values instead reach the existing invariant-failure
 branch. Immediate caller `0x1ddf3b0` consumes the ring as its second inner
 element and distinguishes no-item, error and completed-pair results.
@@ -95,6 +96,29 @@ changed field, then reject below the full-input digest gate. A mutation
 outside selected anchors intentionally passes that subset but fails complete
 native-byte comparison. These checks bind a manual proof; they do not run
 the target or establish semantic equivalence by sampled instruction execution.
+
+## Current-main reproduction
+
+The #115-only migration at base
+`8fd8db680ec4bfef40996e5616bce3d5156d0b86` removed #94 from two parser CLI
+choices and the artifact manifest. The packet's three old dependency hashes
+then prevented its verifier from reaching the target. The imported parser
+functions were unchanged. [migration-validation.json](migration-validation.json)
+records the reproduced failure, exact dependency diffs and fresh validation.
+
+Using Python 3.14.3 and the recorded GNU/LLVM versions, fresh collection
+reproduced all 27 native/table output files byte for byte. The only changes
+in `observed/records.json` are its two parser-file hashes. The unchanged
+verifier then passed normally and under `-O`, each retaining 12 FDEs,
+4,917 bytes, 1,273 instruction rows, two fresh regenerations and 168 rejection
+controls, including 15 operative native mutations. No target instructions
+were executed, and no byte normalization or new recovery credit was added.
+
+The original proof, collector, verifier, spec, native exports and historical
+`VALIDATION.json` / `ROOT_REVIEW.md` receipts remain unchanged. Their dates
+and dependency identities describe the original runs; the migration receipt
+describes the current dependency set. The call-direction wording above now
+matches the unchanged proof: ordering calls the provider, then checks its ring.
 
 ## Limits
 
