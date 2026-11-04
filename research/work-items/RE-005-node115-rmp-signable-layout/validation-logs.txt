@@ -1,0 +1,330 @@
+===== BEGIN baseline-probe/stdout =====
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "captured_execution": false,
+  "cases": [
+    {
+      "option_byte": 0,
+      "variant_dword": 0,
+      "expected_suffix_length": 9,
+      "producer_claimed_length": 29,
+      "matches": false
+    },
+    {
+      "option_byte": 0,
+      "variant_dword": 1,
+      "expected_suffix_length": 18,
+      "producer_claimed_length": 38,
+      "matches": false
+    },
+    {
+      "option_byte": 1,
+      "variant_dword": 0,
+      "expected_suffix_length": 29,
+      "producer_claimed_length": 29,
+      "matches": true
+    },
+    {
+      "option_byte": 1,
+      "variant_dword": 1,
+      "expected_suffix_length": 38,
+      "producer_claimed_length": 38,
+      "matches": true
+    }
+  ],
+  "branch_mutations": [
+    {
+      "name": "constructor_equal_vs_unequal",
+      "va": "0x36aaa0e",
+      "rejected": false,
+      "same_length_claim": true
+    },
+    {
+      "name": "optional_field_equal_vs_unequal",
+      "va": "0x36aaa58",
+      "rejected": false,
+      "same_length_claim": true
+    },
+    {
+      "name": "variant_on_present_option",
+      "va": "0x36aaab3",
+      "rejected": false,
+      "same_length_claim": true
+    },
+    {
+      "name": "variant_on_absent_option",
+      "va": "0x36aaadd",
+      "rejected": false,
+      "same_length_claim": true
+    }
+  ],
+  "mismatched_cases": 2,
+  "undetected_semantic_mutations": 4,
+  "constructor_native_equality_continues": true,
+  "producer_sentinel_label": [
+    "error_sentinel"
+  ]
+}
+===== END baseline-probe/stdout =====
+
+===== BEGIN baseline-probe/stderr =====
+===== END baseline-probe/stderr =====
+
+===== BEGIN baseline-tests/stdout =====
+===== END baseline-tests/stdout =====
+
+===== BEGIN baseline-tests/stderr =====
+test_counterfactual_bswap_byte_is_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_counterfactual_bswap_byte_is_load_bearing) ... ok
+test_counterfactual_location_line_is_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_counterfactual_location_line_is_load_bearing) ... ok
+test_counterfactual_tag_immediate_is_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_counterfactual_tag_immediate_is_load_bearing) ... ok
+test_counterfactual_variant_compare_is_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_counterfactual_variant_compare_is_load_bearing) ... ok
+test_native_regeneration_matches_the_retained_packet (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_native_regeneration_matches_the_retained_packet) ... ok
+test_payload_lengths_follow_the_variant_rule (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_payload_lengths_follow_the_variant_rule) ... ok
+test_result_record_constants (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_result_record_constants) ... ok
+test_tag_byte_rule (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_tag_byte_rule) ... ok
+test_write_order_is_complete (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_write_order_is_complete) ... ok
+test_wrong_public_identity_is_rejected_before_output_creation (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_wrong_public_identity_is_rejected_before_output_creation) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 13.296s
+
+OK
+===== END baseline-tests/stderr =====
+
+===== BEGIN final-tests-on-baseline/stdout =====
+===== END final-tests-on-baseline/stdout =====
+
+===== BEGIN final-tests-on-baseline/stderr =====
+test_branch_encoding_width_preserves_the_fallthrough (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_branch_encoding_width_preserves_the_fallthrough) ... FAIL
+test_constructor_equality_continues_to_the_append_path (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_constructor_equality_continues_to_the_append_path) ... ERROR
+test_counterfactual_bswap_byte_is_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_counterfactual_bswap_byte_is_load_bearing) ... ok
+test_counterfactual_location_line_is_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_counterfactual_location_line_is_load_bearing) ... ok
+test_counterfactual_tag_immediate_is_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_counterfactual_tag_immediate_is_load_bearing) ... ok
+test_counterfactual_variant_compare_is_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_counterfactual_variant_compare_is_load_bearing) ... ok
+test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) ... 
+  test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='constructor', mutation='polarity') ... FAIL
+  test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='constructor', mutation='destination') ... FAIL
+  test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='optional_field', mutation='polarity') ... FAIL
+  test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='optional_field', mutation='destination') ... FAIL
+  test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='present_variant', mutation='polarity') ... FAIL
+  test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='present_variant', mutation='destination') ... FAIL
+  test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='absent_variant', mutation='polarity') ... FAIL
+  test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='absent_variant', mutation='destination') ... FAIL
+test_native_regeneration_matches_the_retained_packet (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_native_regeneration_matches_the_retained_packet) ... ok
+test_optional_and_variant_branches_have_the_measured_rejoins (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_optional_and_variant_branches_have_the_measured_rejoins) ... ERROR
+test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) ... 
+  test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) (va='0x36aaa08') ... FAIL
+  test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) (va='0x36aaa17') ... FAIL
+  test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) (va='0x36aaad3') ... FAIL
+  test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) (va='0x36aaadc') ... FAIL
+  test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) (va='0x36aab24') ... FAIL
+  test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) (va='0x36aaab6') ... FAIL
+test_result_record_constants (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_result_record_constants) ... ok
+test_suffix_lengths_follow_both_independent_conditions (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_suffix_lengths_follow_both_independent_conditions) ... ERROR
+test_tag_byte_rule (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_tag_byte_rule) ... ok
+test_write_order_is_complete (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_write_order_is_complete) ... ERROR
+test_wrong_public_identity_is_rejected_before_output_creation (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_wrong_public_identity_is_rejected_before_output_creation) ... ok
+
+======================================================================
+ERROR: test_constructor_equality_continues_to_the_append_path (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_constructor_equality_continues_to_the_append_path)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 65, in test_constructor_equality_continues_to_the_append_path
+    self.assertEqual(writer['continue_head'], '0x8000000000000004')
+                     ~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'continue_head'
+
+======================================================================
+ERROR: test_optional_and_variant_branches_have_the_measured_rejoins (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_optional_and_variant_branches_have_the_measured_rejoins)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 73, in test_optional_and_variant_branches_have_the_measured_rejoins
+    branches = self.records['branches']
+               ~~~~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'branches'
+
+======================================================================
+ERROR: test_suffix_lengths_follow_both_independent_conditions (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_suffix_lengths_follow_both_independent_conditions)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 54, in test_suffix_lengths_follow_both_independent_conditions
+    suffix = self.records['suffix_bytes']
+             ~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'suffix_bytes'
+
+======================================================================
+ERROR: test_write_order_is_complete (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_write_order_is_complete)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 50, in test_write_order_is_complete
+    self.assertEqual(steps[2]['condition'],
+                     ~~~~~~~~^^^^^^^^^^^^^
+KeyError: 'condition'
+
+======================================================================
+FAIL: test_branch_encoding_width_preserves_the_fallthrough (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_branch_encoding_width_preserves_the_fallthrough)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 146, in test_branch_encoding_width_preserves_the_fallthrough
+    with self.assertRaisesRegex(ValueError, 'branch relation'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='constructor', mutation='polarity')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 129, in test_deciding_branch_polarities_and_destinations_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'branch relation'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='constructor', mutation='destination')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 129, in test_deciding_branch_polarities_and_destinations_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'branch relation'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='optional_field', mutation='polarity')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 129, in test_deciding_branch_polarities_and_destinations_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'branch relation'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='optional_field', mutation='destination')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 129, in test_deciding_branch_polarities_and_destinations_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'branch relation'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='present_variant', mutation='polarity')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 129, in test_deciding_branch_polarities_and_destinations_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'branch relation'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='present_variant', mutation='destination')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 129, in test_deciding_branch_polarities_and_destinations_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'branch relation'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='absent_variant', mutation='polarity')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 129, in test_deciding_branch_polarities_and_destinations_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'branch relation'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) (branch='absent_variant', mutation='destination')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 129, in test_deciding_branch_polarities_and_destinations_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'branch relation'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) (va='0x36aaa08')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 137, in test_prefix_and_cursor_dependencies_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'byte pin'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) (va='0x36aaa17')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 137, in test_prefix_and_cursor_dependencies_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'byte pin'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) (va='0x36aaad3')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 137, in test_prefix_and_cursor_dependencies_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'byte pin'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) (va='0x36aaadc')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 137, in test_prefix_and_cursor_dependencies_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'byte pin'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) (va='0x36aab24')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 137, in test_prefix_and_cursor_dependencies_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'byte pin'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) (va='0x36aaab6')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<BASELINE_SNAPSHOT>/tests/test_rmp_signable_layout_static.py", line 137, in test_prefix_and_cursor_dependencies_are_load_bearing
+    with self.assertRaisesRegex(ValueError, 'byte pin'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 15 tests in 45.198s
+
+FAILED (failures=15, errors=4)
+===== END final-tests-on-baseline/stderr =====
+
+===== BEGIN fixed-tests-v2/stdout =====
+===== END fixed-tests-v2/stdout =====
+
+===== BEGIN fixed-tests-v2/stderr =====
+test_branch_encoding_width_preserves_the_fallthrough (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_branch_encoding_width_preserves_the_fallthrough) ... ok
+test_constructor_equality_continues_to_the_append_path (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_constructor_equality_continues_to_the_append_path) ... ok
+test_counterfactual_bswap_byte_is_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_counterfactual_bswap_byte_is_load_bearing) ... ok
+test_counterfactual_location_line_is_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_counterfactual_location_line_is_load_bearing) ... ok
+test_counterfactual_tag_immediate_is_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_counterfactual_tag_immediate_is_load_bearing) ... ok
+test_counterfactual_variant_compare_is_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_counterfactual_variant_compare_is_load_bearing) ... ok
+test_deciding_branch_polarities_and_destinations_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_deciding_branch_polarities_and_destinations_are_load_bearing) ... ok
+test_native_regeneration_matches_the_retained_packet (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_native_regeneration_matches_the_retained_packet) ... ok
+test_optional_and_variant_branches_have_the_measured_rejoins (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_optional_and_variant_branches_have_the_measured_rejoins) ... ok
+test_prefix_and_cursor_dependencies_are_load_bearing (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_prefix_and_cursor_dependencies_are_load_bearing) ... ok
+test_result_record_constants (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_result_record_constants) ... ok
+test_suffix_lengths_follow_both_independent_conditions (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_suffix_lengths_follow_both_independent_conditions) ... ok
+test_tag_byte_rule (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_tag_byte_rule) ... ok
+test_write_order_is_complete (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_write_order_is_complete) ... ok
+test_wrong_public_identity_is_rejected_before_output_creation (test_rmp_signable_layout_static.RmpSignableLayoutTests.test_wrong_public_identity_is_rejected_before_output_creation) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 28.051s
+
+OK
+===== END fixed-tests-v2/stderr =====
+

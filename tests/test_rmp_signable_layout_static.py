@@ -47,12 +47,39 @@ class RmpSignableLayoutTests(unittest.TestCase):
         self.assertEqual([s['width'] for s in steps], [8, 1, 20, 1, 8])
         self.assertEqual([s['source_offset'] for s in steps], ['0x10', '0x18', '0x19', None, '0x08'])
         self.assertTrue(all(s['evidence'] for s in steps))
+        self.assertEqual(steps[2]['condition'],
+                         {'source_offset': '0x18', 'width': 1, 'equals': 1})
 
-    def test_payload_lengths_follow_the_variant_rule(self):
-        payload = self.records['payload_bytes']
-        self.assertEqual(payload['variant_other'], 8 + 1 + 20)
-        self.assertEqual(payload['variant_one'], payload['variant_other'] + 1 + 8)
-        self.assertEqual(payload['variant_delta'], 9)
+    def test_suffix_lengths_follow_both_independent_conditions(self):
+        suffix = self.records['suffix_bytes']
+        self.assertEqual(suffix['option_byte_other'],
+                         {'variant_other': 9, 'variant_one': 18})
+        self.assertEqual(suffix['option_byte_one'],
+                         {'variant_other': 29, 'variant_one': 38})
+        self.assertEqual(suffix['variant_delta'], 9)
+        self.assertIn('unresolved helper-produced prefix', suffix['scope'])
+        self.assertNotIn('payload_bytes', self.records)
+
+    def test_constructor_equality_continues_to_the_append_path(self):
+        writer = self.records['writer']
+        self.assertEqual(writer['continue_head'], '0x8000000000000004')
+        self.assertNotIn('error_sentinel', writer)
+        self.assertEqual(self.records['branches']['writer_head'], {
+            'site': '0x36aaa0d', 'condition': 'not_equal',
+            'target': '0x36aad04', 'fallthrough': '0x36aaa13',
+            'bytes_hex': '0f85f1020000'})
+
+    def test_optional_and_variant_branches_have_the_measured_rejoins(self):
+        branches = self.records['branches']
+        for name, condition, target, fallthrough in [
+            ('optional_field', 'not_equal', '0x36aaab7', '0x36aaa5a'),
+            ('variant_after_present_option', 'equal', '0x36aaadf', '0x36aaab5'),
+            ('variant_after_absent_option', 'not_equal', '0x36aab2a', '0x36aaadf'),
+        ]:
+            with self.subTest(branch=name):
+                self.assertEqual(branches[name]['condition'], condition)
+                self.assertEqual(branches[name]['target'], target)
+                self.assertEqual(branches[name]['fallthrough'], fallthrough)
 
     def test_tag_byte_rule(self):
         self.assertEqual(layout.tag_byte(3), 0x61)
@@ -87,6 +114,37 @@ class RmpSignableLayoutTests(unittest.TestCase):
     def test_counterfactual_variant_compare_is_load_bearing(self):
         with self.assertRaisesRegex(ValueError, 'byte pin'):
             layout.analyze(self.mutated(0x36aaaaf + 3))
+
+    def test_deciding_branch_polarities_and_destinations_are_load_bearing(self):
+        # Mutate real deciding edges, including both independently emitted
+        # variant tests. Static analysis must reject each changed relation.
+        for name, opcode_va, displacement_va in [
+            ('constructor', 0x36aaa0e, 0x36aaa0f),
+            ('optional_field', 0x36aaa58, 0x36aaa59),
+            ('present_variant', 0x36aaab3, 0x36aaab4),
+            ('absent_variant', 0x36aaadd, 0x36aaade),
+        ]:
+            for kind, va in [('polarity', opcode_va), ('destination', displacement_va)]:
+                with self.subTest(branch=name, mutation=kind):
+                    with self.assertRaisesRegex(ValueError, 'branch relation'):
+                        layout.analyze(self.mutated(va))
+
+    def test_prefix_and_cursor_dependencies_are_load_bearing(self):
+        for va in [0x36aaa05 + 3, 0x36aaa13 + 4, 0x36aaad0 + 3,
+                   0x36aaaa6 + 3, 0x36aaad9 + 3, 0x36aab21 + 3,
+                   0x36aaab5 + 1]:
+            with self.subTest(va=hex(va)):
+                with self.assertRaisesRegex(ValueError, 'byte pin'):
+                    layout.analyze(self.mutated(va))
+
+    def test_branch_encoding_width_preserves_the_fallthrough(self):
+        data = bytearray(self.data)
+        off = va_offset(self.data, 0x36aaa58)
+        # Same JNE condition and taken destination, but a six-byte encoding
+        # moves the fallthrough and overwrites the capacity-check prefix.
+        data[off:off + 6] = bytes.fromhex('0f8559000000')
+        with self.assertRaisesRegex(ValueError, 'branch relation'):
+            layout.analyze(bytes(data))
 
     def test_counterfactual_location_line_is_load_bearing(self):
         data = bytearray(self.data)
