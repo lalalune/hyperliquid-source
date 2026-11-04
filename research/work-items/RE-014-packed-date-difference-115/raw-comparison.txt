@@ -1,0 +1,122 @@
+$ host-o0-compare stdout
+$ checked 131072
+$ checked 262144
+$ checked 393216
+$ checked 524288
+$ checked 655360
+$ checked 786432
+$ checked 917504
+$ checked 1048576
+rows=1071744 mismatches=0
+
+$ host-o0-compare stderr
+
+$ host-o3-compare stdout
+$ checked 131072
+$ checked 262144
+$ checked 393216
+$ checked 524288
+$ checked 655360
+$ checked 786432
+$ checked 917504
+$ checked 1048576
+rows=1071744 mismatches=0
+
+$ host-o3-compare stderr
+
+$ unit-tests stdout
+
+running 3 tests
+test tests::borrow_and_native_leap_adjustments ... ok
+test tests::complete_cycle_and_negative_years ... ok
+test tests::raw_guard_and_ignored_flags ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+$ unit-tests stderr
+
+$ mutant-unsigned-year-compare stdout
+$ checked 131072
+$ checked 262144
+$ checked 393216
+$ checked 524288
+$ checked 655360
+$ checked 786432
+$ checked 917504
+$ checked 1048576
+rows=1071744 mismatches=534362
+
+$ mutant-unsigned-year-compare stderr
+row 0: expected Some(Difference { seconds: -8272465632000, nanos: 0 }), got Some(Difference { seconds: 8272465632000, nanos: 0 })
+row 1: expected Some(Difference { seconds: 8272465632000, nanos: 0 }), got Some(Difference { seconds: -8272465632000, nanos: 0 })
+row 2: expected Some(Difference { seconds: -8272434009600, nanos: 0 }), got Some(Difference { seconds: 8272497254400, nanos: 0 })
+row 3: expected Some(Difference { seconds: 8272434009600, nanos: 0 }), got Some(Difference { seconds: -8272497254400, nanos: 0 })
+
+$ mutant-drop-leap-days-compare stdout
+$ checked 131072
+$ checked 262144
+$ checked 393216
+$ checked 524288
+$ checked 655360
+$ checked 786432
+$ checked 917504
+$ checked 1048576
+rows=1071744 mismatches=1064952
+
+$ mutant-drop-leap-days-compare stderr
+row 0: expected Some(Difference { seconds: -8272465632000, nanos: 0 }), got Some(Difference { seconds: -8266973184000, nanos: 0 })
+row 1: expected Some(Difference { seconds: 8272465632000, nanos: 0 }), got Some(Difference { seconds: 8266973184000, nanos: 0 })
+row 2: expected Some(Difference { seconds: -8272434009600, nanos: 0 }), got Some(Difference { seconds: -8266941648000, nanos: 0 })
+row 3: expected Some(Difference { seconds: 8272434009600, nanos: 0 }), got Some(Difference { seconds: 8266941648000, nanos: 0 })
+
+$ mutant-truncate-negative-nanos-compare stdout
+$ checked 131072
+$ checked 262144
+$ checked 393216
+$ checked 524288
+$ checked 655360
+$ checked 786432
+$ checked 917504
+$ checked 1048576
+rows=1071744 mismatches=10614
+
+$ mutant-truncate-negative-nanos-compare stderr
+row 1048961: expected Some(Difference { seconds: 86399, nanos: 999999999 }), got Some(Difference { seconds: 86400, nanos: 999999999 })
+row 1048962: expected Some(Difference { seconds: 86399, nanos: 1 }), got Some(Difference { seconds: 86400, nanos: 1 })
+row 1048964: expected Some(Difference { seconds: 86398, nanos: 999999999 }), got Some(Difference { seconds: 86399, nanos: 999999999 })
+row 1048965: expected Some(Difference { seconds: 86398, nanos: 1 }), got Some(Difference { seconds: 86399, nanos: 1 })
+
+$ mutant-remove-zero-boundary-compare stdout
+$ checked 131072
+$ checked 262144
+$ checked 393216
+$ checked 524288
+$ checked 655360
+$ checked 786432
+$ checked 917504
+$ checked 1048576
+rows=1071744 mismatches=9
+
+$ mutant-remove-zero-boundary-compare stderr
+row 1048624: expected None, got Some(Difference { seconds: -1, nanos: 999999999 })
+row 1048625: expected None, got Some(Difference { seconds: -1, nanos: 999999999 })
+row 1048626: expected None, got Some(Difference { seconds: -1, nanos: 999999999 })
+row 1048744: expected None, got Some(Difference { seconds: -1, nanos: 999999999 })
+
+$ mutant-equal-second-leap-compare stdout
+$ checked 131072
+$ checked 262144
+$ checked 393216
+$ checked 524288
+$ checked 655360
+$ checked 786432
+$ checked 917504
+$ checked 1048576
+rows=1071744 mismatches=560
+
+$ mutant-equal-second-leap-compare stderr
+row 1048990: expected Some(Difference { seconds: 86401, nanos: 0 }), got Some(Difference { seconds: 86400, nanos: 0 })
+row 1048991: expected Some(Difference { seconds: 86400, nanos: 999999999 }), got Some(Difference { seconds: 86399, nanos: 999999999 })
+row 1048992: expected Some(Difference { seconds: 86400, nanos: 1 }), got Some(Difference { seconds: 86399, nanos: 1 })
+row 1048993: expected Some(Difference { seconds: 86400, nanos: 0 }), got Some(Difference { seconds: 86399, nanos: 0 })
