@@ -405,6 +405,8 @@ def relocations(data):
         sec = next((s for s in sections(data) if s['name'] == name), None)
         if sec is None:
             continue
+        if sec['size'] % 24:
+            raise ValueError(f'truncated.{name[1:]} section')
         for i, (off, info, add) in enumerate(
                 struct.iter_unpack('<QQq', data[sec['offset']:sec['offset'] + sec['size']])):
             out.append({'slot': off, 'type': info & 0xffffffff, 'sym': info >> 32,
@@ -414,11 +416,16 @@ def relocations(data):
 
 
 def dynsym_name(data, index):
-    sym = next(s for s in sections(data) if s['name'] == '.dynsym')
-    strs = next(s for s in sections(data) if s['name'] == '.dynstr')
+    sym = next((s for s in sections(data) if s['name'] == '.dynsym'), None)
+    require(sym is not None, 'missing.dynsym section')
+    strs = next((s for s in sections(data) if s['name'] == '.dynstr'), None)
+    require(strs is not None, 'missing.dynstr section')
     st_name = struct.unpack_from('<I', data, sym['offset'] + 24 * index)[0]
     start = strs['offset'] + st_name
-    return data[start:data.index(b'\0', start)].decode()
+    try:
+        return data[start:data.index(b'\0', start)].decode()
+    except UnicodeDecodeError:
+        require(False, 'dynamic symbol name is not valid UTF-8')
 
 
 def _pin(body, base, va, hexbytes, what):
@@ -506,7 +513,8 @@ def body_lea_targets(body, base):
 
 
 def slot_census(data, slot, owner):
-    text = next(s for s in sections(data) if s['name'] == '.text')
+    text = next((s for s in sections(data) if s['name'] == '.text'), None)
+    require(text is not None, 'missing.text section')
     blob = data[text['offset']:text['offset'] + text['size']]
     base = text['address']
     found = []
