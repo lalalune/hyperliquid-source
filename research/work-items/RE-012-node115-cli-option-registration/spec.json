@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "task": "RE-012",
+  "component": "node-runtime",
+  "targetSHA256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "targetBytes": 105896032,
+  "coordinate": "linked ELF VA before load bias",
+  "functions": [
+    {
+      "start": "0x1638840",
+      "end": "0x1638fc3",
+      "bytes": 1923,
+      "codeSHA256": "9f6b176ba187f6057f275baf233a0e2930ff3af6b302f6687b9f91e8272508ac"
+    },
+    {
+      "start": "0x162cff0",
+      "end": "0x162d51d",
+      "bytes": 1325,
+      "codeSHA256": "4b6113b12c4ed7b3a23ea44eec706ce271f48b3b823af472ed87281dadbab767"
+    },
+    {
+      "start": "0x162f6e0",
+      "end": "0x162f9b4",
+      "bytes": 724,
+      "codeSHA256": "dec2c4cfb0276c24775efa2834a9cb5785c0a2c98d2fea040c83db51106c044f"
+    },
+    {
+      "start": "0x163a670",
+      "end": "0x163a71a",
+      "bytes": 170,
+      "codeSHA256": "4655337b360f87f57146c9532add2d8595a42b9daa3de7ed644695393aec5326"
+    },
+    {
+      "start": "0x1675240",
+      "end": "0x16752da",
+      "bytes": 154,
+      "codeSHA256": "de1ec7c9bb212167c6c08303cb310e8edd98fdd8f658a28824c026ba782d88ba"
+    },
+    {
+      "start": "0x166cb40",
+      "end": "0x166cd90",
+      "bytes": 592,
+      "codeSHA256": "7c350ae753930074239d0979fead0a490f7cf182c7deeb20ae7ed5f7df872730"
+    },
+    {
+      "start": "0x163ac80",
+      "end": "0x163ad35",
+      "bytes": 181,
+      "codeSHA256": "e6913d952337a4c06f795edfb6563624818e83e295108c87fce7933a3bcb398f"
+    },
+    {
+      "start": "0x163aed0",
+      "end": "0x163b014",
+      "bytes": 324,
+      "codeSHA256": "484ac86e23c7fb0893c8c77bb0503ceb2fed7f5fbb9035f0ee8b98b70949238e"
+    },
+    {
+      "start": "0x165b7c0",
+      "end": "0x165b85a",
+      "bytes": 154,
+      "codeSHA256": "e46522b3336bbd51684447b5a1af1430bea58aea17798ce8eaf4326a6c990e49"
+    },
+    {
+      "start": "0x166b550",
+      "end": "0x166b745",
+      "bytes": 501,
+      "codeSHA256": "9dc26cc59f584a4c3011c8bb0ccb88756016a1564ebd7f7101518d77cbf282bf"
+    },
+    {
+      "start": "0x163b130",
+      "end": "0x163b171",
+      "bytes": 65,
+      "codeSHA256": "5365cdaa830e2b7cc3d1e4d63af9bf748748864eb89052936f9889daa3c3d248"
+    },
+    {
+      "start": "0x163b020",
+      "end": "0x163b054",
+      "bytes": 52,
+      "codeSHA256": "bc3eda68635036aa8ee7cfec29f65ca7bce882d36754fd494e0c44594c793de9"
+    }
+  ],
+  "facts": [
+    {
+      "name": "global",
+      "site": "0x1638854",
+      "prefix": "f686b0010000",
+      "kind": "u8",
+      "expected": 8,
+      "observation": "Arg+0x1b0 bit selects borrowed-registration followed by source drop"
+    },
+    {
+      "name": "required",
+      "site": "0x16389b1",
+      "prefix": "f683b0010000",
+      "kind": "u8",
+      "expected": 1,
+      "observation": "Arg+0x1b0 bit controls master-required names"
+    },
+    {
+      "name": "last",
+      "site": "0x1638a2e",
+      "prefix": "a9",
+      "kind": "u32",
+      "expected": 16384,
+      "observation": "Arg flags bit controls implied App settings"
+    },
+    {
+      "name": "last-app-settings",
+      "site": "0x1638a35",
+      "prefix": "6641818feb010000",
+      "kind": "u16",
+      "expected": 32832,
+      "observation": "OR into App+0x1eb word; not a stable Rust ABI"
+    },
+    {
+      "name": "takes-value",
+      "site": "0x1638d2d",
+      "prefix": "a8",
+      "kind": "u8",
+      "expected": 32,
+      "observation": "Non-positional branch chooses option-like rather than flag-like storage"
+    },
+    {
+      "name": "help-literal",
+      "site": "0x1638b34",
+      "prefix": "8139",
+      "kind": "bytes4",
+      "expected": "68656c70",
+      "observation": "Exact four-byte help comparison"
+    },
+    {
+      "name": "version-first",
+      "site": "0x1638a6a",
+      "prefix": "ba",
+      "kind": "bytes4",
+      "expected": "76657273",
+      "observation": "First four-byte XOR comparison of version"
+    },
+    {
+      "name": "version-overlap",
+      "site": "0x1638a71",
+      "prefix": "be",
+      "kind": "bytes4",
+      "expected": "73696f6e",
+      "observation": "Second four-byte comparison at input offset3 overlaps one byte"
+    },
+    {
+      "name": "help-clear",
+      "site": "0x1638b3c",
+      "prefix": "48c7c2",
+      "kind": "i32",
+      "expected": -257,
+      "observation": "AND mask clears App settings bit0x100"
+    },
+    {
+      "name": "version-clear",
+      "site": "0x1638a81",
+      "prefix": "48c7c2",
+      "kind": "i32",
+      "expected": -513,
+      "observation": "AND mask clears App settings bit0x200"
+    },
+    {
+      "name": "long-pointer-field",
+      "site": "0x1638a3f",
+      "prefix": "498b8e",
+      "kind": "u32",
+      "expected": 464,
+      "observation": "Read Arg+0x1d0 long-name pointer"
+    },
+    {
+      "name": "long-length-field",
+      "site": "0x1638a4f",
+      "prefix": "498b96",
+      "kind": "u32",
+      "expected": 472,
+      "observation": "Read Arg+0x1d8 long-name length"
+    },
+    {
+      "name": "app-settings-field",
+      "site": "0x1638b43",
+      "prefix": "492197",
+      "kind": "u32",
+      "expected": 488,
+      "observation": "Apply selected mask at App+0x1e8"
+    },
+    {
+      "name": "short-none-tag",
+      "site": "0x1638b66",
+      "prefix": "4181bef0010000",
+      "kind": "u32",
+      "expected": 1114112,
+      "observation": "Short-field none sentinel participates in unnamed-positional branch"
+    },
+    {
+      "name": "arg-copy-bytes",
+      "site": "0x1638b90",
+      "prefix": "ba",
+      "kind": "u32",
+      "expected": 528,
+      "observation": "First positional path copies original Arg span0x210"
+    },
+    {
+      "name": "flag-record-stride",
+      "site": "0x1638e8c",
+      "prefix": "4c69eb",
+      "kind": "u32",
+      "expected": 240,
+      "observation": "App flag-vector record stride0xf0"
+    },
+    {
+      "name": "option-record-stride",
+      "site": "0x1638f3b",
+      "prefix": "4869fb",
+      "kind": "u32",
+      "expected": 488,
+      "observation": "App option-vector record stride0x1e8"
+    },
+    {
+      "name": "flag-record-prefix-copy",
+      "site": "0x1638e9f",
+      "prefix": "ba",
+      "kind": "u32",
+      "expected": 224,
+      "observation": "Flag record copies0xe0 prefix, then stores two trailing qwords"
+    },
+    {
+      "name": "option-record-copy",
+      "site": "0x1638f1a",
+      "prefix": "ba",
+      "kind": "u32",
+      "expected": 488,
+      "observation": "Option record copies entire0x1e8 span"
+    },
+    {
+      "name": "positional-source-prefix-copy",
+      "site": "0x1638c41",
+      "prefix": "ba",
+      "kind": "u32",
+      "expected": 248,
+      "observation": "Positional conversion moves0xf8 prefix"
+    },
+    {
+      "name": "reset-owned-flags",
+      "site": "0x1638c2e",
+      "prefix": "c78424f0010000",
+      "kind": "u32",
+      "expected": 1028,
+      "observation": "Moved-from temporary receives0x404 flags"
+    }
+  ],
+  "calls": [
+    {
+      "site": "0x5656ec5",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x565717f",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x5657433",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x56576ed",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x56579a1",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x5657c5b",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x5657fc5",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x565827f",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x5658533",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x56587ed",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x5658aa1",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x5658e10",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x56590c4",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x565949c",
+      "form": "rip",
+      "target": "0x64e1cf0",
+      "context": "prior common producer; credited to PR2587"
+    },
+    {
+      "site": "0x16389a2",
+      "form": "direct",
+      "target": "0x162f6e0"
+    },
+    {
+      "site": "0x1638cdc",
+      "form": "direct",
+      "target": "0x1675240"
+    },
+    {
+      "site": "0x1638cf8",
+      "form": "direct",
+      "target": "0x166cb40"
+    },
+    {
+      "site": "0x1638d0c",
+      "form": "direct",
+      "target": "0x163ac80"
+    },
+    {
+      "site": "0x1638d16",
+      "form": "direct",
+      "target": "0x163aed0"
+    },
+    {
+      "site": "0x1638e2f",
+      "form": "direct",
+      "target": "0x165b7c0"
+    },
+    {
+      "site": "0x1638fb0",
+      "form": "direct",
+      "target": "0x163a670"
+    },
+    {
+      "site": "0x1638973",
+      "form": "rip",
+      "target": "0x64e1bc0"
+    },
+    {
+      "site": "0x1638ef1",
+      "form": "rip",
+      "target": "0x64e1cf8"
+    }
+  ],
+  "relativeWriters": [
+    {
+      "slot": "0x64e1cf0",
+      "target": "0x1638840"
+    },
+    {
+      "slot": "0x64e1bc0",
+      "target": "0x162cff0"
+    },
+    {
+      "slot": "0x64e1cf8",
+      "target": "0x166b550"
+    }
+  ],
+  "limits": [
+    "Typed static observations; not stable Rust layouts or full parser equivalence.",
+    "Previous producer range/calls are binding context, not new implementation coverage.",
+    "Imported helper/action-chain semantics remain explicit unknowns until contract review."
+  ]
+}
