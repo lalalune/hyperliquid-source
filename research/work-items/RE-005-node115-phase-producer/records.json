@@ -1,0 +1,1395 @@
+{
+ "artifact": {
+  "bytes": 105896032,
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "snapshot": "<authenticated-node115>"
+ },
+ "b_side": {
+  "answer": "the same lvl4_c buffer, delivered by a fully static chain with no table or indirect boundary.  On the lvl3_c arm's guard path, lvl4_c first stores the buffer pointer in [rsp+0x30] (0x2ae1b86, from the lea at 0x2ae1b0a); the lvl3_c call itself reads it back through the guard record ([rsp+0x88] = &[rsp+0x30] at 0x2ae1e64, so lvl3_c's phase is [[rdi+8]] = the buffer).  After the guard sequence, lvl4_c builds a 0x18-byte descriptor at [rsp+0x60]: [0] = r14 = [rsp+0x30] = the buffer pointer (store at 0x2ae22db), [1] = the heap pointer detached from the guard record's +0x18 field -- the slot-1760 fill's fresh 0x98-byte block, detached from lvl4_c's fill-head copy at [rsp+0x108] -- (store at 0x2ae22e0), [2] = &[rsp+0x228] (store at 0x2ae22ed), and calls pre_4ab at 0x2ae2306 with rdx = &[rsp+0x60].  pre_4ab stores descriptor[0] at its [rsp+0x48] (0x2453622) and &[rsp+0x48] at [rsp+0x50] (0x245362c), and calls call4a_b at 0x2453673 with rdx = &[rsp+0x50]; call4a_b loads rbp = [rdx] and then rdi = [rbp+0] (0x2b40573) = descriptor[0] = &[lvl4_c rsp+0x5aa8], and calls lvl4_a at 0x2b40577 with rsi = its entry rcx (pre_4ab's pair cell).  The buffer at that moment holds the copy-5 memcpy result (0x2ae1b1f): nothing on the guard path stores into the buffer region between the copy and the pre_4ab call (the buffer census covers the whole body).",
+  "producer": "the b-side producer is therefore identical to the a-side producer of question 1: lvl4_c's memcpy from ctor_c's frame, over bytes that are stack residue above the registrar boundary except for ctor_c's three zeroed offsets.  Unlike the spawn chain of the earlier packets, this indirection resolves completely inside statically pinned frames.",
+  "question": "what produces the phase structs that reach lvl4_a through call4a_b's [[rdx]] indirection (record-producer packet, b-side path)"
+ },
+ "boundaries": {
+  "arm0_record_inputs": "what builder_c and lvl4_a's inlined build read beyond the \"hl-node\" key -- in particular what the config fetch through GOT slot 0x64e0a80 (R_X86_64_RELATIVE, body 0x1506840) returns to both shapers' entry sequences, and what the 0x64df480-slot call allocates -- is recorded as an open edge, not traced here.",
+  "next_questions": "what the 0x64e0a80 config fetch returns and what builder_c reads from it; who invokes ctor_c through the registrar's runtime table (the boundary above this chain); whether the record the gate body 0x2cb6500 accepts feeds any further phase construction downstream",
+  "other_copies": "of lvl4_c's three non-buffer memcpy destinations, [rsp+0x86e8] has no reader in the body at all and [rsp+0x220] / [rsp+0x2e68] are read as records (not as phase structs) on the arms that build them; whether any consumer treats those copies as phase structs on paths outside the traced arms is not decided here.",
+  "registrar_invocation": "who invokes ctor_c at runtime, on what schedule and with what stack history, is not statically reachable: the registration is the binary's main storing &ctor_c in a stack cell and calling the registrar body 0x5c99970 with the key cell 0x6440b48 as key; no other instruction in the binary references ctor_c, the key cell or the registrar slot, and the registrar's own caller is likewise only the stub's GOT call.  This packet states the boundary; it does not trace the registrar's runtime table."
+ },
+ "builder_key_string": {
+  "length": 7,
+  "note": "length-prefixed in the code (edi = 0x7 at the allocation); the .rodata bytes are not NUL-terminated here (\"hl-node\" is followed immediately by \"no wallet\")",
+  "va": "0x92a890",
+  "value": "hl-node"
+ },
+ "call_census": {
+  "direct_call_sites": {
+   "call4a_b": [
+    {
+     "containing_fde": "0x24535c0..0x245390d",
+     "site": "0x2453673"
+    }
+   ],
+   "ctor_c": [],
+   "lvl3_c": [
+    {
+     "containing_fde": "0x2ae1690..0x2ae27b2",
+     "site": "0x2ae1eeb"
+    }
+   ],
+   "lvl4_a": [
+    {
+     "containing_fde": "0x2ae1690..0x2ae27b2",
+     "site": "0x2ae1a47"
+    },
+    {
+     "containing_fde": "0x2b404b0..0x2b40666",
+     "site": "0x2b40577"
+    }
+   ],
+   "lvl4_c": [
+    {
+     "containing_fde": "0x2cd8370..0x2cd83af",
+     "site": "0x2cd83a2"
+    }
+   ],
+   "pre_4ab": [
+    {
+     "containing_fde": "0x2ae1690..0x2ae27b2",
+     "site": "0x2ae2306"
+    }
+   ],
+   "registrar_c": []
+  },
+  "lea_references": {
+   "call4a_b": [],
+   "ctor_c": [
+    "0x2cef8f7"
+   ],
+   "lvl3_c": [],
+   "lvl4_a": [],
+   "lvl4_c": [],
+   "pre_4ab": [],
+   "registrar_c": []
+  },
+  "tail_call_sites": {
+   "call4a_b": [],
+   "ctor_c": [],
+   "lvl3_c": [],
+   "lvl4_a": [],
+   "lvl4_c": [],
+   "pre_4ab": [],
+   "registrar_c": []
+  }
+ },
+ "captured_code_executed": false,
+ "copy_slot": "0x64df508",
+ "field_attribution": {
+  "byte_0x1e8": "the same split.  Each body holds exactly one +0x1e8 store (lvl4_a 0x2ae44ce, lvl3_c 0x2cde56b), in the dispatch-0 rebuild, sourcing the low byte of the phase's own DWORD at +0xa0 -- itself a rebuild field -- before the site-1 shaping load (0x2ae45cc / 0x2cde692) copies it to the record byte +0x290.  The other sixteen +0x1e8 loads in each body sit on other arms and read the incoming byte.",
+  "dispatch_byte_0x21a": "written by ctor_c (the byte zero at 0x2cd8395) before any shaping; carried into lvl4_c's buffer by the arm memcpys; read once at each shaper's entry (lvl4_a through rdi at 0x2ae41f4, lvl3_c through r13 at 0x2cde498).  Each shaper also stores +0x21a at five later sites -- state transitions after the first dispatch, not producers of the incoming value.",
+  "question": "for each shaped field (+0xc8..+0xf0 sources, +0x1e8, the dispatch byte +0x21a, the embedded record head at +0x220, the tag +0x248): a writer, or residue above the boundary",
+  "record_head_0x220": "written by the shapers' shaping stores themselves (nine +0x220 store sites in each body; site 1: lvl4_a 0x2ae45e1, lvl3_c 0x2cde6aa) from the +0xc8 sources.  Its incoming content is never read before being overwritten on a shaping path: the only +0x220 load in each body (lvl4_a 0x2ae68b4, lvl3_c 0x2ce0954) sits in a later shaping block, after that block's own +0x220 stores.",
+  "sources_0xc8_0xf0": "two regimes, split by the dispatch byte.  On arm 0 -- the arm the ctor_c-zeroed byte selects -- each shaper first rebuilds the low fields from a record built on its own stack: lvl3_c calls builder_c (0x2b7b640), whose 0x98-byte record is keyed by the 7-byte .rodata string \"hl-node\" (0x92a890; .rodata is identity-mapped, and the 0x98 length is the record length, not the string's), memcpy's it to phase+0x10 at 0x2cde55e and spreads it over +0xa8..+0x138 with the stores at 0x2cde58a..0x2cde631; lvl4_a runs the same build inlined (stores at 0x2ae4443..0x2ae456d, the +0xc0..+0xf0 movups stores sourced from the phase's own just-rebuilt +0x10..+0x50).  The site-1 shaping loads then read the rebuilt values.  On every other arm the loads read incoming bytes: the complete store censuses show the rebuild movups stores are the ONLY stores covering +0xc8..+0xf0 in either body (one store each at +0xc0/+0xd0/+0xe0/+0xf0, none at +0xc8/+0xd8/+0xe8/+0xf8), so no other arm rewrites the sources before shaping.  Incoming here means the memcpy'd ctor_c contents -- residue above the registrar boundary -- except where an earlier pass through lvl4_c's lvl4_a call loop (the loop re-enters lvl4_a at 0x2ae19e0 without re-copying) or an earlier shaping pass rewrote them.",
+  "tag_0x248": "written only by the shapers: eight store sites in each body, the constant 2 at shaping site 1 (lvl4_a 0x2ae4604, lvl3_c 0x2cde6d0) and 1 at site 2.  The two +0x248 loads in each body are 16-byte copies of the shaped record's tail taken after the stores; no incoming byte is ever consumed as the tag."
+ },
+ "got_census": {
+  "config_slot": {
+   "callee": "0x1506840",
+   "relocation": "R_X86_64_RELATIVE",
+   "slot": "0x64e0a80"
+  },
+  "copy_slot": {
+   "lvl4_c_ff15_sites": [
+    "0x2ae1768",
+    "0x2ae18f1",
+    "0x2ae194c",
+    "0x2ae19cc",
+    "0x2ae1b1f"
+   ],
+   "relocation": "R_X86_64_GLOB_DAT",
+   "slot": "0x64df508",
+   "symbol": "memcpy"
+  },
+  "fill_slot": {
+   "callee": "0x5cf9600",
+   "relocation": "R_X86_64_RELATIVE",
+   "rip_relative_references": [
+    "0x15d7026",
+    "0x15d70c2",
+    "0x2ae16f2"
+   ],
+   "slot": "0x64e1760"
+  },
+  "registrar_slot": {
+   "callee": "0x5c99970",
+   "relocation": "R_X86_64_RELATIVE",
+   "rip_relative_references": [
+    "0x2cef90f"
+   ],
+   "slot": "0x64e6c30"
+  }
+ },
+ "key_cell": {
+  "cell": "0x6440b48",
+  "file_qword": "0x0",
+  "relocation": null,
+  "rip_relative_references": [
+   "0x2cef902"
+  ]
+ },
+ "limits": "Static trace only: no captured instruction was executed and no concrete input values were observed.  The classified censuses classify each instruction of the censused bodies by operand position in fresh objdump text (a mov-family bracket destination is a store, a bracket source is a load, a lea bracket is an address-taken); register identity follows the entry assignments (rbx = rdi in lvl4_a, set once at 0x2ae41f1; r13 = [[rdi+8]] in lvl3_c, set once at 0x2cde495; rsp in lvl4_c does not move between the prologue at 0x2ae16b8 and the epilogue, so its frame offsets are absolute for the whole body; rsp in ctor_c moves in three known steps and its phase offsets are derived arithmetically in the findings, with the phase base at final [rsp+0x8]).  A whole-struct copy moves bytes without naming fields: the five lvl4_c memcpys and lvl3_c's 0x98-byte rebuild copy are enumerated as call sites with pinned argument setups, so for copied fields the census is a statement about direct accesses and the copies actually observed.  Arm attribution (which stores dominate which loads) follows the entry dispatch structure read from the disassembly: the jmp-table dispatch on the +0x21a byte at each shaper's entry, the rebuild blocks that immediately precede shaping site 1 on the entry arm, and lvl4_c's two arm memcpys; jump-table arm reachability beyond that structure is not re-decided here.  The registrar body is pinned and its argument saves are cited; its internal runtime behaviour is not reversed in this packet.  Raw values are recorded mechanically; no field types are guessed.",
+ "lvl4c_frame_census": {
+  "buffer_leas": {
+   "0x5aa8": [
+    "0x2ae16e2",
+    "0x2ae17c0",
+    "0x2ae19b7",
+    "0x2ae1b0a",
+    "0x2ae1d46",
+    "0x2ae238e",
+    "0x2ae25c8",
+    "0x2ae267d",
+    "0x2ae2739"
+   ]
+  },
+  "buffer_loads": {
+   "0x5aa8": [
+    "0x2ae1716"
+   ],
+   "0x5ab0": [
+    "0x2ae17d3"
+   ],
+   "0x5ab8": [
+    "0x2ae171e"
+   ],
+   "0x5ac8": [
+    "0x2ae1726"
+   ],
+   "0x5ad8": [
+    "0x2ae172e"
+   ],
+   "0x5ae8": [
+    "0x2ae1706"
+   ]
+  },
+  "buffer_other_dst": {
+   "0x5aa8": [
+    "0x2ae16f8"
+   ]
+  },
+  "buffer_stores": {
+   "0x5aa8": [
+    "0x2ae179b",
+    "0x2ae188d"
+   ],
+   "0x5ab0": [
+    "0x2ae17aa",
+    "0x2ae1895"
+   ]
+  },
+  "entry_slot_loads": [
+   "0x2ae1763",
+   "0x2ae18ec",
+   "0x2ae1947",
+   "0x2ae19c7",
+   "0x2ae1b1a",
+   "0x2ae2794"
+  ],
+  "entry_slot_stores": [
+   "0x2ae16bf"
+  ],
+  "hicopy_leas": {
+   "0x86e8": [
+    "0x2ae1756",
+    "0x2ae2767"
+   ]
+  },
+  "hicopy_loads": {},
+  "hicopy_other_dst": {},
+  "hicopy_stores": {}
+ },
+ "owners": {
+  "builder_c": {
+   "bytes": 348,
+   "end": "0x2b7b79c",
+   "file_offset": "0x2b7a640",
+   "sha256": "1ce5b5a8e849cc065b72f30af834a79f75454bd412d8c67df9137859bbcc8003",
+   "start": "0x2b7b640"
+  },
+  "call4a_b": {
+   "bytes": 438,
+   "end": "0x2b40666",
+   "file_offset": "0x2b3f4b0",
+   "sha256": "05ef87dc8cdf209d34d246b129dfe209764fe409efda8ee0ad73ceebb54fedac",
+   "start": "0x2b404b0"
+  },
+  "ctor_c": {
+   "bytes": 63,
+   "end": "0x2cd83af",
+   "file_offset": "0x2cd7370",
+   "sha256": "ed23bc89640a43b1a5f373d5cb18929d79ce5b47923e58ba0565f592ba2b60d6",
+   "start": "0x2cd8370"
+  },
+  "lvl3_c": {
+   "bytes": 10657,
+   "end": "0x2ce0dd1",
+   "file_offset": "0x2cdd430",
+   "sha256": "99c49a3e20f63cf199f2a160ba9560e439acb2b49a66968623aa9607acfa417b",
+   "start": "0x2cde430"
+  },
+  "lvl4_a": {
+   "bytes": 11142,
+   "end": "0x2ae6d66",
+   "file_offset": "0x2ae31e0",
+   "sha256": "90ae09003ca680bd4b5f32fec22ee1f7146cc1f67b758f8e2f2ac880545b730b",
+   "start": "0x2ae41e0"
+  },
+  "lvl4_c": {
+   "bytes": 4386,
+   "end": "0x2ae27b2",
+   "file_offset": "0x2ae0690",
+   "sha256": "6ca0595c13836bca0cb0173bd591a09d6da6791532e23a5a71c63715380727d9",
+   "start": "0x2ae1690"
+  },
+  "pre_4ab": {
+   "bytes": 845,
+   "end": "0x245390d",
+   "file_offset": "0x24525c0",
+   "sha256": "a088c449b6f4f8d7f75517ed445b3fb65b0eaeaccf04b2763a12cb5ca5778edb",
+   "start": "0x24535c0"
+  },
+  "registrar_c": {
+   "bytes": 1749,
+   "end": "0x5c9a045",
+   "file_offset": "0x5c98970",
+   "sha256": "85c321c5ef4dd64cd999ac133e97a170ffa7d088eab3fe7fcb64f31768181111",
+   "start": "0x5c99970"
+  },
+  "registrar_stub_c": {
+   "bytes": 39,
+   "end": "0x2cef917",
+   "file_offset": "0x2cee8f0",
+   "sha256": "c0621248d6ec3fd7ae1ee2df6b09bdd79541219362b313e5567717eb8f59a5c9",
+   "start": "0x2cef8f0"
+  },
+  "slot1760_callee": {
+   "bytes": 4785,
+   "end": "0x5cfa8b1",
+   "file_offset": "0x5cf8600",
+   "sha256": "12813161d76cb5aa11039d12cbbf45d6f170b2aa53da586df8e03b579e02d13b",
+   "start": "0x5cf9600"
+  }
+ },
+ "packet": "RE-005-node115-phase-producer",
+ "phase_producer": {
+  "answer": "lvl4_c itself transports the struct.  Its frame (0xb328 bytes after the prologue) packs four phase-sized regions back to back -- [rsp+0x220], [rsp+0x2e68], the buffer at [rsp+0x5aa8] and [rsp+0x86e8], each 0x2c40 bytes -- and lvl4_c fills all four by memcpy (GOT slot 0x64df508 = memcpy@GLIBC_2.14) from the saved entry pointer at [rsp+0x18], always with rsi = [rsp+0x18] and edx = 0x2c40: to [rsp+0x86e8] at 0x2ae1768, to [rsp+0x2e68] at 0x2ae18f1, to [rsp+0x220] at 0x2ae194c, and into the buffer at 0x2ae19cc (the arm that calls lvl4_a) and 0x2ae1b1f (the arm that calls lvl3_c and pre_4ab).  The shapers therefore work on a byte-for-byte copy of ctor_c's phase struct, not on the slot-1760 fill: the fill call at 0x2ae16f2 precedes the copies and its [0x0..0x50) result is overwritten in the buffer in full; only lvl4_c's own tag comparison (0x2ae16f8) and the head copy to [rsp+0xe0..0x128] (loads at 0x2ae1706..0x2ae172e) consume the fill.",
+  "boundary": "above ctor_c there is no static writer and no static caller.  ctor_c's address is taken exactly once in the binary -- registrar_stub_c (the ELF entry point's main) at 0x2cef8f7 -- stored into the stub's stack cell, and passed to the registrar body 0x5c99970 through GOT slot 0x64e6c30 (R_X86_64_RELATIVE) with rsi = the key cell 0x6440b48.  The registrar slot and the key cell each have exactly that one rip-relative reference binary-wide; the cell is zero-filled and carries no relocation; ctor_c has no direct or tail call site; the registrar body itself has no direct caller either.  The registrar saves its pointer and key arguments in its own frame (0x5c999c5, 0x5c999c9).  Whoever later invokes ctor_c does so through the registrar's runtime state, which no static reference exposes -- that invocation is the exact boundary, and the phase bytes ctor_c does not zero are stack residue at it.",
+  "buffer_census": "across lvl4_c's whole body, the buffer region [rsp+0x5aa8, rsp+0x86e8) receives exactly four direct stores, all at +0x0/+0x8: the TLS phase-word saves at 0x2ae188d/0x2ae1895 and the TLS-state-2 error arm's vtable stores at 0x2ae179b/0x2ae17aa.  Both pairs are overwritten by the arm memcpy before the shaping call on their path.  No other instruction stores into the region; its remaining accesses are the fill/head-copy loads, the tag cmp and address-takens (the fill destination, the memcpy r12 setups and drop calls).  The [rsp+0x86e8] copy is never loaded from at all: its only accesses are the memcpy destination lea at 0x2ae1756 and one unwind-path drop lea at 0x2ae2767.",
+  "ctor_c": "ctor_c builds a 0x2c48-byte frame in three steps (sub rsp,0x1000 twice, then 0xc48) and writes exactly three phase offsets: the stack probe zero qwords at phase+0x1c40 (store at 0x2cd8377) and phase+0xc40 (0x2cd8386), and the dispatch byte phase+0x21a = 0 (0x2cd8395, [rsp+0x222] with the phase base at [rsp+0x8]).  It then calls lvl4_c at 0x2cd83a2 with rdi = frame+8 and rsi inherited from its own caller.  Its complete store census is two [rsp] probes and the one byte store; every other byte of the phase region is inherited stack contents.",
+  "entry_pointer": "the saved entry pointer at [rsp+0x18] (stored once, 0x2ae16bf) is loaded at exactly six sites: the five memcpy sources (0x2ae1763, 0x2ae18ec, 0x2ae1947, 0x2ae19c7, 0x2ae1b1a) and one unwind-path drop (0x2ae2794).  lvl4_c never dereferences the entry struct in place.",
+  "question": "who writes the phase struct's fields at and above +0x50 before lvl4_a/lvl3_c shape from them (spawn-payload packet, next question 1)"
+ },
+ "pins": {
+  "builder_c": {
+   "0x2b7b64c": "4889fb",
+   "0x2b7b654": "ff15263e9603"
+  },
+  "call4a_b": {
+   "0x2b40573": "488b7d00",
+   "0x2b40577": "e8643cfaff"
+  },
+  "ctor_c": {
+   "0x2cd8370": "4881ec00100000",
+   "0x2cd8377": "48c7042400000000",
+   "0x2cd837f": "4881ec00100000",
+   "0x2cd8386": "48c7042400000000",
+   "0x2cd838e": "4881ec480c0000",
+   "0x2cd8395": "c684242202000000",
+   "0x2cd839d": "488d7c2408",
+   "0x2cd83a2": "e8e992e0ff"
+  },
+  "pre_4ab": {
+   "0x2453622": "4889442448",
+   "0x245362c": "4889442450",
+   "0x2453673": "e838ce6e00"
+  },
+  "registrar_c": {
+   "0x5c999c5": "48897da0",
+   "0x5c999c9": "48897598"
+  },
+  "registrar_stub_c": {
+   "0x2cef8f7": "488d05728afeff",
+   "0x2cef8fe": "48890424",
+   "0x2cef902": "488d353f127503",
+   "0x2cef90f": "ff151b737f03"
+  }
+ },
+ "shaper_census": {
+  "lvl3_c": {
+   "leas": {
+    "r13": {
+     "0x10": 2,
+     "0x150": 2,
+     "0x1e9": 2,
+     "0x205": 1,
+     "0x20a": 1,
+     "0x220": 11,
+     "0x238": 4,
+     "0x240": 1,
+     "0x258": 2,
+     "0x260": 2,
+     "0x278": 1,
+     "0x2b8": 6,
+     "0x2d0": 3,
+     "0x348": 1,
+     "0x3e0": 1,
+     "0x400": 2,
+     "0xa8": 1,
+     "0xc0": 1
+    }
+   },
+   "loads": {
+    "r13": {
+     "0x0": 1,
+     "0x100": 2,
+     "0x108": 1,
+     "0x110": 1,
+     "0x118": 1,
+     "0x11c": 1,
+     "0x11d": 1,
+     "0x11e": 1,
+     "0x12b": 1,
+     "0x133": 1,
+     "0x138": 1,
+     "0x140": 2,
+     "0x148": 1,
+     "0x1d0": 1,
+     "0x1e0": 1,
+     "0x1e8": 17,
+     "0x1ea": 1,
+     "0x1ee": 1,
+     "0x1ef": 1,
+     "0x1f1": 1,
+     "0x201": 1,
+     "0x21a": 1,
+     "0x220": 1,
+     "0x228": 5,
+     "0x230": 3,
+     "0x238": 2,
+     "0x240": 2,
+     "0x248": 2,
+     "0x258": 2,
+     "0x260": 2,
+     "0x268": 3,
+     "0x270": 1,
+     "0x2d0": 1,
+     "0x2d8": 1,
+     "0x2e0": 1,
+     "0x2e8": 1,
+     "0x3c8": 1,
+     "0x3d8": 1,
+     "0x3e0": 1,
+     "0x3e8": 1,
+     "0x3f0": 1,
+     "0x3f8": 1,
+     "0x8": 1,
+     "0x88": 1,
+     "0x90": 1,
+     "0xa0": 1,
+     "0xa8": 2,
+     "0xb0": 2,
+     "0xc0": 1,
+     "0xc8": 18,
+     "0xd0": 11,
+     "0xd8": 9,
+     "0xe0": 5,
+     "0xe4": 1,
+     "0xe8": 6,
+     "0xf0": 4,
+     "0xf8": 2,
+     "0xf9": 1
+    }
+   },
+   "store_sites": {
+    "r13": {
+     "0x0": [
+      "0x2cde9a9"
+     ],
+     "0x100": [
+      "0x2cde5f1"
+     ],
+     "0x110": [
+      "0x2cde5e1"
+     ],
+     "0x120": [
+      "0x2cde5d1"
+     ],
+     "0x130": [
+      "0x2cde5c2"
+     ],
+     "0x138": [
+      "0x2cde901"
+     ],
+     "0x148": [
+      "0x2cde910"
+     ],
+     "0x150": [
+      "0x2cdeecc",
+      "0x2cdeeea",
+      "0x2ce0a6b",
+      "0x2ce0a89"
+     ],
+     "0x160": [
+      "0x2cdeebf",
+      "0x2cdeedb",
+      "0x2ce0a5b",
+      "0x2ce0a7a"
+     ],
+     "0x1e8": [
+      "0x2cde56b"
+     ],
+     "0x1e9": [
+      "0x2cde91e"
+     ],
+     "0x1ed": [
+      "0x2cde92d"
+     ],
+     "0x1ee": [
+      "0x2cde98c"
+     ],
+     "0x1ef": [
+      "0x2cde99b"
+     ],
+     "0x1f0": [
+      "0x2cde9b9"
+     ],
+     "0x1fd": [
+      "0x2cde9c8"
+     ],
+     "0x205": [
+      "0x2cde4b3",
+      "0x2cde57a",
+      "0x2cde82e",
+      "0x2cde9cf",
+      "0x2cdf1e1",
+      "0x2cdf5b9",
+      "0x2cdf670",
+      "0x2cdfbe5",
+      "0x2cdff0e",
+      "0x2ce0cfd"
+     ],
+     "0x206": [
+      "0x2cde95c",
+      "0x2cded02",
+      "0x2cdeef2",
+      "0x2ce0ab6"
+     ],
+     "0x207": [
+      "0x2cdecdf",
+      "0x2ce0ae3"
+     ],
+     "0x208": [
+      "0x2cde69a",
+      "0x2cde715",
+      "0x2ce09dc",
+      "0x2ce09f7"
+     ],
+     "0x209": [
+      "0x2cdf52f",
+      "0x2cdf5a5",
+      "0x2ce0992",
+      "0x2ce09ad"
+     ],
+     "0x20a": [
+      "0x2cdfed9",
+      "0x2ce0ccd"
+     ],
+     "0x20b": [
+      "0x2cde67c"
+     ],
+     "0x20c": [
+      "0x2cdefd6"
+     ],
+     "0x20d": [
+      "0x2cdefb5"
+     ],
+     "0x20e": [
+      "0x2cdf1bb"
+     ],
+     "0x20f": [
+      "0x2cdfd77"
+     ],
+     "0x210": [
+      "0x2cdef06",
+      "0x2cdfece",
+      "0x2ce0cc2"
+     ],
+     "0x211": [
+      "0x2cdfcf3"
+     ],
+     "0x212": [
+      "0x2cde4bb"
+     ],
+     "0x213": [
+      "0x2cde73c"
+     ],
+     "0x215": [
+      "0x2cde952"
+     ],
+     "0x217": [
+      "0x2cde8f1"
+     ],
+     "0x218": [
+      "0x2cde5a1",
+      "0x2cdff16",
+      "0x2ce065f",
+      "0x2ce072e",
+      "0x2ce0d3d"
+     ],
+     "0x219": [
+      "0x2cde572"
+     ],
+     "0x21a": [
+      "0x2cdff24",
+      "0x2ce0669",
+      "0x2ce0738",
+      "0x2ce074b",
+      "0x2ce0d47"
+     ],
+     "0x220": [
+      "0x2cde6aa",
+      "0x2cdea1d",
+      "0x2cdef16",
+      "0x2cdf1cb",
+      "0x2cdf541",
+      "0x2cdf798",
+      "0x2cdfd8e",
+      "0x2ce0905",
+      "0x2ce0923"
+     ],
+     "0x228": [
+      "0x2cde93c"
+     ],
+     "0x230": [
+      "0x2cde6ba",
+      "0x2cdef25",
+      "0x2cdf1da",
+      "0x2cdf551",
+      "0x2cdf789",
+      "0x2cdfd9d",
+      "0x2ce08f8",
+      "0x2ce0914"
+     ],
+     "0x238": [
+      "0x2cde94b",
+      "0x2cdef40",
+      "0x2cdf332",
+      "0x2cdf350",
+      "0x2cdfe33",
+      "0x2ce0843",
+      "0x2ce0861",
+      "0x2ce0896",
+      "0x2ce08b4"
+     ],
+     "0x240": [
+      "0x2cde6c9",
+      "0x2cde97c",
+      "0x2cdf560"
+     ],
+     "0x248": [
+      "0x2cde6d0",
+      "0x2cdf325",
+      "0x2cdf341",
+      "0x2cdf567",
+      "0x2ce0833",
+      "0x2ce0852",
+      "0x2ce088a",
+      "0x2ce08a5"
+     ],
+     "0x250": [
+      "0x2cde96d"
+     ],
+     "0x258": [
+      "0x2cdea38"
+     ],
+     "0x260": [
+      "0x2cdeaba"
+     ],
+     "0x270": [
+      "0x2cdeaab"
+     ],
+     "0x290": [
+      "0x2cde6d8",
+      "0x2cdf56f"
+     ],
+     "0x291": [
+      "0x2cde6df",
+      "0x2cdf576"
+     ],
+     "0x2c8": [
+      "0x2cdfe3a"
+     ],
+     "0x2d0": [
+      "0x2cdfbbc",
+      "0x2cdfbcc",
+      "0x2ce07f2",
+      "0x2ce0810"
+     ],
+     "0x2e0": [
+      "0x2cdfbaf",
+      "0x2cdfbc4",
+      "0x2ce07e2",
+      "0x2ce0801"
+     ],
+     "0x348": [
+      "0x2cdfb7a",
+      "0x2cdfb98",
+      "0x2ce07a1",
+      "0x2ce07bf"
+     ],
+     "0x358": [
+      "0x2cdfb6d",
+      "0x2cdfb89",
+      "0x2ce0791",
+      "0x2ce07b0"
+     ],
+     "0x3e0": [
+      "0x2cdf70f"
+     ],
+     "0x3e8": [
+      "0x2cdf716"
+     ],
+     "0x3f0": [
+      "0x2cdf71d"
+     ],
+     "0x3f8": [
+      "0x2cdf724"
+     ],
+     "0x8": [
+      "0x2cde9ad"
+     ],
+     "0x918": [
+      "0x2cdee77"
+     ],
+     "0x919": [
+      "0x2cdee7e"
+     ],
+     "0x9b0": [
+      "0x2cde8b1",
+      "0x2cdf630",
+      "0x2cdfc5c"
+     ],
+     "0x9b1": [
+      "0x2cde8b8",
+      "0x2cdf637",
+      "0x2cdfc63"
+     ],
+     "0x9c8": [
+      "0x2cdf2dd"
+     ],
+     "0x9c9": [
+      "0x2cdf2e4"
+     ],
+     "0xa8": [
+      "0x2cde58a"
+     ],
+     "0xae8": [
+      "0x2cdef4f"
+     ],
+     "0xaf8": [
+      "0x2cdf8c1"
+     ],
+     "0xaf9": [
+      "0x2cdf8c8"
+     ],
+     "0xafd": [
+      "0x2cdef56"
+     ],
+     "0xafe": [
+      "0x2cdef5d"
+     ],
+     "0xb20": [
+      "0x2cdec58"
+     ],
+     "0xb35": [
+      "0x2cdec5f"
+     ],
+     "0xb36": [
+      "0x2cdec66"
+     ],
+     "0xb8": [
+      "0x2cde59a"
+     ],
+     "0xc0": [
+      "0x2cde631"
+     ],
+     "0xd0": [
+      "0x2cde629"
+     ],
+     "0xe0": [
+      "0x2cde621"
+     ],
+     "0xf0": [
+      "0x2cde619"
+     ]
+    }
+   },
+   "stores": {
+    "r13": {
+     "0x0": 1,
+     "0x100": 1,
+     "0x110": 1,
+     "0x120": 1,
+     "0x130": 1,
+     "0x138": 1,
+     "0x148": 1,
+     "0x150": 4,
+     "0x160": 4,
+     "0x1e8": 1,
+     "0x1e9": 1,
+     "0x1ed": 1,
+     "0x1ee": 1,
+     "0x1ef": 1,
+     "0x1f0": 1,
+     "0x1fd": 1,
+     "0x205": 10,
+     "0x206": 4,
+     "0x207": 2,
+     "0x208": 4,
+     "0x209": 4,
+     "0x20a": 2,
+     "0x20b": 1,
+     "0x20c": 1,
+     "0x20d": 1,
+     "0x20e": 1,
+     "0x20f": 1,
+     "0x210": 3,
+     "0x211": 1,
+     "0x212": 1,
+     "0x213": 1,
+     "0x215": 1,
+     "0x217": 1,
+     "0x218": 5,
+     "0x219": 1,
+     "0x21a": 5,
+     "0x220": 9,
+     "0x228": 1,
+     "0x230": 8,
+     "0x238": 9,
+     "0x240": 3,
+     "0x248": 8,
+     "0x250": 1,
+     "0x258": 1,
+     "0x260": 1,
+     "0x270": 1,
+     "0x290": 2,
+     "0x291": 2,
+     "0x2c8": 1,
+     "0x2d0": 4,
+     "0x2e0": 4,
+     "0x348": 4,
+     "0x358": 4,
+     "0x3e0": 1,
+     "0x3e8": 1,
+     "0x3f0": 1,
+     "0x3f8": 1,
+     "0x8": 1,
+     "0x918": 1,
+     "0x919": 1,
+     "0x9b0": 3,
+     "0x9b1": 3,
+     "0x9c8": 1,
+     "0x9c9": 1,
+     "0xa8": 1,
+     "0xae8": 1,
+     "0xaf8": 1,
+     "0xaf9": 1,
+     "0xafd": 1,
+     "0xafe": 1,
+     "0xb20": 1,
+     "0xb35": 1,
+     "0xb36": 1,
+     "0xb8": 1,
+     "0xc0": 1,
+     "0xd0": 1,
+     "0xe0": 1,
+     "0xf0": 1
+    }
+   }
+  },
+  "lvl4_a": {
+   "leas": {
+    "rbx": {
+     "0x10": 1,
+     "0x150": 2,
+     "0x1e9": 2,
+     "0x205": 1,
+     "0x20a": 1,
+     "0x220": 11,
+     "0x238": 4,
+     "0x240": 1,
+     "0x258": 2,
+     "0x260": 2,
+     "0x278": 1,
+     "0x2b8": 6,
+     "0x2d0": 3,
+     "0x348": 1,
+     "0x3e0": 1,
+     "0x400": 2,
+     "0xa8": 1,
+     "0xc0": 1
+    }
+   },
+   "loads": {
+    "rbx": {
+     "0x0": 1,
+     "0x10": 1,
+     "0x100": 2,
+     "0x108": 1,
+     "0x110": 1,
+     "0x118": 1,
+     "0x11c": 1,
+     "0x11d": 1,
+     "0x11e": 1,
+     "0x12b": 1,
+     "0x133": 1,
+     "0x138": 1,
+     "0x140": 2,
+     "0x148": 1,
+     "0x1d0": 1,
+     "0x1e0": 1,
+     "0x1e8": 17,
+     "0x1ea": 1,
+     "0x1ee": 1,
+     "0x1ef": 1,
+     "0x1f1": 1,
+     "0x20": 1,
+     "0x201": 1,
+     "0x220": 1,
+     "0x228": 5,
+     "0x230": 3,
+     "0x238": 2,
+     "0x240": 2,
+     "0x248": 2,
+     "0x258": 2,
+     "0x260": 2,
+     "0x268": 3,
+     "0x270": 1,
+     "0x2d0": 1,
+     "0x2d8": 1,
+     "0x2e0": 1,
+     "0x2e8": 1,
+     "0x30": 1,
+     "0x3c8": 1,
+     "0x3d8": 1,
+     "0x3e0": 1,
+     "0x3e8": 1,
+     "0x3f0": 1,
+     "0x3f8": 1,
+     "0x40": 1,
+     "0x50": 1,
+     "0x60": 1,
+     "0x70": 1,
+     "0x8": 1,
+     "0x80": 1,
+     "0x88": 1,
+     "0x90": 1,
+     "0xa0": 1,
+     "0xa8": 2,
+     "0xb0": 2,
+     "0xc0": 1,
+     "0xc8": 18,
+     "0xd0": 11,
+     "0xd8": 9,
+     "0xe0": 5,
+     "0xe4": 1,
+     "0xe8": 6,
+     "0xf0": 4,
+     "0xf8": 2,
+     "0xf9": 1,
+     "index": 2
+    }
+   },
+   "store_sites": {
+    "rbx": {
+     "0x0": [
+      "0x2ae48c2"
+     ],
+     "0x10": [
+      "0x2ae4443"
+     ],
+     "0x100": [
+      "0x2ae4541"
+     ],
+     "0x110": [
+      "0x2ae4536"
+     ],
+     "0x120": [
+      "0x2ae452b"
+     ],
+     "0x130": [
+      "0x2ae4520"
+     ],
+     "0x138": [
+      "0x2ae4829"
+     ],
+     "0x148": [
+      "0x2ae4837"
+     ],
+     "0x150": [
+      "0x2ae4dec",
+      "0x2ae4e08",
+      "0x2ae69ec",
+      "0x2ae6a08"
+     ],
+     "0x160": [
+      "0x2ae4ddd",
+      "0x2ae4dfa",
+      "0x2ae69dd",
+      "0x2ae69fa"
+     ],
+     "0x18": [
+      "0x2ae4473"
+     ],
+     "0x1e8": [
+      "0x2ae44ce"
+     ],
+     "0x1e9": [
+      "0x2ae4844"
+     ],
+     "0x1ed": [
+      "0x2ae4851"
+     ],
+     "0x1ee": [
+      "0x2ae48a8"
+     ],
+     "0x1ef": [
+      "0x2ae48b5"
+     ],
+     "0x1f0": [
+      "0x2ae48d0"
+     ],
+     "0x1fd": [
+      "0x2ae48de"
+     ],
+     "0x205": [
+      "0x2ae4213",
+      "0x2ae44dc",
+      "0x2ae475b",
+      "0x2ae48e5",
+      "0x2ae50f7",
+      "0x2ae54b9",
+      "0x2ae556d",
+      "0x2ae5b1a",
+      "0x2ae5e49",
+      "0x2ae6c86"
+     ],
+     "0x206": [
+      "0x2ae487c",
+      "0x2ae4c14",
+      "0x2ae4e0f",
+      "0x2ae6a38"
+     ],
+     "0x207": [
+      "0x2ae4bf2",
+      "0x2ae6a68"
+     ],
+     "0x208": [
+      "0x2ae45d3",
+      "0x2ae4641",
+      "0x2ae693a",
+      "0x2ae6954"
+     ],
+     "0x209": [
+      "0x2ae5436",
+      "0x2ae54a6",
+      "0x2ae68f2",
+      "0x2ae690c"
+     ],
+     "0x20a": [
+      "0x2ae5e15",
+      "0x2ae6c52"
+     ],
+     "0x20b": [
+      "0x2ae45b7"
+     ],
+     "0x20c": [
+      "0x2ae4edb"
+     ],
+     "0x20d": [
+      "0x2ae4ebc"
+     ],
+     "0x20e": [
+      "0x2ae50d4"
+     ],
+     "0x20f": [
+      "0x2ae5cb5"
+     ],
+     "0x210": [
+      "0x2ae4e23",
+      "0x2ae5e0a",
+      "0x2ae6c47"
+     ],
+     "0x211": [
+      "0x2ae5c2f"
+     ],
+     "0x212": [
+      "0x2ae421a"
+     ],
+     "0x213": [
+      "0x2ae466a"
+     ],
+     "0x215": [
+      "0x2ae4873"
+     ],
+     "0x217": [
+      "0x2ae481b"
+     ],
+     "0x218": [
+      "0x2ae4501",
+      "0x2ae5e50",
+      "0x2ae65dc",
+      "0x2ae6978",
+      "0x2ae6cc8"
+     ],
+     "0x219": [
+      "0x2ae44d5"
+     ],
+     "0x21a": [
+      "0x2ae5e5d",
+      "0x2ae65e5",
+      "0x2ae669d",
+      "0x2ae6981",
+      "0x2ae6cd1"
+     ],
+     "0x220": [
+      "0x2ae45e1",
+      "0x2ae492f",
+      "0x2ae4e31",
+      "0x2ae50e2",
+      "0x2ae5446",
+      "0x2ae569e",
+      "0x2ae5cca",
+      "0x2ae6866",
+      "0x2ae6882"
+     ],
+     "0x228": [
+      "0x2ae485e"
+     ],
+     "0x230": [
+      "0x2ae45ef",
+      "0x2ae4e3f",
+      "0x2ae50f0",
+      "0x2ae5454",
+      "0x2ae5691",
+      "0x2ae5cd8",
+      "0x2ae6857",
+      "0x2ae6874"
+     ],
+     "0x238": [
+      "0x2ae486c",
+      "0x2ae4e5a",
+      "0x2ae5258",
+      "0x2ae5274",
+      "0x2ae5d71",
+      "0x2ae678e",
+      "0x2ae67aa",
+      "0x2ae67ec",
+      "0x2ae6808"
+     ],
+     "0x240": [
+      "0x2ae45fd",
+      "0x2ae489a",
+      "0x2ae5462"
+     ],
+     "0x248": [
+      "0x2ae4604",
+      "0x2ae5249",
+      "0x2ae5266",
+      "0x2ae5469",
+      "0x2ae677f",
+      "0x2ae679c",
+      "0x2ae67dd",
+      "0x2ae67fa"
+     ],
+     "0x250": [
+      "0x2ae488c"
+     ],
+     "0x258": [
+      "0x2ae4949"
+     ],
+     "0x260": [
+      "0x2ae49cb"
+     ],
+     "0x270": [
+      "0x2ae49bc"
+     ],
+     "0x28": [
+      "0x2ae446f"
+     ],
+     "0x290": [
+      "0x2ae460b",
+      "0x2ae5470"
+     ],
+     "0x291": [
+      "0x2ae4611",
+      "0x2ae5476"
+     ],
+     "0x2c8": [
+      "0x2ae5d78"
+     ],
+     "0x2d0": [
+      "0x2ae5af3",
+      "0x2ae5b01",
+      "0x2ae6741",
+      "0x2ae675d"
+     ],
+     "0x2e0": [
+      "0x2ae5ae4",
+      "0x2ae5afa",
+      "0x2ae6732",
+      "0x2ae674f"
+     ],
+     "0x348": [
+      "0x2ae5aa9",
+      "0x2ae5ac5",
+      "0x2ae66f4",
+      "0x2ae6710"
+     ],
+     "0x358": [
+      "0x2ae5a9a",
+      "0x2ae5ab7",
+      "0x2ae66e5",
+      "0x2ae6702"
+     ],
+     "0x38": [
+      "0x2ae446b"
+     ],
+     "0x3e0": [
+      "0x2ae5609"
+     ],
+     "0x3e8": [
+      "0x2ae5610"
+     ],
+     "0x3f0": [
+      "0x2ae5617"
+     ],
+     "0x3f8": [
+      "0x2ae561e"
+     ],
+     "0x48": [
+      "0x2ae444f"
+     ],
+     "0x50": [
+      "0x2ae44c4"
+     ],
+     "0x60": [
+      "0x2ae44c0"
+     ],
+     "0x70": [
+      "0x2ae44bc"
+     ],
+     "0x8": [
+      "0x2ae48c5"
+     ],
+     "0x80": [
+      "0x2ae44b5"
+     ],
+     "0x90": [
+      "0x2ae448e"
+     ],
+     "0x918": [
+      "0x2ae4d8b"
+     ],
+     "0x919": [
+      "0x2ae4d92"
+     ],
+     "0x9b0": [
+      "0x2ae47d9",
+      "0x2ae552b",
+      "0x2ae5b8c"
+     ],
+     "0x9b1": [
+      "0x2ae47e0",
+      "0x2ae5532",
+      "0x2ae5b93"
+     ],
+     "0x9c8": [
+      "0x2ae51f7"
+     ],
+     "0x9c9": [
+      "0x2ae51fe"
+     ],
+     "0xa0": [
+      "0x2ae447f"
+     ],
+     "0xa8": [
+      "0x2ae44fa"
+     ],
+     "0xae8": [
+      "0x2ae4e68"
+     ],
+     "0xaf8": [
+      "0x2ae57c6"
+     ],
+     "0xaf9": [
+      "0x2ae57cd"
+     ],
+     "0xafd": [
+      "0x2ae4e6f"
+     ],
+     "0xafe": [
+      "0x2ae4e75"
+     ],
+     "0xb20": [
+      "0x2ae4b79"
+     ],
+     "0xb35": [
+      "0x2ae4b80"
+     ],
+     "0xb36": [
+      "0x2ae4b86"
+     ],
+     "0xb8": [
+      "0x2ae44eb"
+     ],
+     "0xc0": [
+      "0x2ae456d"
+     ],
+     "0xd0": [
+      "0x2ae4566"
+     ],
+     "0xe0": [
+      "0x2ae455f"
+     ],
+     "0xf0": [
+      "0x2ae4558"
+     ],
+     "index": [
+      "0x2ae5bf2",
+      "0x2ae5c0b"
+     ]
+    }
+   },
+   "stores": {
+    "rbx": {
+     "0x0": 1,
+     "0x10": 1,
+     "0x100": 1,
+     "0x110": 1,
+     "0x120": 1,
+     "0x130": 1,
+     "0x138": 1,
+     "0x148": 1,
+     "0x150": 4,
+     "0x160": 4,
+     "0x18": 1,
+     "0x1e8": 1,
+     "0x1e9": 1,
+     "0x1ed": 1,
+     "0x1ee": 1,
+     "0x1ef": 1,
+     "0x1f0": 1,
+     "0x1fd": 1,
+     "0x205": 10,
+     "0x206": 4,
+     "0x207": 2,
+     "0x208": 4,
+     "0x209": 4,
+     "0x20a": 2,
+     "0x20b": 1,
+     "0x20c": 1,
+     "0x20d": 1,
+     "0x20e": 1,
+     "0x20f": 1,
+     "0x210": 3,
+     "0x211": 1,
+     "0x212": 1,
+     "0x213": 1,
+     "0x215": 1,
+     "0x217": 1,
+     "0x218": 5,
+     "0x219": 1,
+     "0x21a": 5,
+     "0x220": 9,
+     "0x228": 1,
+     "0x230": 8,
+     "0x238": 9,
+     "0x240": 3,
+     "0x248": 8,
+     "0x250": 1,
+     "0x258": 1,
+     "0x260": 1,
+     "0x270": 1,
+     "0x28": 1,
+     "0x290": 2,
+     "0x291": 2,
+     "0x2c8": 1,
+     "0x2d0": 4,
+     "0x2e0": 4,
+     "0x348": 4,
+     "0x358": 4,
+     "0x38": 1,
+     "0x3e0": 1,
+     "0x3e8": 1,
+     "0x3f0": 1,
+     "0x3f8": 1,
+     "0x48": 1,
+     "0x50": 1,
+     "0x60": 1,
+     "0x70": 1,
+     "0x8": 1,
+     "0x80": 1,
+     "0x90": 1,
+     "0x918": 1,
+     "0x919": 1,
+     "0x9b0": 3,
+     "0x9b1": 3,
+     "0x9c8": 1,
+     "0x9c9": 1,
+     "0xa0": 1,
+     "0xa8": 1,
+     "0xae8": 1,
+     "0xaf8": 1,
+     "0xaf9": 1,
+     "0xafd": 1,
+     "0xafe": 1,
+     "0xb20": 1,
+     "0xb35": 1,
+     "0xb36": 1,
+     "0xb8": 1,
+     "0xc0": 1,
+     "0xd0": 1,
+     "0xe0": 1,
+     "0xf0": 1,
+     "index": 2
+    }
+   }
+  }
+ },
+ "small_census": {
+  "ctor_c": {
+   "leas": {
+    "rsp": {
+     "0x8": 1
+    }
+   },
+   "loads": {},
+   "stores": {
+    "rsp": {
+     "0x0": 2,
+     "0x222": 1
+    }
+   }
+  },
+  "registrar_stub_c": {
+   "leas": {},
+   "loads": {},
+   "stores": {
+    "rsp": {
+     "0x0": 1
+    }
+   }
+  }
+ }
+}

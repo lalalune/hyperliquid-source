@@ -1,0 +1,15 @@
+Relocation and stored-pointer scan for RE-001-lazy-materialize-predicate-115.
+
+Method (reproduced by census.py in this packet):
+  * Whole-file scan for an 8-byte little-endian qword equal to each
+    window address.
+  * Parse of `readelf -r` output for R_X86_64_RELATIVE records whose
+    addend equals each window address.
+
+Result for the digest-verified node #115 work binary
+(SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301):
+  * Predicate 0x5f77190: 0 stored qwords, 0 RELATIVE addends.
+
+The predicate is reached only through its two direct call sites
+listed in callers.tsv, both inside the two-phase filtered
+accumulation scan 0x5f77330 (PR #2362).

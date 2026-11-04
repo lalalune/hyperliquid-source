@@ -1,0 +1,248 @@
+{
+  "status": "no remaining blocker for the explicit conditional claim",
+  "reviewed_initial_head": "638695d4c0a3a8defda49d9eeb455cd9eca8a81f",
+  "verifier_fix_head": "a309180b11d94539885d60318d5a64d4ddbd1f01",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "reviewed_files": {
+    "rust/lib.rs": {
+      "sha256": "8bd0a24cb34e400bf517fa28e4e5c979806ca72145220971e072f62ee9e2aeee",
+      "bytes": 10232
+    },
+    "rust/driver.rs": {
+      "sha256": "0e54b49a60fbbaf963a02978daf4b46df85a241b3932f08a8e7d0bf724c3c72f",
+      "bytes": 7173
+    },
+    "oracle.py": {
+      "sha256": "d8ac0acba97e35c9665319f2551545497b67a370a829ad9620b21cdb7cc201ed",
+      "bytes": 15079
+    },
+    "freeze.json": {
+      "sha256": "2b9bff5b9a5fd19378e153764a0926ed1e602b3db56e21a117c8bb5e7f5cfe9a",
+      "bytes": 831
+    },
+    "inputs.txt.gz": {
+      "sha256": "3fd5fd73ad8e199ed47ee9b29a1a4d3e9d8c26f15f991f42879e42a7a890bb55",
+      "bytes": 180820
+    },
+    "expected.txt.gz": {
+      "sha256": "ab965dca4058a00f9f589674e9988b44ea9a7d72fb18a5352ccaf65d78e5176a",
+      "bytes": 520609
+    },
+    "PROOF.md": {
+      "sha256": "5b3a5beb5745e630a98d6ea2977f2cada50f47669dc0b83da07697e37f677668",
+      "bytes": 16914
+    },
+    "verify.py": {
+      "sha256": "b255c5c61308a78fca9f1073d417b3b295f9db61630a4fa572d2d9fabb10cc4d",
+      "bytes": 10132
+    },
+    "bindings.json.gz": {
+      "sha256": "3a1c464c090ad3c88ff593a98ada2775fd94b37baff7151c5e9180e739d42c02",
+      "bytes": 132360
+    },
+    "validation/native-final/result.json": {
+      "sha256": "2152ac9377c18d8dc1a71598641bb7ef093bde956ca0dd769825da3921300872",
+      "bytes": 18652
+    }
+  },
+  "findings": [
+    {
+      "id": "manifest-open-inventory",
+      "severity": "evidence admission blocker before fix",
+      "original_verifier_sha256": "5ed0881ccb69e8ce5ac52f2bcaf238b6c0299731d76de7a0ae88f0c908ebe647",
+      "evidence": "inventory-control/result.json and exact original full verifier/stdout/stderr",
+      "observed": "Full original verifier returned PASS/exit0 with all five simultaneous corruptions: unlisted file, unlisted empty directory, unlisted dangling symlink, same-content manifest-file symlink, manifest-parent directory symlink. Copied evidence and unchanged committed verifier ran entirely in own fixture.",
+      "resolution": "Fixed verify_manifest function was read and executed unchanged on isolated positive and five individual negative controls. Ordinary fixture accepted; all five corruptions rejected. See manifest-fix-result.json.",
+      "status": "resolved"
+    }
+  ],
+  "independent_static": {
+    "status": "PASS",
+    "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "full_bodies": 34,
+    "bytes": 38606,
+    "instructions": 8103,
+    "all_rela_records": 61001,
+    "unique_entry_slot_writer": [
+      {
+        "address": 105809648,
+        "kind": 8,
+        "addend": 93702960,
+        "symbol": null,
+        "file_offset": 1374984
+      }
+    ],
+    "incoming_instruction_sites": [
+      "0x2e1b5c5",
+      "0x2e08507",
+      "0x2e12e2f",
+      "0x2e14056",
+      "0x2e199ac",
+      "0x2e199d2",
+      "0x2e19e85",
+      "0x59d6c21"
+    ],
+    "source_sha256": "8bd0a24cb34e400bf517fa28e4e5c979806ca72145220971e072f62ee9e2aeee",
+    "limits": "Independent ELF/FDE/GNU byte authentication of selected extents and named calls, not a new exhaustive call census or captured execution."
+  },
+  "independent_values": {
+    "cases": 9243,
+    "counts": {
+      "H": 1040,
+      "E": 1934,
+      "Q": 120,
+      "P": 610,
+      "S": 571,
+      "G": 334,
+      "R": 4374,
+      "F": 260
+    },
+    "mismatches": 0,
+    "derived_raw_sha256": "7d854feac89d3e5e2a346a926e2be2c637973029844ef0bc729f5b029deff9f0",
+    "frozen_raw_sha256": "7d854feac89d3e5e2a346a926e2be2c637973029844ef0bc729f5b029deff9f0",
+    "source_sha256": "8bd0a24cb34e400bf517fa28e4e5c979806ca72145220971e072f62ee9e2aeee",
+    "independence": "No packet modules imported; CPython binary64 and Fraction->float final rounding, joined membership columns, batched multiplicity subtraction, bisected histories/rings. This is not captured execution or a proof of generic-helper premises."
+  },
+  "semantic_checks": [
+    {
+      "claim": "Different query and selection rounds",
+      "anchors": [
+        "0x595cb41",
+        "0x595cb44",
+        "0x595cd20",
+        "0x595cb64",
+        "0x595cbb2",
+        "0x595dc35",
+        "0x595dc3d..0x595dc52",
+        "0x595e02a..0x595e060"
+      ],
+      "finding": "RCX saved in R15 and forwarded as RDX to both histories; entry RDX saved in R13 then stack+0x1d0 and used for final unsigned remainder. High-half OR test selects equivalent32/64-bit DIV arms. Full range decode authenticates these starts."
+    },
+    {
+      "claim": "Saturated warning thresholds and sequential diagnostic value",
+      "anchors": [
+        "0x595c3d0..0x595c435",
+        "0x595e5c0..0x595e80a"
+      ],
+      "finding": "stake+2000 saturates; execution+200 saturates then increment/zero-test saturates again, equal to sat(execution+201); unsigned maximum chosen; query==limit warns. LOCK INC is wrapping and query continues. Second call is bypassed unless first result byte is0x2e. Noninterference and absence of concurrency remain necessary."
+    },
+    {
+      "claim": "History delayed query and ring/tree admission",
+      "anchors": [
+        "0x595c53c..0x595c57f",
+        "0x4dce7c4..0x4dce7fa",
+        "0x4d38fd0..0x4d391a8",
+        "0x51f5470..0x51f561d",
+        "0x57f2b50..0x57f2c3a"
+      ],
+      "finding": "NEG overflow selects only MIN64 tree tag. Null root yields empty range; well-formed range descent uses unsigned comparisons and advances equality, then predecessor extraction. Ring split suffix/prefix and equality-inclusive upper bound agree with logical bisect on admitted ordered entries. Bad metadata/raw-pointer semantics are excluded, not silently repaired."
+    },
+    {
+      "claim": "Filter, union, total and transformed weights",
+      "anchors": [
+        "0x543ed99..0x543edc9",
+        "0x5b7fcc0",
+        "0x5b7fdb2",
+        "0x595d440..0x595d44b",
+        "0x595d546..0x595d550",
+        "0x595d58c..0x595d5ae",
+        "0x5acafcc..0x5acafe2",
+        "0x5acbf11..0x5acbf23"
+      ],
+      "finding": "memcmp equality in the excluded set resumes the next input row. Carry-controlled MAX handles both total branches. Subtract1000 clamps at0 before unsigned division by union size. Membership subtraction clamps at0; outside multiplication and fallback multiplication saturate. Generic rebuild/clone/insert postconditions are stated premises, not independently closed here."
+    },
+    {
+      "claim": "Rounded event computation",
+      "anchors": [
+        "0x595d722..0x595d743",
+        "0x595d7c2..0x595d7d7",
+        "0x595d8db..0x595d91c",
+        "0x595d940..0x595d970",
+        "0x63f0680..0x63f0686"
+      ],
+      "finding": "Unsigned conversions use two exact parts and one final add; signed index conversion is valid under stated index bound. Separate reciprocal, multiply and divide precede resolved FMA3. Independent CPython/Fraction rounding matches all1934 E records and all materialized schedules; no alternative MXCSR/FMA4/software-path assertion."
+    },
+    {
+      "claim": "Comparator and batched replacement",
+      "anchors": [
+        "0x53ddc4b..0x53ddcb7",
+        "0x53ddd49..0x53dddc4",
+        "0x595dd28..0x595ddba",
+        "0x595ddbd..0x595de1d"
+      ],
+      "finding": "Bitwise total-order coding and exact20-byte memcmp match total_cmp/Option ordering on admitted tags0/1. Batch uses first, second modulo length, third modulo length before sorting. Saturating decrements and post-batch zero removal include the zero-count and one/two-entry cases."
+    },
+    {
+      "claim": "Output image and RAX",
+      "anchors": [
+        "0x595cbfd..0x595cc49",
+        "0x595cc4a..0x595cc5e",
+        "0x595df91",
+        "0x595e045..0x595e060"
+      ],
+      "finding": "Missing branch union of stores covers exactly72 scratch bytes, including overlapping dwords1..5 and4..8. Successful branch writes key1..21 and tag0x2e; empty writes onlytag0x0f to original output. Cleanup eventually returns original output pointer in RAX. Supplied scratch and output snapshots are intentionally separate; aliases and other registers are not claimed."
+    }
+  ],
+  "native_qualification_audit": {
+    "reexecuted_native_builds": 0,
+    "retained_full_verifier_replay": "Original full verifier replay authenticated450 initial/final streams, four final9243-line outputs,47 compiled normal-return mismatches and6 admission results. Independent own9243-line recomputation additionally matches the same complete expected raw hash.",
+    "input_only_client": "Reviewed driver reads stdin, not expected output files; validation supplies only frozen inputs.",
+    "initial_failure": "39 effective mutants followed by a missing multiline text anchor; preserved original validator and failure. Not counted as effective control.",
+    "repeat_objects": "Matching within-opt-level hashes are recorded; reviewer did not rerun compilers or independently regenerate objects.",
+    "pre_source_chronology": "Freeze explicitly precedes first node115 adaptation; historical own Rust existed and was inspected. This is disclosed, not an oracle written in complete isolation from prior work."
+  },
+  "limits": [
+    "No captured instructions, emulator, target process, network or chain execution.",
+    "Independent selected-FDE/GNU authentication does not establish exhaustive dynamic caller reachability.",
+    "Generic container rebuild/clone/insert, deep sort, consuming cursor, allocation/destruction/runtime noninterference and resolved FMA3/RN environment remain explicit premises.",
+    "Full source was read; selected semantic anchors and proof logic were checked. This is not a machine-checked universal equivalence proof or first-party source/version attribution.",
+    "Fresh complete native/compiler and full-suite execution on the proposer branch are the author/parent responsibility; this review does not claim their completion."
+  ],
+  "writes": "Own ignored work/proposer115-peer only; mixer files were not edited.",
+  "artifacts": {
+    "verify_static_independent.py": {
+      "bytes": 6917,
+      "sha256": "f2f971dfc680ae400c216b2465b735f7a8f181bc1f3588be0fbf7b02226e4f57"
+    },
+    "verify_values_independent.py": {
+      "bytes": 9421,
+      "sha256": "6bc49aad07ac44cbbda8053b83631968aaf8796b3f063dacfe8930cfcc043061"
+    },
+    "verify_manifest_fix.py": {
+      "bytes": 3164,
+      "sha256": "3914ad59ffe8795093d8d5ffb99693ac50c186f40cfb52605e88c98e8734cb4e"
+    },
+    "static.stdout": {
+      "bytes": 786,
+      "sha256": "09248b969b5bb4c00798f887c4b1153be84609a2d504cf5f7cac04e3ca5d5f6a"
+    },
+    "static.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "values.stdout": {
+      "bytes": 701,
+      "sha256": "3f4c02cfa2d7479f8f4ef0d767e7a1c38d0edc353bcd5af287cd07a97a5d7592"
+    },
+    "values.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "manifest-fix.stdout": {
+      "bytes": 1179,
+      "sha256": "c004881257fbfe4d91dbdc22232e836a1ea407846e99e50a225d2b7e579e576a"
+    },
+    "manifest-fix.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "manifest-fix-result.json": {
+      "bytes": 1179,
+      "sha256": "c004881257fbfe4d91dbdc22232e836a1ea407846e99e50a225d2b7e579e576a"
+    },
+    "inventory-control/result.json": {
+      "bytes": 1094,
+      "sha256": "5ea81cfac1c510e09858449dd93690d59b06f764a240a4cc4f4f89f01e05b070"
+    }
+  }
+}

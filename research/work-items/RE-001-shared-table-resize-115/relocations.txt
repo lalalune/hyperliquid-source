@@ -1,0 +1,19 @@
+Relocations and PLT references for node #115 0x5f0b420 (from readelf and objdump):
+
+- GOT slot 0x64ed290: R_X86_64_GLOB_DAT for __libc_single_threaded
+  (GLIBC_2.32). Read by the window at 0x5f0b515 and by the dispose
+  helper at 0x5d3507e and the release helper at 0x5f0a23e; nonzero
+  selects the plain use-count decrement, zero selects LOCK XADD.
+- No GOT/RELATIVE slot is read for the window's own address: the
+  census finds no RELATIVE slot whose addend is 0x5f0b420, no
+  whole-file qword hit, and no tail jump. The window is reached
+  only by the direct call at 0x5f10918.
+- PLT calls in-window: 0x63f13a0 std::thread::hardware_concurrency
+  (site 0x5f0b438), 0x63f0e30 operator new _Znam (site 0x5f0b484),
+  0x63f0e40 sized delete[] _ZdaPvm (site 0x5f0b55c),
+  0x63f0a50 _Unwind_Resume (site 0x5f0b5cd),
+  0x63f0d70 __stack_chk_fail (sites 0x5f0b692, 0x5f0b721,
+  0x5f0b726, 0x5f0b72b, 0x5f0b753, 0x5f0b758).
+- Direct non-PLT calls in-window: dispose helper 0x5d35070
+  (site 0x5f0b532); landing-pad call to release helper 0x5f0a1dc
+  (site 0x5f0b5c5).

@@ -100,6 +100,26 @@ class ProcessIsolationTests(unittest.TestCase):
         self.assertIn('after signaled child', result.stdout)
         self.assertIn('2 files attempted; 1 failed', result.stderr)
 
+    def test_function_tests_are_collected_and_failures_propagate(self):
+        self.write('test_functions.py', "def test_reject():\n    assert False, 'function assertion ran'\n")
+        result = self.invoke()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('function assertion ran', result.stdout)
+        self.assertIn('1 files attempted; 1 failed', result.stderr)
+
+    def test_script_main_checks_run_and_failures_propagate(self):
+        self.write('test_script.py', "if __name__ == '__main__':\n    raise ValueError('script check ran')\n")
+        result = self.invoke()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('script check ran', result.stderr)
+        self.assertIn('1 files attempted; 1 failed', result.stderr)
+
+    def test_top_level_assertions_are_run(self):
+        self.write('test_top.py', "assert False, 'top assertion ran'\n")
+        result = self.invoke()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('top assertion ran', result.stderr)
+
     def test_same_interpreter_optimization_and_bytecode_flags(self):
         self.write('test_flags.py', '''
             import sys, unittest

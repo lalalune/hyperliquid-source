@@ -1,0 +1,63 @@
+{
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "census": {
+  "direct_call_count": 39,
+  "internal_calls": 2,
+  "internal_tail_jumps": 1,
+  "relative_addends": 0,
+  "stored_qwords": 0,
+  "tail_jump_count": 0
+ },
+ "neighbour_note": "the block at 0x5d50a06..0x5d50a6c is a separate FDE, not this routine's landing pad: it is the cleanup of an enclosing function that calls this routine twice (sites 0x5d50a32, 0x5d50a3a) and is recorded site-only",
+ "never_read_or_written": [
+  "0x00..0x4f",
+  "0x51..0x6f",
+  "0x78..0x7f",
+  "0x88..0xbf",
+  "0xf0.."
+ ],
+ "node": 115,
+ "order": [
+  "condition-variable destroy at +0xc0 (only when flag byte +0x50 nonzero)",
+  "delete[] of the +0x80 pointer (only when non-null)",
+  "delete[] of the +0x70 pointer (only when non-null, via tail jump)",
+  "the record itself is never freed and no record slot is written"
+ ],
+ "reads": [
+  {
+   "offset": "0x50",
+   "role": "condition-variable flag byte; nonzero destroys the +0xc0 member first",
+   "width": 1
+  },
+  {
+   "offset": "0x70",
+   "role": "second heap buffer pointer; delete[] when non-null, via tail jump",
+   "width": 8
+  },
+  {
+   "offset": "0x80",
+   "role": "first heap buffer pointer; delete[] when non-null",
+   "width": 8
+  },
+  {
+   "offset": "0xc0",
+   "role": "condition variable, destroyed only when the +0x50 byte is nonzero; address passed, contents not read as data",
+   "width": 48
+  }
+ ],
+ "routine": {
+  "address": "0x5d509c0",
+  "arguments": [
+   "rdi: record pointer"
+  ],
+  "fde": "0x5d509c0..0x5d50a06",
+  "internal_calls": 2,
+  "internal_tail_jumps": 1,
+  "return": "void (no return value claimed)",
+  "size_bytes": 70,
+  "tail_jumps": 1
+ },
+ "task": "RE-001",
+ "writes": []
+}

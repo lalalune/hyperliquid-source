@@ -1,0 +1,1210 @@
+{
+  "base_commit": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "tested_code_commit": "705b8976f3f35414ca026a35b9fcd80a80834d4f",
+  "scope": "Static research and official repository test inventory. No captured target execution/emulation, runtime equivalence, hosted CI or container claim.",
+  "same_skips": [
+    "Pinned official HL_RE014_LIBCORE archive not supplied",
+    "Nonce-ring Rust check requires explicit compiler and Capstone5.0.6",
+    "Native JDK has no separate nested JRE"
+  ],
+  "tool_versions": {
+    "python": "3.14.7",
+    "capstone": "5.0.7",
+    "gnu_binutils": "2.47.20260726",
+    "llvm": "18.1.4",
+    "platform": "macOS arm64"
+  },
+  "commands": [
+    {
+      "phase": "qualified baseline in detached unchanged worktree",
+      "command": "PATH=<VENV_BIN>:<GNU_BIN>:<LLVM_BIN>:$PATH make doctor verify test catalogue-check reproduce",
+      "exit_code": 0
+    },
+    {
+      "phase": "full contribution inventory",
+      "command": "PATH=<VENV_BIN>:<GNU_BIN>:<LLVM_BIN>:$PATH make doctor verify test catalogue-check reproduce",
+      "exit_code": 2,
+      "result": "77 modules attempted; only packet manifest module failed after audit archive refresh. Remaining make phases did not run."
+    },
+    {
+      "phase": "repaired packet manifest",
+      "command": "<PYTHON> -m unittest discover -s tests -p test_verify_packets.py -v",
+      "exit_code": 0,
+      "cases": 12
+    },
+    {
+      "phase": "post-repair repository gates",
+      "command": "PATH=<VENV_BIN>:<GNU_BIN>:<LLVM_BIN>:$PATH make doctor verify catalogue-check reproduce",
+      "exit_code": 0
+    },
+    {
+      "phase": "focused final",
+      "command": "<PYTHON> -m unittest discover -s tests -p test_node115_reference_oracle_persistence.py -v",
+      "exit_code": 0,
+      "cases": 4
+    },
+    {
+      "phase": "native exports, twice",
+      "command": "<PYTHON> research/work-items/RE-001-node115-reference-oracle-persistence/export_disassembly.py",
+      "exit_code": 0
+    },
+    {
+      "phase": "packet checker",
+      "command": "<PYTHON> research/work-items/RE-001-node115-reference-oracle-persistence/verify.py --controls",
+      "exit_code": 0
+    },
+    {
+      "phase": "relations",
+      "command": "<PYTHON> research/work-items/RE-001-node115-reference-oracle-persistence/relations.py",
+      "exit_code": 0
+    }
+  ],
+  "baseline_suite": {
+    "modules": 76,
+    "cases": 382,
+    "skipped": 3,
+    "failed_modules": 0,
+    "module_results": [
+      {
+        "module": "test_artifacts.py",
+        "passed_in_full_run": true,
+        "cases": 22,
+        "seconds": 0.057,
+        "skipped": 0
+      },
+      {
+        "module": "test_artifacts_diagnostics.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.168,
+        "skipped": 0
+      },
+      {
+        "module": "test_artifacts_manifest_files_type.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.003,
+        "skipped": 0
+      },
+      {
+        "module": "test_build_provenance.py",
+        "passed_in_full_run": true,
+        "cases": 22,
+        "seconds": 1.697,
+        "skipped": 0
+      },
+      {
+        "module": "test_build_provenance_comment_encoding.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_build_provenance_interp_encoding.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_build_provenance_manifest_fields.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.003,
+        "skipped": 0
+      },
+      {
+        "module": "test_build_provenance_symtab_type.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_cache_suffix_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 40.296,
+        "skipped": 0
+      },
+      {
+        "module": "test_curl_options_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 68.8,
+        "skipped": 0
+      },
+      {
+        "module": "test_doctor_ghidra.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.851,
+        "skipped": 0
+      },
+      {
+        "module": "test_doctor_gnu_binutils.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.83,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.003,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index_cli.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.233,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index_diagnostics.py",
+        "passed_in_full_run": true,
+        "cases": 1,
+        "seconds": 0.002,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index_inventory_dup_keys.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.003,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index_manifest_lookup.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.013,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index_section_name_encoding.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index_shstrtab.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents.py",
+        "passed_in_full_run": true,
+        "cases": 18,
+        "seconds": 0.002,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents_cie_aug_encoding.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents_cli.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.161,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents_duplicate_except.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents_duplicate_frame.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents_inventory_dup_keys.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.003,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents_manifest_lookup.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.013,
+        "skipped": 0
+      },
+      {
+        "module": "test_ghidra_plan_manifest_fields.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.307,
+        "skipped": 0
+      },
+      {
+        "module": "test_ghidra_plan_manifest_lookup.py",
+        "passed_in_full_run": true,
+        "cases": 5,
+        "seconds": 0.372,
+        "skipped": 0
+      },
+      {
+        "module": "test_ghidra_plan_shell.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.25,
+        "skipped": 0
+      },
+      {
+        "module": "test_ip_permit_state_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 13.764,
+        "skipped": 0
+      },
+      {
+        "module": "test_latency_projection_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 14.733,
+        "skipped": 0
+      },
+      {
+        "module": "test_mcp_stdio.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 0.244,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_catalogue.py",
+        "passed_in_full_run": true,
+        "cases": 5,
+        "seconds": 0.128,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_field_adapter_drift.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.002,
+        "skipped": 1
+      },
+      {
+        "module": "test_node115_latency_pair_rust.py",
+        "passed_in_full_run": true,
+        "cases": 5,
+        "seconds": 2.776,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_snapshot_selectors_rust.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 6.361,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_tagged_count.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.784,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_u128_binary64.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.484,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_weighted_fold_rust.py",
+        "passed_in_full_run": true,
+        "cases": 5,
+        "seconds": 3.37,
+        "skipped": 0
+      },
+      {
+        "module": "test_node_padadapter_semantic_comparison.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.074,
+        "skipped": 0
+      },
+      {
+        "module": "test_nonce_ordering_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 18.203,
+        "skipped": 0
+      },
+      {
+        "module": "test_nonce_ring_rust.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 1.068,
+        "skipped": 1
+      },
+      {
+        "module": "test_numeric_selector_static.py",
+        "passed_in_full_run": true,
+        "cases": 9,
+        "seconds": 52.815,
+        "skipped": 0
+      },
+      {
+        "module": "test_priority_prefix_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 48.876,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_config_dup_keys.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.002,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_find_node_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.427,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_java_home.py",
+        "passed_in_full_run": true,
+        "cases": 8,
+        "seconds": 0.035,
+        "skipped": 1
+      },
+      {
+        "module": "test_rea_launcher.py",
+        "passed_in_full_run": true,
+        "cases": 10,
+        "seconds": 1.184,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_main_version_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.004,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_npm_install.py",
+        "passed_in_full_run": true,
+        "cases": 7,
+        "seconds": 0.005,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_profile_disabled_analyzers_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_smoke_manifest_fields.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.384,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_smoke_manifest_lookup.py",
+        "passed_in_full_run": true,
+        "cases": 5,
+        "seconds": 0.451,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_target_branch_config.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_target_default_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_target_manifest_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_target_manifest_fields.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.005,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_target_provider_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_target_targets_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_run_tests.py",
+        "passed_in_full_run": true,
+        "cases": 9,
+        "seconds": 1.676,
+        "skipped": 0
+      },
+      {
+        "module": "test_runtime_tag_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 9.662,
+        "skipped": 0
+      },
+      {
+        "module": "test_snapshot_selection_static.py",
+        "passed_in_full_run": true,
+        "cases": 7,
+        "seconds": 19.858,
+        "skipped": 0
+      },
+      {
+        "module": "test_tls_lock_id_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 41.147,
+        "skipped": 0
+      },
+      {
+        "module": "test_u8_rejection_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 41.199,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports.py",
+        "passed_in_full_run": true,
+        "cases": 14,
+        "seconds": 2.51,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_diagnostics.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.188,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_manifest_entry_path.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.004,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_manifest_file.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.419,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_manifest_files_key.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.004,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_manifest_files_type.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.412,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_source_repo_record.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.291,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_sources_repositories_key.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.003,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_packets.py",
+        "passed_in_full_run": true,
+        "cases": 12,
+        "seconds": 0.094,
+        "skipped": 0
+      },
+      {
+        "module": "test_weighted_comparison_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 14.681,
+        "skipped": 0
+      },
+      {
+        "module": "test_wire_qty_normal_form.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 35.574,
+        "skipped": 0
+      },
+      {
+        "module": "test_wire_qty_rust.py",
+        "passed_in_full_run": true,
+        "cases": 5,
+        "seconds": 2.617,
+        "skipped": 0
+      }
+    ]
+  },
+  "contribution_suite": {
+    "modules": 77,
+    "cases": 386,
+    "skipped": 3,
+    "failed_modules": 1,
+    "module_results": [
+      {
+        "module": "test_artifacts.py",
+        "passed_in_full_run": true,
+        "cases": 22,
+        "seconds": 0.057,
+        "skipped": 0
+      },
+      {
+        "module": "test_artifacts_diagnostics.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.146,
+        "skipped": 0
+      },
+      {
+        "module": "test_artifacts_manifest_files_type.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.004,
+        "skipped": 0
+      },
+      {
+        "module": "test_build_provenance.py",
+        "passed_in_full_run": true,
+        "cases": 22,
+        "seconds": 1.63,
+        "skipped": 0
+      },
+      {
+        "module": "test_build_provenance_comment_encoding.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_build_provenance_interp_encoding.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_build_provenance_manifest_fields.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.003,
+        "skipped": 0
+      },
+      {
+        "module": "test_build_provenance_symtab_type.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_cache_suffix_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 39.985,
+        "skipped": 0
+      },
+      {
+        "module": "test_curl_options_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 75.246,
+        "skipped": 0
+      },
+      {
+        "module": "test_doctor_ghidra.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.912,
+        "skipped": 0
+      },
+      {
+        "module": "test_doctor_gnu_binutils.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 1.269,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.008,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index_cli.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.454,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index_diagnostics.py",
+        "passed_in_full_run": true,
+        "cases": 1,
+        "seconds": 0.002,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index_inventory_dup_keys.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.002,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index_manifest_lookup.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.013,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index_section_name_encoding.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_elf_index_shstrtab.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents.py",
+        "passed_in_full_run": true,
+        "cases": 18,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents_cie_aug_encoding.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents_cli.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.159,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents_duplicate_except.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents_duplicate_frame.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents_inventory_dup_keys.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.002,
+        "skipped": 0
+      },
+      {
+        "module": "test_fde_extents_manifest_lookup.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.013,
+        "skipped": 0
+      },
+      {
+        "module": "test_ghidra_plan_manifest_fields.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.313,
+        "skipped": 0
+      },
+      {
+        "module": "test_ghidra_plan_manifest_lookup.py",
+        "passed_in_full_run": true,
+        "cases": 5,
+        "seconds": 0.378,
+        "skipped": 0
+      },
+      {
+        "module": "test_ghidra_plan_shell.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.355,
+        "skipped": 0
+      },
+      {
+        "module": "test_ip_permit_state_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 14.896,
+        "skipped": 0
+      },
+      {
+        "module": "test_latency_projection_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 17.764,
+        "skipped": 0
+      },
+      {
+        "module": "test_mcp_stdio.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 0.252,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_catalogue.py",
+        "passed_in_full_run": true,
+        "cases": 5,
+        "seconds": 0.123,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_field_adapter_drift.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.002,
+        "skipped": 1
+      },
+      {
+        "module": "test_node115_latency_pair_rust.py",
+        "passed_in_full_run": true,
+        "cases": 5,
+        "seconds": 3.03,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_reference_oracle_persistence.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 11.568,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_snapshot_selectors_rust.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 6.71,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_tagged_count.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.761,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_u128_binary64.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.49,
+        "skipped": 0
+      },
+      {
+        "module": "test_node115_weighted_fold_rust.py",
+        "passed_in_full_run": true,
+        "cases": 5,
+        "seconds": 3.477,
+        "skipped": 0
+      },
+      {
+        "module": "test_node_padadapter_semantic_comparison.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.074,
+        "skipped": 0
+      },
+      {
+        "module": "test_nonce_ordering_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 19.145,
+        "skipped": 0
+      },
+      {
+        "module": "test_nonce_ring_rust.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 0.954,
+        "skipped": 1
+      },
+      {
+        "module": "test_numeric_selector_static.py",
+        "passed_in_full_run": true,
+        "cases": 9,
+        "seconds": 53.339,
+        "skipped": 0
+      },
+      {
+        "module": "test_priority_prefix_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 69.037,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_config_dup_keys.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.004,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_find_node_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.372,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_java_home.py",
+        "passed_in_full_run": true,
+        "cases": 8,
+        "seconds": 0.047,
+        "skipped": 1
+      },
+      {
+        "module": "test_rea_launcher.py",
+        "passed_in_full_run": true,
+        "cases": 10,
+        "seconds": 1.657,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_main_version_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.005,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_npm_install.py",
+        "passed_in_full_run": true,
+        "cases": 7,
+        "seconds": 0.006,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_profile_disabled_analyzers_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_smoke_manifest_fields.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.461,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_smoke_manifest_lookup.py",
+        "passed_in_full_run": true,
+        "cases": 5,
+        "seconds": 0.596,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_target_branch_config.py",
+        "passed_in_full_run": true,
+        "cases": 2,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_target_default_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_target_manifest_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.001,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_target_manifest_fields.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.008,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_target_provider_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_rea_target_targets_config.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.0,
+        "skipped": 0
+      },
+      {
+        "module": "test_run_tests.py",
+        "passed_in_full_run": true,
+        "cases": 9,
+        "seconds": 2.522,
+        "skipped": 0
+      },
+      {
+        "module": "test_runtime_tag_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 14.361,
+        "skipped": 0
+      },
+      {
+        "module": "test_snapshot_selection_static.py",
+        "passed_in_full_run": true,
+        "cases": 7,
+        "seconds": 28.165,
+        "skipped": 0
+      },
+      {
+        "module": "test_tls_lock_id_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 57.93,
+        "skipped": 0
+      },
+      {
+        "module": "test_u8_rejection_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 55.042,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports.py",
+        "passed_in_full_run": true,
+        "cases": 14,
+        "seconds": 4.249,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_diagnostics.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.25,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_manifest_entry_path.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.006,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_manifest_file.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.533,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_manifest_files_key.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.004,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_manifest_files_type.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.523,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_source_repo_record.py",
+        "passed_in_full_run": true,
+        "cases": 4,
+        "seconds": 0.503,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_imports_sources_repositories_key.py",
+        "passed_in_full_run": true,
+        "cases": 3,
+        "seconds": 0.006,
+        "skipped": 0
+      },
+      {
+        "module": "test_verify_packets.py",
+        "passed_in_full_run": false,
+        "cases": 12,
+        "seconds": 0.059,
+        "skipped": 0
+      },
+      {
+        "module": "test_weighted_comparison_static.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 20.324,
+        "skipped": 0
+      },
+      {
+        "module": "test_wire_qty_normal_form.py",
+        "passed_in_full_run": true,
+        "cases": 6,
+        "seconds": 46.463,
+        "skipped": 0
+      },
+      {
+        "module": "test_wire_qty_rust.py",
+        "passed_in_full_run": true,
+        "cases": 5,
+        "seconds": 4.105,
+        "skipped": 0
+      }
+    ]
+  },
+  "final_test_disposition": "The original 77-module run had one manifest error. After regenerating the audit archive manifest, all 12 tests in that affected module passed. The other 76 modules and four new tests had passed; their code did not change. No second full-suite pass is claimed.",
+  "failures_and_interrupted_runs": [
+    {
+      "phase": "full contribution test inventory",
+      "result": "One error in test_every_committed_manifest_passes: overlap-snapshots.json.gz changed in the final audit refresh after the manifest was last generated. Regenerated the manifest and reran all 12 tests of the affected module successfully. Other 76 modules passed.",
+      "log": "contribution-final"
+    },
+    {
+      "phase": "setup/first baseline attempt",
+      "result": "Local shared-submodule clone hit nested alternates depth limit. A prematurely started make stopped in verify because the pinned upstream public-key file was missing. Imported object stores were then populated from the original alternates root, with all six existing pins preserved.",
+      "log": "base-checks"
+    },
+    {
+      "phase": "second baseline attempt",
+      "result": "Interrupted (exit130) after packet files began to appear in the same worktree, so this incomplete run is not used as unmodified baseline evidence. A separate detached worktree was created for the completed baseline above.",
+      "log": "base-qualified"
+    },
+    {
+      "phase": "initial focused test",
+      "result": "3 passed, 1 failed: counterfactual report contained Python tuples while JSON reload used lists. Fixed the report to emit JSON-native lists; persisted relations and native deductions unchanged. Four focused tests then passed.",
+      "log": "focused"
+    }
+  ],
+  "generated_catalogue": "Initial make catalogue ran before the new packet was tracked, so it retained count28. Repeated after source commit while the full test command was running, before its catalogue-check phase; only root README and progress SVG count28->29 changed. Test code and native evidence remained fixed at tested_code_commit.",
+  "negative_controls": {
+    "deep_corruptions": 47,
+    "actual_operand_counterfacts": 8,
+    "separate_guards": [
+      "whole image digest/size",
+      "body digest",
+      "native export bytes"
+    ]
+  },
+  "boundary_checks": {
+    "raw_flag_comparison_cases": 1024,
+    "u64_rounding_cases": 554,
+    "ratio_cases": 14,
+    "pair_normalization_cases": 56
+  },
+  "native_export_repeat": {
+    "identical": true,
+    "files": {
+      "decision.gnu.txt": "e2e28ba478a5f5d5d53790c728f7c74d6f4878c79257fe9694a06db0f1fec123",
+      "entry.gnu.txt": "3d9bb67369e57eb01e1b12e97e33ffe5f732dd2dcef5f998e791f180e6831300",
+      "caller.gnu.txt": "c9e334c2f7a7b465a7e0b04ba0a579954c1c0ce81463165c67a7abd0c53466f3",
+      "entry.llvm.txt": "eeffc1d8afd0d5840277a351c48c06bbc061f2b12f346cf989d57899260c637b",
+      "decision.llvm.txt": "6dbc50a485719d62577e2d1cb4e1079d8b04586b7cf1f69707a548088f89f9d6",
+      "caller.llvm.txt": "cb755fd43cd38ff4c78bde8b1ed407c3233f8c5bbdd1e0ea5368f02a15bbd648",
+      "fdes.readelf.txt": "de19d00bf21ee6f58c5a20c4dd5a1e0de32ba7b1ddba97174ba8cb57179fc899"
+    }
+  },
+  "metadata_only_after_tested_code": [
+    "root README and progress SVG generated inventory count",
+    "packet PROOF wording clarifications",
+    "packet README validation result",
+    "overlap audit/index refresh",
+    "validation report/log archive",
+    "packet manifest"
+  ],
+  "log_archive_sha256": "b4f7a0f5e374fcb4033d378ee4d07dd1e1b452a1a1959231be4708fefd049bc6",
+  "log_normalization": "Only local worktree, interpreter and home prefixes replaced by placeholders; no native bytes or instruction operands normalized."
+}

@@ -1,0 +1,102 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "owners": [
+    {
+      "role": "record0_formatter",
+      "start": "0x16035e0",
+      "end": "0x160361a",
+      "file_offset": "0x16025e0",
+      "bytes": 58,
+      "sha256": "a764351ae22010d7b789b2e29e7cd777f9b08cd34c585b6a8062c073f1db36d5",
+      "frames": {
+        "fde": {
+          "va": "0xcbcc74",
+          "bytes_hex": "14000000a05d0100646994003a00000000440e20750e0800"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    }
+  ],
+  "formatter": {
+    "arguments": {
+      "value": "rdi",
+      "descriptor": "rsi"
+    },
+    "frame": {
+      "alloc": "0x16035e0",
+      "bytes": 24,
+      "restore": "0x1603615",
+      "return": "0x1603619"
+    },
+    "value_store": {
+      "site": "0x16035e4",
+      "slot_offset": 0,
+      "dereferenced_by_formatter": false
+    },
+    "record": {
+      "base_offset": 8,
+      "value_offset": 8,
+      "formatter_offset": 16,
+      "slot_address": "0x16035e8",
+      "value_store": "0x16035eb",
+      "formatter_lea": "0x16035f0",
+      "formatter_store": "0x16035f7",
+      "formatter": "0x15eadd0",
+      "value_word": "address of the stored value word"
+    },
+    "descriptor_reads": {
+      "out_load": "0x16035fc",
+      "table_load": "0x16035ff",
+      "spec_dword": null,
+      "field_a": null,
+      "field_b": null
+    },
+    "nested_call": {
+      "template_lea": "0x1603603",
+      "template": "0x43b857",
+      "block_lea": "0x160360a",
+      "call": "0x160360f",
+      "slot": "0x64df6f0",
+      "target": "0x1680500",
+      "tagged": "block pointer (even: scan path)"
+    },
+    "return": "the nested call AL is returned unchanged"
+  },
+  "slot_bindings": {
+    "0x64e1490": "0x16035e0",
+    "0x64df6f0": "0x1680500"
+  },
+  "template": {
+    "va": "0x43b857",
+    "stream_hex": "c000",
+    "sha256": "e9aff84fdb699ca706c0a1fed47bb095cb25e3c95aa5d1c5d216ff2cfbcd4998",
+    "walk": "one default-spec dispatch of record 0, then the terminator"
+  },
+  "reference_census": {
+    "direct": 0,
+    "via_formatter_slot": 0,
+    "formatter_slot_refs": [
+      "0x15ae459"
+    ],
+    "formatter_slot_store": "0x15ae460",
+    "constructor_fde": [
+      "0x15ae430",
+      "0x15ae5ae"
+    ],
+    "relocation_references": [
+      "0x64e1490"
+    ],
+    "address_as_data": 0
+  },
+  "next_formatter": {
+    "start": "0x15eadd0",
+    "end": "0x15eadff",
+    "bytes": 47
+  },
+  "chain_verdict": "The record-0 formatter never dereferences the flag-group pointer it receives: it stores the value word on its stack, builds one record whose value word is the address of that stored word and whose formatter word is 0x15eadd0, and re-enters the write target with the same two-byte template (c0 00) and the descriptor out/table words forwarded unchanged. The descriptor spec dword and fields are never read. The flag-group pointer therefore reaches the next formatter one indirection deeper, as a pointer to the word holding it, and its first dereference is deferred again.",
+  "captured_code_executed": false,
+  "limits": "Record-0 formatter 0x16035e0 only: the 24-byte stack frame it builds (the value word stored at +0x0 and the single argument record at +0x8 whose value word is the address of that stored word and whose formatter word is 0x15eadd0), the two descriptor words it reads (out at +0x0 and table at +0x8; the spec dword and field A/B are never read), the single nested call it makes to the write target 0x1680500 through slot 0x64df6f0 with the two-byte template at 0x43b857, and the byte-sized contract that the nested call's AL is returned unchanged. What the next formatter 0x15eadd0 computes with the pointer to the stored value word, and what the write target does with the record, are NOT established by these bytes: the write target is owned by the RE-015 flag-group-write-target packet, the arguments-block construction that pairs this formatter with the flag-group pointer by the RE-015 derived-byte-callee packet, and the template forwarding by the RE-015 flag-group-format packet; all three are cited here, not re-derived. No captured code executed, no runtime value, indirect-call recovery, #94 correspondence, or reconstruction gate is claimed."
+}

@@ -1,0 +1,570 @@
+{
+  "base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "pull_requests": 2512,
+  "highest_number": 2517,
+  "open": 491,
+  "merged": 1774,
+  "closed_unmerged": 247,
+  "changed_file_records": 42680,
+  "without_patch": 5664,
+  "method": "Enumerate every PR state through paginated REST pulls; inspect title/body and changed filenames/patches. Reuse older changed-file responses only when both head and base SHA are unchanged. Check main history with git log -G and inspect closest prior packet READMEs. Live upstream main remains the recorded base.",
+  "main_history_matches": [
+    "a64993f4f704c08400d001ab9aae78fde9d6d091",
+    "7acedaf88589c9bbd65d22dbbcd4c6b469449d02"
+  ],
+  "prior_work": [
+    702,
+    1378,
+    1504,
+    569,
+    1939,
+    562
+  ],
+  "conclusion": "No overlapping semantic claim found within audit limits; shared context and explicit exclusions are described in README.md.",
+  "limits": [
+    "Search cannot rule out unpublished or undeclared work.",
+    "Some GitHub file records omit patches; large PR #1151 reaches the 3000-file API limit.",
+    "Address and semantic text matching is not an exhaustive semantic equivalence proof."
+  ],
+  "checked_at": "2026-11-03T18:44:47.831650+00:00",
+  "search_pattern": "\\b(?:0x)?(?:5b2b150|5b7bc60|4fbf270|4f2c470|4dbfa80)\\b|firewall_filtered|node_ips|node.?ip.{0,30}filter",
+  "matching_pull_requests": [
+    {
+      "number": 1504,
+      "title": "RE-001: bind NodeIp value encoding and selected Ip array preparation",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-nodeip-value-encoding-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+`999556f6e0a474b8312db96ec3149e1c44e97c23`, `node/consensus/node_ips.rs` supplied seeds"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1378,
+      "title": "RE-001: recover node94's fixed IPv4 translation table and lookup",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-001-node94-ip-translation/README.md",
+            "matches": 1,
+            "sample": [
+              "+  `node/consensus/node_ips.rs` supplied an unverified address lead only. No"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1154,
+      "title": "staking: map node #94 VoteGlobal staking arms: 14 raw tags, field writes, set and IP rules, refund walk, guards, 5 wire tags",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/staking-vote-arms-94/README.md",
+            "matches": 2,
+            "sample": [
+              "+| `0x44` | `0x2356295` | `disabled_node_ips` | `S+0x260` | 5 byte key, bool |",
+              "+`disabled_node_ips` keys are 5 bytes: tag, then 4 bytes. Node: keys at `+0xc`, stride 5, slot `+8`, length `+0xa`, edges `+0x48`, leaf 0x48, inner 0xa8."
+            ]
+          },
+          {
+            "path": "research/work-items/staking-vote-arms-94/arms.tsv",
+            "matches": 1,
+            "sample": [
+              "+0x44\t0x2356295\tdisabled_node_ips\tfive byte key and a bool"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-vote-arms-94/constants.tsv",
+            "matches": 1,
+            "sample": [
+              "+0x23562ac\t4981c5580b0000\tdisabled_node_ips, Exchange +0xb58"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-vote-arms-94/texts.tsv",
+            "matches": 1,
+            "sample": [
+              "+0x3b0a7a\tdisabled_node_ips"
+            ]
+          },
+          {
+            "path": "tests/test_staking_vote_arms.py",
+            "matches": 4,
+            "sample": [
+              "+        self.assertEqual(rows[\"disabled_node_ips\"], ())",
+              "+        self.assertEqual(len(rows[\"disabled_node_ips\"]), 5)",
+              "+        self.assertEqual(len(rows[\"disabled_node_ips\"]), 4)",
+              "+        self.assertEqual(rows[\"disabled_node_ips\"], (\"0000000002\", \"0001000000\", \"0002000000\"))"
+            ]
+          },
+          {
+            "path": "tools/staking_vote_arms.py",
+            "matches": 7,
+            "sample": [
+              "+TREES = ((\"allowed_validators\", E_ALLOWED, ADDRESS_SET), (\"broadcasters\", E_BROADCASTERS, ADDRESS_SET), (\"jailed_signers.current\", E_JAILED, ADDRESS_SET), (\"disabled_validators\", E_DISABLED, ADDRESS_SET), (\"disabled_node_ips\", E_IPS, IP_SET))",
+              "+        rows = {\"allowed_validators\": case.allowed, \"broadcasters\": case.broadcasters, \"jailed_signers.current\": case.jailed, \"disabled_validators\": case.disabled, \"disabled_node_ips\": case.ips}[name]",
+              "+    trees = {\"allowed_validators\": list(case.allowed), \"broadcasters\": list(case.broadcasters), \"jailed_signers.current\": list(case.jailed), \"disabled_validators\": list(case.disabled), \"disabled_node_ips\": list(case.ips)}",
+              "+        rows = trees[\"disabled_node_ips\"]",
+              "+    (0x23562ac, 7, \"disabled_node_ips, Exchange +0xb58\", \"4981c5580b0000\"),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1151,
+      "title": "Integrate 203 reviewed research and tooling PRs",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/gossip-config-inventory-94/RESULT.md",
+            "matches": 2,
+            "sample": [
+              "+| assertion failed: !res.read().root_node_ips.is_empty() | bound | 54 | 1 | 1 |",
+              "+| assertion failed: !res.read().root_node_ips.is_empty() | 0x4741dc0 | 0x4742a75 | 0x6fb494 | 54 | register_pointer_length_pair |"
+            ]
+          },
+          {
+            "path": "research/work-items/gossip-config-inventory-94/verify.py",
+            "matches": 1,
+            "sample": [
+              "+ ('assertion failed: !res.read().root_node_ips.is_empty()', 'bound', ('0x4742a75',)),"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+| disabled_node_ips | 0x260 | set of Ip or LocalNode | empty |"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/fields.tsv",
+            "matches": 1,
+            "sample": [
+              "+CStaking\tCStaking\t20\tdisabled_node_ips\tset ip\tabsent keeps []"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/memory-checks.tsv",
+            "matches": 1,
+            "sample": [
+              "+disabled_node_ips rows\t0x270\t8\t3"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/original-submission/README.md",
+            "matches": 1,
+            "sample": [
+              "+| disabled_node_ips | 0x260 | set of Ip or LocalNode | empty |"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/original-submission/fields.tsv",
+            "matches": 1,
+            "sample": [
+              "+CStaking\tCStaking\t20\tdisabled_node_ips\tset ip\tabsent keeps []"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/original-submission/memory-checks.tsv",
+            "matches": 1,
+            "sample": [
+              "+disabled_node_ips rows\t0x270\t8\t3"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/original-submission/root-offsets.tsv",
+            "matches": 1,
+            "sample": [
+              "+20\tdisabled_node_ips\t0x260"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/original-submission/scenarios.tsv",
+            "matches": 4,
+            "sample": [
+              "+cstaking_disabled_node_ips_absent\tok sha256 1a51ce01fe1cfefb",
+              "+cstaking_disabled_node_ips_twice\terror duplicate field `disabled_node_ips`",
+              "+cstaking_disabled_node_ips_nil\terror invalid type: unit value, expected a sequence",
+              "+cstaking_disabled_node_ips_true\terror invalid type: boolean `true`, expected a sequence"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/original-submission/texts.tsv",
+            "matches": 1,
+            "sample": [
+              "+0x3b0a7a\tdisabled_node_ips"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/review-original-overflow.json",
+            "matches": 14,
+            "sample": [
+              "+        \"written_json\": \"{\\n  \\\"stakes\\\": {\\n    \\\"epoch_values\\\": {\\n      \\\"initial_round\\\": 0,\\n      \\\"round_to_val\\\": []\\n    },\\n    \\\"current\\\": {\\n      \\\"max_n_validators\\\": null,\\n      \\\"validator_to_stake\\\": []\\n    },\\n    \\\"period\\\": 1,\\n    \\\"n_keep\\\": 0,\\n    \\\"current_round\\\": 0\\n  },\\n  \\\"allowed_validators\\\": [],\\n  \\\"allow_all_",
+              "+        \"written_json\": \"{\\n  \\\"stakes\\\": {\\n    \\\"epoch_values\\\": {\\n      \\\"initial_round\\\": 0,\\n      \\\"round_to_val\\\": []\\n    },\\n    \\\"current\\\": {\\n      \\\"max_n_validators\\\": null,\\n      \\\"validator_to_stake\\\": []\\n    },\\n    \\\"period\\\": 1,\\n    \\\"n_keep\\\": 0,\\n    \\\"current_round\\\": 0\\n  },\\n  \\\"allowed_validators\\\": [],\\n  \\\"allow_all_",
+              "+        \"written_json\": \"{\\n  \\\"stakes\\\": {\\n    \\\"epoch_values\\\": {\\n      \\\"initial_round\\\": 0,\\n      \\\"round_to_val\\\": []\\n    },\\n    \\\"current\\\": {\\n      \\\"max_n_validators\\\": null,\\n      \\\"validator_to_stake\\\": []\\n    },\\n    \\\"period\\\": 1,\\n    \\\"n_keep\\\": 0,\\n    \\\"current_round\\\": 0\\n  },\\n  \\\"allowed_validators\\\": [],\\n  \\\"allow_all_",
+              "+        \"written_json\": \"{\\n  \\\"stakes\\\": {\\n    \\\"epoch_values\\\": {\\n      \\\"initial_round\\\": 0,\\n      \\\"round_to_val\\\": []\\n    },\\n    \\\"current\\\": {\\n      \\\"max_n_validators\\\": null,\\n      \\\"validator_to_stake\\\": []\\n    },\\n    \\\"period\\\": 1,\\n    \\\"n_keep\\\": 0,\\n    \\\"current_round\\\": 0\\n  },\\n  \\\"allowed_validators\\\": [],\\n  \\\"allow_all_",
+              "+        \"written_json\": \"{\\n  \\\"stakes\\\": {\\n    \\\"epoch_values\\\": {\\n      \\\"initial_round\\\": 0,\\n      \\\"round_to_val\\\": []\\n    },\\n    \\\"current\\\": {\\n      \\\"max_n_validators\\\": null,\\n      \\\"validator_to_stake\\\": []\\n    },\\n    \\\"period\\\": 1,\\n    \\\"n_keep\\\": 0,\\n    \\\"current_round\\\": 0\\n  },\\n  \\\"allowed_validators\\\": [],\\n  \\\"allow_all_"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/root-offsets.tsv",
+            "matches": 1,
+            "sample": [
+              "+20\tdisabled_node_ips\t0x260"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/scenarios.tsv",
+            "matches": 4,
+            "sample": [
+              "+cstaking_disabled_node_ips_absent\tok sha256 1a51ce01fe1cfefb",
+              "+cstaking_disabled_node_ips_twice\terror duplicate field `disabled_node_ips`",
+              "+cstaking_disabled_node_ips_nil\terror invalid type: unit value, expected a sequence",
+              "+cstaking_disabled_node_ips_true\terror invalid type: boolean `true`, expected a sequence"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/texts.tsv",
+            "matches": 1,
+            "sample": [
+              "+0x3b0a7a\tdisabled_node_ips"
+            ]
+          },
+          {
+            "path": "tests/test_gossip_config_inventory.py",
+            "matches": 3,
+            "sample": [
+              "+        text = 'assertion failed: !res.read().root_node_ips.is_empty()'",
+              "+        text = 'assertion failed: !res.read().root_node_ips.is_empty()'",
+              "+        with mock.patch.object(n, 'DIAGNOSTICS', ('assertion failed: !res.read().root_node_ips.is_empty()'[:-1],)):"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1140,
+      "title": "Integrate 265 validated static research and tooling PR heads",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/consensus-config-94/README.md",
+            "matches": 14,
+            "sample": [
+              "+# consensus: node #94 `node/consensus/config.rs` validator checks (wallet walk 30:17, public IP 44:25 / 51:21 only when `static+0x8f2` is set, node_ips 60:13; a second address set skips both later checks; node IP tag 1 = LocalNode)",
+              "+`StaticConfig.node_ips` BTree tree at `static_config + 0xA48`, and panics if",
+              "+the validator address is absent\", using `node_ips.get(&home_validator)` and",
+              "+the error \"validator is not in node_ips\". Then, when `static_config + 0x8F2`",
+              "+- `0x20210b`: `{}: validator is not in node_ips: {}`"
+            ]
+          },
+          {
+            "path": "research/work-items/consensus-config-94/excerpts.objdump.txt",
+            "matches": 2,
+            "sample": [
+              "+## 0x284ae13: 0x258ad80(map, \"node_ips\", ..., Location 71:32) [0x284ae13, 0x284ae7c)",
+              "+## 0x284afbf: second-set miss (bl = 1); wallet panic 30:17; node_ips panic 60:13 [0x284afbf, 0x284b0f1)"
+            ]
+          },
+          {
+            "path": "research/work-items/consensus-config-94/records.json",
+            "matches": 5,
+            "sample": [
+              "+    \"label\": \"node_ips\",",
+              "+  \"node_ips\": {",
+              "+    \"node_ips\": {",
+              "+      \"0x20210b\": \"{}: validator is not in node_ips: {}\"",
+              "+    \"node_ips\": ["
+            ]
+          },
+          {
+            "path": "research/work-items/local-abci-gates-94/README.md",
+            "matches": 10,
+            "sample": [
+              "+  `\u2026 @@ using root node ips @@ [root_node_ips: {}]` (template `0x1fc1a0`)",
+              "+  with the 54-byte `assertion failed: !res.read().root_node_ips.is_empty()`",
+              "+this one. The lead uses `root_node_ips` on every startup; the binary uses them",
+              "+`root_node_ips` and reserved peers.",
+              "+  `\u2026 @@ considering local abci state as stale @@ [stale_reason: {}] @ [node_ips: {}]`"
+            ]
+          },
+          {
+            "path": "research/work-items/local-abci-gates-94/records.json",
+            "matches": 3,
+            "sample": [
+              "+  \"node_ips\": {",
+              "+    \"node_ips_arg\": \"&[rsp+0x48] = &[rbx+0x3b70]\",",
+              "+    \"loader_assert\": \"assertion failed: !res.read().root_node_ips.is_empty()\","
+            ]
+          },
+          {
+            "path": "tests/test_consensus_config_static.py",
+            "matches": 13,
+            "sample": [
+              "+                node_ips={WALLET: (0, IP)})",
+              "+    def test_second_set_skips_compare_and_node_ips(self):",
+              "+        self.assertEqual(run(second_set={WALLET}, public_ip='10.9.9.9', node_ips={})['log'], None)",
+              "+    def test_node_ips_60_13(self):",
+              "+        with self.assertRaisesRegex(cf.Panic, 'validator is not in node_ips.*60:13'):"
+            ]
+          },
+          {
+            "path": "tests/test_local_abci_gates_static.py",
+            "matches": 6,
+            "sample": [
+              "+                         ['node_ips', 'node_ips', 'node_ips', 'local_state', 'unobserved', 'no_local_state', 'pending'])",
+              "+    def test_validator_node_ips(self):",
+              "+        self.assertEqual(la.validator_node_ips(signers, profiles),",
+              "+        self.assertEqual(la.validator_node_ips(set(), profiles), [])",
+              "+    def test_node_ips(self):"
+            ]
+          },
+          {
+            "path": "tools/consensus_config_static.py",
+            "matches": 35,
+            "sample": [
+              "+signer's address up in `StaticConfig.node_ips` and panics with \"validator is",
+              "+not in node_ips\" when it is absent, then, when `static_config + 0x8f2` is set,",
+              "+* 60:13, \"validator is not in node_ips\": unless the wallet is in that second",
+              "+`0x258ad80`, called with that third map and the str \"node_ips\".",
+              "+WALLET_PANIC, MISMATCH_PANIC, PARSE_LOG, NODE_IPS_PANIC, HANDLE = 0x56c53d0, 0x56c5370, 0x56c5388, 0x56c53a0, 0x56c53b8"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1129,
+      "title": "staking: pin node #94 CStaking state wire form both ways: 22 fields, defaults, skip rules, msgpack and JSON readers and writers",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+| disabled_node_ips | 0x260 | set of Ip or LocalNode | empty |"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/fields.tsv",
+            "matches": 1,
+            "sample": [
+              "+CStaking\tCStaking\t20\tdisabled_node_ips\tset ip\tabsent keeps []"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/memory-checks.tsv",
+            "matches": 1,
+            "sample": [
+              "+disabled_node_ips rows\t0x270\t8\t3"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/root-offsets.tsv",
+            "matches": 1,
+            "sample": [
+              "+20\tdisabled_node_ips\t0x260"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/scenarios.tsv",
+            "matches": 4,
+            "sample": [
+              "+cstaking_disabled_node_ips_absent\tok sha256 1a51ce01fe1cfefb",
+              "+cstaking_disabled_node_ips_twice\terror duplicate field `disabled_node_ips`",
+              "+cstaking_disabled_node_ips_nil\terror invalid type: unit value, expected a sequence",
+              "+cstaking_disabled_node_ips_true\terror invalid type: boolean `true`, expected a sequence"
+            ]
+          },
+          {
+            "path": "research/work-items/staking-cstaking-state-wire-94/texts.tsv",
+            "matches": 1,
+            "sample": [
+              "+0x3b0a7a\tdisabled_node_ips"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1075,
+      "title": "node94: bounded gossip_config.rs static inventory",
+      "matches": {
+        "metadata": [
+          "Highlights: the `!res.read().root_node_ips.is_empty()` assertion literal, its Location LEA and its ESI length are set up contiguously at `0x4742a75`\u2013`0x4742a83`; the \"failed to load gossip config file at\" and \"using gossip config (\" phrases are bound through counted ASCII chunks in the same FDE. `override_gossip_config.json`, `n_gossip_peers clippe"
+        ],
+        "files": [
+          {
+            "path": "research/work-items/gossip-config-inventory-94/RESULT.md",
+            "matches": 2,
+            "sample": [
+              "+| assertion failed: !res.read().root_node_ips.is_empty() | bound | 54 | 1 | 1 |",
+              "+| assertion failed: !res.read().root_node_ips.is_empty() | 0x4741dc0 | 0x4742a75 | 0x6fb494 | 54 | register_pointer_length_pair |"
+            ]
+          },
+          {
+            "path": "research/work-items/gossip-config-inventory-94/verify.py",
+            "matches": 1,
+            "sample": [
+              "+ ('assertion failed: !res.read().root_node_ips.is_empty()', 'bound', ('0x4742a75',)),"
+            ]
+          },
+          {
+            "path": "tests/test_gossip_config_inventory.py",
+            "matches": 3,
+            "sample": [
+              "+        text = 'assertion failed: !res.read().root_node_ips.is_empty()'",
+              "+        text = 'assertion failed: !res.read().root_node_ips.is_empty()'",
+              "+        with mock.patch.object(n, 'DIAGNOSTICS', ('assertion failed: !res.read().root_node_ips.is_empty()'[:-1],)):"
+            ]
+          },
+          {
+            "path": "tools/gossip_config_inventory.py",
+            "matches": 1,
+            "sample": [
+              "+    'assertion failed: !res.read().root_node_ips.is_empty()',"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 702,
+      "title": "consensus: bind node #94 config.rs validator checks \u2014 wallet walk (30:17 'not a validator'; lead: 'not in node_ips'), public IP only when static+0x8f2 set (44:25 / 51:21), second-set exemption, node_ips 60:13, NodeIp Ip=0/LocalNode=1 (lead: Error=1, LocalNode=2)",
+      "matches": {
+        "metadata": [
+          "consensus: bind node #94 config.rs validator checks \u2014 wallet walk (30:17 'not a validator'; lead: 'not in node_ips'), public IP only when static+0x8f2 set (44:25 / 51:21), second-set exemption, node_ips 60:13, NodeIp Ip=0/LocalNode=1 (lead: Error=1, LocalNode=2)",
+          "- **A wallet missing from the `static+0xa48` tree is \"not a validator\", not \"not in node_ips\".** The code walks every item of the tree and compares 20 bytes at `item+0x38` with the signer's wallet (`signer+0x80`). The last match wins. No match (or an empty tree) panics at 30:17: `running with wallet that is not a validator, address=\u2026`. The lead use",
+          "- **A second address set exempts the wallet from both later checks.** If the wallet is in the set built by `0x3bb4f30`, the IP comparison and the node_ips check are both skipped. The lead has no exemption.",
+          "- **\"validator is not in node_ips\" (60:13) is a separate, later lookup.** It searches a map built by `0x45c3d20` after the IP step. A missing wallet, or a value tag of 2, panics. Then `0x258ad80` gets that map, the str `node_ips` and Location 71:32."
+        ],
+        "files": [
+          {
+            "path": "research/work-items/consensus-config-94/README.md",
+            "matches": 14,
+            "sample": [
+              "+# consensus: node #94 `node/consensus/config.rs` validator checks (wallet walk 30:17, public IP 44:25 / 51:21 only when `static+0x8f2` is set, node_ips 60:13; a second address set skips both later checks; node IP tag 1 = LocalNode)",
+              "+`StaticConfig.node_ips` BTree tree at `static_config + 0xA48`, and panics if",
+              "+the validator address is absent\", using `node_ips.get(&home_validator)` and",
+              "+the error \"validator is not in node_ips\". Then, when `static_config + 0x8F2`",
+              "+- `0x20210b`: `{}: validator is not in node_ips: {}`"
+            ]
+          },
+          {
+            "path": "research/work-items/consensus-config-94/excerpts.objdump.txt",
+            "matches": 2,
+            "sample": [
+              "+## 0x284ae13: 0x258ad80(map, \"node_ips\", ..., Location 71:32) [0x284ae13, 0x284ae7c)",
+              "+## 0x284afbf: second-set miss (bl = 1); wallet panic 30:17; node_ips panic 60:13 [0x284afbf, 0x284b0f1)"
+            ]
+          },
+          {
+            "path": "research/work-items/consensus-config-94/records.json",
+            "matches": 5,
+            "sample": [
+              "+    \"label\": \"node_ips\",",
+              "+  \"node_ips\": {",
+              "+    \"node_ips\": {",
+              "+      \"0x20210b\": \"{}: validator is not in node_ips: {}\"",
+              "+    \"node_ips\": ["
+            ]
+          },
+          {
+            "path": "tests/test_consensus_config_static.py",
+            "matches": 13,
+            "sample": [
+              "+                node_ips={WALLET: (0, IP)})",
+              "+    def test_second_set_skips_compare_and_node_ips(self):",
+              "+        self.assertEqual(run(second_set={WALLET}, public_ip='10.9.9.9', node_ips={})['log'], None)",
+              "+    def test_node_ips_60_13(self):",
+              "+        with self.assertRaisesRegex(cf.Panic, 'validator is not in node_ips.*60:13'):"
+            ]
+          },
+          {
+            "path": "tools/consensus_config_static.py",
+            "matches": 35,
+            "sample": [
+              "+signer's address up in `StaticConfig.node_ips` and panics with \"validator is",
+              "+not in node_ips\" when it is absent, then, when `static_config + 0x8f2` is set,",
+              "+* 60:13, \"validator is not in node_ips\": unless the wallet is in that second",
+              "+`0x258ad80`, called with that third map and the str \"node_ips\".",
+              "+WALLET_PANIC, MISMATCH_PANIC, PARSE_LOG, NODE_IPS_PANIC, HANDLE = 0x56c53d0, 0x56c5370, 0x56c5388, 0x56c53a0, 0x56c53b8"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 430,
+      "title": "node-runtime: bind node #94 local AbciState startup \u2014 fresh (\u2264540/840 s old or height ok) / stale (peer Vec, 20000 height tolerance; lead: 200/1000) / missing; 600 s freshness panic at hl_node.rs:346 (lead: 0x4e20 s stale reason)",
+      "matches": {
+        "metadata": [
+          "- **Who picks root or validator IPs (`0x227a0e0`, `0x22b47c0`):** future field `+0x80` decides. `0x227a0e0` sets it to `[rbx+0x50] + 0x10`, the Ok payload of slot `0x5773b80` \u2192 `0x4741dc0`, a `FileModTimeTracker` loader that asserts `!res.read().root_node_ips.is_empty()` at `node/src/gossip_config.rs:90:13`. `0x22b47c0` stores 0 there straight befo",
+          "- **What `stale` and `missing` feed (`0x22b47c0` \u2192 `0x227a0e0` \u2192 `0x4741dc0`):** the bootstrap writes the three result words into `[rbx+0x3b28..]` and calls `0x227a0e0` on them. `0x227a0e0` passes them as `rdx` to the gossip loader `0x4741dc0`, which treats them as `Option<Vec<NodeIp>>`. With `Some`, used for `stale`, the list becomes `root_node_ip",
+          "- **Which state, which peers (`0x22689f0`):** `[rbx+0x60]` is a straight-line copy of bytes `+0x60..+0x6c` of the state built at `[rbx+0x88]` via slot `0x5773aa8`. That is the same `+0x60` date-time offset as the 600 s check, and `&[rbx+0x88]` is the source the fresh path boxes. The peer list is chosen on `r13` (`= [rbx+0x80]` on the state-0 path).",
+          "- **What the future returns (`0x226ad84`):** three words written to the caller's output, with the niche in word 0. A rel8/rel32 branch scan pins every entry into the block. `0x8000000000000002` means `{}/hyperliquid_data/abci_state.rmp` failed `is_file` (`(st_mode & 0xf000) == 0x8000`), failed to read, or failed to decode. `0x8000000000000000` plus",
+          "`tests/test_local_abci_gates_static.py` has 73 tests. They regenerate `records.json` and check eleven models: the gossip root source, the validator node-IP filter, the peer-reply collection, the height selection (against `max` on 500 random lists), the saturating height gate, the /86400 sequence against exact truncating division on 2010 values, the"
+        ],
+        "files": [
+          {
+            "path": "research/work-items/local-abci-gates-94/README.md",
+            "matches": 10,
+            "sample": [
+              "+  `\u2026 @@ using root node ips @@ [root_node_ips: {}]` (template `0x1fc1a0`)",
+              "+  with the 54-byte `assertion failed: !res.read().root_node_ips.is_empty()`",
+              "+this one. The lead uses `root_node_ips` on every startup; the binary uses them",
+              "+`root_node_ips` and reserved peers.",
+              "+  `\u2026 @@ considering local abci state as stale @@ [stale_reason: {}] @ [node_ips: {}]`"
+            ]
+          },
+          {
+            "path": "research/work-items/local-abci-gates-94/records.json",
+            "matches": 3,
+            "sample": [
+              "+  \"node_ips\": {",
+              "+    \"node_ips_arg\": \"&[rsp+0x48] = &[rbx+0x3b70]\",",
+              "+    \"loader_assert\": \"assertion failed: !res.read().root_node_ips.is_empty()\","
+            ]
+          },
+          {
+            "path": "tests/test_local_abci_gates_static.py",
+            "matches": 6,
+            "sample": [
+              "+                         ['node_ips', 'node_ips', 'node_ips', 'local_state', 'unobserved', 'no_local_state', 'pending'])",
+              "+    def test_validator_node_ips(self):",
+              "+        self.assertEqual(la.validator_node_ips(signers, profiles),",
+              "+        self.assertEqual(la.validator_node_ips(set(), profiles), [])",
+              "+    def test_node_ips(self):"
+            ]
+          },
+          {
+            "path": "tools/local_abci_gates_static.py",
+            "matches": 12,
+            "sample": [
+              "+                           None, b'] @ [node_ips: ', None, b']\\n\\n']),",
+              "+NODE_IP_TEMPLATES = {0x2269511: (0x1fc1a0, b' @@ using root node ips @@ [root_node_ips: '),",
+              "+def check_node_ips(img):",
+              "+    require(root.count(bytes.fromhex('488d442408' '48898424303c0000')) == 1, 'root_node_ips argument is not &[rsp+0x8]')",
+              "+                node_ips_arg='&[rsp+0x48] = &[rbx+0x3b70]',"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "closest_semantic_boundary": "See README Prior-work/Boundaries section for inspected source and behavior distinctions."
+}

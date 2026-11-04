@@ -1,0 +1,12 @@
+case	regular	timestamp_tag	read_word	path_word	write_result	abstract_route
+not_regular_write_ok	0	0	0x0	0x0	0x0	default_after_write
+not_regular_write_error	0	0	0x0	0x0	0x1	write_failure_boundary
+write_error_precedes_unused_inputs	0	1	0x8000000000000000	0x8000000000000000	0x1	write_failure_boundary
+timestamp_error	1	1	0x0	0x0	0x0	fallback_timestamp_error
+timestamp_error_precedes_read	1	1	0x8000000000000000	0x8000000000000000	0x0	fallback_timestamp_error
+read_sentinel	1	0	0x8000000000000000	0x0	0x0	fallback_read_sentinel
+read_sentinel_precedes_path	1	0	0x8000000000000000	0x8000000000000000	0x0	fallback_read_sentinel
+path_sentinel	1	0	0x0	0x8000000000000000	0x0	fallback_path_sentinel
+loaded_zero	1	0	0x0	0x0	0x0	loaded_value_and_timestamp
+loaded_neighbor	1	2	0x8000000000000001	0x7fffffffffffffff	0x0	loaded_value_and_timestamp
+write_result_unused_for_regular	1	0	0x0	0x0	0x1	loaded_value_and_timestamp

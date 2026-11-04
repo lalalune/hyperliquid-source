@@ -1,0 +1,71 @@
+0: 55 push rbp
+1: 4157 push r15
+3: 4156 push r14
+5: 53 push rbx
+6: 4183f901 cmp r9d, 1
+a: 7537 jne 0x100043
+c: 48b8feffffffffffff7f movabs rax, 0x7ffffffffffffffe
+16: 4939c0 cmp r8, rax
+19: 7609 jbe 0x100024
+1b: 48c70700000000 mov qword ptr [rdi], 0
+22: eb30 jmp 0x100054
+24: 4885d2 test rdx, rdx
+27: 741a je 0x100043
+29: 4c8b5908 mov r11, qword ptr [rcx + 8]
+2d: 448b4910 mov r9d, dword ptr [rcx + 0x10]
+31: 4c8b5118 mov r10, qword ptr [rcx + 0x18]
+35: 4d85db test r11, r11
+38: 7470 je 0x1000aa
+3a: 488b09 mov rcx, qword ptr [rcx]
+3d: 31c0 xor eax, eax
+3f: 31db xor ebx, ebx
+41: eb25 jmp 0x100068
+43: 31c0 xor eax, eax
+45: 48c70701000000 mov qword ptr [rdi], 1
+4c: 48894708 mov qword ptr [rdi + 8], rax
+50: 4c894710 mov qword ptr [rdi + 0x10], r8
+54: 5b pop rbx
+55: 415e pop r14
+57: 415f pop r15
+59: 5d pop rbp
+5a: c3 ret
+5b: 0f1f440000 nop dword ptr [rax + rax]
+60: 48ffc3 inc rbx
+63: 4839d3 cmp rbx, rdx
+66: 74dd je 0x100045
+68: 4c6bfb38 imul r15, rbx, 0x38
+6c: 4e8b343e mov r14, qword ptr [rsi + r15]
+70: 4d85f6 test r14, r14
+73: 74d0 je 0x100045
+75: 4e39543e18 cmp qword ptr [rsi + r15 + 0x18], r10
+7a: 75e4 jne 0x100060
+7c: 46394c3e10 cmp dword ptr [rsi + r15 + 0x10], r9d
+81: 75dd jne 0x100060
+83: 4e395c3e08 cmp qword ptr [rsi + r15 + 8], r11
+88: 75d6 jne 0x100060
+8a: 4531ff xor r15d, r15d
+8d: 0f1f00 nop dword ptr [rax]
+90: 430fb62c3e movzx ebp, byte ptr [r14 + r15]
+95: 423a2c39 cmp bpl, byte ptr [rcx + r15]
+99: 75c5 jne 0x100060
+9b: 49ffc7 inc r15
+9e: 4d39fb cmp r11, r15
+a1: 75ed jne 0x100090
+a3: b801000000 mov eax, 1
+a8: eb9b jmp 0x100045
+aa: 4883c618 add rsi, 0x18
+ae: 31c0 xor eax, eax
+b0: eb1b jmp 0x1000cd
+b2: 66666666662e0f1f840000000000 nop word ptr cs:[rax + rax]
+c0: 4883c638 add rsi, 0x38
+c4: 48ffca dec rdx
+c7: 0f8478ffffff je 0x100045
+cd: 48837ee800 cmp qword ptr [rsi - 0x18], 0
+d2: 0f846dffffff je 0x100045
+d8: 4c3916 cmp qword ptr [rsi], r10
+db: 75e3 jne 0x1000c0
+dd: 44394ef8 cmp dword ptr [rsi - 8], r9d
+e1: 75dd jne 0x1000c0
+e3: 48837ef000 cmp qword ptr [rsi - 0x10], 0
+e8: 75d6 jne 0x1000c0
+ea: ebb7 jmp 0x1000a3

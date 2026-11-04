@@ -1,0 +1,94 @@
+Target node #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+Original ELF VAs; strict Python decoder; bytes unnormalized.
+
+complete leaf
+0x5b2d510  488b4710                        mov rax, 64bit [rdi+0x10]
+0x5b2d514  4883f802                        cmp rax, 2
+0x5b2d518  7263                            jb 0x5b2d57d
+0x5b2d51a  488b4f08                        mov rcx, 64bit [rdi+0x8]
+0x5b2d51e  4889c2                          mov rdx, rax
+0x5b2d521  48c1e205                        shl rdx, 5
+0x5b2d525  4883c2e0                        add rdx, -32
+0x5b2d529  41b802000000                    mov r8d, 2
+0x5b2d52f  31f6                            xor esi, esi
+0x5b2d531  6666666666662e0f1f840000000000  nop
+0x5b2d540  f30f6f0431                      movdqu xmm0, 128bit [rcx+rsi*1]
+0x5b2d545  f30f6f4c3120                    movdqu xmm1, 128bit [rcx+rsi*1+0x20]
+0x5b2d54b  660f74c8                        pcmpeqb xmm1, xmm0
+0x5b2d54f  660f6e443130                    movd xmm0, 32bit [rcx+rsi*1+0x30]
+0x5b2d555  660f6e543110                    movd xmm2, 32bit [rcx+rsi*1+0x10]
+0x5b2d55b  660f74d0                        pcmpeqb xmm2, xmm0
+0x5b2d55f  660fdbd1                        pand xmm2, xmm1
+0x5b2d563  66440fd7ca                      pmovmskb r9d, xmm2
+0x5b2d568  4181f9ffff0000                  cmp r9d, 65535
+0x5b2d56f  740d                            je 0x5b2d57e
+0x5b2d571  4883c620                        add rsi, 32
+0x5b2d575  49ffc0                          inc r8
+0x5b2d578  4839f2                          cmp rdx, rsi
+0x5b2d57b  75c3                            jne 0x5b2d540
+0x5b2d57d  c3                              ret
+0x5b2d57e  0f100431                        movups xmm0, 128bit [rcx+rsi*1]
+0x5b2d582  0f104c3110                      movups xmm1, 128bit [rcx+rsi*1+0x10]
+0x5b2d587  f30f6f543120                    movdqu xmm2, 128bit [rcx+rsi*1+0x20]
+0x5b2d58d  0f105c3130                      movups xmm3, 128bit [rcx+rsi*1+0x30]
+0x5b2d592  0f11443120                      movups 128bit [rcx+rsi*1+0x20], xmm0
+0x5b2d597  f30f7f1431                      movdqu 128bit [rcx+rsi*1], xmm2
+0x5b2d59c  0f114c3130                      movups 128bit [rcx+rsi*1+0x30], xmm1
+0x5b2d5a1  0f115c3110                      movups 128bit [rcx+rsi*1+0x10], xmm3
+0x5b2d5a6  498d50ff                        lea rdx, 64bit [r8-0x1]
+0x5b2d5aa  4c29c0                          sub rax, r8
+0x5b2d5ad  0f8690000000                    jbe 0x5b2d643
+0x5b2d5b3  4801ce                          add rsi, rcx
+0x5b2d5b6  4883c640                        add rsi, 64
+0x5b2d5ba  eb20                            jmp 0x5b2d5dc
+0x5b2d5bc  0f1f4000                        nop
+0x5b2d5c0  0f1006                          movups xmm0, 128bit [rsi]
+0x5b2d5c3  0f104e10                        movups xmm1, 128bit [rsi+0x10]
+0x5b2d5c7  410f114810                      movups 128bit [r8+0x10], xmm1
+0x5b2d5cc  410f1100                        movups 128bit [r8], xmm0
+0x5b2d5d0  48ffc2                          inc rdx
+0x5b2d5d3  4883c620                        add rsi, 32
+0x5b2d5d7  48ffc8                          dec rax
+0x5b2d5da  7467                            je 0x5b2d643
+0x5b2d5dc  4989d1                          mov r9, rdx
+0x5b2d5df  49c1e105                        shl r9, 5
+0x5b2d5e3  4e8d0409                        lea r8, 64bit [rcx+r9*1]
+0x5b2d5e7  f30f6f06                        movdqu xmm0, 128bit [rsi]
+0x5b2d5eb  f3420f6f4c09e0                  movdqu xmm1, 128bit [rcx+r9*1-0x20]
+0x5b2d5f2  660f74c8                        pcmpeqb xmm1, xmm0
+0x5b2d5f6  660f6e4610                      movd xmm0, 32bit [rsi+0x10]
+0x5b2d5fb  66420f6e5409f0                  movd xmm2, 32bit [rcx+r9*1-0x10]
+0x5b2d602  660f74d0                        pcmpeqb xmm2, xmm0
+0x5b2d606  660fdbd1                        pand xmm2, xmm1
+0x5b2d60a  66440fd7ca                      pmovmskb r9d, xmm2
+0x5b2d60f  4181f9ffff0000                  cmp r9d, 65535
+0x5b2d616  75a8                            jne 0x5b2d5c0
+0x5b2d618  0f1006                          movups xmm0, 128bit [rsi]
+0x5b2d61b  410f1048e0                      movups xmm1, 128bit [r8-0x20]
+0x5b2d620  0f110e                          movups 128bit [rsi], xmm1
+0x5b2d623  410f1140e0                      movups 128bit [r8-0x20], xmm0
+0x5b2d628  0f104610                        movups xmm0, 128bit [rsi+0x10]
+0x5b2d62c  410f1048f0                      movups xmm1, 128bit [r8-0x10]
+0x5b2d631  0f114e10                        movups 128bit [rsi+0x10], xmm1
+0x5b2d635  410f1140f0                      movups 128bit [r8-0x10], xmm0
+0x5b2d63a  4883c620                        add rsi, 32
+0x5b2d63e  48ffc8                          dec rax
+0x5b2d641  7599                            jne 0x5b2d5dc
+0x5b2d643  48895710                        mov 64bit [rdi+0x10], rdx
+0x5b2d647  c3                              ret
+
+argument-call-result-loads
+0x4dff152  488dbc2400020000                lea rdi, 64bit [rsp+0x200]
+0x4dff15a  e8b1e3d200                      call 0x5b2d510
+0x4dff15f  488b8c2400020000                mov rcx, 64bit [rsp+0x200]
+0x4dff167  488b842408020000                mov rax, 64bit [rsp+0x208]
+0x4dff16f  488b942410020000                mov rdx, 64bit [rsp+0x210]
+
+source-location-reference
+0x4dfe87d  488d0d74e46901                  lea rcx, 64bit [rip+0x169e474]
+
+incoming-direct-branch
+0x4dff846  e907f9ffff                      jmp 0x4dff152
+
+other-incoming-direct-branch
+0x4dff866  e9e7f8ffff                      jmp 0x4dff152

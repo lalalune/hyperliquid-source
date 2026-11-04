@@ -1,0 +1,519 @@
+{
+  "base": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+  "pull_requests": 2515,
+  "highest_number": 2520,
+  "open": 494,
+  "merged": 1774,
+  "closed_unmerged": 247,
+  "changed_file_records": 42742,
+  "without_patch": 5671,
+  "method": "Enumerate every PR state through paginated REST pulls; inspect title/body and changed filenames/patches. Reuse older changed-file responses only when both head and base SHA are unchanged. Check main history with git log -G and inspect closest prior packet READMEs. Live upstream main remains the recorded base.",
+  "main_history_matches": [
+    "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+    "b2e1e4b24d0ab9afdfbe5b6415df039569abf53d",
+    "3514ba93af48fc0cfd819f9706144c6b4b2e44bb",
+    "843c578f7972e0db2779458c27d935871f8e421f",
+    "a63481984571eb4412a7049008aa14760d9040b8",
+    "09b36530336a7ffaed7571b2dc51acddc4f5c862",
+    "385ce8484947f7caac50b50bc85b31a2c5e33c29",
+    "46077389b3225f60f8f4b955c5a8bd7960c93e16",
+    "532dc98b6e2906dfd454e76e06e053939fc7afbd",
+    "690a2c36ad8849ffe728b47cc80bef8680e9cc1f",
+    "6f1fb689469a5497c48e932c858dfdf55abfd172",
+    "4a6750748c69778a0464ed782fecc3ed484c90fe",
+    "025ca569885334627bcd24aa9e6ac5591a282e0f",
+    "a34697510d29f94f71aa01124ba44e7b62993791",
+    "d99bcf2f6f5a22715406b2a5897031a5c50e6db6",
+    "24167e3a452d8eda4857918245f022da487620c9",
+    "be793270252fa744d42e5bd520534cbd4ffad7fa",
+    "7b8575c4c5bb41c96d5e8a71d13520c7c9c73b61",
+    "24e211049d836dd90af6f0f7b0067a4aa6026c8f",
+    "e6bac38a8b9a057ee216dbfadcfed310ee7a4eb6",
+    "0876461fc55fea274127188b2efb6c3f6d36c72b",
+    "803c533618c3137cc31530c89bf3857b8617bc71",
+    "a64993f4f704c08400d001ab9aae78fde9d6d091",
+    "7acedaf88589c9bbd65d22dbbcd4c6b469449d02"
+  ],
+  "prior_work": [
+    430,
+    999,
+    1032,
+    1335,
+    1441,
+    1602,
+    2414
+  ],
+  "conclusion": "No overlapping semantic claim found within audit limits; shared context and explicit exclusions are described in README.md.",
+  "limits": [
+    "Search cannot rule out unpublished or undeclared work.",
+    "Some GitHub file records omit patches; large PR #1151 reaches the 3000-file API limit.",
+    "Address and semantic text matching is not an exhaustive semantic equivalence proof."
+  ],
+  "checked_at": "2026-11-03T18:51:02.738634+00:00",
+  "search_pattern": "\\b(?:0x)?(?:5b9cab0|4fbba00|4f13fd0)\\b|consensus/rpc|rpc.{0,40}(prefix|missing|lookup)|prefix.{0,40}rpc|first.{0,8}(zero|miss).{0,30}prefix",
+  "matching_pull_requests": [
+    {
+      "number": 2414,
+      "title": "Reconstruct Node115 GossipRpcRequest prefix decoder",
+      "matches": {
+        "metadata": [
+          "Reconstruct Node115 GossipRpcRequest prefix decoder",
+          "This recovers the selected Node115 `GossipRpcRequest` prefix decoder: three variants, active error fields, retained input cursor and logical limit charge. It advances RE-005 serialization with RE-012 gossip context under AGENTS/CONTRIBUTING, without changing any acceptance gate."
+        ],
+        "files": [
+          {
+            "path": "research/work-items/RE-005-node115-gossip-rpc-request/README.md",
+            "matches": 1,
+            "sample": [
+              "+# RE-005: Node115 GossipRpcRequest prefix-state reconstruction"
+            ]
+          },
+          {
+            "path": "src/node115-gossip-rpc-request/README.md",
+            "matches": 1,
+            "sample": [
+              "+# Node115 GossipRpcRequest logical prefix decoder"
+            ]
+          },
+          {
+            "path": "src/node115-gossip-rpc-request/lib.rs",
+            "matches": 1,
+            "sample": [
+              "+//! Logical prefix decoder for the selected Node115 GossipRpcRequest relation."
+            ]
+          },
+          {
+            "path": "src/node115-gossip-rpc-request/probe.rs",
+            "matches": 1,
+            "sample": [
+              "+use node115_gossip_rpc_request::{decode_prefix, Error, ReadError, Request};"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 2114,
+      "title": "RE-011: Trace node 115 eth_call input, limiter, and bounded worker path",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-011-eth-call-path-115/README.md",
+            "matches": 1,
+            "sample": [
+              "+**Dependency/fork context.** The ELF contains selected `z_forks/` path prefixes for reth chainspec, Ethereum forks, RPC types, RPC server types and revm precompiles, plus `z_vendor/` revm component prefixes. Their bytes and all selected occurrence coordinates are in the JSON. Embedded paths do not identify exact dependency commits, patch contents,"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-eth-call-path-115/path-evidence.json",
+            "matches": 2,
+            "sample": [
+              "+      \"prefix\": \"z_forks/reth-rpc-eth-types/\"",
+              "+      \"prefix\": \"z_forks/reth-rpc-server-types/\""
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1602,
+      "title": "RE-008: reconstruct owned client transaction join [skip ci]",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-008-client-transaction-join-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+byte, exact first-miss prefixes, supplied-empty versus newly created-empty, and"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-008-client-transaction-join-94/corpus.py",
+            "matches": 1,
+            "sample": [
+              "+            add(f'first miss prefix {n} {at}',hs,mp)"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-008-client-transaction-join-94/root-validation/root-transaction-join-pre-rust-gate.json",
+            "matches": 1,
+            "sample": [
+              "+    \"scope\": \"Add client transaction join module/tests to actual baseline node94-consensus-admission, minimal lib.rs/README integration only. Actual Arc identity and BTreeMap finite relation, provided/empty lazy providers, first-missing consumed-block/prefix cleanup and all12 time bytes. New view/count/reservation refusal policies distinct from re"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1582,
+      "title": "RE-021: trace node 94 call target from a descriptor to the execution environment",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-021-eth-call-target-94/switch-tables.tsv",
+            "matches": 8,
+            "sample": [
+              "+rpc-error-prefix\t0\t0x3e49b8\t0f780e02\t0x24cc1c7",
+              "+rpc-error-prefix\t1\t0x3e49bc\tfd7d0e02\t0x24cc7b5",
+              "+rpc-error-prefix\t2\t0x3e49c0\td67d0e02\t0x24cc78e",
+              "+rpc-error-prefix\t3\t0x3e49c4\te37d0e02\t0x24cc79b",
+              "+rpc-error-prefix\t4\t0x3e49c8\tc97d0e02\t0x24cc781"
+            ]
+          },
+          {
+            "path": "tests/test_eth_call_target94.py",
+            "matches": 1,
+            "sample": [
+              "+                     + subject.table_rows(cls.image, 'rpc-error-prefix',"
+            ]
+          },
+          {
+            "path": "tools/eth_call_target94.py",
+            "matches": 2,
+            "sample": [
+              "+    rpc_rows = [r for r in tables if r['table'] == 'rpc-error-prefix']",
+              "+              + table_rows(image, 'rpc-error-prefix', rip_target(image, 0x24cc1b7, '488d15'),"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1441,
+      "title": "RE-011: bind node94 method lookup to callback descriptor",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/CONTROLS.tsv",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/CONTROLS.tsv"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/MANIFEST.sha256",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/MANIFEST.sha256"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/PROOF.md",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/PROOF.md"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/README.md",
+            "matches": 4,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/README.md",
+              "+# RE-011: bind one node94 EVM RPC method lookup to its callback",
+              "+packet=research/work-items/RE-011-evm-rpc-lookup-94",
+              "+The flat root test `tests/test_evm_rpc_lookup_static.py` runs the full static"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/SCOPE-CHECK.json",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/SCOPE-CHECK.json"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/VALIDATION.json",
+            "matches": 6,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/VALIDATION.json",
+              "+        \"research/work-items/RE-011-evm-rpc-lookup-94/verify.py\",",
+              "+        \"research/work-items/RE-011-evm-rpc-lookup-94/verify.py\",",
+              "+        \"test_evm_rpc_lookup_static.py\",",
+              "+        \"test_evm_rpc_lookup_static.py\","
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/WITNESSES.json",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/WITNESSES.json"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/collect.py",
+            "matches": 2,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/collect.py",
+              "+    with tempfile.TemporaryDirectory(prefix='rpc-lookup-static-') as tmp:"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/native-headers.readelf.txt",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/native-headers.readelf.txt"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/observed/block-number-registration.gnu.txt",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/observed/block-number-registration.gnu.txt"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/observed/callback-direct-callee.gnu.txt",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/observed/callback-direct-callee.gnu.txt"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/observed/insertion-probe.gnu.txt",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/observed/insertion-probe.gnu.txt"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/observed/insertion.gnu.txt",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/observed/insertion.gnu.txt"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/observed/lookup-owner.gnu.txt",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/observed/lookup-owner.gnu.txt"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/observed/method-callback.gnu.txt",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/observed/method-callback.gnu.txt"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/observed/records.json",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/observed/records.json"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/observed/registration-context.gnu.txt",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/observed/registration-context.gnu.txt"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/relocations.readelf.txt",
+            "matches": 1,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/relocations.readelf.txt"
+            ]
+          },
+          {
+            "path": "research/work-items/RE-011-evm-rpc-lookup-94/verify.py",
+            "matches": 2,
+            "sample": [
+              "research/work-items/RE-011-evm-rpc-lookup-94/verify.py",
+              "+        with tempfile.TemporaryDirectory(prefix='rpc-lookup-mutant-') as tmp:"
+            ]
+          },
+          {
+            "path": "tests/test_evm_rpc_lookup_static.py",
+            "matches": 3,
+            "sample": [
+              "tests/test_evm_rpc_lookup_static.py",
+              "+PACKET = ROOT / 'research/work-items/RE-011-evm-rpc-lookup-94'",
+              "+class EvmRpcLookupStatic(unittest.TestCase):"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1351,
+      "title": "RE-013: qualify shell argument NUL admission [skip ci]",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-013-visor-shell-nul-admission/PROOF.md",
+            "matches": 1,
+            "sample": [
+              "+returning the first zero if present. If `a=0`, the prefix is empty."
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1335,
+      "title": "research: node94 gossip_rpc_client.rs Location census and byte-decoded evidence",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/gossip-rpc-client-inventory-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+ends exactly in `node/src/gossip_rpc_client.rs`. The binary compiler-prefix bytes"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1140,
+      "title": "Integrate 265 validated static research and tooling PR heads",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/consensus-rpc-inventory-94/README.md",
+            "matches": 2,
+            "sample": [
+              "+`node/src/consensus/rpc.rs`. The question is which relocated panic Locations,",
+              "+The available [reference file](../../../references/can1357-hl/node/consensus/rpc.rs)"
+            ]
+          },
+          {
+            "path": "research/work-items/consensus-rpc-inventory-94/verify.py",
+            "matches": 1,
+            "sample": [
+              "+    check(evidence['scope_rule'] == 'node/src/consensus/rpc.rs', 'scope differs')"
+            ]
+          },
+          {
+            "path": "research/work-items/local-abci-gates-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+  the whole startup on any RPC error. It records a `None` reply as Missing and"
+            ]
+          },
+          {
+            "path": "tests/test_consensus_rpc_inventory.py",
+            "matches": 2,
+            "sample": [
+              "+            self.assertEqual(loc['path'], 'node/src/consensus/rpc.rs')",
+              "+        self.assertEqual({x['path'] for x in self.e['locations']}, {'node/src/consensus/rpc.rs'})"
+            ]
+          },
+          {
+            "path": "tools/consensus_rpc_inventory.py",
+            "matches": 2,
+            "sample": [
+              "+SCOPE = b'node/src/consensus/rpc.rs'",
+              "+REFERENCE_PATH = 'references/can1357-hl/node/consensus/rpc.rs'"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1073,
+      "title": "Integrate 96 reviewed parser, bincode, and research PRs",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-011-evm-rpc-method-path/README.md",
+            "matches": 1,
+            "sample": [
+              "+- Of 1,186 first-party candidate Location records, **42** have the binary path prefix `evm_rpc/`: method_router 7, evm_rpc 15, evm_store 15, write_forwarder 2, reth_rpc_helpers_copied 2, reth_eth_tx_builder_copied 1. Their LEA sites attribute to **38** FDE ranges. These are scoped record and candidate-site counts, not a census of functions or RPC "
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 1032,
+      "title": "node94: bounded consensus/rpc.rs static inventory",
+      "matches": {
+        "metadata": [
+          "node94: bounded consensus/rpc.rs static inventory",
+          "Bounded static packet for the **consensus RPC** module, exact Location path `node/src/consensus/rpc.rs`, on pinned node #94. No open or merged PR targets this file's Location inventory. Merged RE-008/RE-009 are cited as prior work and not duplicated; a local RE-009 discrepancy (no rpc.rs mention) is documented in `RESULT.md`."
+        ],
+        "files": [
+          {
+            "path": "research/work-items/consensus-rpc-inventory-94/README.md",
+            "matches": 2,
+            "sample": [
+              "+`node/src/consensus/rpc.rs`. The question is which relocated panic Locations,",
+              "+The available [reference file](../../../references/can1357-hl/node/consensus/rpc.rs)"
+            ]
+          },
+          {
+            "path": "research/work-items/consensus-rpc-inventory-94/verify.py",
+            "matches": 1,
+            "sample": [
+              "+    check(evidence['scope_rule'] == 'node/src/consensus/rpc.rs', 'scope differs')"
+            ]
+          },
+          {
+            "path": "tests/test_consensus_rpc_inventory.py",
+            "matches": 2,
+            "sample": [
+              "+            self.assertEqual(loc['path'], 'node/src/consensus/rpc.rs')",
+              "+        self.assertEqual({x['path'] for x in self.e['locations']}, {'node/src/consensus/rpc.rs'})"
+            ]
+          },
+          {
+            "path": "tools/consensus_rpc_inventory.py",
+            "matches": 2,
+            "sample": [
+              "+SCOPE = b'node/src/consensus/rpc.rs'",
+              "+REFERENCE_PATH = 'references/can1357-hl/node/consensus/rpc.rs'"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 430,
+      "title": "node-runtime: bind node #94 local AbciState startup \u2014 fresh (\u2264540/840 s old or height ok) / stale (peer Vec, 20000 height tolerance; lead: 200/1000) / missing; 600 s freshness panic at hl_node.rs:346 (lead: 0x4e20 s stale reason)",
+      "matches": {
+        "metadata": [
+          "- **Height collection (`0x22689f0`):** the lead's `query_root_heights` aborts startup on any RPC error, and marks `None` replies Missing and lagging ones Stale by local height. The binary loops over the queried peer list (5-byte entries). For each peer it logs `querying height`, sends request tag 2 via `0x226bb20` (the FDE holding #211's 10 s `goss"
+        ],
+        "files": [
+          {
+            "path": "research/work-items/local-abci-gates-94/README.md",
+            "matches": 1,
+            "sample": [
+              "+  the whole startup on any RPC error. It records a `None` reply as Missing and"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "number": 126,
+      "title": "RE-011: pin node #94 evm_rpc method table and router Location path",
+      "matches": {
+        "metadata": [],
+        "files": [
+          {
+            "path": "research/work-items/RE-011-evm-rpc-method-path/README.md",
+            "matches": 1,
+            "sample": [
+              "+- Of 1,186 first-party candidate Location records, **42** have the binary path prefix `evm_rpc/`: method_router 7, evm_rpc 15, evm_store 15, write_forwarder 2, reth_rpc_helpers_copied 2, reth_eth_tx_builder_copied 1. Their LEA sites attribute to **38** FDE ranges. These are scoped record and candidate-site counts, not a census of functions or RPC "
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "exact_address_main_history_matches": [],
+  "closest_semantic_boundary": "PRs 999/1602 client transaction join release the temporary prefix and return a missing-hash error. This consensus/rpc.rs collector returns the successful prefix and separately writes the failure byte; it has no supplied-row bypass. PR1032 is Location/literal inventory only; PR2414 is the GossipRpcRequest decoder."
+}

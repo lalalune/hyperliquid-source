@@ -1,0 +1,841 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "owners": [
+    {
+      "role": "large_consumer",
+      "start": "0x15a3b90",
+      "end": "0x15a6509",
+      "file_offset": "0x15a2b90",
+      "bytes": 10617,
+      "sha256": "7995f7af57e2be27ca6ed1e307d9bcce9d6140f72b0ff0cf0804d7f09e5505fb",
+      "frames": {
+        "fde": {
+          "va": "0x105530c",
+          "bytes_hex": "500000000c7d01007ce854007929000004a38612ff410e10420e18420e20420e28420e30410e38470e800783078c068d058e048f03860203d51d0e38410e30420e28420e20420e18420e10410e08410e80070000"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "descriptor_stream_collect",
+      "start": "0x474d890",
+      "end": "0x474dadd",
+      "file_offset": "0x474c890",
+      "bytes": 589,
+      "sha256": "4514bf01206da3b66445a38797f30810be0986c60d0b603943f25bb5bd551102",
+      "frames": {
+        "fde": {
+          "va": "0x12c4d2c",
+          "bytes_hex": "500000002c7728005c8b48034d020000041b7f08ff410e10420e18420e20420e28420e30410e38470e900383078c068d058e048f03860203e0010e38410e30420e28420e20420e18420e10410e08410e90030000"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "descriptor_record_bind",
+      "start": "0x47473c0",
+      "end": "0x47475b9",
+      "file_offset": "0x47463c0",
+      "bytes": 505,
+      "sha256": "b520689de276f092431c1551c2de71915a728cc43666c51b1ff5b9a92766db26",
+      "frames": {
+        "fde": {
+          "va": "0x12c42b8",
+          "bytes_hex": "4c000000b86c280000314803f901000004138408ff410e10420e18420e20420e28420e30410e38440e7083078c068d058e048f0386020362010e38410e30420e28420e20420e18420e10410e08410e70"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    }
+  ],
+  "phase2": {
+    "consumer": {
+      "pins": {
+        "entry_rdi_save": "0x15a3ba1",
+        "sentinel_load": "0x15a3bd5",
+        "scalar_save": "0x15a3c29",
+        "lea_r12_scratch": "0x15a42be",
+        "phase2_tree_init": "0x15a44e0",
+        "probe_compare": "0x15a45e0",
+        "build_a_lea_fmt": "0x15a45e9",
+        "build_a_tagword": "0x15a4618",
+        "collect_call_a": "0x15a4626",
+        "second_len_a": "0x15a467c",
+        "second_strptr_a": "0x15a4688",
+        "bind_hdr_a": "0x15a46d0",
+        "bind_word_a": "0x15a46df",
+        "bind_zero_a": "0x15a46e7",
+        "bind_call": "0x15a46fc",
+        "payload_tag_a": "0x15a4730",
+        "build_b_lea_fmt": "0x15a4840",
+        "collect_call_b": "0x15a487d",
+        "boxed_store_b": "0x15a492a",
+        "block_flag_b": "0x15a4941",
+        "entry_words_b": "0x15a4949",
+        "format_call_b": "0x15a498b",
+        "emit_call_b": "0x15a49b1",
+        "insert_call_b": "0x15a4ab4",
+        "snapshot_size_b": "0x15a4b29",
+        "payload_tag_b": "0x15a4b8f"
+      },
+      "sentinel_provenance": "rbp holds the sentinel at the probe compare: the only write to rbp between the consumer entry and 0x15a45e0 is the entry movabs at 0x15a3bd5 (pinned); every other rbp mention in that range is a read.",
+      "collect_argument": "On every path into the phase-2 initialisation at 0x15a44e0 the last write to r12 is a lea r12,[rsp+0x90] (last site pinned at 0x15a42be); the collect calls on both branches pass r12 as the output argument, so the collect result header lands in the scratch block at [rsp+0x90], whose three words the second record then copies.",
+      "descriptor_record": {
+        "stack_base": "rsp+0x20",
+        "consumed_bytes": "0x38",
+        "written_fields": {
+          "0x0": "0x468adf",
+          "0x8": "0x30",
+          "0x10": "0x468adf",
+          "0x18": "0x468b0f",
+          "0x20": "0x0",
+          "0x30": "0x110001"
+        },
+        "unwritten_offset": "0x28",
+        "format_string": {
+          "va": "0x468adf",
+          "bytes": 48,
+          "text": "{d(%Y-%m-%d %H:%M:%S.%f)} {l} {f}:{L} >>> {m}{n}"
+        },
+        "second_piece": "0x468b0f"
+      },
+      "branch_identity": [
+        {
+          "segment": 1,
+          "a": [
+            "0x15a45e9",
+            "0x15a462b"
+          ],
+          "b": [
+            "0x15a4840",
+            "0x15a4882"
+          ],
+          "bytes": 66,
+          "differing_bytes": 6,
+          "displacement_fields": [
+            [
+              "0x3",
+              "0x7"
+            ],
+            [
+              "0x1d",
+              "0x21"
+            ],
+            [
+              "0x3e",
+              "0x42"
+            ]
+          ],
+          "lea_targets_a": [
+            "0x468adf",
+            "0x468b0f"
+          ],
+          "lea_targets_b": [
+            "0x468adf",
+            "0x468b0f"
+          ],
+          "call_target_a": "0x474d890",
+          "call_target_b": "0x474d890"
+        },
+        {
+          "segment": 2,
+          "a": [
+            "0x15a462b",
+            "0x15a46ad"
+          ],
+          "b": [
+            "0x15a4882",
+            "0x15a4904"
+          ],
+          "bytes": 130,
+          "differing_bytes": 10,
+          "displacement_fields": [
+            [
+              "0xd",
+              "0x11"
+            ],
+            [
+              "0x14",
+              "0x18"
+            ],
+            [
+              "0x1f",
+              "0x23"
+            ],
+            [
+              "0x2a",
+              "0x2e"
+            ],
+            [
+              "0x7e",
+              "0x82"
+            ]
+          ],
+          "string_load_targets": [
+            "0x468aff",
+            "0x468aef",
+            "0x468adf"
+          ],
+          "jump_targets_a": [
+            "0x15a5bd3",
+            "0x15a5981"
+          ],
+          "jump_targets_b": [
+            "0x15a5be8",
+            "0x15a5996"
+          ]
+        }
+      ],
+      "divergence": {
+        "first_differing_sites": [
+          "0x15a46ad",
+          "0x15a4904"
+        ],
+        "sentinel_bind": {
+          "second_record_header": "rewritten in place at [rsp+0xc0]: {boxed record, 0x63ffbd0, word 0 at +0x10}",
+          "extra_callee": "descriptor_record_bind via slot 0x64e1458",
+          "entry_words_read": "none beyond the capacity word",
+          "payload": {
+            "bytes": 48,
+            "tag": 104856568
+          }
+        },
+        "present_format": {
+          "second_record_destination": "boxed pointer stored into the scratch block at [rsp+0x90] with 0x63ffbd0 at +0x8 and flag byte 1 at +0x10",
+          "extra_callees": [
+            "format_consumer via slot 0x64df6e8",
+            "descriptor_emit via slot 0x64e1460",
+            "descriptor_map_insert (direct call)"
+          ],
+          "overflow_piece": {
+            "va": "0x445923",
+            "legible": "_overflow{}"
+          },
+          "entry_words_read": "the found entry pointer/length words at +0x8/+0x10, copied to [rsp+0x338] as the format argument",
+          "payload": {
+            "bytes": 112,
+            "tag": 104856688
+          }
+        }
+      }
+    },
+    "collect": {
+      "pins": {
+        "visit_call_1": "0x474d8ac",
+        "tag_check_state_1": "0x474d8b2",
+        "next_call_1": "0x474d8c3",
+        "tag_check_elem_1": "0x474d8c9",
+        "empty_store_cap": "0x474d8d1",
+        "empty_store_buf": "0x474d8d8",
+        "initial_alloc": "0x474d8ed",
+        "header_capacity": "0x474d94d",
+        "header_count": "0x474d95b",
+        "seed_copy": "0x474d98e",
+        "grow_compare": "0x474da38",
+        "grow_call": "0x474da57",
+        "result_store": "0x474da6b"
+      },
+      "model": {
+        "element_bytes": 88,
+        "initial_capacity": 4,
+        "initial_allocation": 352,
+        "terminal_tag": 5,
+        "empty_header": [
+          0,
+          8,
+          0
+        ]
+      },
+      "protocol": "visit (slot 0x64eafb0) expands the seed into a 0x58-byte state at [rsp+0x20]; a dword tag of 5 there ends the walk before any allocation.  next (slot 0x64eaf10) yields the first element record at [rsp+0x78]; a qword tag of 5 there also ends it.  Both terminal cases store the empty header {0, 8, 0} to the output and return it.  Otherwise the function allocates 0x160 bytes, stores the first element verbatim, initialises the header {capacity 4, buffer, count 1} on its stack, copies the input descriptor record's first 0x38 bytes into a stack cursor at [rsp+0xd0], and loops: visit expands the cursor into a state at [rsp+0x108] (dword tag 5 ends), next yields the next element at [rsp+0x20] (qword tag 5 ends), the element is appended verbatim at stride 0x58, growing through 0x474e640 when count == capacity.  The finished header {capacity, buffer, count} is stored to the first argument and returned in rax.  The input record is consumed as the cursor seed only: no field of it is copied into any element or into the output header.",
+      "cfg_edges": [
+        [
+          "0x474d8b7",
+          "0x474d8d1"
+        ],
+        [
+          "0x474d8cf",
+          "0x474d8ed"
+        ],
+        [
+          "0x474d8e8",
+          "0x474da77"
+        ],
+        [
+          "0x474d8fb",
+          "0x474da8c"
+        ],
+        [
+          "0x474d9b1",
+          "0x474da0c"
+        ],
+        [
+          "0x474da20",
+          "0x474da66"
+        ],
+        [
+          "0x474da36",
+          "0x474da66"
+        ],
+        [
+          "0x474da3d",
+          "0x474d9c0"
+        ],
+        [
+          "0x474da57",
+          "0x474e640"
+        ],
+        [
+          "0x474da61",
+          "0x474d9c0"
+        ],
+        [
+          "0x474daa6",
+          "0x474dc90"
+        ],
+        [
+          "0x474daab",
+          "0x474dacf"
+        ],
+        [
+          "0x474dab5",
+          "0x474dc90"
+        ],
+        [
+          "0x474daba",
+          "0x474dac5"
+        ],
+        [
+          "0x474daca",
+          "0x474e050"
+        ],
+        [
+          "0x474dad2",
+          "0x63f0a50"
+        ]
+      ]
+    },
+    "bind": {
+      "pins": {
+        "path_byte": "0x47473db",
+        "word2_slot_load": "0x47473f2",
+        "word2_table_lea": "0x4747438",
+        "isatty_arg2": "0x4747461",
+        "isatty_arg1": "0x474747f",
+        "flag_load": "0x47474ab",
+        "input_word0": "0x47474ba",
+        "default_call": "0x47474e4",
+        "default_tag": "0x4747507",
+        "out_flag_store": "0x4747525"
+      },
+      "globals_file_initial": {
+        "state_word": 0,
+        "config_byte": 3,
+        "table_dword": 3
+      },
+      "transformation": "The function overwrites its first argument (the descriptor record) in place and returns it: word +0x00 and word +0x08 are configuration outputs (each 0 or 1 on the traced arms), word +0x10 is the slot-object address 0x6500060 when the second record's +0x10 byte is 1 and the global-table address 0x64fe408 otherwise, word +0x18 is the second record's word +0x00 (or, when that is 0, a fresh 0x30-byte heap copy of the default record produced through slot 0x64e12f8), word +0x20 is the second record's word +0x08 (or the static 0x6495038 on the default arm), and byte +0x28 is the configuration flag -- on the default arm the second record's +0x11 byte XOR 1.  The second record itself is only read (words +0x00/+0x08 and bytes +0x10/+0x11); it is neither stored into the output beyond those words nor freed.  The configuration lookup consults the once-initialised state at 0x64fdbe0 (initialiser 0x4752c90), the config byte at 0x64fdbe8, the table at 0x64fe408 with its dword at 0x64fe440 (initialiser 0x5c6c15a), and isatty(1)/isatty(2) through GLOB_DAT slot 0x64eaf90 on the arms where the consulted byte is 0.",
+      "consumer_call": {
+        "path": "global_table",
+        "output_under_file_initial_state": {
+          "word_0x00": "0x1",
+          "word_0x08": "0x0",
+          "word_0x10": "0x64fe408",
+          "word_0x20": "0x63ffbd0",
+          "byte_0x28": "0x1"
+        },
+        "note": "word +0x18 is the boxed second record pointer supplied by the consumer; the remaining fields are the pinned model output for that call."
+      },
+      "cfg_edges": [
+        [
+          "0x47473df",
+          "0x4747420"
+        ],
+        [
+          "0x47473e5",
+          "0x474753b"
+        ],
+        [
+          "0x4747400",
+          "0x4747461"
+        ],
+        [
+          "0x474740f",
+          "0x47474ab"
+        ],
+        [
+          "0x474741b",
+          "0x47474ba"
+        ],
+        [
+          "0x4747424",
+          "0x474754f"
+        ],
+        [
+          "0x4747433",
+          "0x474747f"
+        ],
+        [
+          "0x4747442",
+          "0x4747496"
+        ],
+        [
+          "0x4747453",
+          "0x4747573"
+        ],
+        [
+          "0x474745f",
+          "0x47474ba"
+        ],
+        [
+          "0x4747475",
+          "0x47474ab"
+        ],
+        [
+          "0x474747d",
+          "0x47474ba"
+        ],
+        [
+          "0x4747494",
+          "0x4747444"
+        ],
+        [
+          "0x47474a2",
+          "0x474757d"
+        ],
+        [
+          "0x47474c0",
+          "0x47474c8"
+        ],
+        [
+          "0x47474c6",
+          "0x474750e"
+        ],
+        [
+          "0x47474d6",
+          "0x4747563"
+        ],
+        [
+          "0x4747545",
+          "0x4752c90"
+        ],
+        [
+          "0x474754a",
+          "0x47473eb"
+        ],
+        [
+          "0x4747559",
+          "0x4752c90"
+        ],
+        [
+          "0x474755e",
+          "0x474742a"
+        ],
+        [
+          "0x4747573",
+          "0x5c6c15a"
+        ],
+        [
+          "0x4747578",
+          "0x4747459"
+        ],
+        [
+          "0x474757d",
+          "0x5c6c15a"
+        ],
+        [
+          "0x4747582",
+          "0x47474a8"
+        ],
+        [
+          "0x4747591",
+          "0x4746670"
+        ],
+        [
+          "0x4747596",
+          "0x47475b1"
+        ],
+        [
+          "0x47475b4",
+          "0x63f0a50"
+        ]
+      ]
+    },
+    "direct_calls": {
+      "descriptor_stream_collect": {
+        "sites": [
+          "0x15a4626",
+          "0x15a487d",
+          "0x473a03b"
+        ],
+        "containing_fdes": [
+          "0x15a3b90",
+          "0x15a3b90",
+          "0x4739ff0"
+        ]
+      },
+      "descriptor_record_bind": {
+        "sites": [],
+        "containing_fdes": []
+      },
+      "descriptor_map_insert": {
+        "sites": [
+          "0x15a4ab4"
+        ],
+        "containing_fdes": [
+          "0x15a3b90"
+        ]
+      }
+    }
+  },
+  "slot_bindings": {
+    "stream_visit": {
+      "slot": "0x64eafb0",
+      "type": 8,
+      "type_name": "R_X86_64_RELATIVE",
+      "addend": "0x4744b60"
+    },
+    "stream_next": {
+      "slot": "0x64eaf10",
+      "type": 8,
+      "type_name": "R_X86_64_RELATIVE",
+      "addend": "0x4735b30"
+    },
+    "descriptor_bind": {
+      "slot": "0x64e1458",
+      "type": 8,
+      "type_name": "R_X86_64_RELATIVE",
+      "addend": "0x47473c0"
+    },
+    "descriptor_emit": {
+      "slot": "0x64e1460",
+      "type": 8,
+      "type_name": "R_X86_64_RELATIVE",
+      "addend": "0x473c130"
+    },
+    "bind_default_record": {
+      "slot": "0x64e12f8",
+      "type": 8,
+      "type_name": "R_X86_64_RELATIVE",
+      "addend": "0x4739ff0"
+    },
+    "bind_object_pointer": {
+      "slot": "0x64eaf58",
+      "type": 8,
+      "type_name": "R_X86_64_RELATIVE",
+      "addend": "0x6500060"
+    },
+    "alloc": {
+      "slot": "0x64df480",
+      "type": 8,
+      "type_name": "R_X86_64_RELATIVE",
+      "addend": "0x6355830"
+    },
+    "dealloc": {
+      "slot": "0x64df4a0",
+      "type": 8,
+      "type_name": "R_X86_64_RELATIVE",
+      "addend": "0x635de30"
+    },
+    "format_consumer": {
+      "slot": "0x64df6e8",
+      "type": 8,
+      "type_name": "R_X86_64_RELATIVE",
+      "addend": "0x141e3a0"
+    },
+    "alloc_error": {
+      "slot": "0x64df498",
+      "type": 8,
+      "type_name": "R_X86_64_RELATIVE",
+      "addend": "0x141e264"
+    },
+    "isatty": {
+      "slot": "0x64eaf90",
+      "section": ".got",
+      "relocation_type": 6,
+      "relocation_type_name": "R_X86_64_GLOB_DAT",
+      "symbol_index": 74,
+      "symbol": "isatty"
+    }
+  },
+  "boundaries": [
+    {
+      "role": "stream_visit",
+      "start": "0x4744b60",
+      "end": "0x47461a0",
+      "file_offset": "0x4743b60",
+      "bytes": 5696,
+      "sha256": "46b34fdd460b872f3185b17a926718f502cab985d13c23b72cf6a949d8fd95f5",
+      "frames": {
+        "fde": {
+          "va": "0x12c409c",
+          "bytes_hex": "500000009c6a2800bc0a48034016000004c78408ff410e10420e18420e20420e28420e30410e38470ed00283078c068d058e048f0386020304120e38410e30420e28420e20420e18420e10410e08410ed0020000"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "stream_next",
+      "start": "0x4735b30",
+      "end": "0x47369f5",
+      "file_offset": "0x4734b30",
+      "bytes": 3781,
+      "sha256": "df0ae0145e912e7429f45c17380cb1764bfdd4e9e4bc6a72ed7eb1412973d107",
+      "frames": {
+        "fde": {
+          "va": "0x12c3510",
+          "bytes_hex": "50000000105f280018264703c50e0000041b8908ff410e10420e18420e20420e28420e30410e38470ed00383078c068d058e048f03860203ad060e38410e30420e28420e20420e18420e10410e08410ed0030000"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "collect_grow",
+      "start": "0x474e640",
+      "end": "0x474e6bf",
+      "file_offset": "0x474d640",
+      "bytes": 127,
+      "sha256": "43935a1cdae8c5854d4a239f0992801b4808673b0bb5ff24da951160a868e8bf",
+      "frames": {
+        "fde": {
+          "va": "0xefdcc0",
+          "bytes_hex": "28000000ec6d2500780985037f00000000420e10410e18440e3083038e02025c0e18410e10420e08410e3000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "collect_cleanup_a",
+      "start": "0x474dc90",
+      "end": "0x474dcca",
+      "file_offset": "0x474cc90",
+      "bytes": 58,
+      "sha256": "94793d642a473b6e95b51ca6230d5d4669f9615a94af178549d9ff3097d8f9d2",
+      "frames": {
+        "fde": {
+          "va": "0xefdb58",
+          "bytes_hex": "10000000846c2500300185033a00000000000000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "collect_cleanup_b",
+      "start": "0x474e050",
+      "end": "0x474e0ac",
+      "file_offset": "0x474d050",
+      "bytes": 92,
+      "sha256": "91b4d30f40c6b7bdc620f7e6e286bb7547861e8e5fecf2507b0bf75f193b5006",
+      "frames": {
+        "fde": {
+          "va": "0x12c4f4c",
+          "bytes_hex": "380000004c792800fc9048035c00000004137e08ff420e10420e18410e2083048e038f02650e18420e10420e08460e20410e18420e10420e08410e20"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "bind_once_init",
+      "start": "0x4752c90",
+      "end": "0x4752cd7",
+      "file_offset": "0x4751c90",
+      "bytes": 71,
+      "sha256": "f8129a3041146c7dd1184471e57f0e2cec74d585b66caaca22aff179c8db4f6d",
+      "frames": {
+        "fde": {
+          "va": "0xefdf94",
+          "bytes_hex": "14000000c0702500f44c85034700000000440e4002420e08"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "bind_table_init",
+      "start": "0x5c6c15a",
+      "end": "0x5c6c1ae",
+      "file_offset": "0x5c6b15a",
+      "bytes": 84,
+      "sha256": "a32a6ff3dec82ef5d016ddaa52d1a0fbf751712134decf6c08570ba2b0ffe184",
+      "frames": {
+        "fde": {
+          "va": "0xfe06ec",
+          "bytes_hex": "1c0000001898330066bac80454000000004c0e108602430d0602440c0708c600"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "bind_default_producer",
+      "start": "0x4739ff0",
+      "end": "0x473a0f8",
+      "file_offset": "0x4738ff0",
+      "bytes": 264,
+      "sha256": "a5606da75247dacef820881ce0450a16f0631b5817d79acae77f40cb98823406",
+      "frames": {
+        "fde": {
+          "va": "0x12c3950",
+          "bytes_hex": "2c00000050632800986647030801000004a38708ff420e10410e18440e7083038e0202960e18410e10420e08410e7000"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "descriptor_emit",
+      "start": "0x473c130",
+      "end": "0x473c63f",
+      "file_offset": "0x473b130",
+      "bytes": 1295,
+      "sha256": "9b97c0e64ab18d276a48d9477ffba097ca349189c06a2f6d0da3478fb4571515",
+      "frames": {
+        "fde": {
+          "va": "0xefcb24",
+          "bytes_hex": "4c000000505c250004f683030f05000000410e10420e18420e20420e28420e30410e38470ea00283078c068d058e048f038602036d020e38410e30420e28420e20420e18420e10410e08410ea0020000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "format_consumer",
+      "start": "0x141e3a0",
+      "end": "0x141e538",
+      "file_offset": "0x141d3a0",
+      "bytes": 408,
+      "sha256": "aa4d4d0611c533e38c65e1577c0426b5163846c01225556743d4d4345cadd1fe",
+      "frames": {
+        "fde": {
+          "va": "0x103de90",
+          "bytes_hex": "2c0000009008000008053e0098010000044bea12ff410e108602430d064b83068c058e048f030337010c0708410c0610"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "descriptor_map_insert",
+      "start": "0x156f680",
+      "end": "0x15709e9",
+      "file_offset": "0x156e680",
+      "bytes": 4969,
+      "sha256": "7aaeefbdcb060aba7030de2292e09df0cc20dca32f20fca54689eea5940f2d6c",
+      "frames": {
+        "fde": {
+          "va": "0x10525d8",
+          "bytes_hex": "50000000d84f0100a0d051006913000004978912ff410e10420e18420e20420e28420e30410e38470ee00483078c068d058e048f03860203cf0f0e38410e30420e28420e20420e18420e10410e08410ee0040000"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "second_tree_insert",
+      "start": "0x1497040",
+      "end": "0x1497c54",
+      "file_offset": "0x1496040",
+      "bytes": 3092,
+      "sha256": "e5bff7414cd63e3f4e74c81467ee0d344f5cfbee64df648d7ee2ab0454191b26",
+      "frames": {
+        "fde": {
+          "va": "0x1045a30",
+          "bytes_hex": "500000003084000008164500140c0000044fc312ff410e10420e18420e20420e28420e30410e38470ec00183078c068d058e048f03860203f8070e38410e30420e28420e20420e18420e10410e08410ec0010000"
+        },
+        "cie": {
+          "va": "0x103d604",
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "alloc",
+      "start": "0x6355830",
+      "end": "0x63558f2",
+      "file_offset": "0x6354830",
+      "bytes": 194,
+      "sha256": "72c29274a75359df7c598d254d102cbab84f51d359256facb415bb90bffec5af",
+      "frames": {
+        "fde": {
+          "va": "0x102d848",
+          "bytes_hex": "1000000074693800e07f3205c200000000000000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "dealloc",
+      "start": "0x635de30",
+      "end": "0x635ded5",
+      "file_offset": "0x635ce30",
+      "bytes": 165,
+      "sha256": "714fc5cdd28a2587427c9dac8a25685ec09695a3a21bc9af0eb09b29ae503f61",
+      "frames": {
+        "fde": {
+          "va": "0x102d9c8",
+          "bytes_hex": "10000000f46a380060043305a500000000000000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "format_args_drop",
+      "start": "0x15ebba0",
+      "end": "0x15ebbb3",
+      "file_offset": "0x15eaba0",
+      "bytes": 19,
+      "sha256": "d6974989f446c3a376ca22e23d3f5d3c3744b9d15284072762999e6ccc1198bc",
+      "frames": {
+        "fde": {
+          "va": "0xcbc9f8",
+          "bytes_hex": "10000000245b0100a0f192001300000000000000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    }
+  ],
+  "phase2_verdict": "The phase-2 probe's two branches emit the same descriptor record into the same collect call: the record builds and the string boxing are byte-identical outside displacement fields decoding to the same targets, and the collect function turns the record into a vector of streamed 0x58-byte element records whose header lands at [rsp+0x90] on both branches.  The sentinel (capacity == 0x8000000000000000) branch then binds the descriptor in place through 0x47473c0 (slot 0x64e1458) and stores a 0x30-byte copy under tag 0x63ffbf8; the non-sentinel branch formats the found entry's stored text through the format consumer with the '_overflow{}' piece, emits through 0x473c130 (slot 0x64e1460), inserts the descriptor through 0x156f680, and stores a 0x70-byte snapshot under tag 0x63ffc70.  The branch therefore changes the destination and the downstream emissions, not the descriptor record or the collect result.",
+  "phase2_limits": "Static trace only.  The functions behind slots 0x64eafb0 (stream visit, 5,696 bytes) and 0x64eaf10 (stream next, 3,781 bytes) are hash-pinned boundaries: how they expand the cursor, whether the visit function mutates the cursor in place between loop iterations, and which element records a given descriptor produces are NOT traced.  The bind function's configuration outputs are modelled under the file-initial global values (state 0, config byte 3, table dword 3), under which neither isatty arm is reached for the consumer's call; runtime mutation of those globals by other callers, and the exact outputs on the isatty arms, are NOT traced.  The descriptor-emit function behind slot 0x64e1460 (1,295 bytes), the map insert 0x156f680 (4,969 bytes), the second-tree insert 0x1497040 (3,092 bytes), the grow helper, the two collect cleanup helpers, the two bind initialisers, and the default-record producer are hash-pinned boundaries; the producer is itself the third direct caller of the collect function (0x473a03b), which is recorded as census, not traced.  The format consumer is the RE-015 owner traced by #2408 and is a boundary here.  What the second structure's readers do with the two payload kinds (tag 0x63ffbf8 versus tag 0x63ffc70), and who consumes the vector the collect call leaves at [rsp+0x90] after phase 2, are the next questions.  No captured code executed, no runtime value beyond the pinned file-initial globals, or reconstruction gate is claimed."
+}

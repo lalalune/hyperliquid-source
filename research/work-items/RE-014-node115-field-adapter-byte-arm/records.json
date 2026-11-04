@@ -1,0 +1,150 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "owner": {
+    "role": "adapter_table_byte_callee",
+    "start": "0x1686b70",
+    "end": "0x1686bcf",
+    "file_offset": "0x1685b70",
+    "bytes": 95,
+    "sha256": "f6b8b87fe6061bbd9d6ac77b92485bb94fa838e6f8c3c36f31d339dd7da98b86",
+    "frames": {
+      "fde": {
+        "va": "0xcc3674",
+        "bytes_hex": "2c000000a0c70100f4349c005f00000000410e108602430d064783068c058e048f037b0c0708410c0610560c07080000"
+      },
+      "cie": {
+        "va": "0xca6ed8",
+        "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+      }
+    }
+  },
+  "adapter_table": {
+    "va": "0x64078f8",
+    "header_words": [
+      "0x0",
+      "0x18",
+      "0x8"
+    ],
+    "slots": [
+      {
+        "offset": 24,
+        "slot": "0x6407910",
+        "target": "0x1686bd0",
+        "status": "bulk piece callee, qualified by the merged RE-014 newline packet"
+      },
+      {
+        "offset": 32,
+        "slot": "0x6407918",
+        "target": "0x1686b70",
+        "status": "byte-arm callee, qualified by this packet"
+      },
+      {
+        "offset": 40,
+        "slot": "0x6407920",
+        "target": "0x168aa10",
+        "status": "argument-shifting shim, behaviour opaque"
+      }
+    ]
+  },
+  "protocol": {
+    "state": {
+      "data_offset": "0x0",
+      "table_offset": "0x8",
+      "flag_pointer_offset": "0x10"
+    },
+    "flag_test": {
+      "site": "0x1686b86",
+      "branch": "0x1686b8a",
+      "taken_target": "0x1686bb7"
+    },
+    "indent": {
+      "literal_va": "0x45a128",
+      "literal": "    ",
+      "length": 4,
+      "method_offset": "0x18",
+      "call_site": "0x1686ba1",
+      "result_test": "0x1686ba8",
+      "result_branch": "0x1686baa"
+    },
+    "error_return": {
+      "site": "0x1686bac",
+      "result": "AL = 1",
+      "flag_written": false
+    },
+    "flag_update": {
+      "compare_site": "0x1686bb7",
+      "constant": 10,
+      "store_site": "0x1686bba"
+    },
+    "byte_tail": {
+      "method_offset": "0x20",
+      "load_site": "0x1686bbe",
+      "jump_site": "0x1686bcd"
+    }
+  },
+  "truth_table": [
+    {
+      "flag_set": false,
+      "indent_al": null,
+      "byte": "0xa",
+      "indent_call": false,
+      "flag_written": true,
+      "flag_value": true,
+      "outcome": "tail_byte_call"
+    },
+    {
+      "flag_set": false,
+      "indent_al": null,
+      "byte": "0x61",
+      "indent_call": false,
+      "flag_written": true,
+      "flag_value": false,
+      "outcome": "tail_byte_call"
+    },
+    {
+      "flag_set": true,
+      "indent_al": 0,
+      "byte": "0xa",
+      "indent_call": true,
+      "flag_written": true,
+      "flag_value": true,
+      "outcome": "tail_byte_call"
+    },
+    {
+      "flag_set": true,
+      "indent_al": 0,
+      "byte": "0x61",
+      "indent_call": true,
+      "flag_written": true,
+      "flag_value": false,
+      "outcome": "tail_byte_call"
+    },
+    {
+      "flag_set": true,
+      "indent_al": 1,
+      "byte": "0xa",
+      "indent_call": true,
+      "flag_written": false,
+      "flag_value": null,
+      "outcome": "early_return_al_1"
+    },
+    {
+      "flag_set": true,
+      "indent_al": 1,
+      "byte": "0x61",
+      "indent_call": true,
+      "flag_written": false,
+      "flag_value": null,
+      "outcome": "early_return_al_1"
+    }
+  ],
+  "census": {
+    "direct_callers": 0,
+    "relocation_references": [
+      "0x6407918"
+    ],
+    "raw_va_occurrences": 1
+  },
+  "captured_code_executed": false,
+  "limits": "Only the callee's own 95 bytes are qualified. The argument is taken to point at the 24-byte state its three loads describe (data pointer at +0, callback table at +8, flag-byte pointer at +0x10), and both callback methods are taken to return normally with a status byte in AL; these are the same premises the merged newline packet states for the sibling +0x18 method. What the +0x18 and +0x20 methods do inside the callback owner, which concrete writer a given state names, the flag byte's history before this call, the full ESI register's provenance beyond the pinned equality compare, the +40 callee 0x168aa10 and its slot target 0x1680500, and any nominal type for the state or the table remain unestablished. The sibling bulk callee at table+24 is qualified by the merged RE-014 newline packet and is cited context, not re-derived. No captured code executed."
+}

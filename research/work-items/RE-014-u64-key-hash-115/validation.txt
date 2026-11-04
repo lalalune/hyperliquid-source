@@ -69,3 +69,50 @@ Exact owned CLI paths used for freeze/build:
  --objdump ../host-tools/bin/objdump
  --rustc ../host-tools/rust-1.94.1/bin/rustc
 Local output paths/logs above are preserved and are not public runtime state.
+
+CURRENT-MAIN REFRESH against05bc2de303c05525b71e7e257426e741bc66a390:
+Original8fd collection/build receipts above remain historical and unchanged.
+Current main adds8024files and an expanded7886-window dependency registry;
+the earlier76-common-tests baseline statement must not be read as a claim
+about the new full current-main test set. No exact-current full make test or
+hosted CI result is claimed.
+
+Native1622-input replay matches the original frozen input/output/visited hashes;
+Rust/driver hashes remain exactly those in rust-results.json. Six own tests
+pass7.467s on current-main integration. make catalogue/doctor/artifact checks
+completed, but the complete uncached sequence hit600seconds(exit124) during
+later checks: NOT a pass. A remaining uncached catalogue-check was explicitly
+interrupted through its own exec handle(exit130) for the documented repeated
+source-read blocker. Neither incomplete run is promoted into a full pass.
+
+VALIDATION-BLOCKER.md and snapshot-review.json document the minimal live
+checker change. Full cached coverage is BYTE-identical to the actual uncached
+output before the change (SHA787aa8a3160a5069fd7fadce769153882a9d10ed802cf092ead32336682d14f3).
+Before: two-window source-read regression failed3!=1,13.806s. After: both
+snapshot/next-invocation-tamper tests passed10.593s. Original log preserved.
+
+Cached catalogue-check passes. All13 current catalogue tests pass127.113s.
+The first following integrity run failed because an attempted update of an
+older supporting-tool manifest did not respect its local archived checker
+snapshot. That manifest was restored byte-for-byte to current main; archived
+code/data never changed. Failure log retained; not a cache-correctness failure.
+The older packet's standalone closed-inventory verifier was NOT run in that
+failed sequence and is not claimed as new validation.
+
+Continuation command sequence:
+python3 -m unittest discover -s tests -p test_verify_packets.py -v
+make verify reproduce
+execute unchanged original-o0/original-o3 owned clients on1622frozen inputs,
+compare exact outputs, then execute both original smoke-test binaries.
+PASS232.217s,exit0. All12 packet tests pass44.385s;32imported files/pinned
+repos and559manifests7170entries pass; actual node115/visor inventories
+reproduced. Both original optimization-level clients and41-row smoke tests
+were FRESHLY EXECUTED on this current tree after source/driver hash checks.
+No recompile of unchanged Rust is claimed.
+
+Final snapshot tests with a guard against ever mutating a linked captured
+artifact as fixture source:2testsPASS10.604s,limited12.758s. Live-checker
+source snapshots are per-invocation and later file changes are rejected.
+Dependency-like hash attribution clarified: no first-party algorithm identity,
+registered byte credit or gate completion claimed. All guards/masks remain.
+Final manifest check follows metadata refresh; no further Rust/oracle changes.

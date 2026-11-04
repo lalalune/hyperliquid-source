@@ -1,0 +1,888 @@
+{
+ "artifact": {
+  "bytes": 105896032,
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "snapshot": "<authenticated-node115>"
+ },
+ "boundaries": {
+  "next_questions": "what writes the phase struct at and above +0x50 before lvl4_a shapes it; whether the slot callee's sibling bodies 0x4784750/0x4784d00 ever write the spawn struct's [0x200..0x3008) on another path; what the descriptor helper 0x5ce01f0 computes from the query fields, and what the 0x64e1360-slot callee does with the string-static address the spawns pass it",
+  "payload_first_writer": "for record [0x1f0..0x2ff8) there is no writer in the traced window at all: the region crosses the payload copy as stack residue; whether a sibling of the slot callee (the bodies 0x4784750 and 0x4784d00 operate on the same struct type and do store at +0x278/+0x2a0) is involved on some other path is a separate question -- neither sibling is called by the spawns or by the slot callee (their call-site census is the caller census of this packet)",
+  "phase_struct_above_0x50": "who produced the phase struct bytes at and above +0x50 that lvl4_a shapes from -- lvl4_c's own frame history and ctor_c's frame are the candidates -- is the next question on the c chain, together with what produces the phase structs that reach lvl4_a through call4a_b's [[rdx]]",
+  "table_invocation": "the invoker of spawn_e/spawn_d is not in the binary's static references and the range the record-producer packet called a handler table is a run of statics; the two descriptors' functions (0x2a9fca0, 0x2a9e0f0) and the string statics are pinned as contents and reference forms only"
+ },
+ "call_census": {
+  "direct_call_sites": {
+   "direct540": [
+    {
+     "containing_fde": "0x2accee0..0x2ad0db0",
+     "site": "0x2acdedc"
+    },
+    {
+     "containing_fde": "0x2ad0db0..0x2ad4db7",
+     "site": "0x2ad1ef6"
+    },
+    {
+     "containing_fde": "0x2ad5980..0x2ad655e",
+     "site": "0x2ad60e9"
+    },
+    {
+     "containing_fde": "0x2ad6560..0x2ad713e",
+     "site": "0x2ad6cc9"
+    }
+   ],
+   "slot1760_callee": [],
+   "slot7360_callee": []
+  },
+  "lea_references": {
+   "direct540": [],
+   "slot1760_callee": [],
+   "slot7360_callee": []
+  },
+  "tail_call_sites": {
+   "direct540": [],
+   "slot1760_callee": [],
+   "slot7360_callee": []
+  }
+ },
+ "captured_code_executed": false,
+ "classified_census": {
+  "direct540": {
+   "leas": {
+    "r14": {
+     "0x48": 1
+    }
+   },
+   "loads": {
+    "r14": {
+     "0x48": 1
+    },
+    "r15": {
+     "0x0": 1,
+     "0x10": 1
+    },
+    "rbx": {
+     "0x0": 4,
+     "0x8": 4
+    }
+   },
+   "store_sites": {
+    "r14": {
+     "0x98": [
+      "0x2d4d663"
+     ],
+     "0x9c": [
+      "0x2d4d6b7"
+     ],
+     "0xa4": [
+      "0x2d4d6ad"
+     ],
+     "0xa8": [
+      "0x2d4d66a"
+     ],
+     "0xa9": [
+      "0x2d4d671"
+     ]
+    },
+    "r15": {
+     "0x0": [
+      "0x2d4d65f",
+      "0x2d4d73d"
+     ],
+     "0x10": [
+      "0x2d4d65a",
+      "0x2d4d738"
+     ],
+     "0x20": [
+      "0x2d4d655",
+      "0x2d4d733"
+     ],
+     "0x30": [
+      "0x2d4d650",
+      "0x2d4d72e"
+     ],
+     "0x40": [
+      "0x2d4d638",
+      "0x2d4d716"
+     ]
+    }
+   },
+   "stores": {
+    "r14": {
+     "0x98": 1,
+     "0x9c": 1,
+     "0xa4": 1,
+     "0xa8": 1,
+     "0xa9": 1
+    },
+    "r15": {
+     "0x0": 2,
+     "0x10": 2,
+     "0x20": 2,
+     "0x30": 2,
+     "0x40": 2
+    }
+   }
+  },
+  "slot1760_callee": {
+   "leas": {
+    "r14": {
+     "0xd0": 2
+    }
+   },
+   "loads": {
+    "r14": {
+     "0x10": 1,
+     "0x20": 2,
+     "0x28": 2,
+     "0x30": 2,
+     "0x38": 2,
+     "0x60": 2,
+     "0x68": 2,
+     "0x8": 1,
+     "0x90": 4,
+     "0xa0": 4,
+     "0xb0": 4,
+     "0xc0": 4,
+     "0xe0": 2,
+     "0xe4": 1,
+     "0xe5": 2,
+     "0xe7": 2,
+     "0xe8": 2,
+     "0xe9": 1
+    }
+   },
+   "r14_other_dst_sites": [
+    "0x5cf9627",
+    "0x5cf9c6e",
+    "0x5cf9c97",
+    "0x5cfa3d3",
+    "0x5cfa6f6",
+    "0x5cfa7d4"
+   ],
+   "r14_segment_leas": {
+    "0xd0": 2
+   },
+   "r14_segment_loads": {
+    "0x20": 2,
+    "0x28": 1,
+    "0x30": 1,
+    "0x38": 2,
+    "0x60": 2,
+    "0x68": 2,
+    "0x8": 1,
+    "0x90": 4,
+    "0xa0": 4,
+    "0xb0": 4,
+    "0xc0": 4,
+    "0xe0": 2,
+    "0xe4": 1,
+    "0xe5": 2,
+    "0xe7": 2,
+    "0xe8": 2,
+    "0xe9": 1
+   },
+   "r14_segment_read_dst": {
+    "0x0": 1
+   },
+   "store_sites": {
+    "rbx": {
+     "0x0": [
+      "0x5cf970e",
+      "0x5cfa1c9"
+     ],
+     "0x18": [
+      "0x5cfa198"
+     ],
+     "0x28": [
+      "0x5cfa1aa"
+     ],
+     "0x30": [
+      "0x5cfa1ae"
+     ],
+     "0x38": [
+      "0x5cfa1b6"
+     ],
+     "0x40": [
+      "0x5cfa1ba"
+     ],
+     "0x48": [
+      "0x5cfa491"
+     ],
+     "0x8": [
+      "0x5cf970a",
+      "0x5cfa19c"
+     ],
+     "index": [
+      "0x5cfa1c5"
+     ]
+    }
+   },
+   "stores": {
+    "rbx": {
+     "0x0": 2,
+     "0x18": 1,
+     "0x28": 1,
+     "0x30": 1,
+     "0x38": 1,
+     "0x40": 1,
+     "0x48": 1,
+     "0x8": 2,
+     "index": 1
+    }
+   }
+  },
+  "slot7360_callee": {
+   "leas": {
+    "r14": {
+     "0x78": 1
+    },
+    "r15": {
+     "0x1": 1
+    }
+   },
+   "loads": {
+    "r15": {
+     "0x0": 1,
+     "0x10": 1,
+     "0x8": 1
+    }
+   },
+   "store_sites": {
+    "r14": {
+     "0x0": [
+      "0x4784553"
+     ],
+     "0x10": [
+      "0x47844be"
+     ],
+     "0x128": [
+      "0x4784465"
+     ],
+     "0x138": [
+      "0x478445d"
+     ],
+     "0x148": [
+      "0x4784455"
+     ],
+     "0x158": [
+      "0x478446d"
+     ],
+     "0x160": [
+      "0x4784474"
+     ],
+     "0x168": [
+      "0x4784482"
+     ],
+     "0x170": [
+      "0x47844a1"
+     ],
+     "0x18": [
+      "0x47844c7"
+     ],
+     "0x180": [
+      "0x47844a9"
+     ],
+     "0x190": [
+      "0x47844b1"
+     ],
+     "0x1a0": [
+      "0x4784524"
+     ],
+     "0x1b0": [
+      "0x478452c"
+     ],
+     "0x1c0": [
+      "0x4784534"
+     ],
+     "0x1d0": [
+      "0x4784561"
+     ],
+     "0x1e0": [
+      "0x4784570"
+     ],
+     "0x1f0": [
+      "0x4784578"
+     ],
+     "0x1f8": [
+      "0x478457f"
+     ],
+     "0x20": [
+      "0x47844d0"
+     ],
+     "0x28": [
+      "0x4784510"
+     ],
+     "0x38": [
+      "0x478450b"
+     ],
+     "0x48": [
+      "0x4784506"
+     ],
+     "0x58": [
+      "0x4784501"
+     ],
+     "0x68": [
+      "0x47844dc"
+     ]
+    }
+   },
+   "stores": {
+    "r14": {
+     "0x0": 1,
+     "0x10": 1,
+     "0x128": 1,
+     "0x138": 1,
+     "0x148": 1,
+     "0x158": 1,
+     "0x160": 1,
+     "0x168": 1,
+     "0x170": 1,
+     "0x18": 1,
+     "0x180": 1,
+     "0x190": 1,
+     "0x1a0": 1,
+     "0x1b0": 1,
+     "0x1c0": 1,
+     "0x1d0": 1,
+     "0x1e0": 1,
+     "0x1f0": 1,
+     "0x1f8": 1,
+     "0x20": 1,
+     "0x28": 1,
+     "0x38": 1,
+     "0x48": 1,
+     "0x58": 1,
+     "0x68": 1
+    }
+   }
+  }
+ },
+ "copy_slot": "0x64df508",
+ "got_census": {
+  "0x64e1760": {
+   "all_ff15_calls": true,
+   "callee": "0x5cf9600",
+   "relocation": "R_X86_64_RELATIVE",
+   "rip_relative_references": [
+    "0x15d7026",
+    "0x15d70c2",
+    "0x2ae16f2"
+   ]
+  },
+  "0x64e7360": {
+   "all_ff15_calls": true,
+   "callee": "0x4784130",
+   "relocation": "R_X86_64_RELATIVE",
+   "rip_relative_references": [
+    "0x2ad5ad2",
+    "0x2ad66b2",
+    "0x5a5e358",
+    "0x5a62480"
+   ]
+  }
+ },
+ "handler_table": {
+  "boundary": "how spawn_e/spawn_d themselves come to be invoked stays unobserved: their addresses sit as bare relocated fields among the statics, named by nothing, so the invoker obtains them from outside every statically decodable reference in the binary -- the same boundary class as the b-side caller of the block-fill packet, with the table reading itself now corrected",
+  "census": "modrm-checked rip-relative scan of .text for targets in [0x64478a0, 0x6447918), every candidate verified or refuted against the FDE-synced disassembly of its containing function (recorded in the census records): twelve verified references, the rest phantoms; dword occurrences of in-range addresses in .text: zero; qword occurrences of the base 0x64478a0 anywhere in the file outside the relocation table's own offset fields: zero; relocation addends pointing into the range: zero; relocation slots in the range other than the seven named statics: zero",
+  "structure": "the range 0x64478a0..0x6447910 is not a dispatch table but a run of adjacent .data.rel.ro statics.  At 0x64478a0 a relocated pointer to the .rodata string \"node/src/connections.rs\" (RELATIVE addend 0x445db6), followed by the words 0x17 and 0x1900000124.  At 0x64478b8 the descriptor {function 0x2a9fca0, 0x340, 0x8}; at 0x64478d0 the bare relocated pointer to spawn_e; at 0x64478d8 the descriptor {function 0x2a9e0f0, 0x340, 0x8}; at 0x64478f0 the bare relocated pointer to spawn_d; at 0x64478f8 a second relocated pointer to the same .rodata string, followed by 0x17 and 0x54000000c0; at 0x6447910 a relocated pointer to the .rodata string at 0x449029 (\"node/src/gossip_config.rs\").  The seven RELATIVE slots sit at +0x0, +0x18, +0x30, +0x38, +0x50, +0x58, +0x70 from the base with eight plain data qwords between them (0x17 twice, 0x340 twice, 0x8 twice, 0x1900000124, 0x54000000c0).  The record-producer packet called the range a handler table from its relocation slots alone; the reference census here corrects that reading",
+  "walker_verdict": "no walker and no dispatch: no instruction loads through, indexes, or calls through any address in the range, and the two spawn pointers at 0x64478d0/0x64478f0 are named by no instruction at all.  The twelve verified references all pass an address in the range as a call argument: the base 0x64478a0 as rdx on non-returning arms in lvl2_d/lvl2_e (rdi = a neighbouring static, esi = 0x7d or 0x6b, call through GOT slot 0x64df6b8, then ud2); the descriptor addresses 0x64478b8/0x64478d8 as r8 to the registrar 0x15d6730 and as rsi to the helper 0x15dacd0 in the two small bodies that build the 0x340-byte objects the descriptors describe (each body also calls its descriptor's function directly on its stack template in cleanup: 0x2ad5280 calls 0x2a9fca0 at 0x2ad55ba, 0x2ad5600 calls 0x2a9e0f0 at 0x2ad593b); the string static 0x64478f8 as rdi to the GOT-slot 0x64e1360 callee in the two spawns; and 0x6447910 as rdi to the GOT-slot 0x64e1360/0x64e1368 callees in the body after spawn_e"
+ },
+ "handler_table_census": {
+  "base": "0x64478a0",
+  "base_qword_occurrences": 0,
+  "end": "0x6447918",
+  "raw_candidates": [
+   {
+    "computed_target": "0x64478a0",
+    "kind": "rip-relative instruction",
+    "note": "containing FDE 0x2accee0..0x2ad0db0; instruction: lea    rdx,[rip+0x3976e9b]        # 64478a0 <__register_atfork@plt+0x55d10>",
+    "site": "0x2ad09fe",
+    "verdict": "verified"
+   },
+   {
+    "computed_target": "0x64478a0",
+    "kind": "rip-relative, no REX",
+    "note": "containing FDE 0x2accee0..0x2ad0db0; not an instruction start in the FDE-synced disassembly",
+    "site": "0x2ad09ff",
+    "verdict": "refuted"
+   },
+   {
+    "computed_target": "0x64478a0",
+    "kind": "rip-relative instruction",
+    "note": "containing FDE 0x2accee0..0x2ad0db0; instruction: lea    rdx,[rip+0x3976e80]        # 64478a0 <__register_atfork@plt+0x55d10>",
+    "site": "0x2ad0a19",
+    "verdict": "verified"
+   },
+   {
+    "computed_target": "0x64478a0",
+    "kind": "rip-relative, no REX",
+    "note": "containing FDE 0x2accee0..0x2ad0db0; not an instruction start in the FDE-synced disassembly",
+    "site": "0x2ad0a1a",
+    "verdict": "refuted"
+   },
+   {
+    "computed_target": "0x64478a0",
+    "kind": "rip-relative instruction",
+    "note": "containing FDE 0x2ad0db0..0x2ad4db7; instruction: lea    rdx,[rip+0x3972e8e]        # 64478a0 <__register_atfork@plt+0x55d10>",
+    "site": "0x2ad4a0b",
+    "verdict": "verified"
+   },
+   {
+    "computed_target": "0x64478a0",
+    "kind": "rip-relative, no REX",
+    "note": "containing FDE 0x2ad0db0..0x2ad4db7; not an instruction start in the FDE-synced disassembly",
+    "site": "0x2ad4a0c",
+    "verdict": "refuted"
+   },
+   {
+    "computed_target": "0x64478a0",
+    "kind": "rip-relative instruction",
+    "note": "containing FDE 0x2ad0db0..0x2ad4db7; instruction: lea    rdx,[rip+0x3972e73]        # 64478a0 <__register_atfork@plt+0x55d10>",
+    "site": "0x2ad4a26",
+    "verdict": "verified"
+   },
+   {
+    "computed_target": "0x64478a0",
+    "kind": "rip-relative, no REX",
+    "note": "containing FDE 0x2ad0db0..0x2ad4db7; not an instruction start in the FDE-synced disassembly",
+    "site": "0x2ad4a27",
+    "verdict": "refuted"
+   },
+   {
+    "computed_target": "0x64478b8",
+    "kind": "rip-relative instruction",
+    "note": "containing FDE 0x2ad5280..0x2ad55fa; instruction: lea    r8,[rip+0x3972404]        # 64478b8 <__register_atfork@plt+0x55d28>",
+    "site": "0x2ad54ad",
+    "verdict": "verified"
+   },
+   {
+    "computed_target": "0x64478b8",
+    "kind": "rip-relative, no REX",
+    "note": "containing FDE 0x2ad5280..0x2ad55fa; not an instruction start in the FDE-synced disassembly",
+    "site": "0x2ad54ae",
+    "verdict": "refuted"
+   },
+   {
+    "computed_target": "0x64478b8",
+    "kind": "rip-relative instruction",
+    "note": "containing FDE 0x2ad5280..0x2ad55fa; instruction: lea    rsi,[rip+0x3972378]        # 64478b8 <__register_atfork@plt+0x55d28>",
+    "site": "0x2ad5539",
+    "verdict": "verified"
+   },
+   {
+    "computed_target": "0x64478b8",
+    "kind": "rip-relative, no REX",
+    "note": "containing FDE 0x2ad5280..0x2ad55fa; not an instruction start in the FDE-synced disassembly",
+    "site": "0x2ad553a",
+    "verdict": "refuted"
+   },
+   {
+    "computed_target": "0x64478d8",
+    "kind": "rip-relative instruction",
+    "note": "containing FDE 0x2ad5600..0x2ad5973; instruction: lea    r8,[rip+0x39720a9]        # 64478d8 <__register_atfork@plt+0x55d48>",
+    "site": "0x2ad5828",
+    "verdict": "verified"
+   },
+   {
+    "computed_target": "0x64478d8",
+    "kind": "rip-relative, no REX",
+    "note": "containing FDE 0x2ad5600..0x2ad5973; not an instruction start in the FDE-synced disassembly",
+    "site": "0x2ad5829",
+    "verdict": "refuted"
+   },
+   {
+    "computed_target": "0x64478d8",
+    "kind": "rip-relative instruction",
+    "note": "containing FDE 0x2ad5600..0x2ad5973; instruction: lea    rsi,[rip+0x397201d]        # 64478d8 <__register_atfork@plt+0x55d48>",
+    "site": "0x2ad58b4",
+    "verdict": "verified"
+   },
+   {
+    "computed_target": "0x64478d8",
+    "kind": "rip-relative, no REX",
+    "note": "containing FDE 0x2ad5600..0x2ad5973; not an instruction start in the FDE-synced disassembly",
+    "site": "0x2ad58b5",
+    "verdict": "refuted"
+   },
+   {
+    "computed_target": "0x64478f8",
+    "kind": "rip-relative instruction",
+    "note": "containing FDE 0x2ad5980..0x2ad655e; instruction: lea    rdi,[rip+0x3971f26]        # 64478f8 <__register_atfork@plt+0x55d68>",
+    "site": "0x2ad59cb",
+    "verdict": "verified"
+   },
+   {
+    "computed_target": "0x64478f8",
+    "kind": "rip-relative, no REX",
+    "note": "containing FDE 0x2ad5980..0x2ad655e; not an instruction start in the FDE-synced disassembly",
+    "site": "0x2ad59cc",
+    "verdict": "refuted"
+   },
+   {
+    "computed_target": "0x64478f8",
+    "kind": "rip-relative instruction",
+    "note": "containing FDE 0x2ad6560..0x2ad713e; instruction: lea    rdi,[rip+0x3971346]        # 64478f8 <__register_atfork@plt+0x55d68>",
+    "site": "0x2ad65ab",
+    "verdict": "verified"
+   },
+   {
+    "computed_target": "0x64478f8",
+    "kind": "rip-relative, no REX",
+    "note": "containing FDE 0x2ad6560..0x2ad713e; not an instruction start in the FDE-synced disassembly",
+    "site": "0x2ad65ac",
+    "verdict": "refuted"
+   },
+   {
+    "computed_target": "0x6447910",
+    "kind": "rip-relative instruction",
+    "note": "containing FDE 0x2ad7140..0x2adce3a; instruction: lea    rdi,[rip+0x39703ed]        # 6447910 <__register_atfork@plt+0x55d80>",
+    "site": "0x2ad751c",
+    "verdict": "verified"
+   },
+   {
+    "computed_target": "0x6447910",
+    "kind": "rip-relative, no REX",
+    "note": "containing FDE 0x2ad7140..0x2adce3a; not an instruction start in the FDE-synced disassembly",
+    "site": "0x2ad751d",
+    "verdict": "refuted"
+   },
+   {
+    "computed_target": "0x6447910",
+    "kind": "rip-relative instruction",
+    "note": "containing FDE 0x2ad7140..0x2adce3a; instruction: lea    rdi,[rip+0x39703db]        # 6447910 <__register_atfork@plt+0x55d80>",
+    "site": "0x2ad752e",
+    "verdict": "verified"
+   },
+   {
+    "computed_target": "0x6447910",
+    "kind": "rip-relative, no REX",
+    "note": "containing FDE 0x2ad7140..0x2adce3a; not an instruction start in the FDE-synced disassembly",
+    "site": "0x2ad752f",
+    "verdict": "refuted"
+   }
+  ],
+  "relocation_addends_into_range": [],
+  "slots": {
+   "0x64478a0": {
+    "file_qword": "0x0",
+    "relative_addend": "0x445db6"
+   },
+   "0x64478a8": {
+    "file_qword": "0x17",
+    "relative_addend": null
+   },
+   "0x64478b0": {
+    "file_qword": "0x1900000124",
+    "relative_addend": null
+   },
+   "0x64478b8": {
+    "file_qword": "0x0",
+    "relative_addend": "0x2a9fca0"
+   },
+   "0x64478c0": {
+    "file_qword": "0x340",
+    "relative_addend": null
+   },
+   "0x64478c8": {
+    "file_qword": "0x8",
+    "relative_addend": null
+   },
+   "0x64478d0": {
+    "file_qword": "0x0",
+    "relative_addend": "0x2ad6560"
+   },
+   "0x64478d8": {
+    "file_qword": "0x0",
+    "relative_addend": "0x2a9e0f0"
+   },
+   "0x64478e0": {
+    "file_qword": "0x340",
+    "relative_addend": null
+   },
+   "0x64478e8": {
+    "file_qword": "0x8",
+    "relative_addend": null
+   },
+   "0x64478f0": {
+    "file_qword": "0x0",
+    "relative_addend": "0x2ad5980"
+   },
+   "0x64478f8": {
+    "file_qword": "0x0",
+    "relative_addend": "0x445db6"
+   },
+   "0x6447900": {
+    "file_qword": "0x17",
+    "relative_addend": null
+   },
+   "0x6447908": {
+    "file_qword": "0x54000000c0",
+    "relative_addend": null
+   },
+   "0x6447910": {
+    "file_qword": "0x0",
+    "relative_addend": "0x449029"
+   }
+  },
+  "static_strings": {
+   "0x445db6": "node/src/connections.rs",
+   "0x449029": "node/src/gossip_config.rs"
+  },
+  "verified_references": [
+   {
+    "form": "lea rdx on a non-returning arm in lvl2_e: rdi = the static 0x6057ad, esi = 0x7d, call through GOT slot 0x64df6b8, then ud2",
+    "in": "0x2accee0..0x2ad0db0",
+    "site": "0x2ad09fe",
+    "target": "0x64478a0"
+   },
+   {
+    "form": "lea rdx on a non-returning arm in lvl2_e: rdi = the static 0x6057eb, esi = 0x6b, call through GOT slot 0x64df6b8, then ud2",
+    "in": "0x2accee0..0x2ad0db0",
+    "site": "0x2ad0a19",
+    "target": "0x64478a0"
+   },
+   {
+    "form": "lea rdx on a non-returning arm in lvl2_d: rdi = the static 0x6057ad, esi = 0x7d, call through GOT slot 0x64df6b8, then ud2",
+    "in": "0x2ad0db0..0x2ad4db7",
+    "site": "0x2ad4a0b",
+    "target": "0x64478a0"
+   },
+   {
+    "form": "lea rdx on a non-returning arm in lvl2_d: rdi = the static 0x6057eb, esi = 0x6b, call through GOT slot 0x64df6b8, then ud2",
+    "in": "0x2ad0db0..0x2ad4db7",
+    "site": "0x2ad4a26",
+    "target": "0x64478a0"
+   },
+   {
+    "form": "lea r8 as the last argument of the direct registrar call 0x15d6730, with a fresh 0x340-byte copy of the body's stack template in rcx",
+    "in": "0x2ad5280..0x2ad55fa",
+    "site": "0x2ad54ad",
+    "target": "0x64478b8"
+   },
+   {
+    "form": "lea rsi as the second argument of the direct call 0x15dacd0 (rdi = the body's object) on the error arm",
+    "in": "0x2ad5280..0x2ad55fa",
+    "site": "0x2ad5539",
+    "target": "0x64478b8"
+   },
+   {
+    "form": "lea r8 as the last argument of the direct registrar call 0x15d6730, with a fresh 0x340-byte copy of the body's stack template in rcx",
+    "in": "0x2ad5600..0x2ad5973",
+    "site": "0x2ad5828",
+    "target": "0x64478d8"
+   },
+   {
+    "form": "lea rsi as the second argument of the direct call 0x15dacd0 (rdi = the body's object) on the error arm",
+    "in": "0x2ad5600..0x2ad5973",
+    "site": "0x2ad58b4",
+    "target": "0x64478d8"
+   },
+   {
+    "form": "lea rdi as the argument of the indirect call through GOT slot 0x64e1360 on spawn_d's entry-byte arm",
+    "in": "0x2ad5980..0x2ad655e",
+    "site": "0x2ad59cb",
+    "target": "0x64478f8"
+   },
+   {
+    "form": "lea rdi as the argument of the indirect call through GOT slot 0x64e1360 on spawn_e's entry-byte arm",
+    "in": "0x2ad6560..0x2ad713e",
+    "site": "0x2ad65ab",
+    "target": "0x64478f8"
+   },
+   {
+    "form": "lea rdi as the argument of the indirect call through GOT slot 0x64e1360 in the body after spawn_e",
+    "in": "0x2ad7140..0x2adce3a",
+    "site": "0x2ad751c",
+    "target": "0x6447910"
+   },
+   {
+    "form": "lea rdi as the argument of the indirect call through GOT slot 0x64e1368 in the body after spawn_e",
+    "in": "0x2ad7140..0x2adce3a",
+    "site": "0x2ad752e",
+    "target": "0x6447910"
+   }
+  ]
+ },
+ "limits": "Static trace only: no captured instruction was executed and no concrete input values were observed.  The classified access census classifies each instruction of the three callee bodies by operand position in fresh objdump text (a mov-family bracket destination is a store, a bracket source is a load, a lea bracket is an address-taken); register identity follows the entry assignments (r14 = rdi in 0x4784130, rbx/r14/r15 = rdi/rsi/rdx in 0x2d4d540 until the lea at 0x2d4d5e7 rebinds r15 to rsi + 0x48, rbx/r14 = rdi/rsi in 0x5cf9600) and, for 0x5cf9600, the r14 census is split at the first r14 reload (0x5cf9bc6) and the rbx store sites are enumerated by address because rbx is reloaded on later arms.  Whole-record copies move bytes without naming fields -- the copies observed are enumerated in the findings (the spawns' struct copies, the head copy, the callee's [0x78..0x128) copy) -- so for copied fields the census is a statement about direct accesses and the copies actually observed.  The handler-table census verifies every candidate reference by re-disassembling its containing FDE from its start; raw byte-pattern hits that do not survive that check are recorded as phantoms, not references.  Jump-table arm reachability is recorded where the earlier packets recorded it and is not re-decided here.  Raw values are recorded mechanically; no field types are guessed.",
+ "owners": {
+  "direct540": {
+   "bytes": 521,
+   "end": "0x2d4d749",
+   "file_offset": "0x2d4c540",
+   "sha256": "63f8b162ab28d87a0386a5afd901c1c15de19b023c0a6fd4d11ccd816e524dfb",
+   "start": "0x2d4d540"
+  },
+  "lvl4_c": {
+   "bytes": 4386,
+   "end": "0x2ae27b2",
+   "file_offset": "0x2ae0690",
+   "sha256": "6ca0595c13836bca0cb0173bd591a09d6da6791532e23a5a71c63715380727d9",
+   "start": "0x2ae1690"
+  },
+  "slot1760_callee": {
+   "bytes": 4785,
+   "end": "0x5cfa8b1",
+   "file_offset": "0x5cf8600",
+   "sha256": "12813161d76cb5aa11039d12cbbf45d6f170b2aa53da586df8e03b579e02d13b",
+   "start": "0x5cf9600"
+  },
+  "slot7360_callee": {
+   "bytes": 1559,
+   "end": "0x4784747",
+   "file_offset": "0x4783130",
+   "sha256": "dcdea2d4c674929e33ee250871c0a2e88299d599cd7435c8ab2cc9fb79ce0a8c",
+   "start": "0x4784130"
+  },
+  "spawn_d": {
+   "bytes": 3038,
+   "end": "0x2ad655e",
+   "file_offset": "0x2ad4980",
+   "sha256": "42d1acf80b7d6f20612d69b1df61149a8e669996649b6044f97a4859fac764a4",
+   "start": "0x2ad5980"
+  },
+  "spawn_e": {
+   "bytes": 3038,
+   "end": "0x2ad713e",
+   "file_offset": "0x2ad5560",
+   "sha256": "c8863fdfc321585b0cd46a5bdb0bcd1bd4c1a820ba53f9e56b6082037df03a79",
+   "start": "0x2ad6560"
+  }
+ },
+ "packet": "RE-005-node115-spawn-payload-fields",
+ "phase_fill": {
+  "call_shape": "lvl4_c calls with rdi = its stack phase buffer at [rsp+0x5aa8], rsi = the query struct at [rsp+0x130] filled by the direct helper 0x5cf93f0 (call at 0x2ae16d1, esi = 1); between the two calls lvl4_c patches the query word at +0xe5 to 0x0101 (store at 0x2ae16d6)",
+  "extent": "the fill covers phase [0x0..0x50) at most; no store in the body names a phase offset at or above +0x50, so every field lvl4_a/lvl3_c later shape from (+0xc8..+0xf0, +0x1e8, the dispatch byte +0x21a, the embedded record at +0x220) is left exactly as the caller's stack held it",
+  "identity": "the GOT slot 0x64e1760 holds an R_X86_64_RELATIVE relocation whose addend is 0x5cf9600; the slot has exactly three rip-relative references binary-wide, all FF 15 call sites: lvl4_c 0x2ae16f2 and two sites in the body 0x15d6fd0..0x15d8447 (0x15d7026, 0x15d70c2)",
+  "read_only_fields": "the query struct is read and never stored into: in the entry segment (up to the first r14 reload at 0x5cf9bc6) the body loads +0x8, +0x20, +0x28, +0x30, +0x38, +0x60, +0x68, +0x90, +0xa0, +0xb0, +0xc0, +0xe0, +0xe4, +0xe5, +0xe7, +0xe8, +0xe9, reads +0x0 with a cmp and takes +0xd0 by lea (twice); the body's only r14-destination instructions are that cmp and five lock inc/dec refcount operations at 0x5cf9c6e ([r14-0x10]), 0x5cf9c97, 0x5cfa3d3, 0x5cfa6f6 and 0x5cfa7d4, all through reloaded values",
+  "wrapper_arm": "a third arm writes nothing into the phase struct: it fills a heap wrapper ({+0x0 = 1, +0x30 = 1, +0x38 = r14, +0x40 = the phase pointer, +0x48 = a saved word} -- the +0x40 store at 0x5cfa485), reloads rbx with the wrapper (0x5cfa489) and only then stores [rbx+0x48] (0x5cfa491), so that store is a wrapper field, not a phase field; the arm returns the wrapper",
+  "written_fields": "on the tag-3 arm: {+0x0 = 2, +0x8 = the descriptor-result pair's second word} (stores at 0x5cf970a/0x5cf970e, also reached through the common exit with rcx = 8); on the long arm: +0x0 = 0, +0x8..+0x28 zeroed (movups at 0x5cfa198/0x5cfa19c), +0x28 = a fresh 0x98-byte heap block copied from the callee's staging buffer (allocation call at 0x5cfa16d, copy at 0x5cfa18f), +0x30 = 0, +0x38 = the query pointer itself (r14), +0x40 = the first word and +0x48 = the second word of the result of the direct call 0x5cf3d00(query, [query+0x68]) at 0x5cf9798 (the +0x48 store rides the common-exit indexed store [rbx+rcx*1] at 0x5cfa1c5 with rcx = 0x48)"
+ },
+ "pins": {
+  "direct540": {
+   "0x2d4d574": "488b03",
+   "0x2d4d5b0": "ff15ca397903",
+   "0x2d4d5e7": "4d8d7e48",
+   "0x2d4d65f": "410f1107",
+   "0x2d4d663": "4189ae98000000"
+  },
+  "slot7360_callee": {
+   "0x4784285": "498b07",
+   "0x4784414": "4881fb00a30200",
+   "0x4784465": "410f1186280100",
+   "0x478454d": "ff15b5afd501",
+   "0x4784553": "49c70600000000",
+   "0x4784578": "4d89bef0010000"
+  },
+  "spawn_d": {
+   "0x2ad59cb": "488d3d261f9703",
+   "0x2ad5ad2": "ff158818a103",
+   "0x2ad5adf": "48898424e8340000",
+   "0x2ad60e9": "e852742700",
+   "0x2ad6169": "4889842480330000",
+   "0x2ad6196": "ff156c93a003",
+   "0x2ad61ac": "89ac24e8340000",
+   "0x2ad6307": "ff15fb91a003"
+  },
+  "spawn_e": {
+   "0x2ad65ab": "488d3d46139703",
+   "0x2ad66b2": "ff15a80ca103",
+   "0x2ad66bf": "48898424e8340000",
+   "0x2ad66c7": "488dbc248f630000",
+   "0x2ad6cc9": "e872682700",
+   "0x2ad6d49": "4889842480330000",
+   "0x2ad6d56": "4889842488330000",
+   "0x2ad6d76": "ff158c87a003",
+   "0x2ad6d7c": "4c89a424d8340000",
+   "0x2ad6d84": "4c89b424e0340000",
+   "0x2ad6d8c": "89ac24e8340000",
+   "0x2ad6d93": "66c78424ec3400000100",
+   "0x2ad6ee7": "ff151b86a003"
+  }
+ },
+ "spawn_access_census": {
+  "spawn_d": {
+   "exact_counts": {
+    "[rsp+0x3380]": 5,
+    "[rsp+0x3388]": 1,
+    "[rsp+0x3390]": 2,
+    "[rsp+0x34e8]": 2,
+    "[rsp+0x6388]": 4,
+    "[rsp+0x9390]": 5
+   },
+   "zero_patterns": {
+    "[r13+0x12e8]": 0,
+    "[r13+0x13d8]": 0,
+    "[r13+0x13e0]": 0,
+    "[r13+0x13e8]": 0,
+    "[r13+0x13f0]": 0,
+    "[r13+0x2278]": 0,
+    "[r13+0x2368]": 0,
+    "[r13+0x2370]": 0,
+    "[r13+0x2378]": 0,
+    "[r13+0x2380]": 0,
+    "[rsp+0x4678]": 0,
+    "[rsp+0x4768]": 0,
+    "[rsp+0x4770]": 0,
+    "[rsp+0x4778]": 0,
+    "[rsp+0x4780]": 0,
+    "[rsp+0x5608]": 0,
+    "[rsp+0x56f8]": 0,
+    "[rsp+0x5700]": 0,
+    "[rsp+0x5708]": 0,
+    "[rsp+0x5710]": 0
+   }
+  },
+  "spawn_e": {
+   "exact_counts": {
+    "[rsp+0x3380]": 5,
+    "[rsp+0x3388]": 1,
+    "[rsp+0x3390]": 2,
+    "[rsp+0x34e8]": 2,
+    "[rsp+0x6388]": 4,
+    "[rsp+0x9390]": 5
+   },
+   "zero_patterns": {
+    "[r13+0x12e8]": 0,
+    "[r13+0x13d8]": 0,
+    "[r13+0x13e0]": 0,
+    "[r13+0x13e8]": 0,
+    "[r13+0x13f0]": 0,
+    "[r13+0x2278]": 0,
+    "[r13+0x2368]": 0,
+    "[r13+0x2370]": 0,
+    "[r13+0x2378]": 0,
+    "[r13+0x2380]": 0,
+    "[rsp+0x4678]": 0,
+    "[rsp+0x4768]": 0,
+    "[rsp+0x4770]": 0,
+    "[rsp+0x4778]": 0,
+    "[rsp+0x4780]": 0,
+    "[rsp+0x5608]": 0,
+    "[rsp+0x56f8]": 0,
+    "[rsp+0x5700]": 0,
+    "[rsp+0x5708]": 0,
+    "[rsp+0x5710]": 0
+   }
+  }
+ },
+ "spawn_payload": {
+  "attribution": "final writer per record region: [0x0..0x148) the 0x148-byte head copy; [0x148..0x150) the spawn r12 store; [0x150..0x158) the spawn r14 store; [0x158..0x160) the spawn pointer/dword/word store sequence; [0x160..0x1f0) the 0x64e7360 callee (its struct stores at [0x170..0x200)); [0x1f0..0x2ff8) no writer in any pinned body",
+  "direct540": {
+   "context_writes": "through rsi (held in r14): a 0x50-byte entry stored at [rsi+0x48..0x98) via movups blocks through r15 = rsi + 0x48 (the lea at 0x2d4d5e7; two store blocks), and field stores at [rsi+0x98] (dword), [rsi+0x9c] (qword), [rsi+0xa4] (dword), [rsi+0xa8]/[rsi+0xa9] (bytes)",
+   "identity": "the direct callee 0x2d4d540, a 521-byte body; four direct call sites binary-wide (lvl2_d 0x2acdedc, lvl2_e 0x2ad1ef6, spawn_d 0x2ad60e9, spawn_e 0x2ad6cc9), no tail calls, no lea references",
+   "record_writes": "none: the classified census finds zero stores through rdi in the whole body; the copy is only read -- its [rdi] qword and [rdi+0x8] dword, four times each, as the key of the lookup call through GOT slot 0x64e0f80 at 0x2d4d5b0",
+   "spawn_arguments": "rdi = the record copy at [rsp+0x6388], rsi = the context pointer [entry+0xa8] + 0x18, rdx = a 0x18-byte descriptor {0x605663, 0x18, a dword out of the spawn frame}"
+  },
+  "head_copy": "the record head [0x0..0x148) is the last write to that range: the spawn bodies copy 0x148 bytes (copy slot) from a stack block at [rsp+0x190] assembled by two earlier copies -- [rsp+0x190..0x228) from the 0x98-byte lookup-result block at [rsp+0xf8], [rsp+0x228..0x2d8) from the context snapshot at [rsp+0x48] -- overwriting the slot callee's stores to struct [0x10..0x158)",
+  "slot7360_callee": {
+   "identity": "the GOT slot 0x64e7360 holds an R_X86_64_RELATIVE relocation whose addend is 0x4784130; the slot has exactly four rip-relative references binary-wide, all FF 15 call sites: spawn_d 0x2ad5ad2, spawn_e 0x2ad66b2 and two b-side bodies (0x5a5e358, 0x5a62480)",
+   "second_argument": "a scalar, not a struct length: at 0x4784414 it is clamped against 0x2a300 (cmp/cmovb) and multiplied by 0x3e8 in a division-based rate computation; it is never dereferenced",
+   "spawn_arguments": "rdi = the record struct base ([rsp+0x3380] in the spawns), esi = 0x258, rdx = the address of a {pointer, length, capacity} descriptor of the 11-byte string \"abci_stream\" the spawn built at [rsp+0x370]",
+   "third_argument": "read only: [r15], [r15+0x8] and [r15+0x10] once each (the descriptor triple is copied into the constructed struct at +0x10/+0x18/+0x20)",
+   "writes": "through rdi (held in r14): twenty-five stores covering [0x10..0x200) plus a 0xb0-byte copy (copy slot, call at 0x478454d) into [0x78..0x128), and a zero store at [0x0]; the classified store census is complete for the FDE -- no store names [0x8..0x10) and no store or copy reaches [0x200] or above"
+  },
+  "spawn_stores": "after the head copy each spawn stores r12 at record +0x148 and r14 at record +0x150 (overwriting the callee's struct stores at +0x158/+0x160), stores the function pointer 0x2a92c20 at record +0x158 before the head copy runs, and after it overwrites that qword's low dword with ebp (0x2ad6d8c) and the following word with 0x0001 (0x2ad6d93); the struct head block [0x3380..0x3390) is made self-referential ([rsp+0x3380] = &[rsp+0x40], [rsp+0x3388] = &[rsp+0xf])",
+  "unattributed": "record [0x1f0..0x2ff8) -- struct [0x200..0x3008) -- is written by nothing in the traced window before the payload copy ([rsp+0x3390] -> [rsp+0x9390], 0x2ff8 bytes) reads it; the spawns' descriptor-offset pattern tables over the record are empty exactly as in the record-producer packet, and the slot callee's store census stops at 0x200"
+ }
+}

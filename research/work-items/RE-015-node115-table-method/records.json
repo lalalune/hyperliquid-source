@@ -1,0 +1,205 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "owners": [
+    {
+      "role": "table_method",
+      "start": "0x141e8f0",
+      "end": "0x141e951",
+      "file_offset": "0x141d8f0",
+      "bytes": 97,
+      "sha256": "cca62c47ceefd6b3d4ae5288e6a18da83949305483fcd284be4e52b1c701f712",
+      "frames": {
+        "fde": {
+          "va": "0xca7384",
+          "bytes_hex": "28000000b0040000647577006100000000410e108602430d064783068c058e048f037b0c0708410c06100000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    }
+  ],
+  "method": {
+    "arguments": {
+      "out": "rdi",
+      "string": "rsi",
+      "length": "rdx"
+    },
+    "out_layout": {
+      "capacity": "+0x0",
+      "buffer_pointer": "+0x8",
+      "length": "+0x10"
+    },
+    "capacity_load": {
+      "site": "0x141e901",
+      "reads": "out +0x0"
+    },
+    "length_load": {
+      "site": "0x141e904",
+      "reads": "out +0x10"
+    },
+    "remaining": {
+      "site": "0x141e908",
+      "computes": "capacity - length",
+      "compare": "0x141e90b",
+      "branch": "0x141e90e",
+      "branch_target": "0x141e937",
+      "taken_when": "requested length > remaining"
+    },
+    "zero_length": {
+      "test": "0x141e910",
+      "branch": "0x141e913",
+      "skips_to": "0x141e925"
+    },
+    "copy": {
+      "buffer_load": "0x141e915",
+      "destination": "buffer pointer + current length",
+      "destination_add": "0x141e919",
+      "count_move": "0x141e91c",
+      "call": "0x141e91f",
+      "form": "call qword ptr [rip + disp32] through the .got slot",
+      "slot": "0x64df508",
+      "arguments": {
+        "rdi": "buffer pointer + current length",
+        "rsi": "the string pointer argument, verbatim",
+        "rdx": "the requested length"
+      }
+    },
+    "length_store": {
+      "site": "0x141e928",
+      "stores": "advanced length to out +0x10",
+      "only_store_to_out": true
+    },
+    "return": {
+      "site": "0x141e92c",
+      "value": 0,
+      "form": "xor eax, eax; the byte in AL is the result"
+    },
+    "slow_path": {
+      "entry": "0x141e937",
+      "string_save": "0x141e93a",
+      "string_restore": "0x141e948",
+      "grow_call": "0x141e943",
+      "grow_target": "0x141c980",
+      "grow_arguments": {
+        "rdi": "out",
+        "rsi": "current length",
+        "rdx": "requested length"
+      },
+      "length_reload": "0x141e94b",
+      "rejoin": "0x141e94f",
+      "rejoin_target": "0x141e915",
+      "capacity_rechecked": false
+    }
+  },
+  "table_binding": {
+    "table": "0x63f3d50",
+    "section": ".data.rel.ro",
+    "words": [
+      {
+        "offset": 0,
+        "file_value": 0,
+        "relocation": {
+          "slot": "0x63f3d50",
+          "type": 8,
+          "type_name": "R_X86_64_RELATIVE",
+          "addend": "0x141c960"
+        }
+      },
+      {
+        "offset": 8,
+        "file_value": 24,
+        "relocation": null
+      },
+      {
+        "offset": 16,
+        "file_value": 8,
+        "relocation": null
+      },
+      {
+        "offset": 24,
+        "file_value": 0,
+        "relocation": {
+          "slot": "0x63f3d68",
+          "type": 8,
+          "type_name": "R_X86_64_RELATIVE",
+          "addend": "0x141e8f0"
+        }
+      }
+    ],
+    "method_slot": "0x63f3d68",
+    "method_addend_slots": [
+      "0x63f3d68"
+    ]
+  },
+  "memcpy_binding": {
+    "slot": "0x64df508",
+    "section": ".got",
+    "relocation_type": 6,
+    "relocation_type_name": "R_X86_64_GLOB_DAT",
+    "symbol_index": 7,
+    "symbol": "memcpy"
+  },
+  "reference_census": {
+    "method_direct": 0,
+    "method_rip_relative_refs": [],
+    "method_address_as_data": 0,
+    "table_rip_relative_refs": [
+      "0x141e4ad",
+      "0x141ed86"
+    ],
+    "table_lea_fdes": {
+      "0x141e4ad": [
+        21095328,
+        21095736
+      ],
+      "0x141ed86": [
+        21097856,
+        21097875
+      ]
+    },
+    "method_slot_rip_relative_refs": []
+  },
+  "boundaries": [
+    {
+      "role": "grow",
+      "start": "0x141c980",
+      "end": "0x141c9f2",
+      "file_offset": "0x141b980",
+      "bytes": 114,
+      "sha256": "0d7d86caca16b63ec8781e212843d490b18b5981ac4dac000e961a18466ee6a7",
+      "frames": {
+        "fde": {
+          "va": "0xca7174",
+          "bytes_hex": "24000000a0020000045877007200000000410e108602430d064783048e0302500c0708410c061000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    },
+    {
+      "role": "table_word0_function",
+      "start": "0x141c960",
+      "end": "0x141c975",
+      "file_offset": "0x141b960",
+      "bytes": 21,
+      "sha256": "eea4768c2b16bea6910e54a26dcd08e2d71bd752f0a15e5af7d7dba25ed1f99d",
+      "frames": {
+        "fde": {
+          "va": "0xca7160",
+          "bytes_hex": "100000008c020000f85777001500000000000000"
+        },
+        "cie": {
+          "va": "0xca6ed8",
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+        }
+      }
+    }
+  ],
+  "chain_verdict": "The descriptor table method at +0x18 for the chain's consumer table (0x63f3d50) is 0x141e8f0, a byte-append writer over a 24-byte out header (capacity at +0x0, buffer pointer at +0x8, length at +0x10). Given (out, string pointer, length), it copies the bytes verbatim to buffer + length through the .got memcpy slot when they fit in capacity - length, first calling the grow boundary (out, current length, requested length) when they do not, and in both cases stores the advanced length to out +0x10 and returns 0. The pointer formatter's tail-called write of the selected level name is exactly this append: the name lands at the out buffer's current end and the method's 0 is the formatter's result byte.",
+  "captured_code_executed": false,
+  "limits": "Descriptor table method 0x141e8f0 only: the capacity/length check against the out words (+0x0 capacity, +0x8 buffer pointer, +0x10 length), the verbatim byte copy through the .got memcpy slot (0x64df508), the single length store back to out +0x10, the always-zero return byte, and the slow path that saves the string pointer, calls the grow boundary (0x141c980) with (out, current length, requested length) and rejoins the copy without re-checking capacity; plus the consumer table binding at 0x63f3d50, whose +0x18 word is zero in the file and filled at load by the binary's only R_X86_64_RELATIVE relocation carrying the method as addend (slot 0x63f3d68). The grow callee's body, the table word +0x0 function (0x141c960), the two lea sites' containing bodies, the out structure's construction and lifetime, and every other descriptor table's method are NOT traced: the grow is recorded as a boundary FDE with its call site and argument registers only, since it never receives the string pointer. No captured code executed, no runtime value, indirect-call recovery beyond the pinned table word, #94 correspondence, or reconstruction gate is claimed."
+}

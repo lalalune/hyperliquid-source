@@ -5,6 +5,7 @@ import hashlib
 import http.client
 import json
 import os
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -139,19 +140,31 @@ def signature_pairs(manifest):
     return pairs
 
 
+def gpg_path(path):
+    """Git's MSYS GPG needs the paths used by its own POSIX runtime."""
+    if os.name != 'nt':
+        return str(path)
+    executable = shutil.which('gpg')
+    converter = Path(executable).with_name('cygpath.exe') if executable else None
+    if converter is None or not converter.is_file():
+        return str(path)
+    return subprocess.check_output(
+        [str(converter), '-u', '-a', str(path)], text=True, encoding='utf-8').strip()
+
+
 def verify_signatures(root, manifest):
     fingerprint = manifest['signing_fingerprint']
     pairs = signature_pairs(manifest)
     with tempfile.TemporaryDirectory(prefix='hl-verify-') as home:
         # This workflow imports only a public verification key. It must not
         # require starting a secret-key agent or other helper in a sandbox.
-        base = ['gpg', '--batch', '--no-options', '--no-autostart', '--homedir', home]
-        subprocess.run(base + ['--import', str(root / KEY)],
+        base = ['gpg', '--batch', '--no-options', '--no-autostart', '--homedir', gpg_path(home)]
+        subprocess.run(base + ['--import', gpg_path(root / KEY)],
                        check=True, capture_output=True)
         for relative, signature in pairs:
             binary = root / relative
             try:
-                result = subprocess.run(base + ['--status-fd', '1', '--verify', str(root / signature), str(binary)],
+                result = subprocess.run(base + ['--status-fd', '1', '--verify', gpg_path(root / signature), gpg_path(binary)],
                                         check=True, capture_output=True, text=True, encoding='utf-8')
             except subprocess.CalledProcessError as error:
                 lines = [line for line in (error.stderr or '').strip().splitlines() if line.strip()]

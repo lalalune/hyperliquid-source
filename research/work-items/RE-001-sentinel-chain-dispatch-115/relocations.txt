@@ -1,0 +1,20 @@
+Node #115 work binary work/hl-node-115.bin, SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301.
+Relocation findings (readelf -r, whole-file RELA scan in census.py):
+- Each sentinel function address is the addend of four R_X86_64_RELATIVE
+  relocations. One of the four is the chain-walk getter's global, which
+  therefore holds the sentinel's own address at runtime:
+  - 0x64ecde0 (.got) -> 0x5d2efc0 (sentinel slot 0x70)
+  - 0x64ece30 (.got) -> 0x5d2ef10 (sentinel slot 0x78)
+  - 0x64ecdf0 (.got) -> 0x5d2f070 (sentinel slot 0x98)
+  At runtime each global therefore holds its sentinel function address;
+  the file bytes at those slots are zero (resolved by the loader).
+- The other three RELATIVE slots per sentinel are .data.rel.ro entries
+  (0x64c8e10 / 0x64c8f10 / 0x64c9e70 for slot 0x70, and the +0x8 / +0x28
+  counterparts for slots 0x78 and 0x98); which classes' vtables they
+  belong to is not claimed. The whole-file qword hits for each sentinel
+  address are the addend fields of these RELA records inside .rela.dyn,
+  not separate stored pointers.
+- None of the three windows has a direct call or a tail jump anywhere
+  in .text (see records.json census), so the sentinels are reached only
+  through their vtable slots and the getters' globals, not by a direct
+  call in this binary.

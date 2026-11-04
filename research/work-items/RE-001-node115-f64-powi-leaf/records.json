@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "task_id": "RE-001-node115-f64-powi-leaf",
+  "target": {
+    "release": "node115",
+    "path": "artifacts/node/115/hl-node",
+    "size_bytes": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "function": {
+    "va_start": "0x63f0080",
+    "va_end": "0x63f00c6",
+    "length_bytes": 70,
+    "section": ".text",
+    "fde_va": "0x103d4b0",
+    "cie_va": "0xca6ed8",
+    "lsda": null,
+    "unwind_index": 135300,
+    "body_sha256": "574d4bd89cb36bd1de100c05ba8760818a422ac4593b514a6fed8d975a09877c",
+    "is_leaf": true,
+    "call_count": 0
+  },
+  "seed_constant": {
+    "va": "0x4592b0",
+    "bytes_le": "000000000000f03f",
+    "value_f64": 1.0,
+    "section": ".rodata"
+  },
+  "claim": {
+    "status": "inference-from-disassembly",
+    "label": "IEEE-754 binary64 integer power x**n via binary exponentiation",
+    "abi": "SysV x86-64: xmm0 = base (f64), edi = exponent (i32); returns xmm0 (f64)",
+    "steps": [
+      "0x63f0086 neg eax; 0x63f0088 cmovs eax,edi => eax = magnitude |n| (INT_MIN unchanged)",
+      "0x63f008b test al,1 / je: unrolled bit0 seeds result = base or 1.0",
+      "0x63f00a0 loop: mulsd xmm1,xmm1 (square base); test al,1 folds set bit into result",
+      "0x63f00ac shr eax,1 / jne: consume magnitude bits",
+      "0x63f00b0 test edi,edi; js 0x63f00b5: if ORIGINAL n<0 return 1.0/result (reciprocal)"
+    ],
+    "likely_identity": "compiler-builtins __powidf2 / llvm.powi.f64.i32 lowering (dependency-tagged; NOT claimed as byte-equivalent here and NOT registered as a byte-window)"
+  },
+  "adjacency": {
+    "note": "Immediately precedes the already-studied window at 0x63f00d0 (104792272) in research/byte-windows.json / RE-004 u128->binary64; this leaf (0x63f0080) is distinct and unregistered.",
+    "next_fn_va": "0x63f00d0",
+    "next_fn_unwind_index": 135301
+  },
+  "verification": {
+    "script": "verify_powi_leaf.py",
+    "execution_of_capture": false,
+    "positive_agreements": 84,
+    "positive_total": 84,
+    "exact_reference": "independent binary-exponentiation impl (bit-exact)",
+    "math_reference": "x ** n with relative tolerance 1e-12",
+    "controls": [
+      {"name": "seed=2.0", "diverges": true},
+      {"name": "no reciprocal (js gate)", "diverges": true},
+      {"name": "cmovs->nop (static re-disassembly)", "artifact": "control-1-cmovs-to-nop.objdump.txt"},
+      {"name": "js->jns (static re-disassembly)", "artifact": "control-2-js-to-jns.objdump.txt"}
+    ]
+  },
+  "tools": {
+    "objdump": "GNU binutils (see make doctor)",
+    "readelf": "GNU binutils",
+    "python": "3.x",
+    "fde_source": "tools/fde_extents.py --release 115"
+  },
+  "gates_requested": "none"
+}

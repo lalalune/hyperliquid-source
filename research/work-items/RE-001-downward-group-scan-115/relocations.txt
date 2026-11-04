@@ -1,0 +1,19 @@
+Node #115 work binary work/hl-node-115.bin, SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301.
+Relocation and reference findings (whole-file scans in census.py):
+- None of the five window addresses is the addend of any
+  R_X86_64_RELATIVE relocation, and none appears as a stored 8-byte
+  qword anywhere in the file (see records.json census).
+- The scanner has exactly one direct call, at site 0x5ded3c7 (site
+  only, not claimed here), and no tail jump.
+- The stub has exactly 116 direct calls, including this scanner's
+  site 0x5d52bd7 (sites only), and no tail jump: it is a shared
+  no-op stub, not scanner-specific code.
+- The index leaf has exactly 11 direct calls, including this
+  scanner's site 0x5d52c06 (sites only), and no tail jump.
+- The group sum has exactly four direct calls: this scanner's site
+  0x5d52c15, plus 0x5eeccf5 (the #2320 level-stats getter), 0x5ef22a2
+  and 0x5ef2374 (sites only). It has no tail jump.
+- The leaf has exactly five direct calls (0x5d9df02, 0x5d9df19,
+  0x5d9e015, 0x5d9e482, 0x5da788a — sites only) and exactly one tail
+  jump: the group sum's site 0x5f6c316, which is the call claimed by
+  this work item.

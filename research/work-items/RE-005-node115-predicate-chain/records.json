@@ -1,0 +1,499 @@
+{
+ "artifact": {
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "constants": {
+  "builder_fallback_add": 946080000,
+  "conversion_adjust_down": -999000001,
+  "conversion_adjust_up": 999999,
+  "conversion_threshold": 999000001,
+  "millis_magic_multiplier": 1125899907,
+  "millis_magic_shift": 50,
+  "nsec_per_sec": 1000000000,
+  "selector_offsets": [
+   "0x160",
+   "0x240"
+  ],
+  "value_saturation": "0xfffffffffffffffd",
+  "wheel_bucket_stride": 1040
+ },
+ "decision_table": {
+  "preconditions": "the conversion assert must not trap ([handle+sel+0x90] != 1000000000 at 0x5cead6a and 0x5ceaddd) and the setter wheel byte-lock must be acquired (directly, or after the contention wait via slot 0x64e01f8)",
+  "rows": [
+   {
+    "predicate_result": "returns 1 (nonzero)",
+    "setter_outcome": "direct store: [S+0x38] := converted value at 0x5cea8c1, [S+0x30] := converted value at 0x5cea8c5, entry inserted via 0x5cf6880",
+    "wheel_byte_+0x30": "== 0"
+   },
+   {
+    "predicate_result": "returns 0",
+    "setter_outcome": "no store, flag byte untouched",
+    "wheel_byte_+0x30": "!= 0, entry value slot still -1 at the flag test"
+   },
+   {
+    "predicate_result": "timer-error unwind (no return)",
+    "setter_outcome": "flag store: byte [S+0x58] := 1 at 0x5cea897, [S+0x38] := -1 restored at 0x5cea89c, entry state [S+0x50] |= 2 via cmpxchg at 0x5cea8b7",
+    "wheel_byte_+0x30": "!= 0, entry value slot != -1 at the flag test"
+   }
+  ],
+  "scope": "predicate non-TLS path, [S+0x10] == 2, entry slot [S+0x38] freshly stored as -1 and flag byte [S+0x58] freshly zeroed by the predicate",
+  "testable_statement": "Through this path checker_a returns nonzero iff byte [wheel+0x30] == 0 at the setter's flag test (0x5cea881), where wheel = [S+0x18] + sel + 0x50 and sel = byte [S+0x10] != 0 ? 0x160 : 0x240; the converted value's magnitude never influences the predicate's return beyond being stored."
+ },
+ "exported_bodies": [
+  "checker_a",
+  "builder",
+  "predicate",
+  "normalise",
+  "accessor",
+  "basevalue",
+  "desccall",
+  "conversion",
+  "setter",
+  "postcall",
+  "insert",
+  "bucket"
+ ],
+ "findings": {
+  "attribution": "The -1 sentinel at S+0x38 is overwritten by the conversion chain, not by the slot-0x64e0518 callee. The conversion body 0x5cead40 makes no store through its argument at all (its only stores are four stack slots); it tail-jumps at 0x5ceae3e to the setter body 0x5cea7c0 with rcx = &[S+0x20], rdx = the converted value and rdi = the wheel object at handle+sel+0x50. The setter stores the value at 0x5cea8c1 (mov [r14+0x18], r12 with r14 = &[S+0x20], i.e. S+0x38) and at 0x5cea8c5 ([r14+0x10], i.e. S+0x30).",
+  "builder_inputs": "Builder 0x5cf2150(rdi = S, rsi = duration seconds, edx = duration nanoseconds, rcx = descriptor static 0x644dc28). It calls the base-value body 0x5c842e0 with edi = 1 (sites 0x5cf216f and, on the overflow fallback, 0x5cf21b6; the fallback adds 946080000 to the re-read seconds). 0x5c842e0 forwards that 1 untouched as the clock id of the GLOB_DAT slot 0x64e1248 (clock_gettime) and returns its (sec, nsec) pair, unwrap-trapping on error (message at 0x949294) and trapping if nsec >= 1000000000. The builder forms deadline sec = clock sec + duration sec (checked; on overflow the fallback path runs) and deadline nsec = clock nsec + duration nsec normalised into [0, 1e9) with carry into the seconds. It calls the accessor behind slot 0x64e0848 (0x5cf2b50) with the descriptor: the accessor returns rax in {0, 1} (strong/weak flag) and rdx = the calling thread's current handle pointer (read from the TLS cell at fs:-0x1130+0x10) after a lock xadd refcount increment on it, and the builder asserts [handle+sel+0x90] != 1000000000 (sel from rax bit 0) through the same timers-disabled trap. Stores (0x5cf2261..0x5cf226f): [S+0x60] = deadline sec (qword), [S+0x68] = deadline nsec (dword), [S+0x0] = accessor flag, [S+0x8] = handle, [S+0x10] = 2. The conversion body consumes exactly the pair: [S+0x60] as an integer seconds count (incremented on the nsec carry arm, never dereferenced) and dword [S+0x68] as its nanosecond part - a (sec, nsec) deadline, differenced against the handle's stored (sec, nsec) at [handle+sel+0x88]/[handle+sel+0x90].",
+  "conversion_contract": "0x5cead40(rdi = &[S+0x10], rsi = [S+0x60] seconds, edx = dword [S+0x68] nanoseconds). It reads the handle [S+0x18], selects the table offset from byte [S+0x10] (nonzero -> 0x160, zero -> 0x240), and traps through the assert-fail callee behind slot 0x64df770 if dword [handle+sel+0x90] == 1000000000 - the 115-byte message at 0x94ca6b (timers disabled) - at 0x5cead6a and again at 0x5ceaddd after the difference call. The (sec, nsec) pair is adjusted: nsec >= 999000001 -> sec += 1 (overflow trap at 0x5ceae5c, \"overflow when adding duration to instant\"), nsec -= 999000001; else nsec += 999999. It then calls the difference body 0x5c84210 with a stack descriptor {sec, nsec, [handle+sel+0x88], [handle+sel+0x90]} whose tail doubles as the second operand, computing (sec, nsec) - (handle sec, handle nsec) into {sign, diff sec, diff nsec} (body 0x5c84210, swap-recursive on A < B, panic \"overflow in Duration::new\"). The converted value is diff_sec * 1000 + (diff_nsec * 1125899907 >> 50) + carry (a millisecond-shaped count), forced to 0 when the difference sign qword is nonzero, and saturated at 0xfffffffffffffffd. Return is the tail jump into the setter.",
+  "normalise_negative": "Body 0x5cf1d70 is called by the predicate at 0x5cf2e01, before the sentinel store at 0x5cf2e1e, and on the [S+0x10] == 2 path it returns immediately (its first check is dword [rdi] == 2). In general it writes only through the handle it drops (two lock decq stores) and never through its argument struct, so it cannot be the writer either.",
+  "postcall_negative": "Body 0x5ce91b0 (slot 0x64e0518), called by the predicate on &[S+0x40] after the conversion returns, cannot reach the sentinel: relative to its argument the sentinel sits at -0x8, and the body's complete argument-store census is offsets {0x0, 0x8, 0x10} only (a once-cell state cmpxchg at +0x10, a pair store at +0x0/+0x8, a contention steal at +0x0 and an xchg at +0x10). Its exception-handling pads add exactly one further argument store - a lock cmpxchg at 0x5ce9489 on the same +0x10 state word, on a cleanup path that jumps back into the main contention flow - and three lock decq stores through the global counter pointer loaded from slot 0x64dfe90 (0x5ce9296, 0x5ce9350, 0x5ce946b). No store anywhere in the body uses a negative displacement from the argument.",
+  "predicate_flow": "Predicate 0x5cf2d30 on the non-TLS, [S+0x10] == 2 path: refcount-increments [S+0x8], calls 0x5cf1d70 on &[S+0x10] (no-op for tag 2), then stores the entry fields itself - [S+0x10] = derived flag, [S+0x18] = handle, [S+0x20..0x30] = 0, [S+0x30] = 0, [S+0x38] = -1 at 0x5cf2e1e, [S+0x40] = 0, [S+0x50] = 0, byte [S+0x58] = 0 - calls the conversion, re-checks the handle fields, calls 0x5ce91b0 on &[S+0x40], and only then reads [S+0x38] for its return rule (1 iff != -1; 0 iff == -1 and byte [S+0x58] == 0; -1 with byte [S+0x58] != 0 takes the timer-error unwind). The same eight field stores repeat in the timer-error landing pad at 0x5cf2f99 (the sentinel re-stored at 0x5cf2fb1) before the pad drops the entry through 0x5cf1d10 and resumes the unwind - a cleanup re-initialisation, not a second decision path.",
+  "setter_contract": "0x5cea7c0(rdi = wheel object at handle+sel+0x50, rsi = adjusted seconds, rdx = converted value, rcx = &[S+0x20] entry). Entry byte-locks the wheel (lock cmpxchg [rdi], 1 at 0x5cea7d8); on contention it waits via slot 0x64e01f8 -> 0x5bb59d0 with a 1000000000 timeout and re-reads the entry. Before the flag test it unlinks or bucket-inserts an entry whose value slot is already set: level index from bsr((value xor [wheel+0x10]) | 0x3f) clamped to 0xffffffffe, bucket = [wheel+0x8] + level * 0x410, insert body 0x5ce29a0; an out-of-range level traps at the wheel Location static 0x64c6a48 (path string at 0x446310, line 130 col 17). The decision is the byte at [wheel+0x30], loaded at 0x5cea881 - see the decision table. After a direct store it calls the insert body 0x5cf6880 (rdi = &[wheel+0x8], rsi = entry), which links the entry and returns a (rax, rdx) pair; the setter then rebinds r14 to the rdx object at 0x5cea8d5 and processes that returned entry (its own flag byte and value slot, a callback through [rdx+0x8]) - stores after 0x5cea8d5 are on that other object, not on S."
+ },
+ "open_edges": [
+  "The source identity of the wheel byte at [wheel+0x30] (the flag the setter tests at 0x5cea881): which writer sets it, and on what event, is not traced in this packet; only its three-way effect on the entry is pinned.",
+  "The runtime contents of the handle fields [handle+sel+0x88]/[handle+sel+0x90] (the stored (sec, nsec) the deadline is differenced against) and of the globals behind the TLS accessor cell - runtime data, not statically decidable from the artifact.",
+  "The insert body 0x5cf6880's returned (rax, rdx) object semantics beyond the setter's use of it (an already-due entry handed back for immediate processing); its internals are exported but its producer conditions are not censused here.",
+  "Who re-invokes the gates to reach checker state 3 and the provenance of [record+0x1d8] before its first checker_a call (open edge 4 of #2613) remain open."
+ ],
+ "owners": {
+  "accessor": {
+   "bytes": 228,
+   "end": "0x5cf2c34",
+   "file_offset": "0x5cf1b50",
+   "sha256": "e367d0fd93829f39d7bf17c0645ea453b07f47e6dc71a9172bac94e70d47d05e",
+   "start": "0x5cf2b50"
+  },
+  "basevalue": {
+   "bytes": 201,
+   "end": "0x5c843a9",
+   "file_offset": "0x5c832e0",
+   "sha256": "3efe331bdc612bff27ad3c487fbff92d57a2e097820c38f87506703794918f30",
+   "start": "0x5c842e0"
+  },
+  "bucket": {
+   "bytes": 214,
+   "end": "0x5ce2a76",
+   "file_offset": "0x5ce19a0",
+   "sha256": "7f1bf0ac13bf0df1287b21da22e231bf1b29ea287ea2182aa5b8433b1fef89d8",
+   "start": "0x5ce29a0"
+  },
+  "builder": {
+   "bytes": 409,
+   "end": "0x5cf22e9",
+   "file_offset": "0x5cf1150",
+   "sha256": "63364fa5c7e4158629d264ba1afefeb9e1353840a2bfae7d34266cc38d7dcade",
+   "start": "0x5cf2150"
+  },
+  "checker_a": {
+   "bytes": 955,
+   "end": "0x2c7f71b",
+   "file_offset": "0x2c7e360",
+   "sha256": "ff59e02e9d3e078985ba6e3b58d8f64f3a6ed5171f2120d314cbb5a3c744daed",
+   "start": "0x2c7f360"
+  },
+  "conversion": {
+   "bytes": 309,
+   "end": "0x5ceae75",
+   "file_offset": "0x5ce9d40",
+   "sha256": "a6069a107a631c0f5efdb0f22e5b4a623ad077389b6b09225b8a5ca31de923dd",
+   "start": "0x5cead40"
+  },
+  "desccall": {
+   "bytes": 198,
+   "end": "0x5c842d6",
+   "file_offset": "0x5c83210",
+   "sha256": "f9d8d8a41505bf8c9552d4a34ac4e190a6d0665c245595be11f2848e1a333a4a",
+   "start": "0x5c84210"
+  },
+  "insert": {
+   "bytes": 319,
+   "end": "0x5cf69bf",
+   "file_offset": "0x5cf5880",
+   "sha256": "9b9b96ad18568130435d9442cbc897deef1bd531a6b2bab71e050997e87ef6ef",
+   "start": "0x5cf6880"
+  },
+  "normalise": {
+   "bytes": 136,
+   "end": "0x5cf1df8",
+   "file_offset": "0x5cf0d70",
+   "sha256": "df16d24db15a077c7d624c4820f6ad7206588967bd076bcb903f2ea172364d2f",
+   "start": "0x5cf1d70"
+  },
+  "postcall": {
+   "bytes": 769,
+   "end": "0x5ce94b1",
+   "file_offset": "0x5ce81b0",
+   "sha256": "f5d6c7cb996b0e42213f37df8337c7685b48103a5f856983884cc56d8f34c16d",
+   "start": "0x5ce91b0"
+  },
+  "predicate": {
+   "bytes": 703,
+   "end": "0x5cf2fef",
+   "file_offset": "0x5cf1d30",
+   "sha256": "fb3fb193f0b14f251e01da509c670d299323482419d1edef4170d948604cbbb2",
+   "start": "0x5cf2d30"
+  },
+  "setter": {
+   "bytes": 599,
+   "end": "0x5ceaa17",
+   "file_offset": "0x5ce97c0",
+   "sha256": "5fbfddaf7831cf129e1dc6734e16b7aa37d5e51b3355c96a8da582d905f4d8e2",
+   "start": "0x5cea7c0"
+  }
+ },
+ "pins": {
+  "0x5c842ed": "ff1555cf8500",
+  "0x5ce91c5": "f0480fb14f10",
+  "0x5cea7d8": "f00fb00f",
+  "0x5cea881": "0fb64330",
+  "0x5cea897": "41c6463801",
+  "0x5cea89c": "49c74618ffffffff",
+  "0x5cea8c1": "4d896618",
+  "0x5cea8c5": "4d896610",
+  "0x5cead70": "81fac1878b3b",
+  "0x5ceadb8": "e85394f9ff",
+  "0x5ceadf3": "4869c983de1b43",
+  "0x5ceae3e": "e97df9ffff",
+  "0x5cf216f": "e86c21f9ff",
+  "0x5cf2261": "4c897b60",
+  "0x5cf2265": "896b68",
+  "0x5cf2e1e": "49c74638ffffffff",
+  "0x5cf2e46": "e8f57effff",
+  "0x5cf2e94": "ff157ed67e00"
+ },
+ "slots": {
+  "0x644dc28": "0x4326c1",
+  "0x64c6a48": "0x446310",
+  "0x64df6a0": "0x1680c30",
+  "0x64df770": "0x1680bd0",
+  "0x64dfe40": "0x5ceafd0",
+  "0x64e01f8": "0x5bb59d0",
+  "0x64e0518": "0x5ce91b0",
+  "0x64e0848": "0x5cf2b50",
+  "0x64e0858": "0x5cf2d30",
+  "0x64e0f38": "0x5bb5650",
+  "0x64e1248": "clock_gettime@GLOB_DAT",
+  "0x64e13a0": "0x5cf2150"
+ },
+ "statics": {
+  "descriptor_0x644dc28": {
+   "note": "two panic Location statics {ptr relocated to 0x4326c1, len 14, packed line/col}: 0x50000004b = line 75 col 5, 0x390000004a = line 74 col 57",
+   "qwords": [
+    "0x0",
+    "0xe",
+    "0x50000004b",
+    "0x0",
+    "0xe",
+    "0x390000004a"
+   ]
+  },
+  "wheel_location_0x64c6a48": {
+   "note": "panic Location static {ptr relocated to 0x446310, len 73, packed 0x1100000082 = line 130 col 17}",
+   "qwords": [
+    "0x0",
+    "0x49",
+    "0x1100000082"
+   ]
+  }
+ },
+ "store_censuses": {
+  "builder_s_stores": [
+   {
+    "base": "rbx",
+    "disp": 96,
+    "site": "0x5cf2261"
+   },
+   {
+    "base": "rbx",
+    "disp": 104,
+    "site": "0x5cf2265"
+   },
+   {
+    "base": "rbx",
+    "disp": 0,
+    "site": "0x5cf2268"
+   },
+   {
+    "base": "rbx",
+    "disp": 8,
+    "site": "0x5cf226b"
+   },
+   {
+    "base": "rbx",
+    "disp": 16,
+    "site": "0x5cf226f"
+   }
+  ],
+  "conversion_all_stores": [
+   {
+    "base": "rsp",
+    "disp": 8,
+    "site": "0x5cead97"
+   },
+   {
+    "base": "rsp",
+    "disp": 16,
+    "site": "0x5cead9c"
+   },
+   {
+    "base": "rsp",
+    "disp": 24,
+    "site": "0x5ceada0"
+   },
+   {
+    "base": "rsp",
+    "disp": 32,
+    "site": "0x5ceada5"
+   }
+  ],
+  "conversion_through_argument": [],
+  "normalise_handle_stores": [
+   {
+    "base": "rax",
+    "disp": 0,
+    "site": "0x5cf1d8e"
+   },
+   {
+    "base": "rax",
+    "disp": 0,
+    "site": "0x5cf1d9f"
+   }
+  ],
+  "normalise_through_argument": [],
+  "postcall_argument_stores": [
+   {
+    "base": "rdi",
+    "disp": 16,
+    "site": "0x5ce91c5"
+   },
+   {
+    "base": "rbx",
+    "disp": 0,
+    "site": "0x5ce91ed"
+   },
+   {
+    "base": "rbx",
+    "disp": 8,
+    "site": "0x5ce91f0"
+   },
+   {
+    "base": "rbx",
+    "disp": 16,
+    "site": "0x5ce91fb"
+   },
+   {
+    "base": "rcx",
+    "disp": 0,
+    "site": "0x5ce9235"
+   },
+   {
+    "base": "rcx",
+    "disp": 16,
+    "site": "0x5ce923e"
+   }
+  ],
+  "postcall_eh_global_stores": [
+   {
+    "base": "rcx",
+    "disp": 0,
+    "site": "0x5ce9296"
+   },
+   {
+    "base": "rcx",
+    "disp": 0,
+    "site": "0x5ce9350"
+   },
+   {
+    "base": "rax",
+    "disp": 0,
+    "site": "0x5ce946b"
+   }
+  ],
+  "postcall_eh_rbx_stores": [
+   {
+    "base": "rbx",
+    "disp": 16,
+    "site": "0x5ce9489"
+   }
+  ],
+  "postcall_eh_rdi_stores": [],
+  "predicate_s_stores": [
+   {
+    "base": "r14",
+    "disp": 16,
+    "site": "0x5cf2e06"
+   },
+   {
+    "base": "r14",
+    "disp": 24,
+    "site": "0x5cf2e0a"
+   },
+   {
+    "base": "r14",
+    "disp": 32,
+    "site": "0x5cf2e11"
+   },
+   {
+    "base": "r14",
+    "disp": 48,
+    "site": "0x5cf2e16"
+   },
+   {
+    "base": "r14",
+    "disp": 56,
+    "site": "0x5cf2e1e"
+   },
+   {
+    "base": "r14",
+    "disp": 64,
+    "site": "0x5cf2e26"
+   },
+   {
+    "base": "r14",
+    "disp": 80,
+    "site": "0x5cf2e2e"
+   },
+   {
+    "base": "r14",
+    "disp": 88,
+    "site": "0x5cf2e36"
+   },
+   {
+    "base": "r14",
+    "disp": 16,
+    "site": "0x5cf2f99"
+   },
+   {
+    "base": "r14",
+    "disp": 24,
+    "site": "0x5cf2f9d"
+   },
+   {
+    "base": "r14",
+    "disp": 32,
+    "site": "0x5cf2fa4"
+   },
+   {
+    "base": "r14",
+    "disp": 48,
+    "site": "0x5cf2fa9"
+   },
+   {
+    "base": "r14",
+    "disp": 56,
+    "site": "0x5cf2fb1"
+   },
+   {
+    "base": "r14",
+    "disp": 64,
+    "site": "0x5cf2fb9"
+   },
+   {
+    "base": "r14",
+    "disp": 80,
+    "site": "0x5cf2fc1"
+   },
+   {
+    "base": "r14",
+    "disp": 88,
+    "site": "0x5cf2fc9"
+   }
+  ],
+  "setter_other_stores_pre_rebind": [
+   {
+    "base": "rcx",
+    "disp": 8,
+    "site": "0x5cea84c"
+   },
+   {
+    "base": "rax",
+    "disp": 0,
+    "site": "0x5cea858"
+   },
+   {
+    "base": "rbx",
+    "disp": 24,
+    "site": "0x5cea86e"
+   }
+  ],
+  "setter_q_stores_pre_rebind": [
+   {
+    "base": "r14",
+    "disp": 0,
+    "site": "0x5cea85e"
+   },
+   {
+    "base": "r14",
+    "disp": 56,
+    "site": "0x5cea897"
+   },
+   {
+    "base": "r14",
+    "disp": 24,
+    "site": "0x5cea89c"
+   },
+   {
+    "base": "r14",
+    "disp": 48,
+    "site": "0x5cea8b7"
+   },
+   {
+    "base": "r14",
+    "disp": 24,
+    "site": "0x5cea8c1"
+   },
+   {
+    "base": "r14",
+    "disp": 16,
+    "site": "0x5cea8c5"
+   }
+  ]
+ },
+ "strings": {
+  "add_duration_overflow": {
+   "bytes": 40,
+   "text": "overflow when adding duration to instant",
+   "va": "0x94a2c1"
+  },
+  "duration_overflow": {
+   "bytes": 25,
+   "text": "overflow in Duration::new",
+   "va": "0x949272"
+  },
+  "lu_rs": {
+   "bytes": 14,
+   "text": "base/src/lu.rs",
+   "va": "0x4326c1"
+  },
+  "result_unwrap": {
+   "bytes": 43,
+   "text": "called `Result::unwrap()` on an `Err` value",
+   "va": "0x949294"
+  },
+  "timers_disabled": {
+   "bytes": 115,
+   "text": "A Tokio 1.x context was found, but timers are disabled. Call `enable_time` on the runtime builder to enable timers.",
+   "va": "0x94ca6b"
+  },
+  "wheel_path": {
+   "bytes": 73,
+   "text": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/time/wheel/mod.rs",
+   "va": "0x446310"
+  }
+ },
+ "work_item": "RE-005-node115-predicate-chain"
+}

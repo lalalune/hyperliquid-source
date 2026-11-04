@@ -1,0 +1,364 @@
+node #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+Original ELF VAs; bytes unnormalized; strict Python subset decode.
+
+bound function
+02ee0640  488b4718                       mov rax, m64[rdi+24]
+02ee0644  4885c0                         test rax, rax
+02ee0647  0f8497000000                   je 0x2ee06e4
+02ee064d  488b17                         mov rdx, m64[rdi]
+02ee0650  488b4f10                       mov rcx, m64[rdi+16]
+02ee0654  4531c0                         xor r8d, r8d
+02ee0657  4839d1                         cmp rcx, rdx
+02ee065a  4c0f43c2                       cmovae r8, rdx
+02ee065e  4c29c1                         sub rcx, r8
+02ee0661  4829ca                         sub rdx, rcx
+02ee0664  4989c1                         mov r9, rax
+02ee0667  4929d1                         sub r9, rdx
+02ee066a  767e                           jbe 0x2ee06ea
+02ee066c  4c8b4708                       mov r8, m64[rdi+8]
+02ee0670  4d8b10                         mov r10, m64[r8]
+02ee0673  488b3e                         mov rdi, m64[rsi]
+02ee0676  4939fa                         cmp r10, rdi
+02ee0679  0f97c0                         seta al
+02ee067c  1c00                           sbb al, 0
+02ee067e  0fb6c0                         movzx eax, al
+02ee0681  84c0                           test al, al
+02ee0683  0f84c3000000                   je 0x2ee074c
+02ee0689  3dff000000                     cmp eax, 255
+02ee068e  0f85b9000000                   jne 0x2ee074d
+02ee0694  31c9                           xor ecx, ecx
+02ee0696  4983f901                       cmp r9, 1
+02ee069a  7433                           je 0x2ee06cf
+02ee069c  0f1f4000                       nop m32[rax]
+02ee06a0  4889c8                         mov rax, rcx
+02ee06a3  4c89ce                         mov rsi, r9
+02ee06a6  48d1ee                         shr rsi, 1
+02ee06a9  4801f1                         add rcx, rsi
+02ee06ac  4989ca                         mov r10, rcx
+02ee06af  49c1e205                       shl r10, 5
+02ee06b3  4b393c10                       cmp m64[r8+r10*1], rdi
+02ee06b7  480f47c8                       cmova rcx, rax
+02ee06bb  4929f1                         sub r9, rsi
+02ee06be  4983f901                       cmp r9, 1
+02ee06c2  77dc                           ja 0x2ee06a0
+02ee06c4  4889c8                         mov rax, rcx
+02ee06c7  48c1e005                       shl rax, 5
+02ee06cb  4d8b1400                       mov r10, m64[r8+rax*1]
+02ee06cf  4939fa                         cmp r10, rdi
+02ee06d2  7404                           je 0x2ee06d8
+02ee06d4  4883d100                       adc rcx, 0
+02ee06d8  31c0                           xor eax, eax
+02ee06da  4939fa                         cmp r10, rdi
+02ee06dd  0f95c0                         setne al
+02ee06e0  4801ca                         add rdx, rcx
+02ee06e3  c3                             ret
+02ee06e4  31d2                           xor edx, edx
+02ee06e6  31c9                           xor ecx, ecx
+02ee06e8  eb06                           jmp 0x2ee06f0
+02ee06ea  4801c8                         add rax, rcx
+02ee06ed  4889c2                         mov rdx, rax
+02ee06f0  4829ca                         sub rdx, rcx
+02ee06f3  48c1e105                       shl rcx, 5
+02ee06f7  48034f08                       add rcx, m64[rdi+8]
+02ee06fb  b801000000                     mov eax, 1
+02ee0700  4885d2                         test rdx, rdx
+02ee0703  7459                           je 0x2ee075e
+02ee0705  488b36                         mov rsi, m64[rsi]
+02ee0708  31ff                           xor edi, edi
+02ee070a  4883fa01                       cmp rdx, 1
+02ee070e  7424                           je 0x2ee0734
+02ee0710  4989f8                         mov r8, rdi
+02ee0713  4989d1                         mov r9, rdx
+02ee0716  49d1e9                         shr r9, 1
+02ee0719  4c01cf                         add rdi, r9
+02ee071c  4989fa                         mov r10, rdi
+02ee071f  49c1e205                       shl r10, 5
+02ee0723  4a393411                       cmp m64[rcx+r10*1], rsi
+02ee0727  490f47f8                       cmova rdi, r8
+02ee072b  4c29ca                         sub rdx, r9
+02ee072e  4883fa01                       cmp rdx, 1
+02ee0732  77dc                           ja 0x2ee0710
+02ee0734  4889fa                         mov rdx, rdi
+02ee0737  48c1e205                       shl rdx, 5
+02ee073b  48393411                       cmp m64[rcx+rdx*1], rsi
+02ee073f  7504                           jne 0x2ee0745
+02ee0741  31c0                           xor eax, eax
+02ee0743  eb04                           jmp 0x2ee0749
+02ee0745  4883d700                       adc rdi, 0
+02ee0749  4889fa                         mov rdx, rdi
+02ee074c  c3                             ret
+02ee074d  48c1e105                       shl rcx, 5
+02ee0751  4c01c1                         add rcx, r8
+02ee0754  b801000000                     mov eax, 1
+02ee0759  4885d2                         test rdx, rdx
+02ee075c  75a7                           jne 0x2ee0705
+02ee075e  31d2                           xor edx, edx
+02ee0760  c3                             ret
+
+caller context (no behavioral bind)
+02eedb70  55                             push rbp
+02eedb71  4157                           push r15
+02eedb73  4156                           push r14
+02eedb75  4155                           push r13
+02eedb77  4154                           push r12
+02eedb79  53                             push rbx
+02eedb7a  4881ecc8000000                 sub rsp, 200
+02eedb81  48890c24                       mov m64[rsp], rcx
+02eedb85  4989d4                         mov r12, rdx
+02eedb88  4989f7                         mov r15, rsi
+02eedb8b  48897c2408                     mov m64[rsp+8], rdi
+02eedb90  48899424c0000000               mov m64[rsp+192], rdx
+02eedb98  4c8b36                         mov r14, m64[rsi]
+02eedb9b  488b4618                       mov rax, m64[rsi+24]
+02eedb9f  4c89f1                         mov rcx, r14
+02eedba2  48f7d9                         neg rcx
+02eedba5  0f90c1                         seto cl
+02eedba8  4883f820                       cmp rax, 32
+02eedbac  0f92c2                         setb dl
+02eedbaf  20ca                           and dl, cl
+02eedbb1  80fa01                         cmp dl, 1
+02eedbb4  0f8521010000                   jne 0x2eedcdb
+02eedbba  498b4f08                       mov rcx, m64[r15+8]
+02eedbbe  498b5710                       mov rdx, m64[r15+16]
+02eedbc2  49c7470800000000               mov m64[r15+8], 0
+02eedbca  49c7471800000000               mov m64[r15+24], 0
+02eedbd2  4885c9                         test rcx, rcx
+02eedbd5  743f                           je 0x2eedc16
+02eedbd7  48c784248000000000000000       mov m64[rsp+128], 0
+02eedbe3  48898c2488000000               mov m64[rsp+136], rcx
+02eedbeb  4889942490000000               mov m64[rsp+144], rdx
+02eedbf3  48c78424a000000000000000       mov m64[rsp+160], 0
+02eedbff  48898c24a8000000               mov m64[rsp+168], rcx
+02eedc07  48899424b0000000               mov m64[rsp+176], rdx
+02eedc0f  b901000000                     mov ecx, 1
+02eedc14  eb04                           jmp 0x2eedc1a
+02eedc16  31c9                           xor ecx, ecx
+02eedc18  31c0                           xor eax, eax
+02eedc1a  48894c2478                     mov m64[rsp+120], rcx
+02eedc1f  48898c2498000000               mov m64[rsp+152], rcx
+02eedc27  48898424b8000000               mov m64[rsp+184], rax
+02eedc2f  488d7c2410                     lea rdi, m64[rsp+16]
+02eedc34  488d742478                     lea rsi, m64[rsp+120]
+02eedc39  e812e2ffff                     call 0x2eebe50
+02eedc3e  488b5c2418                     mov rbx, m64[rsp+24]
+02eedc43  488b442420                     mov rax, m64[rsp+32]
+02eedc48  4889442458                     mov m64[rsp+88], rax
+02eedc4d  498b4f08                       mov rcx, m64[r15+8]
+02eedc51  4885c9                         test rcx, rcx
+02eedc54  7435                           je 0x2eedc8b
+02eedc56  498b5710                       mov rdx, m64[r15+16]
+02eedc5a  498b4718                       mov rax, m64[r15+24]
+02eedc5e  48c744241800000000             mov m64[rsp+24], 0
+02eedc67  48894c2420                     mov m64[rsp+32], rcx
+02eedc6c  4889542428                     mov m64[rsp+40], rdx
+02eedc71  48c744243800000000             mov m64[rsp+56], 0
+02eedc7a  48894c2440                     mov m64[rsp+64], rcx
+02eedc7f  4889542448                     mov m64[rsp+72], rdx
+02eedc84  b901000000                     mov ecx, 1
+02eedc89  eb04                           jmp 0x2eedc8f
+02eedc8b  31c9                           xor ecx, ecx
+02eedc8d  31c0                           xor eax, eax
+02eedc8f  4c8b742410                     mov r14, m64[rsp+16]
+02eedc94  48894c2410                     mov m64[rsp+16], rcx
+02eedc99  48894c2430                     mov m64[rsp+48], rcx
+02eedc9e  4889442450                     mov m64[rsp+80], rax
+02eedca3  4c8d6c2460                     lea r13, m64[rsp+96]
+02eedca8  488d6c2410                     lea rbp, m64[rsp+16]
+02eedcad  0f1f00                         nop m32[rax]
+02eedcb0  4c89ef                         mov rdi, r13
+02eedcb3  4889ee                         mov rsi, rbp
+02eedcb6  e8d5cb0100                     call 0x2f0a890
+02eedcbb  48837c246000                   cmp m64[rsp+96], 0
+02eedcc1  75ed                           jne 0x2eedcb0
+02eedcc3  4d8937                         mov m64[r15], r14
+02eedcc6  49895f08                       mov m64[r15+8], rbx
+02eedcca  49c7471000000000               mov m64[r15+16], 0
+02eedcd2  488b442458                     mov rax, m64[rsp+88]
+02eedcd7  49894718                       mov m64[r15+24], rax
+02eedcdb  48bb0000000000000080           mov rbx, 9223372036854775808
+02eedce5  4939de                         cmp r14, rbx
+02eedce8  0f848a010000                   je 0x2eede78
+02eedcee  488db424c0000000               lea rsi, m64[rsp+192]
+02eedcf6  4c89ff                         mov rdi, r15
+02eedcf9  e84229ffff                     call 0x2ee0640
+02eedcfe  4885c0                         test rax, rax
+02eedd01  0f95c1                         setne cl
+02eedd04  498b7718                       mov rsi, m64[r15+24]
+02eedd08  4883fe40                       cmp rsi, 64
+02eedd0c  400f93c7                       setae dil
+02eedd10  4084f9                         test cl, dil
+02eedd13  7462                           je 0x2eedd77
+02eedd15  410f1007                       movups xmm0, m128[r15]
+02eedd19  410f104f10                     movups xmm1, m128[r15+16]
+02eedd1e  0f294c2420                     movaps m128[rsp+32], xmm1
+02eedd23  0f29442410                     movaps m128[rsp+16], xmm0
+02eedd28  49c70700000000                 mov m64[r15], 0
+02eedd2f  4d8d7708                       lea r14, m64[r15+8]
+02eedd33  49c7470808000000               mov m64[r15+8], 8
+02eedd3b  0f57c0                         xorps xmm0, xmm0
+02eedd3e  410f114710                     movups m128[r15+16], xmm0
+02eedd43  488d7c2460                     lea rdi, m64[rsp+96]
+02eedd48  488d742410                     lea rsi, m64[rsp+16]
+02eedd4d  e81ea40100                     call 0x2f08170
+02eedd52  498b37                         mov rsi, m64[r15]
+02eedd55  4889f0                         mov rax, rsi
+02eedd58  48f7d8                         neg rax
+02eedd5b  7068                           jo 0x2eeddc5
+02eedd5d  0f8300010000                   jae 0x2eede63
+02eedd63  498b3e                         mov rdi, m64[r14]
+02eedd66  48c1e605                       shl rsi, 5
+02eedd6a  31d2                           xor edx, edx
+02eedd6c  ff152e175f03                   call_indirect m64[rip+56563502]
+02eedd72  e9ec000000                     jmp 0x2eede63
+02eedd77  498b0f                         mov rcx, m64[r15]
+02eedd7a  4839d9                         cmp rcx, rbx
+02eedd7d  0f84f5000000                   je 0x2eede78
+02eedd83  a801                           test al, 1
+02eedd85  747b                           je 0x2eede02
+02eedd87  4c89642478                     mov m64[rsp+120], r12
+02eedd8c  488b0424                       mov rax, m64[rsp]
+02eedd90  0f1000                         movups xmm0, m128[rax]
+02eedd93  0f11842480000000               movups m128[rsp+128], xmm0
+02eedd9b  488b4010                       mov rax, m64[rax+16]
+02eedd9f  4889842490000000               mov m64[rsp+144], rax
+02eedda7  488d442478                     lea rax, m64[rsp+120]
+02eeddac  4c89ff                         mov rdi, r15
+02eeddaf  4889d6                         mov rsi, rdx
+02eeddb2  4889d3                         mov rbx, rdx
+02eeddb5  4889c2                         mov rdx, rax
+02eeddb8  e8c322ffff                     call 0x2ee0080
+02eeddbd  4889d8                         mov rax, rbx
+02eeddc0  e9b3010000                     jmp 0x2eedf78
+02eeddc5  498b0e                         mov rcx, m64[r14]
+02eeddc8  4885c9                         test rcx, rcx
+02eeddcb  7466                           je 0x2eede33
+02eeddcd  498b5710                       mov rdx, m64[r15+16]
+02eeddd1  498b4718                       mov rax, m64[r15+24]
+02eeddd5  48c744241800000000             mov m64[rsp+24], 0
+02eeddde  48894c2420                     mov m64[rsp+32], rcx
+02eedde3  4889542428                     mov m64[rsp+40], rdx
+02eedde8  48c744243800000000             mov m64[rsp+56], 0
+02eeddf1  48894c2440                     mov m64[rsp+64], rcx
+02eeddf6  4889542448                     mov m64[rsp+72], rdx
+02eeddfb  b901000000                     mov ecx, 1
+02eede00  eb35                           jmp 0x2eede37
+02eede02  4839f2                         cmp rdx, rsi
+02eede05  0f838f010000                   jae 0x2eedf9a
+02eede0b  498b4710                       mov rax, m64[r15+16]
+02eede0f  4801d0                         add rax, rdx
+02eede12  31d2                           xor edx, edx
+02eede14  4839c8                         cmp rax, rcx
+02eede17  480f43d1                       cmovae rdx, rcx
+02eede1b  4829d0                         sub rax, rdx
+02eede1e  498b4f08                       mov rcx, m64[r15+8]
+02eede22  48c1e005                       shl rax, 5
+02eede26  4c8d1401                       lea r10, m64[rcx+rax*1]
+02eede2a  4983c208                       add r10, 8
+02eede2e  e9c7000000                     jmp 0x2eedefa
+02eede33  31c9                           xor ecx, ecx
+02eede35  31c0                           xor eax, eax
+02eede37  48894c2410                     mov m64[rsp+16], rcx
+02eede3c  48894c2430                     mov m64[rsp+48], rcx
+02eede41  4889442450                     mov m64[rsp+80], rax
+02eede46  4c8d6c2478                     lea r13, m64[rsp+120]
+02eede4b  488d6c2410                     lea rbp, m64[rsp+16]
+02eede50  4c89ef                         mov rdi, r13
+02eede53  4889ee                         mov rsi, rbp
+02eede56  e835ca0100                     call 0x2f0a890
+02eede5b  48837c247800                   cmp m64[rsp+120], 0
+02eede61  75ed                           jne 0x2eede50
+02eede63  49891f                         mov m64[r15], rbx
+02eede66  488b442470                     mov rax, m64[rsp+112]
+02eede6b  49894610                       mov m64[r14+16], rax
+02eede6f  0f10442460                     movups xmm0, m128[rsp+96]
+02eede74  410f1106                       movups m128[r14], xmm0
+02eede78  4d8b5708                       mov r10, m64[r15+8]
+02eede7c  4d85d2                         test r10, r10
+02eede7f  0f84a4000000                   je 0x2eedf29
+02eede85  498b4f10                       mov rcx, m64[r15+16]
+02eede89  410fb7b26a010000               movzx esi, m16[r10+362]
+02eede91  8d14f500000000                 lea edx, m32[rsi*8]
+02eede98  4c8d0452                       lea r8, m64[rdx+rdx*2]
+02eede9c  48c7c2ffffffff                 mov rdx, -1
+02eedea3  31ff                           xor edi, edi
+02eedea5  66662e0f1f840000000000         nop m16[rax+rax*1]
+02eedeb0  4d89c1                         mov r9, r8
+02eedeb3  4901f9                         add r9, rdi
+02eedeb6  7428                           je 0x2eedee0
+02eedeb8  4d3b64d210                     cmp r12, m64[r10+rdx*8+16]
+02eedebd  410f97c1                       seta r9b
+02eedec1  4180d900                       sbb r9b, 0
+02eedec5  4883c7e8                       add rdi, -24
+02eedec9  48ffc2                         inc rdx
+02eedecc  4180f901                       cmp r9b, 1
+02eeded0  74de                           je 0x2eedeb0
+02eeded2  410fb6f1                       movzx esi, r9b
+02eeded6  85f6                           test esi, esi
+02eeded8  7419                           je 0x2eedef3
+02eededa  eb07                           jmp 0x2eedee3
+02eededc  0f1f4000                       nop m32[rax]
+02eedee0  4889f2                         mov rdx, rsi
+02eedee3  4883e901                       sub rcx, 1
+02eedee7  7243                           jb 0x2eedf2c
+02eedee9  4d8b94d270010000               mov r10, m64[r10+rdx*8+368]
+02eedef1  eb96                           jmp 0x2eede89
+02eedef3  4929fa                         sub r10, rdi
+02eedef6  4983c248                       add r10, 72
+02eedefa  488b1424                       mov rdx, m64[rsp]
+02eedefe  498b4a10                       mov rcx, m64[r10+16]
+02eedf02  488b442408                     mov rax, m64[rsp+8]
+02eedf07  48894818                       mov m64[rax+24], rcx
+02eedf0b  410f1002                       movups xmm0, m128[r10]
+02eedf0f  0f114008                       movups m128[rax+8], xmm0
+02eedf13  0f1002                         movups xmm0, m128[rdx]
+02eedf16  410f1102                       movups m128[r10], xmm0
+02eedf1a  488b4a10                       mov rcx, m64[rdx+16]
+02eedf1e  49894a10                       mov m64[r10+16], rcx
+02eedf22  b901000000                     mov ecx, 1
+02eedf27  eb5c                           jmp 0x2eedf85
+02eedf29  4531d2                         xor r10d, r10d
+02eedf2c  4983c708                       add r15, 8
+02eedf30  4c897c2410                     mov m64[rsp+16], r15
+02eedf35  4c89642418                     mov m64[rsp+24], r12
+02eedf3a  4c89542420                     mov m64[rsp+32], r10
+02eedf3f  48c744242800000000             mov m64[rsp+40], 0
+02eedf48  4889542430                     mov m64[rsp+48], rdx
+02eedf4d  488d7c2478                     lea rdi, m64[rsp+120]
+02eedf52  488d742410                     lea rsi, m64[rsp+16]
+02eedf57  488b1424                       mov rdx, m64[rsp]
+02eedf5b  e8f0d70100                     call 0x2f0b750
+02eedf60  48837c247800                   cmp m64[rsp+120], 0
+02eedf66  7516                           jne 0x2eedf7e
+02eedf68  4c8bbc2480000000               mov r15, m64[rsp+128]
+02eedf70  488b842488000000               mov rax, m64[rsp+136]
+02eedf78  493b4718                       cmp rax, m64[r15+24]
+02eedf7c  731c                           jae 0x2eedf9a
+02eedf7e  31c9                           xor ecx, ecx
+02eedf80  488b442408                     mov rax, m64[rsp+8]
+02eedf85  488908                         mov m64[rax], rcx
+02eedf88  4881c4c8000000                 add rsp, 200
+02eedf8f  5b                             pop rbx
+02eedf90  415c                           pop r12
+02eedf92  415d                           pop r13
+02eedf94  415e                           pop r14
+02eedf96  415f                           pop r15
+02eedf98  5d                             pop rbp
+02eedf99  c3                             ret
+02eedf9a  488d3dff4e75fd                 lea rdi, m64[rip-42643713]
+02eedfa1  488d1568355703                 lea rdx, m64[rip+56046952]
+02eedfa8  be14000000                     mov esi, 20
+02eedfad  ff15bd175f03                   call_indirect m64[rip+56563645]
+02eedfb3  49891f                         mov m64[r15], rbx
+02eedfb6  488b4c2470                     mov rcx, m64[rsp+112]
+02eedfbb  49894e10                       mov m64[r14+16], rcx
+02eedfbf  0f10442460                     movups xmm0, m128[rsp+96]
+02eedfc4  410f1106                       movups m128[r14], xmm0
+02eedfc8  4889c7                         mov rdi, rax
+02eedfcb  e8802a5003                     call 0x63f0a50
+02eedfd0  4d8937                         mov m64[r15], r14
+02eedfd3  49895f08                       mov m64[r15+8], rbx
+02eedfd7  49c7471000000000               mov m64[r15+16], 0
+02eedfdf  488b4c2458                     mov rcx, m64[rsp+88]
+02eedfe4  49894f18                       mov m64[r15+24], rcx
+02eedfe8  4889c7                         mov rdi, rax
+02eedfeb  e8602a5003                     call 0x63f0a50

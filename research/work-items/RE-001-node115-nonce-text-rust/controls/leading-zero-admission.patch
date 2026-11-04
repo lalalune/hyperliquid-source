@@ -1,0 +1,16 @@
+--- a/src/node115-nonce-text/src/lib.rs
++++ b/src/node115-nonce-text/src/lib.rs
+@@ -67,12 +67,7 @@
+ 
+ fn integer(input: &[u8], cursor: &mut usize) -> Result<u64, Failure> {
+     match input.get(*cursor) {
+-        Some(b'0') => {
+-            *cursor += 1;
+-            // A following digit cannot be a comma or closing delimiter.
+-            Ok(0)
+-        }
+-        Some(b'1'..=b'9') => {
++        Some(b'0'..=b'9') => {
+             let mut value = 0_u64;
+             while let Some(&digit @ b'0'..=b'9') = input.get(*cursor) {
+                 value = value

@@ -1,0 +1,57 @@
+test_artifact_identity (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_artifact_identity) ... ok
+test_boundary_hashes (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_boundary_hashes) ... ok
+test_builder_insert_census (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_builder_insert_census) ... ok
+test_chain_key_bytes (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_chain_key_bytes) ... ok
+test_counterfactual_boundary_body (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_counterfactual_boundary_body) ... ok
+test_counterfactual_ctx_miss_edge (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_counterfactual_ctx_miss_edge) ... ok
+test_counterfactual_default_record_presence_word (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_counterfactual_default_record_presence_word) ... ok
+test_counterfactual_descriptor_table_pointer (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_counterfactual_descriptor_table_pointer) ... ok
+test_counterfactual_drain_insert_call (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_counterfactual_drain_insert_call) ... ok
+test_counterfactual_get_or_insert_slot_binding (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_counterfactual_get_or_insert_slot_binding) ... ok
+test_counterfactual_pair_insert_call (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_counterfactual_pair_insert_call) ... ok
+test_counterfactual_remove_op_items_decrement (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_counterfactual_remove_op_items_decrement) ... ok
+test_helper_census (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_helper_census) ... ok
+test_owner_hashes (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_owner_hashes) ... ok
+test_regeneration_byte_identity (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_regeneration_byte_identity) ... ERROR
+test_whole_binary_helper_slot_census (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_whole_binary_helper_slot_census) ... ok
+test_worker_asserted_sites_are_instruction_starts (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_worker_asserted_sites_are_instruction_starts) ... ERROR
+test_worker_callee_hashes (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_worker_callee_hashes) ... ok
+test_worker_insert_census (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_worker_insert_census) ... ok
+
+======================================================================
+ERROR: test_regeneration_byte_identity (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_regeneration_byte_identity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/shawwalters/hlsource/hyperliquid-source/work/merge-open-20261103/integration/tests/test_chain_entry_insert_static.py", line 34, in test_regeneration_byte_identity
+    pkt.generate(BINARY, out)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/shawwalters/hlsource/hyperliquid-source/work/merge-open-20261103/integration/tools/chain_entry_insert_static.py", line 977, in generate
+    export(role, start, end, body, f'{role}_disassembly.txt')
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/shawwalters/hlsource/hyperliquid-source/work/merge-open-20261103/integration/tools/chain_entry_insert_static.py", line 968, in export
+    insns = decode_export(text, start, end, body)
+  File "/Users/shawwalters/hlsource/hyperliquid-source/work/merge-open-20261103/integration/tools/foundation_millis.py", line 61, in decode_export
+    require(cursor == end and b''.join(raw for _,raw in rows) == body, 'Disassembly bytes/extent changed')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/shawwalters/hlsource/hyperliquid-source/work/merge-open-20261103/integration/tools/foundation_millis.py", line 40, in require
+    raise ValueError(message)
+ValueError: Disassembly bytes/extent changed
+
+======================================================================
+ERROR: test_worker_asserted_sites_are_instruction_starts (test_chain_entry_insert_static.ChainEntryInsertStaticTests.test_worker_asserted_sites_are_instruction_starts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/shawwalters/hlsource/hyperliquid-source/work/merge-open-20261103/integration/tests/test_chain_entry_insert_static.py", line 165, in test_worker_asserted_sites_are_instruction_starts
+    starts = set(pkt.decode_export(text, pkt.WORKER[0], pkt.WORKER[1], body))
+                 ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/shawwalters/hlsource/hyperliquid-source/work/merge-open-20261103/integration/tools/foundation_millis.py", line 61, in decode_export
+    require(cursor == end and b''.join(raw for _,raw in rows) == body, 'Disassembly bytes/extent changed')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/shawwalters/hlsource/hyperliquid-source/work/merge-open-20261103/integration/tools/foundation_millis.py", line 40, in require
+    raise ValueError(message)
+ValueError: Disassembly bytes/extent changed
+
+----------------------------------------------------------------------
+Ran 19 tests in 2.160s
+
+FAILED (errors=2)

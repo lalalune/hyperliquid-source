@@ -1,0 +1,162 @@
+{
+ "answers": "packet #213 next question (0x63ae260 next-node call)",
+ "args": {
+  "thunk": [
+   "thread",
+   "[ref+0xe410]",
+   "node",
+   "0",
+   "kind",
+   "1-or-0"
+  ],
+  "worker": [
+   "thread",
+   "[ref+0xe410]",
+   "node",
+   "arg4",
+   "kind",
+   "flag6",
+   "stack7"
+  ]
+ },
+ "base_commit": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+ "binary_bytes": 105896032,
+ "binary_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "census_e8": {
+  "thunk": 3,
+  "thunk_b": 1,
+  "worker": 2
+ },
+ "census_e8_sites": {
+  "thunk": [
+   "0x63b1bad",
+   "0x63b1c0a",
+   "0x63b1c75"
+  ],
+  "thunk_b": [
+   "0x63b479d"
+  ],
+  "worker": [
+   "0x63ae26e",
+   "0x63ae290"
+  ]
+ },
+ "census_e9": 0,
+ "census_got": 0,
+ "census_lea": 0,
+ "corrections_to_earlier_packets": [],
+ "data_byte_gate": "0x64ffc28",
+ "exhibit_bytes": 222,
+ "exhibit_strict": 56,
+ "exhibits": {
+  "head": {
+   "bytes": 44,
+   "range": [
+    "0x63adf71",
+    "0x63adf9d"
+   ],
+   "strict": 9
+  },
+  "kind": {
+   "bytes": 44,
+   "range": [
+    "0x63ae014",
+    "0x63ae040"
+   ],
+   "strict": 11
+  },
+  "tail": {
+   "bytes": 71,
+   "range": [
+    "0x63ae088",
+    "0x63ae0cf"
+   ],
+   "strict": 18
+  },
+  "thunk": {
+   "bytes": 24,
+   "range": [
+    "0x63ae260",
+    "0x63ae278"
+   ],
+   "strict": 7
+  },
+  "valid": {
+   "bytes": 39,
+   "range": [
+    "0x63adfed",
+    "0x63ae014"
+   ],
+   "strict": 11
+  }
+ },
+ "join_call": {
+  "args": [
+   "thread",
+   "[ref+0xe410]",
+   "rax",
+   "5"
+  ],
+  "site": "0x63ae0c0",
+  "target": "0x63adb50"
+ },
+ "key_byte_sites": 17,
+ "key_calls": 9,
+ "miss_handler": {
+  "args": [
+   "thread",
+   "table",
+   "rbx",
+   "0",
+   "0"
+  ],
+  "decoded": false,
+  "site": "0x63ae239",
+  "target": "0x63d9700"
+ },
+ "next_question": "Decode the 0x63d9700 miss handler end to end: what it does with (thread, table, rbx, 0, 0), what entry pointer it returns, when it returns NULL, and how it inserts or evicts on a full miss.",
+ "node": 115,
+ "null_gates": [
+  "rbx == 0",
+  "entry pointer == 0",
+  "(entry word & 0xffffffffff80) == 0",
+  "flag6==0 and [node] bit 44 set",
+  "flag6!=0 and entry-word bit 1 set",
+  "arg4==0 and kind != (entry>>2)&7",
+  "arg4!=0 and (entry>>2)==0",
+  "arg4==0 and stack7==0 and bit13(*rax) != bit13([node])",
+  "bit14(*rax) != arg4",
+  "0x64ffc28 byte == 0 and (([node] ^ *rax) & 0xfff) != 0"
+ ],
+ "packet": 214,
+ "rela_dyn_entries": 60723,
+ "rela_plt_entries": 278,
+ "returns": "derived entry pointer rax after join 0x63adb50(thread, [ref+0xe410], rax, 5); 0 on any gate failure",
+ "sixth_arg_selects": [
+  "rbx formula: flag6==0 -> page([node+8])-0x1000; flag6!=0 -> page([node+8])+page([node+0x10])",
+  "NULL gate: flag6==0 -> [node] bit 44 set; flag6!=0 -> entry-word bit 1 set"
+ ],
+ "thread_zero_detour": {
+  "decoded": false,
+  "site": "0x63ae114",
+  "target": "0x63d9880"
+ },
+ "thunk_b_fde": [
+  "0x63ae280",
+  "0x63ae29a",
+  26
+ ],
+ "thunk_fde": [
+  "0x63ae260",
+  "0x63ae278",
+  24
+ ],
+ "thunk_ret": "0x63ae277",
+ "title": "RE-001: the node #115 lu next-node call \u2014 thunk, table lookup, then join",
+ "worker_fde": [
+  "0x63adf40",
+  "0x63ae252",
+  786
+ ],
+ "worker_ret": "0x63ae06a"
+}

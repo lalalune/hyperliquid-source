@@ -1,0 +1,25 @@
+[
+  {
+    "label": "compile",
+    "argv": [
+      "$TOOLCHAIN/rustc",
+      "--edition=2021",
+      "--test",
+      "-Copt-level=3",
+      "--remap-path-prefix",
+      "$PACKET=packet",
+      "$PACKET/rust/admission.rs",
+      "-o",
+      "$OUT/tests"
+    ],
+    "exit_code": 0
+  },
+  {
+    "label": "run",
+    "argv": [
+      "$OUT/tests",
+      "--nocapture"
+    ],
+    "exit_code": 0
+  }
+]

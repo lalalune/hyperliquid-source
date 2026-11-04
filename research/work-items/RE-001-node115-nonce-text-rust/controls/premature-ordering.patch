@@ -1,0 +1,12 @@
+--- a/src/node115-nonce-text/src/lib.rs
++++ b/src/node115-nonce-text/src/lib.rs
+@@ -131,6 +131,9 @@
+         loop {
+             let value = integer(input, &mut cursor)?;
+             append(&mut values, value)?;
++            if !ordered(&values) {
++                return Err(Failure::OrderingInvariant);
++            }
+             skip_whitespace(input, &mut cursor);
+             match input.get(cursor) {
+                 Some(b']') => {

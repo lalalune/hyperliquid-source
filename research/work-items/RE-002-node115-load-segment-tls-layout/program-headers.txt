@@ -1,0 +1,54 @@
+node #115 ELF64 program-header table
+source: artifacts/node/115/hl-node (read in place; target not executed, no copy made)
+derived by: test-results/slop-workbench/packet-2c6ec29f2b07.py (proof 0)
+
+Identity and table coordinates
+
+target_sha256  a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+target_size    105896032
+e_type         3        ET_DYN (PIE)
+e_machine      62       EM_X86_64
+e_phoff        0x40
+e_phentsize    56
+e_phnum        12
+table_bytes    672
+
+offset is a raw file offset; vaddr is an ELF virtual address.
+
+idx  type             type_value  flags  offset      vaddr       filesz     memsz       align
+0    PT_PHDR          6           0x4    0x40        0x40        672        672         0x8
+1    PT_INTERP        3           0x4    0x2e0       0x2e0       28         28          0x1
+2    PT_LOAD          1           0x4    0x0         0x0         21070420   21070420    0x1000
+3    PT_LOAD          1           0x5    0x1418300   0x1419300   83724448   83724448    0x1000
+4    PT_LOAD          1           0x6    0x63f0ba0   0x63f2ba0   1031808    1033312     0x1000
+5    PT_LOAD          1           0x6    0x64eca20   0x64efa20   66536      2330372     0x1000
+6    PT_TLS           7           0x4    0x63f0ba0   0x63f2ba0   2848       4480        0x10
+7    PT_DYNAMIC       2           0x6    0x64dd248   0x64df248   528        528         0x8
+8    PT_GNU_RELRO     1685382482  0x4    0x63f0ba0   0x63f2ba0   1031808    1033312     0x1
+9    PT_GNU_EH_FRAME  1685382480  0x4    0xb9ea40    0xb9ea40    1082516    1082516     0x4
+10   PT_GNU_STACK     1685382481  0x6    0x0         0x0         0          0           0x0
+11   PT_NOTE          4           0x4    0x2fc       0x2fc       68         68          0x4
+
+The 32-bit type_value fields are the raw p_type words; for the three GNU
+types they are 0x6474e552 (RELRO), 0x6474e550 (EH_FRAME) and 0x6474e551
+(STACK).
+
+Values recomputed from the records above (same pinned bytes, no execution)
+
+- PT_LOAD segment count: 4 (indexes 2, 3, 4, 5).
+- vaddr - offset per segment: 0x0 for index 2, 0x1000 for index 3, 0x2000 for
+  indexes 4, 6 and 8, 0x3000 for index 5, 0x0 for indexes 0, 1, 7, 9, 10, 11.
+- Zero fill (memsz - filesz): 0 for indexes 0, 1, 2, 3, 7, 9, 10, 11; 1504 for
+  index 4; 2263836 for index 5; 1632 for index 6 (PT_TLS).
+- PT_GNU_RELRO (index 8) covers the segment-4 interval
+  0x63f2ba0..0x63f2ba0 + 1031808; it is 0x2000 below the segment-4 vaddr and
+  matches that segment's filesz and memsz, so bytes beyond that interval are
+  not RELRO-protected.
+- PT_LOAD filesz sum: 21070420 + 83724448 + 1031808 + 66536 = 105893212.
+- Segment 0 ends at file offset 21070420 and segment 3 begins at 21070592, a
+  172-byte gap. Including that gap the four load segments cover file offsets up
+  to 21070592 + 83724448 + 1031808 + 66536 = 105893384.
+- The file is 105896032 bytes, so 2648 bytes at the tail are outside every
+  PT_LOAD segment. Their content is not analysed in this packet.
+- PT_GNU_STACK (index 10) requests flags 0x6 with filesz and memsz 0; this is a
+  static header record, not a runtime kernel stack check.

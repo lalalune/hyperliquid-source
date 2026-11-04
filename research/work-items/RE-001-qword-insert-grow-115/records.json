@@ -1,0 +1,164 @@
+{
+  "task": "RE-001",
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "binary": "work/hl-node-115.bin",
+  "windows": {
+    "grow": {
+      "start": "0x5d9ee20",
+      "stop": "0x5d9efa5",
+      "size_bytes": 389,
+      "fde_file_offset": "0xff34fc",
+      "fde_length_field": "0x48",
+      "cie_augmentation": "zR",
+      "lsda": null,
+      "identity": "std::vector::_M_realloc_insert (length-error string at 0x43d55a)"
+    },
+    "caller": {
+      "start": "0x5f78060",
+      "stop": "0x5f780bf",
+      "size_bytes": 95,
+      "fde_file_offset": "0x10057c0",
+      "fde_length_field": "0x24",
+      "cie_augmentation": "zR",
+      "lsda": null,
+      "identity": "node-specific group append caller of the realloc-insert helper"
+    }
+  },
+  "container_layout": {
+    "begin": "+0x00",
+    "end": "+0x08",
+    "capacity_end": "+0x10",
+    "element_size_bytes": 8,
+    "note": "The helper reads begin and end only; it never reads the capacity field. It writes begin, end and capacity_end at the end."
+  },
+  "arguments": {
+    "rdi": "container pointer (begin at +0x00, end at +0x08, capacity end at +0x10)",
+    "rsi": "insert position pointer, must lie in [begin, end]",
+    "rdx": "pointer to the qword value to insert (the value stored is the qword loaded from this address, not the address itself)"
+  },
+  "size_rule": {
+    "definition": "size = (end - begin) >> 3, arithmetic shift on the wrapped 64-bit difference",
+    "max_elements": "0x0fffffffffffffff",
+    "length_error_arm": "size == 0x0fffffffffffffff calls __throw_length_error with the rodata string at 0x43d55a ('vector::_M_realloc_insert'), noreturn"
+  },
+  "capacity_rule": {
+    "empty_container": "end == begin: new capacity is 1 element (size + 1, capped at the maximum)",
+    "nonempty_container": "new capacity is min(2 * size, 0x0fffffffffffffff) elements",
+    "doubling_overflow_arm": "when 2 * size wraps below size (unsigned), the native code takes the max-bytes allocation path: operator new(0x7ffffffffffffff8), with the capacity end recorded as the new buffer plus that byte count; that byte count equals maximum * 8, so the capped path and the wrap path end at the same capacity (maximum), and the model returns the maximum for both",
+    "allocation_bytes": "new capacity * 8",
+    "note": "The helper always allocates a fresh buffer; there is no in-place arm even when spare capacity exists. Callers invoke it on their full path (end == capacity end), e.g. call site 0x5f780ad, reached only after the caller's own end == capacity-end test at 0x5f7808b."
+  },
+  "copy_steps_in_order": [
+    "value = qword loaded from the rdx pointer",
+    "destination_after_insert = new_buffer + (position - begin) + 8",
+    "new_end = destination_after_insert + (old_end - position)",
+    "store value at new_buffer + (position - begin)",
+    "when (position - begin) > 0 (signed): memmove(new_buffer, old_begin, position - begin)",
+    "when (old_end - position) > 0 (signed): memcpy(destination_after_insert, position, old_end - position)",
+    "when old_begin != 0: operator delete(old_begin, old_capacity_end - old_begin)",
+    "store new_buffer to container +0x00, new_end to container +0x08, new_buffer + allocation_bytes to container +0x10",
+    "return void"
+  ],
+  "callee_steps": [
+    {
+      "callee": "operator new",
+      "argument": "allocation byte count",
+      "site": "0x5d9eef1"
+    },
+    {
+      "callee": "memmove",
+      "arguments": "new_buffer, old_begin, prefix byte count",
+      "site": "0x5d9ef12",
+      "condition": "prefix byte count > 0 (signed)"
+    },
+    {
+      "callee": "memcpy",
+      "arguments": "destination_after_insert, position, suffix byte count",
+      "site": "0x5d9ef6f",
+      "condition": "suffix byte count > 0 (signed)"
+    },
+    {
+      "callee": "operator delete",
+      "arguments": "old_begin, old_capacity_end - old_begin",
+      "site": "0x5d9ef2d",
+      "condition": "old_begin != 0"
+    },
+    {
+      "callee": "__throw_length_error",
+      "argument": "rodata 0x43d55a",
+      "site": "0x5d9efa0",
+      "condition": "size == maximum"
+    }
+  ],
+  "census": {
+    "grow": {
+      "direct_calls": [
+        "0x5d9f0c0",
+        "0x5d9fc0e",
+        "0x5da3d4b",
+        "0x5dbed7c",
+        "0x5dbfbd3",
+        "0x5dbfe5b",
+        "0x5dc1fae",
+        "0x5dc33c8",
+        "0x5dc37dd",
+        "0x5dc434b",
+        "0x5dc47b0",
+        "0x5dc55f8",
+        "0x5dc8a59",
+        "0x5dc8b0a",
+        "0x5dc9ba0",
+        "0x5dca3db",
+        "0x5dcabff",
+        "0x5dcacce",
+        "0x5decfbc",
+        "0x5e190df",
+        "0x5ec4037",
+        "0x5f53153",
+        "0x5f5327e",
+        "0x5f5349a",
+        "0x5f780ad",
+        "0x5f78347"
+      ],
+      "tail_jumps": [],
+      "qword_file_offsets": [],
+      "relative_reloc_offsets": []
+    },
+    "caller": {
+      "direct_calls": [
+        "0x5f539e4",
+        "0x5f53a84",
+        "0x5f53b24"
+      ],
+      "tail_jumps": [
+        "0x5f45dcd"
+      ],
+      "qword_file_offsets": [],
+      "relative_reloc_offsets": []
+    }
+  },
+  "caller_shape": {
+    "note": "Two inspected call sites show the caller-side contract: the caller tests end against capacity end itself and calls this helper only on the full path, passing the container in rdi, the insert position in rsi, and a pointer to the value in rdx.",
+    "inspected_sites": [
+      "0x5f780ad (append at end: rsi = end, rdx = stack slot holding the value; caller test at 0x5f7808b)",
+      "0x5d9f0c0 (rdi = container, rsi = end, rdx = computed element pointer)"
+    ]
+  },
+  "caller_semantics": {
+    "arguments": {
+      "rdi": "object holding the 24-byte group entries at +0xa98",
+      "esi": "group index, sign-extended to 64 bits",
+      "rdx": "element value pointer to append"
+    },
+    "group_entry": "24-byte record at [object + 0xa98] + index * 24; its first three qwords are the element container (begin +0, end +8, capacity end +0x10)",
+    "steps_in_order": [
+      "store the value argument to a stack slot (that slot's address is the helper's value pointer on the full path)",
+      "container = group entry at index",
+      "when end != capacity end (signed compare of pointers as addresses): store the value at end, advance end by 8, then increment the 32-bit field at value + 0xb0 by 1, return void",
+      "when end == capacity end: call the realloc-insert helper with (container, end, address of the stack slot holding the value), then increment the 32-bit field at value + 0xb0 by 1, return void"
+    ],
+    "note": "The +0xb0 increment happens on both arms, after the store in either arm; the helper's own store is what places the value on the full path, and the caller never touches the element list again after the call.",
+    "callers_of_the_caller": "3 direct calls and 1 tail jump, sites only (see census)"
+  }
+}

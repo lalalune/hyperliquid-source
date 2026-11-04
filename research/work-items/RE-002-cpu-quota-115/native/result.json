@@ -1,0 +1,124 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "source_sha256": "fb4339da1049282f741cd6527c212bd6a2638dd3b0a3bdd8f03f0ff09c1b66a3",
+  "driver_sha256": "54e7a18882289d533b1399f339e8dc53988f167ace5d07071f6ffdeb55e5cb49",
+  "input_sha256": "e6d108d5ff59fef634cb23df3569b664b6c565c476d480f5932f7c5deb4a18f8",
+  "expected_sha256": "02af5e166b8f15e8114446400cafd8039fed863ee0b2a34df885ffd321b93362",
+  "quota_cases": 2317,
+  "affinity_cases": 1318,
+  "correct_builds": [
+    {
+      "label": "compiler0-1.94.1-opt0",
+      "cases": 3635,
+      "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: aarch64-apple-darwin\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+      "rlib_sha256": "0fee1bb3d5656afe9cd3c63f08928aa8ed6a23399a140e7741e35852991c7a9d",
+      "output_sha256": "02af5e166b8f15e8114446400cafd8039fed863ee0b2a34df885ffd321b93362"
+    },
+    {
+      "label": "compiler0-1.94.1-opt3",
+      "cases": 3635,
+      "compiler": "rustc 1.94.1 (e408947bf 2026-03-25)\nbinary: rustc\ncommit-hash: e408947bfd200af42db322daf0fadfe7e26d3bd1\ncommit-date: 2026-03-25\nhost: aarch64-apple-darwin\nrelease: 1.94.1\nLLVM version: 21.1.8\n",
+      "rlib_sha256": "a8d38b6fe3de9da77db35f519b30e49f9726d703e44cbb61e4146853af4c8d6c",
+      "output_sha256": "02af5e166b8f15e8114446400cafd8039fed863ee0b2a34df885ffd321b93362"
+    },
+    {
+      "label": "compiler1-1.95.0-opt0",
+      "cases": 3635,
+      "compiler": "rustc 1.95.0 (59807616e 2026-04-14)\nbinary: rustc\ncommit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860\ncommit-date: 2026-04-14\nhost: aarch64-apple-darwin\nrelease: 1.95.0\nLLVM version: 22.1.2\n",
+      "rlib_sha256": "7a04ab13d543c295d9fee0a7e5ea406e7b684a92c06380067137cffd2de4465b",
+      "output_sha256": "02af5e166b8f15e8114446400cafd8039fed863ee0b2a34df885ffd321b93362"
+    },
+    {
+      "label": "compiler1-1.95.0-opt3",
+      "cases": 3635,
+      "compiler": "rustc 1.95.0 (59807616e 2026-04-14)\nbinary: rustc\ncommit-hash: 59807616e1fa2540724bfbac14d7976d7e4a3860\ncommit-date: 2026-04-14\nhost: aarch64-apple-darwin\nrelease: 1.95.0\nLLVM version: 22.1.2\n",
+      "rlib_sha256": "3f028ccaa75f6807c79f415f632d0fac850b3c9fab9a970d1f7b44d606e3ac80",
+      "output_sha256": "02af5e166b8f15e8114446400cafd8039fed863ee0b2a34df885ffd321b93362"
+    }
+  ],
+  "compiled_mutant_controls": [
+    {
+      "name": "input_precision",
+      "normal_return": true,
+      "differences": 1587,
+      "first_index": 57,
+      "input": "Q 2147481599 1 1 0",
+      "expected": "41dffffdffc00000 3ff0000000000000 41dffffdffc00000 2147481599 1 1",
+      "actual": "41dffffe00000000 3ff0000000000000 41dffffe00000000 2147481600 1 1",
+      "source_sha256": "f37017b67e77df1ab5902ae13daca98ab7b8ee544b8b4483f90b41ecaff9fd86"
+    },
+    {
+      "name": "ceil_to_floor",
+      "normal_return": true,
+      "differences": 1830,
+      "first_index": 9,
+      "input": "Q 1 2 1 0",
+      "expected": "3ff0000000000000 4000000000000000 3fe0000000000000 1 1 1",
+      "actual": "3ff0000000000000 4000000000000000 3fe0000000000000 0 - 0",
+      "source_sha256": "8784c243fd465426cea99ea81be1816c9a653e9674b2d9241c019ff00009f120"
+    },
+    {
+      "name": "integer_ceildiv",
+      "normal_return": true,
+      "differences": 129,
+      "first_index": 655,
+      "input": "Q 9007199254740993 1 18446744073709551615 17",
+      "expected": "4340000000000000 3ff0000000000000 4340000000000000 9007199254740992 9007199254740992 9007199254740992",
+      "actual": "4340000000000000 3ff0000000000000 4340000000000000 9007199254740993 9007199254740993 9007199254740993",
+      "source_sha256": "df8deb9a672713efd36145140903d2f3bce1fb76932229ac3c8724ef8354d326"
+    },
+    {
+      "name": "minimum_to_maximum",
+      "normal_return": true,
+      "differences": 2026,
+      "first_index": 8,
+      "input": "Q 1 1 0 18446744073709551615",
+      "expected": "3ff0000000000000 3ff0000000000000 3ff0000000000000 1 0 0",
+      "actual": "3ff0000000000000 3ff0000000000000 3ff0000000000000 1 1 1",
+      "source_sha256": "ea722fd828306f012527ce07cbb3c7e9253af987ac016e8603d47187139d13df"
+    },
+    {
+      "name": "zero_publication",
+      "normal_return": true,
+      "differences": 10,
+      "first_index": 1,
+      "input": "Q 0 1 1 17",
+      "expected": "0000000000000000 3ff0000000000000 0000000000000000 0 - 17",
+      "actual": "0000000000000000 3ff0000000000000 0000000000000000 0 0 0",
+      "source_sha256": "9f217cf4613c55bc4d6f55afc428b07e1dcbeefd70087fed766316778cacb3f9"
+    },
+    {
+      "name": "signed_fallback_zero",
+      "normal_return": true,
+      "differences": 16,
+      "first_index": 3599,
+      "input": "A -9223372036854775808 0 -",
+      "expected": "1 1",
+      "actual": "0 0",
+      "source_sha256": "4b02f289776a33a1944d62067896d07ab2c1fa68074a15156225d61f9d4c7017"
+    },
+    {
+      "name": "affinity_first_word_only",
+      "normal_return": true,
+      "differences": 1217,
+      "first_index": 2318,
+      "input": "A -1 1 ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff",
+      "expected": "1024 1",
+      "actual": "64 1",
+      "source_sha256": "c723ebaf414dc24196030f4819dd3dd0caa7fb9183ba3552ade8081e1f19c22c"
+    },
+    {
+      "name": "cache_precedence_inverted",
+      "normal_return": true,
+      "differences": 1056,
+      "first_index": 2318,
+      "input": "A -1 1 ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffff",
+      "expected": "1024 1",
+      "actual": "1024 1024",
+      "source_sha256": "bed83b566ae58f4f5d23d5edf6d5bcf3456ab4d0e0e889297797465d3e876514"
+    }
+  ],
+  "captured_execution": false,
+  "concurrency_proven": false,
+  "source_byte_match_claimed": false
+}

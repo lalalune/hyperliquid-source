@@ -1,0 +1,11 @@
+--- a/src/node115-nonce-text/src/lib.rs
++++ b/src/node115-nonce-text/src/lib.rs
+@@ -60,7 +60,7 @@
+ }
+ 
+ fn skip_whitespace(input: &[u8], cursor: &mut usize) {
+-    while matches!(input.get(*cursor), Some(b'\t' | b'\n' | b'\r' | b' ')) {
++    while matches!(input.get(*cursor), Some(b'\t' | b'\n' | b'\x0b' | b'\x0c' | b'\r' | b' ')) {
+         *cursor += 1;
+     }
+ }

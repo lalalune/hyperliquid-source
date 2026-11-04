@@ -1,0 +1,578 @@
+{
+  "boundary": {
+    "grand_a": "on the ga_a1/ga_a2/ga_a3/ga_a4 paths the cell pointer is forwarded, never written, inside all traced callers, and the object whose first byte is the tag is written above them: one level higher the pointer is still forwarded (the ga_a2 callers, FDE 0x371d280 site 0x371d31f and FDE 0x371f380 site 0x371f41b, copy it from their own first argument record +0x60 field into the frame record they pass; the ga_a4 caller, FDE 0x3b913e0 site 0x3b91432, passes a record returned by a helper call). The ga_a5 path is closed one level higher by the ga_a5_feeder FDE, which materialises the byte from its own container; the feeder has exactly one direct caller (FDE 0x3ec1b80, site 0x3ec1c0c), not traced. Who writes the tag byte objects on the remaining paths, and which cell contents occur per action family, remain open.",
+    "grand_b_fields": "the writers of the gb_b2/gb_b3 context object +0xa0 source buffer, of the gb_b4 object +0xbd5 byte, and of the object gb_b1 first argument +0x18 points to, are not in the traced FDEs and remain open; in gb_b2/gb_b3 the +0x1e8 field may also keep a value set before the traced entry arm ran, since exactly one store exists in each FDE and it is arm-local.",
+    "grand_b_wrappers": "gb_b5/gb_b6/gb_b7 have no direct call sites; each start address occurs exactly once in the file as a stored qword (gb_b5 at the VA in wrapper_table_entries, likewise gb_b6/gb_b7), i.e. they are reached through a pointer table whose consumer is not traced; which byte their callers pass as the second argument is above that table."
+  },
+  "caller_census": {
+    "ga_a1": [
+      {
+        "kind": "call",
+        "owner": "ga_a2",
+        "owner_start": "0x35c9c80",
+        "site": "0x35ca00e"
+      },
+      {
+        "kind": "call",
+        "owner": "ga_a4",
+        "owner_start": "0x3b87c20",
+        "site": "0x3b87f9f"
+      }
+    ],
+    "ga_a2": [
+      {
+        "kind": "call",
+        "owner": null,
+        "owner_start": "0x371d280",
+        "site": "0x371d31f"
+      },
+      {
+        "kind": "call",
+        "owner": null,
+        "owner_start": "0x371f380",
+        "site": "0x371f41b"
+      }
+    ],
+    "ga_a3": [],
+    "ga_a4": [
+      {
+        "kind": "call",
+        "owner": null,
+        "owner_start": "0x3b913e0",
+        "site": "0x3b91432"
+      }
+    ],
+    "ga_a5": [
+      {
+        "kind": "jump",
+        "owner": "ga_a5_thunk",
+        "owner_start": "0x3d9d160",
+        "site": "0x3d9d167"
+      }
+    ],
+    "ga_a5_feeder": [
+      {
+        "kind": "call",
+        "owner": null,
+        "owner_start": "0x3ec1b80",
+        "site": "0x3ec1c0c"
+      }
+    ],
+    "ga_a5_thunk": [
+      {
+        "kind": "call",
+        "owner": "ga_a5_feeder",
+        "owner_start": "0x3713530",
+        "site": "0x37135da"
+      }
+    ],
+    "grand_b_caller": [],
+    "grand_b_caller_slot_references": [
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "gb_b1",
+        "site": "0x294b0a2"
+      },
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "gb_b2",
+        "site": "0x2ae4d64"
+      },
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "gb_b2",
+        "site": "0x2ae51d0"
+      },
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "gb_b2",
+        "site": "0x2ae579f"
+      },
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "gb_b3",
+        "site": "0x2cdee4f"
+      },
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "gb_b3",
+        "site": "0x2cdf2b5"
+      },
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "gb_b3",
+        "site": "0x2cdf899"
+      },
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "gb_b4",
+        "site": "0x2e09c09"
+      },
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "gb_b4",
+        "site": "0x2e0a08f"
+      },
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "gb_b5",
+        "site": "0x5a70c9e"
+      },
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "gb_b6",
+        "site": "0x5a70d3e"
+      },
+      {
+        "encoding": "ff15",
+        "kind": "call",
+        "owner": "gb_b7",
+        "site": "0x5a70e01"
+      }
+    ],
+    "top_caller": [
+      {
+        "kind": "call",
+        "owner": "ga_a1",
+        "owner_start": "0x35c57e0",
+        "site": "0x35c5834"
+      },
+      {
+        "kind": "call",
+        "owner": "ga_a2",
+        "owner_start": "0x35c9c80",
+        "site": "0x35c9e56"
+      },
+      {
+        "kind": "call",
+        "owner": "ga_a3",
+        "owner_start": "0x3719a90",
+        "site": "0x3719afa"
+      },
+      {
+        "kind": "call",
+        "owner": "ga_a4",
+        "owner_start": "0x3b87c20",
+        "site": "0x3b87de3"
+      },
+      {
+        "kind": "call",
+        "owner": "ga_a5",
+        "owner_start": "0x4301ce0",
+        "site": "0x4301da7"
+      }
+    ]
+  },
+  "captured_code_executed": false,
+  "chain_links_reverified": {
+    "grand_b_caller_capture": "the grand_b_caller FDE captures the byte at [arg2+0x11d] at 0x38d9c77 (chain-top packet pin, re-verified)",
+    "grand_b_caller_slot": {
+      "addend": "0x38d9c60",
+      "slot": "0x64e6c60",
+      "slot_section": ".got",
+      "type": 8,
+      "type_name": "R_X86_64_RELATIVE"
+    },
+    "top_tag_load": "the top FDE loads the tag byte at 0x371336c through the container field +0x10 pointer (chain-top packet pin, re-verified)"
+  },
+  "grand_a_tag_provenance": {
+    "ga_a1": {
+      "call_site": "0x35c5834",
+      "container": "a frame copy of the three-qword sub-struct at the record (second argument) +0x28; its field 0, loaded from record +0x28, is the cell pointer of the chain-top trace: the top FDE loads the qword stored in that cell and takes the byte at that address, so the tag byte is the first byte of the object whose address is stored in the cell at [record +0x28]",
+      "discriminator_argument": "the caller own byte argument, zero-extended",
+      "writer": "no instruction in this FDE stores to the record +0x28/+0x30/+0x38 fields (encoding-scoped store census); the writer is above"
+    },
+    "ga_a2": {
+      "call_site": "0x35c9e56",
+      "container": "a frame copy assembled from the record (second argument) fields +0x60/+0x68/+0x70; the +0x60 field is the cell pointer of the chain-top trace, so the tag byte is the first byte of the object whose address is stored in the cell at [record +0x60]",
+      "discriminator_argument": "constant 1",
+      "writer": "no instruction in this FDE stores to the record +0x60/+0x68/+0x70 fields (encoding-scoped store census); the writer is above"
+    },
+    "ga_a3": {
+      "call_site": "0x3719afa",
+      "container": "a frame copy of the three-qword sub-struct at the record (first argument) +0x28; its field 0, loaded from record +0x28, is the cell pointer of the chain-top trace, so the tag byte is the first byte of the object whose address is stored in the cell at [record +0x28]",
+      "discriminator_argument": "constant 1",
+      "reachability": "no direct call or jump site and no stored qword in the file; the address is materialised by lea in ga_a2 (0x35c9d84) and ga_a4 (0x3b87d1c) and stored into a registry slot with a frame context record",
+      "writer": "no instruction in this FDE stores to the record +0x28/+0x30/+0x38 fields (encoding-scoped store census); the writer is above"
+    },
+    "ga_a4": {
+      "call_site": "0x3b87de3",
+      "container": "a frame copy assembled from the record (second argument) fields +0x60/+0x68/+0x70; the +0x60 field is the cell pointer of the chain-top trace, so the tag byte is the first byte of the object whose address is stored in the cell at [record +0x60]",
+      "discriminator_argument": "constant 0",
+      "writer": "no instruction in this FDE stores to the record +0x60/+0x68/+0x70 fields (encoding-scoped store census); the writer is above"
+    },
+    "ga_a5": {
+      "call_site": "0x4301da7",
+      "container": "assembled on the frame: field 0 is the address of the frame copy of the third argument field 2 (+0x10), field 1 is a computed element pointer, field 2 is the second argument; the cell pointer of the chain-top trace is therefore that frame slot, the qword it holds is the third argument +0x10 value, and the tag byte is the first byte of the object that value addresses",
+      "discriminator_argument": "constant 0",
+      "reachability": "no direct call site and no stored qword in the file; reached only through the ga_a5_thunk adapter (single jump site 0x3d9d167), which forwards its own second argument as the record and that record +0x8 field as the second argument",
+      "writer": "inside ga_a5 the field is copied, never stored to (encoding-scoped store census over the third argument fields). One level higher the writer is pinned: the ga_a5_feeder FDE performs the same two-dereference load from its own third argument container (0x3713590, 0x3713598), stores the byte to a frame byte (0x371359b), and stores that frame byte address as the record +0x10 field (0x37135c8) of the record the thunk forwards to ga_a5 as its third argument; so on this path the tag byte value is the feeder own container byte, whose writer is above the feeder"
+    }
+  },
+  "grand_b_tag_provenance": {
+    "gb_b1": {
+      "call_sites": [
+        "0x294b0a2"
+      ],
+      "record": "built on the frame at +0x60 once per loop iteration (fields +0x00=1, +0x10=0xc2, byte +0x18=2, +0x100 from the first argument +0x10 field)",
+      "tag_source": "the first byte of the object pointed to by the first argument +0x18 field; the pointer is saved once at entry (0x294af5a, count-pinned unique) and the byte is reloaded through it at every loop head (0x294afb5)"
+    },
+    "gb_b2": {
+      "call_sites": [
+        "0x2ae4d64",
+        "0x2ae51d0",
+        "0x2ae579f"
+      ],
+      "record": "built on the frame at +0xd0 per call site (field +0x10 is 0x97 at site 1, blob-copied at site 2, 0x87 at site 3)",
+      "tag_source": "the byte at object +0x1e8 of the context object (the first argument), freshly loaded before each call; the only store to that field in the FDE (0x2ae44ce, count-pinned unique) writes the low byte of the dword at object +0xa0, itself stored from a staged frame value in the same entry arm"
+    },
+    "gb_b3": {
+      "call_sites": [
+        "0x2cdee4f",
+        "0x2cdf2b5",
+        "0x2cdf899"
+      ],
+      "record": "built on the frame at +0x60 per call site (field +0x10 is 0x97 at site 1)",
+      "tag_source": "the byte at object +0x1e8 of the context object (loaded as [[first argument +0x8]] at 0x2cde495), freshly loaded before each call; the only store to that field in the FDE (0x2cde56b, count-pinned unique) writes the low byte of the dword at object +0xa0, itself written by a 0x98-byte copy into the object in the same entry arm"
+    },
+    "gb_b4": {
+      "call_sites": [
+        "0x2e09c09",
+        "0x2e0a08f"
+      ],
+      "record": "built on the frame at +0x50 per call site (field +0x00=1; the +0x10 blob is copied from a frame record whose head qword is 0xdd at site 1 and 0xdc at site 2)",
+      "tag_source": "the byte at object +0xbd5 of the record object (the second argument), freshly loaded in each call block (0x2e09b01, 0x2e09f87; count-pinned exactly two loads and two tag stores)"
+    },
+    "gb_b5": {
+      "call_sites": [
+        "0x5a70c9e"
+      ],
+      "reachability": "no direct call or jump site; the start address occurs exactly once in the file, as a stored qword (see boundary)",
+      "record": "built on the frame at +0x8 (field +0x10 is the constant 0xc4)",
+      "tag_source": "the wrapper own second argument byte, captured at entry (0x5a70c33) and stored both to record +0x48 and to record +0x11d"
+    },
+    "gb_b6": {
+      "call_sites": [
+        "0x5a70d3e"
+      ],
+      "reachability": "no direct call or jump site; the start address occurs exactly once in the file, as a stored qword (see boundary)",
+      "record": "built on the frame at +0x8 (field +0x10 is the constant 0xc3)",
+      "tag_source": "the wrapper own second argument byte, captured at entry (0x5a70cd3) and stored both to record +0x48 and to record +0x11d"
+    },
+    "gb_b7": {
+      "call_sites": [
+        "0x5a70e01"
+      ],
+      "reachability": "no direct call or jump site; the start address occurs exactly once in the file, as a stored qword (see boundary)",
+      "record": "built on the frame at +0x8 (field +0x10 is the constant 0xa8)",
+      "tag_source": "the wrapper own second argument byte, captured at entry (0x5a70d7d) and stored both to record +0x5c and to record +0x11d; the neighbouring byte +0x5d is the fifth argument byte"
+    }
+  },
+  "limits": "Static byte pins, FDE extent censuses, one .text call census, one RIP-relative reference census over the ff 15 / ff 25 / REX.W mov/lea encodings, the .rela.dyn addend census, a raw VA occurrence census, and encoding-scoped store censuses over the container fields (the prefixes and ModRM sets named in the checker) only. Runtime byte values are not observed: which tag the node emits for a given record depends on the source bytes above, whose contents are data. The packet does not name the record or object types the pointers denote and does not follow the forwarding chain above the boundary FDEs.",
+  "owners": [
+    {
+      "bytes": 175,
+      "end": "0x35c588f",
+      "file_offset": "0x35c47e0",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "4800000044ca1a0094b73d02af00000004b3da0cff420e10410e18440e3083038e0202412e104a0e38420e40490e30442e004f0e18410e10420e08410e302e004f2e00562e00482e00482e00",
+          "va": "0x11ea044"
+        }
+      },
+      "role": "ga_a1",
+      "sha256": "054054759fc73cb677ec85b38be72792497162953128d4d3613d7397fa10e120",
+      "start": "0x35c57e0"
+    },
+    {
+      "bytes": 1345,
+      "end": "0x35ca1c1",
+      "file_offset": "0x35c8c80",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "a4000000b8d31a00c0f23d02410500000467d80cff410e10420e18420e20420e28420e30410e38470e900383078c068d058e048f03860202b12e0002fc2e10560e9803420ea003490e900302432e005e2e0002442e0002502e0002a52e0002530e38410e30420e28420e20420e18420e10410e08410e90032e00502e005e2e00562e004f2e004f2e00542e00692e005d2e00562e00472e00532e00722e004f2e006d2e004a2e0000",
+          "va": "0x11ea9b8"
+        }
+      },
+      "role": "ga_a2",
+      "sha256": "afc39f31068d4101aa9b5c04eed9cdb37a0d69e2c0ed99f77da83cea2869d126",
+      "start": "0x35c9c80"
+    },
+    {
+      "bytes": 443,
+      "end": "0x3719c4b",
+      "file_offset": "0x3718a90",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "6c00000048331c0040915102bb010000041b0b0cff410e10420e18420e20410e28440e800183058e048f038602024e2e10510e8801410e9001490e80015b2e0002502e00552e004f0e28410e20420e18420e10410e08410e80012e00522e00622e004d2e00592e0002452e004d2e0000",
+          "va": "0x1200948"
+        }
+      },
+      "role": "ga_a3",
+      "sha256": "79372fc0afd5230a095c2f7a4f704ec06b00bdbcaf520b7383ebaf24b737bcf2",
+      "start": "0x3719a90"
+    },
+    {
+      "bytes": 1212,
+      "end": "0x3b880dc",
+      "file_offset": "0x3b86c20",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "9c00000034212000e4849402bc040000042f590bff410e10420e18420e20420e28420e30410e38470ea00383078c068d058e048f03860202b12e0002ec2e10530ea803420eb003490ea00302462e005e2e007e2e0002542e0002ab2e00024c0e38410e30420e28420e20420e18420e10410e08410ea0032e00502e005e2e00562e004f2e004f2e00542e00692e00632e004f2e004f2e004a2e00482e00000000",
+          "va": "0x123f734"
+        }
+      },
+      "role": "ga_a4",
+      "sha256": "335282c9ce9a817ce28dc383e0d25b9f19afccbedf41451ea820d406187d3444",
+      "start": "0x3b87c20"
+    },
+    {
+      "bytes": 418,
+      "end": "0x4301e82",
+      "file_offset": "0x4300ce0",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "78000000f8b92500e08c0603a201000004b3a809ff410e10420e18420e20420e28420e30410e38440ea00183078c068d058e048f03860202562e00572e00732e10570ea801420eb001490ea0015a0e38410e30420e28420e20420e18420e10410e08410ea0012e006f2e004d2e007d2e005c2e004a2e00482e000000",
+          "va": "0x1298ff8"
+        }
+      },
+      "role": "ga_a5",
+      "sha256": "65f01ebdb08d4a7f582d83e565017e234c8ab896678582bd6865203cff7cc360",
+      "start": "0x4301ce0"
+    },
+    {
+      "bytes": 12,
+      "end": "0x3d9d16c",
+      "file_offset": "0x3d9c160",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+          "va": "0xca6ed8"
+        },
+        "fde": {
+          "bytes_hex": "1000000064be1b0020a4f3020c00000000000000",
+          "va": "0xe62d38"
+        }
+      },
+      "role": "ga_a5_thunk",
+      "sha256": "aaf47a1039989f5314d8a7bbf1958b00b8ad773fec115f33cf73657c7bc57c73",
+      "start": "0x3d9d160"
+    },
+    {
+      "bytes": 411,
+      "end": "0x37136cb",
+      "file_offset": "0x3712530",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "500000005c2b1c00cc3351029b01000004730c0cff410e10420e18420e20420e28420e30410e38470ec00183078c068d058e048f038602030f010e38410e30420e28420e20420e18420e10410e08410ec0010000",
+          "va": "0x120015c"
+        }
+      },
+      "role": "ga_a5_feeder",
+      "sha256": "d0c81e4baa052a3ad566b29dbdeca133a834059382dbdb8e00374d2da73f9465",
+      "start": "0x3713530"
+    },
+    {
+      "bytes": 519,
+      "end": "0x294b127",
+      "file_offset": "0x2949f20",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "5000000020db1100f8fd7e01070200000483870eff410e10420e18420e20420e28420e30410e38470e900883078c068d058e048f03860203b8010e38410e30420e28420e20420e18420e10410e08410e90080000",
+          "va": "0x115b120"
+        }
+      },
+      "role": "gb_b1",
+      "sha256": "74b59319c55c3b1bca1cac4ad0f0756fd3ad1fe10db2e8cc92e8604a5cfad053",
+      "start": "0x294af20"
+    },
+    {
+      "bytes": 11142,
+      "end": "0x2ae6d66",
+      "file_offset": "0x2ae31e0",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "500000009cee13003c7d9601862b00000417260eff410e10420e18420e20420e28420e30410e38470ee01f83078c068d058e048f03860203791c0e38410e30420e28420e20420e18420e10410e08410ee01f0000",
+          "va": "0x117c49c"
+        }
+      },
+      "role": "gb_b2",
+      "sha256": "90ae09003ca680bd4b5f32fec22ee1f7146cc1f67b758f8e2f2ac880545b730b",
+      "start": "0x2ae41e0"
+    },
+    {
+      "bytes": 10657,
+      "end": "0x2ce0dd1",
+      "file_offset": "0x2cdd430",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "50000000acb015007c5db401a12900000493f70dff410e10420e18420e20420e28420e30410e38470ee00983078c068d058e048f03860203f11a0e38410e30420e28420e20420e18420e10410e08410ee0090000",
+          "va": "0x11986ac"
+        }
+      },
+      "role": "gb_b3",
+      "sha256": "99c49a3e20f63cf199f2a160ba9560e439acb2b49a66968623aa9607acfa417b",
+      "start": "0x2cde430"
+    },
+    {
+      "bytes": 30816,
+      "end": "0x2e11140",
+      "file_offset": "0x2e088e0",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+          "va": "0x103d604"
+        },
+        "fde": {
+          "bytes_hex": "50000000104b1700c877c5016078000004c7580dff410e10420e18420e20420e28420e30410e38470ec01a83078c068d058e048f038602031f140e38410e30420e28420e20420e18420e10410e08410ec01a0000",
+          "va": "0x11b2110"
+        }
+      },
+      "role": "gb_b4",
+      "sha256": "3605ca6d67167d3359733cfee3b66ca0a8ca675731b909e97f331fb90d252dc6",
+      "start": "0x2e098e0"
+    },
+    {
+      "bytes": 149,
+      "end": "0x5a70cb5",
+      "file_offset": "0x5a6fc20",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+          "va": "0xca6ed8"
+        },
+        "fde": {
+          "bytes_hex": "38000000bcdb310088c1aa049500000000410e10420e18420e20410e28470ed00283058e048f03860202810e28410e20420e18420e10410e08000000",
+          "va": "0xfc4a90"
+        }
+      },
+      "role": "gb_b5",
+      "sha256": "843bb8c4d7a61b919b6a27b73bf4ad8122c9fe8d4a5b9a8a2d1dc53c4398da64",
+      "start": "0x5a70c20"
+    },
+    {
+      "bytes": 149,
+      "end": "0x5a70d55",
+      "file_offset": "0x5a6fcc0",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+          "va": "0xca6ed8"
+        },
+        "fde": {
+          "bytes_hex": "38000000f8db3100ecc1aa049500000000410e10420e18420e20410e28470ed00283058e048f03860202810e28410e20420e18420e10410e08000000",
+          "va": "0xfc4acc"
+        }
+      },
+      "role": "gb_b6",
+      "sha256": "462351660670e7c30942a8588fe6cf72663834bb53628e8ee92e8f9a3833b8bc",
+      "start": "0x5a70cc0"
+    },
+    {
+      "bytes": 188,
+      "end": "0x5a70e1c",
+      "file_offset": "0x5a6fd60",
+      "frames": {
+        "cie": {
+          "bytes_hex": "1400000000000000017a5200017810011b0c070890010000",
+          "va": "0xca6ed8"
+        },
+        "fde": {
+          "bytes_hex": "4800000034dc310050c2aa04bc00000000410e10420e18420e20420e28420e30410e38470ee00283078c068d058e048f03860202a00e38410e30420e28420e20420e18420e10410e08000000",
+          "va": "0xfc4b08"
+        }
+      },
+      "role": "gb_b7",
+      "sha256": "38f5c89e8f56a685731ad83d8b9c7947f753f7f1d2abb2bc2f7f19265ca5d54e",
+      "start": "0x5a70d60"
+    }
+  ],
+  "serializer_tag_rule": {
+    "argument": "third argument (edx)",
+    "byte_if_equal": "0x61",
+    "byte_otherwise": "0x62",
+    "compared_against": 3
+  },
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "wrapper_table_entries": {
+    "ga_a3": {
+      "eight_byte_file_offsets": [],
+      "eight_byte_vas": []
+    },
+    "ga_a5": {
+      "eight_byte_file_offsets": [],
+      "eight_byte_vas": []
+    },
+    "gb_b5": {
+      "eight_byte_file_offsets": [
+        "0x14c218"
+      ],
+      "eight_byte_vas": [
+        "0x14c218"
+      ]
+    },
+    "gb_b6": {
+      "eight_byte_file_offsets": [
+        "0x14c260"
+      ],
+      "eight_byte_vas": [
+        "0x14c260"
+      ]
+    },
+    "gb_b7": {
+      "eight_byte_file_offsets": [
+        "0x14c200"
+      ],
+      "eight_byte_vas": [
+        "0x14c200"
+      ]
+    }
+  }
+}

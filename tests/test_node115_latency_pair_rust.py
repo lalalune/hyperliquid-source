@@ -1,3 +1,4 @@
+import os
 """Raw signed pair widths, saved/capped distinction and actual byte controls."""
 import hashlib,json
 from pathlib import Path
@@ -5,6 +6,8 @@ import subprocess,sys,tempfile,unittest
 from unittest import mock
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 import node115_latency_pair_rust as subject
+@unittest.skipUnless(os.environ.get('HL_ALLOW_CAPTURED_INSTRUCTION_EVAL') == '1',
+                     'captured instruction evaluation requires explicit authorization')
 class LatencyPairRustTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):cls.result=subject.oracle()

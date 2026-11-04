@@ -1,0 +1,18 @@
+Relocations and references for node #115 0x5f134b0 (from readelf and objdump):
+
+- No GOT/RELATIVE slot is read in-window: the main, value and
+  caller windows contain no rip-relative reference, no PLT call
+  and no stack-canary check. The census finds no RELATIVE slot
+  whose addend is 0x5f134b0, no whole-file qword hit, and no tail
+  jump. The window is reached only by the three direct calls at
+  0x5d8bd5c, 0x5e4bfca and 0x5e4c2d5.
+- Direct calls in-window (main window, 1 site):
+  0x5f0a1d0 at 0x5f13580 (the value callee, excerpted whole in
+  this packet; it returns the qword at its argument + 0xc38).
+  The main window also tail-jumps within itself only (to its own
+  call path at 0x5f13580); it has no other call.
+- Direct calls in the caller window (2 sites):
+  0x5f134b0 at 0x5d8bd5c (the scan, with a null query) and
+  0x5f0a1d0 at 0x5d8bd6b (the value callee on the + 0x8e8 record).
+- No landing pad: all three FDEs have CIE 0 and no LSDA, and none
+  of the windows contains an _Unwind_Resume call.

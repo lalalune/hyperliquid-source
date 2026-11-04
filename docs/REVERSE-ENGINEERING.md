@@ -25,3 +25,8 @@ not establish native node execution or whole-node equivalence.
 The active tree contains only #115 implementations, their needed shared analysis
 helpers, and licensed dependencies. Historical source is available in Git;
 reusing it requires a new, target-specific validation record.
+
+`make fde-gaps` classifies the authenticated #115 gaps between unwind ranges
+and checks direct branches, RIP-relative operands and relocation references.
+See [the bounded gap evidence](../research/work-items/RE-001-fde-gap-classes/README.md).
+The resulting islands are candidate code or data, not validated functions.

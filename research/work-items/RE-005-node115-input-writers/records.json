@@ -1,0 +1,409 @@
+{
+ "access_census": {
+  "builder_bulk_a": {
+   "exact_counts": {},
+   "zero_patterns": {}
+  },
+  "builder_twin_a": {
+   "exact_counts": {},
+   "zero_patterns": {}
+  },
+  "caller_b_side": {
+   "exact_counts": {},
+   "zero_patterns": {
+    "+0x958]": 0,
+    "+0xa58]": 0,
+    "+0xa60]": 0,
+    "+0xc08]": 0,
+    "+0xc40]": 0,
+    "[rbx+0x2900]": 0,
+    "[rbx+0x2a00]": 0,
+    "[rbx+0x2a08]": 0,
+    "[rbx+0xc18]": 0,
+    "[rbx+0xd18]": 0,
+    "[rbx+0xd20]": 0,
+    "[rbx+0xeb8]": 0,
+    "[rbx+0xef0]": 0
+   }
+  },
+  "caller_bulk_a_1": {
+   "exact_counts": {
+    "[rbx+0x6f8]": 1
+   },
+   "zero_patterns": {
+    "[r14+0x178]": 0,
+    "[r14+0x1b0]": 0,
+    "[rbx+0x210]": 0,
+    "[rbx+0x248]": 0,
+    "[rbx+0x730]": 0
+   }
+  },
+  "caller_bulk_a_2": {
+   "exact_counts": {},
+   "zero_patterns": {
+    "[r12+0x178]": 0,
+    "[r12+0x1b0]": 0,
+    "[r15+0x2c8]": 0,
+    "[r15+0x300]": 0,
+    "[r15+0x7b0]": 0,
+    "[r15+0x7e8]": 0
+   }
+  },
+  "caller_twin_a_1": {
+   "exact_counts": {},
+   "zero_patterns": {
+    "[rbx+0x150]": 0,
+    "[rbx+0x158]": 0,
+    "[rbx+0x5b0]": 0,
+    "[rbx+0x5b8]": 0
+   }
+  },
+  "caller_twin_a_2": {
+   "exact_counts": {},
+   "zero_patterns": {
+    "[rbx+0x150]": 0,
+    "[rbx+0x158]": 0,
+    "[rbx+0x5b0]": 0,
+    "[rbx+0x5b8]": 0
+   }
+  },
+  "ctor_twin_a": {
+   "exact_counts": {
+    "[rsp+0x38]": 5
+   },
+   "zero_patterns": {}
+  },
+  "stage_twin_a": {
+   "exact_counts": {
+    "[rbx+0x28]": 1
+   },
+   "zero_patterns": {
+    "XMMWORD PTR [rbx+0x20]": 0,
+    "XMMWORD PTR [rbx+0x28]": 0
+   }
+  }
+ },
+ "artifact": {
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "boundaries": {
+  "first_writer_of_selector_sibling_and_incoming_limit": "above the traced window: whoever fills the a-side caller context structs' descriptor blocks and the b-side shared arena",
+  "stage_result_0x28_chain_bottom": "the nested decoder 0x2ce1730 result +0x28 writer, not traced here"
+ },
+ "call_census": {
+  "direct_call_sites": {
+   "builder_bulk_a": [
+    {
+     "containing_fde": "0x2cc1120..0x2cc971b",
+     "site": "0x2cc5265"
+    }
+   ],
+   "builder_twin_a": [
+    {
+     "containing_fde": "0x2cb1eb0..0x2cb2563",
+     "site": "0x2cb20b3"
+    }
+   ],
+   "ctor_twin_a": [
+    {
+     "containing_fde": "0x2b69d20..0x2b6ae9f",
+     "site": "0x2b6aa53"
+    }
+   ],
+   "stage_twin_a": [
+    {
+     "containing_fde": "0x26ff210..0x26ff830",
+     "site": "0x26ff308"
+    },
+    {
+     "containing_fde": "0x26ff210..0x26ff830",
+     "site": "0x26ff3b3"
+    },
+    {
+     "containing_fde": "0x26ff210..0x26ff830",
+     "site": "0x26ff616"
+    }
+   ]
+  },
+  "lea_references": {
+   "builder_bulk_a": [],
+   "builder_twin_a": [],
+   "ctor_twin_a": [],
+   "stage_twin_a": []
+  }
+ },
+ "captured_code_executed": false,
+ "copy_slot": "0x64df508",
+ "dispatchers": {
+  "bulk_a": {
+   "call_sites": [
+    {
+     "block": "0x4e0 bytes at struct +0x98, duplicated to struct +0x580 before the stack copies",
+     "caller": "0x2ad7140..0x2adce3a",
+     "image": "stack image built inline: a 0x70-byte head, then the caller block copied to image +0x70",
+     "incoming_limit_struct_offset": "+0x248",
+     "object": "caller struct (entry rsi, rbx) + 0xa80",
+     "object_image_bytes": "0x550",
+     "selector_struct_offset": "+0x210",
+     "site": "0x2ad7ff7"
+    },
+    {
+     "block": "0x4e0 bytes at struct +0x150, duplicated to struct +0x638, then copied twice on the stack",
+     "caller": "0x2cc1120..0x2cc971b",
+     "image": "stack image built by builder 0x2b14520 from the caller block",
+     "incoming_limit_struct_offset": "+0x300",
+     "object": "caller struct (entry rsi, r15) + 0xb38",
+     "object_image_bytes": "0x550",
+     "selector_struct_offset": "+0x2c8",
+     "site": "0x2cc52bf"
+    }
+   ],
+   "entry": "0x2b67e50",
+   "first_writer": "no direct store to -- and no read of -- the selector byte or the incoming limit exists in either caller body; both arrive as the incoming contents of the caller struct block (block offsets +0x178 and +0x1b0), so the writer is whoever fills the blocks, above the traced window",
+   "limit_field": "+0x220",
+   "selector_byte": "+0x1e8"
+  },
+  "bulk_b": {
+   "call_sites": [
+    {
+     "caller": "0x5a82670..0x5a89535",
+     "incoming_limit_arena_offset": "+0xef0",
+     "object": "shared arena (entry rsi, rbx) + 0x2b0; the caller initialises only head fields at the call, there is no image copy",
+     "selector_arena_offset": "+0xeb8",
+     "site": "0x5a856d1"
+    }
+   ],
+   "entry": "0x5a64aa0",
+   "first_writer": "no access to the selector byte or the incoming limit exists anywhere in the caller body, through any base register; both are the arena's incoming contents, written above the traced window",
+   "limit_field": "+0xc40",
+   "selector_byte": "+0xc08"
+  },
+  "twin_a": {
+   "call_sites": [
+    {
+     "block": "0x428 bytes at struct +0x48, duplicated to struct +0x4a8 before the stack copies",
+     "caller": "0x2ae0100..0x2ae0917",
+     "image": "stack image built inline: a 0x70-byte head, then the caller block copied to image +0x70",
+     "incoming_limit_struct_offset": "+0x158",
+     "object": "caller struct (entry rsi, rbx) + 0x8e0",
+     "object_image_bytes": "0x498",
+     "sibling_struct_offset": "+0x150",
+     "site": "0x2ae0454",
+     "source_pointer_struct_offset": "+0x50"
+    },
+    {
+     "block": "0x428 bytes at struct +0x48, duplicated to struct +0x4a8, then copied twice on the stack",
+     "caller": "0x2cb1eb0..0x2cb2563",
+     "image": "stack image built by builder 0x2b146a0 from the caller block",
+     "incoming_limit_struct_offset": "+0x158",
+     "object": "caller struct (entry rsi, rbx) + 0x8e0",
+     "object_image_bytes": "0x498",
+     "sibling_struct_offset": "+0x150",
+     "site": "0x2cb2101",
+     "source_pointer_struct_offset": "+0x50"
+    }
+   ],
+   "entry": "0x2b69d20",
+   "first_writer": "the sibling slot and the incoming limit are never stored -- and never even read -- in either caller body, nor through the duplicate-block aliases; they are the block's incoming values at struct +0x150 and +0x158",
+   "limit_field": "+0x180",
+   "sibling_slot": "+0x178",
+   "source_object": "the source pointer is the one input the callers write themselves: on the first entry arm, both callers store struct +0x20 into the block pointer slot (struct +0x50) and copy the struct head triple into +0x20 (tag), +0x28 (start) and +0x30 (end), so the source tag/start/end are the caller struct's own first three qwords; on the other entry arm the pointer keeps its incoming block value",
+   "source_pointer": "+0x78"
+  },
+  "twin_b": {
+   "call_sites": [
+    {
+     "caller": "0x5a82670..0x5a89535",
+     "incoming_limit_arena_offset": "+0x2a08",
+     "object": "shared arena (entry rsi, rbx) + 0x1fa8",
+     "sibling_arena_offset": "+0x2a00",
+     "site": "0x5a83698",
+     "source_pointer_arena_offset": "+0x2900"
+    },
+    {
+     "caller": "0x5a82670..0x5a89535",
+     "incoming_limit_arena_offset": "+0xd20",
+     "object": "shared arena (entry rsi, rbx) + 0x2c0",
+     "sibling_arena_offset": "+0xd18",
+     "site": "0x5a85a2c",
+     "source_pointer_arena_offset": "+0xc18"
+    }
+   ],
+   "entry": "0x5a6a640",
+   "first_writer": "no access to the source pointer, the sibling slot or the incoming limit exists anywhere in the caller body, through any base register; all three are the arena's incoming contents, written above the traced window",
+   "limit_field": "+0xa60",
+   "sibling_slot": "+0xa58",
+   "source_pointer": "+0x958"
+  }
+ },
+ "image_builders": {
+  "builder_bulk_a": {
+   "behaviour": "copies the caller block verbatim to image +0x70 through the copy slot and builds the 0x70-byte head from a slot-call result pair and constants; it writes no input offset directly",
+   "block_bytes": "0x4e0",
+   "entry": "0x2b14520",
+   "sole_call_site": "0x2cc5265"
+  },
+  "builder_twin_a": {
+   "behaviour": "copies the caller block verbatim to image +0x70 through the copy slot and builds the 0x70-byte head from a slot-call result pair and constants; it writes no input offset directly",
+   "block_bytes": "0x428",
+   "entry": "0x2b146a0",
+   "sole_call_site": "0x2cb20b3"
+  }
+ },
+ "limits": "Static trace only: no captured instruction was executed and no concrete input values were observed.  The access census covers direct accesses in the nine pinned bodies through the struct or arena register and the pinned block-alias registers; whole-block copies move the input bytes without naming them, so for the copied fields the census is a statement about direct accesses in the traced bodies, not about the copies.  The copy target at slot 0x64df508 is identified by argument shape only.  Who fills the a-side caller structs' descriptor blocks and the b-side shared arena sits above the traced window; the nested decoder 0x2ce1730's own +0x28 writer sits below it.  Raw values are recorded mechanically; no field types are guessed.",
+ "owners": {
+  "builder_bulk_a": {
+   "bytes": 374,
+   "end": "0x2b14696",
+   "file_offset": "0x2b13520",
+   "sha256": "5f1fb5091cde76fb59571f6934060d996e09c0c44238bfe9971d53ed5908deb0",
+   "start": "0x2b14520"
+  },
+  "builder_twin_a": {
+   "bytes": 374,
+   "end": "0x2b14816",
+   "file_offset": "0x2b136a0",
+   "sha256": "2cfe7b7421563522e8f17cb6ae0e74c3689d0815690776a7b89a40ed9610a31c",
+   "start": "0x2b146a0"
+  },
+  "caller_b_side": {
+   "bytes": 28357,
+   "end": "0x5a89535",
+   "file_offset": "0x5a81670",
+   "sha256": "993bd9a168f2e37e4cdc80092c5ea5e68a3bc0225098621c57e89fccb7bf57fc",
+   "start": "0x5a82670"
+  },
+  "caller_bulk_a_1": {
+   "bytes": 23802,
+   "end": "0x2adce3a",
+   "file_offset": "0x2ad6140",
+   "sha256": "eab07e49a79bfe3de2f5e51d312ef9163f4a5f78f04240982b6a3e5b9c922e7e",
+   "start": "0x2ad7140"
+  },
+  "caller_bulk_a_2": {
+   "bytes": 34299,
+   "end": "0x2cc971b",
+   "file_offset": "0x2cc0120",
+   "sha256": "3efcb009eaf0ab2e2a477d73edbf7834894109e9fdcd943460d2bce59b9a0c57",
+   "start": "0x2cc1120"
+  },
+  "caller_twin_a_1": {
+   "bytes": 2071,
+   "end": "0x2ae0917",
+   "file_offset": "0x2adf100",
+   "sha256": "17ba33c03bd1b37e26619290295566665c7d760d7de93ebb1929f4fb7311a5f9",
+   "start": "0x2ae0100"
+  },
+  "caller_twin_a_2": {
+   "bytes": 1715,
+   "end": "0x2cb2563",
+   "file_offset": "0x2cb0eb0",
+   "sha256": "4606344649429fe2625ca1780a562e7049d7ec4281aac77199715c2a0ecfb7d0",
+   "start": "0x2cb1eb0"
+  },
+  "ctor_twin_a": {
+   "bytes": 1568,
+   "end": "0x26ff830",
+   "file_offset": "0x26fe210",
+   "sha256": "b96ec36847823c98c649950413f331a366379f343daa14bfd7606d1c70591923",
+   "start": "0x26ff210"
+  },
+  "stage_twin_a": {
+   "bytes": 761,
+   "end": "0x2e469a9",
+   "file_offset": "0x2e456b0",
+   "sha256": "e83dbe8a5a053e1c87c7d7ca300a681891cb1a58bf2ac5303c8acc01159ca8e1",
+   "start": "0x2e466b0"
+  }
+ },
+ "packet": "RE-005-node115-input-writers",
+ "pins": {
+  "builder_bulk_a": {
+   "0x2b14534": "48890c24",
+   "0x2b145d0": "4889442418",
+   "0x2b145da": "48c744242802000000",
+   "0x2b145e3": "498d7e70",
+   "0x2b145e7": "bae0040000",
+   "0x2b145f0": "ff1512af9c03",
+   "0x2b1460a": "410f1106"
+  },
+  "builder_twin_a": {
+   "0x2b146b4": "48890c24",
+   "0x2b14750": "4889442418",
+   "0x2b1475a": "48c744242802000000",
+   "0x2b14763": "498d7e70",
+   "0x2b14767": "ba28040000",
+   "0x2b14770": "ff1592ad9c03",
+   "0x2b1478a": "410f1106"
+  },
+  "caller_twin_a_1": {
+   "0x2ae0111": "4889f3",
+   "0x2ae0137": "488d4b20",
+   "0x2ae013e": "0f114320",
+   "0x2ae0146": "48895330",
+   "0x2ae0166": "48894348",
+   "0x2ae016a": "48894b50",
+   "0x2ae01f6": "488d7348",
+   "0x2ae0208": "488dbba8040000",
+   "0x2ae020f": "ba28040000",
+   "0x2ae0214": "ff15eef29f03",
+   "0x2ae025a": "488dbc24a00a0000",
+   "0x2ae0267": "ff159bf29f03",
+   "0x2ae0426": "488dbbe0080000",
+   "0x2ae0435": "ba98040000",
+   "0x2ae0451": "4c89f6"
+  },
+  "caller_twin_a_2": {
+   "0x2cb1ed0": "4889f3",
+   "0x2cb1ef4": "488d4b20",
+   "0x2cb1efb": "0f114320",
+   "0x2cb1f03": "48895330",
+   "0x2cb1f23": "48894348",
+   "0x2cb1f27": "48894b50",
+   "0x2cb1fb1": "488d7348",
+   "0x2cb1fc3": "488dbba8040000",
+   "0x2cb1fcf": "ff1533d58203",
+   "0x2cb2015": "488dbc24a00e0000",
+   "0x2cb2022": "ff15e0d48203",
+   "0x2cb20b0": "4c89e1",
+   "0x2cb20da": "488dbbe0080000",
+   "0x2cb20ef": "488dabe0080000",
+   "0x2cb20fe": "4889ee"
+  },
+  "ctor_twin_a": {
+   "0x26ff224": "4989cd",
+   "0x26ff2e4": "48c744247001000000",
+   "0x26ff2ed": "4c896c2478",
+   "0x26ff330": "4c8b6c2438",
+   "0x26ff357": "4c89ac24c0000000",
+   "0x26ff3fd": "4c8b6c2438",
+   "0x26ff424": "4c89ac24c0000000",
+   "0x26ff480": "4c896c2438",
+   "0x26ff5e9": "48c784249800000001000000",
+   "0x26ff5f5": "4c89ac24a0000000",
+   "0x26ff66c": "4c8b6c2438",
+   "0x26ff68d": "4c896c2438"
+  },
+  "stage_twin_a": {
+   "0x2e466b7": "4989f6",
+   "0x2e466ba": "4889fb",
+   "0x2e466d1": "8b442404",
+   "0x2e466e6": "83f802",
+   "0x2e467a8": "4c8b5c2428",
+   "0x2e46943": "41ba02000000",
+   "0x2e46968": "4c895b28",
+   "0x2e4697b": "40887308"
+  }
+ },
+ "twin_a_result_0x28": {
+  "consumers": "the constructor 0x26ff210 reloads its limit register from the stage result +0x28 slot at 0x26ff330, 0x26ff3fd and 0x26ff66c (the third reload is new here) whenever the result tag is not 5, and stores it to the saved and final record +0x28 slots at 0x26ff357, 0x26ff424, 0x26ff480 and 0x26ff68d",
+  "defined_value_arm": "first decoder result discriminant 2 and state cursor marker byte 1: the nested decoder 0x2ce1730 runs on the state (call 0x2e46771) and, when its result tag is not 2, the stored qword is the nested result's own +0x28 field, loaded at 0x2e467a8 and forwarded verbatim",
+  "field": "twin-a stage result +0x28",
+  "marker_zero_arm": "the same store executes when the marker byte is 0 (result tag forced to 2 at 0x2e46943), but the stored register is never loaded anywhere in the stage body on that arm, so the value is not determined inside the stage",
+  "next_level": "what writes the nested decoder 0x2ce1730 result's +0x28 field, which the stage forwards, is the next question down",
+  "other_arms": "the first-result copy arm, the discriminant-0 arms, the discriminant-1 arm through the twin wrapper 0x2dd2980 and the error arms through the store block at 0x2e4697b never store +0x28",
+  "writer": "the stage function 0x2e466b0 (0x2e466b0..0x2e469a9) itself, at its sole +0x28 store 0x2e46968 inside the shared result store block at 0x2e46949"
+ }
+}

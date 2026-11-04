@@ -1,0 +1,26 @@
+Relocation / PLT notes for the RE-001 arena windows (node #115).
+
+Main window 0x605d7b0:
+- No rip-relative GOT slot is read in-window. The only rip-relative
+  references are the two .rodata strings for the report call:
+  format 0x962ed8, file 0x44ed88.
+- PLT calls: __errno_location 0x63f0ad0, sized operator delete
+  0x63f0d80, __stack_chk_fail 0x63f0d70.
+- Internal calls: grow 0x605d000, string build 0x61d1f30, report
+  0x5fceda0. Internal tail jump: slow window 0x605d6c0.
+- The cleanup stub 0x605d786 (reached from landing pad 0x605d91a)
+  calls basic_string::_M_dispose 0x63f0db0, _Unwind_Resume
+  0x63f0a50 and __stack_chk_fail 0x63f0d70 (all PLT).
+
+Slow window 0x605d6c0:
+- No PLT call and no rip-relative GOT read in-window.
+- Internal calls: block callee 0x605d3c0, grow callee 0x605d000.
+- Internal tail jump: block callee 0x605d3c0 (big path).
+
+Vtable / RELATIVE notes:
+- The main window is reached through the member class vtable slot
+  0x64d1fd0 (RELATIVE addend 0x605d7b0). The slot itself is zero in
+  the file; the whole-file qword hit 0x11a778 is that RELATIVE
+  entry's addend field (entry at file offset 0x11a768), not a
+  separate reference.
+- The slow window has no RELATIVE slot and no qword hit.

@@ -1,0 +1,110 @@
+{
+  "scope": "RE-001 node115 actual runtime entry/callback and selected initialization/exit boundaries",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "sources": [
+    {
+      "id": "node115",
+      "url": "https://github.com/lalalune/hyperliquid-source/blob/c3b77a8e84c3f2b10db7a2a69b6b66bfddea93d4/provenance/artifacts.json",
+      "primary": true,
+      "kind": "authenticated retained capture; no immutable direct binary URL is claimed"
+    },
+    {
+      "id": "rust195-0",
+      "url": "https://raw.githubusercontent.com/rust-lang/rust/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/rt.rs",
+      "sha256": "f435576c645fb30eaca560e819c2a113b556452d79c0303f49ffd4487018c01f",
+      "primary": true,
+      "kind": "official licensed Rust source"
+    },
+    {
+      "id": "rust195-1",
+      "url": "https://raw.githubusercontent.com/rust-lang/rust/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/sys/pal/unix/mod.rs",
+      "sha256": "4a0fe2ece40299f70a5c4a028154c36d318153d2da3d72b88e0e578454ba6c83",
+      "primary": true,
+      "kind": "official licensed Rust source"
+    },
+    {
+      "id": "rust195-2",
+      "url": "https://raw.githubusercontent.com/rust-lang/rust/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/sys/pal/unix/stack_overflow.rs",
+      "sha256": "4b194ef991ea330619c86a6893544ac9bb598802ef2f8e52a215a5cbf7a52d5a",
+      "primary": true,
+      "kind": "official licensed Rust source"
+    },
+    {
+      "id": "rust195-3",
+      "url": "https://raw.githubusercontent.com/rust-lang/rust/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/sys/exit.rs",
+      "sha256": "d0dabb634031b997d0a85d602d126ff85cbeebe1e576c0de07c87d57de087f43",
+      "primary": true,
+      "kind": "official licensed Rust source"
+    },
+    {
+      "id": "rust195-4",
+      "url": "https://raw.githubusercontent.com/rust-lang/rust/59807616e1fa2540724bfbac14d7976d7e4a3860/compiler/rustc_session/src/config/sigpipe.rs",
+      "sha256": "67dfc5accc3cce3a8807a1ce9418d893cca12bca28506590369596c8bc374e60",
+      "primary": true,
+      "kind": "official licensed Rust source"
+    },
+    {
+      "id": "rust195-5",
+      "url": "https://raw.githubusercontent.com/rust-lang/rust/59807616e1fa2540724bfbac14d7976d7e4a3860/LICENSE-MIT",
+      "sha256": "b71bd43a069ca0641a9ecfe585ca7b3c53b5cc1608f8b68321168698e28b5ea1",
+      "primary": true,
+      "kind": "official licensed Rust source"
+    },
+    {
+      "id": "rust195-6",
+      "url": "https://raw.githubusercontent.com/rust-lang/rust/59807616e1fa2540724bfbac14d7976d7e4a3860/LICENSE-APACHE",
+      "sha256": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+      "primary": true,
+      "kind": "official licensed Rust source"
+    }
+  ],
+  "claims": [
+    {
+      "id": "runtime115_sigpipe",
+      "text": "The actual main passes raw zero; the target table selects signal13 handler1 without setting the explicit-option byte. Official compiler constants and Unix initialization support the SIGPIPE-ignore interpretation.",
+      "source_ids": [
+        "node115",
+        "rust195-1",
+        "rust195-4"
+      ],
+      "countersearch": "All four actual jump-table entries inspected, invalid values and signal error arm retained; zero is not inherited behavior.",
+      "classification": "source-supported conditional observation"
+    },
+    {
+      "id": "runtime115_exit",
+      "text": "The target has errno-address CAS with success return, same-pointer diagnostic and different-pointer pause loop, corresponding to public Linux unique_thread_exit.",
+      "source_ids": [
+        "node115",
+        "rust195-3"
+      ],
+      "countersearch": "Full callsites and absence of libc exit in this local guard checked; source atomic ordering and whole-process shutdown safety remain open.",
+      "classification": "source-supported conditional observation"
+    },
+    {
+      "id": "runtime115_callback",
+      "text": "The actual private callback is reached through vtable slot40 and adapters that clear EAX on ordinary returns.",
+      "source_ids": [
+        "node115"
+      ],
+      "countersearch": "Full actual RELATIVE writer census and both13-byte adapters/five-byte direct adapter checked; panic/exit/nonreturning paths excluded.",
+      "classification": "local artifact fact, not externally independently verified"
+    },
+    {
+      "id": "runtime115_full_identity",
+      "text": "An exact source-built original runtime and complete private-main/unwind/cleanup equivalence remain unestablished.",
+      "source_ids": [
+        "node115",
+        "rust195-0"
+      ],
+      "countersearch": "Compiler comment is insufficient; no official compiled candidate was compared and callee/action closure remains open.",
+      "classification": "unresolved"
+    }
+  ],
+  "independence_note": "GNU/LLVM/Capstone decode one artifact and are not independent artifact origins. All Rust source files share one upstream author/origin.",
+  "source_build": false,
+  "target_execution": false,
+  "whole_runtime_equivalence": false,
+  "provider": "openai",
+  "model": "gpt-6-astra",
+  "client": "Codex 0.166.0"
+}

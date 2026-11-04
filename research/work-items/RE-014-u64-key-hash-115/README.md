@@ -74,3 +74,14 @@ No new Rust or frozen output existed at that failure. The final control chooses
 an actual visited ROL13 instruction; full original collection reran and passed
 23.782s,1622distinct triples,41retained smoke rows,4effective code controls.
 The failed log is preserved; no comparison denominator was reduced.
+
+## Dependency attribution and refreshed base
+
+The round structure resembles public standard-library hash machinery. This is
+a dependency-like value reconstruction serving the private selector call path,
+not a claim that the hash algorithm is private first-party logic. Exact crate,
+source revision and original compiler provenance are not yet identified. Its
+foundation allocation and source-area count are inventory only; no first-party
+compiled-byte comparison or acceptance gate is credited. Original collection
+base remains8fd8db68; integration is refreshed against main05bc2de3, preserving
+the pre-Rust freeze commit and original failed/successful receipts.

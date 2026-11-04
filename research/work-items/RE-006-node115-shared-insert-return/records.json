@@ -1,0 +1,431 @@
+{
+  "schema": 1,
+  "target": {
+    "release": 115,
+    "bytes": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "relocation_diagnostics": {
+    "relative_relocation_count": 59534,
+    "body_slot_references": [],
+    "body_addend_references": []
+  },
+  "capture": {
+    "fde_count": 135313,
+    "cie_records": 3,
+    "fde_records": 135313,
+    "unique_fde_starts": 135313,
+    "gap_extents_outside_fdes": 126775
+  },
+  "scope": {
+    "instruction": "Trace the return contract of the two shared book insert routines: the slab slot index they return, its append / reuse / panic cases, and the stack-argument mode selection that does not affect it, with the two ring-append twins as the boundary.",
+    "measured_denominator_bytes": 2134,
+    "owners": [
+      "shared_a",
+      "shared_b"
+    ],
+    "complete_fdes": 2,
+    "owner_body_bytes": 2134
+  },
+  "frames": {
+    "shared_a": {
+      "fde": "0x13895bc",
+      "cie": "0x103d604",
+      "lsda": "0x3d67dc",
+      "range": [
+        "0x58df360",
+        "0x58df78b"
+      ],
+      "bytes": 1067,
+      "file_offset": "0x58de360",
+      "sha256": "9885b0a31f873965b33690748e029b2539e0398c6e9d48f1eca3a5dc61f96e29"
+    },
+    "shared_b": {
+      "fde": "0x1389610",
+      "cie": "0x103d604",
+      "lsda": "0x3d681c",
+      "range": [
+        "0x58df790",
+        "0x58dfbbb"
+      ],
+      "bytes": 1067,
+      "file_offset": "0x58de790",
+      "sha256": "1c933868b0d8b192a97c7454766e2b0b3dfd17879d851ed5a0d58ab9c6a2d077"
+    },
+    "twin_a": {
+      "fde": "0x138a8ec",
+      "cie": "0x103d604",
+      "lsda": "0x3d802c",
+      "range": [
+        "0x5911890",
+        "0x5911b27"
+      ],
+      "bytes": 663,
+      "file_offset": "0x5910890",
+      "sha256": "08e8b4239e731ee50d74c945e5fe6ae3f8e18d12a5ee8c6ab8725363260558b6"
+    },
+    "twin_b": {
+      "fde": "0x138a980",
+      "cie": "0x103d604",
+      "lsda": "0x3d8048",
+      "range": [
+        "0x5911b30",
+        "0x5911dc7"
+      ],
+      "bytes": 663,
+      "file_offset": "0x5910b30",
+      "sha256": "cecc9282e700d4433aa077e63b65b50eaa287b16d6de32964b7bbb743f5b3223"
+    }
+  },
+  "owners": {
+    "shared_a": {
+      "range": [
+        "0x58df360",
+        "0x58df78b"
+      ],
+      "file_offset": "0x58de360",
+      "bytes": 1067,
+      "sha256": "9885b0a31f873965b33690748e029b2539e0398c6e9d48f1eca3a5dc61f96e29",
+      "direct_callers": [
+        "twin_a"
+      ],
+      "direct_e8_call_sites": [
+        "0x59119d1",
+        "0x5911a3f"
+      ]
+    },
+    "shared_b": {
+      "range": [
+        "0x58df790",
+        "0x58dfbbb"
+      ],
+      "file_offset": "0x58de790",
+      "bytes": 1067,
+      "sha256": "1c933868b0d8b192a97c7454766e2b0b3dfd17879d851ed5a0d58ab9c6a2d077",
+      "direct_callers": [
+        "twin_b"
+      ],
+      "direct_e8_call_sites": [
+        "0x5911c71",
+        "0x5911cdf"
+      ]
+    }
+  },
+  "callers": {
+    "twin_a": {
+      "range": [
+        "0x5911890",
+        "0x5911b27"
+      ],
+      "bytes": 663,
+      "sha256": "08e8b4239e731ee50d74c945e5fe6ae3f8e18d12a5ee8c6ab8725363260558b6",
+      "calls": "shared_a",
+      "call_sites": {
+        "registration_arm": "0x59119d1",
+        "append_arm": "0x5911a3f"
+      }
+    },
+    "twin_b": {
+      "range": [
+        "0x5911b30",
+        "0x5911dc7"
+      ],
+      "bytes": 663,
+      "sha256": "cecc9282e700d4433aa077e63b65b50eaa287b16d6de32964b7bbb743f5b3223",
+      "calls": "shared_b",
+      "call_sites": {
+        "registration_arm": "0x5911c71",
+        "append_arm": "0x5911cdf"
+      }
+    }
+  },
+  "slot_bindings": {
+    "0x64df508": null,
+    "0x64df830": "0x1680c10",
+    "0x64df6b8": "0x1680e80",
+    "0x64df6c8": "0x1689420",
+    "0x64e4ea8": "0x4524e40",
+    "0x64df4c0": "0x1680cab"
+  },
+  "source_locations": {
+    "overflow_entry": {
+      "record": "0x64b64b0",
+      "file": "l1/src/qtys/mod.rs",
+      "line": 831,
+      "column": 1
+    },
+    "overflow_totals": {
+      "record": "0x64a34d8",
+      "file": "l1/src/qtys/mod.rs",
+      "line": 831,
+      "column": 1
+    },
+    "vacant_entry_panic": {
+      "record": "0x64b6630",
+      "file": "l1/src/slab/slab.rs",
+      "line": 78,
+      "column": 21
+    },
+    "link_assertion_1": {
+      "record": "0x64b64c8",
+      "file": "l1/src/book/book_orders.rs",
+      "line": 81,
+      "column": 40
+    },
+    "link_assertion_2": {
+      "record": "0x64b64e0",
+      "file": "l1/src/book/book_orders.rs",
+      "line": 89,
+      "column": 40
+    },
+    "vacant_message": {
+      "va": "0x4339b2",
+      "file_offset": "0x4339b2",
+      "bytes": 23,
+      "length_byte": 22,
+      "text": "expected vacant entry "
+    }
+  },
+  "trace": {
+    "arguments": {
+      "rdi": "slab collection of 0x110-byte entries: capacity +0x0, buffer +0x8, length +0x10, counter +0x18, head +0x20",
+      "rsi": "order record (0x110 bytes) being inserted",
+      "rdx": "caller qword copied into the event record at +0x28; not otherwise read by this routine",
+      "rcx": "event collection (capacity +0x0, buffer +0x8, length +0x10) receiving one record per call",
+      "r8": "pointer to the quantity accumulator qword",
+      "r9": "level record: link fields +0x0/+0x8/+0x10/+0x18, totals +0x70/+0x78",
+      "stack_1": "mode selector: the registration arm of each twin passes 0; the append arm passes its flag qword (1 when its derivation lookup returned nonzero, else the qword at level +0x20)",
+      "stack_2": "link index: the append arm passes the cached result of the previous call (the value this routine returned last time); unused in fresh mode"
+    },
+    "entry_accumulator": {
+      "update": "*r8 := *r8 + [order+0xe0] as a checked add",
+      "overflow_arm": "on carry the cold block calls the helper behind slot 0x64e4ea8 with edi = 0 and the location record at 0x64b64b0, then stores the saturating sum (the recomputed sum when it does not carry, else u64::MAX)",
+      "timing": "before the mode selection and all other effects",
+      "location": "l1/src/qtys/mod.rs:831:1"
+    },
+    "mode_selection": {
+      "rule": "link mode iff stack_1 == 1, stack_2 < [rdi+0x10], and the qword at [rdi+0x8] + stack_2 * 0x110 does not equal 2; every other combination falls back to fresh mode",
+      "flag_word": "the effective flag (1 or 0) is stored into the event record at +0x8 and into the rewritten order at +0x10",
+      "link_mode_sources": {
+        "order_+0x0": "the qword at slab buffer[stack_2] + 0x0",
+        "order_+0x8": "the qword at slab buffer[stack_2] + 0x8",
+        "order_+0x18": "stack_2 itself",
+        "event_+0x10": "the qword at slab buffer[stack_2] + 0xf0"
+      },
+      "fresh_mode_sources": {
+        "order_+0x0": "the qword at level + 0x10",
+        "order_+0x8": "the qword at level + 0x18",
+        "order_+0x18": "a frame slot this routine writes only on the link path (recorded, not interpreted)",
+        "event_+0x10": "the qword at order + 0xe0"
+      }
+    },
+    "event_record": {
+      "collection": "the rcx argument",
+      "element_bytes": "per twin (owners_detail)",
+      "grow": "when length equals the capacity field [rcx+0x0], the per-twin grow slot runs on the collection before the copy",
+      "fields": [
+        {
+          "offset": 0,
+          "bytes": 8,
+          "source": "constant 2"
+        },
+        {
+          "offset": 8,
+          "bytes": 8,
+          "source": "the effective mode flag (0 or 1)"
+        },
+        {
+          "offset": 16,
+          "bytes": 8,
+          "source": "link mode: the qword at slab buffer[stack_2] + 0xf0; fresh mode: the qword at order + 0xe0"
+        },
+        {
+          "offset": 24,
+          "bytes": 8,
+          "source": "the qword at order + 0xe0"
+        },
+        {
+          "offset": 32,
+          "bytes": 8,
+          "source": "the qword at order + 0xb0"
+        },
+        {
+          "offset": 40,
+          "bytes": 8,
+          "source": "the rdx argument"
+        },
+        {
+          "offset": 48,
+          "bytes": 8,
+          "source": "the qword at order + 0xf0"
+        },
+        {
+          "offset": 56,
+          "bytes": 16,
+          "source": "the 16 bytes at order + 0xf8"
+        },
+        {
+          "offset": 72,
+          "bytes": 4,
+          "source": "the dword at order + 0x108"
+        },
+        {
+          "offset": 76,
+          "bytes": 1,
+          "source": "the byte at order + 0xd2"
+        }
+      ],
+      "written_span_bytes": 77,
+      "tail": "the remaining element bytes past offset 77 are not written by this routine"
+    },
+    "order_rewrite": {
+      "fields": [
+        {
+          "offset": 0,
+          "bytes": 8,
+          "source": "mode-dependent first qword (mode_selection)"
+        },
+        {
+          "offset": 8,
+          "bytes": 8,
+          "source": "mode-dependent second qword (mode_selection)"
+        },
+        {
+          "offset": 16,
+          "bytes": 8,
+          "source": "the effective mode flag (0 or 1)"
+        },
+        {
+          "offset": 24,
+          "bytes": 8,
+          "source": "link mode: stack_2; fresh mode: a frame slot written only on the link path"
+        }
+      ],
+      "scratch_copies": "the rewritten order is copied to two frame scratch areas (the event record area after its append, and a second area past the record); neither copy is read on the return path"
+    },
+    "return_contract": {
+      "register": "rax",
+      "value": "the slab head field [rdi+0x20], loaded after the event append and the order rewrite; it is the index of the 0x110-byte slab slot that receives the order copy",
+      "counter_before_decision": "[rdi+0x18] is saturating-incremented before the head/length comparison",
+      "cases": [
+        {
+          "case": "append",
+          "condition": "head == length",
+          "action": "when head also equals the capacity field [rdi+0x0], the per-twin slab grow slot runs first; the order copy lands in buffer[head]; length and head both become head + 1",
+          "returns": "head (the pre-insert length)"
+        },
+        {
+          "case": "reuse",
+          "condition": "head < length and the first dword of buffer[head] equals 2 (vacant)",
+          "action": "head becomes the qword at buffer[head] + 0x8 (the vacant slot link) and the order copy overwrites buffer[head]",
+          "returns": "head (the vacant slot index)"
+        },
+        {
+          "case": "panic",
+          "condition": "head > length, or head < length with a first dword other than 2 at buffer[head]",
+          "action": "the vacant-entry panic block runs and traps with ud2",
+          "returns": "never returns"
+        }
+      ],
+      "mode_independence": "the stack arguments change only the order rewrite sources and the link writes; the returned index and the slot choice never depend on them"
+    },
+    "link_writes": {
+      "flag_set": [
+        "the element at the link index is checked (index below the current length and its first dword not equal to 2, assertion location l1/src/book/book_orders.rs:81:40) and receives 1 at +0x0 and the returned index at +0x8",
+        "then, when the rewritten order first dword equals 1, the element at the index taken from [rsp+0x10] receives 1 at +0x10 and the returned index at +0x18 under assertion location l1/src/book/book_orders.rs:89:40; otherwise the level record receives 1 at +0x0 and the returned index at +0x8"
+      ],
+      "flag_clear": [
+        "the level record receives 1 at +0x10 and the returned index at +0x18",
+        "then the same first-dword split applies: the second element link write, or 1 at level +0x0 and the returned index at level +0x8"
+      ]
+    },
+    "level_totals": {
+      "quantity": "[level+0x70] += [order+0xe0] with the same checked-add shape; its overflow arm uses the second location record (also l1/src/qtys/mod.rs:831:1) and the same slot",
+      "count": "[level+0x78] is saturating-incremented",
+      "timing": "after the link writes, before the return"
+    },
+    "panics_and_assertions": {
+      "vacant_entry": {
+        "message": "length byte 0x16 plus the 22-byte text \"expected vacant entry \" at the lea target 0x4339b2",
+        "location": "l1/src/slab/slab.rs:78:21",
+        "helper_slot": "0x64df6b8",
+        "helper_target": "0x1680e80",
+        "argument_record": "two frame words: a pointer to the frame slot holding the head value, and the word loaded through slot 0x64df6c8",
+        "trap": "ud2"
+      },
+      "overflow": {
+        "helper_slot": "0x64e4ea8",
+        "helper_target": "0x4524e40",
+        "locations": [
+          "l1/src/qtys/mod.rs:831:1",
+          "l1/src/qtys/mod.rs:831:1"
+        ]
+      },
+      "link_assertions": {
+        "helper_slot": "0x64df830",
+        "helper_target": "0x1680c10",
+        "locations": [
+          "l1/src/book/book_orders.rs:81:40",
+          "l1/src/book/book_orders.rs:89:40"
+        ]
+      }
+    },
+    "owners_detail": {
+      "shared_a": {
+        "frame_bytes": 1032,
+        "event_element_bytes": 696,
+        "event_grow_slot": "0x64e5a28",
+        "event_grow_target": "0x59630a0",
+        "slab_grow_slot": "0x64e5a30",
+        "slab_grow_target": "0x43bbd40",
+        "unwind_destructor": "0x5947550",
+        "exact_sites_checked": 205,
+        "diff_sites_checked": 31,
+        "branch_sites_checked": 27
+      },
+      "shared_b": {
+        "frame_bytes": 1048,
+        "event_element_bytes": 712,
+        "event_grow_slot": "0x64e4f88",
+        "event_grow_target": "0x5962310",
+        "slab_grow_slot": "0x64e5a38",
+        "slab_grow_target": "0x43bbd40",
+        "unwind_destructor": "0x5948db0",
+        "exact_sites_checked": 205,
+        "diff_sites_checked": 31,
+        "branch_sites_checked": 27
+      }
+    }
+  },
+  "twin_difference": {
+    "instructions_per_routine": 236,
+    "identical_instructions": 205,
+    "differing_instructions": 31,
+    "differing_bytes": 57,
+    "classes": {
+      "frame_and_stack_displacements": "frame size (0x408 / 0x418), the two stack-argument load displacements, and the two frame scratch offsets shift by 0x10 in shared_b",
+      "event_element_size": "the event record element size immediate is 0x2b8 in shared_a and 0x2c8 in shared_b (two sites)",
+      "rip_relative_same_target": "displacements differ but resolve to the same slot, record, message, or callee in both routines",
+      "per_twin_targets": "the event grow slots bind to different functions (0x59630a0 / 0x5962310); the slab grow slots differ but bind to the same function (0x43bbd40); the unwind destructor glue differs (0x5947550 / 0x5948db0)"
+    },
+    "verdict": "the return path -- head load, counter increment, head/length decision, both slot cases, the link writes, the totals, and the rax = r13 return move -- is byte-identical in both routines; the routines are the same contract instantiated over two event record types"
+  },
+  "source_exports": {
+    "shared_a": {
+      "file": "shared_a_58df360_58df78b_objdump.txt",
+      "sha256": "c674b5be042cdf0319caa0320b435bb737acb1e4cd713a131632dcc9cee79687"
+    },
+    "shared_b": {
+      "file": "shared_b_58df790_58dfbbb_objdump.txt",
+      "sha256": "d87efb0764e31f4e2d017b73e5c671db094f6128b02aaa31bbe547934d1571dd"
+    },
+    "twin_a": {
+      "file": "twin_a_5911890_5911b27_objdump.txt",
+      "sha256": "4eb09c66649102e86b24696d2e651e01b12bac92966bc21c55a6d0e027cf330a"
+    },
+    "twin_b": {
+      "file": "twin_b_5911b30_5911dc7_objdump.txt",
+      "sha256": "e190b136986e9777058d954f65dcab9e2308b5483b23cb9ce7ed0314a25564a7"
+    }
+  }
+}

@@ -241,6 +241,11 @@ class ArtifactTests(unittest.TestCase):
             a.main()
 
     def _signature_root(self):
+        # These tests fake GPG policy responses; the platform adapter is tested
+        # separately, so subprocess.run cannot intercept cygpath as fake GPG.
+        paths = patch.object(a, 'gpg_path', side_effect=lambda path: Path(path).as_posix())
+        paths.start()
+        self.addCleanup(paths.stop)
         for rel in ['node/115/hl-node', 'node/115/hl-node', 'visor/captured/hl-visor']:
             for suffix in ('', '.asc'):
                 p = self.root / 'artifacts' / rel
