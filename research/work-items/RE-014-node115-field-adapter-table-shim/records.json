@@ -1,0 +1,138 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "owner": {
+    "role": "adapter_table_shim",
+    "start": "0x168aa10",
+    "end": "0x168aa23",
+    "file_offset": "0x1689a10",
+    "bytes": 19,
+    "sha256": "1e45d7cc5bb1bb477901c86a4259ef3edefc85c705a1302c1de97345edacde82",
+    "frames": {
+      "fde": {
+        "va": "0xcc3f60",
+        "bytes_hex": "100000008cd00100a86a9c001300000000000000"
+      },
+      "cie": {
+        "va": "0xca6ed8",
+        "bytes_hex": "1400000000000000017a5200017810011b0c070890010000"
+      }
+    }
+  },
+  "adapter_table": {
+    "va": "0x64078f8",
+    "header_words": [
+      "0x0",
+      "0x18",
+      "0x8"
+    ],
+    "slots": [
+      {
+        "offset": 24,
+        "slot": "0x6407910",
+        "target": "0x1686bd0",
+        "status": "bulk piece callee, qualified by the merged RE-014 newline packet"
+      },
+      {
+        "offset": 32,
+        "slot": "0x6407918",
+        "target": "0x1686b70",
+        "status": "byte-arm callee, qualified by the RE-014 field-adapter byte-arm packet"
+      },
+      {
+        "offset": 40,
+        "slot": "0x6407920",
+        "target": "0x168aa10",
+        "status": "argument-shifting shim, qualified by this packet"
+      }
+    ]
+  },
+  "transformation": {
+    "moves": [
+      {
+        "site": "0x168aa10",
+        "bytes": "4889d1",
+        "from": "rdx (argument 3)",
+        "to": "rcx (argument 4)"
+      },
+      {
+        "site": "0x168aa13",
+        "bytes": "4889f2",
+        "from": "rsi (argument 2)",
+        "to": "rdx (argument 3)"
+      }
+    ],
+    "insertion": {
+      "site": "0x168aa16",
+      "bytes": "488d35dbced704",
+      "register": "rsi (argument 2)",
+      "value": "0x64078f8",
+      "identity": "the adapter table that holds this shim at +40"
+    },
+    "forwarded_unchanged": [
+      "rdi (argument 1)",
+      "r8 (argument 5)",
+      "r9 (argument 6)"
+    ],
+    "overwritten": [
+      "rcx: the entry argument 4 value is replaced by argument 3 and reaches no register at the tail jump"
+    ],
+    "stack": "rsp unchanged; no stack slot is read or written; stack-passed arguments keep their entry offsets for the tail target",
+    "flags": "mov, lea and the indirect jmp modify no flags; the tail target inherits the shim entry flag state"
+  },
+  "argument_rows": [
+    {
+      "inputs": [
+        "a1",
+        "a2",
+        "a3",
+        "a4",
+        "a5",
+        "a6"
+      ],
+      "outputs": {
+        "rdi": "a1",
+        "rsi": "0x64078f8",
+        "rdx": "a2",
+        "rcx": "a3",
+        "r8": "a5",
+        "r9": "a6"
+      }
+    },
+    {
+      "inputs": [
+        "0x1111111111111111",
+        "0x2222222222222222",
+        "0x3333333333333333",
+        "0x4444444444444444",
+        "0x5555555555555555",
+        "0x6666666666666666"
+      ],
+      "outputs": {
+        "rdi": "0x1111111111111111",
+        "rsi": "0x64078f8",
+        "rdx": "0x2222222222222222",
+        "rcx": "0x3333333333333333",
+        "r8": "0x5555555555555555",
+        "r9": "0x6666666666666666"
+      }
+    }
+  ],
+  "tail": {
+    "jump_site": "0x168aa1d",
+    "bytes": "ff25cd4ce504",
+    "slot": "0x64df6f0",
+    "target": "0x1680500",
+    "relocation_type": 8,
+    "note": "the target body is the next link and is not qualified by this packet"
+  },
+  "census": {
+    "direct_callers": 0,
+    "direct_jumps": 0,
+    "relocation_references": [
+      "0x6407920"
+    ],
+    "raw_va_occurrences": 1
+  },
+  "captured_code_executed": false,
+  "limits": "Only the shim's own 19 bytes are qualified. The transformation is stated for the six integer/pointer argument registers of the System V AMD64 calling convention; the shim writes no stack slot, adjusts no stack pointer and, because mov/lea/indirect-jmp modify no flags, hands the entry flags to the tail target unchanged. What 0x1680500 computes with (argument 1, the adapter table, argument 2, argument 3, argument 5, argument 6), which callers invoke the shim through the table with which argument values, the fate of the caller's fourth argument beyond its overwrite here, and any nominal type for the table or the arguments remain unestablished. The adapter table, its header words and the tail slot binding are pinned context, not counted as recovered function bytes. The sibling callees at table+24 and table+32 are qualified by the merged RE-014 newline packet and the RE-014 field-adapter byte-arm packet and are cited context, not re-derived. No captured code executed."
+}
