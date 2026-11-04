@@ -68,3 +68,45 @@ whole-node, original Rust type/ABI or helper-closure claim. Next: recover actual
 aggregate producers and caller-owned domain before asserting application units.
 The parent records/frames/relocations remain attributed/hash-pinned supporting
 context, not a second static-discovery contribution or peer review.
+
+## Independently authored Rust
+
+Frozen expectations were committed at0ba8b85de06cfb23832b3aeb06ff2b369ed917a3
+before source existed. The no_std library exposes the three separately qualified
+point functions, not an opaque handler implementation. Both rustc1.94.1 opt0/3
+input-only clients match all8916 original observations; optimized own-library
+repeat is identical. Two ordinary tests exercise the original52-row smoke and
+the independently captured overlap-guard case. Ten compiled corruptions all
+differ from the original full corpus and fail their ordinary tests. Compiler,
+source/driver/input/output hashes and exact mismatch counts are retained.
+
+The first complete control-run attempt exposed a sample weakness: all8916-row
+comparisons detected the wrong guard ordering (88 mismatches), but the52-row
+representative smoke did not. The original frozen smoke and expectations were
+preserved. A Rust assertion for already-sealed row4088 (MAX+1 and B>bound)
+was added; its originalA result predates Rust. The complete matrix was rerun.
+This is not a claim that the first failed control sequence passed.
+
+```
+python3 research/work-items/RE-014-raw-threshold-115/build.py --rustc <rustc1.94.1> --output <new-directory>
+python3 -m unittest discover -s tests -p test_node115_raw_threshold.py -v
+```
+
+macOSarm64/edition2021 is a research build, not an original Linux recipe or
+compiled-body identity. New source has no external dependencies or invented
+original Cargo graph. Local catalogue checks may use the exact already-submitted
+#2655 immutable-snapshot performance fix to avoid its measured repeated-read
+blocker. Such validation is explicitly labelled with both helper hashes and
+restores the baseline helper before commit; it is not an exact unmodified-head
+execution claim. Native/Rust tests and other checks use baseline tooling.
+
+## Scoped repository verification
+
+Six focused tests, formatting, Clippy, twelve packet-integrity tests, doctor,
+artifact/import/packet verification, catalogue generation/check and actual
+inventory reproduction pass. Exact command timings are in repository-checks.json.
+Only the catalogue steps use the explicitly recorded already-submitted snapshot
+fix; the baseline helper is restored byte-for-byte and is not part of this diff.
+This scope differs from running those two commands on an unmodified head.
+The earlier independent full-CI585/584-file baselines do not substitute for
+this new PR's own pending upstream CI. No combined local full pass is claimed.

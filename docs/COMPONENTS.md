@@ -140,7 +140,7 @@ Price, size, notional and wei arithmetic plus asset metadata.
 Fee tiers, volume accounting and rebates.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-raw-threshold`.
 - Observed diagnostic paths: 4.
 - First task: Recover maker/taker fee formulas and time-window rollover.
 
