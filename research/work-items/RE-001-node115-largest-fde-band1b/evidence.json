@@ -1,0 +1,54 @@
+{
+  "task": "RE-001",
+  "packet": "RE-001-node115-largest-fde-band1b",
+  "question": "Which complete FDE is the largest whose entry address lies in the .text band 0x1b00000..0x2000000, and what are its exact FDE-derived extent and code-byte digest?",
+  "target": "artifacts/node/115/hl-node",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target_size": 105896032,
+  "coordinate_system": "ELF virtual address; file_offset = text.offset + (va - text.va)",
+  "text": {"va": "0x1419300", "offset": "0x1418300", "size": 83719936},
+  "eh_frame": {"va": "0xca6ed8", "offset": "0xca6ed8", "size": 7803772},
+  "cie_count": 3,
+  "fde_count": 135313,
+  "band": ["0x1b00000", "0x2000000"],
+  "band_fde_count": 3437,
+  "chosen": {
+    "start": "0x1d7f620",
+    "end": "0x1d9243f",
+    "bytes": 77343,
+    "file_offset": "0x1d7e620",
+    "sha256": "7183b9de5bf56bb92e9ac042d79d2bae620eaad91c549e5ef9601b575b605bc2",
+    "fde_record_offset": "0x408068",
+    "cie_record_offset": "0x39672c",
+    "cie_augmentation": "zPLR",
+    "cie_fde_encoding": "0x1b"
+  },
+  "window": {
+    "start": "0x1d7f620",
+    "end": "0x1d9243f",
+    "bytes": 77343,
+    "file_offset": "0x1d7e620",
+    "sha256": "7183b9de5bf56bb92e9ac042d79d2bae620eaad91c549e5ef9601b575b605bc2",
+    "head_hex": "55 41 57 41 56 41 55 41 54 53 48 81 ec 00 10 00 00 48 c7 04 24 00 00 00 00 48 81 ec 00 10 00 00 48 c7 04 24 00 00 00 00 48 81 ec 00 10 00 00 48 c7 04 24 00 00 00 00 48 81 ec 00 10 00 00 48 c7 04 24 00 00 00 00 48 81 ec 00 10 00 00 48 c7 04 24 00 00 00 00 48 81 ec d8 0d 00 00 48 89 bc 24 88 00 00 00 48 b8 00 00 00 00 00 00 00 80 48 89 b4 24 20 05 00 00 c6 84 24 28 05 00 00 01 48 c7 84 24 20 43 00 00 02 00 00 00 48 89 84 24 b8 01 00 00 48 89 84 24 d0 01 00 00 48 89 84 24 e0 2d"
+  },
+  "frames_line": "010aef40 0000006c 0039672c FDE cie=0039672c pc=0000000001d7f620..0000000001d9243f",
+  "candidates": [
+    {"start": "0x1d7f620", "end": "0x1d9243f", "bytes": 77343, "sha256": "7183b9de5bf56bb92e9ac042d79d2bae620eaad91c549e5ef9601b575b605bc2"},
+    {"start": "0x1d793e0", "end": "0x1d7f619", "bytes": 25145, "sha256": "b61907d78b96b2451f187bebbc48e32745b259fd8921bc0d28b1938f819ab1c2"},
+    {"start": "0x1beb080", "end": "0x1bf03eb", "bytes": 21355, "sha256": "85c3db1daf89c42beba525091139f13c9a45a8ad8849c3694406c04d28b43850"},
+    {"start": "0x1c14a50", "end": "0x1c19bd5", "bytes": 20869, "sha256": "4ff2702e4e47268f5b971bbe44bff19a9cb559468ee2d555a483c572b105533f"},
+    {"start": "0x1c1e610", "end": "0x1c23558", "bytes": 20296, "sha256": "8477bbf45c0e169511f7b2e7636436048823b98b39df4e6b23d24e87133a6ef1"},
+    {"start": "0x1f5e410", "end": "0x1f62ecc", "bytes": 19132, "sha256": "1389818585a4c12e0c2a852ff75abacfa690577a7057f0506761f9e4abe61d39"},
+    {"start": "0x1e7a3e0", "end": "0x1e7eb37", "bytes": 18263, "sha256": "df6a429f13c852a2906963ac6895c559765f50bc8b51719272bc85dd195f83a0"},
+    {"start": "0x1e54850", "end": "0x1e58f97", "bytes": 18247, "sha256": "7e47475d565ecf25c168155992404dcc779ba06b56c787a075e333cd90f7aaad"},
+    {"start": "0x1f7e100", "end": "0x1f82681", "bytes": 17793, "sha256": "6a8a64a57bd3c13c758bacecab6bdee9cac9d503780013cd0eed4fb0b588f38e"},
+    {"start": "0x1ed4320", "end": "0x1ed86ed", "bytes": 17357, "sha256": "ddd97f4db968be2e4c7fe76d994086f5c61ef0c9646cbef0d924268d7d705d34"}
+  ],
+  "files": {
+    "tools/foundation_largest_fde_band1b.py": "83f729ad648bd24d77a1857bedcdb3c221b82197c9dbc43aade30c8f691a9f89",
+    "tests/test_foundation_largest_fde_band1b.py": "78cd509025dbf38e4834bd6a4de5f08e03ebb6f7e201a1598033ed4c6b4e5d48"
+  },
+  "observations": "Read statically from the pinned target bytes; the .eh_frame records were decoded from the section bytes and cross-checked against the recorded readelf-style rows. The chosen body digest covers exactly the FDE-derived half-open extent start..end.",
+  "limits": "Static FDE census of one .text band and one complete FDE window only. No semantic identification of the function, no caller or callee recovery, no execution of the target, no whole-module denominator and no reconstruction-gate credit.",
+  "captured_code_executed": false
+}
