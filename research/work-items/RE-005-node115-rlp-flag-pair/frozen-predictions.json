@@ -1,0 +1,186 @@
+{
+  "source": "Manual predictions from complete Node115 static instruction paths; not captured execution",
+  "sourceHead": "05bc2de303c05525b71e7e257426e741bc66a390",
+  "nativeBodyHashes": [
+    "d5718c7c8b9fca5b5da9b61642dafbf3ee92fc8f66e7f78f3152079b15d0dc36",
+    "5a0aa38c70cc676c16e85bb670f0a6d28e179e04c3c5e3e83b2562a02a15bc21"
+  ],
+  "cases": [
+    {
+      "name": "empty",
+      "input": "",
+      "error": 2,
+      "consumed": 0
+    },
+    {
+      "name": "zero-direct",
+      "input": "00",
+      "error": 1,
+      "consumed": 1
+    },
+    {
+      "name": "invalid-boolean",
+      "input": "02",
+      "error": 9,
+      "consumed": 1
+    },
+    {
+      "name": "missing-first",
+      "input": "80",
+      "error": 2,
+      "consumed": 1
+    },
+    {
+      "name": "missing-second",
+      "input": "0180",
+      "error": 2,
+      "consumed": 2
+    },
+    {
+      "name": "noncanonical-single",
+      "input": "8101",
+      "error": 3,
+      "consumed": 1
+    },
+    {
+      "name": "invalid-prefixed-boolean",
+      "input": "8180",
+      "error": 9,
+      "consumed": 2
+    },
+    {
+      "name": "wide-boolean",
+      "input": "820001",
+      "error": 0,
+      "consumed": 3
+    },
+    {
+      "name": "empty-list",
+      "input": "c0",
+      "error": 7,
+      "consumed": 1
+    },
+    {
+      "name": "short-list",
+      "input": "c201",
+      "error": 2,
+      "consumed": 1
+    },
+    {
+      "name": "short-long-length",
+      "input": "b80100",
+      "error": 4,
+      "consumed": 2
+    },
+    {
+      "name": "leading-zero-length",
+      "input": "b800",
+      "error": 1,
+      "consumed": 2
+    },
+    {
+      "name": "first-leading-zero",
+      "input": "8000",
+      "error": 1,
+      "consumed": 2
+    },
+    {
+      "name": "first-noncanonical-single",
+      "input": "808100",
+      "error": 3,
+      "consumed": 2
+    },
+    {
+      "name": "first-leading-zero-wide",
+      "input": "80a00000000000000000000000000000000000000000000000000000000000000001",
+      "error": 1,
+      "consumed": 34
+    },
+    {
+      "name": "first-too-wide",
+      "input": "80a1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80",
+      "error": 0,
+      "consumed": 35
+    },
+    {
+      "name": "true-zero-pair",
+      "input": "018080",
+      "value": {
+        "flag": true,
+        "first": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "second": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      },
+      "consumed": 3
+    },
+    {
+      "name": "false-small-pair",
+      "input": "800102",
+      "value": {
+        "flag": false,
+        "first": [
+          "1",
+          "0",
+          "0",
+          "0"
+        ],
+        "second": [
+          "2",
+          "0",
+          "0",
+          "0"
+        ]
+      },
+      "consumed": 3
+    },
+    {
+      "name": "prefixed-high-byte",
+      "input": "80818080",
+      "value": {
+        "flag": false,
+        "first": [
+          "128",
+          "0",
+          "0",
+          "0"
+        ],
+        "second": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      },
+      "consumed": 4
+    },
+    {
+      "name": "wide-word",
+      "input": "80a0ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80",
+      "value": {
+        "flag": false,
+        "first": [
+          "18446744073709551615",
+          "18446744073709551615",
+          "18446744073709551615",
+          "18446744073709551615"
+        ],
+        "second": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      },
+      "consumed": 35
+    }
+  ]
+}
