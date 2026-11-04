@@ -1,0 +1,284 @@
+{
+ "base_commit": "8fd8db680ec4bfef40996e5616bce3d5156d0b86",
+ "binary": {
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "coordinate_system": ".text file offset = VA - 0x1000; .data.rel.ro/.got file offset = VA - 0x2000; .rodata file offset = VA",
+ "inviting_prior": "#197 (PR #2328), also #196 (PR #2314) second question",
+ "node_layout_328": {
+  "capacity_keys": 11,
+  "value_slots": "16 bytes each at +16*i: [0] u64 value, [8] flag byte",
+  "parent": "+0xb0",
+  "key_array": "u32 keys at +0xb8 + 4*i",
+  "child_index_u16": "+0xe4",
+  "key_count_u16": "+0xe6",
+  "children": "pointers at +0xe8 + 8*i (12 slots, [232,328))",
+  "leaf_size": 232
+ },
+ "frame_56": {
+  "parent": "+0x00",
+  "levels_plus_1": "+0x08",
+  "separator_index": "+0x10",
+  "left_node": "+0x18",
+  "levels_below": "+0x20",
+  "right_node": "+0x28",
+  "levels_below_check": "+0x30"
+ },
+ "merge": {
+  "start": "0x4ca2500",
+  "end": "0x4ca2915",
+  "bytes": 1045,
+  "body_end_ret": "0x4ca28c9",
+  "body_bytes": 970,
+  "tail_bytes": 75,
+  "total_instructions": 225,
+  "body_instructions": 213,
+  "tail_instructions": 12,
+  "nops": 4,
+  "cie": "00000000",
+  "full_sha256": "293ea3858c4e900eefac1a3ada3469834d049dfd0d1cd7212b39fad0f32af6f0",
+  "body_sha256": "d225588427723d9783533ed15ba97021a8b5163537ebfcf60082558915f290ca",
+  "signature": "f(out: *mut [u8; 24], frame: *const Frame56, direction: u64, edge_idx: u64)",
+  "direction": "1 = current is RIGHT node (left-sibling donor path); 0 = current is LEFT node (right-sibling donor path); direction selects only the edge bound and the output edge remap, never the survivor",
+  "survivor": "LEFT node always kept; RIGHT node always freed",
+  "out_layout_24": [
+   "[0] kept node (= left node)",
+   "[0x8] levels (= frame+0x20)",
+   "[0x10] edge index in merged node = edge_idx + (direction ? left_count + 1 : 0)"
+  ],
+  "guards": [
+   "edge_idx <= current count (track_edge_idx, node.rs:1491:9)",
+   "merged left + right + 1 <= 11 (new_left_len, node.rs:1414:9)",
+   "kept-children memcpy length check (node.rs:1876:5, defensive)"
+  ],
+  "separator_move": "parent key/value at separator index saved, then parent keys/values after it shift left by one; separator appended to left node at old-count slot; right keys/values appended after it",
+  "parent_children": "child at index sep+1 removed by left shift (memmove); shifted children reparented single-step (N mod 4) then unrolled-by-4, N = parent_count - sep - 1 (stale tail slot included, dead after count decrement); parent count decremented",
+  "kept_children": "internal only (frame+0x8 >= 2): right children appended to left children at left_count+1 (memcpy), reparented single-step ((right_count+1) mod 4) then unrolled-by-4 to merged total",
+  "free": {
+   "got": "0x64df4a0",
+   "target": "0x635de30",
+   "size_leaf": 232,
+   "size_internal": 328,
+   "edx": 0
+  },
+  "direct_e8_callers": [
+   {
+    "address": "0x4d24967",
+    "bytes": "e8 94 db f7 ff",
+    "in": "leaf op 0x4d24790 first level (both directions funnel here)"
+   }
+  ],
+  "direction_sites": [
+   "0x4d248d1 mov edx,0x1 (left path)",
+   "0x4d24960 xor edx,edx (right path)"
+  ],
+  "got_sites": 0,
+  "panics": [
+   {
+    "site": "0x4ca28ca",
+    "message_va": "0x913599",
+    "message_len": 142,
+    "message": "assertion failed: match track_edge_idx {\n    LeftOrRight::Left(idx) => idx <= old_left_len,\n    LeftOrRight::Right(idx) => idx <= right_len,\n}",
+    "location_va": "0x649a648",
+    "file": "node.rs",
+    "line": 1491,
+    "col": 9
+   },
+   {
+    "site": "0x4ca28e3",
+    "message_va": "0x913627",
+    "message_len": 42,
+    "message": "assertion failed: new_left_len <= CAPACITY",
+    "location_va": "0x649a660",
+    "file": "node.rs",
+    "line": 1414,
+    "col": 9
+   },
+   {
+    "site": "0x4ca28fc",
+    "message_va": "0x913439",
+    "message_len": 40,
+    "message": "assertion failed: src.len() == dst.len()",
+    "location_va": "0x649a540",
+    "file": "node.rs",
+    "line": 1876,
+    "col": 5
+   }
+  ]
+ },
+ "redistribute_left": {
+  "start": "0x4c93c20",
+  "end": "0x4c93f18",
+  "bytes": 760,
+  "body_end_ret": "0x4c93ecc",
+  "body_bytes": 685,
+  "tail_bytes": 75,
+  "total_instructions": 161,
+  "body_instructions": 149,
+  "tail_instructions": 12,
+  "nops": 2,
+  "cie": "00000000",
+  "full_sha256": "ef576dd41de6f921ce763fefe3215968fd2319040bf40c8944ed805c73bf0ed0",
+  "body_sha256": "0d2bbf112a556d275a03462e9e0685c57c316c3f033d03142a5ae684648a8ddc",
+  "signature": "f(frame: *const Frame56, borrow: u64)",
+  "direction": "borrows borrow keys from LEFT node (frame+0x18) into RIGHT node (frame+0x28, underfull current)",
+  "borrow_choice": "none in helper: borrow is caller-supplied esi, only validated (current + borrow <= 11; donor - borrow >= 0)",
+  "key_move": "right keys/values shift right by borrow (memmove); donor top borrow-1 keys/values (indices new_left+1..old_left-1) memcpy to right slots 0..borrow-2; donor key/value at new_left swaps with parent separator; old separator lands in right slot borrow-1",
+  "children_move": "internal only (both levels fields nonzero and agreeing): right children shift right by borrow (memmove); donor children new_left+1..new_left+borrow memcpy to right slots 0..borrow-1; ALL right children reparented (single-step remainder, unrolled-by-4)",
+  "direct_e8_callers": [
+   {
+    "address": "0x4cbdbcb",
+    "bytes": "e8 50 60 fd ff",
+    "in": "build 0x4cbd730 post-pass (#197)"
+   },
+   {
+    "address": "0x4d2497b",
+    "bytes": "e8 a0 f2 f6 ff",
+    "in": "leaf op first level (esi = 1)"
+   },
+   {
+    "address": "0x4d24f12",
+    "bytes": "e8 09 ed f6 ff",
+    "in": "leaf op upward loop (esi = 5 - current count)"
+   }
+  ],
+  "got_sites": 0,
+  "panics": [
+   {
+    "site": "0x4c93ecd",
+    "message_va": "0x9134e5",
+    "message_len": 51,
+    "message": "assertion failed: old_right_len + count <= CAPACITY",
+    "location_va": "0x649a5b8",
+    "file": "node.rs",
+    "line": 1537,
+    "col": 13
+   },
+   {
+    "site": "0x4c93ee6",
+    "message_va": "0x913518",
+    "message_len": 39,
+    "message": "assertion failed: old_left_len >= count",
+    "location_va": "0x649a5d0",
+    "file": "node.rs",
+    "line": 1538,
+    "col": 13
+   },
+   {
+    "site": "0x4c93eff",
+    "message_va": "0x913439",
+    "message_len": 40,
+    "message": "assertion failed: src.len() == dst.len()",
+    "location_va": "0x649a540",
+    "file": "node.rs",
+    "line": 1876,
+    "col": 5
+   },
+   {
+    "site": "0x4c93dfa",
+    "message_va": "0x913496",
+    "message_len": 40,
+    "message": "internal error: entered unreachable code",
+    "location_va": "0x649a5e8",
+    "file": "node.rs",
+    "line": 1585,
+    "col": 22
+   }
+  ]
+ },
+ "redistribute_right": {
+  "start": "0x4c9b3b0",
+  "end": "0x4c9b6ff",
+  "bytes": 847,
+  "body_end_ret": "0x4c9b6cc",
+  "body_bytes": 797,
+  "tail_bytes": 50,
+  "total_instructions": 175,
+  "body_instructions": 167,
+  "tail_instructions": 8,
+  "nops": 2,
+  "cie": "00000000",
+  "full_sha256": "f2673bbf94612ccd06ac3e49b9c2ad177f8200822128d487c32bb8280f20fd13",
+  "body_sha256": "99bfab38291f1ccc0abb3fe3ef32cbb6b87c1683ff23b717ea8b13f9cbab05cd",
+  "signature": "f(frame: *const Frame56, borrow: u64)",
+  "direction": "borrows borrow keys from RIGHT node (frame+0x28) into LEFT node (frame+0x18, underfull current)",
+  "borrow_choice": "none in helper: borrow is caller-supplied esi, only validated (current + borrow <= 11; donor - borrow >= 0)",
+  "key_move": "donor key/value at index borrow-1 swaps with parent separator; old separator appends to left slot old_left; donor keys/values 0..borrow-2 memcpy to left slots old_left+1..; donor remaining keys/values shift left by borrow (memmove)",
+  "children_move": "internal only (both levels fields nonzero and agreeing): donor children 0..borrow-1 memcpy to left children old_left+1..; donor remaining children shift left by borrow (memmove); moved children reparented by unrolled switch covering at most 5 children; donor remaining children reparented generally (single-step remainder, unrolled-by-4)",
+  "direct_e8_callers": [
+   {
+    "address": "0x4d249ac",
+    "bytes": "e8 ff 69 f7 ff",
+    "in": "leaf op first level (esi = 1)"
+   },
+   {
+    "address": "0x4d24f2c",
+    "bytes": "e8 7f 64 f7 ff",
+    "in": "leaf op upward loop (esi = 5 - current count)"
+   }
+  ],
+  "got_sites": 0,
+  "panics": [
+   {
+    "site": "0x4c9b6cd",
+    "message_va": "0x91353f",
+    "message_len": 50,
+    "message": "assertion failed: old_left_len + count <= CAPACITY",
+    "location_va": "0x649a600",
+    "file": "node.rs",
+    "line": 1600,
+    "col": 13
+   },
+   {
+    "site": "0x4c9b6e6",
+    "message_va": "0x913571",
+    "message_len": 40,
+    "message": "assertion failed: old_right_len >= count",
+    "location_va": "0x649a618",
+    "file": "node.rs",
+    "line": 1601,
+    "col": 13
+   },
+   {
+    "site": "0x4c9b5fe",
+    "message_va": "0x913496",
+    "message_len": 40,
+    "message": "internal error: entered unreachable code",
+    "location_va": "0x649a630",
+    "file": "node.rs",
+    "line": 1649,
+    "col": 22
+   }
+  ]
+ },
+ "got_slots": {
+  "memmove": "0x64df568",
+  "memmove_target": "memmove@GLIBC_2.2.5",
+  "memcpy": "0x64df508",
+  "memcpy_target": "memcpy@GLIBC_2.14",
+  "free": "0x64df4a0",
+  "free_target": "0x635de30",
+  "panic_wrapper": "0x64df730",
+  "panic_wrapper_target": "0x1680e60"
+ },
+ "panic_file": {
+  "va": "0x4344f8",
+  "len": 91,
+  "string": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/alloc/src/collections/btree/node.rs"
+ },
+ "corrections_to_prior": [
+  "#196 redistribute-left body_bytes 428 is stale: true body proper is 685 bytes including ret (684 excluding ret), single ret at 0x4c93ecc",
+  "#196 leaf-op out48 labels refined: out+0x20 is levels, out+0x28 is the edge index in the resulting node (not kept-node pointer / loc levels field)",
+  "#196 merge direction gloss refined: merge always keeps the LEFT node and frees the RIGHT node; direction only selects the track_edge_idx bound and the output edge remap",
+  "#197 build-calls-only-redistribute-left confirmed by census; build has no path to redistribute-right or merge"
+ ],
+ "limitations": [
+  "Free wrapper 0x635de30 internals not decoded; only call sites, GOT slot, and size argument (232 leaf / 328 internal) claimed",
+  "Redistribute-right moved-children reparent switch covers at most 5 children; borrow above 5 would leave later moved children stale; no call site passes borrow above 5",
+  "Merge parent-children reparent loop writes the stale tail slot before the count decrement; the slot is dead once the count drops",
+  "Upward loop inline merge core not re-claimed; #196 description stands; this packet claims the extracted first-level merge helper only",
+  "Static analysis only; the node binary was never executed"
+ ]
+}
