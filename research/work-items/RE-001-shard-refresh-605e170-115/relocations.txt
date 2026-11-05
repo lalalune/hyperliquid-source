@@ -1,0 +1,15 @@
+Relocation / PLT notes for the RE-001 shard refresh window (node #115).
+
+Window 0x605e170..0x605e20d:
+- No relocation names this routine: a .rela.dyn scan finds no
+  R_X86_64_RELATIVE slot whose addend is 0x605e170, and a whole-file
+  qword search finds no stored copy of the address (see census.py).
+  The routine is reached only by the two direct calls listed in
+  callers.tsv.
+- The window contains no rip-relative access and no GOT read: both
+  of its calls are direct rel32 transfers (CPUID selector 0x60d5cd0
+  at site 0x605e17b, seed-word getter 0x61c4080 at site 0x605e1d0),
+  and its one TLS access is an fs:0 load with the immediate
+  displacement -0x408 applied to the loaded TCB pointer (initial-exec
+  thread-local storage; no dynamic relocation is involved in-window).
+- No .rodata string reference in-window.
