@@ -1,0 +1,23 @@
+The two GOT slots read in-window by the sibling routine hold canonical
+forwarders, installed by these RELATIVE records (readelf -r):
+0000064c9160  000000000008 R_X86_64_RELATIVE                    96ce30
+0000064c92c8  000000000008 R_X86_64_RELATIVE                    64c9158
+0000064c92d0  000000000008 R_X86_64_RELATIVE                    5d484b0
+0000064c92d8  000000000008 R_X86_64_RELATIVE                    5d484c0
+0000064c92e0  000000000008 R_X86_64_RELATIVE                    5d484d0
+0000064c92e8  000000000008 R_X86_64_RELATIVE                    5d54f10
+0000064c92f0  000000000008 R_X86_64_RELATIVE                    5d54f30
+0000064ed010  000000000008 R_X86_64_RELATIVE                    5d2ca80
+0000064ed778  000000000008 R_X86_64_RELATIVE                    5f04d80
+- GOT slot 0x64ed778 holds 0x5f04d80: the canonical target compared
+  against product-1 (owner+0xa50) vtable slot 0x98 at 0x5f0f44b; when
+  equal, the sibling calls slot 0x90 instead (#3286's forwarder).
+- GOT slot 0x64ed010 holds 0x5d2ca80: the canonical target compared
+  against product-2 (owner+0x10) vtable slot 0x98 at 0x5f0f52e; when
+  equal, the sibling calls slot 0x10 on the product+0x20 subobject
+  instead.
+- The produce object built on the code-1 path is a rocksdb::SnapshotImpl
+  (typeinfo name `N7rocksdb12SnapshotImplE` at 0x96ce30, via the RELATIVE
+  record at 0x64c9160); its vtable 0x64c92d0 holds, by RELATIVE records,
+  slots 0x5d484b0, 0x5d484c0, 0x5d484d0, 0x5d54f10 and 0x5d54f30, with
+  the typeinfo pointer 0x64c9158 at 0x64c92c8.
