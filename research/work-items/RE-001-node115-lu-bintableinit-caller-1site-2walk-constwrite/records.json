@@ -1,0 +1,472 @@
+{
+ "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "calls": [
+  {
+   "note": "bin_table_init",
+   "site": "0x63aea96",
+   "target": "0x63d9880"
+  },
+  {
+   "note": "lu-miss handler (scan A exhaustion)",
+   "site": "0x63aec82",
+   "target": "0x63d9700"
+  },
+  {
+   "note": "lu-miss handler (scan B exhaustion)",
+   "site": "0x63aed2a",
+   "target": "0x63d9700"
+  },
+  {
+   "note": "__stack_chk_fail",
+   "site": "0x63aed34",
+   "target": "0x63f0d70"
+  }
+ ],
+ "census": {
+  "bin_table_init": 1,
+  "bsr": 0,
+  "calls_total": 4,
+  "jumps": 30,
+  "jumps_outside_window": 0,
+  "lock_add": 0,
+  "lock_sub": 0,
+  "lu_miss": 2,
+  "raw_e8": {
+   "tiers": {
+    "1": 17,
+    "10": 1,
+    "2": 12,
+    "4": 8,
+    "5": 1,
+    "6": 2,
+    "8": 1
+   },
+   "total": 108
+  },
+  "rela_dyn": {
+   "relative": 59534,
+   "total": 60723
+  },
+  "rela_plt": 278,
+  "ret": 1,
+  "strict": 189
+ },
+ "cited_not_claimed": [
+  "bin_table_init body 0x63d9880..0x63d9a64 (#262)",
+  "lu-miss handler 0x63d9700..0x63d987b (#215)",
+  "prev FDE 0x63ae6e0..0x63ae974, next FDE 0x63aed40..0x63aefdb",
+  "no node-resolution tables (0x65096c0, 0x6511780) or size tables (0x6727a00, 0x67277c0) are read in this FDE"
+ ],
+ "constwrite": {
+  "composed_value": "constant 0xe8000000000000 (movabs at 0x63aea4a); entry ecx/r8d are not used in this FDE",
+  "entry_registers": "rdi = context (kept in rbx), rsi = live input (kept in callee-saved r13, passed to the lu-miss handler; caller-side meaning not established), rdx = struct pointer (kept in rbp), ecx/r8d unused",
+  "writes": "mov %rcx,(%r14) at 0x63aea54 (first-walk target); mov %rcx,(%rax) at 0x63aea5c (second-walk target, skipped when null via je 0x63aea5f)"
+ },
+ "exhibits": [
+  {
+   "bin_table_init_sites": [
+    "0x63aea96"
+   ],
+   "bsr": 0,
+   "bsr_sites": [],
+   "bytes": 953,
+   "calls_total": 4,
+   "lock_add": 0,
+   "lock_sub": 0,
+   "lu_miss_sites": [
+    "0x63aec82",
+    "0x63aed2a"
+   ],
+   "name": "bintableinit_caller_2walk_constwrite_1site",
+   "range": "0x63ae980..0x63aed39",
+   "ret": 1,
+   "ret_sites": [
+    "0x63aea85"
+   ],
+   "strict": 189,
+   "tail_jump_exits": []
+  }
+ ],
+ "frame": {
+  "canary": "0x188(%rsp)",
+  "endbr64": true,
+  "pushes": [
+   "r14",
+   "r13",
+   "r12",
+   "rbp",
+   "rbx"
+  ],
+  "sub_rsp": "0x190"
+ },
+ "lu_miss_sites": [
+  {
+   "r8": 1,
+   "r9": 0,
+   "rcx": "page(key 0x8(%rbp))",
+   "rdi": "rbx context",
+   "rdx": "r12 scan table",
+   "rejoin": "jmp 0x63aea01 (derived-key recompute)",
+   "return_to": "r14 (second-level pointer)",
+   "rsi": "entry rsi in callee-saved r13 (no save/restore)",
+   "scan": "A",
+   "site": "0x63aec82"
+  },
+  {
+   "r8": 1,
+   "r9": 0,
+   "rcx": "(derived key >> 0x9)",
+   "rdi": "rbx context",
+   "rdx": "r12 scan table",
+   "rejoin": "jmp 0x63aea4a (constant-write block)",
+   "return_to": "rax (second-level pointer, used directly)",
+   "rsi": "entry rsi in callee-saved r13 (no save/restore)",
+   "scan": "B",
+   "site": "0x63aed2a"
+  }
+ ],
+ "next_fde": {
+  "gap_bytes": "cccccccccccccc",
+  "padding": 7,
+  "range": "0x63aed40..0x63aefdb"
+ },
+ "next_question": {
+  "bin_table_init": 1,
+  "bsr": 0,
+  "bytes": 667,
+  "correction": "lu-miss count corrected 2 -> 1: objdump census of 0x63aed40..0x63aefdb finds a single call to 0x63d9700 (0x63aefcd); the #298-#305 surveys said 2",
+  "fall_through": [
+   "0x63aefe0..0x63af45f",
+   "0x63af460..0x63afba4",
+   "0x63afc60..0x63b0324",
+   "0x63bc490..0x63bc728",
+   "0x63bc730..0x63bcb12",
+   "0x63c2f00..0x63c3328"
+  ],
+  "lu_miss": 1,
+  "packet": 307,
+  "ret": 1,
+  "window": "0x63aed40..0x63aefdb"
+ },
+ "prev_fde": {
+  "gap": 12,
+  "gap_bytes": "cccccccccccccccccccccccc",
+  "range": "0x63ae6e0..0x63ae974"
+ },
+ "return_value": {
+  "eax": "not established as a return value: on the write path eax holds the second-level index (derived key >> 0x9) & 0x1ffff8 from address computation (and at 0x63aea41); no explicit return-value setup exists",
+  "out": "constant 0xe8000000000000 stored to both resolved node fields (mov %rcx,(%r14) at 0x63aea54; mov %rcx,(%rax) at 0x63aea5c, skipped when the second-level value is null)"
+ },
+ "scan_a": {
+  "base": "table+0x100",
+  "exhaustion": "0x63aec70 (lu-miss A block)",
+  "key": "high bits of key 0x8(%rbp) in rdx",
+  "move_to_front": "0x63aeb43 (shared, slots 1-7); slot-0 inline block 0x63aeaae..0x63aece",
+  "reversed_operand": [
+   "0x63aec00",
+   "0x63aec13",
+   "0x63aec26",
+   "0x63aec39",
+   "0x63aec4c"
+  ],
+  "slot_compares": [
+   "0x63aeaa0",
+   "0x63aeb35",
+   "0x63aec00",
+   "0x63aec13",
+   "0x63aec26",
+   "0x63aec39",
+   "0x63aec4c",
+   "0x63aec5a"
+  ],
+  "slots": 8,
+  "table": "r12 context+0x1b0"
+ },
+ "scan_b": {
+  "base": "table+0x100",
+  "exhaustion": "0x63aed18 (lu-miss B block)",
+  "key": "high bits of derived key in r11",
+  "move_to_front": "0x63aebac (shared, slots 1-7); slot-0 inline block 0x63aeaf6..0x63aeb28",
+  "reversed_operand": [
+   "0x63aecdc",
+   "0x63aecf0"
+  ],
+  "slot_compares": [
+   "0x63aeae8",
+   "0x63aeb9e",
+   "0x63aeca0",
+   "0x63aecb4",
+   "0x63aecc8",
+   "0x63aecdc",
+   "0x63aecf0",
+   "0x63aecfe"
+  ],
+  "slots": 8,
+  "table": "r12 context+0x1b0"
+ },
+ "sites": [
+  {
+   "argument": "plain %rsp in r12, mov %r12,%rdi",
+   "block": "0x63aea90",
+   "branch": "test %rdi,%rdi; je from 0x63ae9b9",
+   "rejoin": "jmp 0x63ae9bf",
+   "restore": "none - rsi kept in callee-saved r13",
+   "save": "none - rsi kept in callee-saved r13",
+   "site": "0x63aea96"
+  }
+ ],
+ "survey": {
+  "candidates": [
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363095"
+    ],
+    "end": "0x6363258",
+    "miss": 1,
+    "ret": 0,
+    "size": 712,
+    "start": "0x6362f90",
+    "status": "BUILT by packet #298"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63633f8"
+    ],
+    "end": "0x6363552",
+    "miss": 1,
+    "ret": 1,
+    "size": 754,
+    "start": "0x6363260",
+    "status": "BUILT by packet #299"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363b30"
+    ],
+    "end": "0x6363d50",
+    "miss": 1,
+    "ret": 1,
+    "size": 1376,
+    "start": "0x63637f0",
+    "status": "BUILT by packet #300"
+   },
+   {
+    "bsr": 4,
+    "bti": 1,
+    "bti_sites": [
+     "0x6364009"
+    ],
+    "end": "0x6364270",
+    "miss": 1,
+    "ret": 1,
+    "size": 1312,
+    "start": "0x6363d50",
+    "status": "BUILT by packet #301"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6387629"
+    ],
+    "end": "0x6387878",
+    "miss": 1,
+    "ret": 1,
+    "size": 1112,
+    "start": "0x6387420",
+    "status": "BUILT by packet #302"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63adce6"
+    ],
+    "end": "0x63adf34",
+    "miss": 2,
+    "ret": 1,
+    "size": 996,
+    "start": "0x63adb50",
+    "status": "BUILT by packet #303"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae114"
+    ],
+    "end": "0x63ae252",
+    "miss": 1,
+    "ret": 1,
+    "size": 786,
+    "start": "0x63adf40",
+    "status": "EXCLUDED as a whole FDE: overlaps packet #214 (lu nextnode) claimed sub-ranges 0x63adf71..0x63adf9d, 0x63ae014..0x63ae040, 0x63ae088..0x63ae0cf, 0x63adfed..0x63ae014 in its records"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae45d"
+    ],
+    "end": "0x63ae6d1",
+    "miss": 2,
+    "ret": 1,
+    "size": 1057,
+    "start": "0x63ae2b0",
+    "status": "BUILT by packet #304"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae83d"
+    ],
+    "end": "0x63ae974",
+    "miss": 1,
+    "ret": 1,
+    "size": 660,
+    "start": "0x63ae6e0",
+    "status": "BUILT by packet #305"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aea96"
+    ],
+    "end": "0x63aed39",
+    "miss": 2,
+    "ret": 1,
+    "size": 953,
+    "start": "0x63ae980",
+    "status": "BUILT by this packet (#306)"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aeea1"
+    ],
+    "end": "0x63aefdb",
+    "miss": 1,
+    "ret": 1,
+    "size": 667,
+    "start": "0x63aed40",
+    "status": "survives (miss corrected 2 -> 1 by this packet: objdump census finds one lu-miss call 0x63aefcd)"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af198"
+    ],
+    "end": "0x63af45f",
+    "miss": 2,
+    "ret": 1,
+    "size": 1151,
+    "start": "0x63aefe0",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af6c8"
+    ],
+    "end": "0x63afba4",
+    "miss": 4,
+    "ret": 1,
+    "size": 1860,
+    "start": "0x63af460",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63afe1e"
+    ],
+    "end": "0x63b0324",
+    "miss": 4,
+    "ret": 1,
+    "size": 1732,
+    "start": "0x63afc60",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc5e5"
+    ],
+    "end": "0x63bc728",
+    "miss": 1,
+    "ret": 1,
+    "size": 664,
+    "start": "0x63bc490",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc9ec"
+    ],
+    "end": "0x63bcb12",
+    "miss": 1,
+    "ret": 1,
+    "size": 994,
+    "start": "0x63bc730",
+    "status": "survives"
+   },
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x63c30ed"
+    ],
+    "end": "0x63c3328",
+    "miss": 1,
+    "ret": 1,
+    "size": 1064,
+    "start": "0x63c2f00",
+    "status": "survives"
+   }
+  ],
+  "count": 17,
+  "exclusions_reverified": [
+   "0x63ed090..0x63ed862 (#260)",
+   "0x63ef8e0..0x63efba2 (#258)"
+  ],
+  "method": "own .eh_frame parse (135,313 FDEs, sorted before bisect) + raw-e8 census + objdump site count per FDE + exhibits-scoped range-only claim check over merged tree + all prior hl-wt-calls* worktrees",
+  "tiers": {
+   "1": 17,
+   "10": 1,
+   "2": 12,
+   "4": 8,
+   "5": 1,
+   "6": 2,
+   "8": 1
+  },
+  "total_raw": 108
+ },
+ "walk": {
+  "derived_key": "page(0x8(%rbp)) + page(0x10(%rbp)) - 0x1000 (lea -0x1000(%rcx,%rbp,1),%rcx at 0x63aea0c)",
+  "field_update": "no shl/sar $0x10 + mask $0xffffffffffffff80 transform in this FDE (like #303, #304 and #305, unlike #298-#302); instead the constant 0xe8000000000000 is written to both resolved node fields",
+  "node_resolution_table": "none: no 0x65096c0 / 0x6511780 read in this FDE; the node pointers come from the table entries directly",
+  "second_level": "(key>>0x9)&0x1ffff8 + table + 0x8",
+  "table": "context+0x1b0 (r12)",
+  "top_index": "(key>>0x1a)&0xf0"
+ },
+ "window": {
+  "bytes": 953,
+  "range": "0x63ae980..0x63aed39",
+  "strict": 189
+ }
+}
