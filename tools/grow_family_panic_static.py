@@ -73,6 +73,7 @@ from foundation_millis import decode_export, require
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGET = ROOT / 'artifacts/node/115/hl-node'
+TARGET_DISPLAY = 'artifacts/node/115/hl-node'
 SHA = 'a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
 
 ZR_CIE = 0xca6ed8
@@ -1086,7 +1087,10 @@ def generate(out_dir=None):
         decoded = decode_export(output, start, end, body)
         for site in sites:
             require(site in decoded, f'window site {site:#x} missing')
-        (out / name).write_text(output)
+        # objdump's header names the file it was given; committed evidence
+        # must carry the repository-relative path, not this checkout's
+        # absolute one.
+        (out / name).write_text(output.replace(str(TARGET), TARGET_DISPLAY))
     return records
 
 
