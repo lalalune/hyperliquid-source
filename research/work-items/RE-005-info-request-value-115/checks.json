@@ -1,0 +1,390 @@
+{
+  "targetSha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+  "phase": "Pre-commit component/evidence checks; exact final-head results are reported separately with the PR",
+  "pilot": {
+    "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+    "sourceUncommitted": true,
+    "records": [
+      {
+        "label": "lock",
+        "command": [
+          "TOOLCHAIN\\rust-1.95.0-gnullvm\\bin\\cargo.exe",
+          "generate-lockfile",
+          "--offline",
+          "--manifest-path",
+          "REPO_ROOT\\src\\node115-info-request-value\\Cargo.toml"
+        ],
+        "exitCode": 0,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "format",
+        "command": [
+          "TOOLCHAIN\\rust-1.95.0-gnullvm\\bin\\cargo.exe",
+          "fmt",
+          "--manifest-path",
+          "REPO_ROOT\\src\\node115-info-request-value\\Cargo.toml"
+        ],
+        "exitCode": 0,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "debug",
+        "command": [
+          "TOOLCHAIN\\rust-1.95.0-gnullvm\\bin\\cargo.exe",
+          "test",
+          "--offline",
+          "--locked",
+          "--manifest-path",
+          "REPO_ROOT\\src\\node115-info-request-value\\Cargo.toml",
+          "--target-dir",
+          "OPERATOR_OUTPUT\\cargo-debug-target"
+        ],
+        "exitCode": 0,
+        "stdoutSha256": "0cead8e60782889fe50e03a21da5389904a7129481731e58354c19853bc1f374",
+        "stderrSha256": "30506420f9e57fe977ff2fb719b33c1579202717176a514e2dd0ebd4d631df05"
+      },
+      {
+        "label": "release",
+        "command": [
+          "TOOLCHAIN\\rust-1.95.0-gnullvm\\bin\\cargo.exe",
+          "test",
+          "--release",
+          "--offline",
+          "--locked",
+          "--manifest-path",
+          "REPO_ROOT\\src\\node115-info-request-value\\Cargo.toml",
+          "--target-dir",
+          "OPERATOR_OUTPUT\\cargo-release-target"
+        ],
+        "exitCode": 0,
+        "stdoutSha256": "0cead8e60782889fe50e03a21da5389904a7129481731e58354c19853bc1f374",
+        "stderrSha256": "29572836bde8f989460d4e0c451a72a3651c792078eef9ed2bdc709b9d51bde6"
+      },
+      {
+        "label": "clippy",
+        "command": [
+          "TOOLCHAIN\\rust-1.95.0-gnullvm\\bin\\cargo.exe",
+          "clippy",
+          "--offline",
+          "--locked",
+          "--manifest-path",
+          "REPO_ROOT\\src\\node115-info-request-value\\Cargo.toml",
+          "--all-targets",
+          "--target-dir",
+          "OPERATOR_OUTPUT\\cargo-clippy-target",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "exitCode": 0,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "41334c63615eb97d4cdc439c146aa5b792b6a32f4bc44ad7efd4d0e20c4bd418"
+      },
+      {
+        "label": "format-check",
+        "command": [
+          "TOOLCHAIN\\rust-1.95.0-gnullvm\\bin\\cargo.exe",
+          "fmt",
+          "--manifest-path",
+          "REPO_ROOT\\src\\node115-info-request-value\\Cargo.toml",
+          "--all",
+          "--",
+          "--check"
+        ],
+        "exitCode": 0,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "wholeValues": 190,
+    "variants": 55,
+    "allCommandsPassed": true,
+    "sourceSha256": "d3ff06540da7ea2e961f8d0725d5edb506a4e0a5dab90f9e1f50f4764988f0a2",
+    "testSha256": "74e8818b29cf7e336cf1bd4cb48e0b29ed5cf0eddcad1f19b1a7e124d8706270"
+  },
+  "rustCounterfactuals": {
+    "records": [
+      {
+        "name": "omit-false",
+        "exitCode": 101,
+        "sourceSha256": "ea9cb64749f2ef9ff113a3727f71e7d1a168a434177eee3b9bc1b13089fdcafb",
+        "stdoutSha256": "27ca50401830ca166589dcc1843da59e6e9964391efc1bc8fb566dbdd2bb8e69",
+        "stderrSha256": "cdb324ad5c4e9a373070bb3915263e0dffa82919476aee5d8e1278f13e36b7a9",
+        "compiledAndWholeValueTestFailed": true
+      },
+      {
+        "name": "none-to-empty-string",
+        "exitCode": 101,
+        "sourceSha256": "be0c9981750071db121f5754982c08a31c634bad7de8ae25d30234216b2e8b52",
+        "stdoutSha256": "8cabad23475f05df65cb2883ee74bc0bf173e631c702d7bf0649a74ac552ac87",
+        "stderrSha256": "a0719b9f7007b1af05394d72cd9625f1d449a0a95381a8cc4b0faaa3483bac7d",
+        "compiledAndWholeValueTestFailed": true
+      },
+      {
+        "name": "truncate-uint64",
+        "exitCode": 101,
+        "sourceSha256": "abe6ea81c5fc7c57ac960829c0ab822a832e5dd567f3cc2a211fe2d2055e23e4",
+        "stdoutSha256": "1677375d372d0abb781f503d21d4ac4d8b77d9f934f02be17fccc62b150ad5c4",
+        "stderrSha256": "07bf131ae52df769ef630bf08a091c0a72841ad3d29e2c84e4cd1066ed0ed230",
+        "compiledAndWholeValueTestFailed": true
+      },
+      {
+        "name": "inferred-name-instead-of-native-tag",
+        "exitCode": 101,
+        "sourceSha256": "d806acaf09915eccc20a0e96908097d739f1bc78d715c5cedb5c50ac247676a9",
+        "stdoutSha256": "f6f054a8c9e321b4f953518709feaf2fa583d39a0244f6cbaff037a3fef9c6cb",
+        "stderrSha256": "5b650c02c9b9f44865b33b9ee4da0003728f885d25b6a224c3b1b2ce2581bc05",
+        "compiledAndWholeValueTestFailed": true
+      }
+    ],
+    "allFourCounterfactualsDetected": true,
+    "productionSourceUnchanged": true,
+    "targetExecuted": false,
+    "targetEmulated": false,
+    "originalWireEquivalenceClaimed": false
+  },
+  "native": {
+    "completeFdes": 23,
+    "bytes": 32536,
+    "instructions": 6600,
+    "selectedRelocations": 67,
+    "dispatchEntries": 55,
+    "gnuBytePartitionsAllEqual": true
+  },
+  "pythonEvidenceTests": {
+    "tests": 9,
+    "exitCode": 0,
+    "result": "results/evidence-controls.txt"
+  },
+  "baselineCatalogue": {
+    "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+    "classification": "pre-existing baseline generated inventory drift: 559 recorded work items versus 560 active work items",
+    "affectedGeneratedFiles": [
+      {
+        "path": "README.md",
+        "committedSha256": "0f3edf1d60d1521e83c89523a72f4c31b394e2c3996bb4d62cde7d24fa541deb",
+        "generatedSha256": "10e0df3f9fea5f2aa3fe2ec6c0e5175ed28317c1f0a8cdf56466ec35f5fc15d2",
+        "difference": "--- base committed README.md\n+++ base generated README.md\n@@ -16,7 +16,7 @@\n \n ![Node #115 progress](docs/assets/research-progress.svg)\n \n-**34 active Rust implementation areas \u00b7 19 Cargo manifests \u00b7 559 #115 research work items.**\n+**34 active Rust implementation areas \u00b7 19 Cargo manifests \u00b7 560 #115 research work items.**\n \n These inventory counts describe available work, not completed components.\n \n"
+      },
+      {
+        "path": "docs/assets/research-progress.svg",
+        "committedSha256": "169c527a71b7d87f192bd626d4ae33cb527ae94828efea1cc0991818baafea7a",
+        "generatedSha256": "21d972e5eabdd67d4ab0c4b59d719a899d9a57c26eed42526d34c2658f2ddfa6",
+        "difference": "--- base committed docs/assets/research-progress.svg\n+++ base generated docs/assets/research-progress.svg\n@@ -16,7 +16,7 @@\n <text x=\"338\" y=\"180\" fill=\"#71f1c6\" font-size=\"11\" font-weight=\"700\" letter-spacing=\".6\">STANDALONE CARGO MANIFESTS</text>\n <text x=\"338\" y=\"204\" fill=\"#b0c9cb\" font-size=\"11\">Build scopes recorded in source</text>\n <rect x=\"608\" y=\"103\" width=\"272\" height=\"121\" rx=\"10\" fill=\"#102c33\" stroke=\"#21434a\"/>\n-<text x=\"626\" y=\"151\" fill=\"#f0faf7\" font-size=\"38\" font-weight=\"700\">559</text>\n+<text x=\"626\" y=\"151\" fill=\"#f0faf7\" font-size=\"38\" font-weight=\"700\">560</text>\n <text x=\"626\" y=\"180\" fill=\"#71f1c6\" font-size=\"11\" font-weight=\"700\" letter-spacing=\".6\">DOCUMENTED WORK ITEMS</text>\n <text x=\"626\" y=\"204\" fill=\"#b0c9cb\" font-size=\"11\">Research, evidence and limitations</text>\n <rect x=\"896\" y=\"103\" width=\"272\" height=\"121\" rx=\"10\" fill=\"#102c33\" stroke=\"#21434a\"/>\n"
+      }
+    ],
+    "priorDiagnosisFailure": "Operator incorrectly assumed only README would differ; both actual outputs were collected before that assertion failed. Original failure retained, freeze was not run.",
+    "candidateSourceChanged": false,
+    "productAssertionsChanged": false,
+    "gateInputsChanged": false,
+    "oldCheckPassed": false,
+    "nextResolution": "When new source/work item is ready, run official make catalogue and exact-final-head catalogue-check; no hand-edits."
+  },
+  "reusedExactBaseTestFailure": {
+    "sourceHead": "05bc2de303c05525b71e7e257426e741bc66a390",
+    "status": "failed-no-progress",
+    "exitCode": 124,
+    "limits": {
+      "totalSeconds": 300,
+      "phaseSeconds": 300,
+      "idleSeconds": 180,
+      "maxLogBytes": 16777216,
+      "minFreeBytes": 10737418240
+    },
+    "cleanupConfirmed": true,
+    "activeOwnedProcessesAfterCleanup": 0,
+    "lockReleased": true,
+    "testModule": "tests/test_assembled_record_readers_static.py",
+    "testSha256": "6eb5b06f04a8d5701d71712b32528a1b516d387960f67fd216a3664f92242138",
+    "reuseScope": "Existing exact-base no-progress result only; no fresh candidate make test pass, no all-failure unrelated classification."
+  },
+  "logs": [
+    {
+      "path": "results/baseline-catalogue-check.stderr",
+      "originalOperatorSha256": "a64130836f4ab0a1d5b881b3dd869bd89887c01ed9e75d1296f701c105d4a183",
+      "publicSha256": "292f5ae10dd60056cc93b31c1ef416ba0ed1adaf2d80bf86bdfe717802449eed",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/baseline-catalogue-check.stdout",
+      "originalOperatorSha256": "7fbcb079ca4aeb20bab25fe5707b3db7bc5e604e429ffbd04423979b8bf10ee5",
+      "publicSha256": "cfe7893ea01302cce84159d08a0b3387707ee712b3d62a352f6fd8d937a5641b",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/baseline-doctor.stderr",
+      "originalOperatorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publicSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/baseline-doctor.stdout",
+      "originalOperatorSha256": "c2ab54fdf86046bea8e3bcbee6f720e2a9af773eb21a59e5a080a036dd615f48",
+      "publicSha256": "082bd91ddb722551b35414b9ae9138130e50a1d22e18978f522005f144ec921a",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/baseline-verify.stderr",
+      "originalOperatorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publicSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/baseline-verify.stdout",
+      "originalOperatorSha256": "c84f5931c5fed1e71d599003bf3b00eeddd18ddbd9b8319ff0f3b1af16168fd5",
+      "publicSha256": "8d366a12e9048d24818a30a1cc22ff72e41306f80bf738e018d443c30942fdea",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/counterfactual-inferred-name-instead-of-native-tag.stderr",
+      "originalOperatorSha256": "5b650c02c9b9f44865b33b9ee4da0003728f885d25b6a224c3b1b2ce2581bc05",
+      "publicSha256": "7fe7f4f2170c9b65e0f32af3cf932f68a4a3810e50a5bbc5ee7cd3d1b65a6595",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/counterfactual-inferred-name-instead-of-native-tag.stdout",
+      "originalOperatorSha256": "f6f054a8c9e321b4f953518709feaf2fa583d39a0244f6cbaff037a3fef9c6cb",
+      "publicSha256": "7d1959b687bdd94d9db2bb798a4e7c400be8380dc47f5d63e3bcaf0c37878ef5",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/counterfactual-none-to-empty-string.stderr",
+      "originalOperatorSha256": "a0719b9f7007b1af05394d72cd9625f1d449a0a95381a8cc4b0faaa3483bac7d",
+      "publicSha256": "ce0461a19d7112e74b58cdd3c5d082e25edb5dd0d38408a351bd6b52cc58c047",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/counterfactual-none-to-empty-string.stdout",
+      "originalOperatorSha256": "8cabad23475f05df65cb2883ee74bc0bf173e631c702d7bf0649a74ac552ac87",
+      "publicSha256": "eb1d2169380ad7d2d8cfd98ab134e3b526599a6a768f6c66620f7842a6265926",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/counterfactual-omit-false.stderr",
+      "originalOperatorSha256": "cdb324ad5c4e9a373070bb3915263e0dffa82919476aee5d8e1278f13e36b7a9",
+      "publicSha256": "3737f8119ec16530c0775436438e36d81b2769248c00061629ed0010c74f6e19",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/counterfactual-omit-false.stdout",
+      "originalOperatorSha256": "27ca50401830ca166589dcc1843da59e6e9964391efc1bc8fb566dbdd2bb8e69",
+      "publicSha256": "c410540a2fcf71a3a1c8c1ea254acf9e091d52567d6129aab8e583cc483bcc49",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/counterfactual-truncate-uint64.stderr",
+      "originalOperatorSha256": "07bf131ae52df769ef630bf08a091c0a72841ad3d29e2c84e4cd1066ed0ed230",
+      "publicSha256": "9d5bfffd12df194691161fd5a2112c035fe6dd05b3a65e9af6fd86449e0f9e3d",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/counterfactual-truncate-uint64.stdout",
+      "originalOperatorSha256": "1677375d372d0abb781f503d21d4ac4d8b77d9f934f02be17fccc62b150ad5c4",
+      "publicSha256": "a16722d3b3ce2c9c40b92d35fb52100dbf2223203575bc452a8b2026b947b7b3",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/pilot-clippy.stderr",
+      "originalOperatorSha256": "41334c63615eb97d4cdc439c146aa5b792b6a32f4bc44ad7efd4d0e20c4bd418",
+      "publicSha256": "79577e678065892bf8fbaa63b1613c0ec11fd421feab4df20edfc4924ab638c6",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/pilot-clippy.stdout",
+      "originalOperatorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publicSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/pilot-debug.stderr",
+      "originalOperatorSha256": "30506420f9e57fe977ff2fb719b33c1579202717176a514e2dd0ebd4d631df05",
+      "publicSha256": "a2096db3eb8827c7353b88f516b20f5f99e1c9d3e25333ef51354b7812f99aee",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/pilot-debug.stdout",
+      "originalOperatorSha256": "0cead8e60782889fe50e03a21da5389904a7129481731e58354c19853bc1f374",
+      "publicSha256": "c72a5463a9735a84ec68f831ef0cbe4251bd329edcf12d5797ee3ae8b72a0379",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/pilot-format-check.stderr",
+      "originalOperatorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publicSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/pilot-format-check.stdout",
+      "originalOperatorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publicSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/pilot-format.stderr",
+      "originalOperatorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publicSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/pilot-format.stdout",
+      "originalOperatorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publicSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/pilot-lock.stderr",
+      "originalOperatorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publicSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/pilot-lock.stdout",
+      "originalOperatorSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publicSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/pilot-release.stderr",
+      "originalOperatorSha256": "29572836bde8f989460d4e0c451a72a3651c792078eef9ed2bdc709b9d51bde6",
+      "publicSha256": "ebb8590f130066f5b7cde360fd5015d9a8256fd892f4395489b1ad3d9755b0e7",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/pilot-release.stdout",
+      "originalOperatorSha256": "0cead8e60782889fe50e03a21da5389904a7129481731e58354c19853bc1f374",
+      "publicSha256": "c72a5463a9735a84ec68f831ef0cbe4251bd329edcf12d5797ee3ae8b72a0379",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/static-extraction.txt",
+      "originalOperatorSha256": "c750e9b46fe28fc840db1960c526eaba58c296712f60d5e78de28f042769cac7",
+      "publicSha256": "b8fcd5096f1f8009943eb851d68bf0f59cdb3574dc4cd0617ca9545618958c8e",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    },
+    {
+      "path": "results/evidence-controls.txt",
+      "originalOperatorSha256": "202ee5ab55c0edb2e6cbf7f6887ce7fc539a6577c15eb3e2c9dc208216e4e2d6",
+      "publicSha256": "61456d65136532d72f4d3c282d319e6ab1ae100d129c81e99133491b49a1a5be",
+      "normalization": "LF, declared operator path placeholders and terminal empty-line removal only"
+    }
+  ],
+  "toolProfiles": {
+    "python": "3.12.1",
+    "capstone": "5.0.7",
+    "objdump": "2.47",
+    "rust": "1.95.0",
+    "rustTarget": "x86_64-pc-windows-gnullvm",
+    "make": "4.4.1",
+    "rustFlags": "-C link-self-contained=yes",
+    "linker": "rust-lld from the same Rust distribution",
+    "dependencies": "No Rust registry/path dependencies"
+  },
+  "targetExecuted": false,
+  "targetEmulated": false,
+  "gateChanges": false,
+  "compiledRustByteEquivalenceClaimed": false
+}
