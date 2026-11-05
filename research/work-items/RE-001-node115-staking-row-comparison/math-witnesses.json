@@ -1,0 +1,19 @@
+{
+  "scope": "Value-only arithmetic consequences of checked sums and strict unsigned128bit comparison; no captured execution, instruction evaluation or lookup reconstruction",
+  "cases": [
+    {"id":"empty","B":[],"S":[],"expected":false,"reason":"0 is not less than0"},
+    {"id":"all-queries-miss","B":[],"S":["9","4"],"expected":false,"reason":"26 is not less than0"},
+    {"id":"hit-and-missing-key-ignored","B":["9"],"S":["9","4"],"expected":true,"reason":"26 <27"},
+    {"id":"minority-hit","B":["4"],"S":["9","4"],"expected":false,"reason":"26 is not less than12"},
+    {"id":"strict-equality","B":["2"],"S":["2","1"],"expected":false,"reason":"6 equals6"},
+    {"id":"strictly-above","B":["3"],"S":["3","1"],"expected":true,"reason":"8 <9"},
+    {"id":"below-threshold","B":["2"],"S":["2","2"],"expected":false,"reason":"8 is not less than6"},
+    {"id":"maximum-fits-wide-products","B":["18446744073709551615"],"S":["18446744073709551615"],"expected":true,"reason":"Both sums fit;2*M <3*M requires wide products"},
+    {"id":"both-sums-overflow","B":["18446744073709551615","1"],"S":["18446744073709551615","1"],"expected":false,"reason":"Both mathematical sums exceed u64"},
+    {"id":"total-overflow-selected-fits","B":["18446744073709551615"],"S":["18446744073709551615","1"],"expected":false,"reason":"Total carry rejects; saturating both to M would accept"},
+    {"id":"zero-weights","B":["0"],"S":["0","0"],"expected":false,"reason":"Strict zero equality rejects"},
+    {"id":"large-equality","B":["9223372036854775808"],"S":["9223372036854775808","4611686018427387904"],"expected":false,"reason":"2*S equals3*B in128bits"},
+    {"id":"large-one-below-equality","B":["9223372036854775808"],"S":["9223372036854775808","4611686018427387903"],"expected":true,"reason":"2*S is3*B minus2"},
+    {"id":"zero-and-positive-contributions","B":["0","7"],"S":["0","7","3"],"expected":true,"reason":"20 <21"}
+  ]
+}
