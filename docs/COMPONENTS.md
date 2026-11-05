@@ -20,7 +20,7 @@ Time, logging, wallets, collections and shared runtime utilities.
 Private bincode wire codecs and integer encodings.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-four-word-prefix`.
 - Observed diagnostic paths: 0.
 - First task: Recover varint boundaries and encoding mode; compare malformed, truncated and boundary inputs.
 

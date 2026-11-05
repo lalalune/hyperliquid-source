@@ -42,12 +42,26 @@ Reproduce from the repository root after activating the documented Python /
 Capstone / GNU binutils environment:
 
 ```sh
-python3 research/work-items/RE-005-four-word-prefix-115/proof.py --objdump objdump
+python3 research/work-items/RE-005-four-word-prefix-115/proof.py --objdump "$(command -v objdump)"
 python3 -m unittest discover -s tests -p test_four_word_prefix115.py -v
+python3 research/work-items/RE-005-four-word-prefix-115/verify-rust.py --rustc /path/to/rustc --out /fresh/owned/output
 ```
+
+The pre-Rust Git seal is `eb1274be65964c8c7d2642505b50df40db445877`.
+All4,293 frozen rows are distinct `(input, limit, initial_charge)` tuples.
+Four whole FDEs export1,161 bytes/319 instructions; the corpus visits
+1,128 bytes/309 instructions: private150/150 (602B), scalar69/69 (229B),
+slow85/95 (283/316B), constructor5/5 (14B). The unvisited33B are the
+slow reader's u64-success block: it requires remaining>=9 while this actual
+scalar caller selects slow only when remaining<=8. Those instructions are
+exported, not credited as visited. Eleven genuine byte COW changes alter
+outputs; captures rehash unchanged. See `proof.json`, `native-controls.json`
+and `execution-recipe.json` for hashes, bindings and retained initial failures.
 
 Outputs are static-contract qualification, not captured native execution or
 whole-program equivalence. Tool versions, exact build commands, comparison
 counts, retained failures and scope qualifications accompany final receipts.
 Next question: which original schema owns the four fields and how does its
 caller validate the returned prefix and remaining input?
+
+Final results: clean opt0/3 and same-path repeat match all4,293 rows;128 client cases pass;11 compiled mutants all differ and fail the fixture. Seven focused tests, format/Clippy, doctor, verify, catalogue generation/check and actual reproduce pass. See [qualification](VALIDATION.md) for exact commands, the retained initial sample failure, shared catalogue overlay and pending own full-CI limit. No gate is advanced.
