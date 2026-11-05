@@ -5,7 +5,7 @@ helpers stop before invocation. Four observed columns are a qualified domain,
 not a recovered bound on the original context byte or enum.
 """
 from pathlib import Path
-import hashlib,sys
+import hashlib,json,sys
 ROOT=Path(__file__).resolve().parents[3];PACKET=Path(__file__).resolve().parent
 sys.path.insert(0,str(ROOT/'tools'))
 import decimal_scaled_u64 as cpu
@@ -123,6 +123,23 @@ def corpus(im):
  for row in stimuli(im):
   result,trace,count=evaluate(im,row);inputs.append('\t'.join(map(str,row))+'\n');expected.append(result+'\n');seen|=trace;calls+=count
  return ''.join(inputs).encode(),''.join(expected).encode(),seen,calls
+def verify():
+ im=Image()
+ try:
+  proof=json.loads((PACKET/'FREEZE.json').read_text())
+  if hashlib.sha256(im.data).hexdigest()!=SHA:raise ValueError('wrong115target')
+  for owner in proof['owners']:
+   lo,hi=int(owner['start'],16),int(owner['end'],16)
+   if im.view.fde(lo)!=(lo,hi) or hashlib.sha256(im.view.read(lo,hi-lo)).hexdigest()!=owner['sha256']:raise ValueError('owner drift')
+  if im.view.read(TABLE,16).hex()!=proof['index_table']['hex'] or im.view.read(DROP_SLOT,4).hex()!=proof['cleanup_C5']['relative_hex']:raise ValueError('dispatch data drift')
+  for row in proof['observed_rows']:
+   if im.view.read(int(row['va'],16),32).hex()!=row['hex']:raise ValueError('observed columns drift')
+  inputs,expected,seen,calls=corpus(im)
+  if len(set(inputs.splitlines()))!=proof['rows'] or len(expected.splitlines())!=proof['rows']:raise ValueError('denominator drift')
+  if hashlib.sha256(inputs).hexdigest()!=proof['input_sha256'] or hashlib.sha256(expected).hexdigest()!=proof['expected_sha256'] or sorted(seen)!=proof['visited_addresses'] or calls!=proof['actual_cleanup_calls']:raise ValueError('sealed original observations drift')
+  if hashlib.sha256(im.data).hexdigest()!=SHA:raise ValueError('capture changed')
+  return inputs,expected
+ finally:im.close()
 if __name__=='__main__':
  im=Image()
  try:
