@@ -1,0 +1,509 @@
+{
+ "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "calls": [
+  {
+   "kind": "extract helper (FDE 0x63be550..0x63be5be)",
+   "site": "0x63c2fa3",
+   "target": "0x63be550"
+  },
+  {
+   "kind": "pthread_mutex_trylock@plt",
+   "site": "0x63c2fd7",
+   "target": "0x63f17b0"
+  },
+  {
+   "kind": "helper (FDE 0x63d6690..0x63d66ad)",
+   "site": "0x63c3068",
+   "target": "0x63d6690"
+  },
+  {
+   "kind": "pthread_mutex_unlock@plt",
+   "site": "0x63c3086",
+   "target": "0x63f0b70"
+  },
+  {
+   "kind": "init-guard helper (FDE 0x63d7bd0..0x63d7c32)",
+   "site": "0x63c30d0",
+   "target": "0x63d7bd0"
+  },
+  {
+   "kind": "bin_table_init",
+   "site": "0x63c30ed",
+   "target": "0x63d9880"
+  },
+  {
+   "kind": "helper (FDE 0x63d6880..0x63d6cb9)",
+   "site": "0x63c314c",
+   "target": "0x63d6880"
+  },
+  {
+   "kind": "lock-wait helper (#251)",
+   "site": "0x63c3163",
+   "target": "0x63bf680"
+  },
+  {
+   "kind": "lu-miss",
+   "site": "0x63c3319",
+   "target": "0x63d9700"
+  },
+  {
+   "kind": "__stack_chk_fail",
+   "site": "0x63c3323",
+   "target": "0x63f0d70"
+  }
+ ],
+ "census": {
+  "bin_table_init": 1,
+  "bsr": 1,
+  "calls_total": 10,
+  "jumps": 31,
+  "jumps_outside_window": 1,
+  "lock_add": 0,
+  "lock_sub": 0,
+  "lu_miss": 1,
+  "raw_e8": {
+   "tiers": {
+    "1": 17,
+    "10": 1,
+    "2": 12,
+    "4": 8,
+    "5": 1,
+    "6": 2,
+    "8": 1
+   },
+   "total": 108
+  },
+  "rela_dyn": {
+   "relative": 59534,
+   "total": 60723
+  },
+  "rela_plt": 278,
+  "ret": 1,
+  "strict": 230,
+  "tail_jump_exits": 1
+ },
+ "cited_not_claimed": [
+  "bin_table_init body 0x63d9880..0x63d9a64 (#262)",
+  "lu-miss handler 0x63d9700..0x63d987b (#215)",
+  "lock-wait helper 0x63bf680..0x63bf7ee (#251)",
+  "extract helper FDE 0x63be550..0x63be5be",
+  "init-guard helper FDE 0x63d7bd0..0x63d7c32",
+  "helper FDE 0x63d6690..0x63d66ad",
+  "helper FDE 0x63d6880..0x63d6cb9",
+  "tail-jump target FDE 0x63d72b0..0x63d7367",
+  "pthread_mutex_trylock@plt (0x63f17b0) / pthread_mutex_unlock@plt (0x63f0b70)",
+  "prev FDE 0x63c2e80..0x63c2f00, next FDE 0x63c3330..0x63c349b",
+  "0x6511a00, 0x67125f0, 0x6713601, 0x6713620, 0x6713d60, 0x6717690 and 0x67277c0 lie in .bss (NOBITS): runtime-populated objects whose contents are not in the file; only the code use of the addresses is claimed",
+  "node-resolution tables 0x65096c0 and 0x6511780 are NOT read in this FDE (unlike #312); no size table 0x6727a00 is read"
+ ],
+ "exhibits": [
+  {
+   "bin_table_init_sites": [
+    "0x63c30ed"
+   ],
+   "bsr": 1,
+   "bsr_sites": [
+    "0x63c31a1"
+   ],
+   "bytes": 1064,
+   "calls_total": 10,
+   "lock_add": 0,
+   "lock_sub": 0,
+   "lu_miss_sites": [
+    "0x63c3319"
+   ],
+   "name": "bintableinit_caller_1walk_extract_sizeclass_1site",
+   "range": "0x63c2f00..0x63c3328",
+   "ret": 1,
+   "ret_sites": [
+    "0x63c30cf"
+   ],
+   "strict": 230,
+   "tail_jump_exits": [
+    "0x63c3132->0x63d72b0"
+   ]
+  }
+ ],
+ "extract": {
+  "helper_call": "mov %r12,%rdi at 0x63c2fa0; call 0x63be550 at 0x63c2fa3 (FDE 0x63be550..0x63be5be, cited not claimed); helper args rdi = extracted value, rsi = entry r8 (rbx, mov at 0x63c2f91), rdx = entry rdx (r14, mov at 0x63c2f8e)",
+  "mask": "and $0xffffffffffffff80,%r12 at 0x63c2f9c",
+  "note": "unlike #311/#312, the extract here feeds a helper call directly; no inline zero/flag/index output decoding in this FDE",
+  "shl_sar": "shl $0x10,%r12 at 0x63c2f94; sar $0x10,%r12 at 0x63c2f98"
+ },
+ "frame": {
+  "canary": "0x198(%rsp)",
+  "canary_check": "0x63c30a7 (ret path) / 0x63c3100 (tail-jump path)",
+  "canary_fail": "0x63c3323",
+  "canary_store": "0x63c2f2d",
+  "pushes": [
+   "r15",
+   "r14",
+   "r13",
+   "r12",
+   "rbp",
+   "rbx"
+  ],
+  "sub_rsp": "0x1a8"
+ },
+ "init_guard": {
+  "flag": "cmpb $0x0,0x67125f0 at 0x63c2f37 (.bss); jne 0x63c30d0 at 0x63c2f3e",
+  "helper": "call 0x63d7bd0 at 0x63c30d0 (FDE 0x63d7bd0..0x63d7c32, cited not claimed); lea 0x1b0(%rbp),%r15 at 0x63c30d5; test %rbp,%rbp at 0x63c30dc; jne 0x63c2f54 at 0x63c30df (rejoin walk); fall-through to the bin_table_init block when rbp is null",
+  "note": "first 1-raw caller with an init guard"
+ },
+ "lu_miss_sites": [
+  {
+   "block": "0x63c3300",
+   "r8d": 1,
+   "r9d": 0,
+   "rcx": "entry rsi (key) \u2014 r12 holds entry rsi on the miss path: the walk's r12 writes (0x63c2f79/0x63c2f7d/0x63c2f84/0x63c2f8b) run only on the top-match path, the extract's r12 writes (0x63c2f94/0x63c2f98/0x63c2f9c) run only after the second-level load, and the slot-0 hit block's r12 writes (0x63c3202/0x63c3209) rejoin at 0x63c2f8b and never reach the miss block; the epilogue pops restore r12",
+   "rdi": "rbp context",
+   "rdx": "r15 scan table",
+   "rejoin": "jmp 0x63c2f8b",
+   "rsi": "0x6511a00 (.bss address, NOT entry rsi)",
+   "site": "0x63c3319"
+  }
+ ],
+ "next_fde": {
+  "padding": 8,
+  "padding_bytes": "cc",
+  "range": "0x63c3330..0x63c349b"
+ },
+ "next_question": {
+  "note": "1-raw tier EXHAUSTED: 17 candidates = 16 built (#298-#313) + 1 excluded (#214 overlap). Multi-raw tiers re-surveyed by this packet (own .eh_frame parse, 135,313 FDEs; raw-e8 census 108; prior-exhibit overlap check over 68,961 prior range entries): all 25 multi-raw FDEs already claimed \u2014 2-raw 12 (10 exact-claimed by packets #288-#297, 2 partial-overlap with #260/#258 claimed sub-ranges), 4-raw 8 (exact-claimed by #283-#287 and #289), 5-raw 1 (#279), 6-raw 2 (#277/#278), 8-raw 1 (#276), 10-raw 1 (#275). No verified next candidate exists in the bin_table_init caller survey; the next packet needs a new frontier, not yet surveyed.",
+  "packet": 314,
+  "window": null
+ },
+ "prev_fde": {
+  "gap": 0,
+  "gap_bytes": "cc",
+  "range": "0x63c2e80..0x63c2f00"
+ },
+ "return_value": {
+  "eax": 0,
+  "eax_writes": [
+   "0x63c2f35",
+   "0x63c2f65"
+  ],
+  "note": "entry xor %eax,%eax; only other %eax write is and $0xf0,%eax (top index); test %eax,%eax at 0x63c2fdc reads trylock result; both epilogues load the canary into rax and subtract %fs:0x28, so rax is 0 on the non-fault path; no null-flag epilogue",
+  "ret": "0x63c30cf",
+  "tail_jump_exit": "0x63c3132 -> 0x63d72b0 (FDE 0x63d72b0..0x63d7367; rdi=rbp context, rsi=size class, rdx=r14)"
+ },
+ "scan": {
+  "key": "rcx (entry rsi masked: key & 0xffffffffc0000000)",
+  "miss_fallthrough": "0x63c3300",
+  "reversed_operand": [
+   "0x63c32c2",
+   "0x63c32d5"
+  ],
+  "shared_mtf_block": "0x63c323f",
+  "slot0_hit_block": "0x63c31e9..0x63c3218",
+  "slot7_memory_direct": "0x63c32e2",
+  "slots": [
+   "0x63c31e0",
+   "0x63c3236",
+   "0x63c3295",
+   "0x63c32a4",
+   "0x63c32b3",
+   "0x63c32c2",
+   "0x63c32d5",
+   "0x63c32e2"
+  ],
+  "table": "r15 + 0x100"
+ },
+ "sites": {
+  "bin_table_init": [
+   {
+    "argument": "lea 0x10(%rsp) via r15 (mov %r15,%rdi; no save/restore)",
+    "block": "0x63c30e5",
+    "branch": "test %rbp,%rbp; je from 0x63c2f4e (null context); fall-through from the init-guard path (0x63c30df) when rbp is null after the init helper",
+    "rejoin": "jmp 0x63c2f54",
+    "saves": "none",
+    "site": "0x63c30ed"
+   }
+  ]
+ },
+ "size_class": {
+  "bsr_path": "r13 > 0x1000 and r13 <= 0x7000000000000000 (movabs threshold at 0x63c3178, cmp at 0x63c3182, jb 0x63c3220); lea -0x1(%r13,%r13,1),%rax at 0x63c318b; bsr %rax,%r8 at 0x63c31a1; class computed from bsr + masks, mov %r10d,0x8(%rsp) at 0x63c31cc; jmp 0x63c2fcd",
+  "consumed": "mov 0x8(%rsp),%r8d at 0x63c2ff8 (vector-index computation); mov 0x8(%rsp),%esi at 0x63c3117 (tail-jump argument)",
+  "huge_path": "r13 > 0x7000000000000000: movl $0xe8,0x8(%rsp) at 0x63c3220; jmp 0x63c2fcd",
+  "input": "entry rcx (kept in r13)",
+  "small_path": "cmp $0x1000,%r13 at 0x63c2fa8; ja 0x63c3178; byte table 0x67277c0 (lea at 0x63c2fb5), index (r13+7)>>3 (lea 0x7(%r13),%r11; shr $0x3,%r11), movzbl (%r15,%r11,1),%edi at 0x63c2fc4, mov %edi,0x8(%rsp) at 0x63c2fc9"
+ },
+ "survey": {
+  "candidates": [
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363095"
+    ],
+    "end": "0x6363258",
+    "miss": 1,
+    "ret": 0,
+    "size": 712,
+    "start": "0x6362f90",
+    "status": "BUILT by packet #298"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63633f8"
+    ],
+    "end": "0x6363552",
+    "miss": 1,
+    "ret": 1,
+    "size": 754,
+    "start": "0x6363260",
+    "status": "BUILT by packet #299"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363b30"
+    ],
+    "end": "0x6363d50",
+    "miss": 1,
+    "ret": 1,
+    "size": 1376,
+    "start": "0x63637f0",
+    "status": "BUILT by packet #300"
+   },
+   {
+    "bsr": 4,
+    "bti": 1,
+    "bti_sites": [
+     "0x6364009"
+    ],
+    "end": "0x6364270",
+    "miss": 1,
+    "ret": 1,
+    "size": 1312,
+    "start": "0x6363d50",
+    "status": "BUILT by packet #301"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6387629"
+    ],
+    "end": "0x6387878",
+    "miss": 1,
+    "ret": 1,
+    "size": 1112,
+    "start": "0x6387420",
+    "status": "BUILT by packet #302"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63adce6"
+    ],
+    "end": "0x63adf34",
+    "miss": 2,
+    "ret": 1,
+    "size": 996,
+    "start": "0x63adb50",
+    "status": "BUILT by packet #303"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae114"
+    ],
+    "end": "0x63ae252",
+    "miss": 1,
+    "ret": 1,
+    "size": 786,
+    "start": "0x63adf40",
+    "status": "EXCLUDED as a whole FDE: overlaps packet #214 (lu nextnode) claimed sub-ranges 0x63adf71..0x63adf9d, 0x63ae014..0x63ae040, 0x63ae088..0x63ae0cf, 0x63adfed..0x63ae014 in its records"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae45d"
+    ],
+    "end": "0x63ae6d1",
+    "miss": 2,
+    "ret": 1,
+    "size": 1057,
+    "start": "0x63ae2b0",
+    "status": "BUILT by packet #304"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae83d"
+    ],
+    "end": "0x63ae974",
+    "miss": 1,
+    "ret": 1,
+    "size": 660,
+    "start": "0x63ae6e0",
+    "status": "BUILT by packet #305"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aea96"
+    ],
+    "end": "0x63aed39",
+    "miss": 2,
+    "ret": 1,
+    "size": 953,
+    "start": "0x63ae980",
+    "status": "BUILT by packet #306"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aeea1"
+    ],
+    "end": "0x63aefdb",
+    "miss": 1,
+    "ret": 1,
+    "size": 667,
+    "start": "0x63aed40",
+    "status": "BUILT by packet #307; miss corrected 2 -> 1 by packet #306 (objdump census: one lu-miss call 0x63aefcd), re-verified by packet #307"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af198"
+    ],
+    "end": "0x63af45f",
+    "miss": 2,
+    "ret": 1,
+    "size": 1151,
+    "start": "0x63aefe0",
+    "status": "BUILT by packet #308; no correction - #307's pointer (1151B, 1 bti, 2 miss, 1 ret, 0 bsr) verified correct by packet #308's own census"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af6c8"
+    ],
+    "end": "0x63afba4",
+    "miss": 4,
+    "ret": 1,
+    "size": 1860,
+    "start": "0x63af460",
+    "status": "BUILT by packet #309; no correction - #308's pointer (1860B, 1 bti, 4 miss, 1 ret, 0 bsr) verified correct by packet #309's own census"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63afe1e"
+    ],
+    "end": "0x63b0324",
+    "miss": 4,
+    "ret": 1,
+    "size": 1732,
+    "start": "0x63afc60",
+    "status": "BUILT by packet #310 (PR #3214); no correction - #309's pointer (1732B, 1 bti, 4 miss, 1 ret, 0 bsr) verified correct by packet #310's own census"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc5e5"
+    ],
+    "end": "0x63bc728",
+    "miss": 1,
+    "ret": 1,
+    "size": 664,
+    "start": "0x63bc490",
+    "status": "BUILT by packet #311 (PR #3224); no correction - #310's pointer (664B, 1 bti, 1 miss, 1 ret, 0 bsr) verified correct by packet #311's own census"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc9ec"
+    ],
+    "end": "0x63bcb12",
+    "miss": 1,
+    "ret": 1,
+    "size": 994,
+    "start": "0x63bc730",
+    "status": "BUILT by packet #312 (PR #3234); no correction - #311's pointer (994B, 1 bti, 1 miss, 1 ret, 0 bsr) verified correct by packet #312's own census"
+   },
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x63c30ed"
+    ],
+    "end": "0x63c3328",
+    "miss": 1,
+    "ret": 1,
+    "size": 1064,
+    "start": "0x63c2f00",
+    "status": "BUILT by this packet (#313); no correction - #312's pointer (1064B, 1 bti, 1 miss, 1 ret, bsr 1) verified correct by this packet's own census"
+   }
+  ],
+  "correction_carried_forward": "the #298-#305 surveys listed packet #307's window 0x63aed40..0x63aefdb with 2 lu-miss sites; packet #306 proved by targeted objdump census it has 1 (0x63aefcd), re-verified by packets #307, #308 and this packet; the error dates to #298's original survey",
+  "count": 17,
+  "exclusions_reverified": [
+   "0x63ed090..0x63ed862 (#260)",
+   "0x63ef8e0..0x63efba2 (#258)"
+  ],
+  "fall_through_reverified": {
+   "0x63bc730..0x63bcb12": "994B, 212 strict, 6 calls, 1 bti 0x63bc9ec, 1 miss, 1 ret 0x63bc83e, 0 bsr, 27 jumps, 1 outside-window tail jump (0x63bc93b -> 0x63f0b70 pthread_mutex_unlock)",
+   "0x63c2f00..0x63c3328": "1064B, 230 strict, 10 calls, 1 bti 0x63c30ed, 1 miss, 1 ret 0x63c30cf, bsr 1 at 0x63c31a1, 31 jumps, 1 outside-window tail jump (0x63c3132 -> 0x63d72b0)"
+  },
+  "method": "own .eh_frame parse (135,313 FDEs, sorted before bisect) + raw-e8 census + objdump census of every candidate window (strict/call/bti/miss/ret/bsr/jumps); the range-only collector accepts start/end as decimal integers and hex strings (plain int(x, 16)), every range-bearing exhibit form, and asserts 0 skipped records; scan-scope descriptors, enclosing-fde annotations, census/cited-only subtrees, next-caller pointers, and cfg edges are never collected",
+  "multi_raw_tiers": {
+   "10_raw": "1 FDE exact-claimed by #275 (0x63cba10)",
+   "2_raw": "12 FDEs: 10 exact-claimed by prior 2-site caller packets #288-#297 (0x6349780, 0x6361320, 0x636b940, 0x63c89c0, 0x63cd910, 0x63d4171, 0x63d4289, 0x63d4497, 0x63d61a0, 0x63ed8b0); 0x63ed090..0x63ed862 overlaps #260's claimed sub-range 0x63ed090..0x63ed167; 0x63ef8e0..0x63efba2 overlaps #258's claimed sub-ranges 0x63ef8e0..0x63ef92e and 0x63efa50..0x63efa9e",
+   "4_raw": "8 FDEs, all exact-claimed by prior 4-site caller packets #283-#287 and #289 (0x6350210, 0x6365660, 0x636bd90, 0x63c8d60, 0x63cb150, 0x63d3080, 0x63d5940, 0x63ec900)",
+   "5_raw": "1 FDE exact-claimed by #279 (0x63bd8c0)",
+   "6_raw": "2 FDEs exact-claimed by #277/#278 (0x63ce8c0, 0x63d4bbe)",
+   "8_raw": "1 FDE exact-claimed by #276 (0x63c9c80)",
+   "conclusion": "the bin_table_init caller survey is complete: 42 FDEs hold all 108 raw sites (1-raw 17, 2-raw 12, 4-raw 8, 5-raw 1, 6-raw 2, 8-raw 1, 10-raw 1); 16 built in the 1-raw tier (#298-#313), 1 excluded (#214 overlap), 25 multi-raw FDEs claimed by packets #275-#297",
+   "method": "own .eh_frame parse (135,313 FDEs, sorted before bisect) + raw-e8 census (108 total) + prior-exhibit overlap check over 68,961 prior range entries (merged tree plus all prior hl-wt-calls* worktree records, same range-only collector as the verifier, with claiming file named per overlap)",
+   "result": "all 25 multi-raw FDEs already claimed; no surviving candidate"
+  },
+  "tiers": {
+   "1": 17,
+   "10": 1,
+   "2": 12,
+   "4": 8,
+   "5": 1,
+   "6": 2,
+   "8": 1
+  },
+  "total_raw": 108
+ },
+ "trylock": {
+  "call": "pthread_mutex_trylock@plt at 0x63c2fd7 (rdi = *(*rbx)+0x40)",
+  "exit_flag": "flag byte 0x6717690 (lea at 0x63c3099, cmpb at 0x63c30a0); zero -> ret at 0x63c30cf; nonzero -> tail jump 0x63c3132 -> 0x63d72b0",
+  "failure": "lock-wait helper 0x63bf680 at 0x63c3163 (rdi = mutex node); movb $1,0x68(%r15); jmp 0x63c2fe4 (retry locked section)",
+  "post_unlock": "movzbl 0xf(%rsp),%esi; nonzero calls helper 0x63d6880 (rdi=rbp, rsi=r12, rdx=r14, rcx=r13) at 0x63c314c, then rejoins the exit-flag check at 0x63c3099",
+  "success": "addq $1,0x38(%r15); owner bookkeeping at 0x30(%r15)/0x28(%r15); size-class vector update (tables 0x6713620/0x6713d60, paddq into *rbx 0x20..0x5f, flag byte 0x6713601 gates the 0x40/0x50 update); helper 0x63d6690 (rdi=rbp context, rsi=rbx); result byte to 0xf(%rsp); unlock call 0x63f0b70",
+  "unlock_exit": "call pthread_mutex_unlock@plt (0x63f0b70) at 0x63c3086 inside the window (not a tail jump); the tail jump at 0x63c3132 is a second exit to FDE 0x63d72b0..0x63d7367"
+ },
+ "walk": {
+  "key": "entry rsi (kept in r12)",
+  "mismatch": "jne 0x63c31e0 (scan)",
+  "second_level_store": "none - second-level pointer is loaded into r12 at 0x63c2f8b and transformed, not stored",
+  "table": "r15 (lea 0x1b0(%rbp),%r15 at 0x63c2f44; stack temp 0x10(%rsp) on null path)",
+  "top_compare": "cmp %rdi,%rcx at 0x63c2f70"
+ },
+ "window": {
+  "bytes": 1064,
+  "range": "0x63c2f00..0x63c3328",
+  "strict": 230
+ }
+}
