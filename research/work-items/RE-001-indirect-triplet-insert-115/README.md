@@ -43,3 +43,35 @@ admission/state transition, compilerrecipe, Linux execution, target-byte match
 or integrated node. No captured ELF/Unicorn/live service/chain/signing. New
 source MIT, no unlicensed code. Next: bind caller prefix construction and record
 types before composing this local transformation into consensus state.
+
+## Independent source and actual replay
+
+Pre-Rustseal5f27e1e2ebd588189c153c460124c292e5c2e0f8 has no newRust.
+Native10988rows include4392actual entryguardUD2 observations;236B73starts
+visited,11outputCOW+3negative PASS87.187s. Sevenpretests PASS5.975s.
+Independent safe no_std source uses adjacent full-record swaps and preserves
+mixed-sign order and equal-key identities. Its Guard is an own adapter for the
+observed guardfrontier, not native Rust error handling or panic recovery.
+
+```sh
+python3 research/work-items/RE-001-indirect-triplet-insert-115/verify-rust.py \
+  --rustc /path/to/rustc --out /fresh/owned/output
+```
+
+Original opt0/3/repeat match all10988 outputs; same-path opt3 rlib bytes repeat.
+The221case clientfixture selects only unchanged sealed rows. Twelve compiled
+wrong sources emit complete streams and fail ordinary assertions101. The first
+CPU-limited run hit its480s wallcap (NOT a full pass); continuation reused only
+hash-verified completed subprocess stdout/stderr/exit receipts and executed all
+unfinished commands in87.391s. No native-evaluator result is cached/substituted.
+Continuation metadata and archived historical driver/logs preserve this split;
+normal reproduction uses the fresh replay command above, not historical cache.
+Source/fixture/inputs stayed unchanged through continuation. The original opt3
+repeat check completed in the uninterrupted prefix, not newly proved by reuse.
+
+Exact fullreceipts/15streams/152stdout-stderr logs and fixture are losslessly
+gzip archived; only owned path prefixes in command output are projected.
+The published replay only adds SHA-checked fixture rehydration to the same
+original build/compare functions; temporary historical continuation adds a
+receipt-cache guard around run, documented separately. See VALIDATION.md for
+all command scopes and limitations. No acceptance gate advances.
