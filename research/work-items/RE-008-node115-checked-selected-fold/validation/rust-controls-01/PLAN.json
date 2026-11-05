@@ -1,0 +1,60 @@
+{
+  "scope": "Only reconstructed owned Rust source copies, fixed literal tests. No native target execution or instruction evaluation. Compiler failures do not count as controls.",
+  "source_sha256": "43195ed0e6a44b34077729c1d80f35bf6dc3f22abb9ae67d428cd2172e1c1647",
+  "mutants": [
+    {
+      "id": "seam-last",
+      "old": "Ordering::Equal => return Some(self.rows[0].weight),",
+      "new": "Ordering::Equal => return Self::segment_weight(&self.rows[..prefix], key),",
+      "test": "frozen_f02"
+    },
+    {
+      "id": "segment-first",
+      "old": "let end = segment.partition_point(|row| row.key <= *key);\n        let candidate = end.checked_sub(1).map(|i| &segment[i])?;",
+      "new": "let candidate = segment.iter().find(|row| row.key == *key)?;",
+      "test": "frozen_f01"
+    },
+    {
+      "id": "tree-last",
+      "old": "return Some(entry.weight);",
+      "new": "return node.entries.iter().rev().find(|entry| entry.key == *key).map(|entry| entry.weight);",
+      "test": "frozen_t02"
+    },
+    {
+      "id": "carry-saturates",
+      "old": "sum = next;",
+      "new": "sum = if carry { u64::MAX } else { next };",
+      "test": "frozen_a06"
+    },
+    {
+      "id": "carry-ignored",
+      "old": "if carry {",
+      "new": "if false && carry {",
+      "test": "frozen_a05"
+    },
+    {
+      "id": "carry-prefetch",
+      "old": "if carry {",
+      "new": "if carry {\n                let _ = keys.next_key();",
+      "test": "frozen_a05"
+    },
+    {
+      "id": "wrong-child",
+      "old": "node.children()[pos.index + 1]",
+      "new": "node.children()[pos.index]",
+      "test": "frozen_a05"
+    },
+    {
+      "id": "exhaustion-clears-last",
+      "old": "if self.remaining == 0 {\n            return None;",
+      "new": "if self.remaining == 0 {\n            self.last = None;\n            return None;",
+      "test": "frozen_a05"
+    },
+    {
+      "id": "truncated-key",
+      "old": "segment.partition_point(|row| row.key <= *key)",
+      "new": "segment.partition_point(|row| row.key[..19] <= key[..19])",
+      "test": "frozen_u02"
+    }
+  ]
+}
