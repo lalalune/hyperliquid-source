@@ -41,3 +41,28 @@ tracking, target-byte equivalence or whole-component gate is claimed. All92
 gates and byte registrations unchanged; imports/tools/oldpackets/captures
 preserved. New source MIT, no unlicensed code. Next: bind construction and
 invariants of these descriptors at actual callers before integrated use.
+
+## Independent implementation and replay
+
+Pre-Rustseal828d23988090abb80c653115d496c727cadf31a6 contains no newRust.
+Native8930rows/572B181all visited and14outputCOW+4negative PASS47.886s;
+seven focused tests PASS5.729s. One independently authored safe no_std source
+uses logical sorted keys/capacity/rawhead and an upper-bound search per selected
+span, preserving seam equality and exact status/index coordinates. It accepts
+only the finite qualified geometry(capacity<=32); `None` is an own refusal,
+not recovered native malformed-input behavior or ABI.
+
+```sh
+python3 research/work-items/RE-001-wrapped-u64-search-115/verify-rust.py \
+  --rustc /path/to/rustc --out /fresh/owned/output
+```
+
+Rust opt0/3/repeat match all8930 observations; same-path opt3 rlib bytes repeat.
+The119sealed clientcases and12 separately compiled wrong sources pass their
+expected controls: complete output streams, changed values and ordinary failed
+assertions101 for each wrong source. Build/control pipeline172.845s PASS.
+No crash is accepted as a control. Exacttested fixture/fullreceipts/15streams/
+152commandlogs are losslessly gzip archived; only owned local path prefixes
+in command output are projected. The fixture is SHA-checked/decompressed at
+its original packet path before builds; actual build/compare ASTs unchanged.
+See VALIDATION.md for commands/results and all qualifications. No gate advanced.
