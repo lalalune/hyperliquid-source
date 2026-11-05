@@ -1,0 +1,471 @@
+{
+ "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "calls": [
+  {
+   "note": "refcount-release helper",
+   "site": "0x6363f83",
+   "target": "0x635f340"
+  },
+  {
+   "note": "bin_table_init",
+   "site": "0x6364009",
+   "target": "0x63d9880"
+  },
+  {
+   "note": "helper, large-size arm",
+   "site": "0x63640c1",
+   "target": "0x63bd2e0"
+  },
+  {
+   "note": "helper, context-release (ordinary call here; was #300 tail-jump exit)",
+   "site": "0x63640e1",
+   "target": "0x6360ed0"
+  },
+  {
+   "note": "lu-miss handler",
+   "site": "0x636425d",
+   "target": "0x63d9700"
+  },
+  {
+   "note": "__stack_chk_fail",
+   "site": "0x636426b",
+   "target": "0x63f0d70"
+  }
+ ],
+ "census": {
+  "bin_table_init": 1,
+  "bsr": 4,
+  "calls_total": 6,
+  "jumps": 43,
+  "jumps_outside_window": 0,
+  "lock_add": 0,
+  "lock_sub": 0,
+  "lu_miss": 1,
+  "raw_e8": {
+   "tiers": {
+    "1": 17,
+    "10": 1,
+    "2": 12,
+    "4": 8,
+    "5": 1,
+    "6": 2,
+    "8": 1
+   },
+   "total": 108
+  },
+  "rela_dyn": {
+   "relative": 59534,
+   "total": 60723
+  },
+  "rela_plt": 278,
+  "ret": 1,
+  "strict": 289
+ },
+ "cited_not_claimed": [
+  "bin_table_init body 0x63d9880..0x63d9a64 (#262)",
+  "lu-miss handler 0x63d9700..0x63d987b (#215)",
+  "helpers 0x635f340, 0x63bd2e0, 0x6360ed0",
+  "tables 0x67277c0, 0x6727a00, 0x65096c0, 0x6511a00",
+  "prev FDE 0x63637f0..0x6363d50 (#300), next FDE 0x6364270..0x6364280"
+ ],
+ "exhibits": [
+  {
+   "bin_table_init_sites": [
+    "0x6364009"
+   ],
+   "bsr": 4,
+   "bsr_sites": [
+    "0x6364042",
+    "0x6364080",
+    "0x636410d",
+    "0x6364150"
+   ],
+   "bytes": 1312,
+   "calls_total": 6,
+   "lock_add": 0,
+   "lock_sub": 0,
+   "lu_miss_sites": [
+    "0x636425d"
+   ],
+   "name": "bintableinit_caller_4bsr_sizeclass_1site",
+   "range": "0x6363d50..0x6364270",
+   "ret": 1,
+   "ret_sites": [
+    "0x6363ef7"
+   ],
+   "strict": 289,
+   "tail_jump_exits": []
+  }
+ ],
+ "frame": {
+  "canary": "0x198(%rsp)",
+  "endbr64": true,
+  "pushes": [
+   "r15",
+   "r14",
+   "r13",
+   "r12",
+   "rbp",
+   "rbx"
+  ],
+  "sub_rsp": "0x1a8"
+ },
+ "lu_miss_sites": [
+  {
+   "r8": 1,
+   "r9": 0,
+   "rcx": "rbp key",
+   "rdi": "r13 context",
+   "rdx": "r11 scan table",
+   "rejoin": "mov (%rsp),%r10d; jmp 0x6363dd8",
+   "rsi": "lea 0x6511a00",
+   "site": "0x636425d",
+   "stack_arg": "r10d at (%rsp)"
+  }
+ ],
+ "next_fde": {
+  "padding": 0,
+  "range": "0x6364270..0x6364280"
+ },
+ "next_question": {
+  "bin_table_init": 1,
+  "bsr": 0,
+  "bytes": 1112,
+  "fall_through": [
+   "0x63adb50..0x63adf34"
+  ],
+  "lu_miss": 1,
+  "packet": 302,
+  "ret": 1,
+  "window": "0x6387420..0x6387878"
+ },
+ "prev_fde": {
+  "gap": 0,
+  "gap_bytes": "none (adjacent)",
+  "range": "0x63637f0..0x6363d50"
+ },
+ "refcount": {
+  "decrement": "subl $0x1,0x98(%r13) at 0x6363eb0",
+  "helper": "0x635f340 at 0x6363f83 (rdi=0x98(%r13), rsi=0x70(%r13)); nonzero -> 0x63640d3 call 0x6360ed0 (rdi=context, rsi=r11, rcx=0, rdx=0)"
+ },
+ "return_value": {
+  "eax": "0 on plain resolved path (xor at 0x6363ebe); 1 on overflow arm 0x6363fe0, small-size arm 0x6363f66, and size-mismatch arm (setb at 0x6363e7f)",
+  "out": "resolved node pointer written to *r15 (0x1e0(%rsp))"
+ },
+ "scan": {
+  "base": "table+0x100",
+  "exhaustion": "0x6364240",
+  "move_to_front": "0x636417f",
+  "reversed_operand": [
+   "0x6364215"
+  ],
+  "slot_compares": [
+   "0x6363fa0",
+   "0x6364176",
+   "0x63641d5",
+   "0x63641e4",
+   "0x63641f3",
+   "0x6364202",
+   "0x6364215",
+   "0x6364222"
+  ],
+  "slots": 8,
+  "table": "r11 context+0x1b0"
+ },
+ "sites": [
+  {
+   "argument": "lea 0x10(%rsp) in rsi, mov %rsi,%rdi",
+   "block": "0x6363ff8",
+   "branch": "test %rdi,%rdi; je from 0x6363d9c",
+   "rejoin": "jmp 0x6363da2",
+   "restore": "r11 from (%rsp), r10d from 0xc(%rsp) after call",
+   "save": "r9d to 0xc(%rsp), rsi to (%rsp) before call",
+   "site": "0x6364009"
+  }
+ ],
+ "size_class": {
+  "bsr_blocks": [
+   {
+    "block": "0x6364070",
+    "note": "rounded size for r12, rejoin 0x6363e27",
+    "operand": "r12",
+    "site": "0x6364080"
+   },
+   {
+    "block": "0x6364020",
+    "note": "rounded size for rbx, overflow arm 0x63641bc, rejoin 0x6363e66",
+    "operand": "rbx",
+    "site": "0x6364042"
+   },
+   {
+    "block": "0x63640f8",
+    "note": "size-class index for r14, rejoin 0x6363f42",
+    "operand": "r14",
+    "site": "0x636410d"
+   },
+   {
+    "block": "0x6364140",
+    "note": "size-class index for rbx, rejoin 0x6363f21",
+    "operand": "rbx",
+    "site": "0x6364150"
+   }
+  ],
+  "compare_arm": "0x6363f00: size classes of rbx vs r14 compared; mismatch falls to 0x6363e7c flag test",
+  "gate": "cmp $0x1000,%r12 at 0x6363dfa",
+  "size_table": "0x6727a00 (read in this FDE, unlike #298/#299)",
+  "threshold_table": "0x67277c0"
+ },
+ "survey": {
+  "candidates": [
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363095"
+    ],
+    "end": "0x6363258",
+    "miss": 1,
+    "ret": 0,
+    "size": 712,
+    "start": "0x6362f90",
+    "status": "BUILT by packet #298"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63633f8"
+    ],
+    "end": "0x6363552",
+    "miss": 1,
+    "ret": 1,
+    "size": 754,
+    "start": "0x6363260",
+    "status": "BUILT by packet #299"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363b30"
+    ],
+    "end": "0x6363d50",
+    "miss": 1,
+    "ret": 1,
+    "size": 1376,
+    "start": "0x63637f0",
+    "status": "BUILT by packet #300"
+   },
+   {
+    "bsr": 4,
+    "bti": 1,
+    "bti_sites": [
+     "0x6364009"
+    ],
+    "end": "0x6364270",
+    "miss": 1,
+    "ret": 1,
+    "size": 1312,
+    "start": "0x6363d50",
+    "status": "BUILT by this packet (#301)"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6387629"
+    ],
+    "end": "0x6387878",
+    "miss": 1,
+    "ret": 1,
+    "size": 1112,
+    "start": "0x6387420",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63adce6"
+    ],
+    "end": "0x63adf34",
+    "miss": 2,
+    "ret": 1,
+    "size": 996,
+    "start": "0x63adb50",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae114"
+    ],
+    "end": "0x63ae252",
+    "miss": 1,
+    "ret": 1,
+    "size": 786,
+    "start": "0x63adf40",
+    "status": "EXCLUDED as a whole FDE: overlaps packet #214 (lu nextnode) claimed sub-ranges 0x63adf71..0x63adf9d, 0x63ae014..0x63ae040, 0x63ae088..0x63ae0cf, 0x63adfed..0x63ae014 in its records"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae45d"
+    ],
+    "end": "0x63ae6d1",
+    "miss": 2,
+    "ret": 1,
+    "size": 1057,
+    "start": "0x63ae2b0",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae83d"
+    ],
+    "end": "0x63ae974",
+    "miss": 1,
+    "ret": 1,
+    "size": 660,
+    "start": "0x63ae6e0",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aea96"
+    ],
+    "end": "0x63aed39",
+    "miss": 2,
+    "ret": 1,
+    "size": 953,
+    "start": "0x63ae980",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aeea1"
+    ],
+    "end": "0x63aefdb",
+    "miss": 2,
+    "ret": 1,
+    "size": 667,
+    "start": "0x63aed40",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af198"
+    ],
+    "end": "0x63af45f",
+    "miss": 2,
+    "ret": 1,
+    "size": 1151,
+    "start": "0x63aefe0",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af6c8"
+    ],
+    "end": "0x63afba4",
+    "miss": 4,
+    "ret": 1,
+    "size": 1860,
+    "start": "0x63af460",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63afe1e"
+    ],
+    "end": "0x63b0324",
+    "miss": 4,
+    "ret": 1,
+    "size": 1732,
+    "start": "0x63afc60",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc5e5"
+    ],
+    "end": "0x63bc728",
+    "miss": 1,
+    "ret": 1,
+    "size": 664,
+    "start": "0x63bc490",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc9ec"
+    ],
+    "end": "0x63bcb12",
+    "miss": 1,
+    "ret": 1,
+    "size": 994,
+    "start": "0x63bc730",
+    "status": "survives"
+   },
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x63c30ed"
+    ],
+    "end": "0x63c3328",
+    "miss": 1,
+    "ret": 1,
+    "size": 1064,
+    "start": "0x63c2f00",
+    "status": "survives"
+   }
+  ],
+  "count": 17,
+  "exclusions_reverified": [
+   "0x63ed090..0x63ed862 (#260)",
+   "0x63ef8e0..0x63efba2 (#258)"
+  ],
+  "method": "own .eh_frame parse (135,313 FDEs, sorted before bisect) + raw-e8 census + objdump site count per FDE + exhibits-scoped range-only claim check over merged tree + all prior hl-wt-calls* worktrees",
+  "tiers": {
+   "1": 17,
+   "10": 1,
+   "2": 12,
+   "4": 8,
+   "5": 1,
+   "6": 2,
+   "8": 1
+  },
+  "total_raw": 108
+ },
+ "walk": {
+  "field_update": "second-level value shl/sar $0x10, mask $0xffffffffffffff80, node value 0x0(%rbp) resolved via 0x65096c0[(value&0xfff)], result via 0x6727a00[(value>>0x14)&0xff] written to *r15",
+  "node_resolution_table": "0x65096c0 (read in this FDE; 0x6511780 not read, unlike #300)",
+  "second_level": "(key>>0x9)&0x1ffff8 + table + 0x8",
+  "table": "context+0x1b0 (r11)",
+  "top_index": "(key>>0x1a)&0xf0"
+ },
+ "window": {
+  "bytes": 1312,
+  "range": "0x6363d50..0x6364270",
+  "strict": 289
+ }
+}
