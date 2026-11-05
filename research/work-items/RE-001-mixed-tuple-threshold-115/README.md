@@ -48,3 +48,29 @@ Linux execution, original API/ABI, units/financial policy, byte equivalence or
 whole-component acceptance is claimed. All92 gates/byte registrations unchanged;
 oldpackets/imports/captures/tools preserved. New source MIT, no unlicensed code.
 Next: recover caller object provenance and uses of rawAL before assigning policy.
+
+## Independent source and replay
+
+Pre-Rust sealb028a9e5f0353ddfad68146974d2d70a79ee1a1d contains no owned
+Rust source. Native freeze43.631s produced17847 distinct family/input rows
+(5949at each entry); pre-Rust7focused tests passed5.707s. Independent safe
+no_std source uses Rust mixed-sign tuple ordering and saturating_add, instead
+of transplanting the native register/carry sequence. One source API takes the
+raw logical fields; target-specific layouts are independently materialized by
+the native evaluator. The transport family coordinate chooses the original
+measurement, not a different Rust algorithm or invented original ABI.
+
+```sh
+python3 research/work-items/RE-001-mixed-tuple-threshold-115/verify-rust.py \
+  --rustc /path/to/rustc --out /fresh/owned/output
+```
+
+Actual original opt0/3 and repeat match all17847 rows. Same-path opt3 rlib bytes
+repeat. The186case fixture only selects sealed observations. Twelve compiled
+wrong sources emit complete streams and fail ordinary assertions101; crashes
+are not accepted. Build/control run179.501s passed. Large tables/full receipts,
+15comparisonstreams and152stdout/stderr logs are losslessly gzip archived;
+only owned path prefixes in command logs are projected. Exact SHA-checked
+client source is rehydrated before builds, with actual build/compare function
+ASTs unchanged. Source/driver/fixture/input/gold hashes are in rust-results.json.
+See VALIDATION.md for full command results and limits. Nothing advances a gate.
