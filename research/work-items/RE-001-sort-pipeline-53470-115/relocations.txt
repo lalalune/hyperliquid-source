@@ -1,0 +1,16 @@
+No RELATIVE relocation targets any pinned routine (0x5d53470,
+0x5d4c1c0, 0x5d4bce0, 0x5d4a830, 0x5d496d0, 0x5d4ba10, 0x5d4b3f0),
+and no stored qword in the raw binary equals any of them
+(see census.py).
+
+Comparator-identity global 0x64ecfb0: exactly one RELATIVE
+relocation:
+  0000064ecfb0  000000000008 R_X86_64_RELATIVE  5d48410
+so at load time *(0x64ecfb0) = load base + 0x5d48410. The file
+bytes at that address are zero; the value comes only from the
+relocation, verified by readelf -r (see verify.py check 6). Every
+less-than comparison in this packet checks the compared object's
+vtable slot +0xd0 against this value: on a match it takes the
+slot +0x10 tie-break path, on a mismatch it calls the +0xd0 slot
+itself as the comparator. The function at 0x5d48410 is not pinned
+in this packet; only the check and the two arms are.
