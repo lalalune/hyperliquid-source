@@ -116,7 +116,27 @@
    "parse_helper_call": "0x2b6a93a -> 0x2b788e0",
    "record_helper_call": "0x2b6a6a6 -> 0x2b7a290 on +0x168",
    "second_store": "0x2b6a68e (movups of the pair at +0x158)",
-   "sibling_record_call": "0x2b6a65f -> 0x2701770 on +0x150"
+   "sibling_record_call": "0x2b6a65f -> 0x2701770 on +0x150",
+   "tag_conditions": [
+    {
+     "case": "tag_2",
+     "equal": 2,
+     "mask": "0xffffffffffffffff",
+     "operand_bits": 64,
+     "register": "rcx",
+     "site": "0x2b6a7d9",
+     "source_field": "+0"
+    },
+    {
+     "case": "tag_1",
+     "equal": 1,
+     "mask": "0xffffffff",
+     "operand_bits": 32,
+     "register": "ecx",
+     "site": "0x2b6a7e5",
+     "source_field": "+0"
+    }
+   ]
   },
   "twin_b": {
    "also_stored_to": [
@@ -142,7 +162,27 @@
    "parse_helper_call": "0x5a6b78c -> 0x5ab4390",
    "record_helper_call": "0x5a6b4ff -> 0x5ab6ce0 on +0xa48",
    "second_store": "0x5a6b4e7 (movups of the pair at +0xa38)",
-   "sibling_record_call": "0x5a6b4b8 -> 0x5861830 on +0xa30"
+   "sibling_record_call": "0x5a6b4b8 -> 0x5861830 on +0xa30",
+   "tag_conditions": [
+    {
+     "case": "tag_2",
+     "equal": 2,
+     "mask": "0xffffffffffffffff",
+     "operand_bits": 64,
+     "register": "rcx",
+     "site": "0x5a6b62a",
+     "source_field": "+0"
+    },
+    {
+     "case": "tag_1",
+     "equal": 1,
+     "mask": "0xffffffff",
+     "operand_bits": 32,
+     "register": "ecx",
+     "site": "0x5a6b636",
+     "source_field": "+0"
+    }
+   ]
   }
  },
  "first_arm_values": "bulk: an immediate 0 at the limit field while a fresh record (0, 60.0 bit pattern, saved register, copied pair) is built at the field; twin: the record base pointer (first arm) and a 16-byte copy of the sibling pair (second arm)",
@@ -296,5 +336,5 @@
   }
  ],
  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
- "twin_limit_value": "on the compute entry, a saturating formula over a source object: tag 2 -> 120, tag 1 -> 10000, otherwise min((end-start+1)*10000000, 1000000000) with saturation on borrow or overflow; on the copy entry, the current sibling slot value (twin_a +0x178, twin_b +0xa58); the value is stored to the limit field and to two sibling slots"
+ "twin_limit_value": "on the compute entry, a saturating formula over a source object: full source qword == 2 -> 120, then low32(source qword) == 1 -> 10000, otherwise min((end-start+1)*10000000, 1000000000) with saturation on borrow or overflow; on the copy entry, the current sibling slot value (twin_a +0x178, twin_b +0xa58); the value is stored to the limit field and to two sibling slots"
 }

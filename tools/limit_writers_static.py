@@ -47,8 +47,9 @@ exactly two (bulk) or three (twin) arms, in stage order:
   final store, of r13/r15, which is either copied from the
   sibling slot (+0x178 / +0xa58) on one entry or computed on
   the other entry from a source object pointed to by the
-  dispatcher object (+0x78 / +0x958): tag 2 gives 120, tag 1
-  gives 10000, otherwise the saturating value
+  dispatcher object (+0x78 / +0x958): the full source qword
+  equal to 2 gives 120, then its low32 equal to 1 gives
+  10000, otherwise the saturating value
   min((end-start+1)*10000000, 1000000000) over the source's
   +0x8/+0x10 pair (borrow or multiplication overflow also
   saturate to 1000000000); a flag byte records
@@ -390,10 +391,37 @@ def bulk_semantics(data, role):
                          '0x5a68983 -> 0x5a52490']}
 
 
+def tag_conditions(data, role):
+    """Decode the actual ordered CMP widths, without inventing an enum layout."""
+    base, body = body_of(data, role)
+    offsets = {'top_twin_a': (2745, 2757),
+               'top_twin_b': (4074, 4086)}[role]
+    conditions = []
+    for case, offset in zip(('tag_2', 'tag_1'), offsets):
+        p = offset
+        rex = body[p] if 0x40 <= body[p] <= 0x4f else 0
+        p += bool(rex)
+        require(rex in (0, 0x40, 0x48),
+                'compute-tag CMP register extension changed')
+        require(body[p:p + 2] == b'\x83\xf9',
+                'compute-tag CMP register/opcode changed')
+        bits = 64 if rex & 8 else 32
+        mask = (1 << bits) - 1
+        equal = int.from_bytes(body[p + 2:p + 3], 'little',
+                               signed=True) & mask
+        conditions.append({'case': case, 'operand_bits': bits,
+                           'register': 'rcx' if bits == 64 else 'ecx',
+                           'mask': hex(mask), 'equal': equal,
+                           'site': hex(base + offset),
+                           'source_field': '+0'})
+    return conditions
+
+
 def twin_semantics(data, role):
     run_pins(data, role)
     common = {
      'case_values': {'tag_2': 120, 'tag_1': 10000},
+     'tag_conditions': tag_conditions(data, role),
      'formula': 'min((end-start+1)*10000000, 1000000000), '
                 'saturating on borrow or multiplication '
                 'overflow',
@@ -597,8 +625,9 @@ def analyze(data):
       'two sibling slots (bulk_a +0x218/+0x248, bulk_b '
       '+0xc38/+0xc68)',
      'twin_limit_value': 'on the compute entry, a saturating '
-      'formula over a source object: tag 2 -> 120, tag 1 -> '
-      '10000, otherwise min((end-start+1)*10000000, '
+      'formula over a source object: full source qword == 2 '
+      '-> 120, then low32(source qword) == 1 -> 10000, '
+      'otherwise min((end-start+1)*10000000, '
       '1000000000) with saturation on borrow or overflow; '
       'on the copy entry, the current sibling slot value '
       '(twin_a +0x178, twin_b +0xa58); the value is stored '
