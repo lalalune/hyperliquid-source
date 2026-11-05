@@ -1,0 +1,441 @@
+{
+  "authoring_time": "2026-11-05T20:39:35.280679+00:00",
+  "purpose": "Manually derived mathematical boundary witnesses before any decoder source; no captured evaluation or host float conversion.",
+  "policy": "Intel documented CVTSS2SD with masked exceptions, DAZ0 and RNE integer conversions; FTZ0 chosen; final original f32 sign restored.",
+  "rows": [
+    {
+      "id": "F001",
+      "kind": "u64",
+      "input": "0",
+      "expected_binary64_hex": "0000000000000000",
+      "manual_reason": "zero"
+    },
+    {
+      "id": "F002",
+      "kind": "u64",
+      "input": "1",
+      "expected_binary64_hex": "3ff0000000000000",
+      "manual_reason": "one"
+    },
+    {
+      "id": "F003",
+      "kind": "u64",
+      "input": "4294967296",
+      "expected_binary64_hex": "41f0000000000000",
+      "manual_reason": "high limb one low limb zero"
+    },
+    {
+      "id": "F004",
+      "kind": "u64",
+      "input": "4294967297",
+      "expected_binary64_hex": "41f0000000100000",
+      "manual_reason": "exact split limbs"
+    },
+    {
+      "id": "F005",
+      "kind": "u64",
+      "input": "4503599627370496",
+      "expected_binary64_hex": "4330000000000000",
+      "manual_reason": "53-bit threshold predecessor"
+    },
+    {
+      "id": "F006",
+      "kind": "u64",
+      "input": "9007199254740992",
+      "expected_binary64_hex": "4340000000000000",
+      "manual_reason": "largest consecutive-integer boundary"
+    },
+    {
+      "id": "F007",
+      "kind": "u64",
+      "input": "9007199254740993",
+      "expected_binary64_hex": "4340000000000000",
+      "manual_reason": "halfway even lower"
+    },
+    {
+      "id": "F008",
+      "kind": "u64",
+      "input": "9007199254740994",
+      "expected_binary64_hex": "4340000000000001",
+      "manual_reason": "next representable"
+    },
+    {
+      "id": "F009",
+      "kind": "u64",
+      "input": "9007199254740995",
+      "expected_binary64_hex": "4340000000000002",
+      "manual_reason": "halfway even upper"
+    },
+    {
+      "id": "F010",
+      "kind": "u64",
+      "input": "9007199254740996",
+      "expected_binary64_hex": "4340000000000002",
+      "manual_reason": "exact after tie"
+    },
+    {
+      "id": "F011",
+      "kind": "u64",
+      "input": "18014398509481983",
+      "expected_binary64_hex": "4350000000000000",
+      "manual_reason": "carry to next binade"
+    },
+    {
+      "id": "F012",
+      "kind": "u64",
+      "input": "9223372036854775295",
+      "expected_binary64_hex": "43dfffffffffffff",
+      "manual_reason": "below lower-binade midpoint"
+    },
+    {
+      "id": "F013",
+      "kind": "u64",
+      "input": "9223372036854775296",
+      "expected_binary64_hex": "43e0000000000000",
+      "manual_reason": "lower-binade midpoint to even power"
+    },
+    {
+      "id": "F014",
+      "kind": "u64",
+      "input": "9223372036854775297",
+      "expected_binary64_hex": "43e0000000000000",
+      "manual_reason": "above lower-binade midpoint"
+    },
+    {
+      "id": "F015",
+      "kind": "u64",
+      "input": "9223372036854775807",
+      "expected_binary64_hex": "43e0000000000000",
+      "manual_reason": "near power rounds upward"
+    },
+    {
+      "id": "F016",
+      "kind": "u64",
+      "input": "9223372036854775808",
+      "expected_binary64_hex": "43e0000000000000",
+      "manual_reason": "high bit set unsigned"
+    },
+    {
+      "id": "F017",
+      "kind": "u64",
+      "input": "9223372036854776832",
+      "expected_binary64_hex": "43e0000000000000",
+      "manual_reason": "upper-binade midpoint to even lower"
+    },
+    {
+      "id": "F018",
+      "kind": "u64",
+      "input": "9223372036854776833",
+      "expected_binary64_hex": "43e0000000000001",
+      "manual_reason": "above midpoint"
+    },
+    {
+      "id": "F019",
+      "kind": "u64",
+      "input": "9223372036854778879",
+      "expected_binary64_hex": "43e0000000000001",
+      "manual_reason": "below odd-lower midpoint"
+    },
+    {
+      "id": "F020",
+      "kind": "u64",
+      "input": "9223372036854778880",
+      "expected_binary64_hex": "43e0000000000002",
+      "manual_reason": "odd-lower tie rounds upper"
+    },
+    {
+      "id": "F021",
+      "kind": "u64",
+      "input": "18446744073709550591",
+      "expected_binary64_hex": "43efffffffffffff",
+      "manual_reason": "last value below carry midpoint"
+    },
+    {
+      "id": "F022",
+      "kind": "u64",
+      "input": "18446744073709550592",
+      "expected_binary64_hex": "43f0000000000000",
+      "manual_reason": "tie carries to 2^64"
+    },
+    {
+      "id": "F023",
+      "kind": "u64",
+      "input": "18446744073709550593",
+      "expected_binary64_hex": "43f0000000000000",
+      "manual_reason": "above carry midpoint"
+    },
+    {
+      "id": "F024",
+      "kind": "u64",
+      "input": "18446744073709551615",
+      "expected_binary64_hex": "43f0000000000000",
+      "manual_reason": "u64 maximum rounds finite 2^64"
+    },
+    {
+      "id": "F025",
+      "kind": "binary32",
+      "input": "00000000",
+      "expected_binary64_hex": "0000000000000000",
+      "manual_reason": "positive zero"
+    },
+    {
+      "id": "F026",
+      "kind": "binary32",
+      "input": "80000000",
+      "expected_binary64_hex": "8000000000000000",
+      "manual_reason": "negative zero retained"
+    },
+    {
+      "id": "F027",
+      "kind": "binary32",
+      "input": "00000001",
+      "expected_binary64_hex": "36a0000000000000",
+      "manual_reason": "least positive subnormal 2^-149"
+    },
+    {
+      "id": "F028",
+      "kind": "binary32",
+      "input": "80000001",
+      "expected_binary64_hex": "b6a0000000000000",
+      "manual_reason": "least negative subnormal DAZ0"
+    },
+    {
+      "id": "F029",
+      "kind": "binary32",
+      "input": "00000002",
+      "expected_binary64_hex": "36b0000000000000",
+      "manual_reason": "second subnormal"
+    },
+    {
+      "id": "F030",
+      "kind": "binary32",
+      "input": "00400000",
+      "expected_binary64_hex": "3800000000000000",
+      "manual_reason": "subnormal exact power2^-127"
+    },
+    {
+      "id": "F031",
+      "kind": "binary32",
+      "input": "007fffff",
+      "expected_binary64_hex": "380fffffc0000000",
+      "manual_reason": "greatest subnormal"
+    },
+    {
+      "id": "F032",
+      "kind": "binary32",
+      "input": "807fffff",
+      "expected_binary64_hex": "b80fffffc0000000",
+      "manual_reason": "negative greatest subnormal"
+    },
+    {
+      "id": "F033",
+      "kind": "binary32",
+      "input": "00800000",
+      "expected_binary64_hex": "3810000000000000",
+      "manual_reason": "least normal"
+    },
+    {
+      "id": "F034",
+      "kind": "binary32",
+      "input": "00800001",
+      "expected_binary64_hex": "3810000020000000",
+      "manual_reason": "next normal"
+    },
+    {
+      "id": "F035",
+      "kind": "binary32",
+      "input": "3f7fffff",
+      "expected_binary64_hex": "3fefffffe0000000",
+      "manual_reason": "predecessor of one"
+    },
+    {
+      "id": "F036",
+      "kind": "binary32",
+      "input": "3f800000",
+      "expected_binary64_hex": "3ff0000000000000",
+      "manual_reason": "one"
+    },
+    {
+      "id": "F037",
+      "kind": "binary32",
+      "input": "3f800001",
+      "expected_binary64_hex": "3ff0000020000000",
+      "manual_reason": "successor of one"
+    },
+    {
+      "id": "F038",
+      "kind": "binary32",
+      "input": "bf800001",
+      "expected_binary64_hex": "bff0000020000000",
+      "manual_reason": "negative successor magnitude"
+    },
+    {
+      "id": "F039",
+      "kind": "binary32",
+      "input": "7f7fffff",
+      "expected_binary64_hex": "47efffffe0000000",
+      "manual_reason": "maximum finite"
+    },
+    {
+      "id": "F040",
+      "kind": "binary32",
+      "input": "ff7fffff",
+      "expected_binary64_hex": "c7efffffe0000000",
+      "manual_reason": "negative maximum finite"
+    },
+    {
+      "id": "F041",
+      "kind": "binary32",
+      "input": "7f800000",
+      "expected_binary64_hex": "7ff0000000000000",
+      "manual_reason": "positive infinity"
+    },
+    {
+      "id": "F042",
+      "kind": "binary32",
+      "input": "ff800000",
+      "expected_binary64_hex": "fff0000000000000",
+      "manual_reason": "negative infinity"
+    },
+    {
+      "id": "F043",
+      "kind": "binary32",
+      "input": "7fc00000",
+      "expected_binary64_hex": "7ff8000000000000",
+      "manual_reason": "preferred positive qNaN"
+    },
+    {
+      "id": "F044",
+      "kind": "binary32",
+      "input": "ffc00000",
+      "expected_binary64_hex": "fff8000000000000",
+      "manual_reason": "preferred negative qNaN"
+    },
+    {
+      "id": "F045",
+      "kind": "binary32",
+      "input": "7fc00001",
+      "expected_binary64_hex": "7ff8000020000000",
+      "manual_reason": "quiet payload lowbit maps tobit29"
+    },
+    {
+      "id": "F046",
+      "kind": "binary32",
+      "input": "7f800001",
+      "expected_binary64_hex": "7ff8000020000000",
+      "manual_reason": "signaling lowpayload quieted"
+    },
+    {
+      "id": "F047",
+      "kind": "binary32",
+      "input": "ff800001",
+      "expected_binary64_hex": "fff8000020000000",
+      "manual_reason": "negative signaling lowpayload quieted with sign restoration"
+    },
+    {
+      "id": "F048",
+      "kind": "binary32",
+      "input": "7fa00000",
+      "expected_binary64_hex": "7ffc000000000000",
+      "manual_reason": "signaling higher payload retained plus quietbit"
+    },
+    {
+      "id": "F049",
+      "kind": "binary32",
+      "input": "7fbfffff",
+      "expected_binary64_hex": "7fffffffe0000000",
+      "manual_reason": "largest signaling fraction quieted"
+    },
+    {
+      "id": "F050",
+      "kind": "binary32",
+      "input": "7fffffff",
+      "expected_binary64_hex": "7fffffffe0000000",
+      "manual_reason": "all quiet payloadbits retained"
+    },
+    {
+      "id": "F051",
+      "kind": "binary32",
+      "input": "ffbfffff",
+      "expected_binary64_hex": "ffffffffe0000000",
+      "manual_reason": "negative largest signaling fraction"
+    },
+    {
+      "id": "F052",
+      "kind": "binary32",
+      "input": "ffffffff",
+      "expected_binary64_hex": "ffffffffe0000000",
+      "manual_reason": "negative all quiet payloadbits"
+    },
+    {
+      "id": "F053",
+      "kind": "binary64_raw",
+      "input": "0000000000000001",
+      "expected_binary64_hex": "0000000000000001",
+      "manual_reason": "raw cb transfer is bit identity; no quieting or DAZ arithmetic"
+    },
+    {
+      "id": "F054",
+      "kind": "binary64_raw",
+      "input": "8000000000000001",
+      "expected_binary64_hex": "8000000000000001",
+      "manual_reason": "raw cb transfer is bit identity; no quieting or DAZ arithmetic"
+    },
+    {
+      "id": "F055",
+      "kind": "binary64_raw",
+      "input": "7ff0000000000001",
+      "expected_binary64_hex": "7ff0000000000001",
+      "manual_reason": "raw cb transfer is bit identity; no quieting or DAZ arithmetic"
+    },
+    {
+      "id": "F056",
+      "kind": "binary64_raw",
+      "input": "fff0000000000001",
+      "expected_binary64_hex": "fff0000000000001",
+      "manual_reason": "raw cb transfer is bit identity; no quieting or DAZ arithmetic"
+    },
+    {
+      "id": "F057",
+      "kind": "binary64_raw",
+      "input": "7fffffffffffffff",
+      "expected_binary64_hex": "7fffffffffffffff",
+      "manual_reason": "raw cb transfer is bit identity; no quieting or DAZ arithmetic"
+    },
+    {
+      "id": "F058",
+      "kind": "binary64_raw",
+      "input": "ffffffffffffffff",
+      "expected_binary64_hex": "ffffffffffffffff",
+      "manual_reason": "raw cb transfer is bit identity; no quieting or DAZ arithmetic"
+    },
+    {
+      "id": "F059",
+      "kind": "i64",
+      "input": "-9223372036854775808",
+      "expected_binary64_hex": "c3e0000000000000",
+      "manual_reason": "signed64 RN-even context, symmetry of positive magnitude"
+    },
+    {
+      "id": "F060",
+      "kind": "i64",
+      "input": "9223372036854775807",
+      "expected_binary64_hex": "43e0000000000000",
+      "manual_reason": "signed64 RN-even context, symmetry of positive magnitude"
+    },
+    {
+      "id": "F061",
+      "kind": "i64",
+      "input": "-9007199254740993",
+      "expected_binary64_hex": "c340000000000000",
+      "manual_reason": "signed64 RN-even context, symmetry of positive magnitude"
+    },
+    {
+      "id": "F062",
+      "kind": "i64",
+      "input": "-9007199254740995",
+      "expected_binary64_hex": "c340000000000002",
+      "manual_reason": "signed64 RN-even context, symmetry of positive magnitude"
+    }
+  ]
+}
