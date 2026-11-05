@@ -45,3 +45,28 @@ full caller checks, fee schedule validity and byte equivalence remain unclaimed.
 All92 gates remainfalse; captures, pins and sharedtools are unchanged. New code
 MIT, no unlicensed inferred source. Next: trace all caller guards/table construction
 and qualify the actual floating environment before composing a full validator.
+
+## Independently authored Rust
+
+Expectations/evaluator/contract were sealed before Rust at
+b73a15630a1406d0c9ac9ab1f021f9c856a4c69b. Safe no_std library
+`src/node115-fee-window-scan/lib.rs` uses real binary64 ordered comparison and
+tracks the exact consumed position/count. No root Cargo graph/dependency or
+original ABI is invented. The input-only driver transports decimal raw bits.
+
+```sh
+python3 research/work-items/RE-004-fee-window-scan-115/verify-rust.py \
+  --rustc /path/to/rustc --out /fresh/output/directory
+```
+
+Opt0/3 and same-path opt3 byte/output repetition match all6741 sealed states.
+The116-case client fixture is a selection of unchanged sealed rows. Twelve
+compiled wrong sources each emit a complete stream and fail ordinary assertions
+(exit101). They change numeric order, equality, previous-element selection,
+window boundary/width, initial count, early stop, return and cursor coordinates
+or total-order treatment of floating bits. No crash is counted as a successful
+control. Full receipts/15streams/152commandlogs and the exact fixture are gzip
+archived; readable summaries link hashes. Only owned local path prefixes are
+projected in command output. The fixture is SHA-checked/decompressed before
+builds at its original packet path; actual build/compare functions are unchanged.
+See VALIDATION.md for commands, actual results, tool versions and limitations.
