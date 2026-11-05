@@ -1,0 +1,30 @@
+.init_array[0]: 0x63f36c8 RELATIVE 0x5ca55c0
+.bss: 0x64ffe40 + 0x228ae4 (NOBITS)
+array entry: FDE [0x5ca55c0, 0x5ca55d2), file offset 0x5ca45c0
+0x5ca55c0 4863c7               movsxd rax, edi
+0x5ca55c3 48890536aa8500       mov qword ptr [rip + 0x85aa36], rax -> 0x6500000
+0x5ca55ca 48893537aa8500       mov qword ptr [rip + 0x85aa37], rsi -> 0x6500008
+0x5ca55d1 c3                   ret
+second writer: FDE [0x5c99970, 0x5c9a045), file offset 0x5c98e07
+0x5c99e07 488905f2618600       mov qword ptr [rip + 0x8661f2], rax -> 0x6500000
+0x5c99e0e 488b45a8             mov rax, qword ptr [rbp - 0x58]
+0x5c99e12 488905ef618600       mov qword ptr [rip + 0x8661ef], rax -> 0x6500008
+reader: FDE [0x5c9a530, 0x5c9a709), file offset 0x5c99530
+0x5c9a530 55                   push rbp
+0x5c9a531 4889e5               mov rbp, rsp
+0x5c9a534 4157                 push r15
+0x5c9a536 4156                 push r14
+0x5c9a538 4155                 push r13
+0x5c9a53a 4154                 push r12
+0x5c9a53c 53                   push rbx
+0x5c9a53d 4883ec38             sub rsp, 0x38
+0x5c9a541 488b05c05a8600       mov rax, qword ptr [rip + 0x865ac0] -> 0x6500008
+0x5c9a548 488945a8             mov qword ptr [rbp - 0x58], rax
+0x5c9a54c 4885c0               test rax, rax
+0x5c9a54f 742a                 je 0x5c9a57b
+0x5c9a551 48b85555555555555505 movabs rax, 0x555555555555555
+0x5c9a55b 4c8b259e5a8600       mov r12, qword ptr [rip + 0x865a9e] -> 0x6500000
+0x5c9a562 4a8d0ce500000000     lea rcx, [r12*8]
+0x5c9a56a 488d3449             lea rsi, [rcx + rcx*2]
+0x5c9a56e 4939c4               cmp r12, rax
+0x5c9a571 763a                 jbe 0x5c9a5ad
