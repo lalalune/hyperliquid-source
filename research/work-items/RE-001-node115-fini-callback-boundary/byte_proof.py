@@ -5,7 +5,14 @@ from pathlib import Path
 import hashlib,json,struct
 TARGET=Path('artifacts/node/115/hl-node')
 SHA='a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+def authenticate(data):
+    assert len(data)==105896032 and hashlib.sha256(data).hexdigest()==SHA, 'target identity'
+
+def compare(observed, recorded):
+    return observed==recorded
+
 def derive(data):
+    assert data[:6]==b'\x7fELF\x02\x01'
     shoff=struct.unpack_from('<Q',data,40)[0]
     size,count,index=struct.unpack_from('<HHH',data,58)
     headers=[struct.unpack_from('<IIQQQQIIQQ',data,shoff+i*size) for i in range(count)]
@@ -18,18 +25,35 @@ def derive(data):
     def read(va,n):return data[off(va):off(va)+n]
     def rel32(va):return va+5+struct.unpack('<i',read(va+1,4))[0]
     base=0x14193a0
+    fini=sections['.fini_array']
+    assert (fini[1],fini[3],fini[4],fini[5])==(15,0x63f36c0,0x63f16c0,8)
+    assert struct.unpack_from('<Q',data,fini[4])[0]==0
+    fini_relocs=[]
+    for section in headers:
+        if section[1]!=4:continue
+        assert section[9]==24
+        for at in range(section[4],section[4]+section[5],24):
+            va,info,addend=struct.unpack_from('<QQq',data,at)
+            if va==fini[3]:fini_relocs.append((info,addend))
+    assert fini_relocs==[(8,base)], 'fini relocation'
+    assert any(s[2]&4 and s[3]<=base and base+57<=s[3]+s[5] for s in headers)
     # Instruction lengths independently bounded by the retained native decode.
     expected={0:'f30f1efa',4:'803d',11:'75',13:'55',14:'48833d',22:'4889e5',25:'74',27:'488b3d',34:'e8',39:'e8',44:'c605',51:'5d',52:'c3',53:'0f1f00',56:'c3'}
     for delta,prefix in expected.items():assert read(base+delta,len(bytes.fromhex(prefix)))==bytes.fromhex(prefix),(delta,prefix)
     guard_cmp=base+11+struct.unpack('<i',read(base+6,4))[0]
     guard_store=base+51+struct.unpack('<i',read(base+46,4))[0]
-    assert guard_cmp==guard_store and read(base+10,1)==b'\0' and read(base+50,1)==b'\1'
+    assert guard_cmp==guard_store==0x64ffe40 and read(base+10,1)==b'\0' and read(base+50,1)==b'\1'
     branches=[{'site':hex(base+d),'target':hex(base+d+2+struct.unpack('<b',read(base+d+1,1))[0])} for d in [11,25]]
     calls=[{'site':hex(base+d),'target':hex(rel32(base+d))} for d in [34,39]]
     assert branches==[{'site':'0x14193ab','target':'0x14193d8'},{'site':'0x14193b9','target':'0x14193c7'}]
     assert calls==[{'site':'0x14193c2','target':'0x63f0a40'},{'site':'0x14193c7','target':'0x1419330'}]
+    pointer_guard=base+22+struct.unpack('<i',read(base+17,4))[0]
+    argument_slot=base+34+struct.unpack('<i',read(base+30,4))[0]
+    assert pointer_guard==0x64df478 and read(base+21,1)==b'\0'
+    assert argument_slot==0x64efa20
     plt=rel32(base+34);rawplt=read(plt,16);got=None
     if rawplt[:2]==b'\xff\x25':got=plt+6+struct.unpack('<i',rawplt[2:6])[0]
+    assert got==0x64ee170, 'PLT to GOT'
     dynsym=sections['.dynsym'];strings=sections['.dynstr'];strdata=data[strings[4]:strings[4]+strings[5]]
     wanted={got,0x64df478,0x64df468};relocs=[]
     for s in headers:
@@ -40,9 +64,13 @@ def derive(data):
             sym=info>>32;nameoff=struct.unpack_from('<I',data,dynsym[4]+sym*dynsym[9])[0]
             name=strdata[nameoff:].split(b'\0',1)[0].decode()
             relocs.append({'va':hex(va),'type':info&0xffffffff,'symbol':name,'addend':addend})
+    assert sorted((r['va'],r['type'],r['symbol'],r['addend']) for r in relocs)==[
+        ('0x64df468',6,'_ITM_deregisterTMCloneTable',0),
+        ('0x64df478',6,'__cxa_finalize',0),
+        ('0x64ee170',7,'__cxa_finalize',0)], 'symbol relocations'
     return {'callback_entry':hex(base),'callback_file_offset':hex(off(base)),'reachable_envelope_end_exclusive':'0x14193d9','guard':hex(guard_cmp),'branches':branches,'direct_calls':calls,'return_sites':['0x14193d4','0x14193d8'],'plt_first16_hex':rawplt.hex(),'plt_got_slot':hex(got) if got is not None else None,'selected_symbol_relocations':relocs,'raw_callback_57_bytes_hex':read(base,57).hex()}
 def main():
-    data=TARGET.read_bytes();assert hashlib.sha256(data).hexdigest()==SHA
+    data=TARGET.read_bytes();authenticate(data)
     observed=derive(data)
     controls=[]
     for label,delta in [('entry',0),('conditional_branch',12),('direct_call',35),('guard_store',50)]:
