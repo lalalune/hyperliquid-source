@@ -1,0 +1,1008 @@
+{
+  "artifact": {
+    "local_path": "work/hl-node-115.bin",
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "size": 105896032
+  },
+  "bounded_question": "What does the node #115 compaction-stats dump routine 0x5ef66e0 emit end-to-end, and how does each of its sections contribute to the output?",
+  "census": {
+    "method": "Exhaustive E8 (call) / E9 (jmp) rel32 scan over every executable PT_LOAD segment, each candidate confirmed by disassembling its containing FDE; stored qwords are 8-byte little-endian occurrences mapped through the PT_LOAD headers; RELATIVE relocations listed from readelf -r. See census.py; committed output is callers.tsv and relocations.txt.",
+    "summary": "main 0x5ef66e0: 3 direct callers, 0 tail jumps; filler 0x5ef1fa0: 2 callers; sibling_1d60 0x5ef1d60: 1 caller; sibling_6280 0x5ef6280: 2 callers; insert_170 0x5eed170: 2 callers; insert_a0 0x5eed0a0: 4 callers; lower_bound_db 0x5eecdb0: 3 callers; lower_bound_f20 0x5eecf20: 2 callers; tree_free_cc0 0x5eebcc0: 13 callers (incl. self-recursion); tree_free_510 0x5eec510: 7 callers (incl. self-recursion); tree_free_590 0x5eec590: 11 callers (incl. self-recursion); str_assign 0x5eebd00: 117 callers; str_b20 0x5eebb20: 20 callers; getter_3570 0x5dd3570: 10 callers; sum_s 0x5f6c300: 4 callers; sum_vec 0x5da4de0: 5 callers + 1 tail jump (0x5f6c316); parse_u64 0x61d1540: 12 callers + 1 tail jump (0x61d1ef4); key_total_stops 0x5fc9ed0: 2 callers; key_total_delays 0x5fc9f80: 2 callers; header_formatter 0x5eedda0: 2 callers; data_row_formatter 0x5eed6f0: 4 callers; outer_insert 0x5ef1630: 4 callers; snapshot_consumer 0x5eefda0: 2 callers; final 0x5ef5d40: 3 callers; priority_name 0x5fcebc0: 2 callers; map_find_insert 0x5ef40a0: 14 callers; inner_insert 0x5ef1480: 21 callers (all inside outer_insert); str_assign_lit 0x5fcd890: 24 callers; tree_copy 0x5eebe10: 3 callers. No pinned address has a RELATIVE relocation record or a stored qword outside .rela.dyn."
+  },
+  "corrections": [
+    {
+      "evidence": "filler.txt 0x5ef22e2..0x5ef2329",
+      "finding": "Wrong. A fresh objdump of filler 0x5ef22a2..0x5ef2329 shows: test %edx,%edx (edx = level index i); je 0x5ef22ee skips ONLY the reload of the denominator from L+0x20+L+0x10. rax remains rsp+0x48 = owner+0x90 + owner+0x98 (loaded at 0x5ef20c0..0x5ef20d0); the division still runs when that sum is nonzero, and the rsp+0x8 ratio slot is not overwritten before the outer_insert call at 0x5ef23b4 (xmm2 = ratio confirmed at 0x5ef2390). So the level-0 ratio is (L0+0x30 + L0+0x28) / (owner+0x90 + owner+0x98) when the denominator is nonzero, else 0.0. #3164's \"sum_denominator\" record (owner+0x90 + owner+0x98) is consistent with this. The model in this PR implements the corrected rule and tests it explicitly.",
+      "target": "Open PR #3164, records.json and tools/compaction_consumer_a010_115.py ratio_for_level: \"0.0 for level 0\""
+    },
+    {
+      "evidence": "main.txt 0x5ef7580..0x5ef7663",
+      "finding": "Each %lu section does sub $0x8,%rsp before the snprintf call, so the literal 0x60/0x68/0x70(%rsp) operand reads are frame+0x68/+0x70/+0x78, i.e. owner+0xa0/+0xa8/+0xb0. A literal reading of the offsets would mis-attribute the counters by one slot.",
+      "target": "The AddFile %lu lines in the dump routine"
+    }
+  ],
+  "decimal_conversion": {
+    "digit_count_thresholds": [
+      9,
+      99,
+      999,
+      9999,
+      99999,
+      999999,
+      9999999,
+      99999999
+    ],
+    "digit_pair_table": {
+      "builds": [
+        "0x5ef6a14..0x5ef6aeb (per-level \"L<i>\" label)",
+        "0x5ef6cbe..0x5ef6d8a (Sum-row label)"
+      ],
+      "chunks": [
+        "0x451750",
+        "0x453230",
+        "0x456910",
+        "0x453e00",
+        "0x451db0",
+        "0x452ba0",
+        "0x455590",
+        "0x456240",
+        "0x456920",
+        "0x4528d0",
+        "0x456250",
+        "0x453240",
+        "0x454870"
+      ],
+      "note": "The table is assembled by store offset, not load order. The last chunk is stored unaligned at offset 185: its first 7 bytes overwrite the tail of the previous chunk with identical bytes, and its next 8 bytes are the final \"96979899\". The assembled 200 bytes are the two-digit strings \"00\"..\"99\" in order.",
+      "store_offsets": [
+        0,
+        16,
+        32,
+        48,
+        64,
+        80,
+        96,
+        112,
+        128,
+        144,
+        160,
+        176,
+        185
+      ],
+      "table_base": "rsp+0x3f0"
+    },
+    "divide_by_10000_magic": "0x346dc5d63886594b",
+    "divide_by_100_magic": "0x28f5c28f5c28f5c3"
+  },
+  "filler": {
+    "accumulation": "Lane-wise into the Sum struct (rbx = snapshot): paddq lanes +0x00/+0x10/+0x20/+0x30/+0x40/+0x50, scalar +0x60 (u64), +0x68 (i32), paddd lanes +0x6c/+0x7c/+0x8c/+0x9c/+0xac. Bytes 0xbc..0xbf are not accumulated.",
+    "address": "0x5ef1fa0",
+    "direct_callers": [
+      "0x5ef6848",
+      "0x5efa10b"
+    ],
+    "doubles_array": "new double[nlevels], zeroed; for i in 0..*(src+0x10)-2: D[src_idx[i]] = src_doubles[i] where src_idx = src+0xf50 (int array), src_doubles = src+0xf38",
+    "fde": "0x5ef1fa0..0x5ef2831",
+    "flagged_counts": "new int[nlevels], zeroed; counts[i] = number of elements in level i's vector (src+0xa98 + i*24, begin/end pair) whose object has byte +0xb4 != 0",
+    "ratio": "Numerator = (L+0x30+L+0x28). Denominator = (L+0x20+L+0x10) when i != 0, else owner+0x90+owner+0x98 (rsp+0x48). Ratio = numerator/denominator as doubles (u64-to-double fixup) when the denominator is nonzero, else 0.0.",
+    "signature": "fill(owner=rdi, src=rsi, out_ptr=rdx, snapshot=rcx)",
+    "skip_rule": "Skip a level when its first 16 bytes are both zero AND its element count is 0. Its elem/flagged counts still join the Sum totals (accumulated before the skip test); its S and dense do not.",
+    "sum_node": "Key -1 after the loop: outer_insert with elem/flagged = summed totals (i32), S = summed S, dense = 0.0, ratio = 0.0 when (owner+0x90+owner+0x98)==0 else (snap+0x30+snap+0x28)/(owner+0x90+owner+0x98); level struct = accumulated snapshot; inserted into the outer map the same way (0x5eed0a0 path at 0x5ef262e for the -1 key, then 0x5eecdb0/0x5eebcc0).",
+    "sum_s": "S_i = 0x5f6c300(src, i), which tail-jumps to 0x5da4de0 with rdi = src+0xa98 + i*24: sum over non-null elements e of level i's vector of *(e+0x10) as i64 (FDE 0x5da4de0..0x5da4e1e, 62 bytes). Accumulated into rsp+0x10 (S total) with u64-to-double fixup when negative."
+  },
+  "formats": {
+    "addfile_gb": {
+      "address": "0x9661b0",
+      "args": [
+        "owner+0x98*2^-30",
+        "(owner+0x98-owner+0x708)*2^-30"
+      ],
+      "format": "AddFile(GB): cumulative %.3f, interval %.3f\n"
+    },
+    "addfile_keys": {
+      "address": "0x95cf78",
+      "args": [
+        "owner+0xb0",
+        "owner+0xb0-owner+0x720"
+      ],
+      "format": "AddFile(Keys): cumulative %lu, interval %lu\n"
+    },
+    "addfile_l0_files": {
+      "address": "0x9590d0",
+      "args": [
+        "owner+0xa8",
+        "owner+0xa8-owner+0x718"
+      ],
+      "format": "AddFile(L0 Files): cumulative %lu, interval %lu\n"
+    },
+    "addfile_total_files": {
+      "address": "0x964030",
+      "args": [
+        "owner+0xa0",
+        "owner+0xa0-owner+0x710"
+      ],
+      "format": "AddFile(Total Files): cumulative %lu, interval %lu\n"
+    },
+    "blob": {
+      "address": "0x957c88",
+      "args": [
+        "count=(end-begin)/16",
+        "total_gb=u64_to_double(total)*2^-30",
+        "garbage_gb=u64_to_double(garbage)*2^-30",
+        "space_amp=total/(total-garbage) if garbage<total else 0.0"
+      ],
+      "format": "\nBlob file count: %zu, total size: %.1f GB, garbage size: %.1f GB, space amp: %.1f\n\n"
+    },
+    "cumulative_compaction": {
+      "address": "0x964aa8",
+      "args": [
+        "write_gb=r13*2^-30",
+        "write_mbps=(r13*2^-20)/max(uptime_total,0.001)",
+        "read_gb=rbp*2^-30",
+        "read_mbps=(rbp*2^-20)/max(uptime_total,0.001)",
+        "secs=rbx/1e6"
+      ],
+      "format": "Cumulative compaction: %.2f GB write, %.2f MB/s write, %.2f GB read, %.2f MB/s read, %.1f seconds\n"
+    },
+    "flush_gb": {
+      "address": "0x95a548",
+      "args": [
+        "owner+0x90*2^-30",
+        "(owner+0x90-owner+0x6d8)*2^-30"
+      ],
+      "format": "Flush(GB): cumulative %.3f, interval %.3f\n"
+    },
+    "interval_compaction": {
+      "address": "0x964b10",
+      "args": [
+        "write_gb=(r13-owner+0x6e8)*2^-30",
+        "write_mbps=((r13-owner+0x6e8)*2^-20)/max(interval_secs,0.001)",
+        "read_gb=(rbp-owner+0x6f0)*2^-30",
+        "read_mbps=((rbp-owner+0x6f0)*2^-20)/max(interval_secs,0.001)",
+        "secs=(rbx-owner+0x6f8)/1e6"
+      ],
+      "format": "Interval compaction: %.2f GB write, %.2f MB/s write, %.2f GB read, %.2f MB/s read, %.1f seconds\n"
+    },
+    "uptime": {
+      "address": "0x9621a8",
+      "args": [
+        "total_secs=(now-owner+0x790)/1e6",
+        "interval_secs=total_secs-owner+0x700"
+      ],
+      "format": "Uptime(secs): %.1f total, %.1f interval\n"
+    }
+  },
+  "helpers": [
+    {
+      "address": "0x5eed170",
+      "direct_callers": [
+        "0x5ef2433",
+        "0x5ef6932"
+      ],
+      "fde": "0x5eed170..0x5eed231",
+      "role": "map<int, map<int,double>> insert-or-find with hint: allocates a 0x58-byte node (key int at +0x20, empty inner map at +0x28, header at +0x30), calls 0x5eecf20 (lower_bound with hint), inserts via _Rb_tree_insert_and_rebalance or frees the new node and returns the existing one.",
+      "signature": "insert_or_find(map=rdi, hint=rsi, key=edx)",
+      "size_bytes": 193
+    },
+    {
+      "address": "0x5eed0a0",
+      "direct_callers": [
+        "0x5ef1e9f",
+        "0x5ef262e",
+        "0x5ef722b",
+        "0x5ef72ba"
+      ],
+      "fde": "0x5eed0a0..0x5eed161",
+      "role": "Twin of 0x5eed170 (same shape, also a 0x58-byte node); used for the priority map and the Sum -1 key.",
+      "signature": "insert_or_find(map=rdi, hint=rsi, key=edx)",
+      "size_bytes": 193
+    },
+    {
+      "address": "0x5eecf20",
+      "direct_callers": [
+        "0x5eed0f7",
+        "0x5eed1c7"
+      ],
+      "fde": "0x5eecf20..0x5eed09a",
+      "role": "_Rb_tree lower_bound/insert-position with a hint node; uses _Rb_tree_increment/_Rb_tree_decrement PLT helpers; on out-of-range keys tail-jumps to 0x5eeb850.",
+      "signature": "lower_bound_hint(map=rdi, hint=rsi, key=edx)",
+      "size_bytes": 378
+    },
+    {
+      "address": "0x5eecdb0",
+      "direct_callers": [
+        "0x5ef1eb0",
+        "0x5ef2444",
+        "0x5ef263f"
+      ],
+      "fde": "0x5eecdb0..0x5eecf16",
+      "role": "_Rb_tree copy-assign: clears dst's tree (0x5eebcc0) and copies src's tree via 0x5eebe10.",
+      "signature": "copy_assign(dst=rdi, src=rsi)",
+      "size_bytes": 358
+    },
+    {
+      "address": "0x5eebcc0",
+      "direct_callers": [
+        "0x5eebccd",
+        "0x5eebdec",
+        "0x5eec544",
+        "0x5eecd82",
+        "0x5eece94",
+        "0x5ef1d39",
+        "0x5ef1ec3",
+        "0x5ef1f42",
+        "0x5ef1f8e",
+        "0x5ef245a",
+        "0x5ef264c",
+        "0x5ef66b0",
+        "0x5ef70eb"
+      ],
+      "fde": "0x5eebcc0..0x5eebcf1",
+      "role": "Recursive free of 0x30-byte map<int,double> nodes (right child via self-recursion, then _ZdlPvm 0x30).",
+      "signature": "tree_free(root=rdi)",
+      "size_bytes": 49
+    },
+    {
+      "address": "0x5eec510",
+      "direct_callers": [
+        "0x5eec523",
+        "0x5ef660c",
+        "0x5ef6652",
+        "0x5ef7b03",
+        "0x5ef7b10",
+        "0x5ef9fbe",
+        "0x5efa891"
+      ],
+      "fde": "0x5eec510..0x5eec581",
+      "role": "Tree destroy for 0x58-byte nodes: frees inner 0x30-node trees via 0x5eebcc0, then the 0x58 node, then iterates left siblings. Called in the dump caller on rsp+0xd0 and rsp+0xa0.",
+      "signature": "tree_destroy_58(root=rdi)",
+      "size_bytes": 113
+    },
+    {
+      "address": "0x5eec590",
+      "direct_callers": [
+        "0x5eec5a7",
+        "0x5ef41f2",
+        "0x5ef473a",
+        "0x5ef47b3",
+        "0x5ef4984",
+        "0x5ef4a20",
+        "0x5ef4e30",
+        "0x5ef509b",
+        "0x5ef624d",
+        "0x5ef6524",
+        "0x5ef83a7"
+      ],
+      "fde": "0x5eec590..0x5eec601",
+      "role": "Twin of 0x5eec510; called in sibling 0x5ef6280 on rsp+0x40.",
+      "signature": "tree_destroy_58(root=rdi)",
+      "size_bytes": 113
+    },
+    {
+      "address": "0x5eebd00",
+      "direct_callers": [
+        "0x5eef2bc",
+        "0x5eef2d0",
+        "0x5ef6736",
+        "0x5ef6dfb",
+        "0x5ef7064",
+        "0x5ef7114",
+        "0x5ef9bb5",
+        "0x5efbe12",
+        "0x5efbe2f",
+        "0x5efbe7b",
+        "0x5efbe98",
+        "0x5efbedd",
+        "0x5efbefa",
+        "0x5efbf43",
+        "0x5efbf60",
+        "0x5efbfa9",
+        "0x5efbfc6",
+        "0x5efc019",
+        "0x5efc036",
+        "0x5efc07f",
+        "0x5efc09c",
+        "0x5efc0e5",
+        "0x5efc102",
+        "0x5efc14b",
+        "0x5efc168",
+        "0x5efc1b1",
+        "0x5efc1ce",
+        "0x5efc217",
+        "0x5efc234",
+        "0x5efc287",
+        "0x5efc2a4",
+        "0x5efc2f7",
+        "0x5efc314",
+        "0x5efc35d",
+        "0x5efc37a",
+        "0x5efc3c3",
+        "0x5efc3e0",
+        "0x5efc429",
+        "0x5efc446",
+        "0x5efc48f",
+        "0x5efc4ac",
+        "0x5efc4f5",
+        "0x5efc512",
+        "0x5efc55b",
+        "0x5efc578",
+        "0x5efc5c1",
+        "0x5efc5de",
+        "0x5efc620",
+        "0x5efc63d",
+        "0x5efc90f",
+        "0x5efc93f",
+        "0x5efc96f",
+        "0x5efc99f",
+        "0x5efc9cf",
+        "0x5efc9ff",
+        "0x5efca32",
+        "0x5efca62",
+        "0x5efcb8b",
+        "0x5efcbaf",
+        "0x5efcbd3",
+        "0x5efcbf7",
+        "0x5efcc1b",
+        "0x5efcc3f",
+        "0x5efcc63",
+        "0x5efcc87",
+        "0x5efccab",
+        "0x5efcccf",
+        "0x5efccf3",
+        "0x5efcd17",
+        "0x5efcd3b",
+        "0x5efcd5f",
+        "0x5efcd83",
+        "0x5efcda7",
+        "0x5efcdcb",
+        "0x5efcdef",
+        "0x5efce13",
+        "0x5efce37",
+        "0x5efce5b",
+        "0x5efce7f",
+        "0x5efcea3",
+        "0x5efcec7",
+        "0x5efceeb",
+        "0x5efcf0f",
+        "0x5efcf33",
+        "0x5efcf57",
+        "0x5efcf7b",
+        "0x5efcf9f",
+        "0x5efcfc3",
+        "0x5efcfe7",
+        "0x5efd00b",
+        "0x5efd02f",
+        "0x5efd053",
+        "0x5efd077",
+        "0x5efd09b",
+        "0x5efd0bf",
+        "0x5efd0e3",
+        "0x5efd107",
+        "0x5efd12b",
+        "0x5efd14f",
+        "0x5efd173",
+        "0x5efd1cf",
+        "0x5efd1f3",
+        "0x5efd217",
+        "0x5efd23b",
+        "0x5efd25f",
+        "0x5efd283",
+        "0x5efd2a7",
+        "0x5efd2cb",
+        "0x5efd2ef",
+        "0x5efd313",
+        "0x5efd337",
+        "0x5efd35b",
+        "0x5efd37f",
+        "0x5efd3a3",
+        "0x5efd3c7",
+        "0x5efd3eb",
+        "0x5efd40f"
+      ],
+      "fde": "0x5eebd00..0x5eebde3",
+      "role": "std::string assign from const char* (used for the Level/Sum/Int/Priority label assigns).",
+      "signature": "string_assign(dst=rdi, literal=rsi)",
+      "size_bytes": 227
+    },
+    {
+      "address": "0x5eebb20",
+      "direct_callers": [
+        "0x5eec463",
+        "0x5eed2da",
+        "0x5eee3db",
+        "0x5eef126",
+        "0x5eef2f4",
+        "0x5eef3f1",
+        "0x5eef5d9",
+        "0x5ef0563",
+        "0x5ef4d06",
+        "0x5ef4fe2",
+        "0x5ef5fd6",
+        "0x5ef606c",
+        "0x5ef60a3",
+        "0x5ef60e4",
+        "0x5ef6125",
+        "0x5ef6460",
+        "0x5ef840f",
+        "0x5ef847e",
+        "0x5ef84da",
+        "0x5ef9c6d"
+      ],
+      "fde": "0x5eebb20..0x5eebbf8",
+      "role": "std::string move-assign between two string objects (SSO/heap aware).",
+      "signature": "string_move_assign(dst=rdi, src=rsi)",
+      "size_bytes": 216
+    },
+    {
+      "address": "0x5dd3570",
+      "direct_callers": [
+        "0x5dd1694",
+        "0x5eec2d2",
+        "0x5eec342",
+        "0x5ef06ca",
+        "0x5ef7376",
+        "0x5f70b12",
+        "0x5f7f67b",
+        "0x5f8ee20",
+        "0x5f8ee8b",
+        "0x5f90fa7"
+      ],
+      "fde": "0x5dd3570..0x5dd357d",
+      "role": "Tiny getter: returns *(rdi+0x10) + 0x3e.",
+      "signature": "blob_size(elem=rdi)",
+      "size_bytes": 13
+    },
+    {
+      "address": "0x5f6c300",
+      "direct_callers": [
+        "0x5d52c15",
+        "0x5eeccf5",
+        "0x5ef22a2",
+        "0x5ef2374"
+      ],
+      "fde": "0x5f6c300..0x5f6c31b",
+      "role": "Tail-jumps to 0x5da4de0 with rdi = src+0xa98 + level*24 (the filler's per-level S).",
+      "signature": "sum_s(src=rdi, level=esi)",
+      "size_bytes": 27
+    },
+    {
+      "address": "0x5da4de0",
+      "direct_callers": [
+        "0x5d9df02",
+        "0x5d9df19",
+        "0x5d9e015",
+        "0x5d9e482",
+        "0x5da788a"
+      ],
+      "fde": "0x5da4de0..0x5da4e1e",
+      "role": "Sum over the non-null elements of a level's vector of *(element+0x10) as i64.",
+      "signature": "sum_vec(vector=rdi)",
+      "size_bytes": 62,
+      "tail_jump_callers": [
+        "0x5f6c316"
+      ]
+    },
+    {
+      "address": "0x61d1540",
+      "direct_callers": [
+        "0x5ef63a2",
+        "0x5ef63bd",
+        "0x606e803",
+        "0x606ec8c",
+        "0x606f2f1",
+        "0x607e6b7",
+        "0x6082ff5",
+        "0x60a1f41",
+        "0x60bf3f9",
+        "0x60d65e3",
+        "0x61d17dd",
+        "0x61d184d"
+      ],
+      "fde": "0x61d1540..0x61d178b",
+      "role": "Decimal-string -> u64 parser (takes a char**, strlen + __isoc23_strtoull base 10 with errno handling).",
+      "signature": "parse_u64(str_ptr=rdi)",
+      "size_bytes": 587,
+      "tail_jump_callers": [
+        "0x61d1ef4"
+      ]
+    },
+    {
+      "address": "0x5fc9ed0",
+      "direct_callers": [
+        "0x5ef60cd",
+        "0x5ef638a"
+      ],
+      "fde": "0x5fc9ed0..0x5fc9f7a",
+      "role": "Guarded function-local static std::string initializer returning \"total-stops\" (11 chars, at 0x6504900).",
+      "signature": "static_key_stops()",
+      "size_bytes": 170
+    },
+    {
+      "address": "0x5fc9f80",
+      "direct_callers": [
+        "0x5ef610e",
+        "0x5ef63aa"
+      ],
+      "fde": "0x5fc9f80..0x5fca02a",
+      "role": "Guarded function-local static std::string initializer returning \"total-delays\" (12 chars, at 0x65048c0).",
+      "signature": "static_key_delays()",
+      "size_bytes": 170
+    },
+    {
+      "address": "0x5eedda0",
+      "direct_callers": [
+        "0x5ef674d",
+        "0x5ef712b"
+      ],
+      "fde": "0x5eedda0..0x5eee30c",
+      "role": "Compaction-stats table header formatter (pinned in PR #3180: the 21-column row and dash underline).",
+      "signature": "header_formatter(buf=rdi, name=rsi, inner_map=rdx)",
+      "size_bytes": 1388
+    },
+    {
+      "address": "0x5eed6f0",
+      "direct_callers": [
+        "0x5ef6b84",
+        "0x5ef6e09",
+        "0x5ef70de",
+        "0x5ef72dd"
+      ],
+      "fde": "0x5eed6f0..0x5eedd9e",
+      "role": "Per-level data-row formatter (pinned in PR #3189: 21 metric fields, four call sites in this routine).",
+      "signature": "data_row_formatter(buf=rdi, label=rsi, inner_map=rdx)",
+      "size_bytes": 1710
+    },
+    {
+      "address": "0x5ef1630",
+      "direct_callers": [
+        "0x5ef1e2a",
+        "0x5ef23b4",
+        "0x5ef25bc",
+        "0x5ef70d0"
+      ],
+      "fde": "0x5ef1630..0x5ef1d33",
+      "role": "Builds the 21-field inner map for one level struct (pinned in PR #3164).",
+      "signature": "outer_insert(map=rdi, src=rsi, flagged=edx, level=rcx, s=xmm0, dense=xmm1, ratio=xmm2)",
+      "size_bytes": 1795
+    },
+    {
+      "address": "0x5eefda0",
+      "direct_callers": [
+        "0x5ef0558",
+        "0x5ef7aad"
+      ],
+      "fde": "0x5eefda0..0x5ef0360",
+      "role": "Stats-snapshot consumer (pinned in PR #3082: Block-cache dump, human-size formatting, entry table).",
+      "signature": "snapshot_consumer(out=rdi, snapshot=rsi, owner=r8)",
+      "size_bytes": 1472
+    },
+    {
+      "address": "0x5ef5d40",
+      "direct_callers": [
+        "0x5ef6228",
+        "0x5ef62e9",
+        "0x5efa887"
+      ],
+      "fde": "0x5ef5d40..0x5ef621d",
+      "role": "Final/summary consumer filling the map<string,string> the stall sibling renders (pinned in PR #3164).",
+      "signature": "final_summary(owner=rdi, out_map=rsi)",
+      "size_bytes": 3293
+    },
+    {
+      "address": "0x5fcebc0",
+      "direct_callers": [
+        "0x5ef72cd",
+        "0x61d5115"
+      ],
+      "fde": "0x5fcebc0..0x5fcec41",
+      "role": "Assigns the priority name into the label string via 0x5fcd890 and returns the string pointer in rax. Dispatch: 0 -> \"Bottom\" (0x44fd1a), 1 -> \"Low\" (0x43a5d9), 2 -> \"High\" (0x4409fd), 3 -> \"User\" (0x4487bb), else -> \"Invalid\" (0x432082).",
+      "signature": "priority_name(label_string=rdi, index=esi)",
+      "size_bytes": 129
+    },
+    {
+      "address": "0x5ef40a0",
+      "direct_callers": [
+        "0x5ef447a",
+        "0x5ef4cfb",
+        "0x5ef5fcb",
+        "0x5ef6061",
+        "0x5ef6093",
+        "0x5ef60d9",
+        "0x5ef611a",
+        "0x5ef639a",
+        "0x5ef63b5",
+        "0x5ef83d8",
+        "0x5ef8404",
+        "0x5ef8473",
+        "0x5ef84ca",
+        "0x5ef9a5f"
+      ],
+      "fde": "0x5ef40a0..0x5ef41e6",
+      "role": "map<string,string> find-or-insert returning the value slot (used by sibling 0x5ef6280 for the total-stops/total-delays lookups).",
+      "signature": "map_find_insert(map=rdi, key=rsi)",
+      "size_bytes": 326
+    },
+    {
+      "address": "0x5ef1480",
+      "direct_callers": [
+        "0x5ef16d2",
+        "0x5ef1703",
+        "0x5ef1720",
+        "0x5ef173d",
+        "0x5ef178b",
+        "0x5ef17cd",
+        "0x5ef180f",
+        "0x5ef1854",
+        "0x5ef1887",
+        "0x5ef18c1",
+        "0x5ef18d7",
+        "0x5ef190d",
+        "0x5ef1949",
+        "0x5ef1989",
+        "0x5ef19c3",
+        "0x5ef19e9",
+        "0x5ef1a3c",
+        "0x5ef1a76",
+        "0x5ef1ab0",
+        "0x5ef1af1",
+        "0x5ef1b2c"
+      ],
+      "fde": "0x5ef1480..0x5ef1630",
+      "role": "Inserts one (key, double) entry into a map<int,double> (called 21 times inside outer_insert 0x5ef1630).",
+      "signature": "inner_insert(map=rdi, key=esi, value=xmm0)",
+      "size_bytes": 432
+    },
+    {
+      "address": "0x5fcd890",
+      "direct_callers": [
+        "0x5fcdb2d",
+        "0x5fcdb7c",
+        "0x5fcdc25",
+        "0x5fcdd10",
+        "0x5fce830",
+        "0x5fcebda",
+        "0x5fcebf4",
+        "0x5fcec07",
+        "0x5fcec1f",
+        "0x5fcec37",
+        "0x5fd1a23",
+        "0x5fd2107",
+        "0x5fd214d",
+        "0x5fd22a7",
+        "0x5fd260b",
+        "0x5fd27ef",
+        "0x5fd2835",
+        "0x5fd28b5",
+        "0x5fd2f8f",
+        "0x5fd3051",
+        "0x5fd31ea",
+        "0x5fd4264",
+        "0x5fd437a",
+        "0x5fd4459"
+      ],
+      "fde": "0x5fcd890..0x5fcd973",
+      "role": "std::string assign from a literal (used by priority_name for the five name literals).",
+      "signature": "string_assign_lit(dst=rdi, literal=rsi)",
+      "size_bytes": 227
+    },
+    {
+      "address": "0x5eebe10",
+      "direct_callers": [
+        "0x5eebe84",
+        "0x5eebf00",
+        "0x5eece3e"
+      ],
+      "fde": "0x5eebe10..0x5eec03c",
+      "role": "_Rb_tree copy (used by copy-assign 0x5eecdb0).",
+      "signature": "tree_copy(dst=rdi, src=rsi)",
+      "size_bytes": 556
+    }
+  ],
+  "literals": {
+    "doubles": {
+      "0.001": "0x459af0",
+      "1e6": "0x4599a0",
+      "2^-20": "0x459638",
+      "2^-30": "0x459c48"
+    },
+    "labels": {
+      "Int": "0x441a38",
+      "Level": "0x44d03d",
+      "Priority": "0x43e67f",
+      "Sum": "0x43f948"
+    },
+    "priority_names": {
+      "Bottom": "0x44fd1a",
+      "High": "0x4409fd",
+      "Invalid": "0x432082",
+      "Low": "0x43a5d9",
+      "User": "0x4487bb"
+    },
+    "stall": {
+      "colon_space": "0x44cfa7",
+      "comma_space": "0x4360a5",
+      "header": "0x44de6c",
+      "header_len": 21,
+      "header_text": "Write Stall (count): ",
+      "interval_label": "0x43c575",
+      "interval_label_text": "interval: ",
+      "total_count": "0x433107",
+      "total_count_text": " total count\n",
+      "total_delays": "0x65048c0",
+      "total_stops": "0x6504900"
+    },
+    "throw_strings": "0x4474d2"
+  },
+  "metric_fields": {
+    "derived": {
+      "base": "(double)(L+0x00+1)/1e6",
+      "r14_total": "L+0x28+L+0x30",
+      "rdx_total": "L+0x10+L+0x18+L+0x20"
+    },
+    "fields": [
+      [
+        1,
+        "(double)elem_count"
+      ],
+      [
+        2,
+        "(double)flagged_count"
+      ],
+      [
+        3,
+        "S"
+      ],
+      [
+        4,
+        "dense"
+      ],
+      [
+        5,
+        "(double)(L+0x10+L+0x18+L+0x20)*2^-30"
+      ],
+      [
+        6,
+        "(double)L+0x10*2^-30"
+      ],
+      [
+        7,
+        "(double)L+0x18*2^-30"
+      ],
+      [
+        8,
+        "(double)L+0x28*2^-30"
+      ],
+      [
+        9,
+        "(double)(L+0x28-L+0x18)*2^-30"
+      ],
+      [
+        10,
+        "(double)L+0x38*2^-30"
+      ],
+      [
+        11,
+        "ratio"
+      ],
+      [
+        12,
+        "((double)rdx_total*2^-20)/base"
+      ],
+      [
+        13,
+        "((double)r14_total*2^-20)/base"
+      ],
+      [
+        14,
+        "(double)L+0x00/1e6"
+      ],
+      [
+        15,
+        "(double)L+0x08/1e6"
+      ],
+      [
+        16,
+        "(double)(i32)L+0x68"
+      ],
+      [
+        17,
+        "0.0 if (i32)L+0x68==0 else ((double)L+0x00/1e6)/(double)(i32)L+0x68"
+      ],
+      [
+        18,
+        "(double)L+0x50"
+      ],
+      [
+        19,
+        "(double)L+0x58"
+      ],
+      [
+        20,
+        "(double)L+0x20*2^-30"
+      ],
+      [
+        21,
+        "(double)L+0x30*2^-30"
+      ]
+    ],
+    "note": "For one 192-byte level struct L (i64 fields unless noted) with (elem_count, flagged_count, S, dense, ratio). All i64->double conversions use the u64-to-double fixup (t=(v>>1)|(v&1), convert, double) when the high bit is set.",
+    "source": "outer_insert 0x5ef1630, pinned in PR #3164 (records.json there); re-shipped here as outer_insert.txt"
+  },
+  "not_claimed": [
+    "No cargo/rustc, git-lfs or Ghidra is available on this VM, so make verify / make test / make catalogue-check cannot be run here; the packet's own verify.py and the model tests are the verification run, and they pass. Hosted CI results are not claimed.",
+    "The 21 metric formulas are re-shipped from PR #3164's records (outer_insert.txt is byte-identical to #3164's); they are re-derived here only through the shared excerpt and the census, not re-derived from scratch."
+  ],
+  "owner_layout": {
+    "0x128": "mutex holder pointer (snapshot consumer section runs only when non-null)",
+    "0x138": "level-array base (192-byte structs, count owner+0x778)",
+    "0x150/0x158": "priority vector begin/end (192-byte structs)",
+    "0x618..0x6d8": "previous filler snapshot (188 bytes) + previous flush/addfile counters",
+    "0x6d8": "previous flush cumulative",
+    "0x6e0": "previous stall sum",
+    "0x6e8/0x6f0/0x6f8": "previous write/read/secs compaction sums",
+    "0x700": "previous uptime total (double)",
+    "0x708": "previous addfile cumulative + total files",
+    "0x710": "previous addfile total files",
+    "0x718": "previous addfile L0 files + keys",
+    "0x720": "previous addfile keys",
+    "0x778": "level count (i32)",
+    "0x780": "clock object pointer (virtual call slot +0x98)",
+    "0x788": "stats source pointer (+0x08 = name, +0x30 = blob vector, +0x5a8 = alternate-entry flag)",
+    "0x90": "flush cumulative (u64 bytes)",
+    "0x98": "addfile cumulative (u64 bytes)",
+    "0xa0": "addfile total files (u64)",
+    "0xa8": "addfile L0 files (u64)",
+    "0xb0": "addfile keys (u64)"
+  },
+  "routine": {
+    "address": "0x5ef66e0",
+    "direct_caller_notes": "Three tiny wrapper/thunk functions immediately after the routine (FDEs 0x5ef8050..0x5ef8174, 0x5ef8180..0x5ef819c, 0x5ef81a0..0x5ef81cb). They are not modelled here; the dump routine itself is the bounded unit.",
+    "direct_callers": [
+      "0x5ef80f7",
+      "0x5ef818d",
+      "0x5ef81b5"
+    ],
+    "fde": "0x5ef66e0..0x5ef8049",
+    "frame": "sub $0xca8,%rsp; char buffer at rsp+0x4c0 (2024 bytes, 2000-byte snprintf budget); label string at rsp+0x2b0; outer map<int, map<int,double>> at rsp+0x90 (header rsp+0x98); filler snapshot (188 bytes) at rsp+0x130; aggregate struct (192 bytes) at rsp+0x1f0; per-priority map at rsp+0xc0",
+    "signature": "dump(owner=rdi, update=esi: bool, out=rsi: std::string*)",
+    "size_bytes": 6505
+  },
+  "sections": [
+    {
+      "behavior": "Assign the label string \"Level\" (rodata 0x44d03d) via 0x5eebd00, format the header row with the header formatter 0x5eedda0 (name = *(owner+0x788)+0x08), append the buffer to out.",
+      "name": "Level header",
+      "order": 1,
+      "range": "0x5ef6736..0x5ef6768"
+    },
+    {
+      "behavior": "Call the filler 0x5ef1fa0(owner, src=owner+0x788+0x30+0x40, out_map=&rsp+0x90, snapshot=&rsp+0x130), which fills the outer map and the 188-byte snapshot.",
+      "name": "Filler call",
+      "order": 2,
+      "range": "0x5ef6848"
+    },
+    {
+      "behavior": "For i in 0..owner+0x778-1: inlined _Rb_tree lower_bound for key i in the outer map; if found, insert-or-find via 0x5eed170, build the label \"L<i>\" with the inlined digit-pair-table decimal conversion, call the data-row formatter 0x5eed6f0(buffer, label, inner_map), append the buffer to out. A missing key skips the row.",
+      "name": "Per-level rows",
+      "order": 3,
+      "range": "0x5ef684d..0x5ef6c02"
+    },
+    {
+      "behavior": "lower_bound for key -1, label \"Sum\" (rodata 0x43f948), data-row formatter, append.",
+      "name": "Sum row",
+      "order": 4,
+      "range": "0x5ef6c08..0x5ef6e1e"
+    },
+    {
+      "behavior": "Build a 192-byte aggregate struct = lane-wise (filler snapshot - previous snapshot at owner+0x618..0x6d8); label \"Int\" (rodata 0x441a38); outer_insert a temp map at rsp+0xc0 with elem=0, flagged=0, S=0.0, dense=0.0, ratio=(agg+0x30+agg+0x28)/(1 + flush_interval + addfile_interval) where flush_interval = owner+0x90-owner+0x6d8 and addfile_interval = owner+0x98-owner+0x708; data-row formatter; free the temp tree via 0x5eebcc0; append.",
+      "name": "Int aggregate row",
+      "order": 5,
+      "range": "0x5ef6e23..0x5ef7100"
+    },
+    {
+      "behavior": "Label \"Priority\" (rodata 0x43e67f), header formatter, append.",
+      "name": "Priority header",
+      "order": 6,
+      "range": "0x5ef7105..0x5ef7140"
+    },
+    {
+      "behavior": "Call sibling_1d60(owner, &map@rsp+0xc0), which fills the per-priority map.",
+      "name": "Sibling 0x5ef1d60 call",
+      "order": 7,
+      "range": "0x5ef7180"
+    },
+    {
+      "behavior": "For p in 0..(owner+0x158-owner+0x150)/192-1 (bound computed as ((end-begin)>>6) * 0xaaaaaaaaaaaaaaab mod 2^64, i.e. /192 since elements are 192 bytes): lower_bound for key p in the priority map; if found, insert-or-find via 0x5eed0a0, priority_name(p) assigns the name into the label string, data-row formatter, append. A missing key skips the row.",
+      "name": "Per-priority rows",
+      "order": 8,
+      "range": "0x5ef7185..0x5ef7340"
+    },
+    {
+      "behavior": "Iterate the vector at *(owner+0x788)+0x30, +0xb18/+0xb20 begin/end of 16-byte element pointers; per element: total += 0x5dd3570(*elem) = *(*(elem)+0x10) + 0x3e; garbage += *(elem+0x50). Then snprintf with the blob format: count=(end-begin)/16, total_gb=u64_to_double(total)*2^-30, garbage_gb=u64_to_double(garbage)*2^-30, space_amp = total/(total-garbage) when garbage < total else 0.0.",
+      "name": "Blob totals",
+      "order": 9,
+      "range": "0x5ef7340..0x5ef7438"
+    },
+    {
+      "behavior": "now = (*(*(owner+0x780)))[0x98](); total_secs = (now - owner+0x790)/1e6; interval_secs = total_secs - owner+0x700 (double field). snprintf with the uptime format. rsp+0x48 = total_secs, rsp+0x20 = interval_secs.",
+      "name": "Virtual clock call + uptime line",
+      "order": 10,
+      "range": "0x5ef743d..0x5ef74ac"
+    },
+    {
+      "behavior": "Five snprintf lines: Flush(GB) cumulative owner+0x90*2^-30, interval (owner+0x90-owner+0x6d8)*2^-30; AddFile(GB) cumulative owner+0x98*2^-30, interval (owner+0x98-owner+0x708)*2^-30; AddFile(Total Files) cumulative owner+0xa0, interval owner+0xa0-owner+0x710; AddFile(L0 Files) owner+0xa8/-owner+0x718; AddFile(Keys) owner+0xb0/-owner+0x720. NOTE: each %lu section does sub $0x8,%rsp first, so the literal 0x60/0x68/0x70(%rsp) reads are frame+0x68/+0x70/+0x78, i.e. owner+0xa0/+0xa8/+0xb0, not the literal offsets.",
+      "name": "Flush/AddFile lines",
+      "order": 11,
+      "range": "0x5ef74be..0x5ef7663"
+    },
+    {
+      "behavior": "Over owner+0x138 + level*0xc0 (192-byte structs, count owner+0x778): rbx = sum of L+0x00; rbp = sum of (L+0x10+L+0x18+L+0x20) (read total); r13 = sum of (L+0x28+L+0x30) (write total). Cumulative compaction line with (write_gb = r13*2^-30, write_mbps = (r13*2^-20)/uptime_total, read_gb = rbp*2^-30, read_mbps = (rbp*2^-20)/uptime_total, secs = rbx/1e6); interval line with the same five values computed from interval sums (r13-owner+0x6e8, rbp-owner+0x6f0, rbx-owner+0x6f8) divided by interval_secs (rsp+0x20). When an uptime is below 0.001 the MB/s divisor is 0.001 instead (branches at 0x5ef7d4a and 0x5ef7d5b). If nlevels <= 0 the sums are all zero (branch 0x5ef7f1e).",
+      "name": "Level-array sums + compaction lines",
+      "order": 12,
+      "range": "0x5ef7668..0x5ef784b"
+    },
+    {
+      "behavior": "If the bool arg (esi, saved at rsp+0x44) is nonzero: owner+0x6e8 = r13, owner+0x6f0 = rbp, owner+0x6f8 = rbx.",
+      "name": "Update branch 1",
+      "order": 13,
+      "range": "0x5ef784b..0x5ef7869"
+    },
+    {
+      "behavior": "Call sibling_6280(owner, out_str=&rsp+0xf0 string, &stall_sum@rsp+0x78); append the returned string to out with a length bounds check.",
+      "name": "Sibling 0x5ef6280 call",
+      "order": 14,
+      "range": "0x5ef786a..0x5ef78d2"
+    },
+    {
+      "behavior": "If the bool arg is nonzero: copy the filler snapshot (rsp+0x130..0x1dc, 188 bytes) into owner+0x618..0x6d8; owner+0x6d8 = owner+0x90; owner+0x700 = uptime total (rsp+0x48); owner+0x708 = (owner+0x98, owner+0xa0); owner+0x718 = (owner+0xa8, owner+0xb0); owner+0x6e0 = stall sum (rsp+0x78).",
+      "name": "Update branch 2",
+      "order": 15,
+      "range": "0x5ef78d7..0x5ef7d6a"
+    },
+    {
+      "behavior": "If owner+0x128 (mutex holder) is non-null: lock pthread_mutex, copy the 0x148-byte snapshot struct from owner+0x128+0x28..0x158 region to stack at rsp+0x2b0, unlock, call snapshot consumer 0x5eefda0(out_str=&rsp+0x110, snapshot=&rsp+0x2b0, owner+0x780), append, dispose. If the consumer's returned length exceeds 0x141dd75fff the append is skipped (branch 0x5ef7aeb).",
+      "name": "Snapshot-consumer section",
+      "order": 16,
+      "range": "0x5ef78e2..0x5ef7aeb"
+    },
+    {
+      "behavior": "Dispose strings; tree-free 0x5eec510 on rsp+0xd0 (Int temp map root) and rsp+0xa0 (outer map root); stack-canary check; ret. The remaining tail lines (0x5ef7b3e..0x5ef8049) are u64-to-double fixup blocks, the digit-count dispatch for the \"L<i>\" label, the length-error/system-error throw paths (__throw_length_error/__throw_system_error, rodata 0x4474d2), and landing pads.",
+      "name": "Cleanup",
+      "order": 17,
+      "range": "0x5ef7af3..0x5ef7b3d"
+    }
+  ],
+  "sibling_1d60": {
+    "address": "0x5ef1d60",
+    "behavior": "Iterate owner+0x150..0x158 vector of 192-byte structs (count = (end-begin)/192 via the /64-then-magic-x-0xAA...AB trick); skip elements whose first qword is 0; else build a fresh temp map<int,double> at rsp+0x20 and call outer_insert(temp, elem=0, flagged=0, struct=elem, S=0.0, dense=0.0, ratio=0.0), then insert-or-find into the prio map under key = index via 0x5eed0a0, copy-assign via 0x5eecdb0, free temp tree via 0x5eebcc0.",
+    "direct_callers": [
+      "0x5ef7180"
+    ],
+    "fde": "0x5ef1d60..0x5ef1f39",
+    "signature": "sibling(owner=rdi, prio_map=rsi)"
+  },
+  "sibling_6280": {
+    "address": "0x5ef6280",
+    "behavior": "Calls the final/summary consumer 0x5ef5d40(owner, out_map=&rsp+0x30), which fills a map<string,string>. Builds an ostringstream at rsp+0x80; writes the header \"Write Stall (count): \" (rodata 0x44de6c, 21 chars); iterates the map in order writing per entry \"<key>: <value>, \" (key = node+0x20/+0x28, \": \" rodata 0x44cfa7, value = node+0x40/+0x48, \", \" rodata 0x4360a5). If rdx is non-null: key1 = 0x5fc9ed0() -> function-local static std::string \"total-stops\" (11 chars, at 0x6504900); key2 = 0x5fc9f80() -> \"total-delays\" (12 chars, at 0x65048c0); look each up in the summary map via 0x5ef40a0 (map_find_insert); parse each found string value to u64 via 0x61d1540 (takes a char**, strlen + __isoc23_strtoull base 10 with errno handling); sum the two; store the sum to *rdx. If the sum != 0, append \"interval: \" (rodata 0x43c575, 10 chars) + (sum - owner+0x6e0 as unsigned, via ostream::operator<<) + \" total count\\n\" (rodata 0x433107, 13 chars). Converts the ostringstream to a string via 0x5eebb20 (std::string move-assign) into the out string and returns.",
+    "direct_caller_notes": "The second caller 0x5ef65ea is a tiny thunk (FDE 0x5ef65e0..0x5ef65f9) immediately before sibling_6280's own FDE.",
+    "direct_callers": [
+      "0x5ef65ea",
+      "0x5ef78a1"
+    ],
+    "fde": "0x5ef6280..0x5ef65de",
+    "signature": "sibling(owner=rdi, out_str=rsi, stall_sum_ptr=rdx)"
+  },
+  "spot_check": {
+    "method": "verify.py picks three instruction lines at random (random.Random(66)) from the committed excerpts and verifies each byte-for-byte against a fresh objdump run on the real binary. The pre-submit self-check also re-verified the level-0 ratio correction (filler.txt 0x5ef22e2..0x5ef2329) against a fresh objdump.",
+    "seed": 66
+  },
+  "task": "RE-001",
+  "unknowns": [
+    "Alternate filler path: when the byte at (owner+0x788)+0x5a8 == 2, the filler takes an alternate entry (0x5ef272a: count = owner+0x778, ebp = 1). It is not fully modelled (per #3164).",
+    "The virtual call at 0x5ef743d uses slot +0x98 of the vtable at *(owner+0x780); the concrete callee behind that slot is not pinned here.",
+    "The snapshot-consumer append guard 0x141dd75fff (branch at 0x5ef7aeb): the exact meaning of the compared value (the consumer's returned length) is recorded as observed, not as a pinned semantic.",
+    "owner+0x700 (previous uptime total) is read in this routine but never written here; the writer is elsewhere.",
+    "The three tiny wrapper callers of the dump routine (0x5ef8050..0x5ef8174, 0x5ef8180..0x5ef819c, 0x5ef81a0..0x5ef81cb) and the tiny thunk caller of sibling 0x5ef6280 (0x5ef65e0..0x5ef65f9) are not modelled; only their call sites are recorded.",
+    "The strtoull error paths in parse_u64 0x61d1540 (errno, overflow clamp) are modelled only on the well-formed path; the model clamps at 2^64-1 on overflow."
+  ],
+  "work_item": "RE-001-compaction-dump-66e0-115"
+}
