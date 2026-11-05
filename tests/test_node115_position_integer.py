@@ -45,6 +45,7 @@ class PositionIntegerTests(unittest.TestCase):
                     self.assertNotEqual(c['original'],c['changed'])
                 finally:changed.close()
 
+    @unittest.skipUnless(importlib.util.find_spec("capstone"), "Capstone required for independent disassembly; skip is not a decoder pass")
     def test_decode_extent_and_all_selected_starts(self):
         import capstone
         cs=capstone.Cs(capstone.CS_ARCH_X86,capstone.CS_MODE_64);seen=set()
