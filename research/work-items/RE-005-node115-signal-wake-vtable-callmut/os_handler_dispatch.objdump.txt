@@ -1,0 +1,64 @@
+# os_handler action loop: element vtable load, align read, the sole slot dispatch
+Disassembly of section .text:
+
+0000000005c67800 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xe0c30>:
+ 5c67800:	4c 8d 78 01          	lea    0x1(%rax),%r15
+ 5c67804:	48 89 d5             	mov    %rdx,%rbp
+ 5c67807:	48 c1 e0 04          	shl    $0x4,%rax
+ 5c6780b:	48 8b 8c 02 b0 00 00 	mov    0xb0(%rdx,%rax,1),%rcx
+ 5c67812:	00 
+ 5c67813:	48 8b 84 02 b8 00 00 	mov    0xb8(%rdx,%rax,1),%rax
+ 5c6781a:	00 
+ 5c6781b:	48 8b 50 10          	mov    0x10(%rax),%rdx
+ 5c6781f:	48 ff ca             	dec    %rdx
+ 5c67822:	48 83 e2 f0          	and    $0xfffffffffffffff0,%rdx
+ 5c67826:	48 8d 3c 11          	lea    (%rcx,%rdx,1),%rdi
+ 5c6782a:	48 83 c7 10          	add    $0x10,%rdi
+ 5c6782e:	41 b6 01             	mov    $0x1,%r14b
+ 5c67831:	48 89 de             	mov    %rbx,%rsi
+ 5c67834:	ff 50 28             	call   *0x28(%rax)
+ 5c67837:	31 c9                	xor    %ecx,%ecx
+ 5c67839:	4c 89 f8             	mov    %r15,%rax
+ 5c6783c:	49 83 ed 01          	sub    $0x1,%r13
+
+# previous-handler call A context (raw fn pointer from the record, cmp $0x2 gate)
+Disassembly of section .text:
+
+0000000005c67785 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xe0cab>:
+ 5c67785:	b8 a0 00 00 00       	mov    $0xa0,%eax
+ 5c6778a:	0f 85 72 02 00 00    	jne    5c67a02 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xe0a2e>
+ 5c67790:	48 8b 48 08          	mov    0x8(%rax),%rcx
+ 5c67794:	48 83 f9 02          	cmp    $0x2,%rcx
+ 5c67798:	0f 82 64 02 00 00    	jb     5c67a02 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xe0a2e>
+ 5c6779e:	f6 80 90 00 00 00 04 	testb  $0x4,0x90(%rax)
+ 5c677a5:	0f 85 52 02 00 00    	jne    5c679fd <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xe0a33>
+ 5c677ab:	ff d1                	call   *%rcx
+ 5c677ad:	e9 50 02 00 00       	jmp    5c67a02 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xe0a2e>
+ 5c677b2:	4d 01 d5             	add    %r10,%r13
+ 5c677b5:	49 8b 85 48 ff ff ff 	mov    -0xb8(%r13),%rax
+ 5c677bc:	48 83 f8 02          	cmp    $0x2,%rax
+ 5c677c0:	72 10                	jb     5c677d2 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xe0c5e>
+ 5c677c2:	41 f6 45 d0 04       	testb  $0x4,-0x30(%r13)
+ 5c677c7:	75 04                	jne    5c677cd <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xe0c63>
+ 5c677c9:	ff d0                	call   *%rax
+ 5c677cb:	eb 05                	jmp    5c677d2 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xe0c5e>
+ 5c677cd:	48 89 de             	mov    %rbx,%rsi
+ 5c677d0:	ff d0                	call   *%rax
+ 5c677d2:	48 85 db             	test   %rbx,%rbx
+ 5c677d5:	0f 84 80 02 00 00    	je     5c67a5b <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xe09d5>
+ 5c677db:	49 8b 4d e8          	mov    -0x18(%r13),%rcx
+ 5c677df:	48                   	rex.W
+
+# previous-handler call D context
+Disassembly of section .text:
+
+0000000005c679f5 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xe0a3b>:
+ 5c679f5:	fe                   	(bad)
+ 5c679f6:	ff                   	(bad)
+ 5c679f7:	ff                   	ljmp   (bad)
+ 5c679f8:	e9 f1 fe ff ff       	jmp    5c678ee <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xe0b42>
+ 5c679fd:	48 89 de             	mov    %rbx,%rsi
+ 5c67a00:	ff d1                	call   *%rcx
+ 5c67a02:	48 8d 05 4f 85 89 00 	lea    0x89854f(%rip),%rax        # 64fff58 <__register_atfork@plt+0x10e3c8>
+ 5c67a09:	f0 4a ff 4c e0 08    	lock decq 0x8(%rax,%r12,8)
+ 5c67a0f:	48                   	rex.W
