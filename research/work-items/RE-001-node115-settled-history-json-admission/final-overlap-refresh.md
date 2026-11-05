@@ -1,0 +1,7 @@
+# Final overlap refresh for packets 87–90
+
+At 2026-11-05 16:24 UTC, GitHub authenticated as `thegeronimo` and upstream `main` remained `05bc2de303c05525b71e7e257426e741bc66a390`. The complete all-state list has 3,223 currently visible PRs. The 32 previously observed records now unavailable remain retained as historical exclusions, for a 3,255-record union. Since the preceding refresh, three PRs were added (#3263–#3265), two existing heads changed (#3248/#3252), no prior listed PR disappeared, and there are no open non-PR issues.
+
+The five new or changed PR bodies and available changed-file patches were compared against the four prepared subjects. They concern a RocksDB factory role map, allocator lookup caller, bridge-token framing, and X5 callsite/reader inventories. No competing settled-history writer/reader, fee-history reward constructor or TWAP empty-error handoff contract was identified. Three API patches were absent among those five PRs; #3265's 41 changed-file patches were available.
+
+The complete current union is `/private/tmp/hl91-final-census.json`; incremental raw file caches are `/private/tmp/hl91-prepublish-pr*-files.json`. Earlier comparisons and caches remain applicable for unchanged heads. The 32 unavailable historical records, missing or truncated patches, a prior 3,000-file API cap, alternate terminology and future/unpublished work prevent an absolute uniqueness guarantee. This is a point-in-time finding; perform a quick newest-PR check immediately before publication if more work arrives.
