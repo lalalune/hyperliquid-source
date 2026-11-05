@@ -1,0 +1,506 @@
+{
+ "answer": "The handle is a single 0x30-byte heap allocation taken through the libc malloc slot at every one of its 16 construction sites (the 14 spawn bodies, the current-thread lazy initialiser 0x5c9d1f0, and a sibling unnamed initialiser 0x5c82fd0), laid out as an Arc header and four inner fields: strong count at +0x00 and weak count at +0x08 (both initialised to 1), the thread id at +0x10 (minted inline from the global counter 0x6500050, ThreadId::new inlined, overflow panicking at thread/id.rs line 38), the thread name as an owned (pointer, length) buffer at +0x18/+0x20 (validated for interior NUL bytes by body 0x5ca5760, panicking at thread/thread.rs line 24; zero pointer and an unstored length in the two unnamed constructions), and the parker state word at +0x28 (initialised to 0).  There is nothing beyond the parker word: +0x2c..+0x30 is tail padding of the 0x30 block, no constructor stores there and the drop glue reads nothing there.  The drop glue 0x5c98b40 frees the name buffer by (pointer, length) through the dealloc slot, decrements the weak count, and at zero tail-jumps to libc free on the whole block.",
+ "artifact": {
+  "bytes": 105896032,
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "snapshot": "<authenticated-node115>"
+ },
+ "boundaries": {
+  "empty_name_length": "In the two unnamed constructions the length slot at +0x20 is never stored, so its word holds whatever the fresh malloc block contained.  This is safe in the artifact's own terms: the only consumer of +0x20 is the drop glue, which reads it only when the +0x18 pointer is nonzero, and every construction that stores a nonzero pointer also stores the length (census: 14 named, 2 unnamed, no third variant).",
+  "name_first_byte_zero": "The drop glue writes a zero byte at the name buffer's first byte before freeing it.  The binary records no reason for this (no string, Location or comment names it); it is recorded as behaviour only.",
+  "other_malloc_site": "One further call goes through the malloc slot (site 0x5c8b956, body 0x5c8b8f0) without the 0x30 size pattern; it does not construct this layout and is recorded for census completeness only.",
+  "park_side": "The park (futex wait) side of the parker is not pinned by this packet.  The +0x28 word's identity as the parker state word rests on the constructors' zero store, its position as the last field, and PR #3204's pinned unpark tail (an xchg of 1 at [A+0x10]+0x28, waking through futex syscall 202 iff the old word was -1).  The state names (0 empty, 1 notified, -1 parked) follow that pinned unpark behaviour.",
+  "scoped_region_ctor": "Body 0x5c82fd0 is a second lazy initialiser in the scoped-machinery neighborhood: it uses the same TLS slots and id counter as 0x5c9d1f0, constructs the same unnamed handle, and additionally assembles a 0x30 packet through the packet allocator slot.  Which entry points reach it is PR #3206's instantiation question and is not re-derived here; its store map is identical, so the layout does not depend on the answer.",
+  "source_names": "Names such as Thread, ThreadId and parker are the std source names for the mechanisms the artifact itself names through its thread/current.rs, thread/id.rs and thread/thread.rs path strings and panic messages; the binary carries no symbol naming the handle struct.  What is pinned is the byte layout and the code that writes and reads each field.  Whether std spells +0x18/+0x20 as a single Option<Box<str>> field is a source-level question the bytes do not answer; the code pins one owned (pointer, length) buffer, validated as a thread name and freed by size."
+ },
+ "captured_code_executed": false,
+ "construction_census": {
+  "malloc_slot_call_sites": 17,
+  "named_variant": 14,
+  "other_malloc_call": {
+   "owner": "0x5c8b8f0",
+   "site": "0x5c8b956"
+  },
+  "pattern": "bf 30 00 00 00 ff 15 <malloc slot>",
+  "size_0x30_sites": [
+   {
+    "call": "0x15b6e69",
+    "mov": "0x15b6e64",
+    "owner": "0x15b6d10",
+    "variant": "named"
+   },
+   {
+    "call": "0x15b7509",
+    "mov": "0x15b7504",
+    "owner": "0x15b73c0",
+    "variant": "named"
+   },
+   {
+    "call": "0x15b7bc9",
+    "mov": "0x15b7bc4",
+    "owner": "0x15b7a80",
+    "variant": "named"
+   },
+   {
+    "call": "0x15b822a",
+    "mov": "0x15b8225",
+    "owner": "0x15b80e0",
+    "variant": "named"
+   },
+   {
+    "call": "0x2d4699b",
+    "mov": "0x2d46996",
+    "owner": "0x2d46820",
+    "variant": "named"
+   },
+   {
+    "call": "0x2d470eb",
+    "mov": "0x2d470e6",
+    "owner": "0x2d46f90",
+    "variant": "named"
+   },
+   {
+    "call": "0x2d4787a",
+    "mov": "0x2d47875",
+    "owner": "0x2d47710",
+    "variant": "named"
+   },
+   {
+    "call": "0x5613bcb",
+    "mov": "0x5613bc6",
+    "owner": "0x5613a70",
+    "variant": "named"
+   },
+   {
+    "call": "0x561436b",
+    "mov": "0x5614366",
+    "owner": "0x56141f0",
+    "variant": "named"
+   },
+   {
+    "call": "0x5614abb",
+    "mov": "0x5614ab6",
+    "owner": "0x5614960",
+    "variant": "named"
+   },
+   {
+    "call": "0x561524b",
+    "mov": "0x5615246",
+    "owner": "0x56150d0",
+    "variant": "named"
+   },
+   {
+    "call": "0x5bc2dda",
+    "mov": "0x5bc2dd5",
+    "owner": "0x5bc2c90",
+    "variant": "named"
+   },
+   {
+    "call": "0x5c83042",
+    "mov": "0x5c8303d",
+    "owner": "0x5c82fd0",
+    "variant": "unnamed"
+   },
+   {
+    "call": "0x5c9d24e",
+    "mov": "0x5c9d249",
+    "owner": "0x5c9d1f0",
+    "variant": "unnamed"
+   },
+   {
+    "call": "0x5cd95c9",
+    "mov": "0x5cd95c4",
+    "owner": "0x5cd9470",
+    "variant": "named"
+   },
+   {
+    "call": "0x5cf6fc9",
+    "mov": "0x5cf6fc4",
+    "owner": "0x5cf6e80",
+    "variant": "named"
+   }
+  ],
+  "unnamed_variant": 2
+ },
+ "glue_census": {
+  "call_sites": 108,
+  "distinct_owners": 77,
+  "main_ctor_unwind_site": "0x5c9d315",
+  "scoped_ctor_unwind_site": "0x5c8311e",
+  "slot": "0x64dfe58",
+  "target": "0x5c98b40"
+ },
+ "id_shim_census": {
+  "count": 22,
+  "direct_callers": [
+   {
+    "owner": "0x15b6d10",
+    "site": "0x15b7147"
+   },
+   {
+    "owner": "0x15b73c0",
+    "site": "0x15b77e9"
+   },
+   {
+    "owner": "0x15b7a80",
+    "site": "0x15b7e68"
+   },
+   {
+    "owner": "0x15b80e0",
+    "site": "0x15b854f"
+   },
+   {
+    "owner": "0x1639750",
+    "site": "0x1639f14"
+   },
+   {
+    "owner": "0x2d46820",
+    "site": "0x2d46c8e"
+   },
+   {
+    "owner": "0x2d46f90",
+    "site": "0x2d4742a"
+   },
+   {
+    "owner": "0x2d47710",
+    "site": "0x2d47b3f"
+   },
+   {
+    "owner": "0x474a9f0",
+    "site": "0x474ab17"
+   },
+   {
+    "owner": "0x5613a70",
+    "site": "0x5613f0a"
+   },
+   {
+    "owner": "0x56141f0",
+    "site": "0x561465e"
+   },
+   {
+    "owner": "0x5614960",
+    "site": "0x5614de6"
+   },
+   {
+    "owner": "0x56150d0",
+    "site": "0x561553e"
+   },
+   {
+    "owner": "0x5bc2c90",
+    "site": "0x5bc30bd"
+   },
+   {
+    "owner": "0x5c80100",
+    "site": "0x5c80282"
+   },
+   {
+    "owner": "0x5c82fd0",
+    "site": "0x5c830d7"
+   },
+   {
+    "owner": "0x5c99970",
+    "site": "0x5c99e74"
+   },
+   {
+    "owner": "0x5c9d1f0",
+    "site": "0x5c9d2aa"
+   },
+   {
+    "owner": "0x5caaba0",
+    "site": "0x5caacb2"
+   },
+   {
+    "owner": "0x5cab980",
+    "site": "0x5caba92"
+   },
+   {
+    "owner": "0x5cd9470",
+    "site": "0x5cd9882"
+   },
+   {
+    "owner": "0x5cf6e80",
+    "site": "0x5cf72c1"
+   }
+  ],
+  "id_message": {
+   "text": "failed to generate unique thread ID: bitspace exhausted",
+   "va": "0x94a088"
+  },
+  "name_message": {
+   "len": 47,
+   "text": "thread name may not contain interior null bytes",
+   "va": "0x94a1ad"
+  },
+  "target": "0x5ca4480"
+ },
+ "layout": {
+  "allocation": {
+   "align": 8,
+   "alloc_error": "slot 0x64df490 with (align 8, size 0x30) in the main initialiser",
+   "allocator": "libc malloc via slot 0x64e1570",
+   "release": "libc free via slot 0x64e20d8 (no size argument), reached from the field-drop glue when the weak count reaches zero",
+   "size": "0x30"
+  },
+  "fields": [
+   {
+    "evidence": "both read constructors store 1; PR #3204's context release decrements [A+0x10]+0x00 and runs the field-drop glue at zero",
+    "name": "strong count",
+    "offset": "0x00",
+    "size": 8
+   },
+   {
+    "evidence": "both read constructors store 1; the field-drop glue decrements it (lock decq at glue +0x2c) and tail-jumps to free at zero",
+    "name": "weak count",
+    "offset": "0x08",
+    "size": 8
+   },
+   {
+    "evidence": "stored from the lock cmpxchg loop on the global counter 0x6500050 (ThreadId::new inlined) in all three read constructors; overflow calls the panic shim 0x5ca4480 (thread/id.rs line 38)",
+    "inner_offset": "0x00",
+    "name": "thread id",
+    "offset": "0x10",
+    "size": 8
+   },
+   {
+    "evidence": "the 14 spawn constructions store the validated name string's pointer; the two initialisers store 0; the field-drop glue loads it and, when nonzero, zeroes its first byte and frees it by the +0x20 length",
+    "inner_offset": "0x08",
+    "name": "name buffer pointer",
+    "offset": "0x18",
+    "size": 8
+   },
+   {
+    "evidence": "stored by the 14 spawn constructions from the validated name string's length; never stored by the two initialisers; consumed only by the field-drop glue as the dealloc size, only when the +0x18 pointer is nonzero",
+    "inner_offset": "0x10",
+    "name": "name buffer length",
+    "offset": "0x20",
+    "size": 8
+   },
+   {
+    "evidence": "stored as 0 by every construction; PR #3204 pinned the scope payload drop xchg'ing 1 into this word at [A+0x10]+0x28 and waking through the futex syscall iff the old word was -1",
+    "inner_offset": "0x18",
+    "name": "parker state word",
+    "offset": "0x28",
+    "size": 4
+   },
+   {
+    "evidence": "no construction stores at +0x2c and the drop glue reads nothing there; the 0x30 allocation ends at +0x30",
+    "name": "tail padding",
+    "offset": "0x2c",
+    "size": 4
+   }
+  ]
+ },
+ "limits": "Static trace only; no captured code was executed.  The censuses cover the artifact's file bytes, its .rela.dyn relocations and rip-relative / direct-branch references in .text; a construction that obtained the 0x30 block through some other allocator entry would not be a construction of this handle type as pinned here, because the drop chain frees the block through libc free.",
+ "locations": {
+  "current_rs": {
+   "col": 9,
+   "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/current.rs",
+   "len": 81,
+   "line": 315,
+   "record": "0x64c3a70"
+  },
+  "id_rs": {
+   "col": 13,
+   "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/id.rs",
+   "len": 76,
+   "line": 38,
+   "record": "0x64c3dc0"
+  },
+  "thread_rs": {
+   "col": 40,
+   "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/thread.rs",
+   "len": 80,
+   "line": 24,
+   "record": "0x64c3e08"
+  }
+ },
+ "owners": {
+  "main_thread_ctor": {
+   "bytes": 307,
+   "end": "0x5c9d323",
+   "offset": 97108464,
+   "sha256": "a7c468881fcbfe7c35224608b3e1fb3dc99ee78dc8ef16ed8fbf42b54bb5d56c",
+   "start": "0x5c9d1f0"
+  },
+  "name_validator": {
+   "bytes": 355,
+   "end": "0x5ca58c3",
+   "offset": 97142624,
+   "sha256": "dbb953f930491a31d1471558dac0105e2a94fb3484fe281ae620a0d5086213ef",
+   "start": "0x5ca5760"
+  },
+  "scoped_region_ctor": {
+   "bytes": 348,
+   "end": "0x5c8312c",
+   "offset": 97001424,
+   "sha256": "478d76e4fffc052e077d3dab44488e68e8b83f4f31dffd2ee5265a1fdb0d7133",
+   "start": "0x5c82fd0"
+  },
+  "spawn_thread_ctor": {
+   "bytes": 1918,
+   "end": "0x56141ee",
+   "offset": 90253936,
+   "sha256": "b477d0af755bbbda9ee410ad49499a02237628d3b2e78dfa4e2ec73ce566cff4",
+   "start": "0x5613a70"
+  },
+  "thread_field_drop": {
+   "bytes": 73,
+   "end": "0x5c98b89",
+   "offset": 97090368,
+   "sha256": "7ca6f244918e5003e12f248d655375601a436ae72776897c6aad46457a258c15",
+   "start": "0x5c98b40"
+  },
+  "thread_id_panic_shim": {
+   "bytes": 29,
+   "end": "0x5ca449d",
+   "offset": 97137792,
+   "sha256": "1ce593480e9e70545ee1fca277e82db931ad3c7ecc2e1d5a33f5cd17808e4d13",
+   "start": "0x5ca4480"
+  }
+ },
+ "packet": "RE-005-node115-thread-handle-internals",
+ "pins": {
+  "glue_dealloc_call": {
+   "bytes": "ff153a698400",
+   "va": "0x5c98b60"
+  },
+  "glue_free_jmp": {
+   "bytes": "ff2556958400",
+   "va": "0x5c98b7c"
+  },
+  "glue_load_name_len": {
+   "bytes": "488b7320",
+   "va": "0x5c98b52"
+  },
+  "glue_load_name_ptr": {
+   "bytes": "488b7b18",
+   "va": "0x5c98b49"
+  },
+  "glue_weak_decq": {
+   "bytes": "f048ff4b08",
+   "va": "0x5c98b6c"
+  },
+  "glue_zero_first_byte": {
+   "bytes": "c60700",
+   "va": "0x5c98b56"
+  },
+  "main_alloc_call": {
+   "bytes": "ff151c438400",
+   "va": "0x5c9d24e"
+  },
+  "main_alloc_error": {
+   "bytes": "bf08000000be30000000ff1588218400",
+   "va": "0x5c9d2f8"
+  },
+  "main_alloc_size": {
+   "bytes": "bf30000000",
+   "va": "0x5c9d249"
+  },
+  "main_id_cmpxchg": {
+   "bytes": "f04c0fb13d0d2e8600",
+   "va": "0x5c9d23a"
+  },
+  "main_store_block": {
+   "bytes": "48c7000100000048c740080100000048c74018000000004c897810c7402800000000",
+   "va": "0x5c9d260"
+  },
+  "main_unwind_drop_call": {
+   "bytes": "ff153d2b8400",
+   "va": "0x5c9d315"
+  },
+  "scoped_alloc_size": {
+   "bytes": "bf30000000",
+   "va": "0x5c8303d"
+  },
+  "scoped_store_block": {
+   "bytes": "48c7000100000048c740080100000048c74018000000004c897010c7402800000000",
+   "va": "0x5c83054"
+  },
+  "shim_lea_location": {
+   "bytes": "488d152ef98100",
+   "va": "0x5ca448b"
+  },
+  "shim_lea_message": {
+   "bytes": "488d3dfd5bcafa",
+   "va": "0x5ca4484"
+  },
+  "spawn_alloc_call": {
+   "bytes": "ff159fd9ec00",
+   "va": "0x5613bcb"
+  },
+  "spawn_alloc_size": {
+   "bytes": "bf30000000",
+   "va": "0x5613bc6"
+  },
+  "spawn_id_cmpxchg": {
+   "bytes": "f04c0fb13da9c4ee00",
+   "va": "0x5613b9e"
+  },
+  "spawn_name_validate_call": {
+   "bytes": "ff15a8d9ec00",
+   "va": "0x5613bba"
+  },
+  "spawn_store_block": {
+   "bytes": "48c7000100000048c740080100000048895818488968204c897810c7402800000000",
+   "va": "0x5613bdd"
+  },
+  "validator_lea_location": {
+   "bytes": "4c8d0576e58100",
+   "va": "0x5ca588b"
+  },
+  "validator_lea_message": {
+   "bytes": "488d3d2949cafa",
+   "va": "0x5ca587d"
+  },
+  "validator_load_base": {
+   "bytes": "488b0f",
+   "va": "0x5ca5769"
+  },
+  "validator_load_len": {
+   "bytes": "488b5710",
+   "va": "0x5ca5770"
+  }
+ },
+ "question": "The packet-cell-context packet (PR #3204) pinned the packet cells' context pointer as std's ScopeData and its field at A+0x10 as the main thread's handle, with the parker state word at handle +0x28 and a (pointer, length) buffer freed from handle +0x18/+0x20 by the drop glue, but left the handle's own decomposition beyond the parker word explicitly unpinned (its \"thread_handle_internals\" boundary).  What type is the handle allocation, how large is it, and what are its fields -- in particular, is there anything beyond the parker word?",
+ "slots": {
+  "alloc_error": {
+   "slot": "0x64df490",
+   "target": "0x141e251",
+   "type": 8
+  },
+  "dealloc": {
+   "slot": "0x64df4a0",
+   "target": "0x635de30",
+   "type": 8
+  },
+  "free": {
+   "slot": "0x64e20d8",
+   "symbol": "free",
+   "type": 6
+  },
+  "futex_syscall": {
+   "slot": "0x64e06b8",
+   "symbol": "syscall",
+   "type": 6
+  },
+  "malloc": {
+   "slot": "0x64e1570",
+   "symbol": "malloc",
+   "type": 6
+  },
+  "name_validator": {
+   "slot": "0x64e1568",
+   "target": "0x5ca5760",
+   "type": 8
+  },
+  "thread_field_drop": {
+   "slot": "0x64dfe58",
+   "target": "0x5c98b40",
+   "type": 8
+  }
+ },
+ "thread_id_counter": {
+  "address": "0x6500050"
+ }
+}
