@@ -1,0 +1,49 @@
+site	kind	caller_fde	args_at_site
+0x5d79107	call	0x5d78b40..0x5d7a806	tag-13 query called after a 0x606ca40 call: rsi = 0x650(%r15) (null-checked just before); rcx = -0x3b0(%rbp) (16-byte-record range); rdx = -0x388(%rbp) (qword-element range); rdi = lea -0x1e0(%rbp) (out record). After the call the caller frees -0x1d8(%rbp) when non-null, then calls 0x60d52f0 on rbx.
+0x61b456a	call	0x61b45da..0x61b4609	tag-13 query called after a copy loop that builds the two ranges (qwords copied from (%r12,%rax,1) to (%rsi,%rax,1), 16-byte records copied with movdqu from (%r13,%rax,2) to (%rcx,%rax,2)): rcx = r15 (16-byte-record range), rdx = 0x8(%rsp) (qword-element range), rsi = r14 (obj), rdi = rbp (out record). After the call the caller frees both ranges with sized deletes.
+0x61b4739	call	0x61b47a2..0x61b483b	tag-13 query called after a copy loop that builds the two ranges (16-byte records copied with movdqu from (%r13,%rax,1) to (%rcx,%rax,1), one qword per record stored from r12 to (%rdx), rdx advancing by 8): rcx = r15 (16-byte-record range), rdx = 0x8(%rsp) (qword-element range), rsi = r14 (obj), rdi = rbp (out record). After the call the caller frees both ranges with sized deletes.
+0x61b2d7f	call	0x61b2cf0..0x61b3596	tag-13 query calls the count-mismatch helper on the count-mismatch path: rdi = out record (entry rdi), rcx = lea 0x60(%rsp) (first string: "the CFs size and keys size does not match!", 42 bytes), rdx = 0, rsi = 2, r8 = lea 0x70(%rsp) (second string, empty), r9 = 0
+0x61b1b28	call	0x61b1af0..0x61b1e18	tag-3 query calls the throttle gate: rdi = rbp (obj), rsi = lea 0x17(%rsp) (the 1-byte tag string, byte 0x3)
+0x61b1e7b	call	0x61b1e40..0x61b21ca	tag-4 query calls the throttle gate: rdi = rbp (obj), rsi = lea 0x13(%rsp) (the 1-byte tag string, byte 0x4)
+0x61b2247	call	0x61b21f0..0x61b2738	twin tag 5 calls the throttle gate: rdi = r12 (obj), rsi = lea 0x23(%rsp) (the 1-byte tag string, byte 0x5)
+0x61b27b7	call	0x61b2760..0x61b2ca8	twin tag 6 calls the throttle gate: rdi = r12 (obj), rsi = lea 0x23(%rsp) (the 1-byte tag string, byte 0x6)
+0x61b2dc8	call	0x61b2cf0..0x61b3596	tag-13 query calls the throttle gate: rdi = rsi (obj), rsi = lea 0x5b(%rsp) (the 1-byte tag string, byte 0xd)
+0x61b1940	call	0x61b1930..0x61b19e7	gate calls the limit check: rdi = rbx (obj), rsi = rbp (the 1-byte tag string)
+0x61b1cd4	call	0x61b1af0..0x61b1e18	tag-3 query sets flag bit 1 on the mask qword at 0x30(%rsp): rdi = &mask, rsi = 1
+0x61b202c	call	0x61b1e40..0x61b21ca	tag-4 query sets flag bit 2 on the mask qword at 0x30(%rsp): rdi = &mask, rsi = 2
+0x61b203b	call	0x61b1e40..0x61b21ca	tag-4 query sets flag bit 3 on the mask qword at 0x30(%rsp): rdi = &mask, rsi = 3
+0x61b23ec	call	0x61b21f0..0x61b2738	twin tag 5 sets flag bit 4 on the mask qword at 0x40(%rsp): rdi = &mask, rsi = 4
+0x61b23fb	call	0x61b21f0..0x61b2738	twin tag 5 sets flag bit 5 on the mask qword at 0x40(%rsp): rdi = &mask, rsi = 5
+0x61b241f	call	0x61b21f0..0x61b2738	twin tag 5 sets flag bit 7 on the mask qword, only when the pair-C length in r15 is nonzero: rdi = &mask, rsi = 7
+0x61b25bf	call	0x61b21f0..0x61b2738	twin tag 5 sets flag bit 6 on the mask qword, only when the pair-B length at *(r14 + 0x08) is nonzero: rdi = &mask, rsi = 6
+0x61b295c	call	0x61b2760..0x61b2ca8	twin tag 6 sets flag bit 4 on its mask qword: rdi = &mask, rsi = 4
+0x61b296b	call	0x61b2760..0x61b2ca8	twin tag 6 sets flag bit 5 on its mask qword: rdi = &mask, rsi = 5
+0x61b298f	call	0x61b2760..0x61b2ca8	twin tag 6 sets flag bit 7 on its mask qword, only when the pair-C length in r15 is nonzero: rdi = &mask, rsi = 7
+0x61b2b2f	call	0x61b2760..0x61b2ca8	twin tag 6 sets flag bit 6 on its mask qword, only when the pair-B length at *(r14 + 0x08) is nonzero: rdi = &mask, rsi = 6
+0x61b2f46	call	0x61b2cf0..0x61b3596	tag-13 query sets flag bit 8 on the mask qword at 0xd0(%rsp): rdi = &mask, rsi = 8
+0x61b2f53	call	0x61b2cf0..0x61b3596	tag-13 query sets flag bit 9 on the mask qword at 0xd0(%rsp): rdi = &mask, rsi = 9
+0x61b2f60	call	0x61b2cf0..0x61b3596	tag-13 query sets flag bit 10 on the mask qword at 0xd0(%rsp): rdi = &mask, rsi = 10
+0x61b368b	call	0x61b35c0..0x61b371d	sibling routine calls the flag-bit setter (bit number not recorded; outside this packet's routines)
+0x61b1d88	call	0x61b1af0..0x61b1e18	tag-3 query calls frame-and-deliver: rdi = rbx (out), rsi = rbp (obj), rdx = lea 0x20(%rsp) (value block: return at +0x00, tag byte at +0x08, mask at +0x10, message data at +0x18, message size at +0x20)
+0x61b211e	call	0x61b1e40..0x61b21ca	tag-4 query calls frame-and-deliver: rdi = rbx (out), rsi = rbp (obj), rdx = lea 0x20(%rsp) (same value block)
+0x61b257b	call	0x61b21f0..0x61b2738	twin tag 5 calls frame-and-deliver: rdi = rbx (out), rsi = r12 (obj), rdx = lea 0x30(%rsp) (value block: return at +0x00, tag byte at +0x08, mask at +0x10, message data at +0x18, message size at +0x20)
+0x61b2aeb	call	0x61b2760..0x61b2ca8	twin tag 6 calls frame-and-deliver: rdi = rbx (out), rsi = r12 (obj), rdx = lea 0x30(%rsp) (same value block)
+0x61b3318	call	0x61b2cf0..0x61b3596	tag-13 query calls frame-and-deliver: rdi = out (0x18(%rsp)), rsi = obj (0x20(%rsp)), rdx = lea 0xc0(%rsp) (value block: return at +0x00, tag byte at +0x08, mask at +0x10, message data at +0x18, message size at +0x20)
+0x61b36b2	call	0x61b35c0..0x61b371d	sibling routine calls frame-and-deliver (arguments not recorded; outside this packet's routines)
+0x61b3cc7	call	0x61b3860..0x61b3e33	sibling routine calls frame-and-deliver (arguments not recorded; outside this packet's routines)
+0x61b1a57	call	0x61b1a10..0x61b1ac6	frame-and-deliver calls the frame builder: rdi = rdx (value block), rsi = lea 0x10(%rsp) (the framed output string, empty SSO)
+0x61bb28f	call	0x61bb0b0..0x61bb3da	another routine calls the frame builder (arguments not recorded; outside this packet's routines)
+0x61bba0e	call	0x61bb440..0x61bbd76	another routine calls the frame builder (arguments not recorded; outside this packet's routines)
+0x61bc790	call	0x61bc2f0..0x61bc9f5	another routine calls the frame builder (arguments not recorded; outside this packet's routines)
+0x61bcc0e	call	0x61bca30..0x61bcd5a	chain-dispatch notifier 0x61bca30 (open PR #2985) calls the frame builder
+0x61b1d2b	call	0x61b1af0..0x61b1e18	tag-3 query encodes the pair length *(r13 + 0x48) (low 32 bits) with the ULEB128 encoder: rdi = lea 0x63(%rsp), esi = length
+0x61b20c0	call	0x61b1e40..0x61b21ca	tag-4 query encodes the fourth argument's length 0x8(%r12) with the ULEB128 encoder: rdi = lea 0x63(%rsp), esi = length
+0x61b24a3	call	0x61b21f0..0x61b2738	twin tag 5 encodes the pair-A length *(r13 + 0x08) with the ULEB128 encoder: rdi = lea 0x69(%rsp), esi = length
+0x61b251a	call	0x61b21f0..0x61b2738	twin tag 5 encodes the pair-C length in r15 with the ULEB128 encoder: rdi = lea 0x73(%rsp), esi = r15d
+0x61b25d8	call	0x61b21f0..0x61b2738	twin tag 5 encodes the pair-B length *(r14 + 0x08) with the ULEB128 encoder: rdi = lea 0x6e(%rsp), esi = low 32 bits of *(r14 + 0x08)
+0x61b2a13	call	0x61b2760..0x61b2ca8	twin tag 6 encodes the pair-A length *(r13 + 0x08) with the ULEB128 encoder
+0x61b2a8a	call	0x61b2760..0x61b2ca8	twin tag 6 encodes the pair-C length in r15 with the ULEB128 encoder
+0x61b2b48	call	0x61b2760..0x61b2ca8	twin tag 6 encodes the pair-B length *(r14 + 0x08) with the ULEB128 encoder
+0x61b306e	call	0x61b2cf0..0x61b3596	tag-13 query encodes a record length *(r14 + 0x08) (low 32 bits) with the ULEB128 encoder: rdi = lea 0xf9(%rsp), esi = length
+0x61b31c6	call	0x61b2cf0..0x61b3596	tag-13 query encodes the S2 string's size (low 32 bits) with the ULEB128 encoder: rdi = lea 0xfe(%rsp), esi = size
+0x61b3275	call	0x61b2cf0..0x61b3596	tag-13 query encodes the S3 string's size (low 32 bits) with the ULEB128 encoder: rdi = lea 0x103(%rsp), esi = size
