@@ -10,12 +10,22 @@ packet traces the second caller's owner body
 0x5ceafd0..0x5ceb1a4 end to end:
 
 1.  Owner and dispatch: the second caller is a 468-byte
-    body with no direct call or jump references anywhere
-    in .text and no rip-relative references; the only
-    reference to its start in the artifact is one
-    R_X86_64_RELATIVE addend at 0x64dfe40, a code-pointer
-    table slot in .data.rel.ro - it is reached through
-    data, not through a call site.
+    body with no direct call or jump references to its
+    start anywhere in .text and no rip-relative
+    reference to its start; the only reference to its
+    start in the artifact is one R_X86_64_RELATIVE
+    addend at 0x64dfe40, an entry of .got.  That slot
+    is called through (FF /15) at 35 sites, each the
+    only slot call of its own 136-byte drop-glue body
+    at body+0xc: the body runs when a handle whose
+    entry this is gets dropped.  (Correction: as
+    first filed, this packet called the slot a
+    code-pointer table slot in .data.rel.ro, said the
+    body is reached through data rather than a call
+    site and left the invocation event open; its
+    census compared rip-relative targets only against
+    the body's own start and so could not see
+    indirect calls through the slot.)
 2.  The call at 0x5ceb06e: which conditions reach it
     (timers guard, wheel lock, value-slot gate, the
     [entry+0x10] == -1 inline arm), the exact argument
@@ -40,8 +50,9 @@ Method: both bodies are exported in full.  Store
 censuses are taken over the disassembly.  Direct
 callers of the bucket body and references to the second
 caller are censused by whole-.text scans for relative
-call/jump sites and rip-relative slot forms plus a
-.rela.dyn addend scan.  Strings and tables resolve
+call/jump sites, rip-relative slot forms and indirect
+call/jump forms through the slot holding the second
+caller's address, plus a .rela.dyn addend scan.  Strings and tables resolve
 through the section table (.rodata is identity-mapped;
 .text resolves at VA-0x1000; .data.rel.ro at
 VA-0x2000); GOT slots are resolved from .rela.dyn
@@ -49,6 +60,7 @@ addends; panic Location statics are read as raw qwords
 plus their RELATIVE addend.
 """
 
+import bisect
 import hashlib
 import json
 import re
@@ -436,6 +448,77 @@ def bucket_call_sites(data):
     return hits
 
 
+CALLER_SLOT = 0x64DFE40
+
+
+def section_of(data, va):
+    """The section whose VA range holds `va`."""
+    for s in sections(data):
+        if s['address'] <= va < s['address'] + s['size']:
+            return s
+    raise ValueError(f'no section holds {va:#x}')
+
+
+def fde_ranges(data):
+    """Every FDE pc range in .eh_frame, sorted."""
+    with tempfile.NamedTemporaryFile(suffix='.bin',
+                                     delete=False) as tmp:
+        tmp.write(data)
+        name = tmp.name
+    try:
+        text = subprocess.run(['readelf', '-wf', name],
+                              check=True, capture_output=True,
+                              text=True).stdout
+    finally:
+        Path(name).unlink()
+    ranges = sorted(
+        (int(a, 16), int(b, 16)) for a, b in re.findall(
+            r'pc=([0-9a-f]+)\.\.([0-9a-f]+)', text))
+    check(ranges, 'no FDE ranges parsed')
+    return ranges
+
+
+def slot_call_census(data):
+    """Indirect call/jump sites through the caller's slot.
+
+    The correction census (2026-11-05): the original
+    packet asked rip_relative_refs only about the body
+    start, so a call through the slot holding that
+    address - whose rip-relative target is the slot,
+    not the body - was structurally invisible.  Asked
+    about the slot itself, the same scan finds the
+    invocation path: every site sits in its own
+    136-byte FDE body, a monomorphised drop glue.
+    """
+    refs = rip_relative_refs(data, CALLER_SLOT)
+    ranges = fde_ranges(data)
+    starts = [s for s, _ in ranges]
+    sites = []
+    for va_hex, kind in sorted(refs.items(),
+                               key=lambda kv: int(kv[0], 16)):
+        va = int(va_hex, 16)
+        i = bisect.bisect_right(starts, va) - 1
+        start, end = ranges[i]
+        check(start <= va < end,
+              f'slot call site {va_hex} outside any FDE')
+        sites.append({'site': va_hex, 'kind': kind,
+                      'body': hex(start),
+                      'body_end': hex(end),
+                      'body_bytes': end - start,
+                      'site_offset': hex(va - start)})
+    check(len(sites) == 35,
+          f'slot call census drift: {len(sites)} sites')
+    check(all(s['kind'] == 'call' for s in sites),
+          'slot reference is not a call')
+    check(all(s['body_bytes'] == 136 for s in sites),
+          'slot call body size drift')
+    check(all(s['site_offset'] == '0xc' for s in sites),
+          'slot call site offset drift')
+    check(len({s['body'] for s in sites}) == 35,
+          'slot call bodies are not distinct')
+    return sites
+
+
 def caller_references(data):
     """Every static reference to the second caller's start."""
     entries = rela_entries(data)
@@ -471,6 +554,10 @@ def caller_references(data):
           f'table neighbourhood drift: {neighbours}')
     check(entries[0x64DFE50][0] == 6,
           'slot after the code-pointer run is not GLOB_DAT')
+    slot_section = section_of(data, CALLER_SLOT)
+    check(slot_section['name'] == '.got',
+          f"caller slot section drift: {slot_section['name']}")
+    slot_calls = slot_call_census(data)
     return {
         'caller_direct_refs': direct,
         'caller_rip_relative_refs': rip,
@@ -478,6 +565,12 @@ def caller_references(data):
         'bucket_addend_refs': [],
         'bucket_rip_relative_refs': bucket_rip,
         'table_neighbourhood': neighbours,
+        'caller_slot_section': slot_section['name'],
+        'caller_slot_section_range': [
+            hex(slot_section['address']),
+            hex(slot_section['address'] +
+                slot_section['size'])],
+        'caller_slot_call_sites': slot_calls,
     }
 
 
@@ -656,22 +749,49 @@ FINDINGS = {
         'a second pad at 0x5ceb19e calls through slot '
         '0x64df4c0 (0x1680cab).'),
     'dispatch_context': (
-        'The second caller has no direct callers: a '
-        'whole-.text scan finds no relative call/jump '
-        'site to 0x5ceafd0 and no rip-relative slot or '
-        'lea reference, and .rela.dyn holds exactly one '
-        'RELATIVE addend for it, at 0x64dfe40 - one slot '
-        'in a run of four code-pointer addends in '
-        '.data.rel.ro (neighbours pinned in records: '
-        '0x5cf31f0, 0x5ce88e0, this body, 0x15c2d00; '
-        'the run ends at 0x64dfe50, a GLOB_DAT slot).  '
-        'It is therefore invoked through a data-held '
-        'pointer, consistent with a vtable or trait-'
-        'method slot; which object the table belongs '
-        'to is not traced here.  The bucket body, by '
-        'contrast, has no data-held references at all: '
-        'its two direct call sites are the complete '
-        'reference set.'),
+        'CORRECTION (post-publication, 2026-11-05): as '
+        'first filed, this finding stated that the '
+        'second caller has no rip-relative references, '
+        'that its slot at 0x64dfe40 is one slot in a run '
+        'of four code-pointer addends in .data.rel.ro, '
+        'and that the runtime event invoking it was not '
+        'established.  Those statements were wrong.  '
+        'The original census asked its rip-relative '
+        'scan only about the body\'s own start address, '
+        'so an indirect call through the slot holding '
+        'that address - whose rip-relative target is '
+        'the slot, not the body - was structurally '
+        'invisible to it.  Corrected census: the body '
+        'still has no direct callers - a whole-.text '
+        'scan finds no relative call/jump site to '
+        '0x5ceafd0 and no rip-relative reference to its '
+        'start - and .rela.dyn still holds exactly one '
+        'RELATIVE addend for it, at 0x64dfe40 (the '
+        'neighbouring addends remain pinned in '
+        'records).  But the slot is an entry of .got '
+        '(section range 0x64df458..0x64ee158), not a '
+        '.data.rel.ro table, and a whole-.text scan '
+        'for FF /15 and FF /25 forms whose rip-relative '
+        'target is the slot finds 35 call sites and no '
+        'jump sites.  Each call site is the only slot '
+        'call of its own 136-byte FDE body, at '
+        'body+0xc, and the bodies are monomorphised '
+        'drop glue: when the state dword at [rdi] is '
+        'not 2 the glue calls this body with the '
+        'handle pointer unchanged, then releases a '
+        'refcounted field (lock dec of the pointee '
+        'count; a destructor call through a GOT slot '
+        'when it reaches zero) and tail-jumps '
+        '[vtable+0x18] with the boxed field at '
+        '[handle+0x38]; three bodies (0x1472b90, '
+        '0x29f0e60, 0x5cf1d70) were read in full and '
+        'all 35 match the same instruction template.  '
+        'The invocation event is therefore a handle '
+        'drop, in 35 monomorphisations; which handle '
+        'type each serves is not traced here.  The '
+        'bucket body, by contrast, has no data-held '
+        'references at all: its two direct call sites '
+        'are the complete reference set.'),
     'comparison': (
         'Same: the entry object (&[S+0x20]); the value-'
         'slot gate ([entry+0x18] == -1 skips the '
@@ -795,12 +915,16 @@ OPEN_EDGES = [
     '3 and the provenance of [record+0x1d8] before '
     'its first checker_a call (open edge 4 of #2613) '
     'remain open.',
-    'New: the dispatch context of the second caller '
-    '- which object\'s code-pointer table holds the '
-    'slot at 0x64dfe40 and on what runtime event the '
-    'body is invoked through it - is not established '
-    'here; only the slot and its immediate '
-    'neighbourhood are pinned.',
+    'CORRECTED (2026-11-05): the dispatch context of '
+    'the second caller, originally left open here, is '
+    'established - the slot at 0x64dfe40 is a .got '
+    'entry and the body is invoked on handle drop by '
+    '35 monomorphised drop-glue bodies (see the '
+    'correction in the dispatch_context finding).  '
+    'What remains open is only the identity of the '
+    'handle type each monomorphisation drops for; '
+    'the glue bodies\' own drop sites are not '
+    'censused here.',
     'New: the consumers of the wheel list '
     '([wheel+0x18] head / [wheel+0x20] tail) that '
     'both callers\' inline arms maintain - the '

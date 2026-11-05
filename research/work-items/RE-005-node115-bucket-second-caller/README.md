@@ -18,14 +18,43 @@ consumes the entry in place — fired byte cleared,
 value slot set to −1, wake pair claimed. The body has
 no direct callers anywhere in `.text`; the only
 reference to its start in the artifact is one
-`R_X86_64_RELATIVE` addend at `0x64dfe40`, a
-code-pointer table slot in `.data.rel.ro` (the
-predicate-chain packet's slot census already lists
-that slot's value; the body behind it was never
-opened). The shared bucket body only unlinks, which
+`R_X86_64_RELATIVE` addend at `0x64dfe40`, an entry
+of `.got`. Through that slot the body is called
+from 35 sites, each the only slot call of its own
+136-byte drop-glue body (see the correction note
+below; the predicate-chain packet's slot census
+already lists that slot's value, but the body
+behind it was never opened). The shared bucket body
+only unlinks, which
 also settles the predicate-chain packet's "unlinks or
 bucket-inserts" hedge: neither caller inserts into a
 bucket.
+
+**Correction (post-publication, 2026-11-05).** As
+first published, this page called `0x64dfe40` a
+"code-pointer table slot in `.data.rel.ro`" and left
+open "which object's table this is, and on what
+runtime event the body is invoked through it". Both
+were wrong. The slot is an entry of `.got`
+(`0x64df458..0x64ee158` per the section table), and
+the body is invoked on a **handle drop**: a
+whole-`.text` scan for `FF /15` and `FF /25` forms
+whose rip-relative target is the slot finds 35
+`call *0x64dfe40(%rip)` sites and no jump sites,
+each the only slot call of a distinct 136-byte FDE
+body at body+0xc. Those bodies are monomorphised
+drop glue — state dword ≠ 2 → call this body with
+the handle pointer, release a refcounted field
+(lock dec, destructor call on zero), tail-jump a
+boxed field's `[vtable+0x18]` drop — so the event
+the original text left open is the drop of a handle
+whose entry this body consumes. The original
+reference census missed the path because it compared
+rip-relative targets only against the body's own
+start address; a call through the slot targets the
+slot, not the body. The corrected census is pinned
+in `records.json` (`caller_slot_call_sites`) and
+re-derived by the tool.
 
 Both bodies are exported in full (`*.objdump.txt`);
 digests, FDE extents, slot resolutions, strings, panic
@@ -134,13 +163,16 @@ second caller consumes the entry.
   anywhere holds the bucket body's address: the two
   call sites are its complete reference set.
 - The second caller `0x5ceafd0` has no direct or
-  rip-relative references; its single addend
-  reference at `0x64dfe40` sits in a run of four
-  code-pointer addends (`0x5cf31f0`, `0x5ce88e0`,
-  this body, `0x15c2d00`) that ends at `0x64dfe50`,
-  a `GLOB_DAT` slot. Which object's table this is,
-  and on what runtime event the body is invoked
-  through it, is not established here.
+  rip-relative references *to its start*; its
+  single addend reference sits in the `.got` slot
+  at `0x64dfe40` (the adjacent `.got` entries are
+  pinned in records). Through that slot it is
+  invoked from 35 `call *0x64dfe40(%rip)` sites,
+  each the only slot call of a distinct 136-byte
+  FDE body at body+0xc — monomorphised drop glue,
+  so the runtime event is a handle drop (see the
+  correction note above). Which handle type each
+  monomorphisation drops for is not traced here.
 - Open edges 1 (`[wheel+0x30]` writer), 2 (runtime
   field contents) and 4 (gate re-invocation,
   `[record+0x1d8]`) from the earlier RE-005 packets

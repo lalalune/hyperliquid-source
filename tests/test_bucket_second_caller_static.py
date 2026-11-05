@@ -160,6 +160,31 @@ class BucketSecondCallerPacketTests(unittest.TestCase):
         self.assertEqual(
             refs['table_neighbourhood']['0x64dfe40'],
             '0x5ceafd0')
+        # Correction census (2026-11-05): the slot is a
+        # .got entry and is called through from 35
+        # drop-glue bodies - the invocation path the
+        # original reference census could not see.
+        self.assertEqual(refs['caller_slot_section'],
+                         '.got')
+        self.assertEqual(refs['caller_slot_section_range'],
+                         ['0x64df458', '0x64ee158'])
+        sites = refs['caller_slot_call_sites']
+        self.assertEqual(len(sites), 35)
+        self.assertTrue(
+            all(s['kind'] == 'call' for s in sites))
+        self.assertTrue(
+            all(s['body_bytes'] == 136 for s in sites))
+        self.assertTrue(
+            all(s['site_offset'] == '0xc' for s in sites))
+        self.assertEqual(
+            len({s['body'] for s in sites}), 35)
+        self.assertEqual(sites[0]['site'], '0x1472b9c')
+        self.assertEqual(sites[0]['body'], '0x1472b90')
+        self.assertEqual(sites[-1]['site'], '0x5cf1d7c')
+        self.assertEqual(sites[-1]['body'], '0x5cf1d70')
+        self.assertIn(
+            'CORRECTION',
+            self.records['findings']['dispatch_context'])
 
     def test_call_table(self):
         table = self.records['call_table']
