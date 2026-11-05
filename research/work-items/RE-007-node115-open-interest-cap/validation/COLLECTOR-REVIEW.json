@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "reviewer": "node_scout",
+  "reviewed_at_utc": "2026-11-05T18:35:14.447318+00:00",
+  "outcome": "no_actionable_findings_in_bounded_read_only_source_review",
+  "scope": "Complete final collector and focused tests, static evidence admission and replay only. Native behavior, Rust semantics and runtime effects are outside this review.",
+  "files": {
+    "collector": {
+      "path": "<repo>/research/work-items/RE-007-node115-open-interest-cap/collect.py",
+      "sha256": "b0ce80bcdfd8a5606ceefd8651403828099ba63dd14482a24558bbea5975af16",
+      "bytes": 26028
+    },
+    "focused_tests": {
+      "path": "<repo>/tests/test_node115_open_interest_cap.py",
+      "sha256": "4d24c31b4fbc1c893833e9ddfe1abd276a7422edde7bd5a48aacf1bcd4f463b2",
+      "bytes": 6935
+    }
+  },
+  "claimed_target": {
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "bytes": 105896032,
+    "selected_interval": [
+      "0x447c620",
+      "0x447c7c4"
+    ]
+  },
+  "findings": [],
+  "observations": [
+    {
+      "lines": "collect.py:302-305,423-435",
+      "fact": "Whole-target size/SHA admission and all inner/body checks precede output, snapshot and GNU subprocess creation."
+    },
+    {
+      "lines": "collect.py:311-349",
+      "fact": "Bounded ELF tables and file extents; each VA read requires one agreeing file-backed PT_LOAD and section."
+    },
+    {
+      "lines": "collect.py:351-402",
+      "fact": "Five exact raw FDE/CIE records and header mappings are bound; range and CIE backreference are checked after raw equality. Eighteen selected slots require exactly one overlapping RELA, symbol-zero type 8, exact addend/raw record and zero pre-relocation bytes."
+    },
+    {
+      "lines": "collect.py:405-420,462-494",
+      "fact": "Full GNU exports must form a contiguous exact-byte partition of each of five pinned bodies. Direct E8 and selected FF15/FF25 transfers have calculated target/slot metadata. This is not a generic disassembler or CFG proof."
+    },
+    {
+      "lines": "collect.py:441-495",
+      "fact": "Only the caller-selected installed GNU tool is invoked, with fixed options, a private read-only capture snapshot, clean environment and timeout. Command failures retain raw outputs; snapshot/tool identities are rechecked. No capture invocation, emulator or behavioral evaluator appears."
+    },
+    {
+      "lines": "collect.py:508-564",
+      "fact": "Replay allows only tool SHA/version and version-command raw-stream identities to differ; native exports, semantic records and native command/raw hashes remain exact. Final version filenames are fixed before metadata-directed reads and each version stream is separately hash-bound."
+    },
+    {
+      "lines": "test_node115_open_interest_cap.py:30-110",
+      "fact": "Below-outer-digest controls mutate actual anchored instruction/data bytes, RELA type/symbol/addend and CFI tails and require specific inner guard errors. Wrong-target test requires no output or subprocess. Mapping disagreement and missing mapping are checked."
+    },
+    {
+      "lines": "test_node115_open_interest_cap.py:112-141",
+      "fact": "Nine defined test methods include full collection/replay and a comparator control accepting only changed tool SHA before rejecting changed native-record bytes. This review did not execute them."
+    }
+  ],
+  "changes_reviewed_after_initial_read": [
+    "Collector now fixes version stdout/stderr names before reads; prior reviewed transitional hash was 13019669fbb04abb203c4bd84783a8cdf577ce7d442c3409cea63ad83ce40e06.",
+    "Final focused test uses compare_packet for regeneration and adds a provenance/native-record distinction control; prior read hash was 5e1f7a2735ccbfe1ed3f256bae4a840b5258b40195daadf31b4bb9f094a92fa6."
+  ],
+  "limits": [
+    "No collector/test import, qualification execution, captured instruction execution, build or public edit by this reviewer.",
+    "No independent target rehash or GNU export in this review. Target identity is the source-declared pin; parent actual run evidence is separate.",
+    "Hardcoded raw anchors establish admitted byte identity; their corruption controls do not independently prove instruction semantics, callee effects, unwind/LSDA behavior or Rust correspondence.",
+    "The collector accepts an operator-supplied installed objdump path; its GNU version string is not an attestation of arbitrary executable provenance.",
+    "Malformed ELF outside the exact-target public admission is not a promised general parser API; some structural failures can surface as Python parse exceptions.",
+    "No assertion that every possible metadata/export corruption has a focused regression test, and no hosted CI/full-suite pass claim."
+  ],
+  "prior_role": "Reviewer previously scouted a separate persistence candidate. Root/installer authored this collector/tests; reviewer made no edits to them."
+}
