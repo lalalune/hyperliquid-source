@@ -1,0 +1,1238 @@
+{
+ "question": "What do the 65 bodies that call the lu.rs LazyLock accessor 0x1560a40 (GOT slot 0x64e0b20, 100 call sites) use the returned cell +8/+0x10 word pair for, and what does that say about the source-level identity of the 24-byte value the initializer 0x1568de0 builds?",
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "base_commit": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "accessor_slot": {
+  "slot": "0x64e0b20",
+  "target": "0x1560a40",
+  "relocation": "R_X86_64_RELATIVE"
+ },
+ "accessor": {
+  "start": "0x1560a40",
+  "end": "0x1560aab",
+  "size": 107,
+  "sha256": "4dd07ff0fab8b3133d896254e0fecef4f983867a311629f10ccedb52d03ac6bc"
+ },
+ "accessor_returns": "rax = *(cell+8), rdx = *(cell+0x10): the (data pointer, length) half of the cached String; the capacity word at cell+0 is not returned",
+ "initializer": {
+  "start": "0x1568de0",
+  "end": "0x156971c",
+  "size": 2364,
+  "sha256": "c87c9590e5ab4cebd4a7110f74eda4a33237fac3843105dab89bc132924ac41c"
+ },
+ "initializer_value": {
+  "shape": "24-byte String (capacity, pointer, length): the sret result is stored (length, pointer, length) at 0x1569609..0x156961a",
+  "default_before_parse": "(0, 1, 0) stored at 0x1568df6..0x1568e10",
+  "source_locations": [
+   {
+    "record": "0x63fe3a8",
+    "file": "base/src/build_mode.rs",
+    "line": 28,
+    "column": 13
+   },
+   {
+    "record": "0x63fe390",
+    "file": "base/src/build_mode.rs",
+    "line": 30,
+    "column": 26
+   }
+  ],
+  "literal_block": [
+   {
+    "va": "0x4676f2",
+    "len": 6,
+    "text": "/cham/"
+   },
+   {
+    "va": "0x4676f8",
+    "len": 37,
+    "text": "assertion failed: !arg.ends_with('/')"
+   },
+   {
+    "va": "0x46771d",
+    "len": 5,
+    "text": "debug"
+   },
+   {
+    "va": "0x467722",
+    "len": 7,
+    "text": "release"
+   },
+   {
+    "va": "0x467729",
+    "len": 10,
+    "text": "run-client"
+   }
+  ],
+  "transform_fn": {
+   "start": "0x150caf0",
+   "end": "0x150cd87",
+   "size": 663,
+   "sha256": "85a51029abee0fc7b2eeb3656db65feb440ea5a193c9687c990316cc75f78e5f"
+  },
+  "reading": "the initializer scans the process arguments for a path argument, requires it not to end with \"/\" (the assertion panic call at 0x1569663 passes the line-28 Location), locates the \"/cham/\" component (a second panic site at 0x156969b passes the line-30 Location as the last argument of a bounds-checked operation), and builds the lowercased build-mode string (candidate literals debug / release / run-client are packed beside the assertion). Which exact argument and static name: not pinned (see boundaries)."
+ },
+ "census": {
+  "call_sites": 100,
+  "consumer_bodies": 65,
+  "direct_e8_sites": 0,
+  "slot_load_sites": 0,
+  "jmp_sites": 0,
+  "note": "every site is an indirect call through the GOT slot; the body set is identical to the census retained by PR #2999"
+ },
+ "fate": {
+  "sites_where_pair_is_read_as_data": 0,
+  "sites_where_pair_is_discarded": 100,
+  "method": "fall-through fate scan of both registers, block-level CFG walk inside each body, and manual reading of every flagged exception; no site dereferences the pointer, compares or bounds-checks the length, passes the pair to a callee, or stores it"
+ },
+ "context_counts": {
+  "cleanup_block": 2,
+  "statement": 54,
+  "drop_glue": 38,
+  "err_exit": 6
+ },
+ "context_legend": {
+  "drop_glue": "call sits in a generated drop/cleanup sequence: an adjacent TLS-state store, reference-count decrement, or the field-dispatch finalizer 0x452a890 within the surrounding instructions",
+  "err_exit": "call immediately precedes loading an error tag/message and jumping to the shared exit",
+  "cleanup_block": "call sits in an unwind cleanup block",
+  "statement": "call in ordinary statement position; the pair is overwritten or ignored and execution continues"
+ },
+ "consumers": [
+  {
+   "start": "0x1509b70",
+   "end": "0x150acf5",
+   "size": 4485,
+   "sha256": "cc1e73cb5a296fad3f0ea5cdd292665059c8fbcd534b4de8da53ca773a95504c",
+   "sites": [
+    {
+     "site": "0x150abff",
+     "context": "cleanup_block"
+    },
+    {
+     "site": "0x150ac16",
+     "context": "cleanup_block"
+    }
+   ],
+   "ensure_blocks_in_body": 1,
+   "panic_location_files": [
+    "base/src/file_mod_time_tracker.rs"
+   ]
+  },
+  {
+   "start": "0x15d6070",
+   "end": "0x15d60a7",
+   "size": 55,
+   "sha256": "0e9abde7a0b027bbd0d7a45c99ba46df8da4d9d36033a6491a5e7539eacdf19b",
+   "sites": [
+    {
+     "site": "0x15d6074",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x2317b10",
+   "end": "0x2317dae",
+   "size": 670,
+   "sha256": "239bd793cc932017ea663f8f56e7b76458082e81c7ce4aed4e017a5e6b286f70",
+   "sites": [
+    {
+     "site": "0x2317bf9",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 1
+  },
+  {
+   "start": "0x269f5c0",
+   "end": "0x269f84d",
+   "size": 653,
+   "sha256": "692c04374b23715e047491f9f8219d345bc08a18681601098a104a474337e3c3",
+   "sites": [
+    {
+     "site": "0x269f7f3",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x28cd7a0",
+   "end": "0x28d8ac4",
+   "size": 45860,
+   "sha256": "40df69913a9976f4cf044e6f9b686fac43d0f63ba54b984ff79524a3a1794a76",
+   "sites": [
+    {
+     "site": "0x28cda6f",
+     "context": "statement"
+    },
+    {
+     "site": "0x28ceae1",
+     "context": "statement"
+    },
+    {
+     "site": "0x28cf7d2",
+     "context": "statement"
+    },
+    {
+     "site": "0x28d0568",
+     "context": "statement"
+    },
+    {
+     "site": "0x28d14c6",
+     "context": "statement"
+    },
+    {
+     "site": "0x28d2369",
+     "context": "statement"
+    },
+    {
+     "site": "0x28d75d2",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 2,
+   "panic_location_files": [
+    "l1/src/dex_registry/clearinghouses.rs",
+    "l1/src/qtys/impl_ntl.rs",
+    "l1/src/action/vote_global.rs",
+    "l1/src/qtys/impl_wei.rs"
+   ]
+  },
+  {
+   "start": "0x2c01920",
+   "end": "0x2c02dc9",
+   "size": 5289,
+   "sha256": "27909acc5e83d0567ff22c4a9b454590f86ee32751b254f560b315b6fa9e57fd",
+   "sites": [
+    {
+     "site": "0x2c02a8e",
+     "context": "statement"
+    },
+    {
+     "site": "0x2c02aff",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 1,
+   "panic_location_files": [
+    "l1/src/qtys/mod.rs",
+    "l1/src/spot_meta.rs"
+   ]
+  },
+  {
+   "start": "0x2c3edb0",
+   "end": "0x2c3f38a",
+   "size": 1498,
+   "sha256": "098ac60db04670bfb8b504a1250a8800bda506efbceb631ee2b57492feb1f251",
+   "sites": [
+    {
+     "site": "0x2c3f181",
+     "context": "err_exit"
+    },
+    {
+     "site": "0x2c3f1aa",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "l1/src/qtys/impl_ntl.rs"
+   ]
+  },
+  {
+   "start": "0x2c3f5e0",
+   "end": "0x2c41707",
+   "size": 8487,
+   "sha256": "2b840a499df46d16a4f997542f499668104a01eeee63a3a73e44feb1e6e60c2f",
+   "sites": [
+    {
+     "site": "0x2c40d21",
+     "context": "statement"
+    },
+    {
+     "site": "0x2c40db3",
+     "context": "statement"
+    },
+    {
+     "site": "0x2c40f08",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 1,
+   "panic_location_files": [
+    "l1/src/exchange/impl_vault.rs",
+    "l1/src/books.rs",
+    "l1/src/qtys/mod.rs",
+    "l1/src/qtys/impl_ntl.rs"
+   ]
+  },
+  {
+   "start": "0x2c47660",
+   "end": "0x2c4d2e9",
+   "size": 23689,
+   "sha256": "60f6a969d83d1731dcdf772db78d46517cfaffe2b5e8c380fee66e3910291910",
+   "sites": [
+    {
+     "site": "0x2c48026",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 1,
+   "panic_location_files": [
+    "l1/src/asset/pdi.rs"
+   ]
+  },
+  {
+   "start": "0x2e07a00",
+   "end": "0x2e08745",
+   "size": 3397,
+   "sha256": "2f44ddc26d4361cabb292562d8d6acbb943eca3cad20c225beffdaa912c969d0",
+   "sites": [
+    {
+     "site": "0x2e08569",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x2e098e0",
+   "end": "0x2e11140",
+   "size": 30816,
+   "sha256": "3605ca6d67167d3359733cfee3b66ca0a8ca675731b909e97f331fb90d252dc6",
+   "sites": [
+    {
+     "site": "0x2e0a951",
+     "context": "statement"
+    },
+    {
+     "site": "0x2e0eea8",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 6,
+   "panic_location_files": [
+    "node/src/consensus/state.rs",
+    "node/src/consensus/mempool.rs",
+    "node/src/consensus/signature_tracker.rs",
+    "node/src/consensus/timer.rs"
+   ]
+  },
+  {
+   "start": "0x2e157c0",
+   "end": "0x2e197f5",
+   "size": 16437,
+   "sha256": "26757d38d8d0319a9610b9e1e62127e46ef3dfc526e2f582981db05275626c90",
+   "sites": [
+    {
+     "site": "0x2e18562",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "node/src/consensus/mempool.rs",
+    "base/src/l1_map/entry.rs"
+   ]
+  },
+  {
+   "start": "0x36c93c0",
+   "end": "0x36ca5a8",
+   "size": 4584,
+   "sha256": "831323883c714c285dd5810cbd3bd00c4fd07bf09d9d018f3ee37874189121b9",
+   "sites": [
+    {
+     "site": "0x36ca452",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 2
+  },
+  {
+   "start": "0x38bc000",
+   "end": "0x38bca91",
+   "size": 2705,
+   "sha256": "104f0633410a8007124abea13befcd648605d92e7606bcb1385bcd7e87c93354",
+   "sites": [
+    {
+     "site": "0x38bc373",
+     "context": "err_exit"
+    },
+    {
+     "site": "0x38bc3f5",
+     "context": "err_exit"
+    },
+    {
+     "site": "0x38bc6e1",
+     "context": "statement"
+    },
+    {
+     "site": "0x38bc9dd",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 2,
+   "panic_location_files": [
+    "l1/src/spot_meta.rs",
+    "l1/src/hyperliquidity.rs"
+   ]
+  },
+  {
+   "start": "0x38bf120",
+   "end": "0x38c044c",
+   "size": 4908,
+   "sha256": "341dbd3df425daaa199da74e1614b6837cda12ad56194b2ebf7c95d9ab6779df",
+   "sites": [
+    {
+     "site": "0x38c02c6",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d3310",
+   "end": "0x38d348c",
+   "size": 380,
+   "sha256": "c64fd082f718f670e13ae3c630d7509f1d8655ad67d016ebcc0ed06751dd4a3c",
+   "sites": [
+    {
+     "site": "0x38d343a",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d3490",
+   "end": "0x38d3877",
+   "size": 999,
+   "sha256": "d86e5259d505b85b2c9a9d15869b30acb44373a19143a08016341b64bb2b1a7d",
+   "sites": [
+    {
+     "site": "0x38d381b",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d3880",
+   "end": "0x38d3987",
+   "size": 263,
+   "sha256": "ecf9ff9dea8b0929145180fb8db5a2c075b1c615ef9a5305113dedd54031de51",
+   "sites": [
+    {
+     "site": "0x38d393c",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d3990",
+   "end": "0x38d3ea6",
+   "size": 1302,
+   "sha256": "dffb1ce0ebd84809b4ae3ba5c60003c65c61c1afe2bbf096f1dcae97ce9d36cf",
+   "sites": [
+    {
+     "site": "0x38d3e48",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d3eb0",
+   "end": "0x38d47a1",
+   "size": 2289,
+   "sha256": "8b2b84428b43ec101ef7f828bd4ad861043cb9a7da76ed4e11cbdda72317134b",
+   "sites": [
+    {
+     "site": "0x38d4746",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d47b0",
+   "end": "0x38d4f08",
+   "size": 1880,
+   "sha256": "9edc1f918d698bdb292fd59166484a0cb9dc454436ab7f1efb53fe8569d453d1",
+   "sites": [
+    {
+     "site": "0x38d4ead",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d4f10",
+   "end": "0x38d548f",
+   "size": 1407,
+   "sha256": "34abc98aa24ca7ba581a2f89c6d43031dce2f22ba12782dee48bbc65bf5da631",
+   "sites": [
+    {
+     "site": "0x38d5431",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d5490",
+   "end": "0x38d5853",
+   "size": 963,
+   "sha256": "0f5438d90b48392b59e0231f273bfbaa9c10bf22964f52691b24459b141ea1af",
+   "sites": [
+    {
+     "site": "0x38d57f9",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d5860",
+   "end": "0x38d5f55",
+   "size": 1781,
+   "sha256": "f5e8c14e92a2a948d006e0bd5945a6b39f0d6db68508f4edb9b3ab3107f13336",
+   "sites": [
+    {
+     "site": "0x38d5ef7",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d5f60",
+   "end": "0x38d6541",
+   "size": 1505,
+   "sha256": "93353b1a7351e29b406fc58d3b974e86c36576cfe359a4e53f66e93fa5dd63af",
+   "sites": [
+    {
+     "site": "0x38d64e7",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d6550",
+   "end": "0x38d6b2b",
+   "size": 1499,
+   "sha256": "0f5816a2881aae13a716bf56af3e7b5346ba5286a3e9068ad9067b5c9d171085",
+   "sites": [
+    {
+     "site": "0x38d6acd",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d6b30",
+   "end": "0x38d6ed0",
+   "size": 928,
+   "sha256": "12926bd72d6af2d42f67ae65020da181ab3577c36cde27e3c90377ab8d07a744",
+   "sites": [
+    {
+     "site": "0x38d6e76",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d6ed0",
+   "end": "0x38d7271",
+   "size": 929,
+   "sha256": "e91da8bee7afd7acf07add4cbbf4371af7e07846e4a2e5e27633a0728f9fb33a",
+   "sites": [
+    {
+     "site": "0x38d7213",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d7280",
+   "end": "0x38d782b",
+   "size": 1451,
+   "sha256": "b12811a71357e78400348ffd8003b90c854dc7eb74bc350512e09a3f6cb77d55",
+   "sites": [
+    {
+     "site": "0x38d77cd",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d7830",
+   "end": "0x38d7b9b",
+   "size": 875,
+   "sha256": "b15d0fb0e2d1ffde61aa29d9c4f587b931c7df7f78d9a64fd8fe0ef66fc35bab",
+   "sites": [
+    {
+     "site": "0x38d7b3c",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38d7ba0",
+   "end": "0x38d7f11",
+   "size": 881,
+   "sha256": "56e758f263142dade710af553fc38dcf30103763c17c9681a98b5b4016fc922e",
+   "sites": [
+    {
+     "site": "0x38d7eb3",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38df640",
+   "end": "0x38dfb4b",
+   "size": 1291,
+   "sha256": "0d646c0925d117af175d12ea96c34f4d814a80ab72ce9eb28c860e25634b4b66",
+   "sites": [
+    {
+     "site": "0x38dfaf3",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "l1/src/dex_registry/clearinghouses.rs"
+   ]
+  },
+  {
+   "start": "0x38e0100",
+   "end": "0x38e0693",
+   "size": 1427,
+   "sha256": "51e9c41e0ae2d9347e4fb792e2aff6bf76d008855ccb54c9786e2d58a7110975",
+   "sites": [
+    {
+     "site": "0x38e063b",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "l1/src/dex_registry/perp_dex.rs",
+    "l1/src/books.rs"
+   ]
+  },
+  {
+   "start": "0x38e06a0",
+   "end": "0x38e1051",
+   "size": 2481,
+   "sha256": "7a1a06ec83408c2b3399d047f7554cb4baf1f5f57e30775ead834074425dcec0",
+   "sites": [
+    {
+     "site": "0x38e0ff9",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "l1/src/dex_registry/clearinghouses.rs"
+   ]
+  },
+  {
+   "start": "0x38e1060",
+   "end": "0x38e1756",
+   "size": 1782,
+   "sha256": "167d0c206c8cf0a0601f62ffa22d3580a4e49519658e57783323c6ac799d1691",
+   "sites": [
+    {
+     "site": "0x38e16fe",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38e1760",
+   "end": "0x38e2395",
+   "size": 3125,
+   "sha256": "0f58394805f068e5c791cce26a9170903a4b9d1931d7b554cd5af8e37c56fe6b",
+   "sites": [
+    {
+     "site": "0x38e22c4",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "/home/ubuntu/hl/code_Mainnet/z_vendor/alloy-sol-types/src/abi/encoder.rs"
+   ]
+  },
+  {
+   "start": "0x38e23a0",
+   "end": "0x38e2e0a",
+   "size": 2666,
+   "sha256": "7e66f0037b548d4e06d1b01a1befa2a3dfffdb9fed2d4d82795cc2a916e381ae",
+   "sites": [
+    {
+     "site": "0x38e2d66",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "/home/ubuntu/hl/code_Mainnet/z_vendor/alloy-sol-types/src/abi/encoder.rs",
+    "/home/ubuntu/hl/code_Mainnet/z_vendor/alloy-sol-types/src/utils.rs"
+   ]
+  },
+  {
+   "start": "0x38e2e10",
+   "end": "0x38e35f0",
+   "size": 2016,
+   "sha256": "4584ea850c195a385d7e84af19d2dbb0adfe3ec569da1054511755b669ae0942",
+   "sites": [
+    {
+     "site": "0x38e3598",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "l1/src/dex_registry/clearinghouses.rs"
+   ]
+  },
+  {
+   "start": "0x38e35f0",
+   "end": "0x38e3b36",
+   "size": 1350,
+   "sha256": "6c744efe4ea3a33e00a3156f2c0375c66d019f5c3bab9f1b60d7b59b0612e7fc",
+   "sites": [
+    {
+     "site": "0x38e3aea",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38e3cf0",
+   "end": "0x38e41eb",
+   "size": 1275,
+   "sha256": "e8296121ebdef8bfb5ec3963c77133efb2f30507998658b0268a32fb694abcf3",
+   "sites": [
+    {
+     "site": "0x38e4193",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38e41f0",
+   "end": "0x38e487c",
+   "size": 1676,
+   "sha256": "8210ddbb1e6c27a54874a0996c89578c4406aef25fb53e34509d3fab95ce678e",
+   "sites": [
+    {
+     "site": "0x38e4824",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38e4880",
+   "end": "0x38e506c",
+   "size": 2028,
+   "sha256": "8adaeb50af1f7077adfda8a350eb549813d53d83a453ab7d4847b3d1a062e4dc",
+   "sites": [
+    {
+     "site": "0x38e5014",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "l1/src/spot_meta.rs"
+   ]
+  },
+  {
+   "start": "0x38e5070",
+   "end": "0x38e5cf5",
+   "size": 3205,
+   "sha256": "d1c365344d6d7a58faf0bf8eb10701a520b7cffbc6381b1329db2278008ff2dd",
+   "sites": [
+    {
+     "site": "0x38e5c59",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "/home/ubuntu/hl/code_Mainnet/z_vendor/alloy-sol-types/src/abi/encoder.rs",
+    "l1/src/perp_meta.rs",
+    "l1/src/dex_registry/clearinghouses.rs",
+    "/home/ubuntu/hl/code_Mainnet/z_vendor/alloy-sol-types/src/utils.rs"
+   ]
+  },
+  {
+   "start": "0x38e5d00",
+   "end": "0x38e64ac",
+   "size": 1964,
+   "sha256": "8ecb0b84cca3658d5d13fbf646368a8552136f0624d41b734e78377b6acb6dbc",
+   "sites": [
+    {
+     "site": "0x38e6454",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38e64b0",
+   "end": "0x38e6d3f",
+   "size": 2191,
+   "sha256": "b16c72cb94f7e7eb4e3a1b04a62089d4f57989b478bcd773c6437eb1e54b71bf",
+   "sites": [
+    {
+     "site": "0x38e6ce7",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38e6d40",
+   "end": "0x38e76ef",
+   "size": 2479,
+   "sha256": "f5f2993f4fcaa537f2e4be538a7fe8a2171f82ad7678528c51b7aebd7adc1935",
+   "sites": [
+    {
+     "site": "0x38e7697",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "/home/ubuntu/hl/code_Mainnet/z_vendor/indexmap/src/map.rs"
+   ]
+  },
+  {
+   "start": "0x38e76f0",
+   "end": "0x38e7c86",
+   "size": 1430,
+   "sha256": "aef0dacf60985315ab39e806f7dd68118b0890214b2d598c22cb68a0e2df0f28",
+   "sites": [
+    {
+     "site": "0x38e7c2e",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "l1/src/dex_registry/clearinghouses.rs",
+    "l1/src/clearinghouse/oracle/oracle.rs"
+   ]
+  },
+  {
+   "start": "0x38e7c90",
+   "end": "0x38e819b",
+   "size": 1291,
+   "sha256": "8ef479fbf04ffdc4194fbb6e1fea7040f120521ae14d584323b86842a0ef03a2",
+   "sites": [
+    {
+     "site": "0x38e8143",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x38e81a0",
+   "end": "0x38e8e36",
+   "size": 3222,
+   "sha256": "7c8f12bedda3f6e9744e8f8660350b62c4235fde2befa5ee3787ef0020057476",
+   "sites": [
+    {
+     "site": "0x38e8d84",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "/home/ubuntu/hl/code_Mainnet/z_vendor/alloy-sol-types/src/abi/encoder.rs"
+   ]
+  },
+  {
+   "start": "0x38e8e40",
+   "end": "0x38e93d5",
+   "size": 1429,
+   "sha256": "95ddfbf85379c2c52e37b39c6e30db49146fa4f621f7206d2202da156a7509fc",
+   "sites": [
+    {
+     "site": "0x38e937d",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "l1/src/dex_registry/clearinghouses.rs",
+    "l1/src/clearinghouse/oracle/oracle.rs"
+   ]
+  },
+  {
+   "start": "0x38e93e0",
+   "end": "0x38ea5b4",
+   "size": 4564,
+   "sha256": "fd0bfe5c622ec7979503921f33f67b9b33a4d6fe5e45893726d9770a9c8e54b0",
+   "sites": [
+    {
+     "site": "0x38ea4e0",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "/home/ubuntu/hl/code_Mainnet/z_vendor/alloy-sol-types/src/abi/encoder.rs",
+    "/home/ubuntu/hl/code_Mainnet/z_vendor/alloy-sol-types/src/abi/token.rs",
+    "/home/ubuntu/hl/code_Mainnet/z_vendor/alloy-sol-types/src/utils.rs"
+   ]
+  },
+  {
+   "start": "0x421e9d0",
+   "end": "0x421ecb4",
+   "size": 740,
+   "sha256": "3982b2915d6184f86433f359c537f1347c617488580be1e6c9997b3b859e8377",
+   "sites": [
+    {
+     "site": "0x421eb74",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x446c200",
+   "end": "0x4472001",
+   "size": 24065,
+   "sha256": "ef1188179ce0c34ee813bdc8880b31c4f502203717c75570878ff16480346e2d",
+   "sites": [
+    {
+     "site": "0x4470c19",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 3,
+   "panic_location_files": [
+    "l1/src/clearinghouse/clearinghouse.rs",
+    "l1/src/qtys/mod.rs",
+    "BUG:",
+    "l1/src/qtys/impl_ntl.rs"
+   ]
+  },
+  {
+   "start": "0x44ab4a0",
+   "end": "0x44abfaf",
+   "size": 2831,
+   "sha256": "beacb1b1052d75aa0a50b901f3abd56654dac0cc4407b399cfe1eb0577549b18",
+   "sites": [
+    {
+     "site": "0x44abd67",
+     "context": "err_exit"
+    }
+   ],
+   "ensure_blocks_in_body": 2,
+   "panic_location_files": [
+    "l1/src/vault/mod.rs",
+    "l1/src/qtys/mod.rs",
+    "l1/src/qtys/impl_ntl.rs"
+   ]
+  },
+  {
+   "start": "0x4e36d20",
+   "end": "0x4e36fad",
+   "size": 653,
+   "sha256": "98483d45f34e23fba7461eead4bf81c8904ab3c4db3b23725804674313b71f18",
+   "sites": [
+    {
+     "site": "0x4e36f53",
+     "context": "drop_glue"
+    }
+   ],
+   "ensure_blocks_in_body": 0
+  },
+  {
+   "start": "0x538cd30",
+   "end": "0x5397b4d",
+   "size": 44573,
+   "sha256": "fe615521c3cebf329ae984293dd270e6aefd1a74dec4f2b7989b12a555ef833d",
+   "sites": [
+    {
+     "site": "0x538cffc",
+     "context": "statement"
+    },
+    {
+     "site": "0x538e087",
+     "context": "statement"
+    },
+    {
+     "site": "0x538edf6",
+     "context": "statement"
+    },
+    {
+     "site": "0x538faf3",
+     "context": "statement"
+    },
+    {
+     "site": "0x5390a41",
+     "context": "statement"
+    },
+    {
+     "site": "0x53917d7",
+     "context": "statement"
+    },
+    {
+     "site": "0x539666f",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 2,
+   "panic_location_files": [
+    "l1/src/dex_registry/clearinghouses.rs",
+    "l1/src/qtys/impl_ntl.rs",
+    "l1/src/action/vote_global.rs",
+    "l1/src/qtys/impl_wei.rs"
+   ]
+  },
+  {
+   "start": "0x5397b50",
+   "end": "0x53a296d",
+   "size": 44573,
+   "sha256": "a69d025534ce5dca6536f52e51c69a0402842bfce4a0e0b148eb3d429d0282d0",
+   "sites": [
+    {
+     "site": "0x5397e1c",
+     "context": "statement"
+    },
+    {
+     "site": "0x5398ea7",
+     "context": "statement"
+    },
+    {
+     "site": "0x5399c16",
+     "context": "statement"
+    },
+    {
+     "site": "0x539a913",
+     "context": "statement"
+    },
+    {
+     "site": "0x539b861",
+     "context": "statement"
+    },
+    {
+     "site": "0x539c5f7",
+     "context": "statement"
+    },
+    {
+     "site": "0x53a148f",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 2,
+   "panic_location_files": [
+    "l1/src/dex_registry/clearinghouses.rs",
+    "l1/src/qtys/impl_ntl.rs",
+    "l1/src/action/vote_global.rs",
+    "l1/src/qtys/impl_wei.rs"
+   ]
+  },
+  {
+   "start": "0x54efca0",
+   "end": "0x54f126d",
+   "size": 5581,
+   "sha256": "93e778301c83eca7bef3a9434a3b5b2a01e7f3de11d40223ba9e4ac5e8147a8c",
+   "sites": [
+    {
+     "site": "0x54f0f3f",
+     "context": "statement"
+    },
+    {
+     "site": "0x54f0faf",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 1,
+   "panic_location_files": [
+    "l1/src/spot_meta.rs",
+    "l1/src/qtys/impl_ntl.rs",
+    "l1/src/qtys/mod.rs"
+   ]
+  },
+  {
+   "start": "0x54f1270",
+   "end": "0x54f283d",
+   "size": 5581,
+   "sha256": "bc402f0b11e59cfe81f14230955f9e9b9c6d0fbf57c48f986350a76b06545190",
+   "sites": [
+    {
+     "site": "0x54f250f",
+     "context": "statement"
+    },
+    {
+     "site": "0x54f257f",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 1,
+   "panic_location_files": [
+    "l1/src/spot_meta.rs",
+    "l1/src/qtys/impl_ntl.rs",
+    "l1/src/qtys/mod.rs"
+   ]
+  },
+  {
+   "start": "0x5594f60",
+   "end": "0x5597261",
+   "size": 8961,
+   "sha256": "8398f9dde6326f21c4a2c3b96d33b380af607966c3f755126278328cf2ef15ad",
+   "sites": [
+    {
+     "site": "0x55966d7",
+     "context": "statement"
+    },
+    {
+     "site": "0x559676c",
+     "context": "statement"
+    },
+    {
+     "site": "0x55969eb",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 1,
+   "panic_location_files": [
+    "l1/src/exchange/impl_vault.rs",
+    "l1/src/qtys/impl_ntl.rs",
+    "l1/src/books.rs",
+    "l1/src/qtys/mod.rs"
+   ]
+  },
+  {
+   "start": "0x5597a60",
+   "end": "0x559803a",
+   "size": 1498,
+   "sha256": "62c2c39db0c574382caca7a2a76a143812ce2f06963ae0e00b3e3330446470ec",
+   "sites": [
+    {
+     "site": "0x5597e31",
+     "context": "err_exit"
+    },
+    {
+     "site": "0x5597e5a",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "l1/src/qtys/impl_ntl.rs"
+   ]
+  },
+  {
+   "start": "0x55988f0",
+   "end": "0x559ac09",
+   "size": 8985,
+   "sha256": "87e245486099852bc7541051a41d57747f571425d17798aeec90cc808fac5dc4",
+   "sites": [
+    {
+     "site": "0x559a03b",
+     "context": "statement"
+    },
+    {
+     "site": "0x559a0cd",
+     "context": "statement"
+    },
+    {
+     "site": "0x559a34f",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 1,
+   "panic_location_files": [
+    "l1/src/exchange/impl_vault.rs",
+    "l1/src/qtys/impl_ntl.rs",
+    "l1/src/books.rs",
+    "l1/src/qtys/mod.rs"
+   ]
+  },
+  {
+   "start": "0x559e320",
+   "end": "0x559e8fa",
+   "size": 1498,
+   "sha256": "99df82b45de4be8f5c24ab297e56e35878b468ce189e6373346038f0cfc52254",
+   "sites": [
+    {
+     "site": "0x559e6f1",
+     "context": "err_exit"
+    },
+    {
+     "site": "0x559e71a",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 0,
+   "panic_location_files": [
+    "l1/src/qtys/impl_ntl.rs"
+   ]
+  },
+  {
+   "start": "0x55aca20",
+   "end": "0x55b271b",
+   "size": 23803,
+   "sha256": "0eb530d8d2d0e20be4fdf87f8c735607d27a2226544042b307b2903d9429e1c7",
+   "sites": [
+    {
+     "site": "0x55ad3e6",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 1,
+   "panic_location_files": [
+    "l1/src/asset/pdi.rs"
+   ]
+  },
+  {
+   "start": "0x55b2720",
+   "end": "0x55b841b",
+   "size": 23803,
+   "sha256": "ca24931f2f5facf183f72e9e7757e8c492f17b2fffbe5cfbd427f5da8234223b",
+   "sites": [
+    {
+     "site": "0x55b30e6",
+     "context": "statement"
+    }
+   ],
+   "ensure_blocks_in_body": 1,
+   "panic_location_files": [
+    "l1/src/asset/pdi.rs"
+   ]
+  }
+ ],
+ "relation_to_pr_2999": "no contradiction: identical census (100 sites, same 65 bodies), identical accessor and initializer pins. This packet refines two points #2999 left open: the 24-byte value is a String (the word the accessor skips at cell+0 is its capacity), and the initializer belongs to base/src/build_mode.rs",
+ "boundaries": [
+  "the exact command-line argument the initializer selects, and the source name of the LazyLock static and its getter, are not pinned: no Location inside the initializer names the static",
+  "whether wrapper a's kind-1 arm is ever selected at run time stays open, as PR #2969 left it",
+  "the fate classification is a static result about these 100 sites; the inlined ensure blocks in 19 of the 65 bodies pass only the cell address to the once machinery and likewise never load the value words"
+ ]
+}
