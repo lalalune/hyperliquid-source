@@ -1,0 +1,118 @@
+
+<authenticated-node115>:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 4ef8a10: 55                           	push	rbp
+ 4ef8a11: 41 57                        	push	r15
+ 4ef8a13: 41 56                        	push	r14
+ 4ef8a15: 53                           	push	rbx
+ 4ef8a16: 50                           	push	rax
+ 4ef8a17: 48 89 f3                     	mov	rbx, rsi
+ 4ef8a1a: 49 89 fe                     	mov	r14, rdi
+ 4ef8a1d: 4c 8d 7f 20                  	lea	r15, [rdi + 0x20]
+ 4ef8a21: 4c 89 ff                     	mov	rdi, r15
+ 4ef8a24: e8 17 9f f5 ff               	call	0x4e52940 <.text+0x3a39640>
+ 4ef8a29: 49 83 7e 10 00               	cmp	qword ptr [r14 + 0x10], 0x0
+ 4ef8a2e: 0f 84 3e 01 00 00            	je	0x4ef8b72 <.text+0x3adf872>
+ 4ef8a34: 49 8b 16                     	mov	rdx, qword ptr [r14]
+ 4ef8a37: 49 8b 7e 08                  	mov	rdi, qword ptr [r14 + 0x8]
+ 4ef8a3b: 48 89 c6                     	mov	rsi, rax
+ 4ef8a3e: 48 c1 ee 39                  	shr	rsi, 0x39
+ 4ef8a42: 66 0f 6e c6                  	movd	xmm0, esi
+ 4ef8a46: 66 0f 60 c0                  	punpcklbw	xmm0, xmm0      # xmm0 = xmm0[0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7]
+ 4ef8a4a: f2 0f 70 c0 00               	pshuflw	xmm0, xmm0, 0x0         # xmm0 = xmm0[0,0,0,0,4,5,6,7]
+ 4ef8a4f: 66 0f 70 c0 44               	pshufd	xmm0, xmm0, 0x44        # xmm0 = xmm0[0,1,0,1]
+ 4ef8a54: 45 31 d2                     	xor	r10d, r10d
+ 4ef8a57: 66 0f 76 c9                  	pcmpeqd	xmm1, xmm1
+ 4ef8a5b: 45 31 c9                     	xor	r9d, r9d
+ 4ef8a5e: 48 21 f8                     	and	rax, rdi
+ 4ef8a61: f3 0f 6f 14 02               	movdqu	xmm2, xmmword ptr [rdx + rax]
+ 4ef8a66: 66 0f 6f da                  	movdqa	xmm3, xmm2
+ 4ef8a6a: 66 0f 74 d8                  	pcmpeqb	xmm3, xmm0
+ 4ef8a6e: 66 44 0f d7 db               	pmovmskb	r11d, xmm3
+ 4ef8a73: 45 85 db                     	test	r11d, r11d
+ 4ef8a76: 74 58                        	je	0x4ef8ad0 <.text+0x3adf7d0>
+ 4ef8a78: f3 41 0f bc cb               	tzcnt	ecx, r11d
+ 4ef8a7d: 48 01 c1                     	add	rcx, rax
+ 4ef8a80: 48 21 f9                     	and	rcx, rdi
+ 4ef8a83: 48 f7 d9                     	neg	rcx
+ 4ef8a86: 48 8d 0c 89                  	lea	rcx, [rcx + 4*rcx]
+ 4ef8a8a: f3 0f 6f 1b                  	movdqu	xmm3, xmmword ptr [rbx]
+ 4ef8a8e: f3 0f 6f 64 8a ec            	movdqu	xmm4, xmmword ptr [rdx + 4*rcx - 0x14]
+ 4ef8a94: 66 0f 74 e3                  	pcmpeqb	xmm4, xmm3
+ 4ef8a98: 66 0f 6e 5b 10               	movd	xmm3, dword ptr [rbx + 0x10]
+ 4ef8a9d: 66 0f 6e 6c 8a fc            	movd	xmm5, dword ptr [rdx + 4*rcx - 0x4]
+ 4ef8aa3: 66 0f 74 eb                  	pcmpeqb	xmm5, xmm3
+ 4ef8aa7: 66 0f db ec                  	pand	xmm5, xmm4
+ 4ef8aab: 66 0f d7 ed                  	pmovmskb	ebp, xmm5
+ 4ef8aaf: b1 01                        	mov	cl, 0x1
+ 4ef8ab1: 81 fd ff ff 00 00            	cmp	ebp, 0xffff
+ 4ef8ab7: 0f 84 a8 00 00 00            	je	0x4ef8b65 <.text+0x3adf865>
+ 4ef8abd: 41 8d 4b ff                  	lea	ecx, [r11 - 0x1]
+ 4ef8ac1: 66 44 21 d9                  	and	cx, r11w
+ 4ef8ac5: 41 89 cb                     	mov	r11d, ecx
+ 4ef8ac8: 75 ae                        	jne	0x4ef8a78 <.text+0x3adf778>
+ 4ef8aca: 66 0f 1f 44 00 00            	nop	word ptr [rax + rax]
+ 4ef8ad0: 49 83 fa 01                  	cmp	r10, 0x1
+ 4ef8ad4: 74 13                        	je	0x4ef8ae9 <.text+0x3adf7e9>
+ 4ef8ad6: 66 0f d7 ca                  	pmovmskb	ecx, xmm2
+ 4ef8ada: 85 c9                        	test	ecx, ecx
+ 4ef8adc: 74 1f                        	je	0x4ef8afd <.text+0x3adf7fd>
+ 4ef8ade: f3 44 0f bc c1               	tzcnt	r8d, ecx
+ 4ef8ae3: 49 01 c0                     	add	r8, rax
+ 4ef8ae6: 49 21 f8                     	and	r8, rdi
+ 4ef8ae9: 66 0f 74 d1                  	pcmpeqb	xmm2, xmm1
+ 4ef8aed: 66 0f d7 ca                  	pmovmskb	ecx, xmm2
+ 4ef8af1: 85 c9                        	test	ecx, ecx
+ 4ef8af3: 75 1b                        	jne	0x4ef8b10 <.text+0x3adf810>
+ 4ef8af5: 41 ba 01 00 00 00            	mov	r10d, 0x1
+ 4ef8afb: eb 03                        	jmp	0x4ef8b00 <.text+0x3adf800>
+ 4ef8afd: 45 31 d2                     	xor	r10d, r10d
+ 4ef8b00: 4c 01 c8                     	add	rax, r9
+ 4ef8b03: 48 83 c0 10                  	add	rax, 0x10
+ 4ef8b07: 49 83 c1 10                  	add	r9, 0x10
+ 4ef8b0b: e9 4e ff ff ff               	jmp	0x4ef8a5e <.text+0x3adf75e>
+ 4ef8b10: 42 0f b6 04 02               	movzx	eax, byte ptr [rdx + r8]
+ 4ef8b15: 84 c0                        	test	al, al
+ 4ef8b17: 79 7a                        	jns	0x4ef8b93 <.text+0x3adf893>
+ 4ef8b19: 24 01                        	and	al, 0x1
+ 4ef8b1b: 49 8d 48 f0                  	lea	rcx, [r8 - 0x10]
+ 4ef8b1f: 48 21 f9                     	and	rcx, rdi
+ 4ef8b22: 42 88 34 02                  	mov	byte ptr [rdx + r8], sil
+ 4ef8b26: 40 88 74 0a 10               	mov	byte ptr [rdx + rcx + 0x10], sil
+ 4ef8b2b: f3 41 0f 6f 46 10            	movdqu	xmm0, xmmword ptr [r14 + 0x10]
+ 4ef8b31: 0f b6 c0                     	movzx	eax, al
+ 4ef8b34: 66 0f 6e c8                  	movd	xmm1, eax
+ 4ef8b38: 66 0f c6 0d 4f 7c 55 fb 02   	shufpd	xmm1, xmmword ptr [rip - 0x4aa83b1], 0x2 # xmm1 = xmm1[0],mem[1]
+                                                                        # 0x450790
+ 4ef8b41: 66 0f fb c1                  	psubq	xmm0, xmm1
+ 4ef8b45: f3 41 0f 7f 46 10            	movdqu	xmmword ptr [r14 + 0x10], xmm0
+ 4ef8b4b: 49 f7 d8                     	neg	r8
+ 4ef8b4e: 4b 8d 04 80                  	lea	rax, [r8 + 4*r8]
+ 4ef8b52: 8b 4b 10                     	mov	ecx, dword ptr [rbx + 0x10]
+ 4ef8b55: 89 4c 82 fc                  	mov	dword ptr [rdx + 4*rax - 0x4], ecx
+ 4ef8b59: f3 0f 6f 03                  	movdqu	xmm0, xmmword ptr [rbx]
+ 4ef8b5d: f3 0f 7f 44 82 ec            	movdqu	xmmword ptr [rdx + 4*rax - 0x14], xmm0
+ 4ef8b63: 31 c9                        	xor	ecx, ecx
+ 4ef8b65: 89 c8                        	mov	eax, ecx
+ 4ef8b67: 48 83 c4 08                  	add	rsp, 0x8
+ 4ef8b6b: 5b                           	pop	rbx
+ 4ef8b6c: 41 5e                        	pop	r14
+ 4ef8b6e: 41 5f                        	pop	r15
+ 4ef8b70: 5d                           	pop	rbp
+ 4ef8b71: c3                           	ret
+ 4ef8b72: be 01 00 00 00               	mov	esi, 0x1
+ 4ef8b77: 4c 89 f7                     	mov	rdi, r14
+ 4ef8b7a: 4c 89 fa                     	mov	rdx, r15
+ 4ef8b7d: b9 01 00 00 00               	mov	ecx, 0x1
+ 4ef8b82: 49 89 c7                     	mov	r15, rax
+ 4ef8b85: ff 15 95 2e 5f 01            	call	qword ptr [rip + 0x15f2e95] # 0x64eba20
+ 4ef8b8b: 4c 89 f8                     	mov	rax, r15
+ 4ef8b8e: e9 a1 fe ff ff               	jmp	0x4ef8a34 <.text+0x3adf734>
+ 4ef8b93: 66 0f 6f 02                  	movdqa	xmm0, xmmword ptr [rdx]
+ 4ef8b97: 66 0f d7 c0                  	pmovmskb	eax, xmm0
+ 4ef8b9b: f3 44 0f bc c0               	tzcnt	r8d, eax
+ 4ef8ba0: 42 0f b6 04 02               	movzx	eax, byte ptr [rdx + r8]
+ 4ef8ba5: e9 6f ff ff ff               	jmp	0x4ef8b19 <.text+0x3adf819>
