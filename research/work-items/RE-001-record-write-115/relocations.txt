@@ -1,0 +1,12 @@
+(none of the pinned routines is installed by a RELATIVE record.)
+The two GOT slots read in-window by the main routine hold canonical
+forwarders, installed by these RELATIVE records (readelf -r):
+0000064ed010  000000000008 R_X86_64_RELATIVE                    5d2ca80
+0000064ed778  000000000008 R_X86_64_RELATIVE                    5f04d80
+- GOT slot 0x64ed778 holds 0x5f04d80: the canonical target compared
+  against product-1 (owner+0xa50) vtable slot 0x98 at 0x5f0f9a9; when
+  equal, the routine calls slot 0x90 instead (#3286's forwarder).
+- GOT slot 0x64ed010 holds 0x5d2ca80: the canonical target compared
+  against product-2 (owner+0x10) vtable slot 0x98 at 0x5f0fa81; when
+  equal, the routine calls slot 0x10 on the product+0x20 subobject
+  instead.
