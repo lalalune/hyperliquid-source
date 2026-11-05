@@ -65,7 +65,7 @@ class SharedInsertReturnStaticTests(unittest.TestCase):
                              ['differing_bytes'], 57)
             retained_files = sorted(
                 path.name for path in PACKET.iterdir()
-                if path.name != 'MANIFEST.sha256' and path.name != 'README.md'
+                if path.is_file() and path.name not in ('MANIFEST.sha256', 'README.md')
             )
             self.assertEqual(
                 retained_files,
@@ -127,6 +127,48 @@ class SharedInsertReturnStaticTests(unittest.TestCase):
         self.assertEqual(saturating_add(max_u64, 1), max_u64)
         self.assertEqual(saturating_add(max_u64 - 1, 1), max_u64)
         self.assertEqual(saturating_add(1 << 63, 1 << 63), max_u64)
+
+    def test_event_word_reaching_definitions(self):
+        # These are raw frame-word sources, not an inferred Option payload.
+        event = self.report['trace']['event_record']
+        fresh = self.report['trace']['mode_selection']['fresh_mode_sources']
+        self.assertNotEqual(fresh['event_+0x10'], 'the qword at order + 0xe0')
+        self.assertEqual(event['word_0x10_sources'], [
+            {'condition': 'stack_1 != 1', 'source': 'stack_1'},
+            {'condition': 'stack_1 == 1 and stack_2 >= slab_length',
+             'source': '1'},
+            {'condition': 'stack_1 == 1 and stack_2 < slab_length and linked_first_qword == 2',
+             'source': 'low64(stack_2 * 0x110)'},
+            {'condition': 'stack_1 == 1 and stack_2 < slab_length and linked_first_qword != 2',
+             'source': 'the qword at slab buffer[stack_2] + 0xf0'},
+        ])
+        fields = {row['offset']: row for row in event['fields']}
+        self.assertEqual(fields[24]['source'], 'the qword at order + 0xe0')
+        self.assertIn('word_0x10_sources', fields[16]['source'])
+        for owner, base in [('shared_a', 0x58DF360), ('shared_b', 0x58DF790)]:
+            witnesses = self.report['trace']['owners_detail'][owner]['event_word_witnesses']
+            self.assertEqual(witnesses['selector_loads'], [hex(base + 0x44), hex(base + 0xD1)])
+            self.assertEqual(witnesses['scaled_index'], hex(base + 0x70))
+            self.assertEqual(witnesses['linked_word_load'], hex(base + 0xA0))
+            self.assertEqual(witnesses['raw_word_store'], hex(base + 0x13E))
+            self.assertEqual(witnesses['quantity_store'], hex(base + 0x143))
+
+    def test_event_copy_extent_is_not_initialized_prefix(self):
+        event = self.report['trace']['event_record']
+        self.assertNotIn('written_span_bytes', event)
+        self.assertEqual(event['initialized_source_prefix_bytes'], 77)
+        self.assertEqual(event['copy_requested_bytes'], {'shared_a': 0x2B8, 'shared_b': 0x2C8})
+        self.assertIn('not established', event['tail'])
+        self.assertIn('exact-copy', event['destination_premise'])
+
+    def test_event_provenance_instruction_corruptions(self):
+        # In-memory static byte checks below the outer artifact authentication.
+        # No mutated capture is executed or evaluated.
+        for base in (0x58DF360, 0x58DF790):
+            for offset in (0x46, 0xD3, 0x72, 0xA3, 0x140, 0x145, 0x54, 0x6A, 0x84):
+                with self.subTest(base=hex(base), offset=hex(offset)):
+                    with self.assertRaisesRegex(ValueError, 'Pinned instruction changed'):
+                        analyze(self.mutate_va_byte(base + offset))
 
     def test_effective_mode_cases(self):
         # Selector other than 1 is always fresh.
