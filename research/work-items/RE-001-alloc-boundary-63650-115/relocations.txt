@@ -1,0 +1,18 @@
+Relocation / GOT notes for the RE-001 allocation boundary window (node #115).
+
+Window 0x5963650:
+- Four rip-relative GOT loads, one per allocator call site. Every
+  slot is an R_X86_64_RELATIVE record whose addend is the callee
+  entry; the file image stores 0 in each slot.
+  site 0x59636bd: call *0x64df580, RELATIVE addend 0x635a790
+    (aligned realloc entry: xor ecx,ecx; jmp 0x6350210)
+  site 0x59636cb: call *0x64df588, RELATIVE addend 0x635a7a0
+    (plain realloc body, FDE 0x635a7a0..0x635c6c7)
+  site 0x59636f6: call *0x64df590, RELATIVE addend 0x63577f0
+    (aligned fresh-allocation body, FDE 0x63577f0..0x635a786)
+  site 0x5963701: call *0x64df480, RELATIVE addend 0x6355830
+    (plain fresh-allocation body, FDE 0x6355830..0x63558f2)
+- No R_X86_64_RELATIVE record anywhere names the routine itself
+  (addend 0x5963650): 0 of 59,534 RELATIVE records. The routine
+  has no PLT entry and no stored pointer; it is reached only by
+  direct E8 calls (see census.py / callers.tsv).
