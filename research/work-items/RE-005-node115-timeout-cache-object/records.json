@@ -1,0 +1,450 @@
+{
+ "artifact": {
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032,
+  "snapshot": "artifacts/node/115/hl-node"
+ },
+ "call_census": {
+  "getobj": [
+   {
+    "in_body": "0x5cde710",
+    "kind": "call",
+    "site": "0x5cde802"
+   }
+  ],
+  "lookup": [
+   {
+    "in_body": "0x5cee650",
+    "kind": "call",
+    "site": "0x5cee6f9"
+   }
+  ],
+  "notify": [
+   {
+    "in_body": "0x5cee650",
+    "kind": "call",
+    "site": "0x5cee6c4"
+   },
+   {
+    "in_body": "0x5cee650",
+    "kind": "call",
+    "site": "0x5cee793"
+   }
+  ],
+  "refresh": [
+   {
+    "in_body": "0x5ce0160",
+    "kind": "jmp",
+    "site": "0x5ce01cb"
+   },
+   {
+    "in_body": "0x5ce0850",
+    "kind": "jmp",
+    "site": "0x5ce08be"
+   },
+   {
+    "in_body": "0x5cfdd00",
+    "kind": "call",
+    "site": "0x5cfdfef"
+   }
+  ]
+ },
+ "findings": [
+  "The cached object at 0x64fee08 is an Arc clone of the vendored tokio signal registry entry for signal 17 (SIGCHLD): the refresh body 0x5cee650 is the sole direct caller of the registry lookup 0x5cde710, and it passes the immediate 17 as the lookup second argument (pin 0x5cee6f1). The lookup validates the value as a signal number (refusal mask 0x80b10 = signals 4, 8, 9, 11, 19; messages \"Refusing to register signal \", \"signal driver gone\", \"signal too large\", \"registering signal handler failed\") and clones entry 16's object through the getter 0x5cfcf90, whose panic Location is z_vendor/tokio/src/signal/registry.rs:73:32.",
+  "Correction to the timeout-pair-writers packet (PR #2944): its \"0x5cde710 keyed by 17 bytes at the argument\" reads the constant 17 as a byte count. The 17 is the SIGCHLD signal number; the pointer argument is the address of the pair+0x38 slot (the selectors pass pair+0x38 itself: sel_timeout computes r14+0x38 from the pair base, the park forwarder computes X+0x30 from X = pair+8; the refresh forwards the pointer unchanged, pin 0x5cee6f6), which the lookup dereferences twice as a driver-liveness cell: value -1 or a zero first word at the pointee yields \"signal driver gone\". The pair constructor 0x5ce01f0 writes the slot once, from the first qword of its config (builder 0x5cf9600 passes its own config field at +0x60).",
+  "Cached object layout (allocation size 0x150 = 336, from the dealloc size in the weak-release body 0x5ce8860): +0x00 Arc strong count (incremented by the getter 0x5cfcf90, decremented last on release), +0x08 Arc weak count (decremented by 0x5ce8860, which frees 0x150 bytes at zero), +0x110 a tagged function word with a spin byte at +0x118 (an embedded deferred-drop sub-object, run by 0x5ce57c0 when the second count reaches zero), +0x130 the lock word the SIGCHLD drain 0x5ce7380 CASes 0 -> 8, +0x138 the event counter the drain advances by 2 per delivery (bit 0 is a separate flag; the getter returns [obj+0x138] & ~1 as the snapshot word), +0x140 a second reference count (incremented by the getter, decremented first on release; at zero the 0x5ce57c0 closure runs).",
+  "Refresh contract: the refresh lock byte 0x64fee00 is claimed by cmpxchg; contention returns at once. Cache hit with [obj+0x138] & ~1 equal to the cached key 0x64fee10 returns without further work. A moved counter updates the key, takes the orphan lock byte 0x64fede0 and runs the reap pass 0x5cee900. An empty cache resolves the SIGCHLD object through the lookup only when the orphan queue is non-empty; a failed lookup drops the error value through 0x5cee460, leaves the cache empty and returns without panicking.",
+  "The reap pass 0x5cee900 (panic Location z_vendor/tokio/src/process/unix/orphan.rs:118:20) walks the global orphan queue (base 0x64fedf0, length 0x64fedf8, record stride 0x1c) from the last record down: the helper 0x5c902e0 tries to reap the record pid through waitpid@GLIBC (slot 0x64ec8a0, WNOHANG) and builds an ExitStatus-shaped result; a finished record is swap-removed, its four i32 words at +0xc..+0x18 are closed through close@GLIBC (slot 0x64dfe78) when not -1, and its attached value is dropped through 0x5cee460.",
+  "Census: the refresh body has exactly three direct call sites in .text (sel_timeout 0x5ce0160 tail jump, sel_park 0x5ce0850 tail jump, park forwarder 0x5cfdd00 call); the lookup has exactly one (the refresh); the getter has exactly one (the lookup); the reap pass has exactly two (both in the refresh). The cache globals 0x64fee00/0x64fee08/0x64fee10 are referenced only inside the refresh body. No stored pointer and no .rela.dyn addend anywhere in the file names the cache globals, the lookup, the refresh, the getter or the reap pass. The static block 0x64fede0..0x64fee38 lies in .data: the lock bytes, cache object/key words, registry vector pointer/count and queue length all start at 0; the queue base word at 0x64fedf0 starts at 4 (its unpopulated marker; it is only dereferenced once the length is non-zero), the registry once-state word at 0x64fee38 starts at 3 (the not-yet-run value the once helpers test), and the neighbouring id counter at 0x64fee18 starts at 1."
+ ],
+ "globals_initial": {
+  "0x64fede0": 0,
+  "0x64fede8": 0,
+  "0x64fedf0": 4,
+  "0x64fedf8": 0,
+  "0x64fee00": 0,
+  "0x64fee08": 0,
+  "0x64fee10": 0,
+  "0x64fee18": 1,
+  "0x64fee20": 0,
+  "0x64fee28": 0,
+  "0x64fee30": 0,
+  "0x64fee38": 3
+ },
+ "locations": {
+  "0x64c6498": {
+   "col": 20,
+   "line": 118,
+   "path": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/process/unix/orphan.rs"
+  },
+  "0x64c6e80": {
+   "col": 32,
+   "line": 73,
+   "path": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/signal/registry.rs"
+  },
+  "0x64c6ff0": {
+   "col": 20,
+   "line": 28,
+   "path": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/signal/unix.rs"
+  }
+ },
+ "messages": {
+  "0x44ce8e": "Refusing to register signal ",
+  "0x452ef0": "signal too large",
+  "0x94c765": "registering signal handler failed",
+  "0x94d26c": "signal driver gone"
+ },
+ "open_edges": [
+  "The orphan queue records (stride 0x1c) have no static pusher: no .text site outside the reap pass references the queue base/length words, so records reach the queue through a path that does not address these globals directly (for example through a heap-held queue handle). Who enqueues a record, and the exact source-level name of the four closed i32 words at +0xc..+0x18, stay open.",
+  "The cached object fields +0x10..+0x108 are not individually identified here; only +0x110 onward is pinned by the getter and release paths.",
+  "The pair+0x38 pointee (the driver-liveness cell) is identified mechanically: the constructor stores the builder config +0x60 qword there. Which source-level driver object that qword names is not settled by this packet."
+ ],
+ "pinned_bodies": {
+  "convert": {
+   "sha256": "769da788cde99c4364194479cebebf28d3ed0231f2ed7cb3c9a2de97fa03d769",
+   "size": 227,
+   "va": "0x5c902e0"
+  },
+  "draincb": {
+   "sha256": "1c5715a3187cffd7928efc89d944fd9a9911e04fc252d54bfe5485a1e417dfe5",
+   "size": 623,
+   "va": "0x5cfcc50"
+  },
+  "drop_err": {
+   "sha256": "679c565b1d307332676c4812eec8c19a24b221bad2accb493a59ca2e5f14f07a",
+   "size": 209,
+   "va": "0x5cee460"
+  },
+  "getobj": {
+   "sha256": "e878cca37ea05eabff1c29d29c39cdac0ce22b6ee8445318d11b0f8f7e886f6f",
+   "size": 127,
+   "va": "0x5cfcf90"
+  },
+  "lookup": {
+   "sha256": "4d3182ad772f96cf6dd9042ed0737b5109ff2df95b6987a03a8fa0b5184f0b8b",
+   "size": 416,
+   "va": "0x5cde710"
+  },
+  "notify": {
+   "sha256": "7833d8509386d0d497b61ee9616bf14ba2656f3133aef1f0947983929f255f48",
+   "size": 465,
+   "va": "0x5cee900"
+  },
+  "once_entry": {
+   "sha256": "1875d52234f306510353929576a58c24cb6e3476610b6dfa28c5a5340a49a190",
+   "size": 77,
+   "va": "0x5cdf535"
+  },
+  "once_globals": {
+   "sha256": "eb1d96c653d04893807aa124709186466dce90119c8472d37a896b9f12380a57",
+   "size": 69,
+   "va": "0x5cdf582"
+  },
+  "pair_ctor": {
+   "sha256": "90919826d6842d84b3b1229420978c82d49b767f5c609650b17c3785a73e0cba",
+   "size": 1627,
+   "va": "0x5ce01f0"
+  },
+  "refresh": {
+   "sha256": "99aec8bb669106276f9784e558325882a2bd5a3e13e28bb7aa714da1846d4d01",
+   "size": 679,
+   "va": "0x5cee650"
+  },
+  "release_weak": {
+   "sha256": "38434cf34aa11b143ba141e75815f8b7ef78ac45002fb5521dde7970f17a0529",
+   "size": 30,
+   "va": "0x5ce8860"
+  },
+  "runclosure": {
+   "sha256": "f01e5868cee1f1fb79b84e7feecd8c394a23627d3de5fb49bcf510842bacc16f",
+   "size": 1086,
+   "va": "0x5ce57c0"
+  }
+ },
+ "pins": {
+  "0x5cde72a": "b8100b0800",
+  "0x5ce8870": "be50010000",
+  "0x5cee6f1": "be11000000",
+  "0x5cee6f6": "4889da",
+  "0x5cee922": "488d0cc0",
+  "0x5cfcfbb": "488b9038010000",
+  "0x5cfcfc2": "f048ff8040010000"
+ },
+ "rip_refs": {
+  "cache_key": [
+   {
+    "disp_end": "0x5cee6a5",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee6b2",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee793",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee87b",
+    "in_body": "0x5cee650"
+   }
+  ],
+  "cache_obj": [
+   {
+    "disp_end": "0x5cee68e",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee71c",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee771",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee77f",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee78c",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee85a",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee867",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee874",
+    "in_body": "0x5cee650"
+   }
+  ],
+  "globals_base": [
+   {
+    "disp_end": "0x5cde7b1",
+    "in_body": "0x5cde710"
+   },
+   {
+    "disp_end": "0x5cde802",
+    "in_body": "0x5cde710"
+   },
+   {
+    "disp_end": "0x5cde847",
+    "in_body": "0x5cde710"
+   },
+   {
+    "disp_end": "0x5cde8a0",
+    "in_body": "0x5cde710"
+   },
+   {
+    "disp_end": "0x5ce732a",
+    "in_body": "0x5ce71f0"
+   },
+   {
+    "disp_end": "0x5ce7564",
+    "in_body": "0x5ce7380"
+   }
+  ],
+  "globals_state": [
+   {
+    "disp_end": "0x5cde7a2",
+    "in_body": "0x5cde710"
+   },
+   {
+    "disp_end": "0x5cde7f3",
+    "in_body": "0x5cde710"
+   },
+   {
+    "disp_end": "0x5ce7209",
+    "in_body": "0x5ce71f0"
+   },
+   {
+    "disp_end": "0x5ce7442",
+    "in_body": "0x5ce7380"
+   }
+  ],
+  "lock_orphan": [
+   {
+    "disp_end": "0x5cee6be",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee6da",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee7bd",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee800",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee817",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee82e",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee8b7",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee8e7",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5ceea40",
+    "in_body": "0x5cee900"
+   },
+   {
+    "disp_end": "0x5ceea63",
+    "in_body": "0x5cee900"
+   },
+   {
+    "disp_end": "0x5ceeab0",
+    "in_body": "0x5cee900"
+   },
+   {
+    "disp_end": "0x5ceeac1",
+    "in_body": "0x5cee900"
+   }
+  ],
+  "lock_refresh": [
+   {
+    "disp_end": "0x5cee668",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee685",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee7cb",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee7e3",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee8c5",
+    "in_body": "0x5cee650"
+   },
+   {
+    "disp_end": "0x5cee8d6",
+    "in_body": "0x5cee650"
+   }
+  ],
+  "queue_base": [
+   {
+    "disp_end": "0x5cee965",
+    "in_body": "0x5cee900"
+   },
+   {
+    "disp_end": "0x5cee996",
+    "in_body": "0x5cee900"
+   }
+  ],
+  "queue_len": [
+   {
+    "disp_end": "0x5cee915",
+    "in_body": "0x5cee900"
+   },
+   {
+    "disp_end": "0x5cee955",
+    "in_body": "0x5cee900"
+   },
+   {
+    "disp_end": "0x5cee986",
+    "in_body": "0x5cee900"
+   },
+   {
+    "disp_end": "0x5cee9da",
+    "in_body": "0x5cee900"
+   }
+  ],
+  "reg_base": [
+   {
+    "disp_end": "0x5cde7cc",
+    "in_body": "0x5cde710"
+   },
+   {
+    "disp_end": "0x5ce7461",
+    "in_body": "0x5ce7380"
+   }
+  ],
+  "reg_count": [
+   {
+    "disp_end": "0x5cde7c3",
+    "in_body": "0x5cde710"
+   },
+   {
+    "disp_end": "0x5ce7451",
+    "in_body": "0x5ce7380"
+   },
+   {
+    "disp_end": "0x5ce7570",
+    "in_body": "0x5ce7380"
+   }
+  ]
+ },
+ "slots": {
+  "0x64df4a0": {
+   "kind": "relative",
+   "value": "635de30"
+  },
+  "0x64df9f0": {
+   "kind": "relative",
+   "value": "5c87d50"
+  },
+  "0x64dfe78": {
+   "kind": "glob_dat",
+   "value": "close"
+  },
+  "0x64e01e8": {
+   "kind": "relative",
+   "value": "5ce57c0"
+  },
+  "0x64ec898": {
+   "kind": "relative",
+   "value": "5c902e0"
+  },
+  "0x64ec8a0": {
+   "kind": "glob_dat",
+   "value": "waitpid"
+  },
+  "0x64ecba8": {
+   "kind": "relative",
+   "value": "5cfcc50"
+  },
+  "0x64ecc58": {
+   "kind": "relative",
+   "value": "5ce8860"
+  }
+ },
+ "stored_ptr_refs": {
+  "0x5cde710": [],
+  "0x5cee650": [],
+  "0x5cee900": [],
+  "0x5cfcf90": [],
+  "0x64fede0": [],
+  "0x64fedf0": [],
+  "0x64fedf8": [],
+  "0x64fee00": [],
+  "0x64fee08": [],
+  "0x64fee10": [],
+  "0x64fee20": [],
+  "0x64fee28": [],
+  "0x64fee30": [],
+  "0x64fee38": []
+ },
+ "work_item": "RE-005-node115-timeout-cache-object"
+}
