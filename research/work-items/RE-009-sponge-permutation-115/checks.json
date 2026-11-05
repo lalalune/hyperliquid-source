@@ -1,0 +1,95 @@
+[
+  {
+    "name": "fmt",
+    "command": [
+      "<work>/host-tools/rust-1.94.1/bin/rustfmt",
+      "--check",
+      "--edition",
+      "2021",
+      "src/node115-sponge-permutation/lib.rs",
+      "src/node115-sponge-permutation/input_only_driver.rs",
+      "research/work-items/RE-009-sponge-permutation-115/client_fixture.rs"
+    ],
+    "exit": 0,
+    "wall_seconds": 2.568
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "<work>/host-tools/rust-1.94.1/bin/clippy-driver",
+      "--edition=2021",
+      "--crate-name",
+      "node115_sponge_permutation",
+      "--crate-type",
+      "rlib",
+      "-D",
+      "warnings",
+      "src/node115-sponge-permutation/lib.rs",
+      "-o",
+      "<work>/hl-keccak-checks/liblint.rlib"
+    ],
+    "exit": 0,
+    "wall_seconds": 6.672
+  },
+  {
+    "name": "scope-gates",
+    "command": [
+      "<work>/onchain-venv/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_verify_packets.py",
+      "-v"
+    ],
+    "exit": 0,
+    "wall_seconds": 49.143
+  },
+  {
+    "name": "doctor",
+    "command": [
+      "make",
+      "doctor"
+    ],
+    "exit": 0,
+    "wall_seconds": 9.799
+  },
+  {
+    "name": "verify",
+    "command": [
+      "make",
+      "verify"
+    ],
+    "exit": 0,
+    "wall_seconds": 55.999
+  },
+  {
+    "name": "catalogue",
+    "command": [
+      "make",
+      "catalogue"
+    ],
+    "exit": 0,
+    "wall_seconds": 57.869
+  },
+  {
+    "name": "catalogue-check",
+    "command": [
+      "make",
+      "catalogue-check"
+    ],
+    "exit": 0,
+    "wall_seconds": 59.901
+  },
+  {
+    "name": "reproduce",
+    "command": [
+      "make",
+      "reproduce"
+    ],
+    "exit": 0,
+    "wall_seconds": 107.288
+  }
+]

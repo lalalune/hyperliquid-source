@@ -43,3 +43,34 @@ compiler output, entire sponge/digest or private preimage is reconstructed. New
 code uses root MIT; captures/imports and original static packet keep their rights.
 No first-party/dependency/completion percentages or gates advance. Next close
 actual sponge absorb/finalize/helper contracts before a complete digest API.
+
+## Executed independent Rust comparison
+
+Pre-Rust Git seal57b5a0c05de2b93581af1ba92d118c4cfbbfad64 binds the actual
+original evaluator, contract,262inputs/expectations and nativeCOW controls.
+Rust1.94.1/LLVM21.1.8 edition2021 macOSarm64 opt0/3 and exact same-path opt3
+byte-repeat each match all262complete200byte states. The12compiled wrong
+implementations each differ on ALL262rows and each ordinary Rust fixture exits101;
+original fixtures exit0. Actual build229.833s,15full streams/76commands/152output
+channels retained. No padding/statebyte excluded. Raw compiler, source/driver/
+fixture/input/output hashes and failure receipts are preserved.
+
+The fixture runtime loop checks ALL262sealed rows. It shares only input parsing/
+formatting with the input-only driver; expected semantics are unchanged native
+expected.txt. Transport is400hexcharacters perline. Generic retained output
+filenames endin-actual.jsonl for historical runner compatibility, but their actual
+payload is explicitly plain400character hex lines, not JSON; archive indexes/hash
+comparisons operate on those exact original bytes. No expected values are computed
+by the adapter. Compressed transport is checked against the immutable inputs;
+exact Rust fixture bytes are hash-checked and rehydrated before builds.
+
+```sh
+python3 research/work-items/RE-009-sponge-permutation-115/verify-rust.py --rustc /path/to/rustc --out /new/output-directory
+```
+Catalogue/check ONLY uses already-submitted #2655 snapshot-read fix for the
+measured39.47GB repeated-read blocker; baseline helper is restored before
+actual reproduce/final audit and remains unchanged in commits. This is not an
+unmodified-head local catalogue claim. Serialduty0.10 limits active execution,
+not strict aggregate CPU. Full repository make test/new-head hosted CI pending.
+
+Scoped integration355.704s passed8steps: rustfmt, Clippy-Dwarnings,12packet-integrity tests, doctor/verify, disclosed catalogue/check overlay, baselinehelperrestoration and actualreproduce. The7pre-Rust focused tests15.723s bind unchanged native/proof/gold/test sources and are not falsely relabeled as a repeated run. Full new-head repository CI pending.
