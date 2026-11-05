@@ -894,9 +894,14 @@ def objdump_text():
               ('--start-address=0x2d06804', '--stop-address=0x2d06822'),
               ('--start-address=0x2d090a2', '--stop-address=0x2d090c7')]
     out = []
+    # Run objdump from the repo root with a relative target path so the
+    # file-format header it prints is checkout-independent; an absolute
+    # path here made `check` pass only at the author's checkout location.
+    target_rel = str(TARGET.relative_to(ROOT))
     for start, stop in ranges:
-        r = subprocess.run(['objdump', '-d', start, stop, str(TARGET)],
-                           capture_output=True, text=True, check=True)
+        r = subprocess.run(['objdump', '-d', start, stop, target_rel],
+                           capture_output=True, text=True, check=True,
+                           cwd=ROOT)
         out.append(r.stdout)
     return '\n'.join(out)
 
