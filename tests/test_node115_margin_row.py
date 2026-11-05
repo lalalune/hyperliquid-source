@@ -45,6 +45,7 @@ class MarginRowTests(unittest.TestCase):
                     self.assertNotEqual(c['original'],c['changed'])
                 finally:changed.close()
 
+    @unittest.skipUnless(importlib.util.find_spec("capstone"), "Capstone required for independent disassembly; skip is not a decoder pass")
     def test_selected_and_full_context_extents(self):
         import capstone
         cs=capstone.Cs(capstone.CS_ARCH_X86,capstone.CS_MODE_64);seen=set()
