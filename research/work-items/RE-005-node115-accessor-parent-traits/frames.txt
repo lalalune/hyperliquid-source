@@ -1,0 +1,47 @@
+Decisive frames for RE-005-node115-accessor-parent-traits.
+All addresses are virtual addresses in the pinned node115
+binary (sha256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301).
+Full disassembly excerpts live in the *.objdump.txt files in
+this directory.
+
+error_slot_bodies.objdump.txt
+  0x14c57a0  source() of the native-tls enum parent 0x63f9240:
+             word == 0x8000000000000000 -> (self+8, io vtable
+             0x63f8f58); word == 0x8000000000000001 -> None;
+             otherwise -> (self+0, ErrorStack vtable 0x63f8fd0).
+  0x14c5950  +0x38 type_id body (io instance): writes the
+             16-byte constant at 0x451540 through rdi.
+  0x14c5750  +0x40 description body: returns (0x4649a2, 40),
+             the string "description() is deprecated; use
+             Display".
+  0x14c58a0  +0x50 provide body: a single ret.
+
+ssl_error_debug_14cafa0.objdump.txt
+  Debug of openssl::ssl::Error: writes "Error", field "code"
+  (ErrorCode at self+0x18) and field "cause" (tagged word at
+  self+0).
+
+native_tls_debug_475bee0.objdump.txt
+  Debug of the vendored native-tls backend enum: 4-entry jump
+  table at 0x7e039c for the variant arms Normal / Ssl /
+  EmptyChain / NotPkcs8.
+
+native_tls_display_475c850.objdump.txt
+  Display of the same enum: writes "at least one certificate
+  must be provided to create an identity" (0x7e03f0) and
+  "expected PKCS#8 PEM" (0x7e042f), delegates to the
+  ErrorStack Display strings at 0x93f86f / 0x93f87c.
+
+errorstack_debug_14cae70.objdump.txt
+  Debug of openssl::error::ErrorStack (vtable 0x63f8fd0):
+  writes "ErrorStack" + "(" and formats the Vec elements.
+
+big_trait_group_63fa140.objdump.txt
+  One instance of the Error-subtrait family (Self 64, 15
+  groups): prefix Debug stub 0x14cd240 and Display shim
+  0x14cd390 (delegation through Self's first word), one
+  group's field accessor 0x14cb650 returning
+  (self+0x38, 0x63f9a38), pair return 0x14cb9a0, the 33-byte
+  keyed lookup 0x14cba20 (16-byte compare against the
+  constant at 0x454c30, returns self+0x38 or null), and the
+  72-byte worker 0x14cbd80 (drop glue).
