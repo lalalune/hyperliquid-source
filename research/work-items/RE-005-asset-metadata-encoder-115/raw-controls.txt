@@ -1,0 +1,127 @@
+--- evidence-controls.stdout ---
+
+--- evidence-controls.stderr ---
+test_field_call_order_rejected (__main__.MetadataEvidence.test_field_call_order_rejected) ... ok
+test_frozen_adapter_is_exact (__main__.MetadataEvidence.test_frozen_adapter_is_exact) ... ok
+test_positive_anchors (__main__.MetadataEvidence.test_positive_anchors) ... ok
+test_wrong_callback_rejected (__main__.MetadataEvidence.test_wrong_callback_rejected) ... ok
+test_wrong_escape_class_rejected (__main__.MetadataEvidence.test_wrong_escape_class_rejected) ... ok
+test_wrong_growth_default_rejected (__main__.MetadataEvidence.test_wrong_growth_default_rejected) ... ok
+test_wrong_input_offset_rejected (__main__.MetadataEvidence.test_wrong_input_offset_rejected) ... ok
+test_wrong_key_rejected (__main__.MetadataEvidence.test_wrong_key_rejected) ... ok
+test_wrong_omission_target_rejected (__main__.MetadataEvidence.test_wrong_omission_target_rejected) ... ok
+test_wrong_precision_rejected (__main__.MetadataEvidence.test_wrong_precision_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.077s
+
+OK
+
+--- reference-regeneration.stdout ---
+{"cases": 223, "equal": true, "sha256": "4d530386a90634c57f40c4dc047c996dcafe648088f9abcd7917f81f51f816c6"}
+
+--- portable-format-witness.stdout ---
+$ compile independent formatting witness precision10
+{"name": "precision10", "expected": true, "observed": true, "controlsPassed": true}
+$ compile independent formatting witness precision9
+{"name": "precision9", "expected": false, "observed": false, "controlsPassed": true}
+$ compile independent formatting witness precision11
+{"name": "precision11", "expected": false, "observed": false, "controlsPassed": true}
+$ compile independent formatting witness default
+{"name": "default", "expected": false, "observed": false, "controlsPassed": true}
+$ compile independent formatting witness plus_precision10
+{"name": "plus_precision10", "expected": false, "observed": false, "controlsPassed": true}
+$ compile independent formatting witness lower_exp10
+{"name": "lower_exp10", "expected": true, "observed": true, "controlsPassed": true}
+$ compile independent formatting witness upper_exp10
+{"name": "upper_exp10", "expected": true, "observed": true, "controlsPassed": true}
+
+--- counterfactual-precision9.stdout ---
+
+running 2 tests
+test local_timestamp_validation_is_not_a_native_error_claim ... ok
+test frozen_whole_records ... FAILED
+
+failures:
+
+---- frozen_whole_records stdout ----
+
+thread 'frozen_whole_records' (40072) panicked at tests\frozen_cases.rs:53:9:
+assertion `left == right` failed: fee_3dcb7cdfd9d7bdbb
+  left: [123, 34, 115, 122, 68, 101, 99, 105, 109, 97, 108, 115, 34, 58, 54, 44, 34, 110, 97, 109, 101, 34, 58, 34, 88, 89, 90, 34, 44, 34, 109, 97, 120, 76, 101, 118, 101, 114, 97, 103, 101, 34, 58, 53, 48, 44, 34, 109, 97, 114, 103, 105, 110, 84, 97, 98, 108, 101, 73, 100, 34, 58, 53, 54, 44, 34, 100, 101, 112, 108, 111, 121, 101, 114, 70, 101, 101, 83, 99, 97, 108, 101, 34, 58, 34, 48, 46, 48, 34, 125]
+ right: [123, 34, 115, 122, 68, 101, 99, 105, 109, 97, 108, 115, 34, 58, 54, 44, 34, 110, 97, 109, 101, 34, 58, 34, 88, 89, 90, 34, 44, 34, 109, 97, 120, 76, 101, 118, 101, 114, 97, 103, 101, 34, 58, 53, 48, 44, 34, 109, 97, 114, 103, 105, 110, 84, 97, 98, 108, 101, 73, 100, 34, 58, 53, 54, 44, 34, 100, 101, 112, 108, 111, 121, 101, 114, 70, 101, 101, 83, 99, 97, 108, 101, 34, 58, 34, 48, 46, 48, 48, 48, 48, 48, 48, 48, 48, 48, 49, 34, 125]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    frozen_whole_records
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+--- counterfactual-precision9.stderr ---
+   Compiling node115-context-encoder v0.1.0 (REPRO_ROOT\outputs\new-pr\hyperliquid\node115-asset-metadata-encoder\negative-rust\precision9\research\imported\node115-context-encoder-255cb2ccd9c9443c9bb5745f04ecc1c73627b10b)
+   Compiling node115-asset-metadata-encoder v0.1.0 (REPRO_ROOT\outputs\new-pr\hyperliquid\node115-asset-metadata-encoder\negative-rust\precision9\src\node115-asset-metadata-encoder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.62s
+     Running tests\frozen_cases.rs (REPRO_ROOT\outputs\new-pr\hyperliquid\node115-asset-metadata-encoder\negative-target\precision9\debug\deps\frozen_cases-4fe77d22b8ad108a.exe)
+error: test failed, to rerun pass `--test frozen_cases`
+
+--- counterfactual-numeric-fee.stdout ---
+
+running 2 tests
+test local_timestamp_validation_is_not_a_native_error_claim ... ok
+test frozen_whole_records ... FAILED
+
+failures:
+
+---- frozen_whole_records stdout ----
+
+thread 'frozen_whole_records' (49512) panicked at tests\frozen_cases.rs:53:9:
+assertion `left == right` failed: policy_00_00_01
+  left: [123, 34, 115, 122, 68, 101, 99, 105, 109, 97, 108, 115, 34, 58, 54, 44, 34, 110, 97, 109, 101, 34, 58, 34, 88, 89, 90, 34, 44, 34, 109, 97, 120, 76, 101, 118, 101, 114, 97, 103, 101, 34, 58, 53, 48, 44, 34, 109, 97, 114, 103, 105, 110, 84, 97, 98, 108, 101, 73, 100, 34, 58, 53, 54, 44, 34, 103, 114, 111, 119, 116, 104, 77, 111, 100, 101, 34, 58, 34, 101, 110, 97, 98, 108, 101, 100, 34, 44, 34, 100, 101, 112, 108, 111, 121, 101, 114, 70, 101, 101, 83, 99, 97, 108, 101, 34, 58, 49, 46, 48, 125]
+ right: [123, 34, 115, 122, 68, 101, 99, 105, 109, 97, 108, 115, 34, 58, 54, 44, 34, 110, 97, 109, 101, 34, 58, 34, 88, 89, 90, 34, 44, 34, 109, 97, 120, 76, 101, 118, 101, 114, 97, 103, 101, 34, 58, 53, 48, 44, 34, 109, 97, 114, 103, 105, 110, 84, 97, 98, 108, 101, 73, 100, 34, 58, 53, 54, 44, 34, 103, 114, 111, 119, 116, 104, 77, 111, 100, 101, 34, 58, 34, 101, 110, 97, 98, 108, 101, 100, 34, 44, 34, 100, 101, 112, 108, 111, 121, 101, 114, 70, 101, 101, 83, 99, 97, 108, 101, 34, 58, 34, 49, 46, 48, 34, 125]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    frozen_whole_records
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+--- counterfactual-numeric-fee.stderr ---
+   Compiling node115-context-encoder v0.1.0 (REPRO_ROOT\outputs\new-pr\hyperliquid\node115-asset-metadata-encoder\negative-rust\numeric-fee\research\imported\node115-context-encoder-255cb2ccd9c9443c9bb5745f04ecc1c73627b10b)
+   Compiling node115-asset-metadata-encoder v0.1.0 (REPRO_ROOT\outputs\new-pr\hyperliquid\node115-asset-metadata-encoder\negative-rust\numeric-fee\src\node115-asset-metadata-encoder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.65s
+     Running tests\frozen_cases.rs (REPRO_ROOT\outputs\new-pr\hyperliquid\node115-asset-metadata-encoder\negative-target\numeric-fee\debug\deps\frozen_cases-63a831db3dcacdbe.exe)
+error: test failed, to rerun pass `--test frozen_cases`
+
+--- counterfactual-wrong-growth-default.stdout ---
+
+running 2 tests
+test local_timestamp_validation_is_not_a_native_error_claim ... ok
+test frozen_whole_records ... FAILED
+
+failures:
+
+---- frozen_whole_records stdout ----
+
+thread 'frozen_whole_records' (11432) panicked at tests\frozen_cases.rs:53:9:
+assertion `left == right` failed: policy_00_00_00
+  left: [123, 34, 115, 122, 68, 101, 99, 105, 109, 97, 108, 115, 34, 58, 54, 44, 34, 110, 97, 109, 101, 34, 58, 34, 88, 89, 90, 34, 44, 34, 109, 97, 120, 76, 101, 118, 101, 114, 97, 103, 101, 34, 58, 53, 48, 44, 34, 109, 97, 114, 103, 105, 110, 84, 97, 98, 108, 101, 73, 100, 34, 58, 53, 54, 125]
+ right: [123, 34, 115, 122, 68, 101, 99, 105, 109, 97, 108, 115, 34, 58, 54, 44, 34, 110, 97, 109, 101, 34, 58, 34, 88, 89, 90, 34, 44, 34, 109, 97, 120, 76, 101, 118, 101, 114, 97, 103, 101, 34, 58, 53, 48, 44, 34, 109, 97, 114, 103, 105, 110, 84, 97, 98, 108, 101, 73, 100, 34, 58, 53, 54, 44, 34, 103, 114, 111, 119, 116, 104, 77, 111, 100, 101, 34, 58, 34, 101, 110, 97, 98, 108, 101, 100, 34, 125]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    frozen_whole_records
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+--- counterfactual-wrong-growth-default.stderr ---
+   Compiling node115-context-encoder v0.1.0 (REPRO_ROOT\outputs\new-pr\hyperliquid\node115-asset-metadata-encoder\negative-rust\wrong-growth-default\research\imported\node115-context-encoder-255cb2ccd9c9443c9bb5745f04ecc1c73627b10b)
+   Compiling node115-asset-metadata-encoder v0.1.0 (REPRO_ROOT\outputs\new-pr\hyperliquid\node115-asset-metadata-encoder\negative-rust\wrong-growth-default\src\node115-asset-metadata-encoder)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.63s
+     Running tests\frozen_cases.rs (REPRO_ROOT\outputs\new-pr\hyperliquid\node115-asset-metadata-encoder\negative-target\wrong-growth-default\debug\deps\frozen_cases-cb4dfe931018daa9.exe)
+error: test failed, to rerun pass `--test frozen_cases`
