@@ -43,3 +43,7 @@ opaque operation effects and whole-component completion remain open. No
 gate or byte registration is advanced. Next question: close the selected
 lookup representation and its failure/state behavior before composing the
 later saturating count and numeric operation.
+
+Pre-Rust seal: `9c03984b0c82f878458c786345c5d5eedbf8b054`. The7,420 distinct tuples visit all65 selected instructions/281B. Whole973B/189-instruction FDE is retained as context, not a matched-body claim. Nine real byte changes alter outputs; four additional changes are refused by frame/knownness/return checks. Rust opt0/3 and same-path repeat match all7,420 rows;96 sealed client cases pass and all12 compiled mutants differ and fail them. Reproduce builds with `verify-rust.py --rustc /path/to/rustc --out /fresh/owned/output`. Raw stream archives and path-only command-output projections are digest-bound.
+
+Final focused, format/Clippy, doctor, verify, catalogue generation/check and actual reproduce all pass. See [qualification](VALIDATION.md), `checks.json`, `rust-results.json` and the digest-bound raw archives. Own full upstream CI is pending; the shared catalogue overlay and full-scope limits are explicit. All gates remain false.
