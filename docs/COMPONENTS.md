@@ -120,7 +120,7 @@ Book storage, price/time priority and order lifecycle.
 Positions, margin, oracles, liquidations and spot balances.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-margin-range`.
 - Observed diagnostic paths: 14.
 - First task: Map margin/liquidation formulas and state mutations; prove sign and unit conventions.
 
