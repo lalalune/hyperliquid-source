@@ -65,7 +65,12 @@ def read(data,va,n):
 
 
 def relocations(data):
-    sec=next(s for s in sections(data) if s['name']=='.rela.dyn')
+    matches=[s for s in sections(data) if s['name']=='.rela.dyn']
+    if len(matches)!=1:
+        raise ValueError('expected exactly one .rela.dyn section')
+    sec=matches[0]
+    if sec['size']%24!=0:
+        raise ValueError('.rela.dyn size is not a multiple of 24')
     by_offset={}
     accessor_hits=[]
     for a,i,v in struct.iter_unpack('<QQq',data[sec['offset']:sec['offset']+sec['size']]):
