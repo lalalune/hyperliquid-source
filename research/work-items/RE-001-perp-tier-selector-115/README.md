@@ -43,3 +43,11 @@ caller reachability, metadata units, diagnostic/unwind and node integration
 remain open. No component gate or byte registration is advanced. Next question:
 close the initializer's actual callback/data and its ordinary completion before
 composing the nonzero-guard path or claiming complete startup behavior.
+
+Final pre-Rust seal: `1de14ed03dc45c5e2c1e1e1ea8b4d7e6588843d4`. Source opt0/3 and same-path rlib/output repeat match all4,015 rows. All101 sealed client cases pass;16 compiled mutants complete and fail the fixture with ordinary exit101. `rust-results.json` and `native-controls.json` are compact projections, with exact full receipts/witness inputs preserved in their named gzip archives. `client_fixture.rs.gz` preserves the exact tested Rust bytes; the replay runner checks/decompresses them to the original ignored path. Build/compare/transport functions are unchanged from the actual run; fresh fixture preparation is separately checked.
+
+To replay source builds use `verify-rust.py --rustc /path/to/rustc --out /fresh/owned/output`; run `pack-results.py` afterward for the deterministic compact public representation. No source or comparison value is removed. Raw command outputs are also archived with only owned path-prefix projection.
+
+Seven focused checks, formatting/Clippy, doctor, verify, staged catalogue/check and actual reproduce pass. See [qualification](VALIDATION.md) and `checks.json` for exact commands, the scoped snapshot-helper overlay and own pending full-CI limit. Run `pack-results.py` after regenerating results to restore compact summaries and lossless archives; all compared source/value bytes remain preserved.
+
+Ownership recheck: merged #2548 cites the shared `0x4556c50` fallback while studying a different u32 tree-search caller family; open static #2757 cites it as an explicitly unmeasured dependency of a separate registration path. This contribution claims neither of those callers nor exclusive helper ownership. The new result is independently authored tier selection and its actual helper composition, with no standalone primitive/alias credit. All-state Rust/tier/address queries find no competing implementation of this selected caller.
