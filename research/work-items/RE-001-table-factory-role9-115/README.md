@@ -145,12 +145,12 @@ and
 
 Checker ALL CHECKS PASSED (digest, provenance, manifest,
 excerpt regeneration byte-for-byte from fresh objdump runs,
-all excerpt lines byte-for-byte vs the raw binary, 3 spot
+all excerpt lines byte-for-byte vs the raw binary, 13 spot
 instructions plus 3 further random instructions byte-for-byte
 vs fresh objdump and raw binary, FDE ranges, relocation set
 (81 records), literals (map::at, the refcount constant, all
 five typeinfo names), census reproduction, semantic records
-re-derived from the excerpts, model tests); 97 model-test
+re-derived from the excerpts, model tests); 99 model-test
 checks pass (run directly, pytest is not installed on this
 VM).
 
