@@ -1,0 +1,710 @@
+{
+ "answers": {
+  "flow": "the spawn sibling 0x15b7a80 produces the error word as word 1 of its stack result; the supervisor reads it from [rsp+8], and on failure (word 0 == 0) stores it back to (rsp) and panics through the thunk 0x1680c30 with (rdx = rsp, rcx = this vtable); the thunk builds two fmt arguments and the adapter 0x1687260 tail-calls the vtable +0x18 method with (value pointer, formatter); on the unwind path the supervisor drops the value by a direct call to the same drop body 0x15be1a0 at 0x15d5c8f",
+  "identity": "a Rust one-method trait-object vtable for the 8-byte tagged io error value: drop = its tag-dispatch drop glue 0x15be1a0, size 8, align 8, and the single method is the value's Debug format function (the body at 0x5ca7ea0, reached through the 6-byte PLT stub 0x5ca5610), which renders the std debug-struct forms \"Os\" / \"Error\" / \"Custom\" with \"kind\" and \"message\" fields over the same low-two-bit tag encoding the drop body dispatches on",
+  "method": "PLT stub 0x5ca5610 (6 bytes, jmp *0x64e1878) resolving by RELATIVE relocation to body 0x5ca7ea0 (1,237 bytes); convention (rdi = pointer to the 8-byte error value, rsi = &mut Formatter) -> fmt::Result tag in rax (common exit masks al with 1); tag & 3 dispatch through the jump table at 0x948c90 to arms 0x5ca7ecc / 0x5ca80fe / 0x5ca7f3f / 0x5ca8073; the stub is shared by 32 size-8/align-8 vtables in .data.rel.ro, with 30 distinct drops, and by one .got cell (0x64e0170)",
+  "references": "exactly one in the whole binary: the lea at 0x15d5c42 in the spawn supervisor 0x15d5b00, into rcx as the fourth argument of its panic call; no other rip-relative use, no movabs, no relocation addend, no raw qword",
+  "write_body_relation": "the write body 0x1533d60 of PR #3012 produces values of this exact encoding -- 0 for success (not an error value), (errno << 32) | 2 (tag 2, OS error) and the bare address of the static message datum 0x6400488 (tag 0) -- and drops one by a direct call to 0x15be1a0 on its EINTR path; the method's tag-0 arm dereferences statics of the 0x6400488 layout; the write body never references the vtable itself"
+ },
+ "artifact": {
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "bodies": [
+  {
+   "bytes": 19,
+   "end": "0x16875a3",
+   "role": "adapter_a",
+   "sha256": "a787ddffe7b8a5b8fee9b747ab817d7d900e59e2148ab84a9055d174060b80d6",
+   "start": "0x1687590"
+  },
+  {
+   "bytes": 16,
+   "end": "0x1687270",
+   "role": "adapter_b",
+   "sha256": "73a266c7c8ee86fa2addcc6aa746ed789ec1220b78c9de8360c56c6bd74aabbe",
+   "start": "0x1687260"
+  },
+  {
+   "bytes": 209,
+   "end": "0x15be271",
+   "role": "error_drop",
+   "sha256": "b885e0eb89f25e75b60b385a076b04e5e2469790d0fa6d97bf25c6c611b6b52a",
+   "start": "0x15be1a0"
+  },
+  {
+   "bytes": 1237,
+   "end": "0x5ca8375",
+   "role": "method_body",
+   "sha256": "09eb233d4d2fc55ca993391546ad05afb0b80958ac342d16cb0ef4840a20fdf7",
+   "start": "0x5ca7ea0"
+  },
+  {
+   "bytes": 6,
+   "end": "0x5ca5616",
+   "role": "method_stub",
+   "sha256": "c3b98d751eb1b16354e8f9f83d534dae9d93942955949e1c39817295e3070fc7",
+   "start": "0x5ca5610"
+  },
+  {
+   "bytes": 82,
+   "end": "0x1680c82",
+   "role": "panic_msg_thunk",
+   "sha256": "2d00fd36dc6102ab0738e08907482bb818bca6e76e32a5b941eabf431f20767a",
+   "start": "0x1680c30"
+  },
+  {
+   "bytes": 1623,
+   "end": "0x15b80d7",
+   "role": "spawn_sibling",
+   "sha256": "eb31d0e0353e6eebbec0ee2a7b175bf18bf6c44c4fa0e8f559ee1bb43e1541b5",
+   "start": "0x15b7a80"
+  },
+  {
+   "bytes": 430,
+   "end": "0x15d5cae",
+   "role": "spawn_supervisor",
+   "sha256": "e3da8549dab30d424bdd4e00a2ba6c188da8685494618d0cd40af420dbf91c5c",
+   "start": "0x15d5b00"
+  },
+  {
+   "bytes": 277,
+   "end": "0x1533e75",
+   "role": "write_body",
+   "sha256": "58de563d28a4eb6e9bec893db9bb8c4874b530d8a62652810e5c5f9d752cc75b",
+   "start": "0x1533d60"
+  }
+ ],
+ "census": {
+  "direct_rel32_callers_of_error_drop": [
+   {
+    "in_body": "0x1533d60",
+    "site": "0x1533e37"
+   },
+   {
+    "in_body": "0x15bde00",
+    "site": "0x15bde2f"
+   },
+   {
+    "in_body": "0x15c0400",
+    "site": "0x15c0613"
+   },
+   {
+    "in_body": "0x15c19a0",
+    "site": "0x15c21e7"
+   },
+   {
+    "in_body": "0x15c2940",
+    "site": "0x15c2ab0"
+   },
+   {
+    "in_body": "0x15cd520",
+    "site": "0x15ce2c4"
+   },
+   {
+    "in_body": "0x15d5b00",
+    "site": "0x15d5c8f"
+   }
+  ],
+  "movabs_immediates_to_vtable": [],
+  "raw_qwords_naming_vtable": [],
+  "relocation_addends_into_vtable": [],
+  "rip_refs_to_vtable": [
+   {
+    "in_body": "0x15d5b00",
+    "kind": "lea",
+    "site": "0x15d5c42",
+    "target": "0x64005f0"
+   }
+  ]
+ },
+ "cross_checks": {
+  "error_drop_matches_pr3012": true,
+  "panic_msg_thunk_matches_pr3000_pr3012": true,
+  "pr3012_error_drop_sha256": "b885e0eb89f25e75b60b385a076b04e5e2469790d0fa6d97bf25c6c611b6b52a",
+  "spawn_supervisor_matches_pr3012": true,
+  "write_body_matches_pr3012": true
+ },
+ "limitations": "No symbol names the vtable, the method body or the value type; the Debug identity rests on the pinned byte evidence (formatter argument, debug-struct names \"Os\"/\"Error\"/\"Custom\", the \"kind\"/\"message\" field names, and the tag dispatch the drop body shares), not on symbol metadata. The other 31 vtables that share the method stub are recorded by base, drop target, size and align only; which concrete values each of them tags is out of scope. The five direct drop callers outside the write body and the supervisor are recorded by site and body only. The spawn sibling result layout is described from the supervisor's reads of its own stack frame. Out of scope, as in PR #3012: the source-level name of the write body's monomorphised std routine.",
+ "method_jump_table": {
+  "arms": [
+   {
+    "arm": "0x5ca7ecc",
+    "tag": 0
+   },
+   {
+    "arm": "0x5ca80fe",
+    "tag": 1
+   },
+   {
+    "arm": "0x5ca7f3f",
+    "tag": 2
+   },
+   {
+    "arm": "0x5ca8073",
+    "tag": 3
+   }
+  ],
+  "kind_name_table": "0x94a778",
+  "table": "0x948c90"
+ },
+ "pins": [
+  {
+   "body": "adapter_a",
+   "bytes": "ff257d81e504",
+   "label": "jmp through slot 0x64df720: the &str format function",
+   "site": "0x168759d"
+  },
+  {
+   "body": "adapter_b",
+   "bytes": "488b07",
+   "label": "mov rax, (rdi): the value pointer of the pair",
+   "site": "0x1687260"
+  },
+  {
+   "body": "adapter_b",
+   "bytes": "488b4918",
+   "label": "mov rcx, (rcx+0x18): the vtable method slot",
+   "site": "0x1687267"
+  },
+  {
+   "body": "adapter_b",
+   "bytes": "ffe1",
+   "label": "jmp *rcx: tail-call the vtable method",
+   "site": "0x168726e"
+  },
+  {
+   "body": "error_drop",
+   "bytes": "488b07",
+   "label": "load the tagged error word from (rdi)",
+   "site": "0x15be1a8"
+  },
+  {
+   "body": "error_drop",
+   "bytes": "83e103",
+   "label": "and ecx, 3: the variant tag",
+   "site": "0x15be1ad"
+  },
+  {
+   "body": "error_drop",
+   "bytes": "ff257612f204",
+   "label": "tail-jump through slot 0x64df4a0 (dealloc)",
+   "site": "0x15be224"
+  },
+  {
+   "body": "method_body",
+   "bytes": "4c8b37",
+   "label": "mov r14, (rdi): load the tagged error word",
+   "site": "0x5ca7eb3"
+  },
+  {
+   "body": "method_body",
+   "bytes": "83e003",
+   "label": "and eax, 3: the representation tag",
+   "site": "0x5ca7eb9"
+  },
+  {
+   "body": "method_body",
+   "bytes": "488d0dcd0dcafa",
+   "label": "lea rcx, jump table 0x948c90",
+   "site": "0x5ca7ebc"
+  },
+  {
+   "body": "method_body",
+   "bytes": "488d351824cafa",
+   "label": "lea rsi, \"Error\": tag-0 arm debug-struct name",
+   "site": "0x5ca7ed3"
+  },
+  {
+   "body": "method_body",
+   "bytes": "ff5018",
+   "label": "call *0x18(rax): formatter write_str slot",
+   "site": "0x5ca7edf"
+  },
+  {
+   "body": "method_body",
+   "bytes": "2401",
+   "label": "and al, 1: common exit masks the result tag",
+   "site": "0x5ca82e7"
+  },
+  {
+   "body": "method_stub",
+   "bytes": "ff2562c28300",
+   "label": "jmp *slot 0x64e1878: the whole 6-byte method stub",
+   "site": "0x5ca5610"
+  },
+  {
+   "body": "panic_msg_thunk",
+   "bytes": "554889e5",
+   "label": "push rbp; mov rbp, rsp: frame head",
+   "site": "0x1680c30"
+  },
+  {
+   "body": "panic_msg_thunk",
+   "bytes": "48894de8",
+   "label": "mov (rbp-0x18), rcx: save the value vtable beside its pointer",
+   "site": "0x1680c44"
+  },
+  {
+   "body": "panic_msg_thunk",
+   "bytes": "488d0539690000",
+   "label": "lea rax, formatter function 0x1687590 (message argument)",
+   "site": "0x1680c50"
+  },
+  {
+   "body": "panic_msg_thunk",
+   "bytes": "488d05f6650000",
+   "label": "lea rax, formatter function 0x1687260 (value argument)",
+   "site": "0x1680c63"
+  },
+  {
+   "body": "panic_msg_thunk",
+   "bytes": "ff1536eae504",
+   "label": "call through slot 0x64df6b8 (panic formatting entry)",
+   "site": "0x1680c7c"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "e82a1ffeff",
+   "label": "direct call to spawn sibling 0x15b7a80 (table entry 3)",
+   "site": "0x15d5b51"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "48890424",
+   "label": "mov (rsp), rax: error word stored back as the panic value",
+   "site": "0x15d5c37"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "488d3d1b36e9fe",
+   "label": "lea rdi, \"failed to spawn thread\" message at 0x46925d",
+   "site": "0x15d5c3b"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "488d0da7a9e204",
+   "label": "lea rcx, this vtable 0x64005f0: the only reference",
+   "site": "0x15d5c42"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "4c8d0568a8e204",
+   "label": "lea r8, cell 0x64004b8: Location for the panic call",
+   "site": "0x15d5c49"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "be16000000",
+   "label": "mov esi, 0x16: message length 22",
+   "site": "0x15d5c53"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "ff15429af004",
+   "label": "call through slot 0x64df6a0 to panic_msg_thunk",
+   "site": "0x15d5c58"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "e80c85feff",
+   "label": "cleanup pad: direct call to error_drop 0x15be1a0",
+   "site": "0x15d5c8f"
+  },
+  {
+   "body": "write_body",
+   "bytes": "48c1e020",
+   "label": "shl rax, 32: OS-error tag construction",
+   "site": "0x1533e17"
+  },
+  {
+   "body": "write_body",
+   "bytes": "4883c802",
+   "label": "or rax, 2: OS-error tag bits",
+   "site": "0x1533e1b"
+  },
+  {
+   "body": "write_body",
+   "bytes": "e864a30800",
+   "label": "direct call to error_drop 0x15be1a0 (EINTR branch)",
+   "site": "0x1533e37"
+  },
+  {
+   "body": "write_body",
+   "bytes": "31c0",
+   "label": "xor eax, eax: the null (success) result",
+   "site": "0x1533e41"
+  },
+  {
+   "body": "write_body",
+   "bytes": "488d052bc6ec04",
+   "label": "lea rax, cell 0x6400488: write-returns-0 error result",
+   "site": "0x1533e56"
+  }
+ ],
+ "relocation_counts": {
+  "glob_dat": 263,
+  "jump_slot": 278,
+  "relative": 59534,
+  "total": 61001
+ },
+ "relro": {
+  "covers_vtable": true,
+  "end": "0x64ef000",
+  "start": "0x63f2ba0"
+ },
+ "shared_method_census": {
+  "got_cell": "0x64e0170",
+  "method_cells": [
+   "0x63f8f70",
+   "0x63fc2d0",
+   "0x63fd850",
+   "0x63fe898",
+   "0x63ffe58",
+   "0x6400608",
+   "0x64015e8",
+   "0x64032e0",
+   "0x640d690",
+   "0x640e4f8",
+   "0x64112b0",
+   "0x642d6a0",
+   "0x64445d8",
+   "0x64474c0",
+   "0x644e618",
+   "0x6451a38",
+   "0x6455aa0",
+   "0x6456c58",
+   "0x645b260",
+   "0x645b338",
+   "0x6484308",
+   "0x6494ea8",
+   "0x6496840",
+   "0x649dbb0",
+   "0x649e048",
+   "0x64b83b0",
+   "0x64c3288",
+   "0x64c5188",
+   "0x64c5538",
+   "0x64c6470",
+   "0x64c7360",
+   "0x64c7508",
+   "0x64e0170"
+  ],
+  "vtable_count": 32,
+  "vtables": [
+   {
+    "align": 8,
+    "base": "0x63f8f58",
+    "drop_in_place": "0x14c4d00",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x63fc2b8",
+    "drop_in_place": "0x150c590",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x63fd838",
+    "drop_in_place": "0x1538380",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x63fe880",
+    "drop_in_place": "0x1569f30",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x63ffe40",
+    "drop_in_place": "0x15ab660",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64005f0",
+    "drop_in_place": "0x15be1a0",
+    "is_this_vtable": true,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64015d0",
+    "drop_in_place": "0x15dd590",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64032c8",
+    "drop_in_place": "0x1609960",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x640d678",
+    "drop_in_place": "0x17263b0",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x640e4e0",
+    "drop_in_place": "0x1740fe0",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x6411298",
+    "drop_in_place": "0x1774cf0",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x642d688",
+    "drop_in_place": "0x2308f50",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64445c0",
+    "drop_in_place": "0x29eca70",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64474a8",
+    "drop_in_place": "0x2ab0780",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x644e600",
+    "drop_in_place": "0x2c96c90",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x6451a20",
+    "drop_in_place": "0x2df7230",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x6455a88",
+    "drop_in_place": "0x2e69050",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x6456c40",
+    "drop_in_place": "0x2e6cc20",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x645b248",
+    "drop_in_place": "0x2e854e0",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x645b320",
+    "drop_in_place": "0x2e854e0",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64842f0",
+    "drop_in_place": "0x4232440",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x6494e90",
+    "drop_in_place": "0x4746700",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x6496828",
+    "drop_in_place": "0x4775060",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x649db98",
+    "drop_in_place": "0x4e509c0",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x649e030",
+    "drop_in_place": "0x4e509c0",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64b8398",
+    "drop_in_place": "0x5a4b8f0",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64c3270",
+    "drop_in_place": "0x5c74b90",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64c5170",
+    "drop_in_place": "0x5cd6a70",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64c5520",
+    "drop_in_place": "0x5cdd280",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64c6458",
+    "drop_in_place": "0x5cee460",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64c7348",
+    "drop_in_place": "0x5d00d80",
+    "is_this_vtable": false,
+    "size": 8
+   },
+   {
+    "align": 8,
+    "base": "0x64c74f0",
+    "drop_in_place": "0x5d01190",
+    "is_this_vtable": false,
+    "size": 8
+   }
+  ],
+  "vtables_naming_error_drop": [
+   "0x64005f0"
+  ]
+ },
+ "slots": [
+  {
+   "kind": "relative",
+   "slot": "0x64df4a0",
+   "target": "0x635de30"
+  },
+  {
+   "kind": "relative",
+   "slot": "0x64df6a0",
+   "target": "0x1680c30"
+  },
+  {
+   "kind": "relative",
+   "slot": "0x64df6b8",
+   "target": "0x1680e80"
+  },
+  {
+   "kind": "relative",
+   "slot": "0x64df720",
+   "target": "0x167fa70"
+  },
+  {
+   "kind": "relative",
+   "slot": "0x64e1878",
+   "target": "0x5ca7ea0"
+  }
+ ],
+ "strings": [
+  {
+   "address": "0x94a2f7",
+   "length": 6,
+   "role": "custom_name",
+   "text": "Custom"
+  },
+  {
+   "address": "0x94a2f2",
+   "length": 5,
+   "role": "error_name",
+   "text": "Error"
+  },
+  {
+   "address": "0x459f20",
+   "length": 4,
+   "role": "kind_field",
+   "text": "kind"
+  },
+  {
+   "address": "0x94a2eb",
+   "length": 7,
+   "role": "message_field",
+   "text": "message"
+  },
+  {
+   "address": "0x94a2e9",
+   "length": 2,
+   "role": "os_name",
+   "text": "Os"
+  },
+  {
+   "address": "0x46925d",
+   "length": 22,
+   "role": "spawn_message",
+   "text": "failed to spawn thread"
+  }
+ ],
+ "vtable": {
+  "align": 8,
+  "align_cell": "0x6400600",
+  "base": "0x64005f0",
+  "drop_cell": "0x64005f0",
+  "drop_in_place": "0x15be1a0",
+  "method_body": "0x5ca7ea0",
+  "method_cell": "0x6400608",
+  "method_got_slot": "0x64e1878",
+  "method_stub": "0x5ca5610",
+  "method_stub_bytes": "ff2562c28300",
+  "relocations_landing": [
+   "0x64005f0",
+   "0x6400608"
+  ],
+  "section": ".data.rel.ro",
+  "size": 8,
+  "size_bytes": 32,
+  "size_cell": "0x64005f8"
+ }
+}
