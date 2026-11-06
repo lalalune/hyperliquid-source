@@ -1,0 +1,1888 @@
+{
+  "pre_rust_seal": "eb1274be65964c8c7d2642505b50df40db445877",
+  "rows": 4293,
+  "fixture_rows": 128,
+  "source_sha256": "86dbccf42a3c9dc8b61fc5516e8332aec8ccc28228708478b1a628283104a8ee",
+  "driver_sha256": "8e26749d88b237788d07e7ba286f0712941bbbd426789687cf1ea8c41f300a1b",
+  "fixture_sha256": "f359a56594bd2df14a4b2c4ea3331a054aec6426a64ccfb49327f4a6f11a80a3",
+  "dependency_sha256": "fd6afd281a93e28074d355f28306c340bb88c2f492ebc3501a879874d65c4cb2",
+  "input_sha256": "9049992e3a04dcdff95500112c428da77239a0be18035ccbc70f470c70bf0832",
+  "expected_sha256": "4e7e41d0f9eb2a271522d560a082c561c0be48b97f773482727d2ae7ffcb9e0b",
+  "mismatches": {
+    "original-o0": 0,
+    "original-o3": 0,
+    "repeat": 0,
+    "aggregate-precharge": 2025,
+    "rollback-word-charge": 2475,
+    "rollback-word-cursor": 562,
+    "byte-charge-eight": 1363,
+    "byte-overflow-wrap": 3,
+    "byte-limit-equality": 421,
+    "byte-rollback-limit": 253,
+    "mode-not-consumed": 909,
+    "mode-two-accepted": 99,
+    "tail-discarded": 184,
+    "field-order": 263
+  },
+  "commands": [
+    {
+      "name": "rust-version",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "-vV"
+      ],
+      "exit": 0,
+      "wall_seconds": 2.348,
+      "stdout_sha256": "a323109dfabfd30645bdf92aa834b93f71294c582ab67b977485d7f355ceba9a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dependency-o0",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_u64_reader_state",
+        "-C",
+        "opt-level=0",
+        "<work>/hyperliquid-source/src/node115-u64-reader-state/lib.rs",
+        "-o",
+        "<work>/hl-four-rust/libnode115_u64_reader_state_o0.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 5.101,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "original-o0-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=0",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/lib.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o0.rlib",
+        "-o",
+        "<work>/hl-four-rust/libnode115_four_word_prefix_o0.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.039,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "original-o0-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=0",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libnode115_four_word_prefix_o0.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o0.rlib",
+        "-o",
+        "<work>/hl-four-rust/original-o0-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 8.511,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "original-o0-actual",
+      "command": [
+        "<work>/hl-four-rust/original-o0-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.785,
+      "stdout_sha256": "4e7e41d0f9eb2a271522d560a082c561c0be48b97f773482727d2ae7ffcb9e0b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "original-o0-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=0",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libnode115_four_word_prefix_o0.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o0.rlib",
+        "-o",
+        "<work>/hl-four-rust/original-o0-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 5.064,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "original-o0-test",
+      "command": [
+        "<work>/hl-four-rust/original-o0-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.509,
+      "stdout_sha256": "285f4118115f93991c7f75f8c2dde07fd1b4e60464680343ae906ff4e9801b39",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dependency-o3",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_u64_reader_state",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-u64-reader-state/lib.rs",
+        "-o",
+        "<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.88,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "original-o3-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/lib.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libnode115_four_word_prefix_o3.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.544,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "original-o3-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libnode115_four_word_prefix_o3.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/original-o3-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 4.486,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "original-o3-actual",
+      "command": [
+        "<work>/hl-four-rust/original-o3-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.54,
+      "stdout_sha256": "4e7e41d0f9eb2a271522d560a082c561c0be48b97f773482727d2ae7ffcb9e0b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "original-o3-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libnode115_four_word_prefix_o3.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/original-o3-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 8.489,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "original-o3-test",
+      "command": [
+        "<work>/hl-four-rust/original-o3-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.53,
+      "stdout_sha256": "285f4118115f93991c7f75f8c2dde07fd1b4e60464680343ae906ff4e9801b39",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "repeat-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/lib.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libnode115_four_word_prefix_o3.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.815,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "repeat-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libnode115_four_word_prefix_o3.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/repeat-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 4.241,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "repeat-actual",
+      "command": [
+        "<work>/hl-four-rust/repeat-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.528,
+      "stdout_sha256": "4e7e41d0f9eb2a271522d560a082c561c0be48b97f773482727d2ae7ffcb9e0b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "repeat-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libnode115_four_word_prefix_o3.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/repeat-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 8.226,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "repeat-test",
+      "command": [
+        "<work>/hl-four-rust/repeat-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.532,
+      "stdout_sha256": "285f4118115f93991c7f75f8c2dde07fd1b4e60464680343ae906ff4e9801b39",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "aggregate-precharge-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/aggregate-precharge.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libaggregate_precharge.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.068,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "aggregate-precharge-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libaggregate_precharge.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/aggregate-precharge-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 4.253,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "aggregate-precharge-actual",
+      "command": [
+        "<work>/hl-four-rust/aggregate-precharge-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.522,
+      "stdout_sha256": "95388321624cedeab6a9214d66b66b70e005e20391a80ca1fb58a6458edcfc66",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "aggregate-precharge-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libaggregate_precharge.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/aggregate-precharge-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 12.429,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "aggregate-precharge-test",
+      "command": [
+        "<work>/hl-four-rust/aggregate-precharge-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.533,
+      "stdout_sha256": "a02d4573d9a1d1168da22bd9d35b13d6d9cacc80d894f827a821bf033840a73d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-charge-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/rollback-word-charge.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/librollback_word_charge.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.064,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-charge-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/librollback_word_charge.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/rollback-word-charge-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 4.255,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-charge-actual",
+      "command": [
+        "<work>/hl-four-rust/rollback-word-charge-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.542,
+      "stdout_sha256": "094efd7ff83d994272af195c7c8564ec27ea4f8e92a91493e041ec3561997682",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-charge-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/librollback_word_charge.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/rollback-word-charge-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 11.41,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-charge-test",
+      "command": [
+        "<work>/hl-four-rust/rollback-word-charge-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.773,
+      "stdout_sha256": "c73a1786c168064e0eb6de9dc02a4b4010ffa75684c608f6b6ede0d9c6271ce0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-cursor-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/rollback-word-cursor.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/librollback_word_cursor.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.068,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-cursor-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/librollback_word_cursor.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/rollback-word-cursor-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 3.47,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-cursor-actual",
+      "command": [
+        "<work>/hl-four-rust/rollback-word-cursor-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.522,
+      "stdout_sha256": "321bc1eee9c8b1163b3b7de143d96ae3975b099185ef9285e0197776872bf0d3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-cursor-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/librollback_word_cursor.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/rollback-word-cursor-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 9.03,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-cursor-test",
+      "command": [
+        "<work>/hl-four-rust/rollback-word-cursor-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.53,
+      "stdout_sha256": "5919ffa0dd49d3f2e050729f1482f348104de0b7dc745426a91f78b37240da8e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-charge-eight-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/byte-charge-eight.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libbyte_charge_eight.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.811,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-charge-eight-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libbyte_charge_eight.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/byte-charge-eight-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 2.122,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-charge-eight-actual",
+      "command": [
+        "<work>/hl-four-rust/byte-charge-eight-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.526,
+      "stdout_sha256": "f8638d3cf27de538002a265ed0006ae66cfa7bcabe61f4d535b78e1ba31b1c16",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-charge-eight-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libbyte_charge_eight.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/byte-charge-eight-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 8.22,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-charge-eight-test",
+      "command": [
+        "<work>/hl-four-rust/byte-charge-eight-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.522,
+      "stdout_sha256": "d78ea31531b5543cc30527c0d1eedfac0954dbf9ee5a5811ecda7af5e42ca217",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-overflow-wrap-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/byte-overflow-wrap.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libbyte_overflow_wrap.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.068,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-overflow-wrap-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libbyte_overflow_wrap.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/byte-overflow-wrap-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 4.783,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-overflow-wrap-actual",
+      "command": [
+        "<work>/hl-four-rust/byte-overflow-wrap-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.524,
+      "stdout_sha256": "9a0e21c53147e0a332eba5110a02fd6fd34d04ebf5fd1187e5dfb0d48271d2e3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-overflow-wrap-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libbyte_overflow_wrap.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/byte-overflow-wrap-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 9.296,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-overflow-wrap-test",
+      "command": [
+        "<work>/hl-four-rust/byte-overflow-wrap-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.524,
+      "stdout_sha256": "285f4118115f93991c7f75f8c2dde07fd1b4e60464680343ae906ff4e9801b39",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final-original-o0-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=0",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libnode115_four_word_prefix_o0.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o0.rlib",
+        "-o",
+        "<work>/hl-four-rust/final-original-o0-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 10.549,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final-original-o0-actual",
+      "command": [
+        "<work>/hl-four-rust/final-original-o0-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.525,
+      "stdout_sha256": "4e7e41d0f9eb2a271522d560a082c561c0be48b97f773482727d2ae7ffcb9e0b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final-original-o0-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=0",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libnode115_four_word_prefix_o0.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o0.rlib",
+        "-o",
+        "<work>/hl-four-rust/final-original-o0-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 6.069,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final-original-o0-test",
+      "command": [
+        "<work>/hl-four-rust/final-original-o0-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.523,
+      "stdout_sha256": "285f4118115f93991c7f75f8c2dde07fd1b4e60464680343ae906ff4e9801b39",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final-original-o3-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libnode115_four_word_prefix_o3.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/final-original-o3-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 3.221,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final-original-o3-actual",
+      "command": [
+        "<work>/hl-four-rust/final-original-o3-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.757,
+      "stdout_sha256": "4e7e41d0f9eb2a271522d560a082c561c0be48b97f773482727d2ae7ffcb9e0b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final-original-o3-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libnode115_four_word_prefix_o3.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/final-original-o3-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 8.756,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final-original-o3-test",
+      "command": [
+        "<work>/hl-four-rust/final-original-o3-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.529,
+      "stdout_sha256": "285f4118115f93991c7f75f8c2dde07fd1b4e60464680343ae906ff4e9801b39",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final-repeat-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libnode115_four_word_prefix_o3.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/final-repeat-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 3.464,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final-repeat-actual",
+      "command": [
+        "<work>/hl-four-rust/final-repeat-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.519,
+      "stdout_sha256": "4e7e41d0f9eb2a271522d560a082c561c0be48b97f773482727d2ae7ffcb9e0b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final-repeat-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libnode115_four_word_prefix_o3.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/final-repeat-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 8.219,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "final-repeat-test",
+      "command": [
+        "<work>/hl-four-rust/final-repeat-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.541,
+      "stdout_sha256": "285f4118115f93991c7f75f8c2dde07fd1b4e60464680343ae906ff4e9801b39",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "aggregate-precharge-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/aggregate-precharge.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libaggregate_precharge.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.055,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "aggregate-precharge-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libaggregate_precharge.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/aggregate-precharge-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 3.726,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "aggregate-precharge-actual",
+      "command": [
+        "<work>/hl-four-rust/aggregate-precharge-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.517,
+      "stdout_sha256": "aeef606ab326813f73463101feaa21d0ce67627bf0899bae92b324365e80fb74",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "aggregate-precharge-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libaggregate_precharge.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/aggregate-precharge-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 8.218,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "aggregate-precharge-test",
+      "command": [
+        "<work>/hl-four-rust/aggregate-precharge-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.53,
+      "stdout_sha256": "b16bf58576ecf283f6a28dd36310665171fe1138ea4ec5a788375a00c1d0aa9f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-charge-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/rollback-word-charge.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/librollback_word_charge.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.804,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-charge-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/librollback_word_charge.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/rollback-word-charge-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 3.714,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-charge-actual",
+      "command": [
+        "<work>/hl-four-rust/rollback-word-charge-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.247,
+      "stdout_sha256": "094efd7ff83d994272af195c7c8564ec27ea4f8e92a91493e041ec3561997682",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-charge-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/librollback_word_charge.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/rollback-word-charge-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 8.733,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-charge-test",
+      "command": [
+        "<work>/hl-four-rust/rollback-word-charge-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.522,
+      "stdout_sha256": "9cd8be79fc56a990b9b93dd47bfd32e11809f654ef5688290349398f864fabbc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-cursor-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/rollback-word-cursor.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/librollback_word_cursor.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.601,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-cursor-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/librollback_word_cursor.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/rollback-word-cursor-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 5.843,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-cursor-actual",
+      "command": [
+        "<work>/hl-four-rust/rollback-word-cursor-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.263,
+      "stdout_sha256": "321bc1eee9c8b1163b3b7de143d96ae3975b099185ef9285e0197776872bf0d3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-cursor-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/librollback_word_cursor.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/rollback-word-cursor-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 9.295,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "rollback-word-cursor-test",
+      "command": [
+        "<work>/hl-four-rust/rollback-word-cursor-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.521,
+      "stdout_sha256": "21cfa30200aca9d719081b6b2577218d0db0c20b5f5cabbf83cc57511f33079e",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-charge-eight-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/byte-charge-eight.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libbyte_charge_eight.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.818,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-charge-eight-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libbyte_charge_eight.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/byte-charge-eight-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 4.259,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-charge-eight-actual",
+      "command": [
+        "<work>/hl-four-rust/byte-charge-eight-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.509,
+      "stdout_sha256": "f8638d3cf27de538002a265ed0006ae66cfa7bcabe61f4d535b78e1ba31b1c16",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-charge-eight-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libbyte_charge_eight.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/byte-charge-eight-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 8.499,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-charge-eight-test",
+      "command": [
+        "<work>/hl-four-rust/byte-charge-eight-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.518,
+      "stdout_sha256": "72858fb8b17f875cd4680c0347386122bb26459ef77f803719d93a589efe7849",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-overflow-wrap-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/byte-overflow-wrap.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libbyte_overflow_wrap.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.785,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-overflow-wrap-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libbyte_overflow_wrap.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/byte-overflow-wrap-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 3.481,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-overflow-wrap-actual",
+      "command": [
+        "<work>/hl-four-rust/byte-overflow-wrap-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.256,
+      "stdout_sha256": "9a0e21c53147e0a332eba5110a02fd6fd34d04ebf5fd1187e5dfb0d48271d2e3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-overflow-wrap-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libbyte_overflow_wrap.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/byte-overflow-wrap-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 9.287,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-overflow-wrap-test",
+      "command": [
+        "<work>/hl-four-rust/byte-overflow-wrap-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.517,
+      "stdout_sha256": "a4793944d1118b28a517acd85e5b4693942d1d2d7faf1e6172a05728a9beb701",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-limit-equality-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/byte-limit-equality.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libbyte_limit_equality.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.806,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-limit-equality-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libbyte_limit_equality.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/byte-limit-equality-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 3.734,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-limit-equality-actual",
+      "command": [
+        "<work>/hl-four-rust/byte-limit-equality-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.52,
+      "stdout_sha256": "431c81758fd3ea4c2a3d2740a0720f69ba55c4aaa919e331b68aaf2727e9abb3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-limit-equality-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libbyte_limit_equality.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/byte-limit-equality-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 5.054,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-limit-equality-test",
+      "command": [
+        "<work>/hl-four-rust/byte-limit-equality-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.529,
+      "stdout_sha256": "e4edff10956c32fac681a62058311b8aba0619c198630e4e7a306955c8e199c3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-rollback-limit-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/byte-rollback-limit.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libbyte_rollback_limit.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.057,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-rollback-limit-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libbyte_rollback_limit.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/byte-rollback-limit-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 4.251,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-rollback-limit-actual",
+      "command": [
+        "<work>/hl-four-rust/byte-rollback-limit-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.526,
+      "stdout_sha256": "d3958c03642026c4d45a18a597a8a7e29c6933f821be98cd760029db7552a486",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-rollback-limit-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libbyte_rollback_limit.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/byte-rollback-limit-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 9.548,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "byte-rollback-limit-test",
+      "command": [
+        "<work>/hl-four-rust/byte-rollback-limit-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.509,
+      "stdout_sha256": "75d45917cb19483ea7bd569c372ac7f247b0a42cd30cd46bd9a882a6ba321c1d",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mode-not-consumed-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/mode-not-consumed.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libmode_not_consumed.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.052,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mode-not-consumed-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libmode_not_consumed.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/mode-not-consumed-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 4.016,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mode-not-consumed-actual",
+      "command": [
+        "<work>/hl-four-rust/mode-not-consumed-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.516,
+      "stdout_sha256": "6d4651800e425e99b2c23af7c8e1775cc8ded91a60753a7edfc9eb389d970584",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mode-not-consumed-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libmode_not_consumed.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/mode-not-consumed-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 9.266,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mode-not-consumed-test",
+      "command": [
+        "<work>/hl-four-rust/mode-not-consumed-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.519,
+      "stdout_sha256": "26c617050e9b71102cf9a875e099dbed19b35618e0b4153791d08e1d1eb5e70f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mode-two-accepted-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/mode-two-accepted.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libmode_two_accepted.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.052,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mode-two-accepted-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libmode_two_accepted.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/mode-two-accepted-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 3.213,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mode-two-accepted-actual",
+      "command": [
+        "<work>/hl-four-rust/mode-two-accepted-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.506,
+      "stdout_sha256": "e185621527b8c9b8c28f41def17a2d19d967ebec613d750b49ba780ecb50de4b",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mode-two-accepted-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libmode_two_accepted.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/mode-two-accepted-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 10.118,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "mode-two-accepted-test",
+      "command": [
+        "<work>/hl-four-rust/mode-two-accepted-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.513,
+      "stdout_sha256": "16f600672dafc23c9d5db11833427596543f0cf66994cf089ac990a0c7cc0f1a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tail-discarded-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/tail-discarded.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libtail_discarded.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.06,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tail-discarded-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libtail_discarded.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/tail-discarded-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 3.698,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tail-discarded-actual",
+      "command": [
+        "<work>/hl-four-rust/tail-discarded-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.535,
+      "stdout_sha256": "546d3f16996775456964590393c917944e6911623eb1482b160771952b577868",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tail-discarded-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libtail_discarded.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/tail-discarded-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 7.997,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "tail-discarded-test",
+      "command": [
+        "<work>/hl-four-rust/tail-discarded-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.533,
+      "stdout_sha256": "9b6a7d71cc2bc6e5ca42f44b578f541933be4dce8c79942ed83f1d3c71cfbb3f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "field-order-library",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--crate-type=rlib",
+        "--crate-name=node115_four_word_prefix",
+        "-C",
+        "opt-level=3",
+        "<work>/hl-four-rust/field-order.rs",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/libfield_order.rlib"
+      ],
+      "exit": 0,
+      "wall_seconds": 1.308,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "field-order-driver-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/src/node115-four-word-prefix/input_only_driver.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libfield_order.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/field-order-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 3.977,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "field-order-actual",
+      "command": [
+        "<work>/hl-four-rust/field-order-driver"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.523,
+      "stdout_sha256": "c0f31d06d959272013c4a1f44d293cd1c6c0e539c842ce1baeb808fde4754c73",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "field-order-test-build",
+      "command": [
+        "<work>/host-tools/rust-1.94.1/bin/rustc",
+        "--edition=2021",
+        "--test",
+        "-C",
+        "opt-level=3",
+        "<work>/hyperliquid-source/research/work-items/RE-005-four-word-prefix-115/client_fixture.rs",
+        "-L",
+        "dependency=<work>/hl-four-rust",
+        "--extern",
+        "node115_four_word_prefix=<work>/hl-four-rust/libfield_order.rlib",
+        "--extern",
+        "node115_u64_reader_state=<work>/hl-four-rust/libnode115_u64_reader_state_o3.rlib",
+        "-o",
+        "<work>/hl-four-rust/field-order-test"
+      ],
+      "exit": 0,
+      "wall_seconds": 9.581,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "field-order-test",
+      "command": [
+        "<work>/hl-four-rust/field-order-test"
+      ],
+      "exit": 101,
+      "wall_seconds": 0.512,
+      "stdout_sha256": "1737407be1647f118b4892b640fac3d36b2982faae30134b5aab2a86d7a7206f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "platform": "macOS arm64 host research build; edition2021 rustc1.94.1; no original Cargo/Linux build claim",
+  "repeat": "same-path opt3 rlib byte-equal and all outputs identical; not a separate-directory rebuild"
+}
