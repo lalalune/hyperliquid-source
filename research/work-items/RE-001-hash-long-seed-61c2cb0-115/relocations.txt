@@ -1,0 +1,19 @@
+Relocations for the hash-long with-seed window (from .rela.dyn and .rela.plt):
+
+the routine 0x61c2cb0 itself: no R_X86_64_RELATIVE record carries it as
+  addend; no whole-file stored qword equals it
+
+The window is reached only through the one tail jump at 0x61c3808
+inside the parent hash callee 0x61c3530 (see census.py output,
+reproduced by verify.py). The body itself resolves no GOT slot for
+its computation: its two callees (the merge callee 0x61c27f0 and the
+seed==0 delegation target 0x61c2890) are reached by direct
+call/jump, and its .rodata constants are read RIP-relative.
+
+Record the body's own transfers resolve through:
+
+00000000064ee308 R_X86_64_JUMP_SLOT 0000000000000000 __stack_chk_fail@GLIBC_2.4 + 0
+  the .got.plt slot behind the PLT stub at 0x63f0d70, which the
+  body's stack-canary failure exit calls at 0x61c321c; reached only
+  when the canary word stored at frame +0x108 no longer matches
+  %fs:0x28 on either exit path

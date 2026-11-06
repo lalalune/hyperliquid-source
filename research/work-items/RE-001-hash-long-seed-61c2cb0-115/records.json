@@ -1,0 +1,355 @@
+{
+ "acc_init": {
+  "frame_offset": "0x00",
+  "note": "loaded as four 16-byte .rodata chunks (0x455960, 0x455950, 0x453a30, 0x4525e0), held in xmm3/xmm9/xmm2/xmm1 through the loops and stored to frame +0x00..+0x40 before the remaining-stripes phase and again before the merge hand-off",
+  "sources": [
+   "0x455960",
+   "0x455968",
+   "0x455950",
+   "0x455958",
+   "0x453a30",
+   "0x453a38",
+   "0x4525e0",
+   "0x4525e8"
+  ],
+  "values": [
+   "0xc2b2ae3d",
+   "0x9e3779b185ebca87",
+   "0xc2b2ae3d27d4eb4f",
+   "0x165667b19e3779f9",
+   "0x85ebca77c2b2ae63",
+   "0x85ebca77",
+   "0x27d4eb2f165667c5",
+   "0x9e3779b1"
+  ]
+ },
+ "accumulate": {
+  "block_bytes": 1024,
+  "block_loop": "nb_blocks = length >> 10 blocks from the input start; stripe s of a block reads its secret at byte offset 8*s; one scramble follows each block",
+  "last_stripe": "only when length & 63 != 0: one stripe from the input's last 64 bytes (data + length - 64) against the secret at byte offset 121 (= 192 - 64 - 7); the offset is not qword-aligned and the body loads those bytes with movdqu at frame +0xb9/+0xc9/+0xd9/+0xe9",
+  "remaining_stripes": "(length >> 6) & 0xf stripes from data + (length & ~1023), at the same secret offsets 8*s",
+  "rule": "per 16-byte lane pair j of a stripe, with secret byte offset o = stripe_offset + 16*j: key_lo = data64[2j] XOR secret64[o], key_hi = data64[2j+1] XOR secret64[o+8]; acc[2j] += data64[2j] + lo32(key_lo)*hi32(key_lo); acc[2j+1] += data64[2j+1] + lo32(key_hi)*hi32(key_hi) (all mod 2^64)",
+  "stripe_bytes": 64,
+  "stripes_per_block": 16
+ },
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "census": {
+  "direct_call_count": 0,
+  "internal_calls": 2,
+  "internal_indirect_calls": 0,
+  "internal_indirect_tail_jumps": 0,
+  "internal_tail_jumps": 1,
+  "relative_addends": 0,
+  "stored_qwords": 0,
+  "tail_jump_count": 1
+ },
+ "closes_unknown": "RE-001-hash-callee-61c3530-115 (PR #3486) pinned the parent hash dispatch for lengths 0..128 and left the two delegation targets by contract only, naming this body (lengths 241 and above) among its unknowns. This packet pins the body's own instructions end to end: the seed==0 delegation, the custom-secret construction, the accumulator init, the block / remaining / last-stripe accumulate loops, the per-block scramble and the merge hand-off. The sibling delegation target 0x61c3230 (lengths 129..240) is a separate body, not covered here.",
+ "consumers": [
+  {
+   "caller_fde": "0x61c3530..0x61c389d",
+   "kind": "tail jump",
+   "note": "the sole entry: inside the parent hash callee pinned by RE-001-hash-callee-61c3530-115 (PR #3486), which restores the argument registers and tail-jumps here when the length is 241 or more; the parent itself has 108 direct call sites, so the runtime reachability of this body runs through the parent",
+   "site": "0x61c3808"
+  }
+ ],
+ "custom_secret": {
+  "frame_offset": "0x40",
+  "note": "the compiler deinterleaved the default secret into an even-qword constant set and an odd-qword constant set; each 16-byte stack chunk interleaves one +seed qword from the even set with one -seed qword from the odd set (punpcklqdq/punpckhqdq), which is why the source addresses are not address-ordered. The default secret values are the qwords read at those sources.",
+  "rule": "custom qword i = default qword i + seed for even i, default qword i - seed for odd i (all mod 2^64); built only on the seed != 0 path",
+  "size_bytes": 192,
+  "sources": [
+   {
+    "default_qword": "0xbe4ba423396cfeb8",
+    "delta": "+seed",
+    "index": 0,
+    "secret_byte_offset": 0,
+    "source": "0x455f90"
+   },
+   {
+    "default_qword": "0x1cad21f72c81017c",
+    "delta": "-seed",
+    "index": 1,
+    "secret_byte_offset": 8,
+    "source": "0x455cf0"
+   },
+   {
+    "default_qword": "0xdb979083e96dd4de",
+    "delta": "+seed",
+    "index": 2,
+    "secret_byte_offset": 16,
+    "source": "0x455f98"
+   },
+   {
+    "default_qword": "0x1f67b3b7a4a44072",
+    "delta": "-seed",
+    "index": 3,
+    "secret_byte_offset": 24,
+    "source": "0x455cf8"
+   },
+   {
+    "default_qword": "0x78e5c0cc4ee679cb",
+    "delta": "+seed",
+    "index": 4,
+    "secret_byte_offset": 32,
+    "source": "0x454bc0"
+   },
+   {
+    "default_qword": "0x2172ffcc7dd05a82",
+    "delta": "-seed",
+    "index": 5,
+    "secret_byte_offset": 40,
+    "source": "0x4532e0"
+   },
+   {
+    "default_qword": "0x8e2443f7744608b8",
+    "delta": "+seed",
+    "index": 6,
+    "secret_byte_offset": 48,
+    "source": "0x454bc8"
+   },
+   {
+    "default_qword": "0x4c263a81e69035e0",
+    "delta": "-seed",
+    "index": 7,
+    "secret_byte_offset": 56,
+    "source": "0x4532e8"
+   },
+   {
+    "default_qword": "0xcb00c391bb52283c",
+    "delta": "+seed",
+    "index": 8,
+    "secret_byte_offset": 64,
+    "source": "0x452290"
+   },
+   {
+    "default_qword": "0xa32e531b8b65d088",
+    "delta": "-seed",
+    "index": 9,
+    "secret_byte_offset": 72,
+    "source": "0x4562e0"
+   },
+   {
+    "default_qword": "0x4ef90da297486471",
+    "delta": "+seed",
+    "index": 10,
+    "secret_byte_offset": 80,
+    "source": "0x452298"
+   },
+   {
+    "default_qword": "0xd8acdea946ef1938",
+    "delta": "-seed",
+    "index": 11,
+    "secret_byte_offset": 88,
+    "source": "0x4562e8"
+   },
+   {
+    "default_qword": "0x3f349ce33f76faa8",
+    "delta": "+seed",
+    "index": 12,
+    "secret_byte_offset": 96,
+    "source": "0x455980"
+   },
+   {
+    "default_qword": "0x1d4f0bc7c7bbdcf9",
+    "delta": "-seed",
+    "index": 13,
+    "secret_byte_offset": 104,
+    "source": "0x4522a0"
+   },
+   {
+    "default_qword": "0x3159b4cd4be0518a",
+    "delta": "+seed",
+    "index": 14,
+    "secret_byte_offset": 112,
+    "source": "0x455988"
+   },
+   {
+    "default_qword": "0x647378d9c97e9fc8",
+    "delta": "-seed",
+    "index": 15,
+    "secret_byte_offset": 120,
+    "source": "0x4522a8"
+   },
+   {
+    "default_qword": "0xc3ebd33483acc5ea",
+    "delta": "+seed",
+    "index": 16,
+    "secret_byte_offset": 128,
+    "source": "0x4548e0"
+   },
+   {
+    "default_qword": "0xeb6313faffa081c5",
+    "delta": "-seed",
+    "index": 17,
+    "secret_byte_offset": 136,
+    "source": "0x453ed0"
+   },
+   {
+    "default_qword": "0x49daf0b751dd0d17",
+    "delta": "+seed",
+    "index": 18,
+    "secret_byte_offset": 144,
+    "source": "0x4548e8"
+   },
+   {
+    "default_qword": "0x9e68d429265516d3",
+    "delta": "-seed",
+    "index": 19,
+    "secret_byte_offset": 152,
+    "source": "0x453ed8"
+   },
+   {
+    "default_qword": "0xfca1477d58be162b",
+    "delta": "+seed",
+    "index": 20,
+    "secret_byte_offset": 160,
+    "source": "0x4514c0"
+   },
+   {
+    "default_qword": "0xce31d07ad1b8f88f",
+    "delta": "-seed",
+    "index": 21,
+    "secret_byte_offset": 168,
+    "source": "0x450e30"
+   },
+   {
+    "default_qword": "0x280416958f3acb45",
+    "delta": "+seed",
+    "index": 22,
+    "secret_byte_offset": 176,
+    "source": "0x4514c8"
+   },
+   {
+    "default_qword": "0x7e404bbbcafbd7af",
+    "delta": "-seed",
+    "index": 23,
+    "secret_byte_offset": 184,
+    "source": "0x450e38"
+   }
+  ]
+ },
+ "delegation": {
+  "arguments": "rdi/rsi/rdx pass through verbatim (the prologue only copies rdi to r9 and rsi to r8); rsp is restored and the canary re-checked before the jump",
+  "condition": "seed (rdx) == 0, tested at 0x61c2cd0..0x61c2cd3 before any secret or accumulator work",
+  "site": "0x61c2cf3",
+  "target": "0x61c2890 (FDE 0x61c2890..0x61c2cad, 1053 bytes), by contract only"
+ },
+ "internal_call_sites": [
+  {
+   "arguments": "rdi = accumulator array, rsi = custom secret + 11, rdx = length * PRIME64_1",
+   "callee": "0x61c27f0 (FDE 0x61c27f0..0x61c2888), by contract only",
+   "site": "0x61c31fc",
+   "when": "exactly once, at the end of every seed != 0 path"
+  },
+  {
+   "arguments": "none",
+   "callee": "__stack_chk_fail through the PLT stub at 0x63f0d70 (.got.plt slot 0x64ee308, R_X86_64_JUMP_SLOT __stack_chk_fail@GLIBC_2.4)",
+   "site": "0x61c321c",
+   "when": "only when the stack canary stored at frame +0x108 no longer matches %fs:0x28, on either the delegation exit or the merge exit"
+  }
+ ],
+ "merge_handoff": {
+  "arguments": "rdi = the accumulator array at frame +0x00; rsi = the custom secret + 11 bytes (frame +0x4b); rdx = length * 0x9e3779b185ebca87 (mod 2^64)",
+  "callee": "0x61c27f0 (FDE 0x61c27f0..0x61c2888, 152 bytes), by contract only",
+  "return": "the callee's rax is this routine's return value",
+  "site": "0x61c31fc"
+ },
+ "never_written": [
+  "the input bytes: no path stores through the data pointer",
+  "any memory outside the routine's own 0x118-byte stack frame"
+ ],
+ "node": 115,
+ "phases": [
+  {
+   "detail": "seed == 0: canary check, rsp restore, tail jump to 0x61c2890 with the arguments unchanged",
+   "name": "seed delegation"
+  },
+  {
+   "detail": "192-byte stack secret at frame +0x40: even qwords default + seed, odd qwords default - seed, from the 24 pinned .rodata sources",
+   "name": "custom secret build"
+  },
+  {
+   "detail": "the eight pinned constants, from four .rodata chunks",
+   "name": "accumulator init"
+  },
+  {
+   "detail": "length >> 10 blocks of 16 stripes at secret offsets 8*s, each block closed by one scramble against secret bytes 128..192",
+   "name": "block loop"
+  },
+  {
+   "detail": "(length >> 6) & 0xf stripes from data + (length & ~1023)",
+   "name": "remaining stripes"
+  },
+  {
+   "detail": "when length & 63 != 0, the input's final 64 bytes against the secret at byte offset 121",
+   "name": "last stripe"
+  },
+  {
+   "detail": "one call to 0x61c27f0 with (accumulators, custom secret + 11, length * PRIME64_1); its rax is returned after the canary re-check",
+   "name": "merge hand-off"
+  }
+ ],
+ "reads": [
+  {
+   "object": "input",
+   "offset": "0..length",
+   "role": "the hashed bytes; read by the block, remaining-stripes and last-stripe loops; never written",
+   "width": "byte"
+  },
+  {
+   "object": ".rodata constants",
+   "offset": "-",
+   "role": "the 24 default-secret source qwords, the four accumulator-init chunks and the scramble multiplier pair, all read RIP-relative",
+   "width": 8
+  },
+  {
+   "object": "%fs:0x28",
+   "offset": "-",
+   "role": "the stack canary, stored at frame +0x108 in the prologue and compared before both exits",
+   "width": 8
+  }
+ ],
+ "routine": {
+  "address": "0x61c2cb0",
+  "arguments": [
+   "rdi: pointer to the input bytes; read, never written",
+   "rsi: the input length in bytes (the parent dispatch reaches this body only for length >= 241; the body itself imposes no check)",
+   "rdx: the seed; 0 delegates to the seedless body, nonzero builds the custom secret"
+  ],
+  "fde": "0x61c2cb0..0x61c3221",
+  "internal_calls": 2,
+  "internal_indirect_calls": 0,
+  "internal_indirect_tail_jumps": 0,
+  "internal_tail_jumps": 1,
+  "return": "the merge callee 0x61c27f0's rax on every seed != 0 path; the seedless body 0x61c2890's rax on the seed == 0 path (entered by tail jump with the arguments unchanged)",
+  "size_bytes": 1393,
+  "tail_jumps": 1
+ },
+ "scramble": {
+  "rule": "acc[i] = (acc[i] XOR secret64[128 + 8*i] XOR (acc[i] >> 47)) * 0x9e3779b1 (mod 2^64), for i = 0..7; the multiplier is loaded as the pair {0x9e3779b19e3779b1, 0x9e3779b19e3779b1} from 0x4562c0",
+  "secret_offset": 128,
+  "when": "once per 1024-byte block, after its 16 stripes"
+ },
+ "task": "RE-001",
+ "writes": [
+  {
+   "object": "stack frame",
+   "offset": "0x00",
+   "role": "the 8-qword accumulator array (frame +0x00..+0x40)",
+   "width": 64
+  },
+  {
+   "object": "stack frame",
+   "offset": "0x40",
+   "role": "the 192-byte custom secret (frame +0x40..+0x100)",
+   "width": 192
+  },
+  {
+   "object": "stack frame",
+   "offset": "0x108",
+   "role": "the saved stack canary",
+   "width": 8
+  }
+ ]
+}
