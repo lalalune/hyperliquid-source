@@ -1,0 +1,21 @@
+No RELATIVE relocation targets any pinned routine (0x61b21f0,
+0x61b2760, 0x61b1930, 0x61b1910, 0x61b18b0, 0x61b1a10, 0x61b1260,
+0x61bd410), and no stored qword in the raw binary equals any of
+them (see census.py). Every pinned routine is reached only by
+direct code calls, never by data.
+
+Expected-slot walker global 0x64ecf80: exactly one RELATIVE
+relocation:
+  0000064ecf80  000000000008 R_X86_64_RELATIVE  5d4d490
+so at load time *(0x64ecf80) = load base + 0x5d4d490. The file
+bytes at that address are zero; the value comes only from the
+relocation, verified by readelf -r (see verify.py check 6). The
+chain walk in both twins compares each link's vtable slot +0x98
+against the address 0x5d4d490 itself (a lea immediate in the twin
+code, not a load of this global); the walker function at
+0x5d4d490 is pinned whole in the open PR #2985 packet and is not
+re-pinned here — only the comparison and the two arms are.
+
+The gate's jump table at 0x97c5f4 (11 int32 entries, see
+jump_table.tsv) sits in the read-only first LOAD segment; no
+relocation touches it.
