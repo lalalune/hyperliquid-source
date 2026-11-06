@@ -1,0 +1,111 @@
+# llvm: full owning FDE 0x5b2d7c0..0x5b2d9b3 decoded; retained 0x5b2d7c0..0x5b2d9b3
+ 5b2d7c0: 4c 8b 47 10                  	mov	r8, qword ptr [rdi + 0x10]
+ 5b2d7c4: 49 83 f8 02                  	cmp	r8, 0x2
+ 5b2d7c8: 72 57                        	jb	0x5b2d821 <.text+0x4714521>
+ 5b2d7ca: 48 8b 4f 08                  	mov	rcx, qword ptr [rdi + 0x8]
+ 5b2d7ce: 49 8d 50 fe                  	lea	rdx, [r8 - 0x2]
+ 5b2d7d2: 48 8d b1 c0 00 00 00         	lea	rsi, [rcx + 0xc0]
+ 5b2d7d9: b8 01 00 00 00               	mov	eax, 0x1
+ 5b2d7de: 66 90                        	nop
+ 5b2d7e0: f3 0f 6f 86 40 ff ff ff      	movdqu	xmm0, xmmword ptr [rsi - 0xc0]
+ 5b2d7e8: f3 0f 6f 4e a0               	movdqu	xmm1, xmmword ptr [rsi - 0x60]
+ 5b2d7ed: 66 0f 74 c8                  	pcmpeqb	xmm1, xmm0
+ 5b2d7f1: 66 0f 6e 46 b0               	movd	xmm0, dword ptr [rsi - 0x50]
+ 5b2d7f6: 66 0f 6e 96 50 ff ff ff      	movd	xmm2, dword ptr [rsi - 0xb0]
+ 5b2d7fe: 66 0f 74 d0                  	pcmpeqb	xmm2, xmm0
+ 5b2d802: 66 0f db d1                  	pand	xmm2, xmm1
+ 5b2d806: 66 44 0f d7 ca               	pmovmskb	r9d, xmm2
+ 5b2d80b: 41 81 f9 ff ff 00 00         	cmp	r9d, 0xffff
+ 5b2d812: 74 0e                        	je	0x5b2d822 <.text+0x4714522>
+ 5b2d814: 48 ff c0                     	inc	rax
+ 5b2d817: 48 83 c6 60                  	add	rsi, 0x60
+ 5b2d81b: 48 83 c2 ff                  	add	rdx, -0x1
+ 5b2d81f: 72 bf                        	jb	0x5b2d7e0 <.text+0x47144e0>
+ 5b2d821: c3                           	ret
+ 5b2d822: 0f 10 46 a0                  	movups	xmm0, xmmword ptr [rsi - 0x60]
+ 5b2d826: 0f 10 8e 40 ff ff ff         	movups	xmm1, xmmword ptr [rsi - 0xc0]
+ 5b2d82d: f3 0f 6f 96 50 ff ff ff      	movdqu	xmm2, xmmword ptr [rsi - 0xb0]
+ 5b2d835: 0f 10 9e 60 ff ff ff         	movups	xmm3, xmmword ptr [rsi - 0xa0]
+ 5b2d83c: 0f 10 a6 70 ff ff ff         	movups	xmm4, xmmword ptr [rsi - 0x90]
+ 5b2d843: 0f 11 4e a0                  	movups	xmmword ptr [rsi - 0x60], xmm1
+ 5b2d847: 0f 11 86 40 ff ff ff         	movups	xmmword ptr [rsi - 0xc0], xmm0
+ 5b2d84e: 0f 10 46 b0                  	movups	xmm0, xmmword ptr [rsi - 0x50]
+ 5b2d852: f3 0f 7f 56 b0               	movdqu	xmmword ptr [rsi - 0x50], xmm2
+ 5b2d857: 0f 11 86 50 ff ff ff         	movups	xmmword ptr [rsi - 0xb0], xmm0
+ 5b2d85e: 0f 10 46 c0                  	movups	xmm0, xmmword ptr [rsi - 0x40]
+ 5b2d862: 0f 11 5e c0                  	movups	xmmword ptr [rsi - 0x40], xmm3
+ 5b2d866: 0f 11 86 60 ff ff ff         	movups	xmmword ptr [rsi - 0xa0], xmm0
+ 5b2d86d: 0f 10 46 d0                  	movups	xmm0, xmmword ptr [rsi - 0x30]
+ 5b2d871: 0f 11 66 d0                  	movups	xmmword ptr [rsi - 0x30], xmm4
+ 5b2d875: 0f 11 86 70 ff ff ff         	movups	xmmword ptr [rsi - 0x90], xmm0
+ 5b2d87c: 0f 10 46 e0                  	movups	xmm0, xmmword ptr [rsi - 0x20]
+ 5b2d880: 0f 10 4e 80                  	movups	xmm1, xmmword ptr [rsi - 0x80]
+ 5b2d884: 0f 11 4e e0                  	movups	xmmword ptr [rsi - 0x20], xmm1
+ 5b2d888: 0f 11 46 80                  	movups	xmmword ptr [rsi - 0x80], xmm0
+ 5b2d88c: 0f 10 46 90                  	movups	xmm0, xmmword ptr [rsi - 0x70]
+ 5b2d890: 0f 10 4e f0                  	movups	xmm1, xmmword ptr [rsi - 0x10]
+ 5b2d894: 0f 11 46 f0                  	movups	xmmword ptr [rsi - 0x10], xmm0
+ 5b2d898: 0f 11 4e 90                  	movups	xmmword ptr [rsi - 0x70], xmm1
+ 5b2d89c: 4c 8d 48 01                  	lea	r9, [rax + 0x1]
+ 5b2d8a0: 4d 39 c1                     	cmp	r9, r8
+ 5b2d8a3: 72 51                        	jb	0x5b2d8f6 <.text+0x47145f6>
+ 5b2d8a5: e9 04 01 00 00               	jmp	0x5b2d9ae <.text+0x47146ae>
+ 5b2d8aa: 66 0f 1f 44 00 00            	nop	word ptr [rax + rax]
+ 5b2d8b0: 0f 10 46 50                  	movups	xmm0, xmmword ptr [rsi + 0x50]
+ 5b2d8b4: 41 0f 11 40 50               	movups	xmmword ptr [r8 + 0x50], xmm0
+ 5b2d8b9: 0f 10 46 40                  	movups	xmm0, xmmword ptr [rsi + 0x40]
+ 5b2d8bd: 41 0f 11 40 40               	movups	xmmword ptr [r8 + 0x40], xmm0
+ 5b2d8c2: 0f 10 06                     	movups	xmm0, xmmword ptr [rsi]
+ 5b2d8c5: 0f 10 4e 10                  	movups	xmm1, xmmword ptr [rsi + 0x10]
+ 5b2d8c9: f3 0f 6f 56 20               	movdqu	xmm2, xmmword ptr [rsi + 0x20]
+ 5b2d8ce: 0f 10 5e 30                  	movups	xmm3, xmmword ptr [rsi + 0x30]
+ 5b2d8d2: 41 0f 11 58 30               	movups	xmmword ptr [r8 + 0x30], xmm3
+ 5b2d8d7: f3 41 0f 7f 50 20            	movdqu	xmmword ptr [r8 + 0x20], xmm2
+ 5b2d8dd: 41 0f 11 48 10               	movups	xmmword ptr [r8 + 0x10], xmm1
+ 5b2d8e2: 41 0f 11 00                  	movups	xmmword ptr [r8], xmm0
+ 5b2d8e6: 48 ff c0                     	inc	rax
+ 5b2d8e9: 48 83 c6 60                  	add	rsi, 0x60
+ 5b2d8ed: 48 ff ca                     	dec	rdx
+ 5b2d8f0: 0f 84 b8 00 00 00            	je	0x5b2d9ae <.text+0x47146ae>
+ 5b2d8f6: 4c 8d 0c 40                  	lea	r9, [rax + 2*rax]
+ 5b2d8fa: 49 c1 e1 05                  	shl	r9, 0x5
+ 5b2d8fe: 4e 8d 04 09                  	lea	r8, [rcx + r9]
+ 5b2d902: f3 0f 6f 06                  	movdqu	xmm0, xmmword ptr [rsi]
+ 5b2d906: f3 42 0f 6f 4c 09 a0         	movdqu	xmm1, xmmword ptr [rcx + r9 - 0x60]
+ 5b2d90d: 66 0f 74 c8                  	pcmpeqb	xmm1, xmm0
+ 5b2d911: 66 0f 6e 46 10               	movd	xmm0, dword ptr [rsi + 0x10]
+ 5b2d916: 66 42 0f 6e 54 09 b0         	movd	xmm2, dword ptr [rcx + r9 - 0x50]
+ 5b2d91d: 66 0f 74 d0                  	pcmpeqb	xmm2, xmm0
+ 5b2d921: 66 0f db d1                  	pand	xmm2, xmm1
+ 5b2d925: 66 44 0f d7 ca               	pmovmskb	r9d, xmm2
+ 5b2d92a: 41 81 f9 ff ff 00 00         	cmp	r9d, 0xffff
+ 5b2d931: 0f 85 79 ff ff ff            	jne	0x5b2d8b0 <.text+0x47145b0>
+ 5b2d937: 0f 10 06                     	movups	xmm0, xmmword ptr [rsi]
+ 5b2d93a: 41 0f 10 48 a0               	movups	xmm1, xmmword ptr [r8 - 0x60]
+ 5b2d93f: 0f 11 0e                     	movups	xmmword ptr [rsi], xmm1
+ 5b2d942: 41 0f 11 40 a0               	movups	xmmword ptr [r8 - 0x60], xmm0
+ 5b2d947: 0f 10 46 10                  	movups	xmm0, xmmword ptr [rsi + 0x10]
+ 5b2d94b: 41 0f 10 48 b0               	movups	xmm1, xmmword ptr [r8 - 0x50]
+ 5b2d950: 0f 11 4e 10                  	movups	xmmword ptr [rsi + 0x10], xmm1
+ 5b2d954: 41 0f 11 40 b0               	movups	xmmword ptr [r8 - 0x50], xmm0
+ 5b2d959: 0f 10 46 20                  	movups	xmm0, xmmword ptr [rsi + 0x20]
+ 5b2d95d: 41 0f 10 48 c0               	movups	xmm1, xmmword ptr [r8 - 0x40]
+ 5b2d962: 0f 11 4e 20                  	movups	xmmword ptr [rsi + 0x20], xmm1
+ 5b2d966: 41 0f 11 40 c0               	movups	xmmword ptr [r8 - 0x40], xmm0
+ 5b2d96b: 0f 10 46 30                  	movups	xmm0, xmmword ptr [rsi + 0x30]
+ 5b2d96f: 41 0f 10 48 d0               	movups	xmm1, xmmword ptr [r8 - 0x30]
+ 5b2d974: 0f 11 4e 30                  	movups	xmmword ptr [rsi + 0x30], xmm1
+ 5b2d978: 41 0f 11 40 d0               	movups	xmmword ptr [r8 - 0x30], xmm0
+ 5b2d97d: 0f 10 46 40                  	movups	xmm0, xmmword ptr [rsi + 0x40]
+ 5b2d981: 41 0f 10 48 e0               	movups	xmm1, xmmword ptr [r8 - 0x20]
+ 5b2d986: 0f 11 4e 40                  	movups	xmmword ptr [rsi + 0x40], xmm1
+ 5b2d98a: 41 0f 11 40 e0               	movups	xmmword ptr [r8 - 0x20], xmm0
+ 5b2d98f: 0f 10 46 50                  	movups	xmm0, xmmword ptr [rsi + 0x50]
+ 5b2d993: 41 0f 10 48 f0               	movups	xmm1, xmmword ptr [r8 - 0x10]
+ 5b2d998: 0f 11 4e 50                  	movups	xmmword ptr [rsi + 0x50], xmm1
+ 5b2d99c: 41 0f 11 40 f0               	movups	xmmword ptr [r8 - 0x10], xmm0
+ 5b2d9a1: 48 83 c6 60                  	add	rsi, 0x60
+ 5b2d9a5: 48 ff ca                     	dec	rdx
+ 5b2d9a8: 0f 85 48 ff ff ff            	jne	0x5b2d8f6 <.text+0x47145f6>
+ 5b2d9ae: 48 89 47 10                  	mov	qword ptr [rdi + 0x10], rax
+ 5b2d9b2: c3                           	ret

@@ -1,0 +1,193 @@
+{
+  "scope": "Node115 QC and TC voter-map normalization on decode: owners 0x5968d20 and 0x5968f10, normalization 0x4de6470/0x4dbf950, dedup 0x5b2d7c0/0x5b2e330 and small sorts 0x53e6aa0/0x53ea3d0. Decode rows, order by 20-byte signer, retain the last whole row of each adjacent equal-key run independent of payload, then use unique-count <=64 flat representation and >64 tree. For input lengths 2..20 the stable insertion sort establishes last wire occurrence wins. For >=21 long-sort 0x4f39140/0x4f3ada0 is opaque and no wire-order winner is claimed. No signature validity or complete certificate codec is claimed.",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "owner_entries": [
+    "0x5968d20",
+    "0x5968f10"
+  ],
+  "candidate_helpers": [
+    "0x4de6470",
+    "0x4dbf950",
+    "0x5b2d7c0",
+    "0x5b2e330",
+    "0x53e6aa0",
+    "0x53ea3d0"
+  ],
+  "long_sort_boundaries": [
+    "0x4f39140",
+    "0x4f3ada0"
+  ],
+  "snapshot": {
+    "checked_at_utc": "2026-11-04T21:01:10.556992+00:00",
+    "authenticated_login": "thegeronimo",
+    "upstream_main": "05bc2de303c05525b71e7e257426e741bc66a390",
+    "current_all_state_count": 2867,
+    "current_open": 251,
+    "current_closed_including_merged": 2616,
+    "historically_observed_absent_prs": [
+      55,
+      88,
+      313,
+      526,
+      631,
+      692,
+      1059,
+      1718,
+      1748,
+      1804,
+      1851,
+      1893,
+      2262,
+      2294,
+      2300,
+      2308,
+      2340,
+      2355,
+      2385,
+      2414,
+      2428,
+      2476,
+      2497,
+      2587,
+      2599,
+      2611,
+      2816,
+      2843,
+      2852,
+      2854,
+      2857,
+      2877
+    ],
+    "union_count": 2899,
+    "new_since_previous_audit": [
+      2902,
+      2903
+    ],
+    "changed_preexisting_head_or_base": [],
+    "newly_missing_preexisting": [],
+    "open_issues_excluding_pulls": 0,
+    "file_records_last_observed": 57835,
+    "file_records_without_patch_last_observed": 14902,
+    "new_pr_review": {
+      "2902": "Complete body and all 11 changed-file patches reviewed. Node115 u32 varint Rust implementation follows #2412; shared primitive context for timestamp #82, not its timestamp admission/error/propagation policy. Credit #2902 in #82.",
+      "2903": "Complete body and 6 of 8 available changed-file patches reviewed. Allocator lookup/bin-table-init FDE 0x6350210..0x6352f5e, unrelated to 76\u201382 scoped questions; binary/objdump patch omitted."
+    },
+    "scoped_finding": "No newly competing claim identified for prepared scopes 76\u201382 in reviewed changes. #2902 is shared primitive context for 82, not its claimed caller-level timestamp semantics. Subject to explicit limits, suitable to continue final packaging and ordinary pre-publication recheck after validation; not a guarantee of uniqueness.",
+    "limitations": "32 historically observed PRs absent from current listing retained from cached last observations; absence cause and later changes unknown. Missing patches, #1151 3000-file API cap, terminology, unseen or subsequent work limit overlap conclusions. This refresh assesses scope only; it does not verify native evidence or validation.",
+    "pull_list_sha256": "46432db3204b214ed58e59c80d3a73519ae23e95afe6e5c1e2a90a27234e6567",
+    "census_sha256": "707b8394d8a9c7cab1934a5147f9b91ee0d83cfe626aef80d1da00cc1dbe408a"
+  },
+  "semantic_searches": [
+    {
+      "corpus": "current all-state PR metadata and available patches plus retained historic PR text",
+      "patterns": [
+        "0x5968d20",
+        "0x5968f10",
+        "0x4de6470",
+        "0x4dbf950",
+        "0x5b2d7c0",
+        "0x5b2e330",
+        "0x53e6aa0",
+        "0x53ea3d0",
+        "voter/signer vote map decode sort duplicate last wins",
+        "quorum/timeout certificate serialization"
+      ],
+      "method": "case-insensitive exact-address and semantic search, manual inspection of related packet scopes. #2041 file-offset-only collision is a different coordinate and no matching owner. Address absence alone does not establish novelty."
+    }
+  ],
+  "related_prior_work": [
+    {
+      "pr": 2525,
+      "scope": "Node115 generic adjacent 20-byte-key last-record compaction for 32-byte rows in execution-state caller; semantic analogue, not QC/TC 96/104-byte decode and representation."
+    },
+    {
+      "pr": 1844,
+      "scope": "Node94 stable 20-byte-key ordering of 32-byte validator-vote snapshot rows, generic sorting analogue."
+    },
+    {
+      "pr": 1444,
+      "scope": "Node94 timeout tag-2 signing writer and stored-order nested QC signature rows; not claimed as new wire primitive."
+    },
+    {
+      "pr": 1467,
+      "scope": "Node94 timeout/heartbeat/ack preimages and signatures, including eight varint limbs and stored-order nested votes; no QC/TC decoding claim."
+    },
+    {
+      "pr": 1391,
+      "scope": "Node94 QC vote signing preimage, not QC/TC map normalization."
+    },
+    {
+      "pr": 999,
+      "scope": "Node94 client-block verification, proof/buffer rules; expressly does not read decode."
+    },
+    {
+      "pr": 1859,
+      "scope": "Node94 question-settlement batch sorting: unsigned-key insertion sort stable for 2..20 rows, adjacent equal keys discard earlier and retain last; >=21 long sorter stability not analyzed. Close algorithmic analogue but not QC/TC voter-key decode/representation."
+    }
+  ],
+  "finding": "No matching QC/TC decode map-normalization and unique-count representation claim was found in searched available history. Generic stable sorting, last-run compaction, signature wire primitives and preimages are credited as prior analogues. This is not proof of global uniqueness.",
+  "limitations": [
+    "The >=21 sorter is opaque; no assertion about its stability or original-wire duplicate winner. Full QC/TC field schema, cryptographic validity, ABI, allocation/unwind and live consensus are outside the claim.",
+    "32 historically observed PRs absent from current listing retain last-observed data only. 14902 of 57835 file records lack API patches and #1151 hit the 3000-file cap; missing, later, unpublished or differently worded work can conceal overlap.",
+    "Native contract was supplied by the packet author; this overlap audit independently checks history, not native proof or tests."
+  ],
+  "census_sha256": "59865256d5c5cdb1814c3976a8244345288639082037ecac38db1ef10449157e",
+  "final_live_refresh": {
+    "checked_at_utc": "2026-11-04T21:26:45.563910+00:00",
+    "authenticated_login": "thegeronimo",
+    "upstream_main": "05bc2de303c05525b71e7e257426e741bc66a390",
+    "current_all_state_count": 2868,
+    "current_open": 252,
+    "current_closed_including_merged": 2616,
+    "historically_observed_absent_prs": [
+      55,
+      88,
+      313,
+      526,
+      631,
+      692,
+      1059,
+      1718,
+      1748,
+      1804,
+      1851,
+      1893,
+      2262,
+      2294,
+      2300,
+      2308,
+      2340,
+      2355,
+      2385,
+      2414,
+      2428,
+      2476,
+      2497,
+      2587,
+      2599,
+      2611,
+      2816,
+      2843,
+      2852,
+      2854,
+      2857,
+      2877
+    ],
+    "union_count": 2900,
+    "new_since_previous_audit": [
+      2904
+    ],
+    "changed_preexisting_head_or_base": [],
+    "newly_missing_preexisting": [],
+    "open_issues_excluding_pulls": 0,
+    "file_records_last_observed": 57843,
+    "file_records_without_patch_last_observed": 14902,
+    "new_pr_review": {
+      "2904": "Body and all 8 file patches inspected: cold set initialization/allocation, unrelated to the scoped policies 76\u201385."
+    },
+    "scope_finding": "No newly competing claim identified in reviewed #2904 for 76\u201385. Suitable to proceed with final packaging once validation is complete; refresh again immediately before publication. This is not a guarantee of global uniqueness.",
+    "limitations": "32 previously observed PRs absent from current listing retained only at last observation. Missing patches, PR #1151 3000-file cap, alternate terminology and later/unpublished work limit the conclusion. Native instructions, user validation and final branch heads are not independently verified here.",
+    "pull_list_sha256": "e664f2faf8a10334232bd7a859dd5fa761ccaae24dd576621186bd1045b46b45",
+    "census_sha256": "59865256d5c5cdb1814c3976a8244345288639082037ecac38db1ef10449157e"
+  }
+}
