@@ -1,0 +1,111 @@
+[
+  {
+    "name": "focused",
+    "command": [
+      "<work>/onchain-venv/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_node115_limb_add_family.py",
+      "-v"
+    ],
+    "exit": 0,
+    "wall_seconds": 20.728
+  },
+  {
+    "name": "fmt",
+    "command": [
+      "<work>/host-tools/rust-1.94.1/bin/rustfmt",
+      "--check",
+      "--edition",
+      "2021",
+      "src/node115-limb-add-family/lib.rs",
+      "src/node115-limb-add-family/input_only_driver.rs",
+      "research/work-items/RE-004-limb-add-family-115/client_fixture.rs"
+    ],
+    "exit": 0,
+    "wall_seconds": 2.383
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "<work>/host-tools/rust-1.94.1/bin/clippy-driver",
+      "--edition=2021",
+      "--crate-name",
+      "node115_limb_add_family",
+      "--crate-type",
+      "rlib",
+      "-D",
+      "warnings",
+      "src/node115-limb-add-family/lib.rs",
+      "-o",
+      "<work>/hl-limb-add115-checks/liblint.rlib"
+    ],
+    "exit": 0,
+    "wall_seconds": 5.572
+  },
+  {
+    "name": "scope-gates",
+    "command": [
+      "<work>/onchain-venv/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_verify_packets.py",
+      "-v"
+    ],
+    "exit": 0,
+    "wall_seconds": 45.951
+  },
+  {
+    "name": "doctor",
+    "command": [
+      "make",
+      "doctor"
+    ],
+    "exit": 0,
+    "wall_seconds": 5.594
+  },
+  {
+    "name": "verify",
+    "command": [
+      "make",
+      "verify"
+    ],
+    "exit": 0,
+    "wall_seconds": 64.047
+  },
+  {
+    "name": "catalogue",
+    "command": [
+      "make",
+      "catalogue"
+    ],
+    "exit": 0,
+    "wall_seconds": 541.219
+  },
+  {
+    "name": "catalogue-check",
+    "command": [
+      "make",
+      "catalogue-check"
+    ],
+    "exit": 0,
+    "wall_seconds": 522.707
+  },
+  {
+    "name": "reproduce",
+    "command": [
+      "make",
+      "reproduce"
+    ],
+    "exit": 0,
+    "wall_seconds": 122.996
+  }
+]
