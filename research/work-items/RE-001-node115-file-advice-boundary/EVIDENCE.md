@@ -38,6 +38,6 @@ No Rust replacement, two-build comparison, runtime oracle or normalization mask 
 
 ## Results and limitations
 
-Eight scoped tests pass: one authenticated full-range proof plus seven byte-corruption controls. Required independent repository checks have not yet been run for this packet. Passing scoped tests alone is not approval or target equivalence. No progress catalogue or component gate is changed; all broader prerequisites remain unmet.
+Eight scoped tests pass: one authenticated full-range proof plus seven byte-corruption controls. Initial independent validation (`a62414a19ae54b8a8b802ed127b26fa2`) passed `make doctor` but stopped at `make verify catalogue-check`: artifact/import/packet verification passed, while the generated README inventory was stale. `make catalogue` regenerated only the README and progress SVG inventory count (559 to 560); the following `make catalogue-check` passed. No component gate changed. Independent validation of this regenerated tree remains pending; its authoritative result and any global limits must accompany publication. Passing scoped tests alone is not approval or target equivalence. No progress catalogue or component gate is changed; all broader prerequisites remain unmet.
 
 Next question: identify a real higher-level storage caller and determine how, if at all, its returned advice status is used. That work is outside this packet.
