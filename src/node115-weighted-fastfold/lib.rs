@@ -41,3 +41,9 @@ mod tests {
         }
     }
 }
+
+/// Checked first-provider value projection; see the evidence packet for premises.
+pub mod selected;
+
+#[cfg(test)]
+mod selected_tests;

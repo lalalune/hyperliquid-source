@@ -121,6 +121,7 @@ def build(binary,rustc,output):
  source=(COMPONENT/'lib.rs').read_text();mutants=[]
  for name,old,new in [('checked-add','total.checked_add(weight)','Some(total.wrapping_add(weight))'),('wide-product','(total as u128) * 2','u128::from(total.wrapping_mul(2))'),('strictness','* 2 <','* 2 <=')]:
   need(source.count(old)==1,'mutation binding changed');folder=output/('mutant-'+name);folder.mkdir();changed=folder/'lib.rs';changed.write_text(source.replace(old,new));(folder/'target-smoke.tsv').write_bytes((COMPONENT/'target-smoke.tsv').read_bytes())
+  for module in ('selected.rs','selected_tests.rs'):(folder/module).write_bytes((COMPONENT/module).read_bytes())
   _,exe=library(changed,folder/'build',3);p=run([exe],input=result['inputs'].decode());need(p.returncode==0,'mutant must emit rows')
   actual=p.stdout.splitlines();expected=result['expected'].decode().splitlines();mismatch=sum(a!=b for a,b in zip(actual,expected));need(len(actual)==len(expected) and mismatch>0,'mutant escaped')
   p=smoke(changed,folder);need(p.returncode!=0,'mutant passed target-smoke');mutants.append({'name':name,'mismatches':mismatch,'rows':len(actual),'compiled_smoke_exit':p.returncode})
