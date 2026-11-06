@@ -1,0 +1,11 @@
+(none): the window reads no GOT or RELATIVE slot, contains no
+rip-relative data reference and makes no call instruction. Every
+lane constant is a movabs immediate; the only memory the window
+reads is the caller's input through rdi. Its two exits for
+lengths above 128 are direct relative tail jumps (0x61c3a97 to
+the delegate at 0x61c3230, 0x61c3b50 to the seedless body at
+0x61c2890), both inside the window's own bytes in main.txt.
+The caller census likewise finds no stored qword of 0x61c38a0
+anywhere in the file and no RELATIVE slot whose addend is
+0x61c38a0; the entries are the direct calls and the one tail
+jump in callers.tsv.
