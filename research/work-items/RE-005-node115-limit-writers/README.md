@@ -75,8 +75,9 @@ The twins' final value has two entries. On the copy entry
 at `0x5a6abe7`) it is the sibling slot's current value. On the
 compute entry it is derived from a source object pointed to
 by the dispatcher object (twin a: `[rbx+0x78]`; twin b:
-`[rbx+0x958]`): the source's first qword is a tag — 2 gives
-120, 1 gives 10,000 — and otherwise the value is
+`[rbx+0x958]`): the source's full first qword is compared with 2 (giving
+120), then its low32 bits are compared with 1 (giving
+10,000); otherwise the value is
 `min((end-start+1) * 10,000,000, 1,000,000,000)` over the
 source's `+0x8` (start) and `+0x10` (end) qwords, saturating
 to 1,000,000,000 on borrow or multiplication overflow. A flag
@@ -154,3 +155,7 @@ twin sibling slots (`+0x178` / `+0xa58`) and source-object
 fields (`[obj+0x78]` / `[obj+0x958]` targets) — and what
 writes the twin-a stage result's `+0x28` field left open by
 #2501?
+
+## Ordered raw-tag widths
+
+The two comparisons have different widths in both twins: CMP RCX,2 is64-bit, while CMP ECX,1 is32-bit. The generated tag_conditions entries retain the actual ordered masks, immediates, registers and VAs. For raw source word0x100000001 with start0/end9, both actual compute points select10,000; a full-qword equality interpretation of the earlier summary would select100,000,000 instead. These are raw-word observations, not a claim that this encoding is a valid original enum or live input. #2531 traces descriptor inputs but establishes no upper32-zero invariant. Original captures and native exports remain unchanged. The target-backed correction packet is ../RE-005-reader-budget-tag-width-115/.
