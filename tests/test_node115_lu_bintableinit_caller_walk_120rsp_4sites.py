@@ -34,7 +34,7 @@ def ok(name, cond, detail=""):
 
 
 def build_temp():
-    tmp = tempfile.mkdtemp(prefix="hl283-test-", dir="/home/hatch/workspace/scratch-hl283")
+    tmp = tempfile.mkdtemp(prefix="hl283-test-")
     for rel in [PACKET_REL, "tools", "tests"]:
         shutil.copytree(os.path.join(ROOT, rel), os.path.join(tmp, rel))
     os.makedirs(os.path.join(tmp, "artifacts", "node", "115"), exist_ok=True)
