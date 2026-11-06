@@ -1,0 +1,1099 @@
+{
+  "boundary_cases": 10,
+  "cases": [
+    {
+      "after": {
+        "count_at24": 0,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "before": 1,
+      "route": "perp"
+    },
+    {
+      "after": {
+        "count_at24": 1,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "before": 2,
+      "route": "perp"
+    },
+    {
+      "after": {
+        "count_at24": 30,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "before": 31,
+      "route": "perp"
+    },
+    {
+      "after": {
+        "count_at24": 31,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "before": 32,
+      "route": "perp"
+    },
+    {
+      "after": {
+        "count_at24": 18446744073709551614,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "before": 18446744073709551615,
+      "route": "perp"
+    },
+    {
+      "after": {
+        "count_at24": 0,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "before": 1,
+      "route": "spot"
+    },
+    {
+      "after": {
+        "count_at24": 1,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "before": 2,
+      "route": "spot"
+    },
+    {
+      "after": {
+        "count_at24": 30,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "before": 31,
+      "route": "spot"
+    },
+    {
+      "after": {
+        "count_at24": 31,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "before": 32,
+      "route": "spot"
+    },
+    {
+      "after": {
+        "count_at24": 18446744073709551614,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "before": 18446744073709551615,
+      "route": "spot"
+    }
+  ],
+  "counterfactuals": [
+    {
+      "after": {
+        "count_at24": 3,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "before": {
+        "count_at24": 2,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "meaning": "decrement lands in another state field",
+      "replacement": 16,
+      "va": "0x2d2c9ce"
+    },
+    {
+      "after": {
+        "count_at24": 2,
+        "internal_error": 213,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "before": {
+        "count_at24": 2,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "meaning": "different internal error number",
+      "replacement": 213,
+      "va": "0x2d2ccdb"
+    },
+    {
+      "after": {
+        "count_at24": 2,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": false
+      },
+      "before": {
+        "count_at24": 2,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "meaning": "empty handoff branch polarity changes",
+      "replacement": 133,
+      "va": "0x2419884"
+    },
+    {
+      "after": {
+        "count_at24": 2,
+        "internal_error": 212,
+        "outer_tag": 15,
+        "record_processing_skipped": true
+      },
+      "before": {
+        "count_at24": 2,
+        "internal_error": 212,
+        "outer_tag": 5,
+        "record_processing_skipped": true
+      },
+      "meaning": "different outer wrapper variant",
+      "replacement": 15,
+      "va": "0x2a2fc44"
+    }
+  ],
+  "limits": "No target execution/emulation, proof that the selected tag combination is externally reachable, complete removal/movement equivalence, global alias or outer rollback/commit/persistence claim.",
+  "native_fields": {
+    "api_outer_tag": 5,
+    "direct_outer_tag": 5,
+    "perp_count_offset": 24,
+    "perp_empty_branch": "je",
+    "perp_error": 212,
+    "perp_error_variant": 1,
+    "perp_initial_vector": [
+      0,
+      8,
+      0
+    ],
+    "perp_removed_tag": 2,
+    "spot_count_offset": 24,
+    "spot_empty_branch": "je",
+    "spot_error": 212,
+    "spot_error_variant": 1,
+    "spot_initial_vector": [
+      0,
+      8,
+      0
+    ],
+    "spot_removed_tag": 2
+  },
+  "premises": [
+    "Selected compact count store was reached and returns normally from earlier shifting helpers.",
+    "Removed row tag is two; compact representation excludes conversion branch.",
+    "Call outputs and scratch vectors use the observed distinct stack locations; valid native ABI/storage."
+  ],
+  "selected_paths": {
+    "api_wrapper_after_core": {
+      "blocks": [
+        [
+          "0x2c0a86d",
+          "0x2c0a91b"
+        ],
+        [
+          "0x2c0aa96",
+          "0x2c0aaa8"
+        ]
+      ],
+      "calls": [],
+      "edges": [
+        {
+          "condition": "jmp",
+          "next": "0x2c0aa96",
+          "taken": true,
+          "va": "0x2c0a916"
+        }
+      ],
+      "instructions": 40,
+      "memory_writes": [
+        {
+          "base": "rbx",
+          "offset": 0,
+          "va": "0x2c0a8c8",
+          "width": 1
+        },
+        {
+          "base": "rbx",
+          "offset": 17,
+          "va": "0x2c0a8e4",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 33,
+          "va": "0x2c0a8e9",
+          "width": 16
+        }
+      ]
+    },
+    "direct_wrapper_after_core": {
+      "blocks": [
+        [
+          "0x2a2fbe7",
+          "0x2a2fc8e"
+        ],
+        [
+          "0x2a2fcf0",
+          "0x2a2fd02"
+        ]
+      ],
+      "calls": [],
+      "edges": [
+        {
+          "condition": "jmp",
+          "next": "0x2a2fcf0",
+          "taken": true,
+          "va": "0x2a2fc8c"
+        }
+      ],
+      "instructions": 39,
+      "memory_writes": [
+        {
+          "base": "rbx",
+          "offset": 0,
+          "va": "0x2a2fc42",
+          "width": 1
+        }
+      ]
+    },
+    "perp_core_error": {
+      "blocks": [
+        [
+          "0x2c2f13e",
+          "0x2c2f1b2"
+        ],
+        [
+          "0x2c2f4c7",
+          "0x2c2f4ef"
+        ],
+        [
+          "0x2c2f627",
+          "0x2c2f68f"
+        ]
+      ],
+      "calls": [
+        "0x2419810"
+      ],
+      "edges": [
+        {
+          "condition": "jmp",
+          "next": "0x2c2f4c7",
+          "taken": true,
+          "va": "0x2c2f1ad"
+        },
+        {
+          "condition": "jmp",
+          "next": "0x2c2f627",
+          "taken": true,
+          "va": "0x2c2f4ea"
+        }
+      ],
+      "instructions": 49,
+      "memory_writes": [
+        {
+          "base": "rsp",
+          "offset": 512,
+          "va": "0x2c2f151",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 496,
+          "va": "0x2c2f161",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 480,
+          "va": "0x2c2f171",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 464,
+          "va": "0x2c2f18d",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 448,
+          "va": "0x2c2f195",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 432,
+          "va": "0x2c2f19d",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 416,
+          "va": "0x2c2f1a5",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 64,
+          "va": "0x2c2f4cc",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 48,
+          "va": "0x2c2f4d5",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 96,
+          "va": "0x2c2f62f",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 80,
+          "va": "0x2c2f63b",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 64,
+          "va": "0x2c2f647",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 48,
+          "va": "0x2c2f66b",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 32,
+          "va": "0x2c2f66f",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 16,
+          "va": "0x2c2f673",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 0,
+          "va": "0x2c2f677",
+          "width": 16
+        }
+      ]
+    },
+    "perp_empty_drop": {
+      "blocks": [
+        [
+          "0x2822f50",
+          "0x2822f86"
+        ],
+        [
+          "0x2822f9a",
+          "0x2822fa3"
+        ],
+        [
+          "0x2822fbe",
+          "0x2822fc8"
+        ]
+      ],
+      "calls": [],
+      "edges": [
+        {
+          "condition": "je",
+          "next": "0x2822f9a",
+          "taken": true,
+          "va": "0x2822f84"
+        },
+        {
+          "condition": "je",
+          "next": "0x2822fbe",
+          "taken": true,
+          "va": "0x2822fa1"
+        }
+      ],
+      "instructions": 25,
+      "memory_writes": []
+    },
+    "perp_empty_handoff": {
+      "blocks": [
+        [
+          "0x2419810",
+          "0x2419889"
+        ],
+        [
+          "0x241a128",
+          "0x241a144"
+        ]
+      ],
+      "calls": [
+        "0x2822f50"
+      ],
+      "edges": [
+        {
+          "condition": "je",
+          "next": "0x241a128",
+          "taken": true,
+          "va": "0x2419883"
+        }
+      ],
+      "instructions": 36,
+      "memory_writes": [
+        {
+          "base": "rsp",
+          "offset": 0,
+          "va": "0x2419821",
+          "width": 8
+        },
+        {
+          "base": "rdi",
+          "offset": 0,
+          "va": "0x241983e",
+          "width": 8
+        },
+        {
+          "base": "rdi",
+          "offset": 8,
+          "va": "0x2419845",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 128,
+          "va": "0x241984d",
+          "width": 8
+        },
+        {
+          "base": "rdi",
+          "offset": 16,
+          "va": "0x2419855",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 48,
+          "va": "0x2419867",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 56,
+          "va": "0x241986c",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 64,
+          "va": "0x2419871",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 88,
+          "va": "0x2419876",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 72,
+          "va": "0x241987b",
+          "width": 8
+        }
+      ]
+    },
+    "perp_removal_after_store": {
+      "blocks": [
+        [
+          "0x2d2c9c8",
+          "0x2d2ca55"
+        ],
+        [
+          "0x2d2ca55",
+          "0x2d2ca5c"
+        ],
+        [
+          "0x2d2cacc",
+          "0x2d2cae9"
+        ],
+        [
+          "0x2d2cc60",
+          "0x2d2cce9"
+        ],
+        [
+          "0x2d2cdee",
+          "0x2d2ce03"
+        ]
+      ],
+      "calls": [],
+      "edges": [
+        {
+          "condition": "jne",
+          "next": "0x2d2ca55",
+          "taken": false,
+          "va": "0x2d2ca53"
+        },
+        {
+          "condition": "jmp",
+          "next": "0x2d2cacc",
+          "taken": true,
+          "va": "0x2d2ca5a"
+        },
+        {
+          "condition": "jne",
+          "next": "0x2d2cc60",
+          "taken": true,
+          "va": "0x2d2cae3"
+        },
+        {
+          "condition": "jmp",
+          "next": "0x2d2cdee",
+          "taken": true,
+          "va": "0x2d2cce4"
+        }
+      ],
+      "instructions": 61,
+      "memory_writes": [
+        {
+          "base": "r13",
+          "offset": 24,
+          "va": "0x2d2c9cb",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 672,
+          "va": "0x2d2c9ef",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 656,
+          "va": "0x2d2c9f7",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 320,
+          "va": "0x2d2ca1f",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 336,
+          "va": "0x2d2ca27",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 352,
+          "va": "0x2d2ca2f",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 368,
+          "va": "0x2d2ca37",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 381,
+          "va": "0x2d2ca47",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 66,
+          "va": "0x2d2ca55",
+          "width": 1
+        },
+        {
+          "base": "rsp",
+          "offset": 448,
+          "va": "0x2d2cc6a",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 464,
+          "va": "0x2d2cc72",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 480,
+          "va": "0x2d2cc7f",
+          "width": 2
+        },
+        {
+          "base": "rsp",
+          "offset": 576,
+          "va": "0x2d2cc91",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 592,
+          "va": "0x2d2cc9e",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 608,
+          "va": "0x2d2ccab",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 624,
+          "va": "0x2d2ccb8",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 637,
+          "va": "0x2d2ccc8",
+          "width": 8
+        },
+        {
+          "base": "r15",
+          "offset": 16,
+          "va": "0x2d2ccd6",
+          "width": 2
+        },
+        {
+          "base": "r15",
+          "offset": 0,
+          "va": "0x2d2ccdd",
+          "width": 8
+        }
+      ]
+    },
+    "spot_core_error": {
+      "blocks": [
+        [
+          "0x2c2f215",
+          "0x2c2f289"
+        ],
+        [
+          "0x2c2f607",
+          "0x2c2f627"
+        ],
+        [
+          "0x2c2f627",
+          "0x2c2f68f"
+        ]
+      ],
+      "calls": [
+        "0x241a3c0"
+      ],
+      "edges": [
+        {
+          "condition": "jmp",
+          "next": "0x2c2f607",
+          "taken": true,
+          "va": "0x2c2f284"
+        }
+      ],
+      "instructions": 47,
+      "memory_writes": [
+        {
+          "base": "rsp",
+          "offset": 512,
+          "va": "0x2c2f228",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 496,
+          "va": "0x2c2f238",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 480,
+          "va": "0x2c2f248",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 464,
+          "va": "0x2c2f264",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 448,
+          "va": "0x2c2f26c",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 432,
+          "va": "0x2c2f274",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 416,
+          "va": "0x2c2f27c",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 64,
+          "va": "0x2c2f60c",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 48,
+          "va": "0x2c2f615",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 96,
+          "va": "0x2c2f62f",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 80,
+          "va": "0x2c2f63b",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 64,
+          "va": "0x2c2f647",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 48,
+          "va": "0x2c2f66b",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 32,
+          "va": "0x2c2f66f",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 16,
+          "va": "0x2c2f673",
+          "width": 16
+        },
+        {
+          "base": "rbx",
+          "offset": 0,
+          "va": "0x2c2f677",
+          "width": 16
+        }
+      ]
+    },
+    "spot_empty_drop": {
+      "blocks": [
+        [
+          "0x2824790",
+          "0x28247c6"
+        ],
+        [
+          "0x28247da",
+          "0x28247e3"
+        ],
+        [
+          "0x28247fe",
+          "0x2824808"
+        ]
+      ],
+      "calls": [],
+      "edges": [
+        {
+          "condition": "je",
+          "next": "0x28247da",
+          "taken": true,
+          "va": "0x28247c4"
+        },
+        {
+          "condition": "je",
+          "next": "0x28247fe",
+          "taken": true,
+          "va": "0x28247e1"
+        }
+      ],
+      "instructions": 25,
+      "memory_writes": []
+    },
+    "spot_empty_handoff": {
+      "blocks": [
+        [
+          "0x241a3c0",
+          "0x241a42c"
+        ],
+        [
+          "0x241af23",
+          "0x241af3f"
+        ]
+      ],
+      "calls": [
+        "0x2824790"
+      ],
+      "edges": [
+        {
+          "condition": "je",
+          "next": "0x241af23",
+          "taken": true,
+          "va": "0x241a426"
+        }
+      ],
+      "instructions": 32,
+      "memory_writes": [
+        {
+          "base": "rdi",
+          "offset": 0,
+          "va": "0x241a3dc",
+          "width": 8
+        },
+        {
+          "base": "rdi",
+          "offset": 8,
+          "va": "0x241a3e3",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 160,
+          "va": "0x241a3eb",
+          "width": 8
+        },
+        {
+          "base": "rdi",
+          "offset": 16,
+          "va": "0x241a3f3",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 120,
+          "va": "0x241a406",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 128,
+          "va": "0x241a40b",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 136,
+          "va": "0x241a413",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 144,
+          "va": "0x241a41b",
+          "width": 8
+        }
+      ]
+    },
+    "spot_removal_after_store": {
+      "blocks": [
+        [
+          "0x2d2d308",
+          "0x2d2d395"
+        ],
+        [
+          "0x2d2d395",
+          "0x2d2d39c"
+        ],
+        [
+          "0x2d2d40c",
+          "0x2d2d429"
+        ],
+        [
+          "0x2d2d5a0",
+          "0x2d2d629"
+        ],
+        [
+          "0x2d2d72e",
+          "0x2d2d743"
+        ]
+      ],
+      "calls": [],
+      "edges": [
+        {
+          "condition": "jne",
+          "next": "0x2d2d395",
+          "taken": false,
+          "va": "0x2d2d393"
+        },
+        {
+          "condition": "jmp",
+          "next": "0x2d2d40c",
+          "taken": true,
+          "va": "0x2d2d39a"
+        },
+        {
+          "condition": "jne",
+          "next": "0x2d2d5a0",
+          "taken": true,
+          "va": "0x2d2d423"
+        },
+        {
+          "condition": "jmp",
+          "next": "0x2d2d72e",
+          "taken": true,
+          "va": "0x2d2d624"
+        }
+      ],
+      "instructions": 61,
+      "memory_writes": [
+        {
+          "base": "r13",
+          "offset": 24,
+          "va": "0x2d2d30b",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 672,
+          "va": "0x2d2d32f",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 656,
+          "va": "0x2d2d337",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 320,
+          "va": "0x2d2d35f",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 336,
+          "va": "0x2d2d367",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 352,
+          "va": "0x2d2d36f",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 368,
+          "va": "0x2d2d377",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 381,
+          "va": "0x2d2d387",
+          "width": 8
+        },
+        {
+          "base": "rsp",
+          "offset": 66,
+          "va": "0x2d2d395",
+          "width": 1
+        },
+        {
+          "base": "rsp",
+          "offset": 448,
+          "va": "0x2d2d5aa",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 464,
+          "va": "0x2d2d5b2",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 480,
+          "va": "0x2d2d5bf",
+          "width": 2
+        },
+        {
+          "base": "rsp",
+          "offset": 576,
+          "va": "0x2d2d5d1",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 592,
+          "va": "0x2d2d5de",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 608,
+          "va": "0x2d2d5eb",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 624,
+          "va": "0x2d2d5f8",
+          "width": 16
+        },
+        {
+          "base": "rsp",
+          "offset": 637,
+          "va": "0x2d2d608",
+          "width": 8
+        },
+        {
+          "base": "r15",
+          "offset": 16,
+          "va": "0x2d2d616",
+          "width": 2
+        },
+        {
+          "base": "r15",
+          "offset": 0,
+          "va": "0x2d2d61d",
+          "width": 8
+        }
+      ]
+    }
+  }
+}
