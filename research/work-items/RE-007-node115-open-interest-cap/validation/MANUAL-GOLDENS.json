@@ -1,0 +1,180 @@
+{
+  "basis": "Manual branch/operand relations from authenticated native body; not executed target fixtures and not test-run results",
+  "inputs": "a=entry signed R8; b=entry signed R9; c=first stack word; ctx=context+0x378 observed only when its native read occurs",
+  "premises": [
+    "nonnegative c admitted",
+    "valid initialized memory and call stack",
+    "normal-return callbacks preserve callee-saved state and needed local storage; do not clobber output unexpectedly",
+    "MXCSR nearest-even with precision exception masked at conversion/division; preceding callbacks preserve control state"
+  ],
+  "cases": [
+    {
+      "id": "negative_product_valid",
+      "a": 1,
+      "b": -1,
+      "c": 0,
+      "ctx": -9223372036854775808,
+      "expected": "valid product -1; no context read; no diagnostics; sentinel write"
+    },
+    {
+      "id": "minimum_product_valid",
+      "a": 1,
+      "b": -9223372036854775808,
+      "c": 0,
+      "ctx": -9223372036854775808,
+      "expected": "valid product I64_MIN; no context read; no diagnostics; sentinel write"
+    },
+    {
+      "id": "minimum_plus_max",
+      "a": 9223372036854775807,
+      "b": -9223372036854775808,
+      "c": 9223372036854775807,
+      "ctx": -9223372036854775808,
+      "expected": "sum -1; valid product -I64_MAX; no context read; sentinel write"
+    },
+    {
+      "id": "negative_multiplier_zero_math",
+      "a": -1,
+      "b": 0,
+      "c": 0,
+      "ctx": 0,
+      "expected": "invalid despite mathematical product zero; context read; no selector1; format +0.0"
+    },
+    {
+      "id": "minimum_multiplier",
+      "a": -9223372036854775808,
+      "b": 0,
+      "c": 0,
+      "ctx": -9223372036854775808,
+      "expected": "invalid; context read; selector1 then format +0.0"
+    },
+    {
+      "id": "positive_product_overflow",
+      "a": 9223372036854775807,
+      "b": 2,
+      "c": 0,
+      "ctx": 0,
+      "expected": "invalid; wrapped negative low word must not pass cutoff; format +0.0"
+    },
+    {
+      "id": "negative_product_overflow",
+      "a": 2,
+      "b": -9223372036854775808,
+      "c": 0,
+      "ctx": -9223372036854775808,
+      "expected": "invalid negative overflow; selector1 then format +0.0"
+    },
+    {
+      "id": "addition_overflow_zero_multiplier",
+      "a": 0,
+      "b": 9223372036854775807,
+      "c": 1,
+      "ctx": -9223372036854775808,
+      "expected": "selector0 first; saturated sum I64_MAX; valid product0; no context read; sentinel write"
+    },
+    {
+      "id": "both_diagnostics_order",
+      "a": 1,
+      "b": 9223372036854775807,
+      "c": 1,
+      "ctx": -9223372036854775808,
+      "expected": "selector0 first; context observation after it; selector1 next; valid I64_MAX product then format"
+    },
+    {
+      "id": "T1_below",
+      "a": 1,
+      "b": 184467440737095516,
+      "c": 0,
+      "ctx": -9223372036854775808,
+      "expected": "no context read; sentinel write"
+    },
+    {
+      "id": "T1_equal",
+      "a": 1,
+      "b": 184467440737095517,
+      "c": 0,
+      "ctx": -9223372036854775808,
+      "expected": "context read; selector1; sentinel write"
+    },
+    {
+      "id": "T1_above",
+      "a": 1,
+      "b": 184467440737095518,
+      "c": 0,
+      "ctx": 0,
+      "expected": "context read; no selector1; sentinel write"
+    },
+    {
+      "id": "T2_below",
+      "a": 1,
+      "b": 1844674407370955161,
+      "c": 0,
+      "ctx": -9223372036854775808,
+      "expected": "context read; selector1; sentinel write"
+    },
+    {
+      "id": "T2_equal",
+      "a": 1,
+      "b": 1844674407370955162,
+      "c": 0,
+      "ctx": 0,
+      "expected": "format; nearest-even two-stage value bits0x427ad7f29abcaf49; one rational round0x427ad7f29abcaf48 is wrong"
+    },
+    {
+      "id": "T2_above",
+      "a": 1,
+      "b": 1844674407370955163,
+      "c": 0,
+      "ctx": -9223372036854775808,
+      "expected": "context read; selector1 then format"
+    },
+    {
+      "id": "exact_large_float",
+      "a": 1,
+      "b": 2000000000000000000,
+      "c": 0,
+      "ctx": 0,
+      "expected": "format exact2000000000000.0 under nearest-even; both stages exact"
+    }
+  ],
+  "format_route_key_boundaries": [
+    {
+      "key": 0,
+      "mapped": 0
+    },
+    {
+      "key": 9999,
+      "mapped": 9999
+    },
+    {
+      "key": 10000,
+      "mapped": 110000
+    },
+    {
+      "key": 99899999,
+      "mapped": 99999999
+    },
+    {
+      "key": 99900000,
+      "mapped": 4294967295
+    },
+    {
+      "key": 18446744073709551615,
+      "mapped": 4294967295
+    }
+  ],
+  "raw_selector_cases": [
+    0,
+    1,
+    2,
+    128,
+    255
+  ],
+  "selector_expectation": "same stored low byte, never mask/normalize to one bit",
+  "excluded_negative_addend": {
+    "c": -1,
+    "native": "branch0x447c63d to final opaque call through0x64df6a0; no ordinary in-FDE continuation after call",
+    "projection": "reject admission explicitly; do not claim native returns the rejection value"
+  },
+  "rounding_proof": "DATA-MATH-AUDIT.json: exact midpoint inequalities only"
+}
