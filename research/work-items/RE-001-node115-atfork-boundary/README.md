@@ -68,8 +68,11 @@ This is not a census of all callers or callbacks. It adds the registering
 caller, import linkage, callback FDE coordinates and return split beyond the
 previous vendor-census stub identification (merged PR #2050).
 
-Local test results are in `local-checks.json`. Independent required validation
-has not yet run for this packet; no global-suite or hosted-CI success is claimed.
+`local-checks.json` is a historical local-only capture, before independent
+validation. Its "not run" fields describe that capture stage, not the latest
+publication state. Subsequent independent commands, tree identity, results and
+global-suite limits belong to the trusted PR validation receipt. This packet
+does not assert a global-suite or hosted-CI pass.
 No component/progress gate changes are requested. No Rust reconstruction,
 source equivalence, whole-function CFG coverage, callback effects, successful
 fork behavior, or runtime target execution is established. Imported byte
