@@ -1,0 +1,20 @@
+site	kind	caller_fde	args_at_site
+0x5d6e48e	call	0x5d6da20..0x5d6ee3c	rdi = -0x1b60(%rbp); rsi = -0x1bb8(%rbp) (count); rdx = movzbl -0x1bb0(%rbp) (flag byte); rcx = lea -0x1ac0(%rbp) (container)
+0x5d6f51c	call	0x5d6ef60..0x5d6faa0	rdi = -0x1628(%rbp); rsi = -0x1608(%rbp) (count); rdx = movzbl -0x1634(%rbp) (flag byte); rcx = lea -0x1590(%rbp) (container)
+0x5d534f2	call	0x5d53470..0x5d53577	sort entry calls the introsort loop: rdi = rsp, rsi = rsp + 0x10 (the two range structs), rdx = 2 * bsr(count)
+0x5d4c682	call	0x5d4c1c0..0x5d4c8cf	introsort loop recurses on the left half after the partition
+0x5d4c71d	call	0x5d4c1c0..0x5d4c8cf	heapsort fallback (make_heap): sift-down of one parent
+0x5d4c890	call	0x5d4c1c0..0x5d4c8cf	heapsort fallback (sort_heap): sift-down of the new root after each extraction
+0x5d4c26d	call	0x5d4c1c0..0x5d4c8cf	pivot selection: predicate on (first + 1, mid)
+0x5d4c28a	call	0x5d4c1c0..0x5d4c8cf	pivot selection: predicate on (mid, last - 1)
+0x5d4c756	call	0x5d4c1c0..0x5d4c8cf	pivot selection: predicate on (first + 1, last - 1) on the comp(first + 1, mid) false arm
+0x5d4c776	call	0x5d4c1c0..0x5d4c8cf	pivot selection: predicate on (mid, last - 1) on the comp(first + 1, mid) false arm
+0x5d4c7ae	call	0x5d4c1c0..0x5d4c8cf	pivot selection: predicate on (first + 1, last - 1) on the comp(mid, last - 1) false arm
+0x5d4c2a7	call	0x5d4c1c0..0x5d4c8cf	pivot selection: swap (first, mid)
+0x5d4c791	call	0x5d4c1c0..0x5d4c8cf	pivot selection: swap (first, last - 1)
+0x5d4c7c9	call	0x5d4c1c0..0x5d4c8cf	pivot selection: swap (first, first + 1)
+0x5d4c80a	call	0x5d4c1c0..0x5d4c8cf	pivot selection: swap (first, mid)
+0x5d53524	call	0x5d53470..0x5d53577	sort entry calls the insertion-sort pass over the first 16 elements (count > 16 path)
+0x5d53568	call	0x5d53470..0x5d53577	sort entry calls the insertion-sort pass over the whole range (count <= 16 path)
+0x5d4bb2c	call	0x5d4ba10..0x5d4bcd7	insertion-sort pass calls the single-element step for the current index
+0x5d53541	call	0x5d53470..0x5d53577	sort entry calls the single-element step for each index from 16 to count - 1 (count > 16 path)
