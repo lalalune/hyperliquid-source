@@ -54,6 +54,32 @@ def rel32(site, raw, want_kind):
     return site + 5 + struct.unpack("<i", raw[o + 1:o + 5])[0]
 
 
+def claimed_ranges(record):
+    """Citations explicitly marked unclaimed are not additional byte claims."""
+    pair_re = re.compile(r"0x([0-9a-fA-F]+)\s*\.\.\s*0x([0-9a-fA-F]+)")
+    ranges = set()
+    stack = [record]
+    while stack:
+        value = stack.pop()
+        if isinstance(value, dict):
+            for key, child in value.items():
+                if key == "cited_only_not_claimed":
+                    continue
+                if key in ("range", "fde") and isinstance(child, str):
+                    ranges.update((int(a, 16), int(b, 16))
+                                  for a, b in pair_re.findall(child))
+                elif key in ("range", "fde") and isinstance(child, list) and len(child) == 2:
+                    try:
+                        ranges.add((int(str(child[0]), 16), int(str(child[1]), 16)))
+                    except ValueError:
+                        pass
+                else:
+                    stack.append(child)
+        elif isinstance(value, list):
+            stack.extend(value)
+    return ranges
+
+
 def main():
     with open(os.path.join(PACKET, "records.json")) as f:
         rec = json.load(f)
@@ -183,7 +209,6 @@ def main():
 
     # Neighbour disjointness against merged + prior worktree records,
     # deduplicated by path string; ranges deduplicated as a set.
-    pair_re = re.compile(r"0x([0-9a-fA-F]+)\s*\.\.\s*0x([0-9a-fA-F]+)")
     ranges2 = set()
     paths = glob.glob(os.path.join(ROOT, "research/work-items/*/records.json"))
     paths += glob.glob("/home/hatch/workspace/hl-wt-calls*/research/work-items/*/records.json")
@@ -195,23 +220,7 @@ def main():
                 rec2 = json.load(f)
         except Exception:
             continue
-        stack = [rec2]
-        while stack:
-            o2 = stack.pop()
-            if isinstance(o2, dict):
-                for k, v in o2.items():
-                    if k in ("range", "fde") and isinstance(v, str):
-                        for a, b in pair_re.findall(v):
-                            ranges2.add((int(a, 16), int(b, 16)))
-                    elif k in ("range", "fde") and isinstance(v, list) and len(v) == 2:
-                        try:
-                            ranges2.add((int(str(v[0]), 16), int(str(v[1]), 16)))
-                        except Exception:
-                            pass
-                    else:
-                        stack.append(v)
-            elif isinstance(o2, list):
-                stack.extend(o2)
+        ranges2.update(claimed_ranges(rec2))
     over = []
     for (flo, fhi) in fdes:
         for (a, b) in ranges2:

@@ -39,6 +39,14 @@ def objdump_lines(lo, hi):
 
 
 class TestMergeCallers(unittest.TestCase):
+    def test_cited_only_ranges_are_not_claims(self):
+        record = {"cited_only_not_claimed": {
+            "packet_250_caller_b": {"fde": ["0x63b91e0", "0x63b930c"]}},
+            "exhibits": [{"range": "0x63b9400..0x63b9420"}]}
+        self.assertEqual(verifier.claimed_ranges(record), {(0x63b9400, 0x63b9420)})
+        record["exhibits"].append({"fde": ["0x63b91e0", "0x63b930c"]})
+        self.assertIn((0x63b91e0, 0x63b930c), verifier.claimed_ranges(record))
+
     def test_verifier_passes(self):
         r = subprocess.run([sys.executable,
                             os.path.join(ROOT, "tools/node115_lu_merge_callers.py")],
