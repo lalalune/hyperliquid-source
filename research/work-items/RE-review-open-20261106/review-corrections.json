@@ -89,6 +89,14 @@
       "blocker": "Overlap check misclassified explicitly cited_only_not_claimed references in PRs 2751 and 2760 as new claimed byte ranges",
       "change": "Exclude only the explicitly unclaimed citation subtree. Actual range claims at the same addresses continue to be collected.",
       "validation": "11 tests passed, including cited-only versus actual-claim negative control and full target artifact verifier"
+    },
+    {
+      "files": [
+        "tests/test_node115_prof_thread_leaves_bin.py"
+      ],
+      "blocker": "Overlap tamper control copied no prior packet into its temporary root, then failed on stale manifest hashes rather than the intended overlap",
+      "change": "Copy the retained value-leaves packet used by the control, re-seal only the temporary mutant manifest, and require one overlap failure with no manifest failures",
+      "validation": "10 tests passed; the overlap mutant now fails exactly once for overlap with no manifest failure"
     }
   ],
   "validation": {

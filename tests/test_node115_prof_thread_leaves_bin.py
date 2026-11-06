@@ -8,6 +8,7 @@ claims (different regex implementation, independent section parsing,
 independent byte arithmetic).
 """
 
+import hashlib
 import json
 import os
 import re
@@ -132,6 +133,11 @@ class TestPacket262(unittest.TestCase):
         tmp = tempfile.mkdtemp(prefix="hl262-tamper-")
         shutil.copytree(PKT, os.path.join(
             tmp, "research", "work-items", os.path.basename(PKT)))
+        # Retain the actual in-repository prior packet used by the overlap
+        # control instead of depending on an author's external worktrees.
+        prior = "RE-001-node115-lu-value-leaves-bin"
+        shutil.copytree(os.path.join(ROOT, "research", "work-items", prior),
+                        os.path.join(tmp, "research", "work-items", prior))
         for rel in ["tools/node115_prof_thread_leaves_bin.py",
                     "tests/test_node115_prof_thread_leaves_bin.py"]:
             src = os.path.join(ROOT, rel)
@@ -200,9 +206,20 @@ class TestPacket262(unittest.TestCase):
                                     "strict": strict_count(stored)})
             with open(p, "w") as f:
                 json.dump(rec, f, indent=1)
+            manifest = os.path.join(pkt_t, "MANIFEST.sha256")
+            with open(manifest) as f:
+                names = [line.split()[1] for line in f if line.strip()]
+            names.extend(["injected.hex", "injected.objdump.txt"])
+            with open(manifest, "w") as f:
+                for name in sorted(names):
+                    with open(os.path.join(pkt_t, name), "rb") as source:
+                        digest = hashlib.sha256(source.read()).hexdigest()
+                    f.write(digest + "  " + name + "\n")
             result = run_verifier(tmp)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("overlap", result.stdout)
+            self.assertNotIn("FAIL MANIFEST", result.stdout)
+            self.assertIn("1 FAIL", result.stdout)
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
