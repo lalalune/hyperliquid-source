@@ -1,0 +1,20 @@
+--- src/lib.rs
++++ src/lib.rs
+@@ -218,7 +218,7 @@
+     representation(spelling, Map::Spelling, 96, 64)?;
+ 
+     let mut required = used;
+-    for group in primary {
++    for group in primary.iter().rev() {
+         let spelling = spellings(group.name, spelling);
+         for (index, value) in group.values.iter().enumerate() {
+             let (name, _) = chosen(group.name, spelling, index);
+@@ -245,7 +245,7 @@
+     // The immutable second traversal has exactly the planned length. No fallible
+     // operation remains, and every endpoint is <= required <= output.len().
+     let mut position = used;
+-    for group in primary {
++    for group in primary.iter().rev() {
+         let spelling = spellings(group.name, spelling);
+         for (index, value) in group.values.iter().enumerate() {
+             let (name, is_fallback) = chosen(group.name, spelling, index);

@@ -1,0 +1,34 @@
+from pathlib import Path
+import json,hashlib,subprocess,datetime,time
+B=Path(__file__).resolve().parents[1];Q=B/'rust-qualification-02';O=B/'rust-linux-same-basename-01';O.mkdir()
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+def save(p,x):p.write_text(json.dumps(x,indent=2)+'\n')
+# Reuse only the exact previously reviewed parser functions; its main is not called.
+s=B/'source-review/qualify_v2.py';assert sha(s)=='b2b140844e8700046c3df5fbc270dfe0e54e6c171cb2a0f1bce8b3db31597dce';ns={'__name__':'reviewed_comparator','__file__':str(s)};exec(compile(s.read_bytes(),str(s),'exec'),ns);compare=ns['compare'];expected=(B/'rust-transcription-02/generated/expected.tsv').read_bytes()
+commands=json.loads((Q/'COMMANDS.json').read_text());assert len(commands)==49
+for c in commands:
+ assert c['kind']=='completed' and c['exit']==0
+ for stream in ['stdout','stderr']:assert sha(Q/(c['name']+'.'+stream))==c[stream]['sha256']
+ assert (Q/(c['name']+'.stderr')).read_bytes()==b''
+result={'schema':1,'status':'PASS','production_sha256':sha(Q/'input-source/lib.rs'),'test_sha256':sha(Q/'input-source/frozen_cases.rs'),'probe_sha256':sha(Q/'input-source/input_probe.rs'),'expected_sha256':hashlib.sha256(expected).hexdigest(),'compiler_sha256':sha(ns['RUST']),'prior_commands':49,'baseline':[],'mutants':[],'comparator':json.loads((Q/'COMPARATOR-CONTROLS.json').read_text())}
+for mode in ['debug','release']:
+ assert b'46 passed; 0 failed; 0 ignored;' in (Q/(mode+'-test.stdout')).read_bytes();raw=(Q/(mode+'-probe.stdout')).read_bytes();assert compare(expected,raw)==[];result['baseline'].append({'mode':mode,'tests_passed':46,'probe_rows':46,'exact':True,'stdout_sha256':hashlib.sha256(raw).hexdigest()})
+for v in json.loads((B/'source-authoring/mutations/EXACT-EDITS.json').read_text())['variants']:
+ ident=v['id'];assert sha(Q/'input-source'/(ident+'.rs'))==v['mutated_lib_sha256'];raw=(Q/(ident+'-probe.stdout')).read_bytes();diff=compare(expected,raw);assert v['witness'] in diff;result['mutants'].append({'id':ident,'domain':v['domain'],'normal_exit':0,'rows':46,'mismatch_count':len(diff),'mismatches':diff,'witness':v['witness'],'source_sha256':v['mutated_lib_sha256']})
+# Prove the first unequal archives differ only in their GNU ar long-name table.
+def ar_parts(p):
+ raw=p.read_bytes();assert raw[:8]==b'!<arch>\n';off=8;parts=[]
+ while off<len(raw):
+  h=raw[off:off+60];assert h[58:60]==b'`\n';size=int(h[48:58]);parts.append((h[:16].decode().strip(),raw[off+60:off+60+size]));off+=60+size+(size%2)
+ assert off==len(raw);return parts
+p1=ar_parts(Q/'build/linux-1.rlib');p2=ar_parts(Q/'build/linux-2.rlib');assert len(p1)==len(p2)==4
+assert all(a[0]==b[0] and (a[0]=='//' or a[1]==b[1]) for a,b in zip(p1,p2));assert p1[1][1].replace(b'linux-1',b'linux-2')==p2[1][1]
+result['preserved_failure']={'path':'rust-qualification-launch-02','cause':'Different output basenames embedded in ar long-name table; rmeta and object members byte-identical. First unequal archives retained.','first_sha256':sha(Q/'build/linux-1.rlib'),'second_sha256':sha(Q/'build/linux-2.rlib'),'name_tables':[p1[1][1].decode(),p2[1][1].decode()]}
+cmd=[];env=ns['ENV'];rust=ns['RUST'];cwd=O/'empty-cwd';cwd.mkdir()
+for i in (1,2):
+ dest=O/('build-'+str(i));dest.mkdir();argv=[str(rust),'--edition','2024','-D','warnings','--sysroot',str(ns['SYS']),'--remap-path-prefix',str(Q)+'=/qualification','--target','x86_64-unknown-linux-gnu','--crate-name','node115_http_header_writer','--crate-type','rlib','-C','opt-level=3',str(Q/'input-source/lib.rs'),'-o',str(dest/'libwriter.rlib')];start=datetime.datetime.now(datetime.timezone.utc).isoformat();t=time.monotonic();kind='completed';rc=None
+ try:p=subprocess.run(argv,cwd=cwd,env=env,input=b'',stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=60);out,err,rc=p.stdout,p.stderr,p.returncode
+ except subprocess.TimeoutExpired as e:kind='timeout';out=e.stdout or b'';err=e.stderr or b''
+ except OSError as e:kind='oserror';out=b'';err=str(e).encode()
+ name='linux-'+str(i);(O/(name+'.stdout')).write_bytes(out);(O/(name+'.stderr')).write_bytes(err);row={'name':name,'argv':argv,'cwd':str(cwd),'env':env,'started':start,'ended':datetime.datetime.now(datetime.timezone.utc).isoformat(),'seconds':time.monotonic()-t,'kind':kind,'exit':rc,'stdout_sha256':hashlib.sha256(out).hexdigest(),'stderr_sha256':hashlib.sha256(err).hexdigest()};save(O/(name+'.json'),row);cmd.append(row);save(O/'COMMANDS.json',cmd);assert kind=='completed' and rc==0 and not err
+one=(O/'build-1/libwriter.rlib').read_bytes();two=(O/'build-2/libwriter.rlib').read_bytes();assert one==two;assert sha(rust)==result['compiler_sha256'];result['linux']={'compile_only':True,'builds':2,'identical':True,'bytes':len(one),'sha256':hashlib.sha256(one).hexdigest()};result['commands_total']=51;result['limits']='Own safe Rust and frozen literal cases only, no native target execution, all-input or physical-map equivalence. Nine native-value and three host-policy mutants are separate.';save(O/'RESULTS.json',result);print(json.dumps(result,indent=2))
