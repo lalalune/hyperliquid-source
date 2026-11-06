@@ -1,0 +1,47 @@
+
+<authenticated-node115>:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 5d00260: 53                           	push	rbx
+ 5d00261: 48 8b 07                     	mov	rax, qword ptr [rdi]
+ 5d00264: 48 85 c0                     	test	rax, rax
+ 5d00267: 74 1f                        	je	0x5d00288 <.text+0x48e6f88>
+ 5d00269: 83 f8 01                     	cmp	eax, 0x1
+ 5d0026c: 75 1c                        	jne	0x5d0028a <.text+0x48e6f8a>
+ 5d0026e: 48 8b 7f 10                  	mov	rdi, qword ptr [rdi + 0x10]
+ 5d00272: be ff ff ff ff               	mov	esi, 0xffffffff
+ 5d00277: f0                           	lock
+ 5d00278: 0f c1 37                     	xadd	dword ptr [rdi], esi
+ 5d0027b: ff ce                        	dec	esi
+ 5d0027d: 89 f0                        	mov	eax, esi
+ 5d0027f: 25 ff ff ff bf               	and	eax, 0xbfffffff
+ 5d00284: f7 d8                        	neg	eax
+ 5d00286: 70 38                        	jo	0x5d002c0 <.text+0x48e6fc0>
+ 5d00288: 5b                           	pop	rbx
+ 5d00289: c3                           	ret
+ 5d0028a: 48 89 f8                     	mov	rax, rdi
+ 5d0028d: 48 8b 7f 08                  	mov	rdi, qword ptr [rdi + 0x8]
+ 5d00291: 80 78 10 00                  	cmp	byte ptr [rax + 0x10], 0x0
+ 5d00295: 75 12                        	jne	0x5d002a9 <.text+0x48e6fa9>
+ 5d00297: 48 8b 05 f2 fb 7d 00         	mov	rax, qword ptr [rip + 0x7dfbf2] # 0x64dfe90
+ 5d0029e: 48 8b 00                     	mov	rax, qword ptr [rax]
+ 5d002a1: 48 d1 e0                     	shl	rax
+ 5d002a4: 48 85 c0                     	test	rax, rax
+ 5d002a7: 75 1e                        	jne	0x5d002c7 <.text+0x48e6fc7>
+ 5d002a9: be 01 00 00 c0               	mov	esi, 0xc0000001
+ 5d002ae: f0                           	lock
+ 5d002af: 0f c1 37                     	xadd	dword ptr [rdi], esi
+ 5d002b2: 81 c6 01 00 00 c0            	add	esi, 0xc0000001
+ 5d002b8: 81 fe 00 00 00 40            	cmp	esi, 0x40000000
+ 5d002be: 72 c8                        	jb	0x5d00288 <.text+0x48e6f88>
+ 5d002c0: 5b                           	pop	rbx
+ 5d002c1: ff 25 e9 c2 7e 00            	jmp	qword ptr [rip + 0x7ec2e9] # 0x64ec5b0
+ 5d002c7: 48 89 fb                     	mov	rbx, rdi
+ 5d002ca: ff 15 e0 03 7e 00            	call	qword ptr [rip + 0x7e03e0] # 0x64e06b0
+ 5d002d0: 48 89 df                     	mov	rdi, rbx
+ 5d002d3: 84 c0                        	test	al, al
+ 5d002d5: 75 d2                        	jne	0x5d002a9 <.text+0x48e6fa9>
+ 5d002d7: c6 47 08 01                  	mov	byte ptr [rdi + 0x8], 0x1
+ 5d002db: eb cc                        	jmp	0x5d002a9 <.text+0x48e6fa9>
