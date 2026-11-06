@@ -1,0 +1,11 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -77,7 +77,7 @@
+     let second = &rows[..live - first_len];
+     let mut selected_sum = 0u64;
+     for key in selected {
+-        if let Some(row) = lookup(first, second, key) {
++        if let Some(row) = lookup(first, second, key).or_else(|| first.first().or_else(|| second.first())) {
+             selected_sum = selected_sum.saturating_add(row.weight);
+         }
+     }

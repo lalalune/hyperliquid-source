@@ -1,0 +1,11 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -85,7 +85,7 @@
+     // Keep complete traversal even after saturation. Value-only comparisons do
+     // not establish native read/call effects or distinguish every early stop.
+     let mut total_sum = 0u64;
+-    for row in first.iter().chain(second.iter()) {
++    for row in rows.iter() {
+         total_sum = total_sum.saturating_add(row.weight);
+     }
+     let passes = 2u128 * u128::from(total_sum) < 3u128 * u128::from(selected_sum);
