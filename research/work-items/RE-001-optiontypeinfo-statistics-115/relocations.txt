@@ -1,0 +1,37 @@
+Relocations touching this packet (readelf -r -W work/hl-node-115.bin).
+
+The two create hooks are GOT slots filled by R_X86_64_RELATIVE
+relocations, so their values are link-time constants, not computed
+by the builder:
+  0x64eda58  R_X86_64_RELATIVE  addend 0x606fa80 (the manager)
+  0x64eda60  R_X86_64_RELATIVE  addend 0x60780a0 (the invoker)
+The builder copies the pair from these slots into the record at
++0x18/+0x20 (movq 0x64eda58 -> xmm1 low, movhps 0x64eda60 -> xmm1
+high, movaps/movups into the stack temporary, then movdqa/movups
+into out+0x18). The file bytes at both slots are zero; the values
+exist only after relocation.
+
+The manager's kind-0 path returns the address of the lambda
+typeinfo object:
+  0x64d2d38  R_X86_64_64  _ZTVN10__cxxabiv117__class_type_infoE@CXXABI_1.3 + 0x10
+  0x64d2d40  R_X86_64_RELATIVE  addend 0x975620 (the typeinfo name)
+The name string at 0x975620 is
+"ZN7rocksdb14OptionTypeInfo17AsCustomSharedPtrINS_10StatisticsEEES0_iNS_22OptionVerificationTypeENS_15OptionTypeFlagsEEUlRKNS_13ConfigOptionsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESF_PvE_",
+i.e. the AsCustomSharedPtr<Statistics> lambda. This is the
+relocation evidence behind the census correction in records.json:
+the vendor census matched the builder body 413/426 (96.95%) to
+AsCustomSharedPtr<FileSystem>, but the hooks resolve to Statistics.
+
+The only R_X86_64_RELATIVE entries in .rela.dyn whose addend is a
+packet window start are exactly the two hook GOT slots above
+(0x64eda58 -> 0x606fa80, 0x64eda60 -> 0x60780a0); no other RELATIVE
+entry points at a window, and no RELATIVE slot lives inside any
+window's byte range. The windows are entered only by direct call
+(builder, manager) or through those GOT slots (manager, invoker).
+
+The atomicity selector 0x64ed290 (the global byte choosing the
+lock-xadd vs plain decrement in the counted release) is read by a
+RIP-relative mov in the invoker excerpt (no relocation). The
+0x64d2eb8 vtable used by the create host's default branch
+(0x6077820, pinned by open PR #3386) is a RIP-relative lea in the
+host, not in this packet.
