@@ -1,0 +1,232 @@
+{
+ "answer": {
+  "pair_provenance": [
+   {
+    "arg_struct_offset": "0x00",
+    "closure_offset": "0x28",
+    "source": "boolean derived in the caller: 1 if the first word of the caller's fourth-argument struct equals 1, else 0",
+    "store_site": "0x5cf530b"
+   },
+   {
+    "arg_struct_offset": "0x08",
+    "closure_offset": "0x30",
+    "source": "second word of the caller's fourth-argument struct, a pointer whose first qword the caller increments with a locked xadd (strong-count clone of a reference-counted allocation) before the call",
+    "store_site": "0x5cf5310"
+   },
+   {
+    "arg_struct_offset": "0x10",
+    "closure_offset": "0x38",
+    "source": "caller state struct field +0x98, a pointer whose first qword the caller increments with a locked inc before the call",
+    "store_site": "0x5cf531f"
+   },
+   {
+    "arg_struct_offset": "0x18",
+    "closure_offset": "0x40",
+    "source": "caller state struct field +0xb8, a plain word copied unchanged",
+    "store_site": "0x5cf531a"
+   }
+  ],
+  "static_vtable": "neither pair word is a static address: no load of a static vtable feeds either store in the sole caller; the +0x30 word is a per-instance heap pointer"
+ },
+ "artifact": {
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "boundaries": {
+  "caller_reachability": "The caller body itself has no direct callers in .text; one RELATIVE relocation (slot 0x64e7718) stores its address in a writable static table. Which consumer loads that slot, and so how control reaches the caller, is not pinned here.",
+  "concrete_type_names": "The concrete Rust type of the reference-counted struct behind the pair +0x08 word, of the caller fourth-argument struct, and of the caller state struct is not named: no symbol or string in the binary ties a type name to them. What is pinned is their shape: a strong count at +0x00 of the pair target, a bool-indexed pointer pair at +0x1f8 of the pair target (two 0x40-strided entries, the selected entry +0x10 passed on with the closure +0x40 word by the second adapter), and the state fields +0x98 (reference-counted) and +0xb8 (plain word).",
+  "runtime_behaviour": "Which of the two bool-indexed entries is taken at run time, and what the called entry does with the closure +0x40 word, are run-time questions; only the static selection shape is pinned.",
+  "state_field_provenance": "Where the caller state struct fields +0x98 and +0xb8 themselves come from is not traced here; this packet pins only that the caller reads them out of the state struct it is handed."
+ },
+ "captured_code_executed": false,
+ "owners": {
+  "adapter1_x5": {
+   "bytes": 34,
+   "end": "0x5cdd032",
+   "file_offset": "0x5cdc010",
+   "sha256": "08279dcddc059d212fc800281ca155be9aa0a56c7c7a8618a47925b2d227833d",
+   "start": "0x5cdd010"
+  },
+  "adapter2_x5": {
+   "bytes": 472,
+   "end": "0x5cdd008",
+   "file_offset": "0x5cdbe30",
+   "sha256": "589a3b16f5013ff43e75ab39cfb136540820fcd1cc3a3ff7af6dac07763b5f12",
+   "start": "0x5cdce30"
+  },
+  "schedule_caller_x5": {
+   "bytes": 1239,
+   "end": "0x5cf55d7",
+   "file_offset": "0x5cf4100",
+   "sha256": "3ede3e0de6239df2546301485ff8664996a025ed907a977b2d99c6cdc054fcd8",
+   "start": "0x5cf5100"
+  }
+ },
+ "pins": {
+  "adapter2_x5": [
+   {
+    "address": "0x5cdcee3",
+    "bytes": "0fb603",
+    "size": 3
+   },
+   {
+    "address": "0x5cdcee6",
+    "bytes": "488b4b08",
+    "size": 4
+   },
+   {
+    "address": "0x5cdceea",
+    "bytes": "3401",
+    "size": 2
+   },
+   {
+    "address": "0x5cdceef",
+    "bytes": "c1e006",
+    "size": 3
+   },
+   {
+    "address": "0x5cdcef2",
+    "bytes": "488bbc08f8010000",
+    "size": 8
+   },
+   {
+    "address": "0x5cdcefe",
+    "bytes": "488b7318",
+    "size": 4
+   },
+   {
+    "address": "0x5cdcf0a",
+    "bytes": "488b4310",
+    "size": 4
+   },
+   {
+    "address": "0x5cdcf13",
+    "bytes": "f048ff08",
+    "size": 4
+   }
+  ],
+  "schedule_caller_x5": [
+   {
+    "address": "0x5cf5259",
+    "bytes": "498b8698000000",
+    "size": 7
+   },
+   {
+    "address": "0x5cf5269",
+    "bytes": "f048ff00",
+    "size": 4
+   },
+   {
+    "address": "0x5cf527a",
+    "bytes": "498b86b8000000",
+    "size": 7
+   },
+   {
+    "address": "0x5cf5286",
+    "bytes": "4d8b3c24",
+    "size": 4
+   },
+   {
+    "address": "0x5cf528a",
+    "bytes": "498b6c2408",
+    "size": 5
+   },
+   {
+    "address": "0x5cf52dd",
+    "bytes": "41b801000000",
+    "size": 6
+   },
+   {
+    "address": "0x5cf52e9",
+    "bytes": "f04c0fc14d00",
+    "size": 6
+   },
+   {
+    "address": "0x5cf52ef",
+    "bytes": "4983ff01",
+    "size": 4
+   },
+   {
+    "address": "0x5cf5308",
+    "bytes": "4531c0",
+    "size": 3
+   },
+   {
+    "address": "0x5cf530b",
+    "bytes": "4c89442420",
+    "size": 5
+   },
+   {
+    "address": "0x5cf5310",
+    "bytes": "48896c2428",
+    "size": 5
+   },
+   {
+    "address": "0x5cf531a",
+    "bytes": "4c897c2438",
+    "size": 5
+   },
+   {
+    "address": "0x5cf531f",
+    "bytes": "4c896c2430",
+    "size": 5
+   },
+   {
+    "address": "0x5cf5333",
+    "bytes": "4c892424",
+    "size": 4
+   },
+   {
+    "address": "0x5cf5337",
+    "bytes": "488d7c2408",
+    "size": 5
+   },
+   {
+    "address": "0x5cf533c",
+    "bytes": "488d742440",
+    "size": 5
+   },
+   {
+    "address": "0x5cf5347",
+    "bytes": "e8341b0000",
+    "size": 5
+   }
+  ]
+ },
+ "reference_audit": {
+  "schedule_caller_x5": {
+   "address": "0x5cf5100",
+   "direct_branches": [],
+   "reloc_addend_slots": [
+    "0x64e7718"
+   ],
+   "stored_copies_writable": []
+  },
+  "spawn_x5": {
+   "address": "0x5cf6e80",
+   "direct_branches": [
+    {
+     "kind": "call",
+     "site": "0x5cf5347"
+    }
+   ],
+   "reloc_addend_slots": [],
+   "stored_copies_writable": []
+  }
+ },
+ "slots": {
+  "caller_table_slot": {
+   "slot": "0x64e7718",
+   "target": "0x5cf5100"
+  },
+  "x5_adapter1_slot": {
+   "slot": "0x64ecb98",
+   "target": "0x5cdd010"
+  },
+  "x5_adapter2_slot": {
+   "slot": "0x64ecb88",
+   "target": "0x5cdce30"
+  }
+ }
+}
