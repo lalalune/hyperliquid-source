@@ -1,0 +1,81 @@
+{
+  "task": "RE-001",
+  "node": 115,
+  "routine": {
+    "address": "0x5d511b0",
+    "fde": "0x5d511b0..0x5d515ae",
+    "size_bytes": 1022,
+    "arguments": "rdi = holder pointer H; returns nothing",
+    "artifact": "artifacts/node/115/hl-node",
+    "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "container_shape": {
+    "description": "Every pointer/item list in this routine follows one shape: an 8-slot inline segment reached through a pointer field, a heap segment with begin/end pointer fields, and an inline-count field. The element loop runs heap_count + inline_count times; element i comes from the inline segment when i <= 7 and from the heap segment at index i - 8 otherwise. The binary's element-selection threshold is the fixed constant 8, so the model treats well-formed inputs as inline_count == 8; inputs with a different inline_count are outside the pinned behavior.",
+    "inline_slots": 8,
+    "element_rule": "i <= 7 -> inline[i]; i >= 8 -> heap[i - 8]"
+  },
+  "phase_1_records": {
+    "records_array": "begin field H+0x130, end field H+0x138, record stride 0x218",
+    "per_record": {
+      "notify_items": {
+        "item_count": "(heap_item_bytes / 0x30) + inline_count field at record+0x68",
+        "item_fields": "inline segment pointer at record+0x1f0, heap begin at record+0x1f8, heap end at record+0x200, item stride 0x30, target pointer at item+0x28",
+        "pair_list": "begin at target+0x140, end at target+0x148, pair stride 0x10, object pointer at pair+0x00",
+        "virtual_dispatch": "slot at object_vtable+0x100; when the slot equals 0x5d48450 it is skipped; otherwise the slot is called with (object, item)",
+        "noop_slot": "0x5d48450 is an endbr64 followed by ret in the target binary, so skipping it is observable no behavior change"
+      },
+      "pop_inline_items": {
+        "order": "inline_count is decremented to zero, taking the item at the decremented index each time, so items are visited in reverse index order",
+        "delete_rule": "when item_ptr != item_address + 0x10, sized-delete item_ptr with size item_field_at_0x10 + 1; when equal, no delete",
+        "final_inline_count": 0
+      },
+      "dispose_heap_items": {
+        "range": "heap begin at record+0x1f8 to heap end at record+0x200, forward order",
+        "delete_rule": "when item_ptr != item_address + 0x10, sized-delete item_ptr with size item_field_at_0x10 + 1; when equal, no delete",
+        "final_heap_end": "heap end field record+0x200 is set to heap begin record+0x1f8"
+      },
+      "dispose_pointer_array": {
+        "fields": "count field at record+0x00, inline segment pointer at record+0x48, heap begin at record+0x50, heap end at record+0x58",
+        "per_pointer": "a non-null pointer is passed to 0x5d8d820 and then sized-deleted with size 0x290; a null pointer is skipped",
+        "final_state": "count field record+0x00 is set to 0 when it was non-zero; heap end field record+0x58 is set to heap begin record+0x50 when they differed"
+      }
+    }
+  },
+  "phase_2_pointer_list": {
+    "fields": "count field H+0xc8, inline segment pointer H+0x110, heap begin H+0x118, heap end H+0x120",
+    "per_pointer": "a non-null pointer is passed to 0x5f10d40 and then sized-deleted with size 0xd20; a null pointer is skipped",
+    "final_state": "count field H+0xc8 is set to 0 when it was non-zero; heap end field H+0x120 is set to heap begin H+0x118 when they differed"
+  },
+  "phase_3_pointer_list": {
+    "fields": "count field H+0x148, inline segment pointer H+0x190, heap begin H+0x198, heap end H+0x1a0",
+    "per_pointer": "a non-null pointer is passed to 0x5f04800 and then sized-deleted with size 0x58; a null pointer is skipped",
+    "final_state": "count field H+0x148 is set to 0 when it was non-zero at phase entry; heap end field H+0x1a0 is set to heap begin H+0x198 when they differed"
+  },
+  "tail": {
+    "scalar_field": "H+0x1f0",
+    "behavior": "the field is read, then set to 0; when the read value was non-null it is passed to 0x5f3c850 and then sized-deleted with size 0x10 as the routine's final action (tail call); when null the routine returns directly",
+    "returns": "single normal return at 0x5d515ad; tail-delete path returns through the sized-delete tail call at 0x5d5159a"
+  },
+  "callees_not_pinned": {
+    "0x5d8d820": "record pointer-array element destructor, call shape only",
+    "0x5f10d40": "phase-2 pointer destructor, call shape only",
+    "0x5f04800": "phase-3 pointer destructor, call shape only",
+    "0x5f3c850": "tail scalar destructor, call shape only",
+    "virtual_slot_at_0x100": "per-object handler, internals not pinned; only the skip rule for slot 0x5d48450 is pinned"
+  },
+  "consumers": {
+    "direct_calls": 16,
+    "tail_jumps": 0,
+    "stored_qwords": 0,
+    "relative_relocations": 0,
+    "caller_fdes": 11,
+    "note": "reached only by code, never by data; caller sites and FDEs are listed in callers.tsv and reproduced by census.py"
+  },
+  "unknowns": [
+    "the holder's source-level name and owning class",
+    "the record's source-level name",
+    "the meaning of the target+0x140 pair list's second qword",
+    "the inline segment's allocation ownership (its pointer fields are not cleared by this routine)",
+    "whether inline_count can differ from 8 in a valid state; the model pins the binary's literal rule and tests use 8"
+  ]
+}
