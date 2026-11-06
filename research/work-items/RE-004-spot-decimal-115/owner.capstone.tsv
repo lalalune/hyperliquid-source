@@ -1,0 +1,73 @@
+29aea00	50	push	rax
+29aea01	488b4110	mov	rax, qword ptr [rcx + 0x10]
+29aea05	4839c2	cmp	rdx, rax
+29aea08	0f83ce000000	jae	0x29aeadc
+29aea0e	488b4108	mov	rax, qword ptr [rcx + 8]
+29aea12	48c1e205	shl	rdx, 5
+29aea16	488b0410	mov	rax, qword ptr [rax + rdx]
+29aea1a	483b4128	cmp	rax, qword ptr [rcx + 0x28]
+29aea1e	0f83ab000000	jae	0x29aeacf
+29aea24	488b4920	mov	rcx, qword ptr [rcx + 0x20]
+29aea28	4869c058010000	imul	rax, rax, 0x158
+29aea2f	0fb6540148	movzx	edx, byte ptr [rcx + rax + 0x48]
+29aea34	89d0	mov	eax, edx
+29aea36	66b96a00	mov	cx, 0x6a
+29aea3a	83e808	sub	eax, 8
+29aea3d	7721	ja	0x29aea60
+29aea3f	41b801000000	mov	r8d, 1
+29aea45	7521	jne	0x29aea68
+29aea47	4889f0	mov	rax, rsi
+29aea4a	4c09c0	or	rax, r8
+29aea4d	48c1e820	shr	rax, 0x20
+29aea51	7445	je	0x29aea98
+29aea53	4889f0	mov	rax, rsi
+29aea56	31d2	xor	edx, edx
+29aea58	49f7f0	div	r8
+29aea5b	4885d2	test	rdx, rdx
+29aea5e	7444	je	0x29aeaa4
+29aea60	66890f	mov	word ptr [rdi], cx
+29aea63	4889f8	mov	rax, rdi
+29aea66	59	pop	rcx
+29aea67	c3	ret
+29aea68	f7d8	neg	eax
+29aea6a	a801	test	al, 1
+29aea6c	740b	je	0x29aea79
+29aea6e	41b80a000000	mov	r8d, 0xa
+29aea74	83fa07	cmp	edx, 7
+29aea77	74ce	je	0x29aea47
+29aea79	a802	test	al, 2
+29aea7b	7411	je	0x29aea8e
+29aea7d	4d6bc064	imul	r8, r8, 0x64
+29aea81	4189c1	mov	r9d, eax
+29aea84	4183e10e	and	r9d, 0xe
+29aea88	4183f902	cmp	r9d, 2
+29aea8c	74b9	je	0x29aea47
+29aea8e	a804	test	al, 4
+29aea90	7522	jne	0x29aeab4
+29aea92	85d2	test	edx, edx
+29aea94	75ca	jne	0x29aea60
+29aea96	eb2b	jmp	0x29aeac3
+29aea98	89f0	mov	eax, esi
+29aea9a	31d2	xor	edx, edx
+29aea9c	41f7f0	div	r8d
+29aea9f	4885d2	test	rdx, rdx
+29aeaa2	75bc	jne	0x29aea60
+29aeaa4	48894708	mov	qword ptr [rdi + 8], rax
+29aeaa8	66b9a201	mov	cx, 0x1a2
+29aeaac	66890f	mov	word ptr [rdi], cx
+29aeaaf	4889f8	mov	rax, rdi
+29aeab2	59	pop	rcx
+29aeab3	c3	ret
+29aeab4	4d69c010270000	imul	r8, r8, 0x2710
+29aeabb	83e00c	and	eax, 0xc
+29aeabe	83f804	cmp	eax, 4
+29aeac1	7484	je	0x29aea47
+29aeac3	4d69c000e1f505	imul	r8, r8, 0x5f5e100
+29aeaca	e978ffffff	jmp	0x29aea47
+29aeacf	488d3d027eac03	lea	rdi, [rip + 0x3ac7e02]
+29aead6	ff15540db303	call	qword ptr [rip + 0x3b30d54]
+29aeadc	488d0d957bac03	lea	rcx, [rip + 0x3ac7b95]
+29aeae3	4889d7	mov	rdi, rdx
+29aeae6	4889c6	mov	rsi, rax
+29aeae9	4889ca	mov	rdx, rcx
+29aeaec	ff152e0bb303	call	qword ptr [rip + 0x3b30b2e]
