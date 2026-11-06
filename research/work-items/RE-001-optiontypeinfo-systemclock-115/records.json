@@ -1,0 +1,3586 @@
+{
+ "task_id": "RE-001",
+ "bounded_question": "How does node #115 build the OptionTypeInfo record for a custom shared_ptr SystemClock option, and how do the record's two create hooks resolve that option by name?",
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "node": 115,
+ "objdump": "GNU objdump (GNU Binutils for Ubuntu) 2.42",
+ "builder": {
+  "address": "0x5fd0180",
+  "fde": "0x5fd0180..0x5fd02f2",
+  "bytes": 370,
+  "symbol": "rocksdb::OptionTypeInfo::AsCustomSharedPtr<rocksdb::SystemClock>(int, OptionVerificationType, OptionTypeFlags)",
+  "args": {
+   "out": "rdi",
+   "offset": "esi",
+   "verification": "edx",
+   "flags": "ecx"
+  },
+  "record_size": "0xb8",
+  "fields": [
+   {
+    "offset": "+0x00",
+    "name": "offset",
+    "source": "esi (int)"
+   },
+   {
+    "offset": "+0x04",
+    "name": "padding",
+    "note": "never written by the builder or by the copy helper; its content is indeterminate"
+   },
+   {
+    "offset": "+0x08..+0x18",
+    "name": "reserved",
+    "value": 0
+   },
+   {
+    "offset": "+0x18",
+    "name": "create_hook_manager",
+    "value": "0x5fcc660",
+    "via": "GOT slot 0x64ed8d0 (RELATIVE)"
+   },
+   {
+    "offset": "+0x20",
+    "name": "create_hook_invoker",
+    "value": "0x5fd4c30",
+    "via": "GOT slot 0x64ed958 (RELATIVE)"
+   },
+   {
+    "offset": "+0x28..+0xa8",
+    "name": "reserved",
+    "value": 0
+   },
+   {
+    "offset": "+0xa8",
+    "name": "type",
+    "value": 22,
+    "note": "the custom-shared-ptr kind this builder writes"
+   },
+   {
+    "offset": "+0xac",
+    "name": "verification",
+    "source": "edx"
+   },
+   {
+    "offset": "+0xb0",
+    "name": "flags",
+    "source": "ecx"
+   }
+  ],
+  "stack_temp": "The builder first fills an identical 0xb8-byte record as a stack temporary at rsp+0x20 (offset at temp+0x00, hooks at temp+0x18, type 22 at temp+0xa8, verification at temp+0xac, flags at temp+0xb0) and then installs it into out with the record-copy helper 0x5e332c0 (site 0x5fd0266, args (out, temp)). The hook pair is also staged at rsp+0x10 (temp-0x10) as the temporary's std::function object, whose manager the builder destroys after the copy.",
+  "temp_cleanup": {
+   "manager_destroy": {
+    "site": "0x5fd0280",
+    "target": "0x5fcc660",
+    "args": "(rsp, rsp, op 3)",
+    "effect": "No-op: op 3 is destroy_functor and the lambda captures nothing, so the manager returns 0 without touching memory. Skipped when the manager pointer at rsp+0x10 is null."
+   },
+   "record_dtor": {
+    "site": "0x5fd0285",
+    "target": "0x5d3f950",
+    "args": "(temp)",
+    "effect": "No-op for the freshly built record: the destructor destroys the functor members at record+0x58/+0x78/+0x98 via their managers with op 3 when non-null, and all three are zero here. Cited by contract (FDE 0x5d3f950..0x5d3f9d3); not excerpted."
+   }
+  },
+  "returns": "rax = out"
+ },
+ "copy_helper": {
+  "address": "0x5e332c0",
+  "fde": "0x5e332c0..0x5e3354f",
+  "bytes": 655,
+  "role": "OptionTypeInfo copy-assignment: copies a 0xb8-byte record from rsi into rdi. The record holds five std::function members at +0x08/+0x28/+0x48/+0x68/+0x88 (each 0x20 bytes: functor storage at +0x00, manager at +0x10, invoker at +0x18).",
+  "args": {
+   "out": "rdi",
+   "src": "rsi"
+  },
+  "steps": [
+   "Copy the 4-byte offset at +0x00; zero out+0x08..+0x18 and out+0x18/+0x20.",
+   "For each of the five members (in order +0x08, +0x28, +0x48, +0x68, +0x88): zero the member in out; when the source member's manager (at member+0x10) is non-null, call manager(out+member, src+member, op 2 = clone_functor) and then copy the manager+invoker pair (16 bytes) from the source member.",
+   "Copy the 8 bytes at +0xa8 (type + verification) and the 4 bytes at +0xb0 (flags) verbatim."
+  ],
+  "landing_pads": "The five endbr64 stubs at 0x5e33438..0x5e3354d each save %rax and destroy the already-copied members in reverse order via their managers with op 3, then resume unwinding via _Unwind_Resume; not decoded beyond that shape.",
+  "note": "Shared by every OptionTypeInfo installer in the binary (85 direct call sites, including the SliceTransform sibling builder's site 0x6083b76). The Statistics sibling builder 0x6071520 (open PR #3685) does NOT call it: it copies field-wise and calls the manager directly instead. For this builder only the first member is non-empty (the create hooks); the other four members are all zero, so their clones are skipped."
+ },
+ "manager": {
+  "address": "0x5fcc660",
+  "fde": "0x5fcc660..0x5fcc68d",
+  "bytes": 45,
+  "role": "std::function manager (_Function_handler manager) for the AsCustomSharedPtr<SystemClock> lambda. Reached only through the GOT slot 0x64ed8d0 and the copy helper's indirect manager call; it has no direct call site.",
+  "args": {
+   "out": "rdi",
+   "functor_storage": "rsi",
+   "op": "edx"
+  },
+  "ops": [
+   {
+    "op": 0,
+    "name": "get_type_info",
+    "effect": "*(out) = 0x64cda00, the address of the lambda typeinfo object (vtable __cxxabiv1::__class_type_info + 0x10, name string at 0x972460)"
+   },
+   {
+    "op": 1,
+    "name": "get_functor_ptr",
+    "effect": "*(out) = *(functor_storage)"
+   },
+   {
+    "op": 2,
+    "name": "clone_functor",
+    "effect": "no-op, returns 0 (empty lambda: nothing to copy)"
+   },
+   {
+    "op": 3,
+    "name": "destroy_functor",
+    "effect": "no-op, returns 0 (empty lambda: nothing to free)"
+   },
+   {
+    "op": "other",
+    "effect": "no-op, returns 0"
+   }
+  ],
+  "returns": "0 (eax) in every path"
+ },
+ "invoker": {
+  "address": "0x5fd4c30",
+  "fde": "0x5fd4c30..0x5fd4cc1",
+  "bytes": 145,
+  "role": "std::function _M_invoke for the AsCustomSharedPtr<SystemClock> lambda: Status (const ConfigOptions&, const std::string&, const std::string&, void*), returned through a hidden sret pointer in rdi. Reached only through the GOT slot 0x64ed958; it has no direct call site.",
+  "args": {
+   "sret_status": "rdi (also returned in rax)",
+   "functor": "rsi (discarded: the lambda is empty)",
+   "config_options": "rdx (passed to the create host as its 2nd arg)",
+   "id_string": "rcx (std::string: data at +0x00, length at +0x08)",
+   "name_string": "r8 (std::string: data at +0x00, length at +0x08)",
+   "dest_slot": "r9 (pointer to the destination shared_ptr slot)"
+  },
+  "id_fast_path": {
+   "condition": "id_string length == 2 and its first two bytes are 'id' (word 0x6469) and name_string length == 0",
+   "effect": "Release the shared_ptr at *(dest_slot): zero the 16-byte slot, then call _M_release 0x5d350c0 (site 0x5fd4ca1) on the old control block when non-null (the packed use/weak fast path and the use-count decrement live inside _M_release itself, pinned by open PR #3674 \u2014 unlike the Statistics invoker, this invoker does not inline them). Then write an empty Status (code 0, subcode 0, state null) to out and return out."
+  },
+  "forward_path": {
+   "condition": "otherwise",
+   "call": {
+    "site": "0x5fd4c60",
+    "target": "0x5fd46c0",
+    "args": "(out, config_options, name_string, *(dest_slot))"
+   },
+   "effect": "returns out (the host fills it)"
+  }
+ },
+ "create_host": {
+  "address": "0x5fd46c0",
+  "fde": "0x5fd46c0..0x5fd4c2e",
+  "bytes": 1390,
+  "role": "Create-by-name host for the SystemClock option: resolves the name against the current clock, adopting it when it matches, and otherwise creates the default clock through the registry translator. Pinned here for the first time.",
+  "args": {
+   "out": "rdi",
+   "config_options": "rsi",
+   "name_string": "rdx",
+   "dest_slot": "rcx (pointer to the 16-byte shared_ptr storage)"
+  },
+  "current_clock": {
+   "accessor": "0x5fe2680 (site 0x5fd46f4)",
+   "load": "r15 = *(control+0x00) = the clock object (object+0x10 of the combined allocation); rbp = *(control+0x08) = the control block (the allocation base).",
+   "use_count_bump": "The use count at control+0x08 is bumped by 1: lock addl when the global byte at 0x64ed290 is 0, plain addl otherwise (sites 0x5fd4715 / 0x5fd4978)."
+  },
+  "name_dispatch": [
+   {
+    "step": "slot 0x80 predicate",
+    "detail": "Read vtable slot 0x80 of the current clock's table (0x64ce930) and compare it with the global at 0x64eceb8 (RELATIVE -> 0x5d2e770, the default implementation, FDE 0x5d2e770..0x5d2e832). When they differ, call slot 0x80 (current, name); a false result goes to the default path. When they are equal, the predicate is skipped and the host does the same matching inline (steps below). The default predicate itself is verified by reading its body: it returns false for an empty input name; otherwise it returns true when the input equals the slot-0x70 name (strlen + memcmp) or, failing that, the slot-0x90 name (null -> false; strlen + memcmp); otherwise false."
+   },
+   {
+    "step": "empty name",
+    "detail": "When name_string length is 0, go to the default path."
+   },
+   {
+    "step": "slot 0x70 name",
+    "detail": "Call vtable slot 0x70 (current) for its name string; when strlen(name) == name_string length and memcmp is 0, adopt the current clock. Otherwise fall through to the slot 0x90 check."
+   },
+   {
+    "step": "slot 0x90 name",
+    "detail": "Read vtable slot 0x90 and compare it with the global at 0x64eceb0 (RELATIVE -> 0x5d2ca10, the default implementation, FDE 0x5d2ca10..0x5d2ca1c: 7 bytes, lea of the empty string at 0x4376fd and ret \u2014 the default second name is empty). When they are equal, go to the default path. When they differ, call slot 0x90 (current) for a second name string; when it is non-null and strlen(name) == name_string length and memcmp is 0, adopt the current clock; otherwise go to the default path."
+   }
+  ],
+  "adopt_path": {
+   "site": "0x5fd4998",
+   "effect": "Install the current clock into *dest_slot: write the object pointer at dest+0x00 and the control block at dest+0x08; when the old control differs from the new one, bump the new control's use count (same 0x64ed290 selector rule) and release the old control via _M_release 0x5d350c0 (site 0x5fd49c3). Then write an empty Status to out."
+  },
+  "default_path": {
+   "site": "0x5fd4783",
+   "once_init": "pthread_once with the once control at 0x6504b68, the initializer 0x5fd20d0 (passed by lea at 0x5fd47c1) and the TLS slots 0x64ed818/0x64ed820/0x64ed828; on pthread_once failure the host throws a system error (site 0x5fd4beb).",
+   "translator": "Call the registry translator 0x609e510 (site 0x5fd489a; by contract, open PR #3440) with a stack-built options struct (Status out at rsp+0x20, config_options, *dest_slot object, name_string, translated-name string at rsp+0x90, once-arg at rsp+0x50). The translator writes a Status at rsp+0x20, the translated name into the string at rsp+0x90 (length at rsp+0x98) and an error out-param at rsp+0x68.",
+   "outcomes": [
+    {
+     "condition": "translator Status code != 0",
+     "effect": "out = move(translator Status) via the Status move helper 0x5fcdf70 (site 0x5fd48c6)."
+    },
+    {
+     "condition": "translator Status code == 0 and the translated name is non-empty",
+     "effect": "Call the name-to-clock factory helper 0x5fd4080 (site 0x5fd4aa3; by contract, FDE 0x5fd4080..0x5fd4627) with (Status out at rsp+0x40, config_options+0x40, the translated name string, dest_slot), then normalize the resulting Status (see status_normalization) and move it to out."
+    },
+    {
+     "condition": "translator Status code == 0, translated name empty, error out-param (rsp+0x68) non-null",
+     "effect": "Build an error Status via the Status builder 0x61cf670 (site 0x5fd4bc9; by contract, open PR #3440) with code 3 and the message at 0x433f9f (\"Cannot reset object \") plus the name at 0x4376fd, then move it to out."
+    },
+    {
+     "condition": "translator Status code == 0, translated name empty, error out-param null",
+     "effect": "Release *dest_slot (zero the 16-byte slot, _M_release the old control via site 0x5fd4955) and write an empty Status to out."
+    }
+   ]
+  },
+  "status_normalization": {
+   "input": "the factory helper's Status, moved to rsp+0x30",
+   "rules": [
+    "code == 3 (NotSupported, per RocksDB's Status code table \u2014 inference) and config_options+1 != 0: reset the intermediate Status to empty; out = empty.",
+    "code == 0: call the second translator 0x609e2d0 (site 0x5fd4b76; by contract) with (rsp+0x40, config_options, *dest_slot object, current clock), then move the Status at rsp+0x40 to rsp+0x30 and out.",
+    "any other code: out = the factory Status unchanged."
+   ],
+   "note": "The config_options+1 byte's meaning and the 0x609e2d0 contract are open; only the branch structure is pinned."
+  },
+  "cleanup": {
+   "site": "0x5fd48cb",
+   "effect": "Free the array at rsp+0x28 (operator delete[] when non-null); call the once-arg cleanup helper 0x5d36110 (site 0x5fd48dd; by contract, FDE 0x5d36110..0x5d361d5) on rsp+0x50; dispose the translated-name string via _M_dispose (site 0x5fd48e7); release the local current-clock reference via _M_release 0x5d350c0 when non-null (site 0x5fd48f4); stack-canary check; return out."
+  },
+  "returns": "rax = out"
+ },
+ "accessor": {
+  "address": "0x5fe2680",
+  "fde": "0x5fe2680..0x5fe2756",
+  "bytes": 214,
+  "role": "Function-local-static accessor for the current SystemClock shared_ptr (guard byte at 0x6504c98, static at 0x6504ca0). Called from ~190 sites across the node; only the create host's use is pinned in detail here.",
+  "fast_path": "When the guard byte is set, return the static's value (the control-block pointer).",
+  "slow_path": [
+   "__cxa_guard_acquire on the guard; when another thread is initializing, return the static's value.",
+   "Allocate the 0x10-byte control block (operator new) and the 0x30-byte combined allocation (operator new).",
+   "Combined allocation layout: control block at +0x00..+0x10 (table 0x64ced00, packed counts qword 0x100000001 at +0x08, copied from the global at 0x459b20) and the PosixClock object at +0x10..+0x30 (table 0x64ce930 at +0x00, zeroes at +0x08/+0x10/+0x18).",
+   "Control block at +0x00: object+0x10; at +0x08: the allocation base. Store the control block in the static at 0x6504ca0; __cxa_guard_release; return the control block."
+  ],
+  "clock_identity": "The object table 0x64ce930 resolves (via the RELATIVE record at 0x64ce928) to the typeinfo at 0x64ce870, whose name string at 0x972c00 is rocksdb::(anonymous)::PosixClock; the control table 0x64ced00 resolves (via the RELATIVE record at 0x64cecf8) to the typeinfo at 0x64ce8b8, std::_Sp_counted_ptr_inplace<PosixClock, ...>. The packed counts 0x100000001 mean use 1, weak 1. The vtable-header cells in this binary carry the typeinfo pointer at base-0x08 (verified on five vtables: StatisticsImpl, HistogramImpl, SystemClockWrapper, PosixClock, _Sp_counted_ptr_inplace<PosixClock>); slot numbers in this packet are relative to the stored table base, as the code reads them.",
+  "control_vtable_slots": "Read at the stored control-table base 0x64ced00: slot +0x10 is _M_dispose 0x5fe1860, slot +0x18 is _M_destroy 0x5fe1590 (operator delete, size 0x30), slot +0x20 is _M_get_deleter 0x5fe15a0 \u2014 the slots _M_release calls."
+ },
+ "default_init": {
+  "address": "0x5fd20d0",
+  "fde": "0x5fd20d0..0x5fd241d",
+  "bytes": 333,
+  "role": "pthread_once initializer for the default SystemClock registry entry (the routine the create host passes to pthread_once by lea at 0x5fd47c1). It has no direct call site; it is reached only through pthread_once.",
+  "steps": [
+   "Build a stack string via the string helper 0x5fcd890 (by contract) from the literal \"TimeEmulatedSystemClock\" at 0x4372ae.",
+   "Fetch the registry mutex via 0x61f8b60 (by contract; returns the mutex pointer, saved to r12).",
+   "Build a second stack object at rsp+0x60 via 0x5fcd890 with the table references 0x5fcd550 / 0x5fcc630 (by contract).",
+   "Allocate the 0x30-byte registry entry (operator new) and the 0x70-byte clock object (operator new, table 0x64d8ec0+0x10, byte +0x48 = 1); link the entry to the clock object.",
+   "Lock the registry mutex; insert the entry into the mutex-guarded registry under the name \"SystemClock\" (literal at 0x438369) via the registry helper 0x5fd1da0 (site 0x5fd22b4; by contract); unlock; dispose the temporaries."
+  ],
+  "note": "The registry structure and the 0x5fcd890 / 0x61f8b60 / 0x5fcd6f0 / 0x5fd1da0 / 0x61f8700 contracts are open; only the allocation sizes, the table pointers, the two name literals and the lock/insert/unlock shape are pinned. pthread_mutex_lock failure throws a system error; the landing pads are shared rethrow blocks (not decoded)."
+ },
+ "status_move": {
+  "address": "0x5fcdf70",
+  "fde": "0x5fcdf70..0x5fcdfdf",
+  "bytes": 111,
+  "role": "rocksdb::Status move-assignment (dst = std::move(src)). A shared helper (17 direct call sites); the create host uses it four times.",
+  "args": {
+   "dst": "rdi",
+   "src": "rsi"
+  },
+  "steps": [
+   "When dst == src, return dst at once.",
+   "Copy bytes 0..5 from src to dst; zero src bytes 1..5 (src byte 0, the code, is left intact).",
+   "Move the state qword at +0x08 from src to dst, freeing dst's old state via operator delete[] when non-null; src state becomes null.",
+   "Return dst."
+  ],
+  "note": "The 0x10-byte Status layout pinned here is: code byte at +0x00, subcode and severity bytes at +0x01..+0x05, state pointer (char*) at +0x08. An empty Status is all zeros."
+ },
+ "factory_helper_contract": {
+  "address": "0x5fd4080",
+  "fde": "0x5fd4080..0x5fd4627",
+  "bytes": 1447,
+  "role": "Name-to-clock factory helper: takes (Status out, config_options+0x40, translated-name string, dest_slot) and writes a Status to out. Its sole caller is the create host (site 0x5fd4aa3). Cited by contract only; its internals are not pinned here.",
+  "args": {
+   "out": "rdi (a stack Status at rsp+0x40 in the host)",
+   "config_field": "rsi (config_options+0x40)",
+   "name": "rdx (the translated-name string)",
+   "dest_slot": "rcx"
+  }
+ },
+ "installer": {
+  "site": "0x5fd1a14",
+  "kind": "direct_call",
+  "containing_fde": "0x5fd19a0..0x5fd1c56",
+  "args": {
+   "out": "rbp-0x1c0 (a stack record)",
+   "offset": 0,
+   "verification": 1,
+   "flags": 8192
+  },
+  "note": "The containing function (0x5fd19a0..0x5fd1c56) is a static initializer: it registers __cxa_atexit for the global at 0x6504bc0, installs the record with the builder, then assigns the string \"target\" (literal at 0x44a390) via 0x5fcd890. It is NOT pinned here; only this call site and its arguments are. It is the builder's sole direct caller in the binary."
+ },
+ "sibling_note": {
+  "claim": "The SystemClock builder shares the record field map with the Statistics builder 0x6071520 (open PR #3685) \u2014 same 0xb8-byte record, same type 22, same hook-pair layout \u2014 but installs it differently: this builder copies through the record-copy helper 0x5e332c0, while the Statistics builder copies field-wise and calls the manager directly. The GOT-resolved hooks prove SystemClock, not Statistics or FileSystem: the manager 0x5fcc660 is the SystemClock lambda manager (its kind-0 typeinfo name at 0x972460 is the AsCustomSharedPtr<SystemClock> lambda) and the invoker 0x5fd4c30 calls the SystemClock create host 0x5fd46c0.",
+  "other_sibling": "The SliceTransform sibling builder 0x6083a90 shares this builder's install shape (it also calls the copy helper 0x5e332c0 \u2014 census site 0x6083b76) and resolves its own hooks through its own GOT slots (manager 0x607d190, invoker 0x60809e0; typeinfo name at 0x976100 is the AsCustomSharedPtr<const SliceTransform> lambda). It is a separate work item.",
+  "copies_in_binary": 1
+ },
+ "literals": [
+  {
+   "value": 22,
+   "where": "builder 0x5fd023a",
+   "role": "type field"
+  },
+  {
+   "value": "0x5fcc660",
+   "where": "GOT 0x64ed8d0",
+   "role": "manager hook"
+  },
+  {
+   "value": "0x5fd4c30",
+   "where": "GOT 0x64ed958",
+   "role": "invoker hook"
+  },
+  {
+   "value": "0x64cda00",
+   "where": "manager 0x5fcc680",
+   "role": "lambda typeinfo object (kind 0)"
+  },
+  {
+   "value": "0x972460",
+   "where": "reloc at 0x64cda08",
+   "role": "lambda typeinfo name string"
+  },
+  {
+   "value": "0x6469",
+   "where": "invoker 0x5fd4c83",
+   "role": "\"id\" word in the fast-path check"
+  },
+  {
+   "value": "0x64ed290",
+   "where": "host 0x5fd4705",
+   "role": "atomicity selector byte for the counted use-count bump"
+  },
+  {
+   "value": "0x100000001",
+   "where": "global at 0x459b20",
+   "role": "packed use/weak counts for the new control block"
+  },
+  {
+   "value": "0x5d2e770",
+   "where": "global 0x64eceb8",
+   "role": "default slot-0x80 name predicate (FDE 0x5d2e770..0x5d2e832)"
+  },
+  {
+   "value": "0x5d2ca10",
+   "where": "global 0x64eceb0",
+   "role": "default slot-0x90 name getter, returns the empty string"
+  },
+  {
+   "value": "SystemClock",
+   "where": "literal 0x438369",
+   "role": "name under which the default clock is registered"
+  },
+  {
+   "value": "TimeEmulatedSystemClock",
+   "where": "literal 0x4372ae",
+   "role": "name string built by the default initializer"
+  },
+  {
+   "value": "Cannot reset object ",
+   "where": "literal 0x433f9f",
+   "role": "error Status message built by the host error path"
+  },
+  {
+   "value": "target",
+   "where": "literal 0x44a390",
+   "role": "string assigned by the installer after the builder call"
+  }
+ ],
+ "unknowns": [
+  "The OptionVerificationType / OptionTypeFlags enum spellings for the raw values verification 1 / flags 0x2000 used by the sole installing call site; only the raw values are pinned.",
+  "The semantic names of the invoker's two string args beyond their observed roles (rcx is the string compared to \"id\", r8 is the name string the create host dispatches on); the lambda's mangled type only fixes their C++ types.",
+  "The exact vtable-base/header attribution of the PosixClock tables: the typeinfo-bearing cells sit at the stored base minus 0x08 in this binary (verified on five vtables), so slot numbers here are relative to the stored base as the code reads them; the -0x10 cell's role (0, except 0x7 for the PosixClock object table) is open.",
+  "The registry structure built by the default initializer (0x5fcd890 / 0x61f8b60 / 0x5fcd6f0 / 0x5fd1da0 / 0x61f8700 by contract) and the roles of the 0x5fcd550 / 0x5fcc630 table references inside it.",
+  "The factory helper 0x5fd4080's internals (by contract only).",
+  "The translator 0x609e510's stack struct layout beyond the pinned out-params (translated-name string at rsp+0x90, error out-param at rsp+0x68) and the second translator 0x609e2d0's contract.",
+  "The config_options+1 byte's meaning in the Status normalization branch.",
+  "Whether the \"id\" fast path means \"reset to the default object\" or \"release and return empty\" in the caller's terms; the binary only shows the release + empty Status.",
+  "The \"target\" string's role in the installer (assigned after the builder call).",
+  "The host's landing-pad stubs (FDE 0x5fd4c22..0x5fd4c2e region and the jumps to 0x5fd4646/0x5fd4680) are shared rethrow blocks, not decoded; the LSDA call-site tables are not decoded."
+ ],
+ "census": {
+  "0x5fd0180": {
+   "direct_calls": [
+    "0x5fd1a14"
+   ],
+   "tail_jumps": [],
+   "qword_hits_file_offsets": [],
+   "relative_slots": []
+  },
+  "0x5fcc660": {
+   "direct_calls": [],
+   "tail_jumps": [],
+   "qword_hits_file_offsets": [
+    "0x15df60"
+   ],
+   "relative_slots": [
+    "0x64ed8d0"
+   ]
+  },
+  "0x5fd4c30": {
+   "direct_calls": [],
+   "tail_jumps": [],
+   "qword_hits_file_offsets": [
+    "0x15e0f8"
+   ],
+   "relative_slots": [
+    "0x64ed958"
+   ]
+  },
+  "0x5fd46c0": {
+   "direct_calls": [
+    "0x5fd4c60"
+   ],
+   "tail_jumps": [],
+   "qword_hits_file_offsets": [],
+   "relative_slots": []
+  },
+  "0x5fe2680": {
+   "direct_calls": [
+    "0x5d46c46",
+    "0x5d53e73",
+    "0x5d5408b",
+    "0x5d545a6",
+    "0x5d561e9",
+    "0x5d611ca",
+    "0x5d61566",
+    "0x5d61aed",
+    "0x5d61ee4",
+    "0x5d62e90",
+    "0x5d63370",
+    "0x5d638b0",
+    "0x5d78cf4",
+    "0x5d79e5d",
+    "0x5d7a2bd",
+    "0x5d7a3d8",
+    "0x5db0ad0",
+    "0x5db1078",
+    "0x5db3298",
+    "0x5db3a48",
+    "0x5e02423",
+    "0x5e0de65",
+    "0x5e1c487",
+    "0x5e2394c",
+    "0x5e5bc18",
+    "0x5e6a547",
+    "0x5e70aa8",
+    "0x5e70f7d",
+    "0x5e7cc1a",
+    "0x5e7cefc",
+    "0x5e7d471",
+    "0x5e7d5b0",
+    "0x5e7fe36",
+    "0x5e86a40",
+    "0x5e87b06",
+    "0x5e8e661",
+    "0x5e8e940",
+    "0x5e8eb2b",
+    "0x5e8f5b0",
+    "0x5e8ff40",
+    "0x5e90388",
+    "0x5e90e50",
+    "0x5e91078",
+    "0x5e9263b",
+    "0x5e928c2",
+    "0x5e934d2",
+    "0x5e93c4e",
+    "0x5e93e0b",
+    "0x5ea25d0",
+    "0x5ea2bd8",
+    "0x5ea319b",
+    "0x5ea36e0",
+    "0x5ea3fbd",
+    "0x5ea4740",
+    "0x5ea83c0",
+    "0x5ea890b",
+    "0x5ea8fc0",
+    "0x5ea9731",
+    "0x5ea9e28",
+    "0x5ebdeae",
+    "0x5ec0f6e",
+    "0x5ee3f49",
+    "0x5f08ef0",
+    "0x5f09640",
+    "0x5f0d5c8",
+    "0x5f0de13",
+    "0x5f188c8",
+    "0x5f1ca8e",
+    "0x5f203bb",
+    "0x5f3e5e7",
+    "0x5f3fc70",
+    "0x5f42308",
+    "0x5f70dfb",
+    "0x5f75054",
+    "0x5f7578c",
+    "0x5f76c4e",
+    "0x5fab7a7",
+    "0x5fb1f82",
+    "0x5fb286c",
+    "0x5fc3664",
+    "0x5fca9c3",
+    "0x5fcd56a",
+    "0x5fce2f0",
+    "0x5fcf5e9",
+    "0x5fd1267",
+    "0x5fd46f4",
+    "0x5fe28db",
+    "0x5fe58ca",
+    "0x5feae77",
+    "0x5ff0f78",
+    "0x5ff14e0",
+    "0x5ff1710",
+    "0x5ff1fc0",
+    "0x5ff2610",
+    "0x5ff2a00",
+    "0x5ff2df0",
+    "0x5ff3bd3",
+    "0x5ff517f",
+    "0x5ff5409",
+    "0x5fff550",
+    "0x5fffaf0",
+    "0x5ffff87",
+    "0x6000698",
+    "0x6000da8",
+    "0x6000f78",
+    "0x60012f7",
+    "0x60018b0",
+    "0x6003248",
+    "0x6003be0",
+    "0x60043ab",
+    "0x601a5c0",
+    "0x6028f00",
+    "0x6038e72",
+    "0x603b2be",
+    "0x6043da9",
+    "0x6044f10",
+    "0x6044f20",
+    "0x6045928",
+    "0x60471d2",
+    "0x604844f",
+    "0x604caa0",
+    "0x604d330",
+    "0x604db88",
+    "0x604e860",
+    "0x604ed30",
+    "0x604f720",
+    "0x604fb40",
+    "0x60508a0",
+    "0x6051230",
+    "0x6054c80",
+    "0x606cacc",
+    "0x606cd3c",
+    "0x606cffe",
+    "0x607a1d5",
+    "0x607c2c0",
+    "0x60cffce",
+    "0x60d2dee",
+    "0x60f7e08",
+    "0x60fa4b8",
+    "0x60fa718",
+    "0x60facc8",
+    "0x60fb878",
+    "0x61094f8",
+    "0x611984d",
+    "0x611b801",
+    "0x612433c",
+    "0x61401a0",
+    "0x6141270",
+    "0x6147fec",
+    "0x6152148",
+    "0x6153831",
+    "0x61586bd",
+    "0x6158a56",
+    "0x6158e29",
+    "0x615a768",
+    "0x61779ca",
+    "0x6177ea0",
+    "0x61780ea",
+    "0x61784f0",
+    "0x6178d82",
+    "0x617a910",
+    "0x617ab90",
+    "0x617adc7",
+    "0x617b140",
+    "0x617bd20",
+    "0x617d07d",
+    "0x617d780",
+    "0x61c5002",
+    "0x61ede70",
+    "0x61ee050",
+    "0x61ee230",
+    "0x61ee410",
+    "0x61ee5f0",
+    "0x61ee7d0",
+    "0x61ee9c0",
+    "0x61eebb0",
+    "0x61eeda0",
+    "0x61eef90",
+    "0x61ef180",
+    "0x61ef370",
+    "0x61ef560",
+    "0x61ef750",
+    "0x61ef940",
+    "0x61efb30",
+    "0x61efd20",
+    "0x61eff10",
+    "0x61f0100",
+    "0x61f02e8",
+    "0x6206530"
+   ],
+   "tail_jumps": [],
+   "qword_hits_file_offsets": [],
+   "relative_slots": []
+  },
+  "0x5fd20d0": {
+   "direct_calls": [],
+   "tail_jumps": [],
+   "qword_hits_file_offsets": [],
+   "relative_slots": []
+  },
+  "0x5fcdf70": {
+   "direct_calls": [
+    "0x5fce0c3",
+    "0x5fd06bb",
+    "0x5fd0918",
+    "0x5fd0987",
+    "0x5fd333a",
+    "0x5fd36a6",
+    "0x5fd36f4",
+    "0x5fd37ea",
+    "0x5fd3836",
+    "0x5fd3872",
+    "0x5fd3acf",
+    "0x5fd3b61",
+    "0x5fd432c",
+    "0x5fd48c6",
+    "0x5fd4ab5",
+    "0x5fd4b01",
+    "0x5fd4b2f"
+   ],
+   "tail_jumps": [],
+   "qword_hits_file_offsets": [],
+   "relative_slots": []
+  },
+  "0x5e332c0": {
+   "direct_calls": [
+    "0x5e335ce",
+    "0x5e3368e",
+    "0x5e3373e",
+    "0x5e337fe",
+    "0x5e338ae",
+    "0x5e3396e",
+    "0x5e33a1e",
+    "0x5e33ade",
+    "0x5e33b8e",
+    "0x5e33c4e",
+    "0x5e33d0e",
+    "0x5e33dce",
+    "0x5e358c8",
+    "0x5e35902",
+    "0x5e359c9",
+    "0x5e35a03",
+    "0x5e35ac1",
+    "0x5e35af3",
+    "0x5e35e78",
+    "0x5e35eb2",
+    "0x5e35f79",
+    "0x5e35fb3",
+    "0x5e36071",
+    "0x5e360a3",
+    "0x5e36428",
+    "0x5e36462",
+    "0x5e36529",
+    "0x5e36563",
+    "0x5e36621",
+    "0x5e36653",
+    "0x5e369d8",
+    "0x5e36a12",
+    "0x5e36ad9",
+    "0x5e36b13",
+    "0x5e36bd1",
+    "0x5e36c03",
+    "0x5fd0266",
+    "0x5fe0aff",
+    "0x5fe0cdc",
+    "0x5fe0e5c",
+    "0x5ff7d8b",
+    "0x5ff7f95",
+    "0x5ff80db",
+    "0x607eb9e",
+    "0x607ec5e",
+    "0x607ed0e",
+    "0x607edce",
+    "0x607ee7e",
+    "0x607ef3e",
+    "0x607efee",
+    "0x607f0ae",
+    "0x607f16e",
+    "0x607f269",
+    "0x6083636",
+    "0x6083671",
+    "0x60836d5",
+    "0x608370f",
+    "0x60837d0",
+    "0x6083802",
+    "0x6083b76",
+    "0x6083e46",
+    "0x6083e81",
+    "0x6083ee5",
+    "0x6083f1f",
+    "0x6083fe0",
+    "0x6084012",
+    "0x60844f6",
+    "0x6084531",
+    "0x6084595",
+    "0x60845cf",
+    "0x6084690",
+    "0x60846c2",
+    "0x608d984",
+    "0x6090165",
+    "0x60901ed",
+    "0x6090442",
+    "0x6090674",
+    "0x609081d",
+    "0x6090949",
+    "0x6090a7c",
+    "0x6090d6f",
+    "0x60ac5b4",
+    "0x60b0371",
+    "0x60b053c",
+    "0x60b0667",
+    "0x60df346",
+    "0x60e03c9",
+    "0x620702d",
+    "0x620723c",
+    "0x6207399",
+    "0x6207500"
+   ],
+   "tail_jumps": [],
+   "qword_hits_file_offsets": [],
+   "relative_slots": []
+  },
+  "0x5fd4080": {
+   "direct_calls": [
+    "0x5fd4aa3"
+   ],
+   "tail_jumps": [],
+   "qword_hits_file_offsets": [],
+   "relative_slots": []
+  }
+ },
+ "callers": {
+  "0x5fd0180": [
+   {
+    "site": "0x5fd1a14",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd19a0",
+     "0x5fd1c56"
+    ],
+    "role": "the static initializer (FDE 0x5fd19a0..0x5fd1c56) installing the SystemClock record with offset 0, verification 1, flags 0x2000"
+   }
+  ],
+  "0x5fcc660": [],
+  "0x5fd4c30": [],
+  "0x5fd46c0": [
+   {
+    "site": "0x5fd4c60",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd4c30",
+     "0x5fd4cc1"
+    ],
+    "role": "the invoker 0x5fd4c30: forwards (out, config_options, name_string, *(dest_slot))"
+   }
+  ],
+  "0x5fe2680": [
+   {
+    "site": "0x5d46c46",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d46820",
+     "0x5d483a3"
+    ],
+    "role": "consumer in FDE 0x5d46820 (exact use open)"
+   },
+   {
+    "site": "0x5d53e73",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d53670",
+     "0x5d54629"
+    ],
+    "role": "consumer in FDE 0x5d53670 (exact use open)"
+   },
+   {
+    "site": "0x5d5408b",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d53670",
+     "0x5d54629"
+    ],
+    "role": "consumer in FDE 0x5d53670 (exact use open)"
+   },
+   {
+    "site": "0x5d545a6",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d53670",
+     "0x5d54629"
+    ],
+    "role": "consumer in FDE 0x5d53670 (exact use open)"
+   },
+   {
+    "site": "0x5d561e9",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d56120",
+     "0x5d562df"
+    ],
+    "role": "consumer in FDE 0x5d56120 (exact use open)"
+   },
+   {
+    "site": "0x5d611ca",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d60fa0",
+     "0x5d623e0"
+    ],
+    "role": "consumer in FDE 0x5d60fa0 (exact use open)"
+   },
+   {
+    "site": "0x5d61566",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d60fa0",
+     "0x5d623e0"
+    ],
+    "role": "consumer in FDE 0x5d60fa0 (exact use open)"
+   },
+   {
+    "site": "0x5d61aed",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d60fa0",
+     "0x5d623e0"
+    ],
+    "role": "consumer in FDE 0x5d60fa0 (exact use open)"
+   },
+   {
+    "site": "0x5d61ee4",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d60fa0",
+     "0x5d623e0"
+    ],
+    "role": "consumer in FDE 0x5d60fa0 (exact use open)"
+   },
+   {
+    "site": "0x5d62e90",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d62c30",
+     "0x5d63091"
+    ],
+    "role": "consumer in FDE 0x5d62c30 (exact use open)"
+   },
+   {
+    "site": "0x5d63370",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d630a0",
+     "0x5d635d9"
+    ],
+    "role": "consumer in FDE 0x5d630a0 (exact use open)"
+   },
+   {
+    "site": "0x5d638b0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d63640",
+     "0x5d63a6e"
+    ],
+    "role": "consumer in FDE 0x5d63640 (exact use open)"
+   },
+   {
+    "site": "0x5d78cf4",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d78b40",
+     "0x5d7a806"
+    ],
+    "role": "consumer in FDE 0x5d78b40 (exact use open)"
+   },
+   {
+    "site": "0x5d79e5d",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d78b40",
+     "0x5d7a806"
+    ],
+    "role": "consumer in FDE 0x5d78b40 (exact use open)"
+   },
+   {
+    "site": "0x5d7a2bd",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d78b40",
+     "0x5d7a806"
+    ],
+    "role": "consumer in FDE 0x5d78b40 (exact use open)"
+   },
+   {
+    "site": "0x5d7a3d8",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5d78b40",
+     "0x5d7a806"
+    ],
+    "role": "consumer in FDE 0x5d78b40 (exact use open)"
+   },
+   {
+    "site": "0x5db0ad0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5db0830",
+     "0x5db0c9e"
+    ],
+    "role": "consumer in FDE 0x5db0830 (exact use open)"
+   },
+   {
+    "site": "0x5db1078",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5db0df0",
+     "0x5db1f15"
+    ],
+    "role": "consumer in FDE 0x5db0df0 (exact use open)"
+   },
+   {
+    "site": "0x5db3298",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5db2d30",
+     "0x5db35e2"
+    ],
+    "role": "consumer in FDE 0x5db2d30 (exact use open)"
+   },
+   {
+    "site": "0x5db3a48",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5db36e0",
+     "0x5db42ca"
+    ],
+    "role": "consumer in FDE 0x5db36e0 (exact use open)"
+   },
+   {
+    "site": "0x5e02423",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e01d30",
+     "0x5e0291c"
+    ],
+    "role": "consumer in FDE 0x5e01d30 (exact use open)"
+   },
+   {
+    "site": "0x5e0de65",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e0d150",
+     "0x5e0eb39"
+    ],
+    "role": "consumer in FDE 0x5e0d150 (exact use open)"
+   },
+   {
+    "site": "0x5e1c487",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e1b9c0",
+     "0x5e20481"
+    ],
+    "role": "consumer in FDE 0x5e1b9c0 (exact use open)"
+   },
+   {
+    "site": "0x5e2394c",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e23510",
+     "0x5e245eb"
+    ],
+    "role": "consumer in FDE 0x5e23510 (exact use open)"
+   },
+   {
+    "site": "0x5e5bc18",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e5ba60",
+     "0x5e5c1a0"
+    ],
+    "role": "consumer in FDE 0x5e5ba60 (exact use open)"
+   },
+   {
+    "site": "0x5e6a547",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e68fd0",
+     "0x5e6b82a"
+    ],
+    "role": "consumer in FDE 0x5e68fd0 (exact use open)"
+   },
+   {
+    "site": "0x5e70aa8",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e704c0",
+     "0x5e7151e"
+    ],
+    "role": "consumer in FDE 0x5e704c0 (exact use open)"
+   },
+   {
+    "site": "0x5e70f7d",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e704c0",
+     "0x5e7151e"
+    ],
+    "role": "consumer in FDE 0x5e704c0 (exact use open)"
+   },
+   {
+    "site": "0x5e7cc1a",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e7ca80",
+     "0x5e7d919"
+    ],
+    "role": "consumer in FDE 0x5e7ca80 (exact use open)"
+   },
+   {
+    "site": "0x5e7cefc",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e7ca80",
+     "0x5e7d919"
+    ],
+    "role": "consumer in FDE 0x5e7ca80 (exact use open)"
+   },
+   {
+    "site": "0x5e7d471",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e7ca80",
+     "0x5e7d919"
+    ],
+    "role": "consumer in FDE 0x5e7ca80 (exact use open)"
+   },
+   {
+    "site": "0x5e7d5b0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e7ca80",
+     "0x5e7d919"
+    ],
+    "role": "consumer in FDE 0x5e7ca80 (exact use open)"
+   },
+   {
+    "site": "0x5e7fe36",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e7f950",
+     "0x5e8061d"
+    ],
+    "role": "consumer in FDE 0x5e7f950 (exact use open)"
+   },
+   {
+    "site": "0x5e86a40",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e863b0",
+     "0x5e86b38"
+    ],
+    "role": "consumer in FDE 0x5e863b0 (exact use open)"
+   },
+   {
+    "site": "0x5e87b06",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e87a70",
+     "0x5e87d5e"
+    ],
+    "role": "consumer in FDE 0x5e87a70 (exact use open)"
+   },
+   {
+    "site": "0x5e8e661",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e8e4a0",
+     "0x5e8ee70"
+    ],
+    "role": "consumer in FDE 0x5e8e4a0 (exact use open)"
+   },
+   {
+    "site": "0x5e8e940",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e8e4a0",
+     "0x5e8ee70"
+    ],
+    "role": "consumer in FDE 0x5e8e4a0 (exact use open)"
+   },
+   {
+    "site": "0x5e8eb2b",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e8e4a0",
+     "0x5e8ee70"
+    ],
+    "role": "consumer in FDE 0x5e8e4a0 (exact use open)"
+   },
+   {
+    "site": "0x5e8f5b0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e8ef90",
+     "0x5e904bd"
+    ],
+    "role": "consumer in FDE 0x5e8ef90 (exact use open)"
+   },
+   {
+    "site": "0x5e8ff40",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e8ef90",
+     "0x5e904bd"
+    ],
+    "role": "consumer in FDE 0x5e8ef90 (exact use open)"
+   },
+   {
+    "site": "0x5e90388",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e8ef90",
+     "0x5e904bd"
+    ],
+    "role": "consumer in FDE 0x5e8ef90 (exact use open)"
+   },
+   {
+    "site": "0x5e90e50",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e909d0",
+     "0x5e91cd2"
+    ],
+    "role": "consumer in FDE 0x5e909d0 (exact use open)"
+   },
+   {
+    "site": "0x5e91078",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e909d0",
+     "0x5e91cd2"
+    ],
+    "role": "consumer in FDE 0x5e909d0 (exact use open)"
+   },
+   {
+    "site": "0x5e9263b",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e91ed0",
+     "0x5e9406a"
+    ],
+    "role": "consumer in FDE 0x5e91ed0 (exact use open)"
+   },
+   {
+    "site": "0x5e928c2",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e91ed0",
+     "0x5e9406a"
+    ],
+    "role": "consumer in FDE 0x5e91ed0 (exact use open)"
+   },
+   {
+    "site": "0x5e934d2",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e91ed0",
+     "0x5e9406a"
+    ],
+    "role": "consumer in FDE 0x5e91ed0 (exact use open)"
+   },
+   {
+    "site": "0x5e93c4e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e91ed0",
+     "0x5e9406a"
+    ],
+    "role": "consumer in FDE 0x5e91ed0 (exact use open)"
+   },
+   {
+    "site": "0x5e93e0b",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e91ed0",
+     "0x5e9406a"
+    ],
+    "role": "consumer in FDE 0x5e91ed0 (exact use open)"
+   },
+   {
+    "site": "0x5ea25d0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ea2500",
+     "0x5ea2679"
+    ],
+    "role": "consumer in FDE 0x5ea2500 (exact use open)"
+   },
+   {
+    "site": "0x5ea2bd8",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ea26b0",
+     "0x5ea2de2"
+    ],
+    "role": "consumer in FDE 0x5ea26b0 (exact use open)"
+   },
+   {
+    "site": "0x5ea319b",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ea2e40",
+     "0x5ea3c83"
+    ],
+    "role": "consumer in FDE 0x5ea2e40 (exact use open)"
+   },
+   {
+    "site": "0x5ea36e0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ea2e40",
+     "0x5ea3c83"
+    ],
+    "role": "consumer in FDE 0x5ea2e40 (exact use open)"
+   },
+   {
+    "site": "0x5ea3fbd",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ea3ce0",
+     "0x5ea48fc"
+    ],
+    "role": "consumer in FDE 0x5ea3ce0 (exact use open)"
+   },
+   {
+    "site": "0x5ea4740",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ea3ce0",
+     "0x5ea48fc"
+    ],
+    "role": "consumer in FDE 0x5ea3ce0 (exact use open)"
+   },
+   {
+    "site": "0x5ea83c0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ea7f10",
+     "0x5ea855a"
+    ],
+    "role": "consumer in FDE 0x5ea7f10 (exact use open)"
+   },
+   {
+    "site": "0x5ea890b",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ea85b0",
+     "0x5ea93f1"
+    ],
+    "role": "consumer in FDE 0x5ea85b0 (exact use open)"
+   },
+   {
+    "site": "0x5ea8fc0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ea85b0",
+     "0x5ea93f1"
+    ],
+    "role": "consumer in FDE 0x5ea85b0 (exact use open)"
+   },
+   {
+    "site": "0x5ea9731",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ea9450",
+     "0x5ea9ff3"
+    ],
+    "role": "consumer in FDE 0x5ea9450 (exact use open)"
+   },
+   {
+    "site": "0x5ea9e28",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ea9450",
+     "0x5ea9ff3"
+    ],
+    "role": "consumer in FDE 0x5ea9450 (exact use open)"
+   },
+   {
+    "site": "0x5ebdeae",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ebda50",
+     "0x5ebe48e"
+    ],
+    "role": "consumer in FDE 0x5ebda50 (exact use open)"
+   },
+   {
+    "site": "0x5ec0f6e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ec0ab0",
+     "0x5ec250d"
+    ],
+    "role": "consumer in FDE 0x5ec0ab0 (exact use open)"
+   },
+   {
+    "site": "0x5ee3f49",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ee3840",
+     "0x5ee5d2b"
+    ],
+    "role": "consumer in FDE 0x5ee3840 (exact use open)"
+   },
+   {
+    "site": "0x5f08ef0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f08c40",
+     "0x5f09047"
+    ],
+    "role": "consumer in FDE 0x5f08c40 (exact use open)"
+   },
+   {
+    "site": "0x5f09640",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f09050",
+     "0x5f09850"
+    ],
+    "role": "consumer in FDE 0x5f09050 (exact use open)"
+   },
+   {
+    "site": "0x5f0d5c8",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f0d050",
+     "0x5f0d704"
+    ],
+    "role": "consumer in FDE 0x5f0d050 (exact use open)"
+   },
+   {
+    "site": "0x5f0de13",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f0d740",
+     "0x5f0e2c7"
+    ],
+    "role": "consumer in FDE 0x5f0d740 (exact use open)"
+   },
+   {
+    "site": "0x5f188c8",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f185d0",
+     "0x5f18b31"
+    ],
+    "role": "consumer in FDE 0x5f185d0 (exact use open)"
+   },
+   {
+    "site": "0x5f1ca8e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f1b550",
+     "0x5f1e986"
+    ],
+    "role": "consumer in FDE 0x5f1b550 (exact use open)"
+   },
+   {
+    "site": "0x5f203bb",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f20380",
+     "0x5f204d6"
+    ],
+    "role": "consumer in FDE 0x5f20380 (exact use open)"
+   },
+   {
+    "site": "0x5f3e5e7",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f3de70",
+     "0x5f3f664"
+    ],
+    "role": "consumer in FDE 0x5f3de70 (exact use open)"
+   },
+   {
+    "site": "0x5f3fc70",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f3f6c0",
+     "0x5f4000d"
+    ],
+    "role": "consumer in FDE 0x5f3f6c0 (exact use open)"
+   },
+   {
+    "site": "0x5f42308",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f42100",
+     "0x5f42b01"
+    ],
+    "role": "consumer in FDE 0x5f42100 (exact use open)"
+   },
+   {
+    "site": "0x5f70dfb",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f70cb0",
+     "0x5f71050"
+    ],
+    "role": "consumer in FDE 0x5f70cb0 (exact use open)"
+   },
+   {
+    "site": "0x5f75054",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f74ea0",
+     "0x5f75523"
+    ],
+    "role": "consumer in FDE 0x5f74ea0 (exact use open)"
+   },
+   {
+    "site": "0x5f7578c",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f75640",
+     "0x5f75a33"
+    ],
+    "role": "consumer in FDE 0x5f75640 (exact use open)"
+   },
+   {
+    "site": "0x5f76c4e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5f76a00",
+     "0x5f7714a"
+    ],
+    "role": "consumer in FDE 0x5f76a00 (exact use open)"
+   },
+   {
+    "site": "0x5fab7a7",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fab360",
+     "0x5fac683"
+    ],
+    "role": "consumer in FDE 0x5fab360 (exact use open)"
+   },
+   {
+    "site": "0x5fb1f82",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fb1e50",
+     "0x5fb39df"
+    ],
+    "role": "consumer in FDE 0x5fb1e50 (exact use open)"
+   },
+   {
+    "site": "0x5fb286c",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fb1e50",
+     "0x5fb39df"
+    ],
+    "role": "consumer in FDE 0x5fb1e50 (exact use open)"
+   },
+   {
+    "site": "0x5fc3664",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fc2900",
+     "0x5fc3acf"
+    ],
+    "role": "consumer in FDE 0x5fc2900 (exact use open)"
+   },
+   {
+    "site": "0x5fca9c3",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fca940",
+     "0x5fcabdc"
+    ],
+    "role": "consumer in FDE 0x5fca940 (exact use open)"
+   },
+   {
+    "site": "0x5fcd56a",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fcd550",
+     "0x5fcd5a9"
+    ],
+    "role": "consumer in FDE 0x5fcd550 (exact use open)"
+   },
+   {
+    "site": "0x5fce2f0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fce280",
+     "0x5fce766"
+    ],
+    "role": "consumer in FDE 0x5fce280 (exact use open)"
+   },
+   {
+    "site": "0x5fcf5e9",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fcf590",
+     "0x5fcf658"
+    ],
+    "role": "consumer in FDE 0x5fcf590 (exact use open)"
+   },
+   {
+    "site": "0x5fd1267",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd0de0",
+     "0x5fd176a"
+    ],
+    "role": "consumer in FDE 0x5fd0de0 (exact use open)"
+   },
+   {
+    "site": "0x5fd46f4",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "the create host: loads the current clock"
+   },
+   {
+    "site": "0x5fe28db",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fe2860",
+     "0x5fe2c2f"
+    ],
+    "role": "consumer in FDE 0x5fe2860 (exact use open)"
+   },
+   {
+    "site": "0x5fe58ca",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fe58b0",
+     "0x5fe590c"
+    ],
+    "role": "consumer in FDE 0x5fe58b0 (exact use open)"
+   },
+   {
+    "site": "0x5feae77",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fea950",
+     "0x5feb71d"
+    ],
+    "role": "consumer in FDE 0x5fea950 (exact use open)"
+   },
+   {
+    "site": "0x5ff0f78",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff0e00",
+     "0x5ff0ffc"
+    ],
+    "role": "consumer in FDE 0x5ff0e00 (exact use open)"
+   },
+   {
+    "site": "0x5ff14e0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff1360",
+     "0x5ff1550"
+    ],
+    "role": "consumer in FDE 0x5ff1360 (exact use open)"
+   },
+   {
+    "site": "0x5ff1710",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff1590",
+     "0x5ff1780"
+    ],
+    "role": "consumer in FDE 0x5ff1590 (exact use open)"
+   },
+   {
+    "site": "0x5ff1fc0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff1e30",
+     "0x5ff2030"
+    ],
+    "role": "consumer in FDE 0x5ff1e30 (exact use open)"
+   },
+   {
+    "site": "0x5ff2610",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff2360",
+     "0x5ff2711"
+    ],
+    "role": "consumer in FDE 0x5ff2360 (exact use open)"
+   },
+   {
+    "site": "0x5ff2a00",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff2760",
+     "0x5ff2b01"
+    ],
+    "role": "consumer in FDE 0x5ff2760 (exact use open)"
+   },
+   {
+    "site": "0x5ff2df0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff2b50",
+     "0x5ff2ef1"
+    ],
+    "role": "consumer in FDE 0x5ff2b50 (exact use open)"
+   },
+   {
+    "site": "0x5ff3bd3",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff3890",
+     "0x5ff3fd3"
+    ],
+    "role": "consumer in FDE 0x5ff3890 (exact use open)"
+   },
+   {
+    "site": "0x5ff517f",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff5140",
+     "0x5ff56db"
+    ],
+    "role": "consumer in FDE 0x5ff5140 (exact use open)"
+   },
+   {
+    "site": "0x5ff5409",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff5140",
+     "0x5ff56db"
+    ],
+    "role": "consumer in FDE 0x5ff5140 (exact use open)"
+   },
+   {
+    "site": "0x5fff550",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fff410",
+     "0x5fff69e"
+    ],
+    "role": "consumer in FDE 0x5fff410 (exact use open)"
+   },
+   {
+    "site": "0x5fffaf0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fff980",
+     "0x5fffd3e"
+    ],
+    "role": "consumer in FDE 0x5fff980 (exact use open)"
+   },
+   {
+    "site": "0x5ffff87",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fffdf0",
+     "0x6000407"
+    ],
+    "role": "consumer in FDE 0x5fffdf0 (exact use open)"
+   },
+   {
+    "site": "0x6000698",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6000520",
+     "0x600090c"
+    ],
+    "role": "consumer in FDE 0x6000520 (exact use open)"
+   },
+   {
+    "site": "0x6000da8",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6000c60",
+     "0x600118a"
+    ],
+    "role": "consumer in FDE 0x6000c60 (exact use open)"
+   },
+   {
+    "site": "0x6000f78",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6000c60",
+     "0x600118a"
+    ],
+    "role": "consumer in FDE 0x6000c60 (exact use open)"
+   },
+   {
+    "site": "0x60012f7",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60012b0",
+     "0x6002880"
+    ],
+    "role": "consumer in FDE 0x60012b0 (exact use open)"
+   },
+   {
+    "site": "0x60018b0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60012b0",
+     "0x6002880"
+    ],
+    "role": "consumer in FDE 0x60012b0 (exact use open)"
+   },
+   {
+    "site": "0x6003248",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60030e0",
+     "0x60038d3"
+    ],
+    "role": "consumer in FDE 0x60030e0 (exact use open)"
+   },
+   {
+    "site": "0x6003be0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6003940",
+     "0x60040d0"
+    ],
+    "role": "consumer in FDE 0x6003940 (exact use open)"
+   },
+   {
+    "site": "0x60043ab",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6004240",
+     "0x6004d2b"
+    ],
+    "role": "consumer in FDE 0x6004240 (exact use open)"
+   },
+   {
+    "site": "0x601a5c0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x601a370",
+     "0x601a996"
+    ],
+    "role": "consumer in FDE 0x601a370 (exact use open)"
+   },
+   {
+    "site": "0x6028f00",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6028eb0",
+     "0x6028f88"
+    ],
+    "role": "consumer in FDE 0x6028eb0 (exact use open)"
+   },
+   {
+    "site": "0x6038e72",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60382a0",
+     "0x603a507"
+    ],
+    "role": "consumer in FDE 0x60382a0 (exact use open)"
+   },
+   {
+    "site": "0x603b2be",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x603ae70",
+     "0x603bfd6"
+    ],
+    "role": "consumer in FDE 0x603ae70 (exact use open)"
+   },
+   {
+    "site": "0x6043da9",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6043b50",
+     "0x604566a"
+    ],
+    "role": "consumer in FDE 0x6043b50 (exact use open)"
+   },
+   {
+    "site": "0x6044f10",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6043b50",
+     "0x604566a"
+    ],
+    "role": "consumer in FDE 0x6043b50 (exact use open)"
+   },
+   {
+    "site": "0x6044f20",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6043b50",
+     "0x604566a"
+    ],
+    "role": "consumer in FDE 0x6043b50 (exact use open)"
+   },
+   {
+    "site": "0x6045928",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60457d0",
+     "0x6045ab4"
+    ],
+    "role": "consumer in FDE 0x60457d0 (exact use open)"
+   },
+   {
+    "site": "0x60471d2",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6046f70",
+     "0x60484f7"
+    ],
+    "role": "consumer in FDE 0x6046f70 (exact use open)"
+   },
+   {
+    "site": "0x604844f",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6046f70",
+     "0x60484f7"
+    ],
+    "role": "consumer in FDE 0x6046f70 (exact use open)"
+   },
+   {
+    "site": "0x604caa0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x604c900",
+     "0x604d4a7"
+    ],
+    "role": "consumer in FDE 0x604c900 (exact use open)"
+   },
+   {
+    "site": "0x604d330",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x604c900",
+     "0x604d4a7"
+    ],
+    "role": "consumer in FDE 0x604c900 (exact use open)"
+   },
+   {
+    "site": "0x604db88",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x604d7b0",
+     "0x604e01b"
+    ],
+    "role": "consumer in FDE 0x604d7b0 (exact use open)"
+   },
+   {
+    "site": "0x604e860",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x604e140",
+     "0x604ef0d"
+    ],
+    "role": "consumer in FDE 0x604e140 (exact use open)"
+   },
+   {
+    "site": "0x604ed30",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x604e140",
+     "0x604ef0d"
+    ],
+    "role": "consumer in FDE 0x604e140 (exact use open)"
+   },
+   {
+    "site": "0x604f720",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x604f080",
+     "0x604fd97"
+    ],
+    "role": "consumer in FDE 0x604f080 (exact use open)"
+   },
+   {
+    "site": "0x604fb40",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x604f080",
+     "0x604fd97"
+    ],
+    "role": "consumer in FDE 0x604f080 (exact use open)"
+   },
+   {
+    "site": "0x60508a0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x604fe80",
+     "0x6050b8a"
+    ],
+    "role": "consumer in FDE 0x604fe80 (exact use open)"
+   },
+   {
+    "site": "0x6051230",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6050c80",
+     "0x6051937"
+    ],
+    "role": "consumer in FDE 0x6050c80 (exact use open)"
+   },
+   {
+    "site": "0x6054c80",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6054680",
+     "0x605518b"
+    ],
+    "role": "consumer in FDE 0x6054680 (exact use open)"
+   },
+   {
+    "site": "0x606cacc",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x606ca40",
+     "0x606cc6a"
+    ],
+    "role": "consumer in FDE 0x606ca40 (exact use open)"
+   },
+   {
+    "site": "0x606cd3c",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x606ccb0",
+     "0x606ceda"
+    ],
+    "role": "consumer in FDE 0x606ccb0 (exact use open)"
+   },
+   {
+    "site": "0x606cffe",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x606cf20",
+     "0x606d14b"
+    ],
+    "role": "consumer in FDE 0x606cf20 (exact use open)"
+   },
+   {
+    "site": "0x607a1d5",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x607a120",
+     "0x607ab15"
+    ],
+    "role": "consumer in FDE 0x607a120 (exact use open)"
+   },
+   {
+    "site": "0x607c2c0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x607c290",
+     "0x607c3a7"
+    ],
+    "role": "consumer in FDE 0x607c290 (exact use open)"
+   },
+   {
+    "site": "0x60cffce",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60cfb60",
+     "0x60d1354"
+    ],
+    "role": "consumer in FDE 0x60cfb60 (exact use open)"
+   },
+   {
+    "site": "0x60d2dee",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60d2820",
+     "0x60d49d3"
+    ],
+    "role": "consumer in FDE 0x60d2820 (exact use open)"
+   },
+   {
+    "site": "0x60f7e08",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60f7b50",
+     "0x60f8908"
+    ],
+    "role": "consumer in FDE 0x60f7b50 (exact use open)"
+   },
+   {
+    "site": "0x60fa4b8",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60fa350",
+     "0x60fa57d"
+    ],
+    "role": "consumer in FDE 0x60fa350 (exact use open)"
+   },
+   {
+    "site": "0x60fa718",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60fa5b0",
+     "0x60fa7dd"
+    ],
+    "role": "consumer in FDE 0x60fa5b0 (exact use open)"
+   },
+   {
+    "site": "0x60facc8",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60fab80",
+     "0x60fafd7"
+    ],
+    "role": "consumer in FDE 0x60fab80 (exact use open)"
+   },
+   {
+    "site": "0x60fb878",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60fb730",
+     "0x60fbb87"
+    ],
+    "role": "consumer in FDE 0x60fb730 (exact use open)"
+   },
+   {
+    "site": "0x61094f8",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6108fd0",
+     "0x6109baa"
+    ],
+    "role": "consumer in FDE 0x6108fd0 (exact use open)"
+   },
+   {
+    "site": "0x611984d",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6117ed0",
+     "0x6119dad"
+    ],
+    "role": "consumer in FDE 0x6117ed0 (exact use open)"
+   },
+   {
+    "site": "0x611b801",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x611a4e0",
+     "0x611e391"
+    ],
+    "role": "consumer in FDE 0x611a4e0 (exact use open)"
+   },
+   {
+    "site": "0x612433c",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6124290",
+     "0x612536a"
+    ],
+    "role": "consumer in FDE 0x6124290 (exact use open)"
+   },
+   {
+    "site": "0x61401a0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6140070",
+     "0x6140308"
+    ],
+    "role": "consumer in FDE 0x6140070 (exact use open)"
+   },
+   {
+    "site": "0x6141270",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6141140",
+     "0x61413d8"
+    ],
+    "role": "consumer in FDE 0x6141140 (exact use open)"
+   },
+   {
+    "site": "0x6147fec",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6147f70",
+     "0x6148173"
+    ],
+    "role": "consumer in FDE 0x6147f70 (exact use open)"
+   },
+   {
+    "site": "0x6152148",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6151e30",
+     "0x61527dc"
+    ],
+    "role": "consumer in FDE 0x6151e30 (exact use open)"
+   },
+   {
+    "site": "0x6153831",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61537c0",
+     "0x6155d08"
+    ],
+    "role": "consumer in FDE 0x61537c0 (exact use open)"
+   },
+   {
+    "site": "0x61586bd",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61572d0",
+     "0x6159c3a"
+    ],
+    "role": "consumer in FDE 0x61572d0 (exact use open)"
+   },
+   {
+    "site": "0x6158a56",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61572d0",
+     "0x6159c3a"
+    ],
+    "role": "consumer in FDE 0x61572d0 (exact use open)"
+   },
+   {
+    "site": "0x6158e29",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61572d0",
+     "0x6159c3a"
+    ],
+    "role": "consumer in FDE 0x61572d0 (exact use open)"
+   },
+   {
+    "site": "0x615a768",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6159d80",
+     "0x615aa9e"
+    ],
+    "role": "consumer in FDE 0x6159d80 (exact use open)"
+   },
+   {
+    "site": "0x61779ca",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6177850",
+     "0x61791a0"
+    ],
+    "role": "consumer in FDE 0x6177850 (exact use open)"
+   },
+   {
+    "site": "0x6177ea0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6177850",
+     "0x61791a0"
+    ],
+    "role": "consumer in FDE 0x6177850 (exact use open)"
+   },
+   {
+    "site": "0x61780ea",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6177850",
+     "0x61791a0"
+    ],
+    "role": "consumer in FDE 0x6177850 (exact use open)"
+   },
+   {
+    "site": "0x61784f0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6177850",
+     "0x61791a0"
+    ],
+    "role": "consumer in FDE 0x6177850 (exact use open)"
+   },
+   {
+    "site": "0x6178d82",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6177850",
+     "0x61791a0"
+    ],
+    "role": "consumer in FDE 0x6177850 (exact use open)"
+   },
+   {
+    "site": "0x617a910",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x617a7a0",
+     "0x617c1a0"
+    ],
+    "role": "consumer in FDE 0x617a7a0 (exact use open)"
+   },
+   {
+    "site": "0x617ab90",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x617a7a0",
+     "0x617c1a0"
+    ],
+    "role": "consumer in FDE 0x617a7a0 (exact use open)"
+   },
+   {
+    "site": "0x617adc7",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x617a7a0",
+     "0x617c1a0"
+    ],
+    "role": "consumer in FDE 0x617a7a0 (exact use open)"
+   },
+   {
+    "site": "0x617b140",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x617a7a0",
+     "0x617c1a0"
+    ],
+    "role": "consumer in FDE 0x617a7a0 (exact use open)"
+   },
+   {
+    "site": "0x617bd20",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x617a7a0",
+     "0x617c1a0"
+    ],
+    "role": "consumer in FDE 0x617a7a0 (exact use open)"
+   },
+   {
+    "site": "0x617d07d",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x617d030",
+     "0x617d140"
+    ],
+    "role": "consumer in FDE 0x617d030 (exact use open)"
+   },
+   {
+    "site": "0x617d780",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x617d700",
+     "0x617d818"
+    ],
+    "role": "consumer in FDE 0x617d700 (exact use open)"
+   },
+   {
+    "site": "0x61c5002",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61c4fd0",
+     "0x61c5048"
+    ],
+    "role": "consumer in FDE 0x61c4fd0 (exact use open)"
+   },
+   {
+    "site": "0x61ede70",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61edd70",
+     "0x61edf13"
+    ],
+    "role": "consumer in FDE 0x61edd70 (exact use open)"
+   },
+   {
+    "site": "0x61ee050",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61edf50",
+     "0x61ee0f3"
+    ],
+    "role": "consumer in FDE 0x61edf50 (exact use open)"
+   },
+   {
+    "site": "0x61ee230",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61ee130",
+     "0x61ee2d3"
+    ],
+    "role": "consumer in FDE 0x61ee130 (exact use open)"
+   },
+   {
+    "site": "0x61ee410",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61ee310",
+     "0x61ee4b3"
+    ],
+    "role": "consumer in FDE 0x61ee310 (exact use open)"
+   },
+   {
+    "site": "0x61ee5f0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61ee4f0",
+     "0x61ee693"
+    ],
+    "role": "consumer in FDE 0x61ee4f0 (exact use open)"
+   },
+   {
+    "site": "0x61ee7d0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61ee6d0",
+     "0x61ee873"
+    ],
+    "role": "consumer in FDE 0x61ee6d0 (exact use open)"
+   },
+   {
+    "site": "0x61ee9c0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61ee8b0",
+     "0x61eea63"
+    ],
+    "role": "consumer in FDE 0x61ee8b0 (exact use open)"
+   },
+   {
+    "site": "0x61eebb0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61eeaa0",
+     "0x61eec53"
+    ],
+    "role": "consumer in FDE 0x61eeaa0 (exact use open)"
+   },
+   {
+    "site": "0x61eeda0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61eec90",
+     "0x61eee43"
+    ],
+    "role": "consumer in FDE 0x61eec90 (exact use open)"
+   },
+   {
+    "site": "0x61eef90",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61eee80",
+     "0x61ef033"
+    ],
+    "role": "consumer in FDE 0x61eee80 (exact use open)"
+   },
+   {
+    "site": "0x61ef180",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61ef070",
+     "0x61ef223"
+    ],
+    "role": "consumer in FDE 0x61ef070 (exact use open)"
+   },
+   {
+    "site": "0x61ef370",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61ef260",
+     "0x61ef413"
+    ],
+    "role": "consumer in FDE 0x61ef260 (exact use open)"
+   },
+   {
+    "site": "0x61ef560",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61ef450",
+     "0x61ef603"
+    ],
+    "role": "consumer in FDE 0x61ef450 (exact use open)"
+   },
+   {
+    "site": "0x61ef750",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61ef640",
+     "0x61ef7f3"
+    ],
+    "role": "consumer in FDE 0x61ef640 (exact use open)"
+   },
+   {
+    "site": "0x61ef940",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61ef830",
+     "0x61ef9e3"
+    ],
+    "role": "consumer in FDE 0x61ef830 (exact use open)"
+   },
+   {
+    "site": "0x61efb30",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61efa20",
+     "0x61efbd3"
+    ],
+    "role": "consumer in FDE 0x61efa20 (exact use open)"
+   },
+   {
+    "site": "0x61efd20",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61efc10",
+     "0x61efdc3"
+    ],
+    "role": "consumer in FDE 0x61efc10 (exact use open)"
+   },
+   {
+    "site": "0x61eff10",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61efe00",
+     "0x61effb3"
+    ],
+    "role": "consumer in FDE 0x61efe00 (exact use open)"
+   },
+   {
+    "site": "0x61f0100",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61efff0",
+     "0x61f01a3"
+    ],
+    "role": "consumer in FDE 0x61efff0 (exact use open)"
+   },
+   {
+    "site": "0x61f02e8",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x61f01d0",
+     "0x61f0384"
+    ],
+    "role": "consumer in FDE 0x61f01d0 (exact use open)"
+   },
+   {
+    "site": "0x6206530",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6206100",
+     "0x62065e5"
+    ],
+    "role": "consumer in FDE 0x6206100 (exact use open)"
+   }
+  ],
+  "0x5fd20d0": [],
+  "0x5fcdf70": [
+   {
+    "site": "0x5fce0c3",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fce010",
+     "0x5fce0db"
+    ],
+    "role": "consumer in FDE 0x5fce010 (exact use open)"
+   },
+   {
+    "site": "0x5fd06bb",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd0630",
+     "0x5fd0c71"
+    ],
+    "role": "consumer in FDE 0x5fd0630 (exact use open)"
+   },
+   {
+    "site": "0x5fd0918",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd0630",
+     "0x5fd0c71"
+    ],
+    "role": "consumer in FDE 0x5fd0630 (exact use open)"
+   },
+   {
+    "site": "0x5fd0987",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd0630",
+     "0x5fd0c71"
+    ],
+    "role": "consumer in FDE 0x5fd0630 (exact use open)"
+   },
+   {
+    "site": "0x5fd333a",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd3160",
+     "0x5fd341e"
+    ],
+    "role": "consumer in FDE 0x5fd3160 (exact use open)"
+   },
+   {
+    "site": "0x5fd36a6",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd34b0",
+     "0x5fd38f6"
+    ],
+    "role": "consumer in FDE 0x5fd34b0 (exact use open)"
+   },
+   {
+    "site": "0x5fd36f4",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd34b0",
+     "0x5fd38f6"
+    ],
+    "role": "consumer in FDE 0x5fd34b0 (exact use open)"
+   },
+   {
+    "site": "0x5fd37ea",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd34b0",
+     "0x5fd38f6"
+    ],
+    "role": "consumer in FDE 0x5fd34b0 (exact use open)"
+   },
+   {
+    "site": "0x5fd3836",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd34b0",
+     "0x5fd38f6"
+    ],
+    "role": "consumer in FDE 0x5fd34b0 (exact use open)"
+   },
+   {
+    "site": "0x5fd3872",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd34b0",
+     "0x5fd38f6"
+    ],
+    "role": "consumer in FDE 0x5fd34b0 (exact use open)"
+   },
+   {
+    "site": "0x5fd3acf",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd39b0",
+     "0x5fd3cf6"
+    ],
+    "role": "consumer in FDE 0x5fd39b0 (exact use open)"
+   },
+   {
+    "site": "0x5fd3b61",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd39b0",
+     "0x5fd3cf6"
+    ],
+    "role": "consumer in FDE 0x5fd39b0 (exact use open)"
+   },
+   {
+    "site": "0x5fd432c",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd4080",
+     "0x5fd4627"
+    ],
+    "role": "consumer in FDE 0x5fd4080 (exact use open)"
+   },
+   {
+    "site": "0x5fd48c6",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "the create host: out = move(translator Status)"
+   },
+   {
+    "site": "0x5fd4ab5",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "the create host: move(factory Status, rsp+0x40 -> rsp+0x30)"
+   },
+   {
+    "site": "0x5fd4b01",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "the create host: move(Status rsp+0x40 -> rsp+0x30)"
+   },
+   {
+    "site": "0x5fd4b2f",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "the create host: out = move(Status rsp+0x30)"
+   }
+  ],
+  "0x5e332c0": [
+   {
+    "site": "0x5e335ce",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e33550",
+     "0x5e33603"
+    ],
+    "role": "consumer in FDE 0x5e33550 (exact use open)"
+   },
+   {
+    "site": "0x5e3368e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e33610",
+     "0x5e336b4"
+    ],
+    "role": "consumer in FDE 0x5e33610 (exact use open)"
+   },
+   {
+    "site": "0x5e3373e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e336c0",
+     "0x5e33773"
+    ],
+    "role": "consumer in FDE 0x5e336c0 (exact use open)"
+   },
+   {
+    "site": "0x5e337fe",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e33780",
+     "0x5e33824"
+    ],
+    "role": "consumer in FDE 0x5e33780 (exact use open)"
+   },
+   {
+    "site": "0x5e338ae",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e33830",
+     "0x5e338e3"
+    ],
+    "role": "consumer in FDE 0x5e33830 (exact use open)"
+   },
+   {
+    "site": "0x5e3396e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e338f0",
+     "0x5e33994"
+    ],
+    "role": "consumer in FDE 0x5e338f0 (exact use open)"
+   },
+   {
+    "site": "0x5e33a1e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e339a0",
+     "0x5e33a53"
+    ],
+    "role": "consumer in FDE 0x5e339a0 (exact use open)"
+   },
+   {
+    "site": "0x5e33ade",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e33a60",
+     "0x5e33b04"
+    ],
+    "role": "consumer in FDE 0x5e33a60 (exact use open)"
+   },
+   {
+    "site": "0x5e33b8e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e33b10",
+     "0x5e33bc3"
+    ],
+    "role": "consumer in FDE 0x5e33b10 (exact use open)"
+   },
+   {
+    "site": "0x5e33c4e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e33bd0",
+     "0x5e33c83"
+    ],
+    "role": "consumer in FDE 0x5e33bd0 (exact use open)"
+   },
+   {
+    "site": "0x5e33d0e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e33c90",
+     "0x5e33d43"
+    ],
+    "role": "consumer in FDE 0x5e33c90 (exact use open)"
+   },
+   {
+    "site": "0x5e33dce",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e33d50",
+     "0x5e33e03"
+    ],
+    "role": "consumer in FDE 0x5e33d50 (exact use open)"
+   },
+   {
+    "site": "0x5e358c8",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e35800",
+     "0x5e35da4"
+    ],
+    "role": "consumer in FDE 0x5e35800 (exact use open)"
+   },
+   {
+    "site": "0x5e35902",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e35800",
+     "0x5e35da4"
+    ],
+    "role": "consumer in FDE 0x5e35800 (exact use open)"
+   },
+   {
+    "site": "0x5e359c9",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e35800",
+     "0x5e35da4"
+    ],
+    "role": "consumer in FDE 0x5e35800 (exact use open)"
+   },
+   {
+    "site": "0x5e35a03",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e35800",
+     "0x5e35da4"
+    ],
+    "role": "consumer in FDE 0x5e35800 (exact use open)"
+   },
+   {
+    "site": "0x5e35ac1",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e35800",
+     "0x5e35da4"
+    ],
+    "role": "consumer in FDE 0x5e35800 (exact use open)"
+   },
+   {
+    "site": "0x5e35af3",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e35800",
+     "0x5e35da4"
+    ],
+    "role": "consumer in FDE 0x5e35800 (exact use open)"
+   },
+   {
+    "site": "0x5e35e78",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e35db0",
+     "0x5e36354"
+    ],
+    "role": "consumer in FDE 0x5e35db0 (exact use open)"
+   },
+   {
+    "site": "0x5e35eb2",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e35db0",
+     "0x5e36354"
+    ],
+    "role": "consumer in FDE 0x5e35db0 (exact use open)"
+   },
+   {
+    "site": "0x5e35f79",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e35db0",
+     "0x5e36354"
+    ],
+    "role": "consumer in FDE 0x5e35db0 (exact use open)"
+   },
+   {
+    "site": "0x5e35fb3",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e35db0",
+     "0x5e36354"
+    ],
+    "role": "consumer in FDE 0x5e35db0 (exact use open)"
+   },
+   {
+    "site": "0x5e36071",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e35db0",
+     "0x5e36354"
+    ],
+    "role": "consumer in FDE 0x5e35db0 (exact use open)"
+   },
+   {
+    "site": "0x5e360a3",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e35db0",
+     "0x5e36354"
+    ],
+    "role": "consumer in FDE 0x5e35db0 (exact use open)"
+   },
+   {
+    "site": "0x5e36428",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e36360",
+     "0x5e36904"
+    ],
+    "role": "consumer in FDE 0x5e36360 (exact use open)"
+   },
+   {
+    "site": "0x5e36462",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e36360",
+     "0x5e36904"
+    ],
+    "role": "consumer in FDE 0x5e36360 (exact use open)"
+   },
+   {
+    "site": "0x5e36529",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e36360",
+     "0x5e36904"
+    ],
+    "role": "consumer in FDE 0x5e36360 (exact use open)"
+   },
+   {
+    "site": "0x5e36563",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e36360",
+     "0x5e36904"
+    ],
+    "role": "consumer in FDE 0x5e36360 (exact use open)"
+   },
+   {
+    "site": "0x5e36621",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e36360",
+     "0x5e36904"
+    ],
+    "role": "consumer in FDE 0x5e36360 (exact use open)"
+   },
+   {
+    "site": "0x5e36653",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e36360",
+     "0x5e36904"
+    ],
+    "role": "consumer in FDE 0x5e36360 (exact use open)"
+   },
+   {
+    "site": "0x5e369d8",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e36910",
+     "0x5e36eb4"
+    ],
+    "role": "consumer in FDE 0x5e36910 (exact use open)"
+   },
+   {
+    "site": "0x5e36a12",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e36910",
+     "0x5e36eb4"
+    ],
+    "role": "consumer in FDE 0x5e36910 (exact use open)"
+   },
+   {
+    "site": "0x5e36ad9",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e36910",
+     "0x5e36eb4"
+    ],
+    "role": "consumer in FDE 0x5e36910 (exact use open)"
+   },
+   {
+    "site": "0x5e36b13",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e36910",
+     "0x5e36eb4"
+    ],
+    "role": "consumer in FDE 0x5e36910 (exact use open)"
+   },
+   {
+    "site": "0x5e36bd1",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e36910",
+     "0x5e36eb4"
+    ],
+    "role": "consumer in FDE 0x5e36910 (exact use open)"
+   },
+   {
+    "site": "0x5e36c03",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5e36910",
+     "0x5e36eb4"
+    ],
+    "role": "consumer in FDE 0x5e36910 (exact use open)"
+   },
+   {
+    "site": "0x5fd0266",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd0180",
+     "0x5fd02f2"
+    ],
+    "role": "the builder: copies the stack record into out"
+   },
+   {
+    "site": "0x5fe0aff",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fe0760",
+     "0x5fe0fbc"
+    ],
+    "role": "consumer in FDE 0x5fe0760 (exact use open)"
+   },
+   {
+    "site": "0x5fe0cdc",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fe0760",
+     "0x5fe0fbc"
+    ],
+    "role": "consumer in FDE 0x5fe0760 (exact use open)"
+   },
+   {
+    "site": "0x5fe0e5c",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fe0760",
+     "0x5fe0fbc"
+    ],
+    "role": "consumer in FDE 0x5fe0760 (exact use open)"
+   },
+   {
+    "site": "0x5ff7d8b",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff7c90",
+     "0x5ff8256"
+    ],
+    "role": "consumer in FDE 0x5ff7c90 (exact use open)"
+   },
+   {
+    "site": "0x5ff7f95",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff7c90",
+     "0x5ff8256"
+    ],
+    "role": "consumer in FDE 0x5ff7c90 (exact use open)"
+   },
+   {
+    "site": "0x5ff80db",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5ff7c90",
+     "0x5ff8256"
+    ],
+    "role": "consumer in FDE 0x5ff7c90 (exact use open)"
+   },
+   {
+    "site": "0x607eb9e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x607eb20",
+     "0x607ebd3"
+    ],
+    "role": "consumer in FDE 0x607eb20 (exact use open)"
+   },
+   {
+    "site": "0x607ec5e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x607ebe0",
+     "0x607ec84"
+    ],
+    "role": "consumer in FDE 0x607ebe0 (exact use open)"
+   },
+   {
+    "site": "0x607ed0e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x607ec90",
+     "0x607ed43"
+    ],
+    "role": "consumer in FDE 0x607ec90 (exact use open)"
+   },
+   {
+    "site": "0x607edce",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x607ed50",
+     "0x607edf4"
+    ],
+    "role": "consumer in FDE 0x607ed50 (exact use open)"
+   },
+   {
+    "site": "0x607ee7e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x607ee00",
+     "0x607eeb3"
+    ],
+    "role": "consumer in FDE 0x607ee00 (exact use open)"
+   },
+   {
+    "site": "0x607ef3e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x607eec0",
+     "0x607ef64"
+    ],
+    "role": "consumer in FDE 0x607eec0 (exact use open)"
+   },
+   {
+    "site": "0x607efee",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x607ef70",
+     "0x607f023"
+    ],
+    "role": "consumer in FDE 0x607ef70 (exact use open)"
+   },
+   {
+    "site": "0x607f0ae",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x607f030",
+     "0x607f0e3"
+    ],
+    "role": "consumer in FDE 0x607f030 (exact use open)"
+   },
+   {
+    "site": "0x607f16e",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x607f0f0",
+     "0x607f1a3"
+    ],
+    "role": "consumer in FDE 0x607f0f0 (exact use open)"
+   },
+   {
+    "site": "0x607f269",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x607f1b0",
+     "0x607f37a"
+    ],
+    "role": "consumer in FDE 0x607f1b0 (exact use open)"
+   },
+   {
+    "site": "0x6083636",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083570",
+     "0x6083a89"
+    ],
+    "role": "consumer in FDE 0x6083570 (exact use open)"
+   },
+   {
+    "site": "0x6083671",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083570",
+     "0x6083a89"
+    ],
+    "role": "consumer in FDE 0x6083570 (exact use open)"
+   },
+   {
+    "site": "0x60836d5",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083570",
+     "0x6083a89"
+    ],
+    "role": "consumer in FDE 0x6083570 (exact use open)"
+   },
+   {
+    "site": "0x608370f",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083570",
+     "0x6083a89"
+    ],
+    "role": "consumer in FDE 0x6083570 (exact use open)"
+   },
+   {
+    "site": "0x60837d0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083570",
+     "0x6083a89"
+    ],
+    "role": "consumer in FDE 0x6083570 (exact use open)"
+   },
+   {
+    "site": "0x6083802",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083570",
+     "0x6083a89"
+    ],
+    "role": "consumer in FDE 0x6083570 (exact use open)"
+   },
+   {
+    "site": "0x6083b76",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083a90",
+     "0x6083c83"
+    ],
+    "role": "the SliceTransform sibling builder 0x6083a90: copies its stack record into out (separate work item)"
+   },
+   {
+    "site": "0x6083e46",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083d80",
+     "0x6084299"
+    ],
+    "role": "consumer in FDE 0x6083d80 (exact use open)"
+   },
+   {
+    "site": "0x6083e81",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083d80",
+     "0x6084299"
+    ],
+    "role": "consumer in FDE 0x6083d80 (exact use open)"
+   },
+   {
+    "site": "0x6083ee5",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083d80",
+     "0x6084299"
+    ],
+    "role": "consumer in FDE 0x6083d80 (exact use open)"
+   },
+   {
+    "site": "0x6083f1f",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083d80",
+     "0x6084299"
+    ],
+    "role": "consumer in FDE 0x6083d80 (exact use open)"
+   },
+   {
+    "site": "0x6083fe0",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083d80",
+     "0x6084299"
+    ],
+    "role": "consumer in FDE 0x6083d80 (exact use open)"
+   },
+   {
+    "site": "0x6084012",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6083d80",
+     "0x6084299"
+    ],
+    "role": "consumer in FDE 0x6083d80 (exact use open)"
+   },
+   {
+    "site": "0x60844f6",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6084430",
+     "0x6084949"
+    ],
+    "role": "consumer in FDE 0x6084430 (exact use open)"
+   },
+   {
+    "site": "0x6084531",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6084430",
+     "0x6084949"
+    ],
+    "role": "consumer in FDE 0x6084430 (exact use open)"
+   },
+   {
+    "site": "0x6084595",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6084430",
+     "0x6084949"
+    ],
+    "role": "consumer in FDE 0x6084430 (exact use open)"
+   },
+   {
+    "site": "0x60845cf",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6084430",
+     "0x6084949"
+    ],
+    "role": "consumer in FDE 0x6084430 (exact use open)"
+   },
+   {
+    "site": "0x6084690",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6084430",
+     "0x6084949"
+    ],
+    "role": "consumer in FDE 0x6084430 (exact use open)"
+   },
+   {
+    "site": "0x60846c2",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6084430",
+     "0x6084949"
+    ],
+    "role": "consumer in FDE 0x6084430 (exact use open)"
+   },
+   {
+    "site": "0x608d984",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6089b50",
+     "0x6091e5c"
+    ],
+    "role": "consumer in FDE 0x6089b50 (exact use open)"
+   },
+   {
+    "site": "0x6090165",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6089b50",
+     "0x6091e5c"
+    ],
+    "role": "consumer in FDE 0x6089b50 (exact use open)"
+   },
+   {
+    "site": "0x60901ed",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6089b50",
+     "0x6091e5c"
+    ],
+    "role": "consumer in FDE 0x6089b50 (exact use open)"
+   },
+   {
+    "site": "0x6090442",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6089b50",
+     "0x6091e5c"
+    ],
+    "role": "consumer in FDE 0x6089b50 (exact use open)"
+   },
+   {
+    "site": "0x6090674",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6089b50",
+     "0x6091e5c"
+    ],
+    "role": "consumer in FDE 0x6089b50 (exact use open)"
+   },
+   {
+    "site": "0x609081d",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6089b50",
+     "0x6091e5c"
+    ],
+    "role": "consumer in FDE 0x6089b50 (exact use open)"
+   },
+   {
+    "site": "0x6090949",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6089b50",
+     "0x6091e5c"
+    ],
+    "role": "consumer in FDE 0x6089b50 (exact use open)"
+   },
+   {
+    "site": "0x6090a7c",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6089b50",
+     "0x6091e5c"
+    ],
+    "role": "consumer in FDE 0x6089b50 (exact use open)"
+   },
+   {
+    "site": "0x6090d6f",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6089b50",
+     "0x6091e5c"
+    ],
+    "role": "consumer in FDE 0x6089b50 (exact use open)"
+   },
+   {
+    "site": "0x60ac5b4",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60aa2b0",
+     "0x60b1d78"
+    ],
+    "role": "consumer in FDE 0x60aa2b0 (exact use open)"
+   },
+   {
+    "site": "0x60b0371",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60aa2b0",
+     "0x60b1d78"
+    ],
+    "role": "consumer in FDE 0x60aa2b0 (exact use open)"
+   },
+   {
+    "site": "0x60b053c",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60aa2b0",
+     "0x60b1d78"
+    ],
+    "role": "consumer in FDE 0x60aa2b0 (exact use open)"
+   },
+   {
+    "site": "0x60b0667",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60aa2b0",
+     "0x60b1d78"
+    ],
+    "role": "consumer in FDE 0x60aa2b0 (exact use open)"
+   },
+   {
+    "site": "0x60df346",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60dec10",
+     "0x60e1e20"
+    ],
+    "role": "consumer in FDE 0x60dec10 (exact use open)"
+   },
+   {
+    "site": "0x60e03c9",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x60dec10",
+     "0x60e1e20"
+    ],
+    "role": "consumer in FDE 0x60dec10 (exact use open)"
+   },
+   {
+    "site": "0x620702d",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6206ef0",
+     "0x620769f"
+    ],
+    "role": "consumer in FDE 0x6206ef0 (exact use open)"
+   },
+   {
+    "site": "0x620723c",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6206ef0",
+     "0x620769f"
+    ],
+    "role": "consumer in FDE 0x6206ef0 (exact use open)"
+   },
+   {
+    "site": "0x6207399",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6206ef0",
+     "0x620769f"
+    ],
+    "role": "consumer in FDE 0x6206ef0 (exact use open)"
+   },
+   {
+    "site": "0x6207500",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x6206ef0",
+     "0x620769f"
+    ],
+    "role": "consumer in FDE 0x6206ef0 (exact use open)"
+   }
+  ],
+  "0x5fd4080": [
+   {
+    "site": "0x5fd4aa3",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "the create host: factory helper for a translated name"
+   }
+  ]
+ },
+ "packet_internal_sites": {
+  "0x5d350c0": [
+   {
+    "site": "0x5fd4ca1",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd4c30",
+     "0x5fd4cc1"
+    ],
+    "role": "invoker: release the old control in the id fast path"
+   },
+   {
+    "site": "0x5fd49c3",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "host adopt path: release the old control"
+   },
+   {
+    "site": "0x5fd4955",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "host default path: release the old control when the translator found no name"
+   },
+   {
+    "site": "0x5fd48f4",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "host cleanup: release the local current-clock reference"
+   }
+  ],
+  "0x5d3f950": [
+   {
+    "site": "0x5fd0285",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd0180",
+     "0x5fd02f2"
+    ],
+    "role": "builder: destroy the temporary record's functors"
+   }
+  ],
+  "0x609e510": [
+   {
+    "site": "0x5fd489a",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "host default path: registry translator"
+   }
+  ],
+  "0x609e2d0": [
+   {
+    "site": "0x5fd4b76",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "host Status normalization: second translator"
+   }
+  ],
+  "0x61cf670": [
+   {
+    "site": "0x5fd4bc9",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "host error path: build the error Status"
+   }
+  ],
+  "0x5d36110": [
+   {
+    "site": "0x5fd48dd",
+    "kind": "direct_call",
+    "containing_fde": [
+     "0x5fd46c0",
+     "0x5fd4c2e"
+    ],
+    "role": "host cleanup: once-arg cleanup helper"
+   }
+  ]
+ }
+}
