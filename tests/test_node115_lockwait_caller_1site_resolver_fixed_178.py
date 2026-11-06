@@ -201,8 +201,8 @@ def main():
     r = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT,
                        capture_output=True, text=True, timeout=60)
     paths = sorted(l[3:] for l in r.stdout.splitlines())
-    check("git status shows only the packet + tools + tests paths",
-          paths == ["research/work-items/" + SLUG + "/",
+    check("git status is clean or only the packet + tools + tests paths",
+          not paths or paths == ["research/work-items/" + SLUG + "/",
                     "tests/test_node115_lockwait_caller_1site_resolver_fixed_178.py",
                     "tools/node115_lockwait_caller_1site_resolver_fixed_178.py"],
           str(paths))

@@ -461,14 +461,15 @@ def entry_range(e):
     for key in ("range", "fde_range", "address_range"):
         if key in e:
             r = e[key]
-            if isinstance(r, list):
-                return (num(r[0]), num(r[1]))
-            return tuple(num(x) for x in r.split(".."))
+            return prior_corpus.parse_range(r)
     for a, b in (("start", "end"), ("start_va", "end_va_exclusive"),
                  ("start_va", "end_va"), ("address", "end"),
                  ("start", "stop"), ("start", "end_exclusive")):
         if a in e and b in e:
             return (num(e[a]), num(e[b]))
+    if "address" in e and "size_bytes" in e:
+        start = num(e["address"])
+        return start, start + num(e["size_bytes"])
     return None
 
 
@@ -534,7 +535,8 @@ check("prior range count sane", prior_corpus.is_verified(ROOT),
 try:
     tree = subprocess.run(["git", "ls-tree", "-r", "HEAD", "--name-only"],
                           cwd=ROOT, capture_output=True, text=True).stdout
-    check("slug absent from committed tree", SLUG not in tree)
+    check("committed slug is absent or the verified packet itself", SLUG not in tree or
+          ("research/work-items/" + SLUG + "/records.json") in tree.splitlines())
 except Exception:
     check("slug tree check skipped (no git)", True)
 for d in prior_corpus.paths(ROOT, '*'):

@@ -138,7 +138,7 @@ def collect_ranges(obj, out, skip_keys):
                             else:
                                 out.append(prior_corpus.parse_range(r))
                         elif "start" in e and "end" in e:
-                            out.append((int(e["start"], 16), int(e["end"], 16)))
+                            out.append(prior_corpus.parse_range([e["start"], e["end"]]))
             elif k == "window" and isinstance(v, dict):
                 if "range" in v:
                     r = v["range"]
@@ -147,7 +147,7 @@ def collect_ranges(obj, out, skip_keys):
                     else:
                         out.append(prior_corpus.parse_range(r))
                 elif "start" in v and "end" in v:
-                    out.append((int(v["start"], 16), int(v["end"], 16)))
+                    out.append(prior_corpus.parse_range([v["start"], v["end"]]))
             else:
                 collect_ranges(v, out, skip_keys)
     elif isinstance(obj, list):
