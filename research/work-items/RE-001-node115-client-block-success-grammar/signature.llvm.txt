@@ -1,0 +1,78 @@
+# llvm: full owning FDE 0x5821020..0x5821143 decoded; retained 0x5821020..0x5821143
+ 5821020: 41 56                        	push	r14
+ 5821022: 53                           	push	rbx
+ 5821023: 48 81 ec 88 00 00 00         	sub	rsp, 0x88
+ 582102a: 49 89 f6                     	mov	r14, rsi
+ 582102d: 48 89 fb                     	mov	rbx, rdi
+ 5821030: 48 89 e7                     	mov	rdi, rsp
+ 5821033: e8 08 05 00 00               	call	0x5821540 <.text+0x4408240>
+ 5821038: 8b 04 24                     	mov	eax, dword ptr [rsp]
+ 582103b: 0f 10 44 24 08               	movups	xmm0, xmmword ptr [rsp + 0x8]
+ 5821040: 0f 29 44 24 40               	movaps	xmmword ptr [rsp + 0x40], xmm0
+ 5821045: 0f 10 44 24 18               	movups	xmm0, xmmword ptr [rsp + 0x18]
+ 582104a: 0f 29 44 24 50               	movaps	xmmword ptr [rsp + 0x50], xmm0
+ 582104f: 83 f8 01                     	cmp	eax, 0x1
+ 5821052: 75 0c                        	jne	0x5821060 <.text+0x4407d60>
+ 5821054: 0f 28 44 24 40               	movaps	xmm0, xmmword ptr [rsp + 0x40]
+ 5821059: 0f 28 4c 24 50               	movaps	xmm1, xmmword ptr [rsp + 0x50]
+ 582105e: eb 31                        	jmp	0x5821091 <.text+0x4407d91>
+ 5821060: 48 89 e7                     	mov	rdi, rsp
+ 5821063: 4c 89 f6                     	mov	rsi, r14
+ 5821066: e8 d5 04 00 00               	call	0x5821540 <.text+0x4408240>
+ 582106b: 8b 04 24                     	mov	eax, dword ptr [rsp]
+ 582106e: 0f 10 44 24 08               	movups	xmm0, xmmword ptr [rsp + 0x8]
+ 5821073: 0f 29 44 24 60               	movaps	xmmword ptr [rsp + 0x60], xmm0
+ 5821078: 0f 10 44 24 18               	movups	xmm0, xmmword ptr [rsp + 0x18]
+ 582107d: 0f 29 44 24 70               	movaps	xmmword ptr [rsp + 0x70], xmm0
+ 5821082: 83 f8 01                     	cmp	eax, 0x1
+ 5821085: 75 28                        	jne	0x58210af <.text+0x4407daf>
+ 5821087: 0f 28 44 24 60               	movaps	xmm0, xmmword ptr [rsp + 0x60]
+ 582108c: 0f 28 4c 24 70               	movaps	xmm1, xmmword ptr [rsp + 0x70]
+ 5821091: 0f 11 4b 18                  	movups	xmmword ptr [rbx + 0x18], xmm1
+ 5821095: 0f 11 43 08                  	movups	xmmword ptr [rbx + 0x8], xmm0
+ 5821099: b8 01 00 00 00               	mov	eax, 0x1
+ 582109e: 48 89 03                     	mov	qword ptr [rbx], rax
+ 58210a1: 48 89 d8                     	mov	rax, rbx
+ 58210a4: 48 81 c4 88 00 00 00         	add	rsp, 0x88
+ 58210ab: 5b                           	pop	rbx
+ 58210ac: 41 5e                        	pop	r14
+ 58210ae: c3                           	ret
+ 58210af: 41 83 3e 01                  	cmp	dword ptr [r14], 0x1
+ 58210b3: 75 1d                        	jne	0x58210d2 <.text+0x4407dd2>
+ 58210b5: 49 8b 4e 20                  	mov	rcx, qword ptr [r14 + 0x20]
+ 58210b9: b0 02                        	mov	al, 0x2
+ 58210bb: 48 83 f9 ff                  	cmp	rcx, -0x1
+ 58210bf: 74 72                        	je	0x5821133 <.text+0x4407e33>
+ 58210c1: 49 8b 56 08                  	mov	rdx, qword ptr [r14 + 0x8]
+ 58210c5: 48 8d 71 01                  	lea	rsi, [rcx + 0x1]
+ 58210c9: 49 89 76 20                  	mov	qword ptr [r14 + 0x20], rsi
+ 58210cd: 48 39 d1                     	cmp	rcx, rdx
+ 58210d0: 73 61                        	jae	0x5821133 <.text+0x4407e33>
+ 58210d2: 49 8b 46 18                  	mov	rax, qword ptr [r14 + 0x18]
+ 58210d6: 48 85 c0                     	test	rax, rax
+ 58210d9: 74 56                        	je	0x5821131 <.text+0x4407e31>
+ 58210db: 49 8b 4e 10                  	mov	rcx, qword ptr [r14 + 0x10]
+ 58210df: 0f b6 11                     	movzx	edx, byte ptr [rcx]
+ 58210e2: 48 ff c1                     	inc	rcx
+ 58210e5: 48 ff c8                     	dec	rax
+ 58210e8: 49 89 4e 10                  	mov	qword ptr [r14 + 0x10], rcx
+ 58210ec: 49 89 46 18                  	mov	qword ptr [r14 + 0x18], rax
+ 58210f0: 0f 28 44 24 40               	movaps	xmm0, xmmword ptr [rsp + 0x40]
+ 58210f5: 0f 28 4c 24 50               	movaps	xmm1, xmmword ptr [rsp + 0x50]
+ 58210fa: 0f 29 4c 24 10               	movaps	xmmword ptr [rsp + 0x10], xmm1
+ 58210ff: 0f 29 04 24                  	movaps	xmmword ptr [rsp], xmm0
+ 5821103: 0f 28 54 24 60               	movaps	xmm2, xmmword ptr [rsp + 0x60]
+ 5821108: 0f 28 5c 24 70               	movaps	xmm3, xmmword ptr [rsp + 0x70]
+ 582110d: 0f 29 54 24 20               	movaps	xmmword ptr [rsp + 0x20], xmm2
+ 5821112: 0f 29 5c 24 30               	movaps	xmmword ptr [rsp + 0x30], xmm3
+ 5821117: 0f 11 5b 38                  	movups	xmmword ptr [rbx + 0x38], xmm3
+ 582111b: 0f 11 53 28                  	movups	xmmword ptr [rbx + 0x28], xmm2
+ 582111f: 0f 11 4b 18                  	movups	xmmword ptr [rbx + 0x18], xmm1
+ 5821123: 0f 11 43 08                  	movups	xmmword ptr [rbx + 0x8], xmm0
+ 5821127: 88 53 48                     	mov	byte ptr [rbx + 0x48], dl
+ 582112a: 31 c0                        	xor	eax, eax
+ 582112c: e9 6d ff ff ff               	jmp	0x582109e <.text+0x4407d9e>
+ 5821131: 31 c0                        	xor	eax, eax
+ 5821133: 88 43 08                     	mov	byte ptr [rbx + 0x8], al
+ 5821136: 48 c7 43 10 01 00 00 00      	mov	qword ptr [rbx + 0x10], 0x1
+ 582113e: e9 56 ff ff ff               	jmp	0x5821099 <.text+0x4407d99>
