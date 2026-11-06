@@ -1,0 +1,94 @@
+{
+  "task_id": "RE-001",
+  "node": 115,
+  "artifact_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "artifact_path": "artifacts/node/115/hl-node",
+  "local_binary": "work/hl-node-115.bin",
+  "claim": "Three chunked array teardown routines that free fixed-size chunk blocks from holder slots and then free the holder's inner object, called in a fixed sequence by shared owners.",
+  "routines": [
+    {
+      "address": "0x5d5a200",
+      "fde": "0x5d5a200..0x5d5a265",
+      "size_bytes": 101,
+      "chunk_size": 512,
+      "chunk_size_hex": "0x200",
+      "slot_cursor_field": "holder+0x28",
+      "slot_bound_field": "holder+0x48",
+      "loop_bound": "cursor below [holder+0x48] + 8, unsigned, step 8",
+      "inner_field": "holder+0x00",
+      "inner_count_field": "holder+0x08",
+      "inner_free_size": "[holder+0x08] * 8",
+      "delete_plt": "0x63f0d80",
+      "registers_saved": ["r12", "rbp", "rbx"],
+      "stack_reserve": 0,
+      "canary": false,
+      "holder_freed": false,
+      "relation": "instruction-identical to 0x5d5a2e0 modulo addresses and call displacements"
+    },
+    {
+      "address": "0x5d5a270",
+      "fde": "0x5d5a270..0x5d5a2d5",
+      "size_bytes": 101,
+      "chunk_size": 504,
+      "chunk_size_hex": "0x1f8",
+      "slot_cursor_field": "holder+0x28",
+      "slot_bound_field": "holder+0x48",
+      "loop_bound": "cursor below [holder+0x48] + 8, unsigned, step 8",
+      "inner_field": "holder+0x00",
+      "inner_count_field": "holder+0x08",
+      "inner_free_size": "[holder+0x08] * 8",
+      "delete_plt": "0x63f0d80",
+      "registers_saved": ["r12", "rbp", "rbx"],
+      "stack_reserve": 0,
+      "canary": false,
+      "holder_freed": false,
+      "relation": "differs from the other two only in chunk size 0x1f8 instead of 0x200"
+    },
+    {
+      "address": "0x5d5a2e0",
+      "fde": "0x5d5a2e0..0x5d5a345",
+      "size_bytes": 101,
+      "chunk_size": 512,
+      "chunk_size_hex": "0x200",
+      "slot_cursor_field": "holder+0x28",
+      "slot_bound_field": "holder+0x48",
+      "loop_bound": "cursor below [holder+0x48] + 8, unsigned, step 8",
+      "inner_field": "holder+0x00",
+      "inner_count_field": "holder+0x08",
+      "inner_free_size": "[holder+0x08] * 8",
+      "delete_plt": "0x63f0d80",
+      "registers_saved": ["r12", "rbp", "rbx"],
+      "stack_reserve": 0,
+      "canary": false,
+      "holder_freed": false,
+      "relation": "instruction-identical to 0x5d5a200 modulo addresses and call displacements"
+    }
+  ],
+  "owner_sequence": {
+    "description": "Each shared owner calls the three routines in the fixed order 0x5d5a2e0, 0x5d5a270, 0x5d5a200, with rdi from three distinct rbx-relative holders.",
+    "sites": [
+      {"owner_fde": "0x5d8479c..0x5d85475", "calls": ["0x5d84b73", "0x5d84b7f", "0x5d84b8b"], "holders": ["rbx+0xb20", "rbx+0xad0", "rbx+0xa68"]},
+      {"owner_fde": "0x5d878f0..0x5d887b0", "calls": ["0x5d87efb", "0x5d87f07", "0x5d87f13"], "holders": ["rbx+0xb20", "rbx+0xad0", "rbx+0xa68"]},
+      {"owner_fde": "0x5d878f0..0x5d887b0", "calls": ["0x5d88643", "0x5d8864f", "0x5d8865b"], "holders": ["rbx+0xb20", "rbx+0xad0", "rbx+0xa68"]}
+    ]
+  },
+  "consumers": {
+    "0x5d5a200": {"direct_calls": 6, "tail_jumps": 0, "caller_fdes": 4, "stored_qwords": 0, "relative_relocations": 0},
+    "0x5d5a270": {"direct_calls": 3, "tail_jumps": 0, "caller_fdes": 2, "stored_qwords": 0, "relative_relocations": 0},
+    "0x5d5a2e0": {"direct_calls": 3, "tail_jumps": 0, "caller_fdes": 2, "stored_qwords": 0, "relative_relocations": 0},
+    "total_direct_calls": 12,
+    "reached_by": "code only, never by data"
+  },
+  "shared_gates": {
+    "null_inner": "returns plainly with nothing freed, even though the chunk slots live on the holder",
+    "null_slot_pointer_test": "none; every visited slot pointer is passed to the sized delete unconditionally",
+    "cursor_advance": "before the delete call, so frees follow slot order",
+    "loop_skipped_exit": "tail-jump inner free runs whenever the inner object is non-null, whether the loop ran or was skipped"
+  },
+  "unknowns": [
+    "What the holder+0x08 count counts at the source level; only the byte size [holder+0x08] * 8 is pinned.",
+    "Why two instruction-identical routines exist for distinct holders; recorded as distinct routines with distinct caller sets, not merged.",
+    "The source-level type of the holders and of the chunk blocks; only sizes and offsets are pinned.",
+    "What any caller does with a holder before or after the call."
+  ]
+}
