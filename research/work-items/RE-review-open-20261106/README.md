@@ -3,65 +3,55 @@
 Target: Linux x86-64 node #115, SHA-256
 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
 
-The active PR review was blocked by malformed manifest separators and
-historical root-document references resolving to newer or packet-local files.
-`metadata-repairs.json` records the minimal metadata repairs. Original submitted
-manifests and every affected historical root document are retained byte-for-byte.
-The uncommitted CPython cache row is excluded from the active manifest; its
-original declaration remains in the retained submitted manifest.
+The completed review integrates 1,204 PR heads and closes 41 out-of-scope
+PRs. No reviewed PR remains held for evidence or execution approval. Exact
+heads and validation receipts are in `reviewed-pr-heads.json` and
+`validation.json`. Reconstruction remains incomplete; no component gate is
+advanced and no full-node or whole-ELF equivalence is claimed.
 
-No raw binary evidence is rewritten, no instruction execution is claimed, and
-no component reconstruction gate is advanced. The reviewed publication batch contains 1,147 PR heads; 41 out-of-scope PRs were closed, 57 await separate differential-execution approval; the prior-corpus blockers are now repaired. See `reviewed-pr-heads.json`, `held-pr-heads.json` and `validation.json`.
+All 1,051 current test files have passing source-hash-bound receipts. The
+final combined branch reran 81 added, previously deferred or changed files,
+the Linux-only snippet suite, and all 73 repaired prior-corpus checkers.
+The 57 previously held differential suites and 23 baseline suites ran under
+explicit user authorization. The native snippet suite passed seven checks,
+including its 20,000-case comparison, in an offline Linux amd64 guest on a
+macOS arm64 host. No full captured node/visor process, networking or signing
+was performed. `execution-validation.json` records the scope and environment.
 
-The compaction-dump model now wraps packed integer lanes at their observed
-widths. Boundary controls and the host-libc test corrections are recorded in
-`review-corrections.json`; all 71 focused tests pass. These are bounded
-research-model checks, not a reconstructed-node execution or identity claim.
+The original review passed 616 selected packet verifiers, 38 top-level Cargo
+components and two retained flat Rust libraries. All 21 additional Rust
+implementations pass their sealed-stream comparison builders and compiled
+negative controls using rustc 1.94.1 in a separate source mirror. Five older
+nested helper checks lacked standalone lockfiles; those original failures
+remain recorded and their parent builds passed.
 
-## Final review validation
+`make doctor verify catalogue-check reproduce` passes. The original batch
+byte audit checked 550,472 recorded instruction rows; the follow-up batch
+checks 35,972 rows, with zero mismatches. These overlapping recorded-row
+counts are not function coverage or a whole-node denominator. No hosted CI
+success is asserted. Raw exports, original negative results and detailed
+logs remain retained, with log hashes in the receipts.
 
-All 970 authorized test files pass. The 23 remaining pre-existing test files
-require instruction/native execution and were not run. All 616 selected static
-packet verifiers pass, including the explicitly qualified renderer and
-provider-version cases. The final changed-export audit byte-checks 550,472
-recorded instruction rows with zero mismatches; it is not function coverage
-or whole-node equivalence. All 38 top-level Cargo components tested pass;
-two additional retained flat Rust libraries pass. Five nested helpers cannot
-be tested standalone under `--locked` because they have no own lockfile, and
-are covered by their passing parent builds.
+## Review corrections
 
-`make doctor catalogue verify catalogue-check reproduce` passes with
-Python 3.13 and the recorded GNU/LLVM analysis tools. Original raw exports,
-negative results and comparison logs remain retained. No reconstruction gate
-is changed. Captured binaries and original-instruction interpreters were not
-executed. The publication commit skips automatic hosted CI because the existing
-workflow runs unrestricted `make test`; this does not assert hosted CI success.
+`metadata-repairs.json` and `review-corrections.json` retain the manifest,
+packed-lane, module-collision, path and renderer corrections. Original
+submitted manifests and affected historical documents remain byte-for-byte.
+PR #2721 retains its already documented D window as reused context, earning
+no additional coverage credit; its 14 focused checks passed.
 
-The review corrects packed-lane overflow, keeps both colliding RE-005/RE-006
-modules, removes author-private temporary-directory dependence, makes a
-citation-aware overlap check, and makes the profiling overlap mutant fail
-for overlap independently of manifest integrity. Every correction and the
-original affected manifest is retained in this packet.
+The 73 static comparison PRs use an authenticated frozen manifest of 1,211
+public record inputs. Earlier private-worktree counts remain historical,
+not reproduced evidence or coverage metrics. Nine helper tests cover input
+integrity, missing inputs, paths, candidate overlays, committed identities
+and authenticated archives. Two original inputs remain in
+`frozen-prior-inputs/` after reviewed corrections to their live packets;
+the frozen manifest and its hashes are unchanged. Additional candidate
+records can add conflicts but cannot establish positive reference evidence.
+Full before/after receipts are in `prior-repair-validation.json`.
 
-PR #2721 was subsequently reconciled against the pinned, already merged
-PR #2647 record. D is retained as reused context and earns no additional
-coverage credit. Its 14 focused tests pass. The original submission README
-and manifest remain under `submitted-pr2721/`.
-
-## Public prior-corpus repair
-
-The 73 remaining static comparison PRs now use a frozen manifest of 1,211
-public record files. The earlier large private-worktree counts are preserved
-as historical reports; they are not treated as reproduced evidence or as
-coverage metrics. The record manifest, helper and original submitted
-manifests are retained here. All 73 focused test files and all 73 direct
-static checkers pass; eight helper tests exercise integrity, missing-input,
-path, candidate-overlay and reference-identity controls.
-
-The scan also handles valid annotated ranges, numeric coordinates, and
-address-plus-size entries exposed by the larger reference set. Stale
-next-work suggestions may now be documented by a later pinned packet; that
-adds no new coverage credit and does not relax the current-window overlap
-check. Committed packets are validated by exact reference identity and
-recorded base ancestry. No target instructions were executed. Full receipts
-are in `prior-repair-validation.json`.
+Catalogue outputs were regenerated from their owning inputs. Raw target
+records were preserved, except for the two explicitly reviewed semantic
+corrections whose original snapshot bytes are retained. This work does not
+supply a full node build, original compiler identity, dependency closure or
+runtime acceptance.
