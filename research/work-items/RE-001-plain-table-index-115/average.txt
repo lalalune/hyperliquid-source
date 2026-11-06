@@ -1,0 +1,42 @@
+
+work/hl-node-115.bin:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000606b540 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x323110>:
+ 606b540:	f3 0f 1e fa          	endbr64
+ 606b544:	48 8b 47 10          	mov    0x10(%rdi),%rax
+ 606b548:	66 0f ef c0          	pxor   %xmm0,%xmm0
+ 606b54c:	48 8b 57 18          	mov    0x18(%rdi),%rdx
+ 606b550:	48 85 c0             	test   %rax,%rax
+ 606b553:	74 20                	je     606b575 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x323145>
+ 606b555:	48 85 d2             	test   %rdx,%rdx
+ 606b558:	78 26                	js     606b580 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x323150>
+ 606b55a:	66 0f ef c0          	pxor   %xmm0,%xmm0
+ 606b55e:	f2 48 0f 2a c2       	cvtsi2sd %rdx,%xmm0
+ 606b563:	48 85 c0             	test   %rax,%rax
+ 606b566:	78 36                	js     606b59e <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x32316e>
+ 606b568:	66 0f ef c9          	pxor   %xmm1,%xmm1
+ 606b56c:	f2 48 0f 2a c8       	cvtsi2sd %rax,%xmm1
+ 606b571:	f2 0f 5e c1          	divsd  %xmm1,%xmm0
+ 606b575:	c3                   	ret
+ 606b576:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+ 606b57d:	00 00 00 
+ 606b580:	48 89 d1             	mov    %rdx,%rcx
+ 606b583:	83 e2 01             	and    $0x1,%edx
+ 606b586:	66 0f ef c0          	pxor   %xmm0,%xmm0
+ 606b58a:	48 d1 e9             	shr    $1,%rcx
+ 606b58d:	48 09 d1             	or     %rdx,%rcx
+ 606b590:	f2 48 0f 2a c1       	cvtsi2sd %rcx,%xmm0
+ 606b595:	f2 0f 58 c0          	addsd  %xmm0,%xmm0
+ 606b599:	48 85 c0             	test   %rax,%rax
+ 606b59c:	79 ca                	jns    606b568 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x323138>
+ 606b59e:	48 89 c2             	mov    %rax,%rdx
+ 606b5a1:	83 e0 01             	and    $0x1,%eax
+ 606b5a4:	66 0f ef c9          	pxor   %xmm1,%xmm1
+ 606b5a8:	48 d1 ea             	shr    $1,%rdx
+ 606b5ab:	48 09 c2             	or     %rax,%rdx
+ 606b5ae:	f2 48 0f 2a ca       	cvtsi2sd %rdx,%xmm1
+ 606b5b3:	f2 0f 58 c9          	addsd  %xmm1,%xmm1
+ 606b5b7:	eb b8                	jmp    606b571 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x323141>
