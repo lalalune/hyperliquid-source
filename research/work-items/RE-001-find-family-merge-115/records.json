@@ -1,0 +1,909 @@
+{
+ "artifact_path": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bounded_question": "How do the two sibling Find-family hosts (host A 0x609d0e0, host B 0x60bedc0) and the merge driver 0x609c8c0 drive the already-pinned Find pipeline (find_e70 0x6099e70, no_equals 0x609ba30, kind_dispatch 0x609b700, walker 0x609bcb0, matcher 0x60bb9a0, worker 0x6097630), and what does each report when the name cannot be resolved?",
+ "census": {
+  "counts": {
+   "block_creator call": 3,
+   "block_ctor call": 3,
+   "block_table call": 1,
+   "block_table_cleanup jmp": 1,
+   "bool_parser call": 6,
+   "clear_string call": 2,
+   "counted_release call": 1273,
+   "counted_release jmp": 25,
+   "cstr_ctor_607d9f0 call": 141,
+   "cstr_ctor_60b7d80 call": 53,
+   "cstr_dup call": 425,
+   "delegate_impl call": 2,
+   "element_scan call": 2,
+   "element_scan_host call": 1,
+   "element_scan_host_cleanup jmp": 1,
+   "ends_with call": 8,
+   "entry call": 1,
+   "enum_60be160 call": 1,
+   "enum_60be2b0 call": 1,
+   "enum_60be400 call": 1,
+   "enum_60be550 call": 1,
+   "enum_60be6a0 call": 1,
+   "enum_60be7f0 call": 1,
+   "enum_60be940 call": 1,
+   "escape_assign call": 2,
+   "escape_decoder call": 1,
+   "fallback_delegate call": 5,
+   "find_e70 call": 5,
+   "find_norm call": 3,
+   "hash_name_find call": 2,
+   "hex_decode call": 1,
+   "hexval call": 2,
+   "host_a call": 2,
+   "host_a_cleanup jmp": 1,
+   "host_b call": 13,
+   "host_b_catch jmp": 1,
+   "i32_parser call": 1,
+   "kind_dispatch call": 2,
+   "map_clear call": 98,
+   "map_erase_next call": 3,
+   "map_find_name call": 2,
+   "map_insert call": 1,
+   "matcher call": 16,
+   "merge_driver call": 1,
+   "move_assign call": 12,
+   "name_lookup call": 10,
+   "no_equals call": 4,
+   "node_clone call": 2,
+   "options_list_destroy call": 3,
+   "options_record_append call": 37,
+   "parser call": 6,
+   "plain_creator call": 2,
+   "plain_ctor call": 2,
+   "plain_table lea": 1,
+   "plain_table_cleanup jmp": 1,
+   "range_ctor call": 12,
+   "rehash call": 4,
+   "resolve_no_equals call": 1,
+   "resolver call": 8,
+   "shared_release call": 654,
+   "shared_release jmp": 36,
+   "status_builder call": 847,
+   "stod_parser call": 10,
+   "stoi_parser call": 8,
+   "stoll_parser call": 2,
+   "stoull_alias call": 13,
+   "stoull_parser call": 12,
+   "stoull_parser jmp": 1,
+   "str_compare call": 8,
+   "u32_parser call": 1,
+   "u8_parser call": 1,
+   "value_copy call": 4,
+   "value_dtor call": 44,
+   "walker call": 1,
+   "worker_wrapper call": 5,
+   "zero_stub lea": 1
+  },
+  "rows": 3870
+ },
+ "constants": {
+  "enum_map_a": "0x65070a0",
+  "enum_map_b": "0x6507060",
+  "enum_map_c": "0x6507120",
+  "enum_map_d": "0x6507160",
+  "enum_map_e": "0x65070e0",
+  "enum_map_f": "0x6506fe0",
+  "enum_map_u32": "0x6507020",
+  "hash_seed": "0xc70f6907",
+  "host_b_kind_table": "0x9786b4",
+  "linear_walk_limit": 20,
+  "options_map_node_size": 80,
+  "shared_control_counts": "0x100000001",
+  "stoll_suffix_table": "0x97ea50",
+  "stoull_suffix_table": "0x97e998",
+  "value_size": 80
+ },
+ "landing_pads": {
+  "0x6080a71": {
+   "end": "0x6080b0d",
+   "role": "Plain host cleanup fragment."
+  },
+  "0x608183a": {
+   "end": "0x60818eb",
+   "role": "Block host cleanup fragment."
+  },
+  "0x6098a9c": {
+   "end": "0x6098ace",
+   "role": "Element-scan host cleanup fragment."
+  },
+  "0x609d08e": {
+   "end": "0x609d0d8",
+   "role": "Host A cleanup fragment."
+  },
+  "0x60bea8c": {
+   "end": "0x60bedba",
+   "role": "Host B catch: std::exception -> code 4 'Error parsing <name>:<what>'."
+  }
+ },
+ "literals": [
+  {
+   "address": "0x43e863",
+   "value": "Could not find option: "
+  },
+  {
+   "address": "0x43fb8a",
+   "value": "Could not find configurable: "
+  },
+  {
+   "address": "0x44e056",
+   "value": "Could not find option"
+  },
+  {
+   "address": "0x4409b0",
+   "value": "; "
+  },
+  {
+   "address": "0x445245",
+   "value": "="
+  },
+  {
+   "address": "0x4477ed",
+   "value": "Error parsing:"
+  },
+  {
+   "address": "0x4477fc",
+   "value": "Error parsing "
+  },
+  {
+   "address": "0x441b18",
+   "value": ":"
+  },
+  {
+   "address": "0x4376fd",
+   "value": ""
+  },
+  {
+   "address": "0x4373e9",
+   "value": "Deserializing the option "
+  },
+  {
+   "address": "0x437403",
+   "value": " is not supported"
+  },
+  {
+   "address": "0x434345",
+   "value": "stoull"
+  },
+  {
+   "address": "0x43434c",
+   "value": "stoll"
+  },
+  {
+   "address": "0x4311eb",
+   "value": "stoi"
+  },
+  {
+   "address": "0x441d25",
+   "value": "stod"
+  },
+  {
+   "address": "0x963298",
+   "value": "basic_string: construction from null is not valid"
+  }
+ ],
+ "model": "tools/find_family_merge_115.py",
+ "open_unknowns": [
+  "The '; ' literal host A writes into the copied value's name (code low byte 0) is an open unknown: the worker parses ';'-separated options, so it likely means 'no options', but the binary gives no gloss; the model records the literal and the branch faithfully.",
+  "Host A's find_e70 tail writes its Status into a local that is then discarded (only the message is freed); the call survives only through its side effects via the descriptor's slot 0x28 / delegate_impl. Modelled literally and pinned by test.",
+  "The worker's prefix is the string at element+0x20 (the matcher's prefix argument); the element's +0x00 name string is the scan's key. The model takes the +0x20 string as the prefix.",
+  "The seven enum maps live in .bss (runtime-built); the model takes them as harness-injected EnumMap objects, not binary reads.",
+  "The global default name at 0x6508980: its runtime contents are set by static init and were not located (carried from #3440); the model takes 'default' as the documented assumption.",
+  "The delegate vtable base is not pinned; the model holds the delegate's slots as callables supplied by the harness.",
+  "The serializer 0x60ba600 per-kind rules (25 jump-table cases) are a boundary; the default model reports every kind as serialized.",
+  "Which construction paths install a non-null +0x28 delegate is not pinned.",
+  "stod is modelled with Python float() on ordinary decimal inputs; inf/nan/hex-float edge inputs differ from C strtod.",
+  "The rehash excerpt may end with undecodable padding bytes at 0x5d3833a-0x5d3833c; verify.py's raw-bytes check confirms the excerpt matches the binary."
+ ],
+ "relocations": [
+  {
+   "address": "0x64ed290",
+   "symbol": "__libc_single_threaded",
+   "type": "R_X86_64_GLOB_DAT"
+  }
+ ],
+ "routines": {
+  "0x5d35070": {
+   "calls": [],
+   "end": "0x5d350bc",
+   "name": "shared_release",
+   "role": "Shared-control release tail (re-shipped from #3488): dispose through vtable slot 0x10, then decrement the weak count at +0x0c (locked xadd when __libc_single_threaded is 0); when the old weak count was 1, destroy through slot 0x18.",
+   "size": 76
+  },
+  "0x5d350c0": {
+   "calls": [
+    "0x5d35070"
+   ],
+   "end": "0x5d35145",
+   "name": "counted_release",
+   "role": "shared_ptr control release: counts == 0x100000001 -> dispose via vtable slot 0x10 then destroy via slot 0x18; else atomic decrement of the use count (locked xadd when __libc_single_threaded is 0), and when the old use count was 1 the 0x5d35070 tail runs.",
+   "size": 133
+  },
+  "0x5d38260": {
+   "calls": [],
+   "end": "0x5d3839d",
+   "name": "rehash",
+   "role": "Hash-table rehash: new bucket array, same-bucket nodes re-linked contiguously in old-list order; count 1 takes the inline-bucket path; count>>60 throws bad_array_new_length.",
+   "size": 317
+  },
+  "0x5d5b300": {
+   "calls": [],
+   "end": "0x5d5b39b",
+   "name": "map_clear",
+   "role": "Options-map clear (re-shipped from #3488): destroy both strings of every node, sized-delete each 0x50-byte node, zero the buckets, first node and element count.",
+   "size": 155
+  },
+  "0x5e33fb0": {
+   "calls": [
+    "0x5d350c0"
+   ],
+   "end": "0x5e33fea",
+   "name": "value_dtor",
+   "role": "Value-struct destroy (re-shipped from #3485): release the +0x48 control through counted_release 0x5d350c0 and free the name string's heap buffer. Modelled as Value.destroy.",
+   "size": 58
+  },
+  "0x607d9f0": {
+   "calls": [],
+   "end": "0x607dad3",
+   "name": "cstr_ctor",
+   "role": "std::string ctor from const char*: SSO at 15 chars or fewer (length-1 fast path), heap via _M_create above; null throws logic_error via 0x963298. Second instantiation of the same template as 0x60b7d80.",
+   "size": 227
+  },
+  "0x607e020": {
+   "calls": [
+    "0x607e020"
+   ],
+   "end": "0x607e1e9",
+   "name": "options_list_destroy",
+   "role": "Recursive linked-list destroy: +0x18 links walked unrolled 8 deep then recursed; each 0x28-byte node freed after its +0x10 child is freed as a 0x28 node; free order is the chain reversed, each node followed by its child subtree.",
+   "size": 457
+  },
+  "0x6080a71": {
+   "calls": [],
+   "end": "0x6080b0d",
+   "name": "plain_table_cleanup",
+   "role": "Plain host cleanup fragment.",
+   "size": 156
+  },
+  "0x6080b10": {
+   "calls": [
+    "0x607d9f0",
+    "0x609ba30",
+    "0x61cf670",
+    "0x6193b40",
+    "0x6099e70",
+    "0x5d350c0",
+    "0x6080a71"
+   ],
+   "end": "0x6080dcc",
+   "name": "find_plain_table",
+   "role": "PlainTableOptions host: delegate slot 0x38 resolves the options struct; the factory name takes the create path, other names take no_equals or the code-1 error.",
+   "size": 700
+  },
+  "0x608183a": {
+   "calls": [],
+   "end": "0x60818eb",
+   "name": "block_table_cleanup",
+   "role": "Block host cleanup fragment.",
+   "size": 177
+  },
+  "0x60818f0": {
+   "calls": [
+    "0x607d9f0",
+    "0x609ba30",
+    "0x61cf670",
+    "0x60dbd80",
+    "0x5d350c0",
+    "0x607e020",
+    "0x6099e70",
+    "0x608183a"
+   ],
+   "end": "0x6081d08",
+   "name": "find_block_table",
+   "role": "BlockTableOptions host: same skeleton as the plain host with the 0xf8-byte defaults and the 0x260-byte creator; the defaults' owned sub-objects are released after the creator.",
+   "size": 1048
+  },
+  "0x60956f0": {
+   "calls": [],
+   "end": "0x609570c",
+   "name": "zero_stub",
+   "role": "Default vtable slot-0x40 implementation (re-shipped from #3488): zeroes the 16-byte Status.",
+   "size": 28
+  },
+  "0x6095b80": {
+   "calls": [],
+   "end": "0x6095cf9",
+   "name": "node_clone",
+   "role": "Options-map node clone: allocates a 0x50-byte node and deep-copies the key and value strings; +0x40/+0x48 are NOT copied (the caller writes the hash).",
+   "size": 377
+  },
+  "0x6096f40": {
+   "calls": [
+    "0x60ba0b0"
+   ],
+   "end": "0x609710f",
+   "name": "element_scan",
+   "role": "Element-vector scan (re-shipped from #3488): walks the 0x30-byte elements; per element the name lookup runs on the element's +0x28 table; returns the lookup result and stores the element's +0x20 field into found_out.",
+   "size": 463
+  },
+  "0x6097110": {
+   "calls": [],
+   "end": "0x609714e",
+   "name": "delegate_impl",
+   "role": "Delegate implementation (re-shipped from #3488): calls the object's vtable slot 0x48 with (out, obj, value, ctx_map, flag).",
+   "size": 62
+  },
+  "0x6097150": {
+   "calls": [
+    "0x6097110"
+   ],
+   "end": "0x6097192",
+   "name": "fallback_delegate",
+   "role": "Fallback delegate wrapper (re-shipped from #3488): calls delegate_impl with flag 0.",
+   "size": 66
+  },
+  "0x60971c0": {
+   "calls": [],
+   "end": "0x609755b",
+   "name": "resolver",
+   "role": "Name resolver (re-shipped from #3485): the name object's slot-0x60 string as-is, unless it contains '=' -- then '{' + the part before '=' + '}'.",
+   "size": 923
+  },
+  "0x6098510": {
+   "calls": [],
+   "end": "0x60985af",
+   "name": "worker_wrapper",
+   "role": "Worker wrapper: empties the options string, then calls the worker 0x6097630 with an empty prefix string and the emptied options string as the accumulator.",
+   "size": 159
+  },
+  "0x6098a9c": {
+   "calls": [
+    "0x5e33fb0"
+   ],
+   "end": "0x6098ace",
+   "name": "element_scan_host_cleanup",
+   "role": "Element-scan host cleanup fragment.",
+   "size": 50
+  },
+  "0x6098ad0": {
+   "calls": [
+    "0x6096f40",
+    "0x61cf670",
+    "0x60bb9a0",
+    "0x5d35070",
+    "0x6098a9c"
+   ],
+   "end": "0x6099003",
+   "name": "find_by_element_scan",
+   "role": "Element-scan host: element_scan over the table vector; exact match or kind 0x13 takes the matcher, kinds 0x15/0x16 take the delegate slot-0x10 virtual, other kinds are the code-1 error.",
+   "size": 1331
+  },
+  "0x6099ce0": {
+   "calls": [],
+   "end": "0x6099e34",
+   "name": "options_record_append",
+   "role": "Append a 0x30-byte record {name string, options pointer, global} to the vector at obj+0x08 (begin/end/capacity), growing it when end == capacity.",
+   "size": 340
+  },
+  "0x6099e70": {
+   "calls": [
+    "0x60c1190",
+    "0x6097110",
+    "0x5d5b300"
+   ],
+   "end": "0x609a1a9",
+   "name": "find_e70",
+   "role": "The '=' / ';' helper (re-shipped from #3488): parse path into a fresh map + delegate_impl slot 0x48 on success; otherwise slot 0x40 vs the zero stub 0x60956f0; then the value +0x03 byte gates slot 0x28.",
+   "size": 825
+  },
+  "0x609a1b0": {
+   "calls": [],
+   "end": "0x609a2e7",
+   "linear_limit": 20,
+   "name": "map_find_name",
+   "role": "Options-map find by name: count <= 0x14 walks the list (length, then memcmp), otherwise the hash-bucket walk (_Hash_bytes seed 0xc70f6907, stored hash at node+0x48). Returns the node or null.",
+   "size": 311
+  },
+  "0x609a2f0": {
+   "calls": [],
+   "end": "0x609a3de",
+   "name": "map_erase_next",
+   "role": "Options-map erase by node: unlink from the hash bucket, free the two strings (+0x38, +0x18, SSO-checked) and the 0x50-byte node, decrement the element count, return the next node.",
+   "size": 238
+  },
+  "0x609a410": {
+   "calls": [
+    "0x60c1190",
+    "0x5d5b300",
+    "0x609a1b0",
+    "0x609a2f0"
+   ],
+   "end": "0x609a67c",
+   "name": "find_norm",
+   "role": "Find normalizer (re-shipped from #3485): empty/default name takes the fallback; no '=' returns the name; else parse, 'id' lookup/erase, fallback handling.",
+   "size": 620
+  },
+  "0x609a740": {
+   "calls": [
+    "0x61d1390",
+    "0x61d13e0",
+    "0x6099e70",
+    "0x609ba30",
+    "0x61cf670",
+    "0x609a410",
+    "0x5d5b300",
+    "0x5d35070",
+    "0x6097150"
+   ],
+   "end": "0x609b6f3",
+   "name": "entry",
+   "role": "Sibling Find entry point (re-shipped from #3488): flag-chain node resolution, value copy, name dispatch (exact name, id, .id variants, find_norm path, no_equals path). One direct call site (0x609b80f inside kind_dispatch).",
+   "size": 4019
+  },
+  "0x609b700": {
+   "calls": [
+    "0x609a740",
+    "0x61cf670"
+   ],
+   "end": "0x609b869",
+   "name": "kind_dispatch",
+   "role": "Kind dispatch (re-shipped from #3488): kind 0x16 recurses into the entry; equal names or kind 0x13/0x15 take the node's slot-0x50; any other kind is code 1 'Could not find option: ' + str_b.",
+   "size": 361
+  },
+  "0x609b8a0": {
+   "calls": [
+    "0x6096f40",
+    "0x609b700",
+    "0x61cf670"
+   ],
+   "end": "0x609ba2a",
+   "name": "resolve_no_equals",
+   "role": "No-'=' path (re-shipped from #3488): slot-0x68 fills the search name, element_scan runs, a null result is code 1 'Could not find option: ' + key6, otherwise kind_dispatch runs.",
+   "size": 394
+  },
+  "0x609ba30": {
+   "calls": [
+    "0x609b8a0"
+   ],
+   "end": "0x609ba76",
+   "name": "no_equals",
+   "role": "No-'=' wrapper (re-shipped from #3488): forwards to resolve_no_equals 0x609b8a0.",
+   "size": 70
+  },
+  "0x609bad0": {
+   "calls": [],
+   "end": "0x609bbb1",
+   "name": "map_insert",
+   "role": "Local name-set insert: _Prime_rehash_policy check (0x5e52800 when needed), hash stored at node+0x28, node inserted after the bucket's before-begin node (list head for an empty bucket), count incremented. Called only from the walker.",
+   "size": 225
+  },
+  "0x609bcb0": {
+   "calls": [
+    "0x60ba0b0",
+    "0x609b700",
+    "0x609a2f0",
+    "0x61cf610",
+    "0x609bad0",
+    "0x609a1b0"
+   ],
+   "end": "0x609c782",
+   "linear_limit": 20,
+   "local_set_node_size": 48,
+   "name": "resolve_all_elements",
+   "role": "Registry walker: walks the registry map through slot-0x68 + name_lookup + kind_dispatch; code 1 advances, code 3 inserts the name into a local name set, other codes erase; the sweep phase erases the collected names; the final Status follows the value's +0x00 word bytes and the accumulated families.",
+   "size": 2770
+  },
+  "0x609c8c0": {
+   "calls": [
+    "0x6095b80",
+    "0x609bcb0",
+    "0x5d5b300",
+    "0x5d38260",
+    "0x61cf670"
+   ],
+   "end": "0x609d08e",
+   "name": "merge_driver",
+   "role": "Merge driver: clones the source options map first-wins per bucket, walks the descriptor's entries through the walker, merges survivors into arg7 when present, else reports the first surviving clone as 'Could not find option: '.",
+   "size": 1998
+  },
+  "0x609d08e": {
+   "calls": [
+    "0x5e33fb0"
+   ],
+   "end": "0x609d0d8",
+   "name": "host_a_cleanup",
+   "role": "Host A landing pad: destroys the local value, frees the out message and the accumulator, then _Unwind_Resume.",
+   "size": 74
+  },
+  "0x609d0e0": {
+   "calls": [
+    "0x609c8c0",
+    "0x6099e70",
+    "0x6098510",
+    "0x5d35070",
+    "0x609d08e"
+   ],
+   "end": "0x609d75e",
+   "name": "host_a",
+   "role": "Find host A: the empty-map slot-0x28 path, the '; ' worker-wrapper path, the merge-driver call, and the post-driver slot-0x28 / find_e70-0x0101 tail (whose Status is discarded).",
+   "size": 1662
+  },
+  "0x60b79b0": {
+   "calls": [],
+   "end": "0x60b79de",
+   "name": "clear_string",
+   "role": "string._M_replace(0, size, cstr, strlen(cstr)): the string is assigned the C string.",
+   "size": 46
+  },
+  "0x60b79e0": {
+   "calls": [],
+   "end": "0x60b7ab8",
+   "name": "move_assign",
+   "role": "std::string move-assignment (re-shipped from #3488).",
+   "size": 216
+  },
+  "0x60b7cd0": {
+   "calls": [],
+   "end": "0x60b7d73",
+   "name": "range_ctor",
+   "role": "String range ctor: builds a string from [first, last); SSO up to 15 bytes, else heap _M_create + memcpy, NUL-terminated.",
+   "size": 163
+  },
+  "0x60b7d80": {
+   "calls": [],
+   "end": "0x60b7e63",
+   "name": "cstr_ctor_sibling",
+   "role": "std::string ctor from const char* (re-shipped from #3485): the same template as 0x607d9f0; the two excerpts differ only in branch-target addresses.",
+   "size": 227
+  },
+  "0x60b84b0": {
+   "calls": [],
+   "end": "0x60b8564",
+   "name": "hash_name_find",
+   "role": "Hash-bucket name find (re-shipped from #3488): _Hash_bytes(key, len, 0xc70f6907) % bucket count, chain walked comparing stored hash, length, memcmp.",
+   "size": 180
+  },
+  "0x60b9d70": {
+   "calls": [
+    "0x60b7cd0"
+   ],
+   "end": "0x60b9dfc",
+   "name": "value_copy",
+   "role": "Value-struct copy (re-shipped from #3485): deep-copy the 0x50 bytes (name string, the 16 bytes at +0x38, the +0x48 control with its use-count incremented). Modelled as Value.copy.",
+   "size": 140
+  },
+  "0x60ba0b0": {
+   "calls": [
+    "0x60b84b0",
+    "0x60b79e0"
+   ],
+   "end": "0x60ba441",
+   "name": "name_lookup",
+   "role": "Name lookup (re-shipped from #3488): count <= 20 linear walk, else the hash-bucket find; exact match move-assigns the key into out; on a miss the '.' split with a kind 0x13/0x15/0x16 prefix match move-assigns the suffix.",
+   "size": 913
+  },
+  "0x60bb9a0": {
+   "calls": [
+    "0x60b9d70",
+    "0x60b7d80",
+    "0x60971c0",
+    "0x60b79e0",
+    "0x5e33fb0",
+    "0x61cf670",
+    "0x60b79b0"
+   ],
+   "end": "0x60bbdeb",
+   "name": "matcher",
+   "role": "Kind-0x15/0x16 matcher (re-shipped from #3485): null prefix or node state 4 zeroes out; the 0x2000 flag is code 3 'Cannot serialize option: ' + name (msg1 = the name); a non-null node+0x38 takes the virtual slot 0x40; kinds 0x16/0x15 take the resolver paths; other kinds take the serializer path (boundary).",
+   "size": 1099
+  },
+  "0x60be160": {
+   "calls": [],
+   "end": "0x60be2ab",
+   "name": "enum_60be160",
+   "role": "Enum lookup (u8): linear walk at size <= 20, else the _Hash_bytes walk; map 0x65070a0.",
+   "size": 331
+  },
+  "0x60be2b0": {
+   "calls": [],
+   "end": "0x60be3fb",
+   "name": "enum_60be2b0",
+   "role": "Enum lookup (u8): byte-identical to 0x60be160; map 0x6507060.",
+   "size": 331
+  },
+  "0x60be400": {
+   "calls": [],
+   "end": "0x60be54b",
+   "name": "enum_60be400",
+   "role": "Enum lookup (u8): byte-identical to 0x60be160; map 0x6507120.",
+   "size": 331
+  },
+  "0x60be550": {
+   "calls": [],
+   "end": "0x60be69b",
+   "name": "enum_60be550",
+   "role": "Enum lookup (u8): byte-identical to 0x60be160; map 0x6507160.",
+   "size": 331
+  },
+  "0x60be6a0": {
+   "calls": [],
+   "end": "0x60be7eb",
+   "name": "enum_60be6a0",
+   "role": "Enum lookup (u8): byte-identical to 0x60be160; map 0x65070e0.",
+   "size": 331
+  },
+  "0x60be7f0": {
+   "calls": [],
+   "end": "0x60be93b",
+   "name": "enum_60be7f0",
+   "role": "Enum lookup (u32): the one u32 lookup -- reads/writes a full u32 at +0x28; map 0x6507020.",
+   "size": 331
+  },
+  "0x60be940": {
+   "calls": [],
+   "end": "0x60bea8b",
+   "name": "enum_60be940",
+   "role": "Enum lookup (u8): byte-identical to 0x60be160; map 0x6506fe0.",
+   "size": 331
+  },
+  "0x60bea8c": {
+   "calls": [
+    "0x5e33fb0",
+    "0x60b7d80",
+    "0x61cf670"
+   ],
+   "end": "0x60bedba",
+   "name": "host_b_catch",
+   "role": "Host B landing pad: cleanup, then selector 1 catches std::exception and reports code 4 'Error parsing <name>:<what>' via the status builder.",
+   "size": 814
+  },
+  "0x60bedc0": {
+   "calls": [
+    "0x60b7cd0",
+    "0x5d350c0",
+    "0x61d10a0",
+    "0x61cf670",
+    "0x60be7f0",
+    "0x60b9d70",
+    "0x6099e70",
+    "0x5e33fb0",
+    "0x61d1840",
+    "0x61d17d0",
+    "0x61c7fc0",
+    "0x60be400",
+    "0x60be2b0",
+    "0x60be160",
+    "0x60be6a0",
+    "0x60be550",
+    "0x60be940",
+    "0x61d18a0",
+    "0x61d1b30",
+    "0x61d1b90",
+    "0x60b7d80",
+    "0x61d1480",
+    "0x61d1e30",
+    "0x61d1ef0",
+    "0x61d1540",
+    "0x609ba30",
+    "0x60bea8c"
+   ],
+   "end": "0x60bf5bc",
+   "name": "host_b",
+   "role": "Find host B: the kind switch on desc+0xa8 (jump table 0x9786b4, 25 entries) over the nine text parsers, the seven enum lookups, the hex decode, the string assign, the 0x15/0x16 flag/link path and the code-3/code-4 reports.",
+   "size": 2044
+  },
+  "0x60c1190": {
+   "calls": [
+    "0x61cf670"
+   ],
+   "end": "0x60c1887",
+   "name": "parser",
+   "role": "Options parser (re-shipped from #3485): brace stripping, key=value loop over delimiters '={};', duplicate keys overwritten; errors 'Mismatched key value pair, '=' expected', 'Unexpected char in key', 'Empty key found', 'Mismatched curly braces for nested options', 'Unexpected chars after nested options'.",
+   "size": 1783
+  },
+  "0x60db710": {
+   "calls": [
+    "0x6099ce0",
+    "0x5d350c0"
+   ],
+   "end": "0x60dbd69",
+   "name": "block_ctor",
+   "role": "BlockTableOptions ctor (boundary): sub-constructors 0x60db1e0/0x60d7fb0/0x60d6fd0, mutex init 0x60d50c0, options_record_append (name = the options struct's leading string, global 0x6507540) and 0x5db8800; vtables 0x64d39a8/0x64d3a70/0x64c9c60/0x64c9a40; throws on map::at.",
+   "size": 1625
+  },
+  "0x60dbd80": {
+   "calls": [
+    "0x60db710"
+   ],
+   "end": "0x60dbdbb",
+   "name": "block_creator",
+   "role": "new(0x260) + the BlockTableOptions constructor 0x60db710.",
+   "size": 59
+  },
+  "0x6193a00": {
+   "calls": [
+    "0x6099ce0"
+   ],
+   "end": "0x6193b1c",
+   "name": "plain_ctor",
+   "role": "PlainTableOptions ctor: zeroes +0x08/+0x10/+0x18, installs vtable 0x64d6628, copies the 0x28-byte options struct into +0x20..+0x47, appends the record {name PlainTableOptions, obj+0x20, global 0x6508260}.",
+   "size": 284
+  },
+  "0x6193b40": {
+   "calls": [
+    "0x6193a00"
+   ],
+   "end": "0x6193b7b",
+   "name": "plain_creator",
+   "role": "new(0x48) + the PlainTableOptions constructor 0x6193a00.",
+   "size": 59
+  },
+  "0x61c7dc0": {
+   "calls": [],
+   "end": "0x61c7e16",
+   "name": "hexval",
+   "role": "Hex digit value: '0'-'9' -> 0-9, 'A'-'F'/'a'-'f' -> 10-15, anything else -> -1.",
+   "size": 86
+  },
+  "0x61c7fc0": {
+   "calls": [
+    "0x61c7dc0"
+   ],
+   "end": "0x61c80f4",
+   "name": "hex_decode",
+   "role": "Hex decode: odd input length or a null out -> False; an invalid digit -> False with out left partially filled; success -> True.",
+   "size": 308
+  },
+  "0x61cf610": {
+   "calls": [],
+   "end": "0x61cf64f",
+   "name": "cstr_dup",
+   "role": "strdup-like: strlen+1, new char[], __strncpy_chk, pointer stored into *(out); returns out.",
+   "size": 63
+  },
+  "0x61cf670": {
+   "calls": [],
+   "end": "0x61cf767",
+   "name": "status_builder",
+   "role": "Status builder (re-shipped from #3488): writes msg1 + ': ' + msg2 into the 16-byte Status; both message literals already end in ': ', so the binary genuinely reports doubled separators (e.g. 'Could not find option: : foo').",
+   "size": 247
+  },
+  "0x61d0ee0": {
+   "calls": [],
+   "end": "0x61d0efc",
+   "name": "escape_decoder",
+   "role": "Escape decoder: 'r' -> 13, 'n' -> 10, anything else -> the character itself.",
+   "size": 28
+  },
+  "0x61d10a0": {
+   "calls": [
+    "0x61d0ee0"
+   ],
+   "end": "0x61d11e3",
+   "name": "escape_assign",
+   "role": "Escape-assign: unescapes src into out; '\\\\' + char appends the decoded char, a trailing lone '\\\\' is dropped.",
+   "size": 323
+  },
+  "0x61d1390": {
+   "calls": [],
+   "end": "0x61d13db",
+   "name": "ends_with",
+   "role": "Suffix check (re-shipped from #3488): 1 when the suffix fits and the haystack's last bytes equal it, else 0; an empty suffix returns 1.",
+   "size": 75
+  },
+  "0x61d13e0": {
+   "calls": [],
+   "end": "0x61d1437",
+   "name": "str_compare",
+   "role": "Lexicographic string compare (re-shipped from #3488): memcmp over the shorter length, else the signed length difference clamped to int32.",
+   "size": 87
+  },
+  "0x61d1480": {
+   "calls": [],
+   "end": "0x61d1504",
+   "name": "bool_parser",
+   "role": "Bool parser: 'true' -> 1, 'false' -> 0, '1' -> 1, '0' -> 0; anything else throws invalid_argument built from the first argument.",
+   "size": 132
+  },
+  "0x61d1540": {
+   "calls": [],
+   "end": "0x61d178b",
+   "name": "stoull_parser",
+   "role": "stoull parser (__isoc23_strtoull, base 10): no digits -> invalid_argument('stoull'); ERANGE -> out_of_range('stoull'); suffix T/G/M/K shifts by 40/30/20/10.",
+   "size": 587
+  },
+  "0x61d17d0": {
+   "calls": [
+    "0x61d1540"
+   ],
+   "end": "0x61d17f6",
+   "name": "u8_parser",
+   "role": "u8 parser: stoull, then (value >> 8) == 0 or the shared stub throws out_of_range with the input text as the message.",
+   "size": 38
+  },
+  "0x61d1840": {
+   "calls": [
+    "0x61d1540"
+   ],
+   "end": "0x61d1866",
+   "name": "u32_parser",
+   "role": "u32 parser: stoull, then (value >> 32) == 0 or the shared stub throws out_of_range with the input text as the message.",
+   "size": 38
+  },
+  "0x61d18a0": {
+   "calls": [],
+   "end": "0x61d1aeb",
+   "name": "stoll_parser",
+   "role": "stoll parser (__isoc23_strtoll, base 10): instruction-identical to stoull except the conversion and the literal; same T/G/M/K suffix shifts.",
+   "size": 587
+  },
+  "0x61d1b30": {
+   "calls": [
+    "0x61d18a0"
+   ],
+   "end": "0x61d1b5b",
+   "name": "i32_parser",
+   "role": "i32-via-stoll parser: stoll, then (value + 0x80000000) >> 32 == 0 or the shared stub throws out_of_range with the input text as the message.",
+   "size": 43
+  },
+  "0x61d1b90": {
+   "calls": [],
+   "end": "0x61d1e0e",
+   "name": "stoi_parser",
+   "role": "stoi parser (__isoc23_strtol): range check before the suffix shift; G/M/K shift by 30/20/10 with 32-bit wrap; T/t shifts by NOTHING.",
+   "size": 638
+  },
+  "0x61d1e30": {
+   "calls": [],
+   "end": "0x61d1ee6",
+   "name": "stod_parser",
+   "role": "stod parser (strtod): no digits -> invalid_argument('stod'); ERANGE -> out_of_range('stod'); no suffix handling; trailing content ignored.",
+   "size": 182
+  },
+  "0x61d1ef0": {
+   "calls": [
+    "0x61d1540"
+   ],
+   "end": "0x61d1ef9",
+   "name": "stoull_alias",
+   "role": "stoull alias: two instructions -- endbr64; jmp 0x61d1540.",
+   "size": 9
+  }
+ },
+ "slug": "find-family-merge-115",
+ "task_id": "RE-001",
+ "tests": "tests/test_find_family_merge_115.py",
+ "verify": "research/work-items/RE-001-find-family-merge-115/verify.py",
+ "vtables": [
+  {
+   "address": "0x64d6628",
+   "note": "PlainTableOptions object vtable (0x64d6618 + 0x10), installed by plain_ctor."
+  },
+  {
+   "address": "0x64c8748",
+   "note": "Shared_ptr control vtable (0x64c8738 + 0x10) installed by the plain/block hosts; counts 0x100000001 from .rodata 0x459b20."
+  },
+  {
+   "address": "0x64d39a8",
+   "note": "Block ctor vtable reference (boundary)."
+  },
+  {
+   "address": "0x64d3a70",
+   "note": "Block ctor vtable reference (boundary)."
+  },
+  {
+   "address": "0x64c9c60",
+   "note": "Block ctor vtable reference (boundary)."
+  },
+  {
+   "address": "0x64c9a40",
+   "note": "Block ctor vtable reference (boundary)."
+  }
+ ]
+}
