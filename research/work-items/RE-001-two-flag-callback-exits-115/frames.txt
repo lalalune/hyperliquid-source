@@ -1,0 +1,4 @@
+0075b038 000000000000004c 0002ae0c FDE cie=00730230 pc=000000000606a170..000000000606a3d6
+0075b104 000000000000004c 0002aed8 FDE cie=00730230 pc=000000000606a650..000000000606a88e
+The only caller of both windows is the callback 0x606a890 (FDE at .eh_frame offset 0x368ddc, length 0x18, CIE 0, pc 0x606a890..0x606a8bf), mapped by RE-001-two-flag-lazy-init-115 and not re-listed here.
+Both windows share CIE 0x730230 (augmentation zPLR, LSDA encoding sdata4/pcrel); their LSDA call-site tables are decoded in records.json. The landing-pad stubs at the end of each window jump to shared cleanup thunks below the windows (0x606a126..0x606a151 for 0x606a170, 0x606a604..0x606a62a for 0x606a650); those thunks are cited for the pad contract only and are not part of either window.

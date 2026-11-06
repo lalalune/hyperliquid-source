@@ -1,0 +1,15 @@
+RELA scan (whole file, .rela.dyn file range 0x6be8+0x163cc8, .rela.plt 0x16a8b0+0x1a10):
+rela.dyn: addend hits for the window starts 0x606a170 and 0x606a650: none
+rela.plt: addend hits for the same window starts: none
+
+In-window rip-relative references (two, both flavour sentinels):
+- 0x606a1c2 in 0x606a170 compares the first chain flavour against the qword at 0x64ece40. That slot's file bytes are 0x0 and its .rela.dyn entry is R_X86_64_RELATIVE (type 8, sym 0) with addend 0x5d8aee0, so the runtime sentinel value is 0x5d8aee0.
+- 0x606a78a in 0x606a650 compares each element's flavour against the qword at 0x64ed568. That slot's .rela.dyn entry is R_X86_64_RELATIVE (type 8, sym 0) with addend 0x5d48820, so the runtime sentinel value is 0x5d48820 (the slot's file bytes, 0x63f1236, are the pre-relocation link-time value).
+
+Both windows use %fs:0x28 (stack canary): read in each prologue, stored at 0x28(%rsp) in 0x606a170 and at 0x38(%rsp) in 0x606a650, rechecked on every exit path and inside every throw stub; a mismatch calls __stack_chk_fail (shared call at 0x606a339 in 0x606a170, at 0x606a85a in 0x606a650).
+
+PLT calls in 0x606a170: pthread_mutex_lock (0x63f0b60) at 0x606a19f, 0x606a1d6, 0x606a1fe, 0x606a22b, 0x606a25d; pthread_mutex_unlock (0x63f0b70) at 0x606a284, 0x606a28c, 0x606a294, 0x606a29c, plus the tail jump at 0x606a2d1; operator delete[] (0x63f0dc0) at 0x606a2ab; __throw_system_error (0x63f0f90) at 0x606a334, 0x606a350, 0x606a367, 0x606a37e, 0x606a395; __stack_chk_fail (0x63f0d70) at 0x606a339.
+PLT calls in 0x606a650: pthread_mutex_lock (0x63f0b60) at 0x606a6dc; pthread_mutex_unlock (0x63f0b70) at 0x606a6f9, 0x606a82c; operator delete(void*, unsigned long) (0x63f0d80) at 0x606a71b, 0x606a7c4, 0x606a84b; __throw_system_error (0x63f0f90) at 0x606a871; __stack_chk_fail (0x63f0d70) at 0x606a85a.
+Direct calls in-window: none in 0x606a170; in 0x606a650, to 0x60d5230 at 0x606a757, 0x60d52f0 at 0x606a766 and 0x60d5700 at 0x606a76f (call sites and arguments only; internals not read).
+Virtual calls in-window: in 0x606a170, call *0x10(%rax) at 0x606a27e, call *%rax at 0x606a2e8, call *%r14 at 0x606a2fb, call *%r15 at 0x606a30b, call *%rcx at 0x606a31b; in 0x606a650, call *%rax at 0x606a796.
+Whole-file qword scan for 0x606a170 and 0x606a650 (8-byte little-endian): no occurrence of either.
