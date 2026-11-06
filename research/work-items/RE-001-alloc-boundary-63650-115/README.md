@@ -35,7 +35,7 @@ publish into the 24-byte result struct on every exit path?
   re-verifies sampled instructions byte-for-byte against a
   fresh objdump run and the raw binary.
 - Relationship to earlier work: the buffer growth packet
-  (RE-001-buffer-grow-963a10-115, PR #3342) pins this routine's
+  (RE-001-buffer-grow-963a10-115, PR #3346) pins this routine's
   principal caller and records the boundary from the caller's
   side — the result layout and the tag-1 failure hand-off — and
   explicitly leaves this body as its first unknown ("a separate
