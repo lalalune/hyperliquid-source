@@ -1,0 +1,87 @@
+target	site	kind	containing_fde	role
+0x5f32900	0x5f0d1e5	direct_call	0x5f0d050..0x5f0d704	MemTable lookup path (no catalogue row; calls NewRangeTombstoneIterator 0x5f0b050 and MaxCoveringTombstoneSeqnum)
+0x5f32900	0x5f0e09c	direct_call	0x5f0d740..0x5f0e2c7	MemTable Get path (no catalogue row; calls GetFromTable 0x5f0ce10 and MaxCoveringTombstoneSeqnum)
+0x5f32900	0x5f3d5aa	direct_call	0x5f3d4f0..0x5f3d64a	TableCache::UpdateRangeTombstoneSeqnums: the max covering seqnum for the key
+0x5f32900	0x5f4055e	direct_call	0x5f40070..0x5f40a8d	TableCache::Get: the max covering seqnum for the key
+0x5f316d0	0x5f320b5	direct_call	0x5f320a0..0x5f320e1	Seek: position at the covering tombstone for the key
+0x5f316d0	0x5f32920	direct_call	0x5f32900..0x5f32a0a	MaxCoveringTombstoneSeqnum: position before reading the covering seqnum
+0x5f31980	0x5f32505	direct_call	0x5f324f0..0x5f32531	SeekForPrev: position at the covering tombstone for the key
+0x5f31c80	0x5f31f63	tail_jump	0x5f31eb0..0x5f32099	SeekToTopFirst: scan forward to the first visible tombstone
+0x5f31c80	0x5f320be	tail_jump	0x5f320a0..0x5f320e1	Seek: scan forward to the first visible tombstone
+0x5f31c80	0x5f325f3	tail_jump	0x5f32540..0x5f32719	TopNext: scan forward to the next visible tombstone
+0x5f31eb0	0x5f25ff0	tail_jump	0x5f25fd0..0x5f25ff5	TruncatedRangeDelIterator::SeekToFirst forwards to the fragmented iterator's SeekToTopFirst
+0x5f320f0	0x5f323c4	tail_jump	0x5f32310..0x5f324ea	SeekToTopLast: scan backward to the first visible tombstone
+0x5f320f0	0x5f3250e	tail_jump	0x5f324f0..0x5f32531	SeekForPrev: scan backward to the first visible tombstone
+0x5f320f0	0x5f327d4	tail_jump	0x5f32720..0x5f328fa	TopPrev: scan backward to the previous visible tombstone
+0x5f32310	0x5f26020	tail_jump	0x5f26000..0x5f26025	TruncatedRangeDelIterator::SeekToLast forwards to the fragmented iterator's SeekToTopLast
+0x5f32540	0x5f25dee	direct_call	0x5f25d00..0x5f25eb1	TruncatedRangeDelIterator::SeekInternalKey: advance to the next top tombstone
+0x5f32540	0x5f26534	direct_call	0x5f26340..0x5f268ba	RangeDelAggregator::StripeRep::IsRangeOverlapped: advance to the next top tombstone
+0x5f32540	0x5f2be17	direct_call	0x5f2bc80..0x5f2d612	ForwardRangeDelIterator::ShouldDelete: advance to the next top tombstone
+0x5f32540	0x5f2c01a	direct_call	0x5f2bc80..0x5f2d612	ForwardRangeDelIterator::ShouldDelete: advance to the next top tombstone (second site)
+0x5f32540	0x617a3bb	direct_call	0x617a070..0x617a679	MergingIterator path (no catalogue row; drives a TruncatedRangeDelIterator): advance to the next top tombstone
+0x5f32540	0x617c547	direct_call	0x617c1d0..0x617ca6f	range-del aggregation path (no catalogue row): advance to the next top tombstone
+0x5f32540	0x6180a1f	direct_call	0x61804b0..0x6181840	MergingIterator path (no catalogue row): advance to the next top tombstone
+0x5f32540	0x6182033	direct_call	0x6181de0..0x6182956	MergingIterator path (no catalogue row; calls TruncatedRangeDelIterator::Seek): advance to the next top tombstone
+0x5f32720	0x5f29ebe	direct_call	0x5f29d20..0x5f2bc75	ReverseRangeDelIterator::ShouldDelete: step back to the previous top tombstone
+0x5f32720	0x5f2a0c8	direct_call	0x5f29d20..0x5f2bc75	ReverseRangeDelIterator::ShouldDelete: step back to the previous top tombstone (second site)
+0x5f32720	0x617750b	direct_call	0x6177250..0x6177720	MergingIterator reverse path (no catalogue row; calls TruncatedRangeDelIterator::SeekForPrev): step back to the previous top tombstone
+0x5f32720	0x617976f	direct_call	0x61791d0..0x6179a6b	range-del aggregation reverse path (no catalogue row): step back to the previous top tombstone
+0x5eaa060	0x5d641b1	direct_call	0x5d64100..0x5d6434d	shared AppendInternalKey call in _ZN7rocksdb6DBImpl27GetApproximateMemTableStatsEPNS_18ColumnFamilyHandleERKNS_5RangeEPmS6_
+0x5eaa060	0x5d6420a	direct_call	0x5d64100..0x5d6434d	shared AppendInternalKey call in _ZN7rocksdb6DBImpl27GetApproximateMemTableStatsEPNS_18ColumnFamilyHandleERKNS_5RangeEPmS6_
+0x5eaa060	0x5d645f2	direct_call	0x5d643b0..0x5d64ce1	shared AppendInternalKey call in _ZN7rocksdb6DBImpl19GetApproximateSizesERKNS_24SizeApproximationOptionsEPNS_18ColumnFamilyHandleEPKN
+0x5eaa060	0x5d64640	direct_call	0x5d643b0..0x5d64ce1	shared AppendInternalKey call in _ZN7rocksdb6DBImpl19GetApproximateSizesERKNS_24SizeApproximationOptionsEPNS_18ColumnFamilyHandleEPKN
+0x5eaa060	0x5d64930	direct_call	0x5d643b0..0x5d64ce1	shared AppendInternalKey call in _ZN7rocksdb6DBImpl19GetApproximateSizesERKNS_24SizeApproximationOptionsEPNS_18ColumnFamilyHandleEPKN
+0x5eaa060	0x5d64999	direct_call	0x5d643b0..0x5d64ce1	shared AppendInternalKey call in _ZN7rocksdb6DBImpl19GetApproximateSizesERKNS_24SizeApproximationOptionsEPNS_18ColumnFamilyHandleEPKN
+0x5eaa060	0x5d985e5	direct_call	0x5d98230..0x5d98dac	shared AppendInternalKey call in _ZN7rocksdb16ColumnFamilyData26RangesOverlapWithMemtablesERKNS_10autovectorINS_5RangeELm8EEEPNS_12Su
+0x5eaa060	0x5df0834	direct_call	0x5df04e0..0x5df0e0e	shared AppendInternalKey call in _ZN7rocksdb6DBImpl19RunManualCompactionEPNS_16ColumnFamilyDataEiiRKNS_19CompactRangeOptionsEPKNS_5Sl
+0x5eaa060	0x5df089e	direct_call	0x5df04e0..0x5df0e0e	shared AppendInternalKey call in _ZN7rocksdb6DBImpl19RunManualCompactionEPNS_16ColumnFamilyDataEiiRKNS_19CompactRangeOptionsEPKNS_5Sl
+0x5eaa060	0x5e0e75a	direct_call	0x5e0d150..0x5e0eb39	shared AppendInternalKey call in _ZN7rocksdb13CompactionJob24OpenCompactionOutputFileEPNS_18SubcompactionStateERNS_17CompactionOutput
+0x5eaa060	0x5e0e7b0	direct_call	0x5e0d150..0x5e0eb39	shared AppendInternalKey call in _ZN7rocksdb13CompactionJob24OpenCompactionOutputFileEPNS_18SubcompactionStateERNS_17CompactionOutput
+0x5eaa060	0x5e15503	direct_call	0x5e15310..0x5e183ab	shared AppendInternalKey call in FDE 0x5e15310 (no catalogue row)
+0x5eaa060	0x5e1599c	direct_call	0x5e15310..0x5e183ab	shared AppendInternalKey call in FDE 0x5e15310 (no catalogue row)
+0x5eaa060	0x5e16487	direct_call	0x5e15310..0x5e183ab	shared AppendInternalKey call in FDE 0x5e15310 (no catalogue row)
+0x5eaa060	0x5e169a4	direct_call	0x5e15310..0x5e183ab	shared AppendInternalKey call in FDE 0x5e15310 (no catalogue row)
+0x5eaa060	0x5e16d47	direct_call	0x5e15310..0x5e183ab	shared AppendInternalKey call in FDE 0x5e15310 (no catalogue row)
+0x5eaa060	0x5e1769f	direct_call	0x5e15310..0x5e183ab	shared AppendInternalKey call in FDE 0x5e15310 (no catalogue row)
+0x5eaa060	0x5e17f45	direct_call	0x5e15310..0x5e183ab	shared AppendInternalKey call in FDE 0x5e15310 (no catalogue row)
+0x5eaa060	0x5e1d1f2	direct_call	0x5e1b9c0..0x5e20481	shared AppendInternalKey call in FDE 0x5e1b9c0 (no catalogue row)
+0x5eaa060	0x5e1e6d9	direct_call	0x5e1b9c0..0x5e20481	shared AppendInternalKey call in FDE 0x5e1b9c0 (no catalogue row)
+0x5eaa060	0x5e1fbf1	direct_call	0x5e1b9c0..0x5e20481	shared AppendInternalKey call in FDE 0x5e1b9c0 (no catalogue row)
+0x5eaa060	0x5e1fd7b	direct_call	0x5e1b9c0..0x5e20481	shared AppendInternalKey call in FDE 0x5e1b9c0 (no catalogue row)
+0x5eaa060	0x5e458ed	direct_call	0x5e45820..0x5e45b64	shared AppendInternalKey call in _ZN7rocksdb6DBImpl19SuggestCompactRangeEPNS_18ColumnFamilyHandleEPKNS_5SliceES5_
+0x5eaa060	0x5e4592d	direct_call	0x5e45820..0x5e45b64	shared AppendInternalKey call in _ZN7rocksdb6DBImpl19SuggestCompactRangeEPNS_18ColumnFamilyHandleEPKNS_5SliceES5_
+0x5eaa060	0x5ea0ed4	direct_call	0x5ea02e0..0x5ea24ca	shared AppendInternalKey call in FDE 0x5ea02e0 (no catalogue row)
+0x5eaa060	0x5ea1490	direct_call	0x5ea02e0..0x5ea24ca	shared AppendInternalKey call in FDE 0x5ea02e0 (no catalogue row)
+0x5eaa060	0x5ea1e58	direct_call	0x5ea02e0..0x5ea24ca	shared AppendInternalKey call in FDE 0x5ea02e0 (no catalogue row)
+0x5eaa060	0x5ea223f	direct_call	0x5ea02e0..0x5ea24ca	shared AppendInternalKey call in FDE 0x5ea02e0 (no catalogue row)
+0x5eaa060	0x5ea4a1f	direct_call	0x5ea4950..0x5ea5dcd	shared AppendInternalKey call in FDE 0x5ea4950 (no catalogue row)
+0x5eaa060	0x5eba9f7	direct_call	0x5eba980..0x5ebaa54	shared AppendInternalKey call in _ZNK7rocksdb32FragmentedRangeTombstoneIterator3keyEv
+0x5eaa060	0x5ec174a	direct_call	0x5ec0ab0..0x5ec250d	shared AppendInternalKey call in _ZN7rocksdb27ExternalSstFileIngestionJob19GetIngestedFileInfoERKNSt7__cxx1112basic_stringIcSt11char_
+0x5eaa060	0x5ec17bc	direct_call	0x5ec0ab0..0x5ec250d	shared AppendInternalKey call in _ZN7rocksdb27ExternalSstFileIngestionJob19GetIngestedFileInfoERKNSt7__cxx1112basic_stringIcSt11char_
+0x5eaa060	0x5ec1993	direct_call	0x5ec0ab0..0x5ec250d	shared AppendInternalKey call in _ZN7rocksdb27ExternalSstFileIngestionJob19GetIngestedFileInfoERKNSt7__cxx1112basic_stringIcSt11char_
+0x5eaa060	0x5ec1bc1	direct_call	0x5ec0ab0..0x5ec250d	shared AppendInternalKey call in _ZN7rocksdb27ExternalSstFileIngestionJob19GetIngestedFileInfoERKNSt7__cxx1112basic_stringIcSt11char_
+0x5eaa060	0x5ec1d22	direct_call	0x5ec0ab0..0x5ec250d	shared AppendInternalKey call in _ZN7rocksdb27ExternalSstFileIngestionJob19GetIngestedFileInfoERKNSt7__cxx1112basic_stringIcSt11char_
+0x5eaa060	0x5ec1e74	direct_call	0x5ec0ab0..0x5ec250d	shared AppendInternalKey call in _ZN7rocksdb27ExternalSstFileIngestionJob19GetIngestedFileInfoERKNSt7__cxx1112basic_stringIcSt11char_
+0x5eaa060	0x5ec221b	direct_call	0x5ec0ab0..0x5ec250d	shared AppendInternalKey call in _ZN7rocksdb27ExternalSstFileIngestionJob19GetIngestedFileInfoERKNSt7__cxx1112basic_stringIcSt11char_
+0x5eaa060	0x5ee49f6	direct_call	0x5ee3840..0x5ee5d2b	shared AppendInternalKey call in FDE 0x5ee3840 (no catalogue row)
+0x5eaa060	0x5ee4ab7	direct_call	0x5ee3840..0x5ee5d2b	shared AppendInternalKey call in FDE 0x5ee3840 (no catalogue row)
+0x5eaa060	0x5ee5429	direct_call	0x5ee3840..0x5ee5d2b	shared AppendInternalKey call in FDE 0x5ee3840 (no catalogue row)
+0x5eaa060	0x5ee564c	direct_call	0x5ee3840..0x5ee5d2b	shared AppendInternalKey call in FDE 0x5ee3840 (no catalogue row)
+0x5eaa060	0x5ee5b80	direct_call	0x5ee3840..0x5ee5d2b	shared AppendInternalKey call in FDE 0x5ee3840 (no catalogue row)
+0x5eaa060	0x5f1b8e8	direct_call	0x5f1b550..0x5f1e986	shared AppendInternalKey call in FDE 0x5f1b550 (no catalogue row)
+0x5eaa060	0x5f1bbcb	direct_call	0x5f1b550..0x5f1e986	shared AppendInternalKey call in FDE 0x5f1b550 (no catalogue row)
+0x5eaa060	0x5f1c4c9	direct_call	0x5f1b550..0x5f1e986	shared AppendInternalKey call in FDE 0x5f1b550 (no catalogue row)
+0x5eaa060	0x5f1c619	direct_call	0x5f1b550..0x5f1e986	shared AppendInternalKey call in FDE 0x5f1b550 (no catalogue row)
+0x5eaa060	0x5f256f8	direct_call	0x5f25510..0x5f25707	shared AppendInternalKey call in _ZNK7rocksdb12_GLOBAL__N_128TruncatedRangeDelMergingIter3keyEv
+0x5eaa060	0x5f66f50	direct_call	0x5f66ed0..0x5f67123	shared AppendInternalKey call in _ZN7rocksdb12_GLOBAL__N_119OverlapWithIteratorEPKNS_10ComparatorERKNS_5SliceES6_PNS_20InternalIterat
+0x5eaa060	0x5f6a982	direct_call	0x5f6a820..0x5f6abac	shared AppendInternalKey call in _ZN7rocksdb21SomeFileOverlapsRangeERKNS_21InternalKeyComparatorEbRKNS_15LevelFilesBriefEPKNS_5SliceE
+0x5eaa060	0x5f88b0a	direct_call	0x5f889e0..0x5f89249	shared AppendInternalKey call in _ZNK7rocksdb7Version28GetPropertiesOfTablesInRangeEPKNS_5RangeEmPSt13unordered_mapINSt7__cxx1112basi
+0x5eaa060	0x5f88b68	direct_call	0x5f889e0..0x5f89249	shared AppendInternalKey call in _ZNK7rocksdb7Version28GetPropertiesOfTablesInRangeEPKNS_5RangeEmPSt13unordered_mapINSt7__cxx1112basi
+0x5eaa060	0x610f107	direct_call	0x610e4b0..0x610f326	shared AppendInternalKey call in _ZN7rocksdb15BlockBasedTable9DumpTableEPNS_12WritableFileE
+0x5eaa060	0x6163294	direct_call	0x6161440..0x616408a	shared AppendInternalKey call in _ZN7rocksdb18CuckooTableBuilder6FinishEv
+0x5eaa060	0x61798b5	direct_call	0x61791d0..0x6179a6b	shared AppendInternalKey call in FDE 0x61791d0 (no catalogue row)
+0x5eaa060	0x617c8d1	direct_call	0x617c1d0..0x617ca6f	shared AppendInternalKey call in FDE 0x617c1d0 (no catalogue row)
+0x5eaa060	0x61801bb	direct_call	0x617f6e0..0x6180473	shared AppendInternalKey call in FDE 0x617f6e0 (no catalogue row)
+0x5eaa060	0x6180adb	direct_call	0x61804b0..0x6181840	shared AppendInternalKey call in FDE 0x61804b0 (no catalogue row)
+0x5eaa060	0x6181acb	direct_call	0x6181840..0x6181d97	shared AppendInternalKey call in FDE 0x6181840 (no catalogue row)
+0x5eaa060	0x6182245	direct_call	0x6181de0..0x6182956	shared AppendInternalKey call in FDE 0x6181de0 (no catalogue row)
