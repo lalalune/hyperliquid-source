@@ -81,7 +81,9 @@ This packet does not implement or simulate a filesystem durability guarantee.
 This is independently authored offline evidence tooling, not a Rust equivalent
 or a source-reconstruction result. No copied inferred `can1357` code, normalized
 byte matching, transplanted implementation bytes or build-identity claim.
-No catalogue, component, byte-coverage registry or progress gate is changed.
+No component, byte-coverage registry or progress gate is changed. Required
+catalogue regeneration updates only generated work-item inventory counts in
+README.md and docs/assets/research-progress.svg (559 to 560), not acceptance.
 
 The local run executed 14 unittest methods and passed all 14 in 2.286 seconds.
 The recorded target replay also exited zero. Controls mutate the descriptor
@@ -93,9 +95,24 @@ the full-digest layer to exercise the structural/instruction checks themselves.
 They do not execute mutated binaries and do not claim robustness against every
 malformed ELF. The exact verifier stdout is reproducible from `boundary.json`.
 
-Required independent repository and global checks are separate from this local
-proof; their actual receipts must be reported with any submission. This local
-record is not a statement that CI or the full suite has passed.
+The first independent validation attempt passed make doctor and artifact,
+import and packet verification, then stopped at a stale generated README.md
+work-item count. `make catalogue` regenerated the README and SVG inventory
+counts. These are historical setup results, not the final validation status.
+
+A subsequent independent run, `aeea4dcd094343aa8d67012d5c22320e`, validated
+corrected tree `d6ed0d1c772a20020176043603cdcac8b36b4cf3` against the pinned
+repository baseline above. `make doctor`, `make verify catalogue-check`, and
+`make reproduce` exited zero. The independent scoped command
+`python3 -m unittest discover -s tests -p test_node115_file_durability_boundary.py`
+passed all 14 tests in 2.616 seconds. Both proposed and unchanged-baseline
+`make test` runs timed out: exit -9, wall timeout, 980 reported tests each,
+3600.030 and 3600.085 seconds respectively, with no observed failures.
+Neither global run completed; neither is a passing global-suite result.
+Retained failure-detail streams are empty. `run-results.json` separates this
+independent history from the original local receipt. Later exact-tree
+publication validation, if any, is reported separately by the publisher;
+these historical results do not attest a different tree or hosted CI.
 
 ## Results and limitations
 
