@@ -1,0 +1,96 @@
+{
+  "coordinate_system": "ELF VA; all stack offsets are current factory RSP",
+  "input": {
+    "owned_output": "entry RDI retained RBX",
+    "input_slice": [
+      "entry RSI -> rsp+0xa8",
+      "entry RDX -> rsp+0xb0"
+    ]
+  },
+  "format_arguments": {
+    "primary_descriptor": "0x440e47: c0 01 2f c0 01 2f c0 00",
+    "primary_args": [
+      {
+        "address": "global pointer from slot64e0918 plus0x18",
+        "callback": "0x14fcb40",
+        "callback_reads": [
+          "arg+8 pointer",
+          "arg+16 length"
+        ]
+      },
+      {
+        "address": "rsp+0xb8 holding pointer465a0e and length3",
+        "callback": "0x15ebba0",
+        "callback_reads": [
+          "arg+0 pointer",
+          "arg+8 length"
+        ]
+      },
+      {
+        "address": "rsp+0xa8 holding original input pair",
+        "callback": "0x15ebba0",
+        "callback_reads": [
+          "arg+0 pointer",
+          "arg+8 length"
+        ]
+      }
+    ],
+    "fallback_descriptor": "0x438859: 05 2f 74 6d 70 2f c0 00",
+    "fallback_arg": "address rsp+0x50 of complete original owned output; callback14fcb40"
+  },
+  "primary_owned_result": {
+    "first_output": "rsp+0x70 cap, rsp+0x78 ptr, rsp+0x80 len",
+    "retained": "rsp+0x50 cap, rsp+0x58 ptr, rsp+0x60 len"
+  },
+  "fallback_owned_result": {
+    "first_output": "rsp+0x08 cap, rsp+0x10 ptr, rsp+0x18 len",
+    "retained": "R12 cap, R15 ptr, R14 len; RBP/R13 track independently selected parent candidate"
+  },
+  "parent_selection": {
+    "construct": "byte prefix6; front1/back2; absolute iff len!=0 and byte0==0x2f",
+    "next_back_slot": "64e0938 ->5cab560",
+    "eligible_tags": [
+      7,
+      8,
+      9
+    ],
+    "remaining_slot": "64e09b0 ->5c8e8c0",
+    "utf8_slot": "64dfca8 ->16815e0",
+    "replacement": "remaining pointer nonzero and UTF8 result dword !=1 selects its +8/+16 pair; otherwise retain whole path"
+  },
+  "preparation": {
+    "predicate": "64e0928 ->1500a60, accept if AL nonzero",
+    "otherwise": "64e0940 ->5c8f4c0 with option dword0x1ff, byte+4=1; zero RAX accepted; nonzero wraps via1500b90"
+  },
+  "conditional_returns": [
+    {
+      "condition": "primary predicate true OR primary create return zero",
+      "output": [
+        "original cap",
+        "original ptr",
+        "original len"
+      ],
+      "site": "150323b..150324c"
+    },
+    {
+      "condition": "primary create nonzero; fallback predicate true OR fallback create zero; original error handler and cleanup normally return",
+      "output": [
+        "fallback cap",
+        "fallback ptr",
+        "fallback len"
+      ],
+      "site": "1503261..150328d"
+    },
+    {
+      "condition": "both create returns nonzero; both dynamic error handlers and cleanup normally return",
+      "output": [
+        "original cap",
+        "original ptr",
+        "original len"
+      ],
+      "site": "1503209..150324c"
+    }
+  ],
+  "error_handlers": "dynamic call through first function pointer of wrapped object; implementation effects, termination and unwind not claimed",
+  "captured_execution_or_emulation": false
+}
