@@ -1,0 +1,1213 @@
+{
+ "artifact": "work/hl-node-115.bin",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "cache_ctor": {
+  "arguments": [
+   "rdi = cache (0xe8, operator new)",
+   "rsi = &list (pointer to the 0x80 list*)",
+   "rdx = owner+8",
+   "ecx = arg4 (0 in the host)",
+   "r8 = a 0x20-byte stack scratch at 0x30(%rsp) (zeroed by the host; the finalize fills it as a heap range, freed by the host after the install; exact type open)"
+  ],
+  "callers": "4 direct call sites: the host plus the sibling cache builder in FDE 0x5f0a3d0 and two other cache consumers (FDEs 0x5f29140, 0x6109c40)",
+  "finalize": "0x5f36c70(cache, 0x18(%rsp), owner+8, arg4 byte, scratch) at 0x5f3799f (main path) and 0x5f37ad1 (null-list path)",
+  "iteration": "when *list == 0, the null-list path finalizes at once (0x5f37aa8); otherwise a stack iterator (vtable 0x64cca10+0x10, Cleanable at its +0x8) walks the list via vtable slots 0x10 (Valid), 0x18 (Next), 0x50 (key), 0x60 (size), 0x38 and 0x90, counting entries at cache+0xd8 and summing sizes at cache+0xe0; a perf-level gate (TLS perf_level via _ZTHN7rocksdb10perf_levelE, counter at 0x64ed2b0) guards the counting path; the loop at 0x5f37900 builds the sorted index vector (begin +0xc0, end +0xc8, capacity +0xd0 per the teardown's vector triple)",
+  "name": "FragmentedRangeTombstoneListCache constructor (by shape)",
+  "zero_init": {
+   "+0x00..+0x10": "0",
+   "+0x10..+0x40": "0",
+   "+0x40": "0 (qword)",
+   "+0x48": "0 (dword)",
+   "+0x58": "0 (dword)",
+   "+0x60": "0",
+   "+0x68/+0x70": "&cache+0x58",
+   "+0x78": "0",
+   "+0x80..+0x90": "(cache+0x80, cache+0x80)",
+   "+0x90": "0",
+   "+0x98": "Cleanable (ctor 0x61bd0c0)",
+   "+0xb8": "0 (byte)",
+   "+0xc0..+0xd0": "0",
+   "+0xd8..+0xe8": "0"
+  }
+ },
+ "callers": {
+  "0x5f05120": [
+   {
+    "containing_fde": [
+     "0x5f061b0",
+     "0x5f06548"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f061b0 (exact use open)",
+    "site": "0x5f06367"
+   },
+   {
+    "containing_fde": [
+     "0x5f061b0",
+     "0x5f06548"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f061b0 (exact use open)",
+    "site": "0x5f06496"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f0a3d0 (exact use open)",
+    "site": "0x5f0a6ff"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f0a3d0 (exact use open)",
+    "site": "0x5f0a81e"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "host teardown: copies into the old cache's +0xc0 array (upper half)",
+    "site": "0x5f0ae27"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "host teardown: copies the old cache's +0xc0 array (lower half)",
+    "site": "0x5f0af39"
+   },
+   {
+    "containing_fde": [
+     "0x5f0b080",
+     "0x5f0b418"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f0b080 (exact use open)",
+    "site": "0x5f0b237"
+   },
+   {
+    "containing_fde": [
+     "0x5f0b080",
+     "0x5f0b418"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f0b080 (exact use open)",
+    "site": "0x5f0b366"
+   },
+   {
+    "containing_fde": [
+     "0x5f10d40",
+     "0x5f11798"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f10d40 (exact use open)",
+    "site": "0x5f115d5"
+   },
+   {
+    "containing_fde": [
+     "0x5f10d40",
+     "0x5f11798"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f10d40 (exact use open)",
+    "site": "0x5f116f1"
+   }
+  ],
+  "0x5f053d0": [
+   {
+    "containing_fde": [
+     "0x5f053d0",
+     "0x5f05678"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f053d0 (exact use open)",
+    "site": "0x5f055b9"
+   },
+   {
+    "containing_fde": [
+     "0x5f061b0",
+     "0x5f06548"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f061b0 (exact use open)",
+    "site": "0x5f06348"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f0a3d0 (exact use open)",
+    "site": "0x5f0a6e0"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "host teardown: moves the old cache's +0xc0 array entries",
+    "site": "0x5f0ae03"
+   },
+   {
+    "containing_fde": [
+     "0x5f0b080",
+     "0x5f0b418"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f0b080 (exact use open)",
+    "site": "0x5f0b218"
+   },
+   {
+    "containing_fde": [
+     "0x5f10d40",
+     "0x5f11798"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f10d40 (exact use open)",
+    "site": "0x5f115b6"
+   }
+  ],
+  "0x5f059b0": [
+   {
+    "containing_fde": [
+     "0x5f059b0",
+     "0x5f05b79"
+    ],
+    "kind": "direct_call",
+    "role": "self-recursion on the +0x18 child",
+    "site": "0x5f05a41"
+   },
+   {
+    "containing_fde": [
+     "0x5f061b0",
+     "0x5f06548"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f061b0 (exact use open)",
+    "site": "0x5f06234"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "sibling cache builder in FDE 0x5f0a3d0 (exact use open)",
+    "site": "0x5f0a610"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "host teardown: releases the old cache's +0x60 node list",
+    "site": "0x5f0acc4"
+   },
+   {
+    "containing_fde": [
+     "0x5f0b080",
+     "0x5f0b418"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f0b080 (exact use open)",
+    "site": "0x5f0b104"
+   },
+   {
+    "containing_fde": [
+     "0x5f10d40",
+     "0x5f11798"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f10d40 (exact use open)",
+    "site": "0x5f10e24"
+   }
+  ],
+  "0x5f0a9c0": [
+   {
+    "containing_fde": [
+     "0x5f0d740",
+     "0x5f0e2c7"
+    ],
+    "kind": "direct_call",
+    "role": "the merged RE-014 batch-lookup function 0x5f0d740 (window-5f0d740.objdump.txt, merged): at 0x5f0e061 it calls the host with (owner, arg2, seq>>8, flag), then applies 0x5f32900 to the returned iterator and destroys it via vtable slot 0x8",
+    "site": "0x5f0e061"
+   },
+   {
+    "containing_fde": [
+     "0x5f0b050",
+     "0x5f0b073"
+    ],
+    "kind": "tail_jump",
+    "role": "the merged RE-014 probe-gated-lookup thunk 0x5f0b050: tail-jumps to the host (by contract)",
+    "site": "0x5f0b068"
+   }
+  ],
+  "0x5f31380": [
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "host: builds the 0xc8 iterator from a fresh list (flag path)",
+    "site": "0x5f0aa15"
+   },
+   {
+    "containing_fde": [
+     "0x5f33950",
+     "0x5f33b36"
+    ],
+    "kind": "direct_call",
+    "role": "second ctor-A consumer in FDE 0x5f33950 (exact use open)",
+    "site": "0x5f33a3b"
+   }
+  ],
+  "0x5f315a0": [
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "host: builds the 0xc8 iterator from the cached shared_ptr",
+    "site": "0x5f0ab05"
+   }
+  ],
+  "0x5f32900": [
+   {
+    "containing_fde": [
+     "0x5f0d050",
+     "0x5f0d704"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f0d050 (exact use open)",
+    "site": "0x5f0d1e5"
+   },
+   {
+    "containing_fde": [
+     "0x5f0d740",
+     "0x5f0e2c7"
+    ],
+    "kind": "direct_call",
+    "role": "the batch-lookup caller (FDE 0x5f0d740): applies it to the host's returned iterator",
+    "site": "0x5f0e09c"
+   },
+   {
+    "containing_fde": [
+     "0x5f3d4f0",
+     "0x5f3d64a"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f3d4f0 (exact use open)",
+    "site": "0x5f3d5aa"
+   },
+   {
+    "containing_fde": [
+     "0x5f40070",
+     "0x5f40a8d"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f40070 (exact use open)",
+    "site": "0x5f4055e"
+   }
+  ],
+  "0x5f36c70": [
+   {
+    "containing_fde": [
+     "0x5f37410",
+     "0x5f37e31"
+    ],
+    "kind": "direct_call",
+    "role": "cache ctor: finalizes the cache (main path)",
+    "site": "0x5f3799f"
+   },
+   {
+    "containing_fde": [
+     "0x5f37410",
+     "0x5f37e31"
+    ],
+    "kind": "direct_call",
+    "role": "cache ctor: finalizes the cache (null-list path)",
+    "site": "0x5f37ad1"
+   }
+  ],
+  "0x5f37410": [
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "sibling cache builder in FDE 0x5f0a3d0 (exact use open)",
+    "site": "0x5f0a536"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "host: builds the 0xe8 cache from the fresh 0x80 list",
+    "site": "0x5f0ac12"
+   },
+   {
+    "containing_fde": [
+     "0x5f29140",
+     "0x5f294ce"
+    ],
+    "kind": "direct_call",
+    "role": "cache consumer in FDE 0x5f29140 (exact use open)",
+    "site": "0x5f29367"
+   },
+   {
+    "containing_fde": [
+     "0x6109c40",
+     "0x6109fca"
+    ],
+    "kind": "direct_call",
+    "role": "cache consumer in FDE 0x6109c40 (exact use open)",
+    "site": "0x6109f07"
+   }
+  ],
+  "0x605e170": [
+   {
+    "containing_fde": [
+     "0x5f117a0",
+     "0x5f11c38"
+    ],
+    "kind": "direct_call",
+    "role": "merged RE-001 shard-allocate 0x5f117a0: calls the shard refresh",
+    "site": "0x5f11931"
+   },
+   {
+    "containing_fde": [
+     "0x5f11c40",
+     "0x5f12162"
+    ],
+    "kind": "direct_call",
+    "role": "merged RE-001 allocate 0x5f11c40: calls the shard refresh",
+    "site": "0x5f11cf7"
+   }
+  ],
+  "0x60d5cd0": [
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "host: CPUID picker for the shard index",
+    "site": "0x5f0aa40"
+   },
+   {
+    "containing_fde": [
+     "0x605e170",
+     "0x605e20d"
+    ],
+    "kind": "direct_call",
+    "role": "shard helper: CPUID picker for the shard index",
+    "site": "0x605e17b"
+   },
+   {
+    "containing_fde": [
+     "0x606fba0",
+     "0x606fc59"
+    ],
+    "kind": "direct_call",
+    "role": "StatisticsImpl ticker slot 0xb0 0x606fba0 (open PR #3613): CPUID picker",
+    "site": "0x606fbc4"
+   },
+   {
+    "containing_fde": [
+     "0x606fef0",
+     "0x606ffce"
+    ],
+    "kind": "direct_call",
+    "role": "StatisticsImpl histogram slot 0xd8 0x606fef0 (open PR #3613): CPUID picker",
+    "site": "0x606ff0c"
+   },
+   {
+    "containing_fde": [
+     "0x606ffd0",
+     "0x60700c4"
+    ],
+    "kind": "direct_call",
+    "role": "StatisticsImpl histogram wrapper slot 0xd0 0x606ffd0 (open PR #3613): CPUID picker",
+    "site": "0x6070003"
+   },
+   {
+    "containing_fde": [
+     "0x61c1e10",
+     "0x61c1f0f"
+    ],
+    "kind": "direct_call",
+    "role": "ZSTD decompress slot claim 0x61c1e10 (open PR #3635): CPUID picker",
+    "site": "0x61c1e24"
+   }
+  ],
+  "0x61c4080": [
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "host: per-thread seed when the picker returns -1",
+    "site": "0x5f0ad68"
+   },
+   {
+    "containing_fde": [
+     "0x5f6b000",
+     "0x5f6b516"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f6b000 (exact use open)",
+    "site": "0x5f6b06a"
+   },
+   {
+    "containing_fde": [
+     "0x5f6b000",
+     "0x5f6b516"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f6b000 (exact use open)",
+    "site": "0x5f6b11a"
+   },
+   {
+    "containing_fde": [
+     "0x5f999d0",
+     "0x5f9a478"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5f999d0 (exact use open)",
+    "site": "0x5f9a116"
+   },
+   {
+    "containing_fde": [
+     "0x5fca940",
+     "0x5fcabdc"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x5fca940 (exact use open)",
+    "site": "0x5fcaa75"
+   },
+   {
+    "containing_fde": [
+     "0x605e170",
+     "0x605e20d"
+    ],
+    "kind": "direct_call",
+    "role": "shard helper: per-thread seed when the picker returns -1",
+    "site": "0x605e1d0"
+   },
+   {
+    "containing_fde": [
+     "0x605f340",
+     "0x605f6d5"
+    ],
+    "kind": "direct_call",
+    "role": "HashLinkListRep index-insert 0x605f340 (open PR #3575): per-thread seed",
+    "site": "0x605f4bc"
+   },
+   {
+    "containing_fde": [
+     "0x6063150",
+     "0x6063229"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x6063150 (exact use open)",
+    "site": "0x6063165"
+   },
+   {
+    "containing_fde": [
+     "0x6066b80",
+     "0x6066d61"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x6066b80 (exact use open)",
+    "site": "0x6066bc9"
+   },
+   {
+    "containing_fde": [
+     "0x6066f20",
+     "0x6067450"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x6066f20 (exact use open)",
+    "site": "0x60671b1"
+   },
+   {
+    "containing_fde": [
+     "0x606fba0",
+     "0x606fc59"
+    ],
+    "kind": "direct_call",
+    "role": "ticker slot 0xb0 (open PR #3613): seed advance",
+    "site": "0x606fc20"
+   },
+   {
+    "containing_fde": [
+     "0x606fef0",
+     "0x606ffce"
+    ],
+    "kind": "direct_call",
+    "role": "histogram slot 0xd8 (open PR #3613): seed advance",
+    "site": "0x606ff90"
+   },
+   {
+    "containing_fde": [
+     "0x606ffd0",
+     "0x60700c4"
+    ],
+    "kind": "direct_call",
+    "role": "histogram wrapper 0xd0 (open PR #3613): seed advance",
+    "site": "0x6070088"
+   },
+   {
+    "containing_fde": [
+     "0x60e5610",
+     "0x60e5a39"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x60e5610 (exact use open)",
+    "site": "0x60e56f5"
+   },
+   {
+    "containing_fde": [
+     "0x60f4a00",
+     "0x60f4cb5"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x60f4a00 (exact use open)",
+    "site": "0x60f4b2a"
+   },
+   {
+    "containing_fde": [
+     "0x616f960",
+     "0x616fb83"
+    ],
+    "kind": "direct_call",
+    "role": "consumer in FDE 0x616f960 (exact use open)",
+    "site": "0x616fb33"
+   },
+   {
+    "containing_fde": [
+     "0x61c1e10",
+     "0x61c1f0f"
+    ],
+    "kind": "direct_call",
+    "role": "ZSTD decompress slot claim 0x61c1e10 (open PR #3635): seed",
+    "site": "0x61c1ea8"
+   }
+  ]
+ },
+ "census": {
+  "0x5f05120": {
+   "direct_calls": [
+    "0x5f06367",
+    "0x5f06496",
+    "0x5f0a6ff",
+    "0x5f0a81e",
+    "0x5f0ae27",
+    "0x5f0af39",
+    "0x5f0b237",
+    "0x5f0b366",
+    "0x5f115d5",
+    "0x5f116f1"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f053d0": {
+   "direct_calls": [
+    "0x5f055b9",
+    "0x5f06348",
+    "0x5f0a6e0",
+    "0x5f0ae03",
+    "0x5f0b218",
+    "0x5f115b6"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f059b0": {
+   "direct_calls": [
+    "0x5f05a41",
+    "0x5f06234",
+    "0x5f0a610",
+    "0x5f0acc4",
+    "0x5f0b104",
+    "0x5f10e24"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f0a9c0": {
+   "direct_calls": [
+    "0x5f0e061"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": [
+    "0x5f0b068"
+   ]
+  },
+  "0x5f31380": {
+   "direct_calls": [
+    "0x5f0aa15",
+    "0x5f33a3b"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f315a0": {
+   "direct_calls": [
+    "0x5f0ab05"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f32900": {
+   "direct_calls": [
+    "0x5f0d1e5",
+    "0x5f0e09c",
+    "0x5f3d5aa",
+    "0x5f4055e"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f36c70": {
+   "direct_calls": [
+    "0x5f3799f",
+    "0x5f37ad1"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f37410": {
+   "direct_calls": [
+    "0x5f0a536",
+    "0x5f0ac12",
+    "0x5f29367",
+    "0x6109f07"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x605e170": {
+   "direct_calls": [
+    "0x5f11931",
+    "0x5f11cf7"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x60d5cd0": {
+   "direct_calls": [
+    "0x5f0aa40",
+    "0x605e17b",
+    "0x606fbc4",
+    "0x606ff0c",
+    "0x6070003",
+    "0x61c1e24"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x61c4080": {
+   "direct_calls": [
+    "0x5f0ad68",
+    "0x5f6b06a",
+    "0x5f6b11a",
+    "0x5f9a116",
+    "0x5fcaa75",
+    "0x605e1d0",
+    "0x605f4bc",
+    "0x6063165",
+    "0x6066bc9",
+    "0x60671b1",
+    "0x606fc20",
+    "0x606ff90",
+    "0x6070088",
+    "0x60e56f5",
+    "0x60f4b2a",
+    "0x616fb33",
+    "0x61c1ea8"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  }
+ },
+ "cleanable_ctor": {
+  "arguments": [
+   "rdi = Cleanable subobject"
+  ],
+  "name": "Cleanable default constructor (by shape)",
+  "steps": [
+   "zero +0x0 (the cleanup head)",
+   "zero +0x18 (the chain link)"
+  ]
+ },
+ "cleanable_dtor": {
+  "arguments": [
+   "rdi = Cleanable subobject"
+  ],
+  "name": "rocksdb::Cleanable::DoCleanup (catalogue, one of 2 identical copies)",
+  "steps": [
+   "when the head is null, return at once",
+   "call the head's fn(head+0x8, head+0x10)",
+   "walk the +0x18 chain: call each node's fn(node+0x8, node+0x10) and delete the 0x20-byte node"
+  ]
+ },
+ "ctor_a": {
+  "arguments": [
+   "rdi = this (0xc8)",
+   "rsi = list",
+   "rdx = comparator",
+   "rcx = seq (arg4)",
+   "r8 = slice (arg5)",
+   "r9 = arg6"
+  ],
+  "fields": {
+   "+0x00": "vtable 0x64ccae0+0x10",
+   "+0x08": "comparator subobject (ctor 0x61bd0c0)",
+   "+0x28": "comparator+0x8",
+   "+0x30": "comparator+0x8",
+   "+0x38": "comparator",
+   "+0x40": "comparator+0x8",
+   "+0x48..+0x68": "0 (the shared_ptr at +0x58 is null)",
+   "+0x68": "list",
+   "+0x70": "seq",
+   "+0x78": "arg6",
+   "+0x80": "slice",
+   "+0x88": "list+0x8",
+   "+0x90": "list+0x18",
+   "+0x98": "list+0x8",
+   "+0xa0": "list+0x18",
+   "+0xa8": "&this+0xb8",
+   "+0xb0": "0",
+   "+0xb8": "0 (byte)"
+  },
+  "name": "rocksdb::FragmentedRangeTombstoneIterator::FragmentedRangeTombstoneIterator(list, comparator, seq, slice, arg6) (catalogue)"
+ },
+ "ctor_b": {
+  "arguments": [
+   "rdi = this (0xc8)",
+   "rsi = shared_ptr<Cache>",
+   "rdx = comparator",
+   "rcx = seq (arg4)",
+   "r8 = slice (arg5)",
+   "r9 = arg6"
+  ],
+  "fields": {
+   "+0x00": "vtable 0x64ccae0+0x10",
+   "+0x08": "comparator subobject (ctor 0x61bd0c0)",
+   "+0x28": "comparator+0x8",
+   "+0x30": "comparator+0x8",
+   "+0x38": "comparator",
+   "+0x40": "comparator+0x8",
+   "+0x48..+0x58": "0",
+   "+0x58": "the 16-byte shared_ptr copy (ptr, ctrl); when ctrl != 0 its use count at +0x8 is bumped (lock addl iff the global byte at 0x64ed290 is 0, else plain addl)",
+   "+0x68": "shared_ptr object +0x28 (the cache)",
+   "+0x70": "seq",
+   "+0x78": "arg6",
+   "+0x80": "slice (an empty slice, non-null with +0x8 == 0, is treated as null)",
+   "+0x88": "cache+0x8",
+   "+0x90": "cache+0x20",
+   "+0x98": "cache+0x8",
+   "+0xa0": "cache+0x20",
+   "+0xa8": "&this+0xb8",
+   "+0xb0": "0",
+   "+0xb8": "0 (byte)"
+  },
+  "name": "rocksdb::FragmentedRangeTombstoneIterator::FragmentedRangeTombstoneIterator(shared_ptr<Cache>, comparator, seq, slice, arg6) (catalogue)",
+  "note": "ctor A reads the raw list's +0x8/+0x18 as the bounds pair; ctor B reads the cache's +0x8/+0x20. The two layouts differ because the cache is a different struct from the raw list; the iterator distinguishes them by the null/non-null shared_ptr at +0x58"
+ },
+ "generic_helper_counts": {
+  "0x5d350c0": "1273 direct calls + 25 tail jumps",
+  "0x61bd0c0": "103 direct calls",
+  "0x61bd0e0": "223 direct calls + 32 tail jumps"
+ },
+ "host": {
+  "arguments": [
+   "rdi = owner (MemTable)",
+   "rsi = arg2 (a struct; the flag path reads a Slice at arg2+0x58)",
+   "rdx = arg3 (passed as the seq-like argument to both ctors)",
+   "cl = flag byte (bool)"
+  ],
+  "build": [
+   "operator new(0x80) for the list; Cleanable ctor 0x61bd0c0 at list+0x8; fill list fields (see list_fields below)",
+   "operator new(0xe8) for the cache; cache ctor 0x5f37410(cache, &list, owner+8, 0, scratch)",
+   "old = slot-object +0x28; install the new cache there; when old != 0 tear it down (see teardown)",
+   "destroy the temporary list via its vtable slot 1",
+   "set the ready flag byte +0x30 = 1, unlock the mutex, build the iterator via ctor B from the stack copy, release the claim-time reference, return"
+  ],
+  "caller": "the merged RE-014 batch-lookup function 0x5f0d740 calls the host at 0x5f0e061 with (owner, arg2, seq>>8, flag), applies 0x5f32900 to the returned iterator and destroys it via vtable slot 0x8; the merged RE-014 probe thunk 0x5f0b050 tail-jumps to the host at 0x5f0b068",
+  "catalogue_name_note": "the catalogue name lists (const ReadOptions&, bool); the live rdx argument is an observed difference from that name (open)",
+  "claim": "_Sp_locker over the slot, then a 16-byte copy of the slot's shared_ptr {ptr, ctrl}; when ctrl != 0 its use count at +0x8 is bumped (lock addl iff the global byte at 0x64ed290 is 0, else plain addl)",
+  "error_paths": "stack-canary failure -> __stack_chk_fail; pthread_mutex_lock failure -> __throw_system_error (not modelled)",
+  "flag_path": "cl != 0: operator new(0xc8), ctor A 0x5f31380 with (list = owner+0xce0, comparator = owner+8, arg4 = rdx, slice = arg2+0x58, arg6 = 0); the slot is never touched; return the iterator",
+  "landing_pads": "the five endbr64 stubs at 0x5f0b004..0x5f0b048 each save %rax to %rbx and jump to 0x5f0a90a/0x5f0a93e/0x5f0a960/0x5f0a989/0x5f0a9ad in FDE 0x5f0a90a..0x5f0a9bf (the preceding function, a shared rethrow block); not decoded",
+  "list_fields": {
+   "+0x00": "vtable 0x64cc638+0x10",
+   "+0x08": "Cleanable (ctor 0x61bd0c0: head +0x8 = 0, link +0x20 = 0)",
+   "+0x28": "0",
+   "+0x30": "owner+0xc58 (a pointer)",
+   "+0x38": "vtable-valued 0x64cc600+0x10",
+   "+0x40": "vtable-valued 0x64c8fe8+0x10",
+   "+0x48": "owner+0x10",
+   "+0x50": "(owner+0xa58)->vtable slot 0x90()",
+   "+0x58": "0 (u16)",
+   "+0x5a": "owner+0x31 ^ 1 (byte)",
+   "+0x60": "owner+0x6c",
+   "+0x68": "0",
+   "+0x6c": "0 (u16)",
+   "+0x70": "0",
+   "+0x78": "owner+0x60"
+  },
+  "mutex_path": "flag clear: pthread_mutex_lock(slot object); when slot-object +0x28 (cache) != 0, unlock and take the ready path; when it is 0, build",
+  "name": "rocksdb::MemTable::NewRangeTombstoneIteratorInternal",
+  "ready_path": "slot-object flag byte +0x30 != 0: build the iterator via ctor B 0x5f315a0 from the stack copy, release the claim-time reference via _M_release 0x5d350c0, return",
+  "returns": "a 0xc8-byte FragmentedRangeTombstoneIterator (operator new, never null in the observed paths)",
+  "shard_pick": "source = picker 0x60d5cd0; when it returns -1, the per-thread seed 0x61c4080 is advanced once (*0x41a7 mod 0x7fffffff, Mersenne fold) and the advanced value is used; idx = source & ((1 << shift) - 1) with shift = owner+0xd18 (dword); slot = owner+0xd10 + idx*0x10",
+  "slot_object": "the shared_ptr's object: a pthread_mutex_t at +0x0 (0x28 bytes), the cache pointer at +0x28, the ready flag byte at +0x30",
+  "teardown": [
+   "when the old cache's +0xb8 flag is set: the +0xc0 array fixup (memmove 0x5f053d0, memcpy 0x5f05120, insertion-sort dedup, per-entry dtors via *0x8, the +0x98 cleanup chain run, +0x98/+0xb0 zeroed)",
+   "operator delete[] of the +0xc0 array (size = +0xd0 - +0xc0) when its begin != 0",
+   "DoCleanup(old+0x98) via 0x61bd0e0",
+   "walk the +0x80 list (0x30-byte nodes): free each node's +0x10 buffer (size +0x20 + 1) unless it equals &node+0x20, then delete the node (0x30 bytes)",
+   "walk the +0x60 list (0x28-byte nodes): release each node+0x18 via 0x5f059b0, then delete the node (0x28 bytes)",
+   "free the +0x30 buffer (size +0x40 - +0x30), the +0x18 buffer (size +0x28 - +0x18) and the +0x0 buffer (size +0x10 - +0x0), each when non-null",
+   "operator delete(old, 0xe8)"
+  ],
+  "teardown_note": "the old-cache teardown is defensive in this flow: the mutex is held from the null check at +0x28 through the install, so old is null in the single-threaded flow; the branch exists for a cache swap by another path (open)"
+ },
+ "list_release": {
+  "arguments": [
+   "rdi = node (null returns at once)"
+  ],
+  "callers": "6 direct call sites, including the host teardown (0x5f0acc4) and the sibling cache builder (0x5f0a610)",
+  "name": "recursive 0x28-byte node-tree release (by shape)",
+  "steps": [
+   "release the +0x18 child subtree first (self-recursion at 0x5f05a41)",
+   "free the node itself (0x28 bytes)",
+   "release the +0x10 sibling",
+   "every node in the +0x18/+0x10 tree is freed exactly once; the unrolled descent interleaves the levels (exact interleave open)"
+  ]
+ },
+ "packet_internal_sites": {
+  "0x5d350c0": [
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "host: release the claim-time shared_ptr reference",
+    "site": "0x5f0ab18"
+   }
+  ],
+  "0x61bd0c0": [
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "host: the fresh 0x80 list's Cleanable at +0x8",
+    "site": "0x5f0ab3c"
+   },
+   {
+    "containing_fde": [
+     "0x5f31380",
+     "0x5f3146f"
+    ],
+    "kind": "direct_call",
+    "role": "ctor A: the iterator's comparator Cleanable at +0x8",
+    "site": "0x5f313a8"
+   },
+   {
+    "containing_fde": [
+     "0x5f315a0",
+     "0x5f316ce"
+    ],
+    "kind": "direct_call",
+    "role": "ctor B: the iterator's comparator Cleanable at +0x8",
+    "site": "0x5f315c8"
+   },
+   {
+    "containing_fde": [
+     "0x5f37410",
+     "0x5f37e31"
+    ],
+    "kind": "direct_call",
+    "role": "cache ctor: the cache's Cleanable at +0x98",
+    "site": "0x5f374cd"
+   },
+   {
+    "containing_fde": [
+     "0x5f37410",
+     "0x5f37e31"
+    ],
+    "kind": "direct_call",
+    "role": "cache ctor: a stack iterator's Cleanable",
+    "site": "0x5f37827"
+   }
+  ],
+  "0x61bd0e0": [
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "host teardown: the old cache's +0x98 Cleanable",
+    "site": "0x5f0ac60"
+   }
+  ]
+ },
+ "picker": {
+  "arguments": [],
+  "callers": "6 direct call sites: the host, the shard helper, the StatisticsImpl ticker/histogram slots (open PR #3613) and the ZSTD decompress slot claim (open PR #3635)",
+  "name": "rocksdb::port::PhysicalCoreID (catalogue)",
+  "rule": "cpuid leaf 0 gives the max leaf in eax; when it is 0 return -1; otherwise cpuid leaf 1 and return EBX >> 24 (the maximum number of addressable logical-processor IDs)"
+ },
+ "provenance_path": "artifacts/node/115/hl-node",
+ "release": {
+  "arguments": [
+   "rdi = counted base"
+  ],
+  "atomicity": "the global byte at 0x64ed290 selects locked vs plain RMW in the host, ctor B and _M_release alike (0 -> locked, nonzero -> plain); its symbolic identity is open",
+  "name": "std::_Sp_counted_base::_M_release (catalogue)",
+  "steps": [
+   "the +0x8 qword holds (use, weak) as two dwords; when it equals 0x100000001 (use 1, weak 1) dispose at once (vtable slot 0x10, then destroy via slot 0x18)",
+   "otherwise decrement the use count (lock xadd iff the global byte at 0x64ed290 is 0, else plain dec) and dispose iff the old count was 1",
+   "the dispose path jumps to the shared stub FDE 0x5d35070..0x5d350bc (not decoded)"
+  ]
+ },
+ "seed": {
+  "arguments": [],
+  "callers": "17 direct call sites (see callers.tsv)",
+  "name": "per-thread hash seed",
+  "rule": "first use: _Hash_bytes(&pthread_self, 8, 0xc70f6907) & 0x7fffffff, or 1 when that is 0, cached per thread (pointer at thread-0x10); later uses return the cached value; callers advance the cached value in place by *0x41a7 mod 0x7fffffff (Mersenne fold: (x & 0x7fffffff) + (x >> 31), minus 0x7fffffff once when negative as signed 32-bit; a true 0 stays 0x7fffffff)"
+ },
+ "shard": {
+  "arguments": [
+   "rdi = owner"
+  ],
+  "callers": "the merged allocate windows 0x5f117a0 (site 0x5f11931) and 0x5f11c40 (site 0x5f11cf7); the merged allocate packets model it by contract only (tools/shard_allocate_115.py refresh_shard) - this packet pins its internals",
+  "fields": "shift = owner+0x50 (dword), table = owner+0x48",
+  "name": "0x40-stride shard-pointer helper",
+  "relation": "the same picker/seed mask as the host, but a different table (owner+0x48/+0x50) and a 0x40 stride instead of the host's 0x10 shared_ptr slots",
+  "steps": [
+   "source = picker 0x60d5cd0; when -1, the per-thread seed 0x61c4080 is advanced once (same fold) and the advanced value is used",
+   "idx = source & ((1 << shift) - 1); slot = table + idx*0x40",
+   "record = idx | (1 << shift) (bts); TLS[fs:0 - 0x408] = record; return the slot"
+  ]
+ },
+ "task": "RE-001",
+ "unknowns": [
+  "the host's live rdx argument vs the catalogue name's (const ReadOptions&, bool) (see host.catalogue_name_note)",
+  "the 0x80 list's +0x30/+0x38/+0x40 vtable-valued slots' subobject identities",
+  "the owner (MemTable) fields the list build copies (+0x10, +0x31, +0x60, +0x6c, +0xa58, +0xc58, +0xce0) beyond the shard table at +0xd10/+0xd18",
+  "which store in the cache ctor's iteration/finalize populates cache+0x8/+0x20 (the bound pair ctor B copies)",
+  "the cache ctor's sorted-index entry layout and the 0x5f36c70 finalize contract (0x5f36c70 itself is not a window)",
+  "the 0x5f32900 contract (applied by the caller to the returned iterator; 4 call sites, not a window)",
+  "the TLS record at fs:0-0x408 written by the shard helper (idx | (1 << shift)): its consumer is open",
+  "the global byte at 0x64ed290 (the atomicity selector): its symbolic identity is open",
+  "the cache ctor's 5th argument (r8): a 0x20-byte stack scratch the finalize fills as a heap range; its exact type is open",
+  "the host's landing-pad stubs (FDE 0x5f0a90a) and _M_release's dispose stub (FDE 0x5d35070) are shared rethrow/dispose blocks, not decoded; the LSDA call-site tables are not decoded",
+  "the old-cache teardown branch is defensive in the host flow (see host.teardown_note)",
+  "the sibling cache builder in FDE 0x5f0a3d0 (which also calls the cache ctor, the list release and the memmove/memcpy helpers) is not identified",
+  "the 0x5f053d0 (memmove) and 0x5f05120 (memcpy) helpers' exact contracts (census targets only, not windows)"
+ ],
+ "vendor_attribution": {
+  "cache_ctor": {
+   "catalogue_id": null,
+   "evidence": "this packet's excerpts",
+   "label": "FragmentedRangeTombstoneListCache constructor (no catalogue row pins this address; identified by shape: the 0xe8 zero-init, the list iteration via vtable slots, the +0xd8 count / +0xe0 total)",
+   "non_relocation_bytes_equal": null
+  },
+  "cleanable_ctor": {
+   "catalogue_id": null,
+   "evidence": "this packet's excerpts",
+   "label": "Cleanable default constructor (no catalogue row pins this address; identified by shape: zeroes +0x0 and +0x18, the pair its DoCleanup reads)",
+   "non_relocation_bytes_equal": null
+  },
+  "cleanable_dtor": {
+   "catalogue_id": "node115-vendor-61bd0e0",
+   "evidence": "research/work-items/RE-002-node115-vendor-census/census.json",
+   "label": "librocksdb-sys 0.11.0+8.1.1: one of 2 identical copies of 2 build functions, e.g. _ZN7rocksdb9Cleanable9DoCleanupEv",
+   "non_relocation_bytes_equal": "77/81",
+   "raw_equal_bytes": "78/81"
+  },
+  "ctor_a": {
+   "catalogue_id": "node115-vendor-5f31380",
+   "evidence": "research/work-items/RE-002-node115-vendor-census/census.json",
+   "label": "librocksdb-sys 0.11.0+8.1.1: _ZN7rocksdb32FragmentedRangeTombstoneIteratorC1EPNS_28FragmentedRangeTombstoneListERKNS_21InternalKeyComparatorEmPKNS_5SliceEm",
+   "non_relocation_bytes_equal": "230/239",
+   "raw_equal_bytes": "232/239"
+  },
+  "ctor_b": {
+   "catalogue_id": "node115-vendor-5f315a0",
+   "evidence": "research/work-items/RE-002-node115-vendor-census/census.json",
+   "label": "librocksdb-sys 0.11.0+8.1.1: _ZN7rocksdb32FragmentedRangeTombstoneIteratorC1ERKSt10shared_ptrINS_33FragmentedRangeTombstoneListCacheEERKNS_21InternalKeyComparatorEmPKNS_5SliceEm",
+   "non_relocation_bytes_equal": "289/302",
+   "raw_equal_bytes": "292/302"
+  },
+  "host": {
+   "catalogue_id": "node115-vendor-5f0a9c0",
+   "evidence": "research/work-items/RE-002-node115-vendor-census/census.json",
+   "label": "librocksdb-sys 0.11.0+8.1.1: _ZN7rocksdb8MemTable33NewRangeTombstoneIteratorInternalERKNS_11ReadOptionsEmb",
+   "non_relocation_bytes_equal": "1505/1676",
+   "raw_equal_bytes": "1536/1676"
+  },
+  "list_release": {
+   "catalogue_id": null,
+   "evidence": "this packet's excerpts",
+   "label": "recursive 0x28-byte node-tree release (no catalogue row pins this address; identified by shape: the +0x18 self-recursion, the 0x28-byte node frees)",
+   "non_relocation_bytes_equal": null
+  },
+  "picker": {
+   "catalogue_id": "node115-vendor-60d5cd0",
+   "evidence": "research/work-items/RE-002-node115-vendor-census/census.json",
+   "label": "librocksdb-sys 0.11.0+8.1.1: _ZN7rocksdb4port14PhysicalCoreIDEv",
+   "non_relocation_bytes_equal": "32/32",
+   "raw_equal_bytes": "32/32"
+  },
+  "release": {
+   "catalogue_id": "node115-vendor-5d350c0",
+   "evidence": "research/work-items/RE-002-node115-vendor-census/census.json",
+   "label": "librocksdb-sys 0.11.0+8.1.1: _ZNSt16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EE10_M_releaseEv",
+   "non_relocation_bytes_equal": "125/133",
+   "raw_equal_bytes": "126/133"
+  },
+  "seed": {
+   "catalogue_id": null,
+   "evidence": "this packet's excerpts",
+   "label": "per-thread hash seed (no catalogue row pins this address; re-derived fresh here, same routine as open PR #3613)",
+   "non_relocation_bytes_equal": null
+  },
+  "shard": {
+   "catalogue_id": null,
+   "evidence": "this packet's excerpts",
+   "label": "0x40-stride shard-pointer helper (no catalogue row pins this address; identified by shape: the picker/seed mask, the 0x40 stride, the TLS record)",
+   "non_relocation_bytes_equal": null
+  }
+ },
+ "windows": {
+  "cache_ctor": {
+   "cie_offset": "0x00730230",
+   "end": "0x5f37e31",
+   "fde_offset": "0x00746fc8",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 2593,
+   "start": "0x5f37410"
+  },
+  "cleanable_ctor": {
+   "cie_offset": "0x00000000",
+   "end": "0x61bd0d4",
+   "fde_offset": "0x003763d4",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 20,
+   "start": "0x61bd0c0"
+  },
+  "cleanable_dtor": {
+   "cie_offset": "0x00730230",
+   "end": "0x61bd131",
+   "fde_offset": "0x0076b880",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 81,
+   "start": "0x61bd0e0"
+  },
+  "ctor_a": {
+   "cie_offset": "0x00000000",
+   "end": "0x5f3146f",
+   "fde_offset": "0x0035ab84",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 239,
+   "start": "0x5f31380"
+  },
+  "ctor_b": {
+   "cie_offset": "0x00000000",
+   "end": "0x5f316ce",
+   "fde_offset": "0x0035ac18",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 302,
+   "start": "0x5f315a0"
+  },
+  "host": {
+   "cie_offset": "0x00730230",
+   "end": "0x5f0b04c",
+   "fde_offset": "0x00745774",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 1676,
+   "start": "0x5f0a9c0"
+  },
+  "list_release": {
+   "cie_offset": "0x00000000",
+   "end": "0x5f05b79",
+   "fde_offset": "0x00358558",
+   "first_instruction_bytes": "41574156",
+   "size_bytes": 457,
+   "start": "0x5f059b0"
+  },
+  "picker": {
+   "cie_offset": "0x00000000",
+   "end": "0x60d5cf0",
+   "fde_offset": "0x0036ca90",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 32,
+   "start": "0x60d5cd0"
+  },
+  "release": {
+   "cie_offset": "0x00000000",
+   "end": "0x5d35145",
+   "fde_offset": "0x00346bc4",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 133,
+   "start": "0x5d350c0"
+  },
+  "seed": {
+   "cie_offset": "0x00730230",
+   "end": "0x61c4117",
+   "fde_offset": "0x0076c098",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 151,
+   "start": "0x61c4080"
+  },
+  "shard": {
+   "cie_offset": "0x00000000",
+   "end": "0x605e20d",
+   "fde_offset": "0x003677d0",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 157,
+   "start": "0x605e170"
+  }
+ }
+}
