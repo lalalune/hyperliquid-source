@@ -1,0 +1,176 @@
+{
+ "binary": {
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032,
+  "upstream_main": "05bc2de303c05525b71e7e257426e741bc66a390"
+ },
+ "census": {
+  "bin_init_0x63ec4c0": "27 E8 + 1 E9 across 19 caller FDEs; enable slow path FDE holds 4 E8 (0x63ed3fd, 0x63ed50c, 0x63ed5ad, 0x63ed63a); E9 tail-jump at 0x63ee02d in FDE 0x63edf10..0x63ee0a0",
+  "consumer_check_calls_0x63bf840": "11 static call sites in FDE 0x63c41c0..0x63c44d9 (9 in the entry chain, 2 in the 0x70-step loops)",
+  "gate_ctx68_0x63c3b70": "1 E8 (0x63ef834 in teardown gate FDE 0x63ef810..0x63ef8d7), 0 E9",
+  "interval_consumer_0x63c41c0": "1 E8 (0x634f44f in FDE 0x634f0b0..0x634f8d5, the packet #257 predicate FDE), 0 E9",
+  "leaves_direct_entries": "0 E8 and 0 E9 per leaf (all 5): reached only by dispatcher indirect tail-call",
+  "method": "full-binary capstone disassembly over all 135,313 FDEs (18,827,581 instructions), cross-checked at build time by a raw .text scan for E8/E9 rel32 targets with identical counts; named sites verified by exact byte arithmetic",
+  "teardown_slot88_0x63539d0": "1 E8 (0x63ef83c in teardown gate FDE), 0 E9",
+  "teardown_slot90_0x6353a20": "1 E8 (0x63ef844 in teardown gate FDE), 0 E9",
+  "teardown_stub_0x63efd20": "1 E8 (0x63ef858 in teardown gate FDE), 0 E9",
+  "bin_getcreate_0x634ebb0": "64 E8 + 4 E9; enable slow path FDE holds 3 E8 (0x63ed3e1, 0x63ed5e9, 0x63ed723); all 68 sites capstone-verified in their enclosing FDEs"
+ },
+ "cited_only_not_claimed": [
+  "packet #259 prof-byte stores (0x634c035..0x634c047, 0x634d08c..0x634d09d) and latch FDE 0x63c4140..0x63c41b1",
+  "packet #260 apply-global-default 0x63ed870, teardown gate head 0x63ef810..0x63ef830, interval reader 0x63c3a90..0x63c3af2, enable slow path head 0x63ed090..0x63ed167 and its whole-FDE census",
+  "packet #257 predicate FDE 0x634f0b0..0x634f8d5 (sole caller of the interval consumer) and request-init FDE 0x634ece0..0x634f09d",
+  "callees named but not decoded: 0x63bf840 (consumer check helper), 0x63ce240, 0x63ccd30, 0x63c4bf0 (interval counter init), 0x636b370 (allocator used by bin_resolve), 0x6364420 (teardown table handler), 0x63cf8c0 (gate_ctx68 tail target), 0x63bf680 (wait helper), 0x63bf970 (lock helper)",
+  "packet #215 lu-miss handler FDE 0x63d9700..0x63d987b (5 exhibited windows inside it) \u2014 the reason bin_resolve was dropped from this packet"
+ ],
+ "corrections_to_earlier_packets": [
+  "No correction to packet #260's gate-body characterization is needed: its teardown-gate characterization is confirmed \u2014 each of the four body callees (0x63c3b70, 0x63539d0, 0x6353a20, 0x63efd20) has exactly one E8 site, all inside the gate FDE, in address order 0x63ef834, 0x63ef83c, 0x63ef844, 0x63ef858. New finding: the fourth callee 0x63efd20 is a 5-byte no-op stub (endbr64 + ret), so that gate step takes no action.",
+  "Packet #260's separate TLS-helper mutex-location refinement was already corrected by the parent before #260's submission (PR #2788) and is not repeated here; this packet's bin_init record pattern is decoded from its own FDE.",
+  "Overlap found by the fixed disjointness collector (dict-shaped exhibits/windows were initially missed): the assigned bin-setup callee 0x63d9700 is packet #215 lu-miss's own handler FDE, with 5 exhibited windows inside it (0x63d9700..0x63d9739, 0x63d9745..0x63d97a1, 0x63d97b5..0x63d97d7, 0x63d97f3..0x63d9813, 0x63d9830..0x63d984f). Per packet #250's lesson it was dropped without fabrication and substituted with the unclaimed bin-setup callee 0x634ebb0; 0x63d9700 must not be re-attempted as a new packet."
+ ],
+ "exhibit_totals": {
+  "bytes": 2498,
+  "strict": 652,
+  "windows": 12
+ },
+ "exhibits": [
+  {
+   "bytes": 134,
+   "name": "opt_prof",
+   "range": "0x63737c0..0x6373846",
+   "strict": 36
+  },
+  {
+   "bytes": 134,
+   "name": "opt_tcache",
+   "range": "0x63721c0..0x6372246",
+   "strict": 36
+  },
+  {
+   "bytes": 126,
+   "name": "config_stats",
+   "range": "0x6377dc0..0x6377e3e",
+   "strict": 34
+  },
+  {
+   "bytes": 522,
+   "name": "thread_allocated",
+   "range": "0x63749f0..0x6374bfa",
+   "strict": 146
+  },
+  {
+   "bytes": 688,
+   "name": "stats_allocated",
+   "range": "0x637b190..0x637b440",
+   "strict": 180
+  },
+  {
+   "bytes": 308,
+   "name": "bin_init",
+   "range": "0x63ec4c0..0x63ec5f4",
+   "strict": 79
+  },
+  {
+   "bytes": 285,
+   "name": "bin_getcreate",
+   "range": "0x634ebb0..0x634eccd",
+   "strict": 74
+  },
+  {
+   "bytes": 141,
+   "name": "interval_consume",
+   "range": "0x63c4316..0x63c43a3",
+   "strict": 26
+  },
+  {
+   "bytes": 25,
+   "name": "gate_ctx68",
+   "range": "0x63c3b70..0x63c3b89",
+   "strict": 7
+  },
+  {
+   "bytes": 65,
+   "name": "teardown_slot88",
+   "range": "0x63539d0..0x6353a11",
+   "strict": 16
+  },
+  {
+   "bytes": 65,
+   "name": "teardown_slot90",
+   "range": "0x6353a20..0x6353a61",
+   "strict": 16
+  },
+  {
+   "bytes": 5,
+   "name": "teardown_stub",
+   "range": "0x63efd20..0x63efd25",
+   "strict": 2
+  }
+ ],
+ "leaves_classified_before": 28,
+ "leaves_classified_here": [
+  {
+   "class": "read-only",
+   "handler": "0x63737c0..0x6373846",
+   "leaf": "opt/prof",
+   "node": "0x64dea60",
+   "read": "oldp/oldlenp absent returns 0; *oldlenp == 1 gives *oldp = byte, 0; else 1-byte copy, *oldlenp := (*oldlenp != 0), 0x16",
+   "rela_slot": "0x64dea80",
+   "value": "prof byte 0x6713606 (read, never written by this leaf)",
+   "write_attempt": "returns 1 (EPERM)"
+  },
+  {
+   "class": "read-only",
+   "handler": "0x63721c0..0x6372246",
+   "leaf": "opt/tcache",
+   "node": "0x64de880",
+   "read": "oldp/oldlenp absent returns 0; *oldlenp == 1 gives *oldp = byte, 0; else 1-byte copy, *oldlenp := (*oldlenp != 0), 0x16",
+   "rela_slot": "0x64de8a0",
+   "value": "global byte 0x64ffdf8 (global tcache-enabled default; the byte packet #260's apply-global-default stores to ctx+0)",
+   "write_attempt": "returns 1 (EPERM)"
+  },
+  {
+   "class": "read-only",
+   "handler": "0x6377dc0..0x6377e3e",
+   "leaf": "config/stats",
+   "node": "0x64dee88",
+   "read": "oldp/oldlenp absent returns 0; *oldlenp == 1 gives *oldp = 1, 0; else 1-byte copy, *oldlenp := (*oldlenp != 0), 0x16",
+   "rela_slot": "0x64deea8",
+   "value": "constant 1 (build-time; no global load in the handler)",
+   "write_attempt": "returns 1 (EPERM)"
+  },
+  {
+   "class": "read-only",
+   "handler": "0x63749f0..0x6374bfa",
+   "leaf": "thread/allocated",
+   "node": "0x64def28",
+   "read": "oldp/oldlenp absent returns 0; *oldlenp == 8 gives *oldp = value, 0; else bounded copy of min(*oldlenp, 8) from the stack temp, *oldlenp := copied count, 0x16",
+   "rela_slot": "0x64def48",
+   "value": "u64 at ctx+0x338",
+   "write_attempt": "returns 1 (EPERM)"
+  },
+  {
+   "class": "read-only",
+   "handler": "0x637b190..0x637b440",
+   "leaf": "stats/allocated",
+   "node": "0x64daaa0",
+   "read": "oldp/oldlenp absent returns 0; *oldlenp == 8 gives *oldp = value, 0; else bounded copy of min(*oldlenp, 8) from the stack temp, *oldlenp := copied count, 0x16",
+   "rela_slot": "0x64daac0",
+   "value": "u64 at *(*0x6712138), read under init mutex 0x67121a0 (trylock; contention goes to wait helper 0x63bf680 on record base 0x6712160, contended byte 0x67121c8 := 1, retry; counters 0x6712198 +1 every entry, 0x6712188 +1 on ctx change, last-ctx 0x6712190; byte cleared and mutex unlocked on every exit path)",
+   "write_attempt": "returns 1 (EPERM), after unlocking"
+  }
+ ],
+ "leaves_remaining_unclassified": 171,
+ "next_question": "Continue leaf classification with the next batch (opt/prof_prefix, opt/prof_active, opt/lg_prof_sample, thread/allocatedp, thread/deallocated); decode the remaining enable-slow-path bin-setup callees (0x63d9880 first; 0x63ec7a0's FDE overlaps a lu-wait-callers window at 0x63ec890..0x63ec8a3, so claim only unclaimed bytes; 0x63d9700 is packet #215's handler and must not be re-attempted); decode the consumer check helper 0x63bf840.",
+ "packet": "RE-001-node115-lu-value-leaves-bin",
+ "packet_number": 261,
+ "question": "Continue leaf classification with the next value-family batch (opt/prof, opt/tcache, config/stats, thread/allocated, stats/allocated); decode the enable-slow-path bin-setup callees (0x63ec4c0, 0x63d9700 first); decode the interval-value consumer FDE 0x63c41c0 and the teardown-gate body callees.",
+ "unresolved": [
+  "Enable-slow-path bin-setup callees beyond the two decoded here (0x63d9880, 0x63ec7a0 with the overlap note above, 0x63d9880 first; 0x63d9700 is packet #215's handler, not re-attemptable), plus 0x6352fc0, 0x6352f60, 0x63e91c0, 0x6365150, named only by packet #260's census.",
+  "171 control-tree leaves remain unclassified.",
+  "The consumer FDE beyond the exhibited window (entry check chain internals of 0x63bf840, the 0x1c000/0x7000 loops, the 0x63d7bb0/0x63d7b90 tail) characterized, not decoded.",
+  "The semantic purpose of bin_resolve's displaced-pair spill stack at r12+0x100 is characterized mechanically (push-down of displaced slot pairs), not proven from a caller.",
+  "Identities of globals 0x6712138 (stats-allocated pointer), 0x64ffdf8 (tcache default, role known from packets #259/#260), and the bin_init/bin_resolve record layouts beyond the mutex/counter fields are not determined from the file; only their roles are claimed."
+ ]
+}
