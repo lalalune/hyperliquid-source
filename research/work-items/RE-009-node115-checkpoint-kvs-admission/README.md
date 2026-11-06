@@ -1,0 +1,11 @@
+# RE-009 · Checkpoint KVS admission continuation
+
+A selected worker branch in the Node #115 FDE [0x5a64aa0,0x5a69c05) passes object words +0x558 and +0x560 to the call at 0x5a65194. Its relative slot has addend 0x1500a60. The worker tests AL. A zero result enters 0x5a652a9, writes a three-word record at object +0x568/+0x570/+0x578, clears byte +0x8e8 and jumps to the next continuation. On a nonzero result it constructs a diagnostic containing the captured phrase “receiving evm kvs for checkpoint that already exists” and reaches a second indirect call through the slot with addend 0x150b310. The retained 0x69-byte slice includes adjacent text. It does not establish the format record's complete printed output.
+
+This pins the branch effects before further snapshot processing. The predicate's filesystem semantics and actual checkpoint writes remain unresolved. Run the local verifier from the repository root. Several submissions cite the enclosing FDE, so the submission audit must compare their selected windows.
+
+The contextual predicate calls the same metadata helper via slot 0x64e0930 on two paths. Its selected normal result masks the returned word with 0xf000 and tests 0x4000, consistent with a directory mode test. A selected tag-2 cleanup route returns zero if it returns normally. Consequently, the zero route is not sufficient evidence that no filesystem object exists. The predicate and its metadata helper are contextual boundaries, with no fresh claim to their bodies.
+
+Replay with python3 research/work-items/RE-009-node115-checkpoint-kvs-admission/verify.py from the repository root. Static digest-bound evidence only. The selected worker range had no hits in the 1,071-PR difference snapshot. Existing PR hits for the enclosing FDE and predicate remain context.
+
+Two other worker copies use the same directory predicate, zero/nonzero polarity and diagnostic prefix. Their zero branches stage the continuation triple at +0x5c8/+0x5d0/+0x5d8 and +0x360/+0x368/+0x370 respectively. The first also clears +0x948. The evidence separates shared admission behavior from variant-specific object layout. Both copies belong to this packet, since they answer the same admission question.
