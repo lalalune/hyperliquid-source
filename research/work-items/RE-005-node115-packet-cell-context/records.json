@@ -1,0 +1,730 @@
+{
+ "answer": {
+  "decrement_tail": "When the payload drop\u2019s decrement of A+0x18 reaches zero it performs the scope wake-up: eax = 1 is xchg\u2019d into the word at [A+0x10]+0x28 (the main thread\u2019s parker state word: 1 = notified); iff the old word was -1 (parked) it calls the libc syscall slot 0x64e06b8 with number 202 (futex), the word\u2019s address, op 0x81 (FUTEX_WAKE | FUTEX_PRIVATE_FLAG) and count 1.  The same ledger also survives as a standalone body, ScopeData::decrement (0x5c82d00, payload-relative offsets: flag at +0x10 gated on its boolean argument, counter at +0x08, thread handle at +0x00, identical unpark tail); its only caller in the binary is the panic stub\u2019s overflow rollback, through slot 0x64ec708 with the flag argument clear -- the payload drops inline the ledger rather than calling it.",
+  "identity": "Context A is the std scoped-thread scope state (ScopeData in library/std/src/thread/scoped.rs): a 0x28-byte Arc allocation whose payload the scope-creating thread shares with every thread it spawns inside std::thread::scope.  The identification is anchored in the binary, not in a name string: the increment every spawn body performs on A+0x18 overflows into the shared stub 0x5c82d40, which panics at the only scoped.rs Location record in the binary (0x64c32f0, line 60 column 9) with the message \"too many running threads in thread scope\" -- the ScopeData::increment overflow panic.",
+  "layout": [
+   {
+    "evidence": "decremented by each family cell glue (A 0x5bc2a9f, X4 0x5cd86ff, X5 0x5ce83af); at zero the glue calls the family context-release glue through its slot",
+    "name": "strong_count",
+    "offset": "0x00"
+   },
+   {
+    "evidence": "decremented by the context-release glue (A 0x5bc24d1, X4 0x5cd88ee, X5 0x5ce8681); at zero the glue deallocates 0x28 bytes",
+    "name": "weak_count",
+    "offset": "0x08"
+   },
+   {
+    "evidence": "a refcounted handle: the context-release glue decrements the count at [A+0x10] and at zero runs the shared thread drop glue 0x5c98b40 on the field (slot 0x64dfe58); the payload drop loads it to reach the parker word at handle +0x28",
+    "name": "main_thread_handle",
+    "offset": "0x10"
+   },
+   {
+    "evidence": "incremented, null-guarded, by every spawn body on the fresh cell\u2019s context word (A 0x15b835a, X4 0x5cd96e3, X5 0x5cf70ec), overflow to the scoped.rs:60 panic stub; decremented by the payload drops when a packet is discarded",
+    "name": "num_running_threads",
+    "offset": "0x18"
+   },
+   {
+    "evidence": "byte set to 1 by the payload drop only when it discards a live (state nonzero, data nonzero) result pair: A 0x5bc3c6b, X4 0x5cda28b, X5 0x5cfc45b",
+    "name": "a_thread_panicked_flag",
+    "offset": "0x20"
+   }
+  ],
+  "producers": "No spawn call site in this binary passes a live scope.  The 14 spawn bodies carrying the increment idiom have 16 direct call sites between them; at every site the last r9 write before the call is `xor %r9d,%r9d`, and no indirect reference (slot call, lea, relocated data pointer) names any of the 14.  The three packet families\u2019 callers are unscoped spawns: the vendored threadpool crate (caller_x4), tokio\u2019s blocking pool (caller_x5), and a std-functions / lazy_mutex spawn (caller_a).  Every packet cell of these families therefore carries a null context, and the ScopeData ledger in the payload drops never fires for them."
+ },
+ "artifact": {
+  "bytes": 105896032,
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "snapshot": "<authenticated-node115>"
+ },
+ "boundaries": {
+  "live_scope_instantiation": "Whether std::thread::scope itself is instantiated anywhere in the binary is not decided here: no producer passes a non-null scope to any of the 14 spawn bodies, and the scope-exit panic string \"a scoped thread panicked\" does not occur in the artifact, but a Scope::spawn instantiation that built its packet without going through these spawn bodies would evade the call-site census.  What is pinned is narrower and complete for the packet cells: the context slot\u2019s type, role and ledger, and that all 16 call sites of all 14 spawn monomorphisations pass null.",
+  "other_payload_drops": "The three further payload-drop bodies carrying the same ledger template (0x2deb7e0, 0x565bfc0, 0x565c0c0) belong to other result types; their spawn/caller families were not traced here.  Their context slots are the same ScopeData pointer by template identity (flag store, counter decrement, thread-handle load, parker xchg at the same relative sites).",
+  "source_names": "The field names num_running_threads / a_thread_panicked / main_thread are the source-level names of library/std/src/thread/scoped.rs for exactly this layout and ledger; the binary itself names only the file (the scoped.rs Location record) and the mechanism (the increment panic message).  Roles, offsets and the release chain are pinned from code, not from the names.",
+  "thread_handle_internals": "The decomposition of the main-thread handle\u2019s own allocation beyond the parker state word at handle +0x28 is not pinned: its drop glue (0x5c98b40) frees a (pointer, length) buffer at handle +0x18/+0x20 before the weak-count release, consistent with a name buffer, but no claim about its remaining fields is made."
+ },
+ "call_site_census": [
+  {
+   "owner_end": "0x150baaf",
+   "owner_start": "0x150b310",
+   "r9_null": true,
+   "site": "0x150b98c",
+   "spawn": "0x15b80e0",
+   "xor_r9_site": "0x150b989"
+  },
+  {
+   "owner_end": "0x1534feb",
+   "owner_start": "0x1534ed0",
+   "r9_null": true,
+   "site": "0x1534f04",
+   "spawn": "0x15b6d10",
+   "xor_r9_site": "0x1534f01"
+  },
+  {
+   "owner_end": "0x15d5cae",
+   "owner_start": "0x15d5b00",
+   "r9_null": true,
+   "site": "0x15d5b51",
+   "spawn": "0x15b7a80",
+   "xor_r9_site": "0x15d5b4e"
+  },
+  {
+   "owner_end": "0x15d6729",
+   "owner_start": "0x15d63c0",
+   "r9_null": true,
+   "site": "0x15d64a3",
+   "spawn": "0x15b73c0",
+   "xor_r9_site": "0x15d649c"
+  },
+  {
+   "owner_end": "0x2adce3a",
+   "owner_start": "0x2ad7140",
+   "r9_null": true,
+   "site": "0x2ad8f28",
+   "spawn": "0x2d46f90",
+   "xor_r9_site": "0x2ad8f25"
+  },
+  {
+   "owner_end": "0x2af0654",
+   "owner_start": "0x2aeaef0",
+   "r9_null": true,
+   "site": "0x2aeb3a2",
+   "spawn": "0x2d47710",
+   "xor_r9_site": "0x2aeb39f"
+  },
+  {
+   "owner_end": "0x2cb1dff",
+   "owner_start": "0x2cad9b0",
+   "r9_null": true,
+   "site": "0x2cae6bf",
+   "spawn": "0x2d46f90",
+   "xor_r9_site": "0x2cae6bc"
+  },
+  {
+   "owner_end": "0x2cbbbdf",
+   "owner_start": "0x2cb6500",
+   "r9_null": true,
+   "site": "0x2cb69b2",
+   "spawn": "0x2d47710",
+   "xor_r9_site": "0x2cb69af"
+  },
+  {
+   "owner_end": "0x2d275c3",
+   "owner_start": "0x2d25620",
+   "r9_null": true,
+   "site": "0x2d2726c",
+   "spawn": "0x2d46820",
+   "xor_r9_site": "0x2d27266"
+  },
+  {
+   "owner_end": "0x4e39251",
+   "owner_start": "0x4e391b0",
+   "r9_null": true,
+   "site": "0x4e391dd",
+   "spawn": "0x5613a70",
+   "xor_r9_site": "0x4e391da"
+  },
+  {
+   "owner_end": "0x5a0871c",
+   "owner_start": "0x5a07ec0",
+   "r9_null": true,
+   "site": "0x5a08485",
+   "spawn": "0x56141f0",
+   "xor_r9_site": "0x5a0847f"
+  },
+  {
+   "owner_end": "0x5a08f7c",
+   "owner_start": "0x5a08720",
+   "r9_null": true,
+   "site": "0x5a08ce5",
+   "spawn": "0x56150d0",
+   "xor_r9_site": "0x5a08cdf"
+  },
+  {
+   "owner_end": "0x5a6e1e0",
+   "owner_start": "0x5a6dd30",
+   "r9_null": true,
+   "site": "0x5a6dfa7",
+   "spawn": "0x5614960",
+   "xor_r9_site": "0x5a6dfa4"
+  },
+  {
+   "owner_end": "0x5bbebb1",
+   "owner_start": "0x5bbea20",
+   "r9_null": true,
+   "site": "0x5bbeb06",
+   "spawn": "0x5bc2c90",
+   "xor_r9_site": "0x5bbeb03"
+  },
+  {
+   "owner_end": "0x5cd603c",
+   "owner_start": "0x5cd5ea0",
+   "r9_null": true,
+   "site": "0x5cd5f45",
+   "spawn": "0x5cd9470",
+   "xor_r9_site": "0x5cd5f42"
+  },
+  {
+   "owner_end": "0x5cf55d7",
+   "owner_start": "0x5cf5100",
+   "r9_null": true,
+   "site": "0x5cf5347",
+   "spawn": "0x5cf6e80",
+   "xor_r9_site": "0x5cf5344"
+  }
+ ],
+ "caller_locations": {
+  "caller_a": [
+   {
+    "col": 17,
+    "file": "base/src/lazy_mutex.rs",
+    "line": 46,
+    "record": "0x63f8db0"
+   },
+   {
+    "col": 29,
+    "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/functions.rs",
+    "line": 131,
+    "record": "0x63fc220"
+   },
+   {
+    "col": 20,
+    "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/sync/once.rs",
+    "line": 219,
+    "record": "0x63fe278"
+   },
+   {
+    "col": 20,
+    "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/sync/once.rs",
+    "line": 219,
+    "record": "0x6411248"
+   }
+  ],
+  "caller_x4": [
+   {
+    "col": 10,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/threadpool/src/lib.rs",
+    "line": 777,
+    "record": "0x64c5088"
+   }
+  ],
+  "caller_x5": [
+   {
+    "col": 9,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/task/state.rs",
+    "line": 502,
+    "record": "0x64c5f20"
+   },
+   {
+    "col": 29,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/blocking/pool.rs",
+    "line": 424,
+    "record": "0x64c67d0"
+   },
+   {
+    "col": 17,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/blocking/pool.rs",
+    "line": 415,
+    "record": "0x64c67e8"
+   },
+   {
+    "col": 13,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/blocking/pool.rs",
+    "line": 450,
+    "record": "0x64c6800"
+   }
+  ]
+ },
+ "captured_code_executed": false,
+ "decrement_census": {
+  "direct_calls": 0,
+  "slot": "0x64ec708",
+  "slot_call_sites": [
+   "0x5c82d46"
+  ],
+  "sole_caller": "scope_panic_stub"
+ },
+ "indirect_reference_census": {
+  "data_ptrs": 0,
+  "lea_refs": 0,
+  "slot_calls": 0
+ },
+ "limits": "Static analysis only; no captured code was executed. Body boundaries are FDE extents cross-checked by SHA-256.  The call-site audit reads each caller body\u2019s objdump text: for every one of the 16 sites it requires the last r9-writing instruction before the call to be `xor %r9d,%r9d` and no jump target inside the caller to land between that xor and the call.  The spawn-side half of the argument (entry r9 saved, then copied into the cell image at +0x10) is byte-pinned on the three packet families\u2019 spawn bodies; the other eleven monomorphisations share the prologue template and the increment/panic idiom.",
+ "owners": {
+  "caller_a": {
+   "bytes": 1951,
+   "end": "0x150baaf",
+   "file_offset": "0x150a310",
+   "sha256": "19ca3e09da69f37a39c2ed3da2e50a02184d75157857d65c0edd955c1369c2f2",
+   "start": "0x150b310"
+  },
+  "caller_x4": {
+   "bytes": 412,
+   "end": "0x5cd603c",
+   "file_offset": "0x5cd4ea0",
+   "sha256": "78c17eaf8863e6bb09cf2622c31002bc8a612caaff93c71eaa40d3c851f5427d",
+   "start": "0x5cd5ea0"
+  },
+  "caller_x5": {
+   "bytes": 1239,
+   "end": "0x5cf55d7",
+   "file_offset": "0x5cf4100",
+   "sha256": "3ede3e0de6239df2546301485ff8664996a025ed907a977b2d99c6cdc054fcd8",
+   "start": "0x5cf5100"
+  },
+  "cell_glue_a": {
+   "bytes": 308,
+   "end": "0x5bc2bb4",
+   "file_offset": "0x5bc1a80",
+   "sha256": "fd3d9290228daf8af09b05b6c33b186878cb988f7e7eb2af500c61c5e5957ca2",
+   "start": "0x5bc2a80"
+  },
+  "cell_glue_x4": {
+   "bytes": 303,
+   "end": "0x5cd880f",
+   "file_offset": "0x5cd76e0",
+   "sha256": "b00b49cda8cc6f4e875da8f3046d7bd18e270fbec6a3235ccbba0e67b376f5ac",
+   "start": "0x5cd86e0"
+  },
+  "cell_glue_x5": {
+   "bytes": 308,
+   "end": "0x5ce84c4",
+   "file_offset": "0x5ce7390",
+   "sha256": "47595306d82fbac24e1c7ec4c42550d1177efaa130783bc81ba7c27b79dc8af9",
+   "start": "0x5ce8390"
+  },
+  "context_release_a": {
+   "bytes": 111,
+   "end": "0x5bc251f",
+   "file_offset": "0x5bc14b0",
+   "sha256": "9f81ff6a58706bb981ed5dad414257dd5107d35299d0f06258c088a17f72f30e",
+   "start": "0x5bc24b0"
+  },
+  "context_release_x4": {
+   "bytes": 56,
+   "end": "0x5cd8908",
+   "file_offset": "0x5cd78d0",
+   "sha256": "6804f49815f9909b13e7c26c15ce5103f24c5b79c52b4cb99bed9101fec66d0a",
+   "start": "0x5cd88d0"
+  },
+  "context_release_x5": {
+   "bytes": 111,
+   "end": "0x5ce86cf",
+   "file_offset": "0x5ce7660",
+   "sha256": "fea36aaf5fa44c33bc5d56acb20324576efb31b12739faa9281508a19a9395a7",
+   "start": "0x5ce8660"
+  },
+  "payload_drop_a": {
+   "bytes": 366,
+   "end": "0x5bc3d5e",
+   "file_offset": "0x5bc2bf0",
+   "sha256": "34b27ee7a0f42fc39e8ec6eb5ff80aac859e4efa05834dfc7cc2e39d8443c667",
+   "start": "0x5bc3bf0"
+  },
+  "payload_drop_x4": {
+   "bytes": 366,
+   "end": "0x5cda37e",
+   "file_offset": "0x5cd9210",
+   "sha256": "6cfdb2d06e84078fd1f654681ea6a1d4cc4fb711a2fddf7883c66390f668b12e",
+   "start": "0x5cda210"
+  },
+  "payload_drop_x5": {
+   "bytes": 366,
+   "end": "0x5cfc54e",
+   "file_offset": "0x5cfb3e0",
+   "sha256": "7e67f86b57437f1c4a119a9872eb1786806413a7ef944396711a70d8403d3561",
+   "start": "0x5cfc3e0"
+  },
+  "scope_decrement": {
+   "bytes": 59,
+   "end": "0x5c82d3b",
+   "file_offset": "0x5c81d00",
+   "sha256": "c0e94d3d28434c43010bfb30b7db80e3ebe8d8151133fe5a875795ec6a4d68c5",
+   "start": "0x5c82d00"
+  },
+  "scope_panic_stub": {
+   "bytes": 37,
+   "end": "0x5c82d65",
+   "file_offset": "0x5c81d40",
+   "sha256": "8e56d981e4d3963755c766b4afc64f7601e92faa51e0d3be992cc5df698ba8cc",
+   "start": "0x5c82d40"
+  },
+  "spawn_a": {
+   "bytes": 1828,
+   "end": "0x15b8804",
+   "file_offset": "0x15b70e0",
+   "sha256": "967d4b0bb72e2e86245bc092d3d850f2324631adaf5482ac4df09804e3f152b8",
+   "start": "0x15b80e0"
+  },
+  "spawn_x4": {
+   "bytes": 1727,
+   "end": "0x5cd9b2f",
+   "file_offset": "0x5cd8470",
+   "sha256": "a67df4f7707481778d223fca1d10a1dcb3360ea805ae3215f317882fa163c6a2",
+   "start": "0x5cd9470"
+  },
+  "spawn_x5": {
+   "bytes": 1744,
+   "end": "0x5cf7550",
+   "file_offset": "0x5cf5e80",
+   "sha256": "1de6a1382a5d5557a56bcc242cf2a8e7e543e089832f43bcf8548b32a05c5a87",
+   "start": "0x5cf6e80"
+  },
+  "thread_field_drop": {
+   "bytes": 73,
+   "end": "0x5c98b89",
+   "file_offset": "0x5c97b40",
+   "sha256": "7ca6f244918e5003e12f248d655375601a436ae72776897c6aad46457a258c15",
+   "start": "0x5c98b40"
+  }
+ },
+ "packet": "RE-005-node115-packet-cell-context",
+ "panic_message": {
+  "len": 40,
+  "stub_lea_targets": [
+   "0x9492bf",
+   "0x64c32f0"
+  ],
+  "text": "too many running threads in thread scope",
+  "va": "0x9492bf"
+ },
+ "payload_drop_census": [
+  {
+   "counter_dec": "0x2deb827",
+   "flag_store": "0x2deb81f",
+   "parker_xchg": "0x2deb837",
+   "start": "0x2deb7e0",
+   "thread_load": "0x2deb82e"
+  },
+  {
+   "counter_dec": "0x565bff8",
+   "flag_store": "0x565bff4",
+   "parker_xchg": "0x565c008",
+   "start": "0x565bfc0",
+   "thread_load": "0x565bfff"
+  },
+  {
+   "counter_dec": "0x565c133",
+   "flag_store": "0x565c124",
+   "parker_xchg": "0x565c143",
+   "start": "0x565c0c0",
+   "thread_load": "0x565c13a"
+  },
+  {
+   "counter_dec": "0x5bc3c6f",
+   "flag_store": "0x5bc3c6b",
+   "parker_xchg": "0x5bc3c7f",
+   "start": "0x5bc3bf0",
+   "thread_load": "0x5bc3c76"
+  },
+  {
+   "counter_dec": "0x5cda28f",
+   "flag_store": "0x5cda28b",
+   "parker_xchg": "0x5cda29f",
+   "start": "0x5cda210",
+   "thread_load": "0x5cda296"
+  },
+  {
+   "counter_dec": "0x5cfc45f",
+   "flag_store": "0x5cfc45b",
+   "parker_xchg": "0x5cfc46f",
+   "start": "0x5cfc3e0",
+   "thread_load": "0x5cfc466"
+  }
+ ],
+ "pins": {
+  "caller_a": {
+   "0x150b989": "4531c9",
+   "0x150b98c": "e84fc70a00"
+  },
+  "caller_x4": {
+   "0x5cd5f42": "4531c9",
+   "0x5cd5f45": "e826350000"
+  },
+  "caller_x5": {
+   "0x5cf5344": "4531c9",
+   "0x5cf5347": "e8341b0000"
+  },
+  "cell_glue_a": {
+   "0x5bc2a92": "e859110000",
+   "0x5bc2a97": "498b07",
+   "0x5bc2a9f": "f048ff08",
+   "0x5bc2aa8": "ff15daea9100"
+  },
+  "cell_glue_x4": {
+   "0x5cd86f2": "e8191b0000",
+   "0x5cd86f7": "498b07",
+   "0x5cd86ff": "f048ff08",
+   "0x5cd8708": "ff155a448100"
+  },
+  "cell_glue_x5": {
+   "0x5ce83a2": "e839400100",
+   "0x5ce83a7": "498b07",
+   "0x5ce83af": "f048ff08",
+   "0x5ce83b8": "ff1592488000"
+  },
+  "context_release_a": {
+   "0x5bc24b4": "488b1f",
+   "0x5bc24b7": "488b4310",
+   "0x5bc24bb": "f048ff08",
+   "0x5bc24c5": "ff158dd99100",
+   "0x5bc24d1": "f048ff4b08",
+   "0x5bc24d8": "be28000000"
+  },
+  "context_release_x4": {
+   "0x5cd88d1": "488b1f",
+   "0x5cd88d4": "488b4310",
+   "0x5cd88d8": "f048ff08",
+   "0x5cd88e2": "ff1570758000",
+   "0x5cd88ee": "f048ff4b08",
+   "0x5cd88f5": "be28000000"
+  },
+  "context_release_x5": {
+   "0x5ce8664": "488b1f",
+   "0x5ce8667": "488b4310",
+   "0x5ce866b": "f048ff08",
+   "0x5ce8675": "ff15dd777f00",
+   "0x5ce8681": "f048ff4b08",
+   "0x5ce8688": "be28000000"
+  },
+  "payload_drop_a": {
+   "0x5bc3c5e": "488b0348",
+   "0x5bc3c6b": "c6402001",
+   "0x5bc3c6f": "f048ff4818",
+   "0x5bc3c76": "488b7010",
+   "0x5bc3c7f": "874628",
+   "0x5bc3c82": "83f8ff"
+  },
+  "payload_drop_x4": {
+   "0x5cda28b": "c6402001",
+   "0x5cda28f": "f048ff4818",
+   "0x5cda296": "488b7010",
+   "0x5cda29f": "874628"
+  },
+  "payload_drop_x5": {
+   "0x5cfc45b": "c6402001",
+   "0x5cfc45f": "f048ff4818",
+   "0x5cfc466": "488b7010",
+   "0x5cfc46f": "874628"
+  },
+  "scope_decrement": {
+   "0x5c82d04": "c6471001",
+   "0x5c82d08": "f048ff4f08",
+   "0x5c82d0f": "488b37",
+   "0x5c82d17": "874628",
+   "0x5c82d1a": "83f8ff",
+   "0x5c82d24": "bfca000000",
+   "0x5c82d29": "ba81000000",
+   "0x5c82d35": "ff257dd98500"
+  },
+  "scope_panic_stub": {
+   "0x5c82d4c": "488d3d6c65ccfa",
+   "0x5c82d53": "488d1596058400",
+   "0x5c82d5a": "be51000000"
+  },
+  "spawn_a": {
+   "0x15b810a": "4c898c24a8000000",
+   "0x15b82ae": "488b8424a8000000",
+   "0x15b82b6": "48898424c0000000",
+   "0x15b8351": "488b7810",
+   "0x15b8355": "4885ff",
+   "0x15b835a": "f048ff4718",
+   "0x15b8665": "e8d6a66c04"
+  },
+  "spawn_x4": {
+   "0x5cd94a3": "4c898c2488000000",
+   "0x5cd9655": "488b842488000000",
+   "0x5cd965d": "48898424a0000000",
+   "0x5cd96da": "488b7810",
+   "0x5cd96de": "4885ff",
+   "0x5cd96e3": "f048ff4718",
+   "0x5cd99a2": "e89993faff"
+  },
+  "spawn_x5": {
+   "0x5cf6ea6": "4c898c2498000000",
+   "0x5cf704d": "488b842498000000",
+   "0x5cf7055": "48898424b0000000",
+   "0x5cf70ec": "f048ff4718",
+   "0x5cf73d7": "e864b9f8ff"
+  },
+  "thread_field_drop": {
+   "0x5c98b46": "488b1f",
+   "0x5c98b49": "488b7b18",
+   "0x5c98b6c": "f048ff4b08"
+  }
+ },
+ "question": "The packet-cell packets (#3050, #3160) pinned the 0x30-byte packet cell field by field and left the pointer at cell +0x10 (\"context A\") unidentified: the spawn body stores it from argument r9 and increments a counter at A+0x18, the payload drop keeps a ledger on it (flag byte at A+0x20, counter decrement at A+0x18, an xchg on the word at [A+0x10]+0x28), and the cell glue releases it through a family context-release glue -- but what the object is, who creates it and who hands it to the spawn bodies was left open.  What is context A?",
+ "scoped_location_census": {
+  "count": 1,
+  "records": [
+   {
+    "col": 9,
+    "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/scoped.rs",
+    "line": 60,
+    "record": "0x64c32f0"
+   }
+  ]
+ },
+ "slots": {
+  "a_context_release": {
+   "slot": "0x64e1588",
+   "target": "0x5bc24b0",
+   "type": 8
+  },
+  "alloc": {
+   "slot": "0x64df480",
+   "target": "0x6355830",
+   "type": 8
+  },
+  "dealloc": {
+   "slot": "0x64df4a0",
+   "target": "0x635de30",
+   "type": 8
+  },
+  "futex_syscall": {
+   "slot": "0x64e06b8",
+   "symbol": "syscall",
+   "target": null,
+   "type": 6
+  },
+  "panic_entry": {
+   "slot": "0x64df6b8",
+   "target": "0x1680e80",
+   "type": 8
+  },
+  "scope_decrement": {
+   "slot": "0x64ec708",
+   "target": "0x5c82d00",
+   "type": 8
+  },
+  "thread_field_drop": {
+   "slot": "0x64dfe58",
+   "target": "0x5c98b40",
+   "type": 8
+  },
+  "x4_context_release": {
+   "slot": "0x64ecb68",
+   "target": "0x5cd88d0",
+   "type": 8
+  },
+  "x5_context_release": {
+   "slot": "0x64ecc50",
+   "target": "0x5ce8660",
+   "type": 8
+  }
+ },
+ "spawn_census": [
+  {
+   "bytes": 1709,
+   "end": "0x15b73bd",
+   "inc_site": "0x15b6f7d",
+   "sha256": "ba8b646eae1ddb1e3e25a5f388619e4f23b39d4cf3b0f2bdd9cb7290e44480da",
+   "start": "0x15b6d10",
+   "stub_call_site": "0x15b7267"
+  },
+  {
+   "bytes": 1727,
+   "end": "0x15b7a7f",
+   "inc_site": "0x15b762d",
+   "sha256": "943383faaace0e66199d8f4dbd32c3bff3d77df00d7b6c3f1b82876b5c6d1033",
+   "start": "0x15b73c0",
+   "stub_call_site": "0x15b78ff"
+  },
+  {
+   "bytes": 1623,
+   "end": "0x15b80d7",
+   "inc_site": "0x15b7cd6",
+   "sha256": "eb31d0e0353e6eebbec0ee2a7b175bf18bf6c44c4fa0e8f559ee1bb43e1541b5",
+   "start": "0x15b7a80",
+   "stub_call_site": "0x15b7f88"
+  },
+  {
+   "bytes": 1828,
+   "end": "0x15b8804",
+   "inc_site": "0x15b835a",
+   "sha256": "967d4b0bb72e2e86245bc092d3d850f2324631adaf5482ac4df09804e3f152b8",
+   "start": "0x15b80e0",
+   "stub_call_site": "0x15b8665"
+  },
+  {
+   "bytes": 1894,
+   "end": "0x2d46f86",
+   "inc_site": "0x2d46ad3",
+   "sha256": "769211d5e800f3423079524b2cc23b7625e95d362ad3a4c0cfc3fa7340b5cc68",
+   "start": "0x2d46820",
+   "stub_call_site": "0x2d46dad"
+  },
+  {
+   "bytes": 1918,
+   "end": "0x2d4770e",
+   "inc_site": "0x2d4725f",
+   "sha256": "fda32f5393cb7187d6f75cde7b16113eff01e2260e9f22002dfdf9f478084934",
+   "start": "0x2d46f90",
+   "stub_call_site": "0x2d47549"
+  },
+  {
+   "bytes": 1820,
+   "end": "0x2d47e2c",
+   "inc_site": "0x2d479a0",
+   "sha256": "65d0f8b4c398983ab6c076e052b826b2b88b8b266289b5b56de797dcf204997f",
+   "start": "0x2d47710",
+   "stub_call_site": "0x2d47c5e"
+  },
+  {
+   "bytes": 1918,
+   "end": "0x56141ee",
+   "inc_site": "0x5613d3f",
+   "sha256": "b477d0af755bbbda9ee410ad49499a02237628d3b2e78dfa4e2ec73ce566cff4",
+   "start": "0x5613a70",
+   "stub_call_site": "0x5614029"
+  },
+  {
+   "bytes": 1894,
+   "end": "0x5614956",
+   "inc_site": "0x56144a3",
+   "sha256": "d4886b8b5f001183acc7a9b66f478d9c91899fc7b9e2b4d188952f5970486b77",
+   "start": "0x56141f0",
+   "stub_call_site": "0x561477d"
+  },
+  {
+   "bytes": 1898,
+   "end": "0x56150ca",
+   "inc_site": "0x5614bff",
+   "sha256": "d816dbbad7406ae4b9a4640b907ec91341010d63afed189eaaa40e41bb9b716d",
+   "start": "0x5614960",
+   "stub_call_site": "0x5614f05"
+  },
+  {
+   "bytes": 1894,
+   "end": "0x5615836",
+   "inc_site": "0x5615383",
+   "sha256": "804a18ab97e4ee7d77e2049abb8ae0027c9cb643ddd2ce45a6c8d48185dda2d4",
+   "start": "0x56150d0",
+   "stub_call_site": "0x561565d"
+  },
+  {
+   "bytes": 1726,
+   "end": "0x5bc334e",
+   "inc_site": "0x5bc2f3d",
+   "sha256": "bd5dabb011c5845b7cf67357024d004b34c8b2502998ea6e46202ee41b03bf8e",
+   "start": "0x5bc2c90",
+   "stub_call_site": "0x5bc31ce"
+  },
+  {
+   "bytes": 1727,
+   "end": "0x5cd9b2f",
+   "inc_site": "0x5cd96e3",
+   "sha256": "a67df4f7707481778d223fca1d10a1dcb3360ea805ae3215f317882fa163c6a2",
+   "start": "0x5cd9470",
+   "stub_call_site": "0x5cd99a2"
+  },
+  {
+   "bytes": 1744,
+   "end": "0x5cf7550",
+   "inc_site": "0x5cf70ec",
+   "sha256": "1de6a1382a5d5557a56bcc242cf2a8e7e543e089832f43bcf8548b32a05c5a87",
+   "start": "0x5cf6e80",
+   "stub_call_site": "0x5cf73d7"
+  }
+ ]
+}
