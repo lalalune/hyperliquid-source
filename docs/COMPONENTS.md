@@ -10,7 +10,7 @@ The authenticated inventory contains 180 allowlisted source-path observations. D
 Time, logging, wallets, collections and shared runtime utilities.
 
 - Target: node115.
-- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-nonce-text`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`, `src/node115-host-ip-gates`, `src/node115-packed-millis`, `src/node115-utf8-admission`.
+- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-nonce-text`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`, `src/node115-host-ip-gates`, `src/node115-packed-millis`, `src/node115-utf8-admission`, `src/node115-reverse-path-components`, `src/node115-rng-buffer-selection`, `src/node115-time-producer`, `src/node115-date-time-display`, `src/node115-owned-cstring`, `src/node115-iso-week-date`, `src/node115-timespec-difference`, `src/node115-command-construction`, `src/node115-elf-build-id`.
 - Observed diagnostic paths: 33.
 - First task: Map time/quantity conversion helpers; distinguish standard-library code from private helpers.
 
@@ -20,7 +20,7 @@ Time, logging, wallets, collections and shared runtime utilities.
 Private bincode wire codecs and integer encodings.
 
 - Target: node115.
-- Implementation paths: `src/node115-gossip-response-v2-envelope`.
+- Implementation paths: `src/node115-gossip-response-v2-envelope`, `src/node115-client-blocks-error`, `src/node115-gossip-address-vector`, `src/node115-bulk-record-decoder`, `src/node115-varint-buffer-writer`, `src/node115-octet-record-encoder`, `src/node115-fixed20-record-encoder`.
 - Observed diagnostic paths: 0.
 - First task: Recover varint boundaries and encoding mode; compare malformed, truncated and boundary inputs.
 
@@ -30,7 +30,7 @@ Private bincode wire codecs and integer encodings.
 RocksDB wrappers, block readers and database lifecycle.
 
 - Target: node115.
-- Implementation paths: `src/node115-snapshot-selectors`, `src/node115-db-hub-byte-key`.
+- Implementation paths: `src/node115-snapshot-selectors`, `src/node115-db-hub-byte-key`, `src/node115-owned-db-open`.
 - Observed diagnostic paths: 5.
 - First task: Recover key/value schemas and snapshot versioning before replay.
 
@@ -40,7 +40,7 @@ RocksDB wrappers, block readers and database lifecycle.
 TCP framing, LZ4, channels, rate limits and reconnects.
 
 - Target: node115.
-- Implementation paths: `src/node115-lz4-decode`, `src/node115-ipv6-groups`, `src/node115-lz4-literal-encoder`.
+- Implementation paths: `src/node115-lz4-decode`, `src/node115-ipv6-groups`, `src/node115-lz4-literal-encoder`, `src/node115-lz4-dictionary-kernel`, `src/node115-tcp-compression-plan`, `src/node115-lz4-match-extension`, `src/node115-lz4-match-sequence`.
 - Observed diagnostic paths: 12.
 - First task: Map frame lengths, compression boundaries and error handling without network traffic.
 
@@ -50,7 +50,7 @@ TCP framing, LZ4, channels, rate limits and reconnects.
 Votes, rounds, quorum certificates, validator sets and timers.
 
 - Target: node115.
-- Implementation paths: `src/node115-weighted-fastfold`, `src/node115-tree-next`, `src/node115-rpc-flat-materializer`.
+- Implementation paths: `src/node115-weighted-fastfold`, `src/node115-tree-next`, `src/node115-rpc-flat-materializer`, `src/node115-stake-predicate`.
 - Observed diagnostic paths: 17.
 - First task: Map signed wire types and quorum arithmetic; validate invalid signatures and timeout transitions.
 
@@ -120,7 +120,7 @@ Book storage, price/time priority and order lifecycle.
 Positions, margin, oracles, liquidations and spot balances.
 
 - Target: node115.
-- Implementation paths: `src/node115-margin-range`.
+- Implementation paths: `src/node115-margin-range`, `src/node115-clearinghouse-ntl-ratio`.
 - Observed diagnostic paths: 14.
 - First task: Map margin/liquidation formulas and state mutations; prove sign and unit conventions.
 
