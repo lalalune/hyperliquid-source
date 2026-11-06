@@ -1,0 +1,428 @@
+{
+ "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "window": {
+  "bytes": 667,
+  "range": "0x63aed40..0x63aefdb",
+  "strict": 149
+ },
+ "prev_fde": {
+  "gap": 7,
+  "gap_bytes": "cccccccccccccc",
+  "range": "0x63ae980..0x63aed39"
+ },
+ "next_fde": {
+  "gap_bytes": "cccccccccc",
+  "padding": 5,
+  "range": "0x63aefe0..0x63af45f"
+ },
+ "frame": {
+  "canary": "0x198(%rsp)",
+  "endbr64": true,
+  "pushes": [
+   "r15",
+   "r14",
+   "r13",
+   "r12",
+   "rbp",
+   "rbx"
+  ],
+  "sub_rsp": "0x1a8"
+ },
+ "calls": [
+  {
+   "note": "bin_table_init",
+   "site": "0x63aeea1",
+   "target": "0x63d9880"
+  },
+  {
+   "note": "lu-miss handler (scan exhaustion)",
+   "site": "0x63aefcd",
+   "target": "0x63d9700"
+  },
+  {
+   "note": "__stack_chk_fail",
+   "site": "0x63aef60",
+   "target": "0x63f0d70"
+  }
+ ],
+ "census": {
+  "bin_table_init": 1,
+  "bsr": 0,
+  "calls_total": 3,
+  "jumps": 24,
+  "jumps_outside_window": 0,
+  "lock_add": 0,
+  "lock_sub": 0,
+  "lu_miss": 1,
+  "raw_e8": {
+   "tiers": {
+    "1": 17,
+    "10": 1,
+    "2": 12,
+    "4": 8,
+    "5": 1,
+    "6": 2,
+    "8": 1
+   },
+   "total": 108
+  },
+  "rela_dyn": {
+   "relative": 59534,
+   "total": 60723
+  },
+  "rela_plt": 278,
+  "ret": 1,
+  "strict": 149
+ },
+ "exhibits": [
+  {
+   "name": "bintableinit_caller_pageinstall_earlyret_1site",
+   "range": "0x63aed40..0x63aefdb",
+   "bytes": 667,
+   "strict": 149,
+   "calls_total": 3,
+   "bin_table_init_sites": [
+    "0x63aeea1"
+   ],
+   "lu_miss_sites": [
+    "0x63aefcd"
+   ],
+   "bsr": 0,
+   "bsr_sites": [],
+   "lock_add": 0,
+   "lock_sub": 0,
+   "ret": 1,
+   "ret_sites": [
+    "0x63aedb5"
+   ],
+   "tail_jump_exits": []
+  }
+ ],
+ "sites": [
+  {
+   "site": "0x63aeea1",
+   "block": "0x63aee90",
+   "branch": "test %rdi,%rdi; je from 0x63aed75",
+   "argument": "lea 0x10(%rsp) in r13, mov %r13,%rdi",
+   "save": "rdx to 0x8(%rsp), rsi to (%rsp)",
+   "restore": "rdx from 0x8(%rsp), rsi from (%rsp)",
+   "rejoin": "jmp 0x63aed7b"
+  }
+ ],
+ "walk": {
+  "table": "context+0x1b0 (r13)",
+  "top_index": "(cursor>>0x1a)&0xf0",
+  "second_level": "(cursor>>0x9)&0x1ffff8 + table + 0x8",
+  "derived_key": "none - single page-stepping loop, cursor steps 0x1000 from page(0x8(%rbp))+0x1000 to page(0x8(%rbp))+page(0x10(%rbp))-0x2000",
+  "field_update": "no shl/sar $0x10 + mask $0xffffffffffffff80 transform in this FDE (like #303-#306, unlike #298-#302); instead the constant 0xe8000000000000 is stored at each page's second-level entry",
+  "node_resolution_table": "none: no 0x65096c0 / 0x6511780 read in this FDE; the node pointers come from the table entries directly"
+ },
+ "constwrite": {
+  "composed_value": "none - constant 0xe8000000000000 (movabs at 0x63aeddf), same constant as #306",
+  "entry_registers": "ecx/r8d unused in this FDE",
+  "writes": [
+   "mov %r15,-0x8(%rax) at 0x63aee0b (match path and scan/miss path share the store block at 0x63aee00)"
+  ]
+ },
+ "scan": {
+  "base": "table+0x100",
+  "exhaustion": "0x63aefcd (lu-miss block at 0x63aefb7)",
+  "key": "high bits of page cursor in rcx",
+  "move_to_front": "0x63aeec8 (shared, slots 1-7); slot-0 inline block 0x63aee53..0x63aee83",
+  "reversed_operand": [],
+  "slot_compares": [
+   "0x63aee4e",
+   "0x63aeec3",
+   "0x63aef15",
+   "0x63aef3c",
+   "0x63aef48",
+   "0x63aef77",
+   "0x63aef87",
+   "0x63aefaa"
+  ],
+  "slots": 8,
+  "table": "r13 context+0x1b0"
+ },
+ "lu_miss_sites": [
+  {
+   "site": "0x63aefcd",
+   "scan": "single",
+   "rdi": "r12 context",
+   "rsi": "entry rsi (saved to (%rsp) before the call, restored after)",
+   "rdx": "r13 scan table",
+   "rcx": "rbx page cursor",
+   "r8": 1,
+   "r9": 0,
+   "return_to": "rax (second-level pointer, used directly)",
+   "rejoin": "jmp 0x63aee00 (store block)"
+  }
+ ],
+ "return_value": {
+  "eax": "0 on the plain path (xor %eax,%eax at 0x63aed70 and 0x63aedec); the scan move-to-front reuses eax as a slot index, so eax at ret reflects the last move-to-front slot index when a scan hit occurred",
+  "out": "constant 0xe8000000000000 stored at each page's second-level entry (mov %r15,-0x8(%rax) at 0x63aee0b); small ranges (page(0x10(%rdx)) <= 0x2000) return immediately with no table work"
+ },
+ "cited_not_claimed": [
+  "bin_table_init body 0x63d9880..0x63d9a64 (#262)",
+  "lu-miss handler 0x63d9700..0x63d987b (#215)",
+  "prev FDE 0x63ae980..0x63aed39, next FDE 0x63aefe0..0x63af45f",
+  "no node-resolution tables (0x65096c0, 0x6511780) or size tables (0x6727a00, 0x67277c0) are read in this FDE"
+ ],
+ "survey": {
+  "candidates": [
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363095"
+    ],
+    "end": "0x6363258",
+    "miss": 1,
+    "ret": 0,
+    "size": 712,
+    "start": "0x6362f90",
+    "status": "BUILT by packet #298"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63633f8"
+    ],
+    "end": "0x6363552",
+    "miss": 1,
+    "ret": 1,
+    "size": 754,
+    "start": "0x6363260",
+    "status": "BUILT by packet #299"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363b30"
+    ],
+    "end": "0x6363d50",
+    "miss": 1,
+    "ret": 1,
+    "size": 1376,
+    "start": "0x63637f0",
+    "status": "BUILT by packet #300"
+   },
+   {
+    "bsr": 4,
+    "bti": 1,
+    "bti_sites": [
+     "0x6364009"
+    ],
+    "end": "0x6364270",
+    "miss": 1,
+    "ret": 1,
+    "size": 1312,
+    "start": "0x6363d50",
+    "status": "BUILT by packet #301"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6387629"
+    ],
+    "end": "0x6387878",
+    "miss": 1,
+    "ret": 1,
+    "size": 1112,
+    "start": "0x6387420",
+    "status": "BUILT by packet #302"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63adce6"
+    ],
+    "end": "0x63adf34",
+    "miss": 2,
+    "ret": 1,
+    "size": 996,
+    "start": "0x63adb50",
+    "status": "BUILT by packet #303"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae114"
+    ],
+    "end": "0x63ae252",
+    "miss": 1,
+    "ret": 1,
+    "size": 786,
+    "start": "0x63adf40",
+    "status": "EXCLUDED as a whole FDE: overlaps packet #214 (lu nextnode) claimed sub-ranges 0x63adf71..0x63adf9d, 0x63ae014..0x63ae040, 0x63ae088..0x63ae0cf, 0x63adfed..0x63ae014 in its records"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae45d"
+    ],
+    "end": "0x63ae6d1",
+    "miss": 2,
+    "ret": 1,
+    "size": 1057,
+    "start": "0x63ae2b0",
+    "status": "BUILT by packet #304"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae83d"
+    ],
+    "end": "0x63ae974",
+    "miss": 1,
+    "ret": 1,
+    "size": 660,
+    "start": "0x63ae6e0",
+    "status": "BUILT by packet #305"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aea96"
+    ],
+    "end": "0x63aed39",
+    "miss": 2,
+    "ret": 1,
+    "size": 953,
+    "start": "0x63ae980",
+    "status": "BUILT by packet #306"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aeea1"
+    ],
+    "end": "0x63aefdb",
+    "miss": 1,
+    "ret": 1,
+    "size": 667,
+    "start": "0x63aed40",
+    "status": "BUILT by this packet (#307); miss corrected 2 -> 1 by packet #306 (objdump census: one lu-miss call 0x63aefcd), re-verified by this packet"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af198"
+    ],
+    "end": "0x63af45f",
+    "miss": 2,
+    "ret": 1,
+    "size": 1151,
+    "start": "0x63aefe0",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af6c8"
+    ],
+    "end": "0x63afba4",
+    "miss": 4,
+    "ret": 1,
+    "size": 1860,
+    "start": "0x63af460",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63afe1e"
+    ],
+    "end": "0x63b0324",
+    "miss": 4,
+    "ret": 1,
+    "size": 1732,
+    "start": "0x63afc60",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc5e5"
+    ],
+    "end": "0x63bc728",
+    "miss": 1,
+    "ret": 1,
+    "size": 664,
+    "start": "0x63bc490",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc9ec"
+    ],
+    "end": "0x63bcb12",
+    "miss": 1,
+    "ret": 1,
+    "size": 994,
+    "start": "0x63bc730",
+    "status": "survives"
+   },
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x63c30ed"
+    ],
+    "end": "0x63c3328",
+    "miss": 1,
+    "ret": 1,
+    "size": 1064,
+    "start": "0x63c2f00",
+    "status": "survives"
+   }
+  ],
+  "count": 17,
+  "total_raw": 108,
+  "tiers": {
+   "1": 17,
+   "10": 1,
+   "2": 12,
+   "4": 8,
+   "5": 1,
+   "6": 2,
+   "8": 1
+  },
+  "exclusions_reverified": [
+   "0x63ed090..0x63ed862 (#260)",
+   "0x63ef8e0..0x63efba2 (#258)"
+  ],
+  "method": "own .eh_frame parse (135,313 FDEs, sorted before bisect) + raw-e8 census + objdump site count per FDE + exhibits-scoped range-only claim check over merged tree + all prior hl-wt-calls* worktrees"
+ },
+ "next_question": {
+  "packet": 308,
+  "window": "0x63aefe0..0x63af45f",
+  "bytes": 1151,
+  "bin_table_init": 1,
+  "lu_miss": 2,
+  "ret": 1,
+  "bsr": 0,
+  "fall_through": [
+   "0x63af460..0x63afba4",
+   "0x63afc60..0x63b0324",
+   "0x63bc490..0x63bc728",
+   "0x63bc730..0x63bcb12",
+   "0x63c2f00..0x63c3328"
+  ],
+  "correction": "lu-miss count for 0x63aed40 corrected 2 -> 1 by packet #306 (objdump census finds a single call to 0x63d9700 at 0x63aefcd); carried forward here and re-verified by this packet's own census"
+ }
+}
