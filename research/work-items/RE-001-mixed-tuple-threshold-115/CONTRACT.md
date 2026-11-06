@@ -1,0 +1,11 @@
+# Pre-Rust: complete mixed-sign tuple and saturating threshold selector
+
+RE-001/assets, node115 SHA256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301, base05bc2de303c05525b71e7e257426e741bc66a390. One complete semantic family: call-free leaves55ff9e0..55ffa44,2c6f290..2c6f2f4 and55ff970..55ff9d4, each100B28instructions;three FDEs300B84starts,two unique encodings. Merged static2343/2186/2391 are credited and preserved. Exact-byte alias is validated as part of this one family, never a standalone PR. No Rust before expectation seal.
+
+Valid readable object at RDI and return stack, disjoint nonwrapping storage, no mutation during operation. A fields rawu32 at60/64/68, B at4294/4298/429c; T/X/C rawu64 at28/10/4228. The third body uses B offsets4e04/4e08/4e0c and C offset4d98 instead. Only declared fields are initialized; unknown object padding cannot provide invented values. Native does not write memory. Return only AL; upper RAX is not uniformly known or compared.
+
+Compare A/B lexicographically: first field signedi32, second/third unsignedu32. If A>=B and T>=C, return2. Otherwise return1 iff T>=saturating_u64_add(X,5000), else0. Equality is accepted in both unsigned threshold comparisons. Source-level field names, units/time policy and caller validity are not inferred.
+
+Every complete-family instruction and all control edges need actual CPU-evaluator observations. Expected rows are native raw AL values, not an expected hand-written selector. No helper, copied target-code implementation, callback answer or fresh interior-state composition is permitted. Full-FDE/CIE, 4 encoded direct-caller leads from priorpacket, selected realcaller/sourceLocation must be authenticated. No original Rust ABI, financial policy, original compiler recipe, target-byte equivalence or whole-component completion is claimed. All92 gates stayfalse.
+
+The own safe Rust API will take the six rawu32 and three rawu64 values, independently express mixed-sign tuple ordering and saturating addition, and return an owned rawbyte coordinate. Source implementation may use native Rust tuple comparison/saturating_add rather than reproduce register tricks. Inputs/expected bytes must be Git-sealed before this source is authored. No captured ELF process/Unicorn/live service/chain/signing/wallet action. New code MIT, no unlicensed inferred source.
