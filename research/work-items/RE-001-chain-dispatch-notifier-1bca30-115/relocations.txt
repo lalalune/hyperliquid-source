@@ -1,0 +1,16 @@
+Routine 0x61bca30: no RELATIVE relocation targets the routine, no
+stored qword in the raw binary equals 0x61bca30 (see census.py).
+
+Expected-slot global 0x64ecf80: exactly one RELATIVE relocation:
+  0000064ecf80  000000000008 R_X86_64_RELATIVE  5d4d490
+so at load time *(0x64ecf80) = load base + 0x5d4d490, the address of
+the expected-slot walker routine 0x5d4d490 (FDE 0x5d4d490..0x5d4d552).
+The file bytes at that address are zero; the value comes only from
+the relocation, verified by readelf -r (see verify.py check 6).
+
+Tag global 0x6508800: a std::string object (data +0x00, size +0x08)
+in the BSS tail of the fourth LOAD segment (file bytes end at
+vaddr 0x64ffe08; the object sits at 0x6508800, past the file bytes).
+No relocation sets it, so its bytes are not retained in the file;
+the packet pins only the access pattern (varint of its size, then
+its bytes appended) and not the literal tag bytes.
