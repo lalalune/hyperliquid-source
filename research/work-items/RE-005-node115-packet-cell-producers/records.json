@@ -1,0 +1,853 @@
+{
+ "answer": {
+  "cell_layout": "Cell allocation is 0x30 bytes (dealloc size in the Arc drop glue 0x5bc2a80): strong count at +0x00, weak count at +0x08, payload S at +0x10: {context A at +0x10 (its own Arc count at A+0x00 and a second atomic counter at A+0x18, incremented by the spawn body at 0x15b835a and decremented by the payload drop 0x5bc3bf0, which also sets a flag byte at A+0x20 when it discards a live pair), state at +0x18, data at +0x20, vtable at +0x28}. The spawn body initialises state to 0 and leaves the pair slot uninitialised; the pair is only ever read when state is nonzero (dispatcher drain, Arc drop glue, payload drop) or taken by the join body after the thread has finished.",
+  "payload_shapes": "Normal path: r14 is zeroed at dispatcher entry (0x15b9083), so the stored pair is {data = NULL, vtable = r15} -- an empty trait object under a live vtable, with state 1 as the completion marker the join body tests (bit 0) before returning the pair in rax:rdx. Catch path: after the begin-catch body (slot 0x64df4c0 -> 0x1680cab), the helper behind slot 0x64dfe88 (0x5bb19f0) checks the panic object's \"MOZ\\0RUST\" magic and returns the enclosed Box fat pointer (data from object +0x28, vtable from object +0x30) in rax:rdx; the dispatcher moves it to r14:r15 (0x15b9170 / 0x15b918e), drains any pair already in the cell, and the same finish block stores the panic payload pair.",
+  "producers": "The only producer of this cell instance is the dispatcher itself. Its finish block (state := 1, data := r14, vtable := r15, then a strong-count decrement on the cell) runs on every exit: the fall-through copy at 0x15b90da and the landing-pad copy at 0x15b9141. The completion-store idiom occurs in exactly 13 bodies in the whole .text (idiom census); none of the other 12 is a producer of this instance: four are the sibling dispatchers of the same table family, five are sibling dispatchers of other closures whose cells share this cell's Arc drop glue (slot 0x64dfe60), two are dispatchers of two different cell types (their own drop-glue slots), and two write the idiom onto their own stack frames only. The cell's other accesses are not productions: the spawn body initialises it, the join body takes the pair out (state := 0), and the Arc/payload drop paths drain it if a pair is still present.",
+  "r15_origin": "Pinned from the producer side. The dispatcher contains exactly one r15-writing instruction, the catch-path mov %rdx,%r15 at 0x15b918e, so on the normal path the stored r15 is the caller's value, preserved across both adapter calls. The only caller is the thread start routine 0x5ca44a0 (no direct call sites exist; the thread-create body 0x5c87b50 passes it to pthread_create as the start routine, lea at 0x5c87c19). The start routine loads r15 from package +0x10 at 0x5ca45a6 and does not write r15 before the call *0x18(%r15) at 0x5ca45d7. Package +0x10 is written by the spawn body 0x15b80e0: the package is a fresh 0x18-byte allocation {thread Arc at +0x00, closure data at +0x08, vtable base at +0x10}, and the vtable base stored at 0x15b8461.. is the lea 0x6400530 result of 0x15b8436 -- this dispatcher's own static-table entry. So on the normal path packet +0x28 receives the entry vtable base 0x6400530, produced by the spawn body; the lea census shows each of the 11 entries is loaded by exactly one lea, in its own spawn body."
+ },
+ "artifact": {
+  "bytes": 105896032,
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "snapshot": "<authenticated-node115>"
+ },
+ "boundaries": {
+  "adapter_semantics": "What the two adapters per dispatcher do with their environment copies (adapter_0 / adapter_a for v4, pinned in #2969) is not revisited; neither adapter receives the cell pointer in its argument struct (adapter_0 gets closure +0x00..+0x20, adapter_a gets closure +0x28..+0x58), and neither performs the completion store.",
+  "context_a_identity": "What the context object A at cell +0x10 is at source level is not pinned: the binary shows a refcounted object (Arc count at +0x00, second atomic counter at +0x18, flag byte at +0x20) handed to each spawn body as an argument (r9 for spawn_v4) and stored into the fresh cell; no string or Location names it on these paths.",
+  "kind1_arm": "Whether the kind-1 arm of wrapper A (0x15d6fd0, #2969) is selected at run time, and therefore how often any given dispatcher runs, is a run-time question static analysis does not decide.",
+  "sibling_instances": "The sibling dispatchers (families X1/X2/X3) drain cells of the same Arc type but of their own closures; who owns those JoinHandles and whether their callers ever read the returned pair is not traced here. Families X4/X5 use different cell types (drop-glue slots 0x64ecb50 / 0x64ecc48) and are classified only far enough to exclude them."
+ },
+ "call_census": {
+  "cell_payload_drop": [
+   {
+    "body": "0x5bc2a80",
+    "site": "0x5bc2a92"
+   },
+   {
+    "body": "0x5bc3b00",
+    "site": "0x5bc3b0f"
+   }
+  ],
+  "dispatcher_v4": [],
+  "spawn_v4": [
+   {
+    "body": "0x150b310",
+    "site": "0x150b98c"
+   }
+  ],
+  "thread_start": []
+ },
+ "captured_code_executed": false,
+ "dispatcher_audit": {
+  "slots_referenced": [
+   "0x64df4a0",
+   "0x64df4c0",
+   "0x64dfe60",
+   "0x64dfe88",
+   "0x64dfe90",
+   "0x64e1190",
+   "0x64e1318"
+  ],
+  "stores": [
+   {
+    "base": "rsp",
+    "disp": "0x18",
+    "kind": "reg",
+    "site": "0x15b9041",
+    "src": "rcx"
+   },
+   {
+    "base": "rbp",
+    "disp": "0x18",
+    "kind": "imm",
+    "site": "0x15b90da",
+    "src": 1
+   },
+   {
+    "base": "rbp",
+    "disp": "0x20",
+    "kind": "reg",
+    "site": "0x15b90e2",
+    "src": "r14"
+   },
+   {
+    "base": "rbp",
+    "disp": "0x28",
+    "kind": "reg",
+    "site": "0x15b90e6",
+    "src": "r15"
+   },
+   {
+    "base": "rbp",
+    "disp": "0x18",
+    "kind": "imm",
+    "site": "0x15b9141",
+    "src": 1
+   },
+   {
+    "base": "rbp",
+    "disp": "0x20",
+    "kind": "reg",
+    "site": "0x15b9149",
+    "src": "r14"
+   },
+   {
+    "base": "rbp",
+    "disp": "0x28",
+    "kind": "reg",
+    "site": "0x15b914d",
+    "src": "r15"
+   }
+  ]
+ },
+ "idiom_census": {
+  "bodies": [
+   {
+    "base_register": "rbp",
+    "body": "0x15b8cd0",
+    "class": "dispatcher_finish",
+    "family": "L",
+    "role": "dispatcher_v1",
+    "sites": {
+     "data": "0x15b8dce",
+     "state": "0x15b8dc6",
+     "vtable": "0x15b8dd2"
+    },
+    "slots_referenced": [
+     "0x64df4a0",
+     "0x64df4c0",
+     "0x64dfe60",
+     "0x64dfe88",
+     "0x64dfe90",
+     "0x64e1168",
+     "0x64e1310"
+    ]
+   },
+   {
+    "base_register": "rbp",
+    "body": "0x15b8e40",
+    "class": "dispatcher_finish",
+    "family": "L",
+    "role": "dispatcher_v2",
+    "sites": {
+     "data": "0x15b8f44",
+     "state": "0x15b8f3c",
+     "vtable": "0x15b8f48"
+    },
+    "slots_referenced": [
+     "0x64df4a0",
+     "0x64df4c0",
+     "0x64dfe60",
+     "0x64dfe88",
+     "0x64dfe90",
+     "0x64e1198",
+     "0x64e1308"
+    ]
+   },
+   {
+    "base_register": "rbp",
+    "body": "0x15b8fd0",
+    "class": "dispatcher_finish",
+    "family": "L",
+    "role": "dispatcher_v4",
+    "sites": {
+     "data": "0x15b9149",
+     "state": "0x15b9141",
+     "vtable": "0x15b914d"
+    },
+    "slots_referenced": [
+     "0x64df4a0",
+     "0x64df4c0",
+     "0x64dfe60",
+     "0x64dfe88",
+     "0x64dfe90",
+     "0x64e1190",
+     "0x64e1318"
+    ]
+   },
+   {
+    "base_register": "rbp",
+    "body": "0x15b91d0",
+    "class": "dispatcher_finish",
+    "family": "L",
+    "role": "dispatcher_v3",
+    "sites": {
+     "data": "0x15b92c6",
+     "state": "0x15b92be",
+     "vtable": "0x15b92ca"
+    },
+    "slots_referenced": [
+     "0x64df4a0",
+     "0x64df4c0",
+     "0x64dfe60",
+     "0x64dfe88",
+     "0x64dfe90",
+     "0x64e1180",
+     "0x64e11a0"
+    ]
+   },
+   {
+    "base_register": "rbp",
+    "body": "0x2dd4f10",
+    "class": "dispatcher_finish",
+    "family": "X1",
+    "role": "dispatcher_x1",
+    "sites": {
+     "data": "0x2dd5048",
+     "state": "0x2dd5040",
+     "vtable": "0x2dd504c"
+    },
+    "slots_referenced": [
+     "0x64df4a0",
+     "0x64df4c0",
+     "0x64dfe60",
+     "0x64dfe88",
+     "0x64dfe90",
+     "0x64e6ec8",
+     "0x64e8698",
+     "0x64e86a0"
+    ]
+   },
+   {
+    "base_register": "rsp",
+    "body": "0x2e8fd30",
+    "class": "stack_construction",
+    "family": null,
+    "role": null,
+    "sites": {
+     "data": "0x2e8fe65",
+     "state": "0x2e8fe46",
+     "vtable": "0x2e8fe6a"
+    },
+    "slots_referenced": [
+     "0x6403fc0",
+     "0x64df480",
+     "0x64df498",
+     "0x64df4c0",
+     "0x64df508",
+     "0x64df8c0",
+     "0x64df8c8",
+     "0x64e2520"
+    ]
+   },
+   {
+    "base_register": "rsp",
+    "body": "0x3b54430",
+    "class": "stack_construction",
+    "family": null,
+    "role": null,
+    "sites": {
+     "data": "0x3b54833",
+     "state": "0x3b54671",
+     "vtable": "0x3b54838"
+    },
+    "slots_referenced": [
+     "0x7adc8c",
+     "0x6403fc0",
+     "0x6404008",
+     "0x6473b68",
+     "0x6473b80",
+     "0x64df480",
+     "0x64df490",
+     "0x64df498",
+     "0x64df4a0",
+     "0x64df4c0",
+     "0x64df508",
+     "0x64df520",
+     "0x64df8c0",
+     "0x64df8c8"
+    ]
+   },
+   {
+    "base_register": "rbp",
+    "body": "0x561f970",
+    "class": "dispatcher_finish",
+    "family": "X2",
+    "role": "dispatcher_x2a",
+    "sites": {
+     "data": "0x561faa8",
+     "state": "0x561faa0",
+     "vtable": "0x561faac"
+    },
+    "slots_referenced": [
+     "0x64df4a0",
+     "0x64df4c0",
+     "0x64dfe60",
+     "0x64dfe88",
+     "0x64dfe90",
+     "0x64e6ec8",
+     "0x64e8698",
+     "0x64e86a0"
+    ]
+   },
+   {
+    "base_register": "rbp",
+    "body": "0x561fed0",
+    "class": "dispatcher_finish",
+    "family": "X2",
+    "role": "dispatcher_x2b",
+    "sites": {
+     "data": "0x561fff1",
+     "state": "0x561ffe9",
+     "vtable": "0x561fff5"
+    },
+    "slots_referenced": [
+     "0x64df4a0",
+     "0x64df4c0",
+     "0x64dfe60",
+     "0x64dfe88",
+     "0x64dfe90",
+     "0x64eb2b0",
+     "0x64eb2e0"
+    ]
+   },
+   {
+    "base_register": "rbp",
+    "body": "0x5620120",
+    "class": "dispatcher_finish",
+    "family": "X2",
+    "role": "dispatcher_x2c",
+    "sites": {
+     "data": "0x5620258",
+     "state": "0x5620250",
+     "vtable": "0x562025c"
+    },
+    "slots_referenced": [
+     "0x64df4a0",
+     "0x64df4c0",
+     "0x64dfe60",
+     "0x64dfe88",
+     "0x64dfe90",
+     "0x64e6ec8",
+     "0x64eb2a8",
+     "0x64eb2d8"
+    ]
+   },
+   {
+    "base_register": "rbp",
+    "body": "0x5bc3350",
+    "class": "dispatcher_finish",
+    "family": "X3",
+    "role": "dispatcher_x3",
+    "sites": {
+     "data": "0x5bc3585",
+     "state": "0x5bc357d",
+     "vtable": "0x5bc3589"
+    },
+    "slots_referenced": [
+     "0x64df4a0",
+     "0x64df4c0",
+     "0x64dfe60",
+     "0x64dfe88",
+     "0x64dfe90",
+     "0x64ec1e8",
+     "0x64ec1f0"
+    ]
+   },
+   {
+    "base_register": "rbp",
+    "body": "0x5cd9b30",
+    "class": "dispatcher_finish",
+    "family": "X4",
+    "role": "dispatcher_x4",
+    "sites": {
+     "data": "0x5cd9c53",
+     "state": "0x5cd9c4b",
+     "vtable": "0x5cd9c57"
+    },
+    "slots_referenced": [
+     "0x64df4a0",
+     "0x64df4c0",
+     "0x64dfe88",
+     "0x64dfe90",
+     "0x64e1a38",
+     "0x64ecb50",
+     "0x64ecb58",
+     "0x64ecb60"
+    ]
+   },
+   {
+    "base_register": "rbp",
+    "body": "0x5cf7710",
+    "class": "dispatcher_finish",
+    "family": "X5",
+    "role": "dispatcher_x5",
+    "sites": {
+     "data": "0x5cf7868",
+     "state": "0x5cf7860",
+     "vtable": "0x5cf786c"
+    },
+    "slots_referenced": [
+     "0x64df4a0",
+     "0x64df4c0",
+     "0x64dfe88",
+     "0x64dfe90",
+     "0x64ecb88",
+     "0x64ecb98",
+     "0x64ecc48"
+    ]
+   }
+  ],
+  "count": 13
+ },
+ "lea_census": {
+  "0x64004d0": [
+   {
+    "body": "0x15b6d10",
+    "site": "0x15b7028"
+   }
+  ],
+  "0x64004f0": [
+   {
+    "body": "0x15b73c0",
+    "site": "0x15b76d0"
+   }
+  ],
+  "0x6400510": [
+   {
+    "body": "0x15b7a80",
+    "site": "0x15b7d51"
+   }
+  ],
+  "0x6400530": [
+   {
+    "body": "0x15b80e0",
+    "site": "0x15b8436"
+   }
+  ],
+  "0x6451280": [
+   {
+    "body": "0x2d46820",
+    "site": "0x2d46b77"
+   }
+  ],
+  "0x64aa788": [
+   {
+    "body": "0x56141f0",
+    "site": "0x5614547"
+   }
+  ],
+  "0x64aa7a8": [
+   {
+    "body": "0x5614960",
+    "site": "0x5614ccf"
+   }
+  ],
+  "0x64aa7c8": [
+   {
+    "body": "0x56150d0",
+    "site": "0x5615427"
+   }
+  ],
+  "0x64bdc50": [
+   {
+    "body": "0x5bc2c90",
+    "site": "0x5bc2fa5"
+   }
+  ],
+  "0x64c5330": [
+   {
+    "body": "0x5cd9470",
+    "site": "0x5cd976b"
+   }
+  ],
+  "0x64c6ac0": [
+   {
+    "body": "0x5cf6e80",
+    "site": "0x5cf71ac"
+   }
+  ]
+ },
+ "limits": "Static analysis only; the captured binary was parsed and disassembled, never executed. The producer census is instruction-accurate for the completion-store idiom as compiled here (immediate state store + r14/r15 pair store, direct or disp32 addressing, verified per body against objdump); a hypothetical producer using SIB-based addressing, a computed state value, or a bulk copy to write the cell would not match the idiom and is excluded only in combination with the holder-flow evidence (the cell pointer is created by the spawn bodies and escapes only to the closure at +0x20, the JoinHandle at +0x08 and stack temporaries of the pinned bodies). FDE extents are unwind ranges, not proven function boundaries. GOT slot targets are the relocation addends of this static PIE; two slots used by the spawn/join bodies are dynamic (GLOB_DAT) and are identified by role, not by target.",
+ "owners": {
+  "adapter_0_v4": {
+   "bytes": 34,
+   "end": "0x155fa02",
+   "file_offset": "0x155e9e0",
+   "sha256": "1c44ea5176f2e3f4a1ae286402e3f0253413d116e536fbb75f86e3a9d4655772",
+   "start": "0x155f9e0"
+  },
+  "adapter_a_v4": {
+   "bytes": 67,
+   "end": "0x155fa53",
+   "file_offset": "0x155ea10",
+   "sha256": "61b4de43a06f936410b37a7d3c49857857e0fd892024a617d7a522ac59692155",
+   "start": "0x155fa10"
+  },
+  "begin_catch": {
+   "bytes": 20,
+   "end": "0x1680cbf",
+   "file_offset": "0x167fcab",
+   "sha256": "7604c0d4f26a7d70e59c5dcb8a39928bfd7207a5d4439d91d8fb1e50be9846e7",
+   "start": "0x1680cab"
+  },
+  "catch_pair": {
+   "bytes": 79,
+   "end": "0x5bb1a3f",
+   "file_offset": "0x5bb09f0",
+   "sha256": "2cef45eb77cd2fc8d8b607539e99a33167976c451803bc3345f9416197c22d8e",
+   "start": "0x5bb19f0"
+  },
+  "cell_arc_drop": {
+   "bytes": 308,
+   "end": "0x5bc2bb4",
+   "file_offset": "0x5bc1a80",
+   "sha256": "fd3d9290228daf8af09b05b6c33b186878cb988f7e7eb2af500c61c5e5957ca2",
+   "start": "0x5bc2a80"
+  },
+  "cell_payload_drop": {
+   "bytes": 366,
+   "end": "0x5bc3d5e",
+   "file_offset": "0x5bc2bf0",
+   "sha256": "34b27ee7a0f42fc39e8ec6eb5ff80aac859e4efa05834dfc7cc2e39d8443c667",
+   "start": "0x5bc3bf0"
+  },
+  "closure_drop_v4": {
+   "bytes": 135,
+   "end": "0x15bb387",
+   "file_offset": "0x15ba300",
+   "sha256": "60420815afb983f51ec356449a5d87c16ecf47d741c50983f11c12befc156d73",
+   "start": "0x15bb300"
+  },
+  "dealloc_body": {
+   "bytes": 165,
+   "end": "0x635ded5",
+   "file_offset": "0x635ce30",
+   "sha256": "714fc5cdd28a2587427c9dac8a25685ec09695a3a21bc9af0eb09b29ae503f61",
+   "start": "0x635de30"
+  },
+  "dispatcher_v1": {
+   "bytes": 357,
+   "end": "0x15b8e35",
+   "file_offset": "0x15b7cd0",
+   "sha256": "12e808c3517fa8aaa23b9caf9977b3cd269a45709c4a40851b9fce75a87bc083",
+   "start": "0x15b8cd0"
+  },
+  "dispatcher_v2": {
+   "bytes": 388,
+   "end": "0x15b8fc4",
+   "file_offset": "0x15b7e40",
+   "sha256": "c5eb71b1574df93dbc20811992a518e4fe15892012e8572551490b559c226efc",
+   "start": "0x15b8e40"
+  },
+  "dispatcher_v3": {
+   "bytes": 349,
+   "end": "0x15b932d",
+   "file_offset": "0x15b81d0",
+   "sha256": "743621b0b7925a30bfbd46b9b3ed87266f5fda28f797f66ebefa6af69ef00d3c",
+   "start": "0x15b91d0"
+  },
+  "dispatcher_v4": {
+   "bytes": 498,
+   "end": "0x15b91c2",
+   "file_offset": "0x15b7fd0",
+   "sha256": "20cd3ac9bdc80df92482568c93f647e74cf4402f9b8b9c8f917d8f7ba32dd0d9",
+   "start": "0x15b8fd0"
+  },
+  "dispatcher_x1": {
+   "bytes": 445,
+   "end": "0x2dd50cd",
+   "file_offset": "0x2dd3f10",
+   "sha256": "866f54c1d0f22e82fff69bdc2264eb03ce6d21ce135986d5a6147011234c2bd5",
+   "start": "0x2dd4f10"
+  },
+  "dispatcher_x2a": {
+   "bytes": 445,
+   "end": "0x561fb2d",
+   "file_offset": "0x561e970",
+   "sha256": "c274b94bb48e9a5ab9163ba1a428c01dde1bba5594d27cf403b0cdb3bb99cdad",
+   "start": "0x561f970"
+  },
+  "dispatcher_x2b": {
+   "bytes": 419,
+   "end": "0x5620073",
+   "file_offset": "0x561eed0",
+   "sha256": "8967b83b554d76bb806ab31fe1961cbc16977a1916388a525069a66c4bdbca02",
+   "start": "0x561fed0"
+  },
+  "dispatcher_x2c": {
+   "bytes": 445,
+   "end": "0x56202dd",
+   "file_offset": "0x561f120",
+   "sha256": "3aacd56cd0167d82a8b1dc920ceb5fb1965db54ac9da4294f689fdcaf877db08",
+   "start": "0x5620120"
+  },
+  "dispatcher_x3": {
+   "bytes": 695,
+   "end": "0x5bc3607",
+   "file_offset": "0x5bc2350",
+   "sha256": "59e6cda1aa5b9276b19ab3c8aa3abb6cef1a961cdd487fa71ec971cb787852a6",
+   "start": "0x5bc3350"
+  },
+  "dispatcher_x4": {
+   "bytes": 423,
+   "end": "0x5cd9cd7",
+   "file_offset": "0x5cd8b30",
+   "sha256": "939b0f395bedfc84d55c5f6a2de8b19f39bc64089ce0cf3c25efe284478f51ae",
+   "start": "0x5cd9b30"
+  },
+  "dispatcher_x5": {
+   "bytes": 471,
+   "end": "0x5cf78e7",
+   "file_offset": "0x5cf6710",
+   "sha256": "313eb6afb9fb15a3d11f14e20b1bd68e89d8be9ad571026469e43fd35aa0bbd2",
+   "start": "0x5cf7710"
+  },
+  "join_v4": {
+   "bytes": 350,
+   "end": "0x15b896e",
+   "file_offset": "0x15b7810",
+   "sha256": "f57a1ff86b1b2a431d2c168a23145ea2e603de76a51c662852d29c39853587aa",
+   "start": "0x15b8810"
+  },
+  "spawn_v4": {
+   "bytes": 1828,
+   "end": "0x15b8804",
+   "file_offset": "0x15b70e0",
+   "sha256": "967d4b0bb72e2e86245bc092d3d850f2324631adaf5482ac4df09804e3f152b8",
+   "start": "0x15b80e0"
+  },
+  "thread_create": {
+   "bytes": 507,
+   "end": "0x5c87d4b",
+   "file_offset": "0x5c86b50",
+   "sha256": "5a32afe678297cf1c46e730c440c2bc7158ccf7d949d5cc73c923e65644dd1e6",
+   "start": "0x5c87b50"
+  },
+  "thread_start": {
+   "bytes": 509,
+   "end": "0x5ca469d",
+   "file_offset": "0x5ca34a0",
+   "sha256": "65e3438cb7b950aa4b885b7c271b6a8bcbd4574519dee0f3f336360fabb21276",
+   "start": "0x5ca44a0"
+  }
+ },
+ "packet": "RE-005-node115-packet-cell-producers",
+ "pins": {
+  "adapter_a_v4": {
+   "0x155fa46": "e885750700"
+  },
+  "catch_pair": {
+   "0x5bb19f7": "48b84d4f5a0052555354",
+   "0x5bb1a13": "488b5f28"
+  },
+  "cell_arc_drop": {
+   "0x5bc2aae": "48837b1800",
+   "0x5bc2b09": "be30000000"
+  },
+  "cell_payload_drop": {
+   "0x5bc3c56": "48c7430800000000",
+   "0x5bc3c6f": "f048ff4818"
+  },
+  "closure_drop_v4": {
+   "0x15bb339": "488b4320",
+   "0x15bb351": "ff25094bf204"
+  },
+  "dispatcher_v4": {
+   "0x15b9054": "ff15be82f204",
+   "0x15b907d": "ff150d81f204",
+   "0x15b9083": "4531f6",
+   "0x15b9086": "488b6b20",
+   "0x15b908a": "48837d1800",
+   "0x15b9091": "4c8b6520",
+   "0x15b909a": "4c8b6d28",
+   "0x15b90da": "48c7451801000000",
+   "0x15b90e2": "4c897520",
+   "0x15b90e6": "4c897d28",
+   "0x15b90ef": "f048ff4d00",
+   "0x15b918e": "4989d7"
+  },
+  "join_v4": {
+   "0x15b886b": "4c8b7020",
+   "0x15b886f": "4c8b7828",
+   "0x15b8873": "f6401801",
+   "0x15b8877": "48c7401800000000"
+  },
+  "spawn_v4": {
+   "0x15b835a": "f048ff4718",
+   "0x15b83c9": "bf58000000",
+   "0x15b8410": "0f115020",
+   "0x15b8436": "488d05f380e404",
+   "0x15b8476": "ff150491f204"
+  },
+  "thread_create": {
+   "0x5c87c19": "488d1580c80100"
+  },
+  "thread_start": {
+   "0x5ca44af": "4c8b27",
+   "0x5ca45a6": "4c8b7b10",
+   "0x5ca45d7": "41ff5718"
+  }
+ },
+ "question": "The dispatcher-table packet (#3000) left two ends open about the shared packet cell the dispatcher 0x15b8fd0 drains (the Arc allocation pointed to by closure +0x20; payload S at allocation +0x10 = {context at +0x10, state at +0x18, fat pointer data at +0x20, fat pointer vtable at +0x28}): (1) who stores a fat pointer into that cell -- the full census of bodies storing into it, and the payload shape each producer writes; (2) can the origin of the r15 value the dispatcher stores back to packet +0x28 be pinned from the producer side?",
+ "r15_audit": {
+  "dispatcher_r15_stores_to_0x28": [
+   "0x15b90e6",
+   "0x15b914d"
+  ],
+  "dispatcher_r15_writes": [
+   {
+    "insn": "mov    %rdx,%r15",
+    "site": "0x15b918e"
+   }
+  ]
+ },
+ "slots": {
+  "adapter_0_v4": {
+   "slot": "0x64e1318",
+   "target": "0x155f9e0",
+   "type": 8
+  },
+  "adapter_a_v4": {
+   "slot": "0x64e1190",
+   "target": "0x155fa10",
+   "type": 8
+  },
+  "begin_catch": {
+   "slot": "0x64df4c0",
+   "target": "0x1680cab",
+   "type": 8
+  },
+  "catch_counter": {
+   "slot": "0x64dfe90",
+   "target": "0x6500090",
+   "type": 8
+  },
+  "catch_pair": {
+   "slot": "0x64dfe88",
+   "target": "0x5bb19f0",
+   "type": 8
+  },
+  "cell_arc_drop": {
+   "slot": "0x64dfe60",
+   "target": "0x5bc2a80",
+   "type": 8
+  },
+  "dealloc": {
+   "slot": "0x64df4a0",
+   "target": "0x635de30",
+   "type": 8
+  },
+  "thread_arc_drop": {
+   "slot": "0x64dfe58",
+   "target": "0x5c98b40",
+   "type": 8
+  },
+  "thread_create": {
+   "slot": "0x64e1580",
+   "target": "0x5c87b50",
+   "type": 8
+  },
+  "x4_cell_drop": {
+   "slot": "0x64ecb50",
+   "target": "0x5cd86e0",
+   "type": 8
+  },
+  "x5_cell_drop": {
+   "slot": "0x64ecc48",
+   "target": "0x5ce8390",
+   "type": 8
+  }
+ },
+ "tables": [
+  {
+   "align": "0x8",
+   "base": "0x64004d0",
+   "dispatcher": "dispatcher_v1",
+   "drop": "0x15bb900",
+   "family": "L",
+   "method": "0x15b8cd0",
+   "size": "0x30"
+  },
+  {
+   "align": "0x8",
+   "base": "0x64004f0",
+   "dispatcher": "dispatcher_v2",
+   "drop": "0x15bd430",
+   "family": "L",
+   "method": "0x15b8e40",
+   "size": "0x38"
+  },
+  {
+   "align": "0x8",
+   "base": "0x6400510",
+   "dispatcher": "dispatcher_v3",
+   "drop": "0x15bc390",
+   "family": "L",
+   "method": "0x15b91d0",
+   "size": "0x28"
+  },
+  {
+   "align": "0x8",
+   "base": "0x6400530",
+   "dispatcher": "dispatcher_v4",
+   "drop": "0x15bb300",
+   "family": "L",
+   "method": "0x15b8fd0",
+   "size": "0x58"
+  },
+  {
+   "align": "0x8",
+   "base": "0x6451280",
+   "dispatcher": "dispatcher_x1",
+   "drop": "0x2deff30",
+   "family": "X1",
+   "method": "0x2dd4f10",
+   "size": "0x38"
+  },
+  {
+   "align": "0x8",
+   "base": "0x64aa788",
+   "dispatcher": "dispatcher_x2a",
+   "drop": "0x562de30",
+   "family": "X2",
+   "method": "0x561f970",
+   "size": "0x38"
+  },
+  {
+   "align": "0x8",
+   "base": "0x64aa7a8",
+   "dispatcher": "dispatcher_x2b",
+   "drop": "0x562abd0",
+   "family": "X2",
+   "method": "0x561fed0",
+   "size": "0x50"
+  },
+  {
+   "align": "0x8",
+   "base": "0x64aa7c8",
+   "dispatcher": "dispatcher_x2c",
+   "drop": "0x562de30",
+   "family": "X2",
+   "method": "0x5620120",
+   "size": "0x38"
+  },
+  {
+   "align": "0x8",
+   "base": "0x64bdc50",
+   "dispatcher": "dispatcher_x3",
+   "drop": "0x5bc3840",
+   "family": "X3",
+   "method": "0x5bc3350",
+   "size": "0x90"
+  },
+  {
+   "align": "0x8",
+   "base": "0x64c5330",
+   "dispatcher": "dispatcher_x4",
+   "drop": "0x5cd9d70",
+   "family": "X4",
+   "method": "0x5cd9b30",
+   "size": "0x30"
+  },
+  {
+   "align": "0x8",
+   "base": "0x64c6ac0",
+   "dispatcher": "dispatcher_x5",
+   "drop": "0x5cf7d40",
+   "family": "X5",
+   "method": "0x5cf7710",
+   "size": "0x48"
+  }
+ ]
+}
