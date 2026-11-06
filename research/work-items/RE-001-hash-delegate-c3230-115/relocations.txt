@@ -1,0 +1,11 @@
+(none): the window reads no GOT or RELATIVE slot and contains no
+call instruction. Its only rip-relative reference is the lea at
+0x61c33f8, which loads 0x97df0b — the middle loop then reads its
+two secret qwords per stripe at [ptr-8] and [ptr], i.e. the
+192-byte table at 0x97df00 in .rodata read at offset 3 + 16*k.
+The opening stripes and the final pair use the same table's
+entries as immediates and make no memory reference to it. The
+caller census likewise finds no stored qword of 0x61c3230
+anywhere in the file and no RELATIVE slot whose addend is
+0x61c3230; the only entries are the two tail jumps in
+callers.tsv.
