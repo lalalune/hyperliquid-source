@@ -1,0 +1,481 @@
+{
+  "answer": {
+    "forms": "Two slots (0x64b9b70, 0x64ba390) are their own vtable base: the reader loads the slot address itself, and the slot begins a run of seven consecutive code entries.  The other five slots are the first -- and only -- code entry of a vtable whose {drop, size, align} header sits in the 0x18 bytes before the slot (the entry after each of the five points into .rodata: 0x448bd0 for three of them, 0x4349eb for two), and the reader loads the header address.",
+    "no_other_path": "No relocation addend, no stored 8-byte copy outside the relocation sections, no immediate materialisation, and no dynamic symbol names any of the seven slots or five bases.",
+    "one_reader_each": "Each of the seven stored pointers is read through exactly one materialisation of its vtable base: seven `lea` reference sites in seven distinct reader bodies, and no other rip-relative reference to any slot or base exists.",
+    "uses": "Five readers store the materialised base into a record they construct on the stack -- at field offset 0x10 of a 0x200-byte record for the two slot-base readers, and at field offset 0x30 of a 0x128-byte record for the three header-form constructors -- and the record is then copied into a fresh allocation.  The remaining two readers (the header-form dispatchers) also store the base, into an object field at +0x70, and immediately read the stored pointer back with `call qword ptr [rax + 0x18]`: the effective address of that call is the slot itself, so these two bodies are direct readers of the stored pointer, calling exactly the body it names (0x2a225c0 and 0x2a2a0e0)."
+  },
+  "artifact": {
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "size": 105896032
+  },
+  "boundaries": {
+    "generic_dispatch": "Once a constructed record carrying a vtable base leaves its constructor, later reads of the method entry go through that record's vtable field generically (a load of the field at +0x18 for the header form, or at +0x0 for the slot-base form); those dispatch sites are shared by every vtable of the same shape and are not attributable to one slot by static evidence.",
+    "one_level_up": "For each reader body this packet records only two counts: raw direct rel32 call/jump byte occurrences in .text whose target is the body start, and .rela.dyn entries whose addend is the body start.  The reader bodies' own callers are outside this packet's question.",
+    "prior_packets": "RE-011-evm-permit-routing-115 records two of the seven (reader body, base, stored body) triples as method-table rows -- future body 0x2d087e0 with inner vtable 0x6445868 and inner poll target 0x2a2a0e0 (eth_call), and future body 0x2d062f0 with inner vtable 0x64455c8 and inner poll target 0x2a225c0 (eth_estimateGas) -- without reference sites, use forms, or a completeness census. RE-011-eth-call-path-115, RE-001-node115-channel-repoll-terminal and RE-003-pr-integration-20261103 mention individual body or slot addresses incidentally.  The source packet (RE-005-node115-x5-consumer-callers) counted the seven stored pointers and left their readers as an explicit boundary; no earlier packet enumerates the readers of all seven, pins their reference sites and use forms, or excludes the other reference forms for the slots and bases.",
+    "runtime_behaviour": "Which runtime path reaches a given reader, what the per-slot statics name, and the concrete Rust types of the stored and reader bodies are not established by static evidence."
+  },
+  "captured_code_executed": false,
+  "census": {
+    "all_references_are_lea": true,
+    "constructed_record_readers": 5,
+    "defining_relocations_per_body": 1,
+    "direct_dispatch_readers": 2,
+    "direct_references_to_slots": 2,
+    "dynsym_entries_with_slot_or_base_st_value": 0,
+    "executable_sections": [
+      ".fini",
+      ".init",
+      ".plt",
+      ".text"
+    ],
+    "header_forms": 5,
+    "imm_materialisations_of_slots_or_bases": 0,
+    "reader_bodies": 7,
+    "references_to_bases": 7,
+    "rela_dyn_entries": 60723,
+    "rela_plt_entries": 278,
+    "relocation_type": 8,
+    "relocations_with_addend_eq_any_slot_or_base": 0,
+    "slot_base_forms": 2,
+    "slot_section": ".data.rel.ro",
+    "stored_bodies": 7,
+    "stored_qword_copies_of_slots_or_bases_outside_rela": 0
+  },
+  "question": "Who reads the seven stored pointers that are the only static reachability of the seven X5-consumer caller bodies with no direct callers -- at which reference sites, in which bodies, and in what use form?",
+  "source": {
+    "note": "The seven bodies are the source packet's one-level-up zero-direct-caller set; each body's extent and hash, its defining relocation, and its slot are re-derived from the binary in analyze().",
+    "slot": "0x64e7718",
+    "stored_body_count": 7,
+    "work_item": "RE-005-node115-x5-consumer-callers"
+  },
+  "stored": [
+    {
+      "base": "0x63ff730",
+      "body": {
+        "bytes": 5303,
+        "end": "0x159eab7",
+        "sha256": "a37934916d21c1758a453f6829eb9591892fb79faed7ec518de4fa4d96a9233e",
+        "start": "0x159d600"
+      },
+      "entry_after_slot": {
+        "addend": "0x448bd0",
+        "addend_section": ".rodata",
+        "kind": "relocation"
+      },
+      "form": "header",
+      "header": {
+        "align": 8,
+        "drop": "0x15a9c50",
+        "size": 3744
+      },
+      "method_run": 1,
+      "preceding_triple": null,
+      "readers": [
+        {
+          "body": {
+            "bytes": 882,
+            "end": "0x15d09d2",
+            "sha256": "2ca9f336bcb3d4849ed02104a211ae8b4829c3268e41a4e057dbfff59fc76f66",
+            "start": "0x15d0660"
+          },
+          "classification": "materialise_into_constructed_record",
+          "direct_callers": 1,
+          "lea_insn": "lea rdx, [rip + 0x4e2ee8c]",
+          "lea_site": "0x15d089d",
+          "next_insn": "mov qword ptr [rsp + 0x88], rdx",
+          "prev_insn": "mov qword ptr [rsp + 0x80], rbx",
+          "record": {
+            "field_offset": "0x30",
+            "record_size": 296,
+            "record_stack_base": "0x58"
+          },
+          "relocation_addends": 0,
+          "uses": [
+            {
+              "effective": null,
+              "insn": "mov qword ptr [rsp + 0x88], rdx",
+              "kind": "store_value",
+              "reads_stored_pointer": false,
+              "site": "0x15d08a4"
+            }
+          ]
+        }
+      ],
+      "relocation": {
+        "addend": "0x159d600",
+        "offset": "0x63ff748",
+        "type": 8
+      },
+      "slot": "0x63ff748",
+      "slot_section": ".data.rel.ro"
+    },
+    {
+      "base": "0x640e908",
+      "body": {
+        "bytes": 10479,
+        "end": "0x17480df",
+        "sha256": "379175f1539257625a462d8043b297ed8a58f1f8da88910a9a7558b2f92a1e59",
+        "start": "0x17457f0"
+      },
+      "entry_after_slot": {
+        "addend": "0x448bd0",
+        "addend_section": ".rodata",
+        "kind": "relocation"
+      },
+      "form": "header",
+      "header": {
+        "align": 8,
+        "drop": "0x174d9c0",
+        "size": 3744
+      },
+      "method_run": 1,
+      "preceding_triple": null,
+      "readers": [
+        {
+          "body": {
+            "bytes": 1223,
+            "end": "0x16d82b7",
+            "sha256": "1ad3c998cf44f2567218a219afd0085639c03d8b8581549038cea743e04330ba",
+            "start": "0x16d7df0"
+          },
+          "classification": "materialise_into_constructed_record",
+          "direct_callers": 1,
+          "lea_insn": "lea rdx, [rip + 0x4d36790]",
+          "lea_site": "0x16d8171",
+          "next_insn": "mov qword ptr [rsp + 0x98], rdx",
+          "prev_insn": "mov qword ptr [rsp + 0x90], rbx",
+          "record": {
+            "field_offset": "0x30",
+            "record_size": 296,
+            "record_stack_base": "0x68"
+          },
+          "relocation_addends": 0,
+          "uses": [
+            {
+              "effective": null,
+              "insn": "mov qword ptr [rsp + 0x98], rdx",
+              "kind": "store_value",
+              "reads_stored_pointer": false,
+              "site": "0x16d8178"
+            }
+          ]
+        }
+      ],
+      "relocation": {
+        "addend": "0x17457f0",
+        "offset": "0x640e920",
+        "type": 8
+      },
+      "slot": "0x640e920",
+      "slot_section": ".data.rel.ro"
+    },
+    {
+      "base": "0x64455c8",
+      "body": {
+        "bytes": 3471,
+        "end": "0x2a2334f",
+        "sha256": "bb42ae8d0ed28340baf3f36caea9b9d9f0713c5990321c859d34a99da7cb0481",
+        "start": "0x2a225c0"
+      },
+      "entry_after_slot": {
+        "addend": "0x4349eb",
+        "addend_section": ".rodata",
+        "kind": "relocation"
+      },
+      "form": "header",
+      "header": {
+        "align": 16,
+        "drop": "0x29eadd0",
+        "size": 2208
+      },
+      "method_run": 1,
+      "preceding_triple": null,
+      "readers": [
+        {
+          "body": {
+            "bytes": 3222,
+            "end": "0x2d06f86",
+            "sha256": "d2b9807a4fdbf5314547cf0e8cde004779ec4db7d26d66ad33a83d00acd0d464",
+            "start": "0x2d062f0"
+          },
+          "classification": "store_and_direct_dispatch",
+          "direct_callers": 0,
+          "lea_insn": "lea rax, [rip + 0x373edbd]",
+          "lea_site": "0x2d06804",
+          "next_insn": "mov qword ptr [rbx + 0x70], rax",
+          "prev_insn": "mov qword ptr [rbx + 0x68], r13",
+          "record": null,
+          "relocation_addends": 1,
+          "uses": [
+            {
+              "effective": null,
+              "insn": "mov qword ptr [rbx + 0x70], rax",
+              "kind": "store_value",
+              "reads_stored_pointer": false,
+              "site": "0x2d0680b"
+            },
+            {
+              "effective": "0x64455e0",
+              "insn": "call qword ptr [rax + 0x18]",
+              "kind": "mem_through",
+              "reads_stored_pointer": true,
+              "site": "0x2d0681e"
+            }
+          ]
+        }
+      ],
+      "relocation": {
+        "addend": "0x2a225c0",
+        "offset": "0x64455e0",
+        "type": 8
+      },
+      "slot": "0x64455e0",
+      "slot_section": ".data.rel.ro"
+    },
+    {
+      "base": "0x6445868",
+      "body": {
+        "bytes": 6050,
+        "end": "0x2a2b882",
+        "sha256": "6419ef830eec8bc815f0c76b0332c6ec7f85f8a121307e6e77599f4bd788c40d",
+        "start": "0x2a2a0e0"
+      },
+      "entry_after_slot": {
+        "addend": "0x4349eb",
+        "addend_section": ".rodata",
+        "kind": "relocation"
+      },
+      "form": "header",
+      "header": {
+        "align": 16,
+        "drop": "0x29ea680",
+        "size": 2224
+      },
+      "method_run": 1,
+      "preceding_triple": null,
+      "readers": [
+        {
+          "body": {
+            "bytes": 4518,
+            "end": "0x2d09986",
+            "sha256": "113f1730ee43d4ecaf1778f3565eb2c70d88e9ce5d39649683f23f459652c596",
+            "start": "0x2d087e0"
+          },
+          "classification": "store_and_direct_dispatch",
+          "direct_callers": 0,
+          "lea_insn": "lea rax, [rip + 0x373c7bf]",
+          "lea_site": "0x2d090a2",
+          "next_insn": "mov qword ptr [rbp + 0x70], rax",
+          "prev_insn": "mov qword ptr [rbp + 0x68], r14",
+          "record": null,
+          "relocation_addends": 1,
+          "uses": [
+            {
+              "effective": null,
+              "insn": "mov qword ptr [rbp + 0x70], rax",
+              "kind": "store_value",
+              "reads_stored_pointer": false,
+              "site": "0x2d090a9"
+            },
+            {
+              "effective": "0x6445880",
+              "insn": "call qword ptr [rax + 0x18]",
+              "kind": "mem_through",
+              "reads_stored_pointer": true,
+              "site": "0x2d090c3"
+            }
+          ]
+        }
+      ],
+      "relocation": {
+        "addend": "0x2a2a0e0",
+        "offset": "0x6445880",
+        "type": 8
+      },
+      "slot": "0x6445880",
+      "slot_section": ".data.rel.ro"
+    },
+    {
+      "base": "0x6446298",
+      "body": {
+        "bytes": 5380,
+        "end": "0x2a66324",
+        "sha256": "5430a4371ac21fd0b882c6333d719807fb9c7935cff4402a9b0e7d9def8824c4",
+        "start": "0x2a64e20"
+      },
+      "entry_after_slot": {
+        "addend": "0x448bd0",
+        "addend_section": ".rodata",
+        "kind": "relocation"
+      },
+      "form": "header",
+      "header": {
+        "align": 8,
+        "drop": "0x2aa31b0",
+        "size": 3744
+      },
+      "method_run": 1,
+      "preceding_triple": null,
+      "readers": [
+        {
+          "body": {
+            "bytes": 882,
+            "end": "0x294f512",
+            "sha256": "da9eccbdf747db8ff8e770e72808ebffbd675c81b6d2c41ceef624bd804c4353",
+            "start": "0x294f1a0"
+          },
+          "classification": "materialise_into_constructed_record",
+          "direct_callers": 1,
+          "lea_insn": "lea rdx, [rip + 0x3af6eb4]",
+          "lea_site": "0x294f3dd",
+          "next_insn": "mov qword ptr [rsp + 0x88], rdx",
+          "prev_insn": "mov qword ptr [rsp + 0x80], rbx",
+          "record": {
+            "field_offset": "0x30",
+            "record_size": 296,
+            "record_stack_base": "0x58"
+          },
+          "relocation_addends": 0,
+          "uses": [
+            {
+              "effective": null,
+              "insn": "mov qword ptr [rsp + 0x88], rdx",
+              "kind": "store_value",
+              "reads_stored_pointer": false,
+              "site": "0x294f3e4"
+            }
+          ]
+        }
+      ],
+      "relocation": {
+        "addend": "0x2a64e20",
+        "offset": "0x64462b0",
+        "type": 8
+      },
+      "slot": "0x64462b0",
+      "slot_section": ".data.rel.ro"
+    },
+    {
+      "base": "0x64b9b70",
+      "body": {
+        "bytes": 1387,
+        "end": "0x5a940bb",
+        "sha256": "b7b5a37040f259f533695a922a8c046fb11b1aac3eb4f40bab940110924811cf",
+        "start": "0x5a93b50"
+      },
+      "entry_after_slot": {
+        "addend": "0x5a97c60",
+        "addend_section": ".text",
+        "kind": "relocation"
+      },
+      "form": "slot_base",
+      "header": null,
+      "method_run": 7,
+      "preceding_triple": [
+        "0xd38",
+        "0x20",
+        "0x28"
+      ],
+      "readers": [
+        {
+          "body": {
+            "bytes": 395,
+            "end": "0x596507b",
+            "sha256": "a1d9410dcaf754ccc9476b75308ee969b028995cee1255057a6eb2555872071e",
+            "start": "0x5964ef0"
+          },
+          "classification": "materialise_into_constructed_record",
+          "direct_callers": 1,
+          "lea_insn": "lea rax, [rip + 0xb54c05]",
+          "lea_site": "0x5964f64",
+          "next_insn": "mov qword ptr [rsp + 0x90], rax",
+          "prev_insn": "mov qword ptr [rsp + 0x88], 0",
+          "record": {
+            "field_offset": "0x10",
+            "record_size": 512,
+            "record_stack_base": "0x80"
+          },
+          "relocation_addends": 0,
+          "uses": [
+            {
+              "effective": null,
+              "insn": "mov qword ptr [rsp + 0x90], rax",
+              "kind": "store_value",
+              "reads_stored_pointer": false,
+              "site": "0x5964f6b"
+            }
+          ]
+        }
+      ],
+      "relocation": {
+        "addend": "0x5a93b50",
+        "offset": "0x64b9b70",
+        "type": 8
+      },
+      "slot": "0x64b9b70",
+      "slot_section": ".data.rel.ro"
+    },
+    {
+      "base": "0x64ba390",
+      "body": {
+        "bytes": 1343,
+        "end": "0x5a945ff",
+        "sha256": "5792d7aec62adeae709f82a6a04bcc778da7038faadb03c055c5aa015b223239",
+        "start": "0x5a940c0"
+      },
+      "entry_after_slot": {
+        "addend": "0x5a97cb0",
+        "addend_section": ".text",
+        "kind": "relocation"
+      },
+      "form": "slot_base",
+      "header": null,
+      "method_run": 7,
+      "preceding_triple": [
+        "0x58",
+        "0x20",
+        "0x30"
+      ],
+      "readers": [
+        {
+          "body": {
+            "bytes": 395,
+            "end": "0x5965f1b",
+            "sha256": "bd5aef55728fe913a071357386b3b88d6fff7abce3daf2fa8e105ad25bd69997",
+            "start": "0x5965d90"
+          },
+          "classification": "materialise_into_constructed_record",
+          "direct_callers": 1,
+          "lea_insn": "lea rax, [rip + 0xb54585]",
+          "lea_site": "0x5965e04",
+          "next_insn": "mov qword ptr [rsp + 0x90], rax",
+          "prev_insn": "mov qword ptr [rsp + 0x88], 0",
+          "record": {
+            "field_offset": "0x10",
+            "record_size": 512,
+            "record_stack_base": "0x80"
+          },
+          "relocation_addends": 0,
+          "uses": [
+            {
+              "effective": null,
+              "insn": "mov qword ptr [rsp + 0x90], rax",
+              "kind": "store_value",
+              "reads_stored_pointer": false,
+              "site": "0x5965e0b"
+            }
+          ]
+        }
+      ],
+      "relocation": {
+        "addend": "0x5a940c0",
+        "offset": "0x64ba390",
+        "type": 8
+      },
+      "slot": "0x64ba390",
+      "slot_section": ".data.rel.ro"
+    }
+  ]
+}
