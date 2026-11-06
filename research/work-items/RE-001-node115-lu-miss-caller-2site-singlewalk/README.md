@@ -383,3 +383,7 @@ input set, not proof of global function ownership or reconstruction completion.
 The common helper and its corruption tests are pinned by the review packet's
 manifest. Temporary tests use their source checkout as the explicit reference
 root and keep mutations in temporary copies.
+
+A historical next-work suggestion may already have a complete exhibit in
+the pinned input set. That case is validated as already documented and earns
+no new coverage; actual current-window overlap remains a failure.
