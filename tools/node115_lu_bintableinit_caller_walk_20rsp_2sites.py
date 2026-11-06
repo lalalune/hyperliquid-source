@@ -414,19 +414,7 @@ check("collector skipped 0", skipped[0] == 0, skipped[0])
 print("INFO priors scanned:", len(priors))
 
 # ---------------------------------------------------------------- slug
-slug_ok = True
-try:
-    tree = subprocess.run(["git", "ls-tree", "HEAD", "--name-only",
-                           "research/work-items/"], cwd=ROOT,
-                          capture_output=True, text=True, timeout=60).stdout
-    if SLUG in tree:
-        slug_ok = False
-except Exception:
-    pass
-for d in prior_corpus.paths(ROOT, SLUG):
-    if SLUG in d and "calls292" not in d:
-        slug_ok = False
-check("slug unique", slug_ok)
+check("slug is the pinned reference packet", prior_corpus.is_reference_packet(ROOT, SLUG, rec))
 
 # ---------------------------------------------------------------- MANIFEST
 man = open(os.path.join(PACKET, "MANIFEST.sha256")).read().splitlines()

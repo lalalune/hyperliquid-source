@@ -148,3 +148,10 @@ def is_documented(root, lo, hi):
         if any(a <= lo and hi <= b for a, b in _explicit_ranges(record)):
             return True
     return False
+
+
+def is_reference_packet(root, slug, record):
+    """A committed copy of the exact pinned packet is not a slug collision."""
+    _, found = _reference(root)
+    matching = [p for p in found if p.parent.name == slug]
+    return len(matching) == 1 and json.loads(matching[0].read_bytes()) == record

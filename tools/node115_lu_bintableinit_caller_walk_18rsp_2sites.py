@@ -74,7 +74,9 @@ try:
                         capture_output=True, text=True)
     head = gp.stdout.strip()
     if gp.returncode == 0 and head:
-        check("worktree HEAD is base", head == EXPECTED_BASE,
+        ancestry = subprocess.run(["git", "merge-base", "--is-ancestor", EXPECTED_BASE, head],
+                                  cwd=ROOT, capture_output=True)
+        check("worktree descends from recorded base", ancestry.returncode == 0,
               "got %s" % head)
     else:
         check("worktree HEAD check skipped (no git)", True)

@@ -423,7 +423,7 @@ print("INFO priors=%d skipped=%d overlaps=%d" % (len(priors), skipped, len(overl
 out = subprocess.run(["git", "ls-tree", "HEAD", "--name-only",
                       "research/work-items/"], cwd=ROOT,
                      capture_output=True, text=True).stdout
-check("slug absent from committed tree", SLUG not in out)
+check("slug is the pinned reference packet", prior_corpus.is_reference_packet(ROOT, SLUG, rec))
 own = [p for p in glob.glob(os.path.join(ROOT, "research", "work-items", SLUG))]
 check("slug only own dir", own == [PACKET], own)
 

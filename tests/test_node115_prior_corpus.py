@@ -24,6 +24,13 @@ class PriorCorpusTests(unittest.TestCase):
             self.assertTrue(all("lu-nextnode" in p for p in narrowed))
             self.assertEqual(corpus.paths(ROOT, "not-a-real-packet"), [])
 
+    def test_committed_packet_identity_is_checked(self):
+        with patch.dict(os.environ, {"NODE115_PRIOR_ROOT": str(ROOT)}):
+            path = Path(corpus.paths(ROOT, "*lu-nextnode*/records.json")[0])
+            record = json.loads(path.read_text())
+            self.assertTrue(corpus.is_reference_packet(ROOT, path.parent.name, record))
+            self.assertFalse(corpus.is_reference_packet(ROOT, path.parent.name, {}))
+
     def test_missing_or_changed_input_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
