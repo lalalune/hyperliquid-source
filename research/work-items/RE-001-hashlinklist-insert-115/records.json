@@ -1,0 +1,2871 @@
+{
+  "task": "RE-001",
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "provenance_path": "provenance/artifacts.json",
+  "bounded_question": "How does HashLinkListRep's slot-0x08 method insert one key record: decoding its key, running the transform chain, hashing to a bucket, and splicing it into the bucket's ordered chain, with sub-index conversion and the bucket-too-full log?",
+  "windows": {
+    "host": {
+      "start": "0x605f700",
+      "end": "0x605fe21",
+      "file": "host-605f700.objdump.txt",
+      "fde_offset": "0075a430"
+    },
+    "host_cleanup": {
+      "start": "0x605f6d6",
+      "end": "0x605f700",
+      "file": "host-cleanup-605f6d6.objdump.txt",
+      "fde_offset": "0075a484"
+    },
+    "ctor": {
+      "start": "0x605eb40",
+      "end": "0x605ec19",
+      "file": "ctor-605eb40.objdump.txt",
+      "fde_offset": "0075a348"
+    },
+    "dtor": {
+      "start": "0x605ea00",
+      "end": "0x605ea23",
+      "file": "dtor-605ea00.objdump.txt",
+      "fde_offset": "00367960"
+    },
+    "varint32": {
+      "start": "0x61bd4f0",
+      "end": "0x61bd53b",
+      "file": "varint32-61bd4f0.objdump.txt",
+      "fde_offset": "0037652c"
+    },
+    "transform": {
+      "start": "0x5e9af30",
+      "end": "0x5e9b142",
+      "file": "transform-5e9af30.objdump.txt",
+      "fde_offset": "00354dfc"
+    },
+    "hash64": {
+      "start": "0x61c38a0",
+      "end": "0x61c3bb9",
+      "file": "wyhash-61c38a0.objdump.txt",
+      "fde_offset": "00376e1c"
+    },
+    "hex_encode": {
+      "start": "0x61c7e30",
+      "end": "0x61c7fb6",
+      "file": "hex-encode-61c7e30.objdump.txt",
+      "fde_offset": "0076c584"
+    },
+    "index_builder": {
+      "start": "0x605f290",
+      "end": "0x605f33a",
+      "file": "index-builder-605f290.objdump.txt",
+      "fde_offset": "00367b98"
+    },
+    "index_insert": {
+      "start": "0x605f340",
+      "end": "0x605f6d5",
+      "file": "index-insert-605f340.objdump.txt",
+      "fde_offset": "00367bb4"
+    },
+    "log_gate": {
+      "start": "0x5fcef60",
+      "end": "0x5fcf043",
+      "file": "log-gate-5fcef60.objdump.txt",
+      "fde_offset": "00362334"
+    }
+  },
+  "census": {
+    "0x605f700": {
+      "direct_calls": [],
+      "tail_jumps": [],
+      "qword_hits_file_offsets": [
+        "0x11ab68"
+      ],
+      "relative_slots": [
+        "0x64d2170"
+      ]
+    },
+    "0x605f6d6": {
+      "direct_calls": [],
+      "tail_jumps": [
+        "0x605fe1c"
+      ],
+      "qword_hits_file_offsets": [],
+      "relative_slots": []
+    },
+    "0x605eb40": {
+      "direct_calls": [],
+      "tail_jumps": [],
+      "qword_hits_file_offsets": [
+        "0x11af58"
+      ],
+      "relative_slots": [
+        "0x64d22c8"
+      ]
+    },
+    "0x605ea00": {
+      "direct_calls": [],
+      "tail_jumps": [],
+      "qword_hits_file_offsets": [
+        "0x11ab50"
+      ],
+      "relative_slots": [
+        "0x64d2168"
+      ]
+    },
+    "0x61bd4f0": {
+      "direct_calls": [
+        "0x5db16e2",
+        "0x5db1712",
+        "0x5db174f",
+        "0x5db178f",
+        "0x5ecc8bb",
+        "0x5ecd087",
+        "0x5f05d87",
+        "0x5f05de7",
+        "0x5f05e4d",
+        "0x5f05ebd",
+        "0x5f05eea",
+        "0x5f05f6d",
+        "0x5f060a1",
+        "0x5f060cf",
+        "0x5f06f74",
+        "0x5f076c0",
+        "0x5f07726",
+        "0x5f08870",
+        "0x5f093c7",
+        "0x5f09b62",
+        "0x5f09c4f",
+        "0x5f0a084",
+        "0x5f0b7ec",
+        "0x5f0f4e0",
+        "0x5f0fa37",
+        "0x5f545ea",
+        "0x5f584f1",
+        "0x5f5b57b",
+        "0x5f5b5cd",
+        "0x5f5c40a",
+        "0x5f5c4a3",
+        "0x5f5c8d4",
+        "0x5f5ca94",
+        "0x5f5cfc9",
+        "0x5f5d25a",
+        "0x5f5d29f",
+        "0x5f5d2ea",
+        "0x5f5d359",
+        "0x5f5d4c1",
+        "0x5f5d86a",
+        "0x5f5e1dd",
+        "0x5f5fbbc",
+        "0x5f5fcc8",
+        "0x5f5fee9",
+        "0x5f5ff3b",
+        "0x5f609d1",
+        "0x5f60a26",
+        "0x5fa75cb",
+        "0x5fb586b",
+        "0x5fb5928",
+        "0x5fb5ac5",
+        "0x5fb5d80",
+        "0x5fb9bf9",
+        "0x5fb9c78",
+        "0x605f76c",
+        "0x605fc81",
+        "0x6060308",
+        "0x60632a4",
+        "0x6063534",
+        "0x60645c2",
+        "0x6064805",
+        "0x6065263",
+        "0x60654bc",
+        "0x606565f",
+        "0x6065a1c",
+        "0x60660b6",
+        "0x60f6233",
+        "0x60f6258",
+        "0x60f627d",
+        "0x60f62ab",
+        "0x60f62d4",
+        "0x60f715c",
+        "0x60f71fe",
+        "0x60f7227",
+        "0x60f724e",
+        "0x60f754f",
+        "0x60f7578",
+        "0x60f766c",
+        "0x60f7691",
+        "0x60f76b4",
+        "0x60f7f5f",
+        "0x60f7f8b",
+        "0x60f7fb2",
+        "0x60f82f2",
+        "0x60f831b",
+        "0x60f8a40",
+        "0x60f8a65",
+        "0x60f8b06",
+        "0x60f8b43",
+        "0x60f8b68",
+        "0x60f9329",
+        "0x60f9352",
+        "0x60f937b",
+        "0x60f9ccb",
+        "0x60f9cf4",
+        "0x60f9d1d",
+        "0x60f9fd7",
+        "0x60fa000",
+        "0x60fa027",
+        "0x60fa8d1",
+        "0x60fa8fa",
+        "0x60fa923",
+        "0x60fb0d3",
+        "0x60fb0fc",
+        "0x60fb123",
+        "0x60fb47d",
+        "0x60fb4a6",
+        "0x60fb4ce",
+        "0x60fbc54",
+        "0x60fbc7d",
+        "0x60fbca7",
+        "0x60fbf39",
+        "0x60fbf5e",
+        "0x60fbf83",
+        "0x60fc234",
+        "0x60fc25d",
+        "0x60fc286",
+        "0x60fc5f9",
+        "0x60fc61e",
+        "0x60fc643",
+        "0x612c673",
+        "0x612c6a4",
+        "0x612c6d5",
+        "0x61683d0",
+        "0x616c137",
+        "0x616c8ea",
+        "0x616c98e",
+        "0x616ca0a",
+        "0x6171aa3",
+        "0x61980ef",
+        "0x6198114",
+        "0x619a191",
+        "0x619a702",
+        "0x619b443",
+        "0x619b5fb",
+        "0x619b90a",
+        "0x619d063",
+        "0x61a28ad",
+        "0x61b5951",
+        "0x61b5bba",
+        "0x61b5c59",
+        "0x61b5e07",
+        "0x61b6014",
+        "0x61b60a4",
+        "0x61b61a0",
+        "0x61b65a0",
+        "0x61b661c",
+        "0x61b67c8",
+        "0x61b69fd"
+      ],
+      "tail_jumps": [],
+      "qword_hits_file_offsets": [],
+      "relative_slots": []
+    },
+    "0x5e9af30": {
+      "direct_calls": [],
+      "tail_jumps": [],
+      "qword_hits_file_offsets": [
+        "0x11ed08",
+        "0x15d960"
+      ],
+      "relative_slots": [
+        "0x64d3c58",
+        "0x64ed690"
+      ]
+    },
+    "0x61c38a0": {
+      "direct_calls": [
+        "0x5d3c20c",
+        "0x5d3c5e7",
+        "0x5d3e68e",
+        "0x5d3eef2",
+        "0x5f099e7",
+        "0x6027f3e",
+        "0x602c520",
+        "0x605f9cf",
+        "0x605fceb",
+        "0x60603e4",
+        "0x6060680",
+        "0x6060b61",
+        "0x612d61c",
+        "0x612d722",
+        "0x612db29",
+        "0x612ef8a",
+        "0x613b525",
+        "0x61bc013"
+      ],
+      "tail_jumps": [
+        "0x61c3bcb"
+      ],
+      "qword_hits_file_offsets": [],
+      "relative_slots": []
+    },
+    "0x61c7e30": {
+      "direct_calls": [
+        "0x5d58cfb",
+        "0x5d58d61",
+        "0x5d59c18",
+        "0x5d59c70",
+        "0x5d69dde",
+        "0x5dd3693",
+        "0x5ddca61",
+        "0x5ddcac5",
+        "0x5df15ac",
+        "0x5e167ef",
+        "0x5e17c3f",
+        "0x5e29b10",
+        "0x5e2df24",
+        "0x5e2fa15",
+        "0x5e42dfb",
+        "0x5e42e44",
+        "0x5e6fe83",
+        "0x5e6feec",
+        "0x5e75b33",
+        "0x5e75b9c",
+        "0x5e7c778",
+        "0x5e7c7d0",
+        "0x5e88d94",
+        "0x5e88dfb",
+        "0x5e9b2d8",
+        "0x5eaa6cd",
+        "0x5eb2125",
+        "0x5ee054f",
+        "0x5eee812",
+        "0x5f07c4c",
+        "0x5f0c5fe",
+        "0x5f1b949",
+        "0x5f1c67a",
+        "0x5f300d3",
+        "0x5f30478",
+        "0x5f50c43",
+        "0x5f58b3d",
+        "0x5f59395",
+        "0x5f5b6fe",
+        "0x5f5b7d0",
+        "0x5f5b8e1",
+        "0x5f5d034",
+        "0x5f5d3c4",
+        "0x5f5d533",
+        "0x5f5fc16",
+        "0x5f5fe45",
+        "0x5f60393",
+        "0x5f83a9b",
+        "0x5f83b6c",
+        "0x5f8a2d7",
+        "0x5f8e083",
+        "0x5f8e0c6",
+        "0x5f8e5aa",
+        "0x5f8e656",
+        "0x5fbd9a7",
+        "0x5fbdb6c",
+        "0x5fbdca4",
+        "0x5fbdd4c",
+        "0x5fbdee8",
+        "0x5fbdf45",
+        "0x5fc5737",
+        "0x6040ff4",
+        "0x605fcc1",
+        "0x606ebb0",
+        "0x606f2e9",
+        "0x60baae8",
+        "0x60ee0c5",
+        "0x60ee167",
+        "0x60efc5a",
+        "0x60f0538",
+        "0x6102277",
+        "0x61023d8",
+        "0x6102859",
+        "0x61028a0",
+        "0x6102950",
+        "0x610296a",
+        "0x61082e5",
+        "0x610a409",
+        "0x610e777",
+        "0x610e7fe",
+        "0x610e97a",
+        "0x610ea3b",
+        "0x610eac7",
+        "0x610ef32",
+        "0x611063d",
+        "0x6111b25",
+        "0x611365e",
+        "0x61151b5",
+        "0x6116dd5",
+        "0x611f1de",
+        "0x61447b6",
+        "0x6167fbe",
+        "0x6168513",
+        "0x617840a",
+        "0x617b060",
+        "0x6187dc3",
+        "0x6188432",
+        "0x6188743",
+        "0x61889a0",
+        "0x6188da1",
+        "0x6189450",
+        "0x61897ca",
+        "0x61899ed",
+        "0x6189b60",
+        "0x6189ec0",
+        "0x618a1cc",
+        "0x618a20f",
+        "0x618a2ef",
+        "0x618a4de",
+        "0x618a537",
+        "0x618a55b",
+        "0x6198964",
+        "0x6198a90",
+        "0x619b2d1",
+        "0x61a0838",
+        "0x61b0695",
+        "0x61b142e",
+        "0x61ba1fb",
+        "0x61cf80b",
+        "0x61cf818"
+      ],
+      "tail_jumps": [],
+      "qword_hits_file_offsets": [],
+      "relative_slots": []
+    },
+    "0x605f290": {
+      "direct_calls": [
+        "0x605fbab",
+        "0x605ff2d",
+        "0x6062174",
+        "0x6062290"
+      ],
+      "tail_jumps": [],
+      "qword_hits_file_offsets": [],
+      "relative_slots": []
+    },
+    "0x605f340": {
+      "direct_calls": [
+        "0x605fb54",
+        "0x605fbca",
+        "0x605fbeb",
+        "0x6060113",
+        "0x606015a",
+        "0x6062189",
+        "0x60622d6"
+      ],
+      "tail_jumps": [],
+      "qword_hits_file_offsets": [],
+      "relative_slots": []
+    },
+    "0x5fcef60": {
+      "direct_calls": [
+        "0x605fd44",
+        "0x6060094"
+      ],
+      "tail_jumps": [],
+      "qword_hits_file_offsets": [],
+      "relative_slots": []
+    }
+  },
+  "census_notes": {
+    "method": "per-byte .text scan for e8/e9 with rel32 targets, whole-file qword search, .rela.dyn parse; every call/tail site re-verified in objdump output of its containing FDE (see callers.tsv)",
+    "qword_hit_classification": {
+      "0x11ab68": "rela-addend field of entry at 0x11ab58 (slot 0x64d2170, addend 0x605f700)",
+      "0x11af58": "rela-addend field of entry at 0x11af48 (slot 0x64d22c8, addend 0x605eb40)",
+      "0x11ab50": "rela-addend field of entry at 0x11ab40 (slot 0x64d2168, addend 0x605ea00)",
+      "0x11ed08": "rela-addend field of entry at 0x11ecf8 (slot 0x64d3c58, addend 0x5e9af30)",
+      "0x15d960": "rela-addend field of entry at 0x15d950 (slot 0x64ed690, addend 0x5e9af30)"
+    },
+    "host_no_direct_calls": "the host 0x605f700 has no direct call or tail-jump site: it is reached only through the HashLinkListRep vtable slot 0x08 (RELATIVE at 0x64d2170)",
+    "ctor_no_direct_calls": "the ctor 0x605eb40 has no direct call or tail-jump site: it is reached only through the HashLinkListRepFactory vtable slot 0x98 (RELATIVE at 0x64d22c8)",
+    "transform_no_direct_calls": "the canonical transform 0x5e9af30 has no direct call or tail-jump site: it is reached only through the InternalKeySliceTransform vtable slot 0x98 (RELATIVE at 0x64d3c58) and the GOT self-reference at 0x64ed690",
+    "varint32_shared": "the varint32 decoder 0x61bd4f0 has 149 direct callers; it is the general varint32 reader, pinned here because the host decodes the record's key length through it",
+    "hash64_shared": "the hash 0x61c38a0 has 18 direct callers plus one tail jump; it is the general 64-bit key hash, pinned here because the host hashes the transformed key through it",
+    "hex_encode_shared": "the hex encoder 0x61c7e30 has 120 direct callers; it is the general hex renderer, pinned here because the host's log path renders the key through it"
+  },
+  "host_behavior": {
+    "fde": "0x605f700..0x605fe21",
+    "vtable": "0x64d2168 (HashLinkListRep, typeinfo 0x64d2050)",
+    "vtable_slot": "0x08 (RELATIVE at 0x64d2170)",
+    "typeinfo_name": "*N7rocksdb12_GLOBAL__N_115HashLinkListRepE",
+    "signature": "insert(HashLinkListRep *this, record *arg2)",
+    "record_layout": {
+      "+0x00": "next pointer (written by the host)",
+      "+0x08": "varint32 key-length followed by the key bytes"
+    },
+    "this_fields": {
+      "+0x08": "allocator (its vtable slot 0x18 allocates)",
+      "+0x10": "bucket count (u64)",
+      "+0x18": "bucket-head array (u64*)",
+      "+0x20": "sub-index convert threshold (u32, clamped to >= 3 by the ctor)",
+      "+0x28": "transform-chain head (InternalKeySliceTransform chain via +0x20)",
+      "+0x30": "key object (slot 0x08 record/record compare; slot 0x10 record/slice compare; passed to the index builder)",
+      "+0x38": "logger object passed to the log gate",
+      "+0x40": "log threshold (u32): <= 0 disables the log; the log fires when the pre-insert chain count equals it"
+    },
+    "steps": [
+      "decode the key length: if the byte at arg2+0x08 has its high bit clear it IS the length and rdx = arg2+0x09; else decode_varint32 0x61bd4f0(arg2+0x08, arg2+0x0d, out) and rdx = the end pointer; on decode failure rdx = 0 and the length stays 0 (the out slot was pre-zeroed)",
+      "run the key (ptr, len) through the transform chain at *(this+0x28): the host unrolls 13 hops, checking each node's vtable slot 0x98 against the canonical 0x5e9af30 and calling the first differing slot with the pair (ptr, len - 8*(k+1)); if all 13 match it calls the 13th node's slot with (ptr, len - 104); the canonical callee 0x5e9af30 advances one node and repeats with len - 8 per hop (up to 9 hops per call)",
+      "hash the transformed key via 0x61c38a0(ptr, len); bucket = (bucket_count * hash) >> 64 (128-bit multiply-high); bucket head = *(*(this+0x18) + bucket*8)",
+      "if the bucket head is null: *(arg2) = 0 and the bucket head becomes arg2 (bare key node)",
+      "if the head's next is null: allocate a 0x10-byte count node via the allocator's slot 0x18 (count 1), link it as the bucket head over the old head, and continue with it as the current node",
+      "if *(current) == current: the node is a sub-index node: increment its +0x08 count and insert arg2's key into its embedded 0x38-byte index at +0x10 via 0x605f340(index, &(arg2+0x08)); return",
+      "otherwise (plain chain head): if *(this+0x40) > 0 and the head's count equals *(this+0x40), run the log path (below); if the count equals *(this+0x20), run the convert path (below); else increment the count and walk the chain from *(head): compare each node's key record against the decoded key via the key object's slot 0x10, splicing arg2 before the first node that compares >= 0 (or at the end when the chain runs out): *(arg2) = that node and the previous node's next (or *(head) when there is no previous node) becomes arg2"
+    ],
+    "log_path": [
+      "re-decode the key length (same fast path / 0x61bd4f0 call as step 1)",
+      "hex-encode the decoded key bytes into a stack std::string via 0x61c7e30(out, &slice, flag 1) (UPPERCASE hex)",
+      "re-hash the transformed key via 0x61c38a0 and recompute the bucket index by multiply-high",
+      "log via 0x5fcef60(logger, 'HashLinkedList bucket %zu has more than %d entries. Key to insert: %s', bucket, count, hex)",
+      "destroy the stack string (SSO check, heap free when needed) and continue to the convert check; the landing-pad cleanup 0x605f6d6 disposes the same string on unwind"
+    ],
+    "convert_path": [
+      "allocate a 0x48-byte block via the allocator's slot 0x18; *(block) = block (the self-loop marker); *(block+0x08) = old count + 1",
+      "build the 0x38-byte index at block+0x10 via 0x605f290(index, *(this+0x30), count=0xc, arena=*(this+0x08), divisor=4)",
+      "insert every existing chain node's key record via 0x605f340(index, &(node+0x08)), then insert arg2's key via 0x605f340(index, &(arg2+0x08))",
+      "store the block as the bucket head and return"
+    ],
+    "return": "no meaningful return value is read by any caller in the binary; the effect is the record's linkage (and *(arg2) in the chain paths)",
+    "sibling_slots_same_vtable": {
+      "0x90": "0x605feb0 (index rebuild + chain-length histogram + log report; open PR #3575)",
+      "0x98": "0x605ec20 (builds a 0x30-byte object, vtable 0x64d20f8; separate work item)",
+      "0x48": "0x60602c0",
+      "0x60": "0x6060580"
+    }
+  },
+  "ctor_behavior": {
+    "fde": "0x605eb40..0x605ec19",
+    "factory_vtable": "0x64d2230 (HashLinkListRepFactory, typeinfo 0x64d2068)",
+    "factory_vtable_slot": "0x98 (RELATIVE at 0x64d22c8)",
+    "typeinfo_name": "*N7rocksdb12_GLOBAL__N_122HashLinkListRepFactoryE",
+    "factory_name_literal": "HashLinkListRepFactory (0x43a3e1, slot 0x70 target 0x605ea40)",
+    "factory_nickname_literal": "hash_linkedlist (0x4394cc, slot 0x90 target 0x605ea50)",
+    "signature": "new_rep(params *cfg, key_obj, allocator, transform_chain_head, arg5)",
+    "params_struct": {
+      "+0x20": "bucket count (u64)",
+      "+0x28": "convert threshold (u32, clamped to >= 3)",
+      "+0x30": "qword passed as arg3 to the allocator's slot 0x18 when allocating the bucket array",
+      "+0x38": "log threshold (u32) -> this+0x40",
+      "+0x3c": "flag byte -> this+0x44"
+    },
+    "fields": {
+      "+0x00": "vtable 0x64d2168",
+      "+0x08": "allocator (3rd arg)",
+      "+0x10": "bucket count",
+      "+0x18": "bucket array (bucket_count*8 bytes via the allocator's slot 0x18, zeroed)",
+      "+0x20": "max(params+0x28, 3)",
+      "+0x28": "transform-chain head (4th arg)",
+      "+0x30": "key object (2nd arg)",
+      "+0x38": "arg5 (5th arg)",
+      "+0x40": "params+0x38 (u32)",
+      "+0x44": "params+0x3c (byte)"
+    },
+    "return": "the new 0x48-byte object (rax = rbx)",
+    "allocation_failure": "bucket counts with bits above bit 60 raise bad_array_new_length via 0x605eb16"
+  },
+  "dtor_behavior": {
+    "fde": "0x605ea00..0x605ea23",
+    "vtable_slot": "0x00 (RELATIVE at 0x64d2168)",
+    "steps": [
+      "load the allocator at this+0x08, call its slot 0x18 with (size = *(rsi)+0x10, 0, 0) and store the returned block+0x08 into *(rdx)"
+    ],
+    "note": "only the first 0x23 bytes are in the FDE; the body is a 0x10-byte allocator call plus the pointer store, stated as observed"
+  },
+  "varint32_behavior": {
+    "fde": "0x61bd4f0..0x61bd53b",
+    "signature": "decode_varint32(ptr, limit, out_u32*) -> end_ptr or 0",
+    "steps": [
+      "if ptr >= limit: return 0",
+      "read bytes while the high bit is set: value |= (b & 0x7f) << shift; shift += 7; if shift > 28 after accumulating, return 0; if ptr reaches limit, return 0",
+      "on the first byte without the high bit: value |= (b & 0x7f) << shift; write value to *out; return the pointer past that byte"
+    ],
+    "callers_in_host": [
+      "0x605f76c (first decode)",
+      "0x605fc81 (log-path re-decode)"
+    ]
+  },
+  "transform_behavior": {
+    "fde": "0x5e9af30..0x5e9b142",
+    "vtable": "0x64d3bc0 (InternalKeySliceTransform, typeinfo 0x64d3ae0)",
+    "vtable_slot": "0x98 (RELATIVE at 0x64d3c58)",
+    "typeinfo_name": "N7rocksdb25InternalKeySliceTransformE",
+    "got_identity": "GOT slot 0x64ed690 holds 0x5e9af30 (RELATIVE)",
+    "signature": "transform(node *obj, pair *slice) -> (ptr, len) in (rax, rdx)",
+    "pair": "(ptr, len) 16-byte slice; the host builds its pairs on the stack at rsp+0x30..0x108, the callee at rsp+0x00..0x80",
+    "steps": [
+      "advance obj = *(obj+0x20)",
+      "build successive pairs (ptr, len - 8k) for k = 0..8 on the stack",
+      "for each of the next 8 nodes, compare its vtable slot 0x98 with the GOT identity (0x5e9af30); on the first mismatch call that slot with the pair for that level and return its (rax, rdx)",
+      "if all 8 match, call the 9th node's slot 0x98 unconditionally with the (ptr, len - 72) pair and return its (rax, rdx)"
+    ],
+    "meaning": "each canonical hop pre-strips 8 from the length; the chain is the InternalKeySliceTransform chain, so each hop accounts for one 8-byte internal-key trailer",
+    "host_unrolling": "the host inlines the same walk for 13 hops (pairs at rsp+0x30..0x108, final pair (ptr, len - 104) at rsp+0x100) before calling the 13th node's slot"
+  },
+  "hash64_behavior": {
+    "fde": "0x61c38a0..0x61c3bb9",
+    "signature": "hash64(ptr, len) -> u64",
+    "structure": "mum-mixing 64-bit hash: seed = len * 0x9e3779b185ebca87; short paths mix the head/tail words with the constants 0xbe4ba423396cfeb8 / 0x1cad21f72c81017c; long paths accumulate one mum-mix per 32-byte lane pair into the seed; every path ends in the finalizer y = x ^ (x >> 37), z = y * 0x165667b19e3779f9, return z ^ (z >> 32)",
+    "length_paths": {
+      "0": "constant 0x5342c3010fe1dd04",
+      "1..3": "v = data[0] | (len << 24) | (data[len/2] << 8) | (data[len-1] << 16); v ^= 0x396cfeb8; return fin(v * 0x9e3779b185ebca87)",
+      "4..8": "pre = ((u32(p+len-4) << 32) | u32(p)) ^ 0xbe4ba423396cfeb8; t = pre ^ (pre >> 51); t *= 0x9e3779b1; t += len; u = t ^ (t >> 47); return fin(u * 0xc2b2ae3d27d4eb4f)",
+      "9..16": "a = u64(p) ^ 0xbe4ba423396cfeb8; b = u64(p+len-8) ^ 0x1cad21f72c81017c; (lo, hi) = mum(a + len, b); return fin(a + len + b + (lo ^ hi))",
+      "17..32": "(lo1, hi1) = mum(u64(p+8) ^ 0x1cad21f72c81017c, u64(p) ^ 0xbe4ba423396cfeb8); (lo2, hi2) = mum(u64(p+len-8) ^ 0x1f67b3b7a4a44072, u64(p+len-16) ^ 0xdb979083e96dd4de); return fin((hi1 ^ lo1) + (hi2 ^ lo2) + seed)",
+      "33..64": "one 32-byte lane-pair contribution, then the 17..32 tail",
+      "65..96": "two lane-pair contributions, then the 17..32 tail",
+      "97..128": "three lane-pair contributions, then the 17..32 tail",
+      "129..240": "BOUNDARY: jumps to helper 0x61c3230 (FDE 0x61c3230..0x61c3491), not modeled",
+      "241+": "BOUNDARY: jumps to helper 0x61c2890 (FDE 0x61c2890..0x61c2cad), not modeled"
+    },
+    "lane_pair": "(lo1, hi1) = mum(Ka ^ head_word, Kb ^ head_word2); (lo2, hi2) = mum(Kc ^ tail_word, Kd ^ tail_word2); contribution = (lo1 ^ hi1) + (lo2 ^ hi2); the per-lane constants are in the model source"
+  },
+  "hex_encode_behavior": {
+    "fde": "0x61c7e30..0x61c7fb6",
+    "signature": "hex_encode(out_string, slice_ptr, flag) (re-shipped from #3561)",
+    "steps": [
+      "clear the out string (SSO buffer at out+0x10, length 0)",
+      "flag 0: replace the string contents with the slice bytes verbatim (raw copy)",
+      "flag != 0: reserve 2*len, then append two hex digits per byte via hexchar 0x61c7da0 (high nibble, then low nibble; 10..15 map to 'A'..'F', UPPERCASE)"
+    ],
+    "host_use": "the host calls it with flag 1 on the decoded key bytes in the log path"
+  },
+  "index_builder_behavior": {
+    "fde": "0x605f290..0x605f33a",
+    "note": "re-shipped byte-identical from open PR #3575; see that packet for the full record",
+    "signature": "build(out38, key_obj, u16 count, allocator, u16 divisor)",
+    "layout": {
+      "+0x00": "count (u16)",
+      "+0x02": "divisor (u16)",
+      "+0x04": "0x80000000 / divisor (u32 step)",
+      "+0x08": "key_obj",
+      "+0x10": "allocator",
+      "+0x18": "array A (count+1 pointers, zeroed)",
+      "+0x20": "1",
+      "+0x28": "array B (count pointers, each set to array A)",
+      "+0x30": "1"
+    },
+    "host_use": "the convert path builds the index at block+0x10 with (key_obj = *(this+0x30), count = 0xc, allocator = *(this+0x08), divisor = 4)"
+  },
+  "index_insert_behavior": {
+    "fde": "0x605f340..0x605f6d5",
+    "note": "re-shipped byte-identical from open PR #3575; see that packet for the full record",
+    "signature": "insert(index38, key_record_ptr)",
+    "steps": [
+      "comparator dispatch: slot 0x08 of *(index+0x08) on (key, candidate)",
+      "scan array A from the end, comparing each occupied slot's key; a negative compare restarts the scan from the matched slot",
+      "on reaching array A's head without a match, rehash: advance the per-thread seed (multiply by 0x41a7 mod 0x7fffffff until the step at +0x04) and grow array A when needed",
+      "allocate a node through the allocator's slot 0x18, store the key, splice it into the chain ordered by the comparator"
+    ],
+    "host_use": [
+      "self-loop path: insert(cur+0x10, &(arg2+0x08))",
+      "convert path: insert(new+0x10, &(node+0x08)) per chain node, then insert(new+0x10, &(arg2+0x08))"
+    ]
+  },
+  "log_gate_behavior": {
+    "fde": "0x5fcef60..0x5fcf043",
+    "note": "re-shipped byte-identical from open PR #3575; see that packet for the full record",
+    "signature": "log_gate(logger, format, varargs...)",
+    "steps": [
+      "spill the varargs into a stack args array",
+      "call the logger's vtable slot 0x40; if the returned level is greater than 1, return without logging",
+      "otherwise call the logger's vtable slot 0x28 with (level = 1, format, args pointer)"
+    ],
+    "host_use": "log(logger = *(this+0x38), 'HashLinkedList bucket %zu has more than %d entries. Key to insert: %s', bucket, count, hex_key)"
+  },
+  "hashlinklistrep_vtable": {
+    "base": "0x64d2168",
+    "typeinfo": "0x64d2050",
+    "typeinfo_name": "*N7rocksdb12_GLOBAL__N_115HashLinkListRepE",
+    "slots": [
+      {
+        "offset": "0x00",
+        "slot": "0x64d2168",
+        "target": "0x605ea00"
+      },
+      {
+        "offset": "0x08",
+        "slot": "0x64d2170",
+        "target": "0x605f700"
+      },
+      {
+        "offset": "0x10",
+        "slot": "0x64d2178",
+        "target": "0x5f04cf0"
+      },
+      {
+        "offset": "0x18",
+        "slot": "0x64d2180",
+        "target": "0x5f04d10"
+      },
+      {
+        "offset": "0x20",
+        "slot": "0x64d2188",
+        "target": "0x5f05740"
+      },
+      {
+        "offset": "0x28",
+        "slot": "0x64d2190",
+        "target": "0x5f04d20"
+      },
+      {
+        "offset": "0x30",
+        "slot": "0x64d2198",
+        "target": "0x5f05780"
+      },
+      {
+        "offset": "0x38",
+        "slot": "0x64d21a0",
+        "target": "0x5f04ece"
+      },
+      {
+        "offset": "0x40",
+        "slot": "0x64d21a8",
+        "target": "0x5f04d30"
+      },
+      {
+        "offset": "0x48",
+        "slot": "0x64d21b0",
+        "target": "0x60602c0"
+      },
+      {
+        "offset": "0x50",
+        "slot": "0x64d21b8",
+        "target": "0x5f04d50"
+      },
+      {
+        "offset": "0x58",
+        "slot": "0x64d21c0",
+        "target": "0x5f04d60"
+      },
+      {
+        "offset": "0x60",
+        "slot": "0x64d21c8",
+        "target": "0x6060580"
+      },
+      {
+        "offset": "0x68",
+        "slot": "0x64d21d0",
+        "target": "0x5f04d70"
+      },
+      {
+        "offset": "0x70",
+        "slot": "0x64d21d8",
+        "target": "0x5eca210"
+      },
+      {
+        "offset": "0x78",
+        "slot": "0x64d21e0",
+        "target": "0x605ea30"
+      },
+      {
+        "offset": "0x80",
+        "slot": "0x64d21e8",
+        "target": "0x605e9f0"
+      },
+      {
+        "offset": "0x88",
+        "slot": "0x64d21f0",
+        "target": "0x605ea60"
+      },
+      {
+        "offset": "0x90",
+        "slot": "0x64d21f8",
+        "target": "0x605feb0"
+      },
+      {
+        "offset": "0x98",
+        "slot": "0x64d2200",
+        "target": "0x605ec20"
+      },
+      {
+        "offset": "0xa0",
+        "slot": "0x64d2208",
+        "target": "0x5e572d0"
+      },
+      {
+        "offset": "0xa8",
+        "slot": "0x64d2210",
+        "target": "0x5d483f0"
+      },
+      {
+        "offset": "0xb0",
+        "slot": "0x64d2218",
+        "target": "0x5f05db0"
+      }
+    ]
+  },
+  "factory_vtable": {
+    "base": "0x64d2230",
+    "typeinfo": "0x64d2068",
+    "typeinfo_name": "*N7rocksdb12_GLOBAL__N_122HashLinkListRepFactoryE",
+    "slots": [
+      {
+        "offset": "0x00",
+        "slot": "0x64d2230",
+        "target": "0x605eee0"
+      },
+      {
+        "offset": "0x08",
+        "slot": "0x64d2238",
+        "target": "0x605ef70"
+      },
+      {
+        "offset": "0x10",
+        "slot": "0x64d2240",
+        "target": "0x609d760"
+      },
+      {
+        "offset": "0x18",
+        "slot": "0x64d2248",
+        "target": "0x609dc40"
+      },
+      {
+        "offset": "0x20",
+        "slot": "0x64d2250",
+        "target": "0x5d32560"
+      },
+      {
+        "offset": "0x28",
+        "slot": "0x64d2258",
+        "target": "0x6095e70"
+      },
+      {
+        "offset": "0x30",
+        "slot": "0x64d2260",
+        "target": "0x6096790"
+      },
+      {
+        "offset": "0x38",
+        "slot": "0x64d2268",
+        "target": "0x5d2e090"
+      },
+      {
+        "offset": "0x40",
+        "slot": "0x64d2270",
+        "target": "0x60956f0"
+      },
+      {
+        "offset": "0x48",
+        "slot": "0x64d2278",
+        "target": "0x609d0e0"
+      },
+      {
+        "offset": "0x50",
+        "slot": "0x64d2280",
+        "target": "0x60986b0"
+      },
+      {
+        "offset": "0x58",
+        "slot": "0x64d2288",
+        "target": "0x6095710"
+      },
+      {
+        "offset": "0x60",
+        "slot": "0x64d2290",
+        "target": "0x609de80"
+      },
+      {
+        "offset": "0x68",
+        "slot": "0x64d2298",
+        "target": "0x609d980"
+      },
+      {
+        "offset": "0x70",
+        "slot": "0x64d22a0",
+        "target": "0x605ea40"
+      },
+      {
+        "offset": "0x78",
+        "slot": "0x64d22a8",
+        "target": "0x5d32a30"
+      },
+      {
+        "offset": "0x80",
+        "slot": "0x64d22b0",
+        "target": "0x5d2e770"
+      },
+      {
+        "offset": "0x88",
+        "slot": "0x64d22b8",
+        "target": "0x5d2ca00"
+      },
+      {
+        "offset": "0x90",
+        "slot": "0x64d22c0",
+        "target": "0x605ea50"
+      },
+      {
+        "offset": "0x98",
+        "slot": "0x64d22c8",
+        "target": "0x605eb40"
+      },
+      {
+        "offset": "0xa0",
+        "slot": "0x64d22d0",
+        "target": "0x5f04d90"
+      },
+      {
+        "offset": "0xa8",
+        "slot": "0x64d22d8",
+        "target": "0x605e920"
+      },
+      {
+        "offset": "0xb0",
+        "slot": "0x64d22e0",
+        "target": "0x605e930"
+      }
+    ]
+  },
+  "ikst_vtable": {
+    "base": "0x64d3bc0",
+    "typeinfo": "0x64d3ae0",
+    "typeinfo_name": "N7rocksdb25InternalKeySliceTransformE",
+    "slots": [
+      {
+        "offset": "0x00",
+        "slot": "0x64d3bc0",
+        "target": "0x60e2960"
+      },
+      {
+        "offset": "0x08",
+        "slot": "0x64d3bc8",
+        "target": "0x60e29f0"
+      },
+      {
+        "offset": "0x10",
+        "slot": "0x64d3bd0",
+        "target": "0x609d760"
+      },
+      {
+        "offset": "0x18",
+        "slot": "0x64d3bd8",
+        "target": "0x609dc40"
+      },
+      {
+        "offset": "0x20",
+        "slot": "0x64d3be0",
+        "target": "0x5d32560"
+      },
+      {
+        "offset": "0x28",
+        "slot": "0x64d3be8",
+        "target": "0x6095e70"
+      },
+      {
+        "offset": "0x30",
+        "slot": "0x64d3bf0",
+        "target": "0x6096790"
+      },
+      {
+        "offset": "0x38",
+        "slot": "0x64d3bf8",
+        "target": "0x5d2e090"
+      },
+      {
+        "offset": "0x40",
+        "slot": "0x64d3c00",
+        "target": "0x60956f0"
+      },
+      {
+        "offset": "0x48",
+        "slot": "0x64d3c08",
+        "target": "0x609d0e0"
+      },
+      {
+        "offset": "0x50",
+        "slot": "0x64d3c10",
+        "target": "0x60986b0"
+      },
+      {
+        "offset": "0x58",
+        "slot": "0x64d3c18",
+        "target": "0x6095710"
+      },
+      {
+        "offset": "0x60",
+        "slot": "0x64d3c20",
+        "target": "0x609de80"
+      },
+      {
+        "offset": "0x68",
+        "slot": "0x64d3c28",
+        "target": "0x609d980"
+      },
+      {
+        "offset": "0x70",
+        "slot": "0x64d3c30",
+        "target": "0x60e28b0"
+      },
+      {
+        "offset": "0x78",
+        "slot": "0x64d3c38",
+        "target": "0x5d32a30"
+      },
+      {
+        "offset": "0x80",
+        "slot": "0x64d3c40",
+        "target": "0x5d2e770"
+      },
+      {
+        "offset": "0x88",
+        "slot": "0x64d3c48",
+        "target": "0x5d2ca00"
+      },
+      {
+        "offset": "0x90",
+        "slot": "0x64d3c50",
+        "target": "0x5d2ca10"
+      },
+      {
+        "offset": "0x98",
+        "slot": "0x64d3c58",
+        "target": "0x5e9af30"
+      },
+      {
+        "offset": "0xa0",
+        "slot": "0x64d3c60",
+        "target": "0x5f06550"
+      },
+      {
+        "offset": "0xa8",
+        "slot": "0x64d3c68",
+        "target": "0x60e1e30"
+      }
+    ]
+  },
+  "literals": {
+    "log_format": "HashLinkedList bucket %zu has more than %d entries. Key to insert: %s",
+    "factory_name": "HashLinkListRepFactory",
+    "factory_nickname": "hash_linkedlist"
+  },
+  "assumptions": [
+    "the key object's slot-0x08 (record/record) and slot-0x10 (record/slice) comparators are caller-supplied; the model uses bytewise comparison of decoded key bytes as the reference instance",
+    "the transform chain's terminal (non-canonical) transform is chain-supplied; the model takes it as a callable and the reference terminal is the identity on the pair it receives",
+    "the 0x38-byte sub-index's rehash/growth internals are abstracted in the model as an ordered record list preserving its observable contract (ordered insertion by the comparator)",
+    "hash inputs longer than 128 bytes use helpers 0x61c2890 / 0x61c3230 outside the modeled FDE; the model raises for them",
+    "std::string storage/SSO is not modeled; only string contents",
+    "the host's return value is not read by any caller in the binary and is not modeled"
+  ],
+  "open_unknowns": [
+    "the concrete key object passed as the ctor's 2nd arg (its slot-0x08/0x10 comparator implementations)",
+    "the concrete terminal (non-canonical) transform at the end of the *(this+0x28) chain, and which caller builds the chain the factory ctor receives as its 4th arg",
+    "who calls the factory's slot 0x98 (the rep ctor has no direct call site; it is reached only through the factory vtable)",
+    "the hash helpers 0x61c2890 / 0x61c3230 for inputs longer than 128 bytes",
+    "the rep's slot-0x98 method 0x605ec20 (builds a 0x30-byte object, vtable 0x64d20f8) and the other unpinned vtable slots (0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48, 0x50, 0x58, 0x60, 0x68, 0x70, 0x78, 0x80, 0x88, 0xa0, 0xa8, 0xb0)"
+  ],
+  "callers": [
+    {
+      "site": "0x605fd44",
+      "target": "0x5fcef60",
+      "kind": "call",
+      "fde": "0x605f700..0x605fe21"
+    },
+    {
+      "site": "0x6060094",
+      "target": "0x5fcef60",
+      "kind": "call",
+      "fde": "0x605feb0..0x6060199"
+    },
+    {
+      "site": "0x605fbab",
+      "target": "0x605f290",
+      "kind": "call",
+      "fde": "0x605f700..0x605fe21"
+    },
+    {
+      "site": "0x605ff2d",
+      "target": "0x605f290",
+      "kind": "call",
+      "fde": "0x605feb0..0x6060199"
+    },
+    {
+      "site": "0x6062174",
+      "target": "0x605f290",
+      "kind": "call",
+      "fde": "0x6062040..0x6062200"
+    },
+    {
+      "site": "0x6062290",
+      "target": "0x605f290",
+      "kind": "call",
+      "fde": "0x6062230..0x6062374"
+    },
+    {
+      "site": "0x605fb54",
+      "target": "0x605f340",
+      "kind": "call",
+      "fde": "0x605f700..0x605fe21"
+    },
+    {
+      "site": "0x605fbca",
+      "target": "0x605f340",
+      "kind": "call",
+      "fde": "0x605f700..0x605fe21"
+    },
+    {
+      "site": "0x605fbeb",
+      "target": "0x605f340",
+      "kind": "call",
+      "fde": "0x605f700..0x605fe21"
+    },
+    {
+      "site": "0x6060113",
+      "target": "0x605f340",
+      "kind": "call",
+      "fde": "0x605feb0..0x6060199"
+    },
+    {
+      "site": "0x606015a",
+      "target": "0x605f340",
+      "kind": "call",
+      "fde": "0x605feb0..0x6060199"
+    },
+    {
+      "site": "0x6062189",
+      "target": "0x605f340",
+      "kind": "call",
+      "fde": "0x6062040..0x6062200"
+    },
+    {
+      "site": "0x60622d6",
+      "target": "0x605f340",
+      "kind": "call",
+      "fde": "0x6062230..0x6062374"
+    },
+    {
+      "site": "0x605fe1c",
+      "target": "0x605f6d6",
+      "kind": "tail",
+      "fde": "0x605f700..0x605fe21"
+    },
+    {
+      "site": "0x5db16e2",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5db0df0..0x5db1f15"
+    },
+    {
+      "site": "0x5db1712",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5db0df0..0x5db1f15"
+    },
+    {
+      "site": "0x5db174f",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5db0df0..0x5db1f15"
+    },
+    {
+      "site": "0x5db178f",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5db0df0..0x5db1f15"
+    },
+    {
+      "site": "0x5ecc8bb",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5ecc630..0x5ecd649"
+    },
+    {
+      "site": "0x5ecd087",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5ecc630..0x5ecd649"
+    },
+    {
+      "site": "0x5f05d87",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f05d50..0x5f05dac"
+    },
+    {
+      "site": "0x5f05de7",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f05db0..0x5f05e10"
+    },
+    {
+      "site": "0x5f05e4d",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f05e10..0x5f05e7b"
+    },
+    {
+      "site": "0x5f05ebd",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f05e80..0x5f05f1b"
+    },
+    {
+      "site": "0x5f05eea",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f05e80..0x5f05f1b"
+    },
+    {
+      "site": "0x5f05f6d",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f05f20..0x5f0604c"
+    },
+    {
+      "site": "0x5f060a1",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f06050..0x5f061ac"
+    },
+    {
+      "site": "0x5f060cf",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f06050..0x5f061ac"
+    },
+    {
+      "site": "0x5f06f74",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f06f40..0x5f06f99"
+    },
+    {
+      "site": "0x5f076c0",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f07670..0x5f081cb"
+    },
+    {
+      "site": "0x5f07726",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f07670..0x5f081cb"
+    },
+    {
+      "site": "0x5f08870",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f08790..0x5f08a2b"
+    },
+    {
+      "site": "0x5f093c7",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f09050..0x5f09850"
+    },
+    {
+      "site": "0x5f09b62",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f09b10..0x5f09e84"
+    },
+    {
+      "site": "0x5f09c4f",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f09b10..0x5f09e84"
+    },
+    {
+      "site": "0x5f0a084",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f09fe0..0x5f0a19b"
+    },
+    {
+      "site": "0x5f0b7ec",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f0b760..0x5f0ce01"
+    },
+    {
+      "site": "0x5f0f4e0",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f0f3d0..0x5f0f8c1"
+    },
+    {
+      "site": "0x5f0fa37",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f0f930..0x5f10134"
+    },
+    {
+      "site": "0x5f545ea",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f545a0..0x5f54680"
+    },
+    {
+      "site": "0x5f584f1",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f584a0..0x5f58540"
+    },
+    {
+      "site": "0x5f5b57b",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5b1d0..0x5f5bfea"
+    },
+    {
+      "site": "0x5f5b5cd",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5b1d0..0x5f5bfea"
+    },
+    {
+      "site": "0x5f5c40a",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5c4a3",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5c8d4",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5ca94",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5cfc9",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5d25a",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5d29f",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5d2ea",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5d359",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5d4c1",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5d86a",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5e1dd",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5fbbc",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5fac0..0x5f60288"
+    },
+    {
+      "site": "0x5f5fcc8",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5fac0..0x5f60288"
+    },
+    {
+      "site": "0x5f5fee9",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5fac0..0x5f60288"
+    },
+    {
+      "site": "0x5f5ff3b",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f5fac0..0x5f60288"
+    },
+    {
+      "site": "0x5f609d1",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f60900..0x5f60be7"
+    },
+    {
+      "site": "0x5f60a26",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5f60900..0x5f60be7"
+    },
+    {
+      "site": "0x5fa75cb",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5fa7530..0x5fa7b27"
+    },
+    {
+      "site": "0x5fb586b",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5fb5810..0x5fb5feb"
+    },
+    {
+      "site": "0x5fb5928",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5fb5810..0x5fb5feb"
+    },
+    {
+      "site": "0x5fb5ac5",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5fb5810..0x5fb5feb"
+    },
+    {
+      "site": "0x5fb5d80",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5fb5810..0x5fb5feb"
+    },
+    {
+      "site": "0x5fb9bf9",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5fb9bd0..0x5fb9c28"
+    },
+    {
+      "site": "0x5fb9c78",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x5fb9c30..0x5fb9ce7"
+    },
+    {
+      "site": "0x605f76c",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x605f700..0x605fe21"
+    },
+    {
+      "site": "0x605fc81",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x605f700..0x605fe21"
+    },
+    {
+      "site": "0x6060308",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60602c0..0x6060572"
+    },
+    {
+      "site": "0x60632a4",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x6063230..0x6063399"
+    },
+    {
+      "site": "0x6063534",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60634c0..0x6063621"
+    },
+    {
+      "site": "0x60645c2",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x6064560..0x60646a1"
+    },
+    {
+      "site": "0x6064805",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60647a0..0x60648e1"
+    },
+    {
+      "site": "0x6065263",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x6065180..0x60653df"
+    },
+    {
+      "site": "0x60654bc",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60653e0..0x606580b"
+    },
+    {
+      "site": "0x606565f",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60653e0..0x606580b"
+    },
+    {
+      "site": "0x6065a1c",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60659b0..0x6065ebe"
+    },
+    {
+      "site": "0x60660b6",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x6066040..0x60665e9"
+    },
+    {
+      "site": "0x60f6233",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f5f30..0x60f65c8"
+    },
+    {
+      "site": "0x60f6258",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f5f30..0x60f65c8"
+    },
+    {
+      "site": "0x60f627d",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f5f30..0x60f65c8"
+    },
+    {
+      "site": "0x60f62ab",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f5f30..0x60f65c8"
+    },
+    {
+      "site": "0x60f62d4",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f5f30..0x60f65c8"
+    },
+    {
+      "site": "0x60f715c",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f70d0..0x60f7495"
+    },
+    {
+      "site": "0x60f71fe",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f70d0..0x60f7495"
+    },
+    {
+      "site": "0x60f7227",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f70d0..0x60f7495"
+    },
+    {
+      "site": "0x60f724e",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f70d0..0x60f7495"
+    },
+    {
+      "site": "0x60f754f",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f74a0..0x60f7a43"
+    },
+    {
+      "site": "0x60f7578",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f74a0..0x60f7a43"
+    },
+    {
+      "site": "0x60f766c",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f74a0..0x60f7a43"
+    },
+    {
+      "site": "0x60f7691",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f74a0..0x60f7a43"
+    },
+    {
+      "site": "0x60f76b4",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f74a0..0x60f7a43"
+    },
+    {
+      "site": "0x60f7f5f",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f7b50..0x60f8908"
+    },
+    {
+      "site": "0x60f7f8b",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f7b50..0x60f8908"
+    },
+    {
+      "site": "0x60f7fb2",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f7b50..0x60f8908"
+    },
+    {
+      "site": "0x60f82f2",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f7b50..0x60f8908"
+    },
+    {
+      "site": "0x60f831b",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f7b50..0x60f8908"
+    },
+    {
+      "site": "0x60f8a40",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f8940..0x60f9095"
+    },
+    {
+      "site": "0x60f8a65",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f8940..0x60f9095"
+    },
+    {
+      "site": "0x60f8b06",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f8940..0x60f9095"
+    },
+    {
+      "site": "0x60f8b43",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f8940..0x60f9095"
+    },
+    {
+      "site": "0x60f8b68",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f8940..0x60f9095"
+    },
+    {
+      "site": "0x60f9329",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f91a0..0x60f9be9"
+    },
+    {
+      "site": "0x60f9352",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f91a0..0x60f9be9"
+    },
+    {
+      "site": "0x60f937b",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f91a0..0x60f9be9"
+    },
+    {
+      "site": "0x60f9ccb",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f9bf0..0x60f9ee7"
+    },
+    {
+      "site": "0x60f9cf4",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f9bf0..0x60f9ee7"
+    },
+    {
+      "site": "0x60f9d1d",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f9bf0..0x60f9ee7"
+    },
+    {
+      "site": "0x60f9fd7",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f9ef0..0x60fa31f"
+    },
+    {
+      "site": "0x60fa000",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f9ef0..0x60fa31f"
+    },
+    {
+      "site": "0x60fa027",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60f9ef0..0x60fa31f"
+    },
+    {
+      "site": "0x60fa8d1",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fa7e0..0x60fab41"
+    },
+    {
+      "site": "0x60fa8fa",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fa7e0..0x60fab41"
+    },
+    {
+      "site": "0x60fa923",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fa7e0..0x60fab41"
+    },
+    {
+      "site": "0x60fb0d3",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fafe0..0x60fb349"
+    },
+    {
+      "site": "0x60fb0fc",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fafe0..0x60fb349"
+    },
+    {
+      "site": "0x60fb123",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fafe0..0x60fb349"
+    },
+    {
+      "site": "0x60fb47d",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fb350..0x60fb6e9"
+    },
+    {
+      "site": "0x60fb4a6",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fb350..0x60fb6e9"
+    },
+    {
+      "site": "0x60fb4ce",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fb350..0x60fb6e9"
+    },
+    {
+      "site": "0x60fbc54",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fbb90..0x60fbe76"
+    },
+    {
+      "site": "0x60fbc7d",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fbb90..0x60fbe76"
+    },
+    {
+      "site": "0x60fbca7",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fbb90..0x60fbe76"
+    },
+    {
+      "site": "0x60fbf39",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fbe80..0x60fc156"
+    },
+    {
+      "site": "0x60fbf5e",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fbe80..0x60fc156"
+    },
+    {
+      "site": "0x60fbf83",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fbe80..0x60fc156"
+    },
+    {
+      "site": "0x60fc234",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fc160..0x60fc47f"
+    },
+    {
+      "site": "0x60fc25d",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fc160..0x60fc47f"
+    },
+    {
+      "site": "0x60fc286",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fc160..0x60fc47f"
+    },
+    {
+      "site": "0x60fc5f9",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fc480..0x60fcadb"
+    },
+    {
+      "site": "0x60fc61e",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fc480..0x60fcadb"
+    },
+    {
+      "site": "0x60fc643",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x60fc480..0x60fcadb"
+    },
+    {
+      "site": "0x612c673",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x612c5b0..0x612ca74"
+    },
+    {
+      "site": "0x612c6a4",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x612c5b0..0x612ca74"
+    },
+    {
+      "site": "0x612c6d5",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x612c5b0..0x612ca74"
+    },
+    {
+      "site": "0x61683d0",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x6168220..0x6168472"
+    },
+    {
+      "site": "0x616c137",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x616c010..0x616d021"
+    },
+    {
+      "site": "0x616c8ea",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x616c010..0x616d021"
+    },
+    {
+      "site": "0x616c98e",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x616c010..0x616d021"
+    },
+    {
+      "site": "0x616ca0a",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x616c010..0x616d021"
+    },
+    {
+      "site": "0x6171aa3",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x6171990..0x6171aef"
+    },
+    {
+      "site": "0x61980ef",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61980b0..0x61981e3"
+    },
+    {
+      "site": "0x6198114",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61980b0..0x61981e3"
+    },
+    {
+      "site": "0x619a191",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x619a120..0x619a1fc"
+    },
+    {
+      "site": "0x619a702",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x619a5a0..0x619a98a"
+    },
+    {
+      "site": "0x619b443",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x619a9d0..0x619b7af"
+    },
+    {
+      "site": "0x619b5fb",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x619a9d0..0x619b7af"
+    },
+    {
+      "site": "0x619b90a",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x619b870..0x619bb1f"
+    },
+    {
+      "site": "0x619d063",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x619cf70..0x619d700"
+    },
+    {
+      "site": "0x61a28ad",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61a0dc0..0x61a3c78"
+    },
+    {
+      "site": "0x61b5951",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61b5830..0x61b701b"
+    },
+    {
+      "site": "0x61b5bba",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61b5830..0x61b701b"
+    },
+    {
+      "site": "0x61b5c59",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61b5830..0x61b701b"
+    },
+    {
+      "site": "0x61b5e07",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61b5830..0x61b701b"
+    },
+    {
+      "site": "0x61b6014",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61b5830..0x61b701b"
+    },
+    {
+      "site": "0x61b60a4",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61b5830..0x61b701b"
+    },
+    {
+      "site": "0x61b61a0",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61b5830..0x61b701b"
+    },
+    {
+      "site": "0x61b65a0",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61b5830..0x61b701b"
+    },
+    {
+      "site": "0x61b661c",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61b5830..0x61b701b"
+    },
+    {
+      "site": "0x61b67c8",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61b5830..0x61b701b"
+    },
+    {
+      "site": "0x61b69fd",
+      "target": "0x61bd4f0",
+      "kind": "call",
+      "fde": "0x61b5830..0x61b701b"
+    },
+    {
+      "site": "0x5d3c20c",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x5d3c1e0..0x5d3c247"
+    },
+    {
+      "site": "0x5d3c5e7",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x5d3c5d0..0x5d3c609"
+    },
+    {
+      "site": "0x5d3e68e",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x5d3e660..0x5d3e6c8"
+    },
+    {
+      "site": "0x5d3eef2",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x5d3eeb0..0x5d3ef51"
+    },
+    {
+      "site": "0x5f099e7",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x5f099b0..0x5f09a42"
+    },
+    {
+      "site": "0x6027f3e",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x6027e50..0x6028018"
+    },
+    {
+      "site": "0x602c520",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x602c3a0..0x602c733"
+    },
+    {
+      "site": "0x605f9cf",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x605f700..0x605fe21"
+    },
+    {
+      "site": "0x605fceb",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x605f700..0x605fe21"
+    },
+    {
+      "site": "0x60603e4",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x60602c0..0x6060572"
+    },
+    {
+      "site": "0x6060680",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x6060580..0x6060847"
+    },
+    {
+      "site": "0x6060b61",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x6060a60..0x6060e4d"
+    },
+    {
+      "site": "0x612d61c",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x612d5b0..0x612d709"
+    },
+    {
+      "site": "0x612d722",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x612d710..0x612d7ac"
+    },
+    {
+      "site": "0x612db29",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x612db10..0x612de08"
+    },
+    {
+      "site": "0x612ef8a",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x612ef20..0x612f2d8"
+    },
+    {
+      "site": "0x613b525",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x613b500..0x613b7eb"
+    },
+    {
+      "site": "0x61bc013",
+      "target": "0x61c38a0",
+      "kind": "call",
+      "fde": "0x61bbfc0..0x61bc101"
+    },
+    {
+      "site": "0x61c3bcb",
+      "target": "0x61c38a0",
+      "kind": "tail",
+      "fde": "0x61c3bc0..0x61c3bd0"
+    },
+    {
+      "site": "0x5d58cfb",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5d58b20..0x5d58ec6"
+    },
+    {
+      "site": "0x5d58d61",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5d58b20..0x5d58ec6"
+    },
+    {
+      "site": "0x5d59c18",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5d598b0..0x5d59dff"
+    },
+    {
+      "site": "0x5d59c70",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5d598b0..0x5d59dff"
+    },
+    {
+      "site": "0x5d69dde",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5d69a00..0x5d6a6d9"
+    },
+    {
+      "site": "0x5dd3693",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5dd35b0..0x5dd36f4"
+    },
+    {
+      "site": "0x5ddca61",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5ddc2a0..0x5ddce31"
+    },
+    {
+      "site": "0x5ddcac5",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5ddc2a0..0x5ddce31"
+    },
+    {
+      "site": "0x5df15ac",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5df0f40..0x5df1e22"
+    },
+    {
+      "site": "0x5e167ef",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e15310..0x5e183ab"
+    },
+    {
+      "site": "0x5e17c3f",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e15310..0x5e183ab"
+    },
+    {
+      "site": "0x5e29b10",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e29810..0x5e29c17"
+    },
+    {
+      "site": "0x5e2df24",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e2d590..0x5e2f8cb"
+    },
+    {
+      "site": "0x5e2fa15",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e2f930..0x5e2fe1d"
+    },
+    {
+      "site": "0x5e42dfb",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e41fa0..0x5e44899"
+    },
+    {
+      "site": "0x5e42e44",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e41fa0..0x5e44899"
+    },
+    {
+      "site": "0x5e6fe83",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e6f1c0..0x5e702fb"
+    },
+    {
+      "site": "0x5e6feec",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e6f1c0..0x5e702fb"
+    },
+    {
+      "site": "0x5e75b33",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e74e70..0x5e75fab"
+    },
+    {
+      "site": "0x5e75b9c",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e74e70..0x5e75fab"
+    },
+    {
+      "site": "0x5e7c778",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e7c410..0x5e7c95f"
+    },
+    {
+      "site": "0x5e7c7d0",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e7c410..0x5e7c95f"
+    },
+    {
+      "site": "0x5e88d94",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e882b0..0x5e8901d"
+    },
+    {
+      "site": "0x5e88dfb",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e882b0..0x5e8901d"
+    },
+    {
+      "site": "0x5e9b2d8",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5e9b170..0x5e9b6b2"
+    },
+    {
+      "site": "0x5eaa6cd",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5eaa680..0x5eaa7fb"
+    },
+    {
+      "site": "0x5eb2125",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5eb1300..0x5eb4364"
+    },
+    {
+      "site": "0x5ee054f",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5ee04b0..0x5ee0eb6"
+    },
+    {
+      "site": "0x5eee812",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5eee790..0x5eee9e7"
+    },
+    {
+      "site": "0x5f07c4c",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f07670..0x5f081cb"
+    },
+    {
+      "site": "0x5f0c5fe",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f0b760..0x5f0ce01"
+    },
+    {
+      "site": "0x5f1b949",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f1b550..0x5f1e986"
+    },
+    {
+      "site": "0x5f1c67a",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f1b550..0x5f1e986"
+    },
+    {
+      "site": "0x5f300d3",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f2fee0..0x5f301d5"
+    },
+    {
+      "site": "0x5f30478",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f301e0..0x5f30575"
+    },
+    {
+      "site": "0x5f50c43",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f50620..0x5f512e5"
+    },
+    {
+      "site": "0x5f58b3d",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f58590..0x5f59ff2"
+    },
+    {
+      "site": "0x5f59395",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f58590..0x5f59ff2"
+    },
+    {
+      "site": "0x5f5b6fe",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f5b1d0..0x5f5bfea"
+    },
+    {
+      "site": "0x5f5b7d0",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f5b1d0..0x5f5bfea"
+    },
+    {
+      "site": "0x5f5b8e1",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f5b1d0..0x5f5bfea"
+    },
+    {
+      "site": "0x5f5d034",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5d3c4",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5d533",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f5c1c0..0x5f5f84b"
+    },
+    {
+      "site": "0x5f5fc16",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f5fac0..0x5f60288"
+    },
+    {
+      "site": "0x5f5fe45",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f5fac0..0x5f60288"
+    },
+    {
+      "site": "0x5f60393",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f602b0..0x5f603f4"
+    },
+    {
+      "site": "0x5f83a9b",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f83430..0x5f84ea4"
+    },
+    {
+      "site": "0x5f83b6c",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f83430..0x5f84ea4"
+    },
+    {
+      "site": "0x5f8a2d7",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f89ef0..0x5f8bb08"
+    },
+    {
+      "site": "0x5f8e083",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f8dca0..0x5f90b86"
+    },
+    {
+      "site": "0x5f8e0c6",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f8dca0..0x5f90b86"
+    },
+    {
+      "site": "0x5f8e5aa",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f8dca0..0x5f90b86"
+    },
+    {
+      "site": "0x5f8e656",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5f8dca0..0x5f90b86"
+    },
+    {
+      "site": "0x5fbd9a7",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5fbd900..0x5fbdbc5"
+    },
+    {
+      "site": "0x5fbdb6c",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5fbd900..0x5fbdbc5"
+    },
+    {
+      "site": "0x5fbdca4",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5fbdc00..0x5fbde1c"
+    },
+    {
+      "site": "0x5fbdd4c",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5fbdc00..0x5fbde1c"
+    },
+    {
+      "site": "0x5fbdee8",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5fbde50..0x5fbe17b"
+    },
+    {
+      "site": "0x5fbdf45",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5fbde50..0x5fbe17b"
+    },
+    {
+      "site": "0x5fc5737",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x5fc5650..0x5fc59b1"
+    },
+    {
+      "site": "0x6040ff4",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6040f50..0x60418b7"
+    },
+    {
+      "site": "0x605fcc1",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x605f700..0x605fe21"
+    },
+    {
+      "site": "0x606ebb0",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x606eb60..0x606eeac"
+    },
+    {
+      "site": "0x606f2e9",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x606ef50..0x606f91f"
+    },
+    {
+      "site": "0x60baae8",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x60ba600..0x60bb855"
+    },
+    {
+      "site": "0x60ee0c5",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x60ee070..0x60ee611"
+    },
+    {
+      "site": "0x60ee167",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x60ee070..0x60ee611"
+    },
+    {
+      "site": "0x60efc5a",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x60ef340..0x60f08e5"
+    },
+    {
+      "site": "0x60f0538",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x60ef340..0x60f08e5"
+    },
+    {
+      "site": "0x6102277",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6101e10..0x6102742"
+    },
+    {
+      "site": "0x61023d8",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6101e10..0x6102742"
+    },
+    {
+      "site": "0x6102859",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x61027b0..0x6102cf6"
+    },
+    {
+      "site": "0x61028a0",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x61027b0..0x6102cf6"
+    },
+    {
+      "site": "0x6102950",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x61027b0..0x6102cf6"
+    },
+    {
+      "site": "0x610296a",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x61027b0..0x6102cf6"
+    },
+    {
+      "site": "0x61082e5",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6107ff0..0x6108b64"
+    },
+    {
+      "site": "0x610a409",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x610a100..0x610c0d8"
+    },
+    {
+      "site": "0x610e777",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x610e4b0..0x610f326"
+    },
+    {
+      "site": "0x610e7fe",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x610e4b0..0x610f326"
+    },
+    {
+      "site": "0x610e97a",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x610e4b0..0x610f326"
+    },
+    {
+      "site": "0x610ea3b",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x610e4b0..0x610f326"
+    },
+    {
+      "site": "0x610eac7",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x610e4b0..0x610f326"
+    },
+    {
+      "site": "0x610ef32",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x610e4b0..0x610f326"
+    },
+    {
+      "site": "0x611063d",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6110010..0x6110bfe"
+    },
+    {
+      "site": "0x6111b25",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6111830..0x61123a8"
+    },
+    {
+      "site": "0x611365e",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6113360..0x6113eb2"
+    },
+    {
+      "site": "0x61151b5",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6114ec0..0x6115a48"
+    },
+    {
+      "site": "0x6116dd5",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6116ae0..0x6117668"
+    },
+    {
+      "site": "0x611f1de",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x611ea20..0x611f8dd"
+    },
+    {
+      "site": "0x61447b6",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6144610..0x6144a54"
+    },
+    {
+      "site": "0x6167fbe",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6167f50..0x61680bc"
+    },
+    {
+      "site": "0x6168513",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x61684a0..0x616861f"
+    },
+    {
+      "site": "0x617840a",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6177850..0x61791a0"
+    },
+    {
+      "site": "0x617b060",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x617a7a0..0x617c1a0"
+    },
+    {
+      "site": "0x6187dc3",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x6188432",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x6188743",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x61889a0",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x6188da1",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x6189450",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x61897ca",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x61899ed",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x6189b60",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x6189ec0",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x618a1cc",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x618a20f",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x618a2ef",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x618a4de",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x618a537",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x618a55b",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6186e30..0x618a96f"
+    },
+    {
+      "site": "0x6198964",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6198900..0x6198ce2"
+    },
+    {
+      "site": "0x6198a90",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x6198900..0x6198ce2"
+    },
+    {
+      "site": "0x619b2d1",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x619a9d0..0x619b7af"
+    },
+    {
+      "site": "0x61a0838",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x619fe30..0x61a0bc8"
+    },
+    {
+      "site": "0x61b0695",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x61b0660..0x61b06fd"
+    },
+    {
+      "site": "0x61b142e",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x61b13b0..0x61b163c"
+    },
+    {
+      "site": "0x61ba1fb",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x61ba050..0x61ba4ce"
+    },
+    {
+      "site": "0x61cf80b",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x61cf7c0..0x61cfe9f"
+    },
+    {
+      "site": "0x61cf818",
+      "target": "0x61c7e30",
+      "kind": "call",
+      "fde": "0x61cf7c0..0x61cfe9f"
+    }
+  ]
+}
