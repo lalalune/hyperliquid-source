@@ -1,0 +1,527 @@
+{
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "task": "RE-001",
+ "routine": {
+  "address": "0x5ef8360",
+  "fde": "0x5ef8360..0x5ef94ee",
+  "size_bytes": 4494,
+  "arguments": [
+   "snapshot record* in rdi (the published snapshot copy: the twin caller passes rsp, the stack copy from subobject+0x28)",
+   "ctx* in rsi (the twin caller's second argument, passed through unchanged; it holds a std::map<std::string, std::string> at +0x08)",
+   "chain link* in rdx (twin caller *(owner+0x780))"
+  ],
+  "returns": "nothing (void); the ctx map at +0x08 is cleared and filled with 46 entries",
+  "internal_calls": 49,
+  "internal_indirect_calls": 1,
+  "internal_branches": 35,
+  "landing_pads": [
+   {
+    "pad": "0x5ef9482",
+    "target": "0x5ef823c"
+   },
+   {
+    "pad": "0x5ef948e",
+    "target": "0x5ef8299"
+   },
+   {
+    "pad": "0x5ef949a",
+    "target": "0x5ef8246"
+   },
+   {
+    "pad": "0x5ef94a6",
+    "target": "0x5ef82c8"
+   },
+   {
+    "pad": "0x5ef94b2",
+    "target": "0x5ef8301"
+   },
+   {
+    "pad": "0x5ef94be",
+    "target": "0x5ef82a3"
+   },
+   {
+    "pad": "0x5ef94ca",
+    "target": "0x5ef826b"
+   },
+   {
+    "pad": "0x5ef94d6",
+    "target": "0x5ef82d2"
+   },
+   {
+    "pad": "0x5ef94e2",
+    "target": "0x5ef8326"
+   }
+  ]
+ },
+ "snapshot": {
+  "base_note": "312-byte published snapshot; the consumer reads the copy its caller made from the published base (owner-subobject +0x28, per open PR #3049)",
+  "size_bytes": 312,
+  "fields": {
+   "+0x00": "capacity u64 (read: the 'capacity' entry and the portion divisor)",
+   "+0x08": "usage u64 (NOT read by this routine)",
+   "+0x10": "table_size u64 (NOT read by this routine)",
+   "+0x18": "occupancy u64 (NOT read by this routine)",
+   "+0x20": "std::string name@0x<ptr>#<pid>, built by the filler 0x5eef380 (read: the 'di' entry)",
+   "+0x40..+0xb0": "values, 14 x u64, one per entry slot (read: the 'bytes.' entries and the portion numerator)",
+   "+0xb0..+0x120": "counts, 14 x u64, one per entry slot (read: the 'count.' entries)",
+   "+0x120": "sequence u32 (NOT read by this routine)",
+   "+0x124": "no-progress counter u32 (NOT read by this routine)",
+   "+0x128": "prev_value u64, the FIRST slot +0x98 return at fill time (read: elapsed)",
+   "+0x130": "last_value u64, the SECOND slot +0x98 return (read: elapsed and secs_since)"
+  }
+ },
+ "context": {
+  "layout": "ctx+0x08 is a std::map<std::string, std::string> (48 bytes: root +0x08, leftmost +0x10, rightmost +0x18, count +0x20, relative to ctx+0x08)",
+  "clear": "the routine first destroys the old tree (tree_destroy 0x5eec590 on the root at ctx+0x10), then resets the header: root 0, leftmost = rightmost = &header, count 0 (main.txt 0x5ef83a7..0x5ef83c8)",
+  "unknown": "ctx+0x00 is never read here; who allocates ctx and what its +0x00 field is are not pinned (see not_claimed)"
+ },
+ "header": {
+  "order": [
+   "map['di'] = snapshot name (copy-assign via _M_assign, main.txt 0x5ef83cd..0x5ef83e4)",
+   "map['capacity'] = decimal(snapshot+0x00) (to_string 0x5d4f970 into the stack string, then move-assign 0x5eebb20, main.txt 0x5ef83e9..0x5ef8417)",
+   "map['secs_for_last_collection'] = '%f' % (elapsed(snapshot) / 1e6) (fmt_pct 0x5eec680, main.txt 0x5ef841c..0x5ef8486)",
+   "map['secs_since_last_collection'] = decimal(secs_since) (to_string 0x5d4f970, main.txt 0x5ef848b..0x5ef84ea)"
+  ],
+  "keys": [
+   {
+    "address": "0x5efff20",
+    "fde": "0x5efff20..0x5efffbb",
+    "key": "di",
+    "note": "function-local static std::string at 0x6503be0, built on first call from the literal 'di' (0x6469, len 2)"
+   },
+   {
+    "address": "0x5efffc0",
+    "fde": "0x5efffc0..0x5f00060",
+    "key": "capacity",
+    "note": "function-local static std::string at 0x6503ba0, built on first call from the literal 'capacity' (movabs 0x7974696361706163, len 8)"
+   },
+   {
+    "address": "0x5f00090",
+    "fde": "0x5f00090..0x5f0018b",
+    "key": "secs_for_last_collection",
+    "note": "function-local static std::string at 0x6503b60, heap-allocated on first call (len 24): first 16 bytes from .rodata 0x4510c0 ('secs_for_last_co') plus 'llection'"
+   },
+   {
+    "address": "0x5f001c0",
+    "fde": "0x5f001c0..0x5f002b9",
+    "key": "secs_since_last_collection",
+    "note": "function-local static std::string at 0x6503b20, heap-allocated on first call (len 26): 'secs_since' from .rodata 0x453250 plus '_last_collection' from .rodata 0x452f10 (the second 16-byte copy overlaps the first at +0x0a, so the join is exact)"
+   }
+  ]
+ },
+ "entry_loop": {
+  "bounds": "14 slots, i = 0..13 (main.txt 0x5ef84ef..0x5ef8ec8); unlike the twin's text dump, every slot produces all three entries unconditionally, including zero counts",
+  "phases": [
+   {
+    "phase": "A",
+    "key_builder": "0x5f002d0",
+    "key": "'count.' + role_name(i)",
+    "value": "decimal(snapshot+0xb0[i])",
+    "sites": "count read 0x5ef8512, key build 0x5ef8723, map walk 0x5ef8728..0x5ef8807, insert 0x5ef881e, value assign 0x5ef8826..0x5ef88d7"
+   },
+   {
+    "phase": "B",
+    "key_builder": "0x5f00420",
+    "key": "'bytes.' + role_name(i)",
+    "value": "decimal(snapshot+0x40[i])",
+    "sites": "value read 0x5ef88e1, key build 0x5ef8af3, map walk 0x5ef8b10..0x5ef8bd2, insert 0x5ef8be9, value assign 0x5ef8bf1..0x5ef8c9d"
+   },
+   {
+    "phase": "C",
+    "key_builder": "0x5f00570",
+    "key": "'percent.' + role_name(i)",
+    "value": "'%f' % (snapshot+0x40[i] * 100.0 / snapshot+0x00)",
+    "sites": "value read 0x5ef8ca7, portion 0x5ef8cb5..0x5ef8d01, key build 0x5ef8d0f, map walk 0x5ef8d2c..0x5ef8def, insert 0x5ef8e06, value assign 0x5ef8e0e..0x5ef8eb4"
+   }
+  ],
+  "key_builders": [
+   {
+    "address": "0x5f002d0",
+    "fde": "0x5f002d0..0x5f0040e",
+    "prefix": "count.",
+    "note": "static string at 0x6503ae0 (ptr 0x6503af0, len 6, literal 'count.' built in the guard-init branch); appends the prefix, then the role name from 0x5efff00(i)"
+   },
+   {
+    "address": "0x5f00420",
+    "fde": "0x5f00420..0x5f0055e",
+    "prefix": "bytes.",
+    "note": "static string at 0x6503aa0 (ptr 0x6503ab0, len 6, literal 'bytes.' built in the guard-init branch); appends the prefix, then the role name from 0x5efff00(i)"
+   },
+   {
+    "address": "0x5f00570",
+    "fde": "0x5f00570..0x5f006ac",
+    "prefix": "percent.",
+    "note": "static string at 0x6503a60 (ptr 0x6503a70, len 8, literal 'percent.' built in the guard-init branch, movabs 0x2e746e6563726570); appends the prefix, then the role name from 0x5efff00(i). The state file's 'role-to-index' label for this function is not borne out by the code: it builds a 'percent.'-prefixed key string, it does not return an index"
+   }
+  ],
+  "map_ops": "each phase walks the tree by hand (the _Rb_tree lower_bound shape: node+0x28 key length, node+0x20 key data, memcmp, the 0x80000000 length-difference bound) from the root at ctx+0x10; on a miss it inserts via map_insert 0x5ef3c80 with the key string, then copy-assigns the value string into node+0x40 (SSO fast path, heap memcpy path, old-buffer dispose). The header keys instead go through map_find_insert 0x5ef40a0, which inserts via map_node_create 0x5ef3ed0 when absent and returns &node+0x40 (the value string).",
+  "portion": "(double)value * 100.0 / (double)capacity, printed '%f' (6 decimals). A zero capacity gives inf (value > 0) or the x86 DIVSD indefinite QNaN (value == 0), printed '-nan'. The u64-to-double conversions use the sign-bit fixup (t = (v >> 1) | (v & 1), convert, double) at 0x5ef8cb5/0x5ef9140 (value) and 0x5ef8cd1/0x5ef9120 (capacity)."
+ },
+ "name_table": {
+  "address": "0x6503c00",
+  "entry_bytes": 32,
+  "entries": [
+   {
+    "index": 0,
+    "literal": "0x43c5e5",
+    "name": "data-block"
+   },
+   {
+    "index": 1,
+    "literal": "0x442951",
+    "name": "filter-block"
+   },
+   {
+    "index": 2,
+    "literal": "0x434002",
+    "name": "filter-meta-block"
+   },
+   {
+    "index": 3,
+    "literal": "0x44295e",
+    "name": "deprecated-filter-block"
+   },
+   {
+    "index": 4,
+    "literal": "0x43619d",
+    "name": "index-block"
+   },
+   {
+    "index": 5,
+    "literal": "0x448717",
+    "name": "other-block"
+   },
+   {
+    "index": 6,
+    "literal": "0x43a520",
+    "name": "write-buffer"
+   },
+   {
+    "index": 7,
+    "literal": "0x960780",
+    "name": "compression-dictionary-building-buffer"
+   },
+   {
+    "index": 8,
+    "literal": "0x438334",
+    "name": "filter-construction"
+   },
+   {
+    "index": 9,
+    "literal": "0x44a2cb",
+    "name": "block-based-table-reader"
+   },
+   {
+    "index": 10,
+    "literal": "0x430f6b",
+    "name": "file-metadata"
+   },
+   {
+    "index": 11,
+    "literal": "0x43d68e",
+    "name": "blob-value"
+   },
+   {
+    "index": 12,
+    "literal": "0x44381d",
+    "name": "blob-cache"
+   },
+   {
+    "index": 13,
+    "literal": "0x44c271",
+    "name": "misc"
+   }
+  ],
+  "accessor": {
+   "address": "0x5efff00",
+   "fde": "0x5efff00..0x5efff13",
+   "rule": "returns *(table_base + i * 32) where table_base is the qword at 0x64ecd30; a RELATIVE relocation at 0x64ecd30 installs 0x6503c00 (the sibling table), and the next slot 0x64ecd38 installs 0x6503dc0 (the twin table)"
+  },
+  "initializer": {
+   "address": "0x5f007f0",
+   "fde": "0x5f007f0..0x5f00b7e",
+   "destructor": "0x5effea0",
+   "method": "calls the std::string-from-const-char* helper 0x5effdd0 once per entry with (rdi = table + i*0x20, rsi = literal) for both tables (twin table at 0x6503dc0 first, sibling table at 0x6503c00 second), then registers __cxa_atexit(destructor 0x5effea0, table, guard 0x64efa20) for each; the tables live in .bss, so their contents exist only through this initializer, not in the file",
+   "string_init": {
+    "address": "0x5effdd0",
+    "fde": "0x5effdd0..0x5effea0"
+   }
+  }
+ },
+ "helpers": {
+  "elapsed": {
+   "address": "0x5eee580",
+   "fde": "0x5eee580..0x5eee5a5",
+   "size_bytes": 37,
+   "rule": "hi = snapshot+0x130, lo = snapshot+0x128; return hi - lo when lo < hi, else 0 (unsigned 64-bit)",
+   "note": "CORRECTED from open PR #3082, whose records.json and model say 'else hi'. The code is `mov $0x0,%edx; cmovae %rdx,%rax` (elapsed.txt 0x5eee59b/0x5eee5a0): rdx was just zeroed, so the else branch returns 0. #3082's test asserted elapsed_ns(30, 100) == 30 and elapsed_ns(50, 50) == 50; both are wrong per the binary and this packet's model returns 0 for both."
+  },
+  "fmt_pct": {
+   "address": "0x5eec680",
+   "fde": "0x5eec680..0x5eec7e5",
+   "size_bytes": 357,
+   "rule": "formats one double with the format string '%f' at 0x432165 via __vsnprintf_chk into a 0x148-byte stack buffer, then assigns the result into the std::string at rdi (SSO when the result is <= 15 bytes, heap via _M_create above that)",
+   "second_arg": "the caller passes the global at 0x64ed730 (file qword 0) as rsi; the helper never reads its incoming rsi on this path (its two rsi uses are fresh lea/mov for the length and the memcpy source)",
+   "doubles": {
+    "one_million": {
+     "address": "0x4599a0",
+     "value": 1000000.0
+    },
+    "one_hundred": {
+     "address": "0x459498",
+     "value": 100.0
+    }
+   }
+  },
+  "to_string": {
+   "address": "0x5d4f970",
+   "fde": "0x5d4f970..0x5d4fcdd",
+   "size_bytes": 877,
+   "rule": "std::to_string(unsigned long long): the magnitude branches pick the digit count, _M_construct allocates that many NULs, and the pair loop fills the buffer from the end two digits at a time using the 100-pair decimal table ('00'..'99') copied in 16-byte chunks from .rodata to the stack (rsp+0xa0 in the inlined copies; the table bytes were verified to equal the '00'..'99' pairs exactly). The sibling inlines this same conversion three times per slot instead of calling it.",
+   "magic_div10": "0x346dc5d63886594b (the /10 step)",
+   "magic_div100": "0x28f5c28f5c28f5c3 (the /100 step)"
+  },
+  "tree_destroy": {
+   "address": "0x5eec590",
+   "fde": "0x5eec590..0x5eec601",
+   "size_bytes": 113,
+   "rule": "_Rb_tree::_M_erase: recurse on node+0x18 (right), dispose the two strings at node+0x40 and node+0x20, operator delete(node, 0x60), then tail-loop on node+0x10 (left). Node layout: header +0x00..+0x20, key string +0x20, value string +0x40."
+  },
+  "map_find_insert": {
+   "address": "0x5ef40a0",
+   "fde": "0x5ef40a0..0x5ef41e6",
+   "size_bytes": 326,
+   "rule": "std::map::operator[] for the map at rdi+0x08: lower_bound walk from the root at rdi+0x10 (node+0x28 key length, node+0x20 key data, memcmp, 0x80000000 bound); on a miss it creates the node via map_node_create 0x5ef3ed0 and returns &node+0x40 (the value string); on a hit it returns the found node's value string. The end sentinel is &map (rdi+0x08)."
+  },
+  "map_insert": {
+   "address": "0x5ef3c80",
+   "fde": "0x5ef3c80..0x5ef3e6b",
+   "size_bytes": 491,
+   "rule": "allocates a 0x60-byte node, copies the key string (pointed at by the caller's stack slot) into node+0x20, finds the insert position via map_insert_pos 0x5ef3ac0, rebalances via _Rb_tree_insert_and_rebalance, and increments the count at map+0x20 (rdi+0x28). On a duplicate key it frees the node and returns the existing node."
+  },
+  "map_insert_pos": {
+   "address": "0x5ef3ac0",
+   "fde": "0x5ef3ac0..0x5ef3c73",
+   "size_bytes": 435,
+   "rule": "the _Rb_tree::_M_get_insert_unique_pos walk: compares the key against node keys with string_compare 0x5eeb970 and _Rb_tree_increment/_Rb_tree_decrement, returning the parent and the side flag."
+  },
+  "map_node_create": {
+   "address": "0x5ef3ed0",
+   "fde": "0x5ef3ed0..0x5ef409e",
+   "size_bytes": 462,
+   "rule": "allocates a 0x60-byte node, copies the key string into node+0x20 (heap via _M_create when longer than 15 bytes), finds the insert position via map_insert_pos 0x5ef3ac0, rebalances, and returns the node; used by map_find_insert on a miss."
+  },
+  "string_compare": {
+   "address": "0x5eeb970",
+   "fde": "0x5eeb970..0x5eeb9be",
+   "size_bytes": 78,
+   "rule": "std::string three-way compare (memcmp over the common prefix, then the length difference with the 0x80000000 bound); the shared comparator used by the map walks."
+  },
+  "string_move_assign": {
+   "address": "0x5eebb20",
+   "fde": "0x5eebb20..0x5eebbf8",
+   "size_bytes": 216,
+   "rule": "std::string move assignment: steals the source heap buffer when the source is heap-allocated, otherwise memcpys the SSO bytes; the old destination buffer is freed. Used for the header entries (capacity, secs_for_last_collection, secs_since_last_collection)."
+  }
+ },
+ "chain": {
+  "rule": "the sibling does NOT walk the handler chain the way the twin does: it calls the chain head's vtable slot +0x98 once, directly (main.txt 0x5ef848b..0x5ef8491, rdi = chain head), with no comparison against the walker 0x5d4d490 and no link walk. The return is the slot_now value used only for secs_since.",
+  "secs_since": "(slot_now - snapshot+0x130) as unsigned 64-bit (wraps), divided by 1,000,000 by the magic multiply (0x431bde82d7b634db, high word, shift 18); verified equal to unsigned // 1_000_000 on 200,010 values"
+ },
+ "cleanup": {
+  "fde": "0x5ef823c..0x5ef835a",
+  "rule": "on exception the fragment disposes the two stack strings (the key string at rsp+0x60 and the value string at rsp+0x80), checks the stack canary, and resumes unwinding via _Unwind_Resume; nine landing pads enter it at 0x5ef823c, 0x5ef8246, 0x5ef826b, 0x5ef8299, 0x5ef82a3, 0x5ef82c8, 0x5ef82d2, 0x5ef8301 and 0x5ef8326"
+ },
+ "callers": [
+  {
+   "caller_fde": "0x5ef9520..0x5ef9760",
+   "note": "twin caller pinned in open PR #3049; refreshes the snapshot, copies the published 312 bytes under the publish mutex to a stack buffer at rsp+0x00, unlocks, then calls the consumer",
+   "setup": "rdi = rsp (snapshot copy on the caller stack), rsi = the caller's own rsi (ctx, passed through unchanged), rdx = *(owner+0x780) (chain head)",
+   "site": "0x5ef96db"
+  },
+  {
+   "caller_fde": "0x5ef9760..0x5ef976b",
+   "note": "entry thunk: endbr64; xor edx,edx; tail-jump to 0x5ef9520 (flag 0)",
+   "setup": "indirect entry; no direct callers found in the census",
+   "site": "0x5ef9766"
+  },
+  {
+   "caller_fde": "0x5ef9770..0x5ef977e",
+   "note": "entry thunk: endbr64; mov $0x1,%edx; tail-jump to 0x5ef9520 (flag 1)",
+   "setup": "indirect entry; no direct callers found in the census",
+   "site": "0x5ef9779"
+  }
+ ],
+ "census": {
+  "consumer": {
+   "direct_calls": [
+    "0x5ef96db"
+   ],
+   "tail_jumps": [],
+   "note": "exactly one direct call, from the twin caller 0x5ef9520"
+  },
+  "elapsed": {
+   "direct_calls": [
+    "0x5eeff28",
+    "0x5ef841f"
+   ],
+   "note": "0x5eeff28 is the twin consumer's call (open PR #3082); 0x5ef841f is this consumer's call"
+  },
+  "fmt_pct": {
+   "direct_calls": [
+    "0x5eed2cf",
+    "0x5ef845e",
+    "0x5ef8d01",
+    "0x5ef9b9c",
+    "0x5efa665"
+   ],
+   "note": "0x5ef845e (header ratio) and 0x5ef8d01 (per-slot portion) are this consumer's calls; the other three sit in FDEs 0x5eed240, 0x5ef97b0 and 0x5efa010"
+  },
+  "to_string": {
+   "direct_calls": 17,
+   "note": "2 in this consumer (0x5ef83f4 capacity, 0x5ef84ba secs_since); the per-slot conversions are inlined, not calls"
+  },
+  "map_insert": {
+   "direct_calls": [
+    "0x5ef881e",
+    "0x5ef8be9",
+    "0x5ef8e06",
+    "0x5ef9f26"
+   ],
+   "note": "the first three are this consumer's three per-slot inserts; 0x5ef9f26 sits in FDE 0x5ef97b0..0x5ef9f7f, a third map-building consumer (open lead, see README)"
+  },
+  "map_find_insert": {
+   "direct_calls": 14,
+   "note": "4 in this consumer (0x5ef83d8, 0x5ef8404, 0x5ef8473, 0x5ef84ca); the rest are other map users"
+  },
+  "string_move_assign": {
+   "direct_calls": 20,
+   "note": "3 in this consumer (0x5ef840f, 0x5ef847e, 0x5ef84da)"
+  },
+  "tree_destroy": {
+   "direct_calls": 11,
+   "note": "1 in this consumer (0x5ef83a7) plus its own recursive call at 0x5eec5a7"
+  },
+  "key_accessors": {
+   "note": "each static-key accessor is called exactly once, all from this consumer: key_di 0x5ef83cd, key_capacity 0x5ef83f9, key_secs_for_last 0x5ef8463, key_secs_since_last 0x5ef84bf, role_name 3 times (0x5f00301, 0x5f00451, 0x5f005a1) from the three key builders, key_count 0x5ef8723, key_bytes 0x5ef8af3, key_percent 0x5ef8d0f"
+  },
+  "relative_records": {
+   "initializer": [
+    "0x63f3830"
+   ],
+   "note": "the initializer's only RELATIVE record is its .init_array slot; no other pinned routine has one. The role-name table pointer has its own RELATIVE record at 0x64ecd30 (addend 0x6503c00) and the twin table's at 0x64ecd38 (addend 0x6503dc0)."
+  },
+  "stored_qwords": {
+   "initializer": [
+    "0x7048"
+   ],
+   "note": "0x7048 is the .rela.dyn addend field of the initializer's RELATIVE record, not a data pointer. No pinned routine has a stored qword outside .rela.dyn."
+  }
+ },
+ "corrections": [
+  "elapsed else-branch: open PR #3082's records.json ('return hi - lo when lo < hi, else hi'), its tools/snapshot_consumer_efda0_115.py elapsed_ns ('else last') and its tests (elapsed_ns(30, 100) == 30, elapsed_ns(50, 50) == 50) are wrong. The binary is `mov $0x0,%edx; cmovae %rdx,%rax` (elapsed.txt 0x5eee59b/0x5eee5a0): rdx was just zeroed, so the else branch returns 0. This packet's model implements else 0 and its tests assert it.",
+  "The state file's label for 0x5f00570 as a 'role-to-index function (jump-table entries for indices 1..12)' is not borne out by the code: 0x5f00570 builds a 'percent.'-prefixed key string (key_percent.txt), it takes (string*, index) and returns the string, it has no jump table and returns no index."
+ ],
+ "not_claimed": [
+  "what ctx is, who allocates it, what its +0x00 field holds, and who calls the twin caller 0x5ef9520 (its only entries are the two indirect thunks at 0x5ef9760/0x5ef9770, which have no direct callers and no stored qwords or RELATIVE records)",
+  "what the slot +0x98 handler computes (its return is treated here only as a counter/timestamp value)",
+  "what the slot +0x70/+0x78/+0x80/+0x88 producers compute (their results are used only as the snapshot fields the twin pins)",
+  "the exact throw-site mapping of the nine landing pads (they jump into the shared cleanup fragment 0x5ef823c..0x5ef835a; the exception table was not decoded)",
+  "the body of the twin caller beyond the pinned call-site window, and the sibling formatter 0x5eedda0 / helper 0x5eebd00",
+  "the third map-building consumer in FDE 0x5ef97b0..0x5ef9f7f (it calls the same map helpers: string_compare, string_move_assign, fmt_pct, map_find_insert, map_insert)",
+  "behaviour on a null chain link, a null ctx map, or a snapshot whose capacity is zero with a nonzero value (the model prints inf; the binary's stream would print inf the same way, but no binary run confirms it)",
+  "a runtime write to any relocated global after load (only the relocated values are pinned)"
+ ],
+ "model_spot_checks": {
+  "render": {
+   "snapshot": {
+    "name": "test@0x1234#56",
+    "capacity": 1048576,
+    "prev_value": 1000000000,
+    "last_value": 1500000000,
+    "counts": [
+     3,
+     0,
+     5,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "values": [
+     2048,
+     0,
+     1048576,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "slot_now": 2000000000,
+   "expected": {
+    "di": "test@0x1234#56",
+    "capacity": "1048576",
+    "secs_for_last_collection": "500.000000",
+    "secs_since_last_collection": "500",
+    "count.data-block": "3",
+    "bytes.data-block": "2048",
+    "percent.data-block": "0.195312",
+    "count.filter-block": "0",
+    "bytes.filter-block": "0",
+    "percent.filter-block": "0.000000",
+    "count.filter-meta-block": "5",
+    "bytes.filter-meta-block": "1048576",
+    "percent.filter-meta-block": "100.000000",
+    "count.deprecated-filter-block": "0",
+    "bytes.deprecated-filter-block": "0",
+    "percent.deprecated-filter-block": "0.000000",
+    "count.index-block": "0",
+    "bytes.index-block": "0",
+    "percent.index-block": "0.000000",
+    "count.other-block": "0",
+    "bytes.other-block": "0",
+    "percent.other-block": "0.000000",
+    "count.write-buffer": "0",
+    "bytes.write-buffer": "0",
+    "percent.write-buffer": "0.000000",
+    "count.compression-dictionary-building-buffer": "0",
+    "bytes.compression-dictionary-building-buffer": "0",
+    "percent.compression-dictionary-building-buffer": "0.000000",
+    "count.filter-construction": "0",
+    "bytes.filter-construction": "0",
+    "percent.filter-construction": "0.000000",
+    "count.block-based-table-reader": "0",
+    "bytes.block-based-table-reader": "0",
+    "percent.block-based-table-reader": "0.000000",
+    "count.file-metadata": "0",
+    "bytes.file-metadata": "0",
+    "percent.file-metadata": "0.000000",
+    "count.blob-value": "0",
+    "bytes.blob-value": "0",
+    "percent.blob-value": "0.000000",
+    "count.blob-cache": "0",
+    "bytes.blob-cache": "0",
+    "percent.blob-cache": "0.000000",
+    "count.misc": "0",
+    "bytes.misc": "0",
+    "percent.misc": "0.000000"
+   }
+  }
+ }
+}
