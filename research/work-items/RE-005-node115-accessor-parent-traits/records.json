@@ -1,0 +1,811 @@
+{
+ "big_trait_layout": {
+  "debug_display": "delegation shims: load Self's first word, call through [word+8], then tail-dispatch on the third argument's vtable - the wrappers forward their Error formatting to an inner object",
+  "group_slots": [
+   "field accessor: returns (self+0x38, per-group vtable)",
+   "pair return: returns (self, per-group sibling vtable)",
+   "33-byte keyed lookup: compares a 16-byte key against a per-group constant; returns self+0x38 on equality, null otherwise",
+   "72-141 byte worker body (drop glue)",
+   "3-byte body returning 0",
+   "72-141 byte worker body (drop glue)"
+  ],
+  "group_stride": "0x30",
+  "instances": [
+   {
+    "groups": 8,
+    "self_size": 64,
+    "vtable": "0x6444b60"
+   },
+   {
+    "groups": 4,
+    "self_size": 80,
+    "vtable": "0x64845c0"
+   },
+   {
+    "groups": 2,
+    "self_size": 72,
+    "vtable": "0x6494f80"
+   },
+   {
+    "groups": 4,
+    "self_size": 72,
+    "vtable": "0x6496a80"
+   },
+   {
+    "groups": 7,
+    "self_size": 64,
+    "vtable": "0x649e3f0"
+   },
+   {
+    "groups": 15,
+    "self_size": 64,
+    "vtable": "0x63fa140"
+   }
+  ],
+  "own_method_at_0x58": "one method (114-183 bytes across instances) whose body is drop glue over the Self layout",
+  "prefix": "the std::error::Error vtable layout above (offsets 0x18..0x50)"
+ },
+ "binary": {
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "boundary": [
+  "The Error-subtrait behind the six field-accessor parents is not named anywhere in the binary: no string or panic Location names it, and its method bodies are generic glue (delegation shims, a TypeId-keyed field lookup, drop glue). Its vtable layout, group structure and construction neighbourhood (vendored hyper/tokio-openssl connect stack) are pinned; its source-level name is not recoverable.",
+  "For the native-tls enum parents the variant-to-arm correspondence of the source() slots is pinned only at the level of the observed words: word 0x8000000000000000 yields (self+8, io vtable), a small/pointer word yields (self+0, ErrorStack vtable), 0x8000000000000001 and words >= 0x8000000000000002 yield None.  Which named variant owns the small-word arm is not asserted: the Debug jump table maps the small-word arm to Ssl (formatting the value at +0x20) while the accessor returns the word at +0 as an ErrorStack.",
+  "The pair-store and pair-clone bodies are large functions (215-3229 bytes) with no panic Location of their own except 0x2e7db50 (socket2 socket.rs:105 and the hyper-fork HTTP connect code); their argument/return shapes and the two construction xrefs into the field-parent family are pinned, their source-level identities are not.",
+  "Three slot bodies are shared between the io vtables of the census packet and these parents (the +0x38 TypeId writer 0x14c5950, the +0x40 description body 0x14c5750, the +0x50 provide body 0x14c58a0).  They appear here only as slot-role evidence for the parents; the io-vtable census itself is PR #3141's subject and is not re-claimed."
+ ],
+ "clone_bodies": [
+  {
+   "body": "0x15aea00",
+   "body_bytes": 215,
+   "pattern": "takes the destination pair slot and the source pair among its first arguments and produces a fresh (data, vtable) pair; at each census call site the returned pair is consumed in rax:rdx",
+   "sites": [
+    "0x15aebcf"
+   ]
+  },
+  {
+   "body": "0x1750fb0",
+   "body_bytes": 224,
+   "pattern": "takes the destination pair slot and the source pair among its first arguments and produces a fresh (data, vtable) pair; at each census call site the returned pair is consumed in rax:rdx",
+   "sites": [
+    "0x17511b1"
+   ]
+  },
+  {
+   "body": "0x2b11b80",
+   "body_bytes": 215,
+   "pattern": "takes the destination pair slot and the source pair among its first arguments and produces a fresh (data, vtable) pair; at each census call site the returned pair is consumed in rax:rdx",
+   "sites": [
+    "0x2b11d64"
+   ]
+  }
+ ],
+ "description_text": "description() is deprecated; use Display",
+ "enum_parents": [
+  {
+   "cause_body": "0x14c5800",
+   "drop": "0x14c4f20",
+   "drop_body_bytes": 248,
+   "extent": "0x58",
+   "identity": "openssl::ssl::Error",
+   "identity_basis": "32-byte Self; Debug body 0x14cafa0 writes the struct name Error with fields code (ErrorCode at +0x18) and cause (the tagged word at +0); Display is the shared openssl error Display body 0x5badac0; drop 0x14c4f20 frees the ErrorStack Vec at +0 or tail-drops the io error at +8 by the same tag word the accessors read",
+   "self_align": 8,
+   "self_size": 32,
+   "slots": {
+    "0x18": {
+     "body_bytes": 218,
+     "target": "0x14cafa0"
+    },
+    "0x20": {
+     "body_bytes": 381,
+     "target": "0x5badac0"
+    },
+    "0x28": {
+     "body_bytes": null,
+     "target": "0x63f9130"
+    },
+    "0x30": {
+     "body_bytes": 52,
+     "target": "0x14cb1c0"
+    },
+    "0x38": {
+     "body_bytes": 14,
+     "target": "0x14c5b00",
+     "type_id_const": "df7fff8c81131a52be1aa75840aad88d"
+    },
+    "0x40": {
+     "body_bytes": 13,
+     "string_va": "0x4649a2",
+     "target": "0x14c5750"
+    },
+    "0x48": {
+     "body_bytes": 52,
+     "target": "0x14c5800"
+    },
+    "0x50": {
+     "body_bytes": 1,
+     "target": "0x14c58a0"
+    }
+   },
+   "source_body": "0x14cb1c0",
+   "source_cause_same_body": false,
+   "vtable": "0x63f9150"
+  },
+  {
+   "cause_body": "0x14c57a0",
+   "drop": "0x14c4a90",
+   "drop_body_bytes": 419,
+   "extent": "0x58",
+   "identity": "vendored native-tls OpenSSL backend error enum (imp/openssl.rs Error)",
+   "identity_basis": "40-byte Self; Debug body 0x475bee0 dispatches through a 4-entry jump table writing the variant names Normal / Ssl / EmptyChain / NotPkcs8 in declaration order; Display body 0x475c850 writes the native-tls identity strings and delegates to the ErrorStack Display; drop 0x14c4a90 dispatches on the same marker words",
+   "self_align": 8,
+   "self_size": 40,
+   "slots": {
+    "0x18": {
+     "body_bytes": 468,
+     "target": "0x475bee0"
+    },
+    "0x20": {
+     "body_bytes": 6,
+     "target": "0x475c0c0"
+    },
+    "0x28": {
+     "body_bytes": null,
+     "target": "0x63f9220"
+    },
+    "0x30": {
+     "body_bytes": 67,
+     "target": "0x14ca740"
+    },
+    "0x38": {
+     "body_bytes": 14,
+     "target": "0x14c59b0",
+     "type_id_const": "1009f6d3d5b6c3415befcb2d1a327632"
+    },
+    "0x40": {
+     "body_bytes": 13,
+     "string_va": "0x4649a2",
+     "target": "0x14c5750"
+    },
+    "0x48": {
+     "body_bytes": 67,
+     "target": "0x14c57a0"
+    },
+    "0x50": {
+     "body_bytes": 1,
+     "target": "0x14c58a0"
+    }
+   },
+   "source_body": "0x14ca740",
+   "source_cause_same_body": false,
+   "vtable": "0x63f9240"
+  },
+  {
+   "cause_body": "0x1727190",
+   "drop": "0x1740d70",
+   "drop_body_bytes": 419,
+   "extent": "0x58",
+   "identity": "vendored native-tls OpenSSL backend error enum (imp/openssl.rs Error), tokio-side instantiation",
+   "identity_basis": "same Debug body 0x475bee0 and Display body 0x475c850 as the 0x63f9240 parent; the surrounding bodies panic in z_vendor/tokio-native-tls/src/lib.rs (line 124)",
+   "self_align": 8,
+   "self_size": 40,
+   "slots": {
+    "0x18": {
+     "body_bytes": 468,
+     "target": "0x475bee0"
+    },
+    "0x20": {
+     "body_bytes": 6,
+     "target": "0x475c0c0"
+    },
+    "0x28": {
+     "body_bytes": null,
+     "target": "0x640e628"
+    },
+    "0x30": {
+     "body_bytes": 67,
+     "target": "0x1741790"
+    },
+    "0x38": {
+     "body_bytes": 14,
+     "target": "0x1741560",
+     "type_id_const": "1009f6d3d5b6c3415befcb2d1a327632"
+    },
+    "0x40": {
+     "body_bytes": 13,
+     "string_va": "0x4802d8",
+     "target": "0x1741450"
+    },
+    "0x48": {
+     "body_bytes": 67,
+     "target": "0x1727190"
+    },
+    "0x50": {
+     "body_bytes": 1,
+     "target": "0x17414d0"
+    }
+   },
+   "source_body": "0x1741790",
+   "source_cause_same_body": false,
+   "vtable": "0x640e648"
+  },
+  {
+   "cause_body": "0x2cac600",
+   "drop": "0x2c954f0",
+   "drop_body_bytes": 412,
+   "extent": "0x58",
+   "identity": "vendored native-tls OpenSSL backend error enum (imp/openssl.rs Error), further instantiation",
+   "identity_basis": "same Debug body 0x475bee0 and Display body 0x475c850 as the 0x63f9240 parent; own drop 0x2c954f0 of the same marker-dispatch template",
+   "self_align": 8,
+   "self_size": 40,
+   "slots": {
+    "0x18": {
+     "body_bytes": 468,
+     "target": "0x475bee0"
+    },
+    "0x20": {
+     "body_bytes": 6,
+     "target": "0x475c0c0"
+    },
+    "0x28": {
+     "body_bytes": null,
+     "target": "0x644e7d8"
+    },
+    "0x30": {
+     "body_bytes": 67,
+     "target": "0x2cc9a20"
+    },
+    "0x38": {
+     "body_bytes": 14,
+     "target": "0x2cac750",
+     "type_id_const": "1009f6d3d5b6c3415befcb2d1a327632"
+    },
+    "0x40": {
+     "body_bytes": 13,
+     "string_va": "0x60ebc9",
+     "target": "0x2cac5e0"
+    },
+    "0x48": {
+     "body_bytes": 67,
+     "target": "0x2cac600"
+    },
+    "0x50": {
+     "body_bytes": 1,
+     "target": "0x2cac6d0"
+    }
+   },
+   "source_body": "0x2cc9a20",
+   "source_cause_same_body": false,
+   "vtable": "0x644e7f8"
+  },
+  {
+   "cause_body": "0x5d00f40",
+   "drop": "0x5d01340",
+   "drop_body_bytes": 248,
+   "extent": "0x58",
+   "identity": "openssl::ssl::Error, further instantiation",
+   "identity_basis": "Debug body 0x5d01740 writes the same struct name Error and the same field names code / cause as 0x14cafa0; Display is the shared openssl error Display body 0x5badac0; drop 0x5d01340",
+   "self_align": 8,
+   "self_size": 32,
+   "slots": {
+    "0x18": {
+     "body_bytes": 218,
+     "target": "0x5d01740"
+    },
+    "0x20": {
+     "body_bytes": 381,
+     "target": "0x5badac0"
+    },
+    "0x28": {
+     "body_bytes": null,
+     "target": "0x64c7418"
+    },
+    "0x30": {
+     "body_bytes": 52,
+     "target": "0x5d01820"
+    },
+    "0x38": {
+     "body_bytes": 14,
+     "target": "0x5d01480",
+     "type_id_const": "df7fff8c81131a52be1aa75840aad88d"
+    },
+    "0x40": {
+     "body_bytes": 13,
+     "string_va": "0x94df88",
+     "target": "0x5d01440"
+    },
+    "0x48": {
+     "body_bytes": 52,
+     "target": "0x5d00f40"
+    },
+    "0x50": {
+     "body_bytes": 1,
+     "target": "0x5d01460"
+    }
+   },
+   "source_body": "0x5d01820",
+   "source_cause_same_body": false,
+   "vtable": "0x64c7438"
+  }
+ ],
+ "error_stack_vtable": {
+  "drop": "0x14c4e50",
+  "drop_body_bytes": 203,
+  "extent": "0x58",
+  "identity": "openssl::error::ErrorStack",
+  "identity_basis": "24-byte Vec Self; Debug body writes 'ErrorStack(' and Display body writes 'OpenSSL error' / ', '; source and cause are the shared 3-byte None body",
+  "self_align": 8,
+  "self_size": 24,
+  "slots": {
+   "0x18": {
+    "body_bytes": 293,
+    "target": "0x14cae70"
+   },
+   "0x20": {
+    "body_bytes": 258,
+    "target": "0x5bad270"
+   },
+   "0x28": {
+    "body_bytes": null,
+    "target": "0x63f8fb0"
+   },
+   "0x30": {
+    "body_bytes": 3,
+    "target": "0x14c5840"
+   },
+   "0x38": {
+    "body_bytes": 14,
+    "target": "0x14c5a30"
+   },
+   "0x40": {
+    "body_bytes": 13,
+    "target": "0x14c5750"
+   },
+   "0x48": {
+    "body_bytes": 3,
+    "target": "0x14c5840"
+   },
+   "0x50": {
+    "body_bytes": 1,
+    "target": "0x14c58a0"
+   }
+  },
+  "vtable": "0x63f8fd0"
+ },
+ "error_vtable_layout": [
+  {
+   "offset": "0x18",
+   "role": "Debug::fmt of the concrete type"
+  },
+  {
+   "offset": "0x20",
+   "role": "Display::fmt of the concrete type"
+  },
+  {
+   "offset": "0x28",
+   "role": "upcast cell: points at the Display-only sibling vtable at base-0x20"
+  },
+  {
+   "offset": "0x30",
+   "role": "Error::source - returns (data, vtable) pair or None"
+  },
+  {
+   "offset": "0x38",
+   "role": "hidden type_id slot - writes the concrete type's 16-byte TypeId constant through the out pointer"
+  },
+  {
+   "offset": "0x40",
+   "role": "deprecated Error::description - every parent uses the default body returning the deprecation string"
+  },
+  {
+   "offset": "0x48",
+   "role": "deprecated Error::cause - same body logic as source for these types"
+  },
+  {
+   "offset": "0x50",
+   "role": "Error::provide - default no-op (1-byte ret) for every parent here"
+  }
+ ],
+ "field_parents": [
+  {
+   "drop": "0x29f12b0",
+   "drop_body_bytes": 300,
+   "extent": "0x1d8",
+   "field_accessor": {
+    "body": "0x2a01800",
+    "body_bytes": 12,
+    "field_offset": "0x38",
+    "returns_vtable": "0x63f8f58",
+    "slot_offset": "0xf0"
+   },
+   "groups": 8,
+   "identity": "one concrete type implementing the shared Error-subtrait (see big_trait_layout); the trait's source name is not in the binary",
+   "self_align": 8,
+   "self_size": 64,
+   "slots": {
+    "0x18": {
+     "body_bytes": 6,
+     "target": "0x2a027b0"
+    },
+    "0x20": {
+     "body_bytes": 23,
+     "target": "0x2a027d0"
+    },
+    "0x28": {
+     "body_bytes": null,
+     "target": "0x6444b40"
+    },
+    "0x30": {
+     "body_bytes": 14,
+     "target": "0x2a027c0"
+    },
+    "0x38": {
+     "body_bytes": 14,
+     "target": "0x29f5ef0"
+    },
+    "0x40": {
+     "body_bytes": 13,
+     "target": "0x29f5d50"
+    },
+    "0x48": {
+     "body_bytes": 14,
+     "target": "0x29f5d70"
+    },
+    "0x50": {
+     "body_bytes": 1,
+     "target": "0x29f5dc0"
+    }
+   },
+   "vtable": "0x6444b60"
+  },
+  {
+   "drop": "0x4230e90",
+   "drop_body_bytes": 90,
+   "extent": "0x118",
+   "field_accessor": {
+    "body": "0x4302f80",
+    "body_bytes": 12,
+    "field_offset": "0x38",
+    "returns_vtable": "0x63f8f58",
+    "slot_offset": "0xf0"
+   },
+   "groups": 4,
+   "identity": "one concrete type implementing the shared Error-subtrait (see big_trait_layout); the trait's source name is not in the binary",
+   "self_align": 8,
+   "self_size": 80,
+   "slots": {
+    "0x18": {
+     "body_bytes": 6,
+     "target": "0x3f46e70"
+    },
+    "0x20": {
+     "body_bytes": 23,
+     "target": "0x3f46e90"
+    },
+    "0x28": {
+     "body_bytes": null,
+     "target": "0x64845a0"
+    },
+    "0x30": {
+     "body_bytes": 14,
+     "target": "0x3f46e80"
+    },
+    "0x38": {
+     "body_bytes": 14,
+     "target": "0x42345f0"
+    },
+    "0x40": {
+     "body_bytes": 13,
+     "target": "0x4234520"
+    },
+    "0x48": {
+     "body_bytes": 14,
+     "target": "0x3f46bc0"
+    },
+    "0x50": {
+     "body_bytes": 1,
+     "target": "0x42345d0"
+    }
+   },
+   "vtable": "0x64845c0"
+  },
+  {
+   "drop": "0x4746960",
+   "drop_body_bytes": 92,
+   "extent": "0xb8",
+   "field_accessor": {
+    "body": "0x4747120",
+    "body_bytes": 12,
+    "field_offset": "0x38",
+    "returns_vtable": "0x63f8f58",
+    "slot_offset": "0x90"
+   },
+   "groups": 2,
+   "identity": "one concrete type implementing the shared Error-subtrait (see big_trait_layout); the trait's source name is not in the binary",
+   "self_align": 8,
+   "self_size": 72,
+   "slots": {
+    "0x18": {
+     "body_bytes": 6,
+     "target": "0x474ab60"
+    },
+    "0x20": {
+     "body_bytes": 23,
+     "target": "0x474ab80"
+    },
+    "0x28": {
+     "body_bytes": null,
+     "target": "0x6494f60"
+    },
+    "0x30": {
+     "body_bytes": 14,
+     "target": "0x474ab70"
+    },
+    "0x38": {
+     "body_bytes": 14,
+     "target": "0x4746a30"
+    },
+    "0x40": {
+     "body_bytes": 13,
+     "target": "0x47469c0"
+    },
+    "0x48": {
+     "body_bytes": 14,
+     "target": "0x474a5e0"
+    },
+    "0x50": {
+     "body_bytes": 1,
+     "target": "0x4746a00"
+    }
+   },
+   "vtable": "0x6494f80"
+  },
+  {
+   "drop": "0x47752c0",
+   "drop_body_bytes": 16,
+   "extent": "0x118",
+   "field_accessor": {
+    "body": "0x4775a10",
+    "body_bytes": 12,
+    "field_offset": "0x38",
+    "returns_vtable": "0x63f8f58",
+    "slot_offset": "0xf0"
+   },
+   "groups": 4,
+   "identity": "one concrete type implementing the shared Error-subtrait (see big_trait_layout); the trait's source name is not in the binary",
+   "self_align": 8,
+   "self_size": 72,
+   "slots": {
+    "0x18": {
+     "body_bytes": 6,
+     "target": "0x477ab70"
+    },
+    "0x20": {
+     "body_bytes": 23,
+     "target": "0x477ab90"
+    },
+    "0x28": {
+     "body_bytes": null,
+     "target": "0x6496a60"
+    },
+    "0x30": {
+     "body_bytes": 14,
+     "target": "0x477ab80"
+    },
+    "0x38": {
+     "body_bytes": 14,
+     "target": "0x4775370"
+    },
+    "0x40": {
+     "body_bytes": 13,
+     "target": "0x47752e0"
+    },
+    "0x48": {
+     "body_bytes": 14,
+     "target": "0x477a8e0"
+    },
+    "0x50": {
+     "body_bytes": 1,
+     "target": "0x4775310"
+    }
+   },
+   "vtable": "0x6496a80"
+  },
+  {
+   "drop": "0x4e52200",
+   "drop_body_bytes": 16,
+   "extent": "0x1a8",
+   "field_accessor": {
+    "body": "0x4ecdca0",
+    "body_bytes": 12,
+    "field_offset": "0x38",
+    "returns_vtable": "0x63f8f58",
+    "slot_offset": "0xf0"
+   },
+   "groups": 7,
+   "identity": "one concrete type implementing the shared Error-subtrait (see big_trait_layout); the trait's source name is not in the binary",
+   "self_align": 8,
+   "self_size": 64,
+   "slots": {
+    "0x18": {
+     "body_bytes": 6,
+     "target": "0x4ece870"
+    },
+    "0x20": {
+     "body_bytes": 23,
+     "target": "0x4ececc0"
+    },
+    "0x28": {
+     "body_bytes": null,
+     "target": "0x649e3d0"
+    },
+    "0x30": {
+     "body_bytes": 14,
+     "target": "0x4ececb0"
+    },
+    "0x38": {
+     "body_bytes": 14,
+     "target": "0x4e624e0"
+    },
+    "0x40": {
+     "body_bytes": 13,
+     "target": "0x4e62420"
+    },
+    "0x48": {
+     "body_bytes": 14,
+     "target": "0x4e62460"
+    },
+    "0x50": {
+     "body_bytes": 1,
+     "target": "0x4e624c0"
+    }
+   },
+   "vtable": "0x649e3f0"
+  },
+  {
+   "drop": "0x14c5380",
+   "drop_body_bytes": 16,
+   "extent": "0x328",
+   "field_accessor": {
+    "body": "0x14cb640",
+    "body_bytes": 12,
+    "field_offset": "0x38",
+    "returns_vtable": "0x63f8f58",
+    "slot_offset": "0x270"
+   },
+   "groups": 15,
+   "identity": "one concrete type implementing the shared Error-subtrait (see big_trait_layout); the trait's source name is not in the binary",
+   "self_align": 8,
+   "self_size": 64,
+   "slots": {
+    "0x18": {
+     "body_bytes": 6,
+     "target": "0x14cd240"
+    },
+    "0x20": {
+     "body_bytes": 23,
+     "target": "0x14cd390"
+    },
+    "0x28": {
+     "body_bytes": null,
+     "target": "0x63fa120"
+    },
+    "0x30": {
+     "body_bytes": 14,
+     "target": "0x14cd380"
+    },
+    "0x38": {
+     "body_bytes": 14,
+     "target": "0x14c5970"
+    },
+    "0x40": {
+     "body_bytes": 13,
+     "target": "0x14c5760"
+    },
+    "0x48": {
+     "body_bytes": 14,
+     "target": "0x14c5780"
+    },
+    "0x50": {
+     "body_bytes": 1,
+     "target": "0x14c58d0"
+    }
+   },
+   "vtable": "0x63fa140"
+  }
+ ],
+ "packet": "research/work-items/RE-005-node115-accessor-parent-traits",
+ "store_bodies": [
+  {
+   "body": "0x15e12a0",
+   "body_bytes": 234,
+   "pattern": "saves (rdi, rsi) on the stack, allocates 8 bytes, then stores the (data, vtable) pair with one MOVAPS store; six of the seven sites' instruction streams also free a previous pair's contents through the shared dealloc slot",
+   "sites": [
+    "0x15e143f",
+    "0x15e15db"
+   ]
+  },
+  {
+   "body": "0x1741d30",
+   "body_bytes": 269,
+   "pattern": "saves (rdi, rsi) on the stack, allocates 8 bytes, then stores the (data, vtable) pair with one MOVAPS store; six of the seven sites' instruction streams also free a previous pair's contents through the shared dealloc slot",
+   "sites": [
+    "0x1741f47",
+    "0x174201b"
+   ]
+  },
+  {
+   "body": "0x2cca8d0",
+   "body_bytes": 269,
+   "pattern": "saves (rdi, rsi) on the stack, allocates 8 bytes, then stores the (data, vtable) pair with one MOVAPS store; six of the seven sites' instruction streams also free a previous pair's contents through the shared dealloc slot",
+   "sites": [
+    "0x2cca9a6",
+    "0x2ccaa71"
+   ]
+  },
+  {
+   "body": "0x2ccaaf0",
+   "body_bytes": 269,
+   "pattern": "saves (rdi, rsi) on the stack, allocates 8 bytes, then stores the (data, vtable) pair with one MOVAPS store; six of the seven sites' instruction streams also free a previous pair's contents through the shared dealloc slot",
+   "sites": [
+    "0x2ccaba3",
+    "0x2ccac83"
+   ]
+  },
+  {
+   "body": "0x2e73c80",
+   "body_bytes": 269,
+   "pattern": "saves (rdi, rsi) on the stack, allocates 8 bytes, then stores the (data, vtable) pair with one MOVAPS store; six of the seven sites' instruction streams also free a previous pair's contents through the shared dealloc slot",
+   "sites": [
+    "0x2e73d64",
+    "0x2e73e3b"
+   ]
+  },
+  {
+   "body": "0x2e7db50",
+   "body_bytes": 3229,
+   "pattern": "saves (rdi, rsi) on the stack, allocates 8 bytes, then stores the (data, vtable) pair with one MOVAPS store; six of the seven sites' instruction streams also free a previous pair's contents through the shared dealloc slot",
+   "sites": [
+    "0x2e7dc9e",
+    "0x2e7dd73"
+   ]
+  },
+  {
+   "body": "0x2e86150",
+   "body_bytes": 265,
+   "pattern": "saves (rdi, rsi) on the stack, allocates 8 bytes, then stores the (data, vtable) pair with one MOVAPS store; six of the seven sites' instruction streams also free a previous pair's contents through the shared dealloc slot",
+   "sites": [
+    "0x2e86177",
+    "0x2e86271"
+   ]
+  }
+ ],
+ "xref_evidence": [
+  {
+   "inside_body": "0x2e7db50",
+   "note": "the hyper-fork connect pair-store body also constructs this trait object",
+   "site": "0x2e7e54a",
+   "vtable": "0x6444b60"
+  },
+  {
+   "inside_body": "0x2e7db50",
+   "note": "second construction site in the same body",
+   "site": "0x2e7e6c2",
+   "vtable": "0x6444b60"
+  },
+  {
+   "inside_body": "0x2e86150",
+   "note": "the 0x2e86150 pair-store body also constructs this trait object",
+   "site": "0x2e861ec",
+   "vtable": "0x6444b60"
+  },
+  {
+   "inside_body": "0x3f8bba0",
+   "note": "sibling vtable (same delegation-shim prefix, 80-byte Self) constructed in a body whose panic Location is z_vendor/tokio-openssl/src/lib.rs:752",
+   "site": "0x3f8bd8e",
+   "vtable": "0x6444980"
+  }
+ ]
+}
