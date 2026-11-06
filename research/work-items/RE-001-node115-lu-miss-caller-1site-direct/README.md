@@ -180,7 +180,7 @@ The submitted comparison scanned private `hl-wt-calls*` directories. Those
 inputs were not committed, so its large prior-count result was not independently
 reproducible. The original observations remain in this packet and Git history.
 
-The reviewed checker instead authenticates the 1,210 public `records.json`
+The reviewed checker instead authenticates the 1,211 public `records.json`
 inputs listed in `RE-review-open-20261106/prior-source-manifest.json`, using
 `tools/node115_prior_corpus.py`. Every input path and SHA-256 is checked; a
 missing or changed input fails before the comparison. The frozen source commit

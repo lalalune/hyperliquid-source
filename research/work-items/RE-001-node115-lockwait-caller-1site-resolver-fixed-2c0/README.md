@@ -49,7 +49,7 @@ Not yet implemented/measured: no Rust reconstruction is attempted in this packet
 
 ## Review correction: public prior inputs
 
-This checker now uses the 1,210 hash-bound public records in
+This checker now uses the 1,211 hash-bound public records in
 `RE-review-open-20261106/prior-source-manifest.json`, with conservative local
 candidate overlays. Missing or changed reference inputs fail authentication;
 private worktree duplicate counts are historical reports, not acceptance or

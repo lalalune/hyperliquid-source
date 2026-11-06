@@ -11,8 +11,8 @@ from pathlib import Path
 import re
 
 MANIFEST = "research/work-items/RE-review-open-20261106/prior-source-manifest.json"
-MANIFEST_SHA256 = "c84253f3cc24dff04379393266168cd0c5d4ce504cb21ae00390ca483ee32fa3"
-RECORD_COUNT = 1210
+MANIFEST_SHA256 = "46cf6bd20d074b66c54a76ebeeea3a8d0b80446ff233b13c1a0aa86d3bcee674"
+RECORD_COUNT = 1211
 TARGET_SHA256 = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 MARKER = "PRIOR_CORPUS %s %d records verified" % (MANIFEST_SHA256, RECORD_COUNT)
 _cache = {}
