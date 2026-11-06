@@ -1,0 +1,20 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -96,13 +96,13 @@
+             match self.rows[0].key.cmp(query) {
+                 Ordering::Equal => return self.found(first_length),
+                 Ordering::Greater => (
+-                    0,
+-                    segment_search(&self.rows[self.head..self.head + first_length], query),
+-                ),
+-                Ordering::Less => (
+                     first_length,
+                     segment_search(&self.rows[..second_length], query),
+                 ),
++                Ordering::Less => (
++                    0,
++                    segment_search(&self.rows[self.head..self.head + first_length], query),
++                ),
+             }
+         };
+         match result {

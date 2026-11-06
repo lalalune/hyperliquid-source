@@ -1,0 +1,42 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -93,7 +93,7 @@
+                 segment_search(&self.rows[self.head..self.head + first_length], query),
+             )
+         } else {
+-            match self.rows[0].key.cmp(query) {
++            match search_key_cmp(&self.rows[0].key, query) {
+                 Ordering::Equal => return self.found(first_length),
+                 Ordering::Greater => (
+                     0,
+@@ -154,18 +154,28 @@
+ // in [base, base+width); halving shrinks that interval without losing the last
+ // index whose key is <= query (or index0 if none). Equality takes the midpoint,
+ // so the final candidate is the last equal within this segment, not the first.
++fn search_key_cmp(left: &[u8; 32], right: &[u8; 32]) -> Ordering {
++    for (lhs, rhs) in left.iter().zip(right.iter()) {
++        let order = (*lhs as i8).cmp(&(*rhs as i8));
++        if order != Ordering::Equal {
++            return order;
++        }
++    }
++    Ordering::Equal
++}
++
+ fn segment_search(rows: &[Row], query: &[u8; 32]) -> Result<usize, usize> {
+     let mut base = 0;
+     let mut width = rows.len();
+     while width > 1 {
+         let half = width / 2;
+         let midpoint = base + half;
+-        if rows[midpoint].key.cmp(query) != Ordering::Greater {
++        if search_key_cmp(&rows[midpoint].key, query) != Ordering::Greater {
+             base = midpoint;
+         }
+         width -= half;
+     }
+-    match rows[base].key.cmp(query) {
++    match search_key_cmp(&rows[base].key, query) {
+         Ordering::Equal => Ok(base),
+         Ordering::Less => Err(base + 1),
+         Ordering::Greater => Err(base),

@@ -1,0 +1,192 @@
+{
+  "status": "Literal source edits only; no compilation or Rust execution",
+  "baseline_sha256": "8da06fda6977268c7495b3387272aacbaa3eb35bb1ce72026ac317a8db4a4d9f",
+  "mutations": [
+    {
+      "id": "M01",
+      "fault": "uniform_last_equal_ignores_wrapped_seam",
+      "changes": [
+        {
+          "old": "                Ordering::Equal => return self.found(first_length),",
+          "new": "                Ordering::Equal => {\n                    let mut selected = first_length;\n                    for logical in first_length + 1..self.live_length {\n                        if self.rows[self.physical_index(logical)].key == *query {\n                            selected = logical;\n                        }\n                    }\n                    return self.found(selected);\n                }",
+          "count": 1
+        }
+      ],
+      "source": "M01/src/lib.rs",
+      "constructor_text_unchanged": true
+    },
+    {
+      "id": "M02",
+      "fault": "first_equal_in_ordinary_segment",
+      "changes": [
+        {
+          "old": "        Ordering::Equal => Ok(base),",
+          "new": "        Ordering::Equal => {\n            while base > 0 && rows[base - 1].key == *query {\n                base -= 1;\n            }\n            Ok(base)\n        }",
+          "count": 1
+        }
+      ],
+      "source": "M02/src/lib.rs",
+      "constructor_text_unchanged": true
+    },
+    {
+      "id": "M03",
+      "fault": "swap_strict_seam_segment_routes",
+      "changes": [
+        {
+          "old": "                Ordering::Greater => (\n                    0,\n                    segment_search(&self.rows[self.head..self.head + first_length], query),\n                ),\n                Ordering::Less => (\n                    first_length,\n                    segment_search(&self.rows[..second_length], query),\n                ),",
+          "new": "                Ordering::Greater => (\n                    first_length,\n                    segment_search(&self.rows[..second_length], query),\n                ),\n                Ordering::Less => (\n                    0,\n                    segment_search(&self.rows[self.head..self.head + first_length], query),\n                ),",
+          "count": 1
+        }
+      ],
+      "source": "M03/src/lib.rs",
+      "constructor_text_unchanged": true
+    },
+    {
+      "id": "M04",
+      "fault": "omit_second_segment_logical_offset",
+      "changes": [
+        {
+          "old": "                Ordering::Less => (\n                    first_length,\n                    segment_search(&self.rows[..second_length], query),\n                ),",
+          "new": "                Ordering::Less => (\n                    0,\n                    segment_search(&self.rows[..second_length], query),\n                ),",
+          "count": 1
+        }
+      ],
+      "source": "M04/src/lib.rs",
+      "constructor_text_unchanged": true
+    },
+    {
+      "id": "M05",
+      "fault": "ignore_head_in_physical_mapping",
+      "changes": [
+        {
+          "old": "        let physical_index = self.physical_index(logical_index);",
+          "new": "        let physical_index = logical_index;",
+          "count": 1
+        }
+      ],
+      "source": "M05/src/lib.rs",
+      "constructor_text_unchanged": true
+    },
+    {
+      "id": "M06",
+      "fault": "compare_only_31_key_bytes",
+      "changes": [
+        {
+          "old": ".key.cmp(query)",
+          "new": ".key[..31].cmp(&query[..31])",
+          "count": 3
+        }
+      ],
+      "source": "M06/src/lib.rs",
+      "constructor_text_unchanged": true
+    },
+    {
+      "id": "M07",
+      "fault": "signed_byte_order_in_search_only",
+      "changes": [
+        {
+          "old": "self.rows[0].key.cmp(query)",
+          "new": "search_key_cmp(&self.rows[0].key, query)",
+          "count": 1
+        },
+        {
+          "old": "rows[midpoint].key.cmp(query)",
+          "new": "search_key_cmp(&rows[midpoint].key, query)",
+          "count": 1
+        },
+        {
+          "old": "rows[base].key.cmp(query)",
+          "new": "search_key_cmp(&rows[base].key, query)",
+          "count": 1
+        },
+        {
+          "old": "fn segment_search(rows: &[Row], query: &[u8; 32]) -> Result<usize, usize> {",
+          "new": "fn search_key_cmp(left: &[u8; 32], right: &[u8; 32]) -> Ordering {\n    for (lhs, rhs) in left.iter().zip(right.iter()) {\n        let order = (*lhs as i8).cmp(&(*rhs as i8));\n        if order != Ordering::Equal {\n            return order;\n        }\n    }\n    Ordering::Equal\n}\n\nfn segment_search(rows: &[Row], query: &[u8; 32]) -> Result<usize, usize> {",
+          "count": 1
+        }
+      ],
+      "source": "M07/src/lib.rs",
+      "constructor_text_unchanged": true
+    },
+    {
+      "id": "M08",
+      "fault": "little_endian_u64_chunk_order_in_search_only",
+      "changes": [
+        {
+          "old": "self.rows[0].key.cmp(query)",
+          "new": "search_key_cmp(&self.rows[0].key, query)",
+          "count": 1
+        },
+        {
+          "old": "rows[midpoint].key.cmp(query)",
+          "new": "search_key_cmp(&rows[midpoint].key, query)",
+          "count": 1
+        },
+        {
+          "old": "rows[base].key.cmp(query)",
+          "new": "search_key_cmp(&rows[base].key, query)",
+          "count": 1
+        },
+        {
+          "old": "fn segment_search(rows: &[Row], query: &[u8; 32]) -> Result<usize, usize> {",
+          "new": "fn search_key_cmp(left: &[u8; 32], right: &[u8; 32]) -> Ordering {\n    for offset in (0..32).step_by(8) {\n        let lhs = u64::from_le_bytes([\n            left[offset], left[offset + 1], left[offset + 2], left[offset + 3],\n            left[offset + 4], left[offset + 5], left[offset + 6], left[offset + 7],\n        ]);\n        let rhs = u64::from_le_bytes([\n            right[offset], right[offset + 1], right[offset + 2], right[offset + 3],\n            right[offset + 4], right[offset + 5], right[offset + 6], right[offset + 7],\n        ]);\n        let order = lhs.cmp(&rhs);\n        if order != Ordering::Equal {\n            return order;\n        }\n    }\n    Ordering::Equal\n}\n\nfn segment_search(rows: &[Row], query: &[u8; 32]) -> Result<usize, usize> {",
+          "count": 1
+        }
+      ],
+      "source": "M08/src/lib.rs",
+      "constructor_text_unchanged": true
+    },
+    {
+      "id": "M09",
+      "fault": "absent_insertion_plus_one_clamped_to_live_length",
+      "changes": [
+        {
+          "old": "                insertion_index: offset + local,",
+          "new": "                insertion_index: (offset + local).saturating_add(1).min(self.live_length),",
+          "count": 1
+        }
+      ],
+      "source": "M09/src/lib.rs",
+      "constructor_text_unchanged": true
+    },
+    {
+      "id": "M10",
+      "fault": "return_successful_prefix_after_late_miss",
+      "changes": [
+        {
+          "old": "                SearchResult::Missing { .. } => return None,",
+          "new": "                SearchResult::Missing { .. } => return Some(values),",
+          "count": 1
+        }
+      ],
+      "source": "M10/src/lib.rs",
+      "constructor_text_unchanged": true
+    },
+    {
+      "id": "M11",
+      "fault": "append_only_previously_unseen_selected_values",
+      "changes": [
+        {
+          "old": "                SearchResult::Found { value, .. } => values.push(value),",
+          "new": "                SearchResult::Found { value, .. } => {\n                    if !values.contains(&value) {\n                        values.push(value);\n                    }\n                }",
+          "count": 1
+        }
+      ],
+      "source": "M11/src/lib.rs",
+      "constructor_text_unchanged": true
+    },
+    {
+      "id": "M12",
+      "fault": "sort_successful_materialized_values_numerically",
+      "changes": [
+        {
+          "old": "        Some(values)\n",
+          "new": "        values.sort_unstable();\n        Some(values)\n",
+          "count": 1
+        }
+      ],
+      "source": "M12/src/lib.rs",
+      "constructor_text_unchanged": true
+    }
+  ]
+}

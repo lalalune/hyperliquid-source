@@ -1,0 +1,16 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -166,7 +166,12 @@
+         width -= half;
+     }
+     match rows[base].key.cmp(query) {
+-        Ordering::Equal => Ok(base),
++        Ordering::Equal => {
++            while base > 0 && rows[base - 1].key == *query {
++                base -= 1;
++            }
++            Ok(base)
++        }
+         Ordering::Less => Err(base + 1),
+         Ordering::Greater => Err(base),
+     }

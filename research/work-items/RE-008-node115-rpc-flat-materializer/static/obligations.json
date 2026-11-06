@@ -1,0 +1,947 @@
+[
+  {
+    "id": "F01-length",
+    "va": "0x57f5eeb",
+    "bytes": "488b4718",
+    "kind": "instruction",
+    "meaning": "Live length is header+24",
+    "role": "flat",
+    "disassembly": "mov    rax,QWORD PTR [rdi+0x18]"
+  },
+  {
+    "id": "F02-empty",
+    "va": "0x57f5ef6",
+    "bytes": "7468",
+    "kind": "instruction",
+    "meaning": "Zero length branches before capacity/head/key access",
+    "role": "flat",
+    "disassembly": "je     57f5f60 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x5524d0>"
+  },
+  {
+    "id": "F03-capacity",
+    "va": "0x57f5ef8",
+    "bytes": "4c8b37",
+    "kind": "instruction",
+    "meaning": "Capacity is header+0",
+    "role": "flat",
+    "disassembly": "mov    r14,QWORD PTR [rdi]"
+  },
+  {
+    "id": "F04-head",
+    "va": "0x57f5efb",
+    "bytes": "488b6f10",
+    "kind": "instruction",
+    "meaning": "Head is header+16",
+    "role": "flat",
+    "disassembly": "mov    rbp,QWORD PTR [rdi+0x10]"
+  },
+  {
+    "id": "F05-one-wrap",
+    "va": "0x57f5f04",
+    "bytes": "490f43ce",
+    "kind": "instruction",
+    "meaning": "Unsigned >= selects one capacity subtraction",
+    "role": "flat",
+    "disassembly": "cmovae rcx,r14"
+  },
+  {
+    "id": "F06-first-length",
+    "va": "0x57f5f0b",
+    "bytes": "4929ee",
+    "kind": "instruction",
+    "meaning": "First physical span is capacity minus normalized head",
+    "role": "flat",
+    "disassembly": "sub    r14,rbp"
+  },
+  {
+    "id": "F07-unwrapped-equality",
+    "va": "0x57f5f14",
+    "bytes": "7651",
+    "kind": "instruction",
+    "meaning": "n<=first span includes equality in unwrapped route",
+    "role": "flat",
+    "disassembly": "jbe    57f5f67 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x5524c9>"
+  },
+  {
+    "id": "F08-backing",
+    "va": "0x57f5f16",
+    "bytes": "4c8b6708",
+    "kind": "instruction",
+    "meaning": "Wrapped comparator starts at backing pointer+0",
+    "role": "flat",
+    "disassembly": "mov    r12,QWORD PTR [rdi+0x8]"
+  },
+  {
+    "id": "F09-pivot-width",
+    "va": "0x57f5f1a",
+    "bytes": "ba20000000",
+    "kind": "instruction",
+    "meaning": "Seam comparator uses exactly32 bytes",
+    "role": "flat",
+    "disassembly": "mov    edx,0x20"
+  },
+  {
+    "id": "F10-seam-equality",
+    "va": "0x57f5f3a",
+    "bytes": "0f847a010000",
+    "kind": "instruction",
+    "meaning": "Boundary equality returns immediately",
+    "role": "flat",
+    "disassembly": "je     57f60ba <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x552376>"
+  },
+  {
+    "id": "F11-negative-code",
+    "va": "0x57f5f40",
+    "bytes": "3dff000000",
+    "kind": "instruction",
+    "meaning": "Normalized negative comparison is byte255",
+    "role": "flat",
+    "disassembly": "cmp    eax,0xff"
+  },
+  {
+    "id": "F12-segment-choice",
+    "va": "0x57f5f45",
+    "bytes": "0f85d3000000",
+    "kind": "instruction",
+    "meaning": "Nonnegative/nonzero pivot chooses first segment",
+    "role": "flat",
+    "disassembly": "jne    57f601e <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x552412>"
+  },
+  {
+    "id": "F13-second-singleton",
+    "va": "0x57f5f4b",
+    "bytes": "4983ff01",
+    "kind": "instruction",
+    "meaning": "Second segment singleton skips binary loop",
+    "role": "flat",
+    "disassembly": "cmp    r15,0x1"
+  },
+  {
+    "id": "F14-empty-count",
+    "va": "0x57f5f60",
+    "bytes": "4531f6",
+    "kind": "instruction",
+    "meaning": "Empty logical result index is zero",
+    "role": "flat",
+    "disassembly": "xor    r14d,r14d"
+  },
+  {
+    "id": "F15-row-factor-five",
+    "va": "0x57f5f6d",
+    "bytes": "4c8d24ad00000000",
+    "kind": "instruction",
+    "meaning": "Address starts with four-times head, then adds head",
+    "role": "flat",
+    "disassembly": "lea    r12,[rbp*4+0x0]"
+  },
+  {
+    "id": "F16-row-factor-eight",
+    "va": "0x57f5f78",
+    "bytes": "49c1e403",
+    "kind": "instruction",
+    "meaning": "Five-times index is multiplied by8 for40-byte stride",
+    "role": "flat",
+    "disassembly": "shl    r12,0x3"
+  },
+  {
+    "id": "F17-empty-tag",
+    "va": "0x57f5f83",
+    "bytes": "b801000000",
+    "kind": "instruction",
+    "meaning": "Empty result raw tag is1",
+    "role": "flat",
+    "disassembly": "mov    eax,0x1"
+  },
+  {
+    "id": "F18-first-singleton",
+    "va": "0x57f5f98",
+    "bytes": "7449",
+    "kind": "instruction",
+    "meaning": "Length1 goes directly to final comparator",
+    "role": "flat",
+    "disassembly": "je     57f5fe3 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x55244d>"
+  },
+  {
+    "id": "F19-first-half",
+    "va": "0x57f5fb6",
+    "bytes": "48d1eb",
+    "kind": "instruction",
+    "meaning": "First loop halves positive width",
+    "role": "flat",
+    "disassembly": "shr    rbx,1"
+  },
+  {
+    "id": "F20-first-width",
+    "va": "0x57f5fc5",
+    "bytes": "ba20000000",
+    "kind": "instruction",
+    "meaning": "First loop compares32 bytes",
+    "role": "flat",
+    "disassembly": "mov    edx,0x20"
+  },
+  {
+    "id": "F21-first-tie",
+    "va": "0x57f5fd6",
+    "bytes": "4d0f4fef",
+    "kind": "instruction",
+    "meaning": "Only strictly positive comparison restores old base; equality takes midpoint",
+    "role": "flat",
+    "disassembly": "cmovg  r13,r15"
+  },
+  {
+    "id": "F22-first-shrink",
+    "va": "0x57f5fda",
+    "bytes": "4929de",
+    "kind": "instruction",
+    "meaning": "Width reduces by floor(width/2)",
+    "role": "flat",
+    "disassembly": "sub    r14,rbx"
+  },
+  {
+    "id": "F23-first-stop",
+    "va": "0x57f5fe1",
+    "bytes": "77cd",
+    "kind": "instruction",
+    "meaning": "Loop repeats only while width>1",
+    "role": "flat",
+    "disassembly": "ja     57f5fb0 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x552480>"
+  },
+  {
+    "id": "F24-first-final-width",
+    "va": "0x57f5ff2",
+    "bytes": "ba20000000",
+    "kind": "instruction",
+    "meaning": "Final first-segment comparison excludes handle bytes",
+    "role": "flat",
+    "disassembly": "mov    edx,0x20"
+  },
+  {
+    "id": "F25-first-hit",
+    "va": "0x57f5fff",
+    "bytes": "7413",
+    "kind": "instruction",
+    "meaning": "Equality selects tag0 hit route",
+    "role": "flat",
+    "disassembly": "je     57f6014 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x55241c>"
+  },
+  {
+    "id": "F26-first-sign",
+    "va": "0x57f6001",
+    "bytes": "c1e81f",
+    "kind": "instruction",
+    "meaning": "Only sign bit31 adds insertion offset",
+    "role": "flat",
+    "disassembly": "shr    eax,0x1f"
+  },
+  {
+    "id": "F27-first-adjust",
+    "va": "0x57f6004",
+    "bytes": "4901c5",
+    "kind": "instruction",
+    "meaning": "Less-than final comparison increments insertion index",
+    "role": "flat",
+    "disassembly": "add    r13,rax"
+  },
+  {
+    "id": "F28-first-miss-tag",
+    "va": "0x57f600a",
+    "bytes": "b801000000",
+    "kind": "instruction",
+    "meaning": "First-segment miss raw tag1",
+    "role": "flat",
+    "disassembly": "mov    eax,0x1"
+  },
+  {
+    "id": "F29-first-hit-tag",
+    "va": "0x57f6014",
+    "bytes": "31c0",
+    "kind": "instruction",
+    "meaning": "First-segment hit clears EAX",
+    "role": "flat",
+    "disassembly": "xor    eax,eax"
+  },
+  {
+    "id": "F30-second-half",
+    "va": "0x57f6056",
+    "bytes": "49d1ed",
+    "kind": "instruction",
+    "meaning": "Second loop halves positive width",
+    "role": "flat",
+    "disassembly": "shr    r13,1"
+  },
+  {
+    "id": "F31-second-width",
+    "va": "0x57f6065",
+    "bytes": "ba20000000",
+    "kind": "instruction",
+    "meaning": "Second loop compares32 bytes",
+    "role": "flat",
+    "disassembly": "mov    edx,0x20"
+  },
+  {
+    "id": "F32-second-tie",
+    "va": "0x57f607a",
+    "bytes": "480f4feb",
+    "kind": "instruction",
+    "meaning": "Only strictly positive comparison restores old base",
+    "role": "flat",
+    "disassembly": "cmovg  rbp,rbx"
+  },
+  {
+    "id": "F33-second-shrink",
+    "va": "0x57f607e",
+    "bytes": "4d29ef",
+    "kind": "instruction",
+    "meaning": "Second width decreases by half",
+    "role": "flat",
+    "disassembly": "sub    r15,r13"
+  },
+  {
+    "id": "F34-second-stop",
+    "va": "0x57f6085",
+    "bytes": "77c9",
+    "kind": "instruction",
+    "meaning": "Second loop repeats only while width>1",
+    "role": "flat",
+    "disassembly": "ja     57f6050 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x5523e0>"
+  },
+  {
+    "id": "F35-second-final-width",
+    "va": "0x57f6096",
+    "bytes": "ba20000000",
+    "kind": "instruction",
+    "meaning": "Final second-segment comparison uses32 bytes",
+    "role": "flat",
+    "disassembly": "mov    edx,0x20"
+  },
+  {
+    "id": "F36-second-sign",
+    "va": "0x57f60a7",
+    "bytes": "c1e91f",
+    "kind": "instruction",
+    "meaning": "Second insertion adjustment uses sign bit31",
+    "role": "flat",
+    "disassembly": "shr    ecx,0x1f"
+  },
+  {
+    "id": "F37-second-tag",
+    "va": "0x57f60b4",
+    "bytes": "0f95c0",
+    "kind": "instruction",
+    "meaning": "Raw result tag is non-equality",
+    "role": "flat",
+    "disassembly": "setne  al"
+  },
+  {
+    "id": "F38-logical-offset",
+    "va": "0x57f60b7",
+    "bytes": "4901ee",
+    "kind": "instruction",
+    "meaning": "Second local index adds first span length",
+    "role": "flat",
+    "disassembly": "add    r14,rbp"
+  },
+  {
+    "id": "F39-index-return",
+    "va": "0x57f60ba",
+    "bytes": "4c89f2",
+    "kind": "instruction",
+    "meaning": "RDX receives final logical index",
+    "role": "flat",
+    "disassembly": "mov    rdx,r14"
+  },
+  {
+    "id": "M01-failure-init",
+    "va": "0x50f95fe",
+    "bytes": "c644240700",
+    "kind": "instruction",
+    "meaning": "Local failure byte initialized0",
+    "role": "materializer",
+    "disassembly": "mov    BYTE PTR [rsp+0x7],0x0"
+  },
+  {
+    "id": "M02-env-load",
+    "va": "0x50f9603",
+    "bytes": "488b4610",
+    "kind": "instruction",
+    "meaning": "Third input descriptor word is+16",
+    "role": "materializer",
+    "disassembly": "mov    rax,QWORD PTR [rsi+0x10]"
+  },
+  {
+    "id": "M03-env-store",
+    "va": "0x50f9607",
+    "bytes": "4889442430",
+    "kind": "instruction",
+    "meaning": "Third local descriptor word is+48",
+    "role": "materializer",
+    "disassembly": "mov    QWORD PTR [rsp+0x30],rax"
+  },
+  {
+    "id": "M04-iterator-copy",
+    "va": "0x50f960c",
+    "bytes": "0f1006",
+    "kind": "instruction",
+    "meaning": "First16 input descriptor bytes read from RSI",
+    "role": "materializer",
+    "disassembly": "movups xmm0,XMMWORD PTR [rsi]"
+  },
+  {
+    "id": "M05-iterator-local",
+    "va": "0x50f960f",
+    "bytes": "0f29442420",
+    "kind": "instruction",
+    "meaning": "First16 descriptor bytes copied to local+32",
+    "role": "materializer",
+    "disassembly": "movaps XMMWORD PTR [rsp+0x20],xmm0"
+  },
+  {
+    "id": "M06-failure-pointer",
+    "va": "0x50f9614",
+    "bytes": "488d442407",
+    "kind": "instruction",
+    "meaning": "Fourth descriptor word points at local failure byte+7",
+    "role": "materializer",
+    "disassembly": "lea    rax,[rsp+0x7]"
+  },
+  {
+    "id": "M07-pointer-store",
+    "va": "0x50f9619",
+    "bytes": "4889442438",
+    "kind": "instruction",
+    "meaning": "Failure pointer is stored at local descriptor+24",
+    "role": "materializer",
+    "disassembly": "mov    QWORD PTR [rsp+0x38],rax"
+  },
+  {
+    "id": "M08-collector-output",
+    "va": "0x50f961e",
+    "bytes": "488d7c2408",
+    "kind": "instruction",
+    "meaning": "Collector output is local24-byte header at rsp+8",
+    "role": "materializer",
+    "disassembly": "lea    rdi,[rsp+0x8]"
+  },
+  {
+    "id": "M09-collector-input",
+    "va": "0x50f9623",
+    "bytes": "488d742420",
+    "kind": "instruction",
+    "meaning": "Collector receives local descriptor at rsp+32",
+    "role": "materializer",
+    "disassembly": "lea    rsi,[rsp+0x20]"
+  },
+  {
+    "id": "M10-collector-call",
+    "va": "0x50f9628",
+    "bytes": "e88334aa00",
+    "kind": "instruction",
+    "meaning": "Direct collector target is5b9cab0",
+    "role": "materializer",
+    "disassembly": "call   5b9cab0 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x1ab980>"
+  },
+  {
+    "id": "M11-failure-test",
+    "va": "0x50f962d",
+    "bytes": "807c240700",
+    "kind": "instruction",
+    "meaning": "Any nonzero failure byte is failure",
+    "role": "materializer",
+    "disassembly": "cmp    BYTE PTR [rsp+0x7],0x0"
+  },
+  {
+    "id": "M12-success-branch",
+    "va": "0x50f9632",
+    "bytes": "745a",
+    "kind": "instruction",
+    "meaning": "Zero failure chooses full-header transfer",
+    "role": "materializer",
+    "disassembly": "je     50f968e <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xc4eda2>"
+  },
+  {
+    "id": "M13-marker",
+    "va": "0x50f9634",
+    "bytes": "48b80000000000000080",
+    "kind": "instruction",
+    "meaning": "Failure marker is exactly min-i64 bit pattern",
+    "role": "materializer",
+    "disassembly": "movabs rax,0x8000000000000000"
+  },
+  {
+    "id": "M14-marker-destination",
+    "va": "0x50f963e",
+    "bytes": "488903",
+    "kind": "instruction",
+    "meaning": "Only output first word is stored on failure",
+    "role": "materializer",
+    "disassembly": "mov    QWORD PTR [rbx],rax"
+  },
+  {
+    "id": "M15-prefix-length",
+    "va": "0x50f9641",
+    "bytes": "488b442418",
+    "kind": "instruction",
+    "meaning": "Cleanup iteration uses retained header length+16",
+    "role": "materializer",
+    "disassembly": "mov    rax,QWORD PTR [rsp+0x18]"
+  },
+  {
+    "id": "M16-empty-prefix",
+    "va": "0x50f9649",
+    "bytes": "7456",
+    "kind": "instruction",
+    "meaning": "Zero prefix length skips handle loop",
+    "role": "materializer",
+    "disassembly": "je     50f96a1 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xc4ed8f>"
+  },
+  {
+    "id": "M17-prefix-pointer",
+    "va": "0x50f964b",
+    "bytes": "4c8b742410",
+    "kind": "instruction",
+    "meaning": "Cleanup element pointer loads header pointer+8",
+    "role": "materializer",
+    "disassembly": "mov    r14,QWORD PTR [rsp+0x10]"
+  },
+  {
+    "id": "M18-counter-origin",
+    "va": "0x50f9650",
+    "bytes": "41bf01000000",
+    "kind": "instruction",
+    "meaning": "Counter starts1 before subtracting length",
+    "role": "materializer",
+    "disassembly": "mov    r15d,0x1"
+  },
+  {
+    "id": "M19-counter-difference",
+    "va": "0x50f9656",
+    "bytes": "4929c7",
+    "kind": "instruction",
+    "meaning": "Loop counter begins1-length",
+    "role": "materializer",
+    "disassembly": "sub    r15,rax"
+  },
+  {
+    "id": "M20-element-stride",
+    "va": "0x50f9670",
+    "bytes": "4983c608",
+    "kind": "instruction",
+    "meaning": "Next vector element is8 bytes later",
+    "role": "materializer",
+    "disassembly": "add    r14,0x8"
+  },
+  {
+    "id": "M21-counter-step",
+    "va": "0x50f9674",
+    "bytes": "49ffc7",
+    "kind": "instruction",
+    "meaning": "Counter increments toward1",
+    "role": "materializer",
+    "disassembly": "inc    r15"
+  },
+  {
+    "id": "M22-counter-end",
+    "va": "0x50f9677",
+    "bytes": "4983ff01",
+    "kind": "instruction",
+    "meaning": "Loop terminates at counter1",
+    "role": "materializer",
+    "disassembly": "cmp    r15,0x1"
+  },
+  {
+    "id": "M23-counter-branch",
+    "va": "0x50f967b",
+    "bytes": "7424",
+    "kind": "instruction",
+    "meaning": "Equality reaches capacity cleanup",
+    "role": "materializer",
+    "disassembly": "je     50f96a1 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xc4ed8f>"
+  },
+  {
+    "id": "M24-handle-load",
+    "va": "0x50f967d",
+    "bytes": "498b06",
+    "kind": "instruction",
+    "meaning": "Reference word address loaded through current element",
+    "role": "materializer",
+    "disassembly": "mov    rax,QWORD PTR [r14]"
+  },
+  {
+    "id": "M25-reference-decrement",
+    "va": "0x50f9680",
+    "bytes": "f048ff08",
+    "kind": "instruction",
+    "meaning": "Cleanup requests decrement referenced first word",
+    "role": "materializer",
+    "disassembly": "lock dec QWORD PTR [rax]"
+  },
+  {
+    "id": "M26-drop-condition",
+    "va": "0x50f9684",
+    "bytes": "75ea",
+    "kind": "instruction",
+    "meaning": "Nonzero decrement skips drop request",
+    "role": "materializer",
+    "disassembly": "jne    50f9670 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xc4edc0>"
+  },
+  {
+    "id": "M27-drop-argument",
+    "va": "0x50f9686",
+    "bytes": "4c89f7",
+    "kind": "instruction",
+    "meaning": "Drop helper gets element address, not loaded object pointer",
+    "role": "materializer",
+    "disassembly": "mov    rdi,r14"
+  },
+  {
+    "id": "M28-drop-call",
+    "va": "0x50f9689",
+    "bytes": "41ffd4",
+    "kind": "instruction",
+    "meaning": "Normal drop call uses R12 binding",
+    "role": "materializer",
+    "disassembly": "call   r12"
+  },
+  {
+    "id": "M29-length-transfer",
+    "va": "0x50f9693",
+    "bytes": "48894310",
+    "kind": "instruction",
+    "meaning": "Success transfers vector length to output+16",
+    "role": "materializer",
+    "disassembly": "mov    QWORD PTR [rbx+0x10],rax"
+  },
+  {
+    "id": "M30-header-source",
+    "va": "0x50f9697",
+    "bytes": "0f10442408",
+    "kind": "instruction",
+    "meaning": "Success transfers first two retained header words",
+    "role": "materializer",
+    "disassembly": "movups xmm0,XMMWORD PTR [rsp+0x8]"
+  },
+  {
+    "id": "M31-header-destination",
+    "va": "0x50f969c",
+    "bytes": "0f1103",
+    "kind": "instruction",
+    "meaning": "Success header begins at output base RBX",
+    "role": "materializer",
+    "disassembly": "movups XMMWORD PTR [rbx],xmm0"
+  },
+  {
+    "id": "M32-capacity-load",
+    "va": "0x50f96a1",
+    "bytes": "488b742408",
+    "kind": "instruction",
+    "meaning": "Release guard/size use capacity, not length",
+    "role": "materializer",
+    "disassembly": "mov    rsi,QWORD PTR [rsp+0x8]"
+  },
+  {
+    "id": "M33-capacity-guard",
+    "va": "0x50f96a9",
+    "bytes": "7411",
+    "kind": "instruction",
+    "meaning": "Zero capacity skips release request",
+    "role": "materializer",
+    "disassembly": "je     50f96bc <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xc4ed74>"
+  },
+  {
+    "id": "M34-release-pointer",
+    "va": "0x50f96ab",
+    "bytes": "488b7c2410",
+    "kind": "instruction",
+    "meaning": "Release first argument is vector allocation pointer",
+    "role": "materializer",
+    "disassembly": "mov    rdi,QWORD PTR [rsp+0x10]"
+  },
+  {
+    "id": "M35-release-size",
+    "va": "0x50f96b0",
+    "bytes": "48c1e603",
+    "kind": "instruction",
+    "meaning": "Release size request is capacity*8",
+    "role": "materializer",
+    "disassembly": "shl    rsi,0x3"
+  },
+  {
+    "id": "M36-release-third",
+    "va": "0x50f96b4",
+    "bytes": "31d2",
+    "kind": "instruction",
+    "meaning": "Release third argument zeroed",
+    "role": "materializer",
+    "disassembly": "xor    edx,edx"
+  },
+  {
+    "id": "M37-release-call",
+    "va": "0x50f96b6",
+    "bytes": "ff15e45d3e01",
+    "kind": "instruction",
+    "meaning": "Release call resolves slot64df4a0",
+    "role": "materializer",
+    "disassembly": "call   QWORD PTR [rip+0x13e5de4]        # 64df4a0 <__register_atfork@plt+0xed910>"
+  },
+  {
+    "id": "M38-return-output",
+    "va": "0x50f96bc",
+    "bytes": "4889d8",
+    "kind": "instruction",
+    "meaning": "Ordinary return is original output address",
+    "role": "materializer",
+    "disassembly": "mov    rax,rbx"
+  },
+  {
+    "id": "M39-unwind-drop-argument",
+    "va": "0x50f9712",
+    "bytes": "4c89f7",
+    "kind": "instruction",
+    "meaning": "Landing-pad drop also receives element address; effect excluded",
+    "role": "materializer",
+    "disassembly": "mov    rdi,r14"
+  },
+  {
+    "id": "C01-flat-base",
+    "va": "0x4fbbbce",
+    "bytes": "488d7d28",
+    "kind": "instruction",
+    "meaning": "Caller flat header startsL+0x28",
+    "role": "lookup",
+    "disassembly": "lea    rdi,[rbp+0x28]"
+  },
+  {
+    "id": "C02-query-forward",
+    "va": "0x4fbbbd2",
+    "bytes": "4c89e6",
+    "kind": "instruction",
+    "meaning": "Caller forwards R12 query in RSI",
+    "role": "lookup",
+    "disassembly": "mov    rsi,r12"
+  },
+  {
+    "id": "C03-search-call",
+    "va": "0x4fbbbd5",
+    "bytes": "e806a38300",
+    "kind": "instruction",
+    "meaning": "Caller directly invokes selected search",
+    "role": "lookup",
+    "disassembly": "call   57f5ee0 <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x552550>"
+  },
+  {
+    "id": "C04-result-bit",
+    "va": "0x4fbbbdd",
+    "bytes": "a801",
+    "kind": "instruction",
+    "meaning": "Caller tests tag bit0",
+    "role": "lookup",
+    "disassembly": "test   al,0x1"
+  },
+  {
+    "id": "C05-index-bound",
+    "va": "0x4fbbbe1",
+    "bytes": "483b5540",
+    "kind": "instruction",
+    "meaning": "Caller bounds index against length atL+0x40",
+    "role": "lookup",
+    "disassembly": "cmp    rdx,QWORD PTR [rbp+0x40]"
+  },
+  {
+    "id": "C06-index-equality",
+    "va": "0x4fbbbe5",
+    "bytes": "7335",
+    "kind": "instruction",
+    "meaning": "Index equal to length is rejected",
+    "role": "lookup",
+    "disassembly": "jae    4fbbc1c <_ZNKSt5ctypeIcE8do_widenEc@@Base-0xd8c814>"
+  },
+  {
+    "id": "C07-logical-head",
+    "va": "0x4fbbbe7",
+    "bytes": "48035538",
+    "kind": "instruction",
+    "meaning": "Physical selection adds head atL+0x38",
+    "role": "lookup",
+    "disassembly": "add    rdx,QWORD PTR [rbp+0x38]"
+  },
+  {
+    "id": "C08-wrap-equality",
+    "va": "0x4fbbbf0",
+    "bytes": "480f43c3",
+    "kind": "instruction",
+    "meaning": "Physical index >=capacity subtracts once",
+    "role": "lookup",
+    "disassembly": "cmovae rax,rbx"
+  },
+  {
+    "id": "C09-value-offset",
+    "va": "0x4fbbc07",
+    "bytes": "4983c720",
+    "kind": "instruction",
+    "meaning": "Stored handle is row+32",
+    "role": "lookup",
+    "disassembly": "add    r15,0x20"
+  },
+  {
+    "id": "C10-reference-increment",
+    "va": "0x4fbbc0e",
+    "bytes": "f049ff07",
+    "kind": "instruction",
+    "meaning": "Credited caller acquires selected reference",
+    "role": "lookup",
+    "disassembly": "lock inc QWORD PTR [r15]"
+  },
+  {
+    "id": "C11-first-zero",
+    "va": "0x5b9cb2f",
+    "bytes": "0f84fa000000",
+    "kind": "instruction",
+    "meaning": "First zero lookup stops; credited conditional collector",
+    "role": "collector",
+    "disassembly": "je     5b9cc2f <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x1ab801>"
+  },
+  {
+    "id": "C12-later-zero",
+    "va": "0x5b9cbfb",
+    "bytes": "7452",
+    "kind": "instruction",
+    "meaning": "Later zero lookup stops with prefix; credited collector",
+    "role": "collector",
+    "disassembly": "je     5b9cc4f <_ZNKSt5ctypeIcE8do_widenEc@@Base-0x1ab7e1>"
+  },
+  {
+    "id": "C13-later-failure-write",
+    "va": "0x5b9cc54",
+    "bytes": "c60001",
+    "kind": "instruction",
+    "meaning": "Later miss writes1 through failure pointer",
+    "role": "collector",
+    "disassembly": "mov    BYTE PTR [rax],0x1"
+  },
+  {
+    "id": "B00-call-binding",
+    "va": "0x57f5f22",
+    "bytes": "ff15289cce00",
+    "kind": "instruction",
+    "meaning": "Exact register/RIP-relative target binding",
+    "role": "flat",
+    "disassembly": "call   QWORD PTR [rip+0xce9c28]        # 64dfb50 <__register_atfork@plt+0xedfc0>"
+  },
+  {
+    "id": "B01-call-binding",
+    "va": "0x57f5fce",
+    "bytes": "ffd5",
+    "kind": "instruction",
+    "meaning": "Exact register/RIP-relative target binding",
+    "role": "flat",
+    "disassembly": "call   rbp"
+  },
+  {
+    "id": "B02-call-binding",
+    "va": "0x57f5ff7",
+    "bytes": "ff15539bce00",
+    "kind": "instruction",
+    "meaning": "Exact register/RIP-relative target binding",
+    "role": "flat",
+    "disassembly": "call   QWORD PTR [rip+0xce9b53]        # 64dfb50 <__register_atfork@plt+0xedfc0>"
+  },
+  {
+    "id": "B03-call-binding",
+    "va": "0x57f606e",
+    "bytes": "ff15dc9ace00",
+    "kind": "instruction",
+    "meaning": "Exact register/RIP-relative target binding",
+    "role": "flat",
+    "disassembly": "call   QWORD PTR [rip+0xce9adc]        # 64dfb50 <__register_atfork@plt+0xedfc0>"
+  },
+  {
+    "id": "B04-call-binding",
+    "va": "0x57f609b",
+    "bytes": "ff15af9ace00",
+    "kind": "instruction",
+    "meaning": "Exact register/RIP-relative target binding",
+    "role": "flat",
+    "disassembly": "call   QWORD PTR [rip+0xce9aaf]        # 64dfb50 <__register_atfork@plt+0xedfc0>"
+  },
+  {
+    "id": "B05-call-binding",
+    "va": "0x57f5f9a",
+    "bytes": "488b2daf9bce00",
+    "kind": "instruction",
+    "meaning": "Exact register/RIP-relative target binding",
+    "role": "flat",
+    "disassembly": "mov    rbp,QWORD PTR [rip+0xce9baf]        # 64dfb50 <__register_atfork@plt+0xedfc0>"
+  },
+  {
+    "id": "B06-call-binding",
+    "va": "0x50f9659",
+    "bytes": "4c8b2558b63e01",
+    "kind": "instruction",
+    "meaning": "Exact register/RIP-relative target binding",
+    "role": "materializer",
+    "disassembly": "mov    r12,QWORD PTR [rip+0x13eb658]        # 64e4cb8 <__register_atfork@plt+0xf3128>"
+  },
+  {
+    "id": "R-0x64dfb50",
+    "va": "0x163a28",
+    "bytes": "50fb4d0600000000060000000c0000000000000000000000",
+    "kind": "RELA",
+    "meaning": "Exact relocation type, symbol index and addend; RELATIVE symbol index must be0"
+  },
+  {
+    "id": "R-0x64e4cb8",
+    "va": "0x144c78",
+    "bytes": "b84c4e06000000000800000000000000c0e7a80500000000",
+    "kind": "RELA",
+    "meaning": "Exact relocation type, symbol index and addend; RELATIVE symbol index must be0"
+  },
+  {
+    "id": "R-0x64df4a0",
+    "va": "0x1349b8",
+    "bytes": "a0f44d0600000000080000000000000030de350600000000",
+    "kind": "RELA",
+    "meaning": "Exact relocation type, symbol index and addend; RELATIVE symbol index must be0"
+  },
+  {
+    "id": "R-0x64df4c0",
+    "va": "0x134a18",
+    "bytes": "c0f44d06000000000800000000000000ab0c680100000000",
+    "kind": "RELA",
+    "meaning": "Exact relocation type, symbol index and addend; RELATIVE symbol index must be0"
+  },
+  {
+    "id": "D-memcmp-symbol",
+    "va": "0x460",
+    "bytes": "980000001200000000000000000000000000000000000000",
+    "kind": "dynamic symbol",
+    "meaning": "Undefined dynamic memcmp identity; no loaded implementation is inferred"
+  },
+  {
+    "id": "D-memcmp-name",
+    "va": "0x3b88",
+    "bytes": "6d656d636d7000",
+    "kind": "dynamic symbol",
+    "meaning": "Undefined dynamic memcmp identity; no loaded implementation is inferred"
+  },
+  {
+    "id": "D-materializer-lsda-header-table",
+    "va": "0x38dd34",
+    "bytes": "ff9b1d01170096010000960106db01009c0186010000a20206aa0201",
+    "kind": "LSDA",
+    "meaning": "Exact LPStart/type/callsite encodings plus complete23-byte callsite table; actions not interpreted"
+  },
+  {
+    "id": "D-flat-FDE",
+    "va": "0xf96f30",
+    "bytes": "480000005c002f00a8ef8504ec01000000410e10420e18420e20420e28420e30410e38410e4083078c068d058e048f03860203d6010e38410e30420e28420e20420e18420e10410e08000000",
+    "kind": "FDE",
+    "meaning": "Exact full FDE including range, CIE pointer and augmentation"
+  },
+  {
+    "id": "D-materializer-FDE",
+    "va": "0x131d924",
+    "bytes": "3c00000024032e00c4bcdd033001000004ff0307ff420e10420e18420e20410e28440e7083058c048e038f0202c80e28410e20420e18420e10420e08410e7000",
+    "kind": "FDE",
+    "meaning": "Exact full FDE including range, CIE pointer and augmentation"
+  }
+]
