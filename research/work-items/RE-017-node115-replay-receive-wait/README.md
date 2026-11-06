@@ -1,0 +1,9 @@
+# RE-017 · Replay receive wait and retry
+
+Target Linux x86-64 Node #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301. This packet follows the internal wait continuation of receive helper 0x5ab6df0. It separates the local wait selector from the record result returned to the replay worker.
+
+In the selected TLS path the helper saves the bytes at offsets +0x44 and +0x45 from its thread-relative base and temporarily writes the pair 01 80. When the active budget flag is 1 and its remaining byte is zero, 0x5ab6f3e branches to a call through 0x64e0520, then sets the local continuation code to 2. A nonzero active budget is decremented before probing. There is a second way to select continuation 2 after both probes yield a low word of 2. In that route the selected object state can instead bypass the wait when byte +0x1b8 is 1 and word +0x1c0 is below 2.
+
+One selected continuation restores the saved TLS pair before testing the local code. A code of 2 reaches 0x5ab7120. TLS byte FS−0x410 equal to 1 uses the pointer at FS−0x418. Otherwise the lazy getter at 0x5cdf300 runs first, and its selected non-null return rejoins the same path. The call at 0x5ab7137 receives the stored pointer plus 16 and invokes the existing park helper 0x5cfdb90. After that call returns, the receive routine reloads the input pointer and jumps back to the loop at 0x5ab6eb0. The local code 2 on that path remains internal to the receiver.
+
+The TLS getter and parker implementation are treated as existing boundaries. This proof records the replay-specific entry gates and normal return edge. Scheduling, blocking duration and every TLS state are outside its scope. Run `python3 research/work-items/RE-017-node115-replay-receive-wait/verify.py` from the repository root to replay the authenticated extent and selected displacements and operands.
