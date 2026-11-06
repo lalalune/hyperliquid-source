@@ -1,0 +1,21 @@
+# Actual validation and scope
+
+The source base is `05bc2de303c05525b71e7e257426e741bc66a390`. All checks run on macOS ARM64 with Python 3.14.3 and installed GNU objdump 2.47.20260726, executable SHA256 `578b1692bcd1c600b79480cfd5072516420a4391f5177d9df5423f71a40c99aa`.
+
+Baseline `make doctor` and `make verify` passed; verification covered 558 packet manifests and 7,154 entries. `make reproduce` passed for node115 and the retained visor input. Baseline `make catalogue-check` failed with stale README output. That failure is preserved separately from later inventory regeneration.
+
+After staging the new packet, `make catalogue` and `make catalogue-check` passed. Generated README/SVG inventory changes from 559 to 561 work items: this contribution adds one packet, and regeneration incorporates the base's existing one-item count drift. Rust areas remain 34 and Cargo manifests remain 19; these are inventory counts, not completion percentages. Generated progress/component tables are unchanged.
+
+An interim `make verify` passed artifact signatures and all 32 imported files, then failed on this packet's stale `RUN-RECEIPTS.json` manifest digest. A reviewer had correctly caught that no EOF trimming was actually performed on the test log; the description and receipt index were amended while that verification sequence was still in progress. The original failure is retained. The packet manifest is resealed after these documentation/receipt edits, with subsequent verification recorded separately. The collector and focused test source did not change.
+
+The resealed full `make verify` passed at 2026-11-05 19:43:55 UTC: **559 manifests / 7,210 entries**, with zero dangling entries, all artifact signatures and 32 imported files verified, and all six submodule pins unchanged. Its three published receipt/stream files are then included in this packet's manifest. A final packet-only verification after that inclusion belongs to the PR validation record, avoiding a receipt that hashes itself.
+
+The parent reviewed the complete collector, metadata transcriber and focused test before executing the collector. A separate reviewer read the collector and tests without executing them. The independent native reviewer had already read all six full bodies and checked the conditional composition. These are separate reviews of one captured lineage, not independent runtime or organizational corroboration.
+
+The initial collector passed at 2026-11-05 19:34:18 UTC. Its 16 generated files were copied unchanged into the packet. The focused suite completed at 19:34:46 UTC: **13 tests passed in 9.495 seconds**, no skips. It includes a second authentic collection and exact replay comparison. Source hashes are in `SOURCE-HASHES.json`.
+
+The 54 named sites each receive first- and last-byte mutations below the outer target/body digest gates. Additional controls exercise FDE/CIE bytes and index links, RELATIVE symbol/type/addend and overlay checks, data and import pins, conflicting ELF mappings, altered instruction width and call target, incomplete/duplicate/resegmented exports, captured-tool refusal, and narrow replay provenance exceptions. The simulated decoder failure specifically returns exit 9 with partial stdout and stderr; both streams and exit code are retained before rejection. Timeout/OSError handling was read but not separately exercised. No instruction or tree evaluator is used.
+
+`RUN-RECEIPTS.json` indexes original and stored hashes for published command streams and review records. Only declared local path prefixes are replaced. The unittest stderr is byte-identical to the original; no EOF normalization was needed or performed. Internal stream hashes in projected command metadata refer to original private streams; the index gives the public copies' hashes. Native exports and their command stream hashes have no text normalization.
+
+No Rust component, captured node/visor execution, emulation, chain action, signing or live networking service was run. Full `make test` includes captured-instruction evaluators outside this static-only task and was not run. Hosted CI is not claimed; publication uses `[skip ci]`. All full-scope acceptance gates and byte-comparison registrations remain unchanged.
