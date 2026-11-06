@@ -49,6 +49,12 @@ The existing `branch-vectors.tsv` retains all fourteen selected boundary rows.
 The new verifier authenticates both complete FDE bodies and the raw wrapper/core
 decision windows before checking those rows.
 
+The table is not a complete predicate cross product. Prior rejection at length
+zero, duplicate at lengths 1-2 and duplicate at lengths 21-100 are inferred
+from the verified native branch order and exercised as synthetic boundary
+controls; they are not represented as captured target observations.
+The Python tests skip when the authenticated node115 binary is not materialized.
+
 ## Implementation and comparison
 
 Implementation: `src/node115-display-name-decision`.

@@ -23,6 +23,12 @@ predicate. The selected decision order is:
 6. duplicate predicate true: error tag `15`, result word `228`, no mutation;
 7. otherwise: success tag `14`, result word `418`, upsert.
 
+The selected native branch order establishes precedence, but the existing
+runtime-vector table is not a complete cross product. In particular,
+`length=0` with prior rejection, and duplicate predicates for lengths 1-2 or
+21-100, are inferred from the verified branch order and synthetic boundary
+controls. They are not claimed as captured target observations.
+
 The booleans are logical summaries of conditions observed by the native core.
 The contract does not reconstruct the JSON decoder, account keys, container
 scan, allocator, erased/upserted value ownership, actual mutation helper,

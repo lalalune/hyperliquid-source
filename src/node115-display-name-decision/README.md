@@ -11,6 +11,8 @@ serialize a response.
 
 See the evidence packet at
 [`research/work-items/RE-010-node115-display-name-decision`](../../research/work-items/RE-010-node115-display-name-decision/README.md).
+The Python evidence tests require the materialized node115 binary and skip
+otherwise. The Rust tests consume the committed branch-vector file directly.
 
 ```sh
 cargo test --offline --locked

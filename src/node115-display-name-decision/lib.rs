@@ -106,7 +106,6 @@ extern crate std;
 #[cfg(test)]
 mod tests {
     use super::{Mutation, Path, classify};
-    use std::string::String;
     use std::vec::Vec;
 
     fn path_name(path: Path) -> &'static str {
@@ -184,7 +183,6 @@ mod tests {
 
     #[test]
     fn duplicate_only_changes_the_admissible_length_range() {
-        let mut output = String::new();
         for length in 0..=101 {
             let duplicate = classify(length, true, false);
             let unique = classify(length, false, false);
@@ -194,10 +192,6 @@ mod tests {
             } else {
                 assert_eq!(duplicate, unique);
             }
-            if length % 16 == 0 {
-                output.push('.');
-            }
         }
-        assert_eq!(output.len(), 7);
     }
 }
