@@ -1,0 +1,11 @@
+--- src/lib.rs
++++ src/lib.rs
+@@ -130,7 +130,7 @@
+ fn spellings<'a>(name: Name<'_>, groups: &[Group<'a>]) -> Option<&'a [&'a [u8]]> {
+     groups
+         .iter()
+-        .find(|group| group.name == name)
++        .find(|group| fallback(group.name) == fallback(name))
+         .map(|group| group.values)
+ }
+ 

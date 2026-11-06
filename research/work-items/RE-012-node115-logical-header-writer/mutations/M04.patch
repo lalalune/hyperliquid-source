@@ -1,0 +1,13 @@
+--- src/lib.rs
++++ src/lib.rs
+@@ -136,8 +136,8 @@
+ 
+ fn chosen<'a>(name: Name<'a>, spelling: Option<&'a [&'a [u8]]>, index: usize) -> (&'a [u8], bool) {
+     match spelling.and_then(|values| values.get(index)) {
+-        Some(value) => (*value, false),
+-        None => (fallback(name), true),
++        Some(value) if !value.is_empty() => (*value, false),
++        _ => (fallback(name), true),
+     }
+ }
+ 

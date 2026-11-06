@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""Own-source qualification only. Fixed reviewed inputs; no captured input or evaluator."""
+from pathlib import Path
+import datetime, hashlib, json, re, subprocess, time
+B=Path(__file__).resolve().parents[1]
+A=B/'source-authoring'; G=B/'rust-transcription-02/generated'; Q=B/'source-review/qualified-v2'
+OUT=B/'rust-qualification-02'
+RUST=Path('<RUST-SYSROOT>/bin/rustc')
+SYS=RUST.parent.parent
+ENV={'PATH':'/usr/bin:/bin','LC_ALL':'C','LANG':'C','TZ':'UTC'}
+def sha(x): return hashlib.sha256(x).hexdigest()
+def write(p,x): p.write_text(json.dumps(x,indent=2)+'\n')
+def require(c,msg):
+ if not c: raise ValueError(msg)
+def pin(p,s): require(sha(p.read_bytes())==s,'pin '+str(p))
+IDS=[x['id'] for x in json.loads((G/'TRANSCRIPTION.json').read_text())['mapping']]
+def number(x): return bool(re.fullmatch(r'0|[1-9][0-9]*',x)) and len(x)<=20 and int(x)<2**64
+def parse(raw):
+ require(isinstance(raw,bytes) and raw.endswith(b'\n') and b'\r' not in raw and len(raw)<1000000,'framing')
+ text=raw.decode('ascii'); rows=text[:-1].split('\n');require(len(rows)==46,'row count'); parsed=[]
+ for ident,row in zip(IDS,rows):
+  f=row.split('\t');require(f[0]==ident,'ID order');require(len(f)>=2,'fields')
+  if f[1]=='O': require(len(f)==4 and number(f[2]),'success fields')
+  else:
+   require(len(f)==7 and f[1]=='E','error fields');kind,mp,idx,req=f[2:6]
+   if kind in ('UsedBounds','LengthOverflow'): require((mp,idx,req)==('-','-','-'),'unit error')
+   elif kind in ('GroupCount','Representation'): require(mp in ('P','S') and (idx,req)==('-','-'),'map error')
+   elif kind in ('InvalidOrdinal','EmptyValues','DuplicateName'): require(mp in ('P','S') and number(idx) and req=='-','indexed error')
+   elif kind=='Capacity': require(mp=='-' and idx=='-' and number(req),'capacity error')
+   else: raise ValueError('unknown error')
+  require(len(f[-1])<=8192 and len(f[-1])%2==0 and re.fullmatch('[0-9a-f]*',f[-1]) is not None,'buffer hex')
+  parsed.append(row)
+ return parsed
+def compare(expected,actual):
+ e=parse(expected);a=parse(actual);return [IDS[i] for i,(x,y) in enumerate(zip(e,a)) if x!=y]
+def calibration(expected):
+ require(compare(expected,expected)==[],'self compare');lines=expected.splitlines(keepends=True)
+ fields=lines[0].rstrip(b'\n').split(b'\t');fields[2]=b'1';changed=b'\t'.join(fields)+b'\n'+b''.join(lines[1:]);require(compare(expected,changed)==[IDS[0]],'valid difference')
+ bad={'missing_lf':expected[:-1],'cr':expected.replace(b'\n',b'\r\n',1),'blank':expected+b'\n','missing_row':b''.join(lines[:-1]),'extra_row':expected+lines[0],'duplicate':lines[0]+lines[0]+b''.join(lines[2:]),'order':lines[1]+lines[0]+b''.join(lines[2:]),'decimal':expected.replace(b'A01\tO\t0\t',b'A01\tO\t00\t',1),'hex':expected.replace(b'a5',b'A5',1),'error_context':expected.replace(b'UsedBounds\t-\t-\t-',b'UsedBounds\tP\t-\t-',1)}
+ for name,raw in bad.items():
+  try: compare(expected,raw)
+  except (ValueError,UnicodeDecodeError): continue
+  raise ValueError('calibration accepted '+name)
+ return {'valid_equal':True,'valid_value_difference':1,'rejected':list(bad)}
+COMMANDS=[]
+def run(name,args,cwd,timeout=60):
+ start=datetime.datetime.now(datetime.timezone.utc).isoformat();t=time.monotonic();kind='completed';rc=None
+ try:
+  p=subprocess.run([str(x) for x in args],cwd=cwd,env=ENV,input=b'',stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=timeout,check=False);out,err,rc=p.stdout,p.stderr,p.returncode
+ except subprocess.TimeoutExpired as e: kind='timeout';out=e.stdout or b'';err=e.stderr or b''
+ except OSError as e: kind='oserror';out=b'';err=str(e).encode()
+ (OUT/(name+'.stdout')).write_bytes(out);(OUT/(name+'.stderr')).write_bytes(err)
+ r={'name':name,'argv':[str(x) for x in args],'cwd':str(cwd),'env':ENV,'started':start,'ended':datetime.datetime.now(datetime.timezone.utc).isoformat(),'seconds':time.monotonic()-t,'timeout_seconds':timeout,'kind':kind,'exit':rc,'stdout':{'bytes':len(out),'sha256':sha(out)},'stderr':{'bytes':len(err),'sha256':sha(err)}}
+ write(OUT/(name+'.json'),r);COMMANDS.append(r);write(OUT/'COMMANDS.json',COMMANDS)
+ require(kind=='completed' and rc==0,'command '+name+' '+kind+' '+str(rc));require(not err,'stderr '+name)
+ return out
+
+def main():
+ pin(A/'crate/src/lib.rs','dd43cdf62744109e9214ab36d49c0d3cdd879297537bb966a0b5684c0d765217')
+ pin(A/'mutations/EXACT-EDITS.json','01607ae7dfbdf0ee8fa010a999355173407d0ddc1c599b24b058aa6052c023d1')
+ pin(Q/'frozen_cases.rs','c6a5c26c782741f789e6f3d712494871e0d0383f106fba264c73e58ea4ce0f08')
+ pin(Q/'input_probe.rs','dff59a6c105d8231890a97d0b5cfc4ec445146004436c0792b5c2916a7074122')
+ pin(G/'expected.tsv','ea66ce93b3991fcec16aa8a4f067f166f2b7ba3618eb2bdd68e53e7b8b45cf88')
+ require(IDS==['A01','A02','A03','A04','A05','A06','A07','A08','A09','N01','N02','N03','N04','N05','S01','S02','S03','S04','S05','S06','S07','T01','T02','T03','T04','T05','T06','V01','B01','B02','B03','R01','R02','R03','R04','R05','R06','R07','R08','R09','R10','R11','C01','C02','C03','C04'],'ids')
+ OUT.mkdir();empty=OUT/'empty-cwd';empty.mkdir();build=OUT/'build';build.mkdir();sources=OUT/'input-source';sources.mkdir()
+ # Child execution cwd is empty; expected TSV never passed to rustc/probes.
+ for name in ['frozen_cases.rs','input_probe.rs']: (sources/name).write_bytes((Q/name).read_bytes())
+ lib=sources/'lib.rs';lib.write_bytes((A/'crate/src/lib.rs').read_bytes());expected=(G/'expected.tsv').read_bytes();cal=calibration(expected);write(OUT/'COMPARATOR-CONTROLS.json',cal)
+ toolsha=sha(RUST.read_bytes());ver=run('compiler-identity',[RUST,'-vV'],empty).decode();require('rustc 1.95.0' in ver,'rust version')
+ common=[RUST,'--edition','2024','-D','warnings','--sysroot',SYS,'--remap-path-prefix',str(OUT)+'=/qualification']
+ results={'schema':1,'runner_sha256':sha(Path(__file__).read_bytes()),'source_sha256':sha(lib.read_bytes()),'test_sha256':sha((sources/'frozen_cases.rs').read_bytes()),'probe_sha256':sha((sources/'input_probe.rs').read_bytes()),'expected_sha256':sha(expected),'compiler_sha256':toolsha,'compiler_version':ver,'comparator':cal,'baseline':[],'mutants':[],'limits':'Own safe Rust on frozen literals only; no native target/evaluator execution or all-input equivalence. Nine native-value and three host-policy variants are separate.'}
+ for label,opt in [('debug','0'),('release','3')]:
+  rlib=build/('lib'+label+'.rlib');test=build/(label+'-tests');probe=build/(label+'-probe')
+  run(label+'-library',common+['--crate-name','node115_http_header_writer','--crate-type','rlib','-C','opt-level='+opt,lib,'-o',rlib],empty)
+  run(label+'-test-compile',common+['--test',sources/'frozen_cases.rs','--extern','node115_http_header_writer='+str(rlib),'-C','opt-level='+opt,'-o',test],empty)
+  testout=run(label+'-test',[test,'--test-threads=1','--color','never'],empty)
+  require(b'46 passed; 0 failed; 0 ignored;' in testout,'46 tests')
+  run(label+'-probe-compile',common+[sources/'input_probe.rs','--extern','node115_http_header_writer='+str(rlib),'-C','opt-level='+opt,'-o',probe],empty)
+  raw=run(label+'-probe',[probe],empty);require(compare(expected,raw)==[],'baseline mismatch')
+  results['baseline'].append({'mode':label,'tests_passed':46,'probe_rows':46,'exact':True,'probe_stdout_sha256':sha(raw)})
+ variants=json.loads((A/'mutations/EXACT-EDITS.json').read_text())['variants'];require(len(variants)==12,'mutants')
+ for variant in variants:
+  ident=variant['id'];require(re.fullmatch('M(?:0[1-9]|1[0-2])',ident) is not None,'mutation id')
+  s=lib.read_text()
+  for edit in variant['edits']:
+   require(s.count(edit['before'])==edit['count'],'mutation replacement count');s=s.replace(edit['before'],edit['after'])
+  require(sha(s.encode())==variant['mutated_lib_sha256'],'mutant hash');mlib=sources/(ident+'.rs');mlib.write_text(s)
+  rlib=build/('lib'+ident+'.rlib');probe=build/(ident+'-probe')
+  run(ident+'-library',common+['--crate-name','node115_http_header_writer','--crate-type','rlib','-C','opt-level=3',mlib,'-o',rlib],empty)
+  run(ident+'-probe-compile',common+[sources/'input_probe.rs','--extern','node115_http_header_writer='+str(rlib),'-C','opt-level=3','-o',probe],empty)
+  raw=run(ident+'-probe',[probe],empty);diff=compare(expected,raw);require(variant['witness'] in diff,'named mutant witness')
+  results['mutants'].append({'id':ident,'domain':variant['domain'],'source_sha256':sha(mlib.read_bytes()),'normal_exit':0,'rows':46,'mismatches':diff,'named_witness':variant['witness']})
+ for n in (1,2): run('linux-library-'+str(n),common+['--target','x86_64-unknown-linux-gnu','--crate-name','node115_http_header_writer','--crate-type','rlib','-C','opt-level=3',lib,'-o',build/('linux-'+str(n)+'.rlib')],empty)
+ one=(build/'linux-1.rlib').read_bytes();two=(build/'linux-2.rlib').read_bytes();require(one==two,'linux byte equality')
+ results['linux']={'compile_only':True,'builds':2,'identical':True,'bytes':len(one),'sha256':sha(one)}
+ require(sha(RUST.read_bytes())==toolsha,'compiler changed');require(not list(empty.iterdir()),'execution cwd changed')
+ results['commands']=len(COMMANDS);results['verdict']='PASS';write(OUT/'RESULTS.json',results);print(json.dumps(results,indent=2))
+if __name__=='__main__': main()

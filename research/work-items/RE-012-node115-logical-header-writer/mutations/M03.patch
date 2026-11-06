@@ -1,0 +1,13 @@
+--- src/lib.rs
++++ src/lib.rs
+@@ -134,8 +134,8 @@
+         .map(|group| group.values)
+ }
+ 
+-fn chosen<'a>(name: Name<'a>, spelling: Option<&'a [&'a [u8]]>, index: usize) -> (&'a [u8], bool) {
+-    match spelling.and_then(|values| values.get(index)) {
++fn chosen<'a>(name: Name<'a>, spelling: Option<&'a [&'a [u8]]>, _index: usize) -> (&'a [u8], bool) {
++    match spelling.and_then(|values| values.first()) {
+         Some(value) => (*value, false),
+         None => (fallback(name), true),
+     }

@@ -1,0 +1,1009 @@
+{
+  "schema": 1,
+  "authorship": "Literal manual expectations; no behavioral implementation or generator was run.",
+  "notation": {
+    "name": "{builtin: n} or {custom: ASCII bytes} or {custom_hex: lowercase hex bytes}",
+    "group": "[name, values] where values are ASCII strings or {hex: lowercase hex bytes}",
+    "defaults": {
+      "primary": [],
+      "spelling": [],
+      "capitalize": false,
+      "prefix": "",
+      "capacity": 64,
+      "fill_byte": 165
+    },
+    "buffer": "Initialize prefix then fill remaining capacity with0xa5. Explicit buffer overrides this. Explicit used overrides prefix length; otherwise a nonempty prefix implies used=its byte length.",
+    "success": "Exact expected used bytes, returned used count, prefix and unconsumed suffix unchanged. Input maps unchanged.",
+    "error": "Entire output and all inputs unchanged; no successful used result."
+  },
+  "cases": [
+    {
+      "id": "A01",
+      "capacity": 0,
+      "expected": "",
+      "used_result": 0,
+      "purpose": "Empty everything; zero-capacity success"
+    },
+    {
+      "id": "A02",
+      "prefix": "P|",
+      "expected": "P|",
+      "used_result": 2,
+      "purpose": "Empty primary retains used prefix and suffix"
+    },
+    {
+      "id": "A03",
+      "spelling": [
+        [
+          {
+            "custom": "unused"
+          },
+          [
+            "UNUSED"
+          ]
+        ]
+      ],
+      "expected": "",
+      "used_result": 0,
+      "purpose": "Valid unused spelling ignored after eager admission"
+    },
+    {
+      "id": "A04",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a"
+          ]
+        ]
+      ],
+      "expected": "x: a\r\n",
+      "used_result": 6
+    },
+    {
+      "id": "A05",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a"
+          ]
+        ]
+      ],
+      "prefix": "P|",
+      "expected": "P|x: a\r\n",
+      "used_result": 8,
+      "purpose": "Retain prefix and sentinel suffix"
+    },
+    {
+      "id": "A06",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            ""
+          ]
+        ]
+      ],
+      "expected": "x:\r\n",
+      "used_result": 4,
+      "purpose": "Empty value omits the space"
+    },
+    {
+      "id": "A07",
+      "primary": [
+        [
+          {
+            "custom": "z"
+          },
+          [
+            "1"
+          ]
+        ],
+        [
+          {
+            "custom": "a"
+          },
+          [
+            "2"
+          ]
+        ]
+      ],
+      "expected": "z: 1\r\na: 2\r\n",
+      "used_result": 12,
+      "purpose": "Primary order is not sorted"
+    },
+    {
+      "id": "A08",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a",
+            "",
+            "b"
+          ]
+        ]
+      ],
+      "expected": "x: a\r\nx:\r\nx: b\r\n",
+      "used_result": 16,
+      "purpose": "All occurrences including empty retained"
+    },
+    {
+      "id": "A09",
+      "primary": [
+        [
+          {
+            "custom": ""
+          },
+          [
+            ""
+          ]
+        ]
+      ],
+      "expected": ":\r\n",
+      "used_result": 3,
+      "purpose": "Empty custom name is allowed"
+    },
+    {
+      "id": "N01",
+      "primary": [
+        [
+          {
+            "builtin": 0
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "expected": "accept: v\r\n",
+      "used_result": 11,
+      "purpose": "Actual first ordinal"
+    },
+    {
+      "id": "N02",
+      "primary": [
+        [
+          {
+            "builtin": 80
+          },
+          [
+            ""
+          ]
+        ]
+      ],
+      "expected": "x-xss-protection:\r\n",
+      "used_result": 19,
+      "purpose": "Actual last ordinal"
+    },
+    {
+      "id": "N03",
+      "primary": [
+        [
+          {
+            "builtin": 1
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "capitalize": true,
+      "expected": "Accept-Charset: v\r\n",
+      "used_result": 19
+    },
+    {
+      "id": "N04",
+      "primary": [
+        [
+          {
+            "builtin": 0
+          },
+          [
+            "b"
+          ]
+        ],
+        [
+          {
+            "custom": "accept"
+          },
+          [
+            "c"
+          ]
+        ]
+      ],
+      "spelling": [
+        [
+          {
+            "custom": "accept"
+          },
+          [
+            "CUSTOM"
+          ]
+        ]
+      ],
+      "expected": "accept: b\r\nCUSTOM: c\r\n",
+      "used_result": 22,
+      "purpose": "Builtin/custom equality is tagged, not rendered-byte equality"
+    },
+    {
+      "id": "N05",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "1"
+          ]
+        ],
+        [
+          {
+            "custom": "X"
+          },
+          [
+            "2"
+          ]
+        ]
+      ],
+      "expected": "x: 1\r\nX: 2\r\n",
+      "used_result": 12,
+      "purpose": "Case-distinct names coexist"
+    },
+    {
+      "id": "S01",
+      "primary": [
+        [
+          {
+            "custom": "x-test"
+          },
+          [
+            "a",
+            "",
+            "b"
+          ]
+        ]
+      ],
+      "spelling": [
+        [
+          {
+            "custom": "x-test"
+          },
+          [
+            "x-CuStOm"
+          ]
+        ]
+      ],
+      "capitalize": true,
+      "prefix": "P",
+      "expected": "Px-CuStOm: a\r\nX-Test:\r\nX-Test: b\r\n",
+      "used_result": 34,
+      "purpose": "Short spelling sequence falls back per occurrence"
+    },
+    {
+      "id": "S02",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a",
+            "b",
+            "c"
+          ]
+        ]
+      ],
+      "spelling": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "A",
+            "B",
+            "C"
+          ]
+        ]
+      ],
+      "expected": "A: a\r\nB: b\r\nC: c\r\n",
+      "used_result": 18,
+      "purpose": "Equal-length pairing"
+    },
+    {
+      "id": "S03",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a"
+          ]
+        ]
+      ],
+      "spelling": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "A",
+            "B"
+          ]
+        ]
+      ],
+      "expected": "A: a\r\n",
+      "used_result": 6,
+      "purpose": "Excess spellings ignored"
+    },
+    {
+      "id": "S04",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a",
+            "b"
+          ]
+        ]
+      ],
+      "spelling": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "",
+            "Y"
+          ]
+        ]
+      ],
+      "expected": ": a\r\nY: b\r\n",
+      "used_result": 11,
+      "purpose": "Empty spelling is present, not fallback"
+    },
+    {
+      "id": "S05",
+      "primary": [
+        [
+          {
+            "custom": "x-test"
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "spelling": [
+        [
+          {
+            "custom": "X-Test"
+          },
+          [
+            "other"
+          ]
+        ]
+      ],
+      "capitalize": true,
+      "expected": "X-Test: v\r\n",
+      "used_result": 11,
+      "purpose": "Exact lookup occurs before title-case rendering"
+    },
+    {
+      "id": "S06",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a"
+          ]
+        ]
+      ],
+      "spelling": [
+        [
+          {
+            "custom": "z"
+          },
+          [
+            "ignored"
+          ]
+        ]
+      ],
+      "expected": "x: a\r\n",
+      "used_result": 6,
+      "purpose": "Absent matching key"
+    },
+    {
+      "id": "S07",
+      "primary": [
+        [
+          {
+            "custom": "z"
+          },
+          [
+            "1"
+          ]
+        ],
+        [
+          {
+            "custom": "a"
+          },
+          [
+            "2"
+          ]
+        ]
+      ],
+      "spelling": [
+        [
+          {
+            "custom": "a"
+          },
+          [
+            "AA"
+          ]
+        ],
+        [
+          {
+            "custom": "z"
+          },
+          [
+            "ZZ"
+          ]
+        ]
+      ],
+      "expected": "ZZ: 1\r\nAA: 2\r\n",
+      "used_result": 14,
+      "purpose": "Real lookup, secondary array order does not control output"
+    },
+    {
+      "id": "T01",
+      "primary": [
+        [
+          {
+            "custom": "-x--y-"
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "capitalize": true,
+      "expected": "-X--Y-: v\r\n",
+      "used_result": 11,
+      "purpose": "Leading, repeated and trailing hyphens"
+    },
+    {
+      "id": "T02",
+      "primary": [
+        [
+          {
+            "custom": "x-tEsT"
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "capitalize": true,
+      "expected": "X-TEsT: v\r\n",
+      "used_result": 11,
+      "purpose": "No lowercasing of other positions"
+    },
+    {
+      "id": "T03",
+      "primary": [
+        [
+          {
+            "custom_hex": "e9612d62"
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "capitalize": true,
+      "expected_hex": "e9612d423a20760d0a",
+      "used_result": 9,
+      "purpose": "Non-ASCII byte unchanged; a after it unchanged; b after hyphen uppercased"
+    },
+    {
+      "id": "T04",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "spelling": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "x-cUsToM"
+          ]
+        ]
+      ],
+      "capitalize": true,
+      "expected": "x-cUsToM: v\r\n",
+      "used_result": 13,
+      "purpose": "Supplied spelling verbatim"
+    },
+    {
+      "id": "T05",
+      "primary": [
+        [
+          {
+            "custom": "x-test"
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "expected": "x-test: v\r\n",
+      "used_result": 11,
+      "purpose": "Capitalization false"
+    },
+    {
+      "id": "T06",
+      "primary": [
+        [
+          {
+            "custom": ""
+          },
+          [
+            "a"
+          ]
+        ]
+      ],
+      "capitalize": true,
+      "expected": ": a\r\n",
+      "used_result": 5,
+      "purpose": "Empty fallback under capitalization"
+    },
+    {
+      "id": "V01",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            {
+              "hex": "000d0aff"
+            }
+          ]
+        ]
+      ],
+      "expected_hex": "783a20000d0aff0d0a",
+      "used_result": 9,
+      "purpose": "Values are uninterpreted bytes, not HTTP validation"
+    },
+    {
+      "id": "B01",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a"
+          ]
+        ]
+      ],
+      "capacity": 6,
+      "expected": "x: a\r\n",
+      "used_result": 6,
+      "purpose": "Exact capacity succeeds"
+    },
+    {
+      "id": "B02",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a"
+          ]
+        ]
+      ],
+      "capacity": 5,
+      "error": {
+        "kind": "Capacity",
+        "required": 6
+      },
+      "purpose": "One byte short leaves whole buffer unchanged"
+    },
+    {
+      "id": "B03",
+      "primary": [
+        [
+          {
+            "builtin": 81
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "buffer": "pq",
+      "capacity": 2,
+      "used": 3,
+      "error": {
+        "kind": "UsedBounds"
+      },
+      "purpose": "UsedBounds precedes invalid ordinal"
+    },
+    {
+      "id": "R01",
+      "primary": [
+        [
+          {
+            "builtin": 81
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "error": {
+        "kind": "InvalidOrdinal",
+        "map": "Primary",
+        "index": 0
+      }
+    },
+    {
+      "id": "R02",
+      "spelling": [
+        [
+          {
+            "builtin": 255
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "error": {
+        "kind": "InvalidOrdinal",
+        "map": "Spelling",
+        "index": 0
+      },
+      "purpose": "Eager unused-map validation on empty primary"
+    },
+    {
+      "id": "R03",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          []
+        ]
+      ],
+      "error": {
+        "kind": "EmptyValues",
+        "map": "Primary",
+        "index": 0
+      }
+    },
+    {
+      "id": "R04",
+      "spelling": [
+        [
+          {
+            "custom": "x"
+          },
+          []
+        ]
+      ],
+      "error": {
+        "kind": "EmptyValues",
+        "map": "Spelling",
+        "index": 0
+      }
+    },
+    {
+      "id": "R05",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a"
+          ]
+        ],
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "b"
+          ]
+        ]
+      ],
+      "error": {
+        "kind": "DuplicateName",
+        "map": "Primary",
+        "index": 1
+      }
+    },
+    {
+      "id": "R06",
+      "spelling": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a"
+          ]
+        ],
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "b"
+          ]
+        ]
+      ],
+      "error": {
+        "kind": "DuplicateName",
+        "map": "Spelling",
+        "index": 1
+      }
+    },
+    {
+      "id": "R07",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          []
+        ]
+      ],
+      "spelling": [
+        [
+          {
+            "builtin": 255
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "error": {
+        "kind": "InvalidOrdinal",
+        "map": "Spelling",
+        "index": 0
+      },
+      "purpose": "All ordinals before any empty-group refusal"
+    },
+    {
+      "id": "R08",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a"
+          ]
+        ],
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "b"
+          ]
+        ]
+      ],
+      "spelling": [
+        [
+          {
+            "custom": "y"
+          },
+          []
+        ]
+      ],
+      "error": {
+        "kind": "EmptyValues",
+        "map": "Spelling",
+        "index": 0
+      },
+      "purpose": "All nonempty-group checks precede any duplicate check"
+    },
+    {
+      "id": "R09",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "a"
+          ]
+        ],
+        [
+          {
+            "custom": "x"
+          },
+          [
+            "b"
+          ]
+        ]
+      ],
+      "capacity": 0,
+      "error": {
+        "kind": "DuplicateName",
+        "map": "Primary",
+        "index": 1
+      },
+      "purpose": "Duplicate refusal precedes capacity"
+    },
+    {
+      "id": "R10",
+      "primary": [
+        [
+          {
+            "custom": "x"
+          },
+          []
+        ],
+        [
+          {
+            "builtin": 81
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "error": {
+        "kind": "InvalidOrdinal",
+        "map": "Primary",
+        "index": 1
+      },
+      "purpose": "Global pass order, not per-group mixture"
+    },
+    {
+      "id": "R11",
+      "primary": [
+        [
+          {
+            "builtin": 81
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "spelling": [
+        [
+          {
+            "builtin": 255
+          },
+          [
+            "v"
+          ]
+        ]
+      ],
+      "error": {
+        "kind": "InvalidOrdinal",
+        "map": "Primary",
+        "index": 0
+      },
+      "purpose": "Primary before spelling within ordinal pass"
+    }
+  ],
+  "count_boundary_plans": [
+    {
+      "id": "C01",
+      "primary_repeat": {
+        "count": 65536,
+        "group": [
+          {
+            "builtin": 0
+          },
+          [
+            "v"
+          ]
+        ]
+      },
+      "error": {
+        "kind": "GroupCount",
+        "map": "Primary"
+      },
+      "note": "Realizable repeated borrowed Group array; count checked before duplicate"
+    },
+    {
+      "id": "C02",
+      "primary_repeat": {
+        "count": 65535,
+        "group": [
+          {
+            "builtin": 0
+          },
+          [
+            "v"
+          ]
+        ]
+      },
+      "error": {
+        "kind": "DuplicateName",
+        "map": "Primary",
+        "index": 1
+      },
+      "note": "Count boundary admitted; duplicates rejected promptly"
+    },
+    {
+      "id": "C03",
+      "spelling_repeat": {
+        "count": 65536,
+        "group": [
+          {
+            "builtin": 0
+          },
+          [
+            "v"
+          ]
+        ]
+      },
+      "error": {
+        "kind": "GroupCount",
+        "map": "Spelling"
+      },
+      "note": "Empty primary does not bypass spelling count"
+    },
+    {
+      "id": "C04",
+      "primary_repeat": {
+        "count": 65536,
+        "group": [
+          {
+            "builtin": 81
+          },
+          []
+        ]
+      },
+      "spelling": [
+        [
+          {
+            "builtin": 255
+          },
+          []
+        ]
+      ],
+      "error": {
+        "kind": "GroupCount",
+        "map": "Primary"
+      },
+      "note": "Count pass before ordinal and nonempty passes"
+    }
+  ],
+  "nonmaterialized_width_cases": "See OVERFLOW-OBLIGATIONS.md; no huge fabricated slices, runtime results or expected-data generation claimed."
+}
