@@ -1,0 +1,5 @@
+Expectations sealed before new Rust authorship.
+
+Base05bc2de303c05525b71e7e257426e741bc66a390; src/node115-quantity-change does not exist. Whole node115 SHA checked before/after. Original freeze104.227sPASS:3403distinct point inputs,348selected bytes/103starts allvisited,16actual COWinstruction controls,61sealed smoke cases. R632/N1385/L864/AddDiagnostic69/AbsoluteDiagnostic276/SubDiagnostic177. Both entry modes and an independently fresh postlookup point are observations from one function family, not composed helper traces. Raw ordered stores and snapshots are included. Actual RET/RSP or stop BEFORE every opaque lookup/notification/diagnostic call; no supplied result/return.
+
+Existing complete mapping in merged2204 is credited, with no new static-byte credit. Full404byte owner and actual FDE/CIE are bound. All component gates false. New Rust/source-built/ABI/whole-hook claims do not exist at this seal. Output filename is descriptive change-hook.gnu.txt; bytes and expected observations are unchanged.

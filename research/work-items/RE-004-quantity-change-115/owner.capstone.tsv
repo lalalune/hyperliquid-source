@@ -1,0 +1,115 @@
+4206f70	55	push	rbp
+4206f71	4157	push	r15
+4206f73	4156	push	r14
+4206f75	4155	push	r13
+4206f77	4154	push	r12
+4206f79	53	push	rbx
+4206f7a	4883ec48	sub	rsp, 0x48
+4206f7e	4d89cf	mov	r15, r9
+4206f81	4889d3	mov	rbx, rdx
+4206f84	4989f4	mov	r12, rsi
+4206f87	4989fe	mov	r14, rdi
+4206f8a	4885f6	test	rsi, rsi
+4206f8d	0f94c0	sete	al
+4206f90	4885d2	test	rdx, rdx
+4206f93	0f95c2	setne	dl
+4206f96	84d0	test	al, dl
+4206f98	7524	jne	0x4206fbe
+4206f9a	4885db	test	rbx, rbx
+4206f9d	0f94c2	sete	dl
+4206fa0	4d85e4	test	r12, r12
+4206fa3	400f95c6	setne	sil
+4206fa7	488b01	mov	rax, qword ptr [rcx]
+4206faa	4885c0	test	rax, rax
+4206fad	400f95c7	setne	dil
+4206fb1	4020f7	and	dil, sil
+4206fb4	4084d7	test	dil, dl
+4206fb7	7419	je	0x4206fd2
+4206fb9	48ffc8	dec	rax
+4206fbc	eb11	jmp	0x4206fcf
+4206fbe	488b11	mov	rdx, qword ptr [rcx]
+4206fc1	48ffc2	inc	rdx
+4206fc4	48c7c0ffffffff	mov	rax, 0xffffffffffffffff
+4206fcb	480f45c2	cmovne	rax, rdx
+4206fcf	488901	mov	qword ptr [rcx], rax
+4206fd2	4d85c0	test	r8, r8
+4206fd5	745a	je	0x4207031
+4206fd7	4c8d6c2410	lea	r13, [rsp + 0x10]
+4206fdc	4c89ef	mov	rdi, r13
+4206fdf	4c89c6	mov	rsi, r8
+4206fe2	4c89f2	mov	rdx, r14
+4206fe5	e8a63facff	call	0x3ccaf90
+4206fea	4c89ef	mov	rdi, r13
+4206fed	e8beedd0ff	call	0x3f15db0
+4206ff2	4c89e1	mov	rcx, r12
+4206ff5	48f7d9	neg	rcx
+4206ff8	490f48cc	cmovs	rcx, r12
+4206ffc	4885c9	test	rcx, rcx
+4206fff	0f88da000000	js	0x42070df
+4207005	488b28	mov	rbp, qword ptr [rax]
+4207008	4989ed	mov	r13, rbp
+420700b	4929cd	sub	r13, rcx
+420700e	7065	jo	0x4207075
+4207010	4c8928	mov	qword ptr [rax], r13
+4207013	4889d9	mov	rcx, rbx
+4207016	48f7d9	neg	rcx
+4207019	480f48cb	cmovs	rcx, rbx
+420701d	4885c9	test	rcx, rcx
+4207020	0f88b9000000	js	0x42070df
+4207026	4c89ea	mov	rdx, r13
+4207029	4801ca	add	rdx, rcx
+420702c	707e	jo	0x42070ac
+420702e	488910	mov	qword ptr [rax], rdx
+4207031	498b7f18	mov	rdi, qword ptr [r15 + 0x18]
+4207035	4885ff	test	rdi, rdi
+4207038	0f95c0	setne	al
+420703b	4c39e3	cmp	rbx, r12
+420703e	0f95c1	setne	cl
+4207041	84c1	test	cl, al
+4207043	7421	je	0x4207066
+4207045	418b4710	mov	eax, dword ptr [r15 + 0x10]
+4207049	89442420	mov	dword ptr [rsp + 0x20], eax
+420704d	410f1007	movups	xmm0, xmmword ptr [r15]
+4207051	0f29442410	movaps	xmmword ptr [rsp + 0x10], xmm0
+4207056	488d742410	lea	rsi, [rsp + 0x10]
+420705b	4c89f2	mov	rdx, r14
+420705e	4889d9	mov	rcx, rbx
+4207061	e89ac42700	call	0x4483500
+4207066	4883c448	add	rsp, 0x48
+420706a	5b	pop	rbx
+420706b	415c	pop	r12
+420706d	415d	pop	r13
+420706f	415e	pop	r14
+4207071	415f	pop	r15
+4207073	5d	pop	rbp
+4207074	c3	ret
+4207075	0f99c2	setns	dl
+4207078	0fb6d2	movzx	edx, dl
+420707b	48bfffffffffffffff7f	movabs	rdi, 0x7fffffffffffffff
+4207085	4801d7	add	rdi, rdx
+4207088	4829cd	sub	rbp, rcx
+420708b	488d35deb62702	lea	rsi, [rip + 0x227b6de]
+4207092	480f40ef	cmovo	rbp, rdi
+4207096	31ff	xor	edi, edi
+4207098	4989c5	mov	r13, rax
+420709b	ff1507de2d02	call	qword ptr [rip + 0x22dde07]
+42070a1	4c89e8	mov	rax, r13
+42070a4	4989ed	mov	r13, rbp
+42070a7	e964ffffff	jmp	0x4207010
+42070ac	48c1fa3f	sar	rdx, 0x3f
+42070b0	48bf0000000000000080	movabs	rdi, 0x8000000000000000
+42070ba	4831d7	xor	rdi, rdx
+42070bd	4901cd	add	r13, rcx
+42070c0	488d3571cd2702	lea	rsi, [rip + 0x227cd71]
+42070c7	4c0f40ef	cmovo	r13, rdi
+42070cb	31ff	xor	edi, edi
+42070cd	4889c5	mov	rbp, rax
+42070d0	ff15d2dd2d02	call	qword ptr [rip + 0x22dddd2]
+42070d6	4c896d00	mov	qword ptr [rbp], r13
+42070da	e952ffffff	jmp	0x4207031
+42070df	488d3d14255cfc	lea	rdi, [rip - 0x3a3daec]
+42070e6	488d0d33d02702	lea	rcx, [rip + 0x227d033]
+42070ed	4c8d0564b62702	lea	r8, [rip + 0x227b664]
+42070f4	488d54240f	lea	rdx, [rsp + 0xf]
+42070f9	be2b000000	mov	esi, 0x2b
+42070fe	ff159c852d02	call	qword ptr [rip + 0x22d859c]
