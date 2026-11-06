@@ -1,0 +1,217 @@
+{
+ "answer": "thread::scope is not instantiated in this artifact.  Four censuses, each of which any instantiation would disturb, are closed: the scope-exit panic string \"a scoped thread panicked\" occurs nowhere in the artifact; exactly one panic Location names scoped.rs (line 60 col 9, the overflow panic), with none for the scope-exit panic or for Scope::spawn's expect; the overflow stub 0x5c82d40 is called from exactly the 14 known spawn bodies and has no indirect entry; and the standalone ScopeData::decrement body 0x5c82d00 is entered only as the stub's rollback.  ScopeData is therefore never constructed in the binary: the surviving scope machinery is the overflow stub, the decrement body, and the counter ledger inlined in the spawn bodies and payload drops, all of it reachable only with the null context every spawn call site passes.",
+ "artifact": {
+  "bytes": 105896032,
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "snapshot": "<authenticated-node115>"
+ },
+ "boundaries": {
+  "cell_internals": "The packet cells' layouts, the spawn bodies' ledger and the 16 null call sites are PR #3204's pins and are used here as premises, not re-derived; this packet pins only the instantiation question that packet left open.",
+  "inlined_spawn": "A hypothetical Scope::spawn monomorphisation with its own inlined increment is covered, not assumed away: its overflow path must either call the shared stub (census 3: no caller outside the 14 spawn bodies) or panic through its own reference to the scoped.rs Location (census 4: the stub's lea is the only code reference to 0x64c32f0 in the artifact).",
+  "source_names": "Function and field names (thread::scope, ScopeData, decrement_num_running_threads) are the std source names for the mechanisms the artifact itself names through the scoped.rs path string and panic message; the binary carries no symbol for them.",
+  "static_census": "This is a static census over the artifact's bytes, relocations and code references; it does not execute the binary.  A thread::scope body could evade it only if the compiler had deleted the scope-exit panic together with its string and Location while keeping the body -- the panic sits on a data-dependent flag store performed by another thread's unwind path, so it cannot be constant-folded, and every other panic in the artifact retains its string and Location (1,209 std .rs Locations are recovered by the same scan that finds one for scoped.rs)."
+ },
+ "captured_code_executed": false,
+ "data_pointer_census": {
+  "decrement": {
+   "literal_occurrences_outside_rela_dyn": [],
+   "relocation_addend_slots": [
+    "0x64ec708"
+   ],
+   "target": "0x5c82d00"
+  },
+  "location": {
+   "literal_occurrences_outside_rela_dyn": [],
+   "relocation_addend_slots": [],
+   "target": "0x64c32f0"
+  },
+  "stub": {
+   "literal_occurrences_outside_rela_dyn": [],
+   "relocation_addend_slots": [],
+   "target": "0x5c82d40"
+  }
+ },
+ "limits": "Static trace only; no captured code was executed.  The censuses cover the artifact's file bytes, its .rela.dyn relocations and rip-relative / direct-branch references in .text; a reference encoded in some other form (for example a computed jump through a register loaded from a non-relocated constant) would have to materialise the target address as data somewhere, and census 3 covers that form for the stub.",
+ "location_census": {
+  "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/scoped.rs",
+  "file_va": "0x445160",
+  "records": [
+   {
+    "col": 9,
+    "len": 80,
+    "line": 60,
+    "record": "0x64c32f0"
+   }
+  ],
+  "relocations_scanned": 60723,
+  "std_rs_locations_recovered": 1209
+ },
+ "owners": {
+  "scope_decrement": {
+   "bytes": 59,
+   "end": "0x5c82d3b",
+   "offset": 97000704,
+   "sha256": "c0e94d3d28434c43010bfb30b7db80e3ebe8d8151133fe5a875795ec6a4d68c5",
+   "start": "0x5c82d00"
+  },
+  "scope_overflow_stub": {
+   "bytes": 37,
+   "end": "0x5c82d65",
+   "offset": 97000768,
+   "sha256": "8e56d981e4d3963755c766b4afc64f7601e92faa51e0d3be992cc5df698ba8cc",
+   "start": "0x5c82d40"
+  }
+ },
+ "packet": "RE-005-node115-scope-instantiation",
+ "pins": {
+  "decrement_futex_jmp": {
+   "bytes": "ff257dd98500",
+   "va": "0x5c82d35"
+  },
+  "decrement_lock_decq": {
+   "bytes": "f048ff4f08",
+   "va": "0x5c82d08"
+  },
+  "decrement_store_flag": {
+   "bytes": "c6471001",
+   "va": "0x5c82d04"
+  },
+  "decrement_test_flag_arg": {
+   "bytes": "85f6",
+   "va": "0x5c82d00"
+  },
+  "decrement_xchg_parker": {
+   "bytes": "874628",
+   "va": "0x5c82d17"
+  },
+  "stub_lea_location": {
+   "bytes": "488d1596058400",
+   "va": "0x5c82d53"
+  },
+  "stub_lea_message": {
+   "bytes": "488d3d6c65ccfa",
+   "va": "0x5c82d4c"
+  },
+  "stub_panic_call": {
+   "bytes": "ff1553c98500",
+   "va": "0x5c82d5f"
+  },
+  "stub_rollback_call": {
+   "bytes": "ff15bc998600",
+   "va": "0x5c82d46"
+  }
+ },
+ "question": "The packet-cell-context packet (PR #3204) pinned the packet cells' context pointer as std's ScopeData and showed every call site of every spawn monomorphisation passing a null context, but left open whether std::thread::scope itself is instantiated anywhere in the binary: a Scope::spawn that built its packet without going through those spawn bodies would have evaded the call-site census.  Is thread::scope instantiated in node 115, and if not, what scope machinery survives?",
+ "reference_census": {
+  "decrement_direct_callers": [],
+  "decrement_relocation_slots": [
+   "0x64ec708"
+  ],
+  "decrement_slot_call_site": "0x5c82d46",
+  "location_code_refs": [
+   "0x5c82d53"
+  ],
+  "message_code_refs": [
+   "0x5c82d4c"
+  ]
+ },
+ "slots": {
+  "futex_syscall": {
+   "slot": "0x64e06b8",
+   "target": null,
+   "type": 6
+  },
+  "panic_entry": {
+   "slot": "0x64df6b8",
+   "target": "0x1680e80",
+   "type": 8
+  },
+  "scope_decrement": {
+   "slot": "0x64ec708",
+   "target": "0x5c82d00",
+   "type": 8
+  }
+ },
+ "string_census": {
+  "exit_panic_string": {
+   "occurrences": [],
+   "text": "a scoped thread panicked"
+  },
+  "overflow_message": {
+   "len": 40,
+   "text": "too many running threads in thread scope",
+   "va": "0x9492bf"
+  },
+  "scoped_substring": {
+   "occurrences": [
+    {
+     "containing": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/scoped.rs",
+     "va": "0x4451a7"
+    }
+   ]
+  }
+ },
+ "stub_xref_census": {
+  "count": 14,
+  "sites": [
+   {
+    "owner": "0x15b6d10",
+    "site": "0x15b7267"
+   },
+   {
+    "owner": "0x15b73c0",
+    "site": "0x15b78ff"
+   },
+   {
+    "owner": "0x15b7a80",
+    "site": "0x15b7f88"
+   },
+   {
+    "owner": "0x15b80e0",
+    "site": "0x15b8665"
+   },
+   {
+    "owner": "0x2d46820",
+    "site": "0x2d46dad"
+   },
+   {
+    "owner": "0x2d46f90",
+    "site": "0x2d47549"
+   },
+   {
+    "owner": "0x2d47710",
+    "site": "0x2d47c5e"
+   },
+   {
+    "owner": "0x5613a70",
+    "site": "0x5614029"
+   },
+   {
+    "owner": "0x56141f0",
+    "site": "0x561477d"
+   },
+   {
+    "owner": "0x5614960",
+    "site": "0x5614f05"
+   },
+   {
+    "owner": "0x56150d0",
+    "site": "0x561565d"
+   },
+   {
+    "owner": "0x5bc2c90",
+    "site": "0x5bc31ce"
+   },
+   {
+    "owner": "0x5cd9470",
+    "site": "0x5cd99a2"
+   },
+   {
+    "owner": "0x5cf6e80",
+    "site": "0x5cf73d7"
+   }
+  ],
+  "target": "0x5c82d40"
+ }
+}
