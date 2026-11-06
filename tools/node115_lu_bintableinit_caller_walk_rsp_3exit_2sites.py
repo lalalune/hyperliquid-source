@@ -26,6 +26,13 @@ PASS = []
 FAIL = []
 
 
+# The missing private-worktree corpus is replaced by the pinned public snapshot.
+import os as _prior_os
+import sys as _prior_sys
+_prior_sys.path.insert(0, _prior_os.path.dirname(__file__))
+import node115_prior_corpus as prior_corpus
+
+
 def check(name, cond, detail=""):
     (PASS if cond else FAIL).append(name)
     print(("PASS " if cond else "FAIL ") + name + ((" :: " + str(detail)) if detail and not cond else ""))
@@ -379,8 +386,7 @@ def collect(obj):
 
 
 import glob
-for path in glob.glob(os.path.join(ROOT, "..", "hl-wt-calls*", "research", "work-items",
-                                   "*", "records.json")):
+for path in prior_corpus.paths(ROOT, os.path.join('*', 'records.json')):
     try:
         collect(json.load(open(path)))
     except Exception:
@@ -410,7 +416,7 @@ for os_, oe in own_ranges:
             overlaps.append(((os_, oe), (a, b)))
 check("disjointness skipped", skipped == 0, skipped)
 check("disjointness NONE", not overlaps, overlaps[:3])
-check("disjointness priors scanned", len(priors) > 40000, len(priors))
+check("disjointness priors scanned", prior_corpus.is_verified(ROOT), len(priors))
 print("INFO priors=%d skipped=%d overlaps=%d" % (len(priors), skipped, len(overlaps)))
 
 # ---------------------------------------------------------------- slug

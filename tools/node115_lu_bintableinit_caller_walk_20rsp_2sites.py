@@ -28,6 +28,13 @@ MISS_SITES = ["63cdd20", "63cddba"]
 passes, fails = [], []
 
 
+# The missing private-worktree corpus is replaced by the pinned public snapshot.
+import os as _prior_os
+import sys as _prior_sys
+_prior_sys.path.insert(0, _prior_os.path.dirname(__file__))
+import node115_prior_corpus as prior_corpus
+
+
 def check(name, ok, detail=""):
     (passes if ok else fails).append(name)
     print(("PASS " if ok else "FAIL ") + name + ("" if ok else " :: " + str(detail)))
@@ -382,8 +389,7 @@ def collect(obj):
             collect(v)
 
 
-for path in glob.glob(os.path.join(ROOT, "..", "hl-wt-calls*", "research",
-                                   "work-items", "*", "records.json")):
+for path in prior_corpus.paths(ROOT, os.path.join('*', 'records.json')):
     try:
         collect(json.load(open(path)))
     except Exception:
@@ -417,8 +423,7 @@ try:
         slug_ok = False
 except Exception:
     pass
-for d in glob.glob(os.path.join(ROOT, "..", "hl-wt-calls*", "research",
-                                "work-items", SLUG)):
+for d in prior_corpus.paths(ROOT, SLUG):
     if SLUG in d and "calls292" not in d:
         slug_ok = False
 check("slug unique", slug_ok)

@@ -28,6 +28,13 @@ FAIL = 0
 FAILURES = []
 
 
+# The missing private-worktree corpus is replaced by the pinned public snapshot.
+import os as _prior_os
+import sys as _prior_sys
+_prior_sys.path.insert(0, _prior_os.path.dirname(__file__))
+import node115_prior_corpus as prior_corpus
+
+
 def check(name, cond, detail=""):
     global PASS, FAIL
     if cond:
@@ -474,9 +481,7 @@ def main():
 
     priors = []
     skipped = []
-    for d in glob.glob(os.path.join(ROOT, "..", "hl-wt-calls*",
-                                    "research", "work-items", "*",
-                                    "records.json")):
+    for d in prior_corpus.paths(ROOT, os.path.join('*', 'records.json')):
         try:
             collect(json.load(open(d)), priors, skipped, (W_START, W_END))
         except Exception:
@@ -523,9 +528,7 @@ def main():
     if SLUG in git_out.split():
         slug_hit = True
     check("slug not in committed tree", not slug_hit)
-    for d in glob.glob(os.path.join(ROOT, "..", "hl-wt-calls*",
-                                    "research", "work-items", SLUG,
-                                    "records.json")):
+    for d in prior_corpus.paths(ROOT, os.path.join(SLUG, 'records.json')):
         try:
             r2 = json.load(open(d))
             same = False

@@ -30,6 +30,13 @@ FAIL = 0
 FAILURES = []
 
 
+# The missing private-worktree corpus is replaced by the pinned public snapshot.
+import os as _prior_os
+import sys as _prior_sys
+_prior_sys.path.insert(0, _prior_os.path.dirname(__file__))
+import node115_prior_corpus as prior_corpus
+
+
 def check(label, ok, detail=""):
     global PASS, FAIL
     if ok:
@@ -440,9 +447,7 @@ def main():
     check("0 skipped records", len(skipped) == 0, str(skipped[:3]))
     priors = []
     pskipped = []
-    for d in glob.glob(os.path.join(ROOT, "..", "hl-wt-calls*",
-                                    "research", "work-items", "*",
-                                    "records.json")):
+    for d in prior_corpus.paths(ROOT, os.path.join('*', 'records.json')):
         dnorm = os.path.normpath(d)
         if os.path.normpath(PACKET) in dnorm or SLUG in dnorm:
             continue
@@ -473,8 +478,7 @@ def main():
     except Exception:
         pass
     if not slug_hit:
-        for d in glob.glob(os.path.join(ROOT, "..", "hl-wt-calls*",
-                                        "research", "work-items", SLUG)):
+        for d in prior_corpus.paths(ROOT, SLUG):
             dnorm = os.path.normpath(d)
             if os.path.normpath(PACKET) in dnorm:
                 continue

@@ -4,6 +4,8 @@
 Tamper controls first: each tamper must make the temp-copy verifier fail;
 the clean temp copy passes; a byte-exact revert passes again.
 """
+
+import tempfile as _prior_tempfile
 import hashlib
 import json
 import os
@@ -20,13 +22,23 @@ PACKET = os.path.join(ROOT, "research", "work-items", SLUG)
 BIN = os.path.join(ROOT, "artifacts", "node", "115", "hl-node")
 VERIFIER = os.path.join(ROOT, "tools",
                         "node115_lockwait_caller_1site_lookup.py")
-SCRATCH = os.path.expanduser("~/workspace/scratch-hl338")
+SCRATCH = os.path.join(_prior_tempfile.gettempdir(), 'node115-review-scratch-hl338')
 CACHE = os.path.join(SCRATCH, "priors_cache.json")
-TMPBASE = os.path.expanduser("~/workspace")
+TMPBASE = _prior_tempfile.gettempdir()
 
 PASS = 0
 FAIL = 0
 FAILURES = []
+
+
+# Temporary mutation roots use the same authenticated public reference input.
+import os as _prior_os
+import sys as _prior_sys
+_NODE115_PRIOR_ROOT = _prior_os.path.dirname(_prior_os.path.dirname(_prior_os.path.abspath(__file__)))
+_prior_os.environ["NODE115_PRIOR_ROOT"] = _NODE115_PRIOR_ROOT
+_prior_os.environ["PYTHONPATH"] = _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools") + _prior_os.pathsep + _prior_os.environ.get("PYTHONPATH", "")
+_prior_sys.path.insert(0, _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools"))
+import node115_prior_corpus as prior_corpus
 
 
 def check(name, ok, detail=""):

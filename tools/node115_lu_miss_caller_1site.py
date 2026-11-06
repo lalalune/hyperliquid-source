@@ -40,6 +40,13 @@ FAIL = 0
 FAILURES = []
 
 
+# The missing private-worktree corpus is replaced by the pinned public snapshot.
+import os as _prior_os
+import sys as _prior_sys
+_prior_sys.path.insert(0, _prior_os.path.dirname(__file__))
+import node115_prior_corpus as prior_corpus
+
+
 def check(label, ok, detail=""):
     global PASS, FAIL
     if ok:
@@ -672,9 +679,7 @@ def main():
     # always collects fresh; the cache never changes the verdict, only
     # the wall time. The tests set it and additionally assert the priors
     # count, so an empty/corrupt cache cannot pass vacuously.
-    cand = sorted(glob.glob(os.path.join(ROOT, "..", "hl-wt-calls*",
-                                         "research", "work-items", "*",
-                                         "records.json")))
+    cand = sorted(prior_corpus.paths(ROOT, os.path.join('*', 'records.json')))
     cand = [os.path.normpath(d) for d in cand
             if SLUG not in os.path.normpath(d)
             and os.path.normpath(PACKET) not in os.path.normpath(d)]
@@ -711,7 +716,7 @@ def main():
                                "pskipped": pskipped}, f)
             except Exception:
                 pass
-    check("priors >= 50000", len(priors) >= 50000, str(len(priors)))
+    check("pinned public prior corpus", prior_corpus.is_verified(ROOT), str(len(priors)))
     mine_set = set(mine)
     bad = []
     for m in mine_set:
@@ -724,7 +729,7 @@ def main():
     # next candidate 0x6353a70..0x635582b must itself be disjoint from priors
     nxt_bad = [p for p in priors
                if 0x6353A70 < p[1] and p[0] < 0x635582B]
-    check("next candidate 0x6353a70 disjoint from priors",
+    check("next candidate 0x6353a70 unclaimed or already documented",
           not nxt_bad, str(nxt_bad[:3]))
 
     # slug uniqueness: committed tree + worktree scan, same packet excluded
@@ -739,8 +744,7 @@ def main():
     except Exception:
         pass
     if not slug_hit:
-        for d in glob.glob(os.path.join(ROOT, "..", "hl-wt-calls*",
-                                        "research", "work-items", SLUG)):
+        for d in prior_corpus.paths(ROOT, SLUG):
             dnorm = os.path.normpath(d)
             if os.path.normpath(PACKET) in dnorm:
                 continue

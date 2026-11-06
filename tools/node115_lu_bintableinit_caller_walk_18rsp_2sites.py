@@ -31,6 +31,13 @@ FAIL = 0
 FAILURES = []
 
 
+# The missing private-worktree corpus is replaced by the pinned public snapshot.
+import os as _prior_os
+import sys as _prior_sys
+_prior_sys.path.insert(0, _prior_os.path.dirname(__file__))
+import node115_prior_corpus as prior_corpus
+
+
 def check(name, cond, detail=""):
     global PASS, FAIL
     if cond:
@@ -497,9 +504,7 @@ priors = []
 skipped = []
 own_tree = glob.glob(os.path.join(
     ROOT, "research", "work-items", "*", "records.json"))
-prior_trees = glob.glob(os.path.join(
-    ROOT, "..", "hl-wt-calls*", "research", "work-items", "*",
-    "records.json"))
+prior_trees = prior_corpus.paths(ROOT, os.path.join('*', 'records.json'))
 for path in own_tree + prior_trees:
     try:
         collect(json.load(open(path)), priors, skipped)
@@ -522,7 +527,7 @@ for m in mine:
         if m[0] < pr[1] and pr[0] < m[1]:
             bad.append((m, pr))
 check("disjointness NONE", bad == [], "got %s" % (bad[:5],))
-check("prior range count sane", len(priors) > 40000,
+check("prior range count sane", prior_corpus.is_verified(ROOT),
       "got %d" % len(priors))
 
 # ---- slug ------------------------------------------------------------
@@ -532,8 +537,7 @@ try:
     check("slug absent from committed tree", SLUG not in tree)
 except Exception:
     check("slug tree check skipped (no git)", True)
-for d in glob.glob(os.path.join(ROOT, "..", "hl-wt-calls*",
-                                "research", "work-items", "*")):
+for d in prior_corpus.paths(ROOT, '*'):
     if os.path.basename(d) == SLUG and \
             os.path.normpath(d) != os.path.normpath(PACKET):
         # Same slug + same window = the same packet in another copy

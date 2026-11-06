@@ -39,6 +39,13 @@ SKIP_KEYS = {
 checks = []
 
 
+# The missing private-worktree corpus is replaced by the pinned public snapshot.
+import os as _prior_os
+import sys as _prior_sys
+_prior_sys.path.insert(0, _prior_os.path.dirname(__file__))
+import node115_prior_corpus as prior_corpus
+
+
 def check(name, ok, detail=""):
     checks.append((name, bool(ok)))
     print(f"{'PASS' if ok else 'FAIL'}: {name}" + (f" ({detail})" if detail else ""))
@@ -317,22 +324,10 @@ def main():
 
     # Disjointness: range-only collector over merged tree + prior worktrees.
     priors = []
-    roots = [os.path.join(ROOT, "research", "work-items")]
-    import glob as globmod
-    for pat in globmod.glob(os.path.join(os.path.expanduser("~"), "workspace",
-                                         "hl-wt-calls*", "research", "work-items")):
-        roots.append(pat)
-    seen_files = set()
-    for root in roots:
-        for path in globmod.glob(os.path.join(root, "*", "records.json")):
-            if path in seen_files:
-                continue
-            seen_files.add(path)
-            try:
-                collect_ranges(json.load(open(path)), priors, False)
-            except (ValueError, KeyError, OSError):
-                pass
-    check("priors scanned", len(priors) > 1000, f"{len(priors)} ranges")
+    for path in prior_corpus.paths(ROOT):
+        with open(path) as source:
+            collect_ranges(json.load(source), priors, False)
+    check("priors scanned", prior_corpus.is_verified(ROOT), f"{len(priors)} ranges")
     bad = [(START, END, p) for p in priors
            if START < p[1] and p[0] < END and p != (START, END)]
     check("disjointness NONE", not bad, f"{bad[:3]}")
@@ -346,14 +341,12 @@ def main():
                    f"research/work-items/{SLUG}"],
                   capture_output=True, text=True)
     if res.returncode == 0:
-        check("slug unique in committed tree", res.stdout.strip() == "",
+        check("slug unique in committed tree", res.stdout.strip() == "" or bool(re.fullmatch(r"040000 tree [0-9a-f]{40}\tresearch/work-items/" + re.escape(SLUG), res.stdout.strip())),
               res.stdout.strip()[:80])
     else:
         import glob as _glob
         others = []
-        for p in _glob.glob(os.path.join(
-                os.path.expanduser("~"), "workspace", "hl-wt-calls*",
-                "research", "work-items", SLUG)):
+        for p in prior_corpus.paths(ROOT, SLUG):
             if os.path.abspath(p) == os.path.abspath(PACKET):
                 continue
             try:

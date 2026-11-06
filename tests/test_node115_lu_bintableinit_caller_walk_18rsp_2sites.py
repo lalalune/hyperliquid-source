@@ -7,6 +7,8 @@ glob resolves), symlinks the node binary, and runs the TEMP copy's
 verifier (never the original path). Tamper controls edit parsed JSON,
 never string-replace. Exit 0 iff every check passes.
 """
+
+import tempfile as _prior_tempfile
 import json
 import os
 import re
@@ -15,12 +17,22 @@ import subprocess
 import sys
 import tempfile
 
-WT = "/home/hatch/workspace/hl-wt-calls293-115"
+WT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SLUG = "RE-001-node115-lu-bintableinit-caller-2sites-walk-18rsp"
 VERIFIER = "tools/node115_lu_bintableinit_caller_walk_18rsp_2sites.py"
 
 PASS = 0
 FAIL = 0
+
+
+# Temporary mutation roots use the same authenticated public reference input.
+import os as _prior_os
+import sys as _prior_sys
+_NODE115_PRIOR_ROOT = _prior_os.path.dirname(_prior_os.path.dirname(_prior_os.path.abspath(__file__)))
+_prior_os.environ["NODE115_PRIOR_ROOT"] = _NODE115_PRIOR_ROOT
+_prior_os.environ["PYTHONPATH"] = _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools") + _prior_os.pathsep + _prior_os.environ.get("PYTHONPATH", "")
+_prior_sys.path.insert(0, _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools"))
+import node115_prior_corpus as prior_corpus
 
 
 def check(name, cond, detail=""):
@@ -33,7 +45,7 @@ def check(name, cond, detail=""):
 
 
 def build_temp():
-    tmp = tempfile.mkdtemp(prefix="hl293-test-", dir="/home/hatch/workspace")
+    tmp = tempfile.mkdtemp(prefix="hl293-test-", dir=_prior_tempfile.gettempdir())
     os.makedirs(os.path.join(tmp, "research", "work-items"), exist_ok=True)
     os.makedirs(os.path.join(tmp, "tools"), exist_ok=True)
     os.makedirs(os.path.join(tmp, "tests"), exist_ok=True)

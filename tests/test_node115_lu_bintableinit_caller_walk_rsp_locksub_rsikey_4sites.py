@@ -29,6 +29,16 @@ OBJ_NAME = "bintableinit_caller_walk_rsp_locksub_rsikey_4sites.objdump.txt"
 checks = []
 
 
+# Temporary mutation roots use the same authenticated public reference input.
+import os as _prior_os
+import sys as _prior_sys
+_NODE115_PRIOR_ROOT = _prior_os.path.dirname(_prior_os.path.dirname(_prior_os.path.abspath(__file__)))
+_prior_os.environ["NODE115_PRIOR_ROOT"] = _NODE115_PRIOR_ROOT
+_prior_os.environ["PYTHONPATH"] = _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools") + _prior_os.pathsep + _prior_os.environ.get("PYTHONPATH", "")
+_prior_sys.path.insert(0, _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools"))
+import node115_prior_corpus as prior_corpus
+
+
 def check(name, ok, detail=""):
     checks.append((name, bool(ok)))
     print(f"{'PASS' if ok else 'FAIL'}: {name}" + (f" ({detail})" if detail else ""))

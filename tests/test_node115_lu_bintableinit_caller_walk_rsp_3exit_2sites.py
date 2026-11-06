@@ -11,6 +11,8 @@ verifier's prior-scan glob (ROOT/../hl-wt-calls*/...) resolves to the
 real prior worktrees; they are removed afterwards. The binary is
 symlinked into the temp tree, never copied.
 """
+
+import tempfile as _prior_tempfile
 import json
 import os
 import re
@@ -27,9 +29,19 @@ VERIFIER = os.path.join(ROOT, "tools",
                         "node115_lu_bintableinit_caller_walk_rsp_3exit_2sites.py")
 BIN = os.path.join(ROOT, "artifacts", "node", "115", "hl-node")
 SLUG = "RE-001-node115-lu-bintableinit-caller-2sites-walk-rsp-3exit"
-WS = os.path.expanduser("~/workspace")
+WS = _prior_tempfile.gettempdir()
 PASS = []
 FAIL = []
+
+
+# Temporary mutation roots use the same authenticated public reference input.
+import os as _prior_os
+import sys as _prior_sys
+_NODE115_PRIOR_ROOT = _prior_os.path.dirname(_prior_os.path.dirname(_prior_os.path.abspath(__file__)))
+_prior_os.environ["NODE115_PRIOR_ROOT"] = _NODE115_PRIOR_ROOT
+_prior_os.environ["PYTHONPATH"] = _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools") + _prior_os.pathsep + _prior_os.environ.get("PYTHONPATH", "")
+_prior_sys.path.insert(0, _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools"))
+import node115_prior_corpus as prior_corpus
 
 
 def check(name, cond, detail=""):

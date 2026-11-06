@@ -6,6 +6,8 @@ recounts and a regeneration comparison. Temp roots are workspace-adjacent
 so the verifier's ROOT/../hl-wt-calls* prior glob resolves, and the binary
 is a symlink, not a shim.
 """
+
+import tempfile as _prior_tempfile
 import json
 import os
 import re
@@ -14,9 +16,9 @@ import subprocess
 import sys
 import tempfile
 
-WT = os.path.expanduser("~/workspace/hl-wt-calls292-115")
+WT = os.path.join(_prior_tempfile.gettempdir(), 'node115-review-hl-wt-calls292-115')
 SLUG = "RE-001-node115-lu-bintableinit-caller-2sites-walk-20rsp"
-SCRATCH = os.path.expanduser("~/workspace/scratch-hl292")
+SCRATCH = os.path.join(_prior_tempfile.gettempdir(), 'node115-review-scratch-hl292')
 BIN = os.path.join(WT, "artifacts", "node", "115", "hl-node")
 VERIFIER = "node115_lu_bintableinit_caller_walk_20rsp_2sites.py"
 PACKET_FILES = ["README.md", "EVIDENCE.md", "records.json", "MANIFEST.sha256",
@@ -24,6 +26,16 @@ PACKET_FILES = ["README.md", "EVIDENCE.md", "records.json", "MANIFEST.sha256",
                 "bintableinit_caller_walk_20rsp_2sites.objdump.txt"]
 
 fails = []
+
+
+# Temporary mutation roots use the same authenticated public reference input.
+import os as _prior_os
+import sys as _prior_sys
+_NODE115_PRIOR_ROOT = _prior_os.path.dirname(_prior_os.path.dirname(_prior_os.path.abspath(__file__)))
+_prior_os.environ["NODE115_PRIOR_ROOT"] = _NODE115_PRIOR_ROOT
+_prior_os.environ["PYTHONPATH"] = _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools") + _prior_os.pathsep + _prior_os.environ.get("PYTHONPATH", "")
+_prior_sys.path.insert(0, _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools"))
+import node115_prior_corpus as prior_corpus
 
 
 def check(name, ok, detail=""):

@@ -47,3 +47,25 @@ Not yet implemented/measured: no Rust reconstruction is attempted in this packet
 - Corrections to #337's pointer for this window: NONE (prior_pointer_verified). All #337 pointer figures for this window (787 bytes, 202 strict, 5 calls — trylock, unlock, 0x634eba0, lock-wait, stack_chk_fail — 1 lock-wait site at 0x6388124, 0 lu-miss / 0 bin_table_init / 0 second-handler sites, 1 ret at 0x6388055, bsr 0, endbr64 1, canary present, 33 jumps, 0 outside, 3 PLT calls across 3 targets; the 0x634eba0 call is the 11-byte count FDE cited in #334, NOT the second handler 0x634ebb0) were confirmed by targeted census. The NOT-clean notes were also confirmed: 0x6387880 calls the second handler once (raw-e8) and 0x63bcd20 twice.
 - Unknown: entry inputs' caller-side meaning; the field semantics beyond observed reads/writes; the lock-wait helper's semantics beyond its call-site contract and the body read at 0x63bf680..0x63bf7ee; the contents of the .bss mutex fields and the runtime table 0x65096c0; the 0x634eba0 count callee's semantics beyond its observed call-site contract.
 - Next question: 0x63a4cf0..0x63a4fc8 (728 bytes, 191 strict, 6 calls — trylock, unlock, 0x6388310 (this window's next FDE, 0x6388310..0x6388372, 98 B), 0x63bfb90 (a new callee near the lock-wait helper), lock-wait, stack_chk_fail — 1 lock-wait site at 0x63a4df4, 0 lu-miss / 0 bin_table_init / 0 second-handler sites, 1 ret at 0x63a4d97, bsr 0, shr 1, shl 1, endbr64 1, canary present, 28 jumps, 0 outside, 3 PLT calls across 3 targets). The next-largest 1-site candidate 0x6387880 (1,900B) is NOT clean: it calls the second miss handler 0x634ebb0 at 0x63879c0 (and is itself a second-handler survivor), so it is skipped for the light style; 0x63bcd20 (1,428B) is also NOT clean (calls the second handler twice). Two larger 1-site disjoint survivors exist above the 2000B band (0x63b4b50, 2,770B; 0x63eb870, 2,408B) and are noted for a possible heavier packet.
+
+## Review correction: reproducible prior comparison
+
+The submitted comparison scanned private `hl-wt-calls*` directories. Those
+inputs were not committed, so its large prior-count result was not independently
+reproducible. The original observations remain in this packet and Git history.
+
+The reviewed checker instead authenticates the 1,210 public `records.json`
+inputs listed in `RE-review-open-20261106/prior-source-manifest.json`, using
+`tools/node115_prior_corpus.py`. Every input path and SHA-256 is checked; a
+missing or changed input fails before the comparison. The frozen source commit
+and target digest are recorded in that manifest. All 72 incoming static
+packets are included, so their mutual comparisons are also covered.
+
+The original exhibit/range extraction and target-byte controls are retained.
+The arbitrary count of duplicated private-worktree ranges is replaced by
+complete authentication of the public input set. Range counts are reported
+without coverage credit. This is a comparison against a frozen, documented
+input set, not proof of global function ownership or reconstruction completion.
+The common helper and its corruption tests are pinned by the review packet's
+manifest. Temporary tests use their source checkout as the explicit reference
+root and keep mutations in temporary copies.

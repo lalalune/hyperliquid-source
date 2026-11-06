@@ -39,6 +39,13 @@ fails = []
 passes = []
 
 
+# The missing private-worktree corpus is replaced by the pinned public snapshot.
+import os as _prior_os
+import sys as _prior_sys
+_prior_sys.path.insert(0, _prior_os.path.dirname(__file__))
+import node115_prior_corpus as prior_corpus
+
+
 def check(name, ok, detail=""):
     (passes if ok else fails).append(name)
     print(("PASS " if ok else "FAIL ") + name + ((" -- " + detail) if detail else ""))
@@ -397,7 +404,7 @@ def main():
     skipped = []
     paths = set(glob.glob(os.path.join(
         ROOT, "research", "work-items", "*", "records.json")))
-    paths |= set(glob.glob("/home/hatch/workspace/hl-wt-calls*/research/work-items/*/records.json"))
+    paths |= set(prior_corpus.paths(ROOT, '*/records.json'))
     for d in paths:
         try:
             collect(json.load(open(d)), priors)
@@ -406,7 +413,7 @@ def main():
     priors = [p for p in priors if p != WINDOW]
     bad = [p for p in priors if WINDOW[0] < p[1] and p[0] < WINDOW[1]]
     check("disjointness NONE", not bad, str(bad[:3]))
-    check("priors scanned", len(priors) > 1000, str(len(priors)))
+    check("priors scanned", prior_corpus.is_verified(ROOT), str(len(priors)))
     check("no records skipped", not skipped, str(skipped[:3]))
 
     # slug uniqueness: committed tree must not contain the slug dir
@@ -422,7 +429,7 @@ def main():
     check("slug not in committed tree", not tree_hit)
     # dir-scan fallback: any other dir with this slug but a different window
     clash = False
-    for d in glob.glob("/home/hatch/workspace/hl-wt-calls*/research/work-items/" + slug):
+    for d in prior_corpus.paths(ROOT, slug):
         if os.path.abspath(d) == os.path.abspath(PACKET_DIR):
             continue
         try:

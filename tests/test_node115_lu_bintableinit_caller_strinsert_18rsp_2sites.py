@@ -8,6 +8,8 @@ not a shim. Tamper reverts restore records.json BYTES (a json.dump
 rewrite changes bytes and breaks the MANIFEST hash even when values
 are identical).
 """
+
+import tempfile as _prior_tempfile
 import json
 import os
 import re
@@ -28,6 +30,16 @@ PASS = 0
 FAIL = 0
 
 
+# Temporary mutation roots use the same authenticated public reference input.
+import os as _prior_os
+import sys as _prior_sys
+_NODE115_PRIOR_ROOT = _prior_os.path.dirname(_prior_os.path.dirname(_prior_os.path.abspath(__file__)))
+_prior_os.environ["NODE115_PRIOR_ROOT"] = _NODE115_PRIOR_ROOT
+_prior_os.environ["PYTHONPATH"] = _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools") + _prior_os.pathsep + _prior_os.environ.get("PYTHONPATH", "")
+_prior_sys.path.insert(0, _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools"))
+import node115_prior_corpus as prior_corpus
+
+
 def check(name, cond, detail=""):
     global PASS, FAIL
     if cond:
@@ -38,7 +50,7 @@ def check(name, cond, detail=""):
 
 
 def make_temp():
-    tmp = tempfile.mkdtemp(prefix="hl295test-", dir=os.path.expanduser("~/workspace"))
+    tmp = tempfile.mkdtemp(prefix="hl295test-", dir=_prior_tempfile.gettempdir())
     packet = os.path.join(tmp, PACKET_REL)
     shutil.copytree(os.path.join(ROOT, PACKET_REL), packet)
     tools = os.path.join(tmp, "tools")

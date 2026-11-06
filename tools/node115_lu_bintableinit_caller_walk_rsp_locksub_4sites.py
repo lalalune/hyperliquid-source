@@ -63,6 +63,13 @@ PASS = 0
 FAIL = 0
 
 
+# The missing private-worktree corpus is replaced by the pinned public snapshot.
+import os as _prior_os
+import sys as _prior_sys
+_prior_sys.path.insert(0, _prior_os.path.dirname(__file__))
+import node115_prior_corpus as prior_corpus
+
+
 def check(name, cond, detail=""):
     global PASS, FAIL
     if cond:
@@ -127,20 +134,18 @@ def collect_ranges(obj, out, skip_keys):
                         if "range" in e:
                             r = e["range"]
                             if isinstance(r, list):
-                                out.append((int(r[0], 16), int(r[1], 16)))
+                                out.append(prior_corpus.parse_range(r))
                             else:
-                                a, b = r.split("..")
-                                out.append((int(a, 16), int(b, 16)))
+                                out.append(prior_corpus.parse_range(r))
                         elif "start" in e and "end" in e:
                             out.append((int(e["start"], 16), int(e["end"], 16)))
             elif k == "window" and isinstance(v, dict):
                 if "range" in v:
                     r = v["range"]
                     if isinstance(r, list):
-                        out.append((int(r[0], 16), int(r[1], 16)))
+                        out.append(prior_corpus.parse_range(r))
                     else:
-                        a, b = r.split("..")
-                        out.append((int(a, 16), int(b, 16)))
+                        out.append(prior_corpus.parse_range(r))
                 elif "start" in v and "end" in v:
                     out.append((int(v["start"], 16), int(v["end"], 16)))
             else:
@@ -284,25 +289,14 @@ def main(argv):
             "next_caller", "prior_pointer_verified", "raw_e8_ranking",
             "other_remaining_4raw_fdes", "scan", "fde"}
     priors = []
-    roots = [os.path.join(root, "research", "work-items")]
-    home = os.path.expanduser("~")
-    import glob as globmod
-    for d in globmod.glob(os.path.join(home, "workspace", "hl-wt-calls*", "research", "work-items")):
-        roots.append(d)
-    for rdir in roots:
-        if not os.path.isdir(rdir):
-            continue
-        for rfile in globmod.glob(os.path.join(rdir, "*", "records.json")):
-            try:
-                with open(rfile, "r") as f:
-                    collect_ranges(json.load(f), priors, skip)
-            except Exception:
-                continue
+    for rfile in prior_corpus.paths(root):
+        with open(rfile, "r") as source:
+            collect_ranges(json.load(source), priors, skip)
     overlap = [(m, p) for p in priors
                for m in [(WINDOW_START, WINDOW_END)]
                if m[0] < p[1] and p[0] < m[1] and p != (WINDOW_START, WINDOW_END)]
     check("disjointness", not overlap, "overlaps: %s" % overlap[:3])
-    check("priors-scanned", len(priors) > 1000, "got %d" % len(priors))
+    check("priors-scanned", prior_corpus.is_verified(root), "got %d" % len(priors))
 
     # 11. slug collision: exactly one dir of this name in the merged tree
     merged_dirs = [d for d in os.listdir(os.path.join(root, "research", "work-items"))
