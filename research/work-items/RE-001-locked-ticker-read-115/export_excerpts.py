@@ -34,8 +34,8 @@ WINDOWS = [
     ("landing_pad.txt", 0x607047E, 0x607048E),           # 0x98 exception cleanup
     ("locked_percentiles.txt", 0x6070610, 0x60706C9),    # slot 0xa0
     ("locked_histogram_text.txt", 0x6070700, 0x60707C1),  # slot 0xa8
-    ("shared_cleanup.txt", 0x60706CA, 0x60706FE),        # delete temp + unlock
-    ("builder_cleanup.txt", 0x60705D8, 0x607060C),       # builder-callers cleanup
+    ("cleanup_a8.txt", 0x60706CA, 0x60706FE),           # delete temp + unlock
+    ("cleanup_a0.txt", 0x60705D8, 0x607060C),           # delete temp + unlock
 ]
 
 
