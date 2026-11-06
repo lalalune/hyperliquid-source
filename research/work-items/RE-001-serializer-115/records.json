@@ -1,0 +1,306 @@
+{
+ "artifact_path": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bounded_question": "What are the serializer 0x60ba600's 25 per-kind rules -- the single documented boundary of #3485 -- and how does each rule turn a Find-pipeline value into its text form, end to end including the decimal, escape, hex, double and enum-name helpers?",
+ "census": {
+  "counts": {
+   "escape_copy call": 3,
+   "escape_copy_cleanup jmp": 1,
+   "escape_letter call": 1,
+   "escape_predicate call": 1,
+   "hex_encode call": 120,
+   "hexchar call": 2,
+   "int_to_string call": 13,
+   "move_assign call": 12,
+   "serializer call": 1,
+   "snprintf_string call": 2
+  },
+  "rows": 156
+ },
+ "constants": {
+  "bool_false_literal": "0x430e89",
+  "bool_true_literal": "0x43f883",
+  "digits_table_chunks": [
+   "0x451750",
+   "0x453230",
+   "0x456910",
+   "0x453e00",
+   "0x451db0",
+   "0x452ba0",
+   "0x455590",
+   "0x456240",
+   "0x456920",
+   "0x4528d0",
+   "0x456250",
+   "0x453240",
+   "0x454870"
+  ],
+  "digits_table_sha256": "bedfbc17dfedc3a783c817da8b2eec13baff8e36c4e6a61c346332973895315a",
+  "double_format_buffer": 328,
+  "double_format_literal": "0x432165",
+  "enum_map_a": "0x65070a0",
+  "enum_map_b": "0x6507060",
+  "enum_map_c": "0x6507120",
+  "enum_map_d": "0x6507160",
+  "enum_map_e": "0x65070e0",
+  "enum_map_f": "0x6506fe0",
+  "enum_map_u32": "0x6507020",
+  "escape_mask": "0x0200000000800001",
+  "jump_table": "0x978650",
+  "kind_count": 25,
+  "kind_max": "0x18",
+  "vsnprintf_got": "0x64ed730"
+ },
+ "kind_rules": [
+  {
+   "kind": 0,
+   "rule": "bool: byte at *value, nonzero -> \"true\" (0x43f883), zero -> \"false\" (0x430e89); _M_replace into out.",
+   "target": "0x60bab78"
+  },
+  {
+   "kind": 1,
+   "rule": "i32 at *value -> signed decimal via int_to_string 0x5f06bb0, then move_assign into out.",
+   "target": "0x60ba678"
+  },
+  {
+   "kind": 2,
+   "rule": "i32 at *value -> same helper, same value; behaviorally identical to kind 1.",
+   "target": "0x60ba678"
+  },
+  {
+   "kind": 3,
+   "rule": "i64 at *value -> signed decimal: absolute value, '-' fill, two-digit table loop; INT64_MIN -> \"-9223372036854775808\".",
+   "target": "0x60ba8a8"
+  },
+  {
+   "kind": 4,
+   "rule": "u32 at *value -> unsigned decimal, 32-bit divide-by-100 loop, two-digit table.",
+   "target": "0x60baf78"
+  },
+  {
+   "kind": 5,
+   "rule": "u8 at *value -> signed decimal via int_to_string 0x5f06bb0 (zero-extended byte).",
+   "target": "0x60baf60"
+  },
+  {
+   "kind": 6,
+   "rule": "u32 at *value -> unsigned decimal, second copy of the kind-4 loop (separate code, same behaviour).",
+   "target": "0x60bad90"
+  },
+  {
+   "kind": 7,
+   "rule": "u64 at *value -> unsigned decimal, 64-bit divide-by-100 loop, two-digit table.",
+   "target": "0x60babb0"
+  },
+  {
+   "kind": 8,
+   "rule": "u64 at *value -> unsigned decimal, second copy of the kind-7 loop (separate code, same behaviour).",
+   "target": "0x60ba6b0"
+  },
+  {
+   "kind": 9,
+   "rule": "(ptr, len) at *value -> backslash-escaped copy via escape_copy 0x61d0f30, then move_assign into out.",
+   "target": "0x60bb2b0"
+  },
+  {
+   "kind": 10,
+   "rule": "f64 at *value -> \"%f\" via snprintf_string 0x60ba450 (vsnprintf, 328-byte buffer), then move_assign into out.",
+   "target": "0x60bb280"
+  },
+  {
+   "kind": 11,
+   "rule": "u8 enum name: linear walk of the head list at map 0x65070a0 + 0x10 (node next +0x00, name +0x08, key +0x28); on match _M_assign the name into out; on miss return 0.",
+   "target": "0x60bb240"
+  },
+  {
+   "kind": 12,
+   "rule": "u8 enum name, map 0x6507060; same walk as kind 11.",
+   "target": "0x60bb200"
+  },
+  {
+   "kind": 13,
+   "rule": "u8 enum name, map 0x6507120; same walk as kind 11.",
+   "target": "0x60bb1c0"
+  },
+  {
+   "kind": 14,
+   "rule": "u32 enum name, map 0x6507020; the one u32 key compare (full u32 at node +0x28).",
+   "target": "0x60bb180"
+  },
+  {
+   "kind": 15,
+   "rule": "u8 enum name, map 0x6507160; same walk as kind 11.",
+   "target": "0x60bb140"
+  },
+  {
+   "kind": 16,
+   "rule": "u8 enum name, map 0x65070e0; same walk as kind 11.",
+   "target": "0x60baaf8"
+  },
+  {
+   "kind": 17,
+   "rule": "Unhandled: falls through to the return-0 path; out untouched.",
+   "target": "0x60ba648"
+  },
+  {
+   "kind": 18,
+   "rule": "Unhandled: falls through to the return-0 path; out untouched.",
+   "target": "0x60ba648"
+  },
+  {
+   "kind": 19,
+   "rule": "Unhandled: falls through to the return-0 path; out untouched.",
+   "target": "0x60ba648"
+  },
+  {
+   "kind": 20,
+   "rule": "Unhandled: falls through to the return-0 path; out untouched.",
+   "target": "0x60ba648"
+  },
+  {
+   "kind": 21,
+   "rule": "Unhandled: falls through to the return-0 path; out untouched.",
+   "target": "0x60ba648"
+  },
+  {
+   "kind": 22,
+   "rule": "Unhandled: falls through to the return-0 path; out untouched.",
+   "target": "0x60ba648"
+  },
+  {
+   "kind": 23,
+   "rule": "(ptr, len) at *value -> UPPERCASE hex via hex_encode 0x61c7e30 with flag 1, then move_assign into out.",
+   "target": "0x60baac8"
+  },
+  {
+   "kind": 24,
+   "rule": "u8 enum name, map 0x6506fe0; same walk as kind 11.",
+   "target": "0x60bab40"
+  }
+ ],
+ "landing_pads": {
+  "0x61d0f1c": {
+   "end": "0x61d0f2c",
+   "role": "Escape-copy cleanup fragment."
+  }
+ },
+ "literals": [
+  {
+   "address": "0x430e89",
+   "value": "false"
+  },
+  {
+   "address": "0x43f883",
+   "value": "true"
+  },
+  {
+   "address": "0x432165",
+   "value": "%f"
+  }
+ ],
+ "model": "tools/serializer_115.py",
+ "open_unknowns": [
+  "Kinds 1 and 2 are behaviorally identical (both call int_to_string 0x5f06bb0 with the same 32-bit value), as are kinds 4/6 (u32) and 7/8 (u64); the binary gives no gloss for which C++ types the duplicated kinds stand for, so the model records the duplication faithfully and does not name the types.",
+  "The seven enum maps live in .bss (runtime-built); the model takes them as harness-injected EnumMap objects, not binary reads. The serializer's enum walk is a plain head-list walk, unlike the hash-bucket walk the #3560 parsers use in the other direction.",
+  "The double kind formats with C %f via vsnprintf; Python '%f' matches it on ordinary values, inf and nan. A negative NaN's sign is not pinned (the binary's vsnprintf would print '-nan'; the model does not special-case it).",
+  "The serializer's value struct layout beyond the per-kind reads is not pinned: each kind reads only the bytes its rule needs (1, 4 or 8 bytes at *value, or a 16-byte (ptr, len) pair for kinds 9 and 23).",
+  "Which construction paths install a non-null +0x28 delegate (carried from #3485) is still not pinned.",
+  "The global default name at 0x6508980 and the delegate vtable base (carried from #3485/#3560) are still not pinned."
+ ],
+ "relocations": [
+  {
+   "address": "0x64ed730",
+   "symbol": "vsnprintf",
+   "type": "R_X86_64_GLOB_DAT"
+  }
+ ],
+ "routines": {
+  "0x5f06bb0": {
+   "calls": [],
+   "end": "0x5f06f38",
+   "name": "int_to_string",
+   "role": "Signed i32 decimal (std::to_string(int)): sign bit, absolute value, magnitude thresholds, '-' fill, two-digit table loop; INT32_MIN formats as '-2147483648'.",
+   "size": 904
+  },
+  "0x60b79e0": {
+   "calls": [],
+   "end": "0x60b7ab8",
+   "name": "move_assign",
+   "role": "String move-assign: moves the source string into the destination (re-shipped byte-identical from #3488).",
+   "size": 216
+  },
+  "0x60ba450": {
+   "calls": [],
+   "end": "0x60ba600",
+   "name": "snprintf_string",
+   "role": "vsnprintf into a string: calls the function pointer in GOT 0x64ed730 (vsnprintf) with a 328-byte stack buffer, then installs the result in the out string (SSO or _M_create + memcpy).",
+   "size": 432
+  },
+  "0x60ba600": {
+   "calls": [
+    "0x5f06bb0",
+    "0x60b79e0",
+    "0x61c7e30",
+    "0x60ba450",
+    "0x61d0f30"
+   ],
+   "end": "0x60bb855",
+   "name": "serializer",
+   "role": "Value serializer: dispatches on kind (jump table 0x978650, 25 entries, 19 targets) and writes the value's text form into the out string; returns 1 on success, 0 with out untouched for kinds 0x11..0x16 and kind > 0x18. Sole direct caller is the matcher 0x60bb9a0 (site 0x60bbb97).",
+   "size": 4693
+  },
+  "0x61c7da0": {
+   "calls": [],
+   "end": "0x61c7db2",
+   "name": "hexchar",
+   "role": "Nibble to hex char: 0..9 -> '0'+n, 10..15 -> 'A'..'F' (adds 0x37 past 9).",
+   "size": 18
+  },
+  "0x61c7e30": {
+   "calls": [
+    "0x61c7da0"
+   ],
+   "end": "0x61c7fb6",
+   "name": "hex_encode",
+   "role": "Hex encode / raw copy: flag 1 reserves 2*len and writes two UPPERCASE hex chars per byte via hexchar; flag 0 replaces out with the raw input bytes. The serializer always passes flag 1.",
+   "size": 390
+  },
+  "0x61d0e90": {
+   "calls": [],
+   "end": "0x61d0ed5",
+   "name": "escape_predicate",
+   "role": "Needs-escape test: true for 0x0a, 0x0d, '#' (0x23), ':' (0x3a) and '\\\\' (0x5c) only; the bit-test mask is 0x0200000000800001 (bits {0, 23, 57} over byte - 0x23); bytes above 0x5c return 0.",
+   "size": 69
+  },
+  "0x61d0f00": {
+   "calls": [],
+   "end": "0x61d0f1c",
+   "name": "escape_letter",
+   "role": "Escape letter: 0x0a -> 'n', 0x0d -> 'r', anything else -> the byte itself.",
+   "size": 28
+  },
+  "0x61d0f1c": {
+   "calls": [],
+   "end": "0x61d0f2c",
+   "name": "escape_copy_cleanup",
+   "role": "Escape-copy landing pad: disposes the out string, then _Unwind_Resume.",
+   "size": 16
+  },
+  "0x61d0f30": {
+   "calls": [
+    "0x61d0f00",
+    "0x61d0e90",
+    "0x61d0f1c"
+   ],
+   "end": "0x61d108e",
+   "name": "escape_copy",
+   "role": "Backslash-escape copy: for each input byte, escape_predicate decides; escaped bytes become '\\\\' + escape_letter, the rest are copied raw. The inverse of the escape decoder 0x61d0ee0 pinned by #3560.",
+   "size": 350
+  }
+ },
+ "slug": "serializer-115",
+ "task_id": "RE-001",
+ "tests": "tests/test_serializer_115.py",
+ "verify": "research/work-items/RE-001-serializer-115/verify.py",
+ "vtables": {}
+}
