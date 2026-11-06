@@ -16,15 +16,32 @@ an integrated, runnable node remains in progress.
 
 ![Node #115 progress](docs/assets/research-progress.svg)
 
-**93 active Rust implementation areas · 56 Cargo manifests · 1759 #115 research work items.**
+**93 active Rust implementation areas · 56 Cargo manifests · 1760 #115 research work items.**
 
 These inventory counts describe available work, not completed components.
+
+### Completion percentages
+
+| Measure | Completed / scope | Percentage |
+| --- | ---: | ---: |
+| Accepted full-scope gates | 0/92 | 0.00% |
+| Complete node components | 0/23 | 0.00% |
+| Components fully mapped | 0/23 | 0.00% |
+| Components fully built | 0/23 | 0.00% |
+| Components with full behavioral validation | 0/23 | 0.00% |
+| Components with full code/data identity | 0/23 | 0.00% |
+| Target .text bytes compared | 5,313,802/83,719,936 | 6.34712% |
+| Target .text bytes raw-equal | 4,964,007/83,719,936 | 5.92930% |
+
+Gate percentages require acceptance of the full component scope.
+Byte percentages cover the authenticated comparison registry, including dependencies;
+they do not measure whole-node completion or remaining engineering effort.
 
 The retained implementations cover quantity preparation, nonce ordering,
 snapshot selectors, latency, weighted comparisons, tagged counts and unsigned128 conversion.
 Each has a bounded #115 contract; no integrated node executable is claimed.
 
-<details>
+<details open>
 <summary><strong>Node #115 component acceptance</strong></summary>
 
 **Node #115 reconstruction: 0.00% (0/92 accepted gates; 0/23 components complete).**
@@ -60,7 +77,7 @@ Zero registered implementation comparisons do not mean zero correct code.
 
 </details>
 
-<details>
+<details open>
 <summary><strong>Node #115 binary comparisons</strong></summary>
 
 Dependency windows count once in the target total and separately by source.

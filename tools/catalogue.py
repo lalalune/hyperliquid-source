@@ -228,14 +228,33 @@ def render_readme_progress(components, progress, coverage=None, inventory=None):
         lines += ['![Node #115 progress](docs/assets/research-progress.svg)', '',
                   f"**{inventory['rust_areas']} active Rust implementation areas · {inventory['cargo_manifests']} Cargo manifests · {inventory['work_items']} #115 research work items.**", '',
                   'These inventory counts describe available work, not completed components.', '']
+    complete = sum(all(progress['components'][c['id']]['gates'].values()) for c in components)
+    lines += ['### Completion percentages', '',
+              '| Measure | Completed / scope | Percentage |',
+              '| --- | ---: | ---: |',
+              f'| Accepted full-scope gates | {accepted}/{total} | {100 * accepted / total:.2f}% |',
+              f'| Complete node components | {complete}/{len(components)} | {100 * complete / len(components):.2f}% |']
+    for gate, label in [('mapped', 'Components fully mapped'), ('built', 'Components fully built'),
+                        ('behavior', 'Components with full behavioral validation'),
+                        ('identity', 'Components with full code/data identity')]:
+        count = sum(progress['components'][c['id']]['gates'][gate] for c in components)
+        lines.append(f'| {label} | {count}/{len(components)} | {100 * count / len(components):.2f}% |')
+    if coverage:
+        stats = coverage['totals']['node115']
+        size = coverage['targets']['node115']['text_bytes']
+        lines += [f"| Target .text bytes compared | {stats['bytes']:,}/{size:,} | {100 * stats['bytes'] / size:.5f}% |",
+                  f"| Target .text bytes raw-equal | {stats['raw_equal_bytes']:,}/{size:,} | {100 * stats['raw_equal_bytes'] / size:.5f}% |"]
+    lines += ['', 'Gate percentages require acceptance of the full component scope.',
+              'Byte percentages cover the authenticated comparison registry, including dependencies;',
+              'they do not measure whole-node completion or remaining engineering effort.', '']
     lines += ['The retained implementations cover quantity preparation, nonce ordering,',
               'snapshot selectors, latency, weighted comparisons, tagged counts and unsigned128 conversion.',
               'Each has a bounded #115 contract; no integrated node executable is claimed.', '',
-              '<details>', '<summary><strong>Node #115 component acceptance</strong></summary>', '',
+              '<details open>', '<summary><strong>Node #115 component acceptance</strong></summary>', '',
               *render_component_progress(components, progress, coverage, 'docs/', combined=True),
               f'Accepted gates: **{accepted}/{total}**. Full-component byte and function denominators remain unmeasured.',
               'Zero registered implementation comparisons do not mean zero correct code.', '', '</details>', '',
-              '<details>', '<summary><strong>Node #115 binary comparisons</strong></summary>', '',
+              '<details open>', '<summary><strong>Node #115 binary comparisons</strong></summary>', '',
               'Dependency windows count once in the target total and separately by source.',
               'Their equality does not establish first-party or whole-node completion.', '',
               '| Comparison | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows |',

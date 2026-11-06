@@ -22,11 +22,11 @@ insertion (original = present = value) and the journal tag 9 entry. It matches t
 
 ## Reproduce
 
-From the repository root with Python 3 (standard library only, no binutils, nothing is executed):
+From the repository root with Python 3 (standard library only, no binutils; runs the isolated instruction interpreter without launching the captured process):
 
 ```
 python3 tools/re11_storage_cache_load115.py --out research/work-items/RE-011-storage-cache-load-115
-python3 -m unittest tests.test_re11_storage_cache_load115
+python3 -m unittest discover -s tests -p test_re11_storage_cache_load115.py -v
 ```
 
 The tool checks the input SHA-256 first and fails on any other digest. It reads sections with `tools/elf_index.py` and FDE
