@@ -1,0 +1,18 @@
+Relocation / PLT notes for the RE-001 arena snapshot refresh window (node #115).
+
+Window 0x5f07200:
+- No PLT calls, no GOT reads, no rip-relative operands and no
+  .rodata references in-window. The body is seven instructions:
+  endbr64, three load/store qword pairs through rdi-relative
+  offsets, and ret. It reads no global state.
+- No whole-file qword hit and no R_X86_64_RELATIVE addend resolves
+  to the window (see census.py): it is not a vtable slot, not a
+  callback and not stored anywhere as data.
+
+Call sites (both direct e8 calls, both with rdi = the outer object):
+- 0x5f11b70 in the shard-allocation window 0x5f117a0 (direct refill
+  path, after the direct AllocateAligned 0x605d7b0 call and before
+  the global and shard lock bytes are cleared).
+- 0x5f12083 in the allocation window 0x5f11c40 (direct path, after
+  the carved pointer is stored to this + 0x920 and before the
+  global lock byte at this + 0x950 is cleared).
