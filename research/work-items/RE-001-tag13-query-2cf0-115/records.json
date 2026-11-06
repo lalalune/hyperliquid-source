@@ -1,0 +1,418 @@
+{
+ "assumptions": [
+  "the out record's bytes 6..7 are padding: the query writes a u32 at +0x00, a u16 at +0x04 and a qword at +0x08 on the zero-out and count-mismatch paths, and no reader of the record is pinned here",
+  "at least ten links must be reachable via +0x20 from *(obj): the walk never checks for a null link",
+  "the gate's counter at obj+0x30 and limit at obj+0x10 are a throttle: the binary only shows the increment, the comparison and the reset, not what the counter counts",
+  "the tag-13 query's rcx range holds 16-byte {data pointer, length} records and its rdx range holds 8-byte elements; the identity of the objects behind both ranges is not pinned",
+  "in the shared cleanup fragment, rbx holds S3, 0x8(%rsp) holds S2 and rbp holds the message string at the append call sites; the exact throw-site to landing-pad mapping is not decoded from the exception table"
+ ],
+ "callers": [
+  {
+   "address": "0x5d79107",
+   "args": "rsi = 0x650(%r15) (null-checked); rcx = -0x3b0(%rbp) (16-byte-record range); rdx = -0x388(%rbp) (qword-element range); rdi = lea -0x1e0(%rbp) (out record)",
+   "fde": "0x5d78b40..0x5d7a806",
+   "routine": "tag-13 query"
+  },
+  {
+   "address": "0x61b456a",
+   "args": "rcx = r15 (16-byte-record range), rdx = 0x8(%rsp) (qword-element range), rsi = r14 (obj), rdi = rbp (out record); preceded by a copy loop building both ranges",
+   "fde": "0x61b45da..0x61b4609",
+   "routine": "tag-13 query"
+  },
+  {
+   "address": "0x61b4739",
+   "args": "rcx = r15 (16-byte-record range), rdx = 0x8(%rsp) (qword-element range), rsi = r14 (obj), rdi = rbp (out record); preceded by a copy loop building both ranges",
+   "fde": "0x61b47a2..0x61b483b",
+   "routine": "tag-13 query"
+  }
+ ],
+ "consumers": {
+  "0x61b1260": {
+   "direct_calls": 5,
+   "sites": [
+    "0x61b1a57",
+    "0x61bb28f",
+    "0x61bba0e",
+    "0x61bc790",
+    "0x61bcc0e"
+   ],
+   "stored_qwords": 0,
+   "tail_jumps": 0
+  },
+  "0x61b18b0": {
+   "direct_calls": 15,
+   "sites": [
+    "0x61b1cd4",
+    "0x61b202c",
+    "0x61b203b",
+    "0x61b23ec",
+    "0x61b23fb",
+    "0x61b241f",
+    "0x61b25bf",
+    "0x61b295c",
+    "0x61b296b",
+    "0x61b298f",
+    "0x61b2b2f",
+    "0x61b2f46",
+    "0x61b2f53",
+    "0x61b2f60",
+    "0x61b368b"
+   ],
+   "stored_qwords": 0,
+   "tail_jumps": 0
+  },
+  "0x61b1910": {
+   "direct_calls": 1,
+   "sites": [
+    "0x61b1940"
+   ],
+   "stored_qwords": 0,
+   "tail_jumps": 0
+  },
+  "0x61b1930": {
+   "direct_calls": 5,
+   "sites": [
+    "0x61b1b28",
+    "0x61b1e7b",
+    "0x61b2247",
+    "0x61b27b7",
+    "0x61b2dc8"
+   ],
+   "stored_qwords": 0,
+   "tail_jumps": 0
+  },
+  "0x61b1a10": {
+   "direct_calls": 7,
+   "sites": [
+    "0x61b1d88",
+    "0x61b211e",
+    "0x61b257b",
+    "0x61b2aeb",
+    "0x61b3318",
+    "0x61b36b2",
+    "0x61b3cc7"
+   ],
+   "stored_qwords": 0,
+   "tail_jumps": 0
+  },
+  "0x61b2cf0": {
+   "direct_calls": 3,
+   "sites": [
+    "0x5d79107",
+    "0x61b456a",
+    "0x61b4739"
+   ],
+   "stored_qwords": 0,
+   "tail_jumps": 0
+  },
+  "0x61bd410": {
+   "direct_calls": 165,
+   "sites": [
+    "0x61b1d2b",
+    "0x61b20c0",
+    "0x61b24a3",
+    "0x61b251a",
+    "0x61b25d8",
+    "0x61b2a13",
+    "0x61b2a8a",
+    "0x61b2b48",
+    "0x61b306e",
+    "0x61b31c6",
+    "0x61b3275"
+   ],
+   "sites_note": "only the eleven query-family sites are listed; the encoder is a shared helper with 165 direct calls in the executable LOAD segment",
+   "stored_qwords": 0,
+   "tail_jumps": 0
+  },
+  "0x61cf670": {
+   "direct_calls": 847,
+   "sites": [
+    "0x61b2d7f"
+   ],
+   "sites_note": "only the tag-13 query's site is listed; the helper is shared with 847 direct callers in the executable LOAD segment",
+   "stored_qwords": 0,
+   "tail_jumps": 0
+  }
+ },
+ "frame": {
+  "builder": "0x61b1260",
+  "deliver_slot": "vtable +0x10 on *(obj + 0x28)",
+  "deliverer": "0x61b1a10",
+  "layout": "raw8(handler return value) || byte(tag) || LE32(len(message)) || message",
+  "value_block": {
+   "message_data": "+0x18 (the message string's data field)",
+   "message_size": "+0x20 (the message string's size field)",
+   "return_value": "+0x00",
+   "tag_byte": "+0x08"
+  }
+ },
+ "functions": [
+  {
+   "address": "0x61b2cf0",
+   "fde": "0x61b2cf0..0x61b3596",
+   "role": "tag-13 inner query",
+   "rule": [
+    "computes count A = (rcx.end - rcx.begin) / 16 and count B = (rdx.end - rdx.begin) / 8; when they differ, builds two strings and calls the count-mismatch helper 0x61cf670 on (out, &str1, 0, 2, &str2, 0), then checks the canary and returns the out pointer",
+    "when the counts agree, builds a 1-byte tag string holding 0xd and calls the throttle gate 0x61b1930 on (obj, &tag)",
+    "when the gate returns nonzero, zeroes the out record (u32 at +0x00, u16 at +0x04, qword at +0x08) and returns the out pointer at once",
+    "when the gate returns zero, walks the +0x20 handler chain from *(obj), compares each link's vtable slot +0x98 against 0x5d4d490, calls the first mismatching link's slot or the tenth link's slot, and stores the returned qword in the value block",
+    "sets flag bits 8, 9 and 10 on the presence-mask qword (mask 0x700), then builds the message (see message record, tag13), then calls frame-and-deliver 0x61b1a10 with (out, obj, &value block) and returns the out pointer",
+    "disposes the S2, S3 and message strings with a sized delete of capacity+1 when each data pointer is not its SSO buffer; canary at rsp+0x108 checked on the normal return, on the count-mismatch return and on every length-error arm; failure calls __stack_chk_fail",
+    "on exception the landing pads at 0x61b3576 and 0x61b3582 jump into the shared cleanup fragment 0x61b2ca8..0x61b2ce2 (_M_dispose of the live strings, canary check, _Unwind_Resume)"
+   ],
+   "size_bytes": 2214,
+   "tag": 13
+  },
+  {
+   "address": "0x61cf670",
+   "fde": "0x61cf670..0x61cf767",
+   "role": "count-mismatch helper",
+   "rule": [
+    "takes (out, &first string, 0, code, &second string, 0); writes the code byte at out+0x00, zero bytes at out+0x01..out+0x05, and a heap buffer pointer at out+0x08; bytes 6..7 of the out record are never written",
+    "allocates first.size + second.size + 3 bytes (or first.size + 1 when the second string is empty), copies the first string, then when the second string is non-empty writes the two bytes ': ' and copies the second string, then NUL-terminates",
+    "stores the new buffer at out+0x08, freeing the old buffer at out+0x08 with _ZdaPv when non-null (it is zero on the tag-13 path)",
+    "a shared helper with 847 direct callers in the executable LOAD segment; only the tag-13 query's call at 0x61b2d7f is pinned as a consumer here",
+    "on exception its landing pad at 0x61cf75b jumps to the cleanup fragment 0x61cf650..0x61cf666 (frees *(rbx+0x08) with _ZdaPv when non-null, then _Unwind_Resume)"
+   ],
+   "size_bytes": 247
+  },
+  {
+   "address": "0x61cf650",
+   "fde": "0x61cf650..0x61cf666",
+   "role": "mismatch cleanup fragment",
+   "rule": [
+    "frees the buffer at *(rbx+0x08) with _ZdaPv when non-null, then calls _Unwind_Resume on rbp",
+    "its own FDE, entered only from the mismatch helper's landing pad at 0x61cf75b"
+   ],
+   "size_bytes": 22
+  },
+  {
+   "address": "0x61b2ca8",
+   "fde": "0x61b2ca8..0x61b2ce2",
+   "role": "shared cleanup fragment",
+   "rule": [
+    "disposes the string in rbx, then the string at 0x8(%rsp), then the string in rbp, each with _M_dispose; checks the canary at rsp+0x108 and calls _Unwind_Resume on r12, or __stack_chk_fail on a canary mismatch",
+    "its own FDE, sitting between the twin tag-6 FDE (ends 0x61b2ca8) and the tag-13 FDE (starts 0x61b2cf0); the twin tag-6 routine's cleanup, also entered by the tag-13 query's two landing pads",
+    "the tag-13 query's first landing pad at 0x61b3576 enters at 0x61b2ca8 (all three strings live: rbx = S3, 0x8(%rsp) = S2, rbp = message); its second landing pad at 0x61b3582 sets rbp to the message string and enters at 0x61b2cba (message only)"
+   ],
+   "size_bytes": 58
+  },
+  {
+   "address": "0x61b1930",
+   "fde": "0x61b1930..0x61b19e7",
+   "role": "throttle gate",
+   "rule": [
+    "calls the limit check 0x61b1910 on (obj, &tag); when it returns nonzero the gate returns 1 (skip)",
+    "otherwise reads the tag byte, subtracts 3, and dispatches through the jump table at 0x97c5f4: tags 3, 4, 5, 6, 13 map to flag masks 0x02, 0x01, 0x04, 0x08, 0x10; tags 7..12 and any tag outside 3..13 go straight to the counter path",
+    "when a mask applies and (flags at obj+0x18 & mask) is nonzero, the gate returns 1 (skip)",
+    "counter path: increments the counter at obj+0x30; when the new counter is below the limit at obj+0x10 the gate returns 1 (skip); when it reaches the limit the counter is reset to 0 and the gate returns 0 (build)",
+    "returns 1 exactly when the query must be skipped, 0 exactly when the message must be built; no canary"
+   ],
+   "size_bytes": 183
+  },
+  {
+   "address": "0x61b1910",
+   "fde": "0x61b1910..0x61b192b",
+   "role": "limit check",
+   "rule": [
+    "loads the delivery target *(obj + 0x28) and calls its vtable slot +0x20 with no further arguments",
+    "returns 1 exactly when the limit at obj+0x08 is below the slot's return value (unsigned), 0 otherwise; the slot's meaning is not pinned",
+    "no canary"
+   ],
+   "size_bytes": 27
+  },
+  {
+   "address": "0x61b18b0",
+   "fde": "0x61b18b0..0x61b18c8",
+   "role": "flag-bit setter",
+   "rule": [
+    "sets bit rsi in the qword at *(rdi) and returns 1 exactly when the bit was clear before (the bit changed), 0 when it was already set",
+    "no calls, no stack frame, no canary"
+   ],
+   "size_bytes": 24
+  },
+  {
+   "address": "0x61b1a10",
+   "fde": "0x61b1a10..0x61b1ac6",
+   "role": "frame-and-deliver",
+   "rule": [
+    "takes (out, obj, value block); builds an empty SSO string and calls the frame builder 0x61b1260 with (value block, &string)",
+    "delivers by virtual call slot +0x10 on *(obj + 0x28) with (out, target, &{framed data, framed size} view on the stack)",
+    "frees the framed string with a sized delete when its data is not the SSO buffer, checks the canary at rsp+0x38, and returns the out pointer",
+    "the out record itself is filled by the delivery slot, not by this routine"
+   ],
+   "size_bytes": 182
+  },
+  {
+   "address": "0x61b1260",
+   "fde": "0x61b1260..0x61b13a3",
+   "role": "frame builder (shared helper, also pinned whole in the open PR #3001 packet)",
+   "rule": [
+    "takes (value block, out string); appends the 8 raw bytes of the return value at value block +0x00",
+    "appends one byte equal to the value block's +0x08 byte (the tag)",
+    "appends LE32 of the message size at value block +0x20, then tail-jumps to _M_append with the whole message (data at +0x18)",
+    "each append is guarded by remaining capacity against 0x3fffffffffffffff; failure throws __throw_length_error with \"basic_string::append\"",
+    "canary at rsp+0x18 checked before the tail jump"
+   ],
+   "size_bytes": 323
+  },
+  {
+   "address": "0x61bd410",
+   "fde": "0x61bd410..0x61bd4e9",
+   "role": "ULEB128 encoder (shared helper, also pinned whole in the open PR #3001 packet)",
+   "rule": [
+    "writes the ULEB128 of the u32 in esi at rdi and returns the end pointer: 1 byte to 0x7f, 2 to 0x3fff, 3 to 0x1fffff, 4 to 0xfffffff, 5 above",
+    "no calls, no stack frame, no canary"
+   ],
+   "size_bytes": 217
+  }
+ ],
+ "gate_jump_table": {
+  "address": "0x97c5f4",
+  "entries": [
+   {
+    "handler": "mask 0x02",
+    "index": 0,
+    "rel32": "0x058353ec",
+    "tag": 3,
+    "target": "0x61b19e0"
+   },
+   {
+    "handler": "mask 0x01",
+    "index": 1,
+    "rel32": "0x058353dc",
+    "tag": 4,
+    "target": "0x61b19d0"
+   },
+   {
+    "handler": "mask 0x04",
+    "index": 2,
+    "rel32": "0x058353cc",
+    "tag": 5,
+    "target": "0x61b19c0"
+   },
+   {
+    "handler": "mask 0x08",
+    "index": 3,
+    "rel32": "0x058353c4",
+    "tag": 6,
+    "target": "0x61b19b8"
+   },
+   {
+    "handler": "counter path (no flag check)",
+    "index": 4,
+    "rel32": "0x0583539c",
+    "tag": 7,
+    "target": "0x61b1990"
+   },
+   {
+    "handler": "counter path (no flag check)",
+    "index": 5,
+    "rel32": "0x0583539c",
+    "tag": 8,
+    "target": "0x61b1990"
+   },
+   {
+    "handler": "counter path (no flag check)",
+    "index": 6,
+    "rel32": "0x0583539c",
+    "tag": 9,
+    "target": "0x61b1990"
+   },
+   {
+    "handler": "counter path (no flag check)",
+    "index": 7,
+    "rel32": "0x0583539c",
+    "tag": 10,
+    "target": "0x61b1990"
+   },
+   {
+    "handler": "counter path (no flag check)",
+    "index": 8,
+    "rel32": "0x0583539c",
+    "tag": 11,
+    "target": "0x61b1990"
+   },
+   {
+    "handler": "counter path (no flag check)",
+    "index": 9,
+    "rel32": "0x0583539c",
+    "tag": 12,
+    "target": "0x61b1990"
+   },
+   {
+    "handler": "mask 0x10",
+    "index": 10,
+    "rel32": "0x0583537c",
+    "tag": 13,
+    "target": "0x61b1970"
+   }
+  ],
+  "rule": "tag byte minus 3 indexes the table (unsigned); an index above 10 goes straight to the counter path"
+ },
+ "inferences": [
+  "the tag-13 query is the fifth caller of the throttle gate and the largest of the query family: same gate, handler-chain walk, framing and delivery as the tag-3/tag-4 queries and the tag-5/tag-6 twins, but a count-mismatch prologue, a record loop and a nine-comparison walk (three links shallower than the tag-3/tag-4 queries)",
+  "the gate is a throttle: the message is built only while the target's slot +0x20 return does not exceed the limit at obj+0x08, while the tag's flag bit in obj+0x18 is clear, and once every limit-at-obj+0x10 qualifying calls",
+  "the first tag-13 caller follows the tag-4 caller pattern (0x606ca40 first, obj from +0x650, null-checked); the other two callers first zip a qword array and a 16-byte-record array into the two ranges, then free both ranges after the call",
+  "the tag-13 message's first 8 bytes are a presence mask with only bits 8, 9 and 10 set (0x700), followed by LE32(count) and the two length-prefixed strings S2 and S3",
+  "the second landing pad (message only) covers the handler-walk region, where S2 and S3 are not yet built; the first landing pad (all three strings) covers the loop and append region"
+ ],
+ "message": {
+  "tag13": {
+   "fields": [
+    "mask: 8 raw bytes of the presence-mask qword (bits 8, 9 and 10, 0x700)",
+    "count: LE32 of the record count (equal to the element count on this path)",
+    "S2: ULEB128(len(S2)) || S2, where S2 concatenates one LE32 per element, each the u32 returned by virtual slot +0x18 on that element; the S2 length is encoded from its low 32 bits",
+    "S3: ULEB128(len(S3)) || S3, where S3 concatenates one ULEB128(len) || data per 16-byte record; each length is encoded from its low 32 bits while the full length is appended; each pair is appended unconditionally, even for a zero length",
+    "the loop runs once per record (index stepping 8 over count*8 bytes): element = *(elements.begin + index), record = records.begin + index*2"
+   ],
+   "guards": "every append checks remaining capacity against 0x3fffffffffffffff and throws __throw_length_error with \"basic_string::append\" (string at 0x4474d2) on overflow; nine length-error arms in the tag-13 query",
+   "layout": "mask8 || LE32(count) || ULEB128(len(S2)) || S2 || ULEB128(len(S3)) || S3"
+  }
+ },
+ "mismatch": {
+  "first_string": {
+   "address": "0x966820",
+   "length": 42,
+   "text": "the CFs size and keys size does not match!"
+  },
+  "helper_args": "rdi = out record, rcx = &first string, rdx = 0, rsi = 2, r8 = &second string, r9 = 0",
+  "out_record": "u32 2 at +0x00, u16 0 at +0x04, heap buffer pointer at +0x08; bytes 6..7 never written on this path",
+  "second_string": {
+   "address": "0x4376fd",
+   "length": 0,
+   "note": "the pointer value is stored but never dereferenced on this path; only its zero size is read"
+  }
+ },
+ "routine": {
+  "binary_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "inputs": {
+   "rcx": "pointer to a range of 16-byte {data pointer at +0x00, length at +0x08} records (begin at +0x00, end at +0x08)",
+   "rdi": "out record pointer, returned in rax",
+   "rdx": "pointer to a range of 8-byte elements (begin at +0x00, end at +0x08); each element's virtual slot +0x18 returns the u32 appended to S2",
+   "rsi": "obj: chain head at *(obj), limit at +0x08, throttle limit at +0x10, flag bits at +0x18, delivery target at +0x28, throttle counter at +0x30"
+  },
+  "node": 115,
+  "provenance": "provenance/artifacts.json",
+  "returns": "out record pointer; on the count-mismatch path the record holds error code 2 and the mismatch message, on the gate-true path the record is zeroed, on the build path it is filled by the delivery slot",
+  "tags": {
+   "tag13": "0x61b2cf0"
+  },
+  "task_id": "RE-001"
+ },
+ "unknowns": [
+  "the identities of the virtual slot +0x20 (limit check) and slot +0x10 (delivery) targets, and what the delivery slot writes into the out record",
+  "the second argument the chain-walk handler slot receives: the query does not set rsi at the call site, so it holds whatever the gate's virtual call left; only rdi = the link and the message-string address in r14 are pinned",
+  "the meaning of the flag bits at obj+0x18, of the mask bits 8, 9 and 10, and of the u32 each element's slot +0x18 returns",
+  "the identity of the 16-byte records and the 8-byte elements, and what the 'CFs' in the mismatch message stands for",
+  "the owning functions behind the three caller FDEs beyond their call-site windows",
+  "the exact throw-site to landing-pad mapping in the exception table for the two landing pads"
+ ],
+ "walker": {
+  "address": "0x5d4d490",
+  "global": "0x64ecf80",
+  "global_source": "RELATIVE relocation at 0x64ecf80 with addend 0x5d4d490; file bytes zero",
+  "pinned_in": "open PR #2985 packet (RE-001-chain-dispatch-notifier-1bca30-115)",
+  "rule": "the walk compares each link's vtable slot +0x98 against the address 0x5d4d490 (a lea immediate in the query code); the first mismatching link's slot is called, or the tenth link's slot when all nine comparisons pass; the slot is entered with rdi = the link and the message-string address in the routine's string register (r14); the walk never checks for a null link"
+ }
+}
