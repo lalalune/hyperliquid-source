@@ -14,6 +14,7 @@ MANIFEST = "research/work-items/RE-review-open-20261106/prior-source-manifest.js
 MANIFEST_SHA256 = "46cf6bd20d074b66c54a76ebeeea3a8d0b80446ff233b13c1a0aa86d3bcee674"
 RECORD_COUNT = 1211
 TARGET_SHA256 = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+ARCHIVE = "research/work-items/RE-review-open-20261106/frozen-prior-inputs"
 MARKER = "PRIOR_CORPUS %s %d records verified" % (MANIFEST_SHA256, RECORD_COUNT)
 _cache = {}
 
@@ -37,7 +38,17 @@ def verify_files(root, entries):
         except (OSError, ValueError) as exc:
             raise ValueError("missing prior record: " + name) from exc
         if hashlib.sha256(raw).hexdigest() != entry["sha256"]:
-            raise ValueError("prior record digest mismatch: " + name)
+            # Later reviewed PRs may correct a live packet. Keep this comparison
+            # pinned to its original bytes instead of changing its evidence set.
+            archived = root / ARCHIVE / relative.parent.name / "records.json"
+            try:
+                archived.resolve().relative_to(root)
+                raw = archived.read_bytes()
+            except (OSError, ValueError) as exc:
+                raise ValueError("prior record digest mismatch: " + name) from exc
+            if hashlib.sha256(raw).hexdigest() != entry["sha256"]:
+                raise ValueError("archived prior record digest mismatch: " + name)
+            path = archived
         found.append(path)
     return tuple(found)
 
@@ -57,8 +68,13 @@ def _reference(root):
             or len(entries) != RECORD_COUNT):
         raise ValueError("prior corpus scope mismatch")
     try:
-        fingerprint = tuple((entry["path"], (root / entry["path"]).stat().st_size,
-                             (root / entry["path"]).stat().st_mtime_ns)
+        def stamp(path):
+            if not path.exists():
+                return None
+            stat = path.stat()
+            return stat.st_size, stat.st_mtime_ns
+        fingerprint = tuple((entry["path"], stamp(root / entry["path"]),
+                             stamp(root / ARCHIVE / Path(entry["path"]).parent.name / "records.json"))
                             for entry in entries)
     except OSError as exc:
         raise ValueError("missing pinned prior record") from exc
@@ -81,12 +97,12 @@ def paths(root, pattern="*/records.json"):
     overlays = tuple(local_base.glob("*/records.json")) if local_base.exists() else ()
     if pattern.endswith("records.json"):
         result = {str(p) for p in found
-                  if fnmatch.fnmatch(p.relative_to(base).as_posix(), pattern)}
+                  if fnmatch.fnmatch(p.parent.name + "/records.json", pattern)}
         result.update(str(p) for p in overlays
                       if fnmatch.fnmatch(p.relative_to(local_base).as_posix(), pattern))
         return sorted(result)
     result = {str(p.parent) for p in found
-              if fnmatch.fnmatch(p.parent.relative_to(base).as_posix(), pattern)}
+              if fnmatch.fnmatch(p.parent.name, pattern)}
     result.update(str(p.parent) for p in overlays
                   if fnmatch.fnmatch(p.parent.relative_to(local_base).as_posix(), pattern))
     return sorted(result)

@@ -11,7 +11,7 @@ The uncommitted CPython cache row is excluded from the active manifest; its
 original declaration remains in the retained submitted manifest.
 
 No raw binary evidence is rewritten, no instruction execution is claimed, and
-no component reconstruction gate is advanced. The reviewed publication batch contains 1,146 PR heads; 41 out-of-scope PRs were closed, 57 await separate differential-execution approval; the prior-corpus blockers are now repaired. See `reviewed-pr-heads.json`, `held-pr-heads.json` and `validation.json`.
+no component reconstruction gate is advanced. The reviewed publication batch contains 1,147 PR heads; 41 out-of-scope PRs were closed, 57 await separate differential-execution approval; the prior-corpus blockers are now repaired. See `reviewed-pr-heads.json`, `held-pr-heads.json` and `validation.json`.
 
 The compaction-dump model now wraps packed integer lanes at their observed
 widths. Boundary controls and the host-libc test corrections are recorded in
@@ -20,7 +20,7 @@ research-model checks, not a reconstructed-node execution or identity claim.
 
 ## Final review validation
 
-All 969 authorized test files pass. The 23 remaining pre-existing test files
+All 970 authorized test files pass. The 23 remaining pre-existing test files
 require instruction/native execution and were not run. All 616 selected static
 packet verifiers pass, including the explicitly qualified renderer and
 provider-version cases. The final changed-export audit byte-checks 550,472
@@ -50,11 +50,11 @@ and manifest remain under `submitted-pr2721/`.
 
 ## Public prior-corpus repair
 
-The 72 remaining static comparison PRs now use a frozen manifest of 1,210
+The 73 remaining static comparison PRs now use a frozen manifest of 1,211
 public record files. The earlier large private-worktree counts are preserved
 as historical reports; they are not treated as reproduced evidence or as
 coverage metrics. The record manifest, helper and original submitted
-manifests are retained here. All 72 focused test files and all 72 direct
+manifests are retained here. All 73 focused test files and all 73 direct
 static checkers pass; eight helper tests exercise integrity, missing-input,
 path, candidate-overlay and reference-identity controls.
 

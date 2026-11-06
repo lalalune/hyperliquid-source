@@ -17,7 +17,8 @@ class PriorCorpusTests(unittest.TestCase):
     def test_real_snapshot_is_complete_and_filters_the_reference_packet(self):
         with patch.dict(os.environ, {"NODE115_PRIOR_ROOT": str(ROOT)}):
             all_paths = corpus.paths(ROOT)
-            self.assertEqual(len(all_paths), corpus.RECORD_COUNT)
+            self.assertGreaterEqual(len(all_paths), corpus.RECORD_COUNT)
+            self.assertEqual(len(corpus._reference(ROOT)[1]), corpus.RECORD_COUNT)
             self.assertTrue(corpus.is_verified(ROOT))
             narrowed = corpus.paths(ROOT, "*lu-nextnode*/records.json")
             self.assertTrue(narrowed)
@@ -46,6 +47,26 @@ class PriorCorpusTests(unittest.TestCase):
                 corpus.verify_files(root, [entry])
             path.unlink()
             with self.assertRaisesRegex(ValueError, "missing prior"):
+                corpus.verify_files(root, [entry])
+
+    def test_updated_packet_uses_only_hash_authenticated_archive(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            live = root / "research/work-items/test/records.json"
+            saved = root / corpus.ARCHIVE / "test/records.json"
+            live.parent.mkdir(parents=True)
+            saved.parent.mkdir(parents=True)
+            original = b'{"exhibits": [{"range": "0x10..0x20"}]}\n'
+            live.write_bytes(b'{"corrected": true}')
+            saved.write_bytes(original)
+            entry = {"path": live.relative_to(root).as_posix(),
+                     "sha256": hashlib.sha256(original).hexdigest()}
+            self.assertEqual(corpus.verify_files(root, [entry]), (saved.resolve(),))
+            saved.write_bytes(b'{"forged": true}')
+            with self.assertRaisesRegex(ValueError, "archived prior record digest mismatch"):
+                corpus.verify_files(root, [entry])
+            saved.unlink()
+            with self.assertRaisesRegex(ValueError, "prior record digest mismatch"):
                 corpus.verify_files(root, [entry])
 
     def test_duplicate_and_escaping_paths_are_rejected(self):
