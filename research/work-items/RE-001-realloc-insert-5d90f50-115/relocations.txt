@@ -1,0 +1,15 @@
+Relocations for the realloc-insert window (from .rela.dyn and .rela.plt):
+
+grow 0x5d90f50: no R_X86_64_RELATIVE record carries it as addend;
+  no whole-file stored qword equals it
+
+The window is reached only through its 8 direct calls (see census.py
+output, reproduced by verify.py); it is never tail-jumped to and never
+referenced through a function-pointer slot.
+
+caller 0x5f13e00: no R_X86_64_RELATIVE record carries it as addend;
+  no whole-file stored qword equals it
+
+The caller is reached through 3 direct calls (0x5f13eda, 0x5f13f02,
+0x5f14066, sites only) and 1 tail jump (0x5f1435f, site only), exactly
+as the merged RE-001-predicate-drain-115 packet records.
