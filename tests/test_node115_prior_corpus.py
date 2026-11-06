@@ -78,6 +78,16 @@ class PriorCorpusTests(unittest.TestCase):
             self.assertTrue(corpus.is_documented(ROOT, 0x63577f0, 0x635a786))
             self.assertFalse(corpus.is_documented(ROOT, 0, 1 << 64))
 
+    def test_candidate_overlay_adds_conflicts_but_not_positive_evidence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            added = root / "research/work-items/injected/records.json"
+            added.parent.mkdir(parents=True)
+            added.write_text('{"exhibits":[{"range":["0xf0000000000","0xf0000000010"]}]}')
+            with patch.dict(os.environ, {"NODE115_PRIOR_ROOT": str(ROOT)}):
+                self.assertIn(str(added), corpus.paths(root))
+                self.assertFalse(corpus.is_documented(root, 0xf0000000000, 0xf0000000010))
+
 
 if __name__ == "__main__":
     unittest.main()

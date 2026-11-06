@@ -72,13 +72,24 @@ def _reference(root):
 
 def paths(root, pattern="*/records.json"):
     """Return authenticated record paths, or their packet dirs for dir globs."""
-    root, found = _reference(root)
-    base = root / "research/work-items"
+    local_root = Path(root).resolve()
+    reference_root, found = _reference(root)
+    base = reference_root / "research/work-items"
+    local_base = local_root / "research/work-items"
+    # Extra candidate records can add conflicts, but cannot replace pinned
+    # reference inputs or establish a positive is_documented() claim.
+    overlays = tuple(local_base.glob("*/records.json")) if local_base.exists() else ()
     if pattern.endswith("records.json"):
-        return [str(p) for p in found
-                if fnmatch.fnmatch(p.relative_to(base).as_posix(), pattern)]
-    return sorted({str(p.parent) for p in found
-                   if fnmatch.fnmatch(p.parent.relative_to(base).as_posix(), pattern)})
+        result = {str(p) for p in found
+                  if fnmatch.fnmatch(p.relative_to(base).as_posix(), pattern)}
+        result.update(str(p) for p in overlays
+                      if fnmatch.fnmatch(p.relative_to(local_base).as_posix(), pattern))
+        return sorted(result)
+    result = {str(p.parent) for p in found
+              if fnmatch.fnmatch(p.parent.relative_to(base).as_posix(), pattern)}
+    result.update(str(p.parent) for p in overlays
+                  if fnmatch.fnmatch(p.parent.relative_to(local_base).as_posix(), pattern))
+    return sorted(result)
 
 
 def is_verified(root):

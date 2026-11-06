@@ -16,9 +16,9 @@ import subprocess
 import sys
 import tempfile
 
-WT = os.path.join(_prior_tempfile.gettempdir(), 'node115-review-hl-wt-calls292-115')
+WT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SLUG = "RE-001-node115-lu-bintableinit-caller-2sites-walk-20rsp"
-SCRATCH = os.path.join(_prior_tempfile.gettempdir(), 'node115-review-scratch-hl292')
+SCRATCH = _prior_tempfile.gettempdir()
 BIN = os.path.join(WT, "artifacts", "node", "115", "hl-node")
 VERIFIER = "node115_lu_bintableinit_caller_walk_20rsp_2sites.py"
 PACKET_FILES = ["README.md", "EVIDENCE.md", "records.json", "MANIFEST.sha256",
