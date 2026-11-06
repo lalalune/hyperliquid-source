@@ -1,0 +1,112 @@
+{
+  "task_id": "RE-001",
+  "routine": {
+    "address": "0x5d5ab60",
+    "fde": "0x5d5ab60..0x5d5ad13",
+    "size_bytes": 435,
+    "binary": "work/hl-node-115.bin",
+    "binary_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "provenance": "provenance/artifacts.json entry artifacts/node/115/hl-node",
+    "prologue": "endbr64, push rbx only, no stack reserve, no canary check",
+    "arguments": {
+      "rdi": "hidden return-value slot (basic_string object to construct)",
+      "rsi": "lhs string object (pointer at +0x00, size at +0x08, SSO buffer or capacity at +0x10)",
+      "rdx": "rhs string object (same layout)"
+    },
+    "result": "rax = rdi on return; the return slot holds lhs bytes followed by rhs bytes"
+  },
+  "string_layout": {
+    "data_pointer_offset": "0x00",
+    "size_offset": "0x08",
+    "sso_buffer_or_capacity_offset": "0x10",
+    "sso_capacity": 15,
+    "sso_test": "data pointer equals object address + 0x10"
+  },
+  "path_choice": {
+    "total": "lhs size + rhs size, computed as rhs size + lhs size",
+    "insert_condition": "total > capacity(lhs) AND total <= capacity(rhs)",
+    "insert_condition_notes": [
+      "capacity(lhs) is 15 when lhs is SSO, else lhs capacity at +0x10; same rule for rhs",
+      "an SSO lhs with total <= 15 takes the append path (capacity test passes first)",
+      "an SSO lhs with total > 15 and an SSO rhs takes the append path (rhs capacity 15 < total)",
+      "an SSO lhs with total > 15 and a heap rhs takes the insert path exactly when rhs capacity >= total"
+    ],
+    "branch_sites": {
+      "lhs_sso_test": "0x5d5ab84",
+      "lhs_capacity_test": "0x5d5ab8d",
+      "rhs_sso_test": "0x5d5ab97",
+      "rhs_capacity_test": "0x5d5aba4",
+      "sso_lhs_total_test": "0x5d5ac38",
+      "append_path_entry": "0x5d5aba9",
+      "insert_path_entry": "0x5d5ac08"
+    }
+  },
+  "append_path": {
+    "entry": "0x5d5aba9",
+    "length_guard": {
+      "site": "0x5d5abb3",
+      "rule": "if rhs size > 0x3fffffffffffffff - lhs size, throw",
+      "throw_site": "0x5d5ad07",
+      "throw_target": "0x63f0de0 PLT __throw_length_error",
+      "message_string_address": "0x4474d2",
+      "message_string": "basic_string::append"
+    },
+    "append_call": {
+      "site": "0x5d5abc2",
+      "target": "0x63f0f40 PLT _M_append",
+      "arguments": "this = lhs, pointer = rhs data, length = rhs size",
+      "returns": "lhs object address in rax"
+    },
+    "steal_into_return": {
+      "heap_lhs": "return pointer = lhs data, return size = lhs size, return capacity = lhs capacity; lhs reset to empty SSO (pointer = lhs + 0x10, size 0, byte 0)",
+      "sso_lhs": "return pointer = return + 0x10; lhs bytes plus terminating NUL copied into the return SSO buffer (copy routine at 0x5d5ac58: qword loop with 4-byte, 2-byte and 1-byte tails); return size = lhs size; lhs keeps its appended bytes"
+    },
+    "result_representation": "SSO exactly when total <= 15, heap otherwise"
+  },
+  "insert_path": {
+    "entry": "0x5d5ac08",
+    "replace_call": {
+      "site": "0x5d5ac0c",
+      "target": "0x63f0d90 PLT _M_replace",
+      "arguments": "this = rhs, position 0, count 0, pointer = lhs data, length = lhs size",
+      "meaning": "insert the whole lhs at the front of rhs"
+    },
+    "move_construct": {
+      "site": "0x5d5ac17",
+      "target": "0x63f0eb0 PLT move constructor",
+      "arguments": "destination = return slot, source = replace result (rhs)",
+      "rhs_after": "moved-from; its fields are not pinned by this routine"
+    },
+    "length_handling": "no length check of its own in this routine; deferred to _M_replace, not pinned here"
+  },
+  "overload_identification": {
+    "inference": "libstdc++ operator+ for two string rvalues (basic_string&&, basic_string&&)",
+    "grounds": "the routine consumes both operands (it mutates lhs on the append path and rhs on the insert path) and selects between exactly those two paths on the capacity condition; the append-only and insert-only overloads each have a single path, so the two-path shape matches only the two-rvalue overload",
+    "caveat": "the overload name is inferred from the observed two-path structure, not from a symbol in the binary (the routine is local text; objdump labels it only by a nearby symbol offset)"
+  },
+  "consumers": {
+    "direct_calls": 15,
+    "tail_jumps": 0,
+    "stored_qwords_full_file": 0,
+    "relative_relocations": 0,
+    "caller_fdes": [
+      "0x5d7b620..0x5d7d442 (4 sites)",
+      "0x60d2820..0x60d49d3 (6 sites)",
+      "0x6117ed0..0x6119dad (3 sites)",
+      "0x611fb10..0x61213db (2 sites)"
+    ],
+    "argument_setup_pattern": "rdi is a return slot (lea or stack-held pointer), rsi is the lhs temp, rdx is the rhs pointer (register or stack-held); at 12 of the 15 sites a move-construct call immediately precedes the argument setup, building the lhs temp",
+    "sites": [
+      "0x5d7ba4d", "0x5d7c25a", "0x5d7c2b1", "0x5d7c736",
+      "0x60d32f9", "0x60d333a", "0x60d338a", "0x60d3694", "0x60d3bb7", "0x60d4065",
+      "0x6119234", "0x61192a0", "0x6119305",
+      "0x6120f83", "0x6120fd3"
+    ]
+  },
+  "unknowns": [
+    "length handling on the insert path beyond _M_replace entry (inside _M_replace, not examined)",
+    "fields of the moved-from rhs after the insert path",
+    "whether every caller's lhs temp is an rvalue at the source level (the routine's own two-path structure is what pins the overload reading, not a per-site source proof)",
+    "contents of the int3 padding after 0x5d5ad13 up to the next routine at 0x5d5ad20 (padding, not routine code)"
+  ]
+}
