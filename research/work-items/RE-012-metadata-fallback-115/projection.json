@@ -1,0 +1,169 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "addresses": "ELF VA",
+  "statx_raw_size": 256,
+  "result_extent": 176,
+  "statx_success_projection": [
+    {
+      "out": "0x00",
+      "width": 8,
+      "value": "constant tag1"
+    },
+    {
+      "out": "0x08",
+      "width": 16,
+      "raw_statx": "0x50",
+      "operation": "copy16 bytes including raw timestamp reserved bytes"
+    },
+    {
+      "out": "0x18",
+      "width": 4,
+      "raw_statx": "0x00",
+      "operation": "copy mask dword"
+    },
+    {
+      "out": "0x1c",
+      "width": 4,
+      "operation": "UNWRITTEN padding"
+    },
+    {
+      "out": "0x20",
+      "width": 8,
+      "raw_statx": [
+        "0x88 major u32",
+        "0x8c minor u32"
+      ],
+      "operation": "device bit placement"
+    },
+    {
+      "out": "0x28",
+      "width": 8,
+      "raw_statx": "0x20",
+      "operation": "copy qword"
+    },
+    {
+      "out": "0x30",
+      "width": 8,
+      "raw_statx": "0x10",
+      "operation": "zero extend dword"
+    },
+    {
+      "out": "0x38",
+      "width": 4,
+      "raw_statx": "0x1c",
+      "operation": "zero extend word"
+    },
+    {
+      "out": "0x3c",
+      "width": 8,
+      "raw_statx": "0x14",
+      "operation": "copy uid/gid dword pair"
+    },
+    {
+      "out": "0x44",
+      "width": 4,
+      "value": 0
+    },
+    {
+      "out": "0x48",
+      "width": 8,
+      "raw_statx": [
+        "0x80 major u32",
+        "0x84 minor u32"
+      ],
+      "operation": "device bit placement"
+    },
+    {
+      "out": "0x50",
+      "width": 8,
+      "raw_statx": "0x28",
+      "operation": "copy qword"
+    },
+    {
+      "out": "0x58",
+      "width": 8,
+      "raw_statx": "0x04",
+      "operation": "zero extend dword"
+    },
+    {
+      "out": "0x60",
+      "width": 8,
+      "raw_statx": "0x30",
+      "operation": "copy qword"
+    },
+    {
+      "out": "0x68",
+      "width": 8,
+      "raw_statx": "0x40",
+      "operation": "copy seconds qword"
+    },
+    {
+      "out": "0x70",
+      "width": 8,
+      "raw_statx": "0x48",
+      "operation": "zero extend nanoseconds dword"
+    },
+    {
+      "out": "0x78",
+      "width": 8,
+      "raw_statx": "0x70",
+      "operation": "copy seconds qword"
+    },
+    {
+      "out": "0x80",
+      "width": 8,
+      "raw_statx": "0x78",
+      "operation": "zero extend nanoseconds dword"
+    },
+    {
+      "out": "0x88",
+      "width": 8,
+      "raw_statx": "0x60",
+      "operation": "copy seconds qword"
+    },
+    {
+      "out": "0x90",
+      "width": 8,
+      "raw_statx": "0x68",
+      "operation": "zero extend nanoseconds dword"
+    },
+    {
+      "out": "0x98",
+      "width": 24,
+      "value": 0
+    }
+  ],
+  "legacy_success": {
+    "tag0": "output0..8",
+    "payload": "rawstat64 144 bytes copied tooutput+0x20",
+    "unwritten": "output8..0x20"
+  },
+  "error": {
+    "tag2": "output0..8",
+    "word": "output8..0x10",
+    "unwritten": "output0x10..0xb0"
+  },
+  "fallback_sentinel": {
+    "tag3": "output0..8",
+    "unwritten": "output8..0xb0"
+  },
+  "device_bit_ranges": {
+    "major0..11": "output8..19",
+    "major12..31": "output44..63",
+    "minor0..7": "output0..7",
+    "minor8..31": "output20..43"
+  },
+  "policy": {
+    "cache_va": "0x6500088",
+    "initial_read_2": "skipstatx, returntag3",
+    "operation_success": "initialcache0 ->store1; projecttag1",
+    "operation_error": "saveoriginalerrorword; rereadcache; if1 returntag2/original; elseprobe",
+    "probe_uses_libc_if_nonzero": "statx(0,NULL,0,0xfff,NULL)",
+    "probe_without_libc": "syscall(332,0,NULL,0,0xfff,NULL)",
+    "probe_fails_errno14": "discardprobeerror, cache1, returntag2/originalerror",
+    "probe_other_outcome": "cache2, tag3, discardoriginalerror",
+    "outer": "onlytag3 triggersstat64; allotherresults copied/forwarded"
+  },
+  "padding_is_not_zero_normalization": true,
+  "captured_execution_or_emulation": false
+}
