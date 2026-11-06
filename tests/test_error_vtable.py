@@ -6,6 +6,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from evidence_exports import comparable_export
 from error_vtable import (BODIES, DROP_CALLERS, PACKET,
                           SHARED_METHOD_VTABLES, SHA, SIZE, TARGET,
                           VTABLE, analyze, generate)
@@ -50,8 +51,8 @@ class ErrorVtableTest(unittest.TestCase):
                   'MANIFEST.sha256']
                  + [f'{role}.objdump.txt' for role in BODIES])
         for name in names:
-            self.assertEqual((regen_dir / name).read_bytes(),
-                             (PACKET / name).read_bytes(), name)
+            self.assertEqual(comparable_export(regen_dir / name),
+                             comparable_export(PACKET / name), name)
 
     def test_nine_bodies_and_cross_checks(self):
         self.assertEqual(len(self.payload['bodies']), 9)

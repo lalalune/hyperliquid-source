@@ -654,13 +654,14 @@ def generate(target, outdir):
 
 
 def verify():
+    from evidence_exports import comparable_export
     payload = analyze(TARGET.read_bytes())
     with tempfile.TemporaryDirectory() as tmp:
         generate(TARGET, tmp)
         names = ['records.json', 'frames.txt'] + [
             '%s.objdump.txt' % n for n in EXCERPTS]
-        ok = all((Path(tmp) / n).read_bytes()
-                 == (PACKET / n).read_bytes() for n in names)
+        ok = all(comparable_export(Path(tmp) / n)
+                 == comparable_export(PACKET / n) for n in names)
     print(json.dumps({'matches': bool(ok and payload)}))
     return 0 if ok else 1
 

@@ -6,6 +6,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from evidence_exports import comparable_export
 from cfg_byte_consumers_static import (BODIES, EXCERPTS, PACKET,
                                        PRIOR_PINS, SHA, SIZE, TARGET,
                                        analyze, generate)
@@ -50,8 +51,8 @@ class CfgByteConsumersStaticTest(unittest.TestCase):
         names = ['records.json', 'frames.txt'] + [
             '%s.objdump.txt' % n for n in EXCERPTS]
         for name in names:
-            self.assertEqual((regen_dir / name).read_bytes(),
-                             (PACKET / name).read_bytes(), name)
+            self.assertEqual(comparable_export(regen_dir / name),
+                             comparable_export(PACKET / name), name)
 
     def test_artifact_and_body_pins(self):
         self.assertEqual(self.payload['artifact']['sha256'], SHA)

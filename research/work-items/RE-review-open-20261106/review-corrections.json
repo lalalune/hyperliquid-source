@@ -54,6 +54,24 @@
       "blocker": "Script-only checks with top-level loops and sys.exit(0) fail when imported by unittest, despite their successful assertions",
       "change": "Run such scripts directly while preserving discovery for loop-generated unittest methods",
       "validation": "14 real-process runner tests pass, including both regression controls"
+    },
+    {
+      "pull_requests": [
+        3166,
+        2955,
+        3043
+      ],
+      "files": [
+        "tools/evidence_exports.py",
+        "tests/test_evidence_exports.py",
+        "tools/cfg_byte_consumers_static.py",
+        "tests/test_build_mode_arg_selection.py",
+        "tests/test_cfg_byte_consumers_static.py",
+        "tests/test_error_vtable.py"
+      ],
+      "blocker": "Raw export comparisons failed solely because objdump embeds a machine-local input filename",
+      "change": "Normalize only the filename in the file-format header when comparing exports; authenticate each original manifest digest first. Retained raw exports and their manifests are unchanged.",
+      "validation": "3 focused helper controls plus 36 packet tests passed; changed bytes and architecture remain unequal and tampered raw manifest inputs raise an error"
     }
   ],
   "validation": {

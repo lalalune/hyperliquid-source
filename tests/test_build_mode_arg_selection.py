@@ -6,6 +6,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+from evidence_exports import comparable_export
 import build_mode_arg_selection as bm
 from build_mode_arg_selection import PACKET, SHA, SIZE, TARGET, analyze, generate
 
@@ -52,8 +53,8 @@ class BuildModeArgSelectionTest(unittest.TestCase):
             if path.name == 'README.md':
                 continue
             self.assertEqual(
-                (self.regen_dir / path.name).read_bytes(),
-                path.read_bytes(), path.name)
+                comparable_export(self.regen_dir / path.name),
+                comparable_export(path), path.name)
 
     def test_no_contradiction_with_prior_packets(self):
         bodies = self.payload['bodies']
