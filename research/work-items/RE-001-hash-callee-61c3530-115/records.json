@@ -1,0 +1,285 @@
+{
+ "arguments": {
+  "data": "rdi; pointer to the input bytes. Read on every arm except length 0, never written on any arm",
+  "length": "rsi; the input length in bytes; selects the arm by the dispatch bounds 3/8/16/32/64/96/128/240",
+  "seed": "rdx; a 64-bit seed folded into every lane constant as (K + seed) on a pair's first lane and (K - seed) on its second lane"
+ },
+ "census": {
+  "direct_calls": [
+   "0x5f0775f",
+   "0x5f07780",
+   "0x5f077a4",
+   "0x5f077cd",
+   "0x5f09d83",
+   "0x5f09d9c",
+   "0x5f09dbe",
+   "0x5f09dd8",
+   "0x5f09f3f",
+   "0x5f09f5c",
+   "0x5f09f76",
+   "0x5f09f9a",
+   "0x5f0f772",
+   "0x5f0f79e",
+   "0x5f0fd5b",
+   "0x5f0fd79",
+   "0x5f0fda0",
+   "0x5f0fdc0",
+   "0x5f0fe9d",
+   "0x5f0feb9",
+   "0x5f1f88f",
+   "0x5f1f8a4",
+   "0x5fb7105",
+   "0x5fb7119",
+   "0x5fb715b",
+   "0x5fb7175",
+   "0x5fb7191",
+   "0x5fb8023",
+   "0x5fb8041",
+   "0x5fb805b",
+   "0x5fb8079",
+   "0x5fb8133",
+   "0x5fb8151",
+   "0x5fb816b",
+   "0x5fb8189",
+   "0x5fb8243",
+   "0x5fb8261",
+   "0x5fb827b",
+   "0x5fb8299",
+   "0x5fb8353",
+   "0x5fb8371",
+   "0x5fb838b",
+   "0x5fb83a9",
+   "0x5fb8463",
+   "0x5fb8481",
+   "0x5fb849b",
+   "0x5fb84b9",
+   "0x5fb8573",
+   "0x5fb858e",
+   "0x5fb85a8",
+   "0x5fb85c6",
+   "0x5fb8683",
+   "0x5fb869e",
+   "0x5fb86b8",
+   "0x5fb86d6",
+   "0x5fbc424",
+   "0x5fbc449",
+   "0x5fbc469",
+   "0x5fbc487",
+   "0x5fbef64",
+   "0x5fbef7f",
+   "0x5fbef99",
+   "0x5fbefb8",
+   "0x5fbf41d",
+   "0x5fbf444",
+   "0x5fbfdd1",
+   "0x5fbfdec",
+   "0x5fbfe06",
+   "0x5fbfe25",
+   "0x5fc01d3",
+   "0x5fc01f2",
+   "0x5fc0ac1",
+   "0x5fc0adc",
+   "0x5fc0af6",
+   "0x5fc0b15",
+   "0x5fc0ec3",
+   "0x5fc0ee2",
+   "0x5fc1808",
+   "0x5fc1827",
+   "0x5fc1841",
+   "0x5fc1860",
+   "0x5fc1d09",
+   "0x5fc1d2b",
+   "0x5fc2741",
+   "0x5fc2a20",
+   "0x5fc2a5a",
+   "0x5fc37a1",
+   "0x5fc37db",
+   "0x5fc385c",
+   "0x5fc3888",
+   "0x5fc3e6d",
+   "0x5fc3e94",
+   "0x5fc4b38",
+   "0x5fc6f61",
+   "0x5fc6f97",
+   "0x5fc7181",
+   "0x5fc71b7",
+   "0x5fc73a1",
+   "0x5fc73d7",
+   "0x5fc7c45",
+   "0x5fc7c72",
+   "0x5fc7ca7",
+   "0x5fc7cc8",
+   "0x5fc815d",
+   "0x5fc8189",
+   "0x5fc89de",
+   "0x5fc8a06",
+   "0x61c3d25"
+  ],
+  "direct_calls_note": "108 sites, each a real e8 call instruction targeting 0x61c3530, confirmed by linear disassembly of the containing FDE (capstone); per-site caller FDEs are in callers.tsv. Largest caller FDEs: 0x5f0f930..0x5f10134 (6 sites), 0x5fc2900..0x5fc3acf (6 sites), 0x5f07670..0x5f081cb (4 sites). One site (0x61c3d25) sits in the neighbouring function above the window; the remaining 107 are in the 0x5f07xxx-0x5fc8xxx function cluster",
+  "qword_hits_file_offsets": [],
+  "relative_slots": [],
+  "tail_jumps": []
+ },
+ "component": "hash callee (whole-function map)",
+ "delegation": {
+  "gate": "at 0x61c3740 the window restores rdi = data and compares length against 0xf0; the (data, length, seed) registers are already in the callee's argument positions, so both exits are pure tail jumps",
+  "long": {
+   "lengths": "241 and above",
+   "site": "0x61c3808",
+   "target": "0x61c2cb0",
+   "target_window": "0x61c2cb0..0x61c3221 (369 bytes, FDE cie=0)"
+  },
+  "mid": {
+   "lengths": "129..240",
+   "site": "0x61c3750",
+   "target": "0x61c3230",
+   "target_window": "0x61c3230..0x61c3491 (609 bytes, FDE cie=0)"
+  },
+  "status": "both targets cited by contract only: only the jump sites, the length bounds and the argument registers are claimed here, not the target bodies"
+ },
+ "final_mix": "final_mix(x): y = x ^ (x >> 37); y = y * 0x165667b19e3779f9 (mod 2^64); result = y ^ (y >> 32). Shared by every in-window arm; the 9..16 arm reaches it inline at 0x61c3581, the small arms tail-jump into its second half at 0x61c358b, the accumulator arms compute it inline at 0x61c371a",
+ "in_window_exits": [
+  {
+   "kind": "tail jump (delegation, lengths 129..240)",
+   "site": "0x61c3750",
+   "target": "0x61c3230"
+  },
+  {
+   "kind": "tail jump (delegation, lengths 241+)",
+   "site": "0x61c3808",
+   "target": "0x61c2cb0"
+  },
+  {
+   "kind": "internal jump into the shared final-mix tail",
+   "site": "0x61c37af",
+   "target": "0x61c358b"
+  },
+  {
+   "kind": "internal jump (97..128 band entry)",
+   "site": "0x61c3898",
+   "target": "0x61c35e3"
+  }
+ ],
+ "lane_constants": {
+  "accumulator_bands": {
+   "band_A_65_to_128": {
+    "offsets": [
+     "data+32",
+     "data+40",
+     "data+length-48",
+     "data+length-40"
+    ],
+    "pairs": [
+     [
+      "0xcb00c391bb52283c",
+      "0xa32e531b8b65d088"
+     ],
+     [
+      "0x4ef90da297486471",
+      "0xd8acdea946ef1938"
+     ]
+    ]
+   },
+   "band_B_33_to_128": {
+    "offsets": [
+     "data+16",
+     "data+24",
+     "data+length-32",
+     "data+length-24"
+    ],
+    "pairs": [
+     [
+      "0x78e5c0cc4ee679cb",
+      "0x2172ffcc7dd05a82"
+     ],
+     [
+      "0x8e2443f7744608b8",
+      "0x4c263a81e69035e0"
+     ]
+    ]
+   },
+   "band_D_97_to_128": {
+    "offsets": [
+     "data+48",
+     "data+56",
+     "data+length-64",
+     "data+length-56"
+    ],
+    "pairs": [
+     [
+      "0x3f349ce33f76faa8",
+      "0x1d4f0bc7c7bbdcf9"
+     ],
+     [
+      "0x3159b4cd4be0518a",
+      "0x647378d9c97e9fc8"
+     ]
+    ]
+   },
+   "final_pair": {
+    "offsets": [
+     "data+0",
+     "data+8",
+     "data+length-16",
+     "data+length-8"
+    ],
+    "pairs": [
+     [
+      "0xbe4ba423396cfeb8",
+      "0x1cad21f72c81017c"
+     ],
+     [
+      "0xdb979083e96dd4de",
+      "0x1f67b3b7a4a44072"
+     ]
+    ]
+   }
+  },
+  "primes": {
+   "p1": "0x9e3779b185ebca87",
+   "p2": "0xc2b2ae3d27d4eb4f",
+   "p3": "0x165667b19e3779f9"
+  },
+  "small_arms": {
+   "c_a": "0xbe4ba423396cfeb8",
+   "c_b": "0x1cad21f72c81017c",
+   "len1_3_seed_offset": "0x396cfeb8",
+   "len4_8_multiplier": "0x9e3779b1 (the low 32 bits of P1)"
+  }
+ },
+ "length_arms": {
+  "0": "fold(C_A + seed, P2); the data pointer is never dereferenced",
+  "1..3": "v = data[0] | data[length>>1] << 8 | data[length-1] << 16 | length << 24 (32-bit); final_mix((v ^ (seed + 0x396cfeb8)) * P1)",
+  "129..240": "delegates by tail jump to 0x61c3230 (see delegation)",
+  "17..32": "final_mix(P1 * length + fold(final pair 1) + fold(final pair 2))",
+  "241+": "delegates by tail jump to 0x61c2cb0 (see delegation)",
+  "33..64": "the 17..32 form with band B's two folds added into the accumulator first",
+  "4..8": "w = rd32(data) | rd32(data+length-4) << 32; w ^= C_A + seed; u = w ^ (w >> 51); u = u * 0x9e3779b1 + length; u ^= u >> 47; final_mix(u * P2)",
+  "65..96": "the 33..64 form with band A's two folds added as well",
+  "9..16": "A = (C_A + seed) ^ rd64(data); B = (C_B - seed) ^ rd64(data+length-8); final_mix(A + length + B + fold(A, B))",
+  "97..128": "the 65..96 form with band D's two folds added as well"
+ },
+ "mix_primitive": "a lane pair reads two consecutive qwords; x = (K1 + seed) ^ first, y = (K2 - seed) ^ second; the pair contributes fold(x, y) = (x*y mod 2^64) ^ (x*y >> 64) (the low and high halves of the 128-bit product, xored)",
+ "model": "tools/hash_callee_61c3530_115.py",
+ "node": 115,
+ "return_value": "rax: the 64-bit hash of the input under the seed (lengths 0..128); for lengths 129 and above, whatever the delegation target returns for the same (data, length, seed)",
+ "side_effects": "none: no stores, no calls, no reads outside the input's own bytes (overlapping lane reads stay inside [data, data+length) on every arm), callee-saved registers rbx/rbp/r12-r15 untouched (r12/r14/r15 are pushed and popped on the accumulator arms only)",
+ "tests": "tests/test_hash_callee_61c3530_115.py",
+ "unknowns": [
+  "the delegation targets' bodies: 0x61c3230 (lengths 129..240) and 0x61c2cb0 (lengths 241+) are cited by contract, not read in this packet",
+  "the exact source spelling of the function and of its lane constants; the observed structure (per-lane (K + seed)/(K - seed) xors, 128-bit multiply folds, the three primes 0x9e3779b185ebca87 / 0xc2b2ae3d27d4eb4f / 0x165667b19e3779f9, which are xxHash64 primes and the wyhash family's default secret entries) is the wyhash family's, but no specific source function is claimed",
+  "why the 108 callers choose their seeds (only the call sites and containing FDEs were censused, not the callers' semantics); the two packets that cite this callee by contract (RE-001-value-resolve-store-115, RE-001-protection-info-validate-115) use seeds 0, 0xd28aad72f49bd50b, 0xa5155ae5e937aa16 and 0x77a00858ddd37f21",
+  "whether any caller passes length 0 with an invalid data pointer and relies on the no-dereference arm (the arm itself is pinned: no read happens)"
+ ],
+ "window": {
+  "artifact": "work/hl-node-115.bin",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "cie_offset": "0",
+  "end": "0x61c389d",
+  "fde_length": "0x38",
+  "fde_offset": "0x376de0",
+  "provenance_path": "artifacts/node/115/hl-node",
+  "size_bytes": 877,
+  "start": "0x61c3530"
+ }
+}
