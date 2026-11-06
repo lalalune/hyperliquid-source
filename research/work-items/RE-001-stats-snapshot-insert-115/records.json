@@ -1,0 +1,494 @@
+{
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "task": "RE-001",
+ "bounded_question": "What does the stats-snapshot insert 0x606ef50 build from a source iterator, how does its caller 0x5d4cc80 create and hand off the snapshot node, and what do the two node types (vtables 0x64d2c28/0x64d2c90) differ in?",
+ "routine": {
+  "address": "0x606ef50",
+  "fde": "0x606ef50..0x606f91f",
+  "size_bytes": 2511,
+  "name": "stats-snapshot insert"
+ },
+ "caller": {
+  "address": "0x5d4cc80",
+  "fde": "0x5d4cc80..0x5d4ce6a",
+  "size_bytes": 490,
+  "arguments": [
+   "rdi: owner",
+   "rsi: source object",
+   "rdx: lower key bound",
+   "rcx: upper key bound",
+   "r8: snapshot slot (pointer to node pointer)"
+  ],
+  "returns": "owner (rdi)",
+  "direct_calls": 0,
+  "registration_triples": [
+   "0x104ab8",
+   "0x1090c0",
+   "0x109f30",
+   "0x10b0a0"
+  ],
+  "registration_slots": [
+   "0x64c97c8",
+   "0x64cb540",
+   "0x64cba20",
+   "0x64cc020"
+  ]
+ },
+ "wrapper": {
+  "address": "0x606f920",
+  "fde": "0x606f920..0x606f94b",
+  "size_bytes": 43,
+  "rule": "wrapper(node): rsi = 1 + count_getter(node), rdx = *(node+0x18), tail-jump to insert",
+  "vtable_slot": 3,
+  "vtable": "0x64d2c90",
+  "stored_qword": "0x11c9f8",
+  "relative_offset": "0x64d2cb8"
+ },
+ "node": {
+  "size_bytes": 112,
+  "layout": {
+   "+0x00": "vtable pointer (type A 0x64d2c38, type B 0x64d2ca0)",
+   "+0x08": "bound / first-entry sequence: flag-nonzero path zeroes it; flag-0 path leaves the fresh allocation until the locked lookup writes it on success; insert overwrites it with the first parsed key-prefix sequence",
+   "+0x10": "lower key bound (caller's rdx)",
+   "+0x18": "upper key bound (caller's rcx)",
+   "+0x20": "payload: flag-0 path written by map_copy on lookup success, else fresh-allocation contents; flag-nonzero path unwritten",
+   "+0x28": "embedded std::map header: color +0x28 (u32 0), parent +0x30, left +0x38, right +0x40, count +0x48",
+   "+0x50": "u32, zeroed at build; copied into the owner by slot 7",
+   "+0x54": "u16, zeroed at build; copied into the owner by slot 7",
+   "+0x58": "char*, zeroed at build; strdup-copied into the owner by slot 7",
+   "+0x60": "flag byte: 1 while the snapshot is live, 0 on the early exits",
+   "+0x68": "source object pointer (caller's rsi)"
+  },
+  "vtable_a": "0x64d2c28",
+  "vtable_b": "0x64d2c90",
+  "slots_a": [
+   "0x606c5e0",
+   "0x606c660",
+   "0x606c180",
+   "0x606c6b0",
+   "0x606c190",
+   "0x606c170",
+   "0x606c1a0",
+   "0x606c1e0"
+  ],
+  "slots_b": [
+   "0x606e250",
+   "0x606e2d0",
+   "0x606ddf0",
+   "0x606f920",
+   "0x606de00",
+   "0x606c170",
+   "0x606de10",
+   "0x606de50"
+  ],
+  "slot_meanings": {
+   "0": "destructor: free +0x58 array, then free every map entry (key dispose A 0x606c280 / B 0x606def0)",
+   "1": "deleting destructor: slot 0 then operator delete(node, 0x70)",
+   "2": "flag getter: (u8)node+0x60",
+   "3": "refresh: A calls node_init(node, 1+*(node+0x8), *(node+0x18)); B tail-jumps to insert(node, 1+*(node+0x8), *(node+0x18))",
+   "4": "count getter: *(node+0x8)",
+   "5": "returns -1 (shared routine 0x606c170)",
+   "6": "returns &node+0x20",
+   "7": "copy header: owner u32@0 = node u32@0x50, owner u16@4 = node u16@0x54, owner ptr@8 = strdup(node ptr@0x58) (old owner ptr freed); returns owner"
+  },
+  "type_select": "flag *(source+0x4c9) == 0 selects type A, != 0 selects type B"
+ },
+ "insert": {
+  "null_source": "node+0x68 == 0: node+0x60 = 0 and return (no map change)",
+  "state_init": "0x60b21f0 fills a 0x90-byte struct: all zero except +0x2c = 0x101, +0x78 = -1, +0x84 = 4, +0x88 = 0x100; the second argument is ignored",
+  "bound_getter": "0x5d532d0 returns *(source+0xac0), passed as the third argument to the slot-0x198 produce call",
+  "seek_format": "%010d",
+  "seek_value": "max(node+0x8, bound) formatted into an 11-byte buffer (10 digits, NUL at +10)",
+  "iterator_protocol": {
+   "slot_0x198": "produce(iterator) from the source object: (source, &state, *(source+0xac0))",
+   "slot_0x28": "seek(iterator, &seek_view) with the %010d view",
+   "slot_0x10": "has-current -> bool",
+   "slot_0x48": "current key view (ptr, len)",
+   "slot_0x50": "current value view (ptr, len)",
+   "slot_0x38": "advance",
+   "slot_0x8": "release"
+  },
+  "first_entry": "parsed once before the loop: node+0x8 = its key-prefix sequence; if node+0x8 < bound the flag is cleared, the iterator released and the routine returns without touching the map",
+  "per_entry": [
+   "parse the current key view with the delimited-key parser 0x606eb60 (bound = insert bound)",
+   "move the parsed suffix into the saved-key slot (rsp+0xb8)",
+   "skip the entry when the saved key is exactly the 35-byte format-version key (advance via slot 0x38)",
+   "read the value view via slot 0x50, copy it into a string with the hex helper flag-0 path, decimal-parse it with 0x61d1540 into the sequence",
+   "lower-bound walk + 0x5d6c600: an exact duplicate key is dropped (first occurrence wins); otherwise allocate a 0x48-byte map node",
+   "map node: key string at +0x20 (SSO inline at +0x30 when len <= 15, heap via _M_create when len > 15, NUL at +0x30+len), value u64 = sequence at +0x40, header +0x00..+0x1f",
+   "insert via _Rb_tree_insert_and_rebalance and count++",
+   "advance via slot 0x38"
+  ],
+  "merge": {
+   "rule": "when the iterator is exhausted the node's map is REPLACED by the local map; the old tree is freed with the type's tree-free routine",
+   "node_empty": "adopt the local tree into the node map (no free)",
+   "local_empty": "move the node tree to the local header, zero the node map, free the tree",
+   "both_nonempty": "swap the two headers, free the old node tree",
+   "empty_iterator_first_check": "when slot 0x10 is false before any entry, the flag is cleared and the routine returns WITHOUT the merge (the node map is left untouched)"
+  }
+ },
+ "version_keys": {
+  "format_version": {
+   "text": "__persistent_stats_format_version__",
+   "length": 35,
+   "table": "0x65061c0",
+   "literal": "0x95c460",
+   "initializer": "0x606f950"
+  },
+  "compatible_version": {
+   "text": "__persistent_stats_compatible_version__",
+   "length": 39,
+   "table": "0x65061a0",
+   "literal": "0x96ae00",
+   "initializer": "0x606f950"
+  },
+  "note": "both tables live in BSS and are built by the static initializer 0x606f950 from the literals via the string constructor 0x5f204e0; the initializer is registered at 0x63f3990 (.init_array entry, stored qword at file offset 0x7468)"
+ },
+ "locked_lookup": {
+  "address": "0x5d52660",
+  "fde": "0x5d52660..0x5d52765",
+  "size_bytes": 261,
+  "arguments": [
+   "rdi: source object",
+   "rsi: lower key",
+   "rdx: upper key",
+   "rcx: out1 (&node+0x8)",
+   "r8: out2 (&node+0x20)"
+  ],
+  "returns": "1 on hit, 0 otherwise (also 0 without locking when either out pointer is null)",
+  "lock": "instrumented acquire 0x606ca40 on source+0x988, unlock wrapper 0x60d52f0 on every path",
+  "tree": "root at source+0xcb0, sentinel &source+0xca8; nodes carry key +0x20, left +0x10, right +0x18, map +0x28",
+  "hit": "first node with key in [rsi, rdx): *out1 = its key, map_copy(out2, node+0x28)",
+  "miss": "no write to the out pointers"
+ },
+ "map_copy": {
+  "address": "0x5d4e140",
+  "fde": "0x5d4e140..0x5d4e257",
+  "size_bytes": 279,
+  "rule": "deep-copy the map at src+0x00 into the map at dst+0x08 (old dst tree cleared first)"
+ },
+ "lower_bound": {
+  "address": "0x5d6c600",
+  "fde": "0x5d6c600..0x5d6c79b",
+  "size_bytes": 411,
+  "arguments": [
+   "rdi: map object (map header at +0x08)",
+   "rsi: node hint",
+   "rdx: key string pointer"
+  ],
+  "returns": "(parent, insert_pos): insert_pos 0 means the key already exists (caller frees the new node), insert_pos == header means insert at the end",
+  "comparator": "0x5d498c0: memcmp on the common prefix, else the length difference clamped to int32"
+ },
+ "tree_free": {
+  "note": "0x606c280 and 0x606def0 are the same recursive tree-free routine instantiated twice; the only differing instruction is the self-recursive call target. Both are safe no-ops on a null root.",
+  "a": "0x606c280",
+  "b": "0x606def0",
+  "size_bytes": 861
+ },
+ "status": {
+  "invalid_argument_code": 4,
+  "format": "0x960ee0",
+  "format_length": 32,
+  "message": "stats_iterator not preallocated.",
+  "second_view": {
+   "ptr": "0x4376fd",
+   "len": 0
+  }
+ },
+ "literals": {
+  "version_key_format": "__persistent_stats_format_version__",
+  "version_key_compatible": "__persistent_stats_compatible_version__",
+  "seek_format": "%010d",
+  "not_preallocated": "stats_iterator not preallocated.",
+  "delimiter": "#",
+  "empty_view_ptr": "0x4376fd"
+ },
+ "census": {
+  "0x5d498c0": {
+   "direct_calls": 21,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x5d4cc80": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x104ab8",
+    "0x1090c0",
+    "0x109f30",
+    "0x10b0a0"
+   ],
+   "relative_offsets": [
+    "0x64c97c8",
+    "0x64cb540",
+    "0x64cba20",
+    "0x64cc020"
+   ]
+  },
+  "0x5d4e140": {
+   "direct_calls": 2,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x5d52660": {
+   "direct_calls": 1,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x5d532d0": {
+   "direct_calls": 2,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x5d6c600": {
+   "direct_calls": 5,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x5f204e0": {
+   "direct_calls": 12,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x606c170": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11c920",
+    "0x11ca28"
+   ],
+   "relative_offsets": [
+    "0x64d2c60",
+    "0x64d2cc8"
+   ]
+  },
+  "0x606c180": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11c8d8"
+   ],
+   "relative_offsets": [
+    "0x64d2c48"
+   ]
+  },
+  "0x606c190": {
+   "direct_calls": 1,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11c908"
+   ],
+   "relative_offsets": [
+    "0x64d2c58"
+   ]
+  },
+  "0x606c1a0": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11c938"
+   ],
+   "relative_offsets": [
+    "0x64d2c68"
+   ]
+  },
+  "0x606c1e0": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11c950"
+   ],
+   "relative_offsets": [
+    "0x64d2c70"
+   ]
+  },
+  "0x606c280": {
+   "direct_calls": 2,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x606c5e0": {
+   "direct_calls": 1,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11c8a8"
+   ],
+   "relative_offsets": [
+    "0x64d2c38"
+   ]
+  },
+  "0x606c660": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11c8c0"
+   ],
+   "relative_offsets": [
+    "0x64d2c40"
+   ]
+  },
+  "0x606c680": {
+   "direct_calls": 1,
+   "tail_jumps": 1,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x606c6b0": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11c8f0"
+   ],
+   "relative_offsets": [
+    "0x64d2c50"
+   ]
+  },
+  "0x606ddf0": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11c9e0"
+   ],
+   "relative_offsets": [
+    "0x64d2cb0"
+   ]
+  },
+  "0x606de00": {
+   "direct_calls": 1,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11ca10"
+   ],
+   "relative_offsets": [
+    "0x64d2cc0"
+   ]
+  },
+  "0x606de10": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11ca40"
+   ],
+   "relative_offsets": [
+    "0x64d2cd0"
+   ]
+  },
+  "0x606de50": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11ca58"
+   ],
+   "relative_offsets": [
+    "0x64d2cd8"
+   ]
+  },
+  "0x606def0": {
+   "direct_calls": 4,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x606e250": {
+   "direct_calls": 1,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11c9b0"
+   ],
+   "relative_offsets": [
+    "0x64d2ca0"
+   ]
+  },
+  "0x606e2d0": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11c9c8"
+   ],
+   "relative_offsets": [
+    "0x64d2ca8"
+   ]
+  },
+  "0x606eb60": {
+   "direct_calls": 2,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x606ef50": {
+   "direct_calls": 1,
+   "tail_jumps": 1,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x606f920": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x11c9f8"
+   ],
+   "relative_offsets": [
+    "0x64d2cb8"
+   ]
+  },
+  "0x606f950": {
+   "direct_calls": 0,
+   "tail_jumps": 0,
+   "stored_qwords": [
+    "0x7468"
+   ],
+   "relative_offsets": [
+    "0x63f3990"
+   ]
+  },
+  "0x60b21f0": {
+   "direct_calls": 61,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x61c7e30": {
+   "direct_calls": 120,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x61cf610": {
+   "direct_calls": 425,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x61cf670": {
+   "direct_calls": 847,
+   "tail_jumps": 0,
+   "stored_qwords": [],
+   "relative_offsets": []
+  },
+  "0x61d1540": {
+   "direct_calls": 12,
+   "tail_jumps": 1,
+   "stored_qwords": [],
+   "relative_offsets": []
+  }
+ },
+ "not_claimed": [
+  "the concrete dynamic type behind the source object's vtable slots (0x198 produce, 0x28 seek, 0x10 has-current, 0x48 current key, 0x50 current value, 0x38 advance, 0x8 release)",
+  "what the slot-0x50 value view contains beyond its pinned use (copied into a string and decimal-parsed into the map value)",
+  "the owner object's identity and its slot-0x38 dispatch beyond the slot-7 copy that the caller performs",
+  "what the flag byte at source+0x4c9 means beyond selecting node type A (0) versus B (nonzero)",
+  "who fills node +0x50/+0x54/+0x58 in flows other than this one (they are zero in the caller-built node, so slot 7 resets the owner header here)",
+  "the other three vtables whose slots hold the caller 0x5d4cc80 (slots 0x64cb540, 0x64cba20, 0x64cc020)",
+  "behaviour on a null owner or a null source pointer (the caller reads source+0x4c9 unconditionally)",
+  "the sibling routine 0x606e3a0, which shares the bound getter and the version-key table (not mapped here)",
+  "whether the slot-0x50 decimal parse can throw inside the insert loop (the parser throws invalid_argument/out_of_range on malformed input; no handler is pinned in the insert)"
+ ]
+}
