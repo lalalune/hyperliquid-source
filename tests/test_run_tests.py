@@ -120,6 +120,31 @@ class ProcessIsolationTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('top assertion ran', result.stderr)
 
+    def test_loop_suite_with_explicit_exit_runs_as_a_script(self):
+        self.write('test_loop.py', '''
+            import sys
+            for value in range(3):
+                assert value < 3
+            print('loop suite ran as ' + __name__)
+            sys.exit(0)
+        ''')
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('loop suite ran as __main__', result.stdout)
+
+    def test_loop_generated_unittest_methods_keep_discovery(self):
+        self.write('test_generated.py', '''
+            import unittest
+            class Generated(unittest.TestCase):
+                pass
+            for name in ['test_added']:
+                setattr(Generated, name, lambda self: print('generated method ran'))
+        ''')
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('generated method ran', result.stdout)
+        self.assertIn('Generated.test_added', result.stderr)
+
     def test_same_interpreter_optimization_and_bytecode_flags(self):
         self.write('test_flags.py', '''
             import sys, unittest

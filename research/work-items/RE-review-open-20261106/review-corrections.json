@@ -45,6 +45,15 @@
       ],
       "change": "Normalize only the objdump filename label, preserving the declared ELF format and complete instruction text",
       "validation": "10 tests passed, including existing raw-byte and corruption checks"
+    },
+    {
+      "files": [
+        "tools/run_tests.py",
+        "tests/test_run_tests.py"
+      ],
+      "blocker": "Script-only checks with top-level loops and sys.exit(0) fail when imported by unittest, despite their successful assertions",
+      "change": "Run such scripts directly while preserving discovery for loop-generated unittest methods",
+      "validation": "14 real-process runner tests pass, including both regression controls"
     }
   ],
   "validation": {

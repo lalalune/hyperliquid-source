@@ -57,6 +57,19 @@ def test_command(python, start, path):
                           and any(isinstance(child, ast.FunctionDef)
                                   and child.name.startswith('test_')
                                   for child in node.body) for node in tree.body)
+            unittest_classes = any(
+                isinstance(node, ast.ClassDef) and any(
+                    isinstance(base, ast.Attribute) and base.attr == 'TestCase'
+                    or isinstance(base, ast.Name) and base.id == 'TestCase'
+                    for base in node.bases) for node in tree.body)
+            module_checks = any(
+                isinstance(node, (ast.For, ast.While))
+                or (isinstance(node, ast.Expr) and isinstance(node.value, ast.Call)
+                    and isinstance(node.value.func, ast.Attribute)
+                    and isinstance(node.value.func.value, ast.Name)
+                    and node.value.func.value.id == 'sys'
+                    and node.value.func.attr == 'exit')
+                for node in tree.body)
             script = any(isinstance(node, ast.If)
                          and isinstance(node.test, ast.Compare)
                          and len(node.test.ops) == 1
@@ -65,7 +78,8 @@ def test_command(python, start, path):
                               ast.unparse(node.test.comparators[0])}
                              in ({"__name__", "'__main__'"}, {"__name__", '"__main__"'})
                          for node in tree.body)
-            if not methods and (script or any(isinstance(node, ast.Assert) for node in tree.body)):
+            if not methods and (script or any(isinstance(node, ast.Assert) for node in tree.body)
+                                or (module_checks and not unittest_classes)):
                 return [*python, str(path.resolve())]
     return [*python, '-m', 'unittest', 'discover', '-s', str(start.resolve()),
             '-p', path.name if path is not None else 'test*.py', '-v']
