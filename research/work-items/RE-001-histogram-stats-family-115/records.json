@@ -1,0 +1,552 @@
+{
+ "packet": "RE-001-histogram-stats-family-115",
+ "task": "RE-001",
+ "target": "node #115",
+ "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "base_commit": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "bounded_question": "What is the complete HistogramImpl statistics family on node #115: how are the bucket boundaries generated, how are values recorded and merged, how are percentile/average/stddev computed, and what does the full text renderer emit?",
+ "re_shipped_from": {
+  "packet": "RE-001-stats-produce-115",
+  "pr": 3362,
+  "files": {
+   "bucket_count_init.txt": "histogram_init_a.txt",
+   "locked_init.txt": "histogram_init_b.txt",
+   "merge_wrapper.txt": "histogram_merge.txt",
+   "percentile_struct.txt": "histogram_percentiles.txt",
+   "percentile_struct_thunk.txt": "histogram_thunk.txt"
+  },
+  "note": "Byte-identical copies; verify.py regenerates every excerpt fresh from the binary and requires byte-equality."
+ },
+ "histogram_object": {
+  "allocation": "operator new(0x3c8) in builder 0x6070500",
+  "vtable": "0x64d2b80",
+  "typeinfo": "0x64d2b58",
+  "typeinfo_name": "N7rocksdb13HistogramImplE",
+  "typeinfo_name_address": "0x9753f0",
+  "typeinfo_base": "0x64d2b48",
+  "typeinfo_base_name": "N7rocksdb9HistogramE",
+  "typeinfo_base_name_address": "0x9753d0",
+  "fields_inner": {
+   "+0x00": "min (u64, initialised to the last boundary)",
+   "+0x08": "max (u64, initialised to 0)",
+   "+0x10": "count (u64)",
+   "+0x18": "sum (u64)",
+   "+0x20": "sum of squares (u64)",
+   "+0x28": "buckets[0..108] (u64 each)",
+   "+0x390": "bucket count (u64, 109)"
+  },
+  "fields_outer": {
+   "+0x00": "vtable pointer",
+   "+0x08": "statistics struct (inner) starts here",
+   "+0x30": "buckets[0]",
+   "+0x398": "bucket count",
+   "+0x3a0": "pthread mutex (40 bytes, to 0x3c8)"
+  },
+  "note": "The vtable thunks add 8 to `this`, so the implementations take the inner pointer (outer+0x08); the name/min/max accessors take the outer pointer. All field offsets in this packet are inner-relative unless marked outer."
+ },
+ "histogram_impl_vtable": {
+  "address": "0x64d2b80",
+  "slots": {
+   "0x00": "0x5d89570 (destructor, not pinned)",
+   "0x08": "0x5d8b3b0 (sized delete 0x3c8, #3362)",
+   "0x10": "0x606b0c0 (locked init)",
+   "0x18": "0x606b120 (empty-check thunk)",
+   "0x20": "0x606b1c0 (record thunk)",
+   "0x28": "0x606be40 (merge entry)",
+   "0x30": "0x606bc90 (ToString entry)",
+   "0x38": "0x606af40 (name accessor)",
+   "0x40": "0x606af50 (min accessor)",
+   "0x48": "0x606af60 (max accessor)",
+   "0x50": "0x5eeb2e0 (not pinned, unexamined)",
+   "0x58": "0x606b520 (median thunk)",
+   "0x60": "0x606b530 (percentile thunk)",
+   "0x68": "0x606b5c0 (average thunk)",
+   "0x70": "0x606b6b0 (stddev thunk)",
+   "0x78": "0x606bdd0 (percentile-struct thunk)"
+  }
+ },
+ "boundaries": {
+  "statics": "0x6505d20 begin, 0x6505d28 end, 0x6505d30 capacity, 0x6505d38 last boundary (ceiling), 0x6505d40 first boundary",
+  "generator": "0x606bf10",
+  "static_init": "0x606c140 (registered in .init_array at 0x63f3978, RELATIVE record)",
+  "dtor": "0x606af70 (registered via __cxa_atexit by 0x606c140)",
+  "seed": "two qwords at .rodata 0x453950: [1, 2]",
+  "growth_factor": "1.5 at 0x4596c8",
+  "initial_cur": "3.0 (2 * 1.5; also the literal at 0x459608 on the fresh-vector path)",
+  "stop": "cur * 1.5 reaches 2**64 (literal at 0x459090)",
+  "rounding": "a pushed value above 109 is divided by 10 while the pre-division value exceeds 1099 (0x44b), counting a factor of 10 each time, then multiplied back by the factor",
+  "count": 109,
+  "first": 1,
+  "last": 13000000000000000000,
+  "first_12": [
+   1,
+   2,
+   3,
+   4,
+   6,
+   10,
+   15,
+   22,
+   34,
+   51,
+   76,
+   110
+  ],
+  "span_check": "0x28 + 109*8 == 0x390, so the buckets end exactly where the bucket-count field begins",
+  "grow_helper": "0x5dde8e0 (generic vector grow, cited by contract, not excerpted)"
+ },
+ "bucket_index_0x606afa0": {
+  "fde": "0x606afa0..0x606b013",
+  "signature": "uint64_t bucket_index(vector *statics, uint64_t value)",
+  "rule": "first index j with BOUNDARIES[j] >= value (std::lower_bound); values at or above the ceiling (last boundary) return count - 1",
+  "direct_calls": 1,
+  "call_sites": [
+   "0x606b147 (FDE 0x606b130..0x606b1b3)"
+  ]
+ },
+ "shared_init_0x606b020": {
+  "fde": "0x606b020..0x606b07c",
+  "signature": "init(inner)",
+  "behavior": "inner+0x00 (min) = qword at 0x6505d38 (the ceiling); inner+0x08..0x20 (max, count, sum, sumSq) = 0; buckets inner+0x28.. zeroed for bucket_count entries",
+  "callers": [
+   "0x606b0e4 (0x606b0c0)",
+   "tail jump 0x606b09d (0x606b080)"
+  ]
+ },
+ "bucket_count_init_0x606b080": {
+  "fde": "0x606b080..0x606b0a2",
+  "signature": "init_count(inner)",
+  "behavior": "inner+0x390 (bucket count) = (*0x6505d28 - *0x6505d20) / 8, then tail-jumps to 0x606b020",
+  "direct_calls": 7,
+  "re_shipped_from": "RE-001-stats-produce-115"
+ },
+ "locked_init_0x606b0c0": {
+  "fde": "0x606b0c0..0x606b10a",
+  "signature": "locked_init(outer)",
+  "behavior": "locks the mutex at outer+0x3a0 with pthread_mutex_lock (throws __throw_system_error on failure), calls 0x606b020(outer+8), unlocks",
+  "direct_calls": 8,
+  "vtable_slot": "0x10 (RELATIVE at 0x64d2b90)",
+  "re_shipped_from": "RE-001-stats-produce-115"
+ },
+ "empty_check_0x606b110": {
+  "fde": "0x606b110..0x606b11f",
+  "signature": "bool is_empty(inner)",
+  "behavior": "returns 1 when inner+0x10 (count) == 0, else 0",
+  "thunk": "0x606b120 (slot 0x18, RELATIVE at 0x64d2b98; adds 8, tail-jumps here)",
+  "direct_calls_of_thunk": [
+   "0x5ef0c16 (FDE 0x5ef0a90..0x5ef0e7d)"
+  ]
+ },
+ "record_0x606b130": {
+  "fde": "0x606b130..0x606b1b3",
+  "signature": "add(inner, uint64_t value)",
+  "behavior": "bucket = bucket_index(value) via 0x606afa0 (lea of 0x6505d20); buckets[bucket]++; min = min(min, value); max = max(max, value); count++; sum += value; sumSq += value*value (all wrapping u64)",
+  "thunk": "0x606b1c0 (slot 0x20, RELATIVE at 0x64d2ba0; adds 8, tail-jumps here)",
+  "direct_calls_of_thunk": [
+   "0x606004c (FDE 0x605feb0..0x6060199)",
+   "0x6198ae7 (FDE 0x6198900..0x6198ce2)",
+   "0x6198e2a (FDE 0x6198d40..0x6198f4d)"
+  ]
+ },
+ "merge_inner_0x606b1d0": {
+  "fde": "0x606b1d0..0x606b253",
+  "signature": "merge_locked(dst_inner, src_inner)",
+  "behavior": "min = min(dst, src) via lock cmpxchg; max = max(dst, src) via lock cmpxchg; count/sum/sumSq += src via lock add; buckets[i] += src buckets[i] via lock add; skipped entirely when the destination bucket count is 0",
+  "direct_calls": [
+   "0x606be19 (FDE 0x606bdf0..0x606be3d)"
+  ]
+ },
+ "merge_wrapper_0x606bdf0": {
+  "fde": "0x606bdf0..0x606be3d",
+  "signature": "merge_locked_guarded(dst_outer, src_outer)",
+  "behavior": "locks the destination mutex at +0x3a0, calls 0x606b1d0(dst+8, src+8), unlocks",
+  "direct_calls": [
+   "0x6070595 (FDE 0x6070500..0x60705d8, the builder)"
+  ],
+  "tail_jump_from": [
+   "0x606beb0 (FDE 0x606be40..0x606bed5, the merge entry)"
+  ],
+  "re_shipped_from": "RE-001-stats-produce-115"
+ },
+ "merge_entry_0x606be40": {
+  "fde": "0x606be40..0x606bed5",
+  "signature": "merge(dst_outer, src_outer) (vtable slot 0x28, RELATIVE at 0x64d2ba8)",
+  "behavior": "merges only when the two histograms share a name: fast path when the other's vtable slot 0x38 is 0x606af40; otherwise calls each side's slot-0x38 name accessor and strcmp's the results against 'HistogramImpl' (0x43fa67); a name mismatch returns without merging",
+  "name_string": "HistogramImpl at 0x43fa67"
+ },
+ "percentile_0x606b260": {
+  "fde": "0x606b260..0x606b4fe",
+  "signature": "double percentile(inner, double pct)",
+  "threshold": "count * (pct / 100.0); the divisor 100.0 is at 0x459498",
+  "walk": "accumulate bucket counts from index 0 until the running total reaches the threshold; past the last bucket returns (double)max",
+  "interpolation": "value = lower + ((threshold - prev_cum) / bucket_count) * (upper - lower), where lower = BOUNDARIES[i-1] (0 for i == 0) and upper = BOUNDARIES[i]; an empty bucket returns its lower boundary; the result is clamped to [min, max]",
+  "conversions": "u64->double uses the unsigned fixup (shr $1 + or + addsd doubling) wherever a count, sum, bound or bucket value may have the high bit set",
+  "direct_calls": 7,
+  "call_sites": [
+   "0x606b826, 0x606b83b, 0x606b851, 0x606b866, 0x606b87c (FDE 0x606b6f0..0x606bc8d, the renderer)",
+   "0x606bd04, 0x606bd19 (FDE 0x606bce0..0x606bdcd, the percentile struct)"
+  ],
+  "tail_jumps": [
+   "0x606b50c (FDE 0x606b500..0x606b511, P50)",
+   "0x606b538 (FDE 0x606b530..0x606b53d, slot-0x60 thunk)"
+  ]
+ },
+ "median_0x606b500": {
+  "fde": "0x606b500..0x606b511",
+  "signature": "double median(inner)",
+  "behavior": "loads 50.0 (0x459950) into xmm0 and tail-jumps to 0x606b260",
+  "thunk": "0x606b520 (slot 0x58, RELATIVE at 0x64d2bd8; adds 8, tail-jumps here)",
+  "direct_calls": [
+   "0x606b7b8, 0x606bbaf (FDE 0x606b6f0..0x606bc8d, the renderer)",
+   "0x606bcf0 (FDE 0x606bce0..0x606bdcd, the percentile struct)"
+  ]
+ },
+ "percentile_thunk_0x606b530": {
+  "fde": "0x606b530..0x606b53d",
+  "signature": "double percentile_virtual(outer, double pct) (vtable slot 0x60, RELATIVE at 0x64d2be0)",
+  "behavior": "adds 8 to rdi and tail-jumps to 0x606b260 with the caller's xmm0 percentile"
+ },
+ "average_0x606b540": {
+  "fde": "0x606b540..0x606b5b9",
+  "signature": "double average(inner)",
+  "behavior": "0.0 when count == 0, else (double)sum / (double)count, with the unsigned fixup on both conversions",
+  "thunk": "0x606b5c0 (slot 0x68, RELATIVE at 0x64d2be8; adds 8, tail-jumps here)",
+  "direct_calls": [
+   "0x606b74a (FDE 0x606b6f0..0x606bc8d, the renderer)",
+   "0x606bd3d (FDE 0x606bce0..0x606bdcd, the percentile struct)"
+  ]
+ },
+ "stddev_0x606b5d0": {
+  "fde": "0x606b5d0..0x606b6ae",
+  "signature": "double stddev(inner)",
+  "behavior": "0.0 when count == 0, else sqrt(max(0, (count*sumSq - sum*sum) / count*count)) in doubles, with the unsigned fixup on count, sum and sumSq",
+  "thunk": "0x606b6b0 (slot 0x70, RELATIVE at 0x64d2bf0; adds 8, tail-jumps here)",
+  "direct_calls": [
+   "0x606b73d (FDE 0x606b6f0..0x606bc8d, the renderer)",
+   "0x606bd4a (FDE 0x606bce0..0x606bdcd, the percentile struct)"
+  ]
+ },
+ "renderer_0x606b6f0": {
+  "fde": "0x606b6f0..0x606bc8d",
+  "signature": "std::string *render(std::string *out, inner *hist)",
+  "entry": "0x606bc90 (vtable slot 0x30, RELATIVE at 0x64d2bb0; adds 8 to the hist argument, calls here)",
+  "direct_calls_of_entry": [
+   "0x5ef0c43 (FDE 0x5ef0a90..0x5ef0e7d)",
+   "0x606007d (FDE 0x605feb0..0x6060199)",
+   "0x6198e3a (FDE 0x6198d40..0x6198f4d)"
+  ],
+  "lines": [
+   "Count: %lu Average: %.4f  StdDev: %.2f\\n (0x9663a0; count, average via 0x606b540, stddev via 0x606b5d0)",
+   "Min: %lu  Median: %.4f  Max: %lu\\n (0x964d10; min/max fields when count != 0, literal 0/0 when count == 0; median via 0x606b500)",
+   "Percentiles: P50: %.2f P75: %.2f P99: %.2f P99.9: %.2f P99.99: %.2f\\n (0x959298; P99.99 from 0x459080, P99.9 from 0x459ce8, P99 from 0x459258, P75 from 0x459c50, P50 from 0x459950)",
+   "------------------------------------------------------\\n (0x959b38, 55 bytes)",
+   "one row per non-empty bucket: '%c %7lu, %7lu ] %8lu %7.3f%% %7.3f%% ' (0x966d98; '[' + lower 0 for bucket 0, '(' + BOUNDARIES[i-1] otherwise; upper BOUNDARIES[i]; bucket count; bucket percent; cumulative percent), then '#' repeated round(bucket_pct / 5) times, then '\\n'"
+  ],
+  "length_guard": "before each append, 0x3fffffffffffffff - len(out) < len(chunk) throws __throw_length_error('basic_string::append') (message at 0x4474d2)",
+  "cleanup_pad": "0x606b6be..0x606b6e6 disposes the output string and resumes unwinding on exception; reached by the landing pad at 0x606bc81",
+  "direct_calls": [
+   "0x606bcb0 (FDE 0x606bc90..0x606bcd3, the ToString entry)"
+  ]
+ },
+ "percentile_struct_0x606bce0": {
+  "fde": "0x606bce0..0x606bdcd",
+  "signature": "fill(inner, double *out9)",
+  "fields": {
+   "+0x00": "P50 (from 0x606b500)",
+   "+0x08": "P95 (from 0x606b260 with 95.0 at 0x459640)",
+   "+0x10": "P99 (from 0x606b260 with 99.0 at 0x459258)",
+   "+0x18": "average (from 0x606b540)",
+   "+0x20": "stddev (from 0x606b5d0)",
+   "+0x28": "P100 = (double)max",
+   "+0x30": "count (u64)",
+   "+0x38": "sum (u64)",
+   "+0x40": "min as double"
+  },
+  "thunk": "0x606bdd0 (slot 0x78, RELATIVE at 0x64d2bf8; adds 8, tail-jumps here)",
+  "re_shipped_from": "RE-001-stats-produce-115"
+ },
+ "accessors": {
+  "name_0x606af40": {
+   "fde": "0x606af40..0x606af4c",
+   "slot": "0x38 (RELATIVE at 0x64d2bb8)",
+   "behavior": "returns the string 'HistogramImpl' at 0x43fa67"
+  },
+  "min_0x606af50": {
+   "fde": "0x606af50..0x606af59",
+   "slot": "0x40 (RELATIVE at 0x64d2bc0)",
+   "behavior": "returns *(outer+0x08) (min)"
+  },
+  "max_0x606af60": {
+   "fde": "0x606af60..0x606af69",
+   "slot": "0x48 (RELATIVE at 0x64d2bc8)",
+   "behavior": "returns *(outer+0x10) (max)"
+  }
+ },
+ "literals": {
+  "doubles": {
+   "0x459498": 100.0,
+   "0x459950": 50.0,
+   "0x459c50": 75.0,
+   "0x459640": 95.0,
+   "0x459258": 99.0,
+   "0x459ce8": 99.9,
+   "0x459080": 99.99,
+   "0x4596c8": 1.5,
+   "0x459090": 1.8446744073709552e+19,
+   "0x459360": 9.223372036854776e+18,
+   "0x4593d0": 5.0,
+   "0x459490": 0.5,
+   "0x459608": 3.0
+  },
+  "seed_qwords": {
+   "0x453950": [
+    1,
+    2
+   ]
+  },
+  "formats": {
+   "0x9663a0": "Count: %lu Average: %.4f  StdDev: %.2f\n",
+   "0x964d10": "Min: %lu  Median: %.4f  Max: %lu\n",
+   "0x959298": "Percentiles: P50: %.2f P75: %.2f P99: %.2f P99.9: %.2f P99.99: %.2f\n",
+   "0x959b38": "------------------------------------------------------\n",
+   "0x966d98": "%c %7lu, %7lu ] %8lu %7.3f%% %7.3f%% "
+  },
+  "strings": {
+   "0x43fa67": "HistogramImpl",
+   "0x4474d2": "basic_string::append"
+  }
+ },
+ "census": {
+  "0x5dde8e0": {
+   "calls": 5,
+   "sites": [
+    "0x5de071f",
+    "0x5de0a12",
+    "0x5f79e7a",
+    "0x606c09f",
+    "0x6119a90"
+   ]
+  },
+  "0x606af40": {
+   "leas": [
+    "0x606be57"
+   ],
+   "qwords": 1,
+   "relative": [
+    "0x64d2bb8"
+   ]
+  },
+  "0x606af50": {
+   "qwords": 1,
+   "relative": [
+    "0x64d2bc0"
+   ]
+  },
+  "0x606af60": {
+   "qwords": 1,
+   "relative": [
+    "0x64d2bc8"
+   ]
+  },
+  "0x606af70": {
+   "leas": [
+    "0x606c154"
+   ]
+  },
+  "0x606afa0": {
+   "calls": [
+    "0x606b147"
+   ]
+  },
+  "0x606b020": {
+   "calls": [
+    "0x606b0e4"
+   ],
+   "jumps": [
+    "0x606b09d"
+   ]
+  },
+  "0x606b080": {
+   "calls": 7
+  },
+  "0x606b0c0": {
+   "calls": 8,
+   "qwords": 1,
+   "relative": [
+    "0x64d2b90"
+   ]
+  },
+  "0x606b110": {
+   "jumps": [
+    "0x606b128"
+   ]
+  },
+  "0x606b120": {
+   "calls": [
+    "0x5ef0c16"
+   ],
+   "qwords": 1,
+   "relative": [
+    "0x64d2b98"
+   ]
+  },
+  "0x606b130": {
+   "jumps": [
+    "0x606b1c8"
+   ]
+  },
+  "0x606b1c0": {
+   "calls": [
+    "0x606004c",
+    "0x6198ae7",
+    "0x6198e2a"
+   ],
+   "qwords": 1,
+   "relative": [
+    "0x64d2ba0"
+   ]
+  },
+  "0x606b1d0": {
+   "calls": [
+    "0x606be19"
+   ]
+  },
+  "0x606b260": {
+   "calls": 7,
+   "jumps": [
+    "0x606b50c",
+    "0x606b538"
+   ]
+  },
+  "0x606b500": {
+   "calls": [
+    "0x606b7b8",
+    "0x606bbaf",
+    "0x606bcf0"
+   ],
+   "jumps": [
+    "0x606b528"
+   ]
+  },
+  "0x606b520": {
+   "qwords": 1,
+   "relative": [
+    "0x64d2bd8"
+   ]
+  },
+  "0x606b530": {
+   "qwords": 1,
+   "relative": [
+    "0x64d2be0"
+   ]
+  },
+  "0x606b540": {
+   "calls": [
+    "0x606b74a",
+    "0x606bd3d"
+   ],
+   "jumps": [
+    "0x606b5c8"
+   ]
+  },
+  "0x606b5c0": {
+   "qwords": 1,
+   "relative": [
+    "0x64d2be8"
+   ]
+  },
+  "0x606b5d0": {
+   "calls": [
+    "0x606b73d",
+    "0x606bd4a"
+   ],
+   "jumps": [
+    "0x606b6b8"
+   ]
+  },
+  "0x606b6b0": {
+   "qwords": 1,
+   "relative": [
+    "0x64d2bf0"
+   ]
+  },
+  "0x606b6be": {
+   "jumps": [
+    "0x606bc88"
+   ]
+  },
+  "0x606b6f0": {
+   "calls": [
+    "0x606bcb0"
+   ]
+  },
+  "0x606bc90": {
+   "calls": [
+    "0x5ef0c43",
+    "0x606007d",
+    "0x6198e3a"
+   ],
+   "qwords": 1,
+   "relative": [
+    "0x64d2bb0"
+   ]
+  },
+  "0x606bce0": {
+   "jumps": [
+    "0x606bdd8"
+   ]
+  },
+  "0x606bdd0": {
+   "qwords": 1,
+   "relative": [
+    "0x64d2bf8"
+   ]
+  },
+  "0x606bdf0": {
+   "calls": [
+    "0x6070595"
+   ],
+   "jumps": [
+    "0x606beb0"
+   ]
+  },
+  "0x606be40": {
+   "qwords": 1,
+   "relative": [
+    "0x64d2ba8"
+   ]
+  },
+  "0x606bf10": {
+   "calls": [
+    "0x606c14f"
+   ]
+  },
+  "0x606c140": {
+   "qwords": 1,
+   "relative": [
+    "0x63f3978"
+   ]
+  },
+  "0x6070500": {
+   "calls": [
+    "0x607064c",
+    "0x607073c",
+    "0x60709d8"
+   ]
+  },
+  "0x6070810": {
+   "qwords": 1,
+   "relative": [
+    "0x64d2e70"
+   ]
+  }
+ },
+ "unknowns": [
+  "Vtable slot 0x50 (0x5eeb2e0) is not pinned or examined; it sits between the max accessor and the median thunk and its role is unknown.",
+  "Vtable slot 0x00 (0x5d89570, the destructor) and slot 0x08 (0x5d8b3b0, the sized delete, pinned by #3362) are not re-examined here.",
+  "The statics +0x20 slot holds the first boundary (1), written by the generator exit; no reader of that slot is pinned yet.",
+  "The three direct callers of the ToString entry 0x606bc90 (0x5ef0c43, 0x606007d, 0x6198e3a) and the direct callers of the record thunk 0x606b1c0 are cited by FDE only; their owning behaviours are not modelled.",
+  "The vector-grow helper 0x5dde8e0 is generic STL machinery shared by five call sites; only its call from the boundary generator is claimed here.",
+  "The renderer appends with the std::string SSO/fast paths inline; the slow _M_mutate path (0x606bb78) is noted but the model renders with plain string concatenation."
+ ]
+}
