@@ -1,0 +1,78 @@
+{
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "branches": [
+  {
+   "condition": "unconditional (single straight-line path; the routine has no branch, call or jump of any kind)",
+   "reads": [
+    "dword at object +0x40"
+   ],
+   "result": "the dword at object +0x40 is incremented by one, wrapping modulo 2**32; the routine then returns"
+  }
+ ],
+ "census": {
+  "direct_call_count": 3,
+  "internal_calls": 0,
+  "internal_indirect_calls": 0,
+  "internal_indirect_tail_jumps": 0,
+  "internal_tail_jumps": 0,
+  "relative_addends": 0,
+  "stored_qwords": 0,
+  "tail_jump_count": 0
+ },
+ "closes_unknown": "RE-001-drain-driver-115 left this routine by contract only: 'The field-by-field contents moved by 0x5f12840 and established by 0x5f12a00 are unknown; both are by contract only.' This packet pins 0x5f12a00: it establishes no field contents; its only effect is the +0x40 dword increment. The move helper 0x5f12840 remains by contract only and is not claimed here.",
+ "consumers": [
+  {
+   "caller_fde": "0x5d8bc90..0x5d8bcd2",
+   "note": "the call's argument is loaded immediately before the call: rdi is reloaded from the caller object's +0x10 field (mov 0x10(%rdi), %rdi at 0x5d8bcb0); caller semantics beyond the site, the FDE range and that visible argument load are not claimed",
+   "site": "0x5d8bcb8"
+  },
+  {
+   "caller_fde": "0x5d954b0..0x5d96890",
+   "note": "only the site and FDE range are claimed; the argument setup is earlier in this large caller and was not read",
+   "site": "0x5d95ad5"
+  },
+  {
+   "caller_fde": "0x5f13f90..0x5f13ff5",
+   "note": "inside the copy-on-write prepare mapped by RE-001-drain-driver-115: rdi is the fresh 0x50-byte object, called after [outer + 0x08] is stored with the new pointer and immediately before the tail jump into the release 0x5f13ea0 on the old object",
+   "site": "0x5f13fd6"
+  }
+ ],
+ "neighbour_note": "the bytes after the FDE range (0x5f12a09..0x5f12a10) are int3 padding, not a landing-pad block; the next FDE (0x5f12a10..0x5f12a1c) is a separate 12-byte getter routine, not part of this one",
+ "never_read_or_written": [
+  "any object offset other than +0x40",
+  "the object's other fields are neither read nor written: the routine touches exactly one dword",
+  "no register is written (rax included); only the flags are set, by the addl, per its result",
+  "the stack beyond the caller's return address: the routine pushes nothing"
+ ],
+ "node": 115,
+ "reads": [
+  {
+   "offset": "0x40",
+   "role": "unsigned 32-bit reference count; read as the source of the read-modify-write increment",
+   "width": 4
+  }
+ ],
+ "routine": {
+  "address": "0x5f12a00",
+  "arguments": [
+   "rdi: object pointer (only the dword at +0x40 is accessed)"
+  ],
+  "fde": "0x5f12a00..0x5f12a09",
+  "internal_calls": 0,
+  "internal_indirect_calls": 0,
+  "internal_indirect_tail_jumps": 0,
+  "internal_tail_jumps": 0,
+  "return": "void; no register is written, so rax keeps whatever the caller left in it, and all three census callers treat the routine as returning nothing",
+  "size_bytes": 9,
+  "tail_jumps": 0
+ },
+ "task": "RE-001",
+ "writes": [
+  {
+   "offset": "0x40",
+   "role": "the same dword, stored back incremented by one (wrapping modulo 2**32); the addl has no lock prefix, so the read-modify-write is not atomic",
+   "width": 4
+  }
+ ]
+}
