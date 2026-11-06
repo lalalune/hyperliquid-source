@@ -1,0 +1,739 @@
+"""Tests for the node #115 Find-family hosts model.
+
+Run under plain python3 (pytest is not installed on this VM):
+    python3 tests/test_find_family_hosts_115.py
+
+The four hosts (0x6080b10, 0x60818f0, 0x6098ad0, 0x609bcb0)
+and their helpers are pinned against the node #115 binary
+(sha256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301);
+the tests pin the branch behaviour the disassembly dictates.
+"""
+
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
+
+from find_family_hosts_115 import (  # noqa: E402
+    BLOCK_CTOR_BSS, BLOCK_CTOR_VTABLES, BLOCK_DEFAULTS_TEMPLATE,
+    BLOCK_DEFAULTS_TEMPLATE_VALUES, CSTR_CTOR, FIND_BLOCK_TABLE,
+    FIND_BY_ELEMENT_SCAN, FIND_PLAIN_TABLE, MAP_ERASE_NEXT,
+    MAP_FIND_NAME, MAP_INSERT, NAME_SET_NODE_SIZE,
+    OPTIONS_LIST_NODE_SIZE, OPTIONS_RECORD_GLOBAL,
+    PLAIN_CONTROL_COUNTS, PLAIN_CONTROL_VTABLE, PLAIN_OBJECT_SIZE,
+    PLAIN_VTABLE, RESOLVE_ALL_ELEMENTS, ConfigNode, MapNode,
+    NameObject, NameSet, NameSetNode, NameTable, NodeObj,
+    OptionsListNode, OptionsMap, SharedControl, SharedHolder,
+    Slot10Target, Status, TableEntry, TableNode, TableOptions,
+    Value, block_creator, block_default_options,
+    clear_string, counted_release, cstr_ctor, cstr_dup,
+    destroy_block_defaults, element_scan, find_block_table,
+    find_by_element_scan, find_e70, find_plain_table,
+    hash_bytes, map_erase_next, map_find_name, map_insert, matcher,
+    name_lookup, options_list_destroy, options_record_append,
+    plain_creator, plain_default_options, resolve_all_elements,
+    shared_release)
+
+
+# --- small helpers -----------------------------------------------------
+
+
+def test_cstr_ctor_values():
+    assert cstr_ctor("") == ""
+    assert cstr_ctor("x") == "x"
+    assert cstr_ctor("PlainTableOptions") == "PlainTableOptions"
+    assert cstr_ctor("block_based_table_factory") == \
+        "block_based_table_factory"
+
+
+def test_cstr_ctor_null_raises():
+    try:
+        cstr_ctor(None)
+    except ValueError as exc:
+        assert "logic_error" in str(exc)
+    else:
+        raise AssertionError("null cstr did not raise")
+
+
+def test_cstr_dup_and_clear_string():
+    holder = [None]
+    assert cstr_dup(holder, "abc") == "abc"
+    assert holder[0] == "abc"
+    assert clear_string(holder, "def") == "def"
+    assert holder[0] == "def"
+
+
+def test_counted_release_fast_path():
+    control = SharedControl(object())
+    assert control.counts == PLAIN_CONTROL_COUNTS
+    counted_release(control)
+    assert control.use_count == 0
+    assert control.weak_count == 0
+    assert control.disposed
+    assert control.destroyed
+
+
+def test_counted_release_decrements():
+    control = SharedControl(object())
+    control.acquire()
+    control.acquire()
+    assert control.counts == 0x100000003
+    counted_release(control)
+    assert control.use_count == 2
+    assert not control.disposed
+    assert not control.destroyed
+    counted_release(control)
+    assert control.use_count == 1
+    assert not control.disposed
+
+
+def test_counted_release_last_use_disposes():
+    control = SharedControl(object())
+    control.acquire()
+    counted_release(control)  # use 2 -> 1, no dispose
+    assert not control.disposed
+    counted_release(control)  # was 1 -> the 0x5d35070 tail
+    assert control.use_count == 0
+    assert control.weak_count == 0
+    assert control.disposed
+    assert control.destroyed
+
+
+def test_shared_release_weak_count():
+    control = SharedControl(object())
+    control.weak_count = 2
+    shared_release(control)
+    assert control.disposed
+    assert control.weak_count == 1
+    assert not control.destroyed
+    shared_release(control)
+    assert control.weak_count == 0
+    assert control.destroyed
+
+
+def test_release_none_is_noop():
+    counted_release(None)
+    shared_release(None)
+
+
+def test_options_record_append():
+    obj = TableOptions(PLAIN_OBJECT_SIZE, PLAIN_VTABLE)
+    assert options_record_append(obj, "PlainTableOptions",
+                                  {"x": 1}, OPTIONS_RECORD_GLOBAL) == 1
+    assert options_record_append(obj, "n2", {"y": 2}, 0x6507540) == 2
+    assert obj.records[0] == ("PlainTableOptions", {"x": 1},
+                              OPTIONS_RECORD_GLOBAL)
+    assert obj.records[1][2] == 0x6507540
+
+
+def test_plain_ctor_and_creator():
+    options = plain_default_options()
+    obj = plain_creator(options)
+    assert obj.size == PLAIN_OBJECT_SIZE
+    assert obj.vtable == PLAIN_VTABLE
+    assert obj.options is options
+    assert obj.records == [("PlainTableOptions", options,
+                            OPTIONS_RECORD_GLOBAL)]
+    assert options == {0x04: 0x0A, 0x0E: 0x103FE8}
+
+
+def test_block_ctor_boundary():
+    options = block_default_options()
+    obj = block_creator(options)
+    assert obj.size == 0x260
+    assert obj.options is options
+    # The record name is the options struct's leading string
+    # ("" for the zeroed defaults); the global is 0x6507540.
+    assert obj.records[0][0] == ""
+    assert obj.records[0][2] == BLOCK_CTOR_BSS
+    assert obj.boundary_calls[0] == 0x60DB1E0
+    assert obj.boundary_vtables == BLOCK_CTOR_VTABLES
+    # The pinned defaults fields.
+    assert options[0x59] == 0xA00000000000010
+    assert options[0x64] == 0x0000000100000010
+    assert options[0x71] == 0x0200000000000010
+    assert options[0x2E] == 0x43FE8
+    assert options[0xD0] == 5
+    assert options[0xD8] == 0x40000
+    assert options[0xE8] == BLOCK_DEFAULTS_TEMPLATE_VALUES
+    assert BLOCK_DEFAULTS_TEMPLATE == 0x4506C0
+
+
+def test_options_list_destroy_order():
+    # Chain n1 -> n2 -> n3, n2 has a child c2, n3 has a child
+    # c3: the tail is destroyed first, each node followed by
+    # its child subtree.
+    c2 = OptionsListNode()
+    c3 = OptionsListNode()
+    n3 = OptionsListNode(child=c3)
+    n2 = OptionsListNode(child=c2, next=n3)
+    n1 = OptionsListNode(next=n2)
+    freed = options_list_destroy(n1)
+    assert freed == [n3, c3, n2, c2, n1]
+    assert all(n.freed for n in (n1, n2, n3, c2, c3))
+
+
+def test_options_list_destroy_none_and_single():
+    assert options_list_destroy(None) == []
+    single = OptionsListNode()
+    assert options_list_destroy(single) == [single]
+    assert single.freed
+
+
+def test_name_set_linear_and_hash_paths():
+    local = NameSet(1)
+    assert local.find_name("a") is None
+    for key in ("a", "b", "c"):
+        h = hash_bytes(key)
+        map_insert(local, h % local.bucket_count, h,
+                   NameSetNode(key))
+    assert local.find_name("a").key == "a"
+    assert local.find_name("missing") is None
+    # Past 20 elements the hash-bucket walk runs.
+    for i in range(30):
+        key = "k%02d" % i
+        h = hash_bytes(key)
+        map_insert(local, h % local.bucket_count, h,
+                   NameSetNode(key))
+    assert local.element_count == 33
+    assert local.find_name("k17").key == "k17"
+    assert local.find_name("k99") is None
+
+
+def test_map_find_name_and_erase_next():
+    table = OptionsMap()
+    table.index("one").set("1")
+    table.index("two").set("2")
+    node = map_find_name(table, "two")
+    assert node is not None and node.key == "two"
+    assert map_find_name(table, "three") is None
+    nxt = map_erase_next(table, node)
+    assert table.element_count == 1
+    assert map_find_name(table, "two") is None
+    assert map_find_name(table, "one") is not None
+    assert nxt is None or nxt.key == "one"
+
+
+# --- plain host --------------------------------------------------------
+
+
+def _plain_delegate(resolved=None, slot_0x50=None):
+    calls = []
+
+    def slot_0x38(name):
+        calls.append(name)
+        return resolved
+
+    return ConfigNode(slot_0x38=slot_0x38, slot_0x50=slot_0x50), calls
+
+
+def test_plain_null_delegate_nonfactory():
+    holder = SharedHolder(obj=None)
+    status = find_plain_table(Value(), "other", "", holder)
+    assert status.code == 1
+    assert status.msg == "Mismatched table option: : other"
+    assert holder.obj is None
+
+
+def test_plain_null_delegate_factory_builds_defaults():
+    holder = SharedHolder(obj=None)
+    created = []
+
+    def creator(options):
+        obj = plain_creator(options)
+        created.append(obj)
+        return obj
+
+    status = find_plain_table(Value(), "plain_table_factory",
+                              "", holder, creator=creator)
+    assert status.is_ok()
+    assert len(created) == 1
+    assert created[0].options == plain_default_options()
+    assert holder.obj is created[0]
+    assert holder.control is not None
+    assert holder.control.counts == PLAIN_CONTROL_COUNTS
+    assert holder.control.vtable == PLAIN_CONTROL_VTABLE
+
+
+def test_plain_factory_resolved_uses_resolved():
+    resolved = {"resolved": True}
+    delegate, calls = _plain_delegate(resolved=resolved)
+    holder = SharedHolder(obj=delegate)
+    seen = []
+
+    def creator(options):
+        seen.append(options)
+        return plain_creator(options)
+
+    status = find_plain_table(Value(), "plain_table_factory",
+                              "", holder, creator=creator)
+    assert status.is_ok()
+    assert seen == [resolved]
+    assert calls == ["PlainTableOptions"]
+    assert holder.obj is not None
+
+
+def test_plain_factory_resolved_null_uses_defaults():
+    delegate, _ = _plain_delegate(resolved=None)
+    holder = SharedHolder(obj=delegate)
+    seen = []
+
+    def creator(options):
+        seen.append(options)
+        return plain_creator(options)
+
+    status = find_plain_table(Value(), "plain_table_factory",
+                              "", holder, creator=creator)
+    assert status.is_ok()
+    assert seen == [plain_default_options()]
+
+
+def test_plain_nonfactory_resolved_null_is_error():
+    delegate, _ = _plain_delegate(resolved=None)
+    holder = SharedHolder(obj=delegate)
+    status = find_plain_table(Value(), "something_else", "",
+                              holder)
+    assert status.code == 1
+    assert status.msg == "Mismatched table option: : something_else"
+
+
+def test_plain_nonfactory_resolved_runs_no_equals():
+    calls = []
+
+    def slot_0x50(out, node, value, found, str_b, arg7, extra):
+        calls.append((found.name, str_b, arg7))
+        return Status(0, 0, None, 0)
+
+    delegate, _ = _plain_delegate(resolved={"r": 1},
+                                  slot_0x50=slot_0x50)
+    delegate.elements = [TableEntry("something_else",
+                                    NameTable([TableNode(
+                                        "something_else")]))]
+
+    def slot_0x68(node, key6):
+        return key6
+
+    delegate.slot_0x68 = slot_0x68
+    holder = SharedHolder(obj=delegate)
+    status = find_plain_table(Value(), "something_else", "",
+                              holder)
+    assert status.is_ok()
+    assert len(calls) == 1
+    assert calls[0][0] == "something_else"
+
+
+def test_plain_find_e70_failure_calls_slot08_no_install():
+    delegate, _ = _plain_delegate(resolved={"r": 1})
+    holder = SharedHolder(obj=delegate)
+    slot08_calls = []
+
+    def creator(options):
+        obj = plain_creator(options)
+        obj.slot_0x40 = lambda node, value: Status(7, 0, "bad", 0)
+        obj.slot_0x08 = lambda o: slot08_calls.append(o)
+        return obj
+
+    # A non-empty arg7 without ';' or '=' reaches the
+    # slot-0x40 path of find_e70.
+    status = find_plain_table(Value(), "plain_table_factory",
+                              "plain", holder, creator=creator)
+    assert status.code == 7
+    assert status.msg == "bad"
+    assert holder.obj is delegate  # not installed
+    assert holder.control is None
+    assert len(slot08_calls) == 1
+
+
+def test_plain_install_releases_old_control():
+    old = SharedControl(object())
+    delegate, _ = _plain_delegate(resolved={"r": 1})
+    holder = SharedHolder(obj=delegate, control=old)
+    status = find_plain_table(Value(), "plain_table_factory",
+                              "", holder)
+    assert status.is_ok()
+    assert holder.obj is not delegate
+    assert holder.control is not old
+    assert old.disposed and old.destroyed
+
+
+def test_plain_find_e70_with_equals_arg7():
+    delegate, _ = _plain_delegate(resolved={"r": 1})
+    holder = SharedHolder(obj=delegate)
+    status = find_plain_table(Value(), "plain_table_factory",
+                              "k=v", holder)
+    assert status.is_ok()
+    assert holder.obj is not delegate
+
+
+# --- block host --------------------------------------------------------
+
+
+def test_block_factory_defaults_install():
+    delegate, _ = _plain_delegate(resolved=None)
+    holder = SharedHolder(obj=delegate)
+    seen = []
+
+    def creator(options):
+        seen.append(options)
+        return block_creator(options)
+
+    status = find_block_table(Value(), "block_based_table_factory",
+                              "", holder, creator=creator)
+    assert status.is_ok()
+    assert seen[0][0x59] == 0xA00000000000010
+    assert seen[0][0xE8] == BLOCK_DEFAULTS_TEMPLATE_VALUES
+    assert holder.obj is not None
+    assert holder.obj.size == 0x260
+
+
+def test_block_nonfactory_branches():
+    delegate, _ = _plain_delegate(resolved=None)
+    holder = SharedHolder(obj=delegate)
+    status = find_block_table(Value(), "other", "", holder)
+    assert status.code == 1
+    assert status.msg == "Mismatched table option: : other"
+
+
+def test_block_destroy_defaults_noop_and_active():
+    # The pinned defaults carry no owned sub-objects.
+    destroy_block_defaults(block_default_options())
+    control = SharedControl(object())
+    head = OptionsListNode()
+    destroy_block_defaults({"a": control, "options_list": head})
+    assert control.disposed and control.destroyed
+    assert head.freed
+
+
+# --- element-scan host -------------------------------------------------
+
+
+def _scan_table(entries):
+    """Build the element vector for find_by_element_scan:
+    ``entries`` is a list of (name, kind, obj, flag_byte,
+    slot_0x10_target)."""
+    elements = []
+    for name, kind, obj, flag_byte, target in entries:
+        node = TableNode(name, kind=kind, obj=obj,
+                         flag_byte=flag_byte,
+                         slot_0x10_target=target)
+        elements.append(TableEntry(name, NameTable([node]),
+                                   field20=0))
+    return elements
+
+
+def _recording_serializer(calls):
+    def serializer(obj, kind, value_out):
+        calls.append(kind)
+        value_out[0] = "ser"
+        return True
+
+    return serializer
+
+
+def test_scan_miss():
+    table = _scan_table([("opt", 0x13, None, 0, None)])
+    arg5 = [""]
+    status = find_by_element_scan(Value(), table, "nope", arg5)
+    assert status.code == 1
+    assert status.msg == "Cannot find option: : nope"
+    assert arg5[0] == ""
+
+
+def test_scan_exact_match_runs_matcher():
+    table = _scan_table([("opt", 0x10, None, 0, None)])
+    calls = []
+    arg5 = [""]
+    status = find_by_element_scan(
+        Value(), table, "opt", arg5,
+        serializer=_recording_serializer(calls))
+    assert status.is_ok()
+    assert calls == [0x10]
+    assert arg5[0] == "ser"
+
+
+def test_scan_kind_0x13_matcher_on_dotted_key():
+    table = _scan_table([("a", 0x13, None, 0, None)])
+    calls = []
+    arg5 = [""]
+    status = find_by_element_scan(
+        Value(), table, "a.b", arg5,
+        serializer=_recording_serializer(calls))
+    assert status.is_ok()
+    assert calls == [0x13]
+
+
+def test_scan_kind_0x15_exact_match_resolver_path():
+    name_obj = NameObject(slot_0x60="x=y")
+    node_obj = NodeObj(name_object=name_obj)
+    table = _scan_table([("opt", 0x15, node_obj, 0, None)])
+    arg5 = [""]
+    status = find_by_element_scan(Value(), table, "opt", arg5)
+    assert status.is_ok()
+    assert arg5[0] == "{x}"
+
+
+def test_scan_kind_0x15_slot10_path():
+    calls = []
+
+    def slot_0x10(obj, copy, out3_holder, arg5_holder):
+        calls.append((copy.name, out3_holder[0]))
+        arg5_holder[0] = "v10"
+        return Status.ok()
+
+    target = Slot10Target(slot_0x10=slot_0x10)
+    table = _scan_table([("a", 0x15, None, 0, target)])
+    arg5 = [""]
+    status = find_by_element_scan(Value(), table, "a.b", arg5)
+    assert status.is_ok()
+    assert calls == [(";", "b")]
+    assert arg5[0] == "v10"
+
+
+def test_scan_kind_0x16_slot10_deref_and_no_deref():
+    calls = []
+
+    def slot_0x10(obj, copy, out3_holder, arg5_holder):
+        calls.append(obj)
+        return Status.ok()
+
+    inner = Slot10Target(slot_0x10=slot_0x10)
+    outer = Slot10Target(slot_0x10=slot_0x10, deref=inner)
+    # Flag byte 0x08 set -> the object is dereferenced once.
+    table = _scan_table([("a", 0x16, None, 0x08, outer)])
+    assert find_by_element_scan(Value(), table, "a.b",
+                                [""]).is_ok()
+    assert calls == [inner]
+    # Flag byte clear -> the target itself is used.
+    calls.clear()
+    table = _scan_table([("a", 0x16, None, 0x00, outer)])
+    assert find_by_element_scan(Value(), table, "a.b",
+                                [""]).is_ok()
+    assert calls == [outer]
+
+
+def test_scan_kind_0x16_slot10_null_target_is_error():
+    table = _scan_table([("a", 0x16, None, 0, None)])
+    status = find_by_element_scan(Value(), table, "a.b", [""])
+    assert status.code == 1
+    assert status.msg == "Cannot find option: : a.b"
+
+
+def test_scan_other_kind_is_error():
+    table = _scan_table([("a", 0x10, None, 0, None)])
+    status = find_by_element_scan(Value(), table, "a.b", [""])
+    assert status.code == 1
+    assert status.msg == "Cannot find option: : a.b"
+
+
+def test_scan_matcher_serialize_flag_is_code3():
+    table = _scan_table([("opt", 0x10, None, 0, None)])
+    table[0].table.nodes[0].flags = 0x2000
+    status = find_by_element_scan(Value(), table, "opt", [""])
+    assert status.code == 3
+    # The binary passes msg1 = the name, msg2 = the literal,
+    # so the name comes first (the sibling model's pin).
+    assert status.msg == "opt: Cannot serialize option: "
+
+
+def test_scan_value_copy_control_released():
+    control = SharedControl(object())
+    value = Value(shared=control)
+    table = _scan_table([("opt", 0x13, None, 0, None)])
+    status = find_by_element_scan(value, table, "opt", [""])
+    assert status.is_ok()
+    # The copy's acquire is balanced by the exit release.
+    assert control.use_count == 1
+    assert not control.disposed
+
+
+# --- registry walker ---------------------------------------------------
+
+
+def _walker_node(codes, calls):
+    """A ConfigNode whose slot-0x68 returns the element key
+    and whose slot-0x50 returns the per-name code from
+    ``codes`` (recording each call in ``calls``)."""
+
+    def slot_0x68(node, key6):
+        return key6
+
+    def slot_0x50(out, node, value, found, str_b, arg7, extra):
+        calls.append(found.name)
+        code = codes[found.name]
+        return Status(code, 0, "msg-" + found.name, 0)
+
+    return ConfigNode(slot_0x68=slot_0x68, slot_0x50=slot_0x50)
+
+
+def _walker_state(names, codes):
+    """A registry map with one element per name, a name
+    table with the matching nodes, and the walker node."""
+    registry = OptionsMap()
+    nodes = []
+    for name in names:
+        registry.index(name).set("v-" + name)
+        nodes.append(TableNode(name, kind=0x13))
+    table = NameTable(nodes)
+    calls = []
+    node = _walker_node(codes, calls)
+    return registry, table, node, calls
+
+
+def test_walker_empty_map():
+    registry = OptionsMap()
+    table = NameTable([])
+    node = _walker_node({}, [])
+    assert resolve_all_elements(Value(), node, table,
+                                registry, None).is_ok()
+    assert registry.element_count == 0
+
+
+def test_walker_code1_advances_without_erase():
+    registry, table, node, calls = _walker_state(
+        ["a"], {"a": 1})
+    status = resolve_all_elements(Value(), node, table,
+                                  registry, None)
+    assert status.is_ok()
+    assert calls == ["a"]
+    assert registry.element_count == 1
+    assert map_find_name(registry, "a") is not None
+
+
+def test_walker_code0_erases():
+    registry, table, node, calls = _walker_state(
+        ["a"], {"a": 0})
+    status = resolve_all_elements(Value(), node, table,
+                                  registry, None)
+    assert status.is_ok()
+    assert calls == ["a"]
+    assert registry.element_count == 0
+
+
+def test_walker_code3_accumulates_and_sweeps():
+    registry, table, node, calls = _walker_state(
+        ["a"], {"a": 3})
+    status = resolve_all_elements(Value(), node, table,
+                                  registry, None)
+    assert status.code == 3
+    assert status.msg == "msg-a"
+    # The code-3 path does not erase during the walk, but
+    # the sweep phase erases the name from the registry map.
+    assert registry.element_count == 0
+
+
+def test_walker_code2_accumulates_status_a():
+    registry, table, node, calls = _walker_state(
+        ["a"], {"a": 2})
+    status = resolve_all_elements(Value(), node, table,
+                                  registry, None)
+    assert status.code == 2
+    assert status.msg == "msg-a"
+    assert registry.element_count == 0
+
+
+def test_walker_value_byte0_wins_over_status_a():
+    registry, table, node, calls = _walker_state(
+        ["a"], {"a": 2})
+    value = Value(code=0x01)
+    status = resolve_all_elements(value, node, table,
+                                  registry, None)
+    assert status.is_ok()
+
+
+def test_walker_value_byte1_blocks_status_b():
+    registry, table, node, calls = _walker_state(
+        ["a"], {"a": 3})
+    value = Value(code=0x100)
+    status = resolve_all_elements(value, node, table,
+                                  registry, None)
+    assert status.is_ok()
+    # The sweep still ran.
+    assert registry.element_count == 0
+
+
+def test_walker_value_byte1_keeps_status_a():
+    registry, table, node, calls = _walker_state(
+        ["a"], {"a": 2})
+    value = Value(code=0x100)
+    status = resolve_all_elements(value, node, table,
+                                  registry, None)
+    assert status.code == 2
+    assert status.msg == "msg-a"
+
+
+def test_walker_outer_loop_repeats_on_erase():
+    registry, table, node, calls = _walker_state(
+        ["a", "b"], {"a": 0, "b": 1})
+    status = resolve_all_elements(Value(), node, table,
+                                  registry, None)
+    assert status.is_ok()
+    # "a" was erased in the first pass; "b" (code 1) was
+    # visited once per outer iteration, so twice in total.
+    assert calls.count("a") == 1
+    assert calls.count("b") == 2
+    assert registry.element_count == 1
+    assert map_find_name(registry, "b") is not None
+
+
+def test_walker_lookup_miss_advances():
+    registry = OptionsMap()
+    registry.index("ghost").set("v-ghost")
+    table = NameTable([])
+    calls = []
+    node = _walker_node({}, calls)
+    status = resolve_all_elements(Value(), node, table,
+                                  registry, None)
+    assert status.is_ok()
+    assert calls == []
+    assert registry.element_count == 1
+
+
+def test_walker_status_b_cleared_when_list_empty():
+    # A map whose count is non-zero but whose list head is
+    # null: the StatusB code and sub-bytes are zeroed (the
+    # message is kept) and the sweep phase runs.
+    registry = OptionsMap()
+    registry.element_count = 1
+    registry.first = None
+    table = NameTable([])
+    node = _walker_node({}, [])
+    status = resolve_all_elements(Value(), node, table,
+                                  registry, None)
+    assert status.is_ok()
+
+
+def test_walker_phase2_sweep_erases_by_name():
+    # Two code-3 elements: both names land in the local set
+    # and both are swept out of the registry map.
+    registry, table, node, calls = _walker_state(
+        ["a", "b"], {"a": 3, "b": 3})
+    status = resolve_all_elements(Value(), node, table,
+                                  registry, None)
+    assert status.code == 3
+    assert registry.element_count == 0
+
+
+def test_addresses_pinned():
+    assert FIND_PLAIN_TABLE == 0x6080B10
+    assert FIND_BLOCK_TABLE == 0x60818F0
+    assert FIND_BY_ELEMENT_SCAN == 0x6098AD0
+    assert RESOLVE_ALL_ELEMENTS == 0x609BCB0
+    assert CSTR_CTOR == 0x607D9F0
+    assert MAP_FIND_NAME == 0x609A1B0
+    assert MAP_ERASE_NEXT == 0x609A2F0
+    assert MAP_INSERT == 0x609BAD0
+    assert NAME_SET_NODE_SIZE == 0x30
+    assert OPTIONS_LIST_NODE_SIZE == 0x28
+
+
+def _run_all():
+    fns = [(n, f) for n, f in sorted(globals().items())
+           if n.startswith("test_") and callable(f)]
+    for name, fn in fns:
+        fn()
+        print("ok", name)
+    print("all %d tests passed" % len(fns))
+
+
+if __name__ == "__main__":
+    _run_all()

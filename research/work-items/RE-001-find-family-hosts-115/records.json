@@ -1,0 +1,592 @@
+{
+ "artifact_path": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bounded_question": "How do the four remaining sibling Find-family hosts drive the already-pinned Find pipeline (find_e70 0x6099e70, no_equals 0x609ba30, kind_dispatch 0x609b700, name_lookup 0x60ba0b0, element_scan 0x6096f40, matcher 0x60bb9a0, status_builder 0x61cf670), and what does each report when the name cannot be resolved?",
+ "census": {
+  "counts": {
+   "block_creator call": 3,
+   "block_ctor call": 3,
+   "block_table call": 1,
+   "clear_string call": 2,
+   "counted_release call": 1273,
+   "counted_release jmp": 25,
+   "cstr_ctor_607d9f0 call": 141,
+   "cstr_dup call": 425,
+   "element_scan call": 2,
+   "element_scan_host call": 1,
+   "entry call": 1,
+   "find_e70 call": 5,
+   "find_norm call": 3,
+   "kind_dispatch call": 2,
+   "map_clear call": 98,
+   "map_erase_next call": 3,
+   "map_find_name call": 2,
+   "map_insert call": 1,
+   "matcher call": 16,
+   "name_lookup call": 10,
+   "no_equals call": 4,
+   "options_list_destroy call": 3,
+   "options_record_append call": 37,
+   "parser call": 6,
+   "plain_creator call": 2,
+   "plain_ctor call": 2,
+   "plain_table lea": 1,
+   "shared_release call": 654,
+   "shared_release jmp": 36,
+   "status_builder call": 847,
+   "walker call": 1
+  },
+  "rows": 3761
+ },
+ "constants": {
+  "block_ctor_bss": "0x6507540",
+  "block_object_size": 608,
+  "block_options_size": 248,
+  "hash_seed": "0xc70f6907",
+  "linear_walk_limit": 20,
+  "name_set_node_size": 48,
+  "options_list_node_size": 40,
+  "options_map_node_size": 80,
+  "options_record_global": "0x6508260",
+  "plain_control_counts": "0x100000001",
+  "plain_default_byte_0x04": 10,
+  "plain_default_dword_0x0e": "0x103fe8",
+  "plain_object_size": 72,
+  "plain_options_size": 40,
+  "value_size": 80
+ },
+ "landing_pads": {
+  "0x6080a71": {
+   "end": "0x6080b0d",
+   "role": "Plain host cleanup fragment."
+  },
+  "0x608183a": {
+   "end": "0x60818eb",
+   "role": "Block host cleanup fragment."
+  },
+  "0x6098a9c": {
+   "end": "0x6098ace",
+   "role": "Element-scan host cleanup fragment."
+  }
+ },
+ "literals": [
+  {
+   "address": "0x43e802",
+   "value": "PlainTableOptions"
+  },
+  {
+   "address": "0x444587",
+   "value": "BlockTableOptions"
+  },
+  {
+   "address": "0x43413b",
+   "value": "Mismatched table option: "
+  },
+  {
+   "address": "0x43d5c7",
+   "value": ";"
+  },
+  {
+   "address": "0x43d7b4",
+   "value": "Cannot find option: "
+  },
+  {
+   "address": "0x451120",
+   "value": "PlainTableOption"
+  },
+  {
+   "address": "0x4506c0",
+   "note": "16-byte block-defaults template {0x2000, 0x2} as two little-endian u64s",
+   "value": [
+    8192,
+    2
+   ]
+  },
+  {
+   "address": "0x4408a7",
+   "value": "map::at"
+  },
+  {
+   "address": "0x43821e",
+   "value": "."
+  },
+  {
+   "address": "0x445245",
+   "value": "="
+  },
+  {
+   "address": "0x4341c2",
+   "value": "Option not changeable: "
+  },
+  {
+   "address": "0x43e863",
+   "value": "Could not find option: "
+  },
+  {
+   "address": "0x4376fd",
+   "value": ""
+  },
+  {
+   "address": "0x4474d2",
+   "value": "basic_string::append"
+  },
+  {
+   "address": "0x44371c",
+   "value": "default"
+  }
+ ],
+ "model": "tools/find_family_hosts_115.py",
+ "open_unknowns": [
+  "On the null-delegate path with a factory name the binary builds the defaults directly (slot 0x38 is never called); the model takes that deterministic defaults path.",
+  "The walker's arg2 first two bytes select the final Status; their source meaning is not pinned -- the model reads them from the value's +0x00 word.",
+  "The block constructor's sub-calls and field layout are a boundary (see the block_ctor record); only its contract and pinned references are modelled.",
+  "The created objects' vtable slot 0x08 semantics: the binary calls it on the created object only when find_e70 fails; the model calls the injected slot_0x08 on that path (likely the deleting destructor, since the object is otherwise leaked there).",
+  "The plain host's reach is lea-only (address taken at 0x609052f in FDE 0x6089b50..0x6091e5c, no direct call); the block host has one direct call (0x6081d38) and the element-scan host one (0x609907a), the walker one (0x609ca6d).",
+  "The global default name at 0x6508980: its runtime contents are set by static init and were not located (carried from #3440); the model takes 'default' as the documented assumption.",
+  "The delegate vtable base is not pinned; the model holds the delegate's slots as callables supplied by the harness.",
+  "The serializer 0x60ba600 per-kind rules (25 jump-table cases) are a boundary; the default model reports every kind as serialized.",
+  "Which construction paths install a non-null +0x28 delegate is not pinned.",
+  "The walker's local-set insert passes a fifth argument (r8d = 1) to map_insert 0x609bad0 at its only call site; its meaning is not pinned and the model ignores it."
+ ],
+ "relocations": [
+  {
+   "address": "0x64ed290",
+   "symbol": "__libc_single_threaded",
+   "type": "R_X86_64_GLOB_DAT"
+  }
+ ],
+ "routines": {
+  "0x5d35070": {
+   "calls": [],
+   "end": "0x5d350bc",
+   "name": "shared_release",
+   "role": "Shared-control release tail (re-shipped from #3488): dispose through vtable slot 0x10, then decrement the weak count at +0x0c (locked xadd when __libc_single_threaded is 0); when the old weak count was 1, destroy through slot 0x18.",
+   "size": 76
+  },
+  "0x5d350c0": {
+   "calls": [
+    "0x5d35070"
+   ],
+   "end": "0x5d35145",
+   "fast_path_counts": "0x100000001",
+   "name": "counted_release",
+   "role": "shared_ptr control release: counts == 0x100000001 -> dispose via vtable slot 0x10 then destroy via slot 0x18; else atomic decrement of the use count (locked xadd when __libc_single_threaded is 0), and when the old use count was 1 the 0x5d35070 tail runs.",
+   "size": 133
+  },
+  "0x5d5b300": {
+   "calls": [],
+   "end": "0x5d5b39b",
+   "name": "map_clear",
+   "role": "Options-map clear (re-shipped from #3488): destroy both strings of every node, sized-delete each 0x50-byte node, zero the buckets, first node and element count.",
+   "size": 155
+  },
+  "0x5e33fb0": {
+   "calls": [
+    "0x5d350c0"
+   ],
+   "end": "0x5e33fea",
+   "name": "value_dtor",
+   "role": "Value-struct destroy (re-shipped from #3485): release the +0x48 control through counted_release 0x5d350c0 and free the name string's heap buffer. Modelled as Value.destroy.",
+   "size": 58
+  },
+  "0x607d9f0": {
+   "calls": [],
+   "end": "0x607dad3",
+   "name": "cstr_ctor",
+   "role": "std::string ctor from const char*: SSO at 15 chars or fewer (length-1 fast path), heap via _M_create above; null throws logic_error via 0x963298. Second instantiation of the same template as 0x60b7d80.",
+   "size": 227,
+   "sso_limit": 15
+  },
+  "0x607e020": {
+   "calls": [
+    "0x607e020"
+   ],
+   "end": "0x607e1e9",
+   "name": "options_list_destroy",
+   "node_size": 40,
+   "role": "Recursive linked-list destroy: +0x18 links walked unrolled 8 deep then recursed; each 0x28-byte node freed after its +0x10 child is freed as a 0x28 node; free order is the chain reversed, each node followed by its child subtree.",
+   "size": 457
+  },
+  "0x6080b10": {
+   "calls": [
+    "0x607d9f0",
+    "0x6193b40",
+    "0x6099e70",
+    "0x5d350c0",
+    "0x609ba30",
+    "0x61cf670"
+   ],
+   "end": "0x6080dcc",
+   "factory_len": 19,
+   "factory_name": "plain_table_factory",
+   "literals": [
+    "0x43e802",
+    "0x43413b"
+   ],
+   "name": "find_plain_table",
+   "role": "PlainTableOptions host: delegate slot 0x38 resolves the options struct; the factory name takes the create path, other names take no_equals or the code-1 error.",
+   "size": 700
+  },
+  "0x60818f0": {
+   "calls": [
+    "0x607d9f0",
+    "0x60dbd80",
+    "0x6099e70",
+    "0x5d350c0",
+    "0x607e020",
+    "0x609ba30",
+    "0x61cf670"
+   ],
+   "end": "0x6081d08",
+   "factory_len": 25,
+   "factory_name": "block_based_table_factory",
+   "literals": [
+    "0x444587",
+    "0x43413b"
+   ],
+   "name": "find_block_table",
+   "role": "BlockTableOptions host: same skeleton as the plain host with the 0xf8-byte defaults and the 0x260-byte creator; the defaults' owned sub-objects are released after the creator.",
+   "size": 1048
+  },
+  "0x60956f0": {
+   "calls": [],
+   "end": "0x609570c",
+   "name": "zero_stub",
+   "role": "Default vtable slot-0x40 implementation (re-shipped from #3488): zeroes the 16-byte Status.",
+   "size": 28
+  },
+  "0x6096f40": {
+   "calls": [
+    "0x60ba0b0"
+   ],
+   "end": "0x609710f",
+   "name": "element_scan",
+   "role": "Element-vector scan (re-shipped from #3488): walks the 0x30-byte elements; per element the name lookup runs on the element's +0x28 table; returns the lookup result and stores the element's +0x20 field into found_out.",
+   "size": 463
+  },
+  "0x6097110": {
+   "calls": [],
+   "end": "0x609714e",
+   "name": "delegate_impl",
+   "role": "Delegate implementation (re-shipped from #3488): calls the object's vtable slot 0x48 with (out, obj, value, ctx_map, flag).",
+   "size": 62
+  },
+  "0x6097150": {
+   "calls": [
+    "0x6097110"
+   ],
+   "end": "0x6097192",
+   "name": "fallback_delegate",
+   "role": "Fallback delegate wrapper (re-shipped from #3488): calls delegate_impl with flag 0.",
+   "size": 66
+  },
+  "0x60971c0": {
+   "calls": [],
+   "end": "0x609755b",
+   "name": "resolver",
+   "role": "Name resolver (re-shipped from #3485): the name object's slot-0x60 string as-is, unless it contains '=' -- then '{' + the part before '=' + '}'.",
+   "size": 923
+  },
+  "0x6098ad0": {
+   "calls": [
+    "0x6096f40",
+    "0x60bb9a0",
+    "0x61cf670",
+    "0x60b9d70"
+   ],
+   "end": "0x6099003",
+   "literals": [
+    "0x43d7b4",
+    "0x43d5c7"
+   ],
+   "name": "find_by_element_scan",
+   "role": "Element-scan host: element_scan over the table vector; exact match or kind 0x13 takes the matcher, kinds 0x15/0x16 take the delegate slot-0x10 virtual, other kinds are the code-1 error.",
+   "sentinel": ";",
+   "size": 1331
+  },
+  "0x6099ce0": {
+   "calls": [],
+   "end": "0x6099e34",
+   "name": "options_record_append",
+   "record_size": 48,
+   "role": "Append a 0x30-byte record {name string, options pointer, global} to the vector at obj+0x08 (begin/end/capacity), growing it when end == capacity.",
+   "size": 340
+  },
+  "0x6099e70": {
+   "calls": [
+    "0x60c1190",
+    "0x6097110"
+   ],
+   "end": "0x609a1a9",
+   "name": "find_e70",
+   "role": "The '=' / ';' helper (re-shipped from #3488): parse path into a fresh map + delegate_impl slot 0x48 on success; otherwise slot 0x40 vs the zero stub 0x60956f0; then the value +0x03 byte gates slot 0x28.",
+   "size": 825
+  },
+  "0x609a1b0": {
+   "calls": [],
+   "end": "0x609a2e7",
+   "hash_seed": "0xc70f6907",
+   "linear_limit": 20,
+   "name": "map_find_name",
+   "role": "Options-map find by name: count <= 0x14 walks the list (length, then memcmp), otherwise the hash-bucket walk (_Hash_bytes seed 0xc70f6907, stored hash at node+0x48). Returns the node or null.",
+   "size": 311
+  },
+  "0x609a2f0": {
+   "calls": [],
+   "end": "0x609a3de",
+   "name": "map_erase_next",
+   "node_size": 80,
+   "role": "Options-map erase by node: unlink from the hash bucket, free the two strings (+0x38, +0x18, SSO-checked) and the 0x50-byte node, decrement the element count, return the next node.",
+   "size": 238
+  },
+  "0x609a410": {
+   "calls": [
+    "0x60c1190",
+    "0x609a1b0",
+    "0x609a2f0",
+    "0x6097150"
+   ],
+   "end": "0x609a67c",
+   "name": "find_norm",
+   "role": "Find normalizer (re-shipped from #3485): empty/default name takes the fallback; no '=' returns the name; else parse, 'id' lookup/erase, fallback handling.",
+   "size": 620
+  },
+  "0x609a740": {
+   "calls": [
+    "0x6099e70",
+    "0x609a410",
+    "0x609ba30"
+   ],
+   "end": "0x609b6f3",
+   "name": "entry",
+   "role": "Sibling Find entry point (re-shipped from #3488): flag-chain node resolution, value copy, name dispatch (exact name, id, .id variants, find_norm path, no_equals path). One direct call site (0x609b80f inside kind_dispatch).",
+   "size": 4019
+  },
+  "0x609b700": {
+   "calls": [
+    "0x609a740"
+   ],
+   "end": "0x609b869",
+   "name": "kind_dispatch",
+   "role": "Kind dispatch (re-shipped from #3488): kind 0x16 recurses into the entry; equal names or kind 0x13/0x15 take the node's slot-0x50; any other kind is code 1 'Could not find option: ' + str_b.",
+   "size": 361
+  },
+  "0x609b8a0": {
+   "calls": [
+    "0x6096f40",
+    "0x609b700"
+   ],
+   "end": "0x609ba2a",
+   "name": "resolve_no_equals",
+   "role": "No-'=' path (re-shipped from #3488): slot-0x68 fills the search name, element_scan runs, a null result is code 1 'Could not find option: ' + key6, otherwise kind_dispatch runs.",
+   "size": 394
+  },
+  "0x609ba30": {
+   "calls": [
+    "0x609b8a0"
+   ],
+   "end": "0x609ba76",
+   "name": "no_equals",
+   "role": "No-'=' wrapper (re-shipped from #3488): forwards to resolve_no_equals 0x609b8a0.",
+   "size": 70
+  },
+  "0x609bad0": {
+   "calls": [
+    "0x5e52800"
+   ],
+   "end": "0x609bbb1",
+   "name": "map_insert",
+   "node_size": 48,
+   "role": "Local name-set insert: _Prime_rehash_policy check (0x5e52800 when needed), hash stored at node+0x28, node inserted after the bucket's before-begin node (list head for an empty bucket), count incremented. Called only from the walker.",
+   "size": 225
+  },
+  "0x609bcb0": {
+   "calls": [
+    "0x60ba0b0",
+    "0x609b700",
+    "0x609bad0",
+    "0x609a2f0",
+    "0x609a1b0",
+    "0x61cf610"
+   ],
+   "end": "0x609c782",
+   "linear_limit": 20,
+   "local_set_node_size": 48,
+   "name": "resolve_all_elements",
+   "role": "Registry walker: walks the registry map through slot-0x68 + name_lookup + kind_dispatch; code 1 advances, code 3 inserts the name into a local name set, other codes erase; the sweep phase erases the collected names; the final Status follows the value's +0x00 word bytes and the accumulated families.",
+   "size": 2770
+  },
+  "0x60b79b0": {
+   "calls": [],
+   "end": "0x60b79de",
+   "name": "clear_string",
+   "role": "string._M_replace(0, size, cstr, strlen(cstr)): the string is assigned the C string.",
+   "size": 46
+  },
+  "0x60b79e0": {
+   "calls": [],
+   "end": "0x60b7ab8",
+   "name": "move_assign",
+   "role": "std::string move-assignment (re-shipped from #3488).",
+   "size": 216
+  },
+  "0x60b7d80": {
+   "calls": [],
+   "end": "0x60b7e63",
+   "name": "cstr_ctor_sibling",
+   "role": "std::string ctor from const char* (re-shipped from #3485): the same template as 0x607d9f0; the two excerpts differ only in branch-target addresses.",
+   "size": 227,
+   "sso_limit": 15
+  },
+  "0x60b84b0": {
+   "calls": [],
+   "end": "0x60b8564",
+   "name": "hash_name_find",
+   "role": "Hash-bucket name find (re-shipped from #3488): _Hash_bytes(key, len, 0xc70f6907) % bucket count, chain walked comparing stored hash, length, memcmp.",
+   "size": 180
+  },
+  "0x60b9d70": {
+   "calls": [],
+   "end": "0x60b9dfc",
+   "name": "value_copy",
+   "role": "Value-struct copy (re-shipped from #3485): deep-copy the 0x50 bytes (name string, the 16 bytes at +0x38, the +0x48 control with its use-count incremented). Modelled as Value.copy.",
+   "size": 140
+  },
+  "0x60ba0b0": {
+   "calls": [
+    "0x60b84b0",
+    "0x60b79e0"
+   ],
+   "end": "0x60ba441",
+   "name": "name_lookup",
+   "role": "Name lookup (re-shipped from #3488): count <= 20 linear walk, else the hash-bucket find; exact match move-assigns the key into out; on a miss the '.' split with a kind 0x13/0x15/0x16 prefix match move-assigns the suffix.",
+   "size": 913
+  },
+  "0x60bb9a0": {
+   "calls": [
+    "0x60971c0",
+    "0x60ba600"
+   ],
+   "end": "0x60bbdeb",
+   "name": "matcher",
+   "role": "Kind-0x15/0x16 matcher (re-shipped from #3485): null prefix or node state 4 zeroes out; the 0x2000 flag is code 3 'Cannot serialize option: ' + name (msg1 = the name); a non-null node+0x38 takes the virtual slot 0x40; kinds 0x16/0x15 take the resolver paths; other kinds take the serializer path (boundary).",
+   "size": 1099
+  },
+  "0x60c1190": {
+   "calls": [],
+   "end": "0x60c1887",
+   "name": "parser",
+   "role": "Options parser (re-shipped from #3485): brace stripping, key=value loop over delimiters '={};', duplicate keys overwritten; errors 'Mismatched key value pair, '=' expected', 'Unexpected char in key', 'Empty key found', 'Mismatched curly braces for nested options', 'Unexpected chars after nested options'.",
+   "size": 1783
+  },
+  "0x60db710": {
+   "boundary": true,
+   "calls": [
+    "0x60db1e0",
+    "0x60d7fb0",
+    "0x60d6fd0",
+    "0x60d50c0",
+    "0x6099ce0",
+    "0x5db8800"
+   ],
+   "end": "0x60dbd69",
+   "literals": [
+    "0x4408a7"
+   ],
+   "name": "block_ctor",
+   "role": "BlockTableOptions ctor (boundary): sub-constructors 0x60db1e0/0x60d7fb0/0x60d6fd0, mutex init 0x60d50c0, options_record_append (name = the options struct's leading string, global 0x6507540) and 0x5db8800; vtables 0x64d39a8/0x64d3a70/0x64c9c60/0x64c9a40; throws on map::at.",
+   "size": 1625
+  },
+  "0x60dbd80": {
+   "calls": [
+    "0x60db710"
+   ],
+   "end": "0x60dbdbb",
+   "name": "block_creator",
+   "object_size": 608,
+   "role": "new(0x260) + the BlockTableOptions constructor 0x60db710.",
+   "size": 59
+  },
+  "0x6193a00": {
+   "calls": [
+    "0x6099ce0"
+   ],
+   "end": "0x6193b1c",
+   "literals": [
+    "0x451120"
+   ],
+   "name": "plain_ctor",
+   "role": "PlainTableOptions ctor: zeroes +0x08/+0x10/+0x18, installs vtable 0x64d6628, copies the 0x28-byte options struct into +0x20..+0x47, appends the record {name PlainTableOptions, obj+0x20, global 0x6508260}.",
+   "size": 284,
+   "vtable": "0x64d6628"
+  },
+  "0x6193b40": {
+   "calls": [
+    "0x6193a00"
+   ],
+   "end": "0x6193b7b",
+   "name": "plain_creator",
+   "object_size": 72,
+   "role": "new(0x48) + the PlainTableOptions constructor 0x6193a00.",
+   "size": 59
+  },
+  "0x61cf610": {
+   "calls": [],
+   "end": "0x61cf64f",
+   "name": "cstr_dup",
+   "role": "strdup-like: strlen+1, new char[], __strncpy_chk, pointer stored into *(out); returns out.",
+   "size": 63
+  },
+  "0x61cf670": {
+   "calls": [],
+   "end": "0x61cf767",
+   "name": "status_builder",
+   "role": "Status builder (re-shipped from #3488): writes msg1 + ': ' + msg2 into the 16-byte Status; both message literals already end in ': ', so the binary genuinely reports doubled separators (e.g. 'Could not find option: : foo').",
+   "size": 247
+  },
+  "0x61d1390": {
+   "calls": [],
+   "end": "0x61d13db",
+   "name": "ends_with",
+   "role": "Suffix check (re-shipped from #3488): 1 when the suffix fits and the haystack's last bytes equal it, else 0; an empty suffix returns 1.",
+   "size": 75
+  },
+  "0x61d13e0": {
+   "calls": [],
+   "end": "0x61d1437",
+   "name": "str_compare",
+   "role": "Lexicographic string compare (re-shipped from #3488): memcmp over the shorter length, else the signed length difference clamped to int32.",
+   "size": 87
+  }
+ },
+ "slug": "find-family-hosts-115",
+ "task_id": "RE-001",
+ "tests": "tests/test_find_family_hosts_115.py",
+ "verify": "research/work-items/RE-001-find-family-hosts-115/verify.py",
+ "vtables": [
+  {
+   "address": "0x64d6628",
+   "note": "PlainTableOptions object vtable (0x64d6618 + 0x10), installed by plain_ctor."
+  },
+  {
+   "address": "0x64c8748",
+   "note": "Shared_ptr control vtable (0x64c8738 + 0x10) installed by the plain/block hosts; counts 0x100000001 from .rodata 0x459b20."
+  },
+  {
+   "address": "0x64d39a8",
+   "note": "Block ctor vtable reference (boundary)."
+  },
+  {
+   "address": "0x64d3a70",
+   "note": "Block ctor vtable reference (boundary)."
+  },
+  {
+   "address": "0x64c9c60",
+   "note": "Block ctor vtable reference (boundary)."
+  },
+  {
+   "address": "0x64c9a40",
+   "note": "Block ctor vtable reference (boundary)."
+  }
+ ]
+}
