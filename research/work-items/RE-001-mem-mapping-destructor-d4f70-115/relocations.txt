@@ -1,0 +1,19 @@
+Relocations for the mem-mapping release window (from .rela.dyn and .rela.plt):
+
+the routine 0x60d4f70 itself: no R_X86_64_RELATIVE record carries it as
+  addend; no whole-file stored qword equals it
+
+The window is reached only through its 11 direct calls (see
+census.py output, reproduced by verify.py).
+
+Record the body's own transfer resolves through:
+
+000000000064ee250 R_X86_64_JUMP_SLOT munmap@GLIBC_2.2.5
+  the .got.plt slot behind the PLT stub at 0x63f0c00 (jmp
+  *0x64ee250(%rip) at 0x63f0c00), which the body's tail jump
+  at 0x60d4f83 targets; munmap is the window's only external
+  transfer
+
+In-window rip-relative references: the tail jump at 0x60d4f83 is a
+plain rel32 jump to the PLT stub; no GOT load, no %fs:0x28 stack
+canary and no other data reference occurs in the window.
