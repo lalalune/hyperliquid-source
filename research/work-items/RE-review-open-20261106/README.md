@@ -11,7 +11,7 @@ The uncommitted CPython cache row is excluded from the active manifest; its
 original declaration remains in the retained submitted manifest.
 
 No raw binary evidence is rewritten, no instruction execution is claimed, and
-no component reconstruction gate is advanced. The reviewed publication batch contains 1,074 PR heads; 41 out-of-scope PRs were closed, 72 require reproducible evidence, and 57 await separate differential-execution approval. See `reviewed-pr-heads.json`, `held-pr-heads.json` and `validation.json`.
+no component reconstruction gate is advanced. The reviewed publication batch contains 1,146 PR heads; 41 out-of-scope PRs were closed, 57 await separate differential-execution approval; the prior-corpus blockers are now repaired. See `reviewed-pr-heads.json`, `held-pr-heads.json` and `validation.json`.
 
 The compaction-dump model now wraps packed integer lanes at their observed
 widths. Boundary controls and the host-libc test corrections are recorded in
@@ -20,7 +20,7 @@ research-model checks, not a reconstructed-node execution or identity claim.
 
 ## Final review validation
 
-All 896 authorized test files pass. The 23 remaining pre-existing test files
+All 969 authorized test files pass. The 23 remaining pre-existing test files
 require instruction/native execution and were not run. All 616 selected static
 packet verifiers pass, including the explicitly qualified renderer and
 provider-version cases. The final changed-export audit byte-checks 550,472
@@ -47,3 +47,21 @@ PR #2721 was subsequently reconciled against the pinned, already merged
 PR #2647 record. D is retained as reused context and earns no additional
 coverage credit. Its 14 focused tests pass. The original submission README
 and manifest remain under `submitted-pr2721/`.
+
+## Public prior-corpus repair
+
+The 72 remaining static comparison PRs now use a frozen manifest of 1,210
+public record files. The earlier large private-worktree counts are preserved
+as historical reports; they are not treated as reproduced evidence or as
+coverage metrics. The record manifest, helper and original submitted
+manifests are retained here. All 72 focused test files and all 72 direct
+static checkers pass; eight helper tests exercise integrity, missing-input,
+path, candidate-overlay and reference-identity controls.
+
+The scan also handles valid annotated ranges, numeric coordinates, and
+address-plus-size entries exposed by the larger reference set. Stale
+next-work suggestions may now be documented by a later pinned packet; that
+adds no new coverage credit and does not relax the current-window overlap
+check. Committed packets are validated by exact reference identity and
+recorded base ancestry. No target instructions were executed. Full receipts
+are in `prior-repair-validation.json`.
