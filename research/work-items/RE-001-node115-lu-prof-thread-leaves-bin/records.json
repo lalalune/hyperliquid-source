@@ -1,0 +1,187 @@
+{
+ "binary": {
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032,
+  "upstream_main": "05bc2de303c05525b71e7e257426e741bc66a390"
+ },
+ "leaves": [
+  {
+   "name": "opt/prof_prefix",
+   "node": "0x64dea88",
+   "slot": "0x64deaa8",
+   "handler": "0x6373850",
+   "fde": [
+    "0x6373850",
+    "0x6373a5a"
+   ],
+   "class": "read-only",
+   "value": "u64 address 0x6712600 (the prof-prefix string buffer in .bss); *oldlenp == 8 gives *oldp = 0x6712600, 0"
+  },
+  {
+   "name": "opt/prof_active",
+   "node": "0x64deab0",
+   "slot": "0x64dead0",
+   "handler": "0x6373a60",
+   "fde": [
+    "0x6373a60",
+    "0x6373ae6"
+   ],
+   "class": "read-only",
+   "value": "byte at global 0x64ffcf9 (file-initial 1; runtime value may differ); *oldlenp == 1 gives *oldp = byte, 0"
+  },
+  {
+   "name": "opt/lg_prof_sample",
+   "node": "0x64deb00",
+   "slot": "0x64deb20",
+   "handler": "0x6373b80",
+   "fde": [
+    "0x6373b80",
+    "0x6373d97"
+   ],
+   "class": "read-only",
+   "value": "u64 at global 0x64ffcf0 (file-initial 0x13 = 19); *oldlenp == 8 gives *oldp = value, 0"
+  },
+  {
+   "name": "thread/allocatedp",
+   "node": "0x64def50",
+   "slot": "0x64def70",
+   "handler": "0x6374c00",
+   "fde": [
+    "0x6374c00",
+    "0x6374e0a"
+   ],
+   "class": "read-only",
+   "value": "u64 address ctx+0x338 (the pointer itself, not the loaded value); *oldlenp == 8 gives *oldp = ctx+0x338, 0"
+  },
+  {
+   "name": "thread/deallocated",
+   "node": "0x64def78",
+   "slot": "0x64def98",
+   "handler": "0x6374e10",
+   "fde": [
+    "0x6374e10",
+    "0x637501a"
+   ],
+   "class": "read-only",
+   "value": "u64 at ctx+0x348; *oldlenp == 8 gives *oldp = value, 0"
+  }
+ ],
+ "leaf_contract": "All 5: write attempt (newp or newlen nonzero) returns 1; oldp or oldlenp absent returns 0; exact-length read returns 0; short read copies min(*oldlenp, size) from a stack temp, sets *oldlenp to the copied count, returns 0x16. Byte leaf: 1-byte value with a 1-byte copy path. u64 leaves: 8-byte value with a compiler-unrolled copy loop.",
+ "leaf_direct_entries": "0 E8 and 0 E9 per leaf (all 5): reached only by dispatcher indirect tail-call; each .rela.dyn node+0x20 slot holds exactly one RELATIVE addend equal to the handler address.",
+ "exhibits": [
+  {
+   "name": "prof_prefix",
+   "range": [
+    "0x6373850",
+    "0x6373a5a"
+   ],
+   "bytes": 522,
+   "strict": 146
+  },
+  {
+   "name": "prof_active",
+   "range": [
+    "0x6373a60",
+    "0x6373ae6"
+   ],
+   "bytes": 134,
+   "strict": 36
+  },
+  {
+   "name": "lg_prof_sample",
+   "range": [
+    "0x6373b80",
+    "0x6373d97"
+   ],
+   "bytes": 535,
+   "strict": 147
+  },
+  {
+   "name": "allocatedp",
+   "range": [
+    "0x6374c00",
+    "0x6374e0a"
+   ],
+   "bytes": 522,
+   "strict": 146
+  },
+  {
+   "name": "deallocated",
+   "range": [
+    "0x6374e10",
+    "0x637501a"
+   ],
+   "bytes": 522,
+   "strict": 146
+  },
+  {
+   "name": "bin_table_init",
+   "range": [
+    "0x63d9880",
+    "0x63d9a64"
+   ],
+   "bytes": 484,
+   "strict": 50
+  },
+  {
+   "name": "bin_remove_head",
+   "range": [
+    "0x63ec7a0",
+    "0x63ec890"
+   ],
+   "bytes": 240,
+   "strict": 62
+  },
+  {
+   "name": "bin_remove_tail",
+   "range": [
+    "0x63ec8a3",
+    "0x63ec900"
+   ],
+   "bytes": 93,
+   "strict": 17
+  },
+  {
+   "name": "record_init",
+   "range": [
+    "0x63bf840",
+    "0x63bf8fc"
+   ],
+   "bytes": 188,
+   "strict": 51
+  }
+ ],
+ "exhibit_totals": {
+  "bytes": 3240,
+  "strict": 801,
+  "windows": 9
+ },
+ "census": {
+  "method": "raw .text scan for E8/E9 rel32 targets, every reported site confirmed as an objdump call/jmp row in its enclosing FDE at build time; leaf zero-counts are airtight under raw scan (a real E8/E9 opcode byte is always present in the byte stream, so zero raw hits means zero real sites)",
+  "bin_table_init_0x63d9880": "108 E8, 0 E9; enable slow path FDE holds 2 E8 (0x63ed478, 0x63ed4e7), matching packet #260's census",
+  "bin_remove_0x63ec7a0": "4 E8, 0 E9: 0x63ec975 (FDE 0x63ec900..0x63ed06d), 0x63ed59c and 0x63ed629 (enable slow path FDE, matching packet #260's x2), 0x63edcbf (FDE 0x63ed8b0..0x63edf05)",
+  "record_init_0x63bf840": "35 E8, 2 E9 (E9 at 0x63b6ed9 in FDE 0x63b6ec0..0x63b6ede and 0x63d96f9 in FDE 0x63d96e0..0x63d96fe); consumer FDE 0x63c41c0..0x63c44d9 holds 11 E8, matching packet #261's count",
+  "leaf_arithmetic": "33 + 5 + 166 = 204"
+ },
+ "cited_only_not_claimed": [
+  "packet #252 lu-wait-callers exhibit r28_wait [0x63ec890, 0x63ec8a3] (the bin_remove wait path inside FDE 0x63ec7a0..0x63ec900): characterized only, not exhibited here; head and tail windows adjoin it without overlap",
+  "packet #261 interval-consumer window 0x63c4316..0x63c43a3 and consumer FDE 0x63c41c0..0x63c44d9 (11 record_init call sites counted, not re-exhibited)",
+  "packet #260 enable-slow-path whole-FDE call census (bin_table_init x2, bin_remove x2, named only)",
+  "packet #215 lu-miss handler FDE 0x63d9700..0x63d987b (not re-attempted; bin_table_init 0x63d9880 starts at the next FDE)",
+  "callees named only, not decoded: 0x63bfbf0 (single-qword copy, used by record_init), 0x63ec690 (bin_remove cleanup call), 0x636b370 (allocator, consumer FDE), 0x63f17b0/0x63f0b70 (pthread trylock/unlock PLT), 0x63f1b20/0x63f1b30/0x63f14b0/0x63f1b40 (pthread mutexattr/mutex PLT)",
+  "packet #261 bin_init 0x63ec4c0 (the insert twin of bin_remove; cited for the shared record discipline only)"
+ ],
+ "corrections_to_earlier_packets": [
+  "Packet #261's 'check helper' framing for 0x63bf840 is refined, not contradicted: #261 explicitly left the helper undecoded ('named only') and described only the call-site pattern (global address, .rodata string, size, rcx = 0; nonzero result aborts). Decoded here, 0x63bf840 is a record/mutex initializer: it zeroes the 64-byte record header at rdi, copies the template qword (0) from .rodata 0xb9e830 to rdi+0x00 and rdi+0x08 via 0x63bfbf0 (redundant with the zeroing), zeroes rdi+0x30, and initializes a PTHREAD_MUTEX_NORMAL mutex at rdi+0x40 via a stack mutexattr; it returns 0 on success and 1 if mutexattr_init or mutex_init fails. The callee reads only rdi: the rsi/rdx/rcx arguments set at its 11 consumer call sites are dead (rsi is overwritten with the fixed template address 0xb9e830; rdx/rcx are never read). So the consumer entry chain initializes 11 mutex records and aborts on init failure, rather than performing 11 checks. #261's 11-site count and its consumer-window decode stand unchanged."
+ ],
+ "unresolved": [
+  "166 control-tree leaves remain unclassified",
+  "bin_remove cleanup callee 0x63ec690 (called with ctx, arena record, bin+0xa8 field) not decoded",
+  "the 108 bin_table_init callers' contexts beyond the enable-slow-path pair; what the 24 (1,0) pairs represent per subsystem is not determined from this function alone",
+  "record_init template contents beyond the copied zero qword at .rodata 0xb9e830 are not read by the callee",
+  "runtime contents of .bss buffer 0x6712600 (prof_prefix string) and runtime values of .data bytes 0x64ffcf9 / 0x64ffcf0 are not readable from the file; only file-initial values are reported (1 and 0x13)"
+ ],
+ "packet_number": 262,
+ "question": "Packet #261's next question: continue per-leaf read/write classification for the remaining 171 control-tree leaves; decode the remaining enable-slow-path bin-setup callees (0x63d9880 first; 0x63ec7a0's FDE overlaps a lu-wait-callers window at 0x63ec890..0x63ec8a3, so claim only unclaimed bytes; 0x63d9700 is packet #215's handler and must not be re-attempted); decode the consumer check helper 0x63bf840."
+}
