@@ -1,0 +1,426 @@
+{
+ "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "calls": [
+  {
+   "note": "bin_table_init",
+   "site": "0x63ae83d",
+   "target": "0x63d9880"
+  },
+  {
+   "note": "lu-miss handler (scan exhaustion)",
+   "site": "0x63ae965",
+   "target": "0x63d9700"
+  },
+  {
+   "note": "__stack_chk_fail",
+   "site": "0x63ae8f7",
+   "target": "0x63f0d70"
+  }
+ ],
+ "census": {
+  "bin_table_init": 1,
+  "bsr": 0,
+  "calls_total": 3,
+  "jumps": 22,
+  "jumps_outside_window": 0,
+  "lock_add": 0,
+  "lock_sub": 0,
+  "lu_miss": 1,
+  "raw_e8": {
+   "tiers": {
+    "1": 17,
+    "10": 1,
+    "2": 12,
+    "4": 8,
+    "5": 1,
+    "6": 2,
+    "8": 1
+   },
+   "total": 108
+  },
+  "rela_dyn": {
+   "relative": 59534,
+   "total": 60723
+  },
+  "rela_plt": 278,
+  "ret": 1,
+  "strict": 151
+ },
+ "cited_not_claimed": [
+  "bin_table_init body 0x63d9880..0x63d9a64 (#262)",
+  "lu-miss handler 0x63d9700..0x63d987b (#215)",
+  "prev FDE 0x63ae2b0..0x63ae6d1, next FDE 0x63ae980..0x63aed39",
+  "no node-resolution tables (0x65096c0, 0x6511780) or size tables (0x6727a00, 0x67277c0) are read in this FDE"
+ ],
+ "exhibits": [
+  {
+   "bin_table_init_sites": [
+    "0x63ae83d"
+   ],
+   "bsr": 0,
+   "bsr_sites": [],
+   "bytes": 660,
+   "calls_total": 3,
+   "lock_add": 0,
+   "lock_sub": 0,
+   "lu_miss_sites": [
+    "0x63ae965"
+   ],
+   "name": "bintableinit_caller_pageinstall_1site",
+   "range": "0x63ae6e0..0x63ae974",
+   "ret": 1,
+   "ret_sites": [
+    "0x63ae7ec"
+   ],
+   "strict": 151,
+   "tail_jump_exits": []
+  }
+ ],
+ "frame": {
+  "canary": "0x198(%rsp)",
+  "endbr64": true,
+  "pushes": [
+   "r15",
+   "r14",
+   "r13",
+   "r12",
+   "rbp",
+   "rbx"
+  ],
+  "sub_rsp": "0x1a8"
+ },
+ "lu_miss_sites": [
+  {
+   "r8": 1,
+   "r9": 0,
+   "rcx": "rbx page cursor",
+   "rdi": "r15 context",
+   "rdx": "r14 scan table",
+   "rejoin": "jmp 0x63ae7b0 (store path)",
+   "rsi": "entry rsi (saved to 0x8(%rsp), restored after call)",
+   "scan": "single",
+   "site": "0x63ae965"
+  }
+ ],
+ "next_fde": {
+  "gap_bytes": "cccccccccccccccccccccccc",
+  "padding": 12,
+  "range": "0x63ae980..0x63aed39"
+ },
+ "next_question": {
+  "bin_table_init": 1,
+  "bsr": 0,
+  "bytes": 953,
+  "fall_through": [
+   "0x63aed40..0x63aefdb",
+   "0x63aefe0..0x63af45f",
+   "0x63af460..0x63afba4",
+   "0x63afc60..0x63b0324",
+   "0x63bc490..0x63bc728",
+   "0x63bc730..0x63bcb12",
+   "0x63c2f00..0x63c3328"
+  ],
+  "lu_miss": 2,
+  "packet": 306,
+  "ret": 1,
+  "window": "0x63ae980..0x63aed39"
+ },
+ "pageinstall": {
+  "composed_value": "rbp = (ecx << 0x30) | (struct pointer & 0xffffffffffff) | 1, composed at 0x63ae728..0x63ae751",
+  "entry_registers": "rdi = context (kept in r15), rsi = live input (preserved across the bti call and the lu-miss call via 0x8(%rsp); passed to the lu-miss handler; caller-side meaning not established), rdx = struct pointer (kept in rbp), ecx = value low bits (kept in rbx)",
+  "loop": "pages from page(0x8(%rbp)) + 0x1000 up to page(0x8(%rbp)) + page(0x10(%rbp)) - 0x2000, step 0x1000; per page the context-table entry is resolved and the composed value is stored",
+  "writes": "mov %rbp,-0x8(%rax) at 0x63ae7bb (second-level entry for the page, rax = (cursor>>0x9)&0x1ffff8 + table + 0x8)"
+ },
+ "prev_fde": {
+  "gap": 15,
+  "gap_bytes": "cccccccccccccccccccccccccccccc",
+  "range": "0x63ae2b0..0x63ae6d1"
+ },
+ "return_value": {
+  "eax": "0 on the plain path (xor %eax,%eax at 0x63ae715 and 0x63ae755); the scan move-to-front reuses eax as a slot index (mov $0x1..$0x7 at 0x63ae856/0x63ae8ba/0x63ae8ce/0x63ae8ed/0x63ae909/0x63ae92c/0x63ae93c), so eax at ret reflects the last move-to-front slot index when a scan hit occurred",
+  "out": "composed value stored at each page's second-level entry (mov %rbp,-0x8(%rax) at 0x63ae7bb)"
+ },
+ "scan": {
+  "base": "table+0x100",
+  "exhaustion": "0x63ae94e (lu-miss block)",
+  "move_to_front": "0x63ae860 (shared, slots 1-7); slot-0 inline block 0x63ae7fc..0x63ae82c",
+  "reversed_operand": [],
+  "slot_compares": [
+   "0x63ae7f7",
+   "0x63ae85b",
+   "0x63ae8ac",
+   "0x63ae8d3",
+   "0x63ae8df",
+   "0x63ae90e",
+   "0x63ae91e",
+   "0x63ae941"
+  ],
+  "slots": 8,
+  "table": "r14 context+0x1b0"
+ },
+ "sites": [
+  {
+   "argument": "lea 0x10(%rsp) in r14, mov %r14,%rdi",
+   "block": "0x63ae830",
+   "branch": "test %rdi,%rdi; je from 0x63ae71a",
+   "rejoin": "jmp 0x63ae720",
+   "restore": "rsi from 0x8(%rsp) after the call",
+   "save": "rsi to 0x8(%rsp) before the call",
+   "site": "0x63ae83d"
+  }
+ ],
+ "survey": {
+  "candidates": [
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363095"
+    ],
+    "end": "0x6363258",
+    "miss": 1,
+    "ret": 0,
+    "size": 712,
+    "start": "0x6362f90",
+    "status": "BUILT by packet #298"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63633f8"
+    ],
+    "end": "0x6363552",
+    "miss": 1,
+    "ret": 1,
+    "size": 754,
+    "start": "0x6363260",
+    "status": "BUILT by packet #299"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363b30"
+    ],
+    "end": "0x6363d50",
+    "miss": 1,
+    "ret": 1,
+    "size": 1376,
+    "start": "0x63637f0",
+    "status": "BUILT by packet #300"
+   },
+   {
+    "bsr": 4,
+    "bti": 1,
+    "bti_sites": [
+     "0x6364009"
+    ],
+    "end": "0x6364270",
+    "miss": 1,
+    "ret": 1,
+    "size": 1312,
+    "start": "0x6363d50",
+    "status": "BUILT by packet #301"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6387629"
+    ],
+    "end": "0x6387878",
+    "miss": 1,
+    "ret": 1,
+    "size": 1112,
+    "start": "0x6387420",
+    "status": "BUILT by packet #302"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63adce6"
+    ],
+    "end": "0x63adf34",
+    "miss": 2,
+    "ret": 1,
+    "size": 996,
+    "start": "0x63adb50",
+    "status": "BUILT by packet #303"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae114"
+    ],
+    "end": "0x63ae252",
+    "miss": 1,
+    "ret": 1,
+    "size": 786,
+    "start": "0x63adf40",
+    "status": "EXCLUDED as a whole FDE: overlaps packet #214 (lu nextnode) claimed sub-ranges 0x63adf71..0x63adf9d, 0x63ae014..0x63ae040, 0x63ae088..0x63ae0cf, 0x63adfed..0x63ae014 in its records"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae45d"
+    ],
+    "end": "0x63ae6d1",
+    "miss": 2,
+    "ret": 1,
+    "size": 1057,
+    "start": "0x63ae2b0",
+    "status": "BUILT by packet #304"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae83d"
+    ],
+    "end": "0x63ae974",
+    "miss": 1,
+    "ret": 1,
+    "size": 660,
+    "start": "0x63ae6e0",
+    "status": "BUILT by this packet (#305)"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aea96"
+    ],
+    "end": "0x63aed39",
+    "miss": 2,
+    "ret": 1,
+    "size": 953,
+    "start": "0x63ae980",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aeea1"
+    ],
+    "end": "0x63aefdb",
+    "miss": 2,
+    "ret": 1,
+    "size": 667,
+    "start": "0x63aed40",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af198"
+    ],
+    "end": "0x63af45f",
+    "miss": 2,
+    "ret": 1,
+    "size": 1151,
+    "start": "0x63aefe0",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af6c8"
+    ],
+    "end": "0x63afba4",
+    "miss": 4,
+    "ret": 1,
+    "size": 1860,
+    "start": "0x63af460",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63afe1e"
+    ],
+    "end": "0x63b0324",
+    "miss": 4,
+    "ret": 1,
+    "size": 1732,
+    "start": "0x63afc60",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc5e5"
+    ],
+    "end": "0x63bc728",
+    "miss": 1,
+    "ret": 1,
+    "size": 664,
+    "start": "0x63bc490",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc9ec"
+    ],
+    "end": "0x63bcb12",
+    "miss": 1,
+    "ret": 1,
+    "size": 994,
+    "start": "0x63bc730",
+    "status": "survives"
+   },
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x63c30ed"
+    ],
+    "end": "0x63c3328",
+    "miss": 1,
+    "ret": 1,
+    "size": 1064,
+    "start": "0x63c2f00",
+    "status": "survives"
+   }
+  ],
+  "count": 17,
+  "exclusions_reverified": [
+   "0x63ed090..0x63ed862 (#260)",
+   "0x63ef8e0..0x63efba2 (#258)"
+  ],
+  "method": "own .eh_frame parse (135,313 FDEs, sorted before bisect) + raw-e8 census + objdump site count per FDE + exhibits-scoped range-only claim check over merged tree + all prior hl-wt-calls* worktrees",
+  "tiers": {
+   "1": 17,
+   "10": 1,
+   "2": 12,
+   "4": 8,
+   "5": 1,
+   "6": 2,
+   "8": 1
+  },
+  "total_raw": 108
+ },
+ "walk": {
+  "field_update": "no shl/sar $0x10 + mask $0xffffffffffffff80 transform in this FDE (like #303 and #304, unlike #298-#302); instead the loop stores a composed value at each page's second-level entry",
+  "node_resolution_table": "none: no 0x65096c0 / 0x6511780 read in this FDE; the node pointers come from the table entries directly",
+  "page_range": "cursor rbx from page(0x8(%rbp)) + 0x1000 to page(0x8(%rbp)) + page(0x10(%rbp)) - 0x2000, step 0x1000 (end r13 = r12 + rax - 0x2000 at 0x63ae749)",
+  "second_level": "(cursor>>0x9)&0x1ffff8 + table + 0x8",
+  "table": "context+0x1b0 (r14)",
+  "top_index": "(cursor>>0x1a)&0xf0"
+ },
+ "window": {
+  "bytes": 660,
+  "range": "0x63ae6e0..0x63ae974",
+  "strict": 151
+ }
+}
