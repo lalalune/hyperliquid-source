@@ -1,0 +1,815 @@
+{
+ "answer": {
+  "caches_the_wrapper_a_runtime": false,
+  "initializer_is_not_the_builder": "the initializer 0x1568de0 (2364 bytes) never calls the runtime builder 0x5cf9600, the cfg ctor 0x5cf93f0 or the builder slot 0x64e1760; its full call census is retained under init_fn_calls",
+  "the_global": "std::sync::LazyLock<T>, size_of::<T>() == 0x18: a 24-byte value cell at 0x64f01c0 followed by its once state dword at 0x64f01d8 (file value 3, INCOMPLETE)",
+  "value_consumer": "an accessor body at 0x1560a40, reached through GOT slot 0x64e0b20, returns the cached value words at cell +8 and cell +0x10 (rax:rdx); the +0 word is the initializer fn pointer itself until it is overwritten by the product",
+  "what_is_cached": "the return value of the initializer function 0x1568de0, deposited into the cell fn-pointer slot by an R_X86_64_RELATIVE relocation and written over the cell (24 bytes) by the closure shims on the first completed call",
+  "what_the_once_guards": "exactly-once production of that 24-byte value; after completion the state dword is 0 (COMPLETED) and the forced calls wrapper a makes are no-ops",
+  "wrapper_a_use": "wrapper a never reads the cached value: its only references to the pair are the state load at 0x15d6fec and the slow-path lea pair; after the forced call it jumps unconditionally to its own build path (cfg_ctor kind 1, builder slot) and builds a fresh runtime on every call"
+ },
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "artifact_size": 105896032,
+ "boundaries": [
+  "the source-level identity of the LazyLock static (which static of the base crate, and what its 24-byte value denotes) is not pinned: no Location inside the initializer names the static, and this packet does not guess from nearby string literals",
+  "whether the dispatcher that reaches wrapper a ever selects the kind-1 arm at run time stays open, as left by PR #2969; every statement here is about the linked code paths, not about observed execution",
+  "the 41 further bodies that reference the same closure vtable/location statics with other cells are other statics sharing the monomorphized closure; their cells are outside this packet"
+ ],
+ "byte_pins": [
+  {
+   "bytes": "8b05e691f104",
+   "meaning": "wrapper_a loads the once state dword",
+   "va": "0x15d6fec"
+  },
+  {
+   "bytes": "85c0",
+   "meaning": "wrapper_a tests the state",
+   "va": "0x15d6ff2"
+  },
+  {
+   "bytes": "0f85b6010000",
+   "meaning": "wrapper_a jne to slow path 0x15d71b0",
+   "va": "0x15d6ff4"
+  },
+  {
+   "bytes": "488d050990f104",
+   "meaning": "wrapper_a lea rax, cell",
+   "va": "0x15d71b0"
+  },
+  {
+   "bytes": "488d3d0290f104",
+   "meaning": "wrapper_a lea rdi, once state",
+   "va": "0x15d71cf"
+  },
+  {
+   "bytes": "488d0d7370e204",
+   "meaning": "wrapper_a lea rcx, closure vtable",
+   "va": "0x15d71d6"
+  },
+  {
+   "bytes": "4c8d059470e204",
+   "meaning": "wrapper_a lea r8, call location",
+   "va": "0x15d71dd"
+  },
+  {
+   "bytes": "be01000000",
+   "meaning": "wrapper_a force flag esi = 1",
+   "va": "0x15d71ec"
+  },
+  {
+   "bytes": "ff15f987f004",
+   "meaning": "wrapper_a calls the sys once slot",
+   "va": "0x15d71f1"
+  },
+  {
+   "bytes": "e9fefdffff",
+   "meaning": "wrapper_a jumps back to 0x15d6ffa",
+   "va": "0x15d71f7"
+  },
+  {
+   "bytes": "be01000000",
+   "meaning": "wrapper_a cfg_ctor kind argument 1",
+   "va": "0x15d7002"
+  },
+  {
+   "bytes": "e8e4237204",
+   "meaning": "wrapper_a direct call to cfg_ctor",
+   "va": "0x15d7007"
+  },
+  {
+   "bytes": "ff1534a7f004",
+   "meaning": "wrapper_a calls the builder slot",
+   "va": "0x15d7026"
+  },
+  {
+   "bytes": "8b0592f7f804",
+   "meaning": "accessor loads the once state dword",
+   "va": "0x1560a40"
+  },
+  {
+   "bytes": "85c0",
+   "meaning": "accessor tests the state",
+   "va": "0x1560a46"
+  },
+  {
+   "bytes": "750f",
+   "meaning": "accessor jne to slow path 0x1560a59",
+   "va": "0x1560a48"
+  },
+  {
+   "bytes": "488b0577f7f804",
+   "meaning": "accessor fast load of cell +8",
+   "va": "0x1560a4a"
+  },
+  {
+   "bytes": "488b1578f7f804",
+   "meaning": "accessor fast load of cell +0x10",
+   "va": "0x1560a51"
+  },
+  {
+   "bytes": "c3",
+   "meaning": "accessor fast return",
+   "va": "0x1560a58"
+  },
+  {
+   "bytes": "488d055cf7f804",
+   "meaning": "accessor lea rax, cell",
+   "va": "0x1560a5d"
+  },
+  {
+   "bytes": "488d3d5ef7f804",
+   "meaning": "accessor lea rdi, once state",
+   "va": "0x1560a73"
+  },
+  {
+   "bytes": "488d0dcfd7e904",
+   "meaning": "accessor lea rcx, closure vtable",
+   "va": "0x1560a7a"
+  },
+  {
+   "bytes": "4c8d05f0d7e904",
+   "meaning": "accessor lea r8, call location",
+   "va": "0x1560a81"
+  },
+  {
+   "bytes": "be01000000",
+   "meaning": "accessor force flag esi = 1",
+   "va": "0x1560a8d"
+  },
+  {
+   "bytes": "ff1558eff704",
+   "meaning": "accessor calls the sys once slot",
+   "va": "0x1560a92"
+  },
+  {
+   "bytes": "488b0525f7f804",
+   "meaning": "accessor slow load of cell +8",
+   "va": "0x1560a9c"
+  },
+  {
+   "bytes": "488b1526f7f804",
+   "meaning": "accessor slow load of cell +0x10",
+   "va": "0x1560aa3"
+  },
+  {
+   "bytes": "c3",
+   "meaning": "accessor slow return",
+   "va": "0x1560aaa"
+  },
+  {
+   "bytes": "48c70000000000",
+   "meaning": "shim_mut zeroes the caller slot (take)",
+   "va": "0x155fd8b"
+  },
+  {
+   "bytes": "7424",
+   "meaning": "shim_mut je to the null path",
+   "va": "0x155fd95"
+  },
+  {
+   "bytes": "807e0401",
+   "meaning": "shim_mut tests the OnceState poisoned byte",
+   "va": "0x155fd97"
+  },
+  {
+   "bytes": "742b",
+   "meaning": "shim_mut je to the poison helper call",
+   "va": "0x155fd9b"
+  },
+  {
+   "bytes": "ff13",
+   "meaning": "shim_mut calls the fn pointer from the cell",
+   "va": "0x155fda2"
+  },
+  {
+   "bytes": "48894310",
+   "meaning": "shim_mut writes back value word +0x10",
+   "va": "0x155fda9"
+  },
+  {
+   "bytes": "0f1103",
+   "meaning": "shim_mut writes back value words +0/+8",
+   "va": "0x155fdb2"
+  },
+  {
+   "bytes": "488d3d6ee5e904",
+   "meaning": "shim_mut lea rdi, null location",
+   "va": "0x155fdbb"
+  },
+  {
+   "bytes": "ff1568faf704",
+   "meaning": "shim_mut calls the null panic slot",
+   "va": "0x155fdc2"
+  },
+  {
+   "bytes": "ff150202f804",
+   "meaning": "shim_mut calls the poison helper slot",
+   "va": "0x155fdc8"
+  },
+  {
+   "bytes": "48c70000000000",
+   "meaning": "shim_once zeroes the caller slot (take)",
+   "va": "0x156898b"
+  },
+  {
+   "bytes": "807e0401",
+   "meaning": "shim_once tests the OnceState poisoned byte",
+   "va": "0x1568997"
+  },
+  {
+   "bytes": "ff13",
+   "meaning": "shim_once calls the fn pointer from the cell",
+   "va": "0x15689a2"
+  },
+  {
+   "bytes": "48894310",
+   "meaning": "shim_once writes back value word +0x10",
+   "va": "0x15689a9"
+  },
+  {
+   "bytes": "0f1103",
+   "meaning": "shim_once writes back value words +0/+8",
+   "va": "0x15689b2"
+  },
+  {
+   "bytes": "488d3d6e59e904",
+   "meaning": "shim_once lea rdi, null location",
+   "va": "0x15689bb"
+  },
+  {
+   "bytes": "ff15686ef704",
+   "meaning": "shim_once calls the null panic slot",
+   "va": "0x15689c2"
+  },
+  {
+   "bytes": "ff150276f704",
+   "meaning": "shim_once calls the poison helper slot",
+   "va": "0x15689c8"
+  },
+  {
+   "bytes": "f00fb113",
+   "meaning": "sys once lock cmpxchg claims the state",
+   "va": "0x5c87d93"
+  },
+  {
+   "bytes": "83e103",
+   "meaning": "sys once masks the state low bits",
+   "va": "0x5c87d9f"
+  },
+  {
+   "bytes": "83f902",
+   "meaning": "sys once compares the OnceState byte with 2",
+   "va": "0x5c87e28"
+  },
+  {
+   "bytes": "c745c000000000",
+   "meaning": "sys once default OnceState byte is 0",
+   "va": "0x5c87e2e"
+  },
+  {
+   "bytes": "ff5020",
+   "meaning": "sys once calls the closure through +0x20",
+   "va": "0x5c87e44"
+  },
+  {
+   "bytes": "8703",
+   "meaning": "sys once xchg writes the new state back",
+   "va": "0x5c87e4a"
+  },
+  {
+   "bytes": "ff154e888500",
+   "meaning": "sys once calls the futex wake slot",
+   "va": "0x5c87e64"
+  },
+  {
+   "bytes": "b802000000",
+   "meaning": "sys once panic path loads state value 2",
+   "va": "0x5c87f3f"
+  },
+  {
+   "bytes": "8703",
+   "meaning": "sys once xchg writes the poisoned state back",
+   "va": "0x5c87f44"
+  },
+  {
+   "bytes": "488d3df3cacafa",
+   "meaning": "poison helper lea rdi, message",
+   "va": "0x5c9d1a4"
+  },
+  {
+   "bytes": "488d15a6688200",
+   "meaning": "poison helper lea rdx, location",
+   "va": "0x5c9d1ab"
+  },
+  {
+   "bytes": "be5d000000",
+   "meaning": "poison helper mov esi, 0x5d",
+   "va": "0x5c9d1b2"
+  },
+  {
+   "bytes": "ff15fb248400",
+   "meaning": "poison helper calls the panic entry slot",
+   "va": "0x5c9d1b7"
+  },
+  {
+   "bytes": "8b059544fe04",
+   "meaning": "rep site loads the once state dword",
+   "va": "0x150bd3d"
+  },
+  {
+   "bytes": "752d",
+   "meaning": "rep site jne to slow path 0x150bd74",
+   "va": "0x150bd45"
+  },
+  {
+   "bytes": "e841080000",
+   "meaning": "rep site calls its continuation 0x150c590",
+   "va": "0x150bd4a"
+  },
+  {
+   "bytes": "488d054544fe04",
+   "meaning": "rep site lea rax, cell",
+   "va": "0x150bd74"
+  },
+  {
+   "bytes": "488d3d4744fe04",
+   "meaning": "rep site lea rdi, once state",
+   "va": "0x150bd8a"
+  },
+  {
+   "bytes": "488d0db824ef04",
+   "meaning": "rep site lea rcx, closure vtable",
+   "va": "0x150bd91"
+  },
+  {
+   "bytes": "4c8d05d924ef04",
+   "meaning": "rep site lea r8, call location",
+   "va": "0x150bd98"
+  },
+  {
+   "bytes": "be01000000",
+   "meaning": "rep site force flag esi = 1",
+   "va": "0x150bda4"
+  },
+  {
+   "bytes": "ff15413cfd04",
+   "meaning": "rep site calls the sys once slot",
+   "va": "0x150bda9"
+  },
+  {
+   "bytes": "eb96",
+   "meaning": "rep site jumps back to 0x150bd47",
+   "va": "0x150bdaf"
+  }
+ ],
+ "captured_code_executed": false,
+ "census": {
+  "accessor_slot_call_sites": {
+   "bodies": [
+    "0x1509b70",
+    "0x15d6070",
+    "0x2317b10",
+    "0x269f5c0",
+    "0x28cd7a0",
+    "0x2c01920",
+    "0x2c3edb0",
+    "0x2c3f5e0",
+    "0x2c47660",
+    "0x2e07a00",
+    "0x2e098e0",
+    "0x2e157c0",
+    "0x36c93c0",
+    "0x38bc000",
+    "0x38bf120",
+    "0x38d3310",
+    "0x38d3490",
+    "0x38d3880",
+    "0x38d3990",
+    "0x38d3eb0",
+    "0x38d47b0",
+    "0x38d4f10",
+    "0x38d5490",
+    "0x38d5860",
+    "0x38d5f60",
+    "0x38d6550",
+    "0x38d6b30",
+    "0x38d6ed0",
+    "0x38d7280",
+    "0x38d7830",
+    "0x38d7ba0",
+    "0x38df640",
+    "0x38e0100",
+    "0x38e06a0",
+    "0x38e1060",
+    "0x38e1760",
+    "0x38e23a0",
+    "0x38e2e10",
+    "0x38e35f0",
+    "0x38e3cf0",
+    "0x38e41f0",
+    "0x38e4880",
+    "0x38e5070",
+    "0x38e5d00",
+    "0x38e64b0",
+    "0x38e6d40",
+    "0x38e76f0",
+    "0x38e7c90",
+    "0x38e81a0",
+    "0x38e8e40",
+    "0x38e93e0",
+    "0x421e9d0",
+    "0x446c200",
+    "0x44ab4a0",
+    "0x4e36d20",
+    "0x538cd30",
+    "0x5397b50",
+    "0x54efca0",
+    "0x54f1270",
+    "0x5594f60",
+    "0x5597a60",
+    "0x55988f0",
+    "0x559e320",
+    "0x55aca20",
+    "0x55b2720"
+   ],
+   "count": 100
+  },
+  "body_feature_histogram": {
+   "call_sys_slot": 443,
+   "call_sys_slot,lea_cell,lea_loc,lea_once,lea_vtable,load_state": 421,
+   "call_sys_slot,lea_loc": 6,
+   "call_sys_slot,lea_loc,lea_vtable": 41
+  },
+  "closure_statics": {
+   "location_lea_references": 725,
+   "note": "both exceed the 421 ensure bodies of this pair: the monomorphized closure is shared with other statics, whose cells are outside this packet",
+   "vtable_lea_references": 712
+  },
+  "ensure_sites": {
+   "bodies_missing_a_feature": 0,
+   "bodies_with_lea_cell": 421,
+   "feature_set": [
+    "call_sys_slot",
+    "lea_cell",
+    "lea_loc",
+    "lea_once",
+    "lea_vtable",
+    "load_state"
+   ]
+  },
+  "imm64_references": {
+   "0x64f01c0": [
+    {
+     "file_offset": "0x15fbb8",
+     "section": ".rela.dyn"
+    }
+   ],
+   "0x64f01d8": []
+  },
+  "range": {
+   "by_target_opcode": {
+    "0x64f01c0/0x8d": 569,
+    "0x64f01c8/0x8b": 2,
+    "0x64f01d0/0x8b": 2,
+    "0x64f01d8/0x8b": 572,
+    "0x64f01d8/0x8d": 568
+   },
+   "distinct_bodies": 421,
+   "hi": "0x64f01e0",
+   "lo": "0x64f01c0",
+   "store_opcodes": 0,
+   "validated_references": 1713,
+   "value_load_bodies": [
+    "0x1560a40"
+   ]
+  },
+  "rel32_direct_references": {
+   "accessor": [],
+   "init_fn": [],
+   "sys_once": []
+  },
+  "sys_once_slot_call_sites": 1553,
+  "wrapper_a_range_references": [
+   {
+    "field": "0x15d6fee",
+    "opcode": "0x8b",
+    "target": "0x64f01d8"
+   },
+   {
+    "field": "0x15d71b3",
+    "opcode": "0x8d",
+    "target": "0x64f01c0"
+   },
+   {
+    "field": "0x15d71d2",
+    "opcode": "0x8d",
+    "target": "0x64f01d8"
+   }
+  ]
+ },
+ "init_fn_calls": {
+  "never_calls": [
+   "0x5cf9600",
+   "0x5cf93f0",
+   "builder slot 0x64e1760"
+  ],
+  "rel32_calls": [
+   {
+    "site": "0x1568e9c",
+    "target": "0x150caf0"
+   },
+   {
+    "site": "0x156910c",
+    "target": "0x156b230"
+   },
+   {
+    "site": "0x1569177",
+    "target": "0x156b230"
+   },
+   {
+    "site": "0x15691be",
+    "target": "0x156b230"
+   },
+   {
+    "site": "0x15691e7",
+    "target": "0x156b230"
+   },
+   {
+    "site": "0x156926a",
+    "target": "0x156b230"
+   },
+   {
+    "site": "0x1569453",
+    "target": "0x156b230"
+   },
+   {
+    "site": "0x15695bb",
+    "target": "0x150caf0"
+   },
+   {
+    "site": "0x15696ee",
+    "target": "0x153e560"
+   },
+   {
+    "site": "0x1569717",
+    "target": "0x63f0a50"
+   }
+  ],
+  "slot_calls": [
+   {
+    "site": "0x1568e18",
+    "slot": "0x64e1290",
+    "target": "0x5c9a530"
+   },
+   {
+    "site": "0x1568e6b",
+    "slot": "0x64e1298",
+    "target": "0x5caa830"
+   },
+   {
+    "site": "0x1568ef2",
+    "slot": "0x64df6e8",
+    "target": "0x141e3a0"
+   },
+   {
+    "site": "0x1569403",
+    "slot": "0x64df480",
+    "target": "0x6355830"
+   },
+   {
+    "site": "0x1569421",
+    "slot": "0x64df508",
+    "target": "memcpy"
+   },
+   {
+    "site": "0x15694ad",
+    "slot": "0x64e12a0",
+    "target": "0x1681990"
+   },
+   {
+    "site": "0x15694d0",
+    "slot": "0x64df480",
+    "target": "0x6355830"
+   },
+   {
+    "site": "0x15694eb",
+    "slot": "0x64df508",
+    "target": "memcpy"
+   },
+   {
+    "site": "0x15695ab",
+    "slot": "0x64df4a0",
+    "target": "0x635de30"
+   },
+   {
+    "site": "0x15695cd",
+    "slot": "0x64df498",
+    "target": "0x141e264"
+   },
+   {
+    "site": "0x15695e0",
+    "slot": "0x64df480",
+    "target": "0x6355830"
+   },
+   {
+    "site": "0x15695fb",
+    "slot": "0x64df508",
+    "target": "memcpy"
+   },
+   {
+    "site": "0x1569629",
+    "slot": "0x64df4a0",
+    "target": "0x635de30"
+   },
+   {
+    "site": "0x156965b",
+    "slot": "0x64df570",
+    "target": "0x16817e0"
+   },
+   {
+    "site": "0x1569676",
+    "slot": "0x64df730",
+    "target": "0x1680e60"
+   },
+   {
+    "site": "0x156969b",
+    "slot": "0x64df670",
+    "target": "0x16806c0"
+   },
+   {
+    "site": "0x15696b4",
+    "slot": "0x64df498",
+    "target": "0x141e264"
+   },
+   {
+    "site": "0x15696e0",
+    "slot": "0x64df4a0",
+    "target": "0x635de30"
+   },
+   {
+    "site": "0x15696f5",
+    "slot": "0x64df4c0",
+    "target": "0x1680cab"
+   },
+   {
+    "site": "0x156970e",
+    "slot": "0x64df4a0",
+    "target": "0x635de30"
+   }
+  ]
+ },
+ "limits": "Static analysis of the pinned distribution only; no captured code was executed. The register-indirect write set is closed by the census argument in the README: the cell address is materialized in .text only by the 569 lea sites, all inside the 421 ensure-init bodies carrying the identical feature set, and the sys once body writes only the state dword through its rdi argument.",
+ "locations": {
+  "call": {
+   "column": 20,
+   "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/sync/once.rs",
+   "line": 219,
+   "static": "0x63fe278"
+  },
+  "null_fn_pointer": {
+   "column": 49,
+   "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/sync/once.rs",
+   "line": 219,
+   "static": "0x63fe330"
+  },
+  "poisoned": {
+   "column": 5,
+   "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/sync/lazy_lock.rs",
+   "line": 410,
+   "static": "0x64c3a58"
+  }
+ },
+ "owners": [
+  {
+   "bytes": 107,
+   "end": "0x1560aab",
+   "role": "accessor",
+   "sha256": "4dd07ff0fab8b3133d896254e0fecef4f983867a311629f10ccedb52d03ac6bc",
+   "start": "0x1560a40"
+  },
+  {
+   "bytes": 2364,
+   "end": "0x156971c",
+   "role": "init_fn",
+   "sha256": "c87c9590e5ab4cebd4a7110f74eda4a33237fac3843105dab89bc132924ac41c",
+   "start": "0x1568de0"
+  },
+  {
+   "bytes": 25,
+   "end": "0x1680c29",
+   "role": "null_panic",
+   "sha256": "6c62896561a5c8454ceb1945a882a798dcaefe52e78852cbbfee08835a16a81e",
+   "start": "0x1680c10"
+  },
+  {
+   "bytes": 29,
+   "end": "0x5c9d1bd",
+   "role": "poison_helper",
+   "sha256": "870d4fb390ff4ccfcdf457e342985dea3b38bf0cc68022130bb7b75394ccf6ae",
+   "start": "0x5c9d1a0"
+  },
+  {
+   "bytes": 186,
+   "end": "0x150bdca",
+   "role": "rep_site",
+   "sha256": "3be11f24a84521b905a8207b851cb689b06eb822af8b83ebc161a6ab6142dbab",
+   "start": "0x150bd10"
+  },
+  {
+   "bytes": 78,
+   "end": "0x155fdce",
+   "role": "shim_mut",
+   "sha256": "3947f49378f8f922e075c0d0f310b2f850c354ec13a35c90c4ffa192d51bab7b",
+   "start": "0x155fd80"
+  },
+  {
+   "bytes": 78,
+   "end": "0x15689ce",
+   "role": "shim_once",
+   "sha256": "696fd8a51fa6ff68187603b5376673ad32f7069612fe47591f3218840cad0806",
+   "start": "0x1568980"
+  },
+  {
+   "bytes": 540,
+   "end": "0x5c87f6c",
+   "role": "sys_once",
+   "sha256": "677090dab02d8f4089593e314f7dfd16a4acf10c0866e469734fab4b365853bb",
+   "start": "0x5c87d50"
+  },
+  {
+   "bytes": 5239,
+   "end": "0x15d8447",
+   "role": "wrapper_a",
+   "sha256": "0a33a4e33944ad1377a8544831780bcc081401ce3f7d5e86c33606c88ff44d8c",
+   "start": "0x15d6fd0"
+  }
+ ],
+ "question": "PR #2969 pinned wrapper a (0x15d6fd0, base/src/lu.rs): its kind-1 arm consults a process-global once (state dword 0x64f01d8, cell 0x64f01c0) through call_once_force before building its runtime. Does that once cache the built runtime, and if not, what does it guard?",
+ "slots": {
+  "0x64df6b8": {
+   "kind": "RELATIVE",
+   "target": "0x1680e80"
+  },
+  "0x64df830": {
+   "kind": "RELATIVE",
+   "target": "0x1680c10"
+  },
+  "0x64df9f0": {
+   "kind": "RELATIVE",
+   "target": "0x5c87d50"
+  },
+  "0x64dffd0": {
+   "kind": "RELATIVE",
+   "target": "0x5c9d1a0"
+  },
+  "0x64e06b8": {
+   "kind": "GLOB_DAT",
+   "role": "futex wake slot called by the sys once body",
+   "target": "syscall"
+  },
+  "0x64e0b20": {
+   "kind": "RELATIVE",
+   "target": "0x1560a40"
+  },
+  "closure_vtable": {
+   "align": 8,
+   "base": "0x63fe250",
+   "call_mut": "0x155fd80",
+   "call_once": "0x1568980",
+   "drop_in_place": "0x0",
+   "size": 8
+  }
+ },
+ "statics": {
+  "cell": "0x64f01c0",
+  "cell_bytes": "0x18",
+  "cell_file_value": "all zero (the fn pointer slot is filled by the deposit relocation at load)",
+  "deposit_relocation": {
+   "addend": "0x1568de0",
+   "kind": "RELATIVE",
+   "offset": "0x64f01c0"
+  },
+  "note": "a 24-byte value cell immediately followed by its once state dword is the static shape of std::sync::LazyLock<T> with size_of::<T>() == 0x18; the LazyLock identity itself is proven by the poison helper message and its lazy_lock.rs Location below, not by the shape alone",
+  "once_state": "0x64f01d8",
+  "once_state_encoding": {
+   "0": "COMPLETED",
+   "1": "RUNNING",
+   "2": "POISONED",
+   "3": "INCOMPLETE",
+   "bit 0x4": "futex waiter flag"
+  },
+  "once_state_file_value": 3
+ },
+ "strings": {
+  "lazylock_poisoned": {
+   "address": "0x949c9e",
+   "text": "LazyLock instance has previously been poisoned"
+  },
+  "once_poisoned": {
+   "address": "0x949565",
+   "note": "raised by the sys once body on its non-force path; the LazyLock message above is the one this closure reaches, through the poison helper",
+   "text": "Once instance has previously been poisoned"
+  }
+ }
+}
