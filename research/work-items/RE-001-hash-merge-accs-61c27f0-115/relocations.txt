@@ -1,0 +1,14 @@
+Relocations for the hash merge-accumulators window (from .rela.dyn and .rela.plt):
+
+the routine 0x61c27f0 itself: no R_X86_64_RELATIVE record carries it as
+  addend; no whole-file stored qword equals it
+
+The window is reached only through the two direct calls at
+0x61c2c8e and 0x61c31fc (see census.py output, reproduced by
+verify.py). The body itself resolves no GOT slot: it makes no
+call of any kind, reads no GOT entry, and its only transfers
+are the balanced push/pop of %r12 and the final ret. Neither
+caller passes this routine's address in memory: both load the
+argument registers directly. The seedless caller loads the
+secret pointer 0x97df0b with a RIP-relative lea at 0x61c2c80 --
+that records the default secret's address, not this routine's.
