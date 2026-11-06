@@ -40,6 +40,11 @@ def check(name, cond, detail=""):
         print(f"FAIL {name} {detail}")
 
 
+def normalize_objdump_label(text):
+    """Ignore only the invoked filename, preserving format and instructions."""
+    return re.sub(r"(?m)^.+(?=: +file format )", "<binary>", text)
+
+
 def toff(va):
     return va - 0x1000
 
@@ -89,9 +94,9 @@ def main():
             capture_output=True, text=True).stdout
         with open(os.path.join(PACKET, name + ".objdump.txt")) as f:
             saved = f.read()
-        # Drop the first line (embeds the invoked binary path).
+        # Ignore the filename header; objdump starts with a blank line.
         check(f"{name} objdump regeneration",
-              out.split("\n", 1)[1] == saved.split("\n", 1)[1])
+              normalize_objdump_label(out) == normalize_objdump_label(saved))
 
     # rel32 call/jump target spot checks.
     spots = [

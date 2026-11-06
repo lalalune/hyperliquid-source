@@ -1,0 +1,58 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "corrections": [
+    {
+      "pull_request": 3196,
+      "files": [
+        "tools/compaction_dump_66e0_115.py",
+        "tests/test_compaction_dump_66e0_115.py"
+      ],
+      "problem": "Signed Python to_bytes raised at native packed add/sub overflow",
+      "change": "Wrap each 64-bit or 32-bit lane before encoding, matching paddq/paddd/psubq/psubd",
+      "evidence": [
+        "RE-001-compaction-dump-66e0-115/filler.txt:0x5ef21d9",
+        "RE-001-compaction-dump-66e0-115/filler.txt:0x5ef2210",
+        "RE-001-compaction-dump-66e0-115/main.txt:0x5ef6e50",
+        "RE-001-compaction-dump-66e0-115/main.txt:0x5ef6ec9"
+      ],
+      "control": "Cross signed extrema in both lane widths and subtract back to the original record"
+    },
+    {
+      "files": [
+        "tests/test_compaction_consumer_a010_115.py",
+        "tests/test_compaction_data_row_115.py",
+        "tests/test_compaction_dump_66e0_115.py",
+        "tests/test_compaction_stats_header_115.py",
+        "tests/test_snapshot_consumer_97b0_115.py"
+      ],
+      "problem": "Linux library filename and fixed declarations of variadic arguments were not a portable host oracle",
+      "change": "Use process libc and declare only the three fixed snprintf arguments. Keep explicit Linux -nan expectations; constrain the host-libc negative-NaN comparison to Linux. No model output is changed for host libc behavior."
+    },
+    {
+      "pull_request": 2902,
+      "file": "RE-005-node115-u32-reader-rust/README.md",
+      "change": "State the full target digest already enforced by the source checker"
+    },
+    {
+      "file": "tests/test_node115_atfork_boundary.py",
+      "change": "Compare every target observation while retaining provider-version strings as provenance instead of fixed runtime requirements",
+      "validation": "22 tests passed; tool_versions was the only observation difference before the change"
+    },
+    {
+      "files": [
+        "tools/node115_leaf_write_next.py",
+        "tests/test_node115_leaf_write_next.py"
+      ],
+      "change": "Normalize only the objdump filename label, preserving the declared ELF format and complete instruction text",
+      "validation": "10 tests passed, including existing raw-byte and corruption checks"
+    }
+  ],
+  "validation": {
+    "command": "python3.13 -m pytest -q tests/test_compaction_dump_66e0_115.py tests/test_compaction_consumer_a010_115.py tests/test_compaction_stats_header_115.py tests/test_compaction_data_row_115.py tests/test_snapshot_consumer_97b0_115.py",
+    "result": "71 passed",
+    "python": "3.13.12",
+    "pytest": "8.4.1",
+    "captured_code_executed": false
+  },
+  "gate_change": false
+}

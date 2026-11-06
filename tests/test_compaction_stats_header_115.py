@@ -19,7 +19,7 @@ import compaction_stats_header_115 as m
 LIBC = ctypes.CDLL(None)
 LIBC.snprintf.restype = ctypes.c_int
 LIBC.snprintf.argtypes = [ctypes.c_char_p, ctypes.c_size_t,
-                          ctypes.c_char_p, ctypes.c_char_p]
+                          ctypes.c_char_p]
 
 
 def c_snprintf(maxlen, fmt, *args):

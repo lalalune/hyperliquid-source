@@ -80,8 +80,8 @@ class TestLeafWriteNext(unittest.TestCase):
                 capture_output=True, text=True).stdout
             with open(os.path.join(PDIR, e["name"] + ".objdump.txt")) as f:
                 saved = f.read()
-            self.assertEqual(out.split("\n", 1)[1],
-                             saved.split("\n", 1)[1], e["name"])
+            self.assertEqual(re.sub(r"(?m)^.+(?=: +file format )", "<binary>", out),
+                             re.sub(r"(?m)^.+(?=: +file format )", "<binary>", saved), e["name"])
 
     def test_strict_counts_match_records(self):
         for e in self.rec["exhibits"]:

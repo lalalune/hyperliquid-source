@@ -17,7 +17,17 @@ class AtforkBoundaryTests(unittest.TestCase):
         cls.windows = [bytes.fromhex(w["hex"]) for w in cls.actual["windows"]]
 
     def test_real_target_replay(self):
-        self.assertEqual(self.actual, json.loads((PACKET / "records.json").read_text()))
+        retained = json.loads((PACKET / "records.json").read_text())
+        # Retain the original provider versions as provenance, while comparing
+        # every target observation independently of the installed tool release.
+        actual = dict(self.actual)
+        recorded = dict(retained)
+        current_tools = actual.pop("tool_versions")
+        recorded_tools = recorded.pop("tool_versions")
+        self.assertEqual(set(current_tools), set(recorded_tools))
+        for name, version in current_tools.items():
+            self.assertTrue(version.startswith("GNU " + name), version)
+        self.assertEqual(actual, recorded)
         self.assertFalse(self.actual["target_executed"])
         self.assertEqual(self.actual["diagnostic_text"], "<jemalloc>: Error in pthread_atfork()\n")
 

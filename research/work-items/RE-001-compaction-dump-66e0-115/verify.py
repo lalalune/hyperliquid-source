@@ -91,6 +91,8 @@ LOAD_RE = re.compile(r"movdqa\s+[^,]+,%(xmm\d+)\s+# ([0-9a-f]+)")
 STORE_RE = re.compile(r"mov(?:aps|ups)\s+%(xmm\d+),0x([0-9a-f]+)\(%rsp\)")
 
 LIBC = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
+LIBC.snprintf.restype = ctypes.c_int
+LIBC.snprintf.argtypes = [ctypes.c_char_p, ctypes.c_size_t, ctypes.c_char_p]
 
 
 def c_snprintf(fmt, *args):

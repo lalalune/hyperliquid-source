@@ -153,12 +153,12 @@ def filler_skip(first16_zero, elem_count):
 
 def _add_i64(buf, off, value):
     cur = int.from_bytes(buf[off:off + 8], "little", signed=True)
-    buf[off:off + 8] = (cur + value).to_bytes(8, "little", signed=True)
+    buf[off:off + 8] = ((cur + value) & MASK64).to_bytes(8, "little")
 
 
 def _add_i32(buf, off, value):
     cur = int.from_bytes(buf[off:off + 4], "little", signed=True)
-    buf[off:off + 4] = (cur + value).to_bytes(4, "little", signed=True)
+    buf[off:off + 4] = ((cur + value) & 0xFFFFFFFF).to_bytes(4, "little")
 
 
 def accumulate_192(dst, src):
@@ -187,18 +187,18 @@ def diff_192(cur, prev):
         for lane in (off, off + 8):
             a = int.from_bytes(cur[lane:lane + 8], "little", signed=True)
             b = int.from_bytes(prev[lane:lane + 8], "little", signed=True)
-            out[lane:lane + 8] = (a - b).to_bytes(8, "little", signed=True)
+            out[lane:lane + 8] = ((a - b) & MASK64).to_bytes(8, "little")
     a = int.from_bytes(cur[U64_SCALAR:U64_SCALAR + 8], "little", signed=True)
     b = int.from_bytes(prev[U64_SCALAR:U64_SCALAR + 8], "little", signed=True)
-    out[U64_SCALAR:U64_SCALAR + 8] = (a - b).to_bytes(8, "little", signed=True)
+    out[U64_SCALAR:U64_SCALAR + 8] = ((a - b) & MASK64).to_bytes(8, "little")
     a = int.from_bytes(cur[I32_SCALAR:I32_SCALAR + 4], "little", signed=True)
     b = int.from_bytes(prev[I32_SCALAR:I32_SCALAR + 4], "little", signed=True)
-    out[I32_SCALAR:I32_SCALAR + 4] = (a - b).to_bytes(4, "little", signed=True)
+    out[I32_SCALAR:I32_SCALAR + 4] = ((a - b) & 0xFFFFFFFF).to_bytes(4, "little")
     for off in I32_LANES:
         for lane in (off, off + 4, off + 8, off + 12):
             a = int.from_bytes(cur[lane:lane + 4], "little", signed=True)
             b = int.from_bytes(prev[lane:lane + 4], "little", signed=True)
-            out[lane:lane + 4] = (a - b).to_bytes(4, "little", signed=True)
+            out[lane:lane + 4] = ((a - b) & 0xFFFFFFFF).to_bytes(4, "little")
     return bytes(out)
 
 

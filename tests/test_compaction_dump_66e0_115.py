@@ -23,6 +23,10 @@ ROOT = Path(__file__).resolve().parents[1]
 BIN = ROOT / "work" / "hl-node-115.bin"
 
 LIBC = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
+LIBC.snprintf.restype = ctypes.c_int
+# Only the three fixed arguments belong in argtypes; Darwin arm64 has a
+# distinct calling convention for the variadic arguments.
+LIBC.snprintf.argtypes = [ctypes.c_char_p, ctypes.c_size_t, ctypes.c_char_p]
 
 
 def c_snprintf(fmt, *args):
@@ -134,6 +138,22 @@ def test_accumulate_and_diff():
     check("diff round trip",
           m.diff_192(bytes(dst), make_struct({0x00: 7, 0x08: 5})),
           make_struct({0x10: 50, 0x28: 10, 0x60: 500, 0x68: 3}))
+
+
+def test_accumulate_and_diff_wrap_at_packed_lane_widths():
+    # The target uses paddq/paddd and psubq/psubd, which wrap each lane.
+    original = bytearray(make_struct({0: (1 << 63) - 1, 8: -(1 << 63),
+                                      0x60: (1 << 63) - 1, 0x68: (1 << 31) - 1}))
+    delta = bytearray(make_struct({0: 1, 8: -1, 0x60: 1, 0x68: 1}))
+    struct.pack_into("<i", original, 0x6C, (1 << 31) - 1)
+    struct.pack_into("<i", delta, 0x6C, 1)
+    result = m.accumulate_192(bytearray(original), delta)
+    assert m.struct_i64(result, 0) == -(1 << 63)
+    assert m.struct_i64(result, 8) == (1 << 63) - 1
+    assert m.struct_i64(result, 0x60) == -(1 << 63)
+    assert struct.unpack_from("<i", result, 0x68)[0] == -(1 << 31)
+    assert struct.unpack_from("<i", result, 0x6C)[0] == -(1 << 31)
+    assert m.diff_192(result, delta) == original
 
 
 def test_sum_s():

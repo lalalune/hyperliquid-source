@@ -54,10 +54,10 @@ from compaction_consumer_a010_115 import (
     zero_level,
 )
 
-LIBC = ctypes.CDLL("libc.so.6")
+LIBC = ctypes.CDLL(None)
 LIBC.snprintf.restype = ctypes.c_int
 LIBC.snprintf.argtypes = [ctypes.c_char_p, ctypes.c_size_t,
-                          ctypes.c_char_p, ctypes.c_double]
+                          ctypes.c_char_p]
 
 
 def c_printf_f(x):
@@ -120,7 +120,10 @@ def test_format_f_against_libc():
     assert format_f(float("nan")) == "nan"
     neg_nan = math.copysign(float("nan"), -1.0)
     assert format_f(neg_nan) == "-nan"
-    assert c_printf_f(neg_nan) == "-nan"
+    # Darwin libc canonicalizes NaN's sign; the Linux target expectation
+    # above remains explicit even where the host is not a matching oracle.
+    if sys.platform == "linux":
+        assert c_printf_f(neg_nan) == "-nan"
 
 
 def test_pair_table():
@@ -218,7 +221,8 @@ def test_metric_values_edges():
     assert math.isnan(m[13])
     assert format_f(m[12]) == "inf"
     assert format_f(m[13]) == "-nan"
-    assert format_f(m[13]) == c_printf_f(m[13])
+    if sys.platform == "linux":
+        assert format_f(m[13]) == c_printf_f(m[13])
     # A negative-as-signed i64 field converts through the fixup.
     assert metric_values({**zero_level(), "f10": 2**63}, 0, 0, 0.0, 0.0,
                          0.0)[6] == float(2**63) * 2.0**-30

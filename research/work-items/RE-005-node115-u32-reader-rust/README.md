@@ -1,5 +1,8 @@
 # Node #115 u32 reader Rust reconstruction
 
+Target: Linux x86-64 node #115, SHA-256
+`a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
+
 Base commit 05bc2de303c05525b71e7e257426e741bc66a390 contains the static
 reader evidence from #2412. It has no standalone compiled Rust implementation
 for these two wrappers. This packet adds one with a borrowed remaining slice

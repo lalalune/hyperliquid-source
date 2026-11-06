@@ -37,10 +37,10 @@ from snapshot_consumer_97b0_115 import (
     u64_to_double,
 )
 
-LIBC = ctypes.CDLL("libc.so.6")
+LIBC = ctypes.CDLL(None)
 LIBC.snprintf.restype = ctypes.c_int
 LIBC.snprintf.argtypes = [ctypes.c_char_p, ctypes.c_size_t,
-                          ctypes.c_char_p, ctypes.c_double]
+                          ctypes.c_char_p]
 
 
 def c_printf_f(x):
@@ -103,7 +103,8 @@ def test_format_f_against_libc():
     assert format_f(float("nan")) == "nan"
     neg_nan = math.copysign(float("nan"), -1.0)
     assert format_f(neg_nan) == "-nan"
-    assert c_printf_f(neg_nan) == "-nan"
+    if sys.platform == "linux":
+        assert c_printf_f(neg_nan) == "-nan"
 
 
 def test_registry():

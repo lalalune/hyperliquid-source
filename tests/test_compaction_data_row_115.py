@@ -105,7 +105,10 @@ def test_row_nan_inf():
     neg_nan = struct.unpack("<d", struct.pack("<Q", 0xFFF8000000000000))[0]
     metrics[17] = neg_nan
     assert b"   -nan" in m.format_row_bytes("L0", metrics)
-    assert m.format_row_bytes("L0", metrics) == c_row("L0", metrics)
+    # Darwin libc drops NaN's sign. Keep the target's -nan expectation above,
+    # and compare this special value with libc only on the Linux target host.
+    if sys.platform == "linux":
+        assert m.format_row_bytes("L0", metrics) == c_row("L0", metrics)
     metrics[17] = float("inf")
     assert b"     inf" in m.format_row_bytes("L0", metrics)
     assert m.format_row_bytes("L0", metrics) == c_row("L0", metrics)
