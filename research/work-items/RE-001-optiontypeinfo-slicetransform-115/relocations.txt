@@ -1,0 +1,42 @@
+Relocations for RE-001-optiontypeinfo-slicetransform-115
+Binary work/hl-node-115.bin, SHA-256
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+(provenance/artifacts.json, artifacts/node/115/hl-node).
+Read with objdump -R; type 8 is R_X86_64_RELATIVE, type 1
+is R_X86_64_64. The .data.rel.ro cells are zero in the
+captured file: the values below are the relocation addends
+the loader applies, as objdump -R reports them.
+
+Hook GOT slots (the builder's two create hooks):
+  0x64eda68 R_X86_64_RELATIVE -> 0x607d190 (manager)
+  0x64edb70 R_X86_64_RELATIVE -> 0x60809e0 (invoker)
+
+Lambda typeinfo (manager op 0, lea at 0x607d1b0):
+  0x64d3018 R_X86_64_64 -> _ZTVN10__cxxabiv117__class_type_infoE + 0x10
+  0x64d3020 R_X86_64_RELATIVE -> 0x976100 (typeinfo name:
+    the AsCustomSharedPtr<const SliceTransform> lambda)
+
+Control-block table (host loads 0x64d7878, stores +0x10):
+  0x64d7880 R_X86_64_RELATIVE -> 0x64d75c0 (typeinfo cell,
+    stored base - 0x08)
+  0x64d75c0 R_X86_64_64 -> _ZTVN10__cxxabiv120__si_class_type_infoE + 0x10
+  0x64d75c8 R_X86_64_RELATIVE -> 0x97e600 (typeinfo name:
+    _Sp_counted_ptr<const SliceTransform*, _S_atomic>)
+  0x64d7888 R_X86_64_RELATIVE -> 0x61c64d0 (table slot +0x00)
+  0x64d7890 R_X86_64_RELATIVE -> 0x61c6580 (table slot +0x08)
+  0x64d7898 R_X86_64_RELATIVE -> 0x61c6530 (table slot +0x10)
+  0x64d78a0 R_X86_64_RELATIVE -> 0x61c6590 (table slot +0x18)
+
+Host once / TLS machinery:
+  0x64ed818 R_X86_64_TPOFF64 -> _ZSt15__once_callable
+  0x64ed820 R_X86_64_TPOFF64 -> _ZSt11__once_call
+  0x64ed828 R_X86_64_GLOB_DAT -> __once_proxy
+  0x64ed290 R_X86_64_GLOB_DAT -> __libc_single_threaded (atomicity selector)
+
+No R_X86_64_RELATIVE entry points at a packet window (builder 0x6083a90..0x6083c83, manager 0x607d190..0x607d1bd,
+invoker 0x60809e0..0x6080a71, host 0x61ca3d0..0x61cb3dc,
+find 0x61c9d70..0x61ca265, init 0x61ccfa0..0x61cd01b); the
+only RELATIVE slots naming a window are the two hook GOT
+slots above. The qword hits for the manager/invoker in the
+census are the .rela.dyn addend fields of those same two
+slots (file offsets 0x15e428 / 0x15e740).
