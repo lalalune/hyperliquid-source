@@ -1,0 +1,7 @@
+# RE-009 · Root-history internal split child links
+
+Target Node #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301. Within the existing insertion FDE, this packet analyzes the selected successful internal-parent split after a child split. The parent count at +0x1c2 and child index at +0x1c0 are separate 16-bit fields.
+
+The selected full parent branch allocates 0x228 bytes. After transferring the keys and values beyond the pivot, the child-link copy at 0x4c5f6f6 uses eight times (new key count + 1) bytes. Its source starts at old parent +0x1d0 + 8*pivot and its destination at the new parent +0x1c8. For each copied child, the loop at 0x4c5f700 stores the new parent at child +0x160 and the new slot at child +0x1c0. This copy includes one more child than the number of moved keys. Later separator insertion stores the additional child at parent +0x1d0 + 8*local index, publishes the incremented key count and has a further child-link repair path.
+
+Run python3 research/work-items/RE-009-node115-root-history-internal-reparent/verify.py from the repository root. The evidence pins 15 instructions and independently decodes the selected indirect copy slot with a displacement corruption control. The documented behavior assumes successful allocation, valid indices, normal copy completion and no conflicting alias writes. Root replacement, all alternate branches and crash consistency remain unresolved. The leaf redistribution and its key/value counts are separate context.
