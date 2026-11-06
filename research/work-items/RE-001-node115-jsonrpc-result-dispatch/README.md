@@ -32,6 +32,13 @@ The dispatcher selects two handlers. The nonzero handler swaps incoming RDI/RSI 
 
 No RET appears in the two new extents. A normal return from the nonzero handler's child enters the known dispatcher;the zero handler's continuation lies outside the decoded ranges. Neither fact proves nonreturn. Callee ABI/continuation,global word domain,validation/allocation/copy/ownership,default-data storage,source types and runtime behavior remain open. First alternative stores40bytes,nested error ordinary stores100,while second/constructor copies104;copied tails40..103 and100..103 remain unclassified. Store coverage is not initialization,padding or undefined-behavior proof.
 
+## Follow-up on the failure paths
+
+The [failure path addendum](failure-callees/observations.md) traces both further
+callees to Rust standard library body matches and explains the tagged literal
+length. Its two fresh native ranges and controls are reported separately from
+the fourteen ranges checked by the original verifier.
+
 ## Reproduce and controls
 
 With the complete pinned capture,from repository root:
@@ -50,4 +57,4 @@ This packet freezes before required validation;exact commit/tree and actual curr
 
 ## Limits and next step
 
-Further targets0x5c827a0/0x1680e80 and the zero handler's continuation remain unproved. Scalar35/message encoding and boundary,Source Location/type/source ownership,nonreturn/global B,dependent memory/ownership,copied tails,exception/signal and runtime equivalence remain open. No gate,compiled reconstruction,Points,payment or security impact is claimed. Next:inspect the further callees and establish the fixed-operand interpretation before stronger return/schema claims.
+The original verifier leaves the further callees open. The addendum maps their outgoing edges and leaves the zero handler's continuation open. The addendum interprets scalar 35 under the matched format layout. Actual message emission, Source Location and type ownership, nonreturn, global B, dependent memory and ownership, copied tails, exceptions, signals and runtime equivalence remain open. No gate,compiled reconstruction,Points,payment or security impact is claimed. Next: inspect the relocation-bound endpoints before making stronger return or runtime claims.

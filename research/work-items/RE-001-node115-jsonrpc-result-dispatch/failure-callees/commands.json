@@ -1,0 +1,55 @@
+{
+  "native_invocations": 3,
+  "observations": [
+    {
+      "label": "objdump-version",
+      "argv": [
+        "/usr/bin/objdump",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "GNU objdump (GNU Binutils for Ubuntu) 2.42\nCopyright (C) 2024 Free Software Foundation, Inc.\nThis program is free software; you may redistribute it under the terms of\nthe GNU General Public License version 3 or (at your option) any later version.\nThis program has absolutely no warranty.\n",
+      "stderr": ""
+    },
+    {
+      "label": "nonzero-child",
+      "argv": [
+        "/usr/bin/objdump",
+        "-D",
+        "-z",
+        "-b",
+        "binary",
+        "-m",
+        "i386:x86-64",
+        "-M",
+        "intel",
+        "--insn-width=16",
+        "--adjust-vma=0x5c827a0",
+        "/tmp/node115-panic-bridge-levMJRto/fixtures/nonzero-child.bin"
+      ],
+      "exit_code": 0,
+      "stdout": "\n/tmp/node115-panic-bridge-levMJRto/fixtures/nonzero-child.bin:     file format binary\n\n\nDisassembly of section .data:\n\n0000000005c827a0 <.data>:\n 5c827a0:\t55                                              \tpush   rbp\n 5c827a1:\t48 89 e5                                        \tmov    rbp,rsp\n 5c827a4:\t48 89 f8                                        \tmov    rax,rdi\n 5c827a7:\t48 89 f7                                        \tmov    rdi,rsi\n 5c827aa:\t48 89 c6                                        \tmov    rsi,rax\n 5c827ad:\tff 15 4d 9f 86 00                               \tcall   QWORD PTR [rip+0x869f4d]        # 0x64ec700\n",
+      "stderr": ""
+    },
+    {
+      "label": "zero-child",
+      "argv": [
+        "/usr/bin/objdump",
+        "-D",
+        "-z",
+        "-b",
+        "binary",
+        "-m",
+        "i386:x86-64",
+        "-M",
+        "intel",
+        "--insn-width=16",
+        "--adjust-vma=0x1680e80",
+        "/tmp/node115-panic-bridge-levMJRto/fixtures/zero-child.bin"
+      ],
+      "exit_code": 0,
+      "stdout": "\n/tmp/node115-panic-bridge-levMJRto/fixtures/zero-child.bin:     file format binary\n\n\nDisassembly of section .data:\n\n0000000001680e80 <.data>:\n 1680e80:\t55                                              \tpush   rbp\n 1680e81:\t48 89 e5                                        \tmov    rbp,rsp\n 1680e84:\t48 83 ec 30                                     \tsub    rsp,0x30\n 1680e88:\t48 89 7d f0                                     \tmov    QWORD PTR [rbp-0x10],rdi\n 1680e8c:\t48 89 75 f8                                     \tmov    QWORD PTR [rbp-0x8],rsi\n 1680e90:\t48 8d 45 f0                                     \tlea    rax,[rbp-0x10]\n 1680e94:\t48 89 45 d8                                     \tmov    QWORD PTR [rbp-0x28],rax\n 1680e98:\t48 89 55 e0                                     \tmov    QWORD PTR [rbp-0x20],rdx\n 1680e9c:\t66 c7 45 e8 01 00                               \tmov    WORD PTR [rbp-0x18],0x1\n 1680ea2:\t48 8d 7d d8                                     \tlea    rdi,[rbp-0x28]\n 1680ea6:\tff 15 84 10 e6 04                               \tcall   QWORD PTR [rip+0x4e61084]        # 0x64e1f30\n",
+      "stderr": ""
+    }
+  ]
+}
