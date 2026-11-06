@@ -96,6 +96,7 @@ DERIVATION_CALLEES = (0x4DCE580, 0x4E188F0)
 # the per-owner callees differ between the twins.
 EXACT_SITES = (
     (0x000, '55415741564155415453'), (0x011, 'f20f11442408'),
+    (0x017, '4989f4'), (0x041, '498b9c24f0000000'),
     (0x01A, '488b86b0000000'), (0x021, '4885c0'),
     (0x049, '410fb68c24d2000000'), (0x052, '4889c2'), (0x055, '48f7da'),
     (0x058, '85c9'), (0x05A, '480f45d0'), (0x05E, 'c1e105'),
@@ -104,6 +105,7 @@ EXACT_SITES = (
     (0x0B5, '48c744243801000000'), (0x0BE, '48895c2440'),
     (0x0C3, '89442408'), (0x0C7, '89442448'),
     (0x0CB, '48c744245002000000'), (0x0ED, '4885c0'),
+    (0x0F0, '48895c2430'),
     (0x0FC, 'b801000000'), (0x108, '488d5c2468'),
     (0x10D, 'ba10010000'), (0x13F, '6a00'), (0x14A, '41807e2000'),
     (0x155, '49c7462001000000'), (0x15D, '49894628'),
@@ -210,6 +212,33 @@ def slot_target(body, base, offset):
 
 def lea_target(body, base, offset):
     return base + offset + 7 + struct.unpack_from('<i', body, offset + 3)[0]
+
+
+def element0_origin(body, base):
+    """Bind the saved order word, including the reload overwriting cached R15.
+
+    This is caller-local def/use evidence under ordinary ABI/stack premises,
+    not execution or a proof of arbitrary opaque callee effects.
+    """
+    sites = (
+        ('bind_order', 0x017, '4989f4'),
+        ('load_order_word', 0x041, '498b9c24f0000000'),
+        ('save_order_word', 0x0F0, '48895c2430'),
+        ('reload_saved_word', 0x1C3, '4c8b7c2430'),
+        ('store_element0', 0x232, '4c893c01'),
+    )
+    for name, offset, encoded in sites:
+        require(body[offset:offset + len(encoded) // 2] == bytes.fromhex(encoded),
+                f'Element0 source flow changed at {hx(base + offset)} ({name})')
+    source_offset = struct.unpack_from('<I', body, 0x045)[0]
+    saved_offset = body[0x0F4]
+    require(saved_offset == body[0x1C7], 'Element0 reload uses a different spill')
+    return {
+        'object': 'order', 'offset': hx(source_offset),
+        'saved_stack_offset': hx(saved_offset), 'carrier': 'r15',
+        'sites': {name: hx(base + offset) for name, offset, _ in sites},
+        'premise': 'ordinary callee-saved registers and caller-owned stack storage',
+    }
 
 
 def owner_trace(body, base, spec):
@@ -341,6 +370,7 @@ def analyze(data):
             'callees': {key: hx(value) for key, value in calls.items()},
             'slots': {key: hx(value) for key, value in slots.items()},
             'instruction_sites_checked': len(EXACT_SITES) + 22,
+            'element0_origin': element0_origin(body, start),
         }
     for name in names:
         start, end = specs[name]['range']
@@ -473,10 +503,17 @@ def analyze(data):
             },
             'append_arm': {
                 'shared_routine_stack_arguments': (
-                    'the cached qword at level +0x28 and the arm flag qword '
+                    'the selected qword (through post-derivation RDX on the '
+                    'nonzero path, level +0x28 on the zero path) and the arm flag qword '
                     '(1 when the derivation lookup returned nonzero, else '
                     'the qword at level +0x20)'
                 ),
+                'shared_word_sources': {
+                    'zero_derivation': {'base': 'level', 'offset': '0x28'},
+                    'nonzero_derivation': {
+                        'base': 'post_derivation_rdx', 'pointee_identity': 'unclosed',
+                    },
+                },
                 'track_caller_call': (
                     'level +0x50 with the qword at order +0xf0, the dword '
                     'at order +0xdc, and the shared routine result; its '
@@ -506,9 +543,13 @@ def analyze(data):
                     'subtraction of capacity'
                 ),
                 'length_increment': 1,
+                'element0_origin': {
+                    'object': 'order', 'offset': '0xf0',
+                    'saved_stack_offset': '0x30', 'carrier': 'r15',
+                },
                 'element_fields': [
                     {'offset': 0, 'bytes': 8,
-                     'source': 'the qword cached at level +0x28'},
+                     'source': 'the saved order +0xf0 qword, reloaded from stack +0x30'},
                     {'offset': 8, 'bytes': 4,
                      'source': 'the dword at order +0xdc'},
                     {'offset': 12, 'bytes': 16,
