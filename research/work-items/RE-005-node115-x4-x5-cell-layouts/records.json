@@ -1,0 +1,450 @@
+{
+ "answer": {
+  "allocation": "Both cells are 0x30-byte, align-8 Arc allocations; the cell pointer sits at closure +0x20 in both families (closure sizes differ: X4 entry size 0x30, X5 0x48). Size pinned by the spawn alloc immediate (0x30), the 0x30-byte stack image copied into the allocation, and the cell glue dealloc immediate (0x30).",
+  "family_differences": "Layout offsets are identical across type-A, X4 and X5.  The families differ as monomorphisations (own cell glue, payload drop and context-release glue per family, over distinct context object types) and in two uses: the X5 finish store takes its vtable half from closure +0x30 where X4 (and type-A) take the entry base in r15; and X5 has a join body that takes the pair out, while no body takes the X4 pair.",
+  "fields": [
+   {
+    "consumers": "incremented for the closure/package copies at spawn; decremented by the dispatcher after its finish store, by the join body (X5), by handle drops and caller releases (#3148); the cell glue runs when a decrement reaches zero",
+    "name": "strong_count",
+    "offset": "0x00",
+    "producer": "spawn body writes 1"
+   },
+   {
+    "consumers": "CAS sentinel of the X5 join take (1 -> -1, restored to 1; #3074 semantics); decremented by the cell glue before the 0x30-byte dealloc",
+    "name": "weak_count",
+    "offset": "0x08",
+    "producer": "spawn body writes 1"
+   },
+   {
+    "consumers": "payload drop bookkeeping (flag byte at A+0x20 on a discarded live pair, decrement of the counter at A+0x18, xchg on the word at [A+0x10]+0x28); released by the cell glue through the family context-release slot",
+    "name": "context_pointer",
+    "offset": "0x10",
+    "producer": "spawn body, from its r9 argument (saved at spawn entry, copied into the cell image); the spawn body increments the counter at A+0x18"
+   },
+   {
+    "consumers": "dispatcher pre-store drain test; payload drop (drains, then zeroes the word); cell glue re-test (unwind paths, via the family drain helper on the triple at +0x18); X5 join (bit 0 test, word cleared on take)",
+    "name": "state",
+    "offset": "0x18",
+    "producer": "spawn body writes 0; only the dispatcher finish block writes 1 (fall-through and landing-pad copies)"
+   },
+   {
+    "consumers": "X5 join take (loaded out); drained (dropped + deallocated through the stored vtable) by the dispatcher, the payload drop, the cell glue and the drain helper. X4: drained only, never taken",
+    "name": "data",
+    "offset": "0x20",
+    "producer": "dispatcher finish block only; the spawn pair slot is uninitialised. Normal path: 0 (r14 zeroed at dispatcher entry). Catch path: the panic Box data pointer from the catch-pair helper (slot 0x64dfe88)"
+   },
+   {
+    "consumers": "same readers as data; the drain paths call [vtable] as the drop fn and read size at [vtable+0x08] and align at [vtable+0x10]",
+    "name": "vtable",
+    "offset": "0x28",
+    "producer": "dispatcher finish block only. Normal path, X4: r15 = the entry base 0x64c5330, loaded by the thread start routine from package +0x10 (#3050). Normal path, X5: r15 = the word at closure +0x30, the vtable half of the closure environment fat-pointer field at closure +0x28, copied by the spawn body from its caller argument struct; the dispatcher loads r15 from closure +0x30 at entry. Catch path: the panic Box vtable from the catch-pair helper"
+   }
+  ]
+ },
+ "artifact": {
+  "bytes": 105896032,
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "snapshot": "<authenticated-node115>"
+ },
+ "boundaries": {
+  "adapter_semantics": "What the two adapters per dispatcher do with their environment copies (X4 slots 0x64ecb60/0x64ecb58, X5 slots 0x64ecb98/0x64ecb88) is not revisited; neither adapter receives the cell pointer, and neither performs the completion store.",
+  "context_identity": "What the context object A at cell +0x10 is at source level is not pinned for either family (same limit as #3050 for type-A): the binary shows a refcounted object (counter at A+0x18 incremented by the spawn bodies, flag byte at A+0x20, a related object pointer at A+0x10 whose +0x28 word the payload drop xchgs) handed to each spawn body as argument r9; no string or Location names it on these paths.",
+  "drain_reachability": "Whether the dispatchers' pre-store drain (and the glue drain) ever sees a live pair is a run-time question: each dispatcher runs once per fresh cell whose state starts at 0, and static analysis does not decide how a second store into the same cell would arise.  Only the drain paths and the offsets they use are pinned.",
+  "join_x5_semantics": "The take/release semantics of the X5 join body 0x5cf7550 (CAS protocol, reference release order, diagnostics) are the subject of open PR #3074 (RE-012) and are not re-derived here; this packet pins only the cell offsets that body reads and writes, as one consumer of the layout.",
+  "x5_env_pair_identity": "What the fat-pointer field at X5 closure +0x28/+0x30 is at source level is not pinned: the spawn body copies both words from its caller argument struct into the closure image, the dispatcher passes the pair to its second adapter and stores only the +0x30 word into a finished cell.  Its data word is discarded on the finish path (r14 is zeroed), so the cell never holds that pair itself."
+ },
+ "captured_code_executed": false,
+ "finish_store_audit": {
+  "dispatcher_x4": {
+   "slots_referenced": [
+    "0x64df4a0",
+    "0x64df4c0",
+    "0x64dfe88",
+    "0x64dfe90",
+    "0x64e1a38",
+    "0x64ecb50",
+    "0x64ecb58",
+    "0x64ecb60"
+   ],
+   "stores": [
+    {
+     "base": "rbp",
+     "disp": "0x18",
+     "kind": "imm",
+     "site": "0x5cd9be7",
+     "src": 1
+    },
+    {
+     "base": "rbp",
+     "disp": "0x20",
+     "kind": "reg",
+     "site": "0x5cd9bef",
+     "src": "r14"
+    },
+    {
+     "base": "rbp",
+     "disp": "0x28",
+     "kind": "reg",
+     "site": "0x5cd9bf3",
+     "src": "r15"
+    },
+    {
+     "base": "rbp",
+     "disp": "0x18",
+     "kind": "imm",
+     "site": "0x5cd9c4b",
+     "src": 1
+    },
+    {
+     "base": "rbp",
+     "disp": "0x20",
+     "kind": "reg",
+     "site": "0x5cd9c53",
+     "src": "r14"
+    },
+    {
+     "base": "rbp",
+     "disp": "0x28",
+     "kind": "reg",
+     "site": "0x5cd9c57",
+     "src": "r15"
+    }
+   ]
+  },
+  "dispatcher_x5": {
+   "slots_referenced": [
+    "0x64df4a0",
+    "0x64df4c0",
+    "0x64dfe88",
+    "0x64dfe90",
+    "0x64ecb88",
+    "0x64ecb98",
+    "0x64ecc48"
+   ],
+   "stores": [
+    {
+     "base": "rbp",
+     "disp": "0x18",
+     "kind": "imm",
+     "site": "0x5cf77f9",
+     "src": 1
+    },
+    {
+     "base": "rbp",
+     "disp": "0x20",
+     "kind": "reg",
+     "site": "0x5cf7801",
+     "src": "r14"
+    },
+    {
+     "base": "rbp",
+     "disp": "0x28",
+     "kind": "reg",
+     "site": "0x5cf7805",
+     "src": "r15"
+    },
+    {
+     "base": "rbp",
+     "disp": "0x18",
+     "kind": "imm",
+     "site": "0x5cf7860",
+     "src": 1
+    },
+    {
+     "base": "rbp",
+     "disp": "0x20",
+     "kind": "reg",
+     "site": "0x5cf7868",
+     "src": "r14"
+    },
+    {
+     "base": "rbp",
+     "disp": "0x28",
+     "kind": "reg",
+     "site": "0x5cf786c",
+     "src": "r15"
+    }
+   ]
+  }
+ },
+ "limits": "Static analysis only; no captured code was executed. Body boundaries are FDE extents cross-checked by SHA-256.  Producer/consumer closure rests on the byte-pinned bodies above plus the completion-store idiom census of #3050 (13 bodies: the 11 dispatchers and two stack constructions) and the take-idiom census of #3148 (exactly two join bodies), which bound the set of bodies that can store into or take out of any dispatcher packet cell.",
+ "owners": {
+  "cell_glue_x4": {
+   "bytes": 303,
+   "end": "0x5cd880f",
+   "file_offset": "0x5cd76e0",
+   "sha256": "b00b49cda8cc6f4e875da8f3046d7bd18e270fbec6a3235ccbba0e67b376f5ac",
+   "start": "0x5cd86e0"
+  },
+  "cell_glue_x5": {
+   "bytes": 308,
+   "end": "0x5ce84c4",
+   "file_offset": "0x5ce7390",
+   "sha256": "47595306d82fbac24e1c7ec4c42550d1177efaa130783bc81ba7c27b79dc8af9",
+   "start": "0x5ce8390"
+  },
+  "context_release_x4": {
+   "bytes": 56,
+   "end": "0x5cd8908",
+   "file_offset": "0x5cd78d0",
+   "sha256": "6804f49815f9909b13e7c26c15ce5103f24c5b79c52b4cb99bed9101fec66d0a",
+   "start": "0x5cd88d0"
+  },
+  "context_release_x5": {
+   "bytes": 111,
+   "end": "0x5ce86cf",
+   "file_offset": "0x5ce7660",
+   "sha256": "fea36aaf5fa44c33bc5d56acb20324576efb31b12739faa9281508a19a9395a7",
+   "start": "0x5ce8660"
+  },
+  "dispatcher_x4": {
+   "bytes": 423,
+   "end": "0x5cd9cd7",
+   "file_offset": "0x5cd8b30",
+   "sha256": "939b0f395bedfc84d55c5f6a2de8b19f39bc64089ce0cf3c25efe284478f51ae",
+   "start": "0x5cd9b30"
+  },
+  "dispatcher_x5": {
+   "bytes": 471,
+   "end": "0x5cf78e7",
+   "file_offset": "0x5cf6710",
+   "sha256": "313eb6afb9fb15a3d11f14e20b1bd68e89d8be9ad571026469e43fd35aa0bbd2",
+   "start": "0x5cf7710"
+  },
+  "drain_x4": {
+   "bytes": 143,
+   "end": "0x5cd860f",
+   "file_offset": "0x5cd7580",
+   "sha256": "27dde2348fd486d19480e86af2e108d87e5e217bad1891359c47d5f57b6ae749",
+   "start": "0x5cd8580"
+  },
+  "drain_x5": {
+   "bytes": 143,
+   "end": "0x5ce7dff",
+   "file_offset": "0x5ce6d70",
+   "sha256": "2b4e56becb7d10d717359c3955825e468fa096d06475bff135d583c72d9aac70",
+   "start": "0x5ce7d70"
+  },
+  "join_x5": {
+   "bytes": 350,
+   "end": "0x5cf76ae",
+   "file_offset": "0x5cf6550",
+   "sha256": "12fbb6bdf25c91d5912271bcae41e6422635dd8ca655bb0233e985ad9b685c03",
+   "start": "0x5cf7550"
+  },
+  "payload_drop_x4": {
+   "bytes": 366,
+   "end": "0x5cda37e",
+   "file_offset": "0x5cd9210",
+   "sha256": "6cfdb2d06e84078fd1f654681ea6a1d4cc4fb711a2fddf7883c66390f668b12e",
+   "start": "0x5cda210"
+  },
+  "payload_drop_x5": {
+   "bytes": 366,
+   "end": "0x5cfc54e",
+   "file_offset": "0x5cfb3e0",
+   "sha256": "7e67f86b57437f1c4a119a9872eb1786806413a7ef944396711a70d8403d3561",
+   "start": "0x5cfc3e0"
+  },
+  "spawn_x4": {
+   "bytes": 1727,
+   "end": "0x5cd9b2f",
+   "file_offset": "0x5cd8470",
+   "sha256": "a67df4f7707481778d223fca1d10a1dcb3360ea805ae3215f317882fa163c6a2",
+   "start": "0x5cd9470"
+  },
+  "spawn_x5": {
+   "bytes": 1744,
+   "end": "0x5cf7550",
+   "file_offset": "0x5cf5e80",
+   "sha256": "1de6a1382a5d5557a56bcc242cf2a8e7e543e089832f43bcf8548b32a05c5a87",
+   "start": "0x5cf6e80"
+  },
+  "thread_start": {
+   "bytes": 509,
+   "end": "0x5ca469d",
+   "file_offset": "0x5ca34a0",
+   "sha256": "65e3438cb7b950aa4b885b7c271b6a8bcbd4574519dee0f3f336360fabb21276",
+   "start": "0x5ca44a0"
+  }
+ },
+ "packet": "RE-005-node115-x4-x5-cell-layouts",
+ "pins": {
+  "cell_glue_x4": {
+   "0x5cd86eb": "4c8d7b10",
+   "0x5cd86f2": "e8191b0000",
+   "0x5cd870e": "48837b1800",
+   "0x5cd8762": "f048ff4b08",
+   "0x5cd8769": "be30000000"
+  },
+  "cell_glue_x5": {
+   "0x5ce839b": "4c8d7b10",
+   "0x5ce83a2": "e839400100",
+   "0x5ce83be": "48837b1800",
+   "0x5ce8412": "f048ff4b08",
+   "0x5ce8419": "be30000000"
+  },
+  "dispatcher_x4": {
+   "0x5cd9b90": "4531f6",
+   "0x5cd9b93": "488b6b20",
+   "0x5cd9b97": "48837d1800",
+   "0x5cd9be7": "48c7451801000000",
+   "0x5cd9bef": "4c897520",
+   "0x5cd9bf3": "4c897d28",
+   "0x5cd9bfc": "f048ff4d00",
+   "0x5cd9c4b": "48c7451801000000",
+   "0x5cd9c53": "4c897520",
+   "0x5cd9c57": "4c897d28"
+  },
+  "dispatcher_x5": {
+   "0x5cf7728": "4c8b7f30",
+   "0x5cf77a2": "4531f6",
+   "0x5cf77a5": "488b6b20",
+   "0x5cf77a9": "48837d1800",
+   "0x5cf77f9": "48c7451801000000",
+   "0x5cf7801": "4c897520",
+   "0x5cf7805": "4c897d28",
+   "0x5cf7860": "48c7451801000000",
+   "0x5cf7868": "4c897520",
+   "0x5cf786c": "4c897d28"
+  },
+  "drain_x4": {
+   "0x5cd8585": "48833f00",
+   "0x5cd858b": "488b5f08",
+   "0x5cd8594": "4c8b7f10"
+  },
+  "drain_x5": {
+   "0x5ce7d75": "48833f00",
+   "0x5ce7d7b": "488b5f08",
+   "0x5ce7d84": "4c8b7f10"
+  },
+  "join_x5": {
+   "0x5cf7582": "f0480fb15108",
+   "0x5cf7591": "48c7410801000000",
+   "0x5cf75ab": "4c8b7020",
+   "0x5cf75af": "4c8b7828",
+   "0x5cf75b3": "f6401801",
+   "0x5cf75b7": "48c7401800000000"
+  },
+  "payload_drop_x4": {
+   "0x5cda21f": "4c8b7f08",
+   "0x5cda223": "4c8b7710",
+   "0x5cda238": "4c8b6318",
+   "0x5cda276": "48c7430800000000",
+   "0x5cda28b": "c6402001",
+   "0x5cda28f": "f048ff4818"
+  },
+  "payload_drop_x5": {
+   "0x5cfc3ef": "4c8b7f08",
+   "0x5cfc3f3": "4c8b7710",
+   "0x5cfc408": "4c8b6318",
+   "0x5cfc446": "48c7430800000000",
+   "0x5cfc45b": "c6402001",
+   "0x5cfc45f": "f048ff4818"
+  },
+  "spawn_x4": {
+   "0x5cd94a3": "4c898c2488000000",
+   "0x5cd963d": "48c784249000000001000000",
+   "0x5cd9649": "48c784249800000001000000",
+   "0x5cd9655": "488b842488000000",
+   "0x5cd9665": "48c78424a800000000000000",
+   "0x5cd9671": "bf30000000",
+   "0x5cd96e3": "f048ff4718",
+   "0x5cd976b": "488d05bebb7e00"
+  },
+  "spawn_x5": {
+   "0x5cf6ea6": "4c898c2498000000",
+   "0x5cf7035": "48c78424a000000001000000",
+   "0x5cf7041": "48c78424a800000001000000",
+   "0x5cf704d": "488b842498000000",
+   "0x5cf705d": "48c78424b800000000000000",
+   "0x5cf7069": "bf30000000",
+   "0x5cf70ec": "f048ff4718",
+   "0x5cf71ac": "488d050df97c00"
+  }
+ },
+ "question": "The packet-cell producers packet (#3050) left the families X4/X5 classified only far enough to exclude them from the type-A cell: they use different cell types (own drop-glue slots 0x64ecb50 / 0x64ecc48), but their cell layouts were not pinned, and the sibling-join packet (#3148) pinned JoinHandle ownership without pinning the cells.  What is the layout of the packet cell the X4 dispatcher 0x5cd9b30 and the X5 dispatcher 0x5cf7710 drain -- allocation size, field offsets, and the producer and consumer of each field?",
+ "slots": {
+  "alloc": {
+   "slot": "0x64df480",
+   "target": "0x6355830",
+   "type": 8
+  },
+  "catch_pair": {
+   "slot": "0x64dfe88",
+   "target": "0x5bb19f0",
+   "type": 8
+  },
+  "dealloc": {
+   "slot": "0x64df4a0",
+   "target": "0x635de30",
+   "type": 8
+  },
+  "thread_create": {
+   "slot": "0x64e1580",
+   "target": "0x5c87b50",
+   "type": 8
+  },
+  "x4_adapter_env0": {
+   "slot": "0x64ecb60",
+   "target": "0x5cd66c0",
+   "type": 8
+  },
+  "x4_adapter_env1": {
+   "slot": "0x64ecb58",
+   "target": "0x5cd6460",
+   "type": 8
+  },
+  "x4_cell_drop": {
+   "slot": "0x64ecb50",
+   "target": "0x5cd86e0",
+   "type": 8
+  },
+  "x4_context_release": {
+   "slot": "0x64ecb68",
+   "target": "0x5cd88d0",
+   "type": 8
+  },
+  "x5_adapter_env0": {
+   "slot": "0x64ecb98",
+   "target": "0x5cdd010",
+   "type": 8
+  },
+  "x5_adapter_env1": {
+   "slot": "0x64ecb88",
+   "target": "0x5cdce30",
+   "type": 8
+  },
+  "x5_cell_drop": {
+   "slot": "0x64ecc48",
+   "target": "0x5ce8390",
+   "type": 8
+  },
+  "x5_context_release": {
+   "slot": "0x64ecc50",
+   "target": "0x5ce8660",
+   "type": 8
+  }
+ },
+ "tables": [
+  {
+   "align": "0x8",
+   "base": "0x64c5330",
+   "dispatcher": "dispatcher_x4",
+   "drop": "0x5cd9d70",
+   "family": "X4",
+   "method": "0x5cd9b30",
+   "size": "0x30"
+  },
+  {
+   "align": "0x8",
+   "base": "0x64c6ac0",
+   "dispatcher": "dispatcher_x5",
+   "drop": "0x5cf7d40",
+   "family": "X5",
+   "method": "0x5cf7710",
+   "size": "0x48"
+  }
+ ]
+}
