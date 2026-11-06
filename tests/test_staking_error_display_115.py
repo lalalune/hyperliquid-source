@@ -57,8 +57,11 @@ class StakingErrorDisplayTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             out = Path(directory)
             self.assertEqual(collector.collect(self.data, out), json.loads((PACKET / 'records.json').read_text()))
-            for name in ('display.objdump.txt', 'records.json', 'tool-versions.json'):
+            for name in ('display.objdump.txt', 'records.json'):
                 self.assertEqual((out / name).read_bytes(), (PACKET / name).read_bytes(), name)
+            versions = {name: subprocess.check_output([name, '--version'], text=True).splitlines()[0]
+                        for name in ('objdump', 'readelf')}
+            self.assertEqual(json.loads((out / 'tool-versions.json').read_text()), versions)
 
     def test_rust_crate_matches_static_contract(self):
         completed = subprocess.run(
