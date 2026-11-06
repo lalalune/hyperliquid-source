@@ -10,7 +10,7 @@ The authenticated inventory contains 180 allowlisted source-path observations. D
 Time, logging, wallets, collections and shared runtime utilities.
 
 - Target: node115.
-- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-nonce-text`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`, `src/node115-host-ip-gates`, `src/node115-packed-millis`, `src/node115-utf8-admission`, `src/node115-reverse-path-components`, `src/node115-rng-buffer-selection`, `src/node115-time-producer`, `src/node115-date-time-display`, `src/node115-owned-cstring`, `src/node115-iso-week-date`, `src/node115-timespec-difference`, `src/node115-command-construction`, `src/node115-elf-build-id`.
+- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-nonce-text`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`, `src/node115-host-ip-gates`, `src/node115-packed-millis`, `src/node115-utf8-admission`, `src/node115-reverse-path-components`, `src/node115-rng-buffer-selection`, `src/node115-time-producer`, `src/node115-date-time-display`, `src/node115-owned-cstring`, `src/node115-iso-week-date`, `src/node115-timespec-difference`, `src/node115-command-construction`, `src/node115-elf-build-id`, `src/node115-u64-key-hash`, `src/node115-limb-add-family`, `src/node115-wrapped-u64-search`, `src/node115-sponge-permutation`.
 - Observed diagnostic paths: 33.
 - First task: Map time/quantity conversion helpers; distinguish standard-library code from private helpers.
 
@@ -20,7 +20,7 @@ Time, logging, wallets, collections and shared runtime utilities.
 Private bincode wire codecs and integer encodings.
 
 - Target: node115.
-- Implementation paths: `src/node115-gossip-response-v2-envelope`, `src/node115-client-blocks-error`, `src/node115-gossip-address-vector`, `src/node115-bulk-record-decoder`, `src/node115-varint-buffer-writer`, `src/node115-octet-record-encoder`, `src/node115-fixed20-record-encoder`.
+- Implementation paths: `src/node115-gossip-response-v2-envelope`, `src/node115-client-blocks-error`, `src/node115-gossip-address-vector`, `src/node115-bulk-record-decoder`, `src/node115-varint-buffer-writer`, `src/node115-octet-record-encoder`, `src/node115-fixed20-record-encoder`, `src/node115-four-word-prefix`.
 - Observed diagnostic paths: 0.
 - First task: Recover varint boundaries and encoding mode; compare malformed, truncated and boundary inputs.
 
@@ -50,7 +50,7 @@ TCP framing, LZ4, channels, rate limits and reconnects.
 Votes, rounds, quorum certificates, validator sets and timers.
 
 - Target: node115.
-- Implementation paths: `src/node115-weighted-fastfold`, `src/node115-tree-next`, `src/node115-rpc-flat-materializer`, `src/node115-stake-predicate`.
+- Implementation paths: `src/node115-weighted-fastfold`, `src/node115-tree-next`, `src/node115-rpc-flat-materializer`, `src/node115-stake-predicate`, `src/node115-adjacent-last`, `src/node115-indirect-triplet-insert`.
 - Observed diagnostic paths: 17.
 - First task: Map signed wire types and quorum arithmetic; validate invalid signatures and timeout transitions.
 
@@ -100,7 +100,7 @@ Agent-created handler splits and central dispatch.
 Trading orchestration, block hooks, deployment and ledger updates.
 
 - Target: node115.
-- Implementation paths: `src/node115-bole-entry-prefix`.
+- Implementation paths: `src/node115-bole-entry-prefix`, `src/node115-user-admission-prefix`.
 - Observed diagnostic paths: 15.
 - First task: Trace order placement through risk checks, matching, fees and ledger writes.
 
@@ -120,7 +120,7 @@ Book storage, price/time priority and order lifecycle.
 Positions, margin, oracles, liquidations and spot balances.
 
 - Target: node115.
-- Implementation paths: `src/node115-margin-range`, `src/node115-clearinghouse-ntl-ratio`.
+- Implementation paths: `src/node115-margin-range`, `src/node115-clearinghouse-ntl-ratio`, `src/node115-margin-row`.
 - Observed diagnostic paths: 14.
 - First task: Map margin/liquidation formulas and state mutations; prove sign and unit conventions.
 
@@ -130,7 +130,7 @@ Positions, margin, oracles, liquidations and spot balances.
 Price, size, notional and wei arithmetic plus asset metadata.
 
 - Target: node115.
-- Implementation paths: `src/node115-quantity-preparation`, `src/node115-price-core`, `src/node115-signed-bound-kernel`.
+- Implementation paths: `src/node115-quantity-preparation`, `src/node115-price-core`, `src/node115-signed-bound-kernel`, `src/node115-spot-decimal`, `src/node115-perp-tier-selector`, `src/node115-mixed-tuple-threshold`.
 - Observed diagnostic paths: 8.
 - First task: Start with bounded arithmetic helpers: recover width, rounding, scale and overflow branches.
 
@@ -140,7 +140,7 @@ Price, size, notional and wei arithmetic plus asset metadata.
 Fee tiers, volume accounting and rebates.
 
 - Target: node115.
-- Implementation paths: `src/node115-fee-point-classifier`.
+- Implementation paths: `src/node115-fee-point-classifier`, `src/node115-raw-threshold`, `src/node115-fee-window-scan`, `src/node115-fee-active-scaling`.
 - Observed diagnostic paths: 4.
 - First task: Recover maker/taker fee formulas and time-window rollover.
 
