@@ -1,0 +1,24 @@
+Relocations for the selector dispatch windows (from .rela.dyn and
+.rela.plt):
+
+dispatch 0x5f6a820: no R_X86_64_RELATIVE record carries it as addend;
+  no whole-file stored qword equals it
+
+The dispatch is reached only through the index selector 0x5f6c2a0's
+tail jump at 0x5f6c2d7 (inside the selector window
+0x5f6c2a0..0x5f6c2f3 pinned by the RE-001 later-group predicate item);
+it has no direct call site, no function-pointer slot and no other
+tail-jump site.
+
+thunk 0x5d48410 (the fast-route guard value): one whole-file stored
+  qword at file offset 0x15c5f8 (a comparator vtable slot in a data
+  section), and one R_X86_64_RELATIVE record whose offset is
+  0x64ecfb0 with addend 0x5d48410 -- the relocated global the find
+  arm's guard comparison loads (the file bytes at 0x64ecfb0 are zero;
+  the loader fills the slot from the addend). It is never called or
+  jumped to directly.
+
+builder 0x5eaa060 and find 0x5f69d00: no R_X86_64_RELATIVE record
+  carries either as addend; no whole-file stored qword equals either.
+  The builder has 59 direct call sites file-wide and the find has 3
+  (all listed in records.json); neither is tail-jumped to.

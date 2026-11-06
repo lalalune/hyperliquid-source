@@ -1,0 +1,32 @@
+FDE records for the selector dispatch windows (from .eh_frame; the
+builder, find and thunk FDEs use the CIE at the .eh_frame start, file
+offset 0xca6ed8, augmentation "zR"; the dispatch FDE uses the CIE at
+file offset 0x13d7108, augmentation "zPLR", so it carries an LSDA
+pointer; FDE initial_location uses pcrel sdata4, range uses sdata4):
+
+dispatch 0x5f6a820..0x5f6abac (908 bytes):  FDE file offset 0x13efb74,
+  total 80 bytes, length field 0x4c, LSDA at 0x416e43 (in
+  .gcc_except_table); the 4 bytes at 0x5f6abac..0x5f6abb0 are int3
+  padding to the next FDE at 0x5f6abb0, not instructions
+builder 0x5eaa060..0x5eaa10b (171 bytes):  FDE file offset 0xffbf88,
+  total 52 bytes, length field 0x30, no LSDA field
+find 0x5f69d00..0x5f69d31 (49 bytes):  FDE file offset 0x1004a3c,
+  total 28 bytes, length field 0x18, no LSDA field
+thunk 0x5d48410..0x5d48428 (24 bytes):  FDE file offset 0xfef140,
+  total 20 bytes, length field 0x10, no LSDA field
+
+LSDA for the dispatch (header: landing-pad base omitted, type table
+omitted, call-site encoding uleb128, table length 17 bytes):
+
+  [0x5f6a8d4, +3)    no landing pad, action 0 -- the scan arm's first
+                    fast-route compare call; no string is alive
+  [0x5f6a982, +0x27) landing pad 0x5f6aba0, action 0 -- the find arm's
+                    builder and find calls, with the built std::string
+                    alive; the pad moves the exception pointer to rbx
+                    and jumps to the shared cleanup tail at 0x5f6a7f7
+                    (the preceding function's FDE), which disposes the
+                    string at [rsp+8], re-checks the stack canary and
+                    calls _Unwind_Resume
+  [0x5f6aa1a, +0x17c) no landing pad, action 0 -- all remaining compare
+                    calls; the string is already disposed on the find
+                    arm and never built on the scan arms
