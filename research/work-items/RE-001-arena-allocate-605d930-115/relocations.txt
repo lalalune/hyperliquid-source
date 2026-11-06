@@ -1,0 +1,25 @@
+Relocation / PLT notes for the RE-001 arena allocate window (node #115).
+
+Window 0x605d930:
+- No PLT call, no GOT read and no .rodata reference in-window.
+  The window's only external transfer is the tail jump at
+  0x605d962 to the internal slow window 0x605d6c0 (the arena
+  packet's slow window), taken with rdx forced to 0 at
+  0x605d960.
+- No relocation points into the window body itself.
+
+Vtable / RELATIVE notes:
+- The window is reached only through the member class vtable
+  0x64d1fb8 (see the destructor-pair packet): it is the third
+  virtual, held by slot 0x64d1fc8. The slot itself is zero in
+  the file and resolves only through its RELATIVE entry in
+  .rela.dyn (entry at file offset 0x11a750: offset 0x64d1fc8,
+  type 8 = R_X86_64_RELATIVE, addend 0x605d930). The census's
+  single whole-file qword hit (file offset 0x11a760) is that
+  entry's addend field, not a separate reference.
+- Neighbouring slots of the same table, from the same RELATIVE
+  scan: 0x64d1fb8 -> 0x605cc30 (member destroy), 0x64d1fc0 ->
+  0x605cf80, 0x64d1fd0 -> 0x605d7b0 (AllocateAligned, the arena
+  packet's main window, counted there as the fourth virtual),
+  0x64d1fd8 -> 0x605cc20. The typeinfo slot sits at 0x64d1fb0
+  (RELATIVE addend 0x64d1f90), as recorded by the arena packet.
