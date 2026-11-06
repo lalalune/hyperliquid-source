@@ -1,0 +1,95 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "cases": 317520,
+  "freeze": {
+    "cases": 317520,
+    "input_sha256": "2c6c3f6233a50fc66e4ab05f90735b4f3820efd031d9a185e6035c6edf39c7ee",
+    "expected_sha256": "630f2a34b202a5a2c421c21d4bbb8ad736d407a39c4795d142b92b9f139d5120",
+    "oracle_sha256": "6c74003587a4fe569b5f09004eed83d233f6c40e8de1fa784f5ad40e6f942473",
+    "new_rust_exists_at_freeze": false,
+    "time_utc": "2026-11-04T11:47:32.692450+00:00"
+  },
+  "builds": [
+    {
+      "opt_level": 0,
+      "cases": 317520,
+      "output_sha256": "630f2a34b202a5a2c421c21d4bbb8ad736d407a39c4795d142b92b9f139d5120"
+    },
+    {
+      "opt_level": 3,
+      "cases": 317520,
+      "output_sha256": "630f2a34b202a5a2c421c21d4bbb8ad736d407a39c4795d142b92b9f139d5120"
+    }
+  ],
+  "mutants": [
+    {
+      "name": "week53-excludes-leap-Wednesday",
+      "normal_exit": true,
+      "first_case": 8211,
+      "input": "2020 53 0",
+      "actual": "N",
+      "expected": "D 16553649 2020 363 1"
+    },
+    {
+      "name": "weekday-one-based",
+      "normal_exit": true,
+      "first_case": 7,
+      "input": "2000 1 0",
+      "actual": "D 16384068 2000 4 4",
+      "expected": "D 16384052 2000 3 4"
+    },
+    {
+      "name": "week-one-anchor",
+      "normal_exit": true,
+      "first_case": 7,
+      "input": "2000 1 0",
+      "actual": "D 16381659 1999 365 11",
+      "expected": "D 16384052 2000 3 4"
+    },
+    {
+      "name": "century-leap-rule",
+      "normal_exit": true,
+      "first_case": 39183,
+      "input": "2099 53 4",
+      "actual": "D 17203219 2100 1 3",
+      "expected": "D 17203227 2100 1 11"
+    },
+    {
+      "name": "swallow-previous-year-overflow",
+      "normal_exit": true,
+      "first_case": 313607,
+      "input": "-2147483648 1 0",
+      "actual": "N",
+      "expected": "overflow"
+    },
+    {
+      "name": "minimum-supported-year",
+      "normal_exit": true,
+      "first_case": 314786,
+      "input": "-262143 1 3",
+      "actual": "N",
+      "expected": "D -2147475430 -262143 1 10"
+    },
+    {
+      "name": "year-pack-shift",
+      "normal_exit": true,
+      "first_case": 7,
+      "input": "2000 1 0",
+      "actual": "D 8192052 2000 3 4",
+      "expected": "D 16384052 2000 3 4"
+    },
+    {
+      "name": "weekday-flag-rotation",
+      "normal_exit": true,
+      "first_case": 7,
+      "input": "2000 1 0",
+      "actual": "D 16384051 2000 3 3",
+      "expected": "D 16384052 2000 3 4"
+    }
+  ],
+  "source_sha256": "7df563dee29266b882565a1f30181b4f599107b2e2325913dedb18d306add186",
+  "probe_sha256": "a8cef272d7bc57f773102095cac724d3f1eb9ff02a0d424f3a47b6a62e090905",
+  "captured_execution_or_emulation": false,
+  "oracle_limits": "independent Python fromisocalendar with exact 400-year extension; no native execution or ABI equivalence",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14)"
+}
