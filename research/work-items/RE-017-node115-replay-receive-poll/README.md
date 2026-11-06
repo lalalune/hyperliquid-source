@@ -1,0 +1,9 @@
+# RE-017 · Replay receive poll and record publication
+
+Target Linux x86-64 Node #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301. The worker at 0x5a6e1e0 calls receive helper 0x5ab6df0 at 0x5a6e328. This packet follows the selected polling path inside that helper, from the first probe to publication of a ready record.
+
+The first probe calls 0x581a100 and reads the leading qword from its stack result. Full-word zero selects a record arm. Otherwise the low dword is compared with 2. A match calls the slot at 0x64e0518 with the selected object member at +0x100 and a staged pair, then calls the same probe again with the same two object-derived input pointers. The second result repeats the full-word zero and low-dword 2 tests. The subsequent waiting branches depend on more state and remain outside this packet.
+
+On either zero-result arm, a locked subtraction of 2 updates the selected object's word at +0x1c0. An unsigned borrow reaches a failure boundary. The selected no-borrow continuation copies the two words from probe output +8 and +16, stages return tag 1 and enters the common return path through its applicable TLS continuation. On the normal publication route the pair is stored at output +8 and +16, the staged object reference is passed to the existing release helper, and the return tag is then written at output +0. The worker's following tag-one test therefore checks this returned tag rather than the probe's leading qword.
+
+This maps selected local operations under valid object state and normal helper returns. The meaning of all probe tags, synchronization of the wait branch, and scheduling effects remain open. Replay with `python3 research/work-items/RE-017-node115-replay-receive-poll/verify.py` from the repository root. It checks the authenticated ELF, selected transfers and operands, and six synthetic probe status cases including upper-word bits.
