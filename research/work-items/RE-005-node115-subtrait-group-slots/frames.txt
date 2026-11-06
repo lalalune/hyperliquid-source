@@ -1,0 +1,53 @@
+frames.txt — index of the disassembly excerpts in this directory.
+All bodies are from the pinned node115 binary
+(sha256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301);
+sizes are FDE extents as recorded in records.json.
+
+accessor_io_group.objdump.txt
+  The io group (group 3) of member 0x6444b60, slot by slot:
+  0x2a01800 (12B)  slot 0 accessor: lea rax,[rdi+0x38];
+                   lea rdx,[0x64445c0 io vtable]; ret
+  0x2a01bd0 (11B)  slot 1 pair return: mov rax,rdi;
+                   lea rdx,[0x6444890]; ret
+  0x2a01c40 (33B)  slot 2 keyed lookup: movdqu/pcmpeqb against
+                   the 16-byte constant at 0x451540 (the io
+                   type's TypeId), cmove self+0x38 or null
+  0x2a01bb0  (3B)  slot 4 zero: xor eax,eax; ret
+
+glue_variants.objdump.txt
+  The drop-shim templates used by the +0x58 slot and by group
+  slots 3 and 5:
+  0x2a01a40 (183B) +0x58 of 0x6444b60: second-state check,
+                   array drop, buffer free at +0x38/+0x40,
+                   dealloc 80 (first pair size)
+  0x2a01ee0 (141B) slot 3 of 0x6444b60 group 0: second-state
+                   check, array drop, dealloc 80 (pair size)
+  0x3f46dd0  (72B) slot 3 of 0x64845c0 group 0: array-only
+                   form, dealloc 72 (pair size)
+  0x3f46c90 (114B) slot 5 of 0x64845c0 group 0: array drop +
+                   buffer free at +0x38/+0x40, dealloc 80
+                   (next pair size)
+  0x3f46d10 (101B) slot 5 of 0x64845c0 group 1: array drop +
+                   drop call on the field at +0x38, dealloc 80
+                   (next pair size)
+  0x2a01970  (62B) slot 5 of 0x6444b60 group 5: call-form —
+                   calls the next pair type's own vtable drop
+                   body 0x29f12b0, dealloc 64 (next pair size)
+  0x16bf930 (248B) slot 5 of 0x640a448 group 1: fat-pair form —
+                   array drop, drops the (data, vtable) child
+                   stored at +0x38 through its vtable, frees
+                   the 24-byte cell, dealloc 64 (next pair size)
+
+description_variants.objdump.txt
+  Hand-written description() bodies of three accessor types
+  (all other accessor/pair vtables use the shared default):
+  0x14cad10 (40B)  for vtable 0x63f96f0: selects, on the
+                   object's first byte, between the strings
+                   "invalid character" (0x464b54, len 17) and
+                   "invalid length" (0x464b65, len 14)
+  0x14cb1b0 (13B)  for vtable 0x63f97e0: returns the string
+                   "parser error, see to_string() for details"
+                   (0x464b93, len 41)
+  0x1695e80  (9B)  for vtable 0x6408ad0: returns the
+                   (ptr, len) slice stored in the object
+                   itself at +0x08/+0x10
