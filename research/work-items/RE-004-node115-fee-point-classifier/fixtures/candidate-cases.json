@@ -1,0 +1,933 @@
+{
+  "cases": [
+    {
+      "coverage": [
+        "pass"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "G": 0,
+        "J": 0,
+        "K": 0,
+        "T": 0,
+        "U": 0
+      },
+      "id": "H01",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "Every numerical stage is integer0; final0<quantity1.",
+      "name": "zero passes"
+    },
+    {
+      "coverage": [
+        "threshold-equality"
+      ],
+      "expected_first_class": "RoundedMagnitudeAtLeastQuantity",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 1,
+        "E": 0,
+        "K": 0,
+        "T": 1
+      },
+      "id": "H02",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "3ff0000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "D=1 and E=0, C=0, so final1 equals n1; unsigned >= rejects.",
+      "name": "exact threshold one"
+    },
+    {
+      "coverage": [
+        "positive-fraction"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "D": 0,
+        "E": 0,
+        "T": 0
+      },
+      "id": "H03",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "3fd0000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 2,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "h*n=(1/4)*2=1/2 exactly; toward-zero D=0, total0<2.",
+      "name": "fraction truncates before threshold"
+    },
+    {
+      "coverage": [
+        "threshold-below"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "D": 1,
+        "E": 0,
+        "T": 1
+      },
+      "id": "H04",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "3fe0000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 2,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "h*n=(1/2)*2=1 exactly; D1,E0,C0 give total1<2.",
+      "name": "below threshold nonzero"
+    },
+    {
+      "coverage": [
+        "threshold-equality"
+      ],
+      "expected_first_class": "RoundedMagnitudeAtLeastQuantity",
+      "hand_intermediates": {
+        "D": 2,
+        "E": 0,
+        "T": 2
+      },
+      "id": "H05",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "3ff0000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 2,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "h*n=2; D2,E0,C0 give total2=n2.",
+      "name": "exact threshold two"
+    },
+    {
+      "coverage": [
+        "threshold-above"
+      ],
+      "expected_first_class": "RoundedMagnitudeAtLeastQuantity",
+      "hand_intermediates": {
+        "D": 3,
+        "E": 0,
+        "T": 3
+      },
+      "id": "H06",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "3ff8000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 2,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "h*n=(3/2)*2=3 exactly; total3>n2.",
+      "name": "above threshold"
+    },
+    {
+      "coverage": [
+        "priority-1"
+      ],
+      "expected_first_class": "FirstProductNegative",
+      "hand_intermediates": {
+        "A": 1,
+        "B": -1
+      },
+      "id": "H07",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "3ff0000000000000",
+        "m_bits": "bff0000000000000",
+        "q_bits": "bff0000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "3ff0000000000000"
+      },
+      "justification": "A1 times q=-1 yields B=-1. Stop here; m=-1 and h=1 are not evaluated for later classes.",
+      "name": "first rejection outranks later problems"
+    },
+    {
+      "coverage": [
+        "priority-2"
+      ],
+      "expected_first_class": "NetAndBaseNegative",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": -1,
+        "J": 0,
+        "K": -1
+      },
+      "id": "H08",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "3ff0000000000000",
+        "m_bits": "bff0000000000000",
+        "q_bits": "3ff0000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "A=B=0, C=-1; J0 plus C gives K=-1. D/E are not reached despite h=1.",
+      "name": "combined rejection precedes later work"
+    },
+    {
+      "coverage": [
+        "priority-3"
+      ],
+      "expected_first_class": "SecondProductNegative",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 1,
+        "E": -1,
+        "K": 0
+      },
+      "id": "H09",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "3ff0000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "bff0000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "A=B=C=K=0, D1 and q=-1 yield E=-1; the threshold class is not reached.",
+      "name": "second product rejection"
+    },
+    {
+      "coverage": [
+        "negative-D"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "D": -1,
+        "E": 0,
+        "T": 0,
+        "U": 0
+      },
+      "id": "H10",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "bff0000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "D=-1 but q0 gives E0. max(D,0)=0, C0, final0<1. There is no D-negative reject.",
+      "name": "negative D alone is allowed"
+    },
+    {
+      "coverage": [
+        "negative-C"
+      ],
+      "expected_first_class": "RoundedMagnitudeAtLeastQuantity",
+      "hand_intermediates": {
+        "A": 2,
+        "B": 0,
+        "C": -1,
+        "D": 0,
+        "E": 0,
+        "G": 1,
+        "J": 2,
+        "K": 1,
+        "T": 1
+      },
+      "id": "H11",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "bff0000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "4000000000000000"
+      },
+      "justification": "A2,B0,C=-1 produce J2,K1; final unsigned magnitude(C)=1 equals n1.",
+      "name": "negative C can survive combined check"
+    },
+    {
+      "coverage": [
+        "toward-zero"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "A": 2,
+        "B": 0,
+        "C": 0,
+        "J": 2,
+        "K": 2,
+        "T": 0
+      },
+      "id": "H12",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "bfe0000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "4000000000000000"
+      },
+      "justification": "C=trunc(-1/2)=0, not -1. A2,B0,K2; final0<1.",
+      "name": "negative fraction truncates not floors"
+    },
+    {
+      "coverage": [
+        "signed-sub-underflow"
+      ],
+      "expected_first_class": "NetAndBaseNegative",
+      "hand_intermediates": {
+        "A": -9223372036854775808,
+        "B": 9223372036854775807,
+        "C": 0,
+        "J": -9223372036854775808,
+        "K": -9223372036854775808
+      },
+      "id": "H13",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "bff0000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "c3e0000000000000"
+      },
+      "justification": "A=L. F(A)*(-1)=H, whose conversion saturates B=M. A-B=-18446744073709551615 underflows; J=L, C0, K=L.",
+      "name": "signed subtraction underflow"
+    },
+    {
+      "coverage": [
+        "signed-sub-underflow",
+        "signed-add-underflow",
+        "hook-order"
+      ],
+      "expected_first_class": "NetAndBaseNegative",
+      "hand_intermediates": {
+        "A": -9223372036854775808,
+        "B": 9223372036854775807,
+        "C": -1,
+        "J": -9223372036854775808,
+        "K": -9223372036854775808
+      },
+      "id": "H14",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "bff0000000000000",
+        "q_bits": "bff0000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "c3e0000000000000"
+      },
+      "justification": "As H13, subtraction saturates J=L; then C=-1 makes J+C underflow too. Both report continuations precede combined-negative.",
+      "name": "subtraction and addition underflow order"
+    },
+    {
+      "coverage": [
+        "signed-add-underflow"
+      ],
+      "expected_first_class": "NetAndBaseNegative",
+      "hand_intermediates": {
+        "A": -9223372036854775808,
+        "B": 0,
+        "C": -1,
+        "J": -9223372036854775808,
+        "K": -9223372036854775808
+      },
+      "id": "H15",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "bff0000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "c3e0000000000000"
+      },
+      "justification": "A=L,B0 gives exact J=L; C=-1 makes J+C underflow and saturate to L.",
+      "name": "signed addition underflow only"
+    },
+    {
+      "coverage": [
+        "signed-add-overflow",
+        "saturation-direction"
+      ],
+      "expected_first_class": "RoundedMagnitudeAtLeastQuantity",
+      "hand_intermediates": {
+        "A": 9223372036854775807,
+        "B": 0,
+        "C": 9223372036854775807,
+        "D": 0,
+        "E": 0,
+        "J": 9223372036854775807,
+        "K": 9223372036854775807,
+        "T": 9223372036854775807
+      },
+      "id": "H16",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "43e0000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "43e0000000000000"
+      },
+      "justification": "A=C=M by finite H saturation; B0,J=M. J+C positive overflow saturates K=M, so no combined-negative rejection. D=E0; |C|=M>=1.",
+      "name": "signed addition positive overflow"
+    },
+    {
+      "coverage": [
+        "MIN-early-rejection",
+        "unreachable-final-MIN"
+      ],
+      "expected_first_class": "NetAndBaseNegative",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": -9223372036854775808,
+        "J": 0,
+        "K": -9223372036854775808
+      },
+      "id": "H17",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "c3e0000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "C=L,J0 yields K=L. This is not a witness executing final AbsU(MIN); that later path is unreachable.",
+      "name": "MIN C rejects before magnitude"
+    },
+    {
+      "coverage": [
+        "integer-rounding-above-2^53",
+        "priority-1"
+      ],
+      "expected_first_class": "FirstProductNegative",
+      "hand_intermediates": {
+        "A": 9223372036854775807,
+        "B": -1,
+        "F(A)_bits": "43e0000000000000"
+      },
+      "id": "H18",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "bc00000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "43e0000000000000"
+      },
+      "justification": "A=M from finite H. Signed-i64-to-binary64 rounds M to H; q=-2^-63 therefore gives exact B=-1. Using the unrounded real M would wrongly truncate this product to0.",
+      "name": "rounded MAX integer changes first product"
+    },
+    {
+      "coverage": [
+        "integer-rounding-above-2^53",
+        "priority-3"
+      ],
+      "expected_first_class": "SecondProductNegative",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 9223372036854775807,
+        "E": -1,
+        "F(D)_bits": "43e0000000000000",
+        "K": 0
+      },
+      "id": "H19",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "43e0000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "bc00000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "A=B=C=K0; D=M from finite H. F(D)=H and q=-2^-63 produce E=-1. Without that integer-to-f64 rounding the first class would differ.",
+      "name": "rounded MAX integer changes second product"
+    },
+    {
+      "coverage": [
+        "signed-boundary-U",
+        "no-first-u64-wrap"
+      ],
+      "expected_first_class": "RoundedMagnitudeAtLeastQuantity",
+      "hand_intermediates": {
+        "D": 9223372036854775807,
+        "E": 9223372036854775807,
+        "G": 0,
+        "T": 18446744073709551614,
+        "U": 18446744073709551614
+      },
+      "id": "H20",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "43e0000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "3ff0000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "D=M,F(D)=H,q1 gives E=M. U=2M=18446744073709551614 fits u64 without carry, though signed interpretation is -2. G0; threshold rejects.",
+      "name": "first unsigned sum crosses signed boundary"
+    },
+    {
+      "coverage": [
+        "unsigned-carry"
+      ],
+      "expected_first_class": "RoundedMagnitudeAtLeastQuantity",
+      "hand_intermediates": {
+        "C": 9223372036854775807,
+        "D": 9223372036854775807,
+        "E": 9223372036854775807,
+        "G": 9223372036854775807,
+        "K": 9223372036854775807,
+        "T": 18446744073709551615,
+        "U": 18446744073709551614
+      },
+      "id": "H21",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "43e0000000000000",
+        "m_bits": "43e0000000000000",
+        "q_bits": "3ff0000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "A=B0,C=M gives K=M. D=E=M, U=2M. U+G=3M=27670116110564327421 exceeds u64MAX, so final saturation is u64MAX and rejects.",
+      "name": "final unsigned carry saturates"
+    },
+    {
+      "coverage": [
+        "finite-overflow-to-inf-zero"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "K": 0,
+        "T": 0
+      },
+      "id": "H22",
+      "input": {
+        "d_bits": "bff0000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "7fefffffffffffff"
+      },
+      "justification": "d=-1 makes 1-d=2. Multiplying finite max by2 overflows to +infinity; A converts that nonfinite result to0. All remaining integer stages0.",
+      "name": "first finite multiplication overflows to infinity"
+    },
+    {
+      "coverage": [
+        "finite-overflow-to-inf-zero",
+        "scale-6"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "K": 0,
+        "T": 0
+      },
+      "id": "H23",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "7fefffffffffffff",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "4018000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "m=maxfinite with scale6 overflows at m*s to +infinity; C=0 by nonfinite conversion. t=h=q0 leave all stages0.",
+      "name": "third conversion sees finite product overflow"
+    },
+    {
+      "coverage": [
+        "finite-overflow-to-inf-zero",
+        "priority-conversion"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 2,
+        "E": 0,
+        "K": 0,
+        "T": 2,
+        "U": 2
+      },
+      "id": "H24",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "3fe8000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "7fefffffffffffff",
+        "quantity": 3,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "n3,h=3/4 gives exact product9/4 and D2. q=maxfinite times F(D)=2 overflows to infinity, so E0. A0 times finite q is0; C0. Final2<3.",
+      "name": "fifth conversion overflow can permit pass"
+    },
+    {
+      "coverage": [
+        "positive-infinity-zero"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "T": 0
+      },
+      "id": "H25",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "3ff0000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "7ff0000000000000"
+      },
+      "justification": "A input product is +infinity; conversion maps it to0. q1 and other zeros give B=C=D=E0 and pass.",
+      "name": "positive infinity input becomes zero A"
+    },
+    {
+      "coverage": [
+        "negative-infinity-zero"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "T": 0
+      },
+      "id": "H26",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "3ff0000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "fff0000000000000"
+      },
+      "justification": "A input product is -infinity; conversion maps it to0, not i64MIN. Remaining stages0.",
+      "name": "negative infinity input becomes zero A"
+    },
+    {
+      "coverage": [
+        "quiet-NaN"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "T": 0
+      },
+      "id": "H27",
+      "input": {
+        "d_bits": "7ff8000000000123",
+        "h_bits": "0000000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "3ff0000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "3ff0000000000000"
+      },
+      "justification": "1-d is NaN; the A product stays NaN and conversion yields0. Other stages0 under masked FP exceptions.",
+      "name": "quiet NaN subtraction input"
+    },
+    {
+      "coverage": [
+        "signaling-NaN"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "T": 0
+      },
+      "id": "H28",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "3ff0000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "7ff0000000000001"
+      },
+      "justification": "Multiplication quiets the signaling NaN under the admitted environment; nonfinite A converts0. No NaN payload/exception trace is an output.",
+      "name": "signaling NaN input under masked exceptions"
+    },
+    {
+      "coverage": [
+        "zero-times-infinity"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "T": 0
+      },
+      "id": "H29",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "7ff0000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "A=D=0. F(A)*q and q*F(D) are invalid 0*infinity products, become NaN under masked exceptions, then each converts0. Final0<1.",
+      "name": "zero times infinity at both q products"
+    },
+    {
+      "coverage": [
+        "scale-0.1",
+        "rounded-product",
+        "threshold-equality"
+      ],
+      "expected_first_class": "RoundedMagnitudeAtLeastQuantity",
+      "hand_intermediates": {
+        "D": 1,
+        "E": 0,
+        "T": 1
+      },
+      "id": "H30",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "4024000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "3fb999999999999a",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "Exact represented 0.1 times10 is 1+2^-54, strictly below the midpoint 1+2^-53; RN-even gives1. D1,E0,C0, final1=n1.",
+      "name": "binary one tenth times ten reaches equality"
+    },
+    {
+      "coverage": [
+        "scale-0.2",
+        "rounded-product"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "D": 1,
+        "E": 0,
+        "T": 1
+      },
+      "id": "H31",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "3ff0000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 5,
+        "scale_bits": "3fc999999999999a",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "Scale0.2 times h1 stays that exact encoded value; multiplying by n5 gives exact1+2^-54 before rounding, so D1. Final1<5.",
+      "name": "binary one fifth times five"
+    },
+    {
+      "coverage": [
+        "scale-2"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "D": 0,
+        "E": 0,
+        "T": 0
+      },
+      "id": "H32",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "3fd0000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "4000000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "2*(1/4)=1/2 exactly, times n1 unchanged; D0 by truncation. All other stages0.",
+      "name": "scale two exact fraction"
+    },
+    {
+      "coverage": [
+        "scale-40"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "D": 0,
+        "E": 0,
+        "T": 0
+      },
+      "id": "H33",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "3f90000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "4044000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "40*2^-6=5/8 exactly; n1 leaves it unchanged, D0 by truncation.",
+      "name": "scale forty exact fraction"
+    },
+    {
+      "coverage": [
+        "negative-subnormal",
+        "quantity-upper-bound"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "C": 0,
+        "K": 0,
+        "T": 0
+      },
+      "id": "H34",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "8000000000000001",
+        "q_bits": "0000000000000000",
+        "quantity": 10000000,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "0000000000000000"
+      },
+      "justification": "m=-2^-1074, s1, n10,000,000. Product is exactly -10,000,000*2^-1074 (subnormal grid integer below2^52), with magnitude<1; C truncates0, all other stages0.",
+      "name": "negative subnormal at maximum quantity"
+    },
+    {
+      "coverage": [
+        "underflow",
+        "scale-0.2"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "T": 0
+      },
+      "id": "H35",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "0000000000000000",
+        "m_bits": "0000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "3fc999999999999a",
+        "t_bits": "0000000000000001"
+      },
+      "justification": "t=2^-1074 and s=encoded0.2<1/2. Their positive product lies below half the smallest subnormal; RN-even rounds to +0 before A conversion.",
+      "name": "subnormal multiplication rounds to positive zero"
+    },
+    {
+      "coverage": [
+        "signed-zero"
+      ],
+      "expected_first_class": "Pass",
+      "hand_intermediates": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "E": 0,
+        "T": 0
+      },
+      "id": "H36",
+      "input": {
+        "d_bits": "0000000000000000",
+        "h_bits": "8000000000000000",
+        "m_bits": "8000000000000000",
+        "q_bits": "0000000000000000",
+        "quantity": 1,
+        "scale_bits": "3ff0000000000000",
+        "t_bits": "8000000000000000"
+      },
+      "justification": "t,m,h are negative zero; their converted integer results are0. Both q products also convert0. Signed-zero payload distinctions are not classification outputs.",
+      "name": "signed zeros produce integer zero"
+    }
+  ],
+  "conditions": "RN-even; masked FP exceptions; DAZ=FTZ0; required native overflow hooks return preserving operands/control; classifications only",
+  "domain": "quantity1..10000000; six admitted scale encodings; t/d/q/m/h arbitrary bits",
+  "expected_provenance": "manually assigned from sealed mathematical contract; no behavioral model/reference/native execution",
+  "notation": "independent contract A,B,C,J,K,D,E,U,G,T; C/D/E correspond to writer D/E/F",
+  "schema": "independent-fee-point-handcases-v1"
+}

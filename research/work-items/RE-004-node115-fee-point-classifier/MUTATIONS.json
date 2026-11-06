@@ -1,0 +1,218 @@
+{
+  "case_count": 5900,
+  "comparator_sha256": "f4648b881120dd64d07d6f0d01fe28f6fc1828abcb4558e652b1a6bcf1ee3194",
+  "corpus_manifest_sha256": "c54df191f0f8b83e6816d6cc31b78e0a61c601c333f096fe7eb34bc8a4bd586b",
+  "driver_name": "fee-point-driver",
+  "mutations": [
+    {
+      "edits": [
+        {
+          "expected_occurrences": 1,
+          "find": "if total >= point.quantity {",
+          "replace": "if total > point.quantity {"
+        }
+      ],
+      "id": "M01",
+      "mutated_lib_sha256": "b4c08ba857b9dbd273b3cd6dad38d8df840ece8a56df88f745627f7f0bb4c174",
+      "name": "strict-final-threshold",
+      "witnesses": [
+        {
+          "baseline_class": "RoundedMagnitudeAtLeastQuantity",
+          "case_id": "H02",
+          "mutant_class": "Pass"
+        }
+      ]
+    },
+    {
+      "edits": [
+        {
+          "expected_occurrences": 1,
+          "find": "fn finite_trunc_sat(value: f64) -> i64 {\n    if value.is_finite() { value as i64 } else { 0 }\n}",
+          "replace": "fn finite_trunc_sat(value: f64) -> i64 {\n    if value.is_finite() {\n        let truncated = value as i64;\n        if value < 0.0 && value > (i64::MIN as f64) && value != (truncated as f64) {\n            truncated - 1\n        } else {\n            truncated\n        }\n    } else {\n        0\n    }\n}"
+        }
+      ],
+      "id": "M02",
+      "mutated_lib_sha256": "9cf7a9095247dbb0461e5ef04c7acc5c411d50d1061af5eefbadcfc185eed7e4",
+      "name": "finite-floor-instead-of-truncate",
+      "witnesses": [
+        {
+          "baseline_class": "Pass",
+          "case_id": "H12",
+          "mutant_class": "RoundedMagnitudeAtLeastQuantity"
+        }
+      ]
+    },
+    {
+      "edits": [
+        {
+          "expected_occurrences": 1,
+          "find": "fn finite_trunc_sat(value: f64) -> i64 {\n    if value.is_finite() { value as i64 } else { 0 }\n}",
+          "replace": "fn finite_trunc_sat(value: f64) -> i64 {\n    value as i64\n}"
+        }
+      ],
+      "id": "M03",
+      "mutated_lib_sha256": "a95d5ab2fb7272b37b68b16df1ded21cf3f2c1e4160f445ff3a6ad96905a5e45",
+      "name": "plain-cast-nonfinite-policy",
+      "witnesses": [
+        {
+          "baseline_class": "Pass",
+          "case_id": "H23",
+          "mutant_class": "RoundedMagnitudeAtLeastQuantity"
+        }
+      ]
+    },
+    {
+      "edits": [
+        {
+          "expected_occurrences": 1,
+          "find": "fn finite_trunc_sat(value: f64) -> i64 {\n    if value.is_finite() { value as i64 } else { 0 }\n}",
+          "replace": "fn finite_trunc_sat(value: f64) -> i64 {\n    if value.is_finite() {\n        if value >= f64::from_bits(0x43e0_0000_0000_0000) {\n            i64::MIN\n        } else {\n            value as i64\n        }\n    } else {\n        0\n    }\n}"
+        }
+      ],
+      "id": "M04",
+      "mutated_lib_sha256": "88832ceede51cee43090afd9cf41ad5c16e7abf3412386ad7cecbea0ac5b932c",
+      "name": "wrong-finite-upper-endpoint",
+      "witnesses": [
+        {
+          "baseline_class": "RoundedMagnitudeAtLeastQuantity",
+          "case_id": "H16",
+          "mutant_class": "NetAndBaseNegative"
+        }
+      ]
+    },
+    {
+      "edits": [
+        {
+          "expected_occurrences": 1,
+          "find": "    let b = finite_trunc_sat((a as f64) * q);",
+          "replace": "    let a_as_f64 = if a == i64::MAX {\n        f64::from_bits(0x43df_ffff_ffff_ffff)\n    } else {\n        a as f64\n    };\n    let b = finite_trunc_sat(a_as_f64 * q);"
+        },
+        {
+          "expected_occurrences": 1,
+          "find": "    let f = finite_trunc_sat(q * (e as f64));",
+          "replace": "    let e_as_f64 = if e == i64::MAX {\n        f64::from_bits(0x43df_ffff_ffff_ffff)\n    } else {\n        e as f64\n    };\n    let f = finite_trunc_sat(q * e_as_f64);"
+        }
+      ],
+      "id": "M05",
+      "mutated_lib_sha256": "f5d615a8c322183077fddd491dcce6cdb8cc3ba98b38e20b4eccac7342483cad",
+      "name": "round-max-integer-down",
+      "witnesses": [
+        {
+          "baseline_class": "FirstProductNegative",
+          "case_id": "H18",
+          "mutant_class": "Pass"
+        },
+        {
+          "baseline_class": "SecondProductNegative",
+          "case_id": "H19",
+          "mutant_class": "RoundedMagnitudeAtLeastQuantity"
+        }
+      ]
+    },
+    {
+      "edits": [
+        {
+          "expected_occurrences": 1,
+          "find": "let difference = a.saturating_sub(b);",
+          "replace": "let difference = a.wrapping_sub(b);"
+        }
+      ],
+      "id": "M06",
+      "mutated_lib_sha256": "61d5cf11823ed5944a1eafac2b8ece472ed4ad65fd3172f55f34bf5bd6756863",
+      "name": "wrapping-signed-subtract",
+      "witnesses": [
+        {
+          "baseline_class": "NetAndBaseNegative",
+          "case_id": "H13",
+          "mutant_class": "Pass"
+        }
+      ]
+    },
+    {
+      "edits": [
+        {
+          "expected_occurrences": 1,
+          "find": "let net = difference.saturating_add(base);",
+          "replace": "let net = difference.wrapping_add(base);"
+        }
+      ],
+      "id": "M07",
+      "mutated_lib_sha256": "7b80892f79c26a431d0382fca10818ae8e869ca3a082b0b1bba444efc14c6723",
+      "name": "wrapping-signed-add",
+      "witnesses": [
+        {
+          "baseline_class": "RoundedMagnitudeAtLeastQuantity",
+          "case_id": "H16",
+          "mutant_class": "NetAndBaseNegative"
+        }
+      ]
+    },
+    {
+      "edits": [
+        {
+          "expected_occurrences": 1,
+          "find": "let total = v.saturating_add(base.unsigned_abs());",
+          "replace": "let total = v.wrapping_add(base.unsigned_abs());"
+        }
+      ],
+      "id": "M08",
+      "mutated_lib_sha256": "e97742fff2192de26c8db1f1d4b34a025e69782dca60b5f04b87a4821d668436",
+      "name": "wrapping-final-unsigned-add",
+      "witnesses": [
+        {
+          "baseline_class": "RoundedMagnitudeAtLeastQuantity",
+          "case_id": "interaction_u64_exact_wrap",
+          "mutant_class": "Pass"
+        }
+      ]
+    },
+    {
+      "edits": [
+        {
+          "expected_occurrences": 1,
+          "find": "if total >= point.quantity {",
+          "replace": "if (total as i64) >= (point.quantity as i64) {"
+        }
+      ],
+      "id": "M09",
+      "mutated_lib_sha256": "d0e85295ec42f55ef436cc42560cf1f5777795e2dee1687f1b9cc9d49ed7c403",
+      "name": "signed-final-threshold",
+      "witnesses": [
+        {
+          "baseline_class": "RoundedMagnitudeAtLeastQuantity",
+          "case_id": "H20",
+          "mutant_class": "Pass"
+        }
+      ]
+    },
+    {
+      "edits": [
+        {
+          "expected_occurrences": 1,
+          "find": "let positive_e = e.max(0) as u64;",
+          "replace": "let positive_e = e.unsigned_abs();"
+        }
+      ],
+      "id": "M10",
+      "mutated_lib_sha256": "d0bba620f84e10d7e3b66631266f2af7a8786e009406aa1e87c7322581a0ff7b",
+      "name": "magnitude-instead-of-positive-part",
+      "witnesses": [
+        {
+          "baseline_class": "Pass",
+          "case_id": "H10",
+          "mutant_class": "RoundedMagnitudeAtLeastQuantity"
+        }
+      ]
+    }
+  ],
+  "original_plan_sha256": "f904c691f95962e51ed50bb51f1ad20e918ef64a2f26a7cc6de7c8bc58f4c88a",
+  "profile": "release",
+  "rust_release": "1.95.0",
+  "schema": "node115-fee-point-portable-mutations-v1",
+  "source_sha256": {
+    "Cargo.lock": "105c36de2253ee633fb8773a3277fc3332c36bf250566b3b1af9595719fdb637",
+    "Cargo.toml": "678d8b5229644fb37479fe5eb0fbc27be13278eb29254c6a0a0dfaa91137ed03",
+    "driver.rs": "5f98a3100bb8ab1c5385279c64d608cd439c5f1cecc88cd780052e2ab0bae9a8",
+    "lib.rs": "419fcbbb778b34b3b2b9fcc9ff69846eaeb02fc8b66feb188bc5e1ea28481ff4"
+  }
+}
