@@ -1,0 +1,58 @@
+[
+  {
+    "id": "M01",
+    "description": "exclude query equality",
+    "file": "src/lib.rs",
+    "before": "if word(&self.rows[self.physical(middle)], 0) <= exposure {",
+    "after": "if word(&self.rows[self.physical(middle)], 0) < exposure {"
+  },
+  {
+    "id": "M02",
+    "description": "ignore physical ring head",
+    "file": "src/lib.rs",
+    "before": "        let tail = self.rows.len() - self.head;\n        if logical < tail {\n            self.head + logical\n        } else {\n            logical - tail\n        }",
+    "after": "        logical"
+  },
+  {
+    "id": "M03",
+    "description": "choose first occurrence of final included key",
+    "file": "src/lib.rs",
+    "before": "        let logical_index = included_count - 1;",
+    "after": "        let final_key = word(&self.rows[self.physical(included_count - 1)], 0);\n        let logical_index = (0..included_count).find(|&i| word(&self.rows[self.physical(i)], 0) == final_key).unwrap();"
+  },
+  {
+    "id": "M04",
+    "description": "use immediate wrap-seam equality row",
+    "file": "src/lib.rs",
+    "before": "        let logical_index = included_count - 1;",
+    "after": "        let tail = self.rows.len() - self.head;\n        let logical_index = if self.live > tail && word(&self.rows[0], 0) == exposure { tail } else { included_count - 1 };"
+  },
+  {
+    "id": "M05",
+    "description": "search inactive allocation rows",
+    "file": "src/lib.rs",
+    "before": "        let mut high = self.live;",
+    "after": "        let mut high = self.rows.len();"
+  },
+  {
+    "id": "M06",
+    "description": "read offset at wrong native byte",
+    "file": "src/lib.rs",
+    "before": "                offset: word(row, 24),",
+    "after": "                offset: word(row, 16),"
+  },
+  {
+    "id": "M07",
+    "description": "compare query keys as signed integers",
+    "file": "src/lib.rs",
+    "before": "if word(&self.rows[self.physical(middle)], 0) <= exposure {",
+    "after": "if (word(&self.rows[self.physical(middle)], 0) as i64) <= (exposure as i64) {"
+  },
+  {
+    "id": "M08",
+    "description": "drop second span and adjust reported length, preserving parseable output",
+    "file": "src/lib.rs",
+    "before": "        MarginRange {\n            included_count,\n            first,\n            second,",
+    "after": "        MarginRange {\n            included_count: first_len,\n            first,\n            second: &self.rows[0..0],"
+  }
+]
