@@ -1,0 +1,618 @@
+{
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "task": "RE-001",
+ "bounded_question": "What does the node #115 fourth stats consumer (0x5efa010) emit into the out map for each compaction level and in total, and how are its 21 per-level metric values computed?",
+ "routine": {
+  "main": {
+   "address": "0x5efa010",
+   "fde": "0x5efa010..0x5efae21",
+   "signature": "f(owner=rdi, out=rsi: map<string,string>*)",
+   "caller": "23-byte forwarding thunk 0x5efae30 (calls main, returns 1)"
+  },
+  "filler": {
+   "address": "0x5ef1fa0",
+   "fde": "0x5ef1fa0..0x5ef2831",
+   "signature": "fill(owner=rdi, src=rsi, out_ptr=rdx, snapshot=rcx)",
+   "callers": [
+    "0x5efa10b (inside main)",
+    "0x5ef6848 (inside 0x5ef66e0..0x5ef8049, a sibling consumer)"
+   ]
+  },
+  "final": {
+   "address": "0x5ef5d40",
+   "fde": "0x5ef5d40..0x5ef621d",
+   "signature": "summary(owner=rdi, out=rsi)",
+   "callers": [
+    "0x5efa887 (inside main)",
+    "0x5ef6228 (23-byte thunk 0x5ef6220, returns 1)",
+    "0x5ef62e9 (inside 0x5ef6280..0x5ef65de, a sibling consumer)"
+   ]
+  },
+  "outer_insert": {
+   "address": "0x5ef1630",
+   "fde": "0x5ef1630..0x5ef1d33",
+   "note": "inserts metric ids 1..21 into one inner map<std::map<int, double>>"
+  },
+  "inner_insert": {
+   "address": "0x5ef1480",
+   "fde": "0x5ef1480..0x5ef1630",
+   "note": "find-or-insert for one (key, double) slot; 21 call sites, all inside outer_insert"
+  }
+ },
+ "context_map": {
+  "address": "0x6503a00",
+  "type": "std::map<int, std::pair<std::string, std::string>>, 21 entries, keys 1..21",
+  "built_by": "static initializer 0x5efbd80: 21 {int, string, string} entries (stride 0x48) pair_range_inserted via 0x5ef0ea0 (count 21, first = -0x1900(%rbp))",
+  "node_layout": "header 32 B; int key @+0x20; first string @+0x28 (ptr @+0x28, size @+0x30, SSO @+0x38); second string @+0x48 (ptr @+0x48, size @+0x50, SSO @+0x58)",
+  "read_by_main": "the FIRST string only, through map::at (0x5eeb7f0), which throws __throw_out_of_range(\"map::at\") when the key is missing",
+  "read_by_sibling_formatter": "the SECOND string only (0x5eedda0 collects second-string data pointers for its columns)",
+  "note": "RocksDB-style compaction-stats column headers (short name, display name)."
+ },
+ "pair_table": {
+  "address": "0x6503a00",
+  "entries": [
+   {
+    "key": 1,
+    "first": "NumFiles",
+    "second": "Files"
+   },
+   {
+    "key": 2,
+    "first": "CompactedFiles",
+    "second": "CompactedFiles"
+   },
+   {
+    "key": 3,
+    "first": "SizeBytes",
+    "second": "Size"
+   },
+   {
+    "key": 4,
+    "first": "Score",
+    "second": "Score"
+   },
+   {
+    "key": 5,
+    "first": "ReadGB",
+    "second": "Read(GB)"
+   },
+   {
+    "key": 6,
+    "first": "RnGB",
+    "second": "Rn(GB)"
+   },
+   {
+    "key": 7,
+    "first": "Rnp1GB",
+    "second": "Rnp1(GB)"
+   },
+   {
+    "key": 8,
+    "first": "WriteGB",
+    "second": "Write(GB)"
+   },
+   {
+    "key": 9,
+    "first": "WnewGB",
+    "second": "Wnew(GB)"
+   },
+   {
+    "key": 10,
+    "first": "MovedGB",
+    "second": "Moved(GB)"
+   },
+   {
+    "key": 11,
+    "first": "WriteAmp",
+    "second": "W-Amp"
+   },
+   {
+    "key": 12,
+    "first": "ReadMBps",
+    "second": "Rd(MB/s)"
+   },
+   {
+    "key": 13,
+    "first": "WriteMBps",
+    "second": "Wr(MB/s)"
+   },
+   {
+    "key": 14,
+    "first": "CompSec",
+    "second": "Comp(sec)"
+   },
+   {
+    "key": 15,
+    "first": "CompMergeCPU",
+    "second": "CompMergeCPU(sec)"
+   },
+   {
+    "key": 16,
+    "first": "CompCount",
+    "second": "Comp(cnt)"
+   },
+   {
+    "key": 17,
+    "first": "AvgSec",
+    "second": "Avg(sec)"
+   },
+   {
+    "key": 18,
+    "first": "KeyIn",
+    "second": "KeyIn"
+   },
+   {
+    "key": 19,
+    "first": "KeyDrop",
+    "second": "KeyDrop"
+   },
+   {
+    "key": 20,
+    "first": "RblobGB",
+    "second": "Rblob(GB)"
+   },
+   {
+    "key": 21,
+    "first": "WblobGB",
+    "second": "Wblob(GB)"
+   }
+  ]
+ },
+ "registry": {
+  "address": "0x65039c8",
+  "note": "Context only: the 9-entry int->string registry the sibling consumer 0x5ef97b0 reads (#3145). It is built by the same initializer 0x5efbd80 (stride 0x28); its 9th name is the join lookup1(4) + \"-\" + lookup2(1).",
+  "entries": [
+   {
+    "key": 0,
+    "name": "db.wal_bytes_written"
+   },
+   {
+    "key": 1,
+    "name": "db.wal_syncs"
+   },
+   {
+    "key": 2,
+    "name": "db.user_bytes_written"
+   },
+   {
+    "key": 3,
+    "name": "db.user_keys_written"
+   },
+   {
+    "key": 4,
+    "name": "db.user_writes_by_other"
+   },
+   {
+    "key": 5,
+    "name": "db.user_writes_by_self"
+   },
+   {
+    "key": 6,
+    "name": "db.user_writes_with_wal"
+   },
+   {
+    "key": 7,
+    "name": "db.user_write_stall_micros"
+   },
+   {
+    "key": 8,
+    "name": "write-buffer-manager-limit-stops"
+   }
+  ]
+ },
+ "metric_formulas": {
+  "note": "0x5ef1630, for one level struct L (i64 fields unless noted) and the caller's (elem_count, flagged_count, S, dense, ratio). All (double) conversions of i64 values use the u64-to-double fixup (t = (v>>1)|(v&1), convert, double) when the high bit is set. K2_30 = 2**-30 (.rodata 0x459c48), K2_20 = 2**-20 (.rodata 0x459638), base = (double)(L+0x00 + 1) / 1e6.",
+  "rdx_total": "(L+0x10 + L+0x18 + L+0x20) as i64",
+  "r14_total": "(L+0x28 + L+0x30) as i64",
+  "formulas": {
+   "1": "(double)elem_count",
+   "2": "(double)flagged_count",
+   "3": "S (the 0x5f6c300 sum, as a double)",
+   "4": "dense (the dense double)",
+   "5": "(double)rdx_total * 2**-30",
+   "6": "(double)L+0x10 * 2**-30",
+   "7": "(double)L+0x18 * 2**-30",
+   "8": "(double)L+0x28 * 2**-30",
+   "9": "(double)(L+0x28 - L+0x18) * 2**-30",
+   "10": "(double)L+0x38 * 2**-30",
+   "11": "ratio (from the filler)",
+   "12": "((double)rdx_total * 2**-20) / base",
+   "13": "((double)r14_total * 2**-20) / base",
+   "14": "(double)L+0x00 / 1e6",
+   "15": "(double)L+0x08 / 1e6",
+   "16": "(double)(i32)L+0x68",
+   "17": "0.0 if (i32)L+0x68 == 0, else ((double)L+0x00 / 1e6) / (double)(i32)L+0x68",
+   "18": "(double)L+0x50",
+   "19": "(double)L+0x58",
+   "20": "(double)L+0x20 * 2**-30",
+   "21": "(double)L+0x30 * 2**-30"
+  },
+  "correction": "Metric 17's else branch is 0.0 (outer_insert.txt 0x5ef19ee: xmm0 is zeroed before the L+0x68 test, and the zero branch jumps straight to the store). An earlier trace draft had recorded it as (double)L+0x00 / 1e6; the verbatim excerpt corrects that."
+ },
+ "ratio": {
+  "per_level": "0.0 for level 0, or when (L+0x20 + L+0x10) == 0; else (double)(L+0x30 + L+0x28) / (double)(L+0x20 + L+0x10) (filler.txt 0x5ef22e2..0x5ef2329)",
+  "sum": "0.0 when (owner+0x90 + owner+0x98) == 0; else (double)(snap+0x30 + snap+0x28) / (double)(owner+0x90 + owner+0x98) (filler.txt 0x5ef251a..0x5ef2565)"
+ },
+ "sum_node": {
+  "marker": -1,
+  "label": "Sum",
+  "insert_rule": "Inserted unconditionally after the per-level loop (filler.txt 0x5ef251a..0x5ef2644): the lower_bound + node-create + inner-map move-assign run on both the normal loop exit (jump to 0x5ef2555) and the count==0 / alternate paths (which jump to 0x5ef251a). Only the ratio is gated on (owner+0x90 + owner+0x98) != 0.",
+  "args_to_outer_insert": "elem_count = summed elem counts (32-bit), flagged_count = summed flagged counts (32-bit), S = summed S (double), dense = 0.0, ratio = sum_ratio, level struct = the accumulated snapshot",
+  "snapshot": "188-byte struct (0xbc), lane-wise paddq/paddd sum of the processed level structs (filler.txt 0x5ef21b0..0x5ef229b); +0x68 accumulates as i32"
+ },
+ "level_skip_rule": "A level is skipped (no snapshot accumulation, no metric insert, no outer-map node) when its first 16 bytes are both zero AND its element count is 0 (filler.txt 0x5ef2197..0x5ef21aa). Its elem/flagged counts still join the Sum totals (accumulated at 0x5ef216b/0x5ef218b, before the skip test); its S and dense do not.",
+ "alternate_path": {
+  "note": "Not fully modelled. When the subobject byte at owner+0x788+0x5a8 == 2, the filler takes the alternate entry (0x5ef272a: count = owner+0x778, ebp = 1); if ebp <= 0 it jumps to the Sum phase (0x5ef251a) with zeroed totals. The alternate loop-entry deltas (0x58(rsp) = 0, edi = 0, r13d = 0 at 0x5ef270f) are recorded but the alternate src layout is not pinned in this packet.",
+  "address": "0x5ef272a"
+ },
+ "main_emission": {
+  "key_format": "\"compaction.\" + label + \".\" + pair_first[metric_id]",
+  "label": "\"Sum\" for marker -1, else \"L\" + decimal(marker) (the decimal uses the same digit-pair table and divide-by-100 magic as the final routine)",
+  "value_format": "fmt_pct(\"%f\", double) via 0x5eec680 (format \"%f\" at 0x432165, size 0x148, global at 0x64ed730): 6 decimal places",
+  "insert": "insert-or-assign into the out map via map_node_create 0x5ef3ed0 (pair: key string at rsp+0xb0, value string at r13; node: key string @+0x20, value string @+0x40) and string_move_assign 0x5eebb20",
+  "after_loop": "calls the summary consumer 0x5ef5d40, then destroys the outer tree via 0x5eec510"
+ },
+ "final_summary": {
+  "routine": "0x5ef5d40",
+  "loop": "i = 0..2; ebp = 0 for i = 0, then 1; tag = tag_index(i, ebp); skip when tag == 0xe; name = name_builder(i, ebp); value = *(owner + 0xb8 + tag*8) as u64; out[name] = decimal(value) via u64str 0x5d4f970 + map_find_insert 0x5ef40a0 + string_move_assign 0x5eebb20",
+  "tag_table": {
+   "(0,0)": 0,
+   "(0,1)": 1,
+   "(1,0)": 2,
+   "(1,1)": 3,
+   "(2,0)": 4,
+   "(2,1)": 5,
+   "other": "0xe (skip)"
+  },
+  "entries": {
+   "memtable-limit-delays": "decimal(owner+0xb8)  [tag 0]",
+   "l0-file-count-limit-stops": "decimal(owner+0xd0)  [tag 3]",
+   "pending-compaction-bytes-stops": "decimal(owner+0xe0)  [tag 5]"
+  },
+  "correction": "The tag-selected offsets are owner+0xb8, +0xd0, +0xe0 (final.txt 0x5ef5db9: mov 0xb8(%rax,%rbx,8)). An earlier trace draft recorded +0xbd0/+0xbe0; the verbatim excerpt corrects that.",
+  "accumulators": "delays_total (0x18(rsp)) += value when ebp == 0; stops_total (0x10(rsp)) += value when ebp != 0. So delays_total = owner+0xb8, stops_total = owner+0xd0 + owner+0xe0.",
+  "trailing": {
+   "cf-l0-file-count-limit-delays-with-ongoing-compaction": "decimal(owner+0xe8) [key_a 0x5fca050, 53 chars]",
+   "cf-l0-file-count-limit-stops-with-ongoing-compaction": "decimal(owner+0xf0) [key_b 0x5fca190, 52 chars]",
+   "total-stops": "decimal(stops_total) [key_c 0x5fc9ed0, 11 chars]",
+   "total-delays": "decimal(delays_total) [key_d 0x5fc9f80, 12 chars]"
+  },
+  "name_parts": {
+   "part_a": {
+    "0": "memtable-limit",
+    "1": "l0-file-count-limit",
+    "2": "pending-compaction-bytes",
+    "4": "write-buffer-manager-limit"
+   },
+   "part_b": {
+    "0": "delays",
+    "1": "stops"
+   },
+   "name_builder": "part_a(i) + \"-\" + part_b(ebp), defined only for (i <= 2 or i == 4) and ebp in {0, 1}; else \"\""
+  }
+ },
+ "decimal_conversion": {
+  "note": "The main routine's level-label decimal, the final routine's u64->string helper 0x5d4f970, and the model's to_decimal all use the same algorithm: digit-count dispatch, divide-by-10000 magic 0x346dc5d63886594b, divide-by-100 magic 0x28f5c28f5c28f5c3, and the 200-byte digit-pair table built from 13 .rodata chunks.",
+  "digit_pair_table": {
+   "chunks": [
+    "0x451750",
+    "0x453230",
+    "0x456910",
+    "0x453e00",
+    "0x451db0",
+    "0x452ba0",
+    "0x455590",
+    "0x456240",
+    "0x456920",
+    "0x4528d0",
+    "0x456250",
+    "0x453240",
+    "0x454870"
+   ],
+   "store_offsets": [
+    0,
+    16,
+    32,
+    48,
+    64,
+    80,
+    96,
+    112,
+    128,
+    144,
+    160,
+    176,
+    185
+   ],
+   "note": "store_offsets are relative to the table base (main: rsp+0x1d0; the table is 200 bytes). The 13th chunk is stored unaligned at offset 185 (movups at 0x289), so its bytes 7..14 fill the table's last 8 bytes (offsets 192..199)."
+  },
+  "magics": {
+   "divide_by_100": "0x28f5c28f5c28f5c3",
+   "divide_by_10000": "0x346dc5d63886594b",
+   "divide_by_100_main": "0x51eb851f (shr 0x25)"
+  }
+ },
+ "literals": {
+  "0x432165": "%f",
+  "0x43d625": "compaction.",
+  "0x43821e": ".",
+  "0x4408a7": "map::at",
+  "0x4496cf": "-",
+  "0x43e67d": "L",
+  "0x4599a0": "1000000.0 (double)",
+  "0x459c48": "9.313225746154785e-10 (2**-30, double)",
+  "0x459638": "9.5367431640625e-07 (2**-20, double)"
+ },
+ "helpers": {
+  "fmt_pct": {
+   "address": "0x5eec680",
+   "fde": "0x5eec680..0x5eec7e5",
+   "note": "printf-style \"%f\" into a std::string; called from main at 0x5efa665"
+  },
+  "map_node_create": {
+   "address": "0x5ef3ed0",
+   "fde": "0x5ef3ed0..0x5ef409e",
+   "note": "creates the out-map node; called from main at 0x5efa776"
+  },
+  "map_find_insert": {
+   "address": "0x5ef40a0",
+   "fde": "0x5ef40a0..0x5ef41e6",
+   "note": "find-or-insert used by the final routine's trailing inserts"
+  },
+  "string_move_assign": {
+   "address": "0x5eebb20",
+   "fde": "0x5eebb20..0x5eebbf8"
+  },
+  "name_getter": {
+   "address": "0x5eeb7f0",
+   "fde": "0x5eeb7f0..0x5eeb850",
+   "note": "map::at for the global pair map; 13 call sites, all inside the sibling formatter 0x5eedda0"
+  },
+  "scalar_sum": {
+   "address": "0x5f6c300",
+   "fde": "0x5f6c300..0x5f6c31b",
+   "note": "tail-calls 0x5da4de0 with entries[level]"
+  },
+  "scalar_sum2": {
+   "address": "0x5da4de0",
+   "fde": "0x5da4de0..0x5da4e1e",
+   "note": "sum of +0x10 over non-null pointers in [begin, end), stepping 8"
+  },
+  "tree_erase": {
+   "address": "0x5eec510",
+   "fde": "0x5eec510..0x5eec581",
+   "note": "destroys the outer tree (recursive, 0x30-byte nodes)"
+  },
+  "tree_free": {
+   "address": "0x5eebcc0",
+   "fde": "0x5eebcc0..0x5eebcf1",
+   "note": "recursive free for 48-byte inner-map nodes"
+  },
+  "move_assign": {
+   "address": "0x5eecdb0",
+   "fde": "0x5eecdb0..0x5eecf16",
+   "note": "inner-map move-assign (dst = std::move(src))"
+  },
+  "node_create": {
+   "address": "0x5eed170",
+   "fde": "0x5eed170..0x5eed231",
+   "note": "outer-map node create; called from the filler at 0x5ef2433 and from 0x5ef6932"
+  },
+  "u64str": {
+   "address": "0x5d4f970",
+   "fde": "0x5d4f970..0x5d4fcdd",
+   "note": "u64 -> decimal string (same digit-pair table and magics as to_decimal); called by the final routine at 0x5ef604d/0x5ef6083/0x5ef60c8/0x5ef6109"
+  },
+  "tag_index": {
+   "address": "0x5fc9e20",
+   "fde": "0x5fc9e20..0x5fc9e8a"
+  },
+  "name_join": {
+   "address": "0x5fca2d0",
+   "fde": "0x5fca2d0..0x5fca5ca"
+  },
+  "name_lookup1": {
+   "address": "0x5fc9960",
+   "fde": "0x5fc9960..0x5fc9cd5"
+  },
+  "name_lookup2": {
+   "address": "0x5fc9ce0",
+   "fde": "0x5fc9ce0..0x5fc9e1a"
+  }
+ },
+ "owner_layout": {
+  "note": "Owner fields read by this work item (offsets from the owner base). The level structs live at owner+0x138 + level*0xc0 (192 B each); the snapshot is a separate 188-byte (0xbc) struct.",
+  "level_count": "owner+0x778 (i64)",
+  "level_structs": "owner+0x138 + level*0xc0",
+  "sum_denominator": "owner+0x90 + owner+0x98 (u64s)",
+  "final_counters": "owner+0xb8 + tag*8 (tags 0..5), owner+0xe8, owner+0xf0",
+  "alternate_flag": "byte at (owner+0x788)+0x5a8 == 2 selects the alternate filler entry"
+ },
+ "census": {
+  "method": "exhaustive E8/E9 scan of every executable PT_LOAD segment, each kept site confirmed by disassembling its containing FDE; see census.py, callers.tsv, relocations.txt",
+  "main_callers": [
+   "0x5efae38 (thunk 0x5efae30..0x5efae47, 23 B, returns 1)"
+  ],
+  "filler_callers": [
+   "0x5efa10b (main)",
+   "0x5ef6848 (sibling 0x5ef66e0..0x5ef8049)"
+  ],
+  "final_callers": [
+   "0x5efa887 (main)",
+   "0x5ef6228 (thunk 0x5ef6220..0x5ef6237, 23 B, returns 1)",
+   "0x5ef62e9 (sibling 0x5ef6280..0x5ef65de)"
+  ],
+  "outer_insert_callers": [
+   "0x5ef23b4 (filler, per level)",
+   "0x5ef25bc (filler, Sum)",
+   "0x5ef1e2a (sibling 0x5ef1d60..0x5ef1f39)",
+   "0x5ef70d0 (sibling 0x5ef66e0..0x5ef8049)"
+  ],
+  "inner_insert_call_sites": "21, all inside outer_insert (0x5ef16d2..0x5ef1b2c) -- one per metric id 1..21",
+  "name_getter_call_sites": "13, all inside the sibling formatter 0x5eedda0 (0x5eeddfb..0x5eee1a5)",
+  "fmt_global_relocation": "0x64ed730 appears as a RELATIVE relocation addend at file offset 0x16a580",
+  "allocator_global_relocation": "0x64ed5d8 appears as a RELATIVE relocation addend at file offset 0x16a328"
+ },
+ "model_spot_check": {
+  "note": "Synthetic input (three levels; level 1 is skipped) run through tools/compaction_consumer_a010_115.py build_map. The expected map is embedded verbatim; verify.py recomputes it.",
+  "input": {
+   "levels": [
+    {
+     "f00": 2000000,
+     "f08": 0,
+     "f10": 1073741824,
+     "f18": 0,
+     "f20": 0,
+     "f28": 0,
+     "f30": 0,
+     "f38": 0,
+     "f50": 0,
+     "f58": 0,
+     "f60": 0,
+     "f68": 2
+    },
+    {
+     "f00": 0,
+     "f08": 0,
+     "f10": 0,
+     "f18": 0,
+     "f20": 0,
+     "f28": 0,
+     "f30": 0,
+     "f38": 0,
+     "f50": 0,
+     "f58": 0,
+     "f60": 0,
+     "f68": 0
+    },
+    {
+     "f00": 1000000,
+     "f08": 1000000,
+     "f10": 1073741824,
+     "f18": 1073741824,
+     "f20": 1073741824,
+     "f28": 1073741824,
+     "f30": 1073741824,
+     "f38": 0,
+     "f50": 7,
+     "f58": 8,
+     "f60": 0,
+     "f68": 0
+    }
+   ],
+   "per_level": [
+    [
+     10,
+     2,
+     100.0,
+     5.0
+    ],
+    [
+     0,
+     1,
+     999.0,
+     888.0
+    ],
+    [
+     4,
+     1,
+     50.0,
+     2.0
+    ]
+   ],
+   "owner90": 100,
+   "owner98": 200,
+   "owner_fields": {
+    "0xb8": 100,
+    "0xd0": 250,
+    "0xe0": 50,
+    "0xe8": 7,
+    "0xf0": 9
+   }
+  },
+  "expected_map": {
+   "compaction.Sum.NumFiles": "14.000000",
+   "compaction.Sum.CompactedFiles": "4.000000",
+   "compaction.Sum.SizeBytes": "150.000000",
+   "compaction.Sum.Score": "0.000000",
+   "compaction.Sum.ReadGB": "4.000000",
+   "compaction.Sum.RnGB": "2.000000",
+   "compaction.Sum.Rnp1GB": "1.000000",
+   "compaction.Sum.WriteGB": "1.000000",
+   "compaction.Sum.WnewGB": "0.000000",
+   "compaction.Sum.MovedGB": "0.000000",
+   "compaction.Sum.WriteAmp": "7158278.826667",
+   "compaction.Sum.ReadMBps": "1365.332878",
+   "compaction.Sum.WriteMBps": "682.666439",
+   "compaction.Sum.CompSec": "3.000000",
+   "compaction.Sum.CompMergeCPU": "1.000000",
+   "compaction.Sum.CompCount": "2.000000",
+   "compaction.Sum.AvgSec": "1.500000",
+   "compaction.Sum.KeyIn": "7.000000",
+   "compaction.Sum.KeyDrop": "8.000000",
+   "compaction.Sum.RblobGB": "1.000000",
+   "compaction.Sum.WblobGB": "1.000000",
+   "compaction.L0.NumFiles": "10.000000",
+   "compaction.L0.CompactedFiles": "2.000000",
+   "compaction.L0.SizeBytes": "100.000000",
+   "compaction.L0.Score": "5.000000",
+   "compaction.L0.ReadGB": "1.000000",
+   "compaction.L0.RnGB": "1.000000",
+   "compaction.L0.Rnp1GB": "0.000000",
+   "compaction.L0.WriteGB": "0.000000",
+   "compaction.L0.WnewGB": "0.000000",
+   "compaction.L0.MovedGB": "0.000000",
+   "compaction.L0.WriteAmp": "0.000000",
+   "compaction.L0.ReadMBps": "511.999744",
+   "compaction.L0.WriteMBps": "0.000000",
+   "compaction.L0.CompSec": "2.000000",
+   "compaction.L0.CompMergeCPU": "0.000000",
+   "compaction.L0.CompCount": "2.000000",
+   "compaction.L0.AvgSec": "1.000000",
+   "compaction.L0.KeyIn": "0.000000",
+   "compaction.L0.KeyDrop": "0.000000",
+   "compaction.L0.RblobGB": "0.000000",
+   "compaction.L0.WblobGB": "0.000000",
+   "compaction.L2.NumFiles": "4.000000",
+   "compaction.L2.CompactedFiles": "1.000000",
+   "compaction.L2.SizeBytes": "50.000000",
+   "compaction.L2.Score": "2.000000",
+   "compaction.L2.ReadGB": "3.000000",
+   "compaction.L2.RnGB": "1.000000",
+   "compaction.L2.Rnp1GB": "1.000000",
+   "compaction.L2.WriteGB": "1.000000",
+   "compaction.L2.WnewGB": "0.000000",
+   "compaction.L2.MovedGB": "0.000000",
+   "compaction.L2.WriteAmp": "1.000000",
+   "compaction.L2.ReadMBps": "3071.996928",
+   "compaction.L2.WriteMBps": "2047.997952",
+   "compaction.L2.CompSec": "1.000000",
+   "compaction.L2.CompMergeCPU": "1.000000",
+   "compaction.L2.CompCount": "0.000000",
+   "compaction.L2.AvgSec": "0.000000",
+   "compaction.L2.KeyIn": "7.000000",
+   "compaction.L2.KeyDrop": "8.000000",
+   "compaction.L2.RblobGB": "1.000000",
+   "compaction.L2.WblobGB": "1.000000",
+   "memtable-limit-delays": "100",
+   "l0-file-count-limit-stops": "250",
+   "pending-compaction-bytes-stops": "50",
+   "cf-l0-file-count-limit-delays-with-ongoing-compaction": "7",
+   "cf-l0-file-count-limit-stops-with-ongoing-compaction": "9",
+   "total-stops": "300",
+   "total-delays": "100"
+  }
+ },
+ "unknowns": [
+  "The alternate filler entry (subobject byte +0x5a8 == 2): its src layout and loop-entry deltas are not pinned; the normal path is modelled.",
+  "The sibling big consumer 0x5ef66e0..0x5ef8049 (calls the filler at 0x5ef6848 and outer_insert at 0x5ef70d0) and the sibling 0x5ef1d60..0x5ef1f39 (calls outer_insert at 0x5ef1e2a) are not part of this item; they are recorded as the next candidates.",
+  "The sibling formatter 0x5eedda0 (reads the pair map's SECOND strings for its \"** Compaction Stats [%s] **\" columns) is a separate candidate, not modelled here."
+ ],
+ "not_claimed": [
+  "No hosted CI / make verify / make test result is claimed: this VM has no cargo/rustc, no git-lfs and no Ghidra/Java, so the repo's Rust gates are not runnable here.",
+  "The alternate filler path is not modelled (see unknowns).",
+  "The out-map insertion order is the std::map<std::string, std::string> sorted order; the model returns a dict, whose iteration order is insertion order, not the map's sorted order."
+ ],
+ "evidence_note": "Mnemonics such as endbr64 are genuine instructions present in the target binary, not placeholders. Every excerpt in this packet is the raw objdump output for one whole function (FDE), regenerated verbatim from work/hl-node-115.bin; instruction-level detail lives only in those excerpts. The JSON in this file holds semantic records only."
+}
