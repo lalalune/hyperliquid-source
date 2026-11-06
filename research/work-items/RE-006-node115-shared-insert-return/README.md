@@ -30,8 +30,8 @@ counter at `+0x18`. The two stack arguments never change the
 returned index: the first is a mode selector and the second a link
 index; the effective link mode holds iff the selector equals `1`,
 the index is below the slab length, and the qword at that slab slot
-does not equal `2`. They only choose the sources of the order
-rewrite (below) and the target of the link writes.
+does not equal `2`. They choose sources of the order rewrite and
+raw event word (below), and the target of the link writes.
 
 ## Scope
 
@@ -89,13 +89,14 @@ during generation.
    behind `rcx` (capacity `+0x0`, buffer `+0x8`, length `+0x10`),
    growing it through the per-twin slot when length equals
    capacity. The element is `0x2b8` bytes in `shared_a` and
-   `0x2c8` in `shared_b`; this routine writes its first 77 bytes:
-   constant `2`, the mode flag, a mode-dependent qword (link mode:
-   `[slot+0xf0]` of the linked slab element; fresh: `[order+0xe0]`),
+   `0x2c8` in `shared_b`; explicit stores initialize a 77-byte
+   source-frame prefix: constant `2`, the mode flag, a raw qword
+   with the four sources in the correction below,
    `[order+0xe0]`, `[order+0xb0]`, the `rdx` argument,
    `[order+0xf0]`, the 16 bytes at `[order+0xf8]`, the dword at
    `[order+0x108]`, and the byte at `[order+0xd2]`. The remaining
-   element bytes are not written by this routine.
+   source bytes have no established contents here. The first copy
+   requests the **full element size**, not just the initialized prefix.
 4. **Order rewrite.** The order's first four qwords are replaced:
    `+0x0` and `+0x8` take the mode-dependent pair (link mode: the
    linked element's `+0x0`/`+0x8`; fresh: the level record's
@@ -162,6 +163,38 @@ can link against. What do the four insert-order callers above the
 twins do with the value the twins forward to them -- is it stored
 as a durable order handle, or consumed only inside the insert
 path?
+
+## Event-source correction
+
+The original packet conflated the fresh-mode scratch word at event
+offset `+0x10` with the quantity at `+0x18`. In each complete body,
+the first word is stored from **RCX**, the second from **RDI**.
+The corrected raw reaching definitions are:
+
+| Condition at the selection loads | Source-frame word at `+0x10` |
+| --- | --- |
+| selector != 1 | raw selector |
+| selector == 1, index >= slab length | 1 |
+| selector == 1, index in range, slot first qword == 2 | low 64 bits of index × 0x110 |
+| selector == 1, index in range, slot first qword != 2 | slot qword at +0xf0 |
+
+These are raw storage observations. The fresh-mode word's meaning and
+whether a later consumer uses it remain unknown. The index comparison is
+unsigned and the vacancy comparison reads a full qword. The quantity
+loaded from order `+0xe0` is saved separately and reaches `+0x18`.
+
+The selector is reloaded after the entry overflow helper as well as on
+the no-overflow path. Full path/address reasoning, a concrete registration
+counterexample and the copy boundary are in [correction/PROOF.md](correction/PROOF.md).
+Destination correspondence requires the opaque copy slot to perform an
+exact copy and reached helpers to preserve the source frame and relevant
+inputs. A full-size copy request does not establish initialized tail
+values, a source-language type, consumer behavior or runtime equivalence.
+
+The correction retains all captured exports and byte pins. It corrects
+the generated interpretation and its regressions; it adds no recovered
+implementation or acceptance gate. Actual before/after results are in
+[correction/VALIDATION.md](correction/VALIDATION.md).
 
 ## Validation
 

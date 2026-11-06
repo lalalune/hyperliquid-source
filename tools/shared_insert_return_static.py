@@ -4,16 +4,16 @@
 Both 1,067-byte FDE bodies (0x58df360 and 0x58df790) are called only by
 the RE-006 ring-append twins, in their registration and append arms.
 Each routine first folds the order qword at +0xe0 into the accumulator
-behind its fifth argument, builds a 77-byte-written event record from
-the order fields into the collection behind its fourth argument,
+behind its fifth argument, initializes a 77-byte event source prefix
+and requests a full-element copy into its fourth-argument collection,
 rewrites the order's first four qwords, and inserts the order into the
 0x110-byte-entry slab behind its first argument.  This packet pins the
 return contract: the routine returns the slab head field [rdi+0x20] as
 it stood before the insertion -- the index of the slot that receives
 the order copy -- with an append case (head == length), a vacant-slot
 reuse case (head < length), and a non-returning vacant-entry panic
-otherwise.  The two stack arguments select link writes and the order
-rewrite only; they never change the returned index.  This tool
+otherwise.  The two stack arguments select link writes, the order
+rewrite and raw event-word sources; they never change the returned index. This tool
 authenticates the whole capture, pins those facts in bytes, and
 regenerates the packet.
 """
@@ -543,6 +543,19 @@ def owner_trace(body, base, name, spec, relas):
         'exact_sites_checked': len(EXACT_SITES),
         'diff_sites_checked': len(DIFF_SITES),
         'branch_sites_checked': len(BRANCH_SITES),
+        'event_word_witnesses': {
+            'selector_loads': [hx(base + 0x44), hx(base + 0xd1)],
+            'selector_branches': [hx(base + 0x54), hx(base + 0xe1)],
+            'index_bound_branch': hx(base + 0x6a),
+            'scaled_index': hx(base + 0x70),
+            'vacancy_branch': hx(base + 0x84),
+            'linked_word_load': hx(base + 0xa0),
+            'raw_word_store': hx(base + 0x13e),
+            'quantity_store': hx(base + 0x143),
+            'copy_source': hx(base + 0x18a),
+            'copy_count': hx(base + 0x196),
+            'copy_call': hx(base + 0x19b),
+        },
     }
 
 
@@ -759,7 +772,8 @@ def analyze(data):
                 'stack_2': ('link index: the append arm passes the '
                             'cached result of the previous call (the '
                             'value this routine returned last time); '
-                            'unused in fresh mode'),
+                            'not read when stack_1 != 1; otherwise '
+                            'read even when the checks select fresh mode'),
             },
             'entry_accumulator': {
                 'update': '*r8 := *r8 + [order+0xe0] as a checked add',
@@ -797,7 +811,9 @@ def analyze(data):
                     'order_+0x18': ('a frame slot this routine writes '
                                     'only on the link path (recorded, '
                                     'not interpreted)'),
-                    'event_+0x10': 'the qword at order + 0xe0',
+                    'event_+0x10': ('raw selector or scaled index, according '
+                                    'to event_record.word_0x10_sources; '
+                                    'semantic use is not established'),
                 },
             },
             'event_record': {
@@ -811,9 +827,7 @@ def analyze(data):
                     {'offset': 8, 'bytes': 8,
                      'source': 'the effective mode flag (0 or 1)'},
                     {'offset': 16, 'bytes': 8,
-                     'source': ('link mode: the qword at slab '
-                                'buffer[stack_2] + 0xf0; fresh mode: '
-                                'the qword at order + 0xe0')},
+                     'source': 'raw RCX value from word_0x10_sources'},
                     {'offset': 24, 'bytes': 8,
                      'source': 'the qword at order + 0xe0'},
                     {'offset': 32, 'bytes': 8,
@@ -828,9 +842,29 @@ def analyze(data):
                     {'offset': 76, 'bytes': 1,
                      'source': 'the byte at order + 0xd2'},
                 ],
-                'written_span_bytes': 77,
-                'tail': ('the remaining element bytes past offset 77 '
-                         'are not written by this routine'),
+                'word_0x10_sources': [
+                    {'condition': 'stack_1 != 1', 'source': 'stack_1'},
+                    {'condition': 'stack_1 == 1 and stack_2 >= slab_length',
+                     'source': '1'},
+                    {'condition': 'stack_1 == 1 and stack_2 < slab_length and linked_first_qword == 2',
+                     'source': 'low64(stack_2 * 0x110)'},
+                    {'condition': 'stack_1 == 1 and stack_2 < slab_length and linked_first_qword != 2',
+                     'source': 'the qword at slab buffer[stack_2] + 0xf0'},
+                ],
+                'initialized_source_prefix_bytes': 77,
+                'copy_requested_bytes': {
+                    name: spec['event_element_bytes']
+                    for name, spec in OWNERS.items()
+                },
+                'tail': ('source-frame contents past offset 76 are not '
+                         'established by the explicit stores before the '
+                         'first copy; the copy requests the full element'),
+                'destination_premise': (
+                    'destination correspondence requires normal exact-copy '
+                    'behavior at slot 0x64df508, valid nonaliasing buffers '
+                    'and source-frame preservation by the reached helpers; '
+                    'the fresh-mode word semantic use is not established'
+                ),
             },
             'order_rewrite': {
                 'fields': [
@@ -904,8 +938,8 @@ def analyze(data):
                     },
                 ],
                 'mode_independence': (
-                    'the stack arguments change only the order rewrite '
-                    'sources and the link writes; the returned index '
+                    'the stack arguments change the order rewrite '
+                    'sources, raw event word and link writes; the returned index '
                     'and the slot choice never depend on them'
                 ),
             },
