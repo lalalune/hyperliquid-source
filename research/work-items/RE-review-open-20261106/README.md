@@ -11,7 +11,7 @@ The uncommitted CPython cache row is excluded from the active manifest; its
 original declaration remains in the retained submitted manifest.
 
 No raw binary evidence is rewritten, no instruction execution is claimed, and
-no component reconstruction gate is advanced. The reviewed publication batch contains 1,073 PR heads; 41 out-of-scope PRs were closed, 73 require reproducible evidence, and 57 await separate differential-execution approval. See `reviewed-pr-heads.json`, `held-pr-heads.json` and `validation.json`.
+no component reconstruction gate is advanced. The reviewed publication batch contains 1,074 PR heads; 41 out-of-scope PRs were closed, 72 require reproducible evidence, and 57 await separate differential-execution approval. See `reviewed-pr-heads.json`, `held-pr-heads.json` and `validation.json`.
 
 The compaction-dump model now wraps packed integer lanes at their observed
 widths. Boundary controls and the host-libc test corrections are recorded in
@@ -20,7 +20,7 @@ research-model checks, not a reconstructed-node execution or identity claim.
 
 ## Final review validation
 
-All 895 authorized test files pass. The 23 remaining pre-existing test files
+All 896 authorized test files pass. The 23 remaining pre-existing test files
 require instruction/native execution and were not run. All 616 selected static
 packet verifiers pass, including the explicitly qualified renderer and
 provider-version cases. The final changed-export audit byte-checks 550,472
@@ -42,3 +42,8 @@ modules, removes author-private temporary-directory dependence, makes a
 citation-aware overlap check, and makes the profiling overlap mutant fail
 for overlap independently of manifest integrity. Every correction and the
 original affected manifest is retained in this packet.
+
+PR #2721 was subsequently reconciled against the pinned, already merged
+PR #2647 record. D is retained as reused context and earns no additional
+coverage credit. Its 14 focused tests pass. The original submission README
+and manifest remain under `submitted-pr2721/`.
