@@ -1,0 +1,78 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "cases": 22848,
+  "freeze": {
+    "cases": 22848,
+    "input_sha256": "567bc5c29132e833a7657accc0cfa6d94faa4b8235ef4e2a71d1f0cc658a712a",
+    "expected_sha256": "fe96bf0457f60696a0fcd18e63602fcf77dc6db00d067467426e49d98d338de3",
+    "oracle_sha256": "db736ce658d84af0b3e2f00f175b4a51d9b4ca8c10b6581da588ae4386a1634a",
+    "new_rust_exists_at_freeze": false,
+    "time_utc": "2026-11-04T10:51:35.742390+00:00"
+  },
+  "builds": [
+    {
+      "opt_level": 0,
+      "cases": 22848,
+      "output_sha256": "fe96bf0457f60696a0fcd18e63602fcf77dc6db00d067467426e49d98d338de3"
+    },
+    {
+      "opt_level": 3,
+      "cases": 22848,
+      "output_sha256": "fe96bf0457f60696a0fcd18e63602fcf77dc6db00d067467426e49d98d338de3"
+    }
+  ],
+  "mutants": [
+    {
+      "name": "token-low-nibble",
+      "normal_exit": true,
+      "first_case": 1,
+      "input": "0 0 0 1 0 0",
+      "actual": "ok 1 01",
+      "expected": "ok 1 00"
+    },
+    {
+      "name": "skip-required-zero-extension",
+      "normal_exit": true,
+      "first_case": 217,
+      "input": "15 0 15 1 0 0",
+      "actual": "literals 1 f0",
+      "expected": "extension 1 f0"
+    },
+    {
+      "name": "ff-boundary",
+      "normal_exit": true,
+      "first_case": 4808,
+      "input": "270 0 270 2 0 0",
+      "actual": "literals 2 f0ff",
+      "expected": "extension 2 f0ff"
+    },
+    {
+      "name": "extension-divisor",
+      "normal_exit": true,
+      "first_case": 4809,
+      "input": "270 0 270 3 0 0",
+      "actual": "literals 3 f0ff01",
+      "expected": "literals 3 f0ff00"
+    },
+    {
+      "name": "partial-append",
+      "normal_exit": true,
+      "first_case": 23,
+      "input": "2 0 2 2 0 0",
+      "actual": "literals 1 2000",
+      "expected": "literals 1 20a5"
+    },
+    {
+      "name": "length-before-copy",
+      "normal_exit": true,
+      "first_case": 1,
+      "input": "0 0 0 1 0 0",
+      "actual": "ok 0 00",
+      "expected": "ok 1 00"
+    }
+  ],
+  "source_sha256": "0af62d3d6068d94d0621a5ed3af5e4c7611e482cc0304a8650a296fd6d027a50",
+  "probe_sha256": "dc7a7fb590864bceef41ca5b6bca53e48ba7fa0b00b8042a4e9bebb708d08a46",
+  "captured_execution_or_emulation": false,
+  "reciprocal_identity": "all unsigned64 x; integer-error bound, no captured instruction evaluator"
+}
