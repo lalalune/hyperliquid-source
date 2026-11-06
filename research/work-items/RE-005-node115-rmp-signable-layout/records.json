@@ -1,4 +1,34 @@
 {
+  "branches": {
+    "optional_field": {
+      "bytes_hex": "755d",
+      "condition": "not_equal",
+      "fallthrough": "0x36aaa5a",
+      "site": "0x36aaa58",
+      "target": "0x36aaab7"
+    },
+    "variant_after_absent_option": {
+      "bytes_hex": "754b",
+      "condition": "not_equal",
+      "fallthrough": "0x36aaadf",
+      "site": "0x36aaadd",
+      "target": "0x36aab2a"
+    },
+    "variant_after_present_option": {
+      "bytes_hex": "742a",
+      "condition": "equal",
+      "fallthrough": "0x36aaab5",
+      "site": "0x36aaab3",
+      "target": "0x36aaadf"
+    },
+    "writer_head": {
+      "bytes_hex": "0f85f1020000",
+      "condition": "not_equal",
+      "fallthrough": "0x36aaa13",
+      "site": "0x36aaa0d",
+      "target": "0x36aad04"
+    }
+  },
   "captured_code_executed": false,
   "direct_callers": [
     {
@@ -12,7 +42,7 @@
       "site": "0x36aaf2a"
     }
   ],
-  "limits": "Static byte pins and one FDE extent census only. The packet names the serializer by its own panic location inside l1/src/action/rmp_signable.rs; it does not name the action type the source record encodes, does not claim the 32 result bytes are any particular hash, does not decode the 0x01000400 writer spec dword, and does not follow the two callers' own callers. The tag argument is forwarded by both callers, so which tags occur at runtime is a separate question.",
+  "limits": "Static byte pins and one FDE extent census only. The packet names the serializer by its own panic location inside l1/src/action/rmp_signable.rs; it does not name the action type the source record encodes, does not claim the 32 result bytes are any particular hash, does not recover the helper-produced prefix or its length, does not close allocation, growth, diagnostic or unwind helpers, does not decode the 0x01000400 writer spec dword, and does not follow the two callers' own callers. The tag argument is forwarded by both callers, so which tags occur at runtime is a separate question. Suffix composition assumes valid disjoint memory, stable source fields and normally returning growth helpers preserving the live prefix, length and source record.",
   "owners": [
     {
       "bytes": 1094,
@@ -69,11 +99,6 @@
       "start": "0x36aaf10"
     }
   ],
-  "payload_bytes": {
-    "variant_delta": 9,
-    "variant_one": 38,
-    "variant_other": 29
-  },
   "result_record": {
     "bytes_at_0x18": "32 bytes assembled from the 0xe0-byte record and the 0x20-byte record",
     "mark_at_0x38": "0x539",
@@ -81,6 +106,18 @@
     "string_pointer_at_0x08": "fresh 1-byte allocation",
     "word_at_0x00": 1,
     "zero_at_0x40_to_0x58": true
+  },
+  "suffix_bytes": {
+    "option_byte_one": {
+      "variant_one": 38,
+      "variant_other": 29
+    },
+    "option_byte_other": {
+      "variant_one": 18,
+      "variant_other": 9
+    },
+    "scope": "bytes appended after an unresolved helper-produced prefix",
+    "variant_delta": 9
   },
   "tag_byte": {
     "allocation_bytes": 1,
@@ -122,7 +159,14 @@
       "width": 1
     },
     {
+      "condition": {
+        "equals": 1,
+        "source_offset": "0x18",
+        "width": 1
+      },
       "evidence": [
+        "0x36aaa53",
+        "0x36aaa58",
         "0x36aaa8d",
         "0x36aaa96",
         "0x36aaa99",
@@ -130,7 +174,7 @@
         "0x36aaaa1",
         "0x36aaaa6"
       ],
-      "rule": "20 bytes copied verbatim",
+      "rule": "20 bytes copied verbatim only when the byte at source +0x18 equals 1",
       "source_offset": "0x19",
       "step": 3,
       "width": 20
@@ -138,6 +182,9 @@
     {
       "evidence": [
         "0x36aaaaf",
+        "0x36aaab3",
+        "0x36aaad9",
+        "0x36aaadd",
         "0x36aaaf3"
       ],
       "rule": "single 0x00 byte, only when the dword at source +0x00 equals 1",
@@ -148,8 +195,12 @@
     {
       "evidence": [
         "0x36aaaaf",
+        "0x36aaab3",
+        "0x36aaad9",
+        "0x36aaadd",
         "0x36aab00",
-        "0x36aab15"
+        "0x36aab15",
+        "0x36aab1d"
       ],
       "rule": "u64 stored big-endian, only when the dword at source +0x00 equals 1",
       "source_offset": "0x08",
@@ -159,13 +210,16 @@
   ],
   "writer": {
     "constructor": "0x36b1600",
-    "error_sentinel": "0x8000000000000004",
+    "continue_head": "0x8000000000000004",
+    "continue_if": "returned first qword equals continue_head",
     "grow_helper": "0x43bd910",
     "grow_sizes": [
       8,
       20,
       8
     ],
+    "initial_prefix_length": "loaded from helper-updated [rsp+0x50] at 0x36aaa13; not established zero",
+    "otherwise": "conditional buffer release, then diagnostic call and UD2",
     "spec_dword": "0x01000400"
   }
 }
