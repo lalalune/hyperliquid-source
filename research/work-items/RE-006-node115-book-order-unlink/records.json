@@ -1,0 +1,188 @@
+{
+  "target": {
+    "path": "artifacts/node/115/hl-node",
+    "size": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "component": "orderbook",
+  "task": "RE-006",
+  "question": "What does the slab helper immediately after the shared insert-return twins do with one 0x110-byte element?",
+  "scope": {
+    "measured_denominator_bytes": 1720,
+    "owner_fdes": 2,
+    "caller_fdes_retained_as_boundary": 4,
+    "caller_boundary_bytes": 12008,
+    "claim": "The 1,720 owner bytes are the interpreted contract. The four caller FDEs establish the direct-call boundary and the argument setup only."
+  },
+  "frames": {
+    "unlink_a": {
+      "start": "0x58dfbc0",
+      "end": "0x58dff1c",
+      "bytes": 860,
+      "sha256": "17ab611392e3211229944efe4c965d336f193010a8682d19934ece069e26007e",
+      "frame_bytes": 1048,
+      "event_element_bytes": 712,
+      "event_grow_slot": "0x64e4f88",
+      "event_grow_target": "0x5962310",
+      "unwind_destructor": "0x5948db0"
+    },
+    "unlink_b": {
+      "start": "0x58dff20",
+      "end": "0x58e027c",
+      "bytes": 860,
+      "sha256": "b23cb9f94a4440655d0649d0f7b9ccbdbfd1b16594a9e7f2fe83e675e98a3d86",
+      "frame_bytes": 1032,
+      "event_element_bytes": 696,
+      "event_grow_slot": "0x64e5a28",
+      "event_grow_target": "0x59630a0",
+      "unwind_destructor": "0x5947550"
+    },
+    "caller_a1": {
+      "start": "0x58e1400",
+      "end": "0x58e1f34",
+      "bytes": 2868,
+      "sha256": "e978a87b5223ae9319a66a1b651849d36df81823cda84d9e0a688bffc74e9827",
+      "owner": "unlink_a",
+      "call_site": "0x58e1a8c"
+    },
+    "caller_a2": {
+      "start": "0x58e1f40",
+      "end": "0x58e2a74",
+      "bytes": 2868,
+      "sha256": "34c675f2dda0a756f173c72ca26313f16e6d15d5055fd03dc712484d806e5137",
+      "owner": "unlink_a",
+      "call_site": "0x58e25cc"
+    },
+    "caller_b1": {
+      "start": "0x58e2a80",
+      "end": "0x58e36c0",
+      "bytes": 3136,
+      "sha256": "ae7e16c8b741bb8b3bb7931c82d271e359164e42fd9a40c0c96bbe7f56875954",
+      "owner": "unlink_b",
+      "call_site": "0x58e3174"
+    },
+    "caller_b2": {
+      "start": "0x58e36c0",
+      "end": "0x58e4300",
+      "bytes": 3136,
+      "sha256": "1fbc74ef092d6469a9dc7985286fb9c62e682b6c8ceca081fdf2f3181c738e73",
+      "owner": "unlink_b",
+      "call_site": "0x58e3db4"
+    }
+  },
+  "twin_difference": {
+    "instructions_checked_as_shared_sites": 71,
+    "classified_difference_instructions": 24,
+    "differing_bytes": 42,
+    "frame_bytes": [
+      "0x418",
+      "0x408"
+    ],
+    "event_element_bytes": [
+      "0x2c8",
+      "0x2b8"
+    ],
+    "same_resolved_targets": [
+      "0x64df508",
+      "0x64df508",
+      "0x64b64f8",
+      "0x64e4ea8",
+      "0x4de02d0",
+      "0x64b6510",
+      "0x64b6528",
+      "0x64df508",
+      "0x64df830",
+      "0x91f9eb",
+      "0x64a35e0",
+      "0x64a3508",
+      "0x64df6a0",
+      "0x64df4c0",
+      "0x5957f70",
+      "0x63f0a50"
+    ]
+  },
+  "slots": {
+    "0x64df508": null,
+    "0x64df830": "0x1680c10",
+    "0x64e4ea8": "0x4524e40",
+    "0x64df6a0": "0x1680c30",
+    "0x64df4c0": "0x1680cab",
+    "0x64e4f88": "0x5962310",
+    "0x64e5a28": "0x59630a0"
+  },
+  "locations": {
+    "level": {
+      "record": "0x64a3508",
+      "file": "l1/src/book/level.rs",
+      "line": 32,
+      "column": 54
+    },
+    "quantity": {
+      "record": "0x64b64f8",
+      "file": "l1/src/qtys/impl_sz.rs",
+      "line": 9,
+      "column": 1
+    },
+    "link_137": {
+      "record": "0x64b6510",
+      "file": "l1/src/book/book_orders.rs",
+      "line": 137,
+      "column": 44
+    },
+    "link_145": {
+      "record": "0x64b6528",
+      "file": "l1/src/book/book_orders.rs",
+      "line": 145,
+      "column": 44
+    }
+  },
+  "unwrap_message": "called `Result::unwrap()` on an `Err` value",
+  "contract": {
+    "element_stride": 272,
+    "vacant_tag": 2,
+    "early_return": "index >= slab length, or the element qword at +0x0 equals 2: store qword 2 at the output and return",
+    "free_list": "store qword 2 at element +0x0, store the previous head at element +0x8, saturating-decrement the qword at slab +0x18, and store the removed index at slab +0x20",
+    "event": "append one record whose defined stores are qword 2 at +0x0, qword 3 at +0x8, element +0xb0 at +0x20, the rcx argument at +0x28, element +0xf0 at +0x30, the 16 bytes at element +0xf8 at +0x38, the dword at element +0x108 at +0x48, and the byte at element +0xd2 at +0x4c; the copy length is the per-twin event size and the other copied bytes are not stored by this body",
+    "quantity": "subtract element +0xe0 from the u64 behind r9; a borrow calls the helper at the impl_sz.rs:9:1 location and, when that helper returns, stores 0",
+    "null_level": "a null stack argument copies the pre-removal element and writes flag byte 0 at output +0x110",
+    "negative_field": "a negative element qword at +0xb0, reached only when the level pointer is non-null, calls the panic formatter with the 43-byte Result unwrap message and traps with ud2",
+    "cached_link": "when the level dword at +0x20 equals 1 and the qword at +0x28 equals the removed index, copy 16 bytes from element +0x10 onto level +0x20",
+    "side_call_boundary": "a nonzero byte at element +0xd8 calls 0x4de02d0 with rdi = level + 0x50 and an argument pair (element +0xf0, element dword +0xdc); later level stores are not interpreted across that call",
+    "level_totals": "on the zero +0xd8 path, level +0x70 is a saturating subtract of element +0xe0 and level +0x78 is a saturating decrement",
+    "relink": "the low bit of the saved element tag selects which saved link index is checked against the original length and against a live low dword of 2; failure calls the Option unwrap helper and jumps to ud2. The zero link-word arm writes the saved tag and the other index into the level; the nonzero arm writes them into the checked element. The output flag is 0 when the level byte at +0x0 is nonzero, otherwise that byte's counterpart at +0x10 xor 1"
+  },
+  "limitations": [
+    "An FDE extent is not a source-function boundary.",
+    "The four caller bodies are not interpreted beyond the direct call and its immediate argument setup.",
+    "Event bytes other than the listed stores are not defined by this body.",
+    "The callee at 0x4de02d0 is a boundary: its writes are not modeled.",
+    "The quantity helper is the same returning slot used by the insert twins; a path that does not return would skip the following store of 0.",
+    "No whole-book match, cancel API, or component gate is claimed."
+  ],
+  "source_exports": {
+    "unlink_a": {
+      "file": "unlink_a_58dfbc0_58dff1c_objdump.txt",
+      "sha256": "5a972ca2130332148a5d55b62b3315dac0570e271dabb08769b3cc26513cbbd5"
+    },
+    "unlink_b": {
+      "file": "unlink_b_58dff20_58e027c_objdump.txt",
+      "sha256": "e75c836955d5774a1680a7dd0b729c9e0e4ac1818dcab29b54f77a7236b8f892"
+    },
+    "caller_a1": {
+      "file": "caller_a1_58e1400_58e1f34_objdump.txt",
+      "sha256": "d6ff478fbdd73b6ca8bc736aa27d6d842ccdee621e8e98f27ca1dfd1eba64e0a"
+    },
+    "caller_a2": {
+      "file": "caller_a2_58e1f40_58e2a74_objdump.txt",
+      "sha256": "86b90a7051acfcfe5ff3995fd4f6f3b06e5582c6f5bf6cea16513867247c3bdb"
+    },
+    "caller_b1": {
+      "file": "caller_b1_58e2a80_58e36c0_objdump.txt",
+      "sha256": "977ef865bfb7211fef302133b067943f8f3d5e45d443defc8a5e482bdef979aa"
+    },
+    "caller_b2": {
+      "file": "caller_b2_58e36c0_58e4300_objdump.txt",
+      "sha256": "985655c8f84d3c09582fa38d274dacb673f9d6f5458d8ea743b075b23cad0cb1"
+    }
+  }
+}
