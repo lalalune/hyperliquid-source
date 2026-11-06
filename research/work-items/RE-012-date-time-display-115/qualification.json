@@ -1,0 +1,95 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "cases": 325212,
+  "freeze": {
+    "cases": 325212,
+    "input_sha256": "570a914cdbd0090bc93a5b5bc9b428484d5a2b71ceb42a251a1d9152e19c7be2",
+    "expected_sha256": "a41644b4a5205a28c35a0f81646970a9ce9be9dcad29aca9e9223b3e7192c514",
+    "oracle_sha256": "5b8d828af23ad3542bb99f0ab4d10eb935e7e222c0849b5f8489407ec2c4f31d",
+    "new_rust_exists_at_freeze": false,
+    "time_utc": "2026-11-04T11:29:50.668465+00:00"
+  },
+  "builds": [
+    {
+      "opt_level": 0,
+      "cases": 325212,
+      "output_sha256": "a41644b4a5205a28c35a0f81646970a9ce9be9dcad29aca9e9223b3e7192c514"
+    },
+    {
+      "opt_level": 3,
+      "cases": 325212,
+      "output_sha256": "a41644b4a5205a28c35a0f81646970a9ce9be9dcad29aca9e9223b3e7192c514"
+    }
+  ],
+  "mutants": [
+    {
+      "name": "large-year-plus-boundary",
+      "normal_exit": true,
+      "first_case": 149713,
+      "input": "D 10000 1",
+      "actual": "O 10000-01-01",
+      "expected": "O +10000-01-01"
+    },
+    {
+      "name": "short-year-padding",
+      "normal_exit": true,
+      "first_case": 0,
+      "input": "D 0 1",
+      "actual": "O 000-01-01",
+      "expected": "O 0000-01-01"
+    },
+    {
+      "name": "positive-large-year-sign",
+      "normal_exit": true,
+      "first_case": 149713,
+      "input": "D 10000 1",
+      "actual": "O -10000-01-01",
+      "expected": "O +10000-01-01"
+    },
+    {
+      "name": "century-leap-rule",
+      "normal_exit": true,
+      "first_case": 36659,
+      "input": "D 100 60",
+      "actual": "O 0100-02-29",
+      "expected": "O 0100-03-01"
+    },
+    {
+      "name": "minute-padding",
+      "normal_exit": true,
+      "first_case": 151552,
+      "input": "T 0 0",
+      "actual": "O 00:0:00",
+      "expected": "O 00:00:00"
+    },
+    {
+      "name": "leap-second-increment",
+      "normal_exit": true,
+      "first_case": 324402,
+      "input": "T 59 1000000000",
+      "actual": "O 00:00:59",
+      "expected": "O 00:00:60"
+    },
+    {
+      "name": "millisecond-padding",
+      "normal_exit": true,
+      "first_case": 324356,
+      "input": "T 0 1000000",
+      "actual": "O 00:00:00.1",
+      "expected": "O 00:00:00.001"
+    },
+    {
+      "name": "adapter-T-separator",
+      "normal_exit": true,
+      "first_case": 324492,
+      "input": "X -262143 1 0 0",
+      "actual": "O -262143-01-01T00:00:00",
+      "expected": "O -262143-01-01 00:00:00"
+    }
+  ],
+  "source_sha256": "3b373cae2a0e3ded77b7d550ca669bd66028274a4f380f64ddd6f133242579a7",
+  "probe_sha256": "fb7ffd20ff4c53dbf784e22ff2f0bd97ea2c620e516cd51b7de00fd7175d6e7f",
+  "captured_execution_or_emulation": false,
+  "oracle_limits": "independent Python calendar/datetime plus declarative formatting; successful text only, no native writer-failure equivalence",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14)"
+}
