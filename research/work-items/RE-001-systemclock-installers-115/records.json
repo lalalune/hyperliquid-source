@@ -1,0 +1,793 @@
+{
+  "target": {
+    "artifact": "work/hl-node-115.bin",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "node": 115
+  },
+  "work_item": "RE-001-systemclock-installers-115",
+  "task": "RE-001",
+  "question": "Pin node #115's SystemClockWrapper vtable installers: the exact roles of the five installer routines (0x5fd0090, 0x6029110, 0x6029230, 0x6029500, 0x6029620), the shared record-append and shared_ptr-release helpers they call, and the three FactoryEntry entry thunks' mode-1 callers (0x5fcc5d0, 0x5fcc600, 0x5fcc630).",
+  "installers": [
+    {
+      "name": "SystemClockWrapper ctor C1",
+      "addr": 100466832,
+      "fde": "0x5fd0090..0x5fd0178",
+      "role": "installs the wrapper vtable 0x64cdd88, zeroes +0x08..+0x18, copies the wrapped-clock shared_ptr into +0x20/+0x28 with a use-count bump, and appends record {\"\", this+0x20, 0x6504b80} via 0x6099ce0 at 0x5fd0124",
+      "calls": 1,
+      "callers": [
+        "0x60293b6"
+      ],
+      "excerpt": "vtable_install_1.txt"
+    },
+    {
+      "name": "EmulatedSystemClock D2 (slot 0)",
+      "addr": 100831504,
+      "fde": "0x6029110..0x602922b",
+      "role": "releases the +0x28 shared_ptr via 0x5d35070, installs the base vtable 0x64d3420+0x10, and destroys the +0x08 options vector (string-dispose each 0x30-byte record, then free the buffer)",
+      "calls": 0,
+      "callers": [],
+      "installed_by": "RELATIVE record at 0x64d1650 (emulated vtable slot 0)",
+      "excerpt": "vtable_install_2.txt"
+    },
+    {
+      "name": "SystemClockWrapper D2",
+      "addr": 100831792,
+      "fde": "0x6029230..0x602934b",
+      "role": "byte-identical to the Emulated D2: releases +0x28, installs the base vtable, destroys the +0x08 vector",
+      "calls": 1,
+      "callers": [
+        "0x6029357"
+      ],
+      "excerpt": "vtable_install_3.txt"
+    },
+    {
+      "name": "SystemClockWrapper D0",
+      "addr": 100832512,
+      "fde": "0x6029500..0x602961b",
+      "role": "deleting destructor: the D2 body plus operator delete 0x30. Completely unreferenced: no direct caller, no qword hits, no RELATIVE slot. This explains why the wrapper vtable slots 0 and 1 are null",
+      "calls": 0,
+      "callers": [],
+      "excerpt": "vtable_install_4.txt"
+    },
+    {
+      "name": "EmulatedSystemClock D0 (slot 1)",
+      "addr": 100832800,
+      "fde": "0x6029620..0x602973b",
+      "role": "deleting destructor: the D2 body plus operator delete 0x50",
+      "calls": 0,
+      "callers": [],
+      "installed_by": "RELATIVE record at 0x64d1658 (emulated vtable slot 1)",
+      "excerpt": "vtable_install_5.txt"
+    }
+  ],
+  "append": {
+    "addr": 101293280,
+    "fde": "0x6099ce0..0x6099e34",
+    "role": "appends one 0x30-byte {std::string, qword, qword} record to the vector at owner+0x08..+0x18; SSO copy for len<=15, _M_create for longer, grows via 0x6099790 at capacity",
+    "calls": 37,
+    "clock_sites": {
+      "0x5fd0124": {
+        "caller": "wrapper ctor 0x5fd0090",
+        "record": "{\"\" , this+0x20, 0x6504b80}"
+      },
+      "0x6029454": {
+        "caller": "emulated ctor 0x6029390",
+        "record": "{\"\" , this, 0x6505960}"
+      },
+      "0x6029494": {
+        "caller": "emulated ctor 0x6029390",
+        "record": "{\"\" , this, 0x6505920}"
+      }
+    },
+    "excerpt": "append-6099ce0.objdump.txt"
+  },
+  "grow": {
+    "addr": 101291920,
+    "fde": "0x6099790..0x6099cad",
+    "role": "doubles the options-vector capacity (0xaaaaaaaaaaaaaaab divide-by-48, max check against 0x2aaaaaaaaaaaaaa, overflow allocation 0x7fffffffffffffe0), move-constructs the records (SSO strings copied inline, heap strings moved with the source nulled), frees the old buffer",
+    "calls": 1,
+    "callers": [
+      "0x6099e0a"
+    ],
+    "excerpt": "grow-6099790.objdump.txt"
+  },
+  "emu_ctor": {
+    "addr": 100832144,
+    "fde": "0x6029390..0x60294f5",
+    "role": "EmulatedSystemClock ctor C1: calls the wrapper ctor, installs the emulated vtable 0x64d1650, reads the wrapped clock's slot-24 GetCurrentTime (rdi=rsp+0x20 out, rsi=wrapped, rdx=rsp+0x18 value_out; rsp+0x18 preloaded with constant 0x4fb647d0), stores the value at +0x30, duplicates the mode byte at +0x48/+0x49, zeroes +0x38/+0x40, and appends two records via 0x6099ce0",
+    "calls": 2,
+    "callers": [
+      "0x5fcd577",
+      "0x6029800"
+    ],
+    "modes": {
+      "0": "invoker 0x5fcd550 (TimeEmulatedSystemClock), wraps the PosixClock",
+      "1": "factory 0x60297a0 (MockEnv), wraps the holder's clock"
+    },
+    "excerpt": "emu-ctor-6029390.objdump.txt"
+  },
+  "last_use_helper": {
+    "addr": 97734768,
+    "fde": "0x5d35070..0x5d350bc",
+    "role": "shared_ptr last-use helper: control-block slot 0x10 dispose, weak-count decrement at +0x0c (lock xadd iff the byte at 0x64ed290 is 0), old weak count 1 tail-jumps to slot 0x18 destroy. Shared libstdc++ machinery: 654 direct calls and 36 tail jumps binary-wide",
+    "calls": 654,
+    "jumps": 36,
+    "clock_sites": [
+      "0x6029221",
+      "0x6029341",
+      "0x6029611",
+      "0x6029731",
+      "0x60298d3",
+      "0x5fe295d"
+    ],
+    "excerpt": "lastuse-5d35070.objdump.txt"
+  },
+  "landing_pad": {
+    "addr": 100832076,
+    "fde": "0x602934c..0x6029383",
+    "role": "_M_dispose temp string (r12 = rsp+0x30), calls the wrapper D2, checks the stack canary, _Unwind_Resume. Jumped to from 0x60294d8 in the emulated ctor",
+    "jumps": 1,
+    "jumpers": [
+      "0x60294d8"
+    ],
+    "excerpt": "landing-602934c.objdump.txt"
+  },
+  "thunks": [
+    {
+      "name": "MockEnv entry thunk",
+      "addr": 100451792,
+      "fde": "0x5fcc5d0..0x5fcc5fd",
+      "vtable": "0x64cd9d0",
+      "leas": 1,
+      "lea_sites": [
+        "0x5fd280c"
+      ],
+      "excerpt": "entry_install_1.txt"
+    },
+    {
+      "name": "CompositeEnv entry thunk",
+      "addr": 100451840,
+      "fde": "0x5fcc600..0x5fcc62d",
+      "vtable": "0x64cd9e0",
+      "leas": 1,
+      "lea_sites": [
+        "0x5fd288f"
+      ],
+      "excerpt": "entry_install_2.txt"
+    },
+    {
+      "name": "TimeEmulatedSystemClock entry thunk",
+      "addr": 100451888,
+      "fde": "0x5fcc630..0x5fcc65d",
+      "vtable": "0x64cd9f0",
+      "leas": 1,
+      "lea_sites": [
+        "0x5fd2124"
+      ],
+      "excerpt": "entry_install_3.txt"
+    }
+  ],
+  "manager_ops": {
+    "signature": "manager(dest rdi, src rsi, op edx)",
+    "op_0": {
+      "effect": "install the vtable at (%rdi)",
+      "invoked": false
+    },
+    "op_1": {
+      "effect": "store rsi at (%rdi)",
+      "invoked": false,
+      "note": "binary-wide scan found no real manager invocation with op 1; the single edx=1 candidate at 0x2320375 is a GOT call at 0x64e00a0, not a manager call"
+    },
+    "op_2": {
+      "effect": "clone the 8-byte functor storage",
+      "invoked": true,
+      "sites": [
+        "0x5fd2526 (registry insert 0x5fd24c0)",
+        "0x61c9d70 (registry find, per #3764)"
+      ]
+    },
+    "op_3": {
+      "effect": "destroy the functor (no-op for a plain function pointer)",
+      "invoked": true,
+      "sites": [
+        "0x5fd2874 (reg-sysclocks MockEnv)",
+        "0x5fd28ea (reg-sysclocks CompositeEnv)",
+        "0x5fd22fe (default-init)",
+        "0x5fcc72b (node D2 0x5fcc700)"
+      ]
+    },
+    "answer": "No caller passes a mode-1 pointer through the thunks: the op-0/op-1 arms are never invoked; only ops 2 and 3 are exercised. Mode 1 reaches the emulated clock through the factory 0x60297a0, not through a thunk."
+  },
+  "registrations": {
+    "reg_sysclocks": {
+      "addr": 100476864,
+      "fde": "0x5fd27c0..0x5fd297f",
+      "role": "RegisterBuiltinSystemClocks: builds the {manager=thunk1, invoker=0x5fcd5b0} function named MockEnv and the {manager=thunk2, invoker=0x5fcf450} function named CompositeEnv, inserts each via 0x5fd24c0 (0x5fd2848, 0x5fd28c3), destroys the temps with op 3, then calls 0x61f8700",
+      "leas": 2,
+      "lea_sites": [
+        "0x5fd358e",
+        "0x5fd3c3a"
+      ],
+      "excerpt": "reg-sysclocks-5fd27c0.objdump.txt"
+    },
+    "default_init": {
+      "addr": 100475088,
+      "fde": "0x5fd20d0..0x5fd241d",
+      "role": "SystemClock default initializer: builds the {manager=thunk3, invoker=0x5fcd550} function named TimeEmulatedSystemClock and inserts it inline (same shape as insert: new 0x30 function node, new 0x70 entry, op-2 clone, mutex lock, 0x5fd1da0 at 0x5fd22b4, op-3 destroy at 0x5fd22fe, 0x61f8700 at 0x5fd2310)",
+      "leas": 1,
+      "lea_sites": [
+        "0x5fd47c1"
+      ],
+      "node_vtable_note": "the 0x30-byte function node's vtable pointer is 0x64cde88 (node vtable slot 2, 0x5fcc7e0); that slot's role is an open unknown",
+      "excerpt": "default-init-5fd20d0.objdump.txt"
+    },
+    "insert": {
+      "addr": 100476096,
+      "fde": "0x5fd24c0..0x5fd2748",
+      "role": "registry insert: new(0x30) function node (vtable 0x64cde68), op-2 clone of the caller's function, new(0x70) entry (vtable 0x64d8ed0), name string copied via 0x5fcd6f0, mutex lock, calls 0x5fd1da0 under the lock, frees the temp node on failure and destroys the entry on the duplicate path",
+      "calls": 2,
+      "callers": [
+        "0x5fd2848",
+        "0x5fd28c3"
+      ],
+      "excerpt": "insert-5fd24c0.objdump.txt"
+    },
+    "node_dtor": {
+      "addr": 100452096,
+      "fde": "0x5fcc700..0x5fcc742",
+      "role": "registry node D2: installs the node base vtable 0x64cde68, destroys the stored function via manager op 3 (0x5fcc72b), then tail-jumps to the entry's D0 (slot 1 of the entry object at node+0x08)",
+      "installed_by": "RELATIVE record at 0x64cde68 (node vtable slot 0)",
+      "excerpt": "node-dtor-5fcc700.objdump.txt"
+    }
+  },
+  "invokers": [
+    {
+      "name": "TimeEmulatedSystemClock invoker",
+      "addr": 100455760,
+      "fde": "0x5fcd550..0x5fcd5a9",
+      "role": "new(0x50) + Emulated C1(mode 0, wrap the PosixClock); replaces the *(*rdx) cell, D0-deletes the old clock if non-null",
+      "leas": 1,
+      "lea_sites": [
+        "0x5fd211d"
+      ],
+      "excerpt": "invoker-timeemu-5fcd550.objdump.txt"
+    },
+    {
+      "name": "MockEnv invoker",
+      "addr": 100455856,
+      "fde": "0x5fcd5b0..0x5fcd5db",
+      "role": "holder accessor 0x5fe2860, then the factory 0x60297a0 (mode-1 emulated clock), stores the holder in the cell",
+      "leas": 1,
+      "lea_sites": [
+        "0x5fd2805"
+      ],
+      "excerpt": "invoker-mockenv-5fcd5b0.objdump.txt"
+    },
+    {
+      "name": "CompositeEnv invoker",
+      "addr": 100463696,
+      "fde": "0x5fcf450..0x5fcf4cb",
+      "role": "new(0x60), holder accessor 0x5fe2860, 0x5fcf430, 0x5fcf390, builder 0x5fd7360 (FDE 0x5fd7360..0x5fd7466; calls append 3x)",
+      "leas": 1,
+      "lea_sites": [
+        "0x5fd2885"
+      ],
+      "excerpt": "invoker-composite-5fcf450.objdump.txt"
+    }
+  ],
+  "factory": {
+    "addr": 100833184,
+    "fde": "0x60297a0..0x60298f7",
+    "role": "make_shared<EmulatedSystemClock>: new(0x60), in-place control block (vtable 0x64d1c38, counts 0x100000001 from 0x459b20), Emulated C1(mode 1, wrapped = 0x5fcf430(holder)), installs the shared_ptr into the holder via 0x6028d80",
+    "calls": 1,
+    "callers": [
+      "0x5fcd5c0"
+    ],
+    "control_block_vtable": "0x64d1c38 (dispose 0x6025950, destroy 0x6025b90, by contract)",
+    "excerpt": "factory-60297a0.objdump.txt"
+  },
+  "accessor": {
+    "addr": 100463664,
+    "fde": "0x5fcf430..0x5fcf439",
+    "role": "9 bytes: returns arg+0x38 (the holder's wrapped-clock shared_ptr slot)",
+    "calls": 19,
+    "excerpt": "accessor-5fcf430.objdump.txt"
+  },
+  "holder": {
+    "accessor_addr": 100542560,
+    "fde": "0x5fe2860..0x5fe2c2f",
+    "role": "returns the holder at 0x6504cc0 (guard 0x6504ca8); first call initializes from the PosixClock accessor 0x5fe2680 and builds .bss state 0x6504d08..0x6504d78 with pthread_mutex_init. Full body is a separate work item; cited here by contract",
+    "calls": 17,
+    "holder_vtable": "0x64ce2d8 (slot 2 GetOption 0x609d760)",
+    "holder_shared_ptr_slot": "+0x38",
+    "bss_records": [
+      {
+        "addr": 105925504,
+        "note": "third field of the wrapper ctor's record; also lea'd at 0x5fd1bb8 (static initializer 0x5fd19a0..0x5fd1c56); .bss, contents not recoverable statically"
+      },
+      {
+        "addr": 105929056,
+        "note": "third field of the emulated ctor's first record; also lea'd at 0x6029e50 inside the factory; .bss"
+      },
+      {
+        "addr": 105928992,
+        "note": "third field of the emulated ctor's second record; also lea'd at 0x6029fe0 inside the factory; .bss"
+      }
+    ]
+  },
+  "relocations": [
+    {
+      "offset": 105699776,
+      "addend": 9904608
+    },
+    {
+      "offset": 105699784,
+      "addend": 105699728
+    },
+    {
+      "offset": 105699800,
+      "addend": 9904672
+    },
+    {
+      "offset": 105699816,
+      "addend": 9904864
+    },
+    {
+      "offset": 105699832,
+      "addend": 9905056
+    },
+    {
+      "offset": 105700736,
+      "addend": 105699680
+    },
+    {
+      "offset": 105700760,
+      "addend": 101308256
+    },
+    {
+      "offset": 105700768,
+      "addend": 101309504
+    },
+    {
+      "offset": 105700776,
+      "addend": 97723744
+    },
+    {
+      "offset": 105700784,
+      "addend": 100464016
+    },
+    {
+      "offset": 105700792,
+      "addend": 101279632
+    },
+    {
+      "offset": 105700800,
+      "addend": 97706128
+    },
+    {
+      "offset": 105700808,
+      "addend": 101275376
+    },
+    {
+      "offset": 105700816,
+      "addend": 101306592
+    },
+    {
+      "offset": 105700824,
+      "addend": 101287600
+    },
+    {
+      "offset": 105700832,
+      "addend": 101275408
+    },
+    {
+      "offset": 105700840,
+      "addend": 100457184
+    },
+    {
+      "offset": 105700848,
+      "addend": 101308800
+    },
+    {
+      "offset": 105700864,
+      "addend": 97724976
+    },
+    {
+      "offset": 105700872,
+      "addend": 97707888
+    },
+    {
+      "offset": 105700880,
+      "addend": 100451312
+    },
+    {
+      "offset": 105700888,
+      "addend": 97700368
+    },
+    {
+      "offset": 105700896,
+      "addend": 97834128
+    },
+    {
+      "offset": 105700904,
+      "addend": 100451136
+    },
+    {
+      "offset": 105700912,
+      "addend": 100451168
+    },
+    {
+      "offset": 105700920,
+      "addend": 100451200
+    },
+    {
+      "offset": 105700928,
+      "addend": 98386336
+    },
+    {
+      "offset": 105700936,
+      "addend": 97825024
+    },
+    {
+      "offset": 105700944,
+      "addend": 100451232
+    },
+    {
+      "offset": 105700960,
+      "addend": 105699744
+    },
+    {
+      "offset": 105700968,
+      "addend": 100452096
+    },
+    {
+      "offset": 105700976,
+      "addend": 100456512
+    },
+    {
+      "offset": 105700984,
+      "addend": 100452320
+    },
+    {
+      "offset": 105702096,
+      "addend": 105701288
+    },
+    {
+      "offset": 105702120,
+      "addend": 101308256
+    },
+    {
+      "offset": 105715280,
+      "addend": 100831504
+    },
+    {
+      "offset": 105715288,
+      "addend": 100832800
+    },
+    {
+      "offset": 105716784,
+      "addend": 105714520
+    },
+    {
+      "offset": 105716792,
+      "addend": 100817168
+    },
+    {
+      "offset": 105716800,
+      "addend": 100817520
+    },
+    {
+      "offset": 105716808,
+      "addend": 100817232
+    },
+    {
+      "offset": 105716816,
+      "addend": 100817808
+    },
+    {
+      "offset": 105716824,
+      "addend": 100819056
+    },
+    {
+      "offset": 105746120,
+      "addend": 105746064
+    },
+    {
+      "offset": 105746128,
+      "addend": 100606000
+    },
+    {
+      "offset": 105746136,
+      "addend": 100606288
+    },
+    {
+      "offset": 105829352,
+      "addend": 97825024
+    }
+  ],
+  "relocation_ranges": [
+    {
+      "range": "0x64cd9b8..0x64cda00",
+      "what": "FactoryEntry vtable headers",
+      "count": 5
+    },
+    {
+      "range": "0x64cdd78..0x64cde58",
+      "what": "SystemClockWrapper vtable header + slots 2..25",
+      "count": 24
+    },
+    {
+      "range": "0x64cde58..0x64cde80",
+      "what": "registry node vtable header + slots",
+      "count": 4
+    },
+    {
+      "range": "0x64d1650..0x64d1660",
+      "what": "EmulatedSystemClock vtable slots 0-1",
+      "count": 2
+    },
+    {
+      "range": "0x64d1c28..0x64d1c60",
+      "what": "make_shared control-block vtable",
+      "count": 6
+    },
+    {
+      "range": "0x64ce2c8..0x64ce2f0",
+      "what": "holder vtable header + slot 2",
+      "count": 2
+    },
+    {
+      "range": "0x64d8ec0..0x64d8ee0",
+      "what": "registry entry vtable header + slots",
+      "count": 3
+    },
+    {
+      "range": "0x64ed3e8..0x64ed3f0",
+      "what": "GOT slot for the canonical GetCurrentTime 0x5d4b100",
+      "count": 1
+    }
+  ],
+  "literals": [
+    {
+      "addr": 4486790,
+      "offset": 4486790,
+      "text": "MockEnv"
+    },
+    {
+      "addr": 4450146,
+      "offset": 4450146,
+      "text": "CompositeEnv"
+    },
+    {
+      "addr": 4420270,
+      "offset": 4420270,
+      "text": "TimeEmulatedSystemClock"
+    },
+    {
+      "addr": 4424553,
+      "offset": 4424553,
+      "text": "SystemClock"
+    },
+    {
+      "addr": 4498327,
+      "offset": 4498327,
+      "text": "Environment"
+    },
+    {
+      "addr": 4498320,
+      "offset": 4498320,
+      "text": "target"
+    },
+    {
+      "addr": 4467107,
+      "offset": 4467107,
+      "text": "mutex_init"
+    },
+    {
+      "addr": 4421373,
+      "offset": 4421373,
+      "text": ""
+    }
+  ],
+  "census": {
+    "targets": {
+      "0x5d35070": {
+        "calls": 654,
+        "jumps": 36,
+        "leas": 0
+      },
+      "0x5fcc5d0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 1
+      },
+      "0x5fcc600": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 1
+      },
+      "0x5fcc630": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 1
+      },
+      "0x5fcc700": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x5fcd550": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 1
+      },
+      "0x5fcd5b0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 1
+      },
+      "0x5fcf390": {
+        "calls": 14,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x5fcf430": {
+        "calls": 19,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x5fcf450": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 1
+      },
+      "0x5fd0090": {
+        "calls": 1,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x5fd20d0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 1
+      },
+      "0x5fd24c0": {
+        "calls": 2,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x5fd27c0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 2
+      },
+      "0x5fd7360": {
+        "calls": 2,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x5fe2860": {
+        "calls": 17,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x6028d80": {
+        "calls": 1,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x6029110": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x6029230": {
+        "calls": 1,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x602934c": {
+        "calls": 0,
+        "jumps": 1,
+        "leas": 0
+      },
+      "0x6029390": {
+        "calls": 2,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x6029500": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x6029620": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x60297a0": {
+        "calls": 1,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x6099790": {
+        "calls": 1,
+        "jumps": 0,
+        "leas": 0
+      },
+      "0x6099ce0": {
+        "calls": 37,
+        "jumps": 0,
+        "leas": 0
+      }
+    },
+    "callers_tsv_rows": 798,
+    "relocation_records": 47
+  },
+  "reshipped": [
+    {
+      "file": "vtable_install_1.txt",
+      "fde": "0x5fd0090..0x5fd0178",
+      "sha256": "f6a153989b916b75c9b94b63a43e26a7afd04d1bfe97c4bf4a223283afed1d10",
+      "source": "RE-001-canonical-lea-sites-115"
+    },
+    {
+      "file": "vtable_install_2.txt",
+      "fde": "0x6029110..0x602922b",
+      "sha256": "e36a5f5d97bb1daadc8b0725836ec5990c2d57260881da91412b65f7b07ade42",
+      "source": "RE-001-canonical-lea-sites-115"
+    },
+    {
+      "file": "vtable_install_3.txt",
+      "fde": "0x6029230..0x602934b",
+      "sha256": "23efae3a25c485a089e9bf0577f6aa634e6113276c8d16a0214e4fbe294f6c3c",
+      "source": "RE-001-canonical-lea-sites-115"
+    },
+    {
+      "file": "vtable_install_4.txt",
+      "fde": "0x6029500..0x602961b",
+      "sha256": "5ede17f66725f7aeed10a87585aa392d8aac5a09c9fa947488e9814206435993",
+      "source": "RE-001-canonical-lea-sites-115"
+    },
+    {
+      "file": "vtable_install_5.txt",
+      "fde": "0x6029620..0x602973b",
+      "sha256": "d1ee6f2e1390922c5752184f508f32fe79b45bfa9a5934a1d97a16c73dcdd257",
+      "source": "RE-001-canonical-lea-sites-115"
+    },
+    {
+      "file": "entry_install_1.txt",
+      "fde": "0x5fcc5d0..0x5fcc5fd",
+      "sha256": "2206794663bca2405f34cd7193d995e514cb85be2a0de1a782e4493d59cbc54d",
+      "source": "RE-001-canonical-lea-sites-115"
+    },
+    {
+      "file": "entry_install_2.txt",
+      "fde": "0x5fcc600..0x5fcc62d",
+      "sha256": "f531605057517f546125280ed6d0a928d4db91ad6b13aca9a885a3d02c3f3121",
+      "source": "RE-001-canonical-lea-sites-115"
+    },
+    {
+      "file": "entry_install_3.txt",
+      "fde": "0x5fcc630..0x5fcc65d",
+      "sha256": "dce7acdaf1c9b238255ad032725fa08a2ad4d09eb8c9035b25eb99970c3bad41",
+      "source": "RE-001-canonical-lea-sites-115"
+    }
+  ],
+  "corrections_to_3352": [
+    "The canonical-address qwords at file offsets 0x10f9f0 and 0x15d270 are .rela.dyn RELATIVE addends (r_offset 0x64cde48 wrapper slot 24, and 0x64ed3e8 GOT slot), not .eh_frame data.",
+    "Record third fields 0x6504b80/0x6505960/0x6505920 are in .bss (runtime-initialized); their contents are not recoverable statically."
+  ],
+  "open_unknowns": [
+    "Holder class (vtable 0x64ce2d8) and its methods beyond slot 2 GetOption.",
+    "Holder initializer 0x5fe2860 full body (cited by contract).",
+    "CompositeEnv builder 0x5fd7360 full body (cited by contract).",
+    "Registry helpers 0x5fd1da0, 0x5fd17c0, 0x61f8b60, 0x61f8700 exact signatures and the 'Environment' string's role in insert.",
+    "Node vtable slot 2 (0x5fcc7e0), used as the 0x30-byte function node's vtable pointer (0x64cde88) in default-init.",
+    "Factory control-block dispose 0x6025950 / destroy 0x6025b90 bodies (cited by contract).",
+    "Entry D0 0x5ff2150 body (cited by contract).",
+    "Wrapper vtable slot 14 stays null; its intended target, if any, is unknown."
+  ],
+  "test_checks": 135
+}
