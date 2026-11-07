@@ -74,17 +74,34 @@ fn matches_all_fifty_frozen_packet_vectors() {
     for row in rows {
         let mut fields = row.split('|');
         let label = fields.next().expect("label");
-        let depth = fields.next().expect("depth").parse().expect("depth integer");
-        let entry_rax = u64::from_str_radix(fields.next().expect("entry rax"), 16).expect("entry rax integer");
+        let depth = fields
+            .next()
+            .expect("depth")
+            .parse()
+            .expect("depth integer");
+        let entry_rax =
+            u64::from_str_radix(fields.next().expect("entry rax"), 16).expect("entry rax integer");
         let index_slot = word(fields.next().expect("index slot"));
         let mut preceding_slot = word(fields.next().expect("preceding slot"));
-        let expected_depth = fields.next().expect("expected depth").parse().expect("expected depth integer");
-        let expected_rax = u64::from_str_radix(fields.next().expect("expected rax"), 16).expect("expected rax integer");
+        let expected_depth = fields
+            .next()
+            .expect("expected depth")
+            .parse()
+            .expect("expected depth integer");
+        let expected_rax = u64::from_str_radix(fields.next().expect("expected rax"), 16)
+            .expect("expected rax integer");
         let expected_slot = word(fields.next().expect("expected slot"));
         assert!(fields.next().is_none(), "extra fields in {label}");
 
         let actual = apply(depth, &index_slot, &mut preceding_slot, entry_rax);
-        assert_eq!(actual, Transition { depth: expected_depth, rax: expected_rax }, "{label}");
+        assert_eq!(
+            actual,
+            Transition {
+                depth: expected_depth,
+                rax: expected_rax
+            },
+            "{label}"
+        );
         assert_eq!(preceding_slot, expected_slot, "{label}");
     }
 }
