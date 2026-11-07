@@ -133,7 +133,7 @@ class SubvecDrainCalleesTests(unittest.TestCase):
         b = bytearray(self.data)
         s = next(s for s in self.secs if s['name'] == '.rela.dyn')
         for off in range(s['offset'], s['offset'] + s['size'], 24):
-            offset, _, _ = struct.unpack_from('<QQq', bytes(b), off)
+            offset, _, _ = struct.unpack_from('<QQq', b, off)
             if offset == 0x64df4a0:
                 b[off + 16] ^= 1
                 break
