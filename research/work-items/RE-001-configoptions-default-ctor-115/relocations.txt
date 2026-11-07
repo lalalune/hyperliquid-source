@@ -1,0 +1,24 @@
+# Relocation records for RE-001-configoptions-default-ctor-115
+# Source: readelf -r work/hl-node-115.bin (GNU readelf 2.42), verbatim lines.
+#
+# The ObjectRegistry control-block vtable 0x64d8f00 is installed by
+# NewInstance (lea 0x64d8ef0 + 0x10, stored at control-block+0x00).
+# Its slot 0 is a RELATIVE relocation to 0x61f8130 (the cb D1 recorded
+# by #4015). The typeinfo slot at 0x64d8ef0 has NO relocation entry and
+# reads 0x0 in the file; the packet does not rely on a typeinfo address.
+# File qwords at RELATIVE offsets read 0x0: this linker stores RELATIVE
+# addends in the .rela.dyn entries only.
+
+0000064d8f00  000000000008 R_X86_64_RELATIVE                    61f8130
+0000064ed290  00f800000006 R_X86_64_GLOB_DAT 0000000000000000 __libc_single_threaded@GLIBC_2.32 + 0
+0000064ed818  016600000012 R_X86_64_TPOFF64  0000000000000000 _ZSt15__once_callable@GLIBCXX_3.4.11 + 0
+0000064ed820  016700000012 R_X86_64_TPOFF64  0000000000000000 _ZSt11__once_call@GLIBCXX_3.4.11 + 0
+0000064ed828  016800000006 R_X86_64_GLOB_DAT 0000000000000000 __once_proxy@GLIBCXX_3.4.11 + 0
+
+# Data literals pinned by the packet (raw qwords, file-backed):
+#   0x459b20  0x100000001  packed (use, weak) counts for make_shared blocks
+#               (read by NewInstance at 0x61f9437 and by the ctor's
+#               _M_release fast path via the control block)
+#   0x43d5c7  ";" (1 byte, delimiter literal)
+#   0x446696  "\n  " (0x0a 0x20 0x20, Persist delimiter literal)
+#   0x4541e0  "MutableDBOptions" (16 bytes, rodata)
