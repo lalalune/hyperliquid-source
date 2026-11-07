@@ -9,6 +9,7 @@ import os
 import re
 import struct
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -40,6 +41,38 @@ class TestRecordReset(unittest.TestCase):
                                      "node115_lu_record_reset.py")],
             capture_output=True, text=True)
         self.assertEqual(r.returncode, 0, r.stdout[-2000:])
+
+    def test_prior_search_extent_and_real_overlap_without_private_workspace(self):
+        script = """import os, runpy, sys
+from unittest.mock import patch
+sys.path.insert(0, os.path.dirname(sys.argv[1]))
+import node115_prior_corpus as corpus
+original_paths = corpus.paths
+def with_extra(root, pattern="*/records.json"):
+    return original_paths(root, pattern) + [sys.argv[2]]
+with patch.object(corpus, "paths", side_effect=with_extra), patch(
+        "os.listdir", side_effect=FileNotFoundError("private workspace absent")):
+    runpy.run_path(sys.argv[1], run_name="__main__")
+"""
+        census = {"displacement_census": {"range": ["0x5c00000", "0x6400000"]}}
+        cases = [(census, True),
+                 ({**census, "function": {"range": [hex(FDE_START), hex(FDE_END)]}}, False)]
+        with tempfile.TemporaryDirectory() as directory:
+            extra = os.path.join(directory, "records.json")
+            for record, expected_success in cases:
+                with self.subTest(expected_success=expected_success):
+                    with open(extra, "w") as output:
+                        json.dump(record, output)
+                    result = subprocess.run(
+                        [sys.executable, "-c", script,
+                         os.path.join(ROOT, "tools", "node115_lu_record_reset.py"), extra],
+                        capture_output=True, text=True)
+                    self.assertIn("PRIOR_CORPUS", result.stdout)
+                    if expected_success:
+                        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                    else:
+                        self.assertNotEqual(result.returncode, 0)
+                        self.assertIn("FAIL: no neighbour overlap", result.stdout)
 
     def test_manifest_ok(self):
         manifest = os.path.join(PACKET, "MANIFEST.sha256")

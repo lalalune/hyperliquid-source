@@ -16,6 +16,8 @@ import struct
 import subprocess
 import sys
 
+import node115_prior_corpus as prior_corpus
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKET = os.path.join(ROOT, "research", "work-items",
                       "RE-001-node115-lu-record-reset")
@@ -158,7 +160,7 @@ def main():
     # invited; cited FDEs are claimed by their owning packets, whose own
     # records files are scanned independently).
     META_KEYS = ("census", "cited_only_not_claimed", "largest_caller_fde",
-                 "arg_shape_census")
+                 "arg_shape_census", "displacement_census")
 
     def ranges_from(obj, out, meta=False):
         if isinstance(obj, dict):
@@ -177,30 +179,25 @@ def main():
                 ranges_from(v, out, meta)
 
     seen_paths = set()
-    roots = [os.path.join(ROOT, "research", "work-items")]
-    for wt in sorted(os.listdir(os.path.expanduser("~/workspace"))):
-        if wt.startswith("hl-wt-calls"):
-            roots.append(os.path.join(os.path.expanduser("~/workspace"), wt,
-                                      "research", "work-items"))
     claimed = set()
-    for root in roots:
-        if not os.path.isdir(root):
+    # The existing helper authenticates the frozen inputs and adds current
+    # repository overlays without requiring private sibling worktrees.
+    for path in prior_corpus.paths(ROOT):
+        if "RE-001-node115-lu-record-reset" in path:
             continue
-        for dirpath, _dirnames, filenames in os.walk(root):
-            if "RE-001-node115-lu-record-reset" in dirpath:
-                continue
-            if "records.json" in filenames:
-                real = os.path.realpath(os.path.join(dirpath, "records.json"))
-                if real in seen_paths:
-                    continue
-                seen_paths.add(real)
-                try:
-                    rec = json.load(open(real))
-                except Exception:
-                    continue
-                tmp = []
-                ranges_from(rec, tmp)
-                claimed.update(tmp)
+        real = os.path.realpath(path)
+        if real in seen_paths:
+            continue
+        seen_paths.add(real)
+        try:
+            with open(real) as source:
+                rec = json.load(source)
+        except Exception:
+            continue
+        tmp = []
+        ranges_from(rec, tmp)
+        claimed.update(tmp)
+    check("pinned public prior corpus", prior_corpus.is_verified(ROOT))
     overlaps = [(a, b) for (a, b) in claimed
                 if a < FDE_END and FDE_START < b]
     print("note: disjointness inputs: %d record files, %d unique claimed ranges"
