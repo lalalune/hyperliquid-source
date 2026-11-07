@@ -198,3 +198,10 @@ python3 tools/u32_twin_search_static.py generate <scratch-dir>
 # u32_twin_search_full_body_35bf500_35bf592_objdump.txt against this packet
 cd research/work-items/RE-006-node115-u32-twin-search && sha256sum -c MANIFEST.sha256
 ```
+
+## Bounded Rust implementation
+
+`src/node115-priority-three/u32-twin-search` independently models this body's
+u32-key walk and standard four-field cursor record over a validated borrowed
+tree. The 1,280 frozen queries cover empty, singleton, edge and small arrays;
+the crate also pins nested descent, height zero and invalid layouts.
