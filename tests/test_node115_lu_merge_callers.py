@@ -47,6 +47,16 @@ class TestMergeCallers(unittest.TestCase):
         record["exhibits"].append({"fde": ["0x63b91e0", "0x63b930c"]})
         self.assertIn((0x63b91e0, 0x63b930c), verifier.claimed_ranges(record))
 
+    def test_search_extent_is_not_a_claimed_function_range(self):
+        bounds = "0x5c00000..0x6400000 (RocksDB .text)"
+        record = {"displacement_census": {"range": bounds},
+                  "function": {"range": ["0x63b9190", "0x63b91e2"]},
+                  "context": {"fde": "0x63b91f0..0x63b931c"}}
+        self.assertEqual(verifier.claimed_ranges(record),
+                         {(0x63b9190, 0x63b91e2), (0x63b91f0, 0x63b931c)})
+        self.assertEqual(verifier.claimed_ranges({"function": {"range": bounds}}),
+                         {(0x5c00000, 0x6400000)})
+
     def test_verifier_passes(self):
         r = subprocess.run([sys.executable,
                             os.path.join(ROOT, "tools/node115_lu_merge_callers.py")],

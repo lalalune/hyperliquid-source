@@ -55,7 +55,7 @@ def rel32(site, raw, want_kind):
 
 
 def claimed_ranges(record):
-    """Citations explicitly marked unclaimed are not additional byte claims."""
+    """Extract claimed ranges, excluding explicit citations and search extents."""
     pair_re = re.compile(r"0x([0-9a-fA-F]+)\s*\.\.\s*0x([0-9a-fA-F]+)")
     ranges = set()
     stack = [record]
@@ -63,7 +63,7 @@ def claimed_ranges(record):
         value = stack.pop()
         if isinstance(value, dict):
             for key, child in value.items():
-                if key == "cited_only_not_claimed":
+                if key in ("cited_only_not_claimed", "displacement_census"):
                     continue
                 if key in ("range", "fde") and isinstance(child, str):
                     ranges.update((int(a, 16), int(b, 16))
