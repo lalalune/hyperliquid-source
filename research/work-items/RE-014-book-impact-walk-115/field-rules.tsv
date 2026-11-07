@@ -1,0 +1,14 @@
+body	field	meaning
+walk	self +0x88	arena base pointer
+walk	self +0x90	arena entry count
+walk	arena +0x00 (dword)	entry kind, 2 ends a chain
+walk	arena +0x10	continue flag, 0 ends a chain
+walk	arena +0x18	next entry index
+walk	arena +0xe0	entry size
+walk	arena stride	0x110
+walk	level +0x00 (dword)	must be 1
+walk	level +0x08	first arena index
+walk	deque element	key at +0, level at +8, stride 0x88
+walk	container +0x00	0x8000000000000000 selects the B-tree form, else the ring capacity
+next	tree node +0x580/+0x5e0/+0x5e2/+0x5e8	parent, index in parent, key count, edges
+next	tree node +0x588 + 8i / +0x80 i	key slot / level slot
