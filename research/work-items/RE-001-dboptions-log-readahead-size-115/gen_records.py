@@ -1,0 +1,433 @@
+"""Generate records.json for RE-001-dboptions-log-readahead-size-115.
+
+Semantic records only: field map, copy paths, compaction, Persist bridge,
+verify chain, OptionTypeInfo map, census. No per-instruction mnemonic
+list: instruction-level detail lives only in the verbatim objdump
+excerpts. Run from the repository root:
+    python3 research/work-items/RE-001-dboptions-log-readahead-size-115/gen_records.py
+"""
+
+import json
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
+sys.path.insert(0, HERE)
+import census as C
+
+DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+
+CALL_NAMES = {
+    C.DBOPTIONS_CTOR: "rocksdb::DBOptions::DBOptions()",
+    C.DBOPTIONS_COPY: "rocksdb::DBOptions::DBOptions(const DBOptions&)",
+    C.DBOPTIONS_OPTIONS: "rocksdb::DBOptions::DBOptions(const Options&)",
+    C.DBOPTIONS_ASSIGN: "rocksdb::DBOptions::operator=",
+    C.IMMUTABLE_CTOR: "rocksdb::ImmutableDBOptions::"
+                      "ImmutableDBOptions(const DBOptions&)",
+    C.IMMUTABLE_COPY: "rocksdb::ImmutableDBOptions::"
+                      "ImmutableDBOptions(const ImmutableDBOptions&)",
+    C.BUILD_DBOPTIONS: "rocksdb::BuildDBOptions",
+    C.PERSIST_OUTER: "rocksdb::PersistRocksDBOptions (outer)",
+    C.PERSIST_INNER: "rocksdb::PersistRocksDBOptions (inner)",
+    C.VERIFY_FROM_FILE: "rocksdb::RocksDBOptionsParser::"
+                        "VerifyRocksDBOptionsFromFile",
+    C.PARSE: "rocksdb::RocksDBOptionsParser::Parse",
+}
+
+
+def main():
+    calls, tails, hits, _slots = C.scan()
+    call_census = {}
+    for t in C.TARGETS:
+        call_census[hex(t)] = {
+            "name": CALL_NAMES[t],
+            "direct_calls": [hex(v) for v in calls[t]],
+            "tail_jumps": [hex(v) for v in tails[t]],
+            "qword_hits_file_offsets": [hex(v) for v in hits[t]],
+        }
+    totals, by_func = C.disp_census()
+    records = {
+        "target": "node #115",
+        "work_item": "RE-001-dboptions-log-readahead-size-115",
+        "task": "RE-001",
+        "question": "What field is DBOptions+0x220, the value the outer "
+                    "PersistRocksDBOptions copies into ConfigOptions+0x30 "
+                    "when non-null?",
+        "answer": "DBOptions+0x220 is rocksdb::DBOptions::log_readahead_size "
+                  "(size_t, default 0)",
+        "artifact_sha256": DIGEST,
+        "catalogue": {
+            "ctor": "librocksdb-sys 0.11.0+8.1.1: "
+                    "_ZN7rocksdb9DBOptionsC1Ev",
+            "ctor_range": "0x60b2db0..0x60b3154",
+            "copy_ctor": "librocksdb-sys 0.11.0+8.1.1: "
+                         "_ZN7rocksdb9DBOptionsC1ERKS_",
+            "copy_ctor_range": "0x5d38750..0x5d38da5",
+            "options_ctor": "librocksdb-sys 0.11.0+8.1.1: "
+                            "_ZN7rocksdb9DBOptionsC1ERKNS_7OptionsE",
+            "options_ctor_range": "0x60b3280..0x60b3b87",
+            "assign": "librocksdb-sys 0.11.0+8.1.1: "
+                      "_ZN7rocksdb9DBOptionsaSERKS_",
+            "assign_range": "0x60c3480..0x60c3af4",
+            "immutable_ctor": "librocksdb-sys 0.11.0+8.1.1: "
+                              "_ZN7rocksdb18ImmutableDBOptionsC1ERKNS_9DBOptionsE",
+            "immutable_ctor_range": "0x60a3b60..0x60a4363",
+            "build_dboptions": "librocksdb-sys 0.11.0+8.1.1: "
+                               "_ZN7rocksdb15BuildDBOptionsERKNS_18ImmutableDBOptionsERKNS_16MutableDBOptionsE",
+            "build_dboptions_range": "0x60c2e20..0x60c3477",
+            "type_map_builder": "librocksdb-sys 0.11.0+8.1.1: "
+                                "_Z41__static_initialization_and_destruction_0v",
+            "type_map_builder_range": "0x60aa2b0..0x60b1d78",
+        },
+        "field_map": {
+            "struct": "rocksdb::DBOptions (tail +0x218..+0x290)",
+            "header": "v8.1.1 include/rocksdb/options.h, declaration order",
+            "fields": [
+                {"offset": "+0x218", "size": 1, "default": 0,
+                 "name": "wal_compression",
+                 "evidence": "mov %si,0x218(%rbx) in the default ctor "
+                             "writes +0x218/+0x219 together (both 0)"},
+                {"offset": "+0x219", "size": 1, "default": 0,
+                 "name": "atomic_flush",
+                 "evidence": "same 2-byte store as wal_compression"},
+                {"offset": "+0x21a", "size": 1, "default": 0,
+                 "name": "avoid_unnecessary_blocking_io",
+                 "evidence": "movb $0x0,0x21a(%rbx) in the default ctor"},
+                {"offset": "+0x21b", "size": 1, "default": "false (header)",
+                 "name": "write_dbid_to_manifest",
+                 "evidence": "OPEN UNKNOWN: the default ctor never stores "
+                             "+0x21b and no code in the binary reads "
+                             "DBOptions+0x21b (the only 0x21b(%reg) hit is "
+                             "the stack slot -0x21b(%rbp))"},
+                {"offset": "+0x220", "size": 8, "default": 0,
+                 "name": "log_readahead_size",
+                 "evidence": "movq $0x0,0x220(%rbx) in the default ctor; "
+                             "header: 'The number of bytes to prefetch when "
+                             "reading the log... If 0, then the prefetching "
+                             "is disabled.' (options.h L2389-2399)"},
+                {"offset": "+0x228", "size": 16, "default": "null",
+                 "name": "file_checksum_gen_factory",
+                 "evidence": "movups %xmm0,0x228(%rbx) in the default ctor"},
+                {"offset": "+0x238", "size": 1, "default": 0,
+                 "name": "best_efforts_recovery",
+                 "evidence": "movb $0x0,0x238(%rbx) in the default ctor"},
+                {"offset": "+0x23c", "size": 4, "default": 2147483647,
+                 "name": "max_bgerror_resume_count",
+                 "evidence": "movl $0x7fffffff,0x23c(%rbx) in the default "
+                             "ctor; header default INT_MAX"},
+                {"offset": "+0x240", "size": 8, "default": 1000000,
+                 "name": "bgerror_resume_retry_interval",
+                 "evidence": "movq $0xf4240,0x240(%rbx) in the default ctor"},
+                {"offset": "+0x248", "size": 1, "default": 0,
+                 "name": "allow_data_in_errors",
+                 "evidence": "movb $0x0,0x248(%rbx) in the default ctor"},
+                {"offset": "+0x250", "size": 32, "default": "\"__hostname__\"",
+                 "name": "db_host_id",
+                 "evidence": "std::string built from the GOT slot "
+                             "0x64fee88 (R_X86_64_RELATIVE, addend 0x4342d1 "
+                             "-> the string \"__hostname__\")"},
+                {"offset": "+0x270", "size": 8, "default": "empty",
+                 "name": "checksum_handoff_file_types",
+                 "evidence": "zeroed by the default ctor (FileTypeSet)"},
+                {"offset": "+0x278", "size": 16, "default": "null",
+                 "name": "compaction_service",
+                 "evidence": "shared_ptr null in the default ctor"},
+                {"offset": "+0x288", "size": 1, "default": 1,
+                 "name": "lowest_used_cache_tier",
+                 "evidence": "mov %ax,0x101... low byte 1 at +0x288 in the "
+                             "default ctor (kNonVolatileBlockTier)"},
+                {"offset": "+0x289", "size": 1, "default": 1,
+                 "name": "enforce_single_del_contracts",
+                 "evidence": "same store as lowest_used_cache_tier, high "
+                             "byte 1 at +0x289"},
+            ],
+            "rodata_constants": [
+                {"address": "0x458e70",
+                 "value": "0x00000010FFFFFFFF",
+                 "note": "max_open_files=-1, max_file_opening_threads=16"},
+                {"address": "0x4594f0",
+                 "value": "0xFFFFFFFF00000002",
+                 "note": "max_background_jobs=2, "
+                         "max_background_compactions=-1"},
+                {"address": "0x459148",
+                 "value": "0x0000025800000258",
+                 "note": "stats_dump_period_sec=600, "
+                         "stats_persist_period_sec=600"},
+                {"address": "0x4562b0",
+                 "value": "[1000, 0]",
+                 "note": "keep_log_file_num=1000, recycle_log_file_num=0"},
+                {"address": "0x451490",
+                 "value": "[0, 1048576]",
+                 "note": "compaction_readahead_size=0, "
+                         "random_access_max_buffer_size=1MB"},
+                {"address": "0x4517a0",
+                 "value": "[1048576, 100]",
+                 "note": "max_write_batch_group_size_bytes=1MB, "
+                         "write_thread_max_yield_usec=100"},
+            ],
+            "note": "the full default-ctor field map matches the v8.1.1 "
+                    "declaration order at every checkable field; the six "
+                    ".rodata constants above are byte-exact",
+        },
+        "configoptions_resolved_names": {
+            "note": "#4108 left ConfigOptions +0x2c/+0x30 unnamed; this "
+                    "work item resolves both from v8.1.1 "
+                    "include/rocksdb/convenience.h L56-188, whose field "
+                    "order and defaults match the ctor exactly",
+            "fields": [
+                {"offset": "+0x2c", "size": 1, "default": 255,
+                 "name": "sanity_level",
+                 "evidence": "movb $0xff,0x2c(%rdi) in the ctor; header "
+                             "default kSanityLevelExactMatch"},
+                {"offset": "+0x30", "size": 8, "default": 524288,
+                 "name": "file_readahead_size",
+                 "evidence": "movq $0x80000,0x30(%rdi) in the ctor; the "
+                             "outer Persist overwrites it with "
+                             "DBOptions+0x220 when non-null"},
+            ],
+        },
+        "copy_paths": [
+            {"function": "DBOptions copy ctor 0x5d38750",
+             "read": "mov 0x220(%rbp),%rax at 0x5d38b52",
+             "write": "mov %rax,0x220(%rbx) at 0x5d38b60",
+             "note": "verbatim qword copy"},
+            {"function": "DBOptions(const Options&) 0x60b3280",
+             "read": "mov 0x220(%rbp),%rax",
+             "write": "mov %rax,0x220(%rbx)",
+             "note": "verbatim qword copy"},
+            {"function": "DBOptions::operator= 0x60c3480",
+             "read": "mov 0x220(%rbp),%rax",
+             "write": "mov %rax,0x220(%rbx)",
+             "note": "verbatim qword copy (2 such pairs in the function)"},
+            {"function": "ImmutableDBOptions copy ctor 0x5da6bc0",
+             "read": "mov 0x1a0(%rbp),%rax",
+             "write": "mov %rax,0x1a0(%rbx)",
+             "note": "ImmutableDBOptions+0x1a0 copied verbatim"},
+        ],
+        "compaction": {
+            "function": "ImmutableDBOptions(DBOptions&) 0x60a3b60",
+            "pairs": [
+                {"src": "DBOptions+0x220", "dst": "ImmutableDBOptions+0x1a0",
+                 "read": "mov 0x220(%rbp),%rax at 0x60a40c9",
+                 "write": "mov %rax,0x1a0(%rbx) at 0x60a40d0",
+                 "field": "log_readahead_size"},
+                {"src": "DBOptions+0x228", "dst": "ImmutableDBOptions+0x1a8",
+                 "field": "file_checksum_gen_factory"},
+                {"src": "DBOptions+0x238", "dst": "ImmutableDBOptions+0x1b8",
+                 "field": "best_efforts_recovery"},
+                {"src": "DBOptions+0x23c", "dst": "ImmutableDBOptions+0x1bc",
+                 "field": "max_bgerror_resume_count"},
+                {"src": "DBOptions+0x240", "dst": "ImmutableDBOptions+0x1c0",
+                 "field": "bgerror_resume_retry_interval"},
+                {"src": "DBOptions+0x248", "dst": "ImmutableDBOptions+0x1c8",
+                 "field": "allow_data_in_errors"},
+                {"src": "DBOptions+0x250", "dst": "ImmutableDBOptions+0x1d0",
+                 "field": "db_host_id"},
+                {"src": "DBOptions+0x270", "dst": "ImmutableDBOptions+0x1f0",
+                 "field": "checksum_handoff_file_types"},
+                {"src": "DBOptions+0x278", "dst": "ImmutableDBOptions+0x228",
+                 "field": "compaction_service"},
+                {"src": "DBOptions+0x288 (byte)",
+                 "dst": "ImmutableDBOptions+0x1f8",
+                 "field": "lowest_used_cache_tier"},
+                {"src": "DBOptions+0x289 (byte)",
+                 "dst": "ImmutableDBOptions+0x238",
+                 "field": "enforce_single_del_contracts"},
+            ],
+            "packed_bool_groups": [
+                {"dst": "+0x197", "bytes": [
+                    "DBOptions+0x218 wal_compression",
+                    "DBOptions+0x219 atomic_flush",
+                    "DBOptions+0x138 persist_stats_to_disk",
+                    "DBOptions+0x21a avoid_unnecessary_blocking_io"]},
+                {"dst": "+0x190", "bytes": [
+                    "DBOptions+0x210", "DBOptions+0x211",
+                    "DBOptions+0x212", "DBOptions+0x214"]},
+                {"dst": "+0x194", "bytes": [
+                    "DBOptions+0x215", "DBOptions+0x216"]},
+                {"dst": "+0x196", "bytes": ["DBOptions+0x217"]},
+                {"dst": "+0x158", "bytes": [
+                    "DBOptions+0x1c0 enable_thread_tracking",
+                    "DBOptions+0x1d0 enable_pipelined_write",
+                    "DBOptions+0x1d1 unordered_write",
+                    "DBOptions+0x1d2 allow_concurrent_memtable_write"]},
+                {"dst": "+0x15c", "bytes": [
+                    "DBOptions+0x1d3 enable_write_thread_adaptive_yield"]},
+            ],
+            "note": "the packed groups store the source bytes in ascending "
+                    "source order at ascending destination offsets (LE "
+                    "u32 store); the +0x197 group is built as "
+                    "(src21a<<24)|(src138<<16)|(src219<<8)|src218",
+        },
+        "reverse_bridge": {
+            "function": "rocksdb::BuildDBOptions 0x60c2e20",
+            "read": "mov 0x1a0(%rbp),%rax at 0x60c332f",
+            "write": "mov %rax,0x220(%rbx) at 0x60c3336",
+            "source": "options_helper.cc L319: options.log_readahead_size "
+                      "= immutable_db_options.log_readahead_size;",
+            "note": "BuildDBOptions also takes max_open_files from "
+                    "MutableDBOptions (L135), not from ImmutableDBOptions",
+        },
+        "persist_bridge": {
+            "function": "rocksdb::PersistRocksDBOptions (outer) 0x60d4a00",
+            "source": "options_parser.cc L67-97",
+            "steps": [
+                "ConfigOptions default ctor at rbp-0x90",
+                "delimiter replaced with \"\\n  \" (string at 0x446696)",
+                "invoke_prepare_options (+0x03) set to 0",
+                "mov 0x220(%rbx),%rax at 0x60d4a6c (rbx = DBOptions&)",
+                "test %rax,%rax; je skip when the value is 0",
+                "mov %rax,-0x60(%rbp) = ConfigOptions temp+0x30 "
+                "(file_readahead_size) when non-null",
+                "call the inner PersistRocksDBOptions 0x60d2820",
+            ],
+            "source_lines": "if (db_opt.log_readahead_size > 0) { "
+                            "config_options.file_readahead_size = "
+                            "db_opt.log_readahead_size; } "
+                            "(options_parser.cc L85-91)",
+            "note": "the ConfigOptions temp keeps the 0x80000 default at "
+                    "+0x30 unless DBOptions+0x220 is non-null",
+        },
+        "verify_chain": {
+            "steps": [
+                "inner Persist 0x60d2820 writes the OPTIONS file, then calls "
+                "VerifyRocksDBOptionsFromFile 0x60d13a0 (options_parser.cc "
+                "L262-264)",
+                "Verify 0x60d13a0 forwards ConfigOptions+0x30 into Parse "
+                "0x60cfb60 (mov 0x30(%rbx),%rax at 0x60d144d; "
+                "mov %rax,0x30(%rsp); call 0x60cfb60 at 0x60d14c8)",
+                "Parse 0x60cfb60 reads ConfigOptions+0x30 (mov 0x30(%r12),"
+                "%rax at 0x60cfc2b) and builds the LineFileReader with it "
+                "(options_parser.cc L502-504)",
+                "the 4-arg Parse overload stores its file_readahead_size "
+                "argument into ConfigOptions+0x30 (mov %rdx,0x30(%rbx) at "
+                "0x60d0a0f)",
+            ],
+            "note": "the re-read uses the bridged size: a nonzero "
+                    "log_readahead_size sizes the LineFileReader that "
+                    "re-reads the OPTIONS file just written",
+        },
+        "option_type_info": {
+            "builder": "__static_initialization_and_destruction_0v "
+                       "0x60aa2b0..0x60b1d78",
+            "note": "the name -> offset map is built by the static "
+                    "initializer, not by the DBOptionsConfigurable ctor "
+                    "(0x60a47f0), which only embeds a DBOptions at +0x2d8 "
+                    "and an ImmutableDBOptions at +0x98",
+            "entries": [
+                {"name": "log_readahead_size", "string": "0x43d7dc",
+                 "lea": "0x60afa6d", "offset": "0x1a0",
+                 "movq": "movq $0x1a0,-0x4c10(%rbp) at 0x60afa9c",
+                 "match": "equals the ImmutableDBOptions ctor dest +0x1a0"},
+                {"name": "best_efforts_recovery", "string": "0x4310fa",
+                 "lea": "0x60afb55", "offset": "0x1b8",
+                 "movq": "movq $0x1b8,-0x4b50(%rbp) at 0x60afb79",
+                 "match": "equals the ImmutableDBOptions ctor dest +0x1b8"},
+                {"name": "max_bgerror_resume_count", "string": "0x43d7ef",
+                 "lea": "0x60afc36", "offset": "0x1bc",
+                 "movq": "movq $0x1bc,-0x4a90(%rbp) at 0x60afc6c",
+                 "match": "equals the ImmutableDBOptions ctor dest +0x1bc"},
+                {"name": "avoid_unnecessary_blocking_io", "string": "0x44b4da",
+                 "lea": "0x60af895", "offset": "0x198",
+                 "movq": "movq $0x198,-0x4d90(%rbp) at 0x60af8c4",
+                 "match": "OPEN UNKNOWN: the ImmutableDBOptions ctor packs "
+                          "avoid at +0x19a, not +0x198 (+0x198 is "
+                          "atomic_flush)"},
+                {"name": "write_dbid_to_manifest", "string": "0x44a4ea",
+                 "lea": "0x60af981", "offset": "0x19a",
+                 "movq": "movq $0x19a,-0x4cd0(%rbp) at 0x60af9b0",
+                 "match": "OPEN UNKNOWN: the ImmutableDBOptions ctor never "
+                          "reads DBOptions+0x21b; +0x19a is avoid's pack slot"},
+                {"name": "max_open_files", "string": "0x433299",
+                 "lea": "0x60ab468", "offset": "0x40",
+                 "movq": "movq $0x40,-0x4910(%rbp) at 0x60ab497",
+                 "match": "OPEN UNKNOWN: max_open_files is mutable "
+                          "(BuildDBOptions takes it from MutableDBOptions); "
+                          "ImmutableDBOptions+0x40 holds info_log_level"},
+            ],
+            "name_string": "\"log_readahead_size\" at 0x43d7dc is referenced "
+                           "exactly once binary-wide (the lea at 0x60afa6d)",
+            "no_entry": "\"file_readahead_size\" has no string in the binary "
+                        "(it is a ConfigOptions field, not a DBOptions one)",
+        },
+        "configurable": {
+            "function": "DBOptionsConfigurable ctor 0x60a47f0..0x60a636b",
+            "embeds": [
+                {"offset": "+0x2d8", "what": "DBOptions",
+                 "evidence": "lea 0x2d8(%rbx),%rax at 0x60a496e; "
+                             "call DBOptions copy ctor 0x5d38750 at 0x60a4980"},
+                {"offset": "+0x98", "what": "ImmutableDBOptions",
+                 "evidence": "lea 0x98(%rbx),%rax at 0x60a495b; "
+                             "mov %rbp,%rdi; call ImmutableDBOptions ctor "
+                             "0x60a3b60 at 0x60a4997"},
+            ],
+        },
+        "call_census": call_census,
+        "displacement_census": {
+            "range": "0x5c00000..0x6400000 (RocksDB .text)",
+            "method": "positive displacements only, grouped by FDE; a "
+                      "negative -0x220(%rbp) is a stack slot, not a field",
+            "disp_0x220": {"instructions": totals[0x220],
+                           "functions": len(by_func[0x220])},
+            "disp_0x1a0": {"instructions": totals[0x1A0],
+                           "functions": len(by_func[0x1A0])},
+            "note": "most hits belong to unrelated structs that share the "
+                    "displacement; the DBOptions/ImmutableDBOptions-typed "
+                    "sites are the ones pinned in this packet",
+        },
+        "literals": {
+            "log_readahead_size_string": "0x43d7dc (18 bytes + NUL)",
+            "persist_delimiter": "\"\\n  \" (0x0a, 0x20, 0x20) at 0x446696",
+            "hostname_default": "\"__hostname__\" at 0x4342d1 (GOT 0x64fee88, "
+                                "R_X86_64_RELATIVE addend 0x4342d1)",
+            "max_manifest_file_size_string": "\"max_manifest_file_size\" at "
+                                             "0x44a4d3",
+        },
+        "model": {
+            "file": "tools/dboptions_log_readahead_size_115.py",
+            "checks": "defaults, verbatim copies, immutable compaction "
+                      "both directions, Persist bridge, Parse/Verify round "
+                      "trip, OptionTypeInfo lookups, Configurable embeds",
+        },
+        "tests": {
+            "file": "tests/test_dboptions_log_readahead_size_115.py",
+        },
+        "corrections": [
+            "#4108 left ConfigOptions +0x2c/+0x30 unnamed and DBOptions+0x220 "
+            "open; this work item resolves all three: +0x2c is sanity_level "
+            "(0xff), +0x30 is file_readahead_size (0x80000), +0x220 is "
+            "log_readahead_size (0)",
+            "#4108 described the outer Persist delimiter as \"\\n \" (one "
+            "space); the raw bytes at 0x446696 are \"\\n  \" (newline + two "
+            "spaces), matching options_parser.cc L79",
+            "the DBOptions OptionTypeInfo map is built by the static "
+            "initializer __static_initialization_and_destruction_0v "
+            "(0x60aa2b0..0x60b1d78), not by the DBOptionsConfigurable ctor",
+        ],
+        "open_unknowns": [
+            "DBOptions+0x21b (write_dbid_to_manifest per the v8.1.1 header): "
+            "never stored by the default ctor, never read by any code in "
+            "the binary; whether it is a real field left unwritten or "
+            "padding in this build is unresolved",
+            "OptionTypeInfo offset for avoid_unnecessary_blocking_io is "
+            "0x198, but the ImmutableDBOptions ctor packs avoid at +0x19a "
+            "(+0x198 is atomic_flush, +0x199 is persist_stats_to_disk)",
+            "OptionTypeInfo offset for write_dbid_to_manifest is 0x19a, but "
+            "the ImmutableDBOptions ctor never reads DBOptions+0x21b and "
+            "BuildDBOptions does not copy the field at all",
+            "OptionTypeInfo offset for max_open_files is 0x40, but "
+            "max_open_files is mutable (BuildDBOptions takes it from "
+            "MutableDBOptions) and ImmutableDBOptions+0x40 holds "
+            "info_log_level",
+        ],
+    }
+    with open(os.path.join(HERE, "records.json"), "w") as fh:
+        json.dump(records, fh, indent=1)
+        fh.write("\n")
+    print("wrote records.json")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
