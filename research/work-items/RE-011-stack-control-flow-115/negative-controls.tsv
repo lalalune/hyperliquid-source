@@ -1,0 +1,69 @@
+family	kind	control	detected
+push-dup-swap	model	push0_no_gate	1
+push-dup-swap	model	push0_gate_b	1
+push-dup-swap	model	push0_bound_ge	1
+push-dup-swap	model	push_bound_1024	1
+push-dup-swap	model	push_little_endian	1
+push-dup-swap	model	push_drop_last_byte	1
+push-dup-swap	model	push_no_advance	1
+push-dup-swap	model	push_reads_padded_qword	1
+push-dup-swap	model	dup_underflow_2c	1
+push-dup-swap	model	dup_upper_1022	1
+push-dup-swap	model	dup_off_by_one	1
+push-dup-swap	model	swap_need_n2	1
+push-dup-swap	model	swap_upper_bound	1
+push-dup-swap	model	swap_off_by_one	1
+push-dup-swap	code	0x2997066=0x0b PUSH0: spec gate 0xa -> 0xb	1
+push-dup-swap	code	0x2997073=0x73 PUSH0: je (length == 0x400) -> jae	1
+push-dup-swap	code	0x2997097=0x2c PUSH0: not-activated result 0x2b -> 0x2c	1
+push-dup-swap	code	0x29967e6=0xfe PUSH1: length bound 0x3ff -> 0x3fe	1
+push-dup-swap	code	0x2996829=0x2c PUSH1: overflow result 0x2d -> 0x2c	1
+push-dup-swap	code	0x29960c8=0x20 PUSH3: shr 0x28 -> 0x20 after bswap	1
+push-dup-swap	code	0x29960e1=0x02 PUSH3: code pointer advance 3 -> 2	1
+push-dup-swap	code	0x29965e9=0xc8 PUSH32: bswap rdx -> bswap rax (limb 0 left in memory order)	1
+push-dup-swap	code	0x2996614=0x1f PUSH32: code pointer advance 0x20 -> 0x1f	1
+push-dup-swap	code	0x2995bfb=0xff DUP1: range bound 0x3fe -> 0x3ff (accepts length 1024)	1
+push-dup-swap	code	0x2995bf7=0xfe DUP1: range bias -1 -> -2 (length 1 rejected, length 1024 accepted)	1
+push-dup-swap	code	0x2995d7b=0xf0 DUP16: range bound 0x3ef -> 0x3f0	1
+push-dup-swap	code	0x2995d91=0x40 DUP16: source offset -0x200 -> -0x1c0	1
+push-dup-swap	code	0x2996e17=0x03 SWAP1: minimum length 2 -> 3	1
+push-dup-swap	code	0x2996e4e=0x2d SWAP1: underflow result 0x2c -> 0x2d	1
+push-dup-swap	code	0x2996dc7=0x10 SWAP16: minimum length 0x11 -> 0x10	1
+push-dup-swap	code	0x2996dd6=0x00 SWAP16: deep offset -0x220 -> -0x300	1
+control-flow	model	stop_zero	1
+control-flow	model	dest_truncates	1
+control-flow	model	bound_inclusive	1
+control-flow	model	bitmap_msb_first	1
+control-flow	model	jump_pops_late	1
+control-flow	model	cond_low_limb	1
+control-flow	model	pc_no_minus1	1
+control-flow	model	msize_no_offset	1
+control-flow	model	imm_unsigned	1
+control-flow	model	imm_bias_0x90	1
+control-flow	model	dupn_underflow_2c	1
+control-flow	model	swapn_off_by_one	1
+control-flow	model	pair_swapped	1
+control-flow	model	pair_bound_28	1
+control-flow	code	0x2999601=0x02 STOP: result 0x01 -> 0x02	1
+control-flow	code	0x29995bf=0x2b JUMP: bad-destination result 0x2a -> 0x2b	1
+control-flow	code	0x29995c9=0x10 JUMP: bitmap pointer +0x18 -> +0x10	1
+control-flow	code	0x29995e6=0x30 JUMP: code base +0x38 -> +0x30	1
+control-flow	code	0x2999619=0x03 JUMPI: two-word bound 2 -> 3	1
+control-flow	code	0x29996c3=0x30 JUMPI: code base +0x38 -> +0x30	1
+control-flow	code	0x299950e=0x05 PC: stack bound 0x400 -> 0x500	1
+control-flow	code	0x2997557=0x20 MSIZE: memory length +0x28 -> +0x20	1
+control-flow	code	0x29996f1=0x28 INVALID: result 0x29 -> 0x28	1
+control-flow	code	0x2999701=0x27 UNDEFINED: result 0x26 -> 0x27	1
+control-flow	code	0x2995e16=0x0f DUPN: spec gate 0xe -> 0xf	1
+control-flow	code	0x2995e27=0x5a DUPN: immediate bound 0x5b -> 0x5a	1
+control-flow	code	0x2995e2c=0x90 DUPN: depth bias 0x91 -> 0x90	1
+control-flow	code	0x2995e35=0x2c DUPN: short-stack result 0x2d -> 0x2c	1
+control-flow	code	0x2997116=0x2d SWAPN: underflow result 0x2c -> 0x2d	1
+control-flow	code	0x29970bc=0x90 SWAPN: depth bias 0x91 -> 0x90	1
+control-flow	code	0x299713b=0x51 EXCHANGE: immediate bound 0x52 -> 0x51	1
+control-flow	code	0x2997145=0x8e EXCHANGE: immediate xor 0x8f -> 0x8e	1
+control-flow	code	0x2997153=0x1c EXCHANGE: second depth 29 -> 28	1
+shared	input	one flipped .text byte	1
+shared	input	address past .text	1
+shared	input	opcode 0x5e outside the PUSH/DUP/SWAP family	1
+shared	input	opcode 0xa0 outside the PUSH/DUP/SWAP family	1
