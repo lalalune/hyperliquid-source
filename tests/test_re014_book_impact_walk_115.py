@@ -58,9 +58,12 @@ class ByteTests(unittest.TestCase):
             self.assertEqual(self.harness.run_walk(case), {"ret": 100, "events": []})
 
     def test_walk_cases_match(self):
+        seen_kinds = set()
         for index in range(0, 2400, 6):
-            kind = "btree" if index % 2 else "deque"
+            kind = "btree" if (index // 6) % 2 else "deque"
+            seen_kinds.add(kind)
             self.assertIsNone(walk.compare_walk(self.harness, walk.walk_case(index, kind)), index)
+        self.assertEqual(seen_kinds, {"btree", "deque"})
 
     def test_next_cases_match(self):
         for index in range(120):
