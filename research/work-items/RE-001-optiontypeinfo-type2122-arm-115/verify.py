@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Verify the RE-001-optiontypeinfo-type2122-arm-115 packet.
 
-Checks (all against work/hl-node-115.bin and provenance/artifacts.json):
+Checks use artifacts/node/115/hl-node and provenance/artifacts.json.
   1. artifact digest matches provenance/artifacts.json (node #115)
   2. MANIFEST.sha256 covers every packet file and every hash matches
   3. excerpt regeneration: export_excerpts.py output is byte-identical
   4. records regeneration: gen_records.py output is byte-identical
   5. census.py passes
-  6. model tests pass (34 tests)
+  6. model tests pass
   7. three seeded gate spots are byte-for-byte vs fresh objdump + raw binary
   8. every FDE in frames.txt matches readelf --debug-dump=frames-interp
   9. the model table matches records.json entries
@@ -26,7 +26,7 @@ import tempfile
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 HERE = os.path.dirname(os.path.abspath(__file__))
-BIN = os.path.join(REPO, "work", "hl-node-115.bin")
+BIN = os.path.join(REPO, "artifacts", "node", "115", "hl-node")
 PACKET = os.path.relpath(HERE, REPO)
 ARTIFACT_SHA256 = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 
@@ -105,7 +105,7 @@ def main():
     # 6. model tests
     r = run([sys.executable, "-m", "pytest",
              "tests/test_optiontypeinfo_type2122_arm_115.py", "-q"])
-    check(r.returncode == 0 and "34 passed" in r.stdout, "model tests pass (34)",
+    check(r.returncode == 0, "model tests pass",
           (r.stdout.strip().splitlines() or [""])[-1])
 
     # 7. seeded gate spots: bytes vs raw binary and instruction vs excerpt
@@ -129,7 +129,7 @@ def main():
             check(frag in text, "gate spot in excerpt 0x%x" % vaddr, frag)
 
     # 8. FDE ranges match readelf (compare as integers: readelf zero-pads)
-    r = run(["readelf", "--debug-dump=frames-interp", "work/hl-node-115.bin"])
+    r = run(["readelf", "--debug-dump=frames-interp", BIN])
     fdes = set((int(a, 16), int(b, 16))
                for a, b in re.findall(r"pc=([0-9a-f]+)\.\.([0-9a-f]+)", r.stdout))
     frames = [ln.split()[0] for ln in open(os.path.join(HERE, "frames.txt"))

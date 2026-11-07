@@ -3,7 +3,9 @@
 Ground: research/work-items/RE-001-optiontypeinfo-type2122-arm-115/records.json.
 Every expectation traces to a pinned address or literal in that packet.
 """
+import hashlib
 import os
+from pathlib import Path
 import sys
 import unittest
 
@@ -127,7 +129,7 @@ class TestMapParser(unittest.TestCase):
 class TestEqualsPath(unittest.TestCase):
     def test_map_goes_to_configure_options_slot9(self):
         kind, detail = equals_path("id=BasicStatistics")
-        self.assertEqual(kind, "ok")
+        self.assertEqual(kind, "delegate")
         self.assertEqual(detail["slot"], "0x48")
         self.assertEqual(detail["configure_options_map"], {"id": "BasicStatistics"})
 
@@ -143,22 +145,20 @@ class TestEqualsPath(unittest.TestCase):
         # "k" is treated as a bare nested-option name here.
         kind, detail = equals_path("k")
         self.assertEqual(kind, "ok")
-        self.assertEqual(detail["prepare_options"], "skipped")
+        self.assertEqual(detail, "empty Status")
 
     def test_bare_name_with_empty_stub_skips_prepare(self):
         kind, detail = equals_path("BasicStatistics")
         self.assertEqual(kind, "ok")
-        self.assertEqual(detail["prepare_options"], "skipped")
+        self.assertEqual(detail, "empty Status")
 
     def test_bare_name_with_config_byte3_calls_prepare(self):
         kind, detail = equals_path("BasicStatistics", config_byte3=1)
-        self.assertEqual(kind, "ok")
-        self.assertEqual(detail["prepare_options"], "slot 0x28")
+        self.assertEqual((kind, detail), ("delegate", "slot 0x28"))
 
     def test_bare_name_with_real_slot40_calls_it(self):
         kind, detail = equals_path("BasicStatistics", slot40_is_empty_stub=False)
-        self.assertEqual(kind, "ok")
-        self.assertTrue(detail["slot40_called"])
+        self.assertEqual((kind, detail), ("delegate", "slot 0x40"))
 
 
 class TestNoEqualsPath(unittest.TestCase):
@@ -173,8 +173,7 @@ class TestNoEqualsPath(unittest.TestCase):
 
     def test_known_other_type_calls_parse_option(self):
         kind, detail = no_equals_path("x", {"x": "record"}, entry_type=19)
-        self.assertEqual(kind, "ok")
-        self.assertEqual(detail["parse_option"], "slot 0x50")
+        self.assertEqual((kind, detail), ("delegate", "slot 0x50"))
 
 
 class TestCustomParse(unittest.TestCase):
@@ -201,21 +200,118 @@ class TestSerializer(unittest.TestCase):
         self.assertEqual((kind, out), ("ok", ""))
 
     def test_null_object_with_flag_0x100_emits_bss_name(self):
-        # table_factory carries flags 0xc402 (0x100 set).
-        kind, out = serialize_type22("table_factory", False)
+        # prefix_extractor effective flags 0x1500 carry 0x100.
+        kind, out = serialize_type22("prefix_extractor", False, config_byte4=1)
         self.assertEqual((kind, out), ("ok", BSS_NULL_NAME))
 
     def test_present_object_main_body(self):
         kind, out = serialize_type22("comparator", True, object_options="a=1")
-        self.assertEqual((kind, out), ("ok", "BasicStatistics;a=1"))
+        self.assertEqual((kind, out), ("ok", "a=1"))
 
     def test_present_object_config28_eq_2_goes_to_main_body(self):
-        # No stored type-22 entry carries flags 0x8000 (flags survey), so
-        # the 0x60bbc15 branch is entered with the bit clear; config+0x28
-        # == 2 also routes to the main body. Both give name + options.
-        kind, out = serialize_type22("comparator", True, config_u32_28=2,
+        # table_factory has 0x8000 set; config+0x28 == 2 selects
+        # the helper-output branch at 0x60bbc29.
+        kind, out = serialize_type22("table_factory", True, config_u32_28=2,
                                      object_options="a=1")
-        self.assertEqual((kind, out), ("ok", "BasicStatistics;a=1"))
+        self.assertEqual((kind, out), ("ok", "a=1"))
+
+
+class TestBoundariesAndStatus(unittest.TestCase):
+    def test_parser_rejects_unmodeled_trim_and_nested_inputs(self):
+        for value in (" k=v", "k=v ", "k=\tv", "k={x=y;z=w}",
+                      "{{k=v}}", "{}", "k=é", "k=\x00"):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                parse_map(value)
+
+    def test_flat_map_empty_and_duplicate_values(self):
+        self.assertEqual(parse_map(""), (True, {}))
+        self.assertEqual(parse_map("k=;k=v=2;"), (True, {"k": "v=2"}))
+
+    def test_configure_status_propagates_unchanged(self):
+        for status in (("error", 4, "callee detail"), ("ok", "callee detail")):
+            self.assertIs(equals_path("k=v", configure_status=status), status)
+            self.assertIs(apply_arm("comparator", "k=v", True,
+                                    configure_status=status), status)
+
+    def test_slot40_failure_stops_before_prepare(self):
+        failed = ("error", 3, "slot40 detail")
+        self.assertIs(equals_path("name", 1, False, slot40_status=failed,
+                                 prepare_status=("ok", "unused")), failed)
+
+    def test_slot40_success_continues_to_prepare(self):
+        prepared = ("error", 4, "prepare detail")
+        self.assertIs(equals_path("name", 1, False,
+                                 slot40_status=("ok", "slot40 detail"),
+                                 prepare_status=prepared), prepared)
+
+    def test_slot40_success_propagates_when_prepare_disabled(self):
+        success = ("ok", "slot40 detail")
+        self.assertIs(equals_path("name", 0, False, slot40_status=success), success)
+
+    def test_empty_value_skips_slot40(self):
+        self.assertEqual(equals_path("", 0, False), ("ok", "empty Status"))
+
+    def test_parse_option_status_propagates_unchanged(self):
+        status = ("error", 4, "parse detail")
+        self.assertIs(no_equals_path("x", {"x": "record"}, 19,
+                                     parse_status=status), status)
+        with self.assertRaises(ValueError):
+            no_equals_path("x", {"x": "record"}, 7)
+
+    def test_serializer_keeps_helper_output_boundary(self):
+        self.assertEqual(serialize_type22("comparator", True),
+                         ("delegate", "0x60971c0"))
+        self.assertEqual(serialize_type22("comparator", True,
+                                         object_options="name;k=v"),
+                         ("ok", "name;k=v"))
+
+    def test_serializer_name_only_flag_branch(self):
+        self.assertEqual(serialize_type22("table_factory", True,
+                                         object_name="factory"),
+                         ("ok", "factory"))
+        self.assertEqual(serialize_type22("table_factory", True,
+                                         config_byte4=1), ("ok", ""))
+
+    def test_serializer_helper_output_config_gate(self):
+        self.assertEqual(serialize_type22("comparator", True, config_byte4=1,
+                                         object_options="name"), ("ok", ""))
+        self.assertEqual(serialize_type22("comparator", True, config_byte4=1,
+                                         object_options="k=v"), ("ok", "k=v"))
+        self.assertEqual(serialize_type22("prefix_extractor", True, config_byte4=1,
+                                         object_options="name"), ("ok", "name"))
+
+
+class TestTargetBoundaries(unittest.TestCase):
+    @unittest.skipUnless(
+        (Path(__file__).resolve().parents[1] / "artifacts/node/115/hl-node").is_file(),
+        "node #115 artifact is not materialised")
+    def test_status_parser_and_serializer_control_bytes(self):
+        target = Path(__file__).resolve().parents[1] / "artifacts/node/115/hl-node"
+        data = target.read_bytes()
+        self.assertEqual(hashlib.sha256(data).hexdigest(),
+                         "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301")
+        # This authenticated target maps these .text VAs at VA - 0x1000.
+        anchors = {
+            0x609A01F: "84c07561",          # map failure bypasses ConfigureOptions
+            0x609A148: "84c00f85d1fdffff",  # slot40 failure bypasses PrepareOptions
+            0x609A150: "e967fdffff",        # slot40 success reaches config gate
+            0x6099EBC: "807d0300745f",      # PrepareOptions config+3 gate
+            0x6099ED1: "ff5028",            # PrepareOptions slot
+            0x60BF23E: "c68424b300000000",  # apply arm clears copied config+3
+            0x60C11D7: "e814001100",        # initial trim helper call
+            0x60C11E1: "4883fb020f8636010000",  # <=2 bypasses brace stripping
+            0x60C1317: "4883fb020f87cffeffff",  # repeated brace stripping
+            0x60C13E1: "e80afe1000",        # key trim helper call
+            0x60C1449: "e8a283ffff",        # nested delimiter helper call
+            0x60BBD2D: "e88eb4fdff",        # helper emits complete string
+            0x60BBD4F: "807c247400",        # copied config+4 output gate
+            0x60BBD78: "e883513300",        # assign helper result to output
+        }
+        for address, raw in anchors.items():
+            expected = bytes.fromhex(raw)
+            with self.subTest(address=hex(address)):
+                self.assertEqual(data[address - 0x1000:address - 0x1000 + len(expected)],
+                                 expected)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Regenerate every whole-function objdump excerpt in this packet from
-work/hl-node-115.bin, using the FDE ranges recorded in records.json.
+artifacts/node/115/hl-node, using the FDE ranges recorded in records.json.
+The archived input filename label is retained for byte-identical excerpts.
 
 Usage: python3 export_excerpts.py [out_dir]  (default: this script's dir)
 Each file is the verbatim output of:
@@ -15,7 +16,8 @@ import os
 import subprocess
 import sys
 
-BIN = "work/hl-node-115.bin"
+BIN = "artifacts/node/115/hl-node"
+ARCHIVED_LABEL = "work/hl-node-115.bin"
 
 # (file, fde_start, fde_end)
 WINDOWS = [
@@ -50,6 +52,8 @@ def main():
             ["objdump", "-d",
              "--start-address=%#x" % start, "--stop-address=%#x" % end, BIN],
             cwd=repo, capture_output=True, text=True, check=True).stdout
+        out = out.replace("\n" + BIN + ":     file format",
+                          "\n" + ARCHIVED_LABEL + ":     file format", 1)
         path = os.path.join(out_dir, name)
         with open(path, "w") as f:
             f.write(out)

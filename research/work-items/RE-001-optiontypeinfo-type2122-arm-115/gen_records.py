@@ -230,12 +230,12 @@ def build():
                 "0x6097110 tail-calls object vtable slot 0x48 (index 9) = ConfigureOptions (0x609d0e0) with (Status*, field-addr, config-copy, map), propagates",
                 "';' not found -> 0x609a0b0: find('=', 0); found -> same map path",
                 "neither ';' nor '=': compare object vtable slot 0x40 (index 8) against 0x60956f0 (empty-Status stub); equal -> Status OK and continue, else call slot 0x40 with (Status*, field-addr, config-copy) and propagate",
-                "then: config+0x3 == 0 -> OK; else call object vtable slot 0x28 (index 5) = PrepareOptions (0x6095e70) with (Status*, field-addr, config-copy) and propagate",
+                "then after successful slot 0x40: config+0x3 == 0 -> retain Status; else call object vtable slot 0x28 (index 5) = PrepareOptions (0x6095e70) with (Status*, field-addr, config-copy) and propagate",
             ],
             "map_parser": {
                 "address": "0x60c1190", "fde": "0x60c1190..0x60c1887",
-                "braces": "value starting with '{' and ending with '}' has both stripped before parsing",
-                "split": "find_first_of(\"={};\") per pair (literal 0x44b52b); split on ';', then on '='",
+                "braces": "trim via 0x61d11f0, then repeatedly strip matching outer braces while length > 2 and trim again; length <= 2 bypasses stripping",
+                "split": "find_first_of(\"={};\") per key (literal 0x44b52b), trim key via 0x61d11f0, then parse value through delimiter helper 0x60b97f0 with separator ';'; propagate its Status",
                 "errors": [
                     {"trigger": "no '=', ';', '{' or '}' in the pair", "code": 4, "message": "Mismatched key value pair, '=' expected", "literal": "0x969140", "length": 39, "site": "0x60c16c0"},
                     {"trigger": "first special char in the pair is not '=' (e.g. ';', '{', '}')", "code": 4, "message": "Unexpected char in key", "literal": "0x44ff0e", "length": 22, "site": "0x60c1710"},
@@ -278,7 +278,7 @@ def build():
             "type_dispatch": "type == 22 -> 0x60bbbf0; types 21/22 -> shared body at 0x60bba43; other types -> 0x60bbb78",
             "type_21_22_body": {
                 "flags_gate": "flags %ah bits 0x2/0x4/0x8 set -> 0x60bbcb0/0x60bbc70: deref field; null object -> Status OK, emit nothing; non-null -> main body 0x60bba66",
-                "main_body": "ConfigOptions copy (0x60b9d70); _M_replace output with ';' (literal 0x43d5c7); 0x60971c0 serializes the object's options into the string; append to output; Status OK",
+                "main_body": "ConfigOptions copy (0x60b9d70); set copied delimiter to ';' (literal 0x43d5c7); call 0x60971c0 and assign its complete string to output; copied byte +4 suppresses output without '='; flags 0x100 clears that byte; Status OK",
                 "name_emission": "0x60bbc3e: calls object vtable slot 0x78 (index 15) to get the name string, appends it to the output, Status OK",
                 "flags_0x8000_branch": "0x60bbc15: flags bit 0x8000 not set -> main body; ConfigOptions+0x28 == 2 -> main body; ConfigOptions+0x4 == 0 -> name emission; flags bit 0x100 not set -> OK emit nothing, else name emission",
                 "null_object": "0x60bbc85: flags bit 0x100 set -> assign the .bss string at 0x6508980 into the output, OK; not set and ConfigOptions+0x4 != 0 -> assign '' (0x4376fd) into the output, OK; else the 0x6508980 string",

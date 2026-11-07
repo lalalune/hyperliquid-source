@@ -34,12 +34,14 @@ each path return? This resolves open unknowns 1, 3 and 4 left by PR #4311
   callee returned, propagated verbatim.
 - **The `=` path (`0x6099e70`):** ConfigOptions copy, `find("=")`, then the
   map parser `0x60c1190` (`"k=v;k=v"` or `"{k=v;k=v}"`; braces stripped),
-  whose three malformed-input outcomes are all `kInvalidArgument` (code 4):
+  whose three directly constructed malformed-key outcomes are `kInvalidArgument` (code 4). They are
   `"Mismatched key value pair, '=' expected"`, `"Unexpected char in key"`,
   `"Empty key found"`. On a good map it calls ConfigureOptions (slot `0x48`,
   `0x609d0e0`) via `0x6097110`. With no `;` and no `=`, it calls the object's
   slot `0x40` unless that is the empty-Status stub `0x60956f0`, then
-  PrepareOptions (slot `0x28`, `0x6095e70`) unless `ConfigOptions+0x3` is 0.
+  PrepareOptions (slot `0x28`, `0x6095e70`) after a successful result when
+  `ConfigOptions+0x3` is nonzero. The apply arm clears copied byte `+0x3`.
+  The map parser also propagates errors from delimiter helper `0x60b97f0`.
 - **The no-`=` path (`0x609ba30` → `0x609b8a0`):** GetOptionName (slot
   `0x68`, `0x609d980`; return ignored), a scan of the options vector at
   `[field+8]` via the nested-key lookup `0x60ba0b0`, and `0x609b700`:
@@ -52,7 +54,9 @@ each path return? This resolves open unknowns 1, 3 and 4 left by PR #4311
 - **The serializer's type-21/22 arms (`0x60bb9a0`, entries `0x60bbbf0` /
   `0x60bba43`):** the same flags gate (deref first, null object emits
   nothing or the `.bss` string at `0x6508980`); otherwise the emitted form
-  is the object's slot-`0x78` name, or `name;options` via `0x60971c0`.
+  is the object's slot-`0x78` name, or the complete string returned by
+  `0x60971c0`. The caller sets the copied delimiter to `;` and can suppress
+  helper output without `=` when copied `ConfigOptions+0x4` is nonzero.
   A failed per-type serialize is `kNotSupported` (code 3)
   `"Cannot serialize option: <name>"` (`0x4373cf`).
 - **Flags survey:** across all 214 mapped entries only type-22 entries
@@ -68,7 +72,25 @@ each path return? This resolves open unknowns 1, 3 and 4 left by PR #4311
 - `census.py` (44 binary-grounded checks), `export_excerpts.py`,
   `gen_records.py`, `verify.py`, `MANIFEST.sha256`.
 - Model + tests: `tools/optiontypeinfo_type2122_arm_115.py`,
-  `tests/test_optiontypeinfo_type2122_arm_115.py` (34 tests).
+  `tests/test_optiontypeinfo_type2122_arm_115.py` (46 tests).
+
+## Executable model boundary
+
+The Python map model accepts printable ASCII without whitespace and at most
+one outer brace pair around flat values. It raises `ValueError` for other
+inputs, including nested delimiters, whitespace, non-ASCII text and `{}`.
+The target calls trim helper `0x61d11f0`, repeats brace stripping only while
+the string length exceeds two, and delegates value parsing to `0x60b97f0`.
+Those wider parser semantics remain outside the executable model.
+
+Callee Status tuples are explicit inputs. ConfigureOptions, slot `0x40`,
+PrepareOptions and ParseOption return their supplied tuple unchanged. Missing
+callee results yield a `delegate` event. A successful slot `0x40` result
+continues to PrepareOptions when the configuration gate allows it. Serializer
+helper output is likewise supplied as a complete string or reported as a
+`delegate` event. The tests pin these control-flow bytes against node #115. Verifiers read the
+canonical `artifacts/node/115/hl-node` path. Excerpt regeneration retains the
+archived `work/hl-node-115.bin` filename label while comparing all other bytes.
 
 ## Verification
 
@@ -76,7 +98,7 @@ each path return? This resolves open unknowns 1, 3 and 4 left by PR #4311
 python3 research/work-items/RE-001-optiontypeinfo-type2122-arm-115/verify.py
 # verify: ALL CHECKS PASSED
 python3 -m pytest tests/test_optiontypeinfo_type2122_arm_115.py -q
-# 34 passed
+# 46 passed
 ```
 
 ## Open unknowns

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Re-derive the binary-grounded claims of RE-001-optiontypeinfo-type2122-arm-115
-from work/hl-node-115.bin and check them against records.json / the TSVs.
+from artifacts/node/115/hl-node and check them against records.json / the TSVs.
 
 Checks (all read from the binary, never from memory):
   1. artifact digest == provenance/artifacts.json node #115 sha256
@@ -27,7 +27,7 @@ import struct
 import sys
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-BIN = os.path.join(REPO, "work", "hl-node-115.bin")
+BIN = os.path.join(REPO, "artifacts", "node", "115", "hl-node")
 HERE = os.path.dirname(os.path.abspath(__file__))
 ARTIFACT_SHA256 = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 

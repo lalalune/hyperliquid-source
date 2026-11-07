@@ -7,9 +7,10 @@ serializer 0x60bb9a0), bound to artifact sha256
 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301.
 
 Outcomes are ("ok", detail) / ("error", code, message) / ("delegate", address).
-"delegate" means the binary hands the value to a routine whose internals are
-an open unknown (0x609a740, 0x61ca3d0, 0x60971c0); the model records the
-handoff, it does not invent the delegate's result.
+"delegate" records a call boundary whose return value was not supplied.
+Callee Status tuples are explicit inputs and propagate unchanged. The map
+parser covers printable ASCII without whitespace and at most one outer brace
+pair. Other parser inputs raise ValueError for the model boundary.
 
 Status codes: 1 kNotFound, 3 kNotSupported, 4 kInvalidArgument.
 """
@@ -93,14 +94,19 @@ def effective_flags(name):
 def parse_map(value):
     """Model of the map parser 0x60c1190.
 
-    Braces: a value starting with '{' and ending with '}' has both stripped.
-    Pairs are split on ';'; each pair is scanned with find_first_of("={};").
+    The supported domain is printable ASCII without whitespace, with at most
+    one outer brace pair around a flat map. Whitespace trimming and nested
+    delimiter handling in 0x61d11f0 / 0x60b97f0 require separate evidence.
+    ValueError identifies inputs outside this model's domain.
     Returns (True, {k: v}) or (False, (code, message)).
-    A trailing ';' ends the scan cleanly: the loop-end check at 0x60c1321
-    (position >= length -> done) runs before the next find_first_of.
+    A trailing ';' ends the scan cleanly at 0x60c1321.
     """
-    if value.startswith("{") and value.endswith("}") and len(value) >= 2:
+    if any(ord(char) < 33 or ord(char) > 126 for char in value):
+        raise ValueError("map model requires printable ASCII without whitespace")
+    if len(value) > 2 and value.startswith("{") and value.endswith("}"):
         value = value[1:-1]
+    if "{" in value or "}" in value:
+        raise ValueError("map model supports a single outer brace pair and flat values")
     result = {}
     pos = 0
     while pos < len(value):
@@ -134,47 +140,61 @@ def custom_parse(name, value):
     return ("delegate", "0x61ca3d0")
 
 
-def equals_path(value, config_byte3=0, slot40_is_empty_stub=True):
-    """Model of the '=' path setter 0x6099e70.
+def equals_path(value, config_byte3=0, slot40_is_empty_stub=True, *,
+                configure_status=None, slot40_status=None, prepare_status=None):
+    """Project setter 0x6099e70 with explicit callee Status inputs.
 
-    config_byte3: ConfigOptions+0x3; slot40_is_empty_stub: whether the
-    object's vtable slot 0x40 is the empty-Status stub 0x60956f0.
-    Returns ("ok", detail) / ("error", code, message).
+    Missing callee results yield a delegate event. A failed slot 0x40 result
+    stops before PrepareOptions. A successful result continues through the
+    ConfigOptions+0x3 gate, including when slot 0x40 is a real function.
     """
     if ";" in value or "=" in value:
         ok, parsed = parse_map(value)
         if not ok:
             return ("error",) + parsed
-        # 0x6097110 tail-calls ConfigureOptions slot 0x48 (0x609d0e0).
-        return ("ok", {"configure_options_map": parsed, "slot": "0x48"})
-    if not slot40_is_empty_stub:
-        return ("ok", {"slot40_called": True})
-    if config_byte3 == 0:
-        return ("ok", {"slot40": "empty stub", "prepare_options": "skipped"})
-    # PrepareOptions slot 0x28 (0x6095e70).
-    return ("ok", {"slot40": "empty stub", "prepare_options": "slot 0x28"})
+        if configure_status is None:
+            return ("delegate", {"target": "0x6097110", "slot": "0x48",
+                                 "configure_options_map": parsed})
+        return configure_status
+    status = ("ok", "empty Status")
+    # The empty-value branch at 0x6099eae skips slot 0x40.
+    if value and not slot40_is_empty_stub:
+        if slot40_status is None:
+            return ("delegate", "slot 0x40")
+        if slot40_status[0] != "ok":
+            return slot40_status
+        status = slot40_status
+    if config_byte3 != 0:
+        if prepare_status is None:
+            return ("delegate", "slot 0x28")
+        return prepare_status
+    return status
 
 
-def no_equals_path(name, registry, entry_type=22):
-    """Model of the no-'=' path (0x609ba30 -> 0x609b8a0 -> 0x609b700).
+def no_equals_path(name, registry, entry_type=22, *, parse_status=None):
+    """Project a successful nested lookup for record types 19, 21 and 22.
 
-    registry: mapping of nested option name -> (entry_type, found_record).
-    GetOptionName (slot 0x68) is called but its return is ignored.
+    registry supplies the lookup outcome. GetOptionName's return is ignored.
+    Other record types also depend on a separate name-comparison boundary.
     """
     found = registry.get(name)
     if found is None:
         return ("error", 1, "Could not find option: " + name)
     if entry_type == 22:
         return ("delegate", "0x609a740")
-    # types 19/21/22 with a name match call ParseOption slot 0x50 (0x60986b0).
-    return ("ok", {"parse_option": "slot 0x50", "record": found})
+    if entry_type not in (19, 21):
+        raise ValueError("lookup model supports record types 19, 21 and 22")
+    if parse_status is None:
+        return ("delegate", "slot 0x50")
+    return parse_status
 
 
 def apply_arm(name, value, object_present, config_byte3=0,
-              slot40_is_empty_stub=True, registry=None):
+              slot40_is_empty_stub=True, registry=None, *, configure_status=None):
     """Model of the type-21/22 arm at 0x60bf1e0 for one entry.
 
-    registry is used only by the no-'=' path (nested-option lookup).
+    registry supplies the nested lookup. The arm clears byte +0x3 in its
+    ConfigOptions copy at 0x60bf23e before calling the setter.
     """
     entry = entry_by_name(name)
     if entry is None:
@@ -196,17 +216,19 @@ def apply_arm(name, value, object_present, config_byte3=0,
             return ("ok", "empty value")
     # Main body 0x60bf212: ConfigOptions copy, then split on '='.
     if "=" in value:
-        return equals_path(value, config_byte3, slot40_is_empty_stub)
+        return equals_path(value, 0, slot40_is_empty_stub,
+                           configure_status=configure_status)
     return no_equals_path(name, registry or {}, entry["type"])
 
 
 def serialize_type22(name, object_present, config_byte4=0, config_u32_28=0,
-                     object_name="BasicStatistics", object_options=""):
+                     object_name="BasicStatistics", object_options=None):
     """Model of the serializer's type-22 arm (entry 0x60bbbf0).
 
     config_byte4 / config_u32_28 are ConfigOptions+0x4 / +0x28 (C++ names open).
-    object_options is what 0x60971c0 would emit for the object (open unknown);
-    the model records the shape, not its contents.
+    object_options supplies the complete string returned by 0x60971c0.
+    When omitted, that call yields a delegate event. The helper receives a
+    semicolon ConfigOptions delimiter; its internals remain a call boundary.
     Returns ("ok", emitted_string).
     """
     entry = entry_by_name(name)
@@ -222,11 +244,16 @@ def serialize_type22(name, object_present, config_byte4=0, config_u32_28=0,
             return ("ok", BSS_NULL_NAME)
         # Non-null object: the 0x60bbc15 branch.
         if not (flags & 0x8000) or config_u32_28 == 2:
-            return ("ok", object_name + ";" + object_options)
+            if object_options is None:
+                return ("delegate", "0x60971c0")
+            # The caller clears copied byte +4 for flags 0x100, then checks
+            # the helper output for '=' at 0x60bbd56 when that byte is set.
+            if not (flags & 0x100) and config_byte4 != 0 and "=" not in object_options:
+                return ("ok", "")
+            return ("ok", object_options)
         if config_byte4 == 0:
             return ("ok", object_name)
         if not (flags & 0x100):
             return ("ok", "")
         return ("ok", object_name)
-    # No flag bit set: main body 0x60bba66.
-    return ("ok", object_name + ";" + object_options)
+    raise ValueError("stored type-22 entries all carry an effective flag-gate bit")
