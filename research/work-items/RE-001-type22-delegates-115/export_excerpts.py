@@ -9,7 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-BIN = Path(__file__).resolve().parents[3] / "work" / "hl-node-115.bin"
+BIN = Path(__file__).resolve().parents[3] / "artifacts" / "node" / "115" / "hl-node"
 OUT = Path(__file__).resolve().parent
 
 # name -> (start, end) vaddrs; end is exclusive (FDE end)
@@ -24,14 +24,33 @@ FUNCTIONS = {
 }
 
 
+def excerpt(name, start, end):
+    out = subprocess.run(
+        ["objdump", "-d", f"--start-address={start:#x}",
+         f"--stop-address={end:#x}", str(BIN)],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    # Preserve the imported display-path header; every instruction stays exact.
+    retained = OUT / name
+    if retained.exists():
+        old_lines = retained.read_text().splitlines(keepends=True)
+        new_lines = out.splitlines(keepends=True)
+        for i, line in enumerate(new_lines):
+            if line.endswith(":     file format elf64-x86-64\n"):
+                headers = [old for old in old_lines
+                           if old.endswith(":     file format elf64-x86-64\n")]
+                if len(headers) != 1:
+                    raise ValueError("expected one retained ELF display header")
+                new_lines[i] = headers[0]
+                break
+        out = "".join(new_lines)
+    return out
+
+
 def main() -> int:
     for name, (start, end) in FUNCTIONS.items():
-        out = subprocess.run(
-            ["objdump", "-d", f"--start-address={start:#x}",
-             f"--stop-address={end:#x}", str(BIN)],
-            capture_output=True, text=True, check=True,
-        )
-        (OUT / name).write_text(out.stdout)
+        out = excerpt(name, start, end)
+        (OUT / name).write_text(out)
         print(f"{name}: {start:#x}..{end:#x} ({len(out.stdout.splitlines())} lines)")
     return 0
 

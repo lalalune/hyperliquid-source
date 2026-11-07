@@ -26,7 +26,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
-BIN = ROOT / "work" / "hl-node-115.bin"
+BIN = ROOT / "artifacts" / "node" / "115" / "hl-node"
 ARTIFACT = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 TEXT_VADDR, TEXT_OFF, TEXT_SIZE = 0x1419300, 0x1418300, 0x4FD7700
 
@@ -71,10 +71,7 @@ def main() -> int:
     import export_excerpts  # noqa: E402
     ok = True
     for name, (start, end) in export_excerpts.FUNCTIONS.items():
-        out = subprocess.run(
-            ["objdump", "-d", f"--start-address={start:#x}",
-             f"--stop-address={end:#x}", str(BIN)],
-            capture_output=True, text=True, check=True).stdout
+        out = export_excerpts.excerpt(name, start, end)
         if (HERE / name).read_text() != out:
             ok = False
             print(f"  excerpt drift: {name}")
@@ -123,6 +120,11 @@ def main() -> int:
             print(f"  census drift for {target:#x}: {got} != {want}")
     check("caller census reproduces", ok)
 
+    recorded_leas = [int(line.split("\t")[1], 16)
+                     for line in (HERE / "bss-string-lea.tsv").read_text().splitlines()[1:]
+                     if line]
+    check("BSS lea census reproduces", census.lea_sites(data, census.BSS_STRING) == recorded_leas)
+
     # 7. Vtable slots reproduce.
     relocs = {}
     out = subprocess.run(["readelf", "-rW", str(BIN)],
@@ -145,6 +147,8 @@ def main() -> int:
 
     # 8. Semantic records only.
     records = json.loads((HERE / "records.json").read_text())
+    import gen_records
+    check("semantic generator reproduces records", records == gen_records.RECORDS)
     blob = json.dumps(records)
     check("records are semantic only",
           "mnemonic" not in blob and "instruction" not in blob.lower()
@@ -162,6 +166,12 @@ def main() -> int:
 
     # Spot bytes: fixed instruction bytes at pinned sites.
     spots = [
+        (0x609a907, bytes.fromhex("0f857c020000")),
+        (0x609aa1b, bytes.fromhex("84db0f8466010000")),
+        (0x609aab4, bytes.fromhex("4d85ed")),
+        (0x609b09f, bytes.fromhex("0f840bfdffff")),
+        (0x61d1410, bytes.fromhex("85d2751c")),
+        (0x61d142b, bytes.fromhex("85db0f94c0")),
         (0x609A7AA, b"\xf6\xc4\x08"),            # test $0x8,%ah (flags 0x800 gate)
         (0x609A940, b"\xff\x50\x78"),            # call *0x78(%rax) (GetId)
         (0x609A8E2, b"\xe8"),                    # call 0x61d1390 (ends_with)

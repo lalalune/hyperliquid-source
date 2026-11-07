@@ -18,7 +18,7 @@ Pinned semantics
   [rcx-arg] + "id" + "=" + id + [ConfigOptions+0x08] + [nested options]
   when ConfigOptions+0x28 != 1, the id is non-empty, and the nested
   options are non-empty; otherwise the bare id.
-* 0x61d1390 ends_with, 0x61d13e0 string_compare: the string predicates
+* 0x61d1390 ends_with, 0x61d13e0 starts_with: the string predicates
   the delegate uses for the ".id" suffix and key comparisons.
 * Status: code 0 = kOk; code 4 = kInvalidArgument with the prefix
   "Option not changeable: " (literal 0x4341c2).
@@ -50,11 +50,12 @@ def resolve_field(store, base, offset, flags):
     (null options-base) yields a null target. When no deref bit is set the
     field address itself is the target.
     """
-    if base is None:
+    if base is None or base == 0:
         return None
-    addr = base + offset
+    signed_offset = ((offset & 0xffffffff) ^ 0x80000000) - 0x80000000
+    addr = (base + signed_offset) & ((1 << 64) - 1)
     if flags & DEREF_FLAG_MASK:
-        return store.get(addr)
+        return store[addr]
     return addr
 
 
@@ -66,14 +67,14 @@ def ends_with(haystack, suffix):
 
 
 def string_compare(a, b):
-    """0x61d13e0: memcmp over the shorter length, then the length difference
-    clamped to a 32-bit int."""
-    n = min(len(a), len(b))
-    for i in range(n):
-        if a[i] != b[i]:
-            return ord(a[i]) - ord(b[i])
-    diff = len(a) - len(b)
-    return max(-(2**31), min(2**31 - 1, diff))
+    """Historical label for 0x61d13e0, a boolean starts-with predicate.
+
+    It compares the shorter byte span, then accepts only when b fits in a.
+    Text inputs denote their UTF-8 bytes; bytes inputs preserve arbitrary data.
+    """
+    a_bytes = a.encode("utf-8") if isinstance(a, str) else bytes(a)
+    b_bytes = b.encode("utf-8") if isinstance(b, str) else bytes(b)
+    return a_bytes.startswith(b_bytes)
 
 
 def slot12_emit(rcx_arg, obj_id, delimiter, nested_options, config_plus28):
@@ -108,53 +109,31 @@ def status_not_changeable(name):
     return (4, NOT_CHANGEABLE_PREFIX + name)
 
 
-def delegate_decision(*, flags, config_plus4, object_is_null, name,
-                      remaining_key, value, target_id, target_is_null=False,
-                      id_prefix_matches=False, value_has_equals=False):
-    """The delegate's dispatch (0x609a740), reduced to the outcome it picks.
+def delegate_decision(*, flags, config_plus4, name, remaining_key, value,
+                      target_id, target_is_null=False):
+    """Select a local outcome or unresolved callee boundary in 0x609a740.
 
-    ``id_prefix_matches`` is the 0x61d13e0 result of comparing the remaining
-    key against "<GetId()>.", used only on the terminal path when the name
-    does not end with ".id" and the value is non-empty; ``value_has_equals``
-    is whether the value contains '=' (the 0x6099e70 vs 0x609ba30 split).
-
-    Returns one of:
-    * ("configure_slot10", ...)  -- call object vtable slot 10 with
-      (Status*, object, config-copy, record, remaining_key, value)
-    * ("configure_by_id", ...)   -- name ends with ".id" and value == id:
-      configure via helpers 0x609a410 / 0x6097150
-    * ("set_via_equals", ...)    -- value has '=': call 0x6099e70
-    * ("forward_no_equals", ...) -- value has no '=': call 0x609ba30
-    * ("ok", (0, ""))            -- value empty on the terminal path
-    * ("error", (4, msg))        -- kInvalidArgument "Option not changeable"
+    The resolved field target controls the null test. Virtual dispatch assumes
+    valid receiver objects and normal returns. Callee outcomes remain delegated.
     """
     if flags & FLAG_0X100 or config_plus4 == 0:
-        # Nested-key path (0x609a861 / 0x609aaa8): the +0x04 byte is zeroed
-        # on the flags-0x100 branch; both branches land on the same checks.
-        if remaining_key == name or remaining_key == "id":
+        if remaining_key == name or remaining_key == "id" or ends_with(name, ".id"):
             return ("configure_slot10", (name, remaining_key, value))
-        if ends_with(name, ".id"):
-            if value == target_id:
-                return ("configure_by_id", (name, value))
-            return ("error", status_not_changeable(name))
         if not value:
             return ("ok", status_ok())
-        if target_is_null:
+        if target_is_null or not string_compare(remaining_key, target_id + "."):
             return ("configure_slot10", (name, remaining_key, value))
-        # GetId into the value string, append ".", compare the remaining
-        # key against "<id>." (0x61d13e0 @ 0x609a9ce).
-        if id_prefix_matches:
-            return ("configure_slot10", (name, remaining_key, value))
-        if value_has_equals:
+        if "=" in value:
             return ("set_via_equals", (name, value))
         return ("forward_no_equals", (name, value))
-    # flags-0x100 clear and ConfigOptions+0x04 != 0.
-    if object_is_null:
+    if target_is_null:
         if not value:
             return ("ok", status_ok())
         return ("error", status_not_changeable(name))
     if ends_with(name, ".id"):
         if value == target_id:
-            return ("configure_by_id", (name, value))
+            return ("ok", status_ok())
         return ("error", status_not_changeable(name))
-    return ("configure_slot10", (name, remaining_key, value))
+    if remaining_key == name or remaining_key == "id":
+        return ("configure_by_id", (name, value))
+    return ("forward_no_equals", (name, value))

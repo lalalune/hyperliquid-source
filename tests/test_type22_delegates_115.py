@@ -5,6 +5,7 @@ and branch rules in research/work-items/RE-001-type22-delegates-115/
 records.json and the whole-function objdump excerpts there.
 """
 import sys
+import pytest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
@@ -39,8 +40,11 @@ def test_resolve_field_deref_gate():
     assert resolve_field(store, 0x1000, 0x8, 0x0) == 0x1008
     # Null options-base -> null target.
     assert resolve_field(store, None, 0x8, 0xE00) is None
-    # Deref of a missing cell -> null target (field holds nullptr).
-    assert resolve_field({}, 0x1000, 0x8, 0x200) is None
+    assert resolve_field({0x1008: None}, 0x1000, 0x8, 0x200) is None
+    with pytest.raises(KeyError):
+        resolve_field({}, 0x1000, 0x8, 0x200)
+    assert resolve_field({}, 0, 8, 0) is None
+    assert resolve_field({}, 0x1000, 0xffffffff, 0) == 0xfff
 
 
 def test_deref_flag_mask():
@@ -57,16 +61,14 @@ def test_ends_with():
     assert ends_with("x", "") is True
 
 
-def test_string_compare():
-    assert string_compare("abc", "abc") == 0
-    assert string_compare("abc", "abd") < 0
-    assert string_compare("abd", "abc") > 0
-    assert string_compare("ab", "abc") < 0
-    assert string_compare("abc", "ab") > 0
-    assert string_compare("", "") == 0
-    assert string_compare("a", "") > 0
-    # Memcmp decides before the length: "b" > "aa" on the first byte.
-    assert string_compare("b", "aa") > 0
+def test_string_compare_is_a_prefix_predicate():
+    assert string_compare("abc", "abc") is True
+    assert string_compare("abcd", "abc") is True
+    assert string_compare("abc", "abd") is False
+    assert string_compare("ab", "abc") is False
+    assert string_compare("anything", "") is True
+    assert string_compare(b"\xff\x00z", b"\xff\x00") is True
+    assert string_compare("éclair", "é") is True
 
 
 def test_slot12_emit():
@@ -97,7 +99,7 @@ def test_statuses():
 
 
 def _dec(**kw):
-    base = dict(flags=0x100, config_plus4=0, object_is_null=False,
+    base = dict(flags=0x100, config_plus4=0,
                 name="table_factory", remaining_key="", value="",
                 target_id="bbt")
     base.update(kw)
@@ -116,14 +118,12 @@ def test_delegate_key_is_id():
 
 def test_delegate_dot_id_match():
     kind, _ = _dec(name="table_factory.id", value="bbt")
-    assert kind == "configure_by_id"
+    assert kind == "configure_slot10"
 
 
 def test_delegate_dot_id_mismatch():
-    kind, (code, msg) = _dec(name="table_factory.id", value="other")
-    assert kind == "error"
-    assert code == 4
-    assert msg == "Option not changeable: table_factory.id"
+    kind, _ = _dec(name="table_factory.id", value="other")
+    assert kind == "configure_slot10"
 
 
 def test_delegate_empty_value_ok():
@@ -132,18 +132,18 @@ def test_delegate_empty_value_ok():
     assert status == (0, "")
 
 
-def test_delegate_id_prefix_match():
-    kind, _ = _dec(value="x", id_prefix_matches=True)
+def test_delegate_id_prefix_mismatch_reaches_slot10():
+    kind, _ = _dec(value="x", remaining_key="other.setting")
     assert kind == "configure_slot10"
 
 
-def test_delegate_id_prefix_mismatch_equals():
-    kind, _ = _dec(value="k=v", id_prefix_matches=False, value_has_equals=True)
+def test_delegate_matching_prefix_with_equals():
+    kind, _ = _dec(value="k=v", remaining_key="bbt.setting")
     assert kind == "set_via_equals"
 
 
-def test_delegate_id_prefix_mismatch_no_equals():
-    kind, _ = _dec(value="kv", id_prefix_matches=False, value_has_equals=False)
+def test_delegate_matching_prefix_without_equals():
+    kind, _ = _dec(value="kv", remaining_key="bbt.setting")
     assert kind == "forward_no_equals"
 
 
@@ -152,15 +152,47 @@ def test_delegate_null_target_goes_slot10():
     assert kind == "configure_slot10"
 
 
-def test_delegate_config_plus4_nonzero_object_null():
-    # flags-0x100 clear, ConfigOptions+0x04 != 0, object null.
-    kind, status = _dec(flags=0, config_plus4=1, object_is_null=True, value="")
+def test_delegate_config_plus4_nonzero_target_null():
+    # flags-0x100 clear, ConfigOptions+0x04 != 0, resolved target null.
+    kind, status = _dec(flags=0, config_plus4=1, target_is_null=True, value="")
     assert kind == "ok" and status == (0, "")
-    kind, (code, _) = _dec(flags=0, config_plus4=1, object_is_null=True,
+    kind, (code, _) = _dec(flags=0, config_plus4=1, target_is_null=True,
                            value="x")
     assert kind == "error" and code == 4
 
 
-def test_delegate_config_plus4_nonzero_object_present():
-    kind, _ = _dec(flags=0, config_plus4=1, object_is_null=False)
-    assert kind == "configure_slot10"
+def test_delegate_config_plus4_nonzero_target_present():
+    kind, _ = _dec(flags=0, config_plus4=1, remaining_key="table_factory")
+    assert kind == "configure_by_id"
+
+
+def test_delegate_immutable_id_only_accepts_current_id():
+    assert _dec(flags=0, config_plus4=1, name="field.id", value="bbt") == ("ok", (0, ""))
+    assert _dec(flags=0, config_plus4=1, name="field.id", value="other")[0] == "error"
+
+
+def test_delegate_immutable_unmatched_key_keeps_forwarder_boundary():
+    assert _dec(flags=0, config_plus4=1, remaining_key="other", value="a=b")[0] == "forward_no_equals"
+    assert _dec(flags=0, config_plus4=1, remaining_key="id", value="new")[0] == "configure_by_id"
+
+
+def test_delegate_nested_prefix_accepts_longer_keys():
+    assert _dec(remaining_key="bbt.setting.more", value="a=b")[0] == "set_via_equals"
+    assert _dec(remaining_key="bb", value="a=b")[0] == "configure_slot10"
+    assert _dec(name="field.id", value="")[0] == "configure_slot10"
+
+
+def test_native_branch_bytes_pin_regression_contracts():
+    binary = Path(__file__).resolve().parents[1] / "artifacts/node/115/hl-node"
+    raw = binary.read_bytes()
+    sites = {
+        0x609a907: "0f857c020000",  # nested .id goes directly to slot10
+        0x609aa1b: "84db0f8466010000",  # false starts_with goes to slot10
+        0x609aab4: "4d85ed",  # immutable null test uses resolved r13 target
+        0x609b09f: "0f840bfdffff",  # immutable id key joins id comparison
+        0x61d1410: "85d2751c",  # nonzero memcmp returns false
+        0x61d142b: "85db0f94c0",  # zero min-length minus prefix-length returns true
+    }
+    for address, value in sites.items():
+        expected = bytes.fromhex(value)
+        assert raw[address - 0x1000:address - 0x1000 + len(expected)] == expected

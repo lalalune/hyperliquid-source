@@ -28,7 +28,7 @@ Signature (traced through that chain):
 OptionTypeInfo* record, std::string* name, std::string* remaining_key,
 std::string* value, options-base* out_slot)`.
 
-- Field resolution: `target = options_base + record->offset (+0x00)`;
+- Field resolution: `target = options_base + record->signed32-bit offset (+0x00)`;
   when any of record flags `0x200/0x400/0x800` is set the field is
   dereferenced once (pointer/shared_ptr field), else the field address
   itself is the target. A null options-base yields a null target.
@@ -37,25 +37,25 @@ std::string* value, options-base* out_slot)`.
   `0x60b9d70`, shipped in #4320). On the record-flags-`0x100` branch
   the copy's `+0x04` byte is zeroed; on the clear branch `+0x04` is
   tested instead.
-- Dispatch: if the remaining key equals the name, or equals `"id"`,
-  the object vtable slot 10 (ConfigureOption core `0x60986b0`) is called
-  with `(Status*, object, config-copy, record, remaining_key, value)`.
-  If the name ends with `".id"`, the value must equal the target's
-  GetId() (slot 15, `0x5d32a30`); a mismatch builds Status code 4
-  (kInvalidArgument) with prefix `"Option not changeable: "` (literal
-  `0x4341c2`) at sites `0x609ae22` / `0x609b217`. On a match it
-  configures via helpers `0x609a410` / `0x6097150`.
-- Otherwise: GetId is written into the value string, `"."` is appended,
-  and the remaining key is compared against `"<id>."` with
-  `string_compare` (`0x61d13e0`); equal → slot 10; not equal → the value
-  is split on `'='`: found → setter `0x6099e70`, not found → forwarder
-  `0x609ba30`. An empty value on the terminal path stores Status code 0
-  (kOk) at `0x609aacf`.
+- With copied `+0x04` zero (including record flag `0x100`), a key equal
+  to the name or `id`, or a name ending in `.id`, delegates directly to object
+  slot 10. Otherwise an empty value returns local OK. For a nonempty value,
+  a null resolved target or a key lacking the target GetId plus `.` prefix
+  also delegates to slot 10. A matching prefix sends a value containing `=`
+  to `0x6099e70`, and other values to `0x609ba30`.
+- With copied `+0x04` nonzero, the null check uses the resolved field target.
+  A null target accepts only an empty value. For a present target, a name
+  ending in `.id` accepts only a value equal to its current GetId and returns
+  local OK. Other names whose key equals the name or `id` enter the unresolved
+  `0x609a410` helper flow. Remaining keys delegate to `0x609ba30`.
+- `0x61d13e0` is a boolean starts-with predicate. Its `memcmp` covers the
+  shorter span, and its final length test requires the second string to fit.
+  Helper and virtual-call outcomes remain delegated in the model.
 
 ### 0x60971c0 — serializer helper (FDE 0x60971c0..0x609755b)
 
 Signature `(std::string* out, Configurable* object, ConfigOptions*
-config, std::string* empty)`; only `out` and `object` are used.
+config, std::string* empty)`; `config` and the fourth string argument are forwarded unchanged to slot 12.
 It calls the object's vtable slot 12 (`0x609de80`, shared) into a
 temp string, then:
 
@@ -100,14 +100,19 @@ slot 12 = `0x609de80` and slot 15 = GetId `0x5d32a30`. See `vtables.tsv`.
 
 ## Model and tests
 
-`tools/type22_delegates_115.py` models the field-resolution gate, the
+`tools/type22_delegates_115.py` models valid decoded fields and strings. Missing
+synthetic memory cells raise an error. Its dispatch outcomes identify callee
+boundaries, preserving unresolved Status behavior. It models the field-resolution gate, the
 flags-`0x100` / `ConfigOptions+0x04` dispatch, the `".id"` ends-with
-check, the `"<id>."` prefix compare, the `{…}` wrap rule, the slot-12
+check, the boolean `"<id>."` prefix test, the `{…}` wrap rule, the slot-12
 emission, and the two Status constructions.
-`tests/test_type22_delegates_115.py` covers them (19 tests, passing).
+`tests/test_type22_delegates_115.py` covers them, including target-byte-pinned regressions for the corrected branch directions.
 
 ## Files
 
+- Reproduction uses the canonical `artifacts/node/115/hl-node`. The retained
+  objdump display-path header is normalized during comparison; raw instruction
+  text and imported exports remain unchanged.
 - `records.json` — semantic records only (no per-instruction mnemonic list)
 - `fn-*.objdump.txt` — whole-function verbatim excerpts (7 functions)
 - `callers.tsv` — direct-call census (40 sites, byte scan of .text)

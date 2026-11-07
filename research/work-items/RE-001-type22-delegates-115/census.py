@@ -14,7 +14,7 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
-BIN = ROOT / "work" / "hl-node-115.bin"
+BIN = ROOT / "artifacts" / "node" / "115" / "hl-node"
 OUT = Path(__file__).resolve().parent
 
 TEXT_VADDR, TEXT_OFF, TEXT_SIZE = 0x1419300, 0x1418300, 0x4FD7700
@@ -28,7 +28,7 @@ TARGETS = {
     0x609A410: "id-configure helper (RE-001, open unknown)",
     0x6097150: "configure slot-9 entry (RE-001, cited from #4320)",
     0x61D1390: "ends_with (RE-001)",
-    0x61D13E0: "string_compare (RE-001)",
+    0x61D13E0: "starts_with predicate (RE-001)",
     0x609DE80: "slot-12 nested serializer (RE-001)",
     0x5D32A30: "slot-15 GetId (RE-001)",
     0x60986B0: "slot-10 ConfigureOption core (RE-001)",

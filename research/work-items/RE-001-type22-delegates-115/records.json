@@ -28,7 +28,7 @@
       "role": "vtable slot 12: shared nested-Configurable serializer",
       "signature": "(std::string* out, Configurable* object, ConfigOptions* config, std::string* rcx_arg)",
       "callers_direct": 3,
-      "callers_vtable": "slot 12 of every Configurable vtable"
+      "callers_vtable": "slot 12 of both surveyed Configurable vtables"
     },
     {
       "address": "0x5d32a30",
@@ -51,12 +51,12 @@
     {
       "address": "0x61d13e0",
       "fde": "0x61d13e0..0x61d1437",
-      "role": "string_compare(a, b) -> int (memcmp over min length, then length difference)",
+      "role": "starts_with(a, prefix) -> bool (shorter-span memcmp and prefix-length test)",
       "signature": "(const std::string* a, const std::string* b)"
     }
   ],
   "field_resolution": {
-    "record_offset_field": "+0x00 (i64)",
+    "record_offset_field": "+0x00 (signed i32)",
     "record_flags_field": "+0xb0 (i32)",
     "deref_gate": "flags & (0x200 | 0x400 | 0x800) -> deref field once; else use field address",
     "null_base": "options-base null -> resolved target is null (skip offset math)",
@@ -110,32 +110,40 @@
   },
   "delegate_branches": [
     {
-      "condition": "record flags bit 0x100 set",
-      "effect": "zero the ConfigOptions copy's +0x04 byte, then take the nested-key path"
+      "condition": "record flags bit0x100 set or copied ConfigOptions+0x04 ==0",
+      "effect": "nested-key path; flags0x100 clears copied byte+4"
     },
     {
-      "condition": "record flags bit 0x100 clear and ConfigOptions+0x04 == 0",
-      "effect": "same nested-key path (without zeroing)"
+      "condition": "nested-key path and remaining_key equals name or id, or name ends with .id",
+      "effect": "delegate to object slot10; no local GetId equality test"
     },
     {
-      "condition": "record flags bit 0x100 clear and ConfigOptions+0x04 != 0 and object null",
-      "effect": "value empty -> Status OK; value non-empty -> kInvalidArgument 'Option not changeable: <name>'"
+      "condition": "nested-key path, other name/key, empty value",
+      "effect": "local Status OK"
     },
     {
-      "condition": "remaining_key size == name size and bytes equal, or remaining_key == 'id'",
-      "effect": "call object vtable slot 10 (ConfigureOption) with (Status*, object, config-copy, record, remaining_key, value)"
+      "condition": "nested-key path, nonempty value, resolved target null or remaining_key does not start with target GetId plus dot",
+      "effect": "delegate to object slot10"
     },
     {
-      "condition": "name ends with '.id'",
-      "effect": "call object vtable slot 15 (GetId); value must equal that id, else kInvalidArgument 'Option not changeable: <name>'; on match, configure via helpers 0x609a410 / 0x6097150"
+      "condition": "nested-key path, nonempty value, remaining_key starts with target GetId plus dot",
+      "effect": "value containing equals delegates to0x6099e70; otherwise delegates to0x609ba30"
     },
     {
-      "condition": "value empty on the terminal path",
-      "effect": "Status code 0, empty message (store at 0x609aacf)"
+      "condition": "flags0x100 clear, copied byte+4 nonzero, resolved target null",
+      "effect": "empty value returns local OK; nonempty value returns code4 Option not changeable"
     },
     {
-      "condition": "name lacks '.id', value non-empty, target non-null",
-      "effect": "GetId into the value string, append '.', compare the remaining key against '<id>.' via 0x61d13e0; equal -> slot-10 ConfigureOption; not equal -> split value on '=': found -> 0x6099e70, not found -> 0x609ba30"
+      "condition": "flags0x100 clear, copied byte+4 nonzero, target present, name ends with .id",
+      "effect": "value equal to target GetId returns local OK; mismatch returns code4"
+    },
+    {
+      "condition": "flags0x100 clear, copied byte+4 nonzero, other name, remaining_key equals name or id",
+      "effect": "delegate through0x609a410 and subsequent helper/result checks; callee outcomes remain unresolved"
+    },
+    {
+      "condition": "flags0x100 clear, copied byte+4 nonzero, other unmatched name/key",
+      "effect": "delegate directly to0x609ba30 regardless of equals in value"
     }
   ],
   "serializer_rules": [
