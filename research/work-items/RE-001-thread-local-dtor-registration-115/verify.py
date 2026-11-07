@@ -64,6 +64,12 @@ def vaddr_to_offset(segs, vaddr):
     return None
 
 
+def normalized_excerpt(data):
+    """Ignore only the host-specific path in objdump's file-format header."""
+    return re.sub(rb"(?m)^[^\r\n]+(?=:     file format elf64-x86-64$)",
+                  b"<target>", data, count=1)
+
+
 def main():
     data = BIN.read_bytes()
     prov = json.loads(PROV.read_text())
@@ -73,14 +79,15 @@ def main():
 
     with tempfile.TemporaryDirectory() as td:
         td = Path(td)
-        # 2. excerpts regenerate byte-for-byte
+        # 2. Preserve every byte except the host-specific objdump header path.
         subprocess.run([sys.executable, str(HERE / "export_excerpts.py"),
                         "--out", str(td / "excerpts")],
                        check=True, capture_output=True)
         got = sorted(p.name for p in (td / "excerpts").iterdir())
         want = sorted(p.name for p in (HERE / "excerpts").iterdir())
         same = got == want and all(
-            (td / "excerpts" / n).read_bytes() == (HERE / "excerpts" / n).read_bytes()
+            normalized_excerpt((td / "excerpts" / n).read_bytes())
+            == normalized_excerpt((HERE / "excerpts" / n).read_bytes())
             for n in want)
         check("excerpts regenerate byte-for-byte", same, f"{len(want)} files")
 

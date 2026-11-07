@@ -102,3 +102,11 @@ reproduces every claim it makes from the real binary instead.
 - The `allow_2pc` field unknown from #4237 block 26.
 - The Temperature-map serializer `0x5e03db0` and the second static
   initializer `0x6089b50` are cited, not shipped: follow-ups.
+
+## Verification portability
+
+GNU objdump versions differ in whether they print the implicit DS and ES
+segments for the observed `rep movsb` and `rep stos %eax` instructions. The
+verifier accepts those two textual spellings while comparing every instruction
+byte, address and other operand exactly. The retained raw exports preserve
+the original spellings.

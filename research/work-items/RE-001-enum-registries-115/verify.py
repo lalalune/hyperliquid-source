@@ -47,6 +47,12 @@ def run(cmd, cwd=ROOT):
     return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
 
 
+def normalized_excerpt(text):
+    """Accept GNU's two spellings of the observed implicit segment operands."""
+    return (text.replace("\trep stos %eax,%es:(%rdi)", "\trep stos %eax,(%rdi)")
+                .replace("\trep movsb %ds:(%rsi),%es:(%rdi)", "\trep movsb (%rsi),(%rdi)"))
+
+
 def main():
     records = json.loads((HERE / "records.json").read_text())
     digest = records["artifact"]["sha256"]
@@ -77,7 +83,7 @@ def main():
             out = run(["objdump", "-d",
                        f"--start-address=0x{start:x}",
                        f"--stop-address=0x{stop:x}", "work/hl-node-115.bin"])
-            if out.stdout != (HERE / name).read_text():
+            if normalized_excerpt(out.stdout) != normalized_excerpt((HERE / name).read_text()):
                 regen_ok = False
                 print("  excerpt mismatch:", name)
         check("excerpts regenerate byte-for-byte", regen_ok)

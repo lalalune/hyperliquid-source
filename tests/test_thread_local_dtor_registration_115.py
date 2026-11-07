@@ -9,6 +9,7 @@ destructors), callers.tsv (1153 sites), and records.json. Run:
 """
 
 import json
+import runpy
 import os
 import sys
 
@@ -39,6 +40,15 @@ def check(name, cond):
 
 def main():
     n = 0
+    verifier_path = os.path.join(os.path.dirname(__file__), "..", "research",
+                                 "work-items", "RE-001-thread-local-dtor-registration-115", "verify.py")
+    normalize = runpy.run_path(verifier_path)["normalized_excerpt"]
+    first = b"\n/first/node:     file format elf64-x86-64\n\n 10:\t90\tnop\n"
+    second = first.replace(b"/first/node", b"/other/node")
+    n += check("excerpt header ignores host pathname", normalize(first) == normalize(second))
+    n += check("excerpt comparison retains instruction bytes",
+               normalize(first) != normalize(second.replace(b"90", b"91")))
+
     rec = DtorRegistry()
 
     # --- fast path: libc impl present -> dispatch (dtor, t, dso_handle slot).

@@ -7,6 +7,7 @@ and the builders it calls).
 """
 
 import sys
+import runpy
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
@@ -106,3 +107,19 @@ def test_registry_inventory():
     assert len(ORDERED) == 4
     assert sum(len(r) for r in UNORDERED.values()) == 34
     assert sum(len(r) for r in ORDERED.values()) == 15
+
+
+def test_excerpt_implicit_segment_spellings():
+    path = Path(__file__).resolve().parent.parent / "research/work-items/RE-001-enum-registries-115/verify.py"
+    normalize = runpy.run_path(str(path))["normalized_excerpt"]
+    for old, new in [("rep stos %eax,%es:(%rdi)", "rep stos %eax,(%rdi)"),
+                     ("rep movsb %ds:(%rsi),%es:(%rdi)", "rep movsb (%rsi),(%rdi)")]:
+        assert normalize("10:\tf3 ab\t" + old) == normalize("10:\tf3 ab\t" + new)
+
+
+def test_excerpt_comparison_retains_instruction_bytes_and_operands():
+    path = Path(__file__).resolve().parent.parent / "research/work-items/RE-001-enum-registries-115/verify.py"
+    normalize = runpy.run_path(str(path))["normalized_excerpt"]
+    original = "10:\tf3 ab\trep stos %eax,%es:(%rdi)"
+    assert normalize(original) != normalize(original.replace("f3 ab", "f3 aa"))
+    assert normalize(original) != normalize(original.replace("%eax", "%rax"))

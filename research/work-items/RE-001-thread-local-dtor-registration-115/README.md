@@ -134,3 +134,10 @@ the pure-Python model in `tools/thread_local_dtor_registration_115.py`,
 whose tests run with the system Python. `verify.py` re-checks the digest,
 regenerates the excerpts byte-for-byte, re-runs the census, and re-checks
 the relocations and frames against the binary.
+
+## Verification portability
+
+The excerpt comparison ignores the host-specific binary pathname in the
+objdump file-format header. It compares all subsequent output exactly,
+including instruction bytes and operands. The retained raw excerpts preserve
+the original tool output.
