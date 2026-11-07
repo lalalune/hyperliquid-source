@@ -1,5 +1,8 @@
 # RE-001: what the node #115 lu.rs tag 1 vs 3 means — the "compare helper" is Tokio time code, not a comparison
 
+TLS coordinates were corrected from signed instruction operands on 2026-11-07;
+see [the correction and regression scope](../RE-001-node115-lu-coop-context/TLS-OFFSET-CORRECTION.md).
+
 - Component: `base/src/lu.rs` conversion tags, answered through the callee at `0x5cf2d30`.
 - Target: node #115, 105,896,032 bytes; SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
 - Base/source: `8fd8db680ec4bfef40996e5616bce3d5156d0b86` (upstream main, node-115-only migration).
@@ -107,8 +110,8 @@ direct `E8` callers. No dbstkddl8-create topic, address, table, or model is used
 
 ## Observed structure (context, not the main claim)
 
-- TLS lazy init: `r15 = -0x130`; state byte at `fs:[-0xe8]`, word at
-  `fs:[-0xec]`, byte at `fs:[-0xeb]`. State `0` calls init `0x5ca0d20` with
+- TLS lazy init: `r15 = -0x1130`; state byte at `fs:[-0x10e8]`, word at
+  `fs:[-0x10ec]`, byte at `fs:[-0x10eb]`. State `0` calls init `0x5ca0d20` with
   (TLS base, `0x5cdf410`); state `2` skips the word block; state `1` proceeds.
   The TLS word's low bit and second byte steer the `0x5cf2ef4` path, which
   calls `0x5cf3b90` with (dereferenced second argument, `0x64c6648` → Tokio
@@ -133,7 +136,7 @@ direct `E8` callers. No dbstkddl8-create topic, address, table, or model is used
 - The identity of the helper's second argument (the conversion's passed-through
   context pointer) is unresolved beyond its single dereference and its use on
   the `0x5cf2ef4` path.
-- The TLS slot layout's Tokio-internal meaning (which handle/cell the `-0xe8`
+- The TLS slot layout's Tokio-internal meaning (which handle/cell the `-0x10e8`
   state byte belongs to) is not decoded; only the state machine's observable
   transitions are claimed.
 - The `0x160`/`0x240` offset selection's variant meaning is not decoded; only
