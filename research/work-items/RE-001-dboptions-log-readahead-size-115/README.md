@@ -1,5 +1,19 @@
 # RE-001: node #115 DBOptions+0x220 is log_readahead_size
 
+## Correction from subsequent evidence
+
+The later constructor-packing analysis corrects this packet's original
+DBOptions tail source offsets. `wal_compression` is at `+0x217`,
+`atomic_flush` at `+0x218`, `avoid_unnecessary_blocking_io` at `+0x219`, and
+`write_dbid_to_manifest` at `+0x21a`. The byte range `+0x21b..+0x21f` is
+padding in the observed layouts. The raw excerpts and original interpretations
+below remain available to show the correction. The selected
+`log_readahead_size` field is at `+0x220`.
+[Constructor-packing evidence](../RE-001-optiontypeinfo-mismatches-115/README.md)
+and [PR #4233](https://github.com/lalalune/hyperliquid-source/pull/4233).
+The full map count and registrations are resolved separately in the
+[corrected map evidence](../RE-001-optiontypeinfo-maps-115/README.md).
+
 Task: RE-001. Bounded question: what field is DBOptions+0x220, the value
 the outer `PersistRocksDBOptions` copies into ConfigOptions+0x30 when
 non-null? (Open unknown left by #4108, which resolved the ConfigOptions

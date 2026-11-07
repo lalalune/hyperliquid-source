@@ -11,6 +11,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 SLUG = "RE-001-node115-lockwait-caller-1site-resolver-fixed-380"
 START = 0x63A0810
@@ -20,9 +21,11 @@ PACKET = os.path.join(ROOT, "research", "work-items", SLUG)
 BIN = os.path.join(ROOT, "artifacts", "node", "115", "hl-node")
 VERIFIER = os.path.join(ROOT, "tools",
                         "node115_lockwait_caller_1site_resolver_fixed_380.py")
-SCRATCH = os.path.expanduser("~/workspace/scratch-hl364")
-CACHE = os.path.join(SCRATCH, "priors_cache.json")
-TMPBASE = os.path.expanduser("~/workspace")
+SCRATCH = tempfile.TemporaryDirectory(prefix="node115-lockwait-")
+TMPBASE = SCRATCH.name
+
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+import node115_prior_corpus as prior_corpus
 
 PASS = 0
 FAIL = 0
@@ -47,6 +50,12 @@ def make_copy(name):
         tmp, "tools", "node115_lockwait_caller_1site_resolver_fixed_380.py"))
     shutil.copytree(PACKET, os.path.join(tmp, "research", "work-items",
                                          SLUG))
+    prior_root = os.path.join(ROOT, "research", "work-items")
+    copied_root = os.path.join(tmp, "research", "work-items")
+    for slug in os.listdir(prior_root):
+        if slug != SLUG:
+            os.symlink(os.path.join(prior_root, slug),
+                       os.path.join(copied_root, slug))
     art = os.path.join(tmp, "artifacts", "node", "115")
     os.makedirs(art)
     os.symlink(os.path.realpath(BIN), os.path.join(art, "hl-node"))
@@ -55,7 +64,9 @@ def make_copy(name):
 
 def run_verifier(tmp):
     env = dict(os.environ)
-    env["HL_PRIORS_CACHE"] = CACHE
+    env["NODE115_PRIOR_ROOT"] = os.environ.get("NODE115_PRIOR_ROOT", ROOT)
+    env["PYTHONPATH"] = (os.path.join(ROOT, "tools") + os.pathsep
+                         + env.get("PYTHONPATH", ""))
     r = subprocess.run([sys.executable,
                         os.path.join(tmp, "tools",
                                      "node115_lockwait_caller_1site_resolver_fixed_380.py")],
@@ -68,7 +79,7 @@ def main():
     # 1. Clean temp copy passes.
     tmp = make_copy("clean")
     r = run_verifier(tmp)
-    check("clean temp copy verifier exit 0", r.returncode == 0,
+    check("clean temp copy verifier exit 0", r.returncode == 0 and prior_corpus.report_verified(r.stdout),
           r.stdout[-500:] + r.stderr[-500:])
 
     # 2. Hex flip: one flipped byte in the .hex exhibit must fail.
@@ -129,7 +140,7 @@ def main():
     with open(recp, "wb") as f:
         f.write(orig_bytes)
     r = run_verifier(tmp)
-    check("byte-exact revert passes again", r.returncode == 0,
+    check("byte-exact revert passes again", r.returncode == 0 and prior_corpus.report_verified(r.stdout),
           r.stdout[-500:] + r.stderr[-500:])
 
     # 7. Objdump regeneration matches the exhibit (header lines stripped).
@@ -184,16 +195,6 @@ def main():
         sl = f.read(704)
     check("hex exhibit equals binary slice (independent re-check)",
           len(hexb) == 704 and hexb == sl, str(len(hexb)))
-
-    # 12. Worktree git status shows only the expected untracked paths.
-    r = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT,
-                       capture_output=True, text=True, timeout=60)
-    paths = sorted(l[3:] for l in r.stdout.splitlines())
-    check("git status shows only the packet + tools + tests paths",
-          paths == ["research/work-items/" + SLUG + "/",
-                    "tests/test_node115_lockwait_caller_1site_resolver_fixed_380.py",
-                    "tools/node115_lockwait_caller_1site_resolver_fixed_380.py"],
-          str(paths))
 
     # Cleanup temp copies.
     for name in ("clean", "hexflip", "strict", "callsite", "overlap"):

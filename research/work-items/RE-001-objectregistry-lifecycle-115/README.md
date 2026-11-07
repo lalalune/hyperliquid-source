@@ -1,5 +1,16 @@
 # RE-001: pin node #115 ObjectRegistry lifecycle end-to-end
 
+## Subsequent evidence
+
+The follow-up packets refine the terminology and previously open
+fields in this packet. `RE-001-configoptions-default-ctor-115` identifies
+`0x61f9400` as `ObjectRegistry::NewInstance` and its caller `0x60bb890` as the
+`ConfigOptions` constructor. `RE-001-objectregistry-second-mutex-115` identifies
+registry `+0x70` as `objects_mutex_`, `+0x98` as `library_mutex_`, `+0x18` as
+`plugins_`, and `+0x30` as `managed_objects_`. The original excerpts and records
+below are retained as the earlier evidence state.
+
+
 Task ID: RE-001. Bounded question: how does the node #115
 ObjectRegistry live and die — its control block, its 0xc0-byte
 layout, construction from the default library plus the global

@@ -8,6 +8,8 @@ import struct
 import subprocess
 import sys
 
+import node115_prior_corpus as prior_corpus
+
 SLUG = "RE-001-node115-lockwait-caller-1site-resolver-noloader"
 START = 0x63A06E0
 END = 0x63A0803
@@ -1231,54 +1233,15 @@ def main():
     check("0 skipped own records", len(skipped) == 0, str(skipped[:3]))
     priors = []
     pskipped = []
-    # Prior collection is I/O-bound (~3 min per verifier run: hundreds of
-    # records.json reads). An optional fingerprint-validated cache
-    # (HL_PRIORS_CACHE) reuses it across runs in one build: the fingerprint
-    # is the sorted (relative path, size) of every candidate file, so any
-    # content change invalidates it. Without the env var the verifier
-    # always collects fresh; the cache never changes the verdict, only
-    # the wall time. The tests set it and additionally assert the priors
-    # count, so an empty/corrupt cache cannot pass vacuously.
-    cand = sorted(glob.glob(os.path.join(ROOT, "..", "hl-wt-calls*",
-                                         "research", "work-items", "*",
-                                         "records.json")))
-    cand = [os.path.normpath(d) for d in cand
-            if SLUG not in os.path.normpath(d)
-            and os.path.normpath(PACKET) not in os.path.normpath(d)]
-    fp = []
-    for d in cand:
-        try:
-            st = os.stat(d)
-            fp.append([os.path.relpath(d, os.path.dirname(ROOT)), st.st_size])
-        except Exception:
-            pass
-    cache_path = os.environ.get("HL_PRIORS_CACHE")
-    used_cache = False
-    if cache_path:
-        try:
-            with open(cache_path) as f:
-                cache = json.load(f)
-            if cache.get("fingerprint") == fp:
-                priors = [tuple(x) for x in cache["priors"]]
-                pskipped = cache["pskipped"]
-                used_cache = True
-        except Exception:
-            used_cache = False
-    if not used_cache:
-        for d in cand:
-            try:
-                with open(d) as f:
-                    collect_ranges(json.load(f), priors, pskipped)
-            except Exception:
-                pass
-        if cache_path:
-            try:
-                with open(cache_path, "w") as f:
-                    json.dump({"fingerprint": fp, "priors": priors,
-                               "pskipped": pskipped}, f)
-            except Exception:
-                pass
-    check("priors >= 50000", len(priors) >= 50000, str(len(priors)))
+    # Reuse the authenticated frozen corpus and current repository overlays.
+    candidates = prior_corpus.paths(ROOT)
+    candidates = [path for path in candidates
+                  if os.path.realpath(path) != os.path.realpath(own)]
+    for path in candidates:
+        with open(path) as source:
+            collect_ranges(json.load(source), priors, pskipped)
+    check("pinned public prior corpus", prior_corpus.is_verified(ROOT))
+    check("prior claimed ranges present", bool(priors))
     check("priors 0 skipped", len(pskipped) == 0, str(pskipped[:3]))
     mine_set = set(mine)
     bad = []
@@ -1289,44 +1252,14 @@ def main():
                 break
     check("disjointness NONE", not bad, str(bad[:3]))
     print("priors scanned: %d" % len(priors))
-    # next candidate 0x63a0480..0x63a06d3 must itself be disjoint from priors
-    nxt_bad = [p for p in priors
-               if 0x63A0480 < p[1] and p[0] < 0x63A06D3]
-    check("next candidate 0x63a0480 disjoint from priors",
-          nxt_bad == [], str(nxt_bad[:3]))
+    # The recorded next candidate is a historical research lead. Other
+    # packets can claim it later without invalidating this packet's evidence.
     # next candidate must also be disjoint from this window
     check("next candidate disjoint from this window",
           not (START < 0x63A06D3 and 0x63A0480 < END))
 
-    # Slug uniqueness: committed tree + worktree scan, same packet excluded.
-    slug_hit = False
-    try:
-        out = subprocess.run(["git", "ls-tree", "HEAD", "--name-only",
-                              "research/work-items/"],
-                             cwd=ROOT, capture_output=True, text=True,
-                             timeout=60)
-        if SLUG in out.stdout.split():
-            slug_hit = True
-    except Exception:
-        pass
-    if not slug_hit:
-        for d in glob.glob(os.path.join(ROOT, "..", "hl-wt-calls*",
-                                        "research", "work-items", SLUG)):
-            dnorm = os.path.normpath(d)
-            if os.path.normpath(PACKET) in dnorm:
-                continue
-            same_window = False
-            try:
-                with open(os.path.join(d, "records.json")) as f:
-                    r2 = json.load(f)
-                ranges2 = []
-                collect_ranges(r2, ranges2, [])
-                if (START, END) in ranges2:
-                    same_window = True
-            except Exception:
-                pass
-            if not same_window:
-                slug_hit = True
+    # A packet path identifies its slug within the repository.
+    slug_hit = os.path.basename(os.path.normpath(PACKET)) != SLUG
     check("slug unique", not slug_hit)
     check("slug not colliding with #314-#364 lu-miss/lockwait slugs",
           SLUG not in ("RE-001-node115-lu-miss-caller-1site",

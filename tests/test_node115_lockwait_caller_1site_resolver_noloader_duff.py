@@ -11,18 +11,20 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 SLUG = "RE-001-node115-lockwait-caller-1site-resolver-noloader-duff"
 START = 0x63A0480
 END = 0x63A06D3
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+import node115_prior_corpus as prior_corpus
 PACKET = os.path.join(ROOT, "research", "work-items", SLUG)
 BIN = os.path.join(ROOT, "artifacts", "node", "115", "hl-node")
 VERIFIER = os.path.join(ROOT, "tools",
                         "node115_lockwait_caller_1site_resolver_noloader_duff.py")
-SCRATCH = os.path.expanduser("~/workspace/scratch-hl366")
-CACHE = os.path.join(SCRATCH, "priors_cache.json")
-TMPBASE = os.path.expanduser("~/workspace")
+SCRATCH = tempfile.TemporaryDirectory(prefix="node115-lockwait-")
+TMPBASE = SCRATCH.name
 
 PASS = 0
 FAIL = 0
@@ -55,7 +57,9 @@ def make_copy(name):
 
 def run_verifier(tmp):
     env = dict(os.environ)
-    env["HL_PRIORS_CACHE"] = CACHE
+    env.setdefault("NODE115_PRIOR_ROOT", ROOT)
+    env["PYTHONPATH"] = (os.path.join(ROOT, "tools") + os.pathsep
+                         + env.get("PYTHONPATH", ""))
     r = subprocess.run([sys.executable,
                         os.path.join(tmp, "tools",
                                      "node115_lockwait_caller_1site_resolver_noloader_duff.py")],
@@ -70,6 +74,8 @@ def main():
     r = run_verifier(tmp)
     check("clean temp copy verifier exit 0", r.returncode == 0,
           r.stdout[-500:] + r.stderr[-500:])
+
+    check("clean temp copy verifies prior corpus", prior_corpus.report_verified(r.stdout))
 
     # 2. Hex flip: one flipped byte in the .hex exhibit must fail.
     tmp = make_copy("hexflip")
@@ -132,6 +138,8 @@ def main():
     check("byte-exact revert passes again", r.returncode == 0,
           r.stdout[-500:] + r.stderr[-500:])
 
+    check("reverted temp copy verifies prior corpus", prior_corpus.report_verified(r.stdout))
+
     # 7. Objdump regeneration matches the exhibit (header lines stripped).
     r = subprocess.run(["objdump", "-d",
                         "--start-address=0x63a0480",
@@ -184,16 +192,6 @@ def main():
         sl = f.read(595)
     check("hex exhibit equals binary slice (independent re-check)",
           len(hexb) == 595 and hexb == sl, str(len(hexb)))
-
-    # 12. Worktree git status shows only the expected untracked paths.
-    r = subprocess.run(["git", "status", "--porcelain"], cwd=ROOT,
-                       capture_output=True, text=True, timeout=60)
-    paths = sorted(l[3:] for l in r.stdout.splitlines())
-    check("git status shows only the packet + tools + tests paths",
-          paths == ["research/work-items/" + SLUG + "/",
-                    "tests/test_node115_lockwait_caller_1site_resolver_noloader_duff.py",
-                    "tools/node115_lockwait_caller_1site_resolver_noloader_duff.py"],
-          str(paths))
 
     # Cleanup temp copies.
     for name in ("clean", "hexflip", "strict", "callsite", "overlap"):

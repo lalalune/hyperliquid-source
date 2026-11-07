@@ -46,7 +46,11 @@ pub fn append_after_grow(
 
 fn plan(capacity: usize, head: usize, length: usize) -> AppendPlan {
     AppendPlan {
-        index: (head + length) % capacity,
+        index: if length >= capacity - head {
+            length - (capacity - head)
+        } else {
+            head + length
+        },
         next_length: length + 1,
     }
 }
@@ -81,6 +85,17 @@ mod tests {
             rows += 1;
         }
         assert_eq!(rows, 1496);
+    }
+
+    #[test]
+    fn large_valid_coordinates_wrap_without_overflow() {
+        assert_eq!(
+            append_slot(usize::MAX, usize::MAX - 2, usize::MAX - 2),
+            Ok(AppendPlan {
+                index: usize::MAX - 4,
+                next_length: usize::MAX - 1,
+            })
+        );
     }
 
     #[test]

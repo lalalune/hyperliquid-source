@@ -236,3 +236,10 @@ that need the Rust toolchain could not run here; the packet's own
 `verify.py` and the Python model tests are the verification that ran.
 `work/hl-node-115.bin` is the materialized node #115 binary and its
 hash matches provenance/artifacts.json.
+
+## Binutils display compatibility
+
+The verifier accepts the redundant `%es:` destination annotation on
+`rep stos %rax,(%rdi)`. Binutils releases differ in that display spelling.
+Instruction bytes and all other excerpt text must match exactly. The original
+raw exports are restored after verification and retain their recorded hashes.

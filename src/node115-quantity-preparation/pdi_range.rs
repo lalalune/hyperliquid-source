@@ -118,8 +118,8 @@ impl Iterator for PdiRangeIter {
     fn size_hint(&self) -> (usize, Option<usize>) {
         let remaining = self.range.count - self.index;
         match usize::try_from(remaining) {
-            Ok(value) => (value, Some(value)),
-            Err(_) => (usize::MAX, None),
+            Ok(value) => (0, Some(value)),
+            Err(_) => (0, None),
         }
     }
 }
@@ -216,10 +216,22 @@ mod tests {
     }
 
     #[test]
-    fn size_hint_is_exact_for_small_iterators() {
+    fn size_hint_allows_early_termination_on_arithmetic_error() {
+        let threshold = u64::MAX / super::MULTIPLIER;
+        let mut iter = PdiRange::new(0, 2000, threshold).unwrap().into_iter();
+        let (lower, upper) = iter.size_hint();
+        let actual = iter.by_ref().count();
+        assert!(lower <= actual);
+        assert!(upper.unwrap() >= actual);
+        assert_eq!(actual, 1617);
+        assert_eq!(iter.size_hint(), (0, Some(0)));
+    }
+
+    #[test]
+    fn size_hint_bounds_small_iterators() {
         let mut iter = PdiRange::new(7, 10, 1).unwrap().into_iter();
-        assert_eq!(iter.size_hint(), (3, Some(3)));
+        assert_eq!(iter.size_hint(), (0, Some(3)));
         assert!(iter.next().is_some());
-        assert_eq!(iter.size_hint(), (2, Some(2)));
+        assert_eq!(iter.size_hint(), (0, Some(2)));
     }
 }

@@ -1,5 +1,19 @@
 # RE-001: pin node #115 the full DBOptions OptionTypeInfo map: the three mismatched offsets and DBOptions+0x21b
 
+## Correction from subsequent evidence
+
+The original 92-entry map interpretation below is superseded. Subsequent
+node #115 analysis resolves two maps, 19 MutableDBOptions entries at
+`0x6506dc0` and 81 DBOptions entries at `0x6506d80`, together with four enum
+registrations. It also identifies eight special pairs and the OptionTypeInfo
+move constructors. The original extraction and its successful self-checks
+remain here as historical evidence, including the incomplete entry count and
+row interpretation. Use the later packet for the complete map and its
+field/type/verification assignments. The independently observed constructor
+packing and the DBOptions `+0x21b` census below retain their narrower scope.
+[Corrected map evidence](../RE-001-optiontypeinfo-maps-115/README.md) and
+[PR #4237](https://github.com/lalalune/hyperliquid-source/pull/4237).
+
 Task: RE-001. Bounded question: what is the full DBOptions OptionTypeInfo
 map on node #115, and what are #4146's three open unknowns — the
 avoid_unnecessary_blocking_io offset mismatch (map 0x198 vs the
