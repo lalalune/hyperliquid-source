@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Unit tests for RE-001-node115-lu-leaf-write-class (packet #258)."""
 import hashlib
+import importlib.util
 import json
 import os
 import re
@@ -25,6 +26,9 @@ def strip_header(text):
             continue
         if line.startswith("Disassembly of section"):
             continue
+        # GNU versions differ in displaying the implicit DS/ES operands.
+        line = line.replace("\trep movsq %ds:(%rsi),%es:(%rdi)",
+                            "\trep movsq (%rsi),(%rdi)")
         out.append(line)
     return "\n".join(out).strip()
 
@@ -35,6 +39,20 @@ class TestLeafWriteClass(unittest.TestCase):
             self.rec = json.load(f)
         with open(BIN, "rb") as f:
             self.data = f.read()
+
+    def test_implicit_string_segment_display_preserves_bytes_and_operands(self):
+        spec = importlib.util.spec_from_file_location("leaf_write_verifier", TOOL)
+        verifier = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(verifier)
+        saved = " 63efa80:\tf3 48 a5\trep movsq %ds:(%rsi),%es:(%rdi)\n"
+        current = " 63efa80:\tf3 48 a5\trep movsq (%rsi),(%rdi)\n"
+        for normalize in (strip_header, verifier.strip_header):
+            with self.subTest(normalizer=normalize.__module__):
+                self.assertEqual(normalize(saved), normalize(current))
+                self.assertNotEqual(normalize(saved),
+                                    normalize(current.replace("48 a5", "48 ab")))
+                self.assertNotEqual(normalize(saved),
+                                    normalize(current.replace("(%rsi)", "(%rbx)")))
 
     def test_binary_identity(self):
         self.assertEqual(len(self.data), 105896032)

@@ -57,6 +57,9 @@ def strip_header(text):
             continue
         if line.startswith("Disassembly of section"):
             continue
+        # GNU versions differ in displaying the implicit DS/ES operands.
+        line = line.replace("\trep movsq %ds:(%rsi),%es:(%rdi)",
+                            "\trep movsq (%rsi),(%rdi)")
         out.append(line)
     return "\n".join(out).strip()
 
