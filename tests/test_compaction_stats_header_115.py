@@ -183,8 +183,8 @@ def test_long_name_truncation():
 
 
 def test_row_format_literals_match_binary():
-    data = (Path(__file__).resolve().parents[1] / "work"
-            / "hl-node-115.bin").read_bytes()
+    data = (Path(__file__).resolve().parents[1] / "artifacts"
+            / "node" / "115" / "hl-node").read_bytes()
 
     def cstr(addr):
         end = data.find(b"\x00", addr)

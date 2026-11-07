@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 import compaction_dump_66e0_115 as m
 
 ROOT = Path(__file__).resolve().parents[1]
-BIN = ROOT / "work" / "hl-node-115.bin"
+BIN = ROOT / "artifacts" / "node" / "115" / "hl-node"
 
 LIBC = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
 LIBC.snprintf.restype = ctypes.c_int
