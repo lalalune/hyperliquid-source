@@ -1,0 +1,485 @@
+{
+ "task": "RE-001",
+ "work_item": "RE-001-dump-slot-method-names-115",
+ "artifact": {
+  "node": 115,
+  "file": "work/hl-node-115.bin",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+ },
+ "question": "Name, for node #115, the C++ methods behind the vtable slot calls in ColumnFamilyOptions::Dump (0x60b50c0) and the sole host that drives the dump.",
+ "resolves": "#4286 open unknowns: Logger vtable slots 3/5/8, TableFactory slot 0x20, blob_cache slots 0x10/0xc8, collector slot 0xa0, host 0x5d954b0.",
+ "source_basis": "RocksDB v8.1.1 headers (env.h, configurable.h, customizable.h, table_properties.h, options.cc, column_family.cc) for declaration order and call-site source; every slot name below is additionally confirmed by the function body in the binary. The binary's column_family.cc line numbers differ from the v8.1.1 tag (see open_unknowns).",
+ "logger": {
+  "vtable_envlogger": "0x64cda68",
+  "vtable_autoroll": "0x64d1f00",
+  "typeinfo_envlogger": "N7rocksdb9EnvLoggerE",
+  "typeinfo_autoroll": "N7rocksdb14AutoRollLoggerE",
+  "only_two_logger_classes": true,
+  "note": "No PosixLogger vtable exists in the binary.",
+  "level_byte": "this+0x11 (InfoLogLevel)",
+  "closed_flag": "this+0x10 (bool, set by Close)",
+  "slots": {
+   "0": {
+    "fn": "0x5fcfb90",
+    "name": "~EnvLogger (D0)",
+    "note": "AutoRollLogger D0 0x60576b0"
+   },
+   "1": {
+    "fn": "0x5fcfde0",
+    "name": "~EnvLogger (D1)",
+    "note": "AutoRollLogger D1 0x6057d00"
+   },
+   "2": {
+    "fn": "0x5fcc410",
+    "name": "Close()",
+    "shape": "Status by value (sret); if closed_ (+0x10) is set returns OK; else sets it and calls slot 10 (CloseImpl) into the same sret",
+    "shared": "EnvLogger and AutoRollLogger"
+   },
+   "3": {
+    "fn": "0x5fcc200",
+    "name": "LogHeader(const char*, va_list)",
+    "shape": "forwards to slot 5 with level 1 (INFO_LEVEL); AutoRollLogger overrides at 0x6057000 (rollover-aware)"
+   },
+   "4": {
+    "fn": "0x5fce280",
+    "name": "Logv(const char*, va_list)",
+    "note": "by header position and 3-arg shape; AutoRollLogger override 0x6058770"
+   },
+   "5": {
+    "fn": "0x5fcd400",
+    "name": "Logv(InfoLogLevel, const char*, va_list)",
+    "shape": "gate: return iff level < log_level_ (+0x11); else jump to the core 0x5fcd2c0, which routes level 5 (HEADER) through slot 3 and other levels through the formatter",
+    "shared": "EnvLogger and AutoRollLogger"
+   },
+   "6": {
+    "fn": "0x5fcced0",
+    "name": "GetLogFileSize() const",
+    "shape": "calls helpers on this+0x108, returns this+0x98; AutoRollLogger override 0x6057590"
+   },
+   "7": {
+    "fn": "0x5fce130",
+    "name": "Flush()",
+    "note": "by header position; AutoRollLogger override 0x6057440"
+   },
+   "8": {
+    "fn": "0x5fcc220",
+    "name": "GetInfoLogLevel() const",
+    "shape": "movzbl 0x11(%rdi),%eax; ret; AutoRollLogger override 0x60552e0 delegates to the wrapped logger's slot 8"
+   },
+   "9": {
+    "fn": "0x5fcc230",
+    "name": "SetInfoLogLevel(InfoLogLevel)",
+    "shape": "mov %sil,0x11(%rdi); ret; AutoRollLogger override 0x6055280"
+   },
+   "10": {
+    "fn": "0x5fceae0",
+    "name": "CloseImpl()",
+    "note": "called by slot 2; AutoRollLogger override 0x60551d0"
+   }
+  },
+  "helper_routing": {
+   "helper": "0x5fceda0",
+   "pre_gate": "calls slot 8; returns without logging iff log_level_ > level (cmp %bpl,%al; ja ret)",
+   "level_5": "calls slot 3 (LogHeader)",
+   "other_levels": "calls slot 5 (leveled Logv)",
+   "sibling_nolevel": "0x5fceea0 calls slot 3 with no level check",
+   "emission_rule": "a level-L message is emitted iff L >= log_level_; a level-5 (HEADER) message is emitted iff 1 >= log_level_ because LogHeader re-gates through Logv(INFO_LEVEL)"
+  },
+  "tail_slots_11_plus": "unresolved (see open_unknowns)"
+ },
+ "table_factory": {
+  "vtable_blockbased": "0x64d39b8",
+  "vtable_cuckoo": "0x64d5cf0",
+  "vtable_plain": "0x64d6628",
+  "slots": {
+   "2": {
+    "fn": "0x609d760",
+    "name": "GetOption (Configurable)",
+    "shared": "all three factories and CompactOnDeletion",
+    "id_special_case": "if the requested name is \"id\" (size 2, bytes 'i','d'), calls slot 15 (GetId) and returns it as the value"
+   },
+   "3": {
+    "fn": "0x609dc40",
+    "name": "AreEquivalent (Configurable)",
+    "shared": "all three factories and CompactOnDeletion"
+   },
+   "4": {
+    "fn": "BlockBased 0x60da1f0; Cuckoo 0x615aca0; Plain 0x6192d70",
+    "name": "GetPrintableOptions() const",
+    "shape": "returns std::string by value; reserves a large buffer and formats options via snprintf; BlockBased compares a sub-object's slot-0x70 Name against the FlushBlockBySizePolicyFactory literal 0x437447; Cuckoo formats ' hash_table_ratio: %lf\\n' (0x441c35); Plain formats ' user_key_len: %u\\n' (0x44ffa8)"
+   },
+   "5": {
+    "fn": "BlockBased 0x60db570; Cuckoo/Plain 0x6095e70",
+    "name": "PrepareOptions (Configurable)"
+   },
+   "6": {
+    "fn": "BlockBased 0x60d8b10; Cuckoo/Plain 0x6096790",
+    "name": "ValidateOptions (Configurable)"
+   },
+   "7": {
+    "fn": "BlockBased 0x60d74e0; Cuckoo/Plain 0x5d2e090",
+    "name": "GetOptionsPtr (Customizable override)"
+   },
+   "8": {
+    "fn": "0x60956f0",
+    "name": "ParseStringOptions (Configurable)",
+    "shared": "all three factories and CompactOnDeletion"
+   },
+   "9": {
+    "fn": "0x609d0e0",
+    "name": "ConfigureOptions (Configurable)",
+    "shared": "all three factories and CompactOnDeletion"
+   },
+   "10": {
+    "fn": "BlockBased 0x60d7d20; Cuckoo/Plain 0x60986b0",
+    "name": "ParseOption (Configurable)"
+   },
+   "11": {
+    "fn": "0x6095710",
+    "name": "OptionsAreEqual (Configurable)",
+    "shared": "all three factories and CompactOnDeletion"
+   },
+   "12": {
+    "fn": "0x609de80",
+    "name": "SerializeOptions (Configurable)",
+    "shared": "all three factories and CompactOnDeletion"
+   },
+   "13": {
+    "fn": "0x609d980",
+    "name": "GetOptionName (Configurable)",
+    "shared": "all three factories and CompactOnDeletion"
+   },
+   "14": {
+    "fn": "BlockBased 0x60b1d90; Cuckoo 0x615aae0; Plain 0x6192820",
+    "name": "Name() const",
+    "shape": "BlockBased returns the literal 'BlockBasedTable' (0x44ecc8)"
+   },
+   "15": {
+    "fn": "0x5d32a30",
+    "name": "GetId() const (Customizable)",
+    "shared": "all three factories and CompactOnDeletion"
+   }
+  },
+  "dump_call": {
+   "line": 7,
+   "format": "table_factory options: %s",
+   "slot": "0x20 (slot 4)",
+   "method": "GetPrintableOptions() const",
+   "source": "options/options.cc L295-297"
+  }
+ },
+ "cache": {
+  "vtable_base": "0x64c8c60",
+  "vtable_lru": "0x64c89b8",
+  "vtable_sharded": "0x64c88b0",
+  "vtable_sharded_base": "0x64c8b48",
+  "vtable_wrapper": "0x64c8da0",
+  "vtable_secondary_adapter": "0x64c8ea0",
+  "vtable_charged": "0x64c9e00",
+  "slots": {
+   "2": {
+    "name": "Name() const",
+    "base": "__cxa_pure_virtual (pure in base Cache)",
+    "lru": "0x5d3a950 -> literal 'LRUCache' (0x44b256)",
+    "charged": "0x5db68c0 -> literal 'ChargedCache' (0x43b462)",
+    "secondary_adapter": "0x5d42bb0 delegates to the wrapped cache's Name (walks +0x38)"
+   },
+   "25": {
+    "name": "GetPrintableOptions() const",
+    "base": "0x5d3f6c0 constructs an empty std::string (SSO: ptr=&buf, size 0, buf[0]=0)",
+    "lru": "0x5d3f210 formats options (reserve 0x4e20, reads this+0x50)",
+    "secondary_adapter": "0x5d42460 delegates to the wrapped cache's slot 25 then appends",
+    "charged": "0x5d3f6c0 (inherits the base default)",
+    "wrapper": "0x5d3f6c0 (inherits the base default)"
+   }
+  },
+  "dump_calls": {
+   "line_87": {
+    "format": "Options.blob_cache: %s",
+    "slot": "0x10 (slot 2)",
+    "method": "Name() const",
+    "guard": "skipped entirely when blob_cache is null (dump 0x60b6206-0x60b6210)",
+    "source": "options/options.cc L851-859"
+   },
+   "line_88": {
+    "format": "blob_cache options: %s",
+    "slot": "0xc8 (slot 25)",
+    "method": "GetPrintableOptions() const",
+    "guard": "dump 0x60b6235-0x60b624d loads slot 25 and compares it against GOT 0x64ecd20 (RELATIVE -> 0x5d3f6c0, the base default); equal -> empty string, else calls slot 25 (cold block 0x60b7080)"
+   },
+   "line_89": {
+    "format": "blob_cache prepopulated: %s"
+   }
+  }
+ },
+ "collector": {
+  "vtable_compact_on_deletion": "0x64d9088",
+  "typeinfo": "N7rocksdb33CompactOnDeletionCollectorFactoryE",
+  "slots": {
+   "2": {
+    "fn": "0x609d760",
+    "name": "GetOption (Configurable)"
+   },
+   "3": {
+    "fn": "0x609dc40",
+    "name": "AreEquivalent (Configurable)"
+   },
+   "4": {
+    "fn": "0x5d32560",
+    "name": "GetPrintableOptions (Configurable)",
+    "shape": "the base default: constructs an empty std::string (same body as Cache base 0x5d3f6c0)"
+   },
+   "14": {
+    "fn": "0x61f9880",
+    "name": "Name() const",
+    "shape": "returns the literal 'CompactOnDeletionCollector' (0x436389)"
+   },
+   "15": {
+    "fn": "0x5d32a30",
+    "name": "GetId() const (Customizable)"
+   },
+   "16": {
+    "fn": "0x5d2e770",
+    "name": "IsInstanceOf (Customizable)"
+   },
+   "17": {
+    "fn": "0x5d2ca00",
+    "name": "Inner() const (Customizable)",
+    "shape": "xor %eax,%eax; ret (nullptr)"
+   },
+   "18": {
+    "fn": "0x5d2ca10",
+    "name": "NickName() const (Customizable)",
+    "shape": "returns the empty string at 0x4376fd"
+   },
+   "19": {
+    "fn": "0x61fb010",
+    "name": "CreateTablePropertiesCollector(Context)",
+    "shape": "operator-new(0x458) then ctor 0x61faf40 with the factory fields +0x20/+0x28/+0x30"
+   },
+   "20": {
+    "fn": "0x61fb370",
+    "name": "ToString() const (override)",
+    "shape": "builds a std::ostringstream with the factory fields (0x1c8 stack frame)"
+   }
+  },
+  "base_tostring": {
+   "fn": "0x60b1ea0",
+   "name": "TablePropertiesCollectorFactory::ToString() const",
+   "shape": "calls factory->vtable slot 0x70 (Name), copies the name into the return string (SSO path + _M_create heap path; null name -> empty)",
+   "direct_callers": 0,
+   "note": "no vtable in the binary installs 0x60b1ea0 at slot 20; it exists only as the dump's comparison target (and as the inherited implementation for any class that does not override ToString -- none present in the binary)"
+  },
+  "slot_20_why": "v8.1.1 header order: Configurable slots 0-13, Customizable Name(14) GetId(15) IsInstanceOf(16) Inner(17) NickName(18), then CreateTablePropertiesCollector(19), ToString(20). The protected virtual NickName() is the slot that pushes ToString to 20.",
+  "dump_call": {
+   "line": 62,
+   "format": "Options.table_properties_collectors: %s",
+   "slot": "0xa0 (slot 20)",
+   "method": "ToString() const",
+   "vector": "CFOptions +0x138/+0x140, 16-byte elements",
+   "guard": "dump 0x60b5d70-0x60b5d84 loads factory->vtable[20], compares against GOT 0x64edca8 (RELATIVE -> 0x60b1ea0); match -> Name() fast path (slot 0x70, copy into temp string at 0xe0(%rsp)); mismatch -> cold block 0x60b64c0 calls slot 20, then rejoins at 0x60b5dec",
+   "join": "names joined with ';' via ostringstream, trailing separator trimmed",
+   "source": "options/options.cc L711-717; table_properties.h L321"
+  },
+  "short_vtable_note": "UserKeyTablePropertiesCollectorFactory (vtable 0x64c9a98) derives from IntTblPropCollectorFactory (4 virtuals), not from TablePropertiesCollectorFactory; ObjectLibrary::FactoryEntry<T> (vtable 0x64d9140) derives from ObjectLibrary::Entry (4 virtuals), not from T. Readings of their 'slot 20' are artifacts of reading past their short vtables."
+ },
+ "host": {
+  "fn": "0x5d954b0..0x5d96890",
+  "name": "ColumnFamilyData::ColumnFamilyData(...)",
+  "evidence": {
+   "header_log": "[%s:619] --------------- Options for column family [%s]:\\n (0x958358; file string db/column_family.cc at 0x444573, CF name in r8, level 1, logger from this+0x588)",
+   "unknown_style_log": "[%s:610] Unable to recognize the specified compaction style %d. Column family %s will use kCompactionStyleLevel.\\n (0x9652a0)",
+   "skip_log": "[%s:624] \\t(skipping printing options)\\n (0x95ae28)",
+   "gate": "call 0x5d8d0e0 (NumberOfColumnFamilies); cmp $0x9,%rax; ja 0x5d962d0 -- Dump runs iff NumberOfColumnFamilies() < 10, else the skip log",
+   "dump_call": "call 0x60b50c0 at 0x5d95e69, immediately after the header log",
+   "after_dump": "call 0x5d8bea0 (RecalculateWriteStallConditions)",
+   "direct_callers": [
+    "0x5d96cf8",
+    "0x5d972ab"
+   ],
+   "caller_fns": "enclosing functions start at 0x5d969c0 and 0x5d97220 (CF-creation sites; C++ names not yet pinned)"
+  },
+  "line_number_note": "in the v8.1.1 tag the same three log statements sit at lines ~1162-1189 (ctor at L983-1237), not 610/619/624. Statements, order, gate and Dump call all match; only the line numbers differ (the binary's column_family.cc is a nearby revision with the ctor ~560 lines earlier)."
+ },
+ "guards": [
+  {
+   "name": "blob_cache GetPrintableOptions",
+   "dump_cmp_addr": "0x60b6246",
+   "got_slot": "0x64ecd20",
+   "got_addend": "0x5d3f6c0",
+   "expected": "0x5d3f6c0"
+  },
+  {
+   "name": "collector ToString",
+   "dump_cmp_addr": "0x60b5d7d",
+   "got_slot": "0x64edca8",
+   "got_addend": "0x60b1ea0",
+   "expected": "0x60b1ea0"
+  }
+ ],
+ "callers": {
+  "0x5d954b0": [
+   "0x5d96cf8",
+   "0x5d972ab"
+  ],
+  "0x60b50c0": [
+   "0x5d95e69"
+  ],
+  "0x60b1ea0": [],
+  "0x5d3f6c0": []
+ },
+ "literals": {
+  "BlockBasedTable": "0x44ecc8",
+  "LRUCache": "0x44b256",
+  "ChargedCache": "0x43b462",
+  "CompactOnDeletionCollector": "0x436389",
+  "NickName_empty_string": "0x4376fd",
+  "host_header_format": "0x958358",
+  "host_skip_format": "0x95ae28",
+  "blob_cache_name_format": "0x95d490",
+  "blob_cache_options_format": "0x95c868"
+ },
+ "vtables": {
+  "EnvLogger": {
+   "0": "0x5fcfb90",
+   "1": "0x5fcfde0",
+   "2": "0x5fcc410",
+   "3": "0x5fcc200",
+   "4": "0x5fce280",
+   "5": "0x5fcd400",
+   "6": "0x5fcced0",
+   "7": "0x5fce130",
+   "8": "0x5fcc220",
+   "9": "0x5fcc230",
+   "10": "0x5fceae0"
+  },
+  "AutoRollLogger": {
+   "0": "0x60576b0",
+   "1": "0x6057d00",
+   "2": "0x5fcc410",
+   "3": "0x6057000",
+   "4": "0x6058770",
+   "5": "0x5fcd400",
+   "6": "0x6057590",
+   "7": "0x6057440",
+   "8": "0x60552e0",
+   "9": "0x6055280",
+   "10": "0x60551d0"
+  },
+  "BlockBasedTableFactory": {
+   "0": "0x60b2270",
+   "1": "0x60b25e0",
+   "2": "0x609d760",
+   "3": "0x609dc40",
+   "4": "0x60da1f0",
+   "5": "0x60db570",
+   "6": "0x60d8b10",
+   "7": "0x60d74e0",
+   "8": "0x60956f0",
+   "9": "0x609d0e0",
+   "10": "0x60d7d20",
+   "11": "0x6095710",
+   "12": "0x609de80",
+   "13": "0x609d980",
+   "14": "0x60b1d90",
+   "15": "0x5d32a30"
+  },
+  "CuckooTableFactory": {
+   "0": "0x615aef0",
+   "1": "0x615af80",
+   "2": "0x609d760",
+   "3": "0x609dc40",
+   "4": "0x615aca0",
+   "5": "0x6095e70",
+   "6": "0x6096790",
+   "7": "0x5d2e090",
+   "8": "0x60956f0",
+   "9": "0x609d0e0",
+   "10": "0x60986b0",
+   "11": "0x6095710",
+   "12": "0x609de80",
+   "13": "0x609d980",
+   "14": "0x615aae0",
+   "15": "0x5d32a30"
+  },
+  "PlainTableFactory": {
+   "0": "0x6192c20",
+   "1": "0x6192cb0",
+   "2": "0x609d760",
+   "3": "0x609dc40",
+   "4": "0x6192d70",
+   "5": "0x6095e70",
+   "6": "0x6096790",
+   "7": "0x5d2e090",
+   "8": "0x60956f0",
+   "9": "0x609d0e0",
+   "10": "0x60986b0",
+   "11": "0x6095710",
+   "12": "0x609de80",
+   "13": "0x609d980",
+   "14": "0x6192820",
+   "15": "0x5d32a30"
+  },
+  "Cache": {
+   "2": "__cxa_pure_virtual",
+   "25": "0x5d3f6c0"
+  },
+  "LRUCache": {
+   "2": "0x5d3a950",
+   "25": "0x5d3f210"
+  },
+  "ShardedCache<LRUCacheShard>": {
+   "2": "__cxa_pure_virtual",
+   "25": "0x5d3f210"
+  },
+  "ShardedCacheBase": {
+   "2": "__cxa_pure_virtual",
+   "25": "0x5d3f210"
+  },
+  "CacheWrapper": {
+   "2": "__cxa_pure_virtual",
+   "25": "0x5d3f6c0"
+  },
+  "CacheWithSecondaryAdapter": {
+   "2": "0x5d42bb0",
+   "25": "0x5d42460"
+  },
+  "ChargedCache": {
+   "2": "0x5db68c0",
+   "25": "0x5d3f6c0"
+  },
+  "CompactOnDeletionCollectorFactory": {
+   "0": "0x61f9f10",
+   "1": "0x61f9fa0",
+   "2": "0x609d760",
+   "3": "0x609dc40",
+   "4": "0x5d32560",
+   "5": "0x6095e70",
+   "6": "0x6096790",
+   "7": "0x5d2e090",
+   "8": "0x60956f0",
+   "9": "0x609d0e0",
+   "10": "0x60986b0",
+   "11": "0x6095710",
+   "12": "0x609de80",
+   "13": "0x609d980",
+   "14": "0x61f9880",
+   "15": "0x5d32a30",
+   "16": "0x5d2e770",
+   "17": "0x5d2ca00",
+   "18": "0x5d2ca10",
+   "19": "0x61fb010",
+   "20": "0x61fb370"
+  }
+ },
+ "open_unknowns": [
+  "Logger vtable slots 11+: EnvLogger slots 11/13/14 have no relocation and read as zero; slot 12 points at data 0x64cd8d0; the EnvLogger tail holds the shared Configurable GetOption/AreEquivalent (0x609d760/0x609dc40) at offsets 0x78/0x80, and the AutoRollLogger tail holds 0x6055240 (bare ret), 0x6055260/0x6055270 (deleting dtors for 0x18-byte objects) and 0x6057d20 (a dtor-shaped function calling AutoRollLogger D0 0x60576b0). Whether the binary's Logger carries additional virtuals past CloseImpl or these qwords belong to adjacent objects is not resolved; the dump never calls past slot 10.",
+  "AutoRollLogger slot 3 (0x6057000), slot 4 (0x6058770), slots 6/7 (0x6057590/0x6057440), slot 9 (0x6055280), slot 10 (0x60551d0): named by header position only; their bodies were not dissected beyond slot 3 (rollover-aware LogHeader) and slot 8 (delegates GetInfoLogLevel to the wrapped logger). Note: AutoRollLogger's slot-5 gate reads its OWN +0x11 byte while its slot 8 returns the WRAPPED logger's level -- the two can disagree; observed, not explained.",
+  "Logger slot 4 (0x5fce280) and slot 6 (0x5fcced0) and slot 7 (0x5fce130) and slot 10 (0x5fceae0): named by header position plus the observed shape (3-arg Logv; size helpers on this+0x108 returning this+0x98; Flush; CloseImpl called by slot 2); their full bodies were not dissected.",
+  "TableFactory slots 3/5/6/7/10 by declaration order plus the shared-vs-own split observed in the vtables; their bodies were not dissected (only slots 2, 4, 14 were).",
+  "The string at 0x444587 ('BlockTableOptions'), used at host 0x5d961f4; its purpose is not pinned.",
+  "The two host callers' enclosing functions (0x5d969c0, 0x5d97220): CF-creation sites, C++ names not yet pinned.",
+  "Verification C++ enum names carried from #4311 (InfoLogLevel names are the v8.1.1 header names DEBUG/INFO/WARN/ERROR/FATAL/HEADER for values 0-5; the binary only pins the numeric values 1 and 5).",
+  "ColumnFamilyOptions C++ layout names for padding bytes carried from #4286."
+ ]
+}
