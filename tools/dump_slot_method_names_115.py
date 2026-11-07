@@ -6,10 +6,12 @@ a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301.
 This module models the OBSERVABLE behavior pinned by the evidence
 packet research/work-items/RE-001-dump-slot-method-names-115/:
 
-* Logger level gate and the two log helpers (0x5fceda0, 0x5fceea0):
+* EnvLogger level gate and the two log helpers (0x5fceda0, 0x5fceea0):
   a level-L message is emitted iff L >= log_level_; a level-5
   (HEADER) message is emitted iff 1 >= log_level_ because LogHeader
   re-gates through Logv(INFO_LEVEL).
+* AutoRollLogger LogHeader forwards to wrapped slot 4 when its
+  wrapped logger is present. Downstream emission remains unresolved.
 * Logger Close(): idempotent via the closed_ flag at +0x10.
 * GetPrintableOptions() dispatch by concrete TableFactory / Cache
   class (dump lines 7 and 88), including the base-default empty
@@ -143,7 +145,7 @@ def logger_gate(level, log_level):
 
 
 def helper_levelled(level, log_level):
-    """Route of the leveled helper 0x5fceda0.
+    """Route of the leveled helper 0x5fceda0 for EnvLogger.
 
     Returns (path, emitted): path is "skip", "log_header" (slot 3)
     or "logv_levelled" (slot 5).  The helper pre-gates on slot 8
@@ -158,12 +160,22 @@ def helper_levelled(level, log_level):
 
 
 def helper_nolevel(log_level):
-    """Route of the no-level helper 0x5fceea0: always slot 3.
+    """Route of the no-level helper 0x5fceea0 for EnvLogger: always slot 3.
 
     Returns (path, emitted).  LogHeader forwards to Logv(INFO_LEVEL),
     so the message is emitted iff 1 >= log_level_.
     """
     return ("log_header", logger_gate(INFO_LEVEL, log_level))
+
+
+def autoroll_header_slot(has_wrapped_logger):
+    """Selected forwarding slot after AutoRollLogger LogHeader dispatch.
+
+    The body at 0x6057000 returns when this+0xb8 is null. Its non-null
+    path calls wrapped slot 4 at 0x60570f8. Downstream emission and
+    allocation, lock and formatting outcomes remain unresolved.
+    """
+    return 4 if has_wrapped_logger else None
 
 
 def logger_close(closed):

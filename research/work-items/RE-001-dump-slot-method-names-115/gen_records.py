@@ -59,8 +59,9 @@ def main():
         "source_basis": (
             "RocksDB v8.1.1 headers (env.h, configurable.h, customizable.h, "
             "table_properties.h, options.cc, column_family.cc) for "
-            "declaration order and call-site source; every slot name below "
-            "is additionally confirmed by the function body in the binary. "
+            "declaration order and call-site source; selected names are "
+            "corroborated by the target bodies described below, with "
+            "position-only assignments listed under open_unknowns. "
             "The binary's column_family.cc line numbers differ from the "
             "v8.1.1 tag (see open_unknowns)."
         ),
@@ -74,10 +75,10 @@ def main():
             "level_byte": "this+0x11 (InfoLogLevel)",
             "closed_flag": "this+0x10 (bool, set by Close)",
             "slots": {
-                "0": {"fn": "0x5fcfb90", "name": "~EnvLogger (D0)",
-                      "note": "AutoRollLogger D0 0x60576b0"},
-                "1": {"fn": "0x5fcfde0", "name": "~EnvLogger (D1)",
-                      "note": "AutoRollLogger D1 0x6057d00"},
+                "0": {"fn": "0x5fcfb90", "name": "~EnvLogger (D1)",
+                      "note": "AutoRollLogger D1 0x60576b0"},
+                "1": {"fn": "0x5fcfde0", "name": "~EnvLogger (D0)",
+                      "note": "AutoRollLogger D0 0x6057d00"},
                 "2": {"fn": "0x5fcc410", "name": "Close()",
                       "shape": "Status by value (sret); if closed_ (+0x10) "
                                "is set returns OK; else sets it and calls "
@@ -120,10 +121,28 @@ def main():
                 "level_5": "calls slot 3 (LogHeader)",
                 "other_levels": "calls slot 5 (leveled Logv)",
                 "sibling_nolevel": "0x5fceea0 calls slot 3 with no level check",
-                "emission_rule": "a level-L message is emitted iff "
+                "emission_scope": "EnvLogger",
+                "emission_rule": "For EnvLogger, a level-L message is emitted iff "
                                  "L >= log_level_; a level-5 (HEADER) message "
                                  "is emitted iff 1 >= log_level_ because "
                                  "LogHeader re-gates through Logv(INFO_LEVEL)",
+            },
+            "destructor_roles": {
+                "complete_object_slot": 0,
+                "deleting_slot": 1,
+                "envlogger_deleting_tail": "0x5fcffd4",
+                "envlogger_delete_size": "0x140",
+                "autoroll_deleting_tail": "0x6057d16",
+                "autoroll_delete_size": "0x290",
+                "delete_target": "0x63f0d80",
+            },
+            "autoroll_header": {
+                "function": "0x6057000",
+                "wrapped_logger_field": "this+0xb8",
+                "null_wrapped_logger": "return",
+                "wrapped_slot": 4,
+                "call_site": "0x60570f8",
+                "downstream_emission": "unresolved",
             },
             "tail_slots_11_plus": "unresolved (see open_unknowns)",
         },
@@ -366,15 +385,17 @@ def main():
             "0x78/0x80, and the AutoRollLogger tail holds 0x6055240 (bare "
             "ret), 0x6055260/0x6055270 (deleting dtors for 0x18-byte "
             "objects) and 0x6057d20 (a dtor-shaped function calling "
-            "AutoRollLogger D0 0x60576b0). Whether the binary's Logger "
+            "AutoRollLogger D1 0x60576b0). Whether the binary's Logger "
             "carries additional virtuals past CloseImpl or these qwords "
             "belong to adjacent objects is not resolved; the dump never "
             "calls past slot 10.",
             "AutoRollLogger slot 3 (0x6057000), slot 4 (0x6058770), slots "
             "6/7 (0x6057590/0x6057440), slot 9 (0x6055280), slot 10 "
             "(0x60551d0): named by header position only; their bodies were "
-            "not dissected beyond slot 3 (rollover-aware LogHeader) and "
-            "slot 8 (delegates GetInfoLogLevel to the wrapped logger). "
+            "not dissected beyond slot 3 (rollover-aware LogHeader, with "
+            "wrapped slot-4 forwarding at 0x60570f8) and slot 8 "
+            "(delegates GetInfoLogLevel to the wrapped logger). "
+            "Downstream header emission remains unresolved. "
             "Note: AutoRollLogger's slot-5 gate reads its OWN +0x11 byte "
             "while its slot 8 returns the WRAPPED logger's level -- the "
             "two can disagree; observed, not explained.",

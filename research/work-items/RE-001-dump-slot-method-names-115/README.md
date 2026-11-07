@@ -32,12 +32,22 @@ Supporting identifications, all pinned by the same evidence:
   `this+0x11`; the closed flag is `this+0x10`. Only two Logger
   classes exist in the binary (EnvLogger, AutoRollLogger); no
   PosixLogger vtable.
-* **Emission rule.** A level-L message is emitted iff `L >=
+* **Logger destructor roles.** Slot 0 holds the complete-object destructor
+  (D1), and slot 1 holds the deleting destructor (D0). The EnvLogger D0
+  at `0x5fcfde0` ends by deleting `this` with size `0x140` at `0x5fcffd4`.
+  AutoRollLogger D0 at `0x6057d00` calls `0x60576b0`, then deletes `this`
+  with size `0x290` at `0x6057d16`. The D0/D1 labels follow the
+  [Itanium C++ ABI](https://itanium-cxx-abi.github.io/cxx-abi/abi.html#ctor-dtor-name).
+* **EnvLogger emission rule.** A level-L message is emitted iff `L >=
   log_level_`. A level-5 (HEADER) message is emitted iff `1 >=
   log_level_`, because LogHeader re-gates through `Logv(INFO_LEVEL)`.
   The helper pre-gates on slot 8 (`ja ret` when `log_level_ >
   level`); the sibling helper 0x5fceea0 calls slot 3 with no level
   check.
+* **AutoRollLogger header route.** The body at `0x6057000` returns
+  when the wrapped logger at `this+0xb8` is null. Its non-null path
+  calls wrapped slot 4 at `0x60570f8`. Downstream emission remains
+  unresolved. The EnvLogger threshold model applies to EnvLogger.
 * **TableFactory slots** (configurable.h + customizable.h order):
   2 = `GetOption` (shared 0x609d760), 3 = `AreEquivalent`, 4 =
   `GetPrintableOptions`, 5 = `PrepareOptions`, 6 =
@@ -101,8 +111,8 @@ Supporting identifications, all pinned by the same evidence:
 * Source basis: RocksDB v8.1.1 headers (`env.h`,
   `configurable.h`, `customizable.h`, `table_properties.h`,
   `options.cc`, `column_family.cc`) for declaration order and
-  call-site source; every slot name is additionally confirmed by the
-  function body in the binary.
+  call-site source. Selected names are corroborated by the target bodies
+  described above; position-only assignments appear under Open unknowns.
 
 ## Verification
 
@@ -110,11 +120,11 @@ Supporting identifications, all pinned by the same evidence:
 prints ALL CHECKS PASSED: digest, MANIFEST, records/census/excerpt
 regeneration, fixed samples + 3 seeded random gate spots byte-for-byte
 vs fresh objdump and the raw binary, FDE ranges, excerpt content
-pins, model constants, and the 32 model tests
+pins, model constants, and the 35 model tests
 (`python3 -m unittest tests.test_dump_slot_method_names_115`).
 
-Model: `tools/dump_slot_method_names_115.py` -- helper routing by
-level, GetPrintableOptions/Name/ToString dispatch by concrete class,
+Model: `tools/dump_slot_method_names_115.py` -- EnvLogger helper routing by
+level, AutoRollLogger opaque slot-4 forwarding, GetPrintableOptions/Name/ToString dispatch by concrete class,
 the two devirtualization guards, the host gate, Logger Close
 idempotence, and the GetOption "id" special case.
 
@@ -126,7 +136,8 @@ slots 11/13/14 have no relocation and read as zero, slot 12 points
 at data 0x64cd8d0, the EnvLogger tail holds the shared Configurable
 GetOption/AreEquivalent at offsets 0x78/0x80); AutoRollLogger's
 slots 3/4/6/7/9/10 and Logger slots 4/6/7/10 named by header position
-plus shape only; TableFactory slots 3/5/6/7/10 by declaration order
+plus shape only, with downstream header emission unresolved;
+TableFactory slots 3/5/6/7/10 by declaration order
 only; the `BlockTableOptions` string at 0x444587 used at host
 0x5d961f4; the two host callers' C++ names; the verification C++
 enum names carried from #4311; the ColumnFamilyOptions padding-byte

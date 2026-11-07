@@ -6,6 +6,8 @@ class, ToString guard outcomes, the host gate, Logger Close
 idempotence, and the GetOption "id" special case.
 """
 
+import json
+from pathlib import Path
 import unittest
 
 from tools.dump_slot_method_names_115 import (
@@ -14,6 +16,7 @@ from tools.dump_slot_method_names_115 import (
     GET_OPTION,
     HEADER_LEVEL,
     INFO_LEVEL,
+    autoroll_header_slot,
     blob_cache_options,
     cache_name,
     collector_to_string,
@@ -87,6 +90,22 @@ class TestLoggerClose(unittest.TestCase):
         action, closed = logger_close(True)
         self.assertEqual(action, "ok_noop")
         self.assertTrue(closed)
+
+
+class TestAutoRollHeader(unittest.TestCase):
+    def test_forwarding_slot_keeps_emission_unresolved(self):
+        self.assertIsNone(autoroll_header_slot(False))
+        self.assertEqual(autoroll_header_slot(True), 4)
+        self.assertEqual(helper_levelled(HEADER_LEVEL, 2), ("log_header", False))
+
+    def test_packet_scopes_the_threshold_rule_to_envlogger(self):
+        root = Path(__file__).resolve().parents[1]
+        path = root / "research/work-items/RE-001-dump-slot-method-names-115/records.json"
+        logger = json.loads(path.read_text())["logger"]
+        self.assertEqual(logger["helper_routing"]["emission_scope"], "EnvLogger")
+        self.assertEqual(logger["autoroll_header"]["wrapped_slot"], 4)
+        self.assertEqual(logger["autoroll_header"]["call_site"], "0x60570f8")
+        self.assertEqual(logger["autoroll_header"]["downstream_emission"], "unresolved")
 
 
 class TestGetPrintableOptions(unittest.TestCase):
@@ -190,6 +209,15 @@ class TestVtableSlots(unittest.TestCase):
                          vtable_slot("EnvLogger", 2))
         self.assertEqual(vtable_slot("AutoRollLogger", 5),
                          vtable_slot("EnvLogger", 5))
+
+    def test_destructor_roles_match_deleting_tails(self):
+        root = Path(__file__).resolve().parents[1]
+        path = root / "research/work-items/RE-001-dump-slot-method-names-115/records.json"
+        logger = json.loads(path.read_text())["logger"]
+        self.assertEqual(logger["slots"]["0"]["name"], "~EnvLogger (D1)")
+        self.assertEqual(logger["slots"]["1"]["name"], "~EnvLogger (D0)")
+        self.assertEqual(logger["destructor_roles"]["complete_object_slot"], 0)
+        self.assertEqual(logger["destructor_roles"]["deleting_slot"], 1)
 
     def test_factory_and_collector_slots(self):
         self.assertEqual(vtable_slot("BlockBasedTableFactory", 4), 0x60DA1F0)

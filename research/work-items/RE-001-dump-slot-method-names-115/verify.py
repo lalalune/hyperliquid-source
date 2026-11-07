@@ -21,7 +21,7 @@ Checks (prints ALL CHECKS PASSED only when every one holds):
      forward, empty-string construction).
   9. model constants match the packet (spot check).
  10. the model tests run: python3 -m unittest
-     tests.test_dump_slot_method_names_115 -> OK, 32 tests.
+     tests.test_dump_slot_method_names_115 -> OK, 35 tests.
 """
 
 import hashlib
@@ -48,6 +48,10 @@ FIXED_SAMPLES = [
     ((0x60B1EA0, 0x60B1F93), 0x60B1EC9, "call   *0x70(%rax)"),
     ((0x5FCD400, 0x5FCD419), 0x5FCD404, "cmp    0x11(%rdi),%sil"),
     ((0x60B50C0, 0x60B79A6), 0x60B6246, "cmp    0x436ad3(%rip),%rax"),
+    ((0x6057000, 0x60571B4), 0x6057022, "cmpq   $0x0,0xb8(%rdi)"),
+    ((0x6057000, 0x60571B4), 0x60570F8, "call   *0x20(%rax)"),
+    ((0x5FCFDE0, 0x5FD003F), 0x5FCFFD4, "jmp    63f0d80"),
+    ((0x6057D00, 0x6057D1B), 0x6057D16, "jmp    63f0d80"),
 ]
 
 # Candidates for the 3 seeded random gate spots; the seed is the first
@@ -241,7 +245,7 @@ def main():
     out = res.stdout + res.stderr
     m = re.search(r"Ran (\d+) tests", out)
     n = int(m.group(1)) if m else -1
-    check("model tests", res.returncode == 0 and "OK" in out and n == 32,
+    check("model tests", res.returncode == 0 and "OK" in out and n == 35,
           f"Ran {n} tests")
 
     if FAILURES:
