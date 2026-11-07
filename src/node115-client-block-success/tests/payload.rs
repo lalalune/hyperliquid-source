@@ -1,4 +1,4 @@
-use node115_client_block_success::{Parent, decode_payload_prefix};
+use node115_client_block_success::{Parent, admit_timestamp, decode_payload_prefix};
 
 fn u64v(out: &mut Vec<u8>, value: u64) {
     assert!(value <= 250);
@@ -73,8 +73,9 @@ fn parses_nested_timeout_commit_proof_votes_and_opaque_blob() {
     let clients = outcome.result.unwrap();
     assert_eq!(clients.len(), 1);
     let client = &clients[0];
-    assert_eq!(client.block.header.timestamp_seconds, -1);
-    assert_eq!(client.block.header.timestamp_nanos, 9);
+    assert_eq!(client.block.header.timestamp.second_of_day, 86_399);
+    assert_eq!(client.block.header.timestamp.nanoseconds, 9);
+    assert_ne!(client.block.header.timestamp.packed_date, 0);
     match &client.block.header.parent {
         Parent::Timeout {
             certificate,
@@ -89,8 +90,18 @@ fn parses_nested_timeout_commit_proof_votes_and_opaque_blob() {
     }
     let proof = client.block.commit_proof.as_ref().unwrap();
     assert_eq!(proof.quorum_certificate.votes.len(), 1);
-    assert_eq!(proof.header.timestamp_seconds, -1);
+    assert_eq!(proof.header.timestamp.second_of_day, 86_399);
     assert_eq!(client.attachments[0].bytes, [251, 252, 253, 255]);
+}
+
+#[test]
+fn timestamp_admission_matches_negative_epoch_and_leap_second_edges() {
+    assert_eq!(admit_timestamp(-1, 0).unwrap().second_of_day, 86_399);
+    assert_eq!(admit_timestamp(-86_400, 0).unwrap().second_of_day, 0);
+    assert!(admit_timestamp(0, 1_000_000_000).is_err());
+    assert!(admit_timestamp(59, 1_999_999_999).is_ok());
+    assert!(admit_timestamp(59, 2_000_000_000).is_err());
+    assert!(admit_timestamp(i64::MIN, 0).is_err());
 }
 
 #[test]

@@ -13,9 +13,10 @@ bound to #115 by the existing
 packet and its SHA-256-pinned evidence.
 
 The returned fields are positional wire values. In particular, QC's five
-scalars and TC's scalar are not assigned semantic names; timestamps are kept
-as seconds and nanoseconds without calendar admission; signatures are eight
-U64 varints plus one raw recovery byte; attachment content stays opaque.
+scalars and TC's scalar are not assigned semantic names; timestamps pass the
+separately qualified #115 day-count constructor and admission predicate;
+signatures are eight U64 varints plus one raw recovery byte; attachment
+content stays opaque.
 No cryptographic verification, voter-map normalization, allocation-failure
 equivalence, native ABI, malformed-input cursor equivalence, response framing,
 or source-to-node equivalence is claimed. The safe parser's raw-field
@@ -26,4 +27,6 @@ Reads are unmetered because the existing caller's nested budget accounting
 has not been closed across this full graph. This crate does not replace the
 existing composed response decoder's explicit `ResultSuccessBoundary`. It is
 an independently usable structural child decoder until that calling contract
-is established. New code is MIT.
+is established. New code is MIT. Timestamp admission is grounded in
+[`RE-001-node115-client-block-timestamp-admission`](../../research/work-items/RE-001-node115-client-block-timestamp-admission/README.md)
+and composes the existing MIT `node115-daycount-date` implementation.

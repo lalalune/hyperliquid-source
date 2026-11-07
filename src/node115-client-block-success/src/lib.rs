@@ -18,11 +18,15 @@ pub struct Signature {
 pub struct Header {
     pub address: [u8; 20],
     pub hashes: Vec<[u8; 32]>,
-    /// Wire values only; calendar admission and packed native representation
-    /// are outside this structural decoder.
-    pub timestamp_seconds: i64,
-    pub timestamp_nanos: u32,
+    pub timestamp: AdmittedTimestamp,
     pub parent: Parent,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct AdmittedTimestamp {
+    pub packed_date: u32,
+    pub second_of_day: u32,
+    pub nanoseconds: u32,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -95,8 +99,34 @@ pub enum Error {
     UnexpectedEnd { additional: usize },
     InvalidParentTag(u32),
     InvalidOption(u8),
+    InvalidTimestamp { seconds: i64, nanoseconds: u32 },
     LengthDoesNotFitMemory,
     AllocationFailed,
+}
+
+/// Apply the selected #115 ClientBlock timestamp admission to decoded scalar
+/// values. `node115-daycount-date` supplies the separately qualified CE-day
+/// constructor; this returns only the observed packed date/time fields.
+pub fn admit_timestamp(seconds: i64, nanoseconds: u32) -> Result<AdmittedTimestamp, Error> {
+    let invalid = || Error::InvalidTimestamp {
+        seconds,
+        nanoseconds,
+    };
+    let ce_day = seconds.div_euclid(86_400) + 719_163;
+    let ce_day = i32::try_from(ce_day).map_err(|_| invalid())?;
+    let packed_date = node115_daycount_date::node115_date_from_ce_days(ce_day);
+    if packed_date == 0 {
+        return Err(invalid());
+    }
+    let second_of_day = seconds.rem_euclid(86_400) as u32;
+    if nanoseconds > 1_999_999_999 || (nanoseconds >= 1_000_000_000 && second_of_day % 60 != 59) {
+        return Err(invalid());
+    }
+    Ok(AdmittedTimestamp {
+        packed_date,
+        second_of_day,
+        nanoseconds,
+    })
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -238,8 +268,9 @@ impl<'a> Decoder<'a> {
             hashes.try_reserve(1).map_err(|_| Error::AllocationFailed)?;
             hashes.push(self.raw::<32>()?);
         }
-        let timestamp_seconds = self.signed_i64()?;
-        let timestamp_nanos = self.u32()?;
+        let seconds = self.signed_i64()?;
+        let nanoseconds = self.u32()?;
+        let timestamp = admit_timestamp(seconds, nanoseconds)?;
         let parent = match self.u32()? {
             0 => Parent::QuorumCertificate(self.quorum_certificate()?),
             1 => {
@@ -259,8 +290,7 @@ impl<'a> Decoder<'a> {
         Ok(Header {
             address,
             hashes,
-            timestamp_seconds,
-            timestamp_nanos,
+            timestamp,
             parent,
         })
     }
