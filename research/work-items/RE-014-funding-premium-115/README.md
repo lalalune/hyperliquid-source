@@ -88,7 +88,7 @@ record, the panic, and the exact sequence of stub calls.
 
 | Metric | Value |
 |---|---|
-| Cases (18 named + 14,001 generated) | 14,019 |
+| Cases (19 named + 14,000 generated) | 14,019 |
 | Mismatches | 0 |
 | Distinct instructions reached | 270 of 274 |
 | Negative controls (24 wrong readings + 15 structural) | 39, all detected |
