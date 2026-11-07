@@ -56,10 +56,10 @@ VTABLES = [
 
 # (target, note) for the direct-caller census.
 CALLER_TARGETS = [
-    (0x5FCFB90, "EnvLogger D0 destructor"),
-    (0x5FCFDE0, "EnvLogger D1 destructor"),
-    (0x60576B0, "AutoRollLogger D0 destructor"),
-    (0x6057D00, "AutoRollLogger D1 destructor"),
+    (0x5FCFB90, "EnvLogger D1 destructor"),
+    (0x5FCFDE0, "EnvLogger D0 destructor"),
+    (0x60576B0, "AutoRollLogger D1 destructor"),
+    (0x6057D00, "AutoRollLogger D0 destructor"),
     (0x5FCE280, "EnvLogger Logv"),
     (0x5FCE130, "EnvLogger Flush"),
     (0x5FCCED0, "EnvLogger GetLogFileSize"),
@@ -82,7 +82,7 @@ CALLER_TARGETS = [
 # (guard name, compare instruction addr, GOT slot / compared fn,
 #  expected addend-or-fn)
 GUARDS = [
-    ("shared_ptr dispose checks EnvLogger D0", 0x5FCF689, 0x64ED970, 0x5FCFB90),
+    ("shared_ptr dispose checks EnvLogger D1", 0x5FCF689, 0x64ED970, 0x5FCFB90),
     ("AutoRollLogger ctor checks GetFileSize slot", 0x605A487, 0x64ECF80, 0x5D4D490),
     ("roll path checks GetFileSize slot", 0x6058153, None, 0x5D4D490),
 ]

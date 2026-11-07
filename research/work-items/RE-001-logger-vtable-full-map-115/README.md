@@ -16,7 +16,7 @@ header position or body shape only, the Logger slots-11+ tail unresolved,
 the +0x98/+0x130 size fields unexplained, and one live discrepancy: the
 shared slot-5 leveled Logv gate reads the AutoRollLogger's OWN +0x11,
 while slot 8 was thought to return the wrapped logger's level. This
-packet pins all of it:
+packet expands these bounded observations:
 
 - Both full 11-slot maps (EnvLogger vtable `0x64cda68`, AutoRollLogger
   vtable `0x64d1f00`), read from the `.rela.dyn` entries (`vtables.tsv`).
@@ -51,14 +51,19 @@ packet pins all of it:
   +0xe0 != 0) or when log_max_size (+0xd8) is non-zero and the wrapped
   size is >= +0xd8; after a roll it re-logs the queued headers
   (`0x60572a0`) into the new file. LogHeader (`0x6057000`) queues each
-  header into the list at +0xf0 (count at +0x100) before forwarding.
+  header into the list at +0xf0 (count at +0x100) before forwarding
+  through wrapped slot 4. The shared slot-5 test is initial admission.
+  EnvLogger HEADER dispatch applies its INFO-level gate again.
+  AutoRollLogger downstream emission remains unresolved.
 - Construction and destruction: the EnvLogger factory (`0x5fd0de0`)
   allocates the 0x150-byte `_Sp_counted_ptr_inplace<EnvLogger>` control
   block and hardcodes WORD 0x300 at EnvLogger+0x10 (closed_ = 0,
   log_level_ = 3, ERROR_LEVEL); the AutoRollLogger ctor (`0x605a210`)
-  takes its level from a stack argument. D0 closes first when closed_
-  is clear, then tears down; D1 is the same teardown without operator
-  delete.
+  takes its level from a stack argument. Slot 0 is the complete-object
+  destructor D1, which closes when needed and tears down. Slot 1 is
+  deleting destructor D0, which also deletes the object. The retained
+  raw excerpt filenames use the earlier reversed d0/d1 labels. The
+  corrected roles are recorded in the vtable maps and caller tables.
 
 ## Evidence format
 
@@ -92,7 +97,7 @@ packet pins all of it:
   fresh objdump run AND the raw binary bytes.
 - `tools/logger_vtable_115.py` + `tests/test_logger_vtable_115.py`
   model the slot maps, level gates, write path, rollover triggers,
-  writer contract and layouts (29 tests).
+  writer contract and layouts (33 tests).
 
 ## How to verify
 
@@ -117,7 +122,7 @@ closed_ (byte); +0x11 log_level_ (byte); +0x18 Env*; +0x20 file object
 +0x58 pointer to a 0x70-byte heap object; +0x70 heap buffer; +0x98
 cached log file size; +0x108 pthread_mutex_t (40 bytes); +0x130
 last-refreshed file size; +0x138 dirty flag; +0xd8 vector<shared_ptr>;
-+0xf0 heap object deleted via D1.
++0xf0 heap object released through the deleting-destructor slot.
 
 AutoRollLogger, object size 0x290: +0x00 vtable; +0x08 u64 (-1); +0x10
 closed_; +0x11 log_level_ (own copy); +0x18 self-pointer; +0x38/+0x58/
@@ -131,7 +136,7 @@ FileOptions-like struct; +0x268 pthread_mutex_t.
 ## Open unknowns (not claimed)
 
 - Logger+0x28: the writer object starting at +0x28 vs the fname_
-  std::string also at +0x28 (callees address it as writer@+0x28; D0
+  std::string also at +0x28 (callees address it as writer@+0x28; D1
   disposes a string at +0x28/+0x38) -- the exact object boundary needs
   the writer's own dissection; the writer's internal layout (buffer
   +0x50/+0x58/+0x68, flags +0x88/+0x89) is only partially pinned.
@@ -150,7 +155,23 @@ FileOptions-like struct; +0x268 pthread_mutex_t.
   tail holds the shared Configurable GetOption/AreEquivalent
   0x609d760/0x609dc40 at 0x78/0x80; the AutoRollLogger tail holds
   0x6055240 bare ret, 0x6055260/0x6055270 deleting dtors for 0x18-byte
-  objects, 0x6057d20 dtor-shaped calling D0) -- unresolved whether
+  objects, 0x6057d20 dtor-shaped calling D1) -- unresolved whether
   Logger carries additional virtuals past CloseImpl.
 - The two ColumnFamilyData ctor callers 0x5d96cf8 / 0x5d972ab C++ names
   (from #4315, still open).
+
+## Bounded buffer-growth model
+
+The selected EnvLogger factory stores a maximum buffer size of `0x100000`
+at `0x5fd0ec2`, requests `min(maximum, 0x10000)` at `0x5fd1450`, and
+stores the aligned capacity at `0x5fd1496`. Successful initialization with
+a valid positive file alignment gives positive capacity. The Python
+doubling helper accepts that initialized substep. Generic zero-buffer
+writers, maximum-capacity clamping, alignment, flush failures and
+direct-write fallback remain outside this projection.
+
+## Disassembly display compatibility
+
+The verifier accepts the equivalent implicit DS/ES spelling on `rep movsq`.
+Instruction bytes and all other excerpt text must match exactly. It restores
+all original exports after verification, including when comparison fails.

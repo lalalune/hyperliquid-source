@@ -14,6 +14,7 @@ research/work-items/RE-001-logger-vtable-full-map-115/:
     AutoRollLogger 0x290).
 """
 
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -24,6 +25,12 @@ import logger_vtable_115 as m
 
 
 class TestSlotMaps(unittest.TestCase):
+    def test_destructor_roles(self):
+        for table, cls in ((m.ENVLOGGER_VTABLE, "EnvLogger"),
+                           (m.AUTOROLL_VTABLE, "AutoRollLogger")):
+            self.assertEqual(m.slot_name(table, 0), f"~{cls} (D1)")
+            self.assertEqual(m.slot_name(table, 1), f"~{cls} (D0)")
+
     def test_both_vtables_have_11_slots(self):
         self.assertEqual(len(m.ENVLOGGER_SLOTS), 11)
         self.assertEqual(len(m.AUTOROLL_SLOTS), 11)
@@ -70,23 +77,36 @@ class TestSlotMaps(unittest.TestCase):
 class TestLevelGates(unittest.TestCase):
     def test_gate_drops_below_level(self):
         # log_level_ = ERROR (3, the factory default): DEBUG/INFO/WARN
-        # are dropped, ERROR/FATAL/HEADER are written.
+        # fail initial admission, while ERROR/FATAL/HEADER pass it.
         for level in (m.DEBUG_LEVEL, m.INFO_LEVEL, m.WARN_LEVEL):
             self.assertFalse(m.level_gate(m.ERROR_LEVEL, level))
         for level in (m.ERROR_LEVEL, m.FATAL_LEVEL, m.HEADER_LEVEL):
             self.assertTrue(m.level_gate(m.ERROR_LEVEL, level))
 
-    def test_gate_at_info_writes_all_but_debug(self):
+    def test_gate_at_info_admits_all_but_debug(self):
         self.assertFalse(m.level_gate(m.INFO_LEVEL, m.DEBUG_LEVEL))
         for level in (m.INFO_LEVEL, m.WARN_LEVEL, m.ERROR_LEVEL,
                       m.FATAL_LEVEL, m.HEADER_LEVEL):
             self.assertTrue(m.level_gate(m.INFO_LEVEL, level))
 
     def test_logheader_forwards_at_info(self):
-        # LogHeader forwards with level 1; it is written iff
+        # EnvLogger LogHeader forwards with level 1; it is admitted iff
         # 1 >= log_level_.
         self.assertTrue(m.level_gate(m.INFO_LEVEL, 1))
         self.assertFalse(m.level_gate(m.WARN_LEVEL, 1))
+
+    def test_envlogger_header_has_a_second_gate(self):
+        self.assertTrue(m.level_gate(m.ERROR_LEVEL, m.HEADER_LEVEL))
+        self.assertFalse(m.envlogger_emission_gate(m.ERROR_LEVEL, m.HEADER_LEVEL))
+        self.assertTrue(m.envlogger_emission_gate(m.INFO_LEVEL, m.HEADER_LEVEL))
+
+    def test_autoroll_downstream_emission_remains_unresolved(self):
+        root = Path(__file__).resolve().parents[1]
+        path = root / "research/work-items/RE-001-logger-vtable-full-map-115/records.json"
+        gates = json.loads(path.read_text())["logger"]["level_gate"]
+        self.assertEqual(gates["scope"], "initial slot-5 admission")
+        self.assertEqual(gates["autoroll_header_forwarding_slot"], 4)
+        self.assertEqual(gates["autoroll_downstream_emission"], "unresolved")
 
     def test_autoroll_get_level_prefers_wrapped(self):
         # Slot 8 returns the wrapped logger's level when present,
@@ -145,6 +165,12 @@ class TestLogvWritePath(unittest.TestCase):
         self.assertEqual(m.buffer_growth(8, 9), 16)
         self.assertEqual(m.buffer_growth(8, 100), 128)
         self.assertEqual(m.buffer_growth(1, 1), 1)
+
+    def test_buffer_growth_requires_initialized_capacity(self):
+        with self.assertRaises(ValueError):
+            m.buffer_growth(0, 1)
+        with self.assertRaises(ValueError):
+            m.buffer_growth(-1, 1)
 
 
 class TestRollover(unittest.TestCase):

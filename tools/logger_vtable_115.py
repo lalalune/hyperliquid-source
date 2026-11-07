@@ -10,6 +10,8 @@ The model covers the complete Logger + AutoRollLogger vtable maps
 format, dirty flag, cached-size refresh), the rollover triggers, the
 header queue, the writer error contract, and the object layouts --
 each rule traced to a function body in the packet's verbatim excerpts.
+Gate results describe initial admission, with EnvLogger HEADER re-gating
+modeled separately. AutoRollLogger downstream emission remains unresolved.
 """
 
 ARTIFACT_SHA256 = (
@@ -59,7 +61,7 @@ AUTOROLL_RELOG_FN = 0x60572A0
 
 # Object sizes: EnvLogger 0x140 (inside a 0x150-byte
 # _Sp_counted_ptr_inplace<EnvLogger> control block); AutoRollLogger
-# 0x290 (operator delete of 0x290 in D1).
+# 0x290 (operator delete of 0x290 in D0).
 ENVLOGGER_SIZE = 0x140
 ENVLOGGER_CONTROL_BLOCK_SIZE = 0x150
 AUTOROLL_SIZE = 0x290
@@ -69,8 +71,8 @@ ENVLOGGER_VTABLE = 0x64CDA68
 AUTOROLL_VTABLE = 0x64D1F00
 
 ENVLOGGER_SLOTS = {
-    0: (0x5FCFB90, "~EnvLogger (D0)"),
-    1: (0x5FCFDE0, "~EnvLogger (D1)"),
+    0: (0x5FCFB90, "~EnvLogger (D1)"),
+    1: (0x5FCFDE0, "~EnvLogger (D0)"),
     2: (0x5FCC410, "Close()"),
     3: (0x5FCC200, "LogHeader(const char*, va_list)"),
     4: (0x5FCE280, "Logv(const char*, va_list)"),
@@ -83,8 +85,8 @@ ENVLOGGER_SLOTS = {
 }
 
 AUTOROLL_SLOTS = {
-    0: (0x60576B0, "~AutoRollLogger (D0)"),
-    1: (0x6057D00, "~AutoRollLogger (D1)"),
+    0: (0x60576B0, "~AutoRollLogger (D1)"),
+    1: (0x6057D00, "~AutoRollLogger (D0)"),
     2: (0x5FCC410, "Close()"),  # shared with EnvLogger
     3: (0x6057000, "LogHeader(const char*, va_list)"),
     4: (0x6058770, "Logv(const char*, va_list)"),
@@ -134,9 +136,18 @@ AUTOROLL_OFF = {
 
 
 def level_gate(log_level, level):
-    """The slot-5 gate (0x5fcd400): a message at `level` is written
-    iff level >= log_level_ (+0x11); otherwise it is dropped."""
+    """Initial slot-5 admission at 0x5fcd400, before virtual dispatch.
+
+    The supplied threshold is the object's own +0x11 byte. Subsequent
+    EnvLogger HEADER dispatch applies the INFO-level gate again.
+    """
     return level >= log_level
+
+
+def envlogger_emission_gate(log_level, level):
+    """The two established level gates for EnvLogger, before file I/O."""
+    return level_gate(log_level, level) and (
+        level != HEADER_LEVEL or level_gate(log_level, INFO_LEVEL))
 
 
 def perf_timing_active(perf_level):
@@ -227,8 +238,15 @@ def autoroll_get_log_file_size(wrapped_present, wrapped_size):
 
 
 def buffer_growth(capacity, needed):
-    """The writer Append buffer (std::string at writer+0x50/+0x58/
-    +0x68) grows by doubling until it fits `needed` bytes."""
+    """Positive-capacity doubling substep for the selected EnvLogger factory.
+
+    Its successful factory path initializes positive capacity. The caller
+    supplies a needed size within this substep's growth domain. Native
+    maximum-capacity, alignment, direct-I/O and flush decisions remain
+    separate from this bounded arithmetic projection.
+    """
+    if capacity <= 0 or needed < 0:
+        raise ValueError("outside the initialized positive-capacity model")
     cap = capacity
     while cap < needed:
         cap *= 2

@@ -78,14 +78,14 @@ def main():
             "only_two_logger_classes": True,
             "note": "No PosixLogger vtable exists in the binary.",
             "slots_envlogger": {
-                "0": {"fn": "0x5fcfb90", "name": "~EnvLogger (D0)",
+                "0": {"fn": "0x5fcfb90", "name": "~EnvLogger (D1)",
                       "shape": "installs own vtable; if closed_ (+0x10) "
                                "is clear, closes first via the worker "
-                               "0x5fce770, then tears down; ends with "
-                               "operator delete"},
-                "1": {"fn": "0x5fcfde0", "name": "~EnvLogger (D1)",
-                      "shape": "same teardown as D0 without operator "
-                               "delete"},
+                               "0x5fce770, then tears down and returns without "
+                               "deleting this"},
+                "1": {"fn": "0x5fcfde0", "name": "~EnvLogger (D0)",
+                      "shape": "same teardown as D1, then sized operator "
+                               "delete of this with size 0x140 at 0x5fcffd4"},
                 "2": {"fn": "0x5fcc410", "name": "Close()",
                       "shape": "Status by value (sret); idempotent via "
                                "closed_ (+0x10); delegates to slot 10 "
@@ -135,13 +135,13 @@ def main():
                                 "wrapped logger's Close, slot 2)"},
             },
             "slots_autoroll": {
-                "0": {"fn": "0x60576b0", "name": "~AutoRollLogger (D0)",
+                "0": {"fn": "0x60576b0", "name": "~AutoRollLogger (D1)",
                       "shape": "installs own vtable; if the wrapped "
                                "logger is non-null and closed_ is clear, "
-                               "closes first, then tears down; ends with "
-                               "operator delete"},
-                "1": {"fn": "0x6057d00", "name": "~AutoRollLogger (D1)",
-                      "shape": "calls D0, then operator delete of 0x290 "
+                               "closes first, then tears down and returns "
+                               "without deleting this"},
+                "1": {"fn": "0x6057d00", "name": "~AutoRollLogger (D0)",
+                      "shape": "calls D1, then operator delete of 0x290 "
                                "bytes"},
                 "2": {"fn": "0x5fcc410", "name": "Close()",
                       "note": "shared with EnvLogger (same function)"},
@@ -208,7 +208,11 @@ def main():
                 "5": "HEADER_LEVEL",
             },
             "level_gate": {
-                "rule": "a message at level L is written iff L >= log_level_ (+0x11)",
+                "scope": "initial slot-5 admission",
+                "rule": "a message at level L passes the initial gate iff L >= log_level_ (+0x11)",
+                "envlogger_header_rule": "HEADER dispatch forwards at INFO_LEVEL and applies the EnvLogger gate again",
+                "autoroll_header_forwarding_slot": 4,
+                "autoroll_downstream_emission": "unresolved",
                 "header_forward_level": 1,
                 "factory_default_level": 3,
                 "factory_default_note": (
@@ -230,17 +234,17 @@ def main():
                 "0x20": "file object pointer (size via slot 0x98)",
                 "0x28": "writer object start AND std::string fname_ (SSO buffer at +0x38) -- the exact object boundary is an open unknown",
                 "0x50": "shared_ptr control-block release site",
-                "0x58": "pointer to a 0x70-byte heap object (type checked via D1 == 0x5dfdf90)",
+                "0x58": "pointer to a 0x70-byte heap object (type checked via deleting destructor == 0x5dfdf90)",
                 "0x70": "heap buffer (freed with _ZdaPv)",
                 "0x98": "cached log file size (returned by GetLogFileSize under the mutex)",
                 "0x108": "pthread_mutex_t (40 bytes)",
                 "0x130": "last-refreshed file size",
                 "0x138": "dirty / needs-flush flag (byte)",
                 "0xd8": "vector<shared_ptr> (begin/end/cap at +0xd8/+0xe0/+0xe8)",
-                "0xf0": "heap object deleted via D1 in the destructor",
+                "0xf0": "heap object deleted via the deleting-destructor slot in the destructor",
             },
             "autoroll_layout": {
-                "object_size": "0x290 (operator delete of 0x290 in D1)",
+                "object_size": "0x290 (operator delete of 0x290 in D0)",
                 "0x00": "vtable",
                 "0x08": "u64, set to -1 by the ctor (field identity open)",
                 "0x10": "closed_ (byte)",
@@ -335,7 +339,16 @@ def main():
                     "flag": "writer byte +0x89",
                     "rule": "if +0x89 != 0, Append returns kIOError (code 5) with message 'Writer has previous error.' (26 chars: 16 bytes from 0x451480 'Writer has previ' + 16 bytes from 0x452bf0 ' previous error.')",
                 },
-                "buffer": "std::string buffer at writer+0x50/+0x58/+0x68 with doubling growth; writes via the file slot 0xc0 after a type check vs GOT 0x64ecf30 (= 0x5df6e90)",
+                "buffer": "buffer capacity/current-size/max fields at writer+0x50/+0x58/+0x68; bounded doubling is followed by maximum-capacity, alignment and flush/direct-write decisions; writes via file slot 0xc0 after a type check vs GOT 0x64ecf30 (= 0x5df6e90)",
+                "model_growth_scope": "positive-capacity arithmetic substep of the selected EnvLogger factory; full maximum-capacity, alignment and flush/direct-write decisions remain outside the model",
+                "selected_factory_buffer": {
+                    "max_size": "0x100000",
+                    "initial_requested_size": "0x10000",
+                    "max_store": "0x5fd0ec2",
+                    "initial_minimum": "0x5fd1450",
+                    "capacity_store": "0x5fd1496",
+                    "invariant": "successful factory initialization has positive capacity for a valid positive file alignment",
+                },
                 "note": "generic WritableFileWriter methods with ~35/~12/~25 direct call sites binary-wide, NOT logger-specific; their full internal buffer/layout dissection is an open unknown",
             },
             "rollover": {
@@ -358,7 +371,7 @@ def main():
                 },
                 "sharedptr_dispose": {
                     "fn": "0x5fcf660",
-                    "shape": "for _Sp_counted_ptr_inplace<EnvLogger>; verifies the embedded object's slot-0 == EnvLogger D0 (compares [vtable] vs GOT 0x64ed970 = 0x5fcfb90), installs the EnvLogger vtable at +0x10, if closed_ == 0 closes first via the worker 0x5fce770, then the same teardown at +0x10-shifted offsets, tail-jumps to the no-op 0x5fcc400 (the empty base Logger::~Logger())",
+                    "shape": "for _Sp_counted_ptr_inplace<EnvLogger>; verifies the embedded object's slot-0 == EnvLogger D1 (compares [vtable] vs GOT 0x64ed970 = 0x5fcfb90), installs the EnvLogger vtable at +0x10, if closed_ == 0 closes first via the worker 0x5fce770, then the same teardown at +0x10-shifted offsets, tail-jumps to the no-op 0x5fcc400 (the empty base Logger::~Logger())",
                 },
             },
             "tls_perf_context": {
@@ -369,7 +382,7 @@ def main():
                 "open": "the +0x98 byte's exact field name is an open unknown (a per-thread byte in the perf-context TLS block, set for the duration of log writes)",
             },
             "destructor_teardown": {
-                "shape": "mutex destroy 0x60d5170 at +0x108; writer Close 0x6052b80 (+0x28); free [rsp+0x8]; D1 call on the object at +0xf0; vector<shared_ptr> teardown loop at +0xd8/+0xe0 (shared_ptr dispose 0x5d35070, control release 0x5d350c0); _ZdaPv on the buffer at +0x70; teardown of the 0x70-byte object at +0x58 (type check D1 vs GOT 0x64ecf88 = 0x5dfdf90; installs vtables 0x64d0b58+0x10 / 0x64ca720+0x10; string _M_dispose at +0x50; 0x5d350c0 on +0x40; D1 on +0x30; _ZdlPvm(obj, 0x70)); 0x5d350c0 on [logger+0x50]; std::string dispose on fname_ (+0x28/+0x38 SSO check); tail-jump to the no-op 0x5fcc400",
+                "shape": "mutex destroy 0x60d5170 at +0x108; writer Close 0x6052b80 (+0x28); free [rsp+0x8]; deleting-destructor call on the object at +0xf0; vector<shared_ptr> teardown loop at +0xd8/+0xe0 (shared_ptr dispose 0x5d35070, control release 0x5d350c0); _ZdaPv on the buffer at +0x70; teardown of the 0x70-byte object at +0x58 (type check deleting destructor vs GOT 0x64ecf88 = 0x5dfdf90; installs vtables 0x64d0b58+0x10 / 0x64ca720+0x10; string _M_dispose at +0x50; 0x5d350c0 on +0x40; deleting-destructor call on +0x30; _ZdlPvm(obj, 0x70)); 0x5d350c0 on [logger+0x50]; std::string dispose on fname_ (+0x28/+0x38 SSO check); tail-jump to the no-op 0x5fcc400",
                 "d1_differs": "D1 differs from D0 only in that D0 ends with operator delete (D1 returns without it)",
                 "autoroll_teardown": "destroy the mutex at +0x268; destroy the strings at +0x240/+0x220; destroy the list at +0x200 (0x48-byte nodes, 0x6055350 on [node+0x18], string at [node+0x20]/[node+0x30], _ZdlPvm(node, 0x48), follow [node+0x10]); destroy the string at +0x1d0; destroy the list at +0x1a0 (nodes with a string at +0x28/+0x38)",
             },
@@ -403,7 +416,7 @@ def main():
             },
             "guards": [
                 {
-                    "guard": "shared_ptr dispose checks EnvLogger D0",
+                    "guard": "shared_ptr dispose checks EnvLogger D1",
                     "cmp_addr": "0x5fcf689",
                     "got_slot": "0x64ed970",
                     "got_addend": slot_value(rela, 0x64ED970),
@@ -441,11 +454,11 @@ def main():
             },
         },
         "open_unknowns": [
-            "Logger+0x28: the writer object starting at +0x28 vs the fname_ std::string also at +0x28 (callees address it as writer@+0x28; D0 disposes a string at +0x28/+0x38) -- the exact object boundary/layout needs the writer's own dissection; the writer's internal field layout (buffer +0x50/+0x58/+0x68, flags +0x88/+0x89) is only partially pinned.",
-            "Identity of the object at Logger+0xf0 (D1-deleted in the destructor) and of the 0x70-byte object at +0x58; the factory arg3 type and [arg3+0x38] -> Logger+0x20.",
+            "Logger+0x28: the writer object starting at +0x28 vs the fname_ std::string also at +0x28 (callees address it as writer@+0x28; D1 disposes a string at +0x28/+0x38) -- the exact object boundary/layout needs the writer's own dissection; the writer's internal field layout (buffer +0x50/+0x58/+0x68, flags +0x88/+0x89) is only partially pinned.",
+            "Identity of the object at Logger+0xf0 (released through the deleting-destructor slot) and of the 0x70-byte object at +0x58; the factory arg3 type and [arg3+0x38] -> Logger+0x20.",
             "TLS perf-context byte at +0x98 and u64 counter at +0x50: exact field names (the timing counter is the log-write-time metric, gated on perf_level > 2 -- the name is not verified from the binary).",
             "EnvLogger+0x08 (-1) and AutoRollLogger+0x08 (-1) field identities; AutoRollLogger +0x98/+0xa8 shared_ptr members' roles; the +0x108 container's exact type; the +0x190/+0x1d0/+0x200 list/string members' roles; the roll 0x6058110 full mechanics (rename/open sequence) beyond the characterized head.",
-            "Logger vtable slots 11+ tail (EnvLogger slots 11/13/14 have no relocation and read as zero; slot 12 points at data 0x64cd8d0; the tail holds the shared Configurable GetOption/AreEquivalent 0x609d760/0x609dc40 at 0x78/0x80; the AutoRollLogger tail holds 0x6055240 bare ret, 0x6055260/0x6055270 deleting dtors for 0x18-byte objects, 0x6057d20 dtor-shaped calling D0) -- unresolved whether Logger carries additional virtuals past CloseImpl.",
+            "Logger vtable slots 11+ tail (EnvLogger slots 11/13/14 have no relocation and read as zero; slot 12 points at data 0x64cd8d0; the tail holds the shared Configurable GetOption/AreEquivalent 0x609d760/0x609dc40 at 0x78/0x80; the AutoRollLogger tail holds 0x6055240 bare ret, 0x6055260/0x6055270 deleting dtors for 0x18-byte objects, 0x6057d20 dtor-shaped calling D1) -- unresolved whether Logger carries additional virtuals past CloseImpl.",
             "The two ColumnFamilyData ctor callers 0x5d96cf8 / 0x5d972ab C++ names (from #4315, still open).",
         ],
     }

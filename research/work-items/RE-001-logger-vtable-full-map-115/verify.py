@@ -21,7 +21,7 @@ Checks (prints ALL CHECKS PASSED only when every one holds):
      roll guard, writer error, timestamp format).
   9. model constants match the packet (spot check).
  10. the model tests run: python3 -m unittest
-     tests.test_logger_vtable_115 -> OK, 29 tests.
+     tests.test_logger_vtable_115 -> OK, 33 tests.
 """
 
 import hashlib
@@ -47,6 +47,12 @@ FIXED_SAMPLES = [
     ((0x5FCD400, 0x5FCD419), 0x5FCD404, "cmp    0x11(%rdi),%sil"),
     ((0x5FCC220, 0x5FCC229), 0x5FCC224, "movzbl 0x11(%rdi),%eax"),
     ((0x5FCC410, 0x5FCC473), 0x5FCC42C, "cmpb   $0x0,0x10(%rsi)"),
+    ((0x5FCFDE0, 0x5FD003F), 0x5FCFFD4, "jmp    63f0d80"),
+    ((0x6057D00, 0x6057D1B), 0x6057D16, "jmp    63f0d80"),
+    ((0x6057000, 0x60571B4), 0x60570F8, "call   *0x20(%rax)"),
+    ((0x5FD0DE0, 0x5FD176A), 0x5FD0EC2, "movq   $0x100000,0x98(%rsp)"),
+    ((0x5FD0DE0, 0x5FD176A), 0x5FD1450, "mov    $0x10000,%edx"),
+    ((0x5FD0DE0, 0x5FD176A), 0x5FD1496, "mov    %rbp,0x88(%rbx)"),
 ]
 
 # Candidates for the 3 seeded random gate spots; the seed is the first
@@ -156,15 +162,25 @@ def main():
     check("census outputs reproduce",
           all(sha256_file(PACKET / f) == before[f] for f in census_files))
 
-    # 5. excerpts regenerate byte-for-byte.
-    before = {p.name: sha256_file(p)
-              for p in (PACKET / "excerpts").glob("*.objdump.txt")}
-    subprocess.run([sys.executable, str(PACKET / "export_excerpts.py")],
-                   cwd=ROOT, check=True, capture_output=True)
-    after = {p.name: sha256_file(p)
-             for p in (PACKET / "excerpts").glob("*.objdump.txt")}
-    check("excerpts regenerate byte-for-byte",
-          before == after, f"{len(before)} excerpts")
+    # 5. Reproduce excerpts while retaining their original raw exports.
+    excerpts = {p.name: p for p in (PACKET / "excerpts").glob("*.objdump.txt")}
+    before = {name: path.read_bytes() for name, path in excerpts.items()}
+    try:
+        subprocess.run([sys.executable, str(PACKET / "export_excerpts.py")],
+                       cwd=ROOT, check=True, capture_output=True)
+        after = {p.name: p.read_bytes()
+                 for p in (PACKET / "excerpts").glob("*.objdump.txt")}
+        old_spelling = b"\trep movsq %ds:(%rsi),%es:(%rdi)"
+        new_spelling = b"\trep movsq (%rsi),(%rdi)"
+        same = before.keys() == after.keys() and all(
+            raw.replace(old_spelling, new_spelling)
+            == after[name].replace(old_spelling, new_spelling)
+            for name, raw in before.items())
+    finally:
+        for name, raw in before.items():
+            excerpts[name].write_bytes(raw)
+    check("excerpts regenerate with equivalent implicit-segment spelling",
+          same, f"{len(before)} excerpts")
 
     # 6. fixed samples + 3 seeded random gate spots.
     for fn_range, addr, frag in FIXED_SAMPLES:
@@ -261,7 +277,7 @@ def main():
     out = res.stdout + res.stderr
     m = re.search(r"Ran (\d+) tests", out)
     n = int(m.group(1)) if m else -1
-    check("model tests", res.returncode == 0 and "OK" in out and n == 29,
+    check("model tests", res.returncode == 0 and "OK" in out and n == 33,
           f"Ran {n} tests")
 
     if FAILURES:
