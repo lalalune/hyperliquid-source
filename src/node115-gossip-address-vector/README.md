@@ -1,5 +1,8 @@
 # Node115 selected Gossip response vector
 
+Correction: the raw outer response tag selecting this decoder is 1. The
+variant0 label below is historical; this crate accepts only the child payload.
+
 Real no_std+alloc decoder for the full vector payload selected by response
 variant0. It starts at the count (outer tag already selected), decodes each
 actual NodeIp-tag0 element, and preserves cursor/count on all read errors.

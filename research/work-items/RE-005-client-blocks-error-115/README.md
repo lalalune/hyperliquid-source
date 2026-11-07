@@ -1,5 +1,11 @@
 # RE-005: complete ClientBlocksError logical payload
 
+**Raw outer-tag correction:** the parent enters this nested Result path when
+its decoded outer u32 is **0**, not 1. See
+`RE-005-node115-gossip-response-composition` for the branch and call evidence.
+The historical label below is retained for provenance; this child decoder
+starts after both outer tags and its payload behavior is unchanged.
+
 Target Linux x86-64 node #115, SHA256
 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
 Base05bc2de303c05525b71e7e257426e741bc66a390; serialization/RE-005.

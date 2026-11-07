@@ -1,5 +1,8 @@
 # Node115 ClientBlocksError logical payload
 
+Correction: the raw outer response tag entering this nested Result is 0. The
+variant1 label below is historical; this crate accepts only the error payload.
+
 A real no_std Cargo library decoding all seven variants at the nested error
 selection of GossipRpcResponse variant1. `index` stays raw: 0/2/3/4 have no
 payload, 1/5/6 contain two independently read u64 values. Field units and native
