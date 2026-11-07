@@ -30,3 +30,11 @@ Local static checks used Python 3.12.14, Capstone 5.0.7 and pyelftools 0.33. The
 ## Limits
 
 Reference ownership is inferred from the atomic decrement pattern. The concrete pointee types and callback implementations remain open. This packet requests no acceptance gate or byte-coverage change.
+
+## Cleanup callback contracts
+
+The first callback conditionally releases a backing region using the count at `+0x10` scaled by 32, then calls the cleanup routines for the inline regions at `+0x28` and `+0x188`. The second callback first walks the element count at `+0x20` over 40-byte elements. It decrements the reference reached through each element's `+0x20` pointer slot and calls a nested cleanup routine on zero. It subsequently passes a byte size of 40 times the capacity field to the backing-storage release call.
+
+Both callbacks then atomically decrement the outer count at `+8` unless the object pointer is all ones. On zero, the first passes size `0x368` and the second size `0x28` to their respective final release jumps. This distinguishes the two cleanup contracts beyond the pair loop.
+
+Recheck with `objdump -d -M intel --start-address=0x5a8d7c0 --stop-address=0x5a8d860 "$target"` and `objdump -d -M intel --start-address=0x5a8b3e0 --stop-address=0x5a8b47b "$target"`. Local checks decoded both full FDE ranges and distinguished the stride, size and atomic operands. Exact high-level types remain open.
