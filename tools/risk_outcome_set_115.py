@@ -7,7 +7,8 @@ error, builds a lazy B-tree iterator over the set record {root, height, length},
 array header and streams every 0x98-byte record through the record writer. A length that does not fit in u32 takes the
 buffered arm instead (0x80-byte buffer, per-record counter, the walk then ends in the "unwrap on None" panic).
 The record writer emits outcome (u64), settleFraction, details, nameAndDescription (a two-string array) and sideNames
-(a two-string newtype closed by a tuple end), with the field names only when the serializer's struct-map flag is 1.
+(a two-string newtype closed by a tuple end). Field-name keys require the serializer's struct-map flag to be 1,
+except nameAndDescription in the 52f copy, which uses any nonzero flag.
 
 The reconstruction is `body_model`, `record_model` and `next_model`. A concrete x86-64 evaluator runs the real bytes of
 each body, its record writer, header/uint/string writers, the two record-field helpers, the tuple end, Compound::end and

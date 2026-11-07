@@ -5,7 +5,7 @@ five-field records (`outcome`, `settleFraction`, `details`, `nameAndDescription`
 serializer copy families: the set body's reserved-name reject, u32 length test, array header and counted-compound path,
 the record writer's field order, key tests and marker byte, the two-string helpers, and the B-tree `Iter::next` over
 0x98-byte keys. The model was checked against the real bytes of 3 set bodies, 3 record writers (one of which tests
-a different flag value than its siblings), 3 `Iter::next` copies and 15 shared writers on 17,400 cases with
+a different flag value than its siblings), 3 `Iter::next` copies and 20 dependency functions on 17,400 cases with
 0 mismatches, and 107 of 107 negative controls were detected.
 
 - Component ID: `risk` (field names `outcome` / `settleFraction` / `sideNames` mark an outcome record; the component
@@ -36,9 +36,8 @@ python3 -m unittest tests.test_risk_outcome_set_115
 - It writes `bodies.tsv`, `records.tsv`, `iter-next.tsv`, `cases-sample.tsv`, `next-cases-sample.tsv`,
   `controls.tsv`, `undetected-flips.tsv`, `coverage.tsv`, `summary.json` and `measure.json`.
 - Two runs with different `PYTHONHASHSEED` and `TZ` give byte-identical files.
-- Full run: about 4 minutes, about 390 MB resident. Cases are generated and evaluated one at a time; only the
-  comparison result and the written bytes are kept. `--per-body N` (default 1500), `--per-rec N` (default 3000)
-  and `--per-next N` (default 1300) change the case counts.
+- The generator retains cases and their evaluated outputs while computing coverage and negative controls.
+  `--per-body N` (default 1500), `--per-rec N` (default 3000) and `--per-next N` (default 1300) change the case counts.
 - Case generation is a SHA-512 counter stream keyed by unit; `cases-sample.tsv` holds every 5th set case and every 6th
   record case, `summary.json` carries a SHA-256 over the output bytes, results and call lists of all cases.
 
