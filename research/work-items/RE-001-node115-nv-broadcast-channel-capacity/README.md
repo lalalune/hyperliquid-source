@@ -30,3 +30,11 @@ Local static checks used Python 3.12.14, Capstone 5.0.7 and pyelftools 0.33. The
 ## Limits
 
 The arithmetic result precedes allocation. The packet does not claim large allocations succeed or recover send and receive behavior. This packet requests no acceptance gate or byte-coverage change.
+
+## Backing storage layout
+
+The capacity caller passes a pointer to a stack record containing a reference to the rounded capacity, a zero start and the rounded capacity as the exclusive end. The helper at `0x4e00a30` calculates the saturating difference and requests 48 bytes per element. It checks the count against `0x2aaaaaaaaaaaaaa`, which equals the maximum signed byte size divided by 48.
+
+The paired initialization loop advances 96 bytes per iteration. Its stores at element offset `0x28` hold the element index minus the referenced capacity. The odd tail uses the same 48-byte stride and offset. For example, three elements place the position qwords at byte offsets 40, 88 and 136. A 40-byte stride fails against the encoded destination operands.
+
+Recheck with `objdump -d -M intel --start-address=0x4e00a30 --stop-address=0x4e00be6 "$target"`. The target digest, helper FDE, exact count bound, paired-loop operands and odd-tail operand were verified locally. The use of these initial positions by send and receive remains open.
