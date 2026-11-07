@@ -1,0 +1,2170 @@
+{
+  "target": {
+    "artifact": "work/hl-node-115.bin",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "node": 115
+  },
+  "work_item": "RE-001-composite-env-wrapper-115",
+  "task": "RE-001",
+  "question": "Pin node #115's CompositeEnvWrapper construction and destruction end-to-end: the builder 0x5fd7360 and install helper 0x5fceb20, the wrapper D2/D0 and base D2, the wrapper vtable overrides (slots 5, 12, 14, 16, 17) and the 20 forwarder slots, the default holder initializer 0x5fe2860, the FactoryEntry node slot 2, and the factory control-block dispose/destroy pair. This resolves the open unknowns carried by PR #3948 (the CompositeEnv builder, the holder initializer full body, the factory control-block dispose/destroy, the node vtable slot 2).",
+  "layout": {
+    "size": 96,
+    "fields": [
+      {
+        "offset": 0,
+        "what": "vtable pointer"
+      },
+      {
+        "offset": 8,
+        "what": "options vector {begin, end, capacity} of 0x30-byte records"
+      },
+      {
+        "offset": 40,
+        "what": "shared_ptr A (object, control block)"
+      },
+      {
+        "offset": 56,
+        "what": "shared_ptr B (object, control block)"
+      },
+      {
+        "offset": 72,
+        "what": "wrapped Env*"
+      },
+      {
+        "offset": 80,
+        "what": "shared_ptr C (object, control block)"
+      }
+    ],
+    "base_size": 80,
+    "note": "The base (CompositeEnv) object is 0x50 bytes; the wrapper adds shared_ptr C at +0x50/+0x58, which the wrapper D0 deletes with operator delete 0x60."
+  },
+  "builder": {
+    "addr": 100496224,
+    "fde": "0x5fd7360..0x5fd7466",
+    "signature": "(this, wrapped_env, sp_a_slot, sp_b_slot)",
+    "role": "Calls the install helper 0x5fceb20 with (sp_a_slot, sp_b_slot), stores the wrapped env at +0x48, zeroes shared_ptr C (+0x50/+0x58), installs the wrapper vtable 0x64ce590, and appends three empty-named records via 0x6099ce0: {\"\" , this+0x48, 0x6504c60}, {\"\" , this+0x28, 0x6504c20}, {\"\" , this+0x38, 0x6504be0}. The record third fields are .bss addresses; their runtime contents are not statically determinable (open unknown).",
+    "calls": 2,
+    "callers": [
+      "0x5fcf495 (CompositeEnv invoker 0x5fcf450)",
+      "0x60289f8 (MockEnv ctor 0x60289f0)"
+    ],
+    "landing_pads": "The builder's three landing pads (0x5fd7442/0x5fd744e/0x5fd745a) jump to the shared cleanup at 0x5fd730c: dispose the temp record string, release +0x58, install the CompositeEnv vtable, call the base D2 (0x5fd7333), _Unwind_Resume.",
+    "excerpt": "builder-5fd7360.objdump.txt"
+  },
+  "install": {
+    "addr": 100461344,
+    "fde": "0x5fceb20..0x5fcebb7",
+    "signature": "(this, sp_a_slot, sp_b_slot)",
+    "role": "Installs the Env vtable 0x64cdad0, zeroes +0x08/+0x10/+0x18/+0x20, copies shared_ptr A from the caller's slot into +0x28/+0x30 and shared_ptr B from the caller's 16-byte slot into +0x38/+0x40, each with a selector-gated use-count bump (byte at 0x64ed290: 0 selects lock addl, non-zero selects plain addl).",
+    "calls": 2,
+    "callers": [
+      "0x5fd7388 (builder 0x5fd7360)",
+      "0x5fe2900 (holder init 0x5fe2860)"
+    ],
+    "excerpt": "install-5fceb20.objdump.txt"
+  },
+  "string_init": {
+    "addr": 100490432,
+    "fde": "0x5fd5cc0..0x5fd5cd4",
+    "role": "std::string default ctor (20 bytes): ptr = this+0x10, length 0, SSO nul. Initializes the three empty record names in the builder and the temp string in slot 12.",
+    "calls": 4,
+    "callers": [
+      "0x5fd5e63 (slot 12)",
+      "0x5fd73c3",
+      "0x5fd73e2",
+      "0x5fd7408 (builder)"
+    ],
+    "excerpt": "string-init-5fd5cc0.objdump.txt"
+  },
+  "destructors": [
+    {
+      "name": "CompositeEnvWrapper D2 (slot 0)",
+      "addr": 100496080,
+      "fde": "0x5fd72d0..0x5fd730b",
+      "role": "Installs the wrapper vtable, releases +0x58 via _M_release 0x5d350c0 when non-null, installs the CompositeEnv vtable, tail-jumps to the base D2 0x5fcf4d0.",
+      "installed_by": "RELATIVE record at 0x64ce590 (wrapper vtable slot 0)",
+      "excerpt": "wrapper-d2-5fd72d0.objdump.txt"
+    },
+    {
+      "name": "CompositeEnvWrapper D0 (slot 1)",
+      "addr": 100496656,
+      "fde": "0x5fd7510..0x5fd7558",
+      "role": "Deleting destructor: installs the wrapper vtable, releases +0x58, installs the CompositeEnv vtable, CALLS the base D2 (not a tail jump), then operator delete 0x60.",
+      "installed_by": "RELATIVE record at 0x64ce598 (wrapper vtable slot 1)",
+      "excerpt": "wrapper-d0-5fd7510.objdump.txt"
+    },
+    {
+      "name": "CompositeEnv base D2",
+      "addr": 100463824,
+      "fde": "0x5fcf4d0..0x5fcf585",
+      "role": "Installs the Env vtable, releases +0x40 then +0x30 via _M_release 0x5d350c0 when non-null, installs the Configurable vtable 0x64d3430, destroys the options vector (string-dispose each 0x30-byte record whose string is heap allocated, then free the buffer).",
+      "calls": 5,
+      "jumps": 3,
+      "reached_by": {
+        "calls": [
+          "0x5fd7545 (wrapper D0)",
+          "0x5fd7333 (builder landing pad 0x5fd730c)",
+          "0x5fe281f (PosixClock accessor landing pad 0x5fe2756..0x5fe285d)",
+          "0x5fe2dab (neighbor routine 0x5fe2d20..0x5fe2e17)",
+          "0x60290b6 (MockEnv D0 0x6029050)"
+        ],
+        "tail_jumps": [
+          "0x5fd7306 (wrapper D2)",
+          "0x5fe2cbf (TSU atexit dtor 0x5fe2c30 \u2014 the holder cleanup destroys via the base D2)",
+          "0x6028ffc (MockEnv D2 0x6028f90)"
+        ]
+      },
+      "excerpt": "basedtor-5fcf4d0.objdump.txt"
+    }
+  ],
+  "slots": [
+    {
+      "slot": 5,
+      "name": "PrepareOptions",
+      "addr": 100496736,
+      "fde": "0x5fd7560..0x5fd76b1",
+      "signature": "(this, target_env, options)",
+      "role": "Resolves the target's wrapped env: the target's shared_ptr C object if set, else the target's +0x48 if set, else the default holder from 0x5fe2860; stores it at target+0x48. If target+0x28 is null, copies the wrapped env's +0x28 shared_ptr in via the helper 0x5fcf390 (selector-gated bump, old control-block release). If target+0x38 is null, copies the wrapped env's +0x38 shared_ptr in via the accessor 0x5fcf430 the same way. Then calls the base PrepareOptions 0x6095e70 (a plain call, not a tail jump) and returns this.",
+      "excerpt": "wslot5-5fd7560.objdump.txt"
+    },
+    {
+      "slot": 12,
+      "name": "SerializeOptions",
+      "addr": 100490752,
+      "fde": "0x5fd5e00..0x5fd5f07",
+      "signature": "(out_string, env, options, ...)",
+      "role": "Calls the base 0x609de80 first (it fills the output string); then, if the env's wrapped env is non-null and is not the default holder, appends \"target=\" plus the wrapped env's serialization (via the helper 0x60971c0) to the output string. Recorded as observed: the first argument is the output string, the second the env, the third the options \u2014 the base 0x609de80 default-initializes its first argument as a std::string and reads the env from the second.",
+      "excerpt": "wslot12-5fd5e00.objdump.txt"
+    },
+    {
+      "slot": 14,
+      "name": "Name",
+      "addr": 100486752,
+      "fde": "0x5fd4e60..0x5fd4e6c",
+      "role": "Returns \"CompositeEnv\" (string at 0x43e762).",
+      "excerpt": "wslot14-5fd4e60.objdump.txt"
+    },
+    {
+      "slot": 16,
+      "name": "IsInstanceOf",
+      "addr": 100491840,
+      "fde": "0x5fd6240..0x5fd6271",
+      "role": "Returns 1 iff the arg string has length 12 and equals \"CompositeEnv\" (first 8 bytes compared as the constant 0x7469736f706d6f43, next 4 as 0x766e4565); otherwise falls back to the base 0x5d2e770.",
+      "excerpt": "wslot16-5fd6240.objdump.txt"
+    },
+    {
+      "slot": 17,
+      "name": "wrapped-env accessor",
+      "addr": 100486768,
+      "fde": "0x5fd4e70..0x5fd4e79",
+      "role": "Returns this+0x48 (the wrapped Env*).",
+      "excerpt": "wslot17-5fd4e70.objdump.txt"
+    }
+  ],
+  "forwarders": [
+    {
+      "slot": 45,
+      "addr": 100486784,
+      "form": "call",
+      "target_offset": "0x168",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 46,
+      "addr": 100486864,
+      "form": "jmp",
+      "target_offset": "0x170",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 47,
+      "addr": 100486896,
+      "form": "jmp",
+      "target_offset": "0x178",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 48,
+      "addr": 100486928,
+      "form": "jmp",
+      "target_offset": "0x180",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 49,
+      "addr": 100486960,
+      "form": "jmp",
+      "target_offset": "0x188",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 50,
+      "addr": 100487024,
+      "form": "jmp",
+      "target_offset": "0x190",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 51,
+      "addr": 100487056,
+      "form": "jmp",
+      "target_offset": "0x198",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 52,
+      "addr": 100486992,
+      "form": "jmp",
+      "target_offset": "0x1a0",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 59,
+      "addr": 100487088,
+      "form": "call",
+      "target_offset": "0x1d8",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 63,
+      "addr": 100487168,
+      "form": "jmp",
+      "target_offset": "0x1f8",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 64,
+      "addr": 100487200,
+      "form": "jmp",
+      "target_offset": "0x200",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 65,
+      "addr": 100487232,
+      "form": "call",
+      "target_offset": "0x208",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 66,
+      "addr": 100487312,
+      "form": "jmp",
+      "target_offset": "0x210",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 67,
+      "addr": 100487344,
+      "form": "jmp",
+      "target_offset": "0x218",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 68,
+      "addr": 100487408,
+      "form": "call",
+      "target_offset": "0x220",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 69,
+      "addr": 100487376,
+      "form": "jmp",
+      "target_offset": "0x228",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 71,
+      "addr": 100487632,
+      "form": "call",
+      "target_offset": "0x238",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 79,
+      "addr": 100487488,
+      "form": "call",
+      "target_offset": "0x278",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 80,
+      "addr": 100487568,
+      "form": "jmp",
+      "target_offset": "0x280",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    },
+    {
+      "slot": 81,
+      "addr": 100487600,
+      "form": "jmp",
+      "target_offset": "0x288",
+      "role": "Forwards the wrapped env's same slot: jmp-form loads this+0x48 and tail-jumps to wrapped->vtable[slot]; call-form loads arg+0x48, calls wrapped->vtable[slot], and returns this."
+    }
+  ],
+  "holder_init": {
+    "addr": 100542560,
+    "fde": "0x5fe2860..0x5fe2c2f",
+    "role": "Returns the function-local static holder at 0x6504cc0 (guard byte 0x6504ca8). Calls 0x61d2ca0 and 0x61c21b0 unconditionally first (one site each, opaque, by contract), then __cxa_guard_acquire; on first init it takes the PosixClock accessor 0x5fe2680, builds a temp shared_ptr via the PosixFileSystem holder accessor 0x60029f0, installs the holder via 0x5fceb20, releases the temp shared_ptr (fast path at counts (1, 1), else selector-gated decrement plus the 0x5d35070 dispose tail), installs the CompositeEnv vtable, builds a 0x40-byte 4x0x10 record array (vector at 0x6504d08, entries via the by-contract 0x61d4570), a mutex at 0x6504d60 named \"mutex_init\" with a 4-entry loop (0x61d4740 / 0x61d4730, by contract), and a 0xd8-byte ThreadStatusUpdater at 0x6504ce0 (vtable 0x64ce8e0; +0x38/+0x70/+0xa8 = 1; float 1.0 at +0x50/+0x88/+0xc0 from 0x459e78; self-pointers +0x30->+0x60, +0x68->+0x98, +0xa0->+0xd0), registers __cxa_atexit with dtor 0x5fe2c30 and DSO handle 0x64efa20, releases the guard.",
+    "calls": 17,
+    "callers": [
+      "0x5e5da98",
+      "0x5fcd5b8",
+      "0x5fcf46e",
+      "0x5fd34e4",
+      "0x5fd3a7d",
+      "0x5fd576e",
+      "0x5fd5e35",
+      "0x5fd75e9",
+      "0x5fe2c45",
+      "0x5fe2d35",
+      "0x5feab98",
+      "0x6001418",
+      "0x602e67f",
+      "0x60a524d",
+      "0x60b2ded",
+      "0x60bb8e3",
+      "0x60bb8f5"
+    ],
+    "excerpt": "holder-init-5fe2860.objdump.txt"
+  },
+  "node_slot2": {
+    "addr": 100452320,
+    "fde": "0x5fcc7e0..0x5fcc7ee",
+    "role": "FactoryEntry<Env> node vtable slot 2: forwards this+0x08's vtable slot 2 (the entry object's slot 2). Answers the open unknown carried by PR #3948 about that slot's role.",
+    "installed_by": "RELATIVE record at 0x64cde78 (node vtable slot 2)",
+    "excerpt": "node-slot2-5fcc7e0.objdump.txt"
+  },
+  "control_block": {
+    "vtable": 105716792,
+    "typeinfo": "St23_Sp_counted_ptr_inplaceIN7rocksdb19EmulatedSystemClockESaIvELN9__gnu_cxx12_Lock_policyE2EE",
+    "slots": [
+      {
+        "slot": 0,
+        "addr": 100817168,
+        "role": "not excerpted; cited from the RELATIVE record"
+      },
+      {
+        "slot": 1,
+        "addr": 100817520,
+        "role": "not excerpted; cited from the RELATIVE record"
+      },
+      {
+        "slot": 2,
+        "addr": 100817232,
+        "name": "dispose",
+        "fde": "0x6025950..0x6025964",
+        "role": "Tail-jumps to the managed object's slot 0 (D2) with this+0x10.",
+        "installed_by": "RELATIVE record at 0x64d1c48",
+        "excerpt": "cb-dispose-6025950.objdump.txt"
+      },
+      {
+        "slot": 3,
+        "addr": 100817808,
+        "name": "destroy",
+        "fde": "0x6025b90..0x6025b9e",
+        "role": "operator delete 0x60.",
+        "installed_by": "RELATIVE record at 0x64d1c50",
+        "excerpt": "cb-destroy-6025b90.objdump.txt"
+      },
+      {
+        "slot": 4,
+        "addr": 100819056,
+        "role": "not excerpted; cited from the RELATIVE record"
+      }
+    ],
+    "note": "The control-block vtable is _Sp_counted_ptr_inplace<EmulatedSystemClock>; its dispose/destroy are the slots _M_release 0x5d350c0 and its dispose tail 0x5d35070 invoke via vtable +0x10/+0x18."
+  },
+  "shared_ptr_release": {
+    "release_addr": 97734848,
+    "fde": "0x5d350c0..0x5d35145",
+    "dispose_tail_addr": 97734768,
+    "fde_tail": "0x5d35070..0x5d350bc",
+    "role": "_M_release 0x5d350c0: fast path when the counts word is 0x100000001 (use 1, weak 1) \u2014 zero the counts, dispose via slot 0x10, destroy via slot 0x18. Otherwise decrement use (lock xadd when the byte at 0x64ed290 is 0, plain decrement otherwise); when the old use was 1, tail-jump to the dispose tail 0x5d35070, which disposes, decrements weak at +0x0c (selector-gated), and destroys when the old weak count was 1. Direct callers of 0x5d35070 are sites that already decremented use themselves (e.g. the holder init's temp release).",
+    "calls": 1273,
+    "jumps": 25,
+    "tail_calls": 654,
+    "tail_jumps": 36
+  },
+  "append": {
+    "addr": 101293280,
+    "fde": "0x6099ce0..0x6099e34",
+    "role": "Appends one 0x30-byte {std::string, qword, qword} record to the vector at owner+0x08..+0x18; SSO copy for len<=15, _M_create for longer, grows via 0x6099790 at capacity.",
+    "calls": 37,
+    "builder_sites": [
+      "0x5fd73cb",
+      "0x5fd73f1",
+      "0x5fd7417"
+    ],
+    "excerpt": "append-6099ce0.objdump.txt"
+  },
+  "grow": {
+    "addr": 101291920,
+    "fde": "0x6099790..0x6099cad",
+    "role": "Doubles the options-vector capacity (bounded by the max check), move-constructs the records, frees the old buffer.",
+    "calls": 1,
+    "callers": [
+      "0x6099e0a"
+    ],
+    "excerpt": "grow-6099790.objdump.txt"
+  },
+  "accessor": {
+    "addr": 100463664,
+    "fde": "0x5fcf430..0x5fcf439",
+    "role": "9 bytes: returns arg+0x38 (the holder's shared_ptr B slot).",
+    "calls": 19,
+    "excerpt": "accessor-5fcf430.objdump.txt"
+  },
+  "helper": {
+    "addr": 100463504,
+    "fde": "0x5fcf390..0x5fcf399",
+    "role": "9 bytes: lea 0x28(%rdi),%rax \u2014 returns arg+0x28 (the shared_ptr A slot). Used by slot 5 and by the CompositeEnv invoker.",
+    "calls": 14,
+    "excerpt": "helper-5fcf390.objdump.txt"
+  },
+  "invoker": {
+    "addr": 100463696,
+    "fde": "0x5fcf450..0x5fcf4cb",
+    "role": "CompositeEnv invoker: new(0x60), holder accessor 0x5fe2860, 0x5fcf430 (holder+0x38), 0x5fcf390 (holder+0x28), builder 0x5fd7360 (wrapped=holder, sp_a=holder+0x28, sp_b=holder+0x38), then swaps the result into the caller's cell, D0-deleting the old value.",
+    "leas": 1,
+    "lea_sites": [
+      "0x5fd2885"
+    ],
+    "excerpt": "invoker-composite-5fcf450.objdump.txt"
+  },
+  "mock_env": {
+    "vtable": 105714584,
+    "typeinfo": "N7rocksdb7MockEnvE",
+    "ctor": 100829680,
+    "fde_ctor": "0x60289f0..0x6028a0d",
+    "role": "MockEnv ctor: passes its arguments straight through to the builder 0x5fd7360 (its second caller), then installs the MockEnv vtable. MockEnv's vtable differs from the wrapper's in slots 0, 1 and 14 only (its own D2 0x6028f90, D0 0x6029050, Name 0x6025790); all 20 forwarder slots and the slot 5/12/16/17 overrides are shared with the wrapper.",
+    "calls": 1,
+    "callers": [
+      "0x6028e12"
+    ]
+  },
+  "vtables": {
+    "Env": {
+      "header": "0x64cdac0",
+      "vtable": "0x64cdad0",
+      "typeinfo": "N7rocksdb3EnvE",
+      "slots": [
+        "0x0",
+        "0x0",
+        "0x609d760",
+        "0x609dc40",
+        "0x5d32560",
+        "0x6095e70",
+        "0x6096790",
+        "0x5d2e090",
+        "0x60956f0",
+        "0x609d0e0",
+        "0x60986b0",
+        "0x6095710",
+        "0x609de80",
+        "0x609d980",
+        "0x5fcc0d0",
+        "0x5d32a30",
+        "0x5d2e770",
+        "0x5d2ca00",
+        "0x5d2ca10",
+        "0x5fcc0e0",
+        "0x5fcc100",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x5fccc50",
+        "0x5fce010",
+        "0x5fccbd0",
+        "0x5fccb50",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x5fd0630",
+        "0x0",
+        "0x5fccad0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x5fcca50",
+        "0x5fcc9d0",
+        "0x5fcc950",
+        "0x0",
+        "0x0",
+        "0x5fcce50",
+        "0x0",
+        "0x5fcc120",
+        "0x0",
+        "0x5fcc130",
+        "0x5fcc140",
+        "0x5fcc150",
+        "0x5fcc160",
+        "0x0",
+        "0x5fd1770",
+        "0x0",
+        "0x5fcc170",
+        "0x5fcc190",
+        "0x0",
+        "0x0",
+        "0x5fcd480",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x5fccdd0",
+        "0x0",
+        "0x5fcc1a0",
+        "0x5fccd50",
+        "0x5fcc1b0",
+        "0x0",
+        "0x5fccf90",
+        "0x5fcc520",
+        "0x5fcc520",
+        "0x5fcc4b0",
+        "0x5fcc4f0",
+        "0x5fcc550",
+        "0x5fcc590",
+        "0x5fcc590",
+        "0x5fcccd0",
+        "0x5fcc1c0",
+        "0x5fccf10",
+        "0x5fcc8d0",
+        "0x5fcc850",
+        "0x5fcc1d0"
+      ],
+      "null_slots": [
+        0,
+        1,
+        21,
+        22,
+        23,
+        28,
+        29,
+        30,
+        32,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        43,
+        44,
+        46,
+        48,
+        53,
+        55,
+        58,
+        59,
+        61,
+        62,
+        63,
+        64,
+        66,
+        70
+      ]
+    },
+    "CompositeEnv": {
+      "header": "0x64ce2c8",
+      "vtable": "0x64ce2d8",
+      "typeinfo": "N7rocksdb12CompositeEnvE",
+      "slots": [
+        "0x0",
+        "0x0",
+        "0x609d760",
+        "0x609dc40",
+        "0x5d32560",
+        "0x6095e70",
+        "0x6096790",
+        "0x5d2e090",
+        "0x60956f0",
+        "0x609d0e0",
+        "0x60986b0",
+        "0x6095710",
+        "0x609de80",
+        "0x609d980",
+        "0x5fcc0d0",
+        "0x5d32a30",
+        "0x5d2e770",
+        "0x5d2ca00",
+        "0x5d2ca10",
+        "0x5fd5a00",
+        "0x5fd5a80",
+        "0x5fdea30",
+        "0x5fdedd0",
+        "0x5fdf170",
+        "0x5fdf520",
+        "0x5fdf820",
+        "0x5fdfb10",
+        "0x5fd5980",
+        "0x5fdfe00",
+        "0x5fdafb0",
+        "0x5fdad30",
+        "0x5fdab30",
+        "0x5fda8b0",
+        "0x5fda6b0",
+        "0x5fda430",
+        "0x5fda1b0",
+        "0x5fd9f30",
+        "0x5fd9cb0",
+        "0x5fd9a30",
+        "0x5fd97b0",
+        "0x5fd95b0",
+        "0x5fd93b0",
+        "0x5fd91c0",
+        "0x5fd8f40",
+        "0x5fd8cc0",
+        "0x5fcce50",
+        "0x0",
+        "0x5fcc120",
+        "0x0",
+        "0x5fcc130",
+        "0x5fcc140",
+        "0x5fcc150",
+        "0x5fcc160",
+        "0x5fd8a40",
+        "0x5fd8840",
+        "0x5fd5bc0",
+        "0x5fd4e20",
+        "0x5fd4e40",
+        "0x5fd5c40",
+        "0x0",
+        "0x5fcd480",
+        "0x5fd5f10",
+        "0x5fd85c0",
+        "0x0",
+        "0x0",
+        "0x5fccdd0",
+        "0x0",
+        "0x5fcc1a0",
+        "0x5fccd50",
+        "0x5fcc1b0",
+        "0x5fd6190",
+        "0x5fccf90",
+        "0x5fd7fc0",
+        "0x5fd7e40",
+        "0x5fd7cc0",
+        "0x5fd7b40",
+        "0x5fd79c0",
+        "0x5fd7840",
+        "0x5fd76c0",
+        "0x5fcccd0",
+        "0x5fcc1c0",
+        "0x5fccf10",
+        "0x5fd83c0",
+        "0x5fd8140",
+        "0x5fcc1d0"
+      ],
+      "null_slots": [
+        0,
+        1,
+        46,
+        48,
+        59,
+        63,
+        64,
+        66
+      ]
+    },
+    "CompositeEnvWrapper": {
+      "header": "0x64ce580",
+      "vtable": "0x64ce590",
+      "typeinfo": "N7rocksdb19CompositeEnvWrapperE",
+      "slots": [
+        "0x5fd72d0",
+        "0x5fd7510",
+        "0x609d760",
+        "0x609dc40",
+        "0x5d32560",
+        "0x5fd7560",
+        "0x6096790",
+        "0x5d2e090",
+        "0x60956f0",
+        "0x609d0e0",
+        "0x60986b0",
+        "0x6095710",
+        "0x5fd5e00",
+        "0x609d980",
+        "0x5fd4e60",
+        "0x5d32a30",
+        "0x5fd6240",
+        "0x5fd4e70",
+        "0x5d2ca10",
+        "0x5fd5a00",
+        "0x5fd5a80",
+        "0x5fdea30",
+        "0x5fdedd0",
+        "0x5fdf170",
+        "0x5fdf520",
+        "0x5fdf820",
+        "0x5fdfb10",
+        "0x5fd5980",
+        "0x5fdfe00",
+        "0x5fdafb0",
+        "0x5fdad30",
+        "0x5fdab30",
+        "0x5fda8b0",
+        "0x5fda6b0",
+        "0x5fda430",
+        "0x5fda1b0",
+        "0x5fd9f30",
+        "0x5fd9cb0",
+        "0x5fd9a30",
+        "0x5fd97b0",
+        "0x5fd95b0",
+        "0x5fd93b0",
+        "0x5fd91c0",
+        "0x5fd8f40",
+        "0x5fd8cc0",
+        "0x5fd4e80",
+        "0x5fd4ed0",
+        "0x5fd4ef0",
+        "0x5fd4f10",
+        "0x5fd4f30",
+        "0x5fd4f70",
+        "0x5fd4f90",
+        "0x5fd4f50",
+        "0x5fd8a40",
+        "0x5fd8840",
+        "0x5fd5bc0",
+        "0x5fd4e20",
+        "0x5fd4e40",
+        "0x5fd5c40",
+        "0x5fd4fb0",
+        "0x5fcd480",
+        "0x5fd5f10",
+        "0x5fd85c0",
+        "0x5fd5000",
+        "0x5fd5020",
+        "0x5fd5040",
+        "0x5fd5090",
+        "0x5fd50b0",
+        "0x5fd50f0",
+        "0x5fd50d0",
+        "0x5fd6190",
+        "0x5fd51d0",
+        "0x5fd7fc0",
+        "0x5fd7e40",
+        "0x5fd7cc0",
+        "0x5fd7b40",
+        "0x5fd79c0",
+        "0x5fd7840",
+        "0x5fd76c0",
+        "0x5fd5140",
+        "0x5fd5190",
+        "0x5fd51b0",
+        "0x5fd83c0",
+        "0x5fd8140",
+        "0x5fcc1d0"
+      ],
+      "null_slots": []
+    },
+    "MockEnv": {
+      "header": "0x64d1388",
+      "vtable": "0x64d1398",
+      "typeinfo": "N7rocksdb7MockEnvE",
+      "slots": [
+        "0x6028f90",
+        "0x6029050",
+        "0x609d760",
+        "0x609dc40",
+        "0x5d32560",
+        "0x5fd7560",
+        "0x6096790",
+        "0x5d2e090",
+        "0x60956f0",
+        "0x609d0e0",
+        "0x60986b0",
+        "0x6095710",
+        "0x5fd5e00",
+        "0x609d980",
+        "0x6025790",
+        "0x5d32a30",
+        "0x5fd6240",
+        "0x5fd4e70",
+        "0x5d2ca10",
+        "0x5fd5a00",
+        "0x5fd5a80",
+        "0x5fdea30",
+        "0x5fdedd0",
+        "0x5fdf170",
+        "0x5fdf520",
+        "0x5fdf820",
+        "0x5fdfb10",
+        "0x5fd5980",
+        "0x5fdfe00",
+        "0x5fdafb0",
+        "0x5fdad30",
+        "0x5fdab30",
+        "0x5fda8b0",
+        "0x5fda6b0",
+        "0x5fda430",
+        "0x5fda1b0",
+        "0x5fd9f30",
+        "0x5fd9cb0",
+        "0x5fd9a30",
+        "0x5fd97b0",
+        "0x5fd95b0",
+        "0x5fd93b0",
+        "0x5fd91c0",
+        "0x5fd8f40",
+        "0x5fd8cc0",
+        "0x5fd4e80",
+        "0x5fd4ed0",
+        "0x5fd4ef0",
+        "0x5fd4f10",
+        "0x5fd4f30",
+        "0x5fd4f70",
+        "0x5fd4f90",
+        "0x5fd4f50",
+        "0x5fd8a40",
+        "0x5fd8840",
+        "0x5fd5bc0",
+        "0x5fd4e20",
+        "0x5fd4e40",
+        "0x5fd5c40",
+        "0x5fd4fb0",
+        "0x5fcd480",
+        "0x5fd5f10",
+        "0x5fd85c0",
+        "0x5fd5000",
+        "0x5fd5020",
+        "0x5fd5040",
+        "0x5fd5090",
+        "0x5fd50b0",
+        "0x5fd50f0",
+        "0x5fd50d0",
+        "0x5fd6190",
+        "0x5fd51d0",
+        "0x5fd7fc0",
+        "0x5fd7e40",
+        "0x5fd7cc0",
+        "0x5fd7b40",
+        "0x5fd79c0",
+        "0x5fd7840",
+        "0x5fd76c0",
+        "0x5fd5140",
+        "0x5fd5190",
+        "0x5fd51b0",
+        "0x5fd83c0",
+        "0x5fd8140",
+        "0x5fcc1d0"
+      ],
+      "null_slots": []
+    },
+    "Configurable": {
+      "header": "0x64d3420",
+      "vtable": "0x64d3430",
+      "typeinfo": "N7rocksdb12ConfigurableE",
+      "slots": [
+        "0x60957a0",
+        "0x6095830",
+        "0x6099030",
+        "0x60996a0",
+        "0x5d32560",
+        "0x6095e70",
+        "0x6096790",
+        "0x60958c0"
+      ]
+    },
+    "FactoryEntryNode": {
+      "header": "0x64cde58",
+      "vtable": "0x64cde68",
+      "typeinfo": "N7rocksdb13ObjectLibrary12FactoryEntryINS_3EnvEEE",
+      "slots": [
+        "0x5fcc700",
+        "0x5fcd840",
+        "0x5fcc7e0"
+      ]
+    },
+    "diffs": {
+      "env_vs_composite_env": [
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        61,
+        62,
+        70,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        82,
+        83
+      ],
+      "composite_env_vs_wrapper": [
+        0,
+        1,
+        5,
+        12,
+        14,
+        16,
+        17,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        59,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        71,
+        79,
+        80,
+        81
+      ],
+      "wrapper_vs_mock_env": [
+        0,
+        1,
+        14
+      ]
+    },
+    "slot_61_note": "Slot 61 (0x5fd5f10, chain-walk on slot 24 via GOT 0x64ed3e8) is 0x5fd5f10 in both CompositeEnv and the wrapper; Env has no implementation there (null). Cited only, not excerpted."
+  },
+  "relocations": [
+    {
+      "offset": 105700040,
+      "addend": 105699536
+    },
+    {
+      "offset": 105700960,
+      "addend": 105699744
+    },
+    {
+      "offset": 105700968,
+      "addend": 100452096
+    },
+    {
+      "offset": 105700976,
+      "addend": 100456512
+    },
+    {
+      "offset": 105700984,
+      "addend": 100452320
+    },
+    {
+      "offset": 105702096,
+      "addend": 105701288
+    },
+    {
+      "offset": 105702120,
+      "addend": 101308256
+    },
+    {
+      "offset": 105702128,
+      "addend": 101309504
+    },
+    {
+      "offset": 105702136,
+      "addend": 97723744
+    },
+    {
+      "offset": 105702144,
+      "addend": 101277296
+    },
+    {
+      "offset": 105702152,
+      "addend": 101279632
+    },
+    {
+      "offset": 105702160,
+      "addend": 97706128
+    },
+    {
+      "offset": 105702168,
+      "addend": 101275376
+    },
+    {
+      "offset": 105702176,
+      "addend": 101306592
+    },
+    {
+      "offset": 105702184,
+      "addend": 101287600
+    },
+    {
+      "offset": 105702192,
+      "addend": 101275408
+    },
+    {
+      "offset": 105702200,
+      "addend": 101310080
+    },
+    {
+      "offset": 105702208,
+      "addend": 101308800
+    },
+    {
+      "offset": 105702216,
+      "addend": 100450512
+    },
+    {
+      "offset": 105702224,
+      "addend": 97724976
+    },
+    {
+      "offset": 105702232,
+      "addend": 97707888
+    },
+    {
+      "offset": 105702240,
+      "addend": 97700352
+    },
+    {
+      "offset": 105702248,
+      "addend": 97700368
+    },
+    {
+      "offset": 105702256,
+      "addend": 100489728
+    },
+    {
+      "offset": 105702264,
+      "addend": 100489856
+    },
+    {
+      "offset": 105702272,
+      "addend": 100526640
+    },
+    {
+      "offset": 105702280,
+      "addend": 100527568
+    },
+    {
+      "offset": 105702288,
+      "addend": 100528496
+    },
+    {
+      "offset": 105702296,
+      "addend": 100529440
+    },
+    {
+      "offset": 105702304,
+      "addend": 100530208
+    },
+    {
+      "offset": 105702312,
+      "addend": 100530960
+    },
+    {
+      "offset": 105702320,
+      "addend": 100489600
+    },
+    {
+      "offset": 105702328,
+      "addend": 100531712
+    },
+    {
+      "offset": 105702336,
+      "addend": 100511664
+    },
+    {
+      "offset": 105702344,
+      "addend": 100511024
+    },
+    {
+      "offset": 105702352,
+      "addend": 100510512
+    },
+    {
+      "offset": 105702360,
+      "addend": 100509872
+    },
+    {
+      "offset": 105702368,
+      "addend": 100509360
+    },
+    {
+      "offset": 105702376,
+      "addend": 100508720
+    },
+    {
+      "offset": 105702384,
+      "addend": 100508080
+    },
+    {
+      "offset": 105702392,
+      "addend": 100507440
+    },
+    {
+      "offset": 105702400,
+      "addend": 100506800
+    },
+    {
+      "offset": 105702408,
+      "addend": 100506160
+    },
+    {
+      "offset": 105702416,
+      "addend": 100505520
+    },
+    {
+      "offset": 105702424,
+      "addend": 100505008
+    },
+    {
+      "offset": 105702432,
+      "addend": 100504496
+    },
+    {
+      "offset": 105702440,
+      "addend": 100504000
+    },
+    {
+      "offset": 105702448,
+      "addend": 100503360
+    },
+    {
+      "offset": 105702456,
+      "addend": 100502720
+    },
+    {
+      "offset": 105702464,
+      "addend": 100453968
+    },
+    {
+      "offset": 105702480,
+      "addend": 100450592
+    },
+    {
+      "offset": 105702496,
+      "addend": 100450608
+    },
+    {
+      "offset": 105702504,
+      "addend": 100450624
+    },
+    {
+      "offset": 105702512,
+      "addend": 100450640
+    },
+    {
+      "offset": 105702520,
+      "addend": 100450656
+    },
+    {
+      "offset": 105702528,
+      "addend": 100502080
+    },
+    {
+      "offset": 105702536,
+      "addend": 100501568
+    },
+    {
+      "offset": 105702544,
+      "addend": 100490176
+    },
+    {
+      "offset": 105702552,
+      "addend": 100486688
+    },
+    {
+      "offset": 105702560,
+      "addend": 100486720
+    },
+    {
+      "offset": 105702568,
+      "addend": 100490304
+    },
+    {
+      "offset": 105702584,
+      "addend": 100455552
+    },
+    {
+      "offset": 105702592,
+      "addend": 100491024
+    },
+    {
+      "offset": 105702600,
+      "addend": 100500928
+    },
+    {
+      "offset": 105702624,
+      "addend": 100453840
+    },
+    {
+      "offset": 105702640,
+      "addend": 100450720
+    },
+    {
+      "offset": 105702648,
+      "addend": 100453712
+    },
+    {
+      "offset": 105702656,
+      "addend": 100450736
+    },
+    {
+      "offset": 105702664,
+      "addend": 100491664
+    },
+    {
+      "offset": 105702672,
+      "addend": 100454288
+    },
+    {
+      "offset": 105702680,
+      "addend": 100499392
+    },
+    {
+      "offset": 105702688,
+      "addend": 100499008
+    },
+    {
+      "offset": 105702696,
+      "addend": 100498624
+    },
+    {
+      "offset": 105702704,
+      "addend": 100498240
+    },
+    {
+      "offset": 105702712,
+      "addend": 100497856
+    },
+    {
+      "offset": 105702720,
+      "addend": 100497472
+    },
+    {
+      "offset": 105702728,
+      "addend": 100497088
+    },
+    {
+      "offset": 105702736,
+      "addend": 100453584
+    },
+    {
+      "offset": 105702744,
+      "addend": 100450752
+    },
+    {
+      "offset": 105702752,
+      "addend": 100454160
+    },
+    {
+      "offset": 105702760,
+      "addend": 100500416
+    },
+    {
+      "offset": 105702768,
+      "addend": 100499776
+    },
+    {
+      "offset": 105702776,
+      "addend": 100450768
+    },
+    {
+      "offset": 105702792,
+      "addend": 105701312
+    },
+    {
+      "offset": 105702800,
+      "addend": 100496080
+    },
+    {
+      "offset": 105702808,
+      "addend": 100496656
+    },
+    {
+      "offset": 105702816,
+      "addend": 101308256
+    },
+    {
+      "offset": 105702824,
+      "addend": 101309504
+    },
+    {
+      "offset": 105702832,
+      "addend": 97723744
+    },
+    {
+      "offset": 105702840,
+      "addend": 100496736
+    },
+    {
+      "offset": 105702848,
+      "addend": 101279632
+    },
+    {
+      "offset": 105702856,
+      "addend": 97706128
+    },
+    {
+      "offset": 105702864,
+      "addend": 101275376
+    },
+    {
+      "offset": 105702872,
+      "addend": 101306592
+    },
+    {
+      "offset": 105702880,
+      "addend": 101287600
+    },
+    {
+      "offset": 105702888,
+      "addend": 101275408
+    },
+    {
+      "offset": 105702896,
+      "addend": 100490752
+    },
+    {
+      "offset": 105702904,
+      "addend": 101308800
+    },
+    {
+      "offset": 105702912,
+      "addend": 100486752
+    },
+    {
+      "offset": 105702920,
+      "addend": 97724976
+    },
+    {
+      "offset": 105702928,
+      "addend": 100491840
+    },
+    {
+      "offset": 105702936,
+      "addend": 100486768
+    },
+    {
+      "offset": 105702944,
+      "addend": 97700368
+    },
+    {
+      "offset": 105702952,
+      "addend": 100489728
+    },
+    {
+      "offset": 105702960,
+      "addend": 100489856
+    },
+    {
+      "offset": 105702968,
+      "addend": 100526640
+    },
+    {
+      "offset": 105702976,
+      "addend": 100527568
+    },
+    {
+      "offset": 105702984,
+      "addend": 100528496
+    },
+    {
+      "offset": 105702992,
+      "addend": 100529440
+    },
+    {
+      "offset": 105703000,
+      "addend": 100530208
+    },
+    {
+      "offset": 105703008,
+      "addend": 100530960
+    },
+    {
+      "offset": 105703016,
+      "addend": 100489600
+    },
+    {
+      "offset": 105703024,
+      "addend": 100531712
+    },
+    {
+      "offset": 105703032,
+      "addend": 100511664
+    },
+    {
+      "offset": 105703040,
+      "addend": 100511024
+    },
+    {
+      "offset": 105703048,
+      "addend": 100510512
+    },
+    {
+      "offset": 105703056,
+      "addend": 100509872
+    },
+    {
+      "offset": 105703064,
+      "addend": 100509360
+    },
+    {
+      "offset": 105703072,
+      "addend": 100508720
+    },
+    {
+      "offset": 105703080,
+      "addend": 100508080
+    },
+    {
+      "offset": 105703088,
+      "addend": 100507440
+    },
+    {
+      "offset": 105703096,
+      "addend": 100506800
+    },
+    {
+      "offset": 105703104,
+      "addend": 100506160
+    },
+    {
+      "offset": 105703112,
+      "addend": 100505520
+    },
+    {
+      "offset": 105703120,
+      "addend": 100505008
+    },
+    {
+      "offset": 105703128,
+      "addend": 100504496
+    },
+    {
+      "offset": 105703136,
+      "addend": 100504000
+    },
+    {
+      "offset": 105703144,
+      "addend": 100503360
+    },
+    {
+      "offset": 105703152,
+      "addend": 100502720
+    },
+    {
+      "offset": 105703160,
+      "addend": 100486784
+    },
+    {
+      "offset": 105703168,
+      "addend": 100486864
+    },
+    {
+      "offset": 105703176,
+      "addend": 100486896
+    },
+    {
+      "offset": 105703184,
+      "addend": 100486928
+    },
+    {
+      "offset": 105703192,
+      "addend": 100486960
+    },
+    {
+      "offset": 105703200,
+      "addend": 100487024
+    },
+    {
+      "offset": 105703208,
+      "addend": 100487056
+    },
+    {
+      "offset": 105703216,
+      "addend": 100486992
+    },
+    {
+      "offset": 105703224,
+      "addend": 100502080
+    },
+    {
+      "offset": 105703232,
+      "addend": 100501568
+    },
+    {
+      "offset": 105703240,
+      "addend": 100490176
+    },
+    {
+      "offset": 105703248,
+      "addend": 100486688
+    },
+    {
+      "offset": 105703256,
+      "addend": 100486720
+    },
+    {
+      "offset": 105703264,
+      "addend": 100490304
+    },
+    {
+      "offset": 105703272,
+      "addend": 100487088
+    },
+    {
+      "offset": 105703280,
+      "addend": 100455552
+    },
+    {
+      "offset": 105703288,
+      "addend": 100491024
+    },
+    {
+      "offset": 105703296,
+      "addend": 100500928
+    },
+    {
+      "offset": 105703304,
+      "addend": 100487168
+    },
+    {
+      "offset": 105703312,
+      "addend": 100487200
+    },
+    {
+      "offset": 105703320,
+      "addend": 100487232
+    },
+    {
+      "offset": 105703328,
+      "addend": 100487312
+    },
+    {
+      "offset": 105703336,
+      "addend": 100487344
+    },
+    {
+      "offset": 105703344,
+      "addend": 100487408
+    },
+    {
+      "offset": 105703352,
+      "addend": 100487376
+    },
+    {
+      "offset": 105703360,
+      "addend": 100491664
+    },
+    {
+      "offset": 105703368,
+      "addend": 100487632
+    },
+    {
+      "offset": 105703376,
+      "addend": 100499392
+    },
+    {
+      "offset": 105703384,
+      "addend": 100499008
+    },
+    {
+      "offset": 105703392,
+      "addend": 100498624
+    },
+    {
+      "offset": 105703400,
+      "addend": 100498240
+    },
+    {
+      "offset": 105703408,
+      "addend": 100497856
+    },
+    {
+      "offset": 105703416,
+      "addend": 100497472
+    },
+    {
+      "offset": 105703424,
+      "addend": 100497088
+    },
+    {
+      "offset": 105703432,
+      "addend": 100487488
+    },
+    {
+      "offset": 105703440,
+      "addend": 100487568
+    },
+    {
+      "offset": 105703448,
+      "addend": 100487600
+    },
+    {
+      "offset": 105703456,
+      "addend": 100500416
+    },
+    {
+      "offset": 105703464,
+      "addend": 100499776
+    },
+    {
+      "offset": 105703472,
+      "addend": 100450768
+    },
+    {
+      "offset": 105714576,
+      "addend": 105714216
+    },
+    {
+      "offset": 105714584,
+      "addend": 100831120
+    },
+    {
+      "offset": 105716784,
+      "addend": 105714520
+    },
+    {
+      "offset": 105716792,
+      "addend": 100817168
+    },
+    {
+      "offset": 105716800,
+      "addend": 100817520
+    },
+    {
+      "offset": 105716808,
+      "addend": 100817232
+    },
+    {
+      "offset": 105716816,
+      "addend": 100817808
+    },
+    {
+      "offset": 105716824,
+      "addend": 100819056
+    },
+    {
+      "offset": 105722920,
+      "addend": 105722896
+    },
+    {
+      "offset": 105722928,
+      "addend": 101275552
+    },
+    {
+      "offset": 105722936,
+      "addend": 101275696
+    },
+    {
+      "offset": 105722944,
+      "addend": 101290032
+    },
+    {
+      "offset": 105722952,
+      "addend": 101291680
+    },
+    {
+      "offset": 105722960,
+      "addend": 97723744
+    },
+    {
+      "offset": 105722968,
+      "addend": 101277296
+    },
+    {
+      "offset": 105722976,
+      "addend": 101279632
+    },
+    {
+      "offset": 105722984,
+      "addend": 101275840
+    }
+  ],
+  "relocation_ranges": [
+    {
+      "range": "0x64cdac0..0x64cdad8",
+      "what": "Env vtable header",
+      "count": 1
+    },
+    {
+      "range": "0x64ce2c8..0x64ce580",
+      "what": "CompositeEnv vtable header + slots",
+      "count": 78
+    },
+    {
+      "range": "0x64ce580..0x64ce840",
+      "what": "wrapper vtable header + slots",
+      "count": 86
+    },
+    {
+      "range": "0x64d3420..0x64d3470",
+      "what": "Configurable vtable header + slots 0-7",
+      "count": 9
+    },
+    {
+      "range": "0x64cde58..0x64cde80",
+      "what": "FactoryEntry node vtable header + slots",
+      "count": 4
+    },
+    {
+      "range": "0x64d1c28..0x64d1c60",
+      "what": "factory control-block vtable",
+      "count": 6
+    },
+    {
+      "range": "0x64d1388..0x64d13a0",
+      "what": "MockEnv vtable header + slot 0",
+      "count": 2
+    }
+  ],
+  "literals": [
+    {
+      "addr": 4450146,
+      "offset": 4450146,
+      "text": "CompositeEnv"
+    },
+    {
+      "addr": 4495057,
+      "offset": 4495057,
+      "text": "target="
+    },
+    {
+      "addr": 4486354,
+      "offset": 4486354,
+      "text": "basic_string::append"
+    },
+    {
+      "addr": 4467107,
+      "offset": 4467107,
+      "text": "mutex_init"
+    },
+    {
+      "addr": 4498327,
+      "offset": 4498327,
+      "text": "Environment"
+    },
+    {
+      "addr": 4561696,
+      "offset": 4561696,
+      "text": "<packed counts 0x100000001>"
+    },
+    {
+      "addr": 4562552,
+      "offset": 4562552,
+      "text": "<float 1.0>"
+    }
+  ],
+  "census": {
+    "targets": {
+      "0x5d35070": {
+        "calls": 654,
+        "jumps": 36,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x5d350c0": {
+        "calls": 1273,
+        "jumps": 25,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x5fcc7e0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 1,
+        "relative": 1
+      },
+      "0x5fceb20": {
+        "calls": 2,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x5fcf390": {
+        "calls": 14,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x5fcf430": {
+        "calls": 19,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x5fcf450": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 1,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x5fcf4d0": {
+        "calls": 5,
+        "jumps": 3,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x5fd4e60": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 1,
+        "relative": 1
+      },
+      "0x5fd4e70": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd4e80": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd4ed0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd4ef0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd4f10": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd4f30": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd4f50": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd4f70": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd4f90": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd4fb0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd5000": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd5020": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd5040": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd5090": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd50b0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd50d0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd50f0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd5140": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd5190": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd51b0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd51d0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd5cc0": {
+        "calls": 4,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x5fd5e00": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd6240": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fd72d0": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 1,
+        "relative": 1
+      },
+      "0x5fd7360": {
+        "calls": 2,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x5fd7510": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 1,
+        "relative": 1
+      },
+      "0x5fd7560": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 2,
+        "relative": 2
+      },
+      "0x5fe2680": {
+        "calls": 189,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x5fe2860": {
+        "calls": 17,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x60029f0": {
+        "calls": 4,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x6025950": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 1,
+        "relative": 1
+      },
+      "0x6025b90": {
+        "calls": 0,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 1,
+        "relative": 1
+      },
+      "0x60289f0": {
+        "calls": 1,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x60971c0": {
+        "calls": 8,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x6099790": {
+        "calls": 1,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x6099ce0": {
+        "calls": 37,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x61c21b0": {
+        "calls": 1,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      },
+      "0x61d2ca0": {
+        "calls": 1,
+        "jumps": 0,
+        "leas": 0,
+        "qwords": 0,
+        "relative": 0
+      }
+    },
+    "callers_tsv_rows": 2297,
+    "relocation_records": 186
+  },
+  "reshipped": [
+    {
+      "file": "accessor-5fcf430.objdump.txt",
+      "fde": "0x5fcf430..0x5fcf439",
+      "sha256": "10e31147166eceeaa845e3b7a597cd6b4dc1307d7b34224fc04c60577e63c2af",
+      "source": "RE-001-systemclock-installers-115"
+    },
+    {
+      "file": "invoker-composite-5fcf450.objdump.txt",
+      "fde": "0x5fcf450..0x5fcf4cb",
+      "sha256": "efa108e8d5054cf978e294bb4c13e01ebccbc159ea0e652bca7266d10cdbd24f",
+      "source": "RE-001-systemclock-installers-115"
+    },
+    {
+      "file": "append-6099ce0.objdump.txt",
+      "fde": "0x6099ce0..0x6099e34",
+      "sha256": "f813fd6acf4f8a0b6bc65e7547cc59cbce95e8ae2277d79f688efb4257453817",
+      "source": "RE-001-systemclock-installers-115"
+    },
+    {
+      "file": "grow-6099790.objdump.txt",
+      "fde": "0x6099790..0x6099cad",
+      "sha256": "cd90e710a6e4f14497fcd949703eec743fd7b54c5386b5d17038a187a7538280",
+      "source": "RE-001-systemclock-installers-115"
+    }
+  ],
+  "model": "tools/composite_env_wrapper_115.py",
+  "tests": "tests/test_composite_env_wrapper_115.py",
+  "test_checks": 246,
+  "open_unknowns": [
+    "Record third fields 0x6504c60/0x6504c20/0x6504be0 are in .bss (runtime-initialized); their contents are not recoverable statically.",
+    "Holder-init callees 0x61d2ca0, 0x61c21b0, 0x61d4570, 0x61d4740, 0x61d4730, 0x61d4420 and the PosixFileSystem holder accessor 0x60029f0 internals are by contract, not excerpted.",
+    "ThreadStatusUpdater methods are not excerpted; only its construction-time field map is pinned.",
+    "The full MockEnv slot map beyond slots 0, 1, 14 (shared with the wrapper) is open; MockEnv's own D2/D0/Name bodies are not excerpted.",
+    "Configurable vtable slots beyond 0-7 are open.",
+    "The preceding vtable's last slot at 0x64ce2c0 -> 0x5fd5360 (forwards this+0x08's slot 5) is a boundary observation, not in this packet.",
+    "Slot 61 (0x5fd5f10) is cited only, not excerpted.",
+    "The 'Environment' string at 0x44a397 is part of the \"Cannot make a shared Environment from a guarded one\" error text; the Env create-host registry is a separate work item.",
+    "The slot-12 first argument is the output string as observed in the binary; no C++ signature is asserted beyond that."
+  ]
+}
