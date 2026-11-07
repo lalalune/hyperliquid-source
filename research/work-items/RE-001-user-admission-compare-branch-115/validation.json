@@ -1,0 +1,57 @@
+{
+  "base_commit": "7ff06a0973b5b8c79bde0b229c9bb2eabf8b29a6",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "host": "macOS arm64",
+  "tools": {
+    "python": "3.14.3",
+    "capstone": "5.0.7",
+    "rustc": "1.95.0 (59807616e 2026-04-14)"
+  },
+  "checks": [
+    {
+      "command": "/tmp/hyperliquid-re012-check-20261108/bin/python -B research/work-items/RE-001-user-admission-compare-branch-115/verify.py",
+      "exit_code": 0,
+      "result": "Authenticated target and FDE; 1,381 bytes, 268 instructions, 26 anchors; signed branch map verified."
+    },
+    {
+      "command": "/opt/homebrew/bin/rustup run 1.95.0 rustc --edition=2021 --test src/node115-user-admission-prefix/compare_step.rs -o /tmp/user-admission-compare-test && /tmp/user-admission-compare-test",
+      "exit_code": 0,
+      "result": "1 Rust unit test passed."
+    },
+    {
+      "command": "/tmp/hyperliquid-re012-check-20261108/bin/python -B -m unittest discover -s tests -p test_user_admission_prefix115.py -v",
+      "exit_code": 0,
+      "result": "7 existing target-prefix regression tests passed."
+    },
+    {
+      "command": "/opt/homebrew/bin/rustup run 1.95.0 rustfmt --edition 2021 --check src/node115-user-admission-prefix/compare_step.rs",
+      "exit_code": 0,
+      "result": "Formatting check passed."
+    },
+    {
+      "command": "PYTHON=/tmp/hyperliquid-re012-check-20261108/bin/python make catalogue-check",
+      "exit_code": 0,
+      "result": "Catalogue and progress tables match pinned inputs."
+    },
+    {
+      "command": "/tmp/hyperliquid-re012-check-20261108/bin/python -B tools/verify_packets.py",
+      "exit_code": 0,
+      "result": "Verified 1,754 evidence-packet manifests and 20,583 entries; no dangling references."
+    },
+    {
+      "command": "PYTHON=/tmp/hyperliquid-re012-check-20261108/bin/python make verify",
+      "exit_code": 2,
+      "result": "Artifact SHA-256 and signatures passed; full verify stopped because pinned reference upstream/node/pub_key.asc is absent in the local submodule checkout."
+    }
+  ],
+  "execution_boundaries": {
+    "captured_binary_executed": false,
+    "runtime_memcmp_called": false,
+    "node_key_contents_invented": false
+  },
+  "limits": [
+    "The comparator result, sibling-presence flag and depth are explicit model inputs.",
+    "No full native function, caller-owned node memory, or component gate is claimed.",
+    "The repository-wide make verify did not reach import or packet checks because upstream/node/pub_key.asc is absent locally."
+  ]
+}
