@@ -25,6 +25,7 @@ from other_seed_consumers_115 import (  # noqa: E402
     height_byte_offset,
     height_draw,
     level_record,
+    level_record_flag_byte,
     log2_byte,
     mersenne_step,
     sampler_step,
@@ -34,6 +35,8 @@ from other_seed_consumers_115 import (  # noqa: E402
     zstd_gate,
     LEVELITER_RECORD_SIZE,
     LEVELITER_VTABLE,
+    LEVELITER_PLUS_0X70,
+    LEVELITER_PLUS_0XC8,
     NODE_DESCRIPTOR,
     ONESHOT_PATH_POINTER,
     ONESHOT_PATH_STRING,
@@ -292,6 +295,25 @@ class TestLevelRecord(unittest.TestCase):
         self.assertEqual(rec["path_pointer"], ONESHOT_PATH_POINTER)
         self.assertEqual(rec["arg2"], 0x5678)
         self.assertEqual(rec["arg3"], 0x9ABC)
+
+    def test_fixed_fields(self):
+        # Corrected after slopbot's limited review on PR #4156:
+        # +0x70 is movabs $0xffffffffffffff (56-bit), not -1;
+        # +0xc8 is u16 0x100 in both builders.
+        self.assertEqual(LEVELITER_PLUS_0X70, 0x00FFFFFFFFFFFFFF)
+        self.assertNotEqual(LEVELITER_PLUS_0X70, 0xFFFFFFFFFFFFFFFF)
+        self.assertEqual(LEVELITER_PLUS_0XC8, 0x100)
+
+    def test_flag_byte_differs_per_builder(self):
+        # Builder 0x5f6b000 stores the 6th argument's low byte;
+        # lookup 0x5f999d0 stores u16 0x100 (low byte 0x00).
+        self.assertEqual(level_record_flag_byte("builder", 0x5A), 0x5A)
+        self.assertEqual(level_record_flag_byte("builder", 0x00), 0x00)
+        self.assertEqual(level_record_flag_byte("lookup"), 0x00)
+        with self.assertRaises(ValueError):
+            level_record_flag_byte("builder")
+        with self.assertRaises(ValueError):
+            level_record_flag_byte("other")
 
     def test_oneshot_path_pointer_literal(self):
         # The stored pointer is 0x4376fd; the path string begins one

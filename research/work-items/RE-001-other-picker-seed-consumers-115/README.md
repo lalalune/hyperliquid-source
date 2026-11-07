@@ -62,6 +62,11 @@ SkipListRep vtable slots 0 and 14, not code references.
   advance also gates, on the index-0 path only, a `lock addq $0x400`
   to `+0x70` of every node in the list at `*(this+0xad8)`. The
   record layout (offsets `+0x00`..`+0x110`) is in `records.json`.
+  Two fields were corrected after slopbot's limited review on this
+  PR: record `+0x70` is `movabs $0xffffffffffffff`
+  (`0x00ffffffffffffff`, 56-bit, not `-1`) in both builders, and
+  `+0x93` differs per builder — the builder stores the 6th
+  argument's low byte (`r9b`), the lookup stores u16 `0x100`.
 * **0x5fca940 — flag wait.** Spins at most 200 times on the flag
   byte at `(rsi+0x51) & arg-mask`, then the slow path. The seed
   advance gives the skip flag `((seed & 0xff) == 0)` (1-in-256);
@@ -148,7 +153,7 @@ duplicates a merged packet's window.
 `tools/other_seed_consumers_115.py` models the shared advance, the
 height draw, the descent pick, both sample flags, the sampler step,
 the ZSTD gate, the bitmap-node fields and the LevelIterator record
-construction. `tests/test_other_seed_consumers_115.py` has 25
+construction. `tests/test_other_seed_consumers_115.py` has 27
 tests: seeded random inputs drive every derivation end to end, the
 height draw is cross-checked against an independent transcription
 of the disassembly loop, and the boundary cases are covered
@@ -178,5 +183,5 @@ always runs the ZSTD setup, `count = 1` start index is 0).
 python3 research/work-items/RE-001-other-picker-seed-consumers-115/verify.py
 # ALL CHECKS PASSED
 python3 -m pytest tests/test_other_seed_consumers_115.py -q
-# 25 passed
+# 27 passed
 ```

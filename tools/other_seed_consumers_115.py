@@ -59,6 +59,15 @@ LEVELITER_SAMPLE_FLAG_OFFSET = 0x90
 LEVELITER_PREDICATE_OFFSET = 0x92
 LEVELITER_STATS_RECORD_OFFSET = 0x88
 LEVELITER_PATH_OFFSETS = (0xB8, 0x100)
+# Fixed record fields (corrected after slopbot's limited review on
+# PR #4156): +0x70 is movabs $0xffffffffffffff (0x00ffffffffffffff,
+# 56-bit, NOT -1) in both builders; +0xc8 is u16 0x100 in both;
+# +0x93 differs per builder -- the builder stores the 6th argument's
+# low byte (r9b), the lookup stores u16 0x100 (low byte 0x00);
+# +0x94 is byte 1 in the builder and the high byte of that u16 in
+# the lookup.
+LEVELITER_PLUS_0X70 = 0x00FFFFFFFFFFFFFF
+LEVELITER_PLUS_0XC8 = 0x100
 
 # The constant descriptor at 0x459a38 used by the bitmap-node ctor:
 # low u32 4, high u32 32 (the divisor for the bitmap word count).
@@ -279,8 +288,9 @@ def level_record(shard_index, predicate, sample_flag, stats_record,
     +0x90, the predicate result at +0x92, the entry pointer at +0x98,
     the shard index at +0xa0, and the oneshot path pointer at +0xb8
     and +0x100. The remaining fields are zero except +0x91 = 3,
-    +0x93 = u16 0x100, +0xc8 = u16 0x100, +0x70 = -1 and +0x80 =
-    &this+0x1118 (recorded symbolically here).
+    +0x70 = 0x00ffffffffffffff, +0xc8 = u16 0x100, +0x94 = 1 and
+    +0x80 = &this+0x1118 (recorded symbolically here); +0x93 is
+    per-builder, see level_record_flag_byte.
     """
     rec = {
         "vtable": LEVELITER_VTABLE,
@@ -297,3 +307,20 @@ def level_record(shard_index, predicate, sample_flag, stats_record,
         "next_ptr": next_ptr,
     }
     return rec
+
+
+def level_record_flag_byte(builder, sixth_arg_byte=None):
+    """The LevelIterator record byte at +0x93, which differs per builder.
+
+    The builder 0x5f6b000 stores the 6th argument's low byte (r9b,
+    via r12b); the lookup 0x5f999d0 stores u16 0x100 at +0x93, so
+    the byte is 0x00 and +0x94 is 0x01 as its high byte. `builder`
+    is "builder" or "lookup".
+    """
+    if builder == "builder":
+        if sixth_arg_byte is None:
+            raise ValueError("builder needs the 6th argument byte")
+        return sixth_arg_byte & 0xFF
+    if builder == "lookup":
+        return 0x00
+    raise ValueError(builder)
