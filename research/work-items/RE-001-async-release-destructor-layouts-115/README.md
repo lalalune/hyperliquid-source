@@ -5,6 +5,17 @@ Question: why does the flag in `RE-001-async-gate-release-52790-115` select
 same callbacks. This packet recovers their normal-return cleanup sequences;
 it does not duplicate either caller's gate or claim source-level type names.
 
+Prior ownership: `RE-012-snapshot-tcp-zero-drop-layout-115` already records
+the zero-tag layout, while `RE-012-snapshot-tcp-paired-ref-drop-115` records
+the second layout's paired array. Those findings are comparison context here,
+not new recovery claims. The new extension is the second body's subsequent
+8-byte storage, pointer-element loop (+0x150/+0x158 and capacity +0x148),
+128-byte storage, later nested/reference offsets and 0x230 outer release,
+joined in normal-return order. The complete two-body export supports that
+comparison and the scalar sentinel controls; packet count is not new-function
+coverage. The fixed-buffer and nested-counter packets already own the two
+pair-loop callees, whose internals remain outside this packet.
+
 Target: node #115 Linux x86-64, `artifacts/node/115/hl-node`, SHA-256
 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
 Base: `7ff06a0973b5b8c79bde0b229c9bb2eabf8b29a6`.
