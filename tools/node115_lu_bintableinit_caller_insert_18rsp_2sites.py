@@ -52,6 +52,16 @@ def parse_line(l):
     return m.group(1), m.group(2).strip(), m.group(3), m.group(4)
 
 
+def disassembly_body(lines):
+    """Ignore GNU's optional spelling of implicit DS/ES on this MOVSB."""
+    lines = [line.replace("\trep movsb %ds:(%rsi),%es:(%rdi)",
+                          "\trep movsb (%rsi),(%rdi)") for line in lines]
+    for index, line in enumerate(lines):
+        if "file format" in line:
+            return lines[index + 1:]
+    return lines
+
+
 def main():
     data = open(BIN, "rb").read()
     check("binary size 105896032", len(data) == 105896032, "got %d" % len(data))
@@ -554,15 +564,10 @@ def main():
                             "--stop-address=0x63d4425", BIN],
                            capture_output=True, text=True).stdout.splitlines()
 
-    def body(lines):
-        for idx, l in enumerate(lines):
-            if "file format" in l:
-                return lines[idx + 1:]
-        return lines
     check("objdump regeneration matches exhibit",
-          body(regen) == body(txt),
-          "regen %d lines vs exhibit body %d" % (len(body(regen)),
-                                                 len(body(txt))))
+          disassembly_body(regen) == disassembly_body(txt),
+          "regen %d lines vs exhibit body %d" % (len(disassembly_body(regen)),
+                                                 len(disassembly_body(txt))))
 
     print("PASS count: %d, FAIL count: %d" % (PASS, FAIL))
     if FAIL:

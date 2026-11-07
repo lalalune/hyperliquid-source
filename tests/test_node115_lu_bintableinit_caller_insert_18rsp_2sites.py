@@ -38,6 +38,7 @@ _prior_os.environ["NODE115_PRIOR_ROOT"] = _NODE115_PRIOR_ROOT
 _prior_os.environ["PYTHONPATH"] = _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools") + _prior_os.pathsep + _prior_os.environ.get("PYTHONPATH", "")
 _prior_sys.path.insert(0, _prior_os.path.join(_NODE115_PRIOR_ROOT, "tools"))
 import node115_prior_corpus as prior_corpus
+from node115_lu_bintableinit_caller_insert_18rsp_2sites import disassembly_body
 
 
 def check(name, cond, detail=""):
@@ -153,15 +154,20 @@ def main():
              os.path.join(ROOT, "artifacts", "node", "115", "hl-node")],
             capture_output=True, text=True).stdout.splitlines()
 
-        def body(ls):
-            for idx, l in enumerate(ls):
-                if "file format" in l:
-                    return ls[idx + 1:]
-            return ls
+        saved = " 63d43d3:\tf3 a4\trep movsb %ds:(%rsi),%es:(%rdi)"
+        current = " 63d43d3:\tf3 a4\trep movsb (%rsi),(%rdi)"
+        check("implicit DS/ES spelling accepted",
+              disassembly_body([saved]) == disassembly_body([current]))
+        check("changed instruction byte rejected",
+              disassembly_body([saved]) != disassembly_body([
+                  current.replace("f3 a4", "f3 a5")]))
+        check("changed pointer register rejected",
+              disassembly_body([saved]) != disassembly_body([
+                  current.replace("%rsi", "%rbx")]))
         exhibit = open(os.path.join(ROOT, PACKET_REL,
                                     NAME + ".objdump.txt")).read().splitlines()
         check("objdump regeneration matches exhibit",
-              body(regen) == body(exhibit))
+              disassembly_body(regen) == disassembly_body(exhibit))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     print("TESTS PASS count: %d, FAIL count: %d" % (PASS, FAIL))
