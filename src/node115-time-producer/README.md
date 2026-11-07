@@ -18,6 +18,16 @@ full FDEs, independent Python calendar/datetime expectations and compiled mutant
 controls are in `research/work-items/RE-012-time-producer-115`. No clock mock,
 calendar stub, external Cargo dependency or whole-node claim is supplied.
 
+## Heartbeat row classification
+
+`heartbeat::classify` implements the separately recovered RE-008 per-row
+ratio/age decision. It preserves the positive-zero denominator path, ratio
+raw-bit sanitization, configured threshold, unnamed configuration byte and
+strict 180-second age branch as logical tags 0 through 3. Negative and NaN
+denominators become a safe error because the native diagnostic path has no
+established successful return. The API does not claim map layout, the time
+helper, logging, exception state, output padding or wire format.
+
 ```sh
 cargo +1.95.0 build --offline --locked --manifest-path src/node115-time-producer/Cargo.toml
 cargo +1.95.0 build --lib --offline --locked --release --target x86_64-unknown-linux-gnu --manifest-path src/node115-time-producer/Cargo.toml
