@@ -54,13 +54,16 @@ def reused_context(rec, scope):
 
 
 def record_intervals(record):
-    """Conservatively include recorded ranges, including contextual ranges."""
+    """Include recorded function/context ranges, excluding explicit search extents."""
     intervals = set()
     stack = [record]
     while stack:
         value = stack.pop()
         if isinstance(value, dict):
             for key, child in value.items():
+                # This field records where a displacement search ran, not ownership.
+                if key == "displacement_census":
+                    continue
                 if key in ("range", "fde", "window", "fde_range", "address_range"):
                     pairs = []
                     if isinstance(child, str):

@@ -71,6 +71,17 @@ class TestPacket(unittest.TestCase):
                                        "cited": {"fde": [768, 800]}})
         self.assertEqual(intervals, {(0x100, 0x120), (0x200, 0x220), (768, 800)})
 
+    def test_search_extent_is_not_a_claimed_function_range(self):
+        bounds = "0x5c00000..0x6400000 (RocksDB .text)"
+        record = {"displacement_census": {"range": bounds},
+                  "function": {"range": [0x63b7900, 0x63b7ee6]},
+                  "cited": {"fde": [0x63b7ef0, 0x63b8157]}}
+        self.assertEqual(V.record_intervals(record),
+                         {(0x63b7900, 0x63b7ee6), (0x63b7ef0, 0x63b8157)})
+        # The same broad bounds remain visible when recorded as a function.
+        self.assertEqual(V.record_intervals({"function": {"range": bounds}}),
+                         {(0x5c00000, 0x6400000)})
+
     def test_exhibit_bytes_match_binary(self):
         for name, e in self.rec["exhibits"].items():
             lo, hi = int(e["range"][0], 16), int(e["range"][1], 16)
