@@ -1,0 +1,7 @@
+structure	field	offset	meaning
+argument 1 (config)	fraction	+0x88	f64; non-finite means 1.0, otherwise clamped to [0, 0.7]; a stored zero skips the count test
+argument 2 (stakes)	tree root / height / length	+0x20 / +0x28 / +0x30	set of 20 byte stakeholder keys; the length word is the count the fraction applies to
+argument 3 (signers)	tree root / height / length	+0x00 / +0x08 / +0x10	set of 20 byte signer keys; a null root means no signers whatever the length word says
+set node	parent / keys / parent index / length / edges	+0 / +8 / +0xe4 / +0xe6 / +0xe8	20 byte keys, no values; leaf 0xe8 bytes, internal 0x148 bytes
+call 0x64e6a98	stake quorum 0x4d3e1a0	rdi=stakes rsi=signers	al false means false at once, before any other read
+call 0x64dfb50	memcmp	rdi=sought rsi=node key rdx=20	sign of the result steers the node scan: greater continues, equal is found, less descends
