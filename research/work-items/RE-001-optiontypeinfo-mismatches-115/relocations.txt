@@ -1,0 +1,24 @@
+# Relocation entries (readelf -r work/hl-node-115.bin) for the slots this
+# work item pins.
+#
+# db_host_id (re-shipped from #4146): the DBOptions default ctor loads the
+# pointer from GOT slot 0x64fee88 and the relocation resolves it to the
+# .rodata string "__hostname__" at 0x4342d1.
+0000064fee88  000000000008 R_X86_64_RELATIVE                    4342d1
+#
+# The wal_filter teardown temp (block 27, UNATTRIBUTED -- see README):
+# its std::function manager slot reads GOT 0x64edbc0 (resolves to
+# 0x609f250) and GOT 0x64edc70 (resolves to 0x609fc80). These slots are
+# live in the temp, but the string-to-temp link is not proven, so no
+# wal_filter claim is made from them.
+0000064edbc0  000000000008 R_X86_64_RELATIVE                    609f250
+0000064edc70  000000000008 R_X86_64_RELATIVE                    609fc80
+#
+# The atomicity selector the record destructor (0x5d3f950) and the pair
+# constructor consult: GOT slot 0x64ed290 is the
+# __libc_single_threaded GLOB_DAT (single-threaded fast path).
+0000064ed290  00f800000006 R_X86_64_GLOB_DAT 0000000000000000 __libc_single_threaded@GLIBC_2.32 + 0
+#
+# No relocation backs the 92 map-entry name strings: each is a plain
+# .rodata string referenced by the lea in its entry block of the static
+# initializer (see entries.tsv for the block of each name).
