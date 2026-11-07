@@ -5,6 +5,7 @@ Static only: reads the node binary and the packet files, never executes the
 node. Exits non-zero on the first failed check.
 """
 import hashlib
+import json
 import re
 import struct
 import sys
@@ -40,6 +41,33 @@ def fail(msg):
     raise SystemExit(f"FAIL: {msg}")
 
 
+def tls_offsets(coop):
+    """Decode the signed imm32 base and the observed signed disp8 operands."""
+    instruction = coop[4:11]  # 0x5cf3b94: mov rbx, sign_extend(imm32).
+    if len(instruction) != 7 or instruction[:3] != bytes.fromhex('48c7c3'):
+        raise ValueError('coop TLS-base instruction mismatch')
+    base = struct.unpack_from('<i', instruction, 3)[0]
+    result = {'base': base}
+    for name, offset, prefix in (
+        ('state_byte', 0x0b, '640fb643'),
+        ('route_byte', 0x41, '64807b'),
+        ('object_pointer', 0x48, '64488b43'),
+    ):
+        prefix = bytes.fromhex(prefix)
+        raw = coop[offset:offset + len(prefix) + 1]
+        if len(raw) != len(prefix) + 1 or raw[:-1] != prefix:
+            raise ValueError(f'coop TLS operand mismatch: {name}')
+        result[name] = base + struct.unpack('<b', raw[-1:])[0]
+    return result
+
+
+def validate_tls_record(coop, record):
+    offsets = tls_offsets(coop)
+    if record.get('tls_offsets') != offsets:
+        raise ValueError('records.json TLS offsets do not match signed operands')
+    return offsets
+
+
 def main():
     data = NODE.read_bytes()
     if len(data) != NODE_SIZE:
@@ -70,7 +98,7 @@ def main():
     if at(coop, 0x5CF3B90, 4) != bytes.fromhex("41565350"):
         fail("coop entry pushes missing")
     if at(coop, 0x5CF3B94, 7) != bytes.fromhex("48c7c3d0eeffff"):
-        fail("coop TLS base -0x130 missing")
+        fail("coop TLS base -0x1130 missing")
     if at(coop, 0x5CF3B9B, 5) != bytes.fromhex("640fb64348"):
         fail("coop TLS state byte load missing")
     if at(coop, 0x5CF3C0F, 5) != bytes.fromhex("e9fc860000"):
@@ -81,6 +109,10 @@ def main():
         fail("coop panic lea to worker.rs Location missing")
     if data[0x5CF3C32 - 0x1000] != 0xCC:
         fail("coop int3 padding missing after body")
+    try:
+        validate_tls_record(coop, json.loads((PACKET / 'records.json').read_text(encoding='utf-8')))
+    except ValueError as error:
+        fail(str(error))
 
     # Proceed key patterns (offsets relative to PROCEED[0]).
     def pat(buf, va, n):

@@ -50,8 +50,8 @@ relocated-data reference each. Source mapping evidence: the three Tokio
 Location records resolved through RELATIVE addends (file slots zero).
 ABI/layout observations: `Q = (table, payload)` with callable table slots
 `+0x0` and `+0x10`; proceed Vec-like `(guard, capacity, buffer, length)`
-with 16-byte entries; TLS state byte `fs:[-0xe8]`, flag byte `fs:[-0xea]`,
-budget cell `fs:[-0x108]`, helper word `fs:[-0xec]`. Analysis was complete
+with 16-byte entries; TLS state byte `fs:[-0x10e8]`, flag byte `fs:[-0x10ea]`,
+budget cell `fs:[-0x1108]`, helper word `fs:[-0x10ec]`. Analysis was complete
 over the two claimed FDEs and the census scans; it was not a whole-binary
 disassembly. The two proceed direct callers and the slot consumers were
 deliberately not decoded (out of scope).
