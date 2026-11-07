@@ -65,10 +65,12 @@ def test_command(python, start, path):
             module_checks = any(
                 isinstance(node, (ast.For, ast.While))
                 or (isinstance(node, ast.Expr) and isinstance(node.value, ast.Call)
-                    and isinstance(node.value.func, ast.Attribute)
-                    and isinstance(node.value.func.value, ast.Name)
-                    and node.value.func.value.id == 'sys'
-                    and node.value.func.attr == 'exit')
+                    and ((isinstance(node.value.func, ast.Name)
+                          and node.value.func.id == 'check')
+                         or (isinstance(node.value.func, ast.Attribute)
+                             and isinstance(node.value.func.value, ast.Name)
+                             and node.value.func.value.id == 'sys'
+                             and node.value.func.attr == 'exit')))
                 for node in tree.body)
             script = any(isinstance(node, ast.If)
                          and isinstance(node.test, ast.Compare)

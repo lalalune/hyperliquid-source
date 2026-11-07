@@ -120,6 +120,52 @@ class ProcessIsolationTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('top assertion ran', result.stderr)
 
+    def test_top_level_check_helpers_run_and_failures_propagate(self):
+        self.write('test_a.py', """
+            def check(condition, label):
+                if not condition:
+                    raise AssertionError(label)
+            class Helper:
+                def value(self): return 3
+            check(Helper().value() == 3, 'helper check passed')
+            print('top-level checks ran')
+        """)
+        result = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('top-level checks ran', result.stdout)
+        self.assertNotIn('Ran 0 tests', result.stderr)
+        self.write('test_b.py', """
+            def check(condition, label):
+                if not condition:
+                    raise AssertionError(label)
+            check(False, 'top-level check failure')
+        """)
+        result = self.invoke()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('top-level check failure', result.stderr)
+        self.assertIn('2 files attempted; 1 failed', result.stderr)
+
+    def test_setup_calls_and_empty_files_keep_unittest_discovery(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('isolated_runner', RUNNER)
+        runner = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(runner)
+        cases = [
+            ('test_empty.py', '', ['-m', 'unittest', 'discover']),
+            ('test_setup.py', "print('ordinary setup')\n",
+             ['-m', 'unittest', 'discover']),
+            ('test_case.py', "import unittest\ndef check(ok): assert ok\n"
+             "check(True)\nclass Tests(unittest.TestCase):\n"
+             "    def test_case(self): pass\n", ['-m', 'unittest', 'discover']),
+            ('test_function.py', "def check(ok): assert ok\ncheck(True)\n"
+             "def test_function(): pass\n", ['-m', 'pytest', '-q']),
+        ]
+        for name, source, expected in cases:
+            self.write(name, source)
+            command = runner.test_command([sys.executable], self.tests,
+                                          self.tests / name)
+            self.assertEqual(command[1:4], expected)
+
     def test_loop_suite_with_explicit_exit_runs_as_a_script(self):
         self.write('test_loop.py', '''
             import sys
