@@ -2,6 +2,11 @@
 //! reconstructed from target-bound arithmetic/tables; no clock is called.
 #![no_std]
 
+pub mod heartbeat;
+
+#[cfg(test)]
+extern crate std;
+
 pub const MIN_YEAR: i32 = -262143;
 pub const MAX_YEAR: i32 = 262142;
 
