@@ -4,9 +4,9 @@ Target Linux x86-64 node #115, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8
 
 The [block-root packet](../RE-017-abci-block-root-115/README.md) maps descriptor indexes 15 and 16 to state-relative captures `+0x4df8` and `+0x4e04`, using the same 12-byte descriptor. This packet resolves its tail-call visitor and the selected output representation. The capture-to-descriptor relationship is conditional on the recorded pointer array remaining unchanged.
 
-Descriptor visitor `0x3d5e950` jumps through relocation slot `0x64df5a0` to `0x141b1e0`. The latter first checks for child sentinel `0x8000000000000000`; another destination returns status 0. It reads the first eight input bytes as a qword and the following four bytes at `+8` as a dword. It does not copy that qword directly: it takes the upper 32 bits, combines bit fields and signed arithmetic derived from the lower 32 bits, multiplies an intermediate by `0x15180`, and adds the upper word. On the selected inline path it appends the resulting eight-byte word followed by the original four-byte dword, in x86 little-endian memory order, then returns status 4. The two buffer writes have independent capacity tests and may individually enter fallback `0x141adb0`; a failure after the first write is not assumed to roll it back.
+Descriptor visitor `0x3d5e950` jumps through relocation slot `0x64df5a0` to `0x141b1e0`. The latter first checks for child sentinel `0x8000000000000000`; another destination returns status 0. It reads the first eight input bytes as a qword and the following four bytes at `+8` as a dword. It does not copy that qword directly: it takes the upper 32 bits, combines bit fields and signed arithmetic derived from the lower 32 bits, multiplies an intermediate by `0x15180`, and adds the upper word. For valid positive-year inputs the calculation matches Gregorian epoch seconds: year is the signed low word shifted right 13, ordinal is bits 4–12, and the high word supplies seconds within the day. The earlier [begin-block timestamp packet](../RE-001-node115-begin-block-monotonic-reset-bucket/README.md) studies related calendar arithmetic at a different call site. Here the selected child writes seconds and the original dword separately; it does not apply that packet’s millisecond conversion. On the selected inline path it appends the resulting eight-byte word followed by the original four-byte dword, in x86 little-endian memory order, then returns status 4. The two buffer writes have independent capacity tests and may individually enter fallback `0x141adb0`; a failure after the first write is not assumed to roll it back.
 
-Constructor `0x3d5e820` installs a fresh digest/buffer owner and publishes the same sentinel. A successful first inline visit with no intervening mutation therefore supplies the derived 12 bytes to the selected reducer finalization described in [PR #4186](https://github.com/lalalune/hyperliquid-source/pull/4186). These observations do not prove the source-level type, all valid packed values, a complete arithmetic specification for invalid inputs, or an observed real root. No checkpoint or block was executed.
+Constructor `0x3d5e820` installs a fresh digest/buffer owner and publishes the same sentinel. A successful first inline visit with no intervening mutation therefore supplies the derived 12 bytes to the selected reducer finalization described in [PR #4186](https://github.com/lalalune/hyperliquid-source/pull/4186). Independent Python datetime checks below cover valid positive-year leap and century cases. These observations do not prove the source-level type, negative-year or invalid packed behavior, producer validity, or an observed real root. No checkpoint or block was executed.
 
 ## Reproduce
 
@@ -59,6 +59,16 @@ assert relocations[0x64a8388] == (8, 0x3d5e820)
 assert relocations[rip_target(0x3d5e950)] == (8, 0x141b1e0)
 assert rip_target(0x3d5e8e5) == 0x141ad30
 assert relocations[rip_target(0x141b2db)] == (8, 0x141adb0)
+
+from datetime import date, timedelta
+def seconds_model(year, ordinal, seconds):
+    y = year - 1
+    days = (1461 * y) // 4 - y // 100 + y // 400 + ordinal - 719163
+    return days * 86400 + seconds
+for year, ordinal, seconds in [(1, 1, 0), (1969, 365, 86399), (1970, 1, 0), (2000, 60, 7), (2100, 60, 10), (9999, 365, 86399)]:
+    expected = (date(year, 1, 1) + timedelta(days=ordinal - 1) - date(1970, 1, 1)).days * 86400 + seconds
+    assert seconds_model(year, ordinal, seconds) == expected
+assert seconds_model(1970, 1, 0) == 0
 print(f"{len(spans)} authenticated instruction spans and selected edges match")
 PY
 ```
