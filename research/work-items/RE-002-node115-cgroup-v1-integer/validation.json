@@ -1,0 +1,41 @@
+{
+  "source_base": "7ff06a0973b5b8c79bde0b229c9bb2eabf8b29a6",
+  "platform": "Windows AMD64",
+  "environment": {
+    "python": "3.12.0",
+    "capstone": "5.0.7",
+    "pytest": "8.4.1",
+    "gnu_binutils": "2.30",
+    "make": "mingw32-make.exe",
+    "make_argument": "PYTHON=python",
+    "PYTHONUTF8": "1",
+    "temporary_directory": "ASCII path",
+    "pinned_submodule_checkout": "LF, core.autocrlf=false; original commits retained"
+  },
+  "checks": [
+    {"command": "make doctor", "result": "passed", "analysis_ready": true, "exact_rebuild_ready": false},
+    {"command": "make verify", "result": "passed", "artifact_signatures_valid": 2},
+    {"command": "make catalogue-check", "result": "passed"},
+    {"command": "make reproduce", "result": "passed"},
+    {"command": "python -B -m unittest discover -s tests -p test_cpu_quota_115_static.py -v", "result": "passed", "tests": 10},
+    {"command": "python -B research/work-items/RE-002-node115-cgroup-v1-integer/collect.py --out <fresh-output>", "result": "passed", "corruptions_rejected": 12},
+    {"command": "python -B -O research/work-items/RE-002-node115-cgroup-v1-integer/collect.py --check --out <fresh-output>", "result": "passed", "corruptions_rejected": 12},
+    {
+      "command": "make test",
+      "result": "failed_and_stopped",
+      "test_files_available": 1052,
+      "test_file_started_when_stopped": 39,
+      "observed_failures": [
+        {"file": "test_abci_state_export115.py", "failed_checks": 17, "cause": "generated CRLF versus retained LF"},
+        {"file": "test_action_tag_serialize_115.py", "failed_checks": 1, "cause": "Windows versus POSIX path separators"}
+      ],
+      "complete_suite_passed": false
+    },
+    {"command": "python -B -m unittest discover -s tests -p test_action_tag_serialize_115.py -v", "result": "failed", "tests": 12, "failures": 1, "cause": "unchanged Windows path-separator comparison; reproduced with PYTHONUTF8=1"}
+  ],
+  "hosted_ci_success_claimed": false,
+  "captured_binary_executed": false,
+  "instruction_emulation": false,
+  "runtime_outputs_measured": false,
+  "progress_gate_changes": false
+}
