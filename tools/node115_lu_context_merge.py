@@ -51,6 +51,33 @@ def rel32_call(site, raw):
     return site + 5 + struct.unpack("<i", raw[o + 1:o + 5])[0]
 
 
+def record_intervals(record):
+    """Extract claimed/context ranges while excluding displacement search extents."""
+    pair_re = re.compile(r"0x([0-9a-fA-F]+)\s*\.\.\s*0x([0-9a-fA-F]+)")
+    ranges = set()
+    stack = [record]
+    while stack:
+        o2 = stack.pop()
+        if isinstance(o2, dict):
+            for k, v in o2.items():
+                # Search extent metadata does not claim ownership of those bytes.
+                if k == "displacement_census":
+                    continue
+                if k in ("range", "fde") and isinstance(v, str):
+                    for a, b in pair_re.findall(v):
+                        ranges.add((int(a, 16), int(b, 16)))
+                elif k in ("range", "fde") and isinstance(v, list) and len(v) == 2:
+                    try:
+                        ranges.add((int(str(v[0]), 16), int(str(v[1]), 16)))
+                    except Exception:
+                        pass
+                else:
+                    stack.append(v)
+        elif isinstance(o2, list):
+            stack.extend(o2)
+    return ranges
+
+
 def main():
     with open(os.path.join(PACKET, "records.json")) as f:
         rec = json.load(f)
@@ -209,7 +236,6 @@ def main():
 
     # Neighbour disjointness against merged + prior worktree records.
     import glob
-    pair_re = re.compile(r"0x([0-9a-fA-F]+)\s*\.\.\s*0x([0-9a-fA-F]+)")
     ranges2 = set()
     paths = glob.glob(os.path.join(ROOT, "research/work-items/*/records.json"))
     paths += glob.glob("/home/hatch/workspace/hl-wt-calls*/research/work-items/*/records.json")
@@ -221,23 +247,7 @@ def main():
                 rec2 = json.load(f)
         except Exception:
             continue
-        stack = [rec2]
-        while stack:
-            o2 = stack.pop()
-            if isinstance(o2, dict):
-                for k, v in o2.items():
-                    if k in ("range", "fde") and isinstance(v, str):
-                        for a, b in pair_re.findall(v):
-                            ranges2.add((int(a, 16), int(b, 16)))
-                    elif k in ("range", "fde") and isinstance(v, list) and len(v) == 2:
-                        try:
-                            ranges2.add((int(str(v[0]), 16), int(str(v[1]), 16)))
-                        except Exception:
-                            pass
-                    else:
-                        stack.append(v)
-            elif isinstance(o2, list):
-                stack.extend(o2)
+        ranges2.update(record_intervals(rec2))
     over = [(a, b) for (a, b) in ranges2 if a < hi and lo < b]
     check("no neighbour overlap", over == [],
           ["%x..%x" % o for o in over])

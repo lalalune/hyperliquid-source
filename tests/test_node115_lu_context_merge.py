@@ -41,6 +41,16 @@ def objdump_lines(lo, hi):
 
 
 class TestContextMerge(unittest.TestCase):
+    def test_search_extent_is_not_a_claimed_function_range(self):
+        bounds = "0x5c00000..0x6400000 (RocksDB .text)"
+        record = {"displacement_census": {"range": bounds},
+                  "function": {"range": ["0x63d8b20", "0x63d8e67"]},
+                  "context": {"fde": "0x63b7900..0x63b7ee6"}}
+        self.assertEqual(verifier.record_intervals(record),
+                         {(0x63d8b20, 0x63d8e67), (0x63b7900, 0x63b7ee6)})
+        self.assertEqual(verifier.record_intervals({"function": {"range": bounds}}),
+                         {(0x5c00000, 0x6400000)})
+
     def test_verifier_passes(self):
         r = subprocess.run([sys.executable,
                             os.path.join(ROOT, "tools/node115_lu_context_merge.py")],
