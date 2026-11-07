@@ -60,7 +60,19 @@ class TestContextReset(unittest.TestCase):
             lo, hi = int(e["range"][0], 16), int(e["range"][1], 16)
             with open(os.path.join(PACKET, name + ".objdump.txt")) as _f:
                 stored = _f.read()
-            self.assertEqual(stored, "\n".join(objdump_lines(lo, hi)) + "\n", name)
+            self.assertEqual(
+                verifier.normalized_disassembly(stored),
+                verifier.normalized_disassembly("\n".join(objdump_lines(lo, hi)) + "\n"),
+                name,
+            )
+
+    def test_disassembly_spelling_keeps_semantic_changes_visible(self):
+        saved = " 63d8ac0:\tf3 48 ab\trep stos %rax,%es:(%rdi)"
+        current = " 63d8ac0:\tf3 48 ab\trep stos %rax,(%rdi)"
+        normalize = verifier.normalized_disassembly
+        self.assertEqual(normalize(saved), normalize(current))
+        self.assertNotEqual(normalize(saved), normalize(current.replace("48 ab", "48 aa")))
+        self.assertNotEqual(normalize(saved), normalize(current.replace("%rax", "%eax")))
 
     def test_strict_counts(self):
         for name, e in REC["exhibits"].items():

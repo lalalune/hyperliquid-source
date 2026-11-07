@@ -83,6 +83,12 @@ def rel32_jump(site, width):
     return None
 
 
+def normalized_disassembly(text):
+    """Normalize only GNU's optional implicit ES spelling on STOSQ."""
+    return text.replace("\trep stos %rax,%es:(%rdi)",
+                        "\trep stos %rax,(%rdi)")
+
+
 def main():
     with open(os.path.join(PACKET, "records.json")) as f:
         rec = json.load(f)
@@ -107,7 +113,7 @@ def main():
         with open(os.path.join(PACKET, name + ".objdump.txt")) as f:
             stored = f.read()
         regen = "\n".join(objdump_lines(lo, hi)) + "\n"
-        check(name + " objdump regeneration", stored == regen)
+        check(name + " objdump regeneration", normalized_disassembly(stored) == normalized_disassembly(regen))
         strict = sum(1 for l in objdump_lines(lo, hi) if l.count("\t") >= 2)
         check(name + " strict", strict == e["strict"], strict)
         check(name + " inside FDE",
