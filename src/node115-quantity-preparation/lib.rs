@@ -2,6 +2,8 @@
 #![no_std]
 #![forbid(unsafe_code)]
 
+pub mod pdi_range;
+
 /// Own research representation of the established coefficient/scale pair.
 /// This type's Rust layout is unrelated to the captured stack layout.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
