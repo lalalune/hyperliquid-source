@@ -1,0 +1,12 @@
+structure	field	offset	meaning
+set	root	+0x00	node pointer, 0 for an empty set
+set	height	+0x08	0 for a single leaf
+set	length	+0x10	number of keys, raised by the vacant insert
+lazy value	state words	+0x18 / +0x20	both written 1 after the set is built
+node	parent	+0x00	pointer, 0 for the root; only written for a new node
+node	keys	+0x08	11 keys of 20 bytes, compared with memcmp
+node	parent index	+0xe4	u16, written when the node is attached to a parent
+node	length	+0xe6	u16, at most 11
+internal node	edges	+0xe8	12 child pointers; leaf is 0xe8 bytes, internal is 0x148
+vacant entry	map / node / height / index / key	+0x00 / +0x08 / +0x10 / +0x18 / +0x20	key is 20 bytes, no value
+insert result	node / height / index / map	+0x00 / +0x08 / +0x10 / +0x18	where the key landed
