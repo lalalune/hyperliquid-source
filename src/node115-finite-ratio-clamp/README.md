@@ -17,5 +17,6 @@ production ranges, units, result consumers, and floating-point environment
 must be traced before such an integration is justified. The source project has
 no recovered root Cargo workspace. No captured binary is executed or emulated.
 
-Run `cargo test --offline --locked` in this directory. The crate has no
-external dependencies.
+Run `python3 verify_vectors.py` and then `cargo test --offline --locked` in
+this directory. The script compares the fixture byte-for-byte against the
+digest-bound packet's 28 raw rows. The crate has no external dependencies.
