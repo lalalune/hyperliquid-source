@@ -31,4 +31,12 @@ Local static checks used Python 3.12.14, Capstone 5.0.7 and pyelftools 0.33. The
 
 ## Limits
 
-The inner operation's request-level behavior and the precise unwind-table edge remain unresolved. This packet requests no acceptance gate or byte-coverage change.
+The inner operation's request-level behavior remains unresolved. This packet requests no acceptance gate or byte-coverage change.
+
+## Unwind coverage and literal-length check
+
+The FDE's LSDA pointer resolves to `0x246984` in `.gcc_except_table`. Its omitted LPStart makes the function start the offset base. The call-site table has ULEB128 encoding and eight payload bytes. The first row covers `[0x29797b3, 0x29797c9)`, including the complete inner call at `0x29797c1`. Its action is zero and its landing-pad offset `0x6d` resolves to `0x29797ed`, which writes state two and forwards the unwind payload. The next row starts at `0x29797c9` and has no landing pad.
+
+The two length immediates `0x47` and `0x45` encode 35 and 34 bytes after a right shift by one. The exact spans are `[0x46f2ed, 0x46f310)` and `[0x46f310, 0x46f332)`, including the backticks around `async fn`. The unshifted lengths extend into adjacent data and fail the exact-span check.
+
+Recheck the LSDA with `objdump -s -j .gcc_except_table --start-address=0x246984 --stop-address=0x246990 "$target"`. The local parse decoded both rows and rejected treating the exclusive end as covered by the first row.
