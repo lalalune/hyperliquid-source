@@ -105,6 +105,35 @@ fn timestamp_admission_matches_negative_epoch_and_leap_second_edges() {
 }
 
 #[test]
+fn timestamp_leap_predicate_matches_every_second_of_day() {
+    let boundaries = [
+        0,
+        999_999_999,
+        1_000_000_000,
+        1_000_000_001,
+        1_999_999_999,
+        2_000_000_000,
+        u32::MAX,
+    ];
+    for second in 0..86_400_i64 {
+        for nanoseconds in boundaries {
+            let expected =
+                nanoseconds <= 1_999_999_999 && (nanoseconds < 1_000_000_000 || second % 60 == 59);
+            let actual = admit_timestamp(second, nanoseconds);
+            assert_eq!(
+                actual.is_ok(),
+                expected,
+                "second={second}, ns={nanoseconds}"
+            );
+            if let Ok(timestamp) = actual {
+                assert_eq!(timestamp.second_of_day, second as u32);
+                assert_ne!(timestamp.packed_date, 0);
+            }
+        }
+    }
+}
+
+#[test]
 fn empty_client_vector_and_proper_prefix_failures_are_safe() {
     assert_eq!(decode_payload_prefix(&[0]).result, Ok(vec![]));
     let fixture = successful_payload();
