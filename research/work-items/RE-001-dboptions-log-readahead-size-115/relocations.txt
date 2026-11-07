@@ -1,0 +1,12 @@
+# Relocation entries (readelf -r work/hl-node-115.bin) for the slots this
+# work item pins. The db_host_id default string lives behind a GOT slot:
+# the DBOptions default ctor loads the pointer from 0x64fee88 (see the
+# ctor excerpt, mov 0x64fee88(%rip) region) and the relocation resolves it
+# to the .rodata string "__hostname__" at 0x4342d1.
+0000064fee88  000000000008 R_X86_64_RELATIVE                    4342d1
+
+# No relocation backs the "log_readahead_size" name string: it is a plain
+# .rodata string at 0x43d7dc (18 bytes + NUL), referenced exactly once
+# binary-wide by the lea at 0x60afa6d in the static initializer.
+# Likewise the ConfigOptions delimiter literals (";" at 0x43d5c7,
+# "\n  " at 0x446696) are plain .rodata with no relocations.
