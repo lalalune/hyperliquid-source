@@ -25,6 +25,7 @@ pub struct DateTime {
     pub nanoseconds: u32,
 }
 
+/// Logical failure boundaries, not original enum discriminants or panic ABI.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
     Nanoseconds,
@@ -41,6 +42,10 @@ fn days_before_year(year: i32) -> i64 {
     previous * 365 + previous.div_euclid(4) - previous.div_euclid(100) + previous.div_euclid(400)
 }
 
+/// The native input is a signed CE day: CE1 is 0001-01-01.
+/// Full Gregorian cycle arithmetic covers year zero and negative years.
+/// The binary search intentionally differs from the target's reciprocal/table
+/// implementation; exact packed-field semantics are the comparison boundary.
 pub fn from_ce_day(day: i32) -> Option<Date> {
     let day = i64::from(day);
     if day < days_before_year(MIN_YEAR) + 1 || day > days_before_year(MAX_YEAR + 1) {
@@ -59,6 +64,7 @@ pub fn from_ce_day(day: i32) -> Option<Date> {
     let year = low;
     let before = days_before_year(year);
     let ordinal = (day - before) as u16;
+    // January 1 weekday encoded as the target's 1..7 cycle, high bit nonleap.
     let flags = (((before + 5).rem_euclid(7) + 1) as u8) | if leap(year) { 0 } else { 8 };
     let packed = (year << 13) | (i32::from(ordinal) << 4) | i32::from(flags);
     Some(Date {
@@ -69,6 +75,10 @@ pub fn from_ce_day(day: i32) -> Option<Date> {
     })
 }
 
+/// Resume at a successful clock-read boundary. Seconds are the Linux signed
+/// seconds field and nanoseconds the raw unsigned qword interpretation.
+/// Invalid nanos maps the clock adapter's failure boundary; a pre-origin read
+/// maps duration-since-zero failure. No OS call or synthetic clock is provided.
 pub fn from_clock_read(seconds: i64, nanoseconds: u64) -> Result<DateTime, Error> {
     if nanoseconds >= 1_000_000_000 {
         return Err(Error::Nanoseconds);
