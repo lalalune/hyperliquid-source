@@ -10996,5 +10996,277 @@
     "reviewer_environment_note": "The first offline reference run failed because the isolated Cargo cache lacked rand_core. cargo fetch --locked populated test-only dependencies in work/cargo, then the unchanged harness passed offline. All three rand_chacha source hashes match the recorded values.",
     "scope": "Dependency-free no_std owned numerical API for selected six-double-round four-block refill fallback. Counter wraps by4 and key/tail2/tail3 remain preserved. Credited native evidence is rechecked, with source-to-source comparison to rand_chacha0.3.1. No dispatch, entropy, reseeding, native ABI or full-component claim.",
     "main_modified_by_reviewer": false
+  },
+  {
+    "number": 4327,
+    "head_sha": "77f5bb5c0390d2ce5b7a524b5fcfdee0983a5848",
+    "verdict": "approve",
+    "checks": [
+      {
+        "label": "native",
+        "command": [
+          "python",
+          "research/work-items/RE-001-node115-noop-preimage/verify.py"
+        ],
+        "returncode": 0
+      },
+      {
+        "label": "openssl",
+        "command": [
+          "python",
+          "research/work-items/RE-001-node115-noop-preimage/compare-openssl.py"
+        ],
+        "returncode": 0,
+        "reference_result": {
+          "independent_reference": "OpenSSL 3.6.5 29 Sep 2026 (Library: OpenSSL 3.6.5 29 Sep 2026)",
+          "matching_digests": 64,
+          "input_lengths": [
+            20,
+            29,
+            40,
+            49
+          ],
+          "target_execution": false
+        }
+      },
+      {
+        "label": "rust-debug",
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--manifest-path",
+          "src/node115-noop-preimage/Cargo.toml"
+        ],
+        "returncode": 0,
+        "test_count": 4
+      },
+      {
+        "label": "rust-release",
+        "command": [
+          "cargo",
+          "test",
+          "--offline",
+          "--locked",
+          "--release",
+          "--manifest-path",
+          "src/node115-noop-preimage/Cargo.toml"
+        ],
+        "returncode": 0,
+        "test_count": 4
+      },
+      {
+        "label": "clippy",
+        "command": [
+          "cargo",
+          "clippy",
+          "--offline",
+          "--locked",
+          "--manifest-path",
+          "src/node115-noop-preimage/Cargo.toml",
+          "--all-targets",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "returncode": 0
+      },
+      {
+        "label": "manifest and unchanged permutation",
+        "returncode": 0,
+        "manifest_entries": 16,
+        "permutation_sha256": "54d751f5d2366fdba907838d5980826b6fd48c3764adf338c55c13a950a6e0f8"
+      },
+      {
+        "label": "independent source/native join review",
+        "returncode": 0,
+        "report_path": "work/review-4327/independent.json"
+      }
+    ],
+    "findings": [],
+    "source_hashes": {
+      "README.md": "2abc83ef821e2e090fa40e5ff776203baff1a87c04058ac6a63bbda579540c4b",
+      "docs/assets/research-progress.svg": "70f1c756f13a478b437263af763673c6636b23d4fd8f5dde007ee9d747597c40",
+      "research/work-items/RE-001-node115-noop-preimage/MANIFEST.sha256": "a2a51f3313585510291c329bf930b7bb440ca576bdeaff5f94c0f61f778c863a",
+      "research/work-items/RE-001-node115-noop-preimage/README.md": "3b6bad1eaf5e82a6b4d756d993007fb84ae7d637632ac20101b2862ae19511b3",
+      "research/work-items/RE-001-node115-noop-preimage/compare-openssl.py": "dad31facb56888ae73bc9adce2b1f7af3d3e38b2f3e47022d0af0a851e2c7cbf",
+      "research/work-items/RE-001-node115-noop-preimage/openssl-comparison.json": "8ce07925353bf6721fcc9e20de10bec5e40de1f0791ca4e4543491791f46b042",
+      "research/work-items/RE-001-node115-noop-preimage/records.json": "81f030450402d094eaadc7e1f364dcdf2390d506f70a23a282f7a5d822750aa5",
+      "research/work-items/RE-001-node115-noop-preimage/verification.json": "0fa941c09d7b509399841d72a00eeb433cd45ba68a5675869ac46923cef6a534",
+      "research/work-items/RE-001-node115-noop-preimage/verify.py": "9fd3f1c4a2c7716da4e4883e03a557b0f95a4b41934fc9646c5dc4a9cbb54c33",
+      "src/node115-noop-preimage/Cargo.lock": "8afd440e6a44c7d1df596c225bf0f42d1dc0ec7e0e1a06250b0e75f4f7f5ba73",
+      "src/node115-noop-preimage/Cargo.toml": "da2596f0fc59f2ae2edf62e4721c38d06ce06d5261a39a2adcfae2f08971f625",
+      "src/node115-noop-preimage/README.md": "4d7788bacd0aa5455104ca93f762389f69b84318fa2391ecac8259f48334adfa",
+      "src/node115-noop-preimage/permutation-adapter/Cargo.toml": "711dc5bfdd9bc66963897cc374102c7565713760c1f44f87c7c12df4e1ef3739",
+      "src/node115-noop-preimage/rust-toolchain.toml": "696c2536031250a4fa61a1ec4daeba2e8ea2b1c5b725e659e19bf12be076c5f3",
+      "src/node115-noop-preimage/src/lib.rs": "58fa183c152c70ea3208b2ede5d9abdc8dbe800f07ac514c3b5f2402eff59d1b",
+      "src/node115-noop-preimage/tests/digest-vectors.txt": "d6b026540b9be70f862505bae1015566cf23673eb6ed3c3d9f549fb96c1dc77b",
+      "src/node115-noop-preimage/tests/preimage.rs": "5dcbe266a67638e904a0ee34dbd3d205bb656485abb091c8635ed4b4e1f133bc"
+    },
+    "helper_hashes": {
+      "LICENSE": "3fd138dbb1142f2c6feed00884cd52ff337ba90f1ab88df69e5b37529056309e",
+      "tools/elf_index.py": "f142a7c03b0c2aee07d547cf93b0f6ef4b330b43ec61909d9388f340d0cdd70e",
+      "tools/fde_extents.py": "69798abfa12273bf8e3fa0be6e46dcb0a7807f2803287bbaa0916143ae527714",
+      "research/work-items/RE-001-node115-registry-row-labels/verify.py": "3798c2fbd2844466ba4cd20877080be88b45ef0355036a55f721b1c103723079",
+      "src/node115-sponge-permutation/lib.rs": "54d751f5d2366fdba907838d5980826b6fd48c3764adf338c55c13a950a6e0f8"
+    },
+    "test_receipts": "work/review-4327/test-receipts.json",
+    "independent_review": "work/review-4327/independent.json",
+    "native_result": {
+      "issue": 3912,
+      "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+      "selected_windows": 17,
+      "selected_bytes": 2367,
+      "selected_instructions": 593,
+      "semantic_facts": 125,
+      "semantic_corruptions_rejected": [
+        "wrong raw action tag",
+        "two-entry map",
+        "wrong key length",
+        "wrong value length",
+        "array marker instead of map",
+        "array marker instead of string",
+        "wrong value length register",
+        "wrong copied payload length",
+        "wrong vault presence tag",
+        "nonce wrong endian register",
+        "wrong expiry presence tag",
+        "wrong expiry marker",
+        "wrong digest rate",
+        "SHA3 suffix substituted",
+        "OR instead of word XOR",
+        "wrong final padding bit",
+        "digest truncated to16",
+        "wrong permutation helper",
+        "capitalized action value",
+        "wrong copied byte import"
+      ],
+      "scope": "selected static windows, not full component or runtime equivalence"
+    },
+    "openssl_result": {
+      "independent_reference": "OpenSSL 3.6.5 29 Sep 2026 (Library: OpenSSL 3.6.5 29 Sep 2026)",
+      "matching_digests": 64,
+      "input_lengths": [
+        20,
+        29,
+        40,
+        49
+      ],
+      "target_execution": false
+    },
+    "reviewer_environment_note": "Independent digest reproduction used installed OpenSSL3.6.5 KECCAK-256. All64 retained vectors matched; the original author recorded OpenSSL4.1.0.",
+    "scope": "Owned Noop preimage and one-block inner digest for safe typed nonce/vault/expiry inputs, using unchanged pinned local permutation. 20/29/40/49-byte shapes and normal helper returns only; no signing, action authorization, outer domain or full-component completion claim.",
+    "main_modified_by_reviewer": false
+  },
+  {
+    "number": 4328,
+    "head_sha": "fd35186b6bdd77c77a76a1e22226ac667a7e4011",
+    "verdict": "fix_required",
+    "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "findings": [
+      {
+        "severity": "P1",
+        "status": "fixed_in_patch",
+        "message": "0x61d13e0 is a boolean starts-with predicate, not a three-way comparator; corrected helper/model and reversed prefix dispatch. Native zero result at609aa1d delegates toslot10."
+      },
+      {
+        "severity": "P1",
+        "status": "fixed_in_patch",
+        "message": "Nested-key .id names route directly toslot10; immutable .id validates the current target ID and returns local OK/error. Corrected branch separation, resolved-target null guard, and immutable helper/forwarder boundaries."
+      },
+      {
+        "severity": "P2",
+        "status": "fixed_in_patch",
+        "message": "Field offset is sign-extended32bits; corrected zero-pointer handling and reject absent synthetic memory instead of inventing null."
+      },
+      {
+        "severity": "P2",
+        "status": "fixed_in_patch",
+        "message": "Four reproduction entrypoints required untrackedwork/hl-node-115.bin. Switched to canonicalartifact, normalized only importedobjdumpdisplayheader, preserving all7rawexports."
+      },
+      {
+        "severity": "P2",
+        "status": "fixed_in_patch",
+        "message": "Serializer helper forwards config/fourthargument into slot12. Corrected narrative and added missingBSS-LEA census plussemantic-generator checks."
+      }
+    ],
+    "validation": {
+      "original_model_tests": 19,
+      "original_native_verifier": "fails onmissinguntrackedbinary",
+      "corrected_model_tests": 23,
+      "corrected_default_entrypoint_returncode": 0,
+      "corrected_native_verifier_returncode": 0,
+      "corrected_native_verifier_checks": 13,
+      "independent_instruction_count": 1523,
+      "independent_bytes": 7195,
+      "independent_functions": 7,
+      "all21_git_blobs_verified": true,
+      "original_raw_exports_unchanged": 7,
+      "patch_applies_to_exact_original_tree": true
+    },
+    "checks": [
+      {
+        "name": "normal per-file test entrypoint",
+        "command": "python tools/run_tests.py <review-4328-working>/tests",
+        "returncode": 0,
+        "test_count": 23,
+        "file": "tests/test_type22_delegates_115.py",
+        "sha256": "4add0ba76bdd9ee384a8a9c9c7845c03579651a1ca0284f1e825f3b5a389d8cc",
+        "tested_tool": "tools/type22_delegates_115.py",
+        "tested_tool_sha256": "608ddd45b9f60251fe3235f02aab3a690ad11dd71a5cd379f74db414b1c7f551"
+      },
+      {
+        "name": "fullnativepacketverifier",
+        "returncode": 0
+      }
+    ],
+    "changed_files": [
+      {
+        "file": "research/work-items/RE-001-type22-delegates-115/MANIFEST.sha256",
+        "sha256": "7e33c80fbe2306ea8badeff71b3573a0275e9a5871523bc18477951bf0e0e370"
+      },
+      {
+        "file": "research/work-items/RE-001-type22-delegates-115/README.md",
+        "sha256": "cd1d8df587d360b4de9e06413c4ec477690986833b287edd6f3c68d4c881735b"
+      },
+      {
+        "file": "research/work-items/RE-001-type22-delegates-115/callers.tsv",
+        "sha256": "d32c3cdcbf234e1df43b56abafbc14adc866528d3959ef4bc2d42bc6420acbfe"
+      },
+      {
+        "file": "research/work-items/RE-001-type22-delegates-115/census.py",
+        "sha256": "bef6fd8fd3b74beeac18f6c827ff0e5a4ffb52eaae3003b68b2bd46d8c8324f9"
+      },
+      {
+        "file": "research/work-items/RE-001-type22-delegates-115/export_excerpts.py",
+        "sha256": "dd2eaf7bb074bbd68e0c7148c608b1b7b8d4ee6f7972395dbbaf639c566f03eb"
+      },
+      {
+        "file": "research/work-items/RE-001-type22-delegates-115/frames.txt",
+        "sha256": "a8fe855592dab1d7c2001244eb7910f12e4640ceadc4e3c4d71d9af7ef728f3a"
+      },
+      {
+        "file": "research/work-items/RE-001-type22-delegates-115/gen_records.py",
+        "sha256": "5a4e60f57e464483d8e916da89bb4849e720ad8aa2146e7fb99fbfa607d4c7e9"
+      },
+      {
+        "file": "research/work-items/RE-001-type22-delegates-115/records.json",
+        "sha256": "ebcc06a4b3072837821baf4614361bd69e96f720d5874bda1dc656aecda850d2"
+      },
+      {
+        "file": "research/work-items/RE-001-type22-delegates-115/verify.py",
+        "sha256": "4b7b5cd668feb86dca932cb285317397ff6a2af1ec1a6b7d931c4779bebc0c6b"
+      },
+      {
+        "file": "tests/test_type22_delegates_115.py",
+        "sha256": "4add0ba76bdd9ee384a8a9c9c7845c03579651a1ca0284f1e825f3b5a389d8cc"
+      },
+      {
+        "file": "tools/type22_delegates_115.py",
+        "sha256": "608ddd45b9f60251fe3235f02aab3a690ad11dd71a5cd379f74db414b1c7f551"
+      }
+    ],
+    "scope": "Bounded static dispatch/string-output projection. Helper and virtual-call outcomes remain delegated; no fullcomponentgateadvanced."
   }
 ]
