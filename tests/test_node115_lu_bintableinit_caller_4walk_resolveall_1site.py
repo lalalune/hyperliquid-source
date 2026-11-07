@@ -186,11 +186,25 @@ def main():
                        capture_output=True, text=True, timeout=120)
 
     def strip_to_disasm(text):
-        lines = text.splitlines()
+        # GNU versions differ in displaying the implicit ES operand here.
+        lines = [line.replace("\trep stos %rax,%es:(%rdi)",
+                              "\trep stos %rax,(%rdi)")
+                 for line in text.splitlines()]
         for i, l in enumerate(lines):
             if "file format" in l:
                 return lines[i + 1:]
         return lines
+
+    saved_spelling = " 63af4b7:\tf3 48 ab\trep stos %rax,%es:(%rdi)\n"
+    current_spelling = " 63af4b7:\tf3 48 ab\trep stos %rax,(%rdi)\n"
+    check("implicit ES spelling accepted",
+          strip_to_disasm(saved_spelling) == strip_to_disasm(current_spelling))
+    check("changed instruction byte rejected",
+          strip_to_disasm(saved_spelling) != strip_to_disasm(
+              current_spelling.replace("48 ab", "48 aa")))
+    check("changed register operand rejected",
+          strip_to_disasm(saved_spelling) != strip_to_disasm(
+              current_spelling.replace("%rax", "%eax")))
 
     regen = strip_to_disasm(r.stdout)
     exhibit = strip_to_disasm(obj)
