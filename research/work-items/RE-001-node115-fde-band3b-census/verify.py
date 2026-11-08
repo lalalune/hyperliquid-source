@@ -64,11 +64,19 @@ def fde_rows():
 
 def instruction_count(start, end):
     text = run(["objdump", "-d", f"--start-address=0x{start:x}", f"--stop-address=0x{end:x}", str(TARGET)])
-    return sum(
-        bool((address := line.strip().partition(":")[0]))
-        and all(char in "0123456789abcdefABCDEF" for char in address)
-        for line in text.splitlines()
-    )
+    total = 0
+    for line in text.splitlines():
+        address, separator, rest = line.strip().partition(":")
+        columns = rest.split("\t")
+        if (
+            separator
+            and address
+            and all(char in "0123456789abcdefABCDEF" for char in address)
+            and len(columns) >= 3
+            and columns[2].strip()
+        ):
+            total += 1
+    return total
 
 
 def records(rows, section_address, section_offset, section_size):

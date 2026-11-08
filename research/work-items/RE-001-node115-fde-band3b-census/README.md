@@ -32,7 +32,7 @@ make doctor verify catalogue-check
 | complete FDEs starting in band | 58 |
 | first range | `0x3a40970..0x3a4253d`, 7,117 bytes |
 | last range | `0x3a7fa70..0x3a81212`, 6,050 bytes |
-| smallest body | `0x3a7d0d0..0x3a7d7fc`, 1,836 bytes, 440 instructions, SHA-256 `5ec1da22be4a00c4ace34d761c9a9ddd66f505f62cf8e7abcd2e1ee40b6f8dae` |
+| smallest body | `0x3a7d0d0..0x3a7d7fc`, 1,836 bytes, 412 instructions, SHA-256 `5ec1da22be4a00c4ace34d761c9a9ddd66f505f62cf8e7abcd2e1ee40b6f8dae` |
 
 All 58 rows and their exact `readelf` FDE lines are retained in `evidence.json` and `frames.txt`. A body's file offset is `VA - 0x1000`, derived from the recorded `.text` VA and file offset. FDE ends are not clipped to the band: the final body's end lies beyond `0x3a80000`, while remaining within `.text`.
 
