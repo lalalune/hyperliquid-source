@@ -318,7 +318,9 @@ def require(condition, message):
 
 
 def relocations(data):
-    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    sec = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    require(sec is not None, 'missing.rela.dyn section')
+    require(sec['size'] % 24 == 0, 'truncated.rela.dyn section')
     by_offset = {}
     for off in range(sec['offset'], sec['offset'] + sec['size'], 24):
         r_offset, r_info, r_addend = struct.unpack_from('<QQq', data, off)
@@ -328,12 +330,17 @@ def relocations(data):
 
 
 def dynsym_name(data, index):
-    sym = next(s for s in sections(data) if s['name'] == '.dynsym')
-    strs = next(s for s in sections(data) if s['name'] == '.dynstr')
+    sym = next((s for s in sections(data) if s['name'] == '.dynsym'), None)
+    require(sym is not None, 'missing.dynsym section')
+    strs = next((s for s in sections(data) if s['name'] == '.dynstr'), None)
+    require(strs is not None, 'missing.dynstr section')
     noff = struct.unpack_from('<I', data,
                               sym['offset'] + index * 24)[0]
     o = strs['offset'] + noff
-    return data[o:data.index(b'\0', o)].decode()
+    try:
+        return data[o:data.index(b'\0', o)].decode()
+    except UnicodeDecodeError:
+        raise ValueError('dynamic symbol name is not valid UTF-8') from None
 
 
 def relative_at(by_offset, va):
