@@ -6,7 +6,9 @@ The [loader result packet](../RE-017-loader-checkpoint-result-115/README.md) tra
 
 In parent FDE `0x2cb6500`, `0x2cb7404` forms subobject `parent + 0xae8`; `0x2cb7413` passes it as the second argument to `0x2b905a0` at `0x2cb741b`. The callee preserves that argument in RBX. On the selected dispatch, subobject byte `+0x195 == 0` indexes the first signed-relative table entry at `0x607308`, selecting `0x2b905d8`. If the subsequently read dword at `0x64f01d8` is zero, execution takes the local initialization arm; if it is nonzero, execution calls slot `0x64df9f0` and, on normal return, rejoins that same arm at `0x2b90915`. The qword store at `0x2b9062d` writes `0xb` to subobject `+0x38`, hence parent `+0xb20` through `+0xb27`; on x86-64 its first byte is `0x0b`.
 
-The parent later reads `+0xb20` at `0x2cb758f` and saves it to `+0x2a19` at `0x2cb75cd`. It also reads the adjacent byte `+0xb21` and tests it at `0x2cb75e9`; zero branches to `0x2cb9b5c`, which calls an indirect helper and, if that call returns, reaches `ud2` at `0x2cb9ed8`. The qword initializer above writes adjacent byte `+0xb21` as zero as well as `+0xb20` as 11. Therefore, on the selected initialization arm with both bytes unchanged, the zero-neighbor branch is taken; the prior packet's later selected checkpoint helper cannot be assumed reached by simply joining the two observations. Reaching its nonzero-neighbor continuation after this initialization would require an intervening change to the neighbor, a different initialization, or a different path. Calls, alias writes, other state-table entries and resumed paths remain unexamined; no universal flag value, checkpoint height relationship, complete replay or root equality is claimed.
+On the selected parent continuation after the helper returns a tag other than 2, the initializer is **not** the final source of the read bytes. At `0x2cb74cf` the parent loads 16 bytes from `parent + 0x148`; it saves and reloads them through the stack and at `0x2cb7553` stores them at `subobject + 0x30`, i.e. `parent + 0xb18`. This 16-byte store overwrites both `parent + 0xb20` and `+0xb21`, whose selected sources are the bytes at `parent + 0x150` and `+0x151` respectively. The join assumes the selected normal continuation, the SysV callee-saved subobject pointer, and no alias writes changing the source or stack copy. It does not infer those source bytes' values or their earlier producers.
+
+The parent reads those bytes at `0x2cb758f` and `0x2cb7596`, saving the first at `+0x2a19`. It tests the second at `0x2cb75e9`: zero branches to an indirect call and, if that returns, `ud2` at `0x2cb9ed8`. The prior packet connects the saved first byte to a checkpoint helper whose selected result is the predicate byte != 2. The earlier qword initializer alone does **not** determine either read value or the later predicate; the selected overwrite must be accounted for. Other state-table entries, aliasing, runtime reachability, checkpoint-height relationships and root equality remain open.
 
 ## Reproduce
 
@@ -63,6 +65,8 @@ changed = bytearray(entry)
 changed[0] ^= 1
 assert 0x607308 + struct.unpack('<i',changed)[0] != 0x2b905d8
 assert 0xae8 + 0x38 == 0xb20
+assert 0xae8 + 0x30 + 8 == 0xb20
+assert 0x148 + 8 == 0x150 and 0x148 + 9 == 0x151
 assert (0x0b).to_bytes(8,'little')[:2] == bytes((11,0))
 assert rip_target(0x2cb75f1) == 0x2cb9b5c
 assert rip_target(0x2cb9b77) == 0x2cb9ed8
