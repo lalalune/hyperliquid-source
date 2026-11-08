@@ -29,6 +29,10 @@ SPOT_BYTES = {
     0x6207245: bytes.fromhex("4c8d35f4213000"),   # lea map 0x6509440
     0x6207556: bytes.fromhex("4c8d2d631e3000"),   # lea map 0x65093c0
     0x6206EF5: bytes.fromhex("488d35c4253000"),   # lea map 0x65094c0
+    # The ttl record's own pack/flags (record at -0x1d0): movq $0x2 into
+    # +0xa8 (-0x128) and movl $0x0 into +0xb0 (-0x120).
+    0x62071A8: bytes.fromhex("48c785d8feffff02000000"),
+    0x62071B3: bytes.fromhex("c785e0feffff00000000"),
 }
 
 CHECKS = 0

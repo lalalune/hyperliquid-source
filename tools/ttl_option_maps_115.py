@@ -4,16 +4,18 @@
 The static initializer 0x6206ef0 inserts exactly one entry into each of
 four static OptionTypeInfo maps. The pack's low 32 bits are the type (22)
 and its high 32 bits are the verification: 0x100000016 = type 22 /
-verification 1, 0x300000016 = type 22 / verification 3. All four entries
+verification 1, 0x300000016 = type 22 / verification 3. Three entries
 carry type 22; only 'user_filter_factory' carries verification 3, and
 only 'user_filter' carries flags 0x1200 (the others 0x400).
 
-The 'ttl' entry is the odd one: its block sets no pack and no flags of
-its own -- the byte-scan in the packet's census.py finds no store to
-the record's pack (-0x68(%rbp)) or flags (-0x60(%rbp)) slot between the
-end of the 'user_operator' block (0x62070f9) and the ttl insert
-(0x620726b), so the ttl entry reuses the preceding block's pack (from
-GOT slot 0x458f68) and flags 0x400.
+The 'ttl' entry is the odd one: its block builds the record directly at
+-0x1d0(%rbp) and writes its OWN pack/flags into the record's +0xa8/+0xb0
+slots (movq $0x2 at 0x62071a8, movl $0x0 at 0x62071b3), so it carries
+pack 0x2 (type 2, verification 0) and flags 0x0. It calls no record init
+(0x5e32b10) and loads no GOT pack. (An earlier version of this packet
+claimed the ttl entry inherited the preceding block's 0x100000016/0x400;
+that was wrong -- the slopbot review on PR #4498 caught it, and the
+binary confirms the ttl block writes its own 2/0.)
 
 A fifth map, 0x65094c0, is zeroed at the initializer entry (0x6206ef5)
 and atexit-registered, but the initializer inserts nothing into it.
@@ -25,7 +27,7 @@ from __future__ import annotations
 MAP_ENTRIES = {
     0x6509480: ("user_operator", 0x44C438, 0x100000016, 0x400,
                 0x62070C2, 0x62070F4),
-    0x6509440: ("ttl", 0x4322BE, 0x100000016, 0x400,
+    0x6509440: ("ttl", 0x4322BE, 0x2, 0x0,
                 0x620726B, 0x62072D4),
     0x6509400: ("user_filter_factory", 0x44FFE6, 0x300000016, 0x400,
                 0x620740B, 0x620743B),
@@ -61,9 +63,9 @@ def entry_for(map_addr: int) -> dict | None:
 
 
 def pack_source(map_addr: int) -> str:
-    """Where the entry's pack comes from: the 'ttl' entry inherits it."""
+    """Where the entry's pack comes from: the 'ttl' pack is immediate."""
     if map_addr == 0x6509440:
-        return "inherited"
+        return "immediate"
     if map_addr == 0x6509400:
         return "got:0x4594e8"
     if map_addr in MAP_ENTRIES:
@@ -77,9 +79,10 @@ def lookup(map_addr: int, key: str) -> bool:
     return entry is not None and entry["key"] == key
 
 
-def ttl_reuses_preceding_block() -> bool:
-    """The ttl entry reuses the preceding block's pack and flags."""
+def ttl_has_own_pack_and_flags() -> bool:
+    """The ttl entry carries its own pack/flags, not the others'."""
     entry = entry_for(0x6509440)
     assert entry is not None
-    return (entry["pack"] == MAP_ENTRIES[0x6509480][2]
-            and entry["flags"] == MAP_ENTRIES[0x6509480][3])
+    return (entry["pack"] == 0x2 and entry["flags"] == 0x0
+            and entry["pack"] != MAP_ENTRIES[0x6509480][2]
+            and entry["flags"] != MAP_ENTRIES[0x6509480][3])

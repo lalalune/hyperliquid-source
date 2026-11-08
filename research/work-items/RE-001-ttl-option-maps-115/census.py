@@ -11,6 +11,17 @@ static OptionTypeInfo maps: 'user_operator' into 0x6509480, 'ttl' into
 0x65093c0. A fifth map, 0x65094c0, is zeroed and atexit-registered by the
 initializer but receives no insert there.
 
+CORRECTION (slopbot review on PR #4498, re-verified against the binary):
+the 'ttl' entry does NOT inherit the preceding block's pack/flags. The
+other three blocks build their record at -0x110(%rbp) and load the pack
+from a GOT slot; the ttl block builds its record directly at
+-0x1d0(%rbp) and writes its OWN values into the record's +0xa8/+0xb0
+slots: movq $0x2 at 0x62071a8 (-0x128 = -0x1d0+0xa8) and movl $0x0 at
+0x62071b3 (-0x120 = -0x1d0+0xb0). Under the #4389-calibrated layout
+(+0xa8 = pack, +0xb0 = flags) the ttl entry carries pack 0x2 (type 2,
+verification 0) and flags 0x0 -- not 0x100000016/0x400. The ttl block
+calls no record init (0x5e32b10) and loads no GOT pack.
+
 Context (already pinned by merged work, NOT re-pinned here): the maps
 are the option maps of the TTL family -- the filter/factory/merge-op
 ctors and their RegisterOptions groups are pinned by merged PR #4065
@@ -65,7 +76,7 @@ MAPS = {
     0x6509480: ("user_operator", 0x44C438, 0x62070C2, 0x62070F4,
                 0x100000016, 0x400),
     0x6509440: ("ttl", 0x4322BE, 0x620726B, 0x62072D4,
-                0x100000016, 0x400),
+                0x2, 0x0),
     0x6509400: ("user_filter_factory", 0x44FFE6, 0x620740B, 0x620743B,
                 0x300000016, 0x400),
     0x65093C0: ("user_filter", 0x4385BB, 0x6207575, 0x62075BE,
@@ -194,13 +205,20 @@ def main() -> None:
         got = struct.unpack_from("<Q", data, slot)[0]
         assert got == want, f"pack GOT slot {slot:#x}: got {got:#x}"
 
-    # The ttl block sets no pack/flags of its own: between the end of the
-    # user_operator block (0x62070f9) and the ttl insert (0x620726b) there
-    # is no store to the record's pack (-0x68(%rbp)) or flags
-    # (-0x60(%rbp)) slot, so the ttl entry reuses block A's pack/flags.
+    # The ttl block builds its record directly at -0x1d0(%rbp) and
+    # writes its OWN pack/flags into the record's +0xa8/+0xb0 slots:
+    # movq $0x2 at 0x62071a8 (-0x128 = -0x1d0+0xa8) and movl $0x0 at
+    # 0x62071b3 (-0x120 = -0x1d0+0xb0). It loads no GOT pack and sets
+    # no pack/flags in the other blocks' -0x110 record slots -- the
+    # absence of those stores is NOT inheritance, it is a different
+    # record buffer.
     ttl_block = read_va(data, secs, 0x62070F9, 0x620726B - 0x62070F9)
     assert b"\x48\x89\x45\x98" not in ttl_block, "ttl block sets pack"
     assert b"\xc7\x45\xa0" not in ttl_block, "ttl block sets flags"
+    assert read_va(data, secs, 0x62071A8, 11) == bytes.fromhex(
+        "48c785d8feffff02000000"), "ttl pack store"
+    assert read_va(data, secs, 0x62071B3, 10) == bytes.fromhex(
+        "c785e0feffff00000000"), "ttl flags store"
 
     # ---- tables ----
     rows = [("target", "site", "kind", "enclosing_fde")]

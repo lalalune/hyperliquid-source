@@ -5,7 +5,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 
 from ttl_option_maps_115 import (EMPTY_MAP, INITIALIZER, INSERT_HELPER,
                                  MAP_ENTRIES, entry_for, lookup,
-                                 pack_source, ttl_reuses_preceding_block)
+                                 pack_source, ttl_has_own_pack_and_flags)
 
 
 def test_four_maps_each_hold_one_entry():
@@ -21,11 +21,14 @@ def test_keys_are_the_initializer_keys():
     assert entry_for(0x65093C0)["key"] == "user_filter"
 
 
-def test_all_entries_carry_type_22():
-    for addr in MAP_ENTRIES:
+def test_three_entries_carry_type_22_and_ttl_carries_type_2():
+    for addr in (0x6509480, 0x6509400, 0x65093C0):
         entry = entry_for(addr)
         assert entry["type"] == 22
-        assert entry["pack"] & 0xFFFFFFFF == 22
+    ttl = entry_for(0x6509440)
+    assert ttl["type"] == 2
+    assert ttl["pack"] == 0x2
+    assert ttl["verification"] == 0
 
 
 def test_only_user_filter_factory_carries_verification_3():
@@ -33,16 +36,20 @@ def test_only_user_filter_factory_carries_verification_3():
         if addr == 0x6509400:
             assert entry["verification"] == 3
             assert entry["pack"] == 0x300000016
+        elif addr == 0x6509440:
+            assert entry["verification"] == 0
         else:
             assert entry["verification"] == 1
             assert entry["pack"] == 0x100000016
 
 
-def test_only_user_filter_carries_flags_0x1200():
+def test_only_user_filter_carries_flags_0x1200_and_ttl_carries_zero():
     for addr in MAP_ENTRIES:
         entry = entry_for(addr)
         if addr == 0x65093C0:
             assert entry["flags"] == 0x1200
+        elif addr == 0x6509440:
+            assert entry["flags"] == 0x0
         else:
             assert entry["flags"] == 0x400
 
@@ -56,13 +63,13 @@ def test_insert_sites_are_the_initializer_inserts():
 
 def test_pack_sources():
     assert pack_source(0x6509480) == "got:0x458f68"
-    assert pack_source(0x6509440) == "inherited"
+    assert pack_source(0x6509440) == "immediate"
     assert pack_source(0x6509400) == "got:0x4594e8"
     assert pack_source(0x65093C0) == "got:0x458f68"
 
 
-def test_ttl_reuses_the_preceding_blocks_pack_and_flags():
-    assert ttl_reuses_preceding_block()
+def test_ttl_carries_its_own_pack_and_flags():
+    assert ttl_has_own_pack_and_flags()
 
 
 def test_lookup_matches_only_the_inserted_key():

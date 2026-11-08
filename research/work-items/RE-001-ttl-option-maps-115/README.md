@@ -19,25 +19,28 @@ The initializer 0x6206ef0 (FDE 0x6206ef0..0x620769f) builds four
 | map | key | pack (record+0xa8) | flags (record+0xb0) | insert | atexit |
 |-----|-----|-------------------|---------------------|--------|--------|
 | 0x6509480 | user_operator | 0x100000016 | 0x400 | 0x62070c2 | 0x62070f4 |
-| 0x6509440 | ttl | 0x100000016 | 0x400 | 0x620726b | 0x62072d4 |
+| 0x6509440 | ttl | 0x2 | 0x0 | 0x620726b | 0x62072d4 |
 | 0x6509400 | user_filter_factory | 0x300000016 | 0x400 | 0x620740b | 0x620743b |
 | 0x65093c0 | user_filter | 0x100000016 | 0x1200 | 0x6207575 | 0x62075be |
 
 The pack's low 32 bits are the type (22) and its high 32 bits are the
 verification: 0x100000016 = type 22 / verification 1, 0x300000016 =
-type 22 / verification 3. All four entries carry type 22; only
+type 22 / verification 3. Three entries carry type 22; only
 `user_filter_factory` carries verification 3, and only `user_filter`
 carries flags 0x1200 (the others 0x400).
 
-The `ttl` entry is the odd one: its block sets no pack and no flags of
-its own. The byte-scan in `census.py` finds no store to the record's
-pack (-0x68(%rbp)) or flags (-0x60(%rbp)) slot between the end of the
-`user_operator` block (0x62070f9) and the ttl insert (0x620726b), so the
-ttl entry reuses the preceding block's pack (from GOT slot 0x458f68)
-and flags 0x400. The ttl block instead stores a {ptr, size} name pair
-and a 2 at aux +0xc8. The pack qwords are read directly from the
-binary: GOT slot 0x458f68 holds 0x100000016, GOT slot 0x4594e8 holds
-0x300000016.
+The `ttl` entry is the odd one: the other three blocks build their
+record at -0x110(%rbp) and load the pack from a GOT slot, but the ttl
+block builds its record directly at -0x1d0(%rbp) and writes its OWN
+values into the record's +0xa8/+0xb0 slots -- `movq $0x2` at 0x62071a8
+(-0x128 = -0x1d0+0xa8) and `movl $0x0` at 0x62071b3 (-0x120 =
+-0x1d0+0xb0). Under the calibrated layout (+0xa8 = pack, +0xb0 =
+flags) the ttl entry carries pack 0x2 (type 2, verification 0) and
+flags 0x0. It calls no record init (0x5e32b10) and loads no GOT pack.
+An earlier version of this packet claimed the ttl entry inherited the
+preceding block's 0x100000016/0x400; that was wrong -- the slopbot
+review on PR #4498 caught it, and re-checking the bytes confirms the
+ttl block writes its own 2/0.
 
 A fifth map, 0x65094c0, is zeroed at the initializer entry (0x6206ef5)
 and atexit-registered, but the initializer inserts nothing into it.
@@ -55,23 +58,27 @@ neither packet records.
 
 - `census.py`: binary-wide lea census for the four maps and the four
   key literals, E8 callers of the insert helper 0x5d405b0 inside the
-  initializer, FDEs, the pack GOT slots, and the ttl-block byte-scan
-  above.
-- `verify.py`: `ALL CHECKS PASSED (42)` -- artifact digest, manifest,
+  initializer, FDEs, the pack GOT slots, and the ttl block's own
+  pack/flags stores (movq $0x2 at 0x62071a8, movl $0x0 at 0x62071b3).
+- `verify.py`: `ALL CHECKS PASSED (44)` -- artifact digest, manifest,
   excerpt regeneration, FDEs, raw-binary spot bytes, literals, lea/E8
   censuses, record packs, semantic-only records.json, and the model
   tests.
 - The model `tools/ttl_option_maps_115.py` plus
   `tests/test_ttl_option_maps_115.py` (10 tests) assert the four entries
-  and the ttl reuse finding.
+  and the ttl entry's own pack/flags.
 
 ## Open unknowns
 
 - The OptionType enum name for type 22, and the meaning of
-  verification 1 vs 3 across the four map entries.
-- The ttl block's aux +0xc8 = 2 store (present only in that block) and
+  verification 1 vs 3 across the map entries -- and what type 2 (the
+  ttl entry's pack) means against type 22.
+- The ttl record's name string at +0xc0/+0xc8 (ptr -0x100, size 3) and
   the xmm callback pairs the initializer loads from GOT slots
   0x64eda98/0x64edaa0/0x64edae8/0x64edb58.
+- Which buffer the insert ultimately stores: the ttl record is built
+  at -0x1d0 and copied by 0x5e332c0 to -0xf0, while the other three
+  records are built at -0x110 and copied to -0x1d0.
 - The fifth map 0x65094c0: which code inserts entries into it, if any.
 - The `ttl` literal's other lea sites 0x608a88c and 0x608da05 (both in
   0x6089b50..0x6091e5c).
