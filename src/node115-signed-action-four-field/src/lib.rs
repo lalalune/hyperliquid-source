@@ -251,4 +251,26 @@ mod tests {
         );
         assert!(actual.windows(6).any(|w| w == b"0x1234"));
     }
+    #[test]
+    fn matches_target_packet_case_300_variant_str8_boundary() {
+        let actual = encode_body(
+            &[0x1e],
+            ContainerMode::Map,
+            FourFieldAction {
+                tag_key: "8uoH4N=wN^v.",
+                variant: "9i,$w!U -/D8Et_eDjhVX/_CI'P\\nD:'",
+                signature_chain_id: [
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                ],
+                chain: HyperliquidChain::Local,
+                wei: 127,
+                nonce: 1,
+            },
+        );
+        let expected = unhex("1e85ac38756f48344e3d774e5e762ed92039692c24772155202d2f443845745f65446a6856582f5f434927505c6e443a27b07369676e6174757265436861696e4964b330783130303030303030303030303030303030b068797065726c6971756964436861696ea54c6f63616ca37765697fa56e6f6e636501");
+        assert_eq!(actual, expected);
+        assert_eq!(actual.len(), 121);
+    }
 }

@@ -1,8 +1,9 @@
 # node115 four-field signed-action encoder
 
-This crate independently implements the signed-action body at virtual address
+This crate implements the RE-005 action-wire signed-action body at virtual address
 `0x2406120` in the target-bound packet
-`research/work-items/RE-015-signed-action-rmp-encoders-115`. The target is node
+`research/work-items/RE-015-signed-action-rmp-encoders-115`, which supplies its
+digest-bound byte evidence. The target is node
 #115 SHA-256
 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
 
