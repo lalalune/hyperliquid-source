@@ -1,0 +1,28 @@
+function	site	kind	expected	rule
+0x57e8970	0x57e898a	imm	0x8000000000000001	tag sentinel 0x8000000000000001 picks the certificate that carries the round
+0x57e8970	0x57e89c2	slot	0x64e64b0	stake set for the round, called first
+0x57e8970	0x57e8a1d	op	dec	set word 0 against 0x8000000000000000 (sentinel minus one): tree, else ring
+0x57e8970	0x57e8a83	op	calli	tree walk: memcmp of 20 byte keys
+0x57e8970	0x57e8b28	call	0x57f54e0	ring set: binary search 0x57f54e0
+0x57e8970	0x57e8b46	call	0x57e8d40	signing digest of variant 0
+0x57e8970	0x57e8b56	slot	0x64e0ad8	signature recovery over that digest
+0x57e8970	0x57e8b6b	op	calli	recovery error box dropped through its vtable
+0x57e8970	0x57e8bbd	slot	0x64e64c0	block rules run last
+0x57e8bd0	0x57e8c51	op	calli	tree walk: memcmp
+0x57e8bd0	0x57e8cad	call	0x57f54e0	ring set: binary search
+0x57e8bd0	0x57e8cc4	call	0x57e8d40	signing digest
+0x57e8bd0	0x57e8cd6	slot	0x64e0ad8	signature recovery
+0x57e8bd0	0x57e8ceb	op	calli	recovery error box dropped
+0x2786870	0x27868c1	slot	0x64e64b0	stake set for the round
+0x2786870	0x27868f6	slot	0x64e64b8	signer check slot 0x64e64b8
+0x2786870	0x2786909	slot	0x64e64c0	block rules
+0x2786870	0x2786915	imm	0x178	success moves 0x178 bytes of block
+0x2786870	0x27869de	slot	0x64df4a0	error path frees the hash vector, 32 bytes a row
+0x2786870	0x27869e7	call	0x2780350	error path drops the certificates
+0x2786a20	0x2786a46	slot	0x64e64b0	stake set for the round
+0x2786a20	0x2786a86	imm	0x38	message box of 0x38 bytes
+0x2786a20	0x2786b04	slot	0x64e64b8	signer check slot 0x64e64b8 with variant 2
+0x2786a20	0x2786b56	call	0x595fd20	nested certificate wrapper, last
+0x2786a20	0x2786b79	imm	0xe0	success moves 0xe0 bytes of message
+0x2786a20	0x2786cf6	call	0x2448aa0	tree-held vector dropped by stepping its into-iter
+0x2786a20	0x2786d21	slot	0x64df490	box allocation failure goes to the allocation error handler
