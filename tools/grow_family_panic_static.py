@@ -60,10 +60,13 @@ map's business and stays outside.
 import ctypes
 import hashlib
 import json
+import os
+import platform
 import random
 import re
 import struct
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -75,6 +78,27 @@ ROOT = Path(__file__).resolve().parents[1]
 TARGET = ROOT / 'artifacts/node/115/hl-node'
 TARGET_DISPLAY = 'artifacts/node/115/hl-node'
 SHA = 'a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+CAPTURED_EXECUTION_ENV = 'HYPERLIQUID_ALLOW_CAPTURED_NODE_EXECUTION'
+CAPTURED_EXECUTION_VALUE = 'I_AUTHORIZE_CAPTURED_NODE_EXECUTION'
+
+
+def captured_execution_available():
+    """Whether this process has explicit opt-in on the target host ABI."""
+    return (os.environ.get(CAPTURED_EXECUTION_ENV) == CAPTURED_EXECUTION_VALUE
+            and sys.platform == 'linux'
+            and platform.machine().lower() in ('x86_64', 'amd64'))
+
+
+def _require_captured_execution_opt_in():
+    if os.environ.get(CAPTURED_EXECUTION_ENV) != CAPTURED_EXECUTION_VALUE:
+        raise PermissionError(
+            'captured node code execution is disabled; separate authorization '
+            f'is required before setting {CAPTURED_EXECUTION_ENV}='
+            f'{CAPTURED_EXECUTION_VALUE}')
+    if sys.platform != 'linux' or \
+            platform.machine().lower() not in ('x86_64', 'amd64'):
+        raise RuntimeError(
+            'the captured node differential requires a Linux x86-64 host')
 
 ZR_CIE = 0xca6ed8
 ZPLR_CIE = 0x103d604
@@ -918,6 +942,7 @@ def behavioral(data=None):
     the three bodies plus the absorb is mapped privately from the
     artifact itself, so no initialiser of the original binary runs.
     """
+    _require_captured_execution_opt_in()
     if data is None:
         data = TARGET.read_bytes()
     require(hashlib.sha256(data).hexdigest() == SHA,
@@ -1054,17 +1079,18 @@ def _classify(start, end, data):
 def generate(out_dir=None):
     data = TARGET.read_bytes()
     records = analyze(data)
+    behavior = behavioral(data)
+    classification = {role: _classify(start, end, data)
+                      for role, (start, end) in CLASSIFY.items()}
     out = Path(out_dir) if out_dir else \
         ROOT / 'research/work-items/RE-015-node115-grow-family-panic-closure'
     out.mkdir(parents=True, exist_ok=True)
     (out / 'records.json').write_text(
         json.dumps(records, indent=1, sort_keys=True) + '\n')
-    classification = {role: _classify(start, end, data)
-                      for role, (start, end) in CLASSIFY.items()}
     (out / 'classification.json').write_text(
         json.dumps(classification, indent=1, sort_keys=True) + '\n')
     (out / 'behavior.json').write_text(
-        json.dumps(behavioral(data), indent=1, sort_keys=True) + '\n')
+        json.dumps(behavior, indent=1, sort_keys=True) + '\n')
     frames_raw = subprocess.run(
         ['readelf', '--debug-dump=frames-interp', str(TARGET)],
         check=True, capture_output=True, text=True).stdout

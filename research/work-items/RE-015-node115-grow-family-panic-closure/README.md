@@ -123,7 +123,8 @@ bodies. They are outside the family, and the censuses prove it.
   fact above from the raw artifact (body extents and SHA-256s, slot
   bindings, byte pins, branch/call/slot/address censuses, LSDA
   decodings and coverage, the cluster sweep, the neighbour census);
-  `behavioral()` runs the 20,000-case native differential;
+  `behavioral()` runs the 20,000-case native differential only after
+  explicit opt-in on Linux x86-64;
   `generate()` rebuilds all evidence files.
 - `records.json` — the full `analyze()` output.
 - `classification.json` — instruction-exact inventories (calls,
@@ -141,14 +142,21 @@ bodies. They are outside the family, and the censuses prove it.
   assertions, one-byte counterfactuals (branch displacement, call
   displacement, LSDA byte, message byte, hash-body byte, relocation
   addend — each makes `analyze()` fail at the specific check it
-  attacks), the live differential against the committed
-  `behavior.json`, and a byte-exact `generate()` round-trip.
+  attacks), fail-closed checks for the native-execution opt-in, and
+  the live differential and byte-exact `generate()` round-trip when
+  native execution is explicitly enabled.
 
 Reproduce with the artifact materialised:
 
 ```
 python3 -m unittest tests.test_grow_family_panic_static -v
 ```
+
+The native differential maps and calls code bytes from the captured node.
+It is disabled by default. It runs only on Linux x86-64 when the operator
+sets `HYPERLIQUID_ALLOW_CAPTURED_NODE_EXECUTION=I_AUTHORIZE_CAPTURED_NODE_EXECUTION`
+after separate authorization. Without that opt-in, the suite runs the static
+checks and skips the two native differential tests.
 
 ## Scope
 
