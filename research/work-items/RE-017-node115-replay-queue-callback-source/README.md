@@ -6,11 +6,13 @@ The existing [receive-descriptor packet](../RE-012-snapshot-replay-receive-descr
 
 In parent FDE `0x2cb6500`, the selected non-2 branch copies `0x7f0` bytes from the source in R15 to stack `+0x2740`, then to stack `+0x1f50`. The latter copy makes the first 16 bytes at stack `+0x2720` correspond to source R15 `+0x7d0` because `0x2720 - 0x1f50 = 0x7d0`. The selected load/store at `0x2cb80d4/0x2cb80e4` copies those bytes to parent `+0x9b0`. Later `0x2cb97ef/0x2cb9805` copies parent `+0x9b0..+0x9bf` to stack `+0xdf0`, and `0x2cb9874` copies `0x718` bytes from stack `+0x730` to the nonnull allocation. Thus stack `+0xdf0` corresponds to allocation `+0x6c0`. The following 16 bytes take the parallel path through parent `+0x9c0` and callback `+0x6d0`.
 
+After the selected non-tag-2 result from helper `0x2cbbbe0`, the caller reads a 32-byte window at output `+0x388` (`stack+0xab8` relative to output `stack+0x730`). The caller copies it through stack `+0x330/+0x340`, `+0x250/+0x260`, and `+0x4f8/+0x508`. The `0x138` copy from stack `+0x3e0` to `+0x38c8`, with R15 equal to stack `+0x3210`, places that window at source R15 `+0x7d0`, tying it conditionally to the paragraph above. A result tag 2 instead branches away at `0x2cb777e..0x2cb7784`; this packet does not claim those bytes exist on that branch or establish which helper writes their contents.
+
 On the prior packet's selected adapter and original-input receive arm, Q is the first qword of those 32 callback bytes, and the probe uses Q `+0x1a0` and Q `+0x80`. The join is conditional on the selected construction/dispatch arms, normal returns of the copy slots, consistent object identity, and no intervening writes or aliases. It does not determine the value of Q, concrete segment/index/slot, checkpoint-height relation, or prove that the publication caller in the separate queue packet owns this same Q. Indirect helpers and concurrency are not reconstructed.
 
 ## Reproduce
 
-GNU objdump 2.45 and LLVM objdump 23.1.4 agree on 51 selected instructions. Python 3.14.5 verifies the target digest, FDE bounds, selected bytes and branch/call targets; synthetic offset and corruption controls check the two copy projections.
+GNU objdump 2.45 and LLVM objdump 23.1.4 agree on 81 selected instructions. Python 3.14.5 verifies the target digest, FDE bounds, selected bytes and branch/call targets; synthetic offset and corruption controls check the two copy projections.
 
 ```sh
 PYTHONPATH=tools python3 -B - <<'PY'
@@ -55,6 +57,11 @@ relocations = {slot: (info, addend) for slot, info, addend in struct.iter_unpack
     "<QQq", data[section["offset"]:section["offset"] + section["size"]]
 )}
 
+assert rip_target(0x2cb7771)==0x2cbbbe0
+assert spans[0x2cb777e]==bytes.fromhex('7509')
+assert 0x2cb777e+2+9==0x2cb7789
+assert 0xab8-0x730==0x388
+assert 0x38c8+(0x4f8-0x3e0)-0x3210==0x7d0
 assert rip_target(0x2cb7cbc)==0x64df508
 assert rip_target(0x2cb804e)==0x64df508
 assert rip_target(0x2cb97db)==0x64df508
