@@ -1,20 +1,26 @@
 # node115 UsdClassTransfer signed-action body
 
-This standalone crate implements the action-wire serialization body at VA `0x240ad50` in
-`research/work-items/RE-015-signed-action-rmp-encoders-115`. The bound target is
-node #115 SHA-256
+This standalone crate implements the action-wire serialization body at VA
+`0x240ad50` in `research/work-items/RE-015-signed-action-rmp-encoders-115`.
+The bound target is node #115 SHA-256
 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
 
 This is a bounded RE-005 action-wire implementation that uses RE-015 as its
-digest-bound byte evidence. The packet records this field order: `signatureChainId`, `hyperliquidChain`,
-`amount`, `toPerp`, `nonce`. Map mode includes the enum tag and field names;
+digest-bound byte evidence. The packet records this field order:
+`signatureChainId`, `hyperliquidChain`, `amount`, `toPerp`, `nonce`. Map mode includes the enum tag and field names;
 array mode omits those keys. The action label `UsdClassTransfer` is inferred
 from the packet. The API leaves the tag and variant values caller-supplied and
 accepts the chain ID in the target's 32-byte little-endian storage form.
 
-Tests compare complete output bytes against packet cases 0, 25, 100 and 300. Cases 100 and 300 exercise the MessagePack string lengths 256 and 255 at the str8/str16 boundary. The expected
-output SHA-256 values are `d5b390ac8e27e870b881645332abad0da9c4020d2c648f8f3d926eed98efcfaf`
-and `a0aa47b509fb8bc9c093540a483c299d2d36090fc3bc68ab246a8d62339d1326`.
+Tests compare complete output bytes against packet cases 0, 25, 100 and 300.
+Cases 100 and 300 exercise amount lengths 256 and 255 at the MessagePack
+str8/str16 boundary. The expected output SHA-256 values are:
+
+- case 0: `d5b390ac8e27e870b881645332abad0da9c4020d2c648f8f3d926eed98efcfaf`
+- case 25: `a0aa47b509fb8bc9c093540a483c299d2d36090fc3bc68ab246a8d62339d1326`
+- case 100: `0ec82d718854ccf755e704af4b9b645655d16680f6e107dcb0a3622915544a89`
+- case 300: `e43c995268a244db0a6a105595677b7ddb1284355423a33e0631299516aec49d`
+
 These vectors come from the committed static evidence packet; the captured
 binary was not executed or emulated by this crate. This crate covers only this
 body, not the remaining signed-action bodies or the signing/hash path.
