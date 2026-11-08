@@ -1,0 +1,76 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "base_commit": "0781ce04826eeefd89fe336cb8ea073be0c1de30",
+  "scope": "static captured-binary analysis and independently authored Rust execution only",
+  "checks": [
+    {
+      "command": "make doctor",
+      "result": "passed; analysis_ready true; no Ghidra available; no target execution"
+    },
+    {
+      "command": "make verify catalogue-check (base)",
+      "result": "passed",
+      "output": "python3 tools/artifacts.py verify\nSHA-256 OK: artifacts/keys/pub_key.asc\nSHA-256 OK: artifacts/node/115/hl-node\nSHA-256 OK: artifacts/node/115/hl-node.asc\nSHA-256 OK: artifacts/node/115/node_metadata.json\nSHA-256 OK: artifacts/visor/captured/hl-visor\nSHA-256 OK: artifacts/visor/captured/hl-visor.asc\nValid signature: artifacts/node/115/hl-node\nValid signature: artifacts/visor/captured/hl-visor\nPinned upstream binary, signature and public key match.\npython3 tools/verify_imports.py\nVerified 32 imported files and all pinned source repositories.\npython3 tools/verify_packets.py\nVerified 2144 evidence-packet manifests and 22809 entries (0 grandfathered rows reference no committed file).\npython3 tools/catalogue.py --check\nCatalogue and progress tables match pinned inputs.\n"
+    },
+    {
+      "command": "make reproduce",
+      "result": "passed",
+      "output": "python3 tools/reproduce.py\nSHA-256 OK: artifacts/keys/pub_key.asc\nSHA-256 OK: artifacts/node/115/hl-node\nSHA-256 OK: artifacts/node/115/hl-node.asc\nSHA-256 OK: artifacts/node/115/node_metadata.json\nSHA-256 OK: artifacts/visor/captured/hl-visor\nSHA-256 OK: artifacts/visor/captured/hl-visor.asc\nValid signature: artifacts/node/115/hl-node\nValid signature: artifacts/visor/captured/hl-visor\nPinned upstream binary, signature and public key match.\nReproduced hl-node-115 inventory.\nReproduced hl-visor inventory.\n"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests -p test_fde_extents.py -v",
+      "result": "18 passed",
+      "output": "test_counts_fde_missing_from_table (test_fde_extents.FdeExtentTests.test_counts_fde_missing_from_table) ... ok\ntest_counts_overlap_instead_of_hiding_it (test_fde_extents.FdeExtentTests.test_counts_overlap_instead_of_hiding_it) ... ok\ntest_counts_table_start_that_differs_from_fde (test_fde_extents.FdeExtentTests.test_counts_table_start_that_differs_from_fde) ... ok\ntest_decodes_extents_lsda_and_gaps (test_fde_extents.FdeExtentTests.test_decodes_extents_lsda_and_gaps) ... ok\ntest_gap_and_tail_measured_from_running_end (test_fde_extents.FdeExtentTests.test_gap_and_tail_measured_from_running_end) ... ok\ntest_nested_extents_leave_no_false_gap (test_fde_extents.FdeExtentTests.test_nested_extents_leave_no_false_gap) ... ok\ntest_rejects_64_bit_record (test_fde_extents.FdeExtentTests.test_rejects_64_bit_record) ... ok\ntest_rejects_augmentation_length_mismatch (test_fde_extents.FdeExtentTests.test_rejects_augmentation_length_mismatch) ... ok\ntest_rejects_bad_cie_pointer (test_fde_extents.FdeExtentTests.test_rejects_bad_cie_pointer) ... ok\ntest_rejects_bytes_after_terminator (test_fde_extents.FdeExtentTests.test_rejects_bytes_after_terminator) ... ok\ntest_rejects_header_frame_pointer_mismatch (test_fde_extents.FdeExtentTests.test_rejects_header_frame_pointer_mismatch) ... ok\ntest_rejects_length_four_cie (test_fde_extents.FdeExtentTests.test_rejects_length_four_cie) ... ok\ntest_rejects_missing_terminator (test_fde_extents.FdeExtentTests.test_rejects_missing_terminator) ... ok\ntest_rejects_negative_range (test_fde_extents.FdeExtentTests.test_rejects_negative_range) ... ok\ntest_rejects_table_entry_that_is_not_an_fde (test_fde_extents.FdeExtentTests.test_rejects_table_entry_that_is_not_an_fde) ... ok\ntest_rejects_unsupported_augmentation (test_fde_extents.FdeExtentTests.test_rejects_unsupported_augmentation) ... ok\ntest_rejects_unsupported_pointer_encoding (test_fde_extents.FdeExtentTests.test_rejects_unsupported_pointer_encoding) ... ok\ntest_zero_lsda_is_null_not_a_pointer (test_fde_extents.FdeExtentTests.test_zero_lsda_is_null_not_a_pointer) ... ok\n\n----------------------------------------------------------------------\nRan 18 tests in 0.007s\n\nOK\n"
+    },
+    {
+      "command": "python3 -m unittest discover -s tests -p test_elf_index.py -v",
+      "result": "4 passed",
+      "output": "test_duplicate_starts_rejected (test_elf_index.UnwindIndexOrderingTests.test_duplicate_starts_rejected) ... ok\ntest_duplicate_starts_rejected_by_generate (test_elf_index.UnwindIndexOrderingTests.test_duplicate_starts_rejected_by_generate) ... ok\ntest_strictly_increasing_starts_accepted (test_elf_index.UnwindIndexOrderingTests.test_strictly_increasing_starts_accepted) ... ok\ntest_unsorted_starts_still_rejected (test_elf_index.UnwindIndexOrderingTests.test_unsorted_starts_still_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.003s\n\nOK\n"
+    },
+    {
+      "command": "python3 analyze.py --output observed (from packet path)",
+      "result": "7 UNSAT positive proofs, 2 SAT encoded-constant controls with concrete replay, 1 rejected full-image mutation; 281 integer-oracle rows"
+    },
+    {
+      "command": "python3 -O research/work-items/RE-001-node115-scalar-reduction/analyze.py --output work/scalar-check-optimized; cmp records.json and boundaries.tsv with observed",
+      "result": "passed; both files byte-identical"
+    },
+    {
+      "command": "python3 research/work-items/RE-001-node115-scalar-reduction/disassemble.py --output research/work-items/RE-001-node115-scalar-reduction/observed",
+      "result": "166 GNU/Capstone instruction starts, bytes and mnemonics agree; two GNU FDE confirmations"
+    },
+    {
+      "command": "python3 research/work-items/RE-001-node115-scalar-reduction/build.py",
+      "result": "debug/release 281-row corpus tests, fmt, clippy -D warnings, two byte-equal clean release archives; two compiled Rust mutations fail assertions",
+      "details": "observed/build.json"
+    },
+    {
+      "command": "make doctor (final)",
+      "result": "passed; analysis_ready true; captured_binaries_executed false"
+    },
+    {
+      "command": "make verify catalogue-check (final after make catalogue)",
+      "result": "passed",
+      "output": "python3 tools/artifacts.py verify\nSHA-256 OK: artifacts/keys/pub_key.asc\nSHA-256 OK: artifacts/node/115/hl-node\nSHA-256 OK: artifacts/node/115/hl-node.asc\nSHA-256 OK: artifacts/node/115/node_metadata.json\nSHA-256 OK: artifacts/visor/captured/hl-visor\nSHA-256 OK: artifacts/visor/captured/hl-visor.asc\nValid signature: artifacts/node/115/hl-node\nValid signature: artifacts/visor/captured/hl-visor\nPinned upstream binary, signature and public key match.\npython3 tools/verify_imports.py\nVerified 32 imported files and all pinned source repositories.\npython3 tools/verify_packets.py\nVerified 2145 evidence-packet manifests and 22826 entries (0 grandfathered rows reference no committed file).\npython3 tools/catalogue.py --check\nCatalogue and progress tables match pinned inputs.\n"
+    }
+  ],
+  "not_run": [
+    {
+      "command": "make test",
+      "reason": "existing tests/test_grow_family_panic_static.py test_behavioral_differential and test_generate_round_trip invoke captured machine instructions through tools/grow_family_panic_static.py behavioral(); explicit captured-execution authorization is absent. No runner change or bypass performed."
+    },
+    {
+      "command": "hosted CI",
+      "reason": "no hosted run observed"
+    }
+  ],
+  "gates_changed": false,
+  "target_byte_comparison_claimed": false,
+  "authored_by": {
+    "provider": "OpenAI",
+    "model": "GPT-6.1SOL",
+    "client": "codex",
+    "client_version": "0.160.0",
+    "model_identity_source": "operator confirmation in session"
+  }
+}
