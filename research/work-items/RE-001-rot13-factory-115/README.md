@@ -43,7 +43,7 @@ each of the first N bytes with no alphabet check and no wraparound at 'z'
   `python3 research/work-items/RE-001-rot13-factory-115/verify.py`
   (artifact digest, manifest, excerpt regeneration byte-identical to
   fresh objdump, FDE identities, raw-binary spot bytes, literals, lea
-  census, semantic-only records, model tests). ALL CHECKS PASSED (82/82).
+  census, semantic-only records, model tests). ALL CHECKS PASSED (83/83).
 
 ## Model and tests
 
