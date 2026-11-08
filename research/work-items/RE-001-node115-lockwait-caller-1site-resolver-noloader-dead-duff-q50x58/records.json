@@ -1,0 +1,154 @@
+{
+  "base": "0781ce04826eeefd89fe336cb8ea073be0c1de30",
+  "packet": 375,
+  "slug": "RE-001-node115-lockwait-caller-1site-resolver-noloader-dead-duff-q50x58",
+  "thin_packet": true,
+  "window": {
+    "fde": "0x639ebc0..0x639ee80",
+    "bytes": 704,
+    "strict": 186,
+    "hex_file_offset": "0x639abc0",
+    "hex_sha256": "15c9a59529744606d01cc332c950a2a48d889505e26791339df4818eea169c3d"
+  },
+  "census": {
+    "calls": 5,
+    "ret": [
+      "0x639ec67"
+    ],
+    "bsr": 0,
+    "shr": 1,
+    "shr_sites": [
+      "0x639ed17"
+    ],
+    "shl": 0,
+    "endbr64": 1,
+    "canary": true,
+    "canary_lines": 2,
+    "jumps": 28,
+    "jumps_outside_window": 0,
+    "backward_jumps": [
+      "0x639ec9f",
+      "0x639ecb8",
+      "0x639ee27",
+      "0x639ee50",
+      "0x639ee69",
+      "0x639ee79"
+    ]
+  },
+  "calls": {
+    "total": 5,
+    "distinct_targets": 5,
+    "by_target": {
+      "0x6388310": 1,
+      "0x63bf680": 1,
+      "0x63f0b70": 1,
+      "0x63f0d70": 1,
+      "0x63f17b0": 1
+    },
+    "dispatcher": {
+      "0x63bf680": [
+        "0x639ecac"
+      ]
+    },
+    "plt": [
+      "0x63f0b70",
+      "0x63f0d70",
+      "0x63f17b0"
+    ],
+    "plt_calls": 3
+  },
+  "lock_wait": {
+    "site": "0x639ecac",
+    "setup": "lea -0x40(%r15),%rdi at 0x639eca8",
+    "mutex_node": "0x6712160",
+    "predecessors": [
+      "0x639ec02"
+    ],
+    "flag_set": "movb $0x1,0x67121c8 at 0x639ecb1",
+    "flag_clear": "movb $0x0,0x67121c8 at 0x639ec34",
+    "unlock": "0x639ec3e",
+    "rejoin": "0x639ec08"
+  },
+  "resolver": {
+    "callee": "0x6388310",
+    "callee_fde": "0x6388310..0x6388372",
+    "call_site": "0x639ec74",
+    "input": "mov 0x10(%r14),%rdi at 0x639ec70",
+    "first_load": "mov 0x50(%rax),%rax at 0x639ec79",
+    "second_load": "mov 0x58(%rax),%rsi at 0x639ec7d",
+    "stored": "mov %rsi,(%rsp) at 0x639ec81",
+    "loader_called": false,
+    "fixed_adjust": false,
+    "count_call": false
+  },
+  "copy_loop": {
+    "range": "0x639ed08..0x639ee27",
+    "dispatch_tail": "0x639ed08..0x639edbb",
+    "body": "0x639edc1..0x639ee27",
+    "body_entry_predecessors": [
+      "0x639ed2c",
+      "0x639ee27"
+    ],
+    "shr": "shr $0x3,%edi at 0x639ed17",
+    "and": "and $0x7,%edi at 0x639ed1e",
+    "je_tail_entries": 7,
+    "small_tail": "0x639ee30..0x639ee79",
+    "loop_entry_jb": "jb 0x639ee47 at 0x639ed02",
+    "only_cfg_entry": "fall-through from 0x639ed02",
+    "r12d_always_zero": true,
+    "fully_dead": true
+  },
+  "exit": {
+    "ret": "0x639ec67",
+    "return_mov": "mov %ebp,%eax at 0x639ec5b",
+    "ebp_reaching_defs": [
+      "0x639ec28",
+      "0x639ec9d",
+      "0x639ee4b"
+    ],
+    "killed_def": "mov %edx,%ebp at 0x639ee6b (overwritten at 0x639ee4b)",
+    "values": [
+      0,
+      1,
+      22
+    ]
+  },
+  "cited_not_claimed": [
+    "0x63bf680..0x63bf7ee (lock-wait helper body, #251; the callee of this window's single lock-wait site, NOT claimed)",
+    "0x63d9700..0x63d987b (lu-miss handler, #215; NOT called from this FDE)",
+    "0x63d9880..0x63d9a64 (bin_table_init body, #262; NOT called from this FDE)",
+    "0x634ebb0..0x634eccd (second miss handler; NOT called from this FDE)",
+    "0x6365150..0x6365660 (key resolver; NOT called from this FDE)",
+    "0x6388310..0x6388372 (#338's next FDE, index resolver; resolver internals per #373's read)",
+    "0x63bfb90..0x63bfb98 (load helper; NOT called from this window)",
+    "0x639ee80..0x639f140 (#374 window)",
+    "0x639f140..0x639f400 (#373 window)",
+    "0x6387880 (NOT clean: calls second handler at 0x63879c0; skipped)",
+    "0x63bcd20 (NOT clean: calls second handler at 0x63bd1e4 and 0x63bd2a2; skipped)",
+    "0x63c9650..0x63c9c80 (#321 window)",
+    "0x63b4b50 (2,770B larger 1-site survivor, noted only)",
+    "0x63eb870 (2,408B larger 1-site survivor, noted only)"
+  ],
+  "prior_pointer": {
+    "source": "#374 pr_body Next question",
+    "corrections": "NONE (prior_pointer_verified)"
+  },
+  "verification": {
+    "checks": [
+      "window bytes extracted from hl-node at file offset 0x639abc0, 704 B, first bytes f3 0f 1e fa, last 5 bytes e8 f0 1e 05 00; spot bytes verified: e8 b0 2b 05 00 at 0x639ebfb, c3 at 0x639ec67, e8 f0 1e 05 00 at 0x639ee7b",
+      "objdump census over window disassembly: 186 strict, 5 calls, 1 ret, bsr 0, shr 1, shl 0, endbr64 1, canary 2 lines, 28 jumps / 0 outside, 3 PLT by @plt suffix",
+      "FDE bounds: readelf --debug-dump=frames returns FDE pc=0x639ebc0..0x639ee80 directly; ends at 0x639ee80, start of #374's FDE, gap 0",
+      "resolver two-step read from disassembly: mov 0x50(%rax),%rax at 0x639ec79, mov 0x58(%rax),%rsi at 0x639ec7d, stored to (%rsp) at 0x639ec81",
+      "fully-dead Duff: r12d == 0 always at loop-entry jb 0x639ed02; CFG entry check: no jump targets 0x639ed08; preds[0x639edc1] == {0x639ed2c, 0x639ee27}, both inside the dead region",
+      "exit reaching-definitions from disassembly: ebp defs {0x639ec28, 0x639ec9d, 0x639ee4b} reach mov %ebp,%eax at 0x639ec5b; mov %edx,%ebp at 0x639ee6b overwritten at 0x639ee4b"
+    ]
+  },
+  "unknown": [
+    "entry inputs' caller-side meaning",
+    "field semantics beyond observed reads/writes (including the meaning of the *(entry rsi + 0x10) resolver input)",
+    "lock-wait helper's semantics beyond its call-site contract and the body read at 0x63bf680..0x63bf7ee",
+    "contents of the .bss mutex fields",
+    "resolver 0x6388310's semantics beyond its observed call-site contract (its table at 0x6712130+0x18 and the meaning of the 0x1000/0x1001 sentinels)"
+  ],
+  "next_question": "The FDE ending at 0x639ebc0 is UNCENSUSED \u2014 FDE 0x639e900..0x639ebc0 (704 B per .eh_frame) \u2014 the #376 scout must census it directly (strict count, calls, lock-wait sites, exit, resolver offsets). Larger 1-site disjoint survivors above the 2000B band (0x63b4b50, 2,770B; 0x63eb870, 2,408B) noted only for a possible heavier packet."
+}
