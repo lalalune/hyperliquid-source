@@ -4,7 +4,7 @@ Target Linux x86-64 node #115, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8
 
 The [loader result packet](../RE-017-loader-checkpoint-result-115/README.md) traces the checkpoint flag to a byte read at parent `+0xb20` but leaves its earlier producer unresolved. This packet identifies one conditional initialization of that location, not every writer or a proof of runtime reachability.
 
-In parent FDE `0x2cb6500`, `0x2cb7404` forms subobject `parent + 0xae8`; `0x2cb7413` passes it as the second argument to `0x2b905a0` at `0x2cb741b`. The callee preserves that argument in RBX. On the selected dispatch, subobject byte `+0x195 == 0` indexes the first signed-relative table entry at `0x607308`, selecting `0x2b905d8`. If the subsequently read dword at `0x64f01d8` is zero, execution takes the local initialization arm. The qword store at `0x2b9062d` writes `0xb` to subobject `+0x38`, hence parent `+0xb20` through `+0xb27`; on x86-64 its first byte is `0x0b`.
+In parent FDE `0x2cb6500`, `0x2cb7404` forms subobject `parent + 0xae8`; `0x2cb7413` passes it as the second argument to `0x2b905a0` at `0x2cb741b`. The callee preserves that argument in RBX. On the selected dispatch, subobject byte `+0x195 == 0` indexes the first signed-relative table entry at `0x607308`, selecting `0x2b905d8`. If the subsequently read dword at `0x64f01d8` is zero, execution takes the local initialization arm; if it is nonzero, execution calls slot `0x64df9f0` and, on normal return, rejoins that same arm at `0x2b90915`. The qword store at `0x2b9062d` writes `0xb` to subobject `+0x38`, hence parent `+0xb20` through `+0xb27`; on x86-64 its first byte is `0x0b`.
 
 The parent later reads `+0xb20` at `0x2cb758f` and saves it to `+0x2a19` at `0x2cb75cd`. It also reads the adjacent byte `+0xb21` and tests it at `0x2cb75e9`; zero branches to `0x2cb9b5c`, which calls an indirect helper and, if that call returns, reaches `ud2` at `0x2cb9ed8`. The qword initializer above writes adjacent byte `+0xb21` as zero as well as `+0xb20` as 11. Therefore, on the selected initialization arm with both bytes unchanged, the zero-neighbor branch is taken; the prior packet's later selected checkpoint helper cannot be assumed reached by simply joining the two observations. Reaching its nonzero-neighbor continuation after this initialization would require an intervening change to the neighbor, a different initialization, or a different path. Calls, alias writes, other state-table entries and resumed paths remain unexamined; no universal flag value, checkpoint height relationship, complete replay or root equality is claimed.
 
@@ -55,6 +55,8 @@ relocations = {slot: (info, addend) for slot, info, addend in struct.iter_unpack
 )}
 assert rip_target(0x2cb741b) == 0x2b905a0
 assert rip_target(0x2b905c3) == 0x607308
+assert rip_target(0x2b9090f) == 0x64df9f0
+assert rip_target(0x2b90915) == 0x2b90612
 entry = elf_bytes('.rodata',0x607308,4)
 assert 0x607308 + struct.unpack('<i',entry)[0] == 0x2b905d8
 changed = bytearray(entry)
