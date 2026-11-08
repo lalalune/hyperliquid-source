@@ -20,7 +20,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 BIN = ROOT / "work" / "hl-node-115.bin"
-DIGEST = "a6e2897cd051213d004802deca416e8e"
+DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 TEXT_VA, TEXT_OFF, TEXT_SIZE = 0x1419300, 0x1418300, 0x4FD7700
 VA_TO_OFF = 0x1000  # .text vaddr - file offset
 

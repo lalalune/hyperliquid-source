@@ -15,7 +15,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 BIN = ROOT / "work" / "hl-node-115.bin"
 ARTIFACT = "artifacts/node/115/hl-node"
-DIGEST = "a6e2897cd051213d004802deca416e8e"
+DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 
 
 def sha256_file(path: Path) -> str:
