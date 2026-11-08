@@ -70,7 +70,7 @@ CLI, startup, gossip, stream services and process orchestration.
 Block application, state roots and checkpoint handoff.
 
 - Target: node115.
-- Implementation paths: `src/node115-signed-action-four-field`.
+- Implementation paths: not yet implemented.
 - Observed diagnostic paths: 4.
 - First task: Bind begin/action/end-block call paths and state-root inputs for #115.
 
@@ -230,6 +230,6 @@ JSON-RPC routing, EVM reads and transaction forwarding.
 Static network/build configuration and naming.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-signed-action-four-field`.
 - Observed diagnostic paths: 2.
 - First task: Separate constants observed in binary data from illustrative source defaults.
