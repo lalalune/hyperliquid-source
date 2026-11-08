@@ -30,7 +30,7 @@ Private bincode wire codecs and integer encodings.
 RocksDB wrappers, block readers and database lifecycle.
 
 - Target: node115.
-- Implementation paths: `src/node115-snapshot-selectors`, `src/node115-db-hub-byte-key`, `src/node115-owned-db-open`.
+- Implementation paths: `src/node115-snapshot-selectors`, `src/node115-db-hub-byte-key`, `src/node115-owned-db-open`, `src/node115-block-handle-codec`.
 - Observed diagnostic paths: 5.
 - First task: Recover key/value schemas and snapshot versioning before replay.
 
