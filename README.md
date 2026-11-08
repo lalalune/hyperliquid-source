@@ -27,10 +27,10 @@ Observed anchors:
 ```text
 38b53e6: 78 7e              js    0x38b5466
 38b53f7: 49 f7 66 f0        mul   QWORD PTR [r14-0x10]
-38b53fb: 0f 80 ...          jo    0x38b5492
+38b53fb: 0f 80 91 00 00 00 jo    0x38b5492
 38b5401: 48 29 c3           sub   rbx, rax
 38b5404: 73 16              jae   0x38b541c
-38b5411: ff 15 ...          call  QWORD PTR [rip+...] # 0x64e4ea8
+38b5411: ff 15 91 fa c2 02 call  QWORD PTR [rip+0x2c2fa91] # 0x64e4ea8
 38b5417: 41 0f b6 4e f8     movzx ecx, BYTE PTR [r14-0x8]
 38b541c: 01 c9              add   ecx, ecx
 38b541e: 48 8d 0c 49        lea   rcx, [rcx+rcx*2]
