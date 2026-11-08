@@ -16,7 +16,11 @@ variant strings from the caller.
 
 Run `cargo test --manifest-path src/node115-signed-action-four-field/Cargo.toml`
 from the repository root. Tests compare complete output bytes for target packet
-cases 0 and 25 (including the caller's existing prefix). Their expected output
-hashes are recorded in the packet. The crate covers this body only; it does not
+cases 0, 25 and 300 (including the caller's existing prefix). Case 300 exercises
+the 32-byte variant at the MessagePack str8 boundary. The target output hashes
+are `66e40da6e6d47af0308678a7983947843f1dba6dd6c8714c7b1a4f7e26266cff`
+(case 0), `a3907d5dcd9583e867943d84037558416722f0c023621d4803e78026360975d8`
+(case 25), and `0631a23b4c33f63895fe071783dcb786c89b69d3909c75ba2cb4a600991cb098`
+(case 300). The crate covers this body only; it does not
 encode the other 16 action bodies, implement the external signing/hash path, or
 execute the captured binary. It has no external dependencies.
