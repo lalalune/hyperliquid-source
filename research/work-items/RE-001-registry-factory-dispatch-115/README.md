@@ -90,7 +90,7 @@ byte-for-byte, frames, raw-binary spot bytes, literals, lea/E8 censuses,
 the control-block vtable slots + typeinfo, the three manager typeinfo
 addresses, records regeneration, and the model tests
 (`tests/test_registry_factory_dispatch_115.py`, 28 checks). Prints
-`107/107 checks passed` on success.
+`108/108 checks passed` on success.
 
 ## Model
 
