@@ -1,0 +1,101 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "function": {
+    "start": "0x61cd510",
+    "end": "0x61cd5c4",
+    "body_sha256": "1454dfd1b600941130fbbd7f637e0b279b1dd9ad62d01146458f985428943055",
+    "fde": [
+      "0x61cd510",
+      "0x61cd5c4"
+    ],
+    "census_symbol": "rocksdb::FileChecksumGenCrc32c::GetChecksum",
+    "census_id": "node115-vendor-61cd510",
+    "census_body_sha256": "1454dfd1b600941130fbbd7f637e0b279b1dd9ad62d01146458f985428943055",
+    "census_note": "one of 2 identical bodies, e.g. _ZNK7rocksdb11Transaction7GetNameB5cxx11Ev"
+  },
+  "layout": {
+    "vtable_address_point": "0x64d7970",
+    "vtable_slot": 4,
+    "vptr": "+0x0",
+    "crc_accumulator_u32": "+0x8",
+    "checksum_string": "+0x10 (ptr +0x10, length +0x18, SSO buffer/capacity +0x20)",
+    "object_size": "0x30"
+  },
+  "semantics": "return a copy of the std::string at +0x10 (checksum_): length 0 -> empty; length 1 -> one byte; lengths 2..15 -> SSO memcpy; length > 15 -> _M_create + memcpy; NUL terminator after the last byte",
+  "abi": {
+    "return": "std::string by value (hidden return-storage pointer in rdi, this in rsi)",
+    "evidence": "mov %rdi,(%rbx) stores rdi+0x10 into the storage object (would clobber the vptr if rdi were this); length/pointer read from [rsi+0x18]/[rsi+0x10], i.e. this+0x18/+0x10; rax returns the storage pointer"
+  },
+  "sso_threshold": {
+    "cmp": "cmp $0xf,%rbp at 0x61cd542",
+    "heap_when": "length > 15"
+  },
+  "heap_alloc_call": {
+    "plt": [
+      "0x63f0e10",
+      "0x63f0e20"
+    ],
+    "plt_sha256": "048360e851367fc833e765560c963964ac5da7d161cb507c21a06cfb063461bd",
+    "target": "std::__cxx11::basic_string::_M_create(size_type&, size_type)",
+    "args": "this = out, capacity slot on the stack, old capacity 0"
+  },
+  "memcpy_call": {
+    "plt": [
+      "0x63f0a60",
+      "0x63f0a70"
+    ],
+    "plt_sha256": "5cb6bc0584c368131d3c51a083848219bfc1c4721b26619a56309d1da66af49e",
+    "target": "memcpy",
+    "args": "dst = out buffer, src = [rsi+0x10], n = length"
+  },
+  "check_values": {
+    "empty": {
+      "source_hex": "",
+      "out_hex": "",
+      "note": "length 0 stores an empty string (NUL at the SSO buffer)"
+    },
+    "one_byte": {
+      "source_hex": "61",
+      "out_hex": "61",
+      "note": "length 1 copies a single byte, then the NUL terminator"
+    },
+    "sso_max_15": {
+      "source_hex": "000102030405060708090a0b0c0d0e",
+      "out_hex": "000102030405060708090a0b0c0d0e",
+      "note": "length 15 is the longest SSO copy (no allocation)"
+    },
+    "heap_min_16": {
+      "source_hex": "000102030405060708090a0b0c0d0e0f",
+      "out_hex": "000102030405060708090a0b0c0d0e0f",
+      "note": "length 16 takes the _M_create + memcpy heap path"
+    },
+    "finalize_output_round_trip": {
+      "source_hex": "e3069283",
+      "out_hex": "e3069283",
+      "note": "the Finalize output (BE32 of 0xe3069283) copies back unchanged"
+    },
+    "name_round_trip": {
+      "source_hex": "46696c65436865636b73756d437263333263",
+      "out_hex": "46696c65436865636b73756d437263333263",
+      "note": "the 18-byte generator name (heap path) copies back unchanged"
+    },
+    "long_source_1024_ab": {
+      "source": "1024 bytes of 0xab",
+      "out_tail_hex": "abababab",
+      "note": "only the copied bytes differ from nothing; the copy is exact"
+    },
+    "end_to_end_update_finalize_get": {
+      "data_hex": "313233343536373839",
+      "crc": "0xe3069283",
+      "finalize_out_hex": "e3069283",
+      "get_out_hex": "e3069283",
+      "note": "Update accumulates extend(0, data) = 0xe3069283; Finalize appends its big-endian form; GetChecksum returns those same 4 bytes"
+    }
+  },
+  "cases": {
+    "count": 2400,
+    "seed": 20261109,
+    "mismatches_vs_reference": 0,
+    "aggregate_sha256": "44ec3a188db121774a3527ec25d9848634b00bf29a22c2b9ff020c13700d3b6c"
+  }
+}
