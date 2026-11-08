@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "task_id": "RE-001-node115-shortstring-le-u128-fold",
+  "target": {
+    "release": "node115",
+    "path": "artifacts/node/115/hl-node",
+    "size_bytes": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "function": {
+    "va_start": "0x15472b0",
+    "va_end": "0x1547309",
+    "length_bytes": 89,
+    "section": ".text",
+    "fde_va": "0xcb5d38",
+    "cie_va": "0xca6ed8",
+    "cie_augmentation": "zR (no LSDA)",
+    "lsda": null,
+    "unwind_index": 2530,
+    "body_sha256": "be131836977ceb1a02f296cfff40e71654c16b97ce774faec0f4ebe8f2728456",
+    "is_leaf": false,
+    "coordinate_system": {
+      "note": ".text VA - file offset = 0x1000",
+      "text_va": "0x1419300",
+      "text_file_off": "0x1418300"
+    }
+  },
+  "callees": [
+    {
+      "site_va": "0x15472c6",
+      "kind": "call QWORD PTR [rip+0x4f99d14]",
+      "got_slot": "0x64e0fe0",
+      "reloc": "R_X86_64_RELATIVE",
+      "addend": "0x15472b0",
+      "role": "recursive self-call fold(ptr,len,i+1); also the tail-call target of caller FDE 0x1546aa0 (len<=16, edx=0)"
+    },
+    {
+      "site_va": "0x15472f6",
+      "kind": "call QWORD PTR [rip+0x4f98324]",
+      "got_slot": "0x64df620",
+      "reloc": "R_X86_64_RELATIVE",
+      "addend": "0x1680cbf",
+      "role": "slice index-out-of-bounds panic (i > len)"
+    },
+    {
+      "site_va": "0x1547303",
+      "kind": "call QWORD PTR [rip+0x4f98567]",
+      "got_slot": "0x64df870",
+      "reloc": "R_X86_64_RELATIVE",
+      "addend": "0x1681dc0",
+      "role": "arithmetic-overflow panic (<<8 would exceed u128)"
+    }
+  ],
+  "location_descriptors": [
+    {
+      "va": "0x63fdc68",
+      "section": ".data.rel.ro",
+      "ptr_reloc": "R_X86_64_RELATIVE",
+      "file_str_va": "0x435643",
+      "file": "base/src/short_string.rs",
+      "len": 24,
+      "line": 52,
+      "col": 9,
+      "used_by": "bounds panic at 0x15472e9"
+    },
+    {
+      "va": "0x63fdc80",
+      "section": ".data.rel.ro",
+      "ptr_reloc": "R_X86_64_RELATIVE",
+      "file_str_va": "0x435643",
+      "file": "base/src/short_string.rs",
+      "len": 24,
+      "line": 52,
+      "col": 28,
+      "used_by": "overflow panic at 0x15472fc"
+    }
+  ],
+  "claim": {
+    "status": "inference-from-disassembly",
+    "label": "recursive little-endian short-string -> u128 fold over ptr[i..len]",
+    "abi": "SysV x86-64: rdi=ptr, rsi=len, rdx=index i; returns u128 in rdx:rax (rdx=high, rax=low)",
+    "recurrence": [
+      "fold(ptr,len,i) = 0                           if i == len",
+      "fold(ptr,len,i) = panic_bounds                if i > len",
+      "fold(ptr,len,i) = panic_overflow              if fold(ptr,len,i+1) >= 2**120",
+      "fold(ptr,len,i) = (fold(ptr,len,i+1) << 8) | ptr[i]   otherwise"
+    ],
+    "closed_form": "result = sum(ptr[i+k] << (8*k) for k in 0..(len-i))  (little-endian pack)",
+    "successful_domain_bytes": "0..=16 bytes from the current index; 17+ bytes take the overflow panic",
+    "overflow_test_detail": "after the recursive result, rdx (high 64) >> 56 != 0 means the pending <<8 would reach >= 2**128"
+  },
+  "open_pr_boundary": {
+    "note": "Two OPEN PRs map panic location-descriptor EDGES of related short_string.rs sites; this packet recovers the leaf's packing contract, not those edges, and does not reuse their packet names or paths.",
+    "pr_4747": "overflow jne 0x15472d3 / loc 0x15472fc (52:28); packet RE-001-node115-loc-edge-15472fc (not in this tree)",
+    "pr_4744": "caller loc-edge at 0x1546aa0 (line 29); packet RE-001-node115-loc-edge-1547205"
+  },
+  "caller_context": {
+    "note": "Context only, not claimed: FDE 0x1546aa0 does cmp rsi,0x10; jbe then xor edx,edx and tail-jumps GOT 0x64e0fe0 (this leaf) -> short strings of length <= 16 begin the fold at index 0.",
+    "caller_fde_va": "0x1546aa0"
+  },
+  "verification": {
+    "script": "verify_shortstring_le_u128_fold.py",
+    "execution_of_capture": false,
+    "identity_gate_first": true,
+    "positive_reference": "independent little-endian pack int.from_bytes(buf,'little') and closed-form sum(b<<8k)",
+    "positive_agreements": 10,
+    "positive_total": 10,
+    "grid_widths_bytes": [0, 1, 2, 8, 15, 16, 8, 16, 16, 3],
+    "grid_includes": ["0x00", "0xff", "ascending 0x01..0x10", "interior NUL"],
+    "controls": [
+      {"name": "big-endian pack", "diverges": true},
+      {"name": "drop <<8 (OR only)", "diverges": true},
+      {"name": "drop overflow check (17 bytes wrap vs panic)", "diverges": true},
+      {"name": "jne->je (static re-disassembly)", "artifact": "control-1-jne-to-je.objdump.txt"},
+      {"name": "shld->nop (static re-disassembly)", "artifact": "control-2-shld-to-nop.objdump.txt"}
+    ]
+  },
+  "tools": {
+    "objdump": "GNU binutils",
+    "readelf": "GNU binutils",
+    "python": "3.x",
+    "fde_source": "tools/fde_extents.py --release 115"
+  },
+  "gates_requested": "none",
+  "byte_window_registered": false,
+  "component_gate_claimed": false,
+  "compiler_builtins_identity_claimed": false
+}
