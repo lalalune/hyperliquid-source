@@ -21,7 +21,7 @@ Observed anchors in the retained evidence packet:
 38b5592: 0f b6 71 f8        movzx esi, BYTE PTR [rcx-0x8]
 38b55a6: 48 f7 f6           div   rsi
 38b55a9: 48 2b 41 f0        sub   rax, QWORD PTR [rcx-0x10]
-38b55b8: ff 15 ...          call  QWORD PTR [rip+...] # 0x64e4ea8
+38b55b8: ff 15 ea f8 c2 02 call  QWORD PTR [rip+0x2c2f8ea] # 0x64e4ea8
 38b55be: 31 c0              xor   eax, eax
 ```
 
