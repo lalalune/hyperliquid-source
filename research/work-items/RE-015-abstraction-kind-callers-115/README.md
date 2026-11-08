@@ -29,7 +29,13 @@ PATH="/opt/homebrew/opt/binutils/bin:$PATH" objdump -d -w --start-address=0x3f7f
 PATH="/opt/homebrew/opt/binutils/bin:$PATH" objdump -d -w --start-address=0x3fbb239 --stop-address=0x3fbb23e artifacts/node/115/hl-node
 ```
 
-The producer authenticates the complete target digest, scans all of `.text` for `E8 rel32` destinations matching the five entries, and records exact call bytes and FDE ranges. It executes no captured code and makes no network request. Output is deterministic.
+The producer authenticates the complete target digest, scans all of `.text` for `E8 rel32` destinations matching the five entries, and records exact call bytes and FDE ranges. It executes no captured code and makes no network request. Output is deterministic. To check decoded instruction boundaries over the whole file-backed `.text` section, the following full-section disassembly returns exactly the seven sites listed below (GNU objdump 2.47.20260726):
+
+```sh
+PATH="/opt/homebrew/opt/binutils/bin:$PATH" objdump -d -w --section=.text artifacts/node/115/hl-node | rg -i 'call[q]?\s+.*(23c65f0|3bdd720|4d6b5d0|23c6720|3bdd5e0)(\s|$)'
+```
+
+The byte scan is exhaustive for direct near calls encoded as `E8 rel32`; the disassembly independently confirms that every matching site decodes as a call instruction. Neither method counts indirect calls or tail jumps.
 
 ## Evidence and results
 
