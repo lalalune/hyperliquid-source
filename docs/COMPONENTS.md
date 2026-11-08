@@ -110,7 +110,7 @@ Trading orchestration, block hooks, deployment and ledger updates.
 Book storage, price/time priority and order lifecycle.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-tif-name-codec`.
 - Observed diagnostic paths: 6.
 - First task: Recover matching and cancel/modify transitions with exact rounding and overflow behavior.
 
