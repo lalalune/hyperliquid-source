@@ -68,7 +68,8 @@ def instructions(output):
     return found
 
 
-def extract(binary=BINARY, objdump='objdump'):
+def extract(binary=BINARY, objdump=None):
+    objdump = objdump or os.environ.get('OBJDUMP', 'objdump')
     data = Path(binary).read_bytes()
     digest = hashlib.sha256(data).hexdigest()
     if digest != TARGET_SHA256:
@@ -119,6 +120,10 @@ def extract(binary=BINARY, objdump='objdump'):
                 target_address = address + 6 + struct.unpack('<i', raw[2:])[0]
             else:
                 target_address = address + len(raw) + struct.unpack('<b', raw[1:])[0]
+            rdx_producer = next(arg[1] for arg in item['args'] if arg[0] == 'rdx')
+            call_path_address = target_address if relation == 'taken' else address + len(raw)
+            if call_path_address != rdx_producer:
+                raise ValueError(f'{site:#x}: branch path does not reach the recorded argument setup')
             row['branch'] = {'address': address, 'bytes': expected_bytes,
                              'target': target_address,
                              'call_path': relation}

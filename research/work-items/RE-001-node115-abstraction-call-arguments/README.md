@@ -8,10 +8,11 @@
 
 ## Reproduce
 
-With the pinned artifact materialized, Python 3.10+ and GNU objdump on `PATH`:
+With the pinned artifact materialized, Python 3.10+ and GNU objdump available (set `OBJDUMP` if it is not named `objdump` on `PATH`):
 
 ```sh
-export PATH="/opt/homebrew/opt/binutils/bin:$PATH"
+export OBJDUMP="${OBJDUMP:-objdump}"
+"$OBJDUMP" --version
 python3 research/work-items/RE-001-node115-abstraction-call-arguments/collect.py
 python3 -m unittest tests.test_re001_node115_abstraction_call_arguments
 python3 research/work-items/RE-001-node115-abstraction-call-arguments/verify.py
