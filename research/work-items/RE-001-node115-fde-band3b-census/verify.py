@@ -14,8 +14,8 @@ BAND_START = 0x3A40000
 BAND_END = 0x3A80000
 
 
-def run(args):
-    result = subprocess.run(args, check=False, text=True, capture_output=True)
+def run(args, cwd=None):
+    result = subprocess.run(args, check=False, text=True, capture_output=True, cwd=cwd)
     if result.returncode:
         raise SystemExit(f"command failed ({result.returncode}): {' '.join(args)}\n{result.stderr}")
     return result.stdout
@@ -63,7 +63,7 @@ def fde_rows():
 
 
 def instruction_count(start, end):
-    text = run(["objdump", "-d", f"--start-address=0x{start:x}", f"--stop-address=0x{end:x}", str(TARGET)])
+    text = run(["objdump", "-d", f"--start-address=0x{start:x}", f"--stop-address=0x{end:x}", str(TARGET.relative_to(ROOT))], cwd=ROOT)
     total = 0
     for line in text.splitlines():
         address, separator, rest = line.strip().partition(":")
