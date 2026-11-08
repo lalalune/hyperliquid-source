@@ -150,7 +150,7 @@ Fee tiers, volume accounting and rebates.
 Vault and subaccount accounting and permissions.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-vault-identity-guards`.
 - Observed diagnostic paths: 2.
 - First task: Recover share accounting, transfer restrictions and liquidation interaction.
 
