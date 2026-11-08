@@ -35,13 +35,17 @@ The recorded edge is selected when the `jne` predicate (`ZF = 0`) is **true**.
 
 ## Argument flow
 
+**Correction (2026-11-08):** the first submission claimed the descriptor reaches the indirect call at `0x1563508` as argument 4. That claim is withdrawn — slopbot's review was right. Between the location load and that call, `rcx` is overwritten at `0x15634f4` by `lea rcx, [rip + 0x4e9b015]` (`488d0d15b0e904`), which reaches descriptor `0x63fe510` — a RELATIVE relocation to the same string `base/src/u.rs`, raw fields length 13 / line 518 / column 17. So the call at `0x1563508` takes the **:518** descriptor as argument 4, not the :512 descriptor.
 
-The LEA writes `rcx`. The trace follows the unchanged value to the call. At the call, `rcx` is SysV x86-64 integer argument register 4. The signed displacement 83351050 added to `0x156350e` gives the relocation slot `0x64e0b18`. Its symbol-zero RELATIVE addend is `0x150b310`. The target's FDE at `0x104b978` describes `[0x150b310, 0x150baaf)`.
+The correct consumer is the direct call immediately after the location load. The LEA writes `rcx`; `rdi`/`rsi`/`rdx` are set up at `0x1563440`/`0x1563448`/`0x1563450`, and `rcx` still holds the :512 descriptor when the call executes. At the call, `rcx` is SysV x86-64 integer argument register 4. The call is a direct `E8` with rel32 `-390669` (`e8f308faff`), target `0x1503d50`. The target's FDE at `0x104b394` describes `[0x1503d50, 0x15040ae)`.
 
 
 | Instruction VA | Bytes | Decoded instruction |
 | --- | --- | --- |
-| `0x1563508` | `ff150ad6f704` | `call qword ptr [rip + 0x4f7d60a]` |
+| `0x1563440` | `488dbc24b0010000` | `lea rdi, [rsp + 0x1b0]` |
+| `0x1563448` | `488bb42488000000` | `mov rsi, qword ptr [rsp + 0x88]` |
+| `0x1563450` | `488b942410010000` | `mov rdx, qword ptr [rsp + 0x110]` |
+| `0x1563458` | `e8f308faff` | `call 0x1503d50` |
 
 
 ## Reproduce
@@ -57,7 +61,7 @@ printf '%s  %s\n' a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b53
 
 readelf -rW "$target" | grep -i '0*63fe4e0 '
 
-readelf -rW "$target" | grep -i '0*64e0b18 '
+readelf -rW "$target" | grep -i '0*63fe510 '
 
 readelf --debug-dump=frames "$target"
 
@@ -75,7 +79,9 @@ Local extraction used Python 3.12, Capstone 5.0.7 and pyelftools on this VM. The
 ## Interpretation and limits
 
 
-The layout is consistent with Rust source-location metadata for line 512, column 15. The observation establishes the value in an incoming register on this path. Runtime reachability and full callee behavior remain unresolved. Next, trace the incoming register through the callee to determine which record fields it consumes. No captured code was executed and no reconstruction gate or byte denominator is claimed.
+The layout is consistent with Rust source-location metadata for line 512, column 15. The observation establishes the value in an incoming register on this path. Runtime reachability and full callee behavior remain unresolved. Next, trace the descriptor through the callee `0x1503d50` to determine which record fields it consumes. No captured code was executed and no reconstruction gate or byte denominator is claimed.
+
+Correction note: the original submission named the indirect call at `0x1563508` as the consumer; that was wrong (see Argument flow) and is corrected above. The edge and the descriptor decode are unchanged.
 
 Overlap note: the guard instruction and the lea site also appear in the raw disassembly export of merged RE-014-host-ip-gates-115 (`owners.gnu.txt`), which pins a different edge in the same region (`base/u.rs:457`); the descriptor binding for line 512 is not recorded there.
 
