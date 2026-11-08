@@ -142,6 +142,15 @@ def main() -> None:
          va_bytes(0x6025EE9, 4) == bytes.fromhex("0fb64648")),
         ("get-current-time reads +0x30",
          va_bytes(0x6025EF1, 4) == bytes.fromhex("488b4630")),
+        ("get-current-time magic divide by 1e6",
+         va_bytes(0x6025F92, 10)
+         == bytes.fromhex("48b8db34b6d782de1b43")),
+        ("get-current-time offset read +0x40",
+         va_bytes(0x6025F9C, 4) == bytes.fromhex("488b4d40")),
+        ("get-current-time offset add to out slot",
+         va_bytes(0x6025FAE, 4) == bytes.fromhex("49011424")),
+        ("get-current-time skips add on error Status",
+         va_bytes(0x6025F8C, 6) == bytes.fromhex("0f8571ffffff")),
     ]
     for name, ok in spot:
         check(name, ok)

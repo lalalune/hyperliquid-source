@@ -124,6 +124,30 @@ def test_get_current_time_emulated_vs_delegated():
     assert opts.get_current_time() == 9_999
 
 
+def test_get_current_time_adds_offset_in_seconds():
+    # The 0x6025f92..0x6025fae tail adds +0x40/1,000,000 to the output
+    # on both the emulated and the delegated path.
+    wrapped = FakeClock(current_time=9_999)
+    opts = EmulatedClockOptions(wrapped, stored_time=1_337_038_800,
+                                time_elapse_only_sleep=True)
+    opts.sleep_for_microseconds(2_500_000)  # +2 s, mock set by setter
+    assert opts.get_current_time() == 1_337_038_802
+    # Delegated path, fresh clock: +1 s from the offset.
+    wrapped2 = FakeClock(current_time=9_999)
+    opts2 = EmulatedClockOptions(wrapped2, mock_sleep=True)
+    opts2.sleep_for_microseconds(1_500_000)
+    opts2.set_option("mock_sleep", "false")
+    assert opts2.get_current_time() == 10_000
+
+
+def test_get_current_time_sub_second_offset_adds_nothing():
+    wrapped = FakeClock(current_time=9_999)
+    opts = EmulatedClockOptions(wrapped, stored_time=1_337_038_800,
+                                time_elapse_only_sleep=True)
+    opts.sleep_for_microseconds(999_999)
+    assert opts.get_current_time() == 1_337_038_800
+
+
 def test_now_micros_nanos_use_offset():
     wrapped = FakeClock(micros=1_000_000, nanos=1_000_000_000)
     opts = EmulatedClockOptions(wrapped, mock_sleep=True)

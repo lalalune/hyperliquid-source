@@ -228,10 +228,13 @@ RECORDS = {
                 "stored emulated time at object+0x30 into the out "
                 "slot and returns kOk; otherwise delegates to the "
                 "wrapped clock's slot 24 with the same out slots. "
-                "The ctor seeds +0x30 from the wrapped clock's slot "
-                "24 (pinned by merged #3948); the preloaded constant "
-                "0x4fb647d0 is the fallback when the getter does not "
-                "write"
+                "Then, when the Status is kOk, BOTH paths add the "
+                "+0x40 offset converted from microseconds to whole "
+                "seconds (signed division by 1,000,000 via the "
+                "magic-multiply idiom at 0x6025f92..0x6025fae, magic "
+                "0x431bde82d7b634db); the add is skipped on an error "
+                "Status (jne 0x6025f03). The ctor seeds +0x30 from "
+                "the wrapped clock's slot 24 (pinned by merged #3948)"
             ),
         },
     ],

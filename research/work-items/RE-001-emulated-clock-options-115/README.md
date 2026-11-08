@@ -83,9 +83,12 @@ flag is set it delegates with no offset advance.
 `GetCurrentTime` (slot 24, `0x6025eb0..0x6025feb`) returns the stored
 emulated time at `+0x30` when `time_elapse_only_sleep` (`+0x48`) is
 set, else delegates to the wrapped clock's slot 24 with the same out
-slots. The ctor seeds `+0x30` from the wrapped clock's slot 24
-(pinned by merged #3948); the preloaded constant `0x4fb647d0` is the
-fallback when the getter does not write.
+slots; then, when the Status is `kOk`, **both** paths add the `+0x40`
+offset converted from microseconds to whole seconds (signed division
+by 1,000,000 via the magic-multiply idiom at `0x6025f92..0x6025fae`,
+magic `0x431bde82d7b634db`). The offset-add is skipped on an error
+Status (`jne 0x6025f03`). The ctor seeds `+0x30` from the wrapped
+clock's slot 24 (pinned by merged #3948).
 
 Object layout (fields this packet pins; the rest is merged #3948):
 
@@ -116,11 +119,11 @@ invokers, the dtors and the wrapper ctor are cited, not repeated.
 
 ## Verification
 
-`verify.py` ALL CHECKS PASSED (66/66: artifact digest, manifest,
+`verify.py` ALL CHECKS PASSED (70/70: artifact digest, manifest,
 excerpt regeneration, FDEs, raw-binary spot bytes, lea/E8 censuses,
 Emulated vtable slots 19/20/23/24, manager typeinfo names,
 semantic-only records, model tests); `pytest` on
-`tests/test_emulated_clock_options_115.py` passes (11 tests).
+`tests/test_emulated_clock_options_115.py` passes (13 tests).
 
 ## Open unknowns
 

@@ -13,7 +13,11 @@ is set. GetCurrentTime (slot 24) returns the stored time at +0x30
 while time_elapse_only_sleep is set, else delegates to the wrapped
 clock. NowMicros/NowNanos return the wrapped clock's value plus the
 +0x40 offset (x1000 for nanos) when the flag is clear, else just the
-offset.
+offset. GetCurrentTime returns the stored +0x30 time (emulating) or
+the wrapped clock's value (delegating), plus the +0x40 offset
+converted from microseconds to whole seconds (division by 1,000,000)
+when the Status is kOk -- the binary's 0x6025f92..0x6025fae tail
+(magic-multiply idiom) applies to both paths.
 """
 
 
@@ -34,6 +38,16 @@ def parse_bool(text):
 def format_bool(flag):
     """Mirror of the bool getters 0x6025e50 / 0x6026100."""
     return "true" if flag else "false"
+
+
+def _div_1e6(value):
+    """Signed division by 1,000,000 truncating toward zero.
+
+    Mirrors the magic-multiply idiom at 0x6025f92..0x6025fab
+    (magic 0x431bde82d7b634db, sar 0x12, sign correction).
+    """
+    q = abs(value) // 1_000_000
+    return -q if value < 0 else q
 
 
 class EmulatedClockOptions:
@@ -84,10 +98,21 @@ class EmulatedClockOptions:
             self.real_sleeps.append(duration_us)
 
     def get_current_time(self):
-        """Mirror of slot 24 (0x6025eb0)."""
+        """Mirror of slot 24 (0x6025eb0).
+
+        Base value: the stored +0x30 time while emulating, else the
+        wrapped clock's value. Both paths then add the +0x40 offset
+        converted from microseconds to whole seconds (signed division
+        by 1,000,000, truncating toward zero) when the Status is kOk
+        -- the binary skips the add on an error Status (jne 0x6025f03).
+        The model assumes kOk throughout (the wrapped clock never
+        fails here).
+        """
         if self.time_elapse_only_sleep:
-            return self.stored_time
-        return self.wrapped.get_current_time()
+            base = self.stored_time
+        else:
+            base = self.wrapped.get_current_time()
+        return base + _div_1e6(self.offset_us)
 
     def now_micros(self):
         """Mirror of slot 19 (0x60259e0)."""
