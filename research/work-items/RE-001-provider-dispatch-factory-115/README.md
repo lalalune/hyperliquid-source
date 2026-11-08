@@ -49,7 +49,7 @@ E8 caller and no lea site: it is reached only through vtable slot 21.
 
 ## Verification
 
-`verify.py` -- 159 checks, ALL CHECKS PASSED (artifact digest, manifest,
+`verify.py` -- 160 checks, ALL CHECKS PASSED (artifact digest, manifest,
 excerpt regeneration, FDEs, 38 raw-binary spot bytes, literals, lea
 census, E8 caller census, vtable slots + typeinfo names, GOT slots,
 semantic-only records, model tests). `pytest
