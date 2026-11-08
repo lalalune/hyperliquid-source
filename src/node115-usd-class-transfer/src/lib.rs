@@ -221,4 +221,52 @@ mod tests {
         assert_eq!(actual, expected);
         assert_eq!(actual.len(), 385);
     }
+    #[test]
+    fn matches_target_packet_case_100_messagepack_string_boundary() {
+        let amount = unhex("2dd5f971f9e6c57ca5f0eecc7f31e114155a5c9001d77feb6e70cc7a3fd2420b2819b3966c03b3a261f835b92d396f997add41204082797af93439e009703a64623fabda4a3355a461e64a21447d91c0182083509a901c36fd7f58ced904ba5b6f4827e61741c1d941715bcdb169074033a08edbbb2bab114040eb7d34cc972c2129098bcb398d73fdabed07bd893a104c8602c790107ca94d1dfafd8f6322dcf7d6bb084ff06ec4d36be43838c50a3565f7374c92d66f8b4e961e6642ecd78b7891cf0a4f0cf2e10f6c5f2838e3320d035574d02af3bbfe84651adcf17b0ea115131da0486dc6a51d1add8b2cee82563b9f24dd4729cb4080e08bacae32cafd");
+        let actual = encode_body(
+            &[0x46, 0x9e],
+            ContainerMode::Map,
+            UsdClassTransferAction {
+                tag_key: "0",
+                variant: "vO\"9>",
+                signature_chain_id: [
+                    0x86, 0xf3, 0x70, 0xa0, 0x3d, 0xa3, 0x5f, 0xe1, 0xc1, 0xd1, 0x3c, 0x1a, 0xfe,
+                    0xf7, 0x54, 0x6f, 0x0f, 0x5b, 0x36, 0x3b, 0xd7, 0xd6, 0x32, 0xf5, 0xcb, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                ],
+                chain: HyperliquidChain::Sandbox,
+                amount: &amount,
+                to_perp: false,
+                nonce: 41833,
+            },
+        );
+        let expected = unhex("469e86a130a5764f22393eb07369676e6174757265436861696e4964d93430786362663533326436643733623336356230663666353466376665316133636431633165313566613333646130373066333836b068797065726c6971756964436861696ea753616e64626f78a6616d6f756e74da01002dd5f971f9e6c57ca5f0eecc7f31e114155a5c9001d77feb6e70cc7a3fd2420b2819b3966c03b3a261f835b92d396f997add41204082797af93439e009703a64623fabda4a3355a461e64a21447d91c0182083509a901c36fd7f58ced904ba5b6f4827e61741c1d941715bcdb169074033a08edbbb2bab114040eb7d34cc972c2129098bcb398d73fdabed07bd893a104c8602c790107ca94d1dfafd8f6322dcf7d6bb084ff06ec4d36be43838c50a3565f7374c92d66f8b4e961e6642ecd78b7891cf0a4f0cf2e10f6c5f2838e3320d035574d02af3bbfe84651adcf17b0ea115131da0486dc6a51d1add8b2cee82563b9f24dd4729cb4080e08bacae32cafda6746f50657270c2a56e6f6e6365cda369");
+        assert_eq!(actual, expected);
+        assert_eq!(actual.len(), 390);
+    }
+    #[test]
+    fn matches_target_packet_case_300_messagepack_string_boundary() {
+        let amount = unhex("66472102c0b1f81ab073618ec484898192c2c13b6f05c4957e471a23fdf9d68111dd19ecbb6d769ab8df41f4e20704516dc94fc612a52d8c76c9e06e0ccf50f879bc7a0e1f8ad106d6ed89102286e6ee06c5117c693fd489f23c079ac5b0300b569b055436897e5ed3f9745848433c505f960a212bd85cd8be93743166c69fe445218eb63608e86af7de0be7245c245a38e18c7a5824402205b15e8a0b67bdeeeef571ac22deabf5857897c5812554d1d207a5009a26ab6c47f0c5c1e135bad48c292ac25e2f3d5be637d23f5e0cf7903bc91c0273691a98cf1897d6fe4f7cc7d28c16e5a27608f831c13ff64a321382848054f9520a89fdb0a84f97b4c8b3");
+        let actual = encode_body(
+            &[],
+            ContainerMode::Map,
+            UsdClassTransferAction {
+                tag_key: "1+NQ_QE",
+                variant: "]$Nl6YSL",
+                signature_chain_id: [
+                    0xbf, 0x54, 0xdb, 0xa5, 0x4c, 0x59, 0x2d, 0xe9, 0x76, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                ],
+                chain: HyperliquidChain::Mainnet,
+                amount: &amount,
+                to_perp: true,
+                nonce: 2383902,
+            },
+        );
+        let expected = unhex("86a7312b4e515f5145a85d244e6c3659534cb07369676e6174757265436861696e4964b43078373665393264353934636135646235346266b068797065726c6971756964436861696ea74d61696e6e6574a6616d6f756e74d9ff66472102c0b1f81ab073618ec484898192c2c13b6f05c4957e471a23fdf9d68111dd19ecbb6d769ab8df41f4e20704516dc94fc612a52d8c76c9e06e0ccf50f879bc7a0e1f8ad106d6ed89102286e6ee06c5117c693fd489f23c079ac5b0300b569b055436897e5ed3f9745848433c505f960a212bd85cd8be93743166c69fe445218eb63608e86af7de0be7245c245a38e18c7a5824402205b15e8a0b67bdeeeef571ac22deabf5857897c5812554d1d207a5009a26ab6c47f0c5c1e135bad48c292ac25e2f3d5be637d23f5e0cf7903bc91c0273691a98cf1897d6fe4f7cc7d28c16e5a27608f831c13ff64a321382848054f9520a89fdb0a84f97b4c8b3a6746f50657270c3a56e6f6e6365ce0024601e");
+        assert_eq!(actual, expected);
+        assert_eq!(actual.len(), 364);
+    }
 }
