@@ -190,7 +190,7 @@ Stake, validator membership and jailing.
 DEX metadata and clearinghouse registry.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-hip3-disabled-state-codec`.
 - Observed diagnostic paths: 3.
 - First task: Recover identifiers, lookup rules and deployment ownership checks.
 
