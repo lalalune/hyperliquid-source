@@ -6,7 +6,7 @@ The [loader result packet](../RE-017-loader-checkpoint-result-115/README.md) tra
 
 In parent FDE `0x2cb6500`, `0x2cb7404` forms subobject `parent + 0xae8`; `0x2cb7413` passes it as the second argument to `0x2b905a0` at `0x2cb741b`. The callee preserves that argument in RBX. On the selected dispatch, subobject byte `+0x195 == 0` indexes the first signed-relative table entry at `0x607308`, selecting `0x2b905d8`. If the subsequently read dword at `0x64f01d8` is zero, execution takes the local initialization arm. The qword store at `0x2b9062d` writes `0xb` to subobject `+0x38`, hence parent `+0xb20` through `+0xb27`; on x86-64 its first byte is `0x0b`.
 
-The parent later reads `+0xb20` at `0x2cb758f` and saves it to `+0x2a19` at `0x2cb75cd`; the earlier packet connects that saved byte to a checkpoint helper whose selected result is the predicate byte != 2. **Only if** the described initializer executes, reaches that later read, and no intervening operation changes the byte, the helper's selected predicate is true. Calls, alias writes, other state-table entries and resumed paths are not proven absent; no universal flag value, checkpoint height relationship, complete replay or root equality is claimed.
+The parent later reads `+0xb20` at `0x2cb758f` and saves it to `+0x2a19` at `0x2cb75cd`. It also reads the adjacent byte `+0xb21` and tests it at `0x2cb75e9`; zero branches to `0x2cb9b5c`, which calls an indirect helper and, if that call returns, reaches `ud2` at `0x2cb9ed8`. The qword initializer above writes adjacent byte `+0xb21` as zero as well as `+0xb20` as 11. Therefore, on the selected initialization arm with both bytes unchanged, the zero-neighbor branch is taken; the prior packet's later selected checkpoint helper cannot be assumed reached by simply joining the two observations. Reaching its nonzero-neighbor continuation after this initialization would require an intervening change to the neighbor, a different initialization, or a different path. Calls, alias writes, other state-table entries and resumed paths remain unexamined; no universal flag value, checkpoint height relationship, complete replay or root equality is claimed.
 
 ## Reproduce
 
@@ -61,7 +61,9 @@ changed = bytearray(entry)
 changed[0] ^= 1
 assert 0x607308 + struct.unpack('<i',changed)[0] != 0x2b905d8
 assert 0xae8 + 0x38 == 0xb20
-assert (0x0b).to_bytes(8,'little')[0] != 2
+assert (0x0b).to_bytes(8,'little')[:2] == bytes((11,0))
+assert rip_target(0x2cb75f1) == 0x2cb9b5c
+assert rip_target(0x2cb9b77) == 0x2cb9ed8
 print(f"{len(spans)} authenticated instruction spans and selected edges match")
 PY
 ```
