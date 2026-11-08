@@ -230,6 +230,6 @@ JSON-RPC routing, EVM reads and transaction forwarding.
 Static network/build configuration and naming.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-usd-class-transfer`.
 - Observed diagnostic paths: 2.
 - First task: Separate constants observed in binary data from illustrative source defaults.
