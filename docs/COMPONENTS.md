@@ -10,7 +10,7 @@ The authenticated inventory contains 180 allowlisted source-path observations. D
 Time, logging, wallets, collections and shared runtime utilities.
 
 - Target: node115.
-- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-nonce-text`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`, `src/node115-host-ip-gates`, `src/node115-packed-millis`, `src/node115-utf8-admission`, `src/node115-reverse-path-components`, `src/node115-rng-buffer-selection`, `src/node115-time-producer`, `src/node115-date-time-display`, `src/node115-owned-cstring`, `src/node115-iso-week-date`, `src/node115-timespec-difference`, `src/node115-command-construction`, `src/node115-elf-build-id`, `src/node115-u64-key-hash`, `src/node115-limb-add-family`, `src/node115-wrapped-u64-search`, `src/node115-sponge-permutation`.
+- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-nonce-text`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`, `src/node115-host-ip-gates`, `src/node115-packed-millis`, `src/node115-utf8-admission`, `src/node115-reverse-path-components`, `src/node115-rng-buffer-selection`, `src/node115-time-producer`, `src/node115-date-time-display`, `src/node115-owned-cstring`, `src/node115-iso-week-date`, `src/node115-timespec-difference`, `src/node115-command-construction`, `src/node115-elf-build-id`, `src/node115-u64-key-hash`, `src/node115-limb-add-family`, `src/node115-wrapped-u64-search`, `src/node115-sponge-permutation`, `src/node115-stable-record-insertion`.
 - Observed diagnostic paths: 33.
 - First task: Map time/quantity conversion helpers; distinguish standard-library code from private helpers.
 
