@@ -180,7 +180,7 @@ EVM state, database adapters, transaction execution and hashing.
 Stake, validator membership and jailing.
 
 - Target: node115.
-- Implementation paths: `src/node115-staking-error-text`.
+- Implementation paths: `src/node115-staking-error-text`, `src/node115-validator-epoch-ring`.
 - Observed diagnostic paths: 2.
 - First task: Recover stake accounting and epoch transitions separately for #115.
 
