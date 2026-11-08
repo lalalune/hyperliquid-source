@@ -1,0 +1,180 @@
+{
+  "census": {
+    "encodings": "E8/E9 rel32 to the observer; FF15/FF25 rip-relative through the slot, in .text; R_X86_64_RELATIVE addends",
+    "observer_direct_calls": 0,
+    "observer_relative_relocations": [
+      "0x64e1010"
+    ],
+    "observer_slot_calls": 68,
+    "observer_slot_jumps": 0,
+    "recorder_site_va": "0x5b2a24c",
+    "slot_call_sites": [
+      "0x154953b",
+      "0x15ed5e9",
+      "0x15ed63a",
+      "0x2af7792",
+      "0x2bb38a6",
+      "0x2bdf803",
+      "0x2be0607",
+      "0x2be1055",
+      "0x2be1817",
+      "0x2be1da7",
+      "0x2be6b85",
+      "0x2be7997",
+      "0x2be8315",
+      "0x2c7242c",
+      "0x2c7290f",
+      "0x2c7e42b",
+      "0x422a558",
+      "0x422ab41",
+      "0x422c0de",
+      "0x422c6d8",
+      "0x422cea1",
+      "0x422d37b",
+      "0x422da38",
+      "0x422df1b",
+      "0x478079b",
+      "0x47858c4",
+      "0x4dff810",
+      "0x51c9b84",
+      "0x51c9c12",
+      "0x5483df9",
+      "0x5484519",
+      "0x548713c",
+      "0x548760f",
+      "0x548a27c",
+      "0x548a74f",
+      "0x548d9a6",
+      "0x548dbb6",
+      "0x54aa9bc",
+      "0x54ab41c",
+      "0x54abc6f",
+      "0x54ac1ff",
+      "0x54b156c",
+      "0x54b23df",
+      "0x54b37af",
+      "0x54b73dc",
+      "0x54b7e3c",
+      "0x54b860c",
+      "0x54b8b5c",
+      "0x54bdba9",
+      "0x54bea1c",
+      "0x54bfdbc",
+      "0x56176db",
+      "0x5617afb",
+      "0x5617f1b",
+      "0x561832b",
+      "0x5647b98",
+      "0x5648212",
+      "0x5648878",
+      "0x5648ea2",
+      "0x56494d8",
+      "0x564a290",
+      "0x57e765a",
+      "0x595dc04",
+      "0x5a34daf",
+      "0x5a6e8f8",
+      "0x5a6edbe",
+      "0x5b299ec",
+      "0x5b2a24c"
+    ]
+  },
+  "component": "abci",
+  "gates_changed": false,
+  "observer": {
+    "count_multiplier": {
+      "factor": 50,
+      "flag": "byte [rbx+0x25c] == 1",
+      "overflow_jump_va": "0x1548a0b"
+    },
+    "count_zero": {
+      "jump_to_epilogue_va": "0x154866c",
+      "test_va": "0x1547541"
+    },
+    "daily": {
+      "calls": "+0x208 += 1 (saturating)",
+      "count": "+0x200 += count (saturating)",
+      "samples": "deque cap +0x40, buf +0x48, head +0x50, len +0x58: push_front(value), grow via slot 0x64e0ea0 -> 0x152e190 when full, then len = min(len, [+0x1f8])",
+      "sum": "+0x210 += w; an infinite sum is stored as 2^64"
+    },
+    "entry": {
+      "rdi": "state (rbx)",
+      "rdx": "Location: not read or saved before the call at 0x1547559",
+      "rsi": "count (r14)",
+      "xmm0": "value (rsp+0x10)"
+    },
+    "fde": {
+      "end_va": "0x1548ba3",
+      "start_va": "0x1547530"
+    },
+    "lifetime": {
+      "calls": "+0x80 += 1 (saturating)",
+      "count": "+0x78 += count (saturating)",
+      "max": "+0x90 = maxsd(+0x90, value)",
+      "samples": "vector cap +0x60, buf +0x68, len +0x70: push(value) only while len < [+0x1f8]; grow via slot 0x64e0080 -> 0x14ca9a0",
+      "sum": "+0x88 += w; an infinite sum is stored as 2^64"
+    },
+    "rollover": {
+      "compare": "dword [rbx+0x240] vs tuple dword +0",
+      "on_difference": [
+        "zero 24 bytes at +0x200 (count, calls, sum)",
+        "deque length +0x58 = 0",
+        "deque head +0x50 = 0",
+        "store tuple at +0x240 (dword 0), +0x244 (bytes 0..7), +0x24c (dword 8)"
+      ]
+    },
+    "saturation_constant": {
+      "va": "0x459090",
+      "value": 1.8446744073709552e+19
+    },
+    "tuple_call": {
+      "out": "rsp",
+      "slot_va": "0x64e0990",
+      "target_va": "0x1629690",
+      "va": "0x1547559"
+    },
+    "weighted_value": "w = f64(count as u64) * value; negative, infinite or NaN w becomes 0.0; +-0 kept",
+    "window": {
+      "bytes": 952,
+      "end_va": "0x15478e8",
+      "sha256": "b6dd0437992086b9965c06fa44f0e221b72a8bfdb7fc81b46c11dd78c503b7a9",
+      "start_va": "0x1547530"
+    }
+  },
+  "provider": {
+    "clock": {
+      "edi": 0,
+      "helper_va": "0x5c842e0"
+    },
+    "date_call": {
+      "edi": "days + 719163",
+      "slot_va": "0x64dfff0",
+      "target_va": "0x1628f50",
+      "va": "0x1629732",
+      "zero_result": "leaves this window"
+    },
+    "difference": {
+      "from": "(0, 0)",
+      "helper_va": "0x5c84210"
+    },
+    "fde": {
+      "end_va": "0x1629795",
+      "start_va": "0x1629690"
+    },
+    "output": {
+      "+0": "date helper result (dword)",
+      "+4": "seconds of day (dword)",
+      "+8": "nanoseconds (dword)"
+    },
+    "split": "seconds / 86400 -> days; seconds mod 86400 -> seconds of day",
+    "window": {
+      "bytes": 191,
+      "end_va": "0x162974f",
+      "sha256": "61b9bf2c2bacd5ce9ed7e33be557efc7e7214d4c9257ed19b006e454203bb16c",
+      "start_va": "0x1629690"
+    }
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}
