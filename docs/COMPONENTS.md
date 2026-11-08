@@ -170,7 +170,7 @@ Deposit/withdrawal requests and cross-chain signing.
 EVM state, database adapters, transaction execution and hashing.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-evm-precompile-outcome-names`.
 - Observed diagnostic paths: 4.
 - First task: Identify reth/revm private fork boundaries and state transition inputs.
 
