@@ -17,7 +17,7 @@ python3 -m unittest tests.test_re015_chain_local_callers_115
 python3 research/work-items/RE-015-chain-local-callers-115/verify.py
 ```
 
-The analysis reads the target file, parses ELF sections and `.eh_frame`, and scans `.text` bytes for `E8` plus signed rel32 destinations. It executes no captured code, starts no process, and accesses no network. GNU objdump 2.47.20260726 was used only to confirm that the candidate encodings are decoded as `callq` instructions; all candidates were covered by these focused disassemblies:
+The analysis reads the target file, parses ELF sections and `.eh_frame`, and scans `.text` bytes for `E8` plus signed rel32 destinations. It executes no captured code, starts no process, and accesses no network. Apple LLVM objdump 21.0.0 was used only to confirm that the candidate encodings are decoded as `callq` instructions; all candidates were covered by these focused disassemblies:
 
 ```sh
 objdump -d -w --start-address=0x2406120 --stop-address=0x241351c artifacts/node/115/hl-node
