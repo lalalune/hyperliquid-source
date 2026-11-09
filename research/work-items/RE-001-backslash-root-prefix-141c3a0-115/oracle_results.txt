@@ -1,0 +1,46 @@
+# Oracle comparison -- node #115 routine 0x141c3a0
+
+routine bytes (51): 4885f6741bb001803f5c74164883fe01740e807f01c07c084883fe037705740931c0c3807f03c07cf766817f013a5c0f94c0c3
+alphabet: 0x00 0x2f 0x3a 0x41 0x5c 0x7f 0x80 0xbf 0xc0 0xff
+
+## Exhaustive interpreter-vs-model comparison
+buffers: 13146  (len0=1, len1=10, len2=100, len3=1000, len4=10000, len5=1031, len6=1004)
+matches: 13146
+mismatches: 0
+out-of-bounds reads: 0
+
+## Read-index proof
+max buffer index read over all buffers: 3
+buffers reading any index >= 4: 0
+buffers reading index 3 while len <= 3: 0
+
+## Corruption controls (length 0..4 pool = 11111 buffers)
+unpatched interpreter mismatches on the same pool: 0 (see above: 13146/13146 match)
+
+* cmpb $0x5c -> $0x2f  (leading-backslash test at 0x141c3a7)
+  patch: routine byte[9] := 0x2f
+  divergences from model: 2204
+    witness 2f -> al=1 vs model=0
+    witness 5c -> al=0 vs model=1
+    witness 2f00 -> al=1 vs model=0
+
+* cmpw $0x5c3a -> $0x2f3a  (drive-root test at 0x141c3c9)
+  patch: routine byte[46] := 0x2f
+  divergences from model: 162
+    witness 003a2f -> al=1 vs model=0
+    witness 003a5c -> al=0 vs model=1
+    witness 2f3a2f -> al=1 vs model=0
+
+* jl (7c) -> jge (7d)  (byte[1] boundary guard at 0x141c3b6)
+  patch: routine byte[22] := 0x7d
+  divergences from model: 81
+    witness 003a5c -> al=0 vs model=1
+    witness 2f3a5c -> al=0 vs model=1
+    witness 3a3a5c -> al=0 vs model=1
+
+* ja (77) -> jae (73)  (length>3 branch at 0x141c3bc)
+  patch: routine byte[28] := 0x73
+  divergences from model: 720
+    witness 000000 -> patched reads OOB index 3 (model al=0, reads only in-bounds)
+    witness 00002f -> patched reads OOB index 3 (model al=0, reads only in-bounds)
+    witness 00003a -> patched reads OOB index 3 (model al=0, reads only in-bounds)
