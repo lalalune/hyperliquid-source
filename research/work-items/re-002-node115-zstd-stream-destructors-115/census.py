@@ -21,7 +21,7 @@ import sys
 from pathlib import Path
 
 import os
-REPO = Path(os.environ.get("HL_REPO", "/home/hatch/workspace/repos/hyperliquid-source"))
+REPO = Path(os.environ.get("HL_REPO") or Path(__file__).resolve().parents[3])
 BIN = REPO / "work" / "hl-node-115.bin"
 ARTIFACT_SHA256 = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 
