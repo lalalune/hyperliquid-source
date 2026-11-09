@@ -1,0 +1,9 @@
+function	branch	condition	dispatch_site	target_or_effect	scope
+withSecret	short_0_16	len <= 16	0x61db965	short branches (len 0 rrmxmx, 1..3 combined, 4..8 seed transform, 9..16 two-stage mult128 fold) modelled in PR #5449	out of scope
+withSecret	mid_17_128	17 <= len <= 128	0x61db9e2	two-accumulator mix16B sweep at 0x61dbf10, modelled in PR #5449	out of scope
+withSecret	len_129to240	129 <= len <= 240	0x61db9f2	cmp $0xf0, jbe 0x61dc01f; tail-jump (E9) to the len_129to240_64b helper at 0x61d7dc0 at 0x61dc03a	out of scope
+hashlong_64b_withSecret_inline	full_blocks	nbBlocks = (len-1) / blockBytes > 0	0x61dba48	nbStripesPerBlock = (secretSize-64) >> 3 stripes per block (16 for a 192-byte secret, 1024 bytes); secret window sliding 8 bytes per stripe, scrambleAcc with secret+secretLimit after each block	modelled
+hashlong_64b_withSecret_inline	remaining_stripes	((len-1) % blockBytes) >> 6 > 0	0x61dbc4c	stripes from the block boundary, secret restarting at secret + 0 (loop at 0x61dbc70)	modelled
+hashlong_64b_withSecret_inline	last_stripe	len > 240 (always)	0x61dbd52	accumulate_512 over input[len-64..len) against secret + secretLimit - 7	modelled
+hashlong_64b_withSecret_inline	merge	len > 240 (always)	0x61dbd52	mergeAcc(acc, secret + 11, len * PRIME64_1), avalanched; merge words loaded from the caller secret at secret+11..67 (not immediates); len*PRIME64_1 formed by imul at 0x61dbe5b; avalanche epilogue shared at 0x61db9a3	modelled
+hashlong_64b_withSecret_inline	no_blocks	nbBlocks == 0	0x61dba50	cmp blockBytes, len-1; jb 0x61dbc4c jumps straight to the remaining-stripes entry	modelled
