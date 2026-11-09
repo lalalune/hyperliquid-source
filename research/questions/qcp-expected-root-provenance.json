@@ -1,0 +1,36 @@
+{
+  "question_id": "qcp-expected-root-provenance",
+  "title": "Identify the expected root reference consumed during replay validation",
+  "target": {
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "component": "storage",
+  "work_type": "discovery",
+  "scope": {
+    "question": "Where does the expected H+1 root reference enter the selected replay-validation path, and what contract supplies it?",
+    "include": ["The handoff from compact digest references to the selected replay comparison", "The source and identity of the expected root input"],
+    "exclude": ["Recomputing or validating a live chain root", "Assuming a locally produced root is the external expected value", "Unrelated digest algorithms"]
+  },
+  "readiness": "blocked",
+  "evidence_status": "partial",
+  "prior_attempts": [
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/4157", "relation": "maps the source of compact digest references and explicitly leaves external H+1 unresolved"},
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/4117", "relation": "traces the ABCI digest quorum descriptor handoff"}
+  ],
+  "remaining_gap": "The selected evidence does not identify the external H+1 reference or its supplying contract. A fixture cannot assert expected-root equality until that input is identified or bounded as an explicit fixture input.",
+  "dependencies": [],
+  "downstream_consumer": "A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.",
+  "acceptance_requirements": [
+    "Trace the expected-root value to a digest-bound producer or define a minimal explicit fixture contract with provenance.",
+    "Keep local root production separate from externally expected root provenance.",
+    "Record unobserved producers and branches as unresolved."
+  ],
+  "required_capabilities": ["Static cross-function data-flow analysis", "Careful separation of observed and inferred provenance"],
+  "evidence_review": [
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/4157", "decision": "merged evidence; H+1 source remains open"},
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/4117", "decision": "merged evidence; scoped descriptor handoff only"}
+  ],
+  "linked_issue": {"url": "https://github.com/lalalune/hyperliquid-source/issues/3923", "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"},
+  "pilot_issue": "https://github.com/lalalune/hyperliquid-source/issues/5391"
+}
