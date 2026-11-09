@@ -21,7 +21,11 @@ import sys
 from pathlib import Path
 
 import os
-REPO = Path(os.environ.get("HL_REPO", "/home/hatch/workspace/repos/hyperliquid-source"))
+# Repo root is three levels above this packet directory
+# (research/work-items/<packet>/); HL_REPO overrides it for out-of-tree runs.
+REPO = Path(os.environ.get(
+    "HL_REPO",
+    str(Path(__file__).resolve().parents[3])))
 BIN = REPO / "work" / "hl-node-115.bin"
 ARTIFACT_SHA256 = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 
