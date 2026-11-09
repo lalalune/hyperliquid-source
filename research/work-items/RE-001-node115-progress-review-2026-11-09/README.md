@@ -54,3 +54,65 @@ make catalogue-check
 The verifier's default `--before` and `--after` are the immutable commits above; it refuses mutable ref names. `evidence.json` includes the Python/Git versions, auditor source hash, both source trees, all calculated fractions and control results. Exact evidence re-creation requires those source/provider snapshots; a later tree must receive its own refreshed inventory.
 
 Limits: this is static accounting, not native target execution or a hardware/whole-node equivalence proof. Recorded relocation masks do not establish helper semantics, call-target closure or complete program data identity. No captured code is executed, and no live Hyperliquid network traffic, private key or chain action is used. Next step: continue the bounded startup, transport, storage/bootstrap and state-validation work until a complete component scope can satisfy its original gates.
+
+
+## Post-merge refresh
+
+The earlier review above and its `evidence.json` / `verify.py` are preserved.
+This additional snapshot records the actual merged `main` at
+`0e70dfafd1ae86649a1660405b9110dbebe93050`, tree
+`1ff44e49fab7e702781c35a5c87fa2affd59cae6`, before this documentation refresh.
+It replaces neither historical snapshot nor their original negative results.
+
+| Measure | Merged-main snapshot |
+| --- | ---: |
+| Rust implementation areas | 216 |
+| Top-level Cargo manifests | 179 |
+| Research work items | 3,705 |
+| Components registering bounded Rust paths | 20/23 |
+| Registered bounded paths | 88 |
+| Accepted full-scope gates | 0/92 (0.00%) |
+| Complete components | 0/23 (0.00%) |
+| Fully mapped / built / behavior-validated / code-data-identical components | 0/23 each (0.00%) |
+| Compared `.text` bytes | 5,318,174/83,719,936 (6.35234%) |
+| Raw-equal `.text` positions | 4,968,370/83,719,936 (5.93451%) |
+| Raw-equal comparison windows | 507/7,885 (6.43%) |
+| Raw + relocation-qualified windows | 7,885/7,885 (100.00%) |
+
+All 22 registry-pinned evidence files and complete source/target body hashes
+were authenticated again. The 7,885 aligned windows have disjoint target
+intervals; all are public-dependency comparisons, with 4,968,370/5,318,174 raw
+matching positions (93.42%). Two further socket2 candidates retain unequal
+227-byte target / 418-byte source extents and receive no aligned-byte credit.
+The positive relocation-mask control passes and all four original corruption
+controls remain detected. No captured code is executed.
+
+Compared with the old pending snapshot, only the research-work-item inventory
+increases by three; the Rust-area and manifest counts, byte totals and accepted
+gates are unchanged. Appending this section to the existing packet adds no
+work item. The README's generated figures already match the merged tree;
+this refresh pins their post-merge evidence instead of claiming more completion.
+The source-built executable, complete component scopes, code/data/call closure,
+whole-ELF identity and end-to-end acceptance remain open.
+
+`post-merge-evidence.json` records the independent recount, per-component gate
+assessment, owning-source hashes and preserved unmatched candidates.
+`post-merge-verify.py` reuses only the SHA-bound historical independent auditor,
+not the production catalogue comparator. Its full README hash is deliberately
+of the pinned Git snapshot. On a refreshed checkout it checks that the generated
+README block still matches, while allowing this explanatory prose to be added
+outside the markers. This avoids a self-referential evidence hash.
+
+From a hydrated checkout containing the pinned commit:
+
+```sh
+python3 research/work-items/RE-001-node115-progress-review-2026-11-09/post-merge-verify.py \
+  --repo . --provider . \
+  --check research/work-items/RE-001-node115-progress-review-2026-11-09/post-merge-evidence.json
+make catalogue-check
+```
+
+To write a fresh comparison file, replace `--check` with
+`--out work/post-merge-progress-recheck.json`. The evidence preserves the runtime
+versions originally observed; check mode permits a different Python/Git version
+while requiring every numerical result, source binding and control to match.
