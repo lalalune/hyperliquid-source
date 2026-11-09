@@ -1,0 +1,2205 @@
+#!/usr/bin/env python3
+"""Re-derive the node #115 order price shaping function from ELF bytes, in its three copies.
+
+Function 0x5a21510 (copies 0x5a21ed0 and 0x2d3a160) takes a stored order request, the user, the market and the state. It blocks users,
+looks up the reference price and the mark row, moves the reference by an amount or a fraction, builds a 1.1 or 0.9 limit on the tick
+grid, applies the notional, available amount, minimum value, time window and price band tests, and writes either one status word or
+the accepted record. Every callee is a stub at the edge that checks its arguments; the function bytes run as real instructions
+against a separately written specification.
+
+    python3 tools/order_price_shape_115.py --out research/work-items/RE-006-order-price-shape-115
+"""
+
+import bisect
+import hashlib
+import math
+import pathlib
+import struct
+import sys
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+
+from elf_index import sections  # noqa: E402
+from fde_extents import eh_frame_records  # noqa: E402
+
+BINARY = ROOT / "artifacts" / "node" / "115" / "hl-node"
+SHA256 = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+
+RAX, RCX, RDX, RBX, RSP, RBP, RSI, RDI = range(8)
+R8, R9, R10, R11, R12, R13, R14, R15 = range(8, 16)
+VOLATILE = (RCX, RSI, RDI, R8, R9, R10, R11)
+CALLEE_SAVED = (RBX, RBP, R12, R13, R14, R15)
+MASK = {1: 0xFF, 2: 0xFFFF, 4: 0xFFFFFFFF, 8: 0xFFFFFFFFFFFFFFFF}
+SIGN = {1: 0x80, 2: 0x8000, 4: 0x80000000, 8: 0x8000000000000000}
+STACK_MARK = 0xA5
+STACK_TOP = 0x7FF000000
+STACK_SIZE = 0x10000
+HEAP_BASE = 0x600000000
+HEAP_SIZE = 0x400000
+RETURN_SENTINEL = 0xDEAD0000
+POISON = 0xA5A5A5A5A5A5A5A5
+STEP_LIMIT = 200000
+MUTANT_STEP_LIMIT = 120000
+
+
+class EvidenceError(Exception):
+    pass
+
+
+class Halt(Exception):
+    pass
+
+
+class Panicked(Exception):
+    pass
+
+
+class Image:
+    """Section, relocation and FDE views of one ELF byte string, through the shared parsers."""
+
+    def __init__(self, blob):
+        self.blob = blob
+        self.relative_map = None
+        self.sections = sections(blob)
+        # SHT_NOBITS sections have no file bytes, so they never resolve an address.
+        self.mapped = sorted((s for s in self.sections if s["type"] != 8 and s["address"] and s["size"]),
+                             key=lambda s: s["address"])
+        self.named = {s["name"]: s for s in self.sections}
+        _, fdes = eh_frame_records(blob, self.sections)
+        ends = {}
+        for row in fdes:
+            ends[row["start"]] = max(ends.get(row["start"], 0), row["end"])
+        self.fde_ends = ends
+        self.starts = sorted(ends)
+
+    def offset(self, va):
+        for section in self.mapped:
+            if section["address"] <= va < section["address"] + section["size"]:
+                return va - section["address"] + section["offset"]
+        raise EvidenceError("address outside file-backed sections: %#x" % va)
+
+    def fde(self, va):
+        index = bisect.bisect_right(self.starts, va) - 1
+        if index < 0 or va >= self.fde_ends[self.starts[index]]:
+            raise EvidenceError("address outside every FDE: %#x" % va)
+        return self.starts[index], self.fde_ends[self.starts[index]]
+
+    def exact_fde(self, va):
+        start, end = self.fde(va)
+        if start != va:
+            raise EvidenceError("not an FDE start: %#x" % va)
+        return start, end
+
+    def text_bytes(self):
+        text = self.named[".text"]
+        return text["address"], bytes(self.blob[text["offset"]:text["offset"] + text["size"]])
+
+    def relocations(self):
+        """Yield (slot, type, addend, symbol index) for .rela.dyn."""
+        rela = self.named[".rela.dyn"]
+        for at in range(rela["offset"], rela["offset"] + rela["size"], 24):
+            slot, info, addend = struct.unpack_from("<QQq", self.blob, at)
+            yield slot, info & 0xFFFFFFFF, addend, info >> 32
+
+    def relative(self):
+        if self.relative_map is None:
+            self.relative_map = {slot: addend for slot, kind, addend, _ in self.relocations() if kind == 8}
+        return self.relative_map
+
+    def location(self, slot, relative):
+        """Decode one Location record; the path is kept only below the crate or std root."""
+        size, line, column = struct.unpack_from("<QII", self.blob, self.offset(slot) + 8)
+        start = self.offset(relative[slot])
+        path = bytes(self.blob[start:start + size]).decode()
+        for marker in ("/l1/", "/library/"):
+            if marker in path:
+                path = path[path.rindex(marker) + 1:]
+                break
+        return path, line, column
+
+
+OVERLAY_LOW = 0x64EFC80
+MARK_BASE = 0x7700000000
+
+
+def load_image(path=BINARY, expected=SHA256):
+    blob = pathlib.Path(path).read_bytes()
+    digest = hashlib.sha256(blob).hexdigest()
+    if digest != expected:
+        raise EvidenceError("binary SHA-256 mismatch: %s" % digest)
+    return Image(blob)
+
+
+QUIET_BIT = 1 << 51
+INDEFINITE = 0xFFF8000000000000
+
+
+def fdiv(left, right):
+    """Double division with the IEEE rules x86 follows: a zero divisor gives a signed infinity or NaN, never an exception."""
+    if right == 0:
+        if left == 0 or left != left:
+            return math.nan
+        return math.copysign(math.inf, math.copysign(1.0, left) * math.copysign(1.0, right))
+    return left / right
+
+
+def sse_arith(op, left_bits, right_bits):
+    """Scalar double add/sub/mul/div on raw bits: the first NaN operand wins and is quieted, a fresh NaN is the indefinite value."""
+    for bits in (left_bits, right_bits):
+        if (bits >> 52) & 0x7FF == 0x7FF and bits & ((1 << 52) - 1):
+            return bits | QUIET_BIT
+    left, right = to_float(left_bits), to_float(right_bits)
+    if op == "add":
+        result = left + right
+    elif op == "sub":
+        result = left - right
+    elif op == "mul":
+        result = left * right
+    else:
+        result = fdiv(left, right)
+    return INDEFINITE if result != result else to_bits(result)
+
+
+def to_float(bits):
+    return struct.unpack("<d", struct.pack("<Q", bits & MASK[8]))[0]
+
+
+def to_bits(value):
+    return struct.unpack("<Q", struct.pack("<d", value))[0]
+
+
+class Insn:
+    __slots__ = ("va", "size", "op", "a", "b", "width", "cc", "target", "next", "imm_at", "imm_size", "rip_at", "data")
+
+    def __init__(self, va, size, op, a=None, b=None, width=8, cc=None, target=None, imm=None, rip_at=None):
+        self.va, self.size, self.op, self.a, self.b = va, size, op, a, b
+        self.width, self.cc, self.target = width, cc, target
+        self.next = va + size
+        self.imm_at, self.imm_size = imm if imm else (None, None)
+        self.rip_at = rip_at
+
+
+GROUP1 = ("add", "or", "adc", "sbb", "and", "sub", "xor", "cmp")
+SHIFTS = {0: "rol", 1: "ror", 4: "shl", 5: "shr", 7: "sar"}
+
+
+def decode(read, va):
+    """Decode one instruction at va; read(va, n) returns n code bytes."""
+    window = read(va, 16)
+    pos, rex, opsize, rep, repne = 0, 0, False, False, False
+    while True:
+        byte = window[pos]
+        if byte == 0x66:
+            opsize = True
+        elif byte == 0xF3:
+            rep = True
+        elif byte == 0xF2:
+            repne = True
+        elif byte == 0xF0:
+            pass
+        elif byte != 0x2E:
+            break
+        pos += 1
+    if 0x40 <= window[pos] <= 0x4F:
+        rex = window[pos]
+        pos += 1
+    wide = bool(rex & 8)
+    width = 8 if wide else (2 if opsize else 4)
+    byte = window[pos]
+    pos += 1
+    imm = None
+    rip_at = None
+
+    def modrm(vector=False):
+        nonlocal pos, rip_at
+        mod_rm = window[pos]
+        pos += 1
+        mod, reg, rm = mod_rm >> 6, ((mod_rm >> 3) & 7) | ((rex & 4) << 1), mod_rm & 7
+        if mod == 3:
+            return reg, ("x" if vector else "r", rm | ((rex & 1) << 3))
+        base, index, scale, rip = None, None, 1, False
+        if rm == 4:
+            sib = window[pos]
+            pos += 1
+            scale = 1 << (sib >> 6)
+            index = ((sib >> 3) & 7) | ((rex & 2) << 2)
+            if index == 4:
+                index = None
+            base = (sib & 7) | ((rex & 1) << 3)
+            if sib & 7 == 5 and mod == 0:
+                base = None
+                disp = struct.unpack_from("<i", window, pos)[0]
+                pos += 4
+                return reg, ("m", base, index, scale, disp, False)
+        elif rm == 5 and mod == 0:
+            rip = True
+        else:
+            base = rm | ((rex & 1) << 3)
+        disp = 0
+        if mod == 1:
+            disp = struct.unpack_from("<b", window, pos)[0]
+            pos += 1
+        elif mod == 2 or rip:
+            if rip:
+                rip_at = pos
+            disp = struct.unpack_from("<i", window, pos)[0]
+            pos += 4
+        return reg, ("m", base, index, scale, disp, rip)
+
+    def immediate(size):
+        nonlocal pos, imm
+        value = struct.unpack_from({1: "<b", 2: "<h", 4: "<i", 8: "<q"}[size], window, pos)[0]
+        imm = (pos, size)
+        pos += size
+        return value
+
+    def finish(op, a=None, b=None, w=None, cc=None, target=None):
+        size = pos
+        if (width if w is None else w) == 1 and not rex:
+            if op != "mov" and any(operand and operand[0] == "r" and 4 <= operand[1] <= 7 for operand in (a, b)):
+                raise EvidenceError("high byte register at %#x" % va)
+            if a and a[0] == "r" and 4 <= a[1] <= 7:
+                a = ("h", a[1] - 4)
+            if b and b[0] == "r" and 4 <= b[1] <= 7:
+                b = ("h", b[1] - 4)
+
+        def fix(operand):
+            if operand and operand[0] == "m" and operand[5]:
+                return ("m", None, None, 1, va + size + operand[4], False)
+            return operand
+        return Insn(va, size, op, fix(a), fix(b), width if w is None else w, cc, target, imm, rip_at)
+
+    if 0x50 <= byte <= 0x57:
+        return finish("push", ("r", (byte & 7) | ((rex & 1) << 3)), w=8)
+    if 0x58 <= byte <= 0x5F:
+        return finish("pop", ("r", (byte & 7) | ((rex & 1) << 3)), w=8)
+    if byte < 0x40 and byte & 7 < 4:
+        name = GROUP1[byte >> 3]
+        w = 1 if not byte & 1 else width
+        reg, rm = modrm()
+        if byte & 2:
+            return finish(name, ("r", reg), rm, w)
+        return finish(name, rm, ("r", reg), w)
+    if byte < 0x40 and byte & 7 in (4, 5):
+        w = 1 if byte & 7 == 4 else width
+        value = immediate(1 if w == 1 else 2 if w == 2 else 4)
+        return finish(GROUP1[byte >> 3], ("r", RAX), ("i", value), w)
+    if byte == 0x63 and wide:
+        reg, rm = modrm()
+        return finish("movsxd", ("r", reg), rm, 8)
+    if 0x70 <= byte <= 0x7F:
+        rel = immediate(1)
+        return finish("jcc", cc=byte & 15, target=va + pos + rel)
+    if byte in (0x80, 0x81, 0x83):
+        reg, rm = modrm()
+        w = 1 if byte == 0x80 else width
+        value = immediate(4 if byte == 0x81 and w != 2 else 2 if byte == 0x81 else 1)
+        return finish(GROUP1[reg & 7], rm, ("i", value), w)
+    if byte in (0x84, 0x85):
+        reg, rm = modrm()
+        return finish("test", rm, ("r", reg), 1 if byte == 0x84 else width)
+    if byte in (0x88, 0x89, 0x8A, 0x8B):
+        reg, rm = modrm()
+        w = 1 if not byte & 1 else width
+        if byte & 2:
+            return finish("mov", ("r", reg), rm, w)
+        return finish("mov", rm, ("r", reg), w)
+    if byte == 0x8D:
+        reg, rm = modrm()
+        return finish("lea", ("r", reg), rm, width)
+    if byte == 0x90:
+        return finish("nop")
+    if byte == 0x6A:
+        value = immediate(1)
+        return finish("pushi", ("i", value), w=8)
+    if byte == 0x98:
+        return finish("cdqe" if wide else "cwde")
+    if byte == 0xA9:
+        value = immediate(4)
+        return finish("test", ("r", RAX), ("i", value), width)
+    if byte == 0xA8:
+        value = immediate(1)
+        return finish("test", ("r", RAX), ("i", value), 1)
+    if 0xB0 <= byte <= 0xB7:
+        reg = (byte & 7) | ((rex & 1) << 3)
+        value = immediate(1)
+        return finish("mov", ("r", reg), ("i", value & 0xFF), 1)
+    if 0xB8 <= byte <= 0xBF:
+        reg = (byte & 7) | ((rex & 1) << 3)
+        value = immediate(8 if wide else 2 if opsize else 4)
+        return finish("mov", ("r", reg), ("i", value & MASK[width]), width)
+    if byte == 0x69:
+        reg, rm = modrm()
+        value = immediate(4)
+        return finish("imul3", ("r", reg), rm, width, target=value)
+    if byte == 0x6B:
+        reg, rm = modrm()
+        value = immediate(1)
+        return finish("imul3", ("r", reg), rm, width, target=value)
+    if byte == 0xD3:
+        reg, rm = modrm()
+        if reg & 7 not in SHIFTS:
+            raise EvidenceError("unsupported shift at %#x" % va)
+        return finish(SHIFTS[reg & 7], rm, ("r", RCX), width)
+    if byte in (0xD1, 0xD0):
+        reg, rm = modrm()
+        if reg & 7 not in SHIFTS:
+            raise EvidenceError("unsupported shift at %#x" % va)
+        return finish(SHIFTS[reg & 7], rm, ("i", 1), 1 if byte == 0xD0 else width)
+    if byte in (0xC1, 0xC0):
+        reg, rm = modrm()
+        if reg & 7 not in SHIFTS:
+            raise EvidenceError("unsupported shift at %#x" % va)
+        value = immediate(1) & 0xFF
+        return finish(SHIFTS[reg & 7], rm, ("i", value), 1 if byte == 0xC0 else width)
+    if byte == 0xC3:
+        return finish("ret")
+    if byte == 0xCC:
+        return finish("int3")
+    if byte in (0xC6, 0xC7):
+        reg, rm = modrm()
+        w = 1 if byte == 0xC6 else width
+        value = immediate(1 if w == 1 else 2 if w == 2 else 4)
+        return finish("mov", rm, ("i", value & MASK[w]), w)
+    if byte == 0xE8:
+        rel = immediate(4)
+        return finish("call", target=va + pos + rel)
+    if byte == 0xE9:
+        rel = immediate(4)
+        return finish("jmp", target=va + pos + rel)
+    if byte == 0xEB:
+        rel = immediate(1)
+        return finish("jmp", target=va + pos + rel)
+    if byte in (0xF6, 0xF7):
+        reg, rm = modrm()
+        w = 1 if byte == 0xF6 else width
+        kind = reg & 7
+        if kind == 0:
+            value = immediate(1 if w == 1 else 4)
+            return finish("test", rm, ("i", value), w)
+        if kind in (2, 3, 4, 5, 6):
+            return finish({2: "not", 3: "neg", 4: "mul", 5: "imul1", 6: "div"}[kind], rm, w=w)
+        raise EvidenceError("unsupported group 3 opcode at %#x" % va)
+    if byte in (0xFE, 0xFF):
+        reg, rm = modrm()
+        kind = reg & 7
+        w = 1 if byte == 0xFE else width
+        if kind in (0, 1):
+            return finish("inc" if kind == 0 else "dec", rm, w=w)
+        if byte == 0xFF and kind == 2:
+            return finish("calli", rm, w=8)
+        if byte == 0xFF and kind == 4:
+            return finish("jmpi", rm, w=8)
+        if byte == 0xFF and kind == 6:
+            return finish("pushm", rm, w=8)
+        raise EvidenceError("unsupported group 5 opcode at %#x" % va)
+    if byte == 0x87:
+        reg, rm = modrm()
+        return finish("xchg", rm, ("r", reg), width)
+    if byte == 0x0F:
+        two = window[pos]
+        pos += 1
+        if two == 0x0B:
+            return finish("ud2")
+        if 0xC8 <= two <= 0xCF:
+            return finish("bswap", ("r", (two & 7) | ((rex & 1) << 3)), w=width)
+        if two == 0xC6 and opsize:
+            reg, rm = modrm(True)
+            value = immediate(1) & 0xFF
+            return finish("shufpd", ("x", reg), rm, 16, target=value)
+        if two == 0xC2 and opsize:
+            reg, rm = modrm(True)
+            value = immediate(1) & 0xFF
+            return finish("cmppd", ("x", reg), rm, 16, target=value)
+        if two == 0x50 and opsize:
+            reg, rm = modrm(True)
+            return finish("movmskpd", ("r", reg), rm, 4)
+        if two == 0x72 and opsize:
+            reg, rm = modrm(True)
+            if reg & 7 not in (4, 6):
+                raise EvidenceError("unsupported vector shift at %#x" % va)
+            value = immediate(1) & 0xFF
+            return finish("psrad" if reg & 7 == 4 else "pslld", rm, ("i", value), 16)
+        if two == 0x73 and opsize:
+            reg, rm = modrm(True)
+            if reg & 7 != 2:
+                raise EvidenceError("unsupported vector shift at %#x" % va)
+            value = immediate(1) & 0xFF
+            return finish("psrlq", rm, ("i", value), 16)
+        if two == 0xAB:
+            reg, rm = modrm()
+            return finish("btsr", rm, ("r", reg), width)
+        if two == 0xA3:
+            reg, rm = modrm()
+            return finish("btr", rm, ("r", reg), width)
+        if two in (0xBE, 0xBF):
+            reg, rm = modrm()
+            return finish("movsx", ("r", reg), rm, width, cc=1 if two == 0xBE else 2)
+        if two == 0xBA:
+            reg, rm = modrm()
+            if reg & 7 != 4:
+                raise EvidenceError("unsupported bit test at %#x" % va)
+            value = immediate(1) & 0xFF
+            return finish("bt", rm, ("i", value), width)
+        if two == 0x1F:
+            modrm()
+            return finish("nop")
+        if two == 0x1E and rep and window[pos] == 0xFA:
+            pos += 1
+            return finish("nop")                                      # endbr64
+        if two == 0x13:
+            reg, rm = modrm(True)
+            return finish("movq", rm, ("x", reg), 8)
+        if two in (0x10, 0x11) and repne:
+            reg, rm = modrm(True)
+            if two == 0x10:
+                return finish("movsd", ("x", reg), rm, 8)
+            return finish("movsd", rm, ("x", reg), 8)
+        if two in (0x10, 0x11) and rep:
+            reg, rm = modrm(True)
+            if rm[0] == "x":
+                raise EvidenceError("movss between registers at %#x" % va)
+            if two == 0x10:
+                return finish("movss", ("x", reg), rm, 4)
+            return finish("movss", rm, ("x", reg), 4)
+        if two in (0x10, 0x11, 0x28, 0x29, 0x6F, 0x7F):
+            reg, rm = modrm(True)
+            if two in (0x10, 0x28, 0x6F):
+                return finish("movx", ("x", reg), rm, 16)
+            return finish("movx", rm, ("x", reg), 16)
+        vector = {(0x57, False): "xorps", (0x57, True): "xorps", (0xEF, True): "xorps", (0x15, True): "unpckhpd", (0x5C, True): "subpd",
+                  (0x54, True): "andpd", (0xDF, True): "pandn", (0x56, True): "orpd", (0x62, True): "punpckldq", (0x60, True): "punpcklbw",
+                  (0x74, True): "pcmpeqb", (0x76, True): "pcmpeqd", (0x14, False): "punpckldq", (0x6C, True): "punpcklqdq",
+                  (0xDB, True): "andpd", (0xEB, True): "orpd", (0x58, True): "addpd", (0x5E, True): "divpd",
+                  (0x14, True): "punpcklqdq", (0x59, True): "mulpd", (0x5F, True): "maxpd", (0x55, True): "andnpd"}
+        if (two, opsize) in vector:
+            reg, rm = modrm(True)
+            return finish(vector[(two, opsize)], ("x", reg), rm, 16)
+        if two in (0x58, 0x59, 0x5C, 0x5D, 0x5E, 0x5F) and repne:
+            reg, rm = modrm(True)
+            return finish({0x58: "addsd", 0x59: "mulsd", 0x5C: "subsd", 0x5D: "minsd", 0x5E: "divsd", 0x5F: "maxsd"}[two], ("x", reg), rm, 8)
+        if two == 0xC2 and repne:
+            reg, rm = modrm(True)
+            if immediate(1) != 0:
+                raise EvidenceError("unsupported compare predicate at %#x" % va)
+            return finish("cmpeqsd", ("x", reg), rm, 8)
+        if two == 0x2C and repne:
+            reg, rm = modrm(True)
+            return finish("cvttsd2si", ("r", reg), rm, 8)
+        if two == 0x2A and repne:
+            reg, rm = modrm()
+            return finish("cvtsi2sd", ("x", reg), rm, 8)
+        if two == 0x2E and opsize:
+            reg, rm = modrm(True)
+            return finish("ucomisd", ("x", reg), rm, 8)
+        if two == 0x6E and opsize and not wide:
+            reg, rm = modrm()
+            return finish("movd", ("x", reg), rm, 4)
+        if two == 0x70 and (opsize or repne):
+            reg, rm = modrm(True)
+            value = immediate(1) & 0xFF
+            return finish("pshufd" if opsize else "pshuflw", ("x", reg), rm, 16, target=value)
+        if two == 0xD7 and opsize:
+            reg, rm = modrm(True)
+            return finish("pmovmskb", ("r", reg), rm, 4)
+        if two == 0xBC and rep:
+            reg, rm = modrm()
+            return finish("tzcnt", ("r", reg), rm, width)
+        if two == 0xD6 and opsize:
+            reg, rm = modrm(True)
+            return finish("movq", rm, ("x", reg), 8)
+        if two == 0x16 and not opsize:
+            reg, rm = modrm(True)
+            return finish("movhps", ("x", reg), rm, 8)
+        if two == 0x12 and not opsize and not rep and not repne:
+            reg, rm = modrm(True)
+            return finish("movlps", ("x", reg), rm, 8)
+        if two == 0x7E and opsize and not wide:
+            reg, rm = modrm()
+            return finish("movdout", rm, ("x", reg), 4)
+        if two == 0x7E and rep:
+            reg, rm = modrm(True)
+            return finish("movq", ("x", reg), rm, 8)
+        if two == 0x6E and opsize and wide:
+            reg, rm = modrm()
+            return finish("movq", ("x", reg), rm, 8)
+        if two == 0x7E and opsize and wide:
+            reg, rm = modrm()
+            return finish("movq", rm, ("x", reg), 8)
+        if 0x40 <= two <= 0x4F:
+            reg, rm = modrm()
+            return finish("cmov", ("r", reg), rm, width, cc=two & 15)
+        if 0x80 <= two <= 0x8F:
+            rel = immediate(4)
+            return finish("jcc", cc=two & 15, target=va + pos + rel)
+        if 0x90 <= two <= 0x9F:
+            _, rm = modrm()
+            return finish("set", rm, w=1, cc=two & 15)
+        if two == 0xAF:
+            reg, rm = modrm()
+            return finish("imul2", ("r", reg), rm, width)
+        if two == 0xBD:
+            reg, rm = modrm()
+            return finish("bsr", ("r", reg), rm, width)
+        if two == 0xA4:
+            reg, rm = modrm()
+            value = immediate(1) & 0xFF
+            return finish("shld", rm, ("r", reg), width, target=value)
+        if two == 0xAC:
+            reg, rm = modrm()
+            value = immediate(1) & 0xFF
+            return finish("shrd", rm, ("r", reg), width, target=value)
+        if two == 0xB1:
+            reg, rm = modrm()
+            return finish("cmpxchg", rm, ("r", reg), width)
+        if two == 0xAD:
+            reg, rm = modrm()
+            return finish("shrd", rm, ("r", reg), width)
+        if two in (0xB6, 0xB7):
+            reg, rm = modrm()
+            return finish("movzx", ("r", reg), rm, width, cc=1 if two == 0xB6 else 2)
+    raise EvidenceError("undecodable opcode %#x at %#x" % (byte, va))
+
+
+def decode_range(image, start, end):
+    """Decode [start, end) linearly; the last instruction must end exactly at end."""
+    base = image.offset(start)
+    code = image.blob[base:base + (end - start) + 16]
+
+    def read(va, count):
+        return code[va - start:va - start + count]
+
+    rows = []
+    va = start
+    while va < end:
+        row = decode(read, va)
+        row.data = bytes(read(va, row.size))
+        rows.append(row)
+        va = row.next
+    if va != end:
+        raise EvidenceError("decoder overran FDE end at %#x" % end)
+    return rows
+
+
+class Memory:
+    def __init__(self, image):
+        self.image = image
+        self.stack = bytearray(STACK_SIZE)
+        self.heap = bytearray(HEAP_SIZE)
+        self.stack_base = STACK_TOP - STACK_SIZE
+        self.fresh = (bytes([STACK_MARK]) * STACK_SIZE, bytes([STACK_MARK]) * HEAP_SIZE)
+        self.statics = {}
+        self.overlay = None
+
+    def reset(self, used=HEAP_SIZE):
+        """Refill the stack and the first `used` heap bytes; the rest must still be untouched."""
+        self.stack[:] = self.fresh[0]
+        self.heap[:used] = memoryview(self.fresh[1])[:used]
+
+    def locate(self, addr, count):
+        if self.stack_base <= addr and addr + count <= STACK_TOP:
+            return self.stack, addr - self.stack_base
+        if HEAP_BASE <= addr and addr + count <= HEAP_BASE + HEAP_SIZE:
+            return self.heap, addr - HEAP_BASE
+        if self.overlay is not None and OVERLAY_LOW <= addr and addr + count <= OVERLAY_LOW + 0x60:
+            return self.overlay, addr - OVERLAY_LOW
+        return None, 0
+
+    def read(self, addr, count):
+        return int.from_bytes(self.bytes_at(addr, count), "little")
+
+    def write(self, addr, count, value):
+        buffer, at = self.locate(addr, count)
+        if buffer is None:
+            raise Halt("write outside stack and heap: %#x" % addr)
+        buffer[at:at + count] = (value & MASK.get(count, (1 << (8 * count)) - 1)).to_bytes(count, "little")
+
+    def put_bytes(self, addr, data):
+        buffer, at = self.locate(addr, len(data))
+        if buffer is None:
+            raise Halt("write outside stack and heap: %#x" % addr)
+        buffer[at:at + len(data)] = data
+
+    def bytes_at(self, addr, count):
+        buffer, at = self.locate(addr, count)
+        if buffer is not None:
+            return bytes(buffer[at:at + count])
+        if addr in self.statics:
+            return self.statics[addr].to_bytes(count, "little")
+        try:
+            offset = self.image.offset(addr)
+        except EvidenceError:
+            raise Halt("read outside every mapping: %#x" % addr)
+        return bytes(self.image.blob[offset:offset + count])
+
+    def copy(self, dst, src, count):
+        self.put_bytes(dst, self.bytes_at(src, count))
+
+class Machine:
+    def __init__(self, image, patches=None):
+        self.image = image
+        self.patches = patches or {}
+        self.memory = Memory(image)
+        self.cache = {}
+        self.calls = {}
+        self.real = frozenset()
+        self.slots = {}
+        self.regs = [0] * 16
+        self.xmm = [POISON | POISON << 64] * 16
+        self.cf = self.zf = self.sf = self.of = self.pf = False
+        self.seen = set()
+        self.steps = 0
+        self.keep_rdx = False
+        self.step_limit = STEP_LIMIT
+        self.xmm_result = None
+
+    def read_code(self, va, count):
+        offset = self.image.offset(va)
+        data = bytearray(self.image.blob[offset:offset + count])
+        for index in range(count):
+            if va + index in self.patches:
+                data[index] = self.patches[va + index]
+        return data
+
+    def address(self, operand):
+        _, base, index, scale, disp, _ = operand
+        value = disp
+        if base is not None:
+            value += self.regs[base]
+        if index is not None:
+            value += self.regs[index] * scale
+        return value & MASK[8]
+
+    def get(self, operand, width):
+        kind = operand[0]
+        if kind == "r":
+            return self.regs[operand[1]] & MASK[width]
+        if kind == "h":
+            return self.regs[operand[1]] >> 8 & 0xFF
+        if kind == "i":
+            return operand[1] & MASK[width]
+        return self.memory.read(self.address(operand), width)
+
+    def put(self, operand, width, value):
+        value &= MASK[width]
+        if operand[0] == "h":
+            self.regs[operand[1]] = (self.regs[operand[1]] & ~0xFF00) | value << 8
+            return
+        if operand[0] == "r":
+            reg = operand[1]
+            if width >= 4:
+                self.regs[reg] = value
+            else:
+                self.regs[reg] = (self.regs[reg] & ~MASK[width]) | value
+        else:
+            self.memory.write(self.address(operand), width, value)
+
+    def condition(self, code):
+        result = {
+            0: self.of, 1: self.cf, 2: self.zf, 3: self.cf or self.zf, 4: self.sf,
+            5: self.pf, 6: self.sf != self.of, 7: self.zf or self.sf != self.of,
+        }[code >> 1]
+        return bool(result) != bool(code & 1)
+
+    def set_logic(self, result, width):
+        self.cf = self.of = False
+        self.zf = result & MASK[width] == 0
+        self.sf = bool(result & SIGN[width])
+
+    def add_sub(self, left, right, carry, width, subtract):
+        mask = MASK[width]
+        if subtract:
+            result = (left - right - carry) & mask
+            self.cf = left < right + carry
+            self.of = bool((left ^ right) & (left ^ result) & SIGN[width])
+        else:
+            total = left + right + carry
+            result = total & mask
+            self.cf = total > mask
+            self.of = bool(~(left ^ right) & (left ^ result) & SIGN[width])
+        self.zf = result == 0
+        self.sf = bool(result & SIGN[width])
+        return result
+
+    def push(self, value):
+        self.regs[RSP] -= 8
+        self.memory.write(self.regs[RSP], 8, value)
+
+    def pop(self):
+        value = self.memory.read(self.regs[RSP], 8)
+        self.regs[RSP] += 8
+        return value
+
+    def stub(self, hook):
+        self.keep_rdx = False
+        hook(self)
+        for reg in VOLATILE:
+            self.regs[reg] = POISON
+        if not self.keep_rdx:
+            self.regs[RDX] = POISON
+        self.xmm = [POISON | POISON << 64] * 16
+
+    def run(self, entry, args, stack=()):
+        self.regs = [POISON] * 16
+        for reg in CALLEE_SAVED:
+            self.regs[reg] = 0x1111111111111100 + reg
+        for reg, value in args.items():
+            self.regs[reg] = value
+        self.regs[RSP] = STACK_TOP - 0x100
+        for value in reversed(stack):
+            self.push(value)
+        self.push(RETURN_SENTINEL)
+        saved = {reg: self.regs[reg] for reg in CALLEE_SAVED}
+        top = self.regs[RSP]
+        pc = entry
+        limit = self.step_limit
+        cache = self.cache
+        while pc != RETURN_SENTINEL:
+            limit -= 1
+            if limit < 0:
+                raise Halt("step limit")
+            row = cache.get(pc)
+            if row is None:
+                row = decode(self.read_code, pc)
+                cache[pc] = row
+            self.seen.add(pc)
+            self.steps += 1
+            pc = self.step(row)
+        if self.regs[RSP] != top + 8:
+            raise Halt("unbalanced stack")
+        for reg, value in saved.items():
+            if self.regs[reg] != value:
+                raise Halt("callee-saved register changed")
+        return self.regs[RAX]
+
+    def step(self, row):
+        op = row.op
+        width = row.width
+        if op == "mov":
+            self.put(row.a, width, self.get(row.b, width))
+        elif op == "jcc":
+            return row.target if self.condition(row.cc) else row.next
+        elif op == "lea":
+            self.put(row.a, width, self.address(row.b))
+        elif op == "push":
+            self.push(self.regs[row.a[1]])
+        elif op == "pop":
+            self.regs[row.a[1]] = self.pop()
+        elif op in ("add", "adc", "sub", "sbb", "cmp"):
+            carry = int(self.cf) if op in ("adc", "sbb") else 0
+            result = self.add_sub(self.get(row.a, width), self.get(row.b, width), carry, width, op not in ("add", "adc"))
+            if op != "cmp":
+                self.put(row.a, width, result)
+        elif op in ("and", "or", "xor", "test"):
+            left, right = self.get(row.a, width), self.get(row.b, width)
+            result = left & right if op in ("and", "test") else left | right if op == "or" else left ^ right
+            self.set_logic(result, width)
+            if op != "test":
+                self.put(row.a, width, result)
+        elif op == "cmpxchg":
+            current = self.get(row.a, width)
+            wanted = self.regs[RAX] & MASK[width]
+            self.add_sub(wanted, current, 0, width, True)
+            if wanted == current:
+                self.put(row.a, width, self.get(row.b, width))
+            else:
+                self.put(("r", RAX), width, current)
+        elif op == "xchg":
+            first, second = self.get(row.a, width), self.get(row.b, width)
+            self.put(row.a, width, second)
+            self.put(row.b, width, first)
+        elif op == "call":
+            self.push(row.next)
+            if row.target in self.real:
+                return row.target
+            hook = self.calls.get(row.target)
+            if not hook:
+                raise Halt("unmodelled call to %#x at %#x" % (row.target, row.va))
+            self.stub(hook)
+            return self.pop()
+        elif op == "jmp":
+            return row.target
+        elif op == "jmpi":
+            target = self.get(row.a, 8)
+            hook = self.slots.get(target)
+            if hook:
+                self.stub(hook)
+                return self.pop()
+            return target
+        elif op == "pushm":
+            self.push(self.get(row.a, 8))
+        elif op == "pushi":
+            self.push(row.a[1] & MASK[8])
+        elif op == "btsr":
+            bit = self.get(row.b, width) & (8 * width - 1)
+            value = self.get(row.a, width)
+            self.cf = bool(value >> bit & 1)
+            self.put(row.a, width, value | 1 << bit)
+        elif op == "btr":
+            self.cf = bool(self.get(row.a, width) >> (self.get(row.b, width) & (8 * width - 1)) & 1)
+        elif op == "movsx":
+            value = self.get(row.b, row.cc)
+            self.put(row.a, width, value - (1 << (8 * row.cc)) if value & SIGN[row.cc] else value)
+        elif op == "ror":
+            bits = 8 * width
+            count = self.get(row.b, 1) & (bits - 1)
+            value = self.get(row.a, width)
+            self.put(row.a, width, (value >> count | value << (bits - count)) & MASK[width])
+        elif op == "rol":
+            bits = 8 * width
+            count = self.get(row.b, 1) & (bits - 1)
+            value = self.get(row.a, width)
+            self.put(row.a, width, (value << count | value >> (bits - count)) & MASK[width])
+        elif op == "bt":
+            self.cf = bool(self.get(row.a, width) >> (row.b[1] & (8 * width - 1)) & 1)
+        elif op == "calli":
+            target = self.get(row.a, 8)
+            if target in self.real:
+                self.push(row.next)
+                return target
+            hook = self.slots.get(target)
+            if not hook:
+                raise Halt("unmodelled indirect call at %#x" % row.va)
+            self.xmm_result = None
+            self.stub(hook)
+            if self.xmm_result is not None:
+                self.xmm[0] = self.xmm_result
+        elif op == "ret":
+            return self.pop()
+        elif op == "movzx":
+            self.put(row.a, width, self.get(row.b, row.cc))
+        elif op == "set":
+            self.put(row.a, 1, int(self.condition(row.cc)))
+        elif op == "cmov":
+            value = self.get(row.b, width)
+            self.put(row.a, width, value if self.condition(row.cc) else self.get(row.a, width))
+        elif op in ("inc", "dec"):
+            carry = self.cf
+            value = self.add_sub(self.get(row.a, width), 1, 0, width, op == "dec")
+            self.cf = carry
+            self.put(row.a, width, value)
+        elif op == "neg":
+            value = self.add_sub(0, self.get(row.a, width), 0, width, True)
+            self.put(row.a, width, value)
+        elif op == "not":
+            self.put(row.a, width, ~self.get(row.a, width))
+        elif op == "imul1":
+            left, right = self.regs[RAX], self.get(row.a, 8)
+            left -= (left >> 63) << 64
+            right -= (right >> 63) << 64
+            product = left * right
+            self.regs[RAX] = product & MASK[8]
+            self.regs[RDX] = (product >> 64) & MASK[8]
+            self.cf = self.of = not -(1 << 63) <= product < 1 << 63
+        elif op == "mul":
+            product = self.regs[RAX] * self.get(row.a, 8)
+            self.regs[RAX] = product & MASK[8]
+            self.regs[RDX] = product >> 64
+            self.cf = self.of = self.regs[RDX] != 0
+        elif op == "imul3":
+            bits = 8 * width
+            left, right = self.get(row.b, width), row.target & MASK[width]
+            left -= (left >> (bits - 1)) << bits
+            right -= (right >> (bits - 1)) << bits
+            product = left * right
+            self.cf = self.of = not -SIGN[width] <= product < SIGN[width]
+            self.put(row.a, width, product)
+        elif op in ("shl", "shr", "sar"):
+            count = (self.regs[RCX] if row.b[0] == "r" else row.b[1]) & (63 if width == 8 else 31)
+            value = self.get(row.a, width)
+            if op == "shl":
+                result = value << count
+            elif op == "shr":
+                result = value >> count
+            else:
+                result = (value - (1 << (8 * width)) if value & SIGN[width] else value) >> count
+            if count:
+                self.set_logic(result, width)
+            self.put(row.a, width, result)
+        elif op == "movx":
+            if row.a[0] == "x":
+                self.xmm[row.a[1]] = self.vector(row.b)
+            elif row.b[0] == "x":
+                self.memory.write(self.address(row.a), 16, self.xmm[row.b[1]])
+            else:
+                raise Halt("unmodelled vector move")
+        elif op == "xorps":
+            self.xmm[row.a[1]] ^= self.vector(row.b)
+        elif op == "int3":
+            raise Halt("int3 at %#x" % row.va)
+        elif op == "cwde":
+            self.regs[RAX] = ((self.regs[RAX] & 0xFFFF) ^ 0x8000) - 0x8000 & MASK[4]
+        elif op == "cdqe":
+            self.regs[RAX] = (self.regs[RAX] & MASK[4]) | (MASK[8] ^ MASK[4] if self.regs[RAX] & SIGN[4] else 0)
+        elif op == "imul2":
+            bits = 8 * width
+            left, right = self.get(row.a, width), self.get(row.b, width)
+            left -= (left >> (bits - 1)) << bits
+            right -= (right >> (bits - 1)) << bits
+            product = left * right
+            self.cf = self.of = not -SIGN[width] <= product < SIGN[width]
+            self.put(row.a, width, product)
+        elif op == "nop":
+            pass
+        elif op == "bswap":
+            self.put(row.a, width, int.from_bytes(self.get(row.a, width).to_bytes(width, "little"), "big"))
+        elif op == "bsr":
+            source = self.get(row.b, width)
+            if source == 0:
+                raise Halt("bsr of zero at %#x" % row.va)
+            self.put(row.a, width, source.bit_length() - 1)
+        elif op in ("shld", "shrd"):
+            bits = 8 * width
+            count = (row.target if row.target is not None else self.regs[RCX]) & (bits - 1)
+            high, low = self.get(row.a, width), self.get(row.b, width)
+            if op == "shld":
+                value = (high << count | low >> (bits - count)) if count else high
+            else:
+                value = (high >> count | low << (bits - count)) if count else high
+            self.put(row.a, width, value)
+        elif op == "div":
+            divisor = self.get(row.a, width)
+            if divisor == 0:
+                raise Halt("division by zero at %#x" % row.va)
+            dividend = (self.regs[RDX] & MASK[width]) << (8 * width) | (self.regs[RAX] & MASK[width])
+            quotient, remainder = divmod(dividend, divisor)
+            if quotient > MASK[width]:
+                raise Halt("division overflow at %#x" % row.va)
+            self.regs[RAX], self.regs[RDX] = quotient, remainder
+        elif op == "movsxd":
+            value = self.get(row.b, 4)
+            self.put(row.a, 8, value - (1 << 32) if value & SIGN[4] else value)
+        else:
+            self.step_vector(row, op)
+        return row.next
+
+    def low(self, operand):
+        if operand[0] == "x":
+            return self.xmm[operand[1]] & MASK[8]
+        return self.memory.read(self.address(operand), 8)
+
+    def set_low(self, register, bits):
+        self.xmm[register] = (self.xmm[register] & ~MASK[8]) | bits
+
+    def step_vector(self, row, op):
+        if op == "movss":
+            if row.a[0] == "x":
+                self.xmm[row.a[1]] = self.memory.read(self.address(row.b), 4)
+            else:
+                self.memory.write(self.address(row.a), 4, self.xmm[row.b[1]] & MASK[4])
+            return
+        if op == "movsd":
+            if row.a[0] == "x":
+                if row.b[0] == "x":
+                    self.set_low(row.a[1], self.low(row.b))
+                else:
+                    self.xmm[row.a[1]] = self.low(row.b)
+            else:
+                self.memory.write(self.address(row.a), 8, self.xmm[row.b[1]] & MASK[8])
+        elif op == "movq":
+            if row.a[0] == "x":
+                self.xmm[row.a[1]] = self.get(row.b, 8)
+            else:
+                self.put(row.a, 8, self.xmm[row.b[1]] & MASK[8])
+        elif op in ("addsd", "subsd", "mulsd", "divsd", "minsd", "maxsd"):
+            if op in ("addsd", "divsd", "subsd", "mulsd"):
+                self.set_low(row.a[1], sse_arith(op[:3], self.low(row.a), self.low(row.b)))
+                return
+            left, right = to_float(self.low(row.a)), to_float(self.low(row.b))
+            if op == "minsd":
+                result = left if left < right else right
+            else:
+                result = left if left > right else right
+            self.set_low(row.a[1], to_bits(result))
+        elif op == "ucomisd":
+            left, right = to_float(self.low(row.a)), to_float(self.low(row.b))
+            unordered = left != left or right != right
+            self.of = self.sf = False
+            self.pf = unordered
+            self.zf = unordered or left == right
+            self.cf = unordered or left < right
+        elif op == "cvttsd2si":
+            value = to_float(self.low(row.b))
+            if value != value or not -9223372036854775808.0 <= value < 9223372036854775808.0:
+                self.put(row.a, 8, 1 << 63)
+            else:
+                self.put(row.a, 8, int(value))
+        elif op == "cvtsi2sd":
+            value = self.get(row.b, 8)
+            self.set_low(row.a[1], to_bits(float(value - (1 << 64) if value & SIGN[8] else value)))
+        elif op == "andpd":
+            self.xmm[row.a[1]] &= self.vector(row.b)
+        elif op == "orpd":
+            self.xmm[row.a[1]] |= self.vector(row.b)
+        elif op == "subpd":
+            right = self.vector(row.b)
+            left = self.xmm[row.a[1]]
+            low = to_float(left & MASK[8]) - to_float(right & MASK[8])
+            high = to_float(left >> 64) - to_float(right >> 64)
+            self.xmm[row.a[1]] = to_bits(low) | to_bits(high) << 64
+        elif op == "unpckhpd":
+            self.xmm[row.a[1]] = self.xmm[row.a[1]] >> 64 | (self.vector(row.b) >> 64) << 64
+        elif op == "punpckldq":
+            left, right = self.xmm[row.a[1]], self.vector(row.b)
+            self.xmm[row.a[1]] = (left & MASK[4]) | (right & MASK[4]) << 32 | ((left >> 32) & MASK[4]) << 64 | ((right >> 32) & MASK[4]) << 96
+        elif op == "movd":
+            self.xmm[row.a[1]] = self.get(row.b, 4)
+        elif op == "punpcklbw":
+            left, right = self.xmm[row.a[1]].to_bytes(16, "little"), self.vector(row.b).to_bytes(16, "little")
+            self.xmm[row.a[1]] = int.from_bytes(bytes(byte for pair in zip(left[:8], right[:8]) for byte in pair), "little")
+        elif op == "pshuflw":
+            source = self.vector(row.b)
+            words = [(source >> (16 * index)) & 0xFFFF for index in range(4)]
+            low = sum(words[(row.target >> (2 * index)) & 3] << (16 * index) for index in range(4))
+            self.xmm[row.a[1]] = source >> 64 << 64 | low
+        elif op == "pshufd":
+            source = self.vector(row.b)
+            words = [(source >> (32 * index)) & MASK[4] for index in range(4)]
+            self.xmm[row.a[1]] = sum(words[(row.target >> (2 * index)) & 3] << (32 * index) for index in range(4))
+        elif op in ("pcmpeqb", "pcmpeqd"):
+            size = 1 if op == "pcmpeqb" else 4
+            left, right = self.xmm[row.a[1]].to_bytes(16, "little"), self.vector(row.b).to_bytes(16, "little")
+            lanes = (b"\xff" * size if left[at:at + size] == right[at:at + size] else bytes(size) for at in range(0, 16, size))
+            self.xmm[row.a[1]] = int.from_bytes(b"".join(lanes), "little")
+        elif op == "pmovmskb":
+            data = self.xmm[row.b[1]].to_bytes(16, "little")
+            self.put(row.a, 4, sum((byte >> 7) << index for index, byte in enumerate(data)))
+        elif op == "tzcnt":
+            source = self.get(row.b, row.width)
+            count = (source & -source).bit_length() - 1 if source else row.width * 8
+            self.cf = source == 0
+            self.zf = count == 0
+            self.put(row.a, row.width, count)
+        elif op == "movhps":
+            self.xmm[row.a[1]] = (self.xmm[row.a[1]] & MASK[8]) | self.get(row.b, 8) << 64
+        elif op == "movlps":
+            self.xmm[row.a[1]] = self.xmm[row.a[1]] >> 64 << 64 | self.get(row.b, 8)
+        elif op == "movdout":
+            self.put(row.a, 4, self.xmm[row.b[1]] & MASK[4])
+        elif op == "punpcklqdq":
+            self.xmm[row.a[1]] = (self.xmm[row.a[1]] & MASK[8]) | (self.vector(row.b) & MASK[8]) << 64
+        elif op in ("pslld", "psrad"):
+            value, lanes = self.xmm[row.a[1]], 0
+            for shift in (0, 32, 64, 96):
+                lane = (value >> shift) & MASK[4]
+                if op == "pslld":
+                    lane = (lane << row.b[1]) & MASK[4]
+                else:
+                    lane = ((lane - (1 << 32) if lane & SIGN[4] else lane) >> row.b[1]) & MASK[4]
+                lanes |= lane << shift
+            self.xmm[row.a[1]] = lanes
+        elif op == "pandn":
+            self.xmm[row.a[1]] = (self.xmm[row.a[1]] ^ ((1 << 128) - 1)) & self.vector(row.b)
+        elif op == "psrlq":
+            value = self.xmm[row.a[1]]
+            self.xmm[row.a[1]] = ((value & MASK[8]) >> row.b[1]) | (((value >> 64) >> row.b[1]) << 64)
+        elif op in ("addpd", "divpd", "mulpd", "maxpd"):
+            left, right = self.xmm[row.a[1]], self.vector(row.b)
+            lanes = []
+            for shift in (0, 64):
+                one, two = to_float((left >> shift) & MASK[8]), to_float((right >> shift) & MASK[8])
+                if op == "maxpd":
+                    lanes.append(to_bits(one if one > two else two))
+                else:
+                    lanes.append(sse_arith({"addpd": "add", "divpd": "div", "mulpd": "mul"}[op], to_bits(one), to_bits(two)))
+            self.xmm[row.a[1]] = lanes[0] | lanes[1] << 64
+        elif op == "shufpd":
+            left, right = self.xmm[row.a[1]], self.vector(row.b)
+            first = (left >> (64 * (row.target & 1))) & MASK[8]
+            second = (right >> (64 * ((row.target >> 1) & 1))) & MASK[8]
+            self.xmm[row.a[1]] = first | second << 64
+        elif op == "cmppd":
+            if row.target not in (2, 5):
+                raise Halt("unmodelled compare predicate at %#x" % row.va)
+            left, right = self.xmm[row.a[1]], self.vector(row.b)
+            value = 0
+            for shift in (0, 64):
+                one, two = to_float((left >> shift) & MASK[8]), to_float((right >> shift) & MASK[8])
+                if (one <= two) if row.target == 2 else not one < two:
+                    value |= MASK[8] << shift
+            self.xmm[row.a[1]] = value
+        elif op == "cmpeqsd":
+            left, right = to_float(self.low(row.a)), to_float(self.low(row.b))
+            self.set_low(row.a[1], MASK[8] if left == right else 0)
+        elif op == "andnpd":
+            self.xmm[row.a[1]] = (~self.xmm[row.a[1]] & ((1 << 128) - 1)) & self.vector(row.b)
+        elif op == "movmskpd":
+            value = self.xmm[row.b[1]]
+            self.put(row.a, 4, int(bool(value >> 63 & 1)) | int(bool(value >> 127 & 1)) << 1)
+        else:
+            raise Halt("unmodelled operation %s at %#x" % (op, row.va))
+
+    def vector(self, operand):
+        if operand[0] == "x":
+            return self.xmm[operand[1]]
+        return int.from_bytes(self.memory.bytes_at(self.address(operand), 16), "little")
+
+
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Packet part: the order price shaping function of node #115 (three copies), a separate specification, a harness that
+# runs the real bytes with every callee stubbed at the edge, the case lists, and the negative controls.
+# ---------------------------------------------------------------------------------------------------------------------
+
+import argparse
+import json
+
+M64 = MASK[8]
+H = HEAP_BASE
+STATE, MARKETS, ROWS, REQ, USER, OUT = H + 0x10000, H + 0x20000, H + 0x30000, H + 0x40000, H + 0x40100, H + 0x40200
+HEAP_USED = 0x42000
+MARKER = 0xC3
+STRIDE = 0x510
+SLOT_EXEMPT, SLOT_AVAIL, SLOT_GATE, SLOT_BAND, SLOT_STAMP, SLOT_ROUND, SLOT_PANIC_A, SLOT_PANIC_B = (
+    0x64E6A80, 0x64E4E88, 0x64E5A98, 0x64E5AE8, 0x64E8100, 0x64E1890, 0x64DF6A0, 0x64DF620)
+PANIC_TEXTS = {0x7D3212: "market", 0x7C95FA: "second"}
+DROP_MARKET, DROP_SECOND = 0x44E0810, 0x42320D0
+TAG_BLOCKED, TAG_REF_OK, TAG_STEP, TAG_FEE, TAG_CAP, TAG_BAND, TAG_VALUE, TAG_MIN, TAG_TIME = 0x19C, 0x1A2, 0xDE, 0x6D, 0x6C, 0x63, 0x156, 0xC8, 0x78
+SYSTEM_USERS = (b"\xff" * 20, b"\xee" * 20)
+MIN_NOTIONAL = 0x98967F
+NOTIONAL_CAP = 0x1999999999999999
+SIZE_CAP = 0x7FFFFFFFFFFFFFFE
+FRACTION = 100000.0
+
+
+class Layout:
+    def __init__(self, ptr, count, second, tri, lim, band):
+        self.ptr, self.count, self.second, self.tri, self.lim, self.band = ptr, count, second, tri, lim, band
+
+
+L_FIRST = Layout(0x7C8, 0x7D0, 0x3AD0, 0x4294, 0x4228, 0x4220)
+L_SECOND = Layout(0x1338, 0x1340, 0x4640, 0x4E04, 0x4D98, 0x4D90)
+
+COPIES = (
+    dict(name="first", start=0x5A21510, ref=0x5AED270, look=0x5AED180, drop_third=0x5A4A6F0, tick=0x5A01110, layout=L_FIRST),
+    dict(name="second", start=0x5A21ED0, ref=0x5AED4A0, look=0x5AED090, drop_third=0x5A4A6F0, tick=0x5A01110, layout=L_SECOND),
+    dict(name="third", start=0x2D3A160, ref=0x2753840, look=0x2753750, drop_third=0x2DF6730, tick=0x2891F50, layout=L_FIRST),
+)
+
+STATUS_NAMES = {
+    0x19C: "user blocked by the first slot", 0x1A2: "reference lookup passed (not a status of this function)",
+    0xDE: "reference could not move by the step amount", 0x6D: "price times size above 0x1999999999999999",
+    0x6C: "price times size above the available amount", 0x63: "price outside the band", 0xC8: "minimum order value",
+    0x78: "update window", 0x156: "panic marker",
+}
+
+
+def bits(value):
+    return to_bits(value)
+
+
+def round_away(x):
+    """C round(): halves go away from zero; NaN and infinities pass through."""
+    if x != x or x in (math.inf, -math.inf):
+        return x
+    whole = math.trunc(x)
+    if abs(x - whole) >= 0.5:
+        whole += 1 if x > 0 else -1
+    return float(whole) if whole != 0 else math.copysign(0.0, x)
+
+
+def u64_float(value):
+    return float(value)
+
+
+def saturate(x):
+    """The cast chain after round: maxsd 0, infinity and NaN to 0, clamp at 2^64, saturating u64, at least 1."""
+    x = round_away(x)
+    if not x > 0.0:
+        x = 0.0
+    if x == math.inf:
+        x = 0.0
+    if x > 18446744073709551616.0:
+        x = 18446744073709551616.0
+    if x > 1.844674407370955e19:
+        result = M64
+    else:
+        result = int(x)
+    return result or 1
+
+
+class Case:
+    FIELDS = (
+        "label", "user", "blocked", "ref_tag", "asset", "markets", "second", "rows", "flag_a", "side", "flag_b", "junk", "delta",
+        "size", "optref", "tick", "avail", "q0", "q1", "gate", "band_exempt", "stamp", "now", "last", "tri1", "tri2", "lim", "p", "fill",
+    )
+
+    def __init__(self, **kw):
+        self.label = "case"
+        self.user = bytes(range(1, 21))
+        self.blocked = 0
+        self.ref_tag = TAG_REF_OK
+        self.asset = 10000 + 2
+        self.markets = 3
+        self.second = 3
+        self.rows = (500, 600, 700, 800)
+        self.flag_a = 0
+        self.side = 0
+        self.flag_b = 0
+        self.junk = 0
+        self.delta = 0
+        self.size = 100
+        self.optref = 0
+        self.tick = 1
+        self.avail = 1 << 62
+        self.q0 = 0
+        self.q1 = 0
+        self.gate = 0
+        self.band_exempt = 0
+        self.stamp = 0x1122334455667788
+        self.now = 1000000
+        self.last = 0
+        self.tri1 = (5, 5, 5)
+        self.tri2 = (5, 5, 5)
+        self.lim = 0
+        self.p = 0.5
+        self.fill = 1
+        for key, value in kw.items():
+            if key not in self.FIELDS:
+                raise EvidenceError("unknown case field: %s" % key)
+            setattr(self, key, value)
+
+    def changed(self, **kw):
+        values = {name: getattr(self, name) for name in self.FIELDS}
+        values.update(kw)
+        return Case(**values)
+
+    def req0(self):
+        return (self.junk << 8 | self.flag_a) & M64
+
+    def tmp(self):
+        data = bytearray(0x70)
+        for index in range(2, 0x70):
+            data[index] = (self.fill * 37 + index * 11) & 0xFF
+        data[0:2] = self.ref_tag.to_bytes(2, "little")
+        return data
+
+
+PROBE = {}
+
+
+class Panic(Exception):
+    def __init__(self, label):
+        Exception.__init__(self, label)
+        self.label = label
+
+
+def conv(x):
+    return saturate(x)
+
+
+def spec(case, flaw=None):
+    """What the function must do. Returns (out bytes, return word, ordered edge log); raises Panic for the two panics."""
+    out = bytearray([MARKER]) * 0x100
+    log = []
+
+    def finish(tag=None, **fields):
+        if tag is not None:
+            out[0x10:0x12] = tag.to_bytes(2, "little")
+        out[0:8] = (1).to_bytes(8, "little")
+        return out, OUT, log
+
+    log.append(("exempt", case.user))
+    if case.blocked:
+        return finish(TAG_BLOCKED)
+    asset, size, side = case.asset, case.size, case.side
+    dex, idx = asset // 10000, asset % 10000
+    if dex >= case.markets:
+        raise Panic("market")
+    log.append(("drop", TAG_VALUE))
+    log.append(("ref", asset, size, case.flag_b, case.user))
+    tmp = case.tmp()
+    if case.ref_tag != TAG_REF_OK:
+        out[0x10:0x80] = tmp
+        return finish()
+    if dex >= case.second:
+        raise Panic("second")
+    log.append(("drop", TAG_VALUE))
+    rows = case.rows
+    if idx >= len(rows):
+        raise Panic("bounds")
+    row = rows[idx]
+    ref = row if flaw == "ignore_optref" else (case.optref or row)
+    cond = ((row == ref) and flaw != "cond_strict") or (((row < ref) ^ side) & 1)
+    stop, ref2 = (row, row) if cond else (0, ref)
+    if flaw == "stop_zero":
+        stop = 0
+
+    def step_error():
+        out[0x12:0x16] = tmp[2:6]
+        out[0x16:0x18] = tmp[6:8]
+        out[0x20:0x80] = tmp[0x10:0x70]
+        return finish(TAG_STEP)
+
+    if (case.req0() != 0) if flaw == "flag_whole" else (case.flag_a & 0xFF):
+        if side:
+            if (ref2 < case.delta) if flaw == "step_equal_ok" else (ref2 <= case.delta):
+                return step_error()
+            ref2 -= case.delta
+        else:
+            if ref2 + case.delta > M64 and flaw != "add_wrap":
+                return step_error()
+            ref2 = (ref2 + case.delta) & M64
+    else:
+        scale = (FRACTION if side else -FRACTION) if flaw == "fraction_sign" else (-FRACTION if side else FRACTION)
+        ref2 = conv((float(case.delta) / scale + 1.0) * float(ref2))
+    log.append(("drop", TAG_STEP))
+    ref_float = float(ref2)
+    price = conv((1.1 if side else 0.9) * ref_float) if flaw == "factor_swap" else conv((0.9 if side else 1.1) * ref_float)
+    log.append(("tick", asset, price))
+    tick = case.tick
+    quotient = price // tick
+    stepped = ((quotient + 1) & M64 or M64) if (side or flaw == "ceil_both") and flaw != "floor_both" else quotient
+    product = stepped * tick
+    price = M64 if product > M64 else product
+    price = price if flaw == "no_min_price" else (price or 1)
+    if flaw == "probe":
+        PROBE.update(price=price, ref=ref_float)
+    top = max(price, ref2) if flaw == "top_no_row" else max(row, price, ref2)
+    if top * size > M64 or top * size > NOTIONAL_CAP:
+        return finish(TAG_FEE)
+    log.append(("avail", asset, case.user))
+    if price * size > M64 or price * size > SIZE_CAP or (price * size >= case.avail if flaw == "cap_ge" else price * size > case.avail):
+        out[0x18:0x20] = bits(float(case.avail) / (100000.0 if flaw == "cap_scale" else 1000000.0)).to_bytes(8, "little")
+        return finish(TAG_CAP)
+    log.append(("look", asset))
+    log.append(("gate", asset, side))
+    if not case.gate:
+        pick = (case.q1 if side else case.q0) if flaw == "pick_swap" else (case.q0 if side else case.q1)
+        chosen = price
+        if pick:
+            chosen = max(price, case.q0) if side else min(price, case.q1)
+        value = chosen * size
+        if value > M64 or value > SIZE_CAP:
+            low = True
+        elif (value >= MIN_NOTIONAL) if flaw == "min_ge" else (value > MIN_NOTIONAL):
+            low = False
+        else:
+            low = True if flaw == "no_system" else (case.user not in SYSTEM_USERS[:1] if flaw == "one_system" else case.user not in SYSTEM_USERS)
+        if low:
+            if asset <= 0x270F:
+                word = asset & 0xFFFFFFFF
+            elif asset <= 0x5F45A5F:
+                word = (asset + (10000 if flaw == "remap_short" else 100000)) & 0xFFFFFFFF
+            else:
+                word = 0xFFFFFFFF
+            out[0x14:0x18] = word.to_bytes(4, "little")
+            out[0x18:0x20] = (0x8000000000000001).to_bytes(8, "little")
+            out[0x20:0x28] = (0x4024000000000000).to_bytes(8, "little")
+            return finish(TAG_MIN)
+    # shared tail: the time test, then the band, then the success record
+    first = (case.tri1[0] if case.tri1[0] < 0x80000000 else case.tri1[0] - (1 << 32), case.tri1[1], case.tri1[2])
+    second = (case.tri2[0] if case.tri2[0] < 0x80000000 else case.tri2[0] - (1 << 32), case.tri2[1], case.tri2[2])
+    behind = (first <= second) if flaw == "tri_strict" else (first < second)
+    if behind or (case.now <= case.lim if flaw == "lim_ge" else case.now < case.lim):
+        limit = case.last + (4999 if flaw == "window_4999" else 5000)
+        if limit > M64:
+            limit = M64
+        out[0x12] = int(case.now >= limit)
+        return finish(TAG_TIME)
+    p = case.p
+    log.append(("band",))
+    if not case.band_exempt:
+        r = fdiv(float(price), ref_float) + (-1.0)
+        if (p >= abs(r)) if flaw == "p_ge" else (p > abs(r)):
+            pass
+        elif flaw != "no_upper" and r > 0.0 and 1.0 > p and (fdiv(1.0, 1.0 - p) + (-1.0)) >= r:
+            pass
+        else:
+            out[0x18:0x20] = bits(p * 100.0).to_bytes(8, "little")
+            return finish(TAG_BAND)
+    log.append(("stamp", case.tri1))
+    fields = {
+        0x08: 1, 0x10: size, 0x18: 0, 0x28: 0, 0x38: 0, 0x40: 8, 0x48: 0, 0x50: 0xA, 0x60: 0x8000000000000000, 0x98: price,
+        0xA0: case.stamp, 0xC0: case.req0(), 0xC8: case.delta, 0xD0: case.optref, 0xD8: stop,
+    }
+    for at, value in fields.items():
+        out[at:at + 8] = (value & M64).to_bytes(8, "little")
+    out[0xA8] = case.flag_b
+    out[0xA9] = 0
+    out[0xBA] = side
+    out[0:8] = bytes(8)
+    return out, OUT, log
+
+
+class Mismatch(Exception):
+    pass
+
+
+class Harness:
+    """Runs one copy over a Case with every callee a stub that checks what it receives and logs it."""
+
+    def __init__(self, image, copy, patches=None):
+        self.image = image
+        self.copy = copy
+        self.layout = copy["layout"]
+        self.machine = Machine(image, patches)
+        self.machine.memory.statics.update(image.relative())
+        rel = image.relative()
+        calls = self.machine.calls
+        slots = self.machine.slots
+        calls[DROP_MARKET] = self.drop_market
+        calls[DROP_SECOND] = self.drop_second
+        calls[copy["drop_third"]] = self.drop_third
+        calls[copy["ref"]] = self.ref
+        calls[copy["look"]] = self.look
+        calls[copy["tick"]] = self.tick
+        slots[rel[SLOT_EXEMPT]] = self.exempt
+        slots[rel[SLOT_AVAIL]] = self.avail
+        slots[rel[SLOT_GATE]] = self.gate
+        slots[rel[SLOT_BAND]] = self.band
+        slots[rel[SLOT_STAMP]] = self.stamp
+        slots[rel[SLOT_ROUND]] = self.rounder
+        slots[rel[SLOT_PANIC_A]] = self.panic_text
+        slots[rel[SLOT_PANIC_B]] = self.panic_bounds
+        self.case = None
+        self.log = []
+        self.tmp_at = None
+
+    # -- stubs -----------------------------------------------------------------------------------------------------
+    def reg(self, number):
+        return self.machine.regs[number]
+
+    def user_at(self, address):
+        return self.machine.memory.bytes_at(address, 20)
+
+    def need(self, condition, text):
+        if not condition:
+            raise Mismatch(text)
+
+    def exempt(self, m):
+        self.need(self.reg(RDI) == USER, "exempt argument")
+        self.log.append(("exempt", self.user_at(USER)))
+        m.regs[RAX] = self.case.blocked
+
+    def drop_check(self, m, tag):
+        self.need(m.memory.read(self.reg(RDI), 2) == tag, "drop tag %#x" % tag)
+        self.log.append(("drop", tag))
+
+    def drop_market(self, m):
+        self.drop_check(m, TAG_VALUE)
+
+    def drop_second(self, m):
+        self.drop_check(m, TAG_VALUE)
+
+    def drop_third(self, m):
+        self.drop_check(m, TAG_STEP)
+
+    def market_address(self):
+        return MARKETS + (self.case.asset // 10000) * STRIDE
+
+    def ref(self, m):
+        c = self.case
+        tmp = self.reg(RDI)
+        self.need(self.reg(RSI) == self.market_address(), "ref market")
+        self.need(self.reg(RCX) == c.asset and self.reg(R8) == c.size and self.reg(R9) & 0xFF == c.flag_b, "ref arguments")
+        self.need(m.memory.read(self.reg(RSP) + 8, 8) == STATE, "ref state argument")
+        user = self.user_at(self.reg(RDX))
+        self.tmp_at = tmp
+        m.memory.put_bytes(tmp, bytes(c.tmp()))
+        self.log.append(("ref", c.asset, c.size, c.flag_b, user))
+
+    def look(self, m):
+        c = self.case
+        self.need(self.reg(RSI) == self.market_address() and self.reg(RDX) == c.asset and self.reg(RCX) == STATE, "look arguments")
+        self.need(self.reg(RDI) == self.tmp_at, "look out")
+        m.memory.write(self.reg(RDI), 8, c.q0)
+        m.memory.write(self.reg(RDI) + 8, 8, c.q1)
+        self.log.append(("look", c.asset))
+
+    def tick(self, m):
+        c = self.case
+        self.need(self.reg(RDI) == self.market_address() and self.reg(RSI) == c.asset, "tick arguments")
+        self.log.append(("tick", c.asset, self.reg(RDX)))
+        m.regs[RAX] = c.tick
+
+    def avail(self, m):
+        c = self.case
+        self.need(self.reg(RDI) == self.market_address() and self.reg(RDX) == c.asset and self.reg(RCX) & 0xFFFFFFFF == 10, "avail arguments")
+        raw = m.memory.bytes_at(self.reg(RSI), 21)
+        self.need(raw[0] == 1, "avail tag byte")
+        self.log.append(("avail", c.asset, raw[1:21]))
+        m.regs[RAX] = c.avail
+
+    def gate(self, m):
+        c = self.case
+        self.need(self.reg(RDI) == self.market_address() and self.reg(RDX) == c.asset, "gate arguments")
+        self.log.append(("gate", c.asset, self.reg(R8) & 0xFF))
+        m.regs[RAX] = c.gate
+
+    def band(self, m):
+        self.need(self.reg(RDI) == USER, "band argument")
+        self.log.append(("band",))
+        m.regs[RAX] = self.case.band_exempt
+
+    def stamp(self, m):
+        low = m.memory.read(self.reg(RDI), 8)
+        high = m.memory.read(self.reg(RDI) + 8, 4)
+        c = self.case
+        self.need(low == (c.tri1[0] | c.tri1[1] << 32) and high == c.tri1[2], "stamp argument")
+        self.log.append(("stamp", c.tri1))
+        m.regs[RAX] = c.stamp
+
+    def rounder(self, m):
+        m.xmm_result = bits(round_away(to_float(m.xmm[0] & M64)))
+
+    def panic_text(self, m):
+        self.need(self.reg(RSI) == 0x2B, "panic length")
+        raise Panic(PANIC_TEXTS.get(self.reg(RDI), "unknown panic text"))
+
+    def panic_bounds(self, m):
+        raise Panic("bounds")
+
+    # -- one run ---------------------------------------------------------------------------------------------------
+    def load(self, c):
+        mem = self.machine.memory
+        mem.reset(HEAP_USED)
+        lay = self.layout
+        put = mem.write
+        put(STATE + 0x10, 8, c.last)
+        put(STATE + 0x28, 8, c.now)
+        put(STATE + 0x60, 4, c.tri1[0])
+        put(STATE + 0x64, 4, c.tri1[1])
+        put(STATE + 0x68, 4, c.tri1[2])
+        put(STATE + lay.tri, 4, c.tri2[0])
+        put(STATE + lay.tri + 4, 4, c.tri2[1])
+        put(STATE + lay.tri + 8, 4, c.tri2[2])
+        put(STATE + lay.lim, 8, c.lim)
+        put(STATE + lay.band, 8, bits(c.p))
+        put(STATE + lay.ptr, 8, MARKETS)
+        put(STATE + lay.count, 8, c.markets)
+        put(STATE + lay.second, 8, c.second)
+        for index in range(3):
+            base = MARKETS + index * STRIDE
+            rows = ROWS + index * 0x1000
+            put(base + 0x150, 8, rows)
+            put(base + 0x158, 8, len(c.rows) if index == c.asset // 10000 else 1)
+            if index == c.asset // 10000:
+                for j, price in enumerate(c.rows):
+                    put(rows + j * 0x60 + 0x20, 8, price)
+        put(REQ, 8, c.req0())
+        put(REQ + 8, 8, c.delta)
+        put(REQ + 0x10, 8, c.asset)
+        put(REQ + 0x18, 8, c.size)
+        put(REQ + 0x20, 8, c.optref)
+        put(REQ + 0x28, 1, c.side)
+        put(REQ + 0x29, 1, c.flag_b)
+        mem.put_bytes(USER, c.user)
+        mem.put_bytes(OUT, bytes([MARKER]) * 0x100)
+
+    def run(self, c):
+        self.case = c
+        self.log = []
+        self.load(c)
+        m = self.machine
+        try:
+            rax = m.run(self.copy["start"], {RDI: OUT, RSI: REQ, RDX: USER, RCX: STATE})
+        except Panic as error:
+            return ("panic", error.label), self.log
+        return (rax, bytes(m.memory.bytes_at(OUT, 0x100))), self.log
+
+
+def expected(c):
+    try:
+        out, rax, log = spec(c)
+    except Panic as error:
+        return ("panic", error.label), None
+    return (rax, bytes(out)), log
+
+
+def normalise(result):
+    """The payload of status 0x6d is a stale register after the tick call, so it is not compared."""
+    if result[0] == "panic":
+        return result
+    rax, out = result
+    if out[0x10:0x12] == TAG_FEE.to_bytes(2, "little"):
+        out = out[:0x18] + bytes(8) + out[0x20:]
+    return rax, out
+
+
+def agree(c, got, log, want, want_log):
+    if normalise(got) != normalise(want):
+        return False
+    return want_log is None or log == want_log
+
+
+def outcome(c, got):
+    if got[0] == "panic":
+        return "panic " + got[1]
+    out = got[1]
+    if out[0:8] == bytes(8):
+        return "accepted"
+    tag = int.from_bytes(out[0x10:0x12], "little")
+    if tag == 0xC3C3:
+        return "status passed through"
+    return "status %#x" % tag
+
+
+# -- cases ---------------------------------------------------------------------------------------------------------------
+
+def lcg(seed):
+    state = seed & M64
+    while True:
+        state = (state * 6364136223846793005 + 1442695040888963407) & M64
+        yield state >> 11
+
+
+PRICES = (1, 2, 3, 99, 100, 500, 1000, 4999, 5000, 10 ** 5, 123457, 10 ** 6, 2500000, 10 ** 9, 4000000000, 5 * 10 ** 9, 1 << 40, 2 * 10 ** 18, (1 << 63) - 1, 1 << 63,
+          0xC000000000000000, M64 - 1, M64)
+SIZES = (1, 2, 3, 9, 10, 99, 100, 1000, 12345, 10 ** 6, 10 ** 9, 1 << 33, 1 << 62, M64)
+DELTAS = (0, 1, 2, 7, 99, 100, 1000, 99999, 100000, 100001, 150000, 1 << 32, 1 << 63, M64 - 1, M64)
+TICKS = (1, 2, 3, 5, 7, 10, 100, 1000, 12345, 10 ** 6, 1 << 40, 1 << 63, M64)
+AVAILS = (0, 1, 999, 10 ** 6, 10 ** 9, 10 ** 12, (1 << 62), SIZE_CAP, M64)
+USERS = tuple(bytes([(base + i * 7) & 0xFF for i in range(20)]) for base in (1, 77, 3)) + SYSTEM_USERS + (b"\xff" * 19 + b"\xfe", b"\xee" * 19 + b"\xef")
+ASSETS = (0, 1, 2, 7, 9999, 10000, 10001, 10002, 10003, 20000, 20002, 0x270F, 0x2710, 30000, 30003, 40000, 99999, 100000)
+P_VALUES = (0.0, 1e-9, 0.01, 0.1, 0.25, 0.5, 0.9, 0.999, 1.0, 1.5, 100.0, math.inf, math.nan, -0.5)
+TRIPLES = ((5, 5, 5), (5, 5, 4), (5, 5, 6), (5, 4, 9), (5, 6, 0), (4, 9, 9), (6, 0, 0), (-1 & 0xFFFFFFFF, 0, 0), (0x7FFFFFFF, 0, 0), (0x80000000, 0, 0), (5, 0xFFFFFFFF, 0), (5, 5, 0xFFFFFFFF))
+
+
+def named_cases():
+    base = Case()
+    yield "named", base.changed(label="accepted after the band")
+    yield "named", base.changed(label="user blocked", blocked=1)
+    yield "named", base.changed(label="reference lookup fails", ref_tag=0x77)
+    yield "named", base.changed(label="market index at the count", asset=30000)
+    yield "named", base.changed(label="second table too short", second=1, asset=10002)
+    yield "named", base.changed(label="row index at the count", asset=10004)
+    yield "named", base.changed(label="step by amount, side 0", flag_a=1, delta=7)
+    yield "named", base.changed(label="step by amount, side 1", flag_a=1, delta=7, side=1)
+    yield "named", base.changed(label="step to zero, side 1", flag_a=1, delta=600, side=1, optref=0)
+    yield "named", base.changed(label="step overflow, side 0", flag_a=1, delta=M64, side=0, optref=M64)
+    yield "named", base.changed(label="fraction up", delta=1000, rows=(500, 600, 700, 800))
+    yield "named", base.changed(label="fraction down", delta=1000, side=1)
+    yield "named", base.changed(label="fee above cap", size=1 << 40, rows=(1 << 30,) * 4)
+    yield "named", base.changed(label="available too small", avail=10)
+    yield "named", base.changed(label="gate set goes to time test", gate=1)
+    yield "named", base.changed(label="below minimum value", size=1, rows=(5, 6, 7, 8))
+    yield "named", base.changed(label="below minimum, system user", size=1, rows=(5, 6, 7, 8), user=SYSTEM_USERS[0])
+    yield "named", base.changed(label="below minimum, second system user", size=1, rows=(5, 6, 7, 8), user=SYSTEM_USERS[1])
+    yield "named", base.changed(label="time test refuses", tri1=(5, 5, 4), tri2=(5, 5, 5))
+    yield "named", base.changed(label="band refuses", p=1e-7, rows=(5000,) * 4, optref=100)
+    yield "named", base.changed(label="band exempt", p=1e-7, rows=(5000,) * 4, optref=100, band_exempt=1)
+    yield "named", base.changed(label="tick rounds up on side 1", side=1, tick=7)
+    yield "named", base.changed(label="tick above price, side 0", tick=1 << 40, rows=(5, 6, 7, 8))
+    yield "named", base.changed(label="flag byte with junk above it", flag_a=1, junk=0xABCDEF, delta=3)
+    yield "named", base.changed(label="junk above a zero flag byte", flag_a=0, junk=0xABCDEF, delta=3)
+    yield "named", base.changed(label="side byte 2", side=2, delta=3)
+
+
+def group_step():
+    seq = lcg(11)
+    for flag in (0, 1):
+        for side in (0, 1, 2):
+            for delta in (0, 1, 7, 599, 600, 601, 1 << 33, M64):
+                for optref in (0, 300, 600, 1000):
+                    c = Case(label="step", flag_a=flag, side=side, delta=delta, optref=optref, rows=(400, 600, 800, 1000), asset=10000 + 1 + next(seq) % 2)
+                    yield "step", c
+    for row in (0, 1, M64):
+        for optref in (0, 1, 2, M64 - 1, M64):
+            for side in (0, 1):
+                for flag in (0, 1):
+                    yield "step", Case(label="step edge", flag_a=flag, side=side, delta=1, optref=optref, rows=(row, row, row, row), asset=10000)
+
+
+def group_fraction():
+    for side in (0, 1):
+        for delta in DELTAS:
+            for ref in (1, 3, 1000, 1 << 53, (1 << 53) + 1, M64):
+                yield "fraction", Case(label="fraction", side=side, delta=delta, optref=ref, rows=(ref, ref, ref, ref), asset=10001, size=1)
+
+
+def group_tick():
+    for side in (0, 1):
+        for tick in TICKS:
+            for row in (1, 500, 1000, 10 ** 6, 1 << 40, M64 - 3):
+                yield "tick", Case(label="tick", side=side, tick=tick, rows=(row,) * 4, size=1, asset=10003, avail=M64)
+
+
+def group_value():
+    for size in SIZES:
+        for row in PRICES:
+            yield "value", Case(label="value", size=size, rows=(row,) * 4, asset=10002, avail=1 << 62 if size % 2 else M64)
+    for avail in AVAILS:
+        for size in (1, 10, 1000, 1 << 20):
+            for row in (1, 100, 5000, 10 ** 6):
+                yield "available", Case(label="available", size=size, rows=(row,) * 4, avail=avail, asset=10003)
+
+
+def group_gate():
+    for user in USERS:
+        for q0 in (0, 5, 300, 10 ** 9):
+            for q1 in (0, 5, 300, 10 ** 9):
+                for side in (0, 1, 2):
+                    for row, size in ((100, 1000), (5, 1), (1000, 10000), (1, 9999999)):
+                        yield "gate", Case(label="gate", user=user, q0=q0, q1=q1, side=side, rows=(row,) * 4, size=size, asset=10001)
+    for asset in (0, 9999, 10000, 0x270F, 0x2710, 0x5F45A5F, 0x5F45A60, 0x5F45A5E):
+        yield "asset word", Case(label="asset word", asset=asset % 30000, markets=3, second=3, rows=(5,) * 4, size=1)
+    for asset in (0x2710, 0x752F, 20000, 10000):
+        yield "asset word", Case(label="asset word", asset=asset % 30000, rows=(5,) * 4, size=1)
+
+
+def group_time():
+    for tri1 in TRIPLES:
+        for tri2 in TRIPLES:
+            for now, lim in ((10, 11), (11, 11), (12, 11), (M64, M64), (0, 0)):
+                yield "time", Case(label="time", tri1=tri1, tri2=tri2, now=now, lim=lim, last=4990, gate=1)
+    for last in (0, 1, 4999, 5000, 5001, M64 - 5000, M64 - 4999, M64):
+        for now in (0, 4999, 5000, 5001, 9999, 10000, 10001, M64 - 4999, M64 - 1, M64):
+            yield "time", Case(label="time window", last=last, now=now, lim=M64, gate=1)
+
+
+def group_band():
+    for p in P_VALUES:
+        for row, ref in ((1000, 1000), (1000, 1001), (1000, 900), (1000, 500), (1000, 2000), (1000, 1100), (1000, 1010), (1000, 999)):
+            for side in (0, 1):
+                for exempt in (0, 1):
+                    yield "band", Case(label="band", p=p, rows=(row,) * 4, optref=ref, side=side, band_exempt=exempt, size=100, tick=1, asset=10002)
+
+
+def group_zero():
+    """Size zero skips the value tests for a system user, so the accepted record shows the price."""
+    for row in (0, 1, 1000, 4000000000, 2 * 10 ** 18, 1 << 63, 0xC000000000000000, M64):
+        for side in (0, 1):
+            for optref in (0, 1000, M64):
+                for flag, delta in ((0, 0), (0, 7), (0, 100000), (0, M64), (1, 0), (1, 7)):
+                    for tick in (1, 2, 7, 12 * 10 ** 17, 12 * 10 ** 18, M64):
+                        yield "zero size", Case(label="zero size", user=SYSTEM_USERS[side], size=0, rows=(row,) * 4, optref=optref, side=side, flag_a=flag,
+                                                delta=delta, tick=tick, band_exempt=1, asset=10001)
+
+
+def group_top():
+    for row in (1, 1000, 2 * 10 ** 18):
+        for optref in (0, 5, 1000, 2 * 10 ** 18):
+            for side in (0, 1):
+                for size in (1, 2):
+                    yield "top", Case(label="top", rows=(row,) * 4, optref=optref, side=side, size=size, avail=M64, asset=10001)
+
+
+def probe_internals(c):
+    PROBE.clear()
+    try:
+        spec(c, "probe")
+    except Panic:
+        return None
+    return dict(PROBE) or None
+
+
+def group_equal_band():
+    """p equal to, one unit above and one unit below the ratio of the final price to the reference."""
+    bases = []
+    for ref, tick in ((10000, 9000), (10000, 11000), (1024, 768), (3000, 2999), (1 << 20, 1 << 19), (M64 - 2047, 1), (0xC000000000000000, 1), (3 * 10 ** 18, 7)):
+        for side in (0, 1):
+            bases.append(Case(label="equal band", rows=(ref,) * 4, tick=tick, side=side, size=0, asset=10001, user=SYSTEM_USERS[0]))
+    for base in bases:
+        seen = probe_internals(base)
+        if seen is None:
+            continue
+        r = fdiv(float(seen["price"]), seen["ref"]) + (-1.0)
+        for p in (abs(r), math.nextafter(abs(r), math.inf), math.nextafter(abs(r), 0.0)):
+            yield "equal band", base.changed(p=p)
+        if r > 0.0 and r < 1.0:
+            edge = fdiv(1.0, 1.0 - r) + (-1.0)
+            for p in (r, math.nextafter(r, 0.0)):
+                yield "equal band", base.changed(p=p)
+
+
+def group_cap_edge():
+    cap = NOTIONAL_CAP
+    for row in (cap - 1, cap, cap + 1, cap // 2, cap // 2 + 1):
+        for side in (0, 1):
+            for size in (1, 2):
+                yield "cap edge", Case(label="cap edge", rows=(row,) * 4, side=side, size=size, avail=M64, asset=10001, flag_a=1, delta=0)
+
+
+def group_zero_ref():
+    for side in (0, 1):
+        for delta in (0, 1, 99999, 100000):
+            for flag in (0, 1):
+                for size in (1, 1000):
+                    yield "zero reference", Case(label="zero reference", flag_a=flag, side=side, delta=delta, rows=(0,) * 4, optref=0, size=size, asset=10001,
+                                                 p=0.5, user=SYSTEM_USERS[0])
+                    yield "zero reference", Case(label="zero reference", flag_a=flag, side=side, delta=delta, rows=(1000,) * 4, optref=0, size=size, asset=10001,
+                                                 p=0.5)
+
+
+def group_random(count, seed):
+    seq = lcg(seed)
+
+    def pick(values):
+        return values[next(seq) % len(values)]
+
+    for index in range(count):
+        row = pick(PRICES[:15])
+        c = Case(
+            label="random", user=pick(USERS), blocked=int(next(seq) % 40 == 0), ref_tag=pick((TAG_REF_OK,) * 12 + (0x77, 0x1A3, 0)),
+            asset=pick(ASSETS), markets=pick((1, 2, 3, 3, 3, 3)), second=pick((1, 2, 3, 3, 3, 3)),
+            rows=tuple(pick(PRICES[:15]) if next(seq) % 3 else row for _ in range(pick((1, 2, 3, 4)))), flag_a=pick((0, 0, 1, 1, 2)),
+            side=pick((0, 0, 1, 1, 2)), flag_b=pick((0, 1)), junk=pick((0, 0, 0, 5, M64 >> 8)), delta=pick(DELTAS), size=pick(SIZES),
+            optref=pick((0, 0, 0) + PRICES[:15]), tick=pick(TICKS[:9] + (M64,)), avail=pick(AVAILS) if next(seq) % 3 == 0 else 1 << 62,
+            q0=pick((0, 0, 5, 300, 10 ** 9)), q1=pick((0, 0, 5, 300, 10 ** 9)), gate=pick((0, 0, 0, 1)), band_exempt=pick((0, 0, 1)),
+            stamp=next(seq), now=pick((0, 4999, 5000, 10 ** 6, M64)), last=pick((0, 1000, 10 ** 6, M64 - 100)),
+            tri1=pick(TRIPLES), tri2=pick(TRIPLES), lim=pick((0, 10 ** 6, M64)), p=pick(P_VALUES), fill=next(seq) & 0xFF,
+        )
+        yield "random", c
+
+
+def all_cases(random_count=1600):
+    out = []
+    for group in (named_cases(), group_step(), group_fraction(), group_tick(), group_value(), group_gate(), group_time(), group_band(), group_zero(), group_top(), group_equal_band(), group_cap_edge(), group_zero_ref(),
+                  group_random(random_count, 0x5EED)):
+        out.extend(group)
+    return out
+
+
+# -- running ---------------------------------------------------------------------------------------------------------
+
+def check(harness, c):
+    """Return None when the run agrees with the specification, else a short reason."""
+    try:
+        got, log = harness.run(c)
+    except (Mismatch, Halt, EvidenceError, ZeroDivisionError, KeyError, IndexError, TypeError) as error:
+        return "%s: %s" % (type(error).__name__, error)
+    want, want_log = expected(c)
+    if not agree(c, got, log, want, want_log):
+        return "different result"
+    return None
+
+
+def digest_line(copy, index, group, c, got):
+    return "%s\t%d\t%s\t%s\t%s" % (copy, index, group, c.label, outcome(c, got))
+
+
+def run_copy(image, copy, cases, reach=None, listing=None, counts=None):
+    harness = Harness(image, copy)
+    machine = harness.machine
+    mismatches = 0
+    steps = 0
+    seen = set()
+    sha = hashlib.sha256()
+    for index, (group, c) in enumerate(cases):
+        machine.seen = set()
+        reason = check(harness, c)
+        steps += 0
+        seen |= machine.seen
+        if reach is not None:
+            for va in machine.seen:
+                reach.setdefault(va, []).append(index)
+        if reason:
+            mismatches += 1
+            if mismatches < 6:
+                print("mismatch", copy["name"], index, group, c.label, reason, file=sys.stderr)
+            got = ("panic", "mismatch")
+        else:
+            got, _ = harness.run(c)
+        line = digest_line(copy["name"], index, group, c, got)
+        sha.update(line.encode() + b"\n")
+        if counts is not None:
+            key = (copy["name"], outcome(c, got))
+            counts[key] = counts.get(key, 0) + 1
+        if listing is not None and index % 5 in (0, 2):
+            listing.append(line)
+    return mismatches, len(seen), sha.hexdigest(), harness
+
+
+# -- negative controls -----------------------------------------------------------------------------------------------
+
+def mutation_rows(image, copy, seen):
+    """(address, kind, new byte, byte offset) for reached instructions of one copy: condition flips and immediate bit flips."""
+    start, end = image.exact_fde(copy["start"])
+    rows = []
+    for row in decode_range(image, start, end):
+        if row.va not in seen:
+            continue
+        data = bytes(image.blob[image.offset(row.va):image.offset(row.va) + row.size])
+        if row.op == "jcc" or row.op in ("set", "cmov"):
+            at = row.size - 2 if (row.op == "jcc" and row.size == 6) or False else None
+            if row.op == "jcc" and row.size == 2:
+                rows.append((row.va, "condition", row.va, data[0] ^ 1))
+            elif row.op == "jcc" and row.size == 6:
+                rows.append((row.va, "condition", row.va + 1, data[1] ^ 1))
+            elif row.op in ("set", "cmov") and data[0] == 0x0F:
+                rows.append((row.va, "condition", row.va + 1, data[1] ^ 1))
+            elif row.op in ("set", "cmov") and data[0] >> 4 == 4 and data[1] == 0x0F:
+                rows.append((row.va, "condition", row.va + 2, data[2] ^ 1))
+        if row.imm_at is not None and row.imm_size in (1, 4, 8) and row.op not in ("jcc", "call", "jmp"):
+            rows.append((row.va, "immediate", row.va + row.imm_at, data[row.imm_at] ^ 1))
+    return rows
+
+
+def spread(indices, count):
+    if len(indices) <= count:
+        return list(indices)
+    step = len(indices) / count
+    return sorted({indices[int(i * step)] for i in range(count)} | {indices[-1]})
+
+
+def run_mutants(image, copy, cases, reach, first_pass=70, second_pass=700):
+    rows = mutation_rows(image, copy, set(reach))
+    results = []
+    group_sizes = {}
+    for group, _ in cases:
+        group_sizes[group] = group_sizes.get(group, 0) + 1
+    for va, kind, at, value in rows:
+        harness = Harness(image, copy, {at: value})
+        harness.machine.step_limit = MUTANT_STEP_LIMIT
+        killed = None
+        tried = 0
+        done = set()
+        for width in (first_pass, second_pass):
+            for index in spread(reach[va], width):
+                if index in done:
+                    continue
+                done.add(index)
+                tried += 1
+                if check(harness, cases[index][1]):
+                    killed = index
+                    break
+            if killed is not None or va in EQUIVALENT:
+                break
+        if killed is None and va not in EQUIVALENT:
+            for index in reach[va]:
+                if index in done or group_sizes[cases[index][0]] > 250:
+                    continue
+                done.add(index)
+                tried += 1
+                if check(harness, cases[index][1]):
+                    killed = index
+                    break
+        results.append((va, kind, at, killed, tried))
+    return results
+
+
+def spec_flaws():
+    return ("cond_strict", "ignore_optref", "stop_zero", "flag_whole", "step_equal_ok", "add_wrap", "fraction_sign", "factor_swap", "ceil_both",
+            "floor_both", "no_min_price", "top_no_row", "cap_ge", "cap_scale", "pick_swap", "min_ge", "no_system", "one_system", "remap_short",
+            "tri_strict", "lim_ge", "window_4999", "p_ge", "no_upper")
+
+
+def run_flaws(image, cases):
+    harness = Harness(image, COPIES[0])
+    rows = []
+    results = [harness.run(c) for _, c in cases]
+    for flaw in spec_flaws():
+        found = None
+        for index, (_, c) in enumerate(cases):
+            got, log = results[index]
+            try:
+                out, rax, wlog = spec(c, flaw)
+                want = (rax, bytes(out))
+            except Panic as error:
+                want, wlog = ("panic", error.label), None
+            if not agree(c, got, log, want, wlog):
+                found = index
+                break
+        rows.append((flaw, found))
+    return rows
+
+
+CONSTANTS = (
+    (0x459400, 8, "1.1 factor"), (0x459788, 8, "0.9 factor"), (0x458F20, 8, "-100000.0 divisor"), (0x459510, 8, "100000.0 divisor"),
+    (0x4592B0, 8, "1.0"), (0x4599A0, 8, "1000000.0 divisor"), (0x458DC8, 8, "-1.0"), (0x459498, 8, "100.0"), (0x459090, 8, "2^64"),
+    (0x459360, 8, "2^63"), (0x458D58, 8, "largest double below 2^64"), (0x93E30B, 16, "system user A, first 16 bytes"),
+    (0x93E31B, 4, "system user A, last 4 bytes"), (0x93EB11, 16, "system user B, first 16 bytes"), (0x93EB21, 4, "system user B, last 4 bytes"),
+)
+
+EQUIVALENT_CONSTANTS = {
+    (0x459360, 6): "the constant becomes 2^64; for x in [2^63, 2^64) the converted x - 2^64 is negative and its two's complement is x again, so the result is the same",
+    (0x459090, 0): "2^64 plus one unit: a value above 2^64 clamps to it and then saturates through the 0x458d58 test to the same result",
+}
+
+
+def run_constants(image, cases, reach_all):
+    rows = []
+    for va, size, name in CONSTANTS:
+        offset = image.offset(va)
+        for flip in (0, 6) if size == 8 else (0, size - 1):
+            changed = bytearray(image.blob[offset:offset + size])
+            changed[flip] ^= 0x10 if (flip == 6 and size == 8) else 0x01
+            harness = Harness(image, COPIES[0])
+            harness.machine.memory.statics[va] = int.from_bytes(bytes(changed), "little")
+            found = None
+            for index, (_, c) in enumerate(cases):
+                if check(harness, c):
+                    found = index
+                    break
+            rows.append((va, name, flip, found))
+    return rows
+
+
+def rejected_inputs(image):
+    rows = []
+
+    def attempt(name, action):
+        try:
+            action()
+        except (EvidenceError, ValueError, KeyError, struct.error):
+            rows.append((name, True))
+        else:
+            rows.append((name, False))
+
+    attempt("wrong digest", lambda: load_image(BINARY, "0" * 64))
+    attempt("unknown case field", lambda: Case(bogus=1))
+    attempt("address outside every section", lambda: image.offset(0x1))
+    attempt("function start plus one", lambda: image.exact_fde(COPIES[0]["start"] + 1))
+    nobits = next(s for s in image.sections if s["type"] == 8 and s["size"] and s["name"] == ".bss")
+    attempt("NOBITS address", lambda: image.offset(nobits["address"] + 8))
+    return rows
+
+
+# -- evidence --------------------------------------------------------------------------------------------------------
+
+# Mutants that cannot change a reachable result in this harness are not made: the market table of the harness holds three
+# markets, so an asset id above 99,965,535 (market index 9996) cannot be given to the function.
+NOT_MUTATED = {
+    0x5A21DA9: "asset id above 0x5f45a5f needs market index 9996, which the harness cannot place",
+    0x5A21DAE: "asset id boundary 0x5f45a5f needs market index 9996, which the harness cannot place",
+    0x5A21DB5: "branch on the same boundary: the other side needs market index 9996",
+}
+
+EQUIVALENT = {
+    0x5A21811: ("abs mask bit 0", "bit 0 of the mask only matters for a bit pattern that is infinity or NaN either way"),
+    0x5A2181E: ("largest finite double threshold", "differs only for the double 1.797e308; the largest value the function can form is about 3.4e33"),
+    0x5A21860: ("sar 62 for sar 63", "for a value at or above 2^63 the low 11 bits are zero, so the lost mask bit changes nothing"),
+    0x5A21930: ("sar 62 for sar 63, second cast", "same argument as the first cast"),
+    0x5A21D12: ("asset boundary 0x270f", "needs market 0 with 9,999 mark rows; asset ids 0x270e and 0x270f cannot be given to the function in this harness"),
+    0x5A2187C: ("saturated reference minus one", "float(M64) and float(M64 - 1) are the same double, and a saturated reference exceeds the 0x1999999999999999 test for any nonzero size; the reference itself is not stored"),
+    0x5A21B66: ("addend of the saturating window sum", "only the carry flag is used on this path and it is set for every input that reaches the instruction"),
+    0x5A21A2E: ("size cap 0x7ffffffffffffffe in the available test", "dominated: the earlier test top * size <= 0x1999999999999999 already bounds price * size"),
+}
+
+
+def copy_rows(image):
+    """Instruction level comparison of the first copy with the other two: the rows that differ by more than call and rip displacement."""
+    first_start, first_end = image.exact_fde(COPIES[0]["start"])
+    base = decode_range(image, first_start, first_end)
+    rows = []
+    for copy in COPIES[1:]:
+        start, end = image.exact_fde(copy["start"])
+        other = decode_range(image, start, end)
+
+        def key(r, s):
+            target = None
+            if r.target is not None:
+                target = r.target - s if 0 <= r.target - s < 0x4000 else r.target
+            return (r.op, r.a, r.b, r.width, r.cc, target)
+
+        different = 0
+        for x, y in zip(base, other):
+            if len(base) == len(other) and key(x, first_start) != key(y, start):
+                different += 1
+        rows.append((copy["name"], hex(start), hex(end), len(other), len(base) == len(other), different))
+    return rows
+
+
+def analyse(image, full=True):
+    cases = all_cases()
+    reach = {}
+    listing = []
+    counts = {}
+    runs = {}
+    for copy in COPIES:
+        mism, seen, digest, _ = run_copy(image, copy, cases, reach if copy is COPIES[0] else None, listing if copy is COPIES[0] else None, counts)
+        runs[copy["name"]] = dict(cases=len(cases), mismatches=mism, instructions_reached=seen, run_digest=digest)
+    result = dict(cases=cases, reach=reach, listing=listing, counts=counts, runs=runs)
+    if full:
+        mutants = run_mutants(image, COPIES[0], cases, reach)
+        result["mutants"] = [m for m in mutants if m[0] not in NOT_MUTATED]
+        result["flaws"] = run_flaws(image, cases)
+        result["constants"] = run_constants(image, cases, reach)
+        result["rejected"] = rejected_inputs(image)
+        result["copy_rows"] = copy_rows(image)
+    return result
+
+
+def EQUIVALENT_CONSTANTS_NAME(va):
+    return next(name for a, size, name in CONSTANTS if a == va)
+
+
+def tsv(rows):
+    return "\n".join("\t".join(str(v) for v in row) for row in rows) + "\n"
+
+
+def render(result, image):
+    files = {}
+    cases = result["cases"]
+    group_counts = {}
+    for group, _ in cases:
+        group_counts[group] = group_counts.get(group, 0) + 1
+    mutants = result["mutants"]
+    killed = sum(1 for m in mutants if m[3] is not None)
+    constants = result["constants"]
+    equivalent = sum(1 for m in mutants if m[3] is None and m[0] in EQUIVALENT) + sum(1 for c in constants if c[3] is None and (c[0], c[2]) in EQUIVALENT_CONSTANTS)
+    flaws = result["flaws"]
+    constants = result["constants"]
+    rejected = result["rejected"]
+    controls = len(mutants) + len(flaws) + len(constants) + len(rejected)
+    detected = killed + sum(1 for f in flaws if f[1] is not None) + sum(1 for c in constants if c[3] is not None) + sum(1 for r in rejected if r[1])
+    undetected = controls - detected - equivalent
+    runs = result["runs"]
+    total_cases = sum(r["cases"] for r in runs.values())
+    functions = []
+    for copy in COPIES:
+        start, end = image.exact_fde(copy["start"])
+        functions.append(dict(copy=copy["name"], start=hex(start), end=hex(end), bytes=end - start, instructions=len(decode_range(image, start, end)),
+                              reference_lookup=hex(copy["ref"]), second_lookup=hex(copy["look"]), tick=hex(copy["tick"]), third_drop=hex(copy["drop_third"]),
+                              market_list=hex(copy["layout"].ptr), market_count=hex(copy["layout"].count), second_count=hex(copy["layout"].second),
+                              time_triple=hex(copy["layout"].tri), limit=hex(copy["layout"].lim), band_p=hex(copy["layout"].band)))
+    outcome_counts = {"%s: %s" % key: value for key, value in sorted(result["counts"].items())}
+    evidence = dict(
+        target=dict(node=115, sha256=SHA256), functions=functions, runs=runs, group_counts=dict(sorted(group_counts.items())),
+        outcomes=outcome_counts, status_names={hex(k): v for k, v in sorted(STATUS_NAMES.items())},
+        slots={"exempt": hex(SLOT_EXEMPT), "available": hex(SLOT_AVAIL), "gate": hex(SLOT_GATE), "band_exempt": hex(SLOT_BAND), "stamp": hex(SLOT_STAMP),
+               "round": hex(SLOT_ROUND), "panic_text": hex(SLOT_PANIC_A), "panic_bounds": hex(SLOT_PANIC_B)},
+        slot_targets={hex(s): hex(image.relative()[s]) for s in (SLOT_EXEMPT, SLOT_AVAIL, SLOT_GATE, SLOT_BAND, SLOT_STAMP, SLOT_ROUND, SLOT_PANIC_A, SLOT_PANIC_B)},
+        constants={hex(va): name for va, size, name in CONSTANTS},
+        system_users=[u.hex() for u in SYSTEM_USERS],
+        limits=dict(notional_cap=hex(NOTIONAL_CAP), size_cap=hex(SIZE_CAP), min_notional=hex(MIN_NOTIONAL), fraction=FRACTION),
+        totals=dict(undetected=undetected, cases=total_cases, negative_controls=controls, detected=detected, equivalent=equivalent, mutants_made=len(mutants),
+                    mutants_killed=killed, not_mutated=len(NOT_MUTATED)),
+    )
+    files["evidence.json"] = json.dumps(evidence, indent=1, sort_keys=True) + "\n"
+    files["runs.tsv"] = "copy\tcase\tgroup\tlabel\toutcome\n" + "\n".join(result["listing"]) + "\n"
+    files["mutations.tsv"] = "address\tkind\tbyte_address\tkilled_by_case\tcases_tried\tstatus\n" + tsv(
+        (hex(va), kind, hex(at), "" if k is None else k, tried, "killed" if k is not None else ("equivalent" if va in EQUIVALENT else "SURVIVED"))
+        for va, kind, at, k, tried in mutants)
+    files["wrong-implementations.tsv"] = "wrong_rule\tfirst_case_that_separates\n" + tsv(flaws)
+    files["corrupted-constants.tsv"] = "address\tconstant\tbyte_flipped\tfirst_case_that_separates\tstatus\n" + tsv(
+        (hex(a), n, f, "" if k is None else k, "separated" if k is not None else ("equivalent" if (a, f) in EQUIVALENT_CONSTANTS else "NOT SEPARATED")) for a, n, f, k in constants)
+    files["rejected-inputs.tsv"] = "input\trejected\n" + tsv(rejected)
+    files["not-mutated.tsv"] = "address\treason\n" + tsv((hex(a), r) for a, r in sorted(NOT_MUTATED.items()))
+    files["equivalent-mutants.tsv"] = "mutant\taddress\treason\n" + tsv([(name, hex(va), reason) for va, (name, reason) in sorted(EQUIVALENT.items())] + [("constant " + EQUIVALENT_CONSTANTS_NAME(va), hex(va), reason) for (va, flip), reason in sorted(EQUIVALENT_CONSTANTS.items())])
+    files["copies.tsv"] = "copy\tstart\tend\tinstructions\tsame_length_as_first\trows_that_differ\n" + tsv(result["copy_rows"])
+    files["measure.json"] = json.dumps(dict(cases=total_cases, negative_controls=controls, negative_detected=detected, equivalent=equivalent,
+                                            mutants_made=len(mutants), mutants_killed=killed), indent=1, sort_keys=True) + "\n"
+    return files
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--out", required=True)
+    args = parser.parse_args(argv)
+    image = load_image()
+    result = analyse(image)
+    files = render(result, image)
+    out = pathlib.Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    for name, text in files.items():
+        (out / name).write_text(text)
+    totals = json.loads(files["measure.json"])
+    print(json.dumps(totals, sort_keys=True))
+    bad = [m for m in result["mutants"] if m[3] is None and m[0] not in EQUIVALENT]
+    for va, kind, at, k, tried in bad:
+        print("survivor", hex(va), kind, hex(at), tried)
+    for row in result["flaws"]:
+        if row[1] is None:
+            print("flaw not separated", row[0])
+    for row in result["constants"]:
+        if row[3] is None and (row[0], row[2]) not in EQUIVALENT_CONSTANTS:
+            print("constant not separated", hex(row[0]), row[1], row[2])
+    return 0 if not bad and all(r["mismatches"] == 0 for r in result["runs"].values()) else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -339,7 +339,11 @@ def _leas(data, table, role):
 
 
 def _relocations(data):
-    s = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    s = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    if s is None:
+        raise ValueError('missing.rela.dyn section')
+    if s['size'] % 24 != 0:
+        raise ValueError('truncated.rela.dyn section')
     out = {}
     for off in range(s['offset'], s['offset'] + s['size'], 24):
         offset, info, addend = struct.unpack_from('<QQq', data, off)

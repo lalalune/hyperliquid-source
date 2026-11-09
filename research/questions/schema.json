@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/lalalune/hyperliquid-source/blob/main/research/questions/schema.json",
+  "title": "Node #115 bounded reconstruction question",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "question_id", "title", "target", "component", "work_type", "scope",
+    "readiness", "evidence_status", "prior_attempts", "remaining_gap", "dependencies",
+    "downstream_consumer", "acceptance_requirements", "required_capabilities",
+    "evidence_review", "linked_issue", "pilot_issue"
+  ],
+  "properties": {
+    "question_id": {"type": "string", "pattern": "^qcp-[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "title": {"type": "string", "minLength": 1},
+    "target": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"const": "artifacts/node/115/hl-node"},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "component": {"type": "string", "minLength": 1},
+    "work_type": {"enum": ["discovery", "reconstruction", "verification", "integration"]},
+    "scope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["question", "include", "exclude"],
+      "properties": {
+        "question": {"type": "string", "minLength": 1},
+        "include": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "exclude": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "readiness": {"enum": ["ready", "in-progress", "blocked", "recorded"]},
+    "evidence_status": {"enum": ["not-started", "unreviewed", "partial", "reviewed"]},
+    "prior_attempts": {"type": "array", "items": {"$ref": "#/$defs/pullReference"}},
+    "remaining_gap": {"type": "string", "minLength": 1},
+    "dependencies": {"type": "array", "items": {"$ref": "#/$defs/dependency"}},
+    "downstream_consumer": {"type": "string", "minLength": 1},
+    "acceptance_requirements": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "required_capabilities": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "evidence_review": {"type": "array", "items": {"$ref": "#/$defs/reviewReference"}},
+    "linked_issue": {"$ref": "#/$defs/issueReference"},
+    "pilot_issue": {"type": "string", "const": "https://github.com/lalalune/hyperliquid-source/issues/5391"}
+  },
+  "$defs": {
+    "pullReference": {
+      "type": "object", "additionalProperties": false,
+      "required": ["url", "relation"],
+      "properties": {
+        "url": {"type": "string", "pattern": "^https://github\\.com/lalalune/hyperliquid-source/pull/[0-9]+$"},
+        "relation": {"type": "string", "minLength": 1}
+      }
+    },
+    "reviewReference": {
+      "type": "object", "additionalProperties": false,
+      "required": ["url", "decision"],
+      "properties": {
+        "url": {"type": "string", "pattern": "^https://github\\.com/lalalune/hyperliquid-source/pull/[0-9]+$"},
+        "decision": {"type": "string", "minLength": 1}
+      }
+    },
+    "dependency": {
+      "type": "object", "additionalProperties": false,
+      "required": ["question_id", "kind", "contract", "condition"],
+      "properties": {
+        "question_id": {"type": "string", "pattern": "^qcp-[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "kind": {"enum": ["hard", "soft"]},
+        "contract": {"type": "string", "minLength": 1},
+        "condition": {"type": "string", "minLength": 1}
+      }
+    },
+    "issueReference": {
+      "type": "object", "additionalProperties": false,
+      "required": ["url", "purpose"],
+      "properties": {
+        "url": {"type": "string", "pattern": "^https://github\\.com/lalalune/hyperliquid-source/issues/[0-9]+$"},
+        "purpose": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

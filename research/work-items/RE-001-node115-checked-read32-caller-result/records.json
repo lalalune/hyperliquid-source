@@ -1,0 +1,42 @@
+{
+  "target": {
+    "release": 115,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "coordinate": "ELF virtual address"
+  },
+  "caller_fde": {
+    "start": 81887968,
+    "end": 81888083
+  },
+  "helper_call": {
+    "site": 81887981,
+    "bytes": "e83e91a000",
+    "destination": 92410928,
+    "output_argument": "rsp+0x28 in rdi",
+    "other_arguments": "rsi and rdx are passed through unchanged"
+  },
+  "tag_test": {
+    "site": 81887986,
+    "bytes": "807c242801",
+    "tested_byte": "[rsp+0x28]",
+    "equal_to": 1,
+    "not_equal_target": 81888027
+  },
+  "tag_1_result": {
+    "outer_tag": 1,
+    "tag_store_site": 81888072,
+    "payload_source": "helper output bytes [8,40)",
+    "outer_payload": "output bytes [8,40)"
+  },
+  "other_result": {
+    "outer_tag": 0,
+    "tag_store_site": 81888072,
+    "payload_source": "helper output bytes [1,33)",
+    "outer_payload": "output bytes [1,33)"
+  },
+  "limitations": [
+    "One caller only; no caller-of-caller input provenance.",
+    "The copied 32-byte windows are byte movement observations; this packet does not assert every byte is initialized for every helper outcome.",
+    "No source type, error meaning, or runtime behavior is inferred."
+  ]
+}

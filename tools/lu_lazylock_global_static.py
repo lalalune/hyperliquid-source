@@ -240,18 +240,25 @@ def word(data, va):
 
 
 def dynsym_name(data, index):
-    sym = next(s for s in sections(data) if s['name'] == '.dynsym')
-    strs = next(s for s in sections(data) if s['name'] == '.dynstr')
+    sym = next((s for s in sections(data) if s['name'] == '.dynsym'), None)
+    require(sym is not None, 'missing.dynsym section')
+    strs = next((s for s in sections(data) if s['name'] == '.dynstr'), None)
+    require(strs is not None, 'missing.dynstr section')
     noff = struct.unpack_from('<I', data, sym['offset'] + index * 24)[0]
     o = strs['offset'] + noff
-    return data[o:data.index(b'\0', o)].decode()
+    try:
+        return data[o:data.index(b'\0', o)].decode()
+    except UnicodeDecodeError:
+        raise ValueError('dynamic symbol name is not valid UTF-8') from None
 
 
 def relocations(data):
     """offset -> (kind, target) for every .rela.dyn entry: RELATIVE
     entries resolve to their addend, GLOB_DAT / JUMP_SLOT entries
     to their dynamic symbol name."""
-    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    sec = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    require(sec is not None, 'missing.rela.dyn section')
+    require(sec['size'] % 24 == 0, 'truncated.rela.dyn section')
     out = {}
     for off in range(sec['offset'], sec['offset'] + sec['size'], 24):
         r_off, r_info, r_add = struct.unpack_from('<QQq', data, off)

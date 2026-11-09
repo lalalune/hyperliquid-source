@@ -1,0 +1,127 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "records": [
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "address": "0x61cd2e0",
+      "end": "0x61cd36f",
+      "body_sha256": "469590278ff13b8ed347c4085fc75e93a54c8c18fecbbff38b086c2f92fc22cb",
+      "identity": "rocksdb::FileChecksumGenCrc32cFactory::CreateFileChecksumGenerator (vendor census)",
+      "contract": "create(context) -> FileChecksumGenCrc32c* via a hidden out-pointer in rdi; rdx = context",
+      "semantics": "store a new 0x30-byte FileChecksumGenCrc32c at [rdi] iff the requested name is empty or exactly \"FileChecksumCrc32c\"; otherwise store null"
+    },
+    {
+      "kind": "layout",
+      "subject": "FileChecksumGenCrc32c object",
+      "vptr": "+0x0",
+      "crc_accumulator_u32": "+0x8",
+      "checksum_string": "+0x10",
+      "observation": "the factory zeroes crc_ at +0x8, stores the vtable address point 0x64d7970 at +0x0, and initialises the string at +0x10 with pointer object+0x20 (SSO), length 0 and a NUL first byte; the object is 0x30 bytes, matching the layout the Finalize (0x61cd1c0) and Update (0x61cd1a0) packets read off the siblings"
+    },
+    {
+      "kind": "name_gate",
+      "address": "0x61cd2e0",
+      "expected_name": "FileChecksumCrc32c",
+      "observation": "length 0 jumps straight to the allocation at 0x61cd334 (je at 0x61cd2ef); length 0x12 falls through to the byte compare at 0x61cd308; any other length falls through to the null return at 0x61cd2f7"
+    },
+    {
+      "kind": "name_compare",
+      "address": "0x61cd308",
+      "observation": "two movabs immediates (\"FileChec\", \"ksumCrc3\") are xored against the name bytes and or-ed together; a nonzero result jumps to the null return; then cmpw $0x6332 (\"2c\") checks the last two bytes"
+    },
+    {
+      "kind": "create_alloc",
+      "plt": "0x63f0dd0",
+      "plt_sha256": "93c243e02314295cea02f50141461a95e10c09201ec8777b94214ed0177582dd",
+      "target": "operator new",
+      "size": "0x30",
+      "observation": "single call, size 0x30, result in rax"
+    },
+    {
+      "kind": "create_init",
+      "address": "0x61cd33e",
+      "vtable_address_point": "0x64d7970",
+      "observation": "lea loads 0x64d7960 and add $0x10 gives the vtable address point 0x64d7970 (the same point the Finalize packet pins); the new pointer is stored at [rdi] and rdi is returned in rax"
+    },
+    {
+      "kind": "vtable_slot",
+      "slot": 19,
+      "factory_vtable_address_point": "0x64d79b0",
+      "observation": "the merged factory-vtable packet lists this function at slot 19 with the same body hash; that packet records the slot only, this packet reconstructs the behaviour"
+    },
+    {
+      "kind": "window",
+      "label": "gate_load",
+      "start": "0x61cd2e0",
+      "end": "0x61cd2f1",
+      "sha256": "05ad1a4c57371fe1dceefaf74a607bd383c6a7b528cce713fcba1157695e5748"
+    },
+    {
+      "kind": "window",
+      "label": "gate_length",
+      "start": "0x61cd2f1",
+      "end": "0x61cd2f7",
+      "sha256": "d4b8644812f769b2559e860603fc3b0877fc92a67f3cb2d857839e7d0c59415a"
+    },
+    {
+      "kind": "window",
+      "label": "null_return",
+      "start": "0x61cd2f7",
+      "end": "0x61cd308",
+      "sha256": "bcb83ded62c753d146bbe84fa657dc2e1bbeb6eed7511c856d4c071f33f07b67"
+    },
+    {
+      "kind": "window",
+      "label": "name_compare",
+      "start": "0x61cd308",
+      "end": "0x61cd334",
+      "sha256": "fdd59cca8754cf722243119bd05dea8a49518cc587dda2a9ae616fcb1ad272d2"
+    },
+    {
+      "kind": "window",
+      "label": "create_alloc",
+      "start": "0x61cd334",
+      "end": "0x61cd33e",
+      "sha256": "a04342b26db3ea3a6bf10b1ff3161b0de2e6b157302bc983ce90c43f915b08a1"
+    },
+    {
+      "kind": "window",
+      "label": "create_init",
+      "start": "0x61cd33e",
+      "end": "0x61cd36f",
+      "sha256": "f409f43d0d7426e2eeb54f1ef856916f4e51565e0260c6fa1c3b172e70d60c7c"
+    },
+    {
+      "kind": "window",
+      "label": "new_plt",
+      "start": "0x63f0dd0",
+      "end": "0x63f0de0",
+      "sha256": "93c243e02314295cea02f50141461a95e10c09201ec8777b94214ed0177582dd"
+    },
+    {
+      "kind": "case_summary",
+      "count": 2400,
+      "seed": 20261109,
+      "created": 160,
+      "aggregate_sha256": "1db2e4799448982319ca4406ff0ad66fa4c041f91587938ba6191500d6e971f2",
+      "mismatches_vs_reference": 0,
+      "note": "each case cross-checked against an independent implementation (two-word xor transliteration vs plain equality); the binary itself was never executed"
+    },
+    {
+      "kind": "unknown",
+      "subject": "callers of CreateFileChecksumGenerator",
+      "status": "no caller census was run for this packet"
+    },
+    {
+      "kind": "unknown",
+      "subject": "empty-name acceptance",
+      "status": "observed: an empty requested name creates a generator; whether that is the caller treating an empty name as \"use the default\" or the factory's own rule is not determined from this packet"
+    },
+    {
+      "kind": "unknown",
+      "subject": "GetFileChecksumGenCrc32cFactory",
+      "status": "the singleton getter at 0x61cd600 is not modelled here; it is the noted next candidate"
+    }
+  ]
+}

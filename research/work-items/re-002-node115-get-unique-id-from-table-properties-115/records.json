@@ -1,0 +1,193 @@
+{
+ "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM; verification is deterministic offline Python (transliteration vs independently structured model, plus digest binds to the node #115 artifact). The binary was not executed. make verify/test/catalogue-check could not be run in a tooled environment here; the packet tests and tools/verify_packets.py were run instead. The callee transliterations were cross-checked in their own packets: the embedded XXH3-128 against the system libxxhash 0.8.2 oracle (open PR #5834) and BijectiveHash2x64 against the independently derived tool in open PR #5720 (open PR #5831).",
+ "packet": "re-002-node115-get-unique-id-from-table-properties-115",
+ "records": [
+  {
+   "body_sha256": "73426de07243605a472e661f6b4a59094c4a8094cf5dc5b54cf2bfa970761cb9",
+   "bytes": 2735,
+   "census_candidate_versions": [
+    "0.11.0+8.1.1"
+   ],
+   "census_id": "node115-vendor-61af500",
+   "census_raw_equal": false,
+   "census_relocations": 11,
+   "census_source_body_sha256": "54d3c73ebb8be0d7ffbb6ebb62039eaa0e009648b75f9927902827272002822c",
+   "direct_callers": 1,
+   "end": "0x61affaf",
+   "fde": "0x61af500..0x61affaf",
+   "file_offset": "0x61ae500",
+   "kind": "function",
+   "name": "rocksdb::DecodeSessionId",
+   "semantics": "Parses a base-36 DB session id string of 13..24 characters into (session_id, session_id2). The string splits into a high part (the first len-12 characters) and a low part (the last 12 characters), each folded left to right as value = value * 36 + digit, where digits are '0'-'9' (0-9), 'A'-'Z' (10-35) and 'a'-'z' (10-35), case-insensitively. session_id = high >> 2; session_id2 = ((high & 3) << 62) | (low & 0x3fffffffffffffff). Length 0 / <= 12 / > 24 and any non-base-36 byte are errors with Status code 3 (kNotSupported) and the messages 'Missing db_session_id' (21 bytes, .rodata 0x43430e) / 'Too short db_session_id' (23 bytes, 0x435387) / 'Too long db_session_id' (22 bytes, 0x44b53f) / 'Bad digit in db_session_id' (26 bytes, 0x43333e). The low part can reach 36**12 - 1, which exceeds 2**62 - 1, so its bit 62 is dropped by the mask; that lossy edge is the binary's behavior, not a modeling choice. No overflow is possible in the folds: each part holds at most 12 base-36 digits, below 2**63.",
+   "signature": "Status (const string& db_session_id, uint64_t* session_id, uint64_t* session_id2) [+ hidden sret Status*]",
+   "start": "0x61af500",
+   "symbol": "_ZN7rocksdb15DecodeSessionIdERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPmS8_"
+  },
+  {
+   "body_sha256": "1b64d1af98c276016dc33017c08fd35534868998668d2a72e123ddaa0d0db1be",
+   "bytes": 640,
+   "census_candidate_versions": [
+    "0.11.0+8.1.1"
+   ],
+   "census_id": "node115-vendor-61affe0",
+   "census_raw_equal": false,
+   "census_relocations": 14,
+   "census_source_body_sha256": "69c1d9c9d2eb9f75e1e146cb9fa4a8934f85f8b0641aed2889c78a83ffcd9f9a",
+   "direct_callers": 7,
+   "end": "0x61b0260",
+   "fde": "0x61affe0..0x61b0260",
+   "file_offset": "0x61afee0",
+   "kind": "function",
+   "name": "rocksdb::GetSstInternalUniqueId",
+   "semantics": "Derives a 24-byte internal UniqueId for an SST file from (db_id, db_session_id, file_number). Strict mode (lenient flag clear) validates db_id non-empty, file_number != 0, db_session_id non-empty, then DecodeSessionId, propagating any error Status (code 3, kNotSupported) without writing the out buffer. Lenient mode (lenient flag set) skips validation and, when DecodeSessionId fails, hashes the raw session string with the unseeded Hash2x64 wrapper and replaces a zero low word with (high | 1); the failed Status's message is freed, not propagated. Shared tail: out[0] = session_id2; Hash2x64(db_id, seed=session_id) via the seeded wrapper; out[1] = file_number ^ high64; out[2] = low64 only when the write_third_word flag is set, otherwise the third word is not written. Returns an OK Status through the hidden sret pointer. The census symbol demangles to five parameters, but the binary function reads two boolean flags (r9 and a stack bool); all seven in-binary call sites pass the first flag clear, and only the two read paths (BlockBasedTable::Open, OffsetableCacheKey ctor) set the lenient flag.",
+   "signature": "Status (const string& db_id, const string& db_session_id, uint64_t file_number, UniqueIdPtr out, bool write_third_word, bool lenient) [+ hidden sret Status*]",
+   "start": "0x61affe0",
+   "symbol": "_ZN7rocksdb22GetSstInternalUniqueIdERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES7_mNS_11UniqueIdPtrEb"
+  },
+  {
+   "body_sha256": "9a1ae61f46968c646f4819250736e6139b911e675e7b9488a987d54a299533de",
+   "bytes": 147,
+   "census_candidate_versions": [
+    "0.11.0+8.1.1"
+   ],
+   "census_id": "node115-vendor-61b0260",
+   "census_raw_equal": false,
+   "census_relocations": 2,
+   "census_source_body_sha256": "1aef6379dd91210677565021c326d18b8c8b698b1f588738cbe0e66cd70e1c53",
+   "direct_callers": 2,
+   "end": "0x61b02f3",
+   "fde": "0x61b0260..0x61b02f3",
+   "file_offset": "0x61af260",
+   "kind": "function",
+   "name": "rocksdb::InternalUniqueIdToExternal",
+   "semantics": "In-place transform of a 24-byte UniqueId (three little-endian u64 words). With (out1, out2) = BijectiveHash2x64(w1 + 0xf1598607fb45cbd8, w0 + 0x590eb907c873e891, c = 0) via the seed-0 adapter at 0x61c3f60, the result is (out2, out1, w2); when the flag is set the third word becomes w2 + out1 + out2, otherwise it is left untouched. The two additive constants are movabs immediates in the body (0x61b0268, 0x61b027d); no source for them beyond the bytes is claimed.",
+   "signature": "void (UniqueIdPtr* id, bool long_form)",
+   "start": "0x61b0260",
+   "symbol": "_ZN7rocksdb26InternalUniqueIdToExternalENS_11UniqueIdPtrE"
+  },
+  {
+   "body_sha256": "520abebd6899cd3cb64cac38e28f69dcfbb0a0cde30ccfbd0f79b5454c372044",
+   "bytes": 129,
+   "census_candidate_versions": [
+    "0.11.0+8.1.1"
+   ],
+   "census_id": "node115-vendor-61b0300",
+   "census_raw_equal": false,
+   "census_relocations": 2,
+   "census_source_body_sha256": "6bd073dfceab030132d90a35cc1dc0e6cf6a5eb62802e28b99cb99c51e232c5e",
+   "direct_callers": 3,
+   "end": "0x61b0381",
+   "fde": "0x61b0300..0x61b0381",
+   "file_offset": "0x61af300",
+   "kind": "function",
+   "name": "rocksdb::EncodeUniqueIdBytes",
+   "semantics": "Serializes the 24-byte UniqueId to a std::string: 24 bytes (w0, w1, w2, little-endian) when the flag is set, else 16 bytes (w0, w1). Built with basic_string::_M_construct(n, '\\0') then plain word copies; no hashing or escaping.",
+   "signature": "std::string (const UniqueIdPtr* id, bool long_form)",
+   "start": "0x61b0300",
+   "symbol": "_ZN7rocksdb19EncodeUniqueIdBytesB5cxx11ENS_11UniqueIdPtrE"
+  },
+  {
+   "body_sha256": "00698ef733869baa717ad1d89956504088b731feb827238875df41cee3d540d4",
+   "bytes": 417,
+   "census_candidate_versions": [
+    "0.11.0+8.1.1"
+   ],
+   "census_id": "node115-vendor-61b0490",
+   "census_raw_equal": false,
+   "census_relocations": 7,
+   "census_source_body_sha256": "d5faca9cef62ea92b6180a53a1b98823de3c33b975c60cde08a33795b0dfeda6",
+   "direct_callers": 1,
+   "end": "0x61b0631",
+   "fde": "0x61b0490..0x61b0631",
+   "file_offset": "0x61af490",
+   "kind": "function",
+   "name": "rocksdb::GetUniqueIdFromTableProperties",
+   "semantics": "Derives the 16-byte external unique id of an SST file from its TableProperties. Reads orig_file_number (offset 0), db_id (offset 0xc8) and db_session_id (offset 0xe8) from the struct (RocksDB 8.1.1 layout) and calls GetSstInternalUniqueId(db_id, db_session_id, orig_file_number, write_third_word=false, lenient=false). On a non-OK Status the out string is cleared to \"\" (size 0, buffer kept) and the Status is returned as-is. On success it calls InternalUniqueIdToExternal(id, flag=false) and EncodeUniqueIdBytes(id, flag=false) and move-assigns the resulting 16-byte string into the out string. The third UniqueId word is never written by the GetSst call and is passed through untouched by the external conversion, and the 16-byte encoder reads only the first two words, so the unwritten third word cannot affect the output. Returns an OK Status through the hidden sret pointer. The census source body differs from the target body only in the seven relocation fields (six E8 rel32, one E9 rel32); zeroing them reproduces the source hash exactly.",
+   "signature": "Status (const TableProperties&, std::string* out) [+ hidden sret Status*]",
+   "start": "0x61b0490",
+   "symbol": "_ZN7rocksdb30GetUniqueIdFromTablePropertiesERKNS_15TablePropertiesEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE"
+  },
+  {
+   "body_sha256": "cdf83f118dae4ddaabf19ff5fef1f5c12469608c9664d39a3b95b0389165ce3f",
+   "bytes": 35,
+   "census_candidate_versions": [
+    "0.11.0+8.1.1"
+   ],
+   "census_id": "node115-vendor-61c3db0",
+   "census_raw_equal": false,
+   "census_relocations": 1,
+   "census_source_body_sha256": "cd935345e5e5df5f0c38bc68aec85e59c3e27537f20df71166c53036295fcad6",
+   "direct_callers": 2,
+   "end": "0x61c3dd3",
+   "fde": "0x61c3db0..0x61c3dd3",
+   "file_offset": "0x61c2db0",
+   "kind": "function",
+   "name": "rocksdb::Hash2x64",
+   "semantics": "Thin delegating shim (callee context, not this packet's claim): one E8 call to the 128-bit one-shot ROCKSDB_XXH3_128bits at 0x61deab0 (open PR #5578), then high64 through the first out-pointer and low64 through the second. No arithmetic, no branch, no canary. The census source body differs from the target body only in the call displacement (relocation offset 17, kind 4, addend -4).",
+   "signature": "void (const char* data, size_t len, uint64_t* out1, uint64_t* out2)",
+   "start": "0x61c3db0",
+   "symbol": "_ZN7rocksdb8Hash2x64EPKcmPmS2_"
+  },
+  {
+   "body_sha256": "77d46c5d98d167a3da48e8471c2ded2361ced5e47565abbdc0c11628ab785b7b",
+   "bytes": 35,
+   "census_candidate_versions": [
+    "0.11.0+8.1.1"
+   ],
+   "census_id": "node115-vendor-61c3de0",
+   "census_raw_equal": false,
+   "census_relocations": 1,
+   "census_source_body_sha256": "0719e38eb4e655274c5c9e931711b68b35d1bd187b73b58e79ce1c5766c64cc1",
+   "direct_callers": 1,
+   "end": "0x61c3e03",
+   "fde": "0x61c3de0..0x61c3e03",
+   "file_offset": "0x61c2de0",
+   "kind": "function",
+   "name": "rocksdb::Hash2x64",
+   "semantics": "Thin delegating shim (callee context, not this packet's claim): one E8 call to ROCKSDB_XXH3_128bits_withSeed at 0x61defa0 (open PR #5578) with the seed argument, then high64 through the first out-pointer and low64 through the second. No arithmetic, no branch, no canary. The census source body differs from the target body only in the call displacement (relocation offset 17, kind 4, addend -4).",
+   "signature": "void (const char* data, size_t len, uint64_t seed, uint64_t* out1, uint64_t* out2)",
+   "start": "0x61c3de0",
+   "symbol": "_ZN7rocksdb8Hash2x64EPKcmmPmS2_"
+  },
+  {
+   "body_sha256": "d586664de83493cc5a48eefd3bcef95b10a3ab433b32699334c68671b8cb0864",
+   "bytes": 325,
+   "census_candidate_versions": [
+    "0.11.0+8.1.1"
+   ],
+   "census_id": "node115-vendor-61c3e10",
+   "census_raw_equal": true,
+   "census_relocations": 0,
+   "census_source_body_sha256": "d586664de83493cc5a48eefd3bcef95b10a3ab433b32699334c68671b8cb0864",
+   "direct_callers": 1,
+   "end": "0x61c3f55",
+   "fde": "0x61c3e10..0x61c3f55",
+   "file_offset": "0x61c2e10",
+   "kind": "function (callee; bound so the transform executes end-to-end)",
+   "name": "rocksdb::BijectiveHash2x64",
+   "semantics": "Pure arithmetic hash of (a, b, c) into (out1, out2): s = (b^a) ^ (0x59973f0033362349 - c); four 32-bit products from the halves of s build a packed word plus the 0x03c0000000000000 round constant; a second mix v = (0xc202797692d63d58 + c) ^ a folds in through bswap; a second multiply stage mixes the packed word's halves into m, y1 and r; out2 = ((y1 ^ ((m & 0xffffffff) >> 5)) * 0x165667919e3779f9) ^ (>> 32) (this equals the XXH3 avalanche of y1, since y1 >> 37 is (m & 0xffffffff) >> 5); out1 = XXH3 avalanche of (r ^ (r >> 37)), i.e. x ^= x >> 37; x *= 0x165667919e3779f9; x ^= x >> 32. Transliterated here from its own disassembly; its standalone reconstruction is open PR #5720, cross-checked on 5,000 random triples with 0 mismatches.",
+   "signature": "void (uint64_t a, uint64_t b, uint64_t c, uint64_t* out1, uint64_t* out2)",
+   "start": "0x61c3e10",
+   "symbol": "_ZN7rocksdb17BijectiveHash2x64EmmmPmS0_"
+  },
+  {
+   "body_sha256": "8eb9df37604f72f0b72b1b1af72232ed0875460ff8deafd4f46fd93ca8e3dc55",
+   "bytes": 17,
+   "census_candidate_versions": [],
+   "census_id": "",
+   "census_raw_equal": false,
+   "census_relocations": 0,
+   "census_source_body_sha256": "",
+   "direct_callers": 1,
+   "end": "0x61c3f71",
+   "fde": "0x61c3f60..0x61c3f71",
+   "file_offset": "0x61c2f60",
+   "kind": "function (callee adapter; no census record: below the 32-byte minimum)",
+   "name": "rocksdb::BijectiveHash2x64 seed-0 adapter",
+   "semantics": "Four instructions: forwards (out1, out2) from rdx/rcx to rcx/r8, sets c = 0, tail-jumps to BijectiveHash2x64 at 0x61c3e10.",
+   "signature": "void (uint64_t a, uint64_t b, uint64_t* out1, uint64_t* out2)",
+   "start": "0x61c3f60",
+   "symbol": ""
+  }
+ ]
+}

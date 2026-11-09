@@ -1,0 +1,121 @@
+"""Fail-closed controls: builder_wrapper_identities_static on a
+missing/truncated .rela.dyn table, missing .dynsym/.dynstr tables,
+and a non-UTF-8 dynamic symbol name.
+
+relocations() looked .rela.dyn up with bare next() and walked it
+with a range-step loop, so a truncated table was silently accepted;
+dynsym_name() looked .dynsym/.dynstr up with bare next() and
+decoded the name with a bare .decode(). The mutants rename a
+section in .shstrtab, shrink .rela.dyn by one byte, or flip one
+byte of the __libc_start_main name (symbol index 1) to 0xFF; no
+instruction bytes change. The module's refusal idiom is require()
+-> ValueError. analyze() itself digest-gates on the pinned binary,
+so these are helper-level controls; the helpers are called directly.
+"""
+import hashlib
+import struct
+import sys
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "tools"))
+import builder_wrapper_identities_static as subject
+from elf_index import sections
+
+
+def renamed(data, name):
+    shoff = struct.unpack_from("<Q", data, 40)[0]
+    entsize, count, strndx = struct.unpack_from("<HHH", data, 58)
+    rows = [struct.unpack_from("<IIQQQQIIQQ", data, shoff + i * entsize)
+            for i in range(count)]
+    strtab = rows[strndx]
+    table = data[strtab[4]:strtab[4] + strtab[5]]
+    target = None
+    for row in rows:
+        end = table.find(b"\0", row[0])
+        if table[row[0]:end].decode() == name:
+            target = row
+            break
+    assert target is not None, name
+    shstr = next(s for s in sections(data) if s["name"] == ".shstrtab")
+    mutant = bytearray(data)
+    mutant[shstr["offset"] + target[0]] = ord("X")
+    return bytes(mutant)
+
+
+def resized(data, name, new_size):
+    shoff = struct.unpack_from("<Q", data, 40)[0]
+    entsize, count, strndx = struct.unpack_from("<HHH", data, 58)
+    rows = [struct.unpack_from("<IIQQQQIIQQ", data, shoff + i * entsize)
+            for i in range(count)]
+    strtab = rows[strndx]
+    table = data[strtab[4]:strtab[4] + strtab[5]]
+    target = None
+    for row in rows:
+        end = table.find(b"\0", row[0])
+        if table[row[0]:end].decode() == name:
+            target = row
+            break
+    assert target is not None, name
+    mutant = bytearray(data)
+    struct.pack_into("<Q", mutant, shoff + rows.index(target) * entsize + 32,
+                     new_size)
+    return bytes(mutant)
+
+
+def corrupt_name(data, sym_idx):
+    secs = sections(data)
+    sym = next(s for s in secs if s["name"] == ".dynsym")
+    strs = next(s for s in secs if s["name"] == ".dynstr")
+    name_off = struct.unpack_from("<I", data, sym["offset"] + sym_idx * 24)[0]
+    mutant = bytearray(data)
+    mutant[strs["offset"] + name_off] = 0xFF
+    return bytes(mutant)
+
+
+class BuilderWrapperIdentitiesRequiredSections(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.data = subject.TARGET.read_bytes()
+        if hashlib.sha256(cls.data).hexdigest() != subject.SHA:
+            raise unittest.SkipTest("node 115 artifact is not materialised")
+
+    def test_relocations_missing_rela_dyn_refuses(self):
+        with self.assertRaisesRegex(ValueError, "missing.rela.dyn section"):
+            subject.relocations(renamed(self.data, ".rela.dyn"))
+
+    def test_relocations_truncated_rela_dyn_refuses(self):
+        secs = sections(self.data)
+        rela = next(s for s in secs if s["name"] == ".rela.dyn")
+        mutant = resized(self.data, ".rela.dyn", rela["size"] - 1)
+        with self.assertRaisesRegex(ValueError, "truncated.rela.dyn section"):
+            subject.relocations(mutant)
+
+    def test_dynsym_name_missing_dynsym_refuses(self):
+        with self.assertRaisesRegex(ValueError, "missing.dynsym section"):
+            subject.dynsym_name(renamed(self.data, ".dynsym"), 1)
+
+    def test_dynsym_name_missing_dynstr_refuses(self):
+        with self.assertRaisesRegex(ValueError, "missing.dynstr section"):
+            subject.dynsym_name(renamed(self.data, ".dynstr"), 1)
+
+    def test_dynsym_name_corrupt_libc_start_main_refuses(self):
+        with self.assertRaisesRegex(ValueError, "dynamic symbol name is not valid UTF-8"):
+            subject.dynsym_name(corrupt_name(self.data, 1), 1)
+
+    def test_slot_records_corrupt_libc_start_main_refuses(self):
+        mutant = corrupt_name(self.data, 1)
+        with self.assertRaisesRegex(ValueError, "dynamic symbol name is not valid UTF-8"):
+            subject.slot_records(mutant, subject.relocations(mutant))
+
+    def test_unmutated_controls(self):
+        by_offset = subject.relocations(self.data)
+        self.assertTrue(by_offset)
+        records = subject.slot_records(self.data, by_offset)
+        self.assertEqual(records[0]["symbol"], "__libc_start_main")
+        self.assertIsInstance(subject.analyze(self.data), dict)
+
+
+if __name__ == "__main__":
+    unittest.main()

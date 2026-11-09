@@ -1,0 +1,7 @@
+target	call_site	enclosing_function	note
+UniqueIdToHumanString 0x61b0660	0x5f58e88	rocksdb::VersionEdit::DebugString	rsi is the EncodeUniqueIdBytes result produced by the call at 0x5f58e7d; sret in r15
+UniqueIdToHumanString 0x61b0660	0x61aa029	rocksdb::TableProperties::ToString	rsi is the GetUniqueIdFromTableProperties out string at rsp+0xc0 (r15), produced by the call at 0x61aa011; the returned Status byte is checked at 0x61aa016 before this call
+InternalUniqueIdToHumanString 0x61b0750	0x5f58dec	rocksdb::VersionEdit::DebugString	UniqueIdPtr passed by value: ptr in rsi, extended=false (xor %edx,%edx at 0x5f58ddf); result appended after the " unique_id(internal): " label (verbatim .rodata at 0x43d6aa)
+InternalUniqueIdToHumanString 0x61b0750	0x6120eea	rocksdb::BlockBasedTable::Open	UniqueIdPtr passed by value: ptr in rsi, extended=false (xor %edx,%edx at 0x6120ec5); first of the two unique-id mismatch-error operands (source order: Expected, then Actual)
+InternalUniqueIdToHumanString 0x61b0750	0x6120f09	rocksdb::BlockBasedTable::Open	UniqueIdPtr passed by value: ptr in rsi, extended=false (xor %edx,%edx at 0x6120efd); second of the two unique-id mismatch-error operands (source order: Expected, then Actual)
+Slice::ToString 0x61c7e30	0x61b0695	rocksdb::UniqueIdToHumanString	hex flag 1 (mov $0x1,%edx at 0x61b0666); Slice built on the stack from the id string's (data, size)

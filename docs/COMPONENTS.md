@@ -10,7 +10,7 @@ The authenticated inventory contains 180 allowlisted source-path observations. D
 Time, logging, wallets, collections and shared runtime utilities.
 
 - Target: node115.
-- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-nonce-text`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`, `src/node115-host-ip-gates`, `src/node115-packed-millis`, `src/node115-utf8-admission`, `src/node115-reverse-path-components`, `src/node115-rng-buffer-selection`, `src/node115-time-producer`, `src/node115-date-time-display`, `src/node115-owned-cstring`, `src/node115-iso-week-date`, `src/node115-timespec-difference`, `src/node115-command-construction`, `src/node115-elf-build-id`, `src/node115-u64-key-hash`, `src/node115-limb-add-family`, `src/node115-wrapped-u64-search`, `src/node115-sponge-permutation`.
+- Implementation paths: `src/node115-latency-pair`, `src/node115-nonce-ring`, `src/node115-nonce-text`, `src/node115-u128-binary64`, `src/node115-tagged-count`, `src/node115-liquidity-bucket`, `src/node115-host-ip-gates`, `src/node115-packed-millis`, `src/node115-utf8-admission`, `src/node115-reverse-path-components`, `src/node115-rng-buffer-selection`, `src/node115-time-producer`, `src/node115-date-time-display`, `src/node115-owned-cstring`, `src/node115-iso-week-date`, `src/node115-timespec-difference`, `src/node115-command-construction`, `src/node115-elf-build-id`, `src/node115-u64-key-hash`, `src/node115-limb-add-family`, `src/node115-wrapped-u64-search`, `src/node115-sponge-permutation`, `src/node115-stable-record-insertion`, `src/node115-bounded-offset`, `src/node115-two-span-projection`, `src/node115-file-write-lifecycle`, `src/node115-recursive-directory-create`.
 - Observed diagnostic paths: 33.
 - First task: Map time/quantity conversion helpers; distinguish standard-library code from private helpers.
 
@@ -30,7 +30,7 @@ Private bincode wire codecs and integer encodings.
 RocksDB wrappers, block readers and database lifecycle.
 
 - Target: node115.
-- Implementation paths: `src/node115-snapshot-selectors`, `src/node115-db-hub-byte-key`, `src/node115-owned-db-open`.
+- Implementation paths: `src/node115-snapshot-selectors`, `src/node115-db-hub-byte-key`, `src/node115-owned-db-open`, `src/node115-block-handle-codec`, `src/node115-indexed-artifact-variant`.
 - Observed diagnostic paths: 5.
 - First task: Recover key/value schemas and snapshot versioning before replay.
 
@@ -40,7 +40,7 @@ RocksDB wrappers, block readers and database lifecycle.
 TCP framing, LZ4, channels, rate limits and reconnects.
 
 - Target: node115.
-- Implementation paths: `src/node115-lz4-decode`, `src/node115-ipv6-groups`, `src/node115-lz4-literal-encoder`, `src/node115-lz4-dictionary-kernel`, `src/node115-tcp-compression-plan`, `src/node115-lz4-match-extension`, `src/node115-lz4-match-sequence`.
+- Implementation paths: `src/node115-lz4-decode`, `src/node115-ipv6-groups`, `src/node115-lz4-literal-encoder`, `src/node115-lz4-dictionary-kernel`, `src/node115-tcp-compression-plan`, `src/node115-lz4-match-extension`, `src/node115-lz4-match-sequence`, `src/node115-tcp-stream-frame-lz4`.
 - Observed diagnostic paths: 12.
 - First task: Map frame lengths, compression boundaries and error handling without network traffic.
 
@@ -80,7 +80,7 @@ Block application, state roots and checkpoint handoff.
 Action envelopes, signing payloads and delayed actions.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-signed-action-four-field`, `src/node115-usd-class-transfer`.
 - Observed diagnostic paths: 5.
 - First task: Recover tags, signing domains, replay checks and error precedence.
 
@@ -90,7 +90,7 @@ Action envelopes, signing payloads and delayed actions.
 Agent-created handler splits and central dispatch.
 
 - Target: node115.
-- Implementation paths: `src/node115-display-name-decision`.
+- Implementation paths: `src/node115-display-name-decision`, `src/node115-action-msgpack-identifier`.
 - Observed diagnostic paths: 0.
 - First task: Validate each handler seed against #115; do not infer original function boundaries from these splits.
 
@@ -110,7 +110,7 @@ Trading orchestration, block hooks, deployment and ledger updates.
 Book storage, price/time priority and order lifecycle.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-tif-name-codec`.
 - Observed diagnostic paths: 6.
 - First task: Recover matching and cancel/modify transitions with exact rounding and overflow behavior.
 
@@ -120,7 +120,7 @@ Book storage, price/time priority and order lifecycle.
 Positions, margin, oracles, liquidations and spot balances.
 
 - Target: node115.
-- Implementation paths: `src/node115-margin-range`, `src/node115-clearinghouse-ntl-ratio`, `src/node115-margin-row`.
+- Implementation paths: `src/node115-margin-range`, `src/node115-clearinghouse-ntl-ratio`, `src/node115-margin-row`, `src/node115-outcome-record-msgpack`, `src/node115-oracle-outcome-kind`, `src/node115-borrow-lend-codec`, `src/node115-margin-mode-codec`.
 - Observed diagnostic paths: 14.
 - First task: Map margin/liquidation formulas and state mutations; prove sign and unit conventions.
 
@@ -150,7 +150,7 @@ Fee tiers, volume accounting and rebates.
 Vault and subaccount accounting and permissions.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-vault-identity-guards`.
 - Observed diagnostic paths: 2.
 - First task: Recover share accounting, transfer restrictions and liquidation interaction.
 
@@ -170,7 +170,7 @@ Deposit/withdrawal requests and cross-chain signing.
 EVM state, database adapters, transaction execution and hashing.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-evm-precompile-outcome-names`.
 - Observed diagnostic paths: 4.
 - First task: Identify reth/revm private fork boundaries and state transition inputs.
 
@@ -180,7 +180,7 @@ EVM state, database adapters, transaction execution and hashing.
 Stake, validator membership and jailing.
 
 - Target: node115.
-- Implementation paths: `src/node115-staking-error-text`.
+- Implementation paths: `src/node115-staking-error-text`, `src/node115-validator-epoch-ring`.
 - Observed diagnostic paths: 2.
 - First task: Recover stake accounting and epoch transitions separately for #115.
 
@@ -190,7 +190,7 @@ Stake, validator membership and jailing.
 DEX metadata and clearinghouse registry.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-hip3-disabled-state-codec`.
 - Observed diagnostic paths: 3.
 - First task: Recover identifiers, lookup rules and deployment ownership checks.
 
@@ -230,6 +230,6 @@ JSON-RPC routing, EVM reads and transaction forwarding.
 Static network/build configuration and naming.
 
 - Target: node115.
-- Implementation paths: not yet implemented.
+- Implementation paths: `src/node115-chain-name-codec`, `src/node115-spot-mark-codec`.
 - Observed diagnostic paths: 2.
 - First task: Separate constants observed in binary data from illustrative source defaults.

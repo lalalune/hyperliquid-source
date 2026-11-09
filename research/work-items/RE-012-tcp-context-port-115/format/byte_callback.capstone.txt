@@ -1,0 +1,40 @@
+150cf50: 50                               push     rax
+150cf51: 0fb60f                           movzx    ecx, byte ptr [rdi]
+150cf54: b803000000                       mov      eax, 3
+150cf59: 89ca                             mov      edx, ecx
+150cf5b: 80f90a                           cmp      cl, 0xa
+150cf5e: 722d                             jb       0x150cf8d
+150cf60: 0fb6c1                           movzx    eax, cl
+150cf63: 8d1480                           lea      edx, [rax + rax*4]
+150cf66: 8d14d0                           lea      edx, [rax + rdx*8]
+150cf69: c1ea0c                           shr      edx, 0xc
+150cf6c: 6bc264                           imul     eax, edx, 0x64
+150cf6f: 89cf                             mov      edi, ecx
+150cf71: 4028c7                           sub      dil, al
+150cf74: 400fb6c7                         movzx    eax, dil
+150cf78: 488d3d931af6fe                   lea      rdi, [rip - 0x109e56d]
+150cf7f: 0fb70447                         movzx    eax, word ptr [rdi + rax*2]
+150cf83: 6689442406                       mov      word ptr [rsp + 6], ax
+150cf88: b801000000                       mov      eax, 1
+150cf8d: 84d2                             test     dl, dl
+150cf8f: 400f94c7                         sete     dil
+150cf93: 84c9                             test     cl, cl
+150cf95: 0f95c1                           setne    cl
+150cf98: 4084f9                           test     cl, dil
+150cf9b: 7516                             jne      0x150cfb3
+150cf9d: 0fb6ca                           movzx    ecx, dl
+150cfa0: 488d156b1af6fe                   lea      rdx, [rip - 0x109e595]
+150cfa7: 0fb64c4a01                       movzx    ecx, byte ptr [rdx + rcx*2 + 1]
+150cfac: 884c0404                         mov      byte ptr [rsp + rax + 4], cl
+150cfb0: 48ffc8                           dec      rax
+150cfb3: 41b903000000                     mov      r9d, 3
+150cfb9: 4929c1                           sub      r9, rax
+150cfbc: 4c8d0404                         lea      r8, [rsp + rax]
+150cfc0: 4983c005                         add      r8, 5
+150cfc4: ba01000000                       mov      edx, 1
+150cfc9: 4889f7                           mov      rdi, rsi
+150cfcc: be01000000                       mov      esi, 1
+150cfd1: 31c9                             xor      ecx, ecx
+150cfd3: ff15272afd04                     call     qword ptr [rip + 0x4fd2a27]
+150cfd9: 59                               pop      rcx
+150cfda: c3                               ret      

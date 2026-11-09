@@ -98,7 +98,7 @@ are retained.
 The two bodies are instruction-for-instruction parallel to the clones:
 load the key once from `[rcx]`, load the count word, scan the key array
 with the `seta`/`sbb` three-way step, then either store the record at
-the exhausted height (`flag = 0`, `position = count`), descend through
+the exhausted height (`flag = 1`, `position = count`), descend through
 the child edge at the scan position, or store the hit/miss record
 (`flag` 0/1 from the three-way result). Only the layout constants
 differ, and variant A additionally widens every loop counter path for

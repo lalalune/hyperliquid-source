@@ -1,0 +1,142 @@
+{
+  "cases": {
+    "edge": 1200,
+    "far": 600,
+    "fold": 3600,
+    "predicate": 7200,
+    "total": 12600
+  },
+  "doubles": {
+    "cap_factor": 0.9,
+    "clamp_low": 9.223372036854775e+18,
+    "clamp_top": 9.223372036854776e+18,
+    "inf": Infinity
+  },
+  "fields": {
+    "dex_row": {
+      "+0x10": "asset count of the dex",
+      "+0x150/+0x158": "asset rows: pointer and length, stride 0x60, price word at +0x20",
+      "+0x378": "mode word; the niche value 0x8000000000000000 selects the stored asset set",
+      "+0x3d0/+0x3d8": "stored asset set: root and height",
+      "+0x478": "total cap, i64",
+      "+0x4a0": "pointer to a block whose cap map starts at +0x30",
+      "+0x50": "dex number; asset id = dex * 10000 + index",
+      "+0xf0/+0xf8/+0x100/+0x108": "size map: niche word or ring capacity, then root or buffer, height or head, length"
+    },
+    "map_enum": {
+      "niche word": "0x8000000000000000: B-tree map with root at +8 and height at +0x10",
+      "other word": "capacity of a sorted ring buffer of 16 byte entries: buffer +8, head +0x10, length +0x18",
+      "set node": "11 keys at +0x08, length u16 at +0x62, 12 edges at +0x68, size 0xc8",
+      "tree node": "11 keys at +0x08, 11 values at +0x60, length u16 at +0xba, 12 edges at +0xc0, size 0x120"
+    }
+  },
+  "first_mismatch": "",
+  "functions": [
+    {
+      "end": "0x448881f",
+      "instructions": 254,
+      "instructions_stepped": 247,
+      "role": "at-cap test",
+      "size": 1071,
+      "start": "0x44883f0"
+    },
+    {
+      "end": "0x37c16e8",
+      "instructions": 147,
+      "instructions_stepped": 142,
+      "role": "sum fold",
+      "size": 616,
+      "start": "0x37c1480"
+    },
+    {
+      "end": "0x4554901",
+      "instructions": 92,
+      "instructions_stepped": 92,
+      "role": "ring search",
+      "size": 289,
+      "start": "0x45547e0"
+    }
+  ],
+  "instructions_stepped": 2490481,
+  "locations": [
+    {
+      "column": 18,
+      "line": 433,
+      "name": "asset row bound in the test",
+      "path": "l1/src/clearinghouse/oracle/oracle.rs",
+      "slot": "0x648ba20"
+    },
+    {
+      "column": 1,
+      "line": 847,
+      "name": "negative cap in the test",
+      "path": "l1/src/qtys/mod.rs",
+      "slot": "0x648ba38"
+    },
+    {
+      "column": 18,
+      "line": 433,
+      "name": "asset row bound in the fold",
+      "path": "l1/src/clearinghouse/oracle/oracle.rs",
+      "slot": "0x646e3e0"
+    },
+    {
+      "column": 14,
+      "line": 32,
+      "name": "id arithmetic in the fold",
+      "path": "l1/src/asset/pdi.rs",
+      "slot": "0x646e3f8"
+    }
+  ],
+  "mismatches": 0,
+  "mutations": {
+    "killed": 200,
+    "survived": 21,
+    "unreached": 0
+  },
+  "negative_controls": {
+    "detected": 52,
+    "total": 52
+  },
+  "outcomes": {
+    "fold panic bounds": 532,
+    "fold panic multiply overflow": 89,
+    "fold stops": 327,
+    "fold sum": 2952,
+    "pred caps at cap": 2783,
+    "pred caps below cap": 3336,
+    "pred panic bounds": 785,
+    "pred panic multiply overflow": 202,
+    "pred panic unwrap": 370,
+    "pred set at cap": 419,
+    "pred set below cap": 805
+  },
+  "slot": {
+    "address": "0x64e5a78",
+    "target": "0x44883f0"
+  },
+  "step_name_sites": [
+    {
+      "lea": "0x2be11a0",
+      "owner_fde": "0x2bdf8f0",
+      "owner_size": 46769,
+      "string_va": "0x60e23a"
+    },
+    {
+      "lea": "0x54ab5d7",
+      "owner_fde": "0x54a9c70",
+      "owner_size": 51762,
+      "string_va": "0x929e54"
+    },
+    {
+      "lea": "0x54b7f88",
+      "owner_fde": "0x54b66b0",
+      "owner_size": 50232,
+      "string_va": "0x929e54"
+    }
+  ],
+  "target": {
+    "file": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  }
+}

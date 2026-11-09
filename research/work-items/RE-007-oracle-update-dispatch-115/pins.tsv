@@ -1,0 +1,20 @@
+function	pin	pattern	matches	addresses	meaning
+0x2753b90	divisor-10000-magic	48b94b598638d6c56d34	1	0x2753bb0	movabs 0x346dc5d63886594b then shr 11: asset id / 10000
+0x2753b90	clearinghouse-stride	69ec10050000	1	0x2753bd8	imul $0x510 (register form varies; counted by immediate)
+0x2753b90	imm-0x510	10050000	1	0x2753bda	clearinghouse record stride 0x510
+0x2753b90	imm-10000	10270000	1	0x2753c17	imul $0x2710: asset id minus dex*10000
+0x2753b90	imm-0x188	88010000	1	0x2753c9c	add $0x188: oracle book offset inside the 0x200 stride entry
+0x2753b90	len-field-0x7d0	d0070000	1	0x2753bca	clearinghouse count at exchange state +0x7d0 (compare and base)
+0x2753b90	len-field-0x3ad0	d03a0000	1	0x2753bf9	oracle book count at exchange state +0x3ad0
+0x2753b90	limit-field-0x39d0	d0390000	1	0x2753ca3	limit read from exchange state +0x39d0
+0x2753b90	guard-tag-0x156	66c74424305601	6	0x2753be5,0x2753c03,0x2753c5c,0x2753c88,0x2753dd3,0x2753e01	movw $0x156 guard tag stores
+0x2d35a80	ok-tag-0x1a2	3da2010000	1	0x2d35cb1	cmp $0x1a2,%eax: validate result Ok tag
+0x2d35a80	reject-0xd2	66c703d200	1	0x2d35b41	movw $0xd2: classification reject
+0x2d35a80	reject-0xdd	66c703dd00	1	0x2d35e79	movw $0xdd: size limit reject
+0x2d35a80	imm-86400	80510100	1	0x2d35fd6	imul $0x15180: seconds per day
+0x2d35a80	imm-1000	e8030000	1	0x2d35fef	imul $0x3e8: seconds to milliseconds
+0x2d35a80	imm-epoch-0xfff506c5	c506f5ff	1	0x2d35fcc	add $0xfff506c5 = -719163: days from CE to the Unix epoch
+0x2d35a80	imm-1e9	00ca9a3b	2	0x2d35d7c,0x2d35dc5	mov/imul $0x3b9aca00: nanoseconds per second
+0x2d35a80	event-size-0x2b8	b8020000	4	0x2d35bdd,0x2d36096,0x2d36162,0x2d36173	event element size 0x2b8
+0x2776870	event-size-0x2b8	b8020000	4	0x2776899,0x27768b5,0x27768f9,0x2776915	event element size in the drop loop
+0x2783790	niche-0x8000000000000001	0100000000000080	1	0x278379e	capacity niche that skips the whole block

@@ -1,0 +1,123 @@
+{
+ "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM; verification is deterministic offline Python (transliteration vs independently structured model, cross-checked against the independently derived tool of open PR #5720 on 5,000 random triples) plus digest binds to the node #115 artifact. The binary was not executed. make verify/test/catalogue-check could not be run in a tooled environment here; tools/verify_packets.py and the packet tests were run instead.",
+ "packet": "re-002-node115-unique-id-external-115",
+ "records": [
+  {
+   "body_sha256": "9a1ae61f46968c646f4819250736e6139b911e675e7b9488a987d54a299533de",
+   "bytes": 147,
+   "census_candidate_versions": [
+    "0.11.0+8.1.1"
+   ],
+   "census_id": "node115-vendor-61b0260",
+   "census_raw_equal": false,
+   "census_relocations": 2,
+   "census_source_body_sha256": "1aef6379dd91210677565021c326d18b8c8b698b1f588738cbe0e66cd70e1c53",
+   "direct_callers": 2,
+   "end": "0x61b02f3",
+   "fde": "0x61b0260..0x61b02f3",
+   "file_offset": "0x61af260",
+   "kind": "function",
+   "name": "rocksdb::InternalUniqueIdToExternal",
+   "semantics": "In-place transform of a 24-byte UniqueId (three little-endian u64 words). With (out1, out2) = BijectiveHash2x64(w1 + 0xf1598607fb45cbd8, w0 + 0x590eb907c873e891, c = 0) via the seed-0 adapter at 0x61c3f60, the result is (out2, out1, w2); when the flag is set the third word becomes w2 + out1 + out2, otherwise it is left untouched. The two additive constants are movabs immediates in the body (0x61b0268, 0x61b027d); no source for them beyond the bytes is claimed.",
+   "signature": "void (UniqueIdPtr* id, bool long_form)",
+   "start": "0x61b0260",
+   "symbol": "_ZN7rocksdb26InternalUniqueIdToExternalENS_11UniqueIdPtrE"
+  },
+  {
+   "body_sha256": "520abebd6899cd3cb64cac38e28f69dcfbb0a0cde30ccfbd0f79b5454c372044",
+   "bytes": 129,
+   "census_candidate_versions": [
+    "0.11.0+8.1.1"
+   ],
+   "census_id": "node115-vendor-61b0300",
+   "census_raw_equal": false,
+   "census_relocations": 2,
+   "census_source_body_sha256": "6bd073dfceab030132d90a35cc1dc0e6cf6a5eb62802e28b99cb99c51e232c5e",
+   "direct_callers": 3,
+   "end": "0x61b0381",
+   "fde": "0x61b0300..0x61b0381",
+   "file_offset": "0x61af300",
+   "kind": "function",
+   "name": "rocksdb::EncodeUniqueIdBytes",
+   "semantics": "Serializes the 24-byte UniqueId to a std::string: 24 bytes (w0, w1, w2, little-endian) when the flag is set, else 16 bytes (w0, w1). Built with basic_string::_M_construct(n, '\\0') then plain word copies; no hashing or escaping.",
+   "signature": "std::string (const UniqueIdPtr* id, bool long_form)",
+   "start": "0x61b0300",
+   "symbol": "_ZN7rocksdb19EncodeUniqueIdBytesB5cxx11ENS_11UniqueIdPtrE"
+  },
+  {
+   "body_sha256": "8522807e5003634305476eb6c50f6b987a2e80f4f2326d68f77fa2bc83e97054",
+   "bytes": 207,
+   "census_candidate_versions": [
+    "0.11.0+8.1.1"
+   ],
+   "census_id": "node115-vendor-61b0390",
+   "census_raw_equal": false,
+   "census_relocations": 4,
+   "census_source_body_sha256": "6ae7f0656fe39a1d75e436fcb07da91e97d72afb093fcfe3fab44abbf6b79461",
+   "direct_callers": 1,
+   "end": "0x61b045f",
+   "fde": "0x61b0390..0x61b045f",
+   "file_offset": "0x61af390",
+   "kind": "function",
+   "name": "rocksdb::DecodeUniqueIdBytes",
+   "semantics": "Inverse of EncodeUniqueIdBytes. Requires the string to be exactly 24 bytes when the flag is set, else exactly 16 bytes (computed with the sbb trick at 0x61b03ac..0x61b03b6). On a length mismatch returns Status InvalidArgument (code 3) with message \"Not a valid unique_id\" (.rodata 0x434324, 21 bytes) and leaves the output id untouched. On success writes w0, w1 (and w2 when the flag is set) and returns an OK Status (16-byte zeroed representation).",
+   "signature": "Status (const std::string&, UniqueIdPtr* out, bool long_form)",
+   "start": "0x61b0390",
+   "symbol": "_ZN7rocksdb19DecodeUniqueIdBytesERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEENS_11UniqueIdPtrE"
+  },
+  {
+   "body_sha256": "d586664de83493cc5a48eefd3bcef95b10a3ab433b32699334c68671b8cb0864",
+   "bytes": 325,
+   "census_candidate_versions": [
+    "0.11.0+8.1.1"
+   ],
+   "census_id": "node115-vendor-61c3e10",
+   "census_raw_equal": true,
+   "census_relocations": 0,
+   "census_source_body_sha256": "d586664de83493cc5a48eefd3bcef95b10a3ab433b32699334c68671b8cb0864",
+   "direct_callers": 1,
+   "end": "0x61c3f55",
+   "fde": "0x61c3e10..0x61c3f55",
+   "file_offset": "0x61c2e10",
+   "kind": "function (callee; bound so the transform executes end-to-end)",
+   "name": "rocksdb::BijectiveHash2x64",
+   "semantics": "Pure arithmetic hash of (a, b, c) into (out1, out2): s = (b^a) ^ (0x59973f0033362349 - c); four 32-bit products from the halves of s build a packed word plus the 0x03c0000000000000 round constant; a second mix v = (0xc202797692d63d58 + c) ^ a folds in through bswap; a second multiply stage mixes the packed word's halves into m, y1 and r; out2 = ((y1 ^ ((m & 0xffffffff) >> 5)) * 0x165667919e3779f9) ^ (>> 32) (this equals the XXH3 avalanche of y1, since y1 >> 37 is (m & 0xffffffff) >> 5); out1 = XXH3 avalanche of (r ^ (r >> 37)), i.e. x ^= x >> 37; x *= 0x165667919e3779f9; x ^= x >> 32. Transliterated here from its own disassembly; its standalone reconstruction is open PR #5720, cross-checked on 5,000 random triples with 0 mismatches.",
+   "signature": "void (uint64_t a, uint64_t b, uint64_t c, uint64_t* out1, uint64_t* out2)",
+   "start": "0x61c3e10",
+   "symbol": "_ZN7rocksdb17BijectiveHash2x64EmmmPmS0_"
+  },
+  {
+   "body_sha256": "8eb9df37604f72f0b72b1b1af72232ed0875460ff8deafd4f46fd93ca8e3dc55",
+   "bytes": 17,
+   "census_candidate_versions": [],
+   "census_id": "",
+   "census_raw_equal": false,
+   "census_relocations": 0,
+   "census_source_body_sha256": "",
+   "direct_callers": 1,
+   "end": "0x61c3f71",
+   "fde": "0x61c3f60..0x61c3f71",
+   "file_offset": "0x61c2f60",
+   "kind": "function (callee adapter; no census record: below the 32-byte minimum)",
+   "name": "rocksdb::BijectiveHash2x64 seed-0 adapter",
+   "semantics": "Four instructions: forwards (out1, out2) from rdx/rcx to rcx/r8, sets c = 0, tail-jumps to BijectiveHash2x64 at 0x61c3e10.",
+   "signature": "void (uint64_t a, uint64_t b, uint64_t* out1, uint64_t* out2)",
+   "start": "0x61c3f60",
+   "symbol": ""
+  }
+ ],
+ "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "task": "RE-002",
+ "verification": {
+  "bijective_cross_check_pr5720": "5,000 random (a, b, c) triples: this tool's transliteration == open PR #5720's independently derived tool, 0 mismatches (dev-time check; the two tools were derived separately from the same disassembly). The cross-check caught a transcription slip in this tool's PACK_ADD constant (0x003c... vs the binary's 0x03c0...), corrected before submission and re-verified against the raw immediate bytes at 0x61c3e6d.",
+  "cases": {
+   "decode": 600,
+   "encode": 600,
+   "to_external": 1200,
+   "total": 2400
+  },
+  "injectivity_spot_check": "to_external is injective on the first two words over 5,000 random pairs (necessary condition for the census 'bijective' name only; bijectivity is NOT claimed as proven).",
+  "mismatches": 0,
+  "tests": "python3 -m pytest tests/test_unique_id_external115.py -q (7 passed)"
+ }
+}

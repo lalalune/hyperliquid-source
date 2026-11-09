@@ -1,0 +1,11 @@
+mutant	address	reason
+abs mask bit 0	0x5a21811	bit 0 of the mask only matters for a bit pattern that is infinity or NaN either way
+largest finite double threshold	0x5a2181e	differs only for the double 1.797e308; the largest value the function can form is about 3.4e33
+sar 62 for sar 63	0x5a21860	for a value at or above 2^63 the low 11 bits are zero, so the lost mask bit changes nothing
+saturated reference minus one	0x5a2187c	float(M64) and float(M64 - 1) are the same double, and a saturated reference exceeds the 0x1999999999999999 test for any nonzero size; the reference itself is not stored
+sar 62 for sar 63, second cast	0x5a21930	same argument as the first cast
+size cap 0x7ffffffffffffffe in the available test	0x5a21a2e	dominated: the earlier test top * size <= 0x1999999999999999 already bounds price * size
+addend of the saturating window sum	0x5a21b66	only the carry flag is used on this path and it is set for every input that reaches the instruction
+asset boundary 0x270f	0x5a21d12	needs market 0 with 9,999 mark rows; asset ids 0x270e and 0x270f cannot be given to the function in this harness
+constant 2^64	0x459090	2^64 plus one unit: a value above 2^64 clamps to it and then saturates through the 0x458d58 test to the same result
+constant 2^63	0x459360	the constant becomes 2^64; for x in [2^63, 2^64) the converted x - 2^64 is negative and its two's complement is x again, so the result is the same

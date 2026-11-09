@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "task": "RE-012-node115-info-file-sink",
+  "component": "node-runtime",
+  "target": {
+    "release": 115,
+    "path": "artifacts/node/115/hl-node",
+    "sizeBytes": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "sourceCommit": "0781ce04826eeefd89fe336cb8ea073be0c1de30",
+  "claimStatus": "static-observation",
+  "capturedCodeExecuted": false,
+  "observations": [
+    {
+      "id": "conditional-file-descriptor-creation",
+      "ownerFde": ["0x63d4bbe", "0x63d5428"],
+      "guard": "0x67157f0",
+      "pathnamePointerSlot": "0x67147e0",
+      "descriptorLocal": "rsp+0x48",
+      "createMode": "0644",
+      "evidence": ["owner-writer-setup.objdump.txt"]
+    },
+    {
+      "id": "buffer-context-initialization",
+      "initializer": "0x636c4a0",
+      "context": "rsp+0xc0",
+      "callback": "0x63d3b90",
+      "callbackContext": "rsp+0x48",
+      "initialBuffer": null,
+      "requestedAllocationBytes": 65536,
+      "storedCapacityBytes": 65535,
+      "evidence": ["buffer-context-init.objdump.txt", "owner-writer-setup.objdump.txt"]
+    },
+    {
+      "id": "buffered-and-final-flush",
+      "appendCallback": "0x636c530",
+      "flushHelper": "0x636c620",
+      "flushCallbackSource": "context+0",
+      "flushDescriptorContext": "context+8",
+      "flushDataPointer": "context+16",
+      "ownerFlushCall": "0x63d533e",
+      "evidence": ["outer-buffer-sink.objdump.txt", "final-buffer-flush.objdump.txt", "owner-final-flush-close.objdump.txt"]
+    },
+    {
+      "id": "terminal-syscall-arguments",
+      "callback": "0x63d3b90",
+      "guard": "0x67157f0",
+      "syscallNumber": 1,
+      "syscallArguments": ["descriptor from context", "NUL-terminated buffer", "strlen(buffer)"],
+      "returnStoredAt": "context+8",
+      "evidence": ["fd-writer.objdump.txt"]
+    }
+  ],
+  "limitations": [
+    "The pathname pointer's runtime bytes and initializer are not identified.",
+    "Allocation, creat and syscall success are not established by static disassembly.",
+    "The syscall number interpretation as Linux x86-64 write is an ABI inference.",
+    "No CLI behavior, source ownership or component gate is claimed."
+  ]
+}

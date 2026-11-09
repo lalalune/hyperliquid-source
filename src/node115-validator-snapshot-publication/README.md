@@ -1,0 +1,5 @@
+# node115-validator-snapshot-publication
+
+Owned normal-return reconstruction of ordinary validator snapshot publication at0x36cab90 and its selected-snapshot membership consequence. A new publication normally leaves a nonzero selected epoch unchanged; bootstrap copies the old next key. Snapshot values preserve the old Moment while the store receives the new one. Protected history pruning can leave more than1000 records.
+
+See [the evidence packet](../../research/work-items/RE-017-node115-validator-snapshot-publication/README.md) for exact target/caller bindings, prior credit, assumptions and reproduction. `Member<T>` preserves arbitrary owned other data without interpreting validator weights/signatures. Caller-valid packed dates, nonzero periods, valid logical maps and normal allocation/helper return are required. Raw nanoseconds/date flags are copied but ignored for bucket selection. `selected_member` is one membership subcheck, not a signature verifier or full admission gate. The forced-epoch authorization path, initialization and physical container behavior remain outside scope.

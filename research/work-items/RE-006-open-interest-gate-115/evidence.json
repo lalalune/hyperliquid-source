@@ -1,0 +1,344 @@
+{
+  "cases": {
+    "by_kind": {
+      "check": 3249,
+      "clear": 551,
+      "host": 1614,
+      "retain": 1633,
+      "row": 3863
+    },
+    "curated": 410,
+    "mutant_subset": 830,
+    "random": 10500,
+    "total": 10910
+  },
+  "data_words": {
+    "0x64df4a0": "0x635de30",
+    "0x64df6a0": "0x1680c30",
+    "0x64df6e8": "0x141e3a0",
+    "0x64e0c10": "0x5c8b150",
+    "0x64e79c0": "0x447ab80",
+    "0x64eaac0": "0x44810d0"
+  },
+  "display_and_helper_slots": {
+    "0x64df620": "0x1680cbf",
+    "0x64e4ea8": "0x4524e40",
+    "0x64e5a68": "0x44e5c20",
+    "0x64e8090": "0x46f3b70",
+    "0x64e8098": "0x3d66320",
+    "0x64e8c68": "0x35c2d20"
+  },
+  "field_reads": [
+    {
+      "disp": "0x378",
+      "meaning": "cmp rax, [r15+0x378]: the gate tests the niche word of owner +0x378 against i64::MIN",
+      "va": "0x447abab"
+    },
+    {
+      "disp": "0x478",
+      "meaning": "mov r12, [r15+0x478]: the total cap is owner +0x478",
+      "va": "0x447abb8"
+    },
+    {
+      "disp": "0x378",
+      "meaning": "cmp [rsi+0x378], r12: the check tests the same niche word for the second record",
+      "va": "0x447c6af"
+    },
+    {
+      "disp": "0xf0",
+      "meaning": "mov rbp, [r12+0xf0]: the row closure reads the size map niche word at owner +0xf0",
+      "va": "0x3d98823"
+    },
+    {
+      "disp": "0xf8",
+      "meaning": "mov rsi, [r12+0xf8]: tree root, or ring pointer",
+      "va": "0x3d98833"
+    },
+    {
+      "disp": "0x100",
+      "meaning": "mov rdx, [r12+0x100]: tree height, or ring head",
+      "va": "0x3d98847"
+    },
+    {
+      "disp": "0x108",
+      "meaning": "cmp rdx, [r12+0x108]: ring length",
+      "va": "0x3d988a8"
+    },
+    {
+      "disp": "0x118",
+      "meaning": "mov rax, [rax+rcx+0x118]: book total_sz inside a 0x120 byte book row",
+      "va": "0x3d9894d"
+    }
+  ],
+  "fields": {
+    "book_list": {
+      "+0x08": "book rows pointer",
+      "+0x10": "book rows length",
+      "row +0x118": "total_sz",
+      "row stride": "0x120"
+    },
+    "owner": {
+      "+0x378": "niche word: i64::MIN turns the second record on in the check and skips the Mark total in the gate",
+      "+0x478": "total cap, i64",
+      "+0xf0/+0xf8/+0x100/+0x108": "size map by asset: niche word i64::MIN then B-tree root and height, else a sorted ring of (asset, size): capacity, pointer, head, length"
+    },
+    "price_lists": {
+      "+0x00/+0x08/+0x10": "kind 0 Spot: capacity, pointer, length, rows (asset, price)",
+      "+0x18/+0x20/+0x28": "kind 1 Mark",
+      "+0x30/+0x38/+0x40": "kind 2 External",
+      "+0x48": "source byte",
+      "+0x50/+0x58/+0x60": "text list: capacity, pointer, length, rows of 24 bytes"
+    },
+    "ring_row": {
+      "+0x00": "asset key",
+      "+0x08": "size"
+    },
+    "row_closure": {
+      "+0x00": "pointer to (owner, pointer to book list cell)",
+      "+0x08": "pointer to the kind byte",
+      "+0x10": "pointer to the text list",
+      "+0x18": "pointer to the source byte"
+    },
+    "size_map_node": {
+      "+0x08": "keys, u64",
+      "+0x60": "values, u64",
+      "+0xba": "length, u16",
+      "+0xc0": "edges"
+    }
+  },
+  "first_mismatch": "",
+  "float_constants": [
+    {
+      "meaning": "multiplier of the Mark total before the cap test",
+      "va": "0x4593e0",
+      "value": "0.1"
+    },
+    {
+      "meaning": "divisor of the texts",
+      "va": "0x4599a0",
+      "value": "1000000.0"
+    },
+    {
+      "meaning": "lower clamp of the saturating cast",
+      "va": "0x459808",
+      "value": "-9.223372036854776e+18"
+    },
+    {
+      "meaning": "upper clamp of the saturating cast",
+      "va": "0x459360",
+      "value": "9.223372036854776e+18"
+    },
+    {
+      "meaning": "largest double below 2^63: above it the cast result is replaced by i64::MAX",
+      "va": "0x458e50",
+      "value": "9.223372036854775e+18"
+    }
+  ],
+  "functions": [
+    {
+      "end": "0x447aded",
+      "instructions": 144,
+      "instructions_stepped": 124,
+      "role": "update gate",
+      "size": 621,
+      "start": "0x447ab80"
+    },
+    {
+      "end": "0x366d1fe",
+      "instructions": 254,
+      "instructions_stepped": 209,
+      "role": "three list retain",
+      "size": 990,
+      "start": "0x366ce20"
+    },
+    {
+      "end": "0x3d98b32",
+      "instructions": 202,
+      "instructions_stepped": 187,
+      "role": "row closure",
+      "size": 834,
+      "start": "0x3d987f0"
+    },
+    {
+      "end": "0x447c7c4",
+      "instructions": 101,
+      "instructions_stepped": 101,
+      "role": "size times price check",
+      "size": 420,
+      "start": "0x447c620"
+    },
+    {
+      "end": "0x366ce1c",
+      "instructions": 101,
+      "instructions_stepped": 82,
+      "role": "Mark list clear",
+      "size": 412,
+      "start": "0x366cc80"
+    },
+    {
+      "end": "0x4554901",
+      "instructions": 92,
+      "instructions_stepped": 92,
+      "role": "sorted ring search",
+      "size": 289,
+      "start": "0x45547e0"
+    },
+    {
+      "end": "0x35bd6f2",
+      "instructions": 39,
+      "instructions_stepped": 38,
+      "role": "B-tree search",
+      "size": 146,
+      "start": "0x35bd660"
+    },
+    {
+      "end": "0x3dc87d4",
+      "instructions": null,
+      "instructions_stepped": null,
+      "role": "clone slice (stubbed)",
+      "size": 292,
+      "start": "0x3dc86b0"
+    },
+    {
+      "end": "0x3cc5978",
+      "instructions": null,
+      "instructions_stepped": null,
+      "role": "price map builder (stubbed)",
+      "size": 440,
+      "start": "0x3cc57c0"
+    },
+    {
+      "end": "0x44811ce",
+      "instructions": null,
+      "instructions_stepped": null,
+      "role": "total fold behind the fold slot (stubbed)",
+      "size": 254,
+      "start": "0x44810d0"
+    }
+  ],
+  "instructions_stepped": 6061979,
+  "limits": {
+    "row_limit": "0x199999999999999a",
+    "row_limit_times_10": "18446744073709551620",
+    "second_record_limit": "0x28f5c28f5c28f5d",
+    "two_to_64": "18446744073709551616"
+  },
+  "locations": [
+    {
+      "column": 16,
+      "line": 14,
+      "name": "book row bound",
+      "path": "l1/src/books.rs",
+      "slot": "0x647dc08"
+    },
+    {
+      "column": 18,
+      "line": 544,
+      "name": "second record, passed by the row closure",
+      "path": "l1/src/clearinghouse/clearinghouse.rs",
+      "slot": "0x647a6c8"
+    },
+    {
+      "column": 1,
+      "line": 39,
+      "name": "first record, size sum",
+      "path": "l1/src/qtys/impl_sz.rs",
+      "slot": "0x648ba08"
+    },
+    {
+      "column": 1,
+      "line": 848,
+      "name": "negative book total",
+      "path": "l1/src/qtys/mod.rs",
+      "slot": "0x648b9f0"
+    },
+    {
+      "column": 1,
+      "line": 847,
+      "name": "negative total cap",
+      "path": "l1/src/qtys/mod.rs",
+      "slot": "0x648ba38"
+    }
+  ],
+  "mismatches": 0,
+  "mutations": {
+    "killed": 263,
+    "survived": 13,
+    "unreached": 16
+  },
+  "negative_controls": {
+    "detected": 56,
+    "total": 56
+  },
+  "outcomes": {
+    "check pass []": 1505,
+    "check pass [record]": 245,
+    "check text [format record]": 401,
+    "check text [format]": 968,
+    "clear done []": 43,
+    "clear done [format free grow]": 168,
+    "clear done [format free]": 140,
+    "clear done [format grow]": 96,
+    "clear done [format]": 62,
+    "clear done [free]": 42,
+    "host done []": 181,
+    "host done [clone collect fold format free grow record]": 5,
+    "host done [clone collect fold format free grow]": 154,
+    "host done [clone collect fold format free]": 77,
+    "host done [clone collect fold format grow record]": 13,
+    "host done [clone collect fold format grow]": 347,
+    "host done [clone collect fold format record]": 2,
+    "host done [clone collect fold format]": 96,
+    "host done [clone collect fold free]": 13,
+    "host done [clone collect fold]": 205,
+    "host done [format grow record]": 212,
+    "host done [format record]": 56,
+    "host done [record]": 7,
+    "panic: bounds": 372,
+    "panic: unwrap": 375,
+    "retain done []": 629,
+    "retain done [format grow record]": 228,
+    "retain done [format grow]": 516,
+    "retain done [format record]": 81,
+    "retain done [format]": 169,
+    "retain done [record]": 8,
+    "row dropped [format grow record]": 147,
+    "row dropped [format grow]": 345,
+    "row dropped [format record]": 142,
+    "row dropped [format]": 365,
+    "row kept []": 2455,
+    "row kept [record]": 40
+  },
+  "target": {
+    "file": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "texts": {
+    "0x43af28": {
+      "lea_sites": [
+        "0x366cd78",
+        "0x366d7ed",
+        "0x366db39",
+        "0x366e2ca",
+        "0x366e4aa",
+        "0x3d98a8d"
+      ],
+      "text": "Missing price, keeping old {} price asset={} oracle_kind={}",
+      "use": "row and Mark list drop"
+    },
+    "0x449121": {
+      "lea_sites": [
+        "0x447c76c"
+      ],
+      "text": "Asset open interest exceeded cap asset={} kind={}, oi={}",
+      "use": "per asset gate"
+    },
+    "0x44caf1": {
+      "lea_sites": [
+        "0x447acd9"
+      ],
+      "text": "Total open interest exceeded 10x of total open interest cap: total_open_interest={} total_open_interest_cap={}",
+      "use": "total gate"
+    }
+  }
+}

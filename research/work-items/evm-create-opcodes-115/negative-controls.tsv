@@ -1,0 +1,51 @@
+kind	control	description	first_detecting_case
+model-mutant	static_ignored	the static-call refusal (0x28) is skipped	main:5
+model-mutant	spec_off_by_one	CREATE2 is accepted one spec byte too early	main:95
+model-mutant	underflow_off_by_one	two stack words are accepted	main:173
+model-mutant	len_high_ignored	length limbs above the first are ignored	main:41
+model-mutant	offset_high_ignored	offset limbs above the first are ignored	main:7
+model-mutant	empty_not_special	an empty initcode slice takes the copy path	main:2
+model-mutant	no_limit	the initcode size limit is not enforced	main:0
+model-mutant	words_floor	the initcode word count rounds down	main:0
+model-mutant	gas_le	charges fail when gas equals the cost	main:2
+model-mutant	base_ignored	the frame base offset is not added to the source	main:0
+model-mutant	flag_not_restored	the borrow counter is not decremented after the copy	main:0
+model-mutant	field_not_tagged	the Bytes data word is not tagged with bit 0	main:8
+model-mutant	vt_swapped	the even/odd Bytes vtables are swapped	main:1
+model-mutant	drop_missing	the initcode Bytes is not released on failure paths	main:0
+model-mutant	hash_free	CREATE2 charges no hashing words	main:1
+model-mutant	no_refund_accounting	the refund-counter accounting is skipped	main:0
+model-mutant	all_gas	all remaining gas is forwarded	main:0
+model-mutant	keep_wrong	the retained and forwarded gas amounts are swapped	main:1
+model-mutant	salt_big_endian	the CREATE2 salt is stored big-endian	main:1
+model-mutant	addr_zero	the executing address is not recorded	main:1
+model-mutant	no_pending_drop	the old pending-call content is not released	main:1
+model-mutant	pend_tag_keep	the pending tag byte is left untouched	main:2
+model-mutant	b149_keep	the pending flag byte is left untouched	main:8
+model-mutant	no_square	the quadratic memory term is dropped	main:1
+model-mutant	delta_clamp	the memory delta clamps at zero instead of wrapping	resize:22
+model-mutant	store_cost_late	the new memory cost is only stored when the charge succeeds	main:48
+model-mutant	no_words_panic	the 2^59 word limit panic is dropped	resize:40
+model-mutant	no_reserve	the raw vector reserve call is skipped	main:8
+model-mutant	no_zero_fill	newly exposed memory is not zeroed	main:0
+model-mutant	flag_keep	the cell borrow flag is left at 1	main:0
+model-mutant	no_shrink	the cell length is not reset when memory is shorter	main:11
+code-byte	0x4338c10:invert-first-jcc@0x4338c29	byte -> 0x84	main:0
+code-byte	0x4338c10:status-imm-0x2c@0x4338c36	byte -> 0x24	main:136
+code-byte	0x4338c10:last-status-imm-0x20@0x433915d	byte -> 0x24	main:144
+code-byte	0x4339270:invert-first-jcc@0x4339289	byte -> 0x84	main:1
+code-byte	0x4339270:status-imm-0x2c@0x43392a8	byte -> 0x24	main:173
+code-byte	0x4339270:last-status-imm-0x20@0x43398a1	byte -> 0x24	main:133
+code-byte	0x4f07ae0:invert-first-jcc@0x4f07af9	byte -> 0x84	main:2
+code-byte	0x4f07ae0:status-imm-0x2c@0x4f07b06	byte -> 0x24	main:26
+code-byte	0x4f07ae0:last-status-imm-0x20@0x4f07fbf	byte -> 0x24	main:226
+code-byte	0x4f07460:invert-first-jcc@0x4f07479	byte -> 0x84	main:3
+code-byte	0x4f07460:status-imm-0x2c@0x4f07498	byte -> 0x24	main:1687
+code-byte	0x4f07460:last-status-imm-0x20@0x4f07a16	byte -> 0x24	main:391
+code-byte	0x4f00920:invert-first-jcc@0x4f0093d	byte -> 0x85	main:2:fault
+code-byte	0x45244c0:invert-first-jcc@0x45244d3	byte -> 0x81	resize:0
+code-byte	0x45244c0:status-imm-0x21@0x452452d	byte -> 0x29	resize:0
+code-byte	0x45244c0:last-status-imm-0x21@0x452452d	byte -> 0x25	resize:0
+input-corruption	binary-digest	corrupted input	refused
+input-corruption	not-a-function-start	corrupted input	refused
+input-corruption	misaligned-handler	corrupted input	refused

@@ -1,0 +1,304 @@
+#!/usr/bin/env python3
+"""Tests for tools/tracer_get115.py.
+
+Every expectation is grounded in the node #115 binary
+(work/hl-node-115.bin, SHA-256 a6e2897c...): the Get FDE
+(0x61b1e40..0x61b21ca), the vendor census record
+node115-vendor-61b1e40, the SetPayloadMap helper (0x61b18b0),
+EncodeVarint32 (0x61bd410), ShouldSkipTrace (0x61b1930) and
+WriteTrace (0x61b1a10) as modelled in the header/footer packet,
+and ColumnFamilyHandle::GetID (vtable slot 3, 0x18) for the CF id.
+The binary is never executed.
+"""
+
+import csv
+import struct
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+
+from tracer_get115 import (  # noqa: E402
+    K_GET_CF_ID,
+    K_GET_KEY,
+    K_TRACE_GET,
+    FakeClock,
+    FakeWriter,
+    LengthError_,
+    Status,
+    Tracer,
+    _check_append,
+    build_get_payload,
+    encode_varint32,
+    generate_cases,
+    put_fixed32,
+    put_fixed64,
+    set_payload_map,
+)
+
+TOOL = Path(__file__).resolve().parents[1] / "tools" / "tracer_get115.py"
+
+
+def make_tracer(clock_value=0, **kwargs):
+    kwargs.setdefault("writer", FakeWriter())
+    return Tracer(FakeClock(clock_value), **kwargs)
+
+
+class EncodeVarint32Tests(unittest.TestCase):
+    def test_boundaries(self):
+        # 0x61bd410 unrolls the 1/2/3/4/5-byte paths at 0x7f,
+        # 0x3fff, 0x1fffff, 0xfffffff.
+        cases = [
+            (0, "00"),
+            (1, "01"),
+            (127, "7f"),
+            (128, "8001"),
+            (16383, "ff7f"),
+            (16384, "808001"),
+            (2097151, "ffff7f"),
+            (2097152, "80808001"),
+            (268435455, "ffffff7f"),
+            (268435456, "8080808001"),
+            (0xFFFFFFFF, "ffffffff0f"),
+        ]
+        for value, want in cases:
+            self.assertEqual(encode_varint32(value).hex(), want,
+                             hex(value))
+
+    def test_length_is_ceil_bits_over_7(self):
+        for value in [0, 127, 128, 16383, 16384, 2097151, 2097152,
+                      268435455, 268435456, 0xFFFFFFFF]:
+            n = max(1, (value.bit_length() + 6) // 7)
+            self.assertEqual(len(encode_varint32(value)), n)
+
+    def test_masks_to_32_bits(self):
+        # The binary passes the size through esi (a 32-bit load)
+        # before EncodeVarint32; the encoder itself masks too.
+        self.assertEqual(encode_varint32(0x100000000),
+                         encode_varint32(0))
+        self.assertEqual(encode_varint32(0x1FFFFFFFF),
+                         encode_varint32(0xFFFFFFFF))
+
+
+class PayloadTests(unittest.TestCase):
+    def test_empty_key_payload(self):
+        # PutFixed64(payload_map=12) + PutFixed32(0) + varint(0):
+        # 13 bytes.
+        self.assertEqual(
+            build_get_payload(0, b""),
+            b"\x0c\x00\x00\x00\x00\x00\x00\x00"
+            + b"\x00\x00\x00\x00" + b"\x00",
+        )
+
+    def test_realistic_get_payload(self):
+        # CF 0, key "key": map 12, cf id 0, varint(3), "key".
+        self.assertEqual(
+            build_get_payload(0, b"key"),
+            b"\x0c\x00\x00\x00\x00\x00\x00\x00"
+            + b"\x00\x00\x00\x00" + b"\x03" + b"key",
+        )
+
+    def test_cf_id_is_little_endian_u32(self):
+        # CF id 0x01020304 is stored little-endian, not varint.
+        self.assertEqual(
+            build_get_payload(0x01020304, b"")[:12],
+            b"\x0c\x00\x00\x00\x00\x00\x00\x00"
+            + b"\x04\x03\x02\x01",
+        )
+
+    def test_varint_length_prefix(self):
+        # 127 bytes -> 1-byte varint; 128 bytes -> 2-byte varint.
+        self.assertEqual(build_get_payload(0, b"a" * 127)[12:13], b"\x7f")
+        self.assertEqual(build_get_payload(0, b"a" * 128)[12:14],
+                         b"\x80\x01")
+        self.assertEqual(len(build_get_payload(0, b"a" * 128)),
+                         8 + 4 + 2 + 128)
+
+    def test_put_fixed64(self):
+        self.assertEqual(put_fixed64(b"", 12),
+                         b"\x0c\x00\x00\x00\x00\x00\x00\x00")
+        self.assertEqual(put_fixed64(b"", 0x0102030405060708),
+                         struct.pack("<Q", 0x0102030405060708))
+
+    def test_put_fixed32(self):
+        self.assertEqual(put_fixed32(b"", 0),
+                         b"\x00\x00\x00\x00")
+        self.assertEqual(put_fixed32(b"", 0x01020304),
+                         struct.pack("<I", 0x01020304))
+
+    def test_length_guard(self):
+        # The guard itself; reaching it through the payload
+        # builder would need a >2^62-byte string, so the guard is
+        # tested directly (as in the header/footer packet).
+        with self.assertRaises(LengthError_):
+            _check_append(0x3FFFFFFFFFFFFFFF, 8)
+
+
+class GetTests(unittest.TestCase):
+    def test_golden_empty_key_record(self):
+        # clock 0, CF 0, empty key: ts 8x00, type 04, payload-len
+        # 13, payload = PutFixed64(12) + PutFixed32(0) +
+        # varint(0).  26 bytes total.
+        tr = make_tracer(clock_value=0)
+        self.assertTrue(tr.get(0, b"").ok())
+        self.assertEqual(tr.clock.calls, 1)
+        self.assertEqual(
+            tr.writer.written[0],
+            b"\x00" * 8 + b"\x04" + struct.pack("<I", 13)
+            + b"\x0c\x00\x00\x00\x00\x00\x00\x00"
+            + b"\x00\x00\x00\x00" + b"\x00",
+        )
+        self.assertEqual(len(tr.writer.written[0]), 26)
+
+    def test_trace_fields(self):
+        # build_get_trace returns None on skip; otherwise the
+        # Trace has type 4, payload_map 12 (SetPayloadMap bits
+        # 2 and 3).
+        tr = make_tracer(clock_value=42)
+        trace = tr.build_get_trace(2, b"key")
+        self.assertIsNotNone(trace)
+        self.assertEqual(trace.timestamp, 42)
+        self.assertEqual(trace.type, K_TRACE_GET)
+        self.assertEqual(trace.payload_map, 12)
+        self.assertEqual(trace.payload, build_get_payload(2, b"key"))
+
+    def test_flag_skip_returns_ok_without_clock_or_writer(self):
+        # ShouldSkipTrace (0x61b1930): Get's flag bit is 0x01;
+        # a set bit skips at once (counter untouched), the clock is
+        # never consulted and nothing is written.
+        tr = make_tracer(clock_value=7, sampling_period=3,
+                         skip_flags=0x01)
+        self.assertTrue(tr.get(0, b"abc").ok())
+        self.assertEqual(tr.clock.calls, 0)
+        self.assertEqual(tr.writer.write_calls, 0)
+        self.assertEqual(tr.counter, 0)
+
+    def test_file_size_gate(self):
+        # helper 0x61b1910: GetFileSize() > max -> skip; equal -> record.
+        tr = make_tracer(max_trace_file_size=100, sampling_period=1,
+                         writer=FakeWriter(file_size=100))
+        self.assertTrue(tr.get(0, b"abc").ok())
+        self.assertEqual(len(tr.writer.written), 1)
+        tr = make_tracer(max_trace_file_size=100, sampling_period=1,
+                         writer=FakeWriter(file_size=101))
+        self.assertTrue(tr.get(0, b"abc").ok())
+        self.assertEqual(len(tr.writer.written), 0)
+        self.assertEqual(tr.clock.calls, 0)
+
+    def test_sampling_sequence(self):
+        # Period 3, counter 0: skip, skip, record, skip, skip, record.
+        tr = make_tracer(sampling_period=3)
+        got = []
+        for _ in range(6):
+            tr.get(0, b"x")
+            got.append(len(tr.writer.written))
+        self.assertEqual(got, [0, 0, 1, 1, 1, 2])
+        self.assertEqual(tr.counter, 0)
+
+    def test_writer_error_propagates(self):
+        # WriteTrace's Status is forwarded unchanged.
+        err = Status(2, b"disk full")
+        tr = make_tracer(writer=FakeWriter(write_status=err))
+        self.assertEqual(tr.get(0, b"abc"), err)
+        self.assertEqual(len(tr.writer.written), 1)
+
+    def test_clock_called_once_per_record(self):
+        tr = make_tracer(clock_value=99)
+        tr.get(0, b"a")
+        tr.get(1, b"b")
+        self.assertEqual(tr.clock.calls, 2)
+        self.assertEqual(len(tr.writer.written), 2)
+        self.assertEqual(tr.writer.written[0][8], 4)
+        self.assertEqual(tr.writer.written[1][8], 4)
+
+    def test_set_payload_map_bits_2_and_3(self):
+        # 0x61b18b0: bts sets bit `type`; Get passes kGetCFID (2)
+        # then kGetKey (3), so the map becomes 12.
+        self.assertEqual(set_payload_map(0, K_GET_CF_ID), (4, True))
+        self.assertEqual(set_payload_map(4, K_GET_KEY), (12, True))
+        self.assertEqual(set_payload_map(12, K_GET_CF_ID), (12, False))
+        self.assertEqual(set_payload_map(12, K_GET_KEY), (12, False))
+
+
+class CasesTests(unittest.TestCase):
+    def _replay(self, kind, inp, want):
+        if kind == "get":
+            parts = inp.split("|")
+            err = None
+            steps = 1
+            if parts[-1].startswith("err="):
+                err = int(parts[-1][4:])
+                parts = parts[:-1]
+            if parts[-1].startswith("steps="):
+                steps = int(parts[-1][6:])
+                parts = parts[:-1]
+            (clock, flags, period, max_size, fsize, counter0,
+             cf_id) = map(int, parts[:7])
+            key = bytes.fromhex(parts[7])
+            tr = Tracer(FakeClock(clock), max_trace_file_size=max_size,
+                        sampling_period=period, skip_flags=flags,
+                        writer=FakeWriter(
+                            file_size=fsize,
+                            write_status=(Status(err, b"disk full")
+                                          if err is not None else None)))
+            tr.counter = counter0
+            if err is not None:
+                status = tr.get(cf_id, key)
+                self.assertEqual(
+                    want,
+                    f"STATUS|{status.code}|{status.message.hex()}")
+                return
+            pattern = []
+            for _ in range(steps):
+                before = len(tr.writer.written)
+                status = tr.get(cf_id, key)
+                self.assertTrue(status.ok())
+                pattern.append(
+                    "R" if len(tr.writer.written) > before else "S")
+            if steps > 1:
+                self.assertEqual(
+                    want, f"{','.join(pattern)}|{tr.counter}")
+            elif pattern[0] == "S":
+                self.assertEqual(want, f"SKIP|{tr.clock.calls}")
+            else:
+                self.assertEqual(want, tr.writer.written[0].hex())
+        elif kind == "get_payload":
+            cf_id_s, key_hex = inp.split("|")
+            key = bytes.fromhex(key_hex)
+            self.assertEqual(
+                want, build_get_payload(int(cf_id_s), key).hex())
+        elif kind == "encode_varint32":
+            self.assertEqual(want, encode_varint32(int(inp)).hex())
+        else:
+            self.fail(f"unknown kind {kind}")
+
+    def test_all_committed_cases_replay(self):
+        cases_path = (
+            Path(__file__).resolve().parents[1] / "research" / "work-items"
+            / "re-002-node115-tracer-get-115" / "cases.tsv"
+        )
+        with open(cases_path) as fh:
+            rows = list(csv.DictReader(fh, delimiter="\t"))
+        self.assertEqual(len(rows), 2400)
+        for row in rows:
+            with self.subTest(kind=row["kind"], inp=row["input"][:40]):
+                self._replay(row["kind"], row["input"], row["want"])
+
+    def test_generator_reproduces_committed_cases(self):
+        # The committed cases.tsv is exactly what the seeded
+        # generator produces (no hand edits).
+        cases_path = (
+            Path(__file__).resolve().parents[1] / "research" / "work-items"
+            / "re-002-node115-tracer-get-115" / "cases.tsv"
+        )
+        with open(cases_path) as fh:
+            committed = fh.read()
+        lines = ["kind\tinput\twant"]
+        for kind, inp, want in generate_cases():
+            lines.append(f"{kind}\t{inp}\t{want}")
+        self.assertEqual(committed, "\n".join(lines) + "\n")
+
+
+if __name__ == "__main__":
+    unittest.main()

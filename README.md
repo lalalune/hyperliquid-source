@@ -16,7 +16,7 @@ an integrated, runnable node remains in progress.
 
 ![Node #115 progress](docs/assets/research-progress.svg)
 
-**100 active Rust implementation areas · 63 top-level Cargo manifests · 3240 #115 research work items.**
+**216 active Rust implementation areas · 179 top-level Cargo manifests · 3705 #115 research work items.**
 
 These inventory counts describe available work, not completed components.
 
@@ -30,16 +30,16 @@ These inventory counts describe available work, not completed components.
 | Components fully built | 0/23 | 0.00% |
 | Components with full behavioral validation | 0/23 | 0.00% |
 | Components with full code/data identity | 0/23 | 0.00% |
-| Target .text bytes compared | 5,313,802/83,719,936 | 6.34712% |
-| Target .text bytes raw-equal | 4,964,007/83,719,936 | 5.92930% |
+| Target .text bytes compared | 5,318,174/83,719,936 | 6.35234% |
+| Target .text bytes raw-equal | 4,968,370/83,719,936 | 5.93451% |
 
 Gate percentages require acceptance of the full component scope.
 Byte percentages cover the authenticated comparison registry, including dependencies;
 they do not measure whole-node completion or remaining engineering effort.
 
-The retained implementations cover quantity preparation, nonce ordering,
-snapshot selectors, latency, weighted comparisons, tagged counts and unsigned128 conversion.
-Each has a bounded #115 contract; no integrated node executable is claimed.
+Registered bounded Rust work occurs in **20/23 component work areas**
+(**88 implementation paths**). These are fragment registrations, not completed components.
+Each fragment keeps its own #115 contract; an integrated node executable remains unaccepted.
 
 <details open>
 <summary><strong>Node #115 component acceptance</strong></summary>
@@ -85,22 +85,25 @@ Their equality does not establish first-party or whole-node completion.
 
 | Comparison | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows |
 | --- | ---: | ---: | ---: |
-| **Node #115 total** | 4,964,007/5,313,802 (93.42%) | 507/7,884 (6.43%) | 7,884/7,884 (100.00%) |
+| **Node #115 total** | 4,968,370/5,318,174 (93.42%) | 507/7,885 (6.43%) | 7,885/7,885 (100.00%) |
 | compiler-builtins | 2,769/2,874 (96.35%) | 5/13 (38.46%) | 13/13 (100.00%) |
-| native-libraries | 4,716,864/5,053,810 (93.33%) | 445/7,265 (6.13%) | 7,265/7,265 (100.00%) |
+| native-libraries | 4,721,227/5,058,182 (93.34%) | 445/7,266 (6.12%) | 7,266/7,266 (100.00%) |
 | rust-alloc | 759/838 (90.57%) | 0/9 (0.00%) | 9/9 (100.00%) |
 | rust-core | 37,344/39,873 (93.66%) | 5/112 (4.46%) | 112/112 (100.00%) |
 | rust-std | 57,583/60,556 (95.09%) | 16/174 (9.20%) | 174/174 (100.00%) |
 | vendored-crates | 146,270/153,433 (95.33%) | 34/309 (11.00%) | 309/309 (100.00%) |
 | zstandard | 2,418/2,418 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
 
-Compared code: **5,313,802/83,719,936 .text bytes (6.34712%)**.
+Compared code: **5,318,174/83,719,936 .text bytes (6.35234%)**.
 
 All active findings bind to node #115. See [detailed progress](docs/PROGRESS.md)
 and [source-built node acceptance](docs/SCOPE.md#source-built-network-node).
 
 </details>
 <!-- END GENERATED PROGRESS -->
+
+The [2026-11-09 evidence review](research/work-items/RE-001-node115-progress-review-2026-11-09/README.md)
+explains the inventory, byte comparisons and unaccepted full-scope gates.
 
 ## Target: node #115
 

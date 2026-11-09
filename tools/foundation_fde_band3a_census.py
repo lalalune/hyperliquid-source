@@ -114,7 +114,11 @@ def instruction_count(target, start, end):
     total = 0
     for line in output.splitlines():
         left, separator, rest = line.strip().partition(':')
-        if separator and left and all(char in HEX for char in left):
+        columns = rest.split('\t')
+        # Long instruction encodings wrap their remaining bytes onto an
+        # address-prefixed continuation line with no assembly column.
+        if (separator and left and all(char in HEX for char in left)
+                and len(columns) >= 3 and columns[2].strip()):
             total += 1
     if total == 0:
         raise AssertionError('no instructions for %x..%x' % (start, end))
