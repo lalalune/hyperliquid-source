@@ -34,7 +34,7 @@
   "tool": "tools/tracer_iterator_seek_for_prev115.py",
   "what_is_checked": [
    "iterator_seek_for_prev: 200 IteratorSeekForPrev-flag skips (flags 0x08/0x09/0x1F/0x18; the clock is never consulted on the skip path), 200 file-size-gate skips (fsize above max), 200 six-call sampling sequences for periods 0/1/2/3/5/10 with counter starts 0/1/period-1, 50 writer-error rows where the writer's Status is returned as-is, 550 full records over boundary clocks (0, 1, 123456789, 2^63, 2^64-1, random u64s), CF ids (0, 1, 2, 3, 2^32-1, random u32s) and key/lower/upper sizes 0/1/3/127/128/256/1000/16383/16384 (incl. a realistic CF 0 / 'key' / 'lo' / 'hi' seek) cycling the four bound-presence combos",
-   "iterator_seek_for_prev_for_prev_payload: the payload bytes (PutFixed64(map) + PutFixed32(cf_id) + varint + key [+ varint + lower iff non-empty] [+ varint + upper iff non-empty]) for CF ids 0/1/2/3/2^32-1 and key/lower/upper sizes 0/1/3/127/128/256/1000/16383/16384",
+   "iterator_seek_for_prev_payload: the payload bytes (PutFixed64(map) + PutFixed32(cf_id) + varint + key [+ varint + lower iff non-empty] [+ varint + upper iff non-empty]) for CF ids 0/1/2/3/2^32-1 and key/lower/upper sizes 0/1/3/127/128/256/1000/16383/16384",
    "encode_varint32: boundary values 0/1/127/128/16383/16384/2097151/2097152/268435455/268435456/2^32-1 plus random u32s",
    "the committed cases.tsv matches a fresh regeneration from the same seeded generator",
    "the varint encodes the LOW 32 bits of each slice size while the append copies the full size (a >4 GiB slice would prefix the truncated length) is a disassembly-only observation, not covered by a case"
@@ -64,7 +64,7 @@
     "The payload_map bits are never serialized by EncodeTrace; they are visible only as the first 8 payload bytes (PutFixed64). The map is 48 with empty bounds, 112 with lower only, 176 with upper only, 240 with both.",
     "The timestamp comes from the 13-layer SystemClockWrapper::NowMicros fast path (each layer's vtable slot 19 compared against 0x5d4d490, followed through +0x20); the first layer whose slot differs calls that slot's function directly instead of continuing the chain.",
     "The CF id is the uint32_t the caller passes by reference (loaded with a 32-bit load at 0x61b29d2) and stored little-endian as 4 bytes; it is NOT varint-encoded. (Unlike Get, there is no ColumnFamilyHandle vtable call here -- the caller already resolved the id.)",
-    "The upper bound arrives by value: the caller copies its two words onto the stack (movdqu/movups at the call site 0x5d55437-0x5d5544d); the function keeps the data pointer at [rsp+0x10] and the size in r15.",
+    "The upper bound arrives by value: the caller copies its two words onto the stack (movdqu/movups at the call site 0x5d55597-0x5d555ad); the function keeps the data pointer at [rsp+0x10] and the size in r15.",
     "The exception landing pad at 0x61b2c9c..0x61b2ca7 (endbr64; mov rbx,rax; jmp 0x61b2738) runs only on the exception path (bad_alloc from the string appends); the string length guards raise length_error instead (std::string::_M_append, via __throw_length_error).",
     "The payload string is freed only when its pointer differs from the SSO buffer at rsp+0x58 (standard string destruction); the three 5-byte varint buffers sit at rsp+0x69 (key), rsp+0x6e (lower) and rsp+0x73 (upper), just below the stack canary at rsp+0x78."
    ],

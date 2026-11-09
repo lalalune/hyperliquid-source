@@ -134,19 +134,19 @@ bytes, map 240).
 ## Cases
 
 2,400 deterministic cases (`cases.tsv`, seeded generator in
-`tools/tracer_iterator_seek_for_prev_for_prev115.py`): 1,200 `iterator_seek_for_prev` (200
+`tools/tracer_iterator_seek_for_prev115.py`): 1,200 `iterator_seek_for_prev` (200
 IteratorSeekForPrev-flag skips, 200 file-size-gate skips, 200 six-call
 sampling sequences for periods 0/1/2/3/5/10, 50 writer-error rows,
 550 full records over boundary clocks and CF ids 0/1/2/3/2^32-1
 and key/lower/upper sizes 0/1/3/127/128/256/1000/16383/16384 —
 including a realistic CF 0 / `"key"` / `"lo"` / `"hi"` seek —
 cycling the four bound-presence combos), 600
-`iterator_seek_for_prev_for_prev_payload` (the payload bytes for CF ids
+`iterator_seek_for_prev_payload` (the payload bytes for CF ids
 0/1/2/3/2^32-1 and key/lower/upper sizes 0/1/3/127/128/256/1000/
 16383/16384), 600 `encode_varint32` (boundary values
 0/1/127/128/16383/16384/2097151/2097152/268435455/268435456/2^32-1
 plus random u32s). 24 tests pass
-(`tests/test_tracer_iterator_seek_for_prev_for_prev115.py`), including the
+(`tests/test_tracer_iterator_seek_for_prev115.py`), including the
 golden-record tests, the bound-combination map tests, the
 flag/file-size/sampling gate tests, the varint boundary tests and
 the full 2,400-row replay.
