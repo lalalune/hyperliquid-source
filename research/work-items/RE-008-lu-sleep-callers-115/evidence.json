@@ -1,0 +1,71 @@
+{
+  "component": "info-api",
+  "gates_changed": false,
+  "handler_records": {
+    "flag_word": "+0x6da = 0 (0x2e3f7e2)",
+    "option_byte": "1 when byte [rsp+0x160] bit 0 is set (0x2e3f526), else 0 (0x2e3f5a2); stored to [rsp] (0x2e3f5e7)",
+    "record_1": "+0x2d8 byte, +0x2d9 dword, +0x2dd qword [rsp+0x90], +0x2e5 dword [rsp+0x98], +0x2e9 = 2",
+    "record_2": "+0x6b8 byte, +0x6b9 dword, +0x6bd qword [rsp+0x80], +0x6c5 dword [rsp+0x88], +0x6c9 = 2",
+    "value32": "ebp = dword [rsp+0x162] shrd word [rsp+0x166], 16: bytes [rsp+0x164..0x168)"
+  },
+  "helpers": {
+    "inner": "0x2d4f8b0",
+    "outer": "0x2d4f790",
+    "relocations_naming_either": 0
+  },
+  "inner_calls": [
+    [
+      "0x2cf0986",
+      "0x2cf08b0"
+    ],
+    [
+      "0x2d4f7de",
+      "0x2d4f790"
+    ]
+  ],
+  "outer_calls": [
+    {
+      "argument": "f64 [rbx+0x10+8*(byte [rbx+0x8] ^ 1)] copied to +0x28 and +0x38",
+      "call": "0x2cf09c7",
+      "fn": "0x2cf08b0",
+      "locations": [
+        "unfold.rs:108:21",
+        "lu.rs:386:64"
+      ],
+      "other_path": "byte [rbx+0x30] != 0 -> 0x2cf0986 calls 0x2d4f8b0 directly (no zero check)"
+    },
+    {
+      "argument": "max(0, A - B) seconds; B from slot 0x64e0990 -> 0x1629690; difference slot 0x64e0fc0 -> 0x162a290; +inf -> 0",
+      "call": "0x2e072c6",
+      "fn": "0x2e071c0",
+      "locations": [
+        "channel.rs:16:9",
+        "channel.rs:20:33"
+      ]
+    },
+    {
+      "argument": "same shape as 0x2e071c0",
+      "call": "0x2e076f0",
+      "fn": "0x2e075f0",
+      "locations": [
+        "channel.rs:16:9",
+        "channel.rs:20:33"
+      ]
+    },
+    {
+      "argument": "constant 0.014 (0x3f8cac083126e979); guarded by the flag the 25th stage found constant 0",
+      "call": "0x2e3fd8f",
+      "fn": "0x2e3ed10",
+      "locations": []
+    }
+  ],
+  "seconds_model_samples": {
+    "(-1, 0)": 0.0,
+    "(0, 0)": 0.0,
+    "(1, 500000000)": 1.5,
+    "(2**62, 0)": 4.611686018427388e+18
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}

@@ -1,0 +1,76 @@
+{
+  "component": "abci",
+  "gate": {
+    "calls": 23,
+    "deadline": "slot 0x64e0f78 -> 0x162a9a0 (stored time of day + interval, overflow seconds); two range checks; days = overflow / 86400; slot 0x64e0aa0 -> 0x16290d0 (stored date + days, 0 = failed)",
+    "empty": "stored date 0 -> flush",
+    "fallback": "0x4679d0 = (0x7fffd6de, 86399, 999999999) when a range check or the date addition fails",
+    "fde": [
+      "0x154ce40",
+      "0x154cfe0"
+    ],
+    "flush_when": "deadline < record time, comparing date (signed), then seconds, then fraction",
+    "interval": "slot 0x64e0f70 -> 0x15ed960 (secs, nanos); nanos = secs*1e9 + nanos saturated to i64::MAX; split again by 1e9",
+    "on_flush": "store the record time at +0x40..+0x4c, return 1",
+    "state": "liner +0x38: f64 interval; +0x40 stored date (0 = empty), +0x44 seconds, +0x48 fraction"
+  },
+  "gates_changed": false,
+  "initializer": {
+    "check": "accept +-0, positive subnormal, positive normal; else Option::unwrap panic at base/src/liner.rs:17:84",
+    "check_samples": {
+      "-0.0": true,
+      "-1.0": false,
+      "-5e-324": false,
+      "0.0": true,
+      "1e300": true,
+      "5e-324": true,
+      "60.0": true,
+      "inf": false,
+      "nan": false
+    },
+    "env_name": "LINER_FLUSH_PERIOD",
+    "fde": [
+      "0x14c4770",
+      "0x14c48cd"
+    ],
+    "lookup": "slot 0x64e0040 -> 0x5c9a340; Err (tag byte != 0) -> 60.0",
+    "parse": "slot 0x64e0048 -> 0x16876b0; Err -> Result::unwrap panic at base/src/liner.rs:17:74"
+  },
+  "interval_global": {
+    "cell": "0x64efce0",
+    "open_slot_calls": 104,
+    "reader": "0x14c3b7c movsd xmm0, [r13] in the liner open; stored at liner +0x38",
+    "relocations_into_cell": [
+      "0x64e0030"
+    ],
+    "rip_relative_refs_to_cell": 0,
+    "slot_loads": [
+      "0x14c3b6f"
+    ],
+    "state_dword_at_rest": "+0x8 = 3 (open takes the Once path when not 0)",
+    "value_word": "+0x0: R_X86_64_RELATIVE -> initializer 0x14c4770 until init, then the f64",
+    "writer": "0x14c3f9b movsd [rbx], xmm0 in Once closure 0x14c3f80 (vtable 0x63f8d30 +0x18, built only at 0x14c3c03)"
+  },
+  "observer_writer_states": {
+    "constructor": "0x1548bb0",
+    "constructor_slot_calls": 35,
+    "initial": "rsp+0x28 and rsp+0xd8 first qword 0x8000000000000000 (None), copied 0xb0 bytes to +0x98 and +0x148",
+    "object_0xb0_copies_into_plus_0x98": [
+      "0x1548da1"
+    ],
+    "skip": {
+      "+0x148": "0x1547c15 jo 0x1547f47",
+      "+0x98": "0x1548884 jo 0x1548657"
+    }
+  },
+  "seconds_conversion": {
+    "fde": [
+      "0x15ed960",
+      "0x15edb81"
+    ],
+    "paths": "x >= 0 or NaN: bit decode (exponent < 0x3e0 -> 0; < 0x3ff fraction only; < 0x433 seconds and fraction; < 0x43f seconds only; else the saturating microsecond path); x < 0: saturating microsecond path"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}

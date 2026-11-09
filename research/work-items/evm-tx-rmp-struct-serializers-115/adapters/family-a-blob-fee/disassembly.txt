@@ -1,0 +1,51 @@
+0x233a4f0: 4157                     push r15
+0x233a4f2: 4156                     push r14
+0x233a4f4: 53                       push rbx
+0x233a4f5: 4889f3                   mov rbx, rsi
+0x233a4f8: 807e1b01                 cmp byte ptr [rsi + 0x1b], 1
+0x233a4fc: 7539                     jne 0x233a537
+0x233a4fe: 488b0b                   mov rcx, qword ptr [rbx]
+0x233a501: 488b7310                 mov rsi, qword ptr [rbx + 0x10]
+0x233a505: 4839f1                   cmp rcx, rsi
+0x233a508: 743d                     je 0x233a547
+0x233a50a: 4c8b4308                 mov r8, qword ptr [rbx + 8]
+0x233a50e: 41c60430b0               mov byte ptr [r8 + rsi], 0xb0
+0x233a513: 48ffc6                   inc rsi
+0x233a516: 48897310                 mov qword ptr [rbx + 0x10], rsi
+0x233a51a: 4829f1                   sub rcx, rsi
+0x233a51d: 4883f90f                 cmp rcx, 0xf
+0x233a521: 7651                     jbe 0x233a574
+0x233a523: 0f1005b6b811fe           movups xmm0, xmmword ptr [rip - 0x1ee474a]
+0x233a52a: 410f110430               movups xmmword ptr [r8 + rsi], xmm0
+0x233a52f: 4883c610                 add rsi, 0x10
+0x233a533: 48897310                 mov qword ptr [rbx + 0x10], rsi
+0x233a537: 4889d6                   mov rsi, rdx
+0x233a53a: 4889da                   mov rdx, rbx
+0x233a53d: 5b                       pop rbx
+0x233a53e: 415e                     pop r14
+0x233a540: 415f                     pop r15
+0x233a542: e9d9d86200               jmp 0x2967e20
+0x233a547: 4989d6                   mov r14, rdx
+0x233a54a: ba01000000               mov edx, 1
+0x233a54f: b901000000               mov ecx, 1
+0x233a554: 41b801000000             mov r8d, 1
+0x233a55a: 4989ff                   mov r15, rdi
+0x233a55d: 4889df                   mov rdi, rbx
+0x233a560: e8eb3afeff               call 0x231e050
+0x233a565: 4c89ff                   mov rdi, r15
+0x233a568: 4c89f2                   mov rdx, r14
+0x233a56b: 488b0b                   mov rcx, qword ptr [rbx]
+0x233a56e: 488b7310                 mov rsi, qword ptr [rbx + 0x10]
+0x233a572: eb96                     jmp 0x233a50a
+0x233a574: 4989d6                   mov r14, rdx
+0x233a577: ba10000000               mov edx, 0x10
+0x233a57c: b901000000               mov ecx, 1
+0x233a581: 41b801000000             mov r8d, 1
+0x233a587: 4989ff                   mov r15, rdi
+0x233a58a: 4889df                   mov rdi, rbx
+0x233a58d: e8be3afeff               call 0x231e050
+0x233a592: 4c89ff                   mov rdi, r15
+0x233a595: 4c89f2                   mov rdx, r14
+0x233a598: 4c8b4308                 mov r8, qword ptr [rbx + 8]
+0x233a59c: 488b7310                 mov rsi, qword ptr [rbx + 0x10]
+0x233a5a0: eb81                     jmp 0x233a523
