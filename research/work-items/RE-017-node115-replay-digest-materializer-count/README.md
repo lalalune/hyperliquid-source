@@ -72,7 +72,9 @@ for cap,head,n in ((1,0,1),(4,0,4),(7,5,5),(9,8,2)):
     assert len(copied)==n and copied==[source[(head+i)%cap] for i in range(n)]
 for n in (1,20,21,63,64,100):
     assert not (n>63) or (n>=21)
-assert (1<<58)-1 < (1<<58) and not ((1<<58)<(1<<58))
+for n,fail in ((0,False),((1<<58)-1,False),(1<<58,True),(1<<59,True),((1<<64)-1,True)):
+    shifted=(n<<5)&((1<<64)-1)
+    assert ((n>>59)!=0 or (shifted>>63)!=0)==fail
 for addr in (0x5b91a85,0x5b91bb6):
     bad=bytearray(spans[addr]);bad[-1]^=1
     assert bad!=elf_bytes('.text',addr,len(bad))
