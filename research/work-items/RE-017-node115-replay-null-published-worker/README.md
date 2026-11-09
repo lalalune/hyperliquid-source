@@ -6,11 +6,13 @@ The existing [replay-record identity packet](../RE-017-node115-replay-record-ide
 
 The producer increments `[P]` at `0x5a88954`, stages `(0, P)`, and calls the queue publisher. If that same pair is returned by the selected ready probe, the receiver's selected normal publication copies it into its result `+8/+16` and writes tag 1. The worker accepts tag 1, loads the first and second payload words, and tests the first. A zero first word takes `0x5a6e380`, stages `(0, P)`, invokes callback `0x5a63100` with selector 1, and atomically decrements `[P]` after the call. A nonzero decrement result returns directly to retrieval; zero calls the release slot before that return. No explicit expected-word store appears on this local null-first arm.
 
+The [callback-filter packet](../RE-017-node115-replay-callback-filter/README.md) separately maps the selector-dependent search. The worker initializes R12 as the address of its staged pair at `0x5a6e2be`; on the null arm it passes that address as the callback's second argument. The callback saves it in R15 and, on either selected load at `0x5a632f4` or `0x5a6332a`, reads the first qword to its local `+0x28`. The null branch also reads P `+0x18/+0x20` at `0x5a6333f/0x5a63343`. If that first word remains zero and the callback reaches the selected nonzero-selector iteration, `0x5a63688` takes the null continuation `0x5a63832` before the record `+0x20` membership search. This does not mean the callback has no side effects or that the selected iteration is reached.
+
 This is a conditional composition, not proof that a real first replay item has this shape or that the callback leaves the expected word or reference count unchanged. The join assumes the same live queue object and pair, valid P, successful publication/receive, selected normal continuations and no intervening corruption or alias effects. The non-null record-validation path is not taken under the stated first-word condition; this observation neither validates a block nor establishes a state root. No captured binary is executed.
 
 ## Reproduce
 
-GNU objdump 2.45 and LLVM objdump 23.1.4 agree on 60 selected instruction spans (LLVM prints lock prefixes separately). Python 3 verifies target identity, FDE bounds, selected transfers and a corrupted instruction; synthetic branch and refcount examples are local controls, not runtime results.
+GNU objdump 2.45 and LLVM objdump 23.1.4 agree on 84 selected instruction spans (LLVM prints lock prefixes separately). Python 3 verifies target identity, FDE bounds, selected transfers and a corrupted instruction; synthetic branch and refcount examples are local controls, not runtime results.
 
 ```sh
 PYTHONPATH=tools python3 -B - <<'PY'
@@ -67,6 +69,10 @@ assert rip_target(0x5a6e39c)==0x5a63100
 assert rip_target(0x5a6e3a6)==0x5a6e318
 assert rip_target(0x5a6e3b1)==0x64e4cb8
 assert rip_target(0x5a6e3b7)==0x5a6e318
+assert rip_target(0x5a6367a)==0x5a63820
+assert rip_target(0x5a63688)==0x5a63832
+assert spans[0x5a6e2be]==bytes.fromhex('4c8d642460')
+assert spans[0x5a63111]==bytes.fromhex('4989f7')
 for first,refs in ((0,1),(0,2),(1,2)):
     null_arm=first==0
     if null_arm:
