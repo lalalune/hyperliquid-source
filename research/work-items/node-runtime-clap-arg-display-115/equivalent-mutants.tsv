@@ -1,0 +1,22 @@
+mutant	change	reason
+imm+1 option_display 0x166e513	0x166e514:01->02	register eax was just cleared, so testing bit 0 or bit 1 of al is always zero
+imm+1 option_display 0x166e595	0x166e598:08->09	reached only when the height or climb count is not a multiple of 8 (the multiple-of-8 case takes the branch before it), so the compared value is never exactly 8 and 8 -> 9 changes nothing
+imm+1 option_display 0x166e688	0x166e68b:08->09	reached only when the height or climb count is not a multiple of 8 (the multiple-of-8 case takes the branch before it), so the compared value is never exactly 8 and 8 -> 9 changes nothing
+imm+1 option_display 0x166e6ea	0x166e6ed:04->05	the first value is fetched along the leftmost edge chain (edge 0 at every level), so the parent index being scaled by 16 is always 0 and 0 << 4 == 0 << 5
+imm+1 option_display 0x166e724	0x166e725:01->02	this join point is reached with rbx = rbp = 0 only, where both targets (0x166e520 and 0x166e72e) end at 0x166eb13
+imm+1 option_display 0x166e726	0x166e727:01->02	this join point is reached with rbx = rbp = 0 only, where both targets (0x166e520 and 0x166e72e) end at 0x166eb13
+flip-jcc option_display 0x166e728	0x166e729:84->85	this join point is reached with rbx = rbp = 0 only, where both targets (0x166e520 and 0x166e72e) end at 0x166eb13
+imm+1 option_display 0x166e8d8	0x166e8db:08->09	reached only when the height or climb count is not a multiple of 8 (the multiple-of-8 case takes the branch before it), so the compared value is never exactly 8 and 8 -> 9 changes nothing
+imm+1 option_display 0x166eaa8	0x166eaaa:02->03	the mask only feeds the length 3 * (flags >> 1 & 1) and a pointer choice for a zero-length string; bit 0 (required) changes the pointer of an empty chunk, never its text
+imm+1 positional_display 0x1675b13	0x1675b15:01->02	register holds the constant 1 and is only tested for non-zero afterwards, so 1 -> 2 is the same boolean
+imm+1 positional_name 0x167201d	0x167201f:01->02	register holds the constant 1 and is only tested for non-zero afterwards, so 1 -> 2 is the same boolean
+imm+1 positional_name 0x1672235	0x1672238:08->09	reached only when the height or climb count is not a multiple of 8 (the multiple-of-8 case takes the branch before it), so the compared value is never exactly 8 and 8 -> 9 changes nothing
+imm+1 positional_name 0x16722e6	0x16722e8:04->05	the first value is fetched along the leftmost edge chain (edge 0 at every level), so the parent index being scaled by 16 is always 0 and 0 << 4 == 0 << 5
+imm+1 join 0x166a036	0x166a039:04->05	a char separator is 1..4 bytes: the dispatch only chooses between the specialised copy loops and the generic loop at 0x166a25a, which copies the same bytes; length 5 cannot occur
+flip-jcc join 0x166a03a	0x166a03b:87->86	a char separator is 1..4 bytes: the dispatch only chooses between the specialised copy loops and the generic loop at 0x166a25a, which copies the same bytes; length 5 cannot occur
+imm+1 join 0x166a0c0	0x166a0c3:04->05	bound check 'bytes left >= separator length' with the threshold raised by one: join is only called here on the '<name>' strings, at least 2 bytes each, so the bytes left at every separator copy are at least the separator length plus 2 and the raised threshold is never crossed
+imm+1 join 0x166a130	0x166a133:02->03	bound check 'bytes left >= separator length' with the threshold raised by one: join is only called here on the '<name>' strings, at least 2 bytes each, so the bytes left at every separator copy are at least the separator length plus 2 and the raised threshold is never crossed
+imm+1 join 0x166a1a0	0x166a1a3:03->04	bound check 'bytes left >= separator length' with the threshold raised by one: join is only called here on the '<name>' strings, at least 2 bytes each, so the bytes left at every separator copy are at least the separator length plus 2 and the raised threshold is never crossed
+imm+1 aliases_flag 0x165cdd0	0x165cdd3:04->05	frees the empty temporary Vec only when its capacity is non-zero; 0x16572b0 returns capacity 0 whenever it returns length 0
+flip-jcc collect_visible 0x1657405	0x1657405:74->75	unwind landing pad after the allocation-error call; the rig's allocation-error stub raises instead of unwinding
+model name last_value	-	the branch runs only for a map with exactly one entry, where the first and the last value are the same
