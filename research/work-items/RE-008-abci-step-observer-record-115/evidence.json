@@ -1,0 +1,87 @@
+{
+  "component": "abci",
+  "gates_changed": false,
+  "hour_helper": {
+    "fde": [
+      "0x1567ad0",
+      "0x1567b94"
+    ],
+    "reads": "record +0x4 (seconds of day)",
+    "returns": "seconds / 3600 for seconds < 90000 (checked exhaustively)",
+    "slot": "0x64e0f58",
+    "slot_calls": 28
+  },
+  "observer_use": {
+    "call_va": "0x15488a3",
+    "last_time": "+0x134 (12 bytes from record +0x0)",
+    "no_writer": "a new path is freed (0x154864f) and nothing is written",
+    "optional_call": {
+      "slot": "0x64e0038",
+      "target": "0x14c3c90",
+      "when": "byte +0x142 != 0 and byte at 0x64ffe50 != 0"
+    },
+    "rotation": {
+      "cache": {
+        "+0x130": "date",
+        "+0x140": "hourly",
+        "+0x141": "hour"
+      },
+      "drop_old": "0x154f2a0",
+      "open": "0x14c3b30 via 0x64e0020",
+      "open_panic_location": "base/src/liner.rs:28:38"
+    },
+    "write": "0x14c3370",
+    "writer": {
+      "none": "0x8000000000000000",
+      "offset": "+0xe0 (writer +0x48)"
+    },
+    "writer_no_rotation": "jump to the write at 0x1548989",
+    "writer_state": "state +0x98"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "sink": {
+    "arguments": {
+      "rdi": "result (0x20 bytes)",
+      "rdx": "record; only +0x0 (dword) and +0x4 (via hour helper) are read",
+      "rsi": "writer state"
+    },
+    "decision": {
+      "daily": "None when date == +0x98, else Some",
+      "hourly": "None when hour(record) == +0xa9 and date == +0x98, else Some"
+    },
+    "direct_calls": 0,
+    "fde": [
+      "0x1546570",
+      "0x15466f3"
+    ],
+    "formatters": {
+      "date": "0x150ce90 (pattern %Y%m%d at 0x465bc9)",
+      "dir": "0x15ebba0",
+      "hour": "0x150cf50 (u8 decimal)"
+    },
+    "paths_inferred": {
+      "daily": "{dir}/{date:%Y%m%d}",
+      "hourly": "{dir}/hourly/{date:%Y%m%d}/{hour}"
+    },
+    "result": {
+      "+0x0": "date dword",
+      "+0x4": "hourly byte",
+      "+0x5": "hour byte (hourly only)",
+      "+0x8": "path String (cap, ptr, len); cap 0x8000000000000000 = None"
+    },
+    "slot": "0x64e0f80",
+    "slot_calls": 104,
+    "templates": {
+      "0x43aa84": "c0012fc000",
+      "0x43ab07": "c0082f686f75726c792fc0012fc000"
+    },
+    "writer_state": {
+      "+0x8": "directory (ptr, len), Display via 0x15ebba0",
+      "+0x98": "cached date dword",
+      "+0xa8": "hourly mode byte (1 = hourly)",
+      "+0xa9": "cached hour byte"
+    }
+  },
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}
