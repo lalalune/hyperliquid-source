@@ -1,0 +1,76 @@
+{
+  "component": "abci",
+  "day_fields": {
+    "+0x200": "saturating sum of the count argument (x50 when +0x25c == 1): 0x154770d..0x1547729",
+    "+0x208": "saturating record-call count: 0x1547730..0x154773e; no other read in the record entry",
+    "+0x210": "f64 sum: load 0x1547658, add count*value (mulsd 0x15475fd, addsd 0x1547660), store 0x1547758 (the branchy range check between them is not mapped)",
+    "+0x218": "no [rbx+0x218] operand in the record entry",
+    "record_entry_rbx_disp32_modrm_sites": {
+      "0x200": [
+        "0x154756f",
+        "0x154770f",
+        "0x154772b",
+        "0x1547f7a"
+      ],
+      "0x208": [
+        "0x1547732",
+        "0x1547740"
+      ],
+      "0x210": [
+        "0x1547576",
+        "0x154765b",
+        "0x154775b",
+        "0x1547f58"
+      ],
+      "0x218": []
+    },
+    "reset": "0x1547562 date compare; 0x154756d zero +0x200,+0x208; 0x1547574 zero +0x210"
+  },
+  "first_sampler_collect": {
+    "caller_function": "0x5b298d0",
+    "callers": [
+      "0x5b29cba",
+      "0x5b29e02"
+    ],
+    "capacity": "max(4, hint + 1); grow 0x5963a10 with element size 8, align 8",
+    "collect": "0x5b70cf0",
+    "input_modes": "tag 2 at [rsi]: two runs of 0x20-byte elements; else B-tree iterator 0x51360a0",
+    "result": "only capacity [rsp+0x8] and pointer [rsp+0x10] read, then freed (0x5b29cd4, 0x5b29e1c)"
+  },
+  "gates_changed": false,
+  "iterator_callers": [
+    "0x5b70d4c",
+    "0x5b70eb3",
+    "0x5b9273c",
+    "0x5b928a3"
+  ],
+  "json_fields": {
+    "total_mean": {
+      "name_at": "0x466dec",
+      "record_offset": "0x58"
+    },
+    "total_n": {
+      "name_at": "0x466de5",
+      "record_offset": "0x50"
+    }
+  },
+  "second_sampler_collect_callers": [
+    "0x5b2a51a",
+    "0x5b2a662"
+  ],
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008",
+  "window_record": {
+    "clamp": "sum in (-1e-15, 0) -> 0 (0x1547f93); count 0 or sum < 0 after that -> no record (0x1547fb0)",
+    "count": "0x1547f78 load +0x200",
+    "gate": "0x1547f4b window samples (+0x58) >= 10, else no record",
+    "mean": "0x1547fdd sum / (f64)count; 0x1547ff6 skip when not finite",
+    "sum": "0x1547f55 load +0x210; 0x1547f72 skip when not finite",
+    "to_record": {
+      "count": "0x1547ffc rsp+0x1c8 -> 0x15487e0 rsp+0x128 = record +0x50",
+      "mean": "0x1548004 rsp+0x58 -> 0x15487ee rsp+0x130 = record +0x58",
+      "record": "0x15489b0 lea rdx, [rsp+0xd8]; 0x15489bb call 0x14c3370"
+    }
+  }
+}
