@@ -6,11 +6,13 @@ Target Linux x86-64 node #115, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8
 
 The lookup saves the key pointer from RDX. After its earlier conditional storage-conversion branch, a descriptor first word equal to `0x8000000000000000` takes the tree path at `0x4dc909b`. With a nonnull root, it reads an unsigned 16-bit count at node `+0x16a`, multiplies that count by 32 and iterates node bytes in 32-byte steps. At `0x4dc90f3` it invokes the imported `memcmp` slot `0x64dfb50` on the saved key, the selected node row and length 32. The relocation is `R_X86_64_GLOB_DAT` for `memcmp`; no target machine code is executed here. A positive comparison continues to the next slot. A zero comparison follows `0x4dc9115` to `0x4dc9135`, where the result holds the selected node at output `+8`, current depth at `+0x10`, selected slot index at `+0x18`, the saved root-reference address at `+0x20`, and tag 1 at output `+0`.
 
-This is a local selected-node result, assuming valid memory, the indexed FDE path, the imported comparator's usual contract and no concurrent mutation. The sentinel conversion, non-sentinel layout, negative comparison/child traversal, empty-root behavior and actual digest values are not fully reconstructed; no real state root or replay acceptance is claimed. The callback-to-key connection uses the explicit assumptions in #5884. No captured binary is run.
+On a negative comparison, or after every row compares below the key, the selected continuation uses the candidate index and decrements depth. A non-underflowing depth follows child pointer `node +0x170 + 8*index`; underflow reaches the tag-zero output at `0x4dc9158` without following a child. That output copies the 32-byte key and preserves the leaf pointer and candidate index at `+0x30/+0x40`. The distinct null-root entry zeroes the leaf pointer first before sharing this output. This selected continuation does not prove whole-tree ordering or valid metadata.
+
+This is a local selected-node result, assuming valid memory, the indexed FDE path, the imported comparator's usual contract and no concurrent mutation. The sentinel conversion, non-sentinel layout, other conversion and insertion behavior and actual digest values are not fully reconstructed; no real state root or replay acceptance is claimed. The callback-to-key connection uses the explicit assumptions in #5884. No captured binary is run.
 
 ## Reproduce
 
-GNU objdump 2.45 and LLVM objdump 23.1.4 agree on 72 selected instruction spans. Python 3 verifies target digest, FDEs, selected transfers, comparator relocation/symbol identity, and corruption controls. Synthetic comparison examples test only the described ordering cases.
+GNU objdump 2.45 and LLVM objdump 23.1.4 agree on 89 selected instruction spans. Python 3 verifies target digest, FDEs, selected transfers, comparator relocation/symbol identity, and corruption controls. Synthetic comparison examples test only the described ordering cases.
 
 ```sh
 PYTHONPATH=tools python3 -B - <<'PY'
@@ -63,6 +65,10 @@ assert rip_target(0x4dc90b5)==0x64dfb50
 assert short_target(0x4dc910c)==0x4dc90e0
 assert short_target(0x4dc9115)==0x4dc9135
 assert short_target(0x4dc9153)==0x4dc9191
+assert short_target(0x4dc9129)==0x4dc91a6
+assert short_target(0x4dc91ab)==0x4dc9158
+assert rip_target(0x4dc90a6)==0x4dc9155
+assert spans[0x4dc912b]==bytes.fromhex('4f8bacfd70010000')
 info,addend=relocations[0x64dfb50]
 assert (info&0xffffffff)==6 and addend==0
 symindex=info>>32
