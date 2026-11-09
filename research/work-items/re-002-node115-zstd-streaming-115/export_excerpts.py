@@ -1,0 +1,61 @@
+"""Regenerate the verbatim excerpts and raw hex in this packet.
+
+Run from the repository root:
+    python3 research/work-items/re-002-node115-zstd-streaming-115/export_excerpts.py
+
+Uses the repo-relative binary path work/hl-node-115.bin; objdump
+addresses are the window virtual addresses used throughout. Each
+.objdump.txt is one whole FDE, verbatim; each .hex is the same FDE's
+raw bytes as one lowercase hex line.
+"""
+
+import hashlib
+import os
+import subprocess
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
+BIN = os.path.join(ROOT, "work", "hl-node-115.bin")
+DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+
+EXCERPTS = [
+    ("reset-compress-61c1a20", "0x61c1a20", "0x61c1a48"),
+    ("reset-uncompress-61c1a50", "0x61c1a50", "0x61c1a78"),
+    ("uncompress-61c1a80", "0x61c1a80", "0x61c1b2e"),
+    ("compress-61c1b30", "0x61c1b30", "0x61c1bee"),
+    ("create-compress-61c1c10", "0x61c1c10", "0x61c1cc8"),
+    ("create-uncompress-61c1ce0", "0x61c1ce0", "0x61c1d5a"),
+]
+
+
+def _va_to_off(va):
+    out = subprocess.check_output(["readelf", "-lW", BIN]).decode()
+    for line in out.splitlines():
+        p = line.split()
+        if p and p[0] == "LOAD":
+            v, o, f = int(p[2], 16), int(p[1], 16), int(p[4], 16)
+            if v <= va < v + f:
+                return o + (va - v)
+    raise ValueError(hex(va))
+
+
+def main():
+    data = open(BIN, "rb").read()
+    assert hashlib.sha256(data).hexdigest() == DIGEST, "artifact mismatch"
+    for name, start, stop in EXCERPTS:
+        s, e = int(start, 16), int(stop, 16)
+        raw = data[_va_to_off(s):_va_to_off(e)]
+        with open(os.path.join(HERE, name + ".hex"), "w") as fh:
+            fh.write(raw.hex() + "\n")
+        out = subprocess.run(
+            ["objdump", "-d", "-M", "intel",
+             "--start-address=" + start, "--stop-address=" + stop,
+             "work/hl-node-115.bin"],
+            cwd=ROOT, capture_output=True, text=True, check=True)
+        with open(os.path.join(HERE, name + ".objdump.txt"), "w") as fh:
+            fh.write(out.stdout)
+        print(name, len(raw), "bytes")
+
+
+if __name__ == "__main__":
+    main()
