@@ -29,6 +29,7 @@ from tracer_header_footer115 import (  # noqa: E402
     encode_trace,
     generate_cases,
     header_payload,
+    set_payload_map,
 )
 
 TOOL = Path(__file__).resolve().parents[1] / "tools" / "tracer_header_footer115.py"
@@ -162,6 +163,33 @@ class WriteTraceTests(unittest.TestCase):
         err = Status(2, b"disk full")
         tr = make_tracer(writer=FakeWriter(write_status=err))
         self.assertEqual(tr.write_trace(Trace(0, 2, 0, b"")), err)
+
+
+class SetPayloadMapTests(unittest.TestCase):
+    def test_sets_bit_and_reports_change(self):
+        # 0x61b18b0: bts sets bit `type` in the map word and returns
+        # whether it changed (setne).
+        self.assertEqual(set_payload_map(0, 0), (1, True))
+        self.assertEqual(set_payload_map(1, 0), (1, False))
+        self.assertEqual(set_payload_map(0, 3), (8, True))
+        self.assertEqual(set_payload_map(0b101, 1), (0b111, True))
+
+    def test_footer_trace_has_payload_map_one(self):
+        # WriteFooter calls SetPayloadMap(map, kEmptyPayload=0), so
+        # the in-memory footer Trace has payload_map 1 -- but
+        # EncodeTrace never serializes payload_map, so the record on
+        # disk is still 13 bytes (ts 8 + type 1 + length 0).
+        tr = make_tracer(clock_value=99)
+        trace = tr.build_footer_trace()
+        self.assertEqual(trace.payload_map, 1)
+        self.assertEqual(trace.type, 2)
+        self.assertEqual(trace.payload, b"")
+        self.assertTrue(tr.write_footer().ok())
+        self.assertEqual(
+            tr.writer.written[0],
+            struct.pack("<Q", 99) + b"\x02" + struct.pack("<I", 0),
+        )
+        self.assertEqual(len(tr.writer.written[0]), 13)
 
 
 class HeaderFooterTests(unittest.TestCase):

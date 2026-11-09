@@ -24,10 +24,12 @@ PR #5863, same author; copied, not imported, because #5863 is not on
 upstream main yet) and hands the bytes to TraceWriter::Write.
 WriteHeader builds the header trace (magic + "Trace Version: 0.2" +
 "RocksDB Version: 8.1" + the format line, type kTraceBegin) and
-WriteFooter the footer trace (empty payload, type kTraceEnd); both
-stamp the trace with the tracer clock's NowMicros() and return
-WriteTrace's Status.  The binary is never executed; this tool is a
-behavioural model of the four functions only.
+WriteFooter the footer trace (empty payload, type kTraceEnd,
+payload_map = 1 via SetPayloadMap(kEmptyPayload) -- not serialized,
+so the footer record stays 13 bytes); both stamp the trace with the
+tracer clock's NowMicros() and return WriteTrace's Status.  The binary
+is never executed; this tool is a behavioural model of the four
+functions only.
 
 Tracer object layout (pinned from the constructor, 0x61b3e60, which
 copies the 32-byte TraceOptions into this+0x08..0x28, moves the
@@ -37,7 +39,9 @@ WriteHeader once):
   +0x08  TraceOptions word 0: max_trace_file_size (u64)
   +0x10  TraceOptions word 1: sampling period (u64)
   +0x18  TraceOptions word 2: per-type skip flags (u64 bitmask)
-  +0x20  TraceOptions word 3: (u64, role not pinned by these functions)
+  +0x20  TraceOptions word 3: preserve_write_order (bool, padded to
+         a u64 word) -- read only by IsWriteOrderPreserved(), not by
+         these four functions
   +0x28  unique_ptr<TraceWriter> trace_writer_
   +0x30  sampling counter (u64, starts at 0)
 
@@ -87,6 +91,14 @@ TRACE_VERSION_MAJOR = 0
 TRACE_VERSION_MINOR = 2
 ROCKSDB_VERSION_MAJOR = 8
 ROCKSDB_VERSION_MINOR = 1
+
+# TracePayloadType values (trace_replay/trace_replay.h, confirmed by
+# the upstream read).  Only kEmptyPayload is used by these four
+# functions (WriteFooter, via SetPayloadMap).
+K_EMPTY_PAYLOAD = 0
+K_WRITE_BATCH_DATA = 1
+K_GET_CF_ID = 2
+K_GET_KEY = 3
 
 # TraceType values (include/rocksdb/trace_record.h, confirmed by the
 # codec packet's upstream read).
@@ -201,6 +213,20 @@ def encode_trace(trace, out=b""):
     return bytes(out)
 
 
+def set_payload_map(payload_map, payload_type):
+    """Model of TracerHelper::SetPayloadMap (0x61b18b0, its own FDE
+    0x61b18b0..0x61b18c8, not in the vendor census).
+
+    The binary is `bts %rsi, %rdx` on the payload_map word: it sets
+    bit `payload_type` (the index is taken mod 64, as x86-64 bts
+    does) and returns whether the bit changed (setne).  WriteFooter
+    calls it with kEmptyPayload (0) and discards the return value.
+    Returns (new_payload_map, changed).
+    """
+    new = (payload_map & 0xFFFFFFFFFFFFFFFF) | (1 << (payload_type & 63))
+    return new & 0xFFFFFFFFFFFFFFFF, new != payload_map
+
+
 def header_payload():
     """The exact 90-byte payload WriteHeader builds (see the module
     docstring for the insertion sequence)."""
@@ -291,7 +317,8 @@ class Tracer:
         self.max_trace_file_size = max_trace_file_size & 0xFFFFFFFFFFFFFFFF
         self.sampling_period = sampling_period & 0xFFFFFFFFFFFFFFFF
         self.skip_flags = skip_flags & 0xFFFFFFFFFFFFFFFF
-        # TraceOptions word 3 (Tracer+0x20): copied by the constructor
+        # TraceOptions word 3 (Tracer+0x20): preserve_write_order
+        # (bool, padded to a u64 word) -- copied by the constructor
         # but not read by any of the four functions modelled here.
         self.options_word3 = options_word3 & 0xFFFFFFFFFFFFFFFF
         self.writer = writer
@@ -357,17 +384,28 @@ class Tracer:
                       payload=header_payload())
         return self.write_trace(trace)
 
+    def build_footer_trace(self):
+        """Build the footer Trace (0x61b35c0).
+
+        Trace{ts = clock_->NowMicros(), type = kTraceEnd (2),
+        payload_map = SetPayloadMap(0, kEmptyPayload) = 1, payload =
+        ""}.  The payload_map bit is set by TracerHelper::
+        SetPayloadMap (0x61b18b0) before the payload assignment; it
+        is NOT serialized by EncodeTrace, so the footer record on
+        disk is still 13 bytes (ts 8 + type 1 + length 0).
+        """
+        payload_map, _changed = set_payload_map(0, K_EMPTY_PAYLOAD)
+        return Trace(timestamp=self.clock.now_micros(),
+                     type_=K_TRACE_END, payload_map=payload_map,
+                     payload=b"")
+
     def write_footer(self):
         """Model of Tracer::WriteFooter (0x61b35c0).
 
-        Trace{ts = clock_->NowMicros(), type = kTraceEnd (2),
-        payload_map = 0, payload = ""} (the binary assigns the empty
-        string via _M_replace with a 0-length source at .rodata
-        0x4376fd), returned via WriteTrace.
+        The footer Trace (see build_footer_trace), returned via
+        WriteTrace.
         """
-        trace = Trace(timestamp=self.clock.now_micros(),
-                      type_=K_TRACE_END, payload_map=0, payload=b"")
-        return self.write_trace(trace)
+        return self.write_trace(self.build_footer_trace())
 
 
 # ---------------------------------------------------------------------------

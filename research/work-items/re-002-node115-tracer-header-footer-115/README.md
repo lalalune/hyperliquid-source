@@ -19,10 +19,14 @@ part of `ShouldSkipTrace`.
 
 **Tracer layout (56 bytes).** `+0x00` SystemClock\* (the timestamp
 source); `+0x08..0x28` the 32-byte TraceOptions copied wholesale by
-the constructor (0x61b3e60): word 0 is `max_trace_file_size`, word 1
-the sampling period, word 2 the per-type skip flags, word 3 of
-unknown role; `+0x28` `unique_ptr<TraceWriter>`; `+0x30` the sampling
-counter (starts at 0). The size is pinned by `DBImpl::EndTrace`'s
+the constructor (0x61b3e60): word 0 is `max_trace_file_size` (default
+64 GiB), word 1 `sampling_frequency` (default 1), word 2 `filter`
+(the per-type skip flags, a `TraceFilterType` bitmask stored as
+u64), word 3 `preserve_write_order` (bool, padded to a u64 word);
+`+0x28` `unique_ptr<TraceWriter>`; `+0x30` the sampling counter
+(starts at 0). The upstream names are confirmed by the RocksDB v8.1.1
+source read (`trace_replay/trace_replay.h`, `include/rocksdb/
+options.h`). The size is pinned by `DBImpl::EndTrace`'s
 `operator delete` with size `0x38` after destroying the Tracer.
 Tracer is not polymorphic: there is no vtable at `+0x00`, and `~Tracer`
 (D1, 0x61b18d0) destroys only the writer.
@@ -56,17 +60,28 @@ passed-through sret pointer).
 `"RocksDB Version: "` + `8` + `"."` + `1` + TAB +
 `"Format: Timestamp OpType Payload\n"`. The version ints are
 immediates in the binary (trace version "0.2", RocksDB version
-"8.1"). The header Trace is `{ts = clock_->NowMicros(), type = 1
+"8.1"); the upstream names are `kTraceFileMajorVersion` = 0 and
+`kTraceFileMinorVersion` = 2 (`trace_replay/trace_replay.h`), and the
+RocksDB version renders from `kMajorVersion` / `kMinorVersion` (= 8 /
+1). The header Trace is `{ts = clock_->NowMicros(), type = 1
 (kTraceBegin), payload_map = 0, payload}` and is returned via
 `WriteTrace`. The payload round-trips through `ParseTraceHeader`
 (0x61b4840, open PR #5866): field[1][15:] = `"0.2"` parses to 2,
 field[2][17:] = `"8.1"` parses to 81.
 
 **WriteFooter.** The footer Trace is `{ts = clock_->NowMicros(),
-type = 2 (kTraceEnd), payload_map = 0, payload = ""}` (the binary
-assigns the empty string via `_M_replace(0, 0, "", 0)` — a literal
-no-op on the already-empty SSO string) and is returned via
-`WriteTrace`.
+type = 2 (kTraceEnd), payload_map = 1, payload = ""}` and is returned
+via `WriteTrace`. The `payload_map` bit comes from
+`TracerHelper::SetPayloadMap(trace.payload_map, kEmptyPayload)`
+(0x61b18b0, a `bts` on the map word): `kEmptyPayload` is 0, so bit 0 is
+set. The bit is never serialized — `EncodeTrace` writes only
+ts/type/length/payload — so the footer record on disk is still 13
+bytes. (Correction: the first version of this packet modelled the
+footer `payload_map` as 0; the upstream source read surfaced the
+`SetPayloadMap` call, the binary confirms it, and the model now sets
+it. The payload is assigned the empty string via
+`_M_replace(0, 0, "", 0)` — a literal no-op on the already-empty SSO
+string.)
 
 **Timestamps.** Both header and footer stamp `ts` from the
 SystemClock at Tracer+0x00 through a devirtualized wrapper chain:
@@ -86,8 +101,9 @@ sweep with the file-size gate cycled below/equal/above the limit,
 sequences for periods 0/1/2/3/5/10), 600 `write_trace` (550 encoded
 records over boundary timestamps/types/payloads plus 50 writer-error
 rows), 600 `write_header` and 600 `write_footer` (the full encoded
-record for 600 clock values each). 21 tests pass
-(`tests/test_tracer_header_footer115.py`).
+record for 600 clock values each). 23 tests pass
+(`tests/test_tracer_header_footer115.py`), including the
+`SetPayloadMap` unit tests and the footer `payload_map == 1` check.
 
 ## Caller census
 
@@ -97,27 +113,29 @@ the enclosing FDE start with Capstone (`census.py`). 14 validated
 sites: `ShouldSkipTrace` 5 (one per recording method — Write, Get,
 IteratorSeek, IteratorSeekForPrev, MultiGet), `WriteTrace` 7 (the
 same five plus WriteFooter and WriteHeader), `WriteFooter` 1 (the
-unnamed 63-byte forwarder at 0x61b3720, called by
-`DBImpl::EndTrace`), `WriteHeader` 1 (the Tracer constructor).
+63-byte forwarder at 0x61b3720, identified as `Tracer::Close()` by
+the upstream source — `trace_replay/trace_replay.cc:620`, `return
+WriteFooter();` — and called by `DBImpl::EndTrace`), `WriteHeader` 1
+(the Tracer constructor).
 
 ## Unknowns (kept separate from observations)
 
-- The upstream `TraceOptions` field names: the four u64 words at
-  Tracer+0x08..0x28 are copied wholesale from the TraceOptions
-  argument; only word 0's role (`max_trace_file_size`) is pinned by
-  use, words 1–2 by their roles in `ShouldSkipTrace`, and word 3 not
-  at all. An upstream-source read was requested; if it has not
-  landed, these names stay open.
-- The upstream spelling of the version constants (separate ints 0/2
-  and 8/1 in the binary vs. a version string or named constants in
-  source) and of the skip-flags option.
-- The identity of the 63-byte forwarder at 0x61b3720 (no
-  vendor-census record, no symbol): it tail-calls `WriteFooter` and
-  is called only by `DBImpl::EndTrace`.
-- Whether the TraceOptions word at Tracer+0x20 is read by any other
-  Tracer method. The five recording methods (Write/Get/IteratorSeek/
+- The definition location of the `kMajorVersion` / `kMinorVersion`
+  identifiers `WriteHeader` renders as 8.1: the upstream read found
+  only the `ROCKSDB_MAJOR 8` / `ROCKSDB_MINOR 1` macros
+  (`include/rocksdb/version.h`); the rendered value 8.1 is pinned by
+  the binary immediates, but where the identifiers are defined stays
+  open.
+- Whether the TraceOptions word at Tracer+0x20
+  (`preserve_write_order`) is read by any other Tracer method. The
+  five recording methods (Write/Get/IteratorSeek/
   IteratorSeekForPrev/MultiGet) are the natural next read, and are
-  NOT reconstructed in this packet.
+  NOT reconstructed in this packet. (The recording methods' payload
+  encoding is already known from the upstream read: Write puts the
+  `payload_map` first with `PutFixed64` then the length-prefixed
+  WriteBatch data; Get/IteratorSeek/MultiGet set their
+  `TracePayloadType` bits the same way — the next packet should verify
+  each against the binary.)
 
 ## Environment limits
 

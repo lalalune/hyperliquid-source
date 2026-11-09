@@ -1,1 +1,265 @@
-{"artifact":"node #115","artifact_sha256":"a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301","bound_context":["RE-002-node115-tracer-helper-115 (open PR #5863, same author): the TracerHelper codec packet -- ParseVersionStr (0x61b10f0), EncodeTrace (0x61b1260), DecodeTrace, DecodeHeader -- whose EncodeTrace model this packet reuses (copied, not imported, because #5863 is not on upstream main yet).","RE-002-node115-tracer-helper-parse-header-115 (open PR #5866, same author): ParseTraceHeader (0x61b4840) -- the consumer of the header payload built here; the payload's field[1][15:] is \"0.2\" and field[2][17:] is \"8.1\", parsing to 2 and 81.","RE-002-node115-rocksdb-trace-replayer-vtable (merged), RE-002-node115-rocksdb-trace-cache-writer-vtable (merged) and RE-002-node115-rocksdb-trace-handler-vtable (merged): trace vtables; no body of these four functions is reconstructed there.","The Tracer constructor (0x61b3e60, census node115-vendor-61b3e60): copies the 32-byte TraceOptions into this+0x08..0x28, moves the writer into this+0x28, zeroes the counter at this+0x30, and calls WriteHeader once -- observed from its disassembly, not reconstructed in this packet."],"caller_census":{"method":"Whole-.text scan for E8 calls, E9 tail jumps and RIP-relative LEA references landing on the target, validated by decoding forward from the enclosing FDE start with Capstone (census.py). A site counts only on a real instruction boundary with the expected mnemonic.","notes":["ShouldSkipTrace has exactly 5 direct callers, one per recording method: Tracer::Write (0x61b1b28), Tracer::Get (0x61b1e7b), Tracer::IteratorSeek (0x61b2247), Tracer::IteratorSeekForPrev (0x61b27b7), Tracer::MultiGet (0x61b2dc8).","WriteTrace has exactly 7 direct callers: the same five recording methods (0x61b1d88, 0x61b211e, 0x61b257b, 0x61b2aeb, 0x61b3318) plus WriteFooter (0x61b36b2) and WriteHeader (0x61b3cc7).","WriteFooter has exactly 1 direct caller: the 63-byte forwarder at 0x61b3720 (call at 0x61b373c), which is itself called once by rocksdb::DBImpl::EndTrace (0x5d4e47c, in FDE 0x5d4e420..0x5d4e59c); EndTrace then destroys the Tracer (D1 0x61b18d0 + operator delete with size 0x38, pinning sizeof(Tracer) = 56).","WriteHeader has exactly 1 direct caller: the Tracer constructor (0x61b3ead, in FDE 0x61b3e60..0x61b3ee9), which discards the returned Status after freeing its message buffer if any.","No E9 tail jump or LEA reference to any of the four targets exists in .text."],"sites":[{"kind":"call","site":"0x61b1b28","site_fde":"0x61b1af0..0x61b1e18","target":"0x61b1930"},{"kind":"call","site":"0x61b1e7b","site_fde":"0x61b1e40..0x61b21ca","target":"0x61b1930"},{"kind":"call","site":"0x61b2247","site_fde":"0x61b21f0..0x61b2738","target":"0x61b1930"},{"kind":"call","site":"0x61b27b7","site_fde":"0x61b2760..0x61b2ca8","target":"0x61b1930"},{"kind":"call","site":"0x61b2dc8","site_fde":"0x61b2cf0..0x61b3596","target":"0x61b1930"},{"kind":"call","site":"0x61b1d88","site_fde":"0x61b1af0..0x61b1e18","target":"0x61b1a10"},{"kind":"call","site":"0x61b211e","site_fde":"0x61b1e40..0x61b21ca","target":"0x61b1a10"},{"kind":"call","site":"0x61b257b","site_fde":"0x61b21f0..0x61b2738","target":"0x61b1a10"},{"kind":"call","site":"0x61b2aeb","site_fde":"0x61b2760..0x61b2ca8","target":"0x61b1a10"},{"kind":"call","site":"0x61b3318","site_fde":"0x61b2cf0..0x61b3596","target":"0x61b1a10"},{"kind":"call","site":"0x61b36b2","site_fde":"0x61b35c0..0x61b371d","target":"0x61b1a10"},{"kind":"call","site":"0x61b3cc7","site_fde":"0x61b3860..0x61b3e33","target":"0x61b1a10"},{"kind":"call","site":"0x61b373c","site_fde":"0x61b3720..0x61b375f","target":"0x61b35c0"},{"kind":"call","site":"0x61b3ead","site_fde":"0x61b3e60..0x61b3ee9","target":"0x61b3860"}],"validated_sites":14},"cases":{"count":2400,"ledger":"cases.tsv","split":"600 should_skip + 600 write_trace + 600 write_header + 600 write_footer","tests":"tests/test_tracer_header_footer115.py","tool":"tools/tracer_header_footer115.py","what_is_checked":["should_skip: type sweep (types 0..15, 255, random) with the file-size gate cycled below/equal/above the limit; flag sweep for the five flag-tested types (bit clear/set/all-bits/complement); 6-call sampling sequences for periods 0/1/2/3/5/10 with counter starts 0/1/period-1","write_trace: encoded records for boundary timestamps (0, 1, 2^63, 2^64-1), types 0/1/2/3/13/255, payload lengths 0/1/16/100/256 (incl. the magic payload), plus 50 writer-error rows where the writer's Status is returned as-is","write_header: the full encoded record for 600 clock values (0, 1, 123456789, 2^63, 2^64-1, random u64s) -- the 90-byte payload is constant, only the timestamp varies","write_footer: the full encoded record (empty payload, type 2) for the same 600 clock values","the committed cases.tsv matches a fresh regeneration from the same seeded generator"]},"environment_limits":"No cargo/rustc/git-lfs/Ghidra on this VM. The target binary is never executed. make verify/test/catalogue-check in a tooled environment is still owed upstream.","functions":{"0x61b1930":{"arguments":["rdi = this (rocksdb::Tracer*)","rsi = const TraceType& (read as one byte, movzbl)"],"body_sha256":"7f1ff523a09115f77f04ff84d420630cff96d7420432f92078334ea943f6193f","callers":["0x61b1b28 in FDE 0x61b1af0..0x61b1e18 (rocksdb::Tracer::Write)","0x61b1e7b in FDE 0x61b1e40..0x61b21ca (rocksdb::Tracer::Get)","0x61b2247 in FDE 0x61b21f0..0x61b2738 (rocksdb::Tracer::IteratorSeek)","0x61b27b7 in FDE 0x61b2760..0x61b2ca8 (rocksdb::Tracer::IteratorSeekForPrev)","0x61b2dc8 in FDE 0x61b2cf0..0x61b3596 (rocksdb::Tracer::MultiGet)"],"mangled":"_ZN7rocksdb6Tracer15ShouldSkipTraceERKNS_9TraceTypeE","name":"rocksdb::Tracer::ShouldSkipTrace","quirks":["A set bit in the skip-flags word (this+0x18) means SKIP, not enable: the bit-set path returns true at once without advancing the sampling counter. The upstream option name for this word is an open unknown.","Sampling period 0 or 1 records every trace that reaches the counter (counter 1 < 0/1 is false, so the first call already records and resets).","The sampling counter is shared across all operation types, and flag-skipped calls do not advance it; a kTraceWrite skip leaves the counter where the next kTraceGet finds it.","The bool return is not normalized: the file-size helper uses setb (only al is set), so the upper bits of eax on the record path are whatever the helper left -- callers test al only, and the model returns a plain bool.","The file-size check is an outlined helper at 0x61b1910 (its own FDE 0x61b1910..0x61b192b, 27 bytes, not in the vendor census): trace_writer_->GetFileSize() via TraceWriter vtable slot 4, compared strictly-greater with this+0x08."],"rules":["if trace_writer_->GetFileSize() > max_trace_file_size (this+0x08), return true (skip)","t = type byte; d = (t - 3) & 0xFF; if d > 10, go to the sampling counter (types 0, 1, 2 and >= 14)","jump table at .rodata 0x97c5f4 (11 int32 entries for types 3..13): type 3 (kTraceWrite) tests mask 0x02, type 4 (kTraceGet) 0x01, type 5 (kTraceIteratorSeek) 0x04, type 6 (kTraceIteratorSeekForPrev) 0x08, type 13 (kTraceMultiGet) 0x10; types 7..12 (kBlockTrace* and kIOTracer) jump straight to the sampling counter with no flag test","if skip_flags (this+0x18) & mask != 0, return true (skip) at once","sampling counter: counter (this+0x30, u64) += 1 (wrapping); if counter < period (this+0x10), return true; else counter = 0 and return false (record this trace)"],"size":183,"source_note":"Reproduced exactly by zeroing its 2 census relocation fields (kind 4 at offset 17, kind 2 at offset 40).","vtable_slot":"not applicable (ordinary member; no vtable -- Tracer is not polymorphic)"},"0x61b1a10":{"arguments":["rdi = Status* sret (hidden return slot; the function returns Status by value)","rsi = this (rocksdb::Tracer*)","rdx = const Trace& trace"],"body_sha256":"a8b25b27e0dda7a9a03ff580b273b7fd167105079569f08a34e877f39baa1370","callers":["0x61b1d88 in FDE 0x61b1af0..0x61b1e18 (rocksdb::Tracer::Write)","0x61b211e in FDE 0x61b1e40..0x61b21ca (rocksdb::Tracer::Get)","0x61b257b in FDE 0x61b21f0..0x61b2738 (rocksdb::Tracer::IteratorSeek)","0x61b2aeb in FDE 0x61b2760..0x61b2ca8 (rocksdb::Tracer::IteratorSeekForPrev)","0x61b3318 in FDE 0x61b2cf0..0x61b3596 (rocksdb::Tracer::MultiGet)","0x61b36b2 in FDE 0x61b35c0..0x61b371d (rocksdb::Tracer::WriteFooter)","0x61b3cc7 in FDE 0x61b3860..0x61b3e33 (rocksdb::Tracer::WriteHeader)"],"mangled":"_ZN7rocksdb6Tracer10WriteTraceERKNS_5TraceE","name":"rocksdb::Tracer::WriteTrace","quirks":["The encoded record lives in a stack std::string whose SSO buffer is at rsp+0x20; the string is freed (operator delete) only when its pointer differs from the SSO buffer.","The TraceWriter::Write call passes the sret pointer through in rdi, so the writer's Status lands directly in the caller's out slot; WriteTrace returns that Status unchanged."],"rules":["encode the Trace into a stack std::string with TracerHelper::EncodeTrace (0x61b1260): timestamp u64 LE, type byte, payload length u32 LE (low 32 bits of the size), payload bytes","call trace_writer_->Write(Slice) via TraceWriter vtable slot 2 (0x10), with the Slice built on the stack from the encoded string (ptr, size)","return the writer's Status by value"],"size":182,"source_note":"Reproduced exactly by zeroing its 4 census relocation fields (kind 4 at offsets 72/131/166, kind 2 at offset 178).","vtable_slot":"not applicable (ordinary member; no vtable -- Tracer is not polymorphic)"},"0x61b35c0":{"arguments":["rdi = Status* sret (hidden return slot; the function returns Status by value)","rsi = this (rocksdb::Tracer*)"],"body_sha256":"73dfa9bce2106b9091516b9e64b60bb807dfedaa3cddf3ace7eea0c03d7fa728","callers":["0x61b373c in FDE 0x61b3720..0x61b375f (unnamed 63-byte forwarder, called by rocksdb::DBImpl::EndTrace)"],"mangled":"_ZN7rocksdb6Tracer11WriteFooterEv","name":"rocksdb::Tracer::WriteFooter","quirks":["The timestamp comes from the SystemClock at Tracer+0x00 through a devirtualized wrapper chain: each SystemClockWrapper::NowMicros (0x5d4d490) forwards to the wrapped clock's NowMicros (vtable slot 19, 0x98), and the binary unrolls the forwarding checks (comparing each layer's vtable slot 19 against the expected function, loaded from the GOT slot at 0x64ecf80 -- zero in the file image, filled by the loader). The observable result is the innermost clock's NowMicros().","The payload is assigned the empty string via std::string::_M_replace(0, 0, \"\", 0): the source at .rodata 0x4376fd is a single NUL byte, so the call is a literal no-op on the already-empty SSO string -- recorded because it is in the binary, not because it changes the result.","The FDE covers the exception landing pads at 0x61b3711..0x61b371d."],"rules":["build Trace{ts = clock_->NowMicros(), type = kTraceEnd (2), payload_map = 0, payload = \"\"} on the stack","return WriteTrace(trace) -- the Status comes from trace_writer_->Write"],"size":349,"source_note":"Reproduced exactly by zeroing its 8 census relocation fields. The kind-42 entry at offset 85 is a cmp (opcode 0x3B) that shares its opcode with the source -- only the displacement differs; no mov-lea restoration applies there.","vtable_slot":"not applicable (ordinary member; no vtable -- Tracer is not polymorphic)"},"0x61b3860":{"arguments":["rdi = Status* sret (hidden return slot; the function returns Status by value)","rsi = this (rocksdb::Tracer*)"],"body_sha256":"1d1208c9ceabfd0b012279fb423095eb5b70a5484262f8b2a4af6eba88e150e1","callers":["0x61b3ead in FDE 0x61b3e60..0x61b3ee9 (rocksdb::Tracer::Tracer, the constructor)"],"mangled":"_ZN7rocksdb6Tracer11WriteHeaderEv","name":"rocksdb::Tracer::WriteHeader","quirks":["The four version ints are immediates in operator<<(int) calls (0, 2, 8, 1): the trace version is \"0.2\" and the RocksDB version is \"8.1\". The payload round-trips through ParseTraceHeader (0x61b4840): field[1][15:] = \"0.2\" parses to 2, field[2][17:] = \"8.1\" parses to 81.","The timestamp comes from the same SystemClock wrapper chain as WriteFooter, but here the expected function is an immediate (SystemClockWrapper::NowMicros, 0x5d4d490) and the binary unrolls 13 wrapper layers.","The payload is built by streaming into a stack std::ostringstream (ios_base + basic_ios + locale + stringbuf); the FDE covers four exception landing pads at 0x61b3df7..0x61b3e33.","The magic is the global std::string at .bss 0x6508800 (\"feedcafedeadbeef\", built from .rodata 0x452c50 by the static initializer at 0x61b7068); the TAB is the single byte at .rodata 0x43fc29 and the dot is the single byte at .rodata 0x43821e."],"rules":["stream into an ostringstream, in order: magic \"feedcafedeadbeef\" + TAB + \"Trace Version: \" (.rodata 0x4478de, 15 bytes) + int 0 + \".\" + int 2 + TAB + \"RocksDB Version: \" (.rodata 0x442aec, 17 bytes) + int 8 + \".\" + int 1 + TAB + \"Format: Timestamp OpType Payload\\n\" (.rodata 0x969c80, 33 bytes) -- 90 bytes total","build Trace{ts = clock_->NowMicros(), type = kTraceBegin (1), payload_map = 0, payload = the 90-byte string} on the stack","return WriteTrace(trace) -- the Status comes from trace_writer_->Write"],"size":1491,"source_note":"Reproduced exactly by zeroing its 49 census relocation fields. Only offsets 395 and 798 carry the gotpcrelx-mov-lea relaxation (target lea 0x8D vs source mov 0x8B); the other kind-42 sites share their opcode with the source (mov 0x8B) and differ only in the displacement.","vtable_slot":"not applicable (ordinary member; no vtable -- Tracer is not polymorphic)"}},"layouts":{"Trace":{"+0x00":"timestamp (uint64, little-endian)","+0x08":"type (uint8; 1 = kTraceBegin, 2 = kTraceEnd)","+0x10":"payload_map (uint64; 0 in the header/footer traces)","+0x18":"payload (std::string: ptr +0x18, size +0x20, capacity/SSO +0x28)"},"Tracer":{"+0x00":"SystemClock* clock_ -- the timestamp source (possibly wrapped; NowMicros forwards through SystemClockWrapper layers at +0x20 of each wrapper)","+0x08":"TraceOptions word 0: max_trace_file_size (uint64) -- the file-size gate in ShouldSkipTrace","+0x10":"TraceOptions word 1: sampling period (uint64) -- the counter threshold in ShouldSkipTrace","+0x18":"TraceOptions word 2: per-type skip flags (uint64 bitmask; bit set = skip that type)","+0x20":"TraceOptions word 3 (uint64) -- copied by the constructor, not read by any of the four functions modelled here","+0x28":"unique_ptr<TraceWriter> trace_writer_ -- destroyed by ~Tracer (D1 0x61b18d0)","+0x30":"sampling counter (uint64, starts at 0 in the constructor)","size":"56 bytes (0x38), pinned by DBImpl::EndTrace's operator delete with size 0x38 after destroying the Tracer"}},"unknowns":["The upstream TraceOptions field names: the four u64 words at Tracer+0x08..0x28 are copied wholesale from the TraceOptions argument by the constructor; only word 0's role (max_trace_file_size) is pinned by use, words 1-2 by their roles in ShouldSkipTrace, and word 3 not at all. An upstream-source read was requested; if it has not landed, these names stay open.","The upstream spelling of the version constants (separate ints 0/2 and 8/1 in the binary vs. a version string or named constants in source) and of the skip-flags option.","The identity of the 63-byte forwarder at 0x61b3720 (no vendor-census record, no symbol): it tail-calls WriteFooter and is called only by DBImpl::EndTrace.","Whether the TraceOptions word at Tracer+0x20 is read by any other Tracer method -- the five recording methods (Write/Get/IteratorSeek/IteratorSeekForPrev/MultiGet) are the natural next read, and are NOT reconstructed in this packet."]}
+{
+ "artifact": "node #115",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": [
+  "RE-002-node115-tracer-helper-115 (open PR #5863, same author): the TracerHelper codec packet -- ParseVersionStr (0x61b10f0), EncodeTrace (0x61b1260), DecodeTrace, DecodeHeader -- whose EncodeTrace model this packet reuses (copied, not imported, because #5863 is not on upstream main yet).",
+  "RE-002-node115-tracer-helper-parse-header-115 (open PR #5866, same author): ParseTraceHeader (0x61b4840) -- the consumer of the header payload built here; the payload's field[1][15:] is \"0.2\" and field[2][17:] is \"8.1\", parsing to 2 and 81.",
+  "RE-002-node115-rocksdb-trace-replayer-vtable (merged), RE-002-node115-rocksdb-trace-cache-writer-vtable (merged) and RE-002-node115-rocksdb-trace-handler-vtable (merged): trace vtables; no body of these four functions is reconstructed there.",
+  "The Tracer constructor (0x61b3e60, census node115-vendor-61b3e60): copies the 32-byte TraceOptions into this+0x08..0x28, moves the writer into this+0x28, zeroes the counter at this+0x30, and calls WriteHeader once -- observed from its disassembly, not reconstructed in this packet.",
+  "Upstream source read (RocksDB v8.1.1, trace_replay/trace_replay.h + trace_replay.cc, include/rocksdb/options.h, include/rocksdb/trace_record.h): confirms the Tracer member order (clock_, trace_options_, trace_writer_, trace_request_count_), the TraceOptions fields (max_trace_file_size default 64 GiB, sampling_frequency default 1, filter uint64_t, preserve_write_order bool), the TraceFilterType values (Get 0x1, Write 0x2, IteratorSeek 0x4, IteratorSeekForPrev 0x8, MultiGet 0x10), the version constants (kTraceFileMajorVersion 0, kTraceFileMinorVersion 2), and Close() returning WriteFooter(). It also surfaced the SetPayloadMap call in WriteFooter, corrected in this packet (see the WriteFooter quirks)."
+ ],
+ "caller_census": {
+  "method": "Whole-.text scan for E8 calls, E9 tail jumps and RIP-relative LEA references landing on the target, validated by decoding forward from the enclosing FDE start with Capstone (census.py). A site counts only on a real instruction boundary with the expected mnemonic.",
+  "notes": [
+   "ShouldSkipTrace has exactly 5 direct callers, one per recording method: Tracer::Write (0x61b1b28), Tracer::Get (0x61b1e7b), Tracer::IteratorSeek (0x61b2247), Tracer::IteratorSeekForPrev (0x61b27b7), Tracer::MultiGet (0x61b2dc8).",
+   "WriteTrace has exactly 7 direct callers: the same five recording methods (0x61b1d88, 0x61b211e, 0x61b257b, 0x61b2aeb, 0x61b3318) plus WriteFooter (0x61b36b2) and WriteHeader (0x61b3cc7).",
+   "WriteFooter has exactly 1 direct caller: the 63-byte forwarder at 0x61b3720 (call at 0x61b373c), identified as rocksdb::Tracer::Close() by the upstream source (trace_replay/trace_replay.cc:620, `return WriteFooter();`); Close is itself called once by rocksdb::DBImpl::EndTrace (0x5d4e47c, in FDE 0x5d4e420..0x5d4e59c), which then destroys the Tracer (D1 0x61b18d0 + operator delete with size 0x38, pinning sizeof(Tracer) = 56).",
+   "WriteHeader has exactly 1 direct caller: the Tracer constructor (0x61b3ead, in FDE 0x61b3e60..0x61b3ee9), which discards the returned Status after freeing its message buffer if any.",
+   "No E9 tail jump or LEA reference to any of the four targets exists in .text."
+  ],
+  "sites": [
+   {
+    "kind": "call",
+    "site": "0x61b1b28",
+    "site_fde": "0x61b1af0..0x61b1e18",
+    "target": "0x61b1930"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b1e7b",
+    "site_fde": "0x61b1e40..0x61b21ca",
+    "target": "0x61b1930"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b2247",
+    "site_fde": "0x61b21f0..0x61b2738",
+    "target": "0x61b1930"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b27b7",
+    "site_fde": "0x61b2760..0x61b2ca8",
+    "target": "0x61b1930"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b2dc8",
+    "site_fde": "0x61b2cf0..0x61b3596",
+    "target": "0x61b1930"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b1d88",
+    "site_fde": "0x61b1af0..0x61b1e18",
+    "target": "0x61b1a10"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b211e",
+    "site_fde": "0x61b1e40..0x61b21ca",
+    "target": "0x61b1a10"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b257b",
+    "site_fde": "0x61b21f0..0x61b2738",
+    "target": "0x61b1a10"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b2aeb",
+    "site_fde": "0x61b2760..0x61b2ca8",
+    "target": "0x61b1a10"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b3318",
+    "site_fde": "0x61b2cf0..0x61b3596",
+    "target": "0x61b1a10"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b36b2",
+    "site_fde": "0x61b35c0..0x61b371d",
+    "target": "0x61b1a10"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b3cc7",
+    "site_fde": "0x61b3860..0x61b3e33",
+    "target": "0x61b1a10"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b373c",
+    "site_fde": "0x61b3720..0x61b375f",
+    "target": "0x61b35c0"
+   },
+   {
+    "kind": "call",
+    "site": "0x61b3ead",
+    "site_fde": "0x61b3e60..0x61b3ee9",
+    "target": "0x61b3860"
+   }
+  ],
+  "validated_sites": 14
+ },
+ "cases": {
+  "count": 2400,
+  "ledger": "cases.tsv",
+  "split": "600 should_skip + 600 write_trace + 600 write_header + 600 write_footer",
+  "tests": "tests/test_tracer_header_footer115.py",
+  "tool": "tools/tracer_header_footer115.py",
+  "what_is_checked": [
+   "should_skip: type sweep (types 0..15, 255, random) with the file-size gate cycled below/equal/above the limit; flag sweep for the five flag-tested types (bit clear/set/all-bits/complement); 6-call sampling sequences for periods 0/1/2/3/5/10 with counter starts 0/1/period-1",
+   "write_trace: encoded records for boundary timestamps (0, 1, 2^63, 2^64-1), types 0/1/2/3/13/255, payload lengths 0/1/16/100/256 (incl. the magic payload), plus 50 writer-error rows where the writer's Status is returned as-is",
+   "write_header: the full encoded record for 600 clock values (0, 1, 123456789, 2^63, 2^64-1, random u64s) -- the 90-byte payload is constant, only the timestamp varies",
+   "write_footer: the full encoded record (empty payload, type 2) for the same 600 clock values",
+   "the committed cases.tsv matches a fresh regeneration from the same seeded generator",
+   "set_payload_map: bit-setting with the bts rule (bit 0 -> map 1, idempotent re-set reports no change) and the footer Trace's in-memory payload_map == 1 while its encoded record stays 13 bytes (covered by unit tests, not by cases.tsv, since payload_map is never serialized)"
+  ]
+ },
+ "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM. The target binary is never executed. make verify/test/catalogue-check in a tooled environment is still owed upstream.",
+ "functions": {
+  "0x61b1930": {
+   "arguments": [
+    "rdi = this (rocksdb::Tracer*)",
+    "rsi = const TraceType& (read as one byte, movzbl)"
+   ],
+   "body_sha256": "7f1ff523a09115f77f04ff84d420630cff96d7420432f92078334ea943f6193f",
+   "callers": [
+    "0x61b1b28 in FDE 0x61b1af0..0x61b1e18 (rocksdb::Tracer::Write)",
+    "0x61b1e7b in FDE 0x61b1e40..0x61b21ca (rocksdb::Tracer::Get)",
+    "0x61b2247 in FDE 0x61b21f0..0x61b2738 (rocksdb::Tracer::IteratorSeek)",
+    "0x61b27b7 in FDE 0x61b2760..0x61b2ca8 (rocksdb::Tracer::IteratorSeekForPrev)",
+    "0x61b2dc8 in FDE 0x61b2cf0..0x61b3596 (rocksdb::Tracer::MultiGet)"
+   ],
+   "mangled": "_ZN7rocksdb6Tracer15ShouldSkipTraceERKNS_9TraceTypeE",
+   "name": "rocksdb::Tracer::ShouldSkipTrace",
+   "quirks": [
+    "A set bit in the skip-flags word (this+0x18) means SKIP, not enable: the bit-set path returns true at once without advancing the sampling counter. The upstream option name for this word is an open unknown.",
+    "Sampling period 0 or 1 records every trace that reaches the counter (counter 1 < 0/1 is false, so the first call already records and resets).",
+    "The sampling counter is shared across all operation types, and flag-skipped calls do not advance it; a kTraceWrite skip leaves the counter where the next kTraceGet finds it.",
+    "The bool return is not normalized: the file-size helper uses setb (only al is set), so the upper bits of eax on the record path are whatever the helper left -- callers test al only, and the model returns a plain bool.",
+    "The file-size check is an outlined helper at 0x61b1910 (its own FDE 0x61b1910..0x61b192b, 27 bytes, not in the vendor census): trace_writer_->GetFileSize() via TraceWriter vtable slot 4, compared strictly-greater with this+0x08."
+   ],
+   "rules": [
+    "if trace_writer_->GetFileSize() > max_trace_file_size (this+0x08), return true (skip)",
+    "t = type byte; d = (t - 3) & 0xFF; if d > 10, go to the sampling counter (types 0, 1, 2 and >= 14)",
+    "jump table at .rodata 0x97c5f4 (11 int32 entries for types 3..13): type 3 (kTraceWrite) tests mask 0x02, type 4 (kTraceGet) 0x01, type 5 (kTraceIteratorSeek) 0x04, type 6 (kTraceIteratorSeekForPrev) 0x08, type 13 (kTraceMultiGet) 0x10; types 7..12 (kBlockTrace* and kIOTracer) jump straight to the sampling counter with no flag test",
+    "if skip_flags (this+0x18) & mask != 0, return true (skip) at once",
+    "sampling counter: counter (this+0x30, u64) += 1 (wrapping); if counter < period (this+0x10), return true; else counter = 0 and return false (record this trace)"
+   ],
+   "size": 183,
+   "source_note": "Reproduced exactly by zeroing its 2 census relocation fields (kind 4 at offset 17, kind 2 at offset 40).",
+   "vtable_slot": "not applicable (ordinary member; no vtable -- Tracer is not polymorphic)"
+  },
+  "0x61b1a10": {
+   "arguments": [
+    "rdi = Status* sret (hidden return slot; the function returns Status by value)",
+    "rsi = this (rocksdb::Tracer*)",
+    "rdx = const Trace& trace"
+   ],
+   "body_sha256": "a8b25b27e0dda7a9a03ff580b273b7fd167105079569f08a34e877f39baa1370",
+   "callers": [
+    "0x61b1d88 in FDE 0x61b1af0..0x61b1e18 (rocksdb::Tracer::Write)",
+    "0x61b211e in FDE 0x61b1e40..0x61b21ca (rocksdb::Tracer::Get)",
+    "0x61b257b in FDE 0x61b21f0..0x61b2738 (rocksdb::Tracer::IteratorSeek)",
+    "0x61b2aeb in FDE 0x61b2760..0x61b2ca8 (rocksdb::Tracer::IteratorSeekForPrev)",
+    "0x61b3318 in FDE 0x61b2cf0..0x61b3596 (rocksdb::Tracer::MultiGet)",
+    "0x61b36b2 in FDE 0x61b35c0..0x61b371d (rocksdb::Tracer::WriteFooter)",
+    "0x61b3cc7 in FDE 0x61b3860..0x61b3e33 (rocksdb::Tracer::WriteHeader)"
+   ],
+   "mangled": "_ZN7rocksdb6Tracer10WriteTraceERKNS_5TraceE",
+   "name": "rocksdb::Tracer::WriteTrace",
+   "quirks": [
+    "The encoded record lives in a stack std::string whose SSO buffer is at rsp+0x20; the string is freed (operator delete) only when its pointer differs from the SSO buffer.",
+    "The TraceWriter::Write call passes the sret pointer through in rdi, so the writer's Status lands directly in the caller's out slot; WriteTrace returns that Status unchanged."
+   ],
+   "rules": [
+    "encode the Trace into a stack std::string with TracerHelper::EncodeTrace (0x61b1260): timestamp u64 LE, type byte, payload length u32 LE (low 32 bits of the size), payload bytes",
+    "call trace_writer_->Write(Slice) via TraceWriter vtable slot 2 (0x10), with the Slice built on the stack from the encoded string (ptr, size)",
+    "return the writer's Status by value"
+   ],
+   "size": 182,
+   "source_note": "Reproduced exactly by zeroing its 4 census relocation fields (kind 4 at offsets 72/131/166, kind 2 at offset 178).",
+   "vtable_slot": "not applicable (ordinary member; no vtable -- Tracer is not polymorphic)"
+  },
+  "0x61b35c0": {
+   "arguments": [
+    "rdi = Status* sret (hidden return slot; the function returns Status by value)",
+    "rsi = this (rocksdb::Tracer*)"
+   ],
+   "body_sha256": "73dfa9bce2106b9091516b9e64b60bb807dfedaa3cddf3ace7eea0c03d7fa728",
+   "callers": [
+    "0x61b373c in FDE 0x61b3720..0x61b375f (rocksdb::Tracer::Close, identified by the upstream source: trace_replay/trace_replay.cc:620 `return WriteFooter();`; called by rocksdb::DBImpl::EndTrace)"
+   ],
+   "mangled": "_ZN7rocksdb6Tracer11WriteFooterEv",
+   "name": "rocksdb::Tracer::WriteFooter",
+   "quirks": [
+    "The timestamp comes from the SystemClock at Tracer+0x00 through a devirtualized wrapper chain: each SystemClockWrapper::NowMicros (0x5d4d490) forwards to the wrapped clock's NowMicros (vtable slot 19, 0x98), and the binary unrolls the forwarding checks (comparing each layer's vtable slot 19 against the expected function, loaded from the GOT slot at 0x64ecf80 -- zero in the file image, filled by the loader). The observable result is the innermost clock's NowMicros().",
+    "SetPayloadMap (0x61b18b0, its own FDE 0x61b18b0..0x61b18c8, not in the vendor census) is a bts on the payload_map word: it sets bit `type` and returns whether the bit changed. With kEmptyPayload (0) the footer payload_map becomes 1. CORRECTION to the first version of this packet (which modelled payload_map as 0): the encoded record is unaffected, because EncodeTrace serializes only ts/type/length/payload -- but the in-memory Trace differs, and the model now sets it via SetPayloadMap.",
+    "The payload is assigned the empty string via std::string::_M_replace(0, 0, \"\", 0): the source at .rodata 0x4376fd is a single NUL byte, so the call is a literal no-op on the already-empty SSO string -- recorded because it is in the binary, not because it changes the result.",
+    "The FDE covers the exception landing pads at 0x61b3711..0x61b371d."
+   ],
+   "rules": [
+    "build Trace{ts = clock_->NowMicros(), type = kTraceEnd (2), payload_map = 0, payload = \"\"} on the stack",
+    "call TracerHelper::SetPayloadMap(trace.payload_map, kEmptyPayload) (0x61b18b0): payload_map |= (1 << 0), so the in-memory footer Trace has payload_map = 1 (the return value, whether the bit changed, is discarded)",
+    "assign trace.payload = \"\" via std::string::_M_replace(0, 0, \"\", 0)",
+    "return WriteTrace(trace) -- the Status comes from trace_writer_->Write; EncodeTrace never serializes payload_map, so the footer record on disk is 13 bytes (ts 8 + type 1 + length 0)"
+   ],
+   "size": 349,
+   "source_note": "Reproduced exactly by zeroing its 8 census relocation fields. The kind-42 entry at offset 85 is a cmp (opcode 0x3B) that shares its opcode with the source -- only the displacement differs; no mov-lea restoration applies there.",
+   "vtable_slot": "not applicable (ordinary member; no vtable -- Tracer is not polymorphic)"
+  },
+  "0x61b3860": {
+   "arguments": [
+    "rdi = Status* sret (hidden return slot; the function returns Status by value)",
+    "rsi = this (rocksdb::Tracer*)"
+   ],
+   "body_sha256": "1d1208c9ceabfd0b012279fb423095eb5b70a5484262f8b2a4af6eba88e150e1",
+   "callers": [
+    "0x61b3ead in FDE 0x61b3e60..0x61b3ee9 (rocksdb::Tracer::Tracer, the constructor)"
+   ],
+   "mangled": "_ZN7rocksdb6Tracer11WriteHeaderEv",
+   "name": "rocksdb::Tracer::WriteHeader",
+   "quirks": [
+    "The four version ints are immediates in operator<<(int) calls (0, 2, 8, 1): the trace version is \"0.2\" and the RocksDB version is \"8.1\". The payload round-trips through ParseTraceHeader (0x61b4840): field[1][15:] = \"0.2\" parses to 2, field[2][17:] = \"8.1\" parses to 81.",
+    "The timestamp comes from the same SystemClock wrapper chain as WriteFooter, but here the expected function is an immediate (SystemClockWrapper::NowMicros, 0x5d4d490) and the binary unrolls 13 wrapper layers.",
+    "The payload is built by streaming into a stack std::ostringstream (ios_base + basic_ios + locale + stringbuf); the FDE covers four exception landing pads at 0x61b3df7..0x61b3e33.",
+    "The magic is the global std::string at .bss 0x6508800 (\"feedcafedeadbeef\", built from .rodata 0x452c50 by the static initializer at 0x61b7068); the TAB is the single byte at .rodata 0x43fc29 and the dot is the single byte at .rodata 0x43821e."
+   ],
+   "rules": [
+    "stream into an ostringstream, in order: magic \"feedcafedeadbeef\" + TAB + \"Trace Version: \" (.rodata 0x4478de, 15 bytes) + int 0 + \".\" + int 2 + TAB + \"RocksDB Version: \" (.rodata 0x442aec, 17 bytes) + int 8 + \".\" + int 1 + TAB + \"Format: Timestamp OpType Payload\\n\" (.rodata 0x969c80, 33 bytes) -- 90 bytes total",
+    "build Trace{ts = clock_->NowMicros(), type = kTraceBegin (1), payload_map = 0, payload = the 90-byte string} on the stack",
+    "return WriteTrace(trace) -- the Status comes from trace_writer_->Write"
+   ],
+   "size": 1491,
+   "source_note": "Reproduced exactly by zeroing its 49 census relocation fields. Only offsets 395 and 798 carry the gotpcrelx-mov-lea relaxation (target lea 0x8D vs source mov 0x8B); the other kind-42 sites share their opcode with the source (mov 0x8B) and differ only in the displacement.",
+   "vtable_slot": "not applicable (ordinary member; no vtable -- Tracer is not polymorphic)"
+  }
+ },
+ "layouts": {
+  "Trace": {
+   "+0x00": "timestamp (uint64, little-endian)",
+   "+0x08": "type (uint8; 1 = kTraceBegin, 2 = kTraceEnd)",
+   "+0x10": "payload_map (uint64; 0 in the header trace, 1 in the footer trace via SetPayloadMap(kEmptyPayload) -- never serialized by EncodeTrace)",
+   "+0x18": "payload (std::string: ptr +0x18, size +0x20, capacity/SSO +0x28)"
+  },
+  "Tracer": {
+   "+0x00": "SystemClock* clock_ -- the timestamp source (possibly wrapped; NowMicros forwards through SystemClockWrapper layers at +0x20 of each wrapper)",
+   "+0x08": "TraceOptions word 0: max_trace_file_size (uint64) -- the file-size gate in ShouldSkipTrace",
+   "+0x10": "TraceOptions word 1: sampling period (uint64) -- the counter threshold in ShouldSkipTrace",
+   "+0x18": "TraceOptions word 2: per-type skip flags (uint64 bitmask; bit set = skip that type)",
+   "+0x20": "TraceOptions word 3: preserve_write_order (bool, padded to a u64 word) -- read only by IsWriteOrderPreserved(), not by any of the four functions modelled here",
+   "+0x28": "unique_ptr<TraceWriter> trace_writer_ -- destroyed by ~Tracer (D1 0x61b18d0)",
+   "+0x30": "sampling counter (uint64, starts at 0 in the constructor)",
+   "size": "56 bytes (0x38), pinned by DBImpl::EndTrace's operator delete with size 0x38 after destroying the Tracer"
+  }
+ },
+ "unknowns": [
+  "The definition location of the kMajorVersion/kMinorVersion identifiers WriteHeader renders as 8.1: the upstream read found only the ROCKSDB_MAJOR 8 / ROCKSDB_MINOR 1 macros (include/rocksdb/version.h) and the rendered value 8.1 is pinned by the binary immediates; where the identifiers are defined stays open.",
+  "Whether the TraceOptions word at Tracer+0x20 (preserve_write_order) is read by any other Tracer method -- the five recording methods (Write/Get/IteratorSeek/IteratorSeekForPrev/MultiGet) are the natural next read, and are NOT reconstructed in this packet."
+ ]
+}
