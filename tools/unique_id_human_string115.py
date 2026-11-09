@@ -58,7 +58,7 @@ explained for both claimed functions and for `Slice::ToString`:
 the linked bodies differ from the source bodies only in the call
 displacements. The FDE ranges match the census ranges exactly;
 note the census end of `InternalUniqueIdToHumanString`
-(0x61b10e3) is the true FDE end. The 17-byte nibble-to-hex-char
+(0x61b10e3) is the true FDE end. The 18-byte nibble-to-hex-char
 helper at 0x61c7da0 (`v <= 9 ? '0'+v : 'A'+v-10`) has no census
 record; its bytes are verified directly from the binary.
 
@@ -90,7 +90,7 @@ FUNCTIONS = [
      "4a8a644b3202dfa5ba7f96df2b0c905604f0cbbb10831d94f97df47738fd776d"),
     ("Slice::ToString", 0x61C7E30, 0x61C7FB6,
      "be77a499a67f1547cec8e5c371d76772fc82ea3211c529b90628fde535cc7602"),
-    ("toHex", 0x61C7DA0, 0x61C7DB1, None),
+    ("toHex", 0x61C7DA0, 0x61C7DB2, None),
 ]
 
 # Relocation offsets (4-byte fields) whose zeroing reproduces each

@@ -143,9 +143,9 @@ def test_bodies_match_census():
         body = binary[start - 0x1000: end - 0x1000]
         digest = hashlib.sha256(body).hexdigest()
         if target is None:
-            # Only the 17-byte toHex helper has no census record.
+            # Only the 18-byte toHex helper has no census record.
             assert name == "toHex", name
-            assert len(body) == 17, name
+            assert len(body) == 18, name
             assert body[:4] == b"\xf3\x0f\x1e\xfa"  # endbr64
             continue
         assert digest == target, name

@@ -65,7 +65,7 @@ hashing each body with its relocation fields zeroed (5 fields for
 the linked bodies differ from the source bodies only in the call
 displacements. Note the census end of
 `InternalUniqueIdToHumanString` (`0x61b10e3`) is the true FDE end.
-The 17-byte nibble-to-hex-char helper at `0x61c7da0`
+The 18-byte nibble-to-hex-char helper at `0x61c7da0`
 (`v <= 9 ? '0'+v : 'A'+v-10`) has no census record; its bytes are
 verified directly from the binary.
 
