@@ -310,7 +310,7 @@ class Tracer:
     one-time header write is the caller's business, not this model.
     """
 
-    def __init__(self, clock, max_trace_file_size=64 * 1024 * 1024,
+    def __init__(self, clock, max_trace_file_size=64 * 1024 * 1024 * 1024,
                  sampling_period=0, skip_flags=0, options_word3=0,
                  writer=None):
         self.clock = clock
