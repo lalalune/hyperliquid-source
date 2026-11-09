@@ -102,6 +102,9 @@ and [source-built node acceptance](docs/SCOPE.md#source-built-network-node).
 </details>
 <!-- END GENERATED PROGRESS -->
 
+The [2026-11-09 evidence review](research/work-items/RE-001-node115-progress-review-2026-11-09/README.md)
+explains the inventory, byte comparisons and unaccepted full-scope gates.
+
 ## Target: node #115
 
 **Node #115 is the only node implementation target**, authenticated by SHA-256

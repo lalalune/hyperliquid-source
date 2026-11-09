@@ -247,9 +247,11 @@ def render_readme_progress(components, progress, coverage=None, inventory=None):
     lines += ['', 'Gate percentages require acceptance of the full component scope.',
               'Byte percentages cover the authenticated comparison registry, including dependencies;',
               'they do not measure whole-node completion or remaining engineering effort.', '']
-    lines += ['The retained implementations cover quantity preparation, nonce ordering,',
-              'snapshot selectors, latency, weighted comparisons, tagged counts and unsigned128 conversion.',
-              'Each has a bounded #115 contract; no integrated node executable is claimed.', '',
+    registered = sum(bool(c.get('implementation_paths')) for c in components)
+    paths = sum(len(c.get('implementation_paths', [])) for c in components)
+    lines += [f'Registered bounded Rust work occurs in **{registered}/{len(components)} component work areas**',
+              f'(**{paths} implementation paths**). These are fragment registrations, not completed components.',
+              'Each fragment keeps its own #115 contract; an integrated node executable remains unaccepted.', '',
               '<details open>', '<summary><strong>Node #115 component acceptance</strong></summary>', '',
               *render_component_progress(components, progress, coverage, 'docs/', combined=True),
               f'Accepted gates: **{accepted}/{total}**. Full-component byte and function denominators remain unmeasured.',

@@ -1,0 +1,946 @@
+{
+  "schema_version": 1,
+  "reviewed_on": "2026-11-09",
+  "method": "Independent ELF64 section parsing, tracked-Git inventory, direct byte/relocation comparison and printed-fraction checks; production catalogue functions are not imported.",
+  "audit_source_sha256": "1eb1c2a2c68d175240da09d515eb2f44bedb50508dc8309dc8d64948ca6093b2",
+  "tooling": {
+    "python": "3.12.14",
+    "git": "git version 2.55.0"
+  },
+  "audit_scope": "Current remote main and a pinned pending integration snapshot; final generated README must use its actual source tree.",
+  "controls": {
+    "positive_mask": 1,
+    "negative_controls_attempted": 4,
+    "negative_controls_detected": 4
+  },
+  "main": {
+    "commit": "d6395549bfdcfb2237a9ce2129253fd255244eb7",
+    "tree": "159bf4d62438c96a33a666ec46d5f6783e5dba8e",
+    "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "target_file_bytes": 105896032,
+    "text_bytes": 83719936,
+    "inventory": {
+      "rust_areas": 100,
+      "cargo_manifests": 63,
+      "work_items": 3240
+    },
+    "registered_rust_components": 14,
+    "registered_bounded_paths": 66,
+    "accepted_full_scope_gates": 0,
+    "total_gates": 92,
+    "complete_components": 0,
+    "component_count": 23,
+    "gate_counts": {
+      "mapped": 0,
+      "built": 0,
+      "behavior": 0,
+      "identity": 0
+    },
+    "percentages": {
+      "accepted_full_scope_gates": 0.0,
+      "complete_components": 0.0,
+      "target_text_compared": 6.347116653314211,
+      "target_text_raw_equal": 5.92930099707673
+    },
+    "comparisons": {
+      "bytes": 5313802,
+      "raw_equal_bytes": 4964007,
+      "raw_equal_windows": 507,
+      "relocation_qualified_windows": 7884,
+      "windows": 7884,
+      "masked_bytes": 413401,
+      "non_relocation_bytes": 4900401
+    },
+    "dependency_comparisons": {
+      "compiler-builtins": {
+        "bytes": 2874,
+        "raw_equal_bytes": 2769,
+        "raw_equal_windows": 5,
+        "relocation_qualified_windows": 13,
+        "windows": 13,
+        "masked_bytes": 112,
+        "non_relocation_bytes": 2762
+      },
+      "native-libraries": {
+        "bytes": 5053810,
+        "raw_equal_bytes": 4716864,
+        "raw_equal_windows": 445,
+        "relocation_qualified_windows": 7265,
+        "windows": 7265,
+        "masked_bytes": 398757,
+        "non_relocation_bytes": 4655053
+      },
+      "rust-alloc": {
+        "bytes": 838,
+        "raw_equal_bytes": 759,
+        "raw_equal_windows": 0,
+        "relocation_qualified_windows": 9,
+        "windows": 9,
+        "masked_bytes": 84,
+        "non_relocation_bytes": 754
+      },
+      "rust-core": {
+        "bytes": 39873,
+        "raw_equal_bytes": 37344,
+        "raw_equal_windows": 5,
+        "relocation_qualified_windows": 112,
+        "windows": 112,
+        "masked_bytes": 2604,
+        "non_relocation_bytes": 37269
+      },
+      "rust-std": {
+        "bytes": 60556,
+        "raw_equal_bytes": 57583,
+        "raw_equal_windows": 16,
+        "relocation_qualified_windows": 174,
+        "windows": 174,
+        "masked_bytes": 3732,
+        "non_relocation_bytes": 56824
+      },
+      "vendored-crates": {
+        "bytes": 153433,
+        "raw_equal_bytes": 146270,
+        "raw_equal_windows": 34,
+        "relocation_qualified_windows": 309,
+        "windows": 309,
+        "masked_bytes": 8112,
+        "non_relocation_bytes": 145321
+      },
+      "zstandard": {
+        "bytes": 2418,
+        "raw_equal_bytes": 2418,
+        "raw_equal_windows": 2,
+        "relocation_qualified_windows": 2,
+        "windows": 2,
+        "masked_bytes": 0,
+        "non_relocation_bytes": 2418
+      }
+    },
+    "extent_mismatches": [
+      {
+        "id": "node115-socket2-keepalive-5c68520",
+        "target_bytes": 227,
+        "source_bytes": 418,
+        "credit": 0
+      },
+      {
+        "id": "node115-socket2-keepalive-5c68610",
+        "target_bytes": 227,
+        "source_bytes": 418,
+        "credit": 0
+      }
+    ],
+    "component_assessment": [
+      {
+        "id": "foundation",
+        "scope": "Time, logging, wallets, collections and shared runtime utilities",
+        "registered_bounded_paths": 22,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "serialization",
+        "scope": "Private bincode wire codecs and integer encodings",
+        "registered_bounded_paths": 8,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "storage",
+        "scope": "RocksDB wrappers, block readers and database lifecycle",
+        "registered_bounded_paths": 3,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "transport",
+        "scope": "TCP framing, LZ4, channels, rate limits and reconnects",
+        "registered_bounded_paths": 7,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "consensus",
+        "scope": "Votes, rounds, quorum certificates, validator sets and timers",
+        "registered_bounded_paths": 6,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "node-runtime",
+        "scope": "CLI, startup, gossip, stream services and process orchestration",
+        "registered_bounded_paths": 1,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "abci",
+        "scope": "Block application, state roots and checkpoint handoff",
+        "registered_bounded_paths": 0,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "action-wire",
+        "scope": "Action envelopes, signing payloads and delayed actions",
+        "registered_bounded_paths": 0,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "action-dispatch",
+        "scope": "Agent-created handler splits and central dispatch",
+        "registered_bounded_paths": 1,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "exchange",
+        "scope": "Trading orchestration, block hooks, deployment and ledger updates",
+        "registered_bounded_paths": 2,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "orderbook",
+        "scope": "Book storage, price/time priority and order lifecycle",
+        "registered_bounded_paths": 0,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "risk",
+        "scope": "Positions, margin, oracles, liquidations and spot balances",
+        "registered_bounded_paths": 3,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "assets",
+        "scope": "Price, size, notional and wei arithmetic plus asset metadata",
+        "registered_bounded_paths": 6,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "fees",
+        "scope": "Fee tiers, volume accounting and rebates",
+        "registered_bounded_paths": 4,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "vaults",
+        "scope": "Vault and subaccount accounting and permissions",
+        "registered_bounded_paths": 0,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "bridge",
+        "scope": "Deposit/withdrawal requests and cross-chain signing",
+        "registered_bounded_paths": 0,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "evm",
+        "scope": "EVM state, database adapters, transaction execution and hashing",
+        "registered_bounded_paths": 0,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "staking",
+        "scope": "Stake, validator membership and jailing",
+        "registered_bounded_paths": 1,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "dex-registry",
+        "scope": "DEX metadata and clearinghouse registry",
+        "registered_bounded_paths": 0,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "l1-shared",
+        "scope": "Agent, system-user, nonce, timing and other cross-cutting state",
+        "registered_bounded_paths": 0,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "info-api",
+        "scope": "Read-only info requests and position responses",
+        "registered_bounded_paths": 1,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "evm-rpc",
+        "scope": "JSON-RPC routing, EVM reads and transaction forwarding",
+        "registered_bounded_paths": 1,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "constants",
+        "scope": "Static network/build configuration and naming",
+        "registered_bounded_paths": 0,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      }
+    ],
+    "new_blst_window": null,
+    "pinned_byte_evidence_files": 19,
+    "readme_audit": {
+      "sha256": "2627c586b0ce024eec25b18a1d479f60dc74370c37a4c46be8e760d8c66cca85",
+      "inventory_matches_tracked_tree": true,
+      "completion_fraction_rows_checked": 8,
+      "comparison_fraction_rows_checked": 8,
+      "full_scope_gate_percent": 0.0
+    }
+  },
+  "pending_integration_snapshot": {
+    "commit": "91b28122e3956cef666750dc579d5f77810cdfef",
+    "tree": "146c7d6fa7960c33c0540f0c5070aa88fed049d2",
+    "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "target_file_bytes": 105896032,
+    "text_bytes": 83719936,
+    "inventory": {
+      "rust_areas": 216,
+      "cargo_manifests": 179,
+      "work_items": 3702
+    },
+    "registered_rust_components": 20,
+    "registered_bounded_paths": 88,
+    "accepted_full_scope_gates": 0,
+    "total_gates": 92,
+    "complete_components": 0,
+    "component_count": 23,
+    "gate_counts": {
+      "mapped": 0,
+      "built": 0,
+      "behavior": 0,
+      "identity": 0
+    },
+    "percentages": {
+      "accepted_full_scope_gates": 0.0,
+      "complete_components": 0.0,
+      "target_text_compared": 6.35233882644153,
+      "target_text_raw_equal": 5.934512420076384
+    },
+    "comparisons": {
+      "bytes": 5318174,
+      "raw_equal_bytes": 4968370,
+      "raw_equal_windows": 507,
+      "relocation_qualified_windows": 7885,
+      "windows": 7885,
+      "masked_bytes": 413413,
+      "non_relocation_bytes": 4904761
+    },
+    "dependency_comparisons": {
+      "compiler-builtins": {
+        "bytes": 2874,
+        "raw_equal_bytes": 2769,
+        "raw_equal_windows": 5,
+        "relocation_qualified_windows": 13,
+        "windows": 13,
+        "masked_bytes": 112,
+        "non_relocation_bytes": 2762
+      },
+      "native-libraries": {
+        "bytes": 5058182,
+        "raw_equal_bytes": 4721227,
+        "raw_equal_windows": 445,
+        "relocation_qualified_windows": 7266,
+        "windows": 7266,
+        "masked_bytes": 398769,
+        "non_relocation_bytes": 4659413
+      },
+      "rust-alloc": {
+        "bytes": 838,
+        "raw_equal_bytes": 759,
+        "raw_equal_windows": 0,
+        "relocation_qualified_windows": 9,
+        "windows": 9,
+        "masked_bytes": 84,
+        "non_relocation_bytes": 754
+      },
+      "rust-core": {
+        "bytes": 39873,
+        "raw_equal_bytes": 37344,
+        "raw_equal_windows": 5,
+        "relocation_qualified_windows": 112,
+        "windows": 112,
+        "masked_bytes": 2604,
+        "non_relocation_bytes": 37269
+      },
+      "rust-std": {
+        "bytes": 60556,
+        "raw_equal_bytes": 57583,
+        "raw_equal_windows": 16,
+        "relocation_qualified_windows": 174,
+        "windows": 174,
+        "masked_bytes": 3732,
+        "non_relocation_bytes": 56824
+      },
+      "vendored-crates": {
+        "bytes": 153433,
+        "raw_equal_bytes": 146270,
+        "raw_equal_windows": 34,
+        "relocation_qualified_windows": 309,
+        "windows": 309,
+        "masked_bytes": 8112,
+        "non_relocation_bytes": 145321
+      },
+      "zstandard": {
+        "bytes": 2418,
+        "raw_equal_bytes": 2418,
+        "raw_equal_windows": 2,
+        "relocation_qualified_windows": 2,
+        "windows": 2,
+        "masked_bytes": 0,
+        "non_relocation_bytes": 2418
+      }
+    },
+    "extent_mismatches": [
+      {
+        "id": "node115-socket2-keepalive-5c68520",
+        "target_bytes": 227,
+        "source_bytes": 418,
+        "credit": 0
+      },
+      {
+        "id": "node115-socket2-keepalive-5c68610",
+        "target_bytes": 227,
+        "source_bytes": 418,
+        "credit": 0
+      }
+    ],
+    "component_assessment": [
+      {
+        "id": "foundation",
+        "scope": "Time, logging, wallets, collections and shared runtime utilities",
+        "registered_bounded_paths": 27,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "serialization",
+        "scope": "Private bincode wire codecs and integer encodings",
+        "registered_bounded_paths": 8,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "storage",
+        "scope": "RocksDB wrappers, block readers and database lifecycle",
+        "registered_bounded_paths": 5,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "transport",
+        "scope": "TCP framing, LZ4, channels, rate limits and reconnects",
+        "registered_bounded_paths": 8,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "consensus",
+        "scope": "Votes, rounds, quorum certificates, validator sets and timers",
+        "registered_bounded_paths": 6,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "node-runtime",
+        "scope": "CLI, startup, gossip, stream services and process orchestration",
+        "registered_bounded_paths": 1,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "abci",
+        "scope": "Block application, state roots and checkpoint handoff",
+        "registered_bounded_paths": 0,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "action-wire",
+        "scope": "Action envelopes, signing payloads and delayed actions",
+        "registered_bounded_paths": 2,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "action-dispatch",
+        "scope": "Agent-created handler splits and central dispatch",
+        "registered_bounded_paths": 2,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "exchange",
+        "scope": "Trading orchestration, block hooks, deployment and ledger updates",
+        "registered_bounded_paths": 2,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "orderbook",
+        "scope": "Book storage, price/time priority and order lifecycle",
+        "registered_bounded_paths": 1,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "risk",
+        "scope": "Positions, margin, oracles, liquidations and spot balances",
+        "registered_bounded_paths": 7,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "assets",
+        "scope": "Price, size, notional and wei arithmetic plus asset metadata",
+        "registered_bounded_paths": 6,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "fees",
+        "scope": "Fee tiers, volume accounting and rebates",
+        "registered_bounded_paths": 4,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "vaults",
+        "scope": "Vault and subaccount accounting and permissions",
+        "registered_bounded_paths": 1,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "bridge",
+        "scope": "Deposit/withdrawal requests and cross-chain signing",
+        "registered_bounded_paths": 0,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "evm",
+        "scope": "EVM state, database adapters, transaction execution and hashing",
+        "registered_bounded_paths": 1,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "staking",
+        "scope": "Stake, validator membership and jailing",
+        "registered_bounded_paths": 2,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "dex-registry",
+        "scope": "DEX metadata and clearinghouse registry",
+        "registered_bounded_paths": 1,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "l1-shared",
+        "scope": "Agent, system-user, nonce, timing and other cross-cutting state",
+        "registered_bounded_paths": 0,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "info-api",
+        "scope": "Read-only info requests and position responses",
+        "registered_bounded_paths": 1,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "evm-rpc",
+        "scope": "JSON-RPC routing, EVM reads and transaction forwarding",
+        "registered_bounded_paths": 1,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      },
+      {
+        "id": "constants",
+        "scope": "Static network/build configuration and naming",
+        "registered_bounded_paths": 2,
+        "accepted_gates": {
+          "mapped": false,
+          "built": false,
+          "behavior": false,
+          "identity": false
+        },
+        "complete": false,
+        "whole_component_function_denominator": null,
+        "accepted_evidence": []
+      }
+    ],
+    "new_blst_window": {
+      "id": "node115-blst-portable-sha256-cfa",
+      "dependency": "native-libraries",
+      "target_start": 97648896,
+      "target_end": 97653268,
+      "bytes": 4372,
+      "raw_equal_bytes": 4363,
+      "raw_equal_windows": 0,
+      "relocation_qualified_windows": 1,
+      "windows": 1,
+      "masked_bytes": 12,
+      "non_relocation_bytes": 4360
+    },
+    "pinned_byte_evidence_files": 22,
+    "readme_audit": {
+      "sha256": "123c4b42f0807f870e85c9d8ac9337f0403355e1dcc074f7533a40f3fd76bf12",
+      "inventory_matches_tracked_tree": true,
+      "completion_fraction_rows_checked": 8,
+      "comparison_fraction_rows_checked": 8,
+      "full_scope_gate_percent": 0.0
+    }
+  },
+  "delta": {
+    "rust_areas": 116,
+    "cargo_manifests": 116,
+    "research_work_items": 462,
+    "text_bytes_compared": 4372,
+    "raw_equal_bytes": 4363,
+    "compared_percentage_points": 0.005222173127318541,
+    "accepted_gates": 0
+  },
+  "limitations": [
+    "The pending snapshot is not a merged-main claim.",
+    "Rust paths, manifests, work items and PR counts are inventories, not completion percentages.",
+    "All registered aligned comparisons are public dependencies; first-party component comparison totals remain zero.",
+    "Full component function/byte denominators, complete dependency/private-fork closure and an integrated source-built node remain unestablished.",
+    "No captured native code, networking or chain action is executed by this audit."
+  ]
+}
