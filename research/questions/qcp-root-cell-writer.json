@@ -1,0 +1,35 @@
+{
+  "question_id": "qcp-root-cell-writer",
+  "title": "Identify the selected fallback writer for the root digest cell",
+  "target": {
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "component": "storage",
+  "work_type": "discovery",
+  "scope": {
+    "question": "Which selected fallback helper writes the root-digest cell reached by the node #115 selector, and which stores are directly evidenced?",
+    "include": ["The fallback target and its authenticated relocation", "The selected destination and exact store offsets"],
+    "exclude": ["All other writers and readers", "Symbolic names for the stored qwords", "Synchronization and runtime CPUID values"]
+  },
+  "readiness": "in-progress",
+  "evidence_status": "unreviewed",
+  "prior_attempts": [
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5584", "relation": "open selector packet that leaves the fallback writer unresolved"},
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5591", "relation": "open selected-writer packet with three store offsets and bounded unknowns"}
+  ],
+  "remaining_gap": "The selected writer packet is open and does not establish exclusivity, synchronization, or the meaning of the stored words. Its result must not be treated as a complete selector-cell contract.",
+  "dependencies": [
+    {"question_id": "qcp-root-selector", "kind": "hard", "contract": "selected fallback target and destination cell", "condition": "The selector-to-fallback edge and destination relocation are reviewed together."}
+  ],
+  "downstream_consumer": "A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.",
+  "acceptance_requirements": [
+    "Verify the writer target, relocation destination, bounded store bytes, and target digest.",
+    "Check competing references or clearly retain non-exclusivity as an unknown.",
+    "Do not assign field meanings or a concurrency contract without evidence."
+  ],
+  "required_capabilities": ["Static x86-64 instruction and relocation analysis", "Negative-control evidence verification"],
+  "evidence_review": [],
+  "linked_issue": {"url": "https://github.com/lalalune/hyperliquid-source/issues/3923", "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"},
+  "pilot_issue": "https://github.com/lalalune/hyperliquid-source/issues/5391"
+}

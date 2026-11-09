@@ -1,0 +1,32 @@
+case	input_summary	evaluator	verdict
+hit-first	records=2 suffix_len=3 page=0	ok index=0	match
+hit-last	records=3 suffix_len=3 page=0	ok index=2	match
+hit-page7	records=2 suffix_len=3 page=7	ok index=70001	match
+miss-short	records=1 suffix_len=3 page=0	err cap=3 ptr=0x10100000 len=3	match
+miss-empty-table	records=0 suffix_len=3 page=0	err cap=3 ptr=0x10100000 len=3	match
+empty-suffix-hit-zero-len-record	records=2 suffix_len=0 page=0	ok index=1	match
+empty-suffix-miss	records=1 suffix_len=0 page=0	err cap=0 ptr=0x1 len=0	match
+decoy-same-length-different-bytes	records=2 suffix_len=3 page=0	ok index=1	match
+decoy-same-bytes-different-length-field	records=2 suffix_len=3 page=0	ok index=1	match
+duplicate-names-first-wins	records=2 suffix_len=3 page=0	ok index=0	match
+count-zero-page-overflow-ignored	records=0 suffix_len=3 page=1844674407370956	err cap=3 ptr=0x10100000 len=3	match
+mul-overflow-hit-attempt	records=1 suffix_len=3 page=1844674407370956	trap:panic_mul	match
+mul-overflow-miss-attempt	records=1 suffix_len=3 page=1844674407370956	trap:panic_mul	match
+page-max-hit	records=2 suffix_len=3 page=1844674407370955	ok index=18446744073709550001	match
+page-max-miss-err-copy	records=1 suffix_len=4 page=1844674407370955	err cap=4 ptr=0x10100000 len=4	match
+alloc-fail-miss	records=1 suffix_len=4 page=0	trap:alloc_error	match
+alloc-fail-hit-unaffected	records=1 suffix_len=3 page=0	ok index=0	match
+huge-len-miss-alloc-error	records=0 suffix_len=9223372036854775808 page=0	trap:alloc_error	match
+huge-len-after-scan	records=2 suffix_len=9223372036854775808 page=0	trap:alloc_error	match
+len-just-below-2^63-alloc-fail	records=0 suffix_len=9223372036854775807 page=0	trap:alloc_error	match
+index-wrap-guard-fires-before-record-1616	records=1617 suffix_len=5 page=1844674407370955	trap:panic_add	match
+index-wrap-last-reachable-record-1615	records=1617 suffix_len=5 page=1844674407370955	ok index=18446744073709551615	match
+index-wrap-shorter-table-misses	records=1616 suffix_len=5 page=1844674407370955	err cap=5 ptr=0x10100000 len=5	match
+index-wrap-no-match-table-1616-traps	records=1616 suffix_len=5 page=1844674407370955	err cap=5 ptr=0x10100000 len=5	match
+case-sensitive	records=1 suffix_len=3 page=0	err cap=3 ptr=0x10100000 len=3	match
+nine-char-suffix-hit	records=1 suffix_len=9 page=0	ok index=0	match
+long-name-300	records=1 suffix_len=300 page=0	ok index=0	match
+long-name-300-miss-last-byte	records=1 suffix_len=300 page=0	err cap=300 ptr=0x10100000 len=300	match
+record-junk-fields-ignored	records=1 suffix_len=3 page=3	ok index=30000	match
+single-record-hit	records=1 suffix_len=1 page=0	ok index=0	match
+single-record-miss	records=1 suffix_len=1 page=0	err cap=1 ptr=0x10100000 len=1	match

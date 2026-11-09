@@ -1,0 +1,35 @@
+object	offset	type	meaning	first access
+state	0x00	u32	set tag: the key set is walked only when it is 2	0x44af376
+state	0x08	ptr	key set B-tree root	0x44af392
+state	0x10	u64	key set height	0x44af3b1
+state	0x18	u64	key set length: the number of members visited	0x44af396
+state	0x50	u64	depositor map word: capacity of the VecDeque, or 0x8000000000000000 for a B-tree	0x44af6d7
+state	0x58	ptr	deque buffer pointer, or B-tree root	0x44af6f8
+state	0x60	u64	deque head, or B-tree height	0x44af705
+state	0x68	u64	deque length	0x44af7bd
+state	0x70	f64	rate applied to the remainder to size the leader credit	0x44afe41
+state	0x8c	[u8;20]	vault key: amount base, ledger balance key, debit key	0x44af35c
+state	0xa0	[u8;20]	leader key: receives the leader credit	0x44afec6
+set node	0x00	ptr	parent	0x44afe...
+set node	0x08 + 20*i	[u8;20]	member key i (11 slots)	0x44af57e
+set node	0xe4	u16	index in parent	0x44af4bf
+set node	0xe6	u16	length	0x44af3de
+set node	0xe8 + 8*i	ptr	edge i (12 slots)	0x44af420
+map node	0x30*i	value	f64 at +0, i64 units at +8, i64 slot3 at +0x10	0x44af7ee
+map node	0x210	ptr	parent (never read by the body)	
+map node	0x218 + 20*i	[u8;20]	key i (11 slots)	0x44af715
+map node	0x2f6	u16	length	0x44af71c
+map node	0x2f8 + 8*i	ptr	edge i	0x44af79e
+deque entry	0x00	[u8;20]	key (72 byte stride)	0x45579c1
+deque entry	0x18	value	f64 at +0x18, i64 units at +0x20, i64 slot3 at +0x28	0x44af7db
+ledger	0x4a8	i64	running counter the body debits and credits	0x44afbc3
+result	0x00	u64	0x8000000000000005 when a split was made, 0x8000000000000019 for the empty variant	0x44af9b0
+result	0x08	f64 x2	limit / 1e6, leader credit / 1e6	0x44b008e
+result	0x18	f64 x2	remaining gap / 1e6, share units / 1e6	0x44b0095
+result	0x28	f64	kept amount / 1e6	0x44b009c
+result	0x30	[u8;20]	vault key copy	0x44b00ab
+result	0x44	[u8;20]	depositor key copy	0x44b0080
+result	0xb0	i64	kept amount	0x44b00bd
+result	0xb8	u64	Option tag of the leader record: 0x8000000000000007 present, 0x8000000000000019 absent	0x44b00c5
+result	0xc0	f64	leader credit / 1e6	0x44b00cd
+result	0xc8	[u8;20]	leader key copy (written only when the leader record is present)	0x44b00df

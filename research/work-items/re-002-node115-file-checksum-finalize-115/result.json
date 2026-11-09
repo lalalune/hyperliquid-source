@@ -1,0 +1,103 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "function": {
+    "start": "0x61cd1c0",
+    "end": "0x61cd23f",
+    "body_sha256": "d3e24d9354044c97cd94d122250a157da9131c7ccd36d49330e912d3fd1c7007",
+    "fde": [
+      "0x61cd1c0",
+      "0x61cd23f"
+    ],
+    "census_symbol": "rocksdb::FileChecksumGenCrc32c::Finalize",
+    "census_body_sha256": "d3e24d9354044c97cd94d122250a157da9131c7ccd36d49330e912d3fd1c7007"
+  },
+  "layout": {
+    "vtable_address_point": "0x64d7970",
+    "vtable_slot": 3,
+    "vptr": "+0x0",
+    "crc_accumulator_u32": "+0x8",
+    "checksum_string": "+0x10 (ptr +0x10, length +0x18, SSO buffer/capacity +0x20)",
+    "object_size": "0x30"
+  },
+  "semantics": "append BE32(crc at +0x8) to the std::string at +0x10; throw length_error when len > max_size - 4; no Mask/Unmask rotate or add",
+  "append_call": {
+    "plt": [
+      "0x63f0f40",
+      "0x63f0f50"
+    ],
+    "plt_sha256": "cd3467bf6a5ec1c22a3f5ddb23a51ef38bbbd70e49d6efdd60e8ab01d762783f",
+    "target": "std::__cxx11::basic_string::_M_append(const char*, size_t)",
+    "args": "this = object+0x10, data = stack word, n = 4"
+  },
+  "update": {
+    "start": "0x61cd1a0",
+    "end": "0x61cd1b5",
+    "body_sha256": "b5cd54f4dd34dc2b88b9ca44b9a8d368b816ca1bd9e2767e7899b99d19c82910",
+    "semantics": "crc at +0x8 = extend(crc at +0x8, data, n) through the PLT stub",
+    "extend_stub": [
+      "0x61c25f0",
+      "0x61c25fa"
+    ],
+    "extend_stub_sha256": "f6d8b461bc82431a3f10c54b3b509a456b18ad340dff570220cfbaf07fa9ae3d",
+    "fnptr_slot": "0x6508908",
+    "extend_target": "0x61c21d0 (rocksdb::crc32c::ExtendImpl<Slow_CRC32>)"
+  },
+  "length_guard": {
+    "max_size": "0x3fffffffffffffff",
+    "throws_when": "(max_size - len) <= 3",
+    "throw_target": "0x63f0de0 (__throw_length_error)"
+  },
+  "check_values": {
+    "crc32c_vector_empty_prior": {
+      "crc": "0xe3069283",
+      "prior_hex": "",
+      "out_hex": "e3069283",
+      "note": "BE32 of the known CRC32C vector for b\"123456789\""
+    },
+    "zero_crc_abc_prior": {
+      "crc": "0x00000000",
+      "prior_hex": "616263",
+      "out_hex": "61626300000000",
+      "note": "four zero bytes appended after the prior bytes"
+    },
+    "mask_constant_empty_prior": {
+      "crc": "0xa282ead8",
+      "prior_hex": "",
+      "out_hex": "a282ead8",
+      "note": "the Mask constant itself, byte-swapped only"
+    },
+    "prefix_12345678": {
+      "crc": "0x12345678",
+      "prior_hex": "707265666978",
+      "out_hex": "70726566697812345678"
+    },
+    "end_to_end_update_then_finalize": {
+      "data_hex": "313233343536373839",
+      "crc": "0xe3069283",
+      "out_hex": "e3069283",
+      "note": "Update accumulates extend(0, data) = 0xe3069283; Finalize then appends its big-endian form"
+    },
+    "long_prior_1024_ab": {
+      "crc": "0x12345678",
+      "prior": "1024 bytes of 0xab",
+      "out_tail_hex": "12345678",
+      "note": "only the appended tail differs from the prior"
+    },
+    "guard_boundary_allowed": {
+      "prior_len": "0x3ffffffffffffffb",
+      "allowed": true,
+      "note": "append runs when length == max_size - 4"
+    },
+    "guard_boundary_throws": {
+      "prior_len": "0x3ffffffffffffffc",
+      "allowed": false,
+      "note": "append throws when length == max_size - 3"
+    }
+  },
+  "cases": {
+    "count": 2400,
+    "seed": 20261109,
+    "mismatches_vs_reference": 0,
+    "aggregate_sha256": "29d1743475f724c1ddafe6ff4a03cf0af2525b888d9789c0ce5884e0c3626d2f"
+  }
+}

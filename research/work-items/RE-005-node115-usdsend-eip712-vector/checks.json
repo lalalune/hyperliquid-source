@@ -1,0 +1,41 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "environment": {
+    "platform": "macOS arm64",
+    "python": "3.14.3",
+    "disassembler": "Apple LLVM version 21.0.0"
+  },
+  "captured_binary_execution": false,
+  "results": [
+    {
+      "command": "python3 -m unittest discover -s tests -p test_action_wire_usd_send_digest_115.py -v",
+      "result": "passed",
+      "tests": 7
+    },
+    {
+      "command": "make verify",
+      "result": "passed",
+      "detail": "artifacts/signatures, 32 imported files, all packet manifests verified"
+    },
+    {
+      "command": "make catalogue-check",
+      "result": "passed"
+    },
+    {
+      "command": "make reproduce",
+      "result": "passed",
+      "detail": "node #115 and visor inventories reproduced; generated work/reproduced outputs removed after capture"
+    },
+    {
+      "command": "make doctor",
+      "result": "failed_environment_check",
+      "exit_code": 2,
+      "detail": "GNU objdump and readelf unavailable; Apple LLVM objdump 21.0.0 was available and used for the retained static disassembly. No Ghidra was installed."
+    },
+    {
+      "command": "make test",
+      "result": "not_run",
+      "detail": "full flat discovery includes captured-instruction Unicorn emulation tests; this packet stayed static-only. The focused seven-test module above was run."
+    }
+  ]
+}

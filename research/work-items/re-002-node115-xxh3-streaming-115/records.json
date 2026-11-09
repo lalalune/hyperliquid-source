@@ -1,0 +1,62 @@
+{
+ "node": "node #115, artifact SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "component": "XXH3_64bits streaming API (vendored xxHash inside librocksdb-sys; RE-002 build provenance)",
+ "identity": {
+  "createState": "librocksdb-sys 0.11.0+8.1.1: ROCKSDB_XXH3_createState, census id node115-vendor-61dc410, FDE 0x61dc410..0x61dc44b, body SHA-256 27bbf35050058e218a037e0dc64b96af74f3c038bdd3e0902bf1eafa027c1231",
+  "freeState": "librocksdb-sys 0.11.0+8.1.1: ROCKSDB_XXH3_freeState, census id node115-vendor-61dc450, FDE 0x61dc450..0x61dc473, body SHA-256 90c8281d910230476a7dc60f62eb7a910e269dcf5f2465e1ae66d2cf5708e439",
+  "reset": "librocksdb-sys 0.11.0+8.1.1: ROCKSDB_XXH3_64bits_reset, census id node115-vendor-61dc480, FDE 0x61dc480..0x61dc4fe, body SHA-256 b933244dddd1c752b3119f444409e1d42c40844c6ccabb15da68f8a0d65aaf31",
+  "update": "librocksdb-sys 0.11.0+8.1.1: ROCKSDB_XXH3_64bits_update, census id node115-vendor-61dc500, FDE 0x61dc500..0x61de25e, body SHA-256 5df28d5e46b63835c3e0ed20593ad84bd1399a7969f62e90e8f8ff59329f33a9",
+  "digest": "librocksdb-sys 0.11.0+8.1.1: ROCKSDB_XXH3_64bits_digest, census id node115-vendor-61de260, FDE 0x61de260..0x61deaac, body SHA-256 0345f58bd469dc522652275379572fa1d220752e0b059810a5e9c93d1d15b415",
+  "default_secret": "192-byte published xxHash kSecret at .rodata 0x97ec80, file offset 0x97ec80, SHA-256 2cf2f88bf9b71283059b6df53e5bcde20adbfd9e8d6ce2c1ab106262bb283bed; byte-compared against the published constant"
+ },
+ "state_layout": {
+  "size_bytes": 640,
+  "alignment_bytes": 64,
+  "+0x00": "acc[8] (u64); reset to the eight primes",
+  "+0x40": "inline secret copy (192 B); used when customSecret is NULL",
+  "+0x100": "buffer[256]; the last <=256 input bytes",
+  "+0x200": "bufferedSize (u32)",
+  "+0x204": "useSeed flag (u32); 0 -> digest uses withSecret, != 0 -> digest uses withSeed",
+  "+0x208": "nbStripesSoFar (u64); stripe index in the current block",
+  "+0x210": "totalLen (u64)",
+  "+0x218": "nbStripesPerBlock (u64) = 16",
+  "+0x220": "secretLimit (u64) = 128 (= secretSize - 64)",
+  "+0x228": "seed (u64) = 0",
+  "+0x230": "unknown (u64); never touched by these five functions",
+  "+0x238": "customSecret pointer; kSecret after reset; NULL -> state+0x40",
+  "+0x240..0x280": "unknown (64 B); never touched by these five functions"
+ },
+ "model": {
+  "createState": "malloc(0x280); on NULL return NULL; otherwise round the pointer up to the next 64-byte boundary (always advancing by 1..64 bytes), store the delta byte at -1(%rax), zero the seed field at +0x228, return the aligned pointer. Nothing else is initialised.",
+  "freeState": "NULL -> return 0; otherwise free(ptr - byte[-1]) and return 0.",
+  "reset": "NULL -> return 1 (XXH_ERROR); otherwise totalLen = 0, bufferedSize = 0, useSeed flag = 0, nbStripesSoFar = 0, acc = {0xC2B2AE3D, 0x9E3779B185EBCA87, 0xC2B2AE3D27D4EB4F, 0x165667B19E3779F9, 0x85EBCA77C2B2AE63, 0x0000000085EBCA77, 0x27D4EB2F165667C5, 0x000000009E3779B1}, seed = 0, customSecret = kSecret (0x97ec80), nbStripesPerBlock = 16, secretLimit = 128; return 0 (XXH_OK).",
+  "update": "NULL input -> return 0 with no state change (the length is not even read). Otherwise totalLen += len; if bufferedSize + len <= 256 the input is only appended to the buffer; if the buffer is non-empty it is filled to 256 bytes and consumed as 4 stripes; then full 64-byte stripes are consumed from the input in blocks of 16 (secret restarts at the block base, scrambleAcc after each block); the last 64 bytes of the consumed region are preserved at buffer[192..256) and the remaining tail is copied to buffer[0..), bufferedSize = tail length; acc is written back; return 0.",
+  "digest": "totalLen <= 240 -> tail-call withSecret(buffer, totalLen, secret, 192) when the useSeed flag is 0, or withSeed(buffer, totalLen, seed) when it is not; secret is customSecret, or state+0x40 when customSecret is NULL. totalLen > 240 -> consume the remaining buffered stripes into a copy of acc (scrambling at the block boundary), accumulate the final 64-byte stripe with the secret window at secretLimit - 7, then mergeAccs (secret + 11) plus totalLen * PRIME64_1, then the XXH3 avalanche.",
+  "accumulate_512": "Per 64-bit lane i: key = data[i] ^ secret[i]; acc[i] += (key & 0xFFFFFFFF) * (key >> 32) + data[i ^ 1]. Transliterated op by op from the AVX2 loop (pxor / pshufd $0x31 / pmuludq / pshufd $0x4e / paddq); a literal AVX2-op replay agrees with the scalar form on 200 random stripes.",
+  "scrambleAcc": "acc[i] = (acc[i] ^ (acc[i] >> 47) ^ secret[i]) * 0x9E3779B1, secret window at secret + secretLimit (128). Confirmed in three places: update (0x61dc735), digest (0x61de6b3), one-shot withSecret (0x61dbb8b). The constant is the broadcast table at .rodata 0x4562c0, verified.",
+  "mergeAccs": "Four pairs: (acc[2i] ^ secret[11+16i]) * (acc[2i+1] ^ secret[19+16i]) as a 128-bit product folded low ^ high, summed, plus totalLen * PRIME64_1, then the XXH3 avalanche (h ^= h>>37; h *= 0x165667919E3779F9; h ^= h>>32).",
+  "chunking_invariance": "The digest is provably invariant to how the input is split across update calls: the binary's epilogue leaves a tail of up to 256 bytes, while the public rule consumes (len-1)//64 stripes and buffers a 1..64 byte tail; both splits accumulate the same stripes with the same secret offsets and the same final 64 bytes, and digest path B continues the stripe sequence from nbStripesSoFar. The model does not claim the binary uses the (len-1)//64 rule; it implements the binary's own buffer discipline and checks it against the one-shot reference over 2,400 chunkings.",
+  "short_path_reference": "The digest's totalLen <= 240 path is checked against the one-shot reference in tools/xxh3_streaming115.py, which is itself pinned to the withSecret/withSeed disassembly (see the sibling packet re-002-node115-xxh3-with-secret-seed-115 for the 17..128 and 129..240 branches, including the len_129to240 helper at 0x61d7dc0)."
+ },
+ "census": {
+  "direct_calls": "Whole-file E8 scan found the call sites listed in callers.tsv: the five functions are called from rocksdb::log::Reader::ReadPhysicalRecord (census node115-vendor-5f01a30), ReadRecord (census node115-vendor-5f01f10) and ~Reader D1 (census node115-vendor-5f03500). No lea sites were found; the binary is stripped, so no exported-symbol entry can be cited.",
+  "call_sites_note": "Record sites only; no control-flow order is asserted (in ReadPhysicalRecord the createState call site address follows the digest site)."
+ },
+ "return_value": "createState: the aligned state pointer, or NULL on malloc failure. freeState: 0 always. reset: 0 (XXH_OK) or 1 (XXH_ERROR) on a NULL state. update: 0 always. digest: the 64-bit hash in %rax.",
+ "side_effects": "createState allocates 0x280 bytes. reset and update write only the state fields listed in state_layout. digest writes nothing (it copies acc to the stack on the long path). None of the five functions reads outside [input, input+len), the state, and the secret windows listed in the model.",
+ "tests": {
+  "cases": "2,400 deterministic cases: streaming digest vs the independent one-shot reference over varied chunkings (single, halves, thirds, byte-by-byte, 64 B, 256 B, random splits; boundary lengths 0, 1, 15, 16, 17, 31, 32, 33, 63, 64, 65, 127, 128, 129, 191, 192, 239, 240, 241, 255, 256, 257, 319, 320, 1023, 1024, 1025, 2048, 4096) plus seeded-state digests for totalLen <= 240: 0 mismatches. See result.json",
+  "published_anchors": "XXH3_64bits(b'', 0) = 0x2d06800538d394c2 and XXH3_64bits(b'a', 0) = 0xe6c632b61e964e1f hold through the streaming API (createState + reset + digest, no updates)",
+  "unit_tests": "tests/test_xxh3_streaming115.py, 13 tests (published anchors, createState alignment, reset primes, NULL update no-op, binary grounding, chunking invariance, bufferedSize after update, seeded short digest, secret-window sensitivity, AVX2 replay vs scalar, long inputs vs one-shot)"
+ },
+ "unknowns": [
+  "The +0x230 field and the +0x240..0x280 tail are never touched by these five functions; their purpose is not established here (they are part of the 640-byte state the public xxh3.h layout reserves, and may be written by reset_withSecret / reset_withSeed, which are out of scope).",
+  "reset_withSecret / reset_withSeed (custom-secret derivation) are out of scope; the seeded digest cases cover only a simulated seeded state (useSeed flag set, seed at +0x228).",
+  "Whether any Rust caller besides the log Reader uses this API, and what seeds or custom secrets are passed, is not established from the binary.",
+  "The withSecret/withSeed >240 paths use the hashLong helpers (0x61d9090 for withSeed); they are delegation targets only and their bodies are not reconstructed here."
+ ],
+ "window": {
+  "extraction": ".text bodies at file offset VA-0x1000 (the ELF section headers claim VA-0x10000, which does not match the hash-verified bytes); .rodata tables at file offset VA (0x97ec80, 0x4562c0). Both mappings are verified by hash/byte comparison, not by the headers",
+  "objdump": "Whole-function excerpts in xxh3_streaming115.objdump.txt, GNU objdump 2.42 over the hash-verified body slices (objdump -D -b binary -m i386:x86-64 --adjust-vma=<start>). The '<.data>:' label is binary-mode section naming, not a symbol"
+ }
+}

@@ -1,0 +1,8 @@
+mutant	address	reason
+immediate	0x3beba40	stores zero into the unused back handle of the iterator; a forward step never reads it
+displacement	0x3bebb2b	copies row bytes 0x28..0x38 instead of 0x20..0x30 into the stack row copy; the per-entry body reads only +0, +4, +8, +0x10 and +0x38
+displacement	0x3bebc31	address computed into rdx on the path where the entry pointer is null; rdx is dead before the exit
+displacement	0x37c5be7	zeroes bytes 0x18..0x28 of the iterator instead of 0x10..0x20; the front handle words are rewritten at the end of the step and the back handle is never read
+immediate	0x37c5c25	threshold 8 versus 9 on a path that is entered only with height % 8 != 0, so the height is never exactly 8
+immediate	0x37c5d08	threshold 8 versus 9 on a path that is entered only with steps % 8 != 0, so the count is never exactly 8
+displacement	0x37c5d86	stores the zero height at +0x18 instead of +0x10; +0x10 already holds zero on every path that reaches the store and +0x18 is rewritten next

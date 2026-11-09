@@ -1,0 +1,78 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "records": [
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "name": "bijective_hash2x64",
+      "address": "0x61c3e10",
+      "end": "0x61c3f55",
+      "body_sha256": "d586664de83493cc5a48eefd3bcef95b10a3ab433b32699334c68671b8cb0864",
+      "identity": "_ZN7rocksdb17BijectiveHash2x64EmmmPmS0_ (librocksdb-sys 0.11.0+8.1.1, vendor census id node115-vendor-61c3e10)",
+      "contract": "bijective_hash2x64(a: u64, b: u64, c: u64, out1: *mut u64, out2: *mut u64) -> ()",
+      "semantics": "pure arithmetic over three u64 inputs: s = (b^a)^(K_SEED-c); 32-bit multiply chains build a packed word (plus the 0x03c0... round constant); a second mix v folds in (K_MIX+c)^a through a byte-swap; two further mixes X and Y are avalanched into out2 and out1; no calls, no other stores"
+    },
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "name": "seed0_adapter",
+      "address": "0x61c3f60",
+      "end": "0x61c3f71",
+      "body_sha256": "8eb9df37604f72f0b72b1b1af72232ed0875460ff8deafd4f46fd93ca8e3dc55",
+      "identity": "seed0_adapter (no vendor-census record; pinned by FDE extent and disassembly only)",
+      "contract": "seed0_adapter(a: u64, b: u64, out1: *mut u64, out2: *mut u64) -> ()",
+      "semantics": "moves out1/out2 into place, zeroes the third input, tail-jumps to bijective_hash2x64"
+    },
+    {
+      "kind": "immediate",
+      "label": "K_SEED",
+      "address": "0x61c3e1e",
+      "value": "0x59973f0033362349",
+      "observation": "the K_SEED constant folded at 0x61c3e1e"
+    },
+    {
+      "kind": "immediate",
+      "label": "PACK_ADD",
+      "address": "0x61c3e6d",
+      "value": "0x03c0000000000000",
+      "observation": "the PACK_ADD constant folded at 0x61c3e6d"
+    },
+    {
+      "kind": "immediate",
+      "label": "K_MIX",
+      "address": "0x61c3e88",
+      "value": "0xc202797692d63d58",
+      "observation": "the K_MIX constant folded at 0x61c3e88"
+    },
+    {
+      "kind": "immediate",
+      "label": "P64_2",
+      "address": "0x61c3ee2",
+      "value": "0xc2b2ae3d27d4eb4f",
+      "observation": "the P64_2 constant folded at 0x61c3ee2"
+    },
+    {
+      "kind": "immediate",
+      "label": "AVALANCHE_MULT",
+      "address": "0x61c3f14",
+      "value": "0x165667919e3779f9",
+      "observation": "the AVALANCHE_MULT constant folded at 0x61c3f14"
+    },
+    {
+      "kind": "caller",
+      "function": "bijective_hash2x64",
+      "site": "0x61c3f6c",
+      "caller_fde": "0x61c3f60",
+      "target": "0x61c3e10",
+      "observation": "seed-0 adapter tail-jump (third input zeroed)"
+    },
+    {
+      "kind": "caller",
+      "function": "seed0_adapter",
+      "site": "0x61b02a5",
+      "caller_fde": "0x61b0260",
+      "target": "0x61c3f60",
+      "observation": "direct E8 call; same FDE also calls both Hash2x64 wrappers"
+    }
+  ]
+}

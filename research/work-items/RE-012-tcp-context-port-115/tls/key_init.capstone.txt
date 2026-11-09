@@ -1,0 +1,52 @@
+5ca0e20: 55                               push     rbp
+5ca0e21: 4889e5                           mov      rbp, rsp
+5ca0e24: 53                               push     rbx
+5ca0e25: 4883ec18                         sub      rsp, 0x18
+5ca0e29: 488b3d78df8500                   mov      rdi, qword ptr [rip + 0x85df78]
+5ca0e30: 4885ff                           test     rdi, rdi
+5ca0e33: 7569                             jne      0x5ca0e9e
+5ca0e35: 488b3574df8500                   mov      rsi, qword ptr [rip + 0x85df74]
+5ca0e3c: c745f000000000                   mov      dword ptr [rbp - 0x10], 0
+5ca0e43: 488d7df0                         lea      rdi, [rbp - 0x10]
+5ca0e47: ff156bbb8400                     call     qword ptr [rip + 0x84bb6b]
+5ca0e4d: 85c0                             test     eax, eax
+5ca0e4f: 755f                             jne      0x5ca0eb0
+5ca0e51: 8b5df0                           mov      ebx, dword ptr [rbp - 0x10]
+5ca0e54: 85db                             test     ebx, ebx
+5ca0e56: 752b                             jne      0x5ca0e83
+5ca0e58: 488b3551df8500                   mov      rsi, qword ptr [rip + 0x85df51]
+5ca0e5f: c745f000000000                   mov      dword ptr [rbp - 0x10], 0
+5ca0e66: 488d7df0                         lea      rdi, [rbp - 0x10]
+5ca0e6a: ff1548bb8400                     call     qword ptr [rip + 0x84bb48]
+5ca0e70: 85c0                             test     eax, eax
+5ca0e72: 753c                             jne      0x5ca0eb0
+5ca0e74: 8b5df0                           mov      ebx, dword ptr [rbp - 0x10]
+5ca0e77: 31ff                             xor      edi, edi
+5ca0e79: ff1541bb8400                     call     qword ptr [rip + 0x84bb41]
+5ca0e7f: 85db                             test     ebx, ebx
+5ca0e81: 743f                             je       0x5ca0ec2
+5ca0e83: 89df                             mov      edi, ebx
+5ca0e85: 31c0                             xor      eax, eax
+5ca0e87: f0480fb13d18df8500               lock cmpxchg qword ptr [rip + 0x85df18], rdi
+5ca0e90: 740c                             je       0x5ca0e9e
+5ca0e92: 4889c3                           mov      rbx, rax
+5ca0e95: ff1525bb8400                     call     qword ptr [rip + 0x84bb25]
+5ca0e9b: 4889df                           mov      rdi, rbx
+5ca0e9e: be01000000                       mov      esi, 1
+5ca0ea3: ff151fbb8400                     call     qword ptr [rip + 0x84bb1f]
+5ca0ea9: 4883c418                         add      rsp, 0x18
+5ca0ead: 5b                               pop      rbx
+5ca0eae: 5d                               pop      rbp
+5ca0eaf: c3                               ret      
+5ca0eb0: 488d353890cafa                   lea      rsi, [rip - 0x5356fc8]
+5ca0eb7: 488d7df7                         lea      rdi, [rbp - 9]
+5ca0ebb: ba5f000000                       mov      edx, 0x5f
+5ca0ec0: eb10                             jmp      0x5ca0ed2
+5ca0ec2: 488d359184cafa                   lea      rsi, [rip - 0x5357b6f]
+5ca0ec9: 488d7df7                         lea      rdi, [rbp - 9]
+5ca0ecd: ba9b000000                       mov      edx, 0x9b
+5ca0ed2: e889c60000                       call     0x5cad560
+5ca0ed7: 488945e8                         mov      qword ptr [rbp - 0x18], rax
+5ca0edb: 488d7de8                         lea      rdi, [rbp - 0x18]
+5ca0edf: e80c23fdff                       call     0x5c731f0
+5ca0ee4: ff15fef38300                     call     qword ptr [rip + 0x83f3fe]

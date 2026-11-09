@@ -1,0 +1,15 @@
+function	branch	condition	dispatch_site	target_or_effect	scope
+hashlong_64b_default	full_blocks	nbBlocks = (len-1) >> 10 > 0	0x61d8568	16 stripes per block (1024 bytes), secret window sliding 8 bytes per stripe, scrambleAcc with secret+128 after each block	modelled
+hashlong_64b_default	remaining_stripes	((len-1) & 0x3ff) >> 6 > 0	0x61d8780	stripes from the block boundary, secret restarting at kSecret + 0	modelled
+hashlong_64b_default	last_stripe	len > 240 (always)	0x61d8882	accumulate_512 over input[len-64..len) against secret+121	modelled
+hashlong_64b_default	merge	len > 240 (always)	0x61d8911	mergeAcc(acc, secret+11, len * PRIME64_1), avalanched; len*PRIME64_1 formed by imul at 0x61d89bc; avalanche at 0x61d8a13	modelled
+hashlong_64b_withSeed	seed_zero	seed == 0	0x61d90bc	default path (same block loop, remaining-stripes loop and merge immediates as the default helper)	modelled
+hashlong_64b_withSeed	seed_nonzero	seed != 0	0x61d9598	builds a 192-byte custom secret at rsp+0x40 (word 2i += seed, word 2i+1 -= seed), then the identical loop against that secret	modelled
+hashlong_64b_withSeed	no_blocks_seed0	nbBlocks == 0 and seed == 0	0x61d90c8	cold block at 0x61d9b58 re-loads INIT_ACC and jumps to the remaining-stripes entry 0x61d930a	modelled
+hashlong_64b_withSeed	no_blocks_seed	nbBlocks == 0 and seed != 0	0x61d967e	cold block at 0x61d9b88 re-loads INIT_ACC and jumps to the remaining-stripes entry 0x61d98ba	modelled
+hashlong_64b_withSeed	last_stripe_seed_nonzero	seed != 0, len > 240 (always)	0x61d99b2	accumulate_512 over input[len-64..len) against the custom secret + 121 (stack offsets 0xb9/0xc9/0xd9/0xe9); merge words loaded from the stack secret at secret+11..67	modelled
+64bits	len_gt_240	len > 240	0x61db6c9	cmp $0xf0, jbe 0x61db8c0 (len_129to240), fall-through jmp 0x61d8510 at 0x61db6d6 (hashLong_64b_default)	out of scope
+64bits_withSeed	len_gt_240	len > 240	0x61dc141	cmp $0xf0, jbe 0x61dc378 (len_129to240), fall-through jmp 0x61d9090 at 0x61dc14e (hashLong_64b_withSeed)	out of scope
+64bits_withSecret	len_gt_240	len > 240	0x61db9ff	inline SIMD hashLong at 0x61db9ff (does not call 0x61d8510 or 0x61d9090; it runs against a caller-supplied secret)	out of scope
+64bits	len_le_240	len <= 240	0x61db654	short branches (0..16) and len_129to240 helper at 0x61d7dc0, modelled in PR #5449 (short branches) / out of scope (0x61d7dc0)	out of scope
+64bits_withSeed	len_le_240	len <= 240	0x61dc0c7	short branches (0..16) and len_129to240 helper at 0x61d7dc0, modelled in PR #5449 (short branches) / out of scope (0x61d7dc0)	out of scope

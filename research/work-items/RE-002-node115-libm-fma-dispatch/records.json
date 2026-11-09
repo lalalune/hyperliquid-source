@@ -1,0 +1,90 @@
+{
+  "captured_code_executed": false,
+  "census": {
+    "fma_fallback": {
+      "bytes": 1097,
+      "range": "0x63f0230..0x63f0679",
+      "sha256": "ae0cab7ee1c4961b1f732a5ec1e26857cd41dd1aa9057bd701db62f371ae8b01",
+      "source_sha256": "4039abc55abf23dc830fd61cbccddafaeccbb4d60b73cd7f60162cd1946a260d",
+      "symbol": "_RNvNtNtNtNtNtCs6IbZLaMqzNS_17compiler_builtins4math9libm_math4arch3x863fma12fma_fallback"
+    },
+    "fma_initializer": {
+      "bytes": 113,
+      "range": "0x63f06a0..0x63f0711",
+      "sha256": "37a455b1b66f05c2eb0015291a588a28b65e30bea1a76d14bebe7453f01e57e1",
+      "source_sha256": "7f118f4c1b42fdd21b1e1c2f5fcd1a6d663b035df83a9caf6977a51677468d40",
+      "symbol": "_RNvNvNtNtNtNtNtCs6IbZLaMqzNS_17compiler_builtins4math9libm_math4arch3x863fma3fma11initializer"
+    },
+    "full_availability_fma": {
+      "bytes": 17,
+      "range": "0x63f0210..0x63f0221",
+      "sha256": "9a889d39bcdc08351bc226c4473a4aa8ba523647c30c0a8a1489ffa753632881",
+      "source_sha256": "11fdf673aeb3b4967a70a398fafd79fad23faf8c2a47f9aa37a0e9604679ed67",
+      "symbol": "_RNvNtNtCs6IbZLaMqzNS_17compiler_builtins4math17full_availability3fma"
+    },
+    "load_x86_features": {
+      "bytes": 425,
+      "range": "0x63f0730..0x63f08d9",
+      "sha256": "8f847fa817f9241263ac6ad7ababe6dc10566791925db1aa1fe8c983421ffdf1",
+      "source_sha256": "362ab003483238a4647557ee67771326b1f4167637f242553402007282453124",
+      "symbol": "_RNvNtNtNtNtNtCs6IbZLaMqzNS_17compiler_builtins4math9libm_math4arch3x866detect17load_x86_features"
+    }
+  },
+  "component_gate_changed": false,
+  "dispatch": {
+    "cached_feature_byte": "0x6728920",
+    "features": {
+      "fma3": {
+        "bit": 6,
+        "skip_targets": {
+          "missing_xmm_or_ymm_state": "0x63f087c",
+          "missing_xsave_or_osxsave": "0x63f0884"
+        },
+        "source": "CPUID leaf 1 ECX bit 12",
+        "xcr0_gate": "XSAVE and OSXSAVE bits 26/27; XCR0 bits 1/2"
+      },
+      "fma4": {
+        "bit": 7,
+        "source": "CPUID leaf 0x80000001 ECX bit 16",
+        "vendor_gate": [
+          "AuthenticAMD",
+          "HygonGenuine"
+        ],
+        "xcr0_gate": "none observed in this feature-byte path"
+      }
+    },
+    "initialized_marker": "bit 31",
+    "priority": "FMA3 bit 6 selects first; otherwise FMA4 bit 7; otherwise fallback",
+    "selected_entries": {
+      "fallback": {
+        "address": "0x63f0230",
+        "fde": "0x63f0230..0x63f0679"
+      },
+      "fma3": {
+        "address": "0x63f0680",
+        "bytes": "c4e2f1a9c2c3",
+        "instruction": "VFMADD213SD"
+      },
+      "fma4": {
+        "address": "0x63f0690",
+        "bytes": "c4e3f96bc210c3",
+        "instruction": "VFMADDSD four-operand form"
+      }
+    },
+    "slot": "0x64ffe00",
+    "slot_relocations": {
+      "0x64e0fd0": "0x63f0210",
+      "0x64ffe00": "0x63f06a0"
+    },
+    "wrapper": "full_availability::fma loads and calls the function pointer at 0x64ffe00",
+    "xcr0_implication": "This packet records the observed bit-7 path only; it does not assess OS-state safety or runtime consequences."
+  },
+  "question": "How does node #115 choose its compiler_builtins libm fma backend?",
+  "schema_version": 1,
+  "target": {
+    "bytes": 105896032,
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "task": "RE-002"
+}

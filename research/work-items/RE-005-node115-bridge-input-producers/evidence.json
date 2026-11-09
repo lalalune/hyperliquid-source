@@ -1,0 +1,183 @@
+{
+  "target": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032,
+  "anchors": [
+    {
+      "id": "caller_tag4",
+      "va": "0x44d6cc2",
+      "size": 28,
+      "bytes": "c644241004400fb6d5488dbc2470010000488d742410ff150a3e0102",
+      "fde_start": "0x44d69f0",
+      "fde_end": "0x44d7210",
+      "observation": "first bridge builder call receives tag 4; prepares output and calls slot 0x64eaae8"
+    },
+    {
+      "id": "caller_tag5",
+      "va": "0x44d72db",
+      "size": 24,
+      "bytes": "c60424050fb6d2488dbc24d00100004889e6ff15f5370102",
+      "fde_start": "0x44d7210",
+      "fde_end": "0x44d7860",
+      "observation": "second bridge builder call receives tag 5; prepares output and calls slot 0x64eaae8"
+    },
+    {
+      "id": "selector_dispatch",
+      "va": "0x4526230",
+      "size": 39,
+      "bytes": "554157415641554154534881ecf80200004889fb0fb606488d0dbad42afc486304814801c8ffe0",
+      "fde_start": "0x4526230",
+      "fde_end": "0x4526e40",
+      "observation": "constructor dispatch reads byte [rsi] and indexes relative table at 0x7d3708"
+    },
+    {
+      "id": "tag4_case",
+      "va": "0x45263aa",
+      "size": 17,
+      "bytes": "4883c6084889dfe8daff14ffe96b090000",
+      "fde_start": "0x4526230",
+      "fde_end": "0x4526e40",
+      "observation": "tag 4 case passes input pointer plus 8 to helper 0x3676390 and returns"
+    },
+    {
+      "id": "tag5_case_fields",
+      "va": "0x45267ed",
+      "size": 22,
+      "bytes": "4c8b76304989f44c8b7e38bf11000000ff157d8cfb01",
+      "fde_start": "0x4526230",
+      "fde_end": "0x4526e40",
+      "observation": "tag 5 case reads input fields at offsets +0x30 and +0x38, then allocates"
+    },
+    {
+      "id": "tag5_case_payload",
+      "va": "0x4526816",
+      "size": 122,
+      "bytes": "c640106c48c784243801000011000000488984244001000048c784244801000011000000410f104424010f11842458010000418b44241189842468010000410f104424150f1184246c010000418b4424258984247c0100004c89b424500100004c89bc2480010000488d7c2408488db42438010000e8102efcff",
+      "fde_start": "0x4526230",
+      "fde_end": "0x4526e40",
+      "observation": "tag 5 case assembles constant and fields and calls conversion helper 0x44e96a0"
+    },
+    {
+      "id": "constructor_common_output",
+      "va": "0x4526d00",
+      "size": 27,
+      "bytes": "0f284424200f284c24300f114b100f1103488b7424084885f6740b",
+      "fde_start": "0x4526230",
+      "fde_end": "0x4526e40",
+      "observation": "constructor copies exactly 32 bytes from its working buffer to caller output"
+    },
+    {
+      "id": "builder_construct_call",
+      "va": "0x4526e52",
+      "size": 14,
+      "bytes": "488dbc24b0000000ff15083dfc01",
+      "fde_start": "0x4526e40",
+      "fde_end": "0x45270f8",
+      "observation": "outer bridge helper constructs the 32-byte producer result into stack buffer"
+    },
+    {
+      "id": "input_32_copy",
+      "va": "0x4526f0f",
+      "size": 26,
+      "bytes": "0f108424b00000000f108c24c00000000f114424640f114c2474",
+      "fde_start": "0x4526e40",
+      "fde_end": "0x45270f8",
+      "observation": "outer helper copies 32 bytes from constructor output to offset +0x64 in 52-byte input"
+    },
+    {
+      "id": "input_builder_handoff",
+      "va": "0x4526f29",
+      "size": 13,
+      "bytes": "4889e7488d742450e89abdddff",
+      "fde_start": "0x4526e40",
+      "fde_end": "0x45270f8",
+      "observation": "outer helper passes the assembled 52-byte input to 0x4302cd0"
+    },
+    {
+      "id": "tag5_converter_call",
+      "va": "0x452688b",
+      "size": 5,
+      "bytes": "e8102efcff",
+      "fde_start": "0x4526230",
+      "fde_end": "0x4526e40",
+      "observation": "tag 5 field record is passed to converter 0x44e96a0"
+    },
+    {
+      "id": "tag5_result_copy",
+      "va": "0x4526d00",
+      "size": 19,
+      "bytes": "0f284424200f284c24300f114b100f1103488b",
+      "fde_start": "0x4526230",
+      "fde_end": "0x4526e40",
+      "observation": "32 bytes from the tag 5 branch result are copied to the constructor output"
+    },
+    {
+      "id": "tag5_absorb_input",
+      "va": "0x452690f",
+      "size": 24,
+      "bytes": "4c8b742410488b542418488d7c24404c89f6ff152198fb01",
+      "fde_start": "0x4526230",
+      "fde_end": "0x4526e40",
+      "observation": "tag 5 converter pointer and length reach absorb slot 0x64e0148"
+    },
+    {
+      "id": "tag5_finalize_32",
+      "va": "0x4526942",
+      "size": 19,
+      "bytes": "488d742420ba200000004c89ffff15fb97fb01",
+      "fde_start": "0x4526230",
+      "fde_end": "0x4526e40",
+      "observation": "tag 5 branch requests 32 output bytes through slot 0x64e0150"
+    },
+    {
+      "id": "builder_20_copy",
+      "va": "0x4526efd",
+      "size": 18,
+      "bytes": "8b44242c894424600f1044241c0f29442450",
+      "fde_start": "0x4526e40",
+      "fde_end": "0x45270f8",
+      "observation": "outer builder places 20 bytes at offsets +0x50..+0x63 before the 32-byte field"
+    },
+    {
+      "id": "tag5_hash_to_common",
+      "va": "0x4526955",
+      "size": 5,
+      "bytes": "e9a6030000",
+      "fde_start": "0x4526230",
+      "fde_end": "0x4526e40",
+      "observation": "tag-5 finalized result jumps to the shared 32-byte output copy"
+    }
+  ],
+  "relative_relocations": {
+    "0x64eaae8": {
+      "type": 8,
+      "addend": "0x4526e40"
+    },
+    "0x64eab68": {
+      "type": 8,
+      "addend": "0x4526230"
+    },
+    "0x64e0148": {
+      "type": 8,
+      "addend": "0x5cda910"
+    },
+    "0x64e0150": {
+      "type": 8,
+      "addend": "0x5cdad40"
+    }
+  },
+  "switch_table": {
+    "base": "0x7d3708",
+    "entries": {
+      "4": "0x45263aa",
+      "5": "0x45267ed"
+    }
+  },
+  "literals": [
+    {
+      "va": "0x7d3bbc",
+      "bytes": "72657175657374576974686472617761",
+      "observation": "fixed 16-byte prefix copied before the caller writes the final ASCII l at +16"
+    }
+  ]
+}

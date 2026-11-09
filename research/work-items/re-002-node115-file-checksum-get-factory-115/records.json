@@ -1,0 +1,207 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "records": [
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "address": "0x61cd600",
+      "end": "0x61cd716",
+      "body_sha256": "9016de75b9bb6c8723439a5a3ca9b4fba7e7d95bf20ef98cf508d51238e6c4df",
+      "identity": "rocksdb::GetFileChecksumGenCrc32cFactory (vendor census)",
+      "contract": "get() -> shared_ptr<FileChecksumGenCrc32cFactory> via a hidden out-pointer in rdi; no other argument",
+      "semantics": "return the process-wide shared factory; create it on the first call; every call returns the same (factory, control) pair and raises use_count by 1"
+    },
+    {
+      "kind": "guard",
+      "address": "0x6508930",
+      "observation": "the guard byte is tested first (movzbl + test at 0x61cd608..0x61cd614); any nonzero value jumps to the copy path at 0x61cd629. When it is zero, __cxa_guard_acquire (PLT 0x63f0fc0) decides: a zero return also goes to the copy path, a nonzero return runs the init path and then __cxa_guard_release (PLT 0x63f0fd0)"
+    },
+    {
+      "kind": "static",
+      "ptr": "0x6508940",
+      "control_ptr": "0x6508948",
+      "observation": "the static is a 16-byte shared_ptr in .bss (zero at load): factory pointer at +0x0, control pointer at +0x8"
+    },
+    {
+      "kind": "init_factory",
+      "address": "0x61cd670",
+      "size": "0x20",
+      "vtable_address_point": "0x64d79b0",
+      "observation": "operator new(0x20) through PLT 0x63f0dd0; the whole object is zeroed with two movups, then the vptr is stored from lea 0x64d79a0 + add $0x10, and the static pointer is set to the new object"
+    },
+    {
+      "kind": "init_control",
+      "address": "0x61cd6ae",
+      "size": "0x18",
+      "vtable_address_point": "0x64d7a90",
+      "counts_word": "0x0000000100000001",
+      "observation": "operator new(0x18) through PLT 0x63f0dd0; the vptr is stored from lea 0x64d7a80 + add $0x10; the counts word comes from the .rodata constant at 0x459b20 (use_count 1, weak_count 1); the managed pointer at +0x10 is the factory object; the static control pointer is set to the new block"
+    },
+    {
+      "kind": "atexit",
+      "destructor": "0x61cd720",
+      "dso_handle": "0x64efa20",
+      "observation": "__cxa_atexit (PLT 0x63f0f80) registers the destructor at 0x61cd720 for the static shared_ptr, with the dso handle loaded from lea 0x64efa20"
+    },
+    {
+      "kind": "copy",
+      "address": "0x61cd629",
+      "observation": "the 16-byte static is loaded with movdqa and stored to the out-pointer with movups; when the control pointer is zero no increment runs and the call returns the null pair"
+    },
+    {
+      "kind": "increment",
+      "address": "0x61cd63e",
+      "observation": "the .got pointer at 0x64ed290 is dereferenced and its byte tested: 0 selects lock addl $0x1, 0x8(%rax) at 0x61cd660, nonzero selects plain addl $0x1, 0x8(%rax) at 0x61cd64c. The .got slot is zero in the static image (runtime-filled); the byte selecting the form is consistent with __libc_single_threaded (1 = single-threaded), which is an inference, not a proven identity"
+    },
+    {
+      "kind": "factory_layout",
+      "subject": "FileChecksumGenCrc32cFactory object",
+      "size": "0x20",
+      "vptr": "+0x0",
+      "member": "vector-like member at +0x8 (begin), +0x10 (end), +0x18 (capacity); elements are 0x30 bytes",
+      "observation": "the deleting destructor at 0x61cd400 frees the object with size 0x20 after destroying the member: it walks [begin, end) in 0x30-byte steps, freeing each element heap buffer at [element+0] with size [element+0x10]+1 unless [element+0] equals element+0x10, then frees the array with size end-begin. That is the std::string _M_dispose shape (pointer +0, length +8, SSO buffer / allocated capacity +0x10), confirmed by the identical codegen in the generator destructor at 0x61cd490 for the string at generator+0x10; the init path zeroes the member, so the singleton starts empty"
+    },
+    {
+      "kind": "control_vtable",
+      "address_point": "0x64d7a90",
+      "observation": "entries from the R_X86_64_RELATIVE relocations: slot 0 0x61cd080 is a bare return (complete destructor), slot 1 0x61cd180 is operator delete with size 0x18 (deleting destructor), slot 2 0x61cd110 deletes the managed factory object through its deleting destructor at 0x61cd400 (factory vtable slot 1), slot 3 0x61cd190 is operator delete with size 0x18, slot 4 0x61cd130 returns null"
+    },
+    {
+      "kind": "factory_vtable",
+      "address_point": "0x64d79b0",
+      "observation": "the merged factory-vtable packet lists this address point with slot 19 = CreateFileChecksumGenerator at 0x61cd2e0, slot 0 = complete destructor 0x61cd370 and slot 1 = deleting destructor 0x61cd400; that packet records the slots only, this packet reconstructs the getter that hands the factory out"
+    },
+    {
+      "kind": "release",
+      "destructor": "0x61cd720",
+      "observation": "the atexit destructor releases the static: when the counts word is exactly 0x0000000100000001 it zeroes the counts, calls control-vtable slot 2 (dispose) and tail-calls slot 3 (destroy); otherwise it decrements use_count (lock xadd when the thread-flag byte is 0, plain decrement otherwise) and, when the old value was 1, tail-calls the shared release helper at 0x5d35070"
+    },
+    {
+      "kind": "landing_pad",
+      "address": "0x61cd6fe",
+      "observation": "two landing pads inside the FDE: 0x61cd6fe jumps to 0x61cd5d1 (__cxa_guard_abort, then _Unwind_Resume) and 0x61cd70a jumps to 0x61cd5e1 (__cxa_begin_catch, delete the factory object via 0x61cd400, __cxa_rethrow). Both targets lie just before the FDE start; which call site each pad covers was not decoded (the LSDA was not parsed)"
+    },
+    {
+      "kind": "window",
+      "label": "guard_test",
+      "start": "0x61cd600",
+      "end": "0x61cd629",
+      "sha256": "accc609675beaf493f672ebd24f081d6deb8cf17054fc310824d99fb76851197"
+    },
+    {
+      "kind": "window",
+      "label": "copy_path",
+      "start": "0x61cd629",
+      "end": "0x61cd658",
+      "sha256": "8df1ffcee9e31489a192904ad29b9da078626e76b106fba838f56b66a7391a7f"
+    },
+    {
+      "kind": "window",
+      "label": "copy_lock",
+      "start": "0x61cd658",
+      "end": "0x61cd66d",
+      "sha256": "63fedaa7dd40b23c245b3a0b96bb72bbe9ee6d3b4d0ea7aaf54d26400d7e31cc"
+    },
+    {
+      "kind": "window",
+      "label": "init_pad",
+      "start": "0x61cd66d",
+      "end": "0x61cd670",
+      "sha256": "019f07bfe6bd5747f9f3b65f5a095db04a0418d5f11c6feec58eaff709860b66"
+    },
+    {
+      "kind": "window",
+      "label": "init_factory",
+      "start": "0x61cd670",
+      "end": "0x61cd6ae",
+      "sha256": "3b2fddbc229ac092e004baed748df39828d2c10befd868a4b30161b6f6960ad9"
+    },
+    {
+      "kind": "window",
+      "label": "init_control",
+      "start": "0x61cd6ae",
+      "end": "0x61cd6fe",
+      "sha256": "36e936d114841eb3931ace3868c4da2371e12dae79f72c39d44e53ccb33dd0ba"
+    },
+    {
+      "kind": "window",
+      "label": "landing_pads",
+      "start": "0x61cd6fe",
+      "end": "0x61cd716",
+      "sha256": "3bfac46a27a1374721683f1974cbc1b78deccacb2f6da314843e8bdfb91b7811"
+    },
+    {
+      "kind": "window",
+      "label": "new_plt",
+      "start": "0x63f0dd0",
+      "end": "0x63f0de0",
+      "sha256": "93c243e02314295cea02f50141461a95e10c09201ec8777b94214ed0177582dd"
+    },
+    {
+      "kind": "window",
+      "label": "guard_acquire_plt",
+      "start": "0x63f0fc0",
+      "end": "0x63f0fd0",
+      "sha256": "ad04f65a44044f4368e1cf861719b0e07a1791a5538223b6866b392abefac07c"
+    },
+    {
+      "kind": "window",
+      "label": "guard_release_plt",
+      "start": "0x63f0fd0",
+      "end": "0x63f0fe0",
+      "sha256": "0869d84c7c0cb4b76164c7dbdb56eec3213fb70fbcd7da2964efd6a9f6287e4a"
+    },
+    {
+      "kind": "window",
+      "label": "atexit_plt",
+      "start": "0x63f0f80",
+      "end": "0x63f0f90",
+      "sha256": "699d54bd0095912e7c93dce1f6225d63215b2b89b62100d7b2b7e89aa608708f"
+    },
+    {
+      "kind": "window",
+      "label": "counts_const",
+      "start": "0x459b20",
+      "end": "0x459b28",
+      "sha256": "64ed86b909d6d0502b64b28db0ea1272ffb358e20e9b1d88b63ccb07fa900cf5"
+    },
+    {
+      "kind": "window",
+      "label": "thread_flag_slot",
+      "start": "0x64ed290",
+      "end": "0x64ed298",
+      "sha256": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc"
+    },
+    {
+      "kind": "case_summary",
+      "count": 2400,
+      "seed": 20261109,
+      "gets": 15754,
+      "releases": 4714,
+      "init_runs": 2117,
+      "aggregate_sha256": "43181e9223d6ee0a0c0b743900e8a4d2af98ffa3e9be6787892007b3e00c29a1",
+      "mismatches_vs_reference": 0,
+      "note": "each sequence cross-checked between a step-by-step transliteration of the disassembly and a closed-form reference (use_count = 1 + live copies once initialised); the binary itself was never executed"
+    },
+    {
+      "kind": "unknown",
+      "subject": "factory member element identity",
+      "status": "each 0x30-byte element starts with a std::string; the trailing 0x10 bytes of the element and what the member holds in practice are not determined from this packet"
+    },
+    {
+      "kind": "unknown",
+      "subject": "thread-flag byte identity",
+      "status": "the .got slot at 0x64ed290 is zero in the static image and filled at load; the byte it points to selects the atomic vs plain increment, consistent with __libc_single_threaded, but the target was not resolved from the binary"
+    },
+    {
+      "kind": "unknown",
+      "subject": "shared release helper at 0x5d35070",
+      "status": "the destructor tail-calls it when the last use drops; its body was not decoded in this packet"
+    },
+    {
+      "kind": "unknown",
+      "subject": "callers of GetFileChecksumGenCrc32cFactory",
+      "status": "no caller census was run for this packet"
+    }
+  ]
+}

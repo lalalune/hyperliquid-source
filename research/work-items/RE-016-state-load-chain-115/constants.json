@@ -1,0 +1,225 @@
+{
+  "binary_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "checked_bytes": {
+    "0x3c12814": {
+      "bytes": "8b05bed98d02",
+      "meaning": "loader reads dword [0x64f01d8] (one-time-init gate)"
+    },
+    "0x3c12847": {
+      "bytes": "e8d4638500",
+      "meaning": "loader calls prep 0x4468c20"
+    },
+    "0x3c12853": {
+      "bytes": "48f7d8",
+      "meaning": "neg rax: P0 == i64::MIN is the only value that sets OF"
+    },
+    "0x3c12856": {
+      "bytes": "0f8082010000",
+      "meaning": "jo -> panic 0x3c129de (slot 0x64df830, message 0x6476750)"
+    },
+    "0x3c12877": {
+      "bytes": "e80495ccff",
+      "meaning": "loader calls 0x38dbd80 (string producer) with rsi = 0x6476768"
+    },
+    "0x3c128a2": {
+      "bytes": "ff15806d8d02",
+      "meaning": "loader calls the boundary through slot 0x64e9628"
+    },
+    "0x3c128ab": {
+      "bytes": "4883f801",
+      "meaning": "rax == 1 is the boundary error arm"
+    },
+    "0x3c128d7": {
+      "bytes": "0f8539010000",
+      "meaning": "assert_eq failure branch when box[0x28] != r15"
+    },
+    "0x3c128ec": {
+      "bytes": "48ffc0",
+      "meaning": "inc rax; cmovne keeps -1 on wrap: saturating +1 of box[0x18]"
+    },
+    "0x3c12904": {
+      "bytes": "49c78424e810000000000000",
+      "meaning": "box[0x10e8] = 0 (8 bytes)"
+    },
+    "0x3c12959": {
+      "bytes": "6641c78424283e00000000",
+      "meaning": "box[0x3e28] = 0 (16 bit)"
+    },
+    "0x3c12964": {
+      "bytes": "6641c78424e03e00000000",
+      "meaning": "box[0x3ee0] = 0 (16 bit)"
+    },
+    "0x3c1296f": {
+      "bytes": "41c68424b039000002",
+      "meaning": "box[0x39b0] = 2 (8 bit)"
+    },
+    "0x3c1352f": {
+      "bytes": "488d1572328602",
+      "meaning": "boundary passes the constant 0x64767a8 as lookup rdx"
+    },
+    "0x3c1353b": {
+      "bytes": "4883f801",
+      "meaning": "boundary error arm test rax == 1"
+    },
+    "0x3c13558": {
+      "bytes": "4983c618",
+      "meaning": "drop glue receives B + 0x18"
+    },
+    "0x3c135c2": {
+      "bytes": "ff15d83d8d02",
+      "meaning": "boundary calls the builder through slot 0x64e73a0"
+    },
+    "0x3c13612": {
+      "bytes": "53",
+      "meaning": "builder pushes rbx"
+    },
+    "0x3c1364f": {
+      "bytes": "4881ecc8020000",
+      "meaning": "builder frame tail 0x2c8 (4 probed pages + 0x2c8 = 0x42c8 output buffer)"
+    },
+    "0x3c13665": {
+      "bytes": "ff15c55f8d02",
+      "meaning": "builder calls the materializer through slot 0x64e9630"
+    },
+    "0x3c1366b": {
+      "bytes": "bfc8420000",
+      "meaning": "builder allocates 0x42c8 bytes"
+    },
+    "0x3c1367e": {
+      "bytes": "bac8420000",
+      "meaning": "builder copies 0x42c8 bytes into the allocation"
+    },
+    "0x3c1368f": {
+      "bytes": "bea8270000",
+      "meaning": "builder frees the 0x27a8-byte input"
+    },
+    "0x3c136ad": {
+      "bytes": "bf08000000bec8420000",
+      "meaning": "allocation failure: alloc error (align 8, size 0x42c8)"
+    }
+  },
+  "frames": {
+    "b_copy": -256,
+    "boundary_rsp": -288,
+    "builder_rsp": -17408,
+    "loader_rsp": -176,
+    "p_copy": -288
+  },
+  "functions": {
+    "boundary": {
+      "fde_bytes": 233,
+      "fde_end": "0x3c13609",
+      "instructions": 66,
+      "landing_pad": "0x3c135d7",
+      "sha256": "e3ecddd450f806fcbdef75068021278cac769d636496cef42c9d77b996b35dc0",
+      "start": "0x3c13520"
+    },
+    "builder": {
+      "fde_bytes": 221,
+      "fde_end": "0x3c136ed",
+      "instructions": 51,
+      "landing_pad": "0x3c136bf",
+      "sha256": "fac1211531d54f213ee4e57a98e4c2c2f42f642489732c5de9cad4c10d92e6da",
+      "start": "0x3c13610"
+    },
+    "loader": {
+      "fde_bytes": 757,
+      "fde_end": "0x3c12af5",
+      "instructions": 182,
+      "landing_pad": "0x3c12a33",
+      "sha256": "52e2718331566ec5c5cf72a65e69764441372b67802a9f3e8a04445e7d10949a",
+      "start": "0x3c12800"
+    }
+  },
+  "helper_slots": {
+    "alloc_error": {
+      "slot": "0x64df490",
+      "target": "0x141e251"
+    },
+    "assert_failed": {
+      "slot": "0x64e1e68",
+      "target": "0x167bbeb"
+    },
+    "dealloc": {
+      "slot": "0x64df4a0",
+      "target": "0x635de30"
+    },
+    "fix_a2": {
+      "slot": "0x64e4f08",
+      "target": "0x3c374e0"
+    },
+    "fix_c": {
+      "slot": "0x64e4f10",
+      "target": "0x3bec320"
+    },
+    "malloc": {
+      "slot": "0x64df480",
+      "target": "0x6355830"
+    },
+    "once": {
+      "slot": "0x64df9f0",
+      "target": "0x5c87d50"
+    },
+    "panic_neg": {
+      "slot": "0x64df830",
+      "target": "0x1680c10"
+    },
+    "unwrap_failed": {
+      "slot": "0x64df6a0",
+      "target": "0x1680c30"
+    }
+  },
+  "sizes": {
+    "input": 10152,
+    "output": 17096
+  },
+  "slots": {
+    "boundary": {
+      "addend": "0x3c13520",
+      "call_sites": [
+        "0x3c128a2"
+      ],
+      "direct_e8_sites": [],
+      "relative_addends": [
+        "0x64e9628"
+      ],
+      "slot": "0x64e9628"
+    },
+    "builder": {
+      "addend": "0x3c13610",
+      "call_sites": [
+        "0x2add95b",
+        "0x2cc19ea",
+        "0x3c135c2",
+        "0x5646ba2"
+      ],
+      "direct_e8_sites": [],
+      "relative_addends": [
+        "0x64e73a0"
+      ],
+      "slot": "0x64e73a0"
+    },
+    "loader": {
+      "addend": "0x3c12800",
+      "call_sites": [
+        "0x2b41f2d"
+      ],
+      "direct_e8_sites": [],
+      "relative_addends": [
+        "0x64e7728"
+      ],
+      "slot": "0x64e7728"
+    },
+    "materializer": {
+      "addend": "0x3c2e860",
+      "call_sites": [
+        "0x3c13665"
+      ],
+      "direct_e8_sites": [],
+      "relative_addends": [
+        "0x64e9630"
+      ],
+      "slot": "0x64e9630"
+    }
+  }
+}

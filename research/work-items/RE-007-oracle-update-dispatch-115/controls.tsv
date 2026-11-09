@@ -1,0 +1,55 @@
+kind	target	where	description	cases-tried	first-mismatch	detected
+model-mutant	root	dex_div	divide the asset id by 1000 instead of 10000	600	0	1
+model-mutant	root	dex_stride	clearinghouse stride 0x500	600	0	1
+model-mutant	root	dex_cmp	clearinghouse bound uses > instead of >=	600	1	1
+model-mutant	root	asset_stride	asset row stride 0x58	600	0	1
+model-mutant	root	price_off	price read at row +0x28	600	0	1
+model-mutant	root	local_mul	local index uses dex*1000	600	0	1
+model-mutant	root	book_stride	oracle book stride 0x1f8	600	0	1
+model-mutant	root	book_off	oracle book offset 0x180	600	0	1
+model-mutant	root	key_cut	key copied as 0x13 bytes	600	0	1
+model-mutant	body	limit_cmp	size limit rejects only above the limit	600	1	1
+model-mutant	body	ok_tag	Ok tag 0x1a3	600	0	1
+model-mutant	body	wrap	event counter wraps instead of saturating	600	0	1
+model-mutant	body	epoch	epoch constant off by one	600	0	1
+model-mutant	body	no_clamp	milliseconds not clamped at zero	600	10	1
+model-mutant	body	classify_ge	classification reject above 8	600	14	1
+model-mutant	body	limit_code	size-limit reject code 0xde	600	1	1
+model-mutant	body	ms_shift	nanosecond divisor shift 0x31	600	0	1
+model-mutant	body	flag_mask	trading flag masked with 3	600	13	1
+model-mutant	body	nonce_inc2	event counter advances by two	600	5	1
+model-mutant	body	ev_tag	queued event tag 5	600	0	1
+model-mutant	body	f64_total	nanosecond total clamped one lower	600	5	1
+model-mutant	small	first_niche1	first niche 0x8000000000000001 not special	600	2	1
+model-mutant	small	second_niche_free	second niche frees	600	1	1
+model-mutant	events	event_size	event stride 0x2b0	600	6	1
+model-mutant	events	cap_free	frees a zero-capacity buffer	600	1	1
+model-mutant	enum	free_pos	free-if-positive handler frees any nonzero length	3000	5	1
+model-mutant	enum	scale16	two-buffers handler scales the second length by 8	3000	14	1
+model-mutant	enum	k_range	niche-or-free handler skips only kinds 1..2	3000	21	1
+model-mutant	enum	node_size	boxed-node handler frees 0x30 bytes	3000	41	1
+model-mutant	enum	dyn_align	boxed trait object keeps its alignment flag from 0x10	3000	556	1
+byte-patch	root	0x2753bda	clearinghouse stride immediate	4000	0	1
+byte-patch	root	0x2753c17	per-clearinghouse asset count immediate	4000	0	1
+byte-patch	root	0x2753c9c	oracle book offset immediate	4000	0	1
+byte-patch	root	0x2753bf9	oracle book count field offset	4000	0	1
+byte-patch	root	0x2753ca3	limit field offset	4000	0	1
+byte-patch	root	0x2753bb3	division magic constant	4000	1	1
+byte-patch	body	0x2d35cb1	Ok tag compare	4000	0	1
+byte-patch	body	0x2d35b41	classification reject code	4000	3	1
+byte-patch	body	0x2d35e79	size limit reject code	4000	1	1
+byte-patch	body	0x2d35fd6	seconds per day immediate	4000	0	1
+byte-patch	body	0x2d35fef	milliseconds immediate	4000	0	1
+byte-patch	body	0x2d35fcc	epoch day offset	4000	0	1
+byte-patch	body	0x2d35f79	century divisor magic (year <= 0 branch)	4000	-1	0
+byte-patch	body	0x2d35faf	century divisor magic (division by 100)	4000	3895	1
+byte-patch	body	0x2d35fe4	nanosecond divisor magic	4000	82	1
+byte-patch	body	0x2d35fa2	leap-year multiplier 1461	4000	0	1
+byte-patch	small	0x278379e	skip-all niche constant	4000	2	1
+byte-patch	events	0x2776899	event size immediate	4000	6	1
+byte-patch	enum	0x42322d1	range base 0x26 of the nested-or-dyn handler	4000	76	1
+byte-patch	enum	0x423229a	boxed-node size 0x28	4000	41	1
+byte-patch	enum	0x42323b5	alignment-flag threshold 0x11	4000	556	1
+byte-patch	enum	0x4232273	sub-kind bound 0x23	4000	79	1
+byte-patch	enum	0x423210c	tag bound 0x15f	4000	-1	0
+byte-patch	enum	0x4232162	second-buffer scale shift	4000	14	1

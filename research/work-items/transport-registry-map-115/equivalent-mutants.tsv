@@ -1,0 +1,6 @@
+mutant	address	reason
+condition byte 0x74 -> 0x75	reserve_rehash@0x4764652	the odd-group test only matters for an odd group count; table sizes are powers of two, so the flipped branch runs one extra group that lies in the mirror bytes the next 16-byte copy overwrites
+cmp immediate byte 0x9 -> 0x8	reserve_rehash@0x4764447	the 8-bucket table has capacity 7 by the general formula (8 - 1) and by the small-table rule (mask 7)
+condition byte 0x73 -> 0x72	record@0x47720a0	both targets leave xmm1 = 0 for a negative sum (xmm1 is already zero) and reach the same compare that sends it on
+condition byte 0x75 -> 0x74	record@0x47720b8	the branch is reached only for positive subnormals where xmm2 already equals xmm0, so the skipped move changes nothing
+condition byte 0x79 -> 0x78	record@0x47720c1	xmm1 only reaches memory when the sum is infinite, and this path is entered only for a zero sum

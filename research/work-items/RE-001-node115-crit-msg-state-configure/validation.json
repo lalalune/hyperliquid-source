@@ -1,0 +1,39 @@
+{
+  "base_commit": "0781ce048",
+  "platform": "macOS arm64; static analysis of Linux x86-64 ELF",
+  "tools": {
+    "python": "Python 3.9.6",
+    "capstone": "5.0.7",
+    "gnu": "GNU objdump (GNU Binutils) 2.47.20260726; readelf 2.47",
+    "llvm": "Apple LLVM version 17.0.0 (llvm-objdump)"
+  },
+  "packet_checks": {
+    "bodies": 6,
+    "bytes": 3144,
+    "instructions": 718,
+    "obligations": 230,
+    "corruption_rejections": 291,
+    "command": "python3 export_disassembly.py; python3 verify.py --controls; python3 -m unittest tests.test_node115_crit_msg_state_configure",
+    "result": "PASS"
+  },
+  "contribution_checks": {
+    "make verify": "PASS",
+    "make catalogue-check": "PASS",
+    "make reproduce": "PASS",
+    "focused_suite": "tests.test_node115_crit_msg_state_configure PASS (4 tests, including 291 corruption controls)",
+    "related_existing_suites": "tests.test_node115_catalogue PASS (13), tests.test_verify_packets PASS (12), tests.test_node115_lu_nextnode PASS (8)",
+    "full_make_test": "not run to completion on this host: tools/run_tests.py reloads the ~101 MB node115 image per file across 1132 files, which does not finish in a practical window here; no tool or existing test was modified, so unrelated files are unaffected"
+  },
+  "documented_skips": [
+    "make doctor reports optional tools absent on this host (Java runtime, Ghidra); this does not gate the static packet.",
+    "tests.test_run_tests reports 5 pre-existing failures on this host: the assertions expect Python 3.11+ unittest id formatting ('module.Class.method') while the host interpreter is Python 3.9.6, which prints 'method (module.Class)'. run_tests.py, test_run_tests.py and test_make.py are byte-identical to origin/main; this change does not touch them."
+  ],
+  "captured_code_executed_or_emulated": false,
+  "hosted_ci": "not observed",
+  "progress_gates": "unchanged",
+  "agent_metadata": {
+    "provider": "Anthropic",
+    "model": "claude-opus-5.5",
+    "client": "Cursor"
+  }
+}

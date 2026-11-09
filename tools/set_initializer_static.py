@@ -159,7 +159,11 @@ def _slot_call(data, site, slot, label):
 
 
 def _relocations(data):
-    s = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    s = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    if s is None:
+        raise ValueError('missing.rela.dyn section')
+    if s['size'] % 24 != 0:
+        raise ValueError('truncated.rela.dyn section')
     out = {}
     for off in range(s['offset'], s['offset'] + s['size'], 24):
         offset, info, addend = struct.unpack_from('<QQq', data, off)
@@ -169,11 +173,18 @@ def _relocations(data):
 
 
 def _dynsym_name(data, index):
-    ds = next(s for s in sections(data) if s['name'] == '.dynsym')
-    dstr = next(s for s in sections(data) if s['name'] == '.dynstr')
+    ds = next((s for s in sections(data) if s['name'] == '.dynsym'), None)
+    if ds is None:
+        raise ValueError('missing.dynsym section')
+    dstr = next((s for s in sections(data) if s['name'] == '.dynstr'), None)
+    if dstr is None:
+        raise ValueError('missing.dynstr section')
     name_off = struct.unpack_from('<I', data, ds['offset'] + index * 24)[0]
     start = dstr['offset'] + name_off
-    return data[start:data.index(b'\0', start)].decode()
+    try:
+        return data[start:data.index(b'\0', start)].decode()
+    except UnicodeDecodeError:
+        raise ValueError('dynamic symbol name is not valid UTF-8') from None
 
 
 def slot_bindings(data):
