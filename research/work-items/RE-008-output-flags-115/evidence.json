@@ -1,0 +1,169 @@
+{
+  "component": "abci",
+  "gates_changed": false,
+  "reader": {
+    "callers": [
+      {
+        "call": "0x56550de",
+        "subcommand": "run-non-validator",
+        "tag": 2
+      },
+      {
+        "call": "0x56551e9",
+        "subcommand": "run-validator",
+        "tag": 3
+      }
+    ],
+    "fn": "0x564d390",
+    "lookups": [
+      {
+        "lookup": "0x4e4c8e0",
+        "name": "write-trades",
+        "name_va": "0x92ab5a",
+        "offset": "+0x18"
+      },
+      {
+        "lookup": "0x4e4c8e0",
+        "name": "write-fills",
+        "name_va": "0x92ab66",
+        "offset": "+0x19"
+      },
+      {
+        "lookup": "0x4e4c8e0",
+        "name": "write-raw-book-diffs",
+        "name_va": "0x92ab71",
+        "offset": "+0x1a"
+      },
+      {
+        "lookup": "0x4e4c8e0",
+        "name": "write-order-statuses",
+        "name_va": "0x92ab85",
+        "offset": "+0x1b"
+      },
+      {
+        "lookup": "0x4e4c8e0",
+        "name": "write-misc-events",
+        "name_va": "0x92ab99",
+        "offset": "+0x1c"
+      },
+      {
+        "lookup": "0x4e4c8e0",
+        "name": "write-hip3-oracle-updates",
+        "name_va": "0x92abaa",
+        "offset": "+0x1d"
+      },
+      {
+        "lookup": "0x4e4ca30",
+        "name": "write-user-clearinghouse-states",
+        "name_va": "0x92abc3",
+        "offset": "+0x0..+0x18"
+      },
+      {
+        "lookup": "0x4e4c8e0",
+        "name": "write-system-and-core-writer-actions",
+        "name_va": "0x92abe2",
+        "offset": "+0x1e"
+      },
+      {
+        "lookup": "0x4e4c8e0",
+        "name": "disable-output-file-buffering",
+        "name_va": "0x92ac06",
+        "offset": "+0x1f"
+      },
+      {
+        "lookup": "0x4e4c8e0",
+        "name": "batch-by-block",
+        "name_va": "0x92ac23",
+        "offset": "+0x20"
+      },
+      {
+        "lookup": "0x4e4c8e0",
+        "name": "stream-with-block-info",
+        "name_va": "0x92ac31",
+        "offset": "+0x21"
+      },
+      {
+        "lookup": "0x4e4c8e0",
+        "name": "serve-evm-rpc",
+        "name_va": "0x92ac47",
+        "offset": "+0x22"
+      },
+      {
+        "lookup": "0x4e4c8e0",
+        "name": "serve-info",
+        "name_va": "0x92ac54",
+        "offset": "+0x23"
+      },
+      {
+        "lookup": "0x4e4ca30",
+        "name": "replica-cmds-style",
+        "name_va": "0x92ac5e",
+        "offset": "+0x24"
+      }
+    ],
+    "packed_qword_plus_0x18_bytes_from": [
+      "[rsp+0xe]",
+      "[rsp+0xd]",
+      "[rsp+0xc]",
+      "[rsp+0xb]",
+      "[rsp+0xa]",
+      "[rsp+0x9]",
+      "[rsp+0x8]",
+      "[rsp+0x7]"
+    ],
+    "replica_cmds_style": {
+      "actions": 0,
+      "actions-and-responses": 1,
+      "other": "panic",
+      "recent-actions": 2
+    },
+    "slot": "0x64ebcb8"
+  },
+  "setter": {
+    "fn": "0x51cf360",
+    "gates": [
+      {
+        "setter_byte": "+0x19",
+        "test": "0x51cf40b",
+        "writer_name": "node_trades"
+      },
+      {
+        "setter_byte": "+0x1a",
+        "test": "0x51cf4cf",
+        "writer_name": "node_fills"
+      },
+      {
+        "setter_byte": "+0x1b",
+        "test": "0x51cf742",
+        "writer_name": "node_raw_book_diffs"
+      },
+      {
+        "setter_byte": "+0x1c",
+        "test": "0x51cfe07",
+        "writer_name": "node_order_statuses"
+      },
+      {
+        "setter_byte": "+0x1d",
+        "test": "0x51cfc14",
+        "writer_name": "misc_events"
+      },
+      {
+        "setter_byte": "+0x1e",
+        "test": "0x51d0031",
+        "writer_name": "hip3_oracle_updates"
+      },
+      {
+        "setter_byte": "+0x1f",
+        "test": "0x51d0262",
+        "writer_name": "system_and_core_writer_actions"
+      }
+    ],
+    "global_flush": "+0x20 != 0 -> mov byte [slot 0x64e0f88], 1 at 0x51cf3e7",
+    "pair_panic": "+0x21 and +0x22 both set -> 0x51d0aba 'cannot set both batch_by_block and stream_with_block_info'",
+    "reads": "+0x0, +0x8, +0x10 (qwords) and bytes +0x18 .. +0x23",
+    "slot": "0x64e7428"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}

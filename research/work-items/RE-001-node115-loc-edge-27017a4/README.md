@@ -1,0 +1,55 @@
+# RE-001: map node #115 base/u.rs:531 conditional call edge
+
+- Component allocation: `foundation`.
+- Target: Linux x86-64 node #115, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
+- Source baseline: `0781ce04826eeefd89fe336cb8ea073be0c1de30`. No external source revision or implementation comparison.
+- Scope: one conditional call edge and its source-location record.
+
+## Observation
+
+The component catalogue lists `base/u.rs` as an embedded path. At ELF VA `0x27017a4` (file offset `0x27007a4`), `488d15fd5dd303` decodes as `lea rdx, [rip + 0x3d35dfd]`. Adding the signed displacement `64183805` to the next instruction VA `0x27017ab` yields `0x64375a8`. The decode from the start of FDE range `[0x2701770, 0x2701af5)` reaches that instruction boundary. The FDE itself is at `0x1132cac`.
+
+At `0x64375a8` (file offset `0x64355a8`), an `R_X86_64_RELATIVE` relocation points to `0x442e9e` in `.rodata`. The next 16 bytes, `0d000000000000001302000009000000`, decode as a little-endian 64-bit length of 13 and two 32-bit values, 531 and 9. The string's normalized suffix matches `base/u.rs`. [record.json](record.json) preserves the coordinates and instruction bytes.
+
+## Conditional edge
+
+The taken target at branch `0x2701798` is `0x2701816` and the fallthrough is `0x270179a`. The **fallthrough** edge reaches the location load along the instructions below.
+
+The flags come from `test ebp, ebp`. The recorded edge is selected when the `je` predicate (`ZF = 1`) is **false**.
+
+| Instruction VA | Bytes | Decoded instruction |
+| --- | --- | --- |
+| `0x2701796` | `85ed` | `test ebp, ebp` |
+| `0x2701798` | `747c` | `je 0x2701816` |
+| `0x270179a` | `c644240700` | `mov byte ptr [rsp + 7], 0` |
+| `0x270179f` | `c644244800` | `mov byte ptr [rsp + 0x48], 0` |
+
+## Argument flow
+
+The LEA writes `rdx`. The trace follows the unchanged value to the call. At the call, `rdx` is SysV x86-64 integer argument register 3. The signed call displacement -2814970 added to `0x27017ba` gives `0x24523c0`. The target's FDE at `0x110e1b0` describes `[0x24523c0, 0x24525be)`.
+
+| Instruction VA | Bytes | Decoded instruction |
+| --- | --- | --- |
+| `0x27017ab` | `488d7c2407` | `lea rdi, [rsp + 7]` |
+| `0x27017b0` | `488d742448` | `lea rsi, [rsp + 0x48]` |
+| `0x27017b5` | `e8060cd5ff` | `call 0x24523c0` |
+
+## Reproduce
+
+Run from the repository root with the LFS target materialized. Virtual addresses are link-time ELF VAs.
+
+```sh
+target=artifacts/node/115/hl-node
+printf '%s  %s\n' a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301 "$target" | sha256sum -c -
+readelf -rW "$target" | grep -i '0*64375a8 '
+readelf --debug-dump=frames "$target"
+objdump -d -M intel --start-address=0x2701770 --stop-address=0x27017ba "$target"
+od -An -tx1 -j 105076144 -N 16 "$target"
+objdump -s -j .rodata --start-address=0x442e9e --stop-address=0x442eab "$target"
+```
+
+Local extraction used Python 3.12.14, Capstone 5.0.7 and pyelftools 0.33 on Windows. The extractor decoded from the FDE start and read the relocation and data bytes directly. The independent GNU commands above are review steps. With the disp32 changed by +1 in memory (`488d15fe5dd303`), re-decoding lands at `0x64375a9`, which fails the exact descriptor-address check.
+
+## Interpretation and limits
+
+The layout is consistent with Rust source-location metadata for line 531, column 9. The observation establishes the value in an incoming register on this path. Runtime reachability and full callee behavior remain unresolved. Next, trace the incoming register through the callee to determine which record fields it consumes. No captured code was executed and no reconstruction gate or byte denominator is claimed.
