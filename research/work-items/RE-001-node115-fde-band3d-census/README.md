@@ -3,10 +3,10 @@
 - **Component allocation:** `foundation` in the generated component map; this is only a work allocation, not recovered ownership.
 - **Target:** Linux x86-64 node #115, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
 - **Source commit:** `0781ce04826eeefd89fe336cb8ea073be0c1de30`.
-- **Bounded question:** Re-derive every unwind-described range whose start is in `.text` VA interval `[0x3ac0000, 0x3b0000)`, confirm its complete target-byte coverage, and record statically decoded calls and jumps for RE-001's node #115 function-map evidence.
+- **Bounded question:** Re-derive every unwind-described range whose start is in `.text` VA interval `[0x3ac0000, 0x3b00000)`, confirm its complete target-byte coverage, and record statically decoded calls and jumps for RE-001's node #115 function-map evidence.
 - **Claim status:** FDE and byte observations; transfer destinations are disassembler-derived static observations. Names, logical function boundaries and behavior remain unknown.
 
-The interval continues the neighboring-band census: merged PR [#2940](https://github.com/lalalune/hyperliquid-source/pull/2940) covers `[0x3a00000, 0x3a40000)`, open PR [#5064](https://github.com/lalalune/hyperliquid-source/pull/5064) covers `[0x3a40000, 0x3a80000)`, and open PR [#5412](https://github.com/lalalune/hyperliquid-source/pull/5412) covers `[0x3a80000, 0x3ac0000)`. The live search at selection time found no PR for the new half-open interval; the exact queries and adjacent match are recorded in `selection.json`.
+The interval continues the neighboring-band census: merged PR [#2940](https://github.com/lalalune/hyperliquid-source/pull/2940) covers `[0x3a00000, 0x3a40000)`, open PR [#5064](https://github.com/lalalune/hyperliquid-source/pull/5064) covers `[0x3a40000, 0x3a80000)`, and open PR [#5412](https://github.com/lalalune/hyperliquid-source/pull/5412) covers `[0x3a80000, 0x3ac0000)`. The current title/body search found no other PR for the new half-open interval. Searching the corrected end address separately returned no PR; searching the start address finds this PR and the immediately preceding #5412 interval. The exact queries are recorded in `selection.json`.
 
 ## Reproduce
 

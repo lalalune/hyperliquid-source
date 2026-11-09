@@ -216,10 +216,14 @@ def derive(target=TARGET):
             snippet.append('0x%x: %s %s' % (item['address'], item['bytes'].hex(), item['assembly']))
     if not snippet or not snippet[0].startswith('0x%x:' % start):
         raise AssertionError('smallest FDE has no decoded prologue at its start')
+    selection = json.loads((PACKET / 'selection.json').read_text(encoding='utf-8'))
+    source_commit = selection.get('base_commit')
+    if not isinstance(source_commit, str) or not re.fullmatch(r'[0-9a-f]{40}', source_commit):
+        raise AssertionError('selection record has no pinned source commit')
     evidence = {
         'packet': PACKET_NAME, 'target_release': 'node #115',
         'target_size': TARGET_SIZE, 'target_sha256': TARGET_SHA256,
-        'source_commit': subprocess.check_output(['git', '-C', str(ROOT), 'rev-parse', 'HEAD'], text=True).strip(),
+        'source_commit': source_commit,
         'component_allocation': 'foundation',
         'band': {'start': hex(BAND_START), 'end': hex(BAND_END),
                  'rule': 'select FDEs whose start lies in this half-open VA interval'},
@@ -246,7 +250,7 @@ def derive(target=TARGET):
             'The target was read as data and never executed or copied.'
         ],
     }
-    frames = '# Raw FDE records for starts in [0x3ac0000, 0x3b0000)\n' + '\n'.join(frame_lines) + '\n'
+    frames = '# Raw FDE records for starts in [0x3ac0000, 0x3b00000)\n' + '\n'.join(frame_lines) + '\n'
     edges = ('source_fde_va\tinstruction_va\tmnemonic\tkind\toperand\ttarget_or_slot_va\tdirect_target_va_in_band\n' +
              ''.join('%s\t%s\t%s\t%s\t%s\t%s\t%s\n' %
                      (hex(a), hex(b), mnemonic, kind, operand.replace('\t', ' '),
