@@ -99,6 +99,18 @@ def main() -> None:
     assert string_bytes[name_offset:name_end].decode() == imp["symbol"] == "memcpy"
     assert addend == int(imp["addend"], 16) == 0
 
+    cli = EVIDENCE["case_zero_cli_builder_relocation"]
+    call_va = int(cli["call_va"], 16)
+    call_off = text["offset"] + call_va - text["address"]
+    assert bytes(data[call_off : call_off + 2]) == b"\xff\x15"
+    disp = struct.unpack_from("<i", data, call_off + 2)[0]
+    slot = call_va + 6 + disp
+    assert slot == int(cli["slot"], 16)
+    info, addend = relocs[slot]
+    assert info & 0xFFFFFFFF == cli["type"] == 8  # R_X86_64_RELATIVE
+    assert info >> 32 == cli["symbolIndex"] == 0
+    assert addend == int(cli["target"], 16) == 0x564D700
+
     # Negative control: change the initialized selector byte from 0 to 1.
     row = next(r for r in EVIDENCE["anchors"] if r["id"] == "entry_zero_and_call")
     mutated = bytearray(data)
@@ -110,7 +122,7 @@ def main() -> None:
 
     print(
         f"target digest, {len(EVIDENCE['anchors'])} instruction anchors, "
-        "copy relocation, dispatch entry 0 and one-byte control verified"
+        "copy and CLI-builder relocations, dispatch entry 0 and one-byte control verified"
     )
 
 
