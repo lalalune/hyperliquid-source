@@ -30,7 +30,14 @@ The recorded instruction rows were obtained with Apple LLVM `llvm-objdump` 21.0.
 python3 research/work-items/RE-017-node115-digest-quorum-row-bridge/verify.py
 ```
 
-The verifier checks the authenticated #115 digest, selected instruction bytes, their file-backed `.text` mappings and FDE membership, the direct call target and the recorded row-field/argument instructions. It has corruption controls for an altered call displacement and descriptor offset. An FDE extent is an unwind range, not a validated function boundary.
+The verifier checks the authenticated #115 digest, selected instruction bytes, their file-backed `.text` mappings and FDE membership, the direct call target and the recorded row-field/argument instructions. It also rechecks every recorded instruction/FDE row in the three predecessor packets: 73 descriptor-owner spans, 86 raw-history spans and 65 compact-reference spans. The offset join is derived from checked instructions: constructor `0x14c0 - 0x1240 = 0x280`; owner copy `0x6a8 + (0x400 - 0x3f8) = 0x6b0`; descriptor location `0x6b0 + 0x280 = 0x930`; the returned allocation adds `0x10`, giving `0x940`. It has corruption controls for an altered call displacement and descriptor offset. An FDE extent is an unwind range, not a validated function boundary.
+
+The earlier greeting/context packet was regenerated from the same target and its 15 deterministic evidence files matched. To repeat that check:
+
+```sh
+python3 tools/abci_greeting_115.py --out /tmp/abci-greeting-review
+diff -r -x README.md -x MANIFEST.sha256 /tmp/abci-greeting-review research/work-items/RE-017-abci-greeting-115
+```
 
 ## Results and limits
 

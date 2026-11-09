@@ -15,7 +15,7 @@ TARGET = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 PACKET = Path(__file__).resolve().parent
 
 
-def load_witnesses(data):
+def load_packet_witnesses(data, packet_dir, minimum=1):
     sec_rows, header = unwind_index(data)
     _, fdes = eh_frame_records(data, sec_rows)
     indexed = {(row["start"], row["fde"]) for row in header}
@@ -26,7 +26,7 @@ def load_witnesses(data):
         raise ValueError("expected unique .text section")
     text = text[0]
     rows = {}
-    with (PACKET / "instructions.tsv").open(newline="") as stream:
+    with (packet_dir / "instructions.tsv").open(newline="") as stream:
         for row in csv.DictReader(stream, delimiter="\t"):
             address = int(row["va"], 16)
             raw = bytes.fromhex(row["bytes"])
@@ -41,9 +41,13 @@ def load_witnesses(data):
             if data[offset:offset + len(raw)] != raw:
                 raise ValueError(f"instruction bytes differ at {address:#x}")
             rows[address] = raw
-    if len(rows) < 35:
-        raise ValueError("too few selected witnesses")
+    if len(rows) < minimum:
+        raise ValueError(f"too few selected witnesses in {packet_dir.name}")
     return rows
+
+
+def load_witnesses(data):
+    return load_packet_witnesses(data, PACKET, minimum=35)
 
 
 def call_target(rows, address):
@@ -60,11 +64,69 @@ def indirect_slot(rows, address):
     return address + 6 + struct.unpack_from("<i", raw, 2)[0]
 
 
+def verify_predecessor_join(data, current_rows):
+    work = ROOT / "research/work-items"
+    owner = load_packet_witnesses(data, work / "RE-017-node115-digest-quorum-owner", 70)
+    history = load_packet_witnesses(data, work / "RE-017-node115-raw-reference-origin", 80)
+    comparator = load_packet_witnesses(data, work / "RE-017-node115-compact-digest-reference-lookup", 60)
+
+    # Constructor staging: source descriptor at rsp+0x200 is copied to
+    # record base rsp+0x1240 + 0x280 = rsp+0x14c0.
+    expected_owner_bytes = {
+        0x5A6C55F: "488dbc24c0140000",
+        0x5A6C567: "488db42400020000",
+        0x5A6C56F: "bab0000000",
+        0x5A6C574: "41ffd5",
+        0x5A6C5CB: "488db42440120000",
+        0x5A6C5D3: "ba38040000",
+        0x5A6C5D8: "41ffd5",
+        0x5649810: "4c8dbc2400040000",
+        0x5649818: "ba70040000",
+        0x5649820: "4c89e6",
+        0x5649B66: "498dbea8060000",
+        0x5649B6D: "488db424f8030000",
+        0x5649B7C: "ba78040000",
+        0x5649B81: "41ffd7",
+    }
+    for address, expected in expected_owner_bytes.items():
+        if owner.get(address, current_rows.get(address)) != bytes.fromhex(expected):
+            raise ValueError(f"owner/context join instruction changed at {address:#x}")
+
+    # The constructor input descriptor is +0x280. The copied context starts
+    # eight bytes into the owner's 0x478-byte copy, at owner body +0x6b0.
+    staging_offset = 0x14C0 - 0x1240
+    owner_context_offset = 0x6A8 + (0x400 - 0x3F8)
+    descriptor_owner_offset = owner_context_offset + staging_offset
+    if (staging_offset, owner_context_offset, descriptor_owner_offset) != (0x280, 0x6B0, 0x930):
+        raise ValueError("descriptor owner offset arithmetic changed")
+    if 0x930 + 0x10 != 0x940:
+        raise ValueError("returned-allocation prefix offset changed")
+
+    # The raw-reference packet passes owner+0x6b0 into the selected path;
+    # the compact packet retains the context and addresses its +0x280 field.
+    if history.get(0x4FCAE24) != bytes.fromhex("498d8fb0060000"):
+        raise ValueError("raw-reference context offset changed")
+    if history.get(0x4FCAE36) != bytes.fromhex("48898c24b0000000"):
+        raise ValueError("raw-reference context handoff changed")
+    if call_target(history, 0x4FCAE48) != 0x59EC200:
+        raise ValueError("raw-reference handoff target changed")
+    if comparator.get(0x5A05C14) != bytes.fromhex("498d9c2480020000"):
+        raise ValueError("compact comparator context+0x280 use changed")
+    if call_target(comparator, 0x5A05C5E) != 0x4E3A020:
+        raise ValueError("compact row helper call changed")
+    return {"owner_packet_witnesses": len(owner), "history_packet_witnesses": len(history),
+            "comparator_packet_witnesses": len(comparator),
+            "staging_offset": hex(staging_offset), "owner_context_offset": hex(owner_context_offset),
+            "descriptor_owner_offset": hex(descriptor_owner_offset),
+            "returned_allocation_offset": "0x940"}
+
+
 def analyze(data):
     digest = hashlib.sha256(data).hexdigest()
     if digest != TARGET:
         raise ValueError(f"wrong node #115 digest: {digest}")
     rows = load_witnesses(data)
+    predecessor_join = verify_predecessor_join(data, rows)
     if call_target(rows, 0x5A05C5E) != 0x4E3A020:
         raise ValueError("compact row loop no longer calls the selected helper")
     if rows[0x5A05C1C] != bytes.fromhex("4c8db42498000000") or rows[0x5A05C2B] != bytes.fromhex("4c8d642410"):
@@ -89,14 +151,12 @@ def analyze(data):
         raise ValueError("row record is no longer passed to the downstream boundary")
     if rows[0x50E702E] != bytes.fromhex("e87d672900") or call_target(rows, 0x50E702E) != 0x537D7B0:
         raise ValueError("downstream insertion boundary changed")
-    if 0x930 - 0x6B0 != 0x280:
-        raise ValueError("descriptor/context offset join changed")
     return {"target_sha256": digest, "witness_count": len(rows),
             "row_helper_call": hex(call_target(rows, 0x5A05C5E)),
             "descriptor_dispatch_slot": hex(indirect_slot(rows, 0x4E3A060)),
             "row_builder_call": hex(call_target(rows, 0x4E3A15C)),
             "downstream_boundary": hex(call_target(rows, 0x50E702E)),
-            "owner_descriptor_offset": "0x930", "owner_context_offset": "0x6b0"}
+            "predecessor_join": predecessor_join}
 
 
 def self_test(data):
