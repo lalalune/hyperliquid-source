@@ -1,0 +1,89 @@
+{
+ "artifact": "node #115",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": [
+  "RE-002-node115-tracer-header-footer-115 (open PR #5870, same author): the Tracer header/footer + write-gate packet -- ShouldSkipTrace (0x61b1930), WriteTrace (0x61b1a10), WriteFooter (0x61b35c0), WriteHeader (0x61b3860) -- whose gate and WriteTrace models this packet reuses (copied, not imported, because #5870 is not on upstream main yet).",
+  "RE-002-node115-tracer-helper-115 (open PR #5863, same author): the TracerHelper codec packet -- ParseVersionStr (0x61b10f0), EncodeTrace (0x61b1260), DecodeTrace, DecodeHeader -- whose EncodeTrace model this packet reuses (copied, not imported, because #5863 is not on upstream main yet).",
+  "RE-002-node115-tracer-write-115 (open PR #5875, same author) and RE-002-node115-tracer-get-115 (open PR #5877, same author): the Tracer::Write and Tracer::Get packets -- the first three recording methods, whose clock fast path, SetPayloadMap, PutFixed64, PutFixed32, PutLengthPrefixedSlice and EncodeVarint32 models this packet reuses (copied, not imported, because neither PR is on upstream main yet).",
+  "RE-002-node115-rocksdb-trace-replayer-vtable (merged), RE-002-node115-rocksdb-trace-cache-writer-vtable (merged) and RE-002-node115-rocksdb-trace-handler-vtable (merged): trace vtables; no body of Tracer::IteratorSeekForPrev is reconstructed there.",
+  "The Tracer constructor (0x61b3e60, census node115-vendor-61b3e60): copies the 32-byte TraceOptions into this+0x08..0x28, moves the writer into this+0x28, zeroes the counter at this+0x30, and calls WriteHeader once -- observed from its disassembly, not reconstructed in this packet.",
+  "Upstream source read (RocksDB v8.1.1, trace_replay/trace_replay.cc + trace_replay.h + include/rocksdb/trace_record.h): CONFIRMS the packet -- Tracer::IteratorSeekForPrev (trace_replay.cc:424-458) matches the binary step for step (local TraceType trace_type = kTraceIteratorSeekForPrev, gate before the clock, SetPayloadMap(kIterCFID) then SetPayloadMap(kIterKey), conditional SetPayloadMap(kIterLowerBound)/SetPayloadMap(kIterUpperBound) on size() > 0, PutFixed64(payload_map), PutFixed32(cf_id), PutLengthPrefixedSlice(key), conditional PutLengthPrefixedSlice(lower_bound)/PutLengthPrefixedSlice(upper_bound), return WriteTrace(trace)); signature is (const uint32_t& cf_id, const Slice& key, const Slice& lower_bound, const Slice upper_bound) -- the upper bound by value, exactly as the binary receives it on the stack. TracePayloadType is enum : char in trace_replay/trace_replay.h:71-85 (NOT in trace_record.h): kIterCFID = 4, kIterKey = 5, kIterLowerBound = 6, kIterUpperBound = 7; kTraceIteratorSeekForPrev = 6 (trace_record.h:29). SetPayloadMap is payload_map |= (1 << payload_type) (trace_replay.cc:120-127). The kTraceIteratorSeek/kTraceIteratorSeekForPrev decoder (DecodeTraceRecord, trace_replay.cc:214-270) reads the payload_map bits in ascending order -- kIterCFID (GetFixed32), kIterKey, kIterLowerBound, kIterUpperBound (each GetLengthPrefixedSlice) -- the same order the binary encodes. IteratorSeekForPrev (trace_replay.cc:424-458) is identical to IteratorSeek (trace_replay.cc:389-422) except trace_type = kTraceIteratorSeekForPrev -- and the binary confirms this directly: the two 1352-byte FDEs differ in exactly one semantic byte, the movb $0x6 at 0x61b27b2 versus movb $0x5 at 0x61b2242."
+ ],
+ "caller_census": {
+  "method": "Whole-.text scan for E8 calls, E9 tail jumps and RIP-relative LEA references landing on the target, validated by decoding forward from the enclosing FDE start with Capstone (census.py). A site counts only on a real instruction boundary with the expected mnemonic.",
+  "notes": [
+   "Tracer::IteratorSeekForPrev has exactly 1 direct caller: rocksdb::DBImpl::TraceIteratorSeek (FDE 0x5d55520..0x5d55644, the second copy) at 0x5d555b1. It passes (Status* sret, Tracer*, const uint32_t* cf_id, const Slice* key, const Slice* lower_bound, Slice upper_bound by value on the stack) with the tracer taken from the DB member at +0x650 after a null check (mov 0x650(%rsi),%rsi; test %rsi,%rsi; je <skip> at 0x5d5558b-0x5d55595); the same lock helper at 0x606ca40 is called just before, as in the Get callers; the upper bound's two words are copied onto the stack with movdqu/movups at 0x5d55597-0x5d555ad.",
+   "No E9 tail jump or LEA reference to 0x61b2760 exists in .text.",
+   "The first, nominally identical copy of DBImpl::TraceIteratorSeek (FDE 0x5d553c0..0x5d554e4) does NOT call IteratorSeekForPrev: it calls IteratorSeek (0x61b21f0) at 0x5d55451 -- the two copies diverge by seek direction. That call is observed in the first copy's disassembly, not part of this packet's validated census."
+  ],
+  "sites": [
+   {
+    "kind": "call",
+    "site": "0x5d555b1",
+    "site_fde": "0x5d55520..0x5d55644",
+    "target": "0x61b2760"
+   }
+  ],
+  "validated_sites": 1
+ },
+ "cases": {
+  "count": 2400,
+  "ledger": "cases.tsv",
+  "split": "1200 iterator_seek_for_prev + 600 iterator_seek_for_prev_payload + 600 encode_varint32",
+  "tests": "tests/test_tracer_iterator_seek_for_prev115.py",
+  "tool": "tools/tracer_iterator_seek_for_prev115.py",
+  "what_is_checked": [
+   "iterator_seek_for_prev: 200 IteratorSeekForPrev-flag skips (flags 0x08/0x09/0x1F/0x18; the clock is never consulted on the skip path), 200 file-size-gate skips (fsize above max), 200 six-call sampling sequences for periods 0/1/2/3/5/10 with counter starts 0/1/period-1, 50 writer-error rows where the writer's Status is returned as-is, 550 full records over boundary clocks (0, 1, 123456789, 2^63, 2^64-1, random u64s), CF ids (0, 1, 2, 3, 2^32-1, random u32s) and key/lower/upper sizes 0/1/3/127/128/256/1000/16383/16384 (incl. a realistic CF 0 / 'key' / 'lo' / 'hi' seek) cycling the four bound-presence combos",
+   "iterator_seek_for_prev_for_prev_payload: the payload bytes (PutFixed64(map) + PutFixed32(cf_id) + varint + key [+ varint + lower iff non-empty] [+ varint + upper iff non-empty]) for CF ids 0/1/2/3/2^32-1 and key/lower/upper sizes 0/1/3/127/128/256/1000/16383/16384",
+   "encode_varint32: boundary values 0/1/127/128/16383/16384/2097151/2097152/268435455/268435456/2^32-1 plus random u32s",
+   "the committed cases.tsv matches a fresh regeneration from the same seeded generator",
+   "the varint encodes the LOW 32 bits of each slice size while the append copies the full size (a >4 GiB slice would prefix the truncated length) is a disassembly-only observation, not covered by a case"
+  ]
+ },
+ "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM. The target binary is never executed. make verify/test/catalogue-check in a tooled environment is still owed upstream.",
+ "functions": {
+  "0x61b2760": {
+   "arguments": [
+    "rdi = Status* sret (hidden return slot; the function returns Status by value)",
+    "rsi = this (rocksdb::Tracer*)",
+    "rdx = const uint32_t* cf_id (the CF id by reference)",
+    "rcx = const Slice* key (data at +0x00, size at +0x08)",
+    "r8 = const Slice* lower_bound (data at +0x00, size at +0x08)",
+    "stack = Slice upper_bound by value (data at [rsp+0x08], size at [rsp+0x10] on entry; copied to [rsp+0x10] / r15 by the prologue)"
+   ],
+   "body_sha256": "bd710d8fd8b0d6bbbf85400fae86a35df819acf57849d5d8febc0fd30763597a",
+   "callers": [
+    "0x5d555b1 in FDE 0x5d55520..0x5d55644 (rocksdb::DBImpl::TraceIteratorSeek)"
+   ],
+   "mangled": "_ZN7rocksdb6Tracer19IteratorSeekForPrevERKjRKNS_5SliceES5_S3_",
+   "name": "rocksdb::Tracer::IteratorSeekForPrev",
+   "quirks": [
+    "On the skip path IteratorSeekForPrev returns Status::OK() without consulting the clock: a flagged or oversized seek leaves the clock's call count at 0 and the sampling counter untouched (flag skips) -- the gate runs before the timestamp is read.",
+    "The type byte lives in its own stack slot (rsp+0x23) passed by address to ShouldSkipTrace, then copied into trace.type at rsp+0x38 after the gate passes; ShouldSkipTrace reads the type through that pointer (movzbl 0x0(%rbp) at 0x61b1949).",
+    "The varint length prefix encodes the LOW 32 bits of each slice size (key: mov 0x8(%r13),%esi at 0x61b2a08; lower: the size passes through rsi/esi at 0x61b2a6d; upper: mov r15d,%esi at 0x61b2a84) while the append copies the full size_t -- a >4 GiB slice would prefix the truncated length; untestable at that scale, recorded from the disassembly.",
+    "The payload_map bits are never serialized by EncodeTrace; they are visible only as the first 8 payload bytes (PutFixed64). The map is 48 with empty bounds, 112 with lower only, 176 with upper only, 240 with both.",
+    "The timestamp comes from the 13-layer SystemClockWrapper::NowMicros fast path (each layer's vtable slot 19 compared against 0x5d4d490, followed through +0x20); the first layer whose slot differs calls that slot's function directly instead of continuing the chain.",
+    "The CF id is the uint32_t the caller passes by reference (loaded with a 32-bit load at 0x61b29d2) and stored little-endian as 4 bytes; it is NOT varint-encoded. (Unlike Get, there is no ColumnFamilyHandle vtable call here -- the caller already resolved the id.)",
+    "The upper bound arrives by value: the caller copies its two words onto the stack (movdqu/movups at the call site 0x5d55437-0x5d5544d); the function keeps the data pointer at [rsp+0x10] and the size in r15.",
+    "The exception landing pad at 0x61b2c9c..0x61b2ca7 (endbr64; mov rbx,rax; jmp 0x61b2738) runs only on the exception path (bad_alloc from the string appends); the string length guards raise length_error instead (std::string::_M_append, via __throw_length_error).",
+    "The payload string is freed only when its pointer differs from the SSO buffer at rsp+0x58 (standard string destruction); the three 5-byte varint buffers sit at rsp+0x69 (key), rsp+0x6e (lower) and rsp+0x73 (upper), just below the stack canary at rsp+0x78."
+   ],
+   "rules": [
+    "trace.type = 6 (kTraceIteratorSeekForPrev, immediate byte at 0x61b27b2)",
+    "if ShouldSkipTrace(this, type) (0x61b1930) returns true, return Status::OK() at once (no clock call, no writer call)",
+    "trace.ts = clock_->NowMicros() via the 13-layer SystemClockWrapper::NowMicros (0x5d4d490) fast path (vtable slot 19, +0x20 per layer); a layer whose slot differs calls that slot's function directly",
+    "TracerHelper::SetPayloadMap(trace.payload_map, 4) (0x61b18b0): bts bit 4 (kIterCFID), then SetPayloadMap(trace.payload_map, 5): bts bit 5 (kIterKey), so the in-memory payload_map becomes 48",
+    "if lower_bound.size() != 0 (cmp [r14+0x8],0 at 0x61b2970), SetPayloadMap(trace.payload_map, 6): bts bit 6 (kIterLowerBound); if upper_bound.size() != 0 (test r15,r15 at 0x61b297b), SetPayloadMap(trace.payload_map, 7): bts bit 7 (kIterUpperBound); both bounds present gives 240",
+    "PutFixed64(&trace.payload, trace.payload_map): append the 8 little-endian bytes of the map, with the std::string length guard",
+    "PutFixed32(&trace.payload, cf_id): the CF id (uint32_t by reference, 32-bit load at 0x61b29d2), appended as 4 little-endian bytes, with the std::string length guard",
+    "PutLengthPrefixedSlice(&trace.payload, key): EncodeVarint32((uint32_t)key_size) into a 5-byte stack buffer at rsp+0x69, append the varint bytes, then append the key bytes, each append with the std::string length guard",
+    "PutLengthPrefixedSlice(&trace.payload, lower_bound), only when lower_bound is non-empty (test at 0x61b2a71, branch to 0x61b2b40): varint of (uint32_t)lower_size into a 5-byte stack buffer at rsp+0x6e, then the varint bytes and the bound bytes",
+    "PutLengthPrefixedSlice(&trace.payload, upper_bound), only when upper_bound is non-empty (test at 0x61b2a7a): varint of (uint32_t)upper_size into a 5-byte stack buffer at rsp+0x73, then the varint bytes and the bound bytes (data from [rsp+0x10], size from r15)",
+    "return WriteTrace(trace) (0x61b1a10): EncodeTrace + TraceWriter::Write (slot 2); the returned Status is forwarded unchanged"
+   ],
+   "size": 1352,
+   "source_note": "Reproduced exactly by zeroing its 37 census relocation fields (kind 4 at offsets 88/509/524/560/618/671/692/737/777/811/852/892/908/941/976/1001/1042/1081/1091/1119/1147/1175/1208/1240/1272/1304/1336, kind 2 at offsets 1114/1142/1170/1198/1235/1267/1299/1331/1348, kind 42 at offset 215 with the gotpcrelx-mov-lea opcode restoration 0x8D -> 0x8B).",
+   "vtable_slot": "not applicable (ordinary member; no vtable -- Tracer is not polymorphic)"
+  }
+ }
+}
