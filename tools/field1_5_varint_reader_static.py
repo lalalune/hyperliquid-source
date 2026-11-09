@@ -82,7 +82,9 @@ def require(condition, message):
 
 
 def relocations(data):
-    sec = next(s for s in sections(data) if s['name'] == '.rela.dyn')
+    sec = next((s for s in sections(data) if s['name'] == '.rela.dyn'), None)
+    require(sec is not None, 'missing.rela.dyn section')
+    require(sec['size'] % 24 == 0, 'truncated.rela.dyn section')
     by_offset = {}
     for off in range(sec['offset'], sec['offset'] + sec['size'], 24):
         r_offset, r_info, r_addend = struct.unpack_from('<QQq', data, off)
@@ -285,7 +287,8 @@ def slow_outcome(marker, total):
 
 def census(data):
     """Direct E8 call sites and rip-relative references to the slow slot."""
-    sec = next(s for s in sections(data) if s['name'] == '.text')
+    sec = next((s for s in sections(data) if s['name'] == '.text'), None)
+    require(sec is not None, 'missing.text section')
     base, off, size = sec['address'], sec['offset'], sec['size']
     body = data[off:off + size]
     _, fs, _ = fde_extents(data)
