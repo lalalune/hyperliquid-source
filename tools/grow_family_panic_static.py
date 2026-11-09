@@ -60,6 +60,8 @@ map's business and stays outside.
 import ctypes
 import hashlib
 import json
+import os
+import platform
 import random
 import re
 import struct
@@ -918,6 +920,11 @@ def behavioral(data=None):
     the three bodies plus the absorb is mapped privately from the
     artifact itself, so no initialiser of the original binary runs.
     """
+    require(os.environ.get('HL_ALLOW_CAPTURED_EXECUTION') == '1',
+            'Captured execution requires explicit authorization and an isolated harness; '
+            'set HL_ALLOW_CAPTURED_EXECUTION=1 only after obtaining both')
+    require(platform.system() == 'Linux' and platform.machine() in ('x86_64', 'AMD64'),
+            'Captured execution requires Linux x86-64')
     if data is None:
         data = TARGET.read_bytes()
     require(hashlib.sha256(data).hexdigest() == SHA,
