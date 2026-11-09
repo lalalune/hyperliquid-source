@@ -102,8 +102,10 @@ and [source-built node acceptance](docs/SCOPE.md#source-built-network-node).
 </details>
 <!-- END GENERATED PROGRESS -->
 
-The [2026-11-09 evidence review](research/work-items/RE-001-node115-progress-review-2026-11-09/README.md)
-explains the inventory, byte comparisons and unaccepted full-scope gates.
+The [2026-11-09 post-merge evidence review](research/work-items/RE-001-node115-progress-review-2026-11-09/README.md#post-merge-refresh)
+rechecks the merged-main snapshot: **6.35234% of target `.text` bytes compared,
+5.93451% raw-equal, and 0.00% of full-scope gates accepted**. The earlier review
+snapshots and unmatched results remain preserved.
 
 ## Target: node #115
 
