@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""Generate functions.tsv and records.json for this packet from the
+vendor census + the binary, so no hash is hand-transcribed.
+
+Body hashes are recomputed from work/hl-node-115.bin over the FDE
+ranges; source hashes are recomputed by zeroing the census relocation
+fields (kind-42 entries additionally restore the pre-relaxation mov
+opcode 0x8b, exactly as verified during this work item).
+"""
+import hashlib
+import json
+import subprocess
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+PACKET = Path(__file__).resolve().parent
+BIN = ROOT / "work" / "hl-node-115.bin"
+DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+
+FUNCS = [
+    ("0x61b10f0", "0x61b1253", "rocksdb::TracerHelper::ParseVersionStr",
+     "parse-version-str-61b10f0"),
+    ("0x61b1260", "0x61b13a3", "rocksdb::TracerHelper::EncodeTrace",
+     "encode-trace-61b1260"),
+    ("0x61b13b0", "0x61b163c", "rocksdb::TracerHelper::DecodeTrace",
+     "decode-trace-61b13b0"),
+    ("0x61b1670", "0x61b18a5", "rocksdb::TracerHelper::DecodeHeader",
+     "decode-header-61b1670"),
+]
+
+
+def va2off(va):
+    out = subprocess.check_output(["readelf", "-lW", str(BIN)]).decode()
+    for line in out.splitlines():
+        p = line.split()
+        if p and p[0] == "LOAD":
+            v, o, f = int(p[2], 16), int(p[1], 16), int(p[4], 16)
+            if v <= va < v + f:
+                return o + (va - v)
+    raise ValueError(hex(va))
+
+
+def main():
+    data = open(BIN, "rb").read()
+    assert hashlib.sha256(data).hexdigest() == DIGEST
+    census = json.load(open(
+        ROOT / "research" / "work-items" / "RE-002-node115-vendor-census"
+        / "census.json"))["records"]
+    by_start = {r["start"]: r for r in census}
+    rows = []
+    for start_s, end_s, name, slug in FUNCS:
+        start, end = int(start_s, 16), int(end_s, 16)
+        body = data[va2off(start):va2off(end)]
+        body_hash = hashlib.sha256(body).hexdigest()
+        rec = by_start[start]
+        assert body_hash == rec["target_body_sha256"], name
+        zeroed = bytearray(body)
+        for rel in rec["relocations"]:
+            o, w = rel["offset"], rel["width"]
+            zeroed[o:o + w] = b"\x00" * w
+            if rel.get("kind") == 42:
+                assert zeroed[o - 2] == 0x8D
+                zeroed[o - 2] = 0x8B
+        source_hash = hashlib.sha256(bytes(zeroed)).hexdigest()
+        assert source_hash == rec["source_body_sha256"], name
+        relocs = ";".join(
+            f"{r['offset']}:kind{r['kind']}"
+            + ("(mov-lea)" if r.get("kind") == 42 else "")
+            for r in rec["relocations"])
+        rows.append({
+            "name": name, "start": start_s, "end": end_s,
+            "size": str(end - start), "body_sha256": body_hash,
+            "source_sha256": source_hash,
+            "raw_equal": str(rec["raw_equal"]),
+            "relocations": relocs, "census_id": f"node115-vendor-{start_s[2:]}",
+            "symbol": rec["symbol"], "excerpt": slug + ".objdump.txt",
+            "hex": slug + ".hex",
+        })
+    with open(PACKET / "functions.tsv", "w") as fh:
+        cols = ["name", "start", "end", "size", "body_sha256",
+                "source_sha256", "raw_equal", "relocations", "census_id",
+                "symbol", "excerpt", "hex"]
+        fh.write("\t".join(cols) + "\n")
+        for r in rows:
+            fh.write("\t".join(r[c] for c in cols) + "\n")
+    print(f"wrote functions.tsv ({len(rows)} functions, all hashes verified)")
+    return rows
+
+
+if __name__ == "__main__":
+    main()
