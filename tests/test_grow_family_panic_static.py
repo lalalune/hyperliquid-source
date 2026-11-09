@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-"""Verify the grow-family panic-closure packet end to end.
+"""Verify the grow-family panic-closure packet's static evidence.
 
 The packet's claims are checked four ways: the artifact is the pinned
 node #115 binary; analyze() re-derives every pinned fact from the raw
 bytes; one-byte counterfactuals against a branch displacement, a call
 displacement, a slot addend, an LSDA byte and the panic message each
-make analyze() fail; and generate() reproduces the committed evidence
-byte for byte, including the 20,000-case behavioural differential.
+make analyze() fail. The native differential and full generator round-trip
+require separate captured-code authorization and are skipped by default.
 """
 import hashlib
 import json
 import os
-import platform
 import struct
 import sys
 import tempfile
@@ -22,15 +21,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
 
 from elf_index import sections  # noqa: E402
+import grow_family_panic_static as grow  # noqa: E402
 from grow_family_panic_static import (  # noqa: E402
     ROOT, SHA, TARGET, analyze, behavioral, generate)
 
 ITEM = ROOT / 'research/work-items/RE-015-node115-grow-family-panic-closure'
-NATIVE_CAPTURE_AUTHORIZED = (
-    os.environ.get('HL_ALLOW_CAPTURED_EXECUTION') == '1'
-    and platform.system() == 'Linux'
-    and platform.machine() in ('x86_64', 'AMD64')
-)
 
 
 def offset_of(data, va):
@@ -49,11 +44,6 @@ def mutated(data, va, xor=0x01):
 
 
 class GrowFamilyPanicStaticTests(unittest.TestCase):
-    def test_native_execution_requires_explicit_authorization(self):
-        with patch.dict(os.environ, {'HL_ALLOW_CAPTURED_EXECUTION': '0'}):
-            with self.assertRaisesRegex(ValueError, 'explicit authorization'):
-                behavioral(b'')
-
     @classmethod
     def setUpClass(cls):
         cls.data = TARGET.read_bytes()
@@ -139,8 +129,31 @@ class GrowFamilyPanicStaticTests(unittest.TestCase):
         with self.assertRaises(Exception):
             analyze(bytes(blob))
 
-    @unittest.skipUnless(NATIVE_CAPTURE_AUTHORIZED,
-                         'requires authorized isolated Linux x86-64 target execution')
+    def test_native_execution_requires_explicit_opt_in(self):
+        with patch.dict(os.environ, {grow.CAPTURED_EXECUTION_ENV: ''}):
+            with self.assertRaisesRegex(PermissionError,
+                                        grow.CAPTURED_EXECUTION_ENV):
+                behavioral(self.data)
+
+    def test_native_execution_rejects_unsupported_host_even_with_opt_in(self):
+        with patch.dict(os.environ, {
+                grow.CAPTURED_EXECUTION_ENV: grow.CAPTURED_EXECUTION_VALUE}):
+            with patch.object(grow.sys, 'platform', 'linux'):
+                with patch.object(grow.platform, 'machine', return_value='arm64'):
+                    with self.assertRaisesRegex(RuntimeError, 'Linux x86-64'):
+                        behavioral(self.data)
+
+    def test_generate_requires_opt_in_before_writing(self):
+        with tempfile.TemporaryDirectory(dir='/tmp') as tmp:
+            with patch.dict(os.environ, {grow.CAPTURED_EXECUTION_ENV: ''}):
+                with self.assertRaisesRegex(PermissionError,
+                                            grow.CAPTURED_EXECUTION_ENV):
+                    generate(tmp)
+            self.assertEqual(list(Path(tmp).iterdir()), [])
+
+    @unittest.skipUnless(
+        grow.captured_execution_available(),
+        'requires separate captured-code authorization on Linux x86-64')
     def test_behavioral_differential(self):
         result = behavioral(self.data)
         self.assertEqual(result['cases'], 20000)
@@ -149,8 +162,9 @@ class GrowFamilyPanicStaticTests(unittest.TestCase):
         committed = json.loads((ITEM / 'behavior.json').read_text())
         self.assertEqual(result, committed)
 
-    @unittest.skipUnless(NATIVE_CAPTURE_AUTHORIZED,
-                         'requires authorized isolated Linux x86-64 target execution')
+    @unittest.skipUnless(
+        grow.captured_execution_available(),
+        'requires separate captured-code authorization on Linux x86-64')
     def test_generate_round_trip(self):
         committed = {name: (ITEM / name).read_bytes() for name in
                      ('records.json', 'classification.json',

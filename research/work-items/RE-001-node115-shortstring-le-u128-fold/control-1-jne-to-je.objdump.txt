@@ -1,0 +1,33 @@
+# NEGATIVE CONTROL 1: jne 0x15472fc (75 27) @0x15472d3 -> je (74 27)
+# Inverts the overflow-panic branch: the >=2**120 guard now BRANCHES WHEN
+# clear and FALLS THROUGH to panic when set. Scratch copy only; the capture is
+# never modified or executed. Base VA is blob-relative via --adjust-vma.
+
+Disassembly of section .data:
+
+00000000015472b0 <.data>:
+ 15472b0:	53                   	push   rbx
+ 15472b1:	31 c0                	xor    eax,eax
+ 15472b3:	b9 00 00 00 00       	mov    ecx,0x0
+ 15472b8:	48 39 f2             	cmp    rdx,rsi
+ 15472bb:	74 27                	je     0x15472e4
+ 15472bd:	73 2a                	jae    0x15472e9
+ 15472bf:	0f b6 1c 17          	movzx  ebx,BYTE PTR [rdi+rdx*1]
+ 15472c3:	48 ff c2             	inc    rdx
+ 15472c6:	ff 15 14 9d f9 04    	call   QWORD PTR [rip+0x4f99d14]        # 0x64e0fe0
+ 15472cc:	48 89 d1             	mov    rcx,rdx
+ 15472cf:	48 c1 ea 38          	shr    rdx,0x38
+ 15472d3:	74 27                	je     0x15472fc
+ 15472d5:	0f b6 d3             	movzx  edx,bl
+ 15472d8:	48 0f a4 c1 08       	shld   rcx,rax,0x8
+ 15472dd:	48 c1 e0 08          	shl    rax,0x8
+ 15472e1:	48 09 d0             	or     rax,rdx
+ 15472e4:	48 89 ca             	mov    rdx,rcx
+ 15472e7:	5b                   	pop    rbx
+ 15472e8:	c3                   	ret
+ 15472e9:	48 8d 05 78 69 eb 04 	lea    rax,[rip+0x4eb6978]        # 0x63fdc68
+ 15472f0:	48 89 d7             	mov    rdi,rdx
+ 15472f3:	48 89 c2             	mov    rdx,rax
+ 15472f6:	ff 15 24 83 f9 04    	call   QWORD PTR [rip+0x4f98324]        # 0x64df620
+ 15472fc:	48 8d 3d 7d 69 eb 04 	lea    rdi,[rip+0x4eb697d]        # 0x63fdc80
+ 1547303:	ff 15 67 85 f9 04    	call   QWORD PTR [rip+0x4f98567]        # 0x64df870

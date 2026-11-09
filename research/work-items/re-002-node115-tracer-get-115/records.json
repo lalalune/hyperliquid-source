@@ -1,0 +1,96 @@
+{
+ "artifact": "node #115",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": [
+  "RE-002-node115-tracer-header-footer-115 (open PR #5870, same author): the Tracer header/footer + write-gate packet -- ShouldSkipTrace (0x61b1930), WriteTrace (0x61b1a10), WriteFooter (0x61b35c0), WriteHeader (0x61b3860) -- whose gate and WriteTrace models this packet reuses (copied, not imported, because #5870 is not on upstream main yet).",
+  "RE-002-node115-tracer-helper-115 (open PR #5863, same author): the TracerHelper codec packet -- ParseVersionStr (0x61b10f0), EncodeTrace (0x61b1260), DecodeTrace, DecodeHeader -- whose EncodeTrace model this packet reuses (copied, not imported, because #5863 is not on upstream main yet).",
+  "RE-002-node115-tracer-write-115 (open PR #5875, same author): the Tracer::Write packet -- the first recording method, whose clock fast path, SetPayloadMap, PutFixed64, PutLengthPrefixedSlice and EncodeVarint32 models this packet reuses (copied, not imported, because #5875 is not on upstream main yet); its upstream read already gives the Get payload shape verified here.",
+  "RE-002-node115-rocksdb-trace-replayer-vtable (merged), RE-002-node115-rocksdb-trace-cache-writer-vtable (merged) and RE-002-node115-rocksdb-trace-handler-vtable (merged): trace vtables; no body of Tracer::Get is reconstructed there.",
+  "The Tracer constructor (0x61b3e60, census node115-vendor-61b3e60): copies the 32-byte TraceOptions into this+0x08..0x28, moves the writer into this+0x28, zeroes the counter at this+0x30, and calls WriteHeader once -- observed from its disassembly, not reconstructed in this packet.",
+  "Upstream source read (RocksDB v8.1.1, trace_replay/trace_replay.cc + trace_replay.h + include/rocksdb/trace_record.h + include/rocksdb/db.h): CONFIRMS the packet -- Tracer::Get (trace_replay.cc:370-387) matches the binary step for step (local TraceType trace_type = kTraceGet, gate before the clock, SetPayloadMap(kGetCFID) then SetPayloadMap(kGetKey), PutFixed64(payload_map), PutFixed32(column_family->GetID()), PutLengthPrefixedSlice(key), return WriteTrace(trace)); ShouldSkipTrace is bool ShouldSkipTrace(const TraceType& type) (trace_replay.h:175, defined trace_replay.cc:531) -- a const reference, which is why the binary passes the type byte's address; ColumnFamilyHandle::GetID() is virtual uint32_t GetID() const = 0 (include/rocksdb/db.h:83), the third declared virtual after the destructor and GetName, consistent with the binary's vtable slot 3 (0x18); kTraceGet = 4 (trace_record.h:28); SetPayloadMap is payload_map |= (1 << payload_type) (trace_replay.cc:121-127), so the map is 12, and the kTraceGet decoder reads the same order back."
+ ],
+ "caller_census": {
+  "method": "Whole-.text scan for E8 calls, E9 tail jumps and RIP-relative LEA references landing on the target, validated by decoding forward from the enclosing FDE start with Capstone (census.py). A site counts only on a real instruction boundary with the expected mnemonic.",
+  "notes": [
+   "Tracer::Get has exactly 3 direct callers, all in DBImpl Get paths: rocksdb::DBImpl::GetImpl (FDE 0x5d60fa0..0x5d623e0) at 0x5d61261, rocksdb::DBImplReadOnly::Get (FDE 0x5e704c0..0x5e7151e) at 0x5e706b9, rocksdb::DBImplSecondary::GetImpl (FDE 0x5e7ca80..0x5e7d919) at 0x5e7cd24. Each passes (Status* sret, Tracer*, ColumnFamilyHandle*, const Slice&) with the tracer taken from the DB member at +0x650 after a null check.",
+   "No E9 tail jump or LEA reference to 0x61b1e40 exists in .text."
+  ],
+  "validated_sites": 3,
+  "sites": [
+   {
+    "kind": "call",
+    "site": "0x5d61261",
+    "site_fde": "0x5d60fa0..0x5d623e0",
+    "target": "0x61b1e40"
+   },
+   {
+    "kind": "call",
+    "site": "0x5e706b9",
+    "site_fde": "0x5e704c0..0x5e7151e",
+    "target": "0x61b1e40"
+   },
+   {
+    "kind": "call",
+    "site": "0x5e7cd24",
+    "site_fde": "0x5e7ca80..0x5e7d919",
+    "target": "0x61b1e40"
+   }
+  ]
+ },
+ "cases": {
+  "count": 2400,
+  "ledger": "cases.tsv",
+  "split": "1200 get + 600 get_payload + 600 encode_varint32",
+  "tests": "tests/test_tracer_get115.py",
+  "tool": "tools/tracer_get115.py",
+  "what_is_checked": [
+   "get: 200 Get-flag skips (flags 0x01/0x03/0x1F/0x11; the clock is never consulted on the skip path), 200 file-size-gate skips (fsize above max), 200 six-call sampling sequences for periods 0/1/2/3/5/10 with counter starts 0/1/period-1, 50 writer-error rows where the writer's Status is returned as-is, 550 full records over boundary clocks (0, 1, 123456789, 2^63, 2^64-1, random u64s), CF ids (0, 1, 2, 3, 2^32-1, random u32s) and key sizes 0/1/3/127/128/256/1000/16383/16384 (incl. a realistic CF 0 / 'key' get)",
+   "get_payload: the payload bytes (PutFixed64(12) + PutFixed32(cf_id) + varint + key) for CF ids 0/1/2/3/2^32-1 and key sizes 0/1/3/127/128/256/1000/16383/16384",
+   "encode_varint32: boundary values 0/1/127/128/16383/16384/2097151/2097152/268435455/268435456/2^32-1 plus random u32s",
+   "the committed cases.tsv matches a fresh regeneration from the same seeded generator",
+   "the varint encodes the LOW 32 bits of the key size while the append copies the full size (a >4 GiB key would prefix the truncated length) is a disassembly-only observation, not covered by a case"
+  ]
+ },
+ "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM. The target binary is never executed. make verify/test/catalogue-check in a tooled environment is still owed upstream.",
+ "functions": {
+  "0x61b1e40": {
+   "arguments": [
+    "rdi = Status* sret (hidden return slot; the function returns Status by value)",
+    "rsi = this (rocksdb::Tracer*)",
+    "rdx = ColumnFamilyHandle* cf",
+    "rcx = const Slice* key (data at +0x00, size at +0x08)"
+   ],
+   "body_sha256": "cab72ce3c12d0e89e735d3c19bf41b57e7880e18d9292ff216b05da6852da800",
+   "callers": [
+    "0x5d61261 in FDE 0x5d60fa0..0x5d623e0 (rocksdb::DBImpl::GetImpl)",
+    "0x5e706b9 in FDE 0x5e704c0..0x5e7151e (rocksdb::DBImplReadOnly::Get)",
+    "0x5e7cd24 in FDE 0x5e7ca80..0x5e7d919 (rocksdb::DBImplSecondary::GetImpl)"
+   ],
+   "mangled": "_ZN7rocksdb6Tracer3GetEPNS_18ColumnFamilyHandleERKNS_5SliceE",
+   "name": "rocksdb::Tracer::Get",
+   "quirks": [
+    "On the skip path Get returns Status::OK() without consulting the clock: a flagged or oversized get leaves the clock's call count at 0 and the sampling counter untouched (flag skips) -- the gate runs before the timestamp is read.",
+    "The type byte lives in its own stack slot (rsp+0x13) passed by address to ShouldSkipTrace, then copied into trace.type at rsp+0x28 after the gate passes; ShouldSkipTrace reads the type through that pointer (movzbl 0x0(%rbp) at 0x61b1949).",
+    "The varint length prefix encodes the LOW 32 bits of the key size (mov 0x8(%r12),%esi -- a 32-bit load -- before EncodeVarint32) while the append copies the full size_t -- a >4 GiB key would prefix the truncated length; untestable at that scale, recorded from the disassembly.",
+    "The payload_map bits (kGetCFID = 2, kGetKey = 3; map becomes 12) are never serialized by EncodeTrace; they are visible only as the first 8 payload bytes (PutFixed64).",
+    "The timestamp comes from the 13-layer SystemClockWrapper::NowMicros fast path (each layer's vtable slot 19 compared against 0x5d4d490, followed through +0x20); the first layer whose slot differs calls that slot's function directly instead of continuing the chain.",
+    "The CF id is read through the ColumnFamilyHandle vtable slot 3 (0x18) -- GetID() -- and stored little-endian as 4 bytes; it is NOT varint-encoded.",
+    "The exception landing pad at 0x61b21be..0x61b21c5 jumps to the shared pad at 0x61b1e18..0x61b1e3d (_M_dispose + _Unwind_Resume) and runs only on the exception path (bad_alloc from the string appends); the string length guards raise length_error instead (std::string::_M_append, via __throw_length_error).",
+    "The payload string is freed only when its pointer differs from the SSO buffer at rsp+0x48 (standard string destruction); the 5-byte varint buffer sits at rsp+0x63, just below the stack canary at rsp+0x68."
+   ],
+   "rules": [
+    "trace.type = 4 (kTraceGet, immediate byte at 0x61b1e76)",
+    "if ShouldSkipTrace(this, type) (0x61b1930) returns true, return Status::OK() at once (no clock call, no writer call)",
+    "trace.ts = clock_->NowMicros() via the 13-layer SystemClockWrapper::NowMicros (0x5d4d490) fast path (vtable slot 19, +0x20 per layer); a layer whose slot differs calls that slot's function directly",
+    "TracerHelper::SetPayloadMap(trace.payload_map, 2) (0x61b18b0): bts bit 2 (kGetCFID), then SetPayloadMap(trace.payload_map, 3): bts bit 3 (kGetKey), so the in-memory payload_map becomes 12",
+    "PutFixed64(&trace.payload, trace.payload_map): append the 8 little-endian bytes of the map (0c 00 00 00 00 00 00 00), with the std::string length guard",
+    "PutFixed32(&trace.payload, column_family->GetID()): the CF id via the ColumnFamilyHandle vtable slot 3 (0x18), appended as 4 little-endian bytes, with the std::string length guard",
+    "PutLengthPrefixedSlice(&trace.payload, key): EncodeVarint32((uint32_t)key_size) into a 5-byte stack buffer, append the varint bytes, then append the key bytes ([key+0x00], [key+0x08] bytes), each append with the std::string length guard",
+    "return WriteTrace(trace) (0x61b1a10): EncodeTrace + TraceWriter::Write (slot 2); the returned Status is forwarded unchanged"
+   ],
+   "size": 906,
+   "source_note": "Reproduced exactly by zeroing its 21 census relocation fields (kind 4 at offsets 60/493/508/566/623/641/682/719/735/763/773/801/834/862/890, kind 2 at offsets 796/824/857/885/902, kind 42 at offset 178 with the gotpcrelx-mov-lea opcode restoration 0x8D -> 0x8B).",
+   "vtable_slot": "not applicable (ordinary member; no vtable -- Tracer is not polymorphic)"
+  }
+ }
+}

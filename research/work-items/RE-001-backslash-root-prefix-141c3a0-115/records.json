@@ -1,0 +1,58 @@
+{
+  "task": "RE-001",
+  "node": 115,
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "routine": {
+    "address": "0x141c3a0",
+    "fde": "0x141c3a0..0x141c3d3",
+    "size_bytes": 51,
+    "arguments": [
+      "rdi: byte buffer pointer",
+      "rsi: buffer length"
+    ],
+    "return": "one boolean byte in al: 1 when the buffer begins with a backslash separator root, else 0",
+    "internal_calls": 0,
+    "internal_tail_jumps": 0,
+    "internal_indirect_calls": 0,
+    "internal_indirect_tail_jumps": 0,
+    "tail_jumps": 0
+  },
+  "branches": [
+    {"condition": "length is 0", "reads": [], "result": "false; the buffer pointer is never dereferenced"},
+    {"condition": "byte[0] == 0x5c ('\\')", "reads": ["byte[0]"], "result": "true; length/byte[1..] never read on this path"},
+    {"condition": "length is 1 and byte[0] != 0x5c", "reads": ["byte[0]"], "result": "false"},
+    {"condition": "byte[1] is a UTF-8 continuation byte (0x80..0xbf)", "reads": ["byte[0]", "byte[1]"], "result": "false; signed cmpb $0xc0,byte[1] with jl"},
+    {"condition": "length is 2 and byte[1] begins a character", "reads": ["byte[0]", "byte[1]"], "result": "false"},
+    {"condition": "length > 3 and byte[3] is a UTF-8 continuation byte", "reads": ["byte[0]", "byte[1]", "byte[3]"], "result": "false; byte[3] must begin a character"},
+    {"condition": "length is 3, or length > 3 with byte[3] a character start", "reads": ["byte[0]", "byte[1]", "byte[2]", "byte[3] when length > 3"], "result": "true iff byte[1] == 0x3a (':') and byte[2] == 0x5c ('\\'); cmpw $0x5c3a,byte[1] with sete"}
+  ],
+  "reads": [
+    {"offset": "0x00", "width": 1, "role": "byte[0]; the leading-backslash fast path returns true when it is 0x5c"},
+    {"offset": "0x01", "width": 1, "role": "byte[1]; must begin a character (not 0x80..0xbf) before the drive-style test"},
+    {"offset": "0x01", "width": 2, "role": "word at byte[1]; the drive-style true case needs it to equal 0x5c3a (byte[1]=0x3a ':', byte[2]=0x5c '\\')"},
+    {"offset": "0x03", "width": 1, "role": "byte[3]; read only when length > 3, must begin a character (not 0x80..0xbf)"}
+  ],
+  "writes": [],
+  "never_read_or_written": [
+    "any buffer byte at index 4 or beyond",
+    "byte[1] or byte[3] when the earlier length checks already decided the result",
+    "the routine writes nothing and makes no calls"
+  ],
+  "census": {
+    "direct_call_count": 2,
+    "tail_jump_count": 0,
+    "internal_calls": 0,
+    "internal_tail_jumps": 0,
+    "internal_indirect_calls": 0,
+    "internal_indirect_tail_jumps": 0,
+    "stored_qwords": 0,
+    "relative_addends": 0
+  },
+  "consumers": [
+    {"site": "0x141c422", "caller_fde": "0x141c3d3..0x141c571", "note": "called with rdi=the (rsi) argument pointer, rsi=the (rdx) length; the caller inlines the forward-slash twin test (cmpb $0x2f and cmpw $0x2f3a) just before this call and only calls this routine when that inline test fails"},
+    {"site": "0x141c449", "caller_fde": "0x141c3d3..0x141c571", "note": "called with rdi=field +0x8 of the first argument object, rsi=field +0x10; the returned byte selects the separator (cmovne between 0x2f '/' and 0x5c '\\') the caller then compares against the buffer's last byte"}
+  ],
+  "neighbour_note": "the previous FDE 0x141c267..0x141c3a0 and the next FDE 0x141c3d3..0x141c571 (the sole caller) are separate routines; the bytes at 0x141c3d2 end this routine with ret, with no int3 padding before the caller's endbr-less push-rbp prologue at 0x141c3d3",
+  "inference_not_claimed": "the strong resemblance to a Windows backslash-root / drive-letter prefix check (leading '\\' or '?:\\'), reinforced by the caller's inlined '/' twin and separator selection, is an interpretation; this record claims only the bytes the routine reads and the boolean it returns"
+}

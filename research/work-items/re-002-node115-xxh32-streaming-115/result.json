@@ -1,0 +1,240 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "functions": [
+    {
+      "name": "createState",
+      "start": "0x61daa60",
+      "end": "0x61daa6e",
+      "body_sha256": "308f2076440391812825325f24d327c32527672b15d8a9a730fe94232d429aa8",
+      "fde": [
+        "0x61daa60",
+        "0x61daa6e"
+      ],
+      "census_id": null,
+      "census_symbol": null,
+      "census_body_sha256": "308f2076440391812825325f24d327c32527672b15d8a9a730fe94232d429aa8"
+    },
+    {
+      "name": "freeState",
+      "start": "0x61daa70",
+      "end": "0x61daa84",
+      "body_sha256": "630a5e3c790921ea2ebb0214f1d6b96e1a494793443717c8c12c9c26fa551770",
+      "fde": [
+        "0x61daa70",
+        "0x61daa84"
+      ],
+      "census_id": null,
+      "census_symbol": null,
+      "census_body_sha256": "630a5e3c790921ea2ebb0214f1d6b96e1a494793443717c8c12c9c26fa551770"
+    },
+    {
+      "name": "reset",
+      "start": "0x61daa90",
+      "end": "0x61daabb",
+      "body_sha256": "621561804b9507796c857c877e6915fd5dd213c6181a6115532ab4b3147351a4",
+      "fde": [
+        "0x61daa90",
+        "0x61daabb"
+      ],
+      "census_id": "node115-vendor-61daa90",
+      "census_symbol": "ROCKSDB_XXH32_reset",
+      "census_body_sha256": "621561804b9507796c857c877e6915fd5dd213c6181a6115532ab4b3147351a4"
+    },
+    {
+      "name": "update",
+      "start": "0x61daac0",
+      "end": "0x61dace6",
+      "body_sha256": "c9368927c229a3d3840e5fa5489e6b1aba1d178d81cb43d03d7119aacd49eae2",
+      "fde": [
+        "0x61daac0",
+        "0x61dace6"
+      ],
+      "census_id": "node115-vendor-61daac0",
+      "census_symbol": "ROCKSDB_XXH32_update",
+      "census_body_sha256": "c9368927c229a3d3840e5fa5489e6b1aba1d178d81cb43d03d7119aacd49eae2"
+    },
+    {
+      "name": "digest",
+      "start": "0x61dacf0",
+      "end": "0x61dae18",
+      "body_sha256": "f4ced493734fa7a8319db45be0a35b23343a679d37fbbf8bc5cc125b5b6353c5",
+      "fde": [
+        "0x61dacf0",
+        "0x61dae18"
+      ],
+      "census_id": "node115-vendor-61dacf0",
+      "census_symbol": "ROCKSDB_XXH32_digest",
+      "census_body_sha256": "f4ced493734fa7a8319db45be0a35b23343a679d37fbbf8bc5cc125b5b6353c5"
+    }
+  ],
+  "contract": {
+    "createState": "createState() -> *mut XXH32_state_t (malloc 0x30, uninitialised)",
+    "reset": "reset(state: *mut XXH32_state_t, seed: u32) -> 0",
+    "update": "update(state: *mut XXH32_state_t, data: *const u8, n: usize) -> 0",
+    "digest": "digest(state: *const XXH32_state_t) -> u32",
+    "freeState": "freeState(state: *mut XXH32_state_t) -> 0"
+  },
+  "state_layout": {
+    "size": "0x30",
+    "total_len": "0x0",
+    "large_len": "0x4",
+    "v1": "0x8",
+    "v2": "0xc",
+    "v3": "0x10",
+    "v4": "0x14",
+    "mem": "0x18",
+    "memsize": "0x28",
+    "invariant": "after every update, memsize == total_len % 16 and mem holds the last memsize input bytes"
+  },
+  "rodata_vectors": {
+    "reset_seeds@0x451ae0": {
+      "words": [
+        "0x24234428",
+        "0x85ebca77",
+        "0x00000000",
+        "0x61c8864f"
+      ]
+    },
+    "update_p2@0x452c60": {
+      "words": [
+        "0x85ebca77",
+        "0x85ebca77",
+        "0x85ebca77",
+        "0x85ebca77"
+      ]
+    }
+  },
+  "primes": {
+    "P2@0x61dab40": {
+      "value": "0x85ebca77"
+    },
+    "P1@0x61dab4f": {
+      "value": "0x9e3779b1"
+    },
+    "P3@0x61dad34": {
+      "value": "0xc2b2ae3d"
+    },
+    "P4@0x61dad43": {
+      "value": "0x27d4eb2f"
+    },
+    "P5@0x61dad98": {
+      "value": "0x165667b1"
+    },
+    "P1@0x61dada3": {
+      "value": "0x9e3779b1"
+    },
+    "P2@0x61dade6": {
+      "value": "0x85ebca77"
+    },
+    "P3@0x61dadf3": {
+      "value": "0xc2b2ae3d"
+    },
+    "P5@0x61dae08": {
+      "value": "0x165667b1"
+    }
+  },
+  "null_update": {
+    "test_site": "0x61daac4",
+    "target": "0x61dacc0",
+    "semantics": "update(state, NULL, n) returns 0 with the state untouched (total_len unchanged); a zero length with a non-null pointer routes through the small-copy path with a zero-length memcpy and is observably the same no-op"
+  },
+  "caller": {
+    "function": "rocksdb::ComputeBuiltinChecksumWithLastByte",
+    "address": "0x616bd60",
+    "calls": [
+      {
+        "name": "createState",
+        "site": "0x616bd96",
+        "target": "0x61daa60"
+      },
+      {
+        "name": "reset",
+        "site": "0x616bda3",
+        "target": "0x61daa90"
+      },
+      {
+        "name": "update",
+        "site": "0x616bdb1",
+        "target": "0x61daac0"
+      },
+      {
+        "name": "update",
+        "site": "0x616bdc3",
+        "target": "0x61daac0"
+      },
+      {
+        "name": "digest",
+        "site": "0x616bdcb",
+        "target": "0x61dacf0"
+      },
+      {
+        "name": "freeState",
+        "site": "0x616bdd5",
+        "target": "0x61daa70"
+      }
+    ],
+    "note": "the type-2 (xxhash32) arm of ComputeBuiltinChecksumWithLastByte creates a state, resets it with seed 0, updates with the input then with the single last byte, digests, keeps the low 32 bits, and frees the state (reconstructed in PR #5399)"
+  },
+  "check_values": {
+    "xxh32_empty": {
+      "data_hex": "",
+      "seed": "0x0",
+      "out": "0x02cc5d05",
+      "note": "published XXH32 empty vector 0x02cc5d05"
+    },
+    "xxh32_single_a": {
+      "data_hex": "61",
+      "seed": "0x0",
+      "out": "0x550d7456",
+      "note": "published XXH32 vector 0x550d7456"
+    },
+    "xxh32_abc": {
+      "data_hex": "616263",
+      "seed": "0x0",
+      "out": "0x32d153ff",
+      "note": "published XXH32 vector 0x32d153ff"
+    },
+    "xxh32_123456789": {
+      "data_hex": "313233343536373839",
+      "seed": "0x0",
+      "out": "0x937bad67",
+      "note": "computed by model and reference (both agree); confirmed against the system libxxhash oracle"
+    },
+    "xxh32_32_sequential": {
+      "data": "bytes 0..31",
+      "seed": "0x0",
+      "out": "0x830741c1",
+      "note": "two full stripes, no tail"
+    },
+    "xxh32_33_sequential_halves": {
+      "data": "bytes 0..32",
+      "seed": "0x0",
+      "out": "0xf1e6a545",
+      "note": "two stripes plus a 1-byte tail, fed in halves"
+    },
+    "xxh32_64_sequential_seed1_bytes": {
+      "data": "bytes 0..63",
+      "seed": "0x1",
+      "out": "0x55e9e5a0",
+      "note": "four stripes, nonzero seed, fed byte-by-byte"
+    },
+    "xxh32_1024_ab_thirds": {
+      "data": "1024 bytes of 0xab",
+      "seed": "0x0",
+      "out": "0x9248e481",
+      "note": "fed in thirds"
+    },
+    "xxh32_empty_seed1": {
+      "data_hex": "",
+      "seed": "0x1",
+      "out": "0x0b2cb792",
+      "note": "empty input under a nonzero seed"
+    }
+  },
+  "cases": {
+    "count": 2400,
+    "seed": 20261109,
+    "mismatches_vs_reference": 0,
+    "aggregate_sha256": "5e2858a46f0efa7cf256f3008beac389af4e057a5820fea43d0277ae1cd1a010"
+  }
+}

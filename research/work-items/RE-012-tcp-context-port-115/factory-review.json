@@ -1,0 +1,49 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "reviewed_files": {
+    "factory.py": "b5254d2989b469c5659c45f8d056f0408b19c4f1339feaccf9841e0542a7e003",
+    "factory-spec.json": "eb8092f078507329bc18e156be4670252ef682c1c3a69e020e710b7b7162480f"
+  },
+  "all_anchors_match_original_bytes_and_boundaries": 40,
+  "all_fde_digests_match": 9,
+  "raw_native_matches": [
+    "2b3f300.gnu",
+    "2b3f300.llvm",
+    "2b403a0.gnu",
+    "2b403a0.llvm",
+    "2cd1070.gnu",
+    "2cd1070.llvm",
+    "2cd1970.gnu",
+    "2cd1970.llvm",
+    "2b1d9a0.gnu",
+    "2b1d9a0.llvm",
+    "2b26920.gnu",
+    "2b26920.llvm"
+  ],
+  "worksheet_endpoints": {
+    "accept": {
+      "space": "accept_output",
+      "offset": "0x90"
+    },
+    "outer": {
+      "space": "outer_stack",
+      "offset": "0x9420"
+    },
+    "executor_a": {
+      "space": "allocation_a",
+      "offset": "0xc8"
+    },
+    "executor_b": {
+      "space": "allocation_b",
+      "offset": "0xc8"
+    }
+  },
+  "blocking_findings": [],
+  "notes": [
+    "Manual_coordinate_joins are output annotations and not independently semantic-verified by collector; current explicit assumption correctly reflects this.",
+    "Keep guards explicit: accept ctor R12!=3 then R12!=2; outer output tag !=2; outer peer check WORD stack+10 !=1; executor choice excludes R14==2 and selects A for R14d==1, B otherwise. No full R14 domain established.",
+    "Outer accept-state cleanup at 0x2ad5e3e and constructor scheduling calls are opaque. Preservation of copied bytes and resource validity must not be implied unconditional.",
+    "This links only 0x2accee0; executor B is not the large caller 0x2ad0db0.",
+    "Value3999 requires earlier listener-to-constructor evidence and its assumptions; this collector alone establishes the low-word routing geometry."
+  ]
+}

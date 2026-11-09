@@ -1,0 +1,107 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "records": [
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "address": "0x61c2600",
+      "end": "0x61c26c9",
+      "body_sha256": "09b69c91e274c5adf31eb408cf6a7fc004f4db177f34b61dc053cff1b8b4480c",
+      "identity": "rocksdb::crc32c::Crc32cCombine (vendor census)",
+      "contract": "crc32c_combine(crc1: u32, crc2: u32, len: usize) -> u32",
+      "semantics": "crc2 ^ advance(crc1, len zero bytes); no complementing inside; len 0 returns crc1 ^ crc2; stored-form concatenation needs the extra term advance(0xFFFFFFFF, len) (see check_values)"
+    },
+    {
+      "kind": "table",
+      "name": "POW",
+      "address": "0x97cde0",
+      "bytes": 256,
+      "sha256": "926ae5b229d74512abcb72ce4b6fa0e3f06e5704a1765103995fbbb8509c7ee6",
+      "derivation": "entry i advances the raw state by 32 * 2**i zero bits (verified: effective factor equals the bitwise advance; squaring chain holds for i 0..60; entries 62..63 are zero padding)"
+    },
+    {
+      "kind": "window",
+      "label": "entry_prologue",
+      "start": "0x61c2600",
+      "end": "0x61c262f",
+      "sha256": "08e9eb197d259cc4c8da9535415dc7b9a05dc633669b3429349a3bf729fc78f0"
+    },
+    {
+      "kind": "window",
+      "label": "aligned_word_setup",
+      "start": "0x61c262f",
+      "end": "0x61c2640",
+      "sha256": "35f0b32d33be3e9f73177918dce1ea1b56283db72b352e9cc3c6b645b20ec6ae"
+    },
+    {
+      "kind": "window",
+      "label": "outer_head_tzcnt",
+      "start": "0x61c2640",
+      "end": "0x61c2660",
+      "sha256": "afe5f3644682455fa143bc3a0140bd8893b8f906bf3aa6161d3a647c5e24750f"
+    },
+    {
+      "kind": "window",
+      "label": "gf2_multiply_loop",
+      "start": "0x61c2660",
+      "end": "0x61c2689",
+      "sha256": "e6b78207c24f4bae5280a5302d4ce94f54908a69b011f3e50a8e7885c337eb38"
+    },
+    {
+      "kind": "window",
+      "label": "outer_tail_exit",
+      "start": "0x61c2689",
+      "end": "0x61c26ae",
+      "sha256": "770bd93ded075e497bf3edd010266baff303a29d929ff4f1cb26e456737e4fb6"
+    },
+    {
+      "kind": "window",
+      "label": "misaligned_head_call",
+      "start": "0x61c26ae",
+      "end": "0x61c26c9",
+      "sha256": "473e36713dd35c7b01c8e684953a0dd74fcb5f74ff7d57455b3c29da75583980"
+    },
+    {
+      "kind": "window",
+      "label": "head_call_stub",
+      "start": "0x61c25f0",
+      "end": "0x61c25fa",
+      "sha256": "f6d8b461bc82431a3f10c54b3b509a456b18ad340dff570220cfbaf07fa9ae3d"
+    },
+    {
+      "kind": "head_call",
+      "stub": "0x61c25f0",
+      "fnptr_slot": "0x6508908",
+      "initializer": "0x61c26d0",
+      "observation": "misaligned head calls the registered extend function (0x61c21d0) through the PLT stub at 0x61c25f0, which jumps through the .bss slot at 0x6508908; the initializer stores 0x61c21d0 there; the double complement cancels, leaving the raw advance by len % 4 zero bytes"
+    },
+    {
+      "kind": "consumer",
+      "function": "rocksdb::WritableFileWriter::Append (.cold)",
+      "fde": [
+        "0x6054680",
+        "0x605518b"
+      ],
+      "call_site": "0x6054a79",
+      "observation": "call site passes the running checksum, the new chunk checksum and the chunk length; result is stored back to the running checksum field"
+    },
+    {
+      "kind": "case_summary",
+      "count": 2400,
+      "seed": 20261109,
+      "aggregate_sha256": "43ed075c833d623632c64bc6395fc49097144f05a621e3747312f9bfcef2fe0e",
+      "mismatches_vs_bitwise": 0,
+      "note": "model executed on deterministic cases; the binary itself was never executed"
+    },
+    {
+      "kind": "unknown",
+      "subject": "other callers of 0x61c2600",
+      "status": "only the WritableFileWriter::Append call site at 0x6054a79 was located; no exhaustive call census was run"
+    },
+    {
+      "kind": "unknown",
+      "subject": "which files or blocks the node checksums with the combined value",
+      "status": "not established by this packet"
+    }
+  ]
+}

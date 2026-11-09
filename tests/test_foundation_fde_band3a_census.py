@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -122,6 +123,14 @@ class FoundationFdeBand3aCensusTest(unittest.TestCase):
         end = int(record[1], 16)
         self.assertEqual(CHECKER.instruction_count(CHECKER.TARGET, start, end), record[4])
         self.assertGreater(record[4], 1)
+
+    def test_instruction_count_skips_wrapped_byte_continuations(self):
+        output = (
+            ' 00001000:\t48 89 c0          \tmov %rax,%rax\n'
+            ' 00001003:\t00 \n'
+        )
+        with patch.object(CHECKER, 'run', return_value=output):
+            self.assertEqual(CHECKER.instruction_count(CHECKER.TARGET, 0x1000, 0x1004), 1)
 
     def test_accepts_the_saved_packet_records(self):
         self.assertTrue(CHECKER.validate(self.actual, copy.deepcopy(self.evidence)))

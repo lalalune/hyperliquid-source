@@ -1,0 +1,13 @@
+structure	field	offset	meaning
+store argument	cap or niche	+0x00	0x8000000000000000 selects the B-tree form, any other value is the ring capacity
+store argument	buf or root	+0x08	ring buffer pointer, or B-tree root
+store argument	head or height	+0x10	ring head slot, or B-tree height
+store argument	length	+0x18	number of snapshots
+ring element	size	0x38	u64 epoch then a 0x30 byte snapshot value
+snapshot value	cap or niche	+0x00	niche selects a key B-tree, else a ring of 0x68 byte elements
+snapshot value	buf or root / head or height / length	+0x08 / +0x10 / +0x18	
+vec element	key	+0x00	32 bytes, ascending, compared with memcmp (GOT slot 0x64dfb50)
+vec element	address	+0x40	20 bytes
+tree node	key / value	+0x00 stride 0x20 / +0x168 stride 0x48	address at value +0x20
+output record	status word	+0x00	0x1a2 hit, 0x2b address not a member, 0x98 key absent, 0x9b no snapshot of the epoch
+output record	payload	+0x02	32 byte key (by address) or 20 byte address (by key); 0x9b stores a zero qword at +0x08

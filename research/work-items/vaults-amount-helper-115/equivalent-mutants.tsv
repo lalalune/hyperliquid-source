@@ -1,0 +1,17 @@
+address	kind	edited_byte_at	reason
+0x44a95c6	displacement	0x44a95c9	the key tail copy for the third lookup moves to another stack slot, but slot 0x30 already holds the same four bytes from the copy at 0x44a94b9 and nothing writes it in between
+0x44a9601	immediate	0x44a9604	r8 = n << 3 versus n << 2 is only tested against zero before the first key comparison; the back edge that would use it never runs
+0x44a9628	immediate	0x44a962b	the decrement of r8 feeds only the next loop iteration, and the back edge needs 0 > key, which never holds for an unsigned key
+0x44a979f	immediate	0x44a97a2	a saturated sum of 2^64-2 instead of 2^64-1 has the same quotient: (2^64-2) >> 2 == (2^64-1) >> 2
+0x45584f9	immediate	0x45584fa	the compare only separates Less from Greater for the first key of the back slice against target 0; Less cannot occur for unsigned keys
+0x455857a	immediate	0x455857d	for a one element slice the loop body halves 1 to 0, changes nothing and reaches the same final compare as the shortcut
+0x45585b5	immediate	0x45585b8	adc rdi,imm only changes the insertion index of a miss, and the caller reads the index only when the search reported a hit
+0x455b7f8	immediate	0x455b7f9	the compare only separates Less from Greater for the first key of the back slice against target 0; Less cannot occur for unsigned keys
+0x455b879	immediate	0x455b87c	for a one element slice the loop body halves 1 to 0, changes nothing and reaches the same final compare as the shortcut
+0x455b8af	immediate	0x455b8b2	adc rdi,imm only changes the insertion index of a miss, and the caller reads the index only when the search reported a hit
+0x471748e	displacement	0x4717492	the stored copy of the first hasher key word is never read again: write and finish touch only offsets 0 to 0x18 and 0x30 to 0x40
+0x4717493	displacement	0x4717497	the stored copy of the second hasher key word is never read again and the slot at 0x30 is overwritten by the next two stores
+0x459289b	immediate	0x459289e	the tail length mask 7 versus 6 differs only in bit 0, and the hasher is only called with 20 bytes, whose tail length is 4 under both masks
+0x459289f	immediate	0x45928a2	the whole-word byte count mask differs only in bit 0 and 20 & mask is 16 under both masks
+0x459291c	immediate	0x459291d	the tail offset 4 versus 5 only changes whether a following 2 byte or 1 byte read is attempted, and a 4 byte tail needs neither
+0x4592923	immediate	0x4592925	or ecx,1 versus or ecx,0 gives 5 or 4 and both fail the 2 byte read test against a tail length of 4

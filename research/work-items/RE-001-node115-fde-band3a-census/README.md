@@ -50,8 +50,8 @@ at check time:
 | `.text` | VA `0x1419300`, file offset `0x1418300`, size `0x4fd7700` |
 | band | `0x3a00000..0x3a40000` (starts only) |
 | in-band complete FDEs | 53 |
-| first in-band record | `0x3a011d0..0x3a01c63`, 2707 bytes, 630 instructions |
-| smallest body | `0x3a15a60..0x3a15d9e`, 830 bytes, 194 instructions, SHA-256 `50b56241a09beea892f37b1139575cd3bb45efa5d9f33d20c6d853ef3dcd2622` |
+| first in-band record | `0x3a011d0..0x3a01c63`, 2707 bytes, 577 instructions |
+| smallest body | `0x3a15a60..0x3a15d9e`, 830 bytes, 185 instructions, SHA-256 `50b56241a09beea892f37b1139575cd3bb45efa5d9f33d20c6d853ef3dcd2622` |
 
 Within this section a VA maps to file offset `VA - 0x1000` (offset `0x1418300`
 at VA `0x1419300`), which is how each body is read for hashing. Every in-band

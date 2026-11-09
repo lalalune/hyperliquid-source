@@ -1,0 +1,193 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "function": {
+    "start": "0x616bca0",
+    "end": "0x616bd51",
+    "body_sha256": "be940db36c40290321b93a1c386040a55c14fd0beab8a1c5de9688c1ad3674f2",
+    "fde": [
+      "0x616bca0",
+      "0x616bd51"
+    ],
+    "census_symbol": "rocksdb::ComputeBuiltinChecksum",
+    "census_body_sha256": "be940db36c40290321b93a1c386040a55c14fd0beab8a1c5de9688c1ad3674f2"
+  },
+  "dispatch": [
+    {
+      "type": 0,
+      "arm": "default_arm",
+      "note": "returns 0 (kNoChecksum and any other type)"
+    },
+    {
+      "type": 1,
+      "arm": "crc32c_arm",
+      "note": "mask(extend(0, data, n))"
+    },
+    {
+      "type": 2,
+      "arm": "xxhash_arm",
+      "note": "XXH32(data, n, seed 0)"
+    },
+    {
+      "type": 3,
+      "arm": "xxhash64_arm",
+      "note": "(u32) XXH64(data, n, seed 0)"
+    },
+    {
+      "type": 4,
+      "arm": "mulmix_arm",
+      "note": "(u32) XXH3_64bits(data, n-1) ^ (data[n-1] * 0x6b9083d9); n == 0 returns 0; modelled for n <= 17"
+    }
+  ],
+  "crc32c_arm": {
+    "start": "0x616bd18",
+    "end": "0x616bd30",
+    "extend_stub": [
+      "0x61c25f0",
+      "0x61c25fa"
+    ],
+    "extend_stub_sha256": "f6d8b461bc82431a3f10c54b3b509a456b18ad340dff570220cfbaf07fa9ae3d",
+    "fnptr_slot": "0x6508908",
+    "extend_target": "0x61c21d0 (rocksdb::crc32c::ExtendImpl<Slow_CRC32>)",
+    "mask": {
+      "sub_immediate_address": "0x616bd29",
+      "sub_immediate": "0x5d7d1528",
+      "constant": "0xa282ead8",
+      "sub_immediate_sites_in_text": [
+        "0x5db638a",
+        "0x5db64c5",
+        "0x5db6614",
+        "0x5db6667",
+        "0x5db6784",
+        "0x5db6832",
+        "0x5f01d11",
+        "0x5f02e65",
+        "0x5f03c0d",
+        "0x6154d12",
+        "0x6154d18",
+        "0x616bd29"
+      ],
+      "formula": "ror32(crc, 15) + 0xa282ead8 (mod 2**32), expressed in the binary as ror32(crc, 15) - 0x5d7d1528"
+    },
+    "semantics": "mask(extend(0, data, n))"
+  },
+  "xxhash_arm": {
+    "start": "0x616bcc8",
+    "end": "0x616bce0",
+    "callee": {
+      "start": "0x61da8b0",
+      "end": "0x61daa52",
+      "body_sha256": "b2d5ccf56d670650affce9c0efa1fe0ce5eaaf92543d3b3658fd03350f9675b8",
+      "identity": "ROCKSDB_XXH32"
+    },
+    "semantics": "XXH32(data, n, seed 0)"
+  },
+  "xxhash64_arm": {
+    "start": "0x616bd30",
+    "end": "0x616bd48",
+    "callee": {
+      "start": "0x61dae20",
+      "end": "0x61db121",
+      "body_sha256": "577ad945e65ddde3fc0ca78ae8d6316c7cb08203bbca5d08a07babca5d08bec8",
+      "identity": "ROCKSDB_XXH64"
+    },
+    "semantics": "(u32) XXH64(data, n, seed 0)"
+  },
+  "mulmix_arm": {
+    "start": "0x616bce0",
+    "end": "0x616bd18",
+    "callee": {
+      "start": "0x61db650",
+      "end": "0x61db93a",
+      "body_sha256": "adde9328dc4c355cf1410323721f18dea26b8d5508920d127f8cdfdabe5aa3bb",
+      "identity": "ROCKSDB_XXH3_64bits"
+    },
+    "semantics": "n == 0 -> 0; else (u32) XXH3_64bits(data, n-1) ^ (data[n-1] * 0x6b9083d9); modelled for n <= 17"
+  },
+  "check_values": {
+    "crc32c_check_value_123456789": {
+      "type": 1,
+      "data_hex": "313233343536373839",
+      "out": "0xc78ab0e5",
+      "stored_crc_of_data": "0xe3069283"
+    },
+    "crc32c_empty": {
+      "type": 1,
+      "data_hex": "",
+      "out": "0xa282ead8",
+      "stored_crc_of_data": "0x00000000"
+    },
+    "xxhash_empty": {
+      "type": 2,
+      "data_hex": "",
+      "out": "0x02cc5d05",
+      "note": "published XXH32 empty vector 0x02cc5d05"
+    },
+    "xxhash_single_a": {
+      "type": 2,
+      "data_hex": "61",
+      "out": "0x550d7456",
+      "note": "published XXH32 vector 0x550d7456"
+    },
+    "xxhash64_empty_low32": {
+      "type": 3,
+      "data_hex": "",
+      "out": "0x51d8e999",
+      "note": "low 32 bits of published XXH64 empty 0xef46db3751d8e999"
+    },
+    "xxhash64_single_a_low32": {
+      "type": 3,
+      "data_hex": "61",
+      "out": "0xa98c6e5b",
+      "note": "low 32 bits of published XXH64 0xd24ec4f1a98c6e5b"
+    },
+    "mulmix_empty": {
+      "type": 4,
+      "data_hex": "",
+      "out": "0x00000000",
+      "note": "n == 0 returns 0 before the helper call"
+    },
+    "mulmix_single_a": {
+      "type": 4,
+      "data_hex": "61",
+      "out": "0xf91261fb",
+      "note": "(u32) XXH3_64bits(b\"\") ^ (0x61 * 0x6b9083d9)"
+    },
+    "mulmix_abc": {
+      "type": 4,
+      "data_hex": "616263",
+      "out": "0xbc378fb7",
+      "note": "(u32) XXH3_64bits(b\"ab\") ^ (0x63 * 0x6b9083d9)"
+    },
+    "default_type_0": {
+      "type": 0,
+      "data_hex": "616263",
+      "out": "0x00000000"
+    },
+    "default_type_5": {
+      "type": 5,
+      "data_hex": "616263",
+      "out": "0x00000000"
+    },
+    "long_input_1024_ab_crc32c": {
+      "type": 1,
+      "data": "1024 bytes of 0xab",
+      "out": "0x03aa3370"
+    },
+    "long_input_1024_ab_xxhash": {
+      "type": 2,
+      "data": "1024 bytes of 0xab",
+      "out": "0x9248e481"
+    },
+    "long_input_1024_ab_xxhash64": {
+      "type": 3,
+      "data": "1024 bytes of 0xab",
+      "out": "0x25963ec5"
+    }
+  },
+  "cases": {
+    "count": 2400,
+    "seed": 20261109,
+    "mismatches_vs_reference": 0,
+    "aggregate_sha256": "60328b51e92acd9aca52afea99709d090534f8109ec172dd371d2dd066fd9647"
+  }
+}

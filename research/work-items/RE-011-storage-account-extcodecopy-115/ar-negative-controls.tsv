@@ -1,0 +1,34 @@
+kind	control	result	first_detecting_case
+model	hash_gate_minus_one	detected	extcodehash-0-0029
+model	no_cold_charge	detected	balance-0-0002
+model	charge_warm_too	detected	balance-0-0000
+model	skip_when_equal	detected	balance-0-0005
+model	empty_ignores_spec	detected	loader-0-0010
+model	legacy_ignores_touched	detected	loader-0-0011
+model	extcodehash_uses_loader_empty	detected	extcodehash-0-0004
+model	selfbalance_overflow_first	detected	selfbalance-0-0006
+model	selfbalance_err_oog	detected	selfbalance-0-0015
+model	address_little_endian	detected	balance-0-0000
+model	codesize_none_is_zero	detected	extcodesize-0-0000
+model	underflow_wraps	detected	balance-0-0003
+model	no_code_load_on_cold_oog	detected	extcodesize-0-0003
+code	0x29906a6=0x06 EXTCODEHASH copy 0 gate 5 -> 6	detected	extcodehash-0-0001
+code	0x29908d6=0x04 EXTCODEHASH copy 1 gate 5 -> 4	detected	extcodehash-1-0011
+code	0x2990f16=0x07 SELFBALANCE copy 0 gate 6 -> 7	detected	selfbalance-0-0001
+code	0x2990f93=0x75 SELFBALANCE copy 0 je -> jne on the stack limit	detected	selfbalance-0-0001
+code	0x2990f64=0x37 SELFBALANCE copy 0 error result 0x36 -> 0x37	detected	selfbalance-0-0015
+code	0x2991001=0x88 loader 0 cold price params+0x80 -> +0x88	detected	balance-0-0002
+code	0x2991078=0x03 loader 0 content-rule spec bound 2 -> 3	detected	loader-0-0001
+code	0x2991103=0x10 loader 0 not-existing flag 0x08 -> 0x10	detected	loader-0-0010
+code	0x2991117=0x08 loader 0 touched flag 0x04 -> 0x08	detected	loader-0-0010
+code	0x299108b=0x81 loader 0 empty-hash high-half displacement	detected	loader-0-0001
+code	0x2991134=0x10 loader 0 gas store record+0x18 -> +0x10	detected	balance-0-0002
+code	0x29911cb=0x01 loader 1 content-rule spec bound 2 -> 1	detected	loader-1-0012
+code	0x2991257=0x0c loader 1 touched flag 0x04 -> 0x0c	detected	loader-1-0012
+code	0x2991261=0x01 loader 1 sub -> add on the cold charge	detected	balance-1-0000
+code	0x2990c21=0x48 EXTCODESIZE copy 0 code length +0x50 -> +0x48	detected	extcodesize-0-0002
+code	0x29907cd=0x3f EXTCODEHASH copy 0 empty-hash high-half displacement	detected	extcodehash-0-0084
+code	0x2994f60=0x18 BALANCE copy 0 address shift 0x20 -> 0x18	detected	balance-0-0000
+code	0x29950c0=0x18 BALANCE copy 1 address shift 0x20 -> 0x18	detected	balance-1-0001
+input	binary with one flipped byte	detected	sha256
+input	code fetch outside .text	detected	range

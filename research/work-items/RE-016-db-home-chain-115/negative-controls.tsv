@@ -1,0 +1,53 @@
+kind	control	detected
+model	a:dir_inverted	1
+model	a:gate_ignored	1
+model	a:kind_one	1
+model	a:name_len_11	1
+model	a:sub_leak	1
+model	a:out_short	1
+model	b:mode_inverted	1
+model	b:cp_flag_zero	1
+model	c:sort_always_small	1
+model	c:leaf_68	1
+model	c:arc_weak_zero	1
+model	d:key_off_by_one	1
+code	0x38b38db=0x01 directory kind byte 2 -> 1	1
+code	0x38b3950=0x0b remove_dir name length 10 -> 11	1
+code	0x38b38ca=0x85 probe branch je -> jne	1
+code	0x4468375=0x00 first cp flag 1 -> 0	1
+code	0x44682bb=0xfe create_dir mode 0x1ff -> 0x1fe	1
+code	0x44682c3=0x00 create_dir recursive byte 1 -> 0	1
+code	0x44682ea=0x85 mode branch je -> jne	1
+code	0x44682f7=0x01 directory kind byte 2 -> 1	1
+code	0x4468478=0x03 join_kind esi 2 -> 3	1
+code	0x38b3b9d=0x18 item vector allocation 0x10 -> 0x18	1
+code	0x38b3c34=0x68 leaf node allocation 0x70 -> 0x68	1
+code	0x38b3d5d=0x38 block allocation 0x40 -> 0x38	1
+code	0x38b3c1d=0x02 single-item test 1 -> 2	1
+code	0x38b3e71=0x16 small-sort bound 0x15 -> 0x16	1
+code	0x38b3c74=0x03 item stride shl 4 -> 3	1
+code	0x38b3d40=0x02 block strong count 1 -> 2	1
+code	0x38b3d49=0x02 block weak count 1 -> 2	1
+code	0x38b3c06=0x85 empty-items branch je -> jne	1
+code	0x3915d67=0x18 list argument offset 0x10 -> 0x18	1
+code	0x3915d7e=0x81 list error branch jo -> jno	1
+code	0x3915d9d=0x04 entry stride shl 5 -> 4	1
+code	0x3915de3=0x74 sentinel test jne -> je	1
+code	0x3915dfc=0x75 key test je -> jne	1
+code	0x3915e7c=0x04 buffer size shl 5 -> 4	1
+code	0x3915ed4=0xc8 mode 0 -> stale ecx	1
+code	0x38b3880 bit 2 flipped format pieces operand (lea rdx) of the first format	1
+code	0x44683ad bit 2 flipped format pieces operand of the checkpoint text	1
+code	0x4468686 bit 2 flipped mode-0 path: pieces operand	1
+code	0x44687a4 bit 2 flipped tail free test	1
+input	one flipped .text byte	1
+input	address past .text	1
+plan	a: remove_dir before the second probe	1
+plan	a: remove_dir twice	1
+plan	b: write_state dropped	1
+plan	b: cp and join swapped	1
+plan	b: copy_file without the marker probe	1
+plan	b: mode 0 with a join	1
+plan	b: create_dir after cp	1
+plan	d: join in the mode-0 route	1
+plan	d: two source copies	1

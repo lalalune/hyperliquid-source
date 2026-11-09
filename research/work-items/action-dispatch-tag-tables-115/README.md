@@ -1,0 +1,49 @@
+# action-dispatch: reconstruct the node #115 action-tag selector 0x2bdb5b0 and classifier 0x36c30f0
+
+With this packet a reconstruction can rebuild two of the central action-tag switches of node #115 as executable Python models (index rule, all 92 jump-table arms, nested-action forwarding, vector/scalar/slot arms, empty-result word) that agree with the real arm bytes on 12,000 generated action objects, with 75 deliberately wrong variants all rejected.
+
+- Component ID: `action-dispatch`
+- Target release and full SHA-256: Linux x86-64 node #115, `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`
+- Source commit / reference commit: repository `0781ce04826eeefd89fe336cb8ea073be0c1de30`; no reference-source text was used.
+- Claim status: observation (tables, arm bytes, interpreter agreement) and inference (names such as "selector"/"classifier", and the role of each arm); unresolved items are listed under limits.
+- Scope included and excluded: the two functions `0x2bdb5b0..0x2bdb911` (selector) and `0x36c30f0..0x36c3175` (classifier), their relative jump tables at `0x60a080` and `0x79afb0` (92 entries each), the shared index rule, and the observable effect of every arm (callee, argument registers, stack words, output bytes, return word). Callee bodies, the router `0x2bda7c0` (another open PR), the dispatcher `0x2bdbaa0`, wire decoding, execution of the target and chain state are excluded.
+
+## Reproduce
+
+From the repository root, Python 3.10 or newer, the authenticated target at `artifacts/node/115/hl-node`, and the shared parsers `tools/elf_index.py`:
+
+```sh
+python3 tools/action_tag_tables_115.py --out research/work-items/action-dispatch-tag-tables-115
+python3 -m unittest tests.test_action_tag_tables_115
+python3 tools/artifacts.py verify
+python3 tools/catalogue.py --check
+```
+
+The tool hashes the input first and fails if it is not the node #115 digest. It reads only `.text`/`.rodata` file bytes through the section table, never runs the target, spawns no program and uses only the standard library. Every number and list in this folder is produced by it; `MANIFEST.sha256` hashes the other files. Peak memory is far below 1 GB: each case is built, run, compared and discarded.
+
+## Evidence
+
+Observations (all addresses are linked ELF virtual addresses):
+
+- Both functions compute `index = tag - 0x86` when the first qword of the object is `>= 0x86` and `index = 0x14` otherwise (`sub ...,0x86; mov 0x14; cmovb`), then `jmp` through a table of signed 32-bit offsets relative to the table start. 92 entries (tags `0x86..0xe1`) have targets inside each function; the dispatcher `0x2bdbaa0` has a 92-entry table at `0x60a360` with the same index rule. Indices `>= 92` are outside the table; the models refuse them.
+- Selector arms (`arms.tsv`): 36 distinct targets for 92 indices. 56 indices share the empty arm `0x2bdb5f5` (stores `0` to `[rdi+8]` and `[rdi+0x18]`, word `0x1a2` to `[rdi]`, returns `rdi`; this includes the default index 20). 26 indices (25 distinct callees) forward `rsi+8` to a callee with `rdx` unchanged, 7 indices build four stack words `{rdx, 0, 1, u32 [obj+off]}` for `0x2785b80` with `off` in `0x10 0xc 0x58 0x20 0x40 0x50`, one builds `{ptr, ptr+len*0x38, rdx}` for `0x27848b0` from `[obj+0x10]`/`[obj+0x18]`, one (index 40, `0x2bdb694`) builds a six-word record for `0x451e890` and stores `0x1a2`, and index 52 (`0x2bdb5d9`) follows `[obj+0x20]` and dispatches again.
+- Classifier arms: 7 distinct targets. Default `0x36c3115` returns 0; `0x36c313d` returns 1 (indices 3 4 18 35); index 2 tail-jumps through GOT slot `0x64e8e28` with `rdi+8`; indices 12 and 36 return the byte at `+0x56` / `+0x55`; index 14 is true iff every 0x38-byte element of the vector at `+0x10`/`+0x18` has a non-zero byte at `+0x36` (true for an empty vector); index 52 follows `[obj+0x20]`.
+- The index-52 arm is the same nested-action wrapper in both functions, which agrees with the nested route noted in `RE-010-display-name-path-115`.
+
+## Implementation and comparison
+
+`tools/action_tag_tables_115.py` contains (1) an interpreter for the x86-64 opcode forms found in these functions (it raises on any other opcode, so a byte change cannot pass silently), (2) a case generator that lays out chains of action objects with random fields, a vector and a stack filled with a poison byte, (3) independent hand-written models `model_selector` and `model_classifier` driven by the arm dictionaries `SELECTOR_ARMS` / `CLASSIFIER_ARMS`, and (4) the controls. Each case runs the real bytes and the model on identical memory and compares calls (kind, target, `rdi`, `rsi`, `rdx`, six stack words), the first 0x20 output bytes and the return register.
+
+Results (`summary.json`, `measure.json`): 12,000 cases (6,000 per function; every table index is visited as the first tag, plus the default region and nested chains), 0 mismatches. `cases-sample.tsv` keeps every 12th case with result digests; the rest is regenerated by the tool.
+
+Negative controls (`controls.tsv`): 75 in total, all detected: 56 wrong models (callee, field offset, dropped arm, extra arm, tag base, default index, empty word, stride, nest field, flipped classifier results), 10 byte flips in the real code (tag base, default index, empty word, vector stride, scalar offset, nested field, flag byte offsets, return value), 8 out-of-table tag checks (4 tags x 2 functions), and a wrong-digest input.
+
+## Results and limitations
+
+- Established: index rule, both 92-entry tables, the arm behavior of all 36 selector and 7 classifier targets, nested forwarding, and the interpreter-versus-model agreement above.
+- Not established: what each callee does, the Rust enum variant behind each tag, whether `0x2bdb5b0`/`0x36c30f0` are whole source functions (FDE ranges are unwind descriptions), and whether the nested wrapper has a guaranteed terminating chain (the generator avoids a self-referential nested tail because the real code would loop).
+- The interpreter and models are self-derived; they show agreement with the bytes, not source equivalence. No gate in `research/progress.json` is advanced by this packet.
+
+## Next question
+
+Reconstruct the callees of the 26 forwarding arms (first `0x2cf0440`, `0x2608ee0`, `0x250f370`) or the dispatcher `0x2bdbaa0`, whose table shares this index rule.

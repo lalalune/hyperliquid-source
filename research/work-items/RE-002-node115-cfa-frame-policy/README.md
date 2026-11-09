@@ -138,3 +138,12 @@ Next: attribute a bounded first-party #115 object/function family independently,
 then compare candidate rustc 1.95.0 prologues and unwind states under explicitly
 recorded compiler settings. Such a build experiment would still require body,
 helper, data and relocation comparison before claiming reconstruction.
+
+
+The [BLST portable SHA-256 addendum](blst-portable/README.md) compares the
+selected mixed-CFA range 0x5d20100..0x5d21214 with published handwritten
+assembly. Its complete 4,372-byte body agrees outside twelve source-relocation
+bytes. This provides a source-family counterpart for that example while its
+exact historical producer, unique release, outside references and the
+first-party Rust frame-pointer setting remain unresolved. The registered
+comparison is dependency evidence and changes no acceptance gate.

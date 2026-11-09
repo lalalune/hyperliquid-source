@@ -1,0 +1,95 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "function": {
+    "start": "0x61cd2e0",
+    "end": "0x61cd36f",
+    "body_sha256": "469590278ff13b8ed347c4085fc75e93a54c8c18fecbbff38b086c2f92fc22cb",
+    "fde": [
+      "0x61cd2e0",
+      "0x61cd36f"
+    ],
+    "census_symbol": "rocksdb::FileChecksumGenCrc32cFactory::CreateFileChecksumGenerator",
+    "census_body_sha256": "469590278ff13b8ed347c4085fc75e93a54c8c18fecbbff38b086c2f92fc22cb"
+  },
+  "factory_vtable_slot": 19,
+  "factory_vtable_address_point": "0x64d79b0",
+  "layout": {
+    "vtable_address_point": "0x64d7970",
+    "vptr": "+0x0",
+    "crc_accumulator_u32": "+0x8",
+    "checksum_string": "+0x10 (ptr +0x10, length +0x18, SSO buffer/capacity +0x20)",
+    "object_size": "0x30"
+  },
+  "semantics": "create a FileChecksumGenCrc32c iff the requested name is empty or exactly \"FileChecksumCrc32c\" (18 bytes); otherwise return null",
+  "name_gate": {
+    "expected_name": "FileChecksumCrc32c",
+    "expected_length": 18,
+    "empty_name_creates": true,
+    "compare": "two u64 xor/or steps against the movabs immediates \"FileChec\"/\"ksumCrc3\", then a u16 compare against \"2c\"",
+    "context_name": "std::string at context+0x20 (data +0x20, length +0x28)"
+  },
+  "create_alloc": {
+    "plt": [
+      "0x63f0dd0",
+      "0x63f0de0"
+    ],
+    "plt_sha256": "93c243e02314295cea02f50141461a95e10c09201ec8777b94214ed0177582dd",
+    "target": "operator new",
+    "size": "0x30"
+  },
+  "init": {
+    "vptr": 105740656,
+    "crc_u32_at_0x8": 0,
+    "checksum_string_ptr": "object+0x20",
+    "checksum_string_len_at_0x18": 0,
+    "checksum_string_first_byte_at_0x20": 0,
+    "object_size": 48
+  },
+  "check_values": {
+    "empty_name_creates": {
+      "name_hex": "",
+      "created": true,
+      "note": "length 0 jumps straight to the allocation"
+    },
+    "exact_name_creates": {
+      "name_hex": "46696c65436865636b73756d437263333263",
+      "created": true,
+      "note": "the 18-byte name the factory gates creation on"
+    },
+    "one_short_rejected": {
+      "name_hex": "46696c65436865636b73756d4372633332",
+      "created": false,
+      "note": "length 17 never reaches the byte compare"
+    },
+    "one_long_rejected": {
+      "name_hex": "46696c65436865636b73756d43726333326378",
+      "created": false,
+      "note": "length 19 never reaches the byte compare"
+    },
+    "lowercase_rejected": {
+      "name_hex": "66696c65636865636b73756d637263333263",
+      "created": false,
+      "note": "the xor compare is case-sensitive"
+    },
+    "last_byte_rejected": {
+      "name_hex": "46696c65436865636b73756d437263333264",
+      "created": false,
+      "note": "the trailing cmpw $0x6332 (\"2c\") fails"
+    },
+    "init_layout": {
+      "vptr": 105740656,
+      "crc_u32_at_0x8": 0,
+      "checksum_string_ptr": "object+0x20",
+      "checksum_string_len_at_0x18": 0,
+      "checksum_string_first_byte_at_0x20": 0,
+      "object_size": 48
+    }
+  },
+  "cases": {
+    "count": 2400,
+    "seed": 20261109,
+    "created": 160,
+    "mismatches_vs_reference": 0,
+    "aggregate_sha256": "1db2e4799448982319ca4406ff0ad66fa4c041f91587938ba6191500d6e971f2"
+  }
+}

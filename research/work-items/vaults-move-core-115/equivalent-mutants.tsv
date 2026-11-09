@@ -1,0 +1,11 @@
+mutant	checked	why
+model:no-clamp	none of 3000	the maxsd/minsd clamp to [-2^63, 2^63] is redundant: cvttsd2si plus the compare against 2^63-1024 already yield i64::MAX above the range and i64::MIN below it
+byte:owner:0x44ae9b5:0x44ae9b8:imm8:08^01	none of 150 executing cases	tree-height threshold of an 8-way unrolled descent; heights are below 8 for every key count a 64-bit length can hold with 11-key nodes
+byte:owner:0x44aea98:0x44aea9b:imm8:08^01	none of 150 executing cases	same threshold in the second descent loop; the unrolled body is unreachable
+byte:owner:0x44af0ad:0x44af0ad:jcc:77^01	none of 150 executing cases	same redundant clamp: both successors reach the same cvttsd2si saturation
+byte:owner:0x44af0b7:0x44af0b7:jcc:77^01	none of 150 executing cases	same redundant clamp: both successors reach the same cvttsd2si saturation
+byte:owner:0x44af222:0x44af225:imm32:ff^01	none of 150 executing cases	u64::MAX-1 and u64::MAX both round to 2^64 as f64 before the share division
+byte:ring_find:0x455794b:0x455794e:imm8:01^01	none of 150 executing cases	a one-element tail compares element 0 either way (special case vs. loop of zero steps)
+byte:ring_find:0x4557994:0x4557997:imm8:01^01	none of 150 executing cases	a one-element range takes one extra no-op halving step, then the same final compare
+byte:ring_find:0x4557a31:0x4557a32:imm32:01^01	none of 150 executing cases	eax=1 is only returned when the second slice is empty, which cannot happen for head < capacity; otherwise eax is rewritten before return
+byte:ring_find:0x4557aaf:0x4557ab0:imm32:00^01	none of 150 executing cases	bit 0 of eax is overwritten by the following setne al

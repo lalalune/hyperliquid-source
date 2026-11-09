@@ -1,0 +1,91 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "function": {
+    "start": "0x616bd60",
+    "end": "0x616beac",
+    "body_sha256": "5680596a85a5810082875d361be174363d5b2b435a5c2494bc72543840138972",
+    "fde": [
+      "0x616bd60",
+      "0x616beac"
+    ],
+    "census_symbol": "rocksdb::ComputeBuiltinChecksumWithLastByte",
+    "census_body_sha256": "5680596a85a5810082875d361be174363d5b2b435a5c2494bc72543840138972"
+  },
+  "dispatch": [
+    {
+      "type": 0,
+      "arm": "default_arm",
+      "note": "returns 0 (kNoChecksum and any other type)"
+    },
+    {
+      "type": 1,
+      "arm": "crc32c_arm",
+      "note": "mask(extend(extend(0, data), last_byte))"
+    },
+    {
+      "type": 2,
+      "arm": "xxhash_arm",
+      "note": "calls into 0x61daa60..0x61dacf0; not modelled"
+    },
+    {
+      "type": 3,
+      "arm": "xxhash64_arm",
+      "note": "ROCKSDB_XXH64_update/digest; not modelled"
+    },
+    {
+      "type": 4,
+      "arm": "mulmix_arm",
+      "note": "hash(data, n) then imul $0x6b9083d9 ^ last_byte; not modelled"
+    }
+  ],
+  "crc32c_arm": {
+    "start": "0x616be80",
+    "end": "0x616beac",
+    "extend_stub": [
+      "0x61c25f0",
+      "0x61c25fa"
+    ],
+    "extend_stub_sha256": "f6d8b461bc82431a3f10c54b3b509a456b18ad340dff570220cfbaf07fa9ae3d",
+    "fnptr_slot": "0x6508908",
+    "extend_target": "0x61c21d0 (rocksdb::crc32c::ExtendImpl<Slow_CRC32>)",
+    "mask": {
+      "immediate_address": "0x616bea1",
+      "constant": "0xa282ead8",
+      "unique_in_text": true,
+      "formula": "ror32(crc, 15) + 0xa282ead8 (mod 2**32)"
+    },
+    "semantics": "mask(extend(extend(0, data), last_byte))"
+  },
+  "check_values": {
+    "empty_data_zero_last": {
+      "data_hex": "",
+      "last_byte": "0x00",
+      "crc_out": "0x49258fd2",
+      "extend_of_last_only": "0x527d5351"
+    },
+    "crc32c_check_value_123456789": {
+      "data_hex": "313233343536373839",
+      "last_byte": "0x00",
+      "crc_out": "0xdd227149",
+      "stored_crc_of_data": "0xe3069283"
+    },
+    "single_byte_a": {
+      "data_hex": "",
+      "last_byte": "0x61",
+      "crc_out": "0x28e46e78",
+      "stored_crc_of_last_only": "0xc1d04330"
+    },
+    "long_input_1024_ab": {
+      "data": "1024 bytes of 0xab",
+      "last_byte": "0xff",
+      "crc_out": "0x2a29e790",
+      "stored_crc_of_data_plus_last": "0x7e5c43d3"
+    }
+  },
+  "cases": {
+    "count": 2400,
+    "seed": 20261109,
+    "mismatches_vs_table_reference": 0,
+    "aggregate_sha256": "662c61f4dbb92f43954a850644475a2d9a300c93e71ba28750577166904a3736"
+  }
+}
