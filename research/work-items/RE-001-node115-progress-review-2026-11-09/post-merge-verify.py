@@ -9,8 +9,8 @@ import platform
 import re
 import subprocess
 
-COMMIT = '0e70dfafd1ae86649a1660405b9110dbebe93050'
-TREE = '1ff44e49fab7e702781c35a5c87fa2affd59cae6'
+COMMIT = 'e31cae5a86d70922329ee0e59dc3237f61da64d9'
+TREE = '7a607d53954336a477eb526b1373aa4461491471'
 PACKET = 'research/work-items/RE-001-node115-progress-review-2026-11-09'
 LEGACY_SHA = '1eb1c2a2c68d175240da09d515eb2f44bedb50508dc8309dc8d64948ca6093b2'
 HISTORICAL_EVIDENCE_SHA = 'a5f4b0b49a0b123cff451a5d726c517bb5892e72a73d85f0a8304b786273a0be'
@@ -93,6 +93,9 @@ def audit(repo, provider):
     need(current['inventory']['rust_areas'] == previous['inventory']['rust_areas'] and
          current['inventory']['cargo_manifests'] == previous['inventory']['cargo_manifests'],
          'post-review source inventory unchanged')
+    need(previous['inventory']['work_items'] == 3702 and
+         current['inventory']['work_items'] == previous['inventory']['work_items'] + 4,
+         'post-clap merged snapshot adds exactly four historical-pending work items')
     controls = old.controls()
     need(controls['negative_controls_attempted'] == controls['negative_controls_detected'] == 4,
          'historical comparator controls still reject all four corruptions')

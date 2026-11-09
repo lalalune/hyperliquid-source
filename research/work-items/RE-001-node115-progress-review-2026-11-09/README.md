@@ -60,15 +60,15 @@ Limits: this is static accounting, not native target execution or a hardware/who
 
 The earlier review above and its `evidence.json` / `verify.py` are preserved.
 This additional snapshot records the actual merged `main` at
-`0e70dfafd1ae86649a1660405b9110dbebe93050`, tree
-`1ff44e49fab7e702781c35a5c87fa2affd59cae6`, before this documentation refresh.
+`e31cae5a86d70922329ee0e59dc3237f61da64d9`, tree
+`7a607d53954336a477eb526b1373aa4461491471`, before this documentation refresh.
 It replaces neither historical snapshot nor their original negative results.
 
 | Measure | Merged-main snapshot |
 | --- | ---: |
 | Rust implementation areas | 216 |
 | Top-level Cargo manifests | 179 |
-| Research work items | 3,705 |
+| Research work items | 3,706 |
 | Components registering bounded Rust paths | 20/23 |
 | Registered bounded paths | 88 |
 | Accepted full-scope gates | 0/92 (0.00%) |
@@ -88,7 +88,7 @@ The positive relocation-mask control passes and all four original corruption
 controls remain detected. No captured code is executed.
 
 Compared with the old pending snapshot, only the research-work-item inventory
-increases by three; the Rust-area and manifest counts, byte totals and accepted
+increases by four; the Rust-area and manifest counts, byte totals and accepted
 gates are unchanged. Appending this section to the existing packet adds no
 work item. The README's generated figures already match the merged tree;
 this refresh pins their post-merge evidence instead of claiming more completion.
