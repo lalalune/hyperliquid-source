@@ -205,7 +205,7 @@ the slot numbers are pinned by the disassembly and the bindings group.
 - `tools/writable_file_writer_writebufferedwithchecksum115.py` -- the
   WriteBufferedWithChecksum model (plus the Flush oracle at #6057 fidelity
   and the Append oracle at #6041 fidelity, used for the live check).
-- `tests/test_writable_file_writer_writebufferedwithchecksum115.py` -- 34
+- `tests/test_writable_file_writer_writebufferedwithchecksum115.py` -- 32
   tests, all pass.
 - `cases.tsv` -- 2,400 deterministic cases (600 gate + 600 grant_loop + 600
   checksum + 600 bindings), 0 mismatches on replay
