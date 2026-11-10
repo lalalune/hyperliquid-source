@@ -1,0 +1,570 @@
+#!/usr/bin/env python3
+"""Generate functions.tsv and records.json for this packet from the
+vendor census + the binary, so no hash is hand-transcribed.
+
+Body hashes are recomputed from work/hl-node-115.bin over the FDE
+range. The single FDE is vendor-census-bound (member
+25dac13516458d4d-c.o, librocksdb-sys 0.11.0+8.1.1); the source hash
+is reproduced exactly by zeroing the 31 census relocations (kinds
+2/4, no kind-42, no relaxation). The LSDA call-site table was
+decoded from .gcc_except_table with the repo's
+tools/fde_extents.py FDE index (LSDA at 0x407084, 57 bytes; see
+records.json) and is recorded as data, not re-derived here.
+"""
+import hashlib
+import json
+import subprocess
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+PACKET = Path(__file__).resolve().parent
+BIN = ROOT / "work" / "hl-node-115.bin"
+DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+
+# (start, end, name, slug, census-bound?)
+FUNCS = [
+    ("0x5d38750", "0x5d38da5",
+     "rocksdb::DBOptions::DBOptions",
+     "db-options-copy-ctor-5d38750", True),
+]
+
+
+def va2off(va):
+    out = subprocess.check_output(["readelf", "-lW", str(BIN)]).decode()
+    for line in out.splitlines():
+        p = line.split()
+        if p and p[0] == "LOAD":
+            v, o, f = int(p[2], 16), int(p[1], 16), int(p[4], 16)
+            if v <= va < v + f:
+                return o + (va - v)
+    raise ValueError(hex(va))
+
+
+def _caller_sites():
+    sites = []
+    with open(PACKET / "callers.tsv") as fh:
+        header = fh.readline().rstrip("\n").split("\t")
+        for line in fh:
+            row = dict(zip(header, line.rstrip("\n").split("\t")))
+            sites.append({
+                "instruction": row["instruction"],
+                "kind": row["kind"], "site": row["site"],
+                "site_fde_end": row["site_fde_end"],
+                "site_fde_start": row["site_fde_start"],
+                "target": row["target"],
+                "target_name": row["target_name"]})
+    return sites
+
+
+def main():
+    data = open(BIN, "rb").read()
+    assert hashlib.sha256(data).hexdigest() == DIGEST
+    census = json.load(open(
+        ROOT / "research" / "work-items" / "RE-002-node115-vendor-census"
+        / "census.json"))["records"]
+    by_start = {r["start"]: r for r in census}
+    rows = []
+    functions = {}
+    for start_s, end_s, name, slug, census_bound in FUNCS:
+        start, end = int(start_s, 16), int(end_s, 16)
+        body = data[va2off(start):va2off(end)]
+        body_hash = hashlib.sha256(body).hexdigest()
+        assert census_bound
+        rec = by_start[start]
+        assert body_hash == rec["target_body_sha256"], name
+        zeroed = bytearray(body)
+        for rel in rec["relocations"]:
+            o, w = rel["offset"], rel["width"]
+            zeroed[o:o + w] = b"\x00" * w
+            if rel.get("relaxation") == "gotpcrelx-mov-lea":
+                assert zeroed[o - 2] == 0x8D
+                zeroed[o - 2] = 0x8B
+        source_hash = hashlib.sha256(bytes(zeroed)).hexdigest()
+        assert source_hash == rec["source_body_sha256"], name
+        relocs = ";".join(
+            "%d:kind%d%s" % (r["offset"], r["kind"],
+                             "(mov-lea)" if r.get("relaxation")
+                             == "gotpcrelx-mov-lea" else "")
+            for r in rec["relocations"])
+        row = {
+            "name": name, "start": start_s, "end": end_s,
+            "size": str(end - start), "body_sha256": body_hash,
+            "source_sha256": source_hash,
+            "raw_equal": str(rec["raw_equal"]),
+            "relocations": relocs,
+            "census_id": "node115-vendor-%s" % start_s[2:],
+            "symbol": rec["symbol"],
+            "excerpt": slug + ".objdump.txt", "hex": slug + ".hex",
+        }
+        functions[start_s] = {
+            "body_sha256": body_hash,
+            "source_sha256": source_hash,
+            "relocations": relocs,
+            "census_id": row["census_id"],
+            "mangled": rec["symbol"],
+            "callers": [],
+            "lea_refs": [],
+        }
+        rows.append(row)
+    with open(PACKET / "functions.tsv", "w") as fh:
+        cols = ["name", "start", "end", "size", "body_sha256",
+                "source_sha256", "raw_equal", "relocations", "census_id",
+                "symbol", "excerpt", "hex"]
+        fh.write("\t".join(cols) + "\n")
+        for r in rows:
+            fh.write("\t".join(r[c] for c in cols) + "\n")
+    print("wrote functions.tsv (%d functions, all hashes verified)"
+          % len(rows))
+
+    # Caller census sites, read back from callers.tsv (no hand copy).
+    sites = _caller_sites()
+    main_calls = [s for s in sites if s["target"] == "0x5d38750"]
+    functions["0x5d38750"]["callers"] = [s["site"] for s in main_calls]
+    functions["0x5d38750"]["model"] = (
+        "1621-byte (implicit) copy constructor "
+        "DBOptions::DBOptions(const DBOptions&) (this in rdi = rbx; "
+        "source in rsi = rbp; rsi/rdi bumped by +0x18 at the "
+        "prologue, so the first stores use -0x18(%rsi)/-0x18(%rdi)). "
+        "It memberwise-copies a whole 0x290-byte DBOptions. In "
+        "binary order: (1) the 7 leading bools +0x00..0x06 as one "
+        "u32 (+0x00), one u16 (+0x04) and one u8 (+0x06); env "
+        "(+0x08) and the rate_limiter ptr word (+0x10) together in "
+        "one movdqu (+0x08..+0x17); the rate_limiter ctrl (+0x18) "
+        "via the __shared_count copy helper 0x5d35c00 (refcount +1, "
+        "never throws, no LSDA entry). (2) Shared pointers, each "
+        "as ptr word (plain mov) + ctrl word (call 0x5d35c00): "
+        "sst_file_manager (+0x20/+0x28), info_log (+0x30/+0x38), "
+        "statistics (+0x58/+0x60), write_buffer_manager "
+        "(+0x158/+0x160), row_cache (+0x1f8/+0x200), "
+        "file_checksum_gen_factory (+0x228/+0x230), "
+        "compaction_service (+0x278/+0x280) -- eight field copies "
+        "plus one per-element call in the listeners loop (nine "
+        "0x5d35c00 calls in total). The copy SHARES each control "
+        "block (refcount +1); it never deep-copies the pointed-to "
+        "object. (3) Every scalar field copied verbatim by plain "
+        "mov / movdqu / movups at the same offset (info_log_level, "
+        "max_open_files, max_file_opening_threads, "
+        "max_total_wal_size, use_fsync, "
+        "delete_obsolete_files_period_micros, max_background_jobs, "
+        "max_background_compactions, max_subcompactions, "
+        "max_background_flushes, max_log_file_size, "
+        "log_file_time_to_roll, keep_log_file_num, "
+        "recycle_log_file_num, max_manifest_file_size, "
+        "table_cache_numshardbits, WAL_ttl_seconds, "
+        "WAL_size_limit_MB, manifest_preallocation_size, the "
+        "mmap/direct bool quad (+0x128, u32), allow_fallocate / "
+        "is_fd_close_on_exec (+0x12c, u16), stats_dump_period_sec, "
+        "stats_persist_period_sec, persist_stats_to_disk, "
+        "stats_history_buffer_size, advise_random_on_open, "
+        "db_write_buffer_size, access_hint_on_compaction_start, "
+        "compaction_readahead_size, random_access_max_buffer_size, "
+        "writable_file_max_buffer_size, use_adaptive_mutex, "
+        "bytes_per_sync, wal_bytes_per_sync, strict_bytes_per_sync, "
+        "enable_thread_tracking, delayed_write_rate, the "
+        "write-thread bool quad (+0x1d0, u32), "
+        "max_write_batch_group_size_bytes, "
+        "write_thread_max_yield_usec, write_thread_slow_yield_usec, "
+        "the recovery quad (+0x1f0, u32), wal_filter (+0x208, raw "
+        "ptr), the option-file bool run (+0x210..+0x217, u64), "
+        "atomic_flush / avoid_unnecessary_blocking_io (+0x218, "
+        "u16), write_dbid_to_manifest, log_readahead_size, "
+        "best_efforts_recovery, max_bgerror_resume_count, "
+        "bgerror_resume_retry_interval, allow_data_in_errors, "
+        "checksum_handoff_file_types, lowest_used_cache_tier / "
+        "enforce_single_del_contracts (+0x288, u16)). Padding bytes "
+        "are never written. (4) db_paths vector (+0x70): zeroed "
+        "first; if non-empty, byte size bounds-checked against "
+        "0x7ffffffffffffff8 (else __throw_bad_array_new_length), "
+        "operator new(size) allocates exactly size bytes (cap == "
+        "end, no slack), then __do_uninit_copy (0x5d386a0) "
+        "copy-constructs each DbPath (0x28 bytes: string at +0x0 "
+        "via _M_construct, target_size u64 at +0x20) and returns "
+        "the new end. (5) Strings db_log_dir (+0x88), wal_dir "
+        "(+0xa8), db_host_id (+0x250): each built by "
+        "basic_string::_M_construct (0x5d2e540, this/first/last) "
+        "after the dst ptr word is preset to its own SSO buffer; "
+        "len <= 15 stays SSO, len > 15 goes through _M_create + "
+        "memcpy. (6) listeners vector (+0x1a8): zeroed first; if "
+        "non-empty, byte size bounds-checked against "
+        "0x7ffffffffffffff0 (else __throw_bad_array_new_length), "
+        "operator new(size) allocates exactly size bytes, then the "
+        "inline loop copies each shared_ptr<EventListener> element "
+        "(ptr word by mov, ctrl word by call 0x5d35c00 -- refcount "
+        "+1 per element, shared not deep-copied). (7) Epilogue: "
+        "add $0x18,%rsp; pop rbx/rbp/r12/r13/r14/r15; ret.")
+    records = {
+        "artifact": "node #115",
+        "artifact_sha256": DIGEST,
+        "bound_context": [
+            "RE-002-node115-rocksdb-db-options-default-ctor-115 (open, "
+            "PR #6337): reconstructs DBOptions::DBOptions() 0x60b2db0, "
+            "which builds the 93 defaults this copy ctor duplicates "
+            "field by field. Copying the default image yields the "
+            "default image byte-for-byte (sha256 "
+            "ea59a732051f16d90fc6be9592a41045d12fd8786ba1a215acefb9fbd6c94533), "
+            "verified by the tool's live check -- the two packets "
+            "agree on the layout.",
+            "RE-002-node115-rocksdb-build-db-options-115 (open, PR "
+            "#6297): reconstructs BuildDBOptions 0x60c2e20, which "
+            "default-constructs a DBOptions and then overwrites 91 "
+            "of its fields from the immutable + mutable halves; the "
+            "copy ctor is the third member of that family (default "
+            "ctor -> copy ctor -> merge).",
+            "RE-002-node115-vendor-census: the FDE is census-bound "
+            "(member 25dac13516458d4d-c.o, librocksdb-sys "
+            "0.11.0+8.1.1). Body a39ee28a... / source f913228d... "
+            "(31 relocations, kinds 2/4, no kind-42, no relaxation).",
+            "meta/rocksdb v8.1.1, read live this cycle: "
+            "include/rocksdb/options.h declares NO explicit copy "
+            "constructor for DBOptions -- only DBOptions() (:967) "
+            "and explicit DBOptions(const Options& options) (:969) "
+            "under struct DBOptions (:447) -- so the binary's "
+            "_ZN7rocksdb9DBOptionsC1ERKS0_ is the implicitly-defined "
+            "memberwise copy constructor. options/options.cc:128-130 "
+            "confirms the shape: DBOptions::DBOptions() {} is empty "
+            "(the 93 defaults come from in-class member initializers, "
+            "as the #6337 packet pins), and "
+            "DBOptions::DBOptions(const Options& options) delegates "
+            "to the copy ctor (DBOptions(*static_cast<const "
+            "DBOptions*>(&options))). The binary's memberwise copy "
+            "(shared_ptrs shared, vectors/strings deep-copied, "
+            "scalars verbatim) is exactly the implicit copy ctor's "
+            "semantics.",
+        ],
+        "caller_census": {
+            "method": "Whole-.text scan for E8 calls, E9 tail jumps "
+                      "and RIP-relative LEA references landing on the "
+                      "target, validated by decoding forward from the "
+                      "enclosing FDE start with Capstone (census.py). "
+                      "A site counts only on a real instruction "
+                      "boundary with the expected mnemonic.",
+            "notes": [
+                "DBOptions::DBOptions(const DBOptions&) 0x5d38750: "
+                "exactly 3 direct calls, 0 tail jumps, 0 LEA refs. "
+                "rocksdb::SanitizeOptions 0x5e5cf70 (site 0x5e5cfa6, "
+                "census-bound, db_impl_open.o) copies the caller's "
+                "DBOptions before sanitizing; "
+                "rocksdb::DBOptionsConfigurable::DBOptionsConfigurable "
+                "0x60a47f0 (sites 0x60a4980 and 0x60a5248, "
+                "census-bound, db_options.o) stores its own copy of "
+                "the base options.",
+                "The LSDA call-site table was decoded from "
+                ".gcc_except_table (LSDA at 0x407084, 57 bytes, "
+                "header ff ff 01 35, all actions 0 = cleanup only): "
+                "nine entries, one per throwing call; the nine "
+                "__shared_count copy calls have no entry (noexcept). "
+                "The __do_uninit_copy pad 0x5d38711 begins a catch, "
+                "_M_dispose's each constructed DbPath string walking "
+                "back 0x28 at a time, and rethrows -- so the copy "
+                "ctor's pad A only frees the raw db_paths buffer.",
+            ],
+            "sites": sites,
+            "validated_sites": len(sites),
+        },
+        "cases": {
+            "count": 2400,
+            "ledger": "cases.tsv",
+            "split": "600 fields (each of the 93 fields x value / "
+                     "raw-bytes / full-image-hash probes, cycled "
+                     "deterministically, source = defaults with one "
+                     "field varied) + 600 containers (db_paths / "
+                     "listeners / string variants across the SSO/heap "
+                     "boundary, with destination heap contents and "
+                     "shared refcounts) + 600 throw (the eight "
+                     "throwing sites x the exact landing-pad "
+                     "destruction list, incl. the __do_uninit_copy "
+                     "prefix disposal count) + 600 bindings "
+                     "(caller-independence: the same image hash for "
+                     "every one of the 3 callers, with varied host_id "
+                     "and env id)",
+            "tests": "tests/test_db_options_copy_ctor115.py",
+            "tool": "tools/db_options_copy_ctor115.py",
+            "what_is_checked": [
+                "fields: every one of the 93 fields is copied "
+                "verbatim from a varied source (value, raw bytes and "
+                "full-image hash probes)",
+                "containers: vectors are deep-copied into fresh "
+                "buffers with cap == end (exact allocation, no "
+                "slack); DbPath strings are deep-copied (fresh heap "
+                "ids, same bytes; SSO pointers point inside the "
+                "vector buffer); strings are deep-copied via "
+                "_M_construct (SSO <= 15, heap above); shared_ptrs "
+                "share their control blocks with refcount +1, "
+                "including every listeners element",
+                "throw: each of the eight throwing sites raises the "
+                "right exception (BadAlloc / BadArrayNewLength) and "
+                "runs exactly the landing pad its LSDA entry names, "
+                "in pad order; the db_paths element-copy throw "
+                "disposes the constructed prefix inside "
+                "__do_uninit_copy first",
+                "bindings: the copy result depends only on the "
+                "source, never on which of the 3 callers runs it; "
+                "the FDE body and source hashes match the binary and "
+                "the census; the 57-byte LSDA matches the binary; "
+                "the copy map covers every scalar/shared_ptr word; "
+                "copying the defaults yields the defaults "
+                "byte-for-byte (ea59a732...)",
+            ],
+        },
+        "engine_callees": {
+            "0x5d35c00": "std::__shared_count copy ctor (38 B, "
+                         "census-bound, same member c.o): copies a "
+                         "shared_ptr control block (refcount +1); "
+                         "called 9 times (once per shared_ptr field "
+                         "plus once per listeners element). Never "
+                         "throws; no LSDA entry.",
+            "0x5d386a0": "std::__do_uninit_copy for the DbPath range "
+                         "(169 B, census-bound, same member c.o): "
+                         "copy-constructs each DbPath (string via "
+                         "_M_construct 0x5d2e540, target_size by "
+                         "mov); its own pad 0x5d38711 catches, "
+                         "_M_dispose's the constructed prefix "
+                         "walking back 0x28 at a time, and rethrows.",
+            "0x5d2e540": "std::__cxx11::basic_string::_M_construct "
+                         "(163 B, NOT in the census -- a libstdc++ "
+                         "routine): len = last - first; SSO <= 15, "
+                         "_M_create + memcpy above, NUL at buf[len], "
+                         "len == 1 fast path, len == 0 skips the "
+                         "memcpy; stack canary; no LSDA (nothing to "
+                         "clean on a throw). Called 3 times "
+                         "(db_log_dir, wal_dir, db_host_id).",
+            "0x5d35cb0": "std::vector destructor (117 B; census "
+                         "labels the same address "
+                         "vector<TableReader::Anchor>::~vector -- the "
+                         "element loop strides 0x28, frees a heap "
+                         "string at +0x0 (SSO buffer +0x10) and "
+                         "skips the u64 at +0x20, which is exactly "
+                         "DbPath's layout, so the two instantiations "
+                         "share the folded address): destroys the "
+                         "db_paths vector in pad B.",
+            "0x5d350c0": "_Sp_counted_base::_M_release (133 B, "
+                         "census-bound, cache.o): releases each "
+                         "non-null shared_ptr control block in the "
+                         "landing pads.",
+            "0x63f0dd0": "PLT operator new: the db_paths buffer "
+                         "(0x5d38827) and the listeners buffer "
+                         "(0x5d38a45).",
+            "0x63f0d80": "PLT operator delete[]: the db_paths buffer "
+                         "in pad A (0x5d38c81) and the listeners "
+                         "buffer in pad D (0x5d38cd5).",
+            "0x63f0db0": "PLT basic_string::_M_dispose: destroys "
+                         "the db_log_dir (+0x88) and wal_dir (+0xa8) "
+                         "strings in the pads (a no-op for SSO "
+                         "strings), and each constructed DbPath "
+                         "string in __do_uninit_copy's pad.",
+            "0x63f0ec0": "PLT __throw_bad_array_new_length: the "
+                         "db_paths size check (0x5d38c4b) and the "
+                         "listeners size check (0x5d38c50).",
+            "0x63f0e10": "PLT basic_string::_M_create: the heap "
+                         "allocation inside _M_construct.",
+            "0x63f0a60": "PLT memcpy: the string bytes inside "
+                         "_M_construct.",
+            "0x63f0a50": "PLT _Unwind_Resume: the cleanup epilogue.",
+            "0x63f0e60": "PLT __cxa_begin_catch / 0x63f0e70 "
+                         "__cxa_rethrow: __do_uninit_copy's pad.",
+        },
+        "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM. "
+            "The target binary is never executed. The tool models the "
+            "copy ctor in Python; heap addresses (string heap buffers, "
+            "vector buffers, shared_ptr control blocks, env) are "
+            "deterministic ids, not real pointers; src and dst are "
+            "modelled at the same slot address (THIS_BASE), so their "
+            "SSO pointers coincide -- what the copy pins is the "
+            "values, not the addresses; padding bytes the ctor never "
+            "writes are modelled as zero (the binary leaves them "
+            "uninitialized). The live check (--live) reads the binary: "
+            "FDE body/source hashes, the 57-byte LSDA, the 3-site "
+            "caller census, the engine-call counts, the copy-map "
+            "coverage of every scalar/shared_ptr word, and the "
+            "copy-of-defaults identity (8/8 legs). make "
+            "verify/test/catalogue-check in a tooled environment is "
+            "still owed upstream.",
+        "functions": functions,
+        "layouts": {
+            "db_options": {
+                "+0x00": "create_if_missing, "
+                         "create_missing_column_families, error_if_exists, "
+                         "paranoid_checks, flush_verify_memtable_count, "
+                         "track_and_verify_wals_in_manifest, "
+                         "verify_sst_unique_id_in_manifest (7 bools, "
+                         "copied as u32 + u16 + u8)",
+                "+0x08": "env (Env*, verbatim copy)",
+                "+0x10": "rate_limiter (shared_ptr, shared)",
+                "+0x20": "sst_file_manager (shared_ptr, shared)",
+                "+0x30": "info_log (shared_ptr, shared)",
+                "+0x40": "info_log_level (u8)",
+                "+0x44": "max_open_files (i32)",
+                "+0x48": "max_file_opening_threads (i32)",
+                "+0x50": "max_total_wal_size (u64)",
+                "+0x58": "statistics (shared_ptr, shared)",
+                "+0x68": "use_fsync (bool)",
+                "+0x70": "db_paths (vector<DbPath>, deep copy, "
+                         "exact-size allocation)",
+                "+0x88": "db_log_dir (string, deep copy via _M_construct)",
+                "+0xa8": "wal_dir (string, deep copy via _M_construct)",
+                "+0xc8": "delete_obsolete_files_period_micros (u64)",
+                "+0xd0": "max_background_jobs (i32)",
+                "+0xd4": "max_background_compactions (i32)",
+                "+0xd8": "max_subcompactions (u32)",
+                "+0xdc": "max_background_flushes (i32)",
+                "+0xe0": "max_log_file_size (u64)",
+                "+0xe8": "log_file_time_to_roll (u64)",
+                "+0xf0": "keep_log_file_num (u64)",
+                "+0xf8": "recycle_log_file_num (u64)",
+                "+0x100": "max_manifest_file_size (u64)",
+                "+0x108": "table_cache_numshardbits (i32)",
+                "+0x110": "WAL_ttl_seconds (u64)",
+                "+0x118": "WAL_size_limit_MB (u64)",
+                "+0x120": "manifest_preallocation_size (u64)",
+                "+0x128": "allow_mmap_reads, allow_mmap_writes, "
+                         "use_direct_reads, "
+                         "use_direct_io_for_flush_and_compaction "
+                         "(4 bools, copied as one u32)",
+                "+0x12c": "allow_fallocate (bool)",
+                "+0x12d": "is_fd_close_on_exec (bool)",
+                "+0x130": "stats_dump_period_sec (u32)",
+                "+0x134": "stats_persist_period_sec (u32)",
+                "+0x138": "persist_stats_to_disk (bool)",
+                "+0x140": "stats_history_buffer_size (u64)",
+                "+0x148": "advise_random_on_open (bool)",
+                "+0x150": "db_write_buffer_size (u64)",
+                "+0x158": "write_buffer_manager (shared_ptr, shared)",
+                "+0x168": "access_hint_on_compaction_start (i32)",
+                "+0x170": "compaction_readahead_size (u64)",
+                "+0x178": "random_access_max_buffer_size (u64)",
+                "+0x180": "writable_file_max_buffer_size (u64)",
+                "+0x188": "use_adaptive_mutex (bool)",
+                "+0x190": "bytes_per_sync (u64)",
+                "+0x198": "wal_bytes_per_sync (u64)",
+                "+0x1a0": "strict_bytes_per_sync (bool)",
+                "+0x1a8": "listeners (vector<shared_ptr<EventListener>>, "
+                         "fresh buffer, elements shared)",
+                "+0x1c0": "enable_thread_tracking (bool)",
+                "+0x1c8": "delayed_write_rate (u64)",
+                "+0x1d0": "enable_pipelined_write, unordered_write, "
+                         "allow_concurrent_memtable_write, "
+                         "enable_write_thread_adaptive_yield "
+                         "(4 bools, copied as one u32)",
+                "+0x1d8": "max_write_batch_group_size_bytes (u64)",
+                "+0x1e0": "write_thread_max_yield_usec (u64)",
+                "+0x1e8": "write_thread_slow_yield_usec (u64)",
+                "+0x1f0": "skip_stats_update_on_db_open, "
+                         "skip_checking_sst_file_sizes_on_db_open "
+                         "(2 bools, copied as one u32 with "
+                         "wal_recovery_mode + allow_2pc)",
+                "+0x1f2": "wal_recovery_mode (u8)",
+                "+0x1f3": "allow_2pc (bool)",
+                "+0x1f8": "row_cache (shared_ptr, shared)",
+                "+0x208": "wal_filter (ptr, verbatim copy)",
+                "+0x210": "fail_if_options_file_error, dump_malloc_stats, "
+                         "avoid_flush_during_recovery, "
+                         "avoid_flush_during_shutdown, allow_ingest_behind, "
+                         "two_write_queues, manual_wal_flush "
+                         "(7 bools, copied as one u64 with wal_compression)",
+                "+0x217": "wal_compression (u8)",
+                "+0x218": "atomic_flush, avoid_unnecessary_blocking_io "
+                         "(2 bools, copied as one u16)",
+                "+0x21a": "write_dbid_to_manifest (bool)",
+                "+0x220": "log_readahead_size (u64)",
+                "+0x228": "file_checksum_gen_factory (shared_ptr, shared)",
+                "+0x238": "best_efforts_recovery (bool)",
+                "+0x23c": "max_bgerror_resume_count (i32)",
+                "+0x240": "bgerror_resume_retry_interval (u64)",
+                "+0x248": "allow_data_in_errors (bool)",
+                "+0x250": "db_host_id (string, deep copy via _M_construct)",
+                "+0x270": "checksum_handoff_file_types (u64)",
+                "+0x278": "compaction_service (shared_ptr, shared)",
+                "+0x288": "lowest_used_cache_tier (u8)",
+                "+0x289": "enforce_single_del_contracts (bool)",
+            },
+            "db_path": {
+                "+0x00": "path (std::string, deep-copied by _M_construct)",
+                "+0x20": "target_size (u64, verbatim copy)",
+                "size": "0x28 (40 bytes)",
+            },
+            "lsda_call_sites": {
+                "FDE+0xd7..+0xdc": "operator new, db_paths (0x5d38827) -- "
+                                   "pad 0x5d38d45 (chain only)",
+                "FDE+0xfe..+0x103": "__do_uninit_copy, db_paths "
+                                   "(0x5d3884e) -- pad 0x5d38c55 (raw "
+                                   "delete[] of the db_paths buffer, "
+                                   "then the chain)",
+                "FDE+0x132..+0x137": "_M_construct, db_log_dir "
+                                    "(0x5d38882) -- pad 0x5d38c5e "
+                                    "(db_paths vector dtor, then the "
+                                    "chain)",
+                "FDE+0x160..+0x165": "_M_construct, wal_dir "
+                                    "(0x5d388b0) -- pad 0x5d38d5a "
+                                    "(db_log_dir dispose, db_paths "
+                                    "dtor, then the chain)",
+                "FDE+0x2f5..+0x2fa": "operator new, listeners "
+                                    "(0x5d38a45) -- pad 0x5d38d63 "
+                                    "(write_buffer_manager ctrl, "
+                                    "wal_dir dispose, db_log_dir "
+                                    "dispose, db_paths dtor, then the "
+                                    "chain)",
+                "FDE+0x48b..+0x490": "_M_construct, db_host_id "
+                                    "(0x5d38bdb) -- pad 0x5d38d4e "
+                                    "(file_checksum_gen_factory ctrl, "
+                                    "row_cache ctrl, listeners "
+                                    "per-element ctrl releases + "
+                                    "buffer delete[], "
+                                    "write_buffer_manager ctrl, "
+                                    "wal_dir dispose, db_log_dir "
+                                    "dispose, db_paths dtor, then the "
+                                    "chain)",
+                "FDE+0x4fb..+0x500": "__throw_bad_array_new_length, "
+                                    "db_paths (0x5d38c4b) -- pad "
+                                    "0x5d38d45 (chain only)",
+                "FDE+0x500..+0x505": "__throw_bad_array_new_length, "
+                                    "listeners (0x5d38c50) -- pad "
+                                    "0x5d38d63",
+                "FDE+0x5f0..+0x5f5": "_Unwind_Resume (0x5d38d40) -- "
+                                    "NO pad (already inside the "
+                                    "cleanup)",
+            },
+            "lsda": {
+                "va": "0x407084",
+                "bytes_hex": "ffff0135d70105f50b00fe0105850a00b202058e0a00"
+                             "e002058a0c00f50505930c008b0905fe0b00fb0905"
+                             "f50b00800a05930c00f00b050000",
+                "note": "57 bytes: header ff ff 01 35 + 9 call-site "
+                        "entries, all action 0 (cleanup only, no type "
+                        "filter, no action table). Landing pads are "
+                        "FDE-relative offsets from 0x5d38750.",
+            },
+            "landing_pads": {
+                "0x5d38c55": "pad A (db_paths element copy): raw "
+                            "delete[] of the db_paths buffer, then the "
+                            "chain at 0x5d38d05",
+                "0x5d38c5e": "pad B (db_log_dir): vector<DbPath> dtor "
+                            "(0x5d35cb0), then the chain",
+                "0x5d38d45": "pad C (db_paths new / length throw): "
+                            "the chain only",
+                "0x5d38d4e": "pad D (db_host_id): "
+                            "file_checksum_gen_factory ctrl, row_cache "
+                            "ctrl, listeners element releases + "
+                            "buffer delete[], write_buffer_manager "
+                            "ctrl, wal_dir dispose, db_log_dir "
+                            "dispose, db_paths dtor, then the chain",
+                "0x5d38d5a": "pad E (wal_dir): db_log_dir dispose, "
+                            "db_paths dtor, then the chain",
+                "0x5d38d63": "pad F (listeners new / length throw): "
+                            "write_buffer_manager ctrl, wal_dir "
+                            "dispose, db_log_dir dispose, db_paths "
+                            "dtor, then the chain",
+                "0x5d38d05": "the chain: statistics ctrl, info_log "
+                            "ctrl, sst_file_manager ctrl, rate_limiter "
+                            "ctrl (each _M_release if non-null), then "
+                            "_Unwind_Resume",
+            },
+        },
+    }
+    with open(PACKET / "records.json", "w") as fh:
+        json.dump(records, fh, indent=1, sort_keys=True)
+        fh.write("\n")
+    print("wrote records.json")
+
+
+if __name__ == "__main__":
+    main()
