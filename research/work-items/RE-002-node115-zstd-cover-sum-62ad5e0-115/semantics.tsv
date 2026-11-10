@@ -1,0 +1,20 @@
+claim	va	size	bytes	instruction	note
+function entry	0x62ad5e0	4	f30f1efa	endbr64	endbr64: an indirect-branch target, so the window is a routine entry
+n == 0 test	0x62ad5e4	2	85f6	test esi, esi	test %esi,%esi: the count is tested before anything is read
+n == 0 early return	0x62ad5e6	2	7450	je 0x62ad638	je 0x62ad638: zero elements jumps straight to the zeroed result
+n == 1 test	0x62ad5e8	3	83fe01	cmp esi, 1	cmp $0x1,%esi: the single-element case gets its own branch
+n == 1 enters the tail add	0x62ad5eb	2	744e	je 0x62ad63b	je 0x62ad63b: n == 1 jumps into the SHARED scalar add, not a copy of it
+iteration count n >> 1	0x62ad5f6	2	d1ea	shr edx, 1	shr $1,%edx: the vector loop runs n>>1 times, two elements per pass
+vector end pointer	0x62ad5fc	3	4801fa	add rdx, rdi	add %rdi,%rdx after shl $0x4: end = splits + 16*(n>>1)
+two splits loaded at once	0x62ad600	4	f30f6f10	movdqu xmm2, xmmword ptr [rax]	movdqu (%rax),%xmm2: an unaligned 16-byte load of two size_t elements
+lane-wise 64-bit add	0x62ad608	4	660fd4c2	paddq xmm0, xmm2	paddq %xmm2,%xmm0: 64-bit lanes, so no carry crosses into the next lane
+loop bound	0x62ad60c	3	4839c2	cmp rdx, rax	cmp %rax,%rdx with jne: the loop ends when the pointer reaches the end
+horizontal fold	0x62ad615	5	660f73d908	psrldq xmm1, 8	psrldq $0x8,%xmm1 places the high lane low so paddq can add it in
+fold adds the high lane	0x62ad61a	4	660fd4c1	paddq xmm0, xmm1	paddq %xmm1,%xmm0: the second of the two 64-bit lanes joins the sum
+low lane is the result	0x62ad61e	5	66480f7ec0	movq rax, xmm0	movq %xmm0,%rax: only the low lane is kept, so the sum is modulo 2**64
+odd element test	0x62ad623	4	40f6c601	test sil, 1	test $0x1,%sil with je: an even count skips the scalar tail
+tail index is n & ~1	0x62ad629	3	83e6fe	and esi, 0xfffffffe	and $0xfffffffe,%esi: the tail element is the LAST index (n-1) of an odd n
+single scalar add from memory	0x62ad62c	4	480304f7	add rax, qword ptr [rdi + rsi*8]	add (%rdi,%rsi,8),%rax: the only scalar add, shared by n == 1 and the tail
+return	0x62ad630	1	c3	ret	ret: no stores and no calls; the accumulated value is the whole result
+n == 1 zeroes the index	0x62ad63b	2	31f6	xor esi, esi	xor %esi,%esi then xor %eax,%eax and jmp: n == 1 sums exactly splits[0]
+n == 0 zeroes the result	0x62ad638	2	31c0	xor eax, eax	xor %eax,%eax: the empty slice returns 0 without touching splits

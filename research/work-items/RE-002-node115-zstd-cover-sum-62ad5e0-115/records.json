@@ -1,0 +1,113 @@
+{
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": {
+  "candidate_versions": [
+   "2.0.15+zstd.1.5.7",
+   "2.1.2+zstd.1.5.7"
+  ],
+  "crate": "zstd-sys",
+  "end": "0x62ad641",
+  "identical_source_count": 3,
+  "member": "ebb58710e9060628-cover.o",
+  "native": true,
+  "question": "What does the 97-byte leaf routine at 0x62ad5e0 return for a splits pointer and a count, and what do its callers depend on?",
+  "raw_equal": true,
+  "relocations": [],
+  "rlib": "libzstd_sys-c8c5b6f4c7c3aee0.rlib",
+  "source_body_sha256": "4a82aa15ddcc82b7e7775443dfe7c3c32ab7576b2a3be0aaa017ee2b899b092c",
+  "source_offset": 4442581,
+  "start": "0x62ad5e0",
+  "symbol": "COVER_sum",
+  "target_body_sha256": "4a82aa15ddcc82b7e7775443dfe7c3c32ab7576b2a3be0aaa017ee2b899b092c"
+ },
+ "caller_census": {
+  "caller_fdes": [
+   {
+    "end": "0x62ac9c9",
+    "start": "0x62ac520"
+   }
+  ],
+  "consumer_table": "caller_use.tsv",
+  "consumers": {
+   "register-copy": 2,
+   "store": 1
+  },
+  "direct_calls": 3,
+  "method": "Capstone disassembly of the artifact; each call site validated at the instruction boundary and attributed to the .eh_frame FDE that encloses it",
+  "tail_jumps": 0
+ },
+ "claim_anchors": "semantics.tsv (19 anchors: claim -> target instruction address, bytes and decoded instruction)",
+ "engine_callees": [],
+ "environment_limits": [
+  "Static only: the artifact was never executed, and no source build is claimed.",
+  "The model executes the routine's decoded bytes on a small machine model that implements exactly the instructions present and raises on any other; it is not a general x86 emulator.",
+  "capstone 5.0.7 / readelf / objdump were used; results are reproducible with those tools on the digest-verified binary."
+ ],
+ "functions": [],
+ "layouts": [],
+ "ledger": "cases.tsv (300 reviewable cases, 75 per family over empty/single/pairs/odd); the full 2,400-case sweep and a 3,000-array random differential are re-derived in memory by the tests",
+ "observations": [
+  {
+   "claim": "signature",
+   "kind": "observation",
+   "text": "From the disassembly: rdi = splits, esi = n, and the sum is returned in rax; the routine reads splits but never writes memory."
+  },
+  {
+   "claim": "n == 0 early return",
+   "kind": "observation",
+   "text": "test %esi,%esi at 0x62ad5e4 followed by je 0x62ad638 at 0x62ad5e6, where xor %eax,%eax at 0x62ad638 zeroes the result: an empty slice returns 0 without touching splits."
+  },
+  {
+   "claim": "n == 1 shares the tail add",
+   "kind": "observation",
+   "text": "cmp $0x1,%esi with je 0x62ad63b (0x62ad5e8/0x62ad5eb) sends n == 1 to xor %esi,%esi / xor %eax,%eax / jmp (0x62ad63b..0x62ad63f), which lands on the SAME scalar add at 0x62ad62c; the routine therefore contains exactly one scalar add from memory."
+  },
+  {
+   "claim": "vector loop covers n>>1 pairs",
+   "kind": "observation",
+   "text": "shr $1,%edx (0x62ad5f6), shl $0x4,%rdx and add %rdi,%rdx (0x62ad5fa/0x62ad5fc) build end = splits + 16*(n>>1); the loop body at 0x62ad600 loads 16 bytes (movdqu) and adds them with paddq, advancing rax by 16 until it equals rdx."
+  },
+  {
+   "claim": "lane-wise addition",
+   "kind": "observation",
+   "text": "paddq adds two 64-bit lanes with no carry between them, and the horizontal fold (movdqa/psrldq $0x8/paddq at 0x62ad611..0x62ad61a) is another paddq, so the result is the sum modulo 2**64."
+  },
+  {
+   "claim": "low lane only",
+   "kind": "observation",
+   "text": "movq %xmm0,%rax at 0x62ad61e keeps only the low 64-bit lane of the folded accumulator, which is what makes the result a 64-bit wrap."
+  },
+  {
+   "claim": "odd tail is added last",
+   "kind": "observation",
+   "text": "test $0x1,%sil with je (0x62ad623/0x62ad627) skips the tail for an even count; for an odd count and $0xfffffffe,%esi (0x62ad629) forms the index n & ~1 and add (%rdi,%rsi,8),%rax (0x62ad62c) adds that element AFTER the horizontal fold."
+  },
+  {
+   "claim": "leaf",
+   "kind": "observation",
+   "text": "The body is a leaf: no calls, no stores, no relocations, and the whole body is one .eh_frame FDE 0x62ad5e0..0x62ad641 (97 bytes, 32 instructions)."
+  },
+  {
+   "claim": "caller census",
+   "kind": "observation",
+   "text": "3 direct calls, 0 tail jumps, all three inside the single caller FDE 0x62ac520..0x62ac9c9; two consumers copy the sum out of rax and one stores it, so no call site discards the result."
+  },
+  {
+   "claim": "element type",
+   "kind": "inference",
+   "text": "Reading the 8-byte elements as size_t and the result as the byte total of the slice follows from the mangled name and from the callers' use of the value; the packet does not prove the C++ level type beyond that."
+  },
+  {
+   "claim": "caller purpose",
+   "kind": "inference",
+   "text": "Reading the callers as zstd's COVER cost evaluation is inferred from the enclosing object (cover.o) and the symbol name; the surrounding function is not reconstructed here."
+  }
+ ],
+ "unknowns": [
+  "The C-level meaning of the count at each call site and whether it is ever zero or one in practice; the routine handles both, but the callers' runtime arguments are not characterized here.",
+  "What each caller does with the sum beyond its first read (the consumer class is recorded, the downstream arithmetic is not).",
+  "The alignment of the splits array at run time is not observable statically; the routine uses an unaligned load (movdqu), so it is alignment-independent.",
+  "The body is byte-identical in 3 identical source objects; only 0x62ad5e0 is bound."
+ ]
+}

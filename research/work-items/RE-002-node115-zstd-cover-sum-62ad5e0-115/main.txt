@@ -1,0 +1,33 @@
+00000000062ad5e0 <hl-node>:
+ 62ad5e0:	f3 0f 1e fa          	endbr64
+ 62ad5e4:	85 f6                	test   %esi,%esi
+ 62ad5e6:	74 50                	je     62ad638
+ 62ad5e8:	83 fe 01             	cmp    $0x1,%esi
+ 62ad5eb:	74 4e                	je     62ad63b
+ 62ad5ed:	89 f2                	mov    %esi,%edx
+ 62ad5ef:	48 89 f8             	mov    %rdi,%rax
+ 62ad5f2:	66 0f ef c0          	pxor   %xmm0,%xmm0
+ 62ad5f6:	d1 ea                	shr    $1,%edx
+ 62ad5f8:	48 c1 e2 04          	shl    $0x4,%rdx
+ 62ad5fc:	48 01 fa             	add    %rdi,%rdx
+ 62ad5ff:	90                   	nop
+ 62ad600:	f3 0f 6f 10          	movdqu (%rax),%xmm2
+ 62ad604:	48 83 c0 10          	add    $0x10,%rax
+ 62ad608:	66 0f d4 c2          	paddq  %xmm2,%xmm0
+ 62ad60c:	48 39 c2             	cmp    %rax,%rdx
+ 62ad60f:	75 ef                	jne    62ad600
+ 62ad611:	66 0f 6f c8          	movdqa %xmm0,%xmm1
+ 62ad615:	66 0f 73 d9 08       	psrldq $0x8,%xmm1
+ 62ad61a:	66 0f d4 c1          	paddq  %xmm1,%xmm0
+ 62ad61e:	66 48 0f 7e c0       	movq   %xmm0,%rax
+ 62ad623:	40 f6 c6 01          	test   $0x1,%sil
+ 62ad627:	74 11                	je     62ad63a
+ 62ad629:	83 e6 fe             	and    $0xfffffffe,%esi
+ 62ad62c:	48 03 04 f7          	add    (%rdi,%rsi,8),%rax
+ 62ad630:	c3                   	ret
+ 62ad631:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+ 62ad638:	31 c0                	xor    %eax,%eax
+ 62ad63a:	c3                   	ret
+ 62ad63b:	31 f6                	xor    %esi,%esi
+ 62ad63d:	31 c0                	xor    %eax,%eax
+ 62ad63f:	eb eb                	jmp    62ad62c
