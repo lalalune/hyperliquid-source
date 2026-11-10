@@ -1,0 +1,30 @@
+0000000005dd5f00 <hl-node>:
+ 5dd5f00:	f3 0f 1e fa          	endbr64
+ 5dd5f04:	85 ff                	test   %edi,%edi
+ 5dd5f06:	b8 01 00 00 00       	mov    $0x1,%eax
+ 5dd5f0b:	0f 4f c7             	cmovg  %edi,%eax
+ 5dd5f0e:	83 ff ff             	cmp    $0xffffffff,%edi
+ 5dd5f11:	74 25                	je     5dd5f38
+ 5dd5f13:	85 f6                	test   %esi,%esi
+ 5dd5f15:	ba 01 00 00 00       	mov    $0x1,%edx
+ 5dd5f1a:	0f 4f d6             	cmovg  %esi,%edx
+ 5dd5f1d:	84 c9                	test   %cl,%cl
+ 5dd5f1f:	b9 01 00 00 00       	mov    $0x1,%ecx
+ 5dd5f24:	89 c0                	mov    %eax,%eax
+ 5dd5f26:	0f 44 d1             	cmove  %ecx,%edx
+ 5dd5f29:	48 c1 e2 20          	shl    $0x20,%rdx
+ 5dd5f2d:	48 09 d0             	or     %rdx,%rax
+ 5dd5f30:	c3                   	ret
+ 5dd5f31:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+ 5dd5f38:	b8 01 00 00 00       	mov    $0x1,%eax
+ 5dd5f3d:	83 fe ff             	cmp    $0xffffffff,%esi
+ 5dd5f40:	75 d1                	jne    5dd5f13
+ 5dd5f42:	89 d6                	mov    %edx,%esi
+ 5dd5f44:	c1 fe 02             	sar    $0x2,%esi
+ 5dd5f47:	83 fa 07             	cmp    $0x7,%edx
+ 5dd5f4a:	0f 4f c6             	cmovg  %esi,%eax
+ 5dd5f4d:	be 01 00 00 00       	mov    $0x1,%esi
+ 5dd5f52:	29 c2                	sub    %eax,%edx
+ 5dd5f54:	85 d2                	test   %edx,%edx
+ 5dd5f56:	0f 4e d6             	cmovle %esi,%edx
+ 5dd5f59:	eb c2                	jmp    5dd5f1d

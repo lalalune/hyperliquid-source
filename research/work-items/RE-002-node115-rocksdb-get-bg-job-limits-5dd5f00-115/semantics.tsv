@@ -1,0 +1,30 @@
+claim	va	size	bytes	instruction	note
+function entry	0x5dd5f00	4	f30f1efa	endbr64	the FDE begins exactly here and the body opens with an endbr64 CET landing pad; seven int3 bytes sit immediately below the entry, so this is a real function start
+the flush argument is tested for positivity	0x5dd5f04	2	85ff	test %edi,%edi	test %edi,%edi sets the flags the cmovg below reads
+the default flush count is one	0x5dd5f06	5	b801000000	mov $0x1,%eax	mov $0x1,%eax seeds the clamped value
+a positive flush count keeps its value	0x5dd5f0b	3	0f4fc7	cmovg %edi,%eax	cmovg %edi,%eax: eax = flushes when flushes > 0, otherwise the seeded 1
+the kDefault sentinel is -1	0x5dd5f0e	3	83ffff	cmp $0xffffffff,%edi	cmp $0xffffffff,%edi compares the flush argument with -1
+the derivation is entered only for kDefault flushes	0x5dd5f11	2	7425	je 5dd5f38	je 0x5dd5f38 splits the flow; the same path is re-entered from 0x5dd5f40
+the compaction argument is tested for positivity	0x5dd5f13	2	85f6	test %esi,%esi	test %esi,%esi
+the default compaction count is one	0x5dd5f15	5	ba01000000	mov $0x1,%edx	mov $0x1,%edx
+a positive compaction count keeps its value	0x5dd5f1a	3	0f4fd6	cmovg %esi,%edx	cmovg %esi,%edx
+the fourth argument is the multi-db flag	0x5dd5f1d	2	84c9	test %cl,%cl	test %cl,%cl: a byte argument, so the ABI passes it in the low byte of the fourth register
+the forced compaction count is one	0x5dd5f1f	5	b901000000	mov $0x1,%ecx	mov $0x1,%ecx
+the flush count is zero-extended, not recomputed	0x5dd5f24	2	89c0	mov %eax,%eax	mov %eax,%eax: a 32-bit self-move that zero-extends eax into rax and, like every mov, leaves the flags alone - the cmove below still sees the multi-db flag from 0x5dd5f1d
+a single-db deployment is forced to one compaction	0x5dd5f26	3	0f44d1	cmove %ecx,%edx	cmove %ecx,%edx: when multi_db is false edx becomes 1 whatever the rules above produced
+the second field is placed in the high dword	0x5dd5f29	4	48c1e220	shl $0x20,%rdx	shl $0x20,%rdx moves the compaction count to bits 63..32
+the return packs both fields into one register	0x5dd5f2d	3	4809d0	or %rdx,%rax	or %rdx,%rax: rax[31:0] = flushes and rax[63:32] = compactions - the psABI packing of std::pair<int,int> into a single INTEGER eightbyte
+the packed pair is returned	0x5dd5f30	1	c3	ret	ret
+padding after the return	0x5dd5f31	7	0f1f8000000000	nopl 0x0(%rax)	nopl 0x0(%rax): a 7-byte padding nop, so the fast path cannot fall through into the derivation branch
+the derived flush count starts at one	0x5dd5f38	5	b801000000	mov $0x1,%eax	mov $0x1,%eax
+both counts must be kDefault to derive	0x5dd5f3d	3	83feff	cmp $0xffffffff,%esi	cmp $0xffffffff,%esi: an explicit compaction count is required too
+an explicit compaction count skips the derivation	0x5dd5f40	2	75d1	jne 5dd5f13	jne 0x5dd5f13 rejoins the explicit path, where flushes is already 1
+the job budget feeds the split	0x5dd5f42	2	89d6	mov %edx,%esi	mov %edx,%esi
+a quarter of the budget becomes flushes	0x5dd5f44	3	c1fe02	sar $0x2,%esi	sar $0x2,%esi: an arithmetic shift, i.e. division by 4 rounding toward minus infinity
+the quarter only applies above seven jobs	0x5dd5f47	3	83fa07	cmp $0x7,%edx	cmp $0x7,%edx: at most seven jobs keeps a single flush
+the derived flush count is selected	0x5dd5f4a	3	0f4fc6	cmovg %esi,%eax	cmovg %esi,%eax: flushes = jobs/4 when jobs > 7, else 1
+the fallback compaction count is one	0x5dd5f4d	5	be01000000	mov $0x1,%esi	mov $0x1,%esi
+the rest of the budget becomes compactions	0x5dd5f52	2	29c2	sub %eax,%edx	sub %eax,%edx: edx = jobs - flushes
+the remainder is tested	0x5dd5f54	2	85d2	test %edx,%edx	test %edx,%edx
+a non-positive remainder becomes one compaction	0x5dd5f56	3	0f4ed6	cmovle %esi,%edx	cmovle %esi,%edx: a signed compare, so a remainder that wrapped negative is clamped to 1
+the derived compactions still obey the multi-db rule	0x5dd5f59	2	ebc2	jmp 5dd5f1d	jmp 0x5dd5f1d: the derived pair rejoins the multi-db test
