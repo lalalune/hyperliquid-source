@@ -1,0 +1,100 @@
+{
+ "artifact": "node #115",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": [
+  "RE-002-node115-rocksdb-log-reader-read-more-115 (merged, PR #5986): reconstructs log::Reader::ReadMore 0x5f018d0 and pins the SequentialFileReader::Read callee 0x6048e00 by the call-site signature match (sret, file, n, result, scratch, priority) and the IO_TOTAL rate-limiter bypass branch; its Read call initialises the result Slice the same way (data 0x4376fd, size 0), exactly Slice::clear(), as this packet's refill does.",
+  "SequentialFileReader::Read 0x6048e00 (open, PR #5992): the Read this packet scripts as an oracle -- its record bytes, rate-limiter internals and buffered-path scratch[0] bump are that packet's subject, not reimplemented here; this packet records only the call contract (n = 0x2000, result Slice, scratch = buf_, priority forwarded) and the sret move into io_status_.",
+  "RE-002-node115-rocksdb-log-reader-read-physical-record-115 (merged, PR #5982): reconstructs log::Reader::ReadPhysicalRecord 0x5f01a30, the other SequentialFileReader::Read consumer in this family; it reads fixed-size blocks, while this packet reads newline-terminated lines -- the two are siblings, not duplicates.",
+  "RE-002-node115-vendor-census: ReadLine itself has NO census record (body hash only, per the #5992 no-census convention). Its identity is pinned three other ways: the class is named by the census-bound destructor _ZN7rocksdb14LineFileReaderD1Ev at 0x60cbea0 (member d7ece8bd5f9dc186-options_parser.o, body hash 4dfc45e60530e411...), whose body destroys exactly this layout; its only caller is the census-bound RocksDBOptionsParser::Parse 0x60cfb60; and upstream v8.1.1 (below) matches the binary step for step.",
+  "facebook/rocksdb v8.1.1, read live this cycle (the repo has since moved to meta/rocksdb): file/line_file_reader.h (60 lines) declares the class -- buf_ std::array<char, 8192>, sfr_ SequentialFileReader, io_status_ IOStatus, buf_begin_ = buf_.data(), buf_end_ = buf_.data(), line_number_ = 0, at_eof_ = false, in that order (lines 16-24); the constructor is a forwarding template with an empty body (lines 28-30); ReadLine is declared at line 45 as bool ReadLine(std::string* out, Env::IOPriority rate_limiter_priority) with the comment that the line is stored without its delimiter and GetStatus() distinguishes EOF from an I/O error. file/line_file_reader.cc:30-71 defines ReadLine: the io_status_ gate (33-37), out->clear() (38), the for(;;) loop (39), memchr for '\\n' (41-42), the found arm (44-48: append, buf_begin_ += len + 1, ++line_number_, return true), the at_eof_ arm (50-53), the refill (55: append the remainder, 57-58: sfr_.Read(buf_.size(), &result, buf_.data(), rate_limiter_priority), 59: IOSTATS_ADD(bytes_read, result.size()), 60-63: failure -> MustCheck, return false, 64-67: short read -> at_eof_ = true, 'The obscure way of indicating EOF', 68-69: buf_begin_ / buf_end_ reset). options/options_parser.cc:252-321 defines Parse: it builds the reader on its stack as LineFileReader lf_reader(std::move(seq_file), file_name, config_options.file_readahead_size) (264-265), loops while (lf_reader.ReadLine(&line, Env::IO_TOTAL)) (273), uses GetLineNumber() per line (274), and reads the status back with lf_reader.GetStatus() after the loop (310). Binary-vs-source observations, recorded not hidden: MustCheck() has no binary call (empty inline, compiled out); the binary's entry gate tests only the code byte at this+0x20a8 (upstream tests !io_status_.ok()); the binary's IOSTATS_ADD expands to two TLS-helper calls (0x606d9f0) around a guarded counter add, with no sync-point string passed; the binary's IOStatus move copies bytes 0-1, 3-4, 5, 8-15 and leaves byte 2 and bytes 6-7 untouched; the binary has a second, dead operator delete[] at 0x60d4e2b whose argument was just zeroed; there is no explicit destructor in the upstream source (implicit default) -- the census-bound 0x60cbea0 is that implicit destructor, emitted as a symbol."
+ ],
+ "caller_census": {
+  "method": "Whole-.text scan for E8 calls, E9 tail jumps and RIP-relative LEA references landing on the target, validated by decoding forward from the enclosing FDE start with Capstone (census.py). A site counts only on a real instruction boundary with the expected mnemonic.",
+  "notes": [
+   "LineFileReader::ReadLine 0x60d4cf0: exactly 1 direct call, 0 tail jumps, 0 LEA refs. The caller is rocksdb::RocksDBOptionsParser::Parse 0x60cfb60..0x60d1354 (call site 0x60d0343) -- the census-bound symbol _ZN7rocksdb20RocksDBOptionsParser5ParseERKNS_13ConfigOptionsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPNS_10FileSystemE (member d7ece8bd5f9dc186-options_parser.o). No other caller exists in the whole .text; the routine is private to the OPTIONS-file parse loop.",
+   "ReadLine has no .cold landing pad: its FDE carries no LSDA, and the function never throws except through __throw_length_error, which propagates to the caller (Parse).",
+   "ReadLine calls its helpers through direct calls (memchr, std::string::_M_append, SequentialFileReader::Read, the TLS-marker helper 0x606d9f0, __throw_length_error, operator delete[], __stack_chk_fail) -- the targets are pinned by the disassembly and the PLT relocation map, not by the scan."
+  ],
+  "sites": [
+   {
+    "instruction": "call 0x60d4cf0",
+    "kind": "call",
+    "site": "0x60d0343",
+    "site_fde_end": "0x60d1354",
+    "site_fde_start": "0x60cfb60",
+    "target": "0x60d4cf0",
+    "target_name": "rocksdb::LineFileReader::ReadLine"
+   }
+  ],
+  "validated_sites": 1
+ },
+ "cases": {
+  "count": 2400,
+  "ledger": "cases.tsv",
+  "split": "600 gate (scripted Read failures at read 0/1/2 with partial sizes 0/5/100, sticky-error sequences, priorities 0-4; a failed Read returns False with the partial line kept in out, and the NEXT call fails at the entry gate leaving out untouched) + 600 lines (empty-line runs, CRLF, 8193/10000/16384/20000/25000-byte lines, exact 8191/8192/8193/16383/16384/16385-byte boundary lines, with and without a trailing newline; the trailing unterminated line is never returned as a success) + 600 chunking (files sized 8191/8192/8193/16383/16384/16385/24576/24577/32768 bytes with sparse newlines, with and without a trailing newline; a file ending exactly on an 8192-byte boundary learns EOF only from a zero-byte refill Read) + 600 bindings (full end-to-end traces incl. mixed shapes, scripted failures, varied priorities; the FDE body hash; the 1 caller-census site; the layout offsets; the IOSTATS bytes-read totals)",
+  "tests": "tests/test_line_file_reader_readline115.py",
+  "tool": "tools/line_file_reader_readline115.py",
+  "what_is_checked": [
+   "gate: a Read failure returns False with code 5, keeps the partial line in out, does NOT update buf_begin_/buf_end_, and makes the error sticky -- the next call returns False at the entry gate leaving out untouched; the IOSTATS counter still adds the failed Read's partial size (the add precedes the status check)",
+   "lines: the returned line never contains its '\\n'; empty lines return b''; '\\r' stays in the line (only '\\n' splits); a line longer than 8192 bytes is built up across refills and returned whole; a line of exactly 8192 bytes is found only after its refill; a trailing unterminated line is appended to out but the call returns False",
+   "chunking: files ending exactly on an 8192-byte boundary do NOT set at_eof_ on the full read -- the next call refills with 0 bytes and only then learns EOF; short reads set at_eof_ at once; the IOSTATS bytes-read total equals the number of bytes the Reads actually returned",
+   "bindings: the FDE body hash matches the binary; the single call site 0x60d0343 in Parse is pinned; the priority argument is forwarded to every Read (Parse passes IO_TOTAL = 4); line_number_ counts exactly the lines returned; the append length guard throws LengthError('basic_string::append') when out + chunk would exceed 0x3fffffffffffffff"
+  ]
+ },
+ "engine_callees": {
+  "0x6048e00": "SequentialFileReader::Read (NOT in the vendor census; the #5992 subject): io_status_ = sfr_.Read(buf_.size(), &result, buf_.data(), rate_limiter_priority) -- the hidden 16-byte sret in rdi, sfr_ (this+0x2000) in rsi, n = 0x2000 in rdx, the result Slice in rcx, the scratch buf_.data() (= this+0x0) in r8, the priority in r9d. This model scripts it as an oracle.",
+  "0x606d9f0": "TLS-marker helper (NOT in the census; a 64-byte FDE, 0x606d9f0..0x606da30): sets a TLS once-flag at fs-0x400 and clears the guard byte at fs-0x3f8+0x98. Called twice in the refill path, bracketing the guarded IOSTATS bytes-read counter add -- the expansion of IOSTATS_ADD(bytes_read, result.size()). The same helper is called at the WritableFileWriter family's sync-point sites; no sync-point string is passed at either site here, so no upstream sync-point name is pinned.",
+  "0x60cbea0": "rocksdb::LineFileReader::~LineFileReader (census-bound, member d7ece8bd5f9dc186-options_parser.o): the implicit destructor -- it frees io_status_.state_ at +0x20b0 first, then destroys the vector<shared_ptr> at sfr_+0x88..+0x98. It pins the class identity and the layout; it is not modelled (no explicit destructor exists upstream).",
+  "0x60cfb60": "rocksdb::RocksDBOptionsParser::Parse (census-bound): the ONLY caller (site 0x60d0343), looping while (lf_reader.ReadLine(&line, Env::IO_TOTAL)).",
+  "0x63f0d70": "PLT __stack_chk_fail (the stack-canary failure path in the epilogue and in the length-error path).",
+  "0x63f0dc0": "PLT operator delete[] _ZdaPv: frees the old io_status_.state_ in the status move; the second call at 0x60d4e2b is dead (its argument was just zeroed).",
+  "0x63f0de0": "PLT __throw_length_error: the append overflow path, with the string 'basic_string::append' at 0x4474d2.",
+  "0x63f0f40": "PLT std::string::_M_append(const char*, size_t): the two append sites (the newline arm and the refill arm).",
+  "0x63f1790": "PLT memchr: memchr(buf_begin_, '\\n', buf_end_ - buf_begin_) at the loop head."
+ },
+ "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM. The target binary is never executed. The tool models the routine in Python; SequentialFileReader::Read is scripted as an oracle (its record bytes and rate-limiter internals are the #5992 subject), the TLS IOSTATS counter is a plain integer (the guard byte is cleared by the helper on first use, so the add is unconditional in practice), and the implicit destructor is not modelled. The live engine check drives the model against real files in a temp dir and asserts the model output equals the real file bytes split on '\\n' after every ReadLine. make verify/test/catalogue-check in a tooled environment is still owed upstream.",
+ "functions": {
+  "0x60d4cf0": {
+   "body_sha256": "4894ad484826ac17944c8af7f6c897240815886e42b70fd44ae700cffa3418b2",
+   "callers": [
+    "0x60d0343"
+   ],
+   "census_id": "none",
+   "lea_refs": [],
+   "mangled": "",
+   "model": "626-byte bool LineFileReader::ReadLine(std::string* out, Env::IOPriority rate_limiter_priority) (LineFileReader* in rdi, std::string* out in rsi, priority in edx, forwarded to SequentialFileReader::Read as r9d). (1) Entry gate (0x60d4d16): io_status_.code (this+0x20a8, byte 0) != 0 -> return false at once, out NOT cleared and NOT touched (the sticky-error gate; upstream line_file_reader.cc:33-37, whose MustCheck() is an empty inline with no binary call). (2) out->clear() (0x60d4d23..0x60d4d45): out->size() = 0, out->data()[0] = 0; r12 = buf_begin_ (this+0x20b8), r15 = buf_end_ (this+0x20c0). (3) Loop head (0x60d4ebc..0x60d4ed2): remaining = buf_end_ - buf_begin_; p = memchr(buf_begin_, '\\n', remaining) (PLT memchr 0x63f1790); null -> the refill path (step 5). (4) Newline found (0x60d4ed8..0x60d4f17): len = p - buf_begin_; the length check throws __throw_length_error(\"basic_string::append\") (PLT 0x63f0de0, string at 0x4474d2) if len > MAX - out->size() with MAX = 0x3fffffffffffffff; else out->append(buf_begin_, len) (std::string::_M_append, PLT 0x63f0f40) -- the line EXCLUDES the newline; buf_begin_ += len + 1; line_number_ (this+0x20c8) += 1; return true. (5) Refill path (0x60d4d70..0x60d4d96): if at_eof_ (this+0x20d0) is set, return false -- out keeps whatever earlier refills of THIS call appended, and the caller discards it; else the same length check, then out->append(buf_begin_, remaining) -- the leftover partial line is appended BEFORE the refill, so a line spanning several 8 KiB chunks is built up across refills. (6) Refill read (0x60d4d9b..0x60d4dc7): io_status_ = sfr_.Read(buf_.size(), &result, buf_.data(), rate_limiter_priority) -- the call at 0x6048e00 with the hidden 16-byte sret in rdi (stack slot rsp+0x30), sfr_ (the embedded SequentialFileReader at this+0x2000) in rsi, n = 0x2000 in rdx, the result Slice (stack rsp+0x20, initialised to {\"\", 0} -- the empty-string literal at 0x4376fd, exactly Slice::clear()) in rcx, the scratch buf_.data() (= this+0x0) in r8, the priority in r9d. (7) Status move (0x60d4dcc..0x60d4e2b): the sret IOStatus is moved into io_status_ (bytes 0-1, 3-4, 5, 8-15 copied; byte 2 and bytes 6-7 NOT copied); the old state_ pointer is freed with operator delete[] (PLT 0x63f0dc0) and the sret slot is zeroed; the second delete[] at 0x60d4e2b is dead (its argument was just zeroed). (8) IOSTATS (0x60d4e30..0x60d4e79): two calls to the TLS-marker helper 0x606d9f0 (the same helper the WritableFileWriter family calls at its sync-point sites; it sets a TLS once-flag at fs-0x400 and clears the guard byte at fs-0x3f8+0x98) bracketing the guarded counter add (the TLS bytes-read counter at fs-0x3f8+0x10 += result.size(), skipped when the guard byte is set) -- the expansion of upstream IOSTATS_ADD(bytes_read, result.size()) (line_file_reader.cc:59); it runs BEFORE the status check, so a failed Read still adds its (partial) result size; no sync-point string is passed at either helper call site, so no upstream sync-point name is pinned. (9) Status check (0x60d4e7d..0x60d4e84): io_status_.code != 0 -> return false; out keeps the partial line, buf_begin_/ buf_end_ are NOT updated, and the next ReadLine call fails at once at the entry gate (the error is sticky). (10) Short-read EOF (0x60d4e8a..0x60d4e98): result.size() != 0x2000 -> at_eof_ = true (upstream: 'The obscure way of indicating EOF', line_file_reader.cc:64-67); a full 8192-byte read does NOT set at_eof_, even if it was the last chunk -- the next call refills, reads 0 bytes (OK), and only then learns EOF. Then buf_begin_ = result.data() and buf_end_ = result.data() + result.size() (0x60d4e9f..0x60d4eb5, via movups), and the loop repeats. (11) Epilogue (0x60d4f22..0x60d4f40): stack-canary check, restore the six callee-saved registers, return the bool in eax. The length-error path (0x60d4f41..0x60d4f58) checks the canary first, then throws. There is NO .cold landing pad: the FDE has no LSDA.",
+   "relocations": "0",
+   "source_sha256": ""
+  }
+ },
+ "layouts": {
+  "io_status_16b": {
+   "byte 2": "NOT copied by the status move (keeps its previous value)",
+   "byte 5": "u8 -- copied by the status move",
+   "bytes 0-1": "code (u8) + subcode (u8) -- copied by the status move",
+   "bytes 3-4": "u16 -- copied by the status move",
+   "bytes 6-7": "padding -- NOT copied by the status move",
+   "bytes 8-15": "state_ (char*) -- copied by the status move; the old pointer is freed with operator delete[]"
+  },
+  "line_file_reader": {
+   "+0x0000": "buf_ (std::array<char, 8192>, 8192 B) -- the scratch buffer; sfr_.Read writes into it (this+0x0) and buf_begin_/buf_end_ point into it",
+   "+0x2000": "sfr_ (SequentialFileReader, 0xa8 B) -- the embedded file reader; its +0x88..+0x98 holds a vector<shared_ptr> (destroyed by the implicit destructor at 0x60cbea0)",
+   "+0x20a8": "io_status_ (IOStatus, 16 B) -- code at byte 0 (the entry-gate test), subcode at byte 1, state_ pointer at +0x8 (freed with operator delete[] on the status move)",
+   "+0x20b8": "buf_begin_ (const char*, 8) -- the next unconsumed byte of buf_",
+   "+0x20c0": "buf_end_ (const char*, 8) -- one past the last valid byte of buf_",
+   "+0x20c8": "line_number_ (size_t, 8) -- lines returned so far; Parse reads it per line via GetLineNumber()",
+   "+0x20d0": "at_eof_ (bool, 1) -- set by a short Read (result.size() != 8192); Parse distinguishes EOF from an error via GetStatus()"
+  }
+ },
+ "observations": [
+  "The trailing unterminated line is appended to out by the refill path but the call returns False: a while (ReadLine(...)) loop never sees it as a line. This is the one behaviour a naive line reader gets wrong, and the model reproduces it exactly.",
+  "A file ending exactly on an 8192-byte boundary does not set at_eof_ on the full read; EOF is learned only from the next call's zero-byte refill Read. The model reproduces this: at_eof_ is set only when result.size() != 8192.",
+  "The IOSTATS bytes-read add precedes the status check, so a failed Read still adds its (partial) result size to the TLS counter. The model records the add on both paths.",
+  "The entry gate leaves out untouched on a sticky error, but out IS cleared before the loop on a healthy call -- so a partial line left in out by a failed call survives into the caller's hands only when the caller reuses the same string, which Parse does not (it breaks the loop on False).",
+  "MustCheck() has no binary call: it is an empty inline in this build, compiled out on all three false-return paths (entry gate, at_eof_, read error).",
+  "The binary's IOStatus move copies bytes 0-1, 3-4, 5 and 8-15 and leaves byte 2 and bytes 6-7 untouched; the second operator delete[] at 0x60d4e2b is dead (its argument was just zeroed). Both are recorded, not modelled as live behaviour.",
+  "The two TLS-helper calls (0x606d9f0) carry no sync-point string, so no upstream sync-point name is pinned for them; they are the IOSTATS_ADD expansion, not TEST_SYNC_POINT calls.",
+  "The constructor is a forwarding template with an empty body; buf_begin_/buf_end_ start at buf_.data() by their default member initialisers -- so the first ReadLine call always refills (remaining = 0). The model initialises pos_ == end_ == 0 for the same reason.",
+  "No /home/ paths appear in the packet excerpts: the objdump excerpt uses the repo-relative binary path work/hl-node-115.bin (the #5857 defect class, avoided)."
+ ]
+}
