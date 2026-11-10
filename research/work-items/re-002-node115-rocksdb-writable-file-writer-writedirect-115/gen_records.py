@@ -875,8 +875,9 @@ def main():
             "sibling pattern exactly: Flush's failure event "
             "carries its own op (4 = kFlush) and RangeSync's "
             "carries 7 = kRangeSync. The two trailing u64 fields "
-            "are ordered (size, write_offset) -- those are the "
-            "(allowed, old_size) arguments. The model emits 9 "
+            "are ordered (size, write_offset) -- the values passed to "
+            "upstream NotifyOnIOError(s, kPositionedAppend, "
+            "file_name(), size, write_offset). The model emits 9 "
             "exactly as observed. PINNED DIFFERENCE from "
             "WriteBufferedWithChecksum, whose failure event trails "
             "(left, old_size) with type 8.",

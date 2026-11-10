@@ -125,8 +125,9 @@ write_offset}` through vtable slot 47 (0x178), skipping the base no-op
 `include/rocksdb/listener.h:236-248`, implicit 0-based: kRead 0, kWrite 1,
 kTruncate 2, kClose 3, kFlush 4, kSync 5, kFsync 6, kRangeSync 7, kAppend 8,
 kPositionedAppend 9, kOpen 10) -- exactly upstream `NotifyOnIOError(s,
-kPositionedAppend, file_name(), size, write_offset)`; the trailing u64s are
-the (allowed, old_size) arguments. PINNED DIFFERENCE from
+kPositionedAppend, file_name(), size, write_offset)`; the trailing u64s
+carry (size, write_offset), the values passed to that call. PINNED
+DIFFERENCE from
 WriteBufferedWithChecksum: its failure event trails (left, old_size) with
 type 8.
 
