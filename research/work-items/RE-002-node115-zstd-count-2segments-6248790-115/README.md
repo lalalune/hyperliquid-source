@@ -53,8 +53,11 @@ the digest-verified artifact and re-decode them with Capstone.
    `ip < vEnd-7` (`0x62487a8`/`0x62487af`), the dword tail `cursor < vEnd-3`
    (`0x6248836`) and the word tail `cursor < vEnd-1` (`0x624884a`), so no read
    crosses `vEnd`; phase 2 repeats the shape against `iEnd-7` (`0x62487fb`). A
-   `vEnd` below 7 makes `vEnd-7` wrap to a huge value, which merely fails the
-   unsigned `jae` and falls back to the byte tail.
+   `vEnd` below 7 would make `vEnd-7` wrap to a huge value and the unsigned
+   `jae` would then **not** be taken, so control would enter the 8-byte loop at
+   `0x62487b1` instead of the byte tail - recorded as an inference, since a real
+   heap address is never below 7. (An earlier revision of this packet stated the
+   opposite direction; the 2026-11-10 review caught it.)
 4. **The byte tail advances by `sete`.** `movzx (%r11),%ebx` /
    `cmp (%rax),%bl` / `sete %al` / `add %r11,%rax` (`0x6248880`-`0x624888c`)
    add 1 on agreement and 0 otherwise, which is exactly what stops the tail at
@@ -68,9 +71,14 @@ the digest-verified artifact and re-decode them with Capstone.
    phase 2's only match-side cursor; `r10` holds `mEnd` for the wrap tests at
    `0x62487f3` and `0x624886f` and is then reused as a scratch word
    (`mov (%rdx),%r10` at `0x6248944`).
-7. **The routine writes nothing.** The access capture over the whole sweep
-   records loads only, of widths 1, 2, 4 and 8, all inside the two modelled
-   regions - and the window has no store instruction at all.
+7. **The routine writes no caller memory.** No instruction in the window has a
+   memory destination, and the access capture over the whole sweep records loads
+   only, of widths 1, 2, 4 and 8, all inside the two modelled regions. The only
+   memory writes are the two callee-saved spills - `push %rbp` (`0x6248796`)
+   and `push %rbx` (`0x624879d`) - matched by four pops (`0x6248825`/`0x6248826`
+   on the first return path, `0x6248874`/`0x6248875` on the second). `verify.py`
+   pins both the empty explicit-store set and the two pushes, because the store
+   capture alone cannot see a push (the emulator models it on its own stack).
 
 Two further facts about the window itself:
 
@@ -92,14 +100,18 @@ with Capstone and attributed to its enclosing FDE.
 
 | consumer | sites | first use | meaning |
 |---|---|---|---|
-| `arithmetic` | 37 | `add`/`sub`/`lea` on `rax` | the count is folded into a running total or length |
-| `register-copy` | 14 | `mov`, e.g. `mov %rax,%r11` | kept in another register and used later |
-| `overwritten` | 5 | `mov $0x1,%eax` | replaced before any read |
+| `arithmetic` | 44 | `add`/`sub`/`lea` on `rax` | folded into a running total, a length, or an address base (9 sites read it as `lea rX,[rax+4]`) |
+| `register-copy` | 12 | `mov`, e.g. `mov r10, rax` | kept in another register and used later |
 | *discarded* | **0** | — | no site ignores the value |
 
 `records.json` records `direct_calls: 56`, `sites_reading_the_return: 56`,
 `discarded_sites: 0` and a `value-returning` contract; `verify.py` re-derives the
-consumer counts from `caller_use.tsv`.
+consumer counts from `caller_use.tsv`, pins the nine sites whose first read is a
+memory base (`lea rX,[rax+4]`) and asserts that every row's first use names a rax
+register. (The first version of this census classified nine rows wrongly -
+`classify_rax_use` could not see `%rax` as the base of a memory operand - and the
+2026-11-10 review found it; the corrected counts below are the reviewer's
+independent re-derivation as well as the tool's.)
 
 ### Evidence
 
@@ -130,8 +142,8 @@ Run at the branch head, with the tree otherwise clean:
 
 ```
 python3 research/work-items/RE-002-node115-zstd-count-2segments-6248790-115/verify.py
-  -> verify OK: 15 manifest rows, 56 callers / 56 consumers
-     {'overwritten': 5, 'register-copy': 14, 'arithmetic': 37}, 40 claim anchors,
+  -> verify OK: 16 manifest rows, 56 callers / 56 consumers
+     {'register-copy': 12, 'arithmetic': 44}, 40 claim anchors,
      model + 300-case ledger {'prefix': 60, 'wrap': 60, 'wrap_iend': 60,
      'empty_tail': 60, 'iend_first': 60} + excerpt (150 instructions, body
      240b4390c750..., 2400-case sweep)

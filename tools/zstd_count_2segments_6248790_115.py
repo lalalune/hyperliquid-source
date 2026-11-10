@@ -9,7 +9,8 @@ but `match` points into the *dictionary tail*, which ends at `mEnd`. If both
 cursors reach `mEnd` while still agreeing, the match cursor wraps back to
 `mStart` and counting continues against the start of the current block. The
 routine returns the number of **input** bytes matched (never a match-side
-distance), and it writes nothing.
+distance), and it writes no caller memory (its only memory writes are the two
+callee-saved spills).
 
 Register roles read off the routine's own committed bytes (`main.txt`, hashed
 against the digest-verified artifact by `verify.py`):
@@ -54,16 +55,19 @@ Build-specific details pinned by the anchors in `semantics.tsv`:
    zero-safe one;
 3. the fast loops are entered only when a whole 8-byte, 4-byte or 2-byte read
    fits below `vEnd` (`ip < vEnd-7`, `cursor < vEnd-3`, `cursor < vEnd-1`), so no
-   read crosses `vEnd`; a `vEnd` below 7 makes `vEnd-7` wrap to a huge value,
-   which merely fails the *unsigned* `jae` and falls back to the byte tail;
+   read crosses `vEnd`; a `vEnd` below 7 would make `vEnd-7` wrap to a huge
+   value, so the *unsigned* `jae` would **not** be taken and control would enter
+   the 8-byte loop rather than the byte tail (an inference: a real heap address
+   is never below 7);
 4. the byte tail advances the cursor by `sete` (1 on agreement, 0 otherwise),
    which is what makes it stop at the first difference;
 5. the return value is the input-side length: every exit computes `cursor - ip`,
    and the phase-2 exits use the `ip` already advanced by `len1`;
 6. phase 2 uses `r8` (mStart) as its only match-side cursor and `r10` (mEnd)
    only for the wrap test - neither is modified by phase 1;
-7. the routine is a leaf that writes nothing: there are no stores at all, only
-   loads, and its two `push`/`pop` pairs balance.
+7. the routine is a leaf that writes no caller memory: no instruction in the
+   window has a memory destination, only loads; its two `push`/`pop` pairs
+   balance (the pushes are its only memory writes);
 
 The window is one `.eh_frame` FDE, no calls, no relocations, `raw_equal` with 3
 identical source objects (see the vendor census record in `records.json`). The
@@ -546,7 +550,9 @@ def count_2segments_decoded(mem, g, path=None):
 
 def accesses(mem, g, path=None):
     """`(loads, stores)` - every memory access the decoded run performs, as
-    `(address, size)`. The routine writes nothing, so `stores` is empty."""
+    `(address, size)`. The routine writes no caller memory, so `stores` is empty;
+    the two `push`es are modelled on the machine's own stack and are therefore
+    not part of this capture - `verify.py` pins them from the decoded stream."""
     _, loads, stores = _run(mem, g, path, capture=True)
     return loads, stores
 

@@ -41,17 +41,15 @@
     "tail_jumps": 0,
     "caller_fdes": 12,
     "consumers": {
-      "overwritten": 5,
-      "register-copy": 14,
-      "arithmetic": 37
+      "arithmetic": 44,
+      "register-copy": 12
     },
     "sites_reading_the_return": 56,
     "discarded_sites": 0,
-    "contract": "value-returning: all 56 call sites consume the count - 37 fold it into arithmetic (add/sub/lea on rax), 14 copy it into another register for later use and 5 overwrite it with a constant, which is still a use of the value's liveness rather than a discarded call",
+    "contract": "value-returning: all 56 call sites read the count - 44 fold it into arithmetic (add/sub/lea on rax, including 9 sites that use it as a memory base in `lea rX,[rax+4]`), 12 copy it into another register for later use, and 0 discard it",
     "consumer_meaning": {
-      "arithmetic": "the count is folded into a running total or a length computation",
-      "register-copy": "the count is moved to another register and used later in the same FDE",
-      "overwritten": "rax is replaced by a constant or another value before any read"
+      "arithmetic": "the count is folded into a running total, a length, or the base of an address computation",
+      "register-copy": "the count is moved to another register and used later in the same FDE"
     }
   },
   "observations": [
@@ -89,7 +87,7 @@
     },
     {
       "kind": "observation",
-      "claim": "the routine performs no stores; the access capture records loads only (widths 1, 2, 4 and 8)"
+      "claim": "the routine writes no caller memory: no instruction in the window has a memory destination, and the only memory writes are the two callee-saved spills (push rbp at 0x6248796, push rbx at 0x624879d), matched by four pops (0x6248825/0x6248826 on the first return path, 0x6248874/0x6248875 on the second) - the earlier wording 'no stores at all' was wrong because push writes memory"
     },
     {
       "kind": "observation",
@@ -114,6 +112,20 @@
     {
       "kind": "inference",
       "claim": "the routine is a static (non-indirectly-called) function, hence no CET landing pad"
+    }
+  ],
+  "review_followups": [
+    {
+      "date": "2026-11-10",
+      "reviewer": "dbstkddl8-create",
+      "finding": "classify_rax_use skipped non-register operands, so %rax used as the base of a memory operand (lea rX,[rax+4]) was invisible and the scan ran on to an unrelated later write: 9 of 56 rows were misclassified (5 as 'overwritten', 4 with a wrong distance/class)",
+      "resolution": "census.py now detects the read through ins.regs_access(), which includes base/index registers; the recomputed census is arithmetic 44 / register-copy 12 / overwritten 0, matching the reviewer's independent re-derivation of all 56 rows. verify.py pins the 9 memory-base sites and asserts that every row's first use names a rax register (the previous 'all sites consume' check was a tautology), and the 'writes nothing' test now reads the decoded stream instead of the vacuous store capture."
+    },
+    {
+      "date": "2026-11-10",
+      "reviewer": "dbstkddl8-create",
+      "finding": "the wrap sentence for a vEnd below 7 stated the wrong direction",
+      "resolution": "corrected: with a wrapped bound the unsigned jae is NOT taken and control enters the 8-byte loop (0x62487b1) instead of the byte tail; the wraparound is unreachable for real heap pointers and is recorded as an inference"
     }
   ],
   "unknowns": [

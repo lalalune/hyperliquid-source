@@ -13,6 +13,7 @@ import unittest
 from pathlib import Path
 
 import capstone
+import re
 
 from tools.zstd_count_2segments_6248790_115 import (
     START,
@@ -327,6 +328,22 @@ class Model(unittest.TestCase):
                              count_2segments_decoded(mem, g), (n, tail, dist))
 
     def test_the_routine_writes_nothing(self):
+        # The store capture alone cannot see a `push` (the emulator keeps it on
+        # its own stack), so the decoded stream is the evidence that the routine
+        # writes no caller memory: no instruction has a memory destination, and
+        # the only memory writes are the two callee-saved spills. A 2026-11-10
+        # review found the earlier version of this test vacuous.
+        from capstone.x86_const import X86_OP_MEM
+        stream = list(MD.disasm(window_bytes(), START))
+        self.assertEqual(len(stream), 150)
+        self.assertEqual([f"{i.mnemonic} {i.op_str}" for i in stream
+                          if i.operands and i.operands[0].type == X86_OP_MEM
+                          and i.mnemonic not in ("cmp", "test", "lea", "nop")],
+                         [])
+        self.assertEqual([i.op_str for i in stream if i.mnemonic == "push"],
+                         ["rbp", "rbx"])
+        self.assertEqual([i.op_str for i in stream if i.mnemonic == "pop"],
+                         ["rbx", "rbp", "rbx", "rbp"])
         for fam, vals in BOUNDARY_CASES.items():
             for n, tail, dist, p1, p2 in vals:
                 b = case(fam, n, tail, dist, p1, p2)
@@ -413,8 +430,23 @@ class CallerCensus(unittest.TestCase):
         counts = {}
         for u in uses:
             counts[u[1]] = counts.get(u[1], 0) + 1
-        self.assertEqual(counts, {"arithmetic": 37, "register-copy": 14,
-                                  "overwritten": 5})
+        self.assertEqual(counts, {"arithmetic": 44, "register-copy": 12})
+        # Every row's first use must name a rax register, and no row may be a
+        # discarded call. This is what the reviewer's re-derivation checks: the
+        # first version of the census could not see `%rax` used as the base of a
+        # memory operand, so it recorded 9 rows wrongly (5 as `overwritten`).
+        tokens = {"rax", "eax", "ax", "al", "ah"}
+        memory_base = set()
+        for u in uses:
+            self.assertNotIn(u[1], ("overwritten", "dead"), u)
+            self.assertTrue(tokens & set(re.split(r"[^a-z0-9]+", u[3].lower())),
+                            f"{u[0]}: first use does not read a rax register: {u[3]}")
+            if "[rax" in u[3].replace(" ", ""):
+                memory_base.add(u[0])
+        for site in ("0x62630db", "0x6263b5b", "0x6268009", "0x62690a9",
+                     "0x626e999", "0x626ff19", "0x6273f9d", "0x627559a",
+                     "0x627789b"):
+            self.assertIn(site, memory_base, "memory-base read not detected")
         rec = json.loads((PACKET / "records.json").read_text())
         census = rec["caller_census"]
         self.assertEqual(census["direct_calls"], 56)

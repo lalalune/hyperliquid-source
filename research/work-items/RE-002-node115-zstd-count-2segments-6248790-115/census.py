@@ -139,21 +139,19 @@ def census_relocations(start):
 
 def classify_rax_use(insns):
     """Scan forward for the first instruction that READS %rax (any of
-    rax/eax/ax/al/ah), using Capstone's operand access flags. Returns
-    (class, meaning, distance, instruction)."""
+    rax/eax/ax/al/ah). A read includes %rax used as the **base or index of a
+    memory operand** (`lea 0x4(%rax),%r11`, `mov (%rax),%rcx`, `mov %rcx,(%rax)`),
+    which Capstone reports in `ins.regs_access()` and which an operand-type scan
+    that skips non-register operands misses (the 2026-11-10 review finding).
+    Returns (class, meaning, distance, instruction)."""
     for dist, ins in enumerate(insns, 1):
-        read = False
-        written = False
-        for op in ins.operands:
-            if op.type != CS_X86_OP_REG:
-                continue
-            if op.reg not in RAX_REGS:
-                continue
-            acc = getattr(op, "access", 0)
-            if acc & CS_AC_READ:
-                read = True
-            elif acc & CS_AC_WRITE:
-                written = True
+        rd, wr = ins.regs_access()
+        reads = bool(set(rd) & RAX_REGS)
+        writes = bool(set(wr) & RAX_REGS)
+        # A tombstone like `xor %eax,%eax` reads and writes: count it as a write
+        # only when the instruction is a pure definition of the whole register.
+        read = reads
+        written = writes and not reads
         text = f"{ins.mnemonic} {ins.op_str}".strip()
         if not read and not written:
             continue
@@ -173,9 +171,11 @@ def classify_rax_use(insns):
                         dist, text)
             if ins.mnemonic in ("add", "sub", "lea", "inc", "dec", "neg",
                                 "sbb", "adc", "imul"):
+                # `lea 0x4(%rax),%r11` reads the field as a pointer/total: the
+                # count is folded into an address or an arithmetic result.
                 return ("arithmetic",
-                        "the field is folded into a running total", dist,
-                        text)
+                        "the field is folded into a running total or an address",
+                        dist, text)
             if ins.mnemonic.startswith("push"):
                 return ("stack-arg",
                         "pushed as a stack argument for a following call",
@@ -192,7 +192,8 @@ def classify_rax_use(insns):
                         text)
             if ins.mnemonic.startswith("j"):
                 return ("control", "the field selects a branch", dist, text)
-            return "read-other", text, dist, text
+            return ("read-other", "read in a form the classifier does not name",
+                    dist, text)
         return "overwritten", "overwritten before being read", dist, text
     return "dead", "never read inside the enclosing FDE", 0, ""
 

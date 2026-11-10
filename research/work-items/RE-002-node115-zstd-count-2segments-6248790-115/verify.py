@@ -11,6 +11,7 @@ against the committed ledger and the 2,400-case sweep.
 import hashlib
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -31,7 +32,13 @@ REQUIRED_ANCHORS = (0x6248790, 0x6248793, 0x6248797, 0x62487A4, 0x62487A8,
                     0x62487E1, 0x62487F3, 0x62487FB, 0x6248836, 0x624884A,
                     0x6248863, 0x6248886, 0x62488E8)
 
-EXPECTED_CONSUMERS = {"arithmetic": 37, "overwritten": 5, "register-copy": 14}
+EXPECTED_CONSUMERS = {"arithmetic": 44, "register-copy": 12}
+
+# The nine call sites whose first read of %rax is a memory-base use; the
+# classifier missed them until the 2026-11-10 review (see `classify_rax_use`).
+MEMORY_BASE_SITES = ("0x62630db", "0x6263b5b", "0x6268009", "0x62690a9",
+                     "0x626e999", "0x626ff19", "0x6273f9d", "0x627559a",
+                     "0x627789b")
 
 
 def load(path, name):
@@ -151,6 +158,22 @@ def check_census():
     for u in uses:
         seen[u[1]] = seen.get(u[1], 0) + 1
     assert seen == EXPECTED_CONSUMERS, seen
+    # Every call site really does read the count: the first use must name a rax
+    # register, and no site may be classified as a discarded call. This is the
+    # non-tautological form of "all 56 sites consume the return" - the previous
+    # version compared census["sites_reading_the_return"] with len(callers),
+    # which the census had itself derived from len(callers).
+    tokens = {"rax", "eax", "ax", "al", "ah"}
+    memory_base = set()
+    for u in uses:
+        assert u[1] not in ("overwritten", "dead"), (
+            f"{u[0]} discards the count ({u[1]})")
+        assert tokens & set(re.split(r"[^a-z0-9]+", u[3].lower())), (
+            f"{u[0]}: the first use does not read a rax register: {u[3]}")
+        if "[rax" in u[3].replace(" ", ""):
+            memory_base.add(u[0])
+    missing = [s for s in MEMORY_BASE_SITES if s not in memory_base]
+    assert not missing, f"memory-base reads not detected at {missing}"
     rec = json.loads((PACKET / "records.json").read_text())
     census = rec["caller_census"]
     assert census["direct_calls"] == len(callers)
@@ -188,7 +211,23 @@ def check_model():
     b = tool._case({"family": "empty_tail", "n": 8, "tail": 0, "dist": 8,
                     "plant1": 0, "plant2": 8})
     assert tool.count_2segments(b["mem"], b["geometry"]) == (8, 0, 8, True)
-    # the routine writes nothing at all
+    # The routine writes no caller memory. The emulator keeps pushes on its own
+    # stack, so the store capture alone is vacuous evidence (a 2026-11-10 review
+    # point): the decoded stream is what pins it - no instruction has a memory
+    # destination, and the only implicit memory writes are the two callee-saved
+    # spills, matched by four pops on the two return paths.
+    from capstone.x86_const import X86_OP_MEM
+    md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_64)
+    md.detail = True
+    stream = list(md.disasm(window_bytes(), START))
+    assert len(stream) == 150, len(stream)
+    explicit_stores = [f"{i.mnemonic} {i.op_str}" for i in stream
+                       if i.operands and i.operands[0].type == X86_OP_MEM
+                       and i.mnemonic not in ("cmp", "test", "lea", "nop")]
+    assert explicit_stores == [], explicit_stores
+    assert [i.op_str for i in stream if i.mnemonic == "push"] == ["rbp", "rbx"]
+    assert [i.op_str for i in stream if i.mnemonic == "pop"] == [
+        "rbx", "rbp", "rbx", "rbp"]
     b = tool._case({"family": "wrap", "n": 32, "tail": 8, "dist": 40,
                     "plant1": 8, "plant2": 3})
     loads, stores = tool.accesses(b["mem"], b["geometry"])
