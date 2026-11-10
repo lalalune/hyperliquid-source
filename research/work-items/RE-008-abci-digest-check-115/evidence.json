@@ -1,0 +1,51 @@
+{
+  "bookkeeping": {
+    "max_key": "wrapper A stores (tag, max entry key) at engine value +0x10/+0x18",
+    "trim": "when tag set, keep map keys >= max + 1 (saturating) via 0x4de5ad0, before the step"
+  },
+  "compare": {
+    "entry": "0x68 bytes; +0x0 u64 key (looked up), +0x48..+0x68 32 bytes compared",
+    "map": "engine value +0x400; two modes: B-tree when +0x400 == 0x8000000000000000 (root +0x408, height +0x410), else 0x28-byte ring entries via 0x57f8bb0 (len +0x418)",
+    "mismatch": "jne to the panic block; template 0x44c993 \"computed abci digest ... does not match quorum value\"",
+    "missing_key": "skip the entry (no compare)",
+    "sites": [
+      "0x5a05d07",
+      "0x5a07527"
+    ],
+    "wrappers": [
+      "0x5a04e40",
+      "0x5a06600"
+    ]
+  },
+  "component": "abci",
+  "gates_changed": false,
+  "map_fill": {
+    "condition": "height % box divisor == 0 (A +0x39c8, B +0x4538) or bpl set",
+    "insert_calls": [
+      "0x5a07fe5",
+      "0x5a08845"
+    ],
+    "insert_fn": "0x5a03fa0",
+    "trim_at_len": 51,
+    "value_fn": {
+      "A": "0x548dad0",
+      "B": "0x548d8c0"
+    },
+    "value_fn_records": "call [rip+0x64e1010] -> 0x1547530 (observer record)"
+  },
+  "panic_template_refs": {
+    "functions": [
+      "0x2d23610",
+      "0x5a04e40",
+      "0x5a06600"
+    ],
+    "sites": [
+      "0x2d2511b",
+      "0x5a061ff",
+      "0x5a07a54"
+    ]
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}
