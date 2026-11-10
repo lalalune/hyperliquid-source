@@ -1,0 +1,67 @@
+0000000006241700 <hl-node>:
+ 6241700:	4c 8d 42 f9          	lea    -0x7(%rdx),%r8
+ 6241704:	48 89 f9             	mov    %rdi,%rcx
+ 6241707:	4c 39 c7             	cmp    %r8,%rdi
+ 624170a:	73 44                	jae    6241750
+ 624170c:	48 8b 06             	mov    (%rsi),%rax
+ 624170f:	48 8b 3f             	mov    (%rdi),%rdi
+ 6241712:	48 39 f8             	cmp    %rdi,%rax
+ 6241715:	75 79                	jne    6241790
+ 6241717:	48 8d 41 08          	lea    0x8(%rcx),%rax
+ 624171b:	48 83 c6 08          	add    $0x8,%rsi
+ 624171f:	4c 39 c0             	cmp    %r8,%rax
+ 6241722:	73 2f                	jae    6241753
+ 6241724:	48 8b 3e             	mov    (%rsi),%rdi
+ 6241727:	4c 8b 08             	mov    (%rax),%r9
+ 624172a:	4c 39 cf             	cmp    %r9,%rdi
+ 624172d:	0f 84 8d 00 00 00    	je     62417c0
+ 6241733:	4c 31 cf             	xor    %r9,%rdi
+ 6241736:	31 d2                	xor    %edx,%edx
+ 6241738:	f3 48 0f bc d7       	tzcnt  %rdi,%rdx
+ 624173d:	c1 ea 03             	shr    $0x3,%edx
+ 6241740:	48 01 d0             	add    %rdx,%rax
+ 6241743:	48 29 c8             	sub    %rcx,%rax
+ 6241746:	c3                   	ret
+ 6241747:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+ 624174e:	00 00 
+ 6241750:	48 89 f8             	mov    %rdi,%rax
+ 6241753:	48 8d 7a fd          	lea    -0x3(%rdx),%rdi
+ 6241757:	48 39 f8             	cmp    %rdi,%rax
+ 624175a:	73 06                	jae    6241762
+ 624175c:	8b 3e                	mov    (%rsi),%edi
+ 624175e:	39 38                	cmp    %edi,(%rax)
+ 6241760:	74 3e                	je     62417a0
+ 6241762:	48 8d 7a ff          	lea    -0x1(%rdx),%rdi
+ 6241766:	48 39 f8             	cmp    %rdi,%rax
+ 6241769:	73 08                	jae    6241773
+ 624176b:	0f b7 3e             	movzwl (%rsi),%edi
+ 624176e:	66 39 38             	cmp    %di,(%rax)
+ 6241771:	74 3d                	je     62417b0
+ 6241773:	48 39 d0             	cmp    %rdx,%rax
+ 6241776:	73 0e                	jae    6241786
+ 6241778:	0f b6 10             	movzbl (%rax),%edx
+ 624177b:	38 16                	cmp    %dl,(%rsi)
+ 624177d:	0f 94 c2             	sete   %dl
+ 6241780:	0f b6 d2             	movzbl %dl,%edx
+ 6241783:	48 01 d0             	add    %rdx,%rax
+ 6241786:	48 29 c8             	sub    %rcx,%rax
+ 6241789:	c3                   	ret
+ 624178a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+ 6241790:	48 31 f8             	xor    %rdi,%rax
+ 6241793:	f3 48 0f bc c0       	tzcnt  %rax,%rax
+ 6241798:	c1 e8 03             	shr    $0x3,%eax
+ 624179b:	c3                   	ret
+ 624179c:	0f 1f 40 00          	nopl   0x0(%rax)
+ 62417a0:	48 83 c0 04          	add    $0x4,%rax
+ 62417a4:	48 83 c6 04          	add    $0x4,%rsi
+ 62417a8:	eb b8                	jmp    6241762
+ 62417aa:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+ 62417b0:	48 83 c0 02          	add    $0x2,%rax
+ 62417b4:	48 83 c6 02          	add    $0x2,%rsi
+ 62417b8:	eb b9                	jmp    6241773
+ 62417ba:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+ 62417c0:	48 83 c0 08          	add    $0x8,%rax
+ 62417c4:	48 83 c6 08          	add    $0x8,%rsi
+ 62417c8:	4c 39 c0             	cmp    %r8,%rax
+ 62417cb:	0f 82 53 ff ff ff    	jb     6241724
+ 62417d1:	eb 80                	jmp    6241753

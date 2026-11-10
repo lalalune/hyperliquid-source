@@ -1,0 +1,110 @@
+{
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": {
+  "task": "RE-002",
+  "question": "What does the 211-byte leaf routine at 0x6241700 return for two byte ranges and a limit?",
+  "symbol": "ZSTD_count",
+  "crate": "zstd-sys",
+  "member": "7c9960efb53c0b35-zstd_lazy.o",
+  "rlib": "libzstd_sys-c8c5b6f4c7c3aee0.rlib",
+  "start": "0x6241700",
+  "end": "0x62417d3",
+  "target_body_sha256": "d1d23bf72861d94b637585e6d78207aa839a22997e1f7fd4c3b2ac7e1d7a3213",
+  "source_body_sha256": "d1d23bf72861d94b637585e6d78207aa839a22997e1f7fd4c3b2ac7e1d7a3213",
+  "raw_equal": true,
+  "relocations": [],
+  "candidate_versions": [
+   "2.0.15+zstd.1.5.7",
+   "2.1.2+zstd.1.5.7"
+  ],
+  "source_offset": 4150242
+ },
+ "caller_census": {
+  "direct_calls": 25,
+  "tail_jumps": 0,
+  "caller_fdes": [
+   {
+    "start": "0x6250f80",
+    "end": "0x6251bf0"
+   },
+   {
+    "start": "0x6251bf0",
+    "end": "0x6252860"
+   },
+   {
+    "start": "0x6252860",
+    "end": "0x6253528"
+   },
+   {
+    "start": "0x6253530",
+    "end": "0x6254238"
+   },
+   {
+    "start": "0x6254240",
+    "end": "0x6254f48"
+   },
+   {
+    "start": "0x6262260",
+    "end": "0x6262d2e"
+   },
+   {
+    "start": "0x6264e40",
+    "end": "0x6265c58"
+   },
+   {
+    "start": "0x6265c60",
+    "end": "0x6266a78"
+   },
+   {
+    "start": "0x6266a80",
+    "end": "0x6267b24"
+   },
+   {
+    "start": "0x626d0c0",
+    "end": "0x626e4bb"
+   },
+   {
+    "start": "0x62730e0",
+    "end": "0x6273b54"
+   }
+  ],
+  "table": "callers.tsv"
+ },
+ "functions": [],
+ "engine_callees": [],
+ "layouts": [],
+ "observations": [
+  {
+   "claim": "status",
+   "kind": "observation",
+   "text": "Signature from the disassembly: rdi=pIn, rsi=pMatch, rdx=pInLimit; returns (current pIn - pIn_start)."
+  },
+  {
+   "claim": "8-byte tier",
+   "kind": "observation",
+   "text": "While pIn <= pInLimit-8, compare one qword from each range; on inequality return the leading equal low-order byte count via xor + tzcnt>>3 (little-endian)."
+  },
+  {
+   "claim": "4/2/1-byte tiers",
+   "kind": "observation",
+   "text": "Then a <=pInLimit-4 dword tier, a <=pInLimit-2 word tier and a <pInLimit byte tier, each advancing on a match."
+  },
+  {
+   "claim": "cap",
+   "kind": "observation",
+   "text": "The result never exceeds pInLimit-pIn because every read is guarded by the tiers' limit comparisons."
+  },
+  {
+   "claim": "closed form",
+   "kind": "inference",
+   "text": "Result == min(lcp(pIn, pMatch), limit); cross-checked against the tier walk on 200,000 random inputs and in the committed 2,400-case ledger."
+  }
+ ],
+ "unknowns": [
+  "Behavior when pMatch supplies fewer readable bytes than the 8-byte tier reads; the model requires both ranges to supply `limit` bytes, which every caller does.",
+  "The purpose of the returned count in each of the 25 callers (match-length bookkeeping) is not traced here.",
+  "Byte-identical bodies appear in 3 identical source objects (identical_source_count=3); only this address is bound."
+ ],
+ "environment_limits": "Static disassembly only (objdump/readelf on the digest-verified local binary). No cargo/rustc, Ghidra or live node was used; tools/zstd_count_6241700_115.py is a Python transcription of the pinned algorithm, not a build of node or zstd code."
+}
