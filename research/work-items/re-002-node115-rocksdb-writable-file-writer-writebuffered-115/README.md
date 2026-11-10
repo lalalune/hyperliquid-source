@@ -224,7 +224,7 @@ the bindings group.
 ## Upstream cross-check
 
 `facebook/rocksdb` v8.1.1, read live this cycle
-(`file/writable_file_writer.cc`, `WriteBuffered`, lines 544-636), confirms the
+(`file/writable_file_writer.cc`, `WriteBuffered`, lines 1040-1217), confirms the
 packet step for step: the seen-error gate
 (`AssertFalseAndGetStatusForPrevError`), the `IOOptions` build with
 `DecideRateLimiterPriority`, the rate-limiter grant loop (`RequestToken`
@@ -237,8 +237,10 @@ clear, checksum reset, `seen_error_` set after the notifications), and the
 epilogue (`buf_.Size(0)`, checksum reset, return `s`).
 
 CORRECTION: the prior draft cited lines 124-196 -- that range is inside
-`Append`; `WriteBuffered` is 544-636 (verified against the GitHub symbol list
-and line numbers this cycle).
+`Append`; `WriteBuffered` is 1040-1217 (verified against the raw v8.1.1 file
+this cycle; an earlier in-PR correction citing 544-636 was itself wrong --
+that range is inside Close/Flush -- and was fixed while cross-checking
+PR #6094).
 
 RESOLVED this cycle: the failure event type 8 is `FileOperationType::kAppend`
 (`include/rocksdb/listener.h:236-248`, implicit 0-based: kRead 0, kWrite 1,
