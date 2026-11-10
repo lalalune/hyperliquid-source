@@ -1,0 +1,153 @@
+{
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": {
+  "candidate_versions": [
+   "0.11.0+8.1.1"
+  ],
+  "crate": "librocksdb-sys",
+  "end": "0x607f4bb",
+  "identical_source_count": 3,
+  "member": "d7ece8bd5f9dc186-cf_options.o",
+  "native": true,
+  "question": "What does the 43-byte leaf routine at 0x607f490 return for the options pointer it is given, and what do its callers do with the result?",
+  "raw_equal": true,
+  "relocations": [],
+  "rlib": "liblibrocksdb_sys-b032f986857674dc.rlib",
+  "source_body_sha256": "af82ff3149ef371619e7d9ccae6db0160c490ab8155436a698c651573575da75",
+  "source_offset": 2861637,
+  "start": "0x607f490",
+  "symbol": "_ZN7rocksdb23MaxFileSizeForL0MetaPinERKNS_16MutableCFOptionsE",
+  "target_body_sha256": "af82ff3149ef371619e7d9ccae6db0160c490ab8155436a698c651573575da75"
+ },
+ "caller_census": {
+  "caller_fdes": [
+   {
+    "end": "0x5dfb2f7",
+    "start": "0x5dfae60"
+   },
+   {
+    "end": "0x5e20481",
+    "start": "0x5e1b9c0"
+   },
+   {
+    "end": "0x5edb689",
+    "start": "0x5edb360"
+   },
+   {
+    "end": "0x5edd742",
+    "start": "0x5edcf00"
+   },
+   {
+    "end": "0x5ede23a",
+    "start": "0x5edd7e0"
+   },
+   {
+    "end": "0x5f7002d",
+    "start": "0x5f6f680"
+   },
+   {
+    "end": "0x5f71d22",
+    "start": "0x5f717d0"
+   },
+   {
+    "end": "0x5f9521d",
+    "start": "0x5f94ea0"
+   },
+   {
+    "end": "0x5f98c8d",
+    "start": "0x5f95b80"
+   },
+   {
+    "end": "0x5f9da83",
+    "start": "0x5f9d8c0"
+   },
+   {
+    "end": "0x5fa63a7",
+    "start": "0x5fa4f80"
+   }
+  ],
+  "consumer_table": "caller_use.tsv",
+  "consumers": {
+   "overwritten": 1,
+   "register-copy": 4,
+   "stack-arg": 4,
+   "store": 3
+  },
+  "direct_calls": 12,
+  "method": "Capstone disassembly of the artifact; each call site validated at the instruction boundary and attributed to the .eh_frame FDE that encloses it",
+  "tail_jumps": 0
+ },
+ "claim_anchors": "semantics.tsv (11 anchors: claim -> target instruction address, bytes and decoded instruction)",
+ "engine_callees": [],
+ "environment_limits": [
+  "Static only: the artifact was never executed, and no source build is claimed.",
+  "capstone 5.0.7 / readelf / objdump were used; results are reproducible with those tools on the digest-verified binary."
+ ],
+ "functions": [],
+ "layouts": [],
+ "ledger": "cases.tsv (300 reviewable cases, 75 per family over boundary/small/parity/random); the full 2,400-case sweep and a 20,000-input random differential are re-derived in memory by the tests",
+ "observations": [
+  {
+   "claim": "signature",
+   "kind": "observation",
+   "text": "From the disassembly: rdi points at the options struct; the routine reads exactly one field, *rdi (mov (%rdi),%rdx at 0x607f494), and returns a 64-bit value in rax."
+  },
+  {
+   "claim": "sentinel is the default result",
+   "kind": "observation",
+   "text": "mov $0xffffffffffffffff,%rax at 0x607f497 seeds the result with the all-ones sentinel, so the guard's rejected path is a fall-through to the single ret rather than a separate block."
+  },
+  {
+   "claim": "overflow threshold",
+   "kind": "observation",
+   "text": "movabs $0xaaaaaaaaaaaaaaab,%rcx at 0x607f49e loads the threshold 0xAAAAAAAAAAAAAAAB = floor((2^64-1)/3), the largest input for which 3*(value>>1) still fits in 64 bits."
+  },
+  {
+   "claim": "unsigned guard",
+   "kind": "observation",
+   "text": "cmp %rdx,%rcx at 0x607f4a8 followed by jb 0x607f4ba at 0x607f4ab compares UNSIGNED, so the sentinel is returned exactly when the threshold is below the loaded value."
+  },
+  {
+   "claim": "accepted path is three halves",
+   "kind": "observation",
+   "text": "On the accepted path: mov %rdx,%rax (0x607f4ad), and $0xfffffffffffffffe,%rdx (0x607f4b0) leaves 2*(value>>1), shr $1,%rax (0x607f4b4) leaves value>>1, add %rdx,%rax (0x607f4b7) sums them to 3*(value>>1)."
+  },
+  {
+   "claim": "halving precedes the multiply",
+   "kind": "observation",
+   "text": "The shift happens before the addition, so an odd input truncates: 5 gives 6, not 7, and 7 gives 9, not 10."
+  },
+  {
+   "claim": "leaf routine",
+   "kind": "observation",
+   "text": "The body is a leaf: one %rdi read, no stores, no calls, no relocations, and a single ret at 0x607f4ba; the whole body is one .eh_frame FDE 0x607f490..0x607f4bb (43 bytes)."
+  },
+  {
+   "claim": "threshold input equals the sentinel value",
+   "kind": "observation",
+   "text": "value == 0xAAAAAAAAAAAAAAAB is accepted and its exact result is 0xFFFFFFFFFFFFFFFF \u2014 the same bit pattern as the sentinel \u2014 so the rejected and the (largest) accepted inputs are indistinguishable by return value alone."
+  },
+  {
+   "claim": "caller census",
+   "kind": "observation",
+   "text": "12 direct calls, 0 tail jumps, clustered in 11 distinct caller FDEs, each call validated at the instruction boundary with Capstone; consumers are 4 stack-arg, 4 register-copy, 3 store and 1 overwritten."
+  },
+  {
+   "claim": "field identity",
+   "kind": "inference",
+   "text": "Reading *rdi as the first member of rocksdb::MutableCFOptions (max_file_size, a uint64_t) follows from the mangled signature; the packet does not prove which C++ member it is beyond that."
+  },
+  {
+   "claim": "purpose",
+   "kind": "inference",
+   "text": "Reading the 3-halves result as the L0 metadata-pinning file-size allowance is inferred from the symbol name; the call sites are not traced to a semantic purpose here."
+  }
+ ],
+ "unknowns": [
+  "The C-level meaning and units of the field read at *rdi at each call site; it is a runtime value and is not characterized here.",
+  "What each of the 12 callers does with the result beyond the first read (the consumer class is recorded, the downstream use is not).",
+  "Whether any caller relies on telling the sentinel apart from a legitimate 3*(value>>1) that happens to be all ones: the routine returns the same bit pattern for both.",
+  "The body is byte-identical in 3 identical source objects; only 0x607f490 is bound."
+ ]
+}
