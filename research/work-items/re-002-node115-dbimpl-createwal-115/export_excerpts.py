@@ -2,7 +2,7 @@
 """Regenerate the verbatim excerpts and raw hex in this packet.
 
 Run from the repository root:
-    python3 research/work-items/re-002-node115-rocksdb-writable-file-writer-createwal-115/export_excerpts.py
+    python3 research/work-items/re-002-node115-dbimpl-createwal-115/export_excerpts.py
 
 Uses the repo-relative binary path work/hl-node-115.bin; objdump
 addresses are the window virtual addresses used throughout. The
