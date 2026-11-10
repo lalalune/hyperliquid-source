@@ -1,0 +1,56 @@
+{
+  "component": "abci",
+  "driver": {
+    "fde": [
+      "0x5a34440",
+      "0x5a3539f"
+    ]
+  },
+  "driver_scan": {
+    "imm_5000": [],
+    "lock_inc_dec_plus_0x10": [
+      "0x5a34558",
+      "0x5a34cbd"
+    ]
+  },
+  "gates_changed": false,
+  "locations": {
+    "0x64a3648": "node/src/abci_latency_sampler.rs:60:41",
+    "0x64b8a20": "node/src/node.rs:652:42",
+    "0x64b8a38": "node/src/node.rs:732:40"
+  },
+  "per_message": {
+    "apply": "get (3) via 0x4f19fa0; 0x59edc50; spawn_slow_abci_driver_apply_block (34) via 0x4e47900 edx=1; on a result spawn_slow_abci_driver_write_greeting (37) via 0x4f18bd0",
+    "counter": "lock dec [[closure+0x88]+0x10] at 0x5a34cbd",
+    "drop": "Vec of 0x28-byte items, Arc at +0x20 each",
+    "gap": "wall clock 0x1629690; from the 2nd message, duration 0x162a290 -> secs + nanos/1e9, max 0, +inf -> 0, min 60.0; recorded count 1 via 0x1547530 into rsp+0x2b8",
+    "gap_samples": {
+      "-1s": 0.0,
+      "0.25s": 0.25,
+      "3600s": 60.0,
+      "59.5s": 59.5
+    },
+    "size": "0x58 bytes; first word 0x8000000000000000 ends the loop (0x5a34cab -> 0x5a350c5)"
+  },
+  "receive": {
+    "channel": "[closure+0x80]",
+    "closed": "byte chan+0x1b8 == 1 and word chan+0x1c0 < 2 -> end",
+    "empty": "0x8000000000000001 -> register waker chan+0x100 via slot 0x64e0518 -> 0x5ce91b0, pop again",
+    "pop": "0x58189f0(chan+0x1a0, chan+0x80) at 0x5a348b6 and 0x5a34904 (after the waker)",
+    "pop_callers_outside_driver": [
+      "0x5a428ad",
+      "0x5aab82e",
+      "0x5aab869"
+    ],
+    "taken": "lock sub chan+0x1c0, 2",
+    "wait": "park on [r14+0x18] with 1e9 ns timeout via slot 0x64e73b8 -> 0x5bb4670"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "startup": {
+    "group": "node_slow (9), 0.5 via slot 0x64ebbc8 -> 0x51c9cb0 at rsp+0x2b8",
+    "read": "hardfork_hashes (15) via 0x5647720 -> rsp+0x2b8",
+    "second_channel_send": "at start, when byte [closure] == 0 (0x5a34517): [[closure+0x30]+0x10] += 1; chan [closure+0x28]; message word +0x1c0 += 2; push 0x581a4f0 on chan+0x80; wake chan+0x110"
+  },
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}
