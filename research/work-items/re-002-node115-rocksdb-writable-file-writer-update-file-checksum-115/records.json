@@ -1,0 +1,60 @@
+{
+ "artifact": "node #115",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": [
+  "RE-002-node115-rocksdb-writable-file-writer-append-115 (PR #6215, open at submission time): reconstructs WritableFileWriter::Append 0x6054680, which calls this helper once (site 0x6054764) before PrepareWrite. The #6215 packet records checksum_generator_ at this+0xc8 and names this helper as the checksum-forwarding step; this packet supersedes that reference oracle with the full reconstruction.",
+  "RE-002-node115-vendor-census: the single FDE is census-bound (member a895f7517936a0f7-writable_file_writer.o, librocksdb-sys 0.11.0+8.1.1). Body 1f2a30cf... / source 1f2a30cf... (raw_equal, 0 relocations).",
+  "meta/rocksdb v8.1.1, read live this cycle: file/writable_file_writer.cc:731-735 defines this helper exactly as the binary behaves (if checksum_generator_ != nullptr, checksum_generator_->Update(data.data(), data.size())); file/writable_file_writer.h:163 declares checksum_generator_ as std::unique_ptr<FileChecksumGenerator>; file/writable_file_writer.cc:59 calls it once, in Append -- the same single call site the census finds in the binary. include/rocksdb/file_checksum.h:52-67 declares FileChecksumGenerator's virtuals in order (dtor, Update, Finalize, GetChecksum, Name), so vtable slot 2 (*0x10 past the vptr) is Update(const char*, size_t). The binary matches v8.1.1 step for step.",
+  "Binary-vs-source observations (recorded, not hidden): the binary tail-jumps to the generator's Update instead of calling it (jmp *0x10(%rax) at 0x604c7ca), so this FDE has no return path after the dispatch -- the generator's Update returns directly to Append's caller. The 3-byte nop at 0x604c7cd is alignment padding inside the FDE. The concrete checksum algorithm is the generator's own behavior (already reconstructed for the CRC32C/XXH generators in earlier RE-002 packets), not this function's; this model pins the dispatch and the forwarded arguments only. The FDE has no LSDA and no .cold FDE."
+ ],
+ "caller_census": {
+  "method": "Whole-.text scan for E8 calls, E9 tail jumps and RIP-relative LEA references landing on the target, validated by decoding forward from the enclosing FDE start with Capstone (census.py). A site counts only on a real instruction boundary with the expected mnemonic.",
+  "notes": [
+   "UpdateFileChecksum 0x604c7b0: exactly 1 direct call, 0 tail jumps, 0 LEA refs -- WritableFileWriter::Append 0x6054680 (site 0x6054764, census-bound, writable_file_writer.o). The helper runs once per Append, before PrepareWrite, forwarding the appended Slice to the writer's checksum generator when one is set.",
+   "No LSDA: the FDE record in .eh_frame (section offset 0x367168, length 0x10, initial_location 0x604c7b0, range 0x21, aug_len 0) carries no LSDA pointer, so there is no call-site table and no landing pad. The function cannot throw: it has no calls, no stack frame and no canary; the tail jump to the generator's Update is the only transfer out, and Update itself is the callee's behavior, not this function's."
+  ],
+  "sites": [
+   {
+    "target": "0x604c7b0",
+    "target_name": "rocksdb::WritableFileWriter::UpdateFileChecksum",
+    "kind": "call",
+    "site": "0x6054764",
+    "site_fde_start": "0x6054680",
+    "site_fde_end": "0x605518b",
+    "instruction": "call 0x604c7b0"
+   }
+  ],
+  "validated_sites": 1
+ },
+ "cases": {
+  "count": 300,
+  "ledger": "cases.tsv",
+  "split": "100 checks (50 data variants -- 10 lens x 5 ptr ids -- x 2 generator states: null and FileChecksumGenCrc32c) + 100 edge (size_t extremes 0, 1, 2, 0x7fffffff, 0x80000000, 0xffffffff, 0x100000000, 0x7fffffffffffffff, 0x8000000000000000, 0xffffffffffffffff on either side, pinning that a null generator never calls even for a huge len and a present generator is called even for len 0) + 100 bindings (25 (generator, data) pairs x 4 recorded invariants: body_sha256, source_sha256, fde_record, caller_census -- each row records the invariant's expected value and replay compares it)",
+  "tests": "tests/test_update_file_checksum115.py",
+  "tool": "tools/update_file_checksum115.py",
+  "what_is_checked": [
+   "checks: a null generator never calls, for every data variant; a present generator always calls exactly once, with (data.data(), data.size()) forwarded verbatim",
+   "edge: size_t extremes pass through as 64-bit values (len 0x100000000 stays 0x100000000, not truncated to 32 bits); len 0 still calls Update when a generator is set",
+   "bindings: the result depends only on the writer state and the Slice, never on the caller site; each bindings row records its invariant's expected value (body hash, source hash, FDE record, 1-site caller census) and replay compares it"
+  ]
+ },
+ "engine_callees": {
+  "FileChecksumGenerator::Update": "Virtual dispatch, not a direct call: the tail jump at 0x604c7ca goes to vtable slot 2 of the object at this+0xc8 (checksum_generator_). The slot is Update(const char*, size_t) by the FileChecksumGenerator vtable order in include/rocksdb/file_checksum.h:52-67 (dtor, Update, Finalize, GetChecksum, Name). The concrete Update implementation is the generator's (CRC32C/XXH generators reconstructed in earlier RE-002 packets); this packet claims no checksum algorithm, only the dispatch and the forwarded (data, len)."
+ },
+ "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM. The target binary is never executed. The tool models the helper in Python from its whole-FDE disassembly; data pointers are deterministic ids, not real addresses, and the generator is modelled as an abstract FileChecksumGenerator (null or named). The live check (--live) reads the binary: the FDE body hash, the source hash, the FDE record (length 0x10, range 0x21, aug_len 0, no LSDA), the 10 verbatim instructions, the 1-site caller census and the model end-to-end legs. make verify/test/catalogue-check in a tooled environment is still owed upstream.",
+ "functions": {
+  "0x604c7b0": {
+   "body_sha256": "1f2a30cf85914602784dea75923fb645ef27bc3bfc508a05a57872ab6d25dd63",
+   "callers": [
+    "0x6054764"
+   ],
+   "census_id": "node115-vendor-604c7b0",
+   "lea_refs": [],
+   "mangled": "_ZN7rocksdb18WritableFileWriter18UpdateFileChecksumERKNS_5SliceE",
+   "model": "33-byte leaf UpdateFileChecksum(const Slice&) (this in rdi, data Slice* in rsi: data.data() at (%rsi), data.size() at 0x8(%rsi); no stack frame, no canary, no calls). Loads this+0xc8 (checksum_generator_, std::unique_ptr<FileChecksumGenerator>); if null, returns; else tail-jumps to vtable slot 2 of the generator (*0x10(%rax)) with (data.data(), data.size()) -- slot 2 is Update(const char*, size_t) by the FileChecksumGenerator vtable order (dtor, Update, Finalize, GetChecksum, Name). 10 instructions: endbr64; mov rdi, [rdi+0xc8]; test rdi, rdi; je 0x604c7d0; mov rax, [rdi]; mov rdx, [rsi+8]; mov rsi, [rsi]; jmp [rax+0x10]; nop (3-byte alignment padding); ret. The FDE has no .cold FDE and no LSDA (aug_len 0): no landing pad, no catch, no cleanup; the function cannot throw.",
+   "relocations": "",
+   "source_sha256": "1f2a30cf85914602784dea75923fb645ef27bc3bfc508a05a57872ab6d25dd63",
+   "raw_equal": true
+  }
+ }
+}
