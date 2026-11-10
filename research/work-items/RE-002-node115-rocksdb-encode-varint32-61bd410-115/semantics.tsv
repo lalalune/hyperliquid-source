@@ -1,0 +1,20 @@
+claim	va	size	bytes	instruction	note
+function entry	0x61bd410	4	f30f1efa	endbr64	endbr64: an indirect-branch target, so the window is a routine entry
+dst becomes the return base	0x61bd414	3	4889f8	mov rax, rdi	mov %rdi,%rax: the return value starts as the buffer pointer
+1-byte class test	0x61bd417	3	83fe7f	cmp esi, 0x7f	cmp $0x7f,%esi with ja: the test is UNSIGNED above, so v == 0x7f stays in this class
+1-byte class jump	0x61bd41a	2	7714	ja 0x61bd430	ja 0x61bd430 leaves the 1-byte class only for v > 0x7f
+1-byte store	0x61bd41c	3	408837	mov byte ptr [rdi], sil	mov %sil,(%rdi): the whole value is stored unmasked because v <= 0x7f
+1-byte end pointer	0x61bd41f	4	488d5701	lea rdx, [rdi + 1]	lea 0x1(%rdi),%rdx: the returned end pointer is dst+1 - the value returned is a POINTER, not a count
+2-byte continuation bit	0x61bd435	4	4183c880	or r8d, 0xffffff80	or $0xffffff80,%r8d sets bit 7 of the first byte, i.e. 'more bytes follow'
+2-byte shift for the final byte	0x61bd439	3	c1e907	shr ecx, 7	shr $0x7,%ecx: the second byte is v>>7, stored unmasked - safe because the bound is 0x3fff
+2-byte class bound	0x61bd43c	6	81feff3f0000	cmp esi, 0x3fff	cmp $0x3fff,%esi: the second class ends at 0x3fff inclusive
+2-byte stores	0x61bd448	3	448807	mov byte ptr [rdi], r8b	mov %r8b,(%rdi) then mov %cl,0x1(%rdi): TWO separate byte stores
+3-byte class bound	0x61bd460	6	81feffff1f00	cmp esi, 0x1fffff	cmp $0x1fffff,%esi: the third class ends at 0x1fffff inclusive
+3-byte stores	0x61bd4ba	4	40887802	mov byte ptr [rax + 2], dil	mov %dil,0x2(%rax): a third separate byte store, end pointer dst+3 at 0x61bd4b0
+4-byte class bound	0x61bd474	6	81feffffff0f	cmp esi, 0xfffffff	cmp $0xfffffff,%esi: the fourth class ends at 0x0fffffff inclusive
+4-byte word composition	0x61bd495	3	c1e708	shl edi, 8	shl $0x8,%edi and the surrounding or/shl build the four bytes in a register
+4-byte SINGLE 32-bit store	0x61bd4a0	2	8908	mov dword ptr [rax], ecx	mov %ecx,(%rax): the 4-byte class writes with ONE unaligned 32-bit store, unlike every other class
+5-byte continuation on the 4th byte	0x61bd4c8	3	83cf80	or edi, 0xffffff80	or $0xffffff80,%edi sets the continuation bit of the fourth byte only in the 5-byte class
+5-byte top byte	0x61bd4cb	3	c1ee1c	shr esi, 0x1c	shr $0x1c,%esi: the fifth byte is v>>28, so only its low nibble is non-zero for a uint32_t
+5-byte stores	0x61bd4e0	4	40887004	mov byte ptr [rax + 4], sil	mov %sil,0x4(%rax): five separate byte stores, end pointer dst+5
+a return tail	0x61bd423	3	4889d0	mov rax, rdx	mov %rdx,%rax then ret at 0x61bd426: rdx is dst+n. The 4- and 5-byte classes jmp here (0x61bd4a2, 0x61bd4e4) and the 1-byte class falls into it; the 2- and 3-byte classes have their OWN identical mov/ret pairs at 0x61bd44e and 0x61bd4be, so the routine has three tail sites, not one
