@@ -77,9 +77,10 @@ identical semantics for every 32-bit input. The model follows the binary.
 - 100 edge: out-of-range 32-bit values (`5, 6, 255, 0x7fffffff, 0x80000000, 0xffffffff`) on
   either side, pinning that the binary compares full 32-bit values against 4 only.
 - 100 bindings: the 25 valid pairs x 4 recorded invariants (`body_sha256`, `source_sha256`,
-  `fde_record`, `caller_census`).
+  `fde_record`, `caller_census`) — each row records the invariant's expected value and replay
+  compares it, so the rows check the invariant they are named after, not just the pair.
 
-0 mismatches on replay (`--verify-cases`). 12 tests pass
+0 mismatches on replay (`--verify-cases`). 13 tests pass
 (`tests/test_decide_rate_limiter_priority115.py`). Live check (`--live`, 14 legs) passes:
 artifact digest, body hash, source hash (raw_equal, 0 relocations), the FDE record
 (length `0x10`, range `0x27`, `aug_len` 0, no LSDA), the 16 verbatim instructions,

@@ -89,6 +89,18 @@ def test_cases_file_shape():
     assert groups.count("bindings") == 100
 
 
+def test_bindings_rows_check_their_invariant():
+    rows = (PACKET / "cases.tsv").read_text().splitlines()[1:]
+    bindings = [r for r in rows if r.split("\t")[0] == "bindings"]
+    assert len(bindings) == 100
+    for r in bindings:
+        inputs = json.loads(r.split("\t")[2])
+        expected = json.loads(r.split("\t")[3])
+        inv = inputs["invariant"]
+        assert expected["invariant"] == inv
+        assert expected["invariant_expected"] == tool.invariant_value(inv)
+
+
 def test_records_bindings():
     records = json.loads((PACKET / "records.json").read_text())
     assert records["artifact_sha256"] == tool.ARTIFACT_SHA256

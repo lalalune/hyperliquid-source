@@ -122,7 +122,10 @@ def main():
                      "32-bit values against 4 only) + 100 bindings "
                      "(the 25 valid pairs x 4 recorded invariants: "
                      "body_sha256, source_sha256, fde_record, "
-                     "caller_census)",
+                     "caller_census -- each row records the "
+                     "invariant's expected value and replay "
+                     "compares it, so the rows check the invariant "
+                     "they are named after, not just the pair)",
             "tests": "tests/test_decide_rate_limiter_priority115.py",
             "tool": "tools/decide_rate_limiter_priority115.py",
             "what_is_checked": [
@@ -135,9 +138,10 @@ def main():
                 "the enum range and for the 32-bit extremes, "
                 "including 0xffffffff and 0x80000000",
                 "bindings: the result depends only on the two "
-                "priorities, never on the caller site; the FDE body "
-                "hash, the source hash (raw_equal, 0 relocations) "
-                "and the 6-site caller census match the binary",
+                "priorities, never on the caller site; each "
+                "bindings row records its invariant's expected "
+                "value (body hash, source hash, FDE record, 6-site "
+                "caller census) and replay compares it",
             ],
         },
         "engine_callees": {},

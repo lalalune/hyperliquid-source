@@ -132,16 +132,36 @@ def name_of(value):
 
 
 def run_case(inputs):
-    """Run one case: inputs has file_priority, op_priority (ints)."""
+    """Run one case: inputs has file_priority, op_priority (ints),
+    and optionally invariant (one of body_sha256, source_sha256,
+    fde_record, caller_census)."""
     file_p = inputs["file_priority"]
     op_p = inputs["op_priority"]
     result = decide(file_p, op_p)
-    return {"file_priority": _u32(file_p),
-            "file_priority_name": name_of(file_p),
-            "op_priority": _u32(op_p),
-            "op_priority_name": name_of(op_p),
-            "result": result,
-            "result_name": name_of(result)}
+    out = {"file_priority": _u32(file_p),
+           "file_priority_name": name_of(file_p),
+           "op_priority": _u32(op_p),
+           "op_priority_name": name_of(op_p),
+           "result": result,
+           "result_name": name_of(result)}
+    if "invariant" in inputs:
+        out["invariant"] = inputs["invariant"]
+        out["invariant_expected"] = invariant_value(inputs["invariant"])
+    return out
+
+
+def invariant_value(name):
+    """The recorded expected value of a binding invariant."""
+    if name == "body_sha256":
+        return BODY_SHA256
+    if name == "source_sha256":
+        return SOURCE_SHA256
+    if name == "fde_record":
+        return {"section_offset": hex(FDE_SECTION_OFFSET),
+                "length": FDE_LENGTH, "range": FDE_RANGE, "aug_len": 0}
+    if name == "caller_census":
+        return {"calls": len(CALLERS), "jumps": 0, "lea_refs": 0}
+    raise ValueError(name)
 
 
 VALID_PAIRS = [(f, o) for f in range(5) for o in range(5)]
@@ -187,11 +207,11 @@ def gen_cases():
                   "caller_census"]
     for i, (f, o) in enumerate(VALID_PAIRS):
         for inv in invariants:
-            rows.append(("bindings", f"bindings-{len(rows) - 200:04d}",
-                         {"case_id": f"bindings-{len(rows) - 200:04d}",
-                          "group": "bindings", "invariant": inv,
-                          "file_priority": f, "op_priority": o},
-                         run_case({"file_priority": f, "op_priority": o})))
+            inputs = {"case_id": f"bindings-{len(rows) - 200:04d}",
+                      "group": "bindings", "invariant": inv,
+                      "file_priority": f, "op_priority": o}
+            rows.append(("bindings", inputs["case_id"], inputs,
+                         run_case(inputs)))
     assert len(rows) == 300, len(rows)
     return rows
 
