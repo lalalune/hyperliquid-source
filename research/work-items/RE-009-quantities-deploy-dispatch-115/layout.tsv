@@ -1,0 +1,26 @@
+object	offset	size	meaning
+action	0x0	8	tag word: values 0x800000000000000d..0x13 pick jump-table slots 0..4,5,6; any value <= 0x800000000000000c is the default arm
+action (slots 0,2,3,4)	0x8	24	String: capacity, pointer, length (length must be below 0x65 for slots 0 and 3)
+action (slots 3,4)	0x20	1	flag byte
+action (slot 2)	0x20	20	20-byte value stored with the 24-byte key in the map at state+0x338
+action (slot 1)	0x8	21	one-byte kind followed by a 20-byte address, passed whole to the emitter with record tag 0x2d
+action (slot 6)	0x8	8	vector position, bounds checked against state+0xb8
+action (slot 6)	0x10	20	A; B at 0x24, C at 0x38, D at 0x4c (4 pad bytes after each)
+action (slot 5)	0x0	176	whole action copied by memcpy and handed to 0x55cfe90 with a zeroed 20-byte value
+state	0xb0	8	pointer to the first element of a vector
+state	0xb8	8	vector length
+state element 0	0x12c	1	must be 1 (else error 0x167)
+state element 0	0x12d	20	address D must differ from this (else error 0x168)
+state	0x338	8	map receiving slot-2 insertions through 0x4dd59a0
+state	0x398	8	map searched and extended by the pair registration
+state	0x7c0	8	table behind the name lookups (slots 0, 3, 4)
+state	0x968	8	set of already registered C addresses
+state	0x1108	8	account table; its 32-byte code hash must equal the empty-code hash
+dex object	0x10	8	third word of the iteration record passed to 0x5acc8c0
+dex object	0x378	8	0x8000000000000000 means absent (error 0x156)
+dex object	0x408	8	must be 0x8000000000000001 for slot 4 (else error 0x1a1)
+dex object	0x468	1	written 2 (flagged) or 0 by slot 3
+result block	0x0	2	tag; 0x1a2 is success; the other tags the bodies write themselves: 0xfa 0x101 0x156 0x158 0x166 0x167 0x168 0x169 0x1a1
+result block	0x8	8	payload word of a success from the callees; position for tag 0xfa
+pair parameter	0x0	8	index (zero gives 0x101)
+pair parameter	0x8	20	A; B at 0x1c, C at 0x30, D at 0x44
