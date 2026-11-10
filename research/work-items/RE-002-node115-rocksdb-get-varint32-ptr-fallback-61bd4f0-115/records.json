@@ -1,0 +1,76 @@
+{
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "bound_context": {
+    "candidate_versions": ["0.11.0+8.1.1"],
+    "crate": "librocksdb-sys",
+    "end": "0x61bd53b",
+    "identical_source_count": 3,
+    "member": "6cca28ae25285154-coding.o",
+    "native": true,
+    "question": "What does the 75-byte leaf routine at 0x61bd4f0 do with (p, limit, uint32_t* value), and when does it return nullptr?",
+    "raw_equal": true,
+    "relocations": [],
+    "rlib": "liblibrocksdb_sys-b032f986857674dc.rlib",
+    "source_body_sha256": "21d63f1ecf0f9f09edc7aa1970313b5ad3892641cc3c49c40f0f18cedc0460e6",
+    "source_offset": 3808707,
+    "start": "0x61bd4f0",
+    "symbol": "_ZN7rocksdb22GetVarint32PtrFallbackEPKcS1_Pj",
+    "target_body_sha256": "21d63f1ecf0f9f09edc7aa1970313b5ad3892641cc3c49c40f0f18cedc0460e6"
+  },
+  "caller_census": {
+    "caller_fdes": 45,
+    "consumer_table": [
+      {"consumer": "compare", "sites": 27, "first_use": "test rax, rax; je ...",
+       "meaning": "the nullptr contract is checked before the result is used"},
+      {"consumer": "register-copy", "sites": 95, "first_use": "mov r12, rax, mov rcx, rax, ...",
+       "meaning": "the advanced pointer is carried in another register"},
+      {"consumer": "store", "sites": 19, "first_use": "mov qword ptr [..], rax",
+       "meaning": "the advanced pointer is spilled"},
+      {"consumer": "arithmetic", "sites": 3, "first_use": "sub rbp, rax",
+       "meaning": "the advanced pointer is subtracted from a base to size a consumed range"},
+      {"consumer": "dead", "sites": 4, "first_use": "-",
+       "meaning": "never read inside the enclosing FDE (the call's only effect is the stored value)"},
+      {"consumer": "overwritten", "sites": 1, "first_use": "mov eax, dword ptr [rbp - 0x2f0]",
+       "meaning": "rax is overwritten before being read"}
+    ],
+    "consumers": {"arithmetic": 3, "compare": 27, "dead": 4,
+                  "overwritten": 1, "register-copy": 95, "store": 19},
+    "contract": "returns p+n (a pointer past the decoded varint) on success and nullptr on failure; the failure value is observable at the call site, since 27 of the 149 sites test it first",
+    "direct_calls": 149,
+    "discarded_sites": 5,
+    "method": "every call target matching the window start is decoded with Capstone and attributed to the enclosing .eh_frame FDE; the instruction after the call is classified by how rax is first used",
+    "null_checks": 27,
+    "tail_jumps": 0
+  },
+  "claim_anchors": "semantics.tsv (24 anchors: claim -> target instruction address, bytes and decoded instruction)",
+  "engine_callees": [],
+  "environment_limits": [
+    "the packet is static: the artifact is never executed and no source build is claimed",
+    "the emulator implements only the instructions this routine uses and raises on any other",
+    "the caller-side behaviour is read from the instruction after each call; it is not executed"
+  ],
+  "functions": [],
+  "layouts": [],
+  "ledger": "cases.tsv (300 reviewable cases, 50 per family: the 1..5-byte varints plus the nullptr family) recording the limit, the outcome (ok/null), the decoded value and the next index; the boundary rows are kept verbatim and the full 2,400-case sweep is re-derived in memory by the tests",
+  "observations": [
+    {"kind": "observation", "text": "the window 0x61bd4f0..0x61bd53b is one .eh_frame FDE and one leaf routine: no calls, no relocations, 27 instructions"},
+    {"kind": "observation", "text": "p >= limit returns nullptr immediately and no byte is read (cmp %rsi,%rdi / jae 0x61bd538)"},
+    {"kind": "observation", "text": "the continuation test is the sign bit of the byte just read (test %dil,%dil / js), so any byte >= 0x80 continues the varint"},
+    {"kind": "observation", "text": "each continuation byte advances the shift by 7 and a shift above 28 is rejected, so at most four continuation bytes (five bytes in all) are accepted"},
+    {"kind": "observation", "text": "after every continuation byte the advanced pointer is compared with limit and nullptr is returned if it reached it: a truncated varint is rejected, never answered with the bytes seen so far"},
+    {"kind": "observation", "text": "the accumulator, the final shift and the store are 32-bit, so the decoded value is masked to 32 bits: 80 80 80 80 20 decodes to 0 and 80 80 80 80 7f to 0xf0000000"},
+    {"kind": "observation", "text": "the successful return value is the pointer just past the last byte read (rax is advanced before the continuation test), not a count"},
+    {"kind": "observation", "text": "the only memory accesses are one byte load per input byte and a single 32-bit store through value; a failed decode writes nothing"},
+    {"kind": "observation", "text": "149 direct call sites in 45 caller FDEs; 27 of them test the returned pointer first (test rax,rax / je), so the nullptr contract is observable"},
+    {"kind": "inference", "text": "the signature is const char* GetVarint32PtrFallback(const char* p, const char* limit, uint32_t* value): p in rdi, limit in rsi, value in rdx, read off the mangled name and the uses of rdi/rsi/rdx"},
+    {"kind": "inference", "text": "the callers that test rax for zero are handling the decode failure ('no varint in range'), which is consistent with the nullptr return rather than with a count"}
+  ],
+  "unknowns": [
+    "which call sites can actually reach the failure return at run time is not characterized (it depends on the buffer contents the callers are given)",
+    "the C++ types are inferred from the mangled signature and the shift widths; the packet does not prove them",
+    "the sibling windows in the same object (EncodeVarint32 0x61bd410, GetVarint64Ptr 0x61bd540) are separate windows and are not covered here",
+    "the body is byte-identical in 3 identical source objects; only 0x61bd4f0 is bound",
+    "the caller-side classification stops at the first use of rax; a value that is copied and then discarded is classified by its first use"
+  ]
+}

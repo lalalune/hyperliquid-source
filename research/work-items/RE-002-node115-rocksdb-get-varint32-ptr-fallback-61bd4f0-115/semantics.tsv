@@ -1,0 +1,25 @@
+claim	va	size	bytes	instruction	note
+function entry	0x61bd4f0	4	f30f1efa	endbr64	endbr64: an indirect-branch target, so the window is a routine entry
+the return base is the input pointer	0x61bd4f4	3	4889f8	mov rax, rdi	mov %rdi,%rax: rax starts as p, so on success it can be advanced to the end
+bound test	0x61bd4f7	3	4839f7	cmp rdi, rsi	cmp %rsi,%rdi compares p with limit
+the bound is checked before any byte is read	0x61bd4fa	2	733c	jae 0x61bd538	jae 0x61bd538 -> nullptr when p >= limit (unsigned), so an empty/zero-length range never reads
+shift starts at zero	0x61bd4fc	2	31c9	xor ecx, ecx	xor %ecx,%ecx: cl is the shift count radix
+the accumulator is 32-bit	0x61bd4fe	3	4531c0	xor r8d, r8d	xor %r8d,%r8d: r8d, not r8 - the decoded value is accumulated in 32 bits
+continuation mask	0x61bd508	3	83e77f	and edi, 0x7f	and $0x7f,%edi drops bit 7 of the continuation byte before it is placed
+continuation placement	0x61bd50b	2	d3e7	shl edi, cl	shl %cl,%edi places those 7 bits at the current shift
+shift advance	0x61bd50d	3	83c107	add ecx, 7	add $0x7,%ecx advances the shift by 7 per continuation byte
+32-bit accumulate	0x61bd510	3	4109f8	or r8d, edi	or %edi,%r8d accumulates in r8d, so a shift above 31 would silently drop the high bits
+shift guard	0x61bd513	3	83f91c	cmp ecx, 0x1c	cmp $0x1c,%ecx: the running shift is compared with 28
+a fifth continuation byte is rejected	0x61bd516	2	7720	ja 0x61bd538	ja 0x61bd538 -> nullptr when the shift exceeds 28, i.e. after 4 continuation bytes
+truncation guard	0x61bd518	3	4839f0	cmp rax, rsi	cmp %rsi,%rax compares the advanced pointer with limit
+a varint running past the limit is rejected	0x61bd51b	2	731b	jae 0x61bd538	jae 0x61bd538 -> nullptr instead of answering with the bytes seen so far
+byte load	0x61bd51d	3	0fb638	movzx edi, byte ptr [rax]	movzbl (%rax),%edi reads one byte, zero-extended
+the pointer advances BEFORE the continuation test	0x61bd520	4	4883c001	add rax, 1	add $0x1,%rax: the returned pointer is already past the byte being tested
+the continuation test is the byte's bit 7	0x61bd524	3	4084ff	test dil, dil	test %dil,%dil is an 8-bit AND; SF therefore reflects bit 7 of the byte
+continuation branch on the sign flag	0x61bd527	2	78df	js 0x61bd508	js 0x61bd508 -> bit 7 set means another byte follows
+final byte shift	0x61bd529	2	d3e7	shl edi, cl	shl %cl,%edi places the final byte at the accumulated shift
+final byte merge	0x61bd52b	3	4409c7	or edi, r8d	or %r8d,%edi merges the low bits already accumulated
+the single 32-bit store	0x61bd52e	2	893a	mov dword ptr [rdx], edi	mov %edi,(%rdx) writes the value through the uint32_t* - 4 bytes, 32-bit wide; nothing else is written
+success returns the advanced pointer	0x61bd530	1	c3	ret	ret with rax = p + n: the returned value is a POINTER past the varint, not the count
+nullptr path	0x61bd538	2	31c0	xor eax, eax	xor %eax,%eax: every failure returns 0
+nullptr is returned as rax = 0	0x61bd53a	1	c3	ret	ret on the failure path; there is no error code and no output written
