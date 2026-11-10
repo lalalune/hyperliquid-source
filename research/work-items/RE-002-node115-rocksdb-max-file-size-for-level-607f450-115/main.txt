@@ -1,0 +1,21 @@
+000000000607f450 <hl-node>:
+ 607f450:	f3 0f 1e fa          	endbr64
+ 607f454:	48 89 f8             	mov    %rdi,%rax
+ 607f457:	39 ce                	cmp    %ecx,%esi
+ 607f459:	89 d7                	mov    %edx,%edi
+ 607f45b:	48 8b 90 e0 01 00 00 	mov    0x1e0(%rax),%rdx
+ 607f462:	0f 9c c0             	setl   %al
+ 607f465:	40 84 ff             	test   %dil,%dil
+ 607f468:	40 0f 95 c7          	setne  %dil
+ 607f46c:	40 08 f8             	or     %dil,%al
+ 607f46f:	75 06                	jne    607f477
+ 607f471:	41 80 f8 01          	cmp    $0x1,%r8b
+ 607f475:	74 09                	je     607f480
+ 607f477:	48 63 f6             	movslq %esi,%rsi
+ 607f47a:	48 8b 04 f2          	mov    (%rdx,%rsi,8),%rax
+ 607f47e:	c3                   	ret
+ 607f47f:	90                   	nop
+ 607f480:	29 ce                	sub    %ecx,%esi
+ 607f482:	48 63 f6             	movslq %esi,%rsi
+ 607f485:	48 8b 04 f2          	mov    (%rdx,%rsi,8),%rax
+ 607f489:	c3                   	ret

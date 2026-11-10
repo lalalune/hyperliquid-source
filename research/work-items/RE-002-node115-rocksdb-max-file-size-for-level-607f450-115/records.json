@@ -1,0 +1,149 @@
+{
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "bound_context": {
+    "candidate_versions": [
+      "0.11.0+8.1.1"
+    ],
+    "crate": "librocksdb-sys",
+    "end": "0x607f48a",
+    "identical_source_count": 3,
+    "member": "d7ece8bd5f9dc186-cf_options.o",
+    "native": true,
+    "question": "What does the 58-byte leaf routine at 0x607f450 return for an options pointer, a level, a compaction style, a base level and a flag, and what do its callers depend on?",
+    "raw_equal": true,
+    "relocations": [],
+    "rlib": "liblibrocksdb_sys-b032f986857674dc.rlib",
+    "source_body_sha256": "5335970edebb7744b4b2810ee044582b0a386ecda2f865ca0a8d8ab464af89f0",
+    "source_offset": 2861579,
+    "start": "0x607f450",
+    "symbol": "_ZN7rocksdb19MaxFileSizeForLevelERKNS_16MutableCFOptionsEiNS_15CompactionStyleEib",
+    "target_body_sha256": "5335970edebb7744b4b2810ee044582b0a386ecda2f865ca0a8d8ab464af89f0",
+    "task": "RE-002"
+  },
+  "caller_census": {
+    "caller_fdes": [
+      {
+        "end": "0x5da48ec",
+        "start": "0x5da3060"
+      },
+      {
+        "end": "0x5dc23c2",
+        "start": "0x5dc03b0"
+      },
+      {
+        "end": "0x5dc393e",
+        "start": "0x5dc2e60"
+      },
+      {
+        "end": "0x5dc49d7",
+        "start": "0x5dc39c0"
+      },
+      {
+        "end": "0x5dc65a6",
+        "start": "0x5dc4af0"
+      },
+      {
+        "end": "0x5dc8f3e",
+        "start": "0x5dc6750"
+      },
+      {
+        "end": "0x5dedffa",
+        "start": "0x5decc70"
+      },
+      {
+        "end": "0x5e10910",
+        "start": "0x5e0fb90"
+      },
+      {
+        "end": "0x5ec4959",
+        "start": "0x5ec3ad0"
+      }
+    ],
+    "consumer_table": "caller_use.tsv",
+    "consumers": {
+      "register-copy": 2,
+      "stack-arg": 7,
+      "store": 1
+    },
+    "direct_calls": 10,
+    "shared_callee_of_stack_arg_sites": "0x5da8870",
+    "table": "callers.tsv",
+    "tail_jumps": 0,
+    "top_consumer_instructions": {
+      "mov qword ptr [rbp - 0x170], rax": 1,
+      "mov r13, rax": 1,
+      "mov rcx, rax": 1,
+      "push rax": 7
+    }
+  },
+  "claim_anchors": "semantics.tsv (15 anchors: claim -> target instruction address and bytes)",
+  "engine_callees": [],
+  "environment_limits": "Static disassembly only (objdump/readelf on the digest-verified local binary); no cargo/rustc, Ghidra or a live node; the model is a Python transcription cross-checked by decoding and executing the routine's own instruction bytes, not a build of node or rocksdb.",
+  "functions": [],
+  "layouts": [],
+  "ledger": "cases.tsv (300 reviewable cases, 75 per family); the full 2,400-case sweep and a 20,000-input random differential are re-derived in memory by the tests",
+  "observations": [
+    {
+      "claim": "signature",
+      "kind": "observation",
+      "text": "From the disassembly: rdi=options, esi=level, edx=style, ecx=base, r8b=flag; the result is a single 64-bit table entry returned in rax."
+    },
+    {
+      "claim": "single field read",
+      "kind": "observation",
+      "text": "The routine reads exactly one field of the options struct: options+0x1e0, a table pointer (mov 0x1e0(%rax),%rdx at 0x607f45b)."
+    },
+    {
+      "claim": "level/base compare",
+      "kind": "observation",
+      "text": "cmp %ecx,%esi with setl %al at 0x607f457/0x607f462 records level<base as a 0/1 value."
+    },
+    {
+      "claim": "style low byte only",
+      "kind": "observation",
+      "text": "mov %edx,%edi then test %dil,%dil / setne %dil (0x607f459, 0x607f465, 0x607f468) test only style&0xff, so style=256 passes as zero and takes the subtraction path."
+    },
+    {
+      "claim": "flag low byte only",
+      "kind": "observation",
+      "text": "cmp $0x1,%r8b at 0x607f471 compares only flag&0xff against 1, so flag=257 behaves like 1 and flag=256 like 0."
+    },
+    {
+      "claim": "condition combine",
+      "kind": "observation",
+      "text": "or %dil,%al / jne 0x607f477 (0x607f46c, 0x607f46f): the plain level index is used when level<base or (style&0xff)!=0."
+    },
+    {
+      "claim": "index computation",
+      "kind": "observation",
+      "text": "sub %ecx,%esi (0x607f480) computes level-base in 32 bits on the subtraction path and movslq %esi,%rsi (0x607f477/0x607f482) sign-extends the index; the subtraction is only reachable when level>=base, so the index is never negative."
+    },
+    {
+      "claim": "no bound check",
+      "kind": "observation",
+      "text": "The only table access is mov (%rdx,%rsi,8),%rax (0x607f47a and 0x607f485); there is no length load and no comparison against a bound."
+    },
+    {
+      "claim": "closed form",
+      "kind": "inference",
+      "text": "result == table[level] normally, and table[level-base] when level>=base and (style&0xff)==0 and (flag&0xff)==1; validated against a decoded execution of the routine's own committed instructions over the 2,400-case sweep and 20,000 random inputs."
+    },
+    {
+      "claim": "caller dependency",
+      "kind": "observation",
+      "text": "All 10 call sites pass the value on rather than comparing it: 7 push it as a stack argument (all seven to 0x5da8870), 2 copy it to a register (one divides by it at 0x5e105dc), 1 stores it to a stack slot."
+    },
+    {
+      "claim": "claim anchors",
+      "kind": "observation",
+      "text": "semantics.tsv binds each semantic claim to a specific target instruction address and its bytes; verify.py regenerates it and re-reads those bytes from the binary."
+    }
+  ],
+  "unknowns": [
+    "The C-level meaning of style, base and flag at each call site; they are runtime values and are not characterized here.",
+    "The length and fill order of the table at options+0x1e0, and whether any caller passes an index past its end; the routine does not bound-check.",
+    "The adjacent MaxFileSizeForL0MetaPin window at 0x607f490..0x607f4bb is not covered here.",
+    "The body is byte-identical in 3 identical source objects; only 0x607f450 is bound."
+  ]
+}

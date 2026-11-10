@@ -1,0 +1,16 @@
+claim	va	size	bytes	instruction	note
+options pointer kept in rax	0x607f454	3	4889f8	mov rax, rdi	mov %rdi,%rax keeps the options pointer for the one field read
+level vs base compare	0x607f457	2	39ce	cmp esi, ecx	cmp %ecx,%esi: esi=level against ecx=base; setl records level<base
+style low byte moved to dil	0x607f459	2	89d7	mov edi, edx	mov %edx,%edi puts style in dil, so only its low byte is tested
+table pointer load	0x607f45b	7	488b90e0010000	mov rdx, qword ptr [rax + 0x1e0]	mov 0x1e0(%rax),%rdx: the level-indexed table lives at options+0x1e0
+level<base predicate	0x607f462	3	0f9cc0	setl al	setl %al turns the level/base compare into 0/1
+style low-byte test	0x607f465	3	4084ff	test dil, dil	test %dil,%dil tests ONLY the low byte: style=256 passes as zero
+style != 0 predicate	0x607f468	4	400f95c7	setne dil	setne %dil turns the low-byte style test into 0/1
+branch condition combine	0x607f46c	3	4008f8	or al, dil	or %dil,%al: subtract iff (level<base) or (style&0xff)!=0
+flag test	0x607f471	4	4180f801	cmp r8b, 1	cmp $0x1,%r8b: only the low byte of flag is compared
+default index path	0x607f477	3	4863f6	movsxd rsi, esi	movslq %esi,%rsi: the plain level index, sign-extended
+default table read	0x607f47a	4	488b04f2	mov rax, qword ptr [rdx + rsi*8]	mov (%rdx,%rsi,8),%rax: one 64-bit table entry, step 8, no bound check
+subtract path	0x607f480	2	29ce	sub esi, ecx	sub %ecx,%esi: index = level - base, computed in 32 bits
+subtract index sign-extend	0x607f482	3	4863f6	movsxd rsi, esi	movslq %esi,%rsi sign-extends the 32-bit difference
+subtract table read	0x607f485	4	488b04f2	mov rax, qword ptr [rdx + rsi*8]	the same single 64-bit table read on the subtract path
+leaf, single return value	0x607f47e	1	c3	ret	ret: no stores, no calls, the table value is the whole result
