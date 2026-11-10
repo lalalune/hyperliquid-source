@@ -1,0 +1,20 @@
+claim	va	size	bytes	instruction	note
+function entry	0x630c430	4	f30f1efa	endbr64	endbr64: an indirect-branch target, so the window is a routine entry
+source base for both loops	0x630c434	3	4989f0	mov r8, rsi	mov %rsi,%r8: the source pointer is kept in r8 while rsi is reused as scratch
+length kept in eax	0x630c437	2	89d0	mov eax, edx	mov %edx,%eax: the length survives in eax, which the byte loop then reuses as its index
+len == 0 test	0x630c439	2	85d2	test edx, edx	test %edx,%edx: a zero length is the first thing ruled out
+len == 0 returns at once	0x630c43b	2	7434	je 0x630c471	je 0x630c471: nothing is read or written for an empty copy
+small-length test	0x630c43d	3	8d52ff	lea edx, [rdx - 1]	lea -0x1(%rdx),%edx then cmp $0x6: the test is on len-1, so it is len <= 7
+small length -> byte loop	0x630c443	2	7610	jbe 0x630c455	jbe 0x630c455: a short copy goes byte at a time, never through the 16-byte path
+overlap probe base	0x630c445	4	488d7601	lea rsi, [rsi + 1]	lea 0x1(%rsi),%rsi: the probe compares dest against source+1, not source
+overlap probe dest	0x630c449	3	4889f9	mov rcx, rdi	mov %rdi,%rcx: the destination pointer becomes the minuend
+unsigned distance	0x630c44c	3	4829f1	sub rcx, rsi	sub %rsi,%rcx computes dest-(source+1) as an UNSIGNED difference, so dest <= source wraps to a huge value
+overlap bound	0x630c44f	4	4883f90e	cmp rcx, 0xe	cmp $0xe,%rcx: the guard fires when dest-(source+1) <= 14
+overlap -> byte loop	0x630c453	2	7723	ja 0x630c478	ja 0x630c478: only diff > 14 takes the chunk path, i.e. the byte loop is kept for 1 <= dest-source <= 15
+byte loop load	0x630c460	5	410fb60c00	movzx ecx, byte ptr [r8 + rax]	movzbl (%r8,%rax,1),%ecx: one byte read from the source, observing any earlier store
+byte loop store	0x630c465	3	880c07	mov byte ptr [rdi + rax], cl	mov %cl,(%rdi,%rax,1): one byte written to the destination, so an overlap repeats forward
+byte loop bound	0x630c46c	3	4839c2	cmp rdx, rax	cmp %rax,%rdx with jne: the loop runs exactly len times
+tail-only length test	0x630c478	3	83fa0e	cmp edx, 0xe	cmp $0xe,%edx then jbe 0x630c548: len <= 15 skips the chunk loop and goes straight to byte-at-a-time copying
+chunk load snapshots 16 bytes	0x630c490	6	f3410f6f0410	movdqu xmm0, xmmword ptr [r8 + rdx]	movdqu (%r8,%rdx,1),%xmm0: an unaligned 16-byte load, so the chunk is snapshotted before any store
+chunk store writes 16 bytes	0x630c496	4	0f110417	movups xmmword ptr [rdi + rdx], xmm0	movups %xmm0,(%rdi,%rdx,1): the snapshot is stored, which is why the chunk path may NOT be used on overlap
+return	0x630c471	1	c3	ret	ret: the routine has no return value - it is void, and every caller's rax use after the call is its own

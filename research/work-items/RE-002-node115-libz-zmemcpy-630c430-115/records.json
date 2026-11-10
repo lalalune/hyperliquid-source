@@ -1,0 +1,138 @@
+{
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": {
+  "candidate_versions": [
+   "1.1.22"
+  ],
+  "crate": "libz-sys",
+  "end": "0x630c558",
+  "identical_source_count": 1,
+  "member": "f0389296f42960e9-zutil.o",
+  "native": true,
+  "question": "What bytes does the 296-byte leaf routine at 0x630c430 write for a destination, a source and a length, and which path does its own guard select?",
+  "raw_equal": true,
+  "relocations": [],
+  "rlib": "liblibz_sys-a9c65f05df14367b.rlib",
+  "source_body_sha256": "194f2a4894ab292a5d1c235e7a1c21d805c74cd59ea0003c486ba1a7fe1950df",
+  "source_offset": 4858870,
+  "start": "0x630c430",
+  "symbol": "zmemcpy",
+  "target_body_sha256": "194f2a4894ab292a5d1c235e7a1c21d805c74cd59ea0003c486ba1a7fe1950df",
+  "version_note": "node115 embeds ZLIB_VERSION \"1.3.1\"; these bodies are identical in the zlib 1.3.2 bundled by libz-sys 1.1.31, so the zlib release is not pinned by these windows."
+ },
+ "caller_census": {
+  "caller_fdes": [
+   {
+    "end": "0x6301379",
+    "start": "0x6300e20"
+   },
+   {
+    "end": "0x6301c5f",
+    "start": "0x6301380"
+   },
+   {
+    "end": "0x6302204",
+    "start": "0x6301c60"
+   },
+   {
+    "end": "0x63029ab",
+    "start": "0x6302210"
+   },
+   {
+    "end": "0x630482c",
+    "start": "0x6302fb0"
+   },
+   {
+    "end": "0x630570f",
+    "start": "0x63055d0"
+   },
+   {
+    "end": "0x6307c34",
+    "start": "0x6305940"
+   },
+   {
+    "end": "0x630b9bd",
+    "start": "0x630b840"
+   }
+  ],
+  "consumer_table": "caller_use.tsv",
+  "consumers": {
+   "dead": 2,
+   "overwritten": 42
+  },
+  "contract": "memory effect only: the routine is void, so the post-call rax column is the caller's own register reuse, not a returned value",
+  "direct_calls": 44,
+  "method": "Capstone disassembly of the artifact; each call site validated at the instruction boundary and attributed to the .eh_frame FDE that encloses it",
+  "tail_jumps": 0
+ },
+ "claim_anchors": "semantics.tsv (19 anchors: claim -> target instruction address, bytes and decoded instruction)",
+ "engine_callees": [],
+ "environment_limits": [
+  "Static only: the artifact was never executed, and no source build is claimed.",
+  "The model executes the routine's decoded bytes on a small machine model that implements exactly the instructions present (including movdqu/movups) and raises on any other; it models the buffer explicitly rather than relying on host memcpy semantics, which are undefined for overlapping regions.",
+  "For overlapping inputs the C-level result is undefined by the C standard; the packet reports what THIS compiled body computes, which is the point of reconstructing it.",
+  "capstone 5.0.7 / readelf / objdump were used; results are reproducible with those tools on the digest-verified binary."
+ ],
+ "functions": [],
+ "layouts": [],
+ "ledger": "cases.tsv (300 reviewable cases, 75 per family over empty/small/overlap/vector) with a path column and a vector_only_differs column that records where the chunk path would have produced different bytes; the full 2,400-case sweep and a random differential are re-derived in memory by the tests",
+ "observations": [
+  {
+   "claim": "void contract",
+   "kind": "observation",
+   "text": "The routine has no return value: the only ret is at 0x630c471, which is also the len==0 target, and rax is used as a loop index (xor %eax,%eax at 0x630c457) rather than a result. caller_use.tsv therefore records each caller's own post-call use of rax (42 sites write it before reading, 2 never read it again) and is NOT a returned-value contract."
+  },
+  {
+   "claim": "short copies go byte-at-a-time",
+   "kind": "observation",
+   "text": "lea -0x1(%rdx),%edx with cmp $0x6 and jbe 0x630c455 (0x630c43d..0x630c443) select the byte loop for len <= 7, so the 16-byte path is never entered for a short copy."
+  },
+  {
+   "claim": "the overlap guard keeps the byte loop",
+   "kind": "observation",
+   "text": "lea 0x1(%rsi),%rsi / mov %rdi,%rcx / sub %rsi,%rcx / cmp $0xe,%rcx / ja 0x630c478 (0x630c445..0x630c453) take the chunk path only when dest-(source+1) > 14, i.e. the byte loop is kept for 1 <= dest-source <= 15. The subtraction is unsigned, so dest <= source wraps and always takes the chunk path."
+  },
+  {
+   "claim": "why the guard exists",
+   "kind": "observation",
+   "text": "The chunk path snapshots 16 bytes (movdqu at 0x630c490) and then stores them (movups at 0x630c496), so a store cannot feed the next load within one chunk; on overlapping regions that produces different bytes than the forward byte loop (movzbl/mov at 0x630c460/0x630c465, which store one byte then read the next). The committed ledger records 96 rows whose chunk-path result differs from the byte-path result."
+  },
+  {
+   "claim": "chunk path structure",
+   "kind": "observation",
+   "text": "After the guard, cmp $0xe,%edx with jbe 0x630c548 (0x630c478/0x630c47b) skips the chunk loop for len <= 15; otherwise ecx = (len>>4)<<4 bounds a movdqu/movups loop that advances 16 bytes at a time, and the remainder is copied byte-at-a-time by the unrolled tail block beginning at 0x630c4ca."
+  },
+  {
+   "claim": "both paths are forward",
+   "kind": "observation",
+   "text": "Both loops advance their index upward (add $0x1,%rax at 0x630c468, add $0x10,%rdx at 0x630c49a), so neither path copies backwards; the guard is about reads seeing stale stores, not about direction."
+  },
+  {
+   "claim": "leaf",
+   "kind": "observation",
+   "text": "The body has no calls and no relocations, and the whole body is one .eh_frame FDE 0x630c430..0x630c558 (296 bytes, 90 instructions)."
+  },
+  {
+   "claim": "caller census",
+   "kind": "observation",
+   "text": "44 direct calls, 0 tail jumps, in the caller FDEs listed in records.json; each call is validated at the instruction boundary with Capstone and attributed to the FDE that encloses it."
+  },
+  {
+   "claim": "element semantics",
+   "kind": "inference",
+   "text": "Reading the three arguments as dest, source and a byte count follows from the mangled symbol name and from the loops' byte/16-byte strides; the packet does not prove the C-level types beyond that."
+  },
+  {
+   "claim": "version is not pinned",
+   "kind": "inference",
+   "text": "The vendor census note records that node #115 embeds ZLIB_VERSION 1.3.1 while these bodies are identical in the zlib 1.3.2 bundled by libz-sys 1.1.31, so this window does not pin the zlib release; the packet therefore cites the member and the body digest rather than a zlib version."
+  }
+ ],
+ "unknowns": [
+  "Whether any caller actually relies on overlapping behaviour: the guard is present in the body, but the runtime relationship between each call's dest and source is not characterized here.",
+  "The C-level meaning of the three arguments beyond their roles (the packet does not prove the C types).",
+  "The vendor census notes that this body is identical in zlib 1.3.1 and 1.3.2, so the window cannot pin the zlib release; the exact crate version that produced the object is taken from the census, not proved here.",
+  "identical_source_count is 1 for this window (unlike the sibling packets), so the body has a single source object."
+ ]
+}

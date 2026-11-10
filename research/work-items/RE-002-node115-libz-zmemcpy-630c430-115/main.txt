@@ -1,0 +1,91 @@
+000000000630c430 <hl-node>:
+ 630c430:	f3 0f 1e fa          	endbr64
+ 630c434:	49 89 f0             	mov    %rsi,%r8
+ 630c437:	89 d0                	mov    %edx,%eax
+ 630c439:	85 d2                	test   %edx,%edx
+ 630c43b:	74 34                	je     630c471
+ 630c43d:	8d 52 ff             	lea    -0x1(%rdx),%edx
+ 630c440:	83 fa 06             	cmp    $0x6,%edx
+ 630c443:	76 10                	jbe    630c455
+ 630c445:	48 8d 76 01          	lea    0x1(%rsi),%rsi
+ 630c449:	48 89 f9             	mov    %rdi,%rcx
+ 630c44c:	48 29 f1             	sub    %rsi,%rcx
+ 630c44f:	48 83 f9 0e          	cmp    $0xe,%rcx
+ 630c453:	77 23                	ja     630c478
+ 630c455:	89 c2                	mov    %eax,%edx
+ 630c457:	31 c0                	xor    %eax,%eax
+ 630c459:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+ 630c460:	41 0f b6 0c 00       	movzbl (%r8,%rax,1),%ecx
+ 630c465:	88 0c 07             	mov    %cl,(%rdi,%rax,1)
+ 630c468:	48 83 c0 01          	add    $0x1,%rax
+ 630c46c:	48 39 c2             	cmp    %rax,%rdx
+ 630c46f:	75 ef                	jne    630c460
+ 630c471:	c3                   	ret
+ 630c472:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+ 630c478:	83 fa 0e             	cmp    $0xe,%edx
+ 630c47b:	0f 86 c7 00 00 00    	jbe    630c548
+ 630c481:	89 c1                	mov    %eax,%ecx
+ 630c483:	31 d2                	xor    %edx,%edx
+ 630c485:	c1 e9 04             	shr    $0x4,%ecx
+ 630c488:	48 c1 e1 04          	shl    $0x4,%rcx
+ 630c48c:	0f 1f 40 00          	nopl   0x0(%rax)
+ 630c490:	f3 41 0f 6f 04 10    	movdqu (%r8,%rdx,1),%xmm0
+ 630c496:	0f 11 04 17          	movups %xmm0,(%rdi,%rdx,1)
+ 630c49a:	48 83 c2 10          	add    $0x10,%rdx
+ 630c49e:	48 39 d1             	cmp    %rdx,%rcx
+ 630c4a1:	75 ed                	jne    630c490
+ 630c4a3:	41 89 c2             	mov    %eax,%r10d
+ 630c4a6:	89 c2                	mov    %eax,%edx
+ 630c4a8:	41 83 e2 f0          	and    $0xfffffff0,%r10d
+ 630c4ac:	45 89 d1             	mov    %r10d,%r9d
+ 630c4af:	44 29 d2             	sub    %r10d,%edx
+ 630c4b2:	4a 8d 0c 0f          	lea    (%rdi,%r9,1),%rcx
+ 630c4b6:	4b 8d 34 08          	lea    (%r8,%r9,1),%rsi
+ 630c4ba:	a8 0f                	test   $0xf,%al
+ 630c4bc:	74 b3                	je     630c471
+ 630c4be:	44 8d 52 ff          	lea    -0x1(%rdx),%r10d
+ 630c4c2:	89 d0                	mov    %edx,%eax
+ 630c4c4:	41 83 fa 06          	cmp    $0x6,%r10d
+ 630c4c8:	76 1c                	jbe    630c4e6
+ 630c4ca:	4f 8b 04 08          	mov    (%r8,%r9,1),%r8
+ 630c4ce:	4e 89 04 0f          	mov    %r8,(%rdi,%r9,1)
+ 630c4d2:	89 c7                	mov    %eax,%edi
+ 630c4d4:	83 e7 f8             	and    $0xfffffff8,%edi
+ 630c4d7:	41 89 f8             	mov    %edi,%r8d
+ 630c4da:	29 fa                	sub    %edi,%edx
+ 630c4dc:	4c 01 c1             	add    %r8,%rcx
+ 630c4df:	4c 01 c6             	add    %r8,%rsi
+ 630c4e2:	a8 07                	test   $0x7,%al
+ 630c4e4:	74 8b                	je     630c471
+ 630c4e6:	0f b6 06             	movzbl (%rsi),%eax
+ 630c4e9:	88 01                	mov    %al,(%rcx)
+ 630c4eb:	83 fa 01             	cmp    $0x1,%edx
+ 630c4ee:	74 81                	je     630c471
+ 630c4f0:	0f b6 46 01          	movzbl 0x1(%rsi),%eax
+ 630c4f4:	88 41 01             	mov    %al,0x1(%rcx)
+ 630c4f7:	83 fa 02             	cmp    $0x2,%edx
+ 630c4fa:	0f 84 71 ff ff ff    	je     630c471
+ 630c500:	0f b6 46 02          	movzbl 0x2(%rsi),%eax
+ 630c504:	88 41 02             	mov    %al,0x2(%rcx)
+ 630c507:	83 fa 03             	cmp    $0x3,%edx
+ 630c50a:	0f 84 61 ff ff ff    	je     630c471
+ 630c510:	0f b6 46 03          	movzbl 0x3(%rsi),%eax
+ 630c514:	88 41 03             	mov    %al,0x3(%rcx)
+ 630c517:	83 fa 04             	cmp    $0x4,%edx
+ 630c51a:	0f 84 51 ff ff ff    	je     630c471
+ 630c520:	0f b6 46 04          	movzbl 0x4(%rsi),%eax
+ 630c524:	88 41 04             	mov    %al,0x4(%rcx)
+ 630c527:	83 fa 05             	cmp    $0x5,%edx
+ 630c52a:	0f 84 41 ff ff ff    	je     630c471
+ 630c530:	0f b6 46 05          	movzbl 0x5(%rsi),%eax
+ 630c534:	88 41 05             	mov    %al,0x5(%rcx)
+ 630c537:	83 fa 06             	cmp    $0x6,%edx
+ 630c53a:	0f 84 31 ff ff ff    	je     630c471
+ 630c540:	0f b6 46 06          	movzbl 0x6(%rsi),%eax
+ 630c544:	88 41 06             	mov    %al,0x6(%rcx)
+ 630c547:	c3                   	ret
+ 630c548:	89 c2                	mov    %eax,%edx
+ 630c54a:	4c 89 c6             	mov    %r8,%rsi
+ 630c54d:	48 89 f9             	mov    %rdi,%rcx
+ 630c550:	45 31 c9             	xor    %r9d,%r9d
+ 630c553:	e9 72 ff ff ff       	jmp    630c4ca
