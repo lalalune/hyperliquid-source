@@ -1,0 +1,386 @@
+#!/usr/bin/env python3
+"""Generate functions.tsv and records.json for this packet from the
+vendor census + the binary, so no hash is hand-transcribed.
+
+The body hash is recomputed from work/hl-node-115.bin over the FDE
+range. The single FDE is vendor-census-bound (member
+25dac13516458d4d-column_family.o, librocksdb-sys 0.11.0+8.1.1);
+its source hash reproduces exactly by zeroing the census
+relocations (6, kinds 2/4, no relaxation). The FDE has no .cold
+FDE and no LSDA (aug_len 0).
+"""
+import hashlib
+import json
+import subprocess
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+PACKET = Path(__file__).resolve().parent
+BIN = ROOT / "work" / "hl-node-115.bin"
+DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+
+# (start, end, name, slug, census-bound?)
+FUNCS = [
+    ("0x5d8bb50", "0x5d8bc55",
+     "rocksdb::CheckCFPathsSupported",
+     "check-cf-paths-supported-5d8bb50", True),
+]
+
+
+def va2off(va):
+    out = subprocess.check_output(["readelf", "-lW", str(BIN)]).decode()
+    for line in out.splitlines():
+        p = line.split()
+        if p and p[0] == "LOAD":
+            v, o, f = int(p[2], 16), int(p[1], 16), int(p[4], 16)
+            if v <= va < v + f:
+                return o + (va - v)
+    raise ValueError(hex(va))
+
+
+def _caller_sites():
+    sites = []
+    with open(PACKET / "callers.tsv") as fh:
+        header = fh.readline().rstrip("\n").split("\t")
+        for line in fh:
+            row = dict(zip(header, line.rstrip("\n").split("\t")))
+            sites.append({
+                "instruction": row["instruction"],
+                "kind": row["kind"], "site": row["site"],
+                "site_fde_end": row["site_fde_end"],
+                "site_fde_start": row["site_fde_start"],
+                "target": row["target"],
+                "target_name": row["target_name"]})
+    return sites
+
+
+def main():
+    data = open(BIN, "rb").read()
+    assert hashlib.sha256(data).hexdigest() == DIGEST
+    census = json.load(open(
+        ROOT / "research" / "work-items" / "RE-002-node115-vendor-census"
+        / "census.json"))["records"]
+    by_start = {r["start"]: r for r in census}
+    rows = []
+    functions = {}
+    for start_s, end_s, name, slug, census_bound in FUNCS:
+        start, end = int(start_s, 16), int(end_s, 16)
+        body = data[va2off(start):va2off(end)]
+        body_hash = hashlib.sha256(body).hexdigest()
+        assert census_bound
+        rec = by_start[start]
+        assert body_hash == rec["target_body_sha256"], name
+        zeroed = bytearray(body)
+        for rel in rec["relocations"]:
+            o, w = rel["offset"], rel["width"]
+            zeroed[o:o + w] = b"\x00" * w
+        source_hash = hashlib.sha256(bytes(zeroed)).hexdigest()
+        assert source_hash == rec["source_body_sha256"], name
+        relocs = ";".join(
+            "%d:kind%d" % (r["offset"], r["kind"])
+            for r in rec["relocations"])
+        symbol = rec["symbol"]
+        raw_equal = str(rec["raw_equal"])
+        row = {
+            "name": name, "start": start_s, "end": end_s,
+            "size": str(end - start), "body_sha256": body_hash,
+            "source_sha256": source_hash,
+            "raw_equal": raw_equal,
+            "relocations": relocs,
+            "census_id": "node115-vendor-%s" % start_s[2:],
+            "symbol": symbol,
+            "excerpt": slug + ".objdump.txt", "hex": slug + ".hex",
+        }
+        functions[start_s] = {
+            "body_sha256": body_hash,
+            "source_sha256": source_hash,
+            "relocations": relocs,
+            "census_id": row["census_id"],
+            "mangled": symbol,
+            "callers": [],
+            "lea_refs": [],
+        }
+        rows.append(row)
+    with open(PACKET / "functions.tsv", "w") as fh:
+        cols = ["name", "start", "end", "size", "body_sha256",
+                "source_sha256", "raw_equal", "relocations", "census_id",
+                "symbol", "excerpt", "hex"]
+        fh.write("\t".join(cols) + "\n")
+        for r in rows:
+            fh.write("\t".join(r[c] for c in cols) + "\n")
+    print("wrote functions.tsv (%d functions, all hashes verified)"
+          % len(rows))
+
+    # Caller census sites, read back from callers.tsv (no hand copy).
+    sites = _caller_sites()
+    main_calls = [s for s in sites if s["target"] == "0x5d8bb50"]
+    functions["0x5d8bb50"]["callers"] = [s["site"] for s in main_calls]
+    functions["0x5d8bb50"]["model"] = (
+        "261-byte helper "
+        "CheckCFPathsSupported(const DBOptions&, const "
+        "ColumnFamilyOptions&) (result by value, sret out in rdi = "
+        "rax; db_options in rsi; cf_options in rdx; stack canary "
+        "used). Checks in binary order, first failure wins: "
+        "compaction_style (+0xe8, u8) <= 1 (kCompactionStyleLevel 0 "
+        "/ kCompactionStyleUniversal 1) -> OK regardless of paths; "
+        "cf_paths (+0x2c8..+0x2d0, vector<DbPath>) byte size > 0x28 "
+        "(more than one path) -> 'More than one CF paths are only "
+        "supported in universal and level compaction styles. ' "
+        "(NotSupported, 84 B, 0x956f18); cf_paths empty and "
+        "db_paths (+0x70..+0x78, vector<DbPath>) byte size > 0x28 "
+        "(more than one path) -> 'More than one DB paths are only "
+        "supported in universal and level compaction styles. ' "
+        "(NotSupported, 84 B, 0x963340). Else OK (out = {0, 0, "
+        "nullptr}). Both error paths share the single Status ctor "
+        "call at 0x5d8bc0e (0x61cf670); the Slices are built on the "
+        "stack (msg at 0x10(%rsp)/0x18(%rsp) with len 0x54, msg2 = "
+        "{0x4376fd, 0} at 0x20(%rsp)/0x28(%rsp)). The FDE has no "
+        ".cold FDE and no LSDA (aug_len 0): no landing pad, no "
+        "catch, no cleanup; a throw propagates straight through "
+        "and the canary is checked only on normal returns.")
+    records = {
+        "artifact": "node #115",
+        "artifact_sha256": DIGEST,
+        "bound_context": [
+            "RE-002-node115-rocksdb-column-family-data-validate-"
+            "options-115 (open, PR #6449): reconstructs "
+            "ColumnFamilyData::ValidateOptions 0x5d8e3b0, which "
+            "calls this helper once (site 0x5d8e4a7), as its fourth "
+            "check. The #6449 packet's reference oracle for this "
+            "function is superseded by this full reconstruction.",
+            "RE-002-node115-vendor-census: the single FDE is "
+            "census-bound (member 25dac13516458d4d-column_family.o, "
+            "librocksdb-sys 0.11.0+8.1.1). Body 938266cf... / "
+            "source d7378425... (6 relocations, kinds 2/4, no "
+            "relaxation; all six are PC32/PLT32 disp32s: 132/144 "
+            "the two msg2 leas, 191 the Status ctor call, 238/250 "
+            "the two message leas, 257 the __stack_chk_fail "
+            "call).",
+            "meta/rocksdb v8.1.1, read live this cycle: "
+            "db/column_family.cc:173-192 defines this helper "
+            "exactly as the binary behaves (the universal/level "
+            "style gate, then the cf_paths size test, then the "
+            "empty-cf_paths db_paths size test, else OK, with both "
+            "verbatim messages including their trailing spaces); "
+            "include/rocksdb/advanced_options.h:26-35 defines "
+            "the CompactionStyle enum (Level 0, Universal 1, FIFO "
+            "2, None 3); include/rocksdb/options.h declares "
+            "ColumnFamilyOptions and DBOptions. The binary matches "
+            "v8.1.1 step for step.",
+            "ColumnFamilyOptions/DBOptions field offsets verified "
+            "this cycle by compiling offsetof() against the real "
+            "v8.1.1 headers (g++): compaction_style +0xe8, "
+            "cf_paths +0x2c8, db_paths +0x70, sizeof DbPath 0x28, "
+            "sizeof ColumnFamilyOptions 0x300, sizeof DBOptions "
+            "0x290; the #6449 anchors reproduce too (ttl +0x160, "
+            "table_factory +0x2b8). The byte-size comparisons are "
+            "exact: the binary subtracts vector begin/end pointers, "
+            "so > 0x28 is a > 1 element test for real vectors.",
+            "Binary-vs-source observations (recorded, not hidden): "
+            "the FDE has no LSDA and no .cold FDE, so there is no "
+            "landing pad and no cleanup for a throw from the "
+            "Status ctor -- the exception propagates straight "
+            "through, and the canary is checked only on normal "
+            "returns. The source writes the style gate as two "
+            "inequality tests (style != universal && style != "
+            "level); the binary compiles it to one unsigned "
+            "byte compare (cmpb $0x1, jbe), so a style byte above "
+            "3 (e.g. 255) also falls into the path checks -- the "
+            "model follows the binary. The two error blocks share "
+            "one Status ctor call and one message-length store "
+            "(movq $0x54,0x18(%rsp)); the second block jumps back "
+            "into the first block's tail after storing its own "
+            "message pointer.",
+        ],
+        "caller_census": {
+            "method": "Whole-.text scan for E8 calls, E9 tail jumps "
+                      "and RIP-relative LEA references landing on the "
+                      "target, validated by decoding forward from the "
+                      "enclosing FDE start with Capstone (census.py). "
+                      "A site counts only on a real instruction "
+                      "boundary with the expected mnemonic.",
+            "notes": [
+                "CheckCFPathsSupported 0x5d8bb50: exactly 1 "
+                "direct call, 0 tail jumps, 0 LEA refs -- "
+                "ColumnFamilyData::ValidateOptions 0x5d8e3b0 (site "
+                "0x5d8e4a7, census-bound, column_family.o, open PR "
+                "#6449). The helper runs once per ValidateOptions "
+                "call, as its fourth check.",
+                "No LSDA: the FDE record in .eh_frame (section "
+                "offset 0x34ba28, length 0x18, initial_location "
+                "0x5d8bb50, range 0x105, aug_len 0) carries no LSDA "
+                "pointer, so there is no call-site table and no "
+                "landing pad.",
+            ],
+            "sites": sites,
+            "validated_sites": len(sites),
+        },
+        "cases": {
+            "count": 2400,
+            "ledger": "cases.tsv",
+            "split": "600 checks (each check failing alone, pairs "
+                     "where check 1 must win, boundaries: level and "
+                     "universal styles ignoring 2 cf + 2 db paths, "
+                     "one cf path never reading db_paths, empty "
+                     "cf_paths with one db path, mixed styles 0/1/2/"
+                     "3/4/255 x path counts 0..3) + 600 status (OK "
+                     "image, each error image with code/subcode/"
+                     "severity/pad/state_ content, the ctor's ': ' "
+                     "join with a non-empty msg2, both verbatim "
+                     "messages) + 600 throw (BadAlloc in the Status "
+                     "ctor at each of the 2 error sites with the "
+                     "half-built status attached and no cleanup, "
+                     "canary failures on OK and error returns, "
+                     "BadAlloc beating a bad canary -- with no LSDA "
+                     "there is no pad canary check, so it still "
+                     "propagates as BadAlloc -- alloc_ok=False with "
+                     "no fail_at, firing only on an error path and "
+                     "passing through on an OK path) + 600 bindings "
+                     "(caller-site independence across the single "
+                     "caller, FDE hashes as expected values)",
+            "tests": "tests/test_check_cf_paths_supported115.py",
+            "tool": "tools/check_cf_paths_supported115.py",
+            "what_is_checked": [
+                "checks: the first failing check wins (check 1 "
+                "masks check 2); the compaction_style gate is "
+                "tested before any path is read (level/universal "
+                "pass with 2 cf + 2 db paths); a single cf path "
+                "passes without ever reading db_paths; the "
+                "db_paths check fires only for empty cf_paths; an "
+                "out-of-range style byte (255) still falls into "
+                "the path checks",
+                "status: the Status byte layout the ctor proves "
+                "(code u8 +0x0, subcode u8 +0x1, severity u8 +0x2, "
+                "padding +0x3..+0x7 zero with +0x6..+0x7 unwritten, "
+                "state_ +0x8); the state_ buffer is msg + NUL with "
+                "alloc len+1; the ctor's ': ' join when msg2 is "
+                "non-empty (ctor behavior, never fired by this FDE); "
+                "both messages byte-exact (84 B each, trailing "
+                "space included)",
+                "throw: each throwing call is recorded with pad "
+                "None and empty cleanup (no LSDA); a BadAlloc "
+                "leaves out half-built (code/subcode/severity "
+                "written, state_ null); canary failures raise "
+                "StackCheckFailed on the return path only -- a "
+                "throw never reaches the epilogue and there is no "
+                "pad canary check, so BadAlloc + a bad canary "
+                "still propagates as BadAlloc",
+                "bindings: the result depends only on the options, "
+                "never on the caller site; the FDE body hash, the "
+                "source hash (6 relocations zeroed) and the "
+                "engine-call counts match the binary",
+            ],
+        },
+        "engine_callees": {
+            "0x61cf670": "rocksdb::Status::Status(Code, SubCode, "
+                         "const Slice&, const Slice&, Severity) "
+                         "(census-bound, status.o): the five-argument "
+                         "Status ctor, called once (0x5d8bc0e, shared "
+                         "by both error paths). Its observable "
+                         "behavior IS pinned from its disassembly: "
+                         "code u8 +0x0, subcode u8 +0x1, severity u8 "
+                         "+0x2, zeroes +0x3..+0x5, state_ = new "
+                         "char[size+1] holding msg + (': ' + msg2 if "
+                         "len2) + NUL. Its trailing delete[] of the "
+                         "old state_ is DEAD (state_ is zeroed at "
+                         "0x61cf6b0 before the read at 0x61cf6e4).",
+            "0x63f0d70": "PLT __stack_chk_fail: the canary failure "
+                         "at the epilogue (0x5d8bc50). Reached only "
+                         "on a normal return; a throw never reaches "
+                         "the epilogue.",
+        },
+        "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM. "
+            "The target binary is never executed. The tool models the "
+            "helper in Python from its whole-FDE disassembly; the "
+            "Status ctor's observable behavior is pinned from its own "
+            "disassembly. Status state_ buffers are deterministic heap "
+            "ids, not real pointers; the subcode padding bytes "
+            "(+0x6..+0x7) the binary never writes are modelled as "
+            "zero. The live check (--live) reads the binary: the FDE "
+            "body hash, the source hash, the FDE record (length "
+            "0x18, range 0x105, aug_len 0, no LSDA), the engine-call "
+            "counts, the field cmp instructions, the two message "
+            "bytes and the one-site caller census. make "
+            "verify/test/catalogue-check in a tooled environment is "
+            "still owed upstream.",
+        "functions": functions,
+        "layouts": {
+            "status": {
+                "+0x00": "code (u8; the Code enum; 0 = kOk, 3 = "
+                         "kNotSupported here). Written by the ctor "
+                         "(mov %sil) and by the OK path (movl $0x0 "
+                         "covers +0x0..+0x3).",
+                "+0x01": "subcode (u8). Written by the ctor "
+                         "(mov %dl); 0 in every result this FDE "
+                         "produces.",
+                "+0x02": "severity (u8). Written by the ctor "
+                         "(mov %r9b); 0 in every result this FDE "
+                         "produces.",
+                "+0x03": "padding (5 bytes, +0x3..+0x7). The ctor "
+                         "writes +0x3..+0x5 zero; the OK path writes "
+                         "+0x3..+0x5 zero; +0x6..+0x7 are NEVER "
+                         "written by any path in this FDE -- modelled "
+                         "as zero, recorded as unwritten.",
+                "+0x08": "state_ (char*, 8 bytes). nullptr = no "
+                         "message; otherwise a heap buffer of "
+                         "len(msg)+1 bytes holding msg + NUL (msg2 "
+                         "is always empty here), freed by the "
+                         "caller's move/delete[], never in this FDE.",
+                "size": "0x10 (16 bytes)",
+            },
+            "db_options_fields_read": {
+                "+0x70": "db_paths begin (vector<DbPath>::begin, "
+                         "read only when cf_paths is empty).",
+                "+0x78": "db_paths end (vector<DbPath>::end).",
+                "not_read": "No other DBOptions field is read.",
+            },
+            "cf_options_fields_read": {
+                "+0xe8": "compaction_style (u8 CompactionStyle "
+                         "enum: 0 level, 1 universal, 2 FIFO, "
+                         "3 none).",
+                "+0x2c8": "cf_paths begin (vector<DbPath>::begin).",
+                "+0x2d0": "cf_paths end (vector<DbPath>::end).",
+                "not_read": "allow_concurrent_memtable_write (+0x1d2) "
+                            "and every other ColumnFamilyOptions field "
+                            "are never read by this FDE.",
+            },
+            "lsda": {
+                "none": "This FDE has NO LSDA: the .eh_frame record "
+                        "(section offset 0x34ba28, length 0x18, "
+                        "initial_location 0x5d8bb50, range 0x105, "
+                        "aug_len 0) carries no LSDA pointer. There "
+                        "is no call-site table, no landing pad, no "
+                        "catch and no cleanup. A throw from the "
+                        "Status ctor (0x5d8bc0e) propagates straight "
+                        "through; the canary is checked only on "
+                        "normal returns (epilogue 0x5d8bbab).",
+            },
+            "landing_pads": {
+                "none": "No landing pads exist: the FDE has no LSDA.",
+            },
+            "error_blocks": {
+                "0x5d8bbc8": "cf_paths error: Slices built (msg "
+                            "0x956f18 len 84, msg2 empty) -> shared "
+                            "Status ctor 0x5d8bc0e into out -> "
+                            "epilogue.",
+                "0x5d8bc32": "db_paths error: Slices built (msg "
+                            "0x963340 len 84, msg2 empty) -> jumps "
+                            "to 0x5d8bbe4, the shared ctor tail "
+                            "(stores the message pointer, then the "
+                            "shared Status ctor 0x5d8bc0e into out) "
+                            "-> epilogue.",
+                "0x5d8bb97": "OK path: xor %edx,%edx; movl $0x0,"
+                            "(%rax); mov %dx,0x4(%rax); movq "
+                            "$0x0,0x8(%rax), then the epilogue "
+                            "(canary check).",
+            },
+        },
+    }
+    with open(PACKET / "records.json", "w") as fh:
+        json.dump(records, fh, indent=1, sort_keys=True)
+        fh.write("\n")
+    print("wrote records.json")
+
+
+if __name__ == "__main__":
+    main()
