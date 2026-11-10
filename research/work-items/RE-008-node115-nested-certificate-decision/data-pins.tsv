@@ -1,0 +1,16 @@
+address	bytes	meaning
+0x4592b0	000000000000f03f	f64 1.0, the fraction used when the config double is infinite or NaN (read at 0x595bc91)
+0x459a10	666666666666e63f	f64 0.7 (0x3fe6666666666666), upper clamp of the fraction (read at 0x595bcb4)
+0x451210	0000304300003045	u64 to f64 split constants 0x43300000 and 0x45300000 (read at 0x595bff5, exact two-half conversion, one rounding)
+0x450170	00000000000030430000000000003045	subtrahends 2^52 and 2^84 (read at 0x595c001)
+0x936313	48797065726c69717569642043	first 13 bytes of the 29 byte prefix "Hyperliquid Consensus Payload" (16 byte load at 0x57e8d7b, stored to +0 of the buffer; the 16th byte of that load is overwritten by the second store)
+0x936320	6f6e73656e737573205061796c6f6164	last 16 bytes of the prefix, "onsensus Payload" (16 byte load at 0x57e8d70, stored to +0xd of the buffer)
+0x935a70	9633eb049633eb049633eb04ab33eb049633eb04c333eb049633eb049e33eb04d033eb04	serializer result tag jump table of the digest builder (read at 0x57e8dfd): nine 32 bit offsets from 0x935a70; tag 8 goes to 0x57e8e40, tags 0 1 2 4 6 to 0x57e8e06, 3 to 0x57e8e1b, 5 to 0x57e8e33, 7 to 0x57e8e0e
+0x935c44	b4e1ee04bce2ee0423e2ee0442e2ee04d7e1ee04	message serializer size-pass jump table (read at 0x5823def): five offsets from 0x935c44, arm 1 is 0x5823f00
+0x935c58	2ae3ee04d9e3ee0483e3ee04aee3ee0458e3ee04	message serializer write-pass jump table (read at 0x5823ef7): five offsets from 0x935c58, arm 1 is 0x5824031 (tag byte 1), arms 0 2 3 4 write tag bytes 0 2 3 4
+0x466818	47030d0131030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0138030d0147030d0131030d01	recovery id jump table of the recovery wrapper (read at 0x1536b40): 29 offsets from 0x466818; v = 0 and 27 go to 0x1536b5f (id 0), v = 1 and 28 to 0x1536b49 (id 1), v = 2..26 to 0x1536b50 (error)
+0x4363d5	73696720213d204e554c4c00	"sig != NULL": argument-check text read by the function at 0x632b660 (the first of the three strings it reports)
+0x43439d	696e707574363420213d204e554c4c00	"input64 != NULL": second argument-check text of 0x632b660
+0x442b47	7265636964203e3d2030202626207265636964203c3d203300	"recid >= 0 && recid <= 3": third argument-check text of 0x632b660
+0x458060	414136d08c5ed2bf3ba048afe6dcaebafeffffffffffffffffffffffffffffff	the 32 bytes of the secp256k1 group order n, little endian (the limbs 0xbfd25e8cd0364141 and 0xbaaedce6af48a03b are immediates of 0x6321680, the scalar reader called by 0x632b660)
+0xa182e0	9817f8165b81f259d928ce2ddbfc9b02070b87ce9562a055acbbdcf97e66be79b8d410fb8fd0479c195485a648b417fda808110efcfba45d65c4a32677da3a48	the secp256k1 generator point G: x then y, 32 bytes each, little endian
