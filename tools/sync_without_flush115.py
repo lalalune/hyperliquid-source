@@ -9,7 +9,7 @@ SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c
 3867b5301).
 
 The direct sibling of the earlier RE-002 WritableFileWriter
-packets (Append, Flush, Sync, UpdateFileChecksum, GetFileChecksum,
+packets (Append, Flush, UpdateFileChecksum, GetFileChecksum,
 GetFileChecksumFuncName, DecideRateLimiterPriority): the sync
 without a flush -- sync the underlying file while a concurrent
 writer may still be appending. Upstream RocksDB v8.1.1 calls it

@@ -84,17 +84,18 @@ def main():
         "artifact": "node #115",
         "artifact_sha256": tool.ARTIFACT_SHA256,
         "bound_context": [
-            "RE-002-node115-rocksdb-writable-file-writer-sync-115 "
-            "(open PR, sibling): reconstructs "
-            "WritableFileWriter::Sync 0x6052800, which flushes "
-            "first and then calls SyncInternal when pending_sync_ "
-            "is set. This packet reconstructs the sibling that "
-            "syncs WITHOUT flushing -- the call a concurrent "
-            "writer may make while appends continue. Both share "
-            "SyncInternal (0x604c900) as their engine call and "
-            "the seen_error_ flag at this+0x89; Sync additionally "
-            "reads pending_sync_ and calls Flush, which this "
-            "function never does.",
+            "WritableFileWriter::Sync 0x6052800 (NOT yet covered -- "
+            "a noted next candidate; no open or merged packet for "
+            "it exists as of submission, verified against the open-"
+            "PR list and merged work-items): the upstream sibling "
+            "that flushes first and then calls SyncInternal when "
+            "pending_sync_ is set (file/writable_file_writer.cc: "
+            "436-453). This packet covers only SyncWithoutFlush -- "
+            "the call a concurrent writer may make while appends "
+            "continue. The two share SyncInternal (0x604c900) as "
+            "their engine call and the seen_error_ flag at "
+            "this+0x89; Sync additionally reads pending_sync_ "
+            "and calls Flush, which this function never does.",
             "RE-002-node115-rocksdb-writable-file-writer-append-115 "
             "(merged): reconstructs WritableFileWriter::Append, "
             "the only caller of UpdateFileChecksum and the "
