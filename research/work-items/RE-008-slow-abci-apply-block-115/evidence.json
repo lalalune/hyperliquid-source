@@ -1,0 +1,46 @@
+{
+  "body": {
+    "discarded_draw": "if +0xb40 and [runner+0x3f8] == 1: slot 0x64e1028 -> 0x1562120 (random % edi == 0) with edi = 50; result not read (0x4fcaf51)",
+    "flag": "runner +0xb40 (byte)",
+    "fn": "0x4fcac10",
+    "locked_value": "runner +0x6b0 passed in rcx to 0x59ec200 at 0x4fcae48",
+    "recorder_call": "slot 0x64eb1a8 -> 0x4770c90 with rdi = runner +0xb20, name, [runner+0x18], [runner+0x20], wait, hold",
+    "times": "wait (start -> acquire) and hold (acquire -> release) as f64 seconds",
+    "write_lock": "lock cmpxchg [runner+0x6a8] 0 -> 8 at 0x4fcac88; release 8 -> 0 at 0x4fcae59"
+  },
+  "component": "abci",
+  "gates_changed": false,
+  "recorder": {
+    "block": "+0x0 lock byte, +0x8 divisor (60000), +0x10 last minute (525600 at build), +0x18 count",
+    "count": "[block+0x18] += 1, saturating",
+    "extent": [
+      "0x4770c90",
+      "0x4770f33"
+    ],
+    "extent_sha256": "01483c34ec1c0f3a95f2ea8576682b37cab1d5cd1ee72113c1bcbfe3c3a0900e",
+    "minute": "now_ms / [block+0x8]; store if greater than [block+0x10]",
+    "record": "profiled_rw_lock_increment (0.01, 0.05) through 0x4780430",
+    "unused_arguments": "rsi, rdx, rcx and xmm0 are written before any read; xmm1 is not used"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "step_chain": [
+    "0x4fcac10 -0x4fcae48-> 0x59ec200",
+    "0x59ec200 -0x59ec2a8-> 0x56185e0",
+    "0x56185e0 -0x5618630-> 0x5a04e40",
+    "0x5a04e40 -0x5a05fc9-> 0x5a07ec0 (layout A step)",
+    "0x59ec200 -0x59ec380-> 0x5942b40 (visor_abci_state wrapper)"
+  ],
+  "step_direct_calls": [
+    "0x4fcae48"
+  ],
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008",
+  "wrapper": {
+    "body_calls": [
+      "0x4f1532c",
+      "0x4f15ae2"
+    ],
+    "call": "0x5a34f0d -> 0x4e47900 (edx = 1, name spawn_slow_abci_driver_apply_block)",
+    "runner": "0x4e47a7c -> 0x4f152a0 (Location 0x649ee50), lock-ordering checks (lock ordering violations, base/src/lock_id.rs)"
+  }
+}
