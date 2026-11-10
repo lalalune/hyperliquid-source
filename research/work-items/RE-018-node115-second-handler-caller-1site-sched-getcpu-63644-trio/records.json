@@ -1,0 +1,219 @@
+{
+ "base": "a8616af9432b8d8517b2af677880e117b7c28ef3",
+ "packet": 508,
+ "slug": "RE-018-node115-second-handler-caller-1site-sched-getcpu-63644-trio",
+ "thin_packet": true,
+ "window": {
+  "fde": "0x6353610..0x63537ef",
+  "hex_file_offset": "0x6352610",
+  "hex_sha256": "ba90394dd608d031d2d3b3b5b034915a422635a97048899cae8eb6f827fcd344",
+  "strict": 124
+ },
+ "census": {
+  "calls": 10,
+  "ret": [
+   "0x6353623"
+  ],
+  "endbr64": 0,
+  "canary": false,
+  "canary_lines": 0,
+  "bsr": 0,
+  "shr": 2,
+  "shr_sites": [
+   "0x635366d",
+   "0x6353698"
+  ],
+  "shl": 0,
+  "shl_sites": [],
+  "jumps": 25,
+  "jumps_outside_window": 1,
+  "backward_jumps": [
+   "0x6353653",
+   "0x635367a",
+   "0x6353680",
+   "0x63536b1",
+   "0x63536cd",
+   "0x6353739",
+   "0x635374a",
+   "0x635375d",
+   "0x6353776",
+   "0x6353799",
+   "0x63537aa",
+   "0x63537ba",
+   "0x63537d1",
+   "0x63537ea"
+  ]
+ },
+ "calls": {
+  "by_target": {
+   "0x634ebb0": 1,
+   "0x6352fc0": 1,
+   "0x6360ed0": 1,
+   "0x6364400": 1,
+   "0x6364410": 1,
+   "0x6364420": 1,
+   "0x63ec4c0": 1,
+   "0x63edf10": 2,
+   "0x63f1ad0": 1
+  },
+  "distinct_targets": 9,
+  "plt": [
+   "0x63f1ad0"
+  ],
+  "plt_calls": 1,
+  "total": 10
+ },
+ "second_handler": {
+  "call_site": "0x63537e2",
+  "tail_jump": "0x635375d",
+  "target": "0x634ebb0"
+ },
+ "handler": {
+  "fde": "0x634ebb0..0x634eccd",
+  "bytes": 285,
+  "strict": 78,
+  "endbr64": 1,
+  "calls": 9,
+  "ret": "0x634ec45",
+  "trylock": "pthread_mutex_trylock@plt at 0x634ebce on mutex 0x6511700 (lea at 0x634ebb6)",
+  "lock_wait_fallback": "lock-wait helper 0x63bf680 at 0x634ec94 (rdi = mutex - 0x40, lea at 0x634ec90); movb $0x1,0x6511728 at 0x634ec99; jmp 0x634ebdb",
+  "counters": [
+   "add QWORD [0x65116f8],0x1 at 0x634ebdb",
+   "cmp rbp,[0x65116f0] at 0x634ebe3",
+   "add QWORD [0x65116e8],0x1 at 0x634ebec",
+   "mov [0x65116f0],rbp at 0x634ebf4"
+  ],
+  "cmp_ebx": "cmp ebx,0xffe at 0x634ebfb; ja 0x634ec50",
+  "table": "0x65096c0 (lea at 0x634ec13; mov r12,[rdx+rcx*8] at 0x634ec1a, rcx = ebx)",
+  "count": "0x65096b0 (mov eax,[0x65096b0] at 0x634ec03; lock add [0x65096b0],0x1 at 0x634ecc0)",
+  "null_slot": "call 0x6364430 at 0x634ecb0; mov r12,rax at 0x634ecb5",
+  "abort_path": "call 0x63bf5b6 at 0x634ec86; call abort@plt at 0x634ec8b"
+ },
+ "twin": {
+  "fde": "0x63537f0..0x63539cf",
+  "bytes": 479,
+  "strict": 124,
+  "sha256": "20aa03a8dacc897627c0a8b2d07d127bd5a04aef37b60cf947788edca9b34a97",
+  "gap_bytes": 1,
+  "padding_byte": {
+   "va": "0x63537ef",
+   "file_offset": "0x63527ef",
+   "value": "0xcc"
+  },
+  "byte_diffs": 36,
+  "diff_offsets": [
+   "0x38",
+   "0x39",
+   "0x4d",
+   "0x4e",
+   "0x73",
+   "0x74",
+   "0x81",
+   "0x82",
+   "0xc5",
+   "0xc6",
+   "0xdc",
+   "0xdd",
+   "0xe6",
+   "0xe7",
+   "0xf7",
+   "0xf8",
+   "0x11e",
+   "0x11f",
+   "0x133",
+   "0x134",
+   "0x143",
+   "0x144",
+   "0x14e",
+   "0x14f",
+   "0x15b",
+   "0x15c",
+   "0x196",
+   "0x197",
+   "0x1a6",
+   "0x1a7",
+   "0x1bd",
+   "0x1be",
+   "0x1c9",
+   "0x1ca",
+   "0x1d3",
+   "0x1d4"
+  ],
+  "pos_dep_diffs": 36,
+  "other_diffs": 0,
+  "insn_mismatches": 0,
+  "calls": 10,
+  "ret": "0x6353803",
+  "jumps": 25
+ },
+ "entry": {
+  "pushes": [
+   "push %r12 at 0x6353610",
+   "push %rbp at 0x6353612",
+   "push %rbx at 0x6353613"
+  ],
+  "saves": [
+   "mov %rsi,%rbx at 0x6353614",
+   "mov %rdi,%rbp at 0x635362c"
+  ],
+  "early_return": "rsi != 0 returns rsi (mov %rbx,%rax at 0x635361c; ret at 0x6353623)"
+ },
+ "exit": {
+  "ret": "0x6353623",
+  "return_mov": "mov %rbx,%rax at 0x635361c",
+  "rbx_reaching_defs": [
+   "0x6353614 (entry rsi)",
+   "0x6353635 (qword at +0x90 of entry struct)",
+   "0x63536c0 (qword at +0x90 of rbp struct)",
+   "0x6353732 (qword at +0x90 of rbp struct)",
+   "0x6353740 (first qword of table 0x65096c0)",
+   "0x6353773 (result of 0x6352fc0 call)"
+  ],
+  "tail_jump_never_returns": "jmp 0x634ebb0 at 0x635375d"
+ },
+ "cited_not_claimed": [
+  "0x634ebb0..0x634eccd (second miss handler; claimed as a window by RE-001-node115-lu-value-leaves-bin \u2014 cited context only, never a stage)",
+  "0x63537f0..0x63539cf (stage 2 twin \u2014 the NEXT stage, cited not claimed)",
+  "0x6378120..0x6378364 (stage 3, 580B, handler x2 \u2014 survey range, not re-censused here; cited, not claimed)",
+  "0x6364790..0x6364877 (stage 4 leaf, 231B \u2014 survey range, not re-censused here; cited, not claimed)",
+  "0x63a5550..0x63a56a5 (stage 5, 341B \u2014 survey range, not re-censused here; cited, not claimed)",
+  "0x6379310..0x6379804 (stage 6, 1268B, handler x3 \u2014 survey range, not re-censused here; cited, not claimed)",
+  "0x63bcd20..0x63bd2b4 (stage 7, 1428B, handler x2 \u2014 survey range, not re-censused here; cited, not claimed; calls second handler at 0x63bd1e4 and 0x63bd2a2)",
+  "0x6387880..0x6387fec (stage 8, 1900B, handler x1 \u2014 survey range, not re-censused here; cited, not claimed; calls second handler at 0x63879c0)",
+  "0x6364880..0x6365142 (2242B, excluded by the 2000B cap \u2014 survey range, not re-censused here; cited, not claimed)",
+  "0x63bf680..0x63bf7ee (lock-wait helper body, #251; the handler's fallback callee \u2014 cited context)",
+  "0x63d9700..0x63d987b (lu-miss handler, #215; NOT called from this FDE)",
+  "0x63d9880..0x63d9a64 (bin_table_init body, #262; NOT called from this FDE)",
+  "0x6365150..0x6365660 (key resolver; NOT called from this FDE)",
+  "0x63bfb90..0x63bfb98 (load helper; NOT called from this window)",
+  "0x6364420 (call target at 0x63536eb; FDE not censused)",
+  "0x6364410 (call target at 0x63536f5; FDE not censused)",
+  "0x6364400 (call target at 0x6353706; FDE not censused)",
+  "0x63edf10 (call target at 0x635372d and 0x63537a5; FDE not censused)",
+  "0x6352fc0 (call target at 0x635376a; FDE not censused)",
+  "0x63ec4c0 (call target at 0x63537b5; FDE not censused)",
+  "0x6360ed0 (call target at 0x63537cc; FDE not censused)",
+  "0x63f1ad0 (sched_getcpu@plt; call site 0x6353682)",
+  "0x6364430 (handler's null-slot callee at 0x634ecb0; FDE not censused)"
+ ],
+ "next_question": "An identical 479B copy starts at 0x63537f0, one padding byte below this window's end (0x63537ef) \u2014 why does this function exist twice? The twin is FDE 0x63537f0..0x63539cf (479 B, 124 strict), byte-identical to this window modulo position-dependent immediates only (36 raw byte diffs at 18 offset pairs, all rel32/disp32; 0 other diffs; 0 instruction-stream mismatches modulo immediates), with the same 10 calls shifted +0x1e0, 1 ret at 0x6353803 and 25 jumps. It is the next stage (stage 2), not a distinct function.",
+ "prior_pointer": {
+  "corrections": "NONE \u2014 stage 1 of a new series; no prior RE-018 packet. The twin below is the NEXT stage, not a prior packet.",
+  "source": "n/a (series opener)"
+ },
+ "verification": [
+  "window bytes extracted from hl-node at file offset 0x6352610, 479 B, first bytes 41 54 55 53, last 5 bytes e9 f7 fe ff ff; spot bytes verified: e8 49 e4 09 00 at 0x6353682, c3 at 0x6353623, e9 4e b4 ff ff at 0x635375d, e8 c9 b3 ff ff at 0x63537e2",
+  "objdump census: 124 strict (123 instructions + 1 continuation line, the split cs nop at 0x63536b6/0x63536bd), 10 calls, 1 ret, bsr 0, shr 2, shl 0, endbr64 0, canary 0, 25 jumps / 1 outside, 1 PLT",
+  "FDE bounds: readelf --debug-dump=frames returns FDE pc=0x6353610..0x63537ef directly; gap 1 to the twin FDE start 0x63537f0 \u2014 the byte at VA 0x63537ef (file offset 0x63527ef) is 0xcc, one padding byte",
+  "twin verified by direct byte comparison: 36 raw byte diffs at 18 offset pairs, all position-dependent (7 RIP-relative disp32 pairs, 11 rel32 call/jmp pairs); 0 other diffs; 0 instruction-stream mismatches modulo immediates",
+  "handler shape read straight from the handler disassembly (FDE 0x634ebb0..0x634eccd, 285 B, 78 strict, 9 calls, 1 ret at 0x634ec45): trylock on mutex 0x6511700, lock-wait fallback 0x63bf680, counters 0x65116f8/0x65116e8/0x65116f0, cmp ebx,0xffe, table 0x65096c0",
+  "exit reaching-definitions read straight from the disassembly: rbx defs {0x6353614, 0x6353635, 0x63536c0, 0x6353732, 0x6353740, 0x6353773} reach mov %rbx,%rax at 0x635361c; the tail-jump path at 0x635375d never returns"
+ ],
+ "unknown": [
+  "entry inputs' caller-side meaning (rdi struct layout beyond the observed +0x1, +0x90, +0x10, +0x100, +0x128, +0x358 reads; rsi's role beyond the non-zero early return)",
+  "field semantics beyond observed reads/writes (including the meaning of the count at 0x64ffb80, the counter at 0x6511730, and the table at 0x65096c0)",
+  "the 0x63644xx trio's, 0x63edf10's, 0x6352fc0's, 0x63ec4c0's and 0x6360ed0's semantics beyond their call-site contracts",
+  "the second handler's semantics beyond its observed body (its table at 0x65096c0, the count at 0x65096b0, the meaning of the 0xffe bound, and the abort path via 0x63bf5b6)",
+  "why the twin copy exists (the stage-2 question)"
+ ]
+}
