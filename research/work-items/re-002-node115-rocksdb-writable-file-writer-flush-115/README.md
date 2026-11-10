@@ -232,19 +232,23 @@ pad has exactly 1 tail jump from 0x6052523. Call sites:
 
 | site | caller FDE | caller |
 |---|---|---|
-| 0x5e2641b | 0x5e26300..0x5e26498 | (unnamed FDE) |
-| 0x5e26987 | 0x5e265c0..0x5e26a03 | (unnamed FDE) |
-| 0x5f03b25 | 0x5f03a90..0x5f03b3d | (unnamed FDE) |
+| 0x5e2641b | 0x5e26300..0x5e26498 | `BlobLogWriter::WriteHeader` |
+| 0x5e26987 | 0x5e265c0..0x5e26a03 | `BlobLogWriter::EmitPhysicalRecord` |
+| 0x5f03b25 | 0x5f03a90..0x5f03b3d | `log::Writer::WriteBuffer` |
 | 0x5f04105 | 0x5f03d60..0x5f0418f | `log::Writer::AddRecord` |
 | 0x5f04394 | 0x5f041d0..0x5f0441c | `log::Writer::AddCompressionTypeRecord` |
-| 0x5fce232 | 0x5fce130..0x5fce27d | (unnamed FDE) |
-| 0x5fce6b8 | 0x5fce280..0x5fce766 | (unnamed FDE) |
+| 0x5fce232 | 0x5fce130..0x5fce27d | (uncatalogued FDE) |
+| 0x5fce6b8 | 0x5fce280..0x5fce766 | (uncatalogued FDE) |
 | 0x605269a | 0x60525b0..0x60527a5 | `WritableFileWriter::Pad` |
-| 0x60528a6 | 0x6052800..0x60529ee | (unnamed FDE) |
-| 0x6052e6c | 0x6052b80..0x6054600 | `Flush.cold` |
+| 0x60528a6 | 0x6052800..0x60529ee | `WritableFileWriter::Sync` |
+| 0x6052e6c | 0x6052b80..0x6054600 | `WritableFileWriter::Close` |
 | 0x6054b5d | 0x6054680..0x605518b | `WritableFileWriter::Append` (flush-if-needed arm) |
 | 0x6054ef4 | 0x6054680..0x605518b | `WritableFileWriter::Append` (write loop) |
 | 0x6054fa1 | 0x6054680..0x605518b | `WritableFileWriter::Append` (write loop) |
+
+Caller names are the vendor-census symbols for each enclosing FDE
+(`RE-002-node115-vendor-census`); the two `0x5fce...` FDEs have no census
+symbol and stay uncatalogued.
 
 ## Evidence
 
