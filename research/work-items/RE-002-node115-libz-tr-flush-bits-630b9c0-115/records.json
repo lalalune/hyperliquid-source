@@ -1,0 +1,76 @@
+{
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "bound_context": {
+    "candidate_versions": ["1.1.22", "1.1.31"],
+    "crate": "libz-sys",
+    "end": "0x630ba48",
+    "identical_source_count": 3,
+    "member": "b9b191b8e1a44c35-trees.o",
+    "native": true,
+    "question": "What does the 136-byte leaf routine at 0x630b9c0 do to a deflate_state, what does it leave in rax, and what does it assume about its caller?",
+    "raw_equal": true,
+    "relocations": [],
+    "rlib": "liblibz_sys-bddd9d79cb3dc319.rlib",
+    "source_body_sha256": "ad48f7422e3db6481708b67438ab68421a5ef21aacf766496ad4c0447cfe9a66",
+    "source_offset": 4090698,
+    "start": "0x630b9c0",
+    "symbol": "_tr_flush_bits",
+    "target_body_sha256": "ad48f7422e3db6481708b67438ab68421a5ef21aacf766496ad4c0447cfe9a66",
+    "version_note": "node115 embeds ZLIB_VERSION \"1.3.1\"; these bodies are identical in the zlib 1.3.2 bundled by libz-sys 1.1.31, so the zlib release is not pinned by these windows."
+  },
+  "caller_census": {
+    "caller_fdes": 4,
+    "consumer_table": [
+      {"consumer": "overwritten", "sites": 26, "first_use": "mov/lea/add writing rax",
+       "meaning": "rax is clobbered by an unrelated value at every site before it could be read"}
+    ],
+    "consumers": {"overwritten": 26},
+    "contract": "void-style: the routine's effect is entirely through its first argument, and whatever it leaves in rax is a leftover (bi_valid, the old pending count, or 0 depending on the path) - every one of the 26 call sites overwrites rax before reading it",
+    "direct_calls": 26,
+    "discarded_sites": 26,
+    "method": "every call target matching the window start is decoded with Capstone and attributed to the enclosing .eh_frame FDE; the instruction after the call is classified by how rax is first used",
+    "sites_reading_the_return": 0,
+    "tail_jumps": 0
+  },
+  "claim_anchors": "semantics.tsv (20 anchors: claim -> target instruction address, bytes and decoded instruction)",
+  "engine_callees": [],
+  "environment_limits": [
+    "the packet is static: the artifact is never executed and no source build is claimed",
+    "the emulator implements only the instructions this routine uses and raises on any other",
+    "the modelled deflate_state is a synthetic struct at a fixed address; real callers reach the same fields at different addresses"
+  ],
+  "functions": [],
+  "layouts": [
+    {"name": "deflate_state (fields touched by this window)",
+     "fields": {"+0x10": "pending_out, pointer to the output buffer",
+                "+0x28": "pending, u64 count of bytes written",
+                "+0x1730": "bi_buf, u16 bit buffer",
+                "+0x1734": "bi_valid, u32 count of valid bits"},
+     "note": "+0x20 (pending_buf_size) is NOT touched: no store is bounds checked"}
+  ],
+  "ledger": "cases.tsv (300 reviewable cases, 60 per family: 0..7, 8..15, 17..0x7fffffff, 0x80000000..0xffffffff and exactly 16) recording bi_valid, bi_buf, pending, the emitted bytes, the new field values and the rax leftover; the boundary rows are kept verbatim and the full 2,400-case sweep is re-derived in memory by the tests",
+  "observations": [
+    {"kind": "observation", "text": "the window 0x630b9c0..0x630ba48 is one .eh_frame FDE, 136 bytes, 32 instructions, a leaf with no calls and no relocations"},
+    {"kind": "observation", "text": "the dispatch is three-way: bi_valid == 16 emits two bytes, bi_valid <= 7 emits nothing, and every other value emits exactly one byte"},
+    {"kind": "observation", "text": "the <= 7 test is a SIGNED jle on the 32-bit field, so every value with bit 31 set emits nothing even though the field is an unsigned count"},
+    {"kind": "observation", "text": "out-of-range but positive values behave as the one-byte path: 17 -> 9, 18 -> 10, 23 -> 15, 24 -> 16, 100 -> 92"},
+    {"kind": "observation", "text": "the pending counter is written with pending+1 BEFORE the byte store, and the store uses the pre-increment index, so the byte lands at pending_out[old pending]"},
+    {"kind": "observation", "text": "the two-byte emit is little-endian: pending_out[p] gets bi_buf & 0xff and pending_out[p+1] gets bi_buf >> 8, in ascending address order"},
+    {"kind": "observation", "text": "the 8..15 path shifts bi_buf down by 8 as a 2-byte read-modify-write and subtracts 8 from bi_valid as a 4-byte one"},
+    {"kind": "observation", "text": "the 16 path zeroes bi_buf with a 2-byte store and bi_valid with a 4-byte store; it does not mask or merge"},
+    {"kind": "observation", "text": "rax is left holding bi_valid on the nothing-to-do path, the old pending count on the one-byte path, and 0 on the two-byte path: three different leftovers, so it is not a status"},
+    {"kind": "observation", "text": "all 26 direct call sites overwrite rax before reading it, which is consistent with the leftovers carrying no information"},
+    {"kind": "observation", "text": "no store is bounds checked: pending_buf_size (+0x20) is never read and no pointer is compared with a limit"},
+    {"kind": "inference", "text": "the argument is deflate_state* (a struct whose touched fields are at +0x10, +0x28, +0x1730 and +0x1734) and the routine is zlib's bit-flush step, read off the struct usage rather than a symbol"},
+    {"kind": "inference", "text": "the caller is responsible for having space for two more bytes in the pending buffer, since the body cannot check it"},
+    {"kind": "inference", "text": "in normal zlib use bi_valid never exceeds 16, so the one-byte path is reached only for 8..15; the behaviour outside that invariant is documented here but is not reachable from a conforming caller"}
+  ],
+  "unknowns": [
+    "the real callers' invariants (buffer space, bi_valid <= 16) are inferred from zlib's contract and the absence of checks, not verified against any caller",
+    "the zlib release is not pinned by this window (the census records that these bodies are identical in the zlib 1.3.2 bundled by libz-sys 1.1.31)",
+    "the body is byte-identical in 3 identical source objects; only 0x630b9c0 is bound",
+    "whether pending_out can be null in some caller state is not characterized here",
+    "which of the 26 call sites are reachable for a given compression is not characterized"
+  ]
+}
