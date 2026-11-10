@@ -1,0 +1,28 @@
+Oracle frozen before the Rust crate existed.
+
+Frozen at (UTC, author's clock; not an external timestamp): 2026-11-10T22:35:38Z
+
+sha256  gen_oracle.py        aa68db28c6e1a4184fc8b98e3c077f76956765949c9d8f333e30e738e5694603
+sha256  corpus.tsv           fd8eb585c38677c7ddfa23d7fb39920b29c539a0f3b48bb4791514967895d508   (135 cases)
+sha256  wrong-variants.tsv   adbae46e7fe9f8be09b84fc362defcc2276394bc6ab173148b101bdb5c2af847   (1,428 wrong-implementation addresses)
+
+State at that time: no file of src/node115-vault-address existed; `gen_oracle.py --selftest` passed (3 published
+Keccak-256 vectors, 702 SHA3-256 length cross-checks, 20 MessagePack specification examples, the scout anchor, the amount
+bound recomputed as floor(2^64 / 20)); the corpus was written by `gen_oracle.py --outdir <new directory>` and is
+byte-identical across two generations.
+
+What the oracle takes from public specifications: MessagePack encoding rules, Keccak-256, SHA3-256 (only as a wrong
+variant and as a sponge cross-check), published vectors (empty input, "abc", the quick-brown-fox sentence).
+What it takes from the binary, i.e. from the author's reading of the pinned instructions: the array-of-two shape, the creator as
+"0x" plus 40 lower-case hex digits, the map key order (name, description, initialUsd, nonce), the absence of maxUsdcFee,
+the first 20 digest bytes, the caller's name limit (length >= 101) and amount bound (>= 0x0ccccccccccccccc). The oracle is
+therefore the same reader's model of the node, built with an implementation of the standards that shares no code with the crate.
+
+Disclosure: the first two runs of `gen_oracle.py --outdir` stopped on the generator's own consistency assertions (an
+upper-case creator that has no digit a-f gives the same text; rows that differ only in maxUsdcFee were counted as address
+collisions). The generator logic for those two points was corrected; a third run succeeded; a fourth run, after a
+vacuous assertion (hex text compared with bytes) was replaced by a comment, produced byte-identical files. The corpus above
+is the output of the corrected generator. No expected value was edited by hand.
+
+Amendments after this freeze: none at the time of writing (any later change will be appended below with its time and
+the new hashes).
