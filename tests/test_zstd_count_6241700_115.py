@@ -1,8 +1,9 @@
 """Tests for the node #115 zstd-sys ZSTD_count model (0x6241700, RE-002).
 
 Covers the closed-form result, the tiered walk it is cross-checked
-against, the committed 2,400-case ledger, and binary bindings (the
-function body hash, the empty relocation record, and byte windows).
+against, the committed reviewable ledger, the in-memory full sweep and
+random differential, the caller-consumer census, and binary bindings
+(body hash, empty relocation record, byte windows).
 """
 import hashlib
 import json
@@ -19,6 +20,7 @@ from tools.zstd_count_6241700_115 import (
     zstd_count,
     zstd_count_tiers,
     generate_cases,
+    ledger_rows,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -108,12 +110,18 @@ class ZstdCountSemanticsTest(unittest.TestCase):
 
 
 class ZstdCountLedgerTest(unittest.TestCase):
+    """The committed ledger is the review artifact: small enough to read.
+    The exhaustive sweep is re-derived here, in memory."""
+
     def test_committed_ledger_replays(self):
         rows = (PACKET / "cases.tsv").read_text().splitlines()
         header = rows[0].split("\t")
         self.assertEqual(header, ["id", "group", "param", "expected"])
         data = rows[1:]
-        self.assertEqual(len(data), 2400)
+        self.assertEqual(len(data), 300)
+        # Every comparison width and both cap paths are represented.
+        groups = {line.split("\t")[1] for line in data}
+        self.assertEqual(groups, {"boundary", "tiers", "random", "mixed"})
         for line in data:
             cid, group, param, expected = line.split("\t")
             p = json.loads(param)
@@ -121,13 +129,79 @@ class ZstdCountLedgerTest(unittest.TestCase):
                              bytes.fromhex(p["match"]), p["limit"])
             self.assertEqual(got, json.loads(expected)["count"], cid)
 
-    def test_ledger_matches_generator(self):
+    def test_committed_ledger_is_the_documented_subset(self):
         committed = (PACKET / "cases.tsv").read_text()
         want = ["id\tgroup\tparam\texpected"]
-        for r in generate_cases():
+        for r in ledger_rows():
             want.append("\t".join(r[k] for k in ("id", "group", "param",
-                                                 "expected")))
+                                                  "expected")))
         self.assertEqual(committed, "\n".join(want) + "\n")
+        # And it is a subset of the generated sweep, not a separate set.
+        sweep = {r["id"]: r for r in generate_cases()}
+        for r in ledger_rows():
+            self.assertEqual(sweep[r["id"]]["expected"], r["expected"])
+
+    def test_full_sweep_matches_tier_walk(self):
+        cases = generate_cases()
+        self.assertEqual(len(cases), 2400)
+        for c in cases:
+            p = json.loads(c["param"])
+            ip, m, lim = (bytes.fromhex(p["in"]), bytes.fromhex(p["match"]),
+                          p["limit"])
+            self.assertEqual(zstd_count(ip, m, lim),
+                             zstd_count_tiers(ip, m, lim), c["id"])
+
+    def test_random_differential_200k(self):
+        rng = random.Random(6241700)
+        for i in range(200_000):
+            lim = rng.randrange(0, 41)
+            ip = bytes(rng.randrange(256) for _ in range(lim))
+            lcp = rng.randrange(lim + 1)
+            m = bytearray(ip)
+            if lcp < lim:
+                m[lcp] ^= 1 << rng.randrange(8)
+            m = bytes(m)
+            if zstd_count(ip, m, lim) != zstd_count_tiers(ip, m, lim):
+                self.fail(f"mismatch at case {i}: {ip.hex()} {m.hex()} {lim}")
+
+
+class ZstdCountCallerCensusTest(unittest.TestCase):
+    """What the call sites depend on: the census classifies the first read
+    of the returned count inside each enclosing FDE."""
+
+    def setUp(self):
+        path = PACKET / "caller_use.tsv"
+        if not path.is_file():
+            self.skipTest("caller census not generated")
+        rows = path.read_text().splitlines()
+        self.header = rows[0].split("\t")
+        self.rows = [dict(zip(self.header, line.split("\t")))
+                     for line in rows[1:]]
+
+    def test_every_call_site_has_a_consumer(self):
+        self.assertEqual(len(self.rows), 25)
+        self.assertTrue(all(r["consumer"] for r in self.rows))
+
+    def test_count_is_consumed_as_a_length(self):
+        # The callers depend on an exact, bounded common-prefix length:
+        # the dominant use folds it into a running length.
+        classes = {}
+        for r in self.rows:
+            classes[r["consumer"]] = classes.get(r["consumer"], 0) + 1
+        self.assertEqual(classes.get("length-arithmetic"), 19)
+        self.assertEqual(sum(classes.values()), 25)
+
+    def test_minmatch_offsets_are_visible_in_the_callers(self):
+        # Nine sites add zstd's MINMATCH+1 offset to the count, which is the
+        # semantic the byte match alone does not state.
+        plus4 = [r for r in self.rows if r["use"] == "add rax, 4"]
+        self.assertEqual(len(plus4), 9)
+
+    def test_caller_fdes_are_recorded(self):
+        for r in self.rows:
+            a, b = r["caller_fde"].split("..")
+            self.assertLess(int(a, 16), int(b, 16))
+            self.assertNotEqual(int(a, 16), START)
 
 
 class ZstdCountBindingsTest(unittest.TestCase):

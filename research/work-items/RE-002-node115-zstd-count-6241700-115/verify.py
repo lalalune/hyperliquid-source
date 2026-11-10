@@ -89,11 +89,22 @@ def check_census():
         rows.append(f"{hex(site)}\t{kind}\t{hex(e[0])}\t{hex(e[1])}")
     assert "\n".join(rows) + "\n" == (PKT / "callers.tsv").read_text(), \
         "callers.tsv drifted"
+    # caller_use.tsv -- the consumer census regenerates exactly too.
+    uses = cen.caller_use(segs, ranges, hits)
+    urows = ["site\tconsumer\tdistance\tuse\tcaller_fde\tmeaning"]
+    for u in uses:
+        urows.append("\t".join([
+            hex(u["site"]), u["consumer"], str(u["distance"]),
+            u["use"] or "-",
+            f"{hex(u['fde'][0])}..{hex(u['fde'][1])}", u["meaning"],
+        ]))
+    assert "\n".join(urows) + "\n" == (PKT / "caller_use.tsv").read_text(), \
+        "caller_use.tsv drifted"
     rec = cen.census_relocations(cen.START)
     body = cen.BINARY.read_bytes()[cen.va_to_off(segs, cen.START):
                                     cen.va_to_off(segs, cen.END)]
     assert hashlib.sha256(body).hexdigest() == rec["target_body_sha256"]
-    return len(hits)
+    return len(hits), len(uses)
 
 
 def check_model():
@@ -103,6 +114,7 @@ def check_model():
     assert tool.zstd_count(b"", b"", 0) == 0
     assert tool.zstd_count(b"AB", b"AB", 1) == 1
     bad = 0
+    ncases = 0
     for line in (PKT / "cases.tsv").read_text().splitlines()[1:]:
         import json
         _, _, param, expected = line.split("\t")
@@ -111,16 +123,24 @@ def check_model():
                               bytes.fromhex(p["match"]), p["limit"])
         if got != json.loads(expected)["count"]:
             bad += 1
+        ncases += 1
     assert bad == 0, f"{bad} ledger rows failed"
-    return True
+    # The committed ledger must be the documented subset of the sweep.
+    assert [r["id"] for r in tool.ledger_rows()] == [
+        ln.split("\t")[0]
+        for ln in (PKT / "cases.tsv").read_text().splitlines()[1:]], \
+        "committed ledger is not the generated subset"
+    assert len(tool.generate_cases()) == 2400
+    return ncases
 
 
 def main():
     n = check_manifest()
     check_excerpt()
-    calls = check_census()
-    check_model()
-    print(f"verify OK: {n} manifest rows, {calls} callers, model + ledger + excerpt")
+    calls, consumers = check_census()
+    ncases = check_model()
+    print(f"verify OK: {n} manifest rows, {calls} callers / {consumers} "
+          f"consumers, model + {ncases}-case ledger + excerpt")
     return 0
 
 

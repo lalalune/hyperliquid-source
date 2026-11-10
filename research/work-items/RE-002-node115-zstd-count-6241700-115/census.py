@@ -6,6 +6,13 @@ Reproduces, from the digest-verified local binary only:
   callers.tsv     every direct E8 (call) / E9 (jmp) site whose rel32
                   resolves to 0x6241700, with the enclosing FDE bounds
                   read from the .eh_frame unwind table.
+  callers.tsv     every direct E8 (call) / E9 (jmp) site whose rel32
+                  resolves to 0x6241700, with the enclosing FDE bounds
+                  read from the .eh_frame unwind table.
+  caller_use.tsv  for every call site, the first instruction that reads
+                  the returned count (%rax/%eax/...) after the call,
+                  classified with Capstone operand access flags -- i.e.
+                  the dependency each caller places on the routine.
   frames.txt      the unwinding entry (FDE) that covers the routine.
   relocations.txt the routine's relocation record (none), as read from
                   the vendor census and cross-checked against the
@@ -19,6 +26,17 @@ import struct
 import subprocess
 import sys
 from pathlib import Path
+
+import capstone
+
+CS_X86_OP_REG = capstone.x86.X86_OP_REG
+CS_AC_READ = capstone.CS_AC_READ
+CS_AC_WRITE = capstone.CS_AC_WRITE
+RAX_REGS = {capstone.x86.X86_REG_RAX, capstone.x86.X86_REG_EAX,
+            capstone.x86.X86_REG_AX, capstone.x86.X86_REG_AL,
+            capstone.x86.X86_REG_AH}
+MD = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_64)
+MD.detail = True
 
 ROOT = Path(__file__).resolve().parents[3]
 BINARY = ROOT / "artifacts" / "node" / "115" / "hl-node"
@@ -122,6 +140,75 @@ def census_relocations(start):
     return rec
 
 
+def classify_rax_use(insns):
+    """Scan forward for the first instruction that READS %rax (any of
+    rax/eax/ax/al/ah), using Capstone's operand access flags. Returns
+    (class, meaning, distance, instruction)."""
+    for dist, ins in enumerate(insns, 1):
+        read = False
+        written = False
+        for op in ins.operands:
+            if op.type != CS_X86_OP_REG:
+                continue
+            if op.reg not in RAX_REGS:
+                continue
+            acc = getattr(op, "access", 0)
+            if acc & CS_AC_READ:
+                read = True
+            elif acc & CS_AC_WRITE:
+                written = True
+        text = f"{ins.mnemonic} {ins.op_str}".strip()
+        if not read and not written:
+            continue
+        if read:
+            if ins.mnemonic in ("cmp", "cmpq", "cmpl", "test", "testq",
+                                "testl"):
+                return ("compare", "count is compared against a bound",
+                        dist, text)
+            if ins.mnemonic in ("add", "sub", "lea", "inc", "dec", "neg",
+                                "sbb", "adc", "imul", "shl", "shr"):
+                return ("length-arithmetic",
+                        "count is folded into a running length", dist, text)
+            if ins.mnemonic in ("mov", "movl", "movq", "movzx", "movsx",
+                                "push", "movd", "movaps", "movups", "movdqu"):
+                return ("store-pass",
+                        "count is stored or passed on", dist, text)
+            if ins.mnemonic.startswith(("set", "cmov")):
+                return ("predicate", "count feeds a conditional", dist, text)
+            if ins.mnemonic.startswith("j"):
+                return ("control", "count selects a branch", dist, text)
+            return "read-other", text, dist, text
+        return "overwritten", "overwritten before being read", dist, text
+    return "dead", "never read inside the enclosing FDE", 0, ""
+
+
+def caller_use(segs, ranges, hits, limit=4000):
+    """For every call site, decode forward inside the enclosing FDE and
+    classify how the returned count is consumed. This is the dependency
+    the callers place on the routine: it must be an exact common-prefix
+    length no larger than the limit passed in %rdx."""
+    data = BINARY.read_bytes()
+    out = []
+    for site, kind in hits:
+        enc = encloser(ranges, site)
+        start_off = va_to_off(segs, site)
+        end_off = min(va_to_off(segs, enc[1]), len(data))
+        code = data[start_off:end_off]
+        insns = []
+        for ins in MD.disasm(code, site):
+            if ins.address == site:
+                continue           # the call itself
+            insns.append(ins)
+            if len(insns) >= limit:
+                break
+        cls, why, dist, use = classify_rax_use(insns)
+        out.append({"site": site, "kind": kind, "fde": enc,
+                    "consumer": cls, "meaning": why,
+                    "distance": dist, "use": use})
+    return out
+
+
+
 def main():
     segs = load_segments()
     ranges = fde_ranges()
@@ -135,6 +222,18 @@ def main():
         assert enc, hex(site)
         rows.append(f"{hex(site)}\t{kind}\t{hex(enc[0])}\t{hex(enc[1])}")
     (PACKET / "callers.tsv").write_text("\n".join(rows) + "\n")
+
+    # caller_use.tsv -- what each caller does with the returned count
+    # (the dependency the call sites place on the routine).
+    uses = caller_use(segs, ranges, hits)
+    urows = ["site\tconsumer\tdistance\tuse\tcaller_fde\tmeaning"]
+    for u in uses:
+        urows.append("\t".join([
+            hex(u["site"]), u["consumer"], str(u["distance"]),
+            u["use"] or "-",
+            f"{hex(u['fde'][0])}..{hex(u['fde'][1])}", u["meaning"],
+        ]))
+    (PACKET / "caller_use.tsv").write_text("\n".join(urows) + "\n")
 
     # frames.txt
     enc = encloser(ranges, START)
@@ -163,7 +262,10 @@ def main():
 
     print(f"callers: {len(hits)}")
     print(f"fde: {hex(enc[0])}..{hex(enc[1])}")
-    print("wrote callers.tsv frames.txt relocations.txt functions.tsv")
+    print("consumers: " + ", ".join(
+        f"{c}={sum(1 for u in uses if u['consumer'] == c)}"
+        for c in sorted({u["consumer"] for u in uses})))
+    print("wrote callers.tsv caller_use.tsv frames.txt relocations.txt functions.tsv")
 
 
 if __name__ == "__main__":

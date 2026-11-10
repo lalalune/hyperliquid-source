@@ -50,26 +50,55 @@ Behaviour, pinned from the disassembly:
    and it stores nothing.
 
 The closed form `min(lcp, limit)` and the four-tier walk were
-cross-checked on 200,000 random inputs and over the committed
-2,400-case ledger (see tools/zstd_count_6241700_115.py).
-target_body_sha256 == source_body_sha256: the census records the body
+cross-checked on 200,000 random inputs and over the full 2,400-case
+generated sweep, both re-derived in memory by the test suite
+(`tools/zstd_count_6241700_115.py`, `tests/test_zstd_count_6241700_115.py`).
+`cases.tsv` is the **reviewable** 300-case ledger (every hand-written
+structural cell that fits in a readable line, plus a deterministic
+stride sample of the sweep). The exhaustive sweep is not committed as
+a 1.6 MB blob because a blob is not reviewable evidence.
+`target_body_sha256 == source_body_sha256`: the census records the body
 as raw-equal to its public source bytes, with **no relocations**, so no
 relocation field is zeroed.
 
-## Consumers: the zstd match-length counter
+## Consumers: what the callers depend on
 
 Census (executable-LOAD-segment E8/E9 scan, rel32 resolved, each
 candidate Capstone-validated at the instruction boundary by linear
 disassembly from its enclosing FDE start, callers grouped by that
 FDE; reproduced by census.py and re-run inside verify.py): **25 direct
 calls, 0 tail jumps, 11 distinct caller FDEs**, no stored qwords and no
-RELATIVE relocations. The call sites are listed in callers.tsv. They sit in the
-zstd match finders (the `zstd_lazy` object's own neighbours
-0x6250f80..0x6274xxx), which use this routine to measure how far a
-candidate match extends before the block limit. The identification of
-each caller FDE as a specific zstd function is inference from the
-region and the call shape; the pinned facts are this routine's own
-algorithm and the 25 call sites with their enclosing FDE bounds.
+RELATIVE relocations. The call sites are listed in callers.tsv.
+
+**The byte match above is already in the vendor comparison registry;
+what this packet adds is the contract the callers place on the
+routine.** For every call site `caller_use.tsv` records the first
+instruction that reads the returned count (Capstone operand access
+flags, scanning forward inside the enclosing FDE) and classifies it:
+
+| consumer | sites | first read |
+|---|---|---|
+| length-arithmetic (folded into a running length) | 19 | `add rcx, rax`, `add r10, rax`, `add rbp, rax`, `add rax, 4` |
+| store-pass (stored or passed on) | 5 | `mov r11/rbx/r13/rbp, rax` |
+| overwritten before being read | 1 | `mov eax, 1` |
+
+The callers therefore depend on the count being an **exact,
+bounded, forward** common-prefix length: a wrong byte would corrupt a
+running match length, and a value past `pInLimit - pIn` would overrun
+the accumulator. Nine of the 25 sites add a constant `4` to it
+(`add rax, 4`), i.e. they consume `count + 4` — zstd's `MINMATCH + 1`
+match-length offset. That is a semantic fact the raw byte match does
+*not* state, and it is what makes this reconstruction usable by a
+caller-side check: a reimplementation of the callers must produce
+`count + 4` as the encoded match length.
+
+The call sites sit in the zstd match finders (the `zstd_lazy` object's
+own neighbours 0x6250f80..0x6274xxx), which use this routine to
+measure how far a candidate match extends before the block limit. The
+identification of each caller FDE as a specific named zstd function is
+inference from the region and the call shape; the pinned facts are this
+routine's own algorithm, the 25 call sites with their enclosing FDE
+bounds, and each site's consumer class.
 
 ## Evidence notes
 
@@ -89,8 +118,10 @@ algorithm and the 25 call sites with their enclosing FDE bounds.
   list; instruction detail lives only in main.txt.
 - verify.py re-checks the manifest, regenerates main.txt byte-for-byte
   and every instruction's bytes against the raw binary, regenerates the
-  caller census, checks the FDE bounds and the census body hash, and
-  replays the model and ledger.
+  caller census and the caller-consumer census, checks the FDE bounds
+  and the census body hash, replays the committed ledger, and asserts
+  the ledger is the generated subset (with the 2,400-case sweep still
+  present in the generator).
 
 Reproduce the excerpt:
 
@@ -104,8 +135,9 @@ Reproduce the excerpt:
   passes pMatch pointing into the same block, so this is not
   characterized; the model requires both ranges to supply `limit`
   bytes.
-- The role of the returned count in each of the 25 callers; only the
-  return value and the call sites are pinned here.
+- How each of the 25 callers uses the count *beyond* its first read
+  (the consumer class and the `+4` offset are pinned; the full
+  dataflow of a match length through the sequence encoder is not).
 - The body is byte-identical in three identical source objects
   (`identical_source_count` = 3); only address 0x6241700 is bound.
 

@@ -127,6 +127,7 @@ def generate_cases(seed=115):
     600 mixed. Each row is (id, group, param, expected)."""
     rng = random.Random(seed)
     rows = []
+    state = {"cell": "structural"}
 
     def add(cid, group, param):
         ip = bytes.fromhex(param["in"])
@@ -137,7 +138,8 @@ def generate_cases(seed=115):
         assert expected == zstd_count_tiers(ip, match, limit), (cid, param)
         rows.append({"id": cid, "group": group,
                      "param": json.dumps(param, sort_keys=True),
-                     "expected": json.dumps({"count": expected})})
+                     "expected": json.dumps({"count": expected}),
+                     "cell": state["cell"]})
 
     # --- group 1: boundary (600) ---
     n = [0]
@@ -181,6 +183,7 @@ def generate_cases(seed=115):
         bnd({"in": _repeat(0x21, lim).hex(), "match": match[:lim].hex(),
              "limit": lim})
     # Deterministic pseudo-random boundary rows up to limit 40.
+    state["cell"] = "sweep"
     while n[0] < 600:
         lim = rng.randrange(0, 41)
         inb = bytes(rng.randrange(4) for _ in range(lim))
@@ -227,6 +230,7 @@ def generate_cases(seed=115):
     m = bytearray(inb)
     m[8] ^= 0x08
     tier({"in": inb.hex(), "match": bytes(m).hex(), "limit": 9})
+    state["cell"] = "sweep"
     while n[0] < 600:
         lim = rng.choice((1, 2, 3, 4, 5, 8, 9, 10, 12, 16, 17, 24))
         inb = _repeat(rng.randrange(256), lim)
@@ -243,6 +247,7 @@ def generate_cases(seed=115):
         add(f"random-{n[0]:04d}", "random", param)
         n[0] += 1
 
+    state["cell"] = "sweep"
     while n[0] < 600:
         lim = rng.choice((0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 16, 20, 32, 33, 40, 64, 128))
         inb = bytes(rng.randrange(256) for _ in range(lim))
@@ -275,6 +280,7 @@ def generate_cases(seed=115):
             if lcp < lim:
                 m[lcp] = (inb[lcp] ^ 0xFF) & 0xFF
             mix({"in": inb.hex(), "match": bytes(m).hex(), "limit": lim})
+    state["cell"] = "sweep"
     while n[0] < 600:
         lim = rng.choice((50, 100, 129, 200, 300, 511, 512, 513, 1000, 2048))
         inb = bytes(rng.randrange(256) for _ in range(lim))
@@ -300,8 +306,37 @@ def replay_case(case):
     return got == json.loads(case["expected"])["count"], got
 
 
+# The generated sweep is exhaustive (2,400 cases) but only a readable
+# subset is committed: `cases.tsv` is a review artifact, and a 1.6 MB file
+# is not reviewable on GitHub. The committed ledger keeps every cell whose
+# parameter is small enough to read, plus a deterministic stride sample of
+# the generated sweep; the full 2,400-case sweep and the 200,000-input
+# differential are re-derived in memory by the test suite.
+LEDGER_PARAM_MAX = 600
+LEDGER_TARGET = 300
+
+
+def ledger_rows(rows=None):
+    """The committed, human-reviewable ledger: structural cases first,
+    then an even stride sample of the sweep, capped at LEDGER_TARGET."""
+    if rows is None:
+        rows = generate_cases()
+    structural = [r for r in rows
+                  if r.get("cell") == "structural"
+                  and len(r["param"]) <= LEDGER_PARAM_MAX]
+    sweep = [r for r in rows
+             if r.get("cell") != "structural"
+             and len(r["param"]) <= LEDGER_PARAM_MAX]
+    if len(structural) >= LEDGER_TARGET:
+        step = len(structural) // LEDGER_TARGET
+        return structural[::step][:LEDGER_TARGET]
+    need = LEDGER_TARGET - len(structural)
+    step = max(1, len(sweep) // need)
+    return structural + sweep[::step][:need]
+
+
 def cases_tsv_rows():
-    return generate_cases()
+    return ledger_rows()
 
 
 def main(argv=None):
@@ -314,7 +349,8 @@ def main(argv=None):
             for r in rows:
                 fh.write("\t".join(r[k] for k in ("id", "group", "param",
                                                   "expected")) + "\n")
-        print(f"wrote {out} ({len(rows)} cases)")
+        print(f"wrote {out} ({len(rows)} committed cases; the full "
+              f"2,400-case sweep is re-derived in memory by the tests)")
         return 0
     print("usage: zstd_count_6241700_115.py [gen-cases]")
     return 2
