@@ -1,0 +1,129 @@
+{
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "bound_context": {
+    "symbol": "ZSTD_count_2segments",
+    "member": "7c9960efb53c0b35-zstd_lazy.o",
+    "rlib": "liblibzstd_sys-c8c5b6f4c7c3aee0.rlib",
+    "crate": "zstd-sys",
+    "candidate_versions": [
+      "2.0.15+zstd.1.5.7",
+      "2.1.2+zstd.1.5.7"
+    ],
+    "start": "0x6248790",
+    "end": "0x624899a",
+    "size_bytes": 522,
+    "fde": "0x6248790..0x624899a",
+    "raw_equal": true,
+    "relocations": [],
+    "identical_source_count": 3,
+    "target_body_sha256": "240b4390c750b88bffb838623b0da0b2168f950182ba9b4567817fb0eea41ff5",
+    "source_body_sha256": "240b4390c750b88bffb838623b0da0b2168f950182ba9b4567817fb0eea41ff5",
+    "instructions": 150,
+    "cet_landing_pad": false,
+    "boundary_below": "cc cc cc cc (int3 padding) immediately below 0x6248790",
+    "version_note": "the bundle pins zstd-sys 2.0.15+zstd.1.5.7 / 2.1.2+zstd.1.5.7 and this body is byte-identical in both, so the window fixes the behaviour but not the zstd revision"
+  },
+  "register_roles": {
+    "rdi": "ip (input cursor)",
+    "rsi": "match (dictionary-tail cursor)",
+    "rdx": "iEnd, then reused for vEnd",
+    "rcx": "mEnd, then reused",
+    "r8": "mStart",
+    "r9": "iEnd (preserved)",
+    "r10": "mEnd (preserved; reused as a scratch word in phase 2)",
+    "r11": "input cursor",
+    "rax": "the returned count",
+    "rbx": "vEnd - 7 (the 8-byte loop bound)"
+  },
+  "caller_census": {
+    "direct_calls": 56,
+    "tail_jumps": 0,
+    "caller_fdes": 12,
+    "consumers": {
+      "overwritten": 5,
+      "register-copy": 14,
+      "arithmetic": 37
+    },
+    "sites_reading_the_return": 56,
+    "discarded_sites": 0,
+    "contract": "value-returning: all 56 call sites consume the count - 37 fold it into arithmetic (add/sub/lea on rax), 14 copy it into another register for later use and 5 overwrite it with a constant, which is still a use of the value's liveness rather than a discarded call",
+    "consumer_meaning": {
+      "arithmetic": "the count is folded into a running total or a length computation",
+      "register-copy": "the count is moved to another register and used later in the same FDE",
+      "overwritten": "rax is replaced by a constant or another value before any read"
+    }
+  },
+  "observations": [
+    {
+      "kind": "observation",
+      "claim": "vEnd is min(iEnd, ip + (mEnd - match)) computed with an UNSIGNED cmovbe at 0x62487a4"
+    },
+    {
+      "kind": "observation",
+      "claim": "phase 1 counts the agreeing bytes of (ip, match) below vEnd and stops at the first difference"
+    },
+    {
+      "kind": "observation",
+      "claim": "the wrap test is (match + len1 == mEnd) at 0x62487f3 / 0x624886f; without it phase 2 is skipped"
+    },
+    {
+      "kind": "observation",
+      "claim": "phase 2 counts the agreeing bytes of (ip+len1, mStart) below iEnd, using r8 = mStart as its only match-side cursor"
+    },
+    {
+      "kind": "observation",
+      "claim": "the return value is the input-side length: every exit computes cursor - ip"
+    },
+    {
+      "kind": "observation",
+      "claim": "the first differing byte in a word comes from tzcnt at 0x62487e1/0x624881a/0x624889b/0x624894f, each guarded by a cmp/je on the same words"
+    },
+    {
+      "kind": "observation",
+      "claim": "the whole-word loop requires ip < vEnd-7, the dword tail cursor < vEnd-3 and the word tail cursor < vEnd-1, so no read crosses vEnd"
+    },
+    {
+      "kind": "observation",
+      "claim": "the byte tail advances by sete (0 or 1), so it stops at the first difference"
+    },
+    {
+      "kind": "observation",
+      "claim": "the routine performs no stores; the access capture records loads only (widths 1, 2, 4 and 8)"
+    },
+    {
+      "kind": "observation",
+      "claim": "the body has no endbr64 and the four bytes below the window are cc cc cc cc"
+    },
+    {
+      "kind": "observation",
+      "claim": "56 direct calls, 0 tail jumps, in a handful of large caller FDEs; every call site consumes the count"
+    },
+    {
+      "kind": "inference",
+      "claim": "the phase-2 wrap models the dictionary tail ending at mEnd and the match continuing at the block start"
+    },
+    {
+      "kind": "inference",
+      "claim": "the caller is responsible for ip+len1 never running past iEnd while phase 2 reads forward"
+    },
+    {
+      "kind": "inference",
+      "claim": "a vEnd below 7 is unreachable for real pointers (memory is not mapped there), which is why the vEnd-7 wrap is unobservable"
+    },
+    {
+      "kind": "inference",
+      "claim": "the routine is a static (non-indirectly-called) function, hence no CET landing pad"
+    }
+  ],
+  "unknowns": [
+    "which of the 56 call sites are reachable for a given compression level or block size is not characterized",
+    "whether every caller keeps the pointer invariant (match >= mStart, mEnd <= the block end) is not verified from the call sites",
+    "the exact zstd revision is not pinned (the body is identical in the two bundled zstd-sys versions)",
+    "the geometry of the real dictionary tail (how often mEnd - mStart exceeds the 8-byte loop bound) is not measured",
+    "the three identical source objects are not individually identified; only 0x6248790 is bound"
+  ],
+  "claim_anchors": "semantics.tsv (40 rows, each re-decoded from the artifact by verify.py)",
+  "ledger": "cases.tsv (300 rows: 60 per family, the boundary rows kept verbatim)",
+  "sweep": "2400 cases (5 families x 480) plus a 3000-case random-content differential in the tests"
+}

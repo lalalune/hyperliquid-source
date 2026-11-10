@@ -1,0 +1,41 @@
+claim	va	size	bytes	instruction	note
+function entry	0x6248790	3	4989d1	mov r9, rdx	mov %rdx,%r9: the body starts here with no endbr64 landing pad, and the four bytes below it are cc cc cc cc (int3 padding), so the window is a real function start
+the match end becomes the working copy	0x6248793	3	4889ca	mov rdx, rcx	mov %rcx,%rdx: rdx takes mEnd (the input end was already saved in r9 at 0x6248790)
+the match end is kept in r10 for the wrap test	0x6248797	3	4989ca	mov r10, rcx	mov %rcx,%r10: the fourth argument (mEnd) is preserved; the working copy is the one at 0x6248793
+the callee-saved registers are pushed	0x6248796	1	55	push rbp	push %rbp
+and the second one	0x624879d	1	53	push rbx	push %rbx: the two pushes at 0x6248796/0x624879d are matched by pop %rbx/... at 0x6248825 and 0x6248874
+the dictionary tail length is computed	0x624879a	3	4829f2	sub rdx, rsi	sub %rsi,%rdx: mEnd - match, the number of bytes left in the tail
+the first segment ends at ip plus that length	0x624879e	3	4801fa	add rdx, rdi	add %rdi,%rdx: the unwrapped end of segment one
+the bound compares iEnd with the unwrapped end	0x62487a1	3	4939d1	cmp r9, rdx	cmp %rdx,%r9
+the bound is an UNSIGNED minimum	0x62487a4	4	490f46d1	cmovbe rdx, r9	cmovbe %r9,%rdx: 'below or equal' on pointers, so a pointer with bit 63 set is never taken for a negative value
+the whole-word loop bound	0x62487a8	4	488d5af9	lea rbx, [rdx - 7]	lea -0x7(%rdx),%rbx: vEnd - 7, the highest cursor for which 8 bytes still fit
+the whole-word loop is guarded	0x62487af	2	737f	jae 0x6248830	jae 0x6248830: entered only when ip < vEnd-7; a vEnd below 7 wraps it to a huge value that merely fails this unsigned test
+the match word is loaded	0x62487b1	3	488b06	mov rax, qword ptr [rsi]	mov (%rsi),%rax: an unaligned 8-byte load
+the input word is loaded	0x62487b4	3	488b0f	mov rcx, qword ptr [rdi]	mov (%rdi),%rcx: an unaligned 8-byte load
+a differing first word is drained	0x62487ba	6	0f85d8000000	jne 0x6248898	jne 0x6248898: the first 8 bytes already differ, so the count is finished by the drain path
+the first differing byte is found with tzcnt	0x62487e1	5	f3480fbcc1	tzcnt rax, rcx	tzcnt %rax,%rcx: the BMI1 zero-safe count of trailing zeros, not bsf
+the bit index becomes a byte index	0x62487e6	3	c1e803	shr eax, 3	shr $0x3,%eax: the tzcnt result divided by 8
+the byte index is added to the match cursor	0x62487e9	3	4c01d8	add rax, r11	add %r11,%rax: the address of the first differing byte
+the count is measured on the input side	0x62487ec	3	4829f8	sub rax, rdi	sub %rdi,%rax: cursor - ip, so the routine returns input bytes, never a match-side distance
+the wrap test compares the match cursor with mEnd	0x62487f3	3	4939d2	cmp r10, rdx	cmp %r10,%rdx: r10 still holds mEnd
+no wrap: the first-segment count is returned	0x62487f6	2	757c	jne 0x6248874	jne 0x6248874: if the match cursor stopped short of mEnd, phase 2 is skipped
+the wrap advances the input cursor	0x62487f8	3	4801c7	add rdi, rax	add %rdi,%rax: ip += len1, so phase 2 continues where phase 1 stopped
+phase 2 is bounded by iEnd	0x62487fb	4	498d71f9	lea rsi, [r9 - 7]	lea -0x7(%r9),%rsi: the second segment's whole-word bound is iEnd-7
+the two phases are summed	0x6248822	3	4801d0	add rax, rdx	add %rax,%rdx: total = len1 + (phase-2 cursor - ip)
+the short exit	0x6248827	1	c3	ret	ret: taken from the one-word and phase-2 paths, after popping rbx and rbp
+the tail path starts the match cursor at the match pointer	0x6248830	3	4889f0	mov rax, rsi	mov %rsi,%rax
+and the input cursor at ip	0x6248833	3	4989fb	mov r11, rdi	mov %rdi,%r11: fewer than 8 bytes remain, so the cursors restart at the segment start
+the dword tail is guarded	0x6248836	4	488d4afd	lea rcx, [rdx - 3]	lea -0x3(%rdx),%rcx: a 4-byte compare only when cursor < vEnd-3
+the word tail is guarded	0x624884a	4	488d4aff	lea rcx, [rdx - 1]	lea -0x1(%rdx),%rcx: a 2-byte compare only when cursor < vEnd-1
+otherwise the byte tail is taken	0x6248863	2	721b	jb 0x6248880	jb 0x6248880: a single byte at a time is the fallback
+the input byte is loaded	0x6248880	4	410fb61b	movzx ebx, byte ptr [r11]	movzx (%r11),%ebx
+the match byte is compared	0x6248884	2	3818	cmp byte ptr [rax], bl	cmp (%rax),%bl: a 1-byte compare, so the width follows the register
+equality is turned into an advance	0x6248886	3	0f94c0	sete al	sete %al: 1 when the bytes agree, 0 otherwise
+the cursor advances by that 0 or 1	0x624888c	3	4901c3	add r11, rax	add %r11,%rax: this is what makes the byte tail stop at the first difference
+the tail path makes the same wrap test	0x624886f	3	4939d2	cmp r10, rdx	cmp %rdx,%r10: no phase 2 unless the cursors reached mEnd
+the tail path enters phase 2	0x6248872	2	7484	je 0x62487f8	je 0x62487f8: the two paths share the wrap target
+phase 2 repeats the tail shape	0x62488a8	3	4889fa	mov rdx, rdi	mov %rdi,%rdx: the second segment's cursors start at ip (already advanced) and at r8 = mStart
+phase 2's whole-word cursor	0x6248930	4	488d5708	lea rdx, [rdi + 8]	lea 0x8(%rdi),%rdx: iEnd-7 bounds the 8 bytes read from ip
+r10 is reused as a scratch word in phase 2	0x6248944	3	4c8b12	mov r10, qword ptr [rdx]	mov (%rdx),%r10: mEnd is only needed for the wrap test, which phase 2 has already passed
+the phase-2 length is measured from the advanced ip	0x62488e8	3	4829fa	sub rdx, rdi	sub %rdi,%rdx
+phase 2 rejoins the shared sum	0x62488eb	5	e932ffffff	jmp 0x6248822	jmp 0x6248822: total = len1 + (phase-2 cursor - ip)
