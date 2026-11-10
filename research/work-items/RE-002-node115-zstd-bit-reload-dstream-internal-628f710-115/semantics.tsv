@@ -1,0 +1,13 @@
+claim	va	size	bytes	instruction	note
+the body opens by loading bitsConsumed	0x628f710	3	8b5708	mov edx, dword ptr [rdi + 8]	mov 0x8(%rdi),%edx: the window starts with a 32-bit load of the consumed-bit count at +0x08, and there is NO endbr64 - this body is never an indirect-branch target and does nothing else first
+the stream pointer is read	0x628f713	4	488b4710	mov rax, qword ptr [rdi + 0x10]	mov 0x10(%rdi),%rax: the byte pointer lives at +0x10
+the copy zero-extends into a 64-bit register	0x628f717	2	89d1	mov ecx, edx	mov %edx,%ecx clears the upper 32 bits, so the rewind is unsigned and cannot go negative
+the sub-byte remainder is isolated	0x628f719	3	83e207	and edx, 7	and $0x7,%edx leaves bitPos = bitsConsumed & 7
+the whole bytes are isolated	0x628f71c	3	c1e903	shr ecx, 3	shr $0x3,%ecx computes bitsConsumed >> 3 - the number of whole bytes to rewind
+the remainder is written back as the new bitsConsumed	0x628f71f	3	895708	mov dword ptr [rdi + 8], edx	mov %edx,0x8(%rdi): after the call bitsConsumed is always in [0,7]
+the pointer moves BACKWARD	0x628f722	3	4829c8	sub rax, rcx	sub %rcx,%rax: the rewind re-reads bytes already delivered instead of advancing
+the rewound pointer is stored	0x628f725	4	48894710	mov qword ptr [rdi + 0x10], rax	mov %rax,0x10(%rdi) commits the rewound pointer before the load
+one unconditional 8-byte little-endian container load	0x628f729	3	488b00	mov rax, qword ptr [rax]	mov (%rax),%rax loads exactly 8 bytes from the rewound pointer - MEM_readLEST, with no bounds check of any kind
+the container is REPLACED, not merged	0x628f72c	3	488907	mov qword ptr [rdi], rax	mov %rax,(%rdi) stores the newly loaded word over the whole container: no shift, no OR with the previous bits
+the return value is the constant 0	0x628f72f	2	31c0	xor eax, eax	xor %eax,%eax on the only path: the value carries no information (no comparison exists in the body)
+the only exit	0x628f731	1	c3	ret	a single ret: the 12-instruction body has no conditional branch

@@ -1,0 +1,73 @@
+{
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "bound_context": {
+    "candidate_versions": ["2.0.15+zstd.1.5.7", "2.1.2+zstd.1.5.7"],
+    "crate": "zstd-sys",
+    "end": "0x628f732",
+    "identical_source_count": 3,
+    "member": "865a32d3ef5dbaad-huf_decompress.o",
+    "native": true,
+    "question": "What does the 34-byte leaf routine at 0x628f710 do to a BIT_DStream_t, what does it return, and what does it require of its caller?",
+    "raw_equal": true,
+    "relocations": [],
+    "rlib": "liblibzstd_sys-c8c5b6f4c7c3aee0.rlib",
+    "source_body_sha256": "38e87a35b78b16a1be5316153c1c927c77e095c515b2caf63ffba5da1f0bda39",
+    "source_offset": 4323017,
+    "start": "0x628f710",
+    "symbol": "BIT_reloadDStream_internal",
+    "target_body_sha256": "38e87a35b78b16a1be5316153c1c927c77e095c515b2caf63ffba5da1f0bda39"
+  },
+  "caller_census": {
+    "caller_fdes": 6,
+    "consumer_table": [
+      {"consumer": "overwritten", "sites": 10, "first_use": "mov rax, qword ptr [rsp + 0xd0]",
+       "meaning": "rax is overwritten by an unrelated value before the status is read"},
+      {"consumer": "dead", "sites": 6, "first_use": "-",
+       "meaning": "never read inside the enclosing FDE"}
+    ],
+    "consumers": {"dead": 6, "overwritten": 10},
+    "contract": "returns the constant 0 (BIT_DStream_unfinished) and mutates the BIT_DStream_t through its first argument; the return value is discarded by every call site, which is consistent with a constant that carries no information",
+    "direct_calls": 16,
+    "discarded_sites": 16,
+    "method": "every call target matching the window start is decoded with Capstone and attributed to the enclosing .eh_frame FDE; the instruction after the call is classified by how rax is first used",
+    "sites_reading_the_return": 0,
+    "tail_jumps": 0
+  },
+  "claim_anchors": "semantics.tsv (12 anchors: claim -> target instruction address, bytes and decoded instruction)",
+  "engine_callees": [],
+  "environment_limits": [
+    "the packet is static: the artifact is never executed and no source build is claimed",
+    "the emulator implements only the instructions this routine uses and raises on any other",
+    "the modelled stream pointer is a single fixed base per case; the packet does not model any caller's buffer"
+  ],
+  "functions": [],
+  "layouts": [
+    {"name": "BIT_DStream_t (fields touched by this window)",
+     "fields": {"+0x00": "bitContainer, 8 bytes (the 64-bit bit reader window)",
+                "+0x08": "bitsConsumed, u32 (read and written back as its sub-byte remainder)",
+                "+0x10": "ptr, const BYTE* (read and rewritten to the rewound position)"},
+     "note": "+0x18 (limitPtr) is NOT touched by this body, which is why the body performs no bounds check"}
+  ],
+  "ledger": "cases.tsv (300 reviewable cases, 75 per family: sub-byte counts, whole-byte counts, mixed values and extreme values up to 0xffffffff) recording the bits consumed, the bytes rewound, the new bit position, the rewound pointer, the loaded container and the status; the boundary rows are kept verbatim and the full 2,400-case sweep is re-derived in memory by the tests",
+  "observations": [
+    {"kind": "observation", "text": "the window 0x628f710..0x628f732 is one .eh_frame FDE, 34 bytes, 12 instructions, one leaf routine with no calls and no relocations"},
+    {"kind": "observation", "text": "there is no endbr64: the body opens with the bitsConsumed load, so it is not an indirect-branch target"},
+    {"kind": "observation", "text": "bitsConsumed is split by and $0x7 / shr $0x3, and only the sub-byte remainder is written back, so after the call bitsConsumed is always in [0,7]"},
+    {"kind": "observation", "text": "mov %edx,%ecx zero-extends, so the rewind (bitsConsumed >> 3, up to 0x1fffffff) is unsigned and the pointer moves backward, never forward"},
+    {"kind": "observation", "text": "the reload is exactly one unconditional 8-byte little-endian load from the rewound pointer, stored over the whole container with no shift or merge"},
+    {"kind": "observation", "text": "the return value is a constant 0: the only exit is xor %eax,%eax, and the body contains no comparison and no conditional branch"},
+    {"kind": "observation", "text": "the body performs no bounds check against +0x18 (limitPtr) or any start pointer before the rewind and the 8-byte read"},
+    {"kind": "observation", "text": "all 16 direct call sites discard the returned value (10 overwrite rax immediately, 6 never read it): no caller branches on the status"},
+    {"kind": "inference", "text": "the C type is BIT_DStream_t* (a three-field struct at +0x00/+0x08/+0x10) and the parameter is the single register argument rdi, read off the struct offsets and the mangling-free symbol"},
+    {"kind": "inference", "text": "the constant 0 is zstd's BIT_DStream_unfinished; the other BIT_DStream_status values cannot be produced by this body, and the callers' indifference to the value is consistent with that"},
+    {"kind": "inference", "text": "the routine is the unchecked fast path (the name says internal): the caller is expected to have established that the rewound pointer still has 8 readable bytes"}
+  ],
+  "unknowns": [
+    "the caller-side obligation is inferred, not proven: the packet shows the body has no bounds check, but does not verify any caller's precondition",
+    "whether some sibling body in this object performs the checks this one omits is not established here (candidate siblings are separate windows)",
+    "the exact zstd release is not pinned: the body is raw-equal across the candidate versions and no version string is read from it",
+    "the body is byte-identical in 3 identical source objects; only 0x628f710 is bound",
+    "which of the 16 call sites are reachable at run time for a decompression of a given frame is not characterized"
+  ]
+}
