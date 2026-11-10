@@ -100,6 +100,18 @@ inference from the region and the call shape; the pinned facts are this
 routine's own algorithm, the 25 call sites with their enclosing FDE
 bounds, and each site's consumer class.
 
+## Claim anchors (target evidence)
+
+Every behavioural claim above is anchored to the exact instruction in
+the target image that carries it. `semantics.tsv` lists 21 anchors
+(`claim`, `va`, `size`, `bytes`, `instruction`, `note`) — the qword
+tier's `lea pInLimit-7` + strict `jae`, the two `tzcnt` mismatch paths,
+the dword / word / byte tier bounds and advances, the `sete` byte
+comparison, and the two `sub pIn - pIn_start` cap returns. `verify.py`
+regenerates the file and re-reads each anchor's bytes from the binary,
+so the claim set is checked against the artifact rather than against
+another model; the test suite asserts the same.
+
 ## Evidence notes
 
 - main.txt is the raw `objdump -d` listing of the whole routine,

@@ -86,6 +86,7 @@
       "mov r11, rax": 2
     }
   },
+  "claim_anchors": "semantics.tsv (21 anchors: claim -> target instruction address and bytes)",
   "engine_callees": [],
   "environment_limits": "Static disassembly only (objdump/readelf on the digest-verified local binary). No cargo/rustc, Ghidra or live node was used; tools/zstd_count_6241700_115.py is a Python transcription of the pinned algorithm, not a build of node or zstd code.",
   "functions": [],
@@ -125,6 +126,11 @@
       "claim": "ledger",
       "kind": "observation",
       "text": "cases.tsv commits 300 reviewable cases (structural cells plus a stride sample); the exhaustive 2,400-case sweep and a 200,000-input closed-form/tier-walk differential are re-derived in memory by the test suite and by verify.py, not committed as a blob."
+    },
+    {
+      "claim": "claim anchors",
+      "kind": "observation",
+      "text": "Each semantic claim is bound to a specific target instruction address and its bytes; verify.py regenerates semantics.tsv and re-reads those bytes from the binary, so the claims are anchored in the artifact, not only cross-checked between two transcriptions."
     }
   ],
   "unknowns": [

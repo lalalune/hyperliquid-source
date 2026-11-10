@@ -7,7 +7,9 @@ Checks, all offline:
      every instruction byte matches the raw binary;
   3. callers.tsv / frames.txt / relocations.txt regenerate exactly;
   4. the FDE covers the routine and the census body hash matches it;
-  5. the model spot checks and the committed ledger replay.
+  5. semantics.tsv regenerates exactly and every claim's address carries
+     the recorded bytes in the target image;
+  6. the model spot checks and the committed ledger replay.
 
 Run: python3 research/work-items/RE-002-node115-zstd-count-6241700-115/verify.py
 """
@@ -107,6 +109,34 @@ def check_census():
     return len(hits), len(uses)
 
 
+def check_semantics():
+    sem = _load("semantics", PKT / "semantics.py")
+    rows = sem.rows()
+    import tempfile
+    with tempfile.NamedTemporaryFile("w+", suffix=".tsv",
+                                     delete=False) as fh:
+        tmp = Path(fh.name)
+    try:
+        n = sem.write(tmp)
+        assert tmp.read_text() == (PKT / "semantics.tsv").read_text(), \
+            "semantics.tsv drifted"
+    finally:
+        tmp.unlink()
+    # Every anchored claim must be inside the routine's FDE.
+    cen = _load("census", PKT / "census.py")
+    ranges = cen.fde_ranges()
+    enc = cen.encloser(ranges, cen.START)
+    assert enc == (cen.START, cen.END), enc
+    for r in rows:
+        va = int(r["va"], 16)
+        assert cen.START <= va < cen.END, r["claim"]
+        # ... and the bytes recorded for it must really be there.
+        off = cen.va_to_off(cen.load_segments(), va)
+        body = cen.BINARY.read_bytes()[off:off + int(r["size"])]
+        assert body.hex() == r["bytes"], r["claim"]
+    return n
+
+
 def check_model():
     tool = _load("zstd_count", ROOT / "tools" / "zstd_count_6241700_115.py")
     assert tool.zstd_count(b"ABC", b"ABD", 3) == 2
@@ -138,9 +168,11 @@ def main():
     n = check_manifest()
     check_excerpt()
     calls, consumers = check_census()
+    claims = check_semantics()
     ncases = check_model()
     print(f"verify OK: {n} manifest rows, {calls} callers / {consumers} "
-          f"consumers, model + {ncases}-case ledger + excerpt")
+          f"consumers, {claims} claim anchors, model + {ncases}-case ledger "
+          f"+ excerpt")
     return 0
 
 

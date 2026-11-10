@@ -234,6 +234,22 @@ class ZstdCountBindingsTest(unittest.TestCase):
         self.assertEqual(body[:4], b"\x4c\x8d\x42\xf9")
         self.assertNotIn(b"\xf3\x0f\x1e\xfa", body)
 
+    def test_claim_anchors_are_in_the_target(self):
+        # Target evidence: every behavioural claim is anchored to an
+        # instruction address whose bytes are really in the image.
+        rows = (PACKET / "semantics.tsv").read_text().splitlines()
+        header = rows[0].split("\t")
+        self.assertEqual(header, ["claim", "va", "size", "bytes",
+                                  "instruction", "note"])
+        self.assertEqual(len(rows) - 1, 21)
+        for line in rows[1:]:
+            r = dict(zip(header, line.split("\t")))
+            va = int(r["va"], 16)
+            self.assertTrue(START <= va < END, r["claim"])
+            off = _va_to_off(va)
+            self.assertEqual(self.data[off:off + int(r["size"])].hex(),
+                             r["bytes"], r["claim"])
+
     def test_fde_bounds(self):
         out = subprocess.check_output(["readelf", "-wf", str(BINARY)]).decode()
         line = next(l for l in out.splitlines()

@@ -1,0 +1,22 @@
+claim	va	size	bytes	instruction	note
+limit-8 threshold	0x6241700	4	4c8d42f9	lea r8, [rdx - 7]	lea computes pInLimit-7; the strict jae makes the effective qword bound pInLimit-8
+start pointer saved	0x6241704	3	4889f9	mov rcx, rdi	rcx = pIn, the base the final subtraction uses
+qword tier entry test	0x6241707	3	4c39c7	cmp rdi, r8	enters the qword loop only while pIn <= pInLimit-8
+qword load (pMatch)	0x624170c	3	488b06	mov rax, qword ptr [rsi]	loads one qword from pMatch
+qword load (pIn)	0x624170f	3	488b3f	mov rdi, qword ptr [rdi]	loads one qword from pIn
+qword compare	0x6241712	3	4839f8	cmp rax, rdi	equal qwords advance both pointers by 8
+qword mismatch xor	0x6241790	3	4831f8	xor rax, rdi	xor of the two differing qwords
+qword mismatch tzcnt	0x6241793	5	f3480fbcc0	tzcnt rax, rax	counts trailing zero bits of the xor
+qword mismatch byte index	0x6241798	3	c1e803	shr eax, 3	tzcnt >> 3 = equal low-order bytes (little-endian)
+second qword iteration	0x6241727	3	4c8b08	mov r9, qword ptr [rax]	the loop's second qword load, closing the 16-byte step
+dword tier threshold	0x6241753	4	488d7afd	lea rdi, [rdx - 3]	lea computes pInLimit-3; the strict jae makes the effective dword bound pInLimit-4
+dword tier test	0x6241757	3	4839f8	cmp rax, rdi	enters the dword tier only while pIn <= pInLimit-4
+dword advance	0x62417a0	4	4883c004	add rax, 4	advances by 4 on a dword match
+word tier threshold	0x6241762	4	488d7aff	lea rdi, [rdx - 1]	lea computes pInLimit-1; the strict jae makes the effective word bound pInLimit-2
+word tier test	0x6241766	3	4839f8	cmp rax, rdi	enters the word tier only while pIn <= pInLimit-2
+word advance	0x62417b0	4	4883c002	add rax, 2	advances by 2 on a word match
+byte tier test	0x6241773	3	4839d0	cmp rax, rdx	enters the byte tier only while pIn < pInLimit
+byte equality	0x624177d	3	0f94c2	sete dl	sete: the byte tier counts an equal byte
+byte advance	0x6241783	3	4801d0	add rax, rdx	advances by 0 or 1 on the byte comparison
+the cap	0x6241743	3	4829c8	sub rax, rcx	return = current pIn - pIn_start, so the result never exceeds the limit
+the cap (fallthrough)	0x6241786	3	4829c8	sub rax, rcx	the same subtraction on the 4/2/1-byte fallthrough exit
