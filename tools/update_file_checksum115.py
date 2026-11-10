@@ -29,15 +29,20 @@ Whole-FDE facts (verified live, see --live):
   file/writable_file_writer.h:163); if null, return; else tail-jump
   to vtable slot 2 of the generator with (data.data(),
   data.size()). Slot 2 is Update: FileChecksumGenerator's virtuals
-  are (dtor, Update, Finalize, GetChecksum, Name)
-  (include/rocksdb/file_checksum.h:52-67), so the third virtual
-  slot (0x10 past the vptr) is Update(const char*, size_t). The
+  occupy six vtable entries in declaration order -- the two
+  Itanium ABI destructor slots (complete-object dtor, deleting
+  dtor), then Update, Finalize, GetChecksum, Name
+  (include/rocksdb/file_checksum.h:52-67) -- so the third entry
+  (0x10 past the vptr) is Update(const char*, size_t). The
   concrete checksum algorithm is the generator's own behavior --
   already reconstructed for the CRC32C/XXH generators in earlier
   RE-002 packets -- not this function's; this model pins the
   dispatch and the forwarded arguments only.
 - The 3-byte nop at 0x604c7cd is alignment padding inside the FDE
-  (the ret at 0x604c7d0 is the fall-through of the je).
+  (the ret at 0x604c7d0 is the fall-through of the je). The tail
+  jump transfers control to Update with Append's return address
+  still on the stack, so Update returns to Append, at the
+  instruction after the call site -- not to Append's caller.
 
 Environment limits: no cargo/rustc/git-lfs/Ghidra on this VM. The
 target binary is never executed. The tool models the helper in

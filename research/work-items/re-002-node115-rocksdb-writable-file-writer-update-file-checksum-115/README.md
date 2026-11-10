@@ -26,8 +26,9 @@ range `0x21`, `aug_len` 0: no LSDA pointer, no landing pad. The function cannot 
 **Dispatch.** Load `this+0xc8` (`checksum_generator_`, a `std::unique_ptr<FileChecksumGenerator>`
 per `file/writable_file_writer.h:163`); if null, return; else tail-jump to vtable slot 2 of the
 generator with (`data.data()`, `data.size()`). Slot 2 is `Update`: `FileChecksumGenerator`'s
-virtuals are (`dtor`, `Update`, `Finalize`, `GetChecksum`, `Name`)
-(`include/rocksdb/file_checksum.h:52-67`), so the third virtual slot (`0x10` past the vptr) is
+virtuals occupy six vtable entries in declaration order -- the two Itanium ABI destructor slots
+(complete-object dtor, deleting dtor), then `Update`, `Finalize`, `GetChecksum`, `Name`
+(`include/rocksdb/file_checksum.h:52-67`) -- so the third entry (`0x10` past the vptr) is
 `Update(const char*, size_t)`. The 10 instructions (verified verbatim by `--live`):
 
 ```
@@ -44,10 +45,11 @@ ret
 ```
 
 The binary tail-jumps to `Update` instead of calling it, so this FDE has no return path after the
-dispatch -- the generator's `Update` returns directly to `Append`'s caller. The concrete checksum
-algorithm is the generator's own behavior (already reconstructed for the CRC32C/XXH generators in
-earlier RE-002 packets), not this function's; this model pins the dispatch and the forwarded
-arguments only.
+dispatch -- the tail jump transfers control with Append's return address still on the stack, so
+`Update` returns to `Append`, at the instruction after the call site (not to `Append`'s caller).
+The concrete checksum algorithm is the generator's own behavior (already reconstructed for the
+CRC32C/XXH generators in earlier RE-002 packets), not this function's; this model pins the dispatch
+and the forwarded arguments only.
 
 **Callers.** Exactly 1 direct call, 0 tail jumps, 0 LEA refs (whole-`.text` E8/E9/LEA scan,
 Capstone-validated) -- `WritableFileWriter::Append` (site 0x6054764), once per `Append` before
