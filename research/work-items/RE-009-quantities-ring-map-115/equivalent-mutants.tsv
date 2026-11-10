@@ -1,0 +1,81 @@
+va	byte	new	kind	reason
+0x57f6965	3	0x0	immediate-low-byte	length-1 second slice: entering the halving loop with n = 1 adds zero to the base and keeps it, so skipping it or not gives the same base and key
+0x57f69b3	1	0x7	immediate-low-byte	empty handle: the jump lands one byte into the next instruction, which decodes as a 32-bit lea into rcx, a register that is dead before the early return
+0x57f69d9	3	0x0	immediate-low-byte	length-1 first slice: entering the halving loop with n = 1 adds zero to the base and keeps it, so skipping it or not gives the same base and key
+0x57f6a0d	1	0x5	immediate-low-byte	hit exit: the jump lands on the 32-bit form of mov rdx,rdi, equal for every index below 2^32 (indices are bounded by the length)
+0x4ddc0a3	2	0x1	immediate-low-byte	inside the ring representation the compared word is a capacity that never equals i64::MIN, so the changed constant is never reached
+0x4dd617b	3	0x19	displacement-low-byte	inside the ring representation the compared word is a capacity that never equals i64::MIN, so the changed constant is never reached (the length word is only used together with that test)
+0x4dd6188	3	0x21	immediate-low-byte	inside the ring representation the compared word is a capacity that never equals i64::MIN, so the changed constant is never reached (the length limit 0x20 only matters for the tree representation)
+0x4dd62bb	2	0x1	immediate-low-byte	inside the ring representation the compared word is a capacity that never equals i64::MIN, so the changed constant is never reached
+0x4dd62e8	3	0x41	immediate-low-byte	a ring of 0x40 records or more is converted to the tree representation before the insert; every ring case here is shorter, so the limit 0x40 vs 0x41 is not separable
+0x4dd658a	1	0x15	immediate-low-byte	dead panic: after a hit or an insert the index is below the length, the message length is never used
+0x57eef72	1	0x26	immediate-low-byte	dead panic: the upsert only inserts at an index not above the length, the message length is never used
+0x5362379	1	0xa1	immediate-low-byte	the jump re-enters the loop head one byte late and executes mov esi,ebp instead of mov esi,r13d; this path has esi = 0 (set by xor at 0x536236b) and r13 = i64::MIN, whose low half is 0, so r13d = esi and the later mov r13d,esi restores the same value
+0x5b7279d	1	0x3	immediate-low-byte	the jump skips xor ebx,ebx; one byte later it lands in a 32-bit load of the capacity word, equal to the 64-bit load for every capacity below 2^32, and the allocation contract refuses blocks above 0x1000 bytes
+0x5b727dc	1	0xc	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b727fe	1	0x1	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b72803	4	0x1	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b72808	0	0x75	condition-flip	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b7280a	4	0x3d	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b7280f	4	0x9	displacement-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b7281f	1	0x2d	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b9ecc5	1	0x0	immediate-low-byte	grow-amortized is called with additional = 1 or 0 only when length == capacity; max(2 * cap, cap + 1, floor) equals max(2 * cap, cap, floor) for every capacity because the floor is at least 4 when cap = 0 and 2 * cap >= cap + 1 otherwise
+0x5b9ed3f	4	0x59	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b9ed45	3	0x9	displacement-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b9ed49	1	0x14	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b9ed4b	4	0x59	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b9ed51	3	0x9	displacement-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b9ed58	1	0xf2	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b9ed67	0	0x75	condition-flip	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b9ed69	4	0x9	displacement-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b9ed6e	3	0x2	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x5b9ed7d	1	0xcf	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x51d896b	1	0x7	immediate-low-byte	the jump lands one byte late, on the 32-bit form of sub $1 from the remaining height; the carry flag and the value agree for every height below 2^32
+0x51d8996	4	0x49	displacement-low-byte	the fourth word of the argument block passed to 0x4d33ab0 is never read there (it reads words 0, 1 and 2), and the misplaced store only overlaps the result block the callee overwrites
+0x51d8a63	1	0x20	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4d33c7a	3	0x9	immediate-low-byte	the compare is reached only through the branch taken when height & 7 != 0, so height 8 never arrives here; thresholds 8 and 9 give the same branch for every other height
+0x4d19e90	1	0xd1	immediate-low-byte	the jump lands one byte late, on the 32-bit form of the load of the leaf-edge index; the index of a root leaf is below 2^32
+0x4d19fee	4	0x41	displacement-low-byte	the displacement 0x41 reads the spilled height shifted by one byte: the seven upper bytes of the height word (zero for any height below 256) and the low byte of the next spill; r15 = that word + 1 is at least 1, its only uses are spill slots and the test of r15 + 1 against 2 at 0x4d1a34f, which is never below 2 for either value, and the exit path reloads the height from the spill
+0x4d1a342	1	0x19	immediate-low-byte	the 0x119 only reaches the release size when the test at 0x4d1a358 is taken, but that test sees (height + 1) + 1 with a height of at least 1, so it is never below 2; on the other path esi is rewritten at 0x4d1a3e8 or by the panic arm 0x4d1a4d6 before use
+0x4d1a47a	3	0xff	immediate-low-byte	reached only when the remainder of (count & 3) is zero and the count is positive, so the count is a positive multiple of 4; the guard compares count - 1 (or count) against 3, true for 4, 8, ... either way
+0x4d1a47e	2	0x2	immediate-low-byte	same entry condition as 0x4d1a47a: count - 1 is at least 3 and the threshold 2 gives the same branch
+0x4d1a487	1	0xaf	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4d1a4e4	1	0x29	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4d1a4fd	1	0x7a	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca165a	3	0xd	immediate-low-byte	the only caller (0x4d19eef) takes the merge only when left + right + 1 is below 12, so the assertion limit 12 vs 13 is never reached
+0x4ca1888	5	0x3	immediate-low-byte	the height word in the context built at 0x4d19ea3 comes from the leaf the removal starts on (both callers of 0x4d19d30 sit in 0x4d33ab0 after the descent to a leaf, height 0), so the compared word is below 2 and the thresholds 2 and 3 give the same branch
+0x4ca18a2	4	0x19	displacement-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca18bb	1	0x84	condition-flip	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca18e3	3	0x2	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca18e7	0	0x75	condition-flip	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca18e9	4	0x9	displacement-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca18f2	3	0x21	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca191c	0	0x74	condition-flip	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca1921	1	0x79	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca1926	3	0x2	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca192a	0	0x73	condition-flip	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca1992	3	0x5	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca1999	0	0x74	condition-flip	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca19e8	1	0x8f	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca1a01	1	0x2b	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4ca1a1a	1	0x29	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4c958be	3	0xd	immediate-low-byte	the capacity assertion compares the new length (old length + stolen count) with 12; a repair only runs on a node of at most 4 entries and steals up to 5, so the new length never reaches 12
+0x4c958ed	4	0x21	displacement-low-byte	the new length is stored one byte off; the only later read is the compare of that word with 3 in the edge-renumbering branch, and after a repair the length is exactly 5 so the outcome is unchanged
+0x4c95935	3	0x5	immediate-low-byte	the value move is twice as long; it only copies stale value slots (the node holds at most 4 entries when the steal runs, so at most 8 slots from the start stay inside the 11 value slots)
+0x4c95a2f	3	0x9	immediate-low-byte	one extra byte of the edge move lands in the first stale edge slot past the new edge count, which no later read observes
+0x4c95a66	2	0x2	immediate-low-byte	mask on the new edge count 6 (length 5 + 1 after every repair); bit 0 of that count is clear, so the masks 3 and 2 agree
+0x4c95a69	5	0x2	immediate-low-byte	the compared word is the new length, which is exactly 5 after every repair, so thresholds 3 and 2 give the same branch
+0x4c95a73	1	0xa9	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4c95a8f	1	0x29	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4c95a9a	2	0x3d	immediate-low-byte	mask on the new edge count 6, whose bit 0 is clear, so the masks 0x3c and 0x3d agree
+0x4c95b5b	1	0x32	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4c95b74	1	0x26	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4c95b8d	1	0x29	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4c9638e	3	0xd	immediate-low-byte	mirror of 0x4c958be in the steal-from-right helper: the new length never reaches 12
+0x4c96407	3	0x5	immediate-low-byte	mirror of 0x4c95935 in the steal-from-right helper: only stale value slots are copied
+0x4c964f9	3	0x9	immediate-low-byte	mirror of 0x4c95a2f in the steal-from-right helper: the extra byte lands in a stale edge slot
+0x4c965af	2	0x2	immediate-low-byte	mirror of 0x4c95a69 in the steal-from-right helper: the compared length is exactly 5 after every repair
+0x4c965b6	1	0xb4	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4c965d2	1	0x29	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4c966ab	1	0x33	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
+0x4c966c4	1	0x29	immediate-low-byte	no case executes this instruction: it is reached only by a handle whose length does not exceed the capacity checks the generator keeps
