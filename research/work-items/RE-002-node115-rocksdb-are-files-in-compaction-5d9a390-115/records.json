@@ -1,0 +1,76 @@
+{
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "bound_context": {
+    "symbol": "_ZN7rocksdb16CompactionPicker20AreFilesInCompactionERKSt6vectorIPNS_12FileMetaDataESaIS3_EE",
+    "demangled": "rocksdb::CompactionPicker::AreFilesInCompaction(std::vector<rocksdb::FileMetaData*> const&)",
+    "mangled_parameters": "ERKSt6vectorIPNS_12FileMetaDataESaIS3_EE",
+    "member": "e7c8f0e01ce23ae2-compaction_picker.o",
+    "rlib": "liblibrocksdb_sys-b032f986857674dc.rlib",
+    "crate": "librocksdb-sys",
+    "candidate_versions": ["0.11.0+8.1.1"],
+    "start": "0x5d9a390",
+    "end": "0x5d9a3cf",
+    "size_bytes": 63,
+    "fde": "0x5d9a390..0x5d9a3cf",
+    "raw_equal": true,
+    "relocations": [],
+    "identical_source_count": 3,
+    "source_offset": 563952,
+    "target_body_sha256": "6de8326a03541c2778148ae408b2f22c254ffdb5d4e5c204fc145911752d90b3"
+  },
+  "register_roles": {
+    "rsi": "&files - the three 8-byte fields of the std::vector header: begin at +0x0, end at +0x8, capacity at +0x10; the body reads begin and end only",
+    "rdi": "the CompactionPicker receiver (`this`); the body never reads it",
+    "rax": "files.end first, then the walk index i (the low 32 bits are zeroed by `xor %eax,%eax`)",
+    "rcx": "files.begin, kept in a register for the whole walk",
+    "rdx": "files[i], then the zero-extended flag byte read from that element",
+    "eax": "the returned byte: 0, or the flag byte itself"
+  },
+  "caller_census": {
+    "direct_calls": 9,
+    "tail_jumps": 0,
+    "caller_fdes": 5,
+    "consumers": {"arithmetic": 7, "returned": 1, "stored": 1},
+    "sites_reading_the_return": 9,
+    "discarded_sites": 0,
+    "contract": "returns a byte predicate: 0 when no element carries a non-zero byte at +0xb4, otherwise that byte (in practice 1)",
+    "consumer_meaning": {
+      "arithmetic": "the predicate is consumed by a test/cmp/xor/movzx at the call site - five callers use `test %al,%al` and one inverts it with `xor %eax,1`",
+      "returned": "the caller forwards the predicate as its own return value: the byte is copied to the callee-saved ebx, survives an intervening `call` (which is why the taint kill must follow the ABI, not `call` alone), and is moved back to eax at the epilogue",
+      "stored": "the caller spills the predicate into a local (`mov byte ptr [rbp - 0x195],al`) before using it"
+    },
+    "call_sites": [
+      {"site": "0x5d9a539", "fde": "0x5d9a400..0x5d9a5b8", "use": "arithmetic", "note": "`xor eax,1` - the caller asks for the negation"},
+      {"site": "0x5d9dae8", "fde": "0x5d9da80..0x5d9db2f", "use": "returned", "note": "the predicate becomes the caller's return value"},
+      {"site": "0x5d9de9d", "fde": "0x5d9dd80..0x5d9e6b2", "use": "arithmetic", "note": "`test al,al`"},
+      {"site": "0x5d9e0b0", "fde": "0x5d9dd80..0x5d9e6b2", "use": "stored", "note": "`mov byte ptr [rbp - 0x195],al`"},
+      {"site": "0x5d9e18a", "fde": "0x5d9dd80..0x5d9e6b2", "use": "arithmetic", "note": "`test al,al`"},
+      {"site": "0x5d9e4e7", "fde": "0x5d9dd80..0x5d9e6b2", "use": "arithmetic", "note": "`test al,al`"},
+      {"site": "0x5da3af9", "fde": "0x5da3060..0x5da48ec", "use": "arithmetic", "note": "copied to ecx, then `test cl,cl`"},
+      {"site": "0x5da3d7c", "fde": "0x5da3060..0x5da48ec", "use": "arithmetic", "note": "`test al,al`"},
+      {"site": "0x5df2b48", "fde": "0x5df2380..0x5df3659", "use": "arithmetic", "note": "`test al,al`"}
+    ],
+    "reachability_note": "The first-use walk follows the linear fall-through path inside the caller's FDE and drops taint when a register is overwritten and at every intervening `call`; a conditional branch does not clobber registers and is not treated as one, so a value that only dies on a branch path would still be reported as read. Every one of the nine sites reaches its use on the fall-through path, so no site is path-dependent here.",
+    "method": "Capstone linear sweep of .text, direct-call filter on the entry, FDE attribution from .eh_frame, then a taint walk of rax/eax/al forward inside the owning FDE (regs_access-based, ABI call kills applied)."
+  },
+  "observations": [
+    "The routine is a leaf with no call, no indirect branch, no relocation and no memory write: its static memory effect is exactly four loads (vector begin, vector end, one element pointer, one flag byte).",
+    "The element count is derived as `n = (end - begin) >> 3` with a signed shift, then compared with an unsigned `jae` - a valid std::vector always satisfies end >= begin, which the model asserts instead of guessing.",
+    "An empty vector is answered from the header alone: `cmp %rcx,%rax; je` jumps straight to the shared exit with edx = 0, so no element pointer is ever dereferenced.",
+    "The returned value is the flag byte itself, not a normalised boolean - a build that stored 2 or 0xFF at +0xb4 would return that value through eax.",
+    "Both the `not-found` exit and the empty-vector path funnel through the single `mov %edx,%eax` at 0x5d9a3c8, so the routine has one return site.",
+    "The walk is a rotated do-while: the increment and bound test sit at the back edge (0x5d9a3b0/0x5d9a3b4) after a 2-byte `xchg %ax,%ax` alignment nop.",
+    "All nine call sites read the returned byte - none discards it - and the census shows three distinct shapes of use: seven arithmetic (one of them an inversion, `xor eax,1`), one forwarded as the caller's own return value, one spilled to a stack local.",
+    "The window is int3-fenced on both sides (eight 0xCC bytes below the entry, one 0xCC byte up to the next FDE at 0x5d9a3d0), which is what makes the 63-byte span a complete function body rather than an excerpt of a larger one.",
+    "The census taint walk has to model the ABI rather than the instruction: `call` does not report rax among its written registers in Capstone, so the caller-saved kill is applied explicitly - the forward-return site at 0x5d9dae8 is exactly the case that needs it, because it carries the byte across an intervening `call _ZdlPvm` in the callee-saved ebx."
+  ],
+  "unknowns": [
+    "Which field of rocksdb FileMetaData sits at +0xb4 in 0.11.0+8.1.1 is inferred from the public 8.1.1 sources (`being_compacted`); the binary fixes the offset, not the name.",
+    "The five caller FDEs carry no symbols in the stripped image, so they are identified by address range only - no claim is made about which method each one is.",
+    "The three identical source copies the vendor census records (identical_source_count = 3) are not enumerated individually; the reconstruction is bound to the sha256 of the body."
+  ],
+  "claim_anchors": "semantics.tsv: 22 anchors, one per instruction, contiguous over the whole 63-byte window (sizes sum to 63); verify.py re-decodes each anchor's bytes with Capstone (one instruction, same length, same mnemonic family) and matches its text against the committed excerpt",
+  "ledger": "cases.tsv: 300 stratified rows (empty, clear, first/last/middle position, every subset of vectors up to five elements, dense, alternating, first-wins, several flag values) with the model and the decoded-bytes answer for each; 0 disagreements",
+  "sweep": "verify.py: every vector of n = 0..40 elements with a flag byte at every position at five values (1, 2, 0x7F, 0x80, 0xFF) plus the all-clear shape, each compared between the closed-form model and the emulator that executes the routine's own bytes"
+}

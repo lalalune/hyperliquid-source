@@ -1,0 +1,23 @@
+0000000005d9a390 <hl-node>:
+ 5d9a390:	f3 0f 1e fa          	endbr64
+ 5d9a394:	48 8b 46 08          	mov    0x8(%rsi),%rax
+ 5d9a398:	48 8b 0e             	mov    (%rsi),%rcx
+ 5d9a39b:	48 89 c6             	mov    %rax,%rsi
+ 5d9a39e:	48 29 ce             	sub    %rcx,%rsi
+ 5d9a3a1:	48 c1 fe 03          	sar    $0x3,%rsi
+ 5d9a3a5:	48 39 c8             	cmp    %rcx,%rax
+ 5d9a3a8:	74 21                	je     5d9a3cb
+ 5d9a3aa:	31 c0                	xor    %eax,%eax
+ 5d9a3ac:	eb 0b                	jmp    5d9a3b9
+ 5d9a3ae:	66 90                	xchg   %ax,%ax
+ 5d9a3b0:	48 83 c0 01          	add    $0x1,%rax
+ 5d9a3b4:	48 39 f0             	cmp    %rsi,%rax
+ 5d9a3b7:	73 0f                	jae    5d9a3c8
+ 5d9a3b9:	48 8b 14 c1          	mov    (%rcx,%rax,8),%rdx
+ 5d9a3bd:	0f b6 92 b4 00 00 00 	movzbl 0xb4(%rdx),%edx
+ 5d9a3c4:	84 d2                	test   %dl,%dl
+ 5d9a3c6:	74 e8                	je     5d9a3b0
+ 5d9a3c8:	89 d0                	mov    %edx,%eax
+ 5d9a3ca:	c3                   	ret
+ 5d9a3cb:	31 d2                	xor    %edx,%edx
+ 5d9a3cd:	eb f9                	jmp    5d9a3c8

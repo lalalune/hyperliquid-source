@@ -1,0 +1,23 @@
+address	size	instruction	claim
+0x5d9a390	4	endbr64	CET entry pad; no register or memory effect.
+0x5d9a394	4	mov 0x8(%rsi),%rax	rax = files.end - the second 8-byte field of the vector header in rsi.
+0x5d9a398	3	mov (%rsi),%rcx	rcx = files.begin - the first field; the header itself is not read again.
+0x5d9a39b	3	mov %rax,%rsi	the end pointer moves into rsi because rsi is about to be turned into the count.
+0x5d9a39e	3	sub %rcx,%rsi	rsi = end - begin, i.e. the vector's byte size.
+0x5d9a3a1	4	sar $0x3,%rsi	rsi = n = byte size / 8 = the element count. A signed shift; see the precondition in the model (end >= begin, so the count is non-negative).
+0x5d9a3a5	3	cmp %rcx,%rax	compare end with begin to answer the empty vector from the header alone.
+0x5d9a3a8	2	je 5d9a3cb	end == begin: jump to the empty answer (edx = 0) without touching an element.
+0x5d9a3aa	2	xor %eax,%eax	i = 0 - the loop counter starts at the low 32 bits and zeroes rax.
+0x5d9a3ac	2	jmp 5d9a3b9	enter the loop at the element load: a rotated do-while, so the increment and the bound test live at the back edge.
+0x5d9a3ae	2	xchg %ax,%ax	a 2-byte padding nop; it is the loop's alignment and has no effect.
+0x5d9a3b0	4	add $0x1,%rax	i += 1 - the back edge, reached only when the current element is not flagged.
+0x5d9a3b4	3	cmp %rsi,%rax	compare i with n.
+0x5d9a3b7	2	jae 5d9a3c8	unsigned i >= n: leave the loop through the shared exit with the last flag byte (0, since the loop only continues past a zero flag) in edx.
+0x5d9a3b9	4	mov (%rcx,%rax,8),%rdx	rdx = files[i] - the element pointer; the scale 8 is an addressing-mode property, not a second multiply of the pre-scaled count.
+0x5d9a3bd	7	movzbl 0xb4(%rdx),%edx	edx = zero-extended byte at +0xb4 of the element - the being_compacted flag of FileMetaData in this build.
+0x5d9a3c4	2	test %dl,%dl	the only test of the flag; the byte value itself is what gets returned.
+0x5d9a3c6	2	je 5d9a3b0	flag == 0: keep walking.
+0x5d9a3c8	2	mov %edx,%eax	the shared exit: whatever is in edx becomes the returned byte (the flag, or 0).
+0x5d9a3ca	1	ret	return; the value leaves in al/eax, zero-extended by the movzbl above.
+0x5d9a3cb	2	xor %edx,%edx	the empty-vector path: edx = 0 so the shared exit answers false.
+0x5d9a3cd	2	jmp 5d9a3c8	join the shared exit - one return site serves both the empty and the not-found cases.
