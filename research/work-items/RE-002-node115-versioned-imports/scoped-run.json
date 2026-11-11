@@ -1,0 +1,68 @@
+{
+  "python": "3.11.11 (main, Apr  8 2025, 01:39:46) [GCC 12.2.0]",
+  "platform": "Linux-6.12.116-fly-x86_64-with-glibc2.36",
+  "readelf": "GNU readelf (GNU Binutils for Debian) 2.40",
+  "commands": [
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "tools/re002_node115_versioned_imports.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.31287573800000246,
+      "stdout": "{\n  \"derived\": {\n    \"imports\": [\n      {\n        \"binding\": 2,\n        \"dynsym_index\": 140,\n        \"dynsym_offset\": 4192,\n        \"dynsym_va\": 4192,\n        \"library\": \"libc.so.6\",\n        \"name\": \"pidfd_spawnp\",\n        \"section_index\": 0,\n        \"size\": 0,\n        \"symbol_name_offset\": 16990,\n        \"symbol_type\": 2,\n        \"value\": 0,\n        \"vernaux_offset\": 15020,\n        \"vernaux_va\": 15020,\n        \"verneed_offset\": 14172,\n        \"version\": \"GLIBC_2.39\",\n        \"version_flags\": 0,\n        \"version_hash\": 110531001,\n        \"version_index\": 20,\n        \"version_name_offset\": 27589,\n        \"versym_offset\": 13352,\n        \"versym_va\": 13352,\n        \"visibility\": 0\n      },\n      {\n        \"binding\": 2,\n        \"dynsym_index\": 168,\n        \"dynsym_offset\": 4864,\n        \"dynsym_va\": 4864,\n        \"library\": \"libc.so.6\",\n        \"name\": \"pidfd_getpid\",\n        \"section_index\": 0,\n        \"size\": 0,\n        \"symbol_name_offset\": 17429,\n        \"symbol_type\": 2,\n        \"value\": 0,\n        \"vernaux_offset\": 15020,\n        \"vernaux_va\": 15020,\n        \"verneed_offset\": 14172,\n        \"version\": \"GLIBC_2.39\",\n        \"version_flags\": 0,\n        \"version_hash\": 110531001,\n        \"version_index\": 20,\n        \"version_name_offset\": 27589,\n        \"versym_offset\": 13408,\n        \"versym_va\": 13408,\n        \"visibility\": 0\n      },\n      {\n        \"binding\": 1,\n        \"dynsym_index\": 286,\n        \"dynsym_offset\": 7696,\n        \"dynsym_va\": 7696,\n        \"library\": \"libstdc++.so.6\",\n        \"name\": \"_ZNSt18condition_variable4waitERSt11unique_lockISt5mutexE\",\n        \"section_index\": 0,\n        \"size\": 0,\n        \"symbol_name_offset\": 20180,\n        \"symbol_type\": 2,\n        \"value\": 0,\n        \"vernaux_offset\": 14412,\n        \"vernaux_va\": 14412,\n        \"verneed_offset\": 14092,\n        \"version\": \"GLIBCXX_3.4.30\",\n        \"version_flags\": 0,\n        \"version_hash\": 43513920,\n        \"version_index\": 44,\n        \"version_name_offset\": 27135,\n        \"versym_offset\": 13644,\n        \"versym_va\": 13644,\n        \"visibility\": 0\n      }\n    ],\n    \"selected_versions\": [\n      \"GLIBCXX_3.4.30\",\n      \"GLIBC_2.39\"\n    ],\n    \"table_census\": {\n      \"defined_nonempty_versioned\": 0,\n      \"symbols\": 510,\n      \"version_carriers\": 498,\n      \"version_indices\": 510\n    }\n  },\n  \"target\": {\n    \"path\": \"artifacts/node/115/hl-node\",\n    \"sha256\": \"a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301\",\n    \"size\": 105896032\n  }\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "readelf",
+        "--wide",
+        "--dyn-syms",
+        "artifacts/node/115/hl-node"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.016310933999989174,
+      "stdout": "140: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND pidfd_spawnp@GLIBC_2.39 (20)\n168: 0000000000000000     0 FUNC    WEAK   DEFAULT  UND pidfd_getpid@GLIBC_2.39 (20)\n286: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND _ZNSt18condition_variable4waitERSt11unique_lockISt5mutexE@GLIBCXX_3.4.30 (44)\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "tools/re002_node115_versioned_imports.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.2273529440000175,
+      "stdout": "packet matches authenticated target: 3 selected imports\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/usr/local/bin/python3",
+        "tests/test_re002_node115_versioned_imports.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.010313814999904,
+      "stdout": "",
+      "stderr": "test_authenticated_packet (__main__.VersionedImportsTest.test_authenticated_packet) ... ok\ntest_binding_corruption_changes_join (__main__.VersionedImportsTest.test_binding_corruption_changes_join) ... ok\ntest_exact_named_bindings (__main__.VersionedImportsTest.test_exact_named_bindings) ... ok\ntest_symbol_name_corruption_changes_join (__main__.VersionedImportsTest.test_symbol_name_corruption_changes_join) ... ok\ntest_target_corruption_rejected (__main__.VersionedImportsTest.test_target_corruption_rejected) ... ok\ntest_version_flags_corruption_changes_join (__main__.VersionedImportsTest.test_version_flags_corruption_changes_join) ... ok\ntest_version_index_corruption_rejected (__main__.VersionedImportsTest.test_version_index_corruption_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 0.855s\n\nOK\n"
+    },
+    {
+      "command": [
+        "readelf",
+        "--version"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.0034934970000222165,
+      "stdout": "GNU readelf (GNU Binutils for Debian) 2.40\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis program is free software; you may redistribute it under the terms of\nthe GNU General Public License version 3 or (at your option) any later version.\nThis program has absolutely no warranty.\n",
+      "stderr": ""
+    }
+  ],
+  "sha256": {
+    "tools/re002_node115_versioned_imports.py": "2932527dc0da00511c8cb47877467e62aa71047e70710f6884558db135ee6044",
+    "tools/foundation_libstdcxx_abi.py": "b5f0a1ce1b4fff32ad7a131dee31ff57914599e25949dcb61b1ef0994a6c34ae",
+    "tests/test_re002_node115_versioned_imports.py": "b97e05626bff27715c5437e4ca2e5cee44b33dc4af8be40edc79918268a2db2d",
+    "research/work-items/RE-002-node115-versioned-imports/evidence.json": "6b0639432d0ad71ca2d2ad692bda705204aeca702179bb3100b5900cd0f37b78",
+    "research/work-items/RE-002-node115-versioned-imports/readelf-crosscheck.txt": "f5e34e5018c085931943dc0ed897dc676fc235fe64e94683dc1d0be6ef4c0a5c"
+  }
+}
