@@ -38,7 +38,7 @@ Byte percentages cover the authenticated comparison registry, including dependen
 they do not measure whole-node completion or remaining engineering effort.
 
 Registered bounded Rust work occurs in **20/23 component work areas**
-(**88 implementation paths**). These are fragment registrations, not completed components.
+(**89 implementation paths**). These are fragment registrations, not completed components.
 Each fragment keeps its own #115 contract; an integrated node executable remains unaccepted.
 
 <details open>
