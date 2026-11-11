@@ -1,0 +1,87 @@
+{
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "bound_context": {
+    "symbol": "_ZN7rocksdb18CompactionJobStats5ResetEv",
+    "demangled": "rocksdb::CompactionJobStats::Reset()",
+    "mangled_parameters": "Ev",
+    "member": "6cca28ae25285154-compaction_job_stats_impl.o",
+    "rlib": "liblibrocksdb_sys-b032f986857674dc.rlib",
+    "crate": "librocksdb-sys",
+    "candidate_versions": ["0.11.0+8.1.1"],
+    "start": "0x61bd590",
+    "end": "0x61bd60f",
+    "size_bytes": 127,
+    "fde": "0x61bd590..0x61bd60f",
+    "raw_equal": true,
+    "relocations": [],
+    "identical_source_count": 3,
+    "source_offset": 3808857,
+    "target_body_sha256": "cfcbe3988ac0d3eeaf68f8d2bb01aa116ee041e03bbd57ab23818ea23a03c009"
+  },
+  "register_roles": {
+    "rdi": "&this - the CompactionJobStats object, the only argument; the receiver is passed by pointer and never re-loaded",
+    "rax": "zeroed by `xor %eax,%eax` for the two-byte store, then reused twice to hold a std::string data pointer loaded out of the object (offset +0xc0, then +0xe0)",
+    "xmm0": "zeroed once by `pxor %xmm0,%xmm0` and reused by all twelve 16-byte `movups` stores; never reloaded",
+    "ax": "the low 16 bits of the zeroed rax, the source of the `mov %ax,0x48(%rdi)` store"
+  },
+  "write_set": {
+    "total_rows": 18,
+    "bytes_touched": 220,
+    "fields": {
+      "16_byte (movups)": [0, 16, 32, 48, 80, 96, 112, 128, 144, 160, 176, 256],
+      "8_byte": [64, 200, 232],
+      "2_byte": [72]
+    },
+    "pointer_following_rows": [
+      {"index": 14, "pointer_member": "0xc0", "width": 1, "meaning": "first std::string data pointer (inlined clear(): NUL at buffer[0])"},
+      {"index": 16, "pointer_member": "0xe0", "width": 1, "meaning": "second std::string data pointer (inlined clear())"}
+    ],
+    "preserved": [
+      "the two std::string data pointers at +0xc0 and +0xe0",
+      "the two std::string capacities at +0xd0 and +0xf0 (the 16-byte movups strides skip both)",
+      "+0x4a..+0x4f, untouched because the store at +0x48 is two bytes wide and the next store starts at +0x50",
+      "every byte of the object at or beyond +0x110"
+    ],
+    "gap_note": "the object is written in 16/8/2-byte pieces, so the write set has no single stride; the union of the rows is what a consumer must treat as undefined afterwards"
+  },
+  "caller_census": {
+    "direct_calls": 8,
+    "tail_jumps": 0,
+    "caller_fdes": 8,
+    "consumers": {"discarded": 8},
+    "sites_reading_the_return": 0,
+    "argument_forms": {"lea": 7, "register-copy": 1},
+    "contract": "void - the result is the mutation of *this. The register the body leaves behind holds the second std::string data pointer (loaded at 0x61bd5f2), not a value, and no caller reads it.",
+    "call_sites": [
+      {"site": "0x5deb6c8", "fde": "0x5deb5a0..0x5deb8ea", "argument": "lea rdi, [rbp - 0x180]"},
+      {"site": "0x5debacf", "fde": "0x5deb9c0..0x5debc68", "argument": "lea rdi, [rbp - 0x180]"},
+      {"site": "0x5df2e26", "fde": "0x5df2380..0x5df3659", "argument": "mov rdi, rbx"},
+      {"site": "0x5df3ebb", "fde": "0x5df3dd0..0x5df64b6", "argument": "lea rdi, [rbp - 0x6e0]"},
+      {"site": "0x5dfd1e0", "fde": "0x5dfd120..0x5dfd41b", "argument": "lea rdi, [rsp + 0x68]"},
+      {"site": "0x5dfd544", "fde": "0x5dfd4a0..0x5dfd77b", "argument": "lea rdi, [rsp + 0x68]"},
+      {"site": "0x5dfe710", "fde": "0x5dfe640..0x5dfe8c1", "argument": "lea rdi, [rdi + 0x60] - the object is a member of the caller's own receiver (a sub-object at +0x60)"},
+      {"site": "0x5e4380f", "fde": "0x5e41fa0..0x5e44899", "argument": "lea rdi, [rbp - 0x8b0]"}
+    ],
+    "method": "raw byte scan of .text for the `e8 rel32` direct-call encoding whose target is the routine entry, each hit confirmed by decoding exactly 5 bytes; forward/backward context decoded in <=0x180-byte windows; FDE attribution from .eh_frame; rax taint walk with the caller-saved set killed at every intervening call.",
+    "reachability_note": "Every site reaches its (empty) use on the fall-through path inside the owning FDE within a handful of instructions, so no site's answer is path-dependent. The two callers that stack two consecutive Reset calls (0x5dfd1e0 and 0x5dfd544) each pass a distinct object ([rsp + 0x68] of different frames)."
+  },
+  "observations": [
+    "The routine is a leaf: no call, no indirect branch, no branch of any kind, no relocation, and no stack frame - its whole effect is 18 stores to memory that either the object or the object's own pointers name.",
+    "It is an inlined aggregate zeroing: `pxor`/`xor` produce the zeros once, then twelve 16-byte `movups` plus three 8-byte and one 2-byte store cover the object, skipping +0x4a..+0x4f and the 16-byte string metadata blocks at +0xc0 and +0xe0.",
+    "Two of the eighteen stores are argument-dependent: the body loads a `std::string` data pointer out of the object at +0xc0 / +0xe0 and writes a single NUL through it. That is an inlined `std::string::clear()` - the size word at +0xc8 / +0xe8 is zeroed, the pointer and capacity are preserved, and the buffer keeps its allocation.",
+    "Because those two writes follow the object's own contents, the write set is not expressible as a fixed address list: it is a fixed object offset list plus two pointer dereferences. The packet proves both halves - the closed-form model and the decoded-bytes emulator agree row for row on all 300 ledger rows, and the field rows are identical in every one of them.",
+    "The routine is idempotent (all eighteen writes store zero), which the packet tests explicitly.",
+    "A self-referential (SSO) string is handled the same way: the object's pointer names an address inside the object, the NUL lands there, and the write count is unchanged at 18 - no size-dependent branch exists.",
+    "The object offset +0x48 is written with a two-byte store while every neighbouring field is 16 or 8 bytes wide, so bytes +0x4a..+0x4f survive a Reset. This is the sort of detail a reconstruction-from-prose would get wrong.",
+    "All eight callers discard the register the body leaves in rax (the census taint walk drops it within a few instructions or at the next call), confirming the void contract; none of them reads it as a value."
+  ],
+  "unknowns": [
+    "Which rocksdb field each offset names in 0.11.0+8.1.1 is not recovered: the offsets are fixed by the binary, the field names are not. The two `std::string` members at +0xc0/+0xe0 are inferred from the load-then-one-byte-zero shape and from the 16-byte gap that follows each, which is what libstdc++'s SSO layout produces.",
+    "The eight caller FDEs carry no symbols in the stripped image, so they are identified by address range only; no claim is made about which method each one is. The member-object call at 0x5dfe710 is the only one whose `rdi` is derived from the caller's own receiver.",
+    "The three identical source copies the vendor census records (identical_source_count = 3) are not enumerated individually; the reconstruction is bound to the sha256 of the body."
+  ],
+  "claim_anchors": "semantics.tsv: 24 anchors, one per instruction, contiguous over the whole 127-byte window (sizes sum to 127); verify.py re-decodes each anchor's bytes with Capstone (exactly one instruction, same length, same mnemonic family) and matches its text against the committed excerpt",
+  "ledger": "cases.tsv: 300 stratified rows (all-zero, all-0xFF, alternating, five object lengths, three buffer fill values, self-referential vs arena strings, random patterns) with the model and the decoded-bytes answer for each; 0 disagreements",
+  "sweep": "verify.py: 150 further cases over {5 object lengths} x {5 fill bytes} x {2 string shapes} x {3 buffer bytes}, plus an idempotence check and three doctored-excerpt checks that prove the emulator executes the committed bytes rather than echoing the model"
+}

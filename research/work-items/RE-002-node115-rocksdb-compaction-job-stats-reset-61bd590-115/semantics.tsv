@@ -1,0 +1,25 @@
+address	size	instruction	claim
+0x61bd590	4	endbr64	CET entry pad; no register or memory effect.
+0x61bd594	2	xor %eax,%eax	eax = 0 - the source of the `mov %ax,0x48(%rdi)` two-byte store.
+0x61bd596	4	pxor %xmm0,%xmm0	xmm0 = 0 - one 128-bit zero register reused by all twelve `movups` stores.
+0x61bd59a	8	movq $0x0,0x40(%rdi)	the 8-byte word at +0x40 is cleared.
+0x61bd5a2	4	mov %ax,0x48(%rdi)	the 2-byte word at +0x48 is cleared; it is deliberately narrower than the `movups` strides, so the field at +0x4a is not touched.
+0x61bd5a6	7	mov 0xc0(%rdi),%rax	rax = the pointer stored at +0xc0 - the data pointer of the first `std::string` member. This is the first of the body's two argument-dependent addresses: the write targets depend on the object's own contents.
+0x61bd5ad	11	movq $0x0,0xc8(%rdi)	the 8-byte word at +0xc8 is cleared - the string's *size* field; the pointer at +0xc0 and the capacity at +0xd0 are preserved, which is `std::string::clear()`.
+0x61bd5b8	3	movups %xmm0,(%rdi)	the 16 bytes at +0x00 are cleared (xmm0 is zero; `movups` has no disp because the displacement is 0).
+0x61bd5bb	4	movups %xmm0,0x10(%rdi)	the 16 bytes at +0x10 are cleared.
+0x61bd5bf	4	movups %xmm0,0x20(%rdi)	the 16 bytes at +0x20 are cleared.
+0x61bd5c3	4	movups %xmm0,0x30(%rdi)	the 16 bytes at +0x30 are cleared.
+0x61bd5c7	4	movups %xmm0,0x50(%rdi)	the 16 bytes at +0x50 are cleared - the first field after the two-byte store, confirming +0x4a..+0x4f is skipped on purpose.
+0x61bd5cb	4	movups %xmm0,0x60(%rdi)	the 16 bytes at +0x60 are cleared.
+0x61bd5cf	4	movups %xmm0,0x70(%rdi)	the 16 bytes at +0x70 are cleared.
+0x61bd5d3	7	movups %xmm0,0x80(%rdi)	the 16 bytes at +0x80 are cleared.
+0x61bd5da	7	movups %xmm0,0x90(%rdi)	the 16 bytes at +0x90 are cleared.
+0x61bd5e1	7	movups %xmm0,0xa0(%rdi)	the 16 bytes at +0xa0 are cleared.
+0x61bd5e8	7	movups %xmm0,0xb0(%rdi)	the 16 bytes at +0xb0 are cleared - the last field before the first string.
+0x61bd5ef	3	movb $0x0,(%rax)	the first byte of the first string's buffer is set to NUL. The buffer is the one the object pointed at, so `clear()` leaves a terminated empty string; the buffer itself, at whatever address, is not part of the object.
+0x61bd5f2	7	mov 0xe0(%rdi),%rax	rax = the pointer stored at +0xe0 - the second `std::string`'s data pointer.
+0x61bd5f9	11	movq $0x0,0xe8(%rdi)	the 8-byte size word at +0xe8 is cleared; +0xe0 and +0xf0 are preserved.
+0x61bd604	3	movb $0x0,(%rax)	NUL at the start of the second string's buffer.
+0x61bd607	7	movups %xmm0,0x100(%rdi)	the last 16-byte field at +0x100 is cleared. The window ends at +0x10f, so the object's tail beyond +0x110 is not touched.
+0x61bd60e	1	ret	return; there is no return value - the method's result is the mutation.
