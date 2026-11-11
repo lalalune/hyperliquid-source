@@ -55,8 +55,9 @@ controls, not behavioral equivalence or tests of a reconstructed serializer.
 ## Results and limits
 
 Actual execution results are retained separately in `local-proof.json`.
-Independent required validation has not run. No hosted-CI or full-suite pass
-is claimed. Imported binary bytes retain upstream rights; newly authored code
+The local proof predates independent validation; independent check results are
+reported in the PR and controller validation record. No hosted-CI or full-suite
+pass is claimed here. Imported binary bytes retain upstream rights; newly authored code
 and documentation use the repository MIT terms. There is no whole-component
 function denominator, Rust implementation, source-built node, helper closure,
 network/chain operation, signing or paid dataset. All gates stay false.
