@@ -1,0 +1,32 @@
+Relocations for the error-wrap dispatch window (from .rela.dyn and .rela.plt):
+
+the routine 0x50df400 itself: no R_X86_64_RELATIVE record carries it as
+  addend; no whole-file stored qword equals it
+
+The window is reached only through its 9 direct calls (see
+census.py output, reproduced by verify.py).
+
+Records the body's own transfers resolve through:
+
+000000000064df4a0 R_X86_64_RELATIVE 000000000635de30
+  the GOT slot the discriminant slow path calls through
+  (call *0x64df4a0(%rip) at 0x50df48c); resolved target
+  0x635de30, the tagged-drop callee (FDE
+  0x635de30..0x635ded5)
+000000000064df4c0 R_X86_64_RELATIVE 0000000001680cab
+  the GOT slot the landing pad's closing call goes through
+  (call *0x64df4c0(%rip) at 0x50df4b0); resolved target
+  0x1680cab, a 20-byte message stub (FDE
+  0x1680cab..0x1680cbf) reached only if _Unwind_Resume returns
+000000000064df520 R_X86_64_RELATIVE 0000000001681da0
+  the GOT slot the descriptor thunk at 0x5616320 tail-jumps
+  through; resolved target 0x1681da0 (FDE
+  0x1681da0..0x1681db9)
+000000000064e0a48 R_X86_64_RELATIVE 0000000005c3f000
+  the GOT slot the descriptor's fourth word is loaded from
+  (mov 0x64e0a48(%rip),%rax at 0x50df420); resolved value
+  0x5c3f000 (FDE 0x5c3f000..0x5c3f100)
+00000000064ee178 R_X86_64_JUMP_SLOT _Unwind_Resume@GCC_3.0
+  the .got.plt slot behind the PLT stub at 0x63f0a50, which
+  the landing pad calls at 0x50df4ab after the cleanup
+  callee 0x50f0690
