@@ -36,6 +36,7 @@ START = 0x61BD590
 END = 0x61BD60F
 SIZE = END - START
 DIGEST = "cfcbe3988ac0d3eeaf68f8d2bb01aa116ee041e03bbd57ab23818ea23a03c009"
+SNAP_REGIONS = ((0x100000, 0x100200), (0x200000, 0x200200))   # object + string arena
 CALLS = 8
 CALLER_FDES = 8
 WRITES = 18
@@ -176,6 +177,11 @@ def check_census():
 
 def check_model():
     tool = load("tool", ROOT / "tools" / "rocksdb_compaction_job_stats_reset_61bd590_115.py")
+    # the differential must compare where the staged bytes are, never a nominal
+    # window: a revision that compared `snapshot(0, 0x40)` proved nothing, because
+    # the object is staged at SELF and nothing writes the low addresses.
+    assert tool.SNAP_REGIONS == ((tool.SELF, tool.SELF + 0x200),
+                                 (tool.ARENA, tool.ARENA + 0x200)), tool.SNAP_REGIONS
     cases = tool.generate_cases(seed=7)
     assert len(cases) == 300, len(cases)
     canon = None
@@ -314,7 +320,8 @@ def main():
     print(f"verify OK: {rows} manifest rows, {size}-byte window sha {DIGEST[:12]}..., "
           f"{anchors} claim anchors, {nins} instructions, {calls} calls / {fdes} caller "
           f"FDEs {consumers}, argument forms {args}, {cases}-row ledger + {swept}-case "
-          f"sweep agree (write set {WRITES} rows / {TOUCHED} bytes, idempotent), "
+          f"sweep agree (write set {WRITES} rows / {TOUCHED} bytes, idempotent, image "
+          f"differential over {len(SNAP_REGIONS)} staged regions), "
           f"{loads} loads / {stores} stores static and executed; fidelity: {fidelity}")
     return 0
 

@@ -24,7 +24,7 @@ sys.path.insert(0, str(ROOT))
 from tools.rocksdb_compaction_job_stats_reset_61bd590_115 import (  # noqa: E402
     START, END, PACKET, SELF, ARENA, ZERO16, ZERO8, ZERO2, DEREF,
     Memory, model_writes, decoded, build_case, agree, apply_writes, touched,
-    generate_cases, instructions,
+    image, SNAP_REGIONS, generate_cases, instructions,
 )
 
 BINARY = ROOT / "artifacts" / "node" / "115" / "hl-node"
@@ -287,6 +287,61 @@ class FidelityTests(unittest.TestCase):
             got.words = dict(mem.words)
             decoded(got, SELF, log=True)
             self.assertEqual(want, got.log)
+
+    def test_the_image_comparison_covers_the_staged_regions(self):
+        """The differential must compare where the bytes are. An earlier revision
+        compared the low 64 bytes of the address space, which nothing writes, so
+        the \"final image matches\" claim proved nothing."""
+        img = image(build_case(bytes(0x130)))
+        self.assertEqual(min(img), SELF)
+        for addr in (SELF, SELF + 0x40, SELF + 0x100, SELF + 0x1FF,
+                     ARENA, ARENA + 0x100, ARENA + 0x1FF):
+            self.assertIn(addr, img, hex(addr))
+        for addr in (0x0, 0x10, 0x3F, SELF - 1):
+            self.assertNotIn(addr, img, hex(addr))
+        self.assertEqual(set(SNAP_REGIONS), {(SELF, SELF + 0x200),
+                                            (ARENA, ARENA + 0x200)})
+
+    def test_the_image_comparison_detects_one_wrong_byte(self):
+        """A single byte the model does not predict must be found - including in
+        the last field, which a 0x40-byte window would have missed."""
+        mem = build_case(bytes(0x130))
+        expected = apply_writes(mem, model_writes(mem, SELF))
+        got = Memory()
+        got.words = dict(mem.words)
+        decoded(got, SELF, log=True)
+        for addr in (SELF + 0x100, SELF + 0x1F0, ARENA + 0x100):
+            probe = Memory()
+            probe.words = dict(got.words)
+            probe.store8(addr, 0x5A, log=False)
+            diff = [a for a in image(expected) if image(expected)[a] != image(probe)[a]]
+            self.assertEqual(diff, [addr], f"the differential missed {addr:#x}")
+
+    def test_the_readme_pseudocode_accounts_for_every_written_byte(self):
+        """The pseudocode is the reader's map of the write set. An earlier revision
+        listed the +0xe8 store twice. This ties the prose to the artifact: each
+        explicit store appears once, the three memset16 calls cover the twelve
+        16-byte fields, and the byte total equals the 220 bytes the routine writes."""
+        text = (PACKET / "README.md").read_text()
+        block = text.split("```c", 1)[1].split("```", 1)[0]
+        explicit = re.findall(
+            r"\*\(uint(\d+)_t\*\)\(this \+ 0x([0-9a-f]+)\) = 0;", block)
+        self.assertEqual(sorted(int(o, 16) for _, o in explicit),
+                         [0x40, 0x48, 0xc8, 0xe8])
+        for _, off in explicit:
+            self.assertEqual(
+                len(re.findall(rf"this \+ 0x{int(off, 16):x}\)", block)), 1,
+                f"offset 0x{int(off, 16):x} appears more than once")
+        memsets = re.findall(r"memset16\(this \+ 0x([0-9a-f]+), 0, 0x([0-9a-f]+)\)",
+                             block)
+        self.assertEqual([(int(a, 16), int(b, 16)) for a, b in memsets],
+                         [(0x00, 0x40), (0x50, 0x70), (0x100, 0x10)])
+        self.assertEqual(len(re.findall(r"\*\(char\*\)this->s\d\.data = '\\0';", block)), 2)
+        # the memset16 length argument is already a byte count (0x40 bytes = the
+        # four 16-byte fields at 0x00,0x10,0x20,0x30); the two NULs are one byte
+        total = sum(int(w) // 8 for w, _ in explicit) \
+            + sum(int(b, 16) for _, b in memsets) + 2
+        self.assertEqual(total, TOUCHED)
 
 
 class CensusTests(unittest.TestCase):

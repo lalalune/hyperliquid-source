@@ -45,7 +45,12 @@ DEREF = (0xC0, 0xE0)          # the two std::string data pointers
 
 SELF = 0x100000               # where the ledger stages the object
 ARENA = 0x200000              # where it stages the two string buffers
-SNAP = 0x40                   # the byte window the differential compares
+# The differential compares the bytes the routine can reach: the whole object and
+# the arena the two std::string buffers live in. It must NOT compare a nominal
+# window: an earlier revision compared `snapshot(0, 0x40)` - the low 64 bytes of
+# the address space, which nothing writes - so the "final image matches" claim was
+# vacuous. The region below is where the staged bytes actually are.
+SNAP_REGIONS = ((SELF, SELF + 0x200), (ARENA, ARENA + 0x200))
 
 INSN = re.compile(r"^\s*([0-9a-f]+):\t([0-9a-f ]+)\t(.*)$")
 # an objdump line's address + byte column, whether or not it carries instruction
@@ -102,6 +107,17 @@ class Memory:
 
     def snapshot(self, lo, hi):
         return {a: self.load8(a) for a in range(lo, hi)}
+
+
+def image(mem, regions=SNAP_REGIONS):
+    """{address: byte} over the regions the routine can reach, read straight from
+    the word store so the check has no side effect on the load/store counters."""
+    out = {}
+    for lo, hi in regions:
+        for a in range(lo, hi):
+            word, shift = a & ~7, 8 * (a & 7)
+            out[a] = (mem.words.get(word, 0) >> shift) & 0xFF
+    return out
 
 
 def _split_operands(text):
@@ -400,13 +416,12 @@ def agree(mem, self_ptr=SELF, excerpt=None):
     got = Memory()
     got.words = dict(mem.words)
     decoded(got, self_ptr, excerpt=excerpt, log=True)
-    snap_want = expected.snapshot(0, SNAP)
-    snap_got = got.snapshot(0, SNAP)
-    if snap_want != snap_got:
-        for a in sorted(snap_want):
-            if snap_want[a] != snap_got[a]:
-                return (False, f"byte 0x{a:x}: model {snap_want[a]:#x} vs bytes "
-                               f"{snap_got[a]:#x}", want, got.log)
+    img_want, img_got = image(expected), image(got)
+    if img_want != img_got:
+        for a in sorted(img_want):
+            if img_want[a] != img_got[a]:
+                return (False, f"byte 0x{a:x}: model {img_want[a]:#x} vs bytes "
+                               f"{img_got[a]:#x}", want, got.log)
     if want != got.log:
         return False, f"write log differs: {want} vs {got.log}", want, got.log
     return True, "", want, got.log

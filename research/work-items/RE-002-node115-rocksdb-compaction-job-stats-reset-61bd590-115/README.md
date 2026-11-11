@@ -18,16 +18,15 @@ Reconstruction of one vendor body of the pinned node #115 artifact:
 ```c
 // rdi = this
 void CompactionJobStats::Reset() {
-    // twelve 16-byte stores skip +0x4a..+0x4f and the string metadata blocks
-    *(uint64_t*)(this + 0x40) = 0;          // 8-byte
+    // The 0x4a..0x4f bytes survive because the store at +0x48 is two bytes wide.
+    *(uint64_t*)(this + 0x40) = 0;          // 8-byte field
     *(uint16_t*)(this + 0x48) = 0;          // 2-byte only - +0x4a..+0x4f survive
-    std::string_clear(&this->s1);           // inlined: *(uint64_t*)(this+0xc8) = 0;
-                                            //          *(char*)this->s1.data = '\0';
+    *(uint64_t*)(this + 0xc8) = 0;          // string 1 size; +0xc0/+0xd0 kept
     memset16(this + 0x00, 0, 0x40);         // 0x00,0x10,0x20,0x30
     memset16(this + 0x50, 0, 0x70);         // 0x50,0x60,0x70,0x80,0x90,0xa0,0xb0
-    *(uint64_t*)(this + 0xe8) = 0;          // 8-byte
-    std::string_clear(&this->s2);           // inlined: *(uint64_t*)(this+0xe8) = 0;
-                                            //          *(char*)this->s2.data = '\0';
+    *(char*)this->s1.data = '\0';           // inlined std::string::clear()
+    *(uint64_t*)(this + 0xe8) = 0;          // string 2 size; +0xe0/+0xf0 kept
+    *(char*)this->s2.data = '\0';           // inlined std::string::clear()
     memset16(this + 0x100, 0, 0x10);        // 0x100
 }
 ```
@@ -127,6 +126,13 @@ re-decoded with Capstone), the census (8 calls / 8 FDEs / the map above, recompu
 and `.eh_frame`), the model-vs-decoded ledger, a 150-case sweep, idempotence, three
 doctored-excerpt checks that prove the emulator executes the committed bytes rather than echoing
 the model, and the static memory effect (2 loads / 18 stores in 24 instructions, 127 bytes).
+
+The differential has two halves, and both must have teeth: the emulator's store log must equal the
+model's 18 rows in program order, **and** the resulting memory image must match. The image comparison
+covers the two regions where the staged bytes are - the object (`0x100000..0x100200`) and the string
+arena (`0x200000..0x200200`) - not a nominal window; a revision that compared the low 64 bytes of the
+address space proved nothing, because nothing writes there. Three negative tests corrupt one byte at
+`+0x100`, at `+0x1f0` and in the arena and require the comparison to report exactly that address.
 
 As in the sibling packets, a doctored excerpt must change the answer: widening the two-byte store
 to `mov %eax,0x4c(%rdi)` or moving the last `movups` to `0x120(%rdi)` must divert the write set,
