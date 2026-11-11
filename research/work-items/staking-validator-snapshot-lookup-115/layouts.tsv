@@ -1,0 +1,15 @@
+structure	field	offset	meaning
+lookup argument	cap or niche	+0x00	0x8000000000000000 selects the B-tree form, any other value is the ring capacity
+lookup argument	buf or root	+0x08	ring buffer pointer, or B-tree root
+lookup argument	head or height	+0x10	ring head slot, or B-tree height
+lookup argument	length	+0x18	number of snapshots
+lookup argument	epoch	+0x58	key compared with the snapshot epochs, by equality
+ring element	size	0x38	u64 epoch then a 0x30 byte snapshot value
+snapshot value	cap or niche	+0x00	niche selects an address B-tree, else a ring of 0x68 byte elements
+snapshot value	buf or root	+0x08	
+snapshot value	head or height	+0x10	
+snapshot value	length	+0x18	
+vec element	address	+0x40	20 bytes compared as 16 + 4
+tree value	address	+0x20	20 bytes in a 0x48 byte value, 32 byte keys
+outer node	keys / parent / len / edges	+0x218 / +0x210 / +0x272 / +0x278	u64 keys, 0x30 byte values at +0
+inner node	vals / parent / len / edges	+0x168 / +0x160 / +0x482 / +0x488	32 byte keys at +0, 0x48 byte values

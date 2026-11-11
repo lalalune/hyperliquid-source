@@ -1,0 +1,99 @@
+{
+  "target": {
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "size": 105896032,
+    "release": "node #115 Linux x86-64"
+  },
+  "source_fde": {
+    "start": "0x3aa8840",
+    "end": "0x3aa887f",
+    "length": 63,
+    "sha256": "586290b2ef468005b52e09f0d88c98e497fc1e6e9fc14ff8ba595670ea86ec2d",
+    "fde_offset": "0xe3a074",
+    "cie_offset": "0xca6ed8",
+    "raw_fde_sha256": "69e6a2cbdeddba4618c24d37eb27d45348b4dc6b7f5edd4b5d93c13ddbd8bab2"
+  },
+  "observed_dispatch": {
+    "input_read": {
+      "address": "0x3aa8840",
+      "bytes": "0fb607",
+      "statement": "zero-extend one byte from the initial RDI address"
+    },
+    "branches": [
+      {
+        "site": "0x3aa8846",
+        "bytes": "7503",
+        "predicate": "input byte is not 0x16",
+        "taken_to": "0x3aa884b",
+        "fallthrough_to": "0x3aa8848"
+      },
+      {
+        "site": "0x3aa884f",
+        "bytes": "740c",
+        "predicate": "input byte is 0x12",
+        "taken_to": "0x3aa885d"
+      },
+      {
+        "site": "0x3aa8854",
+        "bytes": "7513",
+        "predicate": "input byte is not 0x15",
+        "taken_to": "0x3aa8869"
+      },
+      {
+        "site": "0x3aa885b",
+        "bytes": "750c",
+        "predicate": "qword at initial RDI + 0x18 is nonzero",
+        "taken_to": "0x3aa8869"
+      }
+    ],
+    "direct_calls": [
+      {
+        "site": "0x3aa885d",
+        "instruction_bytes": "e8ce9d0b00",
+        "target": "0x3b62630",
+        "target_fde": {
+          "start": "0x3b62630",
+          "end": "0x3b627ed",
+          "length": 445,
+          "sha256": "006887bce411358da1d17f82cdbe848d416b2bc9744755571542ac77b584ec66",
+          "fde_offset": "0x123bde0",
+          "cie_offset": "0x103d604",
+          "raw_fde_sha256": "09cb59fbca4907621aa936984f1c796e9a3142cf4114edd4eee0ff1ac5c63c48"
+        }
+      },
+      {
+        "site": "0x3aa8875",
+        "instruction_bytes": "e866ee0b00",
+        "target": "0x3b676e0",
+        "target_fde": {
+          "start": "0x3b676e0",
+          "end": "0x3b67744",
+          "length": 100,
+          "sha256": "c4acc66afa5c0b792035319bb33480d2c98de033ac3dda4b7f881d55c8a10bad",
+          "fde_offset": "0x123cd68",
+          "cie_offset": "0x103d604",
+          "raw_fde_sha256": "4bb0dfcdf169a8708980ec5b9866e3ec1f75e732be0d5f6d212a3d2adbd6020b"
+        }
+      }
+    ],
+    "error_helper_arguments": {
+      "rdi": "initial RDI value is not overwritten before the call",
+      "rsi": {
+        "site": "0x3aa8870",
+        "bytes": "488d742407",
+        "addressing": "current RSP + 7"
+      },
+      "rdx": {
+        "site": "0x3aa8869",
+        "bytes": "488d15c8729c02",
+        "target": "0x646fb38",
+        "section": ".data.rel.ro",
+        "window_hex": "0000000000000000000000000000000001000000000000000000000000000000",
+        "window_sha256": "6cc4f0e930b34481d03a4134331852eaed66667e3b3d8605f7cd3777551d2b6f"
+      }
+    },
+    "excluded_cases": [
+      "input byte 0x16 reaches the zero-return branch before either call"
+    ]
+  }
+}

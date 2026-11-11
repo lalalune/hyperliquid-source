@@ -1,0 +1,443 @@
+{
+ "task": "RE-001",
+ "target": {
+  "local_copy": "work/hl-node-115.bin",
+  "node": 115,
+  "provenance_path": "artifacts/node/115/hl-node",
+  "reference_commit": "upstream main 05bc2de30",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+ },
+ "bounded_question": "What does the big FragmentedRangeTombstoneListCache control's _M_dispose 0x5f061b0 do to tear down the cache state at *(control+0x38): which sub-objects it frees, in what order, how the embedded sorted-unique clear at state+0x98 is run, and what its sort/tree/cleanable callees do?",
+ "excerpts": {
+  "big_dispose.txt": [
+   "0x5f061b0",
+   "0x5f06548"
+  ],
+  "introsort.txt": [
+   "0x5f053d0",
+   "0x5f05678"
+  ],
+  "insertion_sort.txt": [
+   "0x5f05120",
+   "0x5f051f5"
+  ],
+  "adjust_heap.txt": [
+   "0x5f04f80",
+   "0x5f0511d"
+  ],
+  "tree_destroy.txt": [
+   "0x5f059b0",
+   "0x5f05b79"
+  ],
+  "cleanable_drain.txt": [
+   "0x61bd0e0",
+   "0x61bd131"
+  ],
+  "cleanable_init.txt": [
+   "0x61bd0c0",
+   "0x61bd0d4"
+  ]
+ },
+ "census": {
+  "destroy_dispatch_0x5d35070": {
+   "calls": 654,
+   "jumps": 36
+  },
+  "release_helper_0x5d350c0": {
+   "calls": 1273,
+   "jumps": 25
+  },
+  "sorted_unique_insertion_0x5d497e0": {
+   "calls": 6,
+   "callsites": [
+    "0x5d5050f",
+    "0x5d50606",
+    "0x5d601ee",
+    "0x5d602e6",
+    "0x5d7a14b",
+    "0x5d7a310"
+   ]
+  },
+  "sorted_unique_introsort_0x5d4a3f0": {
+   "calls": 4,
+   "callsites": [
+    "0x5d4a5d9",
+    "0x5d504ef",
+    "0x5d601cf",
+    "0x5d7a128"
+   ]
+  },
+  "sorted_unique_clear_0x5d50470": {
+   "calls": 9,
+   "callsites": [
+    "0x5d60e07",
+    "0x5d616bf",
+    "0x5d789d1",
+    "0x5e2aa4d",
+    "0x5e7035b",
+    "0x5e7c967",
+    "0x5e9dd53",
+    "0x5f37332",
+    "0x5f914df"
+   ]
+  },
+  "small_slot0_0x5f04e20": {
+   "calls": 0,
+   "callsites": []
+  },
+  "big_slot0_0x5f04e30": {
+   "calls": 0,
+   "callsites": []
+  },
+  "big_slot1_0x5f04e50": {
+   "calls": 0,
+   "callsites": []
+  },
+  "small_slot1_0x5f04e60": {
+   "calls": 0,
+   "callsites": []
+  },
+  "small_slot3_0x5f04f60": {
+   "calls": 0,
+   "callsites": []
+  },
+  "big_slot3_0x5f04f70": {
+   "calls": 0,
+   "callsites": []
+  },
+  "adjust_heap_0x5f04f80": {
+   "calls": 2,
+   "callsites": [
+    "0x5f0560d",
+    "0x5f0564f"
+   ]
+  },
+  "insertion_sort_0x5f05120": {
+   "calls": 10,
+   "callsites": [
+    "0x5f06367",
+    "0x5f06496",
+    "0x5f0a6ff",
+    "0x5f0a81e",
+    "0x5f0ae27",
+    "0x5f0af39",
+    "0x5f0b237",
+    "0x5f0b366",
+    "0x5f115d5",
+    "0x5f116f1"
+   ]
+  },
+  "small_slot4_0x5f05380": {
+   "calls": 0,
+   "callsites": []
+  },
+  "introsort_0x5f053d0": {
+   "calls": 6,
+   "callsites": [
+    "0x5f055b9",
+    "0x5f06348",
+    "0x5f0a6e0",
+    "0x5f0ae03",
+    "0x5f0b218",
+    "0x5f115b6"
+   ]
+  },
+  "big_slot4_0x5f057c0": {
+   "calls": 0,
+   "callsites": []
+  },
+  "tree_destroy_0x5f059b0": {
+   "calls": 6,
+   "callsites": [
+    "0x5f05a41",
+    "0x5f06234",
+    "0x5f0a610",
+    "0x5f0acc4",
+    "0x5f0b104",
+    "0x5f10e24"
+   ]
+  },
+  "big_dispose_0x5f061b0": {
+   "calls": 0,
+   "callsites": []
+  },
+  "release_loop_helper_0x5f0a1dc": {
+   "calls": 2,
+   "callsites": [
+    "0x5f0b5c5",
+    "0x5f1020f"
+   ]
+  },
+  "small_dispose_0x5f0a290": {
+   "calls": 0,
+   "callsites": []
+  },
+  "arena_alloc_aligned_0x5f117a0": {
+   "calls": 0,
+   "callsites": []
+  },
+  "cleanable_init_0x61bd0c0": {
+   "calls": 103
+  },
+  "cleanable_drain_0x61bd0e0": {
+   "calls": 223,
+   "jumps": 32
+  },
+  "operator_delete_0x63f0d80": {
+   "calls": 11706,
+   "jumps": 898
+  },
+  "control_slot_functions_relative": {
+   "0x5f04e20": {
+    "qword_file_offset": "0x10c2d0",
+    "relative_site": "0x64cc750"
+   },
+   "0x5f04e30": {
+    "qword_file_offset": "0x10c240",
+    "relative_site": "0x64cc718"
+   },
+   "0x5f04e50": {
+    "qword_file_offset": "0x10c258",
+    "relative_site": "0x64cc720"
+   },
+   "0x5f04e60": {
+    "qword_file_offset": "0x10c2e8",
+    "relative_site": "0x64cc758"
+   },
+   "0x5f04f60": {
+    "qword_file_offset": "0x10c318",
+    "relative_site": "0x64cc768"
+   },
+   "0x5f04f70": {
+    "qword_file_offset": "0x10c288",
+    "relative_site": "0x64cc730"
+   },
+   "0x5f05380": {
+    "qword_file_offset": "0x10c330",
+    "relative_site": "0x64cc770"
+   },
+   "0x5f057c0": {
+    "qword_file_offset": "0x10c2a0",
+    "relative_site": "0x64cc738"
+   },
+   "0x5f061b0": {
+    "qword_file_offset": "0x10c270",
+    "relative_site": "0x64cc728"
+   },
+   "0x5f0a290": {
+    "qword_file_offset": "0x10c300",
+    "relative_site": "0x64cc760"
+   }
+  },
+  "relocation_records_total": 17,
+  "relocation_groups": {
+   "control_typeinfo_objects": "0x64cc590, 0x64cc5a0, 0x64cc5a8, 0x64cc5b8, 0x64cc5c0 (5 records)",
+   "control_vtables": "typeinfos 0x64cc710/0x64cc748 + slots 0x64cc718..0x64cc738 and 0x64cc750..0x64cc770 (12 records)"
+  },
+  "callers_tsv_rows": 14995,
+  "distinct_caller_fdes": {
+   "big_dispose_0x5f061b0": 0,
+   "introsort_0x5f053d0": 6,
+   "insertion_sort_0x5f05120": 5,
+   "adjust_heap_0x5f04f80": 1,
+   "tree_destroy_0x5f059b0": 6,
+   "cleanable_drain_0x61bd0e0": 151,
+   "cleanable_init_0x61bd0c0": 71,
+   "sorted_unique_clear_0x5d50470": 9
+  }
+ },
+ "literals": {
+  "control_counts": {
+   "address": "0x459b20",
+   "meaning": "use=1, weak=1 in one qword",
+   "value": "0x100000001"
+  }
+ },
+ "big_dispose_0x5f061b0": {
+  "argument": "rdi = big control (0x48 bytes)",
+  "entry": "state = *(control+0x38); when state is null the dispose returns at once, freeing nothing",
+  "fde": "pc=0x5f061b0..0x5f06548",
+  "phase_order": "embedded clear at state+0x98, then the +0x80 string list, then the +0x60 node list, then vector +0x30, then vector +0x18, then vector +0x00, then _ZdlPvm(state, 0xe8) via a tail jump",
+  "size_bytes": 920,
+  "state_layout": {
+   "+0x00": "vector 1 begin",
+   "+0x08": "vector 1 end",
+   "+0x10": "vector 1 cap",
+   "+0x18": "vector 2 begin",
+   "+0x20": "vector 2 end",
+   "+0x28": "vector 2 cap",
+   "+0x30": "vector 3 begin",
+   "+0x38": "vector 3 end",
+   "+0x40": "vector 3 cap",
+   "+0x48": "unknown (not touched by the dispose)",
+   "+0x50": "unknown (not touched by the dispose)",
+   "+0x58": "unknown (not touched by the dispose)",
+   "+0x60": "singly-linked list head (0x28-byte nodes)",
+   "+0x68": "unknown (not touched by the dispose)",
+   "+0x70": "unknown (not touched by the dispose)",
+   "+0x78": "unknown (not touched by the dispose)",
+   "+0x80": "std::list<std::string> sentinel (next +0x80, prev +0x88)",
+   "+0x90": "unknown (not touched by the dispose)",
+   "+0x98": "Cleanable head fn (embedded clear object starts here)",
+   "+0xa0": "Cleanable head arg1",
+   "+0xa8": "Cleanable head arg2",
+   "+0xb0": "Cleanable chain head",
+   "+0xb8": "clear flag byte",
+   "+0xc0": "pair-array begin",
+   "+0xc8": "pair-array end",
+   "+0xd0": "pair-array cap",
+   "+0xd8": "unknown (not touched by the dispose)",
+   "+0xe0": "unknown (not touched by the dispose)"
+  },
+  "state_pointer": "control+0x38 == cache object at control+0x10 plus 0x28",
+  "vectors_freed": "each with _ZdlPvm(begin, cap-begin); a null begin frees nothing; element types not touched, not modelled"
+ },
+ "embedded_clear_0x98": {
+  "dead_branch": "the duplicate-found path tests whether the write cursor equals the old end after subtracting 0x10; that test cannot be true because the read cursor never passes the old end (same note as the merged 0x5d50470 packet)",
+  "duplicates": "duplicate copies beyond new_end are never disposed; their storage is abandoned with the freed buffer",
+  "empty_range": "begin equal to end on the flag-set path: sort, unique and destroy phases skipped; reset and virtual phases still run",
+  "flag_clear": "flag byte zero: skip sort, unique, destroy, reset and virtual phases; free the pair-array buffer if non-null, then drain the Cleanable with 0x61bd0e0; head/chain left untouched",
+  "flag_set": "flag byte nonzero: flag cleared first, then the full clear runs; the later 0x61bd0e0 call at 0x5f0620a finds the zeroed head and returns at once",
+  "layout_matches": "RE-001-sorted-unique-clear-50470-115 object layout shifted by +0x98 (head +0x00, args +0x08/+0x10, chain +0x18, flag +0x20, pairs +0x28/+0x30/+0x38)",
+  "null_head": "a null head fn skips the head call AND the chain walk: the chain nodes are neither called nor deleted, they are abandoned under the zeroed pointer; head and chain are still zeroed",
+  "per_element": "call the element +0x08 qword as a function with the element +0x00 qword as argument, in sorted array order",
+  "range": "[begin, new_end) where new_end is one past the last kept element; on the no-duplicate path new_end is the old end",
+  "reset": "pair-array end (+0xc8) is set to begin when it differs",
+  "virtual_phase": "when +0x98 is non-null, call it with (+0xa0, +0xa8), then walk the +0xb0 chain calling each node fn with (node+0x08, node+0x10) and deleting the node with size 0x20, then zero +0x98 and +0xb0"
+ },
+ "sort_phase": {
+  "comparison": "ascending by unsigned (first qword, second qword)",
+  "depth_argument": "2 times floor(log2(element_count)) for element_count >= 1, computed with bsr; the literal -2 left in rdx when the byte count is below 16",
+  "fallback": "depth 0: make-heap over the range (adjust_heap from (n-2)/2 down to 0) then sort-heap (swap top with last, re-adjust); adjust_heap 0x5f04f80 is called only from the introsort fallback (2 sites)",
+  "final_insertion_sort": "byte count at most 0x100 (16 elements): insertion sort 0x5f05120 with (begin, end); otherwise 0x5f05120 with (begin, begin+0x100) and the inlined unguarded insertion tail over [begin+0x100, end); the tail has no lower-bound check and relies on the introsort partition sentinel",
+  "first_call": "introsort 0x5f053d0 with (begin, end, depth)",
+  "introsort_early_return": "byte count at most 0x100: __introsort_loop returns at once; the final insertion sort does the whole sort",
+  "median": "median of (first+1, middle, last-1) moved to first; middle is first + (count/2) elements; partition is a Hoare scan from first+1 and last-1; the right part is recursed on with depth-1 and the left part is looped on"
+ },
+ "cleanable_0x61bd0e0": {
+  "calls": 223,
+  "distinct_caller_fdes": 151,
+  "jumps": 32,
+  "head": "when *head is null it returns at once; otherwise it calls *head with (head+0x08, head+0x10)",
+  "chain": "for each node from head+0x18 while non-null: call the node fn with (node+0x08, node+0x10), then operator delete(node, 0x20), then advance to node+0x18",
+  "head_storage": "the head storage itself is never freed by the drain; it is freed with the 0xe8-byte state (or owned by the caller)",
+  "init_0x61bd0c0": "zeroes +0x00 (head fn) and +0x18 (chain head); 103 direct calls, 71 distinct caller FDEs"
+ },
+ "string_list_0x80": {
+  "node_layout": "{next +0x00, prev +0x08, string {ptr +0x10, size +0x18, buf +0x20}}",
+  "node_size": 48,
+  "sentinel": "state+0x80 is the list node itself (next at +0x80, prev at +0x88); the walk ends when the next pointer equals &state+0x80",
+  "string_free": "heap string (ptr != &buf): _ZdlPvm(ptr, *(node+0x20)+1); SSO string (ptr == &buf): no buffer free; the node is then freed with size 0x30"
+ },
+ "node_list_0x60": {
+  "node_layout": "{opaque +0x00, opaque +0x08, next +0x10, subtree +0x18}",
+  "node_size": 40,
+  "walk": "for each node: destroy its +0x18 subtree with 0x5f059b0, free the node with size 0x28, advance to +0x10"
+ },
+ "tree_destroy_0x5f059b0": {
+  "calls": 6,
+  "callsites_note": "1 from the dispose (0x5f06234), 1 self-recursion (0x5f05a41), 4 from the sibling routines 0x5f0a3d0/0x5f0a9c0/0x5f0b080/0x5f10d40",
+  "node_size": 40,
+  "order": "children before the node, node before its next sibling: destroy(child subtree), free node, advance to +0x10",
+  "shape": "left-child (+0x18) / right-sibling (+0x10) tree destroy; a null node destroys nothing"
+ },
+ "shared_helpers": {
+  "introsort_0x5f053d0": "6 calls: the dispose, self-recursion, and one each from 0x5f0a3d0..0x5f0a909, 0x5f0a9c0..0x5f0b04c, 0x5f0b080..0x5f0b418, 0x5f10d40..0x5f11798",
+  "insertion_sort_0x5f05120": "10 calls: two from the dispose, two each from the same four routines",
+  "tree_destroy_0x5f059b0": "6 calls: the dispose, self-recursion, and one each from the same four routines",
+  "note": "the four routines sharing the sort/tree helpers are not decomposed here; they are follow-up ground, not claimed ground"
+ },
+ "control_vtables": {
+  "big_0x64cc718": [
+   "0x5f04e30",
+   "0x5f04e50",
+   "0x5f061b0",
+   "0x5f04f70",
+   "0x5f057c0"
+  ],
+  "slot_layout": [
+   "0 trivial complete dtor (endbr64; ret)",
+   "1 deleting dtor (mov $size; jmp _ZdlPvm)",
+   "2 _M_dispose",
+   "3 _M_destroy",
+   "4 _M_get_deleter"
+  ],
+  "small_0x64cc750": [
+   "0x5f04e20",
+   "0x5f04e60",
+   "0x5f0a290",
+   "0x5f04f60",
+   "0x5f05380"
+  ],
+  "small_dispose_0x5f0a290": {
+   "note": "releases the big control it holds; excerpted in #3304, cited here, not re-shipped",
+   "range": [
+    "0x5f0a290",
+    "0x5f0a319"
+   ]
+  }
+ },
+ "typeinfo": {
+  "base_0x64c81a8": {
+   "name": "St16_Sp_counted_baseILN9__gnu_cxx12_Lock_policyE2EE",
+   "name_address": "0x96c540"
+  },
+  "big_0x64cc598": {
+   "base": "0x64c81a8",
+   "demangled": "std::_Sp_counted_ptr_inplace<rocksdb::FragmentedRangeTombstoneListCache, std::allocator<void>, (__gnu_cxx::_Lock_policy)2>",
+   "name": "St23_Sp_counted_ptr_inplaceIN7rocksdb33FragmentedRangeTombstoneListCacheESaIvELN9__gnu_cxx12_Lock_policyE2EE",
+   "name_address": "0x9709a0"
+  },
+  "c_filt_note": "c++filt on this VM does NOT demangle bare type names; prefix _ZTI first",
+  "correction_to_3304": "its neighbour_0x64cc580 record gave name_address 0x96e660; the name pointer is the RELATIVE record at 0x64cc588 -> 0x970970 (string N7rocksdb16MemTableIteratorE); the 0x96e660 string (N7rocksdb20InternalIteratorBaseINS_5SliceEEE) is the name of the BASE typeinfo 0x64ca638 (RELATIVE record at 0x64ca640 -> 0x96e660)",
+  "neighbour_0x64cc580": {
+   "base": "0x64ca638",
+   "demangled": "rocksdb::MemTableIterator",
+   "name": "N7rocksdb16MemTableIteratorE",
+   "name_address": "0x970970",
+   "note": "noted, not modelled"
+  },
+  "neighbour_base_0x64ca638": {
+   "demangled": "rocksdb::InternalIteratorBase<rocksdb::Slice>",
+   "name": "N7rocksdb20InternalIteratorBaseINS_5SliceEEE",
+   "name_address": "0x96e660"
+  },
+  "small_0x64cc5b0": {
+   "base": "0x64c81a8",
+   "demangled": "std::_Sp_counted_ptr_inplace<std::shared_ptr<rocksdb::FragmentedRangeTombstoneListCache> const, std::allocator<void>, (__gnu_cxx::_Lock_policy)2>",
+   "name": "St23_Sp_counted_ptr_inplaceIKSt10shared_ptrIN7rocksdb33FragmentedRangeTombstoneListCacheEESaIvELN9__gnu_cxx12_Lock_policyE2EE",
+   "name_address": "0x970a20"
+  }
+ },
+ "callers": {
+  "big_dispose_0x5f061b0": "no direct callers, no tail jumps, no lea references, no stored qwords; reached only through vtable slot 2 (RELATIVE record at 0x64cc728 -> 0x5f061b0)",
+  "sort_helpers_callers": "the dispose plus the four routines 0x5f0a3d0..0x5f0a909, 0x5f0a9c0..0x5f0b04c, 0x5f0b080..0x5f0b418, 0x5f10d40..0x5f11798 (see frames.txt)",
+  "sorted_unique_clear_callers": "9 direct calls, 9 distinct caller FDEs (same set as the merged packet)"
+ },
+ "model": "tools/big_dispose_115.py",
+ "tests": "tests/test_big_dispose_115.py (run directly; pytest is not installed on this VM)",
+ "test_checks": 152,
+ "follow_up_ground": [
+  "the four routines sharing the sort/tree helpers (0x5f0a3d0..0x5f0a909, 0x5f0a9c0..0x5f0b04c, 0x5f0b080..0x5f0b418, 0x5f10d40..0x5f11798): their own teardown/clear behaviours, and whether they are sibling cache disposals",
+  "the +0xe8/+0xf0/+0x9f8/+0xa00 writers (the once predicate reads them; the owner never writes them)",
+  "elem_ctor 0x60d5880 other callers 0x6002925/0x6067a9f (what arrays they build)",
+  "once-helper 0x5f07490 other 6 callers",
+  "the 10 init-only sites later preset behaviour (which apply a different preset, if any)",
+  "the singleton 0x61be810 other 8 callers use of the shared pointer",
+  "the 0x5d54910 routine (476 bytes, NO direct callers and NO stored qwords, do NOT submit without a consumer)",
+  "the 0x5d591d0 routine (505 bytes, near-duplicate of #2720 record-loop phase, do NOT submit)",
+  "the 0x5d4ed40/0x5d4f400 map routines (1725/1390 bytes, need decomposition)",
+  "the owning caller functions 0x5d6da20..0x5d6ee3c, 0x5d6ef60..0x5d6faa0, 0x5d8479c..0x5d85475, 0x5d878f0..0x5d887b0 (large, need decomposition)",
+  "which of the 252 acquire callers pass type code 0x34 versus other codes (needs the object+0x38 construction trace, not a site census)",
+  "what the virtual produce callee behind slot 0xe8 in the stats-emit routine computes, and what the single stats-emit caller at 0x5d7e339 does (FDE 0x5d7dfc0..0x5d7e627)"
+ ],
+ "unknowns": [
+  "Bodies of the merged 0x5d50470 routine's sort callees 0x5d4a3f0/0x5d497e0; only their call sites are pinned here (the dispose uses its own instantiation 0x5f053d0/0x5f05120, whose bodies ARE pinned here).",
+  "Identities of the head, chain-node and element-disposer callees and the element type names; only the call protocol is pinned.",
+  "The purpose behind disposing each distinct pair exactly once in sorted order; the disposal order and the once-each rule are observed, the reason is not claimed.",
+  "Behavior when the pair-array byte count is not a multiple of 16; the depth literal -2 for a sub-16-byte count is pinned, nothing further is claimed.",
+  "Roles of state fields +0x48/+0x50/+0x58, +0x68/+0x70/+0x78, +0x90 and +0xd8/+0xe0, and the element types of the three vectors at +0x00/+0x18/+0x30; the dispose never reads them.",
+  "Who writes *(control+0x38) (the state pointer) and when the cache object at control+0x10 gains its state; the dispose only reads it.",
+  "What populates the +0x60 node list and the three vectors; only their teardown is pinned here."
+ ]
+}

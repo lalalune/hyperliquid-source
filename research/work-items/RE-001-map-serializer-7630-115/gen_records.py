@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+"""Generate records.json (semantic records only) for this packet.
+
+Run from the repo root:
+    python3 research/work-items/RE-001-map-serializer-7630-115/gen_records.py
+"""
+import json
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+
+RECORDS = {
+    "task": "RE-001",
+    "work_item": "RE-001-map-serializer-7630-115",
+    "node": 115,
+    "artifact": "artifacts/node/115/hl-node",
+    "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "question": "What does 0x6097630 do - the S0 writer behind the delimiter pre-step 0x6098510?",
+    "resolves": "#4334 open unknown: 0x6097630 internals (the S0 writer behind the delimiter pre-step)",
+    "functions": {
+        "0x6097630": {
+            "fde": "0x6097630..0x60984e8",
+            "role": "options-map serializer: walks the Configurable object's option-group range and appends name=value pairs into the output string S0",
+            "signature": "(Status* out, const ConfigOptions* opts, const Configurable* object, const std::string* prefix, std::string* out_text)",
+            "returns": "void; the final Status is written into *out",
+        },
+        "0x6098510": {
+            "fde": "0x6098510..0x60985af",
+            "role": "delimiter pre-step: truncates S0 to empty, forwards (out, object, C1, empty prefix string, S0) to 0x6097630, returns out",
+            "signature": "(Status* out, const Configurable* object, const ConfigOptions* opts, std::string* s0)",
+        },
+        "0x60985e0": {
+            "fde": "0x60985e0..0x609865e",
+            "role": "reset-and-serialize wrapper: resets *S to an empty SSO string, calls 0x6097630 with a stack Status temp (discarded, message freed), forwards its own rcx as the prefix, returns S",
+            "signature": "(std::string* out_text, const Configurable* object, const ConfigOptions* opts, const std::string* prefix)",
+        },
+        "0x60bb9a0": {
+            "role": "per-entry serializer (cited from #4311/#4320, not re-shipped): (Status* out, const OptionTypeInfo* record, const ConfigOptions* opts, const std::string* name, const void* options_base, std::string* value_out)",
+            "note": "record+0xac verification 4 skips the entry in the dump; every other verification serializes normally",
+        },
+    },
+    "iteration": {
+        "range": "object+0x08 begin, object+0x10 end (Configurable object: vtable at +0x00)",
+        "element_stride": "0x30 bytes; cursor += 0x30 at 0x6097690, end check against object+0x10",
+        "element_layout": {
+            "+0x20": "options-base pointer (passed to the serializer as its 5th argument; field address = base + record+0x00)",
+            "+0x28": "pointer to the per-group OptionTypeInfo map (null -> skip the element)",
+            "+0x00..+0x18": "open unknown",
+        },
+        "map": {
+            "layout": "unordered_map<string, OptionTypeInfo>, 56 bytes (same layout as #4334: buckets +0x00, bucket_count +0x08, before_begin +0x10, element_count +0x18)",
+            "first_node": "map+0x10 (before_begin); node chain via node+0x00",
+        },
+        "node": {
+            "next": "+0x00",
+            "key_name_string": "+0x08 data, +0x10 length, +0x18 capacity (the option name)",
+            "value_record": "+0x28, embedded OptionTypeInfo (0xb8 bytes)",
+            "record_type": "node+0xd0 (= record+0xa8)",
+            "record_verification": "node+0xd4 (= record+0xac)",
+            "record_flags": "node+0xd8 (= record+0xb0)",
+            "hash_offset_and_node_size": "open unknown",
+        },
+    },
+    "skip_rules": [
+        {"condition": "element+0x28 == 0", "site": "0x60976ab..0x60976af"},
+        {"condition": "map+0x10 (first node) == 0", "site": "0x60976b4..0x60976b8"},
+        {"condition": "record verification in {4, 5}", "site": "0x609772a..0x6097736 (sub $0x4; cmp $0x1; jbe)", "note": "the map-level dump drops verification-5 entries too; the bare serializer 0x60bb9a0 drops only verification 4 (0x60bb9d4)"},
+        {"condition": "record flags & 0x2000", "site": "0x6097738..0x6097741 (test $0x20, %ah on record+0xd9)"},
+        {"condition": "ConfigOptions+0x04 != 0 and record+0xd9 bit 0 clear and type not in {21, 22}", "site": "0x60976e9..0x60976fb"},
+        {"condition": "type in {21, 22} and ConfigOptions+0x28 != 2 and record+0xd9 bit 7 set", "site": "0x6097ef8..0x6097f02"},
+    ],
+    "dispatch": {
+        "gate": "ConfigOptions+0x04 (cmpb $0x0, 0x4(%r15) at 0x6097747)",
+        "block_a": {
+            "condition": "ConfigOptions+0x04 == 0",
+            "site": "0x6097778..0x6097853",
+            "serializer_args": "rdx = original ConfigOptions (r15)",
+        },
+        "block_b": {
+            "condition": "ConfigOptions+0x04 != 0 and record+0xd9 bit 0 set",
+            "site": "0x6097bd8..0x6097d82",
+            "copy": "full 0x50-byte ConfigOptions copy at 0x110(%rsp); copy+0x04 written 1 at 0x6097bdf then 0 at 0x6097ca7, so the serializer receives the copy with +0x04 == 0",
+            "shared_ptr": "copy+0x48 refcount bumped (plain addl at 0x6097c92, or lock addl at 0x6098118 when the 0x64ed290 flag byte is 0); released after the call (xadd -1 at 0x6098263; count reaching 1 calls 0x5d35070, then the 0x6098298 path calls vtable slots 0x10 and 0x18)",
+            "serializer_args": "rdx = the stack copy (lea 0x110(%rsp) at 0x6097d50)",
+        },
+        "block_c": {
+            "condition": "ConfigOptions+0x04 != 0, record+0xd9 bit 0 clear, type in {21, 22}, and (ConfigOptions+0x28 == 2 or record+0xd9 bit 7 clear)",
+            "site": "0x6097f08..0x6097fe3",
+            "serializer_args": "rdx = original ConfigOptions (r15)",
+        },
+    },
+    "serializer_calls": [
+        {"site": "0x6097853", "block": "A", "args": "(Status@0x80(%rsp), record at node+0x28, ConfigOptions, name temp, options_base element+0x20, value_out T2@0x90(%rsp))"},
+        {"site": "0x6097d82", "block": "B", "args": "(Status@0x80(%rsp), record at node+0x28, copied ConfigOptions, name temp, options_base element+0x20, value_out T2@0x90(%rsp))"},
+        {"site": "0x6097fe3", "block": "C", "args": "(Status@0x80(%rsp), record at node+0x28, ConfigOptions, name temp, options_base element+0x20, value_out T2@0x90(%rsp))"},
+    ],
+    "name_temp": "prefix string (arg4) + name (node+0x08 data, node+0x10 length), built into a stack string before each serializer call",
+    "status": {
+        "layout": "16-byte Status: bytes +0..+5 copied verbatim, pointer at +8; byte +0 is the code (0 = kOk)",
+        "error_propagation": "serializer Status byte 0 != 0 -> the 6 bytes + pointer are copied into *out at 0x6097e6f..0x6097ea4 and the function returns immediately; later entries are not visited",
+        "empty_range": "begin == end at entry (0x6097684..0x6097689) or the cursor reaching end -> *out is zeroed (16 bytes, 0x609827a..0x6098292) and the function returns (kOk)",
+    },
+    "emission": {
+        "gate": "value string T2 non-empty (T2.size at 0x98(%rsp) != 0, 0x60978cf); empty value -> nothing is appended for the entry",
+        "format": "prefix + name + \"=\" + value + delimiter, appended to S0 (arg5)",
+        "equals_literal": "1 byte at 0x445245",
+        "delimiter": "ConfigOptions+0x08 string (data at 0x8(%r15), length at 0x10(%r15)); slot 9 forces it to \"; \" (0x4409b0, 2 chars) when ConfigOptions+0x00 byte 0 == 0",
+        "site": "0x60978f8..0x6097b3e",
+    },
+    "wrappers": {
+        "0x6098510_callers": ["0x609d5ea (slot 9 0x609d0e0)", "0x609e80f (in 0x609e510)", "0x60b96cd", "0x60b977f", "0x60d4187"],
+        "0x60985e0_callers": ["0x609e0a9 (in 0x609e510)"],
+        "prefix_in_practice": "both known call paths pass an empty prefix string (0x6098510 builds an empty temp; 0x609e510 builds an empty temp at 0x50(%rsp))",
+    },
+    "literals": [
+        {"address": "0x445245", "bytes": "3d", "text": "=", "role": "name/value separator appended in the emission block"},
+        {"address": "0x4409b0", "bytes": "3b20", "text": "; ", "role": "delimiter forced into the ConfigOptions copy by slot 9 when ConfigOptions+0x00 byte 0 == 0"},
+    ],
+    "callers": {
+        "0x6097630": ["0x6098566 (in 0x6098510)", "0x609861f (in 0x60985e0)"],
+        "0x6098510": ["0x609d5ea", "0x609e80f", "0x60b96cd", "0x60b977f", "0x60d4187"],
+        "0x60985e0": ["0x609e0a9"],
+    },
+    "open_unknowns": [
+        "Element +0x00..+0x18 fields and the element struct's C++ name.",
+        "The map's C++ name: layout matches unordered_map<string, OptionTypeInfo> (before_begin +0x10, node key +0x08 / value record +0x28), but the node hash offset and total node size are not verified.",
+        "Why block B writes 1 then 0 to the copy's +0x04 byte (0x6097bdf, 0x6097ca7); only the end state (+0x04 == 0 at the call) is pinned.",
+        "0x609e510 host identity (FDE 0x609e510..0x609f073); it calls both 0x6098510 (0x609e80f) and 0x60985e0 (0x609e0a9).",
+        "What the release helper 0x5d35070 does exactly (cited only, from the block-B shared_ptr release path).",
+        "Slot-9 arg5 C++ meaning (still open from #4334).",
+        "ConfigOptions+0x00/+0x04/+0x08/+0x28 C++ names and defaults (still open from #4334).",
+    ],
+    "do_not_pick": ["0x6097630", "0x6098510", "0x60985e0", "0x609e510 (cited as caller host)", "0x60bb9a0 (cited)", "0x609c8c0", "0x609bcb0", "0x609d0e0"],
+}
+
+
+def main() -> None:
+    (HERE / "records.json").write_text(json.dumps(RECORDS, indent=2) + "\n")
+    print("wrote records.json")
+
+
+if __name__ == "__main__":
+    main()

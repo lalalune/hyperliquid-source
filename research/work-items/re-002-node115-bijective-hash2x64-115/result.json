@@ -1,0 +1,120 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "functions": [
+    {
+      "name": "bijective_hash2x64",
+      "start": "0x61c3e10",
+      "end": "0x61c3f55",
+      "body_sha256": "d586664de83493cc5a48eefd3bcef95b10a3ab433b32699334c68671b8cb0864",
+      "fde": [
+        "0x61c3e10",
+        "0x61c3f55"
+      ],
+      "census_id": "node115-vendor-61c3e10",
+      "census_symbol": "_ZN7rocksdb17BijectiveHash2x64EmmmPmS0_",
+      "census_body_sha256": "d586664de83493cc5a48eefd3bcef95b10a3ab433b32699334c68671b8cb0864"
+    },
+    {
+      "name": "seed0_adapter",
+      "start": "0x61c3f60",
+      "end": "0x61c3f71",
+      "body_sha256": "8eb9df37604f72f0b72b1b1af72232ed0875460ff8deafd4f46fd93ca8e3dc55",
+      "fde": [
+        "0x61c3f60",
+        "0x61c3f71"
+      ],
+      "census_id": null,
+      "census_symbol": null,
+      "census_body_sha256": "8eb9df37604f72f0b72b1b1af72232ed0875460ff8deafd4f46fd93ca8e3dc55"
+    }
+  ],
+  "contract": {
+    "bijective_hash2x64": "bijective_hash2x64(a: u64, b: u64, c: u64, out1: *mut u64, out2: *mut u64) -> ()",
+    "seed0_adapter": "seed0_adapter(a: u64, b: u64, out1: *mut u64, out2: *mut u64) -> ()"
+  },
+  "outputs": {
+    "out1": "XXH3_avalanche(Y), stored through rcx (first out-pointer)",
+    "out2": "XXH3_avalanche(X), stored through r8 (second out-pointer)"
+  },
+  "immediates": {
+    "K_SEED@0x61c3e1e": {
+      "value": "0x59973f0033362349"
+    },
+    "PACK_ADD@0x61c3e6d": {
+      "value": "0x03c0000000000000"
+    },
+    "K_MIX@0x61c3e88": {
+      "value": "0xc202797692d63d58"
+    },
+    "P64_2@0x61c3ee2": {
+      "value": "0xc2b2ae3d27d4eb4f"
+    },
+    "AVALANCHE_MULT@0x61c3f14": {
+      "value": "0x165667919e3779f9"
+    }
+  },
+  "callers": [
+    {
+      "function": "bijective_hash2x64",
+      "site": "0x61c3f6c",
+      "caller_fde": "0x61c3f60",
+      "target": "0x61c3e10",
+      "note": "seed-0 adapter tail-jump (third input zeroed)"
+    },
+    {
+      "function": "seed0_adapter",
+      "site": "0x61b02a5",
+      "caller_fde": "0x61b0260",
+      "target": "0x61c3f60",
+      "note": "direct E8 call; same FDE also calls both Hash2x64 wrappers"
+    }
+  ],
+  "check_values": {
+    "zero_inputs": {
+      "a": "0x0",
+      "b": "0x0",
+      "c": "0x0",
+      "out1": "0xe5189a9599e3f862",
+      "out2": "0x05ea23ef06e28b2d",
+      "note": "all-zero inputs; the seed constant K_SEED still mixes"
+    },
+    "unit_inputs": {
+      "a": "0x1",
+      "b": "0x1",
+      "c": "0x1",
+      "out1": "0x137ec3075546cf03",
+      "out2": "0x4a4fe11e9c4a1079",
+      "note": "all-one inputs"
+    },
+    "all_ones": {
+      "a": "0xffffffffffffffff",
+      "b": "0xffffffffffffffff",
+      "c": "0xffffffffffffffff",
+      "out1": "0x8e2557123a6b36e1",
+      "out2": "0x75a157082183aceb",
+      "note": "wrap-around extremes"
+    },
+    "seed0_adapter_case": {
+      "a": "0x0123456789abcdef",
+      "b": "0xfedcba9876543210",
+      "c": "0x0",
+      "out1": "0xd4ccfe0bd485ffd4",
+      "out2": "0xef84a4e5f6f92607",
+      "note": "the adapter path: third input fixed to 0"
+    },
+    "constants_as_inputs": {
+      "a": "0x59973f0033362349",
+      "b": "0xc202797692d63d58",
+      "c": "0x03c0000000000000",
+      "out1": "0xfa9e1041902f88ff",
+      "out2": "0xb561b4dc2ef8f23a",
+      "note": "the folded immediates fed back as inputs"
+    }
+  },
+  "cases": {
+    "count": 2400,
+    "seed": 20261109,
+    "mismatches_vs_structured_model": 0,
+    "aggregate_sha256": "753fca262bf947c9862c99ca7691bac034fe25e7b0ff9e10035a1a958675b40e"
+  }
+}

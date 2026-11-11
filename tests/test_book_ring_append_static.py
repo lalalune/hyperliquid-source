@@ -52,9 +52,14 @@ class BookRingAppendStaticTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / 'packet'
             generate(TARGET, output)
+            # Rust contract assets are checked by the crate tests and manifest.
+            non_native_files = {
+                'MANIFEST.sha256', 'README.md', 'RUST-CONTRACT.md',
+                'generate-rust-vectors.py', 'ring-vectors.tsv',
+            }
             retained_files = sorted(
                 path.name for path in PACKET.iterdir()
-                if path.name != 'MANIFEST.sha256' and path.name != 'README.md'
+                if path.name not in non_native_files
             )
             self.assertEqual(
                 retained_files,

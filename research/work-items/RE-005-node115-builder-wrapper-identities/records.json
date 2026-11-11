@@ -1,0 +1,530 @@
+{
+ "answer": "wrapper_a 0x15d6fd0 is a base/src/lu.rs runtime-runner: it builds a runtime with the builder (cfg kind from its edi flag, kind-1 arm once-guarded by a process global) and expect()s failures with the message \"tokio_run\", then enters the runtime in place; as linked it is reached only as a registered callback with the flag 0. wrapper_b 0x2ae1690 is the node binary's principal entry function -- the sole callee of the user main -- building one runtime (kind 1) with a plain unwrap attributed to node/src/utils.rs:66 and entering it in place. Same builder idiom, different crates, arguments, failure behaviour and call-graph positions; neither calls the other.",
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "artifact_size": 105896032,
+ "boundaries": {
+  "argument_layouts": "the 0x3d0- and 0x2c40-byte argument structs are pinned by size and construction only",
+  "builder_and_cfg": "the builder body 0x5cf9600, cfg_ctor 0x5cf93f0 beyond its kind store, and the cfg drop bodies are PR #2950 boundaries, cited by span pins",
+  "cfg_bytes": "what the builder does with the cfg kind byte at +0xe4 and the 0x0101 pair at +0xe5 is PR #2955 territory; this packet pins only who writes them",
+  "dispatcher_context": "who registers the adapter-a callback in the static table at 0x6400548, what list the dispatcher walks, and who calls the dispatcher are above the traced window",
+  "once_semantics": "the kind-1 arm's once consultation is pinned byte-wise; whether the guarded global caches the runtime is not resolved (see limits)",
+  "wrapper_b_definition_site": "wrapper b may itself be defined in utils.rs or inline a utils.rs helper into the entry body; the binary does not distinguish the two"
+ },
+ "builder_slot_census": {
+  "call_sites": [
+   "0x15d7026",
+   "0x15d70c2",
+   "0x2ae16f2"
+  ],
+  "note": "byte-pattern census over .text; the three sites are instruction starts in the retained objdump exports of wrapper_a / wrapper_b",
+  "slot": "0x64e1760"
+ },
+ "captured_code_executed": false,
+ "census_notes": {
+  "adapter_b_disp32": "the window at 0x2055ec8 lies inside the instruction at 0x2055ec6 (mov %r12,0xc8(%rsp), bytes 4c89a424c8000000) and is not an instruction start; the only instruction-level reference to adapter_b is the main shim lea whose field starts at 0x2cef8fa",
+  "wrapper_disp32": "each wrapper's single disp32 window is the displacement field of its sole rel32 call (0x155fa47 inside adapter_a, 0x2cd83a3 inside adapter_b), not a separate reference"
+ },
+ "limits": "Static trace only: no pinned bytes were executed and no live node, network, signer, or exchange state was used. Source identities are pinned by the panic Location structs, panic message strings, and call-graph positions the verifier recomputes; the exact Rust source text of the two functions is not recovered and no function names are claimed. Wrapper a is identified as a function of base/src/lu.rs (its own Locations name that file at lines 55, 58 and 60) and wrapper b as the node binary entry function whose runtime build is attributed to node/src/utils.rs line 66; whether wrapper b is itself defined in utils.rs or inlines a utils.rs helper is not distinguishable from the binary and is not claimed. The kind argument of cfg_ctor is the byte cfg_ctor stores at cfg +0xe4; what the builder does with the two cfg bytes is the subject of PR #2955 and is a boundary here, as are the builder body itself and the cfg drop 0x5cf1af0 (PR #2950 boundaries). For wrapper a, the once consultation on the kind-1 arm is pinned at the byte level (state dword 0x64f01d8, cell 0x64f01c0, closure statics 0x63fe250 / 0x63fe278, call_once_force through slot 0x64df9f0); whether the guarded global caches the built runtime or serves another once-only purpose is not resolved by the traced window and is stated as a boundary. The dispatcher 0x15b8fd0 is pinned by span, its slot call site, and its static table cell only; the subsystem that registers the adapter-a callback, the list it walks, and the callers of the dispatcher are above the traced window. The 0x3d0- and 0x2c40-byte argument structs are pinned by size and by the adapters that build them; their field layouts are not traced. The lang_start body 0x5c99970 is identified by its position in the compiler main shim (the shim passes it the user-main trait object, argc, argv and a zero sigpipe argument); no symbol name is claimed for it beyond that role.",
+ "locations": {
+  "wrapper_a": [
+   {
+    "col": 25,
+    "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/local.rs",
+    "line": 479,
+    "struct": "0x6401240"
+   },
+   {
+    "col": 76,
+    "file": "base/src/lu.rs",
+    "line": 58,
+    "struct": "0x64014f8"
+   },
+   {
+    "col": 40,
+    "file": "base/src/lu.rs",
+    "line": 55,
+    "struct": "0x6401510"
+   },
+   {
+    "col": 13,
+    "file": "base/src/lu.rs",
+    "line": 60,
+    "struct": "0x6401528"
+   },
+   {
+    "col": 9,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/multi_thread/mod.rs",
+    "line": 91,
+    "struct": "0x6401908"
+   },
+   {
+    "col": 39,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/multi_thread/mod.rs",
+    "line": 92,
+    "struct": "0x6401920"
+   },
+   {
+    "col": 33,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 218,
+    "struct": "0x6401950"
+   },
+   {
+    "col": 26,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 235,
+    "struct": "0x6401968"
+   },
+   {
+    "col": 50,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 491,
+    "struct": "0x6401980"
+   },
+   {
+    "col": 30,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 491,
+    "struct": "0x6401998"
+   },
+   {
+    "col": 20,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 485,
+    "struct": "0x64019b0"
+   },
+   {
+    "col": 36,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 900,
+    "struct": "0x64019c8"
+   },
+   {
+    "col": 53,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 903,
+    "struct": "0x64019e0"
+   },
+   {
+    "col": 23,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 908,
+    "struct": "0x64019f8"
+   },
+   {
+    "col": 33,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 903,
+    "struct": "0x6401a10"
+   }
+  ],
+  "wrapper_b": [
+   {
+    "col": 25,
+    "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/local.rs",
+    "line": 479,
+    "struct": "0x6443cf0"
+   },
+   {
+    "col": 70,
+    "file": "node/src/utils.rs",
+    "line": 66,
+    "struct": "0x6447bf0"
+   },
+   {
+    "col": 79,
+    "file": "node/src/utils.rs",
+    "line": 66,
+    "struct": "0x6447c08"
+   },
+   {
+    "col": 9,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/multi_thread/mod.rs",
+    "line": 91,
+    "struct": "0x644a4a8"
+   },
+   {
+    "col": 39,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/multi_thread/mod.rs",
+    "line": 92,
+    "struct": "0x644a4c0"
+   },
+   {
+    "col": 33,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 218,
+    "struct": "0x644a4d8"
+   },
+   {
+    "col": 26,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 235,
+    "struct": "0x644a4f0"
+   },
+   {
+    "col": 36,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 900,
+    "struct": "0x644a550"
+   },
+   {
+    "col": 53,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 903,
+    "struct": "0x644a568"
+   },
+   {
+    "col": 23,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 908,
+    "struct": "0x644a580"
+   },
+   {
+    "col": 33,
+    "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/scheduler/current_thread/mod.rs",
+    "line": 903,
+    "struct": "0x644a598"
+   }
+  ]
+ },
+ "owners": [
+  {
+   "bytes": 67,
+   "end": "0x155fa53",
+   "role": "adapter_a",
+   "sha256": "61b4de43a06f936410b37a7d3c49857857e0fd892024a617d7a522ac59692155",
+   "start": "0x155fa10"
+  },
+  {
+   "bytes": 63,
+   "end": "0x2cd83af",
+   "role": "adapter_b",
+   "sha256": "ed23bc89640a43b1a5f373d5cb18929d79ce5b47923e58ba0565f592ba2b60d6",
+   "start": "0x2cd8370"
+  },
+  {
+   "bytes": 4785,
+   "end": "0x5cfa8b1",
+   "role": "builder",
+   "sha256": "12813161d76cb5aa11039d12cbbf45d6f170b2aa53da586df8e03b579e02d13b",
+   "start": "0x5cf9600"
+  },
+  {
+   "bytes": 540,
+   "end": "0x5c87f6c",
+   "role": "call_once_force",
+   "sha256": "677090dab02d8f4089593e314f7dfd16a4acf10c0866e469734fab4b365853bb",
+   "start": "0x5c87d50"
+  },
+  {
+   "bytes": 431,
+   "end": "0x5cf959f",
+   "role": "cfg_ctor",
+   "sha256": "9736d15280792f960bb0b52a53ff015185c0ac78b5f3a7f4daaf0387ead23680",
+   "start": "0x5cf93f0"
+  },
+  {
+   "bytes": 498,
+   "end": "0x15b91c2",
+   "role": "dispatcher_a",
+   "sha256": "20cd3ac9bdc80df92482568c93f647e74cf4402f9b8b9c8f917d8f7ba32dd0d9",
+   "start": "0x15b8fd0"
+  },
+  {
+   "bytes": 38,
+   "end": "0x1419326",
+   "role": "entry_start",
+   "sha256": "cf432d50b96a11a67b03f671fe51599dd44a6b9c5a009eefba514c487d9e23bd",
+   "start": "0x1419300"
+  },
+  {
+   "bytes": 1749,
+   "end": "0x5c9a045",
+   "role": "lang_start",
+   "sha256": "85c321c5ef4dd64cd999ac133e97a170ffa7d088eab3fe7fcb64f31768181111",
+   "start": "0x5c99970"
+  },
+  {
+   "bytes": 39,
+   "end": "0x2cef917",
+   "role": "main_shim",
+   "sha256": "c0621248d6ec3fd7ae1ee2df6b09bdd79541219362b313e5567717eb8f59a5c9",
+   "start": "0x2cef8f0"
+  },
+  {
+   "bytes": 44,
+   "end": "0x1680eac",
+   "role": "panic_entry",
+   "sha256": "28fc3434a04bb9e49d5a0164306a5c31abf6bce26425d99d27031ac1c9beb2e3",
+   "start": "0x1680e80"
+  },
+  {
+   "bytes": 82,
+   "end": "0x1680c82",
+   "role": "panic_msg_thunk",
+   "sha256": "2d00fd36dc6102ab0738e08907482bb818bca6e76e32a5b941eabf431f20767a",
+   "start": "0x1680c30"
+  },
+  {
+   "bytes": 5239,
+   "end": "0x15d8447",
+   "role": "wrapper_a",
+   "sha256": "0a33a4e33944ad1377a8544831780bcc081401ce3f7d5e86c33606c88ff44d8c",
+   "start": "0x15d6fd0"
+  },
+  {
+   "bytes": 4386,
+   "end": "0x2ae27b2",
+   "role": "wrapper_b",
+   "sha256": "6ca0595c13836bca0cb0173bd591a09d6da6791532e23a5a71c63715380727d9",
+   "start": "0x2ae1690"
+  }
+ ],
+ "question": "PR #2950 pinned the driver builder 0x5cf9600 and showed its only callers are two bodies reached through GOT slot 0x64e1760, both overwriting the cfg u16 at +0xe5 with 0x0101. What are those two bodies at source level, and how do they relate?",
+ "reach_chains": {
+  "wrapper_a_reach": "static .data.rel.ro table cell 0x6400548 -> dispatcher_a 0x15b8fd0; its only call through slot 0x64e1190 (site 0x15b907d) invokes adapter_a 0x155fa10, which copies 0x30 bytes from its own argument, zeroes the byte at +0x3c8, and calls wrapper_a with edi = 0 (site 0x155fa46) -- the only direct caller, so only the kind-0 arm is exercised as linked",
+  "wrapper_b_reach": "_start 0x1419300 -> __libc_start_main (main = main_shim 0x2cef8f0) -> lang_start 0x5c99970 (user main = adapter_b 0x2cd8370, vtable 0x6440b48) -> adapter_b zero-builds the 0x2c40-byte struct (zero byte at +0x21a) and calls wrapper_b at 0x2cd83a2 -- its only direct caller"
+ },
+ "reference_census": {
+  "adapter_a": {
+   "disp32_field_starts": [],
+   "imm64_references": [
+    {
+     "file_offset": "0x139cf0",
+     "section": ".rela.dyn"
+    }
+   ],
+   "rel32_callers": [],
+   "target": "0x155fa10"
+  },
+  "adapter_b": {
+   "disp32_field_starts": [
+    "0x2055ec8",
+    "0x2cef8fa"
+   ],
+   "imm64_references": [],
+   "rel32_callers": [],
+   "target": "0x2cd8370"
+  },
+  "dispatcher_a": {
+   "disp32_field_starts": [],
+   "imm64_references": [
+    {
+     "file_offset": "0x17650",
+     "section": ".rela.dyn"
+    }
+   ],
+   "rel32_callers": [],
+   "target": "0x15b8fd0"
+  },
+  "main_shim": {
+   "disp32_field_starts": [
+    "0x141931b"
+   ],
+   "imm64_references": [],
+   "rel32_callers": [],
+   "target": "0x2cef8f0"
+  },
+  "wrapper_a": {
+   "disp32_field_starts": [
+    "0x155fa47"
+   ],
+   "imm64_references": [],
+   "rel32_callers": [
+    {
+     "in_body": "0x155fa10",
+     "site": "0x155fa46"
+    }
+   ],
+   "target": "0x15d6fd0"
+  },
+  "wrapper_b": {
+   "disp32_field_starts": [
+    "0x2cd83a3"
+   ],
+   "imm64_references": [],
+   "rel32_callers": [
+    {
+     "in_body": "0x2cd8370",
+     "site": "0x2cd83a2"
+    }
+   ],
+   "target": "0x2ae1690"
+  }
+ },
+ "slots": [
+  {
+   "kind": "R_X86_64_GLOB_DAT",
+   "slot": "0x64df458",
+   "symbol": "__libc_start_main"
+  },
+  {
+   "kind": "R_X86_64_RELATIVE",
+   "slot": "0x64df480",
+   "target": "0x6355830"
+  },
+  {
+   "kind": "R_X86_64_GLOB_DAT",
+   "slot": "0x64df508",
+   "symbol": "memcpy"
+  },
+  {
+   "kind": "R_X86_64_RELATIVE",
+   "slot": "0x64df6a0",
+   "target": "0x1680c30"
+  },
+  {
+   "kind": "R_X86_64_RELATIVE",
+   "slot": "0x64df6b8",
+   "target": "0x1680e80"
+  },
+  {
+   "kind": "R_X86_64_RELATIVE",
+   "slot": "0x64df9f0",
+   "target": "0x5c87d50"
+  },
+  {
+   "kind": "R_X86_64_RELATIVE",
+   "slot": "0x64e1190",
+   "target": "0x155fa10"
+  },
+  {
+   "kind": "R_X86_64_RELATIVE",
+   "slot": "0x64e1760",
+   "target": "0x5cf9600"
+  },
+  {
+   "kind": "R_X86_64_RELATIVE",
+   "slot": "0x64e6c30",
+   "target": "0x5c99970"
+  }
+ ],
+ "strings": [
+  {
+   "address": "0x469c40",
+   "length": 9,
+   "role": "wrapper a builder-error expect message",
+   "text": "tokio_run"
+  },
+  {
+   "address": "0x469d92",
+   "length": 193,
+   "role": "wrapper a nested-runtime panic message",
+   "text": "Cannot start a runtime from within a runtime. This happens because a function (like `block_on`) attempted to block the current thread while the thread is being used to drive asynchronous tasks."
+  },
+  {
+   "address": "0x605542",
+   "length": 43,
+   "role": "wrapper b builder-error unwrap message",
+   "text": "called `Result::unwrap()` on an `Err` value"
+  },
+  {
+   "address": "0x60692e",
+   "length": 193,
+   "role": "wrapper b nested-runtime panic message",
+   "text": "Cannot start a runtime from within a runtime. This happens because a function (like `block_on`) attempted to block the current thread while the thread is being used to drive asynchronous tasks."
+  },
+  {
+   "address": "0x6069ef",
+   "length": 21,
+   "role": "wrapper b park panic message",
+   "text": "failed to park thread"
+  }
+ ],
+ "wrapper_a": {
+  "argument_copy": "memcpy of 0x3d0 bytes from rsi to rsp+0x8e8 through slot 0x64df508 (memcpy@GLIBC) at 0x15d7140, after the 0x70-byte runtime object is copied to rsp+0x70",
+  "arguments": "edi = arm flag (stored nowhere; tested at entry), rsi = pointer to a 0x3d0-byte argument struct that the body memcpy's into its frame after the build",
+  "build_sites": [
+   {
+    "arm": "edi != 0",
+    "builder_call": "0x15d7026 through slot 0x64e1760",
+    "cfg_ctor_call": "0x15d7007",
+    "cfg_ctor_kind_argument": 1,
+    "cfg_drop_call": "0x15d7034 -> 0x5cf1af0",
+    "cfg_u16_store": "0x15d700c (0x0101 at cfg +0xe5)",
+    "error_branch": "0x15d7041 -> 0x15d7239",
+    "tag_compare": "0x15d7039 (dword at out +0x0 vs 2)"
+   },
+   {
+    "arm": "edi == 0",
+    "builder_call": "0x15d70c2 through slot 0x64e1760",
+    "cfg_ctor_call": "0x15d70a3",
+    "cfg_ctor_kind_argument": 0,
+    "cfg_u16_store": "0x15d70a8 (0x0101 at cfg +0xe5)",
+    "error_branch": "0x15d70d0 -> 0x15d71fc",
+    "post_copy_call": "0x15d712b -> 0x15de690 after the runtime object is copied out (target not further traced)",
+    "tag_compare": "0x15d70c8 (dword at out +0x0 vs 2)"
+   }
+  ],
+  "error_sites": [
+   {
+    "arm": "edi != 0",
+    "call": "0x15d726b",
+    "error_vtable": "0x64015d0",
+    "location": "base/src/lu.rs:55:40",
+    "message": "0x469c40 \"tokio_run\" (length 9)"
+   },
+   {
+    "arm": "edi == 0",
+    "call": "0x15d722e",
+    "error_vtable": "0x64015d0",
+    "location": "base/src/lu.rs:58:76",
+    "message": "0x469c40 \"tokio_run\" (length 9)"
+   }
+  ],
+  "identity": "a runtime-runner function of the base crate, source file base/src/lu.rs (its own builder-error Locations are lu.rs:55:40 and lu.rs:58:76 and its nested-runtime panic Location is lu.rs:60:13)",
+  "nested_runtime_panics": [
+   {
+    "call": "0x15d8044",
+    "location": "multi_thread/mod.rs:91:9 (inlined scheduler)",
+    "message": "0x469d92 (387 bytes)"
+   },
+   {
+    "call": "0x15d805f",
+    "location": "base/src/lu.rs:60:13 (the body's own block_on call site)",
+    "message": "0x469d92 (387 bytes)"
+   }
+  ],
+  "once_global": {
+   "call": "0x15d71f1 through slot 0x64df9f0 -> call_once_force 0x5c87d50, entered only when the state dword is nonzero; control then falls into the kind-1 build at 0x15d6ffa",
+   "cell": "0x64f01c0 (its address is loaded at 0x15d71b0 into the call_once closure environment)",
+   "closure_statics": [
+    "0x63fe250",
+    "0x63fe278"
+   ],
+   "state_dword": "0x64f01d8 (loaded at 0x15d6fec; the kind-1 arm consults it before building)"
+  }
+ },
+ "wrapper_b": {
+  "argument_copy": "memcpy of 0x2c40 bytes from rdi to rsp+0x86e8 through slot 0x64df508 (memcpy@GLIBC) at 0x2ae1768, after the 0x70-byte runtime object is copied to rsp+0xe0",
+  "arguments": "rdi = pointer to a 0x2c40-byte struct the user main zero-builds; the body memcpy's it into its frame after the build",
+  "build_site": {
+   "builder_call": "0x2ae16f2 through slot 0x64e1760",
+   "cfg_ctor_call": "0x2ae16d1",
+   "cfg_ctor_kind_argument": 1,
+   "cfg_u16_store": "0x2ae16d6 (0x0101 at cfg +0xe5)",
+   "error_branch": "0x2ae1700 -> 0x2ae17d3",
+   "tag_compare": "0x2ae16f8 (dword at out +0x0 vs 2)"
+  },
+  "error_site": {
+   "call": "0x2ae1805",
+   "error_vtable": "0x64474a8",
+   "location": "node/src/utils.rs:66:70",
+   "message": "0x605542 \"called `Result::unwrap()` on an `Err` value\" (length 43)"
+  },
+  "identity": "the node binary's principal entry function: the sole callee of the user main 0x2cd8370, which the compiler main shim 0x2cef8f0 registers with lang_start and _start passes to __libc_start_main; its runtime build and block_on call site are attributed to node/src/utils.rs:66 (unwrap at column 70, nested-runtime panic at column 79)",
+  "nested_runtime_panics": [
+   {
+    "call": "0x2ae21c9",
+    "location": "multi_thread/mod.rs:91:9 (inlined scheduler)",
+    "message": "0x60692e (387 bytes)"
+   },
+   {
+    "call": "0x2ae21e7",
+    "location": "node/src/utils.rs:66:79 (the body's own block_on call site)",
+    "message": "0x60692e (387 bytes)"
+   }
+  ]
+ }
+}

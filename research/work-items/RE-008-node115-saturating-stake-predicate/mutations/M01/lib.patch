@@ -1,0 +1,11 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -99,7 +99,7 @@
+ fn lookup<'a>(first: &'a [Row], second: &'a [Row], key: &[u8; 20]) -> Option<&'a Row> {
+     if let Some(seam) = second.first() {
+         match key.cmp(&seam.key) {
+-            Ordering::Equal => Some(seam),
++            Ordering::Equal => last_equal(second, key),
+             Ordering::Less => last_equal(first, key),
+             Ordering::Greater => last_equal(second, key),
+         }

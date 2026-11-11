@@ -1,0 +1,17 @@
+function	site	kind	expected	rule
+0x294acb0	0x294ace6	imm	0x84bda12f684bda13	item count from the byte span: exact division by 0x1b0 through the inverse of 27 (0x1b0 = 16 * 27)
+0x294acb0	0x294ad57	imm3	0x1b0	item stride 0x1b0
+0x294acb0	0x294ad5e	op	cmp	item word at +0x18 against the 0x8000000000000000 niche: inline block, else look the hash up
+0x294acb0	0x294ad72	op	cmp	known set word 0 against the niche: tree, else ring
+0x294acb0	0x294ad92	op	movzx	tree node key count u16 at +0x1192
+0x294acb0	0x294adc9	imm	0x20	tree walk compares 32 byte keys
+0x294acb0	0x294add1	slot	0x64dfb50	tree walk memcmp
+0x294acb0	0x294ae99	call	0x24c5ba0	ring form: binary search 0x24c5ba0
+0x294acb0	0x294aec2	imm3	0x198	ring row stride 0x198
+0x294acb0	0x294ad20	op	cmp	second certificate tag at +0xa8 of the block against the sentinel
+0x294acb0	0x294ad3e	op	mov	round word at +0x30 of the selected certificate
+0x294acb0	0x294ad45	op	cmov	unsigned minimum into r14
+0x231b6f0	0x231b71c	call	0x2705af0	the batch filter 0x2705af0 with the output at the buffer start
+0x231b6f0	0x231b72b	imm	0x84bda12f684bda13	collected count: exact division by 0x1b0
+0x231b6f0	0x231b7a0	call	0x277ff30	drop loop for unread items
+0x231b6f0	0x231b7bd	call	0x2824570	closure drop

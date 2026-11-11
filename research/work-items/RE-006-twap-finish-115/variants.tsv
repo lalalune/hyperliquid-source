@@ -1,0 +1,21 @@
+variant	meaning	first case where the bytes disagree	disagreeing cases	cases tried
+asset_word_swapped	the asset id is read from the other record word	order taken, user keeps orders	490	2568
+market_div_1000	market index is the asset id divided by 1000	order taken, user keeps orders	376	2568
+bounds_inclusive	an asset index equal to the market count is accepted	asset index equals the count	85	2568
+free_reason_always	the reason string is freed whenever its capacity word is nonzero	order not found	325	2568
+free_reason_nonneg	the reason string is freed when its capacity word is zero or positive	order not found, reason capacity zero	136	2568
+remove_user_always	the user record is removed even when its order ring still holds orders	order taken, user keeps orders	743	2568
+no_remove_user	the user record is never removed	order taken, ring emptied: user removed, freed	452	2568
+none_freed	the no-user marker word frees a buffer	ring emptied, user removal word no-user	66	2568
+event_tag	the pushed event has tag 5	order taken, user keeps orders	1227	2568
+oid_user_swapped	the user key comes before the order id in the event	order taken, user keeps orders	1227	2568
+no_drop_temp	no drop of the temporary word before the builder	order taken, user keeps orders	422	2568
+builder_swapped	the two status builders are selected the other way round	order taken, user keeps orders	1227	2568
+error_code	the not-found error code is 0xd5	order not found	954	2568
+free_stride_68	the freed order ring is sized with a 0x68 byte element	order taken, ring emptied: user removed, freed	164	2568
+grow_missing	a full vector is not grown	vector full: grow	559	2568
+precheck_after_find	the precheck runs after the user search	order taken, user keeps orders	2568	2568
+past_accepted	a user position at or past the ring length is accepted	user position past the length	246	2568
+no_wrap	the physical user slot does not wrap at the capacity	wrapped user ring	515	2568
+spot_book_offset	spot builder gets the book at outer + 0x98	order taken, user keeps orders	805	2568
+compare_reversed	the tree search steps right on a smaller key instead of a larger one	tree, one leaf, user absent	307	2568

@@ -1,0 +1,170 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "records": [
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "address": "0x616bca0",
+      "end": "0x616bd51",
+      "body_sha256": "be940db36c40290321b93a1c386040a55c14fd0beab8a1c5de9688c1ad3674f2",
+      "identity": "rocksdb::ComputeBuiltinChecksum (vendor census)",
+      "contract": "compute(type: u8, data: *const u8, n: usize) -> u32",
+      "semantics": "dispatches on type; 1 -> mask(extend(0, data, n)); 2 -> XXH32(data, n, seed 0); 3 -> (u32) XXH64(data, n, seed 0); 4 -> n == 0 ? 0 : (u32) XXH3_64bits(data, n-1) ^ (data[n-1] * 0x6b9083d9); any other type -> 0"
+    },
+    {
+      "kind": "dispatch",
+      "type": 0,
+      "arm": "default_arm",
+      "note": "returns 0 (kNoChecksum and any other type)"
+    },
+    {
+      "kind": "dispatch",
+      "type": 1,
+      "arm": "crc32c_arm",
+      "note": "mask(extend(0, data, n))"
+    },
+    {
+      "kind": "dispatch",
+      "type": 2,
+      "arm": "xxhash_arm",
+      "note": "XXH32(data, n, seed 0)"
+    },
+    {
+      "kind": "dispatch",
+      "type": 3,
+      "arm": "xxhash64_arm",
+      "note": "(u32) XXH64(data, n, seed 0)"
+    },
+    {
+      "kind": "dispatch",
+      "type": 4,
+      "arm": "mulmix_arm",
+      "note": "(u32) XXH3_64bits(data, n-1) ^ (data[n-1] * 0x6b9083d9); n == 0 returns 0; modelled for n <= 17"
+    },
+    {
+      "kind": "mask",
+      "address": "0x616bd29",
+      "sub_immediate": "0x5d7d1528",
+      "constant": "0xa282ead8",
+      "formula": "ror32(crc, 15) + 0xa282ead8 (mod 2**32)",
+      "observation": "the binary expresses the Mask as ror32 then sub 0x5d7d1528 (the two's complement of 0xa282ead8); that immediate occurs at 12 sites in .text, this arm's site is 0x616bd29"
+    },
+    {
+      "kind": "extend_call",
+      "stub": "0x61c25f0",
+      "stub_sha256": "f6d8b461bc82431a3f10c54b3b509a456b18ad340dff570220cfbaf07fa9ae3d",
+      "fnptr_slot": "0x6508908",
+      "observation": "the CRC32C arm calls the registered extend function once through the PLT stub at 0x61c25f0, which jumps through the .bss slot at 0x6508908; the initializer at 0x61c26d0 stores 0x61c21d0 there; the call is extend(0, data, n)"
+    },
+    {
+      "kind": "callee",
+      "arm": "xxhash",
+      "address": "0x61da8b0",
+      "end": "0x61daa52",
+      "body_sha256": "b2d5ccf56d670650affce9c0efa1fe0ce5eaaf92543d3b3658fd03350f9675b8",
+      "identity": "ROCKSDB_XXH32"
+    },
+    {
+      "kind": "callee",
+      "arm": "xxhash64",
+      "address": "0x61dae20",
+      "end": "0x61db121",
+      "body_sha256": "577ad945e65ddde3fc0ca78ae8d6316c7cb08203bbca5d08a07babca5d08bec8",
+      "identity": "ROCKSDB_XXH64"
+    },
+    {
+      "kind": "callee",
+      "arm": "mulmix",
+      "address": "0x61db650",
+      "end": "0x61db93a",
+      "body_sha256": "adde9328dc4c355cf1410323721f18dea26b8d5508920d127f8cdfdabe5aa3bb",
+      "identity": "ROCKSDB_XXH3_64bits"
+    },
+    {
+      "kind": "window",
+      "label": "entry_dispatch",
+      "start": "0x616bca0",
+      "end": "0x616bcc8",
+      "sha256": "eb53d97a027d43d668506b991cd1454363bf05d8adbed8e1ce9131cd7e362ac5"
+    },
+    {
+      "kind": "window",
+      "label": "xxhash_arm",
+      "start": "0x616bcc8",
+      "end": "0x616bce0",
+      "sha256": "bd5274aab04901e3c347f290ba010c65637c6873cf06723669218fafae482617"
+    },
+    {
+      "kind": "window",
+      "label": "mulmix_arm",
+      "start": "0x616bce0",
+      "end": "0x616bd18",
+      "sha256": "e6ab50521b05ff53aa59f6c28a65b4221601c53a5a851d0ddb1c2ca64755ccb1"
+    },
+    {
+      "kind": "window",
+      "label": "crc32c_arm",
+      "start": "0x616bd18",
+      "end": "0x616bd30",
+      "sha256": "53401005abb8b8ed16c5578d033bebae16b3511d6312d423e48944fe554b9d22"
+    },
+    {
+      "kind": "window",
+      "label": "xxhash64_arm",
+      "start": "0x616bd30",
+      "end": "0x616bd48",
+      "sha256": "95409c547d51b5773b7ae38187146abafee676e47420c8b8a0748181b32c1130"
+    },
+    {
+      "kind": "window",
+      "label": "default_arm",
+      "start": "0x616bd48",
+      "end": "0x616bd51",
+      "sha256": "aedc5493c52563258cd0a908e493a5637ee2d6ceedd114f622e17c8b7500a823"
+    },
+    {
+      "kind": "window",
+      "label": "xxh32_oneshot",
+      "start": "0x61da8b0",
+      "end": "0x61daa52",
+      "sha256": "b2d5ccf56d670650affce9c0efa1fe0ce5eaaf92543d3b3658fd03350f9675b8"
+    },
+    {
+      "kind": "window",
+      "label": "xxh64_oneshot",
+      "start": "0x61dae20",
+      "end": "0x61db121",
+      "sha256": "577ad945e65ddde3fc0ca78ae8d6316c7cb08203bbca5d08a07babca5d08bec8"
+    },
+    {
+      "kind": "window",
+      "label": "xxh3_64bits",
+      "start": "0x61db650",
+      "end": "0x61db93a",
+      "sha256": "adde9328dc4c355cf1410323721f18dea26b8d5508920d127f8cdfdabe5aa3bb"
+    },
+    {
+      "kind": "case_summary",
+      "count": 2400,
+      "seed": 20261109,
+      "aggregate_sha256": "60328b51e92acd9aca52afea99709d090534f8109ec172dd371d2dd066fd9647",
+      "mismatches_vs_reference": 0,
+      "note": "each arm cross-checked against an independent implementation on every case (bitwise vs table extend; one-shot vs streaming XXH32/XXH64; transliterated vs byte-buffer XXH3 short); the binary itself was never executed"
+    },
+    {
+      "kind": "unknown",
+      "subject": "callers of 0x616bca0",
+      "status": "no caller census was run for this packet"
+    },
+    {
+      "kind": "unknown",
+      "subject": "RocksDB ChecksumType enum name for type 4",
+      "status": "the type number and behavior are recorded; the enum member name was not verified from the binary"
+    },
+    {
+      "kind": "unknown",
+      "subject": "type-4 arm for n > 17",
+      "status": "the XXH3 helper is modelled only for inputs of length 0..16, so the arm is modelled only for n <= 17; longer inputs need the 17..240 and long-input XXH3 branches"
+    }
+  ]
+}

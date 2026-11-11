@@ -1,8 +1,13 @@
 #![no_std]
 
-//! Encode the four binary64 bit patterns carried by Node115 FeeRateMapSerde.
-//! This implements its observed MessagePack output, not the native serializer
-//! ABI, allocation/error paths, decoder, fee units, or complete fee subsystem.
+//! Encode and decode the four binary64 words carried by Node115 FeeRateMapSerde.
+//! The fresh-reader decoder projects values and cursor/depth/error classes.
+//! This is not the native ABI, allocation/unwind behavior or complete fee subsystem.
+
+mod decoder;
+pub use decoder::{
+    decode_prefix, CacheState, ContainerKind, DecodeError, DecodeOutcome, Observation,
+};
 
 /// Encode four stored IEEE-754 binary64 words without floating-point arithmetic.
 ///

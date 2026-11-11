@@ -1,0 +1,21 @@
+target	site	kind	containing_fde_start	containing_fde_end	role
+0x5f31380	0x5f0aa15	direct_call	0x5f0a9c0	0x5f0b04c	MemTable::NewRangeTombstoneIteratorInternal flag path: ctor A with (list = owner+0xce0, comparator = owner+8, seq = rdx, slice = arg2+0x58, arg6 = 0)
+0x5f31380	0x5f33a3b	direct_call	0x5f33950	0x5f33b36	SplitBySnapshot: ctor A with (list = this+0x68, comparator = this+0x38, seq = snapshot, slice = this+0x80, arg6 = prev_snapshot+1)
+0x5f31470	0x5f293b3	direct_call	0x5f29140	0x5f294ce	CompactionRangeDelAggregator::NewIterator: ctor List with (shared_ptr = the fresh make_shared<List> at rsp+0x30, comparator = *(aggregator+8), seq = -1, slice = null, arg6 = 0)
+0x5f31470	0x60fcf4b	direct_call	0x60fcee0	0x60fcf6a	BlockBasedTable::NewRangeTombstoneIterator: ctor List with (shared_ptr = table subobject+0x208, comparator = *(table+8)+0x110, seq = snapshot or -1, slice = ReadOptions+0x58, arg6 = 0)
+0x5f315a0	0x5f0ab05	direct_call	0x5f0a9c0	0x5f0b04c	MemTable::NewRangeTombstoneIteratorInternal cache path: ctor Cache with (shared_ptr = the slot's shared_ptr copy, comparator = owner+8, seq = rdx, slice = arg2+0x58, arg6 = 0)
+0x5f33950	0x5f26a13	direct_call	0x5f269e0	0x5f26ed5	TruncatedRangeDelIterator::SplitBySnapshot: splits the owned iterator; the returned map is re-wrapped entry by entry
+0x5f31250	0x5f33a03	direct_call	0x5f33950	0x5f33b36	SplitBySnapshot's probe gate: (list = this+0x68, lower = prev+1, snapshot)
+0x5f33670	0x5f33ab7	direct_call	0x5f33950	0x5f33b36	SplitBySnapshot's map insert: _Rb_tree::_M_emplace_hint_unique
+0x5f269e0	0x5f28815	direct_call	0x5f28710	0x5f28dac	CompactionRangeDelAggregator::AddTombstones: splits the truncated iterator and moves the entries into the aggregator's map
+0x5f32900	0x5f0d1e5	direct_call	0x5f0d050	0x5f0d704	MemTable lookup path (no catalogue row; calls NewRangeTombstoneIterator 0x5f0b050 and MaxCoveringTombstoneSeqnum)
+0x5f32900	0x5f0e09c	direct_call	0x5f0d740	0x5f0e2c7	MemTable Get path (no catalogue row; calls GetFromTable 0x5f0ce10 and MaxCoveringTombstoneSeqnum)
+0x5f32900	0x5f3d5aa	direct_call	0x5f3d4f0	0x5f3d64a	TableCache::UpdateRangeTombstoneSeqnums: the max covering seqnum for the key
+0x5f32900	0x5f4055e	direct_call	0x5f40070	0x5f40a8d	TableCache::Get: the max covering seqnum for the key
+0x5f29140	0x5e1561d	direct_call	0x5e15310	0x5e183ab	Compaction iterator-construction site (unnamed stripped FDE): NewIterator with (out = stack slot, aggregator = *(struct+0x88), slices = two stack Slices)
+0x5f29140	0x5e1cd48	direct_call	0x5e1b9c0	0x5e20481	Compaction iterator-construction site (unnamed stripped FDE): NewIterator with (out = stack slot, aggregator = r15, slices = null, null), after a 0x5e2f930 gate call and flag tests
+0x5f29140	0x5ed0c70	direct_call	0x5ed01f0	0x5ed2238	Compaction iterator-construction site (unnamed stripped FDE): NewIterator with (out = stack slot, aggregator = stack slot, slices = null, null), after a 0x5e2f930 gate call and flag tests
+0x5f37410	0x5f0a536	direct_call	0x5f0a3d0	0x5f0a909	List ctor from a MemTableIterator temp: operator new(0xe8) + ctor with (source = stack temp, comparator = rbx+0x8, arg4 = 0, scratch = stack temp)
+0x5f37410	0x5f0ac12	direct_call	0x5f0a9c0	0x5f0b04c	List ctor from a MemTableIterator temp in the host: arg4 = 0, scratch = a 0x20-byte stack scratch (per #3674)
+0x5f37410	0x5f29367	direct_call	0x5f29140	0x5f294ce	List ctor from a TruncatedRangeDelMergingIter temp in NewIterator: make_shared (0xf8), arg4 = 1, scratch = *(aggregator+0x88)
+0x5f37410	0x6109f07	direct_call	0x6109c40	0x6109fca	List ctor from a stack temp: make_shared (0xf8, control-block vtable 0x64cc9a8+0x10), arg4 = 0, scratch = r13

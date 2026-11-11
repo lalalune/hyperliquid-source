@@ -1,0 +1,460 @@
+{
+ "answers": {
+  "cell_0x6400488": "a static io error-message datum: {message &str \"failed to write whole buffer\", kind dword 23 = ErrorKind::WriteZero by the in-binary calibration, zero tail dword}; the write body 0x1533d60 returns its bare address as the error result when write(2) returns 0; never dereferenced by its only referencer",
+  "cell_0x64004a0": "a core::panic::Location static for std/src/io/mod.rs:1881:36, lea'd by the same write body into rcx as the Location argument of the slice range-check helper 0x16817e0",
+  "cell_0x64004b8": "a core::panic::Location static for std/src/thread/functions.rs:131:29, lea'd by body 0x15d5b00 into r8 as the Location argument of the panic call to panic_msg_thunk 0x1680c30 on the \"failed to spawn thread\" path",
+  "family": "none of the three belongs to the dispatcher vtable table family: they are 0x18-byte statics (one error-message datum, two panic Locations), lea'd once each by two bodies that are not spawn siblings, against the table's 0x20-byte {drop, size, align, method} entries lea'd by the spawn siblings"
+ },
+ "artifact": {
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "bodies": [
+  {
+   "bytes": 209,
+   "end": "0x15be271",
+   "role": "error_drop",
+   "sha256": "b885e0eb89f25e75b60b385a076b04e5e2469790d0fa6d97bf25c6c611b6b52a",
+   "start": "0x15be1a0"
+  },
+  {
+   "bytes": 82,
+   "end": "0x1680c82",
+   "role": "panic_msg_thunk",
+   "sha256": "2d00fd36dc6102ab0738e08907482bb818bca6e76e32a5b941eabf431f20767a",
+   "start": "0x1680c30"
+  },
+  {
+   "bytes": 200,
+   "end": "0x16818a8",
+   "role": "range_check",
+   "sha256": "002f50151d50c9884dc671db9023071d4db87bb150a52d4b510e653c39a293ba",
+   "start": "0x16817e0"
+  },
+  {
+   "bytes": 430,
+   "end": "0x15d5cae",
+   "role": "spawn_supervisor",
+   "sha256": "e3da8549dab30d424bdd4e00a2ba6c188da8685494618d0cd40af420dbf91c5c",
+   "start": "0x15d5b00"
+  },
+  {
+   "bytes": 277,
+   "end": "0x1533e75",
+   "role": "write_body",
+   "sha256": "58de563d28a4eb6e9bec893db9bb8c4874b530d8a62652810e5c5f9d752cc75b",
+   "start": "0x1533d60"
+  }
+ ],
+ "cells": [
+  {
+   "cell": "0x6400488",
+   "dword_at_0x10": 23,
+   "dword_at_0x14": 0,
+   "error_kind": "WriteZero (dword 23, calibrated below)",
+   "file_value_at_0x00": 0,
+   "kind": "io_error_message",
+   "relocation_at_0x00": "R_X86_64_RELATIVE",
+   "size": 24,
+   "str_length": 28,
+   "str_pointer": "0x469219",
+   "text": "failed to write whole buffer"
+  },
+  {
+   "cell": "0x64004a0",
+   "column": 36,
+   "dword_at_0x10": 1881,
+   "dword_at_0x14": 36,
+   "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/io/mod.rs",
+   "file_value_at_0x00": 0,
+   "kind": "panic_location",
+   "line": 1881,
+   "relocation_at_0x00": "R_X86_64_RELATIVE",
+   "size": 24,
+   "str_length": 73,
+   "str_pointer": "0x43870c"
+  },
+  {
+   "cell": "0x64004b8",
+   "column": 29,
+   "dword_at_0x10": 131,
+   "dword_at_0x14": 29,
+   "file": "/rustc/59807616e1fa2540724bfbac14d7976d7e4a3860/library/std/src/thread/functions.rs",
+   "file_value_at_0x00": 0,
+   "kind": "panic_location",
+   "line": 131,
+   "relocation_at_0x00": "R_X86_64_RELATIVE",
+   "size": 24,
+   "str_length": 83,
+   "str_pointer": "0x440e73"
+  }
+ ],
+ "census": {
+  "direct_rel32_callers": {
+   "spawn_supervisor": [],
+   "write_body": []
+  },
+  "movabs_immediates_to_cells": [],
+  "rip_refs_in_window": [
+   {
+    "in_body": "0x1533d60",
+    "kind": "lea",
+    "site": "0x1533e56",
+    "target": "0x6400488"
+   },
+   {
+    "in_body": "0x1533d60",
+    "kind": "lea",
+    "site": "0x1533e5f",
+    "target": "0x64004a0"
+   },
+   {
+    "in_body": "0x15b6d10",
+    "kind": "lea",
+    "site": "0x15b7028",
+    "target": "0x64004d0"
+   },
+   {
+    "in_body": "0x15b73c0",
+    "kind": "lea",
+    "site": "0x15b76d0",
+    "target": "0x64004f0"
+   },
+   {
+    "in_body": "0x15b7a80",
+    "kind": "lea",
+    "site": "0x15b7d51",
+    "target": "0x6400510"
+   },
+   {
+    "in_body": "0x15b80e0",
+    "kind": "lea",
+    "site": "0x15b8436",
+    "target": "0x6400530"
+   },
+   {
+    "in_body": "0x15b8810",
+    "kind": "lea",
+    "site": "0x15b88fe",
+    "target": "0x6400550"
+   },
+   {
+    "in_body": "0x15b8810",
+    "kind": "lea",
+    "site": "0x15b8912",
+    "target": "0x6400568"
+   },
+   {
+    "in_body": "0x15d5b00",
+    "kind": "lea",
+    "site": "0x15d5c49",
+    "target": "0x64004b8"
+   }
+  ],
+  "rip_refs_to_cells": [
+   {
+    "in_body": "0x1533d60",
+    "kind": "lea",
+    "site": "0x1533e56",
+    "target": "0x6400488"
+   },
+   {
+    "in_body": "0x1533d60",
+    "kind": "lea",
+    "site": "0x1533e5f",
+    "target": "0x64004a0"
+   },
+   {
+    "in_body": "0x15d5b00",
+    "kind": "lea",
+    "site": "0x15d5c49",
+    "target": "0x64004b8"
+   }
+  ],
+  "stores_into_cells": []
+ },
+ "cross_checks": {
+  "panic_msg_thunk_matches_pr3000": true,
+  "pr3000_panic_msg_thunk_sha256": "2d00fd36dc6102ab0738e08907482bb818bca6e76e32a5b941eabf431f20767a",
+  "window_census_matches_pr3000": true
+ },
+ "data_census": {
+  "raw_qwords_naming_cells": [],
+  "relocation_addends_into_cells": [],
+  "relocation_counts": {
+   "glob_dat": 263,
+   "jump_slot": 278,
+   "relative": 59534,
+   "total": 61001
+  },
+  "relocations_landing_in_cells": [
+   "0x6400488",
+   "0x64004a0",
+   "0x64004b8"
+  ]
+ },
+ "error_value_vtable": {
+  "align": 8,
+  "align_cell": "0x6400600",
+  "base": "0x64005f0",
+  "drop_cell": "0x64005f0",
+  "drop_in_place": "0x15be1a0",
+  "method": "0x5ca5610",
+  "method_cell": "0x6400608",
+  "size": 8,
+  "size_cell": "0x64005f8"
+ },
+ "limitations": "The two referencing bodies are described behaviourally; no source-level type name for either is pinned by this packet. The ErrorKind name WriteZero rests on the in-binary message-to-discriminant calibration recorded here plus the std declaration order, not on any symbol. Which std routine the write body monomorphises is not pinned. The method cell of the error-value vtable at 0x64005f0 is recorded, but that static is context for the spawn supervisor's panic call, not part of the question. Out of scope, as in PR #3000: the 0x3d0/0x2c40 argument layouts, the sv[1] writer (PR #2952), the wrapper-B registration cell (PR #2972) and the kind-1 Once cache (PR #2999).",
+ "message_census": [
+  {
+   "kind_dword": 20,
+   "message": "could not resolve to any addresses"
+  },
+  {
+   "kind_dword": 38,
+   "message": "failed to allocate read buffer"
+  },
+  {
+   "kind_dword": 37,
+   "message": "failed to fill whole buffer"
+  },
+  {
+   "kind_dword": 23,
+   "message": "failed to write the buffered data"
+  },
+  {
+   "kind_dword": 23,
+   "message": "failed to write whole buffer"
+  },
+  {
+   "kind_dword": 20,
+   "message": "file name contained an unexpected NUL byte"
+  },
+  {
+   "kind_dword": 20,
+   "message": "invalid argument"
+  },
+  {
+   "kind_dword": 20,
+   "message": "invalid stack size"
+  },
+  {
+   "kind_dword": 21,
+   "message": "invalid timestamp"
+  },
+  {
+   "kind_dword": 20,
+   "message": "nul byte found in provided data"
+  },
+  {
+   "kind_dword": 21,
+   "message": "stream did not contain valid UTF-8"
+  },
+  {
+   "kind_dword": 20,
+   "message": "the source path is neither a regular file nor a symlink to a regular file"
+  }
+ ],
+ "pins": [
+  {
+   "body": "error_drop",
+   "bytes": "488b07",
+   "label": "load the tagged error word from (rdi)",
+   "site": "0x15be1a8"
+  },
+  {
+   "body": "error_drop",
+   "bytes": "83e103",
+   "label": "and ecx, 3: the variant tag",
+   "site": "0x15be1ad"
+  },
+  {
+   "body": "error_drop",
+   "bytes": "ff257612f204",
+   "label": "tail-jump through slot 0x64df4a0 (dealloc)",
+   "site": "0x15be224"
+  },
+  {
+   "body": "panic_msg_thunk",
+   "bytes": "554889e5",
+   "label": "push rbp; mov rbp, rsp: frame head",
+   "site": "0x1680c30"
+  },
+  {
+   "body": "range_check",
+   "bytes": "4839d7",
+   "label": "cmp rdi, rdx: start index against length",
+   "site": "0x16817e8"
+  },
+  {
+   "body": "range_check",
+   "bytes": "488d3d7a65dcfe",
+   "label": "lea rdi, \"range start index ..\" pieces at 0x447d95",
+   "site": "0x1681814"
+  },
+  {
+   "body": "range_check",
+   "bytes": "ff1590dee504",
+   "label": "call through slot 0x64df6b8 (panic formatting)",
+   "site": "0x1681822"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "e82a1ffeff",
+   "label": "direct call to spawn sibling 0x15b7a80 (table entry 3)",
+   "site": "0x15d5b51"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "488d3d1b36e9fe",
+   "label": "lea rdi, \"failed to spawn thread\" message at 0x46925d",
+   "site": "0x15d5c3b"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "488d0da7a9e204",
+   "label": "lea rcx, error-value vtable 0x64005f0",
+   "site": "0x15d5c42"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "4c8d0568a8e204",
+   "label": "lea r8, cell 0x64004b8: Location for the panic call",
+   "site": "0x15d5c49"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "be16000000",
+   "label": "mov esi, 0x16: message length 22",
+   "site": "0x15d5c53"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "ff15429af004",
+   "label": "call through slot 0x64df6a0 to panic_msg_thunk",
+   "site": "0x15d5c58"
+  },
+  {
+   "body": "spawn_supervisor",
+   "bytes": "0f0b",
+   "label": "ud2 after the panic call",
+   "site": "0x15d5c5e"
+  },
+  {
+   "body": "write_body",
+   "bytes": "ff1552b7fa04",
+   "label": "call through GLOB_DAT slot 0x64df508 (memcpy)",
+   "site": "0x1533db0"
+  },
+  {
+   "body": "write_body",
+   "bytes": "4c8b2de9c1fa04",
+   "label": "load write fn from GLOB_DAT slot 0x64dffc0",
+   "site": "0x1533dd0"
+  },
+  {
+   "body": "write_body",
+   "bytes": "41ffd5",
+   "label": "call *r13: the loaded write fn",
+   "site": "0x1533ded"
+  },
+  {
+   "body": "write_body",
+   "bytes": "48c1e020",
+   "label": "shl rax, 32: OS-error tag construction",
+   "site": "0x1533e17"
+  },
+  {
+   "body": "write_body",
+   "bytes": "4883c802",
+   "label": "or rax, 2: OS-error tag bits",
+   "site": "0x1533e1b"
+  },
+  {
+   "body": "write_body",
+   "bytes": "e864a30800",
+   "label": "direct call to error_drop 0x15be1a0 (EINTR branch)",
+   "site": "0x1533e37"
+  },
+  {
+   "body": "write_body",
+   "bytes": "31c0",
+   "label": "xor eax, eax: the null (success) result",
+   "site": "0x1533e41"
+  },
+  {
+   "body": "write_body",
+   "bytes": "488d052bc6ec04",
+   "label": "lea rax, cell 0x6400488: write-returns-0 error result",
+   "site": "0x1533e56"
+  },
+  {
+   "body": "write_body",
+   "bytes": "488d0d3ac6ec04",
+   "label": "lea rcx, cell 0x64004a0: Location for the range-check helper",
+   "site": "0x1533e5f"
+  }
+ ],
+ "relro": {
+  "covers_cells_and_table": true,
+  "end": "0x64ef000",
+  "start": "0x63f2ba0"
+ },
+ "slots": [
+  {
+   "kind": "relative",
+   "slot": "0x6401300",
+   "target": "0x15d5b00"
+  },
+  {
+   "kind": "relative",
+   "slot": "0x64df4a0",
+   "target": "0x635de30"
+  },
+  {
+   "kind": "glob_dat",
+   "slot": "0x64df508",
+   "symbol": "memcpy"
+  },
+  {
+   "kind": "relative",
+   "slot": "0x64df570",
+   "target": "0x16817e0"
+  },
+  {
+   "kind": "relative",
+   "slot": "0x64df6a0",
+   "target": "0x1680c30"
+  },
+  {
+   "kind": "glob_dat",
+   "slot": "0x64dffc0",
+   "symbol": "write"
+  },
+  {
+   "kind": "glob_dat",
+   "slot": "0x64dffc8",
+   "symbol": "__errno_location"
+  },
+  {
+   "kind": "relative",
+   "slot": "0x64e0010",
+   "target": "0x1533d60"
+  }
+ ],
+ "strings": [
+  {
+   "address": "0x46925d",
+   "length": 22,
+   "role": "spawn_message",
+   "text": "failed to spawn thread"
+  },
+  {
+   "address": "0x469219",
+   "length": 28,
+   "role": "write_zero_message",
+   "text": "failed to write whole buffer"
+  }
+ ]
+}

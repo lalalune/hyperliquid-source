@@ -1,0 +1,56 @@
+Relocations for the RE-001-tablecache-tombstone-consumers-115 packet
+(node #115, artifact sha256
+a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301).
+
+All rows below are R_X86_64_RELATIVE records from `readelf -r`
+on work/hl-node-115.bin. On-disk qwords at RELATIVE targets are 0;
+the addends in .rela.dyn are authoritative (verify.py checks them
+via readelf -r, not by reading the file content).
+
+GOT slot 0x64ed6e8 -> 0x5eba930 (the null-returning slot-0x18 stub)
+  The two hosts compare the reader's vtable slot 0x18 against this
+  GOT slot: equal means "no range tombstones", skip the consultation.
+  The same stub address is the addend of two further RELATIVE
+  records, both vtable slot-0x18 entries:
+    0x64d5ea8 -> 0x5eba930  (CuckooTableReader vtable 0x64d5e90,
+                            typeinfo N7rocksdb17CuckooTableReaderE,
+                            slot 0x00 = 0x615b1b0)
+    0x64d6768 -> 0x5eba930  (PlainTableReader vtable 0x64d6750,
+                            typeinfo N7rocksdb16PlainTableReaderE,
+                            slot 0x00 = 0x61a3cc0)
+  Typeinfo pointers resolve through their own RELATIVE records:
+    0x64d5e88 -> 0x64d5e50, 0x64d5e58 -> 0x97ba20 ("N7rocksdb17CuckooTableReaderE")
+    0x64d6748 -> 0x64d6710, 0x64d6718 -> 0x97c2f0 ("N7rocksdb16PlainTableReaderE")
+
+GOT slot 0x64ecd48 -> 0x5d42220 (cache-chain slot-0x18 canonical)
+  Also the addend of two vtable slot-0x18 RELATIVE records:
+    0x64c8db8 -> 0x5d42220  (CacheWrapper vtable 0x64c8da0,
+                            typeinfo N7rocksdb12CacheWrapperE)
+    0x64c8eb8 -> 0x5d42220  (CacheWithSecondaryAdapter vtable 0x64c8ea0,
+                            typeinfo N7rocksdb25CacheWithSecondaryAdapterE)
+
+GOT slot 0x64ecd18 -> 0x5d3f090 (cache-chain slot-0x38 canonical)
+  Also the addend of two vtable slot-0x38 RELATIVE records:
+    0x64c8dd8 -> 0x5d3f090  (CacheWrapper vtable 0x64c8da0)
+    0x64c8ed8 -> 0x5d3f090  (CacheWithSecondaryAdapter vtable 0x64c8ea0)
+
+GOT slot 0x64ece10 -> 0x5d420a0 (cache-chain slot-0x40 canonical)
+  Also the addend of two vtable slot-0x40 RELATIVE records:
+    0x64c8de0 -> 0x5d420a0  (CacheWrapper vtable 0x64c8da0)
+    0x64c9e40 -> 0x5d420a0  (ChargedCache vtable 0x64c9e00,
+                            typeinfo N7rocksdb12ChargedCacheE)
+  Typeinfo pointers resolve through their own RELATIVE records:
+    0x64c8d98 -> 0x64c8d50 ("N7rocksdb12CacheWrapperE")
+    0x64c8e98 -> 0x64c8d68 ("N7rocksdb25CacheWithSecondaryAdapterE")
+    0x64c9df8 -> 0x64c9da8 ("N7rocksdb12ChargedCacheE")
+
+PLT calls used by the pinned windows (no RELATIVE records; resolved
+through .got.plt at load time, cited by contract):
+  0x63f0d90  std::string::_M_replace (called by both hosts to refresh
+           the +0x190 covering-key string)
+  0x63f0d80  operator delete(void*, size_t) (_ZdlPvm)
+  0x63f0dc0  operator delete[](void*) (_ZdaPv)
+  0x63f0dd0  operator new(unsigned long) (_Znwm)
+  0x63f0fc0  __cxa_guard_acquire
+  0x63f0fd0  __cxa_guard_release
+  0x63f0d70  __stack_chk_fail

@@ -1,0 +1,594 @@
+{
+  "binary_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "checked_bytes": {
+    "0x2995df4": {
+      "bytes": "4885c0",
+      "meaning": "POP: empty stack test"
+    },
+    "0x2995e03": {
+      "bytes": "b02c",
+      "meaning": "POP: result 0x2c (stack underflow)"
+    },
+    "0x2997a57": {
+      "bytes": "0f8401010000",
+      "meaning": "CALLDATALOAD: empty stack -> 0x2c"
+    },
+    "0x2997aae": {
+      "bytes": "4883f920",
+      "meaning": "CALLDATALOAD: remaining length capped at 32"
+    },
+    "0x2997ab2": {
+      "bytes": "ba20000000",
+      "meaning": "CALLDATALOAD: copy length 32 when at least 32 remain"
+    },
+    "0x2997b70": {
+      "bytes": "48837f3800",
+      "meaning": "CALLDATASIZE: interpreter +0x38 selects direct slice or shared view"
+    },
+    "0x2997bb8": {
+      "bytes": "482b4f40",
+      "meaning": "CALLDATASIZE: view length end - start (saturating at 0 by cmovae)"
+    },
+    "0x2997ebc": {
+      "bytes": "488b8f88010000",
+      "meaning": "GAS: interpreter +0x188 = remaining gas"
+    },
+    "0x2997efc": {
+      "bytes": "8b8f8c000000",
+      "meaning": "CALLER: 20-byte address at interpreter +0x8c"
+    },
+    "0x2997f54": {
+      "bytes": "483d00040000",
+      "meaning": "ADDRESS: stack length 0x400 = full (push arms share this bound)"
+    },
+    "0x2997f5c": {
+      "bytes": "8b4f78",
+      "meaning": "ADDRESS: 20-byte address at interpreter +0x78 (bswapped dword + 2 qwords)"
+    },
+    "0x2997f9e": {
+      "bytes": "b02d",
+      "meaning": "ADDRESS: result 0x2d (stack overflow)"
+    },
+    "0x2998253": {
+      "bytes": "488b4950",
+      "meaning": "CODESIZE: [interpreter +0x120] +0x50"
+    },
+    "0x29982a7": {
+      "bytes": "0f104768",
+      "meaning": "CALLVALUE: native 32-byte word at interpreter +0x58..+0x78"
+    },
+    "0x299972c": {
+      "bytes": "8b8ec8010000",
+      "meaning": "ORIGIN: 20-byte address at context +0x1c8"
+    },
+    "0x2999780": {
+      "bytes": "80bef101000002",
+      "meaning": "GASPRICE: context +0x1f1 (transaction type) >= 2 for the fee-market arm"
+    },
+    "0x2999797": {
+      "bytes": "80bee000000000",
+      "meaning": "GASPRICE: context +0xe0 = priority fee present"
+    },
+    "0x29997b5": {
+      "bytes": "4883d600",
+      "meaning": "GASPRICE: base fee + priority fee carry (saturated to 2^128 - 1)"
+    },
+    "0x29997c8": {
+      "bytes": "4839c2",
+      "meaning": "GASPRICE: min(max fee, base fee + priority fee)"
+    },
+    "0x2999830": {
+      "bytes": "80bfa90100000b",
+      "meaning": "BLOBHASH: spec byte >= 0xb"
+    },
+    "0x2999844": {
+      "bytes": "0f8495000000",
+      "meaning": "BLOBHASH: empty stack -> 0x2c"
+    },
+    "0x2999874": {
+      "bytes": "80bef101000003",
+      "meaning": "BLOBHASH: only transaction type 3 reads the hash list"
+    },
+    "0x2b95730": {
+      "bytes": "80bfa90100000b",
+      "meaning": "BLOBBASEFEE: spec byte >= 0xb"
+    },
+    "0x2b95739": {
+      "bytes": "f60601",
+      "meaning": "BLOBBASEFEE: context +0x0 bit 0 = blob fee present"
+    },
+    "0x2b957b7": {
+      "bytes": "0f104630",
+      "meaning": "NUMBER: 32-byte word at context +0x30"
+    },
+    "0x2b957e0": {
+      "bytes": "80bfa901000008",
+      "meaning": "BASEFEE: spec byte >= 8"
+    },
+    "0x2b957f5": {
+      "bytes": "488b8e98000000",
+      "meaning": "BASEFEE: u64 at context +0x98"
+    },
+    "0x2b95830": {
+      "bytes": "80bfa901000006",
+      "meaning": "CHAINID: spec byte interpreter +0x1a9 >= 6"
+    },
+    "0x2b95845": {
+      "bytes": "488b8e58020000",
+      "meaning": "CHAINID: u64 at context +0x258"
+    },
+    "0x2b9588c": {
+      "bytes": "8b8ea8000000",
+      "meaning": "COINBASE: 20-byte address at context +0xa8"
+    },
+    "0x2b958ec": {
+      "bytes": "488b8e90000000",
+      "meaning": "GASLIMIT: u64 at context +0x90"
+    },
+    "0x2b95920": {
+      "bytes": "80bfa90100000e",
+      "meaning": "OP4B: spec byte >= 0xe"
+    },
+    "0x2b95935": {
+      "bytes": "488b8ea0000000",
+      "meaning": "OP4B: u64 at context +0xa0"
+    },
+    "0x2b9597c": {
+      "bytes": "488b4e68",
+      "meaning": "TIMESTAMP: 32-byte word at context +0x50 (limb 3 at +0x68)"
+    }
+  },
+  "context_offsets": {
+    "base_fee": "0x98",
+    "blob_fee_present_bit0": "0x0",
+    "blob_fee_u128": "0x10",
+    "blob_hashes_len": "0x198",
+    "blob_hashes_ptr": "0x190",
+    "chain_id": "0x258",
+    "coinbase": "0xa8",
+    "gas_limit": "0x90",
+    "gas_price_max_fee_u128": "0x130",
+    "number": "0x30",
+    "op4b_u64": "0xa0",
+    "origin": "0x1c8",
+    "priority_fee_present": "0xe0",
+    "priority_fee_u128": "0xf0",
+    "timestamp": "0x50",
+    "tx_type": "0x1f1"
+  },
+  "functions": {
+    "0x2995df0": {
+      "calls": 0,
+      "fde_bytes": 22,
+      "fde_end": "0x2995e06",
+      "inferred_name": "POP",
+      "instructions": 9,
+      "opcode": "0x50",
+      "returns": 2,
+      "sha256": "c8a6ba788dc413b801f5c7d4f2c788b6394908211122d4282a18e80f4833917a",
+      "spec_gate": null
+    },
+    "0x2997a50": {
+      "calls": 1,
+      "fde_bytes": 273,
+      "fde_end": "0x2997b61",
+      "inferred_name": "CALLDATALOAD",
+      "instructions": 79,
+      "opcode": "0x35",
+      "returns": 2,
+      "sha256": "7153078ab31b6bb47d724e144d62dacb2e699d1ce56f9912311d2bf6627d1340",
+      "spec_gate": null
+    },
+    "0x2997b70": {
+      "calls": 0,
+      "fde_bytes": 96,
+      "fde_end": "0x2997bd0",
+      "inferred_name": "CALLDATASIZE",
+      "instructions": 26,
+      "opcode": "0x36",
+      "returns": 2,
+      "sha256": "d926e23172c6d33f8b9c6a4f434e0b6c32c28ba9381695a103ec00103813a422",
+      "spec_gate": null
+    },
+    "0x2997eb0": {
+      "calls": 0,
+      "fde_bytes": 64,
+      "fde_end": "0x2997ef0",
+      "inferred_name": "GAS",
+      "instructions": 17,
+      "opcode": "0x5a",
+      "returns": 2,
+      "sha256": "b94467ad7e91ae69f78564b1fb9f5cb54a3f82f772b22f722f36b96e0df47eef",
+      "spec_gate": null
+    },
+    "0x2997ef0": {
+      "calls": 0,
+      "fde_bytes": 87,
+      "fde_end": "0x2997f47",
+      "inferred_name": "CALLER",
+      "instructions": 22,
+      "opcode": "0x33",
+      "returns": 2,
+      "sha256": "a9aadc1c83f729373eca16c22c4ed912b494009b47c95b2c3d668da7f044a806",
+      "spec_gate": null
+    },
+    "0x2997f50": {
+      "calls": 0,
+      "fde_bytes": 81,
+      "fde_end": "0x2997fa1",
+      "inferred_name": "ADDRESS",
+      "instructions": 22,
+      "opcode": "0x30",
+      "returns": 2,
+      "sha256": "7fe80b36d45d2810aeebbf9a3101868e3e13555958e7e6e71e989e013e8c69fb",
+      "spec_gate": null
+    },
+    "0x2998240": {
+      "calls": 0,
+      "fde_bytes": 68,
+      "fde_end": "0x2998284",
+      "inferred_name": "CODESIZE",
+      "instructions": 18,
+      "opcode": "0x38",
+      "returns": 2,
+      "sha256": "b147abc31ff388f3e13456d0f2f97f9b7b159971d78e1a266c1b28417faa36e7",
+      "spec_gate": null
+    },
+    "0x2998290": {
+      "calls": 0,
+      "fde_bytes": 53,
+      "fde_end": "0x29982c5",
+      "inferred_name": "CALLVALUE",
+      "instructions": 16,
+      "opcode": "0x34",
+      "returns": 2,
+      "sha256": "93717c8b2f4a94974e1d776d5ddea25e554d4f48728cd2d27b4fce910378ebb4",
+      "spec_gate": null
+    },
+    "0x2999720": {
+      "calls": 0,
+      "fde_bytes": 87,
+      "fde_end": "0x2999777",
+      "inferred_name": "ORIGIN",
+      "instructions": 22,
+      "opcode": "0x32",
+      "returns": 2,
+      "sha256": "e483f2f83b674760136d90c6a4d0e8cdcc844e06d8af9147bcf19326ccdccc29",
+      "spec_gate": null
+    },
+    "0x2999780": {
+      "calls": 0,
+      "fde_bytes": 168,
+      "fde_end": "0x2999828",
+      "inferred_name": "GASPRICE",
+      "instructions": 41,
+      "opcode": "0x3a",
+      "returns": 2,
+      "sha256": "ca0cb96822855c8d55380f2a204b7c5ef57b60e11c2882ebbe5727270c678400",
+      "spec_gate": null
+    },
+    "0x2999830": {
+      "calls": 0,
+      "fde_bytes": 178,
+      "fde_end": "0x29998e2",
+      "inferred_name": "BLOBHASH",
+      "instructions": 46,
+      "opcode": "0x49",
+      "returns": 3,
+      "sha256": "691e60ccac63667f73c915c5250b14ae945769b3227ac3d4c2da21528ba24603",
+      "spec_gate": "0xb"
+    },
+    "0x2b95730": {
+      "calls": 0,
+      "fde_bytes": 109,
+      "fde_end": "0x2b9579d",
+      "inferred_name": "BLOBBASEFEE",
+      "instructions": 33,
+      "opcode": "0x4a",
+      "returns": 3,
+      "sha256": "634824e7690f7a215a5cd6fa8a9caf3641db3f5bcced7b8e2c80aa08d8b70cbe",
+      "spec_gate": "0xb"
+    },
+    "0x2b957a0": {
+      "calls": 0,
+      "fde_bytes": 53,
+      "fde_end": "0x2b957d5",
+      "inferred_name": "NUMBER",
+      "instructions": 16,
+      "opcode": "0x43",
+      "returns": 2,
+      "sha256": "a690772c084059909d7c5e5f521311ab69000490e2b1328419c724ae40a48210",
+      "spec_gate": null
+    },
+    "0x2b957e0": {
+      "calls": 0,
+      "fde_bytes": 76,
+      "fde_end": "0x2b9582c",
+      "inferred_name": "BASEFEE",
+      "instructions": 21,
+      "opcode": "0x48",
+      "returns": 3,
+      "sha256": "f3b76fb43dee28f66d5cbb47e27f5dc2989460203b100242fc34aa925a632f48",
+      "spec_gate": "0x8"
+    },
+    "0x2b95830": {
+      "calls": 0,
+      "fde_bytes": 76,
+      "fde_end": "0x2b9587c",
+      "inferred_name": "CHAINID",
+      "instructions": 21,
+      "opcode": "0x46",
+      "returns": 3,
+      "sha256": "0b35784821f92a734b3a07e31d8f6540afdd0a6f913a03762c3d0f70e31a574a",
+      "spec_gate": "0x6"
+    },
+    "0x2b95880": {
+      "calls": 0,
+      "fde_bytes": 87,
+      "fde_end": "0x2b958d7",
+      "inferred_name": "COINBASE",
+      "instructions": 22,
+      "opcode": "0x41",
+      "returns": 2,
+      "sha256": "b16906dc5a5bb0a3e2d01734b21f8b60efab5a4493ca1eda86114aacfd17e1b6",
+      "spec_gate": null
+    },
+    "0x2b958e0": {
+      "calls": 0,
+      "fde_bytes": 64,
+      "fde_end": "0x2b95920",
+      "inferred_name": "GASLIMIT",
+      "instructions": 17,
+      "opcode": "0x45",
+      "returns": 2,
+      "sha256": "04911508c995c19ac2874d02e07d797e54a5293bbd6d5bafc0a7021478b61289",
+      "spec_gate": null
+    },
+    "0x2b95920": {
+      "calls": 0,
+      "fde_bytes": 76,
+      "fde_end": "0x2b9596c",
+      "inferred_name": "OP4B",
+      "instructions": 21,
+      "opcode": "0x4b",
+      "returns": 3,
+      "sha256": "a9a6a010b24813a9def96941c23105cb32431ee6638ea23ed6f679e725676eab",
+      "spec_gate": "0xe"
+    },
+    "0x2b95970": {
+      "calls": 0,
+      "fde_bytes": 63,
+      "fde_end": "0x2b959af",
+      "inferred_name": "TIMESTAMP",
+      "instructions": 18,
+      "opcode": "0x42",
+      "returns": 2,
+      "sha256": "a1e6345bfbbaaa2cd4c08d1890da140bcec26befab38f897deba49bb0fd0c3ae",
+      "spec_gate": null
+    }
+  },
+  "interpreter_offsets": {
+    "address": "0x78",
+    "call_value": "0x58",
+    "calldata_kind": "0x38",
+    "calldata_len_or_end": "0x48",
+    "calldata_ptr_or_start": "0x40",
+    "calldata_shared": "0x10",
+    "caller": "0x8c",
+    "code_object": "0x120",
+    "gas_remaining": "0x188",
+    "spec_byte": "0x1a9",
+    "stack_len": "0x30",
+    "stack_ptr": "0x28"
+  },
+  "memcpy_got_slot": "0x64df508",
+  "opcode_table_slots": {
+    "0x6441210+0x180": {
+      "claimed": true,
+      "opcode": "0x30",
+      "target": "0x2997f50"
+    },
+    "0x6441210+0x190": {
+      "claimed": true,
+      "opcode": "0x32",
+      "target": "0x2999720"
+    },
+    "0x6441210+0x198": {
+      "claimed": true,
+      "opcode": "0x33",
+      "target": "0x2997ef0"
+    },
+    "0x6441210+0x1a0": {
+      "claimed": true,
+      "opcode": "0x34",
+      "target": "0x2998290"
+    },
+    "0x6441210+0x1a8": {
+      "claimed": true,
+      "opcode": "0x35",
+      "target": "0x2997a50"
+    },
+    "0x6441210+0x1b0": {
+      "claimed": true,
+      "opcode": "0x36",
+      "target": "0x2997b70"
+    },
+    "0x6441210+0x1c0": {
+      "claimed": true,
+      "opcode": "0x38",
+      "target": "0x2998240"
+    },
+    "0x6441210+0x1d0": {
+      "claimed": true,
+      "opcode": "0x3a",
+      "target": "0x2999780"
+    },
+    "0x6441210+0x208": {
+      "claimed": true,
+      "opcode": "0x41",
+      "target": "0x2b95880"
+    },
+    "0x6441210+0x210": {
+      "claimed": true,
+      "opcode": "0x42",
+      "target": "0x2b95970"
+    },
+    "0x6441210+0x218": {
+      "claimed": true,
+      "opcode": "0x43",
+      "target": "0x2b957a0"
+    },
+    "0x6441210+0x220": {
+      "claimed": false,
+      "opcode": "0x44",
+      "target": "0x2b95670"
+    },
+    "0x6441210+0x228": {
+      "claimed": true,
+      "opcode": "0x45",
+      "target": "0x2b958e0"
+    },
+    "0x6441210+0x230": {
+      "claimed": true,
+      "opcode": "0x46",
+      "target": "0x2b95830"
+    },
+    "0x6441210+0x240": {
+      "claimed": true,
+      "opcode": "0x48",
+      "target": "0x2b957e0"
+    },
+    "0x6441210+0x248": {
+      "claimed": true,
+      "opcode": "0x49",
+      "target": "0x2999830"
+    },
+    "0x6441210+0x250": {
+      "claimed": true,
+      "opcode": "0x4a",
+      "target": "0x2b95730"
+    },
+    "0x6441210+0x258": {
+      "claimed": true,
+      "opcode": "0x4b",
+      "target": "0x2b95920"
+    },
+    "0x6441210+0x280": {
+      "claimed": true,
+      "opcode": "0x50",
+      "target": "0x2995df0"
+    },
+    "0x6441210+0x2d0": {
+      "claimed": true,
+      "opcode": "0x5a",
+      "target": "0x2997eb0"
+    },
+    "0x6441f00+0x180": {
+      "claimed": true,
+      "opcode": "0x30",
+      "target": "0x2997f50"
+    },
+    "0x6441f00+0x190": {
+      "claimed": true,
+      "opcode": "0x32",
+      "target": "0x2999720"
+    },
+    "0x6441f00+0x198": {
+      "claimed": true,
+      "opcode": "0x33",
+      "target": "0x2997ef0"
+    },
+    "0x6441f00+0x1a0": {
+      "claimed": true,
+      "opcode": "0x34",
+      "target": "0x2998290"
+    },
+    "0x6441f00+0x1a8": {
+      "claimed": true,
+      "opcode": "0x35",
+      "target": "0x2997a50"
+    },
+    "0x6441f00+0x1b0": {
+      "claimed": true,
+      "opcode": "0x36",
+      "target": "0x2997b70"
+    },
+    "0x6441f00+0x1c0": {
+      "claimed": true,
+      "opcode": "0x38",
+      "target": "0x2998240"
+    },
+    "0x6441f00+0x1d0": {
+      "claimed": true,
+      "opcode": "0x3a",
+      "target": "0x2999780"
+    },
+    "0x6441f00+0x208": {
+      "claimed": true,
+      "opcode": "0x41",
+      "target": "0x2b95880"
+    },
+    "0x6441f00+0x210": {
+      "claimed": true,
+      "opcode": "0x42",
+      "target": "0x2b95970"
+    },
+    "0x6441f00+0x218": {
+      "claimed": true,
+      "opcode": "0x43",
+      "target": "0x2b957a0"
+    },
+    "0x6441f00+0x220": {
+      "claimed": false,
+      "opcode": "0x44",
+      "target": "0x2b95670"
+    },
+    "0x6441f00+0x228": {
+      "claimed": true,
+      "opcode": "0x45",
+      "target": "0x2b958e0"
+    },
+    "0x6441f00+0x230": {
+      "claimed": true,
+      "opcode": "0x46",
+      "target": "0x2b95830"
+    },
+    "0x6441f00+0x240": {
+      "claimed": true,
+      "opcode": "0x48",
+      "target": "0x2b957e0"
+    },
+    "0x6441f00+0x248": {
+      "claimed": true,
+      "opcode": "0x49",
+      "target": "0x2999830"
+    },
+    "0x6441f00+0x250": {
+      "claimed": true,
+      "opcode": "0x4a",
+      "target": "0x2b95730"
+    },
+    "0x6441f00+0x258": {
+      "claimed": true,
+      "opcode": "0x4b",
+      "target": "0x2b95920"
+    },
+    "0x6441f00+0x280": {
+      "claimed": true,
+      "opcode": "0x50",
+      "target": "0x2995df0"
+    },
+    "0x6441f00+0x2d0": {
+      "claimed": true,
+      "opcode": "0x5a",
+      "target": "0x2997eb0"
+    }
+  },
+  "results": {
+    "not_activated": 43,
+    "ok": 0,
+    "overflow": 45,
+    "underflow": 44
+  },
+  "stack_limit": 1024
+}

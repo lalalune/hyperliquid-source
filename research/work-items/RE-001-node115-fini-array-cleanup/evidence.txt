@@ -1,0 +1,48 @@
+DT_FINI_ARRAY: 0x63f36c0
+DT_FINI_ARRAYSZ: 0x8
+DT_FINI: 0x63f0a1c
+.fini_array: 0x63f36c0 0000000000000000
+finalizer: VA 0x14193a0, file offset 0x14183a0
+0x14193a0 f30f1efa         endbr64
+0x14193a4 803d956a0e0500   cmp byte ptr [rip + 0x50e6a95], 0
+0x14193ab 752b             jne 0x14193d8
+0x14193ad 55               push rbp
+0x14193ae 48833dc2600c0500 cmp qword ptr [rip + 0x50c60c2], 0
+0x14193b6 4889e5           mov rbp, rsp
+0x14193b9 740c             je 0x14193c7
+0x14193bb 488b3d5e660d05   mov rdi, qword ptr [rip + 0x50d665e]
+0x14193c2 e87976fd04       call 0x63f0a40
+0x14193c7 e864ffffff       call 0x1419330
+0x14193cc c6056d6a0e0501   mov byte ptr [rip + 0x50e6a6d], 1
+0x14193d3 5d               pop rbp
+0x14193d4 c3               ret
+0x14193d5 0f1f00           nop dword ptr [rax]
+0x14193d8 c3               ret
+helper: VA 0x1419330, file offset 0x1418330
+0x1419330 488d3de9660d05   lea rdi, [rip + 0x50d66e9]
+0x1419337 488d05e2660d05   lea rax, [rip + 0x50d66e2]
+0x141933e 4839f8           cmp rax, rdi
+0x1419341 7415             je 0x1419358
+0x1419343 488b051e610c05   mov rax, qword ptr [rip + 0x50c611e]
+0x141934a 4885c0           test rax, rax
+0x141934d 7409             je 0x1419358
+0x141934f ffe0             jmp rax
+0x1419351 0f1f8000000000   nop dword ptr [rax]
+0x1419358 c3               ret
+PLT: VA 0x63f0a40, file offset 0x63efa40
+0x63f0a40 ff252ad70f00     jmp qword ptr [rip + 0xfd72a]
+0x63f0a46 6800000000       push 0
+0x63f0a4b e9e0ffffff       jmp 0x63f0a30
+data reference: 0x63f36c0 .tbss .fini_array
+data reference: 0x64df468 .got
+data reference: 0x64df478 .got
+data reference: 0x64ee170 .got.plt
+data reference: 0x64efa20 .data
+data reference: 0x64ffe40 .bss
+.rela.dyn: 0x63f36c0 type=8 addend=0x14193a0
+.rela.dyn: 0x64efa20 type=8 addend=0x64efa20
+.rela.dyn: 0x64df468 type=6 addend=0x0 _ITM_deregisterTMCloneTable
+.rela.dyn: 0x64df478 type=6 addend=0x0 __cxa_finalize
+.rela.plt: 0x64ee170 type=7 addend=0x0 __cxa_finalize
+.text [0x1419300, 0x63f0a00) rel32 E8/E9 candidates: []
+.eh_frame covering FDE starts: []

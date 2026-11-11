@@ -232,7 +232,17 @@
       "rule": "if the level byte at +0x20 is nonzero the arm returns the shared routine result unchanged; otherwise it sets +0x20 to 1 and stores the result at +0x28, then returns it; it never appends"
     },
     "append_arm": {
-      "shared_routine_stack_arguments": "the cached qword at level +0x28 and the arm flag qword (1 when the derivation lookup returned nonzero, else the qword at level +0x20)",
+      "shared_routine_stack_arguments": "the selected qword (through post-derivation RDX on the nonzero path, level +0x28 on the zero path) and the arm flag qword (1 when the derivation lookup returned nonzero, else the qword at level +0x20)",
+      "shared_word_sources": {
+        "zero_derivation": {
+          "base": "level",
+          "offset": "0x28"
+        },
+        "nonzero_derivation": {
+          "base": "post_derivation_rdx",
+          "pointee_identity": "unclosed"
+        }
+      },
       "track_caller_call": "level +0x50 with the qword at order +0xf0, the dword at order +0xdc, and the shared routine result; its own result is discarded",
       "element_patch": "the copied order bytes at stack +0x68 are patched at +4 with the third argument qword and at +12 with its dword at +8 before the tail copy"
     },
@@ -247,11 +257,17 @@
       "grow_rule": "when length equals capacity the grow helper behind slot 0x64e27a8 runs on the ring fields at +0x30 before the store",
       "index_rule": "(head + length) mod capacity by one conditional subtraction of capacity",
       "length_increment": 1,
+      "element0_origin": {
+        "object": "order",
+        "offset": "0xf0",
+        "saved_stack_offset": "0x30",
+        "carrier": "r15"
+      },
       "element_fields": [
         {
           "offset": 0,
           "bytes": 8,
-          "source": "the qword cached at level +0x28"
+          "source": "the saved order +0xf0 qword, reloaded from stack +0x30"
         },
         {
           "offset": 8,
@@ -284,7 +300,21 @@
           "grow": "0x64e27a8",
           "panic_format": "0x64df6a0"
         },
-        "instruction_sites_checked": 85
+        "instruction_sites_checked": 88,
+        "element0_origin": {
+          "object": "order",
+          "offset": "0xf0",
+          "saved_stack_offset": "0x30",
+          "carrier": "r15",
+          "sites": {
+            "bind_order": "0x59118a7",
+            "load_order_word": "0x59118d1",
+            "save_order_word": "0x5911980",
+            "reload_saved_word": "0x5911a53",
+            "store_element0": "0x5911ac2"
+          },
+          "premise": "ordinary callee-saved registers and caller-owned stack storage"
+        }
       },
       "ring_append_b": {
         "callees": {
@@ -303,7 +333,21 @@
           "grow": "0x64e27a8",
           "panic_format": "0x64df6a0"
         },
-        "instruction_sites_checked": 85
+        "instruction_sites_checked": 88,
+        "element0_origin": {
+          "object": "order",
+          "offset": "0xf0",
+          "saved_stack_offset": "0x30",
+          "carrier": "r15",
+          "sites": {
+            "bind_order": "0x5911b47",
+            "load_order_word": "0x5911b71",
+            "save_order_word": "0x5911c20",
+            "reload_saved_word": "0x5911cf3",
+            "store_element0": "0x5911d62"
+          },
+          "premise": "ordinary callee-saved registers and caller-owned stack storage"
+        }
       }
     }
   },

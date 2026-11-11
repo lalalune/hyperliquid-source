@@ -1,0 +1,173 @@
+"""Authenticate the public record snapshot used by blocked #115 comparisons.
+
+The snapshot replaces unavailable private worktree copies. It is a frozen
+comparison input set, not a whole-node coverage or ownership denominator.
+"""
+import fnmatch
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+
+MANIFEST = "research/work-items/RE-review-open-20261106/prior-source-manifest.json"
+MANIFEST_SHA256 = "46cf6bd20d074b66c54a76ebeeea3a8d0b80446ff233b13c1a0aa86d3bcee674"
+RECORD_COUNT = 1211
+TARGET_SHA256 = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+ARCHIVE = "research/work-items/RE-review-open-20261106/frozen-prior-inputs"
+MARKER = "PRIOR_CORPUS %s %d records verified" % (MANIFEST_SHA256, RECORD_COUNT)
+_cache = {}
+
+
+def verify_files(root, entries):
+    root = Path(root).resolve()
+    found = []
+    seen = set()
+    for entry in entries:
+        name = entry["path"]
+        relative = Path(name)
+        if (relative.is_absolute() or ".." in relative.parts
+                or not name.startswith("research/work-items/")
+                or relative.name != "records.json" or name in seen):
+            raise ValueError("invalid or duplicate prior record path: " + name)
+        seen.add(name)
+        path = root / relative
+        try:
+            path.resolve().relative_to(root)
+            raw = path.read_bytes()
+        except (OSError, ValueError) as exc:
+            raise ValueError("missing prior record: " + name) from exc
+        if hashlib.sha256(raw).hexdigest() != entry["sha256"]:
+            # Later reviewed PRs may correct a live packet. Keep this comparison
+            # pinned to its original bytes instead of changing its evidence set.
+            archived = root / ARCHIVE / relative.parent.name / "records.json"
+            try:
+                archived.resolve().relative_to(root)
+                raw = archived.read_bytes()
+            except (OSError, ValueError) as exc:
+                raise ValueError("prior record digest mismatch: " + name) from exc
+            if hashlib.sha256(raw).hexdigest() != entry["sha256"]:
+                raise ValueError("archived prior record digest mismatch: " + name)
+            path = archived
+        found.append(path)
+    return tuple(found)
+
+
+def _reference(root):
+    root = Path(os.environ.get("NODE115_PRIOR_ROOT", str(root))).resolve()
+    manifest = root / MANIFEST
+    try:
+        raw = manifest.read_bytes()
+    except OSError as exc:
+        raise ValueError("missing pinned public prior corpus") from exc
+    if hashlib.sha256(raw).hexdigest() != MANIFEST_SHA256:
+        raise ValueError("prior corpus manifest digest mismatch")
+    record = json.loads(raw)
+    entries = record["records"]
+    if (record.get("schema") != 1 or record.get("target_sha256") != TARGET_SHA256
+            or len(entries) != RECORD_COUNT):
+        raise ValueError("prior corpus scope mismatch")
+    try:
+        def stamp(path):
+            if not path.exists():
+                return None
+            stat = path.stat()
+            return stat.st_size, stat.st_mtime_ns
+        fingerprint = tuple((entry["path"], stamp(root / entry["path"]),
+                             stamp(root / ARCHIVE / Path(entry["path"]).parent.name / "records.json"))
+                            for entry in entries)
+    except OSError as exc:
+        raise ValueError("missing pinned prior record") from exc
+    cached = _cache.get(root)
+    if cached is None or cached[0] != fingerprint:
+        found = verify_files(root, entries)
+        _cache[root] = (fingerprint, found)
+        print(MARKER)
+    return root, _cache[root][1]
+
+
+def paths(root, pattern="*/records.json"):
+    """Return authenticated record paths, or their packet dirs for dir globs."""
+    local_root = Path(root).resolve()
+    reference_root, found = _reference(root)
+    base = reference_root / "research/work-items"
+    local_base = local_root / "research/work-items"
+    # Extra candidate records can add conflicts, but cannot replace pinned
+    # reference inputs or establish a positive is_documented() claim.
+    overlays = tuple(local_base.glob("*/records.json")) if local_base.exists() else ()
+    if pattern.endswith("records.json"):
+        result = {str(p) for p in found
+                  if fnmatch.fnmatch(p.parent.name + "/records.json", pattern)}
+        result.update(str(p) for p in overlays
+                      if fnmatch.fnmatch(p.relative_to(local_base).as_posix(), pattern))
+        return sorted(result)
+    result = {str(p.parent) for p in found
+              if fnmatch.fnmatch(p.parent.name, pattern)}
+    result.update(str(p.parent) for p in overlays
+                  if fnmatch.fnmatch(p.parent.relative_to(local_base).as_posix(), pattern))
+    return sorted(result)
+
+
+def is_verified(root):
+    _reference(root)
+    return True
+
+
+def report_verified(output):
+    return MARKER in output
+
+
+def parse_range(value):
+    if isinstance(value, list) and len(value) == 2:
+        lo, hi = (int(x, 0) if isinstance(x, str) else int(x) for x in value)
+    elif isinstance(value, str):
+        match = re.fullmatch(r"\s*(0x[0-9a-fA-F]+)\s*\.\.\s*(0x[0-9a-fA-F]+)(?:\s*\((\d+) bytes\))?\s*", value)
+        if not match:
+            raise ValueError("unsupported prior range")
+        lo, hi = int(match[1], 16), int(match[2], 16)
+        if match[3] is not None and int(match[3]) != hi - lo:
+            raise ValueError("prior range byte annotation mismatch")
+    else:
+        raise ValueError("unsupported prior range")
+    if lo < 0 or hi <= lo:
+        raise ValueError("invalid prior range bounds")
+    return lo, hi
+
+
+def _explicit_ranges(record, inside=False):
+    if isinstance(record, dict):
+        if inside:
+            if "range" in record:
+                try:
+                    yield parse_range(record["range"])
+                except ValueError:
+                    pass
+            elif "start" in record and "end" in record:
+                try:
+                    yield parse_range([record["start"], record["end"]])
+                except ValueError:
+                    pass
+        for key, child in record.items():
+            if key.startswith(("next", "prev", "cited")) or key in ("survey", "census"):
+                continue
+            yield from _explicit_ranges(child, inside or key in ("exhibits", "windows"))
+    elif isinstance(record, list):
+        for child in record:
+            yield from _explicit_ranges(child, inside)
+
+
+def is_documented(root, lo, hi):
+    """A former next-work hint can now have a complete, pinned exhibit."""
+    _, found = _reference(root)
+    for path in found:
+        record = json.loads(path.read_bytes())
+        if any(a <= lo and hi <= b for a, b in _explicit_ranges(record)):
+            return True
+    return False
+
+
+def is_reference_packet(root, slug, record):
+    """A committed copy of the exact pinned packet is not a slug collision."""
+    _, found = _reference(root)
+    matching = [p for p in found if p.parent.name == slug]
+    return len(matching) == 1 and json.loads(matching[0].read_bytes()) == record

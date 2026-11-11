@@ -1,0 +1,37 @@
+6355830: f30f1efa                         endbr64  
+6355834: 4881ff00100000                   cmp      rdi, 0x1000
+635583b: 0f877f000000                     ja       0x63558c0
+6355841: 488d15781f3d00                   lea      rdx, [rip + 0x3d1f78]
+6355848: 488d4707                         lea      rax, [rdi + 7]
+635584c: 48c7c158efffff                   mov      rcx, 0xffffffffffffef58
+6355853: 48c1e803                         shr      rax, 3
+6355857: 488d35a2213d00                   lea      rsi, [rip + 0x3d21a2]
+635585e: 440fb60402                       movzx    r8d, byte ptr [rdx + rax]
+6355863: 644c8b9138030000                 mov      r10, qword ptr fs:[rcx + 0x338]
+635586b: 4e0314c6                         add      r10, qword ptr [rsi + r8*8]
+635586f: 644c3b9140030000                 cmp      r10, qword ptr fs:[rcx + 0x340]
+6355877: 7347                             jae      0x63558c0
+6355879: 644c8b1c2500000000               mov      r11, qword ptr fs:[0]
+6355882: 4f8d0c40                         lea      r9, [r8 + r8*2]
+6355886: 4b8d04cb                         lea      rax, [r11 + r9*8]
+635588a: 4801c8                           add      rax, rcx
+635588d: 488b9060030000                   mov      rdx, qword ptr [rax + 0x360]
+6355894: 488b32                           mov      rsi, qword ptr [rdx]
+6355897: 4c8d4208                         lea      r8, [rdx + 8]
+635589b: 663b9070030000                   cmp      dx, word ptr [rax + 0x370]
+63558a2: 7424                             je       0x63558c8
+63558a4: 4c898060030000                   mov      qword ptr [rax + 0x360], r8
+63558ab: 644c899138030000                 mov      qword ptr fs:[rcx + 0x338], r10
+63558b3: 4883806803000001                 add      qword ptr [rax + 0x368], 1
+63558bb: 4889f0                           mov      rax, rsi
+63558be: c3                               ret      
+63558bf: 90                               nop      
+63558c0: e9abe1ffff                       jmp      0x6353a70
+63558c5: 0f1f00                           nop      dword ptr [rax]
+63558c8: 663b9074030000                   cmp      dx, word ptr [rax + 0x374]
+63558cf: 74ef                             je       0x63558c0
+63558d1: 4c898060030000                   mov      qword ptr [rax + 0x360], r8
+63558d8: 6644898070030000                 mov      word ptr [rax + 0x370], r8w
+63558e0: 644c899138030000                 mov      qword ptr fs:[rcx + 0x338], r10
+63558e8: 4883806803000001                 add      qword ptr [rax + 0x368], 1
+63558f0: ebc9                             jmp      0x63558bb

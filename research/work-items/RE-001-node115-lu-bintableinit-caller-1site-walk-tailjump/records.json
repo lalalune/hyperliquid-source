@@ -1,0 +1,427 @@
+{
+ "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "calls": [
+  {
+   "note": "cited 1-raw candidate #12",
+   "site": "0x636330c",
+   "target": "0x63aefe0"
+  },
+  {
+   "note": "bin_table_init",
+   "site": "0x63633f8",
+   "target": "0x63d9880"
+  },
+  {
+   "note": "helper",
+   "site": "0x6363435",
+   "target": "0x63eb870"
+  },
+  {
+   "note": "lu-miss handler",
+   "site": "0x636353e",
+   "target": "0x63d9700"
+  },
+  {
+   "note": "__stack_chk_fail",
+   "site": "0x636354d",
+   "target": "0x63f0d70"
+  }
+ ],
+ "census": {
+  "bin_table_init": 1,
+  "bsr": 0,
+  "calls_total": 5,
+  "jumps": 23,
+  "jumps_outside_window": 1,
+  "lock_add": 0,
+  "lock_sub": 0,
+  "lu_miss": 1,
+  "raw_e8": {
+   "tiers": {
+    "1": 17,
+    "10": 1,
+    "2": 12,
+    "4": 8,
+    "5": 1,
+    "6": 2,
+    "8": 1
+   },
+   "total": 108
+  },
+  "rela_dyn": {
+   "relative": 59534,
+   "total": 60723
+  },
+  "rela_plt": 278,
+  "ret": 1,
+  "strict": 161
+ },
+ "cited_not_claimed": [
+  "bin_table_init body 0x63d9880..0x63d9a64 (#262)",
+  "lu-miss handler 0x63d9700..0x63d987b (#215)",
+  "tail-jump target FDE 0x63aefe0..0x63af45f (1-raw candidate #12)",
+  "helper 0x63eb870",
+  "tables 0x6728848, 0x6728868, 0x6511a00, 0x64ffdc8"
+ ],
+ "exhibits": [
+  {
+   "bin_table_init_sites": [
+    "0x63633f8"
+   ],
+   "bsr": 0,
+   "bytes": 754,
+   "calls_total": 5,
+   "lock_add": 0,
+   "lock_sub": 0,
+   "lu_miss_sites": [
+    "0x636353e"
+   ],
+   "name": "bintableinit_caller_walk_tailjump_1site",
+   "range": "0x6363260..0x6363552",
+   "ret": 1,
+   "ret_sites": [
+    "0x636336e"
+   ],
+   "strict": 161,
+   "tail_jump_exits": [
+    "0x63bd6c0"
+   ]
+  }
+ ],
+ "frame": {
+  "canary": "0x198(%rsp)",
+  "endbr64": true,
+  "pushes": [
+   "r13",
+   "r12",
+   "rbp",
+   "rbx"
+  ],
+  "sub_rsp": "0x1a8"
+ },
+ "lu_miss_sites": [
+  {
+   "r8": 1,
+   "r9": 0,
+   "rcx": "r12 key",
+   "rdi": "rbp context",
+   "rdx": "rbx scan table",
+   "rejoin": "jmp 0x63632dd",
+   "rsi": "lea 0x6511a00",
+   "site": "0x636353e"
+  }
+ ],
+ "next_fde": {
+  "padding": 14,
+  "range": "0x6363560..0x636365a"
+ },
+ "next_question": {
+  "bin_table_init": 1,
+  "bsr": 0,
+  "bytes": 1376,
+  "fall_through": [
+   "0x6363d50..0x6364270",
+   "0x6387420..0x6387878",
+   "0x63adb50..0x63adf34"
+  ],
+  "lu_miss": 1,
+  "packet": 300,
+  "ret": 1,
+  "window": "0x63637f0..0x6363d50"
+ },
+ "prev_fde": {
+  "gap": 8,
+  "gap_bytes": "all 0xcc",
+  "range": "0x6362910..0x6362f82"
+ },
+ "scan": {
+  "base": "table+0x100",
+  "exhaustion": "0x6363520",
+  "move_to_front": "0x6363467",
+  "reversed_operand": [
+   "0x63634cc"
+  ],
+  "slot_compares": [
+   "0x63633a0",
+   "0x636345e",
+   "0x63634bd",
+   "0x63634cc",
+   "0x63634db",
+   "0x63634ea",
+   "0x63634fd",
+   "0x636350a"
+  ],
+  "slots": 8,
+  "table": "rbx context+0x1b0"
+ },
+ "sites": [
+  {
+   "argument": "lea 0x10(%rsp) in rbx",
+   "block": "0x63633f0",
+   "branch": "test %rdi,%rdi; je from 0x6363297",
+   "rejoin": "jmp 0x636329d",
+   "site": "0x63633f8"
+  }
+ ],
+ "size_class": {
+  "note": "no size-class/bsr block; entry rdx (r13) is a struct pointer, 0x368(%r13) field ops"
+ },
+ "survey": {
+  "candidates": [
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363095"
+    ],
+    "end": "0x6363258",
+    "miss": 1,
+    "ret": 0,
+    "size": 712,
+    "start": "0x6362f90",
+    "status": "BUILT by packet #298"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63633f8"
+    ],
+    "end": "0x6363552",
+    "miss": 1,
+    "ret": 1,
+    "size": 754,
+    "start": "0x6363260",
+    "status": "BUILT by this packet (#299)"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363b30"
+    ],
+    "end": "0x6363d50",
+    "miss": 1,
+    "ret": 1,
+    "size": 1376,
+    "start": "0x63637f0",
+    "status": "survives, next (#300)"
+   },
+   {
+    "bsr": 4,
+    "bti": 1,
+    "bti_sites": [
+     "0x6364009"
+    ],
+    "end": "0x6364270",
+    "miss": 1,
+    "ret": 1,
+    "size": 1312,
+    "start": "0x6363d50",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6387629"
+    ],
+    "end": "0x6387878",
+    "miss": 1,
+    "ret": 1,
+    "size": 1112,
+    "start": "0x6387420",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63adce6"
+    ],
+    "end": "0x63adf34",
+    "miss": 2,
+    "ret": 1,
+    "size": 996,
+    "start": "0x63adb50",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae114"
+    ],
+    "end": "0x63ae252",
+    "miss": 1,
+    "ret": 1,
+    "size": 786,
+    "start": "0x63adf40",
+    "status": "EXCLUDED as a whole FDE: overlaps packet #214 (lu nextnode) claimed sub-ranges 0x63adf71..0x63adf9d, 0x63ae014..0x63ae040, 0x63ae088..0x63ae0cf, 0x63adfed..0x63ae014 in its records"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae45d"
+    ],
+    "end": "0x63ae6d1",
+    "miss": 2,
+    "ret": 1,
+    "size": 1057,
+    "start": "0x63ae2b0",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae83d"
+    ],
+    "end": "0x63ae974",
+    "miss": 1,
+    "ret": 1,
+    "size": 660,
+    "start": "0x63ae6e0",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aea96"
+    ],
+    "end": "0x63aed39",
+    "miss": 2,
+    "ret": 1,
+    "size": 953,
+    "start": "0x63ae980",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aeea1"
+    ],
+    "end": "0x63aefdb",
+    "miss": 2,
+    "ret": 1,
+    "size": 667,
+    "start": "0x63aed40",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af198"
+    ],
+    "end": "0x63af45f",
+    "miss": 2,
+    "ret": 1,
+    "size": 1151,
+    "start": "0x63aefe0",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af6c8"
+    ],
+    "end": "0x63afba4",
+    "miss": 4,
+    "ret": 1,
+    "size": 1860,
+    "start": "0x63af460",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63afe1e"
+    ],
+    "end": "0x63b0324",
+    "miss": 4,
+    "ret": 1,
+    "size": 1732,
+    "start": "0x63afc60",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc5e5"
+    ],
+    "end": "0x63bc728",
+    "miss": 1,
+    "ret": 1,
+    "size": 664,
+    "start": "0x63bc490",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc9ec"
+    ],
+    "end": "0x63bcb12",
+    "miss": 1,
+    "ret": 1,
+    "size": 994,
+    "start": "0x63bc730",
+    "status": "survives"
+   },
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x63c30ed"
+    ],
+    "end": "0x63c3328",
+    "miss": 1,
+    "ret": 1,
+    "size": 1064,
+    "start": "0x63c2f00",
+    "status": "survives"
+   }
+  ],
+  "count": 17,
+  "exclusions_reverified": [
+   "0x63ed090..0x63ed862 (#260)",
+   "0x63ef8e0..0x63efba2 (#258)"
+  ],
+  "method": "own .eh_frame parse (135,313 FDEs, sorted before bisect) + raw-e8 census + objdump site count per FDE + exhibits-scoped range-only claim check over merged tree + all prior hl-wt-calls* worktrees",
+  "tiers": {
+   "1": 17,
+   "10": 1,
+   "2": 12,
+   "4": 8,
+   "5": 1,
+   "6": 2,
+   "8": 1
+  },
+  "total_raw": 108
+ },
+ "tail_jump_exit": {
+  "note": "tail-jump exit, verified per FDE (0x63bd6c0 was a tail-jump exit in #288, an ordinary call in #287/#289)",
+  "site": "0x636339a",
+  "target": "0x63bd6c0"
+ },
+ "walk": {
+  "field_update": "second-level value shl/sar $0x10, mask $0xffffffffffffff80, or $0x2400000 after mask $0xfffffffff00fffff, written back at 0x6363309",
+  "node_resolution_table": "none in this FDE (no 0x6727a00 read)",
+  "second_level": "(key>>0x9)&0x1ffff8 + table + 0x8",
+  "table": "context+0x1b0 (rbx)",
+  "top_index": "(key>>0x1a)&0xf0"
+ },
+ "window": {
+  "bytes": 754,
+  "range": "0x6363260..0x6363552",
+  "strict": 161
+ }
+}

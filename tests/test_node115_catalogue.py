@@ -69,8 +69,8 @@ class CatalogueTests(unittest.TestCase):
     def test_dependency_bytes_do_not_count_as_first_party(self):
         coverage = byte_progress.load_coverage(ROOT, 'research/byte-windows.json', self.components)
         self.assertEqual(set(coverage['targets']), {'node115'})
-        self.assertEqual(coverage['totals']['node115']['windows'], 7884)
-        self.assertEqual(coverage['totals']['node115']['bytes'], 5313802)
+        self.assertEqual(coverage['totals']['node115']['windows'], 7885)
+        self.assertEqual(coverage['totals']['node115']['bytes'], 5318174)
         self.assertTrue(all(row['windows'] == 0 for row in coverage['components'].values()))
 
     def test_wrong_owner_target_and_changed_evidence_rejected(self):

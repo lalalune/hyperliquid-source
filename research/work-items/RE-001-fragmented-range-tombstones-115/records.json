@@ -1,0 +1,1444 @@
+{
+ "adjust_heap": {
+  "algorithm": "sift the hole down: repeatedly move the larger child (by (first, second)) into the hole, then sift the value back up from the hole's parent chain; the two call sites are the __make_heap build loop and the __sort_heap extraction loop inside __introsort_loop",
+  "arguments": [
+   "rdi = first (16-byte entries)",
+   "rsi = hole index",
+   "rdx = length (entries)",
+   "rcx = value first qword",
+   "r8 = value second qword"
+  ],
+  "comparator": "same lexicographic (first, second) unsigned order",
+  "name": "std::__adjust_heap (libstdc++ std::sort internals, by shape)"
+ },
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "cache_ctor": {
+  "arguments": [
+   "rdi = cache (0xe8, operator new)",
+   "rsi = &iterator (pointer to the 0x80 iterator*)",
+   "rdx = iterator+8 (its Cleanable)",
+   "ecx = arg4 (0 in the host)",
+   "r8 = a 0x20-byte stack scratch (vector<size_t>: begin, end, capacity; zeroed by the host; the finalize fills it as a heap range, freed by the host after the install)"
+  ],
+  "callers": "4 direct call sites: this host, NewRangeTombstoneIteratorInternal (#3674), CompactionRangeDelAggregator::NewIterator (0x5f29140), BlockBasedTable::ReadRangeDelBlock (0x6109c40)",
+  "finalize": "FragmentedRangeTombstoneList::FragmentTombstones(unique_ptr<InternalIteratorBase<Slice>>, const InternalKeyComparator&, bool, const vector<size_t>&) at 0x5f36c70 (catalogue), called from the cache ctor at 0x5f3799f (main path) and 0x5f37ad1 (null-list path); it sets cache+0xb8 = 1 (the ready flag) and builds the fragmented tombstones; its internals are by contract in this packet (see unknowns)",
+  "iteration": "when *iterator == 0, the null-list path finalizes at once (0x5f37aa8); otherwise a stack iterator (vtable 0x64cca10+0x10, Cleanable at its +0x8) walks the list via vtable slots 0x10 (Valid), 0x18 (Next), 0x50 (key), 0x60 (size), 0x38 and 0x90, counting entries at cache+0xd8 and summing sizes at cache+0xe0; the loop at 0x5f37900 builds the sorted index vector (begin +0xc0, end +0xc8, capacity +0xd0)",
+  "name": "FragmentedRangeTombstoneListCache constructor (by shape; re-shipped from #3674)",
+  "zero_init": {
+   "+0x00..+0x10": "0",
+   "+0x10..+0x40": "0",
+   "+0x40": "0 (qword)",
+   "+0x48": "0 (dword)",
+   "+0x58": "0 (dword)",
+   "+0x60": "0",
+   "+0x68/+0x70": "&cache+0x58",
+   "+0x78": "0",
+   "+0x80..+0x90": "(cache+0x80, cache+0x80)",
+   "+0x90": "0",
+   "+0x98": "Cleanable (ctor 0x61bd0c0)",
+   "+0xb8": "0 (byte)",
+   "+0xc0..+0xd0": "0",
+   "+0xd8..+0xe8": "0"
+  }
+ },
+ "callers": {
+  "0x5f04f80": [
+   {
+    "containing_fde": [
+     "0x5f053d0",
+     "0x5f05678"
+    ],
+    "kind": "direct_call",
+    "role": "heapsort fallback (__make_heap/__sort_heap) inside __introsort_loop",
+    "site": "0x5f0560d"
+   },
+   {
+    "containing_fde": [
+     "0x5f053d0",
+     "0x5f05678"
+    ],
+    "kind": "direct_call",
+    "role": "heapsort fallback (__make_heap/__sort_heap) inside __introsort_loop",
+    "site": "0x5f0564f"
+   }
+  ],
+  "0x5f05120": [
+   {
+    "containing_fde": [
+     "0x5f061b0",
+     "0x5f06548"
+    ],
+    "kind": "direct_call",
+    "role": "_Sp_counted_ptr_inplace<FragmentedRangeTombstoneListCache>::_M_dispose: sort the cache index on shared_ptr dispose (final insertion sort)",
+    "site": "0x5f06367"
+   },
+   {
+    "containing_fde": [
+     "0x5f061b0",
+     "0x5f06548"
+    ],
+    "kind": "direct_call",
+    "role": "_Sp_counted_ptr_inplace<FragmentedRangeTombstoneListCache>::_M_dispose: sort the cache index on shared_ptr dispose (final insertion sort)",
+    "site": "0x5f06496"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "this host: sort the old cache index on rebuild (final insertion sort)",
+    "site": "0x5f0a6ff"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "this host: sort the old cache index on rebuild (final insertion sort)",
+    "site": "0x5f0a81e"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "NewRangeTombstoneIteratorInternal (#3674): sort the old cache index on lazy-build install (final insertion sort)",
+    "site": "0x5f0ae27"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "NewRangeTombstoneIteratorInternal (#3674): sort the old cache index on lazy-build install (final insertion sort)",
+    "site": "0x5f0af39"
+   },
+   {
+    "containing_fde": [
+     "0x5f0b080",
+     "0x5f0b418"
+    ],
+    "kind": "direct_call",
+    "role": "unique_ptr<FragmentedRangeTombstoneList>::~unique_ptr: sort the cache index on list destruction (final insertion sort)",
+    "site": "0x5f0b237"
+   },
+   {
+    "containing_fde": [
+     "0x5f0b080",
+     "0x5f0b418"
+    ],
+    "kind": "direct_call",
+    "role": "unique_ptr<FragmentedRangeTombstoneList>::~unique_ptr: sort the cache index on list destruction (final insertion sort)",
+    "site": "0x5f0b366"
+   },
+   {
+    "containing_fde": [
+     "0x5f10d40",
+     "0x5f11798"
+    ],
+    "kind": "direct_call",
+    "role": "MemTable::~MemTable: sort the cache index on memtable destruction (final insertion sort)",
+    "site": "0x5f115d5"
+   },
+   {
+    "containing_fde": [
+     "0x5f10d40",
+     "0x5f11798"
+    ],
+    "kind": "direct_call",
+    "role": "MemTable::~MemTable: sort the cache index on memtable destruction (final insertion sort)",
+    "site": "0x5f116f1"
+   }
+  ],
+  "0x5f053d0": [
+   {
+    "containing_fde": [
+     "0x5f053d0",
+     "0x5f05678"
+    ],
+    "kind": "direct_call",
+    "role": "self-recursion on the right partition inside __introsort_loop",
+    "site": "0x5f055b9"
+   },
+   {
+    "containing_fde": [
+     "0x5f061b0",
+     "0x5f06548"
+    ],
+    "kind": "direct_call",
+    "role": "_Sp_counted_ptr_inplace<FragmentedRangeTombstoneListCache>::_M_dispose: sort the cache index on shared_ptr dispose",
+    "site": "0x5f06348"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "this host: sort the old cache index on rebuild",
+    "site": "0x5f0a6e0"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "NewRangeTombstoneIteratorInternal (#3674): sort the old cache index on lazy-build install",
+    "site": "0x5f0ae03"
+   },
+   {
+    "containing_fde": [
+     "0x5f0b080",
+     "0x5f0b418"
+    ],
+    "kind": "direct_call",
+    "role": "unique_ptr<FragmentedRangeTombstoneList>::~unique_ptr: sort the cache index on list destruction",
+    "site": "0x5f0b218"
+   },
+   {
+    "containing_fde": [
+     "0x5f10d40",
+     "0x5f11798"
+    ],
+    "kind": "direct_call",
+    "role": "MemTable::~MemTable: sort the cache index on memtable destruction",
+    "site": "0x5f115b6"
+   }
+  ],
+  "0x5f059b0": [
+   {
+    "containing_fde": [
+     "0x5f059b0",
+     "0x5f05b79"
+    ],
+    "kind": "direct_call",
+    "role": "self-recursion on the +0x18 child",
+    "site": "0x5f05a41"
+   },
+   {
+    "containing_fde": [
+     "0x5f061b0",
+     "0x5f06548"
+    ],
+    "kind": "direct_call",
+    "role": "_Sp_counted_ptr_inplace<FragmentedRangeTombstoneListCache>::_M_dispose: release the +0x60 node tree on shared_ptr dispose",
+    "site": "0x5f06234"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "this host: release the old cache +0x60 node tree",
+    "site": "0x5f0a610"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "NewRangeTombstoneIteratorInternal (#3674): sort the old cache index on lazy-build install",
+    "site": "0x5f0acc4"
+   },
+   {
+    "containing_fde": [
+     "0x5f0b080",
+     "0x5f0b418"
+    ],
+    "kind": "direct_call",
+    "role": "unique_ptr<FragmentedRangeTombstoneList>::~unique_ptr: release the +0x60 node tree on list destruction",
+    "site": "0x5f0b104"
+   },
+   {
+    "containing_fde": [
+     "0x5f10d40",
+     "0x5f11798"
+    ],
+    "kind": "direct_call",
+    "role": "MemTable::~MemTable: release the +0x60 node tree on memtable destruction",
+    "site": "0x5f10e24"
+   }
+  ],
+  "0x5f0a3d0": [
+   {
+    "containing_fde": [
+     "0x5e82cc0",
+     "0x5e844e1"
+    ],
+    "kind": "direct_call",
+    "role": "DBImplSecondary::RecoverLogFiles: rebuild on recovery",
+    "site": "0x5e83a0b"
+   },
+   {
+    "containing_fde": [
+     "0x5e8a890",
+     "0x5e8c518"
+    ],
+    "kind": "direct_call",
+    "role": "DBImpl::SwitchMemtable: rebuild when a memtable turns immutable",
+    "site": "0x5e8aaab"
+   },
+   {
+    "containing_fde": [
+     "0x5ed01f0",
+     "0x5ed2238"
+    ],
+    "kind": "direct_call",
+    "role": "FlushJob::MemPurge: rebuild on memtable purge",
+    "site": "0x5ed1bcd"
+   }
+  ],
+  "0x5f36c70": [
+   {
+    "containing_fde": [
+     "0x5f37410",
+     "0x5f37e31"
+    ],
+    "kind": "direct_call",
+    "role": "cache ctor: fragment the tombstones (main path)",
+    "site": "0x5f3799f"
+   },
+   {
+    "containing_fde": [
+     "0x5f37410",
+     "0x5f37e31"
+    ],
+    "kind": "direct_call",
+    "role": "cache ctor: fragment the tombstones (null-list path)",
+    "site": "0x5f37ad1"
+   }
+  ],
+  "0x5f37410": [
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "this host: build the fresh cache from the temp iterator",
+    "site": "0x5f0a536"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a9c0",
+     "0x5f0b04c"
+    ],
+    "kind": "direct_call",
+    "role": "NewRangeTombstoneIteratorInternal (#3674): lazy-build the cache",
+    "site": "0x5f0ac12"
+   },
+   {
+    "containing_fde": [
+     "0x5f29140",
+     "0x5f294ce"
+    ],
+    "kind": "direct_call",
+    "role": "CompactionRangeDelAggregator::NewIterator: build a compaction cache",
+    "site": "0x5f29367"
+   },
+   {
+    "containing_fde": [
+     "0x6109c40",
+     "0x6109fca"
+    ],
+    "kind": "direct_call",
+    "role": "BlockBasedTable::ReadRangeDelBlock: build a table-reader cache",
+    "site": "0x6109f07"
+   }
+  ],
+  "0x60b21f0": [
+   {
+    "containing_fde": [
+     "0x5d34c90",
+     "0x5d34d14"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in rocksdb_readoptions_create",
+    "site": "0x5d34caa"
+   },
+   {
+    "containing_fde": [
+     "0x5d44ff0",
+     "0x5d45103"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZNK7rocksdb12TableFactory14NewTableReaderERKNS_18TableReaderOptionsEOSt10unique_ptrINS_22RandomAcce",
+    "site": "0x5d4504a"
+   },
+   {
+    "containing_fde": [
+     "0x5d46820",
+     "0x5d483a3"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb21VerifySstFileChecksumERKNS_7OptionsERKNS_10EnvOptionsERKNS_11ReadOptionsERKNSt7__cxx111",
+    "site": "0x5d47056"
+   },
+   {
+    "containing_fde": [
+     "0x5d76570",
+     "0x5d76660"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb2DB14VerifyChecksumEv",
+    "site": "0x5d765a8"
+   },
+   {
+    "containing_fde": [
+     "0x5d98230",
+     "0x5d98dac"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb16ColumnFamilyData26RangesOverlapWithMemtablesERKNS_10autovectorINS_5RangeELm8EEEPNS_12Su",
+    "site": "0x5d9829b"
+   },
+   {
+    "containing_fde": [
+     "0x5dcd5b0",
+     "0x5dcd752"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb25NewArenaWrappedDbIteratorEPNS_3EnvERKNS_11ReadOptionsERKNS_16ImmutableOptionsERKNS_16Mu",
+    "site": "0x5dcd654"
+   },
+   {
+    "containing_fde": [
+     "0x5df0f40",
+     "0x5df1e22"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb6DBImpl20CompactRangeInternalERKNS_19CompactRangeOptionsEPNS_18ColumnFamilyHandleEPKNS_5S",
+    "site": "0x5df16d5"
+   },
+   {
+    "containing_fde": [
+     "0x5df0f40",
+     "0x5df1e22"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb6DBImpl20CompactRangeInternalERKNS_19CompactRangeOptionsEPNS_18ColumnFamilyHandleEPKNS_5S",
+    "site": "0x5df1811"
+   },
+   {
+    "containing_fde": [
+     "0x5dfae60",
+     "0x5dfb2f7"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZZN7rocksdb13CompactionJob3RunEvENKUlRNS_6StatusEE_clES2_",
+    "site": "0x5dfaed1"
+   },
+   {
+    "containing_fde": [
+     "0x5dff230",
+     "0x5e019df"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in FDE 0x5dff230 (no catalogue row)",
+    "site": "0x5dff451"
+   },
+   {
+    "containing_fde": [
+     "0x5e0fb90",
+     "0x5e10910"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb13CompactionJob26GenSubcompactionBoundariesEv",
+    "site": "0x5e0fd99"
+   },
+   {
+    "containing_fde": [
+     "0x5e1b9c0",
+     "0x5e20481"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in FDE 0x5e1b9c0 (no catalogue row)",
+    "site": "0x5e1f118"
+   },
+   {
+    "containing_fde": [
+     "0x5e29de0",
+     "0x5e29f9a"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb18CompactionIterator25CreateBlobFetcherIfNeededEPKNS0_15CompactionProxyE",
+    "site": "0x5e29e39"
+   },
+   {
+    "containing_fde": [
+     "0x5e666a0",
+     "0x5e68ceb"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb6DBImpl27WriteLevel0TableForRecoveryEiPNS_16ColumnFamilyDataEPNS_8MemTableEPNS_11VersionE",
+    "site": "0x5e669dc"
+   },
+   {
+    "containing_fde": [
+     "0x5e9c070",
+     "0x5e9c307"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb6DBIter20SetBlobValueIfNeededERKNS_5SliceES3_",
+    "site": "0x5e9c0c9"
+   },
+   {
+    "containing_fde": [
+     "0x5ec0ab0",
+     "0x5ec250d"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb27ExternalSstFileIngestionJob19GetIngestedFileInfoERKNSt7__cxx1112basic_stringIcSt11char_",
+    "site": "0x5ec11cd"
+   },
+   {
+    "containing_fde": [
+     "0x5ec0ab0",
+     "0x5ec250d"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb27ExternalSstFileIngestionJob19GetIngestedFileInfoERKNSt7__cxx1112basic_stringIcSt11char_",
+    "site": "0x5ec13b7"
+   },
+   {
+    "containing_fde": [
+     "0x5ec0ab0",
+     "0x5ec250d"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb27ExternalSstFileIngestionJob19GetIngestedFileInfoERKNSt7__cxx1112basic_stringIcSt11char_",
+    "site": "0x5ec16a4"
+   },
+   {
+    "containing_fde": [
+     "0x5ec8f00",
+     "0x5ec95d3"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb27ExternalSstFileIngestionJob34AssignLevelAndSeqnoForIngestedFileEPNS_12SuperVersionEbNS_",
+    "site": "0x5ec9007"
+   },
+   {
+    "containing_fde": [
+     "0x5ecc630",
+     "0x5ecd649"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb8FlushJob15MemPurgeDeciderEd",
+    "site": "0x5ecc775"
+   },
+   {
+    "containing_fde": [
+     "0x5ed01f0",
+     "0x5ed2238"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb8FlushJob8MemPurgeEv",
+    "site": "0x5ed038c"
+   },
+   {
+    "containing_fde": [
+     "0x5ed2440",
+     "0x5ed5cbb"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb8FlushJob16WriteLevel0TableEv",
+    "site": "0x5ed2802"
+   },
+   {
+    "containing_fde": [
+     "0x5ee3840",
+     "0x5ee5d2b"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in FDE 0x5ee3840 (no catalogue row)",
+    "site": "0x5ee47a8"
+   },
+   {
+    "containing_fde": [
+     "0x5ee3840",
+     "0x5ee5d2b"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in FDE 0x5ee3840 (no catalogue row)",
+    "site": "0x5ee4921"
+   },
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb8MemTable34ConstructFragmentedRangeTombstonesEv",
+    "site": "0x5f0a43d"
+   },
+   {
+    "containing_fde": [
+     "0x5f40b00",
+     "0x5f410c9"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb10TableCache18GetTablePropertiesERKNS_11FileOptionsERKNS_21InternalKeyComparatorERKNS_12F",
+    "site": "0x5f40c7c"
+   },
+   {
+    "containing_fde": [
+     "0x5f415c0",
+     "0x5f418d6"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb10TableCache27GetMemoryUsageByTableReaderERKNS_11FileOptionsERKNS_21InternalKeyComparator",
+    "site": "0x5f41641"
+   },
+   {
+    "containing_fde": [
+     "0x5f41940",
+     "0x5f41c11"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb10TableCache19ApproximateOffsetOfERKNS_5SliceERKNS_12FileMetaDataENS_17TableReaderCallerE",
+    "site": "0x5f41a66"
+   },
+   {
+    "containing_fde": [
+     "0x5f41c80",
+     "0x5f41f69"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb10TableCache15ApproximateSizeERKNS_5SliceES3_RKNS_12FileMetaDataENS_17TableReaderCallerER",
+    "site": "0x5f41dbd"
+   },
+   {
+    "containing_fde": [
+     "0x5f45810",
+     "0x5f45b38"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZNSt17_Function_handlerIFvvEZN7rocksdb14VersionBuilder3Rep17LoadTableHandlersEPNS1_13InternalStatsE",
+    "site": "0x5f4592c"
+   },
+   {
+    "containing_fde": [
+     "0x5f717d0",
+     "0x5f71d22"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb10VersionSet18VerifyFileMetadataEPNS_16ColumnFamilyDataERKNSt7__cxx1112basic_stringIcSt11",
+    "site": "0x5f71bca"
+   },
+   {
+    "containing_fde": [
+     "0x5fc2900",
+     "0x5fc3acf"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb12_GLOBAL__N_116MemTableInserter7MergeCFEjRKNS_5SliceES4_",
+    "site": "0x5fc2bb5"
+   },
+   {
+    "containing_fde": [
+     "0x5fc6070",
+     "0x5fc6e8b"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb12_GLOBAL__N_116MemTableInserter9PutCFImplEjRKNS_5SliceES4_NS_9ValueTypeEPKNS_18Protectio",
+    "site": "0x5fc64a1"
+   },
+   {
+    "containing_fde": [
+     "0x606e3a0",
+     "0x606ea29"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb34DecodePersistentStatsVersionNumberEPNS_6DBImplENS_19StatsVersionKeyTypeEPm",
+    "site": "0x606e420"
+   },
+   {
+    "containing_fde": [
+     "0x606ef50",
+     "0x606f91f"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb30PersistentStatsHistoryIterator21AdvanceIteratorByTimeEmm",
+    "site": "0x606ef9c"
+   },
+   {
+    "containing_fde": [
+     "0x6101e10",
+     "0x6102742"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15BlockBasedTable14DumpIndexBlockERSo",
+    "site": "0x6101e62"
+   },
+   {
+    "containing_fde": [
+     "0x6104800",
+     "0x6105171"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15BlockBasedTable26VerifyChecksumInMetaBlocksEPNS_20InternalIteratorBaseINS_5SliceEEE",
+    "site": "0x61048db"
+   },
+   {
+    "containing_fde": [
+     "0x6104800",
+     "0x6105171"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15BlockBasedTable26VerifyChecksumInMetaBlocksEPNS_20InternalIteratorBaseINS_5SliceEEE",
+    "site": "0x6104e24"
+   },
+   {
+    "containing_fde": [
+     "0x610c190",
+     "0x610d339"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in FDE 0x610c190 (no catalogue row)",
+    "site": "0x610c46d"
+   },
+   {
+    "containing_fde": [
+     "0x610c190",
+     "0x610d339"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in FDE 0x610c190 (no catalogue row)",
+    "site": "0x610c7bf"
+   },
+   {
+    "containing_fde": [
+     "0x610c190",
+     "0x610d339"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in FDE 0x610c190 (no catalogue row)",
+    "site": "0x610cfa5"
+   },
+   {
+    "containing_fde": [
+     "0x610d430",
+     "0x610e33f"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15BlockBasedTable14DumpDataBlocksERSo",
+    "site": "0x610d483"
+   },
+   {
+    "containing_fde": [
+     "0x610d430",
+     "0x610e33f"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15BlockBasedTable14DumpDataBlocksERSo",
+    "site": "0x610d7c0"
+   },
+   {
+    "containing_fde": [
+     "0x610e4b0",
+     "0x610f326"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15BlockBasedTable9DumpTableEPNS_12WritableFileE",
+    "site": "0x610e6d5"
+   },
+   {
+    "containing_fde": [
+     "0x610e4b0",
+     "0x610f326"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15BlockBasedTable9DumpTableEPNS_12WritableFileE",
+    "site": "0x610ef79"
+   },
+   {
+    "containing_fde": [
+     "0x611fb10",
+     "0x61213db"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15BlockBasedTable4OpenERKNS_11ReadOptionsERKNS_16ImmutableOptionsERKNS_10EnvOptionsERKNS_",
+    "site": "0x611fc6b"
+   },
+   {
+    "containing_fde": [
+     "0x6121580",
+     "0x6121b00"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15BlockBasedTable19ApproximateOffsetOfERKNS_5SliceENS_17TableReaderCallerE",
+    "site": "0x6121782"
+   },
+   {
+    "containing_fde": [
+     "0x61226e0",
+     "0x6122ba7"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15BlockBasedTable14VerifyChecksumERKNS_11ReadOptionsENS_17TableReaderCallerE",
+    "site": "0x6122744"
+   },
+   {
+    "containing_fde": [
+     "0x6122c20",
+     "0x6123276"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15BlockBasedTable15ApproximateSizeERKNS_5SliceES3_NS_17TableReaderCallerE",
+    "site": "0x6122e2a"
+   },
+   {
+    "containing_fde": [
+     "0x6140350",
+     "0x61405dc"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZNK7rocksdb23FilterBlockReaderCommonINS_27Block_kFilterPartitionIndexEE20GetOrReadFilterBlockEbPNS_",
+    "site": "0x614049d"
+   },
+   {
+    "containing_fde": [
+     "0x6141420",
+     "0x61416ac"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZNK7rocksdb23FilterBlockReaderCommonINS_21ParsedFullFilterBlockEE20GetOrReadFilterBlockEbPNS_10GetC",
+    "site": "0x614156d"
+   },
+   {
+    "containing_fde": [
+     "0x6142be0",
+     "0x6143d06"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15HashIndexReader6CreateEPKNS_15BlockBasedTableERKNS_11ReadOptionsEPNS_18FilePrefetchBuff",
+    "site": "0x6142fcc"
+   },
+   {
+    "containing_fde": [
+     "0x6142be0",
+     "0x6143d06"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb15HashIndexReader6CreateEPKNS_15BlockBasedTableERKNS_11ReadOptionsEPNS_18FilePrefetchBuff",
+    "site": "0x61435ae"
+   },
+   {
+    "containing_fde": [
+     "0x61481b0",
+     "0x614841e"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZNK7rocksdb15BlockBasedTable17IndexReaderCommon19GetOrReadIndexBlockEbNS_3Env10IOPriorityEPNS_10Get",
+    "site": "0x6148303"
+   },
+   {
+    "containing_fde": [
+     "0x614a4c0",
+     "0x614a8ae"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZNK7rocksdb28PartitionedFilterBlockReader23GetFilterPartitionBlockEPNS_18FilePrefetchBufferERKNS_11",
+    "site": "0x614a648"
+   },
+   {
+    "containing_fde": [
+     "0x614ebb0",
+     "0x614f3ef"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb20PartitionIndexReader11NewIteratorERKNS_11ReadOptionsEbPNS_14IndexBlockIterEPNS_10GetCon",
+    "site": "0x614eeb7"
+   },
+   {
+    "containing_fde": [
+     "0x6155ff0",
+     "0x6156299"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZNK7rocksdb23UncompressionDictReader32GetOrReadUncompressionDictionaryEPNS_18FilePrefetchBufferEbbP",
+    "site": "0x6156150"
+   },
+   {
+    "containing_fde": [
+     "0x6184300",
+     "0x6184982"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb24ReadMetaIndexBlockInFileEPNS_22RandomAccessFileReaderEmmRKNS_16ImmutableOptionsEPNS_13B",
+    "site": "0x61844ba"
+   },
+   {
+    "containing_fde": [
+     "0x6184bf0",
+     "0x6185116"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb13ReadMetaBlockEPNS_22RandomAccessFileReaderEPNS_18FilePrefetchBufferEmmRKNS_16ImmutableO",
+    "site": "0x6184d2a"
+   },
+   {
+    "containing_fde": [
+     "0x618a9c0",
+     "0x618abb9"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb19ReadTablePropertiesEPNS_22RandomAccessFileReaderEmmRKNS_16ImmutableOptionsEPSt10unique_",
+    "site": "0x618aa9c"
+   },
+   {
+    "containing_fde": [
+     "0x61b9b40",
+     "0x61b9fb7"
+    ],
+    "kind": "direct_call",
+    "role": "default ReadOptions construction in _ZN7rocksdb21TraceExecutionHandlerC1EPNS_2DBERKSt6vectorIPNS_18ColumnFamilyHandleESaIS5_EE",
+    "site": "0x61b9bd4"
+   }
+  ]
+ },
+ "census": {
+  "0x5f04f80": {
+   "direct_calls": [
+    "0x5f0560d",
+    "0x5f0564f"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f05120": {
+   "direct_calls": [
+    "0x5f06367",
+    "0x5f06496",
+    "0x5f0a6ff",
+    "0x5f0a81e",
+    "0x5f0ae27",
+    "0x5f0af39",
+    "0x5f0b237",
+    "0x5f0b366",
+    "0x5f115d5",
+    "0x5f116f1"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f053d0": {
+   "direct_calls": [
+    "0x5f055b9",
+    "0x5f06348",
+    "0x5f0a6e0",
+    "0x5f0ae03",
+    "0x5f0b218",
+    "0x5f115b6"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f059b0": {
+   "direct_calls": [
+    "0x5f05a41",
+    "0x5f06234",
+    "0x5f0a610",
+    "0x5f0acc4",
+    "0x5f0b104",
+    "0x5f10e24"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f0a3d0": {
+   "direct_calls": [
+    "0x5e83a0b",
+    "0x5e8aaab",
+    "0x5ed1bcd"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f36c70": {
+   "direct_calls": [
+    "0x5f3799f",
+    "0x5f37ad1"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f37410": {
+   "direct_calls": [
+    "0x5f0a536",
+    "0x5f0ac12",
+    "0x5f29367",
+    "0x6109f07"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x60b21f0": {
+   "direct_calls": [
+    "0x5d34caa",
+    "0x5d4504a",
+    "0x5d47056",
+    "0x5d765a8",
+    "0x5d9829b",
+    "0x5dcd654",
+    "0x5df16d5",
+    "0x5df1811",
+    "0x5dfaed1",
+    "0x5dff451",
+    "0x5e0fd99",
+    "0x5e1f118",
+    "0x5e29e39",
+    "0x5e669dc",
+    "0x5e9c0c9",
+    "0x5ec11cd",
+    "0x5ec13b7",
+    "0x5ec16a4",
+    "0x5ec9007",
+    "0x5ecc775",
+    "0x5ed038c",
+    "0x5ed2802",
+    "0x5ee47a8",
+    "0x5ee4921",
+    "0x5f0a43d",
+    "0x5f40c7c",
+    "0x5f41641",
+    "0x5f41a66",
+    "0x5f41dbd",
+    "0x5f4592c",
+    "0x5f71bca",
+    "0x5fc2bb5",
+    "0x5fc64a1",
+    "0x606e420",
+    "0x606ef9c",
+    "0x6101e62",
+    "0x61048db",
+    "0x6104e24",
+    "0x610c46d",
+    "0x610c7bf",
+    "0x610cfa5",
+    "0x610d483",
+    "0x610d7c0",
+    "0x610e6d5",
+    "0x610ef79",
+    "0x611fc6b",
+    "0x6121782",
+    "0x6122744",
+    "0x6122e2a",
+    "0x614049d",
+    "0x614156d",
+    "0x6142fcc",
+    "0x61435ae",
+    "0x6148303",
+    "0x614a648",
+    "0x614eeb7",
+    "0x6156150",
+    "0x61844ba",
+    "0x6184d2a",
+    "0x618aa9c",
+    "0x61b9bd4"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  }
+ },
+ "cleanable_ctor": {
+  "fields": "head fn at +0x0 = 0, chain link at +0x18 = 0; arg1 (+0x8) and arg2 (+0x10) are left unwritten by the ctor",
+  "name": "rocksdb::Cleanable::Cleanable (re-shipped from #3674)"
+ },
+ "cleanable_dtor": {
+  "algorithm": "run the head fn as fn(arg1, arg2) when non-null, then walk the +0x18 chain running each 0x20-byte node's fn(arg1, arg2) and freeing the node (0x20 bytes)",
+  "name": "rocksdb::Cleanable::DoCleanup (re-shipped from #3674)"
+ },
+ "dedup": {
+  "algorithm": "the sorted vector is walked with a write cursor; an entry equal to the previous kept entry in both qwords is skipped, otherwise it is copied forward; the vector end (+0xc8) is updated to the compacted end",
+  "name": "adjacent-duplicate compaction (inlined in the host at 0x5f0a823..0x5f0a8c6)"
+ },
+ "final_insertion_sort": {
+  "algorithm": "if the range is > 16 entries: __insertion_sort(first, first + 16), then an unguarded insertion loop for the remaining entries (inlined at 0x5f0a704..0x5f0a759); otherwise __insertion_sort(first, last)",
+  "name": "std::__final_insertion_sort (inlined in the host; by shape)"
+ },
+ "finalize": {
+  "catalogue": "librocksdb-sys 0.11.0+8.1.1",
+  "contract": "FragmentTombstones(unique_ptr<InternalIteratorBase<Slice>>, const InternalKeyComparator&, bool, const vector<size_t>&): sets the cache ready flag +0xb8 = 1, walks the iterator (SeekToFirst slot 0x18, Valid slot 0x10, key slot 0x50, seq = (key last qword >> 8), slot 0x90, size slot 0x60, slot 0x98), allocates 0x40-byte tombstone nodes (operator new(0x40); +0x20/+0x28 pointers, +0x30 = seq, +0x38 = 0x0f) and fills the index; called only from the cache ctor (2 sites). Internals are by contract in this packet (see unknowns).",
+  "name": "rocksdb::FragmentedRangeTombstoneList::FragmentTombstones"
+ },
+ "generic_helper_counts": {
+  "0x61bd0c0": "103 direct call sites binary-wide (not enumerated; see census.py note)",
+  "0x61bd0e0": "223 direct calls + 32 tail jumps binary-wide (not enumerated; see census.py note)"
+ },
+ "host": {
+  "arguments": [
+   "rdi = owner (MemTable)"
+  ],
+  "cache_build": "operator new(0xe8) for the cache; cache ctor 0x5f37410(cache, &iterator, iterator+0x8, 0, scratch) where scratch is a 0x20-byte zeroed stack vector<size_t> at rsp+0x10 (begin rsp+0x10, end rsp+0x18, capacity rsp+0x20); after the ctor the temp iterator is destroyed via its vtable slot 1 (0x5f058e0) and the scratch heap array is freed with operator delete[](begin, capacity - begin)",
+  "callers": "DBImplSecondary::RecoverLogFiles (0x5e82cc0), DBImpl::SwitchMemtable (0x5e8a890), FlushJob::MemPurge (0x5ed01f0)",
+  "early_return": "owner+0xa60 != 0: return at once (stack-canary check, no rebuild); the flag means the fragmented cache is already built",
+  "install": "old = owner+0xce0; owner+0xce0 = new cache; the old cache (when non-null) is torn down (see teardown)",
+  "iterator_build": {
+   "alloc": "operator new(0x80) for the temp iterator",
+   "cleanable": "Cleanable ctor 0x61bd0c0 at iterator+0x8 (head fn +0x8 = 0, chain link +0x20 = 0)",
+   "fields": {
+    "+0x00": "vtable 0x64cc638+0x10 (rocksdb::MemTableIterator, 24 slots)",
+    "+0x08": "Cleanable (see cleanable_ctor)",
+    "+0x28": "0 (qword)",
+    "+0x30": "owner+0xc58 (a pointer)",
+    "+0x38": "vtable 0x64cc600+0x10 (rocksdb::MemTable::KeyComparator, 5 slots)",
+    "+0x40": "vtable 0x64c8fe8+0x10 (rocksdb::InternalKeyComparator, 3 slots)",
+    "+0x48": "owner+0x10 (the user comparator pointer)",
+    "+0x50": "(owner+0xa58)->vtable slot 0x90(obj, 0, 0): the rep iterator",
+    "+0x58": "0 (u16)",
+    "+0x5a": "owner+0x31 ^ 1 (byte)",
+    "+0x60": "owner+0x6c (qword)",
+    "+0x68": "0 (qword)",
+    "+0x6c": "0 (u16)",
+    "+0x70": "0 (qword)",
+    "+0x78": "owner+0x60 (qword)"
+   },
+   "note": "the build is field-wise in the host (the MemTableIterator ctor is inlined); the comparator subobject at +0x38 is a MemTable::KeyComparator whose InternalKeyComparator member sits at +0x40 with its user_comparator_ at +0x48"
+  },
+  "landing_pads": "the five endbr64 stubs at 0x5f0a8cd..0x5f0a8fd each save %rax to %rbx and jump to 0x5f0a31a/0x5f0a33a/0x5f0a353/0x5f0a382/0x5f0a3a4 in the preceding FDE (a shared rethrow block); not decoded",
+  "name": "rocksdb::MemTable::ConstructFragmentedRangeTombstones",
+  "readopts": "a ReadOptions temp is default-constructed on the stack at rsp+0x30 by 0x60b21f0 (see readopts); the host then reads temp+0x48 as a function pointer and invokes it as fn(temp+0x38, temp+0x38, 3) when non-null \u2014 the ctor zeroes +0x48 and no store in this flow rewrites it, so the call never fires here (see unknowns)",
+  "rep_iterator_call": "(owner+0xa58)->vtable slot 0x90 with (obj, 0, 0); the result is stored at iterator+0x50",
+  "teardown": {
+   "common_tail": "operator delete[](old+0xc0 array, size +0xd0 - +0xc0) when begin != 0; DoCleanup(old+0x98) via 0x61bd0e0 (no-op after the ready path zeroed it); walk the +0x80 list (0x30-byte nodes: free each node's +0x10 buffer with size +0x20 + 1 unless it equals &node+0x20, then delete the node, 0x30 bytes); walk the +0x60 list (0x28-byte nodes: release each node+0x18 via 0x5f059b0, then delete the node, 0x28 bytes); free the +0x30 buffer (size +0x40 - +0x30), the +0x18 buffer (size +0x28 - +0x18) and the +0x0 buffer (size +0x10 - +0x0), each when non-null; operator delete(old, 0xe8)",
+   "not_ready": "old+0xb8 == 0: the +0xc0 array is freed without invoking its entries (operator delete[](begin, +0xd0 - begin) when begin != 0), then the common tail runs (DoCleanup, +0x80 list, +0x60 tree, buffers, delete old)",
+   "note": "unlike #3674's host, where this teardown is defensive (the mutex is held, so old is null), the old cache here is LIVE: re-fragmenting a memtable whose cache already exists really replaces it, so the sort/dedup/invoke sequence runs on real entries",
+   "ready": "old+0xb8 != 0: the ready flag is cleared; the +0xc0 index vector is sorted by (first, second) with std::sort (__introsort_loop 0x5f053d0, then __insertion_sort 0x5f05120 plus the host's inlined unguarded insertion loop), adjacent duplicates are compacted in place, and every surviving entry is invoked as entry[1](entry[0]); then the +0x98 head cleanup fn is called as fn(+0xa0, +0xa8), each 0x20-byte node of the +0xb0 chain is called as fn(+0x8, +0x10) and freed (0x20 bytes), +0x98/+0xb0 are zeroed, and the common tail runs"
+  }
+ },
+ "insertion_sort": {
+  "algorithm": "classic insertion sort: for each entry past the first, shift the sorted prefix right while the predecessor is greater by (first, second), then insert",
+  "arguments": [
+   "rdi = first (16-byte entries)",
+   "rsi = last"
+  ],
+  "comparator": "same lexicographic (first, second) unsigned order as __introsort_loop",
+  "name": "std::__insertion_sort (libstdc++ std::sort internals, by shape)"
+ },
+ "introsort_loop": {
+  "arguments": [
+   "rdi = first (16-byte entries)",
+   "rsi = last",
+   "rdx = depth limit (2*floor(log2(n)), or -2 when n == 0)"
+  ],
+  "comparator": "lexicographic on (first qword, second qword), unsigned (jb/jae); equal first qwords fall through to the second qword",
+  "depth_zero": "depth == 0: heapsort fallback \u2014 __make_heap loop via __adjust_heap 0x5f04f80, then __sort_heap loop via __adjust_heap",
+  "name": "std::__introsort_loop (libstdc++ std::sort internals, by shape)",
+  "partition": "median-of-three pivot (first, middle, last by (first, second)), __unguarded_partition, recurse on the right partition (tail call to self), loop on the left",
+  "threshold": "range <= 0x100 bytes (16 entries): return at once; the caller finishes with __insertion_sort"
+ },
+ "list_release": {
+  "algorithm": "recursively release a tree of 0x28-byte nodes (+0x18 child first, then the node, then the +0x10 sibling)",
+  "name": "node-tree list release (by shape; re-shipped from #3674)"
+ },
+ "packet_internal_sites": {
+  "0x61bd0c0": [
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "this host: Cleanable ctor at iterator+0x8",
+    "site": "0x5f0a449"
+   }
+  ],
+  "0x61bd0e0": [
+   {
+    "containing_fde": [
+     "0x5f0a3d0",
+     "0x5f0a909"
+    ],
+    "kind": "direct_call",
+    "role": "this host: DoCleanup(old+0x98) in the common teardown tail",
+    "site": "0x5f0a5b8"
+   }
+  ]
+ },
+ "provenance_path": "provenance/artifacts.json",
+ "readopts": {
+  "callers": "61 direct call sites (see census); the host's site is 0x5f0a43d",
+  "field_names": "open: the per-field source names are not pinned (see unknowns); the byte-level init map above is exact",
+  "init_map": {
+   "+0x00..+0x0f": "0 (movups)",
+   "+0x10": "0 (qword)",
+   "+0x18..+0x27": "0 (movups)",
+   "+0x28..+0x2b": "0 (dword)",
+   "+0x2c": "0x101 (qword: bytes +0x2c = 1, +0x2d = 1, rest 0)",
+   "+0x34..+0x35": "0 (u16)",
+   "+0x38..+0x47": "0 (movups)",
+   "+0x48": "0 (qword)",
+   "+0x50": "0 (qword)",
+   "+0x58..+0x67": "0 (movups)",
+   "+0x68..+0x77": "0 (movups)",
+   "+0x78": "-1 (qword)",
+   "+0x80": "0 (byte)",
+   "+0x84": "4 (dword)",
+   "+0x88": "0x0100 (u16)"
+  },
+  "name": "rocksdb::ReadOptions::ReadOptions",
+  "span_bytes": "0x8a (writes +0x00..+0x89)"
+ },
+ "task": "RE-001",
+ "unknowns": [
+  "the owner+0xa60 flag's setter (which store marks the cache already built)",
+  "the owner (MemTable) fields the iterator build copies (+0x10, +0x31, +0x60, +0x6c, +0xa58, +0xc58) beyond the shard table at +0xd10/+0xd18: the +0xa58 object's identity (its vtable slot 0x90 is the rep-iterator factory, called with (obj, 0, 0)) and the +0xc58 pointer's role",
+  "the ReadOptions per-field source names for the pinned init map (+0x2c = 0x101, +0x78 = -1, +0x84 = 4, +0x88 = 0x0100) and the +0x48 slot's source-level identity: it is read as a function pointer and invoked as fn(temp+0x38, temp+0x38, 3) when non-null, but the ctor zeroes it and no store in this flow rewrites it, so the call never fires here",
+  "the +0xc0 index entries' semantic identity: observed as 16-byte (arg, fn) pairs, sorted lexicographically, deduplicated, and invoked as fn(arg) on teardown; which producer registers them is open (the finalize 0x5f36c70 is by contract)",
+  "the FragmentTombstones finalize 0x5f36c70 internals: the 0x40-byte tombstone node layout beyond (+0x20/+0x28 pointers, +0x30 seq, +0x38 = 0x0f), which store populates cache+0x8/+0x20, and the exact contents of the vector<size_t> scratch",
+  "the cache ctor's stack-iterator vtable 0x64cca10+0x10 slot identities beyond the walked slots",
+  "the host's landing-pad stubs (shared rethrow block in the preceding FDE) and the LSDA call-site tables are not decoded",
+  "the 0x5f32900 contract (applied by the caller to the returned iterator; 4 call sites, not a window) \u2014 carried over from #3674",
+  "the sibling teardown FDEs 0x5f061b0 (_M_dispose), 0x5f0b080 (unique_ptr dtor) and 0x5f10d40 (MemTable dtor) share this teardown code; their entry conditions are not pinned here"
+ ],
+ "vendor_attribution": {
+  "0x5f04f80/0x5f053d0/0x5f05120": "no catalogue row; identified by shape as libstdc++ std::sort internals (__adjust_heap / __introsort_loop / __insertion_sort) from the depth-limit, threshold and call structure",
+  "0x5f0a3d0": "librocksdb-sys 0.11.0+8.1.1 _ZN7rocksdb8MemTable34ConstructFragmentedRangeTombstonesEv, 1238/1337 (92.60%)",
+  "0x5f36c70": "librocksdb-sys 0.11.0+8.1.1 _ZN7rocksdb28FragmentedRangeTombstoneList18FragmentTombstonesESt10unique_ptrINS_20InternalIteratorBaseINS_5SliceEEESt14default_deleteIS4_EERKNS_21InternalKeyComparatorEbRKSt6vectorImSaImEE",
+  "0x60b21f0": "librocksdb-sys 0.11.0+8.1.1 _ZN7rocksdb11ReadOptionsC1Ev, 114/114 (100.00%)",
+  "0x61bd0e0": "librocksdb-sys 0.11.0+8.1.1: one of 2 identical copies of 2 build functions, e.g. _ZN7rocksdb9Cleanable9DoCleanupEv"
+ },
+ "vtables": {
+  "internal_key_comparator": {
+   "base": "0x64c8fe8",
+   "slots": [
+    {
+     "offset": "0x0",
+     "target": "0x5d44c60"
+    },
+    {
+     "offset": "0x8",
+     "target": "0x5d45110"
+    },
+    {
+     "offset": "0x10",
+     "target": "0x5d451e0"
+    }
+   ],
+   "stored_pointer": "0x64c8ff8",
+   "typeinfo_name": "N7rocksdb21InternalKeyComparatorE"
+  },
+  "key_comparator": {
+   "base": "0x64cc600",
+   "slots": [
+    {
+     "offset": "0x0",
+     "target": "0x5f05d50"
+    },
+    {
+     "offset": "0x8",
+     "target": "0x5f06050"
+    },
+    {
+     "offset": "0x10",
+     "target": "0x5f05f20"
+    },
+    {
+     "offset": "0x18",
+     "target": "0x5f04db0"
+    },
+    {
+     "offset": "0x20",
+     "target": "0x5f04e40"
+    }
+   ],
+   "stored_pointer": "0x64cc610",
+   "typeinfo_name": "N7rocksdb8MemTable13KeyComparatorE"
+  },
+  "memtable_iterator": {
+   "base": "0x64cc638",
+   "slots": [
+    {
+     "offset": "0x0",
+     "target": "0x5f04e70"
+    },
+    {
+     "offset": "0x8",
+     "target": "0x5f058e0"
+    },
+    {
+     "offset": "0x10",
+     "target": "0x5f04de0"
+    },
+    {
+     "offset": "0x18",
+     "target": "0x5f081d0"
+    },
+    {
+     "offset": "0x20",
+     "target": "0x5f08320"
+    },
+    {
+     "offset": "0x28",
+     "target": "0x5f08c40"
+    },
+    {
+     "offset": "0x30",
+     "target": "0x5f09050"
+    },
+    {
+     "offset": "0x38",
+     "target": "0x5f08600"
+    },
+    {
+     "offset": "0x40",
+     "target": "0x5f08790"
+    },
+    {
+     "offset": "0x48",
+     "target": "0x5f08470"
+    },
+    {
+     "offset": "0x50",
+     "target": "0x5f05e10"
+    },
+    {
+     "offset": "0x58",
+     "target": "0x5df7650"
+    },
+    {
+     "offset": "0x60",
+     "target": "0x5f05e80"
+    },
+    {
+     "offset": "0x68",
+     "target": "0x5f05680"
+    },
+    {
+     "offset": "0x70",
+     "target": "0x5df7670"
+    },
+    {
+     "offset": "0x78",
+     "target": "0x5df7680"
+    },
+    {
+     "offset": "0x80",
+     "target": "0x5df7690"
+    },
+    {
+     "offset": "0x88",
+     "target": "0x5d485b0"
+    },
+    {
+     "offset": "0x90",
+     "target": "0x5f04e00"
+    },
+    {
+     "offset": "0x98",
+     "target": "0x5f04e10"
+    },
+    {
+     "offset": "0xa0",
+     "target": "0x5df7800"
+    },
+    {
+     "offset": "0xa8",
+     "target": "0x5df76d0"
+    },
+    {
+     "offset": "0xb0",
+     "target": "0x5df76e0"
+    },
+    {
+     "offset": "0xb8",
+     "target": "0x5df7640"
+    }
+   ],
+   "stored_pointer": "0x64cc648",
+   "typeinfo_name": "N7rocksdb16MemTableIteratorE"
+  }
+ },
+ "windows": [
+  {
+   "address": "0x5f0a3d0",
+   "catalogue": "librocksdb-sys 0.11.0+8.1.1: 1238/1337 (92.60%)",
+   "excerpt": "host-5f0a3d0.objdump.txt",
+   "fde": "0x5f0a3d0..0x5f0a909",
+   "name": "rocksdb::MemTable::ConstructFragmentedRangeTombstones",
+   "size_bytes": 1337
+  },
+  {
+   "address": "0x60b21f0",
+   "catalogue": "librocksdb-sys 0.11.0+8.1.1: 114/114 (100.00%)",
+   "excerpt": "readopts-60b21f0.objdump.txt",
+   "fde": "0x60b21f0..0x60b2262",
+   "name": "rocksdb::ReadOptions::ReadOptions",
+   "size_bytes": 114
+  },
+  {
+   "address": "0x5f053d0",
+   "catalogue": null,
+   "excerpt": "introsort-5f053d0.objdump.txt",
+   "fde": "0x5f053d0..0x5f05678",
+   "name": "std::__introsort_loop (16-byte entries, by shape)",
+   "size_bytes": 680
+  },
+  {
+   "address": "0x5f05120",
+   "catalogue": null,
+   "excerpt": "insertion-5f05120.objdump.txt",
+   "fde": "0x5f05120..0x5f051f5",
+   "name": "std::__insertion_sort (16-byte entries, by shape)",
+   "size_bytes": 213
+  },
+  {
+   "address": "0x5f04f80",
+   "catalogue": null,
+   "excerpt": "adjust-heap-5f04f80.objdump.txt",
+   "fde": "0x5f04f80..0x5f0511d",
+   "name": "std::__adjust_heap (16-byte entries, by shape)",
+   "size_bytes": 413
+  },
+  {
+   "address": "0x5f37410",
+   "catalogue": null,
+   "excerpt": "cache-ctor-5f37410.objdump.txt",
+   "fde": "0x5f37410..0x5f37e31",
+   "name": "FragmentedRangeTombstoneListCache constructor (by shape; re-shipped from #3674)",
+   "size_bytes": 2593
+  },
+  {
+   "address": "0x61bd0c0",
+   "catalogue": "78/81",
+   "excerpt": "cleanable-ctor-61bd0c0.objdump.txt",
+   "fde": "0x61bd0c0..0x61bd0d4",
+   "name": "rocksdb::Cleanable::Cleanable (re-shipped from #3674)",
+   "size_bytes": 20
+  },
+  {
+   "address": "0x61bd0e0",
+   "catalogue": "librocksdb-sys 0.11.0+8.1.1: one of 2 identical copies",
+   "excerpt": "cleanable-dtor-61bd0e0.objdump.txt",
+   "fde": "0x61bd0e0..0x61bd131",
+   "name": "rocksdb::Cleanable::DoCleanup (re-shipped from #3674)",
+   "size_bytes": 81
+  },
+  {
+   "address": "0x5f059b0",
+   "catalogue": null,
+   "excerpt": "list-release-5f059b0.objdump.txt",
+   "fde": "0x5f059b0..0x5f05b79",
+   "name": "node-tree list release (by shape; re-shipped from #3674)",
+   "size_bytes": 457
+  }
+ ]
+}

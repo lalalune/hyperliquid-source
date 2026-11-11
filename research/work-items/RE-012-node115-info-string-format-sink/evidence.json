@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "task": "RE-012-node115-info-string-format-sink",
+  "component": "node-runtime",
+  "target": {
+    "release": 115,
+    "path": "artifacts/node/115/hl-node",
+    "sizeBytes": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "sourceCommit": "0781ce04826eeefd89fe336cb8ea073be0c1de30",
+  "claimStatus": "static-observation",
+  "capturedCodeExecuted": false,
+  "observations": [
+    {
+      "id": "selected-info-format-call",
+      "address": "0x63d4d18",
+      "fde": [
+        "0x63d4bbe",
+        "0x63d5428"
+      ],
+      "literalAddress": "0x4312f2",
+      "formatHelper": "0x63d3d27",
+      "evidence": [
+        "caller-context.objdump.txt",
+        "format-key-helper.objdump.txt"
+      ]
+    },
+    {
+      "id": "format-and-first-variadic-argument",
+      "formatAddress": "0x449912",
+      "formatBytes": "\"%s\":%s\u0000",
+      "firstVariadicRegister": "rdx",
+      "firstVariadicValue": "info literal pointer",
+      "vaListGpOffset": 16,
+      "evidence": [
+        "varargs-bridge.objdump.txt"
+      ]
+    },
+    {
+      "id": "s-conversion-dispatch",
+      "dispatchTableAddress": "0xb9e790",
+      "dispatchIndex": 16,
+      "entryAddress": "0xb9e7d0",
+      "entryBytesLittleEndian": "960a8205",
+      "branchAddress": "0x63bf226",
+      "stringLengthCall": "0x63f0a80",
+      "copyInstruction": "rep movsb",
+      "evidence": [
+        "formatter.objdump.txt",
+        "s-dispatch-entry.bin"
+      ]
+    },
+    {
+      "id": "selected-callback-buffer-path",
+      "callbackAddress": "0x636c530",
+      "dispatcherAddress": "0x63bf52c",
+      "temporaryCapacityBytes": 4096,
+      "evidence": [
+        "callback-dispatch.objdump.txt",
+        "output-buffer-sink.objdump.txt"
+      ]
+    }
+  ],
+  "limitations": [
+    "FDE ranges are unwind extents and do not by themselves prove source function boundaries.",
+    "The second percent-s argument and the eventual output callback destination are unresolved.",
+    "No CLI reachability, source ownership, JSON role, or completed output is claimed.",
+    "No component acceptance gate is advanced."
+  ]
+}

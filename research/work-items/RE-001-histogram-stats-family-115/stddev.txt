@@ -1,0 +1,67 @@
+
+work/hl-node-115.bin:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000606b5d0 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x3231a0>:
+ 606b5d0:	f3 0f 1e fa          	endbr64
+ 606b5d4:	48 8b 47 10          	mov    0x10(%rdi),%rax
+ 606b5d8:	48 85 c0             	test   %rax,%rax
+ 606b5db:	0f 88 af 00 00 00    	js     606b690 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x323260>
+ 606b5e1:	66 0f ef c0          	pxor   %xmm0,%xmm0
+ 606b5e5:	f2 48 0f 2a c0       	cvtsi2sd %rax,%xmm0
+ 606b5ea:	66 0f ef c9          	pxor   %xmm1,%xmm1
+ 606b5ee:	48 8b 57 18          	mov    0x18(%rdi),%rdx
+ 606b5f2:	48 8b 47 20          	mov    0x20(%rdi),%rax
+ 606b5f6:	66 0f 2e c1          	ucomisd %xmm1,%xmm0
+ 606b5fa:	7a 06                	jp     606b602 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x3231d2>
+ 606b5fc:	66 0f 28 d1          	movapd %xmm1,%xmm2
+ 606b600:	74 42                	je     606b644 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x323214>
+ 606b602:	48 85 d2             	test   %rdx,%rdx
+ 606b605:	78 49                	js     606b650 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x323220>
+ 606b607:	66 0f ef d2          	pxor   %xmm2,%xmm2
+ 606b60b:	f2 48 0f 2a d2       	cvtsi2sd %rdx,%xmm2
+ 606b610:	48 85 c0             	test   %rax,%rax
+ 606b613:	78 59                	js     606b66e <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x32323e>
+ 606b615:	66 0f ef c9          	pxor   %xmm1,%xmm1
+ 606b619:	f2 48 0f 2a c8       	cvtsi2sd %rax,%xmm1
+ 606b61e:	f2 0f 59 c8          	mulsd  %xmm0,%xmm1
+ 606b622:	f2 0f 59 d2          	mulsd  %xmm2,%xmm2
+ 606b626:	f2 0f 59 c0          	mulsd  %xmm0,%xmm0
+ 606b62a:	f2 0f 5c ca          	subsd  %xmm2,%xmm1
+ 606b62e:	66 0f ef d2          	pxor   %xmm2,%xmm2
+ 606b632:	f2 0f 5e c8          	divsd  %xmm0,%xmm1
+ 606b636:	66 0f 2f d1          	comisd %xmm1,%xmm2
+ 606b63a:	77 08                	ja     606b644 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x323214>
+ 606b63c:	66 0f 28 d1          	movapd %xmm1,%xmm2
+ 606b640:	f2 0f 51 d2          	sqrtsd %xmm2,%xmm2
+ 606b644:	66 0f 28 c2          	movapd %xmm2,%xmm0
+ 606b648:	c3                   	ret
+ 606b649:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+ 606b650:	48 89 d1             	mov    %rdx,%rcx
+ 606b653:	83 e2 01             	and    $0x1,%edx
+ 606b656:	66 0f ef d2          	pxor   %xmm2,%xmm2
+ 606b65a:	48 d1 e9             	shr    $1,%rcx
+ 606b65d:	48 09 d1             	or     %rdx,%rcx
+ 606b660:	f2 48 0f 2a d1       	cvtsi2sd %rcx,%xmm2
+ 606b665:	f2 0f 58 d2          	addsd  %xmm2,%xmm2
+ 606b669:	48 85 c0             	test   %rax,%rax
+ 606b66c:	79 a7                	jns    606b615 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x3231e5>
+ 606b66e:	48 89 c2             	mov    %rax,%rdx
+ 606b671:	83 e0 01             	and    $0x1,%eax
+ 606b674:	66 0f ef c9          	pxor   %xmm1,%xmm1
+ 606b678:	48 d1 ea             	shr    $1,%rdx
+ 606b67b:	48 09 c2             	or     %rax,%rdx
+ 606b67e:	f2 48 0f 2a ca       	cvtsi2sd %rdx,%xmm1
+ 606b683:	f2 0f 58 c9          	addsd  %xmm1,%xmm1
+ 606b687:	eb 95                	jmp    606b61e <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x3231ee>
+ 606b689:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+ 606b690:	48 89 c2             	mov    %rax,%rdx
+ 606b693:	83 e0 01             	and    $0x1,%eax
+ 606b696:	66 0f ef c0          	pxor   %xmm0,%xmm0
+ 606b69a:	48 d1 ea             	shr    $1,%rdx
+ 606b69d:	48 09 c2             	or     %rax,%rdx
+ 606b6a0:	f2 48 0f 2a c2       	cvtsi2sd %rdx,%xmm0
+ 606b6a5:	f2 0f 58 c0          	addsd  %xmm0,%xmm0
+ 606b6a9:	e9 3c ff ff ff       	jmp    606b5ea <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x3231ba>

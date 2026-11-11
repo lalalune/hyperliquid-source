@@ -1,0 +1,135 @@
+{
+  "target": {
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "size": 105896032,
+    "release": "node #115",
+    "platform": "linux-x86-64"
+  },
+  "fde": {
+    "index": "0009c51c",
+    "pc_start": "0x26ce540",
+    "pc_end": "0x26ce5ec",
+    "derivation": "recorded-readelf",
+    "note": "pc limits are compared with the recorded window constants; this checker does not re-parse .eh_frame. No separate frames.txt is retained in this packet."
+  },
+  "caller": {
+    "call_va": "0x2a2121d",
+    "bytes_hex": "e81ed3caff",
+    "call_target": "0x26ce540",
+    "note": "direct relative call from the smaller-input path of the RE-011 fee-history caller"
+  },
+  "window": {
+    "start": "0x26ce540",
+    "end": "0x26ce5ec",
+    "length": 172,
+    "sha256": "a4ac8ddf95b3cbfb5ed4acb30ac773f7bbd95bdc6c050bee03a2ad5e9a96f693",
+    "stride_bytes": 32
+  },
+  "comparison": {
+    "operand_width_bits": 128,
+    "cmp": {
+      "va": "0x26ce592",
+      "bytes_hex": "483b48e0"
+    },
+    "sbb": {
+      "va": "0x26ce599",
+      "bytes_hex": "4c1b48e8"
+    },
+    "jae": {
+      "va": "0x26ce59d",
+      "bytes_hex": "73df",
+      "target": "0x26ce57e"
+    },
+    "note": "low qword compared by CMP, high qword by SBB; unsigned JAE skips the insertion when the held key is not less than the scanned key"
+  },
+  "loop": {
+    "back_branch": {
+      "va": "0x26ce5e1",
+      "bytes_hex": "72cd",
+      "target": "0x26ce5b0"
+    },
+    "inner_comparison": {
+      "cmp": {
+        "va": "0x26ce5d1",
+        "bytes_hex": "4a3b4c1fc0"
+      },
+      "sbb": {
+        "va": "0x26ce5d9",
+        "bytes_hex": "4a1b5c1fc8"
+      }
+    },
+    "note": "inner insertion loop re-compares the held key against each preceding record; the back edge rejoins the loop body after the outer comparison"
+  },
+  "stride": {
+    "sites": [
+      {
+        "va": "0x26ce557",
+        "bytes_hex": "48c1e605"
+      },
+      {
+        "va": "0x26ce55e",
+        "bytes_hex": "48c1e205"
+      }
+    ],
+    "note": "both sites are SHL r64, imm8 with shift 5, i.e. a 32-byte record stride"
+  },
+  "records": {
+    "stride_bytes": 32,
+    "moved_span_bytes": 32,
+    "held_write_bytes": 24,
+    "sites": [
+      {
+        "va": "0x26ce570",
+        "bytes_hex": "4989fa49890a4d8942084d894a10",
+        "kind": "write"
+      },
+      {
+        "va": "0x26ce57e",
+        "bytes_hex": "4883c0204883c220",
+        "kind": "step"
+      },
+      {
+        "va": "0x26ce586",
+        "bytes_hex": "4839f0745d",
+        "kind": "step"
+      },
+      {
+        "va": "0x26ce58b",
+        "bytes_hex": "488b084c8b4008",
+        "kind": "read"
+      },
+      {
+        "va": "0x26ce59f",
+        "bytes_hex": "4c8b4810",
+        "kind": "read"
+      },
+      {
+        "va": "0x26ce5b0",
+        "bytes_hex": "420f28441fe0420f284c1ff0420f294c1f10420f29041f",
+        "kind": "write"
+      }
+    ],
+    "note": "the loop shifts complete 32-byte records with vector transfers, but the held-record stores at 0x26ce573, 0x26ce576 and 0x26ce57a write offsets 0, 8 and 16 (24 bytes). The fourth qword is not shown to follow its record or to be meaningful padding. The site at 0x26ce586 is a register CMP followed by a conditional JE: a loop step, not a memory read."
+  },
+  "model": {
+    "pairs": [
+      [0, 0, 0, 0, 0],
+      [0, 1, 0, 0, 1],
+      [0, 0, 0, 1, -1],
+      [1, 0, 0, 18446744073709551615, 1],
+      [18446744073709551615, 18446744073709551615, 18446744073709551615, 18446744073709551614, 1]
+    ],
+    "stability": {
+      "records": [
+        [0, 5, "a"],
+        [0, 3, "b"],
+        [0, 5, "c"],
+        [0, 1, "d"],
+        [0, 3, "e"]
+      ],
+      "order": ["d", "b", "e", "a", "c"]
+    },
+    "note": "independent unsigned 128-bit comparison and stable insertion model; equal keys keep their input order (non-less and strict-less branches do not shift on equality). This is a model, not target execution."
+  },
+  "limits": "Static byte evidence only. The helper is not executed. The external method identity, a complete reward algorithm and the ordering behaviour of paths other than the observed small-input path are not inferred. The fourth qword of each 32-byte record is not shown to follow its record or to be meaningful padding. The FDE limits are compared with the recorded window constants and are not re-parsed from .eh_frame by the checker."
+}

@@ -1,0 +1,43 @@
+{
+  "question_id": "qcp-checkpoint-replay-root-fixture",
+  "title": "Connect checkpoint restore, replay references, and root validation in one bounded fixture",
+  "target": {
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "component": "storage",
+  "work_type": "integration",
+  "scope": {
+    "question": "What is the smallest independently checked offline fixture that connects a restored checkpoint, its first replay record, and a provenance-bounded expected root?",
+    "include": ["One selected checkpoint/replay path", "Only contracts established by the four prerequisite questions", "Explicitly supplied and provenance-labeled fixture inputs"],
+    "exclude": ["Captured binary execution", "Live chain data or signing", "A full storage or consensus component claim"]
+  },
+  "readiness": "blocked",
+  "evidence_status": "not-started",
+  "prior_attempts": [
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/3988", "relation": "selected replay-key path"},
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/4011", "relation": "selected restored round field"},
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/4157", "relation": "compact digest reference provenance with external H+1 gap"},
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/4117", "relation": "ABCI digest descriptor handoff"},
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5584", "relation": "open root selector packet"},
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5591", "relation": "open selected fallback-writer packet"}
+  ],
+  "remaining_gap": "The external expected H+1 reference is unresolved, and the selector/writer evidence remains open. Starting an implementation fixture now would silently invent a hard dependency contract.",
+  "dependencies": [
+    {"question_id": "qcp-first-replay-key", "kind": "hard", "contract": "restored height and round provenance", "condition": "The selected restore-to-replay field relationship is reproduced from its retained packet."},
+    {"question_id": "qcp-expected-root-provenance", "kind": "hard", "contract": "expected-root input provenance", "condition": "The H+1 input producer or an explicit fixture contract with provenance is established."},
+    {"question_id": "qcp-root-selector", "kind": "hard", "contract": "root selector production", "condition": "The selector path and runtime unknowns are reviewed."},
+    {"question_id": "qcp-root-cell-writer", "kind": "hard", "contract": "fallback cell writer", "condition": "The selected store destination and limits are reviewed with the selector evidence."}
+  ],
+  "downstream_consumer": "A small offline checkpoint-to-replay-to-root-validation fixture, the shared consumer of all five pilot questions.",
+  "acceptance_requirements": [
+    "Name and hash every fixture input; use synthetic, offline data only.",
+    "Require explicit provenance for an expected-root input and preserve unresolved branches.",
+    "Compare only an observable result established by the prerequisite contracts.",
+    "Keep captured execution and the full component gate out of scope."
+  ],
+  "required_capabilities": ["Cross-function state-flow reasoning", "Offline fixture design", "Independent review of dependency contracts"],
+  "evidence_review": [],
+  "linked_issue": {"url": "https://github.com/lalalune/hyperliquid-source/issues/3923", "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"},
+  "pilot_issue": "https://github.com/lalalune/hyperliquid-source/issues/5391"
+}

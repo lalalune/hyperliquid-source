@@ -1,0 +1,61 @@
+node #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301; ELF virtual addresses; no normalization
+
+complete leaf
+0x2e564b0  4c8b4708                  mov r8, qword [rdi+0x8]
+0x2e564b4  488b5710                  mov rdx, qword [rdi+0x10]
+0x2e564b8  b801000300                mov eax, 0x30001
+0x2e564bd  4c39c2                    cmp rdx, r8
+0x2e564c0  736f                      jae 0x2e56531
+0x2e564c2  0fb60a                    movzx ecx, byte [rdx]
+0x2e564c5  488d7201                  lea rsi, qword [rdx+0x1]
+0x2e564c9  48897710                  mov qword [rdi+0x10], rsi
+0x2e564cd  80c1d0                    add cl, 0xd0
+0x2e564d0  80f909                    cmp cl, 0x9
+0x2e564d3  775d                      ja 0x2e56532
+0x2e564d5  4c39c6                    cmp rsi, r8
+0x2e564d8  7357                      jae 0x2e56531
+0x2e564da  0fb67201                  movzx esi, byte [rdx+0x1]
+0x2e564de  4c8d4a02                  lea r9, qword [rdx+0x2]
+0x2e564e2  4c894f10                  mov qword [rdi+0x10], r9
+0x2e564e6  448d56d0                  lea r10d, dword [rsi-0x30]
+0x2e564ea  4180fa09                  cmp r10b, 0x9
+0x2e564ee  7742                      ja 0x2e56532
+0x2e564f0  4d39c1                    cmp r9, r8
+0x2e564f3  733c                      jae 0x2e56531
+0x2e564f5  440fb64202                movzx r8d, byte [rdx+0x2]
+0x2e564fa  4883c203                  add rdx, 0x3
+0x2e564fe  48895710                  mov qword [rdi+0x10], rdx
+0x2e56502  4180c0d0                  add r8b, 0xd0
+0x2e56506  b802000300                mov eax, 0x30002
+0x2e5650b  4180f80a                  cmp r8b, 0xa
+0x2e5650f  7320                      jae 0x2e56531
+0x2e56511  0fb6c1                    movzx eax, cl
+0x2e56514  6bc064                    imul eax, eax, 0x64
+0x2e56517  400fb6ce                  movzx ecx, sil
+0x2e5651b  01c9                      add ecx, ecx
+0x2e5651d  8d0c89                    lea ecx, dword [rcx+rcx*4]
+0x2e56520  80c120                    add cl, 0x20
+0x2e56523  0fb6c9                    movzx ecx, cl
+0x2e56526  01c1                      add ecx, eax
+0x2e56528  410fb6c0                  movzx eax, r8b
+0x2e5652c  01c8                      add eax, ecx
+0x2e5652e  c1e010                    shl eax, 0x10
+0x2e56531  c3                        ret
+0x2e56532  b802000300                mov eax, 0x30002
+0x2e56537  c3                        ret
+
+local caller context
+0x2e57e7a  4889542418                mov qword [rsp+0x18], rdx
+0x2e57e7f  4889542408                mov qword [rsp+0x8], rdx
+0x2e57e84  4d89c4                    mov r12, r8
+0x2e57e87  4989f7                    mov r15, rsi
+0x2e57e8a  4989ce                    mov r14, rcx
+0x2e57e8d  488d7c2408                lea rdi, qword [rsp+0x8]
+0x2e57e92  e819e6ffff                call 0x2e564b0
+0x2e57e97  89c1                      mov ecx, eax
+0x2e57e99  c1e910                    shr ecx, 0x10
+0x2e57e9c  6683f802                  cmp ax, 0x2
+0x2e57ea0  750d                      jne 0x2e57eaf
+
+caller source reference
+0x2e57f81  488d3d00be5f03            lea rdi, qword [rip+0x35fbe00]

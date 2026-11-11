@@ -1,0 +1,21 @@
+--- src/lib.rs
++++ src/lib.rs
+@@ -249,17 +249,15 @@
+         let spelling = spellings(group.name, spelling);
+         for (index, value) in group.values.iter().enumerate() {
+             let (name, is_fallback) = chosen(group.name, spelling, index);
+-            let mut previous = b'-';
+             for &byte in name {
+                 let emitted =
+-                    if capitalize && is_fallback && previous == b'-' && byte.is_ascii_lowercase() {
++                    if capitalize && is_fallback && byte.is_ascii_lowercase() {
+                         byte - (b'a' - b'A')
+                     } else {
+                         byte
+                     };
+                 output[position] = emitted;
+                 position += 1;
+-                previous = emitted;
+             }
+             output[position] = b':';
+             position += 1;

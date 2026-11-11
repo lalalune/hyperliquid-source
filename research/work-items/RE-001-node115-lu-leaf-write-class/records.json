@@ -1,0 +1,914 @@
+{
+ "packet": "RE-001-node115-lu-leaf-write-class",
+ "question": "Packet #257 next question: per-leaf read/write classification for the remaining leaves, TLS-byte slow path, predicate completion tail-call, writers of prof-gating byte 0x6713606.",
+ "binary": {
+  "path": "artifacts/node/115/hl-node",
+  "size": 105896032,
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "base": "05bc2de303c05525b71e7e257426e741bc66a390"
+ },
+ "exhibits": [
+  {
+   "name": "arenas_create_head",
+   "range": [
+    "0x63a5950",
+    "0x63a5a05"
+   ],
+   "strict": 43,
+   "fde": [
+    "0x63a5950",
+    "0x63a5bef"
+   ],
+   "leaf": "arenas.create",
+   "note": "Entry + mutex + read-side gates + create call + result save; writeback + copy tail characterized."
+  },
+  {
+   "name": "tcache_create_head",
+   "range": [
+    "0x6377950",
+    "0x6377a04"
+   ],
+   "strict": 52,
+   "fde": [
+    "0x6377950",
+    "0x6377b5d"
+   ],
+   "leaf": "tcache.create",
+   "note": "Entry gates + context fetch + create call + bool test + exact-size writeback; copy tail characterized."
+  },
+  {
+   "name": "tcache_destroy",
+   "range": [
+    "0x63778b0",
+    "0x63778f6"
+   ],
+   "strict": 20,
+   "fde": [
+    "0x63778b0",
+    "0x63778f6"
+   ],
+   "leaf": "tcache.destroy",
+   "note": "Full FDE."
+  },
+  {
+   "name": "hooks_install_head",
+   "range": [
+    "0x636d5f0",
+    "0x636d674"
+   ],
+   "strict": 34,
+   "fde": [
+    "0x636d5f0",
+    "0x636d863"
+   ],
+   "leaf": "experimental.hooks.install",
+   "note": "Entry validation + 32B template copy + install call + exact-size writeback; copy tail characterized."
+  },
+  {
+   "name": "hooks_remove",
+   "range": [
+    "0x6376d50",
+    "0x6376d9e"
+   ],
+   "strict": 23,
+   "fde": [
+    "0x6376d50",
+    "0x6376d9e"
+   ],
+   "leaf": "experimental.hooks.remove",
+   "note": "Full FDE."
+  },
+  {
+   "name": "log_start",
+   "range": [
+    "0x63777f0",
+    "0x6377841"
+   ],
+   "strict": 24,
+   "fde": [
+    "0x63777f0",
+    "0x6377841"
+   ],
+   "leaf": "prof.log_start",
+   "note": "Full FDE."
+  },
+  {
+   "name": "log_stop",
+   "range": [
+    "0x63777c0",
+    "0x63777ee"
+   ],
+   "strict": 14,
+   "fde": [
+    "0x63777c0",
+    "0x63777ee"
+   ],
+   "leaf": "prof.log_stop",
+   "note": "Full FDE."
+  },
+  {
+   "name": "prof_active_head",
+   "range": [
+    "0x636de60",
+    "0x636df06"
+   ],
+   "strict": 48,
+   "fde": [
+    "0x636de60",
+    "0x636df5e"
+   ],
+   "leaf": "thread.prof.active",
+   "note": "Entry + snapshot + write path through the 0x63c3e20 call + ret-11 edge; read path characterized."
+  },
+  {
+   "name": "tls_dispatch",
+   "range": [
+    "0x63ef8e0",
+    "0x63ef92e"
+   ],
+   "strict": 21,
+   "fde": [
+    "0x63ef8e0",
+    "0x63efba2"
+   ],
+   "leaf": null,
+   "note": "TLS slow-path entry + state dispatch + value-2 xchg loop head; remaining blocks characterized."
+  },
+  {
+   "name": "tls_install",
+   "range": [
+    "0x63efa50",
+    "0x63efa9e"
+   ],
+   "strict": 18,
+   "fde": [
+    "0x63ef8e0",
+    "0x63efba2"
+   ],
+   "leaf": null,
+   "note": "Value-4 install path: 0x63ef640 call + TLS copy + pthread_setspecific + failure branch."
+  },
+  {
+   "name": "completion",
+   "range": [
+    "0x6368e40",
+    "0x6368ebb"
+   ],
+   "strict": 33,
+   "fde": [
+    "0x6368e40",
+    "0x6368ebb"
+   ],
+   "leaf": null,
+   "note": "Full FDE: predicate completion tail-call target."
+  },
+  {
+   "name": "profbyte_clear",
+   "range": [
+    "0x634c035",
+    "0x634c047"
+   ],
+   "strict": 3,
+   "fde": [
+    "0x6349be0",
+    "0x634eb7c"
+   ],
+   "leaf": null,
+   "note": "lea + flag test + movb $0 store to the prof-gating byte."
+  },
+  {
+   "name": "profbyte_set",
+   "range": [
+    "0x634d08c",
+    "0x634d09d"
+   ],
+   "strict": 3,
+   "fde": [
+    "0x6349be0",
+    "0x634eb7c"
+   ],
+   "leaf": null,
+   "note": "lea + flag test + movb $1 store to the prof-gating byte."
+  },
+  {
+   "name": "profbyte_latch",
+   "range": [
+    "0x63c4140",
+    "0x63c41b1"
+   ],
+   "strict": 29,
+   "fde": [
+    "0x63c4140",
+    "0x63c41b1"
+   ],
+   "leaf": null,
+   "note": "Full FDE: prof-state latch; reads 0x6713602/0x6713603/0x6713606, writes 0x6713606=1 and 0x6713605=0."
+  }
+ ],
+ "exhibit_totals": {
+  "bytes": 1361,
+  "strict": 365
+ },
+ "census": {
+  "leaf_handler_direct_entries": {
+   "arenas.create": {
+    "node": "0x64dde78",
+    "handler": "0x63a5950",
+    "rela_slot": "0x64dde98",
+    "E8": [],
+    "E9": [],
+    "addrtaken_lea_movabs": 0
+   },
+   "tcache.create": {
+    "node": "0x64de260",
+    "handler": "0x6377950",
+    "rela_slot": "0x64de280",
+    "E8": [],
+    "E9": [],
+    "addrtaken_lea_movabs": 0
+   },
+   "tcache.destroy": {
+    "node": "0x64de2b0",
+    "handler": "0x63778b0",
+    "rela_slot": "0x64de2d0",
+    "E8": [],
+    "E9": [],
+    "addrtaken_lea_movabs": 0
+   },
+   "experimental.hooks.install": {
+    "node": "0x64da9c0",
+    "handler": "0x636d5f0",
+    "rela_slot": "0x64da9e0",
+    "E8": [],
+    "E9": [],
+    "addrtaken_lea_movabs": 0
+   },
+   "experimental.hooks.remove": {
+    "node": "0x64da9e8",
+    "handler": "0x6376d50",
+    "rela_slot": "0x64daa08",
+    "E8": [],
+    "E9": [],
+    "addrtaken_lea_movabs": 0
+   },
+   "prof.log_start": {
+    "node": "0x64ddaa0",
+    "handler": "0x63777f0",
+    "rela_slot": "0x64ddac0",
+    "E8": [],
+    "E9": [],
+    "addrtaken_lea_movabs": 0
+   },
+   "prof.log_stop": {
+    "node": "0x64ddac8",
+    "handler": "0x63777c0",
+    "rela_slot": "0x64ddae8",
+    "E8": [],
+    "E9": [],
+    "addrtaken_lea_movabs": 0
+   },
+   "thread.prof.active": {
+    "node": "0x64df0a8",
+    "handler": "0x636de60",
+    "rela_slot": "0x64df0c8",
+    "E8": [],
+    "E9": [],
+    "addrtaken_lea_movabs": 0
+   }
+  },
+  "tls_slow_callers": {
+   "target": "0x63ef8e0",
+   "E8": [
+    "0x634f8a4",
+    "0x634fd74",
+    "0x634ffbd",
+    "0x63501fd",
+    "0x6350d7f",
+    "0x6353d55",
+    "0x6355c45",
+    "0x6357864",
+    "0x635ac73",
+    "0x635b362",
+    "0x635ccb8",
+    "0x635df78",
+    "0x635e010",
+    "0x635e0bb",
+    "0x635e18a",
+    "0x635e2d1",
+    "0x635ecc5",
+    "0x6368d26",
+    "0x636a49a",
+    "0x636a5f2",
+    "0x636ad9c",
+    "0x636ae44",
+    "0x636aee7",
+    "0x636af7c",
+    "0x636afa6",
+    "0x636affd",
+    "0x636b040",
+    "0x636b07e",
+    "0x638836b",
+    "0x63a7b5e",
+    "0x63a7fa6",
+    "0x63a8890",
+    "0x63ad630",
+    "0x63ad845",
+    "0x63b1756",
+    "0x63b17c8",
+    "0x63b1a76",
+    "0x63b1b16",
+    "0x63b1f6b",
+    "0x63b1feb",
+    "0x63b2061",
+    "0x63b20e4",
+    "0x63b23c2",
+    "0x63b2463",
+    "0x63b2b25",
+    "0x63b2c0b",
+    "0x63b2db4",
+    "0x63b2e17",
+    "0x63b2fae",
+    "0x63b3040",
+    "0x63b344a",
+    "0x63b3632",
+    "0x63b3686",
+    "0x63b3761",
+    "0x63b37e0",
+    "0x63b3882",
+    "0x63b3d16",
+    "0x63b3d76",
+    "0x63b3eb6",
+    "0x63b3f16",
+    "0x63b41ea",
+    "0x63b4293",
+    "0x63b4546",
+    "0x63b45e6",
+    "0x63b52d1",
+    "0x63b5560",
+    "0x63b7372",
+    "0x63b74c7",
+    "0x63b7658",
+    "0x63c2e6e",
+    "0x63d5468",
+    "0x63dc128",
+    "0x63dc1a2",
+    "0x63dc26d",
+    "0x63dc335",
+    "0x63dc3fd",
+    "0x63dc4c6",
+    "0x63dc590",
+    "0x63dc610",
+    "0x63ddb8a",
+    "0x63ddbf8",
+    "0x63ddc42",
+    "0x63ddc9b",
+    "0x63ddd44",
+    "0x63dddd0",
+    "0x63dde48",
+    "0x63ddeeb",
+    "0x63ddf6e",
+    "0x63de005",
+    "0x63de08c",
+    "0x63e00ca",
+    "0x63e0136",
+    "0x63e017e",
+    "0x63e01d7",
+    "0x63e027b",
+    "0x63e0330",
+    "0x63e03b5",
+    "0x63e047a",
+    "0x63e0502",
+    "0x63e0582",
+    "0x63e0608",
+    "0x63e0686",
+    "0x63e0705",
+    "0x63e0784",
+    "0x63e0802",
+    "0x63e087f",
+    "0x63e08fd",
+    "0x63e097c",
+    "0x63e09fb",
+    "0x63e0a78",
+    "0x63e0af5",
+    "0x63e0b64",
+    "0x63e0c24",
+    "0x63e0cee",
+    "0x63e0db0",
+    "0x63e0e78",
+    "0x63e0f39",
+    "0x63e0fc3",
+    "0x63e30ef",
+    "0x63e317e",
+    "0x63e3207",
+    "0x63e3295",
+    "0x63e331e",
+    "0x63e3458",
+    "0x63e34e4",
+    "0x63e5b4d",
+    "0x63e5bbe",
+    "0x63e61d0",
+    "0x63e623a",
+    "0x63e62aa",
+    "0x63e6341",
+    "0x63e63c3",
+    "0x63e644c",
+    "0x63e64cd",
+    "0x63e6556",
+    "0x63e783e",
+    "0x63e789b",
+    "0x63e7930",
+    "0x63e79ad",
+    "0x63e7a22",
+    "0x63e7aa0",
+    "0x63e7b14",
+    "0x63e7b9c",
+    "0x63e839d",
+    "0x63efcb2"
+   ],
+   "E9": [
+    "0x63efc17"
+   ]
+  },
+  "completion_callers": {
+   "target": "0x6368e40",
+   "E8": [
+    "0x634ec72",
+    "0x6353526",
+    "0x6353596",
+    "0x6378d95",
+    "0x6379085"
+   ],
+   "E9": [
+    "0x634f751"
+   ]
+  },
+  "profbyte_0x6713606": {
+   "total_sites": 76,
+   "reads": 73,
+   "writes": [
+    {
+     "site": "0x634c035",
+     "instruction": "movb $0x0,(%r8)",
+     "fde": [
+      "0x6349be0",
+      "0x634eb7c"
+     ]
+    },
+    {
+     "site": "0x634d08c",
+     "instruction": "movb $0x1,(%rbx)",
+     "fde": [
+      "0x6349be0",
+      "0x634eb7c"
+     ]
+    },
+    {
+     "site": "0x63c41a0",
+     "instruction": "movb $0x1,0x34f45f(%rip)",
+     "fde": [
+      "0x63c4140",
+      "0x63c41b1"
+     ]
+    }
+   ],
+   "rela_addends": 0,
+   "method": "Full .text objdump grep for comment '# 6713606' (76 lines); each lea site classified by a 256-byte linear window with register-overwrite and call-clobber tracking; first-pass classifier false positives from register reuse (0x635a874, 0x635c781) caught by hand and fixed. A store through a spilled/reloaded register or beyond the window would be missed; none was found in the windows, and all three writers sit within 8 bytes of their lea.",
+   "sites": [
+    {
+     "site": "0x63497a2",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x634c035",
+     "class": "WRITE-via-reg@0x634c043"
+    },
+    {
+     "site": "0x634d08c",
+     "class": "WRITE-via-reg@0x634d09a"
+    },
+    {
+     "site": "0x635036e",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6350599",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63512e4",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6353ae8",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6353db4",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63559a1",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6355cc3",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6357958",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6357b5f",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x635a874",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x635aa47",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x635acd2",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x635c781",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x635caf2",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x635d242",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x635d6d5",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x635e4f3",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x635e682",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x635eb7e",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6361425",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6361a56",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636581b",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6365cb8",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636c884",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636c8c4",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636cd8a",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636d1b2",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636d3f6",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636d874",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636d8fe",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636d9e1",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636da40",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636dace",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636de7e",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x636df7a",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63737e2",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6376c34",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6376dac",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x637702c",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63772bc",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x637753c",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63777c4",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63777f4",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6377854",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x6386048",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63a5ca6",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63a7a1b",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63b2803",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63b2854",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63b2b48",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63b30c0",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63b3141",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63b3b55",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63b4a52",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63b4c58",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63b51f6",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63b5433",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63bda35",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63c3704",
+     "class": "READ-direct"
+    },
+    {
+     "site": "0x63c4152",
+     "class": "READ-direct"
+    },
+    {
+     "site": "0x63c41a0",
+     "class": "WRITE-direct"
+    },
+    {
+     "site": "0x63c4316",
+     "class": "READ-direct"
+    },
+    {
+     "site": "0x63c44e4",
+     "class": "READ-direct"
+    },
+    {
+     "site": "0x63c46c4",
+     "class": "READ-direct"
+    },
+    {
+     "site": "0x63c4754",
+     "class": "READ-direct"
+    },
+    {
+     "site": "0x63c49a4",
+     "class": "READ-direct"
+    },
+    {
+     "site": "0x63d4adc",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63d4be4",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63dd531",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63deb9b",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63eecf1",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63eeeb6",
+     "class": "READ-via-reg"
+    },
+    {
+     "site": "0x63ef25f",
+     "class": "READ-via-reg"
+    }
+   ]
+  },
+  "leaves_classified_here": [
+   {
+    "leaf": "arenas.create",
+    "class": "write",
+    "returns": "new arena index (4B via oldp)"
+   },
+   {
+    "leaf": "tcache.create",
+    "class": "write",
+    "returns": "new tcache id (4B via oldp)"
+   },
+   {
+    "leaf": "tcache.destroy",
+    "class": "write",
+    "returns": "0"
+   },
+   {
+    "leaf": "experimental.hooks.install",
+    "class": "write",
+    "returns": "installed hook pointer (8B via oldp)"
+   },
+   {
+    "leaf": "experimental.hooks.remove",
+    "class": "write",
+    "returns": "0"
+   },
+   {
+    "leaf": "prof.log_start",
+    "class": "write",
+    "returns": "0 or 14"
+   },
+   {
+    "leaf": "prof.log_stop",
+    "class": "write",
+    "returns": "0 or 14"
+   },
+   {
+    "leaf": "thread.prof.active",
+    "class": "read/write",
+    "returns": "0, 11, or 22"
+   }
+  ],
+  "leaves_classified_before": [
+   "epoch",
+   "thread.tcache.flush",
+   "thread.peak.reset",
+   "prof.reset",
+   "prof.dump",
+   "stats.mutexes.reset"
+  ],
+  "leaves_remaining_unclassified": 190
+ },
+ "cited_only_not_claimed": [
+  {
+   "range": [
+    "0x63a5bef",
+    "0x63a5bf0"
+   ],
+   "note": "padding between arenas.create FDE end and sweep FDE start; not claimed"
+  },
+  {
+   "fde": [
+    "0x63a5bf0",
+    "0x63a6470"
+   ],
+   "note": "#253 sweep, cited"
+  },
+  {
+   "fde": [
+    "0x63bf680",
+    "0x63bf7ee"
+   ],
+   "note": "#251 wait helper, cited"
+  },
+  {
+   "fde": [
+    "0x63a8ff0",
+    "0x63a93ba"
+   ],
+   "note": "#255 dispatcher, cited"
+  },
+  {
+   "fde": [
+    "0x636e340",
+    "0x636e817"
+   ],
+   "note": "#256 resolver, cited"
+  },
+  {
+   "fde": [
+    "0x634f0b0",
+    "0x634f8d5"
+   ],
+   "note": "#257 gate predicate, cited"
+  },
+  {
+   "fde": [
+    "0x634ece0",
+    "0x634f09d"
+   ],
+   "note": "#257 request-init, cited"
+  },
+  {
+   "fde": [
+    "0x636d870",
+    "0x636d8d1"
+   ],
+   "note": "#257 prof.reset exhibit window, cited"
+  },
+  {
+   "fde": [
+    "0x6377850",
+    "0x63778a1"
+   ],
+   "note": "#257 prof.dump exhibit window, cited"
+  },
+  {
+   "fde": [
+    "0x636de20",
+    "0x636de56"
+   ],
+   "note": "#257 tcache.flush exhibit window, cited"
+  },
+  {
+   "fde": [
+    "0x636e210",
+    "0x636e236"
+   ],
+   "note": "#257 peak.reset exhibit window, cited"
+  }
+ ]
+}

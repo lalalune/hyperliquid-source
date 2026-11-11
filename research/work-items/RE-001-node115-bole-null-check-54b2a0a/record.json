@@ -1,0 +1,72 @@
+{
+  "target": "node115",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "source_baseline": "0781ce04826eeefd89fe336cb8ea073be0c1de30",
+  "component": "exchange",
+  "source_location": "l1/exchange/impl_bole.rs:547:43",
+  "parent_fde": {
+    "fde_va": "0x13539b0",
+    "start": "0x54a9c70",
+    "end": "0x54b66a2"
+  },
+  "branch": {
+    "load_va": "0x54b29e3",
+    "load_bytes": "488b4508",
+    "load": "mov rax, qword ptr [rbp+8]",
+    "test_va": "0x54b29e7",
+    "test_bytes": "4885c0",
+    "test": "test rax, rax",
+    "conditional_va": "0x54b29ea",
+    "conditional_bytes": "0f8418010000",
+    "conditional": "je 0x54b2b08",
+    "predicate": "taken iff qword at [rbp+8] is zero"
+  },
+  "caller_input": {
+    "address_base_construction": [
+      {"va": "0x54b272f", "bytes": "440fb6642468", "instruction": "movzx r12d, byte ptr [rsp+0x68]"},
+      {"va": "0x54b2754", "bytes": "0fb64c246f", "instruction": "movzx ecx, byte ptr [rsp+0x6f]"},
+      {"va": "0x54b275c", "bytes": "0fb754246d", "instruction": "movzx edx, word ptr [rsp+0x6d]"},
+      {"va": "0x54b2763", "bytes": "8b6c2469", "instruction": "mov ebp, dword ptr [rsp+0x69]"},
+      {"va": "0x54b2767", "bytes": "48c1e228", "instruction": "shl rdx, 40"},
+      {"va": "0x54b276b", "bytes": "48c1e508", "instruction": "shl rbp, 8"},
+      {"va": "0x54b276f", "bytes": "4809d5", "instruction": "or rbp, rdx"},
+      {"va": "0x54b2772", "bytes": "4809c5", "instruction": "or rbp, rax"}
+    ],
+    "helper_call": {
+      "va": "0x54b2724",
+      "bytes": "ff15864a0301",
+      "instruction": "call qword ptr [rip+0x1034a86]",
+      "next_va": "0x54b272a",
+      "slot": "0x64e71b0",
+      "relocation_type": "R_X86_64_RELATIVE",
+      "relocation_type_numeric": 8,
+      "relocation_symbol_index": 0,
+      "relocation_addend": "0x3699410",
+      "arguments": [
+        {"register": "rdi", "value": "&[rsp+0x60]"},
+        {"register": "rsi", "value": "[rsp+0x30]"}
+      ],
+      "rsi_provenance": [
+        {"va": "0x54b259f", "bytes": "4d8da770060000", "instruction": "lea r12, [r15+0x670]"},
+        {"va": "0x54b25d1", "bytes": "4c89642430", "instruction": "mov qword ptr [rsp+0x30], r12"}
+      ]
+    }
+  },
+  "helper_fde": {
+    "start": "0x3699410",
+    "end": "0x3699613",
+    "entry_bytes": "55415741564155415453",
+    "return_bytes": "4c89e85b415c415d415e415f5dc3"
+  },
+  "negative_control": {
+    "mutated_call_displacement_byte_index": 2,
+    "mutation": "increment by one",
+    "expected": "computed GOT slot differs from 0x64e71b0"
+  },
+  "limitations": [
+    "No source-level output type is inferred.",
+    "The helper's downstream indirect calls and semantics are unresolved.",
+    "No target code was executed.",
+    "No component completion gate or function denominator is claimed."
+  ]
+}

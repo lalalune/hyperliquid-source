@@ -1,0 +1,18 @@
+# Node #115 failure paths after the dispatcher
+
+This addendum joins the caller evidence from PR #2127 to the standard library body census already on main. The target is Linux x86-64 node #115, 105,896,032 bytes, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. Addresses below are ELF virtual addresses unless marked file offsets. The reference tree is `05bc2de303c05525b71e7e257426e741bc66a390`.
+
+| Path | Fresh decoded FDE | Bytes / rows | Outgoing RELATIVE slot and target |
+| --- | --- | ---: | --- |
+| Nonzero | `[0x5c827a0,0x5c827b3)` | 19 / 6 | `0x64ec700 → 0x5c9af00` |
+| Zero | `[0x1680e80,0x1680eac)` | 44 / 11 | `0x64e1f30 → 0x5c826c0` |
+
+On the message allocation failure route, the first handler passes `(n,1)`. The next handler swaps RDI and RSI again and forwards `(1,n)` through the call at `0x5c827ad`. Its RELATIVE record is at file offset `0x15b490`. The destination matches the census entry for `rust_oom` across 22 unmasked bytes of a complete 26-byte FDE.
+
+The zero route passes a literal pointer, scalar `35` and a location-like descriptor. Its callee stores the first two words at `rbp-0x10` and `rbp-0x8`. It writes a pointer to those words, the incoming descriptor and a word containing `01 00` into a stack record at `rbp-0x28`. The call at `0x1680ea6` passes that record by address. Its RELATIVE record at file offset `0x13c488` resolves to the census match for `rust_begin_unwind` across 25 unmasked bytes of a complete 29-byte FDE.
+
+The zero callee matches the census entry for `panic_fmt` across 40 unmasked bytes of its complete 44-byte FDE. The pinned Rust source encodes literal arguments as `(length << 1) | 1`. This supports interpreting the observed `35` as the tagged length of the 17-byte `capacity overflow` literal at `0x456d73`. The subsequent string pool bytes lie beyond that source-layout length. The caller itself matches the capacity-overflow source body over 17 unmasked bytes of 29, with a second equivalent source body in the census. [Pinned Rust format layout](https://github.com/rust-lang/rust/blob/59807616e1fa2540724bfbac14d7976d7e4a3860/library/core/src/fmt/mod.rs#L583) · [Merged standard library census](https://github.com/lalalune/hyperliquid-source/blob/05bc2de303c05525b71e7e257426e741bc66a390/research/work-items/RE-002-node115-std-census/census.json)
+
+[Native result](decode-result.json) records both FDE decodes and replay of the retained incoming handler boundaries. [Commands and output](commands.json) include the GNU objdump 2.42 version query and both complete 45-second-capped decode commands. [Provenance](provenance.json) binds the run, execution commit, archive and isolation qualification. [Relocation audit](relocation-audit.json) binds the two outgoing calls to the complete image. [Census replay](census-replay.json) preserves four comparisons, exact relocation mask offsets, raw differences and one rejected unmasked mutation per comparison. The two outgoing endpoint comparisons reuse published reference bodies and the complete captured FDE bytes. Only the two ranges in the table received fresh native decoding. [Hosted run](https://github.com/clutchpbcfo/hyperliquid-source/actions/runs/41772473150)
+
+The parent verifier checks this addendum's manifest digests and retains its earlier fourteen-range semantic scope. The new static evidence covers argument forwarding and the published body matches. Exact source ownership, diagnostic emission, endpoint callees, continuation and global nonreturn remain open. Any additional control-flow work should start from the two relocation-bound endpoint addresses.

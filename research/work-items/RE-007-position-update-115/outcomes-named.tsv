@@ -1,0 +1,65 @@
+case	price	delta	balance	mode	divisor	acc	size	kind	r9	digest	events
+zero delta copies the record	100	0	77	1	10000	9	5	ok	77	a7472738d61c6895	
+zero delta keeps even a bad price	-5	0	-3	1	10000	0	0	ok	-3	7e624d70674bd4ca	
+flat open long, cap above price	50	100	1000	1	10000	0	0	ok	1000	bf449563dbd72751	
+flat open long, cap below price	50	100	1000	1	10000	0	0	ok	0	e6c62183112654e6	
+flat open short, cap above price	50	-100	1000	1	10000	0	0	ok	0	e7fac10a6404838f	
+flat open short, cap below price	50	-100	1000	1	10000	0	0	ok	1000	008c32dd1a15146a	
+flat open, divisor 1	50	100	0	1	1	0	0	ok	0	4550c5a9d8d30406	
+flat open, divisor 0xffffffff	50	100	0	1	4294967295	0	0	ok	0	7d636b553d1c97cc	
+flat open, worth past 32 bits	10000000	1000000	0	1	3	0	0	ok	0	f75c55039cadb184	
+flat open, zero divisor faults	50	100	0	1	0	0	0	fault	None	c141e75dfc175252	
+flat open, zero worth with zero divisor still faults	0	100	0	1	0	0	0	fault	None	c141e75dfc175252	
+flat open, quotient 2^63 panics	1	-2	0	1	1	0	0	panic	None	a8571fc889e470b7	
+flat open, worth 2^63 - 2 under divisor 1	4611686018427387904	2	0	1	1	0	0	err	None	664d068b416807a0	
+flat open, cap with the top bit is refused	10	5	0	1	10000	0	0	ok	0	a13a844171c53521	
+flat open short, cap with the top bit is the maximum	10	-5	0	1	10000	0	0	err	None	d294d3a49d5ea62b	
+flat open, negative price	-1	5	0	1	10000	0	0	err	None	d294d3a49d5ea62b	
+flat open, price times delta overflows	3	9223372036854775807	0	1	10000	0	0	err	None	d294d3a49d5ea62b	
+flat open, delta at the minimum	1	-9223372036854775808	0	1	10000	0	0	ok	0	4bb9def937887d33	648ba50
+flat open, balance saturates down	9223372036854775	1000	-9223372036854775803	1	1000000000	0	0	ok	0	f651400282b9fa5f	648ba50,648ba50
+flat open, accumulator saturates up	1000000	100	0	1	1	9223372036854775804	0	ok	0	7cb01740d072ad05	648b9c0
+flat open, floor above balance	10	10	5	1	10000	0	0	ok	1000000	f9b49864617888b0	
+flat open, floor equal balance	10	10	0	1	10000	0	0	ok	0	f6f1c71ea7595d53	
+add to long	40	25	500	1	10000	1000	50	ok	500	2a3c28ab817a71f4	
+add to short	40	-25	500	1	10000	-1000	-50	ok	500	4eeafe34dccf246c	
+add past the top	1	10	0	1	10000	0	9223372036854775805	ok	0	5749be0a234b7378	648ba08,648b9d8
+add past the bottom	1	-10	0	1	10000	0	-9223372036854775806	ok	0	d7e46ab87b14194d	648ba08,648b9d8
+reduce long, proportional share	60	-40	100	1	10000	5000	100	ok	4500	41eddf304ef420d5	
+reduce short, proportional share	60	40	100	1	10000	5000	-100	ok	100	62f29afa8830fac2	
+reduce long, negative accumulator	60	-40	100	1	10000	-5000	100	ok	500	9fa06d28091cc1c3	
+reduce long, value below zero	1	-40	100	1	10000	-5000	100	ok	100	b059f014bb0b0109	
+close long exactly	60	-100	100	1	10000	5000	100	ok	11100	0f55975ab34914df	
+close short exactly	60	100	100	1	10000	-5000	-100	ok	-10900	584074bfd7d2587b	
+close exactly, floor above	60	-100	100	1	10000	5000	100	ok	11100	0f55975ab34914df	
+flip long to short	60	-150	100	1	10000	5000	100	ok	10600	4c9afe029d8d2403	
+flip short to long	60	150	100	1	10000	5000	-100	ok	0	945c3d1980213787	
+flip with value below zero	1	-150	100	1	10000	-5000	100	ok	0	80570aab8d2acdbb	
+flip short with value below zero	1	150	100	1	10000	-5000	-100	ok	0	8266b6a0b42f4c7d	
+price times size overflows, long	10	-1	0	1	10000	0	9223372036854775807	ok	10	91089b4c4cabc3b6	
+price times size overflows, short	10	1	0	1	10000	0	-9223372036854775808	ok	0	8cbb4b8c133fffa4	
+price times size plus accumulator overflows	4194304	-1	0	1	10000	9223372036854775807	1099511627776	ok	12582912	c0b44a0add825869	648ba50
+share of a huge accumulator	2	-1	0	1	10000	9223372036854775807	3	ok	3074457345618258434	69357ec58b9c6300	648ba50
+share of a huge negative accumulator	2	-1	0	1	10000	-9223372036854775808	3	ok	0	7060a1154c986f77	
+share is exactly the accumulator	2	-7	9	1	10000	12345	7	ok	12368	190be4f668dc0a4c	
+share minus value overflows	1844674407370955161	-5	0	1	10000	-3074457345618258603	10	ok	7686143364045646589	a7d8eaa015890a08	
+base plus share overflows	1	-5	9223372036854775807	1	10000	9223372036854775807	10	ok	9223372036854775807	42dd974ce535a360	648ba50,648b9c0,648ba50
+size sum overflows in mode 1	100	9223372036854775807	0	1	10000	0	9223372036854775807	err	None	f209a35294e766f2	648ba08
+size sum overflows downward in mode 1	100	-9223372036854775808	0	1	10000	0	-9223372036854775808	err	None	328c63ec05e7b82b	648ba08
+fold of the accumulator overflows	2	-7	4611686018427387789	1	10	4611686018427388304	7	ok	9223372036854775807	a208bb89f43d833a	648b9c0
+fold of the accumulator overflows downward	2	7	-4611686018427387790	1	10	-4611686018427388304	-7	ok	-9223372036854775808	9bc61d8e39a895ab	648ba50
+base plus share saturates, zero value	0	-5	9223372036854775807	1	10000	9223372036854775807	10	ok	9223372036854775807	cf44adc4a8742147	648b9c0
+flip, base plus accumulator saturates down	1	-5	-9223372036854775808	1	4294967295	-4611686018427387904	3	ok	-9223372036854775808	b36d4e826d9feaea	648b9c0
+flip short, base plus accumulator saturates down	1	5	-9223372036854775808	1	4294967295	-4611686018427387904	-3	ok	-9223372036854775806	345789c85638ca3a	648b9c0,648ba50
+mark cleared when the sign flips	2	-9	0	1	10000	0	5	ok	0	5bb613c35cb84831	
+mark kept when the sign holds	2	-5	0	1	10000	0	9	ok	10	1b7f55349eacb083	
+mode 0 buys	7	5	100	0	10000	0	10	ok	65	9b9410cfbc07084e	
+mode 2 sells	7	-5	100	2	10000	0	10	ok	135	ffe068b4da6da262	
+mode 0xffffffff	7	5	100	4294967295	10000	0	-10	ok	65	e3ab65a72c0a6f2f	
+mode 0 size overflows	7	5	0	0	10000	0	9223372036854775807	ok	-35	60c9239c1d63caf6	648ba08,648b9d8
+mode 0 size underflows	7	-5	0	0	10000	0	-9223372036854775808	ok	35	cbcba45d74134523	648ba08,648b9d8
+mode 0 negative price	-7	5	0	0	10000	0	1	err	None	b8a2460d8f04353b	
+mode 0 price times delta overflows	3	9223372036854775807	0	0	10000	0	1	err	None	a963b6689e140b4e	648ba08,648b9d8
+mode 0 balance saturates	1844674407370955161	-5	9223372036854775804	0	10000	0	1	ok	9223372036854775807	04f19f21708ac174	648ba50
+mode 0 balance saturates below	1844674407370955161	5	-9223372036854775805	0	10000	0	1	ok	-9223372036854775808	e661faa52b824fd4	648ba50
+mode 0 sign flip clears the mark	1	-8	0	0	10000	0	3	ok	8	718f84de8874873c	

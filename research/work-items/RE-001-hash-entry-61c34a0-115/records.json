@@ -1,0 +1,81 @@
+{
+ "arguments": {
+  "data": "rdi; pointer to the input bytes. Read on every path (the word loop reads data[0..4*(length//4)), the tail reads the remaining length%4 bytes), never written",
+  "length": "rsi; the input length in bytes (size_t). The initial multiply reads %esi, the low 32 bits of the length; the end pointer (rdi + rsi) and the tail-length arithmetic use the full 64-bit length",
+  "seed": "rdx; a 32-bit seed in %edx, xored into the accumulator once at entry: h = (uint32(length) * 0xc6a4a793) ^ seed. Recorded call-site seeds: 0x18d (at 0x5f0e695, per RE-001-hash-find-insert-115) and 0xbc9f1d34 (at 0x5f0da73, per RE-014-batch-lookup-115); the remaining sites' seeds were not read"
+ },
+ "census": {
+  "direct_calls": [
+   "0x5f08dd5",
+   "0x5f09180",
+   "0x5f0d2e1",
+   "0x5f0d43d",
+   "0x5f0da73",
+   "0x5f0e695",
+   "0x5f0eb87",
+   "0x5f0eea7",
+   "0x5f0f0bc",
+   "0x5f0f21b",
+   "0x612bf6a",
+   "0x612c1ec",
+   "0x612caca",
+   "0x612ce6c",
+   "0x612d821",
+   "0x612d947",
+   "0x61365e9",
+   "0x618ef88",
+   "0x61989f6",
+   "0x619c44e",
+   "0x619d834",
+   "0x619e28b",
+   "0x619e306",
+   "0x61a02a6",
+   "0x61a052b",
+   "0x61a073c"
+  ],
+  "direct_calls_note": "26 e8 call sites in 19 distinct caller FDEs; every site was confirmed as a real call instruction on an instruction boundary by linear disassembly of its containing FDE from the FDE start (capstone). Per-site caller FDEs are in callers.tsv",
+  "qword_hits_file_offsets": [],
+  "relative_slots": [],
+  "tail_jumps": [],
+  "tail_jumps_note": "no e9 site targets the window; it is entered only by the direct calls above (and by fall-through from nothing: the preceding bytes at 0x61c3491..0x61c34a0 are the tail of the neighbouring hash delegate 0x61c3230's FDE and its int3 padding)"
+ },
+ "component": "hash entry (rocksdb::Hash)",
+ "entry_paths": [
+  {
+   "kind": "direct call (e8 rel32), 26 sites in 19 caller FDEs",
+   "note": "two sites are documented by the citing packets: 0x5f0e695 in FDE 0x5f0e660..0x5f0e85f (RE-001-hash-find-insert-115: arguments key pointer, key length, seed 0x18d; the 32-bit result is kept in ebp and zero-extended for the divisions) and 0x5f0da73 in FDE 0x5f0d740..0x5f0e2c7 (RE-014-batch-lookup-115: per-view hash with seed 0xbc9f1d34). The full site list with caller FDEs is in callers.tsv"
+  }
+ ],
+ "final_mix": "runs only when length % 4 != 0, after the tail bytes are folded in: t = h * 0xc6a4a793 (mod 2^32); result = t ^ (t >> 24). When length % 4 == 0 there is no final mix and the accumulator is returned as it stands",
+ "length_arms": {
+  "0": "h = (0 * M) ^ seed = seed; remainder 0, so the seed itself is returned",
+  "1..3": "no word step; the tail fold and the final mix run on h = (length * M) ^ seed",
+  "4k+1..4k+3": "k word steps, then the tail fold (sign-extended bytes, highest byte first) and the final mix",
+  "multiple of 4": "length//4 word steps; no tail, no final mix: the last word step's h is returned"
+ },
+ "mix_primitive": "the word step: for each little-endian 4-byte word w of the input, h = (h + w) * 0xc6a4a793, then h ^= h >> 16 (all mod 2^32). The tail fold adds the sign-extended (movsbl) tail bytes at their positions: tail[2] << 16, tail[1] << 8, tail[0]",
+ "model": "tools/hash_entry_61c34a0_115.py",
+ "multiplier": "0xc6a4a793 (the MurmurHash multiplier; every multiply in the body uses it: the initial length fold, each word step, and the final mix)",
+ "node": 115,
+ "return_value": "rax: the 32-bit hash in %eax, zero-extended into %rax (the citing packets record a 32-bit 'hash32' result)",
+ "semantics": "h starts at (uint32(length) * 0xc6a4a793) ^ seed. The body walks the input in little-endian 4-byte words; for each word it adds the word into h, multiplies by 0xc6a4a793 and xors the product with itself shifted right 16. The remaining 0..3 tail bytes are then handled by remainder: 0 means an immediate return of h with no further mixing; otherwise the tail bytes are sign-extended and added at their byte positions (third byte << 16, second byte << 8, first byte) and one final mix runs: multiply by 0xc6a4a793 and xor with itself shifted right 24. The window is a leaf: no calls, no stores, no stack use; it reads only [data, data+length) and returns in %eax",
+ "side_effects": "none: no memory writes, no calls, no stack frame (the FDE carries no CFA instructions beyond nops); only rax, rcx, rdx, rsi, rdi, r8, r9 are touched and only rax is live on exit",
+ "tests": "tests/test_hash_entry_61c34a0_115.py",
+ "unknowns": [
+  "the exact source spelling of the function; the RE-002 vendor census registers this window as rocksdb::Hash(const char*, size_t, uint32_t) (librocksdb-sys 0.11.0+8.1.1) \u2014 that identity is the census's claim and is consistent with everything pinned here (the MurmurHash-family multiplier 0xc6a4a793 and the (data, length, seed) argument roles), but this packet pins the target body's own semantics and neither needs nor re-claims the identity",
+  "the caller-chosen seeds at the other 24 call sites (only the two sites the citing packets document were read: 0x18d and 0xbc9f1d34) and the caller functions' identities beyond their FDE bounds",
+  "lengths >= 2^32 are pinned at the instruction level (the initial multiply truncates the length to 32 bits while the end pointer uses the full length) but are not differentially tested, which would need a >= 4 GiB input",
+  "the claimed byte-identity with the #94 counterpart at 0x5422e70 (recorded by RE-014-batch-lookup-115 via RE-014-probe-gated-lookup-115) is those packets' claim and was not re-verified here; this packet is bound to the #115 binary only"
+ ],
+ "window": {
+  "artifact": "work/hl-node-115.bin",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "cie_offset": "0",
+  "end": "0x61c3525",
+  "fde_length": "0x10",
+  "fde_offset": "0x376dcc",
+  "provenance_path": "artifacts/node/115/hl-node",
+  "size_bytes": 133,
+  "start": "0x61c34a0"
+ }
+}

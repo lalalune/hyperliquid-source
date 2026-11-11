@@ -1,0 +1,45 @@
+
+work/hl-node-115.bin:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000606b1d0 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x322da0>:
+ 606b1d0:	f3 0f 1e fa          	endbr64
+ 606b1d4:	48 8b 07             	mov    (%rdi),%rax
+ 606b1d7:	48 89 f1             	mov    %rsi,%rcx
+ 606b1da:	48 8b 36             	mov    (%rsi),%rsi
+ 606b1dd:	48 89 fa             	mov    %rdi,%rdx
+ 606b1e0:	48 39 c6             	cmp    %rax,%rsi
+ 606b1e3:	73 07                	jae    606b1ec <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x322dbc>
+ 606b1e5:	f0 48 0f b1 32       	lock cmpxchg %rsi,(%rdx)
+ 606b1ea:	75 f4                	jne    606b1e0 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x322db0>
+ 606b1ec:	48 8b 42 08          	mov    0x8(%rdx),%rax
+ 606b1f0:	48 8b 71 08          	mov    0x8(%rcx),%rsi
+ 606b1f4:	48 8d 7a 08          	lea    0x8(%rdx),%rdi
+ 606b1f8:	48 39 f0             	cmp    %rsi,%rax
+ 606b1fb:	73 07                	jae    606b204 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x322dd4>
+ 606b1fd:	f0 48 0f b1 37       	lock cmpxchg %rsi,(%rdi)
+ 606b202:	75 f4                	jne    606b1f8 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x322dc8>
+ 606b204:	48 8b 41 10          	mov    0x10(%rcx),%rax
+ 606b208:	f0 48 01 42 10       	lock add %rax,0x10(%rdx)
+ 606b20d:	48 8b 41 18          	mov    0x18(%rcx),%rax
+ 606b211:	f0 48 01 42 18       	lock add %rax,0x18(%rdx)
+ 606b216:	48 8b 41 20          	mov    0x20(%rcx),%rax
+ 606b21a:	f0 48 01 42 20       	lock add %rax,0x20(%rdx)
+ 606b21f:	48 83 ba 90 03 00 00 	cmpq   $0x0,0x390(%rdx)
+ 606b226:	00 
+ 606b227:	74 29                	je     606b252 <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x322e22>
+ 606b229:	31 ff                	xor    %edi,%edi
+ 606b22b:	31 f6                	xor    %esi,%esi
+ 606b22d:	31 c0                	xor    %eax,%eax
+ 606b22f:	48 83 c6 05          	add    $0x5,%rsi
+ 606b233:	48 83 c0 05          	add    $0x5,%rax
+ 606b237:	48 8b 34 f1          	mov    (%rcx,%rsi,8),%rsi
+ 606b23b:	f0 48 01 34 c2       	lock add %rsi,(%rdx,%rax,8)
+ 606b240:	8d 47 01             	lea    0x1(%rdi),%eax
+ 606b243:	48 89 c7             	mov    %rax,%rdi
+ 606b246:	48 89 c6             	mov    %rax,%rsi
+ 606b249:	48 3b 82 90 03 00 00 	cmp    0x390(%rdx),%rax
+ 606b250:	72 dd                	jb     606b22f <_ZNKSt5ctypeIcE8do_widenEc@@Base+0x322dff>
+ 606b252:	c3                   	ret

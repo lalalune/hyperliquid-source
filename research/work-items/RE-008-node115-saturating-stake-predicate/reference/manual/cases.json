@@ -1,0 +1,1497 @@
+{
+  "schema": "stake-manual-cases-v1",
+  "host_contract_sha256": "4bb6a164423609b2310b7952351be5e88f8583d205b1ec144e9393cfde92a28e",
+  "native_contract_sha256": "7aacee53dfaab38c19464d579b3b737aaa078b56a591c3a0dd4123b7f563c5e7",
+  "cases": [
+    {
+      "id": "H01",
+      "family": "empty",
+      "input": {
+        "capacity": "0",
+        "head": "0",
+        "live": "0",
+        "physical_rows": [],
+        "selected_keys": []
+      },
+      "expected_fields": [
+        "H01",
+        "ok",
+        "0",
+        "0",
+        "0"
+      ],
+      "derivation": "No rows and no selected occurrences: B=S=0, and strict0<0 is false.",
+      "anchors": [
+        "0x57f54eb..0x57f5582",
+        "0x4d3e27d..0x4d3e299",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H02",
+      "family": "empty_misses",
+      "input": {
+        "capacity": "0",
+        "head": "0",
+        "live": "0",
+        "physical_rows": [],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000001",
+          "ff00000000000000000000000000000000000000"
+        ]
+      },
+      "expected_fields": [
+        "H02",
+        "ok",
+        "0",
+        "0",
+        "0"
+      ],
+      "derivation": "Every actual query misses the empty map; repeated queries do not invent weight. B=S=0.",
+      "anchors": [
+        "0x57f54eb..0x57f5582",
+        "0x4d3e27d..0x4d3e299",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H03",
+      "family": "empty_head_bounds",
+      "input": {
+        "capacity": "0",
+        "head": "1",
+        "live": "0",
+        "physical_rows": [],
+        "selected_keys": []
+      },
+      "expected_fields": [
+        "H03",
+        "bounds"
+      ],
+      "derivation": "Empty backing requires head0; this is host Bounds, not a native failure result.",
+      "anchors": [
+        "HOST-CONTRACT.md Library admission1..4"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H04",
+      "family": "empty_live_bounds",
+      "input": {
+        "capacity": "0",
+        "head": "0",
+        "live": "1",
+        "physical_rows": [],
+        "selected_keys": []
+      },
+      "expected_fields": [
+        "H04",
+        "bounds"
+      ],
+      "derivation": "live1 exceeds capacity0, so Bounds before any ordering or lookup.",
+      "anchors": [
+        "HOST-CONTRACT.md Library admission1..4"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H05",
+      "family": "bounds_before_order_head",
+      "input": {
+        "capacity": "2",
+        "head": "2",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "5"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "9"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H05",
+        "bounds"
+      ],
+      "derivation": "head2 is outside capacity2. Physical keys are descending, but Bounds has priority over Order.",
+      "anchors": [
+        "HOST-CONTRACT.md Library admission1..4"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H06",
+      "family": "bounds_before_order_live",
+      "input": {
+        "capacity": "2",
+        "head": "0",
+        "live": "3",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "5"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "9"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H06",
+        "bounds"
+      ],
+      "derivation": "live3 exceeds capacity2; do not wrap repeatedly or return Order first.",
+      "anchors": [
+        "HOST-CONTRACT.md Library admission1..4"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H07",
+      "family": "order",
+      "input": {
+        "capacity": "2",
+        "head": "0",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "5"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "9"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H07",
+        "order"
+      ],
+      "derivation": "Valid bounds, but logical keys2,1 descend. Order is a chosen host refusal.",
+      "anchors": [
+        "HOST-CONTRACT.md Library admission1..4"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H08",
+      "family": "inactive_zero_live",
+      "input": {
+        "capacity": "2",
+        "head": "1",
+        "live": "0",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "18446744073709551615"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "18446744073709551615"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001",
+          "8000000000000000000000000000000000000000"
+        ]
+      },
+      "expected_fields": [
+        "H08",
+        "ok",
+        "0",
+        "0",
+        "0"
+      ],
+      "derivation": "The nonempty backing has valid head1 but no live rows. Both MAX weights and descending inactive keys are ignored.",
+      "anchors": [
+        "HOST-CONTRACT.md Library admission1..4",
+        "0x57f54eb..0x57f5582",
+        "0x4d3e27d..0x4d3e299",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H09",
+      "family": "empty_live_strict_head",
+      "input": {
+        "capacity": "2",
+        "head": "2",
+        "live": "0",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "18446744073709551615"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "18446744073709551615"
+          }
+        ],
+        "selected_keys": []
+      },
+      "expected_fields": [
+        "H09",
+        "bounds"
+      ],
+      "derivation": "The safe host requires head<capacity even when live0. Native inert-state permissiveness is not copied.",
+      "anchors": [
+        "HOST-CONTRACT.md Library admission1..4"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H10",
+      "family": "inactive_rows",
+      "input": {
+        "capacity": "4",
+        "head": "1",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000003",
+            "weight": "18446744073709551615"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "2"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "3"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000000",
+            "weight": "18446744073709551615"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000002",
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000009"
+        ]
+      },
+      "expected_fields": [
+        "H10",
+        "ok",
+        "5",
+        "5",
+        "1"
+      ],
+      "derivation": "Only physical rows1,2 are live, logical keys1,2. Found weights3+2=5; query9 misses. S=2+3=5, so10<15.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x4d3e24c..0x4d3e299",
+        "0x4e40729..0x4e40759",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H11",
+      "family": "zero_weight",
+      "input": {
+        "capacity": "1",
+        "head": "0",
+        "live": "1",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "0"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H11",
+        "ok",
+        "0",
+        "0",
+        "0"
+      ],
+      "derivation": "Two found occurrences each add0; S0. Strict equality is false.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H12",
+      "family": "all_misses",
+      "input": {
+        "capacity": "1",
+        "head": "0",
+        "live": "1",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "5"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000002"
+        ]
+      },
+      "expected_fields": [
+        "H12",
+        "ok",
+        "0",
+        "5",
+        "0"
+      ],
+      "derivation": "Queries0 and2 are below/above sole key1. B0, S5, so10<0 is false.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H13",
+      "family": "single_hit",
+      "input": {
+        "capacity": "1",
+        "head": "0",
+        "live": "1",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "5"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H13",
+        "ok",
+        "5",
+        "5",
+        "1"
+      ],
+      "derivation": "One hit contributes5 and total is5;10<15 is true.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H14",
+      "family": "selected_repeats_unsorted",
+      "input": {
+        "capacity": "2",
+        "head": "0",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "5"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "7"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000002",
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000002"
+        ]
+      },
+      "expected_fields": [
+        "H14",
+        "ok",
+        "19",
+        "12",
+        "1"
+      ],
+      "derivation": "Selected order2,1,2 is preserved:7+5+7=19, S12. No selected sorting/uniqueness admission;24<57.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x4e44c65..0x4e44c77",
+        "0x4e40729..0x4e40738",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H15",
+      "family": "contiguous_last_equal",
+      "input": {
+        "capacity": "3",
+        "head": "0",
+        "live": "3",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "2"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "7"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "11"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H15",
+        "ok",
+        "7",
+        "20",
+        "0"
+      ],
+      "derivation": "Contiguous key1 selects its last row weight7, not2. S2+7+11=20;40<21 is false.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H16",
+      "family": "contiguous_repeated_equal",
+      "input": {
+        "capacity": "3",
+        "head": "0",
+        "live": "3",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "2"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "7"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "11"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H16",
+        "ok",
+        "14",
+        "20",
+        "1"
+      ],
+      "derivation": "Each key1 occurrence selects weight7: B14, S20;40<42. Deduplicating selected input would change this.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x4e44c65..0x4e44c77",
+        "0x4e40729..0x4e40738",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H17",
+      "family": "wrapped_seam_override",
+      "input": {
+        "capacity": "4",
+        "head": "3",
+        "live": "4",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "3"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "11"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "17"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "2"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H17",
+        "ok",
+        "3",
+        "33",
+        "0"
+      ],
+      "derivation": "Logical rows are key1/2,key1/3,key1/11,key2/17. Query1 equals physical row0 seam, selecting3 immediately rather than11. S33;66<9 false.",
+      "anchors": [
+        "0x57f5516..0x57f553a",
+        "0x57f5699",
+        "0x4d3e24c..0x4d3e299",
+        "0x4e40729..0x4e40759",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H18",
+      "family": "wrapped_seam_repeats",
+      "input": {
+        "capacity": "4",
+        "head": "3",
+        "live": "4",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "3"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "11"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "17"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "2"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H18",
+        "ok",
+        "9",
+        "33",
+        "0"
+      ],
+      "derivation": "Each repeated seam key contributes3, so B9,S33,false. A global-last-equal fault contributes33 and would pass66<99.",
+      "anchors": [
+        "0x57f5516..0x57f553a",
+        "0x57f5699",
+        "0x4e44c65..0x4e44c77",
+        "0x4e40729..0x4e40738",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H19",
+      "family": "wrapped_first_segment_last",
+      "input": {
+        "capacity": "4",
+        "head": "2",
+        "live": "4",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "13"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000003",
+            "weight": "17"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "2"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "7"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H19",
+        "ok",
+        "7",
+        "39",
+        "0"
+      ],
+      "derivation": "Seam key2>query1, so search first segment physical2,3 and select last key1 weight7. S13+17+2+7=39;78<21 false.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x4d3e24c..0x4d3e299",
+        "0x4e40729..0x4e40759",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H20",
+      "family": "both_segments_selected_order",
+      "input": {
+        "capacity": "4",
+        "head": "2",
+        "live": "4",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "13"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000003",
+            "weight": "17"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "2"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "7"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000003",
+          "0000000000000000000000000000000000000002",
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H20",
+        "ok",
+        "37",
+        "39",
+        "1"
+      ],
+      "derivation": "Queries3,2,1 contribute17,13,7. B37,S39;78<111 true. Both spans and unsorted selected input are used.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x57f5516..0x57f553a",
+        "0x57f5699",
+        "0x4d3e24c..0x4d3e299",
+        "0x4e40729..0x4e40759",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H21",
+      "family": "wrapped_second_segment_last",
+      "input": {
+        "capacity": "4",
+        "head": "3",
+        "live": "4",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "3"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000003",
+            "weight": "5"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000003",
+            "weight": "11"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "2"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000003"
+        ]
+      },
+      "expected_fields": [
+        "H21",
+        "ok",
+        "11",
+        "21",
+        "0"
+      ],
+      "derivation": "Seam key2<query3; second segment has two key3 rows, so last weight11 is used. S21;42<33 false.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x4d3e24c..0x4d3e299",
+        "0x4e40729..0x4e40759",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H22",
+      "family": "wrapped_hits_and_late_miss",
+      "input": {
+        "capacity": "4",
+        "head": "3",
+        "live": "4",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "3"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000003",
+            "weight": "5"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000003",
+            "weight": "11"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "2"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000002",
+          "0000000000000000000000000000000000000003",
+          "0000000000000000000000000000000000000009"
+        ]
+      },
+      "expected_fields": [
+        "H22",
+        "ok",
+        "16",
+        "21",
+        "1"
+      ],
+      "derivation": "Found weights2+3+11=16; final query9 misses without replacing the saved sum. S21;42<48 true.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x57f5516..0x57f553a",
+        "0x57f5699",
+        "0x4d3e24c..0x4d3e299",
+        "0x4e40729..0x4e40759",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H23",
+      "family": "contiguous_nonzero_head",
+      "input": {
+        "capacity": "3",
+        "head": "1",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000009",
+            "weight": "18446744073709551615"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "2"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "3"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000002"
+        ]
+      },
+      "expected_fields": [
+        "H23",
+        "ok",
+        "5",
+        "5",
+        "1"
+      ],
+      "derivation": "Live span ends exactly at capacity. Inactive first-row MAX is excluded; B=S=5.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x4d3e24c..0x4d3e299",
+        "0x4e40729..0x4e40759",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H24",
+      "family": "exact_end_no_wrap",
+      "input": {
+        "capacity": "4",
+        "head": "2",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000009",
+            "weight": "18446744073709551615"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000000",
+            "weight": "18446744073709551615"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "4"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "6"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000009",
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000002"
+        ]
+      },
+      "expected_fields": [
+        "H24",
+        "ok",
+        "10",
+        "10",
+        "1"
+      ],
+      "derivation": "head2+live2 equals capacity4, so there is no wrapped second segment. Query9 misses despite inactive physicalrow0 key9. B=S=10.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x4d3e24c..0x4d3e299",
+        "0x4e40729..0x4e40759",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H25",
+      "family": "total_saturation_only",
+      "input": {
+        "capacity": "2",
+        "head": "0",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "18446744073709551615"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "1"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H25",
+        "ok",
+        "18446744073709551615",
+        "18446744073709551615",
+        "1"
+      ],
+      "derivation": "B is exactly MAX. Raw total is MAX+1, independently clamped toMAX.2MAX<3MAX.",
+      "anchors": [
+        "0x4e44c65..0x4e44c77",
+        "0x4e40729..0x4e40738",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H26",
+      "family": "selected_saturation_only",
+      "input": {
+        "capacity": "1",
+        "head": "0",
+        "live": "1",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "9223372036854775808"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H26",
+        "ok",
+        "18446744073709551615",
+        "9223372036854775808",
+        "1"
+      ],
+      "derivation": "Each hit is2^63; exact selected sum2^64 clamps toMAX while S remains2^63.2*S=2^64<3*MAX.",
+      "anchors": [
+        "0x4e44c65..0x4e44c77",
+        "0x4e40729..0x4e40738",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H27",
+      "family": "both_saturations",
+      "input": {
+        "capacity": "2",
+        "head": "0",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "18446744073709551615"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "18446744073709551615"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000002"
+        ]
+      },
+      "expected_fields": [
+        "H27",
+        "ok",
+        "18446744073709551615",
+        "18446744073709551615",
+        "1"
+      ],
+      "derivation": "Both exact sums are2*MAX and clamp independently toMAX; wide comparison is true.",
+      "anchors": [
+        "0x4e44c65..0x4e44c77",
+        "0x4e40729..0x4e40738",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H28",
+      "family": "post_saturation_misses",
+      "input": {
+        "capacity": "1",
+        "head": "0",
+        "live": "1",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "18446744073709551615"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000002",
+          "0000000000000000000000000000000000000000"
+        ]
+      },
+      "expected_fields": [
+        "H28",
+        "ok",
+        "18446744073709551615",
+        "18446744073709551615",
+        "1"
+      ],
+      "derivation": "First hit saturates the selected value; later misses leave it unchanged. This expected value cannot distinguish an observationally equivalent early stop.",
+      "anchors": [
+        "0x57f55a0..0x57f5608",
+        "0x4e44dab..0x4e44ddf",
+        "0x4e44c65..0x4e44c77",
+        "0x4e40729..0x4e40738",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H29",
+      "family": "strict_equality",
+      "input": {
+        "capacity": "2",
+        "head": "0",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "2"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "1"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H29",
+        "ok",
+        "2",
+        "3",
+        "0"
+      ],
+      "derivation": "2*S=6 and3*B=6; strict comparison rejects equality.",
+      "anchors": [
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H30",
+      "family": "strict_above",
+      "input": {
+        "capacity": "2",
+        "head": "0",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "3"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "1"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H30",
+        "ok",
+        "3",
+        "4",
+        "1"
+      ],
+      "derivation": "2*S=8<9=3*B; just above the small threshold passes.",
+      "anchors": [
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H31",
+      "family": "strict_below",
+      "input": {
+        "capacity": "2",
+        "head": "0",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "1"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "1"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H31",
+        "ok",
+        "1",
+        "2",
+        "0"
+      ],
+      "derivation": "2*S=4 is not below3*B=3.",
+      "anchors": [
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H32",
+      "family": "near_max_equality",
+      "input": {
+        "capacity": "2",
+        "head": "0",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "12297829382473034410"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "6148914691236517205"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H32",
+        "ok",
+        "12297829382473034410",
+        "18446744073709551615",
+        "0"
+      ],
+      "derivation": "The weights sum exactlyMAX. B=2*MAX/3, so3B=2MAX=36893488147419103230; equality is false and requires high limbs.",
+      "anchors": [
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H33",
+      "family": "near_max_above",
+      "input": {
+        "capacity": "2",
+        "head": "0",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "12297829382473034411"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "6148914691236517204"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H33",
+        "ok",
+        "12297829382473034411",
+        "18446744073709551615",
+        "1"
+      ],
+      "derivation": "S remainsMAX; B is one above2MAX/3, so3B exceeds2MAX by3. True with exact wide products.",
+      "anchors": [
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H34",
+      "family": "near_max_below",
+      "input": {
+        "capacity": "2",
+        "head": "0",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "12297829382473034409"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "6148914691236517206"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H34",
+        "ok",
+        "12297829382473034409",
+        "18446744073709551615",
+        "0"
+      ],
+      "derivation": "S remainsMAX; B is one below2MAX/3, so3B is2MAX-3. False.",
+      "anchors": [
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H35",
+      "family": "unsigned_first_byte",
+      "input": {
+        "capacity": "3",
+        "head": "0",
+        "live": "3",
+        "physical_rows": [
+          {
+            "key_hex": "7f00000000000000000000000000000000000000",
+            "weight": "2"
+          },
+          {
+            "key_hex": "8000000000000000000000000000000000000000",
+            "weight": "5"
+          },
+          {
+            "key_hex": "ff00000000000000000000000000000000000000",
+            "weight": "9"
+          }
+        ],
+        "selected_keys": [
+          "ff00000000000000000000000000000000000000",
+          "8000000000000000000000000000000000000000"
+        ]
+      },
+      "expected_fields": [
+        "H35",
+        "ok",
+        "14",
+        "16",
+        "1"
+      ],
+      "derivation": "Unsigned first bytes7f<80<ff are correctly ordered. Queriesff,80 contribute9+5=14;S16,32<42.",
+      "anchors": [
+        "0x57f5522",
+        "0x57f55bf",
+        "0x57f55e6",
+        "0x57f564f",
+        "0x57f567a",
+        "import0x64dfb50 symbol12 memcmp",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H36",
+      "family": "unsigned_twentieth_byte",
+      "input": {
+        "capacity": "3",
+        "head": "0",
+        "live": "3",
+        "physical_rows": [
+          {
+            "key_hex": "000000000000000000000000000000000000007f",
+            "weight": "2"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000080",
+            "weight": "5"
+          },
+          {
+            "key_hex": "00000000000000000000000000000000000000ff",
+            "weight": "9"
+          }
+        ],
+        "selected_keys": [
+          "00000000000000000000000000000000000000ff",
+          "0000000000000000000000000000000000000080"
+        ]
+      },
+      "expected_fields": [
+        "H36",
+        "ok",
+        "14",
+        "16",
+        "1"
+      ],
+      "derivation": "First19 bytes are equal; byte20 unsigned7f<80<ff determines order and hits. B14,S16,true.",
+      "anchors": [
+        "0x57f5522",
+        "0x57f55bf",
+        "0x57f55e6",
+        "0x57f564f",
+        "0x57f567a",
+        "import0x64dfb50 symbol12 memcmp",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H37",
+      "family": "middle_byte_order",
+      "input": {
+        "capacity": "3",
+        "head": "0",
+        "live": "3",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000000",
+            "weight": "2"
+          },
+          {
+            "key_hex": "0000000000000000000001000000000000000000",
+            "weight": "5"
+          },
+          {
+            "key_hex": "0000000000000000000100000000000000000000",
+            "weight": "9"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000100000000000000000000",
+          "0000000000000000000001000000000000000000"
+        ]
+      },
+      "expected_fields": [
+        "H37",
+        "ok",
+        "14",
+        "16",
+        "1"
+      ],
+      "derivation": "Zero key < key with byte11=1 < key with byte10=1. Queries consume the full20-byte key, B9+5=14,S16,true.",
+      "anchors": [
+        "0x57f5522",
+        "0x57f55bf",
+        "0x57f55e6",
+        "0x57f564f",
+        "0x57f567a",
+        "import0x64dfb50 symbol12 memcmp",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H38",
+      "family": "twentieth_byte_miss",
+      "input": {
+        "capacity": "1",
+        "head": "0",
+        "live": "1",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "7"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000002"
+        ]
+      },
+      "expected_fields": [
+        "H38",
+        "ok",
+        "0",
+        "7",
+        "0"
+      ],
+      "derivation": "The query differs only at byte20, so it misses. Comparing only a common prefix would incorrectly add7.",
+      "anchors": [
+        "0x57f5522",
+        "0x57f55bf",
+        "0x57f55e6",
+        "0x57f564f",
+        "0x57f567a",
+        "import0x64dfb50 symbol12 memcmp",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H39",
+      "family": "wrapped_order_failure",
+      "input": {
+        "capacity": "3",
+        "head": "1",
+        "live": "3",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "5"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000003",
+            "weight": "7"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "2"
+          }
+        ],
+        "selected_keys": [
+          "0000000000000000000000000000000000000001"
+        ]
+      },
+      "expected_fields": [
+        "H39",
+        "order"
+      ],
+      "derivation": "Logical order from head1 is key3,key1,key2; the live seam descends, so host Order.",
+      "anchors": [
+        "HOST-CONTRACT.md Library admission1..4"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    },
+    {
+      "id": "H40",
+      "family": "empty_selection_nonempty_total",
+      "input": {
+        "capacity": "2",
+        "head": "0",
+        "live": "2",
+        "physical_rows": [
+          {
+            "key_hex": "0000000000000000000000000000000000000001",
+            "weight": "5"
+          },
+          {
+            "key_hex": "0000000000000000000000000000000000000002",
+            "weight": "7"
+          }
+        ],
+        "selected_keys": []
+      },
+      "expected_fields": [
+        "H40",
+        "ok",
+        "0",
+        "12",
+        "0"
+      ],
+      "derivation": "Empty selected sequence contributes0, but every live row is still summed to12.24<0 is false.",
+      "anchors": [
+        "0x57f54eb..0x57f5582",
+        "0x4d3e27d..0x4d3e299",
+        "0x4d3e2e4..0x4d3e302",
+        "0x4d3e24c..0x4d3e299",
+        "0x4e40729..0x4e40759",
+        "0x4d3e2e4..0x4d3e302"
+      ],
+      "expected_provenance": "manual literal before reference source"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "question_id": "qcp-first-replay-key",
+  "title": "Relate restored checkpoint fields to the first replay key",
+  "target": {
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "component": "storage",
+  "work_type": "verification",
+  "scope": {
+    "question": "On the selected restore path, which restored height and round fields initialize the first replay key?",
+    "include": ["The selected checkpoint field decoder and materializer path", "The matching first replay key handoff"],
+    "exclude": ["Other restore encodings", "A general rule relating height to consensus round", "State-root correctness"]
+  },
+  "readiness": "recorded",
+  "evidence_status": "reviewed",
+  "prior_attempts": [
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/3988", "relation": "traces the first replay key to the loaded state"},
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/4011", "relation": "traces the selected restore round field into the materialized state"}
+  ],
+  "remaining_gap": "The selected path is documented by merged evidence. This does not establish other decoding paths or complete the storage/replay component gate.",
+  "dependencies": [],
+  "downstream_consumer": "A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.",
+  "acceptance_requirements": [
+    "Retain exact #115 digest-bound field and copy evidence for the selected path.",
+    "Keep height and round provenance separate and state that no arithmetic relation is established.",
+    "Preserve alternate decode paths and full component acceptance as open."
+  ],
+  "required_capabilities": ["Static xref and field-flow tracing", "Digest-bound evidence review"],
+  "evidence_review": [
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/3988", "decision": "merged evidence; scoped result only"},
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/4011", "decision": "merged evidence; scoped result only"}
+  ],
+  "linked_issue": {"url": "https://github.com/lalalune/hyperliquid-source/issues/3923", "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"},
+  "pilot_issue": "https://github.com/lalalune/hyperliquid-source/issues/5391"
+}

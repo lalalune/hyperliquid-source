@@ -1,0 +1,136 @@
+{
+ "artifact": {
+  "binary": "work/hl-node-115.bin",
+  "provenance": "provenance/artifacts.json",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+ },
+ "assumptions": [
+  "the holder pointer in rsi is readable and writable for at least 0x1798 bytes; behaviour on a shorter holder is not pinned",
+  "the flag bytes are written by other threads; this packet pins the routine's own control flow, not the timing of those writes",
+  "the lock-shaped callees 0x606ca40 and 0x60d52f0 behave as lock and unlock of the H+0x700 slot; their internals are not pinned here",
+  "the chain walk assumes a finite chain; cyclic input loops forever in the binary as in the model"
+ ],
+ "bounded_question": "What does the routine at 0x5d52380 do to the holder it takes in rsi and the record it takes in rdi, and where is that routine used?",
+ "callers": {
+  "direct_calls": 3,
+  "sites": [
+   {
+    "caller_fde": "0x5d69a00..0x5d6a6d9",
+    "kind": "call",
+    "site": "0x5d6a436"
+   },
+   {
+    "caller_fde": "0x5d6a740..0x5d6ad0c",
+    "kind": "call",
+    "site": "0x5d6a8dd"
+   },
+   {
+    "caller_fde": "0x5e62c50..0x5e65462",
+    "kind": "call",
+    "site": "0x5e63e12"
+   }
+  ],
+  "stored_references": 0,
+  "tail_jumps": 0,
+  "unique_caller_fdes": 3
+ },
+ "chain_walk": {
+  "base": "H+0x1748",
+  "head": "[H+0x1790]",
+  "no_visited_set": "a cyclic chain would loop forever in the binary; the model reproduces the walk step for step",
+  "node_fields": {
+   "down_link": "+0x18",
+   "kind": "byte at +0x20",
+   "next_link": "+0x10",
+   "payload": "+0x28"
+  },
+  "rules": [
+   "descend via +0x18 while kind <= 2",
+   "on kind > 2, step via +0x10 and resume",
+   "on null +0x18, back up to the node last stepped from via +0x10",
+   "end at a node that is not the sentinel with kind <= 3, building the temp with 0x5f22020(rsp, H+0x1748, 3, node+0x28)",
+   "throw out_of_range when backing up to the sentinel, when the end node kind > 3, or when the head is null"
+  ],
+  "sentinel": "H+0x1788"
+ },
+ "emit": {
+  "callee": "0x5f3c510",
+  "empty_case": "(0, 0)",
+  "first_argument": "H+0x18c8",
+  "nonempty_case": "(mn, mx)"
+ },
+ "failure_paths": {
+  "landing_pads": "0x5d525b8 and 0x5d525c4 save the exception in rbx and jump to shared cleanup at 0x5d52332 and 0x5d52352 (outside this FDE, not pinned)",
+  "out_of_range": "via the __throw_out_of_range PLT entry at 0x5d525ae, reached through the canary-checked path at 0x5d52597",
+  "stack_canary": "mismatch reaches the stack-failure handler at 0x5d525b3"
+ },
+ "list_scan": {
+  "accumulators": {
+   "mn": "running minimum, starts at -1",
+   "mx": "running maximum, starts at 0"
+  },
+  "empty_condition": "first node is the sentinel itself",
+  "first_node": "[sentinel+0x938]",
+  "next": "[node+0x938] until back to the sentinel",
+  "per_node": {
+   "flag": "byte at +0x3d; nonzero skips the node",
+   "value": "unsigned min of qwords at +0x658 and +0x660; zero values skipped"
+  },
+  "sentinel": "[[H+0x68]+0x40]+0x110"
+ },
+ "lock": {
+  "lock_call": "0x606ca40 on H+0x700",
+  "note": "call-shape only; internals not pinned",
+  "unlock_call": "0x60d52f0 on H+0x700"
+ },
+ "main_routine": {
+  "address": "0x5d52380",
+  "arguments": {
+   "rdi": "the record",
+   "rsi": "the holder"
+  },
+  "fde_range": [
+   "0x5d52380",
+   "0x5d525d0"
+  ],
+  "returns": "the record pointer (r12 on return)",
+  "size_bytes": 592
+ },
+ "model": "tools/minmax_scan_52380_115.py",
+ "model_tests": "tests/test_minmax_scan_52380_115.py",
+ "node": 115,
+ "not_claimed": [
+  "the holder's source-level name or its owning class",
+  "what the emit callee 0x5f3c510 does inside H+0x18c8",
+  "what the temp builders 0x5f20a00 / 0x5f22020 and the assign callee 0x5d49b10 do beyond their call shapes and arguments",
+  "why the quotient is computed but not consumed in this routine",
+  "the source-level meanings of the list nodes' +0x658 / +0x660 pair, the flag byte at +0x3d, and the chain nodes' kind byte"
+ ],
+ "quotient": {
+  "constant": "0x28f5c28f5c28f5c3",
+  "consumed": false,
+  "consumed_note": "no later step in the routine reads r8",
+  "formula": "((mn + 99) >> 2, multiply by constant, >> 64, >> 2)",
+  "ordinary_values": {
+   "1": 1,
+   "100": 1,
+   "101": 2,
+   "12345": 124
+  },
+  "wrap_corner": "mn within 99 of 2^64 wraps mn+99 to 98 or less; quotient 0 and the chain walk is skipped"
+ },
+ "record_zeroing": {
+  "dword_at_0": 0,
+  "qword_at_8": 0,
+  "unwritten": "bytes +0x06..+0x07 are not written and not pinned",
+  "word_at_4": 0
+ },
+ "tail": {
+  "assign": "0x5d49b10(record, rsp)",
+  "default_builder": "0x5f20a00(rsp, H+0x1748, 3)",
+  "found_builder": "0x5f22020(rsp, H+0x1748, 3, node+0x28)",
+  "return": "single normal return at 0x5d52567 via the epilogue at 0x5d5254a",
+  "temp_free": "delete[] on [rsp+0x08] when non-null"
+ },
+ "task": "RE-001"
+}

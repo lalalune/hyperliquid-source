@@ -1,0 +1,14 @@
+function	branch	condition	dispatch_site	target_or_effect	scope
+hashlong_128b_default	full_blocks	nbBlocks = (len-1) >> 10 > 0	0x61d8ac1	16 stripes per block (1024 bytes), secret window sliding 8 bytes per stripe, scrambleAcc with secret+128 after each block	modelled
+hashlong_128b_default	remaining_stripes	((len-1) & 0x3ff) >> 6 > 0	0x61d8cd9	stripes from the block boundary, secret restarting at kSecret + 0	modelled
+hashlong_128b_default	last_stripe	len > 240 (always)	0x61d8ddb	accumulate_512 over input[len-64..len) against secret+121	modelled
+hashlong_128b_default	merge_low	len > 240 (always)	0x61d8f07	mergeAccs(acc, secret+11, len * PRIME64_1), avalanched; len*PRIME64_1 formed by imul at 0x61d8f07..0x61d8f11	modelled
+hashlong_128b_default	merge_high	len > 240 (always)	0x61d8fec	mergeAccs(acc, secret+117, ~(len * PRIME64_2)), avalanched; len*PRIME64_2 formed by imul at 0x61d8fec..0x61d9000	modelled
+hashlong_128b_withSeed	seed_zero	seed == 0	0x61d9bf8	default path (same block loop, remaining-stripes loop and merge immediates as the default helper)	modelled
+hashlong_128b_withSeed	seed_nonzero	seed != 0	0x61da1b5	builds a 192-byte custom secret at rsp+0x50 (word 2i += seed, word 2i+1 -= seed), then the identical loop against that secret	modelled
+hashlong_128b_withSeed	no_blocks_seed0	nbBlocks == 0 and seed == 0	0x61d9c01	cold block at 0x61da845 re-loads INIT_ACC and jumps to the remaining-stripes entry 0x61d9e4b	modelled
+hashlong_128b_withSeed	no_blocks_seed	nbBlocks == 0 and seed != 0	0x61da29b	cold block at 0x61da875 re-loads INIT_ACC and jumps to the remaining-stripes entry 0x61da4db	modelled
+128bits	len_gt_240	len > 240	0x61deda0	cmp $0xf0, ja 0x61def10 -> call 0x61d8a60 (hashLong_128b_default)	out of scope
+128bits_withSeed	len_gt_240	len > 240	0x61df2a8	cmp $0xf0, ja 0x61df430 -> call 0x61d9bc0 (hashLong_128b_withSeed)	out of scope
+128bits	len_le_240	len <= 240	0x61deabc	short branches (0..128) and len_129to240 helper, modelled in PRs #5578/#5595	out of scope
+128bits_withSeed	len_le_240	len <= 240	0x61defb1	short branches (0..128) and len_129to240 helper, modelled in PRs #5578/#5595	out of scope

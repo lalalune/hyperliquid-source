@@ -1,0 +1,11 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -122,7 +122,7 @@
+         for query in queries {
+             match self.search(query) {
+                 SearchResult::Found { value, .. } => values.push(value),
+-                SearchResult::Missing { .. } => return None,
++                SearchResult::Missing { .. } => return Some(values),
+             }
+         }
+         Some(values)

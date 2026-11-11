@@ -105,10 +105,15 @@ def load_coverage(root, registry_path, components):
     require(type(registry['schema_version']) is int and registry['schema_version'] == 1,
             'Unknown byte registry schema')
     pinned = registry['evidence_sha256']
+    # One authenticated immutable snapshot per load, not one full-file hash
+    # per window. A later invocation starts fresh and rechecks changed files.
+    evidence_data = {}
     def evidence(path):
-        data = read(path)
-        require(path in pinned and digest(data) == pinned[path], 'Byte evidence digest changed: ' + path)
-        return data
+        if path not in evidence_data:
+            data = read(path)
+            require(path in pinned and digest(data) == pinned[path], 'Byte evidence digest changed: ' + path)
+            evidence_data[path] = data
+        return evidence_data[path]
     records = {}
     def record(path, pointer):
         if path not in records:

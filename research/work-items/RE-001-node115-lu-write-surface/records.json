@@ -1,0 +1,2839 @@
+{
+ "packet": "RE-001-node115-lu-write-surface",
+ "question": "Does the control tree have a genuine write surface, what guards gated dispatch, and what invokes the wrapper root-resolve entry?",
+ "binary": {
+  "artifact": "artifacts/node/115/hl-node",
+  "bytes": 105896032,
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "upstream_main": "05bc2de303c05525b71e7e257426e741bc66a390"
+ },
+ "exhibits": [
+  {
+   "name": "pred_entry",
+   "range": [
+    "0x634f0b0",
+    "0x634f116"
+   ],
+   "bytes": 102,
+   "strict": 21
+  },
+  {
+   "name": "pred_flag1",
+   "range": [
+    "0x634f2a4",
+    "0x634f2da"
+   ],
+   "bytes": 54,
+   "strict": 11
+  },
+  {
+   "name": "pred_flag0",
+   "range": [
+    "0x634f671",
+    "0x634f692"
+   ],
+   "bytes": 33,
+   "strict": 4
+  },
+  {
+   "name": "reqinit_flag2",
+   "range": [
+    "0x634ef41",
+    "0x634ef74"
+   ],
+   "bytes": 51,
+   "strict": 8
+  },
+  {
+   "name": "pred_thunk",
+   "range": [
+    "0x635f320",
+    "0x635f334"
+   ],
+   "bytes": 20,
+   "strict": 6
+  },
+  {
+   "name": "epoch_head",
+   "range": [
+    "0x63a7fc0",
+    "0x63a8054"
+   ],
+   "bytes": 148,
+   "strict": 40
+  },
+  {
+   "name": "tcache_flush",
+   "range": [
+    "0x636de20",
+    "0x636de56"
+   ],
+   "bytes": 54,
+   "strict": 16
+  },
+  {
+   "name": "peak_reset",
+   "range": [
+    "0x636e210",
+    "0x636e236"
+   ],
+   "bytes": 38,
+   "strict": 11
+  },
+  {
+   "name": "prof_reset",
+   "range": [
+    "0x636d870",
+    "0x636d8d1"
+   ],
+   "bytes": 97,
+   "strict": 26
+  },
+  {
+   "name": "prof_dump",
+   "range": [
+    "0x6377850",
+    "0x63778a1"
+   ],
+   "bytes": 81,
+   "strict": 24
+  },
+  {
+   "name": "init_entry",
+   "range": [
+    "0x63a8240",
+    "0x63a829b"
+   ],
+   "bytes": 91,
+   "strict": 19
+  },
+  {
+   "name": "fmt_entry",
+   "range": [
+    "0x63de320",
+    "0x63de372"
+   ],
+   "bytes": 82,
+   "strict": 24
+  }
+ ],
+ "census": {
+  "flag_0x64ffab4": {
+   "writes": [
+    {
+     "site": "0x634ef6a",
+     "value": 2,
+     "fde": "0x634ece0..0x634f09d",
+     "role": "request-init arms init-requested"
+    },
+    {
+     "site": "0x634f2d0",
+     "value": 1,
+     "fde": "0x634f0b0..0x634f8d5",
+     "role": "predicate slow-path start, init in progress"
+    },
+    {
+     "site": "0x634f680",
+     "value": 0,
+     "fde": "0x634f0b0..0x634f8d5",
+     "role": "predicate slow-path end, init done"
+    }
+   ],
+   "reads": [
+    {
+     "site": "0x634f10e",
+     "fde": "0x634f0b0..0x634f8d5"
+    },
+    {
+     "site": "0x634f1d3",
+     "fde": "0x634f0b0..0x634f8d5"
+    },
+    {
+     "site": "0x634f220",
+     "fde": "0x634f0b0..0x634f8d5"
+    },
+    {
+     "site": "0x634f266",
+     "fde": "0x634f0b0..0x634f8d5"
+    },
+    {
+     "site": "0x6353d6a",
+     "fde": "0x6353a70..0x635582b"
+    },
+    {
+     "site": "0x6355c5a",
+     "fde": "0x6355900..0x63577e2"
+    },
+    {
+     "site": "0x6357882",
+     "fde": "0x63577f0..0x635a786"
+    },
+    {
+     "site": "0x635ac88",
+     "fde": "0x635a7a0..0x635c6c7"
+    },
+    {
+     "site": "0x635defd",
+     "fde": "0x635dee0..0x635df87"
+    },
+    {
+     "site": "0x635dfa3",
+     "fde": "0x635df90..0x635e01f"
+    },
+    {
+     "site": "0x635e044",
+     "fde": "0x635e020..0x635e0c5"
+    },
+    {
+     "site": "0x635f324",
+     "fde": "0x635f320..0x635f334"
+    }
+   ],
+   "lea_read": [
+    {
+     "site": "0x63ed259",
+     "deref": "0x63ed26b",
+     "fde": "0x63ed090..0x63ed862",
+     "note": "lea + deref idiom, not an address-taken store"
+    }
+   ],
+   "method": "full .text objdump piped to grep for the objdump # 64ffab4 comment; every line classified by mnemonic"
+  },
+  "gate_predicate_callers": {
+   "e8": [
+    "0x6354368",
+    "0x6356483",
+    "0x6358979",
+    "0x635b3c1",
+    "0x635df45",
+    "0x635dfe5",
+    "0x635e098"
+   ],
+   "e9": [
+    "0x635f32f"
+   ],
+   "method": "raw E8/E9 scan over .text, each site verified with objdump to be a genuine call/jmp"
+  },
+  "init_callers": {
+   "e8": [
+    "0x63a88df",
+    "0x63a89b3",
+    "0x63a8a26",
+    "0x63a8d2a",
+    "0x63a9056"
+   ],
+   "e9": [],
+   "note": "exactly the five tree-entry functions (invoke, wrapper, walk-invoke, sibling, dispatcher)"
+  },
+  "fmt_callers": {
+   "e8": [
+    "0x63e119c",
+    "0x63e2dee",
+    "0x63e452e",
+    "0x63e4ab0",
+    "0x63e5b0d",
+    "0x63e5c17",
+    "0x63e6b6b",
+    "0x63e6f2a",
+    "0x63e7399",
+    "0x63e80c4",
+    "0x63e8207",
+    "0x63e82e2",
+    "0x63e841e",
+    "0x63e8491",
+    "0x63e865d",
+    "0x63e86ce",
+    "0x63e8765",
+    "0x63e8a0e"
+   ],
+   "e9": []
+  },
+  "leaf_handler_direct_entries": {
+   "wrapper_0x63a8990": {
+    "e8": [],
+    "e9": [
+     "0x635dfd3"
+    ]
+   },
+   "invoke_0x63a88a0": {
+    "e8": [],
+    "e9": [
+     "0x635df37"
+    ]
+   },
+   "epoch_0x63a7fc0": {
+    "e8": [],
+    "e9": []
+   },
+   "tcache_flush_0x636de20": {
+    "e8": [],
+    "e9": []
+   },
+   "peak_reset_0x636e210": {
+    "e8": [],
+    "e9": []
+   },
+   "prof_reset_0x636d870": {
+    "e8": [],
+    "e9": []
+   },
+   "prof_dump_0x6377850": {
+    "e8": [],
+    "e9": []
+   }
+  },
+  "tree": {
+   "nodes": 246,
+   "leaves": [
+    [
+     "/version",
+     "0x64da500",
+     {
+      "va": 105751808,
+      "flag": 1,
+      "name": 4459536,
+      "count": 0,
+      "children": 0,
+      "handler": 104261664
+     }
+    ],
+    [
+     "/epoch",
+     "0x64da528",
+     {
+      "va": 105751848,
+      "flag": 1,
+      "name": 4455593,
+      "count": 0,
+      "children": 0,
+      "handler": 104497088
+     }
+    ],
+    [
+     "/background_thread",
+     "0x64da550",
+     {
+      "va": 105751888,
+      "flag": 1,
+      "name": 4483008,
+      "count": 0,
+      "children": 0,
+      "handler": 104360256
+     }
+    ],
+    [
+     "/max_background_threads",
+     "0x64da578",
+     {
+      "va": 105751928,
+      "flag": 1,
+      "name": 4421053,
+      "count": 0,
+      "children": 0,
+      "handler": 104361648
+     }
+    ],
+    [
+     "/thread/arena",
+     "0x64def00",
+     {
+      "va": 105770752,
+      "flag": 1,
+      "name": 4433898,
+      "count": 0,
+      "children": 0,
+      "handler": 104305424
+     }
+    ],
+    [
+     "/thread/allocated",
+     "0x64def28",
+     {
+      "va": 105770792,
+      "flag": 1,
+      "name": 4416541,
+      "count": 0,
+      "children": 0,
+      "handler": 104286704
+     }
+    ],
+    [
+     "/thread/allocatedp",
+     "0x64def50",
+     {
+      "va": 105770832,
+      "flag": 1,
+      "name": 4442405,
+      "count": 0,
+      "children": 0,
+      "handler": 104287232
+     }
+    ],
+    [
+     "/thread/deallocated",
+     "0x64def78",
+     {
+      "va": 105770872,
+      "flag": 1,
+      "name": 4425229,
+      "count": 0,
+      "children": 0,
+      "handler": 104287760
+     }
+    ],
+    [
+     "/thread/deallocatedp",
+     "0x64defa0",
+     {
+      "va": 105770912,
+      "flag": 1,
+      "name": 4506882,
+      "count": 0,
+      "children": 0,
+      "handler": 104288288
+     }
+    ],
+    [
+     "/thread/tcache/enabled",
+     "0x64df140",
+     {
+      "va": 105771328,
+      "flag": 1,
+      "name": 4510052,
+      "count": 0,
+      "children": 0,
+      "handler": 104260160
+     }
+    ],
+    [
+     "/thread/tcache/flush",
+     "0x64df168",
+     {
+      "va": 105771368,
+      "flag": 1,
+      "name": 4499204,
+      "count": 0,
+      "children": 0,
+      "handler": 104259104
+     }
+    ],
+    [
+     "/thread/peak/read",
+     "0x64df0e0",
+     {
+      "va": 105771232,
+      "flag": 1,
+      "name": 4437934,
+      "count": 0,
+      "children": 0,
+      "handler": 104299360
+     }
+    ],
+    [
+     "/thread/peak/reset",
+     "0x64df108",
+     {
+      "va": 105771272,
+      "flag": 1,
+      "name": 4459554,
+      "count": 0,
+      "children": 0,
+      "handler": 104260112
+     }
+    ],
+    [
+     "/thread/prof/name",
+     "0x64df080",
+     {
+      "va": 105771136,
+      "flag": 1,
+      "name": 4494899,
+      "count": 0,
+      "children": 0,
+      "handler": 104259424
+     }
+    ],
+    [
+     "/thread/prof/active",
+     "0x64df0a8",
+     {
+      "va": 105771176,
+      "flag": 1,
+      "name": 4437827,
+      "count": 0,
+      "children": 0,
+      "handler": 104259168
+     }
+    ],
+    [
+     "/thread/idle",
+     "0x64df040",
+     {
+      "va": 105771072,
+      "flag": 1,
+      "name": 4416608,
+      "count": 0,
+      "children": 0,
+      "handler": 104300832
+     }
+    ],
+    [
+     "/config/cache_oblivious",
+     "0x64ded20",
+     {
+      "va": 105770272,
+      "flag": 1,
+      "name": 4455651,
+      "count": 0,
+      "children": 0,
+      "handler": 104301808
+     }
+    ],
+    [
+     "/config/debug",
+     "0x64ded48",
+     {
+      "va": 105770312,
+      "flag": 1,
+      "name": 4404297,
+      "count": 0,
+      "children": 0,
+      "handler": 104301936
+     }
+    ],
+    [
+     "/config/fill",
+     "0x64ded70",
+     {
+      "va": 105770352,
+      "flag": 1,
+      "name": 4517803,
+      "count": 0,
+      "children": 0,
+      "handler": 104301680
+     }
+    ],
+    [
+     "/config/lazy_lock",
+     "0x64ded98",
+     {
+      "va": 105770392,
+      "flag": 1,
+      "name": 4429637,
+      "count": 0,
+      "children": 0,
+      "handler": 104302320
+     }
+    ],
+    [
+     "/config/malloc_conf",
+     "0x64dedc0",
+     {
+      "va": 105770432,
+      "flag": 1,
+      "name": 4487579,
+      "count": 0,
+      "children": 0,
+      "handler": 104262192
+     }
+    ],
+    [
+     "/config/opt_safety_checks",
+     "0x64dede8",
+     {
+      "va": 105770472,
+      "flag": 1,
+      "name": 4412544,
+      "count": 0,
+      "children": 0,
+      "handler": 104302064
+     }
+    ],
+    [
+     "/config/prof",
+     "0x64dee10",
+     {
+      "va": 105770512,
+      "flag": 1,
+      "name": 4408291,
+      "count": 0,
+      "children": 0,
+      "handler": 104301552
+     }
+    ],
+    [
+     "/config/prof_libgcc",
+     "0x64dee38",
+     {
+      "va": 105770552,
+      "flag": 1,
+      "name": 4506870,
+      "count": 0,
+      "children": 0,
+      "handler": 104302192
+     }
+    ],
+    [
+     "/config/prof_libunwind",
+     "0x64dee60",
+     {
+      "va": 105770592,
+      "flag": 1,
+      "name": 4416593,
+      "count": 0,
+      "children": 0,
+      "handler": 104300704
+     }
+    ],
+    [
+     "/config/stats",
+     "0x64dee88",
+     {
+      "va": 105770632,
+      "flag": 1,
+      "name": 4490906,
+      "count": 0,
+      "children": 0,
+      "handler": 104299968
+     }
+    ],
+    [
+     "/config/utrace",
+     "0x64deeb0",
+     {
+      "va": 105770672,
+      "flag": 1,
+      "name": 4499210,
+      "count": 0,
+      "children": 0,
+      "handler": 104301424
+     }
+    ],
+    [
+     "/config/xmalloc",
+     "0x64deed8",
+     {
+      "va": 105770712,
+      "flag": 1,
+      "name": 4412536,
+      "count": 0,
+      "children": 0,
+      "handler": 104302448
+     }
+    ],
+    [
+     "/opt/abort",
+     "0x64de2e0",
+     {
+      "va": 105767648,
+      "flag": 1,
+      "name": 4467552,
+      "count": 0,
+      "children": 0,
+      "handler": 104262720
+     }
+    ],
+    [
+     "/opt/abort_conf",
+     "0x64de308",
+     {
+      "va": 105767688,
+      "flag": 1,
+      "name": 4467558,
+      "count": 0,
+      "children": 0,
+      "handler": 104262864
+     }
+    ],
+    [
+     "/opt/cache_oblivious",
+     "0x64de330",
+     {
+      "va": 105767728,
+      "flag": 1,
+      "name": 4455651,
+      "count": 0,
+      "children": 0,
+      "handler": 104263008
+     }
+    ],
+    [
+     "/opt/trust_madvise",
+     "0x64de358",
+     {
+      "va": 105767768,
+      "flag": 1,
+      "name": 4421039,
+      "count": 0,
+      "children": 0,
+      "handler": 104263152
+     }
+    ],
+    [
+     "/opt/confirm_conf",
+     "0x64de380",
+     {
+      "va": 105767808,
+      "flag": 1,
+      "name": 4455558,
+      "count": 0,
+      "children": 0,
+      "handler": 104263296
+     }
+    ],
+    [
+     "/opt/hpa",
+     "0x64de3a8",
+     {
+      "va": 105767848,
+      "flag": 1,
+      "name": 4425225,
+      "count": 0,
+      "children": 0,
+      "handler": 104263440
+     }
+    ],
+    [
+     "/opt/hpa_slab_max_alloc",
+     "0x64de3d0",
+     {
+      "va": 105767888,
+      "flag": 1,
+      "name": 4471346,
+      "count": 0,
+      "children": 0,
+      "handler": 104265664
+     }
+    ],
+    [
+     "/opt/hpa_hugification_threshold",
+     "0x64de3f8",
+     {
+      "va": 105767928,
+      "flag": 1,
+      "name": 4487492,
+      "count": 0,
+      "children": 0,
+      "handler": 104263584
+     }
+    ],
+    [
+     "/opt/hpa_hugify_delay_ms",
+     "0x64de420",
+     {
+      "va": 105767968,
+      "flag": 1,
+      "name": 4425190,
+      "count": 0,
+      "children": 0,
+      "handler": 104264128
+     }
+    ],
+    [
+     "/opt/hpa_min_purge_interval_ms",
+     "0x64de448",
+     {
+      "va": 105768008,
+      "flag": 1,
+      "name": 4471365,
+      "count": 0,
+      "children": 0,
+      "handler": 104264672
+     }
+    ],
+    [
+     "/opt/hpa_dirty_mult",
+     "0x64de470",
+     {
+      "va": 105768048,
+      "flag": 1,
+      "name": 4502963,
+      "count": 0,
+      "children": 0,
+      "handler": 104265216
+     }
+    ],
+    [
+     "/opt/hpa_sec_nshards",
+     "0x64de498",
+     {
+      "va": 105768088,
+      "flag": 1,
+      "name": 4499105,
+      "count": 0,
+      "children": 0,
+      "handler": 104266208
+     }
+    ],
+    [
+     "/opt/hpa_sec_max_alloc",
+     "0x64de4c0",
+     {
+      "va": 105768128,
+      "flag": 1,
+      "name": 4404216,
+      "count": 0,
+      "children": 0,
+      "handler": 104266752
+     }
+    ],
+    [
+     "/opt/hpa_sec_max_bytes",
+     "0x64de4e8",
+     {
+      "va": 105768168,
+      "flag": 1,
+      "name": 4446622,
+      "count": 0,
+      "children": 0,
+      "handler": 104267296
+     }
+    ],
+    [
+     "/opt/hpa_sec_bytes_after_flush",
+     "0x64de510",
+     {
+      "va": 105768208,
+      "flag": 1,
+      "name": 4506744,
+      "count": 0,
+      "children": 0,
+      "handler": 104267840
+     }
+    ],
+    [
+     "/opt/hpa_sec_batch_fill_extra",
+     "0x64de538",
+     {
+      "va": 105768248,
+      "flag": 1,
+      "name": 4446640,
+      "count": 0,
+      "children": 0,
+      "handler": 104268384
+     }
+    ],
+    [
+     "/opt/metadata_thp",
+     "0x64de560",
+     {
+      "va": 105768288,
+      "flag": 1,
+      "name": 4425177,
+      "count": 0,
+      "children": 0,
+      "handler": 104268928
+     }
+    ],
+    [
+     "/opt/retain",
+     "0x64de588",
+     {
+      "va": 105768328,
+      "flag": 1,
+      "name": 4404209,
+      "count": 0,
+      "children": 0,
+      "handler": 104269456
+     }
+    ],
+    [
+     "/opt/dss",
+     "0x64de5b0",
+     {
+      "va": 105768368,
+      "flag": 1,
+      "name": 4495560,
+      "count": 0,
+      "children": 0,
+      "handler": 104269600
+     }
+    ],
+    [
+     "/opt/narenas",
+     "0x64de5d8",
+     {
+      "va": 105768408,
+      "flag": 1,
+      "name": 4522028,
+      "count": 0,
+      "children": 0,
+      "handler": 104270144
+     }
+    ],
+    [
+     "/opt/percpu_arena",
+     "0x64de600",
+     {
+      "va": 105768448,
+      "flag": 1,
+      "name": 4491679,
+      "count": 0,
+      "children": 0,
+      "handler": 104270592
+     }
+    ],
+    [
+     "/opt/oversize_threshold",
+     "0x64de628",
+     {
+      "va": 105768488,
+      "flag": 1,
+      "name": 4400219,
+      "count": 0,
+      "children": 0,
+      "handler": 104271664
+     }
+    ],
+    [
+     "/opt/mutex_max_spin",
+     "0x64de650",
+     {
+      "va": 105768528,
+      "flag": 1,
+      "name": 4400173,
+      "count": 0,
+      "children": 0,
+      "handler": 104271120
+     }
+    ],
+    [
+     "/opt/background_thread",
+     "0x64de678",
+     {
+      "va": 105768568,
+      "flag": 1,
+      "name": 4483008,
+      "count": 0,
+      "children": 0,
+      "handler": 104272208
+     }
+    ],
+    [
+     "/opt/max_background_threads",
+     "0x64de6a0",
+     {
+      "va": 105768608,
+      "flag": 1,
+      "name": 4421053,
+      "count": 0,
+      "children": 0,
+      "handler": 104272352
+     }
+    ],
+    [
+     "/opt/dirty_decay_ms",
+     "0x64de6c8",
+     {
+      "va": 105768648,
+      "flag": 1,
+      "name": 4408237,
+      "count": 0,
+      "children": 0,
+      "handler": 104272896
+     }
+    ],
+    [
+     "/opt/muzzy_decay_ms",
+     "0x64de6f0",
+     {
+      "va": 105768688,
+      "flag": 1,
+      "name": 4517666,
+      "count": 0,
+      "children": 0,
+      "handler": 104273440
+     }
+    ],
+    [
+     "/opt/stats_print",
+     "0x64de718",
+     {
+      "va": 105768728,
+      "flag": 1,
+      "name": 4416481,
+      "count": 0,
+      "children": 0,
+      "handler": 104273984
+     }
+    ],
+    [
+     "/opt/stats_print_opts",
+     "0x64de740",
+     {
+      "va": 105768768,
+      "flag": 1,
+      "name": 4502946,
+      "count": 0,
+      "children": 0,
+      "handler": 104274128
+     }
+    ],
+    [
+     "/opt/stats_interval",
+     "0x64de768",
+     {
+      "va": 105768808,
+      "flag": 1,
+      "name": 4408252,
+      "count": 0,
+      "children": 0,
+      "handler": 104274656
+     }
+    ],
+    [
+     "/opt/stats_interval_opts",
+     "0x64de790",
+     {
+      "va": 105768848,
+      "flag": 1,
+      "name": 4499085,
+      "count": 0,
+      "children": 0,
+      "handler": 104275200
+     }
+    ],
+    [
+     "/opt/junk",
+     "0x64de7b8",
+     {
+      "va": 105768888,
+      "flag": 1,
+      "name": 4400188,
+      "count": 0,
+      "children": 0,
+      "handler": 104275728
+     }
+    ],
+    [
+     "/opt/zero",
+     "0x64de7e0",
+     {
+      "va": 105768928,
+      "flag": 1,
+      "name": 4478498,
+      "count": 0,
+      "children": 0,
+      "handler": 104276272
+     }
+    ],
+    [
+     "/opt/utrace",
+     "0x64de808",
+     {
+      "va": 105768968,
+      "flag": 1,
+      "name": 4499210,
+      "count": 0,
+      "children": 0,
+      "handler": 104253360
+     }
+    ],
+    [
+     "/opt/xmalloc",
+     "0x64de830",
+     {
+      "va": 105769008,
+      "flag": 1,
+      "name": 4412536,
+      "count": 0,
+      "children": 0,
+      "handler": 104300688
+     }
+    ],
+    [
+     "/opt/experimental_infallible_new",
+     "0x64de858",
+     {
+      "va": 105769048,
+      "flag": 1,
+      "name": 4404269,
+      "count": 0,
+      "children": 0,
+      "handler": 104299952
+     }
+    ],
+    [
+     "/opt/tcache",
+     "0x64de880",
+     {
+      "va": 105769088,
+      "flag": 1,
+      "name": 4442335,
+      "count": 0,
+      "children": 0,
+      "handler": 104276416
+     }
+    ],
+    [
+     "/opt/tcache_max",
+     "0x64de8a8",
+     {
+      "va": 105769128,
+      "flag": 1,
+      "name": 4471335,
+      "count": 0,
+      "children": 0,
+      "handler": 104276560
+     }
+    ],
+    [
+     "/opt/tcache_nslots_small_min",
+     "0x64de8d0",
+     {
+      "va": 105769168,
+      "flag": 1,
+      "name": 4408267,
+      "count": 0,
+      "children": 0,
+      "handler": 104277104
+     }
+    ],
+    [
+     "/opt/tcache_nslots_small_max",
+     "0x64de8f8",
+     {
+      "va": 105769208,
+      "flag": 1,
+      "name": 4514199,
+      "count": 0,
+      "children": 0,
+      "handler": 104277552
+     }
+    ],
+    [
+     "/opt/tcache_nslots_large",
+     "0x64de920",
+     {
+      "va": 105769248,
+      "flag": 1,
+      "name": 4416514,
+      "count": 0,
+      "children": 0,
+      "handler": 104278000
+     }
+    ],
+    [
+     "/opt/lg_tcache_nslots_mul",
+     "0x64de948",
+     {
+      "va": 105769288,
+      "flag": 1,
+      "name": 4446601,
+      "count": 0,
+      "children": 0,
+      "handler": 104278448
+     }
+    ],
+    [
+     "/opt/tcache_gc_incr_bytes",
+     "0x64de970",
+     {
+      "va": 105769328,
+      "flag": 1,
+      "name": 4450720,
+      "count": 0,
+      "children": 0,
+      "handler": 104278992
+     }
+    ],
+    [
+     "/opt/tcache_gc_delay_bytes",
+     "0x64de998",
+     {
+      "va": 105769368,
+      "flag": 1,
+      "name": 4455571,
+      "count": 0,
+      "children": 0,
+      "handler": 104279536
+     }
+    ],
+    [
+     "/opt/lg_tcache_flush_small_div",
+     "0x64de9c0",
+     {
+      "va": 105769408,
+      "flag": 1,
+      "name": 4517681,
+      "count": 0,
+      "children": 0,
+      "handler": 104280080
+     }
+    ],
+    [
+     "/opt/lg_tcache_flush_large_div",
+     "0x64de9e8",
+     {
+      "va": 105769448,
+      "flag": 1,
+      "name": 4400193,
+      "count": 0,
+      "children": 0,
+      "handler": 104280528
+     }
+    ],
+    [
+     "/opt/thp",
+     "0x64dea10",
+     {
+      "va": 105769488,
+      "flag": 1,
+      "name": 4408324,
+      "count": 0,
+      "children": 0,
+      "handler": 104280976
+     }
+    ],
+    [
+     "/opt/lg_extent_max_active_fit",
+     "0x64dea38",
+     {
+      "va": 105769528,
+      "flag": 1,
+      "name": 4487467,
+      "count": 0,
+      "children": 0,
+      "handler": 104281504
+     }
+    ],
+    [
+     "/opt/prof",
+     "0x64dea60",
+     {
+      "va": 105769568,
+      "flag": 1,
+      "name": 4408291,
+      "count": 0,
+      "children": 0,
+      "handler": 104282048
+     }
+    ],
+    [
+     "/opt/prof_prefix",
+     "0x64dea88",
+     {
+      "va": 105769608,
+      "flag": 1,
+      "name": 4475024,
+      "count": 0,
+      "children": 0,
+      "handler": 104282192
+     }
+    ],
+    [
+     "/opt/prof_active",
+     "0x64deab0",
+     {
+      "va": 105769648,
+      "flag": 1,
+      "name": 4499121,
+      "count": 0,
+      "children": 0,
+      "handler": 104282720
+     }
+    ],
+    [
+     "/opt/prof_thread_active_init",
+     "0x64dead8",
+     {
+      "va": 105769688,
+      "flag": 1,
+      "name": 4506770,
+      "count": 0,
+      "children": 0,
+      "handler": 104282864
+     }
+    ],
+    [
+     "/opt/lg_prof_sample",
+     "0x64deb00",
+     {
+      "va": 105769728,
+      "flag": 1,
+      "name": 4499133,
+      "count": 0,
+      "children": 0,
+      "handler": 104283008
+     }
+    ],
+    [
+     "/opt/lg_prof_interval",
+     "0x64deb28",
+     {
+      "va": 105769768,
+      "flag": 1,
+      "name": 4487519,
+      "count": 0,
+      "children": 0,
+      "handler": 104283696
+     }
+    ],
+    [
+     "/opt/prof_gdump",
+     "0x64deb50",
+     {
+      "va": 105769808,
+      "flag": 1,
+      "name": 4459497,
+      "count": 0,
+      "children": 0,
+      "handler": 104284240
+     }
+    ],
+    [
+     "/opt/prof_final",
+     "0x64deb78",
+     {
+      "va": 105769848,
+      "flag": 1,
+      "name": 4491692,
+      "count": 0,
+      "children": 0,
+      "handler": 104284384
+     }
+    ],
+    [
+     "/opt/prof_leak",
+     "0x64deba0",
+     {
+      "va": 105769888,
+      "flag": 1,
+      "name": 4429531,
+      "count": 0,
+      "children": 0,
+      "handler": 104284528
+     }
+    ],
+    [
+     "/opt/prof_leak_error",
+     "0x64debc8",
+     {
+      "va": 105769928,
+      "flag": 1,
+      "name": 4506794,
+      "count": 0,
+      "children": 0,
+      "handler": 104284672
+     }
+    ],
+    [
+     "/opt/prof_accum",
+     "0x64debf0",
+     {
+      "va": 105769968,
+      "flag": 1,
+      "name": 4442342,
+      "count": 0,
+      "children": 0,
+      "handler": 104283552
+     }
+    ],
+    [
+     "/opt/prof_recent_alloc_max",
+     "0x64dec18",
+     {
+      "va": 105770008,
+      "flag": 1,
+      "name": 4463936,
+      "count": 0,
+      "children": 0,
+      "handler": 104284816
+     }
+    ],
+    [
+     "/opt/prof_stats",
+     "0x64dec40",
+     {
+      "va": 105770048,
+      "flag": 1,
+      "name": 4412421,
+      "count": 0,
+      "children": 0,
+      "handler": 104285360
+     }
+    ],
+    [
+     "/opt/prof_sys_thread_name",
+     "0x64dec68",
+     {
+      "va": 105770088,
+      "flag": 1,
+      "name": 4495564,
+      "count": 0,
+      "children": 0,
+      "handler": 104285504
+     }
+    ],
+    [
+     "/opt/prof_time_resolution",
+     "0x64dec90",
+     {
+      "va": 105770128,
+      "flag": 1,
+      "name": 4416493,
+      "count": 0,
+      "children": 0,
+      "handler": 104285648
+     }
+    ],
+    [
+     "/opt/lg_san_uaf_align",
+     "0x64decb8",
+     {
+      "va": 105770168,
+      "flag": 1,
+      "name": 4459576,
+      "count": 0,
+      "children": 0,
+      "handler": 104300672
+     }
+    ],
+    [
+     "/opt/zero_realloc",
+     "0x64dece0",
+     {
+      "va": 105770208,
+      "flag": 1,
+      "name": 4459508,
+      "count": 0,
+      "children": 0,
+      "handler": 104286176
+     }
+    ],
+    [
+     "/tcache/create",
+     "0x64de260",
+     {
+      "va": 105767520,
+      "flag": 1,
+      "name": 4400274,
+      "count": 0,
+      "children": 0,
+      "handler": 104298832
+     }
+    ],
+    [
+     "/tcache/flush",
+     "0x64de288",
+     {
+      "va": 105767560,
+      "flag": 1,
+      "name": 4499204,
+      "count": 0,
+      "children": 0,
+      "handler": 104298752
+     }
+    ],
+    [
+     "/tcache/destroy",
+     "0x64de2b0",
+     {
+      "va": 105767600,
+      "flag": 1,
+      "name": 4491763,
+      "count": 0,
+      "children": 0,
+      "handler": 104298672
+     }
+    ],
+    [
+     "/arenas/narenas",
+     "0x64ddcc0",
+     {
+      "va": 105766080,
+      "flag": 1,
+      "name": 4522028,
+      "count": 0,
+      "children": 0,
+      "handler": 104312656
+     }
+    ],
+    [
+     "/arenas/dirty_decay_ms",
+     "0x64ddce8",
+     {
+      "va": 105766120,
+      "flag": 1,
+      "name": 4408237,
+      "count": 0,
+      "children": 0,
+      "handler": 104302576
+     }
+    ],
+    [
+     "/arenas/muzzy_decay_ms",
+     "0x64ddd10",
+     {
+      "va": 105766160,
+      "flag": 1,
+      "name": 4517666,
+      "count": 0,
+      "children": 0,
+      "handler": 104300096
+     }
+    ],
+    [
+     "/arenas/quantum",
+     "0x64ddd38",
+     {
+      "va": 105766200,
+      "flag": 1,
+      "name": 4416585,
+      "count": 0,
+      "children": 0,
+      "handler": 104288816
+     }
+    ],
+    [
+     "/arenas/page",
+     "0x64ddd60",
+     {
+      "va": 105766240,
+      "flag": 1,
+      "name": 4446697,
+      "count": 0,
+      "children": 0,
+      "handler": 104289360
+     }
+    ],
+    [
+     "/arenas/tcache_max",
+     "0x64ddd88",
+     {
+      "va": 105766280,
+      "flag": 1,
+      "name": 4471335,
+      "count": 0,
+      "children": 0,
+      "handler": 104289904
+     }
+    ],
+    [
+     "/arenas/nbins",
+     "0x64dddb0",
+     {
+      "va": 105766320,
+      "flag": 1,
+      "name": 4522050,
+      "count": 0,
+      "children": 0,
+      "handler": 104290448
+     }
+    ],
+    [
+     "/arenas/nhbins",
+     "0x64dddd8",
+     {
+      "va": 105766360,
+      "flag": 1,
+      "name": 4421179,
+      "count": 0,
+      "children": 0,
+      "handler": 104290896
+     }
+    ],
+    [
+     "/arenas/nlextents",
+     "0x64dde28",
+     {
+      "va": 105766440,
+      "flag": 1,
+      "name": 4491753,
+      "count": 0,
+      "children": 0,
+      "handler": 104293408
+     }
+    ],
+    [
+     "/arenas/create",
+     "0x64dde78",
+     {
+      "va": 105766520,
+      "flag": 1,
+      "name": 4400274,
+      "count": 0,
+      "children": 0,
+      "handler": 104487248
+     }
+    ],
+    [
+     "/arenas/lookup",
+     "0x64ddea0",
+     {
+      "va": 105766560,
+      "flag": 1,
+      "name": 4517783,
+      "count": 0,
+      "children": 0,
+      "handler": 104363040
+     }
+    ],
+    [
+     "/prof/thread_active_init",
+     "0x64dd960",
+     {
+      "va": 105765216,
+      "flag": 1,
+      "name": 4455632,
+      "count": 0,
+      "children": 0,
+      "handler": 104258224
+     }
+    ],
+    [
+     "/prof/active",
+     "0x64dd988",
+     {
+      "va": 105765256,
+      "flag": 1,
+      "name": 4437827,
+      "count": 0,
+      "children": 0,
+      "handler": 104257968
+     }
+    ],
+    [
+     "/prof/dump",
+     "0x64dd9b0",
+     {
+      "va": 105765296,
+      "flag": 1,
+      "name": 4503008,
+      "count": 0,
+      "children": 0,
+      "handler": 104298576
+     }
+    ],
+    [
+     "/prof/gdump",
+     "0x64dd9d8",
+     {
+      "va": 105765336,
+      "flag": 1,
+      "name": 4499186,
+      "count": 0,
+      "children": 0,
+      "handler": 104257760
+     }
+    ],
+    [
+     "/prof/prefix",
+     "0x64dda00",
+     {
+      "va": 105765376,
+      "flag": 1,
+      "name": 4499192,
+      "count": 0,
+      "children": 0,
+      "handler": 104357936
+     }
+    ],
+    [
+     "/prof/reset",
+     "0x64dda28",
+     {
+      "va": 105765416,
+      "flag": 1,
+      "name": 4459554,
+      "count": 0,
+      "children": 0,
+      "handler": 104257648
+     }
+    ],
+    [
+     "/prof/interval",
+     "0x64dda50",
+     {
+      "va": 105765456,
+      "flag": 1,
+      "name": 4514243,
+      "count": 0,
+      "children": 0,
+      "handler": 104294384
+     }
+    ],
+    [
+     "/prof/lg_sample",
+     "0x64dda78",
+     {
+      "va": 105765496,
+      "flag": 1,
+      "name": 4412526,
+      "count": 0,
+      "children": 0,
+      "handler": 104294928
+     }
+    ],
+    [
+     "/prof/log_start",
+     "0x64ddaa0",
+     {
+      "va": 105765536,
+      "flag": 1,
+      "name": 4442395,
+      "count": 0,
+      "children": 0,
+      "handler": 104298480
+     }
+    ],
+    [
+     "/prof/log_stop",
+     "0x64ddac8",
+     {
+      "va": 105765576,
+      "flag": 1,
+      "name": 4467601,
+      "count": 0,
+      "children": 0,
+      "handler": 104298432
+     }
+    ],
+    [
+     "/stats/allocated",
+     "0x64daaa0",
+     {
+      "va": 105753248,
+      "flag": 1,
+      "name": 4416541,
+      "count": 0,
+      "children": 0,
+      "handler": 104313232
+     }
+    ],
+    [
+     "/stats/active",
+     "0x64daac8",
+     {
+      "va": 105753288,
+      "flag": 1,
+      "name": 4437827,
+      "count": 0,
+      "children": 0,
+      "handler": 104307152
+     }
+    ],
+    [
+     "/stats/metadata",
+     "0x64daaf0",
+     {
+      "va": 105753328,
+      "flag": 1,
+      "name": 4433786,
+      "count": 0,
+      "children": 0,
+      "handler": 104307840
+     }
+    ],
+    [
+     "/stats/metadata_thp",
+     "0x64dab18",
+     {
+      "va": 105753368,
+      "flag": 1,
+      "name": 4425177,
+      "count": 0,
+      "children": 0,
+      "handler": 104308528
+     }
+    ],
+    [
+     "/stats/resident",
+     "0x64dab40",
+     {
+      "va": 105753408,
+      "flag": 1,
+      "name": 4491731,
+      "count": 0,
+      "children": 0,
+      "handler": 104309216
+     }
+    ],
+    [
+     "/stats/mapped",
+     "0x64dab68",
+     {
+      "va": 105753448,
+      "flag": 1,
+      "name": 4437834,
+      "count": 0,
+      "children": 0,
+      "handler": 104309904
+     }
+    ],
+    [
+     "/stats/retained",
+     "0x64dab90",
+     {
+      "va": 105753488,
+      "flag": 1,
+      "name": 4404246,
+      "count": 0,
+      "children": 0,
+      "handler": 104310592
+     }
+    ],
+    [
+     "/stats/background_thread/num_threads",
+     "0x64db820",
+     {
+      "va": 105756704,
+      "flag": 1,
+      "name": 4478517,
+      "count": 0,
+      "children": 0,
+      "handler": 104311280
+     }
+    ],
+    [
+     "/stats/background_thread/num_runs",
+     "0x64db848",
+     {
+      "va": 105756744,
+      "flag": 1,
+      "name": 4510399,
+      "count": 0,
+      "children": 0,
+      "handler": 104311968
+     }
+    ],
+    [
+     "/stats/background_thread/run_interval",
+     "0x64db870",
+     {
+      "va": 105756784,
+      "flag": 1,
+      "name": 4421096,
+      "count": 0,
+      "children": 0,
+      "handler": 104355136
+     }
+    ],
+    [
+     "/stats/mutexes/background_thread/num_ops",
+     "0x64db700",
+     {
+      "va": 105756416,
+      "flag": 1,
+      "name": 4437855,
+      "count": 0,
+      "children": 0,
+      "handler": 104313920
+     }
+    ],
+    [
+     "/stats/mutexes/background_thread/num_wait",
+     "0x64db728",
+     {
+      "va": 105756456,
+      "flag": 1,
+      "name": 4459560,
+      "count": 0,
+      "children": 0,
+      "handler": 104314608
+     }
+    ],
+    [
+     "/stats/mutexes/background_thread/num_spin_acq",
+     "0x64db750",
+     {
+      "va": 105756496,
+      "flag": 1,
+      "name": 4412466,
+      "count": 0,
+      "children": 0,
+      "handler": 104315296
+     }
+    ],
+    [
+     "/stats/mutexes/background_thread/num_owner_switch",
+     "0x64db778",
+     {
+      "va": 105756536,
+      "flag": 1,
+      "name": 4429558,
+      "count": 0,
+      "children": 0,
+      "handler": 104315984
+     }
+    ],
+    [
+     "/stats/mutexes/background_thread/total_wait_time",
+     "0x64db7a0",
+     {
+      "va": 105756576,
+      "flag": 1,
+      "name": 4514227,
+      "count": 0,
+      "children": 0,
+      "handler": 104346688
+     }
+    ],
+    [
+     "/stats/mutexes/background_thread/max_wait_time",
+     "0x64db7c8",
+     {
+      "va": 105756616,
+      "flag": 1,
+      "name": 4483033,
+      "count": 0,
+      "children": 0,
+      "handler": 104347392
+     }
+    ],
+    [
+     "/stats/mutexes/background_thread/max_num_thds",
+     "0x64db7f0",
+     {
+      "va": 105756656,
+      "flag": 1,
+      "name": 4463970,
+      "count": 0,
+      "children": 0,
+      "handler": 104316672
+     }
+    ],
+    [
+     "/stats/mutexes/max_per_bg_thd/num_ops",
+     "0x64db5e0",
+     {
+      "va": 105756128,
+      "flag": 1,
+      "name": 4437855,
+      "count": 0,
+      "children": 0,
+      "handler": 104317248
+     }
+    ],
+    [
+     "/stats/mutexes/max_per_bg_thd/num_wait",
+     "0x64db608",
+     {
+      "va": 105756168,
+      "flag": 1,
+      "name": 4459560,
+      "count": 0,
+      "children": 0,
+      "handler": 104317936
+     }
+    ],
+    [
+     "/stats/mutexes/max_per_bg_thd/num_spin_acq",
+     "0x64db630",
+     {
+      "va": 105756208,
+      "flag": 1,
+      "name": 4412466,
+      "count": 0,
+      "children": 0,
+      "handler": 104318624
+     }
+    ],
+    [
+     "/stats/mutexes/max_per_bg_thd/num_owner_switch",
+     "0x64db658",
+     {
+      "va": 105756248,
+      "flag": 1,
+      "name": 4429558,
+      "count": 0,
+      "children": 0,
+      "handler": 104319312
+     }
+    ],
+    [
+     "/stats/mutexes/max_per_bg_thd/total_wait_time",
+     "0x64db680",
+     {
+      "va": 105756288,
+      "flag": 1,
+      "name": 4514227,
+      "count": 0,
+      "children": 0,
+      "handler": 104345280
+     }
+    ],
+    [
+     "/stats/mutexes/max_per_bg_thd/max_wait_time",
+     "0x64db6a8",
+     {
+      "va": 105756328,
+      "flag": 1,
+      "name": 4483033,
+      "count": 0,
+      "children": 0,
+      "handler": 104345984
+     }
+    ],
+    [
+     "/stats/mutexes/max_per_bg_thd/max_num_thds",
+     "0x64db6d0",
+     {
+      "va": 105756368,
+      "flag": 1,
+      "name": 4463970,
+      "count": 0,
+      "children": 0,
+      "handler": 104320000
+     }
+    ],
+    [
+     "/stats/mutexes/ctl/num_ops",
+     "0x64db4c0",
+     {
+      "va": 105755840,
+      "flag": 1,
+      "name": 4437855,
+      "count": 0,
+      "children": 0,
+      "handler": 104320576
+     }
+    ],
+    [
+     "/stats/mutexes/ctl/num_wait",
+     "0x64db4e8",
+     {
+      "va": 105755880,
+      "flag": 1,
+      "name": 4459560,
+      "count": 0,
+      "children": 0,
+      "handler": 104321264
+     }
+    ],
+    [
+     "/stats/mutexes/ctl/num_spin_acq",
+     "0x64db510",
+     {
+      "va": 105755920,
+      "flag": 1,
+      "name": 4412466,
+      "count": 0,
+      "children": 0,
+      "handler": 104321952
+     }
+    ],
+    [
+     "/stats/mutexes/ctl/num_owner_switch",
+     "0x64db538",
+     {
+      "va": 105755960,
+      "flag": 1,
+      "name": 4429558,
+      "count": 0,
+      "children": 0,
+      "handler": 104322640
+     }
+    ],
+    [
+     "/stats/mutexes/ctl/total_wait_time",
+     "0x64db560",
+     {
+      "va": 105756000,
+      "flag": 1,
+      "name": 4514227,
+      "count": 0,
+      "children": 0,
+      "handler": 104343872
+     }
+    ],
+    [
+     "/stats/mutexes/ctl/max_wait_time",
+     "0x64db588",
+     {
+      "va": 105756040,
+      "flag": 1,
+      "name": 4483033,
+      "count": 0,
+      "children": 0,
+      "handler": 104344576
+     }
+    ],
+    [
+     "/stats/mutexes/ctl/max_num_thds",
+     "0x64db5b0",
+     {
+      "va": 105756080,
+      "flag": 1,
+      "name": 4463970,
+      "count": 0,
+      "children": 0,
+      "handler": 104323328
+     }
+    ],
+    [
+     "/stats/mutexes/prof/num_ops",
+     "0x64db3a0",
+     {
+      "va": 105755552,
+      "flag": 1,
+      "name": 4437855,
+      "count": 0,
+      "children": 0,
+      "handler": 104323904
+     }
+    ],
+    [
+     "/stats/mutexes/prof/num_wait",
+     "0x64db3c8",
+     {
+      "va": 105755592,
+      "flag": 1,
+      "name": 4459560,
+      "count": 0,
+      "children": 0,
+      "handler": 104324592
+     }
+    ],
+    [
+     "/stats/mutexes/prof/num_spin_acq",
+     "0x64db3f0",
+     {
+      "va": 105755632,
+      "flag": 1,
+      "name": 4412466,
+      "count": 0,
+      "children": 0,
+      "handler": 104325280
+     }
+    ],
+    [
+     "/stats/mutexes/prof/num_owner_switch",
+     "0x64db418",
+     {
+      "va": 105755672,
+      "flag": 1,
+      "name": 4429558,
+      "count": 0,
+      "children": 0,
+      "handler": 104325968
+     }
+    ],
+    [
+     "/stats/mutexes/prof/total_wait_time",
+     "0x64db440",
+     {
+      "va": 105755712,
+      "flag": 1,
+      "name": 4514227,
+      "count": 0,
+      "children": 0,
+      "handler": 104348096
+     }
+    ],
+    [
+     "/stats/mutexes/prof/max_wait_time",
+     "0x64db468",
+     {
+      "va": 105755752,
+      "flag": 1,
+      "name": 4483033,
+      "count": 0,
+      "children": 0,
+      "handler": 104348800
+     }
+    ],
+    [
+     "/stats/mutexes/prof/max_num_thds",
+     "0x64db490",
+     {
+      "va": 105755792,
+      "flag": 1,
+      "name": 4463970,
+      "count": 0,
+      "children": 0,
+      "handler": 104326656
+     }
+    ],
+    [
+     "/stats/mutexes/prof_thds_data/num_ops",
+     "0x64db280",
+     {
+      "va": 105755264,
+      "flag": 1,
+      "name": 4437855,
+      "count": 0,
+      "children": 0,
+      "handler": 104327232
+     }
+    ],
+    [
+     "/stats/mutexes/prof_thds_data/num_wait",
+     "0x64db2a8",
+     {
+      "va": 105755304,
+      "flag": 1,
+      "name": 4459560,
+      "count": 0,
+      "children": 0,
+      "handler": 104327920
+     }
+    ],
+    [
+     "/stats/mutexes/prof_thds_data/num_spin_acq",
+     "0x64db2d0",
+     {
+      "va": 105755344,
+      "flag": 1,
+      "name": 4412466,
+      "count": 0,
+      "children": 0,
+      "handler": 104328608
+     }
+    ],
+    [
+     "/stats/mutexes/prof_thds_data/num_owner_switch",
+     "0x64db2f8",
+     {
+      "va": 105755384,
+      "flag": 1,
+      "name": 4429558,
+      "count": 0,
+      "children": 0,
+      "handler": 104329296
+     }
+    ],
+    [
+     "/stats/mutexes/prof_thds_data/total_wait_time",
+     "0x64db320",
+     {
+      "va": 105755424,
+      "flag": 1,
+      "name": 4514227,
+      "count": 0,
+      "children": 0,
+      "handler": 104349504
+     }
+    ],
+    [
+     "/stats/mutexes/prof_thds_data/max_wait_time",
+     "0x64db348",
+     {
+      "va": 105755464,
+      "flag": 1,
+      "name": 4483033,
+      "count": 0,
+      "children": 0,
+      "handler": 104350208
+     }
+    ],
+    [
+     "/stats/mutexes/prof_thds_data/max_num_thds",
+     "0x64db370",
+     {
+      "va": 105755504,
+      "flag": 1,
+      "name": 4463970,
+      "count": 0,
+      "children": 0,
+      "handler": 104329984
+     }
+    ],
+    [
+     "/stats/mutexes/prof_dump/num_ops",
+     "0x64db160",
+     {
+      "va": 105754976,
+      "flag": 1,
+      "name": 4437855,
+      "count": 0,
+      "children": 0,
+      "handler": 104330560
+     }
+    ],
+    [
+     "/stats/mutexes/prof_dump/num_wait",
+     "0x64db188",
+     {
+      "va": 105755016,
+      "flag": 1,
+      "name": 4459560,
+      "count": 0,
+      "children": 0,
+      "handler": 104331248
+     }
+    ],
+    [
+     "/stats/mutexes/prof_dump/num_spin_acq",
+     "0x64db1b0",
+     {
+      "va": 105755056,
+      "flag": 1,
+      "name": 4412466,
+      "count": 0,
+      "children": 0,
+      "handler": 104331936
+     }
+    ],
+    [
+     "/stats/mutexes/prof_dump/num_owner_switch",
+     "0x64db1d8",
+     {
+      "va": 105755096,
+      "flag": 1,
+      "name": 4429558,
+      "count": 0,
+      "children": 0,
+      "handler": 104332624
+     }
+    ],
+    [
+     "/stats/mutexes/prof_dump/total_wait_time",
+     "0x64db200",
+     {
+      "va": 105755136,
+      "flag": 1,
+      "name": 4514227,
+      "count": 0,
+      "children": 0,
+      "handler": 104352320
+     }
+    ],
+    [
+     "/stats/mutexes/prof_dump/max_wait_time",
+     "0x64db228",
+     {
+      "va": 105755176,
+      "flag": 1,
+      "name": 4483033,
+      "count": 0,
+      "children": 0,
+      "handler": 104353024
+     }
+    ],
+    [
+     "/stats/mutexes/prof_dump/max_num_thds",
+     "0x64db250",
+     {
+      "va": 105755216,
+      "flag": 1,
+      "name": 4463970,
+      "count": 0,
+      "children": 0,
+      "handler": 104333312
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_alloc/num_ops",
+     "0x64db040",
+     {
+      "va": 105754688,
+      "flag": 1,
+      "name": 4437855,
+      "count": 0,
+      "children": 0,
+      "handler": 104333888
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_alloc/num_wait",
+     "0x64db068",
+     {
+      "va": 105754728,
+      "flag": 1,
+      "name": 4459560,
+      "count": 0,
+      "children": 0,
+      "handler": 104334576
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_alloc/num_spin_acq",
+     "0x64db090",
+     {
+      "va": 105754768,
+      "flag": 1,
+      "name": 4412466,
+      "count": 0,
+      "children": 0,
+      "handler": 104335264
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_alloc/num_owner_switch",
+     "0x64db0b8",
+     {
+      "va": 105754808,
+      "flag": 1,
+      "name": 4429558,
+      "count": 0,
+      "children": 0,
+      "handler": 104335952
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_alloc/total_wait_time",
+     "0x64db0e0",
+     {
+      "va": 105754848,
+      "flag": 1,
+      "name": 4514227,
+      "count": 0,
+      "children": 0,
+      "handler": 104350912
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_alloc/max_wait_time",
+     "0x64db108",
+     {
+      "va": 105754888,
+      "flag": 1,
+      "name": 4483033,
+      "count": 0,
+      "children": 0,
+      "handler": 104351616
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_alloc/max_num_thds",
+     "0x64db130",
+     {
+      "va": 105754928,
+      "flag": 1,
+      "name": 4463970,
+      "count": 0,
+      "children": 0,
+      "handler": 104336640
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_dump/num_ops",
+     "0x64daf20",
+     {
+      "va": 105754400,
+      "flag": 1,
+      "name": 4437855,
+      "count": 0,
+      "children": 0,
+      "handler": 104337216
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_dump/num_wait",
+     "0x64daf48",
+     {
+      "va": 105754440,
+      "flag": 1,
+      "name": 4459560,
+      "count": 0,
+      "children": 0,
+      "handler": 104337904
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_dump/num_spin_acq",
+     "0x64daf70",
+     {
+      "va": 105754480,
+      "flag": 1,
+      "name": 4412466,
+      "count": 0,
+      "children": 0,
+      "handler": 104338592
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_dump/num_owner_switch",
+     "0x64daf98",
+     {
+      "va": 105754520,
+      "flag": 1,
+      "name": 4429558,
+      "count": 0,
+      "children": 0,
+      "handler": 104339280
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_dump/total_wait_time",
+     "0x64dafc0",
+     {
+      "va": 105754560,
+      "flag": 1,
+      "name": 4514227,
+      "count": 0,
+      "children": 0,
+      "handler": 104353728
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_dump/max_wait_time",
+     "0x64dafe8",
+     {
+      "va": 105754600,
+      "flag": 1,
+      "name": 4483033,
+      "count": 0,
+      "children": 0,
+      "handler": 104354432
+     }
+    ],
+    [
+     "/stats/mutexes/prof_recent_dump/max_num_thds",
+     "0x64db010",
+     {
+      "va": 105754640,
+      "flag": 1,
+      "name": 4463970,
+      "count": 0,
+      "children": 0,
+      "handler": 104339968
+     }
+    ],
+    [
+     "/stats/mutexes/prof_stats/num_ops",
+     "0x64dae00",
+     {
+      "va": 105754112,
+      "flag": 1,
+      "name": 4437855,
+      "count": 0,
+      "children": 0,
+      "handler": 104340544
+     }
+    ],
+    [
+     "/stats/mutexes/prof_stats/num_wait",
+     "0x64dae28",
+     {
+      "va": 105754152,
+      "flag": 1,
+      "name": 4459560,
+      "count": 0,
+      "children": 0,
+      "handler": 104341232
+     }
+    ],
+    [
+     "/stats/mutexes/prof_stats/num_spin_acq",
+     "0x64dae50",
+     {
+      "va": 105754192,
+      "flag": 1,
+      "name": 4412466,
+      "count": 0,
+      "children": 0,
+      "handler": 104341920
+     }
+    ],
+    [
+     "/stats/mutexes/prof_stats/num_owner_switch",
+     "0x64dae78",
+     {
+      "va": 105754232,
+      "flag": 1,
+      "name": 4429558,
+      "count": 0,
+      "children": 0,
+      "handler": 104342608
+     }
+    ],
+    [
+     "/stats/mutexes/prof_stats/total_wait_time",
+     "0x64daea0",
+     {
+      "va": 105754272,
+      "flag": 1,
+      "name": 4514227,
+      "count": 0,
+      "children": 0,
+      "handler": 104356528
+     }
+    ],
+    [
+     "/stats/mutexes/prof_stats/max_wait_time",
+     "0x64daec8",
+     {
+      "va": 105754312,
+      "flag": 1,
+      "name": 4483033,
+      "count": 0,
+      "children": 0,
+      "handler": 104357232
+     }
+    ],
+    [
+     "/stats/mutexes/prof_stats/max_num_thds",
+     "0x64daef0",
+     {
+      "va": 105754352,
+      "flag": 1,
+      "name": 4463970,
+      "count": 0,
+      "children": 0,
+      "handler": 104343296
+     }
+    ],
+    [
+     "/stats/mutexes/reset",
+     "0x64dadc8",
+     {
+      "va": 105754056,
+      "flag": 1,
+      "name": 4459554,
+      "count": 0,
+      "children": 0,
+      "handler": 104487920
+     }
+    ],
+    [
+     "/stats/zero_reallocs",
+     "0x64dac30",
+     {
+      "va": 105753648,
+      "flag": 1,
+      "name": 4437841,
+      "count": 0,
+      "children": 0,
+      "handler": 104355840
+     }
+    ],
+    [
+     "/experimental/hooks/install",
+     "0x64da9c0",
+     {
+      "va": 105753024,
+      "flag": 1,
+      "name": 4467581,
+      "count": 0,
+      "children": 0,
+      "handler": 104257008
+     }
+    ],
+    [
+     "/experimental/hooks/remove",
+     "0x64da9e8",
+     {
+      "va": 105753064,
+      "flag": 1,
+      "name": 4483026,
+      "count": 0,
+      "children": 0,
+      "handler": 104295760
+     }
+    ],
+    [
+     "/experimental/hooks/prof_backtrace",
+     "0x64daa10",
+     {
+      "va": 105753104,
+      "flag": 1,
+      "name": 4487545,
+      "count": 0,
+      "children": 0,
+      "handler": 104256416
+     }
+    ],
+    [
+     "/experimental/hooks/prof_dump",
+     "0x64daa38",
+     {
+      "va": 105753144,
+      "flag": 1,
+      "name": 4421086,
+      "count": 0,
+      "children": 0,
+      "handler": 104255840
+     }
+    ],
+    [
+     "/experimental/hooks/safety_check_abort",
+     "0x64daa60",
+     {
+      "va": 105753184,
+      "flag": 1,
+      "name": 4412447,
+      "count": 0,
+      "children": 0,
+      "handler": 104295680
+     }
+    ],
+    [
+     "/experimental/utilization/query",
+     "0x64da920",
+     {
+      "va": 105752864,
+      "flag": 1,
+      "name": 4506835,
+      "count": 0,
+      "children": 0,
+      "handler": 104295568
+     }
+    ],
+    [
+     "/experimental/utilization/batch_query",
+     "0x64da948",
+     {
+      "va": 105752904,
+      "flag": 1,
+      "name": 4502996,
+      "count": 0,
+      "children": 0,
+      "handler": 104255456
+     }
+    ],
+    [
+     "/experimental/arenas_create_ext",
+     "0x64da798",
+     {
+      "va": 105752472,
+      "flag": 1,
+      "name": 4395655,
+      "count": 0,
+      "children": 0,
+      "handler": 104486576
+     }
+    ],
+    [
+     "/experimental/prof_recent/alloc_max",
+     "0x64da840",
+     {
+      "va": 105752640,
+      "flag": 1,
+      "name": 4459544,
+      "count": 0,
+      "children": 0,
+      "handler": 104254848
+     }
+    ],
+    [
+     "/experimental/prof_recent/alloc_dump",
+     "0x64da868",
+     {
+      "va": 105752680,
+      "flag": 1,
+      "name": 4446665,
+      "count": 0,
+      "children": 0,
+      "handler": 104295472
+     }
+    ],
+    [
+     "/experimental/batch_alloc",
+     "0x64da7e8",
+     {
+      "va": 105752552,
+      "flag": 1,
+      "name": 4467569,
+      "count": 0,
+      "children": 0,
+      "handler": 104254288
+     }
+    ],
+    [
+     "/experimental/thread/activity_callback",
+     "0x64da980",
+     {
+      "va": 105752960,
+      "flag": 1,
+      "name": 4395673,
+      "count": 0,
+      "children": 0,
+      "handler": 104253696
+     }
+    ]
+   ],
+   "dynamic_flag0": 7,
+   "dynamic": [
+    [
+     "/arena/<bad>",
+     "0x64de040",
+     {
+      "va": 105766976,
+      "flag": 0,
+      "name": 104305264,
+      "count": 0,
+      "children": 0,
+      "handler": 1
+     }
+    ],
+    [
+     "/arenas/bin/<bad>",
+     "0x64ddf50",
+     {
+      "va": 105766736,
+      "flag": 0,
+      "name": 104253376,
+      "count": 1,
+      "children": 4421373,
+      "handler": 4
+     }
+    ],
+    [
+     "/arenas/lextent/<bad>",
+     "0x64dded0",
+     {
+      "va": 105766608,
+      "flag": 0,
+      "name": 104253408,
+      "count": 1,
+      "children": 4421373,
+      "handler": 1
+     }
+    ],
+    [
+     "/prof/stats/bins/<bad>",
+     "0x64ddc10",
+     {
+      "va": 105765904,
+      "flag": 0,
+      "name": 104253568,
+      "count": 1,
+      "children": 4421373,
+      "handler": 2
+     }
+    ],
+    [
+     "/prof/stats/lextents/!\u0006",
+     "0x64ddb70",
+     {
+      "va": 105765744,
+      "flag": 0,
+      "name": 104253632,
+      "count": 1,
+      "children": 4421373,
+      "handler": 2
+     }
+    ],
+    [
+     "/stats/arenas/<bad>",
+     "0x64db8a0",
+     {
+      "va": 105756832,
+      "flag": 0,
+      "name": 104306928,
+      "count": 0,
+      "children": 0,
+      "handler": 1
+     }
+    ],
+    [
+     "/experimental/arenas/<bad>",
+     "0x64da890",
+     {
+      "va": 105752720,
+      "flag": 0,
+      "name": 104306704,
+      "count": 1,
+      "children": 4421373,
+      "handler": 1
+     }
+    ]
+   ]
+  }
+ },
+ "cited_only_not_claimed": [
+  "dispatcher 0x63a8ff0..0x63a93ba (#255)",
+  "sibling 0x63a8d00..0x63a8fe8 (#256)",
+  "wrapper 0x63a8990..0x63a89f0 (#256)",
+  "invoke 0x63a88a0..0x63a8984 (#256)",
+  "walk-invoke 0x63a89f0..0x63a8cff (#256)",
+  "gated helpers 0x635dee0..0x635df87, 0x635df90..0x635e01f, 0x635e020..0x635e0c5 (#256)",
+  "sweep 0x63a5bf0..0x63a6470 (#253)",
+  "resolver 0x636e340..0x636e817 (#256)",
+  "predicate body outside exhibited windows 0x634f0b0..0x634f8d5",
+  "request-init body outside exhibited window 0x634ece0..0x634f09d",
+  "epoch body outside exhibited window 0x63a7fc0..0x63a8239"
+ ]
+}

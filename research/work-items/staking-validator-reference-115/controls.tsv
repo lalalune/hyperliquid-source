@@ -1,0 +1,99 @@
+kind	control	status	where
+rule	member_inverted	detected	21
+rule	zero_signer_counts	detected	9
+rule	scan_ignores_flag	detected	70
+rule	scan_flag_nonzero	detected	70
+rule	row_flag_nonzero	detected	78
+rule	address_prefix_only	detected	2118
+rule	huge_limit_off	detected	27
+rule	cap_limit_off	detected	25
+rule	map_limit_missing	detected	24
+rule	mapped_checked_early	detected	23
+rule	free_missing	detected	3
+rule	alloc_after_check	detected	6
+rule	ok_variants_checked	detected	0
+rule	wrong_offset_20_50	detected	12
+rule	inactive_denied	detected	39
+rule	code_swap	detected	21
+rule	unknown_len	detected	72
+rule	decoy_store	detected	3
+edit	base 0x2c58959 immediate	killed	ok
+edit	base 0x2c5897b condition	killed	ok
+edit	base 0x2c589a9 immediate	killed	empty
+edit	base 0x2c58a5a condition	killed	zero_match
+edit	base 0x2c58a6b immediate	killed	map_hit
+edit	base 0x2c58b2a condition	killed	scan_zero
+edit	base 0x2c58ae2 immediate	killed	ok
+edit	base 0x2c58ba5 condition	killed	map_hit
+edit	base 0x2c58b94 immediate	killed	map_cap_edge
+edit	base 0x2c58a35 condition	killed	inactive2
+edit	base 0x2c58bf8 immediate	killed	map_huge
+edit	base 0x2c58b4d condition	killed	scan_flag2_only
+edit	base 0x2c58976 immediate	killed	match
+edit	base 0x2c589e0 condition	killed	inactive2
+edit	base 0x2c58a49 immediate	killed	empty
+edit	base 0x2c58b7a condition	killed	scan_flag2_only
+edit	base 0x2c58b06 immediate	killed	scan_first
+edit	base 0x2c58a77 condition	killed	map_hit
+edit	base 0x2c58bce immediate	killed	map_hit
+edit	base 0x2c589c8 condition	killed	empty
+edit	base 0x2c58966 immediate	killed	inactive2
+edit	base 0x2c589b7 condition	killed	empty
+edit	copy_a 0x55cee29 immediate	killed	inactive2
+edit	copy_a 0x55cee4b condition	killed	inactive2
+edit	copy_a 0x55cee79 immediate	killed	inactive2
+edit	copy_a 0x55cef2a condition	killed	zero_inactive
+edit	copy_a 0x55cef3b immediate	killed	zero_inactive
+edit	copy_a 0x55ceffa condition	killed	scan_second
+edit	copy_a 0x55cefb2 immediate	killed	inactive2
+edit	copy_a 0x55cf075 condition	killed	map_cap_edge
+edit	copy_a 0x55cf064 immediate	killed	map_cap_edge
+edit	copy_a 0x55cef05 condition	killed	inactive2
+edit	copy_a 0x55cf0c8 immediate	killed	map_huge
+edit	copy_a 0x55cf01d condition	killed	scan_second
+edit	copy_a 0x55cee46 immediate	killed	inactive0
+edit	copy_a 0x55ceeb0 condition	killed	inactive2
+edit	copy_a 0x55cef19 immediate	killed	empty
+edit	copy_a 0x55cf04a condition	killed	scan_flag2_only
+edit	copy_a 0x55cefd6 immediate	killed	scan_second
+edit	copy_a 0x55cef47 condition	killed	match
+edit	copy_a 0x55cf09e immediate	killed	map_cap_edge
+edit	copy_a 0x55cee98 condition	killed	inactive2
+edit	copy_a 0x55cee36 immediate	killed	inactive2
+edit	copy_a 0x55cee87 condition	killed	inactive2
+edit	copy_b 0x55cf149 immediate	killed	near0
+edit	copy_b 0x55cf16b condition	killed	near0
+edit	copy_b 0x55cf199 immediate	killed	near0
+edit	copy_b 0x55cf24a condition	killed	zero_inactive
+edit	copy_b 0x55cf25b immediate	killed	zero_inactive
+edit	copy_b 0x55cf31a condition	killed	scan_second
+edit	copy_b 0x55cf2d2 immediate	killed	near0
+edit	copy_b 0x55cf395 condition	killed	map_len
+edit	copy_b 0x55cf384 immediate	killed	map_cap_edge
+edit	copy_b 0x55cf225 condition	killed	near0
+edit	copy_b 0x55cf3e8 immediate	killed	map_huge
+edit	copy_b 0x55cf33d condition	killed	scan_second
+edit	copy_b 0x55cf166 immediate	killed	match
+edit	copy_b 0x55cf1d0 condition	killed	match
+edit	copy_b 0x55cf239 immediate	killed	huge
+edit	copy_b 0x55cf36a condition	killed	scan_near
+edit	copy_b 0x55cf2f6 immediate	killed	scan_second
+edit	copy_b 0x55cf267 condition	killed	match
+edit	copy_b 0x55cf3be immediate	killed	map_cap_edge
+edit	copy_b 0x55cf1b8 condition	killed	near0
+edit	copy_b 0x55cf156 immediate	killed	near0
+edit	copy_b 0x55cf1a7 condition	killed	near0
+table	variant 2 takes the arm of 3	detected	near15
+table	variant 2 takes the arm of 0	detected	empty
+table	variant 5 takes the arm of 3	detected	map_hit
+table	variant 5 takes the arm of 0	detected	map_hit
+table	variant 8 takes the arm of 3	detected	match
+table	variant 8 takes the arm of 0	detected	match
+table	variant 10 takes the arm of 3	detected	scan_flag2_only
+table	variant 10 takes the arm of 0	detected	scan_flag2_only
+range	wrong input hash	detected	EvidenceError
+range	address inside an instruction is not an FDE start	detected	EvidenceError
+range	jump table entry pointing outside the arms	detected	EvidenceError
+range	step limit reached	detected	Halt
+range	entry in the middle of an instruction	detected	EvidenceError
+range	store read at the other body's offset	detected	Halt

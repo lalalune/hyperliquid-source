@@ -1,0 +1,10 @@
+--- src/lib.rs
++++ src/lib.rs
+@@ -184,6 +184,7 @@
+     if used > output.len() {
+         return Err(Error::UsedBounds);
+     }
++    if primary.is_empty() { return Ok(used); }
+     let maps = [(Map::Primary, primary), (Map::Spelling, spelling)];
+     for (map, groups) in maps {
+         if groups.len() > 65_535 {

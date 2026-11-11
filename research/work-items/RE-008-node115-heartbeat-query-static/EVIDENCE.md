@@ -178,6 +178,24 @@ safety or current-network support is claimed. Full component gates stay false.
 Before this packet there was no target-bound record of this connected 115 path
 in this intake. After it there is a reproducible bounded static map and an
 explicit numeric/output-store hypothesis; a falsified record is rejected.
+
+## Bounded Rust classification
+
+The recovered normal-return ratio/age decision is independently implemented as
+`src/node115-time-producer/src/heartbeat.rs` under the existing time-producer
+source area. The safe API models the observed denominator check, positive-zero
+fast path, raw-bit ratio sanitization, configured threshold, unnamed
+configuration byte and strict `age > 180.0` branch.
+
+It returns logical tags 0, 1, 2 or 3 without claiming the native map layout,
+time-source helper, floating-point exception state, logging effects, output
+padding, panic behavior or wire format. Negative and NaN denominators are a
+logical error because the selected native diagnostic path has no established
+successful return.
+
+`heartbeat-vectors.tsv` freezes 1,025 combinations over missing lookup, signed
+zero, positive and negative values, infinities, NaN, threshold equality,
+configuration gating and age boundaries.
 Next question: bind the configuration initialization and encoded-time domains,
 then independently reconstruct the admitted-domain classifier with frozen
 boundary expectations. Recover sort ordering, map updates and unwind/helper

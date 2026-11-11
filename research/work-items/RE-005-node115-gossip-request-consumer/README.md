@@ -1,0 +1,17 @@
+# RE-005: node 115 request wrapper's selected caller
+
+This static packet follows one caller of the GossipRpcRequest wrapper rather than re-owning the request decoder or its state initialization. It is bound to Linux x86-64 node #115, artifact `artifacts/node/115/hl-node`, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. The earlier `RE-005-node115-gossip-rpc-request` identifies `0x5aac6a0` as the three-variant request decoder; [PR #5068](https://github.com/lalalune/hyperliquid-source/pull/5068) separately traces a selected zero-selector wrapper through `0x5860970` and `0x4e4a1e0`. The caller identified here is `0x5a60a50` (FDE extent, not an assertion of all callers).
+
+## Selected route
+
+At `0x5a61255`, the caller invokes helper `0x5ab4390` with a stack output at `rsp+0xf0`. It tests output qword 0 against `0x8000000000000001`; equality takes `0x5a61275`, while inequality loads output qwords at `+8` and `+16` into `r15` and `r12`. After a distinct cleanup branch, it compares the first qword against `0x8000000000000000`. Equality takes `0x5a6130f`, bypassing the wrapper call; inequality reaches `0x5a6143f`. The cases are raw machine values; the helper's source-level return type and full behavior are not established here.
+
+At `0x5a6146e`, the latter path passes `r15` as the wrapper's byte pointer, `r12` as length, qword `[rbx+0xe48]` as limit, and zero-extended byte `[rbx+0x1098]` as selector. This connects the helper's selected output slots to the wrapper's arguments. It is a conditional data-flow statement assuming valid storage, normal helper returns and ABI-preserving intervening calls; it does not show where the helper obtained its bytes or establish transport framing.
+
+The caller tests wrapper output byte 0 against `0x12`. On equality it loads qwords at output `+8`, `+16`, and `+24`. After a conditional indirect call at `0x5a614ab` and setting a status byte, qword `+8` is compared to 4: equality branches away at `0x5a614bf`. Otherwise all three qwords are stored at `[rbx+0xde0..0xdf7]`. If the first qword equals 3, `0x5a614e3` takes a different path; otherwise these 24 bytes are copied both through a saved output pointer and to a stack temporary, passed to the indirect target whose relative relocation resolves slot `0x64ebfb0` to `0x5a5dbc0`. This is the observed link to the next helper; its semantics, actual dynamic binding, and complete resulting behavior are not assigned.
+
+If wrapper output byte 0 is not `0x12`, `0x5a615e1` copies the 32-byte wrapper output into a temporary and calls `0x5ab5b50`. On return it puts that helper's `rax` in `r12`, sets `rbp` to 3, and rejoins the conditional indirect-call/status sequence; it then follows the `rbp == 3` branch. No assertion is made about the meaning of that helper's result or the uninitialized/previous contents of other stack fields. The qword values 3 and 4 are observations of comparisons, not asserted wire variants.
+
+## Reproduce and limits
+
+Run `PYTHONPATH=tools python research/work-items/RE-005-node115-gossip-request-consumer/verify.py` from the repository root. The verifier authenticates the target, two FDE bodies and selected instructions, branch/call targets, and two relocation entries; its arithmetic and corruption checks are static only. It never executes or emulates the target. There is no claim of live reachability, pointer identity across unexamined aliases, request field names, whole-frame acceptance, complete error handling or dynamic helper effects.

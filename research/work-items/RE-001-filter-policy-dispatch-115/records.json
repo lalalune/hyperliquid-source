@@ -1,0 +1,195 @@
+{
+  "task": "RE-001",
+  "work_item": "RE-001-filter-policy-dispatch-115",
+  "question": "What does the remaining sibling registry factory dispatch 0x6136b40 do -- the FilterPolicy dispatch listed as an open unknown in #4428 and #4453 -- and how does its name lookup 0x6136650 resolve a policy name in the registry? Resolves #4428's open unknown 'the sibling dispatch 0x6136b40..0x613721b' (the second of the two; the first was pinned by #4453).",
+  "artifact": "work/hl-node-115.bin",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "resolves": {
+    "pr": 4428,
+    "open_unknowns": [
+      "the sibling dispatch 0x6136b40..0x613721b (the FilterPolicy dispatch)"
+    ],
+    "answer": "0x6136b40 is the FilterPolicy registry factory dispatch (Status* out, ObjectRegistry* registry, name, shared_ptr<const FilterPolicy>* policy_slot), the same template as #4428's BlockCipher dispatch 0x5ff9fe0 and #4453's SystemClock dispatch 0x5fd4080 instantiated for the 'FilterPolicy' factory type. It resolves the name through the lookup 0x6136650, invokes the matched creator through the factory record's +0x18 invoker, and wraps the returned raw object in a fresh 0x18-byte non-inplace shared_ptr control block (vtable 0x64d37f0, typeinfo for shared_ptr<const rocksdb::FilterPolicy>). Two template differences from the siblings: the lookup inlines the unordered_map find (no call to the map-find helper 0x5fd2980), and the shared tail copies the 16-byte temp Status inline at 0x6136e30 instead of calling the Status move-assign helper 0x5fcdf70."
+  },
+  "dispatch_0x6136b40": {
+    "fde": "0x6136b40..0x613721b",
+    "signature": "(Status* out, ObjectRegistry* registry, const std::string& name, shared_ptr<const FilterPolicy>* policy_slot)",
+    "sole_caller": "0x61374a0 in the dispatcher 0x6137290 (cited)",
+    "frame": "0xf8 bytes, stack canary at 0xe8(%rsp)",
+    "lookup_call": "0x6136b83 -> 0x6136650",
+    "factory_call": "indirect call *0x78(%rsp) (record+0x18, the invoker)",
+    "outcomes": [
+      {
+        "condition": "lookup returns a zeroed record (manager null)",
+        "status": "kNotSupported (code 3)",
+        "message": "Could not load FilterPolicy: <name>",
+        "sites": [
+          "0x6136f68",
+          "0x6137021"
+        ],
+        "note": "built into the 0x30(%rsp) temp, then copied into *out by the shared tail at 0x6136e30"
+      },
+      {
+        "condition": "factory returns null and left the string arg empty (0x88(%rsp) == 0)",
+        "status": "kInvalidArgument (code 4)",
+        "message": "Could not load FilterPolicy: <name>",
+        "sites": [
+          "0x6136e73",
+          "0x6136f0a"
+        ],
+        "note": "built into the 0x30(%rsp) temp, then copied into *out by the shared tail at 0x6136e30"
+      },
+      {
+        "condition": "factory returns null but filled the string arg with a message (0x88(%rsp) != 0)",
+        "status": "kInvalidArgument (code 4)",
+        "message": "<factory message>: <name>",
+        "sites": [
+          "0x6136f30",
+          "0x6136f59"
+        ],
+        "note": "the factory's string is the msg1 string_view (ptr at 0x40(%rsp), size at 0x48(%rsp)); built into the 0x30(%rsp) temp, then copied into *out by the shared tail at 0x6136e30"
+      },
+      {
+        "condition": "factory returns non-null but stores nothing in the slot",
+        "status": "kInvalidArgument (code 4)",
+        "message": "Cannot make a shared FilterPolicy from unguarded one : <name>",
+        "sites": [
+          "0x6136d18",
+          "0x6136e05"
+        ],
+        "note": "built directly into *out (rdi is rbx); the shared tail is not taken; the unguarded object is then destroyed through its vtable slot 1 at 0x6136ce4"
+      },
+      {
+        "condition": "factory returns non-null and stores the raw object in the slot",
+        "status": "kOk (code 0)",
+        "action": "new 0x18-byte control block (vtable 0x64d37f0, counts (1,1) from 0x459b20, object at +0x10); store (object, control) into the out policy slot; release the old policy via 0x5d350c0",
+        "sites": [
+          "0x6136c66",
+          "0x6136c70",
+          "0x6136c91",
+          "0x6136cab"
+        ]
+      }
+    ],
+    "record_destroy": "after a non-null factory return the record is destroyed via its manager with op 3 (0x6136c42); a no-op for the stateless creator lambdas, as in #4428 and #4453",
+    "status_temp": "the 16 bytes at 0x30(%rsp) are a Status temp, zeroed to kOk at 0x6136bf7 after the factory call; the dispatch itself writes a non-kOk Status there in the factory-null branches (0x6136f0a, 0x6136f59) and the lookup-miss branch (0x6137021), and the shared tail at 0x6136e30 copies it into *out inline (movzwl/mov/mov, 16 bytes) when its code byte is non-zero. No registered creator writes the temp -- the same answer as #4453 gave for the SystemClock dispatch. Unlike the SystemClock dispatch, whose tail calls the Status move-assign helper 0x5fcdf70 at 0x5fd432c, this dispatch has no call to 0x5fcdf70 anywhere in 0x6136b40..0x613721b.",
+    "status_ctor": "0x61cf670(out, code, subcode 0, msg1, msg2, severity 0): msg1 and msg2 are string_views ({ptr, size} pairs at 0x40(%rsp) and 0x50(%rsp)); message is msg1, or msg1 + ': ' + msg2 when msg2 is non-empty"
+  },
+  "lookup_0x6136650": {
+    "fde": "0x6136650..0x6136b35",
+    "signature": "(FactoryRecord* out, ObjectRegistry* registry, const std::string& name) -> FactoryRecord*",
+    "callers": [
+      "0x6136b83 in 0x6136b40",
+      "0x6136802 (recursion)"
+    ],
+    "registry_layout": {
+      "+0x00/+0x08": "libraries vector (begin/end)",
+      "+0x60": "parent registry pointer (recursed into on exhaustion)",
+      "+0x98": "pthread_mutex_t (locked for the whole walk)"
+    },
+    "algorithm": [
+      "lock the registry mutex at +0x98 (lock failure throws system_error with the errno)",
+      "walk the libraries vector backwards, 16-byte elements (first qword = library pointer; second qword unread, open unknown)",
+      "per library lock its mutex at +0x00, then query its map for the type name 'FilterPolicy' with an INLINED unordered_map find (no call to 0x5fd2980, unlike the SystemClock/BlockCipher lookups): if the map holds more than 0x14 entries hash it (seed 0xc70f6907, bucket count at +0x30, bucket array at +0x28, chain walk with hash + size + memcmp), else walk the node list linearly from the head at +0x38, comparing the 12-byte key by length then bytes",
+      "on a hit walk the entry's candidate vector (+0x28/+0x30) and call each candidate's vtable slot 2 (Matches, forwards to PatternEntry Matches 0x61f8670) with (candidate, name)",
+      "on a match clone the factory record (manager op 2, a no-op here, plus the explicit 16-byte copy of the {manager, invoker} pair) into a temp record, then clone the temp into *out when its manager is non-null (0x61367c0) and destroy the temp with manager op 3 (0x6136a15)",
+      "on exhaustion unlock and recurse into the parent registry at +0x60; with no parent zero *out"
+    ],
+    "map_key": "FilterPolicy (12 chars, built SSO: movabs 'FilterPo' at 0x61366cd + 'licy' 0x7963696c at 0x61366e0)",
+    "manager_ops_observed": "op 2 (clone) at 0x61367a5 and 0x61369f4, op 3 (destroy) at 0x6136a15 are called on the record's manager; both are no-ops for the stateless creator lambdas, as in #4428 and #4453"
+  },
+  "factory_record": {
+    "size": "0x20 bytes",
+    "layout": {
+      "+0x00": "functor storage (16 bytes, zero for stateless lambdas)",
+      "+0x10": "manager function pointer",
+      "+0x18": "invoker (the creator lambda's _M_invoke)"
+    },
+    "invoker_signature": "(record, name, slot_ptr_ptr, string*) -> raw FilterPolicy* or null; stores the new raw object at *slot_ptr_ptr; may fill the string arg with an error message when returning null",
+    "factory_slot_protocol": "the creator stores the new raw object pointer at the slot (0x28(%rsp) in the dispatch), destroying any previous object there through its vtable slot 1, and returns the same pointer; null return means failure"
+  },
+  "control_block": {
+    "size": "0x18 bytes",
+    "vtable": "0x64d37f0",
+    "typeinfo": "St15_Sp_counted_ptrIPKN7rocksdb12FilterPolicyELN9__gnu_cxx12_Lock_policyE2EE",
+    "typeinfo_addr": "0x64d3758",
+    "typeinfo_note": "the pointee is const (IPK...): the out slot is a shared_ptr<const rocksdb::FilterPolicy>, unlike the BlockCipher/SystemClock slots, whose typeinfos name a non-const pointee",
+    "layout": {
+      "+0x00": "vtable 0x64d37f0",
+      "+0x08": "counts (1, 1) from qword 0x459b20",
+      "+0x10": "object pointer"
+    },
+    "slots": [
+      {
+        "slot": 0,
+        "addr": "0x60b1da0"
+      },
+      {
+        "slot": 1,
+        "addr": "0x60b1e60"
+      },
+      {
+        "slot": 2,
+        "addr": "0x60b1dd0"
+      },
+      {
+        "slot": 3,
+        "addr": "0x60b1e70"
+      },
+      {
+        "slot": 4,
+        "addr": "0x60b1df0"
+      }
+    ],
+    "vtable_length_note": "5 function slots plus a trailing zero slot (vtable_len 6), like the BlockCipher control-block vtable 0x64d0198 (#4428). Unlike the SystemClock vtable 0x64cdf38 (#4453), the qword after slot 4 here is a zero slot, not the next .data.rel.ro object."
+  },
+  "dispatcher_and_wrapper": {
+    "dispatcher": "0x6137290 (FDE 0x6137290..0x6137688, cited)",
+    "dispatcher_calls": [
+      "0x609e510 (options-map host) at 0x61373eb",
+      "pthread_once init of the provider registry map 0x6507c78 with init 0x6138a10 at 0x6137457",
+      "0x6136b40 (this dispatch) at 0x61374a0",
+      "0x609e2d0 (configure) at 0x61374e7",
+      "0x61cf670 (Status ctor, 'Cannot reset object ' 0x433f9f) at 0x6137622"
+    ],
+    "dispatcher_note": "mirrors #4402's dispatcher 0x5ffa710: pthread_once init, the options-map host call, the dispatch call, and the configure call. Its internals are cited, not pinned here.",
+    "wrapper": "0x60dafb0 (FDE 0x60dafb0..0x60db041, cited)",
+    "wrapper_gate": "if rcx+0x08 == 2 and the string at (%rcx) starts with 'id' (0x6469) and r8+0x08 == 0, it zeroes the shared_ptr at (%r9) (releasing the old policy via 0x5d350c0 at 0x60db021) and returns kOk; otherwise it forwards to the dispatcher at 0x60dafe0",
+    "wrapper_note": "mirrors #4402's wrapper 0x5ffae10 exactly."
+  },
+  "filter_policy_registration": {
+    "registrar": "0x6137fe0 (FDE 0x6137fe0..0x61389e4, cited)",
+    "evidence": "the only other binary-wide lea sites of 'FilterPolicy' are 0x6138179 (inside 0x6137fe0) and 0x6137b6c (inside the per-factory registrar 0x6137810). 0x6137fe0 is called from the dispatcher's pthread_once init 0x6138a10 (FDE 0x6138a10..0x6138a8b); it registers 'FilterPolicy' via the register helper 0x5fd1da0 at 0x613818f, then calls 0x6137810 three times (0x613825f, 0x6138356, 0x6138450) with names built from literals including ':false' (0x442ac3) and ':true' (0x4384f5) suffixes. 0x6137810 allocates a 0x30-byte record (vtable 0x64d5390 at 0x6137b00) and registers 'FilterPolicy' via 0x5fd1da0 at 0x6137b87.",
+    "interpretation": "plausibly the builtin FilterPolicy registrations (BloomFilterPolicy-style names with ':false' / ':true' suffixes); the exact creator routines are not pinned here (open unknown)"
+  },
+  "literals": {
+    "0x4487c0": "Cannot make a shared ",
+    "0x44d20e": "FilterPolicy",
+    "0x432138": " from unguarded one ",
+    "0x439466": "Could not load ",
+    "0x442ac3": ":false (built by the registrar 0x6137fe0)",
+    "0x4384f5": ":true (built by the registrar 0x6137fe0)"
+  },
+  "open_unknowns": [
+    "the registered FilterPolicy creators: which factory routines back the 'FilterPolicy' entries (0x6137fe0 builds ':false' / ':true' suffixed names and calls the register helper 0x5fd1da0, but the creator routines themselves are not pinned)",
+    "the libraries vector element's second qword (the lookup reads only the first qword, the library pointer)",
+    "the library object's fields at +0x08..+0x27 (mutex at +0x00, map at +0x28)",
+    "the map value's owning type (the entry whose +0x28/+0x30 candidate vector the lookup walks)",
+    "the control-block vtable slots 0..4 (0x60b1da0/0x60b1e60/0x60b1dd0/0x60b1e70/0x60b1df0) method identities",
+    "the dispatcher 0x6137290 internals (cited only: options-map host, dispatch and configure calls) and the wrapper 0x60dafb0's caller",
+    "the base names the registrar 0x6137fe0 builds before the ':false' / ':true' suffixes (the first 0x6137810 call's name is built by 0x61301a0, not traced here)",
+    "the string ctor copy 0x612f730's identity: it is byte-identical in its first 16 bytes to 0x5fcd890, a second COMDAT copy of the std::string(const char*) ctor used by this TU"
+  ],
+  "cited_not_pinned": [
+    "0x6137290 dispatcher and 0x60dafb0 wrapper (#4402 shape)",
+    "0x6137fe0 builtin FilterPolicy registrar, 0x6137810 per-factory registrar, 0x6138a10 pthread_once init, and 0x5fd1da0 register helper",
+    "0x5ff9fe0/0x5ff9c60 BlockCipher dispatch + lookup (#4428)",
+    "0x5fd4080/0x5fd3d00 SystemClock dispatch + lookup (#4453)",
+    "0x5ffb250/0x5ffaeb0 EncryptionProvider dispatch + lookup (#4428)",
+    "0x5ffa710/0x5ffba10 dispatchers and 0x5ffae10/0x5ffbde0 wrappers (#4402)",
+    "0x609e510 options-map host and 0x609e2d0 configure (#4349, #4402)",
+    "0x61cf670 Status ctor, 0x5d350c0 shared_ptr release",
+    "0x612f730 string ctor (this TU's copy; 0x5fcd890 is the sibling copy)",
+    "0x61f8670 PatternEntry Matches (PR #3983)"
+  ]
+}

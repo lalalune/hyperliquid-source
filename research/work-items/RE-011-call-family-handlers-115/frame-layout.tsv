@@ -1,0 +1,18 @@
+offset	length	source
+0x0	8	record tag: 1 for DELEGATECALL, 0 otherwise
+0x8	32	call value: CALL/CALLCODE = third stack word, DELEGATECALL = interpreter +0x58, STATICCALL = 0
+0x28	32	host result bytes +0x10..+0x2f
+0x48	8	host result word 0
+0x50	8	zero
+0x58	16	range helper in_off, in_end (after the +0x18 shift)
+0x68	8	never written (stack garbage)
+0x70	16	range helper out_off, out_end
+0x80	8	host result word 1
+0x88	8	interpreter +0x190
+0x90	20	target address, big-endian 160 bits of the second stack word
+0xa4	20	CALL/STATICCALL = target address again; CALLCODE/DELEGATECALL = interpreter +0x78
+0xb8	20	DELEGATECALL = interpreter +0x8c (caller); others = interpreter +0x78 (executing address)
+0xcc	1	static byte: STATICCALL = 1, others = interpreter +0x1a8
+0xcd	1	host result tag byte (0 or 1)
+0xce	1	frame scheme: CALL 0, CALLCODE 1, DELEGATECALL 2, STATICCALL 3
+0xcf	1	never written (stack garbage)

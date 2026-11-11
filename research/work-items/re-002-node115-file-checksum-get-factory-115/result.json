@@ -1,0 +1,124 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "function": {
+    "start": "0x61cd600",
+    "end": "0x61cd716",
+    "body_sha256": "9016de75b9bb6c8723439a5a3ca9b4fba7e7d95bf20ef98cf508d51238e6c4df",
+    "fde": [
+      "0x61cd600",
+      "0x61cd716"
+    ],
+    "census_symbol": "rocksdb::GetFileChecksumGenCrc32cFactory",
+    "census_body_sha256": "9016de75b9bb6c8723439a5a3ca9b4fba7e7d95bf20ef98cf508d51238e6c4df"
+  },
+  "guard": {
+    "address": "0x6508930",
+    "observation": "byte tested first; nonzero jumps straight to the copy path"
+  },
+  "static": {
+    "ptr": "0x6508940",
+    "control_ptr": "0x6508948",
+    "layout": "16-byte shared_ptr: factory pointer +0x0, control pointer +0x8"
+  },
+  "semantics": "return the process-wide shared FileChecksumGenCrc32cFactory, creating it (and its control block) on the first call; every call returns the same pair and raises use_count by 1",
+  "init": {
+    "factory_object": {
+      "size": "0x20",
+      "vptr": "0x64d79b0",
+      "vector_member_zeroed": true,
+      "member": "begin +0x8, end +0x10, capacity +0x18 (all zero)"
+    },
+    "control_block": {
+      "size": "0x18",
+      "vptr": "0x64d7a90",
+      "use_count": 1,
+      "weak_count": 1,
+      "counts_word": "0x0000000100000001",
+      "managed_ptr": "factory object A"
+    },
+    "static": {
+      "guard": "0x6508930",
+      "ptr": "0x6508940",
+      "control_ptr": "0x6508948"
+    },
+    "atexit": {
+      "destructor": "0x61cd720",
+      "dso_handle": "0x64efa20"
+    }
+  },
+  "copy": {
+    "form": "16-byte movdqa load + movups store; increment use_count by 1 iff the control pointer is nonzero",
+    "increment": "lock addl when the thread-flag byte is 0, plain addl otherwise",
+    "thread_flag_slot": "0x64ed290 (.got, zero in the static image)"
+  },
+  "check_values": {
+    "fresh_first_get": {
+      "call": [
+        "A",
+        "B",
+        2,
+        true,
+        "lock"
+      ],
+      "note": "init runs once, returns (A, B), use_count 1 -> 2"
+    },
+    "five_gets_from_fresh": {
+      "final_use": 6,
+      "init_runs": 1,
+      "note": "one static reference + five live copies"
+    },
+    "get_then_release": {
+      "final_use": 1,
+      "note": "use_count returns to 1 (the static reference)"
+    },
+    "threaded_flag_selects_plain_increment": {
+      "flag_zero_form": "lock",
+      "flag_nonzero_form": "plain",
+      "note": "flag byte 0 -> lock addl at 0x61cd660; nonzero -> plain addl at 0x61cd64c"
+    },
+    "defensive_empty_static": {
+      "call": [
+        null,
+        null,
+        0,
+        false,
+        null
+      ],
+      "note": "guard set but static empty returns (None, None) with no increment"
+    },
+    "init_layout": {
+      "factory_object": {
+        "size": "0x20",
+        "vptr": "0x64d79b0",
+        "vector_member_zeroed": true,
+        "member": "begin +0x8, end +0x10, capacity +0x18 (all zero)"
+      },
+      "control_block": {
+        "size": "0x18",
+        "vptr": "0x64d7a90",
+        "use_count": 1,
+        "weak_count": 1,
+        "counts_word": "0x0000000100000001",
+        "managed_ptr": "factory object A"
+      },
+      "static": {
+        "guard": "0x6508930",
+        "ptr": "0x6508940",
+        "control_ptr": "0x6508948"
+      },
+      "atexit": {
+        "destructor": "0x61cd720",
+        "dso_handle": "0x64efa20"
+      }
+    }
+  },
+  "cases": {
+    "count": 2400,
+    "seed": 20261109,
+    "gets": 15754,
+    "releases": 4714,
+    "init_runs": 2117,
+    "mismatches_vs_reference": 0,
+    "aggregate_sha256": "43181e9223d6ee0a0c0b743900e8a4d2af98ffa3e9be6787892007b3e00c29a1"
+  }
+}

@@ -1,0 +1,81 @@
+{
+ "arguments": {
+  "data": "rdi; pointer to the input bytes. Read on every path (the opening stripes read data[0..128) unconditionally), never written",
+  "length": "rsi; the input length in bytes. The parent delegates exactly the range 129..240 here; inside the body the length selects nothing but the middle-loop gate (length > 0x8f) and the stripe count nbRounds = length >> 4 (signed division form), and addresses the final pair at data + length - 16",
+  "seed": "rdx; a 64-bit seed folded into every lane constant as (K + seed) on a pair's first lane and (K - seed) on its second lane. The sibling entry at 0x61c3a97 always passes seed 0 (edx zeroed at the site)"
+ },
+ "census": {
+  "direct_calls": [],
+  "direct_calls_note": "no e8 call site targets the window; it is entered only by the two tail jumps below",
+  "qword_hits_file_offsets": [],
+  "relative_slots": [],
+  "tail_jumps": [
+   "0x61c3750",
+   "0x61c3a97"
+  ],
+  "tail_jumps_note": "0x61c3750 sits in the parent hash callee (FDE 0x61c3530..0x61c389d), its delegation exit for lengths 129..240 with (data, length, seed) already in the argument registers. 0x61c3a97 sits in a sibling hash body (FDE 0x61c38a0..0x61c3bb9); at the site the length was compared against 0xf0 (ja away at 0x61c3a8f) and edx was zeroed, so that entry always passes seed 0. Both sites confirmed as real jmp instructions by linear disassembly of their containing FDEs (objdump). Per-site rows are in callers.tsv"
+ },
+ "component": "hash delegate (lengths 129..240)",
+ "entry_paths": [
+  {
+   "gate": "the parent's length dispatch: lengths 129..240 reach the restore block at 0x61c3740 (rdi = data restored) and the jump at 0x61c3750, with length <= 0xf0 established by the compare at 0x61c3743",
+   "kind": "tail jump (delegation from the parent hash callee)",
+   "site": "0x61c3750",
+   "source_fde": "0x61c3530..0x61c389d"
+  },
+  {
+   "gate": "inside the sibling body, the arm at 0x61c3a88 compares the length against 0xf0 and jumps away when above; otherwise edx is zeroed at 0x61c3a95 and the jump at 0x61c3a97 enters here with seed 0",
+   "kind": "tail jump (sibling hash body, seed forced to 0)",
+   "site": "0x61c3a97",
+   "source_fde": "0x61c38a0..0x61c3bb9"
+  }
+ ],
+ "final_mix": "avalanche(x): y = x ^ (x >> 37); y = y * 0x165667b19e3779f9 (mod 2^64); result = y ^ (y >> 32). Applied twice in this body: once to the accumulator after the eight opening stripes (inline at 0x61c33ca..0x61c33e6, result held in r8), and once at the end to r8 plus the final pair's fold (inline at 0x61c346e..0x61c348d)",
+ "length_arms": {
+  "129..143": "acc = len * P1 + the eight opening folds; avalanche; plus the final pair's fold (at data + len - 16, secret offset 119); avalanche. No middle loop (the gate at 0x61c33e9 compares the length against 0x8f and skips it)",
+  "144..240": "the 129..143 form with the middle loop added between the intermediate avalanche and the final pair: nbRounds - 8 stripes (1..7) at data + 128 + 16*k, secret read at offset 3 + 16*k, each fold added into the avalanched accumulator"
+ },
+ "mix_primitive": "a lane pair reads two consecutive qwords; x = (K1 + seed) ^ first, y = (K2 - seed) ^ second; the pair contributes fold(x, y) = (x*y mod 2^64) ^ (x*y >> 64) (the low and high halves of the 128-bit product, xored). K1/K2 are consecutive qwords of the 192-byte secret table at 0x97df00 at the pair's stated offset",
+ "model": "tools/hash_delegate_c3230_115.py",
+ "node": 115,
+ "primes": {
+  "p1": "0x9e3779b185ebca87",
+  "p3": "0x165667b19e3779f9 (the avalanche multiplier)"
+ },
+ "return_value": "rax: the 64-bit hash of the input under the seed, for lengths 129..240",
+ "secret_table": {
+  "note": "the 192-byte table at VA 0x97df00 in .rodata. The opening stripes and the final pair use its entries as immediates (verified entry by entry against the table); the middle loop reads it from memory at offset 3 + 16*k per stripe (the lea at 0x61c33f8 loads 0x97df0b and the loop reads [ptr-8] / [ptr]). Its first two qwords are the parent's C_A / C_B lane constants, so it is the same table the parent cites",
+  "offsets_used": {
+   "final_pair": "119 (one pair: qwords at 119 and 127)",
+   "middle_loop": "3 + 16*k for k = 0..nbRounds-9 (qwords at 3+16*k and 11+16*k)",
+   "opening_stripes": "16*i for i = 0..7 (qwords at 16*i and 16*i+8)"
+  },
+  "va": "0x97df00"
+ },
+ "semantics": {
+  "accumulator_init": "acc = len * 0x9e3779b185ebca87 (imul at 0x61c3252)",
+  "final_pair": "one lane pair at data + len - 16 with the secret at offset 119, added after the middle loop (the pair is set up at 0x61c3437..0x61c3465)",
+  "intermediate_avalanche": "after the eight opening folds the accumulator is avalanched once (0x61c33ca) and the middle-loop folds and the final pair's fold accumulate onto the avalanched value; the result is avalanched again before ret",
+  "middle_loop": "gate: cmp $0x8f,%ebx at 0x61c33e9, skipped when len <= 143. Trip count nbRounds - 8 with nbRounds = len >> 4 (the lea/cmovns/sar sequence at 0x61c3233..0x61c327a is a signed divide by 16; the counter r9d starts at 8). Stripe k reads data at 128 + 16*k and the secret qwords at 0x97df03 + 16*k and 0x97df0b + 16*k (i.e. table offsets 3 + 16*k and 11 + 16*k)",
+  "opening_stripes": "eight lane pairs over data[0..128): pair i reads data + 16*i with the secret qwords at offsets 16*i (+ seed) and 16*i + 8 (- seed), baked in as immediates at 0x61c3260..0x61c33bd"
+ },
+ "side_effects": "none: no stores but the three saved-register pushes (rbx, r14, r15, all popped before ret), no calls, and \u2014 for lengths in the contract range 129..240 \u2014 no reads outside [data, data+length) plus the secret table; callee-saved registers rbx/rbp/r12-r15 preserved (rbp, r12, r13 are never touched)",
+ "tests": "tests/test_hash_delegate_c3230_115.py",
+ "unknowns": [
+  "the sibling entry body's own semantics (FDE 0x61c38a0..0x61c3bb9): only its delegation site, the 0xf0 length gate and the seed zeroing are claimed here, not the sibling's arms",
+  "the second delegation target's body: 0x61c2cb0 (lengths 241+) remains cited by contract only, as in the parent packet",
+  "the exact source spelling of the function; the RE-002 vendor census registers this window as XXPH3_len_129to240_64b.constprop.0 (librocksdb-sys 0.11.0+8.1.1) \u2014 that identity is the census's claim and is consistent with everything pinned here (the wyhash-family secret table, the (K + seed)/(K - seed) lane xors, the 128-bit multiply folds, the two primes), but this packet pins the target body's own semantics and neither needs nor re-claims the identity",
+  "why the middle loop reads the secret at offset 3 + 16*k rather than at the stripe-aligned offset; the offset is pinned as written, its source-level reason is not claimed"
+ ],
+ "window": {
+  "artifact": "work/hl-node-115.bin",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "cie_offset": "0",
+  "end": "0x61c3491",
+  "fde_length": "0x28",
+  "fde_offset": "0x376da0",
+  "provenance_path": "artifacts/node/115/hl-node",
+  "size_bytes": 609,
+  "start": "0x61c3230"
+ }
+}

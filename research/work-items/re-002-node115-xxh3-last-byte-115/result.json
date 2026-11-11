@@ -1,0 +1,129 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "function": {
+    "start": "0x616bd60",
+    "end": "0x616beac",
+    "body_sha256": "5680596a85a5810082875d361be174363d5b2b435a5c2494bc72543840138972",
+    "fde": [
+      "0x616bd60",
+      "0x616beac"
+    ],
+    "census_symbol": "rocksdb::ComputeBuiltinChecksumWithLastByte",
+    "census_body_sha256": "5680596a85a5810082875d361be174363d5b2b435a5c2494bc72543840138972"
+  },
+  "dispatch": [
+    {
+      "type": 0,
+      "arm": "default_arm",
+      "note": "returns 0 (kNoChecksum and any other type)"
+    },
+    {
+      "type": 1,
+      "arm": "crc32c_arm",
+      "note": "mask(extend(extend(0, data), last_byte)); reconstructed in PR #5396"
+    },
+    {
+      "type": 2,
+      "arm": "xxhash_arm",
+      "note": "XXH32(data || last_byte, seed 0); reconstructed in PR #5402"
+    },
+    {
+      "type": 3,
+      "arm": "xxhash64_arm",
+      "note": "(u32) XXH64(data || last_byte, seed 0); reconstructed in PR #5399"
+    },
+    {
+      "type": 4,
+      "arm": "mulmix_arm",
+      "note": "(u32) XXH3_64bits(data, n) ^ (last_byte * 0x6b9083d9); modelled here for n <= 16"
+    }
+  ],
+  "mulmix_arm": {
+    "start": "0x616bdee",
+    "end": "0x616be11",
+    "body_sha256": "3ffd29f510ec5ac717311872c4bce129b14ed4d1b6503b8ac601028ef421213d",
+    "helper": [
+      "0x61db650",
+      "0x61db93a"
+    ],
+    "helper_body_sha256": "adde9328dc4c355cf1410323721f18dea26b8d5508920d127f8cdfdabe5aa3bb",
+    "fde": [
+      "0x61db650",
+      "0x61db93a"
+    ],
+    "modelled_lengths": "0..16",
+    "semantics": "(u32) xxh3_64_short(data) ^ (last_byte * 0x6b9083d9)",
+    "secret_table": "0x97ec80",
+    "secret_words": [
+      "0xbe4ba423396cfeb8",
+      "0x1cad21f72c81017c",
+      "0xdb979083e96dd4de",
+      "0x1f67b3b7a4a44072",
+      "0x78e5c0cc4ee679cb",
+      "0x2172ffcc7dd05a82",
+      "0x8e2443f7744608b8",
+      "0x4c263a81e69035e0",
+      "0xcb00c391bb52283c"
+    ]
+  },
+  "immediates": {
+    "bitflip_1to3": "0x87275a9b",
+    "bitflip_4to8": "0xc73ab174c5ecd5a2",
+    "c1_9to16": "0x6782737bea4239b9",
+    "c2_9to16": "0xaf56bc3b0996523a",
+    "prime64_2": "0xc2b2ae3d27d4eb4f",
+    "prime64_3": "0x165667b19e3779f9",
+    "avalanche_mul": "0x165667919e3779f9",
+    "rrmxmx_mul": "0x9fb21c651e98df25",
+    "mulmix_imul": "0x6b9083d9",
+    "empty_hash": "0x2d06800538d394c2"
+  },
+  "immediate_sites": {
+    "bitflip_1to3": [
+      "0x61db90f"
+    ],
+    "empty_hash": [
+      "0x61db8d6"
+    ],
+    "bitflip_4to8": [
+      "0x61db875"
+    ],
+    "rrmxmx_mul": [
+      "0x61db893"
+    ],
+    "c1_9to16": [
+      "0x61db666"
+    ],
+    "c2_9to16": [
+      "0x61db673"
+    ],
+    "avalanche_mul": [
+      "0x61db6a2"
+    ],
+    "prime64_2": [
+      "0x61db906"
+    ],
+    "prime64_3": [
+      "0x61db923"
+    ]
+  },
+  "check_value": {
+    "helper_empty": "0x2d06800538d394c2",
+    "expected_helper_empty": "0x2d06800538d394c2",
+    "helper_a": "0xe6c632b61e964e1f",
+    "expected_helper_a": "0xe6c632b61e964e1f",
+    "helper_abc": "0x78af5f94892f3950",
+    "helper_16byte": "0x8355e3a6f61770db",
+    "arm_empty_0x00": "0x38d394c2",
+    "arm_a_0x00": "0x1e964e1f",
+    "arm_abc_0xff": "0xaddc6c77",
+    "arm_16byte_0x00": "0xf61770db"
+  },
+  "cases": {
+    "count": 2400,
+    "seed": 20261109,
+    "max_length": 16,
+    "mismatches_vs_reference": 0,
+    "aggregate_sha256": "e3a1ed59ddc08b455fb80269d75e9680f60439ca4eda4d69449d790a4e288bfe"
+  }
+}

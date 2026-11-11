@@ -1,0 +1,1100 @@
+{
+  "ar": {
+    "binary_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "checked_bytes": {
+      "0x298f464": {
+        "bytes": "4883fe1f",
+        "meaning": "SIGNEXTEND: index limb 0 compared with 31"
+      },
+      "0x298f468": {
+        "bytes": "4983d800",
+        "meaning": "SIGNEXTEND: sbb chain folds the upper index limbs into the >= 31 test"
+      },
+      "0x298f47d": {
+        "bytes": "48c1e93d",
+        "meaning": "SIGNEXTEND: index >> 61 non-zero goes to the panic arm (unreachable after the < 31 test)"
+      },
+      "0x298f48a": {
+        "bytes": "488d04f507000000",
+        "meaning": "SIGNEXTEND: sign bit index 8 * k + 7"
+      },
+      "0x298f52a": {
+        "bytes": "40f6c701",
+        "meaning": "SIGNEXTEND: sign bit selects the or-ones arm or the and-mask arm"
+      },
+      "0x298f596": {
+        "bytes": "488d3d3b42ab03",
+        "meaning": "SIGNEXTEND: panic arm loads its location argument"
+      },
+      "0x298f59d": {
+        "bytes": "ff15cd02b503",
+        "meaning": "SIGNEXTEND: panic arm calls through a GOT slot"
+      },
+      "0x298f7f0": {
+        "bytes": "488b4730",
+        "meaning": "MUL: stack length at interpreter +0x30"
+      },
+      "0x298f7f4": {
+        "bytes": "4883f802",
+        "meaning": "MUL: two operands required"
+      },
+      "0x298f808": {
+        "bytes": "4c8b6f28",
+        "meaning": "MUL: stack base pointer at interpreter +0x28"
+      },
+      "0x298f83b": {
+        "bytes": "48f7e1",
+        "meaning": "MUL: first 64x64->128 limb product (low limbs)"
+      },
+      "0x298f862": {
+        "bytes": "490fafda",
+        "meaning": "MUL: truncated product limb 3 x limb 0 (only the low half reaches result limb 3)"
+      },
+      "0x298f8e9": {
+        "bytes": "b02c",
+        "meaning": "MUL: result 0x2c (stack underflow)"
+      },
+      "0x298f9cf": {
+        "bytes": "482b7411e0",
+        "meaning": "SUB: top minus second, limb 0 (sub)"
+      },
+      "0x298f9d4": {
+        "bytes": "4c1b4411e8",
+        "meaning": "SUB: borrow chain, limb 1 (sbb)"
+      }
+    },
+    "functions": {
+      "0x298f430": {
+        "arity": 2,
+        "fde_bytes": 371,
+        "fde_end": "0x298f5a3",
+        "instructions": 99,
+        "min_spec_byte": null,
+        "name_inferred": "SIGNEXTEND",
+        "opcode": "0xb",
+        "returns": 2,
+        "sha256": "5ab68bf776cd54c54646a53bf61fb2ca450f063997c3eb2a75a0bde27a99f6a6"
+      },
+      "0x298f7f0": {
+        "arity": 2,
+        "fde_bytes": 252,
+        "fde_end": "0x298f8ec",
+        "instructions": 75,
+        "min_spec_byte": null,
+        "name_inferred": "MUL",
+        "opcode": "0x2",
+        "returns": 2,
+        "sha256": "f135e34aeaded350b891dae247c17ebc1ba467994f805e23331cfc80d821e5bf"
+      },
+      "0x298f9a0": {
+        "arity": 2,
+        "fde_bytes": 93,
+        "fde_end": "0x298f9fd",
+        "instructions": 24,
+        "min_spec_byte": null,
+        "name_inferred": "SUB",
+        "opcode": "0x3",
+        "returns": 2,
+        "sha256": "67f7b50ff6434e5c98165a5a49802d2f539bf3d1c0ff87c267be3ce694cabd68"
+      }
+    },
+    "interpreter_offsets": {
+      "spec_byte": "0x1a9",
+      "stack_len": "0x30",
+      "stack_ptr": "0x28"
+    },
+    "opcode_table_slots": {
+      "0x6441210+0x10": {
+        "opcode": "0x2",
+        "target": "0x298f7f0"
+      },
+      "0x6441210+0x18": {
+        "opcode": "0x3",
+        "target": "0x298f9a0"
+      },
+      "0x6441210+0x58": {
+        "opcode": "0xb",
+        "target": "0x298f430"
+      },
+      "0x6441f00+0x10": {
+        "opcode": "0x2",
+        "target": "0x298f7f0"
+      },
+      "0x6441f00+0x18": {
+        "opcode": "0x3",
+        "target": "0x298f9a0"
+      },
+      "0x6441f00+0x58": {
+        "opcode": "0xb",
+        "target": "0x298f430"
+      }
+    },
+    "results": {
+      "not_activated": 43,
+      "ok": 0,
+      "underflow": 44
+    },
+    "signextend_panic_arm": {
+      "arm": "0x298f596",
+      "got_slot": "0x64df870",
+      "got_slot_kind": "RELATIVE 0x1681dc0",
+      "got_slot_section": ".got",
+      "rdi_lea_target": "0x64437d8",
+      "rdi_section": ".data.rel.ro",
+      "reachable": "no: the index >= 31 test returns first, so index >> 61 is always zero here"
+    }
+  },
+  "dv": {
+    "binary_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "checked_bytes": {
+      "0x144de4c": {
+        "bytes": "0f92c1",
+        "meaning": "div_rem: numerator < divisor limb compare chain"
+      },
+      "0x144debc": {
+        "bytes": "ff1546160905",
+        "meaning": "div_rem: n < d copies the numerator into the remainder (memcpy)"
+      },
+      "0x144dfdc": {
+        "bytes": "488b3d751a0905",
+        "meaning": "div_rem: reciprocal table pointer from GOT slot 0x64dfa58"
+      },
+      "0x144e0f7": {
+        "bytes": "49f7f6",
+        "meaning": "div_rem: single-limb divisor uses the hardware div"
+      },
+      "0x144ea89": {
+        "bytes": "4b1904ea",
+        "meaning": "div_rem: multiply-subtract borrow chain"
+      },
+      "0x298f946": {
+        "bytes": "7443",
+        "meaning": "MOD: zero divisor skips the divider and leaves the zero word in place"
+      },
+      "0x298f968": {
+        "bytes": "ff151202b503",
+        "meaning": "MOD: call the divider through GOT slot 0x64dfb80"
+      },
+      "0x298f96e": {
+        "bytes": "0f280424",
+        "meaning": "MOD: result is the divisor slot (the remainder)"
+      },
+      "0x298f993": {
+        "bytes": "b02c",
+        "meaning": "MOD: result 0x2c (stack underflow)"
+      },
+      "0x298fa04": {
+        "bytes": "4883f802",
+        "meaning": "SDIV: two operands required"
+      },
+      "0x298fa5a": {
+        "bytes": "e8615c0000",
+        "meaning": "SDIV: call i256_div helper 0x29956c0 (out, &top, &second)"
+      },
+      "0x298fa7f": {
+        "bytes": "b02c",
+        "meaning": "SDIV: result 0x2c (stack underflow)"
+      },
+      "0x298faea": {
+        "bytes": "e8915d0000",
+        "meaning": "SMOD: call i256_mod helper 0x2995880 (out, &top, &second)"
+      },
+      "0x298fb0f": {
+        "bytes": "b02c",
+        "meaning": "SMOD: result 0x2c (stack underflow)"
+      },
+      "0x29956d4": {
+        "bytes": "782b",
+        "meaning": "i256_div: negative divisor is negated in place"
+      },
+      "0x29956f1": {
+        "bytes": "7538",
+        "meaning": "i256_div: zero divisor stores 0"
+      },
+      "0x2995772": {
+        "bytes": "660fef0d9602acfd",
+        "meaning": "i256_div: |a| xor 2^255 (constant 0x455a10) tests a == MIN"
+      },
+      "0x29957c5": {
+        "bytes": "81ffffff0000",
+        "meaning": "i256_div: |b| == 1 together with a == MIN returns MIN"
+      },
+      "0x2995808": {
+        "bytes": "ff1572a3b403",
+        "meaning": "i256_div: divider through GOT slot 0x64dfb80 (quotient = numerator slot)"
+      },
+      "0x299582b": {
+        "bytes": "4130ef",
+        "meaning": "i256_div: (a >= 0) xor (b < 0) == 0 means the signs differ: negate"
+      },
+      "0x299586b": {
+        "bytes": "49ffc6",
+        "meaning": "i256_div: 0x7fff..ff + 1 builds the MIN top limb"
+      },
+      "0x2995891": {
+        "bytes": "7854",
+        "meaning": "i256_mod: negative dividend is negated in place"
+      },
+      "0x29958ae": {
+        "bytes": "7426",
+        "meaning": "i256_mod: zero dividend stores 0"
+      },
+      "0x29958d4": {
+        "bytes": "756d",
+        "meaning": "i256_mod: zero divisor stores 0"
+      },
+      "0x299597e": {
+        "bytes": "ff15fca1b403",
+        "meaning": "i256_mod: divider through GOT slot 0x64dfb80 (remainder = divisor slot)"
+      },
+      "0x29959ab": {
+        "bytes": "0f892effffff",
+        "meaning": "i256_mod: result takes the dividend's sign"
+      }
+    },
+    "functions": {
+      "0x144dde0": {
+        "fde_bytes": 5874,
+        "fde_end": "0x144f4d2",
+        "name_inferred": "u256 div_rem (in place)",
+        "reached_via": "RELATIVE GOT slot 0x64dfb80",
+        "sha256": "9ffe01517b40f90f250383631c40d0ee6bfab88e8a24c24239d6457b8b300e8c"
+      },
+      "0x298f8f0": {
+        "calls": [
+          {
+            "site": "0x298f968",
+            "target": "got:0x64dfb80"
+          }
+        ],
+        "fde_bytes": 166,
+        "fde_end": "0x298f996",
+        "instructions": 43,
+        "name_inferred": "MOD",
+        "returns": 2,
+        "sha256": "916e20a36de55138bd8deddfc83784cbd98c3eddcb7491e4840eb6bb4a7e0df1"
+      },
+      "0x298fa00": {
+        "calls": [
+          {
+            "site": "0x298fa5a",
+            "target": "0x29956c0"
+          }
+        ],
+        "fde_bytes": 130,
+        "fde_end": "0x298fa82",
+        "instructions": 34,
+        "name_inferred": "SDIV",
+        "returns": 2,
+        "sha256": "fba918f6c053d046e33719b5ff06aeedc6d5e8e9f71783a9bc217b1e170b37fe"
+      },
+      "0x298fa90": {
+        "calls": [
+          {
+            "site": "0x298faea",
+            "target": "0x2995880"
+          }
+        ],
+        "fde_bytes": 130,
+        "fde_end": "0x298fb12",
+        "instructions": 34,
+        "name_inferred": "SMOD",
+        "returns": 2,
+        "sha256": "d008ee5cd6f5a3b26ce40c873ab0224616cc85353cb56bc65c473230b0834517"
+      },
+      "0x29956c0": {
+        "calls": [
+          {
+            "site": "0x2995808",
+            "target": "got:0x64dfb80"
+          }
+        ],
+        "fde_bytes": 445,
+        "fde_end": "0x299587d",
+        "instructions": 113,
+        "name_inferred": "i256_div",
+        "returns": 1,
+        "sha256": "1d6d40ccfad4d95f9e27570c8c944cf5c65319fa4a78a22711b9aca96e485117"
+      },
+      "0x2995880": {
+        "calls": [
+          {
+            "site": "0x299597e",
+            "target": "got:0x64dfb80"
+          }
+        ],
+        "fde_bytes": 354,
+        "fde_end": "0x29959e2",
+        "instructions": 96,
+        "name_inferred": "i256_mod",
+        "returns": 2,
+        "sha256": "77b84d85022fded8c6d1e13c287543f889b021e0492f1a685556430004a87cd3"
+      }
+    },
+    "interpreter_offsets": {
+      "stack_len": "0x30",
+      "stack_ptr": "0x28"
+    },
+    "libc_imports": {
+      "0x64df508": "memcpy",
+      "0x64df568": "memmove",
+      "0x64df750": "memset"
+    },
+    "min_test_constant": {
+      "bytes": "00000000000000000000000000000080",
+      "va": "0x455a10"
+    },
+    "opcode_table_slots": {
+      "0x6441210+0x28": {
+        "opcode": "0x5",
+        "target": "0x298fa00"
+      },
+      "0x6441210+0x30": {
+        "opcode": "0x6",
+        "target": "0x298f8f0"
+      },
+      "0x6441210+0x38": {
+        "opcode": "0x7",
+        "target": "0x298fa90"
+      },
+      "0x6441f00+0x28": {
+        "opcode": "0x5",
+        "target": "0x298fa00"
+      },
+      "0x6441f00+0x30": {
+        "opcode": "0x6",
+        "target": "0x298f8f0"
+      },
+      "0x6441f00+0x38": {
+        "opcode": "0x7",
+        "target": "0x298fa90"
+      }
+    },
+    "reciprocal_table": {
+      "entries": 256,
+      "first": 2045,
+      "index": "top 9 bits of the normalised divisor limb (256..511), base table - 0x200",
+      "last": 1024,
+      "matches_floor_0x7fd00_div_d9": 256,
+      "sha256": "8b408ead863f2f5ee70ebae15f8cf153075b8801234366e88a3a059947f000a7",
+      "slot": "0x64dfa58",
+      "table": "0x944462"
+    },
+    "results": {
+      "ok": 0,
+      "underflow": 44
+    }
+  },
+  "ex": {
+    "binary_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "checked_bytes": {
+      "0x298f6a4": {
+        "bytes": "4883f802",
+        "meaning": "EXP: two operands required"
+      },
+      "0x298f6c8": {
+        "bytes": "48894730",
+        "meaning": "EXP: the new length is stored before any gas check"
+      },
+      "0x298f6ec": {
+        "bytes": "0f8489000000",
+        "meaning": "EXP: zero exponent skips the dynamic charge"
+      },
+      "0x298f706": {
+        "bytes": "bb7f000000",
+        "meaning": "EXP: bsr default for an all-zero low half (0x7f ^ 0x3f + 0x40)"
+      },
+      "0x298f747": {
+        "bytes": "baff000000",
+        "meaning": "EXP: 255 - leading zeros"
+      },
+      "0x298f753": {
+        "bytes": "488b8950020000",
+        "meaning": "EXP: host +0x250 = parameter block"
+      },
+      "0x298f75a": {
+        "bytes": "c1e803",
+        "meaning": "EXP: / 8"
+      },
+      "0x298f75d": {
+        "bytes": "48ffc0",
+        "meaning": "EXP: + 1 = significant exponent bytes"
+      },
+      "0x298f760": {
+        "bytes": "48f76118",
+        "meaning": "EXP: bytes * parameter +0x18 (gas per exponent byte)"
+      },
+      "0x298f764": {
+        "bytes": "706c",
+        "meaning": "EXP: multiply overflow takes the saturating arm"
+      },
+      "0x298f766": {
+        "bytes": "488b8f88010000",
+        "meaning": "EXP: interpreter +0x188 = remaining gas"
+      },
+      "0x298f770": {
+        "bytes": "7273",
+        "meaning": "EXP: remaining < cost -> out of gas"
+      },
+      "0x298f7b1": {
+        "bytes": "e8fad70600",
+        "meaning": "EXP: call the helper 0x29fcfb0 (out, &top, &copy of second)"
+      },
+      "0x298f7cf": {
+        "bytes": "b02c",
+        "meaning": "EXP: result 0x2c (stack underflow)"
+      },
+      "0x298f7d2": {
+        "bytes": "48c7c0ffffffff",
+        "meaning": "EXP: saturated cost 2^64 - 1"
+      },
+      "0x298f7e5": {
+        "bytes": "b020",
+        "meaning": "EXP: result 0x20 (out of gas)"
+      },
+      "0x2998720": {
+        "bytes": "488b4730",
+        "meaning": "LT: stack length at interpreter +0x30"
+      },
+      "0x299872a": {
+        "bytes": "488b4f28",
+        "meaning": "LT: stack base pointer at interpreter +0x28"
+      },
+      "0x2998763": {
+        "bytes": "0f92c0",
+        "meaning": "LT: setb after the four-limb cmp/sbb chain (top < second)"
+      },
+      "0x2998782": {
+        "bytes": "b02c",
+        "meaning": "LT: result 0x2c (stack underflow)"
+      },
+      "0x2998790": {
+        "bytes": "80bfa90100000d",
+        "meaning": "CLZ: spec byte at interpreter +0x1a9 must be >= 0xd"
+      },
+      "0x29987bd": {
+        "bytes": "41b87f000000",
+        "meaning": "CLZ: bsr destination preset to 0x7f so a zero low limb gives 0x40 + 0x40"
+      },
+      "0x29987e0": {
+        "bytes": "4983e980",
+        "meaning": "CLZ: sub $-0x80 adds 128 when the upper half is zero"
+      },
+      "0x2998b80": {
+        "bytes": "80bfa901000005",
+        "meaning": "SHL: spec byte at interpreter +0x1a9 must be >= 5"
+      },
+      "0x2998bce": {
+        "bytes": "483d00010000",
+        "meaning": "SHL: shift limb 0 compared with 0x100"
+      },
+      "0x2998cb2": {
+        "bytes": "b02b",
+        "meaning": "SHL: result 0x2b (not activated)"
+      },
+      "0x29fcfe8": {
+        "bytes": "83f804",
+        "meaning": "helper: four zero limbs = zero exponent"
+      },
+      "0x29fcfed": {
+        "bytes": "b801000000",
+        "meaning": "helper: zero exponent returns 1"
+      },
+      "0x29fd123": {
+        "bytes": "480facfa01",
+        "meaning": "helper: exponent shifted right by one in place"
+      },
+      "0x29fd161": {
+        "bytes": "83ff04",
+        "meaning": "helper: loop ends when the exponent is zero"
+      },
+      "0x29fd16a": {
+        "bytes": "f6c201",
+        "meaning": "helper: low exponent bit selects the multiply"
+      }
+    },
+    "functions": {
+      "0x298f6a0": {
+        "arity": 2,
+        "calls": 1,
+        "fde_bytes": 333,
+        "fde_end": "0x298f7ed",
+        "instructions": 87,
+        "min_spec_byte": null,
+        "opcode": "0xa",
+        "returns": 3,
+        "role": "EXP handler (inferred name)",
+        "sha256": "ead59dd56c64ec9b8e44b632d425423efafa76309df6498540038c48273d0239"
+      },
+      "0x2998630": {
+        "arity": 2,
+        "calls": 0,
+        "fde_bytes": 120,
+        "fde_end": "0x29986a8",
+        "instructions": 29,
+        "min_spec_byte": null,
+        "opcode": "0x14",
+        "returns": 2,
+        "role": "EQ handler (inferred name)",
+        "sha256": "7809f096ea4138aefd93c82129ffa623c7aba78af0a418786a381f27d3edc54c"
+      },
+      "0x29986b0": {
+        "arity": 2,
+        "calls": 0,
+        "fde_bytes": 110,
+        "fde_end": "0x299871e",
+        "instructions": 29,
+        "min_spec_byte": null,
+        "opcode": "0x11",
+        "returns": 2,
+        "role": "GT handler (inferred name)",
+        "sha256": "e42b146e8faa1c721592a80e641122803a76e7d4700015d5993bb0128b358abe"
+      },
+      "0x2998720": {
+        "arity": 2,
+        "calls": 0,
+        "fde_bytes": 101,
+        "fde_end": "0x2998785",
+        "instructions": 26,
+        "min_spec_byte": null,
+        "opcode": "0x10",
+        "returns": 2,
+        "role": "LT handler (inferred name)",
+        "sha256": "00de095608e203ea9ec59e2764a9b57ac79ca48c2010dfb3063a9809109c52a9"
+      },
+      "0x2998790": {
+        "arity": 1,
+        "calls": 0,
+        "fde_bytes": 149,
+        "fde_end": "0x2998825",
+        "instructions": 38,
+        "min_spec_byte": 13,
+        "opcode": "0x1e",
+        "returns": 3,
+        "role": "CLZ handler (inferred name)",
+        "sha256": "b3822512879eada9c9099d3163237a47aa704de084ccad0a0e73fb83c37d239b"
+      },
+      "0x2998830": {
+        "arity": 1,
+        "calls": 0,
+        "fde_bytes": 59,
+        "fde_end": "0x299886b",
+        "instructions": 16,
+        "min_spec_byte": null,
+        "opcode": "0x19",
+        "returns": 2,
+        "role": "NOT handler (inferred name)",
+        "sha256": "554a911f4870475fb76995c99d278edc424044fa3e6d1068c67e5cb78a8e3376"
+      },
+      "0x2998870": {
+        "arity": 2,
+        "calls": 0,
+        "fde_bytes": 535,
+        "fde_end": "0x2998a87",
+        "instructions": 145,
+        "min_spec_byte": 5,
+        "opcode": "0x1d",
+        "returns": 3,
+        "role": "SAR handler (inferred name)",
+        "sha256": "3ba3b186f978f4828a1ef94e41f52ac277978b0d5a7035f6586398b23e5a1a3b"
+      },
+      "0x2998a90": {
+        "arity": 2,
+        "calls": 0,
+        "fde_bytes": 240,
+        "fde_end": "0x2998b80",
+        "instructions": 63,
+        "min_spec_byte": null,
+        "opcode": "0x13",
+        "returns": 2,
+        "role": "SGT handler (inferred name)",
+        "sha256": "e3930e1bf06021883f02aa3605506eac7aabb1d9ad4c2cd9898ff9e9737242e6"
+      },
+      "0x2998b80": {
+        "arity": 2,
+        "calls": 0,
+        "fde_bytes": 312,
+        "fde_end": "0x2998cb8",
+        "instructions": 90,
+        "min_spec_byte": 5,
+        "opcode": "0x1b",
+        "returns": 3,
+        "role": "SHL handler (inferred name)",
+        "sha256": "fc1781f523a1cd9935cf6b634d1c0d450ae487381848a5dbe8c453fa0ed4085f"
+      },
+      "0x2998cc0": {
+        "arity": 2,
+        "calls": 0,
+        "fde_bytes": 305,
+        "fde_end": "0x2998df1",
+        "instructions": 87,
+        "min_spec_byte": 5,
+        "opcode": "0x1c",
+        "returns": 3,
+        "role": "SHR handler (inferred name)",
+        "sha256": "8947d5bf5e6986ef7c75dfde42d438adcdc4ad7fccf42adae1f77e1433b21c43"
+      },
+      "0x2998e00": {
+        "arity": 2,
+        "calls": 0,
+        "fde_bytes": 240,
+        "fde_end": "0x2998ef0",
+        "instructions": 63,
+        "min_spec_byte": null,
+        "opcode": "0x12",
+        "returns": 2,
+        "role": "SLT handler (inferred name)",
+        "sha256": "ea37cd65199821351874eb0f248a9ac94d63c92da802b931e5c3aa017bb26ac9"
+      },
+      "0x2998ef0": {
+        "arity": 2,
+        "calls": 0,
+        "fde_bytes": 140,
+        "fde_end": "0x2998f7c",
+        "instructions": 37,
+        "min_spec_byte": null,
+        "opcode": "0x1a",
+        "returns": 2,
+        "role": "BYTE handler (inferred name)",
+        "sha256": "9759a9d3c907be76f7a15ed8a30f9ee9494258557cff34f87c7b9b5151ab5552"
+      },
+      "0x2998f80": {
+        "arity": 2,
+        "calls": 0,
+        "fde_bytes": 66,
+        "fde_end": "0x2998fc2",
+        "instructions": 19,
+        "min_spec_byte": null,
+        "opcode": "0x17",
+        "returns": 2,
+        "role": "OR handler (inferred name)",
+        "sha256": "056ceffcdfa73fcd14ec4f99808ac845de995c8f13994ca256892a903b651a9e"
+      },
+      "0x2998fd0": {
+        "arity": 2,
+        "calls": 0,
+        "fde_bytes": 66,
+        "fde_end": "0x2999012",
+        "instructions": 19,
+        "min_spec_byte": null,
+        "opcode": "0x16",
+        "returns": 2,
+        "role": "AND handler (inferred name)",
+        "sha256": "4d85b516ee21fb8cbb0d199ad2f366ebfad27098080390415742ce1d752b183a"
+      },
+      "0x2999020": {
+        "arity": 2,
+        "calls": 0,
+        "fde_bytes": 66,
+        "fde_end": "0x2999062",
+        "instructions": 19,
+        "min_spec_byte": null,
+        "opcode": "0x18",
+        "returns": 2,
+        "role": "XOR handler (inferred name)",
+        "sha256": "fd93b4d9a5c5f485f8ba89480dfae8bb9be470f4f3a08fbf272a7a07143c54e0"
+      },
+      "0x2999070": {
+        "arity": 1,
+        "calls": 0,
+        "fde_bytes": 79,
+        "fde_end": "0x29990bf",
+        "instructions": 21,
+        "min_spec_byte": null,
+        "opcode": "0x15",
+        "returns": 2,
+        "role": "ISZERO handler (inferred name)",
+        "sha256": "bd61937bf784255f9c848fa8bd0016cb547d0f525785ee1945582fd786d4fd3b"
+      },
+      "0x29fcfb0": {
+        "arity": null,
+        "calls": 0,
+        "fde_bytes": 655,
+        "fde_end": "0x29fd23f",
+        "instructions": 171,
+        "min_spec_byte": null,
+        "opcode": "0xa",
+        "returns": 1,
+        "role": "256-bit wrapping square-and-multiply power, exponent consumed in place (inferred role)",
+        "sha256": "41c9faccbdc767e986472ace201aa37e9be22ae11b683b409952282277f8cb7b"
+      }
+    },
+    "host_offsets": {
+      "gas_per_exponent_byte": "0x18",
+      "parameter_block": "0x250"
+    },
+    "interpreter_offsets": {
+      "gas_remaining": "0x188",
+      "spec_byte": "0x1a9",
+      "stack_len": "0x30",
+      "stack_ptr": "0x28"
+    },
+    "opcode_table_slots": {
+      "0x6441210+0x50": {
+        "opcode": "0xa",
+        "target": "0x298f6a0"
+      },
+      "0x6441210+0x80": {
+        "opcode": "0x10",
+        "target": "0x2998720"
+      },
+      "0x6441210+0x88": {
+        "opcode": "0x11",
+        "target": "0x29986b0"
+      },
+      "0x6441210+0x90": {
+        "opcode": "0x12",
+        "target": "0x2998e00"
+      },
+      "0x6441210+0x98": {
+        "opcode": "0x13",
+        "target": "0x2998a90"
+      },
+      "0x6441210+0xa0": {
+        "opcode": "0x14",
+        "target": "0x2998630"
+      },
+      "0x6441210+0xa8": {
+        "opcode": "0x15",
+        "target": "0x2999070"
+      },
+      "0x6441210+0xb0": {
+        "opcode": "0x16",
+        "target": "0x2998fd0"
+      },
+      "0x6441210+0xb8": {
+        "opcode": "0x17",
+        "target": "0x2998f80"
+      },
+      "0x6441210+0xc0": {
+        "opcode": "0x18",
+        "target": "0x2999020"
+      },
+      "0x6441210+0xc8": {
+        "opcode": "0x19",
+        "target": "0x2998830"
+      },
+      "0x6441210+0xd0": {
+        "opcode": "0x1a",
+        "target": "0x2998ef0"
+      },
+      "0x6441210+0xd8": {
+        "opcode": "0x1b",
+        "target": "0x2998b80"
+      },
+      "0x6441210+0xe0": {
+        "opcode": "0x1c",
+        "target": "0x2998cc0"
+      },
+      "0x6441210+0xe8": {
+        "opcode": "0x1d",
+        "target": "0x2998870"
+      },
+      "0x6441210+0xf0": {
+        "opcode": "0x1e",
+        "target": "0x2998790"
+      },
+      "0x6441f00+0x50": {
+        "opcode": "0xa",
+        "target": "0x298f6a0"
+      },
+      "0x6441f00+0x80": {
+        "opcode": "0x10",
+        "target": "0x2998720"
+      },
+      "0x6441f00+0x88": {
+        "opcode": "0x11",
+        "target": "0x29986b0"
+      },
+      "0x6441f00+0x90": {
+        "opcode": "0x12",
+        "target": "0x2998e00"
+      },
+      "0x6441f00+0x98": {
+        "opcode": "0x13",
+        "target": "0x2998a90"
+      },
+      "0x6441f00+0xa0": {
+        "opcode": "0x14",
+        "target": "0x2998630"
+      },
+      "0x6441f00+0xa8": {
+        "opcode": "0x15",
+        "target": "0x2999070"
+      },
+      "0x6441f00+0xb0": {
+        "opcode": "0x16",
+        "target": "0x2998fd0"
+      },
+      "0x6441f00+0xb8": {
+        "opcode": "0x17",
+        "target": "0x2998f80"
+      },
+      "0x6441f00+0xc0": {
+        "opcode": "0x18",
+        "target": "0x2999020"
+      },
+      "0x6441f00+0xc8": {
+        "opcode": "0x19",
+        "target": "0x2998830"
+      },
+      "0x6441f00+0xd0": {
+        "opcode": "0x1a",
+        "target": "0x2998ef0"
+      },
+      "0x6441f00+0xd8": {
+        "opcode": "0x1b",
+        "target": "0x2998b80"
+      },
+      "0x6441f00+0xe0": {
+        "opcode": "0x1c",
+        "target": "0x2998cc0"
+      },
+      "0x6441f00+0xe8": {
+        "opcode": "0x1d",
+        "target": "0x2998870"
+      },
+      "0x6441f00+0xf0": {
+        "opcode": "0x1e",
+        "target": "0x2998790"
+      }
+    },
+    "results": {
+      "not_activated": 43,
+      "ok": 0,
+      "out_of_gas": 32,
+      "underflow": 44
+    }
+  },
+  "md": {
+    "binary_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "checked_bytes": {
+      "0x298fb2e": {
+        "bytes": "4883fb03",
+        "meaning": "ADDMOD: three operands required"
+      },
+      "0x298fba1": {
+        "bytes": "e88ae80600",
+        "meaning": "ADDMOD: call core 0x29fe430 (out, &top, &second, &third)"
+      },
+      "0x298fbc9": {
+        "bytes": "b02c",
+        "meaning": "ADDMOD: result 0x2c (stack underflow)"
+      },
+      "0x298fbee": {
+        "bytes": "4883fb03",
+        "meaning": "MULMOD: three operands required"
+      },
+      "0x298fc5c": {
+        "bytes": "ff157671b503",
+        "meaning": "MULMOD: call core through GOT slot 0x64e6dd8 (&top, &second, &third)"
+      },
+      "0x298fc8e": {
+        "bytes": "b02c",
+        "meaning": "MULMOD: result 0x2c (stack underflow)"
+      },
+      "0x29fe452": {
+        "bytes": "83f00f",
+        "meaning": "ADDMOD core: movmskps ^ 0xf == 0 means all four modulus dwords pairs are zero"
+      },
+      "0x29fe455": {
+        "bytes": "0f84d1000000",
+        "meaning": "ADDMOD core: zero modulus stores the zero word"
+      },
+      "0x29fe47d": {
+        "bytes": "4983d000",
+        "meaning": "ADDMOD core: adc carries into the top limb"
+      },
+      "0x29fe488": {
+        "bytes": "0f82a5000000",
+        "meaning": "ADDMOD core: carry out of the top limb (add r10, r9) takes the 5-limb path"
+      },
+      "0x29fe491": {
+        "bytes": "0f859c000000",
+        "meaning": "ADDMOD core: carry out of the adc chain takes the 5-limb path"
+      },
+      "0x29fe4cc": {
+        "bytes": "7247",
+        "meaning": "ADDMOD core: sum < modulus is returned unreduced"
+      },
+      "0x29fe4fc": {
+        "bytes": "ff157e16ae03",
+        "meaning": "ADDMOD core: otherwise u256 div_rem through GOT slot 0x64dfb80 (remainder)"
+      },
+      "0x29fe555": {
+        "bytes": "48c744242001000000",
+        "meaning": "ADDMOD core: fifth limb = 1 (the carry)"
+      },
+      "0x29fe567": {
+        "bytes": "ff15e389ae03",
+        "meaning": "ADDMOD core: 5-limb div_rem through GOT slot 0x64e6f50; n slot gets the remainder"
+      },
+      "0x43be00f": {
+        "bytes": "0f92c0",
+        "meaning": "limb compare: borrow of the first limb"
+      },
+      "0x43be01e": {
+        "bytes": "481b4a08",
+        "meaning": "limb compare: sbb chain over the next limbs"
+      },
+      "0x43bfca9": {
+        "bytes": "83f00f",
+        "meaning": "MULMOD core: zero-modulus test"
+      },
+      "0x43bfcac": {
+        "bytes": "0f84ff1b0000",
+        "meaning": "MULMOD core: zero modulus returns without writing (the zero word stays)"
+      },
+      "0x43c01e2": {
+        "bytes": "e819deffff",
+        "meaning": "MULMOD core: limb-slice compare helper 0x43be000"
+      },
+      "0x43c1f69": {
+        "bytes": "48837e1800",
+        "meaning": "5-limb div_rem: top divisor limb test"
+      }
+    },
+    "functions": {
+      "0x144dde0": {
+        "fde_bytes": 5874,
+        "fde_end": "0x144f4d2",
+        "name_inferred": "u256 div_rem (in place)",
+        "sha256": "9ffe01517b40f90f250383631c40d0ee6bfab88e8a24c24239d6457b8b300e8c"
+      },
+      "0x298fb20": {
+        "calls": [
+          {
+            "site": "0x298fba1",
+            "target": "0x29fe430"
+          }
+        ],
+        "fde_bytes": 182,
+        "fde_end": "0x298fbd6",
+        "instructions": 43,
+        "name_inferred": "ADDMOD",
+        "returns": 2,
+        "sha256": "6556cbacf0c137b46b3386766d710a9592a9d67662beb50a513c5729222cc033"
+      },
+      "0x298fbe0": {
+        "calls": [
+          {
+            "site": "0x298fc5c",
+            "target": "got:0x64e6dd8"
+          }
+        ],
+        "fde_bytes": 187,
+        "fde_end": "0x298fc9b",
+        "instructions": 44,
+        "name_inferred": "MULMOD",
+        "returns": 2,
+        "sha256": "1868ac41bbd089193319e14bf2a62cf1c497f411e6157869e1ceaea115282f17"
+      },
+      "0x29fe430": {
+        "calls": [
+          {
+            "site": "0x29fe4fc",
+            "target": "got:0x64dfb80"
+          },
+          {
+            "site": "0x29fe567",
+            "target": "got:0x64e6f50"
+          }
+        ],
+        "fde_bytes": 343,
+        "fde_end": "0x29fe587",
+        "instructions": 87,
+        "name_inferred": "addmod core (u256 add_mod)",
+        "returns": 2,
+        "sha256": "52dc8636bf3e6b20fdd92e22b7bd1dd82580ca1118cb790ec94110dba266478d"
+      },
+      "0x43be000": {
+        "calls": [
+          {
+            "site": "0x43be05a",
+            "target": "got:0x64df620"
+          }
+        ],
+        "fde_bytes": 96,
+        "fde_end": "0x43be060",
+        "instructions": 30,
+        "name_inferred": "limb-slice borrow compare",
+        "returns": 1,
+        "sha256": "ac533fcaf5eb4e8b4f62ab709fee1c3f1c1b4abca3b9caeac866fc74580f6882"
+      },
+      "0x43bfc80": {
+        "fde_bytes": 8909,
+        "fde_end": "0x43c1f4d",
+        "name_inferred": "mulmod core (u256 mul_mod, in place on the modulus)",
+        "sha256": "2414052e23f087872bb055b41ef4fadd3b4e52ccb98d933eb400fb247da33726"
+      },
+      "0x43c1f50": {
+        "fde_bytes": 6477,
+        "fde_end": "0x43c389d",
+        "name_inferred": "5-limb by 4-limb div_rem (in place)",
+        "sha256": "9b589ae93f401dbf302337a6315cdad1b25cde8f2a80df75378f1bf4f3d0fe1d"
+      }
+    },
+    "got_slots": {
+      "0x64dfb80": "0x144dde0",
+      "0x64e6dd8": "0x43bfc80",
+      "0x64e6f50": "0x43c1f50"
+    },
+    "interpreter_offsets": {
+      "stack_len": "0x30",
+      "stack_ptr": "0x28"
+    },
+    "libc_imports": {
+      "0x64df508": "memcpy",
+      "0x64df568": "memmove",
+      "0x64df750": "memset"
+    },
+    "opcode_table_slots": {
+      "0x6441210+0x40": {
+        "opcode": "0x8",
+        "target": "0x298fb20"
+      },
+      "0x6441210+0x48": {
+        "opcode": "0x9",
+        "target": "0x298fbe0"
+      },
+      "0x6441f00+0x40": {
+        "opcode": "0x8",
+        "target": "0x298fb20"
+      },
+      "0x6441f00+0x48": {
+        "opcode": "0x9",
+        "target": "0x298fbe0"
+      }
+    },
+    "panic_helpers": {
+      "0x64df520": {
+        "esi_imm": 57,
+        "helper": "0x1681da0",
+        "message": "attempt to add with overflow",
+        "text_va": "0x46eadd"
+      },
+      "0x64df840": {
+        "esi_imm": 71,
+        "helper": "0x1681e00",
+        "message": "attempt to shift left with overflow",
+        "text_va": "0x46eb39"
+      },
+      "0x64df848": {
+        "esi_imm": 67,
+        "helper": "0x1681e40",
+        "message": "attempt to subtract with overflow",
+        "text_va": "0x46eb80"
+      },
+      "0x64df878": {
+        "esi_imm": 51,
+        "helper": "0x1681d60",
+        "message": "attempt to divide by zero",
+        "text_va": "0x46f29b"
+      }
+    },
+    "results": {
+      "ok": 0,
+      "underflow": 44
+    }
+  }
+}

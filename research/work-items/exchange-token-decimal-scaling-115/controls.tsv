@@ -1,0 +1,61 @@
+control	meaning	first_mismatch_case
+spec:tok0_checked	token 0 also bounds-checked and scaled	0
+spec:bounds_gt	token index equal to the row count accepted	201
+spec:swap_dec	decimals bytes swapped	2
+spec:no_underflow	negative decimals difference accepted	630
+spec:allow_big	scale above u64 accepted	53
+spec:always_divide_first	divide-first used even when the product fits	12
+spec:ceil	quotient rounded up	2
+spec:ovf_flag_one	overflow fallback always reports success	0
+spec:pct10	percent divisor 10	4
+spec:no_round	round-up flag ignored	24
+spec:round_always	round up even when exact	4
+spec:bound_plus	bound one higher	407
+spec:no_hi_check	high word ignored	154
+spec:flip_sign	multiply and divide exchanged	8
+spec:mul_wrap	multiply overflow wraps	507
+spec:lo_only	only the low word is bounded	278
+byte:m_x100	scale step 100 -> 101	20
+byte:m_x1e4	scale step 10000 -> 10001	20
+byte:m_x1e8	scale step 1e8 -> 1e8+..	40
+byte:m_x1e16	scale step 1e16 changed	852
+byte:m_stride	token stride 0x158 -> 0x159	2
+byte:m_dec_off	wei decimals offset 0x49 -> 0x48	2
+byte:m_borrow	decimals underflow test inverted	2
+byte:m_bounds	token bound test inverted	2
+byte:m_mul_jo	product overflow test inverted	0
+byte:m_tok0	token 0 shortcut inverted	0
+byte:m_ret_flag	success flag 1 -> 0	1
+byte:m_setno	fallback flag setno -> seto	0
+byte:p_x100	percent divisor 100 -> 101	4
+byte:p_round	round-up flag test inverted	14
+byte:p_bound	percent bound constant changed	407
+byte:p_hi	high word zero test sete -> setne	7
+byte:p_carry	round-up carry adc 0 -> 1	7
+byte:p_ne	remainder non-zero setne -> sete	4
+byte:p_and	bound and high test and -> or	26
+byte:p_stride	token stride 0x158 -> 0x159	4
+byte:s_xor	sign fold xor -> or	59
+byte:s_x100	scale step 100 -> 101	19
+byte:s_x1e16	scale step 1e16 changed	78
+byte:s_bound	acceptance bound changed	657
+byte:s_jns	sign branch inverted	8
+byte:s_ovf	multiply overflow test inverted	189
+byte:s_zero	zero exponent test inverted	8
+byte:d_shr24	reciprocal shift 24 -> 25	8
+byte:d_shr55	reciprocal table index shift 55 -> 54	8
+byte:d_shl	normalising shift changed	8
+byte:s_one	zero exponent scale 1 -> 2	28
+misc:digest_flip	one flipped byte fails the digest check	0
+misc:fde_start	an address inside the body is refused as a start	0
+misc:extent_434f660	the body keeps its recorded extent	0
+misc:extent_434f790	the body keeps its recorded extent	0
+misc:extent_434f910	the body keeps its recorded extent	0
+misc:extent_63efec0	the body keeps its recorded extent	0
+misc:extent_43be790	the body keeps its recorded extent	0
+misc:extent_144dde0	the body keeps its recorded extent	0
+misc:unknown_target	a call to an unlisted target is refused	0
+misc:bad_location	a non-Location address is refused	0
+misc:unlisted_panic	a panic location outside the table is refused	0
+misc:wide_value	a 65-bit value cannot enter a 64-bit slot	0
+misc:exp_range	an exponent outside i8 is refused by the specification	0

@@ -1,0 +1,111 @@
+[
+  {
+    "name": "focused",
+    "command": [
+      "<work>/onchain-venv/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_user_admission_prefix115.py",
+      "-v"
+    ],
+    "exit": 0,
+    "wall_seconds": 6.581
+  },
+  {
+    "name": "fmt",
+    "command": [
+      "<work>/host-tools/rust-1.94.1/bin/rustfmt",
+      "--check",
+      "--edition",
+      "2021",
+      "src/node115-user-admission-prefix/lib.rs",
+      "src/node115-user-admission-prefix/input_only_driver.rs",
+      "research/work-items/RE-001-user-admission-prefix-115/client_fixture.rs"
+    ],
+    "exit": 0,
+    "wall_seconds": 2.125
+  },
+  {
+    "name": "clippy",
+    "command": [
+      "<work>/host-tools/rust-1.94.1/bin/clippy-driver",
+      "--edition=2021",
+      "--crate-name",
+      "node115_user_admission_prefix",
+      "--crate-type",
+      "rlib",
+      "-D",
+      "warnings",
+      "src/node115-user-admission-prefix/lib.rs",
+      "-o",
+      "<work>/hl-userprefix-checks/liblint.rlib"
+    ],
+    "exit": 0,
+    "wall_seconds": 6.646
+  },
+  {
+    "name": "scope-gates",
+    "command": [
+      "<work>/onchain-venv/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_verify_packets.py",
+      "-v"
+    ],
+    "exit": 0,
+    "wall_seconds": 49.419
+  },
+  {
+    "name": "doctor",
+    "command": [
+      "make",
+      "doctor"
+    ],
+    "exit": 0,
+    "wall_seconds": 6.952
+  },
+  {
+    "name": "verify",
+    "command": [
+      "make",
+      "verify"
+    ],
+    "exit": 0,
+    "wall_seconds": 68.464
+  },
+  {
+    "name": "catalogue",
+    "command": [
+      "make",
+      "catalogue"
+    ],
+    "exit": 0,
+    "wall_seconds": 57.211
+  },
+  {
+    "name": "catalogue-check",
+    "command": [
+      "make",
+      "catalogue-check"
+    ],
+    "exit": 0,
+    "wall_seconds": 62.125
+  },
+  {
+    "name": "reproduce",
+    "command": [
+      "make",
+      "reproduce"
+    ],
+    "exit": 0,
+    "wall_seconds": 118.344
+  }
+]

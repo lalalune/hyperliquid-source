@@ -1,0 +1,121 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "function": {
+    "start": "0x61dae20",
+    "end": "0x61db121",
+    "body_sha256": "577ad945e65ddde3fc0ca78ae8d6316c7cb08203bbca5d08a07babca5d08bec8",
+    "fde": [
+      "0x61dae20",
+      "0x61db121"
+    ],
+    "census_id": "node115-vendor-61dae20",
+    "census_symbol": "ROCKSDB_XXH64",
+    "census_body_sha256": "577ad945e65ddde3fc0ca78ae8d6316c7cb08203bbca5d08a07babca5d08bec8"
+  },
+  "contract": "xxh64(data: *const u8, n: usize, seed: u64) -> u64",
+  "primes": {
+    "P5": {
+      "site": "0x61dae24",
+      "value": "0x27d4eb2f165667c5"
+    },
+    "P2": {
+      "site": "0x61dae67",
+      "value": "0xc2b2ae3d27d4eb4f"
+    },
+    "P1": {
+      "site": "0x61dae82",
+      "value": "0x9e3779b185ebca87"
+    },
+    "P4": {
+      "site": "0x61daf59",
+      "value": "0x85ebca77c2b2ae63"
+    },
+    "P3": {
+      "site": "0x61db074",
+      "value": "0x165667b19e3779f9"
+    }
+  },
+  "strength_reduction": {
+    "site": "0x61daf0f",
+    "constant": "0xdef35b010f796ca9",
+    "formula": "P1 * P2 mod 2**64; round(0, v) is computed as rol(pre * P1*P2, 31) * P1 where pre is the stripe loop pre-multiply lane value"
+  },
+  "null_branch": {
+    "je_site": "0x61dae3c",
+    "avalanche_start": "0x61db0de",
+    "semantics": "null data jumps to the avalanche with h = seed + P5 + n; no buffer load"
+  },
+  "caller": {
+    "function": "rocksdb::ComputeBuiltinChecksum",
+    "address": "0x616bca0",
+    "call_site": "0x616bd38",
+    "note": "the type-3 arm calls 0x61dae20 and keeps the low 32 bits (reconstructed in PR #5413)"
+  },
+  "check_values": {
+    "xxh64_empty": {
+      "data_hex": "",
+      "seed": "0x0",
+      "out": "0xef46db3751d8e999",
+      "note": "published XXH64 empty vector 0xef46db3751d8e999"
+    },
+    "xxh64_single_a": {
+      "data_hex": "61",
+      "seed": "0x0",
+      "out": "0xd24ec4f1a98c6e5b",
+      "note": "published XXH64 vector 0xd24ec4f1a98c6e5b"
+    },
+    "xxh64_abc": {
+      "data_hex": "616263",
+      "seed": "0x0",
+      "out": "0x44bc2cf5ad770999",
+      "note": "published XXH64 vector 0x44bc2cf5ad770999"
+    },
+    "xxh64_123456789": {
+      "data_hex": "313233343536373839",
+      "seed": "0x0",
+      "out": "0x8cb841db40e6ae83",
+      "note": "computed by model and reference (both agree)"
+    },
+    "xxh64_32_sequential": {
+      "data": "bytes 0..31",
+      "seed": "0x0",
+      "out": "0xcbf59c5116ff32b4",
+      "note": "one full stripe, no tail"
+    },
+    "xxh64_33_sequential": {
+      "data": "bytes 0..32",
+      "seed": "0x0",
+      "out": "0x0c535d1acafb8ead",
+      "note": "one stripe plus a 1-byte tail"
+    },
+    "xxh64_64_sequential_seed1": {
+      "data": "bytes 0..63",
+      "seed": "0x1",
+      "out": "0x3ce5bdf7575926c0",
+      "note": "two stripes, nonzero seed"
+    },
+    "xxh64_1024_ab": {
+      "data": "1024 bytes of 0xab",
+      "seed": "0x0",
+      "out": "0x31c5118d25963ec5"
+    },
+    "xxh64_empty_seed1": {
+      "data_hex": "",
+      "seed": "0x1",
+      "out": "0xd5afba1336a3be4b",
+      "note": "empty input under a nonzero seed"
+    },
+    "xxh64_null_seed0_len9": {
+      "data": "null pointer, length 9",
+      "seed": "0x0",
+      "out": "0xd5dd67ec9a0b4dfa",
+      "note": "null branch: avalanche(seed + P5 + 9), no buffer load"
+    }
+  },
+  "cases": {
+    "count": 2400,
+    "seed": 20261109,
+    "mismatches_vs_reference": 0,
+    "aggregate_sha256": "cceb1459ff06f7a0c738d43b2c2453880a36604fb6b01195babdad808f556365"
+  }
+}

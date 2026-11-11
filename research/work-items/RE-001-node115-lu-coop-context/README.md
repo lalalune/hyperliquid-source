@@ -1,5 +1,8 @@
 # RE-001: what the node #115 lu.rs conversion's passed-through context pointer points to — and what the coop-path call does with it
 
+TLS coordinates were corrected from signed instruction operands on 2026-11-07;
+see [the correction and regression scope](TLS-OFFSET-CORRECTION.md).
+
 - Component: `base/src/lu.rs` conversion context pointer, answered through the
   coop-path callee at `0x5cf3b90` and its proceed function at `0x5cfc310`.
 - Target: node #115, 105,896,032 bytes; SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
@@ -64,13 +67,13 @@ and the table's slot `+0x8` is never called on any observed path.
 read anywhere in the body (it is overwritten at `0x5cf3bb6` and `0x5cf3c02`
 before any use). The body proper:
 
-- TLS base `rbx = -0x130`. State byte `fs:[-0xe8]`: `1` skips init and goes
+- TLS base `rbx = -0x1130`. State byte `fs:[-0x10e8]`: `1` skips init and goes
   to the budget check; `2` jumps straight to the tail path; any other value
   runs TLS init (`rdi` = TLS base, `rsi` = `0x5cdf410`, call through GOT
   `0x64e0510` → `0x5ca0d20`, the same init slot the helper uses), then sets
-  `fs:[-0xe8] = 1` and falls through.
-- `fs:[-0xea] == 2` → tail path.
-- Budget cell `rax = QWORD fs:[-0x108]`: null → tail path.
+  `fs:[-0x10e8] = 1` and falls through.
+- `fs:[-0x10ea] == 2` → tail path.
+- Budget cell `rax = QWORD fs:[-0x1108]`: null → tail path.
 - `[cell] != 1` → proceed path. `[cell] == 1`: if `[cell+0x10] >=
   i64::MAX`, the panic path (`lea rdi, [0x64c6380]`, the
   `multi_thread/worker.rs:922:22` Location, call through GOT `0x64e1090` →
@@ -82,7 +85,7 @@ before any use). The body proper:
 
 Why the helper reaches the coop call at all (from #184's helper body,
 re-read here): the helper takes the coop path exactly when the TLS word
-`fs:[-0xec]` has low bit `1` and its second byte `fs:[-0xeb]` is `0`
+`fs:[-0x10ec]` has low bit `1` and its second byte `fs:[-0x10eb]` is `0`
 (branch `0x5cf2d99 je 0x5cf2ef4`). After the coop call returns, the helper
 sets `al = 1` and returns true — so the coop path always yields tag 3
 (set state) in the conversion, whatever the coop callee did internally.

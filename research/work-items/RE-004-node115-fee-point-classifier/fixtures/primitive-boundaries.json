@@ -1,0 +1,202 @@
+{
+  "fixtures": [
+    {
+      "expected_integer": 9223372036854775807,
+      "id": "P01",
+      "input_bits": "43e0000000000000",
+      "operation": "finite_nonfinite_conversion",
+      "why": "Finite +2^63 saturates to MAX after masked-invalid hardware conversion repair."
+    },
+    {
+      "expected_integer": -9223372036854775808,
+      "id": "P02",
+      "input_bits": "c3e0000000000000",
+      "operation": "finite_nonfinite_conversion",
+      "why": "Finite -2^63 is exactly MIN."
+    },
+    {
+      "expected_integer": 9223372036854774784,
+      "id": "P03",
+      "input_bits": "43dfffffffffffff",
+      "operation": "finite_nonfinite_conversion",
+      "why": "Largest binary64 below +2^63 is 2^63-1024 and is exact i64."
+    },
+    {
+      "expected_integer": 9223372036854775807,
+      "id": "P04",
+      "input_bits": "43e0000000000001",
+      "operation": "finite_nonfinite_conversion",
+      "why": "Finite 2^63+2048 saturates high."
+    },
+    {
+      "expected_integer": -9223372036854775808,
+      "id": "P05",
+      "input_bits": "c3e0000000000001",
+      "operation": "finite_nonfinite_conversion",
+      "why": "Finite -2^63-2048 saturates low."
+    },
+    {
+      "expected_integer": 0,
+      "id": "P06",
+      "input_bits": "7ff0000000000000",
+      "operation": "finite_nonfinite_conversion",
+      "why": "Nonfinite branch discards infinity to zero."
+    },
+    {
+      "expected_integer": 0,
+      "id": "P07",
+      "input_bits": "fff0000000000000",
+      "operation": "finite_nonfinite_conversion",
+      "why": "Nonfinite branch discards negative infinity to zero."
+    },
+    {
+      "expected_integer": 0,
+      "id": "P08",
+      "input_bits": "7ff8000000000123",
+      "operation": "finite_nonfinite_conversion",
+      "why": "NaN has masked exponent/fraction bits above max-finite."
+    },
+    {
+      "expected_integer": 0,
+      "id": "P09",
+      "input_bits": "7ff0000000000001",
+      "operation": "finite_nonfinite_conversion",
+      "why": "The initial bit test classifies signaling NaN as nonfinite too; this primitive does not promise prior arithmetic has no exception."
+    },
+    {
+      "expected_integer": 0,
+      "id": "P10",
+      "input_bits": "bfe8000000000000",
+      "operation": "finite_nonfinite_conversion",
+      "why": "-3/4 truncates toward zero, unlike floor."
+    },
+    {
+      "expected_integer": -1,
+      "id": "P11",
+      "input_bits": "bff8000000000000",
+      "operation": "finite_nonfinite_conversion",
+      "why": "-3/2 truncates toward zero to-1."
+    },
+    {
+      "expected_bits": "43e0000000000000",
+      "id": "P12",
+      "input_integer": 9223372036854775807,
+      "operation": "i64_to_binary64_RN_even",
+      "why": "MAX is distance1 from 2^63 and distance1023 from preceding binary64."
+    },
+    {
+      "candidate_reachability": "primitive-only; not an A/D witness",
+      "expected_bits": "4340000000000000",
+      "id": "P13",
+      "input_integer": 9007199254740993,
+      "operation": "i64_to_binary64_RN_even",
+      "why": "2^53+1 is midpoint; lower significand is even. This odd integer cannot be A/D from the native finite conversion map."
+    },
+    {
+      "candidate_reachability": "primitive-only; not an A/D witness",
+      "expected_bits": "4340000000000002",
+      "id": "P14",
+      "input_integer": 9007199254740995,
+      "operation": "i64_to_binary64_RN_even",
+      "why": "2^53+3 is midpoint; upper 2^53+4 has even significand. Not a native A/D output."
+    },
+    {
+      "expected_bits": "3ff0000000000000",
+      "id": "P15",
+      "left_bits": "3fb999999999999a",
+      "operation": "binary64_multiply_RN_even",
+      "right_bits": "4024000000000000",
+      "why": "Exact product1+2^-54 is below upper midpoint1+2^-53."
+    },
+    {
+      "expected_bits": "3ff0000000000000",
+      "id": "P16",
+      "left_bits": "3fc999999999999a",
+      "operation": "binary64_multiply_RN_even",
+      "right_bits": "4014000000000000",
+      "why": "Encoded0.2*5 also equals exact1+2^-54 before rounding."
+    },
+    {
+      "expected_bits": "0000000000000000",
+      "id": "P17",
+      "left_bits": "0000000000000001",
+      "operation": "binary64_multiply_RN_even",
+      "right_bits": "3fe0000000000000",
+      "why": "Half-minimum-subnormal is a tie; even zero wins."
+    },
+    {
+      "expected_bits": "0000000000000002",
+      "id": "P18",
+      "left_bits": "0000000000000003",
+      "operation": "binary64_multiply_RN_even",
+      "right_bits": "3fe0000000000000",
+      "why": "1.5 subnormal units ties indices1 and2; even index2 wins."
+    },
+    {
+      "expected_bits": "7ff0000000000000",
+      "id": "P19",
+      "left_bits": "7fefffffffffffff",
+      "operation": "binary64_multiply_RN_even",
+      "right_bits": "4000000000000000",
+      "why": "Exact product exceeds the RN overflow midpoint; positive infinity under masked overflow."
+    },
+    {
+      "expected_category": "NaN",
+      "id": "P20",
+      "left_bits": "7ff0000000000000",
+      "operation": "binary64_multiply_RN_even",
+      "right_bits": "0000000000000000",
+      "why": "Invalid infinity*zero; payload/sign not constrained by this fixture."
+    },
+    {
+      "expected_integer": -9223372036854775808,
+      "id": "P21",
+      "left_integer": -9223372036854775808,
+      "operation": "sat_i64_subtract",
+      "right_integer": 9223372036854775807,
+      "why": "Exact difference below MIN; saturation is low."
+    },
+    {
+      "expected_integer": 9223372036854775807,
+      "id": "P22",
+      "left_integer": 9223372036854775807,
+      "operation": "sat_i64_add",
+      "right_integer": 9223372036854775807,
+      "why": "Positive overflow saturates high."
+    },
+    {
+      "expected_integer": -9223372036854775808,
+      "id": "P23",
+      "left_integer": -9223372036854775808,
+      "operation": "sat_i64_add",
+      "right_integer": -1,
+      "why": "Negative overflow saturates low."
+    },
+    {
+      "candidate_reachability": "primitive-only; C=MIN rejects before final magnitude block",
+      "expected_integer": 9223372036854775808,
+      "id": "P24",
+      "input_integer": -9223372036854775808,
+      "operation": "unsigned_i64_magnitude",
+      "why": "Mathematical magnitude is2^63; native NEG/CMOVS bit mapping agrees."
+    },
+    {
+      "expected_integer": 18446744073709551614,
+      "id": "P25",
+      "left_integer": 9223372036854775807,
+      "operation": "u64_add_without_carry",
+      "right_integer": 9223372036854775807,
+      "why": "2MAX fits u64 and crosses signed boundary."
+    },
+    {
+      "expected_integer": 18446744073709551615,
+      "id": "P26",
+      "left_integer": 18446744073709551614,
+      "operation": "sat_u64_add",
+      "right_integer": 9223372036854775807,
+      "why": "Exact 3MAX exceeds u64MAX; saturate high."
+    }
+  ],
+  "limits": "Isolated mathematical specifications, not full-candidate path reachability or native execution; NaN payloads excluded.",
+  "schema": "independent-fee-point-primitives-v1"
+}

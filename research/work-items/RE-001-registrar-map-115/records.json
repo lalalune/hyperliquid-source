@@ -1,0 +1,412 @@
+{
+ "target": {
+  "node": 115,
+  "artifact": "work/hl-node-115.bin",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "provenance_path": "provenance/artifacts.json"
+ },
+ "work_item": "RE-001-registrar-map-115",
+ "task": "RE-001",
+ "question": "Pin node #115's ObjectRegistry registrar map end-to-end: the static init 0x620b470 that constructs the three build-info strings and initializes the map in place, the map's unordered_map layout and node layout, the string-install helper 0x5f204e0, the map destructor 0x620a500, and the ctor replay loop -- and answer #4015's open unknown: which (name, creator) pairs populate the map before the first getter call.",
+ "answer": "NONE. No (name, creator) pair ever populates the map: the whole-binary census finds exactly two lea sites for the map address (the ctor 0x61f9234 and the static init 0x620b516), zero stored qword pointers, zero absolute immediates and zero RELATIVE relocation addends naming it. The map stays empty, the ctor replay loop is vacuous, and registration happens only through direct AddLibrary calls -- TTL (0x62069f0, pinned by #4065) and encryption (0x5ff88c0, pinned by #4028). The 'populating static initializers' do not exist.",
+ "corrections_to_4015": [
+  "The registrar map is a std::unordered_map (libstdc++ _Hashtable), not a std::map: the static init writes the _Hashtable empty-state fields (buckets=&single_bucket, count 1, before_begin null, elements 0, max_load_factor 1.0f, next_resize 0, single_bucket null) and the destructor walks the _M_before_begin chain and frees the bucket array only when it is not the single bucket.",
+  "The registrar node is 0x50 bytes, not 0x48: the destructor frees each node with operator delete(node, 0x50). Fields: _M_nxt +0x00, key string +0x08, creator std::function +0x28, and 8 trailing bytes at +0x48 (the cached hash-code slot in this toolchain's _Hash_node layout; never read by any pinned routine).",
+  "The map object is 0x38 bytes (0x6509540..0x6509577), not 0x48; the next global (the date string at 0x6509580) starts 8 bytes later."
+ ],
+ "static_init": {
+  "fde": "0x620b470..0x620b57d",
+  "size": 269,
+  "catalogue_row": "_GLOBAL__sub_I_build_version.cc",
+  "catalogue_source": "docs/PROGRESS.md RE-002 vendor census row 6219",
+  "catalogue_match": "206/269 (76.58%) published-crate rebuild",
+  "excerpt": "static-init-620b470.objdump.txt",
+  "excerpt_credit": "Byte-identical to the excerpt shipped by #4015 (registrar-init-620b470.objdump.txt); the reading below is new.",
+  "invocation": {
+   "method": ".init_array entry 166, slot vaddr 0x63f3bf8",
+   "relocation": "R_X86_64_RELATIVE at 0x63f3bf8, addend 0x620b470",
+   "relocation_note": "The qword hit for 0x620b470 at file offset 0x7ba0 is the addend field of that RELATIVE relocation entry inside .rela.dyn, not a stored pointer."
+  },
+  "string_constructions": [
+   {
+    "call_site": "0x620b4b5",
+    "object": "0x65095c0",
+    "literal": "0x965c68",
+    "value": "6a436150417120a3f9732d65a2a5c2b8d19b60fc",
+    "length": 40,
+    "storage": "heap (40 > 15 SSO limit)",
+    "role": "rocksdb git SHA"
+   },
+   {
+    "call_site": "0x620b4dc",
+    "object": "0x65095a0",
+    "literal": "0x44eed4",
+    "value": "rocksdb_build_git_tag:v8.1.1",
+    "length": 28,
+    "storage": "heap (28 > 15 SSO limit)",
+    "role": "rocksdb git tag"
+   },
+   {
+    "call_site": "0x620b503",
+    "object": "0x6509580",
+    "literal": "0x95b628",
+    "value": "rocksdb_build_date:2023-04-06 16:38:52",
+    "length": 38,
+    "storage": "heap (38 > 15 SSO limit)",
+    "role": "rocksdb build date"
+   }
+  ],
+  "atexit_registrations": [
+   {
+    "call_site": "0x620b4ca",
+    "function": "std::string::~basic_string (GOT 0x64ed5d8)",
+    "argument": "0x65095c0",
+    "dso_handle": "0x64efa20"
+   },
+   {
+    "call_site": "0x620b4ea",
+    "function": "std::string::~basic_string (GOT 0x64ed5d8)",
+    "argument": "0x65095a0",
+    "dso_handle": "0x64efa20"
+   },
+   {
+    "call_site": "0x620b511",
+    "function": "std::string::~basic_string (GOT 0x64ed5d8)",
+    "argument": "0x6509580",
+    "dso_handle": "0x64efa20"
+   },
+   {
+    "call_site": "0x620b55f (tail jmp)",
+    "function": "registrar-map destructor 0x620a500",
+    "argument": "0x6509540",
+    "dso_handle": "0x64efa20"
+   }
+  ],
+  "map_initialization": {
+   "site": "0x620b516..0x620b54e",
+   "fields": [
+    {
+     "offset": "+0x00",
+     "value": "0x6509570",
+     "field": "_M_buckets",
+     "note": "&_M_single_bucket"
+    },
+    {
+     "offset": "+0x08",
+     "value": 1,
+     "field": "_M_bucket_count",
+     "note": "single bucket"
+    },
+    {
+     "offset": "+0x10",
+     "value": 0,
+     "field": "_M_before_begin._M_nxt",
+     "note": "no nodes"
+    },
+    {
+     "offset": "+0x18",
+     "value": 0,
+     "field": "_M_element_count",
+     "note": "empty"
+    },
+    {
+     "offset": "+0x20",
+     "value": "1.0f (0x3f800000)",
+     "field": "_M_rehash_policy._M_max_load_factor"
+    },
+    {
+     "offset": "+0x28",
+     "value": 0,
+     "field": "_M_rehash_policy._M_next_resize"
+    },
+    {
+     "offset": "+0x30",
+     "value": 0,
+     "field": "_M_single_bucket",
+     "note": "null bucket pointer"
+    }
+   ]
+  },
+  "stack_canary": "fs:0x28 saved at rsp+0x08, checked before the tail"
+ },
+ "string_assign_helper": {
+  "fde": "0x5f204e0..0x5f205c3",
+  "size": 227,
+  "excerpt": "string-assign-5f204e0.objdump.txt",
+  "arguments": {
+   "rdi": "std::string object",
+   "rsi": "const char* literal (must be non-null)",
+   "rdx": "ignored (callers pass a stack scratch address, rsp+7)"
+  },
+  "behavior": [
+   "Sets the object's data pointer to its SSO buffer (obj+0x10) first.",
+   "Null input throws std::logic_error with the message at 0x963298.",
+   "Length <= 15: SSO path (length 1 has its own single-char arm; length 0 stores size 0 and a NUL); copies the bytes, stores the length at +0x08 and a NUL at SSO+length.",
+   "Length > 15: _M_create(length, 0) heap-allocates, stores the buffer at +0x00 and the capacity at +0x10, memcpy, then stores the length at +0x08 and a NUL after the copy.",
+   "Stack canary checked on both exits."
+  ],
+  "call_sites": {
+   "total": 12,
+   "in_this_init": [
+    "0x620b4b5",
+    "0x620b4dc",
+    "0x620b503"
+   ],
+   "sibling_static_initializers": [
+    {
+     "fde": "0x5f23140..0x5f23658",
+     "catalogue": "_GLOBAL__sub_I_periodic_task_scheduler.cc",
+     "sites": [
+      "0x5f232b3",
+      "0x5f232ce",
+      "0x5f232ef",
+      "0x5f23310"
+     ]
+    },
+    {
+     "fde": "0x605e340..0x605e7fc",
+     "catalogue": "__static_initialization_and_destruction_0v",
+     "sites": [
+      "0x605e37e",
+      "0x605e473",
+      "0x605e564"
+     ]
+    },
+    {
+     "fde": "0x606f950..0x606fa16",
+     "catalogue": "_GLOBAL__sub_I_persistent_stats_history.cc",
+     "sites": [
+      "0x606f9b8",
+      "0x606f9e6"
+     ]
+    }
+   ],
+   "note": "The 9 sibling sites are other translation units' static initializers using the same shared helper; this packet pins only the 3 sites in the registrar init."
+  }
+ },
+ "map_destructor": {
+  "fde": "0x620a500..0x620a5bd",
+  "size": 189,
+  "excerpt": "map-dtor-620a500.objdump.txt",
+  "invocation": "only via __cxa_atexit (address taken by lea at 0x620b55f); 0 direct callers, 0 tail jumps, 0 stored pointers",
+  "node_walk": {
+   "start": "map+0x10 (_M_before_begin._M_nxt)",
+   "advance": "next = *node (saved before destroying the node)",
+   "per_node": [
+    "If the creator std::function's manager (node+0x38) is non-null, call manager(node+0x28, node+0x28, op 3) to destroy the functor.",
+    "Destroy the key string at node+0x08: if its data pointer differs from its SSO buffer (node+0x18), operator delete(ptr, capacity+1) where capacity is *(node+0x18).",
+    "operator delete(node, 0x50)."
+   ]
+  },
+  "bucket_teardown": [
+   "memset(_M_buckets, 0, _M_bucket_count * 8).",
+   "_M_element_count (+0x18) = 0; _M_before_begin (+0x10) = 0.",
+   "If _M_buckets != &_M_single_bucket, operator delete[](_M_buckets, _M_bucket_count * 8); otherwise the single bucket is inline and is not freed."
+  ]
+ },
+ "map_layout": {
+  "address": "0x6509540",
+  "size": 56,
+  "fields": [
+   {
+    "offset": "+0x00",
+    "field": "_M_buckets",
+    "note": "bucket-array pointer; &_M_single_bucket when empty"
+   },
+   {
+    "offset": "+0x08",
+    "field": "_M_bucket_count"
+   },
+   {
+    "offset": "+0x10",
+    "field": "_M_before_begin._M_nxt",
+    "note": "head of the node chain"
+   },
+   {
+    "offset": "+0x18",
+    "field": "_M_element_count"
+   },
+   {
+    "offset": "+0x20",
+    "field": "_M_rehash_policy._M_max_load_factor",
+    "note": "float, 1.0f"
+   },
+   {
+    "offset": "+0x28",
+    "field": "_M_rehash_policy._M_next_resize"
+   },
+   {
+    "offset": "+0x30",
+    "field": "_M_single_bucket",
+    "note": "inline bucket storage"
+   }
+  ],
+  "neighbours": [
+   {
+    "address": "0x6509580",
+    "object": "build-date std::string"
+   },
+   {
+    "address": "0x65095a0",
+    "object": "git-tag std::string"
+   },
+   {
+    "address": "0x65095c0",
+    "object": "git-SHA std::string"
+   }
+  ]
+ },
+ "node_layout": {
+  "size": 80,
+  "fields": [
+   {
+    "offset": "+0x00",
+    "field": "_M_nxt",
+    "note": "next node in the bucket chain"
+   },
+   {
+    "offset": "+0x08",
+    "size": 32,
+    "field": "key std::string",
+    "note": "data ptr +0x08, length +0x10, capacity/SSO +0x18"
+   },
+   {
+    "offset": "+0x28",
+    "size": 32,
+    "field": "value std::function",
+    "note": "functor +0x28, manager +0x38, invoker +0x40"
+   },
+   {
+    "offset": "+0x48",
+    "size": 8,
+    "field": "cached hash code (layout inference)",
+    "note": "Never read by any pinned routine; inferred from the 0x50 sized delete plus this toolchain's _Hash_node layout (hash slot after the value). Recorded as inference, not observed use."
+   }
+  ]
+ },
+ "ctor_replay": {
+  "fde": "0x61f91b0..0x61f9277",
+  "excerpt": "ctor-61f91b0.objdump.txt",
+  "excerpt_credit": "Byte-identical to the excerpt shipped by #4015 (reg-ctor-61f91b0.objdump.txt); the ctor is pinned by #4015 and cited here as the map's only consumer.",
+  "behavior": [
+   "Zeroes the registry fields (+0x00..+0x58, +0x60..+0x70, +0x70..+0x7f, +0x80..+0x8f, +0x98..+0xa7, +0xa8..+0xb7; +0x38 = 0, +0x40 = 0, +0x48 = +0x50 = this+0x38).",
+   "Seeds libraries[0] with the default library via vec-insert 0x5ff7960.",
+   "Walks the registrar map's node chain from *(map+0x10): while the node is non-null, calls AddLibrary(this, node+0x08 [name], node+0x28 [creator]), then advances to *node.",
+   "Because the census proves the map is empty, the loop body never runs on this target."
+  ],
+  "sole_direct_caller": "0x61f9380 (inside the getter 0x61f92b0)"
+ },
+ "getter_callers": [
+  {
+   "site": "0x5ff88fc",
+   "host": "0x5ff88c0..0x5ff9c50",
+   "role": "RegisterEncryptionBuiltins host lambda (#4028)"
+  },
+  {
+   "site": "0x61f9420",
+   "host": "0x61f9400..0x61f963e",
+   "role": "ObjectRegistry::NewInstance (#4108)"
+  },
+  {
+   "site": "0x6206a3d",
+   "host": "0x62069f0..0x6206d29",
+   "role": "TTL library registration (#4065)"
+  }
+ ],
+ "direct_registrations": [
+  {
+   "library": "TTL",
+   "register_fn": "0x62069f0",
+   "pr": "#4065"
+  },
+  {
+   "library": "encryption",
+   "register_fn": "0x5ff88c0",
+   "pr": "#4028"
+  }
+ ],
+ "census": {
+  "map_address_lea_sites": [
+   "0x61f9234",
+   "0x620b516"
+  ],
+  "map_address_imm32_hits": 0,
+  "map_address_qword_hits": 0,
+  "map_address_relative_addends": 0,
+  "static_init_calls": 0,
+  "static_init_tails": 0,
+  "static_init_qwords": [
+   "0x7ba0 (.rela.dyn addend)"
+  ],
+  "string_helper_calls": 12,
+  "string_helper_tails": 0,
+  "map_dtor_calls": 0,
+  "map_dtor_tails": 0,
+  "ctor_calls": [
+   "0x61f9380"
+  ],
+  "getter_calls": [
+   "0x5ff88fc",
+   "0x61f9420",
+   "0x6206a3d"
+  ]
+ },
+ "relocations": [
+  {
+   "offset": "0x63f3bf8",
+   "type": "R_X86_64_RELATIVE",
+   "addend": "0x620b470",
+   "note": ".init_array slot: invokes the static init at startup"
+  },
+  {
+   "offset": "0x64efa20",
+   "type": "R_X86_64_RELATIVE",
+   "addend": "0x64efa20",
+   "note": "__dso_handle self-pointer"
+  },
+  {
+   "offset": "0x64fe448",
+   "type": "R_X86_64_RELATIVE",
+   "addend": "0x64efa20",
+   "note": "second slot holding &__dso_handle"
+  },
+  {
+   "offset": "0x64ed5d8",
+   "type": "R_X86_64_GLOB_DAT",
+   "symbol": "std::string::~basic_string (GLIBCXX_3.4.21)",
+   "note": "dtor used by the three string atexit registrations"
+  }
+ ],
+ "literals": [
+  {
+   "address": "0x965c68",
+   "length": 40,
+   "value": "6a436150417120a3f9732d65a2a5c2b8d19b60fc"
+  },
+  {
+   "address": "0x44eed4",
+   "length": 28,
+   "value": "rocksdb_build_git_tag:v8.1.1"
+  },
+  {
+   "address": "0x95b628",
+   "length": 38,
+   "value": "rocksdb_build_date:2023-04-06 16:38:52"
+  },
+  {
+   "address": "0x963298",
+   "length": 49,
+   "value": "basic_string: construction from null is not valid"
+  }
+ ],
+ "open_unknowns": [
+  "The 8 trailing node bytes at +0x48: consistent with the cached hash-code slot, but no pinned routine reads them, so the role is layout inference, not observed use.",
+  "The second __dso_handle slot at 0x64fe448: which registration uses it is not pinned (the static init uses 0x64efa20).",
+  "The registry +0x70..0x98 region (40 bytes) is still open (see #4015); this packet does not touch it."
+ ],
+ "model": {
+  "tools": "tools/registrar_map_115.py",
+  "tests": "tests/test_registrar_map_115.py",
+  "coverage": "unordered_map empty-state invariants, the static-init field writes, the string-assign SSO/heap/null arms, the node-chain walk with seeded (name, creator) pairs in ctor order, the destructor's manager-op-3 + string-dispose + sized-free + bucket teardown, and the empty-map census result."
+ }
+}

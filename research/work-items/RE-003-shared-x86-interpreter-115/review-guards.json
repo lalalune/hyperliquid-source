@@ -1,0 +1,60 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "original_pr": 5835,
+  "original_head": "0c10a129bbb6478338d0c689d64a3809ae7f3134",
+  "guard_module_sha256": "9bcfa7339e2ba137e47f7be9172dc14fd22a135e5352e9647961a9e97b346a0f",
+  "guard_tests_sha256": "dc64e359e91339af7910b8854c94083b0ca13a723d4d84b9106facedb355b43c",
+  "focused_tests": {
+    "original": 53,
+    "added_refusal_and_preservation": 10,
+    "passed": 63
+  },
+  "independent_review": {
+    "edge_probes": 13,
+    "byte_adc_sbb_arithmetic_cases": 262144,
+    "module_sha256": "9bcfa7339e2ba137e47f7be9172dc14fd22a135e5352e9647961a9e97b346a0f"
+  },
+  "bounded_reproduction": {
+    "cases": 11642,
+    "decoded_functions": 16915,
+    "decoded_instructions": 2151565,
+    "equivalent": 1,
+    "negative_controls": 59,
+    "negative_detected": 58,
+    "probes": 141,
+    "byte_identical_generated_files": 12,
+    "original_decoder_rows_identical": 11,
+    "replay_directory_decoder_inventory": 46
+  },
+  "guards": [
+    "Condition/ADC/SBB consumers reject unmodeled or undefined flags",
+    "Architecturally masked-zero shifts and rotates preserve prior flags; narrow full-cycle rotates refuse flag consumers",
+    "SAR by1 supplies OF0; BSR supplies ZF and conservatively refuses zero-source execution",
+    "Out-of-word register offsets for memory BT/BTS refuse execution; in-word and register-modulo forms remain supported",
+    "Unsupported narrow one-operand multiply/divide and 16-bit double-shift forms refuse execution",
+    "Non-REX.W SSE integer conversions and ambiguous high-byte extension sources refuse execution"
+  ],
+  "limits": [
+    "The decoder and historical packet records are unchanged; accepting a decode alone is not an execution correctness claim",
+    "The comparison establishes equality on five stated workloads, not hardware ISA equivalence or support for arbitrary programs",
+    "Direct Python inspection of flag attributes must first check unsupported_flags; instruction consumers enforce the check automatically",
+    "Floating operations assume default masked SSE exceptions and round-to-nearest; MXCSR and other FP modes are not modeled",
+    "Integer parity and several shift/rotate/architecturally undefined flags are deliberately not supplied"
+  ],
+  "primary_references": [
+    {
+      "title": "Intel SDM Volume2B Rotate Flags Affected",
+      "url": "https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-2b-manual.pdf",
+      "printed_page": "4-525",
+      "pdf_page": 526,
+      "supports": "Rotate flag effects follow the architectural masked count, including narrow full-cycle rotations"
+    },
+    {
+      "title": "Intel SDM Volume2A BT Bit Test",
+      "url": "https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-2a-manual.pdf",
+      "printed_page": "3-113",
+      "pdf_page": 214,
+      "supports": "A memory bit base uses bit-string address adjustment rather than register-style modulo indexing"
+    }
+  ]
+}

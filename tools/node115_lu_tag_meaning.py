@@ -50,6 +50,33 @@ def text_at(va, n, delta):
         return fh.read(n)
 
 
+def tls_offsets(helper):
+    """Bind recorded FS offsets to sign-extended instruction operands."""
+    instruction = helper[0x14:0x1b]  # 0x5cf2d44: mov r15, sign_extend(imm32).
+    if len(instruction) != 7 or instruction[:3] != bytes.fromhex('49c7c7'):
+        raise ValueError('helper TLS-base instruction mismatch')
+    base = struct.unpack_from('<i', instruction, 3)[0]
+    result = {'r15': hex(base)}
+    for name, offset, prefix in (
+        ('state_byte', 0x27, '64410fb647'),
+        ('word', 0x55, '64410fb76f'),
+        ('byte', 0x71, '64418847'),
+    ):
+        prefix = bytes.fromhex(prefix)
+        raw = helper[offset:offset + len(prefix) + 1]
+        if len(raw) != len(prefix) + 1 or raw[:-1] != prefix:
+            raise ValueError(f'helper TLS operand mismatch: {name}')
+        result[name] = f"fs:[{hex(base + struct.unpack('<b', raw[-1:])[0])}]"
+    return result
+
+
+def validate_tls_record(helper, record):
+    offsets = tls_offsets(helper)
+    if record.get('tls') != offsets:
+        raise ValueError('records.json TLS offsets do not match signed operands')
+    return offsets
+
+
 def main():
     data = NODE.read_bytes()
     if len(data) != NODE_SIZE:
@@ -150,6 +177,10 @@ def main():
 
     # Packet records cross-check.
     rec = json.loads((PACKET / "records.json").read_text())
+    try:
+        validate_tls_record(helper, rec)
+    except ValueError as error:
+        fail(str(error))
     if rec["helper"]["sha256"] != HELPER_SHA:
         fail("records.json helper hash mismatch")
     if rec["callsite_excerpt"]["sha256"] != CALLSITE_SHA:

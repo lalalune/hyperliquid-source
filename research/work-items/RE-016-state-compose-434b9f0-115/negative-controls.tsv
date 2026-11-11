@@ -1,0 +1,25 @@
+kind	control	detected
+model	swap_b38_b58	1
+model	f32_as_f64	1
+model	eb8_from_370	1
+model	trail_untouched	1
+model	pad_zeroed	1
+model	ctx_vec_swapped	1
+model	prep_b_flag_zero	1
+model	block_flag_one	1
+model	dealloc_always	1
+model	dealloc_never	1
+model	dealloc_size_x38	1
+code	0x434ba59=0x70 pre-call copy 0x378 -> 0x370	1
+code	0x434bafe=0xb4 movsd source in +0xbb0 -> +0xbb4	1
+code	0x434bb4b=0x02 prep-b flag 1 -> 2	1
+code	0x434bb7c=0x58 trailing field in +0xb38 -> +0xb58	1
+code	0x434bbb6=0x10 block copy 0x1b20 -> 0x1b10	1
+code	0x434bbc7=0x75 je -> jne (dealloc on capacity 0 only)	1
+code	0x434bbdd=0x70 out +0x1b40 copy 0x378 -> 0x370	1
+code	0x434bc1b=0x30 out +0x2638 -> +0x2630	1
+code	0x434bc9e=0x30 final copy 0x1b40 -> 0x1b30	1
+code	0x434bcce=0xb0 out +0x1eb8 -> +0x1eb0	1
+code	0x434bcdb=0xd8 out +0x26d0 -> +0x26d8	1
+input	one flipped .text byte	1
+input	address past .text	1

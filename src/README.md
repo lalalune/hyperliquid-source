@@ -4,6 +4,7 @@ These independently authored Rust components have bounded, target-specific
 contracts. They are not yet one integrated node. See each README and evidence
 packet for supported behavior, build commands and remaining gaps.
 
+- `node115-book-order-unlink`: one-element slab removal, free-list push, and level link rewiring.
 - `node115-latency-pair`: latency-associated numeric projections.
 - `node115-nonce-ring`: conditional strict ordering of a two-span nonce ring.
 - `node115-quantity-preparation`: decimal coefficient and scale preparation.

@@ -1,0 +1,436 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "source_base": "05bc2de303c05525b71e7e257426e741bc66a390",
+  "platform_scope": "Windows static parsing/disassembly only; no captured ELF execution or CPU emulation",
+  "make_available": false,
+  "make_recipe_equivalents": {
+    "doctor": [
+      "python -B tools/doctor.py"
+    ],
+    "verify": [
+      "python -B tools/artifacts.py verify",
+      "python -B tools/verify_imports.py",
+      "python -B tools/verify_packets.py"
+    ],
+    "test": [
+      "python -B tools/run_tests.py"
+    ],
+    "catalogue-check": [
+      "python -B tools/catalogue.py --check"
+    ],
+    "reproduce": [
+      "python -B tools/reproduce.py"
+    ]
+  },
+  "baseline_checks": [
+    {
+      "check": "doctor",
+      "args": [
+        "tools/doctor.py"
+      ],
+      "returncode": 0,
+      "seconds": 0.7
+    },
+    {
+      "check": "artifacts",
+      "args": [
+        "tools/artifacts.py",
+        "verify"
+      ],
+      "returncode": 0,
+      "seconds": 0.75
+    },
+    {
+      "check": "imports",
+      "args": [
+        "tools/verify_imports.py"
+      ],
+      "returncode": 0,
+      "seconds": 0.78
+    },
+    {
+      "check": "packets",
+      "args": [
+        "tools/verify_packets.py"
+      ],
+      "returncode": 0,
+      "seconds": 9.55
+    }
+  ],
+  "repository_checks": [
+    {
+      "check": "catalogue",
+      "args": [
+        "tools/catalogue.py",
+        "--check"
+      ],
+      "returncode": 1,
+      "seconds": 46.19
+    },
+    {
+      "check": "reproduce",
+      "args": [
+        "tools/reproduce.py"
+      ],
+      "returncode": 0,
+      "seconds": 6.17
+    },
+    {
+      "check": "tests",
+      "args": [
+        "tools/run_tests.py"
+      ],
+      "returncode": 4294967295,
+      "seconds": 493.3
+    }
+  ],
+  "catalogue": "Failed before the new packet was written: stale generated README (559 recorded work items versus 560 tracked). Not repaired in this bounded research packet.",
+  "test_suite": {
+    "status": "incomplete; interrupted after a bounded attempt, not passed",
+    "total_files": 583,
+    "completed_files": 40,
+    "passed_files": 36,
+    "failed_files": 4,
+    "interrupted_file": "test_assembled_record_readers_static.py",
+    "unstarted_files": 542,
+    "failure_details": [
+      {
+        "file": "test_abci_state_export115.py",
+        "reason": "17 generated-text subtest mismatches show CRLF versus LF"
+      },
+      {
+        "file": "test_accept4_source115.py",
+        "reason": "Four symlink controls fail with Windows privilege error 1314"
+      },
+      {
+        "file": "test_argument_producers_static.py",
+        "reason": "Generated records.json differs by CRLF versus LF"
+      },
+      {
+        "file": "test_artifacts_diagnostics.py",
+        "reason": "Expected POSIX path separators differ from Windows diagnostic path"
+      }
+    ],
+    "interruption": {
+      "reason": "Stopped bounded validation: existing test repeatedly copies the complete 105896032-byte input inside a 52495-iteration relocation search",
+      "test": "test_exit_slot_mutation_rejected",
+      "file": "tests/test_assembled_record_readers_static.py",
+      "copied_bytes_for_one_loop": 5559012199840,
+      "started_at_file": "41/583",
+      "elapsed_test_process_seconds": 352.8,
+      "test_runner_completed": false
+    },
+    "completed_file_results": [
+      {
+        "ordinal": 1,
+        "file": "test_abci_binary_context115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 2,
+        "file": "test_abci_block_root115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 3,
+        "file": "test_abci_cancel_state115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 4,
+        "file": "test_abci_compact_root115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 5,
+        "file": "test_abci_context_result115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 6,
+        "file": "test_abci_entry_checkpoint115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 7,
+        "file": "test_abci_expanded_result115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 8,
+        "file": "test_abci_freeze_snapshot115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 9,
+        "file": "test_abci_greeting_115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 10,
+        "file": "test_abci_item_prep115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 11,
+        "file": "test_abci_keyed_result115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 12,
+        "file": "test_abci_linked_commit115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 13,
+        "file": "test_abci_loader_checkpoint115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 14,
+        "file": "test_abci_loader_handoff115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 15,
+        "file": "test_abci_local_restore115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 16,
+        "file": "test_abci_post_root115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 17,
+        "file": "test_abci_postblock_keys115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 18,
+        "file": "test_abci_preflight_result115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 19,
+        "file": "test_abci_prune_path115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 20,
+        "file": "test_abci_res_variants115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 21,
+        "file": "test_abci_result_bridge115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 22,
+        "file": "test_abci_result_digest115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 23,
+        "file": "test_abci_result_sort115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 24,
+        "file": "test_abci_ring_growth115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 25,
+        "file": "test_abci_root_tree115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 26,
+        "file": "test_abci_row_repr115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 27,
+        "file": "test_abci_snapshot_handoff115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 28,
+        "file": "test_abci_state_export115.py",
+        "status": "failed"
+      },
+      {
+        "ordinal": 29,
+        "file": "test_abci_state_read115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 30,
+        "file": "test_abci_tree_cursor115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 31,
+        "file": "test_accept4_source115.py",
+        "status": "failed"
+      },
+      {
+        "ordinal": 32,
+        "file": "test_advance_max_raise_115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 33,
+        "file": "test_aggregate_sum_getter_115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 34,
+        "file": "test_allocate_115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 35,
+        "file": "test_arena_allocate_aligned_115.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 36,
+        "file": "test_argument_producers_static.py",
+        "status": "failed"
+      },
+      {
+        "ordinal": 37,
+        "file": "test_artifacts.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 38,
+        "file": "test_artifacts_diagnostics.py",
+        "status": "failed"
+      },
+      {
+        "ordinal": 39,
+        "file": "test_artifacts_gpg_paths.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 40,
+        "file": "test_artifacts_manifest_files_type.py",
+        "status": "passed"
+      },
+      {
+        "ordinal": 41,
+        "file": "test_assembled_record_readers_static.py",
+        "status": "interrupted"
+      }
+    ],
+    "shared_test_or_tool_fixes": false
+  },
+  "packet_checks": {
+    "collector_exit_code": 0,
+    "verify_exit_code": 0,
+    "optimized_verify_exit_code": 0,
+    "all_native_exports_and_records_equal_regeneration": true,
+    "normal_and_optimized_control_reports_raw_equal": true,
+    "native_git_filters_preserve_all_raw_objdump_bytes": true,
+    "exported_bytes": 12000,
+    "exported_instructions": 2312,
+    "rejected_corruptions": 41,
+    "scalar_eligibility_relations": 1048576,
+    "rust_build_or_behavioral_equivalence": "not implemented or claimed"
+  },
+  "followup_checks": {
+    "collector_exit_code": 0,
+    "optimized_collector_exit_code": 0,
+    "normal_and_optimized_outputs_raw_equal": true,
+    "exported_bytes": 4479,
+    "exported_instructions": 855,
+    "rejected_corruptions": 12,
+    "conditional_port": 4002,
+    "independently_reviewed_against_original_bytes": true
+  },
+  "independent_review": {
+    "scope": "Both selected caller copies, producer field retention, constructor width, dynamic imports and socket-address argument; subsequent read-only collector review",
+    "blocking_findings": 0,
+    "addressed_reporting_notes": [
+      "Native comparison validates bytes/boundaries, not semantic decoder agreement or CFG completeness",
+      "Reproduction requires collect and verify",
+      "Capstone memory access flags explicitly advisory"
+    ]
+  },
+  "raw_repository_logs_retained_locally": {
+    "work/context115/baseline/artifacts.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "work/context115/baseline/artifacts.stdout": {
+      "bytes": 427,
+      "sha256": "332abf991a7776a50b65f26b7729dc6c043ac0afe7d256d14dac5582fbd4d444"
+    },
+    "work/context115/baseline/doctor.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "work/context115/baseline/doctor.stdout": {
+      "bytes": 2704,
+      "sha256": "cad436c23992a6dce357f5c53329920e1168209f145d1e2d405ac50fcd80b3f6"
+    },
+    "work/context115/baseline/imports.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "work/context115/baseline/imports.stdout": {
+      "bytes": 64,
+      "sha256": "f0fb9f69bede9a2d5e8235581bf970b295fd75d962514f21ecbf44bf935718b0"
+    },
+    "work/context115/baseline/packets.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "work/context115/baseline/packets.stdout": {
+      "bytes": 109,
+      "sha256": "9ede686f4f22ca4d4c6ae322424f0b6e2943a2a56c552b99bf8721eea130f1f2"
+    },
+    "work/context115/baseline/results.json": {
+      "bytes": 549,
+      "sha256": "6e1773b7816af97d97efdafaf7b7b18d7bc93e8033da5618b30d7b59af622b61"
+    },
+    "work/context115/suite/catalogue.stderr": {
+      "bytes": 48,
+      "sha256": "a5cf48663ba02f2f29c82ccca2b6905c623e716cc43935d90d571eeb6c398d41"
+    },
+    "work/context115/suite/catalogue.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "work/context115/suite/interruption.json": {
+      "bytes": 445,
+      "sha256": "a214012d414122000aad3e0e0f27f15d925f22e23dad8075382a04c39ea13396"
+    },
+    "work/context115/suite/reproduce.stderr": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "work/context115/suite/reproduce.stdout": {
+      "bytes": 494,
+      "sha256": "cff37714899a1d9256a31e6531238623e495417a8dc23deebc82f4c89a86d048"
+    },
+    "work/context115/suite/results.json": {
+      "bytes": 426,
+      "sha256": "43de6bc177dd91e2a0ac8c6a427a1ab6da804cb93fce133ab378a6507edda162"
+    },
+    "work/context115/suite/tests.stderr": {
+      "bytes": 168031,
+      "sha256": "4459086ec3abeffbfe70e74e761144b64eadeb32e2c24cdfa3c4d3a81f8eca0a"
+    },
+    "work/context115/suite/tests.stdout": {
+      "bytes": 613,
+      "sha256": "8bf1d9583220c19288075a5d95ac2ed898dd43e52e8f15f17c4de806dd00cec6"
+    }
+  },
+  "component_gates_changed": false,
+  "commit_or_push_performed": false
+}

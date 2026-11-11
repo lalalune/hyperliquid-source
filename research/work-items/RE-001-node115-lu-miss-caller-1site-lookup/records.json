@@ -1,0 +1,299 @@
+{
+  "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+  "calls": {
+    "by_target": {
+      "0x63d9700": 1
+    },
+    "dispatcher": {
+      "0x63d9700": [
+        "0x63d4003"
+      ]
+    },
+    "distinct_targets": 1,
+    "indirect": 0,
+    "indirect_sites": [],
+    "plt": [],
+    "tail_jumps": [],
+    "total": 1
+  },
+  "census": {
+    "bsr": 0,
+    "bss": "0x64ffe40..0x6728924",
+    "bss_referenced_addresses": [
+      "0x6511a00"
+    ],
+    "calls": 1,
+    "data_rel_ro_referenced_addresses": [],
+    "jumps": 7,
+    "jumps_outside_window": 0,
+    "lock_add": 0,
+    "lock_sub": 0,
+    "raw_e8_bti": {
+      "this_fde_raw_sites": 0,
+      "tiers": {
+        "1": 17,
+        "10": 1,
+        "2": 12,
+        "4": 8,
+        "5": 1,
+        "6": 2,
+        "8": 1
+      },
+      "total_fdes": 42,
+      "total_sites": 108
+    },
+    "raw_e8_lu_miss": {
+      "this_fde_raw_sites": 1,
+      "tiers": {
+        "1": 18,
+        "10": 3,
+        "13": 1,
+        "2": 14,
+        "3": 1,
+        "4": 11,
+        "5": 1,
+        "6": 2,
+        "7": 1,
+        "8": 1
+      },
+      "total_fdes": 53,
+      "total_sites": 168
+    },
+    "raw_e8_second_handler": {
+      "this_fde_raw_sites": 0,
+      "total_fdes": 28,
+      "total_sites": 64
+    },
+    "rela_dyn": {
+      "relative": 59534,
+      "total": 60723
+    },
+    "rela_plt": 278,
+    "ret": [
+      "0x63d4047"
+    ],
+    "strict": 75,
+    "tail_jump_exits": [],
+    "total_fdes": 135313
+  },
+  "cited_not_claimed": [
+    "0x63d9700..0x63d987b (lu-miss handler, #215)",
+    "0x63d9880..0x63d9a64 (bin_table_init body, #262)",
+    "0x634ebb0..0x634eccd (second miss handler; NOT called from this FDE)",
+    "0x63bf680..0x63bf7ee (lock-wait helper, #251; NOT called from this FDE)",
+    "0x63d3eee..0x63d3f0e (prev FDE)",
+    "0x63d4048..0x63d4171 (next FDE)",
+    "0x6365150..0x6365660 (key resolver; NOT called from this FDE)",
+    "0x63495b0..0x6349775 (#314 window)",
+    "0x6353a70..0x635582b (#315 window)",
+    "0x6355900..0x63577e2 (#316 window)",
+    "0x63577f0..0x635a786 (#317 window)",
+    "0x635a7a0..0x635c6c7 (#318 window)",
+    "0x635c6d0..0x635de25 (#319 window)",
+    "0x635e2e0..0x635f315 (#320 window)",
+    "0x63c9650..0x63c9c80 (#321 window)",
+    "0x63ccd60..0x63cd907 (#322 window)",
+    "0x63cddd0..0x63ce23b (#323 window)",
+    "0x63d03a0..0x63d17d7 (#324 window)",
+    "0x63d17e0..0x63d2a80 (#325 window)",
+    "0x63d2a80..0x63d3071 (#326 window)"
+  ],
+  "exhibits": [
+    {
+      "bytes": 314,
+      "file": "lu_miss_caller_1site_lookup.hex",
+      "kind": "raw binary slice",
+      "name": "window",
+      "range": "0x63d3f0e..0x63d4048"
+    },
+    {
+      "file": "lu_miss_caller_1site_lookup.objdump.txt",
+      "kind": "objdump -d --start-address=0x63d3f0e --stop-address=0x63d4048",
+      "name": "objdump",
+      "range": "0x63d3f0e..0x63d4048"
+    }
+  ],
+  "frame": {
+    "entry": {
+      "context": "rdi (passed through to the lu-miss call as rdi; mov %rdi,%rax at 0x63d3f15)",
+      "endbr64": false,
+      "first": "mov %rdx,%r8 at 0x63d3f0e (NO endbr64)",
+      "key": "rdx (mov %rdx,%rcx at 0x63d3f26; mov %rdx,%r8 at 0x63d3f0e)",
+      "pushes": [],
+      "sub": "$0x28,%rsp at 0x63d3f11",
+      "table": "rsi (table base; mov %rsi,%r10 at 0x63d3f50)"
+    },
+    "epilogue": {
+      "add": "$0x28,%rsp at 0x63d4043",
+      "pops": [],
+      "ret": "0x63d4047"
+    }
+  },
+  "lu_miss_sites": [
+    {
+      "block": "0x63d3fed",
+      "r8_def": "0x63d3ffd",
+      "r8d": 1,
+      "r9_def": "0x63d3ff4",
+      "r9d": 0,
+      "rcx": "rdx (entry key)",
+      "rcx_def": "0x63d3f26",
+      "rdi": "rax (entry rdi)",
+      "rdi_def": "0x63d3f15",
+      "rdx": "walk table pointer (entry rsi, via r10)",
+      "rdx_defs": [
+        "0x63d3ff7"
+      ],
+      "rejoin": "0x63d4008 (resolve tail; fall-through after the call)",
+      "rsi": ".bss 0x6511a00",
+      "rsi_def": "0x63d3fed",
+      "scan": "single 8-slot scan (slot 0 + counter loop slots 1-7)",
+      "site": "0x63d4003"
+    }
+  ],
+  "next_fde": {
+    "note": "starts with mov %rsi,%rax at 0x63d4048 (NO endbr64); directly adjacent, no padding",
+    "padding": 0,
+    "range": "0x63d4048..0x63d4171"
+  },
+  "next_question": {
+    "bin_table_init_sites": 0,
+    "bsr": 0,
+    "bytes": 297,
+    "calls": 1,
+    "calls_by_target": {
+      "0x63d9700": 1
+    },
+    "canary": false,
+    "endbr64": 0,
+    "jumps": 7,
+    "jumps_outside_window": 0,
+    "lock_add": 0,
+    "lock_sub": 0,
+    "lu_miss_site": [
+      "0x63d4127"
+    ],
+    "lu_miss_sites": 1,
+    "note": "next lu-miss survivor in address order; a lu-miss-ONLY survivor (0 second-handler sites) -- NOT shared. Figures verified by targeted objdump census against priors (disjoint, see verifier).",
+    "range": "0x63d4048..0x63d4171",
+    "ret": [
+      "0x63d4170"
+    ],
+    "second_handler_site": [],
+    "second_handler_sites": 0,
+    "strict": 76,
+    "verified": true
+  },
+  "prev_fde": {
+    "gap": 0,
+    "gap_bytes": "",
+    "note": "directly adjacent, no padding",
+    "range": "0x63d3eee..0x63d3f0e"
+  },
+  "resolver": null,
+  "return_value": {
+    "rax": "single reaching def: mov 0x14(%rsp),%rax at 0x63d4035 -- value is (resolved node[0] >> 0x30) truncated to 32 bits, data-dependent, no constant exit value established; edx also carries bit 1 of node[0] (mov 0x1c(%rsp),%edx at 0x63d403f)"
+  },
+  "scan": {
+    "kind": "one 8-slot move-to-front scan over 0x100..0x180 in r10 (table base), 16-byte entries, bubble-up-by-one swap on hit",
+    "normal_sites": [
+      "0x63d3f53",
+      "0x63d3f83"
+    ],
+    "reversed_operand_compares": 0,
+    "reversed_positions": 0,
+    "reversed_sites": [],
+    "scans": {
+      "S1": {
+        "entry": "0x63d3f50",
+        "entry_from": "top compare mismatch at 0x63d3f39",
+        "key": "rdi (key & 0xffffffffc0000000)",
+        "loop_bound": "cmp $0x8,%rdx at 0x63d3fe7",
+        "loop_compare": "0x63d3f83",
+        "loop_head": "0x63d3f7c",
+        "miss_site": 1,
+        "reversed_slots": [],
+        "slot_0": "0x63d3f53"
+      }
+    },
+    "slot_compares_total": 2,
+    "slot_positions_total": 8
+  },
+  "second_handler_sites": [],
+  "sites": {
+    "bin_table_init": 0,
+    "bsr": 0,
+    "lock_wait": 0,
+    "lu_miss": 1,
+    "second_handler": 0
+  },
+  "size_class": {
+    "bsr_paths": [],
+    "byte_table": null,
+    "cap": null,
+    "count": "entry rdx is used directly as the key; no count rounding",
+    "fallback_cap": null,
+    "fallback_table": null,
+    "gate": null,
+    "kind": "none: this window computes NO size class -- no byte table, no size table, no $0x3fff cap, no fallback, no bsr arms, no resolver call. The lookup indexes the table directly from the entry key ((key >> 0x1a) & 0xf0 top index, (key >> 0x9) & 0x1ffff8 second level). First frontier window with no size-class computation.",
+    "resolver_input": null,
+    "size_table": null,
+    "thresholds": []
+  },
+  "survey": {
+    "combined_pool": 25,
+    "frontier": "callers of lu-miss handler 0x63d9700 that do not call bin_table_init",
+    "lu_miss_fdes": 53,
+    "lu_miss_sites": 168,
+    "lu_miss_survivors": 16,
+    "second_handler_fdes": 28,
+    "second_handler_survivors": 18,
+    "shared_survivors": [
+      "0x6353a70",
+      "0x6355900",
+      "0x63577f0",
+      "0x635a7a0",
+      "0x635e2e0",
+      "0x63ccd60",
+      "0x63d03a0",
+      "0x63d17e0",
+      "0x63d2a80"
+    ],
+    "source": "~/workspace/scratch-hl314survey/census.json",
+    "survivors": [
+      "0x63495b0",
+      "0x6353a70",
+      "0x6355900",
+      "0x63577f0",
+      "0x635a7a0",
+      "0x635c6d0",
+      "0x635e2e0",
+      "0x63c9650",
+      "0x63ccd60",
+      "0x63cddd0",
+      "0x63d03a0",
+      "0x63d17e0",
+      "0x63d2a80",
+      "0x63d3f0e",
+      "0x63d4048",
+      "0x63e94a0"
+    ],
+    "this_packet_consumes": "one slot of the combined 25-FDE miss-handler pool (lu-miss-ONLY survivor -- it is in the 16-FDE lu-miss survivor list but NOT in the 18-FDE second-handler survivor list)"
+  },
+  "walks": {
+    "high_bits": "key & 0xffffffffc0000000",
+    "kind": "single lookup (no walk A/B/C split, no element loop, no prev-FDE call, no deep-resolution tail, no resolver call): top-index lookup + second-level extract + one 8-slot move-to-front scan",
+    "second_compare": "cmp %r9,%rdi at 0x63d3f36 (register-first operand order)",
+    "second_level": "(key >> 0x9) & 0x1ffff8 + table + 0x8",
+    "table": "rsi + 0x1b0 (top index), rsi + 0x100 (scan slots)",
+    "top_index": "(key >> 0x1a) & 0xf0",
+    "walk_a": null,
+    "walk_b": null,
+    "walk_c": null
+  },
+  "window": {
+    "bytes": 314,
+    "range": "0x63d3f0e..0x63d4048",
+    "strict": 75
+  }
+}

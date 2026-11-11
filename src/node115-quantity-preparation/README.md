@@ -30,6 +30,22 @@ input/niche type; it does not establish a production negative-quantity rule.
 Original formatter behavior, final strings, caller reachability, units, panic,
 allocation and unwind behavior remain unimplemented here.
 
+## PDI range iterator
+
+`pdi_range` implements the separately recovered selected relation from node115
+`0x22b3160..0x22b3298`. For `count = max(end-start,0) <= 2^60-1`, each output
+word is `10000*base + start + index` with checked unsigned multiply and add.
+`PdiRange` is a fallible streaming iterator, not the native allocation:
+
+```rust
+pub fn new(start: u64, end: u64, base: u64) -> Result<PdiRange, PdiRangeError>;
+```
+
+The iterator yields every representable value, yields one terminal arithmetic
+error, and then stops. The native function can instead leave a partially filled
+allocation and unwind through a panic boundary; those effects remain excluded.
+See `research/work-items/RE-004-node115-pdi-range/RUST-CONTRACT.md`.
+
 The real build is direct `rustc 1.94.1`, edition 2021, with no external
 dependencies or Cargo workspace. This is the repository's research compiler,
 not an inference about the captured node's original build. To reproduce:

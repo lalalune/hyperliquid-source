@@ -1,0 +1,364 @@
+{
+ "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "window": {
+  "range": "0x63c9650..0x63c9c80",
+  "bytes": 1584,
+  "strict": 363
+ },
+ "calls": {
+  "total": 12,
+  "distinct_targets": 10,
+  "indirect": 0,
+  "indirect_sites": [],
+  "by_target": {
+   "0x63c58b0": 1,
+   "0x63f17b0": 1,
+   "0x63c7620": 1,
+   "0x63c50e0": 1,
+   "0x63c89c0": 1,
+   "0x63c7ef0": 1,
+   "0x63f0b70": 2,
+   "0x63bf680": 1,
+   "0x63c9500": 1,
+   "0x63d9700": 2
+  },
+  "dispatcher": {
+   "0x63c58b0": [
+    "0x63c9692"
+   ],
+   "0x63c7620": [
+    "0x63c96e1"
+   ],
+   "0x63c50e0": [
+    "0x63c9742"
+   ],
+   "0x63c89c0": [
+    "0x63c97e1"
+   ],
+   "0x63c7ef0": [
+    "0x63c97f8"
+   ],
+   "0x63bf680": [
+    "0x63c99db"
+   ],
+   "0x63c9500": [
+    "0x63c9a09"
+   ]
+  },
+  "plt": {
+   "pthread_mutex_trylock@plt 0x63f17b0": 1,
+   "pthread_mutex_unlock@plt 0x63f0b70": 2
+  }
+ },
+ "census": {
+  "strict": 363,
+  "calls": 12,
+  "jumps": 58,
+  "jumps_outside_window": 0,
+  "bsr": 0,
+  "lock_sub": 1,
+  "lock_add": 0,
+  "ret": [
+   "0x63c9868"
+  ],
+  "tail_jump_exits": [],
+  "total_fdes": 135313,
+  "raw_e8_lu_miss": {
+   "total_sites": 168,
+   "total_fdes": 53,
+   "tiers": {
+    "1": 18,
+    "2": 14,
+    "3": 1,
+    "4": 11,
+    "5": 1,
+    "6": 2,
+    "7": 1,
+    "8": 1,
+    "10": 3,
+    "13": 1
+   },
+   "this_fde_raw_sites": 2
+  },
+  "raw_e8_bti": {
+   "total_sites": 108,
+   "total_fdes": 42,
+   "tiers": {
+    "1": 17,
+    "2": 12,
+    "4": 8,
+    "5": 1,
+    "6": 2,
+    "8": 1,
+    "10": 1
+   },
+   "this_fde_raw_sites": 0
+  },
+  "raw_e8_second_handler": {
+   "total_sites": 64,
+   "total_fdes": 28,
+   "this_fde_raw_sites": 0
+  },
+  "rela_dyn": {
+   "total": 60723,
+   "relative": 59534
+  },
+  "rela_plt": 278,
+  "bss": "0x64ffe40..0x6728924",
+  "bss_referenced_addresses": [
+   "0x65096c0",
+   "0x6511a00",
+   "0x6713601",
+   "0x6727a00"
+  ]
+ },
+ "frame": {
+  "endbr64": 0,
+  "prologue": "push r15/r14/r13/r12/rbp/rbx; sub $0x38,%rsp; NO canary",
+  "entry": "rdi -> r14 (context base); rsi -> r12 (address of the list-head pointer); rax = 0x68(%rdi) saved to 0x18(%rsp)",
+  "null_guard": "mov (%rsi),%rdx at 0x63c9662; test %rdx,%rdx at 0x63c966a; je 0x63c985a (epilogue) \u2014 null list head skips the body",
+  "epilogue": "add $0x38,%rsp; pops; ret at 0x63c9868"
+ },
+ "list_walk": {
+  "kind": "outer linked-list walk over 0x18 next pointers (0x63c9680 loop), one element per iteration; r15 = last node",
+  "trylock": "lea 0x40(%rbx),%rdi at 0x63c969a; call pthread_mutex_trylock@plt at 0x63c969e; test %eax,%eax; jne 0x63c99d8 (lock-wait path)",
+  "lock_wait": "mov %rbx,%rdi at 0x63c99d8; call 0x63bf680 at 0x63c99db; movb $0x1,0x68(%rbx) at 0x63c99e0; jmp 0x63c96ab (retry)",
+  "refcount": "addq $0x1,0x38(%rbx) at 0x63c96ab (lock acquired); owner field 0x30(%rbx) compared to r14, updated with addq $0x1,0x28(%rbx) when it changes",
+  "ordered_insert": "three-field key compare (0x8, 0x10, 0x68) via setb/sbb at 0x63c98b0..0x63c98f2 over the 0x78-linked chain (and $~1,%rax); ebp == -1 -> 0x63c9915 (take node), ebp == 0 -> 0x63c973c (helper path)",
+  "field_dispatch": "mov 0x84(%rbp),%ecx at 0x63c96ef; cmp $0x2 -> je 0x63c9870 (movl $0x1,0x84(%rbp)); cmp $0x3 -> jne 0x63c987a; 0x63c987a walks the 0x78 chain (mov 0x78(%rbp),%rsi; and $~1,%rbp; cmp $0x1,%rsi; ja 0x63c96d0)"
+ },
+ "walk": {
+  "kind": "single context-table walk, re-entered per list element (key = r12 node pointer)",
+  "table": "r14 + 0x1b0 (r14 is the entry-rdi context base); walk table pointer (lea 0x1b0(%r14)) saved to 0x10(%rsp) at 0x63c9716 and reloaded as the lu-miss rdx at both miss sites",
+  "key_load": "r12 IS the walk key: first iteration mov %rbp,%r12 at 0x63c9713 (rbp = 0x10(%r15), the current node's key field, or the 0x63c7620 return / 0x78-chain advance); later iterations mov %rax,%r12 at 0x63c97fd (return of helper 0x63c7ef0)",
+  "top_index": "(key >> 0x1a) & 0xf0 (shr $0x1a,%r10 at 0x63c974d; and $0xf0,%r10d at 0x63c9758; add %r14,%r10 at 0x63c975f)",
+  "high_bits": "key & 0xffffffffc0000000 (mov %r12,%r11 at 0x63c974a; and $0xffffffffc0000000,%r11 at 0x63c9751)",
+  "top_compare": "cmp %rdx,%r11 at 0x63c9769 (rdx = 0x1b0(%r10)); mismatch jne 0x63c9930 (scan A)",
+  "second_level": "(key >> 0x9) & 0x1ffff8 + table + 0x8 (shr $0x9,%rax at 0x63c9775; and $0x1ffff8,%eax at 0x63c9779; add 0x1b8(%r10),%rax at 0x63c977e); mov (%rax),%rbp at 0x63c9785",
+  "second_compare": "cmp %r11,%rdx at 0x63c9797 (flipped operand order vs the top compare); mismatch jne 0x63c9988 (scan B)"
+ },
+ "extract": {
+  "kind": "two inline extract shapes, no helper call",
+  "inline_shr30": "shr $0x30,%rbp at 0x63c978f; mov (%rax,%rbp,8),%rbp at 0x63c9793 with rax = lea 0x6727a00 (size table)",
+  "shl_sar10": "shl $0x10,%r11 at 0x63c97bd; sar $0x10,%r11 at 0x63c97c1; and $0xffffffffffffff80,%r11 at 0x63c97c5; mov (%r11),%rdi at 0x63c97c9; and $0xfff,%edi at 0x63c97cc; mov (%rax,%rdi,8),%r8 at 0x63c97d2 with rax = lea 0x65096c0 (node table); lock sub %rbp,0x38(%r8) at 0x63c97d6",
+  "no_helper_call": "no 0x63be540, 0x63be4d0 or 0x63bd6c0 call in this FDE"
+ },
+ "scan": {
+  "kind": "two 8-slot move-to-front scan loops (A at 0x63c9a13, B at 0x63c9a74) over the context table slots 0x2b0..0x320 (%r14), 16-byte entries, swap-on-hit",
+  "slot0": "A: mov 0x2b0(%r14),%rsi at 0x63c9930; cmp %rsi,%r11 at 0x63c9937 (normal order); B: mov 0x2b0(%r14),%rsi at 0x63c9988; cmp %r11,%rsi at 0x63c998f (REVERSED order)",
+  "loop_compares": "slots 1-7 at 0x2c0/0x2d0/0x2e0/0x2f0/0x300/0x310/0x320: A at 0x63c9a21/0x63c9ad8/0x63c9b1e/0x63c9b2e/0x63c9b8e/0x63c9b9e/0x63c9bf7, B at 0x63c9a82/0x63c9af6/0x63c9b56/0x63c9b66/0x63c9bc6/0x63c9bd6/0x63c9c4e; all slot-value-first (normal order)",
+  "slot_compares_total": 16,
+  "reversed_operand_compares": 1,
+  "reversed_sites": [
+   "0x63c998f"
+  ],
+  "exhaustion": "slot-7 mismatch in loop A falls through to miss block 1 (0x63c9c04); in loop B to miss block 2 (0x63c9c5b)"
+ },
+ "lu_miss_sites": [
+  {
+   "block": "0x63c9c04",
+   "site": "0x63c9c29",
+   "rdi": "r14 context (mov %r14,%rdi at 0x63c9c0f)",
+   "rsi": "0x6511a00 (.bss) via lea at 0x63c9c12",
+   "rdx": "0x10(%rsp) saved walk table (mov 0x10(%rsp),%rdx at 0x63c9c04)",
+   "rcx": "r12 walk key (mov %r12,%rcx at 0x63c9c0c)",
+   "rcx_provenance": "reaching-definitions: the only r12 defs reaching this site are mov %rbp,%r12 at 0x63c9713 and mov %rax,%r12 at 0x63c97fd (both node pointers, not entry rdi); entry mov %rsi,%r12 at 0x63c9676 is killed on both paths before the walk, and the tail restore mov 0x8(%rsp),%r12 at 0x63c9809 only reaches the walk via the outer loop, which passes 0x63c9713/0x63c97fd first",
+   "r8d": 1,
+   "r9d": 0,
+   "r8d_def": "mov $0x1,%r8d at 0x63c9c19",
+   "r9d_def": "xor %r9d,%r9d at 0x63c9c09",
+   "rejoin": "mov 0x28(%rsp),%r10 at 0x63c9c2e; mov 0x20(%rsp),%r11 at 0x63c9c33; mov 0x1b0(%r10),%rdx at 0x63c9c38; jmp 0x63c9785 (second-level deref + shr $0x30 extract)"
+  },
+  {
+   "block": "0x63c9c5b",
+   "site": "0x63c9c76",
+   "rdi": "r14 context (mov %r14,%rdi at 0x63c9c66)",
+   "rsi": "0x6511a00 (.bss) via lea at 0x63c9c69",
+   "rdx": "0x10(%rsp) saved walk table (mov 0x10(%rsp),%rdx at 0x63c9c5b)",
+   "rcx": "r12 walk key (mov %r12,%rcx at 0x63c9c63)",
+   "rcx_provenance": "same reaching-definitions proof as site 1: only 0x63c9713 and 0x63c97fd reach this site",
+   "r8d": 1,
+   "r9d": 0,
+   "r8d_def": "mov $0x1,%r8d at 0x63c9c70",
+   "r9d_def": "xor %r9d,%r9d at 0x63c9c60",
+   "rejoin": "jmp 0x63c97b3 (second-level deref + shl/sar $0x10 extract; rax holds the handler return)"
+  }
+ ],
+ "second_handler_sites": [],
+ "sites": {
+  "bin_table_init": 0,
+  "bsr": [],
+  "lock_wait": 1,
+  "lu_miss": 2,
+  "second_handler": 0
+ },
+ "return_value": {
+  "rax": "path-dependent: reaching defs at ret are the entry mov 0x68(%rdi),%rax at 0x63c965e (null-head path), CALL 0x63c9848 (pthread_mutex_unlock return) and CALL 0x63c9a09 (0x63c9500 return) \u2014 no single exit value is established, unlike #314 (rbx), #315 (r12), #316 (r13), #317 (r12), #319 (0), #320 (r15)"
+ },
+ "survey": {
+  "frontier": "callers of lu-miss handler 0x63d9700 that do not call bin_table_init",
+  "lu_miss_fdes": 53,
+  "lu_miss_sites": 168,
+  "lu_miss_survivors": 16,
+  "second_handler_fdes": 28,
+  "second_handler_survivors": 18,
+  "shared_survivors": [
+   "0x6353a70",
+   "0x6355900",
+   "0x63577f0",
+   "0x635a7a0",
+   "0x635e2e0",
+   "0x63ccd60",
+   "0x63d03a0",
+   "0x63d17e0",
+   "0x63d2a80"
+  ],
+  "combined_pool": 25,
+  "survivors": [
+   "0x63495b0",
+   "0x6353a70",
+   "0x6355900",
+   "0x63577f0",
+   "0x635a7a0",
+   "0x635c6d0",
+   "0x635e2e0",
+   "0x63c9650",
+   "0x63ccd60",
+   "0x63cddd0",
+   "0x63d03a0",
+   "0x63d17e0",
+   "0x63d2a80",
+   "0x63d3f0e",
+   "0x63d4048",
+   "0x63e94a0"
+  ],
+  "source": "~/workspace/scratch-hl314survey/census.json",
+  "this_packet_consumes": "one slot of the combined 25-FDE miss-handler pool (lu-miss-ONLY survivor \u2014 NOT shared; it is in the lu-miss survivor list but NOT in the second-handler survivor list)"
+ },
+ "next_question": {
+  "range": "0x63ccd60..0x63cd907",
+  "bytes": 2983,
+  "strict": 613,
+  "calls": 31,
+  "lu_miss_sites": 6,
+  "lu_miss_site": [
+   "0x63cd70d",
+   "0x63cd7b3",
+   "0x63cd7f1",
+   "0x63cd831",
+   "0x63cd86a",
+   "0x63cd8fd"
+  ],
+  "bin_table_init_sites": 0,
+  "second_handler_sites": 1,
+  "second_handler_site": [
+   "0x63cd27f"
+  ],
+  "ret": "0x63cd044",
+  "bsr": 0,
+  "verified": "targeted objdump census by this packet; disjoint from all priors and from this window (verifier); it IS a shared survivor (1 second-handler site), unlike this packet"
+ },
+ "prev_fde": {
+  "range": "0x63c9500..0x63c964d",
+  "gap": 3,
+  "gap_bytes": "cc",
+  "note": "prev FDE is also a callee of this window (called at 0x63c9a09)"
+ },
+ "next_fde": {
+  "range": "0x63c9c80..0x63cb146",
+  "padding": 0,
+  "note": "starts with push %r15/%r14/%r13/%r12 (41 57 41 56 41 55 41 54), no endbr64"
+ },
+ "cited_not_claimed": [
+  {
+   "range": "0x63d9700..0x63d987b",
+   "what": "lu-miss handler (#215)"
+  },
+  {
+   "range": "0x63d9880..0x63d9a64",
+   "what": "bin_table_init body (#262)"
+  },
+  {
+   "range": "0x634ebb0..0x634eccd",
+   "what": "second miss handler (NOT called from this FDE)"
+  },
+  {
+   "range": "0x63bf680..0x63bf7ee",
+   "what": "lock-wait helper (#251; called once at 0x63c99db on the trylock-failure path)"
+  },
+  {
+   "range": "0x63c58b0..0x63c60a2",
+   "what": "dispatcher callee (called once at 0x63c9692)"
+  },
+  {
+   "range": "0x63c7620..0x63c78e1",
+   "what": "dispatcher callee (called once at 0x63c96e1; takes the 0x63c4c40 callback in rdx)"
+  },
+  {
+   "range": "0x63c50e0..0x63c58a4",
+   "what": "dispatcher callee (called once at 0x63c9742)"
+  },
+  {
+   "range": "0x63c89c0..0x63c8d5a",
+   "what": "dispatcher callee (called once at 0x63c97e1)"
+  },
+  {
+   "range": "0x63c7ef0..0x63c7fd8",
+   "what": "dispatcher callee (called once at 0x63c97f8; its return becomes the next walk key in r12)"
+  },
+  {
+   "range": "0x63c9500..0x63c964d",
+   "what": "prev FDE (called once at 0x63c9a09 on the last-reference path)"
+  },
+  {
+   "range": "0x63c4c40..0x63c4c6d",
+   "what": "45-byte field-check callback passed in rdx to 0x63c7620 (0x84(%rsi) == 2 -> set 1; == 3 -> return rsi; else return 0)"
+  },
+  {
+   "range": "0x63c9c80..0x63cb146",
+   "what": "next FDE (1222-byte FDE, not decoded here)"
+  },
+  {
+   "range": "0x63495b0..0x6349775",
+   "what": "#314 window (NOT called from this FDE)"
+  },
+  {
+   "range": "0x6353a70..0x635582b",
+   "what": "#315 window (NOT called from this FDE)"
+  },
+  {
+   "range": "0x6355900..0x63577e2",
+   "what": "#316 window (NOT called from this FDE)"
+  },
+  {
+   "range": "0x63577f0..0x635a786",
+   "what": "#317 window (NOT called from this FDE)"
+  },
+  {
+   "range": "0x635a7a0..0x635c6c7",
+   "what": "#318 window (NOT called from this FDE)"
+  },
+  {
+   "range": "0x635c6d0..0x635de25",
+   "what": "#319 window (NOT called from this FDE)"
+  },
+  {
+   "range": "0x635e2e0..0x635f315",
+   "what": "#320 window (NOT called from this FDE)"
+  }
+ ],
+ "exhibits": [
+  {
+   "file": "lu_miss_caller_2site_trylock.hex",
+   "kind": "raw binary slice",
+   "range": "0x63c9650..0x63c9c80",
+   "bytes": 1584
+  },
+  {
+   "file": "lu_miss_caller_2site_trylock.objdump.txt",
+   "kind": "objdump -d --start-address=0x63c9650 --stop-address=0x63c9c80",
+   "range": "0x63c9650..0x63c9c80",
+   "strict": 363
+  }
+ ]
+}

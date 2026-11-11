@@ -1,0 +1,60 @@
+control	meaning	first_mismatch_case
+spec:many_gt	level limit test uses > 4001	190
+spec:few_off	level floor one higher	21
+spec:lim_off	final product limit dropped	16
+spec:hype_any	market cap band applies to HYPE too	64
+spec:ctx_skip	context write dropped	1
+spec:no_empty_path	empty seed treated as a normal seed	3
+spec:seed_le	seed count refused at equality	3
+spec:exists_inv	duplicate test inverted	0
+spec:hold_inv	holdings test inverted	0
+spec:y_ge	count limit refused at equality	38
+spec:bal_loose	balance equality not checked	19
+spec:prod_le	starting value refused at the floor	35
+spec:price_ge	price limit refused at the limit	36
+spec:order_swap	bands applied to the wrong price	0
+spec:cost_ge	funding refused at the cap	31
+spec:supply_skip	missing supply not refused	11
+spec:same_ok	equal start and end price accepted	14
+spec:low_mul	lower band factor 700001	36
+spec:high_lt	upper band excludes equality	34
+byte:max_levels	level limit 4000 -> 4001	190
+byte:min_levels	level floor 10 -> 11	21
+byte:y_limit	count limit 1000000 -> 1000001	260
+byte:mul_limit	product limit top byte raised	87
+byte:price_limit	price limit 1e15 -> 1e15+256	23
+byte:band_end_lo	end band lower 1e9 raised	0
+byte:band_start_hi	start band upper 1e7 raised	0
+byte:hype_text	exempt name HYPE -> IYPE	64
+byte:hype_len	exempt name length 4 -> 5	64
+byte:tag_err	refusal tag 0xee -> 0xef	5
+byte:tag_ok	success tag 0x1a2 -> 0x1a3	1
+byte:token_stride	token record stride 0x158 -> 0x159	62
+byte:row_shift	row stride 32 -> 16	0
+byte:seed_borrow	seed count borrow test inverted	0
+byte:tok_bound	row bounds test inverted	0
+byte:bal_one	balance flag test inverted	0
+byte:bal_cmp	balance equality test inverted	0
+byte:first_last	start/end price equality test inverted	0
+byte:price_gt	price limit test ja -> jae	36
+byte:cap_gt	funding cap test ja -> jae	31
+byte:ctx_store	context write base register changed	1
+byte:pow_blocks	multiplication block mask 0xff8 -> 0xff0	0
+byte:pow_rest	multiplication remainder mask 7 -> 6	1
+byte:band_low_mul	lower band factor 700000 -> 700001	36
+byte:band_high_mul	upper band factor 1300000 -> 1300001	0
+byte:band_low_cmp	lower band test setae -> setb	0
+byte:band_high_cmp	upper band test setbe -> seta	0
+byte:band_and	both band tests and -> or	0
+byte:band_scale	first band scale 100 -> 101	36
+byte:one_usdc	starting value floor 1e6 -> 1e6+1	35
+byte:msg_len_seed	seed refusal length 34 -> 33	6
+misc:digest_flip	one flipped byte fails the digest check	0
+misc:fde_start	an address inside the body is refused as a start	0
+misc:extent	the body keeps its recorded extent	0
+misc:band_extent	the band check keeps its recorded extent	0
+misc:unknown_site	a call outside the site table is refused	0
+misc:unwritten_read	a stub read of unwritten memory is refused	0
+misc:bad_location	a non-Location address is refused	0
+misc:wide_value	a 65-bit value cannot enter a 64-bit slot	0
+misc:msg_text	a refusal text outside the table does not classify	0

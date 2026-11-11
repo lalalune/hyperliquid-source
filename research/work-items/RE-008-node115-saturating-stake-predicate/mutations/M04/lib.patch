@@ -1,0 +1,14 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -76,7 +76,10 @@
+     let first = &rows[head..head + first_len];
+     let second = &rows[..live - first_len];
+     let mut selected_sum = 0u64;
+-    for key in selected {
++    for (position, key) in selected.iter().enumerate() {
++        if selected[..position].contains(key) {
++            continue;
++        }
+         if let Some(row) = lookup(first, second, key) {
+             selected_sum = selected_sum.saturating_add(row.weight);
+         }

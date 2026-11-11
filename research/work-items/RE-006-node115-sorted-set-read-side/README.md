@@ -258,3 +258,11 @@ python3 tools/sorted_set_read_side_static.py \
 python3 -m unittest tests/test_sorted_set_read_side_static.py
 sha256sum -c research/work-items/RE-006-node115-sorted-set-read-side/MANIFEST.sha256
 ```
+
+## Bounded Rust implementation
+
+`src/node115-priority-three/sorted-set-read` independently models the standalone
+`find` and `contains` walk over a validated borrowed sorted set. It returns a
+matched logical node and key position, or a boolean. Native node+0x64 payload
+interpretation, remove, allocation, malformed trees and downstream slab lookups
+remain outside scope.

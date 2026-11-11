@@ -1,0 +1,6 @@
+function	family	address	reason
+huffman_encode	imm-low-bit	0x179d7cf	shift-count guard cmp r12,0x40: r12 = 0x28 - pending bits never exceeds 0x28, so bound 0x40 or 0x41 never fires
+huffman_encode	imm-low-bit	0x179d83b	output-length overflow guard cmp rax,-1: a BytesMut length cannot reach usize::MAX, so -1 or -2 never fires
+huffman_encode	imm-low-bit	0x179d855	flush loop continues while old offset < 0x19 (0x18): a full byte left pending at offset 0x18 is emitted by the next flush or by the final padding step; the 40-bit window still holds 8 + 30 bits
+encode_str	imm-low-bit	0x17acfb0	the placeholder length byte pushed before the Huffman body is overwritten on every path (0x80|len, or 0xff), so its initial value is never observable
+encode_str	imm-low-bit	0x17ad139	bounds guard for the right shift of the body: lower bound pos+9-k is the first destination index, every destination index is >= it, so a bound one lower never fires

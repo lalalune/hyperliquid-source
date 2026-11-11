@@ -1,0 +1,137 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "function": {
+    "start": "0x616bd60",
+    "end": "0x616beac",
+    "body_sha256": "5680596a85a5810082875d361be174363d5b2b435a5c2494bc72543840138972",
+    "fde": [
+      "0x616bd60",
+      "0x616beac"
+    ],
+    "census_symbol": "rocksdb::ComputeBuiltinChecksumWithLastByte",
+    "census_body_sha256": "5680596a85a5810082875d361be174363d5b2b435a5c2494bc72543840138972"
+  },
+  "dispatch": [
+    {
+      "type": 0,
+      "arm": "default_arm",
+      "note": "returns 0 (kNoChecksum and any other type)"
+    },
+    {
+      "type": 1,
+      "arm": "crc32c_arm",
+      "note": "mask(extend(extend(0, data), last_byte)); reconstructed in PR #5396"
+    },
+    {
+      "type": 2,
+      "arm": "xxhash_arm",
+      "note": "XXH32(data || last_byte, seed 0); modelled here"
+    },
+    {
+      "type": 3,
+      "arm": "xxhash64_arm",
+      "note": "(u32) XXH64(data || last_byte, seed 0); reconstructed in PR #5399"
+    },
+    {
+      "type": 4,
+      "arm": "mulmix_arm",
+      "note": "ROCKSDB_XXH3_64bits(data, n) then imul $0x6b9083d9 ^ last_byte; not modelled"
+    }
+  ],
+  "xxhash_arm": {
+    "start": "0x616bd96",
+    "end": "0x616bde5",
+    "callees": {
+      "createState": [
+        "0x61daa60",
+        "0x61daa6e"
+      ],
+      "reset": [
+        "0x61daa90",
+        "0x61daabb"
+      ],
+      "update": [
+        "0x61daac0",
+        "0x61dace6"
+      ],
+      "digest": [
+        "0x61dacf0",
+        "0x61dae18"
+      ],
+      "freeState": [
+        "0x61daa70",
+        "0x61daa84"
+      ]
+    },
+    "callee_body_sha256": {
+      "create": "308f2076440391812825325f24d327c32527672b15d8a9a730fe94232d429aa8",
+      "free": "630a5e3c790921ea2ebb0214f1d6b96e1a494793443717c8c12c9c26fa551770",
+      "reset": "621561804b9507796c857c877e6915fd5dd213c6181a6115532ab4b3147351a4",
+      "update": "c9368927c229a3d3840e5fa5489e6b1aba1d178d81cb43d03d7119aacd49eae2",
+      "digest": "f4ced493734fa7a8319db45be0a35b23343a679d37fbbf8bc5cc125b5b6353c5"
+    },
+    "state_bytes": 48,
+    "seed": 0,
+    "semantics": "XXH32(data || last_byte, seed 0)"
+  },
+  "primes": {
+    "PRIME32_1": "0x9e3779b1",
+    "PRIME32_2": "0x85ebca77",
+    "PRIME32_3": "0xc2b2ae3d",
+    "PRIME32_4": "0x27d4eb2f",
+    "PRIME32_5": "0x165667b1"
+  },
+  "prime_sites": {
+    "PRIME32_1": [
+      "0x61dab51",
+      "0x61dab68",
+      "0x61dab80",
+      "0x61dab96",
+      "0x61dada5",
+      "0x61dadc0",
+      "0x61daddb"
+    ],
+    "PRIME32_2": [
+      "0x61dab42",
+      "0x61dab5b",
+      "0x61dab73",
+      "0x61dab8b",
+      "0x61dade8"
+    ],
+    "PRIME32_3": [
+      "0x61dad36",
+      "0x61dad52",
+      "0x61dad6e",
+      "0x61dadf5"
+    ],
+    "PRIME32_4": [
+      "0x61dad45",
+      "0x61dad61",
+      "0x61dad79"
+    ],
+    "PRIME32_5": [
+      "0x61dad9a",
+      "0x61dadb5",
+      "0x61dadd0",
+      "0x61dae0b"
+    ]
+  },
+  "check_value": {
+    "xxh32_empty_seed0": "0x02cc5d05",
+    "expected_xxh32_empty_seed0": "0x02cc5d05",
+    "xxh32_a_seed0": "0x550d7456",
+    "expected_xxh32_a_seed0": "0x550d7456",
+    "xxh32_16byte_seed0": "0xc2c45b69",
+    "expected_xxh32_16byte_seed0": "0xc2c45b69",
+    "arm_empty_0x00": "0xcf65b03e",
+    "arm_123456789_0x00": "0x08faf2da",
+    "arm_empty_0x61": "0x550d7456",
+    "arm_16byte_0x00": "0xb9eb4e9b"
+  },
+  "cases": {
+    "count": 2400,
+    "seed": 20261109,
+    "mismatches_vs_oneshot": 0,
+    "aggregate_sha256": "ed7bf572431d2a8591e7c587b9064acdf2833f2b9532d33da13106c2746afc5d"
+  }
+}

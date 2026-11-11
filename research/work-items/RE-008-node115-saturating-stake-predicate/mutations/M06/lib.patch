@@ -1,0 +1,15 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -73,7 +73,11 @@
+     }
+ 
+     let first_len = live.min(tail);
+-    let first = &rows[head..head + first_len];
++    let first = if live <= tail {
++        &rows[..first_len]
++    } else {
++        &rows[head..head + first_len]
++    };
+     let second = &rows[..live - first_len];
+     let mut selected_sum = 0u64;
+     for key in selected {

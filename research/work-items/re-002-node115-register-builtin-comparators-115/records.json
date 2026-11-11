@@ -1,0 +1,139 @@
+{
+ "artifact": "node #115",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": [
+  "RE-002-node115-bytewise-reverse-factories-115 (open PR #5950): the two factories this lambda registers (BytewiseComparator() 0x61be810, ReverseBytewiseComparator() 0x61be8f0) and their 9-byte forwarder stubs (0x61be8d0 / 0x61be9b0), whose addresses the three LEA sites in this function take (0x61c1261, 0x61c135b, 0x61c1439).",
+  "RE-002-node115-u64ts-name-factory-115 (open PR #5852): the U64Ts factory 0x61be9d0 + kClassNameInternal + Name; this lambda's third block reads the cached Name() string (guard 0x6508898, string 0x65088a0) that #5852 reconstructed, and its forwarder stub 0x61beac0 is the third registered entry point.",
+  "RE-002-node115-u64ts-comparator-wrapper-115 (open PR #5847): the ComparatorWithU64TsImpl wrapper layer whose kClassNameInternal the third block's cold path builds via ostringstream.",
+  "RE-002-node115-vendor-census: symbol, body hash and source hash for the 0x61c1210 lambda (see functions.tsv). Its census symbol is the std::call_once lambda inside Comparator::CreateFromString; RegisterBuiltinComparators itself is inlined into it.",
+  "RE-001-record-write-caller-115 (merged): its census records the 0x61be810 singleton as 9 calls + 1 jump, agreeing with the #5950 packet's caller census; this packet's census records the lambda's single LEA reference from CreateFromString.",
+  "facebook/rocksdb v8.1.1, util/comparator.cc (upstream confirmation, see below)."
+ ],
+ "caller_census": {
+  "method": "whole-.text scan for E8 calls, E9 tail jumps and RIP-relative LEA references landing on the target, validated by decoding forward from the enclosing FDE start with Capstone (census.py). A site counts only on a real instruction boundary with the expected mnemonic.",
+  "notes": [
+   "RegisterBuiltinComparators (call_once lambda) 0x61c1210: 0 direct calls, 0 tail jumps, exactly 1 LEA ref at 0x61c01fa inside Comparator::CreateFromString 0x61c0180..0x61c0cb4 (lea rcx, [rip + 0x100f]) -- the lambda's address is taken for std::call_once, never called directly.",
+   "The three stub LEA sites inside this function (0x61c1261 bytewise stub, 0x61c135b reverse stub, 0x61c1439 U64Ts stub) are the registration itself: the ObjectLibrary factory lambdas take the stub address, not the factory body address."
+  ],
+  "sites": [
+   {
+    "instruction": "lea rcx, [rip + 0x100f]",
+    "kind": "lea",
+    "site": "0x61c01fa",
+    "site_fde_end": "0x61c0cb4",
+    "site_fde_start": "0x61c0180",
+    "target": "0x61c1210",
+    "target_name": "rocksdb::RegisterBuiltinComparators (call_once lambda)"
+   }
+  ],
+  "validated_sites": 1
+ },
+ "cases": {
+  "count": 2400,
+  "ledger": "cases.tsv",
+  "split": "600 registration sequence (200 full-cold, 200 full-warm, 100 full-duplicate, 100 full-second-run) + 600 name builds (100 frag-block1, 100 frag-block2, 100 frag-u64ts, 100 copy-sso, 100 copy-heap, 50 copy-len1, 50 copy-empty) + 600 manager dispatch (150 op0, 150 op1, 100 op2, 100 op3, 100 op-other) + 600 name-cache (200 cold, 200 warm, 100 acquire-zero, 100 len-boundary)",
+  "tests": "tests/test_register_builtin_comparators115.py",
+  "tool": "tools/register_builtin_comparators115.py",
+  "what_is_checked": [
+   "full-cold / full-warm: the three blocks run in the fixed order Bytewise, Reverse, U64Ts; each registers (name, manager, stub); AddFactory is called 3 times, no duplicates; the name cache ends guard-set with __cxa_atexit registered",
+   "full-duplicate: re-running the lambda with the same names keeps the existing entries (AddFactory's 0x61c0fa0 find branch) -- 3 duplicates, 6 AddFactory calls, entries byte-identical",
+   "full-second-run: a second invocation adds no new entries (3 entries before and after)",
+   "frag-block1: 'leveldb.BytewiseComparator' (26) rebuilt from the .rodata movdqa fragments 0x455300 (16 B at +0) + 0x453a20 (16 B at +10, overlapping the first fragment's trailing 'tewise' with identical bytes)",
+   "frag-block2: 'rocksdb.ReverseBytewiseComparator' (33) rebuilt from 0x452fb0 (16 B at +0) + 0x454210 (16 B at +16) + 'r' (0x72 at +32)",
+   "frag-u64ts: 'leveldb.BytewiseComparator.u64ts' (32) rebuilt from the cached Name() -- the 26-char literal at 0x44e0fe + '.u64ts' at 0x43c8ab, in that insert order",
+   "copy-sso: len 0/1/2/15 copy inline (SSO, no heap); copy-heap: len 16/26/32/33 allocate via _M_create + memcpy; copy-len1: the single byte is stored inline; copy-empty: the empty string stays SSO",
+   "mgr-op0: each manager returns its .data.rel.ro slot address (bytewise 0x64d6ff8, reverse 0x64d7008, u64ts 0x64d7018); mgr-op1: copies the functor value (rsi) into *rdi; mgr-op2 / mgr-op3 / mgr-op-other: no write, return 0",
+   "cache-cold: guard 0 -> __cxa_guard_acquire -> ostringstream build (26-char literal, then '.u64ts') -> __cxa_atexit registered -> __cxa_guard_release; builds counts 1",
+   "cache-warm: guard set -> the cached string is returned with no acquire and no new build",
+   "cache-acquire-zero: another thread built the name meanwhile; the other thread's value is returned with no new build",
+   "cache-len-boundary: the copy rules at len 0/1/15 (SSO) vs 16/32 (heap)"
+  ]
+ },
+ "engine_callees": {
+  "0x61c0d50": "rocksdb::ObjectLibrary::AddFactory<const Comparator> (792 B, census-bound, body 3208c820...): allocates a 0x70-byte registry entry plus a 0x30-byte node, copies the name string (SSO <= 15, heap + memcpy above) and the (manager, stub) pair, inserts under the 'Comparator' map key behind the library mutex; on a duplicate name takes the 0x61c0fa0 find branch instead of inserting",
+  "0x61f8b60": "ObjectLibrary::Default() (call at 0x61c1255; the returned pointer is dereferenced into r14, the library passed to all three AddFactory calls)",
+  "0x63f0a60": "memcpy (PLT stub; the heap copy of a name longer than 15 chars)",
+  "0x63f0a80": "strlen (PLT stub; the warm-path length of the cached U64Ts name)",
+  "0x63f0d80": "operator delete (sized _ZdlPvm, PLT stub; frees a heap name string after its AddFactory call)",
+  "0x63f0e10": "std::string::_M_create (PLT stub; heap allocation for names longer than 15 chars -- all three registered names, 26/33/32)",
+  "0x63f0f80": "__cxa_atexit (PLT stub; registers the cached U64Ts name string for destruction -- unlike the comparator singletons, which are STATIC_AVOID_DESTRUCTION and never registered)",
+  "0x63f0fc0": "__cxa_guard_acquire (PLT stub; the U64Ts Name() guard 0x6508898 in the block-3 cold path)",
+  "0x63f0fd0": "__cxa_guard_release (PLT stub; marks the Name() guard initialized after the cached string is built)",
+  "0x63f10f0": "std::ostream::__ostream_insert (PLT stub; the two ostringstream inserts in the block-3 cold path)"
+ },
+ "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM. The target binary is never executed. The tool models the three registration blocks in Python; no engine call is needed for a registration, so there is no ctypes dependency here. make verify/test/catalogue-check in a tooled environment is still owed upstream.",
+ "functions": {
+  "0x61bd810": {
+   "body_sha256": "164736ddd65a2c526c108f2e0344c812ff98589bb661a365a59ebf05fd28165b",
+   "callers": [],
+   "census_id": "none",
+   "lea_refs": [
+    "0x61c126a"
+   ],
+   "mangled": "",
+   "model": "45-byte std::function manager (own FDE, no census record): op 0 stores the address of the .data.rel.ro slot 0x64d6ff8 into *rdi; op 1 stores rsi into *rdi (copy the functor value); any other op returns 0 without touching memory. LEA-referenced once, from RegisterBuiltinComparators at 0x61c126a.",
+   "relocations": "0",
+   "source_sha256": ""
+  },
+  "0x61bd840": {
+   "body_sha256": "425a388c9d87a3732aac918124ccc6263a3e3b4e6fd7112df99dfa4492671e28",
+   "callers": [],
+   "census_id": "none",
+   "lea_refs": [
+    "0x61c1367"
+   ],
+   "mangled": "",
+   "model": "45-byte std::function manager (own FDE, no census record): op 0 stores the address of the .data.rel.ro slot 0x64d7008 into *rdi; op 1 stores rsi into *rdi; any other op returns 0 without touching memory. LEA-referenced once, from RegisterBuiltinComparators at 0x61c1367.",
+   "relocations": "0",
+   "source_sha256": ""
+  },
+  "0x61bd870": {
+   "body_sha256": "434ddcf8ec3744d6fc8b1919b774c864067debeee5e4188ba7384775ae0f8381",
+   "callers": [],
+   "census_id": "none",
+   "lea_refs": [
+    "0x61c1440"
+   ],
+   "mangled": "",
+   "model": "45-byte std::function manager (own FDE, no census record): op 0 stores the address of the .data.rel.ro slot 0x64d7018 into *rdi; op 1 stores rsi into *rdi; any other op returns 0 without touching memory. LEA-referenced once, from RegisterBuiltinComparators at 0x61c1440.",
+   "relocations": "0",
+   "source_sha256": ""
+  },
+  "0x61c1210": {
+   "body_sha256": "260a5d53134aa84f31c151e9fcae09083038d854329ed7ef73f411a752d24b38",
+   "callers": [],
+   "census_id": "node115-vendor-61c1210",
+   "lea_refs": [
+    "0x61c01fa"
+   ],
+   "mangled": "_ZZNSt9once_flag18_Prepare_executionC4IZSt9call_onceIZN7rocksdb10Comparator16CreateFromStringERKNS3_13ConfigOptionsERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPPKS4_EUlvE_JEEvRS_OT_DpOT0_EUlvE_EERSL_ENUlvE_4_FUNEv",
+   "model": "2058-byte call_once lambda (RegisterBuiltinComparators inlined): fetch ObjectLibrary::Default() into r14; block 1 builds 'leveldb.BytewiseComparator' (26, movdqa 0x455300 + 0x453a20) + function (manager 0x61bd810, stub 0x61be8d0) + AddFactory at 0x61c131a + manager op 3 at 0x61c1355; block 2 builds 'rocksdb.ReverseBytewiseComparator' (33, movdqa 0x452fb0 + 0x454210 + 'r') + function (manager 0x61bd840, stub 0x61be9b0) + AddFactory at 0x61c13f8 + manager op 3 at 0x61c1433; block 3 reads the cached U64Ts Name() (guard 0x6508898, string 0x65088a0; cold path builds it via ostringstream: 26-char literal + '.u64ts') + function (manager 0x61bd870, stub 0x61beac0) + AddFactory at 0x61c14d3 + manager op 3 at 0x61c150e. Returns void (upstream return 3 discarded by inlining).",
+   "relocations": "70:kind4;84:kind2;93:kind2;176:kind4;195:kind2;230:kind2;267:kind2;297:kind4;334:kind2;346:kind2;402:kind4;415:kind2;448:kind2;489:kind2;519:kind4;556:kind2;563:kind2;600:kind2;615:kind2;640:kind4;708:kind2;738:kind4;793:kind4;875:kind2;880:kind4;909:kind4;916:kind42;923:kind42;1041:kind4;1089:kind4;1101:kind42;1113:kind42;1162:kind42;1245:kind4;1252:kind42;1334:kind4;1346:kind2;1354:kind4;1366:kind2;1374:kind4;1389:kind2;1396:kind2;1407:kind2;1413:kind2;1449:kind2;1475:kind4;1482:kind42;1515:kind42;1534:kind42;1582:kind4;1589:kind42;1611:kind4;1695:kind42;1724:kind4;1731:kind42;1738:kind2;1745:kind2;1750:kind4;1757:kind2;1762:kind4;1786:kind4;1821:kind4;1859:kind2;1864:kind4;1895:kind2;1900:kind4;1905:kind4;1922:kind2;1934:kind2;1946:kind2;1958:kind2;1970:kind2;1982:kind2;1994:kind2;2006:kind2;2018:kind2;2030:kind2;2042:kind2;2054:kind2",
+   "source_sha256": "3d78ed4569b06ab290febf5037cb5012f61d47a1eb3899fe6461593f293f6856"
+  }
+ },
+ "observations": [
+  "The census symbol names 0x61c1210 as the std::call_once lambda inside Comparator::CreateFromString, not as RegisterBuiltinComparators itself: the static function is inlined into the lambda, and the lambda's body is exactly the three AddFactory calls from upstream util/comparator.cc:598-634.",
+  "Block 1's name is built with OVERLAPPING movdqa stores: the first 16-byte store writes 'leveldb.Bytewise' at +0 and the second 16-byte store writes 'tewiseComparator' at +10, overwriting the first fragment's trailing 'tewise' with identical bytes. The result is 'leveldb.BytewiseComparator' (26); the overlap is a compiler artifact of the two fragments sharing the 'tewise' run, not two different spellings.",
+  "Block 2's name is built the same way without overlap: 16 bytes at +0, 16 bytes at +16, then a single movb $0x72 ('r') at +32 -- 33 chars total.",
+  "The three std::function objects are 32 bytes: 16 zeroed functor bytes, the manager at +0x10, the factory stub at +0x18. The functor storage stays zero because the callable is the stub itself, held at +0x18; the manager is what AddFactory loads from +0x10.",
+  "The managers' op-0 slots (0x64d6ff8 / 0x64d7008 / 0x64d7018) each carry an R_X86_64_64 relocation to _ZTVN10__cxxabiv117__class_type_infoE + 0x10; the file bytes are zero and the runtime value materializes at load. The three managers are otherwise byte-identical in shape (45 B each, differing only in the op-0 LEA displacement and the relative branch targets).",
+  "The two manager call sites pass op 2 (inside AddFactory, before the pair is copied out by movdqu) and op 3 (the local destroy after each AddFactory); both are no-ops in the manager's dispatch, and the pair itself is transferred by the movdqu copy. The libstdc++ _Manager_operation naming for ops 2/3 is an open unknown (see below).",
+  "The function returns void: no 'mov $0x3,%eax' appears anywhere in the 2058-byte body, and eax is 0 on the normal return path (the last manager call returns 0, then the stack-canary check leaves eax 0). The upstream 'return 3' is discarded when RegisterBuiltinComparators is inlined into the call_once lambda.",
+  "The U64Ts name cache (guard 0x6508898, string 0x65088a0) is the ONLY guard in this function: the Bytewise/Reverse names are compile-time literals copied from .rodata, so only the third block can take a cold path. The cold path's ostringstream lives at rsp+0x120 and is destroyed (ios_base dtor + locale dtor) before the function returns.",
+  "The caller census finds exactly one reference to 0x61c1210: a LEA at 0x61c01fa in CreateFromString. The lambda is never called directly -- std::call_once takes its address and invokes it through the once_flag machinery."
+ ],
+ "open_unknowns": [
+  "The runtime values of the three manager op-0 slots (0x64d6ff8 / 0x64d7008 / 0x64d7018): each carries an R_X86_64_64 relocation to _ZTVN10__cxxabiv117__class_type_infoE + 0x10, so the value materializes only at load; which libstdc++ functor-type record each slot points to is not pinned here.",
+  "The libstdc++ _Manager_operation enum naming for the op values observed here: AddFactory invokes the manager with op 2 and the local destroy with op 3, while the manager's dispatch only distinguishes op 0 (slot address) and op 1 (copy) from everything else (no-op returning 0). Whether op 2 is a move and op 3 the destroy in this libstdc++ version is not established from the binary alone.",
+  "ObjectLibrary::AddFactory 0x61c0d50 (792 B, census-bound) is an engine callee: its 0x70-byte registry entry and 0x30-byte node layouts are described at contract level only (name copy, (manager, stub) pair copy, 'Comparator' map insert under the mutex, duplicate-name find branch at 0x61c0fa0). Its full internal layout is not modeled in this packet.",
+  "Comparator::CreateFromString 0x61c0180..0x61c0cb4 (3244 B) has no vendor census record, so its body/source hashes cannot be bound the census way; its reconstruction (call_once registration, GetOptionsMap, the three name branches, the empty-value / unknown-id paths) is the follow-up, not this packet."
+ ],
+ "task": "RE-002",
+ "upstream_confirmation": {
+  "create_from_string": "Comparator::CreateFromString (lines 637-649): 'static std::once_flag once; std::call_once(once, [&]() { RegisterBuiltinComparators(*(ObjectLibrary::Default().get()), \"\"); });' -- the census symbol of 0x61c1210 is exactly that lambda, and the binary's single LEA reference (0x61c01fa) is the lambda address being taken for call_once.",
+  "name_cache": "ComparatorWithU64TsImpl::kClassName() (lines 461-467) caches the class name in a function-local static std::string -- the guard 0x6508898 / string 0x65088a0 pair from #5852 that block 3 reads; kClassNameInternal() (lines 550-558) builds it with 'std::stringstream ss; ss << TComparator::kClassName() << \".u64ts\";' -- the ostringstream cold path at 0x61c1578.",
+  "registration": "RegisterBuiltinComparators (lines 598-634): 'static int RegisterBuiltinComparators(ObjectLibrary& library, const std::string& /*arg*/)' -- three library.AddFactory<const Comparator> calls with BytewiseComparatorImpl::kClassName() ('leveldb.BytewiseComparator'), ReverseBytewiseComparatorImpl::kClassName() ('rocksdb.ReverseBytewiseComparator') and ComparatorWithU64TsImpl<BytewiseComparatorImpl>::kClassName(), each with a lambda of the form '[](const std::string&, std::unique_ptr<const Comparator>*, std::string*) { return BytewiseComparator(); }', then 'return 3'. The lambdas ignore all three arguments and return the factory directly, which is why the binary stores the factory stub as the std::function functor.",
+  "source": "facebook/rocksdb v8.1.1, util/comparator.cc"
+ }
+}

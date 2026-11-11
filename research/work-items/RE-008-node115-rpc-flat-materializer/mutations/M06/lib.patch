@@ -1,0 +1,26 @@
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -93,7 +93,7 @@
+                 segment_search(&self.rows[self.head..self.head + first_length], query),
+             )
+         } else {
+-            match self.rows[0].key.cmp(query) {
++            match self.rows[0].key[..31].cmp(&query[..31]) {
+                 Ordering::Equal => return self.found(first_length),
+                 Ordering::Greater => (
+                     0,
+@@ -160,12 +160,12 @@
+     while width > 1 {
+         let half = width / 2;
+         let midpoint = base + half;
+-        if rows[midpoint].key.cmp(query) != Ordering::Greater {
++        if rows[midpoint].key[..31].cmp(&query[..31]) != Ordering::Greater {
+             base = midpoint;
+         }
+         width -= half;
+     }
+-    match rows[base].key.cmp(query) {
++    match rows[base].key[..31].cmp(&query[..31]) {
+         Ordering::Equal => Ok(base),
+         Ordering::Less => Err(base + 1),
+         Ordering::Greater => Err(base),

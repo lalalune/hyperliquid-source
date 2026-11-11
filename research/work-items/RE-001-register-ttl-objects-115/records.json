@@ -1,0 +1,595 @@
+{
+ "target": {
+  "artifact": "work/hl-node-115.bin",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "node": 115
+ },
+ "work_item": "RE-001-register-ttl-objects-115",
+ "task": "RE-001",
+ "question": "Pin node #115's RegisterTtlObjects registrar end-to-end: the once-wrapper 0x6202da0 that runs the register function 0x62069f0 exactly once (pthread_once on the control at 0x65093a8) from DBWithTTL::Open and DBWithTTLImpl::CreateColumnFamilyWithTtl, the register function that creates the 'TTL' ObjectLibrary and invokes the creator 0x6208290 through a std::function, the three FactoryEntry records the creator registers (MergeOperator, CompactionFilterFactory, CompactionFilter -- all exact-match patterns), the creator lambdas' _M_invoke bodies (default empty-object construction plus the RegisterOptions calls), the FactoryEntry vtables and their D2/D0/Matches/accessor slots, the std::function manager protocol, and the consumers that construct the TTL objects (SanitizeOptions and CreateCompactionFilter).",
+ "identity": {
+  "catalogue_row": "_ZN7rocksdb18RegisterTtlObjectsEv",
+  "catalogue_source": "docs/PROGRESS.md RE-002 vendor census row",
+  "catalogue_match": "1,882/2,154 (87.37%) published-crate rebuild",
+  "fde": "0x6208290..0x6208afa",
+  "cold_fde": "0x62080a4..0x620828d"
+ },
+ "triggers": {
+  "role": "The once-wrapper 0x6202da0 has exactly two direct callers, both verified as real `call 6202da0` instructions with objdump (a byte scan alone also reports false positives at 0x6206165 and 0x6205a5d, which are E8 bytes inside other instructions).  DBWithTTL::Open (FDE 0x6206100..0x62065e5, catalogue 1,157/1,253, 92.34%) calls it at 0x620615d; DBWithTTLImpl::CreateColumnFamilyWithTtl (FDE 0x6205d20..0x6205e08, catalogue 202/232, 87.07%) calls it at 0x6205d61, first, before SanitizeOptions and the base CreateColumnFamily.  Either entry point therefore ensures the TTL library is registered exactly once before any TTL object is used.",
+  "open": {
+   "fde": "0x6206100..0x62065e5",
+   "catalogue_match": "1,157/1,253 (92.34%)",
+   "call_site": "0x620615d"
+  },
+  "create_column_family": {
+   "fde": "0x6205d20..0x6205e08",
+   "catalogue_match": "202/232 (87.07%)",
+   "call_site": "0x6205d61",
+   "excerpt": "trigger-6205d20.objdump.txt"
+  }
+ },
+ "once_wrapper": {
+  "addr": 102772128,
+  "fde": "0x6202da0..0x6202e78",
+  "role": "Stores the register function 0x62069f0 (lea at 0x6202df2) into the TLS __once_callable slot (GOT 0x64ed820; the callable itself is loaded from GOT 0x64ed828, the slot address from GOT 0x64ed818) and calls pthread_once on the once control at 0x65093a8. On failure it throws __throw_system_error with the pthread_once return value; on success it clears both TLS slots.  No lea sites and no qword occurrences of 0x6202da0 exist anywhere in the file; it is not in .init_array (whose first qwords read as 0, RELATIVE-relocated at load).",
+  "once_control": "0x65093a8",
+  "callable": "0x62069f0",
+  "call_sites": [
+   "0x620615d",
+   "0x6205d61"
+  ],
+  "excerpt": "once-6202da0.objdump.txt"
+ },
+ "register_fn": {
+  "addr": 102787568,
+  "fde": "0x62069f0..0x6206d29",
+  "role": "Calls the registry getter 0x61f92b0 (pinned by PR #4015) at 0x6206a3d, builds a 0x90-byte make_shared ObjectLibrary block named 'TTL' (control-block vtable 0x64d00f0, counts 0x100000001 from the global at 0x459b20, SSO name string 'TTL': 0x5454 + byte 0x4c at +0x92, NUL at +0x93, copied into the library name via _M_assign) and appends it to the registry libraries vector under the registry mutex (registry+0x98; the full path goes through vec-insert 0x5ff7960 at 0x6206c78, pinned by PR #4015; the use-count bump is a lock addl gated on the byte at GOT 0x64ed290).  Then invokes the creator via a std::function (functor 0x6208290 loaded by lea at 0x6206a4c, manager 0x6201000 from GOT 0x64ee090, invoker 0x6200a30 from GOT 0x64ee088; call *0x78(%rsp) at 0x6206bd8) with the library and an empty-string name, destroys the std::function (manager op 3) and releases the registry copy via _M_release 0x5d350c0.  A null manager throws __throw_bad_function_call.",
+  "excerpt": "register-62069f0.objdump.txt",
+  "manager_excerpt": "regmgr-6201000.objdump.txt",
+  "invoker_excerpt": "reginvoke-6200a30.objdump.txt"
+ },
+ "register_manager": {
+  "addr": "0x6201000",
+  "fde": "0x6201000..0x6201035",
+  "role": "The register std::function's manager (53 bytes): op 0 stores the typeinfo object address at *rdi, op 1 stores rsi at *rdi (functor clone), op 2 returns false with no memory effect, op 3 returns false with no memory effect."
+ },
+ "register_invoker": {
+  "addr": "0x6200a30",
+  "fde": "0x6200a30..0x6200a3f",
+  "role": "The register std::function's invoker (15 bytes): an arg-shifting tail-jump thunk -- mov %rdi,%rax; mov %rsi,%rdi; mov %rdx,%rsi; jmp *(%rax) -- calls the functor (0x6208290) with (library, name)."
+ },
+ "library": {
+  "name": "TTL",
+  "block_size": 144,
+  "object_size": 128,
+  "control_block_vtable": "0x64d00f0",
+  "control_block_typeinfo": "St23_Sp_counted_ptr_inplaceIN7rocksdb13ObjectLibraryESaIvELN9__gnu_cxx12_Lock_policyE2EE",
+  "counts": 4294967297,
+  "counts_global": "0x459b20",
+  "map_max_load_factor": 1.0,
+  "map_max_load_factor_bits": "0x3f800000",
+  "note": "The 1.0f word at block+0x58 is the unordered_map's max_load_factor (library+0x48), NOT a library version float: the 0x80-byte library object (0x28 mutex + 0x38 map + 0x20 name) has no version field.  This corrects PR #4028, which recorded the same word as a version float."
+ },
+ "creator": {
+  "addr": 102793872,
+  "fde": "0x6208290..0x6208afa",
+  "cold_fde": "0x62080a4..0x620828d",
+  "role": "Takes (ObjectLibrary* in rdi, name string in rsi -- invoked with '').  Locks the library mutex around each registration block (block 1 inline, block 2 inside the register helper, block 3 inline), registers the three entries, then calls count 0x61f8700 (pinned by PR #3983) at 0x62088e1; both the returned total-entry count and the element-count out value (stored at rsp+0x28) are discarded.  The cold FDE holds only exception landing pads: string _M_dispose, pthread_mutex_unlock, PatternEntry D0 via vtable slot 1, operator delete 0x70 (PatternEntry) and 0x30 (FactoryEntry), and std::function manager op-3 destroys.",
+  "excerpt": "creator-6208290.objdump.txt",
+  "cold_excerpt": "creator-cold-62080a4.objdump.txt"
+ },
+ "register_helper": {
+  "addr": 100631136,
+  "fde": "0x5ff8260..0x5ff8449",
+  "signature": "(library, name_cstring, record_ptr_slot)",
+  "role": "Locks the mutex at rdi, builds the name string from a C-string literal (strlen, SSO <=15 else _M_create), calls find-or-insert 0x5fd1da0 (rdi=arg+0x28, rsi=name string; pinned by PR #3983), appends ONE qword -- the record pointer, moved out of the slot at rdx and then zeroed -- to that name's vector (end==capacity goes through vec-insert 0x5fd17c0, pinned by PR #3983), unlocks.  Used by the creator's block 2 only (call site 0x620868a).",
+  "call_site": "0x620868a"
+ },
+ "entries": [
+  {
+   "index": 1,
+   "name": "MergeOperator",
+   "name_literal": "movabs-built SSO string (13 chars)",
+   "creator": "MO",
+   "invoke": "0x62056b0",
+   "manager": "0x62009a0",
+   "manager_typeinfo": "*Z18RegisterTtlObjectsEUlRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPSt10unique_ptrIN7rocksdb13MergeOperatorESt14default_deleteIS9_EEPS4_E_",
+   "factory_vtable": "0x64d86a0",
+   "pattern": "TtlMergeOperator",
+   "pattern_source": "rodata 0x451e80, 16 bytes via _M_create + copy",
+   "elements": [],
+   "flag": 1,
+   "register_path": "inline find-or-insert 0x5fd1da0 + append"
+  },
+  {
+   "index": 2,
+   "name": "CompactionFilterFactory",
+   "name_literal": "0x43d944",
+   "creator": "CFF",
+   "invoke": "0x6205c60",
+   "manager": "0x62009d0",
+   "manager_typeinfo": "*Z18RegisterTtlObjectsEUlRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPSt10unique_ptrIN7rocksdb23CompactionFilterFactoryESt14default_deleteIS9_EEPS4_E_",
+   "factory_vtable": "0x64d9d38",
+   "pattern": "TtlCompactionFilterFactory",
+   "pattern_literal": "0x449896",
+   "elements": [],
+   "flag": 1,
+   "register_path": "register helper 0x5ff8260 at 0x620868a"
+  },
+  {
+   "index": 3,
+   "name": "CompactionFilter",
+   "name_literal": "rodata 0x451e60, first 16 bytes",
+   "creator": "CF",
+   "invoke": "0x6202ca0",
+   "manager": "0x6200a00",
+   "manager_typeinfo": "*Z18RegisterTtlObjectsEUlRKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPSt10unique_ptrIN7rocksdb16CompactionFilterESt14default_deleteIS9_EEPS4_E_",
+   "factory_vtable": "0x64d7da0",
+   "pattern": "TtlCompactionFilter",
+   "pattern_literal": "0x4363a4",
+   "elements": [],
+   "flag": 1,
+   "register_path": "inline find-or-insert 0x5fd1da0 + append"
+  }
+ ],
+ "pattern_entry": {
+  "size": 112,
+  "vtable": "0x64d8ed0",
+  "typeinfo": "N7rocksdb13ObjectLibrary12PatternEntryE",
+  "fields": [
+   {
+    "offset": 0,
+    "what": "vtable pointer"
+   },
+   {
+    "offset": 8,
+    "what": "std::string pattern (0x20)"
+   },
+   {
+    "offset": 40,
+    "what": "size_t pattern-length copy"
+   },
+   {
+    "offset": 48,
+    "what": "std::vector<std::string> sub-patterns (0x20-byte elements)"
+   },
+   {
+    "offset": 72,
+    "what": "bool byte (1)"
+   },
+   {
+    "offset": 80,
+    "what": "pointer (0)"
+   },
+   {
+    "offset": 88,
+    "what": "std::vector<0x28-byte> sub-pattern elements: string at +0x00, mode at +0x20"
+   }
+  ],
+  "note": "Layout pinned by PR #3983; the creator's scratch struct confirms it field for field.  D2/D0/Matches/accessor are pinned by PR #3983 and cited here, not re-derived.",
+  "matcher": "str-match 0x61f8430 + elem-match 0x61f8280 (PR #3983): empty +0x58 vector means exact match only (flag not checked); equal lengths with a non-empty vector means exact match with the flag set; otherwise the query must start with the pattern, every +0x58 element must match in sequence (element 0 governed by the initial mode 2; element i+1 governed by element i's mode), and the tail is decided by the last element's mode (2: reach the end; 3/4: remainder after an optional '-' is digits / dotted digits with at least one digit; other modes accept).  All three TTL records have empty +0x58 vectors, so all three match exactly."
+ },
+ "factory_entry": {
+  "size": 48,
+  "fields": [
+   {
+    "offset": 0,
+    "what": "vtable pointer"
+   },
+   {
+    "offset": 8,
+    "what": "PatternEntry*"
+   },
+   {
+    "offset": 16,
+    "what": "std::function functor storage (16 bytes, zeros for stateless lambdas)"
+   },
+   {
+    "offset": 32,
+    "what": "std::function manager"
+   },
+   {
+    "offset": 40,
+    "what": "std::function invoker (_M_invoke)"
+   }
+  ],
+  "vtables": [
+   {
+    "kind": "MergeOperator",
+    "header": "0x64d8690",
+    "vtable": "0x64d86a0",
+    "typeinfo": "N7rocksdb13ObjectLibrary12FactoryEntryINS_13MergeOperatorEEE",
+    "slots": [
+     {
+      "slot": 0,
+      "addr": "0x61f06f0",
+      "name": "D2",
+      "fde": "0x61f06f0..0x61f0732"
+     },
+     {
+      "slot": 1,
+      "addr": "0x61f0990",
+      "name": "D0",
+      "fde": "0x61f0990..0x61f09da"
+     },
+     {
+      "slot": 2,
+      "addr": "0x61f0770",
+      "name": "forward Matches",
+      "fde": "0x61f0770..0x61f077e"
+     },
+     {
+      "slot": 3,
+      "addr": "0x61f0780",
+      "name": "forward accessor",
+      "fde": "0x61f0780..0x61f078e"
+     }
+    ]
+   },
+   {
+    "kind": "CompactionFilterFactory",
+    "header": "0x64d9d28",
+    "vtable": "0x64d9d38",
+    "typeinfo": "N7rocksdb13ObjectLibrary12FactoryEntryINS_23CompactionFilterFactoryEEE",
+    "slots": [
+     {
+      "slot": 0,
+      "addr": "0x6200a60",
+      "name": "D2",
+      "fde": "0x6200a60..0x6200aa2"
+     },
+     {
+      "slot": 1,
+      "addr": "0x6201240",
+      "name": "D0",
+      "fde": "0x6201240..0x620128a"
+     },
+     {
+      "slot": 2,
+      "addr": "0x6200b10",
+      "name": "forward Matches",
+      "fde": "0x6200b10..0x6200b1e"
+     },
+     {
+      "slot": 3,
+      "addr": "0x6200b20",
+      "name": "forward accessor",
+      "fde": "0x6200b20..0x6200b2e"
+     }
+    ]
+   },
+   {
+    "kind": "CompactionFilter",
+    "header": "0x64d7d90",
+    "vtable": "0x64d7da0",
+    "typeinfo": "N7rocksdb13ObjectLibrary12FactoryEntryINS_16CompactionFilterEEE",
+    "slots": [
+     {
+      "slot": 0,
+      "addr": "0x61e7cf0",
+      "name": "D2",
+      "fde": "0x61e7cf0..0x61e7d32"
+     },
+     {
+      "slot": 1,
+      "addr": "0x61e7e00",
+      "name": "D0",
+      "fde": "0x61e7e00..0x61e7e4a"
+     },
+     {
+      "slot": 2,
+      "addr": "0x61e7d70",
+      "name": "forward Matches",
+      "fde": "0x61e7d70..0x61e7d7e"
+     },
+     {
+      "slot": 3,
+      "addr": "0x61e7d80",
+      "name": "forward accessor",
+      "fde": "0x61e7d80..0x61e7d8e"
+     }
+    ]
+   }
+  ],
+  "d2_role": "Installs the base vtable; if the manager is non-null calls manager(this+0x10, this+0x10, op 3) -- a no-op for these managers -- then deletes the PatternEntry via its D0 (vtable slot 1).  The std::function member starts at +0x10, which is why D2 passes this+0x10.",
+  "d0_role": "Same as D2, plus operator delete(node, 0x30).",
+  "forward_role": "Slot 2 forwards to the PatternEntry vtable slot 2 (Matches 0x61f8670); slot 3 forwards to the PatternEntry vtable slot 3 (accessor 0x61f8120).  Both pinned by PR #3983."
+ },
+ "managers": {
+  "addrs": [
+   "0x62009a0",
+   "0x62009d0",
+   "0x6200a00"
+  ],
+  "signature": "(to=rdi, from=rsi, op=rdx)",
+  "ops": {
+   "0": "store the typeinfo object address at *rdi",
+   "1": "store rsi at *rdi (functor clone)",
+   "2": "return false, no memory effect (the effective clone is the bitwise movdqa/punpcklqdq copy of the {manager, invoker} pair)",
+   "3": "return false, no memory effect (destroy is a no-op for stateless lambdas)"
+  },
+  "pair_order": "PUNPCKLQDQ result.low = DEST.low, result.high = SRC.low, so the assembled pair is (manager, invoker) with the manager at the lower address and the invoker at the higher -- the standard libstdc++ layout (functor 16B, manager +0x10, invoker +0x18).  The creator builds each pair with the manager in the low half and the invoker in the high half (e.g. MO at 0x62082f4..0x6208309)."
+ },
+ "creators": [
+  {
+   "id": "MO",
+   "invoke": "0x62056b0",
+   "fde": "0x62056b0..0x620573d",
+   "cold_fde": "0x620566b..0x62056a4",
+   "ctor": "0x6205560",
+   "ctor_fde": "0x6205560..0x620566b",
+   "object_size": 56,
+   "role": "Builds a TtlMergeOperator via C1 0x6205560 (catalogue: rocksdb::TtlMergeOperator::C1, 243/267, 91.01%) with an empty shared_ptr and a null clock, then installs it into the out unique_ptr: the invoker loads *(rdx) as the slot address, replaces the stored pointer, destroys the previous object via its D1 (vtable slot 1), releases a control block via _M_release 0x5d350c0 when present, and returns the new pointer.  The cold FDE is the landing pad: release the control block at rsp+0x8, delete the 0x38-byte object, _Unwind_Resume.",
+   "excerpt": "invoke-mo-62056b0.objdump.txt",
+   "cold_excerpt": "invoke-mo-cold-620566b.objdump.txt",
+   "ctor_excerpt": "ctor-mo-6205560.objdump.txt"
+  },
+  {
+   "id": "CFF",
+   "invoke": "0x6205c60",
+   "fde": "0x6205c60..0x6205cef",
+   "ctor": "0x6205790",
+   "ctor_fde": "0x6205790..0x62058f7",
+   "ctor_cold_fde": "0x620573e..0x6205788",
+   "object_size": 64,
+   "role": "Builds a TtlCompactionFilterFactory via C2 0x6205790 with ttl 0, a null clock and an empty shared_ptr, then installs it into the out unique_ptr the same way as the MO invoker and returns the new pointer.  The CFF invoker has no cold FDE (single range 0x6205c60..0x6205cef).  The ctor's cold FDE installs base vtable 0x64d3430 and calls base destructor 0x5d35b50.",
+   "excerpt": "invoke-cff-6205c60.objdump.txt",
+   "ctor_excerpt": "ctor-cff-6205790.objdump.txt",
+   "ctor_cold_excerpt": "ctor-cff-cold-620573e.objdump.txt"
+  },
+  {
+   "id": "CF",
+   "invoke": "0x6202ca0",
+   "fde": "0x6202ca0..0x6202d1a",
+   "cold_fde": "0x6202c60..0x6202c99",
+   "ctor": "0x6202a10",
+   "ctor_fde": "0x6202a10..0x6202b50",
+   "ctor_cold_fde": "0x6202976..0x6202a0a",
+   "object_size": 64,
+   "role": "Builds a TtlCompactionFilter via C2 0x6202a10 with ttl 0, a null clock, a null filter and an empty unique_ptr, and returns the raw pointer directly -- unlike the other two invokers it installs into no out slot.  The cold FDE is the landing pad: destroy the moved-from unique_ptr's object via D1 when non-null, delete the 0x40-byte object, _Unwind_Resume.  The ctor's cold FDE installs base vtables 0x64d93e0 then 0x64d3430, destroying the owned filter and the +0x08 string vector between them.",
+   "excerpt": "invoke-cf-6202ca0.objdump.txt",
+   "cold_excerpt": "invoke-cf-cold-6202c60.objdump.txt",
+   "ctor_excerpt": "ctor-cf-6202a10.objdump.txt",
+   "ctor_cold_excerpt": "ctor-cf-cold-6202976.objdump.txt"
+  }
+ ],
+ "objects": [
+  {
+   "kind": "TtlMergeOperator",
+   "ctor": "0x6205560",
+   "size": 56,
+   "vtable": "0x64d9558",
+   "vtable_header": "0x64d9548",
+   "typeinfo": "N7rocksdb16TtlMergeOperatorE",
+   "typeinfo_object": "0x64d9308",
+   "fields": [
+    {
+     "offset": 0,
+     "what": "vtable pointer"
+    },
+    {
+     "offset": 8,
+     "what": "std::vector<std::string> (0x18, zeroed)"
+    },
+    {
+     "offset": 32,
+     "what": "shared_ptr<MergeOperator> (ptr + control block)"
+    },
+    {
+     "offset": 48,
+     "what": "SystemClock*"
+    }
+   ],
+   "options": [
+    {
+     "name": "TtlMergeOptions",
+     "global": "0x6509480",
+     "field": "wrapped shared_ptr (+0x20)"
+    }
+   ],
+   "note": "The option name is built as the 15-char string 'TtlMergeOptions' (movabs 'TtlMerge' at rsp+0x10 and 'eOptions' at rsp+0x17, sharing the 'e' at 0x17; size 15, NUL at rsp+0x1f).  The use-count bump for the copied shared_ptr is a lock addl gated on the byte at GOT 0x64ed290."
+  },
+  {
+   "kind": "TtlCompactionFilterFactory",
+   "ctor": "0x6205790",
+   "size": 64,
+   "vtable": "0x64d9718",
+   "vtable_header": "0x64d9708",
+   "typeinfo": "N7rocksdb26TtlCompactionFilterFactoryE",
+   "typeinfo_object": "0x64d92f0",
+   "fields": [
+    {
+     "offset": 0,
+     "what": "vtable pointer"
+    },
+    {
+     "offset": 8,
+     "what": "std::vector<std::string> (0x18, zeroed)"
+    },
+    {
+     "offset": 32,
+     "what": "ttl (int)"
+    },
+    {
+     "offset": 40,
+     "what": "SystemClock*"
+    },
+    {
+     "offset": 48,
+     "what": "shared_ptr<CompactionFilterFactory> (ptr + control block)"
+    }
+   ],
+   "options": [
+    {
+     "name": "UserOptions",
+     "global": "0x6509400",
+     "field": "wrapped shared_ptr (+0x30)"
+    },
+    {
+     "name": "TTL",
+     "global": "0x6509440",
+     "field": "ttl (+0x20)"
+    }
+   ]
+  },
+  {
+   "kind": "TtlCompactionFilter",
+   "ctor": "0x6202a10",
+   "size": 64,
+   "vtable": "0x64d9630",
+   "vtable_header": "0x64d9620",
+   "typeinfo": "N7rocksdb19TtlCompactionFilterE",
+   "typeinfo_object": "0x64d92d8",
+   "fields": [
+    {
+     "offset": 0,
+     "what": "vtable pointer"
+    },
+    {
+     "offset": 8,
+     "what": "std::vector<std::string> (0x18, zeroed; the ctor's unwind path destroys it element by element, stride 0x30)"
+    },
+    {
+     "offset": 32,
+     "what": "const CompactionFilter* (the moved unique_ptr's object when the const arg is null)"
+    },
+    {
+     "offset": 40,
+     "what": "owned unique_ptr<CompactionFilter> pointer (moved out of the r8 argument)"
+    },
+    {
+     "offset": 48,
+     "what": "ttl (int)"
+    },
+    {
+     "offset": 56,
+     "what": "SystemClock*"
+    }
+   ],
+   "options": [
+    {
+     "name": "TTL",
+     "global": "0x6509440",
+     "field": "filter (+0x20)"
+    },
+    {
+     "name": "UserFilter",
+     "global": "0x65093c0",
+     "field": "filter (+0x20)"
+    }
+   ],
+   "note": "The 'TTL' option global 0x6509440 is shared with the factory's 'TTL' option; both register their own ttl field through it."
+  }
+ ],
+ "consumers": [
+  {
+   "fn": "DBWithTTLImpl::SanitizeOptions",
+   "fde": "0x6205a00..0x6205c18",
+   "catalogue_match": "455/536 (84.89%)",
+   "calls": [
+    {
+     "site": "0x6205aa0",
+     "target": "0x6205560",
+     "what": "TtlMergeOperator C1"
+    },
+    {
+     "site": "0x6205a5d",
+     "target": "0x6202a10",
+     "what": "TtlCompactionFilter C2"
+    },
+    {
+     "site": "0x6205b6c",
+     "target": "0x6205790",
+     "what": "TtlCompactionFilterFactory C2"
+    }
+   ],
+   "note": "Cited by call site, FDE and catalogue row, not re-excerpted: the function body is mostly other option-sanitizing logic."
+  },
+  {
+   "fn": "TtlCompactionFilterFactory::CreateCompactionFilter",
+   "fde": "0x6202ba0..0x6202c60",
+   "catalogue_match": "170/192 (88.54%)",
+   "calls": [
+    {
+     "site": "0x6202c01",
+     "target": "0x6202a10",
+     "what": "TtlCompactionFilter C2"
+    }
+   ],
+   "note": "Cited by call site, FDE and catalogue row."
+  }
+ ],
+ "helpers": [
+  {
+   "addr": "0x6201040",
+   "fde": "0x6201040..0x62010e3",
+   "role": "std::string build from a [begin, end) range: SSO <=15 else _M_create+memcpy, NUL-terminates.  Used for the pattern-string copies in all three blocks.",
+   "excerpt": "string-build-6201040.objdump.txt"
+  },
+  {
+   "addr": "0x62010f0",
+   "fde": "0x62010f0..0x62011d3",
+   "role": "std::string assign from a const char*: strlen, SSO <=15 else _M_create, null throws logic_error via 0x963298.  Used for the CFF and CF pattern strings.",
+   "excerpt": "string-assign-62010f0.objdump.txt"
+  }
+ ],
+ "literals": [
+  {
+   "addr": "0x449896",
+   "value": "TtlCompactionFilterFactory"
+  },
+  {
+   "addr": "0x4363a4",
+   "value": "TtlCompactionFilter"
+  },
+  {
+   "addr": "0x43d944",
+   "value": "CompactionFilterFactory"
+  },
+  {
+   "addr": "0x451e80",
+   "value": "TtlMergeOperator",
+   "length": 16
+  },
+  {
+   "addr": "0x451e60",
+   "value": "CompactionFilter",
+   "length": 16
+  }
+ ],
+ "count_fn": {
+  "addr": "0x61f8700",
+  "role": "ObjectLibrary count (pinned by PR #3983): locks the library mutex, stores the map element_count at *rsi, walks the bucket chain summing each name vector's length, unlocks, returns the total entry count.  The creator calls it at 0x62088e1 with out=rsp+0x28 and discards both results."
+ },
+ "cited_not_rederived": {
+  "reg_getter_0x61f92b0": "PR #4015 (ObjectRegistry lifecycle).",
+  "find_or_insert_0x5fd1da0": "PR #3983 (ObjectLibrary registry).",
+  "vec_insert_0x5fd17c0": "PR #3983.",
+  "vec_insert_0x5ff7960": "PR #4015 (libraries-vector growth).",
+  "register_helper_0x5ff8260": "PR #4028 (body re-read here to pin the third argument: a pointer to a slot holding the record, moved out and zeroed).",
+  "pattern_d2_0x5ff2030": "PR #3983.",
+  "pattern_d0_0x5ff2150": "PR #3983.",
+  "pattern_matches_0x61f8670": "PR #3983.",
+  "pattern_accessor_0x61f8120": "PR #3983.",
+  "str_match_0x61f8430": "PR #3983.",
+  "elem_match_0x61f8280": "PR #3983.",
+  "count_0x61f8700": "PR #3983 (body re-read here to pin the out-pointer argument and the discarded results).",
+  "shared_ptr_release_0x5d350c0": "PR #4015.",
+  "register_options_0x6099ce0": "catalogue: Configurable::RegisterOptions, 317/340.",
+  "libcb_dispose_0x5ff7900": "catalogue: _Sp_counted_ptr_inplace<ObjectLibrary>::_M_dispose, 72/82; cited from the RELATIVE records, not re-excerpted."
+ },
+ "open_unknowns": [
+  "The TtlMergeOperator / TtlCompactionFilterFactory / TtlCompactionFilter runtime methods (Merge, Filter, CreateCompactionFilter bodies beyond the C2 call, the options they expose) are not pinned here -- only construction and registration.",
+  "The exact C++ names of the base vtables 0x64d93e0 and 0x64d3430 (installed by the ctor unwind paths) are not proven here; 0x64d3430 is shared with PR #4028's creator and is plausibly Configurable's vtable.",
+  "The base destructor 0x5d35b50 (called by the CFF ctor's unwind path) is not pinned.",
+  "The two pthread_once host FDEs are the trigger functions themselves (Open and CreateColumnFamilyWithTtl), both named in the catalogue -- unlike PR #4028's unnamed once hosts.",
+  "The +0x08 field of the MergeOperator and CompactionFilterFactory objects is recorded as a std::vector<std::string> by shape (identical zeroing to the CompactionFilter's, whose unwind path proves the destruction loop); only the CompactionFilter's is proven.",
+  "The out-slot indirection (the invoker loads *(rdx) as the slot address) means the create-host passes the out unique_ptr behind one more pointer level; the exact C++ type of that level is not pinned.",
+  "ObjectRegistry +0x70..0x98 region (from PR #4015, still open): the register function touches the registry mutex at +0x98 but the +0x70..0x98 fields are not pinned here."
+ ],
+ "model": {
+  "tool": "tools/register_ttl_objects_115.py",
+  "tests": "tests/test_register_ttl_objects_115.py",
+  "checks": 129
+ }
+}

@@ -1,0 +1,40 @@
+{
+  "function": {
+    "end": 69315020,
+    "sha256": "6f1a63aad6cfbcc1635d94d4cb57cd28153f4714301d3b23da4711bf1e8cc967",
+    "start": 69314736
+  },
+  "limitations": [
+    "the evaluator models the six external slots as stubs; the real bcmp, memcpy, allocator and panic shims were identified by relocation and call shape, not executed",
+    "out bytes 2..7 are never written by the body and keep the caller buffer contents; the corpus compares the full 0x20 output against a 0xAA prefill",
+    "caller-side consumption of the returned index and error string is outside this body and stays with the RE-007 registration caller question"
+  ],
+  "rules": [
+    "the count at front+0x10 gates everything: with zero records the page product is never computed and an overflowing page is ignored",
+    "with at least one record, prod = page * 10000 is computed once under a multiply-overflow panic",
+    "records are scanned in order at a 0x20 stride from front+8; the length field at record+0x10 must equal the suffix length before bcmp compares the name bytes at record+8",
+    "the comparison covers exactly the length-field count of bytes from each pointer: a zero length compares equal against any record, and a length past a shorter stored name reads whatever follows it in memory",
+    "before the record at position p is examined, prod + p is checked for add overflow; the first unreachable position at the maximal page is 1616",
+    "a hit stores tag 0x1a2 and the global index prod + position at out+8 and returns",
+    "the first matching record wins",
+    "a miss with a negative i64 length traps through the allocation-error shim with arguments (0, len)",
+    "a zero-length miss stores tag 0x68 with cap 0, ptr 1, len 0 and allocates nothing",
+    "any other miss allocates len bytes, copies the suffix into the allocation and stores tag 0x68 with cap = len, ptr = allocation, len = len; an allocation failure traps with arguments (1, len)",
+    "both panic guards use the shared Location object for l1/src/asset/pdi.rs:32:14"
+  ],
+  "slot": {
+    "relocation": "R_X86_64_RELATIVE",
+    "target": 69314736,
+    "va": 105802168
+  },
+  "stubs": {
+    "0x64df480": "alloc",
+    "0x64df498": "alloc_err",
+    "0x64df508": "memcpy",
+    "0x64df520": "panic_add",
+    "0x64df870": "panic_mul",
+    "0x64df9f8": "bcmp"
+  },
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "tool": "tools/pdi_name_lookup115.py"
+}

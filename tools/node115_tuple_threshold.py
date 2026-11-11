@@ -367,7 +367,8 @@ def check_window(data, secs, cies, fdes):
 
 def direct_scan(data, secs, targets):
     """Every byte offset with room for rel32, not a linear disassembly census."""
-    text = next(s for s in secs if s['name'] == '.text')
+    text = next((s for s in secs if s['name'] == '.text'), None)
+    demand(text is not None, 'missing.text section')
     demand((text['address'], text['address'] + text['size'], text['flags']) ==
            (TEXT_START, TEXT_END, 6), 'Unexpected .text geometry/flags')
     lower, upper = text['offset'], text['offset'] + text['size']
@@ -411,7 +412,9 @@ def source_association(data, secs, fdes):
     lea = decode(read_va(data, secs, SOURCE_LEA, 7), SOURCE_LEA)
     demand(len(lea) == 1 and lea[0]['mnemonic'] == 'lea'
            and lea[0]['operands'] == ['rdi', hex(LOCATION)], 'Location LEA mismatch')
-    section = next(s for s in secs if s['name'] == '.rela.dyn')
+    section = next((s for s in secs if s['name'] == '.rela.dyn'), None)
+    demand(section is not None, 'missing.rela.dyn section')
+    demand(section['size'] % 24 == 0, 'truncated.rela.dyn section')
     matches = []
     for p in range(section['offset'], section['offset'] + section['size'], 24):
         slot, info, addend = struct.unpack_from('<QQq', data, p)

@@ -1,0 +1,33 @@
+5c8b980: 55                               push     rbp
+5c8b981: 4889e5                           mov      rbp, rsp
+5c8b984: 4156                             push     r14
+5c8b986: 53                               push     rbx
+5c8b987: 4883ec20                         sub      rsp, 0x20
+5c8b98b: 4889fb                           mov      rbx, rdi
+5c8b98e: 48ffc6                           inc      rsi
+5c8b991: 488b07                           mov      rax, qword ptr [rdi]
+5c8b994: 488d0c00                         lea      rcx, [rax + rax]
+5c8b998: 4839ce                           cmp      rsi, rcx
+5c8b99b: 480f46f1                         cmovbe   rsi, rcx
+5c8b99f: 4883fe05                         cmp      rsi, 5
+5c8b9a3: 41be04000000                     mov      r14d, 4
+5c8b9a9: 4c0f43f6                         cmovae   r14, rsi
+5c8b9ad: 488b5708                         mov      rdx, qword ptr [rdi + 8]
+5c8b9b1: 488d7dd8                         lea      rdi, [rbp - 0x28]
+5c8b9b5: 4889c6                           mov      rsi, rax
+5c8b9b8: 4c89f1                           mov      rcx, r14
+5c8b9bb: e830ffffff                       call     0x5c8b8f0
+5c8b9c0: 807dd800                         cmp      byte ptr [rbp - 0x28], 0
+5c8b9c4: 740a                             je       0x5c8b9d0
+5c8b9c6: 488b45e0                         mov      rax, qword ptr [rbp - 0x20]
+5c8b9ca: 488b55e8                         mov      rdx, qword ptr [rbp - 0x18]
+5c8b9ce: eb15                             jmp      0x5c8b9e5
+5c8b9d0: 488b45e0                         mov      rax, qword ptr [rbp - 0x20]
+5c8b9d4: 48894308                         mov      qword ptr [rbx + 8], rax
+5c8b9d8: 4c8933                           mov      qword ptr [rbx], r14
+5c8b9db: 48b80100000000000080             movabs   rax, 0x8000000000000001
+5c8b9e5: 4883c420                         add      rsp, 0x20
+5c8b9e9: 5b                               pop      rbx
+5c8b9ea: 415e                             pop      r14
+5c8b9ec: 5d                               pop      rbp
+5c8b9ed: c3                               ret      

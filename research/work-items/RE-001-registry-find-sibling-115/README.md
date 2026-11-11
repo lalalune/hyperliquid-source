@@ -1,0 +1,222 @@
+# RE-001: pin node #115 registry Find through the sibling entry point 0x609a740: the flag-chain node resolution, the '.id' variants, the '=' helper and the kind dispatcher with its recursive call
+
+## Bounded question
+
+How does node #115 Find a component through the sibling entry point
+`0x609a740`: the flag-chain node resolution, the name dispatch
+(exact name, `'id'`, the `'.id'` suffix, the node-name-plus-dot
+compare), the `'='` / `';'` helper `0x6099e70`, the no-`'='` helper
+`0x609ba30`, the kind dispatcher `0x609b700` with its recursive
+kind-0x16 call, the element scan `0x6096f40` and the name lookup
+`0x60ba0b0` with its dotted-name fallback — and what does each step
+report when the name cannot be resolved?
+
+## Answer in one paragraph
+
+The sibling entry `0x609a740` is the second Find entry point the
+`#3485` packet left open, and this item pins it end to end. The
+entry first resolves the node: `base8` null → node null, otherwise
+`base8 + desc+0x00`, followed through one pointer load when any of
+the `desc+0xb0` flags `0x200/0x400/0x800` is set (the same
+flag-chain shape as the `#3485` matcher). It copies the 0x50-byte
+value struct (name deep-copied, the `+0x48` control use-count
+incremented, released on every exit path); when `desc+0xb1` bit 0 is
+set the copy's `+0x04` byte is cleared and the name dispatch runs
+(`name5 == key6` → the delegate's slot-0x50, `key6 == "id"` → slot-
+0x50, otherwise the `'.id'` path); when the flag is clear and
+`+0x04` is 0 the same dispatch runs, and when the flag is clear and
+`+0x04` is set a non-null node takes the `'.id'` variant 2 while a
+null node with a non-empty `arg7` reports code 4 `"Option not
+changeable: " + name5` (an empty `arg7` clears out and succeeds).
+Variant 1 of the `'.id'` path: `name5` ends with `".id"` → slot-0x50;
+`arg7` empty → clear out; node null → slot-0x50; otherwise the
+node's slot-0x78 name plus `"."` is compared with `key6` (unequal →
+slot-0x50, equal → the `'='` helper when `arg7` contains `'='`,
+else the no-`'='` helper). Variant 2: `name5` ends with `".id"` or
+`key6 == "id"` → the node's slot-0x78 name is compared with `arg7`
+(equal → clear out, unequal → the code-4 error); `name5 == key6`
+→ the `find_norm` path (empty options map, slot-0x78 name as the
+fallback, `find_norm` on `arg7`; a non-zero status is returned, on
+success the name is re-fetched and compared with `find_norm`'s
+out-string, equal → the map-empty check, unequal → the code-4
+error); otherwise → the no-`'='` helper. The `'='` helper
+`0x6099e70` zeroes out, then on a `';'` or `'='` in `arg7` parses
+into a fresh empty map and delegates through `0x6097110` on success
+(a parser error is kept); without either character it consults the
+node's slot-0x40 — the zero stub `0x60956f0` (the only `lea`
+reference to it, at `0x609a0d7`) zeroes out outright, a real slot
+fills a temp Status whose six bytes plus message pointer are copied
+into out, and a non-zero code returns at once — and then, when the
+value's `+0x03` byte is set, the node's slot-0x28 fills a temp
+Status that is moved into out. The no-`'='` helper `0x609ba30`
+forwards to `resolve_no_equals` `0x609b8a0`, which fills the search
+name from the node's slot-0x68, scans the node's `+0x08` vector
+with `element_scan` `0x6096f40` (0x30-byte elements, the name lookup
+per element, the matched element's `+0x20` field stored into
+found_out), and on a null scan reports code 1 `"Could not find
+option: " + key6`, else runs `kind_dispatch` `0x609b700`. The
+dispatcher reads the kind at `found+0xa8` (the matched node's
+`+0xd0`): kind 0x16 recurses into the entry (passing `str_b` twice,
+the matched record as the descriptor and the element's `+0x20`
+field as `base8`); equal names or kinds 0x13/0x15 take the node's
+slot-0x50; any other kind reports code 1 `"Could not find option:
+" + str_b`. The name lookup `0x60ba0b0` walks the table linearly up
+to 20 elements and by hash bucket above (`_Hash_bytes(key, len,
+0xc70f6907) % bucket_count`, the chain ending on a node whose hash
+falls in a different bucket); on a miss it splits the key at the
+first `'.'` and retries the prefix, admitting the suffix into out
+only when the prefix node has kind 0x13, 0x15 or 0x16. Two
+corrections to `#3485`'s record are pinned here: the true
+`find_norm` argument order is `(out, name, fallback, out-string,
+ctx-map)`, and the status builder `0x61cf670` writes `msg1 + ": " +
+msg2`, so because both message literals already end in `": "` the
+binary genuinely reports `"Could not find option: : foo"` and
+`"Option not changeable: : foo"` — the doubled separator is the
+binary's own quirk, not a model typo.
+
+## Target
+
+Node #115 binary `work/hl-node-115.bin`, SHA-256
+`a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`
+(`provenance/artifacts.json`, `artifacts/node/115/hl-node`).
+
+## Evidence
+
+- `excerpts/` — 19 whole-function objdump excerpts, verbatim as
+  objdump emitted them. Generated by `export_excerpts.py` with:
+  `objdump -d --start-address=<start> --stop-address=<stop> work/hl-node-115.bin`
+  (run from the repository root). The mnemonics in the excerpts —
+  `endbr64` included — are genuine instructions present in the
+  target binary, not placeholders. The `find_norm`, `parser`,
+  `map_clear`, `fallback_delegate`, `delegate_impl` and
+  `status_builder` excerpts are byte-identical re-ships from
+  #3485/#3440; the other 13 are new in this packet.
+- `records.json` — semantic records only: the entry, the `'='`
+  helper, the no-`'='` helper, the kind dispatcher, the element
+  scan, the name lookup and the small string helpers, the
+  descriptor/element/table-node/value-struct layouts, the message
+  strings with their `.rodata` addresses, the census counts and the
+  open unknowns. No per-instruction mnemonic list.
+- `vtables.tsv` — 1 row: the `__libc_single_threaded` GOT entry
+  (`0x64ed290`, `R_X86_64_GLOB_DAT`). The delegate vtable base
+  itself was not pinned from locally retained evidence; see the
+  open unknowns.
+- `frames.txt` — the 19 FDE header lines from
+  `readelf --debug-dump=frames`.
+- `relocations.txt` — the 1 relocation record for the packet's GOT
+  entry (`R_X86_64_GLOB_DAT` for `__libc_single_threaded` at
+  `0x64ed290`).
+- `callers.tsv` — every direct call/jump/lea site for the packet's
+  routines, with the enclosing FDE per site; generated by
+  `census.py` from one objdump pass over the binary (1707 rows).
+- `census.py` — the generator behind `callers.tsv`.
+- `export_excerpts.py` — the generator behind `excerpts/`.
+- `verify.py` — the packet checker (see below).
+
+## Model and tests
+
+`tools/registry_find_sibling_115.py` models the whole behaviour end
+to end: `Status` (with the builder's `msg1 + ": " + msg2` join),
+`_Hash_bytes` (MurmurHash64A, verified against the system
+libstdc++ on the vectors in `records.json` — re-shipped from
+#3485), the options map, the 0x50-byte value struct with its shared
+control, `trim`, `value_extract`, `parse_options`, `find_norm`
+(including the swallowed parser error and the `id` lookup/erase),
+`ends_with`, `str_compare`, `move_assign`, the name table with its
+linear and hash-bucket walks and the dotted-name fallback,
+`element_scan`, `kind_dispatch` (including the recursive kind-0x16
+call, which builds the descriptor from the matched record: its
+`+0x28` first field as the offset, its `+0xd8` flags and `+0xd9`
+flag byte as the descriptor's `+0xb0/+0xb1`), `resolve_no_equals`,
+`delegate_impl` / `fallback_delegate`, the zero stub, `find_e70`
+(the `';'`/`'='` parse path, the zero-stub vs real slot-0x40
+branches, the `+0x03`-gated slot-0x28 call) and the sibling `entry`
+(the flag-chain resolution over a synthetic address space, the
+`+0x04` clear on `desc+0xb1`, both `'.id'` variants, the
+`find_norm` path, the shared-control release on every exit path).
+`tests/test_registry_find_sibling_115.py` exercises all of it (132
+checks, run directly with `python3`).
+
+Corrected semantics worth noting, each re-verified against the raw
+excerpts this cycle: the true `find_norm` argument order is `(out,
+name, fallback, out-string, ctx-map)` — `rcx` is the out-string and
+`r8` is the ctx-map (the parser call takes `rdx = r8` and the
+`_M_assign` takes `rdi = rcx`), correcting the order recorded in
+#3485; the status builder appends `": "` before a non-empty second
+string, so both message literals (which already end in `": "`)
+produce a doubled `": : "` in the reported message; the variant-2
+node-name compare returns straight to the clear-out block on a
+match — the map-empty check at `0x609b4f0` belongs to the
+`find_norm` path only; and the recursive kind-0x16 call passes the
+matched record as the descriptor, so its flag-chain inputs are the
+record's `+0x28` first field and its `+0xd8/+0xd9` flags, not the
+descriptor the caller was given.
+
+## Checks
+
+`verify.py` runs 11 checks: the artifact digest, MANIFEST coverage,
+excerpt regeneration byte-for-byte, a raw-byte instruction check at
+fixed and seeded-random spots (`random.seed(20261106)`), FDE
+presence, relocation presence, literal read-back from `.rodata`,
+census reproduction (re-runs `census.py` and requires
+`callers.tsv` byte-identical), GOT re-derivation from
+`relocations.txt` plus model constants, and the model tests.
+Run it from the repository root:
+
+    python3 research/work-items/RE-001-registry-find-sibling-115/verify.py
+
+It prints `ALL CHECKS PASSED` on success.
+
+## Environment limits
+
+This packet was built on a VM with no cargo/rustc, no git-lfs and no
+Ghidra/Java, so `make verify`, `make test` and `make catalogue-check`
+cannot run here. The claims above are grounded in the materialized
+node #115 binary (`work/hl-node-115.bin`, hash verified against
+`provenance/artifacts.json`) and the system libstdc++ for the hash
+ground truth; the binary checks that need a tooled environment are
+left for maintainers.
+
+## Open unknowns
+
+- The entry's top-level reach: it has exactly one direct call site
+  (the recursive kind-0x16 call), so the caller that invokes it from
+  outside this family reaches it through an indirect slot that is
+  not pinned here; its argument roles at the top level (which object
+  is the delegate, which table `base8` points at) are therefore
+  pinned only from the recursive call and the sibling callers of
+  `find_e70`/`no_equals`.
+- The recursive kind-0x16 call passes the matched element's `+0x20`
+  field as the entry's `base8` and the matched record as the
+  descriptor: the flag-chain resolution there depends on the
+  matched record's `+0x28` first field (the offset added to
+  `base8`) and its `+0xb0/+0xb1` descriptor fields, which are not
+  pinned from locally retained evidence; the model implements the
+  chain generically and the tests cover it with synthetic records.
+- The global default name at `0x6508980` (a `std::string`; compared
+  by length then memcmp in `find_norm`): its runtime value is set by
+  static init, and the initializer was not located. The model
+  parameterizes `DEFAULT_NAME`, defaulting to `"default"` as the
+  documented assumption.
+- The delegate vtable base address: the delegate's vtable slots
+  0x28/0x40/0x48/0x50/0x68/0x78 need a base, which was not pinned
+  from locally retained evidence. Only the `__libc_single_threaded`
+  GOT entry is pinned (see `vtables.tsv`).
+- The serializer `0x60ba600`'s per-kind serialization rules (25
+  jump-table cases, 0..0x18): a documented boundary carried over
+  from #3485, not modeled internally.
+- The value struct's `+0x48` shared_ptr control vtable base for
+  this item's value objects (the Statistics control vptr
+  `0x64d2f00` was pinned in #3440 for Statistics objects only).
+- Which construction paths install a non-null `+0x28` delegate
+  (the value struct's delegate slot).
+- The `0x609bcb0..0x609c782` routine, the second caller of
+  `kind_dispatch` (`0x609bec5`) and of `name_lookup` (`0x609be8a`):
+  a sibling Find-family routine whose body is not pinned here.
+- The `0x6080b10..0x6080dcc` and `0x60818f0..0x6081d08` routines,
+  the other callers of `find_e70` (`0x6080d09`, `0x6081c2e`) and
+  `no_equals` (`0x6080bbc`, `0x60819a6`): sibling Find-family
+  routines whose bodies are not pinned here.
+- The `0x6098ad0..0x6099003` routine, the second caller of
+  `element_scan` (`0x6098b4e`): a sibling routine whose body is not
+  pinned here.

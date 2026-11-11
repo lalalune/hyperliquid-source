@@ -90,3 +90,15 @@ rejected. Native FDE replay is an unmutated external-tool check, not a
 corruption control on unwind metadata. Excerpt file offset `0x5a86930`;
 SHA-256 `c5e53989de7e3487a95e7458d42a86e74bd26ae22fcb01b9aeada610b5e3efb1`.
 These are local observations only; required independent validation is pending.
+
+## Refreshed-baseline local replay
+
+After supported source-materialization recovery, the unchanged verifier and scoped
+corruption controls were replayed at pinned source baseline
+`0e70dfafd1ae86649a1660405b9110dbebe93050`. Exact commands, stdout, stderr and
+exit codes are retained in `recovery-proof.json`. Both commands returned zero.
+This is local static proof only, not an independent-validation receipt, full-suite
+success or current-main overlap clearance. The original source baseline above
+identifies discovery; this refreshed baseline identifies the new local replay.
+No captured code was executed. Independent validation of the final refreshed
+tree and current overlap clearance remain required before publication.

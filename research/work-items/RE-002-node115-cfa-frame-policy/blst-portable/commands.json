@@ -1,0 +1,137 @@
+{
+  "version-cpp": {
+    "argv": [
+      "cpp",
+      "--version"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "8541ac57ba8a4c776ba3705f3e630ed32eed1339c28df5779dc13e0797501ae0",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "version-as": {
+    "argv": [
+      "as",
+      "--version"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "fe8d630c0d32e52bd4600a48e9f99f99a0c381f4754c990c9db429724b6fb417",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "version-objdump": {
+    "argv": [
+      "objdump",
+      "--version"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "8feb2cb2830955a0c282e6abca2b512dcf52cb9380e6b0263a481bf1c6349d8d",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "version-readelf": {
+    "argv": [
+      "readelf",
+      "--version"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "6aca4321453ac381865f3d353ea7896b150c05026483cb9db0047eee6916723d",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "version-llvm-objdump": {
+    "argv": [
+      "llvm-objdump",
+      "--version"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "51392c170c10af97eef3453dc5fcdf5c978f7413c95106fd742cc2474d6efa99",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "preprocess": {
+    "argv": [
+      "cpp",
+      "-P",
+      "-undef",
+      "-nostdinc",
+      "-D__BLST_PORTABLE__=1",
+      "-x",
+      "assembler-with-cpp",
+      "/tmp/node115-blst-SocX7G7f/frozen/reference-source.s",
+      "-o",
+      "/tmp/node115-blst-SocX7G7f/work/reference.s"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "assemble": {
+    "argv": [
+      "as",
+      "--64",
+      "-o",
+      "/tmp/node115-blst-SocX7G7f/work/reference.o",
+      "/tmp/node115-blst-SocX7G7f/work/reference.s"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "object-gnu": {
+    "argv": [
+      "objdump",
+      "-d",
+      "-z",
+      "--insn-width=16",
+      "/tmp/node115-blst-SocX7G7f/work/reference.o"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "55f7645bc3aae723a5fecf1855b46a1897ea39543fea6cd5a1bbf7fb2f2266b6",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "object-llvm": {
+    "argv": [
+      "llvm-objdump",
+      "-d",
+      "--disassemble-zeroes",
+      "/tmp/node115-blst-SocX7G7f/work/reference.o"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "ce55884a759edccfa06c3243b526d689dc8bcea74de92d5e1a089482c18b6a25",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "object-readelf": {
+    "argv": [
+      "readelf",
+      "-Wr",
+      "-Ws",
+      "/tmp/node115-blst-SocX7G7f/work/reference.o"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "6bc4b533d3c03d9562b8c8c45d370de4cb53ab228adc72a3f337fd8c21df6094",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "target-gnu": {
+    "argv": [
+      "objdump",
+      "-d",
+      "-z",
+      "--insn-width=16",
+      "--start-address=0x5d20100",
+      "--stop-address=0x5d21214",
+      "/tmp/node115-blst-SocX7G7f/target/hl-node"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "d1fc648fe087304a4e80f03bc1a3d6e814fbac58586174fe2ce6b78457878962",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "target-llvm": {
+    "argv": [
+      "llvm-objdump",
+      "-d",
+      "--disassemble-zeroes",
+      "--start-address=0x5d20100",
+      "--stop-address=0x5d21214",
+      "/tmp/node115-blst-SocX7G7f/target/hl-node"
+    ],
+    "exit_code": 0,
+    "stdout_sha256": "ed6e8b6c5a3acfe244d0e2c4473572fc0a351f133d9e123293d8f1c2c7eda6f6",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

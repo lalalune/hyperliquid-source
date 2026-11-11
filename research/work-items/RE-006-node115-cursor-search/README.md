@@ -57,6 +57,17 @@ record was written by a variant search (`0x35bd660` /
 `0x35bd800`) running the same algorithm over a shifted node
 layout - never by one of the clones.
 
+## Bounded Rust implementation
+
+`src/node115-priority-three/cursor-search` independently implements the
+selected u64 cursor-search relation as a safe borrowed B-tree. `Node::new`
+requires at most eleven ascending keys and `n+1` child slots. `search` returns
+the final logical node, found flag, remaining height and equal/insertion
+position without reproducing native pointers, malformed trees, ownership or
+caller effects. The frozen 1,280 flat-tree query cases cover every u8 value over
+empty, singleton and edge-shaped key arrays; a separate nested test pins descent
+and final height.
+
 ## Method
 
 Duplicate gate first: the merged records on `main` claim none

@@ -1,0 +1,408 @@
+{
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "budget": {
+    "counter_hi": "owner-subobject +0x2c8",
+    "counter_lo": "owner-subobject +0x2c0",
+    "derivation": "cmp $0x1,%sil; sbb gives -1 for sil == 0 and 0 otherwise; and $0x1ea then add $0xa gives 500 vs 10; the second sbb/and $0xa21fe80/add $0x989680 gives 180000000 vs 10000000",
+    "fast": {
+      "cap_ns": 10000000,
+      "flag": "sil != 0",
+      "per_unit_ns": 10
+    },
+    "rule": "allowed = min(cap_ns, (counter_hi - counter_lo) * per_unit_ns) when counter_lo < counter_hi, else allowed = cap_ns; all arithmetic is unsigned 64-bit",
+    "slow": {
+      "cap_ns": 180000000,
+      "flag": "sil == 0",
+      "per_unit_ns": 500
+    }
+  },
+  "caller_flag": {
+    "return": "both new callers return 1 after the handoff, or 0 at once when *(rdi+0x128) is null",
+    "rule": "both new callers pass the inverted low bit of their own flag argument (xor $0x1,%edx; movzbl %dl,%esi), so their flag 1 selects the fast budget and their flag 0 selects the slow budget"
+  },
+  "callers": [
+    {
+      "caller_fde": "0x5d7dfc0..0x5d7e627",
+      "note": "the stats-emit caller pinned in open PR #3037; its full FDE is in that packet, only the call-site window is re-shipped here",
+      "setup": "rdi = node+0x8d8, esi = 0 (slow budget)",
+      "site": "0x5d7e0d7"
+    },
+    {
+      "caller_fde": "0x5ef0390..0x5ef0608",
+      "note": "after the refresh, copies the published snapshot under the publish mutex and hands it to 0x5eefda0",
+      "setup": "rdi = owner, esi = inverted caller flag",
+      "site": "0x5ef03d5"
+    },
+    {
+      "caller_fde": "0x5ef9520..0x5ef9760",
+      "note": "after the refresh, copies the published snapshot under the publish mutex and hands it to 0x5ef8360",
+      "setup": "rdi = owner, esi = inverted caller flag",
+      "site": "0x5ef9565"
+    }
+  ],
+  "census": {
+    "direct_calls": {
+      "0x5d2ef10": [],
+      "0x5d2efc0": [],
+      "0x5d3ef70": [],
+      "0x5d3ef80": [],
+      "0x5d427e0": [],
+      "0x5d4d490": [],
+      "0x5eeb290": [],
+      "0x5eeb750": [],
+      "0x5eebb20": [
+        "0x5eec463",
+        "0x5eed2da",
+        "0x5eee3db",
+        "0x5eef126",
+        "0x5eef2f4",
+        "0x5eef3f1",
+        "0x5eef5d9",
+        "0x5ef0563",
+        "0x5ef4d06",
+        "0x5ef4fe2",
+        "0x5ef5fd6",
+        "0x5ef606c",
+        "0x5ef60a3",
+        "0x5ef60e4",
+        "0x5ef6125",
+        "0x5ef6460",
+        "0x5ef840f",
+        "0x5ef847e",
+        "0x5ef84da",
+        "0x5ef9c6d"
+      ],
+      "0x5eee520": [
+        "0x5eef9db"
+      ],
+      "0x5eee560": [
+        "0x5eefb5c"
+      ],
+      "0x5eee570": [
+        "0x5eefb04"
+      ],
+      "0x5eef380": [
+        "0x5eef9b1"
+      ],
+      "0x5eef8a0": [
+        "0x5d7e0d7",
+        "0x5ef03d5",
+        "0x5ef9565"
+      ],
+      "0x5eefda0": [
+        "0x5ef0558",
+        "0x5ef7aad"
+      ],
+      "0x5ef8360": [
+        "0x5ef96db"
+      ],
+      "0x60d5e80": [
+        "0x5eef56e",
+        "0x602e7f2",
+        "0x602ea58",
+        "0x602ea91"
+      ]
+    },
+    "internal_calls": 11,
+    "internal_indirect_calls": 8,
+    "internal_indirect_tail_jumps": 0,
+    "internal_tail_jumps": 4,
+    "relative_addends": {
+      "0x5d2ef10": 4,
+      "0x5d2efc0": 4,
+      "0x5d3ef70": 6,
+      "0x5d3ef80": 6,
+      "0x5d427e0": 4,
+      "0x5d4d490": 2
+    },
+    "stored_qwords": {
+      "0x5d2ef10": [
+        "0x1040c0",
+        "0x1043a8",
+        "0x106988",
+        "0x15d178"
+      ],
+      "0x5d2efc0": [
+        "0x1040a8",
+        "0x104390",
+        "0x106970",
+        "0x15d088"
+      ],
+      "0x5d3ef70": [
+        "0x103d48",
+        "0x103e50",
+        "0x1040d8",
+        "0x1043c0",
+        "0x1069a0",
+        "0x15cde8"
+      ],
+      "0x5d3ef80": [
+        "0x103d60",
+        "0x103e68",
+        "0x1040f0",
+        "0x1043d8",
+        "0x1069b8",
+        "0x15ce00"
+      ],
+      "0x5d427e0": [
+        "0x104180",
+        "0x104468",
+        "0x106a48",
+        "0x15d100"
+      ],
+      "0x5d4d490": [
+        "0x110978",
+        "0x15d568"
+      ]
+    },
+    "tail_jumps": {}
+  },
+  "chain_walk": {
+    "head": "owner-subobject +0x2d8",
+    "identity": "0x5d4d490",
+    "identity_global": "0x64ecf80",
+    "link": "link +0x20",
+    "links": 4,
+    "rule": "compare the head link's slot +0x98 against 0x5d4d490; walk +0x20 links while the slot matches; call the first mismatching link's slot +0x98 with (rdi = link), or the fourth link's slot unconditionally; the walker 0x5d4d490 itself is pinned whole in walker.txt",
+    "slot": "vtable +0x98"
+  },
+  "consumers": [
+    {
+      "address": "0x5eefda0",
+      "direct_calls": [
+        "0x5ef0558",
+        "0x5ef7aad"
+      ],
+      "fde": "0x5eefda0..0x5ef0360",
+      "note": "takes the copied snapshot; its body is not pinned in this packet"
+    },
+    {
+      "address": "0x5ef8360",
+      "direct_calls": [
+        "0x5ef96db"
+      ],
+      "fde": "0x5ef8360..0x5ef94ee",
+      "note": "takes the copied snapshot; its body is not pinned in this packet"
+    }
+  ],
+  "fill_chains": {
+    "rule": "each chain starts at the object at owner-subobject +0x2d0 and walks +0x38 links; the first link whose slot differs from the identity is called with (rdi = link); when every compared link matches, the last link's slot is called unconditionally",
+    "slot70": {
+      "global": "0x64ecde0",
+      "identity": "0x5d2efc0",
+      "links": 5,
+      "slot": "vtable +0x70",
+      "store": "snapshot+0x00"
+    },
+    "slot78": {
+      "global": "0x64ece30",
+      "identity": "0x5d2ef10",
+      "links": 5,
+      "slot": "vtable +0x78",
+      "store": "snapshot+0x08"
+    },
+    "slot80": {
+      "default": -1,
+      "global": "0x64ecd00",
+      "identity": "0x5d3ef70",
+      "slot": "vtable +0x80",
+      "store": "snapshot+0x18"
+    },
+    "slot88": {
+      "default": 0,
+      "global": "0x64ecd08",
+      "identity": "0x5d3ef80",
+      "slot": "vtable +0x88",
+      "store": "snapshot+0x10"
+    }
+  },
+  "mutexes": {
+    "lock_order": "refresh mutex first, publish mutex second; the publish mutex is released before the refresh mutex",
+    "publish_mutex": "owner-subobject +0x0, locked only around the publish copy",
+    "refresh_mutex": "owner-subobject +0x160, locked at entry and unlocked by the tail jump at the normal return and by the cleanup fragment on exception"
+  },
+  "name_string": {
+    "at_sign": "one byte 0x40 at file address 0x43f946",
+    "format": "name@0x<ptr>#<pid>",
+    "hash_sign": "one byte 0x23 at file address 0x4393ae",
+    "name_source": "virtual slot +0x10 of the object at owner-subobject +0x2d0",
+    "pid_source": "0x60d5e80, which returns getpid() sign-extended",
+    "pointer_source": "the object at owner-subobject +0x2d0 itself"
+  },
+  "not_claimed": [
+    "what the owner, the subobject, or the snapshot fields denote beyond the pinned offsets",
+    "what the slot +0x98 handler, the slot +0xb8 producer, or the slot +0x70/+0x78/+0x80/+0x88 producers compute",
+    "what the consumers at 0x5eefda0 and 0x5ef8360 do with the copied snapshot",
+    "what the range functions at 0x5eeb290 and 0x5eeb750 denote beyond their pinned arithmetic",
+    "the exact throw-site mapping of the three landing pads in the main routine (they jump into the shared cleanup fragment 0x5eef854..0x5eef89d, whose own FDE is pinned)",
+    "behaviour on a null owner, a chain that ends before a dispatch, or a mutex lock failure (the lock failure throws __throw_system_error; the model raises instead)",
+    "a runtime write to any relocated global after load (only the relocated values are pinned)"
+  ],
+  "produce_chain": {
+    "arguments": "(rdi = link object, rsi = &record, rdx = &0x100)",
+    "identity": "0x5d427e0",
+    "identity_global": "0x64ece08",
+    "links": 10,
+    "record": {
+      "begin": "0x5eeb290",
+      "end": "0x5eeb750",
+      "ptr": "snapshot"
+    },
+    "rule": "the record at rsp+0x10 is built by 0x5eee520 as {ptr = snapshot, 0x5eeb290, 0x5eeb750}; walk the +0x38 chain while slot +0xb8 equals 0x5d427e0; call the first differing link's slot, or the tenth link's slot unconditionally; the identity 0x5d427e0 itself walks the same chain and tail-jumps to the first differing slot",
+    "slot": "vtable +0xb8"
+  },
+  "progress": {
+    "produced_value": "the second slot +0x98 call's return is stored at counter_hi and at snapshot+0x130 via 0x5eee560",
+    "rule": "after the slot call returns value V, delta = V - counter_hi (unsigned); when delta < allowed, store V at counter_lo and fill the snapshot; otherwise bump the no-progress counter at snapshot+0x124 and publish the existing snapshot"
+  },
+  "publish_copy": {
+    "destination": "owner-subobject +0x28..+0x160",
+    "note": "the copy covers snapshot+0x00..+0x138, including +0x130 (last produced value)",
+    "size_bytes": 312,
+    "source": "owner-subobject +0x188..+0x2c0",
+    "string": "the std::string at destination+0x20 is assigned (not bitwise copied) from source+0x20"
+  },
+  "range_functions": {
+    "begin": {
+      "address": "0x5eeb290",
+      "fde": "0x5eeb290..0x5eeb2bc",
+      "rule": "increments a bucket counter selected by *(r8)+0x20 (default index 13) and adds *(rcx) to the bucket's +0x40 field"
+    },
+    "end": {
+      "address": "0x5eeb750",
+      "fde": "0x5eeb750..0x5eeb785",
+      "rule": "on edx 0 stores the global at 0x64cc428 into *(rdi); on 1 stores rsi; on 2 stores *(rsi); otherwise returns 0"
+    }
+  },
+  "relocations": {
+    "also_installed": [
+      {
+        "addend": "0x5d427e0",
+        "slots": [
+          "0x64c8e58",
+          "0x64c8f58",
+          "0x64c9eb8"
+        ]
+      },
+      {
+        "addend": "0x5d2efc0",
+        "slots": [
+          "0x64c8e10",
+          "0x64c8f10",
+          "0x64c9e70"
+        ]
+      },
+      {
+        "addend": "0x5d2ef10",
+        "slots": [
+          "0x64c8e18",
+          "0x64c8f18",
+          "0x64c9e78"
+        ]
+      },
+      {
+        "addend": "0x5d3ef70",
+        "slots": [
+          "0x64c8bc8",
+          "0x64c8ce0",
+          "0x64c8e20",
+          "0x64c8f20",
+          "0x64c9e80"
+        ]
+      },
+      {
+        "addend": "0x5d3ef80",
+        "slots": [
+          "0x64c8bd0",
+          "0x64c8ce8",
+          "0x64c8e28",
+          "0x64c8f28",
+          "0x64c9e88"
+        ]
+      },
+      {
+        "addend": "0x5d4d490",
+        "slots": [
+          "0x64cde20"
+        ]
+      }
+    ],
+    "depended_on": [
+      {
+        "addend": "0x5d3ef70",
+        "role": "slot +0x80 identity",
+        "slot": "0x64ecd00"
+      },
+      {
+        "addend": "0x5d3ef80",
+        "role": "slot +0x88 identity",
+        "slot": "0x64ecd08"
+      },
+      {
+        "addend": "0x5d2efc0",
+        "role": "slot +0x70 identity",
+        "slot": "0x64ecde0"
+      },
+      {
+        "addend": "0x5d427e0",
+        "role": "slot +0xb8 identity",
+        "slot": "0x64ece08"
+      },
+      {
+        "addend": "0x5d2ef10",
+        "role": "slot +0x78 identity",
+        "slot": "0x64ece30"
+      },
+      {
+        "addend": "0x5d4d490",
+        "role": "slot +0x98 walker",
+        "slot": "0x64ecf80"
+      }
+    ]
+  },
+  "routine": {
+    "address": "0x5eef8a0",
+    "arguments": [
+      "owner pointer in rdi",
+      "flag byte in sil (0 = slow budget, nonzero = fast budget)"
+    ],
+    "fde": "0x5eef8a0..0x5eefd49",
+    "internal_calls": 11,
+    "internal_indirect_calls": 8,
+    "internal_indirect_tail_jumps": 0,
+    "internal_tail_jumps": 4,
+    "returns": "nothing (void); refreshes the snapshot at owner+0x128 in place and publishes a copy at owner+0x28",
+    "size_bytes": 1193
+  },
+  "snapshot": {
+    "base": "owner-subobject +0x188",
+    "body": "snapshot+0x40..snapshot+0x138 is zeroed by the filler (copied from a zeroed stack scratch), except +0x120 (sequence) and +0x128 (chain head), which are written after the copy",
+    "counter_offset": "+0x120",
+    "fields": {
+      "+0x00": "slot +0x70 chain result (first non-identity link's slot, else the identity 0x5d2efc0 tail)",
+      "+0x08": "slot +0x78 chain result (first non-identity link's slot, else the identity 0x5d2ef10 tail)",
+      "+0x10": "slot +0x88 result, or 0 when the slot is the identity 0x5d3ef80",
+      "+0x120": "sequence, incremented by 1 on every fill",
+      "+0x124": "no-progress counter, incremented by 1 when the progress check fails",
+      "+0x128": "chain head value (the filler's third argument, owner-subobject +0x2d8)",
+      "+0x130": "last produced value (the second slot +0x98 return)",
+      "+0x18": "slot +0x80 result, or -1 when the slot is the identity 0x5d3ef70",
+      "+0x20": "std::string name@ptr#pid, built by the filler through ostringstream"
+    },
+    "head_offset": "+0x128",
+    "last_value_offset": "+0x130",
+    "no_progress_offset": "+0x124",
+    "publish_bytes": 312,
+    "published_base": "owner-subobject +0x28",
+    "size_bytes": 312,
+    "string_offset": "+0x20"
+  },
+  "string_move": {
+    "address": "0x5eebb20",
+    "direct_calls": 20,
+    "fde": "0x5eebb20..0x5eebbf8",
+    "rule": "moves a std::string from rsi to rdi: a short (SSO) source is copied byte-wise into the destination buffer, a heap source transfers its pointer and the source is emptied; the destination's old heap buffer is freed and its first byte zeroed"
+  },
+  "task": "RE-001"
+}

@@ -1,0 +1,269 @@
+#!/usr/bin/env python3
+"""Generate records.json for RE-001-enum-registries-115 from registries.tsv.
+
+The packet's JSON holds semantic records only -- registry tables,
+builder contracts, parse/serialize behaviour, consumer sites, the
+__cxa_atexit table and open unknowns.  Instruction-level detail lives
+only in the verbatim objdump excerpts.  No per-instruction mnemonic
+list is emitted here.
+
+Usage: python3 gen_records.py  (run from the repo root)
+"""
+
+import csv
+import json
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ARTIFACT_SHA256 = ("a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e9"
+                   "8c3867b5301")
+
+# Parse helper per OptionType named-enum type (verified in the
+# fn-60bedc0 dispatch: the type field's jump table 0x9786b4; the
+# registry each helper reads is the lea inside the helper).
+PARSE_HELPERS = {
+    11: {"helper": "0x60be160", "registry": "0x65070a0",
+         "enum": "CompactionStyle", "field_bytes": 1},
+    12: {"helper": "0x60be2b0", "registry": "0x6507060",
+         "enum": "CompactionPri", "field_bytes": 1},
+    13: {"helper": "0x60be400", "registry": "0x6507120",
+         "enum": "CompressionType", "field_bytes": 1},
+    14: {"helper": "0x60be7f0", "registry": "0x6507020",
+         "enum": "CompactionStopStyle", "field_bytes": 4},
+    15: {"helper": "0x60be550", "registry": "0x6507160",
+         "enum": "ChecksumType", "field_bytes": 1},
+    16: {"helper": "0x60be6a0", "registry": "0x65070e0",
+         "enum": "EncodingType", "field_bytes": 1},
+    24: {"helper": "0x60be940", "registry": "0x6506fe0",
+         "enum": "Temperature", "field_bytes": 1},
+}
+
+# Serialize case per type inside fn-60ba600 (jump table 0x978650).
+SERIALIZE_CASES = {
+    11: {"case": "0x60bb240", "registry": "0x65070a0"},
+    12: {"case": "0x60bb200", "registry": "0x6507060"},
+    13: {"case": "0x60bb1c0", "registry": "0x6507120"},
+    14: {"case": "0x60bb180", "registry": "0x6507020"},
+    15: {"case": "0x60bb140", "registry": "0x6507160"},
+    16: {"case": "0x60baaf8", "registry": "0x65070e0"},
+    24: {"case": "0x60bab40", "registry": "0x6506fe0"},
+}
+
+BUILDERS = {
+    "0x60bd6e0": {"registry": "0x6507260", "enum": "CompactionStyle",
+                  "container": "map", "key_compare": "signed byte"},
+    "0x60bd980": {"registry": "0x6507220", "enum": "CompactionPri",
+                  "container": "map", "key_compare": "signed byte"},
+    "0x60bdc20": {"registry": "0x65071e0",
+                  "enum": "CompactionStopStyle", "container": "map",
+                  "key_compare": "32-bit"},
+    "0x60bdec0": {"registry": "0x65071a0", "enum": "Temperature",
+                  "container": "map", "key_compare": "unsigned byte"},
+    "0x60c4950": {"registry": "0x6507160", "enum": "ChecksumType",
+                  "container": "unordered_map"},
+    "0x60c4ea0": {"registry": "0x6507120", "enum": "CompressionType",
+                  "container": "unordered_map"},
+    "0x60c53f0": {"registry": "0x65070e0", "enum": "EncodingType",
+                  "container": "unordered_map"},
+    "0x60c5940": {"registry": "0x65070a0", "enum": "CompactionStyle",
+                  "container": "unordered_map"},
+    "0x60c5e90": {"registry": "0x6507060", "enum": "CompactionPri",
+                  "container": "unordered_map"},
+    "0x60c6470": {"registry": "0x6507020",
+                  "enum": "CompactionStopStyle",
+                  "container": "unordered_map"},
+    "0x60c69c0": {"registry": "0x6506fe0", "enum": "Temperature",
+                  "container": "unordered_map"},
+    "0x60c6f10": {"registry": "0x6506fa0",
+                  "enum": "PrepopulateBlobCache",
+                  "container": "unordered_map"},
+}
+
+ATEXIT = [
+    {"dtor": "0x60b8c90", "object": "0x6507260"},
+    {"dtor": "0x60b9410", "object": "0x6507220"},
+    {"dtor": "0x60b9050", "object": "0x65071e0"},
+    {"dtor": "0x60b88d0", "object": "0x65071a0"},
+    {"dtor": "0x60b81f0", "object": "0x6507160"},
+    {"dtor": "0x60b8350", "object": "0x6507120"},
+    {"dtor": "0x60b7f30", "object": "0x65070e0"},
+    {"dtor": "0x60b82a0", "object": "0x65070a0"},
+    {"dtor": "0x60b7fe0", "object": "0x6507060"},
+    {"dtor": "0x60b8140", "object": "0x6507020"},
+    {"dtor": "0x60b8400", "object": "0x6506fe0"},
+    {"dtor": "0x60b8090", "object": "0x6506fa0",
+     "note": "registered by a tail jmp to __cxa_atexit@plt, not a call"},
+]
+
+
+def main():
+    registries = {}
+    with open(HERE / "registries.tsv") as f:
+        for row in csv.DictReader(f, delimiter="\t"):
+            key = row["registry"]
+            entry = registries.setdefault(key, {
+                "address": key, "enum": row["enum"],
+                "option_type": (int(row["option_type"])
+                                if row["option_type"] else None),
+                "builder": row["builder"], "container": row["container"],
+                "entries": []})
+            entry["entries"].append({
+                "name": row["name"], "value": int(row["value"]),
+                "literal": row["literal"]})
+    for entry in registries.values():
+        entry["entry_count"] = len(entry["entries"])
+
+    records = {
+        "task": "RE-001",
+        "work_item": "RE-001-enum-registries-115",
+        "artifact": {"node": 115, "file": "work/hl-node-115.bin",
+                     "sha256": ARTIFACT_SHA256},
+        "question": ("Pin, for node #115, the seven named-enum "
+                     "registries of the OptionTypeInfo maps: their "
+                     "name->value tables, how they are built at load "
+                     "time, how names are parsed to values and values "
+                     "serialized back to names, and which code reads "
+                     "them. Resolves #4237's first open unknown (the "
+                     "seven .bss enum registries' name lists)."),
+        "initializer": {
+            "function": "0x60c78a0..0x60c870d",
+            "note": ("__static_initialization_and_destruction_0v: "
+                     "builds all twelve registries from stack-built "
+                     "record arrays (49 string-ctor calls). "
+                     "Re-shipped byte-identical from #4237."),
+            "init_array_slot": 96,
+            "thunk": "0x60c8710..0x60c8719",
+            "thunk_action": "jmp 0x60c78a0",
+            "relocation": {"offset": "0x63f39c8", "type": "RELATIVE",
+                           "addend": "0x60c8710"},
+            "layout": {"first": "0x6506fa0", "last": "0x6507260",
+                       "stride": "0x40", "count": 12},
+        },
+        "registries": [registries[k] for k in sorted(registries)],
+        "builders": BUILDERS,
+        "builder_contracts": {
+            "map": {"record": "{u8 key @ +0, std::string @ +8}",
+                    "node_bytes": 72,
+                    "args": "(registry=%rdi, first=%rsi, count=%edx)",
+                    "insert": "_Rb_tree_insert_and_rebalance",
+                    "key_widths": ("signed byte for CompactionStyle "
+                                   "and CompactionPri, 32-bit for "
+                                   "CompactionStopStyle, unsigned byte "
+                                   "for Temperature")},
+            "unordered_map": {
+                "record": "{std::string @ +0, u8 value @ +0x20}",
+                "node_bytes": 56,
+                "args": "(registry=%rdi, first=%rsi, end=%rdx)",
+                "init": ("buckets ptr = &single_bucket, bucket_count "
+                         "= 1, element_count = 0, max_load_factor = "
+                         "1.0f (0x3f800000)"),
+                "hash_seed": "0xc70f6907"},
+        },
+        "parse": {
+            "dispatch": "fn-60bedc0, jump table 0x9786b4",
+            "helpers": PARSE_HELPERS,
+            "signature": "(registry=%rdi, name=%rsi, out=%rdx) -> "
+                         "1 on hit, 0 on miss",
+            "threshold": ("element_count (+0x18) > 20 -> hash path "
+                          "(_ZSt11_Hash_bytes, seed 0xc70f6907, modulo "
+                          "bucket_count); otherwise linear scan of the "
+                          "element list from +0x10, comparing size "
+                          "then memcmp"),
+            "live_path": ("linear: every registry has at most 10 "
+                          "entries"),
+            "type_14_width": ("the type-14 helper 0x60be7f0 stores "
+                              "the hit with a 4-byte mov "
+                              "(mov 0x28(%rbx),%eax; mov %eax,(%r12)); "
+                              "the other six store one byte with "
+                              "movzbl/mov %al"),
+        },
+        "serialize": {
+            "dispatch": "fn-60ba600, jump table 0x978650",
+            "cases": SERIALIZE_CASES,
+            "shape": ("linear reverse scan from registry +0x10, "
+                      "comparing node value byte @+0x28 with the "
+                      "stored value byte; on match jump to the shared "
+                      "assign block 0x60bab28 "
+                      "(basic_string::_M_assign); on exhaustion jump "
+                      "to the default path 0x60ba648"),
+            "type_14_width": ("the type-14 case 0x60bb180 loads and "
+                              "compares 4 bytes "
+                              "(mov (%rdi),%eax; cmp 0x28(%rsi),%eax); "
+                              "the other six load/compare one byte"),
+        },
+        "consumers": [
+            {"function": "0x60b50c0..0x60b79a6",
+             "reads": ["0x6507260", "0x6507220", "0x65071e0"],
+             "shape": ("std::map find (key = byte at struct offset "
+                       "0xe8 and siblings), then _M_assign the name "
+                       "into an output string; options serializer")},
+            {"function": "0x5d85480..0x5d878e2",
+             "reads": ["0x6507120"],
+             "shape": ("walks the CompressionType registry's element "
+                       "list and keeps only entries whose value byte "
+                       "v satisfies 1 <= v <= 254 "
+                       "((u8)(v-1) <= 0xfd); skips kNoCompression (0) "
+                       "and kDisableCompressionOption (0xff)")},
+            {"function": "0x60d8b10..0x60da1a7",
+             "reads": ["0x6507160"],
+             "shape": ("linear scan of the ChecksumType registry "
+                       "comparing node value @+0x28 with the signed "
+                       "byte at struct+0x50; on match _M_assign the "
+                       "name into an output string")},
+        ],
+        "not_a_consumer": {
+            "function": "0x609fd10..0x609fd6c",
+            "note": ("dtor for the section-name strings; it references "
+                     "0x6506fa0 only as a loop bound, never reads the "
+                     "PrepopulateBlobCache registry"),
+        },
+        "compression_anomaly": {
+            "as_built": ("kZSTDNotFinalCompression = 64 (0x40), "
+                         "kDisableCompressionOption = 255 (0xff)"),
+            "upstream_header": ("kZSTDNotFinalCompression = 8, "
+                                "kDisableCompressionOption = 64 (0x40)"),
+            "evidence": [
+                "the initializer writes value bytes "
+                "[0,1,2,3,4,5,6,7,0x40,0xff] into the ten "
+                "CompressionType records at record+0x20; the builder "
+                "reads the value from record+0x20",
+                "0x08 is never written anywhere in 0x60c78a0",
+                "the trailing movb $0xff at 0x60c7e47 sits exactly at "
+                "the last record's value slot (dest -0x68 + 0x20 = "
+                "-0x48)",
+                "the 0x5d85480 consumer keeps registry values 1..254 "
+                "and skips 0 and 0xff -- that filter only makes sense "
+                "if the disable sentinel IS 0xff, so the binary's own "
+                "code agrees with the as-built reading",
+            ],
+            "status": ("recorded as observed; the disagreement with "
+                       "the upstream header is left open, not smoothed "
+                       "over"),
+        },
+        "atexit": {"dso": "0x64efa20", "registrations": ATEXIT},
+        "open_unknowns": [
+            "PrepopulateBlobCache has no entry in the DBOptions or "
+            "MutableDBOptions OptionTypeInfo maps; its entry lives in "
+            "the second OptionTypeInfo map built by the static "
+            "initializer 0x6089b50 (offset 0x144) -- follow-up",
+            "the exact C++ OptionType enum names for types 4 vs 6 and "
+            "3 vs 7 vs 8, and the names of types 5 and 23 "
+            "(carried over from #4237)",
+            "the allow_2pc field unknown from #4237 block 26",
+            "the Temperature-map serializer 0x5e03db0 (reads 0x65071a0) "
+            "and the second static initializer 0x6089b50 are cited, "
+            "not shipped -- follow-ups",
+        ],
+    }
+    with open(HERE / "records.json", "w") as f:
+        json.dump(records, f, indent=2)
+        f.write("\n")
+    print(f"registries: {len(registries)}, pairs: "
+          f"{sum(len(e['entries']) for e in registries.values())}")
+    print("wrote records.json")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

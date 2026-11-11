@@ -1,0 +1,43 @@
+kind	control	detected
+model	dot_normal	1
+model	parent_normal	1
+model	parse_no_start	1
+model	parse_first_sep	1
+model	parse_extra_zero	1
+model	trim_floor_zero	1
+model	body_to_prefix	1
+model	no_curdir	1
+code	0x5c8e83a=0x2f parse ..: first '.' test '.' -> '/'	1
+code	0x5c8e803=0x2e parse separator test '/' -> '.'	1
+code	0x5c8e83e=0x09 parse ParentDir kind 8 -> 9	1
+code	0x5c8e826=0x0b parse None kind 0xa -> 0xb	1
+code	0x5c8e867=0x08 parse Normal kind 9 -> 8	1
+code	0x5c8e7ac=0x02 parse root start 1 -> 2	1
+code	0x5c8e863=0x2f parse single-byte '.' test -> '/'	1
+code	0x5c8e923=0x2e as_path trim_left separator '/' -> '.'	1
+code	0x5c8e94d=0x02 as_path trim_left single piece length 1 -> 2	1
+code	0x5c8e952=0x2f as_path trim_left '.' test -> '/'	1
+code	0x5c8e98e=0x03 as_path trim_right floor 2 -> 3	1
+code	0x5c8e8f6=0x03 as_path front Body 2 -> 3	1
+code	0x5c8e976=0x03 as_path back Body 2 -> 3	1
+code	0x5c8e984=0x01 as_path has_root 0 -> 1 test	1
+code	0x5cab57d=0x02 next_back front Done 3 -> 2	1
+code	0x5cab57a=0x0b next_back None kind 0xa -> 0xb	1
+code	0x5cab8cc=0x06 next_back CurDir kind 7 -> 6	1
+code	0x5cab8e8=0x07 next_back RootDir kind 6 -> 7	1
+code	0x5cab73d=0x2f next_back cur-dir '.' test -> '/'	1
+code	0x5cab8ab=0x2f next_back StartDir cur-dir '.' test (len>=2) -> '/'	1
+code	0x5cab8b5=0x2e next_back StartDir cur-dir second byte '/' -> '.'	1
+code	0x5cab5aa=0x00 next_back front<=1 test 1 -> 0	1
+code	0x5cab5ac=0x86 next_back ja -> jbe on front>1	1
+code	0x5cab5c3=0x85 next_back has_root je -> jne	1
+code	0x5cab5ca=0x74 next_back finished jne -> je	1
+code	0x5cab5b2=0x02 next_back back Done 3 -> 2	1
+code	0x5cab5d1=0x02 next_back back StartDir 1 -> 2	1
+code	0x5cab5dd=0x01 next_back back Body 2 -> 1	1
+code	0x5cab89b=0x02 next_back StartDir cur-dir len 1 -> 2	1
+code	0x5cab8bf=0x00 next_back CurDir shrink by 1 -> 0	1
+code	0x5cab8df=0x00 next_back RootDir shrink by 1 -> 0	1
+code	0x5c8e9b1=0x09 as_path trim_right stop kind 0xa -> 9	1
+input	one flipped .text byte	1
+input	address past .text	1

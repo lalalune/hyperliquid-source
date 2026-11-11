@@ -1,0 +1,328 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "records": [
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "name": "createState",
+      "address": "0x61db130",
+      "end": "0x61db13e",
+      "body_sha256": "b0d76579e9e2feb60c2263ceaff242d69aa681f6deccb834d1ea89bcfc9b83d5",
+      "identity": "createState (no vendor-census record; pinned by FDE extent and disassembly only)",
+      "contract": "createState() -> *mut XXH64_state_t (malloc 0x58, uninitialised)",
+      "semantics": "malloc(0x58) tail call; the returned state is uninitialised until reset runs"
+    },
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "name": "freeState",
+      "address": "0x61db140",
+      "end": "0x61db154",
+      "body_sha256": "7d72966cb6b17f2fc99570c89cb360c349dcb13ee4d2d197dddd4b53ff1b160f",
+      "identity": "freeState (no vendor-census record; pinned by FDE extent and disassembly only)",
+      "contract": "freeState(state: *mut XXH64_state_t) -> 0",
+      "semantics": "free(state); returns 0"
+    },
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "name": "reset",
+      "address": "0x61db160",
+      "end": "0x61db1c9",
+      "body_sha256": "55640a2f386af102afa902c1695c2c609cab93621b3eeac7e6871a0108232025",
+      "identity": "ROCKSDB_XXH64_reset (librocksdb-sys 0.11.0+8.1.1, vendor census id node115-vendor-61db160)",
+      "contract": "reset(state: *mut XXH64_state_t, seed: u64) -> 0",
+      "semantics": "zero the whole 0x58-byte state, then v1 = seed+P1+P2, v2 = seed+P2, v3 = seed, v4 = seed-P1; returns 0"
+    },
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "name": "update",
+      "address": "0x61db1d0",
+      "end": "0x61db3de",
+      "body_sha256": "bde58491e6f3fa0a1febf1f0635c2d6b49399cf2d9c6ada9c7fc2a458cbc8de5",
+      "identity": "ROCKSDB_XXH64_update (librocksdb-sys 0.11.0+8.1.1, vendor census id node115-vendor-61db1d0)",
+      "contract": "update(state: *mut XXH64_state_t, data: *const u8, n: usize) -> 0",
+      "semantics": "buffer sub-32-byte remainders in mem, process full 32-byte stripes with one round per lane, keep memsize == total_len % 32; returns 0"
+    },
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "name": "digest",
+      "address": "0x61db3e0",
+      "end": "0x61db649",
+      "body_sha256": "bab7d213c94b5599f51e62102067dbed9cf676a9223a3a3f51ed949426a9edb4",
+      "identity": "ROCKSDB_XXH64_digest (librocksdb-sys 0.11.0+8.1.1, vendor census id node115-vendor-61db3e0)",
+      "contract": "digest(state: *const XXH64_state_t) -> u64",
+      "semantics": "merge the lanes (or seed+P5+total_len when total_len < 32), run the 8/4/1-byte tail over mem, avalanche; returns the u64 hash"
+    },
+    {
+      "kind": "prime",
+      "prime": "P1+P2",
+      "address": "0x61db193",
+      "value": "0x60ea27eeadc0b5d6",
+      "observation": "the P1+P2 prime appears as a movabs immediate at 0x61db193"
+    },
+    {
+      "kind": "prime",
+      "prime": "P2",
+      "address": "0x61db1a4",
+      "value": "0xc2b2ae3d27d4eb4f",
+      "observation": "the P2 prime appears as a movabs immediate at 0x61db1a4"
+    },
+    {
+      "kind": "prime",
+      "prime": "-P1",
+      "address": "0x61db1b5",
+      "value": "0x61c8864e7a143579",
+      "observation": "the -P1 prime appears as a movabs immediate at 0x61db1b5"
+    },
+    {
+      "kind": "prime",
+      "prime": "P2",
+      "address": "0x61db238",
+      "value": "0xc2b2ae3d27d4eb4f",
+      "observation": "the P2 prime appears as a movabs immediate at 0x61db238"
+    },
+    {
+      "kind": "prime",
+      "prime": "P1",
+      "address": "0x61db242",
+      "value": "0x9e3779b185ebca87",
+      "observation": "the P1 prime appears as a movabs immediate at 0x61db242"
+    },
+    {
+      "kind": "prime",
+      "prime": "P2",
+      "address": "0x61db400",
+      "value": "0xc2b2ae3d27d4eb4f",
+      "observation": "the P2 prime appears as a movabs immediate at 0x61db400"
+    },
+    {
+      "kind": "prime",
+      "prime": "P1",
+      "address": "0x61db44a",
+      "value": "0x9e3779b185ebca87",
+      "observation": "the P1 prime appears as a movabs immediate at 0x61db44a"
+    },
+    {
+      "kind": "prime",
+      "prime": "P4",
+      "address": "0x61db463",
+      "value": "0x85ebca77c2b2ae63",
+      "observation": "the P4 prime appears as a movabs immediate at 0x61db463"
+    },
+    {
+      "kind": "prime",
+      "prime": "P3",
+      "address": "0x61db582",
+      "value": "0x165667b19e3779f9",
+      "observation": "the P3 prime appears as a movabs immediate at 0x61db582"
+    },
+    {
+      "kind": "prime",
+      "prime": "P5",
+      "address": "0x61db594",
+      "value": "0x27d4eb2f165667c5",
+      "observation": "the P5 prime appears as a movabs immediate at 0x61db594"
+    },
+    {
+      "kind": "state_layout",
+      "observation": "total_len +0x00, v1 +0x08, v2 +0x10, v3 +0x18, v4 +0x20, mem +0x28 (32 bytes), memsize +0x48 (u32); after every update memsize == total_len % 32 and mem holds the last memsize input bytes"
+    },
+    {
+      "kind": "merge",
+      "observation": "h = rol(v1,1) + rol(v2,7) + rol(v3,12) + rol(v4,18), then one mergeRound per lane (h ^= round(0, v); h = h*P1 + P4); the + total_len term is folded into the last mergeRound as + P4 + total_len (add %rbp,%r8 at 0x61db497); the short path (total_len < 32) instead starts from h = v3 + total_len + P5"
+    },
+    {
+      "kind": "null_update",
+      "address": "0x61db1d4",
+      "target": "0x61db3b8",
+      "observation": "test data; je returns 0 with the state untouched when the data pointer is null"
+    },
+    {
+      "kind": "caller",
+      "address": "0x616be28",
+      "observation": "the xxhash64 arm of rocksdb::ComputeBuiltinChecksumWithLastByte (0x616bd60) calls createState here (reconstructed in PR #5399)"
+    },
+    {
+      "kind": "caller",
+      "address": "0x616be35",
+      "observation": "the xxhash64 arm of rocksdb::ComputeBuiltinChecksumWithLastByte (0x616bd60) calls reset here (reconstructed in PR #5399)"
+    },
+    {
+      "kind": "caller",
+      "address": "0x616be43",
+      "observation": "the xxhash64 arm of rocksdb::ComputeBuiltinChecksumWithLastByte (0x616bd60) calls update here (reconstructed in PR #5399)"
+    },
+    {
+      "kind": "caller",
+      "address": "0x616be55",
+      "observation": "the xxhash64 arm of rocksdb::ComputeBuiltinChecksumWithLastByte (0x616bd60) calls update here (reconstructed in PR #5399)"
+    },
+    {
+      "kind": "caller",
+      "address": "0x616be5d",
+      "observation": "the xxhash64 arm of rocksdb::ComputeBuiltinChecksumWithLastByte (0x616bd60) calls digest here (reconstructed in PR #5399)"
+    },
+    {
+      "kind": "caller",
+      "address": "0x616be67",
+      "observation": "the xxhash64 arm of rocksdb::ComputeBuiltinChecksumWithLastByte (0x616bd60) calls freeState here (reconstructed in PR #5399)"
+    },
+    {
+      "kind": "window",
+      "label": "create_state",
+      "start": "0x61db130",
+      "end": "0x61db13e",
+      "sha256": "b0d76579e9e2feb60c2263ceaff242d69aa681f6deccb834d1ea89bcfc9b83d5"
+    },
+    {
+      "kind": "window",
+      "label": "free_state",
+      "start": "0x61db140",
+      "end": "0x61db154",
+      "sha256": "7d72966cb6b17f2fc99570c89cb360c349dcb13ee4d2d197dddd4b53ff1b160f"
+    },
+    {
+      "kind": "window",
+      "label": "reset_zero",
+      "start": "0x61db160",
+      "end": "0x61db18f",
+      "sha256": "e71b992f9618ab434cc2b460c35dd7a6b60546297cce20ba3397f82355fc0633"
+    },
+    {
+      "kind": "window",
+      "label": "reset_seeds",
+      "start": "0x61db18f",
+      "end": "0x61db1c9",
+      "sha256": "3212e3f24763d79f30048124d81a7fab496174c66c4de4705c8ed880bf2ade87"
+    },
+    {
+      "kind": "window",
+      "label": "update_entry",
+      "start": "0x61db1d0",
+      "end": "0x61db20b",
+      "sha256": "bfc1911fd61c0f398e461de7334748041ba708179231aa1a99b08b00dc2d475e"
+    },
+    {
+      "kind": "window",
+      "label": "update_stripes",
+      "start": "0x61db20b",
+      "end": "0x61db2e8",
+      "sha256": "5bea1399d3955e57e3d06491a691045ca056ab780637a7334d4b7ab53cbabb07"
+    },
+    {
+      "kind": "window",
+      "label": "update_fill",
+      "start": "0x61db2e8",
+      "end": "0x61db390",
+      "sha256": "833705ae78480e7200332f97bd11a4be4d34a66b206f657238a573fdb474e1c4"
+    },
+    {
+      "kind": "window",
+      "label": "update_trailing",
+      "start": "0x61db390",
+      "end": "0x61db3b8",
+      "sha256": "cbb705f718695dc1e29a861a62c32f744e27ae216c4de28b11719961bec4f22a"
+    },
+    {
+      "kind": "window",
+      "label": "update_empty",
+      "start": "0x61db3b8",
+      "end": "0x61db3c0",
+      "sha256": "67057d04515933d140ac22efd4580abe49f39b5114b275b0403b07ca719efe52"
+    },
+    {
+      "kind": "window",
+      "label": "update_small",
+      "start": "0x61db3c0",
+      "end": "0x61db3de",
+      "sha256": "682363e96550466bdcc9e5aef1f334da103b53f9ca75c3b0ac3ee2f060feaf6d"
+    },
+    {
+      "kind": "window",
+      "label": "digest_entry",
+      "start": "0x61db3e0",
+      "end": "0x61db3f8",
+      "sha256": "e0396823503045c1d335a7d24e65fe689495bc266ba3d24c24d145810105bd04"
+    },
+    {
+      "kind": "window",
+      "label": "digest_merge",
+      "start": "0x61db3f8",
+      "end": "0x61db4a8",
+      "sha256": "e94402dfca5d257e27e5f8e851aa2b831740db560148f38185f7da18d33aa0a7"
+    },
+    {
+      "kind": "window",
+      "label": "digest_tail8",
+      "start": "0x61db4a8",
+      "end": "0x61db54f",
+      "sha256": "5876ce21e25039376aeaa474c6f768de62db2f0f5236f1ef80db1dd044b4569f"
+    },
+    {
+      "kind": "window",
+      "label": "digest_tail4",
+      "start": "0x61db54f",
+      "end": "0x61db58f",
+      "sha256": "3766bbcdf60819d0316482c3f162ff0ecec8956864af9819e1cf33b8ed3f9a8d"
+    },
+    {
+      "kind": "window",
+      "label": "digest_tail1",
+      "start": "0x61db58f",
+      "end": "0x61db5ec",
+      "sha256": "a1bd7c045c85e13372f8968f3b2ab8a9c10661926fe7dc2d71d0f811d931216d"
+    },
+    {
+      "kind": "window",
+      "label": "digest_avalanche",
+      "start": "0x61db5ec",
+      "end": "0x61db630",
+      "sha256": "7c0e52343ed8224e5bd08d3c96c69ee2da36aff7b913e84b943f3d156d8a0eaf"
+    },
+    {
+      "kind": "window",
+      "label": "digest_short",
+      "start": "0x61db630",
+      "end": "0x61db649",
+      "sha256": "2fc2f99dd0611bb7b078283e96ed5307724a3c61370f87fdd9fe9a3c336361b2"
+    },
+    {
+      "kind": "window",
+      "label": "arm_xxh64_calls",
+      "start": "0x616be28",
+      "end": "0x616be6c",
+      "sha256": "8975338d4e670b6cb13349b6983a18bc5eeff4b77f06fe29f23bfec47db49e9a"
+    },
+    {
+      "kind": "case_summary",
+      "count": 2400,
+      "seed": 20261109,
+      "aggregate_sha256": "cc1b2023dbe85386763c5ecb9b1979f27003d1a39270ba4251c0e335fb13531a",
+      "mismatches_vs_reference": 0,
+      "note": "streaming model (disassembly transliteration) cross-checked against an independent clean-room XXH64 one-shot reference over the concatenated input on every case, under varied chunkings; the binary itself was never executed"
+    },
+    {
+      "kind": "unknown",
+      "subject": "trailing state bytes +0x4c..+0x58",
+      "status": "zeroed by reset, never read or written by update/digest in the observed code; purpose not claimed"
+    },
+    {
+      "kind": "unknown",
+      "subject": "createState/freeState census",
+      "status": "no vendor-census records for 0x61db130 or 0x61db140; pinned by FDE extent and disassembly only"
+    },
+    {
+      "kind": "unknown",
+      "subject": "update/digest before reset",
+      "status": "the binary would read uninitialised malloc memory; the public API contract requires reset first, so that path is not modelled"
+    },
+    {
+      "kind": "unknown",
+      "subject": "callers of the streaming API",
+      "status": "only the ComputeBuiltinChecksumWithLastByte xxhash64 arm call sites are recorded; no full caller census was run for this packet"
+    }
+  ]
+}

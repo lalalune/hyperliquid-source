@@ -1,0 +1,893 @@
+{
+ "task": "RE-001",
+ "work_item": "RE-001-options-dump-115",
+ "artifact": {
+  "node": 115,
+  "file": "work/hl-node-115.bin",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+ },
+ "question": "Pin, for node #115, the ColumnFamilyOptions header dump end to end: the 93 lines it logs, the struct field behind each line, the name/enum/bool value rules, the sole caller that drives it, and the leveled log helper it funnels through.",
+ "dump": {
+  "function": "0x60b50c0..0x60b79a6",
+  "size_bytes": 10470,
+  "signature": "(this: ColumnFamilyOptions*, logger) -> void",
+  "helper_calls": 93,
+  "helper_level": 5,
+  "return": "ret at 0x60b6445; 0x60b6445..0x60b79a6 are cold blocks and landing pads",
+  "stack_frame": "0x368 bytes; stack canary at rsp+0x358; local ostringstream and temp strings"
+ },
+ "helper": {
+  "function": "0x5fceda0..0x5fcee93",
+  "size_bytes": 243,
+  "signature": "(level: u8, logger, fmt: const char*, ...) -> void",
+  "contract": [
+   "builds a va_list from the varargs",
+   "level_now = logger->vtable[8]() (level query); if level_now > level, log nothing and return",
+   "if level == 5, logger->vtable[3](fmt, va_list) (header-format path)",
+   "otherwise logger->vtable[5](level, fmt, va_list) (leveled path)",
+   "level values match InfoLogLevel: 0 DEBUG, 1 INFO, 2 WARN, 3 ERROR, 4 FATAL, 5 HEADER"
+  ],
+  "direct_callers": 341,
+  "level_counts": {
+   "dynamic": 1,
+   "0": 2,
+   "1": 84,
+   "2": 43,
+   "3": 31,
+   "4": 0,
+   "5": 180
+  },
+  "dynamic_level_site": "0x605c6de (level from a variable byte)",
+  "zero_level_sites": [
+   "0x61983ab",
+   "0x6198572"
+  ],
+  "sibling": {
+   "function": "0x5fceea0..0x5fcef5b",
+   "contract": "(logger, fmt, ...) -> void; calls logger->vtable[3](fmt, va_list) directly with no level check",
+   "direct_callers": 1,
+   "caller": "0x60a0fb9"
+  }
+ },
+ "sole_caller": {
+  "function": "0x5d954b0..0x5d96890",
+  "call_site": "0x5d95e69",
+  "header_log_site": "0x5d95e56",
+  "header_level": 1,
+  "header_format": "[%s:619] --------------- Options for column family [%s]:\\n",
+  "header_args": [
+   "0x444573 (db/column_family.cc)",
+   "*(3rd argument) (column family name)"
+  ],
+  "dump_args": [
+   "rdi = 4th argument (the options object, saved at -0x110(%rbp))",
+   "rsi = *(this+0x588) (the logger)"
+  ]
+ },
+ "enumfn": {
+  "function": "0x5d8b3c0..0x5d8b4cb",
+  "signature": "(out: string*, value: u8) -> void",
+  "jump_table": "0x96d4f0, 65 int32 entries, relative to the table base",
+  "mapping": {
+   "0": "NoCompression",
+   "1": "Snappy",
+   "2": "Zlib",
+   "3": "BZip2",
+   "4": "LZ4",
+   "5": "LZ4HC",
+   "6": "Xpress",
+   "7": "ZSTD",
+   "64": "ZSTDNotFinal",
+   "255": "DisableOption"
+  },
+  "default_arm": "0x5d8b3f0 appends the empty string at 0x4376fd; indices 8..63 and bytes > 0x40 (other than 0xff) take it",
+  "direct_callers": 14,
+  "dump_callers": [
+   "0x60b5309 (compression loop)",
+   "0x60b611b (blob_compression_type)",
+   "0x60b6dd5 (bottommost cold block)",
+   "0x60b702c (compression cold block)"
+  ],
+  "cross_check": "values 64 (ZSTDNotFinal) and 255 (DisableOption) confirm the as-built CompressionType values pinned by #4239"
+ },
+ "registries_consumed": [
+  {
+   "address": "0x6507260",
+   "enum": "CompactionStyle",
+   "entries": {
+    "0": "kCompactionStyleLevel",
+    "1": "kCompactionStyleUniversal",
+    "2": "kCompactionStyleFIFO",
+    "3": "kCompactionStyleNone"
+   },
+   "used_for": "line 52 (+0xe8)"
+  },
+  {
+   "address": "0x6507220",
+   "enum": "CompactionPri",
+   "entries": {
+    "0": "kByCompensatedSize",
+    "1": "kOldestLargestSeqFirst",
+    "2": "kOldestSmallestSeqFirst",
+    "3": "kMinOverlappingRatio",
+    "4": "kRoundRobin"
+   },
+   "used_for": "line 53 (+0xe9)"
+  },
+  {
+   "address": "0x65071e0",
+   "enum": "CompactionStopStyle",
+   "entries": {
+    "0": "kCompactionStopStyleSimilarSize",
+    "1": "kCompactionStopStyleTotalSize"
+   },
+   "used_for": "line 59 (+0x100)"
+  }
+ ],
+ "fields": [
+  {
+   "line": 0,
+   "format": "Options.comparator: %s",
+   "offset": "0x1e8",
+   "kind": "name",
+   "notes": "unconditional deref; no null check"
+  },
+  {
+   "line": 1,
+   "format": "Options.merge_operator: %s",
+   "offset": "0x1f0",
+   "kind": "name",
+   "notes": "null -> None"
+  },
+  {
+   "line": 2,
+   "format": "Options.compaction_filter: %s",
+   "offset": "0x200",
+   "kind": "name",
+   "notes": "null -> None"
+  },
+  {
+   "line": 3,
+   "format": "Options.compaction_filter_factory: %s",
+   "offset": "0x208",
+   "kind": "name",
+   "notes": "null -> None"
+  },
+  {
+   "line": 4,
+   "format": "Options.sst_partitioner_factory: %s",
+   "offset": "0x2f0",
+   "kind": "name",
+   "notes": "null -> None; slot 0x70 vs GOT 0x64ed508 (RELATIVE -> 0x6093050); equal -> literal SstPartitionerFixedPrefixFactory; else cold 0x60b72a0 calls Name()"
+  },
+  {
+   "line": 5,
+   "format": "Options.memtable_factory: %s",
+   "offset": "0x128",
+   "kind": "name",
+   "notes": "unconditional deref; no null check"
+  },
+  {
+   "line": 6,
+   "format": "Options.table_factory: %s",
+   "offset": "0x2b8",
+   "kind": "name",
+   "notes": "slot 0x70 vs GOT 0x64edca0 (RELATIVE -> 0x60b1d90); equal -> literal BlockBasedTable; else cold 0x60b6e90 calls Name(); unconditional deref"
+  },
+  {
+   "line": 7,
+   "format": "table_factory options: %s",
+   "offset": "0x2b8",
+   "kind": "slot",
+   "notes": "vtable slot 4 (0x20) on the factory fills a temp string"
+  },
+  {
+   "line": 8,
+   "format": "Options.write_buffer_size: %zu",
+   "offset": "0x218",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 9,
+   "format": "Options.max_write_buffer_number: %d",
+   "offset": "0x0",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 10,
+   "format": "Options.compression[%d]: %s",
+   "offset": "0x70",
+   "kind": "loop",
+   "notes": "vector<u8> at +0x70/+0x78, one line per element, value via enumfn; runs only when the vector is non-empty"
+  },
+  {
+   "line": 11,
+   "format": "Options.bottommost_compression: %s",
+   "offset": "0x221",
+   "kind": "enumfn",
+   "notes": "byte 0xff -> literal Disabled (fast path); else cold 0x60b6dd0 via enumfn"
+  },
+  {
+   "line": 12,
+   "format": "Options.prefix_extractor: %s",
+   "offset": "0x290",
+   "kind": "name",
+   "notes": "null -> nullptr"
+  },
+  {
+   "line": 13,
+   "format": "Options.memtable_insert_with_hint_prefix_extractor: %s",
+   "offset": "0x50",
+   "kind": "name",
+   "notes": "null -> nullptr"
+  },
+  {
+   "line": 14,
+   "format": "Options.num_levels: %d",
+   "offset": "0x88",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 15,
+   "format": "Options.min_write_buffer_number_to_merge: %d",
+   "offset": "0x4",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 16,
+   "format": "Options.max_write_buffer_number_to_maintain: %d",
+   "offset": "0x8",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 17,
+   "format": "Options.max_write_buffer_size_to_maintain: %lu",
+   "offset": "0x10",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 18,
+   "format": "Options.bottommost_compression_opts.window_bits: %d",
+   "offset": "0x228",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 19,
+   "format": "Options.bottommost_compression_opts.level: %d",
+   "offset": "0x22c",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 20,
+   "format": "Options.bottommost_compression_opts.strategy: %d",
+   "offset": "0x230",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 21,
+   "format": "Options.bottommost_compression_opts.max_dict_bytes: %u",
+   "offset": "0x234",
+   "kind": "scalar",
+   "notes": "u32"
+  },
+  {
+   "line": 22,
+   "format": "Options.bottommost_compression_opts.zstd_max_train_bytes: %u",
+   "offset": "0x238",
+   "kind": "scalar",
+   "notes": "u32"
+  },
+  {
+   "line": 23,
+   "format": "Options.bottommost_compression_opts.parallel_threads: %u",
+   "offset": "0x23c",
+   "kind": "scalar",
+   "notes": "u32"
+  },
+  {
+   "line": 24,
+   "format": "Options.bottommost_compression_opts.enabled: %s",
+   "offset": "0x240",
+   "kind": "bool",
+   "notes": "byte != 0 -> true"
+  },
+  {
+   "line": 25,
+   "format": "Options.bottommost_compression_opts.max_dict_buffer_bytes: %lu",
+   "offset": "0x248",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 26,
+   "format": "Options.bottommost_compression_opts.use_zstd_dict_trainer: %s",
+   "offset": "0x250",
+   "kind": "bool",
+   "notes": "byte != 0 -> true"
+  },
+  {
+   "line": 27,
+   "format": "Options.compression_opts.window_bits: %d",
+   "offset": "0x258",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 28,
+   "format": "Options.compression_opts.level: %d",
+   "offset": "0x25c",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 29,
+   "format": "Options.compression_opts.strategy: %d",
+   "offset": "0x260",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 30,
+   "format": "Options.compression_opts.max_dict_bytes: %u",
+   "offset": "0x264",
+   "kind": "scalar",
+   "notes": "u32"
+  },
+  {
+   "line": 31,
+   "format": "Options.compression_opts.zstd_max_train_bytes: %u",
+   "offset": "0x268",
+   "kind": "scalar",
+   "notes": "u32"
+  },
+  {
+   "line": 32,
+   "format": "Options.compression_opts.use_zstd_dict_trainer: %s",
+   "offset": "0x280",
+   "kind": "bool",
+   "notes": "byte != 0 -> true"
+  },
+  {
+   "line": 33,
+   "format": "Options.compression_opts.parallel_threads: %u",
+   "offset": "0x26c",
+   "kind": "scalar",
+   "notes": "u32"
+  },
+  {
+   "line": 34,
+   "format": "Options.compression_opts.enabled: %s",
+   "offset": "0x270",
+   "kind": "bool",
+   "notes": "byte != 0 -> true"
+  },
+  {
+   "line": 35,
+   "format": "Options.compression_opts.max_dict_buffer_bytes: %lu",
+   "offset": "0x278",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 36,
+   "format": "Options.level0_file_num_compaction_trigger: %d",
+   "offset": "0x288",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 37,
+   "format": "Options.level0_slowdown_writes_trigger: %d",
+   "offset": "0x8c",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 38,
+   "format": "Options.level0_stop_writes_trigger: %d",
+   "offset": "0x90",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 39,
+   "format": "Options.target_file_size_base: %lu",
+   "offset": "0x98",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 40,
+   "format": "Options.target_file_size_multiplier: %d",
+   "offset": "0xa0",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 41,
+   "format": "Options.max_bytes_for_level_base: %lu",
+   "offset": "0x2a0",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 42,
+   "format": "Options.level_compaction_dynamic_level_bytes: %d",
+   "offset": "0xa4",
+   "kind": "scalar",
+   "notes": "bool byte printed as %d"
+  },
+  {
+   "line": 43,
+   "format": "Options.max_bytes_for_level_multiplier: %f",
+   "offset": "0xa8",
+   "kind": "scalar",
+   "notes": "f64"
+  },
+  {
+   "line": 44,
+   "format": "Options.max_bytes_for_level_multiplier_addtl[%zu]: %d",
+   "offset": "0xb0",
+   "kind": "loop",
+   "notes": "vector<i32> at +0xb0/+0xb8, one line per element"
+  },
+  {
+   "line": 45,
+   "format": "Options.max_sequential_skip_in_iterations: %lu",
+   "offset": "0x120",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 46,
+   "format": "Options.max_compaction_bytes: %lu",
+   "offset": "0xc8",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 47,
+   "format": "Options.ignore_max_compaction_bytes_for_input: %s",
+   "offset": "0xd0",
+   "kind": "bool",
+   "notes": "byte != 0 -> true"
+  },
+  {
+   "line": 48,
+   "format": "Options.arena_block_size: %zu",
+   "offset": "0x68",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 49,
+   "format": "Options.soft_pending_compaction_bytes_limit: %lu",
+   "offset": "0xd8",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 50,
+   "format": "Options.hard_pending_compaction_bytes_limit: %lu",
+   "offset": "0xe0",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 51,
+   "format": "Options.disable_auto_compactions: %d",
+   "offset": "0x2b0",
+   "kind": "scalar",
+   "notes": "bool byte printed as %d"
+  },
+  {
+   "line": 52,
+   "format": "Options.compaction_style: %s",
+   "offset": "0xe8",
+   "kind": "enummap",
+   "notes": "std::map<u8,string> at 0x6507260 (#4239 CompactionStyle: 0 Level, 1 Universal, 2 FIFO, 3 None); miss -> cold 0x60b6b20 builds unknown_<n> via ostringstream"
+  },
+  {
+   "line": 53,
+   "format": "Options.compaction_pri: %s",
+   "offset": "0xe9",
+   "kind": "enummap",
+   "notes": "std::map<u8,string> at 0x6507220 (#4239 CompactionPri: 0 ByCompensatedSize, 1 OldestLargestSeqFirst, 2 OldestSmallestSeqFirst, 3 MinOverlappingRatio, 4 RoundRobin); miss -> cold 0x60b6870 builds unknown_<n>"
+  },
+  {
+   "line": 54,
+   "format": "Options.compaction_options_universal.size_ratio: %u",
+   "offset": "0xec",
+   "kind": "scalar",
+   "notes": "u32"
+  },
+  {
+   "line": 55,
+   "format": "Options.compaction_options_universal.min_merge_width: %u",
+   "offset": "0xf0",
+   "kind": "scalar",
+   "notes": "u32"
+  },
+  {
+   "line": 56,
+   "format": "Options.compaction_options_universal.max_merge_width: %u",
+   "offset": "0xf4",
+   "kind": "scalar",
+   "notes": "u32"
+  },
+  {
+   "line": 57,
+   "format": "Options.compaction_options_universal.max_size_amplification_percent: %u",
+   "offset": "0xf8",
+   "kind": "scalar",
+   "notes": "u32"
+  },
+  {
+   "line": 58,
+   "format": "Options.compaction_options_universal.compression_size_percent: %d",
+   "offset": "0xfc",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 59,
+   "format": "Options.compaction_options_universal.stop_style: %s",
+   "offset": "0x100",
+   "kind": "enummap",
+   "notes": "std::map<u8,string> at 0x65071e0 (#4239 CompactionStopStyle: 0 SimilarSize, 1 TotalSize); miss -> cold unknown_<n> path"
+  },
+  {
+   "line": 60,
+   "format": "Options.compaction_options_fifo.max_table_files_size: %lu",
+   "offset": "0x108",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 61,
+   "format": "Options.compaction_options_fifo.allow_compaction: %d",
+   "offset": "0x110",
+   "kind": "scalar",
+   "notes": "bool byte printed as %d"
+  },
+  {
+   "line": 62,
+   "format": "Options.table_properties_collectors: %s",
+   "offset": "0x138",
+   "kind": "loop",
+   "notes": "vector at +0x138/+0x140; each element's vtable slot 0xa0 vs GOT 0x64edca8 (RELATIVE -> 0x60b1ea0), mismatch -> cold 0x60b64c0; Name() slot 0x70 joined with a separator via ostringstream; trailing separator trimmed via _M_replace; empty vector -> cold 0x60b72b0"
+  },
+  {
+   "line": 63,
+   "format": "Options.inplace_update_support: %d",
+   "offset": "0x18",
+   "kind": "scalar",
+   "notes": "bool byte printed as %d"
+  },
+  {
+   "line": 64,
+   "format": "Options.inplace_update_num_locks: %zu",
+   "offset": "0x20",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 65,
+   "format": "Options.memtable_prefix_bloom_size_ratio: %f",
+   "offset": "0x38",
+   "kind": "scalar",
+   "notes": "f64"
+  },
+  {
+   "line": 66,
+   "format": "Options.memtable_whole_key_filtering: %d",
+   "offset": "0x40",
+   "kind": "scalar",
+   "notes": "bool byte printed as %d"
+  },
+  {
+   "line": 67,
+   "format": "Options.memtable_huge_page_size: %zu",
+   "offset": "0x48",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 68,
+   "format": "Options.bloom_locality: %d",
+   "offset": "0x60",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 69,
+   "format": "Options.max_successive_merges: %zu",
+   "offset": "0x150",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 70,
+   "format": "Options.optimize_filters_for_hits: %d",
+   "offset": "0x158",
+   "kind": "scalar",
+   "notes": "bool byte printed as %d"
+  },
+  {
+   "line": 71,
+   "format": "Options.paranoid_file_checks: %d",
+   "offset": "0x15a",
+   "kind": "scalar",
+   "notes": "bool byte printed as %d"
+  },
+  {
+   "line": 72,
+   "format": "Options.force_consistency_checks: %d",
+   "offset": "0x15b",
+   "kind": "scalar",
+   "notes": "bool byte printed as %d"
+  },
+  {
+   "line": 73,
+   "format": "Options.report_bg_io_stats: %d",
+   "offset": "0x15c",
+   "kind": "scalar",
+   "notes": "bool byte printed as %d"
+  },
+  {
+   "line": 74,
+   "format": "Options.ttl: %lu",
+   "offset": "0x160",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 75,
+   "format": "Options.periodic_compaction_seconds: %lu",
+   "offset": "0x168",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 76,
+   "format": "Options.preclude_last_level_data_seconds: %lu",
+   "offset": "0x180",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 77,
+   "format": "Options.preserve_internal_time_seconds: %lu",
+   "offset": "0x188",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 78,
+   "format": "Options.enable_blob_files: %s",
+   "offset": "0x190",
+   "kind": "bool",
+   "notes": "byte != 0 -> true"
+  },
+  {
+   "line": 79,
+   "format": "Options.min_blob_size: %lu",
+   "offset": "0x198",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 80,
+   "format": "Options.blob_file_size: %lu",
+   "offset": "0x1a0",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 81,
+   "format": "Options.blob_compression_type: %s",
+   "offset": "0x1a8",
+   "kind": "enumfn",
+   "notes": "CompressionType byte via 0x5d8b3c0"
+  },
+  {
+   "line": 82,
+   "format": "Options.enable_blob_garbage_collection: %s",
+   "offset": "0x1a9",
+   "kind": "bool",
+   "notes": "byte != 0 -> true"
+  },
+  {
+   "line": 83,
+   "format": "Options.blob_garbage_collection_age_cutoff: %f",
+   "offset": "0x1b0",
+   "kind": "scalar",
+   "notes": "f64"
+  },
+  {
+   "line": 84,
+   "format": "Options.blob_garbage_collection_force_threshold: %f",
+   "offset": "0x1b8",
+   "kind": "scalar",
+   "notes": "f64"
+  },
+  {
+   "line": 85,
+   "format": "Options.blob_compaction_readahead_size: %lu",
+   "offset": "0x1c0",
+   "kind": "scalar",
+   "notes": "u64"
+  },
+  {
+   "line": 86,
+   "format": "Options.blob_file_starting_level: %d",
+   "offset": "0x1c8",
+   "kind": "scalar",
+   "notes": "i32"
+  },
+  {
+   "line": 87,
+   "format": "Options.blob_cache: %s",
+   "offset": "0x1d0",
+   "kind": "slot",
+   "notes": "vtable slot 2 (0x10) returns the name; null cache jumps to 0x60b62dd, skipping lines 87-89"
+  },
+  {
+   "line": 88,
+   "format": "blob_cache options: %s",
+   "offset": "0x1d0",
+   "kind": "slot",
+   "notes": "vtable slot 25 (0xc8) vs GOT 0x64ecd20 (RELATIVE -> 0x5d3f6c0); equal -> empty string; else cold 0x60b7080 calls the slot to fill the temp string"
+  },
+  {
+   "line": 89,
+   "format": "blob_cache prepopulated: %s",
+   "offset": "0x1e0",
+   "kind": "scalar",
+   "notes": "byte == 1 -> flush only; else disabled (#4239 PrepopulateBlobCache: 0 Disable, 1 FlushOnly)"
+  },
+  {
+   "line": 90,
+   "format": "Options.experimental_mempurge_threshold: %f",
+   "offset": "0x28",
+   "kind": "scalar",
+   "notes": "f64"
+  },
+  {
+   "line": 91,
+   "format": "Options.bottommost_compression: %s",
+   "offset": "0x221",
+   "kind": "enumfn",
+   "notes": "cold-block emission at 0x60b6df3 (same format as line 11)"
+  },
+  {
+   "line": 92,
+   "format": "Options.compression: %s",
+   "offset": "0x220",
+   "kind": "enumfn",
+   "notes": "cold-block emission at 0x60b704a; reached only when compression_per_level is empty"
+  }
+ ],
+ "cold_blocks": [
+  {
+   "address": "0x60b6b20",
+   "for": "compaction_style (+0xe8) registry miss",
+   "does": "builds unknown_<n> via ostringstream and logs line 52"
+  },
+  {
+   "address": "0x60b6870",
+   "for": "compaction_pri (+0xe9) registry miss",
+   "does": "builds unknown_<n> via ostringstream and logs line 53"
+  },
+  {
+   "address": "0x60b6dd0",
+   "for": "bottommost_compression byte != 0xff",
+   "does": "enum-name via 0x5d8b3c0, logs line 91, jumps back to 0x60b538f"
+  },
+  {
+   "address": "0x60b6e90",
+   "for": "table_factory Name slot != GOT 0x64edca0",
+   "does": "calls Name(), logs line 6, jumps back to 0x60b5236"
+  },
+  {
+   "address": "0x60b7020",
+   "for": "compression_per_level empty (begin == end)",
+   "does": "enum-name of the scalar byte +0x220, logs line 92, jumps back to 0x60b5361"
+  },
+  {
+   "address": "0x60b7080",
+   "for": "blob_cache slot 0xc8 != GOT 0x64ecd20",
+   "does": "calls the slot to fill the temp string, logs line 88"
+  },
+  {
+   "address": "0x60b72a0",
+   "for": "sst_partitioner_factory Name slot != GOT 0x64ed508",
+   "does": "calls Name(), logs line 4, jumps back to 0x60b51d8"
+  },
+  {
+   "address": "0x60b72b0",
+   "for": "table_properties_collectors vector empty",
+   "does": "joins to the collectors log line 62"
+  },
+  {
+   "address": "0x60b64c0",
+   "for": "collector slot 0xa0 != GOT 0x64edca8",
+   "does": "cold path for a non-default collector"
+  }
+ ],
+ "name_getter": {
+  "slot": "vtable slot 14 (0x70)",
+  "objects": [
+   "comparator +0x1e8",
+   "merge_operator +0x1f0",
+   "compaction_filter +0x200",
+   "compaction_filter_factory +0x208",
+   "sst_partitioner_factory +0x2f0",
+   "memtable_factory +0x128",
+   "table_factory +0x2b8",
+   "prefix_extractor +0x290",
+   "memtable_insert_with_hint_prefix_extractor +0x50",
+   "table_properties_collectors elements"
+  ],
+  "null_defaults": {
+   "merge_operator": "None",
+   "compaction_filter": "None",
+   "compaction_filter_factory": "None",
+   "sst_partitioner_factory": "None",
+   "prefix_extractor": "nullptr",
+   "memtable_insert_with_hint_prefix_extractor": "nullptr"
+  },
+  "no_null_check": [
+   "comparator +0x1e8",
+   "memtable_factory +0x128",
+   "table_factory +0x2b8"
+  ]
+ },
+ "relocations": [
+  {
+   "got": "0x64ed508",
+   "type": "R_X86_64_RELATIVE",
+   "addend": "0x6093050",
+   "role": "default sst_partitioner_factory Name()"
+  },
+  {
+   "got": "0x64edca0",
+   "type": "R_X86_64_RELATIVE",
+   "addend": "0x60b1d90",
+   "role": "default table_factory Name() (BlockBasedTable)"
+  },
+  {
+   "got": "0x64edca8",
+   "type": "R_X86_64_RELATIVE",
+   "addend": "0x60b1ea0",
+   "role": "default collector slot 0xa0"
+  },
+  {
+   "got": "0x64ecd20",
+   "type": "R_X86_64_RELATIVE",
+   "addend": "0x5d3f6c0",
+   "role": "default blob_cache slot 0xc8"
+  },
+  {
+   "got": "0x64ed5a8",
+   "type": "R_X86_64_GLOB_DAT",
+   "addend": "basic_ostringstream vtable",
+   "role": "local ostringstream vtable"
+  },
+  {
+   "got": "0x64ed5b0",
+   "type": "R_X86_64_GLOB_DAT",
+   "addend": "basic_stringbuf vtable",
+   "role": "local ostringstream stringbuf vtable"
+  }
+ ]
+}

@@ -1,0 +1,43 @@
+{
+  "schema": "fee-point-handcase-addendum-v1",
+  "original_handcase_freeze_sha256": "887aebb50c0b926ca5c9dc3374f6adb970d87c3f557b0a9697015b71a5983ca1",
+  "provenance": "Parent proposed this additive witness after the original 36 expectations and initial qualification; node_scout checked it algebraically after reading the reference source, without executing the reference. It is not part of the original pre-reference handcase freeze.",
+  "case": {
+    "id": "A01",
+    "name": "unsigned carry exactly to two-to-64 distinguishes wrapping",
+    "input": {
+      "quantity": 1,
+      "scale_bits": "3ff0000000000000",
+      "t_bits": "0000000000000000",
+      "d_bits": "0000000000000000",
+      "q_bits": "3ff0000000000000",
+      "m_bits": "4000000000000000",
+      "h_bits": "43e0000000000000"
+    },
+    "expected_first_class": "RoundedMagnitudeAtLeastQuantity",
+    "hand_intermediates": {
+      "A": 0,
+      "B": 0,
+      "C": 2,
+      "J": 0,
+      "K": 2,
+      "D": 9223372036854775807,
+      "F(D)_bits": "43e0000000000000",
+      "E": 9223372036854775807,
+      "U": 18446744073709551614,
+      "G": 2,
+      "exact_U_plus_G": 18446744073709551616,
+      "T": 18446744073709551615
+    },
+    "justification": "A=B=0, C=2 and K=2 pass the first two signs. h=2^63 converts D to MAX; its signed-integer conversion rounds back to2^63, q=1 gives E=MAX. U=2MAX=2^64-2; adding |C|=2 reaches exactly2^64 and saturates to u64MAX, which is >=quantity1.",
+    "counterfactual": {
+      "mutation": "Replace only the final u64 saturation with reduction modulo2^64; preserve all earlier operations and threshold comparison.",
+      "mathematically_predicted_total": 0,
+      "mathematically_predicted_first_class": "Pass",
+      "compiled_or_executed": false
+    }
+  },
+  "scope": "Fixed admitted scalar domain and ordinary native-hook/frame/FP premises. Classification only, not returned diagnostic/winner state.",
+  "qualification_status": "Algebraically reviewed only; no reference run or compiled mutant run in this addendum.",
+  "original_expectations_changed": false
+}

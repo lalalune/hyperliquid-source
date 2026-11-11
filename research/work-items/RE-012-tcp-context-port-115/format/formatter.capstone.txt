@@ -1,0 +1,122 @@
+141e3a0: 55                               push     rbp
+141e3a1: 4889e5                           mov      rbp, rsp
+141e3a4: 4157                             push     r15
+141e3a6: 4156                             push     r14
+141e3a8: 4154                             push     r12
+141e3aa: 53                               push     rbx
+141e3ab: 4883ec20                         sub      rsp, 0x20
+141e3af: 4989d6                           mov      r14, rdx
+141e3b2: 4989f7                           mov      r15, rsi
+141e3b5: 4889fb                           mov      rbx, rdi
+141e3b8: 41f6c601                         test     r14b, 1
+141e3bc: 0f8591000000                     jne      0x141e453
+141e3c2: 410fb617                         movzx    edx, byte ptr [r15]
+141e3c6: 84d2                             test     dl, dl
+141e3c8: 0f84c7000000                     je       0x141e495
+141e3ce: 31c0                             xor      eax, eax
+141e3d0: 4c89f9                           mov      rcx, r15
+141e3d3: 4531e4                           xor      r12d, r12d
+141e3d6: eb18                             jmp      0x141e3f0
+141e3d8: 0f1f840000000000                 nop      dword ptr [rax + rax]
+141e3e0: 0fb6d2                           movzx    edx, dl
+141e3e3: 4901d4                           add      r12, rdx
+141e3e6: 4801d1                           add      rcx, rdx
+141e3e9: 0fb611                           movzx    edx, byte ptr [rcx]
+141e3ec: 84d2                             test     dl, dl
+141e3ee: 746b                             je       0x141e45b
+141e3f0: 48ffc1                           inc      rcx
+141e3f3: 84d2                             test     dl, dl
+141e3f5: 79e9                             jns      0x141e3e0
+141e3f7: 89d6                             mov      esi, edx
+141e3f9: 40f6de                           neg      sil
+141e3fc: 710f                             jno      0x141e40d
+141e3fe: 0fb711                           movzx    edx, word ptr [rcx]
+141e401: 4901d4                           add      r12, rdx
+141e404: 4801d1                           add      rcx, rdx
+141e407: 4883c102                         add      rcx, 2
+141e40b: ebdc                             jmp      0x141e3e9
+141e40d: 4d85e4                           test     r12, r12
+141e410: 400f94c6                         sete     sil
+141e414: 4008f0                           or       al, sil
+141e417: 89d6                             mov      esi, edx
+141e419: 40c0e607                         shl      sil, 7
+141e41d: 89d7                             mov      edi, edx
+141e41f: 40c0e705                         shl      dil, 5
+141e423: 4080e740                         and      dil, 0x40
+141e427: 4008f7                           or       dil, sil
+141e42a: 40c0ef05                         shr      dil, 5
+141e42e: 400fb6f7                         movzx    esi, dil
+141e432: 89d7                             mov      edi, edx
+141e434: 40d0ef                           shr      dil, 1
+141e437: 4080e702                         and      dil, 2
+141e43b: 400fb6ff                         movzx    edi, dil
+141e43f: c0ea02                           shr      dl, 2
+141e442: 80e202                           and      dl, 2
+141e445: 0fb6d2                           movzx    edx, dl
+141e448: 4801f9                           add      rcx, rdi
+141e44b: 4801d1                           add      rcx, rdx
+141e44e: 4801f1                           add      rcx, rsi
+141e451: eb96                             jmp      0x141e3e9
+141e453: 4d89f4                           mov      r12, r14
+141e456: 49d1ec                           shr      r12, 1
+141e459: eb19                             jmp      0x141e474
+141e45b: 4983fc10                         cmp      r12, 0x10
+141e45f: 0f92c1                           setb     cl
+141e462: 84c8                             test     al, cl
+141e464: 7405                             je       0x141e46b
+141e466: 4531e4                           xor      r12d, r12d
+141e469: eb09                             jmp      0x141e474
+141e46b: 4d01e4                           add      r12, r12
+141e46e: 0f8899000000                     js       0x141e50d
+141e474: 4d85e4                           test     r12, r12
+141e477: 741c                             je       0x141e495
+141e479: 4c89e7                           mov      rdi, r12
+141e47c: ff15fe0f0c05                     call     qword ptr [rip + 0x50c0ffe]
+141e482: 4885c0                           test     rax, rax
+141e485: 7516                             jne      0x141e49d
+141e487: bf01000000                       mov      edi, 1
+141e48c: 4c89e6                           mov      rsi, r12
+141e48f: ff1503100c05                     call     qword ptr [rip + 0x50c1003]
+141e495: b801000000                       mov      eax, 1
+141e49a: 4531e4                           xor      r12d, r12d
+141e49d: 4c8965c0                         mov      qword ptr [rbp - 0x40], r12
+141e4a1: 488945c8                         mov      qword ptr [rbp - 0x38], rax
+141e4a5: 48c745d000000000                 mov      qword ptr [rbp - 0x30], 0
+141e4ad: 488d359c58fd04                   lea      rsi, [rip + 0x4fd589c]
+141e4b4: 488d7dc0                         lea      rdi, [rbp - 0x40]
+141e4b8: 4c89fa                           mov      rdx, r15
+141e4bb: 4c89f1                           mov      rcx, r14
+141e4be: ff152c120c05                     call     qword ptr [rip + 0x50c122c]
+141e4c4: 84c0                             test     al, al
+141e4c6: 751f                             jne      0x141e4e7
+141e4c8: 488b45d0                         mov      rax, qword ptr [rbp - 0x30]
+141e4cc: 48894310                         mov      qword ptr [rbx + 0x10], rax
+141e4d0: 0f1045c0                         movups   xmm0, xmmword ptr [rbp - 0x40]
+141e4d4: 0f1103                           movups   xmmword ptr [rbx], xmm0
+141e4d7: 4889d8                           mov      rax, rbx
+141e4da: 4883c420                         add      rsp, 0x20
+141e4de: 5b                               pop      rbx
+141e4df: 415c                             pop      r12
+141e4e1: 415e                             pop      r14
+141e4e3: 415f                             pop      r15
+141e4e5: 5d                               pop      rbp
+141e4e6: c3                               ret      
+141e4e7: 488d3d968803ff                   lea      rdi, [rip - 0xfc776a]
+141e4ee: 488d0dab57fd04                   lea      rcx, [rip + 0x4fd57ab]
+141e4f5: 4c8d058458fd04                   lea      r8, [rip + 0x4fd5884]
+141e4fc: 488d55df                         lea      rdx, [rbp - 0x21]
+141e500: be56000000                       mov      esi, 0x56
+141e505: ff1595110c05                     call     qword ptr [rip + 0x50c1195]
+141e50b: 0f0b                             ud2      
+141e50d: 31ff                             xor      edi, edi
+141e50f: 4c89e6                           mov      rsi, r12
+141e512: ff15800f0c05                     call     qword ptr [rip + 0x50c0f80]
+141e518: 4889c3                           mov      rbx, rax
+141e51b: 488b75c0                         mov      rsi, qword ptr [rbp - 0x40]
+141e51f: 4885f6                           test     rsi, rsi
+141e522: 740c                             je       0x141e530
+141e524: 488b7dc8                         mov      rdi, qword ptr [rbp - 0x38]
+141e528: 31d2                             xor      edx, edx
+141e52a: ff15700f0c05                     call     qword ptr [rip + 0x50c0f70]
+141e530: 4889df                           mov      rdi, rbx
+141e533: e81825fd04                       call     0x63f0a50

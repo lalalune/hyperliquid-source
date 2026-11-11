@@ -1,0 +1,1097 @@
+{
+  "task": "RE-001",
+  "artifact": {
+    "binary": "work/hl-node-115.bin",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "provenance": "provenance/artifacts.json artifacts/node/115/hl-node"
+  },
+  "bounded_question": "What is the full DBOptions OptionTypeInfo map on node #115, and what are #4146's three open unknowns (the avoid offset mismatch, the max_open_files offset mismatch, DBOptions+0x21b)?",
+  "answer": {
+    "map_entries": 92,
+    "avoid_unnecessary_blocking_io": "Map offset 0x198 is correct; #4146's DBOptions source offset was off by one (+0x21a -> +0x219).",
+    "max_open_files": "Map offset 0x40 is a MutableDBOptions offset, not ImmutableDBOptions; BuildDBOptions reads it at 0x60c2f0b.",
+    "dboptions_0x21b": "Alignment padding (+0x21b..+0x21f) before log_readahead_size at +0x220; no DBOptions/ImmutableDBOptions function touches it."
+  },
+  "map": [
+    {
+      "block": 0,
+      "name": "allow_os_buffer",
+      "offset": "0x0",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 1,
+      "name": "base_background_compactions",
+      "offset": "0x0",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 2,
+      "name": "max_background_jobs",
+      "offset": "0x0",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 3,
+      "name": "max_background_compactions",
+      "offset": "0x4",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 4,
+      "name": "max_subcompactions",
+      "offset": "0x8",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 5,
+      "name": "avoid_flush_during_shutdown",
+      "offset": "0xc",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 6,
+      "name": "writable_file_max_buffer_size",
+      "offset": "0x10",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 7,
+      "name": "delayed_write_rate",
+      "offset": "0x18",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 8,
+      "name": "max_total_wal_size",
+      "offset": "0x20",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 9,
+      "name": "delete_obsolete_files_period_micros",
+      "offset": "0x28",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 10,
+      "name": "stats_dump_period_sec",
+      "offset": "0x30",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 11,
+      "name": "stats_persist_period_sec",
+      "offset": "0x34",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 12,
+      "name": "stats_history_buffer_size",
+      "offset": "0x38",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 13,
+      "name": "max_open_files",
+      "offset": "0x40",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 14,
+      "name": "bytes_per_sync",
+      "offset": "0x48",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 15,
+      "name": "wal_bytes_per_sync",
+      "offset": "0x50",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 16,
+      "name": "strict_bytes_per_sync",
+      "offset": "0x58",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 17,
+      "name": "compaction_readahead_size",
+      "offset": "0x60",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 18,
+      "name": "max_background_flushes",
+      "offset": "0x68",
+      "flags": "0x100",
+      "group": "A"
+    },
+    {
+      "block": 19,
+      "name": "advise_random_on_open",
+      "offset": "0x10e",
+      "flags": "0x0",
+      "group": "B"
+    },
+    {
+      "block": 20,
+      "name": "allow_mmap_reads",
+      "offset": "0x108",
+      "flags": "0x0",
+      "group": "B"
+    },
+    {
+      "block": 21,
+      "name": "allow_fallocate",
+      "offset": "0x10c",
+      "flags": "0x0",
+      "group": "B"
+    },
+    {
+      "block": 22,
+      "name": "allow_mmap_writes",
+      "offset": "0x109",
+      "flags": "0x0",
+      "group": "B"
+    },
+    {
+      "block": 23,
+      "name": "use_direct_reads",
+      "offset": "0x10a",
+      "flags": "0x0",
+      "group": "B"
+    },
+    {
+      "block": 24,
+      "name": "use_direct_writes",
+      "offset": "0x0",
+      "flags": "0x0",
+      "group": "B"
+    },
+    {
+      "block": 25,
+      "name": "use_direct_io_for_flush_and_compaction",
+      "offset": "0x10b",
+      "flags": "0x0",
+      "group": "B"
+    },
+    {
+      "block": 26,
+      "name": "allow_2pc",
+      "offset": "0x173",
+      "flags": "0x0",
+      "group": "B"
+    },
+    {
+      "block": 27,
+      "name": "create_if_missing",
+      "offset": "0x0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 28,
+      "name": "create_missing_column_families",
+      "offset": "0x1",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 29,
+      "name": "disableDataSync",
+      "offset": "0x0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 30,
+      "name": "disable_data_sync",
+      "offset": "0x0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 31,
+      "name": "enable_thread_tracking",
+      "offset": "0x158",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 32,
+      "name": "error_if_exists",
+      "offset": "0x2",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 33,
+      "name": "experimental_allow_mempurge",
+      "offset": "0x0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 34,
+      "name": "experimental_mempurge_policy",
+      "offset": "0x0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 35,
+      "name": "experimental_mempurge_threshold",
+      "offset": "0x0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 36,
+      "name": "is_fd_close_on_exec",
+      "offset": "0x10d",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 37,
+      "name": "paranoid_checks",
+      "offset": "0x3",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 38,
+      "name": "flush_verify_memtable_count",
+      "offset": "0x4",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 39,
+      "name": "track_and_verify_wals_in_manifest",
+      "offset": "0x5",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 40,
+      "name": "verify_sst_unique_id_in_manifest",
+      "offset": "0x6",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 41,
+      "name": "skip_log_error_on_recovery",
+      "offset": "0x0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 42,
+      "name": "skip_stats_update_on_db_open",
+      "offset": "0x170",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 43,
+      "name": "skip_checking_sst_file_sizes_on_db_open",
+      "offset": "0x171",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 44,
+      "name": "new_table_reader_for_compaction_inputs",
+      "offset": "0x0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 45,
+      "name": "random_access_max_buffer_size",
+      "offset": "0x130",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 46,
+      "name": "use_adaptive_mutex",
+      "offset": "0x138",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 47,
+      "name": "use_fsync",
+      "offset": "0x58",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 48,
+      "name": "max_file_opening_threads",
+      "offset": "0x44",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 49,
+      "name": "table_cache_numshardbits",
+      "offset": "0xe0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 50,
+      "name": "db_write_buffer_size",
+      "offset": "0x110",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 51,
+      "name": "keep_log_file_num",
+      "offset": "0xc8",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 52,
+      "name": "recycle_log_file_num",
+      "offset": "0xd0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 53,
+      "name": "log_file_time_to_roll",
+      "offset": "0xc0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 54,
+      "name": "manifest_preallocation_size",
+      "offset": "0x100",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 55,
+      "name": "max_log_file_size",
+      "offset": "0xb8",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 56,
+      "name": "db_log_dir",
+      "offset": "0x78",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 57,
+      "name": "wal_dir",
+      "offset": "0x98",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 58,
+      "name": "WAL_size_limit_MB",
+      "offset": "0xf0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 59,
+      "name": "WAL_ttl_seconds",
+      "offset": "0xe8",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 60,
+      "name": "max_manifest_file_size",
+      "offset": "0xd8",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 61,
+      "name": "persist_stats_to_disk",
+      "offset": "0x199",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 62,
+      "name": "fail_if_options_file_error",
+      "offset": "0x190",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 63,
+      "name": "enable_pipelined_write",
+      "offset": "0x159",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 64,
+      "name": "unordered_write",
+      "offset": "0x15a",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 65,
+      "name": "allow_concurrent_memtable_write",
+      "offset": "0x15b",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 66,
+      "name": "enable_write_thread_adaptive_yield",
+      "offset": "0x15c",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 67,
+      "name": "write_thread_slow_yield_usec",
+      "offset": "0x168",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 68,
+      "name": "max_write_batch_group_size_bytes",
+      "offset": "0xf8",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 69,
+      "name": "write_thread_max_yield_usec",
+      "offset": "0x160",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 70,
+      "name": "dump_malloc_stats",
+      "offset": "0x191",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 71,
+      "name": "avoid_flush_during_recovery",
+      "offset": "0x192",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 72,
+      "name": "allow_ingest_behind",
+      "offset": "0x193",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 73,
+      "name": "preserve_deletes",
+      "offset": "0x0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 74,
+      "name": "concurrent_prepare",
+      "offset": "0x0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 75,
+      "name": "two_write_queues",
+      "offset": "0x194",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 76,
+      "name": "manual_wal_flush",
+      "offset": "0x195",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 77,
+      "name": "wal_compression",
+      "offset": "0x196",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 78,
+      "name": "seq_per_batch",
+      "offset": "0x0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 79,
+      "name": "atomic_flush",
+      "offset": "0x197",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 80,
+      "name": "avoid_unnecessary_blocking_io",
+      "offset": "0x198",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 81,
+      "name": "write_dbid_to_manifest",
+      "offset": "0x19a",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 82,
+      "name": "log_readahead_size",
+      "offset": "0x1a0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 83,
+      "name": "best_efforts_recovery",
+      "offset": "0x1b8",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 84,
+      "name": "max_bgerror_resume_count",
+      "offset": "0x1bc",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 85,
+      "name": "bgerror_resume_retry_interval",
+      "offset": "0x1c0",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 86,
+      "name": "db_host_id",
+      "offset": "0x1d0",
+      "flags": "0x1",
+      "group": "C"
+    },
+    {
+      "block": 87,
+      "name": "rate_limiter",
+      "offset": "0x10",
+      "flags": "0x2001",
+      "group": "C"
+    },
+    {
+      "block": 88,
+      "name": "rate_limiter_bytes_per_sec",
+      "offset": "0x10",
+      "flags": "0x2001",
+      "group": "C"
+    },
+    {
+      "block": 89,
+      "name": "allow_data_in_errors",
+      "offset": "0x1c8",
+      "flags": "0x0",
+      "group": "C"
+    },
+    {
+      "block": 90,
+      "name": "listeners",
+      "offset": "0x140",
+      "flags": "0x1",
+      "group": "C"
+    },
+    {
+      "block": 91,
+      "name": "enforce_single_del_contracts",
+      "offset": "0x238",
+      "flags": "0x0",
+      "group": "C"
+    }
+  ],
+  "groups": [
+    {
+      "group": "A",
+      "blocks": [
+        0,
+        18
+      ],
+      "struct": "MutableDBOptions",
+      "flags": "0x100",
+      "note": "MutableDBOptions fields; BuildDBOptions copies them into DBOptions (see builddboptions records)."
+    },
+    {
+      "group": "B",
+      "blocks": [
+        19,
+        26
+      ],
+      "struct": "EnvOptions (bool cluster)",
+      "flags": "0x0",
+      "note": "Offsets are ImmutableDBOptions-relative; the ImmutableDBOptions ctor packs DBOptions+0x128..0x12d and +0x148 into +0x108..0x10e. use_direct_writes (offset 0) and allow_2pc (offset 0x173) do not fit the cluster; see open_unknowns."
+    },
+    {
+      "group": "C",
+      "blocks": [
+        27,
+        91
+      ],
+      "struct": "DBOptions",
+      "flags": "0x0",
+      "note": "DBOptions fields; offsets are ImmutableDBOptions-relative except where the ctor packs them from a different DBOptions source offset (see ctor_pack)."
+    }
+  ],
+  "ctor_pack": [
+    {
+      "dst": "0x158",
+      "src": [
+        "0x1c0",
+        "0x1d0",
+        "0x1d1",
+        "0x1d2"
+      ],
+      "width": 4,
+      "store": "0x60a3ff0",
+      "note": "enable_pipelined_write, unordered_write, allow_concurrent_memtable_write, enable_write_thread_adaptive_yield (see default_ctor values)."
+    },
+    {
+      "dst": "0x15c",
+      "src": [
+        "0x1d3"
+      ],
+      "width": 1,
+      "store": "0x60a3ffd",
+      "note": "write_thread_slow_yield_usec low byte (the full 8-byte field is copied by the -0x28 shifted movdqu block)."
+    },
+    {
+      "dst": "0x190",
+      "src": [
+        "0x210",
+        "0x211",
+        "0x212",
+        "0x214"
+      ],
+      "width": 4,
+      "store": "0x60a407e",
+      "note": "DBOptions+0x213 is SKIPPED: the four bytes are packed from +0x210/+0x211/+0x212/+0x214, not a contiguous word."
+    },
+    {
+      "dst": "0x194",
+      "src": [
+        "0x215",
+        "0x216"
+      ],
+      "width": 2,
+      "store": "0x60a408b",
+      "note": "2-byte copy."
+    },
+    {
+      "dst": "0x196",
+      "src": [
+        "0x217"
+      ],
+      "width": 1,
+      "store": "0x60a4099",
+      "note": "wal_compression."
+    },
+    {
+      "dst": "0x197",
+      "src": [
+        "0x218",
+        "0x219",
+        "0x138",
+        "0x21a"
+      ],
+      "width": 4,
+      "store": "0x60a40c3",
+      "note": "Byte order (low byte first): +0x197 <- DBOptions+0x218 (atomic_flush), +0x198 <- +0x219 (avoid_unnecessary_blocking_io), +0x199 <- +0x138 (persist_stats_to_disk), +0x19a <- +0x21a (write_dbid_to_manifest). The map offsets match these destinations exactly. The assembler loads +0x21a first and shifts it to the top byte; edx still holds +0x138 from 0x60a4077 when it is or-ed in second."
+    },
+    {
+      "dst": "0x108",
+      "src": [
+        "0x128",
+        "0x129",
+        "0x12a",
+        "0x12b"
+      ],
+      "width": 4,
+      "store": "0x60a3e5f",
+      "note": "allow_mmap_reads, allow_mmap_writes, use_direct_reads, use_direct_io_for_flush_and_compaction."
+    },
+    {
+      "dst": "0x10c",
+      "src": [
+        "0x12c",
+        "0x12d"
+      ],
+      "width": 2,
+      "store": "0x60a3e73",
+      "note": "allow_fallocate, is_fd_close_on_exec."
+    },
+    {
+      "dst": "0x10e",
+      "src": [
+        "0x148"
+      ],
+      "width": 1,
+      "store": "0x60a3e88",
+      "note": "advise_random_on_open."
+    }
+  ],
+  "builddboptions": [
+    {
+      "mutable": "0x4",
+      "read": "0x60c2fa4",
+      "name": "max_background_compactions"
+    },
+    {
+      "mutable": "0x8",
+      "read": "0x60c2fd3",
+      "name": "max_subcompactions"
+    },
+    {
+      "mutable": "0x20",
+      "read": "0x60c2f19",
+      "name": "max_total_wal_size"
+    },
+    {
+      "mutable": "0x28",
+      "read": "0x60c2f8e",
+      "name": "delete_obsolete_files_period_micros"
+    },
+    {
+      "mutable": "0x40",
+      "read": "0x60c2f0b",
+      "name": "max_open_files",
+      "note": "mov 0x40(%r12),%eax at 0x60c2f0b; mov %eax,0x44(%rbx) at 0x60c2f10. ImmutableDBOptions+0x40 is info_log_level, a different struct -- #4146's second unknown was a category error."
+    },
+    {
+      "mutable": "0x48",
+      "read": "0x60c2faf",
+      "name": "bytes_per_sync"
+    },
+    {
+      "mutable": "0x50",
+      "read": "0x60c2fbb",
+      "name": "wal_bytes_per_sync"
+    },
+    {
+      "mutable": "0x58",
+      "read": "0x60c2fc7",
+      "name": "strict_bytes_per_sync"
+    },
+    {
+      "mutable": "0x68",
+      "read": "0x60c2fde",
+      "name": "max_background_flushes"
+    }
+  ],
+  "default_ctor": [
+    {
+      "offset": "0x128",
+      "store": "0x60b2f0c",
+      "value": "0x0",
+      "width": 4,
+      "note": "allow_mmap_reads, allow_mmap_writes, use_direct_reads, use_direct_io_for_flush_and_compaction all false."
+    },
+    {
+      "offset": "0x12c",
+      "store": "0x60b2f25",
+      "value": "0x0101",
+      "width": 2,
+      "note": "%ecx = 0x101 (0x60b2e07): allow_fallocate = true, is_fd_close_on_exec = true."
+    },
+    {
+      "offset": "0x138",
+      "store": "0x60b2f42",
+      "value": "0x0",
+      "width": 1,
+      "note": "persist_stats_to_disk = false."
+    },
+    {
+      "offset": "0x148",
+      "store": "0x60b2f54",
+      "value": "0x1",
+      "width": 1,
+      "note": "advise_random_on_open = true."
+    },
+    {
+      "offset": "0x1d0",
+      "store": "0x60b2fa6",
+      "value": "0x01010000",
+      "width": 4,
+      "note": "enable_pipelined_write = false, unordered_write = false, allow_concurrent_memtable_write = true, enable_write_thread_adaptive_yield = true -- confirms the +0x158 pack field identities."
+    },
+    {
+      "offset": "0x210",
+      "store": "0x60b2fd0",
+      "value": "0x0",
+      "width": 8,
+      "note": "Zeroes DBOptions+0x210..0x217, incl. wal_compression (kNoCompression = 0) at +0x217."
+    },
+    {
+      "offset": "0x218",
+      "store": "0x60b2fdb",
+      "value": "0x0000",
+      "width": 2,
+      "note": "%esi was zeroed at 0x60b2dfa: atomic_flush = false, avoid_unnecessary_blocking_io = false."
+    },
+    {
+      "offset": "0x21a",
+      "store": "0x60b2fe2",
+      "value": "0x0",
+      "width": 1,
+      "note": "write_dbid_to_manifest = false. No store touches +0x21b..+0x21f."
+    },
+    {
+      "offset": "0x220",
+      "store": "0x60b2fe9",
+      "value": "0x0",
+      "width": 8,
+      "note": "log_readahead_size = 0 (8-byte size_t)."
+    }
+  ],
+  "padding_21b": {
+    "sites": [
+      {
+        "address": "0x1ad8403",
+        "register": "rsp",
+        "enclosing_fde": "0x1ad6690..0x1ad986e"
+      },
+      {
+        "address": "0x1ad8e70",
+        "register": "rsp",
+        "enclosing_fde": "0x1ad6690..0x1ad986e"
+      },
+      {
+        "address": "0x1c244ab",
+        "register": "rsp",
+        "enclosing_fde": "0x1c23560..0x1c25ccf"
+      },
+      {
+        "address": "0x1e4b676",
+        "register": "rsp",
+        "enclosing_fde": "0x1e4ae40..0x1e4d375"
+      },
+      {
+        "address": "0x1e4c4ad",
+        "register": "rsp",
+        "enclosing_fde": "0x1e4ae40..0x1e4d375"
+      },
+      {
+        "address": "0x206de82",
+        "register": "rsp",
+        "enclosing_fde": "0x206d880..0x206f36c"
+      },
+      {
+        "address": "0x206e701",
+        "register": "rsp",
+        "enclosing_fde": "0x206d880..0x206f36c"
+      },
+      {
+        "address": "0x30c8573",
+        "register": "rsp",
+        "enclosing_fde": "0x30c6800..0x30c99de"
+      },
+      {
+        "address": "0x30c8fe0",
+        "register": "rsp",
+        "enclosing_fde": "0x30c6800..0x30c99de"
+      },
+      {
+        "address": "0x323890b",
+        "register": "rsp",
+        "enclosing_fde": "0x32379c0..0x323a12f"
+      },
+      {
+        "address": "0x3a76bd2",
+        "register": "rsp",
+        "enclosing_fde": "0x3a765d0..0x3a780bc"
+      },
+      {
+        "address": "0x3a77451",
+        "register": "rsp",
+        "enclosing_fde": "0x3a765d0..0x3a780bc"
+      },
+      {
+        "address": "0x40795fc",
+        "register": "rsp",
+        "enclosing_fde": "0x4077e60..0x407a522"
+      },
+      {
+        "address": "0x407a206",
+        "register": "rsp",
+        "enclosing_fde": "0x4077e60..0x407a522"
+      },
+      {
+        "address": "0x49839fb",
+        "register": "rsp",
+        "enclosing_fde": "0x4982ab0..0x498521f"
+      },
+      {
+        "address": "0x4aa58f3",
+        "register": "rsp",
+        "enclosing_fde": "0x4aa3b80..0x4aa6d5e"
+      },
+      {
+        "address": "0x4aa6360",
+        "register": "rsp",
+        "enclosing_fde": "0x4aa3b80..0x4aa6d5e"
+      },
+      {
+        "address": "0x51fb621",
+        "register": "rsp",
+        "enclosing_fde": "0x51fb4a0..0x51fbe08"
+      },
+      {
+        "address": "0x56da372",
+        "register": "rsp",
+        "enclosing_fde": "0x56d9d70..0x56db85c"
+      },
+      {
+        "address": "0x56dabf1",
+        "register": "rsp",
+        "enclosing_fde": "0x56d9d70..0x56db85c"
+      },
+      {
+        "address": "0x5a89943",
+        "register": "rbx",
+        "enclosing_fde": "0x5a897e0..0x5a8a1cc"
+      },
+      {
+        "address": "0x5a899a2",
+        "register": "rbx",
+        "enclosing_fde": "0x5a897e0..0x5a8a1cc"
+      },
+      {
+        "address": "0x5a89fcc",
+        "register": "rbx",
+        "enclosing_fde": "0x5a897e0..0x5a8a1cc"
+      },
+      {
+        "address": "0x5a8a19d",
+        "register": "rbx",
+        "enclosing_fde": "0x5a897e0..0x5a8a1cc"
+      },
+      {
+        "address": "0x5a8a1b3",
+        "register": "rbx",
+        "enclosing_fde": "0x5a897e0..0x5a8a1cc"
+      }
+    ],
+    "rsp_stack_slots": 20,
+    "struct_field_uses": 5,
+    "note": "All five struct-field uses are %rbx in one function (FDE 0x5a897e0..0x5a8a1cc), which operates on a different struct: it stores std::strings at +0x18/+0x28/+0x38/+0x40 (where DBOptions holds numbers), writes a 'D' tag byte at +0x110 (where DBOptions holds db_write_buffer_size), and writes +0x220 as a single byte = 2 (where DBOptions holds the 8-byte log_readahead_size). One -0x21b(%rbp) stack local (0x5fac529) is a false positive and is excluded from the site list. Census method: displacement text; computed-address accesses (base+index) would not appear."
+  },
+  "corrections_to_4146": [
+    {
+      "pr": 4146,
+      "claim": "DBOptions tail: wal_compression +0x218, atomic_flush +0x219, avoid_unnecessary_blocking_io +0x21a, write_dbid_to_manifest +0x21b",
+      "correction": "All four are one byte lower: wal_compression +0x217, atomic_flush +0x218, avoid_unnecessary_blocking_io +0x219, write_dbid_to_manifest +0x21a. The map offsets (0x196-0x19a) were correct; the DBOptions source offsets in #4146 were read off by one. Proof: the ImmutableDBOptions ctor pack (0x60a4092-0x60a40c3) lands DBOptions+0x217 at +0x196, +0x218 at +0x197, +0x219 at +0x198, +0x21a at +0x19a."
+    },
+    {
+      "pr": 4146,
+      "claim": "max_open_files map offset 0x40 conflicts with ImmutableDBOptions+0x40 = info_log_level",
+      "correction": "No conflict: 0x40 is a MutableDBOptions offset. BuildDBOptions reads MutableDBOptions+0x40 (0x60c2f0b) and stores it at DBOptions+0x44 (0x60c2f10)."
+    },
+    {
+      "pr": 4146,
+      "claim": "DBOptions+0x21b (write_dbid_to_manifest) is never stored or read",
+      "correction": "The field is at +0x21a, not +0x21b. DBOptions+0x21b itself is alignment padding (+0x21b..+0x21f) before the 8-byte-aligned log_readahead_size at +0x220; see padding_21b."
+    }
+  ],
+  "nested_entries": [
+    {
+      "name": "env",
+      "string_addr": "0x44feff",
+      "offset": "0x8",
+      "flags": "0x2001",
+      "temp": "-0x7e50",
+      "block": 89,
+      "note": "Built interleaved in block 89; DBOptions+0x8 is the env Env* pointer, which fits. Construction path via the once-called helpers 0x60a0180/0x60a63d0/0x60a6450 is not fully resolved."
+    },
+    {
+      "name": "file_checksum_gen_factory",
+      "string_addr": "0x434210",
+      "offset": "0x1a8",
+      "flags": "0x1400",
+      "temp": "-0x4550",
+      "block": 90,
+      "note": "Built in block 90's teardown temp; the pair-constructor call in that block consumes the listeners temp, so this entry's insertion path is unresolved."
+    },
+    {
+      "name": "statistics",
+      "string_addr": "0x44ff03",
+      "offset": "0x48",
+      "flags": "0x3401",
+      "temp": "-0x4550",
+      "block": 90,
+      "note": "Same teardown temp as file_checksum_gen_factory; insertion path unresolved."
+    },
+    {
+      "name": "wal_filter",
+      "string_addr": "0x4454b1",
+      "offset": "0x188",
+      "flags": "0x1201",
+      "temp": "-0x4550",
+      "block": 27,
+      "note": "UNATTRIBUTED: the teardown temp in block 27 carries offset 0x188 and flags 0x1201 with a live std::function manager, but the string-to-temp link is not proven; recorded as uncertain, not as a wal_filter fact."
+    }
+  ],
+  "open_unknowns": [
+    "15 entries have offset 0 and null std::function members (allow_os_buffer, base_background_compactions, max_background_jobs, use_direct_writes, create_if_missing, disableDataSync, disable_data_sync, experimental_allow_mempurge, experimental_mempurge_policy, experimental_mempurge_threshold, skip_log_error_on_recovery, new_table_reader_for_compaction_inputs, preserve_deletes, concurrent_prepare, seq_per_batch): their access path is unresolved -- offset 0 cannot address a struct field and no parse function is installed. disableDataSync/disable_data_sync look like an alias pair (old camelCase + new snake_case).",
+    "use_direct_writes (offset 0) and allow_2pc (offset 0x173) do not fit the EnvOptions bool cluster (+0x108..+0x10e, seven consecutive bytes incl. is_fd_close_on_exec at +0x10d). allow_2pc at +0x173 would be the top byte of the int the ctor copies from DBOptions+0x1f0 (0x20000) to +0x170 -- that word is not four bools, so the attribution is open.",
+    "Exact map-insert mechanics: which global map object each pair range goes to, and the arguments of the once-called helpers (0x60a76c0/0x60a7c90/0x60a8260/0x60a8830 prologue, 0x60a66b0/0x60a65c0/0x60a64d0 blocks ~67-69, 0x60a63d0/0x60a6450/0x60a0180 block 89, 0x609f1c0 block 88, 0x609f1f0/0x609f220 block 90, 0x60a67a0 block 91/92 boundary). The 0x5e32b10 (7 calls) / 0x5e332c0 (4 calls) helpers are std::function move constructors, likely part of the nested-entry insertion.",
+    "The pair-copy 4-byte quirk: the pair constructor 0x5d400f0 copies only the low 4 bytes of temp+0x00; the +0x04 padding dword is never written by the builder or the copy helper (already noted by a prior contributor in tools/optiontypeinfo_slicetransform_115.py). Recorded as observed, not explained.",
+    "The +0xa8 (type/verification) values are NOT recorded: they are loaded into registers whose values the initializer does not set in the same block (stale r12/r13/r14/rax), so register tracking is unreliable for them. Only name, offset (immediate) and flags (immediate) are claimed per entry."
+  ]
+}

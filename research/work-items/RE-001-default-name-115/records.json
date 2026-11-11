@@ -1,0 +1,376 @@
+{
+ "artifact": {
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+ },
+ "bounded_question": "What is node #115's global default name, how is it constructed at startup, and what does every consumer site do with it: the static initializer 0x61d2970, the global std::string at 0x6508980, and all eleven sites that load it across the Find/create/release family?",
+ "global": {
+  "address": "0x6508980",
+  "section": ".bss",
+  "type": "std::string (libstdc++ SSO, 32 bytes)",
+  "text": "nullptr",
+  "length": 7,
+  "buffer_address": "0x6508990",
+  "buffer": "nullptr\\0"
+ },
+ "initializer": {
+  "address": "0x61d2970",
+  "fde": "0x61d2970..0x61d29af",
+  "bytes": 63,
+  "init_array": {
+   "base": "0x63f36c8",
+   "entries": 168,
+   "slot": 141,
+   "slot_address": "0x63f3b30"
+  },
+  "stores": [
+   {
+    "offset": "+0x10",
+    "value": "0x6c6c756e",
+    "note": "bytes 'null'"
+   },
+   {
+    "offset": "+0x00",
+    "value": "0x6508990",
+    "note": "_M_p = &local buffer"
+   },
+   {
+    "offset": "+0x13",
+    "value": "0x7274706c",
+    "note": "bytes 'lptr', overlapping the last 'l'"
+   },
+   {
+    "offset": "+0x08",
+    "value": "7",
+    "note": "_M_length"
+   },
+   {
+    "offset": "+0x17",
+    "value": "0",
+    "note": "NUL terminator"
+   }
+  ],
+  "atexit": {
+   "func_got": "0x64ed5d8",
+   "func": "~basic_string@GLIBCXX_3.4.21",
+   "arg": "0x6508980",
+   "dso_handle": "0x64efa20"
+  }
+ },
+ "routines": {
+  "0x61d2970": {
+   "name": "initializer",
+   "fde": "0x61d2970..0x61d29af",
+   "bytes": 63
+  },
+  "0x6077820": {
+   "name": "create_host",
+   "fde": "0x6077820..0x60780a0",
+   "bytes": 2176
+  },
+  "0x607e710": {
+   "name": "resolver_host",
+   "fde": "0x607e710..0x607ea0a",
+   "bytes": 762
+  },
+  "0x6086b70": {
+   "name": "twin_a",
+   "fde": "0x6086b70..0x6086cc9",
+   "bytes": 345
+  },
+  "0x60a7420": {
+   "name": "twin_b",
+   "fde": "0x60a7420..0x60a7579",
+   "bytes": 345
+  },
+  "0x60bf5f0": {
+   "name": "matcher_wrapper",
+   "fde": "0x60bf5f0..0x60bf78d",
+   "bytes": 413
+  },
+  "0x6137290": {
+   "name": "release_host",
+   "fde": "0x6137290..0x6137688",
+   "bytes": 1016
+  },
+  "0x5e4bcf0": {
+   "name": "string_equal",
+   "fde": "0x5e4bcf0..0x5e4bd2b",
+   "bytes": 59
+  },
+  "0x5d66e30": {
+   "name": "map_find_name",
+   "fde": "0x5d66e30..0x5d66f67",
+   "bytes": 311
+  },
+  "0x60bf980": {
+   "name": "kind_validator",
+   "fde": "0x60bf980..0x60bfca2",
+   "bytes": 802
+  },
+  "0x6075bc0": {
+   "name": "once_init_create",
+   "fde": "0x6075bc0..0x6075ff5",
+   "bytes": 1077
+  },
+  "0x6138a10": {
+   "name": "once_init_release",
+   "fde": "0x6138a10..0x6138a8b",
+   "bytes": 123
+  },
+  "0x6130140": {
+   "name": "canonical_name",
+   "fde": "0x6130140..0x613014c",
+   "bytes": 12
+  },
+  "0x609e510": {
+   "name": "find_entry",
+   "fde": "0x609e510..0x609f073",
+   "bytes": 2915
+  },
+  "0x609a410": {
+   "name": "find_norm",
+   "fde": "0x609a410..0x609a67c",
+   "bytes": 620
+  },
+  "0x60bb9a0": {
+   "name": "matcher",
+   "fde": "0x60bb9a0..0x60bbdeb",
+   "bytes": 1099
+  },
+  "0x61cf670": {
+   "name": "status_builder",
+   "fde": "0x61cf670..0x61cf767",
+   "bytes": 247
+  }
+ },
+ "consumer_sites": [
+  {
+   "site": "0x6077907",
+   "routine": "create_host",
+   "test": "default length (7) vs name length; memcmp",
+   "match_outcome": "release the holder, Status 0",
+   "nonmatch_outcome": "registry Find path",
+   "note": "length 0 builds a fresh StatisticsImpl; length 15 with bytes 'BasicStatistics' also builds fresh"
+  },
+  {
+   "site": "0x607e8e0",
+   "routine": "resolver_host",
+   "test": "delegate's first field is null",
+   "match_outcome": "assign the default name, Status 0",
+   "nonmatch_outcome": "resolver 0x60971c0 path",
+   "note": "the +0x04 flag set instead clears the output name"
+  },
+  {
+   "site": "0x6086c84",
+   "routine": "twin_a",
+   "test": "record name length, then memcmp vs default",
+   "match_outcome": "return 1, nothing assigned",
+   "nonmatch_outcome": "assign the candidate name, return 0",
+   "note": "kind-0x15/0x16 tail only; the record comes from map_find_name"
+  },
+  {
+   "site": "0x60a7534",
+   "routine": "twin_b",
+   "test": "record name length, then memcmp vs default",
+   "match_outcome": "return 1, nothing assigned",
+   "nonmatch_outcome": "assign the candidate name, return 0",
+   "note": "byte-identical instantiation of twin_a"
+  },
+  {
+   "site": "0x60bf710",
+   "routine": "matcher_wrapper",
+   "test": "string_equal(candidate, default)",
+   "match_outcome": "return True",
+   "nonmatch_outcome": "fall to the generic compare",
+   "note": "kind 2 only"
+  },
+  {
+   "site": "0x60bf730",
+   "routine": "matcher_wrapper",
+   "test": "default length vs candidate length, memcmp",
+   "match_outcome": "return True",
+   "nonmatch_outcome": "fall to the generic compare",
+   "note": "kind 3 only"
+  },
+  {
+   "site": "0x61372c8",
+   "routine": "release_host",
+   "test": "default length (7) vs name length; memcmp",
+   "match_outcome": "clear the holder, Status 0",
+   "nonmatch_outcome": "canonical-name check, then registry Find path",
+   "note": "length 0 also clears; the canonical name is 'rocksdb.BuiltinBloomFilter'"
+  },
+  {
+   "site": "0x609e567",
+   "routine": "find_entry",
+   "test": "default length (7) vs name length; memcmp",
+   "match_outcome": "clear the name string and the map, Status 0",
+   "nonmatch_outcome": "normal Find path",
+   "note": "length 0 clears without the memcmp"
+  },
+  {
+   "site": "0x609a45e",
+   "routine": "find_norm",
+   "test": "default length (7) vs name length; memcmp",
+   "match_outcome": "assign the fallback name",
+   "nonmatch_outcome": "search the name for '='",
+   "note": "length 0 also assigns the fallback"
+  },
+  {
+   "site": "0x60bbc99",
+   "routine": "matcher",
+   "test": "record +0xb1 flag bit 0 set, or +0x04 byte clear",
+   "match_outcome": "assign the default name",
+   "nonmatch_outcome": "the other branch",
+   "note": "assigns the global itself as the source"
+  }
+ ],
+ "helpers": {
+  "string_equal": {
+   "address": "0x5e4bcf0",
+   "contract": "lengths equal and (length 0 or memcmp equal)"
+  },
+  "map_find_name": {
+   "address": "0x5d66e30",
+   "linear_limit": 20,
+   "hash_seed": "0xc70f6907",
+   "contract": "unordered_map find by key: linear walk at <= 20 entries, hash bucket walk above"
+  },
+  "kind_validator": {
+   "address": "0x60bf980",
+   "jump_table": "0x978718",
+   "kind_count": 25,
+   "contract": "kind dispatch over the descriptor's +0xac word; returns a boolean the twins consume as a gate"
+  },
+  "canonical_name": {
+   "address": "0x6130140",
+   "literal": "0x44481b",
+   "text": "rocksdb.BuiltinBloomFilter",
+   "length": 26
+  }
+ },
+ "twins": {
+  "entries": [
+   "0x6086b70",
+   "0x60a7420"
+  ],
+  "identical": false,
+  "holder_offsets": {
+   "0x6086b70": "0x630",
+   "0x60a7420": "0x90"
+  },
+  "difference": "one template instantiated twice: the instruction streams are identical except the holder-map field offset (0x630 in A, 0x90 in B); verify.py checks the normalized streams differ only in those two loads",
+  "vtable_slots": [
+   {
+    "slot": "0x64d3210",
+    "vtable": "0x64d31b0",
+    "index": 12,
+    "target": "0x6086b70"
+   },
+   {
+    "slot": "0x64d3690",
+    "vtable": "0x64d3630",
+    "index": 12,
+    "target": "0x60a7420"
+   },
+   {
+    "slot": "0x64d3710",
+    "vtable": "0x64d36b0",
+    "index": 12,
+    "target": "0x60a7420"
+   }
+  ],
+  "note": "slot index 12 is offset 0x60, the virtual call the kind validator makes at 0x60bfa2a; both twins are reached by indirect dispatch, with no direct call sites in the census"
+ },
+ "literals": {
+  "0x4376fd": "",
+  "0x433f9f": "Cannot reset object ",
+  "0x44481b": "rocksdb.BuiltinBloomFilter"
+ },
+ "constants": {
+  "control_counts": "0x100000001",
+  "basic_statistics": "BasicStatistics",
+  "basic_statistics_len": 15,
+  "reset_message_len": 20
+ },
+ "relocations": {
+  "0x63f3b30": {
+   "offset": "0x63f3b30",
+   "type": "R_X86_64_RELATIVE",
+   "symbol": "61d2970"
+  },
+  "0x64ed5d8": {
+   "offset": "0x64ed5d8",
+   "type": "R_X86_64_GLOB_DAT",
+   "symbol": "0000000000000000 _ZNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEED1Ev@GLIBCXX_3.4.21 + 0"
+  },
+  "0x64d3210": {
+   "offset": "0x64d3210",
+   "type": "R_X86_64_RELATIVE",
+   "symbol": "6086b70"
+  },
+  "0x64d3690": {
+   "offset": "0x64d3690",
+   "type": "R_X86_64_RELATIVE",
+   "symbol": "60a7420"
+  },
+  "0x64d3710": {
+   "offset": "0x64d3710",
+   "type": "R_X86_64_RELATIVE",
+   "symbol": "60a7420"
+  },
+  "0x64ed028": {
+   "offset": "0x64ed028",
+   "type": "R_X86_64_RELATIVE",
+   "symbol": "5d2cac0"
+  },
+  "0x64ed290": {
+   "offset": "0x64ed290",
+   "type": "R_X86_64_GLOB_DAT",
+   "symbol": "0000000000000000 __libc_single_threaded@GLIBC_2.32 + 0"
+  },
+  "0x64ed818": {
+   "offset": "0x64ed818",
+   "type": "R_X86_64_TPOFF64",
+   "symbol": "0000000000000000 _ZSt15__once_callable@GLIBCXX_3.4.11 + 0"
+  },
+  "0x64ed820": {
+   "offset": "0x64ed820",
+   "type": "R_X86_64_TPOFF64",
+   "symbol": "0000000000000000 _ZSt11__once_call@GLIBCXX_3.4.11 + 0"
+  },
+  "0x64ed828": {
+   "offset": "0x64ed828",
+   "type": "R_X86_64_GLOB_DAT",
+   "symbol": "0000000000000000 __once_proxy@GLIBCXX_3.4.11 + 0"
+  },
+  "0x64efa20": {
+   "offset": "0x64efa20",
+   "type": "R_X86_64_RELATIVE",
+   "symbol": "64efa20"
+  }
+ },
+ "census": {
+  "rows": 939,
+  "counts": {
+   "0x61cf670:call": 847,
+   "0x5d66e30:call": 6,
+   "0x60bf980:call": 15,
+   "0x60bf980:jmp": 1,
+   "0x60bb9a0:call": 16,
+   "0x5e4bcf0:call": 8,
+   "0x609e510:call": 21,
+   "0x6075bc0:lea": 1,
+   "0x6508980:lea": 11,
+   "0x6077820:call": 1,
+   "0x60bf5f0:call": 3,
+   "0x607e710:lea": 1,
+   "0x609a410:call": 3,
+   "0x6137290:call": 1,
+   "0x6130140:jmp": 1,
+   "0x6130140:call": 2,
+   "0x6138a10:lea": 1
+  }
+ }
+}

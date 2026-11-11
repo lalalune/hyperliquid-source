@@ -1,0 +1,340 @@
+{
+ "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "window": {
+  "range": "0x63495b0..0x6349775",
+  "bytes": 453,
+  "strict": 100
+ },
+ "prev_fde": {
+  "range": "0x6349560..0x63495a5",
+  "gap": 11,
+  "gap_bytes": "cc"
+ },
+ "next_fde": {
+  "range": "0x6349780..0x6349bd9",
+  "padding": 11,
+  "padding_bytes": "cc"
+ },
+ "frame": {
+  "entry": "rdi -> rbx (output struct), rsi -> r10 (context), rdx = table base, rcx = lookup key",
+  "prologue": "mov %rcx,%rax; push %rbx; mov %rsi,%r10; mov %rdi,%rbx",
+  "endbr64": 0,
+  "canary": 0,
+  "stack_frame": "none beyond push %rbx / pop %rbx; no sub %rsp, no %fs:0x28 reference",
+  "epilogue": "mov %rbx,%rax; pop %rbx; ret at 0x634962f"
+ },
+ "return_value": {
+  "rax": "rbx (the output struct pointer); NOT 0, unlike the bin_table_init caller chain where eax = 0 at ret"
+ },
+ "walk": {
+  "kind": "single",
+  "table": "entry rdx",
+  "top_index": "(key >> 0x1a) & 0xf0 + table (shr $0x1a,%rax at 0x63495ba; and $0xf0,%eax at 0x63495c1; add %rdx,%rax at 0x63495cd)",
+  "high_bits": "key & 0xffffffffc0000000 (and at 0x63495c6)",
+  "top_compare": "cmp %rdi,%rsi at 0x63495d3; mismatch jne 0x6349630 (scan)",
+  "second_level": "(key >> 0x9) & 0x1ffff8 + table + 0x8 (shr $0x9,%rcx at 0x63495d8; and $0x1ffff8,%ecx at 0x63495dc; add 0x8(%rax),%rcx at 0x63495e2)",
+  "pointer_load": "mov (%rax),%rsi at 0x63495e9 (not stored to an output slot; feeds the extract)"
+ },
+ "extract": {
+  "kind": "inline, five stores into the struct at rbx",
+  "transform": "shl $0x10,%rax at 0x63495f8; sar $0x10,%rax at 0x6349603; and $0xffffffffffffff80,%rax at 0x6349611 (sign-extended 48-bit value)",
+  "stores": [
+   "mov %rax,(%rbx) at 0x6349620 \u2014 sign-extended 48-bit value",
+   "mov %r11d,0x8(%rbx) at 0x6349626 \u2014 (descriptor >> 0x30) & 0xffffffff (shr $0x30,%r11 at 0x6349615)",
+   "mov %edx,0xc(%rbx) at 0x634961d \u2014 (descriptor >> 0x2) & 0x7 (shr $0x2,%rdx at 0x63495fc; and $0x7,%edx at 0x634960a)",
+   "mov %r10b,0x10(%rbx) at 0x634962a \u2014 (descriptor >> 0x1) & 0x1 (shr $1,%r10 at 0x6349607; and $0x1,%r10d at 0x6349619)",
+   "mov %sil,0x11(%rbx) at 0x634960d \u2014 descriptor & 0x1 (and $0x1,%esi at 0x6349600)"
+  ],
+  "note": "No helper call, no size class, no trylock: the extract decodes directly into the output struct and returns"
+ },
+ "scan": {
+  "kind": "single 8-slot move-to-front, table+0x100 in rdx, key in rsi (high bits)",
+  "slots": [
+   "0x6349630",
+   "0x6349676",
+   "0x63496e9",
+   "0x63496f8",
+   "0x634970b",
+   "0x634971e",
+   "0x6349731",
+   "0x634973e"
+  ],
+  "slot_offsets": [
+   "0x100",
+   "0x110",
+   "0x120",
+   "0x130",
+   "0x140",
+   "0x150",
+   "0x160",
+   "0x170"
+  ],
+  "reversed_operand_compares": [],
+  "slot0_hit_block": "0x6349639..0x6349667 (inline swap + recompute second-level pointer, jmp 0x63495e9)",
+  "shared_mtf_block": "0x634967f (r8d = slot index 1..7, r9d = index-1, shift *16, swap slot toward head, jmp 0x63495e9)",
+  "slot_index_movs": {
+   "0x6349670": 1,
+   "0x63496e3": 2,
+   "0x63496f2": 3,
+   "0x6349705": 4,
+   "0x6349718": 5,
+   "0x634972b": 6,
+   "0x6349747": 7
+  },
+  "exhaustion": "slot-7 miss jne 0x6349758 (lu-miss block)"
+ },
+ "lu_miss_sites": [
+  {
+   "site": "0x634976b",
+   "target": "0x63d9700",
+   "block": "0x6349758",
+   "rdi": "entry rsi (mov %rsi,%r10 at 0x63495b4; mov %r10,%rdi at 0x6349768)",
+   "rsi": "0x6511a00 (.bss; lea at 0x6349758)",
+   "rdx": "entry rdx (table base; never written on the miss path)",
+   "rcx": "entry rcx (key; never written on the miss path \u2014 the shr $0x9 / and $0x1ffff8 at 0x63495d8/0x63495dc run only on the top-level-match path)",
+   "r8d": 1,
+   "r9d": 0,
+   "rejoin": "jmp 0x63495e9 (rax -> extract)",
+   "provenance": "miss-path write-set check (39 traced instructions): r10 written only at entry 0x63495b4; rcx and rdx never written; r8d last written $0x1 at 0x6349762; r9d zeroed at 0x634975f"
+  }
+ ],
+ "sites": {
+  "lu_miss": [
+   "0x634976b"
+  ],
+  "bin_table_init": []
+ },
+ "calls": [
+  {
+   "kind": "lu-miss",
+   "site": "0x634976b",
+   "target": "0x63d9700"
+  }
+ ],
+ "census": {
+  "strict": 100,
+  "calls_total": 1,
+  "lu_miss": 1,
+  "bin_table_init": 0,
+  "ret": 1,
+  "tail_jump_exits": 0,
+  "bsr": 0,
+  "lock_sub": 0,
+  "lock_add": 0,
+  "jumps": 13,
+  "jumps_outside_window": 0,
+  "raw_e8": {
+   "target": "0x63d9700",
+   "total": 168,
+   "tiers": {
+    "1": 18,
+    "2": 14,
+    "3": 1,
+    "4": 11,
+    "5": 1,
+    "6": 2,
+    "7": 1,
+    "8": 1,
+    "10": 3,
+    "13": 1
+   },
+   "fdes": 53,
+   "this_fde": 1,
+   "bti_raw_in_this_fde": 0
+  },
+  "rela_dyn": {
+   "total": 60723,
+   "relative": 59534
+  },
+  "rela_plt": 278
+ },
+ "exhibits": [
+  {
+   "name": "lu_miss_caller_1site",
+   "range": "0x63495b0..0x6349775",
+   "bytes": 453,
+   "strict": 100,
+   "calls_total": 1,
+   "lu_miss_sites": [
+    "0x634976b"
+   ],
+   "bin_table_init_sites": [],
+   "bsr": 0,
+   "ret": 1,
+   "ret_sites": [
+    "0x634962f"
+   ],
+   "tail_jump_exits": [],
+   "lock_sub": 0,
+   "lock_add": 0
+  }
+ ],
+ "cited_not_claimed": [
+  "lu-miss handler 0x63d9700..0x63d987b (#215)",
+  "bin_table_init body 0x63d9880..0x63d9a64 (#262)",
+  "lock-wait helper 0x63bf680..0x63bf7ee (#251)",
+  "prev FDE 0x6349560..0x63495a5, next FDE 0x6349780..0x6349bd9",
+  "0x6511a00 lies in .bss 0x64ffe40..0x6728924 (NOBITS): runtime-populated object whose contents are not in the file; only the code use of the address is claimed",
+  "no size table, no node-resolution table, no trylock, no init guard is read or called in this FDE"
+ ],
+ "init_guard": null,
+ "size_class": null,
+ "trylock": null,
+ "survey": {
+  "frontier": "lu-miss handler 0x63d9700 callers that do NOT call bin_table_init",
+  "method": "own .eh_frame parse (135,313 FDEs, sorted before bisect) + raw-e8 census + prior-exhibit overlap check over 68,124 prior range entries (0 skipped); ~/workspace/scratch-hl314survey/census.json",
+  "total_sites": 168,
+  "total_fdes": 53,
+  "survivors": 16,
+  "tiers": {
+   "1": 18,
+   "2": 14,
+   "3": 1,
+   "4": 11,
+   "5": 1,
+   "6": 2,
+   "7": 1,
+   "8": 1,
+   "10": 3,
+   "13": 1
+  },
+  "candidates": [
+   {
+    "start": "0x63495b0",
+    "end": "0x6349775",
+    "size": 453,
+    "lu_miss_sites": 1,
+    "also_second_handler_survivor": false,
+    "status": "BUILT by packet #314"
+   },
+   {
+    "start": "0x6353a70",
+    "end": "0x635582b",
+    "size": 7611,
+    "lu_miss_sites": 1,
+    "also_second_handler_survivor": true,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x6355900",
+    "end": "0x63577e2",
+    "size": 7906,
+    "lu_miss_sites": 1,
+    "also_second_handler_survivor": true,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x63577f0",
+    "end": "0x635a786",
+    "size": 12182,
+    "lu_miss_sites": 1,
+    "also_second_handler_survivor": true,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x635a7a0",
+    "end": "0x635c6c7",
+    "size": 7975,
+    "lu_miss_sites": 4,
+    "also_second_handler_survivor": true,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x635c6d0",
+    "end": "0x635de25",
+    "size": 5973,
+    "lu_miss_sites": 7,
+    "also_second_handler_survivor": false,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x635e2e0",
+    "end": "0x635f315",
+    "size": 4149,
+    "lu_miss_sites": 1,
+    "also_second_handler_survivor": true,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x63c9650",
+    "end": "0x63c9c80",
+    "size": 1584,
+    "lu_miss_sites": 2,
+    "also_second_handler_survivor": false,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x63ccd60",
+    "end": "0x63cd907",
+    "size": 2983,
+    "lu_miss_sites": 6,
+    "also_second_handler_survivor": true,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x63cddd0",
+    "end": "0x63ce23b",
+    "size": 1131,
+    "lu_miss_sites": 2,
+    "also_second_handler_survivor": false,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x63d03a0",
+    "end": "0x63d17d7",
+    "size": 5175,
+    "lu_miss_sites": 10,
+    "also_second_handler_survivor": true,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x63d17e0",
+    "end": "0x63d2a80",
+    "size": 4768,
+    "lu_miss_sites": 10,
+    "also_second_handler_survivor": true,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x63d2a80",
+    "end": "0x63d3071",
+    "size": 1521,
+    "lu_miss_sites": 2,
+    "also_second_handler_survivor": true,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x63d3f0e",
+    "end": "0x63d4048",
+    "size": 314,
+    "lu_miss_sites": 1,
+    "also_second_handler_survivor": false,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x63d4048",
+    "end": "0x63d4171",
+    "size": 297,
+    "lu_miss_sites": 1,
+    "also_second_handler_survivor": false,
+    "status": "SURVIVOR (lu-miss frontier)"
+   },
+   {
+    "start": "0x63e94a0",
+    "end": "0x63e9bf2",
+    "size": 1874,
+    "lu_miss_sites": 3,
+    "also_second_handler_survivor": false,
+    "status": "SURVIVOR (lu-miss frontier)"
+   }
+  ],
+  "second_handler_note": "second miss handler 0x634ebb0 has 28 FDEs / 64 sites / 18 survivors; 9 FDEs are survivors in BOTH lists (0x6353a70, 0x6355900, 0x63577f0, 0x635a7a0, 0x635e2e0, 0x63ccd60, 0x63d03a0, 0x63d17e0, 0x63d2a80); combined miss-handler pool is 25 distinct FDEs \u2014 a shared FDE is one packet, not two",
+  "lock_wait_frontier_note": "lock-wait helper 0x63bf680 callers: 385 FDEs / 474 sites / 344 survivors \u2014 held as the follow-on frontier after the lu-miss pool",
+  "bti_survey_holds": "bin_table_init caller survey holds: 108 sites, 42 FDEs, 0 survivors"
+ },
+ "next_question": {
+  "packet": 315,
+  "window": "0x6353a70..0x635582b",
+  "note": "Next lu-miss survivor in address order (verified by program: FDE 0x6353a70..0x635582b = 7611 bytes from own .eh_frame parse; 1691 strict lines; 105 calls; 1 ret; bsr 8; exactly 1 lu-miss site at 0x63557eb (objdump call + raw-e8 scan agree); 0 bin_table_init sites; 6 second-handler 0x634ebb0 sites \u2014 it is a SHARED survivor of both miss-handler lists, so claiming it here consumes it from the combined 25-FDE pool. Disjoint from all priors (survey survivor + re-checked against the verifier's prior collection). A large dispatcher-like routine: it calls this packet's window 0x63495b0 at 0x6354682 and packet #313's window 0x63c2f00 at 0x6353caa and 0x6355415."
+ }
+}

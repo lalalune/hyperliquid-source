@@ -1,0 +1,49 @@
+{
+  "input": {
+    "options": "RDI: dword mode at+0, nonrecursive ifbyte+4==0",
+    "path": "RSI pointer, RDX byte length"
+  },
+  "outcome": "RAX=0 success; nonzero encoded error",
+  "path_policy": {
+    "stack_max_length": 383,
+    "stack_buffer_bytes": 384,
+    "appended_nul": "at original byte length",
+    "interior_nul": "return static error pointer64c2fb8 withkind20",
+    "long_path": "5c78ed0 ->64df718/141e960 -> callback5c81110 -> mkdir",
+    "encoding_of_native_error": "(u32 errno <<32)|2"
+  },
+  "upward": {
+    "missing_count": "rbp-0x58, initially0",
+    "mode_copy": "rbp-0x3c",
+    "current_path": "R14 pointer/R15 length at loop5c8f710",
+    "parent_next": "rbp-0x50 pointer/rbp-0x168 length",
+    "errno2": "kind0; discarderror, increment missing_count, move to parent",
+    "errno17": "kind12; stat andacceptonlydirectory; otherwisepreserveoriginalcreateerror",
+    "other_errors": "returnoriginalcreateerror withoutretry"
+  },
+  "prefix_vector": {
+    "entry_size": 16,
+    "capacity": "rbp-0xe0",
+    "pointer": "rbp-0xd8 andrbp-0x30",
+    "length": "rbp-0xd0",
+    "pair_words": [
+      "pathpointer",
+      "pathlength"
+    ],
+    "collection": "originaltarget then successiveparent untilmissing_countentries orparentnone",
+    "replay": "endpointer minus16 perstep; parent-first order"
+  },
+  "metadata": {
+    "error_tag": 2,
+    "mode_offset_in_result": "0x38",
+    "mask": "0xf000",
+    "directory_value": "0x4000",
+    "failed_stat": "discardstaterror andretainmkdirerror"
+  },
+  "boundaries": [
+    "no target execution or actual filesystem",
+    "no assumption mkdir/stat are race-free",
+    "mode passed asobserved not finalOSpermissionproof",
+    "allocator/reserve/import/runtime effects andunwind remain explicit"
+  ]
+}

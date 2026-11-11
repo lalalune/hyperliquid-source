@@ -1,0 +1,9 @@
+# RE-009 · Text state metadata field order
+
+The selected Node #115 text projection at 0x27743e0 writes an opening brace and invokes six ordered field writers: hardfork_version, initial_height, height, scheduled_freeze_height, consensus_time, wall_clock_time. A nonzero writer result exits the chain. The temporary writer-state byte can also divert between fields. The freeze field takes a different helper from the three leading fields. This is distinct from the binary freeze field writer using MessagePack-compatible markers.
+
+Direct caller 0x26a5768 passes a stack writer record and branches on a nonzero result. The verifier pins the entire callee, field names, lengths and direct destinations, mutation controls for all six call displacements, caller FDE and delimiter. The captured bytes support this local text projection, but do not identify the destination file or a reader. Further trace the caller before treating the format as a persisted checkpoint.
+
+### Path and output evidence
+
+Outer caller 0x2c7d760 checks the ten-byte key abci_state and selects the three-byte suffix rmp on equality. Otherwise it selects json. Both paths feed the existing format-building calls and then the direct call at 0x2c7d8af. Independently, the format wrapper tests the destination suffix against the three-byte rmp literal. On the selected nonzero comparison it calls 0x2774150 and checks for 0x8000000000000004. On the selected zero comparison it reaches the text projection above. The final output preparation slot resolves to 0x15020f0, and only a zero return reaches the buffer output slot resolving to 0x15024a0. Both were previously analyzed in RE-009-abci-state-export-115 and are contextual here. The format helper's internal behavior, actual output persistence and all abnormal paths remain open.

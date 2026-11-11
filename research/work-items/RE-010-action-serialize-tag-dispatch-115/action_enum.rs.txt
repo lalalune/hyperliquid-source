@@ -1,0 +1,125 @@
+// Reconstructed from node #115 (sha256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301)
+// by tools/action_tag_serialize_115.py.  Variant order, serde names, unit payloads
+// and the niche layout are byte-checked; payload types are only named by variant.
+#[derive(Serialize)]
+#[serde(tag = "type", rename_all = "camelCase")]
+pub enum Action {
+    Noop(NoopAction), // index 0, first word 0x86, serializer 0x2610750 in copy 0x2bce570
+    #[serde(rename = "approveAgent")]
+    ApproveAgent3(ApproveAgent3Payload), // index 1, first word 0x87, serializer 0x2d3e3a0 in copy 0x2bce570
+    BatchModify(BatchModifyPayload), // index 2, first word 0x88, serializer 0x2d3bfc0 in copy 0x2bce570
+    Cancel(CancelPayload), // index 3, first word 0x89, serializer 0x25e58e0 in copy 0x2bce570
+    CancelByCloid(CancelByCloidPayload), // index 4, first word 0x8a, serializer 0x25e2390 in copy 0x2bce570
+    ClaimRewards(ClaimRewardsAction), // index 5, first word 0x8b, serializer 0x2610750 in copy 0x2bce570
+    CreateSubAccount(CreateSubAccountPayload), // index 6, first word 0x8c, serializer 0x2914170 in copy 0x2bce570
+    CreateVault(CreateVaultPayload), // index 7, first word 0x8d, serializer 0x28fb4f0 in copy 0x2bce570
+    EvmRawTx(EvmRawTxPayload), // index 8, first word 0x8e, serializer 0x29aabd0 in copy 0x2bce570
+    #[serde(rename = "ForceIncreaseEpochAction")]
+    ForceIncreaseEpoch(ForceIncreaseEpochPayload), // index 9, first word 0x8f, serializer 0x240c570 in copy 0x2bce570
+    Liquidate(LiquidatePayload), // index 10, first word 0x90, serializer 0x25e5fe0 in copy 0x2bce570
+    LinkStakingUser(LinkStakingUserPayload), // index 11, first word 0x91, serializer 0x2d3ee90 in copy 0x2bce570
+    Modify(ModifyPayload), // index 12, first word 0x92, serializer 0x291dcc0 in copy 0x2bce570
+    #[serde(rename = "NetChildVaultPositionsAction")]
+    NetChildVaultPositions(NetChildVaultPositionsPayload), // index 13, first word 0x93, serializer 0x27690d0 in copy 0x2bce570
+    Order(OrderPayload), // index 14, first word 0x94, serializer 0x2d432b0 in copy 0x2bce570
+    RegisterReferrer(RegisterReferrerPayload), // index 15, first word 0x95, serializer 0x290d360 in copy 0x2bce570
+    #[serde(rename = "RegisterValidatorAction")]
+    RegisterValidator(RegisterValidatorPayload), // index 16, first word 0x96, serializer 0x2d3fe50 in copy 0x2bce570
+    #[serde(rename = "CValidatorAction")]
+    CValidator(CValidatorPayload), // index 17, first word 0x97, serializer 0x28bfa80 in copy 0x2bce570
+    ScheduleCancel(ScheduleCancelPayload), // index 18, first word 0x98, serializer 0x290b140 in copy 0x2bce570
+    SetDisplayName(SetDisplayNamePayload), // index 19, first word 0x99, serializer 0x240a450 in copy 0x2bce570
+    #[serde(rename = "VoteGlobalAction")]
+    VoteGlobal(VoteGlobalPayload), // index 20, dataful (any first word < 0x86), serializer 0x28ebdf0 in copy 0x2bce570
+    ValidatorL1Vote(ValidatorL1VotePayload), // index 21, first word 0x9b, serializer 0x2912e50 in copy 0x2bce570
+    ValidatorL1Stream(ValidatorL1StreamPayload), // index 22, first word 0x9c, serializer 0x2916ca0 in copy 0x2bce570
+    ValidatorL1Status(ValidatorL1StatusPayload), // index 23, first word 0x9d, serializer 0x2bc93e0 in copy 0x2bce570
+    ValidatorL1UpdateReferenceOracle(ValidatorL1UpdateReferenceOraclePayload), // index 24, first word 0x9e, serializer 0x2769fd0 in copy 0x2bce570
+    #[serde(rename = "SetGlobalAction")]
+    SetGlobal(SetGlobalPayload), // index 25, first word 0x9f, serializer 0x27680c0 in copy 0x2bce570
+    SetReferrer(SetReferrerPayload), // index 26, first word 0xa0, serializer 0x2408120 in copy 0x2bce570
+    SpotDeploy(SpotDeployPayload), // index 27, first word 0xa1, serializer 0x28c66b0 in copy 0x2bce570
+    SpotUser(SpotUserPayload), // index 28, first word 0xa2, serializer 0x2bdcb70 in copy 0x2bce570
+    SpotSend(SpotSendPayload), // index 29, first word 0xa3, serializer 0x2413710 in copy 0x2bce570
+    #[serde(rename = "SignValidatorSetUpdateAction")]
+    SignValidatorSetUpdate(SignValidatorSetUpdatePayload), // index 30, first word 0xa4, serializer 0x29ad1e0 in copy 0x2bce570
+    SubAccountModify(SubAccountModifyPayload), // index 31, first word 0xa5, serializer 0x2914820 in copy 0x2bce570
+    SubAccountTransfer(SubAccountTransferPayload), // index 32, first word 0xa6, serializer 0x240cae0 in copy 0x2bce570
+    SubAccountSpotTransfer(SubAccountSpotTransferPayload), // index 33, first word 0xa7, serializer 0x2919540 in copy 0x2bce570
+    TokenDelegate(TokenDelegatePayload), // index 34, first word 0xa8, serializer 0x2408f80 in copy 0x2bce570
+    TwapCancel(TwapCancelPayload), // index 35, first word 0xa9, serializer 0x29ab110 in copy 0x2bce570
+    TwapOrder(TwapOrderPayload), // index 36, first word 0xaa, serializer 0x28bd780 in copy 0x2bce570
+    UpdateIsolatedMargin(UpdateIsolatedMarginPayload), // index 37, first word 0xab, serializer 0x25e4490 in copy 0x2bce570
+    #[serde(rename = "topUpIsolatedOnlyMargin")]
+    TopUpStrictIsolatedMargin(TopUpStrictIsolatedMarginPayload), // index 38, first word 0xac, serializer 0x291abc0 in copy 0x2bce570
+    #[serde(rename = "updateLeverage")]
+    UpdateUserLeverage(UpdateUserLeveragePayload), // index 39, first word 0xad, serializer 0x25e2cf0 in copy 0x2bce570
+    UsdSend(UsdSendPayload), // index 40, first word 0xae, serializer 0x24125a0 in copy 0x2bce570
+    #[serde(rename = "ValidatorSignWithdrawalAction")]
+    ValidatorSignWithdrawal(ValidatorSignWithdrawalPayload), // index 41, first word 0xaf, serializer 0x2919bf0 in copy 0x2bce570
+    VaultDistribute(VaultDistributePayload), // index 42, first word 0xb0, serializer 0x290c320 in copy 0x2bce570
+    VaultModify(VaultModifyPayload), // index 43, first word 0xb1, serializer 0x28fe700 in copy 0x2bce570
+    VaultTransfer(VaultTransferPayload), // index 44, first word 0xb2, serializer 0x290a520 in copy 0x2bce570
+    #[serde(rename = "VoteEthDepositAction")]
+    VoteEthDeposit(VoteEthDepositPayload), // index 45, first word 0xb3, serializer 0x290c4b0 in copy 0x2bce570
+    #[serde(rename = "VoteEthFinalizedValidatorSetUpdateAction")]
+    VoteEthFinalizedValidatorSetUpdate(VoteEthFinalizedValidatorSetUpdatePayload), // index 46, first word 0xb4, serializer 0x29ad9e0 in copy 0x2bce570
+    #[serde(rename = "VoteEthFinalizedWithdrawalAction")]
+    VoteEthFinalizedWithdrawal(VoteEthFinalizedWithdrawalPayload), // index 47, first word 0xb5, serializer 0x291b3e0 in copy 0x2bce570
+    Withdraw3(Withdraw3Payload), // index 48, first word 0xb6, serializer 0x24125a0 in copy 0x2bce570
+    GovPropose(GovProposePayload), // index 49, first word 0xb7, serializer 0x2407a90 in copy 0x2bce570
+    GovVote(GovVotePayload), // index 50, first word 0xb8, serializer 0x2411e50 in copy 0x2bce570
+    UsdClassTransfer(UsdClassTransferPayload), // index 51, first word 0xb9, serializer 0x240b170 in copy 0x2bce570
+    MultiSig(MultiSigPayload), // index 52, first word 0xba, serializer 0x2d45780 in copy 0x2bce570
+    ConvertToMultiSigUser(ConvertToMultiSigUserPayload), // index 53, first word 0xbb, serializer 0x2410530 in copy 0x2bce570
+    ApproveBuilderFee(ApproveBuilderFeePayload), // index 54, first word 0xbc, serializer 0x240b5a0 in copy 0x2bce570
+    StartFeeTrial(StartFeeTrialPayload), // index 55, first word 0xbd, serializer 0x2409260 in copy 0x2bce570
+    #[serde(rename = "SystemBoleAction")]
+    SystemBole(SystemBolePayload), // index 56, first word 0xbe, serializer 0x28cce10 in copy 0x2bce570
+    #[serde(rename = "SystemSpotSendAction")]
+    SystemSpotSend(SystemSpotSendPayload), // index 57, first word 0xbf, serializer 0x290b440 in copy 0x2bce570
+    DeployerSendToEvmForFrozenUser(DeployerSendToEvmForFrozenUserPayload), // index 58, first word 0xc0, serializer 0x291c420 in copy 0x2bce570
+    #[serde(rename = "SystemUsdClassTransferAction")]
+    SystemUsdClassTransfer(SystemUsdClassTransferPayload), // index 59, first word 0xc1, serializer 0x2410ce0 in copy 0x2bce570
+    #[serde(rename = "CSignerAction")]
+    CSigner(CSignerPayload), // index 60, first word 0xc2, serializer 0x2a82a30 in copy 0x2bce570
+    CWithdraw(CWithdrawPayload), // index 61, first word 0xc3, serializer 0x2406800 in copy 0x2bce570
+    CDeposit(CDepositPayload), // index 62, first word 0xc4, serializer 0x2406800 in copy 0x2bce570
+    CUserModify(CUserModifyPayload), // index 63, first word 0xc5, serializer 0x2d3c720 in copy 0x2bce570
+    ReassessFees(ReassessFeesPayload), // index 64, first word 0xc6, serializer 0x2917f90 in copy 0x2bce570
+    EvmUserModify(EvmUserModifyPayload), // index 65, first word 0xc7, serializer 0x290acc0 in copy 0x2bce570
+    ReserveRequestWeight(ReserveRequestWeightPayload), // index 66, first word 0xc8, serializer 0x2918610 in copy 0x2bce570
+    FinalizeEvmContract(FinalizeEvmContractPayload), // index 67, first word 0xc9, serializer 0x2917490 in copy 0x2bce570
+    #[serde(rename = "perpDeploy")]
+    Hip3Deploy(Hip3DeployPayload), // index 68, first word 0xca, serializer 0x28c5160 in copy 0x2bce570
+    SendAsset(SendAssetPayload), // index 69, first word 0xcb, serializer 0x2406a50 in copy 0x2bce570
+    #[serde(rename = "SystemApproveBuilderFeeAction")]
+    SystemApproveBuilderFee(SystemApproveBuilderFeePayload), // index 70, first word 0xcc, serializer 0x24116d0 in copy 0x2bce570
+    #[serde(rename = "SystemSendAssetAction")]
+    SystemSendAsset(SystemSendAssetPayload), // index 71, first word 0xcd, serializer 0x290d9c0 in copy 0x2bce570
+    AgentEnableDexAbstraction(AgentEnableDexAbstractionAction), // index 72, first word 0xce, serializer 0x2610750 in copy 0x2bce570
+    UserDexAbstraction(UserDexAbstractionPayload), // index 73, first word 0xcf, serializer 0x240d720 in copy 0x2bce570
+    #[serde(rename = "borrowLend")]
+    Bole(BolePayload), // index 74, first word 0xd0, serializer 0x291d610 in copy 0x2bce570
+    SendToEvmWithData(SendToEvmWithDataPayload), // index 75, first word 0xd1, serializer 0x240eef0 in copy 0x2bce570
+    UserPortfolioMargin(UserPortfolioMarginPayload), // index 76, first word 0xd2, serializer 0x240d720 in copy 0x2bce570
+    UserSetAbstraction(UserSetAbstractionPayload), // index 77, first word 0xd3, serializer 0x240dc20 in copy 0x2bce570
+    AgentSetAbstraction(AgentSetAbstractionPayload), // index 78, first word 0xd4, serializer 0x240ea80 in copy 0x2bce570
+    UserOutcome(UserOutcomePayload), // index 79, first word 0xd5, serializer 0x28fbc00 in copy 0x2bce570
+    GossipPriorityBid(GossipPriorityBidPayload), // index 80, first word 0xd6, serializer 0x2915190 in copy 0x2bce570
+    AgentSendAsset(AgentSendAssetPayload), // index 81, first word 0xd7, serializer 0x2409a20 in copy 0x2bce570
+    Hip3LiquidatorTransfer(Hip3LiquidatorTransferPayload), // index 82, first word 0xd8, serializer 0x2918fd0 in copy 0x2bce570
+    L1ValidatorVoteBridgeDeposit(L1ValidatorVoteBridgeDepositPayload), // index 83, first word 0xd9, serializer 0x291b860 in copy 0x2bce570
+    AuthorizeAqav2Role(AuthorizeAqav2RolePayload), // index 84, first word 0xda, serializer 0x29acaa0 in copy 0x2bce570
+    StakingLinkDisableTradingUser(StakingLinkDisableTradingUserPayload), // index 85, first word 0xdb, serializer 0x2d40710 in copy 0x2bce570
+    VoteL1Hash(VoteL1HashPayload), // index 86, first word 0xdc, serializer 0x28ff0c0 in copy 0x2bce570
+    VoteAbciDigest(VoteAbciDigestPayload), // index 87, first word 0xdd, serializer 0x29abef0 in copy 0x2bce570
+    ActivateOutcomeDeployer(ActivateOutcomeDeployerPayload), // index 88, first word 0xde, serializer 0x269fa30 in copy 0x2bce570
+    #[serde(rename = "trailingStop")]
+    TrailingStopOrder(TrailingStopOrderPayload), // index 89, first word 0xdf, serializer 0x2916310 in copy 0x2bce570
+    OutcomeDeploy(OutcomeDeployPayload), // index 90, first word 0xe0, serializer 0x2900770 in copy 0x2bce570
+    CDeposit2(CDeposit2Payload), // index 91, first word 0xe1, serializer 0x29aa8d0 in copy 0x2bce570
+}
+pub struct AgentEnableDexAbstractionAction; // unit struct, name emitted as the payload
+pub struct ClaimRewardsAction; // unit struct, name emitted as the payload
+pub struct NoopAction; // unit struct, name emitted as the payload

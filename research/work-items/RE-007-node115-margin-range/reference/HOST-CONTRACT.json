@@ -1,0 +1,16 @@
+{
+  "scope": "flat unbounded-lower/included-upper margin range and predecessor projection; no margin arithmetic",
+  "target": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "source": "src/node115-margin-range",
+  "packet": "research/work-items/RE-007-node115-margin-range",
+  "rows": "borrowed [[u8;40]] physical allocation; u64 little-endian key at0,offset at24,divisor byte32; otherbytespreserved",
+  "view": "capacity=rows.len(); if capacity0, head=live=0; otherwise head<capacity,live<=capacity; reject bounds before sorting; only live logical keys must be nondecreasing unsigned",
+  "operation": "prefix of logical rows whose key <= exposure:u64, return actual two physical borrowed slices and final included row; duplicates select last logical equal across seam; zero divisor accepted",
+  "indices": "logical and physical indices are chosen safe API observations; not original return ABI",
+  "empty": "two empty borrowed slices at backing rows[0..0] and None; no claim about downstream native diagnostic behavior",
+  "driver_input": "5 ASCII tab-separated fields: id,head,live,exposure,rows. id1..64 ascii alnum_-; canonical unsigned decimal(head/liveusize,exposureu64); rows lower-case hex80 per40-byte row separated commas, or - for empty. Unique ids. LF-terminated. No args. Read/validate all records before stdout. Limits16MiB input,50000records,4096rows perrecord. Parsefail exit2emptystdout. Output I/O failure exit1.",
+  "driver_output": "Success 12 tabfields: id,ok,included_count,first_len,second_len,logical_index,physical_index,key,offset,divisor,first_rows_hex,second_rows_hex. No selectedrow uses - for indices/key/offset/divisor; emptysegment uses -. Errors threefields id,err,bounds or order. LFterminated.",
+  "library": "no_std no dependencies unsafe FFI or build hooks; no driver caps in library; stable immutable borrowedrows; validatefullviewsortingonce and logicalbinarysearchquery",
+  "authorship": "Root authors linearreference/frozenexpectations; source agent receives thiscontract and laterfreeze hashes without oraclecode/results. No claim that authorisindependentof providednativeproof.",
+  "recorded_at": "2026-11-05T14:57:34.695752+00:00"
+}

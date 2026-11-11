@@ -1,0 +1,73 @@
+{
+  "issue": 3921,
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "selected_windows": 10,
+  "selected_bytes": 5767,
+  "selected_instructions": 1144,
+  "semantic_facts": 92,
+  "semantic_corruptions_rejected": [
+    "wrong first nested poll offset",
+    "wrong second nested poll offset",
+    "wrong first owner source",
+    "wrong second owner source",
+    "wrong first query state",
+    "wrong second query state",
+    "wrong first bookkeeping guard",
+    "wrong second bookkeeping guard",
+    "wrong first guard offset",
+    "wrong second guard offset",
+    "wrong first reader increment",
+    "wrong second reader increment",
+    "wrong first snapshot field",
+    "wrong alternate first snapshot field",
+    "wrong second snapshot field",
+    "wrong alternate second snapshot field",
+    "wrong first reader decrement",
+    "wrong alternate first reader decrement",
+    "wrong second reader decrement",
+    "swapped first nested query",
+    "swapped second nested query"
+  ],
+  "guard_paths": [
+    {
+      "query": "first",
+      "start": "0x2a52620",
+      "acquired_join": "0x2a526b8",
+      "snapshot_reads": [
+        "0x2a5274d",
+        "0x2a52a81"
+      ],
+      "releases": [
+        "0x2a5279f",
+        "0x2a52bda"
+      ],
+      "normal_return": "0x2a52994",
+      "reachable_instructions": 301,
+      "graph_corruptions_rejected": [
+        "snapshot before acquired join",
+        "return before release",
+        "snapshot after release"
+      ]
+    },
+    {
+      "query": "second",
+      "start": "0x2a3ceb0",
+      "acquired_join": "0x2a3cf4f",
+      "snapshot_reads": [
+        "0x2a3cfed",
+        "0x2a3d142"
+      ],
+      "releases": [
+        "0x2a3d60e"
+      ],
+      "normal_return": "0x2a3d894",
+      "reachable_instructions": 474,
+      "graph_corruptions_rejected": [
+        "snapshot before acquired join",
+        "return before release",
+        "snapshot after release"
+      ]
+    }
+  ],
+  "scope": "selected static windows, not full component or runtime equivalence"
+}

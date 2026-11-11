@@ -1,0 +1,77 @@
+{
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "callers": {
+    "direct_call_sites": 25,
+    "distinct_caller_fdes": 20,
+    "multi_call_callers": [
+      {
+        "caller_fde": "0x5f9521e..0x5f95276",
+        "sites": 3
+      },
+      {
+        "caller_fde": "0x6086e00..0x608818d",
+        "sites": 3
+      },
+      {
+        "caller_fde": "0x5f98c8e..0x5f98dcb",
+        "sites": 2
+      }
+    ],
+    "reachability": "reached only by code, never by data",
+    "stored_references": "none: 0 RELATIVE relocations for 0x5d55870, 0 stored qwords",
+    "tail_jump_sites": 0
+  },
+  "observations": [
+    "The routine writes nothing back to the object: no field is cleared and no size is reset.",
+    "An empty but non-null buffer (end == begin) still reaches the sized delete, with size 0.",
+    "The three buffers are freed in the fixed order A, B, C regardless of their addresses or sizes.",
+    "The +0x48 release is a tail jump, so the helper's return is the routine's return; the three buffer frees are direct calls.",
+    "The release helper 0x5d350c0 is pinned by call shape only here; its internal release contract (64-bit count at +0x08, destroy at zero) is established in the RE-001 derived-destructor packet for the same helper address."
+  ],
+  "phases": [
+    {
+      "begin_field": "+0x1e0",
+      "buffer": "A",
+      "end_field": "+0x1f0",
+      "order": 1,
+      "rule": "if begin is null, skip; otherwise sized delete (begin, end - begin) via _ZdlPvm@plt"
+    },
+    {
+      "begin_field": "+0x1c8",
+      "buffer": "B",
+      "end_field": "+0x1d8",
+      "order": 2,
+      "rule": "if begin is null, skip; otherwise sized delete (begin, end - begin) via _ZdlPvm@plt"
+    },
+    {
+      "begin_field": "+0xc0",
+      "buffer": "C",
+      "end_field": "+0xd0",
+      "order": 3,
+      "rule": "if begin is null, skip; otherwise sized delete (begin, end - begin) via _ZdlPvm@plt"
+    },
+    {
+      "field": "+0x48",
+      "order": 4,
+      "rule": "if the pointer is null, return; otherwise tail-jump to the shared release helper 0x5d350c0 with the pointer"
+    }
+  ],
+  "routine": {
+    "address": "0x5d55870",
+    "arguments": [
+      "rdi: object pointer"
+    ],
+    "fde": "0x5d55870..0x5d558e2",
+    "frame": "pushes rbx only; no stack canary, no landing pads",
+    "returns": "nothing",
+    "size_bytes": 114
+  },
+  "target": "node #115",
+  "task": "RE-001",
+  "unknowns": [
+    "What the three buffers contain; only their begin/end pairs are pinned, not their element types.",
+    "The class name owning the +0x48 / +0xc0 / +0x1c8 / +0x1e0 layout.",
+    "Why three callers (0x5f9521e, 0x6086e00, 0x5f98c8e) invoke the routine more than once; their bodies beyond the call sites are not pinned."
+  ]
+}

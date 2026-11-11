@@ -1,0 +1,113 @@
+{
+  "counterfactuals": [
+    {
+      "byte": 24,
+      "mutated": [
+        "success",
+        44
+      ],
+      "original": [
+        "success",
+        295
+      ],
+      "va": "0x5b56a28"
+    },
+    {
+      "byte": 0,
+      "mutated": [
+        "ordinary-header-result",
+        40
+      ],
+      "original": [
+        "success",
+        295
+      ],
+      "va": "0x5b569d9"
+    },
+    {
+      "byte": 43,
+      "mutated": [
+        "overflow"
+      ],
+      "original": [
+        "success",
+        295
+      ],
+      "va": "0x5b56a42"
+    }
+  ],
+  "examples": [
+    {
+      "header_H": 40,
+      "lengths": [],
+      "result": [
+        "success",
+        41
+      ]
+    },
+    {
+      "header_H": 40,
+      "lengths": [
+        0
+      ],
+      "result": [
+        "success",
+        42
+      ]
+    },
+    {
+      "header_H": 40,
+      "lengths": [
+        250
+      ],
+      "result": [
+        "success",
+        292
+      ]
+    },
+    {
+      "header_H": 40,
+      "lengths": [
+        251
+      ],
+      "result": [
+        "success",
+        295
+      ]
+    },
+    {
+      "header_H": 40,
+      "lengths": [
+        0,
+        0
+      ],
+      "result": [
+        "success",
+        43
+      ]
+    },
+    {
+      "header_H": 40,
+      "lengths": [
+        1,
+        250
+      ],
+      "result": [
+        "success",
+        294
+      ]
+    }
+  ],
+  "fixed_prefix_cases": 216,
+  "framing_cases": 4100,
+  "limits": "Header H is the counter after successful 0x5829040; its nested 0x5966e40 contribution is opaque. Formula assumes successful helper returns, valid metadata and no u64 overflow. Payload contents are not accessed by the selected loop. Overflow is nonreturning and may occur after partial prefix increments; this model reports the outcome, not exact panic-state counters. It does not execute the target or prove a whole wire serialization format.",
+  "native_operands": {
+    "header_success": 8,
+    "large_shift": 32,
+    "last_prefix_offset": 56,
+    "length_offset": 32,
+    "medium_threshold": 65536,
+    "payload_arithmetic": 3,
+    "small_threshold": 251
+  }
+}

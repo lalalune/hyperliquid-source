@@ -1,0 +1,138 @@
+1680500: 55                               push     rbp
+1680501: 4889e5                           mov      rbp, rsp
+1680504: 4157                             push     r15
+1680506: 4156                             push     r14
+1680508: 4155                             push     r13
+168050a: 4154                             push     r12
+168050c: 53                               push     rbx
+168050d: 4883ec38                         sub      rsp, 0x38
+1680511: 4889cb                           mov      rbx, rcx
+1680514: 4989d5                           mov      r13, rdx
+1680517: 4989fe                           mov      r14, rdi
+168051a: f6c301                           test     bl, 1
+168051d: 0f8568010000                     jne      0x168068b
+1680523: 410fb64500                       movzx    eax, byte ptr [r13]
+1680528: 84c0                             test     al, al
+168052a: 0f847b010000                     je       0x16806ab
+1680530: 488975b0                         mov      qword ptr [rbp - 0x50], rsi
+1680534: 488b4e18                         mov      rcx, qword ptr [rsi + 0x18]
+1680538: 48894da8                         mov      qword ptr [rbp - 0x58], rcx
+168053c: 48c745d000000000                 mov      qword ptr [rbp - 0x30], 0
+1680544: eb1a                             jmp      0x1680560
+1680546: 662e0f1f840000000000             nop      word ptr cs:[rax + rax]
+1680550: 410fb60424                       movzx    eax, byte ptr [r12]
+1680555: 4d89e5                           mov      r13, r12
+1680558: 84c0                             test     al, al
+168055a: 0f844b010000                     je       0x16806ab
+1680560: 4d8d6501                         lea      r12, [r13 + 1]
+1680564: 440fb6f8                         movzx    r15d, al
+1680568: 84c0                             test     al, al
+168056a: 7824                             js       0x1680590
+168056c: 4c89f7                           mov      rdi, r14
+168056f: 4c89e6                           mov      rsi, r12
+1680572: 4c89fa                           mov      rdx, r15
+1680575: ff55a8                           call     qword ptr [rbp - 0x58]
+1680578: 84c0                             test     al, al
+168057a: 0f852f010000                     jne      0x16806af
+1680580: 4d01fc                           add      r12, r15
+1680583: ebcb                             jmp      0x1680550
+1680585: 66662e0f1f840000000000           nop      word ptr cs:[rax + rax]
+1680590: 3c80                             cmp      al, 0x80
+1680592: 7421                             je       0x16805b5
+1680594: 4181ffc0000000                   cmp      r15d, 0xc0
+168059b: 753f                             jne      0x16805dc
+168059d: 4c8b7dd0                         mov      r15, qword ptr [rbp - 0x30]
+16805a1: 4c89f8                           mov      rax, r15
+16805a4: 48c1e004                         shl      rax, 4
+16805a8: 48c745c820000060                 mov      qword ptr [rbp - 0x38], 0x60000020
+16805b0: e99d000000                       jmp      0x1680652
+16805b5: 450fb77d01                       movzx    r15d, word ptr [r13 + 1]
+16805ba: 498d7503                         lea      rsi, [r13 + 3]
+16805be: 4c89f7                           mov      rdi, r14
+16805c1: 4c89fa                           mov      rdx, r15
+16805c4: ff55a8                           call     qword ptr [rbp - 0x58]
+16805c7: 84c0                             test     al, al
+16805c9: 0f85e0000000                     jne      0x16806af
+16805cf: 4f8d242f                         lea      r12, [r15 + r13]
+16805d3: 4983c403                         add      r12, 3
+16805d7: e974ffffff                       jmp      0x1680550
+16805dc: b920000060                       mov      ecx, 0x60000020
+16805e1: a801                             test     al, 1
+16805e3: 740b                             je       0x16805f0
+16805e5: 418b4d01                         mov      ecx, dword ptr [r13 + 1]
+16805e9: 4983c505                         add      r13, 5
+16805ed: 4d89ec                           mov      r12, r13
+16805f0: a802                             test     al, 2
+16805f2: 7519                             jne      0x168060d
+16805f4: 31d2                             xor      edx, edx
+16805f6: 4c8b7dd0                         mov      r15, qword ptr [rbp - 0x30]
+16805fa: a804                             test     al, 4
+16805fc: 7420                             je       0x168061e
+16805fe: 410fb73424                       movzx    esi, word ptr [r12]
+1680603: 4983c402                         add      r12, 2
+1680607: a808                             test     al, 8
+1680609: 7519                             jne      0x1680624
+168060b: eb20                             jmp      0x168062d
+168060d: 410fb71424                       movzx    edx, word ptr [r12]
+1680612: 4983c402                         add      r12, 2
+1680616: 4c8b7dd0                         mov      r15, qword ptr [rbp - 0x30]
+168061a: a804                             test     al, 4
+168061c: 75e0                             jne      0x16805fe
+168061e: 31f6                             xor      esi, esi
+1680620: a808                             test     al, 8
+1680622: 7409                             je       0x168062d
+1680624: 450fb73c24                       movzx    r15d, word ptr [r12]
+1680629: 4983c402                         add      r12, 2
+168062d: a810                             test     al, 0x10
+168062f: 7549                             jne      0x168067a
+1680631: a820                             test     al, 0x20
+1680633: 740b                             je       0x1680640
+1680635: 0fb7c6                           movzx    eax, si
+1680638: c1e004                           shl      eax, 4
+168063b: 0fb7740308                       movzx    esi, word ptr [rbx + rax + 8]
+1680640: 4c89f8                           mov      rax, r15
+1680643: 48c1e004                         shl      rax, 4
+1680647: 894dc8                           mov      dword ptr [rbp - 0x38], ecx
+168064a: 668955cc                         mov      word ptr [rbp - 0x34], dx
+168064e: 668975ce                         mov      word ptr [rbp - 0x32], si
+1680652: 4c8975b8                         mov      qword ptr [rbp - 0x48], r14
+1680656: 488b4db0                         mov      rcx, qword ptr [rbp - 0x50]
+168065a: 48894dc0                         mov      qword ptr [rbp - 0x40], rcx
+168065e: 488b3c03                         mov      rdi, qword ptr [rbx + rax]
+1680662: 488d75b8                         lea      rsi, [rbp - 0x48]
+1680666: ff540308                         call     qword ptr [rbx + rax + 8]
+168066a: 84c0                             test     al, al
+168066c: 7541                             jne      0x16806af
+168066e: 49ffc7                           inc      r15
+1680671: 4c897dd0                         mov      qword ptr [rbp - 0x30], r15
+1680675: e9d6feffff                       jmp      0x1680550
+168067a: 0fb7d2                           movzx    edx, dx
+168067d: c1e204                           shl      edx, 4
+1680680: 0fb7541308                       movzx    edx, word ptr [rbx + rdx + 8]
+1680685: a820                             test     al, 0x20
+1680687: 75ac                             jne      0x1680635
+1680689: ebb5                             jmp      0x1680640
+168068b: 48d1eb                           shr      rbx, 1
+168068e: 488b4618                         mov      rax, qword ptr [rsi + 0x18]
+1680692: 4c89f7                           mov      rdi, r14
+1680695: 4c89ee                           mov      rsi, r13
+1680698: 4889da                           mov      rdx, rbx
+168069b: 4883c438                         add      rsp, 0x38
+168069f: 5b                               pop      rbx
+16806a0: 415c                             pop      r12
+16806a2: 415d                             pop      r13
+16806a4: 415e                             pop      r14
+16806a6: 415f                             pop      r15
+16806a8: 5d                               pop      rbp
+16806a9: ffe0                             jmp      rax
+16806ab: 31c0                             xor      eax, eax
+16806ad: eb02                             jmp      0x16806b1
+16806af: b001                             mov      al, 1
+16806b1: 4883c438                         add      rsp, 0x38
+16806b5: 5b                               pop      rbx
+16806b6: 415c                             pop      r12
+16806b8: 415d                             pop      r13
+16806ba: 415e                             pop      r14
+16806bc: 415f                             pop      r15
+16806be: 5d                               pop      rbp
+16806bf: c3                               ret      

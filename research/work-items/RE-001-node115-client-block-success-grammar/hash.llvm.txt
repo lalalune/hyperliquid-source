@@ -1,0 +1,38 @@
+# llvm: full owning FDE 0x5821430..0x58214a3 decoded; retained 0x5821430..0x58214a3
+ 5821430: 48 89 f8                     	mov	rax, rdi
+ 5821433: 83 3e 01                     	cmp	dword ptr [rsi], 0x1
+ 5821436: 75 24                        	jne	0x582145c <.text+0x440815c>
+ 5821438: 48 8b 4e 20                  	mov	rcx, qword ptr [rsi + 0x20]
+ 582143c: 48 83 f9 df                  	cmp	rcx, -0x21
+ 5821440: 77 11                        	ja	0x5821453 <.text+0x4408153>
+ 5821442: 48 8b 56 08                  	mov	rdx, qword ptr [rsi + 0x8]
+ 5821446: 48 83 c1 20                  	add	rcx, 0x20
+ 582144a: 48 89 4e 20                  	mov	qword ptr [rsi + 0x20], rcx
+ 582144e: 48 39 d1                     	cmp	rcx, rdx
+ 5821451: 76 09                        	jbe	0x582145c <.text+0x440815c>
+ 5821453: c6 40 08 02                  	mov	byte ptr [rax + 0x8], 0x2
+ 5821457: b1 01                        	mov	cl, 0x1
+ 5821459: 88 08                        	mov	byte ptr [rax], cl
+ 582145b: c3                           	ret
+ 582145c: 48 8b 4e 18                  	mov	rcx, qword ptr [rsi + 0x18]
+ 5821460: 48 83 f9 1f                  	cmp	rcx, 0x1f
+ 5821464: 77 15                        	ja	0x582147b <.text+0x440817b>
+ 5821466: ba 20 00 00 00               	mov	edx, 0x20
+ 582146b: 48 29 ca                     	sub	rdx, rcx
+ 582146e: c6 40 08 00                  	mov	byte ptr [rax + 0x8], 0x0
+ 5821472: 48 89 50 10                  	mov	qword ptr [rax + 0x10], rdx
+ 5821476: b1 01                        	mov	cl, 0x1
+ 5821478: 88 08                        	mov	byte ptr [rax], cl
+ 582147a: c3                           	ret
+ 582147b: 48 8b 56 10                  	mov	rdx, qword ptr [rsi + 0x10]
+ 582147f: 48 8d 7a 20                  	lea	rdi, [rdx + 0x20]
+ 5821483: 48 83 c1 e0                  	add	rcx, -0x20
+ 5821487: 48 89 7e 10                  	mov	qword ptr [rsi + 0x10], rdi
+ 582148b: 48 89 4e 18                  	mov	qword ptr [rsi + 0x18], rcx
+ 582148f: 0f 10 02                     	movups	xmm0, xmmword ptr [rdx]
+ 5821492: 0f 10 4a 10                  	movups	xmm1, xmmword ptr [rdx + 0x10]
+ 5821496: 0f 11 48 11                  	movups	xmmword ptr [rax + 0x11], xmm1
+ 582149a: 0f 11 40 01                  	movups	xmmword ptr [rax + 0x1], xmm0
+ 582149e: 31 c9                        	xor	ecx, ecx
+ 58214a0: 88 08                        	mov	byte ptr [rax], cl
+ 58214a2: c3                           	ret

@@ -1,0 +1,80 @@
+[
+  {
+    "run": "rust-qualification-launch-01",
+    "command": {
+      "runner_sha256": "4f13e6a5d549cb05893ec689d72dab031d8532f9b2017b2c2d92e4d2f618633b",
+      "review": "Authored and read entire runner: fixed reviewed source pins; direct pinned rustc only; no captured inputs; exact strict parent comparison calibrated; all raw child streams saved before assertions; no expected TSV in execution cwd; no native/evaluator/Cargo execution.",
+      "argv": [
+        "/opt/homebrew/bin/python3",
+        "-I",
+        "-B",
+        "-S",
+        "<ARTIFACTS>/source-review/qualify.py"
+      ],
+      "cwd": "<ARTIFACTS>",
+      "env": {
+        "PATH": "/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TZ": "UTC"
+      },
+      "started": "2026-11-06T01:02:36.992352+00:00",
+      "exit": 1,
+      "ended": "2026-11-06T01:02:37.616414+00:00",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "fdb286280a40d7b9bb4d6a22c6a2abdc3e1bafab00d8f368b6cb1d4d2408ef78"
+    },
+    "original_command_sha256": "35a1f7c9d9522886ec3ec3831d11beb0667c00223720c7fb9e6d6d3d4ffd04ea",
+    "streams": {
+      "stdout": {
+        "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "text": ""
+      },
+      "stderr": {
+        "original_sha256": "fdb286280a40d7b9bb4d6a22c6a2abdc3e1bafab00d8f368b6cb1d4d2408ef78",
+        "stored_sha256": "bf383c720e67efd6fad58bd77b37b7447f61c149809b8727f9634bd112b38801",
+        "text": "Traceback (most recent call last):\n  File \"<ARTIFACTS>/source-review/qualify.py\", line 98, in <module>\n    if __name__=='__main__': main()\n                             ~~~~^^\n  File \"<ARTIFACTS>/source-review/qualify.py\", line 75, in main\n    run(label+'-test-compile',common+['--test',sources/'frozen_cases.rs','--extern','node115_http_header_writer='+str(rlib),'-C','opt-level='+opt,'-o',test],empty)\n    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<ARTIFACTS>/source-review/qualify.py\", line 55, in run\n    require(kind=='completed' and rc==0,'command '+name+' '+kind+' '+str(rc));require(not err,'stderr '+name)\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<ARTIFACTS>/source-review/qualify.py\", line 14, in require\n    if not c: raise ValueError(msg)\n              ^^^^^^^^^^^^^^^^^^^^^\nValueError: command debug-test-compile completed 1\n"
+      }
+    }
+  },
+  {
+    "run": "rust-qualification-launch-02",
+    "command": {
+      "runner_sha256": "b2b140844e8700046c3df5fbc270dfe0e54e6c171cb2a0f1bce8b3db31597dce",
+      "review": "Same fully reviewed runner with only fresh generated/qualified/output paths and two admitted generated source hashes updated. Comparator and command logic unchanged.",
+      "argv": [
+        "/opt/homebrew/bin/python3",
+        "-I",
+        "-B",
+        "-S",
+        "<ARTIFACTS>/source-review/qualify_v2.py"
+      ],
+      "cwd": "<ARTIFACTS>",
+      "env": {
+        "PATH": "/usr/bin:/bin",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TZ": "UTC"
+      },
+      "started": "2026-11-06T01:05:17.289035+00:00",
+      "exit": 1,
+      "ended": "2026-11-06T01:05:29.075712+00:00",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "74b58b6c83f096c18b24b56dbc0561e25a2463a84d575cc114475441e7d8ad7c"
+    },
+    "original_command_sha256": "09ecb605d123c126f1cb2d89384627820530c942dfa82bf44280d9e386d0e521",
+    "streams": {
+      "stdout": {
+        "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "text": ""
+      },
+      "stderr": {
+        "original_sha256": "74b58b6c83f096c18b24b56dbc0561e25a2463a84d575cc114475441e7d8ad7c",
+        "stored_sha256": "8bfff2f34873766037fec22feeb5e73df93f9aec06e555d4a3792b3e12237359",
+        "text": "Traceback (most recent call last):\n  File \"<ARTIFACTS>/source-review/qualify_v2.py\", line 98, in <module>\n    if __name__=='__main__': main()\n                             ~~~~^^\n  File \"<ARTIFACTS>/source-review/qualify_v2.py\", line 94, in main\n    one=(build/'linux-1.rlib').read_bytes();two=(build/'linux-2.rlib').read_bytes();require(one==two,'linux byte equality')\n                                                                                    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<ARTIFACTS>/source-review/qualify_v2.py\", line 14, in require\n    if not c: raise ValueError(msg)\n              ^^^^^^^^^^^^^^^^^^^^^\nValueError: linux byte equality\n"
+      }
+    }
+  }
+]

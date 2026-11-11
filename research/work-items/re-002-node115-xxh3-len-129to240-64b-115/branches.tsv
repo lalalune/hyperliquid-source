@@ -1,0 +1,16 @@
+function	branch	condition	dispatch_site	target_or_effect	scope
+len_129to240_64b	front_windows	len in 129..240 (always)	0x61d7dc0	8 mix16B input+0..112/secret+0..127 summed into len * PRIME64_1, then XXH3_avalanche	modelled
+len_129to240_64b	middle_i8	nbRounds > 8 (len > 143)	0x61d7f30	mix16B input+128/secret+3	modelled
+len_129to240_64b	middle_i9	nbRounds > 9 (len > 159)	0x61d7f5f	mix16B input+144/secret+19	modelled
+len_129to240_64b	middle_i10	nbRounds > 10 (len > 175)	0x61d7f8e	mix16B input+160/secret+35	modelled
+len_129to240_64b	middle_i11	nbRounds > 11 (len > 191)	0x61d7fbd	mix16B input+176/secret+51	modelled
+len_129to240_64b	middle_i12	nbRounds > 12 (len > 207)	0x61d7fec	mix16B input+192/secret+67	modelled
+len_129to240_64b	middle_i13	nbRounds > 13 (len > 223)	0x61d8017	mix16B input+208/secret+83	modelled
+len_129to240_64b	middle_i14	nbRounds == 15 (len == 240)	0x61d8042	mix16B input+224/secret+99	modelled
+len_129to240_64b	trailing_window	len in 129..240 (always)	0x61d7eea	mix16B input+len-16/secret+119	modelled
+64bits	len_le_128	len <= 128	0x61db6c0	short branches inline	out of scope
+64bits	len_gt_240	len > 240	0x61db6c9	0x61db6d6 -> jmp 0x61d8510 (hashLong_64b_default, PR #5601)	out of scope
+withSecret	len_17_to_128	len in 17..128	0x61db9e2	0x61dbf10 inline mix16B	out of scope
+withSecret	len_gt_240	len > 240	0x61db9f2	0x61db9ff inline SIMD hashLong	out of scope
+withSeed	len_le_128	len <= 128	0x61dc138	short branches inline	out of scope
+withSeed	len_gt_240	len > 240	0x61dc141	0x61dc14e -> jmp 0x61d9090 (hashLong_64b_withSeed, PR #5601)	out of scope

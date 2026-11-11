@@ -195,7 +195,7 @@
       "r8": "pointer to the quantity accumulator qword",
       "r9": "level record: link fields +0x0/+0x8/+0x10/+0x18, totals +0x70/+0x78",
       "stack_1": "mode selector: the registration arm of each twin passes 0; the append arm passes its flag qword (1 when its derivation lookup returned nonzero, else the qword at level +0x20)",
-      "stack_2": "link index: the append arm passes the cached result of the previous call (the value this routine returned last time); unused in fresh mode"
+      "stack_2": "link index: the append arm passes the cached result of the previous call (the value this routine returned last time); not read when stack_1 != 1; otherwise read even when the checks select fresh mode"
     },
     "entry_accumulator": {
       "update": "*r8 := *r8 + [order+0xe0] as a checked add",
@@ -216,7 +216,7 @@
         "order_+0x0": "the qword at level + 0x10",
         "order_+0x8": "the qword at level + 0x18",
         "order_+0x18": "a frame slot this routine writes only on the link path (recorded, not interpreted)",
-        "event_+0x10": "the qword at order + 0xe0"
+        "event_+0x10": "raw selector or scaled index, according to event_record.word_0x10_sources; semantic use is not established"
       }
     },
     "event_record": {
@@ -237,7 +237,7 @@
         {
           "offset": 16,
           "bytes": 8,
-          "source": "link mode: the qword at slab buffer[stack_2] + 0xf0; fresh mode: the qword at order + 0xe0"
+          "source": "raw RCX value from word_0x10_sources"
         },
         {
           "offset": 24,
@@ -275,8 +275,31 @@
           "source": "the byte at order + 0xd2"
         }
       ],
-      "written_span_bytes": 77,
-      "tail": "the remaining element bytes past offset 77 are not written by this routine"
+      "word_0x10_sources": [
+        {
+          "condition": "stack_1 != 1",
+          "source": "stack_1"
+        },
+        {
+          "condition": "stack_1 == 1 and stack_2 >= slab_length",
+          "source": "1"
+        },
+        {
+          "condition": "stack_1 == 1 and stack_2 < slab_length and linked_first_qword == 2",
+          "source": "low64(stack_2 * 0x110)"
+        },
+        {
+          "condition": "stack_1 == 1 and stack_2 < slab_length and linked_first_qword != 2",
+          "source": "the qword at slab buffer[stack_2] + 0xf0"
+        }
+      ],
+      "initialized_source_prefix_bytes": 77,
+      "copy_requested_bytes": {
+        "shared_a": 696,
+        "shared_b": 712
+      },
+      "tail": "source-frame contents past offset 76 are not established by the explicit stores before the first copy; the copy requests the full element",
+      "destination_premise": "destination correspondence requires normal exact-copy behavior at slot 0x64df508, valid nonaliasing buffers and source-frame preservation by the reached helpers; the fresh-mode word semantic use is not established"
     },
     "order_rewrite": {
       "fields": [
@@ -327,7 +350,7 @@
           "returns": "never returns"
         }
       ],
-      "mode_independence": "the stack arguments change only the order rewrite sources and the link writes; the returned index and the slot choice never depend on them"
+      "mode_independence": "the stack arguments change the order rewrite sources, raw event word and link writes; the returned index and the slot choice never depend on them"
     },
     "link_writes": {
       "flag_set": [
@@ -381,7 +404,26 @@
         "unwind_destructor": "0x5947550",
         "exact_sites_checked": 205,
         "diff_sites_checked": 31,
-        "branch_sites_checked": 27
+        "branch_sites_checked": 27,
+        "event_word_witnesses": {
+          "selector_loads": [
+            "0x58df3a4",
+            "0x58df431"
+          ],
+          "selector_branches": [
+            "0x58df3b4",
+            "0x58df441"
+          ],
+          "index_bound_branch": "0x58df3ca",
+          "scaled_index": "0x58df3d0",
+          "vacancy_branch": "0x58df3e4",
+          "linked_word_load": "0x58df400",
+          "raw_word_store": "0x58df49e",
+          "quantity_store": "0x58df4a3",
+          "copy_source": "0x58df4ea",
+          "copy_count": "0x58df4f6",
+          "copy_call": "0x58df4fb"
+        }
       },
       "shared_b": {
         "frame_bytes": 1048,
@@ -393,7 +435,26 @@
         "unwind_destructor": "0x5948db0",
         "exact_sites_checked": 205,
         "diff_sites_checked": 31,
-        "branch_sites_checked": 27
+        "branch_sites_checked": 27,
+        "event_word_witnesses": {
+          "selector_loads": [
+            "0x58df7d4",
+            "0x58df861"
+          ],
+          "selector_branches": [
+            "0x58df7e4",
+            "0x58df871"
+          ],
+          "index_bound_branch": "0x58df7fa",
+          "scaled_index": "0x58df800",
+          "vacancy_branch": "0x58df814",
+          "linked_word_load": "0x58df830",
+          "raw_word_store": "0x58df8ce",
+          "quantity_store": "0x58df8d3",
+          "copy_source": "0x58df91a",
+          "copy_count": "0x58df926",
+          "copy_call": "0x58df92b"
+        }
       }
     }
   },

@@ -1,0 +1,170 @@
+{
+  "component": "abci",
+  "gates_changed": false,
+  "liner": {
+    "buffer": "0x14c3950 (lazy open: mode 0o666, append, create)",
+    "explicit_flush": {
+      "error": "dropped",
+      "fde": [
+        "0x14c3c90",
+        "0x14c3cb1"
+      ],
+      "flush": "0x1533e80"
+    },
+    "flush_gate": {
+      "fde": [
+        "0x154ce40",
+        "0x154cfe0"
+      ],
+      "flush": "0x1533e80; an io::Error is dropped",
+      "flush_when": "stored date (+0x40) is 0, or the record time is later than stored + interval (fallback deadline 0x4679d0)",
+      "interval": "f64 at +0x38, copied at open from 0x64efce0 (0000000000000000 at rest)",
+      "state": "liner +0x38"
+    },
+    "write": {
+      "fast_path": "memcpy when len < spare capacity",
+      "fde": [
+        "0x14c37f0",
+        "0x14c389b"
+      ],
+      "slow_path": "slot 0x64e0010 -> 0x1533d60; an io::Error is dropped"
+    }
+  },
+  "observer": {
+    "flag_record_offset": "0xa4",
+    "flag_store": "0x1548873 mov byte [rsp+0x17c], r15b",
+    "record_argument": "0x15489b0 lea rdx, [rsp+0xd8]",
+    "write_call": "0x15489bb"
+  },
+  "serializer": {
+    "close": "}",
+    "direct_callers": 1,
+    "fde": [
+      "0x1548f40",
+      "0x15492b3"
+    ],
+    "fields": [
+      {
+        "helper": "0x159ca40",
+        "kind": "string (Display)",
+        "name": "time",
+        "record_offset": "0x98"
+      },
+      {
+        "helper": "0x159b710",
+        "kind": "u64",
+        "name": "total_n",
+        "record_offset": "0x50"
+      },
+      {
+        "helper": "0x159c0f0",
+        "kind": "f64 (non-finite -> null)",
+        "name": "total_mean",
+        "record_offset": "0x58"
+      },
+      {
+        "helper": "0x159b710",
+        "kind": "u64",
+        "name": "n_buffer",
+        "record_offset": "0x60"
+      },
+      {
+        "helper": "0x159c4f0",
+        "kind": "Option<f64> (None or non-finite -> null)",
+        "name": "work_frac",
+        "record_offset": "0x0"
+      },
+      {
+        "helper": "0x159c0f0",
+        "kind": "f64 (non-finite -> null)",
+        "name": "mean",
+        "record_offset": "0x68"
+      },
+      {
+        "helper": "0x159c0f0",
+        "kind": "f64 (non-finite -> null)",
+        "name": "med",
+        "record_offset": "0x70"
+      },
+      {
+        "helper": "0x159c0f0",
+        "kind": "f64 (non-finite -> null)",
+        "name": "p90",
+        "record_offset": "0x78"
+      },
+      {
+        "helper": "0x159c0f0",
+        "kind": "f64 (non-finite -> null)",
+        "name": "p95",
+        "record_offset": "0x80"
+      },
+      {
+        "helper": "0x159c0f0",
+        "kind": "f64 (non-finite -> null)",
+        "name": "max",
+        "record_offset": "0x88"
+      },
+      {
+        "helper": "0x159c0f0",
+        "kind": "f64 (non-finite -> null)",
+        "name": "std_dev",
+        "record_offset": "0x90"
+      },
+      {
+        "helper": "0x159c4f0",
+        "kind": "Option<f64> (None or non-finite -> null)",
+        "name": "bucket_mean",
+        "record_offset": "0x10"
+      },
+      {
+        "helper": "0x159c4f0",
+        "kind": "Option<f64> (None or non-finite -> null)",
+        "name": "bucket_work_frac",
+        "record_offset": "0x20"
+      },
+      {
+        "helper": "0x159bf00",
+        "kind": "Option<u64> (None -> null)",
+        "name": "bucket_n",
+        "record_offset": "0x30"
+      },
+      {
+        "helper": "0x159bf00",
+        "kind": "Option<u64> (None -> null)",
+        "name": "bucket_n_orig",
+        "record_offset": "0x40"
+      },
+      {
+        "helper": "0x1554100",
+        "kind": "bool (true/false)",
+        "name": "is_subsampled",
+        "record_offset": "0xa4"
+      }
+    ],
+    "line_inferred": "one compact JSON object per line",
+    "open": "{"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008",
+  "value_helpers": {
+    "bool": "0x1554100 -> 0x159b8a0: true / false",
+    "f64": "0x159c0f0: |x| >= 0x7ff0000000000000 -> null, else slot 0x64e13d0",
+    "option_f64": "0x159c4f0: tag 1 = Some (value at +0x8), same finiteness check",
+    "option_u64": "0x159bf00: tag 1 = Some (value at +0x8) -> 0x1599300, else null",
+    "time": "0x159ca40 -> 0x1598e80: quoted, Display 0x15608d0",
+    "u64": "0x159b710 -> 0x1599300"
+  },
+  "write": {
+    "buffer_capacity": 128,
+    "direct_callers": 1,
+    "fde": [
+      "0x14c3370",
+      "0x14c34e5"
+    ],
+    "line_end": "0x0a appended after the serializer",
+    "line_write": "0x14c37f0",
+    "serialize_error": "error box (0x28 bytes) dropped; code 1 drops an io::Error via 0x14c4d00; nothing is written",
+    "serializer": "0x1548f40"
+  }
+}

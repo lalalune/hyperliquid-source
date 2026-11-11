@@ -1,0 +1,120 @@
+{
+  "inputs": [
+    "RDI pathpointer",
+    "RSI pathlength",
+    "RDX datapointer",
+    "RCX datalength"
+  ],
+  "options": {
+    "base": "rbp-0x38",
+    "bytes_hex": "00000000b6010000000100010100",
+    "fields": [
+      {
+        "offset": 0,
+        "width": 4,
+        "value": 0,
+        "inferred_role": "custom_flags"
+      },
+      {
+        "offset": 4,
+        "width": 4,
+        "value": 438,
+        "inferred_role": "creation_mode"
+      },
+      {
+        "offset": 8,
+        "width": 1,
+        "value": 0,
+        "inferred_role": "read"
+      },
+      {
+        "offset": 9,
+        "width": 1,
+        "value": 1,
+        "inferred_role": "write"
+      },
+      {
+        "offset": 10,
+        "width": 1,
+        "value": 0,
+        "inferred_role": "append"
+      },
+      {
+        "offset": 11,
+        "width": 1,
+        "value": 1,
+        "inferred_role": "truncate"
+      },
+      {
+        "offset": 12,
+        "width": 1,
+        "value": 1,
+        "inferred_role": "create"
+      },
+      {
+        "offset": 13,
+        "width": 1,
+        "value": 0,
+        "inferred_role": "create_new"
+      }
+    ]
+  },
+  "open": {
+    "helper": "5c97060..5c97226",
+    "import_slot": "64ec8c8",
+    "symbol": "open64",
+    "selected_flags": "0x80241",
+    "selected_mode": "0666",
+    "error": "resulttag1,errorword+8",
+    "success": "resulttag0,fd_dword+4",
+    "interrupt_retry": "onlyerrorinteger4, samepathname/flags/mode",
+    "short_path_max": 383,
+    "long_path_adapter": "5c78c10..5c78cc8",
+    "callback": "5c810e0..5c81101"
+  },
+  "write": {
+    "pointer": "R14",
+    "remaining": "RBX",
+    "fd": "R15D",
+    "result": "R13",
+    "partial_progress": "advancepointer anddecreaseremaining byrawpositivecount",
+    "interrupt": "errno4 discardsencodedtemporaryerror, unchangedpointer/remaining retry",
+    "zero": "staticerror64c39a8 kind23, literal failed towritewholebuffer",
+    "other_error": "nativeencoding(errno<<32)|2",
+    "overreport": "boundshelper64df570 thenud2 ifreturns"
+  },
+  "normal_close": {
+    "site": "5ca534f",
+    "symbol": "close",
+    "argument": "R15D originalfd",
+    "result_policy": "close RAX ignored; nextinstruction MOV RAX,R13 returns retainedwrite result",
+    "retry": false
+  },
+  "outcomes": [
+    {
+      "condition": "path contains interiorNUL oropen fails",
+      "write": false,
+      "close": false,
+      "return": "path/openerror"
+    },
+    {
+      "condition": "open succeeds, emptydata",
+      "write": false,
+      "close": true,
+      "return": "0 irrespectiveofnormalclose return value"
+    },
+    {
+      "condition": "allwrites succeed",
+      "close": true,
+      "return": "0 irrespectiveofnormalclose return value"
+    },
+    {
+      "condition": "writezero/noninterrupt error",
+      "close": true,
+      "return": "selectedwrite error; closecannotreplaceit undernormalABI"
+    }
+  ],
+  "unwind": "selected landingpad callsclose before_Unwind_Resume; arbitraryhelper/allocator/importexception behavior remainsboundary",
+  "captured_execution_or_emulation": false,
+  "filesystem_actions": false
+}

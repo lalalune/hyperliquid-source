@@ -1,0 +1,7 @@
+# RE-009 · CF rejection in the binary restore decoder
+
+Node #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301. In the selected restore decoder, marker CF reaches 0x1b4500d via the table at 0x57834c. It passes the marker through the relative slot at 0x64e4220 to 0x341ff00. The second table at 0x77ad80, indexed by CF−C0, reaches 0x341ffc9.
+
+With eight or more payload bytes available, this arm consumes eight bytes, converts the qword from big endian and calls 0x3bc91d0. The callee constructs an invalid-type diagnostic using the converted value. Thus observing an eight-byte scalar decode does not establish acceptance of a CF value by this visitor. With fewer than eight bytes, the arm consumes the remaining span, zeroes the remaining count and writes output byte 1 with a descriptor whose relocation names the failed-to-fill-whole-buffer diagnostic. The complete formatting and error propagation outside these branches remain open.
+
+Run python3 research/work-items/RE-009-node115-snapshot-cf-rejection/verify.py from the repository root. It checks the authenticated artifact, two dispatch table cells with corruption controls, call and branch operands, relocations, FDE boundaries and both diagnostic literals. These static observations apply only to this selected visitor. They do not show that every restore visitor rejects CF or that the previously studied freeze field writer is incompatible with its corresponding reader.

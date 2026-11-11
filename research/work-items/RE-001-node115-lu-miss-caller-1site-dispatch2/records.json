@@ -1,0 +1,382 @@
+{
+ "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "window": {
+  "range": "0x6355900..0x63577e2",
+  "bytes": 7906,
+  "strict": 1717
+ },
+ "prev_fde": {
+  "range": "0x6355830..0x63558f2",
+  "gap": 14,
+  "gap_bytes": "cc"
+ },
+ "next_fde": {
+  "range": "0x63577f0..0x635a786",
+  "padding": 14,
+  "padding_bytes": "cc"
+ },
+ "frame": {
+  "entry": "rdi -> r14 (size/count input: mul %r12, product in rbp, seto overflow flag in r13d); rsi -> r12; rbx = %fs:0x0 + 0xffffffffffffef58 (TLS-derived context base)",
+  "prologue": "endbr64; push r15/r14/r13/r12/rbp/rbx; sub $0xa8,%rsp; canary %fs:0x28 -> 0x98(%rsp)",
+  "endbr64": 1,
+  "canary": "0x98(%rsp)",
+  "tls_flag": "cmpb $0x0,%fs:0x330(%rax) at 0x635593f; jne 0x6355c40 (init block calls 0x63ef8e0, the #258 exclusion FDE)",
+  "epilogue": "canary check at 0x6355a7d (jne 0x6356fdc -> call __stack_chk_fail@plt at 0x6356fdc); add $0xa8,%rsp; mov %r13,%rax; pops; ret at 0x6355aa8"
+ },
+ "return_value": {
+  "rax": "r13 at ret (mov %r13,%rax at 0x6355a9b); NOT 0, like #314 (rax = rbx there) and #315 (rax = r12 there)"
+ },
+ "size_class": {
+  "input": "product of entry rdi * entry rsi in rbp (mul %r12 at 0x6355950; seto %cl -> r13d overflow flag)",
+  "byte_table": "0x67277c0 (.bss) at index (rbp+7)>>3 (lea 0x7(%rbp),%r9 at 0x6355980; shr $0x3,%r9; movzbl (%r11,%r9,1),%r15d at 0x635598f); cmp $0xe7,%r15d at 0x6355994; ja 0x6355c26 (error path: __errno_location, movl $0xc, r13d = 0)",
+  "size_table": "0x6727a00 (.bss): mov (%r10,%r12,8),%r14 at 0x63559b9",
+  "flag": "0x6713606 (.bss): cmpb $0x0,(%rax) at 0x63559b6; jne 0x6355ab0",
+  "thresholds": "cmp $0x1000,%rbp at 0x6355973 (ja 0x6355e70, bsr path with movabs $0x7000000000000000); cmp $0x3800,%rbp at 0x63559cf (ja 0x6356050)"
+ },
+ "walk": {
+  "kind": "single",
+  "table": "rbx + top index (rbx is the TLS-derived context base)",
+  "key_load": "r13 is the walk key (no separate load: entry mul result and helper returns accumulate in r13; the walk derives from it at 0x6356140)",
+  "top_index": "(key >> 0x1a) & 0xf0 (mov %r13,%r12 at 0x6356140; shr $0x1a,%r12 at 0x6356146; and $0xf0,%r12d at 0x6356151; add %rbx,%r12 at 0x6356158)",
+  "high_bits": "key & 0xffffffffc0000000 (mov %r13,%rbp at 0x6356143; and $0xffffffffc0000000,%rbp at 0x635614a)",
+  "top_compare": "cmp %rsi,%rbp at 0x6356163 (rsi = 0x1b0(%r12) at 0x635615b); mismatch jne 0x6356b4d (scan slot 0)",
+  "second_level": "(key >> 0x9) & 0x1ffff8 + table + 0x8 (mov %r13,%rax at 0x635616c; shr $0x9,%rax at 0x635616f; and $0x1ffff8,%eax at 0x6356173; add 0x1b8(%r12),%rax at 0x6356178)",
+  "pointer_load": "mov (%rax),%rdi at 0x6356180 (rejoin address; not stored to an output slot; feeds the extract)"
+ },
+ "extract": {
+  "kind": "shl/sar $0x10 + and, then helper call 0x63be540",
+  "transform": "shl $0x10,%rdi at 0x6356183; sar $0x10,%rdi at 0x6356187; and $0xffffffffffffff80,%rdi at 0x635618b",
+  "helper": "call 0x63be540 at 0x635618f (2 sites in this FDE: 0x635618f, 0x635671c)",
+  "note": "No inline output decoding in this FDE (unlike #314); the extract feeds helper 0x63be540 directly"
+ },
+ "scan": {
+  "kind": "single 8-slot move-to-front, table+0x2b0 in rbx, key in rbp (key high bits)",
+  "slot0": "cmp 0x2b0(%rbx),%rbp at 0x6356b4d; hit block at 0x6356b5a swaps the 16-byte entries and recomputes the second-level pointer, rejoining the extract at 0x6356180 (jmp at 0x6356b96)",
+  "loop_entry": "mov $0x1,%edi at 0x6357031 (slot index starts at 1); only jump to 0x6357031 is jne at 0x6356b54",
+  "loop_compare": "cmp 0x2b0(%rbx,%r10,1),%rbp at 0x635703d (r10 = rdi<<4, rdi = 1..7) \u2014 slots 1-7 share this one compare instruction",
+  "exhaustion": "add $0x1,%rdi at 0x635771f; cmp $0x8,%rdi at 0x6357723; jne 0x6357036 (loop back); fall-through at rdi == 8 reaches the lu-miss block at 0x635772d",
+  "mtf_swap": "shared hit block 0x635704b..0x6357091 swaps the 16-byte entries at 0x2b0/0x2b8 and rejoins jmp 0x6356b77 at 0x6357091 (into the slot-0 hit block tail)",
+  "reversed_operand_compares": 0
+ },
+ "lu_miss_sites": [
+  {
+   "site": "0x635774a",
+   "block": "0x635772d",
+   "rdi": "rbx context (mov %rbx,%rdi at 0x635773a)",
+   "rsi": "0x6511a00 (.bss) via lea at 0x635772d",
+   "rdx": "lea 0x1b0(%rbx) at 0x635773d (walk table)",
+   "rcx": "r13 walk key (mov %r13,%rcx at 0x6357737)",
+   "r8d": 1,
+   "r9d": 0,
+   "rejoin": "jmp 0x6356180 at 0x635774f (second-level deref + extract)",
+   "rcx_provenance": "no r13 write on the walk -> scan -> miss path (0x6356140..0x6356166, 0x6356b4d..0x6356b54, 0x6357031..0x6357045, 0x635771f..0x6357727, 0x635772d..0x635774a): r13 is only read there (mov %r13,%r12 / %r13,%rbp at the walk, mov %r13,%rcx at the miss block), so rcx is the same register the walk derives its key from"
+  }
+ ],
+ "second_handler_sites": [
+  {
+   "site": "0x63568c4",
+   "rdi": "rbx",
+   "rsi": 0,
+   "rdx": "0x64da4b0 (.data.rel.ro)",
+   "note": "xor %esi,%esi at 0x63568b5; saves r8/r11 to stack"
+  },
+  {
+   "site": "0x6356afa",
+   "rdi": "rbx",
+   "rsi": "not established (last write mov %r13,%rsi at 0x6356ab2, before an intervening call to 0x63e9c40 which may clobber rsi)",
+   "rdx": "0x64da4b0 (.data.rel.ro)",
+   "note": "saves r10/ecx to stack"
+  },
+  {
+   "site": "0x6356bc1",
+   "rdi": "rbx",
+   "rsi": 0,
+   "rdx": "0x64da4b0 (.data.rel.ro)",
+   "note": "xor %esi,%esi at 0x6356bb2; saves r8/r11 to stack"
+  },
+  {
+   "site": "0x6356dfc",
+   "rdi": "rbx",
+   "rsi": "not established (lea 0x100(%rbx),%rsi at 0x6356d95, before an intervening call to 0x63edf10 which may clobber rsi)",
+   "rdx": "0x64da4b0 (.data.rel.ro)",
+   "note": "saves r10/ecx to stack"
+  },
+  {
+   "site": "0x6357651",
+   "rdi": "rbx",
+   "rsi": "not established (mov %r15,%rsi at 0x635761c, before an intervening call to 0x63bd2c0 which may clobber rsi)",
+   "rdx": "0x64da4b0 (.data.rel.ro)",
+   "note": "saves r8/r11 to stack"
+  },
+  {
+   "site": "0x63576ff",
+   "rdi": "rbx",
+   "rsi": "not established (xor %esi,%esi at 0x63576b5, before an intervening call to 0x6365150 which may clobber rsi)",
+   "rdx": "0x64da4b0 (.data.rel.ro)",
+   "note": "saves r8/r11 to stack"
+  }
+ ],
+ "sites": {
+  "bin_table_init": 0,
+  "lu_miss": 1,
+  "second_handler": 6,
+  "lock_wait": 0,
+  "bsr": [
+   "0x6355e98",
+   "0x6356547",
+   "0x635696b",
+   "0x6356c56",
+   "0x6356ed5",
+   "0x6357165",
+   "0x63574a7",
+   "0x63575f3"
+  ]
+ },
+ "calls": {
+  "total": 111,
+  "distinct_targets": 31,
+  "by_target": {
+   "0x6364880": 13,
+   "0x63f0a90": 12,
+   "0x63e9cd0": 12,
+   "0x6353610": 10,
+   "0x63bd2c0": 8,
+   "0x634ebb0": 6,
+   "0x6365150": 4,
+   "0x63e9c40": 4,
+   "0x63edf10": 4,
+   "0x63c3890": 2,
+   "0x63c2f00": 2,
+   "0x63c3b00": 2,
+   "0x63c2e80": 2,
+   "0x63f0ad0": 2,
+   "0x63eec80": 2,
+   "0x63be540": 2,
+   "0x63f1ad0": 2,
+   "0x6364420": 2,
+   "0x6364410": 2,
+   "0x6364400": 2,
+   "0x6362f90": 2,
+   "0x6352fc0": 2,
+   "0x63c3780": 2,
+   "0x63ec4c0": 2,
+   "0x6360ed0": 2,
+   "0x63ef8e0": 1,
+   "0x63b7240": 1,
+   "0x634f0b0": 1,
+   "0x63495b0": 1,
+   "0x63f0d70": 1,
+   "0x63d9700": 1
+  },
+  "indirect": 0,
+  "plt": {
+   "memset@plt 0x63f0a90": 12,
+   "__errno_location@plt 0x63f0ad0": 2,
+   "sched_getcpu@plt 0x63f1ad0": 2,
+   "__stack_chk_fail@plt 0x63f0d70": 1
+  },
+  "dispatcher": {
+   "#314 window 0x63495b0": [
+    "0x6356712"
+   ],
+   "#313 window 0x63c2f00": [
+    "0x6355b7f",
+    "0x63572e4"
+   ],
+   "#298 window 0x6362f90": [
+    "0x63567d3",
+    "0x63573dd"
+   ],
+   "0x6364880": 13,
+   "0x63e9cd0": 12,
+   "0x63bd2c0 (18B thunk)": 8,
+   "0x6353610": 10,
+   "0x6365150": 4,
+   "0x63e9c40": 4,
+   "0x63edf10": 4,
+   "0x63c3890": 2,
+   "0x63c3b00": 2,
+   "0x63c2e80": 2,
+   "0x63be540": 2,
+   "0x63c3780": 2,
+   "0x6364420": 2,
+   "0x6364410": 2,
+   "0x6364400": 2,
+   "0x6352fc0": 2,
+   "0x63ec4c0": 2,
+   "0x6360ed0": 2
+  }
+ },
+ "census": {
+  "strict": 1717,
+  "calls": 111,
+  "ret": [
+   "0x6355aa8"
+  ],
+  "tail_jump_exits": 0,
+  "bsr": 8,
+  "lock_sub": 0,
+  "lock_add": 0,
+  "jumps": 278,
+  "jumps_outside_window": 0,
+  "raw_e8_lu_miss": {
+   "total_sites": 168,
+   "total_fdes": 53,
+   "tiers": {
+    "1": 18,
+    "2": 14,
+    "3": 1,
+    "4": 11,
+    "5": 1,
+    "6": 2,
+    "7": 1,
+    "8": 1,
+    "10": 3,
+    "13": 1
+   },
+   "this_fde_raw_sites": 1
+  },
+  "raw_e8_bti": {
+   "total_sites": 108,
+   "total_fdes": 42,
+   "tiers": {
+    "1": 17,
+    "2": 12,
+    "4": 8,
+    "5": 1,
+    "6": 2,
+    "8": 1,
+    "10": 1
+   },
+   "this_fde_raw_sites": 0
+  },
+  "total_fdes": 135313,
+  "rela_dyn": {
+   "total": 60723,
+   "relative": 59534
+  },
+  "rela_plt": 278,
+  "bss": "0x64ffe40..0x6728924"
+ },
+ "exhibits": [
+  {
+   "file": "lu_miss_caller_1site_dispatch2.hex",
+   "kind": "raw binary slice",
+   "range": "0x6355900..0x63577e2",
+   "bytes": 7906
+  },
+  {
+   "file": "lu_miss_caller_1site_dispatch2.objdump.txt",
+   "kind": "objdump -d --start-address=0x6355900 --stop-address=0x63577e2",
+   "range": "0x6355900..0x63577e2",
+   "strict": 1717
+  }
+ ],
+ "cited_not_claimed": [
+  {
+   "range": "0x63d9700..0x63d987b",
+   "what": "lu-miss handler (#215)"
+  },
+  {
+   "range": "0x63d9880..0x63d9a64",
+   "what": "bin_table_init body (#262)"
+  },
+  {
+   "range": "0x634ebb0..0x634eccd",
+   "what": "second miss handler (called 6 times here)"
+  },
+  {
+   "range": "0x63bf680..0x63bf7ee",
+   "what": "lock-wait helper (#251)"
+  },
+  {
+   "range": "0x63495b0..0x6349775",
+   "what": "#314 window (called once at 0x6356712)"
+  },
+  {
+   "range": "0x63c2f00..0x63c3328",
+   "what": "#313 window (called at 0x6355b7f and 0x63572e4)"
+  },
+  {
+   "range": "0x6362f90..0x6363258",
+   "what": "#298 window (called at 0x63567d3 and 0x63573dd)"
+  },
+  {
+   "range": "0x63c2e80..0x63c2f00",
+   "what": "#313's prev FDE (called twice)"
+  },
+  {
+   "range": "0x6353a70..0x635582b",
+   "what": "#315 window (dispatcher sibling; NOT called from this FDE)"
+  },
+  {
+   "range": "0x6355830..0x63558f2",
+   "what": "previous FDE"
+  },
+  {
+   "range": "0x63577f0..0x635a786",
+   "what": "next FDE (next lu-miss survivor; not decoded here)"
+  },
+  {
+   "range": "0x63bd2c0..0x63bd2d2",
+   "what": "18B thunk (called 8 times here)"
+  },
+  {
+   "range": "0x63ef8e0..0x63efba2",
+   "what": "#258 exclusion FDE (called once at 0x6355c45 from the TLS init block)"
+  }
+ ],
+ "survey": {
+  "frontier": "callers of lu-miss handler 0x63d9700 that do not call bin_table_init",
+  "lu_miss_fdes": 53,
+  "lu_miss_sites": 168,
+  "lu_miss_survivors": 16,
+  "survivors": [
+   "0x63495b0",
+   "0x6353a70",
+   "0x6355900",
+   "0x63577f0",
+   "0x635a7a0",
+   "0x635c6d0",
+   "0x635e2e0",
+   "0x63c9650",
+   "0x63ccd60",
+   "0x63cddd0",
+   "0x63d03a0",
+   "0x63d17e0",
+   "0x63d2a80",
+   "0x63d3f0e",
+   "0x63d4048",
+   "0x63e94a0"
+  ],
+  "second_handler_fdes": 28,
+  "second_handler_survivors": 18,
+  "shared_survivors": [
+   "0x6353a70",
+   "0x6355900",
+   "0x63577f0",
+   "0x635a7a0",
+   "0x635e2e0",
+   "0x63ccd60",
+   "0x63d03a0",
+   "0x63d17e0",
+   "0x63d2a80"
+  ],
+  "combined_pool": 25,
+  "this_packet_consumes": "one slot of the combined 25-FDE miss-handler pool (shared survivor)",
+  "source": "~/workspace/scratch-hl314survey/census.json"
+ },
+ "next_question": {
+  "range": "0x63577f0..0x635a786",
+  "bytes": 12182,
+  "strict": 2679,
+  "calls": 132,
+  "lu_miss_sites": 1,
+  "lu_miss_site": "0x635a6cd",
+  "bin_table_init_sites": 0,
+  "second_handler_sites": 10,
+  "ret": "0x6357e19",
+  "bsr": 0,
+  "verified": "targeted objdump census by this packet; disjoint from all priors and from this window (verifier)"
+ }
+}

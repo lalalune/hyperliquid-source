@@ -1,0 +1,1368 @@
+{
+ "apply": {
+  "arguments": [
+   "rdi = params struct (CCtx+0x10)",
+   "esi = parameter",
+   "edx = value"
+  ],
+  "arms": {
+   "10": {
+    "field": "+0x00",
+    "kind": "range-checked dword store"
+   },
+   "100": {
+    "field": "+0x2c",
+    "kind": "clamp to bounds; 0 means default level 3; returns the clamped value, 0 when negative"
+   },
+   "1000": {
+    "field": "+0x30",
+    "kind": "boolean (value != 0) store"
+   },
+   "1001": {
+    "field": "+0x44",
+    "kind": "range-checked dword store"
+   },
+   "1002": {
+    "field": "+0x48",
+    "kind": "range-checked dword store"
+   },
+   "1004": {
+    "field": "+0x40",
+    "kind": "range-checked dword store"
+   },
+   "1005": {
+    "field": "+0x78",
+    "kind": "boolean (value != 0) store"
+   },
+   "1006": {
+    "field": "+0x7c",
+    "kind": "range-checked dword store"
+   },
+   "1007": {
+    "field": "+0x80",
+    "kind": "range-checked dword store"
+   },
+   "1008": {
+    "field": "+0x84",
+    "kind": "range-checked dword store"
+   },
+   "1009": {
+    "field": "+0x88",
+    "kind": "range-checked dword store"
+   },
+   "101": {
+    "field": "+0x04",
+    "kind": "range-checked dword store"
+   },
+   "1010": {
+    "field": "+0x8c",
+    "kind": "range-checked dword store"
+   },
+   "1011": {
+    "field": "+0x90",
+    "kind": "bounds lookup inlined; range-checked dword store"
+   },
+   "1012": {
+    "field": "+0x94",
+    "kind": "range-checked, then boolean (value != 0) store"
+   },
+   "1013": {
+    "field": "+0xb0",
+    "kind": "bounds lookup inlined; range-checked dword store"
+   },
+   "1014": {
+    "field": "+0xb4",
+    "kind": "range-checked dword store"
+   },
+   "1015": {
+    "field": "+0xc8",
+    "kind": "0 stores 0; else range-checked, 64-bit store"
+   },
+   "1016": {
+    "field": "+0xd0",
+    "kind": "range-checked dword store"
+   },
+   "102": {
+    "field": "+0x0c",
+    "kind": "range-checked dword store"
+   },
+   "103": {
+    "field": "+0x08",
+    "kind": "range-checked dword store"
+   },
+   "104": {
+    "field": "+0x10",
+    "kind": "range-checked dword store"
+   },
+   "105": {
+    "field": "+0x14",
+    "kind": "range-checked dword store"
+   },
+   "106": {
+    "field": "+0x18",
+    "kind": "range-checked dword store"
+   },
+   "107": {
+    "field": "+0x1c",
+    "kind": "range-checked dword store"
+   },
+   "130": {
+    "field": "+0x38",
+    "kind": "0 stores 0; else max(value, 1340), range-checked, 64-bit store"
+   },
+   "160": {
+    "field": "+0x60",
+    "kind": "range-checked dword store"
+   },
+   "161": {
+    "field": "+0x64",
+    "kind": "range-checked dword store"
+   },
+   "162": {
+    "field": "+0x6c",
+    "kind": "range-checked dword store"
+   },
+   "163": {
+    "field": "+0x68",
+    "kind": "range-checked dword store"
+   },
+   "164": {
+    "field": "+0x70",
+    "kind": "range-checked dword store"
+   },
+   "200": {
+    "field": "+0x20",
+    "kind": "boolean (value != 0) store"
+   },
+   "201": {
+    "field": "+0x24",
+    "kind": "boolean (value != 0) store"
+   },
+   "202": {
+    "field": "+0x28",
+    "kind": "boolean (value == 0) store"
+   },
+   "400": {
+    "field": "none",
+    "kind": "returns 0 iff value == 0, else -40"
+   },
+   "401": {
+    "field": "none",
+    "kind": "returns 0 iff value == 0, else -40"
+   },
+   "402": {
+    "field": "none",
+    "kind": "returns 0 iff value == 0, else -40"
+   },
+   "500": {
+    "field": "none",
+    "kind": "returns 0 iff value == 0, else -40"
+   }
+  },
+  "dispatch": "jump table 0x980e20 for params 100..202, jump table 0x980fbc for params 1000..1016; param 10 is a special arm; params 400..402 and 500 return 0 iff value == 0, else -40; all other params return -40",
+  "name": "parameter apply worker",
+  "returns": "the stored value for value arms, the boolean for bool arms, the clamped value (or 3) for param 100, -40 for an unlisted param, -42 when a range check fails"
+ },
+ "artifact": "work/hl-node-115.bin",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bounds": {
+  "arguments": [
+   "edi = parameter id"
+  ],
+  "name": "parameter bounds lookup",
+  "notes": [
+   "bounds(100) = (-131072, 22): the zstd compression level range; the param-100 arm clamps into it and maps 0 to the default level 3",
+   "bounds(400..402) = (0, 0): only value 0 passes",
+   "bounds(1003) errors while 1001, 1002, 1004 have rows",
+   "bounds(200..202) = (0, 1): the boolean arms do not consult the table"
+  ],
+  "returns": "(status, lo, hi): status 0 with the packed bounds, or -40 when the parameter has no bounds row",
+  "table": {
+   "10": [
+    0,
+    1
+   ],
+   "100": [
+    -131072,
+    22
+   ],
+   "1000": [
+    0,
+    1
+   ],
+   "1001": [
+    0,
+    3
+   ],
+   "1002": [
+    0,
+    2
+   ],
+   "1004": [
+    0,
+    2147483647
+   ],
+   "1005": [
+    0,
+    1
+   ],
+   "1006": [
+    0,
+    1
+   ],
+   "1007": [
+    0,
+    1
+   ],
+   "1008": [
+    0,
+    1
+   ],
+   "1009": [
+    0,
+    1
+   ],
+   "101": [
+    10,
+    31
+   ],
+   "1010": [
+    0,
+    1
+   ],
+   "1011": [
+    0,
+    2
+   ],
+   "1012": [
+    0,
+    1
+   ],
+   "1013": [
+    1024,
+    131072
+   ],
+   "1014": [
+    0,
+    1
+   ],
+   "1015": [
+    0,
+    2
+   ],
+   "1016": [
+    1024,
+    131072
+   ],
+   "102": [
+    6,
+    30
+   ],
+   "103": [
+    6,
+    30
+   ],
+   "104": [
+    1,
+    30
+   ],
+   "105": [
+    3,
+    7
+   ],
+   "106": [
+    0,
+    131072
+   ],
+   "107": [
+    1,
+    9
+   ],
+   "130": [
+    1340,
+    131072
+   ],
+   "160": [
+    0,
+    2
+   ],
+   "161": [
+    6,
+    30
+   ],
+   "162": [
+    4,
+    4096
+   ],
+   "163": [
+    1,
+    8
+   ],
+   "164": [
+    0,
+    25
+   ],
+   "200": [
+    0,
+    1
+   ],
+   "201": [
+    0,
+    1
+   ],
+   "202": [
+    0,
+    1
+   ],
+   "400": [
+    0,
+    0
+   ],
+   "401": [
+    0,
+    0
+   ],
+   "402": [
+    0,
+    0
+   ],
+   "500": [
+    0,
+    1
+   ]
+  }
+ },
+ "callers": {
+  "0x5f03b80": [
+   {
+    "containing_fde": [
+     "0x5f03d60",
+     "0x5f0418f"
+    ],
+    "kind": "direct_call",
+    "role": "AddRecord (census): emits a physical record via 0x5f03b80",
+    "site": "0x5f03ee3"
+   },
+   {
+    "containing_fde": [
+     "0x5f041d0",
+     "0x5f0441c"
+    ],
+    "kind": "direct_call",
+    "role": "refresh routine: emits the 4-byte kind record (type 9)",
+    "site": "0x5f04294"
+   }
+  ],
+  "0x5f041d0": [
+   {
+    "containing_fde": [
+     "0x5e5c270",
+     "0x5e5c9a3"
+    ],
+    "kind": "direct_call",
+    "role": "the refresh routine's one caller, FDE 0x5e5c270 (exact use open)",
+    "site": "0x5e5c5a3"
+   }
+  ],
+  "0x6051a20": [
+   {
+    "containing_fde": [
+     "0x5e26300",
+     "0x5e26498"
+    ],
+    "kind": "direct_call",
+    "role": "shared 4-byte copy helper consumer in FDE 0x5e26300",
+    "site": "0x5e2641b"
+   },
+   {
+    "containing_fde": [
+     "0x5e265c0",
+     "0x5e26a03"
+    ],
+    "kind": "direct_call",
+    "role": "shared 4-byte copy helper consumer in FDE 0x5e265c0",
+    "site": "0x5e26987"
+   },
+   {
+    "containing_fde": [
+     "0x5f03a90",
+     "0x5f03b3d"
+    ],
+    "kind": "direct_call",
+    "role": "shared 4-byte copy helper consumer in FDE 0x5f03a90",
+    "site": "0x5f03b25"
+   },
+   {
+    "containing_fde": [
+     "0x5f03d60",
+     "0x5f0418f"
+    ],
+    "kind": "direct_call",
+    "role": "shared 4-byte copy helper consumer in FDE 0x5f03d60 (AddRecord, census)",
+    "site": "0x5f04105"
+   },
+   {
+    "containing_fde": [
+     "0x5f041d0",
+     "0x5f0441c"
+    ],
+    "kind": "direct_call",
+    "role": "refresh routine: 4-byte copy of owner+0x00 into the template slot (overwritten by the global-qword fill)",
+    "site": "0x5f04394"
+   },
+   {
+    "containing_fde": [
+     "0x5fce130",
+     "0x5fce27d"
+    ],
+    "kind": "direct_call",
+    "role": "shared 4-byte copy helper consumer in FDE 0x5fce130",
+    "site": "0x5fce232"
+   },
+   {
+    "containing_fde": [
+     "0x5fce280",
+     "0x5fce766"
+    ],
+    "kind": "direct_call",
+    "role": "shared 4-byte copy helper consumer in FDE 0x5fce280",
+    "site": "0x5fce6b8"
+   },
+   {
+    "containing_fde": [
+     "0x60525b0",
+     "0x60527a5"
+    ],
+    "kind": "direct_call",
+    "role": "shared 4-byte copy helper consumer in FDE 0x60525b0",
+    "site": "0x605269a"
+   },
+   {
+    "containing_fde": [
+     "0x6052800",
+     "0x60529ee"
+    ],
+    "kind": "direct_call",
+    "role": "shared 4-byte copy helper consumer in FDE 0x6052800",
+    "site": "0x60528a6"
+   },
+   {
+    "containing_fde": [
+     "0x6052b80",
+     "0x6054600"
+    ],
+    "kind": "direct_call",
+    "role": "shared 4-byte copy helper consumer in FDE 0x6052b80",
+    "site": "0x6052e6c"
+   },
+   {
+    "containing_fde": [
+     "0x6054680",
+     "0x605518b"
+    ],
+    "kind": "direct_call",
+    "role": "shared 4-byte copy helper consumer in FDE 0x6054680",
+    "site": "0x6054b5d"
+   },
+   {
+    "containing_fde": [
+     "0x6054680",
+     "0x605518b"
+    ],
+    "kind": "direct_call",
+    "role": "shared 4-byte copy helper consumer in FDE 0x6054680",
+    "site": "0x6054ef4"
+   },
+   {
+    "containing_fde": [
+     "0x6054680",
+     "0x605518b"
+    ],
+    "kind": "direct_call",
+    "role": "shared 4-byte copy helper consumer in FDE 0x6054680",
+    "site": "0x6054fa1"
+   }
+  ],
+  "0x61c1c10": [
+   {
+    "containing_fde": [
+     "0x5f041d0",
+     "0x5f0441c"
+    ],
+    "kind": "direct_call",
+    "role": "refresh routine AddCompressionTypeRecord: installs the factory product at owner+0x48 beside a fresh array at +0x50",
+    "site": "0x5f0430b"
+   }
+  ],
+  "0x62117e0": [
+   {
+    "containing_fde": [
+     "0x62119e0",
+     "0x6211a08"
+    ],
+    "kind": "direct_call",
+    "role": "range-check helper: bounds lookup for its caller",
+    "site": "0x62119e4"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1011: bounds lookup, inlined check",
+    "site": "0x6211b5d"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1013: bounds lookup, inlined check",
+    "site": "0x6211bd5"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 100: bounds lookup, clamp",
+    "site": "0x6211d64"
+   }
+  ],
+  "0x62119e0": [
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1016: range-checks the value",
+    "site": "0x6211aa8"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1008: range-checks the value",
+    "site": "0x6211ae8"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1009: range-checks the value",
+    "site": "0x6211b10"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1010: range-checks the value",
+    "site": "0x6211b38"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1012: range-checks the value",
+    "site": "0x6211ba0"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1014: range-checks the value",
+    "site": "0x6211c18"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1015: range-checks the value",
+    "site": "0x6211c45"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1004: range-checks the value",
+    "site": "0x6211c75"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1006: range-checks the value",
+    "site": "0x6211cb8"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1007: range-checks the value",
+    "site": "0x6211ce0"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1001: range-checks the value",
+    "site": "0x6211d08"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 1002: range-checks the value",
+    "site": "0x6211d30"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 101: range-checks the value",
+    "site": "0x6211dac"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 102: range-checks the value",
+    "site": "0x6211dd2"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 103: range-checks the value",
+    "site": "0x6211df8"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 104: range-checks the value",
+    "site": "0x6211e1e"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 105: range-checks the value",
+    "site": "0x6211e44"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 106: range-checks the value",
+    "site": "0x6211e65"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 107: range-checks the value",
+    "site": "0x6211e8b"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 130: range-checks the value",
+    "site": "0x6211ec1"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 160: range-checks the value",
+    "site": "0x6211ee2"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 163: range-checks the value",
+    "site": "0x6211f08"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 164: range-checks the value",
+    "site": "0x6211f2e"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 161: range-checks the value",
+    "site": "0x6211f80"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 162: range-checks the value",
+    "site": "0x6211fa2"
+   },
+   {
+    "containing_fde": [
+     "0x6211a10",
+     "0x621200c"
+    ],
+    "kind": "direct_call",
+    "role": "apply arm for param 10: range-checks the value",
+    "site": "0x6211fc7"
+   }
+  ],
+  "0x6211a10": [
+   {
+    "containing_fde": [
+     "0x6212010",
+     "0x6212101"
+    ],
+    "kind": "tail_jump",
+    "role": "setter: tail-jumps into the apply worker with params = ctx+0x10",
+    "site": "0x6212036"
+   }
+  ],
+  "0x6212010": [
+   {
+    "containing_fde": [
+     "0x61c1c10",
+     "0x61c1cc8"
+    ],
+    "kind": "direct_call",
+    "role": "factory: sets parameter 201 to 1 on the fresh CCtx",
+    "site": "0x61c1c99"
+   }
+  ],
+  "0x62187a0": [
+   {
+    "containing_fde": [
+     "0x5d41fb0",
+     "0x5d41fe2"
+    ],
+    "kind": "direct_call",
+    "role": "CDict-free consumer in FDE 0x5d41fb0 (exact use open)",
+    "site": "0x5d41fc0"
+   },
+   {
+    "containing_fde": [
+     "0x60e8220",
+     "0x60e88a7"
+    ],
+    "kind": "direct_call",
+    "role": "CDict-free consumer in FDE 0x60e8220 (exact use open)",
+    "site": "0x60e8480"
+   },
+   {
+    "containing_fde": [
+     "0x60e8ab0",
+     "0x60eb83d"
+    ],
+    "kind": "direct_call",
+    "role": "CDict-free consumer in FDE 0x60e8ab0, which also creates a CCtx at 0x60ea2ed (exact use open)",
+    "site": "0x60eb639"
+   },
+   {
+    "containing_fde": [
+     "0x60ef340",
+     "0x60f08e5"
+    ],
+    "kind": "direct_call",
+    "role": "CDict-free consumer in FDE 0x60ef340 (exact use open)",
+    "site": "0x60ef940"
+   },
+   {
+    "containing_fde": [
+     "0x62188a0",
+     "0x621891a"
+    ],
+    "kind": "direct_call",
+    "role": "reset: frees the CCtx's +0xe68 CDict",
+    "site": "0x62188cc"
+   },
+   {
+    "containing_fde": [
+     "0x62189a0",
+     "0x6219135"
+    ],
+    "kind": "direct_call",
+    "role": "CDict-free consumer in FDE 0x62189a0, the large function right after the create (exact use open)",
+    "site": "0x62190d3"
+   },
+   {
+    "containing_fde": [
+     "0x6219ac0",
+     "0x6219c13"
+    ],
+    "kind": "direct_call",
+    "role": "CDict-free consumer in FDE 0x6219ac0 (exact use open)",
+    "site": "0x6219b2f"
+   },
+   {
+    "containing_fde": [
+     "0x6219c20",
+     "0x6219d2d"
+    ],
+    "kind": "direct_call",
+    "role": "CDict-free consumer in FDE 0x6219c20 (exact use open)",
+    "site": "0x6219c9c"
+   },
+   {
+    "containing_fde": [
+     "0x62aa6f0",
+     "0x62ab6bc"
+    ],
+    "kind": "direct_call",
+    "role": "CDict-free consumer in FDE 0x62aa6f0, which also creates a CCtx at 0x62aaa4f (exact use open)",
+    "site": "0x62ab308"
+   },
+   {
+    "containing_fde": [
+     "0x62ad760",
+     "0x62ad968"
+    ],
+    "kind": "direct_call",
+    "role": "CDict-free consumer in FDE 0x62ad760 (four sites in one function; exact use open)",
+    "site": "0x62ad8ce"
+   },
+   {
+    "containing_fde": [
+     "0x62ad760",
+     "0x62ad968"
+    ],
+    "kind": "direct_call",
+    "role": "CDict-free consumer in FDE 0x62ad760 (four sites in one function; exact use open)",
+    "site": "0x62ad91d"
+   },
+   {
+    "containing_fde": [
+     "0x62ad760",
+     "0x62ad968"
+    ],
+    "kind": "direct_call",
+    "role": "CDict-free consumer in FDE 0x62ad760 (four sites in one function; exact use open)",
+    "site": "0x62ad941"
+   },
+   {
+    "containing_fde": [
+     "0x62ad760",
+     "0x62ad968"
+    ],
+    "kind": "direct_call",
+    "role": "CDict-free consumer in FDE 0x62ad760 (four sites in one function; exact use open)",
+    "site": "0x62ad955"
+   }
+  ],
+  "0x62188a0": [
+   {
+    "containing_fde": [
+     "0x6218920",
+     "0x6218996"
+    ],
+    "kind": "direct_call",
+    "role": "create: resets the fresh calloc'd context",
+    "site": "0x6218952"
+   }
+  ],
+  "0x6218920": [
+   {
+    "containing_fde": [
+     "0x5e21b00",
+     "0x5e22615"
+    ],
+    "kind": "direct_call",
+    "role": "CCtx-create consumer in FDE 0x5e21b00 (exact use open)",
+    "site": "0x5e21e10"
+   },
+   {
+    "containing_fde": [
+     "0x60e5610",
+     "0x60e5a39"
+    ],
+    "kind": "direct_call",
+    "role": "CCtx-create consumer in FDE 0x60e5610 (exact use open)",
+    "site": "0x60e582a"
+   },
+   {
+    "containing_fde": [
+     "0x60e8ab0",
+     "0x60eb83d"
+    ],
+    "kind": "direct_call",
+    "role": "CCtx-create consumer in FDE 0x60e8ab0, which also frees a CDict at 0x60eb639 (exact use open)",
+    "site": "0x60ea2ed"
+   },
+   {
+    "containing_fde": [
+     "0x61c1c10",
+     "0x61c1cc8"
+    ],
+    "kind": "direct_call",
+    "role": "factory: the CCtx for the new 0x70-byte holder",
+    "site": "0x61c1c83"
+   },
+   {
+    "containing_fde": [
+     "0x62aa6f0",
+     "0x62ab6bc"
+    ],
+    "kind": "direct_call",
+    "role": "CCtx-create consumer in FDE 0x62aa6f0, which also frees a CDict at 0x62ab308 (exact use open)",
+    "site": "0x62aaa4f"
+   },
+   {
+    "containing_fde": [
+     "0x62ad760",
+     "0x62ad968"
+    ],
+    "kind": "direct_call",
+    "role": "CCtx-create consumer in FDE 0x62ad760, which frees four CDicts (exact use open)",
+    "site": "0x62ad810"
+   }
+  ]
+ },
+ "census": {
+  "0x5f03b80": {
+   "direct_calls": [
+    "0x5f03ee3",
+    "0x5f04294"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x5f041d0": {
+   "direct_calls": [
+    "0x5e5c5a3"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x6051a20": {
+   "direct_calls": [
+    "0x5e2641b",
+    "0x5e26987",
+    "0x5f03b25",
+    "0x5f04105",
+    "0x5f04394",
+    "0x5fce232",
+    "0x5fce6b8",
+    "0x605269a",
+    "0x60528a6",
+    "0x6052e6c",
+    "0x6054b5d",
+    "0x6054ef4",
+    "0x6054fa1"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x61c1c10": {
+   "direct_calls": [
+    "0x5f0430b"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x62117e0": {
+   "direct_calls": [
+    "0x62119e4",
+    "0x6211b5d",
+    "0x6211bd5",
+    "0x6211d64"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x62119e0": {
+   "direct_calls": [
+    "0x6211aa8",
+    "0x6211ae8",
+    "0x6211b10",
+    "0x6211b38",
+    "0x6211ba0",
+    "0x6211c18",
+    "0x6211c45",
+    "0x6211c75",
+    "0x6211cb8",
+    "0x6211ce0",
+    "0x6211d08",
+    "0x6211d30",
+    "0x6211dac",
+    "0x6211dd2",
+    "0x6211df8",
+    "0x6211e1e",
+    "0x6211e44",
+    "0x6211e65",
+    "0x6211e8b",
+    "0x6211ec1",
+    "0x6211ee2",
+    "0x6211f08",
+    "0x6211f2e",
+    "0x6211f80",
+    "0x6211fa2",
+    "0x6211fc7"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x6211a10": {
+   "direct_calls": [],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": [
+    "0x6212036"
+   ]
+  },
+  "0x6212010": {
+   "direct_calls": [
+    "0x61c1c99"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x62187a0": {
+   "direct_calls": [
+    "0x5d41fc0",
+    "0x60e8480",
+    "0x60eb639",
+    "0x60ef940",
+    "0x62188cc",
+    "0x62190d3",
+    "0x6219b2f",
+    "0x6219c9c",
+    "0x62ab308",
+    "0x62ad8ce",
+    "0x62ad91d",
+    "0x62ad941",
+    "0x62ad955"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x62188a0": {
+   "direct_calls": [
+    "0x6218952"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  },
+  "0x6218920": {
+   "direct_calls": [
+    "0x5e21e10",
+    "0x60e582a",
+    "0x60ea2ed",
+    "0x61c1c83",
+    "0x62aaa4f",
+    "0x62ad810"
+   ],
+   "qword_hits_file_offsets": [],
+   "relative_slots": [],
+   "tail_jumps": []
+  }
+ },
+ "create_cctx": {
+  "alloc": "calloc(1, 0x1480); null returns null",
+  "arguments": [],
+  "callers": "6 direct call sites: the factory plus five other CCtx consumers (see callers.tsv)",
+  "feature_probe": "+0x08 = 0 when cpuid max leaf <= 6; else 1 iff leaf-7 EBX has both bits 3 and 8 set (BMI1 + BMI2), else 0",
+  "init": {
+   "0x08": "CPUID feature flag (see below)",
+   "0x10..0xe8": "zeroed by rep stos (27 qwords)",
+   "0x30": 1,
+   "0x3c": 3
+  },
+  "name": "ZSTD_createCCtx (by shape; see vendor_attribution)",
+  "reset_call": "reset 0x62188a0 runs on the fresh context; its pointers are all null, so it frees nothing"
+ },
+ "factory": {
+  "arguments": [
+   "dil = kind byte",
+   "rsi = CompressionOptions template (0x30 bytes)",
+   "edx = arg3 (2 in the one caller)",
+   "rcx = arg4 (0x7ff5 / 0x7ff9 in the one caller)"
+  ],
+  "caller": "0x5f041d0 installs the product at owner+0x48 beside a fresh array at +0x50",
+  "gate": "kind != 7 returns null",
+  "landing_pad": "0x61c1bee (its own FDE): on unwind, delete(0x70) and resume",
+  "name": "rocksdb::StreamingCompress::Create",
+  "product": {
+   "cctx": "+0x50, fresh create 0x6218920",
+   "field_40": "arg3",
+   "field_48": "arg4",
+   "field_58": "0",
+   "field_60": "0 (16 bytes)",
+   "kind_byte": "7 at +0x8",
+   "size": "0x70",
+   "table": "0x64d7408 + 0x10 at +0x0",
+   "template": "0x30 bytes copied to +0x10..+0x40"
+  },
+  "set_parameter": "setParameter(cctx, 201, 1) after the create",
+  "sibling": "0x61c1ce0 StreamingUncompress::Create (open PR #3635) is the decompress-side twin: 0x38-byte holder, fresh DCtx at +0x18, no setParameter call"
+ },
+ "free_cdict": {
+  "arguments": [
+   "rdi = CDict (null returns 0 at once)"
+  ],
+  "branch_note": "which of the two allocations is released depends on whether the +0x20 pointer lies inside the CDict object itself (bounds +0x00 and +0x28); the exact embedded-region rule is recorded as observed structure, not a fully decoded contract",
+  "callers": "13 direct call sites, including the reset",
+  "name": "ZSTD_freeCDict (catalogue)",
+  "steps": [
+   "zero +0x20..+0x60 and +0x60",
+   "release the +0x20 backing allocation and the CDict itself through the +0x17a0 custom free (opaque +0x17a8) when set, else plain free",
+   "return 0"
+  ]
+ },
+ "provenance_path": "artifacts/node/115/hl-node",
+ "range_check": {
+  "arguments": [
+   "edi = parameter id",
+   "esi = value"
+  ],
+  "callers": "26 apply arms (see callers.tsv; the parameter id is recorded per site)",
+  "name": "parameter range check",
+  "returns": "1 iff the bounds lookup succeeds and lo <= value <= hi (signed); 0 otherwise"
+ },
+ "refresh": {
+  "arguments": [
+   "rdi = 16-byte out status",
+   "rsi = owner"
+  ],
+  "caller": "0x5e5c5a3 in FDE 0x5e5c270 (exact use open)",
+  "helpers": "0x5f03b80 emits the record (catalogue EmitPhysicalRecord); 0x6051a20 is a shared 4-byte copy helper whose write into the template slot is overwritten by the global-qword fill (observed; reason open)",
+  "name": "rocksdb::log::Writer::AddCompressionTypeRecord",
+  "steps": [
+   "kind byte owner+0x45 == 0: zero the out, return",
+   "append the kind dword to a stack string; emit it as a type-9 physical record via 0x5f03b80",
+   "emit failure: clear owner+0x45, return the status",
+   "build the 0x30-byte template (see below) and call the factory with (kind, template, 2, 0x7ff5/0x7ff9)",
+   "install the holder at owner+0x48; operator new[] a fresh array of the same size at owner+0x50, delete[]ing the old array",
+   "copy the 16-byte emit status into the out"
+  ],
+  "template": {
+   "array_size": "0x7ff5, or 0x7ff9 when owner+0x18 is 0",
+   "global": "first qword loaded from 0x459aa0; as int32s (-14, 2147483647): -14 matches RocksDB's documented default window_bits; the field names are inferred, the qwords are pinned",
+   "qwords": [
+    "0x7ffffffffff2",
+    "0",
+    "0x100000000",
+    "0",
+    "0",
+    "1"
+   ]
+  }
+ },
+ "reset": {
+  "arguments": [
+   "rdi = CCtx"
+  ],
+  "callers": "only the create (0x6218952) calls it directly; no separate freeCCtx was found in the census",
+  "name": "CCtx workspace release",
+  "steps": [
+   "if +0xe48 != 0: custom free at +0x370 (opaque +0x378) with (opaque, +0xe48), or plain free(+0xe48) when the custom free is null",
+   "freeCDict(+0xe68) via 0x62187a0",
+   "zero +0xe48..+0xe90"
+  ]
+ },
+ "setparam": {
+  "apply_entry": "tail-jumps to 0x6211a10 with rdi = CCtx+0x10",
+  "arguments": [
+   "rdi = CCtx",
+   "esi = parameter",
+   "edx = value"
+  ],
+  "flag_meaning": "the +0xe18 flag is unpinned; it is 0 on a fresh calloc'd context",
+  "flagged_gate": "CCtx+0xe18 != 0: only params 100 and 102..107 are accepted (else -60); accepted params set CCtx+0x4 = 1, then apply",
+  "name": "ZSTD_CCtx_setParameter (by shape)",
+  "return_codes": "-40 (parameter out of bound), -60 (parameter unsupported in the flagged gate), or the apply result",
+  "unflagged_gate": "CCtx+0xe18 == 0: accepted params are 10, 100..107, 130, 160..164, 200..202, 400 (value 0, or value != 0 only when CCtx+0x388 == 0), 401, 402, 500, 999..1002, 1004..1016; else -40; no dirty write"
+ },
+ "task": "RE-001",
+ "unknowns": [
+  "the +0xe18 flag in the setter (unpinned meaning)",
+  "the +0x30 = 1 and +0x3c = 3 fields of the fresh CCtx (offsets and values pinned; field names open)",
+  "the exact embedded-region rule in ZSTD_freeCDict (which of the two allocations is released in each branch)",
+  "no ZSTD_freeCCtx analogue was found: the reset is called only by the create, so the 0x70-byte holder's teardown is unpinned",
+  "the RocksDB-level identities of the five other CCtx-create consumers and of the refresh routine's caller (FDEs only; the binary is stripped)",
+  "the 0x6051a20 helper's contract (a shared 4-byte copy; its write in the refresh path is overwritten)",
+  "the LSDA call-site tables for the landing pads (not decoded)"
+ ],
+ "vendor_attribution": {
+  "create_cctx": {
+   "catalogue_id": null,
+   "evidence": "this packet's excerpts",
+   "label": "zstd ZSTD_createCCtx (identified by shape: calloc(1, 0x1480), CPUID BMI1+BMI2 probe, reset helper, +0x30=1/+0x3c=3; no catalogue row pins this address)",
+   "non_relocation_bytes_equal": null
+  },
+  "emit": {
+   "catalogue_id": "node115-vendor-5f03b80",
+   "evidence": "research/work-items/RE-002-node115-vendor-census/census.json",
+   "label": "librocksdb-sys 0.11.0+8.1.1: _ZN7rocksdb3log6Writer18EmitPhysicalRecordENS0_10RecordTypeEPKcmNS_3Env10IOPriorityE",
+   "non_relocation_bytes_equal": "394/422"
+  },
+  "factory": {
+   "catalogue_id": "node115-vendor-61c1c10",
+   "evidence": "research/work-items/RE-002-node115-vendor-census/census.json",
+   "label": "librocksdb-sys 0.11.0+8.1.1: _ZN7rocksdb17StreamingCompress6CreateENS_15CompressionTypeERKNS_18CompressionOptionsEjm",
+   "non_relocation_bytes_equal": "167/184"
+  },
+  "free_cdict": {
+   "catalogue_id": "node115-vendor-62187a0",
+   "evidence": "research/work-items/RE-002-node115-vendor-census/census.json",
+   "label": "zstd-sys 2.0.15+zstd.1.5.7/2.1.2+zstd.1.5.7: ZSTD_freeCDict",
+   "non_relocation_bytes_equal": "242/251"
+  },
+  "refresh": {
+   "catalogue_id": "node115-vendor-5f041d0",
+   "evidence": "research/work-items/RE-002-node115-vendor-census/census.json",
+   "label": "librocksdb-sys 0.11.0+8.1.1: _ZN7rocksdb3log6Writer24AddCompressionTypeRecordEv",
+   "non_relocation_bytes_equal": "547/588"
+  }
+ },
+ "windows": {
+  "apply": {
+   "cie_offset": "0x00000000",
+   "end": "0x621200c",
+   "fde_offset": "0x0037b5c4",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 1532,
+   "start": "0x6211a10"
+  },
+  "bounds": {
+   "cie_offset": "0x00000000",
+   "end": "0x62119d9",
+   "fde_offset": "0x0037b598",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 505,
+   "start": "0x62117e0"
+  },
+  "create_cctx": {
+   "cie_offset": "0x00000000",
+   "end": "0x6218996",
+   "fde_offset": "0x0037bf64",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 118,
+   "start": "0x6218920"
+  },
+  "factory": {
+   "cie_offset": "0x00730230",
+   "end": "0x61c1cc8",
+   "fde_offset": "0x0076bd4c",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 184,
+   "start": "0x61c1c10"
+  },
+  "factory_landing": {
+   "cie_offset": "0x00730230",
+   "end": "0x61c1c03",
+   "fde_offset": "0x0076bda0",
+   "first_instruction_bytes": "4889dfbe",
+   "size_bytes": 21,
+   "start": "0x61c1bee"
+  },
+  "free_cdict": {
+   "cie_offset": "0x00000000",
+   "end": "0x621889b",
+   "fde_offset": "0x0037bee4",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 251,
+   "start": "0x62187a0"
+  },
+  "range_check": {
+   "cie_offset": "0x00000000",
+   "end": "0x6211a08",
+   "fde_offset": "0x0037b5ac",
+   "first_instruction_bytes": "4883ec08",
+   "size_bytes": 40,
+   "start": "0x62119e0"
+  },
+  "refresh": {
+   "cie_offset": "0x00730230",
+   "end": "0x5f0441c",
+   "fde_offset": "0x0074527c",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 588,
+   "start": "0x5f041d0"
+  },
+  "reset": {
+   "cie_offset": "0x00000000",
+   "end": "0x621891a",
+   "fde_offset": "0x0037bf44",
+   "first_instruction_bytes": "53488bb7",
+   "size_bytes": 122,
+   "start": "0x62188a0"
+  },
+  "setparam": {
+   "cie_offset": "0x00000000",
+   "end": "0x6212101",
+   "fde_offset": "0x0037b5e0",
+   "first_instruction_bytes": "f30f1efa",
+   "size_bytes": 241,
+   "start": "0x6212010"
+  }
+ }
+}

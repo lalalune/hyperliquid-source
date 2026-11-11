@@ -1,0 +1,47 @@
+control	group	kind	detected
+key opening quote 0x22 -> 0x23	key	patch	True
+key closing quote 0x22 -> 0x23	key	patch	True
+key first-entry newline 0x0a -> 0x0b	key	patch	True
+key comma-newline immediate low byte	key	patch	True
+key error-byte branch je -> jne	key	patch	True
+key first-state compare 0x01 -> 0x00	key	patch	True
+escape unicode prefix immediate	escape	patch	True
+escape unicode selector 0x75 -> 0x76	escape	patch	True
+escape backslash 0x5c -> 0x5d	escape	patch	True
+array opening bracket 0x5b -> 0x5c	array	patch	True
+array closing bracket 0x5d -> 0x5e	array	patch	True
+array first newline 0x0a -> 0x0b	array	patch	True
+array comma-newline immediate	array	patch	True
+array hundred threshold 0x63 -> 0x62	array	patch	True
+array ten threshold 0x0a -> 0x0b	array	patch	True
+end brace 0x7d -> 0x7e	end	patch	True
+end state test je -> jne	end	patch	True
+close newline 0x0a -> 0x0b	close	patch	True
+close brace 0x7d -> 0x7e	close	patch	True
+close zero-depth test je -> jne	close	patch	True
+close has-value test je -> jne	close	patch	True
+begin opening brace 0x7b -> 0x7c	begin	patch	True
+begin colon immediate 0x203a -> 0x203b	begin	patch	True
+begin value-failure branch jne -> je	begin	patch	True
+escape table: newline entry n -> m	escape	table	True
+escape table: quote entry cleared	escape	table	True
+escape table: 0x7f escaped as unicode	escape	table	True
+hex table: upper-case digits	escape	table	True
+decimal pair table: 42 -> 43	array	table	True
+model: key without separator after first entry	key	variant	True
+model: key with extra indent level	key	variant	True
+model: key quotes dropped	key	variant	True
+model: escaper disabled	escape	variant	True
+model: unicode escape with three zeros	escape	variant	True
+model: end writes bracket	end	variant	True
+model: array digits zero padded	array	variant	True
+model: array one indent level short	array	variant	True
+model: array closes with brace	array	variant	True
+model: close without newline before brace	close	variant	True
+model: close indents one level deeper	close	variant	True
+model: close writes opening brace	close	variant	True
+model: begin colon without space	begin	variant	True
+model: begin opens with bracket	begin	variant	True
+input: start address outside every FDE	any	outside	True
+input: start address inside data not code	any	rodata	True
+input: binary digest corrupted	any	digest	True

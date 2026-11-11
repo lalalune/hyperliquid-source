@@ -1,0 +1,113 @@
+
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 581c340: 55                           	pushq	%rbp
+ 581c341: 41 57                        	pushq	%r15
+ 581c343: 41 56                        	pushq	%r14
+ 581c345: 41 55                        	pushq	%r13
+ 581c347: 41 54                        	pushq	%r12
+ 581c349: 53                           	pushq	%rbx
+ 581c34a: 50                           	pushq	%rax
+ 581c34b: b8 01 00 00 00               	movl	$0x1, %eax
+ 581c350: f0                           	lock
+ 581c351: 48 0f c1 47 08               	xaddq	%rax, 0x8(%rdi)
+ 581c356: 49 89 c7                     	movq	%rax, %r15
+ 581c359: 49 83 e7 e0                  	andq	$-0x20, %r15
+ 581c35d: 48 8b 0f                     	movq	(%rdi), %rcx
+ 581c360: 4c 89 fa                     	movq	%r15, %rdx
+ 581c363: 48 2b 91 00 01 00 00         	subq	0x100(%rcx), %rdx
+ 581c36a: 75 21                        	jne	0x581c38d <.text+0x440308d>
+ 581c36c: 48 b8 00 00 00 00 02 00 00 00	movabsq	$0x200000000, %rax      # imm = 0x200000000
+ 581c376: f0                           	lock
+ 581c377: 48 09 81 10 01 00 00         	orq	%rax, 0x110(%rcx)
+ 581c37e: 48 83 c4 08                  	addq	$0x8, %rsp
+ 581c382: 5b                           	popq	%rbx
+ 581c383: 41 5c                        	popq	%r12
+ 581c385: 41 5d                        	popq	%r13
+ 581c387: 41 5e                        	popq	%r14
+ 581c389: 41 5f                        	popq	%r15
+ 581c38b: 5d                           	popq	%rbp
+ 581c38c: c3                           	retq
+ 581c38d: 48 89 fb                     	movq	%rdi, %rbx
+ 581c390: 48 c1 ea 05                  	shrq	$0x5, %rdx
+ 581c394: 83 e0 1f                     	andl	$0x1f, %eax
+ 581c397: 48 39 c2                     	cmpq	%rax, %rdx
+ 581c39a: 40 0f 97 c5                  	seta	%bpl
+ 581c39e: 4c 8b 25 db 30 cc 00         	movq	0xcc30db(%rip), %r12    # 0x64df480
+ 581c3a5: eb 16                        	jmp	0x581c3bd <.text+0x44030bd>
+ 581c3a7: 66 0f 1f 84 00 00 00 00 00   	nopw	(%rax,%rax)
+ 581c3b0: 31 ed                        	xorl	%ebp, %ebp
+ 581c3b2: f3 90                        	pause
+ 581c3b4: 4c 39 b9 00 01 00 00         	cmpq	%r15, 0x100(%rcx)
+ 581c3bb: 74 af                        	je	0x581c36c <.text+0x440306c>
+ 581c3bd: 49 89 ce                     	movq	%rcx, %r14
+ 581c3c0: 48 8b 89 08 01 00 00         	movq	0x108(%rcx), %rcx
+ 581c3c7: 48 85 c9                     	testq	%rcx, %rcx
+ 581c3ca: 0f 85 b0 00 00 00            	jne	0x581c480 <.text+0x4403180>
+ 581c3d0: 4d 8b ae 00 01 00 00         	movq	0x100(%r14), %r13
+ 581c3d7: 49 83 fd df                  	cmpq	$-0x21, %r13
+ 581c3db: 0f 87 0d 01 00 00            	ja	0x581c4ee <.text+0x44031ee>
+ 581c3e1: bf 20 01 00 00               	movl	$0x120, %edi            # imm = 0x120
+ 581c3e6: 41 ff d4                     	callq	*%r12
+ 581c3e9: 48 85 c0                     	testq	%rax, %rax
+ 581c3ec: 0f 84 ec 00 00 00            	je	0x581c4de <.text+0x44031de>
+ 581c3f2: 48 89 c1                     	movq	%rax, %rcx
+ 581c3f5: 49 83 c5 20                  	addq	$0x20, %r13
+ 581c3f9: 4c 89 a8 00 01 00 00         	movq	%r13, 0x100(%rax)
+ 581c400: 0f 57 c0                     	xorps	%xmm0, %xmm0
+ 581c403: 0f 11 80 08 01 00 00         	movups	%xmm0, 0x108(%rax)
+ 581c40a: 48 c7 80 18 01 00 00 00 00 00 00     	movq	$0x0, 0x118(%rax)
+ 581c415: 31 c0                        	xorl	%eax, %eax
+ 581c417: f0                           	lock
+ 581c418: 49 0f b1 8e 08 01 00 00      	cmpxchgq	%rcx, 0x108(%r14)
+ 581c420: 74 5e                        	je	0x581c480 <.text+0x4403180>
+ 581c422: 48 89 c2                     	movq	%rax, %rdx
+ 581c425: 48 8b 80 00 01 00 00         	movq	0x100(%rax), %rax
+ 581c42c: 48 83 c0 20                  	addq	$0x20, %rax
+ 581c430: 48 89 81 00 01 00 00         	movq	%rax, 0x100(%rcx)
+ 581c437: 31 c0                        	xorl	%eax, %eax
+ 581c439: f0                           	lock
+ 581c43a: 48 0f b1 8a 08 01 00 00      	cmpxchgq	%rcx, 0x108(%rdx)
+ 581c442: 74 30                        	je	0x581c474 <.text+0x4403174>
+ 581c444: 48 89 c6                     	movq	%rax, %rsi
+ 581c447: 66 0f 1f 84 00 00 00 00 00   	nopw	(%rax,%rax)
+ 581c450: f3 90                        	pause
+ 581c452: 48 8b 86 00 01 00 00         	movq	0x100(%rsi), %rax
+ 581c459: 48 83 c0 20                  	addq	$0x20, %rax
+ 581c45d: 48 89 81 00 01 00 00         	movq	%rax, 0x100(%rcx)
+ 581c464: 31 c0                        	xorl	%eax, %eax
+ 581c466: f0                           	lock
+ 581c467: 48 0f b1 8e 08 01 00 00      	cmpxchgq	%rcx, 0x108(%rsi)
+ 581c46f: 48 89 c6                     	movq	%rax, %rsi
+ 581c472: 75 dc                        	jne	0x581c450 <.text+0x4403150>
+ 581c474: 48 89 d1                     	movq	%rdx, %rcx
+ 581c477: 66 0f 1f 84 00 00 00 00 00   	nopw	(%rax,%rax)
+ 581c480: 49 8b 86 10 01 00 00         	movq	0x110(%r14), %rax
+ 581c487: 83 f8 ff                     	cmpl	$-0x1, %eax
+ 581c48a: 0f 94 c0                     	sete	%al
+ 581c48d: 40 84 c5                     	testb	%al, %bpl
+ 581c490: 0f 84 1a ff ff ff            	je	0x581c3b0 <.text+0x44030b0>
+ 581c496: 4c 89 f0                     	movq	%r14, %rax
+ 581c499: f0                           	lock
+ 581c49a: 48 0f b1 0b                  	cmpxchgq	%rcx, (%rbx)
+ 581c49e: 0f 85 0c ff ff ff            	jne	0x581c3b0 <.text+0x44030b0>
+ 581c4a4: f0                           	lock
+ 581c4a5: 83 4c 24 c0 00               	orl	$0x0, -0x40(%rsp)
+ 581c4aa: 48 8b 43 08                  	movq	0x8(%rbx), %rax
+ 581c4ae: 49 89 86 18 01 00 00         	movq	%rax, 0x118(%r14)
+ 581c4b5: 48 b8 00 00 00 00 01 00 00 00	movabsq	$0x100000000, %rax      # imm = 0x100000000
+ 581c4bf: f0                           	lock
+ 581c4c0: 49 09 86 10 01 00 00         	orq	%rax, 0x110(%r14)
+ 581c4c7: 40 b5 01                     	movb	$0x1, %bpl
+ 581c4ca: f3 90                        	pause
+ 581c4cc: 4c 39 b9 00 01 00 00         	cmpq	%r15, 0x100(%rcx)
+ 581c4d3: 0f 85 e4 fe ff ff            	jne	0x581c3bd <.text+0x44030bd>
+ 581c4d9: e9 8e fe ff ff               	jmp	0x581c36c <.text+0x440306c>
+ 581c4de: bf 08 00 00 00               	movl	$0x8, %edi
+ 581c4e3: be 20 01 00 00               	movl	$0x120, %esi            # imm = 0x120
+ 581c4e8: ff 15 a2 2f cc 00            	callq	*0xcc2fa2(%rip)         # 0x64df490
+ 581c4ee: 48 8d 3d eb a3 c9 00         	leaq	0xc9a3eb(%rip), %rdi    # 0x64b68e0
+ 581c4f5: ff 15 25 30 cc 00            	callq	*0xcc3025(%rip)         # 0x64df520

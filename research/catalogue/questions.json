@@ -1,0 +1,390 @@
+{
+  "schema_version": 1,
+  "target": {
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "ownership_freshness": "historical read-only GitHub context fetched 2026-11-09T05:51:52Z; treat as stale after 30 minutes and run `python3 tools/question_registry.py --status`",
+  "questions": [
+    {
+      "question_id": "qcp-checkpoint-replay-root-fixture",
+      "title": "Connect checkpoint restore, replay references, and root validation in one bounded fixture",
+      "target": {
+        "path": "artifacts/node/115/hl-node",
+        "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+      },
+      "component": "storage",
+      "work_type": "integration",
+      "scope": {
+        "question": "What is the smallest independently checked offline fixture that connects a restored checkpoint, its first replay record, and a provenance-bounded expected root?",
+        "include": [
+          "One selected checkpoint/replay path",
+          "Only contracts established by the four prerequisite questions",
+          "Explicitly supplied and provenance-labeled fixture inputs"
+        ],
+        "exclude": [
+          "Captured binary execution",
+          "Live chain data or signing",
+          "A full storage or consensus component claim"
+        ]
+      },
+      "readiness": "blocked",
+      "evidence_status": "not-started",
+      "prior_attempts": [
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/3988",
+          "relation": "selected replay-key path"
+        },
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/4011",
+          "relation": "selected restored round field"
+        },
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/4157",
+          "relation": "compact digest reference provenance with external H+1 gap"
+        },
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/4117",
+          "relation": "ABCI digest descriptor handoff"
+        },
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/5584",
+          "relation": "open root selector packet"
+        },
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/5591",
+          "relation": "open selected fallback-writer packet"
+        }
+      ],
+      "remaining_gap": "The external expected H+1 reference is unresolved, and the selector/writer evidence remains open. Starting an implementation fixture now would silently invent a hard dependency contract.",
+      "dependencies": [
+        {
+          "question_id": "qcp-first-replay-key",
+          "kind": "hard",
+          "contract": "restored height and round provenance",
+          "condition": "The selected restore-to-replay field relationship is reproduced from its retained packet."
+        },
+        {
+          "question_id": "qcp-expected-root-provenance",
+          "kind": "hard",
+          "contract": "expected-root input provenance",
+          "condition": "The H+1 input producer or an explicit fixture contract with provenance is established."
+        },
+        {
+          "question_id": "qcp-root-selector",
+          "kind": "hard",
+          "contract": "root selector production",
+          "condition": "The selector path and runtime unknowns are reviewed."
+        },
+        {
+          "question_id": "qcp-root-cell-writer",
+          "kind": "hard",
+          "contract": "fallback cell writer",
+          "condition": "The selected store destination and limits are reviewed with the selector evidence."
+        }
+      ],
+      "downstream_consumer": "A small offline checkpoint-to-replay-to-root-validation fixture, the shared consumer of all five pilot questions.",
+      "acceptance_requirements": [
+        "Name and hash every fixture input; use synthetic, offline data only.",
+        "Require explicit provenance for an expected-root input and preserve unresolved branches.",
+        "Compare only an observable result established by the prerequisite contracts.",
+        "Keep captured execution and the full component gate out of scope."
+      ],
+      "required_capabilities": [
+        "Cross-function state-flow reasoning",
+        "Offline fixture design",
+        "Independent review of dependency contracts"
+      ],
+      "evidence_review": [],
+      "linked_issue": {
+        "url": "https://github.com/lalalune/hyperliquid-source/issues/3923",
+        "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"
+      },
+      "pilot_issue": "https://github.com/lalalune/hyperliquid-source/issues/5391"
+    },
+    {
+      "question_id": "qcp-expected-root-provenance",
+      "title": "Identify the expected root reference consumed during replay validation",
+      "target": {
+        "path": "artifacts/node/115/hl-node",
+        "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+      },
+      "component": "storage",
+      "work_type": "discovery",
+      "scope": {
+        "question": "Where does the expected H+1 root reference enter the selected replay-validation path, and what contract supplies it?",
+        "include": [
+          "The handoff from compact digest references to the selected replay comparison",
+          "The source and identity of the expected root input"
+        ],
+        "exclude": [
+          "Recomputing or validating a live chain root",
+          "Assuming a locally produced root is the external expected value",
+          "Unrelated digest algorithms"
+        ]
+      },
+      "readiness": "ready",
+      "evidence_status": "partial",
+      "prior_attempts": [
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/4157",
+          "relation": "maps the source of compact digest references and explicitly leaves external H+1 unresolved"
+        },
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/4117",
+          "relation": "traces the ABCI digest quorum descriptor handoff"
+        }
+      ],
+      "remaining_gap": "The selected evidence does not identify the external H+1 reference or its supplying contract. Identifying that producer is this discovery task, not an unmet input prerequisite: the authenticated node #115 artifact and the retained #4157/#4117 evidence are available, and there are no hard dependencies on another pilot question. The downstream integration fixture remains blocked until the producer is identified or an explicit fixture input contract is justified with provenance.",
+      "dependencies": [],
+      "downstream_consumer": "A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.",
+      "acceptance_requirements": [
+        "Trace the expected-root value to a digest-bound producer or define a minimal explicit fixture contract with provenance.",
+        "Keep local root production separate from externally expected root provenance.",
+        "Record unobserved producers and branches as unresolved."
+      ],
+      "required_capabilities": [
+        "Static cross-function data-flow analysis",
+        "Careful separation of observed and inferred provenance"
+      ],
+      "evidence_review": [
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/4157",
+          "decision": "merged evidence; H+1 source remains open"
+        },
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/4117",
+          "decision": "merged evidence; scoped descriptor handoff only"
+        }
+      ],
+      "linked_issue": {
+        "url": "https://github.com/lalalune/hyperliquid-source/issues/3923",
+        "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"
+      },
+      "pilot_issue": "https://github.com/lalalune/hyperliquid-source/issues/5391"
+    },
+    {
+      "question_id": "qcp-first-replay-key",
+      "title": "Relate restored checkpoint fields to the first replay key",
+      "target": {
+        "path": "artifacts/node/115/hl-node",
+        "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+      },
+      "component": "storage",
+      "work_type": "verification",
+      "scope": {
+        "question": "On the selected restore path, which restored height and round fields initialize the first replay key?",
+        "include": [
+          "The selected checkpoint field decoder and materializer path",
+          "The matching first replay key handoff"
+        ],
+        "exclude": [
+          "Other restore encodings",
+          "A general rule relating height to consensus round",
+          "State-root correctness"
+        ]
+      },
+      "readiness": "recorded",
+      "evidence_status": "reviewed",
+      "prior_attempts": [
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/3988",
+          "relation": "traces the first replay key to the loaded state"
+        },
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/4011",
+          "relation": "traces the selected restore round field into the materialized state"
+        }
+      ],
+      "remaining_gap": "The selected path is documented by merged evidence. This does not establish other decoding paths or complete the storage/replay component gate.",
+      "dependencies": [],
+      "downstream_consumer": "A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.",
+      "acceptance_requirements": [
+        "Retain exact #115 digest-bound field and copy evidence for the selected path.",
+        "Keep height and round provenance separate and state that no arithmetic relation is established.",
+        "Preserve alternate decode paths and full component acceptance as open."
+      ],
+      "required_capabilities": [
+        "Static xref and field-flow tracing",
+        "Digest-bound evidence review"
+      ],
+      "evidence_review": [
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/3988",
+          "decision": "merged evidence; scoped result only"
+        },
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/4011",
+          "decision": "merged evidence; scoped result only"
+        }
+      ],
+      "linked_issue": {
+        "url": "https://github.com/lalalune/hyperliquid-source/issues/3923",
+        "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"
+      },
+      "pilot_issue": "https://github.com/lalalune/hyperliquid-source/issues/5391"
+    },
+    {
+      "question_id": "qcp-root-cell-writer",
+      "title": "Identify the selected fallback writer for the root digest cell",
+      "target": {
+        "path": "artifacts/node/115/hl-node",
+        "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+      },
+      "component": "storage",
+      "work_type": "discovery",
+      "scope": {
+        "question": "Which selected fallback helper writes the root-digest cell reached by the node #115 selector, and which stores are directly evidenced?",
+        "include": [
+          "The fallback target and its authenticated relocation",
+          "The selected destination and exact store offsets"
+        ],
+        "exclude": [
+          "All other writers and readers",
+          "Symbolic names for the stored qwords",
+          "Synchronization and runtime CPUID values"
+        ]
+      },
+      "readiness": "in-progress",
+      "evidence_status": "unreviewed",
+      "prior_attempts": [
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/5584",
+          "relation": "open selector packet that leaves the fallback writer unresolved"
+        },
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/5591",
+          "relation": "open selected-writer packet with three store offsets and bounded unknowns"
+        }
+      ],
+      "remaining_gap": "The selected writer packet is open and does not establish exclusivity, synchronization, or the meaning of the stored words. Its result must not be treated as a complete selector-cell contract.",
+      "dependencies": [
+        {
+          "question_id": "qcp-root-selector",
+          "kind": "hard",
+          "contract": "selected fallback target and destination cell",
+          "condition": "The selector-to-fallback edge and destination relocation are reviewed together."
+        }
+      ],
+      "downstream_consumer": "A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.",
+      "acceptance_requirements": [
+        "Verify the writer target, relocation destination, bounded store bytes, and target digest.",
+        "Check competing references or clearly retain non-exclusivity as an unknown.",
+        "Do not assign field meanings or a concurrency contract without evidence."
+      ],
+      "required_capabilities": [
+        "Static x86-64 instruction and relocation analysis",
+        "Negative-control evidence verification"
+      ],
+      "evidence_review": [],
+      "linked_issue": {
+        "url": "https://github.com/lalalune/hyperliquid-source/issues/3923",
+        "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"
+      },
+      "pilot_issue": "https://github.com/lalalune/hyperliquid-source/issues/5391"
+    },
+    {
+      "question_id": "qcp-root-selector",
+      "title": "Map node #115 root digest selector production",
+      "target": {
+        "path": "artifacts/node/115/hl-node",
+        "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+      },
+      "component": "storage",
+      "work_type": "discovery",
+      "scope": {
+        "question": "What selected reads and branches produce the root digest selector byte, without naming CPU feature semantics not established by evidence?",
+        "include": [
+          "The selected root setup caller",
+          "The selector fallback decision path and repeated cell reads"
+        ],
+        "exclude": [
+          "Runtime CPU feature values",
+          "All writers and synchronization for the selector cell",
+          "Digest equality or whole-state correctness"
+        ]
+      },
+      "readiness": "in-progress",
+      "evidence_status": "unreviewed",
+      "prior_attempts": [
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/5584",
+          "relation": "open static packet for selector production and fallback branches"
+        }
+      ],
+      "remaining_gap": "The cited PR is open. The record does not treat an open attempt as reviewed evidence or as a completed component gate.",
+      "dependencies": [],
+      "downstream_consumer": "A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.",
+      "acceptance_requirements": [
+        "Verify the target digest, selector call site, selected branch bytes, FDE bounds, and relocation or data references.",
+        "Preserve repeated reads and branches rather than assuming a stable runtime cell.",
+        "Do not infer runtime CPU values or complete the RE-009 gate from a partial selector packet."
+      ],
+      "required_capabilities": [
+        "Static x86-64 control-flow and relocation analysis",
+        "Independent packet reproduction"
+      ],
+      "evidence_review": [],
+      "linked_issue": {
+        "url": "https://github.com/lalalune/hyperliquid-source/issues/3923",
+        "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"
+      },
+      "pilot_issue": "https://github.com/lalalune/hyperliquid-source/issues/5391"
+    }
+  ],
+  "ownership_snapshot": {
+    "schema_version": 1,
+    "source": "GitHub REST API via gh",
+    "fetched_at": "2026-11-09T05:51:52Z",
+    "issues": {
+      "3923": {
+        "state": "open",
+        "assignees": [],
+        "url": "https://github.com/lalalune/hyperliquid-source/issues/3923"
+      },
+      "5391": {
+        "state": "open",
+        "assignees": [],
+        "url": "https://github.com/lalalune/hyperliquid-source/issues/5391"
+      }
+    },
+    "pull_requests": {
+      "3988": {
+        "state": "merged",
+        "author": "0xQueenQ",
+        "url": "https://github.com/lalalune/hyperliquid-source/pull/3988",
+        "review_state": "merged"
+      },
+      "4011": {
+        "state": "merged",
+        "author": "0xQueenQ",
+        "url": "https://github.com/lalalune/hyperliquid-source/pull/4011",
+        "review_state": "merged"
+      },
+      "4117": {
+        "state": "merged",
+        "author": "0xQueenQ",
+        "url": "https://github.com/lalalune/hyperliquid-source/pull/4117",
+        "review_state": "merged"
+      },
+      "4157": {
+        "state": "merged",
+        "author": "0xQueenQ",
+        "url": "https://github.com/lalalune/hyperliquid-source/pull/4157",
+        "review_state": "merged"
+      },
+      "5584": {
+        "state": "open",
+        "author": "Jonas-Augustinus-Linus",
+        "url": "https://github.com/lalalune/hyperliquid-source/pull/5584",
+        "review_state": "no-approval-on-current-head"
+      },
+      "5591": {
+        "state": "open",
+        "author": "Jonas-Augustinus-Linus",
+        "url": "https://github.com/lalalune/hyperliquid-source/pull/5591",
+        "review_state": "no-approval-on-current-head"
+      }
+    }
+  }
+}

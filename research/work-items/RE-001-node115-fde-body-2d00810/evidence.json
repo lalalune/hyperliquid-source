@@ -1,0 +1,65 @@
+{
+  "task": "RE-001",
+  "question": "what is the authenticated FDE extent, file offset and body digest of one bounded .text range of node #115, how many objdump lines does that range disassemble to, and which byte-supported direct call edge does the range contain?",
+  "target": "artifacts/node/115/hl-node",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target_size_bytes": 105896032,
+  "window": {
+    "start": "0x2d00810",
+    "end": "0x2d009ef",
+    "size_bytes": 479,
+    "file_offset": "0x2cff810",
+    "body_sha256": "743cdc0425af36017af36e8e2882b9896eeb29ebe547eb3600368ef4118d99d3",
+    "covered": false
+  },
+  "fde_record": "004f30bc 0000000000000050 0015c994 FDE cie=0039672c pc=0000000002d00810..0000000002d009ef",
+  "text_section": {
+    "va": "0x1419300",
+    "file_offset": "0x1418300",
+    "size": "0x4fd7700"
+  },
+  "objdump_line_count": 132,
+  "call_edge": {
+    "instruction_va": "0x2d00849",
+    "instruction_bytes": "e8 22 14 d2 ff",
+    "opcode": "e8 (call rel32)",
+    "displacement_bytes_le": "22 14 d2 ff",
+    "displacement_signed_le": "-0x2debde",
+    "displacement_decimal": -3009502,
+    "next_instruction_va": "0x2d0084e",
+    "target_va": "0x2a21c70",
+    "derivation": "0x2d0084e + (-0x2debde) = 0x2a21c70",
+    "callee_label": "prior RE-011 interpretation only: role=block_number_resolver in research/work-items/RE-011-evm-fee-history-115/functions.json (start_va 0x2a21c70, end_va_exclusive 0x2a225bd); not a recovered symbol",
+    "caller_ownership": "unknown; this edge does not establish which function owns 0x2d00810..0x2d009ef or what it does"
+  },
+  "selection_rule": "first FDE whose extent is not >=90% inside any registered window",
+  "ownership": "unknown; an FDE extent and disassembly do not establish function ownership, a source name, or first-party authorship",
+  "re_derived_by_checker": [
+    "target_sha256",
+    "text_section.va",
+    "text_section.file_offset",
+    "text_section.size",
+    "window.start",
+    "window.end",
+    "window.size_bytes",
+    "window.file_offset",
+    "window.body_sha256",
+    "presence of an FDE record for the exact pc range",
+    "call_edge.instruction_va",
+    "call_edge.instruction_bytes",
+    "call_edge.opcode",
+    "call_edge.displacement_bytes_le",
+    "call_edge.displacement_signed_le",
+    "call_edge.displacement_decimal",
+    "call_edge.next_instruction_va",
+    "call_edge.target_va"
+  ],
+  "recorded_not_re_derived": [
+    "fde_record (full text; the checker only confirms an FDE exists for the pc range)",
+    "objdump_line_count (recorded observation; the checker does not recount objdump lines)",
+    "call_edge.derivation (explanatory string; the checker does not compare it)",
+    "call_edge.callee_label (explanatory string; the checker does not compare it)",
+    "call_edge.caller_ownership (explanatory string; the checker does not compare it)"
+  ],
+  "limits": "This packet records the authenticated FDE extent, file offset and body digest of one .text range, its objdump line count, and one byte-supported direct call edge inside that range: the five instruction bytes at 0x2d00849 are e8 22 14 d2 ff, the signed little-endian displacement is -0x2debde (-3009502), and the derived target is 0x2a21c70. The callee label is prior RE-011 interpretation only, not a recovered symbol. An FDE, disassembly and one call edge do not establish function ownership, a source name, or semantics; the nearest objdump dynamic symbol is not the function identity. No execution, emulation, caller census or reconstruction claim is made."
+}

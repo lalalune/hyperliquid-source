@@ -1,0 +1,11 @@
+function	branch	condition	dispatch_site	target_or_effect	scope
+len_129to240_128b	front_pairs	len in 129..240 (always)	0x61d80a0	8 mix16B input+0..112/secret+0..127 in pairs (0,16),(32,48),(64,80),(96,112); both accumulators avalanched after	modelled
+len_129to240_128b	middle_pair_8_9	len > 159	0x61d82d1	mix16B input+128/secret+3 with input+144/secret+19	modelled
+len_129to240_128b	middle_pair_10_11	len > 191	0x61d8344	mix16B input+160/secret+35 with input+176/secret+51	modelled
+len_129to240_128b	middle_pair_12_13	len > 223	0x61d83b7	mix16B input+192/secret+67 with input+208/secret+83	modelled
+len_129to240_128b	trailing_pair	len in 129..240 (always)	0x61d8427	mix16B input+len-16/secret+103 with input+len-32/secret+119, seed negated	modelled
+len_129to240_128b	middle_i14	len == 240 only	-	no block: the pair loop runs while i+1 < len//16, so the i=14 window (input+224/secret+99) never runs	out of scope
+128bits	len_gt_240	len > 240	0x61deda0	0x61def10 -> call 0x61d8a60 (hashLong)	out of scope
+128bits_withSeed	len_gt_240	len > 240	0x61df2a8	0x61df430 -> call 0x61d9bc0 (hashLong_withSeed)	out of scope
+128bits	len_lt_129	len < 129	0x61deabc	short branches, modelled in PR #5578	out of scope
+128bits_withSeed	len_lt_129	len < 129	0x61defb1	short branches, modelled in PR #5578	out of scope

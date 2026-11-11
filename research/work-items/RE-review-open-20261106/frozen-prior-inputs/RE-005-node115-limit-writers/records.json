@@ -1,0 +1,300 @@
+{
+ "boundaries": {
+  "incoming_values": "who first set the bulk selector bytes, the twin sibling slots and source-object fields, and the incoming limit value when the final stage is entered downstream of its store, is above the traced window",
+  "record_helper_a": "the copy-a record helper 0x2b7a290 is pinned at its call sites only; whether its tag-0 arm writes its record first qword is not traced (the copy-b helper is exported in full and does not)",
+  "sibling_record_calls": "the calls on the sibling records (bulk 0x27013e0 / 0x5860f30, twin 0x2701770 / 0x5861830) do not take the limit field address; their internal writes are not traced",
+  "twin_a_result_0x28": "the writer of the twin-a stage result +0x28 field left open by #2501 is a different field and remains open"
+ },
+ "bulk_limit_value": "selected by one object byte (bulk_a +0x1e8, bulk_b +0xc08): 1000 when the byte is 0, 4000000000 (0xee6b2800) when it is nonzero; the selected value is stored to the limit field and to two sibling slots (bulk_a +0x218/+0x248, bulk_b +0xc38/+0xc68)",
+ "call_census": {
+  "top_bulk_a": {
+   "direct_calls": [
+    {
+     "containing_fde": "0x2ad7140..0x2adce3a",
+     "site": "0x2ad7ff7"
+    },
+    {
+     "containing_fde": "0x2cc1120..0x2cc971b",
+     "site": "0x2cc52bf"
+    }
+   ],
+   "lea_references": []
+  },
+  "top_bulk_b": {
+   "direct_calls": [
+    {
+     "containing_fde": "0x5a82670..0x5a89535",
+     "site": "0x5a856d1"
+    }
+   ],
+   "lea_references": []
+  },
+  "top_twin_a": {
+   "direct_calls": [
+    {
+     "containing_fde": "0x2ae0100..0x2ae0917",
+     "site": "0x2ae0454"
+    },
+    {
+     "containing_fde": "0x2cb1eb0..0x2cb2563",
+     "site": "0x2cb2101"
+    }
+   ],
+   "lea_references": []
+  },
+  "top_twin_b": {
+   "direct_calls": [
+    {
+     "containing_fde": "0x5a82670..0x5a89535",
+     "site": "0x5a83698"
+    },
+    {
+     "containing_fde": "0x5a82670..0x5a89535",
+     "site": "0x5a85a2c"
+    }
+   ],
+   "lea_references": []
+  }
+ },
+ "captured_code_executed": false,
+ "dispatchers": {
+  "bulk_a": {
+   "downstream_call": "0x2b688b4",
+   "downstream_target": "0x26fe940 (state constructor, #2501)",
+   "exit_path_calls": [
+    "0x2b68b9d -> 0x2abc7e0",
+    "0x2b69009 -> 0x2abc7e0"
+   ],
+   "final_store": "0x2b6874d",
+   "first_store": "0x2b6847a",
+   "limit_field": "+0x220",
+   "limit_load": "0x2b68885",
+   "object": "entry rsi saved to rbx",
+   "parse_helper_call": "0x2b687a7 -> 0x2b788e0",
+   "record_helper_call": "0x2b684b5 -> 0x2b7a290",
+   "selector_byte": "+0x1e8",
+   "sibling_record_call": "0x2b6846e -> 0x27013e0 on +0x208"
+  },
+  "bulk_b": {
+   "downstream_call": "0x5a66d32",
+   "downstream_target": "0x5860cd0 (view builder, #2501)",
+   "exit_path_calls": [
+    "0x5a6703b -> 0x5a52490",
+    "0x5a68983 -> 0x5a52490"
+   ],
+   "final_store": "0x5a66bcd",
+   "first_store": "0x5a668e6",
+   "limit_field": "+0xc40",
+   "limit_load": "0x5a66d03",
+   "object": "entry rsi saved to r13",
+   "parse_helper_call": "0x5a66c2e -> 0x5ab4390",
+   "record_helper_call": "0x5a66926 -> 0x5ab6ce0",
+   "selector_byte": "+0xc08",
+   "sibling_record_call": "0x5a668d8 -> 0x5860f30 on +0xc28"
+  },
+  "twin_a": {
+   "also_stored_to": [
+    "+0x178",
+    "+0x1a8"
+   ],
+   "case_values": {
+    "tag_1": 10000,
+    "tag_2": 120
+   },
+   "compute_source": "pointer at [obj+0x78]; tag at [ptr], start at [ptr+0x8], end at [ptr+0x10]",
+   "copy_entry": "r13 = [obj+0x178] at 0x2b69f05, jump at 0x2b69f21",
+   "downstream_call": "0x2b6aa53",
+   "downstream_target": "0x26ff210 (state constructor, #2501)",
+   "final_store": "0x2b6a8e0",
+   "first_stage_read": "0x2b69f4d, propagated to +0x268 at 0x2b69f5f",
+   "first_store": "0x2b69e69 (record base pointer, lea obj+0x140)",
+   "flag": "a byte records value >= 100000000 and is passed to the downstream call",
+   "formula": "min((end-start+1)*10000000, 1000000000), saturating on borrow or multiplication overflow",
+   "limit_field": "+0x180",
+   "limit_load": "0x2b6aa24",
+   "object": "entry rsi saved to rbx",
+   "parse_helper_call": "0x2b6a93a -> 0x2b788e0",
+   "record_helper_call": "0x2b6a6a6 -> 0x2b7a290 on +0x168",
+   "second_store": "0x2b6a68e (movups of the pair at +0x158)",
+   "sibling_record_call": "0x2b6a65f -> 0x2701770 on +0x150"
+  },
+  "twin_b": {
+   "also_stored_to": [
+    "+0xa58",
+    "+0xa88"
+   ],
+   "case_values": {
+    "tag_1": 10000,
+    "tag_2": 120
+   },
+   "compute_source": "pointer at [obj+0x958]; tag at [ptr], start at [ptr+0x8], end at [ptr+0x10]",
+   "copy_entry": "r15 = [obj+0xa58] at 0x5a6abcb, jump at 0x5a6abe7",
+   "downstream_call": "0x5a6b8b5",
+   "downstream_target": "0x58606f0 (view builder, #2501)",
+   "final_store": "0x5a6b732",
+   "first_stage_read": "0x5a6ac0f, propagated to +0xb48 at 0x5a6ac21",
+   "first_store": "0x5a6aad6 (record base pointer, lea obj+0xa20)",
+   "flag": "a byte records value >= 100000000 and is passed to the downstream call",
+   "formula": "min((end-start+1)*10000000, 1000000000), saturating on borrow or multiplication overflow",
+   "limit_field": "+0xa60",
+   "limit_load": "0x5a6b881",
+   "object": "entry rsi saved to rbx",
+   "parse_helper_call": "0x5a6b78c -> 0x5ab4390",
+   "record_helper_call": "0x5a6b4ff -> 0x5ab6ce0 on +0xa48",
+   "second_store": "0x5a6b4e7 (movups of the pair at +0xa38)",
+   "sibling_record_call": "0x5a6b4b8 -> 0x5861830 on +0xa30"
+  }
+ },
+ "first_arm_values": "bulk: an immediate 0 at the limit field while a fresh record (0, 60.0 bit pattern, saved register, copied pair) is built at the field; twin: the record base pointer (first arm) and a 16-byte copy of the sibling pair (second arm)",
+ "last_writer": "in direct control flow the only instructions reaching each limit load without passing a limit store are the tail instructions after the final store; the pinned jump-table slots are the only targets inside (final store, load] and land inside the final stage block downstream of the store (bulk b: none)",
+ "limits": "Static trace only: no pinned bytes were executed and no live node, network, signer, or exchange state was used. The access census for each limit field covers direct accesses through the dispatcher object register inside the dispatcher FDE, cross-checked with two independent disassemblies; stores through a differently-based alias of the same object inside the dispatcher, and writes by callees other than the recorded record-helper behaviour, are not excluded. The last-writer analysis covers direct branches and the pinned jump-table slots; other jump-table targets were enumerated in the analysis and none lands in (final store, load] except the pinned ones. Who first set the object fields the final values are derived from (the bulk selector bytes, the twin sibling slots and source-object fields, and the incoming limit value on a downstream stage entry) sits above the traced window and is a stated boundary, as is the copy-a record helper effect on its record first qword and the writer of the twin-a stage result +0x28 field left open by #2501. Raw values are recorded mechanically; which Rust types or enum variants they belong to is not established. No Rust reconstruction is included or claimed.",
+ "owners": [
+  {
+   "bytes": 5161,
+   "end": "0x2b69279",
+   "file_offset": "0x2b66e50",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+     "va": "0x103d604"
+    },
+    "fde": {
+     "bytes_hex": "50000000e480140064279e0129140000043f390eff410e10420e18420e20420e28420e30410e38470ec00883078c068d058e048f03860203b30d0e38410e30420e28420e20420e18420e10410e08410ec0080000",
+     "va": "0x11856e4"
+    }
+   },
+   "role": "top_bulk_a",
+   "sha256": "3584f0ac010d68cbcb1583dc2d6761695f0f22a45d44fe659a2b3403ef1ac9b8",
+   "start": "0x2b67e50"
+  },
+  {
+   "bytes": 4479,
+   "end": "0x2b6ae9f",
+   "file_offset": "0x2b68d20",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+     "va": "0x103d604"
+    },
+    "fde": {
+     "bytes_hex": "5000000020821400f8449e017f11000004373a0eff410e10420e18420e20420e28420e30410e38470e900783078c068d058e048f038602038e0e0e38410e30420e28420e20420e18420e10410e08410e90070000",
+     "va": "0x1185820"
+    }
+   },
+   "role": "top_twin_a",
+   "sha256": "5b854640e07f22fdce4262d719e531d12d68014e9518b7f848b2dcb4c13069ba",
+   "start": "0x2b69d20"
+  },
+  {
+   "bytes": 20837,
+   "end": "0x5a69c05",
+   "file_offset": "0x5a63aa0",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+     "va": "0x103d604"
+    },
+    "fde": {
+     "bytes_hex": "5400000084c7360014ad6b0465510000048fed03ff410e10420e18420e20420e28420e30410e38470eb8204f0e803f83078c068d058e048f038602035f4a0e38410e30420e28420e20420e18420e10410e08410e803f0000",
+     "va": "0x13a9d84"
+    }
+   },
+   "role": "top_bulk_b",
+   "sha256": "7ef4223a0df3ad1e2489d38b717dfc79df37e94c6f92b32d5c651445fb257d6c",
+   "start": "0x5a64aa0"
+  },
+  {
+   "bytes": 6506,
+   "end": "0x5a6bfaa",
+   "file_offset": "0x5a69640",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+     "va": "0x103d604"
+    },
+    "fde": {
+     "bytes_hex": "5400000084c83600b4076c046a19000004cbf103ff410e10420e18420e20420e28420e30410e38470eb8204f0ea02a83078c068d058e048f038602032a160e38410e30420e28420e20420e18420e10410e08410ea02a0000",
+     "va": "0x13a9e84"
+    }
+   },
+   "role": "top_twin_b",
+   "sha256": "24b644822cfac0aad7bea4dfb9f819f70101780c0e9bd563122908f6e13d894a",
+   "start": "0x5a6a640"
+  },
+  {
+   "bytes": 267,
+   "end": "0x5ab6deb",
+   "file_offset": "0x5ab5ce0",
+   "frames": {
+    "cie": {
+     "bytes_hex": "1c00000000000000017a504c5200017810079b11244b051b1b0c070890010000",
+     "va": "0x103d604"
+    },
+    "fde": {
+     "bytes_hex": "3c000000f80f3700e08670040b01000004170704ff420e10420e18420e20410e28410e3083058c048e038f0202af0e28410e20420e18420e10420e08410e3000",
+     "va": "0x13ae5f8"
+    }
+   },
+   "role": "record_helper_b",
+   "sha256": "08357015a1b05bbfc9165468f78eef893001cc4d76ee61463c1e474cc69d779b",
+   "start": "0x5ab6ce0"
+  }
+ ],
+ "record_helper_b": {
+  "entry": "rdi saved to rbx; dispatch on the tag byte at +0x310",
+  "first_qword": "read at +0x0 and copied to +0x28; no store to +0x0 anywhere in the 267-byte body (retained export)",
+  "stores": [
+   "+0x28",
+   "+0x30",
+   "+0x38",
+   "+0x48",
+   "+0x308",
+   "+0x309",
+   "+0x310 (tag byte outcomes)"
+  ]
+ },
+ "tail_slots": [
+  {
+   "index": 10,
+   "table": "0x604ac4",
+   "target": "0x2b68776"
+  },
+  {
+   "index": 3,
+   "table": "0x604ae0",
+   "target": "0x2b68792"
+  },
+  {
+   "index": 9,
+   "table": "0x604b48",
+   "target": "0x2b6a90d"
+  },
+  {
+   "index": 3,
+   "table": "0x604b60",
+   "target": "0x2b6a925"
+  },
+  {
+   "index": 17,
+   "table": "0x939690",
+   "target": "0x5a6b73f"
+  },
+  {
+   "index": 9,
+   "table": "0x9396b0",
+   "target": "0x5a6b75f"
+  },
+  {
+   "index": 13,
+   "table": "0x9396a0",
+   "target": "0x5a6b74f"
+  },
+  {
+   "index": 3,
+   "table": "0x9396c8",
+   "target": "0x5a6b777"
+  }
+ ],
+ "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "twin_limit_value": "on the compute entry, a saturating formula over a source object: tag 2 -> 120, tag 1 -> 10000, otherwise min((end-start+1)*10000000, 1000000000) with saturation on borrow or overflow; on the copy entry, the current sibling slot value (twin_a +0x178, twin_b +0xa58); the value is stored to the limit field and to two sibling slots"
+}

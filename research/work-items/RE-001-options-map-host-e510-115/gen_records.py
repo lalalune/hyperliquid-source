@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+"""Generate records.json (semantic records only) for this packet.
+
+Run from the repo root:
+    python3 research/work-items/RE-001-options-map-host-e510-115/gen_records.py
+"""
+import json
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+
+HOST_CALLERS = [
+    {"site": "0x5eba260", "containing_fde": "0x5eba1a0..0x5eba64d"},
+    {"site": "0x5fd3672", "containing_fde": "0x5fd34b0..0x5fd38f6"},
+    {"site": "0x5fd3a73", "containing_fde": "0x5fd39b0..0x5fd3cf6"},
+    {"site": "0x5fd489a", "containing_fde": "0x5fd46c0..0x5fd4c2e"},
+    {"site": "0x5fed884", "containing_fde": "0x5fed600..0x5fedc93"},
+    {"site": "0x5ffa85a", "containing_fde": "0x5ffa710..0x5ffaad9"},
+    {"site": "0x5ffbb5a", "containing_fde": "0x5ffba10..0x5ffbdd9"},
+    {"site": "0x60779af", "containing_fde": "0x6077820..0x60780a0"},
+    {"site": "0x60952ca", "containing_fde": "0x6095180..0x60956da"},
+    {"site": "0x61373eb", "containing_fde": "0x6137290..0x6137688"},
+    {"site": "0x613d996", "containing_fde": "0x613d840..0x613dea9"},
+    {"site": "0x6197b55", "containing_fde": "0x6197a10..0x6197eb3"},
+    {"site": "0x61a7194", "containing_fde": "0x61a7010..0x61a75a9"},
+    {"site": "0x61c02ea", "containing_fde": "0x61c0180..0x61c0cb4"},
+    {"site": "0x61ca53b", "containing_fde": "0x61ca3d0..0x61cb3dc"},
+    {"site": "0x61cf087", "containing_fde": "0x61cef30..0x61cf5c9"},
+    {"site": "0x61ea080", "containing_fde": "0x61e9f30..0x61ea389"},
+    {"site": "0x61ec04b", "containing_fde": "0x61ebf90..0x61ec3b3"},
+    {"site": "0x61f457a", "containing_fde": "0x61f4430..0x61f498a"},
+    {"site": "0x61fd94a", "containing_fde": "0x61fd800..0x61fdd5a"},
+    {"site": "0x620a120", "containing_fde": "0x620a060..0x620a480"},
+]
+
+RECORDS = {
+    "task": "RE-001",
+    "work_item": "RE-001-options-map-host-e510-115",
+    "node": 115,
+    "artifact": "artifacts/node/115/hl-node",
+    "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "question": "What does 0x609e510 do - the host that resolves an id-prefixed option name, checks it against the object's own names, serializes the object's options, and merges the result into the caller's map?",
+    "resolves": "#4337 open unknown: 0x609e510 host identity; #4334 open unknown: what the release helper 0x5d35070 does; corrects #4334/#4337: the wrapper 0x60985e0's sole caller 0x609e0a9 is inside slot-12 0x609de80 (FDE 0x609de80..0x609e29e), not inside 0x609e510",
+    "functions": {
+        "0x609e510": {
+            "fde": "0x609e510..0x609f073",
+            "role": "options-map host: resolve an (id-prefixed) option name against the object, verify it is the object's own name, serialize the object's options with the caller's config, parse the serialization, and merge the pairs into the caller's map (existing keys win)",
+            "signature": "(Status* out, const ConfigOptions* opts, const Configurable* object, const std::string* name, std::string* out_name, std::unordered_map<std::string, std::string>* map)",
+            "returns": "Status* (== out); *out is kOk on entry and on every silent early return",
+            "frame": "0x138 bytes; stack canary at 0x128(%rsp); checked at 0x609ea03 / 0x609efd4",
+            "callers": HOST_CALLERS,
+            "caller_count": 21,
+        },
+        "0x6098510": {
+            "fde": "0x6098510..0x60985af",
+            "role": "delimiter pre-step: truncates *s0 to empty, forwards (out, object, opts, empty prefix string, s0) to 0x6097630, returns out",
+            "signature": "(Status* out, const Configurable* object, const ConfigOptions* opts, std::string* s0)",
+            "callers": ["0x609d5ea (in slot 9 0x609d0e0)", "0x609e80f (in 0x609e510)",
+                        "0x60b96cd", "0x60b977f", "0x60d4187"],
+        },
+        "0x60985e0": {
+            "fde": "0x60985e0..0x609865e",
+            "role": "reset-and-serialize wrapper (from #4337): resets *S to an empty SSO string, calls 0x6097630 with a stack Status temp (discarded, its message freed), forwards its own rcx as the prefix, returns S",
+            "signature": "(std::string* out_text, const Configurable* object, const ConfigOptions* opts, const std::string* prefix)",
+            "callers": ["0x609e0a9 (CORRECTED: inside slot-12 0x609de80, FDE 0x609de80..0x609e29e - NOT inside 0x609e510 as #4334/#4337 stated; 0x609e0a9 < 0x609e510)"],
+        },
+        "0x609a410": {
+            "role": "id-configure helper (from #4334, cited): (Status* out, const std::string* input, const std::string* id, std::string* out_name, std::unordered_map<std::string, std::string>* map); resolves 'id', 'id.name' and plain names into out_name",
+            "callers": ["0x609b190 (in the type-22 delegate 0x609a740)", "0x609e5bf (in 0x609e510, main path)", "0x609ea72 (in 0x609e510, null-object path)"],
+        },
+        "0x60c1190": {
+            "fde": "0x60c1190..0x60c1887",
+            "role": "map parser (from #4320, cited): (Status* out, const std::string* input, std::unordered_map<std::string, std::string>* map); trims, strips matching outer braces, splits on '={};' (literal 0x44b52b); three kInvalidArgument outcomes",
+            "callers": ["0x6099fc5 (in the '=' setter 0x6099e70)", "0x609a499",
+                        "0x609e896 (in 0x609e510)", "0x60c1c2e (inside 0x60c1190 itself)",
+                        "0x60c3d69", "0x60c4769"],
+        },
+        "0x5d35070": {
+            "fde": "0x5d35070..0x5d350bc",
+            "role": "shared_ptr counted-base release: called when use_count reaches 0; calls the dispose slot (vtable +0x10), then decrements weak_count at +0x0c (plain addl, or lock xadd when the __libc_single_threaded flag byte at GOT 0x64ed290 is 0); when weak_count reaches 0 it tail-calls the destroy slot (vtable +0x18)",
+            "signature": "(void* control_block) - the _Sp_counted_base* whose use_count just hit 0",
+            "callers_binary_wide": 654,
+            "in_packet_site": "0x609ef91 (in 0x609e510, plain-decrement path when the old use_count was 1)",
+        },
+        "0x5d36110": {
+            "fde": "0x5d36110..0x5d361d5",
+            "role": "unordered_map<string,string> destructor: walks the before_begin chain (map+0x10), destroys each node's key string (node+0x08) and value string (node+0x28) SSO-aware, and frees the node",
+            "callers_binary_wide": 484,
+            "in_packet_site": "0x609e939 (in 0x609e510: after the merge loop finishes, and on the parse-failure path)",
+        },
+        "0x5d2e770": {
+            "fde": "0x5d2e770..0x5d2e832",
+            "role": "base slot-16 name predicate: bool (object, name); false when name is empty; else true iff Name() (slot 0x70) == name (strlen + memcmp) or NickName() (slot 0x90) == name",
+            "signature": "(const Configurable* object, const std::string* name) -> bool",
+            "direct_callers": 0,
+            "note": "no direct E8 call site binary-wide; reached only through the vtable slot and through the GOT guard comparison at 0x609e64b. 44 R_X86_64_RELATIVE entries carry this addend binary-wide (43 vtable slots + the GOT guard entry at 0x64eceb8). Both Configurable vtables (0x64d39b8, 0x64cdad0) carry it at slot 16 (offset 0x80).",
+        },
+    },
+    "steps": [
+        {"step": 1, "what": "*out = kOk (code 0, subcode 0, empty message string)",
+         "site": "0x609e547..0x609e55d"},
+        {"step": 2, "what": "empty-name gate: name.size == 0 -> empty path 0x609e9e3; name == .bss string 0x6508980 (size compare at 0x609e574, memcmp at 0x609e9d0..0x609e9db) -> the same empty path. Empty path: erase out_name (string replace [0, len) with 0 chars from literal 0x4376fd), clear the caller map via 0x5d5b300, return *out (kOk)",
+         "site": "0x609e552..0x609e581, 0x609e9d0..0x609e9fe"},
+        {"step": 3, "what": "null-object path: object == null -> 0x609ea30: call 0x609a410 with an empty id string (ptr = &0xe0(%rsp), size 0), move its Status into *out, free the temp string, return",
+         "site": "0x609e57e..0x609e581, 0x609ea30..0x609eae6"},
+        {"step": 4, "what": "GetId via vtable slot 15 (0x78) into a stack string at 0xd0(%rsp); then 0x609a410(Status tmp at 0x70(%rsp), name, id, out_name, map) at 0x609e5bf; the tmp Status is moved into *out (old message freed) and the id string is freed; if *out code != 0 -> return at 0x609ea03",
+         "site": "0x609e587..0x609e637"},
+        {"step": 5, "what": "name gate: object vtable slot 16 (0x80) vs GOT 0x64eceb8 (= base predicate 0x5d2e770). Different -> call slot 16 (object, out_name) at 0x609ed18; false -> return, true -> copy path. Equal (base) -> out_name empty -> return; else Name() (slot 14, 0x70) compared by strlen + memcmp with out_name, equal -> copy path; else NickName() (slot 18, 0x90) compared the same way, equal -> copy path, else return. All silent returns leave *out kOk",
+         "site": "0x609e637..0x609e6d8, 0x609eb08..0x609eb2a, 0x609ed18..0x609ed28"},
+        {"step": 6, "what": "ConfigOptions copy: the 0x50-byte ConfigOptions at opts is copied to a stack copy C1 at 0xd0(%rsp) - u32 +0x00, u8 +0x04, delimiter string at +0x08 (SSO-aware: len <= 15 inline at 0xe8, len == 1 single byte at 0x609ed30, len > 15 heap via _M_create + memcpy at 0x609ed40), u32 +0x28, u8 +0x2c, u64 +0x30, 16 bytes +0x38, shared_ptr +0x48 (refcount bump: plain addl at 0x609e7a7, or lock addl at 0x609ed98 when the __libc_single_threaded flag byte at GOT 0x64ed290 is 0)",
+         "site": "0x609e6d8..0x609e7ab, 0x609ed30..0x609ed8c, 0x609ed98"},
+        {"step": 7, "what": "delimiter force: _M_replace(&C1.string, 0, len, ';', 1) - the copy's delimiter becomes the 1-byte literal at 0x43d5c7 (';'), not the '; ' (0x4409b0) slot 9 forces",
+         "site": "0x609e7b8..0x609e7c7"},
+        {"step": 8, "what": "serialize: 0x6098510(Status tmp at 0x70(%rsp), object, &C1, S0 = empty stack string at 0xb0(%rsp)) at 0x609e80f - truncates S0 and calls 0x6097630 with an empty prefix. If the tmp Status code != 0 -> free S0, release C1's shared_ptr, free the id temp, return (0x609e93e)",
+         "site": "0x609e7cc..0x609e82b, 0x609e93e..0x609e961"},
+        {"step": 9, "what": "parse: build a stack unordered_map<string,string> at 0x70(%rsp) (buckets = &single-bucket 0xa0, bucket_count 1, before_begin null, element_count 0, max_load_factor 1.0f, next_resize 0, single_bucket null) and call 0x60c1190(Status at 0x60(%rsp), S0, &map) at 0x609e896. Parse failure (Status code != 0) -> free the Status message, destroy the map via 0x5d36110, clean up, return",
+         "site": "0x609e831..0x609e8b8"},
+        {"step": 10, "what": "merge: walk the parsed map's nodes (first node = map+0x10 before_begin, next = node+0x00). Per node, look the key up in the caller map: linear scan of the caller map's node chain when the caller map has <= 20 elements (cmp $0x14 at 0x609e8d8), else the hash path (0x609eb30: _Hash_bytes(key, size, seed 0xc70f6907), bucket = hash % bucket_count, walk the bucket chain comparing hash at node+0x48, key size at node+0x10, key bytes via memcmp). Key present -> keep the caller's value, next parsed node. Key absent -> allocate a 0x50-byte node (operator new at 0x609ec00), copy the key string (node+0x08) and value string (node+0x28) SSO-aware, store the hash at node+0x48, _M_need_rehash(bucket_count, element_count, 1) at 0x609ecc5 with rehash at 0x609edba when needed, link into the bucket and the before_begin chain, bump element_count (0x609ed0b)",
+         "site": "0x609e8b8..0x609e934, 0x609eaf9..0x609eb5f, 0x609ec00..0x609ed0f, 0x609edba..0x609ee6e"},
+        {"step": 11, "what": "teardown (all exits after the copy): release C1's shared_ptr (0x609e961..0x609e9a5): control null -> skip; combined (weak<<32 | use) == 0x100000001 -> inline dispose (slot 0x10) + destroy (slot 0x18) at 0x609ef48; flag byte 0 -> lock xadd -1 on use_count at 0x609ef3a; else plain decrement and, when the old use_count was 1, call the release helper 0x5d35070 at 0x609ef8e. Then free the id-temp string and return through the canary check",
+         "site": "0x609e961..0x609e9ab, 0x609ef3a..0x609ef64, 0x609ef8e..0x609ef96"},
+    ],
+    "config_options_layout": {
+        "size": "0x50 bytes (from the copy at 0x609e6d8..0x609e78a)",
+        "+0x00": "u32 (copied as a 4-byte load)",
+        "+0x04": "u8 (copied as a 1-byte load)",
+        "+0x08": "std::string: the delimiter (data +0x08, length +0x10, SSO buffer +0x18)",
+        "+0x28": "u32",
+        "+0x2c": "u8 (= sanity_level per #4146)",
+        "+0x30": "u64 (= file_readahead_size per #4146)",
+        "+0x38": "16 bytes (copied via movdqu)",
+        "+0x48": "shared_ptr control-block pointer (refcount at control+0x08, weak count at control+0x0c)",
+        "open": "C++ names/defaults for +0x00/+0x04/+0x28/+0x38 still open from #4334",
+    },
+    "parsed_map_node": {
+        "size": "0x50 bytes (operator new 0x50 at 0x609ec00)",
+        "+0x00": "next node pointer",
+        "+0x08": "key string (data +0x08, length +0x10, SSO buffer +0x18)",
+        "+0x28": "value string (data +0x28, length +0x30, SSO buffer +0x38)",
+        "+0x48": "hash (size_t, from _Hash_bytes with seed 0xc70f6907)",
+    },
+    "stack_map_layout": {
+        "size": "0x38 bytes at 0x70(%rsp)",
+        "+0x00": "buckets pointer (= &single_bucket at 0xa0)",
+        "+0x08": "bucket_count = 1",
+        "+0x10": "before_begin._M_nxt = null",
+        "+0x18": "element_count = 0",
+        "+0x20": "rehash policy: max_load_factor 1.0f at +0x20, next_resize 0 at +0x28",
+        "+0x30": "single_bucket = null",
+    },
+    "status_and_map_overlap": "the parse Status lives at 0x60(%rsp) (code +0x00, subcode +0x04, message string at +0x08) while the stack map starts at 0x70(%rsp), so the message string's length/buffer slots (0x70/0x78) alias the map's buckets/count slots. Benign: the message is empty on the success path (the Status write touches only 0x60..0x70), and on the failure path the map is dead (destroyed via 0x5d36110 before any use).",
+    "literals": [
+        {"address": "0x43d5c7", "bytes": "3b", "text": ";", "role": "1-byte delimiter forced into the ConfigOptions copy at 0x609e7c7"},
+        {"address": "0x4376fd", "bytes": "00", "text": "(first byte NUL, then '/home/ubuntu/hl/code_Mainnet/z_vendor/futures-channel/src/oneshot.rs', NUL-terminated)", "role": "location identity passed to the string replace in the empty-name path with n=0, so its bytes are never read there; identity/role still open (#4156)"},
+        {"address": "0x44b52b", "bytes": "3d 7b 7d 3b", "text": "={};", "role": "map-parser split set (cited from #4320)"},
+        {"address": "0x445245", "bytes": "3d", "text": "=", "role": "name/value separator used by the serializer 0x6097630 (cited from #4337)"},
+        {"address": "0x4409b0", "bytes": "3b 20", "text": "; ", "role": "delimiter slot 9 forces into its ConfigOptions copy (cited from #4334) - contrast: this host forces ';'"},
+        {"address": "0x6508980", "bytes": "(in .bss - not readable from the file)", "text": "(runtime-initialized)", "role": "default name: a name equal to this string is treated as empty (10 lea sites, identity/content open)"},
+    ],
+    "got_entries": [
+        {"address": "0x64eceb8", "reloc": "R_X86_64_RELATIVE -> 0x5d2e770", "role": "base slot-16 predicate, compared against the object's slot 16 at 0x609e64b"},
+        {"address": "0x64ed290", "reloc": "R_X86_64_GLOB_DAT -> __libc_single_threaded", "role": "flag byte selecting plain addl vs lock addl on shared_ptr refcounts (0x609e797, 0x609e989, 0x5d35085)"},
+    ],
+    "open_unknowns": [
+        "The host 0x609e510's C++ name (behavior pinned; the name is not established from the binary).",
+        "Slot 16's C++ name (behavior pinned: Name-or-NickName equality predicate; shared base 0x5d2e770).",
+        "The .bss string 0x6508980 content and identity (runtime-initialized; 10 lea sites).",
+        "The 0x4376fd location string's role (Rust source path '.../z_vendor/futures-channel/src/oneshot.rs' with a leading NUL byte; passed with n=0 in the empty path).",
+        "ConfigOptions+0x00/+0x04/+0x28/+0x38 C++ names and defaults (still open from #4334).",
+        "The 0x30-byte option-group element's +0x00..+0x18 fields and C++ name (still open from #4337).",
+        "Why the host forces ';' (1 byte) as the delimiter while slot 9 forces '; ' (2 bytes); only the outcome is pinned.",
+        "The map-parse internal call site 0x60c1c2e (inside 0x60c1190 itself) - recursion/iteration detail not pinned.",
+        "Per-caller argument shapes: which of the 21 callers pass id-prefixed names vs plain names (the host handles all forms via 0x609a410).",
+    ],
+    "do_not_pick": ["0x609e510", "0x6098510", "0x60985e0", "0x5d35070", "0x5d36110", "0x5d2e770", "0x60c1190 (cited)", "0x609a410 (cited)", "0x6097630 (cited)", "0x609de80 (cited)", "0x609c8c0", "0x609bcb0", "0x609d0e0"],
+}
+
+
+def main() -> None:
+    (HERE / "records.json").write_text(json.dumps(RECORDS, indent=2) + "\n")
+    print("wrote records.json")
+
+
+if __name__ == "__main__":
+    main()

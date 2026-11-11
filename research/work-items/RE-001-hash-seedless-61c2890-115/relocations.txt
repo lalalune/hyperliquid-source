@@ -1,0 +1,20 @@
+(none): the caller census finds no stored qword of 0x61c2890
+anywhere in the file and no RELATIVE slot whose addend is
+0x61c2890; the only entries are the two tail jumps in
+callers.tsv. The window itself reads no GOT or RELATIVE slot.
+Its rip-relative references are: the lea at 0x61c291a loading
+0x97df80 (the secret table + 128, the block loop's secret-walk
+end), the leas at 0x61c2934 and 0x61c2ae5 loading 0x97df00 (the
+secret table base, reset per block and per remainder sequence),
+the lea at 0x61c2c80 loading 0x97df0b (the secret table + 11,
+the merge call's secret window), two %fs:0x28 stack-canary
+reads, and the movdqa constant vectors in .rodata: the
+accumulator init ladder at 0x455960 / 0x455950 / 0x453a30 /
+0x4525e0, the scramble keys at 0x454220 / 0x451ad0 / 0x451150 /
+0x455970 (the secret's last 64 bytes), the PRIME32_1 multiply
+vector at 0x4562c0, and the final stripe's secret window at
+0x450ae0 / 0x4562d0 / 0x454520 / 0x451160 (the secret table at
+offset 121). Its one call is the direct call at 0x61c2c8e to
+the merge routine at 0x61c27f0 (plus the canary-failure call
+to __stack_chk_fail@plt at 0x61c2ca8, taken only when the
+canary check fails).

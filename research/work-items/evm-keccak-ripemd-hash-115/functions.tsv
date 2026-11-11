@@ -1,0 +1,5 @@
+name	start	end	bytes	instructions	sha256	role
+f1600	0x5cda380	0x5cda902	1410	354	15d45b717ea70b1633e3d7972ca6a4dcc1240cc9e0518cfbfcbff4efc11838e8	Keccak-f[1600] permutation over 25 little-endian lanes at rdi, 24 rounds, round constants read from the rodata table
+absorb	0x5cda910	0x5cdad3a	1066	269	e24dbc47639c217bb45897e746eb069fe9e323e4098cd53fda92d4b95afb390f	sponge write: xor input bytes into the rate part, permute through the f1600 slot at every full block
+squeeze	0x5cdad40	0x5cdb03d	765	171	94b1e9200106a1fc11ecd749e7eb693d22687fe87059406140f79c6bfdd53596	sponge finalize-and-read on a copy: pad with delimiter and 0x80, permute, copy output blocks
+ripemd160_compress	0x5c3ce60	0x5c3e4eb	5771	1788	0ab235340aa7d68f18886a4b117e294aa0cc78113efec3959e8a12daa6ebf21f	RIPEMD-160 block compression: five-word state at rdi, 64-byte block at rsi

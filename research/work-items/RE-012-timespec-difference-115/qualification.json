@@ -1,0 +1,87 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "cases": 43425,
+  "freeze": {
+    "cases": 43425,
+    "input_sha256": "21cd450743322b01fd9a299799579e30d73ebbaecb990ce49dfa8f4e36694fbf",
+    "expected_sha256": "0567d50beafce2ac4741a32e07c3b1c8f49e0a1f079beb207d7fa899aef1cc9c",
+    "oracle_sha256": "f2e0c1ae6c44315da1e7a7ece093fb503c007e2e475921c8fe102c62a3364ba0",
+    "new_rust_exists_at_freeze": false,
+    "time_utc": "2026-11-04T11:51:57.158473+00:00"
+  },
+  "builds": [
+    {
+      "opt_level": 0,
+      "cases": 43425,
+      "output_sha256": "0567d50beafce2ac4741a32e07c3b1c8f49e0a1f079beb207d7fa899aef1cc9c"
+    },
+    {
+      "opt_level": 3,
+      "cases": 43425,
+      "output_sha256": "0567d50beafce2ac4741a32e07c3b1c8f49e0a1f079beb207d7fa899aef1cc9c"
+    }
+  ],
+  "mutants": [
+    {
+      "name": "equal-is-negative",
+      "normal_exit": true,
+      "first_case": 0,
+      "input": "-9223372036854775808 0 -9223372036854775808 0",
+      "actual": "E 0 0",
+      "expected": "O 0 0"
+    },
+    {
+      "name": "positive-result-tag",
+      "normal_exit": true,
+      "first_case": 0,
+      "input": "-9223372036854775808 0 -9223372036854775808 0",
+      "actual": "E 0 0",
+      "expected": "O 0 0"
+    },
+    {
+      "name": "negative-result-tag",
+      "normal_exit": true,
+      "first_case": 1,
+      "input": "-9223372036854775808 0 -9223372036854775808 1",
+      "actual": "O 0 1",
+      "expected": "E 0 1"
+    },
+    {
+      "name": "clamp-unsigned-seconds-span",
+      "normal_exit": true,
+      "first_case": 294,
+      "input": "-9223372036854775808 0 0 0",
+      "actual": "E 9223372036854775807 0",
+      "expected": "E 9223372036854775808 0"
+    },
+    {
+      "name": "omit-seconds-borrow",
+      "normal_exit": true,
+      "first_case": 56,
+      "input": "-9223372036854775808 1 -9223372036854775807 0",
+      "actual": "E 1 999999999",
+      "expected": "E 0 999999999"
+    },
+    {
+      "name": "borrow-base-minus-one",
+      "normal_exit": true,
+      "first_case": 56,
+      "input": "-9223372036854775808 1 -9223372036854775807 0",
+      "actual": "E 0 999999998",
+      "expected": "E 0 999999999"
+    },
+    {
+      "name": "reject-valid-nanos-max",
+      "normal_exit": true,
+      "first_case": 6,
+      "input": "-9223372036854775808 0 -9223372036854775808 999999999",
+      "actual": "domain",
+      "expected": "E 0 999999999"
+    }
+  ],
+  "source_sha256": "130be87b12852b2f76fc73051875d29a237ddcc075ff0788f0270caac4b8069a",
+  "probe_sha256": "89ba544102f29df34e87c95950c927d6e1d76d6b6b4f6a266de34d09100c12ef",
+  "captured_execution_or_emulation": false,
+  "oracle_limits": "independent Python arbitrary-precision signed nanoseconds; no native execution or ABI equivalence",
+  "rustc": "rustc 1.95.0 (59807616e 2026-04-14)"
+}

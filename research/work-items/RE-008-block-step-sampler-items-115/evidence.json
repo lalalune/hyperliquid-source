@@ -1,0 +1,74 @@
+{
+  "after_walk": {
+    "len_ge_2_and_minute_ge_6": "0x5b2a662 call 0x5b926e0; result freed at 0x5b2a67c",
+    "len_ge_3": "0x5b2a51a call 0x5b926e0; 8-byte-element result freed at 0x5b2a534",
+    "minute_of_day": "floor(seconds of day / 60) from [rsp+0x130] (clock result at rsp+0x12c)",
+    "minute_samples": {
+      "0": 0,
+      "359": 5,
+      "3599": 59,
+      "360": 6,
+      "3600": 60,
+      "86399": 1439
+    }
+  },
+  "census": {
+    "0x4da4e80": {
+      "caller_frames": [
+        "0x5b2a130"
+      ],
+      "direct_calls": 1
+    },
+    "0x4dc2420": {
+      "caller_frames": [
+        "0x5b2a130"
+      ],
+      "direct_calls": 1
+    },
+    "0x4dc50c0": {
+      "caller_frames": [
+        "0x5b2a130"
+      ],
+      "direct_calls": 1
+    },
+    "0x5b926e0": {
+      "caller_frames": [
+        "0x5b2a130"
+      ],
+      "direct_calls": 2
+    }
+  },
+  "component": "abci",
+  "gates_changed": false,
+  "insert": {
+    "host": "0x5b2a232 call 0x4da7e20 (rdi = lookup result, rsi = &tag, rdx = &0); result -> rdi of the record",
+    "lookup": "0x5b2a21a call 0x4dc50c0 (rdi out, rsi = state, edx = tag)",
+    "record": "0x5b2a24c slot 0x64e1010 -> 0x1547530",
+    "tag": "0x5b2a1fd stores the tag byte at rsp+0xe0"
+  },
+  "item": {
+    "+0x0": "u8 key (0x5b2a3e2 movzx ebp, byte [rax])",
+    "+0x208": "qword pushed with the key (0x5b2a403)",
+    "+0x248": "dword grouping key (0x5b2a3e5)",
+    "+0x8": "payload pointer r12 (0x5b2a3c3)",
+    "size": "0x268"
+  },
+  "lookup": {
+    "fn": "0x4dc50c0",
+    "free_size": "0x4dc517c len * 0x268",
+    "key": "tag byte at rsp+7 (0x4dc50d4)",
+    "mode_test": "0x4dc50db cmp 0, [state]; jo (first word == 0x8000000000000000)",
+    "search": "0x4dc50f6 call 0x57f4db0"
+  },
+  "sampler": "0x5b2a130",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008",
+  "walk": {
+    "entry": "0x5b2a3f3 call 0x4dc2420 (rdi = rsp+0x98, rsi = local map, edx = item +0x248)",
+    "grow": "slot 0x64ebf88 -> 0x5962620",
+    "local_map": "rsp+0x50 = {0, 8, 0, 0}; length at rsp+0x68",
+    "push": "16-byte element: qword item +0x208 at +0, key byte at +8 (0x5b2a36b, 0x5b2a36f)",
+    "vec": "0x5b2a3fb call 0x4da4e80 -> {cap, ptr, len}"
+  }
+}

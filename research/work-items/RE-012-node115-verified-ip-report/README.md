@@ -1,0 +1,13 @@
+# RE-012: node 115 selected verified-IP report handoff
+
+Target Linux x86-64 node #115, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. [#5113](https://github.com/lalalune/hyperliquid-source/pull/5113) identifies the later tree lookup and selected byte store but leaves the earlier diagnostic helper opaque. [#3326](https://github.com/lalalune/hyperliquid-source/pull/3326) establishes the reusable `Ip` JSON writer at `0x5a2ff40`; [#3223](https://github.com/lalalune/hyperliquid-source/pull/3223) establishes similar framing for a different gossip report. This packet connects the specific descriptor and key in this call path to a distinct report writer and establishes its ordering relative to the tree search.
+
+## Descriptor and ordering
+
+At `0x4fac49d`, the caller constructs a descriptor containing the 27-byte literal `marking node_ip as verified` at `0x919921`, its length 27, and the original `esi` dword. Under its first lock it calls `0x4e40010` with that descriptor. On normal return it releases that lock, then obtains a second lock and begins the tree search in #5113. Therefore the diagnostic-helper call precedes the selected lookup and does not by itself prove that any key is later found or marked. The first helper's internal work, not its final external delivery, is the boundary; no runtime event is asserted.
+
+The helper copies the 24-byte descriptor behind a separately prepared 16-byte prefix. On the selected path where the helper's object word at `+0x48` is not `INT64_MIN`, and intervening calls return normally, it passes that local composite to `0x50e9340`. The selected successful writer path first writes `[`, delegates the first value, writes `,["`, supplies the literal pointer and length to a string helper, writes `",`, and invokes the already-studied `Ip` writer on the descriptor's dword. It then writes `]]` and a line feed before a local output-helper handoff. This describes framing and dataflow with valid stable storage, successful helpers and sufficient output capacity; the first value, payload writer internals, allocation growth, failures and actual delivery are not asserted. The text is a literal label, not independent proof of the source-level meaning or success of the later update.
+
+## Static verification
+
+`PYTHONPATH=tools python research/work-items/RE-012-node115-verified-ip-report/verify.py` authenticates the target, four complete FDE bodies, the literal, selected instruction bytes and direct call targets. Controls corrupt individual selected bytes or the literal. It does not execute or emulate captured instructions.

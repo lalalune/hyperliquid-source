@@ -1,0 +1,419 @@
+{
+ "target": "node #115",
+ "work_item": "RE-001-configoptions-default-ctor-115",
+ "task": "RE-001",
+ "question": "What are the defaults of rocksdb::ConfigOptions, how is one torn down, and where is the default ctor used?",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "catalogue": {
+  "ctor": "librocksdb-sys 0.11.0+8.1.1: _ZN7rocksdb13ConfigOptionsC1Ev",
+  "ctor_range": "0x60bb890..0x60bb932",
+  "ctor_bytes": 162,
+  "ctor_rebuild_equal_bytes": 140,
+  "dtor": "librocksdb-sys 0.11.0+8.1.1: _ZN7rocksdb13ConfigOptionsD1Ev",
+  "dtor_range": "0x5e33fb0..0x5e33fea",
+  "dtor_bytes": 58,
+  "dtor_rebuild_equal_bytes": 51,
+  "note": "byte counts are the repo catalogue's published-crate rebuild comparison; the 22 differing ctor bytes are relocation bytes (the two direct calls), not semantics"
+ },
+ "field_map": {
+  "size_bytes": 80,
+  "fields": [
+   {
+    "offset": "+0x00",
+    "size": 4,
+    "default": [
+     0,
+     1,
+     1,
+     1
+    ],
+    "name": "flag bytes 0-3 (C++ names open)",
+    "evidence": "movl $0x1010100,(%rdi) in the ctor"
+   },
+   {
+    "offset": "+0x04",
+    "size": 1,
+    "default": 0,
+    "name": "flag byte 4 (C++ name open)",
+    "evidence": "movb $0x0,0x4(%rdi) in the ctor; SetOptions sets it to 1"
+   },
+   {
+    "offset": "+0x08",
+    "size": 32,
+    "default": "\";\" (SSO, len 1)",
+    "name": "delimiter (std::string)",
+    "evidence": "SSO init in the ctor; Persist replaces it with \"\\n  \", AsString re-assigns \";\"; the inner Persist copies it with the string copy helper"
+   },
+   {
+    "offset": "+0x28",
+    "size": 4,
+    "default": 0,
+    "name": "u32 field (C++ name open)",
+    "evidence": "movl $0x0,0x28(%rdi) in the ctor; copied as a u32 by the inner Persist"
+   },
+   {
+    "offset": "+0x2c",
+    "size": 1,
+    "default": 255,
+    "name": "u8 field (C++ name open)",
+    "evidence": "movb $0xff,0x2c(%rdi) in the ctor; copied as a byte by the inner Persist"
+   },
+   {
+    "offset": "+0x30",
+    "size": 8,
+    "default": 524288,
+    "name": "u64 field (C++ name open)",
+    "evidence": "movq $0x80000,0x30(%rdi) in the ctor; copied as a qword by the inner Persist; the outer Persist overwrites it with DBOptions+0x220 when that is non-null"
+   },
+   {
+    "offset": "+0x38",
+    "size": 8,
+    "default": "Env::Default()",
+    "name": "env (Env*, raw)",
+    "evidence": "two calls to rocksdb::Env::Default() 0x5fe2860; never released by the dtor"
+   },
+   {
+    "offset": "+0x40",
+    "size": 16,
+    "default": "ObjectRegistry::Default()->NewInstance()",
+    "name": "registry (std::shared_ptr<ObjectRegistry>)",
+    "evidence": "NewInstance 0x61f9400 returns by value into +0x40/+0x48; released by the dtor via _M_release on +0x48"
+   }
+  ]
+ },
+ "ctor": {
+  "range": "0x60bb890..0x60bb932",
+  "steps": [
+   "store flag bytes 0,1,1,1 at +0x00 and 0 at +0x04",
+   "init the delimiter string at +0x08 (SSO, \";\", len 1)",
+   "store 0 at +0x28, 0xff at +0x2c, 0x80000 at +0x30",
+   "call Env::Default() 0x5fe2860, store at +0x38",
+   "call ObjectRegistry::NewInstance() 0x61f9400 with the out-pointer at +0x40",
+   "call Env::Default() 0x5fe2860 again, store at +0x38"
+  ],
+  "double_env_call_note": "the second Env::Default() call stores the same pointer over the first; no intervening read of +0x38 exists in the ctor, so the first store is dead",
+  "landing_pad": "0x60bb856..0x60bb88a (own FDE): on unwind, releases *(this+0x48) via _M_release and disposes the delimiter string at +0x08, then resumes unwinding"
+ },
+ "dtor": {
+  "range": "0x5e33fb0..0x5e33fea",
+  "steps": [
+   "if *(this+0x48) is non-null, _M_release it (the registry shared_ptr control block)",
+   "dispose the delimiter string at +0x08 (heap buffer freed only when _M_dataplus != this+0x18)"
+  ],
+  "note": "env at +0x38 is a raw pointer and is not released; the flag bytes and the +0x28/+0x2c/+0x30 scalars need no teardown",
+  "inline_teardown": "all nine construction hosts inline this teardown on their normal path (release +0x48, dispose +0x08); D1 is called only from landing pads"
+ },
+ "new_instance": {
+  "range": "0x61f9400..0x61f963e",
+  "name": "rocksdb::ObjectRegistry::NewInstance()",
+  "correction": "#4015 labelled this routine 'clone'; the catalogue name is NewInstance. It is not a copy: it allocates a fresh 0xd0-byte control block and a fresh 0xc0-byte ObjectRegistry whose parent is the Default singleton",
+  "steps": [
+   "call ObjectRegistry::Default() 0x61f92b0 into a stack temp",
+   "operator new(0xd0) for the control block",
+   "install control-block vtable 0x64d8f00 (RELATIVE slot 0x64d8f00 -> 0x61f8130), packed counts 0x100000001 from 0x459b20",
+   "copy the parent shared_ptr (ptr, cb) into the new registry's parent slot at registry+0x60",
+   "zero registry+0x70..+0xb7 (including the mutex slot at +0x98)",
+   "release the stack temp's reference to the parent",
+   "return the shared_ptr by value (ptr = control block +0x10, cb = control block)"
+  ],
+  "resolves": "#4015's open unknown: the ObjectRegistry +0x70..0x98 region is zero at construction (NewInstance zeroes registry+0x70..+0xb7); the parent shared_ptr lives at registry+0x60, already pinned by #4015",
+  "sole_caller": "the ConfigOptions ctor at 0x60bb8f0 is the only direct caller binary-wide"
+ },
+ "sites": [
+  {
+   "call_site": "0x5d8eacf",
+   "host": "rocksdb::ColumnFamilyData::SetOptions",
+   "host_range": "0x5d8ea70..0x5d8f4b5",
+   "config_address": "rsp+0x510",
+   "overrides": [
+    {
+     "offset": "+0x04",
+     "value": 1,
+     "size": 1
+    }
+   ],
+   "consumer": "apply helper 0x60c4550 (no catalogue label)",
+   "consumer_note": "copies the incoming CFOptions (0x60c3e10), builds the Configurable view (0x60881b0), runs ConfigureFromMap 0x6097150 over the map"
+  },
+  {
+   "call_site": "0x5e3406f",
+   "host": "rocksdb::CompactionServiceResult::Write",
+   "host_range": "0x5e34010..0x5e34108",
+   "config_address": "rsp+0x00",
+   "overrides": [
+    {
+     "offset": "+0x03",
+     "value": 0,
+     "size": 1
+    }
+   ],
+   "consumer": "rocksdb::OptionTypeInfo::SerializeType 0x60bbe50",
+   "consumer_note": "serializes the result's option map with the type map at 0x6501de0"
+  },
+  {
+   "call_site": "0x5e34458",
+   "host": "rocksdb::CompactionServiceResult::Read",
+   "host_range": "0x5e34160..0x5e347c1",
+   "config_address": "rsp+0x50",
+   "overrides": [
+    {
+     "offset": "+0x00",
+     "value": 1,
+     "size": 1
+    },
+    {
+     "offset": "+0x03",
+     "value": 0,
+     "size": 1
+    }
+   ],
+   "consumer": "rocksdb::OptionTypeInfo::ParseType 0x60c1bb0",
+   "consumer_note": "version-1 arm only (first u32 of the input == 1); parses the stored option string with the type map at 0x6501ce0"
+  },
+  {
+   "call_site": "0x5ffad84",
+   "host": "rocksdb::CTREncryptionProvider::AddCipher",
+   "host_range": "0x5ffabd0..0x5ffae04",
+   "config_address": "rsp+0x40",
+   "overrides": [],
+   "consumer": "cipher factory 0x5ffa710 (pinned by #4028)",
+   "consumer_note": "runs the RegisterEncryptionBuiltins pthread_once (callable 0x5ff9c50) then creates the BlockCipher from the name string through the registry"
+  },
+  {
+   "call_site": "0x60a1dcf",
+   "host": "rocksdb::GetMutableDBOptionsFromStrings",
+   "host_range": "0x60a1d60..0x60a1f03",
+   "config_address": "rsp+0x00",
+   "overrides": [],
+   "consumer": "rocksdb::OptionTypeInfo::ParseType 0x60c18b0",
+   "consumer_note": "parses the string map into the out MutableDBOptions with the type map at 0x6506dc0"
+  },
+  {
+   "call_site": "0x60a20cd",
+   "host": "rocksdb::MutableDBOptionsAreEqual",
+   "host_range": "0x60a2080..0x60a2357",
+   "config_address": "rbp-0x90",
+   "overrides": [],
+   "consumer": "rocksdb::OptionTypeInfo::StructsAreEqual 0x60bfda0",
+   "consumer_note": "compares the two MutableDBOptions under the name \"MutableDBOptions\" (rodata 0x4541e0, 16 bytes)"
+  },
+  {
+   "call_site": "0x60d4a48",
+   "host": "rocksdb::PersistRocksDBOptions (outer)",
+   "host_range": "0x60d4a00..0x60d4b7e",
+   "config_address": "rbp-0x90",
+   "overrides": [
+    {
+     "offset": "+0x08",
+     "value": "\\n  ",
+     "kind": "delimiter-replace",
+     "size": 3
+    },
+    {
+     "offset": "+0x03",
+     "value": 0,
+     "size": 1
+    },
+    {
+     "offset": "+0x30",
+     "value": "DBOptions+0x220",
+     "kind": "conditional-overwrite",
+     "condition": "only when DBOptions+0x220 is non-null"
+    }
+   ],
+   "consumer": "rocksdb::PersistRocksDBOptions (inner) 0x60d2820",
+   "consumer_note": "the inner overload re-copies the ConfigOptions field-by-field (see persist-copy excerpt) and re-applies the \"\\n  \" delimiter"
+  },
+  {
+   "call_site": "0x612073b",
+   "host": "rocksdb::BlockBasedTable::Open",
+   "host_range": "0x611fb10..0x61213db",
+   "config_address": "rbp-0x190",
+   "overrides": [],
+   "gate": "constructs only when the table has a stored prefix-extractor name (*(r12+0x1e0) != 0) and no instantiated transform (*(r13+0x1b0) == 0)",
+   "consumer": "SliceTransform create host 0x61ca3d0 (pinned by #3764)",
+   "consumer_note": "instantiates the table's prefix extractor by name through the registry"
+  },
+  {
+   "call_site": "0x61c83aa",
+   "host": "rocksdb::SliceTransform::AsString",
+   "host_range": "0x61c8370..0x61c84fa",
+   "config_address": "rsp+0x20",
+   "overrides": [
+    {
+     "offset": "+0x08",
+     "value": ";",
+     "kind": "delimiter-replace",
+     "size": 1
+    }
+   ],
+   "consumer": "rocksdb::Configurable::ToString 0x60971c0",
+   "consumer_note": "the delimiter re-assignment is a no-op: the value written (\";\") equals the ctor default"
+  }
+ ],
+ "dtor_callers": {
+  "count": 44,
+  "claim": "every direct call site of D1 sits inside a landing-pad FDE; no main-path caller exists",
+  "examples": [
+   "0x5e34113 (Write landing pad)",
+   "0x5ffaadd (AddCipher landing pad)",
+   "0x60a1d39 (GetMutableDBOptionsFromStrings landing pad)",
+   "0x60a205c (MutableDBOptionsAreEqual landing pad)",
+   "0x60d49d6 (inner Persist landing pad)",
+   "0x611fa4a (BlockBasedTable::Open landing pad)",
+   "0x61c834b (SliceTransform::AsString landing pad)"
+  ]
+ },
+ "census": {
+  "0x60bb890": {
+   "direct_calls": [
+    "0x5d8eacf",
+    "0x5e3406f",
+    "0x5e34458",
+    "0x5ffad84",
+    "0x60a1dcf",
+    "0x60a20cd",
+    "0x60d4a48",
+    "0x612073b",
+    "0x61c83aa"
+   ],
+   "tail_jumps": [],
+   "qword_hits_file_offsets": [],
+   "relative_slots": []
+  },
+  "0x5e33fb0": {
+   "direct_calls": [
+    "0x5e33fed",
+    "0x5e34113",
+    "0x5e376e8",
+    "0x5e38078",
+    "0x5e3864d",
+    "0x5e38e73",
+    "0x5e398d8",
+    "0x5e403ef",
+    "0x5e40cc3",
+    "0x5e41ce6",
+    "0x5ffaadd",
+    "0x60852f3",
+    "0x6085e53",
+    "0x60869b3",
+    "0x609239f",
+    "0x609294f",
+    "0x6092f67",
+    "0x60975de",
+    "0x6098684",
+    "0x6098a9f",
+    "0x60990d3",
+    "0x609a692",
+    "0x609d091",
+    "0x609d0cc",
+    "0x609e468",
+    "0x60a181c",
+    "0x60a1d39",
+    "0x60a205c",
+    "0x60a6b78",
+    "0x60bb93d",
+    "0x60bb968",
+    "0x60bbadf",
+    "0x60bc4ca",
+    "0x60bea8f",
+    "0x60bec0b",
+    "0x60bf269",
+    "0x60bf939",
+    "0x60bfc6f",
+    "0x60cf9e7",
+    "0x60d1371",
+    "0x60d25d2",
+    "0x60d49d6",
+    "0x611fa4a",
+    "0x61c834b"
+   ],
+   "tail_jumps": [],
+   "qword_hits_file_offsets": [],
+   "relative_slots": []
+  },
+  "0x61f9400": {
+   "direct_calls": [
+    "0x60bb8f0"
+   ],
+   "tail_jumps": [],
+   "qword_hits_file_offsets": [],
+   "relative_slots": []
+  }
+ },
+ "relocations": {
+  "relative": [
+   {
+    "offset": "0x64d8f00",
+    "addend": "0x61f8130",
+    "note": "ObjectRegistry control-block vtable slot 0"
+   }
+  ],
+  "tls_once": [
+   {
+    "offset": "0x64ed818",
+    "type": "R_X86_64_TPOFF64",
+    "symbol": "_ZSt15__once_callable",
+    "note": "AddCipher pthread_once callable slot"
+   },
+   {
+    "offset": "0x64ed820",
+    "type": "R_X86_64_TPOFF64",
+    "symbol": "_ZSt11__once_call",
+    "note": "AddCipher pthread_once call slot"
+   },
+   {
+    "offset": "0x64ed828",
+    "type": "R_X86_64_GLOB_DAT",
+    "symbol": "__once_proxy",
+    "note": "AddCipher pthread_once proxy slot"
+   }
+  ],
+  "glob_dat": [
+   {
+    "offset": "0x64ed290",
+    "type": "R_X86_64_GLOB_DAT",
+    "symbol": "__libc_single_threaded",
+    "note": "use-count selector byte read by every shared_ptr release in this packet"
+   }
+  ],
+  "data_literals": [
+   {
+    "address": "0x459b20",
+    "value": "0x100000001",
+    "note": "packed (use, weak) counts for make_shared blocks"
+   }
+  ]
+ },
+ "literals": {
+  "flag_dword": "0x1010100",
+  "delimiter": "\";\" (0x3b)",
+  "persist_delimiter": "\"\\n  \" (0x0a, 0x20, 0x20)",
+  "scalar30_default": "0x80000 (524288)",
+  "control_block_size": "0xd0",
+  "mutable_name": "\"MutableDBOptions\" (rodata 0x4541e0, 16 bytes)",
+  "type_maps": [
+   "0x6501ce0 (Read)",
+   "0x6501de0 (Write)",
+   "0x6506dc0 (GetMutableDBOptionsFromStrings, MutableDBOptionsAreEqual)"
+  ]
+ },
+ "model": {
+  "file": "tools/configoptions_default_ctor_115.py",
+  "checks": "defaults, dtor trace, Persist copy, NewInstance parent/zeroed region, per-site overrides, bbtopen gate"
+ },
+ "tests": {
+  "file": "tests/test_configoptions_default_ctor_115.py"
+ },
+ "corrections": [
+  "#4015 called 0x61f9400 'clone'; it is ObjectRegistry::NewInstance() per the catalogue, creating a fresh child registry parented at the Default singleton",
+  "#3950 described 0x5fe2860 as 'the default holder initializer'; it is rocksdb::Env::Default() per the catalogue (the holder initialization lives inside it); it has 17 callers binary-wide"
+ ],
+ "open_unknowns": [
+  "C++ names of the five flag bytes at +0x00..+0x04 (defaults 0,1,1,1,0; Read sets +0x00=1 and +0x03=0, Write and Persist set +0x03=0, SetOptions sets +0x04=1)",
+  "C++ names of the scalars at +0x28 (u32, 0), +0x2c (u8, 0xff) and +0x30 (u64, 0x80000)",
+  "identity of DBOptions+0x220, the value the outer Persist copies into +0x30 when non-null",
+  "C++ name of the SetOptions apply helper 0x60c4550 (no catalogue label): it copies CFOptions, builds the Configurable view and runs ConfigureFromMap 0x6097150",
+  "exact argument mapping of the SliceTransform create host 0x61ca3d0 at the BlockBasedTable::Open site (the ConfigOptions is the 2nd argument; the host itself is pinned by #3764)"
+ ]
+}

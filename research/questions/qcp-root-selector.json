@@ -1,0 +1,32 @@
+{
+  "question_id": "qcp-root-selector",
+  "title": "Map node #115 root digest selector production",
+  "target": {
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "component": "storage",
+  "work_type": "discovery",
+  "scope": {
+    "question": "What selected reads and branches produce the root digest selector byte, without naming CPU feature semantics not established by evidence?",
+    "include": ["The selected root setup caller", "The selector fallback decision path and repeated cell reads"],
+    "exclude": ["Runtime CPU feature values", "All writers and synchronization for the selector cell", "Digest equality or whole-state correctness"]
+  },
+  "readiness": "in-progress",
+  "evidence_status": "unreviewed",
+  "prior_attempts": [
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5584", "relation": "open static packet for selector production and fallback branches"}
+  ],
+  "remaining_gap": "The cited PR is open. The record does not treat an open attempt as reviewed evidence or as a completed component gate.",
+  "dependencies": [],
+  "downstream_consumer": "A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.",
+  "acceptance_requirements": [
+    "Verify the target digest, selector call site, selected branch bytes, FDE bounds, and relocation or data references.",
+    "Preserve repeated reads and branches rather than assuming a stable runtime cell.",
+    "Do not infer runtime CPU values or complete the RE-009 gate from a partial selector packet."
+  ],
+  "required_capabilities": ["Static x86-64 control-flow and relocation analysis", "Independent packet reproduction"],
+  "evidence_review": [],
+  "linked_issue": {"url": "https://github.com/lalalune/hyperliquid-source/issues/3923", "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"},
+  "pilot_issue": "https://github.com/lalalune/hyperliquid-source/issues/5391"
+}

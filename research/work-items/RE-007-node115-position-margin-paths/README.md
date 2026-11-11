@@ -127,3 +127,12 @@ equivalence, complete original Rust types, protocol execution, signing, chain
 action, paid dataset or live user fixture is introduced. New code/analysis is
 root MIT; imported artifacts retain their existing terms. Full repository checks
 and generated inventory integration are recorded with the final submitted head.
+
+## Bounded Rust implementation
+
+`src/node115-margin-range/position-modes` independently models the five observed
+mode paths as no division, exact division, two opaque margin-table variants and
+capped division. It also implements signed magnitude, floor quotient and the
+saturating active-offset positive-part projection. Table internals, original
+units, risk names, panic boundaries and broader position accounting remain
+outside scope.

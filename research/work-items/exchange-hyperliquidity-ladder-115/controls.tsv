@@ -1,0 +1,58 @@
+control	meaning	first_mismatch_case
+spec:rows_gt	row bound accepts tok == len	234
+spec:one_skip	single-entry shortcut removed	5
+spec:found_any	any non-zero probe result counts as found	6
+spec:idx_gt	index bound test uses > len	35
+spec:special_1001	special tick 1001	6
+spec:dig6	six significant digits	6
+spec:dl_swap	decimals bytes taken from the wrong rows	5
+spec:no_min	decimals clamp dropped	5
+spec:dl0_keep	equal decimals keep the digit tick	31
+spec:first_no_round	start price not rounded to the tick	5
+spec:min1_off	floor to one dropped	25
+spec:mul_1004	growth factor 1.004	5
+spec:no_tick_after	later prices not rounded to the tick	5
+spec:n_minus	one level fewer	5
+spec:round_trunc	truncation instead of round half away	5
+spec:sat_zero	products above the saturation bound become zero	16
+spec:cost_ge	cost refuses the limit itself	118
+spec:take_plus1	one level too many costed	8
+spec:no_add_check	cost accumulator overflow unchecked	378
+byte:t_100k	first tick step 100000 -> 100001	61
+byte:t_1m	second tick step 1000000 -> 1000001	64
+byte:t_10m	third tick step 1e7 -> 1e7+1	82
+byte:t_shift10	1e10 step shift 10 -> 11	121
+byte:t_shift13	1e13 step shift 13 -> 12	144
+byte:t_1e14	1e14 step bound lowered	162
+byte:t_1e15	1e15 step bound lowered	180
+byte:t_ten_pow	tick 1e10 constant lowered	163
+byte:t_special	special tick 1000 -> 1001	34
+byte:t_one_ent	single-entry special test inverted	10
+byte:t_row_shift	row stride 32 -> 16	0
+byte:t_tok_stride	token stride 0x158 -> 0x159	10
+byte:t_dec_first	second decimals byte offset 0x49 -> 0x48	11
+byte:t_dec_borrow	decimals underflow test inverted	0
+byte:t_pow100	decimals step factor 100 -> 101	30
+byte:t_bounds	row bounds test inverted	0
+byte:l_adc	first tick floor-to-one adc -> sbb	25
+byte:l_dec	loop counter dec -> inc	5
+byte:l_cap	price store offset 0x10 -> 0x8	5
+byte:l_stride	level stride scale 2 -> 1	5
+byte:l_cmova	saturation cmova -> cmovb	5
+byte:l_max	max with zero -> min	5
+byte:l_size_out	size output offset 0x18 -> 0x10	5
+byte:c_limit	product limit 2^63-2 -> 2^63-1	208
+byte:c_seta	product limit test seta -> setae	118
+byte:c_borrow	take counter step 1 -> 2	19
+byte:c_add	accumulator add -> sub	68
+byte:c_or	overflow flag or -> and	29
+misc:digest_flip	one flipped byte fails the digest check	0
+misc:fde_start	an address inside the body is refused as a start	0
+misc:extent_3be2a50	the body keeps its recorded extent	0
+misc:extent_38bddf0	the body keeps its recorded extent	0
+misc:extent_38bcb80	the body keeps its recorded extent	0
+misc:round_bytes	the libm round routine keeps its byte digest	0
+misc:unknown_target	a call to an unlisted target is refused	0
+misc:bad_location	a non-Location address is refused	0
+misc:unlisted_panic	a panic location outside the table is refused	0
+misc:wide_value	a 65-bit value cannot enter a 64-bit slot	0

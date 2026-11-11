@@ -1,0 +1,206 @@
+{
+  "census": {
+    "constructor_slot_calls": 35,
+    "operands": {
+      "0x208": {
+        "in_owner_functions": [
+          [
+            "0x1547732",
+            "0x1547530"
+          ],
+          [
+            "0x1547740",
+            "0x1547530"
+          ],
+          [
+            "0x15ed69e",
+            "0x15ed290"
+          ],
+          [
+            "0x2be19dd",
+            "0x2bdf8f0"
+          ],
+          [
+            "0x2be1a3c",
+            "0x2bdf8f0"
+          ],
+          [
+            "0x2be43ac",
+            "0x2bdf8f0"
+          ],
+          [
+            "0x2cc80fd",
+            "0x2cc1120"
+          ],
+          [
+            "0x2cc811c",
+            "0x2cc1120"
+          ],
+          [
+            "0x2cc8b73",
+            "0x2cc1120"
+          ],
+          [
+            "0x2f195a9",
+            "0x2f19520"
+          ],
+          [
+            "0x422acd2",
+            "0x422abf0"
+          ],
+          [
+            "0x422acee",
+            "0x422abf0"
+          ],
+          [
+            "0x422ad48",
+            "0x422abf0"
+          ],
+          [
+            "0x422bddc",
+            "0x422abf0"
+          ],
+          [
+            "0x422c27e",
+            "0x422abf0"
+          ],
+          [
+            "0x54abe52",
+            "0x54a9c70"
+          ],
+          [
+            "0x54b87c9",
+            "0x54b66b0"
+          ]
+        ],
+        "text_wide_non_rsp": 1261
+      },
+      "0x218": {
+        "in_owner_functions": [
+          [
+            "0x1548dd6",
+            "0x1548bb0"
+          ],
+          [
+            "0x2be5ec8",
+            "0x2bdf8f0"
+          ],
+          [
+            "0x2cc3a70",
+            "0x2cc1120"
+          ],
+          [
+            "0x2cc82c7",
+            "0x2cc1120"
+          ],
+          [
+            "0x2cc82d3",
+            "0x2cc1120"
+          ],
+          [
+            "0x2f195b0",
+            "0x2f19520"
+          ],
+          [
+            "0x422ace0",
+            "0x422abf0"
+          ],
+          [
+            "0x422ad09",
+            "0x422abf0"
+          ],
+          [
+            "0x422ad64",
+            "0x422abf0"
+          ],
+          [
+            "0x422bdf7",
+            "0x422abf0"
+          ],
+          [
+            "0x422c297",
+            "0x422abf0"
+          ],
+          [
+            "0x54b07f8",
+            "0x54a9c70"
+          ],
+          [
+            "0x54bce47",
+            "0x54b66b0"
+          ]
+        ],
+        "text_wide_non_rsp": 1994
+      }
+    },
+    "owner_functions": 77,
+    "record_slot_calls": 68,
+    "spot_checks": {
+      "0x15ed69c": "byte flag at +0x200 and a pointer at +0x208: not the observer layout",
+      "0x422acd0": "+0x208..+0x220 read, then +0x208 = 0 and +0x210 = 8: not the observer layout"
+    }
+  },
+  "component": "abci",
+  "count": {
+    "overflow": "0x15475cb jo -> 0x1548a0b count = u64::MAX",
+    "x50": "0x15475b1 flag +0x25c == 1 -> mul by 50 at 0x15475c2"
+  },
+  "day": {
+    "+0x200": "count, u64 saturating add (0x1547721)",
+    "+0x208": "calls + 1, u64 saturating (0x154773a)",
+    "+0x210": "clamp_sum(+0x210 + product) (0x1547758)",
+    "reset": "0x1547562 date +0x240 differs -> +0x200..+0x218 = 0, ring +0x50/+0x58 = 0"
+  },
+  "gates_changed": false,
+  "plus_0x218_store": "0x1548dd2 constructor movsd [r14+0x218] (scaled first guard constant, #5865)",
+  "product_clamp": {
+    "masks": [
+      "0x7fffffffffffffff",
+      "0xfff0000000000000",
+      "0xfffffffffffff",
+      "normal bound 0x3ff"
+    ],
+    "rule": "keep +-0 and positive finite; negative, NaN and +-inf become 0.0",
+    "samples": {
+      "-0.0": "-0.0",
+      "-2.0": "0.0",
+      "-5e-324": "0.0",
+      "-inf": "0.0",
+      "0.0": "0.0",
+      "1.5": "1.5",
+      "1e308": "1e+308",
+      "5e-324": "5e-324",
+      "inf": "0.0",
+      "nan": "0.0"
+    },
+    "span": [
+      "0x1547601",
+      "0x1547658"
+    ]
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "sum_clamp": {
+    "rule": "keep +-0 and positive finite; +inf becomes 2^64; negative, NaN and -inf become 0.0",
+    "samples": {
+      "-0.0": "-0.0",
+      "-2.0": "0.0",
+      "-5e-324": "0.0",
+      "-inf": "0.0",
+      "0.0": "0.0",
+      "1.5": "1.5",
+      "1e308": "1e+308",
+      "5e-324": "5e-324",
+      "inf": "1.8446744073709552e+19",
+      "nan": "0.0"
+    },
+    "saturation_constant": "0x459090 = 0x43f0000000000000 (1.8446744073709552e+19)"
+  },
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008",
+  "window": {
+    "+0x78": "count, u64 saturating add (0x1547860)",
+    "+0x80": "calls + 1, u64 saturating (0x154787a)",
+    "+0x88": "clamp_sum(+0x88 + product) (0x1547898)",
+    "ring": "+0x40 cap, +0x48 buffer, +0x50 head, +0x58 len; raw value pushed at 0x15477c2; len cut to +0x1f8 at 0x15477cd"
+  }
+}

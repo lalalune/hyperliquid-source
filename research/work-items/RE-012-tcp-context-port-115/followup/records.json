@@ -1,0 +1,71 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "source_base": "05bc2de303c05525b71e7e257426e741bc66a390",
+  "captured_code_executed_or_emulated": false,
+  "start": "0x2b69d20",
+  "end": "0x2b6ae9f",
+  "fde": "0x1185820",
+  "file_offset": 45518112,
+  "length": 4479,
+  "body_sha256": "5b854640e07f22fdce4262d719e531d12d68014e9518b7f848b2dcb4c13069ba",
+  "instructions": 855,
+  "native": [
+    {
+      "file": "caller.gnu.objdump",
+      "sha256": "8152045e18ce338523e977668b135c78b0bf9eb558930c10e439eb8c2e5fc62e",
+      "raw_rows": 855,
+      "lock_prefix_splits": 0
+    },
+    {
+      "file": "caller.llvm.objdump",
+      "sha256": "4588e1b8c4d43f467133d092280925978e971adcfd337ba349b657694361e525",
+      "raw_rows": 857,
+      "lock_prefix_splits": 2
+    }
+  ],
+  "normalization_masks": [],
+  "initial_input": {
+    "tag": 0,
+    "word_value": 4002,
+    "store_va": "0x2b69dbb",
+    "field": "caller+0x86"
+  },
+  "input_pointer_route": [
+    "caller+0x80",
+    "caller+0x140 first qword",
+    "RCX -> caller+0x1a0",
+    "double dereference at 0x2b6a369/370",
+    "32 bytes copied to caller+0x278",
+    "producer 0x2b782e0"
+  ],
+  "context_tail_copy_route": [
+    "producer result+0x10 -> caller+0x1e0 (inside 0x98-byte copy)",
+    "caller+0x1e0 -> stack+0x1a0",
+    "stack+0x1a0 -> stack+0x248",
+    "stack+0x248 -> stack+0x2d0",
+    "stack+0x2d0 -> caller+0xb0 (context+0x10)"
+  ],
+  "sender_context": "caller+0xa0, passed in caller+0x178 with sender base caller+0x168",
+  "conditional_port_value": 4002,
+  "eligible_by_port_predicate": true,
+  "length_threshold_still_required": 1025,
+  "negative_controls_rejected": [
+    "outer-initial-dispatch",
+    "ipv4-port-input",
+    "input-descriptor",
+    "initial-producer-pointer",
+    "producer-input-and-call",
+    "producer-result-gate",
+    "first-tail-copy",
+    "second-tail-copy-and-gate",
+    "r12-tail-copies-and-context",
+    "saved-context",
+    "sender-setup-and-call",
+    "initial-dispatch"
+  ],
+  "limitations": [
+    "Selected initial path with normal helper/copy contracts and no unmodeled alias effects only",
+    "Retry/resume states and helper internals remain open",
+    "No recovered Rust type, network execution or full-caller census claim"
+  ]
+}

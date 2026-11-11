@@ -99,4 +99,22 @@ Next: establish what the object word at +0x50 means, its source of truth and
 stability, and the input/output contracts of `0x2bee760` before assigning asset
 semantics or writing a source-compatible quantity component.
 
+## Bounded Rust implementation
+
+The selected arithmetic relation is now independently implemented as
+`src/node115-quantity-preparation/pdi_range.rs` under the existing quantity
+preparation source area. `PdiRange::new` applies the observed `max(end-start,0)`
+and `2^60-1` admission bound. Its fallible iterator evaluates
+`10000*base + start + index` with checked multiplication and addition.
+
+This is a streaming logical API, not the native allocation. It deliberately
+performs no allocation and cannot reproduce the partially populated buffer that
+the target may leave before an arithmetic panic. It stops after yielding one
+terminal arithmetic error. Asset units, the object word at `+0x50`, formatter
+and caller semantics remain unresolved.
+
+The frozen `pdi-range-vectors.tsv` covers empty and reversed ranges, the count
+boundary, exact multiplier threshold, multiplier overflow, addition overflow,
+partial-iterator termination and ordinary generated values.
+
 Native text exports trim trailing whitespace only; instruction bytes, operands and addresses are unchanged.

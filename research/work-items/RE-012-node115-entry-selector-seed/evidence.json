@@ -1,0 +1,71 @@
+{
+  "target": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032,
+  "anchors": [
+    {
+      "id": "entry_zero_and_call",
+      "va": "0x2cd8370",
+      "size": 63,
+      "bytes": "4881ec0010000048c70424000000004881ec0010000048c70424000000004881ec480c0000c684242202000000488d7c2408e8e992e0ff4881c4482c0000c3",
+      "fde_start": "0x2cd8370",
+      "fde_end": "0x2cd83af",
+      "observation": "Entry callback zeroes its output byte at stack +0x222, passes output pointer +8 to 0x2ae1690, then returns."
+    },
+    {
+      "id": "wrapper_saves_source",
+      "va": "0x2ae16bf",
+      "size": 5,
+      "bytes": "48897c2418",
+      "fde_start": "0x2ae1690",
+      "fde_end": "0x2ae27b2",
+      "observation": "Wrapper saves its incoming first-argument pointer in [rsp+0x18]."
+    },
+    {
+      "id": "wrapper_copy_and_dispatch_call",
+      "va": "0x2ae19b7",
+      "size": 149,
+      "bytes": "4c8da424a85a0000ba402c00004c89e7488b742418ff1536db9f034c8dac24b0000000660f1f44000048c7c0d0eeffff640fb6584883fb01742f83fb02743c488b7c2410488d35eeebbbffff1508eb9f0348c7c0d0eeffff64c64048016666662e0f1f840000000000640fb6584464440fb670456466c740440180889c24800000004488b424810000004c89e74c89eee894270000",
+      "fde_start": "0x2ae1690",
+      "fde_end": "0x2ae27b2",
+      "observation": "Wrapper copies 0x2c40 bytes from the saved input pointer into its local buffer, then passes that buffer to 0x2ae41e0."
+    },
+    {
+      "id": "executor_reads_dispatch_byte",
+      "va": "0x2ae41e0",
+      "size": 43,
+      "bytes": "554157415641554154534881eca80f00004889fb0fb6871a020000488d0de2feb1fd486304814801c8ffe0",
+      "fde_start": "0x2ae41e0",
+      "fde_end": "0x2ae6d66",
+      "observation": "Executor loads byte +0x21a, uses the signed-relative table at 0x6040e4, and jumps through the selected entry."
+    },
+    {
+      "id": "case_zero_calls_cli_builder",
+      "va": "0x2ae42f5",
+      "size": 6,
+      "bytes": "ff15c530a003",
+      "fde_start": "0x2ae41e0",
+      "fde_end": "0x2ae6d66",
+      "observation": "The table entry-0 arm calls through a RIP-relative slot that relocates to 0x564d700, the CLI builder mapped by the adjacent RE-012 packet."
+    }
+  ],
+  "dispatch_table": {
+    "base": "0x6040e4",
+    "index": 0,
+    "target": "0x2ae420b"
+  },
+  "copy_import_relocation": {
+    "slot": "0x64df508",
+    "type": 6,
+    "symbolIndex": 7,
+    "symbol": "memcpy",
+    "addend": "0x0"
+  },
+  "case_zero_cli_builder_relocation": {
+    "call_va": "0x2ae42f5",
+    "slot": "0x64e73c0",
+    "type": 8,
+    "symbolIndex": 0,
+    "target": "0x564d700"
+  }
+}

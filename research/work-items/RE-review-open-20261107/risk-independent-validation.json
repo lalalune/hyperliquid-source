@@ -1,0 +1,114 @@
+{
+  "pr": 4325,
+  "head_sha": "be283fa25fe7c5978140e71ef7ef8bd5626908cf",
+  "scope": "Independent target ranges/instruction decoding and explicit corruption witnesses; full model/PR review delegated separately.",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "scoped_verdict": "pass",
+  "checks": {
+    "functions": 29,
+    "instruction_boundaries": 3880,
+    "boundary_mismatches": 0,
+    "direct_or_rip_target_mismatches": 0,
+    "corruption_operand_encodings": 94,
+    "corruption_encoding_mismatches": 0,
+    "model_witnesses_replayed": 23,
+    "byte_witnesses_replayed": 77,
+    "range_controls_replayed": 7,
+    "all107_detected": true,
+    "original_byte_control_instructions_executed": true,
+    "retained_coverage_denominator": true
+  },
+  "findings": [
+    {
+      "severity": "low",
+      "file": "research/work-items/risk-outcome-record-set-115/README.md",
+      "finding": "Intro says15sharedwriters while authenticated coverage lists20dependency functions beyond the3bodies,3records and3iterators. Full reviewer is preparing correction."
+    },
+    {
+      "severity": "low",
+      "file": "research/work-items/risk-outcome-record-set-115/README.md",
+      "finding": "One-at-a-time case generation and retained-results description is inaccurate; all_cases builds complete list and evaluate retains source cases with outputs. Full reviewer is preparing correction."
+    }
+  ],
+  "tested_source_hashes": {
+    "tools/risk_outcome_set_115.py": "bbd190ffa60319cd8390333df155a0a3041727a76e60e8b249dfe8212dc695c8",
+    "tests/test_risk_outcome_set_115.py": "574fac214674635d16b4ae10a9e23c9438e170791de5b8bc2871cd28f1334f16"
+  },
+  "receipts": {
+    "static": "work/review-4325/independent/static-results.json",
+    "witness": "work/review-4325/independent/witness-results.json",
+    "static_log": "work/review-4325/independent/static-validation.log",
+    "witness_log": "work/review-4325/independent/witness-validation.log"
+  },
+  "limitations": [
+    "Replay used the recorded first distinguishing case for each of100model/bytecontrols, plusall7rangecontrols. It did not rerunall17400 cases or thefullsample search used to establish17undetectedflips.",
+    "Capstone5.0.7 independently confirmed customdecoder instructionbytes,lengths,relative targets and RIP-relative targets. This does not independently prove every modeled instructionsemantic."
+  ],
+  "flag_liveness": {
+    "shift_sites": 15,
+    "cf_of_consumers_before_overwrite": [],
+    "call_boundaries": [
+      {
+        "shift": "0x226c384",
+        "flag": "CF",
+        "call": "0x226c3e2"
+      },
+      {
+        "shift": "0x226c384",
+        "flag": "CF",
+        "call": "0x226c40c"
+      },
+      {
+        "shift": "0x226c384",
+        "flag": "OF",
+        "call": "0x226c3e2"
+      },
+      {
+        "shift": "0x226c384",
+        "flag": "OF",
+        "call": "0x226c40c"
+      },
+      {
+        "shift": "0x41a7124",
+        "flag": "CF",
+        "call": "0x41a7182"
+      },
+      {
+        "shift": "0x41a7124",
+        "flag": "CF",
+        "call": "0x41a71ac"
+      },
+      {
+        "shift": "0x41a7124",
+        "flag": "OF",
+        "call": "0x41a7182"
+      },
+      {
+        "shift": "0x41a7124",
+        "flag": "OF",
+        "call": "0x41a71ac"
+      },
+      {
+        "shift": "0x52f0c74",
+        "flag": "CF",
+        "call": "0x52f0cd2"
+      },
+      {
+        "shift": "0x52f0c74",
+        "flag": "CF",
+        "call": "0x52f0cfc"
+      },
+      {
+        "shift": "0x52f0c74",
+        "flag": "OF",
+        "call": "0x52f0cd2"
+      },
+      {
+        "shift": "0x52f0c74",
+        "flag": "OF",
+        "call": "0x52f0cfc"
+      }
+    ],
+    "conclusion": "No observed CF/OF use after a shift before overwrite in the29functions, including caller-side flow past calls. Array-header callees overwrite incoming flags in prologues; allocator is an explicit contract stub. Generic shift-flag modeling remains limited outside this observed scope."
+  }
+}

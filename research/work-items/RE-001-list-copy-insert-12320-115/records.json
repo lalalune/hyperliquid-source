@@ -1,0 +1,107 @@
+{
+ "artifact": "work/hl-node-115.bin",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "assumptions": [
+  "A list node is 0x18 bytes: next link at +0x00, prev link at +0x08, payload qword at +0x10. The body reads the source chain only through +0x00 and +0x10; it never reads a source node's +0x08.",
+  "The source range must be a well-formed forward chain that reaches the end node (rdx..rcx by +0x00 links). A chain that never reaches it is not a handled case: the native body keeps allocating until it faults, so the model raises instead of looping forever. No such input is claimed as a valid case.",
+  "_M_hook and _M_transfer are library primitives outside the FDE; in the model tests and in the Unicorn differential they are answered with the libstdc++ semantics stated in README.md, on both sides alike. The differential tests this body's own instructions, not the primitives' bytes.",
+  "Exception behaviour is modelled from the FDE's LSDA: exactly one call-site entry, for the operator-new call in the copy loop, landing on the pad at 0x5f12407, which jumps into the shared cleanup block at 0x5f122e0. No other PLT call in the body has a landing pad."
+ ],
+ "callees": [
+  {
+   "contract": "operator new with size 0x18, once per copied source node, in source order; the only call in the body with a landing pad",
+   "target": "0x63f0dd0 (PLT _Znwm)"
+  },
+  {
+   "contract": "link each fresh copy into the on-stack temp list before the temp header, so copies accumulate in source order at the temp tail",
+   "target": "0x63f1090 (PLT _ZNSt8__detail15_List_node_base7_M_hookEPS0_)"
+  },
+  {
+   "contract": "splice the whole finished temp chain before the position node in one call: _M_transfer(position, temp first, temp header)",
+   "target": "0x63f13c0 (PLT _ZNSt8__detail15_List_node_base11_M_transferEPS0_S1_)"
+  },
+  {
+   "contract": "sized operator delete (node, 0x18) for every node still linked in the temp list after the transfer (the drain loop), and for every temp node on the exception path (the shared cleanup block)",
+   "target": "0x63f0d80 (PLT _ZdlPvm)"
+  },
+  {
+   "contract": "resume the original exception after the cleanup block has raw-deleted the temp chain",
+   "target": "0x63f0a50 (PLT _Unwind_Resume)"
+  },
+  {
+   "contract": "stack-canary failure exit only; not reached on any modelled path",
+   "target": "0x63f0d70 (PLT __stack_chk_fail)"
+  }
+ ],
+ "census": {
+  "direct_call_count": 2,
+  "direct_call_sites_file": "callers.tsv",
+  "note": "Both direct calls are inside the copy-on-write move helper 0x5f12840..0x5f129a6 (open PR #3391's routine), at 0x5f128b5 and 0x5f12924; there are no tail jumps, no stored qwords, and no RELATIVE addends.",
+  "relative_addends": 0,
+  "stored_qwords": 0,
+  "tail_jumps": 0
+ },
+ "distinct_from": [
+  "Open PR #3391 (RE-001-cow-move-helper-12840-115): pins the caller 0x5f12840 and cites this routine by contract only -- its differential intercepts the two call sites and answers them with a contract function. This packet pins the body itself. The contract's observable claims are all confirmed; two mechanism details are corrected (see README.md).",
+  "RE-002 vendor census (research/byte-windows.json, id node115-vendor-5f12320): identifies the FDE as a librocksdb-sys 0.11.0+8.1.1 build copy of std::list<rocksdb::MemTable*>::insert (.isra.0) -- identification only, no behaviour pinned.",
+  "RE-001-drain-driver-115 (merged): its README states the 0x5f12840/0x5f12320 list-move area was judged too tangled to pin honestly in earlier cycles and claims only call sites there. This packet pins the 0x5f12320 body; the windows and claims do not overlap.",
+  "Sweep on 2026-11-06: no open PR title among all 783 open hyperliquid-source PRs mentions 0x5f12320, and a body search for 5f12320 returns no open PR."
+ ],
+ "fields": [
+  {
+   "kind": "next link",
+   "offset": "+0x00",
+   "rule": "the body follows it to walk the source range; in a copy it is written only by the _M_hook/_M_transfer primitives, never by the body's own stores"
+  },
+  {
+   "kind": "previous link",
+   "offset": "+0x08",
+   "rule": "never read from a source node; in a copy it is written only by the _M_hook/_M_transfer primitives"
+  },
+  {
+   "kind": "payload qword",
+   "offset": "+0x10",
+   "rule": "the body's only own store to a fresh copy: copied verbatim from the source node at the same offset, before the _M_hook call"
+  },
+  {
+   "kind": "destination size",
+   "offset": "dest +0x10",
+   "rule": "grows by the copied count in a single add placed after the _M_transfer call returns; untouched on the empty-range path and on the exception path"
+  }
+ ],
+ "node": 115,
+ "not_claimed": [
+  "Caller semantics beyond the two call sites' argument setups, non-empty guards, and the fact that neither site reads rax after the call.",
+  "What the payload qwords denote. The vendor census identifies the list element type as rocksdb::MemTable*; no claim here depends on it.",
+  "Any behaviour when the source chain does not reach the end node, and the contents of a fresh copy's +0x00/+0x08 fields before _M_hook writes them.",
+  "Which try region the landing pad guards beyond the single LSDA call-site entry for the operator-new call."
+ ],
+ "routine": {
+  "address": "0x5f12320",
+  "allocation_size": "0x18",
+  "fde": "0x5f12320..0x5f12413",
+  "returns": "nothing its callers use: neither of the two call sites reads rax after the call",
+  "takes": "destination list object in rdi (header node at +0x00/+0x08, size qword at +0x10), insertion position node in rsi, first source node in rdx, source end node (exclusive) in rcx; the source range is the forward +0x00 chain [rdx, rcx)"
+ },
+ "sites": [
+  {
+   "address": "0x5f128b5",
+   "caller_fde": "0x5f12840..0x5f129a6",
+   "guard": "called only when the source first list is non-empty (first node != its header)",
+   "rcx": "the source object's first-list header",
+   "rdi": "the destination object; the list object is its first list at +0x00",
+   "rdx": "the source first list's first node",
+   "rsi": "rdi: the destination first list's header (tail position)"
+  },
+  {
+   "address": "0x5f12924",
+   "caller_fde": "0x5f12840..0x5f129a6",
+   "guard": "called only when the surviving source range is non-empty",
+   "rcx": "the source object + 0x18: the source second list's header",
+   "rdi": "the destination object + 0x18: the destination second list as its own list object",
+   "rdx": "the first surviving source node of the source object's second list, after the caller's lockstep adjustment walk",
+   "rsi": "the same +0x18 header (tail position)"
+  }
+ ],
+ "task": "RE-001"
+}

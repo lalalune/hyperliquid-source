@@ -1,0 +1,149 @@
+{
+  "allocation": {
+    "data_pointer_at": "0x80",
+    "destroy": "0x5ce86d0",
+    "destroy_bytes": 389,
+    "field_drops": [
+      "0x5ce7e50",
+      "0x5ce7f40"
+    ],
+    "size": "0x300",
+    "strong_at": "0x0",
+    "wake_target_at": "0x240",
+    "wake_target_fd_at": "0x284",
+    "weak_at": "0x8",
+    "woken_flag_at": "0x1d0"
+  },
+  "answers": {
+    "extent_corrected": "0x20",
+    "fields": [
+      "clone",
+      "wake",
+      "wake_by_ref",
+      "drop"
+    ],
+    "h15_measured_extent": "0x40",
+    "table_at_base_plus_0x20": "core::task::RawWakerVTable",
+    "waker_owner": "tokio I/O driver shared inner state"
+  },
+  "artifact": {
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "size": 105896032
+  },
+  "debug_vtable": {
+    "align": 8,
+    "base": "0x64c6458",
+    "debug_slot": {
+      "body": "0x5ca7ea0",
+      "kind": "RELATIVE",
+      "offset": "0x18",
+      "target": "0x5ca5610"
+    },
+    "drop": "0x5cee460",
+    "drop_bytes": 209,
+    "reference_kind": "panic-format sites only",
+    "references": [
+      "0x156f04c",
+      "0x172d07c",
+      "0x2a00aec",
+      "0x2e74219",
+      "0x478118f",
+      "0x59647c9",
+      "0x5ce0a32"
+    ],
+    "size": 8
+  },
+  "limitations": [
+    "No DWARF type names in the binary: the allocation is attributed to the tokio I/O driver's inner state from the wake body's panic location and the field layout, not from a name.",
+    "The thread-local cell (TLS slot -0x1130) is pinned by its consult pattern and key only; the parker value object behind it is RE-005 #2935's subject, not re-identified here.",
+    "The 8 bytes at the data pointer (alloc+0x80) are never dereferenced by the four waker functions; any role other code gives that field is out of scope.",
+    "Static records only; nothing was executed."
+  ],
+  "panic_format_path": {
+    "fmt_shim": "0x1687260",
+    "helper": "0x1680c30",
+    "panic_fmt": "0x1680e80",
+    "slot_used": "0x18"
+  },
+  "raw_waker_vtable": {
+    "base": "0x64c6478",
+    "clone": {
+      "overflow": "ud2 abort",
+      "returns": {
+        "rax": "0x64c6478",
+        "rdx": "data"
+      },
+      "strong_inc_at": "data-0x80"
+    },
+    "drop": {
+      "destroy": "0x5ce86d0",
+      "strong_dec_at": "data-0x80"
+    },
+    "fields": [
+      {
+        "body_bytes": 20,
+        "cell": "0x64c6478",
+        "field": "clone",
+        "kind": "RELATIVE",
+        "target": "0x5cee5a0"
+      },
+      {
+        "body_bytes": 10,
+        "cell": "0x64c6480",
+        "field": "wake",
+        "kind": "RELATIVE",
+        "target": "0x5cee590"
+      },
+      {
+        "body_bytes": 136,
+        "cell": "0x64c6488",
+        "field": "wake_by_ref",
+        "kind": "RELATIVE",
+        "target": "0x5cee5c0"
+      },
+      {
+        "body_bytes": 27,
+        "cell": "0x64c6490",
+        "field": "drop",
+        "kind": "RELATIVE",
+        "target": "0x5cee570"
+      }
+    ],
+    "reference_kind": "the lea inside clone only",
+    "references": [
+      "0x5cee5a7"
+    ],
+    "wake": {
+      "adjusts": "data-0x80",
+      "body": "0x5cfc550",
+      "consumes_strong_ref": true
+    },
+    "wake_by_ref": {
+      "flag_xchg_at": "data+0x150",
+      "touches_count": false,
+      "wake_target_at": "data+0x1c0"
+    }
+  },
+  "relocation_counts": {
+    "glob_dat": 263,
+    "jump_slot": 278,
+    "relative": 59534,
+    "total": 61001
+  },
+  "wake_path": {
+    "consume_body": "0x5cfc550",
+    "consume_bytes": 193,
+    "driver_wake_body": "0x5ce09a0",
+    "driver_wake_bytes": 258,
+    "panic": {
+      "file": "/home/ubuntu/hl/code_Mainnet/z_vendor/tokio/src/runtime/io/driver.rs",
+      "line": 272,
+      "message": "failed to wake I/O driver"
+    },
+    "thread_local": {
+      "fn": "0x5ca0d20",
+      "got": "0x64e0510",
+      "key": "0x5cdf410"
+    }
+  }
+}

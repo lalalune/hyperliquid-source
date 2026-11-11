@@ -1,0 +1,173 @@
+{
+  "counterfactuals": [
+    {
+      "after": {
+        "balances": [
+          1,
+          1
+        ],
+        "diagnostics": [],
+        "lookups": [
+          11,
+          22
+        ],
+        "rows": [
+          [
+            11,
+            1
+          ],
+          [
+            22,
+            1
+          ],
+          [
+            33,
+            1000
+          ]
+        ]
+      },
+      "before": {
+        "diagnostics": [],
+        "lookups": [],
+        "skip": true
+      },
+      "meaning": "reserved address",
+      "new_byte": 51,
+      "va": "0x38daa50"
+    },
+    {
+      "after": {
+        "diagnostics": [],
+        "error": 19,
+        "lookups": [
+          11
+        ]
+      },
+      "before": {
+        "balances": [
+          1,
+          1
+        ],
+        "diagnostics": [],
+        "lookups": [
+          11,
+          22
+        ],
+        "rows": [
+          [
+            11,
+            1
+          ],
+          [
+            22,
+            1
+          ],
+          [
+            33,
+            1000
+          ]
+        ]
+      },
+      "meaning": "held-balance gate",
+      "new_byte": 132,
+      "va": "0x38dac34"
+    },
+    {
+      "after": {
+        "diagnostics": [],
+        "error": 19,
+        "lookups": [
+          11,
+          22
+        ]
+      },
+      "before": {
+        "diagnostics": [],
+        "error": 14,
+        "lookups": [
+          11
+        ]
+      },
+      "meaning": "first product overflow",
+      "new_byte": 129,
+      "va": "0x38dac8d"
+    },
+    {
+      "after": {
+        "balances": [
+          36893488147419103,
+          36893488147419103
+        ],
+        "diagnostics": [
+          "sum overflow"
+        ],
+        "lookups": [
+          11,
+          22
+        ],
+        "rows": [
+          [
+            11,
+            36893488147419103
+          ],
+          [
+            22,
+            36893488147419103
+          ],
+          [
+            33,
+            18446744073709551614
+          ]
+        ]
+      },
+      "before": {
+        "balances": [
+          36893488147419103,
+          36893488147419103
+        ],
+        "diagnostics": [
+          "sum overflow"
+        ],
+        "lookups": [
+          11,
+          22
+        ],
+        "rows": [
+          [
+            11,
+            36893488147419103
+          ],
+          [
+            22,
+            36893488147419103
+          ],
+          [
+            33,
+            18446744073709551615
+          ]
+        ]
+      },
+      "meaning": "sum saturation",
+      "new_byte": 254,
+      "va": "0x38daf3d"
+    }
+  ],
+  "exclusion_cases": 210,
+  "limits": "Map lookup values are explicit total/held boundaries; valid native container descriptors and successful allocations. Diagnostic-call continuation is conditional on those calls returning. No parallel execution, lookup algorithm, precise token units, global application or captured-code execution/emulation.",
+  "native_operands": {
+    "balance_error": 19,
+    "first_balance_branch": "jne",
+    "first_prefix": 50,
+    "first_product_branch": "jo",
+    "product_error": 14,
+    "second_balance_branch": "jne",
+    "second_prefix": 50,
+    "second_product_branch": "jo",
+    "second_product_error": 14,
+    "skip_marker": 9223372036854775809,
+    "sum_branch": "jb",
+    "sum_saturation": 18446744073709551615,
+    "weight_scale": 1000
+  },
+  "projection_cases": 5248
+}

@@ -1,0 +1,470 @@
+{
+ "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "calls": [
+  {
+   "note": "pthread_mutex_trylock",
+   "site": "0x63638cc",
+   "target": "0x63f17b0"
+  },
+  {
+   "note": "pthread_mutex_unlock",
+   "site": "0x6363966",
+   "target": "0x63f0b70"
+  },
+  {
+   "note": "lock-wait helper (#251)",
+   "site": "0x63639b3",
+   "target": "0x63bf680"
+  },
+  {
+   "note": "helper, rebalance arm",
+   "site": "0x6363a2d",
+   "target": "0x635f3a0"
+  },
+  {
+   "note": "helper, grow arm",
+   "site": "0x6363a6f",
+   "target": "0x63acb40"
+  },
+  {
+   "note": "pthread_mutex_unlock",
+   "site": "0x6363a9a",
+   "target": "0x63f0b70"
+  },
+  {
+   "note": "helper, key",
+   "site": "0x6363ab6",
+   "target": "0x63c0340"
+  },
+  {
+   "note": "helper",
+   "site": "0x6363acc",
+   "target": "0x6360610"
+  },
+  {
+   "note": "bin_table_init",
+   "site": "0x6363b30",
+   "target": "0x63d9880"
+  },
+  {
+   "note": "helper, context-release arm",
+   "site": "0x6363b4b",
+   "target": "0x635f340"
+  },
+  {
+   "note": "lu-miss handler",
+   "site": "0x6363d29",
+   "target": "0x63d9700"
+  },
+  {
+   "note": "__stack_chk_fail",
+   "site": "0x6363d33",
+   "target": "0x63f0d70"
+  }
+ ],
+ "census": {
+  "bin_table_init": 1,
+  "bsr": 0,
+  "calls_total": 12,
+  "jumps": 44,
+  "jumps_outside_window": 1,
+  "lock_add": 0,
+  "lock_sub": 0,
+  "lu_miss": 1,
+  "raw_e8": {
+   "tiers": {
+    "1": 17,
+    "10": 1,
+    "2": 12,
+    "4": 8,
+    "5": 1,
+    "6": 2,
+    "8": 1
+   },
+   "total": 108
+  },
+  "rela_dyn": {
+   "relative": 59534,
+   "total": 60723
+  },
+  "rela_plt": 278,
+  "ret": 1,
+  "strict": 291
+ },
+ "cited_not_claimed": [
+  "bin_table_init body 0x63d9880..0x63d9a64 (#262)",
+  "lu-miss handler 0x63d9700..0x63d987b (#215)",
+  "tail-jump target 0x6360ed0",
+  "helpers 0x63f17b0, 0x63f0b70, 0x63bf680, 0x635f3a0, 0x63acb40, 0x63c0340, 0x6360610, 0x635f340",
+  "tables 0x65096c0, 0x6511780, 0x6511820, 0x6711b40, 0x650969c, 0x6511a00"
+ ],
+ "exhibits": [
+  {
+   "bin_table_init_sites": [
+    "0x6363b30"
+   ],
+   "bsr": 0,
+   "bytes": 1376,
+   "calls_total": 12,
+   "lock_add": 0,
+   "lock_sub": 0,
+   "lu_miss_sites": [
+    "0x6363d29"
+   ],
+   "name": "bintableinit_caller_leaf_update_1site",
+   "range": "0x63637f0..0x6363d50",
+   "ret": 1,
+   "ret_sites": [
+    "0x63639a6"
+   ],
+   "strict": 291,
+   "tail_jump_exits": [
+    "0x6360ed0"
+   ]
+  }
+ ],
+ "frame": {
+  "canary": "0x1a8(%rsp)",
+  "endbr64": true,
+  "pushes": [
+   "r15",
+   "r14",
+   "r13",
+   "r12",
+   "rbp",
+   "rbx"
+  ],
+  "sub_rsp": "0x1b8"
+ },
+ "lu_miss_sites": [
+  {
+   "r8": 1,
+   "r9": 0,
+   "rcx": "rbp key",
+   "rdi": "r14 context",
+   "rdx": "rbx scan table",
+   "rejoin": "jmp 0x6363868",
+   "rsi": "lea 0x6511a00",
+   "site": "0x6363d29"
+  }
+ ],
+ "next_fde": {
+  "padding": 0,
+  "range": "0x6363d50..0x6364270"
+ },
+ "next_question": {
+  "bin_table_init": 1,
+  "bsr": 4,
+  "bytes": 1312,
+  "fall_through": [
+   "0x6387420..0x6387878",
+   "0x63adb50..0x63adf34"
+  ],
+  "lu_miss": 1,
+  "packet": 301,
+  "ret": 1,
+  "window": "0x6363d50..0x6364270"
+ },
+ "node_update": {
+  "bit_set": "xor %rbp,0x40(%r15,%r11,8); node value += 0x10000000",
+  "context_release": "subl $0x1,0x98(%r14); js 0x6363b40 -> helper 0x635f340",
+  "grow_arm": "0x6363a40: helper 0x63acb40, unlock, key helper 0x63c0340",
+  "lock_wait_helper": "0x63bf680 at 0x63639b3 (sets 0x68(%rbx)=1, retries)",
+  "rebalance_arm": "0x63639c8: list-node unlink/relink, helper 0x635f3a0",
+  "refcount": "addq $0x1,0x38(%rbx); context 0x30(%rbx) vs r14",
+  "trylock": "0x63f17b0 at 0x63638cc"
+ },
+ "prev_fde": {
+  "gap": 14,
+  "gap_bytes": "all 0xcc",
+  "range": "0x6363660..0x63637e2"
+ },
+ "scan": {
+  "base": "table+0x100",
+  "exhaustion": "0x6363d10",
+  "move_to_front": "0x6363c2f",
+  "reversed_operand": [],
+  "slot_compares": [
+   "0x6363ae0",
+   "0x6363c26",
+   "0x6363ca2",
+   "0x6363cb1",
+   "0x6363cc4",
+   "0x6363cd7",
+   "0x6363cea",
+   "0x6363cf7"
+  ],
+  "slots": 8,
+  "table": "rbx context+0x1b0"
+ },
+ "sites": [
+  {
+   "argument": "lea 0x20(%rsp) in rbx",
+   "block": "0x6363b28",
+   "branch": "test %rdi,%rdi; je from 0x6363828",
+   "rejoin": "jmp 0x636382e",
+   "site": "0x6363b30"
+  }
+ ],
+ "size_class": {
+  "note": "no size-class/bsr block; entry rdx has no callee-saved copy in the head (all later rdx uses are re-set first)"
+ },
+ "survey": {
+  "candidates": [
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363095"
+    ],
+    "end": "0x6363258",
+    "miss": 1,
+    "ret": 0,
+    "size": 712,
+    "start": "0x6362f90",
+    "status": "BUILT by packet #298"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63633f8"
+    ],
+    "end": "0x6363552",
+    "miss": 1,
+    "ret": 1,
+    "size": 754,
+    "start": "0x6363260",
+    "status": "BUILT by packet #299"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363b30"
+    ],
+    "end": "0x6363d50",
+    "miss": 1,
+    "ret": 1,
+    "size": 1376,
+    "start": "0x63637f0",
+    "status": "BUILT by this packet (#300)"
+   },
+   {
+    "bsr": 4,
+    "bti": 1,
+    "bti_sites": [
+     "0x6364009"
+    ],
+    "end": "0x6364270",
+    "miss": 1,
+    "ret": 1,
+    "size": 1312,
+    "start": "0x6363d50",
+    "status": "survives, next (#301)"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6387629"
+    ],
+    "end": "0x6387878",
+    "miss": 1,
+    "ret": 1,
+    "size": 1112,
+    "start": "0x6387420",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63adce6"
+    ],
+    "end": "0x63adf34",
+    "miss": 2,
+    "ret": 1,
+    "size": 996,
+    "start": "0x63adb50",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae114"
+    ],
+    "end": "0x63ae252",
+    "miss": 1,
+    "ret": 1,
+    "size": 786,
+    "start": "0x63adf40",
+    "status": "EXCLUDED as a whole FDE: overlaps packet #214 (lu nextnode) claimed sub-ranges 0x63adf71..0x63adf9d, 0x63ae014..0x63ae040, 0x63ae088..0x63ae0cf, 0x63adfed..0x63ae014 in its records"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae45d"
+    ],
+    "end": "0x63ae6d1",
+    "miss": 2,
+    "ret": 1,
+    "size": 1057,
+    "start": "0x63ae2b0",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae83d"
+    ],
+    "end": "0x63ae974",
+    "miss": 1,
+    "ret": 1,
+    "size": 660,
+    "start": "0x63ae6e0",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aea96"
+    ],
+    "end": "0x63aed39",
+    "miss": 2,
+    "ret": 1,
+    "size": 953,
+    "start": "0x63ae980",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aeea1"
+    ],
+    "end": "0x63aefdb",
+    "miss": 2,
+    "ret": 1,
+    "size": 667,
+    "start": "0x63aed40",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af198"
+    ],
+    "end": "0x63af45f",
+    "miss": 2,
+    "ret": 1,
+    "size": 1151,
+    "start": "0x63aefe0",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af6c8"
+    ],
+    "end": "0x63afba4",
+    "miss": 4,
+    "ret": 1,
+    "size": 1860,
+    "start": "0x63af460",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63afe1e"
+    ],
+    "end": "0x63b0324",
+    "miss": 4,
+    "ret": 1,
+    "size": 1732,
+    "start": "0x63afc60",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc5e5"
+    ],
+    "end": "0x63bc728",
+    "miss": 1,
+    "ret": 1,
+    "size": 664,
+    "start": "0x63bc490",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc9ec"
+    ],
+    "end": "0x63bcb12",
+    "miss": 1,
+    "ret": 1,
+    "size": 994,
+    "start": "0x63bc730",
+    "status": "survives"
+   },
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x63c30ed"
+    ],
+    "end": "0x63c3328",
+    "miss": 1,
+    "ret": 1,
+    "size": 1064,
+    "start": "0x63c2f00",
+    "status": "survives"
+   }
+  ],
+  "count": 17,
+  "exclusions_reverified": [
+   "0x63ed090..0x63ed862 (#260)",
+   "0x63ef8e0..0x63efba2 (#258)"
+  ],
+  "method": "own .eh_frame parse (135,313 FDEs, sorted before bisect) + raw-e8 census + objdump site count per FDE + exhibits-scoped range-only claim check over merged tree + all prior hl-wt-calls* worktrees",
+  "tiers": {
+   "1": 17,
+   "10": 1,
+   "2": 12,
+   "4": 8,
+   "5": 1,
+   "6": 2,
+   "8": 1
+  },
+  "total_raw": 108
+ },
+ "tail_jump_exit": {
+  "note": "tail-jump exit, verified per FDE (sole outside-window jump; epilogue sets rdi=context, rsi=r13, rcx=0, rdx=0)",
+  "site": "0x6363b8a",
+  "target": "0x6360ed0"
+ },
+ "walk": {
+  "field_update": "second-level value shl/sar $0x10, mask $0xffffffffffffff80, node pointer in rax/rbx",
+  "node_resolution_table": "0x65096c0 + 0x6511780 (read in this FDE, unlike #298/#299)",
+  "second_level": "(key>>0x9)&0x1ffff8 + table + 0x8",
+  "table": "context+0x1b0 (rbx)",
+  "top_index": "(key>>0x1a)&0xf0"
+ },
+ "window": {
+  "bytes": 1376,
+  "range": "0x63637f0..0x6363d50",
+  "strict": 291
+ }
+}

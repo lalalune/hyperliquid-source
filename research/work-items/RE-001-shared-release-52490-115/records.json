@@ -1,0 +1,724 @@
+{
+ "task": "RE-001",
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "routine": {
+  "address": "0x5a52490",
+  "fde": "0x5a52490..0x5a52518",
+  "size_bytes": 136,
+  "arguments": [
+   "cell pointer in rdi"
+  ],
+  "returns": "nothing meaningful (returns void; ends in a tail jump to the callback when the +0x30 table is present)",
+  "internal_calls": 2,
+  "internal_tail_jumps": 0,
+  "internal_indirect_calls": 5,
+  "internal_indirect_tail_jumps": 1
+ },
+ "layout": {
+  "state_dword": "+0x00: value 2 returns at once; its low byte selects the destructor",
+  "refcount_pointer": "+0x08: pointer to the refcount qword that is lock-decremented",
+  "directly_untouched": "+0x10..+0x2f: never read or written by this routine's own instructions",
+  "callback_table": "+0x30: called through +0x18 when nonzero",
+  "callback_data": "+0x38: passed in rdi to the callback"
+ },
+ "steps": [
+  {
+   "order": 0,
+   "rule": "if the dword at +0x00 equals 2, return immediately; no other field is read"
+  },
+  {
+   "order": 1,
+   "rule": "call the first callee through slot 0x64dfe40 with rdi = the cell; its return value is discarded",
+   "site": "0x5a5249c"
+  },
+  {
+   "order": 2,
+   "rule": "lock-dec the qword pointed to by +0x08; only on reaching 0, call the destructor selected by the byte at +0x00 (nonzero: slot 0x64dfdc8; zero: slot 0x64dfdb8) with rdi = cell + 8",
+   "sites": [
+    "0x5a524ae",
+    "0x5a524b4",
+    "0x5a524c5"
+   ]
+  },
+  {
+   "order": 3,
+   "rule": "if the qword at +0x30 is nonzero, tail-jump to [table + 0x18] with rdi = the qword at +0x38; otherwise return",
+   "site": "0x5a524df"
+  }
+ ],
+ "first_callee": {
+  "slot": "0x64dfe40",
+  "callee": "0x5ceafd0",
+  "fde": "0x5ceafd0..0x5ceb1a4",
+  "opaque": true,
+  "rule": "called with the cell itself in rdi before any release step; the return value is discarded and the body is not modelled"
+ },
+ "destructors": {
+  "argument": "cell + 8",
+  "nonzero_byte": "0x5ce8da0",
+  "nonzero_slot": "0x64dfdc8",
+  "nonzero_fde": "0x5ce8da0..0x5ce90c1",
+  "zero_byte": "0x5ce86d0",
+  "zero_slot": "0x64dfdb8",
+  "zero_fde": "0x5ce86d0..0x5ce8855",
+  "rule": "exactly one runs, only when the +0x08 refcount decrement reaches 0; bodies not modelled"
+ },
+ "pair_helper": {
+  "address": "0x5a4f0e0",
+  "fde": "0x5a4f0e0..0x5a4f10b",
+  "size_bytes": 43,
+  "rule": "the standalone form of step 2 (same decrement, same byte-selected destructor tail jump, argument = the cell); called by the first cleanup pad at 0x5a524f5"
+ },
+ "callback": {
+  "table_offset": "+0x30",
+  "data_offset": "+0x38",
+  "entry_offset": "+0x18",
+  "rule": "tail jump on the normal path; a plain call inside the cleanup pads"
+ },
+ "unwind": {
+  "lsda_callsites": [
+   {
+    "range": "0x5a52499..0x5a524a2",
+    "covers": "the first-callee call at 0x5a5249c",
+    "pad": "0x5a524ef",
+    "action": 0
+   },
+   {
+    "range": "0x5a524b4..0x5a524cb",
+    "covers": "both destructor calls at 0x5a524b4 and 0x5a524c5",
+    "pad": "0x5a524ea",
+    "action": 0
+   },
+   {
+    "range": "0x5a524cb..0x5a524f2",
+    "covers": "the callback test/tail region and the pad prologues",
+    "pad": null,
+    "action": 0
+   },
+   {
+    "range": "0x5a524f2..0x5a5250a",
+    "covers": "the cleanup pads' own calls at 0x5a524f5 and 0x5a52507",
+    "pad": "0x5a52512",
+    "action": 1
+   },
+   {
+    "range": "0x5a5250a..0x5a52518",
+    "covers": "the _Unwind_Resume call and the final shim call",
+    "pad": null,
+    "action": 0
+   }
+  ],
+  "pads": {
+   "0x5a524ef": "first callee raised: run the pair release via the helper 0x5a4f0e0, call the callback step, then _Unwind_Resume",
+   "0x5a524ea": "a destructor raised: call the callback step only (the pair release is not redone), then _Unwind_Resume",
+   "0x5a52512": "a cleanup call raised: call the panic shim through slot 0x64df4c0 instead of resuming"
+  },
+  "panic_shim": {
+   "address": "0x1680cab",
+   "fde": "0x1680cab..0x1680cbf",
+   "slot": "0x64df4c0",
+   "message": "panic in a destructor during cleanup",
+   "message_address": "0x46e9bd",
+   "message_length": 36,
+   "entry": "0x1680e40",
+   "entry_slot": "0x64e1f28"
+  },
+  "unwind_resume": "0x63f0a50"
+ },
+ "census": {
+  "direct_call_count": 82,
+  "tail_jump_count": 14,
+  "distinct_caller_fdes": 45,
+  "stored_qwords": [],
+  "relative_addends": 0,
+  "internal_calls": 2,
+  "internal_tail_jumps": 0,
+  "internal_indirect_calls": 5,
+  "internal_indirect_tail_jumps": 1
+ },
+ "callers": [
+  {
+   "site": "0x5a2f5e8",
+   "caller_fde": "0x5a2f550..0x5a2f661",
+   "kind": "call",
+   "setup": "lea 0x28(%rbx) into rdi"
+  },
+  {
+   "site": "0x5a2f622",
+   "caller_fde": "0x5a2f550..0x5a2f661",
+   "kind": "call",
+   "setup": "lea 0x28(%rbx) into rdi (caller cleanup pad)"
+  },
+  {
+   "site": "0x5a2f9c2",
+   "caller_fde": "0x5a2f760..0x5a2fa70",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a2fa33",
+   "caller_fde": "0x5a2f760..0x5a2fa70",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3a42c",
+   "caller_fde": "0x5a3a360..0x5a3a499",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3a46f",
+   "caller_fde": "0x5a3a360..0x5a3a499",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3bf1c",
+   "caller_fde": "0x5a3be70..0x5a3c2a3",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3c1a9",
+   "caller_fde": "0x5a3be70..0x5a3c2a3",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3c381",
+   "caller_fde": "0x5a3c2b0..0x5a3c3f6",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3c3c4",
+   "caller_fde": "0x5a3c2b0..0x5a3c3f6",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3c48a",
+   "caller_fde": "0x5a3c400..0x5a3c554",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3c4d8",
+   "caller_fde": "0x5a3c400..0x5a3c554",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3c9db",
+   "caller_fde": "0x5a3c960..0x5a3ca86",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3ca17",
+   "caller_fde": "0x5a3c960..0x5a3ca86",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3ee54",
+   "caller_fde": "0x5a3ede0..0x5a3ef3e",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3eeaa",
+   "caller_fde": "0x5a3ede0..0x5a3ef3e",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3ef87",
+   "caller_fde": "0x5a3ef40..0x5a3efbc",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3ef96",
+   "caller_fde": "0x5a3ef40..0x5a3efbc",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3fc52",
+   "caller_fde": "0x5a3fbc0..0x5a3fcae",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a3fc9b",
+   "caller_fde": "0x5a3fbc0..0x5a3fcae",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a41223",
+   "caller_fde": "0x5a411d0..0x5a41258",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a41232",
+   "caller_fde": "0x5a411d0..0x5a41258",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a418a7",
+   "caller_fde": "0x5a41860..0x5a418dc",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a418b6",
+   "caller_fde": "0x5a41860..0x5a418dc",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a41a43",
+   "caller_fde": "0x5a419f0..0x5a41a78",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a41a52",
+   "caller_fde": "0x5a419f0..0x5a41a78",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a41ac7",
+   "caller_fde": "0x5a41a80..0x5a41afc",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a41ad6",
+   "caller_fde": "0x5a41a80..0x5a41afc",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a423de",
+   "caller_fde": "0x5a423a0..0x5a42400",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a423ed",
+   "caller_fde": "0x5a423a0..0x5a42400",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a449d7",
+   "caller_fde": "0x5a44990..0x5a44a0c",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a449e6",
+   "caller_fde": "0x5a44990..0x5a44a0c",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a44da9",
+   "caller_fde": "0x5a44d30..0x5a44dde",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a44dcb",
+   "caller_fde": "0x5a44d30..0x5a44dde",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a458fb",
+   "caller_fde": "0x5a45860..0x5a45957",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a45944",
+   "caller_fde": "0x5a45860..0x5a45957",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a45cb9",
+   "caller_fde": "0x5a45c10..0x5a45cfa",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a45ce7",
+   "caller_fde": "0x5a45c10..0x5a45cfa",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a46340",
+   "caller_fde": "0x5a462f0..0x5a4637d",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a4635e",
+   "caller_fde": "0x5a462f0..0x5a4637d",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a466e7",
+   "caller_fde": "0x5a466a0..0x5a46724",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a46705",
+   "caller_fde": "0x5a466a0..0x5a46724",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a47170",
+   "caller_fde": "0x5a47120..0x5a471ad",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a4718e",
+   "caller_fde": "0x5a47120..0x5a471ad",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a47750",
+   "caller_fde": "0x5a47700..0x5a4778d",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a4776e",
+   "caller_fde": "0x5a47700..0x5a4778d",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a477d7",
+   "caller_fde": "0x5a47790..0x5a47814",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a477f5",
+   "caller_fde": "0x5a47790..0x5a47814",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a47a3d",
+   "caller_fde": "0x5a47a00..0x5a47a77",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a47a58",
+   "caller_fde": "0x5a47a00..0x5a47a77",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a4aabc",
+   "caller_fde": "0x5a4aa40..0x5a4ab5b",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a4ab07",
+   "caller_fde": "0x5a4aa40..0x5a4ab5b",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a4b83c",
+   "caller_fde": "0x5a4b7b0..0x5a4b8cf",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a4b881",
+   "caller_fde": "0x5a4b7b0..0x5a4b8cf",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a527ec",
+   "caller_fde": "0x5a52790..0x5a5280e",
+   "kind": "tail jump",
+   "setup": "caller r14 + 0x28 into rdi"
+  },
+  {
+   "site": "0x5a527fb",
+   "caller_fde": "0x5a52790..0x5a5280e",
+   "kind": "call",
+   "setup": "caller r14 + 0x28 into rdi (caller cleanup pad)"
+  },
+  {
+   "site": "0x5a55bfe",
+   "caller_fde": "0x5a55a90..0x5a55c93",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a55c10",
+   "caller_fde": "0x5a55a90..0x5a55c93",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a55ec0",
+   "caller_fde": "0x5a55e70..0x5a55ee2",
+   "kind": "tail jump",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a55ecf",
+   "caller_fde": "0x5a55e70..0x5a55ee2",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a5701b",
+   "caller_fde": "0x5a56fa0..0x5a571a3",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a57116",
+   "caller_fde": "0x5a56fa0..0x5a571a3",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a5929e",
+   "caller_fde": "0x5a59220..0x5a59324",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a592d0",
+   "caller_fde": "0x5a59220..0x5a59324",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a5c888",
+   "caller_fde": "0x5a5c610..0x5a5ca8f",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a5c93d",
+   "caller_fde": "0x5a5c610..0x5a5ca8f",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a5ee0b",
+   "caller_fde": "0x5a5e290..0x5a60a43",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a5f518",
+   "caller_fde": "0x5a5e290..0x5a60a43",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a6009b",
+   "caller_fde": "0x5a5e290..0x5a60a43",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a60777",
+   "caller_fde": "0x5a5e290..0x5a60a43",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a61ef8",
+   "caller_fde": "0x5a61e40..0x5a6221b",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a6217b",
+   "caller_fde": "0x5a61e40..0x5a6221b",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a6703b",
+   "caller_fde": "0x5a64aa0..0x5a69c05",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a68983",
+   "caller_fde": "0x5a64aa0..0x5a69c05",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a6b153",
+   "caller_fde": "0x5a6a640..0x5a6bfaa",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a6be66",
+   "caller_fde": "0x5a6a640..0x5a6bfaa",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a6d2a3",
+   "caller_fde": "0x5a6d200..0x5a6d385",
+   "kind": "call",
+   "setup": "lea 0xa8(%rbx) into rdi"
+  },
+  {
+   "site": "0x5a6d342",
+   "caller_fde": "0x5a6d200..0x5a6d385",
+   "kind": "call",
+   "setup": "lea 0xa8(%rbx) into rdi (caller cleanup pad)"
+  },
+  {
+   "site": "0x5a711b0",
+   "caller_fde": "0x5a71040..0x5a7172a",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a7167f",
+   "caller_fde": "0x5a71040..0x5a7172a",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a7953f",
+   "caller_fde": "0x5a794a0..0x5a79722",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a796d3",
+   "caller_fde": "0x5a794a0..0x5a79722",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a7e692",
+   "caller_fde": "0x5a7e540..0x5a7f395",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a7f269",
+   "caller_fde": "0x5a7e540..0x5a7f395",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a850d3",
+   "caller_fde": "0x5a82670..0x5a89535",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a85145",
+   "caller_fde": "0x5a82670..0x5a89535",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a86a6e",
+   "caller_fde": "0x5a82670..0x5a89535",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a8905a",
+   "caller_fde": "0x5a82670..0x5a89535",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a89dee",
+   "caller_fde": "0x5a897e0..0x5a8a1cc",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5a8a13f",
+   "caller_fde": "0x5a897e0..0x5a8a1cc",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5ab4b2d",
+   "caller_fde": "0x5ab4390..0x5ab5b4d",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5ab4fc9",
+   "caller_fde": "0x5ab4390..0x5ab5b4d",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5ab547a",
+   "caller_fde": "0x5ab4390..0x5ab5b4d",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5ab5a56",
+   "caller_fde": "0x5ab4390..0x5ab5b4d",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5ab690d",
+   "caller_fde": "0x5ab5be0..0x5ab6cdc",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  },
+  {
+   "site": "0x5ab6beb",
+   "caller_fde": "0x5ab5be0..0x5ab6cdc",
+   "kind": "call",
+   "setup": "rdi setup not pinned (site-only census)"
+  }
+ ],
+ "not_claimed": [
+  "the bodies of the first callee 0x5ceafd0, of either destructor (0x5ce8da0, 0x5ce86d0), of the callback, and of the panic entry 0x1680e40",
+  "what the cell, its refcounted allocation, or its callback denote at a higher level; the +0x30/+0x18 shape matches a raw-waker vtable drop slot but that identity is not claimed",
+  "who writes the state dword, the +0x08 pointer, or the +0x30/+0x38 pair, and what values the state dword takes besides the pinned 2",
+  "the rdi setup of consumer sites beyond the six pinned in callers.tsv"
+ ]
+}

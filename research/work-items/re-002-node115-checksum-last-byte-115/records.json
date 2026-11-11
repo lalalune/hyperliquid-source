@@ -1,0 +1,119 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "records": [
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "address": "0x616bd60",
+      "end": "0x616beac",
+      "body_sha256": "5680596a85a5810082875d361be174363d5b2b435a5c2494bc72543840138972",
+      "identity": "rocksdb::ComputeBuiltinChecksumWithLastByte (vendor census)",
+      "contract": "compute(type: u8, data: *const u8, n: usize, last_byte: u8) -> u32",
+      "semantics": "dispatches on type; type 1 (kCRC32c) returns mask(extend(extend(0, data), last_byte)); any other type returns 0 except types 2, 3, 4, which take their own hash arms (not modelled)"
+    },
+    {
+      "kind": "dispatch",
+      "type": 0,
+      "arm": "default_arm",
+      "note": "returns 0 (kNoChecksum and any other type)"
+    },
+    {
+      "kind": "dispatch",
+      "type": 1,
+      "arm": "crc32c_arm",
+      "note": "mask(extend(extend(0, data), last_byte))"
+    },
+    {
+      "kind": "dispatch",
+      "type": 2,
+      "arm": "xxhash_arm",
+      "note": "calls into 0x61daa60..0x61dacf0; not modelled"
+    },
+    {
+      "kind": "dispatch",
+      "type": 3,
+      "arm": "xxhash64_arm",
+      "note": "ROCKSDB_XXH64_update/digest; not modelled"
+    },
+    {
+      "kind": "dispatch",
+      "type": 4,
+      "arm": "mulmix_arm",
+      "note": "hash(data, n) then imul $0x6b9083d9 ^ last_byte; not modelled"
+    },
+    {
+      "kind": "mask",
+      "address": "0x616bea1",
+      "constant": "0xa282ead8",
+      "formula": "ror32(crc, 15) + 0xa282ead8 (mod 2**32)",
+      "observation": "the constant occurs exactly once in .text, as the immediate of the lea at 0x616be9f..0x616bea5 inside the CRC32C arm"
+    },
+    {
+      "kind": "extend_call",
+      "stub": "0x61c25f0",
+      "stub_sha256": "f6d8b461bc82431a3f10c54b3b509a456b18ad340dff570220cfbaf07fa9ae3d",
+      "fnptr_slot": "0x6508908",
+      "observation": "the CRC32C arm calls the registered extend function twice through the PLT stub at 0x61c25f0, which jumps through the .bss slot at 0x6508908; the initializer at 0x61c26d0 stores 0x61c21d0 there; first call is extend(0, data, n), second is extend(crc, &last_byte, 1)"
+    },
+    {
+      "kind": "window",
+      "label": "entry_dispatch",
+      "start": "0x616bd60",
+      "end": "0x616bd96",
+      "sha256": "76a69aff3608cf671aac77f285be8bdd167e1c64386801c0bdc83d3f9de6709f"
+    },
+    {
+      "kind": "window",
+      "label": "xxhash_arm",
+      "start": "0x616bd96",
+      "end": "0x616bde8",
+      "sha256": "43e46d1949a574fb09da3a5b84b9a829035b7af147958b83691ad7fadb73ac27"
+    },
+    {
+      "kind": "window",
+      "label": "mulmix_arm",
+      "start": "0x616bde8",
+      "end": "0x616be18",
+      "sha256": "368f205067170c470334c893b93d4ade79a9f3829eceee2b78facc2aca7a6d61"
+    },
+    {
+      "kind": "window",
+      "label": "default_arm",
+      "start": "0x616be18",
+      "end": "0x616be28",
+      "sha256": "871281eefd0268b9d4cf08fb38e3bc6613415208353631d06076fcf74cc006cc"
+    },
+    {
+      "kind": "window",
+      "label": "xxhash64_arm",
+      "start": "0x616be28",
+      "end": "0x616be80",
+      "sha256": "e46c048adfa98a43eea28b065cb9e74efa97d675751a65ab6422e2841fcfd6ed"
+    },
+    {
+      "kind": "window",
+      "label": "crc32c_arm",
+      "start": "0x616be80",
+      "end": "0x616beac",
+      "sha256": "cac8e8e64b059cd09553df65a256fb92a51f4df2b303806f230ca2d66bde95a6"
+    },
+    {
+      "kind": "case_summary",
+      "count": 2400,
+      "seed": 20261109,
+      "aggregate_sha256": "662c61f4dbb92f43954a850644475a2d9a300c93e71ba28750577166904a3736",
+      "mismatches_vs_table_reference": 0,
+      "note": "bitwise model cross-checked against an independent table-driven extend on every case; the binary itself was never executed"
+    },
+    {
+      "kind": "unknown",
+      "subject": "callers of 0x616bd60",
+      "status": "no caller census was run for this packet"
+    },
+    {
+      "kind": "unknown",
+      "subject": "semantics of the type 2, 3 and 4 arms",
+      "status": "call targets and the 0x6b9083d9 mix constant are recorded from the disassembly; the hash functions they implement were not reconstructed"
+    }
+  ]
+}

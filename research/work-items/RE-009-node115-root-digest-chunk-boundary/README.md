@@ -1,0 +1,7 @@
+# RE-009 · Root digest update at a partially filled chunk
+
+Node #115 SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301. The root digest update call at 0x41c5387 resolves to 0x160b3a0. For selected valid states with nonzero used bytes, the callee computes used as byte[+0x68] + 64 × byte[+0x69], then gives the update subroutine min(1024−used, incoming length) bytes. If the remainder is zero it returns the original context without reaching the selected chunk-ending path. Thus an exact fill and a fill with one additional byte differ at this boundary.
+
+With a positive remainder, the selected path ORs bit 1 and the boolean test of byte[+0x69] being zero into the saved flags at +0x6a. After implementation dispatch, it calls 0x160b0e0 with the saved chunk counter. On the checked normal capacity path it copies the 32-byte value to the stack of values rooted at context +0x94, indexed by 32 times the count at +0x90, then publishes count+1. It also checks the old chunk counter against all ones before the increment path. The evidence is separate from the finalizer dispatch and leaves the initially empty state, compression equivalence and complete carry behavior open.
+
+Run python3 research/work-items/RE-009-node115-root-digest-chunk-boundary/verify.py from the repository root. Replay checks the artifact, FDE, sixteen byte witnesses, four edges, two slots, a displacement corruption control and five synthetic boundary cases.

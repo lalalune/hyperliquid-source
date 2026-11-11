@@ -1,0 +1,85 @@
+{
+ "artifact": "artifacts/node/115/hl-node",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "callers": [
+  {
+   "caller_fde": "0x4dce8b0..0x4dced3e",
+   "setup": "caller r14 into rdi; lea of the caller stack slot at 0xc0(%rsp) into rsi",
+   "site": "0x4dcea39"
+  },
+  {
+   "caller_fde": "0x4dd45c0..0x4dd4a4e",
+   "setup": "caller r14 into rdi; lea of the caller stack slot at 0xc0(%rsp) into rsi",
+   "site": "0x4dd4749"
+  },
+  {
+   "caller_fde": "0x5a04e40..0x5a065f8",
+   "setup": "caller rbp into rdi, caller r13 into rsi",
+   "site": "0x5a05df6"
+  },
+  {
+   "caller_fde": "0x5a06600..0x5a07eb6",
+   "setup": "caller rbp into rdi, caller r13 into rsi",
+   "site": "0x5a07616"
+  }
+ ],
+ "census": {
+  "direct_call_count": 4,
+  "direct_calls": [
+   "0x4dcea39",
+   "0x4dd4749",
+   "0x5a05df6",
+   "0x5a07616"
+  ],
+  "internal_calls": 0,
+  "internal_indirect_calls": 0,
+  "internal_indirect_tail_jumps": 0,
+  "internal_tail_jumps": 0,
+  "relative_addends": 0,
+  "stored_qwords": [],
+  "tail_jump_count": 0
+ },
+ "descriptor": {
+  "base": "descriptor +0x8 (buffer base pointer)",
+  "element": "40-byte records; the first qword of each record is its key",
+  "f0": "descriptor +0x0",
+  "f2": "descriptor +0x10",
+  "f3": "descriptor +0x18",
+  "key": "the qword pointed to by rsi"
+ },
+ "not_claimed": [
+  "what the descriptor, the buffer, or the records denote in the callers' terms",
+  "caller semantics beyond the sites, FDE ranges, pinned moves, and the engine window shipped as caller.txt",
+  "that the buffer is any particular source-level container type; the two-run layout is the binary's arithmetic, not a recovered type",
+  "behaviour on inputs whose field arithmetic makes the routine read outside the supplied buffer (the model raises)",
+  "sortedness of the logical sequence on any particular call; the search result is only a match or insertion index if the sequence is sorted, which the routine itself does not check"
+ ],
+ "routine": {
+  "address": "0x57f8bb0",
+  "arguments": [
+   "descriptor pointer in rdi",
+   "key pointer in rsi"
+  ],
+  "fde": "0x57f8bb0..0x57f8ccc",
+  "internal_calls": 0,
+  "internal_indirect_calls": 0,
+  "internal_indirect_tail_jumps": 0,
+  "internal_tail_jumps": 0,
+  "returns": "(rax, rdx): rax is 0 on an exact match, 1 otherwise; rdx is the logical index of the match or the insertion index",
+  "size_bytes": 284
+ },
+ "runs": {
+  "first_run": "physical [start, start + skip)",
+  "len1": "f3 - skip",
+  "logical_order": "first run followed by second run",
+  "second_run": "physical [0, len1)",
+  "skip": "f0 - start",
+  "start": "f2 - f0 if f2 >= f0 else f2"
+ },
+ "search": {
+  "empty": "f3 == 0 returns (1, 0) without reading any record",
+  "head_rule": "otherwise record 0 is compared first: equal returns (0, skip); greater routes the search to the first run with length skip (or (1, 0) when skip == 0); smaller binary-searches the second run and adds skip to its local index",
+  "single_run": "f3 <= skip searches the first run only, with length f3, and returns its local result"
+ },
+ "task": "RE-001"
+}

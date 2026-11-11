@@ -1,0 +1,55 @@
+{
+  "cell": {
+    "after_ctor": "observer +0x0 = 1, +0x8 = 2.0, +0x1f8 = 6000",
+    "cell": "0x64f3a18",
+    "initializer": "0x2f19520 (R_X86_64_RELATIVE value word; no direct calls)",
+    "layout": "+0x0 lock byte; +0x8..+0x268 observer; +0x268 N (initial 1)",
+    "observer_ctor": "slot 0x64e1020 -> 0x1548bb0, name 'handle_request_rate_limiter', a = 0.001, selector 0",
+    "state_dword_at_rest": "+0x270 = 3"
+  },
+  "component": "abci",
+  "gates_changed": false,
+  "record_rollover": {
+    "outputs": "observer +0x10 = 1, +0x18 = window +0x78, +0x20 = window +0x80 (0x1547bf2..0x1547bfe)",
+    "window_calls": "+0x80 (inc at 0x1547877)",
+    "window_count_sum": "+0x78 (add at 0x1547852)"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008",
+  "users": {
+    "cell_slot": "0x64e8920 (the only relocation into the cell)",
+    "cell_slot_loads": [
+      "0x2e3fccb",
+      "0x2e3fd2f",
+      "0x2e3fd44"
+    ],
+    "functions": [
+      "0x2e3ed10"
+    ],
+    "value": "f64 from 0x5c842e0 (edi = 1) then 0x5c84210 at 0x2e3fc63 / 0x2e3fca2",
+    "wrapper_calls": [
+      "0x2e3fd4b"
+    ],
+    "wrapper_result": "unused: 0x2e3fd51 tests bpl after the call"
+  },
+  "wrapper": {
+    "fn": "0x15494d0",
+    "record": "lock byte cmpxchg 0 -> 1; slot 0x64e1010 -> 0x1547530 (observer, value, count = k)",
+    "rollover": "if observer +0x10 == 1: clear it; N = observer +0x18; N >= 2001 && calls < 200, or calls > 20000, only moves the store after the unlock",
+    "sample": "slot 0x64e1028 -> 0x1562120: thread-local random value % k == 0",
+    "stride": "k = 1 if N < 2000 else N / 2000 (magic 0x20c49ba5e353f7d)",
+    "stride_samples": {
+      "0": 1,
+      "1": 1,
+      "1000000000": 500000,
+      "123456": 61,
+      "1999": 1,
+      "2000": 1,
+      "2001": 1,
+      "3999": 1,
+      "4000": 2,
+      "9223372036854788153": 4611686018427394
+    }
+  }
+}

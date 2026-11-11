@@ -1,0 +1,54 @@
+{
+  "between_reads": {
+    "conversion": "0x273bf30 (rsp+0x100 -> rsp+0x908), drop 0x26b1890",
+    "dispatch": "request copied to state +0x428; call slot 0x64e8918 -> 0x2ecf9d0 (rdi = rsp+0x100, rsi = state+0x428) at 0x2e3fb42",
+    "response_store": "state +0x468..+0x4b0 from rsp+0x908..+0x948 (main path)",
+    "span_sha256": {
+      "0x2e3fb2a-0x2e3fb82": "692d9a60a8eb7d487b6f336029edfbc3886a0b5ae7fe8a4d851e62a7a59e8413",
+      "0x2e3fbbe-0x2e3fca7": "60e1f7d982235628485b59b92380d0a8b6bc28589e4b358392c14be0b75252dd"
+    }
+  },
+  "clock": {
+    "clock_id": 1,
+    "fn": "0x5c842e0",
+    "reads": [
+      "0x2e3fb25 start -> r14 (secs), r12d (nanos)",
+      "0x2e3fc63 now -> [rsp+0xab8]"
+    ],
+    "symbol": "clock_gettime via GLOB_DAT 0x64e1248"
+  },
+  "component": "info-api",
+  "difference": {
+    "args": "rdi = rsp+0x100 (result), rsi = &now, rdx = &start",
+    "err": "otherwise: recursive start - now, tag flipped by xorps with 0x453aa0",
+    "fn": "0x5c84210",
+    "ok": "now >= start (secs signed, then nanos): tag qword 0, secs +0x8, nanos +0x10"
+  },
+  "gates_changed": false,
+  "handler": "0x2e3ed10",
+  "recorded_value": {
+    "call": "cell 0x64f3a18 through slot 0x64e1030 at 0x2e3fd4b",
+    "equal_to_inf": 0.0,
+    "err_tag": 0.0,
+    "ok": "secs (u64 -> f64 via 0x451210 / 0x450170) + nanos / 1000000000.0"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008",
+  "user_ip_future": {
+    "arms": {
+      "0": "0x2e3fd6f store 0.014 at +0x570, state +0x600 = 0, then poll",
+      "1": "0x2e3fe65 `async fn` resumed after completion (slot 0x64e1368)",
+      "2": "0x2e40f3f `async fn` resumed after panicking (slot 0x64e1360)",
+      "3": "0x2e3fd87 poll again"
+    },
+    "entered_when": "bpl != 0 at 0x2e3fd51, after the wrapper call",
+    "location": "info_server/src/user_ip.rs:28:48",
+    "location_refs": [
+      "0x2e3fe69",
+      "0x2e40f43"
+    ],
+    "poll": "0x2d4f790 (rdi = state+0x570, rsi = [rsp+0x30]) at 0x2e3fd8f; pending -> state 3; ready -> state 1 at 0x2e3ff01",
+    "state": "byte state +0x608, future at state +0x570, table 0x6164a8"
+  }
+}

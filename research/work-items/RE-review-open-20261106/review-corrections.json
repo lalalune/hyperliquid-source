@@ -1,0 +1,130 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "corrections": [
+    {
+      "pull_request": 3196,
+      "files": [
+        "tools/compaction_dump_66e0_115.py",
+        "tests/test_compaction_dump_66e0_115.py"
+      ],
+      "problem": "Signed Python to_bytes raised at native packed add/sub overflow",
+      "change": "Wrap each 64-bit or 32-bit lane before encoding, matching paddq/paddd/psubq/psubd",
+      "evidence": [
+        "RE-001-compaction-dump-66e0-115/filler.txt:0x5ef21d9",
+        "RE-001-compaction-dump-66e0-115/filler.txt:0x5ef2210",
+        "RE-001-compaction-dump-66e0-115/main.txt:0x5ef6e50",
+        "RE-001-compaction-dump-66e0-115/main.txt:0x5ef6ec9"
+      ],
+      "control": "Cross signed extrema in both lane widths and subtract back to the original record"
+    },
+    {
+      "files": [
+        "tests/test_compaction_consumer_a010_115.py",
+        "tests/test_compaction_data_row_115.py",
+        "tests/test_compaction_dump_66e0_115.py",
+        "tests/test_compaction_stats_header_115.py",
+        "tests/test_snapshot_consumer_97b0_115.py"
+      ],
+      "problem": "Linux library filename and fixed declarations of variadic arguments were not a portable host oracle",
+      "change": "Use process libc and declare only the three fixed snprintf arguments. Keep explicit Linux -nan expectations; constrain the host-libc negative-NaN comparison to Linux. No model output is changed for host libc behavior."
+    },
+    {
+      "pull_request": 2902,
+      "file": "RE-005-node115-u32-reader-rust/README.md",
+      "change": "State the full target digest already enforced by the source checker"
+    },
+    {
+      "file": "tests/test_node115_atfork_boundary.py",
+      "change": "Compare every target observation while retaining provider-version strings as provenance instead of fixed runtime requirements",
+      "validation": "22 tests passed; tool_versions was the only observation difference before the change"
+    },
+    {
+      "files": [
+        "tools/node115_leaf_write_next.py",
+        "tests/test_node115_leaf_write_next.py"
+      ],
+      "change": "Normalize only the objdump filename label, preserving the declared ELF format and complete instruction text",
+      "validation": "10 tests passed, including existing raw-byte and corruption checks"
+    },
+    {
+      "files": [
+        "tools/run_tests.py",
+        "tests/test_run_tests.py"
+      ],
+      "blocker": "Script-only checks with top-level loops and sys.exit(0) fail when imported by unittest, despite their successful assertions",
+      "change": "Run such scripts directly while preserving discovery for loop-generated unittest methods",
+      "validation": "14 real-process runner tests pass, including both regression controls"
+    },
+    {
+      "pull_requests": [
+        3166,
+        2955,
+        3043
+      ],
+      "files": [
+        "tools/evidence_exports.py",
+        "tests/test_evidence_exports.py",
+        "tools/cfg_byte_consumers_static.py",
+        "tests/test_build_mode_arg_selection.py",
+        "tests/test_cfg_byte_consumers_static.py",
+        "tests/test_error_vtable.py"
+      ],
+      "blocker": "Raw export comparisons failed solely because objdump embeds a machine-local input filename",
+      "change": "Normalize only the filename in the file-format header when comparing exports; authenticate each original manifest digest first. Retained raw exports and their manifests are unchanged.",
+      "validation": "3 focused helper controls plus 36 packet tests passed; changed bytes and architecture remain unequal and tampered raw manifest inputs raise an error"
+    },
+    {
+      "pull_request": 2903,
+      "file": "tests/test_node115_lu_bintableinit_caller_walk_120rsp_4sites.py",
+      "blocker": "Tamper-control test cannot create its temporary copy because it requires an author-private /home/hatch scratch directory",
+      "change": "Use the platform temporary directory; original manifest preserved",
+      "validation": "Passed: four tamper controls, clean temporary copy, exact hex regeneration, qualified objdump regeneration, and six independent recounts"
+    },
+    {
+      "pull_request": 2738,
+      "files": [
+        "tools/node115_lu_merge_callers.py",
+        "tests/test_node115_lu_merge_callers.py"
+      ],
+      "blocker": "Overlap check misclassified explicitly cited_only_not_claimed references in PRs 2751 and 2760 as new claimed byte ranges",
+      "change": "Exclude only the explicitly unclaimed citation subtree. Actual range claims at the same addresses continue to be collected.",
+      "validation": "11 tests passed, including cited-only versus actual-claim negative control and full target artifact verifier"
+    },
+    {
+      "files": [
+        "tests/test_node115_prof_thread_leaves_bin.py"
+      ],
+      "blocker": "Overlap tamper control copied no prior packet into its temporary root, then failed on stale manifest hashes rather than the intended overlap",
+      "change": "Copy the retained value-leaves packet used by the control, re-seal only the temporary mutant manifest, and require one overlap failure with no manifest failures",
+      "validation": "10 tests passed; the overlap mutant now fails exactly once for overlap with no manifest failure"
+    },
+    {
+      "files": [
+        "tests/test_staking_error_display_115.py"
+      ],
+      "blocker": "Export reproduction treated the originally recorded GNU tool version as fixed observation content",
+      "change": "Keep display bytes and records exact; check regenerated tool provenance against the installed objdump/readelf versions. Original tool-versions.json is unchanged.",
+      "validation": "All four tests passed, including the source Rust crate and target corruption controls"
+    },
+    {
+      "pull_request": 2721,
+      "blocker": "D function was already studied by PR #2647; submitted no-overlap claim failed",
+      "change": "Pin the prior record, retain D as reused context, and check A/B for additional coverage against the committed corpus. Preserve original records and raw exports.",
+      "coverage": {
+        "new_exhibit_bytes": 115,
+        "reused_exhibit_bytes": 92,
+        "new_fde_bytes": 2125,
+        "reused_fde_bytes": 871
+      },
+      "validation": "14 focused tests pass including prior-digest, widened-range and accounting corruption controls"
+    }
+  ],
+  "validation": {
+    "command": "python3.13 -m pytest -q tests/test_compaction_dump_66e0_115.py tests/test_compaction_consumer_a010_115.py tests/test_compaction_stats_header_115.py tests/test_compaction_data_row_115.py tests/test_snapshot_consumer_97b0_115.py",
+    "result": "71 passed",
+    "python": "3.13.12",
+    "pytest": "8.4.1",
+    "captured_code_executed": false
+  },
+  "gate_change": false
+}

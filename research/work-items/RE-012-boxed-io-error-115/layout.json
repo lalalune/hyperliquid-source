@@ -1,0 +1,94 @@
+{
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "constructor": "0x5c700a0..0x5c701a9",
+  "input": [
+    "EDI kind word (onlylowbyte stored)",
+    "RSI borrowedmessage pointer",
+    "RDX message length"
+  ],
+  "nonempty_allocations": [
+    {
+      "size": "message length",
+      "role": "cloned message bytes, noNUL append"
+    },
+    {
+      "size": 24,
+      "role": "owned message object",
+      "fields": {
+        "0x0": "allocation count =message length",
+        "0x8": "cloned bytepointer",
+        "0x10": "length =message length"
+      }
+    },
+    {
+      "size": 24,
+      "role": "custom/error payload",
+      "fields": {
+        "0x0": "owned message object pointer",
+        "0x8": "traitvtable pointer64c4178",
+        "0x10": "kind byte",
+        "0x11..0x18": "unwritten padding"
+      }
+    }
+  ],
+  "empty_input": {
+    "messagepointer": 1,
+    "messageallocationcount": 0,
+    "message_length": 0,
+    "byteallocation_skipped": true,
+    "both_24byte_allocations_retained": true
+  },
+  "return": "outer allocation address+1, lowtwo-bit tag1 undervalid8bytealignment",
+  "trait_header": {
+    "base": "0x64c4178",
+    "drop_slot_RELATIVE_target": "0x5c75250",
+    "size": 24,
+    "alignment": 8,
+    "size_alignment_have_relocations": false,
+    "other_methods": "notinterpreted"
+  },
+  "normal_drop": [
+    "5c74b90: selectlowbits1, outer=errorword-1",
+    "loadmessageobject=*(errorword-1), table=*(errorword+7)",
+    "calltablefirstslot ->5c75250; freesmessagebytes iffcount!=0",
+    "usevtable size24/align8 tofreemessageobject",
+    "free24byteoutererrorpayload"
+  ],
+  "allocation_failure_unwind": [
+    {
+      "failed_allocation": "24byte message object",
+      "failure_call": "0x5c70149",
+      "LSDA_landing": "0x5c7018b",
+      "cleanup": "freecloned message bytes iff lengthnonzero"
+    },
+    {
+      "failed_allocation": "24byte outer error payload",
+      "failure_call": "0x5c7015b",
+      "LSDA_landing": "0x5c70171",
+      "cleanup": "5c74c60(messageobject,64c4178): selectedStringdrop,thenfree24bytemessageobject"
+    }
+  ],
+  "specific_caller": {
+    "function": "0x5c97060..0x5c97226",
+    "constructor_slot": "0x64e0750",
+    "kind": 20,
+    "messages": [
+      {
+        "va": "0x949b01",
+        "len": 58
+      },
+      {
+        "va": "0x949b3b",
+        "len": 61
+      }
+    ],
+    "result": "tag1+errorword atoutput+8, beforeopen64oninvalidoptionroutes"
+  },
+  "captured_execution_or_emulation": false,
+  "allocator_executed": false,
+  "limits": [
+    "not an implementation of a complete Rust I/Oerror ABI",
+    "allocator/import contracts andexception runtime remainboundaries",
+    "LSDA action/type tables are retained onlyasheaderoffsets, notexecuted or interpreted"
+  ]
+}

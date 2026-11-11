@@ -1,0 +1,16 @@
+# Pre-Rust: fee-associated ordered-increase scan and exact cursor consumption
+
+RE-001/fees, node115 SHA256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301.
+ELF VA36e1b10..36e1b81,113B33instructions. Static packets2153 and2094 are credited and preserved. NoRust source may precede this contract and expected-stream Git seal.
+
+Input RDI points at disjoint writable24-byte cursor: pointer+0, u64remaining+8, u64width+16. Valid readable nonwrapping8-byte binary64 storage covers remaining rows. Normal domain: width>=2, or empty input with width0/1. Nonemptywidth0/1 reaches an opaque diagnostic call and is excluded, without a fake helper return or public panic claim. Corpus length<=32; deliberately unaligned backing memory. Original type, caller construction and production input admission are unknown.
+
+For width>=2, while remaining>=width: decrement remaining, store next-element pointer and remaining, compare that next value with its predecessor, advance the temporary pointer another8 bytes. Ordered next>previous returns AL1 immediately; equality, less-than and unordered continue. Exhausting possible windows returns AL0. Width>length leaves the cursor unchanged. Width2 is the only measured caller value; wider widths are raw leaf premises, not caller-reachable assertions. No generic full-window comparison is inferred: even width>2 compares only the first adjacent pair of each visited window.
+
+Binary64 contract: ordinary UCOMISD completes; DAZclear and denormal exceptions masked for subnormal cases. Signaling NaN input is excluded. Quiet NaNs follow the unordered flag edge; signed zeros compare equal; infinities retain their ordered meaning. No MXCSR state is recovered, and exception sticky bits/PF/unwind are not outputs. Actual machine evaluator tracks C/Z/S/O needed by this leaf, with MOVSD memory-load upper-lane zeroing. Exact integer bit-order derives floating relations independently of host arithmetic.
+
+Compare exact AL, consumed element offset relative to the unchanged original backing origin, and stored remaining count. Width and all input bytes must remain unchanged. The relative pointer coordinate is the source API's explicit cursor position, with no byte masking or ignored cursor change. Stack scratch and unobserved registers are excluded. Genuine RET and restored stack are required. No external helper participates in any qualified normal observation; body/FDE and excluded diagnostic relocation remain authenticated context.
+
+Own safe Rust API will accept raw u64 float bits, width and return an owned scan result; invalidwidth/nonempty or signalingNaN is an own refusal, not native error semantics. Caller fee-table acceptance, environment configuration, original ABI, complete fee validation and source-built byte equivalence remain open. No captured ELF process, Unicorn, networking, chain or signing is used. All92 gates stayfalse. New source MIT, no unlicensed inferred code.
+
+ISA reference: Intel 64/IA-32 SDM Vol2B, UCOMISD/MOVSD, https://cdrdv2-public.intel.com/782151/253667-sdm-vol-2b.pdf ; UCOMISD raises invalid for SNaN, while quietNaN sets unordered flags. This reference defines instruction semantics, not target environment reachability.

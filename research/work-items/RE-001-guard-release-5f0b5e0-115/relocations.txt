@@ -1,0 +1,33 @@
+Relocation / PLT notes for the RE-001 guard release window (node #115).
+
+Window 0x5f0b5e0..0x5f0b605:
+- One call leaves the window: at 0x5f0b600, call to the PLT stub
+  at 0x63f0f90. The stub is jmp *0xfd482(%rip) to GOT slot
+  0x64ee418, which carries an R_X86_64_JUMP_SLOT relocation for
+  _ZSt20__throw_system_errori (std::__throw_system_error(int),
+  GLIBCXX_3.4.11, addend 0). The stub pushes index 0x55, matching
+  the .rela.plt entry whose r_offset is 0x64ee418.
+- The call is the window's throw tail: edi is loaded with the
+  constant 1 immediately before it, and the callee is noreturn,
+  so control never returns into the window from it.
+- No other relocation touches the window: no GOT read, no
+  rip-relative operand and no .rodata reference appears in the
+  remaining eleven instructions; the only memory operands are
+  rdi-relative (the slot) and rax-indirect (the lock byte).
+- No whole-file qword hit and no R_X86_64_RELATIVE addend
+  resolves to the window (see census.py): it is not a vtable
+  slot, not a callback and not stored anywhere as data.
+
+Call sites (all direct e8 calls from landing pads, all with
+rdi = a 16-byte stack lock slot whose owns byte the pad has just
+tested nonzero):
+- 0x5f11bb3 in the shard-allocation window 0x5f117a0 cleanup pad
+  (slot at rsp + 0x40, owns byte at rsp + 0x48).
+- 0x5f11bc4 in the same pad (slot at rsp + 0x30, owns byte at
+  rsp + 0x38).
+- 0x5f120e0 in the allocation window 0x5f11c40 cleanup pad
+  (slot at rsp + 0x30, owns byte at rsp + 0x38).
+- 0x5f120f1 in the same pad (slot at rsp + 0x20, owns byte at
+  rsp + 0x28).
+Both pads first store 0 to the global lock byte at this + 0x950
+directly, then release the two held slots in this order.

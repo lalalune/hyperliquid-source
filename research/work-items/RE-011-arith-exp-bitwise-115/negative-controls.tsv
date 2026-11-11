@@ -1,0 +1,131 @@
+family	kind	control	detected
+ar	model	mul_low_128	1
+ar	model	mul_no_cross_limbs	1
+ar	model	sub_swapped	1
+ar	model	sub_saturating	1
+ar	model	signext_bound_30	1
+ar	model	signext_low_limb_index	1
+ar	model	signext_bit_8k	1
+ar	model	signext_never_ones	1
+ar	model	underflow_2b	1
+ar	code	0x298f8be=0x29 MUL: add r10,rax -> sub (limb 2 high-product accumulation)	1
+ar	code	0x298f8b3=0x01 MUL: adc r11,0 -> adc r11,1 (limb 3 carry)	1
+ar	code	0x298f868=0xd8 MUL: second multiplicand limb 1 -> limb 0 source register (mov rax,r11)	1
+ar	code	0x298f8ea=0x2d MUL: underflow result 0x2c -> 0x2d	1
+ar	code	0x298f7f7=0x01 MUL: operand count 2 -> 1	1
+ar	code	0x298f9d0=0x03 SUB: sub -> add on limb 0	1
+ar	code	0x298f9d5=0x13 SUB: sbb -> adc on limb 1	1
+ar	code	0x298f9df=0x13 SUB: sbb -> adc on limb 3	1
+ar	code	0x298f9fb=0x2d SUB: underflow result 0x2c -> 0x2d	1
+ar	code	0x298f467=0x1e SIGNEXTEND: index bound 31 -> 30	1
+ar	code	0x298f46f=0x01 SIGNEXTEND: sbb on index limb 2 subtracts 1 (upper limbs mis-folded)	1
+ar	code	0x298f48e=0x06 SIGNEXTEND: sign bit 8k+7 -> 8k+6	1
+ar	code	0x298f52d=0x02 SIGNEXTEND: sign test bit 0 -> bit 1	1
+ar	code	0x298f4df=0x11 SIGNEXTEND: 128-bit mask split at index 16 -> 17	1
+ar	code	0x298f556=0x23 SIGNEXTEND: or limb 0 -> and on the negative arm	1
+dv	model	divrem_ceil	1
+dv	model	divrem_swap	1
+dv	model	sdiv_zero_returns_a	1
+dv	model	sdiv_min_saturates	1
+dv	model	sdiv_floor	1
+dv	model	sdiv_neg_any	1
+dv	model	smod_divisor_sign	1
+dv	model	smod_unsigned	1
+dv	model	mod_zero_returns_a	1
+dv	model	underflow_2d	1
+dv	code	0x298fa80=0x2d SDIV: underflow result 0x2c -> 0x2d	1
+dv	code	0x298fb10=0x2d SMOD: underflow result 0x2c -> 0x2d	1
+dv	code	0x298f994=0x2d MOD: underflow result 0x2c -> 0x2d	1
+dv	code	0x298f946=0x75 MOD: zero-divisor je -> jne	1
+dv	code	0x29956d4=0x79 i256_div: divisor sign js -> jns	1
+dv	code	0x29956f1=0x74 i256_div: zero-divisor test jne -> je	1
+dv	code	0x299582e=0x74 i256_div: sign-combine jne -> je	1
+dv	code	0x299586d=0xce i256_div: MIN top limb inc -> dec	1
+dv	code	0x29957c7=0xfe i256_div: |b| == 1 mask 0xffff -> 0xfffe	1
+dv	code	0x2995891=0x79 i256_mod: dividend sign js -> jns	1
+dv	code	0x29959ac=0x88 i256_mod: result sign jns -> js	1
+dv	code	0x144de4d=0x93 div_rem: numerator < divisor setb -> setae	1
+dv	code	0x144e0f9=0xf7 div_rem: single-limb div r14 -> div r15	1
+dv	code	0x144ea8a=0x11 div_rem: multiply-subtract sbb -> adc	1
+md	model	addmod_wrap	1
+md	model	addmod_zero_returns_sum	1
+md	model	addmod_le	1
+md	model	core_keeps_n	1
+md	model	mulmod_trunc	1
+md	model	mulmod_zero_returns_a	1
+md	model	reduce5_low4	1
+md	model	underflow_2d	1
+md	code	0x298fbca=0x2d ADDMOD: underflow result 0x2c -> 0x2d	1
+md	code	0x298fc8f=0x2d MULMOD: underflow result 0x2c -> 0x2d	1
+md	code	0x298fb31=0x02 ADDMOD: arity check cmp $3 -> cmp $2	1
+md	code	0x29fe456=0x85 ADDMOD core: zero-modulus je -> jne	1
+md	code	0x29fe489=0x83 ADDMOD core: top-limb carry jb -> jae	1
+md	code	0x29fe4cc=0x73 ADDMOD core: sum < modulus jb -> jae	1
+md	code	0x29fe55a=0x00 ADDMOD core: carry limb 1 -> 0	1
+md	code	0x43bfcad=0x85 MULMOD core: zero-modulus je -> jne	1
+md	code	0x43be010=0x93 limb compare: setb -> setae	1
+md	code	0x43c1f6d=0x01 5-limb div_rem: top divisor limb test cmp $0 -> cmp $1	1
+ex	model	bytes_floor	1
+ex	model	bytes_words	1
+ex	model	zero_exp_charged	1
+ex	model	cost_wraps	1
+ex	model	pow_zero_zero	1
+ex	model	pow_low_exp	1
+ex	model	pow_swap	1
+ex	model	oog_keeps_len	1
+ex	model	lt_swapped	1
+ex	model	slt_unsigned	1
+ex	model	eq_low_limb	1
+ex	model	iszero_low_limb	1
+ex	model	not_low_limb	1
+ex	model	byte_little_endian	1
+ex	model	shr_limit_255	1
+ex	model	sar_big_zero	1
+ex	model	clz_zero_255	1
+ex	model	shift_gate_4	1
+ex	model	no_spec_gate	1
+ex	model	underflow_2b	1
+ex	model	direct pow_zero_zero	1
+ex	model	direct pow_low_exp	1
+ex	model	direct exp_untouched	1
+ex	code	0x298f6a7=0x03 EXP: operand count 2 -> 3	1
+ex	code	0x298f7d0=0x2d EXP: underflow result 0x2c -> 0x2d	1
+ex	code	0x298f7e6=0x21 EXP: out-of-gas result 0x20 -> 0x21	1
+ex	code	0x298f75c=0x04 EXP: byte count shift 3 -> 4	1
+ex	code	0x298f748=0xfe EXP: 255 - lz -> 254 - lz	1
+ex	code	0x298f770=0x76 EXP: out of gas jb -> jbe	1
+ex	code	0x298f6ed=0x85 EXP: zero-exponent je -> jne	1
+ex	code	0x298f764=0x71 EXP: overflow jo -> jno	1
+ex	code	0x2998764=0x93 LT: setb -> setae	1
+ex	code	0x2998783=0x2d LT: underflow result 0x2c -> 0x2d	1
+ex	code	0x29986fd=0x93 GT: setb -> setae	1
+ex	code	0x2998e97=0x9f SLT: setl -> setg on differing signums	1
+ex	code	0x2998b26=0x9c SGT: setg -> setl on differing signums	1
+ex	code	0x2998682=0xfe EQ: pmovmskb mask 0xffff -> 0xfffe (byte 0 ignored)	1
+ex	code	0x2998ff8=0x56 AND: andps -> orps	1
+ex	code	0x2998fa8=0x54 OR: orps -> andps	1
+ex	code	0x2998853=0xeb NOT: pxor with all-ones -> por	1
+ex	code	0x2998f29=0x1f BYTE: index bound 0x20 -> 0x1f	1
+ex	code	0x2998b86=0x06 SHL: spec gate 5 -> 6	1
+ex	code	0x2998bd1=0x00 SHL: shift bound 0x100 -> 0 (every shift saturates)	1
+ex	code	0x2998d0f=0x00 SHR: shift bound 0x100 -> 0 (every shift saturates)	1
+ex	code	0x2998d41=0xe7 SHR: shr -> shl on the first limb pair	1
+ex	code	0x29988c3=0x00 SAR: shift bound 0x100 -> 0 (every shift saturates)	1
+ex	code	0x2998a39=0xf0 SAR: saturation sign read from limb 2 instead of limb 3	1
+ex	code	0x2998796=0x0e CLZ: spec gate 0xd -> 0xe	1
+ex	code	0x29987bf=0x7e CLZ: bsr preset 0x7f -> 0x7e (zero word gives 257)	1
+ex	code	0x29fcfee=0x02 helper: zero exponent returns 1 -> 2	1
+ex	code	0x29fd16c=0x02 helper: multiply on bit 0 -> bit 1	1
+ex	code	0x29fd163=0x03 helper: loop end at 4 zero limbs -> 3	1
+all	input	one flipped .text byte (digest)	1
+all	input	code address past .text	1
+all	input	truncated ELF	1
+all	input	read inside SHT_NOBITS .bss	1
+all	input	no FDE at EXP body + 1	1
+all	input	SHR slot rewired to the SHL body	1
+all	input	MUL slot rewired to the SUB body	1
+all	input	checked byte changed (EXP shift 3 -> 4)	1
+all	input	call planted in the EXP power helper	1
+all	input	stack word 2^256 (out of range)	1
+all	input	spec byte 0x100 (out of range)	1
+all	input	helper exponent 2^256 (out of range)	1

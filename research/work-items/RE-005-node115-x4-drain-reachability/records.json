@@ -1,0 +1,398 @@
+{
+ "answer": {
+  "caller_context": "The call sits in the landing pad at 0x5cd87c1 of the X4 cell drop glue 0x5cd86e0.  The glue's LSDA call-site table assigns that pad to exactly one call site, the payload-drop call at 0x5cd86f2 (entry [0x5cd86ef..0x5cd86f7)).  The pad redoes the context release the unwound payload drop skipped, calls the drain helper on the triple at cell +0x18, and joins the shared weak-count tail into _Unwind_Resume.  The glue's main path never calls the helper: it tests the state word itself at 0x5cd870e and drains inline, and assigns its own inline drain calls to a different pad (0x5cd8790).",
+  "conclusion": "The standalone X4 drain helper is reachable only as landing-pad cleanup for a panicking payload drop, and it never drops or deallocates a live pair on any path the unwind tables describe.  The live drains of the X4 cell are the three inlined copies: the dispatcher's pre-store drain (state test at 0x5cd9b97, #3160), the payload drop's inline drain (0x5cda238..0x5cda270) and the cell glue's main-path inline drain (state test at 0x5cd870e).  The X5 control is geometrically identical: sole call at 0x5ce8494 in cell_glue_x5's payload-drop pad 0x5ce8476, payload_drop_x5's pad storing 0 into the state word at 0x5cfc4da.",
+  "sole_reference": "Exactly one reference to the X4 drain helper 0x5cd8580 exists in the artifact: the direct call at 0x5cd87df.  The census covers direct rel32 branches in executable sections, 64-bit pointer occurrences in every file-backed section, 32-bit immediate occurrences, relocation addends, and rip-relative lea / indirect-branch address computations; every channel but the direct branch is empty, and fall-through is excluded by the preceding FDE's tail jump and the int3 fill at 0x5cd857c..0x5cd8580.",
+  "state_on_entry": "On every unwind path by which the payload drop 0x5cda210 can leave its frame, the state word has already been stored 0 before the glue pad runs: the pair drop call at 0x5cda248 is assigned the payload pad 0x5cda2db (action 5), which deallocates the pair data and stores 0 into the state word at 0x5cda30a before resuming the unwind; the context-ledger panic tail jump at 0x5cda2d5 is preceded by the normal-path store at 0x5cda276; unwinds out of the payload pad's rethrow processing start from code after 0x5cda30a.  The helper's guard (cmpq $0x0,(%rdi) at 0x5cd8585) therefore reads a zero state word on every described path and the helper returns having dropped nothing."
+ },
+ "artifact": {
+  "bytes": 105896032,
+  "path": "artifacts/node/115/hl-node",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "snapshot": "<authenticated-node115>"
+ },
+ "boundaries": {
+  "dealloc_unwind_caveat": "The two dealloc calls of the payload drop (0x5cda270 normal path, 0x5cda304 in its pad) have no LSDA call-site entry: the unwind tables record the dealloc entry (GOT slot 0x64df4a0) as non-unwinding.  A hypothetical unwind out of either call is the only path that could enter the glue pad with the state word still 1, and it would do so while that call is freeing the pair's allocation.  The packet reports this as a boundary of the unwind-table evidence, not as a reachable path: nothing in the artifact contradicts the compiler's non-unwinding record, and the same absence holds for the cell glue's own dealloc calls.",
+  "payload_panic_possibility": "Whether the payload drop can actually panic on its drop call -- a payload destructor panicking while the cell glue runs -- is a run-time property of the payload type and is not decided here.  The packet decides the static side completely: the helper has one caller, the caller is a landing pad, and the state word is zero on entry on every path the unwind tables describe, panic or not.",
+  "prior_packets": "The cell layout, the producers and the inlined drain paths are #3160's pins and are not re-derived; this packet cites the dispatcher pre-store test at 0x5cd9b97 from that packet.  The take/release semantics of the X5 join body remain open PR #3074's subject and are untouched: the X5 bodies here are a reachability control only."
+ },
+ "captured_code_executed": false,
+ "limits": "Static analysis only; no captured code was executed. Body boundaries are FDE extents cross-checked by SHA-256.  The reachability closure rests on the reference census (channels enumerated in the records), the LSDA call-site tables of the drain, glue and payload-drop bodies of both families, and the byte pins, all re-derived from the authenticated artifact by analyze().  A mov that reads the helper's first bytes as data would not transfer control and is not a reference channel; control can reach a body start only by a direct branch, an indirect branch through a stored or computed pointer, or fall-through, and each is enumerated or excluded.",
+ "lsda_tables": {
+  "cell_glue_x4": {
+   "entries": [
+    {
+     "action": 0,
+     "end": "0x5cd86f7",
+     "landing_pad": "0x5cd87c1",
+     "start": "0x5cd86ef"
+    },
+    {
+     "action": 0,
+     "end": "0x5cd8730",
+     "landing_pad": "0x5cd8790",
+     "start": "0x5cd872b"
+    },
+    {
+     "action": 1,
+     "end": "0x5cd87e4",
+     "landing_pad": "0x5cd8809",
+     "start": "0x5cd87df"
+    },
+    {
+     "action": 0,
+     "end": "0x5cd880f",
+     "landing_pad": null,
+     "start": "0x5cd87e4"
+    }
+   ],
+   "lpbase": "0x5cd86e0",
+   "lsda": "0x402224"
+  },
+  "cell_glue_x5": {
+   "entries": [
+    {
+     "action": 0,
+     "end": "0x5ce83a7",
+     "landing_pad": "0x5ce8476",
+     "start": "0x5ce839f"
+    },
+    {
+     "action": 0,
+     "end": "0x5ce83be",
+     "landing_pad": "0x5ce8471",
+     "start": "0x5ce83b5"
+    },
+    {
+     "action": 0,
+     "end": "0x5ce83e0",
+     "landing_pad": "0x5ce8440",
+     "start": "0x5ce83db"
+    },
+    {
+     "action": 1,
+     "end": "0x5ce8499",
+     "landing_pad": "0x5ce84be",
+     "start": "0x5ce8487"
+    },
+    {
+     "action": 0,
+     "end": "0x5ce84c4",
+     "landing_pad": null,
+     "start": "0x5ce8499"
+    }
+   ],
+   "lpbase": "0x5ce8390",
+   "lsda": "0x403428"
+  },
+  "drain_x4": {
+   "entries": [
+    {
+     "action": 0,
+     "end": "0x5cd85a5",
+     "landing_pad": "0x5cd85da",
+     "start": "0x5cd85a0"
+    },
+    {
+     "action": 0,
+     "end": "0x5cd860f",
+     "landing_pad": null,
+     "start": "0x5cd85a5"
+    }
+   ],
+   "lpbase": "0x5cd8580",
+   "lsda": "0x402218"
+  },
+  "payload_drop_x4": {
+   "entries": [
+    {
+     "action": 5,
+     "end": "0x5cda24a",
+     "landing_pad": "0x5cda2db",
+     "start": "0x5cda245"
+    },
+    {
+     "action": 0,
+     "end": "0x5cda35c",
+     "landing_pad": "0x5cda362",
+     "start": "0x5cda33e"
+    },
+    {
+     "action": 1,
+     "end": "0x5cda370",
+     "landing_pad": "0x5cda378",
+     "start": "0x5cda365"
+    },
+    {
+     "action": 0,
+     "end": "0x5cda37e",
+     "landing_pad": null,
+     "start": "0x5cda370"
+    }
+   ],
+   "lpbase": "0x5cda210",
+   "lsda": "0x4024fc"
+  },
+  "payload_drop_x5": {
+   "entries": [
+    {
+     "action": 5,
+     "end": "0x5cfc41a",
+     "landing_pad": "0x5cfc4ab",
+     "start": "0x5cfc415"
+    },
+    {
+     "action": 0,
+     "end": "0x5cfc52c",
+     "landing_pad": "0x5cfc532",
+     "start": "0x5cfc50e"
+    },
+    {
+     "action": 1,
+     "end": "0x5cfc540",
+     "landing_pad": "0x5cfc548",
+     "start": "0x5cfc535"
+    },
+    {
+     "action": 0,
+     "end": "0x5cfc54e",
+     "landing_pad": null,
+     "start": "0x5cfc540"
+    }
+   ],
+   "lpbase": "0x5cfc3e0",
+   "lsda": "0x4051fc"
+  }
+ },
+ "owners": {
+  "cell_glue_x4": {
+   "bytes": 303,
+   "end": "0x5cd880f",
+   "file_offset": "0x5cd76e0",
+   "sha256": "b00b49cda8cc6f4e875da8f3046d7bd18e270fbec6a3235ccbba0e67b376f5ac",
+   "start": "0x5cd86e0"
+  },
+  "cell_glue_x5": {
+   "bytes": 308,
+   "end": "0x5ce84c4",
+   "file_offset": "0x5ce7390",
+   "sha256": "47595306d82fbac24e1c7ec4c42550d1177efaa130783bc81ba7c27b79dc8af9",
+   "start": "0x5ce8390"
+  },
+  "drain_x4": {
+   "bytes": 143,
+   "end": "0x5cd860f",
+   "file_offset": "0x5cd7580",
+   "sha256": "27dde2348fd486d19480e86af2e108d87e5e217bad1891359c47d5f57b6ae749",
+   "start": "0x5cd8580"
+  },
+  "drain_x5": {
+   "bytes": 143,
+   "end": "0x5ce7dff",
+   "file_offset": "0x5ce6d70",
+   "sha256": "2b4e56becb7d10d717359c3955825e468fa096d06475bff135d583c72d9aac70",
+   "start": "0x5ce7d70"
+  },
+  "payload_drop_x4": {
+   "bytes": 366,
+   "end": "0x5cda37e",
+   "file_offset": "0x5cd9210",
+   "sha256": "6cfdb2d06e84078fd1f654681ea6a1d4cc4fb711a2fddf7883c66390f668b12e",
+   "start": "0x5cda210"
+  },
+  "payload_drop_x5": {
+   "bytes": 366,
+   "end": "0x5cfc54e",
+   "file_offset": "0x5cfb3e0",
+   "sha256": "7e67f86b57437f1c4a119a9872eb1786806413a7ef944396711a70d8403d3561",
+   "start": "0x5cfc3e0"
+  },
+  "preceding_body": {
+   "bytes": 60,
+   "end": "0x5cd857c",
+   "file_offset": "0x5cd7540",
+   "sha256": "989276ed8b69cb40d878fa3e9916ee9cf2917ad31c9f4578e5aa6be4dfddedab",
+   "start": "0x5cd8540"
+  }
+ },
+ "packet": "RE-005-node115-x4-drain-reachability",
+ "pins": {
+  "cell_glue_x4": {
+   "0x5cd86f2": "e8191b0000",
+   "0x5cd870e": "48837b1800",
+   "0x5cd87d5": "ff158d438100",
+   "0x5cd87db": "488d7b18",
+   "0x5cd87df": "e89cfdffff"
+  },
+  "cell_glue_x5": {
+   "0x5ce83a2": "e839400100",
+   "0x5ce8490": "488d7b18",
+   "0x5ce8494": "e8d7f8ffff"
+  },
+  "drain_x4": {
+   "0x5cd8585": "48833f00",
+   "0x5cd858b": "488b5f08",
+   "0x5cd8594": "4c8b7f10"
+  },
+  "drain_x5": {
+   "0x5ce7d75": "48833f00",
+   "0x5ce7d7b": "488b5f08",
+   "0x5ce7d84": "4c8b7f10"
+  },
+  "payload_drop_x4": {
+   "0x5cda245": "4c89f7",
+   "0x5cda248": "ffd0",
+   "0x5cda270": "ff152a528000",
+   "0x5cda276": "48c7430800000000",
+   "0x5cda304": "ff1596518000",
+   "0x5cda30a": "48c7430800000000",
+   "0x5cda315": "ff156d5b8000"
+  },
+  "payload_drop_x5": {
+   "0x5cfc415": "4c89f7",
+   "0x5cfc418": "ffd0",
+   "0x5cfc440": "ff155a307e00",
+   "0x5cfc446": "48c7430800000000",
+   "0x5cfc4d4": "ff15c62f7e00",
+   "0x5cfc4da": "48c7430800000000"
+  },
+  "preceding_body": {
+   "0x5cd855d": "e9ae000000",
+   "0x5cd8577": "e8d4847100"
+  }
+ },
+ "question": "The X4/X5 cell-layout packet (#3160) pinned the packet cells' standalone drain helpers (X4 0x5cd8580, X5 0x5ce7d70, each taking the {state, data, vtable} triple at cell +0x18) but left their reachability open: the drains it pinned in the dispatchers, the payload drops and the cell glues are inlined copies of the same idiom, and whether the standalone bodies are ever entered, under what condition and with what in the cell was stated as a run-time question only the paths and offsets being pinned.  Who references the X4 drain helper, under what condition does control reach it, and can it ever drain a live pair?  (The X5 helper is carried as a control.)",
+ "reference_census": {
+  "drain_x4": {
+   "direct_branches": [
+    {
+     "containing_body": "cell_glue_x4",
+     "kind": "call",
+     "site": "0x5cd87df"
+    }
+   ],
+   "immediate32_occurrences": [],
+   "pointer_occurrences": [],
+   "relocation_addends": [],
+   "rip_relative": [],
+   "target": "0x5cd8580"
+  },
+  "drain_x5": {
+   "direct_branches": [
+    {
+     "containing_body": "cell_glue_x5",
+     "kind": "call",
+     "site": "0x5ce8494"
+    }
+   ],
+   "immediate32_occurrences": [],
+   "pointer_occurrences": [],
+   "relocation_addends": [],
+   "rip_relative": [],
+   "target": "0x5ce7d70"
+  },
+  "fallthrough": {
+   "excluded": true,
+   "int3_fill": {
+    "end": "0x5cd8580",
+    "start": "0x5cd857c"
+   },
+   "preceding_fde": {
+    "end": "0x5cd857c",
+    "start": "0x5cd8540"
+   }
+  }
+ },
+ "slots": {
+  "catch_pair": {
+   "slot": "0x64dfe88",
+   "target": "0x5bb19f0",
+   "type": 8
+  },
+  "dealloc": {
+   "slot": "0x64df4a0",
+   "target": "0x635de30",
+   "type": 8
+  },
+  "terminate_stub": {
+   "slot": "0x64df4c0",
+   "target": "0x1680cab",
+   "type": 8
+  },
+  "x4_context_release": {
+   "slot": "0x64ecb68",
+   "target": "0x5cd88d0",
+   "type": 8
+  },
+  "x4_panic_raise": {
+   "slot": "0x64e06b8",
+   "target": null,
+   "type": 6
+  },
+  "x5_context_release": {
+   "slot": "0x64ecc50",
+   "target": "0x5ce8660",
+   "type": 8
+  }
+ },
+ "unwind_audit": {
+  "x4": {
+   "drain_call_site": "0x5cd87df",
+   "drain_call_within_pad": {
+    "pad_end": "0x5cd87e4",
+    "pad_start": "0x5cd87c1"
+   },
+   "glue_pad_for_payload_call": "0x5cd87c1",
+   "glue_payload_call": "0x5cd86f2",
+   "payload_pad_calls_before_state_store": [
+    "0x5cda304"
+   ],
+   "payload_panic_tail_jmp": {
+    "after_state_store": true,
+    "pad": null,
+    "site": "0x5cda2d5"
+   },
+   "payload_pre_store_calls": {
+    "dealloc_call": "0x5cda270",
+    "dealloc_call_pad": null,
+    "drop_call": "0x5cda248",
+    "drop_call_action": 5,
+    "drop_call_pad": "0x5cda2db"
+   },
+   "payload_state_stores": {
+    "in_payload_pad": "0x5cda30a",
+    "normal_path": "0x5cda276"
+   },
+   "state_word_on_glue_pad_entry": 0
+  },
+  "x5": {
+   "drain_call_site": "0x5ce8494",
+   "drain_call_within_pad": {
+    "pad_end": "0x5ce8499",
+    "pad_start": "0x5ce8476"
+   },
+   "glue_pad_for_payload_call": "0x5ce8476",
+   "glue_payload_call": "0x5ce83a2",
+   "payload_pad_calls_before_state_store": [
+    "0x5cfc4d4"
+   ],
+   "payload_panic_tail_jmp": {
+    "after_state_store": true,
+    "pad": null,
+    "site": "0x5cfc4a5"
+   },
+   "payload_pre_store_calls": {
+    "dealloc_call": "0x5cfc440",
+    "dealloc_call_pad": null,
+    "drop_call": "0x5cfc418",
+    "drop_call_action": 5,
+    "drop_call_pad": "0x5cfc4ab"
+   },
+   "payload_state_stores": {
+    "in_payload_pad": "0x5cfc4da",
+    "normal_path": "0x5cfc446"
+   },
+   "state_word_on_glue_pad_entry": 0
+  }
+ }
+}

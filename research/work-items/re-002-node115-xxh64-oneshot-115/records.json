@@ -1,0 +1,145 @@
+{
+  "target_digest": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "records": [
+    {
+      "kind": "function",
+      "task": "RE-002",
+      "address": "0x61dae20",
+      "end": "0x61db121",
+      "body_sha256": "577ad945e65ddde3fc0ca78ae8d6316c7cb08203bbca5d08a07babca5d08bec8",
+      "identity": "ROCKSDB_XXH64 (librocksdb-sys 0.11.0+8.1.1, vendor census id node115-vendor-61dae20)",
+      "contract": "xxh64(data: *const u8, n: usize, seed: u64) -> u64",
+      "semantics": "public XXH64 one-shot: four seeded lanes, 32-byte stripes (round rol(acc + k*P2, 31) * P1), mergeRounds, 8/4/1-byte tails, 64-bit avalanche"
+    },
+    {
+      "kind": "prime",
+      "prime": "P5",
+      "address": "0x61dae24",
+      "value": "0x27d4eb2f165667c5",
+      "observation": "the P5 prime appears as a movabs immediate at 0x61dae24"
+    },
+    {
+      "kind": "prime",
+      "prime": "P2",
+      "address": "0x61dae67",
+      "value": "0xc2b2ae3d27d4eb4f",
+      "observation": "the P2 prime appears as a movabs immediate at 0x61dae67"
+    },
+    {
+      "kind": "prime",
+      "prime": "P1",
+      "address": "0x61dae82",
+      "value": "0x9e3779b185ebca87",
+      "observation": "the P1 prime appears as a movabs immediate at 0x61dae82"
+    },
+    {
+      "kind": "prime",
+      "prime": "P4",
+      "address": "0x61daf59",
+      "value": "0x85ebca77c2b2ae63",
+      "observation": "the P4 prime appears as a movabs immediate at 0x61daf59"
+    },
+    {
+      "kind": "prime",
+      "prime": "P3",
+      "address": "0x61db074",
+      "value": "0x165667b19e3779f9",
+      "observation": "the P3 prime appears as a movabs immediate at 0x61db074"
+    },
+    {
+      "kind": "strength_reduction",
+      "address": "0x61daf0f",
+      "constant": "0xdef35b010f796ca9",
+      "observation": "the merge multiplies the stripe loop pre-multiply lane value by P1*P2 mod 2**64 before rol-31/*P1, because pre * P1 * P2 == v * P2; this computes round(0, v) without recomputing v * P2"
+    },
+    {
+      "kind": "null_branch",
+      "address": "0x61dae3c",
+      "target": "0x61db0de",
+      "observation": "je at 0x61dae3c jumps to the avalanche when data is null; h = seed + P5 + n with no buffer load, so a null pointer yields the seeded empty-input avalanche even for nonzero n"
+    },
+    {
+      "kind": "merge",
+      "observation": "h = rol(v1,1) + rol(v2,7) + rol(v3,12) + rol(v4,18), then one mergeRound per lane (h ^= round(0, v); h = h*P1 + P4); the + n term is folded into the last mergeRound as + P4 + n (add %rbp,%r8 at 0x61daf8d); the short path (n < 32) instead starts from h = seed + P5 + n"
+    },
+    {
+      "kind": "caller",
+      "address": "0x616bd38",
+      "observation": "the type-3 arm of rocksdb::ComputeBuiltinChecksum (0x616bca0) calls 0x61dae20 here and keeps the low 32 bits (reconstructed in PR #5413)"
+    },
+    {
+      "kind": "window",
+      "label": "entry",
+      "start": "0x61dae20",
+      "end": "0x61dae55",
+      "sha256": "8048e3a5d53a02400af825f0b7aef8613a10e64e59dc33bad2bca305bd5d7228"
+    },
+    {
+      "kind": "window",
+      "label": "lane_init_and_stripes",
+      "start": "0x61dae55",
+      "end": "0x61daef0",
+      "sha256": "7e3a69c4dcb09c22783621329945dd6150e11a9cc79c61ec05a004286c956b3c"
+    },
+    {
+      "kind": "window",
+      "label": "merge",
+      "start": "0x61daef0",
+      "end": "0x61daf9a",
+      "sha256": "1758f7a033109268b5bc0d6ad58b37db24d379217d3fe103be507253ab2a83d5"
+    },
+    {
+      "kind": "window",
+      "label": "tail8",
+      "start": "0x61daf9a",
+      "end": "0x61db041",
+      "sha256": "d66fdd6c97258ba36f2939dd417fc5ee0979d99e87576b426185682bebf463a5"
+    },
+    {
+      "kind": "window",
+      "label": "tail4",
+      "start": "0x61db041",
+      "end": "0x61db081",
+      "sha256": "e865718bd941d89da1b64ac4b790d3a341a2d90e9bd6961f671ec7f19d759e70"
+    },
+    {
+      "kind": "window",
+      "label": "tail1",
+      "start": "0x61db081",
+      "end": "0x61db0de",
+      "sha256": "6ef252a88c0745f7f2e08db73071c9b9c5ed6d865b970040b7e75f7240829ca2"
+    },
+    {
+      "kind": "window",
+      "label": "avalanche",
+      "start": "0x61db0de",
+      "end": "0x61db121",
+      "sha256": "3c137bc79ee2965f10f879e4c600f231b0da798f54527e7bb6c9f314d0bd0f6a"
+    },
+    {
+      "kind": "window",
+      "label": "dispatcher_xxh64_call",
+      "start": "0x616bd30",
+      "end": "0x616bd48",
+      "sha256": "95409c547d51b5773b7ae38187146abafee676e47420c8b8a0748181b32c1130"
+    },
+    {
+      "kind": "case_summary",
+      "count": 2400,
+      "seed": 20261109,
+      "aggregate_sha256": "cceb1459ff06f7a0c738d43b2c2453880a36604fb6b01195babdad808f556365",
+      "mismatches_vs_reference": 0,
+      "note": "model (disassembly transliteration) cross-checked against an independent clean-room XXH64 and a streaming state machine on every case; the binary itself was never executed"
+    },
+    {
+      "kind": "unknown",
+      "subject": "callers of 0x61dae20",
+      "status": "only the ComputeBuiltinChecksum type-3 call site is recorded; no full caller census was run for this packet"
+    },
+    {
+      "kind": "unknown",
+      "subject": "streaming XXH64 API",
+      "status": "createState/reset/update/digest/freeState at 0x61db130..0x61db3e0 are separate functions, modelled only as callees in PR #5399; they are not reconstructed here"
+    }
+  ]
+}

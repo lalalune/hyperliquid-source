@@ -1,0 +1,62 @@
+{
+  "base_commit": "05bc2de303c05525b71e7e257426e741bc66a390",
+  "platform": "Linux x86-64 (Ubuntu 24.04); static analysis of Linux x86-64 ELF",
+  "tools": {
+    "python": [
+      "Python 3.12.3"
+    ],
+    "capstone": [
+      "5.0.7"
+    ],
+    "gnu": [
+      "GNU objdump (GNU Binutils for Ubuntu) 2.42"
+    ],
+    "llvm": [
+      "LLVM version 18.1.7-rust-dev",
+      "  Optimized build."
+    ]
+  },
+  "baseline": {
+    "command": "make doctor verify",
+    "result": "NOT COMPLETED in this environment",
+    "provenance": "Run on the unchanged base with the node artifact materialized from the pinned digest. make doctor reports analysis_ready=false because git-lfs, the Rust 1.95.0 toolchain and Ghidra are unavailable on this host; tools/artifacts.py verify passes for artifacts/node/115/hl-node (SHA-256 OK) but stops at artifacts/visor/captured/hl-visor, which remains a Git LFS pointer with no local materialized copy. These are pre-existing environment gaps, not tree failures. No full-suite baseline result is claimed.",
+    "log": "baseline.log.gz"
+  },
+  "documented_skips": [
+    "make doctor: git-lfs not installed on this host.",
+    "make doctor: Rust 1.95.0 toolchain not installed on this host.",
+    "make doctor: Ghidra not installed on this host.",
+    "artifacts/visor/captured/hl-visor remains a Git LFS pointer; no materialized local copy exists in this workspace.",
+    "Full make test suite not run in this environment; focused packet checks and repository packet/catalogue verifiers were run instead.",
+    "tools/verify_packets.py fails identically on the pristine base (pre-existing digest mismatch in RE-008-tc-parallel-abort-115/expected.tsv.gz); this packet's own MANIFEST.sha256 verifies clean (18/18).",
+    "tools/verify_imports.py cannot run: git submodule upstream/block-importer is not initialized in this environment (pre-existing)."
+  ],
+  "agent_metadata": {
+    "provider": "Anthropic",
+    "model": "Muse Spark",
+    "client": "Muse"
+  },
+  "contribution_checks": {
+    "command": "export_disassembly.py; verify.py --controls; relations.py; python3 -m unittest discover -s tests -p test_node115_gossip_variant_writer.py -v; sha256sum -c MANIFEST.sha256; make catalogue-check",
+    "result": "PASS",
+    "test_modules": 1,
+    "reported_cases": 4,
+    "skips": 0,
+    "log": "validation.log.gz",
+    "log_redactions": "Local home and analysis-venv paths only."
+  },
+  "packet_checks": {
+    "bodies": 1,
+    "bytes": 890,
+    "instructions": 208,
+    "deep_corruption_rejections": 29
+  },
+  "captured_code_executed_or_emulated": false,
+  "hosted_ci": "not observed",
+  "container_validation": "not performed",
+  "progress_gates": "unchanged",
+  "final_metadata_check": {
+    "command": "make verify test catalogue-check reproduce",
+    "recording": "Full-suite run remains for the submitting environment; this packet records only the checks actually executed here, listed under contribution_checks."
+  }
+}

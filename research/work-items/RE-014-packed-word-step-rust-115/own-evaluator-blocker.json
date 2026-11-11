@@ -1,0 +1,26 @@
+{
+  "error": "mnemonic lock cmpxchg at 0x10001e",
+  "initial_word": 4,
+  "own_instructions": [
+    "100000: 488b06 mov rax, qword ptr [rsi]",
+    "100003: 31c9 xor ecx, ecx",
+    "100005: 66662e0f1f840000000000 nop word ptr cs:[rax + rax]",
+    "100010: a801 test al, 1",
+    "100012: 7516 jne 0x10002a",
+    "100014: 4883f802 cmp rax, 2",
+    "100018: 721b jb 0x100035",
+    "10001a: 488d50fe lea rdx, [rax - 2]",
+    "10001e: f0480fb116 lock cmpxchg qword ptr [rsi], rdx",
+    "100023: 75eb jne 0x100010",
+    "100025: b902000000 mov ecx, 2",
+    "10002a: 48890f mov qword ptr [rdi], rcx",
+    "10002d: 488b06 mov rax, qword ptr [rsi]",
+    "100030: 48894708 mov qword ptr [rdi + 8], rax",
+    "100034: c3 ret ",
+    "100035: b901000000 mov ecx, 1",
+    "10003a: 48890f mov qword ptr [rdi], rcx",
+    "10003d: 488b06 mov rax, qword ptr [rsi]",
+    "100040: 48894708 mov qword ptr [rdi + 8], rax",
+    "100044: c3 ret "
+  ]
+}

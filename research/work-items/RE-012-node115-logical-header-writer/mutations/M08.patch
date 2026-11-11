@@ -1,0 +1,18 @@
+--- src/lib.rs
++++ src/lib.rs
+@@ -221,6 +221,7 @@
+     for group in primary {
+         let spelling = spellings(group.name, spelling);
+         for (index, value) in group.values.iter().enumerate() {
++            if value.is_empty() { continue; }
+             let (name, _) = chosen(group.name, spelling, index);
+             required = required
+                 .checked_add(name.len())
+@@ -248,6 +249,7 @@
+     for group in primary {
+         let spelling = spellings(group.name, spelling);
+         for (index, value) in group.values.iter().enumerate() {
++            if value.is_empty() { continue; }
+             let (name, is_fallback) = chosen(group.name, spelling, index);
+             let mut previous = b'-';
+             for &byte in name {

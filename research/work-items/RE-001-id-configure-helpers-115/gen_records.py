@@ -1,0 +1,337 @@
+#!/usr/bin/env python3
+"""Generate records.json for RE-001 id-configure-helpers-115.
+
+Semantic records only: no per-instruction mnemonic list. Re-run to
+regenerate; verify.py checks the file is internally consistent and bound
+to the node #115 artifact digest.
+"""
+import json
+from pathlib import Path
+
+OUT = Path(__file__).resolve().parent
+ARTIFACT = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+
+RECORDS = {
+    "task": "RE-001",
+    "work_item": "RE-001-id-configure-helpers-115",
+    "node": 115,
+    "artifact": {
+        "path": "artifacts/node/115/hl-node",
+        "sha256": ARTIFACT,
+        "size": 105896032,
+        "source": "provenance/artifacts.json",
+    },
+    "artifact_sha256": ARTIFACT,
+    "question": "What do the id-configure helper 0x609a410 and the slot-9 entry 0x6097150/0x6097110 do in node #115, and what does their shared vtable slot 9 (0x609d0e0) do with the map they build? Resolves #4328 open unknowns 0x609a410 and 0x6097150/0x6097110 internals.",
+    "resolves": [
+        "#4328 open unknowns: 0x609a410 internals, 0x6097150/0x6097110 internals",
+    ],
+    "functions": [
+        {
+            "address": "0x609a410",
+            "fde": "0x609a410..0x609a67c",
+            "role": "id-configure helper: resolve the configure-name from a value string, parsing it as a k=v map when it contains '='",
+            "signature": "(Status* out, const std::string* input, const std::string* id, std::string* out_name, std::unordered_map<std::string, std::string>* map)",
+            "callers_direct": 3,
+            "returns": "Status* out; always kOk (code 0)",
+        },
+        {
+            "address": "0x6097150",
+            "fde": "0x6097150..0x6097192",
+            "role": "configure slot-9 entry: zero arg5 (r8) and forward to the slot-9 tail",
+            "signature": "(Status* out, Configurable* object, ConfigOptions* config, std::unordered_map<std::string, std::string>* map, int arg5)",
+            "callers_direct": 5,
+            "returns": "Status* out",
+        },
+        {
+            "address": "0x6097110",
+            "fde": "0x6097110..0x609714e",
+            "role": "slot-9 tail: call the object's vtable slot 9 (offset 0x48) with the same arguments",
+            "signature": "(Status* out, Configurable* object, ConfigOptions* config, std::unordered_map<std::string, std::string>* map, int arg5)",
+            "callers_direct": 2,
+            "returns": "Status* out",
+        },
+        {
+            "address": "0x609d0e0",
+            "fde": "0x609d0e0..0x609d75e",
+            "role": "vtable slot 9 (shared by both Configurable vtables): apply a parsed options map to the object under a ConfigOptions copy, with a setter fallback",
+            "signature": "(Status* out, Configurable* object, ConfigOptions* config, std::unordered_map<std::string, std::string>* map, int arg5)",
+            "callers_direct": 2,
+            "callers_direct_sites": [
+                {"address": "0x607e447", "host": "0x607e420..0x607e536 (thin wrapper; forwards its args unchanged)"},
+                {"address": "0x60a24a1", "host": "0x60a2470..0x60a3191 (thin wrapper; forwards its args unchanged)"},
+            ],
+            "callers_vtable": "slot 9 (offset 0x48) in 66 vtable slots across the Configurable vtables (R_X86_64_RELATIVE count)",
+            "returns": "Status* out",
+        },
+        {
+            "address": "0x609a1b0",
+            "fde": "0x609a1b0..0x609a2e7",
+            "role": "unordered_map<string, string> find: linear scan while element_count <= 20, hash path (seed 0xc70f6907) above that; returns node* or null",
+            "signature": "(std::unordered_map<std::string, std::string>* map, const std::string* key, const char* key_data)",
+            "callers_direct": 2,
+        },
+        {
+            "address": "0x609a2f0",
+            "fde": "0x609a2f0..0x609a3de",
+            "role": "unordered_map<string, string> erase: unlink a node from its bucket chain, destroy both strings, operator delete 0x50 bytes, decrement element_count; returns the next node",
+            "signature": "(std::unordered_map<std::string, std::string>* map, node* node)",
+            "callers_direct": 3,
+        },
+        {
+            "address": "0x5d5b300",
+            "fde": "0x5d5b300..0x5d5b39b",
+            "role": "unordered_map<string, string> clear/destroy: walk the node list, destroy both strings per node, free each node",
+            "signature": "(std::unordered_map<std::string, std::string>* map)",
+            "callers_direct_binary_wide": 98,
+            "callers_in_packet": 6,
+        },
+        {
+            "address": "0x6098510",
+            "fde": "0x6098510..0x60985af",
+            "role": "delimiter pre-step: truncate the S0 string to empty, then forward (out, C1, object, fresh empty string, S0) to 0x6097630",
+            "signature": "(Status* out, Configurable* object, ConfigOptions* C1, std::string* S0, int arg5)",
+            "callers_direct": 5,
+            "callers_direct_sites": [
+                {"address": "0x609d5ea", "host": "slot 9 0x609d0e0 (this packet)"},
+                {"address": "0x609e80f", "host": "0x609e510..0x609f073 (sibling id-configure caller)"},
+                {"address": "0x60b96cd", "host": "0x60b9680..0x60b970e"},
+                {"address": "0x60b977f", "host": "0x60b9740..0x60b97c0"},
+                {"address": "0x60d4187", "host": "0x60d2820..0x60d49d3"},
+            ],
+        },
+        {
+            "address": "0x609e2d0",
+            "fde": "0x609e2d0..0x609e3e2",
+            "role": "null-checked slot-9 entry: null object with a non-empty map yields kInvalidArgument 'Cannot configure null object ' (code 4, 29 chars); otherwise forward to 0x6097150 and move the Status into out",
+            "signature": "(Status* out, Configurable* object, ConfigOptions* config, std::unordered_map<std::string, std::string>* map, int arg5)",
+            "callers_direct": 5,
+            "callers_direct_sites": [
+                {"address": "0x5eba500", "host": "0x5eba1a0..0x5eba64d"},
+                {"address": "0x5fd3866", "host": "0x5fd34b0..0x5fd38f6"},
+                {"address": "0x5fd3b56", "host": "0x5fd39b0..0x5fd3cf6"},
+                {"address": "0x5fd4b76", "host": "0x5fd46c0..0x5fd4c2e"},
+                {"address": "0x5feda73", "host": "0x5fed600..0x5fedc93"},
+            ],
+        },
+        {
+            "address": "0x60c1190",
+            "fde": "0x60c1190..0x60c1887",
+            "role": "map parser: parse a 'k=v;k=v' string into the map; three kInvalidArgument outcomes (shipped in #4320, re-shipped byte-identical)",
+            "signature": "(Status* out, const std::string* input, std::unordered_map<std::string, std::string>* map)",
+            "callers_direct": 6,
+            "callers_direct_sites": [
+                {"address": "0x6099fc5", "host": "setter 0x6099e70 (re-shipped from #4320)"},
+                {"address": "0x609a499", "host": "0x609a410 (this packet)"},
+                {"address": "0x609e896", "host": "0x609e510..0x609f073 (sibling id-configure caller)"},
+                {"address": "0x60c1c2e", "host": "0x60c1190-adjacent parser routine"},
+                {"address": "0x60c3d69", "host": "0x60c3b50..0x60c3cb8"},
+                {"address": "0x60c4769", "host": "0x60c4550..0x60c46b8"},
+            ],
+        },
+        {
+            "address": "0x6099e70",
+            "fde": "0x6099e70..0x609a1a9",
+            "role": "setter: the '='-path setter from #4320; also calls the slot-9 tail 0x6097110 directly with arg5=0 (shipped in #4320, re-shipped byte-identical)",
+            "signature": "(Status* out, Configurable* object, ConfigOptions* config, std::string* value, int arg5)",
+            "callers_direct": 5,
+            "callers_direct_sites": [
+                {"address": "0x6080d09", "host": "0x6080c00-adjacent routine"},
+                {"address": "0x6081c2e", "host": "0x6081b00-adjacent routine"},
+                {"address": "0x609aa61", "host": "delegate 0x609a740 (shipped in #4328)"},
+                {"address": "0x609d4b6", "host": "slot 9 0x609d0e0 (this packet)"},
+                {"address": "0x60bf261", "host": "arm 0x60bf1e0 (shipped in #4320)"},
+            ],
+        },
+        {
+            "address": "0x609c8c0",
+            "fde": "0x609c8c0..0x609d08e",
+            "role": "map-copy-and-apply: copy the map into a fresh bucket array (rehash via 0x6095b80), then iterate the 0x30-byte-element array at object+0x08..+0x10 and call 0x609bcb0 once per element whose +0x28 pointer is non-null",
+            "signature": "(Status* out, ConfigOptions* config, Configurable* object, std::unordered_map<std::string, std::string>* map, int arg5)",
+            "callers_direct": 1,
+        },
+        {
+            "address": "0x609bcb0",
+            "fde": "0x609bcb0..0x609c782",
+            "role": "per-entry apply: for each entry in the map, resolve the option name via vtable slot 13 (GetOptionName 0x609d980), scan for the record via 0x60ba0b0, and apply via apply-created 0x609b700 (which dispatches to the type-22 delegate 0x609a740 for type-22 records)",
+            "signature": "(Status* out, ConfigOptions* config, Configurable* object, const std::string* value, std::unordered_map<std::string, std::string>* map, ...)",
+            "callers_direct": 1,
+        },
+        {
+            "address": "0x61cf670",
+            "fde": "0x61cf670..0x61cf767",
+            "role": "Status two-slice ctor: out->code = rsi byte, out+0x01 = rdx byte, out+0x02 = r9 byte, message = slice1 + slice2 (heap copy, NUL-terminated)",
+            "signature": "(Status* out, uint8_t code, uint8_t byte1, const Slice* slice1, const Slice* slice2, uint8_t byte2)",
+            "callers_direct": "hundreds (shared binary-wide Status ctor; not enumerated)",
+        },
+    ],
+    "id_configure_helper": {
+        "outcomes": [
+            {
+                "case": "input empty",
+                "sites": ["0x609a449..0x609a458"],
+                "result": "out_name = id; Status kOk; map untouched",
+            },
+            {
+                "case": "input equals the .bss string 0x6508980 (size, then memcmp)",
+                "sites": ["0x609a45e..0x609a46f", "0x609a538..0x609a546"],
+                "result": "out_name = id; Status kOk; map untouched",
+            },
+            {
+                "case": "input has no '=' (string::find returns npos)",
+                "sites": ["0x609a475..0x609a488", "0x609a580..0x609a58b"],
+                "result": "out_name = input; Status kOk; map untouched",
+            },
+            {
+                "case": "input parses as a map, no 'id' key, id non-empty",
+                "sites": ["0x609a48e..0x609a499", "0x609a590..0x609a5bf", "0x609a648..0x609a64d"],
+                "result": "out_name = id; Status kOk; map entries SURVIVE for the caller (slot 9 applies them)",
+            },
+            {
+                "case": "input parses as a map, no 'id' key, id empty",
+                "sites": ["0x609a648..0x609a666"],
+                "result": "out_name = input; Status kOk; map cleared (0x5d5b300)",
+            },
+            {
+                "case": "input parses as a map and has an 'id' key",
+                "sites": ["0x609a590..0x609a5bf", "0x609a5e5..0x609a611"],
+                "result": "out_name = map['id']; the 'id' entry is ERASED (0x609a2f0); other entries survive; if out_name equals the .bss string it is truncated to empty (size 0, data[0] = 0); Status kOk",
+            },
+            {
+                "case": "input fails to parse as a map (parser Status code != 0)",
+                "sites": ["0x609a48e..0x609a4f5", "0x609a4fb..0x609a530"],
+                "result": "out_name = input; map cleared (0x5d5b300); the parse error is DISCARDED and out is reset to kOk (code 0, subcode 0, state null)",
+            },
+        ],
+        "always_kok": "every path leaves out at kOk; the delegate's post-call status check (0x609b1b8, cmpb $0x0,-0x140(%rbp)) never fires from this helper",
+        "id_lookup": "the 'id' key is a 2-byte SSO string ('id', 0x6469) built on the stack at 0x609a590..0x609a5bf and looked up with 0x609a1b0",
+        "map_node_layout": {
+            "size_bytes": 80,
+            "next": "+0x00",
+            "key_string": "+0x08 (ptr), +0x10 (size), +0x18 (SSO buffer)",
+            "value_string": "+0x28 (ptr), +0x30 (size), +0x38 (SSO buffer)",
+            "hash": "+0x48",
+        },
+        "map_layout": {
+            "size_bytes": 56,
+            "buckets": "+0x00",
+            "bucket_count": "+0x08",
+            "before_begin": "+0x10",
+            "element_count": "+0x18",
+            "max_load_factor": "+0x20 (float 1.0)",
+            "next_resize": "+0x28",
+            "single_bucket": "+0x30",
+        },
+        "delegate_call_site": {
+            "address": "0x609b190",
+            "host": "0x609a740 type-22 apply delegate (shipped in #4328)",
+            "args": {
+                "rdi": "Status* at -0x140(%rbp)",
+                "rsi": "value string at -0x160(%rbp) (delegate stack arg 0x10)",
+                "rdx": "id string at -0x178(%rbp) (GetId output, slot 15 call at 0x609b15d)",
+                "rcx": "out-name string at -0xd0(%rbp) (empty SSO string)",
+                "r8": "empty unordered_map<string, string> at -0x110(%rbp) (single bucket, count 1, element_count 0)",
+            },
+        },
+        "other_call_sites": [
+            {
+                "address": "0x609e5bf",
+                "host": "0x609e510..0x609f073 (sibling id-configure caller; also compares against the .bss string at 0x609e567)",
+                "args": "rdi = Status* at 0x70(%rsp); rsi = r14 (string); rdx = lea 0xd0(%rsp) (GetId output string); rcx = r13 (string); r8 = r15 (map)",
+            },
+            {
+                "address": "0x609ea72",
+                "host": "0x609e510..0x609f073 (same host, second call; empty-input path)",
+                "args": "rdi = Status* at 0x70(%rsp); rsi = r14 (string); rdx = lea 0xd0(%rsp) (empty string); rcx = r13 (string); r8 = r15 (map)",
+            },
+        ],
+    },
+    "slot9_entry": {
+        "entry_6097150": "sets r8d = 0, then tail-calls 0x6097110 with the same (rdi, rsi, rdx, rcx); returns the Status*",
+        "tail_6097110": "loads the vtable from (%rsi), calls slot 9 (offset 0x48) with the same (rdi, rsi, rdx, rcx, r8); returns the Status*; the slot-9 target is 0x609d0e0 in both Configurable vtables (BBT 0x64d39b8, second 0x64cdad0)",
+        "arg5": "arg5 (r8) is 0 on every observed path: 0x6097150 zeroes it, and the setter 0x6099e70 calls the tail directly with r8d = 0 (0x609a023); its C++ meaning is not established (open unknown)",
+        "entry_call_sites": [
+            {"address": "0x609b535", "host": "0x609a740 delegate (shipped in #4328)", "args": "rdi = Status* -0x148(%rbp); rsi = r13 (target object); rdx = ConfigOptions copy at -0x90(%rbp); rcx = map at -0x110(%rbp); called only when map element_count != 0 (0x609b4f0)"},
+            {"address": "0x609e314", "host": "0x609e2d0..0x609e3e2 (null-checked entry)", "args": "rdi = Status* at 0x20(%rsp); rsi = object; rdx = ConfigOptions; rcx = map; r8 = arg5"},
+            {"address": "0x60c3bac", "host": "0x60c3b50..0x60c3cb8", "args": "rdi = Status* at 0x10(%rsp); rsi = rbp (object); rdx = r13 (ConfigOptions); rcx = r14 (map)"},
+            {"address": "0x60c45ac", "host": "0x60c4550..0x60c46b8", "args": "same shape as 0x60c3bac (sibling routine)"},
+            {"address": "0x60cf385", "host": "0x60cf020..0x60cf92f", "args": "rdi = Status* (%rsp); rsi = 0x2b8(%r12) (object field); rdx = rbx (ConfigOptions); rcx = r13 (map)"},
+        ],
+        "tail_call_sites": [
+            {"address": "0x609716f", "host": "0x6097150 (the entry itself)"},
+            {"address": "0x609a032", "host": "0x6099e70 setter (re-shipped from #4320)", "args": "rdi = r15 (Status*); rsi = r12 (object); rdx = rbp (ConfigOptions); rcx = r13 (map); r8d = 0"},
+        ],
+    },
+    "slot9": {
+        "map_empty": {
+            "gate": "map element_count (+0x18) == 0 at 0x609d127",
+            "config_byte3_set": "call vtable slot 5 (offset 0x28; BBT 0x60db570, second vtable 0x6095e70) with (Status*, object, ConfigOptions*) at 0x609d180..0x609d199, move the Status into out",
+            "config_byte3_clear": "return kOk immediately (0x609d14d..0x609d153)",
+            "after_slot5": "if out code == 0, return; else if S0 (the empty stack string at 0x30(%rsp)) is non-empty, call the setter fallback; else return",
+        },
+        "map_nonempty": {
+            "gate": "map element_count (+0x18) != 0 at 0x609d127",
+            "copy": "copy the first 0x50 bytes of ConfigOptions to a stack copy C1 at 0x50(%rsp) (fields +0x00 u32, +0x04 byte, +0x08 string, +0x28 u32, +0x2c byte, +0x30 u64, +0x38 16 bytes, +0x48 shared_ptr)",
+            "delimiter_prestep": "when ConfigOptions+0x00 byte 0 == 0 (0x609d2cf), force C1.string = '; ' (literal 0x4409b0, 2 chars, _M_replace at 0x609d598..0x609d5c8) and call 0x6098510 (Status*, object, C1, S0, arg5)",
+            "apply": "call 0x609c8c0 (Status*, C1, object, map, arg5) at 0x609d30a, then move the Status into out",
+            "setter_fallback": "when ConfigOptions+0x00 byte 3 != 0 (0x609d3c8), re-copy ConfigOptions to C1, patch C1+0x00 low word to 0x0101 and C1+0x03 to 1, and call the setter 0x6099e70 (Status*, object, C1, S0, arg5) at 0x609d4b6; when byte 3 == 0, the setter fires only if out code != 0 and S0 is non-empty",
+            "s0": "S0 is the empty SSO string at 0x30(%rsp); it is only ever written by 0x6097630 (reached via the 0x6098510 pre-step), whose internals are not decoded in this packet",
+        },
+        "slot5": "vtable slot 5 (offset 0x28), called with (Status*, object, ConfigOptions*); C++ name not established (open unknown)",
+        "config_flag_bytes": "ConfigOptions+0x00 byte 0 and byte 3 are flag bytes of the +0x00 u32; their C++ names are not established (open unknown from #4328)",
+    },
+    "nullchecked_entry": {
+        "address": "0x609e2d0",
+        "null_object": "object == null and map element_count != 0 -> Status code 4 (kInvalidArgument) via 0x61cf670 with slices ('Cannot configure null object ', 29) + ('', 0); object == null and map empty -> kOk",
+        "nonnull_object": "forward to 0x6097150 with (stack Status at 0x20(%rsp), object, ConfigOptions, map, arg5), then move the Status into out",
+    },
+    "literals": [
+        {"address": "0x4409b0", "text": "; ", "length": 2, "role": "delimiter forced into C1.string by the slot-9 pre-step"},
+        {"address": "0x44a46e", "text": "Cannot configure null object ", "length": 29, "role": "null-object error message (0x609e2d0)"},
+        {"address": "0x4376fd", "text": "", "length": 0, "role": "empty second slice of the null-object error (the byte at 0x4376fd is NUL)"},
+        {"address": "0x6469", "text": "id", "length": 2, "role": "the 'id' key built on the stack in 0x609a410 (mov $0x6469, %eax)"},
+        {"address": "0x43fb8a", "text": "Could not find configurable: ", "length": 29, "role": "cited from #4320: arm null-object error prefix"},
+        {"address": "0x4341c2", "text": "Option not changeable: ", "length": 23, "role": "cited from #4328: '.id' mismatch error prefix"},
+        {"address": "0x6508980", "text": None, "length": None, "role": ".bss std::string (serializer null-object string); content is runtime-initialized, identity still open; 10 lea sites enumerated in #4328"},
+    ],
+    "config_options": {
+        "size_bytes": 80,
+        "fields_cited_from_4328": [
+            {"offset": "+0x00", "type": "u32", "note": "low bytes hold bool flags; byte 0 gates the slot-9 delimiter pre-step, byte 3 gates the setter fallback"},
+            {"offset": "+0x04", "type": "u8", "note": "bool; zeroed on flags-0x100 path, tested on flags-clear path (delegate)"},
+            {"offset": "+0x08", "type": "std::string", "note": "the delimiter string; forced to '; ' by the slot-9 pre-step when byte 0 == 0"},
+            {"offset": "+0x28", "type": "u32", "note": "copied verbatim into C1"},
+            {"offset": "+0x2c", "type": "u8", "note": "copied verbatim into C1"},
+            {"offset": "+0x30", "type": "u64", "note": "copied verbatim into C1"},
+            {"offset": "+0x38", "type": "16 bytes", "note": "copied verbatim into C1"},
+            {"offset": "+0x48", "type": "shared_ptr", "note": "copied into C1 with refcount increment; decremented after the apply call"},
+        ],
+    },
+    "call_chain": "arm 0x60bf212 (#4320) -> forwarder 0x609ba30 -> create-by-name 0x609b8a0 -> scan 0x6096f40 -> apply-created 0x609b700 (type==22) -> delegate 0x609a740 (#4328) -> 0x609a410 (this packet) and, when the map survives, 0x6097150 -> 0x6097110 -> slot 9 0x609d0e0 -> 0x609c8c0 -> 0x609bcb0 -> apply-created 0x609b700 (per map entry) -> delegate 0x609a740 (for type-22 records)",
+    "open_unknowns": [
+        "0x6097630 internals (reached via the 0x6098510 pre-step; the only writer of S0 in the slot-9 call graph)",
+        "0x609c8c0 tail branches (0x609cb60..0x609d08e): the re-check loop and the second find path; and the C++ identity of the 0x30-byte-element array at object+0x08..+0x10 that it iterates",
+        "0x609bcb0 inner branches (0x609bf50..0x609c782): the empty-map path, the scan-miss path, and the post-apply Status handling",
+        "slot 5 (offset 0x28) C++ name (BBT 0x60db570, second vtable 0x6095e70)",
+        "slot 9 arg5 (r8) C++ meaning (always 0 on every observed path)",
+        "ConfigOptions+0x00/+0x04/+0x08/+0x28 C++ names and defaults (from #4328)",
+        ".bss string at 0x6508980 identity and runtime content (from #4328; only read sites found, no writer in the 10 lea sites)",
+        "0x609e510 host identity (sibling id-configure caller; its full body is not decoded)",
+        "record+0xb8 name-string inference (from #4320)",
+    ],
+    "do_not_pick": [
+        "0x609a410, 0x6097150, 0x6097110, 0x609d0e0, 0x609a1b0, 0x609a2f0, 0x5d5b300, 0x6098510, 0x609e2d0, 0x609c8c0, 0x609bcb0, 0x61cf670, 0x60c1190, 0x6099e70 (this packet)",
+        "0x609a740, 0x60971c0, 0x609de80, 0x5d32a30, 0x60986b0, 0x61d1390, 0x61d13e0 (#4328)",
+        "apply 0x60bedc0, serializer 0x60bb9a0, arm 0x60bf1e0, apply-created 0x609b700, forwarder 0x609ba30, create-by-name 0x609b8a0, scan 0x6096f40, map parser 0x60c1190 (cited), setter 0x6099e70 (cited) (#4320)",
+    ],
+}
+
+
+def main() -> int:
+    (OUT / "records.json").write_text(json.dumps(RECORDS, indent=1) + "\n")
+    print("records.json written")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

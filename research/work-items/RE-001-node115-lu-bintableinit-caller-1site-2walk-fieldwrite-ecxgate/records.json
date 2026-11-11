@@ -1,0 +1,465 @@
+{
+ "base": "05bc2de303c05525b71e7e257426e741bc66a390",
+ "calls": [
+  {
+   "note": "bin_table_init",
+   "site": "0x63af198",
+   "target": "0x63d9880"
+  },
+  {
+   "note": "lu-miss handler (scan A exhaustion)",
+   "site": "0x63af3a8",
+   "target": "0x63d9700"
+  },
+  {
+   "note": "__stack_chk_fail",
+   "site": "0x63af3bf",
+   "target": "0x63f0d70"
+  },
+  {
+   "note": "lu-miss handler (scan B exhaustion)",
+   "site": "0x63af44d",
+   "target": "0x63d9700"
+  }
+ ],
+ "census": {
+  "bin_table_init": 1,
+  "bsr": 0,
+  "calls_total": 4,
+  "jumps": 35,
+  "jumps_outside_window": 0,
+  "lock_add": 0,
+  "lock_sub": 0,
+  "lu_miss": 2,
+  "raw_e8": {
+   "tiers": {
+    "1": 17,
+    "10": 1,
+    "2": 12,
+    "4": 8,
+    "5": 1,
+    "6": 2,
+    "8": 1
+   },
+   "total": 108
+  },
+  "rela_dyn": {
+   "relative": 59534,
+   "total": 60723
+  },
+  "rela_plt": 278,
+  "ret": 1,
+  "strict": 243
+ },
+ "cited_not_claimed": [
+  "bin_table_init body 0x63d9880..0x63d9a64 (#262)",
+  "lu-miss handler 0x63d9700..0x63d987b (#215)",
+  "prev FDE 0x63aed40..0x63aefdb, next FDE 0x63af460..0x63afba4",
+  "no node-resolution tables (0x65096c0, 0x6511780) or size tables (0x6727a00, 0x67277c0) are read in this FDE"
+ ],
+ "constwrite": {
+  "composed_value": "walk 1: (struct & 0xffffffffffff) | r8b | (ecx<<0x30) | (((%rbx)>>0x11 & 7)*4) | (((%rbx)>>0x2c & 1)*2); walk 2: same except r8b is replaced by constant 1 (or $0x1 at 0x63af17b)",
+  "entry_registers": "rdi context (rbp), rsi live input (r15), rdx struct (rbx), ecx (r12d), r8d (r14d)",
+  "writes": [
+   "mov %rax,(%rcx) at 0x63af0b9 (walk 1, second-level entry)",
+   "mov %rdi,(%rdx) at 0x63af17f (walk 2, second-level entry)"
+  ]
+ },
+ "exhibits": [
+  {
+   "bin_table_init_sites": [
+    "0x63af198"
+   ],
+   "bsr": 0,
+   "bsr_sites": [],
+   "bytes": 1151,
+   "calls_total": 4,
+   "lock_add": 0,
+   "lock_sub": 0,
+   "lu_miss_sites": [
+    "0x63af3a8",
+    "0x63af44d"
+   ],
+   "name": "bintableinit_caller_2walk_fieldwrite_ecxgate_1site",
+   "range": "0x63aefe0..0x63af45f",
+   "ret": 1,
+   "ret_sites": [
+    "0x63af0e9"
+   ],
+   "strict": 243,
+   "tail_jump_exits": []
+  }
+ ],
+ "frame": {
+  "canary": "0x198(%rsp)",
+  "endbr64": true,
+  "pushes": [
+   "r15",
+   "r14",
+   "r13",
+   "r12",
+   "rbp",
+   "rbx"
+  ],
+  "sub_rsp": "0x1a8"
+ },
+ "lu_miss_sites": [
+  {
+   "r8": 0,
+   "r9": 1,
+   "rcx": "not set before the call (stale scan value); the handler's return lands in rcx after",
+   "rdi": "rbp context",
+   "rdx": "rdx scan table (saved to (%rsp) before the call, restored after)",
+   "rejoin": "jmp 0x63af081 (second-level null test)",
+   "return_to": "rax (second-level pointer, into rcx)",
+   "rsi": "entry rsi (r15, never overwritten in this FDE)",
+   "scan": "A (walk 1)",
+   "site": "0x63af3a8"
+  },
+  {
+   "r8": 0,
+   "r9": 1,
+   "rcx": "derived key rsi",
+   "rdi": "rbp context",
+   "rdx": "rdx scan table",
+   "rejoin": "jmp 0x63af14d (second-level null test)",
+   "return_to": "rax (second-level pointer, into rdx)",
+   "rsi": "entry rsi (r15, never overwritten in this FDE)",
+   "scan": "B (walk 2)",
+   "site": "0x63af44d"
+  }
+ ],
+ "next_fde": {
+  "gap_bytes": "cc",
+  "padding": 1,
+  "range": "0x63af460..0x63afba4"
+ },
+ "next_question": {
+  "bin_table_init": 1,
+  "bsr": 0,
+  "bytes": 1860,
+  "correction": "none - #307's pointer verified correct; 0x63bc730 has a tail-jump exit to 0x63f0b70 and 0x63c2f00 has a tail-jump exit to 0x63d72b0 (both outside-window, from this packet's census)",
+  "fall_through": [
+   "0x63afc60..0x63b0324",
+   "0x63bc490..0x63bc728",
+   "0x63bc730..0x63bcb12",
+   "0x63c2f00..0x63c3328"
+  ],
+  "lu_miss": 4,
+  "packet": 309,
+  "ret": 1,
+  "window": "0x63af460..0x63afba4"
+ },
+ "prev_fde": {
+  "gap": 5,
+  "gap_bytes": "cccccccccc",
+  "range": "0x63aed40..0x63aefdb"
+ },
+ "return_value": {
+  "eax": "0 on the ret path (xor %eax,%eax at 0x63af01c; the only other %eax writes are the two top-index and $0xf0,%eax at 0x63af05b/0x63af128; the epilogue canary sub leaves rax 0; the move-to-front blocks do not touch eax)",
+  "out": "walk 1 stores the composed value (with r8b) at the first walk's second-level entry; walk 2 (only when r8b != 0 and page(0x10(%rbx)) > 0x1000) stores the composed value (with constant 1 instead of r8b) at the derived key's second-level entry; ecx == 0xe8 returns immediately with no write"
+ },
+ "scan_a": {
+  "base": "table+0x100",
+  "exhaustion": "0x63af3a8 (lu-miss block at 0x63af390)",
+  "key": "high bits of 0x8(%rbx) in rsi",
+  "move_to_front": "slot-0 inline block 0x63af1b1..0x63af1de (swaps the top-level entry's second-level base with the scan slot's stored base, recomputes the second-level pointer from the swapped base); shared block 0x63af23b (slots 1-7, r8d = slot index, r9d = index-1)",
+  "rejoin": "jmp 0x63af081 (second-level null test)",
+  "reversed_operand": [],
+  "slot_compares": [
+   "0x63af1a8",
+   "0x63af22e",
+   "0x63af323",
+   "0x63af336",
+   "0x63af349",
+   "0x63af35c",
+   "0x63af36f",
+   "0x63af37c"
+  ],
+  "slots": 8
+ },
+ "scan_b": {
+  "base": "table+0x100",
+  "exhaustion": "0x63af44d (lu-miss block at 0x63af437)",
+  "key": "high bits of the derived key in rdi",
+  "move_to_front": "slot-0 inline block 0x63af1f5..0x63af223 (same base-swap as scan A); shared block 0x63af2b9 (slots 1-7, r9d = slot index, ebp = index-1)",
+  "rejoin": "jmp 0x63af14d (second-level null test)",
+  "reversed_operand": [],
+  "slot_compares": [
+   "0x63af1e8",
+   "0x63af2ac",
+   "0x63af3ca",
+   "0x63af3dd",
+   "0x63af3f0",
+   "0x63af403",
+   "0x63af416",
+   "0x63af423"
+  ],
+  "slots": 8
+ },
+ "sites": [
+  {
+   "argument": "lea 0x10(%rsp) in r13, mov %r13,%rdi",
+   "block": "0x63af190",
+   "branch": "test %rdi,%rdi; je from 0x63af021",
+   "rejoin": "jmp 0x63af027 (restarts at the ecx==0xe8 gate)",
+   "restore": "none - rdx restored from r13 after the call (mov %r13,%rdx at 0x63af19d)",
+   "save": "none - rsi lives in callee-saved r15 across the call; rdx is the table (context+0x1b0)",
+   "site": "0x63af198"
+  }
+ ],
+ "survey": {
+  "candidates": [
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363095"
+    ],
+    "end": "0x6363258",
+    "miss": 1,
+    "ret": 0,
+    "size": 712,
+    "start": "0x6362f90",
+    "status": "BUILT by packet #298"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63633f8"
+    ],
+    "end": "0x6363552",
+    "miss": 1,
+    "ret": 1,
+    "size": 754,
+    "start": "0x6363260",
+    "status": "BUILT by packet #299"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6363b30"
+    ],
+    "end": "0x6363d50",
+    "miss": 1,
+    "ret": 1,
+    "size": 1376,
+    "start": "0x63637f0",
+    "status": "BUILT by packet #300"
+   },
+   {
+    "bsr": 4,
+    "bti": 1,
+    "bti_sites": [
+     "0x6364009"
+    ],
+    "end": "0x6364270",
+    "miss": 1,
+    "ret": 1,
+    "size": 1312,
+    "start": "0x6363d50",
+    "status": "BUILT by packet #301"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x6387629"
+    ],
+    "end": "0x6387878",
+    "miss": 1,
+    "ret": 1,
+    "size": 1112,
+    "start": "0x6387420",
+    "status": "BUILT by packet #302"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63adce6"
+    ],
+    "end": "0x63adf34",
+    "miss": 2,
+    "ret": 1,
+    "size": 996,
+    "start": "0x63adb50",
+    "status": "BUILT by packet #303"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae114"
+    ],
+    "end": "0x63ae252",
+    "miss": 1,
+    "ret": 1,
+    "size": 786,
+    "start": "0x63adf40",
+    "status": "EXCLUDED as a whole FDE: overlaps packet #214 (lu nextnode) claimed sub-ranges 0x63adf71..0x63adf9d, 0x63ae014..0x63ae040, 0x63ae088..0x63ae0cf, 0x63adfed..0x63ae014 in its records"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae45d"
+    ],
+    "end": "0x63ae6d1",
+    "miss": 2,
+    "ret": 1,
+    "size": 1057,
+    "start": "0x63ae2b0",
+    "status": "BUILT by packet #304"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63ae83d"
+    ],
+    "end": "0x63ae974",
+    "miss": 1,
+    "ret": 1,
+    "size": 660,
+    "start": "0x63ae6e0",
+    "status": "BUILT by packet #305"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aea96"
+    ],
+    "end": "0x63aed39",
+    "miss": 2,
+    "ret": 1,
+    "size": 953,
+    "start": "0x63ae980",
+    "status": "BUILT by packet #306"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63aeea1"
+    ],
+    "end": "0x63aefdb",
+    "miss": 1,
+    "ret": 1,
+    "size": 667,
+    "start": "0x63aed40",
+    "status": "BUILT by packet #307; miss corrected 2 -> 1 by packet #306 (objdump census: one lu-miss call 0x63aefcd), re-verified by packet #307"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af198"
+    ],
+    "end": "0x63af45f",
+    "miss": 2,
+    "ret": 1,
+    "size": 1151,
+    "start": "0x63aefe0",
+    "status": "BUILT by this packet (#308); no correction - #307's pointer (1151B, 1 bti, 2 miss, 1 ret, 0 bsr) verified correct by this packet's own census"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63af6c8"
+    ],
+    "end": "0x63afba4",
+    "miss": 4,
+    "ret": 1,
+    "size": 1860,
+    "start": "0x63af460",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63afe1e"
+    ],
+    "end": "0x63b0324",
+    "miss": 4,
+    "ret": 1,
+    "size": 1732,
+    "start": "0x63afc60",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc5e5"
+    ],
+    "end": "0x63bc728",
+    "miss": 1,
+    "ret": 1,
+    "size": 664,
+    "start": "0x63bc490",
+    "status": "survives"
+   },
+   {
+    "bsr": 0,
+    "bti": 1,
+    "bti_sites": [
+     "0x63bc9ec"
+    ],
+    "end": "0x63bcb12",
+    "miss": 1,
+    "ret": 1,
+    "size": 994,
+    "start": "0x63bc730",
+    "status": "survives"
+   },
+   {
+    "bsr": 1,
+    "bti": 1,
+    "bti_sites": [
+     "0x63c30ed"
+    ],
+    "end": "0x63c3328",
+    "miss": 1,
+    "ret": 1,
+    "size": 1064,
+    "start": "0x63c2f00",
+    "status": "survives"
+   }
+  ],
+  "count": 17,
+  "exclusions_reverified": [
+   "0x63ed090..0x63ed862 (#260)",
+   "0x63ef8e0..0x63efba2 (#258)"
+  ],
+  "method": "own .eh_frame parse (135,313 FDEs, sorted before bisect) + raw-e8 census + objdump site count per FDE + exhibits-scoped range-only claim check over merged tree + all prior hl-wt-calls* worktrees",
+  "tiers": {
+   "1": 17,
+   "10": 1,
+   "2": 12,
+   "4": 8,
+   "5": 1,
+   "6": 2,
+   "8": 1
+  },
+  "total_raw": 108
+ },
+ "walk": {
+  "derived_key": "second walk: page(0x10(%rbx)) + page(0x8(%rbx)) - 0x1000 (lea -0x1000(%r14,%rcx,1) at 0x63af10f)",
+  "field_update": "no shl/sar $0x10 + mask $0xffffffffffffff80 transform in this FDE (like #303-#307); each walk stores a composed value built from the struct fields, ecx, and r8b (walk 1) or constant 1 (walk 2)",
+  "node_resolution_table": "none: no 0x65096c0 / 0x6511780 read in this FDE; the node pointers come from the table entries directly",
+  "second_level": "(key>>0x9)&0x1ffff8 + table + 0x8",
+  "table": "context+0x1b0 (rdx)",
+  "top_index": "(key>>0x1a)&0xf0"
+ },
+ "window": {
+  "bytes": 1151,
+  "range": "0x63aefe0..0x63af45f",
+  "strict": 243
+ }
+}

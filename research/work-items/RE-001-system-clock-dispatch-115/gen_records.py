@@ -1,0 +1,317 @@
+#!/usr/bin/env python3
+"""Generate the semantic-record JSON for this packet.
+
+Run from the repo root:
+    python3 research/work-items/RE-001-system-clock-dispatch-115/gen_records.py
+
+Writes records.json. The JSON holds semantic records only -- branch
+site->target pairs, record sets, caller/key domains -- never a
+per-instruction mnemonic list. Instruction-level detail lives only in the
+raw disassembly excerpt text files.
+"""
+import hashlib
+import json
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[2]
+BIN = ROOT / "artifacts" / "node" / "115" / "hl-node"
+
+DIGEST = hashlib.sha256(BIN.read_bytes()).hexdigest()
+assert DIGEST == "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+
+RECORDS = {
+    "task": "RE-001",
+    "work_item": "RE-001-system-clock-dispatch-115",
+    "question": (
+        "What does the sibling registry factory dispatch 0x5fd4080 do -- "
+        "the SystemClock dispatch listed as an open unknown in #4428 -- "
+        "how does its name lookup 0x5fd3d00 resolve a clock name in the "
+        "registry, and which code writes a non-kOk Status into the "
+        "dispatch's 0x30(%rsp) temp (also open in #4428)? Resolves "
+        "#4428's open unknowns: 'the sibling dispatches at "
+        "0x5fd4080..0x5fd4627 and 0x6136b40..0x613721b' (the first of the "
+        "two) and 'which factory writes a non-kOk Status into the "
+        "dispatch's 0x30(%rsp) temp'."
+    ),
+    "artifact": "artifacts/node/115/hl-node",
+    "artifact_sha256": DIGEST,
+    "resolves": {
+        "pr": 4428,
+        "open_unknowns": [
+            "the sibling dispatch 0x5fd4080..0x5fd4627 (the SystemClock dispatch)",
+            "which factory writes a non-kOk Status into the dispatch's "
+            "0x30(%rsp) temp (the 0x5ffa2c0 move-assign path in #4428)",
+        ],
+        "answer": (
+            "0x5fd4080 is the SystemClock registry factory dispatch "
+            "(Status* out, ObjectRegistry* registry, name, "
+            "shared_ptr<SystemClock>* clock_slot), the same template as "
+            "#4428's BlockCipher dispatch 0x5ff9fe0 instantiated for the "
+            "'SystemClock' factory type. It resolves the name through the "
+            "lookup 0x5fd3d00, invokes the matched creator through the "
+            "factory record's +0x18 invoker, and wraps the returned raw "
+            "object in a fresh 0x18-byte non-inplace shared_ptr control "
+            "block (vtable 0x64cdf38). No factory writes the 0x30(%rsp) "
+            "temp: the dispatch itself builds the temp Status in the "
+            "factory-null branches (0x5fd43d7 when the factory left the "
+            "string arg empty, 0x5fd441f when it filled it with a "
+            "message) and in the lookup-miss branch (0x5fd44be), then the "
+            "shared tail at 0x5fd414b move-assigns it into *out via "
+            "0x5fcdf70 at 0x5fd432c -- the same template holds in #4428 "
+            "(0x5ffa3d9 builds the temp, 0x5ffa0af is the shared tail)."
+        ),
+    },
+    "dispatch_0x5fd4080": {
+        "fde": "0x5fd4080..0x5fd4627",
+        "signature": (
+            "(Status* out, ObjectRegistry* registry, "
+            "const std::string& name, shared_ptr<SystemClock>* clock_slot)"
+        ),
+        "sole_caller": "0x5fd4aa3 in the dispatcher 0x5fd46c0 (cited)",
+        "frame": "0xf8 bytes, stack canary at 0xe8(%rsp)",
+        "lookup_call": "0x5fd40c4 -> 0x5fd3d00",
+        "factory_call": "indirect call *0x78(%rsp) (record+0x18, the invoker)",
+        "outcomes": [
+            {
+                "condition": "lookup returns a zeroed record (manager null)",
+                "status": "kNotSupported (code 3)",
+                "message": "Could not load SystemClock: <name>",
+                "sites": ["0x5fd4430", "0x5fd44be"],
+                "note": "built into the 0x30(%rsp) temp, then move-assigned "
+                        "into *out by the shared tail at 0x5fd414b",
+            },
+            {
+                "condition": "factory returns null and left the string "
+                             "arg empty (0x88(%rsp) == 0)",
+                "status": "kInvalidArgument (code 4)",
+                "message": "Could not load SystemClock: <name>",
+                "sites": ["0x5fd4340", "0x5fd43d7"],
+                "note": "built into the 0x30(%rsp) temp, then move-assigned "
+                        "into *out by the shared tail at 0x5fd414b",
+            },
+            {
+                "condition": "factory returns null but filled the string "
+                             "arg with a message (0x88(%rsp) != 0)",
+                "status": "kInvalidArgument (code 4)",
+                "message": "<factory message>: <name>",
+                "sites": ["0x5fd43f8", "0x5fd441f"],
+                "note": "the factory's string is the msg1 string_view "
+                        "(ptr at 0x40(%rsp), size at 0x48(%rsp)); built "
+                        "into the 0x30(%rsp) temp, then move-assigned into "
+                        "*out by the shared tail at 0x5fd414b",
+            },
+            {
+                "condition": "factory returns non-null but stores nothing "
+                             "in the slot",
+                "status": "kInvalidArgument (code 4)",
+                "message": "Cannot make a shared SystemClock from "
+                           "unguarded one : <name>",
+                "sites": ["0x5fd4240", "0x5fd42e4"],
+                "note": "built directly into *out (rdi is rbx); the "
+                        "shared tail is not taken",
+            },
+            {
+                "condition": "factory returns non-null and stores the raw "
+                             "object in the slot",
+                "status": "kOk (code 0)",
+                "action": "new 0x18-byte control block (vtable 0x64cdf38, "
+                          "counts (1,1) from 0x459b20, object at +0x10); "
+                          "store (object, control) into the out clock "
+                          "slot; release the old clock via 0x5d350c0",
+                "sites": ["0x5fd418c", "0x5fd41b8", "0x5fd41c3", "0x5fd41d2"],
+            },
+        ],
+        "record_destroy": (
+            "after a non-null factory return the record is destroyed via "
+            "its manager with op 3 (0x5fd4168); a no-op for the stateless "
+            "creator lambdas, as in #4428"
+        ),
+        "status_temp": (
+            "the 16 bytes at 0x30(%rsp) are a Status temp, zeroed to kOk "
+            "at 0x5fd4133 after the factory call; the dispatch itself "
+            "writes a non-kOk Status there in the factory-null branches "
+            "(0x5fd43d7, 0x5fd441f) and the lookup-miss branch (0x5fd44be), "
+            "and the shared tail at 0x5fd414b move-assigns it into *out "
+            "via 0x5fcdf70 at 0x5fd432c when its code byte is non-zero. "
+            "No registered creator writes the temp -- this resolves "
+            "#4428's open unknown of the same shape (there the temp is "
+            "built at 0x5ffa3d9 and the shared tail is 0x5ffa0af)."
+        ),
+        "status_ctor": (
+            "0x61cf670(out, code, subcode 0, msg1, msg2, severity 0): "
+            "msg1 and msg2 are string_views ({ptr, size} pairs at "
+            "0x40(%rsp) and 0x50(%rsp)); message is msg1, or "
+            "msg1 + ': ' + msg2 when msg2 is non-empty"
+        ),
+    },
+    "lookup_0x5fd3d00": {
+        "fde": "0x5fd3d00..0x5fd4079",
+        "signature": (
+            "(FactoryRecord* out, ObjectRegistry* registry, "
+            "const std::string& name) -> FactoryRecord*"
+        ),
+        "callers": ["0x5fd40c4 in 0x5fd4080", "0x5fd3ec0 (recursion)"],
+        "registry_layout": {
+            "+0x00/+0x08": "libraries vector (begin/end)",
+            "+0x60": "parent registry pointer (recursed into on exhaustion)",
+            "+0x98": "pthread_mutex_t (locked for the whole walk)",
+        },
+        "algorithm": [
+            "lock the registry mutex at +0x98 (lock failure throws "
+            "system_error with the errno)",
+            "walk the libraries vector backwards, 16-byte elements "
+            "(first qword = library pointer; second qword unread, open "
+            "unknown)",
+            "per library lock its mutex at +0x00, then query its map at "
+            "+0x28 for the type name via 0x5fd2980",
+            "on a hit walk the entry's candidate vector (+0x28/+0x30) and "
+            "call each candidate's vtable slot 2 (Matches, forwards to "
+            "PatternEntry Matches 0x61f8670) with (candidate, name)",
+            "on a match clone the factory record (manager op 2, a no-op "
+            "here, plus the explicit 16-byte copy of the "
+            "{manager, invoker} pair) into *out and return",
+            "on exhaustion unlock and recurse into the parent registry at "
+            "+0x60; with no parent zero *out",
+        ],
+        "map_key": "SystemClock (11 chars, built SSO: movabs 'SystemCl' "
+                   "at 0x5fd3da5 + 'lock' 0x6b636f6c at 0x5fd3dc1)",
+        "manager_ops_observed": (
+            "op 2 (clone) at 0x5fd3e68 and op 3 (destroy) at 0x5fd3f78 are "
+            "called on the record's manager; both are no-ops for the "
+            "stateless creator lambdas, as in #4428"
+        ),
+    },
+    "factory_record": {
+        "size": "0x20 bytes",
+        "layout": {
+            "+0x00": "functor storage (16 bytes, zero for stateless lambdas)",
+            "+0x10": "manager function pointer",
+            "+0x18": "invoker (the creator lambda's _M_invoke)",
+        },
+        "invoker_signature": (
+            "(record, name, slot_ptr_ptr, string*) -> raw SystemClock* "
+            "or null; stores the new raw object at *slot_ptr_ptr; may "
+            "fill the string arg with an error message when returning null"
+        ),
+        "factory_slot_protocol": (
+            "the creator stores the new raw object pointer at the slot "
+            "(0x28(%rsp) in the dispatch), destroying any previous object "
+            "there through its vtable slot 1, and returns the same "
+            "pointer; null return means failure"
+        ),
+    },
+    "control_block": {
+        "size": "0x18 bytes",
+        "vtable": "0x64cdf38",
+        "typeinfo": (
+            "St15_Sp_counted_ptrIPN7rocksdb11SystemClockE"
+            "LN9__gnu_cxx12_Lock_policyE2EE"
+        ),
+        "typeinfo_addr": "0x64cda40",
+        "layout": {
+            "+0x00": "vtable 0x64cdf38",
+            "+0x08": "counts (1, 1) from qword 0x459b20",
+            "+0x10": "object pointer",
+        },
+        "slots": [
+            {"slot": 0, "addr": "0x5fcc690"},
+            {"slot": 1, "addr": "0x5fcc800"},
+            {"slot": 2, "addr": "0x5fcc750"},
+            {"slot": 3, "addr": "0x5fcc810"},
+            {"slot": 4, "addr": "0x5fcc770"},
+        ],
+        "vtable_length_note": (
+            "exactly 5 function slots. Unlike the BlockCipher control-block "
+            "vtable 0x64d0198 (#4428), which has a trailing zero slot, the "
+            "qword after slot 4 here is a RELATIVE reloc to the 'DEBUG' "
+            "string table at 0x446560 -- the next .data.rel.ro object, not "
+            "part of this vtable."
+        ),
+    },
+    "dispatcher_and_wrapper": {
+        "dispatcher": "0x5fd46c0 (FDE 0x5fd46c0..0x5fd4c2e, cited)",
+        "dispatcher_calls": [
+            "0x609e510 (options-map host) at 0x5fd489a",
+            "0x5fd4080 (this dispatch) at 0x5fd4aa3",
+            "0x609e2d0 (configure) at 0x5fd4b76",
+            "0x5fcdf70 (Status move-assign) at 0x5fd48c6/0x5fd4ab5/0x5fd4b01/0x5fd4b2f",
+        ],
+        "dispatcher_note": (
+            "mirrors #4402's dispatcher 0x5ffa710: pthread_once init, the "
+            "options-map host call, the dispatch call, and the configure "
+            "call. Its internals are cited, not pinned here."
+        ),
+        "wrapper": "0x5fd4c30 (FDE 0x5fd4c30..0x5fd4cc1, cited)",
+        "wrapper_gate": (
+            "if rcx+0x08 == 2 and the string at (%rcx) starts with 'id' "
+            "(0x6469) and r8+0x08 == 0, it zeroes the shared_ptr at (%r9) "
+            "(releasing the old clock via 0x5d350c0) and returns kOk; "
+            "otherwise it forwards to the dispatcher at 0x5fd4c60"
+        ),
+        "wrapper_note": "mirrors #4402's wrapper 0x5ffae10 exactly.",
+    },
+    "system_clock_registration": {
+        "registrar": "0x5fd20d0 (FDE 0x5fd20d0..0x5fd241d, cited)",
+        "evidence": (
+            "the only other binary-wide lea of 'SystemClock' (0x5fd2298) "
+            "sits in 0x5fd20d0, which also builds 'TimeEmulatedSystemClock' "
+            "(literal 0x4372ae) and calls the register helper 0x5fd1da0 "
+            "(22 E8 callers binary-wide) at 0x5fd22b4"
+        ),
+        "interpretation": (
+            "plausibly the TimeEmulatedSystemClock registration; the exact "
+            "creator routine it registers is not pinned here (open unknown)"
+        ),
+    },
+    "literals": {
+        "0x4487c0": "Cannot make a shared ",
+        "0x438369": "SystemClock",
+        "0x432138": " from unguarded one ",
+        "0x439466": "Could not load ",
+        "0x4372ae": "TimeEmulatedSystemClock (built by the registrar 0x5fd20d0)",
+    },
+    "open_unknowns": [
+        "the registered SystemClock creators: which factory routines back "
+        "the 'SystemClock' entries (0x5fd20d0 builds "
+        "'TimeEmulatedSystemClock' and calls the register helper "
+        "0x5fd1da0, but the creator routine itself is not pinned)",
+        "the libraries vector element's second qword (the lookup reads "
+        "only the first qword, the library pointer)",
+        "the library object's fields at +0x08..+0x27 (mutex at +0x00, map "
+        "at +0x28)",
+        "the map value's owning type (0x5fd2980 returns the entry whose "
+        "+0x28/+0x30 candidate vector the lookup walks)",
+        "the control-block vtable slots 0..4 (0x5fcc690/0x5fcc800/0x5fcc750/"
+        "0x5fcc810/0x5fcc770) method identities",
+        "the remaining sibling dispatch at 0x6136b40..0x613721b (same "
+        "'Cannot make a shared ' / 'Could not load ' literals, another "
+        "factory type)",
+        "the dispatcher 0x5fd46c0 internals (cited only: options-map host, "
+        "dispatch and configure calls) and the wrapper 0x5fd4c30's "
+        "caller (no direct E8 caller binary-wide; reached through a "
+        "function-pointer table, as in #4402)",
+    ],
+    "cited_not_pinned": [
+        "0x5fd46c0 dispatcher and 0x5fd4c30 wrapper (#4402 shape)",
+        "0x5fd20d0 TimeEmulatedSystemClock registrar and 0x5fd1da0 register helper",
+        "0x5ff9fe0/0x5ff9c60 BlockCipher dispatch + lookup (#4428)",
+        "0x5ffb250/0x5ffaeb0 EncryptionProvider dispatch + lookup (#4428)",
+        "0x5ffa710/0x5ffba10 dispatchers and 0x5ffae10/0x5ffbde0 wrappers (#4402)",
+        "0x609e510 options-map host and 0x609e2d0 configure (#4349, #4402)",
+        "0x5fd2980 map lookup helper",
+        "0x61cf670 Status ctor, 0x5fcdf70 Status move-assign",
+        "0x5d350c0 shared_ptr release, 0x5fcd890 string ctor",
+        "0x61f8670 PatternEntry Matches (PR #3983)",
+    ],
+}
+
+
+def main() -> None:
+    (HERE / "records.json").write_text(
+        json.dumps(RECORDS, indent=2) + "\n")
+    print(f"wrote records.json ({len(RECORDS)} top-level keys)")
+
+
+if __name__ == "__main__":
+    main()

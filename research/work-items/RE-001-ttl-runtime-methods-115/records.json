@@ -1,0 +1,837 @@
+{
+ "target": {
+  "artifact": "work/hl-node-115.bin",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "node": 115
+ },
+ "work_item": "RE-001-ttl-runtime-methods-115",
+ "task": "RE-001",
+ "question": "Pin node #115's three TTL runtime classes end-to-end: what do TtlMergeOperator, TtlCompactionFilterFactory and TtlCompactionFilter do at runtime -- the TTL value format, how FullMergeV2 and PartialMergeMulti strip, delegate and re-timestamp, how Filter decides expiry and re-appends the timestamp, how CreateCompactionFilter wraps the factory's filter, what the Configurable slots (Prepare/ValidateOptions, IsInstanceOf, Name) enforce, and what every vtable slot of the three classes holds?",
+ "identity": {
+  "catalogue_rows": [
+   "TtlMergeOperator::PrepareOptions 0x6200b70, 102/113 (90.27%)",
+   "TtlCompactionFilter::PrepareOptions 0x6200bf0, 102/113",
+   "TtlCompactionFilterFactory::PrepareOptions 0x6200c70, 103/113 (91.15%)",
+   "TtlCompactionFilter::ValidateOptions 0x6200cf0, 124/143 (86.71%)",
+   "TtlCompactionFilterFactory::ValidateOptions 0x6200d80, 124/143",
+   "TtlMergeOperator::ValidateOptions 0x6200e10, 173/200 (86.50%)",
+   "TtlMergeOperator::IsInstanceOf 0x6202520, 205/217 (94.47%)",
+   "TtlCompactionFilter::IsInstanceOf 0x6202440, 205/217",
+   "TtlMergeOperator::FullMergeV2 0x6206610, 722/787 (91.74%)",
+   "TtlMergeOperator::FullMergeV2 cold 0x62065e6, 30/40 (75.00%)",
+   "TtlMergeOperator::PartialMergeMulti 0x6201c90, 1467/1569 (93.50%)",
+   "TtlMergeOperator::PartialMergeMulti cold 0x6201b74, 224/269 (83.27%)",
+   "TtlCompactionFilter::Filter 0x6203520, 246/263 (93.54%)",
+   "TtlCompactionFilterFactory::CreateCompactionFilter 0x6202ba0, 170/192 (88.54%)",
+   "TtlCompactionFilterFactory::CreateCompactionFilter cold 0x6202b50, 65/74 (87.84%)",
+   "CompactionFilter::FilterV2 0x5d2e4a0, 151/157 (96.18%)",
+   "CompactionFilter::FilterV3 0x5d2f8a0, 240/249 (96.39%)"
+  ],
+  "catalogue_source": "docs/PROGRESS.md, librocksdb-sys 0.11.0+8.1.1, published-crate rebuild"
+ },
+ "ttl_value_format": {
+  "shape": "payload + 4-byte little-endian timestamp suffix",
+  "strip": "len - 4 (existing value and every operand)",
+  "append": "low 32 bits of the clock's current time, via _M_append",
+  "length_guard": "0x3fffffffffffffff, else __throw_length_error",
+  "error_source_file": "utilities/ttl/db_ttl_impl.cc",
+  "error_lines": {
+   "36": "Could not remove timestamp from existing value.",
+   "45": "Could not remove timestamp from operand value.",
+   "86": "Could not get current time to be attached internally to the new value.",
+   "108": "Could not remove timestamp from value.",
+   "126": "Could not get current time to be attached internally to the new value."
+  }
+ },
+ "vtables": {
+  "TtlMergeOperator": {
+   "vtable": "0x64d9558",
+   "header": "0x64d9548",
+   "typeinfo": "N7rocksdb16TtlMergeOperatorE",
+   "typeinfo_object": "0x64d9308",
+   "size": 56,
+   "slots": [
+    [
+     0,
+     "0x6203b80",
+     "D2"
+    ],
+    [
+     1,
+     "0x6203c30",
+     "D0"
+    ],
+    [
+     2,
+     "0x609d760",
+     "GetOption (Configurable)"
+    ],
+    [
+     3,
+     "0x609dc40",
+     "AreEquivalent (Configurable)"
+    ],
+    [
+     4,
+     "0x5d32560",
+     "empty-string (Configurable)"
+    ],
+    [
+     5,
+     "0x6200b70",
+     "PrepareOptions"
+    ],
+    [
+     6,
+     "0x6200e10",
+     "ValidateOptions"
+    ],
+    [
+     7,
+     "0x5d2e090",
+     "GetOptionsPtr (Configurable)"
+    ],
+    [
+     8,
+     "0x60956f0",
+     "empty-Status (Configurable)"
+    ],
+    [
+     9,
+     "0x609d0e0",
+     "ConfigureOptions (Configurable)"
+    ],
+    [
+     10,
+     "0x60986b0",
+     "ParseOption (Configurable)"
+    ],
+    [
+     11,
+     "0x6095710",
+     "OptionsAreEqual (Configurable)"
+    ],
+    [
+     12,
+     "0x609de80",
+     "SerializeOptions (Configurable)"
+    ],
+    [
+     13,
+     "0x609d980",
+     "GetOptionName (Configurable)"
+    ],
+    [
+     14,
+     "0x6200930",
+     "Name"
+    ],
+    [
+     15,
+     "0x5d32a30",
+     "GetId (Customizable)"
+    ],
+    [
+     16,
+     "0x6202520",
+     "IsInstanceOf"
+    ],
+    [
+     17,
+     "0x6200940",
+     "wrapped-object accessor (C++ name open)"
+    ],
+    [
+     18,
+     "0x5d2ca10",
+     "short-name accessor, empty string"
+    ],
+    [
+     19,
+     "0x5d2cd80",
+     "FullMerge (default: return false)"
+    ],
+    [
+     20,
+     "0x6206610",
+     "FullMergeV2"
+    ],
+    [
+     21,
+     "0x5d2cd90",
+     "PartialMerge (default: return false)"
+    ],
+    [
+     22,
+     "0x6201c90",
+     "PartialMergeMulti"
+    ],
+    [
+     23,
+     "0x5d2cda0",
+     "AllowSingleOperand (default: false)"
+    ],
+    [
+     24,
+     "0x5d2cdb0",
+     "ShouldMerge (default: false)"
+    ]
+   ],
+   "fields": [
+    {
+     "offset": 0,
+     "what": "vtable pointer"
+    },
+    {
+     "offset": 8,
+     "what": "std::vector<std::string> (0x18)"
+    },
+    {
+     "offset": 32,
+     "what": "shared_ptr<MergeOperator> (ptr + control block)"
+    },
+    {
+     "offset": 48,
+     "what": "SystemClock*"
+    }
+   ]
+  },
+  "TtlCompactionFilterFactory": {
+   "vtable": "0x64d9718",
+   "header": "0x64d9708",
+   "typeinfo": "N7rocksdb26TtlCompactionFilterFactoryE",
+   "typeinfo_object": "0x64d92f0",
+   "size": 64,
+   "slots": [
+    [
+     0,
+     "0x6203ad0",
+     "D2"
+    ],
+    [
+     1,
+     "0x6203ce0",
+     "D0"
+    ],
+    [
+     2,
+     "0x609d760",
+     "GetOption (Configurable)"
+    ],
+    [
+     3,
+     "0x609dc40",
+     "AreEquivalent (Configurable)"
+    ],
+    [
+     4,
+     "0x5d32560",
+     "empty-string (Configurable)"
+    ],
+    [
+     5,
+     "0x6200c70",
+     "PrepareOptions"
+    ],
+    [
+     6,
+     "0x6200d80",
+     "ValidateOptions"
+    ],
+    [
+     7,
+     "0x5d2e090",
+     "GetOptionsPtr (Configurable)"
+    ],
+    [
+     8,
+     "0x60956f0",
+     "empty-Status (Configurable)"
+    ],
+    [
+     9,
+     "0x609d0e0",
+     "ConfigureOptions (Configurable)"
+    ],
+    [
+     10,
+     "0x60986b0",
+     "ParseOption (Configurable)"
+    ],
+    [
+     11,
+     "0x6095710",
+     "OptionsAreEqual (Configurable)"
+    ],
+    [
+     12,
+     "0x609de80",
+     "SerializeOptions (Configurable)"
+    ],
+    [
+     13,
+     "0x609d980",
+     "GetOptionName (Configurable)"
+    ],
+    [
+     14,
+     "0x6200910",
+     "Name"
+    ],
+    [
+     15,
+     "0x5d32a30",
+     "GetId (Customizable)"
+    ],
+    [
+     16,
+     "0x5d2e770",
+     "IsInstanceOf (shared default)"
+    ],
+    [
+     17,
+     "0x6200920",
+     "wrapped-object accessor (C++ name open)"
+    ],
+    [
+     18,
+     "0x5d2ca10",
+     "short-name accessor, empty string"
+    ],
+    [
+     19,
+     "0x5d2ca70",
+     "takes an int, returns arg == 1 (C++ name open)"
+    ],
+    [
+     20,
+     "0x6202ba0",
+     "CreateCompactionFilter"
+    ]
+   ],
+   "fields": [
+    {
+     "offset": 0,
+     "what": "vtable pointer"
+    },
+    {
+     "offset": 8,
+     "what": "std::vector<std::string> (0x18)"
+    },
+    {
+     "offset": 32,
+     "what": "ttl (int)"
+    },
+    {
+     "offset": 40,
+     "what": "SystemClock*"
+    },
+    {
+     "offset": 48,
+     "what": "shared_ptr<CompactionFilterFactory> (ptr + control block)"
+    }
+   ],
+   "boundary_note": "The qword at 0x64d97c0 has NO RELATIVE relocation: it is the next vtable's header (DBWithTTLImpl, typeinfo 0x64d92a8, vtable 0x64d97d0), not a 21st CFF slot."
+  },
+  "TtlCompactionFilter": {
+   "vtable": "0x64d9630",
+   "header": "0x64d9620",
+   "typeinfo": "N7rocksdb19TtlCompactionFilterE",
+   "typeinfo_object": "0x64d92d8",
+   "size": 64,
+   "slots": [
+    [
+     0,
+     "0x62018f0",
+     "D2"
+    ],
+    [
+     1,
+     "0x62019a0",
+     "D0"
+    ],
+    [
+     2,
+     "0x609d760",
+     "GetOption (Configurable)"
+    ],
+    [
+     3,
+     "0x609dc40",
+     "AreEquivalent (Configurable)"
+    ],
+    [
+     4,
+     "0x5d32560",
+     "empty-string (Configurable)"
+    ],
+    [
+     5,
+     "0x6200bf0",
+     "PrepareOptions"
+    ],
+    [
+     6,
+     "0x6200cf0",
+     "ValidateOptions"
+    ],
+    [
+     7,
+     "0x5d2e090",
+     "GetOptionsPtr (Configurable)"
+    ],
+    [
+     8,
+     "0x60956f0",
+     "empty-Status (Configurable)"
+    ],
+    [
+     9,
+     "0x609d0e0",
+     "ConfigureOptions (Configurable)"
+    ],
+    [
+     10,
+     "0x60986b0",
+     "ParseOption (Configurable)"
+    ],
+    [
+     11,
+     "0x6095710",
+     "OptionsAreEqual (Configurable)"
+    ],
+    [
+     12,
+     "0x609de80",
+     "SerializeOptions (Configurable)"
+    ],
+    [
+     13,
+     "0x609d980",
+     "GetOptionName (Configurable)"
+    ],
+    [
+     14,
+     "0x6200900",
+     "Name"
+    ],
+    [
+     15,
+     "0x5d32a30",
+     "GetId (Customizable)"
+    ],
+    [
+     16,
+     "0x6202440",
+     "IsInstanceOf"
+    ],
+    [
+     17,
+     "0x62008e0",
+     "wrapped-object accessor (C++ name open)"
+    ],
+    [
+     18,
+     "0x5d2ca10",
+     "short-name accessor, empty string"
+    ],
+    [
+     19,
+     "0x6203520",
+     "Filter"
+    ],
+    [
+     20,
+     "0x5d2ca30",
+     "FilterMergeOperand (default: return false)"
+    ],
+    [
+     21,
+     "0x5d2e4a0",
+     "FilterV2"
+    ],
+    [
+     22,
+     "0x5d2f8a0",
+     "FilterV3"
+    ],
+    [
+     23,
+     "0x5d2ca40",
+     "PrepareBlobOutput (default: kKeep = 0)"
+    ],
+    [
+     24,
+     "0x5df72f0",
+     "IgnoreSnapshots (default: true)"
+    ],
+    [
+     25,
+     "0x5d2ca50",
+     "IsStackedBlobDbInternalCompactionFilter (default: false)"
+    ],
+    [
+     26,
+     "0x5d2ca60",
+     "returns the constant 8 (C++ name open)"
+    ]
+   ],
+   "fields": [
+    {
+     "offset": 0,
+     "what": "vtable pointer"
+    },
+    {
+     "offset": 8,
+     "what": "std::vector<std::string> (0x18)"
+    },
+    {
+     "offset": 32,
+     "what": "const CompactionFilter*"
+    },
+    {
+     "offset": 40,
+     "what": "owned unique_ptr<CompactionFilter> pointer"
+    },
+    {
+     "offset": 48,
+     "what": "ttl (int)"
+    },
+    {
+     "offset": 56,
+     "what": "SystemClock*"
+    }
+   ]
+  },
+  "cross_class": {
+   "note": "MaxOperator (vtable 0x64d8720), PutOperator (0x64d8828), SortList (0x64d89f0) and StringAppendTESTOperator (0x64d8bd8) all have the same 25-slot layout as TtlMergeOperator; RemoveEmptyValueCompactionFilter (0x64d7e20) has the same 27-slot layout as TtlCompactionFilter.  Slot 17 is the wrapped-object accessor (null by default, 0x5d2ca00) and slot 18 the short name ('' by default, 0x5d2ca10) in every family: MaxOperator 'max', PutOperator 'put_v1', SortList 'sortlist', StringAppendTESTOperator 'stringappendtest', PosixClock 'PosixClock' (while its Name is 'DefaultClock').  The TTL classes have no short name.",
+   "slot17_callers": "GetOptionsPtr 0x5d2e090 calls slot 0x88 once: the wrapped-object accessor is how option lookup delegates to the wrapped object.",
+   "slot18_callers": "The shared default IsInstanceOf 0x5d2e770 calls slot 0x90 once: the short name is the alternate name IsInstanceOf accepts."
+  }
+ },
+ "methods": {
+  "full_merge_v2": {
+   "addr": "0x6206610",
+   "fde": "0x6206610..0x6206923",
+   "cold_fde": "0x62065e6..0x620660e",
+   "signature": "(this, merge_in, merge_out)",
+   "role": "Existing value non-null with size <= 3 -> merge-error log via 0x5fceda0 (code 3, logger = merge_in+0x18, db_ttl_impl.cc:36) and return false.  Each operand with size <= 3 -> same error path (:45) and return false.  Rebuilds MergeOperationInput on the stack (key, existing Slice{ptr, len-4}, stripped operand vector via 0x5d36370, logger) and calls the wrapped FullMergeV2 via vtable slot 0xa0 (slot 20).  Wrapped false -> return false.  Wrapped true: replace merge_out's new_value via _M_replace, then call clock GetCurrentTime via the slot 0xc0 (slot 24) chain-walk; clock failure -> error log (:86), return false; success -> append the 4-byte timestamp (low 32 bits of the returned time) via _M_append and return true. The cold FDE destroys the operand vector via 0x5d36020.",
+   "excerpt": "mo-fullmergev2-6206610.objdump.txt",
+   "cold_excerpt": "mo-fullmergev2-cold-62065e6.objdump.txt"
+  },
+  "partial_merge_multi": {
+   "addr": "0x6201c90",
+   "fde": "0x6201c90..0x62022b1",
+   "cold_fde": "0x6201b74..0x6201c81",
+   "signature": "(this, key, operand deque, new_value, logger)",
+   "role": "Same strip/delegate pattern as FullMergeV2.  The deque is walked in 0x200-byte chunks (32 Slices per chunk); operands are copied with len-4 into a heap vector (operator new 0x40 + 0x200).  A short operand -> error log (:108), return false.  Delegates to the wrapped PartialMergeMulti via slot 0xb0 (slot 22). On wrapped true: clock GetCurrentTime chain-walk; clock failure -> error log (:126), return false; else append the 4-byte timestamp to *new_value, return true.  On wrapped false -> return false.  Frees the chunk buffers and the 0x40-byte object on all exits.",
+   "excerpt": "mo-partialmerge-multi-6201c90.objdump.txt",
+   "cold_excerpt": "mo-partialmerge-multi-cold-6201b74.objdump.txt"
+  },
+  "filter": {
+   "addr": "0x6203520",
+   "fde": "0x6203520..0x6203627",
+   "signature": "(this, level, key, existing_value, new_value, value_changed)",
+   "role": "Calls the expiry helper 0x6203400 (existing_value, ttl=this+0x30, clock=this+0x38); expired -> kRemove (1).  Wrapped filter (this+0x20) null -> kKeep (0). Else delegates to the wrapped Filter via slot 0x98 (slot 19) with existing Slice{ptr, len-4}; wrapped nonzero -> kRemove (1).  Else if *value_changed -> append the original value's last 4 bytes (timestamp at ptr+len-4) to *new_value via _M_append, return kKeep (0).",
+   "excerpt": "cf-filter-6203520.objdump.txt"
+  },
+  "expiry_helper": {
+   "addr": "0x6203400",
+   "fde": "0x6203400..0x6203513",
+   "signature": "(value Slice, ttl int, clock)",
+   "role": "ttl <= 0 -> false.  Chain-walks the clock's GetCurrentTime (slot 0xc0, 8-level unrolled, GOT canonical 0x64ed3e8 -> 0x5d4b100; the first level whose slot-24 differs from the canonical is called, else the 9th unconditional).  Returns (uint32)(value last 4 bytes) + ttl < now_seconds, computed as a 64-bit signed sum: the 4-byte load zero-extends (mov -0x4(%rdx,%rax,1),%eax) and the ttl is sign-extended (movslq %esi,%rbx) before a 64-bit add, so the sum does NOT wrap at 32 bits.",
+   "excerpt": "cf-expiry-6203400.objdump.txt"
+  },
+  "create_compaction_filter": {
+   "addr": "0x6202ba0",
+   "fde": "0x6202ba0..0x6202c60",
+   "cold_fde": "0x6202b50..0x6202b9a",
+   "signature": "(hidden unique_ptr out, Context*)",
+   "role": "If *(context+0x30) is non-null, call its vtable slot 0xa0 (slot 20 = CreateCompactionFilter) into a stack temp unique_ptr; operator new(0x40) + TtlCompactionFilter C2 0x6202a10 (ttl=this+0x20, clock=this+0x28, filter=wrapped ptr, unique_ptr=&temp); destroy the temp remainder via D1 (slot 1) if non-null; store the new filter into *rdi and return rdi.  The cold FDE holds the landing pads (0x6202c3c/0x6202c48/0x6202c54).",
+   "excerpt": "cff-create-6202ba0.objdump.txt",
+   "cold_excerpt": "cff-create-cold-6202b50.objdump.txt"
+  },
+  "prepare_options": {
+   "addrs": [
+    "0x6200b70",
+    "0x6200bf0",
+    "0x6200c70"
+   ],
+   "fdes": [
+    "0x6200b70..0x6200be1",
+    "0x6200bf0..0x6200c61",
+    "0x6200c70..0x6200ce1"
+   ],
+   "signature": "(hidden Status ret, this, ConfigOptions)",
+   "role": "Status-returning (rdi=hidden Status ret, rsi=this, rdx=ConfigOptions).  If the clock field is null (MO +0x30, CFF +0x28, CF +0x38), resolve it via 0x5fcf430 (*(ConfigOptions+0x38)) and store *(result) into the field; then call base Configurable::PrepareOptions 0x6095e70; return rdi.",
+   "excerpts": [
+    "mo-prepare-6200b70.objdump.txt",
+    "cf-prepare-6200bf0.objdump.txt",
+    "cff-prepare-6200c70.objdump.txt"
+   ]
+  },
+  "validate_options": {
+   "addrs": [
+    "0x6200e10",
+    "0x6200cf0",
+    "0x6200d80"
+   ],
+   "fdes": [
+    "0x6200e10..0x6200ed8",
+    "0x6200cf0..0x6200d7f",
+    "0x6200d80..0x6200e0f"
+   ],
+   "signature": "(hidden Status ret, this, DBOptions, ColumnFamilyOptions)",
+   "role": "MO tests this+0x20 (wrapped shared_ptr) and this+0x30 (clock); CFF tests this+0x28 (clock); CF tests this+0x38 (clock).  A null field builds an error via 0x61cf670 with the option-name string, then the base ValidateOptions 0x6096790 is called; return rdi.",
+   "errors": {
+    "0x966878": "SystemClock required by TtlMergeOperator",
+    "0x959598": "UserMergeOperator required by TtlMergeOperator",
+    "0x95eaf8": "SystemClock required by TtlCompactionFilter",
+    "0x967120": "SystemClock required by TtlCompactionFilterFactory"
+   },
+   "excerpts": [
+    "mo-validate-6200e10.objdump.txt",
+    "cf-validate-6200cf0.objdump.txt",
+    "cff-validate-6200d80.objdump.txt"
+   ]
+  },
+  "is_instance_of": {
+   "mo": {
+    "addr": "0x6202520",
+    "fde": "0x6202520..0x62025f9",
+    "role": "True if name == 'Merge By TTL' (12 chars; hardcoded movabs 'Merge By' 0x794220656772654d + cmpl 'TTL ' 0x4c545420), OR name == Name() (slot 0x70, strlen+memcmp), OR name == the slot-18 short name ('' never matches non-empty).",
+    "excerpt": "mo-isinstanceof-6202520.objdump.txt"
+   },
+   "cf": {
+    "addr": "0x6202440",
+    "fde": "0x6202440..0x6202519",
+    "role": "Same shape as the merge operator: true if name == 'Delete By TTL' (13 chars; movabs 'Delete B' 0x42206574656c6544 + 'e By TTL' 0x4c54542079422065), OR name == Name() (slot 0x70), OR name == the slot-18 short name.",
+    "excerpt": "cf-isinstanceof-6202440.objdump.txt"
+   },
+   "cff_default": {
+    "addr": "0x5d2e770",
+    "fde": "0x5d2e770..0x5d2e832",
+    "role": "The shared default (also used by the factory): empty name -> false, else Name() (slot 0x70) or the slot-18 short-name match.  Described in PR #3715.",
+    "excerpt": "shared-isinst-default-5d2e770.objdump.txt"
+   }
+  },
+  "names": {
+   "mo": {
+    "addr": "0x6200930",
+    "literal": "0x439667",
+    "value": "TtlMergeOperator",
+    "excerpt": "mo-name-6200930.objdump.txt"
+   },
+   "cf": {
+    "addr": "0x6200900",
+    "literal": "0x4363a4",
+    "value": "TtlCompactionFilter",
+    "excerpt": "cf-name-6200900.objdump.txt"
+   },
+   "cff": {
+    "addr": "0x6200910",
+    "literal": "0x449896",
+    "value": "TtlCompactionFilterFactory",
+    "excerpt": "cff-name-6200910.objdump.txt"
+   }
+  },
+  "slot17_getters": {
+   "mo": {
+    "addr": "0x6200940",
+    "body": "mov 0x20(%rdi),%rax; ret",
+    "excerpt": "mo-slot17-6200940.objdump.txt"
+   },
+   "cf": {
+    "addr": "0x62008e0",
+    "body": "mov 0x20(%rdi),%rax; ret",
+    "excerpt": "cf-slot17-62008e0.objdump.txt"
+   },
+   "cff": {
+    "addr": "0x6200920",
+    "body": "mov 0x30(%rdi),%rax; ret",
+    "excerpt": "cff-slot17-6200920.objdump.txt"
+   },
+   "default": {
+    "addr": "0x5d2ca00",
+    "body": "return 0/null",
+    "excerpt": "shared-null-5d2ca00.objdump.txt"
+   }
+  },
+  "filter_v2": {
+   "addr": "0x5d2e4a0",
+   "fde": "0x5d2e4a0..0x5d2e53d",
+   "mangled": "_ZNK7rocksdb16CompactionFilter8FilterV2EiRKNS_5SliceENS0_9ValueTypeES3_PNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESB_",
+   "role": "value_type 0 (kValue) -> call Filter via slot 0x98, map: Filter==0 -> 2xvalue_changed (0=kKeep, 2=kChangeValue); Filter!=0 -> 1 (kRemove).  value_type 1 (kMergeOperand) -> if slot 0xa0 (slot 20) != GOT canonical 0x64ecff0, call it and return its byte; else return 0.  Other value_types -> 0.",
+   "excerpt": "cf-filterv2-5d2e4a0.objdump.txt"
+  },
+  "filter_v3": {
+   "addr": "0x5d2f8a0",
+   "fde": "0x5d2f8a0..0x5d2f999",
+   "mangled": "_ZNK7rocksdb16CompactionFilter8FilterV3EiRKNS_5SliceENS0_9ValueTypeEPS2_PKSt6vectorINS_10WideColumnESaIS7_EEPNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPS6_ISt4pairISH_SH_ESaISK_EESI_",
+   "role": "value_type 3 (kWideColumnEntity) -> kKeep (0).  Else if slot 0xa8 (slot 21) != GOT canonical 0x64ed0b8 -> tail-call slot 21 with the same args.  Else the same mapping as FilterV2 (Filter for kValue, slot-20 delegate for kMergeOperand).",
+   "excerpt": "cf-filterv3-5d2f8a0.objdump.txt"
+  },
+  "destructors": {
+   "mo_d2": {
+    "addr": "0x6203b80",
+    "fde": "0x6203b80..0x6203c25",
+    "role": "Installs the TtlMergeOperator vtable, releases the shared_ptr at +0x28 via _M_release 0x5d350c0 if non-null, installs the base vtable 0x64d3420+0x10, destroys the vector<string> at +0x08 element-wise (stride 0x30, SSO check + _M_dispose via operator delete), frees the buffer.",
+    "excerpt": "mo-d2-6203b80.objdump.txt"
+   },
+   "mo_d0": {
+    "addr": "0x6203c30",
+    "fde": "0x6203c30..0x6203cd3",
+    "role": "Same as D2, plus operator delete(this, 0x38).",
+    "excerpt": "mo-d0-6203c30.objdump.txt"
+   },
+   "cf_d2": {
+    "addr": "0x62018f0",
+    "fde": "0x62018f0..0x6201995",
+    "role": "Same shape as the MO D2 for the CF layout.",
+    "excerpt": "cf-d2-62018f0.objdump.txt"
+   },
+   "cf_d0": {
+    "addr": "0x62019a0",
+    "fde": "0x62019a0..0x6201a43",
+    "role": "Same as CF D2, plus operator delete(this, 0x40).",
+    "excerpt": "cf-d0-62019a0.objdump.txt"
+   },
+   "cff_d2": {
+    "addr": "0x6203ad0",
+    "fde": "0x6203ad0..0x6203b75",
+    "role": "Same shape as the MO D2 for the CFF layout.",
+    "excerpt": "cff-d2-6203ad0.objdump.txt"
+   },
+   "cff_d0": {
+    "addr": "0x6203ce0",
+    "fde": "0x6203ce0..0x6203d83",
+    "role": "Same as CFF D2, plus operator delete(this, 0x40).",
+    "excerpt": "cff-d0-6203ce0.objdump.txt"
+   }
+  },
+  "merge_error_logger": {
+   "addr": "0x5fceda0",
+   "fde": "0x5fceda0..0x5fcee93",
+   "role": "Shared helper called with edi=3 (code), rsi=logger, rdx=message literal, rcx=source-file literal.  Exact C++ name open.",
+   "excerpt": "merge-error-logger-5fceda0.objdump.txt"
+  },
+  "slot19_fullmerge_witness": {
+   "addr": "0x61f4d60",
+   "role": "PutOperator's slot-19 body: reads the operand deque's _M_finish (rcx+0x30/0x38/0x48), assigns the last operand to *new_value via _M_assign and returns 1 -- last-operand-wins, i.e. Put semantics.  This is the behavioral witness that MO slot 19 is FullMerge: the other MergeOperator subclasses (MaxOperator, SortList, StringAppendTESTOperator, TtlMergeOperator) all hold the ret-0 default there, matching FullMerge's assert(false); return false; default.  Cited, not re-excerpted."
+  }
+ },
+ "status_abi": {
+  "note": "Status is 16 bytes; Status-returning methods take a hidden return pointer in rdi, `this` in rsi, first real arg in rdx.  GetCurrentTime call convention: (rdi=&Status out, rsi=clock, rdx=&int64 time).  Status code byte at +0; a non-null state pointer at +8 is delete[]'d inline.  PosixClock::GetCurrentTime 0x5fe2230 uses time(); on time()==-1 it builds an error Status, else it writes an empty Status (16 zero bytes) and the time, and returns rdi.  The canonical GetCurrentTime 0x5d4b100 is the SystemClockWrapper chain-walk (same 8-level pattern; PR #3902)."
+ },
+ "literals": [
+  {
+   "addr": "0x439667",
+   "value": "TtlMergeOperator"
+  },
+  {
+   "addr": "0x449896",
+   "value": "TtlCompactionFilterFactory"
+  },
+  {
+   "addr": "0x4363a4",
+   "value": "TtlCompactionFilter"
+  },
+  {
+   "addr": "0x962870",
+   "value": "utilities/ttl/db_ttl_impl.cc"
+  },
+  {
+   "addr": "0x969ca8",
+   "value": "[%s:36] Error: Could not remove timestamp from existing value."
+  },
+  {
+   "addr": "0x95aba0",
+   "value": "[%s:45] Error: Could not remove timestamp from operand value."
+  },
+  {
+   "addr": "0x95eb28",
+   "value": "[%s:86] Error: Could not get current time to be attached internally to the new value."
+  },
+  {
+   "addr": "0x9617d0",
+   "value": "[%s:108] Error: Could not remove timestamp from value."
+  },
+  {
+   "addr": "0x95bff8",
+   "value": "[%s:126] Error: Could not get current time to be attached internally to the new value."
+  },
+  {
+   "addr": "0x966878",
+   "value": "SystemClock required by TtlMergeOperator"
+  },
+  {
+   "addr": "0x959598",
+   "value": "UserMergeOperator required by TtlMergeOperator"
+  },
+  {
+   "addr": "0x95eaf8",
+   "value": "SystemClock required by TtlCompactionFilter"
+  },
+  {
+   "addr": "0x967120",
+   "value": "SystemClock required by TtlCompactionFilterFactory"
+  },
+  {
+   "addr": "0x4474d2",
+   "value": "basic_string::append"
+  }
+ ],
+ "movabs_names": [
+  {
+   "addr": "0x6202520",
+   "what": "MO IsInstanceOf legacy name",
+   "parts": [
+    "0x794220656772654d",
+    "0x4c545420"
+   ],
+   "value": "Merge By TTL"
+  },
+  {
+   "addr": "0x6202440",
+   "what": "CF IsInstanceOf legacy name",
+   "parts": [
+    "0x42206574656c6544",
+    "0x4c54542079422065"
+   ],
+   "value": "Delete By TTL"
+  }
+ ],
+ "cited_not_rederived": {
+  "base_prepare_0x6095e70": "Configurable::PrepareOptions (catalogue).",
+  "base_validate_0x6096790": "Configurable::ValidateOptions (catalogue).",
+  "clock_resolver_0x5fcf430": "9-byte stub; exact C++ name open.",
+  "validate_error_builder_0x61cf670": "Exact C++ name open.",
+  "vector_copy_0x5d36370": "std::vector helper (catalogue).",
+  "vector_destroy_0x5d36020": "std::vector helper (catalogue).",
+  "shared_ptr_release_0x5d350c0": "PR #4015.",
+  "canonical_get_current_time_0x5d4b100": "SystemClockWrapper chain-walk, PR #3902.",
+  "posix_clock_get_current_time_0x5fe2230": "PR #3902 (uses time()).",
+  "cf_ctor_c2_0x6202a10": "PR #4065.",
+  "mo_ctor_c1_0x6205560": "PR #4065.",
+  "cff_ctor_c2_0x6205790": "PR #4065.",
+  "put_operator_fullmerge_0x61f4d60": "Behavioral witness for MO slot 19; cited, not re-excerpted.",
+  "register_ttl_objects": "PR #4065 (construction and registration).",
+  "systemclock_wrapper_vtable": "PR #3902 (slot layout precedent)."
+ },
+ "open_unknowns": [
+  "The C++ names of vtable slots 17 (wrapped-object accessor) and 18 (short-name accessor) are open; both are pinned by behavior, cross-class census and callers (GetOptionsPtr calls slot 17, the default IsInstanceOf calls slot 18).",
+  "MO slot 19 is FullMerge by the PutOperator behavioral witness and the header declaration order; the catalogue does not name it.",
+  "MO slot 23 is AllowSingleOperand and slot 24 is ShouldMerge by header declaration order (both defaults return false in the published headers); the catalogue does not name them.",
+  "CF slot 20 is FilterMergeOperand, slot 23 PrepareBlobOutput, slot 24 IgnoreSnapshots (default true in 8.1.1, matching 9.5.2) and slot 25 IsStackedBlobDbInternalCompactionFilter by header declaration order; the catalogue does not name them.",
+  "CF slot 26 returns the constant 8; its C++ name is open.",
+  "CFF slot 19 takes an int and returns arg == 1; its C++ name is open.",
+  "The exact C++ names of 0x5fcf430 (clock resolver), 0x5fceda0 (merge-error logger) and 0x61cf670 (ValidateOptions error builder) are open.",
+  "The header declaration order differs across RocksDB versions (e.g. IgnoreSnapshots defaults false in the oldest header, true in 9.5.2), so slot identities above rest on the binary behavior plus the 8.1.1-era order, not on header order alone.",
+  "The +0x08 field of the MergeOperator and CompactionFilterFactory objects is recorded as a std::vector<std::string> by shape (PR #4065); only the CompactionFilter's is proven by its ctor unwind path."
+ ],
+ "model": {
+  "tool": "tools/ttl_runtime_methods_115.py",
+  "tests": "tests/test_ttl_runtime_methods_115.py",
+  "checks": 405
+ }
+}

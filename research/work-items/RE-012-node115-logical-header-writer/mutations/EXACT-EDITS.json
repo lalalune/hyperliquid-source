@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "baseline_lib_sha256": "dd43cdf62744109e9214ab36d49c0d3cdd879297537bb966a0b5684c0d765217",
+  "design_freeze_sha256": "62d74a758d9cd8ade061c7dbb04b03bc8b455c213ece5158ebea68a4f17e9c6c",
+  "qualification_rule": "Compilation success plus normal probe exit, complete canonical46 output rows and a value mismatch at the exact frozen witness. No process/compiler failure counted. Nine native-value and three host-policy faults are distinct claims.",
+  "variants": [
+    {
+      "id": "M01",
+      "fault": "rendered-byte equality erases name tag",
+      "witness": "N04",
+      "domain": "native-value",
+      "edits": [
+        {
+          "before": ".find(|group| group.name == name)",
+          "after": ".find(|group| fallback(group.name) == fallback(name))",
+          "count": 1
+        }
+      ],
+      "mutated_lib_sha256": "63f38f5f44edffe06bb6b703b1c198453c97b5c62eb7509d5e9a947055be16e9",
+      "patch_file": "M01.patch",
+      "patch_sha256": "1a6d7b9bf20ff1ca91aab238db828f095354fa092baa589c4d0e954a6584e65d"
+    },
+    {
+      "id": "M02",
+      "fault": "reverse primary group order",
+      "witness": "A07",
+      "domain": "native-value",
+      "edits": [
+        {
+          "before": "for group in primary {",
+          "after": "for group in primary.iter().rev() {",
+          "count": 2
+        }
+      ],
+      "mutated_lib_sha256": "322154fd5dae2dfb47cce282a26062f9131b30b0e0649ea49bcbadfa23c0b88d",
+      "patch_file": "M02.patch",
+      "patch_sha256": "b7009dd888e3dc0cd49fb8b314880e90d13ec68f69d075153d6a8b202a0ee884"
+    },
+    {
+      "id": "M03",
+      "fault": "reuse first spelling for every occurrence",
+      "witness": "S02",
+      "domain": "native-value",
+      "edits": [
+        {
+          "before": "spelling: Option<&'a [&'a [u8]]>, index: usize)",
+          "after": "spelling: Option<&'a [&'a [u8]]>, _index: usize)",
+          "count": 1
+        },
+        {
+          "before": "values.get(index)",
+          "after": "values.first()",
+          "count": 1
+        }
+      ],
+      "mutated_lib_sha256": "a63fd5a78774ea3f6de02e9abbb4ffc344ba56276ea0f5a2df4d0f94fe530144",
+      "patch_file": "M03.patch",
+      "patch_sha256": "9c5a26aadd58d2f513b9c1f9c0b341114d69483ddf051b67d7cce74dd9c8913a"
+    },
+    {
+      "id": "M04",
+      "fault": "empty present spelling incorrectly falls back",
+      "witness": "S04",
+      "domain": "native-value",
+      "edits": [
+        {
+          "before": "Some(value) => (*value, false),",
+          "after": "Some(value) if !value.is_empty() => (*value, false),",
+          "count": 1
+        },
+        {
+          "before": "None => (fallback(name), true),",
+          "after": "_ => (fallback(name), true),",
+          "count": 1
+        }
+      ],
+      "mutated_lib_sha256": "931b90823e9509dfe6fb9695f29f420df14eb398ad4de0e87162771893fd8bbf",
+      "patch_file": "M04.patch",
+      "patch_sha256": "4716baa1c0bbc16ec73e190d30c2791792b388427815c2c04b0a9d766a2c9180"
+    },
+    {
+      "id": "M05",
+      "fault": "title case supplied spelling too",
+      "witness": "T04",
+      "domain": "native-value",
+      "edits": [
+        {
+          "before": "let (name, is_fallback) = chosen",
+          "after": "let (name, _is_fallback) = chosen",
+          "count": 1
+        },
+        {
+          "before": "capitalize && is_fallback && previous",
+          "after": "capitalize && previous",
+          "count": 1
+        }
+      ],
+      "mutated_lib_sha256": "aadc4018c07dc792e25ad926ae58610ab18920e9aa5fe148f44e63c1af9f6dd8",
+      "patch_file": "M05.patch",
+      "patch_sha256": "e41357cfbae0e6545c61430cdbd2234633ec3210aa235e83cb6bd1268726d647"
+    },
+    {
+      "id": "M06",
+      "fault": "uppercase every lowercase fallback byte",
+      "witness": "T02",
+      "domain": "native-value",
+      "edits": [
+        {
+          "before": "            let mut previous = b'-';\n",
+          "after": "",
+          "count": 1
+        },
+        {
+          "before": "capitalize && is_fallback && previous == b'-' && byte.is_ascii_lowercase()",
+          "after": "capitalize && is_fallback && byte.is_ascii_lowercase()",
+          "count": 1
+        },
+        {
+          "before": "                previous = emitted;\n",
+          "after": "",
+          "count": 1
+        }
+      ],
+      "mutated_lib_sha256": "ecff3babf9a135139c480ee2f340d9f7f2ffb299a1763cb43783f2b0ec4520ea",
+      "patch_file": "M06.patch",
+      "patch_sha256": "ddfcf04764173c9d3dd4e1bf9ea32d7ce5953c85a6da32d8b3b83e725a556e4a"
+    },
+    {
+      "id": "M07",
+      "fault": "add space for empty values",
+      "witness": "A06",
+      "domain": "native-value",
+      "edits": [
+        {
+          "before": "required.checked_add(3)",
+          "after": "required.checked_add(4)",
+          "count": 1
+        },
+        {
+          "before": "if !value.is_empty() {",
+          "after": "if true {",
+          "count": 1
+        }
+      ],
+      "mutated_lib_sha256": "ffddd19687c9de8c88f1da0d7b24ac7d55c56f7ee5245e62b9bc5aeedd51cb1e",
+      "patch_file": "M07.patch",
+      "patch_sha256": "40721bbcfee65fa91a2c7a15a4ebfd4fa81fcc5d253d1b17f242746b68c04a22"
+    },
+    {
+      "id": "M08",
+      "fault": "drop empty value occurrences",
+      "witness": "A08",
+      "domain": "native-value",
+      "edits": [
+        {
+          "before": "for (index, value) in group.values.iter().enumerate() {",
+          "after": "for (index, value) in group.values.iter().enumerate() {\n            if value.is_empty() { continue; }",
+          "count": 2
+        }
+      ],
+      "mutated_lib_sha256": "f8070a69ae74cd53676837f480822e8057d047dbc2ce3af89e74dad9489edef6",
+      "patch_file": "M08.patch",
+      "patch_sha256": "26d08ba76d0189803029717436770cfabe04c71b1834cea9d968abdd634dd4ad"
+    },
+    {
+      "id": "M09",
+      "fault": "overwrite retained output prefix",
+      "witness": "A05",
+      "domain": "native-value",
+      "edits": [
+        {
+          "before": "let mut required = used;",
+          "after": "let mut required = 0usize;",
+          "count": 1
+        },
+        {
+          "before": "let mut position = used;",
+          "after": "let mut position = 0usize;",
+          "count": 1
+        }
+      ],
+      "mutated_lib_sha256": "652697be8675461b80dd1d508571b688631373540c2762c91be0f200c1e2f736",
+      "patch_file": "M09.patch",
+      "patch_sha256": "28c28941049cc5d3d9bae4836f572a9867efa30ea5f75d9e077331b3e26daa8b"
+    },
+    {
+      "id": "M10",
+      "fault": "refuse exact output capacity",
+      "witness": "B01",
+      "domain": "host-policy",
+      "edits": [
+        {
+          "before": "if required > output.len() {",
+          "after": "if required >= output.len() {",
+          "count": 1
+        }
+      ],
+      "mutated_lib_sha256": "dbc3e2bae7f874a9b6d74fbbdf8be8041ddd9214b57edcca62de92e41ec516c6",
+      "patch_file": "M10.patch",
+      "patch_sha256": "f4e580013709802883b76c2340257fdaf4950616a3fab71472cfff31434e454e"
+    },
+    {
+      "id": "M11",
+      "fault": "admit 65536 groups before duplicate checks",
+      "witness": "C01",
+      "domain": "host-policy",
+      "edits": [
+        {
+          "before": "groups.len() > 65_535",
+          "after": "groups.len() > 65_536",
+          "count": 1
+        }
+      ],
+      "mutated_lib_sha256": "ec6318160fe467dab42b94d561597370331a7b176bc538199566cd87866ee87d",
+      "patch_file": "M11.patch",
+      "patch_sha256": "f422ecd4ee620152834ac929e644d02e357b60d0fcc81e69ac1326b4900430e5"
+    },
+    {
+      "id": "M12",
+      "fault": "skip unused spelling admission on empty primary",
+      "witness": "R02",
+      "domain": "host-policy",
+      "edits": [
+        {
+          "before": "    let maps = [(Map::Primary, primary), (Map::Spelling, spelling)];",
+          "after": "    if primary.is_empty() { return Ok(used); }\n    let maps = [(Map::Primary, primary), (Map::Spelling, spelling)];",
+          "count": 1
+        }
+      ],
+      "mutated_lib_sha256": "133fceab55ee1248e3b8ac2e8c01852c017778069ac17acb6c4e1dddbb1985d3",
+      "patch_file": "M12.patch",
+      "patch_sha256": "0d41778da5777627989688f6117146c1245320da3bc0f2646ca17f1ac47e2a7f"
+    }
+  ]
+}

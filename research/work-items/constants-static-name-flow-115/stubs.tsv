@@ -1,0 +1,16 @@
+kind	name	target	contract
+slot	free	0x64df4a0	deallocate: records (pointer, capacity, 0) in call order
+slot	unwrap	0x64df6a0	Result::unwrap panic; the Location/vtable pair (rcx, r8) names the site
+slot	expect	0x64df520	second panic entry, same recording
+slot	resume	0x64df4c0	unwind landing pad call, never reached on a normal return
+slot	format	0x64df6e8	path formatter: writes {capacity, pointer, length}; entry argument recorded
+slot	read	0x64e09c0	file read: writes {capacity or 1<<63, pointer or error, length}
+slot	path	0x64e23e0	aws_name path builder 0x1772fa0: writes {capacity, pointer, length}
+slot	string	0x64e08f8	JSON string parser: writes {tag, pointer, length}; tag 2 is an error
+slot	classify	0x64e2400	resolves to the plain classifier 0x1775500 and runs real
+call	error_new	0x1775ee0	serde error constructor: records the code word, returns a 0x28 byte box
+call	document	0x17771b0	document reader: writes the tag byte, the value byte or an error box
+call	drop_io	0x1778770	io::Error drop: records its argument
+call	unknown_variant	0x1777fd0	unknown-variant error: records (pointer, length, table, count)
+call	invalid_type	0x1776910	invalid-type error: records the expectation pointer
+call	position	0x1778060	attaches the reader position to an error

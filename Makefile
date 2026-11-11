@@ -1,5 +1,5 @@
 PYTHON ?= python3
-.PHONY: setup pull fetch verify test reproduce doctor index fde-index visor-index catalogue catalogue-check provenance rea-install rea-doctor rea-mcp rea-smoke rea-mcp-check rea-native-smoke
+.PHONY: setup pull fetch verify test reproduce doctor index fde-index visor-index catalogue catalogue-check provenance rea-install rea-doctor rea-mcp rea-smoke rea-mcp-check rea-native-smoke question-ownership-refresh
 setup:
 	./scripts/setup.sh
 pull:
@@ -30,6 +30,8 @@ catalogue:
 	$(PYTHON) tools/catalogue.py
 catalogue-check:
 	$(PYTHON) tools/catalogue.py --check
+question-ownership-refresh:
+	$(PYTHON) tools/question_registry.py --refresh-ownership
 rea-install:
 	$(PYTHON) tools/rea.py install
 rea-doctor:

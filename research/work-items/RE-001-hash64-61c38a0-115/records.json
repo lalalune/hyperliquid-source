@@ -1,0 +1,112 @@
+{
+ "arguments": {
+  "data": "rdi; pointer to the input bytes. Read on every non-empty arm, never written; the read window of each arm stays inside [data, data+length) (see length_arms)",
+  "length": "rsi; the input length in bytes (size_t). It drives the dispatch (compares against 0x10, 8, 0x80, 0xf0 and the stripe gates 0x20/0x40/0x60), the end-relative stripe addresses, and is folded into the result on the 4..8 arm (added after the 0x9e3779b1 multiply), the 9..16 arm (added to the accumulator) and the 17..128 arms (the accumulator starts at length * PRIME64_1)",
+  "seed": "none: this entry takes no seed register. rdx is never read on the arms the body finishes; on the 129..240 exit it is zeroed for the delegate, on the 241+ exit it is forwarded untouched"
+ },
+ "census": {
+  "direct_calls": [
+   "0x5d3c20c",
+   "0x5d3c5e7",
+   "0x5d3e68e",
+   "0x5d3eef2",
+   "0x5f099e7",
+   "0x6027f3e",
+   "0x602c520",
+   "0x605f9cf",
+   "0x605fceb",
+   "0x60603e4",
+   "0x6060680",
+   "0x6060b61",
+   "0x612d61c",
+   "0x612d722",
+   "0x612db29",
+   "0x612ef8a",
+   "0x613b525",
+   "0x61bc013"
+  ],
+  "direct_calls_note": "18 e8 call sites in 17 distinct caller FDEs; every site was confirmed as a real call instruction on an instruction boundary by linear disassembly of its containing FDE from the FDE start (capstone). Per-site caller FDEs are in callers.tsv. One site is documented by the citing packet: 0x5f099e7 in FDE 0x5f099b0..0x5f09a42 (RE-001-hash-bucket-projection-115), arguments key pointer and key length",
+  "qword_hits_file_offsets": [],
+  "relative_slots": [],
+  "tail_jumps": [
+   "0x61c3bcb"
+  ],
+  "tail_jumps_note": "0x61c3bcb sits in a 16-byte adapter stub (FDE 0x61c3bc0..0x61c3bd0) immediately after this window: the stub loads rsi = [rdi+8] and rdi = [rdi] and jumps here, so record-shaped callers reach the body through it. Confirmed as a real jmp instruction by linear disassembly of the stub FDE (capstone). No fall-through entry is possible: the three bytes before the window (0x61c389d..0x61c38a0) are int3 padding at the end of the parent hash callee's FDE, and seven int3 bytes (0x61c3bb9..0x61c3bc0) separate the window from the stub"
+ },
+ "component": "Hash64 entry (whole function; lengths 0..128 inline, 129+ delegated)",
+ "entry_paths": [
+  {
+   "kind": "direct call (e8 rel32), 18 sites in 17 caller FDEs",
+   "note": "the general entry; the callers pass (data, length) in rdi/rsi. Full site list with caller FDEs in callers.tsv"
+  },
+  {
+   "gate": "the stub at 0x61c3bc0 loads rsi = [rdi+8] (the record's length qword) and rdi = [rdi] (its pointer qword), then jumps at 0x61c3bcb",
+   "kind": "tail jump (adapter stub for (pointer, length) record arguments)",
+   "site": "0x61c3bcb",
+   "source_fde": "0x61c3bc0..0x61c3bd0"
+  }
+ ],
+ "final_mix": "avalanche(x): y = x ^ (x >> 37); y = y * 0x165667b19e3779f9 (mod 2^64); result = y ^ (y >> 32). Every finished arm ends with exactly one avalanche. The 9..16 arm carries it inline at 0x61c38e5..0x61c3907; the 1..3 and 4..8 arms jump into the middle of that same instruction sequence (at 0x61c3aec for the final multiply of the 4..8 arm, at 0x61c38ef for both), and the 17..128 arms carry their own inline copy at 0x61c3a5e..0x61c3a80",
+ "length_arms": {
+  "0": "no read at all: the constant 0x5342c3010fe1dd04 is loaded at 0x61c3aa6, before the test that branches to the bare ret at 0x61c3b58, and returned as-is",
+  "1..3": "combined (32-bit) = data[0] | data[len >> 1] << 8 | data[len - 1] << 16 | len << 24; result = avalanche((combined ^ 0x396cfeb8) * PRIME64_1). The xor runs on edx, so the keyed value is zero-extended before the 64-bit multiply",
+  "129..240": "not finished here: edx is zeroed at 0x61c3a95 and the body tail-jumps at 0x61c3a97 to the delegate at 0x61c3230 with (data, length, seed=0). By contract only (the delegate's body is pinned in RE-001-hash-delegate-c3230-115); the differential checks the jump target and the zeroed seed from this side",
+  "17..32": "acc = len * PRIME64_1 + fold of the first pair (data + 0, secret 0) + fold of the last pair (data + len - 16, secret 16); result = avalanche(acc)",
+  "241+": "not finished here: the body tail-jumps at 0x61c3b50 to the seedless long body at 0x61c2890 with (data, length) unchanged and rdx untouched. By contract only (that body is the seedless target cited in RE-001-hash-long-seed-61c2cb0-115); the differential checks the jump target and the untouched registers from this side",
+  "33..64": "the 17..32 form plus two stripe folds added before the first/last pairs: (data + 16, secret 32) and (data + len - 32, secret 48)",
+  "4..8": "input = rd32(data) | rd32(data + len - 4) << 32; h = input ^ SECRET[0]; h ^= h >> 51; h *= 0x9e3779b1 (32-bit prime, zero-extended into a 64-bit imul); h += len; h ^= h >> 47; result = avalanche(h * PRIME64_2)",
+  "65..96": "the 33..64 form plus, executed before it: (data + 32, secret 64) and (data + len - 48, secret 80)",
+  "9..16": "lo = SECRET[0] ^ rd64(data), hi = SECRET[8] ^ rd64(data + len - 8); result = avalanche(lo + len + hi + fold(lo, hi))",
+  "97..128": "the 65..96 form plus, executed before it: (data + 48, secret 96) and (data + len - 64, secret 112)"
+ },
+ "mix_primitive": "a lane pair reads two consecutive qwords of the input; x = K1 ^ first, y = K2 ^ second (no seed term: the constants are used exactly as baked in); the pair contributes fold(x, y) = (x*y mod 2^64) ^ (x*y >> 64), the low and high halves of the 128-bit product xored. K1/K2 are consecutive qwords of the 192-byte secret table at 0x97df00 at the pair's stated offset",
+ "model": "tools/hash64_61c38a0_115.py",
+ "node": 115,
+ "primes": {
+  "p1": "0x9e3779b185ebca87",
+  "p2": "0xc2b2ae3d27d4eb4f",
+  "p3": "0x165667b19e3779f9 (the avalanche multiplier)",
+  "p32_1": "0x9e3779b1 (the 4..8 arm's multiplier, zero-extended)"
+ },
+ "return_value": "rax: the 64-bit hash of the input, for lengths 0..128. Lengths 129..240 and 241+ never return from this body (tail jumps)",
+ "secret_table": {
+  "note": "the 192-byte table at VA 0x97df00 in .rodata, the same table the sibling hash bodies cite. This body never reads it from memory: every lane constant is a movabs immediate, and each immediate was verified entry by entry to equal the table qword at the offset the arm names (the test file pins the offsets used). The 1..3 arm's xor immediate 0x396cfeb8 is the low 32 bits of qword 0",
+  "offsets_used": {
+   "first_pair": "0 (qwords at 0 and 8)",
+   "last_pair": "16 (qwords at 16 and 24)",
+   "stripe_data+16": "32",
+   "stripe_data+32": "64",
+   "stripe_data+48": "96",
+   "stripe_end-32": "48",
+   "stripe_end-48": "80",
+   "stripe_end-64": "112"
+  },
+  "va": "0x97df00"
+ },
+ "semantics": {
+  "accumulator_init": "the 17..128 arms start acc = len * 0x9e3779b185ebca87 (imul at 0x61c3929); the 9..16 arm instead folds len into its single-pair accumulator directly (add at 0x61c38d6)",
+  "dispatch": "cmp 0x10 at entry sends lengths above 16 to the banded arms; cmp 8 sends 9..16 to the inline pair arm at 0x61c38b4 and 0..8 to the small arms at 0x61c3aa0 (0..3) and 0x61c3b00 (4..8); in the banded path, cmp 0x80 sends 129+ to the delegation exits at 0x61c3a88, and the stripe gates cmp 0x20 / 0x40 / 0x60 add one stripe block per band, executed longest-band first (the 97..128 block at 0x61c3b60 jumps back to 0x61c394b)",
+  "shared_tail": "the 17..128 arms share one tail (0x61c39f9..0x61c3a80): it computes the first pair's fold and the last pair's fold, adds both to the stripe accumulator in rcx, and avalanches. The saved registers r15, r14, r12 pushed on entry to the banded path are popped inside this tail (0x61c3a06, 0x61c3a16, 0x61c3a1b), interleaved with the first pair's setup"
+ },
+ "side_effects": "none: no stores at all, no calls, and no reads outside [data, data+length) on any finished arm (the empty input reads nothing); the only stack traffic is the push/pop of r15, r14, r12 on the 17..128 arms, balanced before ret; callee-saved registers rbx/rbp/r12-r15 preserved (rbx, rbp, r13 are never touched)",
+ "task": "RE-001",
+ "tests": "tests/test_hash64_61c38a0_115.py",
+ "unknowns": [
+  "the two delegation targets' bodies: 0x61c3230 (lengths 129..240, entered with seed 0) and 0x61c2890 (lengths 241+) are cited by contract only here, as the citing packets cite them; their semantics are pinned by their own packets (RE-001-hash-delegate-c3230-115; the seedless body is the contract target named in RE-001-hash-long-seed-61c2cb0-115)",
+  "the adapter stub's own body (FDE 0x61c3bc0..0x61c3bd0): only its two loads and its jump are claimed, as this window's second entry path; who calls the stub is not read",
+  "the containing functions' identities for the direct call sites other than 0x5f099e7: only the sites and their FDEs are recorded (callers.tsv)",
+  "the exact source spelling of the function; the RE-002 vendor census registers this window as librocksdb-sys 0.11.0+8.1.1 rocksdb::Hash64(const char*, size_t) (_ZN7rocksdb6Hash64EPKcm, window id node115-vendor-61c38a0) \u2014 that identity is the census's claim and is consistent with everything pinned here (a two-argument hash over the family's secret table with length-banded arms), but this packet pins the target body's own semantics and neither needs nor re-claims the identity",
+  "the source-level reason the empty input returns 0x5342c3010fe1dd04: the constant is pinned as written (loaded before the zero test, returned untouched), its derivation is not claimed"
+ ],
+ "window": {
+  "artifact": "work/hl-node-115.bin",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "cie_offset": "0",
+  "end": "0x61c3bb9",
+  "fde_length": "0x38",
+  "fde_offset": "0x376e1c",
+  "provenance_path": "artifacts/node/115/hl-node",
+  "size_bytes": 793,
+  "start": "0x61c38a0"
+ }
+}
