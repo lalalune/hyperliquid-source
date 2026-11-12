@@ -147,3 +147,7 @@ bytes. This provides a source-family counterpart for that example while its
 exact historical producer, unique release, outside references and the
 first-party Rust frame-pointer setting remain unresolved. The registered
 comparison is dependency evidence and changes no acceptance gate.
+
+## Direct caller of the selected R11-CFA interval
+
+The [R11 direct-caller addendum](r11-fixed-hex-caller/README.md) retains two native-qualified direct calls from interval `0x250ecd0..0x250ee44` to `0x298af40..0x298b04d` and the surrounding `0x20000` stride instructions. It records static incoming context; the original source/type owner remains unresolved. It requests no implementation-byte registration or component gate.

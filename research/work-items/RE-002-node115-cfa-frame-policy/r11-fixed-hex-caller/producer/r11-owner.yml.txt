@@ -1,0 +1,22 @@
+name: Node115 bounded R11 source-ownership references
+on:
+  push:
+    branches: [research-validation/node115-r11-owner-20261110]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Authenticate capture and inspect bounded references offline
+        run: bash payload/bootstrap.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: node115-r11-owner-receipts
+          path: probe-receipts/
+          retention-days: 7
