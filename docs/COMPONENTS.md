@@ -50,7 +50,7 @@ TCP framing, LZ4, channels, rate limits and reconnects.
 Votes, rounds, quorum certificates, validator sets and timers.
 
 - Target: node115.
-- Implementation paths: `src/node115-weighted-fastfold`, `src/node115-tree-next`, `src/node115-rpc-flat-materializer`, `src/node115-stake-predicate`, `src/node115-adjacent-last`, `src/node115-indirect-triplet-insert`.
+- Implementation paths: `src/node115-weighted-fastfold`, `src/node115-tree-next`, `src/node115-rpc-flat-materializer`, `src/node115-stake-predicate`, `src/node115-adjacent-last`, `src/node115-indirect-triplet-insert`, `src/node115-execution-history-selection`.
 - Observed diagnostic paths: 17.
 - First task: Map signed wire types and quorum arithmetic; validate invalid signatures and timeout transitions.
 
