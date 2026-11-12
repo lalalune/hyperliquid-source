@@ -35,8 +35,9 @@ node retains its upstream rights. No source is copied or inferred from a rebuild
 
 ## Reproduce
 
+Run from the repository root:
+
 ```bash
-cd /home/sypherwork/slop-work/hyperliquid-source
 python3 research/work-items/RE-002-node115-build-plan/verify.py
 python3 research/work-items/RE-002-node115-build-plan/verify.py --control
 ```
@@ -166,4 +167,4 @@ image must set, not that any image has matched.
 
 Next question: for one bounded function that this release's provenance record
 already binds, does a rebuild at the plan's settings reproduce its bytes, and
-which of the nine unresolved inputs changes the result first?
+which of the ten unresolved inputs changes the result first?
