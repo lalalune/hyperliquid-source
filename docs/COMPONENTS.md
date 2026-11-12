@@ -100,7 +100,7 @@ Agent-created handler splits and central dispatch.
 Trading orchestration, block hooks, deployment and ledger updates.
 
 - Target: node115.
-- Implementation paths: `src/node115-bole-entry-prefix`, `src/node115-user-admission-prefix`.
+- Implementation paths: `src/node115-bole-entry-prefix`, `src/node115-user-admission-prefix`, `src/node115-modify-window-admission`.
 - Observed diagnostic paths: 15.
 - First task: Trace order placement through risk checks, matching, fees and ledger writes.
 
