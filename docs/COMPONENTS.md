@@ -220,7 +220,7 @@ Read-only info requests and position responses.
 JSON-RPC routing, EVM reads and transaction forwarding.
 
 - Target: node115.
-- Implementation paths: `src/node115-storage-key-builder`.
+- Implementation paths: `src/node115-storage-key-builder`, `src/node115-block-number-text`.
 - Observed diagnostic paths: 6.
 - First task: Map method dispatch and wire errors against the captured release.
 
