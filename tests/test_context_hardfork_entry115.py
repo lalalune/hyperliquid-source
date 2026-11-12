@@ -3,6 +3,7 @@ import importlib.util
 import json
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKET = ROOT / 'research/work-items/RE-008-context-hardfork-entry-115'
@@ -20,6 +21,16 @@ class ContextHardforkEntry115(unittest.TestCase):
     def test_real_image_replay(self):
         self.assertEqual(m.replay(self.data), self.expected)
         self.assertEqual(len(m.excerpt_bytes()), 511)
+
+    def test_continuation_whitespace_is_not_evidence(self):
+        text = (PACKET / 'entry.asm').read_text()
+        compact = '\n'.join(line.rstrip() for line in text.splitlines()) + '\n'
+        padded = '\n'.join(line + ' ' for line in compact.splitlines()) + '\n'
+        with patch.object(Path, 'read_text', return_value=compact):
+            expected = m.excerpt_bytes()
+        with patch.object(Path, 'read_text', return_value=padded):
+            self.assertEqual(m.excerpt_bytes(), expected)
+        self.assertEqual(len(expected), 511)
 
     def test_fresh_marker_table_denominator(self):
         groups = self.expected['table']['groups']

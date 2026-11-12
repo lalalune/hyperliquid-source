@@ -1,6 +1,6 @@
 # RE-008 / RE-001 / RE-005: Context hardfork decoder entry (#115)
 
-**Partial, unvalidated research. Not ready for publication or a gate.**
+**Bounded static observations with passing local scoped proof; independent validation pending. No gate requested.**
 
 Question: what are the first native dispatch and failure boundaries of the Context `hardfork` child at `0x32b03e0`? Target, pinned source, commands, actual tool versions, measured discovery time and remaining acceptance work are in `progress.json`. Evidence is static; the captured node was never executed. Imported disassembly retains the target artifact rights; no Rust reconstruction or licensing of the binary is claimed.
 
@@ -12,12 +12,8 @@ Integrated `RE-009-abci-binary-context-115` owns the Context map/sequence calls,
 - At `0x32b03f4..0x32b0402`, the old input byte at `+0x20` is read, the field is set to 1, and old value 1 selects fresh-byte fetching. The old byte at `+0x21` is also read. Exact field types remain unknown.
 - Fresh-byte fetching uses pointer `+0x10` and remaining count `+0x18`, decrementing count and advancing pointer. A zero count takes `0x32b042b`, stores byte 0 to output, then jumps to `0x32b0f6f`. That continuation has not been inspected; no complete return/error semantics are claimed.
 - Fresh negative-byte comparisons route compact map-shaped markers to `0x32b04dc`, sequence-shaped markers to `0x32b0d3f`, and string-shaped markers to `0x32b0ec8`. Names are MessagePack interpretations; only selected route instructions are observed, not object validity or acceptance.
-- Old state other than 1 reaches the signed-relative table dispatch at `0x32b0462..0x32b0474`, table VA `0x718010`. Entries and reachable state domain are not yet validated.
+- Old state other than 1 reaches the signed-relative table dispatch at `0x32b0462..0x32b0474`, table VA `0x718010`. The retained 225-entry data window is replayed below; complete table extent and reachable cached-state domain remain unknown.
 - The selected fallback preparation reaches indirect call `0x32b0486` through slot `0x64e3770`, then jumps to `0x32b14bd`. The helper and continuation are boundaries, not proven error/default behavior.
-
-## Remaining work
-
-Resolve the selected table, relocation and FDE-header joins with real-image proof and corruption controls. No new native excerpt is permitted by this bound. Root checks and independent validation remain unrun. No full hardfork decoder, consensus transition, source equivalence, complete helper closure, progress gate, hosted CI, container or runtime result is claimed.
 
 ## Data-only continuation and replay
 
@@ -66,10 +62,54 @@ The retained native sample remains one candidate and one 511-byte excerpt.
 No full native decoding, Rust implementation, build equivalence, hosted CI,
 container result, RE-008 dependency completion or component gate is requested.
 
-The initial 'remaining work' list above describes the earlier partial snapshot;
-data/FDE/relocation replay is now implemented, while cached-state reachability,
-helper semantics and complete decoder behavior remain unknown. Root checks and
-independent validation remain unrun. Concrete component-catalogue ID and final
-packet review are still required before publication. Next native research, if
-separately selected after this bounded task, should identify the cached-state
-constructor/invariants rather than assume all byte values can reach this table.
+## Evidence record and coordinate provenance
+
+- Component ID: `abci` (Block execution and state), an allocation inferred from
+  the integrated Context caller packet, not complete function ownership.
+- Task: bounded entry-coordinate subquestion supporting RE-008, with RE-001 /
+  RE-005 static mapping only. No transition, signature or dependency completion.
+- Source commit: `a8616af9432b8d8517b2af677880e117b7c28ef3`.
+- Reference: integrated `RE-009-abci-binary-context-115` at that source commit;
+  no inferred reference source copied and no external source revision assumed.
+- Claim status: instruction, unwind and relocation joins are observations;
+  MessagePack marker labels and component allocation are interpretations;
+  helper semantics, cached-state invariants and full decoder behavior unresolved.
+- Scope: one target, one candidate, one aligned 511-byte native excerpt and a
+  separately bounded 900-byte data window. No further native excerpt was taken.
+
+GNU readelf's `fde.txt` FDE/CIE columns are section-relative offsets, not ELF
+VAs. `coordinate-replay.json` records the independently read ELF section base:
+`.eh_frame` VA/file offset `0xca6ed8`; FDE offset `0x533ec8` maps to
+`0x11dada0`; CIE offset `0x39672c` maps to `0x103d604`. This resolves the apparent
+CIE-coordinate difference without treating either coordinate system as runtime
+rebased addresses. The replay binds the complete selected CIE encoding bytes;
+it does not interpret every augmentation operand or establish personality-helper
+semantics. The historical readelf grep arguments were not retained; no exact
+historical invocation is invented. `progress.json` records that limitation.
+
+## Implementation and comparison
+
+The independently authored stdlib Python replay is a static comparator, not a
+Rust decoder. No Cargo build, source/target compilation comparison, two-build
+result, runtime oracle or normalization mask is implemented or claimed.
+`replay-result.json` records the actual image replay: 511/511 retained instruction
+bytes, 225/225 bounded data entries, and 2/2 selected helper relocation records.
+The 13/32 fallback-route count is restricted to fresh markers c0..df; neither
+225 entries nor all possible cached states is a validated semantic denominator.
+The FDE range is 5194 bytes; only the retained 511-byte prefix was disassembled.
+
+## Results, limitations and next question
+
+`scoped.txt` records the local nine-test result, including six image-corruption
+controls. Those controls test the comparator, not captured decoder execution.
+Root checks and independent validation have separate status in `progress.json`;
+no hosted CI or container success is claimed. Root MIT applies to independently
+authored tooling/documentation, not imported target bytes or disassembly.
+No progress/component/byte-coverage gate or whole-function equivalence is sought.
+Next native question, if separately selected: find the cached-state constructor
+and invariants rather than assuming all byte values can reach the table.
+
+The replay accepts GNU continuation lines with or without trailing whitespace.
+An observed noncontiguous-excerpt failure after whitespace cleanup motivated
+that local parser correction; the regression compares both renderings and the
+real-image replay still authenticates every retained instruction byte.

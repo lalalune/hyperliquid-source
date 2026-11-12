@@ -20,7 +20,7 @@ BASE = 'a8616af9432b8d8517b2af677880e117b7c28ef3'
 def excerpt_bytes():
     rows = []
     for line in (PACKET / 'entry.asm').read_text().splitlines():
-        match = re.match(r'^\s*([0-9a-f]+):\s+((?:[0-9a-f]{2}\s+)+)', line)
+        match = re.match(r'^\s*([0-9a-f]+):\s+((?:[0-9a-f]{2}(?:\s+|$))+)', line)
         if match:
             rows.append((int(match[1], 16), bytes.fromhex(match[2])))
     pos = 0x32b03e0
