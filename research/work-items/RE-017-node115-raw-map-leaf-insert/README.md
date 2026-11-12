@@ -8,6 +8,6 @@ The raw-map insertion helper `0x51ef9a0` calls `0x4c3f280` for a non-null descri
 * At i < n, `0x4c3f2f5..0x4c3f329` makes an indirect move call over `8*(n-i)` bytes from key slot i to slot i+1, then writes the new key at i. `0x4c3f32e..0x4c3f355` similarly requests a move over `12*(n-i)` bytes for the value slots.
 * `0x4c3f36b..0x4c3f383` writes the supplied 12 bytes into value slot i and stores count n+1 at node +0xe6.
 
-The exact behavior of the indirect memory-move slot, full-node split, allocation failure, malformed descriptor, and runtime reachability are not asserted. The separately reported absent-key tree search establishes how the insertion index is supplied; these observations do not establish complete tree equivalence.
+The indirect move calls use slot `0x64df568`, which the pinned ELF dynamic relocation table identifies as `memmove@GLIBC_2.2.5` (`R_X86_64_GLOB_DAT`). This identifies the imported symbol, not a runtime binding or behavior under malformed pointers. Full-node split, allocation failure, malformed descriptor, and runtime reachability remain outside scope. The separately reported absent-key tree search establishes how the insertion index is supplied; these observations do not establish complete tree equivalence.
 
 Reproduction: `python3 research/work-items/RE-017-node115-raw-map-leaf-insert/verify.py` checks the whole-file target digest, instruction and call anchors, and rejects mutated anchors without target execution. `windows.txt` was generated with Apple `objdump -d --x86-asm-syntax=intel`.
