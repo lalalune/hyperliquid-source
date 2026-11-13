@@ -1,0 +1,321 @@
+{
+ "artifact": "node #115",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": [
+  "RE-002-node115-rocksdb-writable-file-writer-append-115 (PR #6041): reconstructs WritableFileWriter::Append 0x6054680, which calls this routine three times (its flush-if-needed arm at 0x6054b5d and its two write loops at 0x6054ef4 and 0x6054fa1) and took Flush as an input oracle. This packet supersedes that oracle with the full body model; it is the direct follow-up the #6041 entry left open.",
+  "RE-002-node115-rocksdb-log-writer-emit-physical-record-115 (open, PR #6012): reconstructs log::Writer::EmitPhysicalRecord 0x5f03b80, which calls Append (which in turn calls Flush) and takes its status as the emit result.",
+  "RE-002-node115-vendor-census: Flush and Flush.cold are BOTH census-bound (body hashes match target_body_sha256 exactly; source hashes reproduced by zeroing the recorded relocations: Flush 49 relocations, kinds 2/4/42; .cold 12 relocations, kind 4). The RangeSync member has NO vendor census record: body hash only, per the #5992 no-census convention.",
+  "facebook/rocksdb v8.1.1, read live this cycle: a 2019 RocksDB mirror (GitLab cracking_rocksdb, commit 876c2dbf) confirms the Flush skeleton step for step -- the buf_-non-empty write dispatch with the pending_sync_ gate on the direct arm, the plain file_->Flush() call, and the bytes_per_sync block with the 1 MiB not-synced range, the 4 KiB align-down, and RangeSync(last_sync_size_, offset_sync_to - last_sync_size_) plus last_sync_size_ = offset_sync_to. The mirror PREDATES the binary's version: it has no IOOptions, no priority arguments, no seen_error_/checksum members, no listener notifications inside Flush, and a 3-line RangeSync wrapper -- so the binary's seen-error gates, IOOptions builds, DecideRateLimiterPriority, listener events, timer guard and member-RangeSync body are pinned from the binary alone, NOT from that mirror; the mirror is evidence for the skeleton only, and the version gap is recorded, not hidden. FileOperationType values (kFlush = 4, kRangeSync = 7) are confirmed by the RocksDB 8.11 changelog ('Added another enumerator kVerify to enum class FileOperationType in listener.h') and the rocksdbjni 9.0.0 EventListener docs (onFileFlushFinish / onFileRangeSyncFinish take FileOperationInfo)."
+ ],
+ "caller_census": {
+  "method": "Whole-.text scan for E8 calls, E9 tail jumps and RIP-relative LEA references landing on the targets, validated by decoding forward from the enclosing FDE start with Capstone (census.py). A site counts only on a real instruction boundary with the expected mnemonic.",
+  "notes": [
+   "WritableFileWriter::Flush 0x6051a20: exactly 13 direct calls, 0 tail jumps, 0 LEA refs. Callers: BlobLogWriter::WriteHeader (1, 0x5e2641b); BlobLogWriter::EmitPhysicalRecord (1, 0x5e26987); log::Writer::WriteBuffer (1, 0x5f03b25); log::Writer::AddRecord (1, 0x5f04105); log::Writer::AddCompressionTypeRecord (1, 0x5f04394); uncatalogued FDE 0x5fce130 (1, 0x5fce232); uncatalogued FDE 0x5fce280 (1, 0x5fce6b8 -- the same uncatalogued FDE that calls Append); WritableFileWriter::Pad (1, 0x605269a); WritableFileWriter::Sync (1, 0x60528a6); WritableFileWriter::Close (1, 0x6052e6c); WritableFileWriter::Append (3, 0x6054b5d, 0x6054ef4, 0x6054fa1 -- flush-if-needed + two write loops).",
+   "WritableFileWriter::Flush.cold 0x6051938: exactly 1 tail jump at 0x6052523 (the endbr64 stub at the main FDE tail). The .cold FDE has 10 endbr64 stubs at the main-FDE tail (0x605250a..0x6052577) jumping into .cold at 0x605194a, 0x6051968, 0x605197a, 0x605197f, 0x6051991, 0x60519a3, 0x60519be, 0x60519d4, 0x60519e8 and 0x6051a12.",
+   "The RangeSync member 0x604d7b0 is called from exactly one site in the binary: the E8 call at 0x605210e inside Flush's RangeSync arm (verified by reading the Flush disassembly; the member is not a census.py target, so this site is pinned by inspection, not by the scan).",
+   "Every file flush the node makes through a WritableFileWriter goes through this routine."
+  ],
+  "sites": [
+   {
+    "instruction": "jmp 0x6051938",
+    "kind": "jmp",
+    "site": "0x6052523",
+    "site_fde_end": "0x605257c",
+    "site_fde_start": "0x6051a20",
+    "target": "0x6051938",
+    "target_name": "rocksdb::WritableFileWriter::Flush.cold"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x5e2641b",
+    "site_fde_end": "0x5e26498",
+    "site_fde_start": "0x5e26300",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x5e26987",
+    "site_fde_end": "0x5e26a03",
+    "site_fde_start": "0x5e265c0",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x5f03b25",
+    "site_fde_end": "0x5f03b3d",
+    "site_fde_start": "0x5f03a90",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x5f04105",
+    "site_fde_end": "0x5f0418f",
+    "site_fde_start": "0x5f03d60",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x5f04394",
+    "site_fde_end": "0x5f0441c",
+    "site_fde_start": "0x5f041d0",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x5fce232",
+    "site_fde_end": "0x5fce27d",
+    "site_fde_start": "0x5fce130",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x5fce6b8",
+    "site_fde_end": "0x5fce766",
+    "site_fde_start": "0x5fce280",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x605269a",
+    "site_fde_end": "0x60527a5",
+    "site_fde_start": "0x60525b0",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x60528a6",
+    "site_fde_end": "0x60529ee",
+    "site_fde_start": "0x6052800",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x6052e6c",
+    "site_fde_end": "0x6054600",
+    "site_fde_start": "0x6052b80",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x6054b5d",
+    "site_fde_end": "0x605518b",
+    "site_fde_start": "0x6054680",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x6054ef4",
+    "site_fde_end": "0x605518b",
+    "site_fde_start": "0x6054680",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   },
+   {
+    "instruction": "call 0x6051a20",
+    "kind": "call",
+    "site": "0x6054fa1",
+    "site_fde_end": "0x605518b",
+    "site_fde_start": "0x6054680",
+    "target": "0x6051a20",
+    "target_name": "rocksdb::WritableFileWriter::Flush"
+   }
+  ],
+  "validated_sites": 14
+ },
+ "cases": {
+  "count": 2400,
+  "ledger": "cases.tsv",
+  "split": "600 gate (seen-error, empty/non-empty buffer, pending_sync, direct I/O, verification flags, priorities 0..4, tracer selection, perf level 0..5, sync point, clock pairs, flag_d9, file names) + 600 rangesync (the Flush arm matrix: filesize vs 1 MiB, 4 KiB align-down, last_sync_size vs bytes_per_sync, direct-I/O exclusion; plus direct RangeSync member calls with offset/nbytes, perf-level guard, sync point, scripted file failures) + 600 write_paths (buffered/direct x verification x pending_sync x scripted write/file-Flush/RangeSync outcomes x rate limiter x listeners x clock pairs) + 600 bindings (body hashes for Flush, .cold, RangeSync, WriteBuffered, WriteBufferedWithChecksum, WriteDirect, WriteDirectWithChecksum; both census records; 14 caller-census sites; vtable slots 8/12/16/23/35/37/47; 30 writer-layout offsets; IOOptions defaults; 25-cell priority matrix; FileOperationType 4/7; RangeSync arm constants; CRC vectors incl. check vector '123456789' -> 0xE3069283, Combine identities, AlignedBuffer unit rows, timer-guard thresholds, file-selection matrix)",
+  "tests": "tests/test_writable_file_writer_flush115.py",
+  "tool": "tools/writable_file_writer_flush115.py",
+  "what_is_checked": [
+   "gate: seen_error returns code 5 with the 27-byte heap state_ and writes nothing; empty buffer skips the write step and still calls file_->Flush; pending_sync_ clear skips the direct write entirely; file-Flush failure sets seen_error_ after the notifications and returns that status",
+   "rangesync: the arm fires only when filesize > 1 MiB, offset_sync_to > 0 and offset_sync_to - last_sync_size_ >= bytes_per_sync_; the align-down to 4 KiB is pinned at the boundary (filesize 0x100000+4095 -> offset_sync_to 0, no sync); last_sync_size_ is updated unconditionally, even when the member fails; the member's own seen-error gate returns the prev-error status without touching the file; the member's timer guard adds elapsed nanoseconds to range_sync_nanos only when perf_level > 2",
+   "write_paths: a buffered flush moves the buffer bytes to the file and empties buf_; the direct flush page-pads the buffer and refits the tail; a write failure sets seen_error_ and returns before any file Flush; a file-Flush failure still fires the finish AND the failure listener events; a RangeSync failure after a successful file Flush sets seen_error_ and returns that status",
+   "bindings: all seven FDE body hashes match the binary; both census source hashes are reproduced by zeroing the recorded relocations; the RangeSync member has no census record; the 13 call sites and 1 jump site are pinned; vtable slots 8/12/16/23 and the listener slots 35/37/47; the 30 writer-layout offsets incl. the unnamed bool at +0xd9; IOOptions defaults (0x58 B image, type 7, rate_limiter_priority at +0x0c); the 25-cell DecideRateLimiterPriority matrix; FileOperationType kFlush 4 / kRangeSync 7; RangeSync constants 1 MiB / 4 KiB; CRC check vector, Combine == Value(a+b), Mask/Unmask round-trip; timer guard armed iff perf_level > 2; file selection raw vs wrapper"
+  ]
+ },
+ "engine_callees": {
+  "0x5d36110": "std::_Hashtable dtor for the IOOptions property_bag, called after file_->Flush and after file->RangeSync.",
+  "0x5df6e90": "Base FSWritableFile::GetIOPriority ('mov 0x18(%rdi),%eax; ret'): the devirtualization guard compares vtable slot 16 against the RELATIVE reloc at 0x64ecf30; when equal the binary reads file+0x18 directly.",
+  "0x5fe2680": "SystemClock::Default (census-bound): the RangeSync timer guard's NowNanos() source (vtable slot 20).",
+  "0x6042c20": "Base EventListener no-op skipped by the failure notification (vtable slot 47, shared by Flush and RangeSync).",
+  "0x604c670": "Base EventListener no-op skipped by the flush-finish notification (vtable slot 35).",
+  "0x604c690": "Base EventListener no-op skipped by the range-sync-finish notification (vtable slot 37).",
+  "0x604c6b6": "Out-of-line IOSTATS_TIMER_GUARD dtor (no census): the same stop work as the inlined RangeSync guard stop, called from .cold only.",
+  "0x604c7b0": "WritableFileWriter::UpdateFileChecksum (census-bound, 33 B): NOT used by Flush -- no call in the FDE. Listed because Append uses it; Flush never updates the file checksum.",
+  "0x604c800": "WritableFileWriter::DecideRateLimiterPriority (census-bound, 39 B): both IO_TOTAL -> IO_TOTAL; file TOTAL -> op; op TOTAL -> file; else op. Verified instruction by instruction. Called by Flush (0x6051ab0); NOT called by the RangeSync member (it takes the file priority directly).",
+  "0x604e140": "WritableFileWriter::WriteBuffered (no census, oracle): writes the data straight to the file, clears buf_, resets the buffer checksum, advances flushed_size_.",
+  "0x604f080": "WritableFileWriter::WriteBufferedWithChecksum (no census, oracle): as WriteBuffered, with the buffered_data_crc32c_checksum_ passed as the handoff checksum.",
+  "0x604fe80": "WritableFileWriter::WriteDirect (no census, oracle): page-pads the buffer, writes it positionally, refits the tail.",
+  "0x6050c80": "WritableFileWriter::WriteDirectWithChecksum (no census, oracle): as WriteDirect, with the buffered checksum recomputed as Value of the remaining buffer.",
+  "0x606d9f0": "TEST_SYNC_POINT helper FDE (RELATIVE reloc from *0x64ed5d0): the sync-point gate for 'WritableFileWriter::RangeSync:0'. Flush itself has NO such call.",
+  "0x61cf610": "IOStatus::CopyState (census-bound, 63 B): deep-copies a status into the listener event structs.",
+  "0x63f0d70": "PLT __stack_chk_fail (the stack-canary failure path in the main epilogue and in .cold).",
+  "0x63f0dc0": "PLT operator delete[] _ZdaPv (the seen-error gate's delete of the old sret state_ and the .cold pad's deletes)."
+ },
+ "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM. The target binary is never executed. The tool models the routine in Python; the callees WriteBuffered, WriteBufferedWithChecksum, WriteDirect, WriteDirectWithChecksum and the file's Flush/RangeSync are taken as scripted oracles, and the live engine check drives the model against a real file and asserts the model's file image equals the real file bytes after every Flush (a real file, not the node binary). make verify/test/catalogue-check in a tooled environment is still owed upstream.",
+ "functions": {
+  "0x604d7b0": {
+   "body_sha256": "ea8c92fe81c54b3e73dfcdf644de23fc169290efcab403030c3c95d101627013",
+   "callers": [
+    "0x605210e"
+   ],
+   "census_id": "none",
+   "lea_refs": [],
+   "mangled": "",
+   "model": "2155-byte IOStatus RangeSync(uint64_t offset, uint64_t nbytes) (sret rdi, WritableFileWriter* rsi, offset rdx, nbytes rcx). Seen-error gate (0x604d7e4): same 27-byte 'Writer has previous error.' return (unreachable from Flush -- Flush only calls it with seen_error_ clear -- but part of the member's own contract). TEST_SYNC_POINT gate (0x604d7f3): if the sync-point global (*0x64ed5d0) is non-null, call 0x606d9f0 ('WritableFileWriter::RangeSync:0'). IOSTATS_TIMER_GUARD(range_sync_nanos) (0x604d805, stop 0x604dca8): armed iff perf_level > 2, start = SystemClock::Default()->NowNanos() (vtable slot 20; SystemClock::Default 0x5fe2680), elapsed added to the TLS range_sync_nanos counter at stop; the CPU-timer half is DEAD (flag rsp+0x51, id rsp+0x54, object rsp+0x70 zeroed, never set). Listener start times (0x604d87a): only when listeners_ is non-empty, steady + system now into rsp+0x30. Own IOOptions (0x604d8af): a fresh 0x58-byte IOOptions at rsp+0xd0 with the same defaults, but rate_limiter_priority at +0x0c is the FILE's GetIOPriority directly (no DecideRateLimiterPriority call -- RangeSync takes no op priority); Flush's IOOptions is NOT reused (its property_bag was already destroyed by Flush before the call). file->RangeSync (0x604d984, vtable slot 23) as file->RangeSync(sret, file, offset, nbytes, io_options, nullptr). Listener notifications (0x604d9b1..0x604de96), only when listeners_ is non-empty: (a) finish event at rsp+0x80 = {FileOperationType type 7 (kRangeSync), WritableFileWriter* this, bool [this+0xd9], uint64 offset, uint64 nbytes, uint64 elapsed_nanos, TimePoint* &start_times, Status status (CopyState)} through vtable slot 37 (0x128), skipping the base no-op 0x604c690; (b) failure event at rsp+0x150 = {Status status (CopyState), FileOperationType type 7, std::string file_name_} through vtable slot 47 (0x178), skipping the base no-op 0x6042c20, only when the file RangeSync status is not OK. On a file failure seen_error_ = 1 BEFORE the failure notification (0x604dc90) -- the opposite order from Flush, where seen_error_ is set after the notifications. Then the IOOptions property_bag is destroyed (call 0x5d36110). Epilogue: the sret copy zeroes byte 2; canary checked, return.",
+   "relocations": "0",
+   "source_sha256": ""
+  },
+  "0x6051938": {
+   "body_sha256": "be6981880b6cb3112ea941ebda10eb684990c24149069b682b361513e85c2588",
+   "callers": [
+    "0x6052523"
+   ],
+   "census_id": "node115-vendor-6051938",
+   "lea_refs": [],
+   "mangled": "_ZN7rocksdb18WritableFileWriter5FlushENS_3Env10IOPriorityE.cold",
+   "model": "228-byte .cold landing pad, entered from the ten endbr64 stubs at the main FDE tail (0x605250a..0x6052577) that jump here at 0x605194a, 0x6051968, 0x605197a, 0x605197f, 0x6051991, 0x60519a3, 0x60519be, 0x60519d4, 0x60519e8 and 0x6051a12 (only the jump at 0x6052523 is the census-validated site): delete[] the RangeSync-event strings, destroy the IOOptions property_bag (call 0x5d36110), check the stack canary, then _Unwind_Resume or __stack_chk_fail. Unwind-only; no case exercises it.",
+   "relocations": "32:kind4;42:kind4;62:kind4;80:kind4;103:kind4;130:kind4;147:kind4;170:kind4;187:kind4;214:kind4;219:kind4;224:kind4",
+   "source_sha256": "847b94888d4af2423df9dbea0d8f2ad21e70e5d54bd9ae66a74b407670059fe2"
+  },
+  "0x6051a20": {
+   "body_sha256": "fc5f4ed6a546b13e6ffeccdf9629bd4f9c1c704c8e8a0e9eaeb0013c679d2bc6",
+   "callers": [
+    "0x5e2641b",
+    "0x5e26987",
+    "0x5f03b25",
+    "0x5f04105",
+    "0x5f04394",
+    "0x5fce232",
+    "0x5fce6b8",
+    "0x605269a",
+    "0x60528a6",
+    "0x6052e6c",
+    "0x6054b5d",
+    "0x6054ef4",
+    "0x6054fa1"
+   ],
+   "census_id": "node115-vendor-6051a20",
+   "lea_refs": [],
+   "mangled": "_ZN7rocksdb18WritableFileWriter5FlushENS_3Env10IOPriorityE",
+   "model": "2908-byte IOStatus Flush(Env::IOPriority priority) (sret 16-byte out-pointer in rdi, WritableFileWriter* in rsi, priority in edx). Seen-error gate (0x6051a4b): byte this+0x89 set -> return IOStatus code 5 'Writer has previous error.' (27-byte heap state_, old sret state_ delete[]'d first), nothing else touched. Write step (0x6051a5a..0x6051d26), only when buf_.cursize_ (this+0x58) != 0, over Slice{bufstart_ (this+0x60), cursize_}: use_direct_io() (vtable slot 12) true -> only when pending_sync_ (this+0x88) is set, WriteDirect(priority) at 0x604fe80 or WriteDirectWithChecksum(priority) at 0x6050c80 when perform_data_verification_ (this+0xd1) AND buffered_data_with_checksum_ (this+0xd8); pending_sync_ clear -> the write is skipped entirely and the status stays OK. use_direct_io() false -> WriteBuffered(Slice, priority) at 0x604e140 or WriteBufferedWithChecksum at 0x604f080 under the same two flags (priority in r8d for the buffered pair, in edx for the direct pair). A write failure sets seen_error_ and returns at once (0x6051d14, sret byte 2 zeroed). Listener start times (0x6051a71): only when listeners_ (this+0xb0) is non-empty, steady_clock::now() + system_clock::now() into rsp+0x40. There is NO IOSTATS_TIMER_GUARD in Flush and NO TEST_SYNC_POINT call anywhere in the FDE (verified: no call to the 0x606d9f0 helper, no reference to the 0x64ed5d0 global). IOOptions 0x58 B built on the stack at rsp+0xa0 with the exact defaults (timeout 0, prio 0 = kIOLow, rate_limiter_priority IO_TOTAL 4 then overwritten at +0x0c with DecideRateLimiterPriority, type 7 = kUnknown, empty property_bag with self-pointer bucket at rsp+0xb8, count 1, max_load 1.0f, force_dir_fsync 0, do_not_recurse 0). DecideRateLimiterPriority (0x604c800, 39 B): both IO_TOTAL -> IO_TOTAL; file TOTAL -> op; op TOTAL -> file; else op. GetIOPriority devirtualization: the guard compares vtable slot 16 against the RELATIVE reloc at 0x64ecf30 (addend 0x5df6e90); 0x5df6e90 is 'mov 0x18(%rdi),%eax; ret' = base FSWritableFile::GetIOPriority, so when equal the binary reads file+0x18 directly, else it makes the virtual call at 0x60523a8. The file is selected by FSWritableFilePtr::operator-> (tracer null or its +0x68 byte clear -> the raw file at wrapper+0x28, else the wrapper at this+0x30); the Flush call itself peels [file+0x28] targets while vtable slot 8 (0x40) equals the RELATIVE reloc at 0x64ecf70, then calls slot 8 as file->Flush(sret, file, io_options, nullptr). The returned status is move-assigned into the working status. Listener notifications (0x6051dd5..0x6052425), only when listeners_ is non-empty: (a) finish event at rsp+0x50 = {FileOperationType type 4 (kFlush), WritableFileWriter* this, bool [this+0xd9], uint64 offset (NOT written by Flush), uint64 length (NOT written), uint64 elapsed_nanos (steady finish - start), TimePoint* &start_times, Status status (CopyState deep copy)} through vtable slot 35 (0x118), skipping the base no-op 0x604c670; (b) failure event at rsp+0x120 = {Status status (CopyState), FileOperationType type 4, std::string file_name_} through vtable slot 47 (0x178), skipping the base no-op 0x6042c20, only when the file Flush status is not OK. Then the IOOptions property_bag is destroyed (call 0x5d36110). Failure return (0x60521c6): seen_error_ = 1 AFTER the notifications, sret byte 2 zeroed, return the status; no RangeSync. RangeSync arm (0x6051f28..0x60521ab), only when !use_direct_io() AND bytes_per_sync_ (this+0x98) != 0: filesize_ (this+0x70) <= 0x100000 -> skip; offset_sync_to = (filesize_ - 0x100000) & ~0xfff; offset_sync_to == 0 -> skip; offset_sync_to - last_sync_size_ (this+0x90) < bytes_per_sync_ -> skip; else s = RangeSync(last_sync_size_, offset_sync_to - last_sync_size_) at 0x604d7b0 (call site 0x605210e) and last_sync_size_ = offset_sync_to UNCONDITIONALLY afterwards (0x605219f), even on failure; on a non-OK status seen_error_ = 1 as well (0x60524f9). Epilogue (0x6051f5b..0x6051fc5): the working status is copied into the sret with byte 2 forced to 0; the stack canary is checked, __stack_chk_fail on mismatch. CORRECTION: the Append packet's engine-callee note said Flush is '3452 B' -- the FDE is 0x6051a20..0x605257c, 2908 B, plus the 228 B .cold.",
+   "relocations": "103:kind4;111:kind4;313:kind42;330:kind4;378:kind42;678:kind4;798:kind42;930:kind4;945:kind4;970:kind4;1113:kind4;1153:kind4;1168:kind4;1194:kind42(mov-lea);1262:kind4;1284:kind4;1530:kind4;1538:kind2;1563:kind2;1581:kind4;1690:kind4;1775:kind4;1888:kind4;1906:kind4;1945:kind4;2183:kind4;2223:kind4;2238:kind4;2383:kind42(mov-lea);2450:kind4;2495:kind4;2513:kind4;2548:kind4;2561:kind4;2599:kind4;2637:kind4;2673:kind4;2715:kind4;2750:kind4;2790:kind4;2802:kind2;2820:kind2;2832:kind2;2844:kind2;2856:kind2;2868:kind2;2880:kind2;2892:kind2;2904:kind2",
+   "source_sha256": "16b71dba652a3329bfab312411eb4f3a93c611a6c6659b3b35b2906c5373e528"
+  }
+ },
+ "layouts": {
+  "aligned_buffer": {
+   "+0x00": "alignment_ (size_t, 8)",
+   "+0x08": "buf_ (char*, 8)",
+   "+0x10": "capacity_ (size_t, 8)",
+   "+0x18": "cursize_ (size_t, 8)",
+   "+0x20": "bufstart_ (char*, 8)"
+  },
+  "failure_event": {
+   "+0x00": "Status status (CopyState deep copy)",
+   "+0x10": "FileOperationType type (int32) -- 4 = kFlush, 7 = kRangeSync",
+   "+0x18": "std::string file_name_ (a copy of the writer's file name)",
+   "struct": "rsp+0x120 (Flush), rsp+0x150 (RangeSync)"
+  },
+  "flush_finish_event": {
+   "+0x00": "FileOperationType type (int32) -- 4 = kFlush, 7 = kRangeSync",
+   "+0x08": "WritableFileWriter* this",
+   "+0x10": "bool [this+0xd9] (1 byte)",
+   "+0x18": "uint64 offset -- Flush leaves it UNWRITTEN; RangeSync writes the offset argument",
+   "+0x20": "uint64 length/nbytes -- Flush leaves it UNWRITTEN; RangeSync writes the nbytes argument",
+   "+0x28": "uint64 elapsed_nanos (steady finish - start)",
+   "+0x30": "TimePoint* &start_times {system, steady}",
+   "+0x38": "Status status (CopyState deep copy)",
+   "struct": "rsp+0x50 (Flush), rsp+0x80 (RangeSync)"
+  },
+  "io_options_0x58": {
+   "+0x00": "timeout (uint64, 8) -- 0",
+   "+0x08": "prio (uint8, 1) -- 0 = kIOLow",
+   "+0x0c": "rate_limiter_priority (int, 4) -- Flush: DecideRateLimiterPriority result; RangeSync: the file's GetIOPriority directly",
+   "+0x10": "type (uint8, 1) -- 7 = kUnknown",
+   "+0x18": "property_bag (unordered_map, 56 B) -- empty, self-pointer bucket at rsp+0xb8 (Flush, struct at rsp+0xa0) / rsp+0xe8 (RangeSync, struct at rsp+0xd0), count 1, max_load 1.0f",
+   "+0x50": "force_dir_fsync (bool, 1) -- 0",
+   "+0x51": "do_not_recurse (bool, 1) -- 0"
+  },
+  "status_16": {
+   "+0x00": "code (uint8)",
+   "+0x01": "subcode (uint8)",
+   "+0x02": "severity (uint8) -- forced to 0 on every Flush/RangeSync return path",
+   "+0x03": "retryable (uint8)",
+   "+0x04": "data_loss (uint8)",
+   "+0x05": "scope (uint8)",
+   "+0x06..+0x07": "padding",
+   "+0x08..+0x0f": "state_ pointer (uint64) -- 0 = null, else a heap message"
+  },
+  "writer_0xe0": {
+   "+0x00": "file_name_ (std::string, 32 B)",
+   "+0x20": "writable_file_ (FSWritableFilePtr: io_tracer_ +0x20/+0x28, fs_tracer_ +0x30)",
+   "+0x38": "clock_ (SystemClock*, 8)",
+   "+0x40": "buf_ (AlignedBuffer: alignment_ +0x40, buf_ +0x48, capacity_ +0x50, cursize_ +0x58, bufstart_ +0x60)",
+   "+0x68": "max_buffer_size_ (size_t, 8)",
+   "+0x70": "filesize_ (uint64, 8) -- read: the RangeSync arm threshold",
+   "+0x78": "flushed_size_ (uint64, 8)",
+   "+0x80": "next_write_offset_ (uint64, 8)",
+   "+0x88": "pending_sync_ (bool, 1) -- read: the direct write gate",
+   "+0x89": "seen_error_ (bool, 1) -- read: the gate; written: = 1 on any failure",
+   "+0x90": "last_sync_size_ (uint64, 8) -- written: = offset_sync_to unconditionally after the RangeSync call",
+   "+0x98": "bytes_per_sync_ (uint64, 8) -- read: the RangeSync arm gate",
+   "+0xa0": "rate_limiter_ (RateLimiter*, 8)",
+   "+0xa8": "stats_ (Statistics*, 8)",
+   "+0xb0": "listeners_ (24 B)",
+   "+0xc8": "checksum_generator_ (FileChecksumGenerator*, 8) -- NOT read by Flush",
+   "+0xd0": "checksum_finalized_ (bool, 1)",
+   "+0xd1": "perform_data_verification_ (bool, 1)",
+   "+0xd4": "buffered_data_crc32c_checksum_ (uint32, 4)",
+   "+0xd8": "buffered_data_with_checksum_ (bool, 1)",
+   "+0xd9": "UNNAMED bool (1) -- read into both finish events; not named by the Append layout; open unknown",
+   "+0xdc": "temperature_ (Temperature, 4)"
+  }
+ },
+ "observations": [
+  "Flush has NO IOSTATS_TIMER_GUARD and NO TEST_SYNC_POINT: the FDE contains no call to the 0x606d9f0 helper and no reference to the 0x64ed5d0 sync-point global (verified by grep over the regenerated disassembly). Only the RangeSync member has both. The listener start timestamps are the only clock reads in Flush.",
+  "The direct write is gated on pending_sync_: with use_direct_io() true and pending_sync_ clear, Flush skips the write entirely and still calls file_->Flush. The 2019 upstream mirror confirms this gate.",
+  "Every return path zeroes sret byte 2 (severity): the write-failure path (0x6051d1b), the file-flush failure path (0x60521cd) and the epilogue (0x6051f5b) all store 0 at sret+2 before copying the status out.",
+  "The RangeSync arm's last_sync_size_ store is unconditional: on failure the binary jumps to 0x60524f9 (seen_error_ = 1) and then falls through to 0x605219f, which stores offset_sync_to into last_sync_size_ before jumping to the epilogue. The model sets it before checking the status, exactly as the binary does.",
+  "Flush and the RangeSync member order the failure bookkeeping differently: Flush sets seen_error_ AFTER both listener notifications (0x60521c6, after the 0x6051dd5..0x6052425 notification region); the member sets it BEFORE the failure notification (0x604dc90). Both orders are pinned from the binary.",
+  "The finish-event offset/length fields are NOT written by Flush (the struct at rsp+0x50 is built with only type, writer, flag, elapsed, start_times and status stores) but ARE written by the RangeSync member (offset and nbytes arguments). The model records them as null for Flush and as the arguments for RangeSync.",
+  "The file_->Flush call peels wrapper layers: the binary loops over [file+0x28] while vtable slot 8 equals the RELATIVE reloc at 0x64ecf70, then calls slot 8. The same peel shape appears at every file use in Append.",
+  "CORRECTION: the Append packet's engine-callee note said Flush is '3452 B'. The FDE is 0x6051a20..0x605257c, 2908 B, plus the 228 B .cold. The 3452 figure was wrong and is corrected here.",
+  "The caller census names the three WritableFileWriter members that call Flush directly: Pad (0x60525b0), Sync (0x6052800) and Close (0x6052b80) -- plus the three Append call sites and the five log/blob-log writers.",
+  "The RangeSync member builds its OWN IOOptions at rsp+0xd0: Flush's IOOptions (rsp+0xa0) is NOT reused -- its property_bag was already destroyed (call 0x5d36110) before the member is called, and the member's rate_limiter_priority is the file's GetIOPriority directly, with no DecideRateLimiterPriority call.",
+  "The CPU-timer half of the RangeSync IOSTATS_TIMER_GUARD is dead, exactly as in Append's prepare_write guard: flag (rsp+0x51), id (rsp+0x54) and object (rsp+0x70) are zeroed and never set. Only the wall-clock half runs, and only when perf_level > 2."
+ ],
+ "unknowns": [
+  "The bool at this+0xd9, read into both finish events (Flush 0x6051df3, RangeSync 0x604d9cf): it is not named by the Append packet's writer layout and no upstream header in the 2019 mirror has a member at that offset. Modelled as flag_d9, carried into the event dicts, and listed here as an open unknown.",
+  "The listener method names for vtable slots 35/37/47: the slots are the binary's observed positions and the FileOperationType values (4/7) plus the rocksdbjni 9.0.0 docs support OnFileFlushFinish / OnFileRangeSyncFinish for slots 35/37, but slot 47's method name is not established, and the slot numbers do not line up with the 2019 listener.h declaration order (ReadFinish is slot 33 per the open #5992 packet, implying ~19 more virtuals before it than the 2019 order has). Recorded as open; no name is asserted.",
+  "The exact identity of the +0x18/+0x20 fields in Flush's finish event (offset/length, left unwritten by Flush -- likely zero/garbage from the uninitialized stack slot). The model records them as null.",
+  "WriteBuffered, WriteBufferedWithChecksum, WriteDirect, WriteDirectWithChecksum and the file's Flush/RangeSync are taken as oracles here (their bodies are separate FDEs; only Flush/.cold are census-bound). Their internal steps are modelled from upstream source, not from their own binary bodies; reconstructing them is the natural follow-up.",
+  "The RangeSync member has no vendor census record, so its source hash cannot be reproduced by zeroing relocations; its binding is body hash only, per the #5992 no-census convention. Its single call site (0x605210e) is pinned by inspection of the Flush disassembly, not by the census.py scan.",
+  "make verify/test/catalogue-check in a tooled environment is still owed upstream (no cargo/rustc/git-lfs/Ghidra on this VM)."
+ ]
+}

@@ -1,0 +1,95 @@
+{
+  "artifact": "artifacts/node/115/hl-node",
+  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "task": "RE-001",
+  "node": 115,
+  "routine": {
+    "address": "0x143ddc0",
+    "fde": "0x143ddc0..0x143ddf2",
+    "size_bytes": 50,
+    "arguments": [
+      "rdi: pointer to a one-byte boolean (arg1); only the byte at (%rdi) is read",
+      "rsi: an opaque sink pointer (arg2); saved and passed to the tail-callee as its arg1"
+    ],
+    "return": "tail-call (no ret in the body): both arms jmp *0x64df720 after setting rdi=arg2, rsi=&string, rdx=length; the routine returns whatever the tail-callee returns",
+    "internal_calls": 0,
+    "internal_direct_tail_jumps": 0,
+    "internal_indirect_tail_jumps": 2
+  },
+  "branches": [
+    {
+      "condition": "the byte at (%rdi) is 0 (cmpb $0x0; je)",
+      "reads": ["one byte at (%rdi)"],
+      "result": "select (&\"false\" = 0x479247, length 5); set rdi=arg2; tail-jmp *0x64df720"
+    },
+    {
+      "condition": "the byte at (%rdi) is non-zero",
+      "reads": ["one byte at (%rdi)"],
+      "result": "select (&\"true\" = 0x459fd8, length 4); set rdi=arg2; tail-jmp *0x64df720"
+    }
+  ],
+  "reads": [
+    {
+      "address": "(%rdi)",
+      "width": 1,
+      "section": "caller-provided (register-indirect, not a fixed global)",
+      "role": "boolean selector; compared against 0 with cmpb, so only the low 8 bits matter"
+    },
+    {
+      "address": "0x64df720",
+      "width": 8,
+      "section": ".got",
+      "role": "indirect tail-jump target; both arms jump through this one slot"
+    }
+  ],
+  "writes": [],
+  "string_operands": [
+    {
+      "address": "0x459fd8",
+      "section": ".rodata",
+      "bytes": "true",
+      "length_immediate": 4,
+      "arm": "non-zero byte",
+      "note": "address is computed with lea and passed on; the routine does not dereference it. The immediate length 4 equals the byte length of \"true\"."
+    },
+    {
+      "address": "0x479247",
+      "section": ".rodata",
+      "bytes": "false",
+      "length_immediate": 5,
+      "arm": "zero byte",
+      "note": "address is computed with lea and passed on; the routine does not dereference it. The immediate length 5 equals the byte length of \"false\"."
+    }
+  ],
+  "tail_call": {
+    "slot": "0x64df720",
+    "section": ".got",
+    "installed_target": "0x167fa70",
+    "install": "R_X86_64_RELATIVE addend 0x167fa70",
+    "note": "the loader writes the address of the routine at 0x167fa70 (an FDE-bounded function, 0x167fa70..0x167fe99) into this .got slot; the callee's semantics and the meaning of the sink pointer are observed-only and NOT claimed here"
+  },
+  "descriptor_context": {
+    "routine_pointer_slot": {
+      "address": "0x63f53d0",
+      "section": ".data.rel.ro",
+      "install": "R_X86_64_RELATIVE addend 0x143ddc0"
+    }
+  },
+  "census": {
+    "direct_call_count": 0,
+    "direct_tail_jump_count": 0,
+    "stored_qwords": ["file offset 0x9898, the .rela.dyn addend of the installing RELATIVE record"],
+    "relative_addends": 1,
+    "relative_slots": ["0x63f53d0"],
+    "internal_calls": 0,
+    "internal_direct_tail_jumps": 0,
+    "internal_indirect_tail_jumps": 2,
+    "in_body_conditional_branches": 1
+  },
+  "neighbour_note": "the bytes after the second tail-jmp (0x143ddf2..0x143de00, 14 bytes) are int3 (0xcc) padding; the next FDE (0x143de00..0x143de19) is a separate, differently-shaped fmt shim (it dereferences arg2 twice, loads a vtable slot at 0x18(%rax), leas a 0x1c-byte .rodata string at 0x45a217 and jmps *%rax) and is not part of this routine or characterised here",
+  "never_read_or_written": [
+    "the routine writes no memory",
+    "the routine never dereferences either string pointer; it only computes the two addresses and passes one on",
+    "there is no ret in the body; control always leaves via one of the two indirect tail-jumps through 0x64df720"
+  ]
+}

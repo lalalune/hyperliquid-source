@@ -1,0 +1,32 @@
+Run of the README's Reproduce commands, in order, in a fresh checkout of base a8616af9432b8d8517b2af677880e117b7c28ef3
+with only the new files added. Every --outdir / --target-dir was a new directory outside the checkout.
+Python 3.12.3, GNU objdump 2.42, rustc/cargo 1.99.1 (the repository pins 1.95.0; not available here).
+Edition 2021 crate, no crates.io dependency. This log is the author's record of one run.
+
+1. gen_oracle.py --outdir <new>/oracle
+   229 cases, sha256 f2247c7d83228f0651a1c1c674a553a23c7280eb79864b969f8977808422925c
+   cmp <new>/oracle/corpus.tsv src/node115-peers-response-set/tests/corpus.tsv  -> identical
+
+2. verify_target.py --binary <hl-node> --selftest
+   selftest: baseline passes
+   selftest: bit flip at first byte of each fact, pins off: 145/146 detected by the fact text alone
+   selftest: range byte flip is caught by the pin: ok
+   selftest: moved relocation target is caught: ok
+   selftest: missing relocation is caught: ok
+   selftest: a wrong expected text rejects exactly that fact: ok
+
+3. verify_target.py --binary <hl-node> --outdir <new>/verify
+   20 ranges, 146 facts, 4 relocations, 0 failures   (results.txt: target_sha256 a6e2897c...5301, failures 0)
+
+4. cargo test --offline --locked (debug)
+   api.rs: 5 passed; corpus.rs: 1 passed (229 cases); 0 failed
+   cargo test --release --offline --locked: the same 5 + 1 passed
+
+5. mutate.py --outdir <new>/mut-self --selftest
+   baseline passes; BUILD_ERROR / NOT_APPLIED / NOT_APPLIED / SURVIVED / KILLED / ENV_ERROR as expected (6 of 6)
+
+6. mutate.py --outdir <new>/mut
+   baseline passes; 23 mutants: 21 killed, 2 survived (the two declared equivalent); 4/4 corpus controls detected; 0 unexpected
+   per-mutant rows: mutation_results.tsv
+
+Not run: make verify, make test, make catalogue-check, make reproduce, Rust 1.95.0, cargo fmt, cargo clippy.

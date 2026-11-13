@@ -1,0 +1,160 @@
+{
+ "artifact": "node #115",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": [
+  "RE-002-node115-rocksdb-dbimpl-validate-options-115 (open, PR #6342): reconstructs the two-argument dispatcher 0x5e5a000, which calls this per-CF validator once per column family (site 0x5e5a06a). The dispatcher packet's reference oracle for this function is superseded by this full reconstruction.",
+  "RE-002-node115-rocksdb-dbimpl-validate-options-1arg-115 (open, PR #6379): reconstructs the one-argument DBImpl::ValidateOptions 0x5e59cd0, called by the dispatcher (site 0x5e5a0ee) after every column family passed, and by DBImpl::SetDBOptions (site 0x5d7256d) on the rebuilt DBOptions. This packet's Status byte layout (code u8 +0x0, subcode u8 +0x1, severity u8 +0x2, state_ +0x8) and the Status ctor / move-assign models follow #6379's ctor-proved layout.",
+  "RE-002-node115-rocksdb-build-db-options-115 (open, PR #6297): reconstructs BuildDBOptions 0x60c2e20; the default-ctor packet (open PR #6337, 0x60b2db0) builds the 93 DBOptions defaults and pins the DBOptions field offsets this FDE reads (max_open_files +0x44, unordered_write +0x1d1, allow_concurrent_memtable_write +0x1d2). The ColumnFamilyOptions offsets this FDE reads were computed from the v8.1.1 headers this cycle (compaction_style +0xe8, max_successive_merges +0x150, ttl +0x160, periodic_compaction_seconds +0x168, enable_blob_garbage_collection +0x1a9, blob_garbage_collection_age_cutoff +0x1b0, blob_garbage_collection_force_threshold +0x1b8, memtable_protection_bytes_per_key +0x1e4, table_factory +0x2b8) -- all 8 binary-read offsets match the computed layout exactly.",
+  "RE-002-node115-vendor-census: both FDEs are census-bound (member 25dac13516458d4d-column_family.o, librocksdb-sys 0.11.0+8.1.1). Main body 4c564ac3... / source 7738e1c8... (49 relocations, kinds 2/4/42, no relaxation); cold body 4df4d5cd... / source 66b93075... (6 kind-4 relocations, no relaxation).",
+  "meta/rocksdb v8.1.1, read live this cycle: db/column_family.cc:113-192 defines the three helper oracles in order (CheckCompressionSupported, CheckConcurrentWritesSupported, CheckCFPathsSupported) with their messages, and :1364-1448 defines this validator's seven inline checks in order with the messages quoted verbatim (including the trailing space in the TTL and periodic messages). The binary matches v8.1.1 step for step. A newer rust-rocksdb mirror (commit bad0727b) contains EXTRA checks the binary does NOT have (a UDT/comparator-timestamp block, a block_protection_bytes_per_key check and a file_temperature_age_thresholds check) -- recorded as a binary-vs-source observation that the mirror is newer than v8.1.1; the model follows v8.1.1. db/column_family.cc:2828 (SetOptions) confirms the third caller: SetOptions calls ValidateOptions.",
+  "Binary-vs-source observations (recorded, not hidden): the unordered_write error is built into T1 and routed through the shared error-return block (the source assigns to the local Status `s` and hits the `if (!s.ok()) return s` gate), while the six later inline errors return directly (the source returns the Status inline); the ttl/periodic IsInstanceOf calls are devirtualized against the GOT slot (the source calls the virtual IsInstanceOf); the memtable-protection std::find is constant-folded into a switch on the five supported values; the vector is freed with sized delete on both paths; the blob range checks use comisd, so NaN passes (the source `x < 0.0 || x > 1.0` is false for NaN); the FIFO check tests ttl as plain != 0 with no kDefaultTtl exclusion, unlike the TTL check."
+ ],
+ "caller_census": {
+  "method": "Whole-.text scan for E8 calls, E9 tail jumps and RIP-relative LEA references landing on the target, validated by decoding forward from the enclosing FDE start with Capstone (census.py). A site counts only on a real instruction boundary with the expected mnemonic.",
+  "notes": [
+   "ColumnFamilyData::ValidateOptions 0x5d8e3b0: exactly 4 direct calls, 0 tail jumps, 0 LEA refs -- DBImpl::CreateColumnFamilyImpl 0x5d69a00 (site 0x5d69a9d, census-bound, db_impl.o), DBImpl::SetDBOptions 0x5d71fe0 (site 0x5d725f6, census-bound, db_impl.o), ColumnFamilyData::SetOptions 0x5d8ea70 (site 0x5d8eb60, census-bound, column_family.o; matches v8.1.1 column_family.cc:2828), and the two-argument dispatcher DBImpl::ValidateOptions 0x5e5a000 (site 0x5e5a06a, census-bound, db_impl_open.o, open PR #6342). The validator runs once per column family at open, once per SetDBOptions and once per SetOptions call.",
+   "LSDA: the main FDE record in .eh_frame (section offset 0x735798, length 0x4c, initial_location 0x5d8e3b0, range 0x613, aug_len 4) carries an LSDA pointer (pcrel sdata4) to 0x40a30f: header ff ff 01, table length 0x31, 8 entries, all action 0 (cleanup only). The .cold FDE record (section offset 0x7357e8, length 0x20, initial_location 0x5d8e356, range 0x4f, aug_len 4) points to 0x40a344: header ff ff 01, table length 0x04, 1 entry (FDE+0x2b..+0x30, pad 0) for the _Unwind_Resume call."
+  ],
+  "sites": [
+   {
+    "instruction": "call 0x5d8e3b0",
+    "kind": "call",
+    "site": "0x5d69a9d",
+    "site_fde_end": "0x5d6a6d9",
+    "site_fde_start": "0x5d69a00",
+    "target": "0x5d8e3b0",
+    "target_name": "rocksdb::ColumnFamilyData::ValidateOptions"
+   },
+   {
+    "instruction": "call 0x5d8e3b0",
+    "kind": "call",
+    "site": "0x5d725f6",
+    "site_fde_end": "0x5d72e50",
+    "site_fde_start": "0x5d71fe0",
+    "target": "0x5d8e3b0",
+    "target_name": "rocksdb::ColumnFamilyData::ValidateOptions"
+   },
+   {
+    "instruction": "call 0x5d8e3b0",
+    "kind": "call",
+    "site": "0x5d8eb60",
+    "site_fde_end": "0x5d8f4b5",
+    "site_fde_start": "0x5d8ea70",
+    "target": "0x5d8e3b0",
+    "target_name": "rocksdb::ColumnFamilyData::ValidateOptions"
+   },
+   {
+    "instruction": "call 0x5d8e3b0",
+    "kind": "call",
+    "site": "0x5e5a06a",
+    "site_fde_end": "0x5e5a151",
+    "site_fde_start": "0x5e5a000",
+    "target": "0x5d8e3b0",
+    "target_name": "rocksdb::ColumnFamilyData::ValidateOptions"
+   }
+  ],
+  "validated_sites": 4
+ },
+ "cases": {
+  "count": 2400,
+  "ledger": "cases.tsv",
+  "split": "600 checks (each check failing alone, pairs where the earlier one must win, boundaries: ttl 1 / kDefaultTtl-1 / kDefaultTtl, periodic 1 / kDefaultPeriodic, blob cutoffs 0 / 0.5 / 1 / 1+eps / -eps / NaN, memtable values 0/1/2/4/8 vs 3/5/9/0xffffffff, FIFO with kDefaultTtl, mixed options) + 600 status (OK image, each error image with code/subcode/severity/pad/state_ content, the ctor's ': ' join with a non-empty msg2, move-assign semantics, OK-with-state helper propagation) + 600 throw (BadAlloc in the Status ctor at each of the 7 inline error sites with the half-built status and the pad's cleanup attached, callee throws at every helper / string-ctor / IsInstanceOf / operator-new site with its LSDA pad, canary failures on OK and error returns, BadAlloc beating a bad canary via the pad's canary check, alloc_ok=False with no fail_at) + 600 bindings (caller-site independence across all four callers, FDE/LSDA hashes as expected values)",
+  "tests": "tests/test_cf_data_validate_options115.py",
+  "tool": "tools/cf_data_validate_options115.py",
+  "what_is_checked": [
+   "checks: the first failing check wins (later checks never run); the helper-oracle gates (concurrent only when allow_concurrent_memtable_write); the kDefaultTtl / kDefaultPeriodicCompSecs exclusions in checks 5-6 and their ABSENCE in check 9 (FIFO fires for kDefaultTtl); NaN passing both blob range checks (comisd); the memtable-protection switch over {0,1,2,4,8}",
+   "status: the Status byte layout the ctor proves (code u8 +0x0, subcode u8 +0x1, severity u8 +0x2, padding +0x3..+0x7 zero with +0x6..+0x7 unwritten, state_ +0x8); the state_ buffer is msg + NUL with alloc len+1; the ctor's ': ' join when msg2 is non-empty (ctor behavior, never fired by this FDE); move-assign moves state_, zeroes the source and frees the old destination state_; a code-0-with-state helper result propagates into out via the final move-assign",
+   "throw: each throwing call names its LSDA pad and cleanup (generic 0x607; string-dispose 0x5fb for ttl IsInstanceOf, 0x5e3 for periodic IsInstanceOf; sized-delete-vector 0x5ef for the memtable ctor); a BadAlloc leaves out half-built (code/subcode/severity written, state_ null); canary failures raise StackCheckFailed on the return path -- a throw never reaches the epilogue, but the pad's own canary check fires first, so a throw with a bad canary raises StackCheckFailed instead of resuming",
+   "bindings: the result depends only on the options, never on the caller site; the FDE body hashes, the source hashes (49 + 6 relocations zeroed), the LSDA entries and the engine-call counts match the binary"
+  ]
+ },
+ "engine_callees": {
+  "0x5d89b20": "Status::operator=(Status&&) (NOT in the census): the move-assign, called 5 times (error-return block, after each helper, after the unordered ctor, final OK path). Decoded from its disassembly: self-assign guard, copies the 6 bytes, moves state_, zeroes the source, frees the destination's OLD state_ via operator delete[] tail-jump.",
+  "0x5d89d40": "libstdc++ basic_string(const char*) (NOT in the census): builds the 'BlockBasedTable' string (16 chars -> heap via _M_create + memcpy) at 0x50(%rsp), called twice (ttl 0x5d8e519, periodic 0x5d8e861).",
+  "0x5d89e80": "Customizable::IsInstanceOf(const std::string&) constprop.0 (census-bound, column_family.o): the devirtualized IsInstanceOf, called directly twice (ttl 0x5d8e537, periodic 0x5d8e87f) when the vtable slot 16 pointer equals GOT slot 0x64eceb8 (addend 0x5d2e770 = Customizable::IsInstanceOf); otherwise the virtual call runs (0x5d8e907, 0x5d8e987).",
+  "0x5d8ba60": "CheckConcurrentWritesSupported (census-bound, column_family.o): ORACLE -- its body is not reconstructed here. Modelled from v8.1.1 db/column_family.cc:161-171: inplace_update_support -> InvalidArgument; memtable_factory->IsInsertConcurrentlySupported() false -> InvalidArgument.",
+  "0x5d8bb50": "CheckCFPathsSupported (census-bound, column_family.o): ORACLE -- its body is not reconstructed here. Modelled from v8.1.1 db/column_family.cc:173-192: non-universal/level compaction with > 1 cf_paths, or empty cf_paths with > 1 db_paths -> NotSupported.",
+  "0x5d8dcc0": "CheckCompressionSupported (census-bound, column_family.o): ORACLE -- its body is not reconstructed here. Modelled from v8.1.1 db/column_family.cc:113-159: per-level (or single) compression type must be linked ('Compression type X is not linked with the binary.'); zstd dict trainer / finalize support and max_dict_bytes != 0 when zstd_max_train_bytes > 0; blob compression type must be linked. The linked-codec set is an explicit model input.",
+  "0x61cf670": "rocksdb::Status::Status(Code, SubCode, const Slice&, const Slice&, Severity) (census-bound, status.o): the five-argument Status ctor, called 4 times (0x5d8e590 shared code-3 tail for ttl/periodic/fifo, 0x5d8e5ef unordered into T1, 0x5d8e6aa shared code-4 tail for age/force, 0x5d8e798 memtable into out). ORACLE in the sense that its body is not reconstructed here -- but its observable behavior IS pinned from its disassembly: code u8 +0x0, subcode u8 +0x1, severity u8 +0x2, zeroes +0x3..+0x5, state_ = new char[size+1] holding msg + (': ' + msg2 if len2) + NUL. Its trailing delete[] of the old state_ is DEAD (state_ is zeroed at 0x61cf6b0 before the read at 0x61cf6e4).",
+  "0x63f0d70": "PLT __stack_chk_fail: the canary failure at the epilogue (0x5d8e98e) and in the .cold pad (0x5d8e395).",
+  "0x63f0d80": "PLT sized delete (_ZdlPvm): the vector free (0x14) at 0x5d8e7a5 (main) and 0x5d8e38e (.cold pad 0x5ef).",
+  "0x63f0dc0": "PLT operator delete[] (_ZdaPv): called 4 times in the main FDE (error-return block, T2-state deletes) and once in the .cold pad; dead on every normal path (the state_ it would free was zeroed by the move-assign).",
+  "0x63f0dd0": "PLT operator new (_Znwm): the 20-byte vector alloc at 0x5d8e711."
+ },
+ "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM. The target binary is never executed. The tool models the validator in Python from its whole-FDE disassembly; the three helper oracles are modelled from the v8.1.1 source they implement (their bodies are not reconstructed here); the Status ctor's and move-assign's observable behavior is pinned from their own disassembly. Status state_ buffers are deterministic heap ids, not real pointers; the subcode padding bytes (+0x6..+0x7) the binary never writes are modelled as zero. The live check (--live) reads the binary: the FDE body hashes, the source hashes, the LSDA bytes and FDE records, the engine-call counts, the field cmp instructions, the seven message bytes and the four-site caller census. make verify/test/catalogue-check in a tooled environment is still owed upstream.",
+ "functions": {
+  "0x5d8e356": {
+   "body_sha256": "4df4d5cd1f379d7866ba92c9b18e0ea634492a6136623aae87e50f435c93cd9c",
+   "callers": [],
+   "census_id": "node115-vendor-5d8e356",
+   "lea_refs": [],
+   "mangled": "_ZN7rocksdb16ColumnFamilyData15ValidateOptionsERKNS_9DBOptionsERKNS_19ColumnFamilyOptionsE.cold",
+   "model": "79-byte .cold FDE for the main validator: the landing-pad bodies. cold+0x0 disposes the BlockBasedTable string then falls to cold+0x9; cold+0x9 deletes T2.state_ if non-null, checks the stack canary and calls _Unwind_Resume; cold+0x30 sized-deletes the 20-byte memtable vector then jumps to cold+0x9; cold+0x44 disposes the string then jumps to cold+0x9. Its LSDA at 0x40a344 has 1 entry for the _Unwind_Resume call (pad 0).",
+   "relocations": "5:kind4;20:kind4;44:kind4;57:kind4;64:kind4;73:kind4",
+   "source_sha256": "66b930753725447dcab71b3d141e053d0fdf2a3c43e6a4e9e92fe0b60591d162"
+  },
+  "0x5d8e3b0": {
+   "body_sha256": "4c564ac336f94f2e9a06f9a725d47902a850a87162844c5ce7691f07672591d0",
+   "callers": [
+    "0x5d69a9d",
+    "0x5d725f6",
+    "0x5d8eb60",
+    "0x5e5a06a"
+   ],
+   "census_id": "node115-vendor-5d8e3b0",
+   "lea_refs": [],
+   "mangled": "_ZN7rocksdb16ColumnFamilyData15ValidateOptionsERKNS_9DBOptionsERKNS_19ColumnFamilyOptionsE",
+   "model": "1555-byte per-CF validator ColumnFamilyData::ValidateOptions(const DBOptions&, const ColumnFamilyOptions&) (result by value, sret out in rdi = rbp; db_options in rsi = r12; cf_options in rdx = rbx; stack canary used). Ten checks in binary order, first failure wins: CheckCompressionSupported (0x5d8dcc0) -> InvalidArgument; if allow_concurrent_memtable_write, CheckConcurrentWritesSupported (0x5d8ba60) -> InvalidArgument; unordered_write && max_successive_merges != 0 -> InvalidArgument (62 B message); CheckCFPathsSupported (0x5d8bb50) -> NotSupported; ttl != 0 && ttl != kDefaultTtl && table_factory is not BlockBasedTable -> NotSupported (51 B, trailing space); periodic_compaction_seconds != 0 && != kDefaultPeriodic && not BlockBasedTable -> NotSupported (67 B, trailing space); blob age cutoff outside [0.0, 1.0] -> InvalidArgument (77 B); blob force threshold outside [0.0, 1.0] -> InvalidArgument (98 B); compaction_style FIFO && max_open_files != -1 && ttl != 0 -> NotSupported (56 B; ttl tested as plain != 0, no kDefaultTtl exclusion); memtable_protection_bytes_per_key not in {0,1,2,4,8} -> NotSupported (87 B); else OK (out = move of the last helper's OK status). Helper errors return via the shared error-return block (0x5d8e428: out = move(T2)); inline errors build directly into out via the Status ctor 0x61cf670 (msg + the empty msg2 at 0x4376fd) and jump to the epilogue (0x5d8e448). The memtable check heap-allocates a 20-byte vector {0,1,2,4,8} (operator new(0x14), 16 B copied from .rodata 0x4544c0) and frees it with sized delete on both the error and the OK path. The ttl/periodic IsInstanceOf checks devirtualize: the table_factory vtable slot 16 pointer is compared against GOT slot 0x64eceb8 (addend 0x5d2e770 = Customizable::IsInstanceOf); if equal, the constprop clone 0x5d89e80 is called directly, else the virtual call. NaN passes both blob range checks (comisd unordered). Bytes +0x6..+0x7 of out are never written by any path. Main LSDA at 0x40a30f: 8 entries, all cleanup; the .cold FDE (0x5d8e356..0x5d8e3a5) holds the four landing pads (dispose the BlockBasedTable string, sized-delete the vector, delete T2.state_, canary check, _Unwind_Resume).",
+   "relocations": "76:kind4;148:kind2;163:kind4;248:kind4;264:kind2;279:kind4;330:kind2;362:kind2;374:kind42;392:kind2;404:kind4;429:kind2;441:kind2;481:kind4;513:kind2;538:kind2;576:kind4;592:kind2;607:kind4;689:kind2;711:kind2;723:kind2;763:kind4;843:kind2;866:kind4;940:kind2;982:kind2;1001:kind4;1014:kind4;1067:kind2;1087:kind4;1103:kind2;1118:kind4;1170:kind2;1202:kind2;1214:kind42;1232:kind2;1244:kind4;1269:kind2;1281:kind2;1324:kind2;1336:kind2;1388:kind2;1400:kind2;1503:kind4;1515:kind2;1527:kind2;1539:kind2;1551:kind2",
+   "source_sha256": "7738e1c844bcbf2f687ce337478b114527447b1e9a53dc2b8de6ca535251e564"
+  }
+ },
+ "layouts": {
+  "cf_options_fields_read": {
+   "+0x150": "max_successive_merges (u64).",
+   "+0x160": "ttl (u64; kDefaultTtl = 0xfffffffffffffffe excluded).",
+   "+0x168": "periodic_compaction_seconds (u64; kDefaultPeriodicCompSecs = 0xfffffffffffffffe excluded).",
+   "+0x1a9": "enable_blob_garbage_collection (bool).",
+   "+0x1b0": "blob_garbage_collection_age_cutoff (double; comisd range [0.0, 1.0]).",
+   "+0x1b8": "blob_garbage_collection_force_threshold (double; comisd range [0.0, 1.0]).",
+   "+0x1e4": "memtable_protection_bytes_per_key (u32; switch over {0,1,2,4,8}).",
+   "+0x2b8": "table_factory (shared_ptr; vtable slot 16 = IsInstanceOf).",
+   "+0xe8": "compaction_style (1 byte; FIFO = 2; cf_paths oracle: universal = 1, level = 0).",
+   "oracle_fields": "compression_per_level, compression, compression_opts, blob_compression_type (compression oracle); inplace_update_support, memtable_factory (concurrent oracle); cf_paths (cf_paths oracle)."
+  },
+  "db_options_fields_read": {
+   "+0x1d1": "unordered_write (bool; read twice).",
+   "+0x1d2": "allow_concurrent_memtable_write (bool; gates the concurrent-writes helper).",
+   "+0x44": "max_open_files (i32; FIFO check: != -1).",
+   "db_paths.size()": "read only by the CheckCFPathsSupported oracle (empty cf_paths + > 1 db_paths -> NotSupported)."
+  },
+  "error_blocks": {
+   "0x5d8e428": "shared error-return block (helper errors): out = move(T2) via 0x5d89b20, delete[] T2.state_ (dead: T2 was zeroed by the move), epilogue 0x5d8e448.",
+   "0x5d8e551": "check 5 (TTL): msg 0x96b4c0 len 51 -> shared code-3 tail 0x5d8e57b, ctor 0x5d8e590 into out, epilogue.",
+   "0x5d8e5ae": "check 3 (unordered_write): msg 0x9601d8 len 62 -> InvalidArgument ctor 0x5d8e5ef into T1, then move-assign T2 and the shared error-return block 0x5d8e428.",
+   "0x5d8e66b": "check 7 (blob age): msg 0x96bde8 len 77 -> shared code-4 tail 0x5d8e695, ctor 0x5d8e6aa into out, epilogue.",
+   "0x5d8e759": "check 10 (memtable): msg 0x96a950 len 87 -> ctor 0x5d8e798 into out, sized delete of the vector, epilogue.",
+   "0x5d8e899": "check 6 (periodic): msg 0x9669d0 len 67 -> shared code-3 tail 0x5d8e57b.",
+   "0x5d8e8d0": "check 8 (blob force): msg 0x958e00 len 98 -> shared code-4 tail 0x5d8e695.",
+   "0x5d8e910": "check 9 (FIFO): msg 0x95b860 len 56 -> shared code-3 tail 0x5d8e57b."
+  },
+  "landing_pads": {
+   "0x5e3": "periodic IsInstanceOf (main stub 0x5d8e993 -> .cold+0x0): dispose the BlockBasedTable string, then generic.",
+   "0x5ef": "memtable Status ctor (main stub 0x5d8e99f -> .cold+0x30): sized-delete the 20-byte vector, then generic.",
+   "0x5fb": "ttl IsInstanceOf (main stub 0x5d8e9ab -> .cold+0x44): dispose the BlockBasedTable string, then generic.",
+   "0x607": "generic cleanup (main stubs 0x5d8e9b7 -> .cold+0x9): delete T2.state_ if non-null, canary check, _Unwind_Resume. Covers the helper calls, the string-ctor calls, the shared code-3/code-4 Status ctor tails, the unordered ctor, the operator new and the move-assigns."
+  },
+  "lsda": {
+   "cold": "LSDA at 0x40a344 (8 bytes): header ff ff 01, table length 0x04, 1 entry (43,5,0,0) for the _Unwind_Resume call at 0x5d8e381.",
+   "main": "LSDA at 0x40a30f (53 bytes): header ff ff 01, table length 0x31, 8 entries, all action 0 (cleanup only): (75,291,1543), (391,5,1531), (480,390,1543), (1000,5,1519), (1086,120,1543), (1231,5,1507), (1367,2,1531), (1495,2,1507) (start, length, landing_pad, all FDE-relative)."
+  },
+  "status": {
+   "+0x00": "code (u8; the Code enum; 0 = kOk). Written by the ctor (mov %sil) and by the OK path (movl $0x0 covers +0x0..+0x3).",
+   "+0x01": "subcode (u8). Written by the ctor (mov %dl); 0 in every result this FDE produces.",
+   "+0x02": "severity (u8). Written by the ctor (mov %r9b); 0 in every result this FDE produces.",
+   "+0x03": "padding (5 bytes, +0x3..+0x7). The ctor writes +0x3..+0x5 zero; the OK path writes +0x3..+0x5 zero; +0x6..+0x7 are NEVER written by any path in this FDE -- modelled as zero, recorded as unwritten.",
+   "+0x08": "state_ (char*, 8 bytes). nullptr = no message; otherwise a heap buffer of len(msg)+1 bytes holding msg + NUL (msg2 is always empty here), freed by the caller's move/delete[], never in this FDE.",
+   "size": "0x10 (16 bytes)"
+  }
+ }
+}

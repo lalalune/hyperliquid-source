@@ -1,0 +1,68 @@
+RE-005 node115 twapCancel signing input -- oracle freeze record
+
+Frozen (UTC, local clock of the authoring host): 2026-11-10T16:23:54Z
+This record was written after the generator ran and before any Rust source of
+the crate `node115-twap-cancel-signing-input` existed. The crate directory at
+that moment contained only `tests/oracle/corpus.tsv`.
+
+Reference revision: a8616af9432b8d8517b2af677880e117b7c28ef3
+Target ELF SHA-256: a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+
+Generator  research/work-items/RE-005-node115-twap-cancel-signing-input/oracle/oracle.py
+  sha256 at freeze 7500f51e14727f78c7d6e6416156e5c59d678bb6e463416eb7dcd419b09f23af
+  (edited later, current hash in amendment 2)
+Corpus     src/node115-twap-cancel-signing-input/tests/oracle/corpus.tsv
+  sha256 5c3467f7de3252d047bd71d45dce6a790e20b84a0ecb54e7fa319ca4dbd631bd
+  665 rows, 11 columns
+
+Independence
+  * MessagePack is hand-written from the MessagePack specification (oracle.py
+    mp_* functions). No msgpack/rmp library and no Rust source is used.
+  * Keccak-256 is a separate bit-level implementation (round constants from the
+    FIPS 202 rc(t) LFSR, rho offsets from the (t+1)(t+2)/2 walk); it shares no
+    table with `node115-sponge-permutation`.
+  * Keccak-256 public vectors checked by the generator before it writes rows
+    (each aborts the run on mismatch):
+      ""      -> c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470
+      "abc"   -> 4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45
+      "The quick brown fox jumps over the lazy dog"
+              -> 4d741b6f1eb29cb2a9b9911c82f56fa8d73b04959d3d9d222895df6c0b28aa15
+    These are the widely published Keccak-256 (pre-FIPS padding, domain byte
+    0x01) vectors; they were recalled by the author, not fetched (no network),
+    and they agree with the implementation. Additionally the same sponge with
+    domain byte 0x06 equals the standard library hashlib.sha3_256 for all
+    message lengths 0..400, which validates the permutation and multi-block
+    absorption independently of the recalled vectors.
+  * Anchor (a=1, t=2, nonce=0x0102030405060708, vault=None, expiry=None):
+    input bytes  83a474797065aa7477617043616e63656ca16101a17402010203040506070800
+    digest       5f07dac3d5e01782799cf9f3260ae8ce3d00107075fbef13fae3266c6abf38de
+    The input bytes equal the scouting value; the generator aborts if they do
+    not. The digest equals the scouting-note preliminary value, which came from a
+    different Python model; this oracle re-derives it independently.
+
+Expected behaviour encoded in the corpus was derived from the binary reading
+recorded in the packet README (suffix layout, marker widths, chain tag rule), not
+from the Rust crate. The rule that the tag depends only on the low byte of
+the selector (selector 0x103 -> 0x61) is an observation of `cmp bpl,0x3` at
+0x36aac32 and is encoded in rows with selectors 0x100, 0x103, 0x203, 0xFFFFFF03.
+
+Amendments after freeze (reason required):
+  1. The generator and corpus above are unchanged (hashes still match). One
+     Rust test was changed after the first mutation run: `returned_record_matches_oracle`
+     passed tag address 0, so a mutant that stored the pointer in the wrong record
+     word survived (M26, 2 of 62 mutant/profile pairs in the first run). The test
+     now supplies address 0x1122334455667788 and patches the oracle's zero pointer
+     word accordingly; the second run killed all 62. Expected values were not
+     adjusted to fit the crate; only the test's pointer input changed.
+  2. After the freeze, oracle.py was edited, which changes its
+     hash (current sha256 adc451fa222ac5448e082b156e84c0a61175e78ea75e900f2488425a37be2093).
+     Reason: the packet README said every tool refuses an in-packet --outdir, but
+     oracle.py only checked that the path did not exist. The edit adds a refusal of
+     an --outdir inside the packet or the crate (after resolving symlinks and ".."),
+     exit code 4, a --selftest of that guard (11 controls), and replaces the
+     reference to a nonexistent EVIDENCE.md by the packet README (docstring here and
+     in this record). The Keccak, MessagePack, corpus-row and render code is
+     unchanged (a diff against the frozen file shows only those additions plus
+     main() returning an exit code), the corpus hash above is unchanged and the
+     regenerated corpus is byte-identical to the frozen one. No expected value and
+     no Rust file was touched by this edit.

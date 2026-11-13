@@ -1,0 +1,19 @@
+# Borrow-lend decoded-Content field assembly
+
+Target: Linux x86-64 node #115, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`; base `a8616af9432b8d8517b2af677880e117b7c28ef3`. Partial RE-007 advance of HL115-085. No captured instruction was executed or emulated.
+
+Earlier #3377 establishes the operation and field-name visitors and encoding helpers; #4858 supplies their Rust codec. #4889 studies separate operation-identifier readers and explicitly leaves this struct reader open. This contribution reuses the existing field/operation definitions and focuses on `0x2021f80` plus the real Action entry call `0x2b83cab`; it does not reconstruct the generic JSON wrapper or lending state changes.
+
+The Action reader passes the ten-byte struct label `BoleAction`, field pool `0x643e1d8`, and count 3 to `0x2021f80`. The pool and literal checks identify `operation`, `token` and `amount`. On Content-map tag `0x15`, 64-byte key/value pairs are visited in input order. A recognized duplicate is rejected before its value decoder is called. Operation invokes `0x1ff4ec0`, token `0x2120f20`, amount `0x2009c20`. At end, missing operation fails first; after it is present, missing token fails. An absent amount instead converts its uninitialized-field sentinel `0x8000000000000001` into `0x8000000000000000`, the same selected None-like result produced by `0x2009c20` for its raw Content tags `0x10` and `0x12`. This proves a typed/decoded None relation, not that a particular public JSON spelling reaches either tag.
+
+The Content-sequence tag `0x14` reads the three values in operation/token/amount order. It diagnoses a short sequence at the first absent element and checks for trailing elements after all three. Therefore map omission of amount and sequence omission are distinct. On normal success the amount's descriptor occupies output offsets `+0`, `+8`, `+0x10`, token the qword at `+0x18`, and the operation tag byte `+0x20`. The outer reader stores its Action tag `0xd0` and forwards the associated result; unselected Action variants and inactive bytes are outside the claim.
+
+`src/node115-borrow-lend-content-assembly` models assembly from **already-successful field-decoder outputs**, reusing the prior operation and field codec. Amount bytes are an opaque owned leaf-decoder output; this does not claim their financial units or raw input decoding. `UnclosedValue` stops before the corresponding value decoder, while unknown keys and duplicate fields are decided before value inspection. Inputs are decoded valid UTF-8 field names and valid operation variants. Individual value-decoder errors, other Content key forms, actual JSON cursors, error-object contents, allocation failure, panics/unwind and downstream execution are not implemented. Normal return from the selected leaf decoders and final cleanup is a premise. `InvalidSequenceLength` is a logical arity projection, not a native wire-error encoding.
+
+The static packet pins 11 windows (1,533 bytes / 305 instructions), 84 facts and 46 changed-byte controls to the exact digest, including field comparisons, duplicate guards, absent-amount conversion, sequence arity, output stores, raw Content None tags and outer handoff. Three source tests cover all six field orders for all four operations, absent versus explicit typed None, duplicate-before-value boundary, missing-field precedence and 0/1/2/3/4 sequence lengths. They validate the projected assembly, not native runtime equivalence. Full component and backlog gates remain open.
+
+```sh
+PYTHONPATH=/path/to/capstone python3 research/work-items/RE-007-node115-borrow-lend-content-assembly/verify.py --target /path/to/original/hl-node
+cargo test --offline --manifest-path src/node115-borrow-lend-content-assembly/Cargo.toml
+cargo test --offline --release --manifest-path src/node115-borrow-lend-content-assembly/Cargo.toml
+```

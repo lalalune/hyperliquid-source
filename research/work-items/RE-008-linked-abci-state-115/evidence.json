@@ -1,0 +1,37 @@
+{
+  "component": "abci",
+  "gates_changed": false,
+  "label_choice": {
+    "freeze": "0x93a687 (6 bytes) when r13b != 0",
+    "length": "rcx = (r13b ^ 1) * 2 + 6",
+    "periodic": "0x458f30 (8 bytes) when r13b == 0",
+    "site": "0x5a0887e"
+  },
+  "linked_state_fn": {
+    "args": "rdi = 0x38-byte result, rsi = holder whose [0] is the box, (rdx, rcx) = label",
+    "calls_in_order": [
+      "0x38d8240 slot 0x64e4f30 (height): {}/data/{} with periodic_abci_state_statuses, then {}/{}/{}",
+      "0x5942870 (abci_state): {}/hyperliquid_data/{} and {}.{} with rmp or json",
+      "0x4e45a30 (edx = 1): its 0x38-byte result is returned at 0x548629b..0x54862cd",
+      "0x1505a50 slot 0x64e09e0, Location state.rs:201:9; non-zero -> Result::unwrap panic state.rs:201:32",
+      "0x38d7f20 slot 0x64e4f38 (periodic path, abci_state path): utils_hard_link_and_replace/{}; a returned boxed error is dropped via its vtable at 0x54860da",
+      "0x5c9b830 slot 0x64e0ae8 with WARN template 0x448ef9"
+    ],
+    "direct_callers": [
+      "0x5a0887e"
+    ],
+    "fn": "0x5485f80",
+    "height": "[[rsi]+0x28] at 0x5485faa, kept at rsp+0xe8",
+    "warn_args": {
+      "desc": "label (rsp+0x160)",
+      "fln": "rsp+0xd0, the abci_state path",
+      "height": "rsp+0xe8",
+      "periodic_fln": "rsp+0x20, the 0x38d8240 path",
+      "slice_0x929b03": "0x23 bytes: \"linked abci state\" then \"assertion failed: \"",
+      "time_format": "0x929aed %Y-%m-%dT%H:%M:%S%.3fZ (0x16 bytes)"
+    }
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}

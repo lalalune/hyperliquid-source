@@ -1,0 +1,605 @@
+#!/usr/bin/env python3
+"""Generate functions.tsv and records.json for this packet from the
+vendor census + the binary, so no hash is hand-transcribed.
+
+Body hashes are recomputed from work/hl-node-115.bin over the FDE
+ranges. Both FDEs are vendor-census-bound (member
+d7ece8bd5f9dc186-options.o, librocksdb-sys 0.11.0+8.1.1); the source
+hashes are reproduced exactly by zeroing the census relocations
+(the one kind-42 entry at main-FDE offset 642 is a GOTPCRELX
+mov->lea relaxation, restored to the mov opcode first, as in the
+#6222 packet). The LSDA call-site table was decoded from
+.gcc_except_table by hand (see records.json) and is recorded as
+data, not re-derived here.
+"""
+import hashlib
+import json
+import subprocess
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+PACKET = Path(__file__).resolve().parent
+BIN = ROOT / "work" / "hl-node-115.bin"
+DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+
+# (start, end, name, slug, census-bound?)
+FUNCS = [
+    ("0x60b2db0", "0x60b3154",
+     "rocksdb::DBOptions::DBOptions",
+     "db-options-default-ctor-60b2db0", True),
+    ("0x60b2cf0", "0x60b2da5",
+     "rocksdb::DBOptions::DBOptions.cold",
+     "db-options-default-ctor-60b2cf0-cold", True),
+]
+
+
+def va2off(va):
+    out = subprocess.check_output(["readelf", "-lW", str(BIN)]).decode()
+    for line in out.splitlines():
+        p = line.split()
+        if p and p[0] == "LOAD":
+            v, o, f = int(p[2], 16), int(p[1], 16), int(p[4], 16)
+            if v <= va < v + f:
+                return o + (va - v)
+    raise ValueError(hex(va))
+
+
+def _caller_sites():
+    sites = []
+    with open(PACKET / "callers.tsv") as fh:
+        header = fh.readline().rstrip("\n").split("\t")
+        for line in fh:
+            row = dict(zip(header, line.rstrip("\n").split("\t")))
+            sites.append({
+                "instruction": row["instruction"],
+                "kind": row["kind"], "site": row["site"],
+                "site_fde_end": row["site_fde_end"],
+                "site_fde_start": row["site_fde_start"],
+                "target": row["target"],
+                "target_name": row["target_name"]})
+    return sites
+
+
+def main():
+    data = open(BIN, "rb").read()
+    assert hashlib.sha256(data).hexdigest() == DIGEST
+    census = json.load(open(
+        ROOT / "research" / "work-items" / "RE-002-node115-vendor-census"
+        / "census.json"))["records"]
+    by_start = {r["start"]: r for r in census}
+    rows = []
+    functions = {}
+    for start_s, end_s, name, slug, census_bound in FUNCS:
+        start, end = int(start_s, 16), int(end_s, 16)
+        body = data[va2off(start):va2off(end)]
+        body_hash = hashlib.sha256(body).hexdigest()
+        assert census_bound
+        rec = by_start[start]
+        assert body_hash == rec["target_body_sha256"], name
+        zeroed = bytearray(body)
+        for rel in rec["relocations"]:
+            o, w = rel["offset"], rel["width"]
+            zeroed[o:o + w] = b"\x00" * w
+            if rel.get("relaxation") == "gotpcrelx-mov-lea":
+                assert zeroed[o - 2] == 0x8D
+                zeroed[o - 2] = 0x8B
+        source_hash = hashlib.sha256(bytes(zeroed)).hexdigest()
+        assert source_hash == rec["source_body_sha256"], name
+        relocs = ";".join(
+            "%d:kind%d%s" % (r["offset"], r["kind"],
+                             "(mov-lea)" if r.get("relaxation")
+                             == "gotpcrelx-mov-lea" else "")
+            for r in rec["relocations"])
+        row = {
+            "name": name, "start": start_s, "end": end_s,
+            "size": str(end - start), "body_sha256": body_hash,
+            "source_sha256": source_hash,
+            "raw_equal": str(rec["raw_equal"]),
+            "relocations": relocs,
+            "census_id": "node115-vendor-%s" % start_s[2:],
+            "symbol": rec["symbol"],
+            "excerpt": slug + ".objdump.txt", "hex": slug + ".hex",
+        }
+        functions[start_s] = {
+            "body_sha256": body_hash,
+            "source_sha256": source_hash,
+            "relocations": relocs,
+            "census_id": row["census_id"],
+            "mangled": rec["symbol"],
+            "callers": [],
+            "lea_refs": [],
+        }
+        rows.append(row)
+    with open(PACKET / "functions.tsv", "w") as fh:
+        cols = ["name", "start", "end", "size", "body_sha256",
+                "source_sha256", "raw_equal", "relocations", "census_id",
+                "symbol", "excerpt", "hex"]
+        fh.write("\t".join(cols) + "\n")
+        for r in rows:
+            fh.write("\t".join(r[c] for c in cols) + "\n")
+    print("wrote functions.tsv (%d functions, all hashes verified)"
+          % len(rows))
+
+    # Caller census sites, read back from callers.tsv (no hand copy).
+    sites = _caller_sites()
+    main_calls = [s for s in sites if s["target"] == "0x60b2db0"]
+    functions["0x60b2db0"]["callers"] = [s["site"] for s in main_calls]
+    functions["0x60b2db0"]["model"] = (
+        "932-byte default constructor DBOptions::DBOptions() (this in "
+        "rdi = rbx; r12 = this+0x260, the db_host_id SSO buffer). It "
+        "default-constructs a 0x290-byte DBOptions (93 data members, "
+        "upstream options.h v8.1.1 declaration order). In binary "
+        "order: (1) leading bools +0x00..0x06 = 00 00 00 01 01 00 01 "
+        "(create_if_missing, create_missing_column_families, "
+        "error_if_exists false; paranoid_checks, "
+        "flush_verify_memtable_count true; "
+        "track_and_verify_wals_in_manifest false; "
+        "verify_sst_unique_id_in_manifest true). (2) env (+0x08) = "
+        "rocksdb::Env::Default() 0x5fe2860 -- the only call before "
+        "any member is constructed (LSDA site 0, no landing pad). "
+        "(3) info_log_level (+0x40) = 1 (INFO_LEVEL, NDEBUG build). "
+        "(4) One 8-byte .rodata load (0x458e70, 0x00000010ffffffff) "
+        "at +0x44: max_open_files = -1, max_file_opening_threads = "
+        "16. (5) rate_limiter (+0x10), sst_file_manager (+0x20), "
+        "info_log (+0x30), statistics (+0x58) nulled as 16-byte "
+        "pairs; use_fsync (+0x68) = false. (6) db_paths (+0x70) "
+        "zeroed; db_log_dir (+0x88) and wal_dir (+0xa8) SSO-empty "
+        "(ptr LEA'd to the own SSO buffer, size 0, NUL at "
+        "buffer[0]). (7) delete_obsolete_files_period_micros (+0xc8) "
+        "= 21600000000 (6 h in microseconds, movabs 0x50775d800). "
+        "(8) One 8-byte .rodata load (0x4594f0, "
+        "0xffffffff00000002) at +0xd0: max_background_jobs = 2, "
+        "max_background_compactions = -1. (9) movabs "
+        "0xffffffff00000001 at +0xd8: max_subcompactions = 1, "
+        "max_background_flushes = -1. (10) movups %xmm0 at +0xe0 "
+        "(max_log_file_size = 0, log_file_time_to_roll = 0) and "
+        "+0x110 (WAL_ttl_seconds = 0, WAL_size_limit_MB = 0). (11) "
+        "max_manifest_file_size (+0x100) = 1073741824 (1 GiB); "
+        "table_cache_numshardbits (+0x108) = 6. (12) "
+        "manifest_preallocation_size (+0x120) = 4194304 (4 MiB). "
+        "(13) movl $0x0 at +0x128: allow_mmap_reads, "
+        "allow_mmap_writes, use_direct_reads, "
+        "use_direct_io_for_flush_and_compaction all false. (14) One "
+        "8-byte .rodata load (0x459148, 0x0000025800000258) at "
+        "+0x130: stats_dump_period_sec = 600, "
+        "stats_persist_period_sec = 600. (15) mov %cx,0x12c with "
+        "cx = 0x101: allow_fallocate = true, is_fd_close_on_exec = "
+        "true. (16) persist_stats_to_disk (+0x138) = false; "
+        "stats_history_buffer_size (+0x140) = 1048576 (1 MiB). (17) "
+        "advise_random_on_open (+0x148) = true; db_write_buffer_size "
+        "(+0x150) = 0. (18) access_hint_on_compaction_start (+0x168) "
+        "= 1 (NORMAL). (19) movdqa from .rodata 0x451490, movups "
+        "%xmm1 at +0x170: compaction_readahead_size = 0, "
+        "random_access_max_buffer_size = 1048576 (1 MiB). (20) "
+        "writable_file_max_buffer_size (+0x180) = 1048576 (1 MiB); "
+        "use_adaptive_mutex (+0x188) = false. (21) movups %xmm0 at "
+        "+0x190: bytes_per_sync = 0, wal_bytes_per_sync = 0; "
+        "strict_bytes_per_sync (+0x1a0) = false. (22) listeners "
+        "(+0x1a8) zeroed (begin/end via movups %xmm0, cap via movq "
+        "$0x0). (23) enable_thread_tracking (+0x1c0) = false; "
+        "delayed_write_rate (+0x1c8) = 0. (24) movl $0x1010000 at "
+        "+0x1d0: enable_pipelined_write = false, unordered_write = "
+        "false, allow_concurrent_memtable_write = true, "
+        "enable_write_thread_adaptive_yield = true. (25) movdqa "
+        "from .rodata 0x4517a0, movups %xmm1 at +0x1d8: "
+        "max_write_batch_group_size_bytes = 1048576 (1 MiB), "
+        "write_thread_max_yield_usec = 100. (26) "
+        "write_thread_slow_yield_usec (+0x1e8) = 3. (27) movl "
+        "$0x20000 at +0x1f0: skip_stats_update_on_db_open = false, "
+        "skip_checking_sst_file_sizes_on_db_open = false, "
+        "wal_recovery_mode = 2 (kPointInTimeRecovery), allow_2pc = "
+        "false. (28) row_cache (+0x1f8) null pair; wal_filter "
+        "(+0x208) = nullptr. (29) movq $0x0 at +0x210: "
+        "fail_if_options_file_error, dump_malloc_stats, "
+        "avoid_flush_during_recovery, avoid_flush_during_shutdown, "
+        "allow_ingest_behind, two_write_queues, manual_wal_flush "
+        "all false, wal_compression = 0 (kNoCompression). (30) mov "
+        "%si,0x218 with si = 0: atomic_flush = false, "
+        "avoid_unnecessary_blocking_io = false. (31) "
+        "write_dbid_to_manifest (+0x21a) = false; log_readahead_size "
+        "(+0x220) = 0. (32) file_checksum_gen_factory (+0x228) null "
+        "pair; best_efforts_recovery (+0x238) = false. (33) "
+        "max_bgerror_resume_count (+0x23c) = INT_MAX; "
+        "bgerror_resume_retry_interval (+0x240) = 1000000 (1 s in "
+        "microseconds). (34) allow_data_in_errors (+0x248) = false. "
+        "(35) db_host_id (+0x250) from the .data global char* at "
+        "0x64fee88 (R_X86_64_RELATIVE addend 0x4342d1) pointing at "
+        "the .rodata literal \"__hostname__\" (12 bytes, upstream "
+        "kHostnameForDbHostId): strlen, SSO when len <= 15 (ptr = "
+        "this+0x260, size = len, memcpy, NUL at buf[len]), heap via "
+        "_M_create + memcpy when len > 15; a NULL global throws "
+        "std::logic_error (\"basic_string: construction from null "
+        "is not valid\", .rodata 0x963298). The only other read of "
+        "that global in .text is ReifyDbHostIdProperty at 0x616d0ab "
+        "(a strlen length check); no code ever writes it, so the "
+        "default is pinned. (36) checksum_handoff_file_types "
+        "(+0x270) = 0 (empty FileTypeSet); compaction_service "
+        "(+0x278) null pair. (37) mov $0x101,%eax / mov %ax,0x288: "
+        "lowest_used_cache_tier = 1 (kNonVolatileBlockTier), "
+        "enforce_single_del_contracts = true.")
+    functions["0x60b2cf0"]["model"] = (
+        "181-byte landing pad (.cold) for DBOptions::DBOptions(). "
+        "Entry 0x60b2cf0, reached from the main FDE's pad stub "
+        "0x60b3148 (endbr64; mov %rax,%rbp; jmp 0x60b2cf0). It "
+        "destroys the partially built object in reverse declaration "
+        "order -- file_checksum_gen_factory ctrl (+0x230), row_cache "
+        "ctrl (+0x200), listeners vector (+0x1a8, via 0x5d46140), "
+        "write_buffer_manager ctrl (+0x160), wal_dir string (+0xa8, "
+        "_M_dispose), db_log_dir string (+0x88, _M_dispose), "
+        "db_paths vector (+0x70, via 0x5d35cb0), statistics ctrl "
+        "(+0x60), info_log ctrl (+0x38), sst_file_manager ctrl "
+        "(+0x28), rate_limiter ctrl (+0x18) -- each shared_ptr "
+        "control block released via _Sp_counted_base::_M_release "
+        "0x5d350c0 only if non-null; then the stack canary is "
+        "checked and unwinding resumes with _Unwind_Resume (PLT "
+        "0x63f0a50). db_host_id (+0x250) is NOT destroyed: its "
+        "_M_create throws before the heap pointer is installed (the "
+        "string is still in SSO state, where _M_dispose is a "
+        "no-op); compaction_service (+0x278) is zeroed after the "
+        "guarded region, so it is not yet constructed either. The "
+        "LSDA call-site table (decoded from .gcc_except_table) has "
+        "two entries: FDE+0x3d..+0x42 (the Env::Default() call) "
+        "with NO landing pad; FDE+0x33f..+0x398 (the db_host_id "
+        "string build: _M_create, memcpy, __throw_logic_error) -> "
+        "pad 0x60b3148. All actions are 0 (cleanup only).")
+    records = {
+        "artifact": "node #115",
+        "artifact_sha256": DIGEST,
+        "bound_context": [
+            "RE-002-node115-rocksdb-build-db-options-115 (open, PR "
+            "#6297): reconstructs BuildDBOptions 0x60c2e20, which "
+            "calls this ctor at 0x60c2e37 before copying the 91 "
+            "fields -- every field the ctor defaults is the "
+            "BuildDBOptions packet's oracle, and this packet "
+            "supersedes that oracle note with the full ctor body. "
+            "The two fields BuildDBOptions never writes "
+            "(write_dbid_to_manifest +0x21a, compaction_service "
+            "+0x278..+0x287) keep exactly the defaults pinned "
+            "here (false, nullptr).",
+            "RE-002-node115-vendor-census: BOTH FDEs are "
+            "census-bound (member d7ece8bd5f9dc186-options.o, "
+            "librocksdb-sys 0.11.0+8.1.1). Main FDE body "
+            "ce915d9a... / source 433788f7... (15 relocations, "
+            "kinds 2/4/42 -- the kind-42 entry at FDE offset 642 "
+            "is a GOTPCRELX mov->lea relaxation, restored to the "
+            "mov opcode before hashing, as in the #6222 packet); "
+            ".cold body 108108c9... / source dac8b44e... (13 "
+            "relocations, kind 4).",
+            "meta/rocksdb v8.1.1, read live this cycle: "
+            "include/rocksdb/options.h declares DBOptions "
+            "(struct at :843, 93 data members in the exact "
+            "declaration order the binary lays out) with every "
+            "default the binary stores -- create_if_missing false "
+            "(:891), paranoid_checks true (:920), "
+            "flush_verify_memtable_count true (:933), "
+            "verify_sst_unique_id_in_manifest true (:1003), env = "
+            "Env::Default() (:1016), info_log_level INFO_LEVEL "
+            "under NDEBUG (:1096-1104), max_open_files -1 (:1133), "
+            "max_file_opening_threads 16 (:1142), "
+            "max_total_wal_size 0 (:1187), use_fsync false (:1211), "
+            "db_log_dir \"\" (:1275), wal_dir \"\" (:1290), "
+            "delete_obsolete_files_period_micros 6h (:1309), "
+            "max_background_jobs 2 (:1322), "
+            "max_background_compactions -1 (:1357), "
+            "max_subcompactions 1 (:1372), max_background_flushes "
+            "-1 (:1415), max_log_file_size 0 (:1428), "
+            "log_file_time_to_roll 0 (:1439), keep_log_file_num "
+            "1000 (:1446), recycle_log_file_num 0 (:1465), "
+            "max_manifest_file_size 1 GiB (:1476), "
+            "table_cache_numshardbits 6 (:1481), WAL_ttl_seconds 0 "
+            "(:1508), WAL_size_limit_MB 0 (:1510), "
+            "manifest_preallocation_size 4 MiB (:1521), "
+            "allow_mmap_reads/writes false (:1546/:1555), "
+            "use_direct_reads false (:1577), "
+            "use_direct_io_for_flush_and_compaction false (:1584), "
+            "allow_fallocate true (:1605), is_fd_close_on_exec "
+            "true (:1610), stats_dump_period_sec 600 (:1623), "
+            "stats_persist_period_sec 600 (:1630), "
+            "persist_stats_to_disk false (:1653), "
+            "stats_history_buffer_size 1 MiB (:1662), "
+            "advise_random_on_open true (:1671), "
+            "db_write_buffer_size 0 (:1694), write_buffer_manager "
+            "nullptr (:1727), access_hint_on_compaction_start "
+            "NORMAL (:1738), compaction_readahead_size 0 (:1755), "
+            "random_access_max_buffer_size 1 MiB (:1788), "
+            "writable_file_max_buffer_size 1 MiB (:1809), "
+            "use_adaptive_mutex false (:1822), bytes_per_sync 0 "
+            "(:1869), wal_bytes_per_sync 0 (:1882), "
+            "strict_bytes_per_sync false (:1923), "
+            "enable_thread_tracking false (:1941), "
+            "delayed_write_rate 0 (:1976), enable_pipelined_write "
+            "false (:2005), unordered_write false (:2056), "
+            "allow_concurrent_memtable_write true (:2075), "
+            "enable_write_thread_adaptive_yield true (:2090), "
+            "max_write_batch_group_size_bytes 1 MiB (:2103), "
+            "write_thread_max_yield_usec 100 (:2120), "
+            "write_thread_slow_yield_usec 3 (:2139), "
+            "skip_stats_update_on_db_open false (:2154), "
+            "skip_checking_sst_file_sizes_on_db_open false "
+            "(:2173), wal_recovery_mode kPointInTimeRecovery "
+            "(:2180), allow_2pc false (:2187), row_cache nullptr "
+            "(:2194), wal_filter nullptr (:2207), "
+            "fail_if_options_file_error false (:2218), "
+            "dump_malloc_stats false (:2227), "
+            "avoid_flush_during_recovery false (:2244), "
+            "avoid_flush_during_shutdown false (:2261), "
+            "allow_ingest_behind false (:2290), two_write_queues "
+            "false (:2303), manual_wal_flush false (:2312), "
+            "wal_compression kNoCompression (:2323), atomic_flush "
+            "false (:2350), avoid_unnecessary_blocking_io false "
+            "(:2365), write_dbid_to_manifest false (declared just "
+            "after the :2368-2377 comment), log_readahead_size 0 "
+            "(binary-pinned at +0x220), file_checksum_gen_factory "
+            "nullptr (:2416), best_efforts_recovery false (:2483), "
+            "max_bgerror_resume_count INT_MAX (:2502), "
+            "bgerror_resume_retry_interval 1000000 (:2515), "
+            "allow_data_in_errors false (:2532), db_host_id = "
+            "kHostnameForDbHostId (:2557; extern const char* at "
+            ":737; the table writer substitutes the real hostname "
+            "when writing SST files), checksum_handoff_file_types "
+            "empty (:2576), compaction_service nullptr (:2593), "
+            "lowest_used_cache_tier kNonVolatileBlockTier (:2616), "
+            "enforce_single_del_contracts true (:2641).",
+            "rocksdb::ReifyDbHostIdProperty(Env*, std::string*) "
+            "0x616d080: the only other reader of the db_host_id "
+            "global (site 0x616d0ab, a strlen length check) -- the "
+            "function that substitutes the real hostname for the "
+            "\"__hostname__\" placeholder. No code in the binary "
+            "ever writes the global, so the ctor's default is the "
+            "static \"__hostname__\" literal.",
+        ],
+        "caller_census": {
+            "method": "Whole-.text scan for E8 calls, E9 tail jumps "
+                      "and RIP-relative LEA references landing on the "
+                      "target, validated by decoding forward from the "
+                      "enclosing FDE start with Capstone (census.py). "
+                      "A site counts only on a real instruction "
+                      "boundary with the expected mnemonic.",
+            "notes": [
+                "DBOptions::DBOptions() 0x60b2db0: exactly 11 direct "
+                "calls, 0 tail jumps, 0 LEA refs. Every caller "
+                "default-constructs a DBOptions before filling it: "
+                "the C API rocksdb_options_create, the unnamed FDE "
+                "0x5d74aa0 (also a BuildDBOptions caller, not in "
+                "the vendor census), CompactionServiceInput's ctor, "
+                "a cs_input_type_info lambda, EnvOptions' ctor, "
+                "ImmutableDBOptions' ctor, BuildDBOptions, "
+                "RocksDBOptionsParser::Reset, "
+                "RocksDBOptionsParser's ctor, "
+                "RocksDBOptionsParser::EndSection, and "
+                "DBWithTTLImpl::SetTtl.",
+                "The LSDA call-site table was decoded from "
+                ".gcc_except_table by hand: the Env::Default() call "
+                "has no landing pad (nothing constructed yet); the "
+                "db_host_id string build maps to pad 0x60b3148, "
+                "which jumps to the .cold FDE 0x60b2cf0.",
+            ],
+            "sites": sites,
+            "validated_sites": len(sites),
+        },
+        "cases": {
+            "count": 2400,
+            "ledger": "cases.tsv",
+            "split": "600 defaults (each of the 93 fields x value / "
+                     "raw-bytes / full-image-hash probes, cycled "
+                     "deterministically) + 600 host_id (distinct "
+                     "db_host_id byte strings across the SSO/heap "
+                     "boundary at length 15/16, incl. empty, "
+                     "\"__hostname__\", and 64-byte values, with "
+                     "varied env ids) + 600 throw (NULL-global "
+                     "std::logic_error and >15-byte _M_create "
+                     "std::bad_alloc, each with the 11-member .cold "
+                     "destruction list) + 600 bindings "
+                     "(caller-independence: the same image hash for "
+                     "every one of the 11 callers, with varied "
+                     "host_id and env id)",
+            "tests": "tests/test_db_options_default_ctor115.py",
+            "tool": "tools/db_options_default_ctor115.py",
+            "what_is_checked": [
+                "defaults: every one of the 93 fields holds the "
+                "pinned default value, and the full 656-byte image "
+                "hash matches the model; the disassembly re-parse "
+                "leg (--live) rebuilds the same image from the "
+                "objdump stores with 0 diffs outside the masked "
+                "runtime-address slots",
+                "host_id: len <= 15 stays in the SSO buffer at "
+                "+0x260 (ptr = this+0x260, size = len, NUL at "
+                "buf[len]); len >= 16 goes to the heap with a "
+                "deterministic heap id and capacity = len; the "
+                "default is the 12-byte \"__hostname__\" literal",
+                "throw: a NULL db_host_id global throws "
+                "std::logic_error with the exact message, and a "
+                "failing _M_create throws std::bad_alloc; both run "
+                "the .cold, which destroys exactly the 11 members "
+                "constructed before the guarded region, in reverse "
+                "declaration order, and never db_host_id or "
+                "compaction_service",
+                "bindings: the ctor result depends only on "
+                "(host_id, env_id), never on which of the 11 "
+                "callers runs it; the FDE body and source hashes "
+                "match the binary and the census for both FDEs; "
+                "the six .rodata constants match the model; the "
+                "LSDA's 2 call-site entries and the .cold entry "
+                "are pinned",
+            ],
+        },
+        "engine_callees": {
+            "0x5fe2860": "rocksdb::Env::Default (census-bound, "
+                         "3d290f9c0dad3aa8-env_posix.o): returns the "
+                         "default Env singleton; the ctor stores it "
+                         "at +0x08. The only call before any member "
+                         "is constructed.",
+            "0x63f0e10": "PLT basic_string::_M_create: the heap "
+                         "allocation for a >15-byte db_host_id "
+                         "(0x60b30ef); throws std::bad_alloc on "
+                         "failure.",
+            "0x63f0a60": "PLT memcpy: copies the db_host_id bytes "
+                         "into the SSO buffer or the heap buffer "
+                         "(0x60b3112).",
+            "0x63f0a80": "PLT strlen: the db_host_id length "
+                         "(0x60b305e); the SSO/heap branch is len "
+                         "<= 15 vs len > 15, with the len == 1 and "
+                         "len == 0 fast paths.",
+            "0x63f0e20": "PLT __throw_logic_error: the NULL-global "
+                         "path (0x60b3143) with the .rodata message "
+                         "\"basic_string: construction from null is "
+                         "not valid\" (0x963298).",
+            "0x63f0db0": "PLT basic_string::_M_dispose: destroys "
+                         "the wal_dir (+0xa8) and db_log_dir (+0x88) "
+                         "strings in the .cold (a no-op for SSO "
+                         "strings).",
+            "0x5d350c0": "_Sp_counted_base::_M_release: releases "
+                         "each non-null shared_ptr control block in "
+                         "the .cold (file_checksum_gen_factory "
+                         "+0x230, row_cache +0x200, "
+                         "write_buffer_manager +0x160, statistics "
+                         "+0x60, info_log +0x38, sst_file_manager "
+                         "+0x28, rate_limiter +0x18).",
+            "0x5d46140": "std::vector<std::shared_ptr<EventListener>> "
+                         "destructor: destroys the listeners vector "
+                         "(+0x1a8) in the .cold.",
+            "0x5d35cb0": "std::vector<DbPath> destructor: destroys "
+                         "the db_paths vector (+0x70) in the .cold.",
+            "0x63f0a50": "PLT _Unwind_Resume: the .cold epilogue.",
+            "0x63f0d70": "PLT __stack_chk_fail: the stack-canary "
+                         "failure path in the main FDE and the .cold.",
+        },
+        "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM. "
+            "The target binary is never executed. The tool models the "
+            "ctor in Python; heap addresses (env, string heap "
+            "buffers, shared_ptr control blocks) are deterministic "
+            "ids, not real pointers; padding bytes the ctor never "
+            "writes are modelled as zero (the binary leaves them "
+            "uninitialized). The live check (--live) reads the "
+            "binary: FDE body/source hashes, the six .rodata "
+            "constants, the db_host_id RELATIVE relocation and "
+            "literal, the 11-site caller census, and an independent "
+            "disassembly re-parse of the whole main FDE (0 diffs "
+            "outside the masked runtime-address slots). make "
+            "verify/test/catalogue-check in a tooled environment is "
+            "still owed upstream.",
+        "functions": functions,
+        "layouts": {
+            "db_options": {
+                "+0x00": "create_if_missing, "
+                         "create_missing_column_families, error_if_exists, "
+                         "paranoid_checks, flush_verify_memtable_count, "
+                         "track_and_verify_wals_in_manifest, "
+                         "verify_sst_unique_id_in_manifest (7 bools: "
+                         "false, false, false, true, true, false, true)",
+                "+0x08": "env (Env*, Env::Default())",
+                "+0x10": "rate_limiter (shared_ptr, null)",
+                "+0x20": "sst_file_manager (shared_ptr, null)",
+                "+0x30": "info_log (shared_ptr, null)",
+                "+0x40": "info_log_level (u8 = 1, INFO_LEVEL)",
+                "+0x44": "max_open_files (i32 = -1)",
+                "+0x48": "max_file_opening_threads (i32 = 16)",
+                "+0x50": "max_total_wal_size (u64 = 0)",
+                "+0x58": "statistics (shared_ptr, null)",
+                "+0x68": "use_fsync (bool = false)",
+                "+0x70": "db_paths (vector, empty)",
+                "+0x88": "db_log_dir (string = \"\", SSO)",
+                "+0xa8": "wal_dir (string = \"\", SSO)",
+                "+0xc8": "delete_obsolete_files_period_micros (u64 = "
+                         "21600000000)",
+                "+0xd0": "max_background_jobs (i32 = 2)",
+                "+0xd4": "max_background_compactions (i32 = -1)",
+                "+0xd8": "max_subcompactions (u32 = 1)",
+                "+0xdc": "max_background_flushes (i32 = -1)",
+                "+0xe0": "max_log_file_size (u64 = 0)",
+                "+0xe8": "log_file_time_to_roll (u64 = 0)",
+                "+0xf0": "keep_log_file_num (u64 = 1000)",
+                "+0xf8": "recycle_log_file_num (u64 = 0)",
+                "+0x100": "max_manifest_file_size (u64 = 1073741824)",
+                "+0x108": "table_cache_numshardbits (i32 = 6)",
+                "+0x110": "WAL_ttl_seconds (u64 = 0)",
+                "+0x118": "WAL_size_limit_MB (u64 = 0)",
+                "+0x120": "manifest_preallocation_size (u64 = 4194304)",
+                "+0x128": "allow_mmap_reads, allow_mmap_writes, "
+                         "use_direct_reads, "
+                         "use_direct_io_for_flush_and_compaction "
+                         "(4 bools, false)",
+                "+0x12c": "allow_fallocate (bool = true)",
+                "+0x12d": "is_fd_close_on_exec (bool = true)",
+                "+0x130": "stats_dump_period_sec (u32 = 600)",
+                "+0x134": "stats_persist_period_sec (u32 = 600)",
+                "+0x138": "persist_stats_to_disk (bool = false)",
+                "+0x140": "stats_history_buffer_size (u64 = 1048576)",
+                "+0x148": "advise_random_on_open (bool = true)",
+                "+0x150": "db_write_buffer_size (u64 = 0)",
+                "+0x158": "write_buffer_manager (shared_ptr, null)",
+                "+0x168": "access_hint_on_compaction_start (i32 = 1, "
+                         "NORMAL)",
+                "+0x170": "compaction_readahead_size (u64 = 0)",
+                "+0x178": "random_access_max_buffer_size (u64 = "
+                         "1048576)",
+                "+0x180": "writable_file_max_buffer_size (u64 = "
+                         "1048576)",
+                "+0x188": "use_adaptive_mutex (bool = false)",
+                "+0x190": "bytes_per_sync (u64 = 0)",
+                "+0x198": "wal_bytes_per_sync (u64 = 0)",
+                "+0x1a0": "strict_bytes_per_sync (bool = false)",
+                "+0x1a8": "listeners (vector, empty)",
+                "+0x1c0": "enable_thread_tracking (bool = false)",
+                "+0x1c8": "delayed_write_rate (u64 = 0)",
+                "+0x1d0": "enable_pipelined_write (bool = false)",
+                "+0x1d1": "unordered_write (bool = false)",
+                "+0x1d2": "allow_concurrent_memtable_write (bool = true)",
+                "+0x1d3": "enable_write_thread_adaptive_yield (bool = "
+                         "true)",
+                "+0x1d8": "max_write_batch_group_size_bytes (u64 = "
+                         "1048576)",
+                "+0x1e0": "write_thread_max_yield_usec (u64 = 100)",
+                "+0x1e8": "write_thread_slow_yield_usec (u64 = 3)",
+                "+0x1f0": "skip_stats_update_on_db_open (bool = false)",
+                "+0x1f1": "skip_checking_sst_file_sizes_on_db_open "
+                         "(bool = false)",
+                "+0x1f2": "wal_recovery_mode (u8 = 2, "
+                         "kPointInTimeRecovery)",
+                "+0x1f3": "allow_2pc (bool = false)",
+                "+0x1f8": "row_cache (shared_ptr, null)",
+                "+0x208": "wal_filter (ptr = nullptr)",
+                "+0x210": "fail_if_options_file_error (bool = false)",
+                "+0x211": "dump_malloc_stats (bool = false)",
+                "+0x212": "avoid_flush_during_recovery (bool = false)",
+                "+0x213": "avoid_flush_during_shutdown (bool = false)",
+                "+0x214": "allow_ingest_behind (bool = false)",
+                "+0x215": "two_write_queues (bool = false)",
+                "+0x216": "manual_wal_flush (bool = false)",
+                "+0x217": "wal_compression (u8 = 0, kNoCompression)",
+                "+0x218": "atomic_flush (bool = false)",
+                "+0x219": "avoid_unnecessary_blocking_io (bool = false)",
+                "+0x21a": "write_dbid_to_manifest (bool = false)",
+                "+0x220": "log_readahead_size (u64 = 0)",
+                "+0x228": "file_checksum_gen_factory (shared_ptr, null)",
+                "+0x238": "best_efforts_recovery (bool = false)",
+                "+0x23c": "max_bgerror_resume_count (i32 = INT_MAX)",
+                "+0x240": "bgerror_resume_retry_interval (u64 = 1000000)",
+                "+0x248": "allow_data_in_errors (bool = false)",
+                "+0x250": "db_host_id (string = \"__hostname__\", SSO)",
+                "+0x270": "checksum_handoff_file_types (u64 = 0, empty "
+                         "set)",
+                "+0x278": "compaction_service (shared_ptr, null)",
+                "+0x288": "lowest_used_cache_tier (u8 = 1, "
+                         "kNonVolatileBlockTier)",
+                "+0x289": "enforce_single_del_contracts (bool = true)",
+            },
+            "lsda_call_sites": {
+                "FDE+0x3d..+0x42": "Env::Default() call (0x60b2ded) -- NO "
+                                   "landing pad",
+                "FDE+0x33f..+0x398": "db_host_id string build "
+                                    "(0x60b30ef..0x60b3148: _M_create, "
+                                    "memcpy, __throw_logic_error) -- "
+                                    "landing pad 0x60b3148 (-> .cold "
+                                    "0x60b2cf0, full cleanup)",
+            },
+        },
+    }
+    with open(PACKET / "records.json", "w") as fh:
+        json.dump(records, fh, indent=1, sort_keys=True)
+        fh.write("\n")
+    print("wrote records.json")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,35 @@
+{
+  "caught_up": {
+    "compare": "date signed (setg), then seconds (seta), then fraction (jbe -> not caught up)",
+    "deadline": "slot 0x64e0f78 (time of day add), days = overflow / 86400 (magic 0x1845c8a0ce512957 >> 13), slot 0x64e0aa0 (date add); failure -> fallback tuple 0x4679d0",
+    "engine_value_copy": "0x470 bytes via slot 0x64df508 at 0x2b1ecce",
+    "log": "template 0x4309cd [abci_time][wall_time][round][height], message 0x606063 'using initial abci state from non-validator', round = box +0x30",
+    "requires": "counter >= 6 (0x2b1e652) and box consensus time (+0x60/+0x68) + 2 s + 500000000 ns strictly later than the wall clock"
+  },
+  "component": "abci",
+  "counter": "[rsp+0x28] += 1, saturating at u64::MAX (0x2b1e605)",
+  "gates_changed": false,
+  "loop_entry": {
+    "counter_reset": "0x2b1e1fd [rsp+0x28] = 0",
+    "shim_call": "0x2b1e1f8 -> 0x2d275d0"
+  },
+  "not_caught_up_log": {
+    "log": "template 0x44bccf [n_abci_blocks_seen], message 0x606039 'non-validator abci state not caught up yet'",
+    "when": "counter % 10 == 0 (multiply by 0xcccccccccccccccd, ror 1, compare 0x199999999999999a)"
+  },
+  "per_block": "0x2b1e3ee -> 0x2774590; its only call of 0x2d23610 is 0x27745e0; 0x2d23610 reaches the stage 68 step 0x2d25620",
+  "poll": {
+    "fde": [
+      "0x2b1df60",
+      "0x2b1f5f2"
+    ],
+    "reached_by": "R_X86_64_RELATIVE at 0x6449fb0, no direct call"
+  },
+  "receive": {
+    "call": "0x2b1e252 -> 0x2b149d0 (only direct call; receiver not followed)",
+    "end": "result word 0 -> 0x2b1efbf message client block recver ended before valid block via slot 0x64df6b8"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}

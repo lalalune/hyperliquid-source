@@ -1,0 +1,29 @@
+name	target	contract
+lookup_a	0x64e6a68	(table, ptr, len) -> result; success payload is a table value forwarded to the asset callee
+asset	0x64e69b8	(name ptr, name len, value) -> result; success payload is the packed asset number
+emit	0x538cd30	(state, record) -> result written straight to the output
+rec_check	0x64e4e58	(cap, ptr, len) -> result
+btree_insert	0x4dd59a0	(map, key 24 bytes, value 20 bytes); the Option result is unused
+lookup_b	0x64e6c18	(table, ptr, len) -> result with a dex object pointer
+post	0x55bd6b0	(state, cap, ptr, len) -> result with a dex object pointer
+flag	0x64e6c20	(object+0x378, amount) -> result whose byte at +8 is compared with 2
+divide	0x64e6ad8	(table, amount div 10000) -> table value
+finish	0x64e6c28	(table value, amount, flag 1 or 2) -> result
+vec_of	0x5acc8c0	(dex, 0, dex word 0x10) -> Vec<u64> (cap, ptr, len)
+per_elem	0x54ca190	(state, element)
+dealloc	0x64df4a0	(ptr, size, align)
+memcpy	0x64df508	(dst, src, count)
+memcmp	0x64df9f8	(left, right, count) -> 0 when equal
+memchr	0x64dfcb0	(byte, ptr, len) -> (found, index in rdx); only the needle-size >= 5 branch calls it
+slice_panic	0x64df570	(0, bound, 4, location) diverges; reached only when a needle of five bytes or more matches
+drop	0x50f1840	(0xb0-byte action copy)
+big	0x55cfe90	(state, zero 20 bytes, 0xb0-byte action copy) -> result
+cdd30	0x55cdd30	(state, 20-byte address, 0 or 1) -> result
+account	0x64e6ff8	(account table, 20-byte address) -> block; byte +0x28 bit 0 selects the hash at +0x29 over the default hash
+hash_key	0x4ef4560	(hasher word 1, hasher word 2, 20-byte key) -> 64-bit hash
+table_find	0x4eff000	(table, hash, probe {key, entries, count}) -> slot pointer or 0; the word before the slot is read
+map_find	0x4dc31d0	(map, 0) -> block: byte 0 present flag, 32 payload bytes at +8
+tree_insert	0x51f3910	(0x28-byte vacant handle) -> four words; the new value is not passed
+ring_insert	0x57ec4d0	(ring, index, 8-byte extra word plus 0xa0-byte record); raises the ring length by one
+panic_str	0x64df770	(message, length, location) diverges
+panic	0x64df830	(location) diverges

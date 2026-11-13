@@ -1,0 +1,135 @@
+# RE-018: second handler caller 1site sched getcpu 63644 trio
+
+First packet of the second-miss-handler-caller series (RE-018; the handler 0x634ebb0 has 64 call sites across 28 FDEs in the 11-05 frontier census, 10 windows free in the current tree, 8 of them under the 2000B cap, planned as 8 stages; the lu-miss frontier is exhausted 16/16 (all 16 caller variants in the merged tree); the lock-wait series is finished at #507). FDE 0x6353610..0x63537ef (479 B, 124 strict) has one second-handler call site, calls sched_getcpu, the 0x63644xx trio, and the handler itself, with no endbr64, no canary, and a single ret. An identical 479B copy — the stage-2 twin — starts one padding byte below at 0x63537f0.
+
+Thin packet: no verifier tool, no unit tests, no `make verify`, no `make catalogue`, no full `make test`. Every claim below is a direct check over the window disassembly and bytes, quoted with addresses.
+
+## Window
+
+| Field | Value |
+|---|---|
+| FDE | 0x6353610..0x63537ef |
+| Bytes | 479 |
+| Strict | 124 (123 instructions + 1 continuation line: the split `cs nop` at 0x63536b6/0x63536bd, bytes `66 2e 0f 1f 84 00 00 00 00 00`) |
+| Second-handler call site | 0x63537e2 |
+| Second-handler tail-jump | 0x635375d |
+| Rets | 1 (0x6353623) |
+| bsr | 0 |
+| shr | 2 (shr $1 at 0x635366d, shr $1 at 0x6353698) |
+| shl | 0 |
+| endbr64 | 0 |
+| Canary | absent (0 %fs:0x28 lines; no __stack_chk_fail call) |
+| Jumps | 25 (1 outside) |
+| PLT | 1 |
+| Prefetch/tzcnt/btc | 0 / 0 / 0 |
+
+## Second-handler site
+
+| Field | Value |
+|---|---|
+| Call site | 0x63537e2 |
+| Setup | lea 0x186cd3(%rip),%rdx at 0x63537d6 (# 0x64da4b0); mov %eax,%esi at 0x63537dd; mov %rbp,%rdi at 0x63537df |
+| Target | 0x634ebb0 (FDE 0x634ebb0..0x634eccd, 285 B, 78 strict) |
+| Predecessor | the null table slot at 0x63536dd/0x63536e0 (je 0x63537d6 at 0x63536e0) |
+| Tail-jump | jmp 0x634ebb0 at 0x635375d (after lea 0x186d59(%rip),%rdx at 0x6353750 and pops at 0x6353757/0x635375a/0x635375b; never returns) |
+| Tail-jump predecessor | the table-first-qword check at 0x6353740/0x635374a (je 0x635361c at 0x635374a when the first qword is non-null) |
+
+## Handler (0x634ebb0, cited context)
+
+| Field | Value |
+|---|---|
+| FDE | 0x634ebb0..0x634eccd (285 B, 78 strict, endbr64 1 at 0x634ebb0) |
+| Trylock | pthread_mutex_trylock@plt at 0x634ebce on mutex 0x6511700 (lea at 0x634ebb6) |
+| Trylock failure | jne 0x634ec90 at 0x634ebd5; lea rdi,[r14-0x40] at 0x634ec90; call lock-wait 0x63bf680 at 0x634ec94; movb $0x1,0x6511728 at 0x634ec99; jmp 0x634ebdb (back to the counter increment — retry) |
+| Counters | add QWORD [0x65116f8],0x1 at 0x634ebdb; cmp rbp,[0x65116f0] at 0x634ebe3; add QWORD [0x65116e8],0x1 at 0x634ebec; mov [0x65116f0],rbp at 0x634ebf4 |
+| Bound | cmp ebx,0xffe at 0x634ebfb; ja 0x634ec50 (out-of-range path: movb $0x0,0x6511728 at 0x634ec50; unlock at 0x634ec5d; xor r12d,r12d at 0x634ec5a) |
+| Count | mov eax,[0x65096b0] at 0x634ec03; lock add [0x65096b0],0x1 at 0x634ecc0 (when ebx == count, je 0x634ecc0 at 0x634ec0b) |
+| Table | lea rdx,0x65096c0 at 0x634ec13; mov r12,[rdx+rcx*8] at 0x634ec1a (rcx = ebx) |
+| Null slot | je 0x634eca8 at 0x634ec21; call 0x6364430 at 0x634ecb0; mov r12,rax at 0x634ecb5 |
+| Unlock | pthread_mutex_unlock@plt at 0x634ec31 (and at 0x634ec5d on the out-of-range path) |
+| Return | test ebx,ebx at 0x634ec36; ebx == 0 returns r12 (mov rax,r12 at 0x634ec3b; ret at 0x634ec45); else 0x6367450 at 0x634ec64 and 0x6368e40 at 0x634ec72 are checked, then the abort path (call 0x63bf5b6 at 0x634ec86; call abort@plt (0x63f0bf0) at 0x634ec8b) |
+| Calls | 9 (trylock, unlock x2, 0x6367450, 0x6368e40, 0x63bf5b6, abort, lock-wait 0x63bf680, 0x6364430) |
+
+The handler is already claimed as a window by RE-001-node115-lu-value-leaves-bin — it is cited context only, never a stage. It links back to the finished lock-wait series: on trylock failure it falls back to the lock-wait helper 0x63bf680.
+
+## Calls
+
+| Target | Site | PLT |
+|---|---|---|
+| 0x63f1ad0 (sched_getcpu) | 0x6353682 | yes |
+| 0x6364420 | 0x63536eb | no |
+| 0x6364410 | 0x63536f5 | no |
+| 0x6364400 | 0x6353706 | no |
+| 0x63edf10 | 0x635372d | no |
+| 0x6352fc0 | 0x635376a | no |
+| 0x63edf10 | 0x63537a5 | no |
+| 0x63ec4c0 | 0x63537b5 | no |
+| 0x6360ed0 | 0x63537cc | no |
+| 0x634ebb0 (second miss handler) | 0x63537e2 | no |
+
+No lu-miss, bin_table_init, key-resolver (0x6365150), count call, loader call, or #314–#507 window calls. PLT determination is by `@plt` suffix only: the internal `.text` calls (0x6364420, 0x6364410, 0x6364400, 0x63edf10, 0x6352fc0, 0x63ec4c0, 0x6360ed0, 0x634ebb0) are NOT PLT stubs. (The `@plt` substring also appears in lea/mov symbol annotations such as `__register_atfork@plt+0x10dff0` for the .bss/.data addresses; those are not PLT calls.)
+
+## Shape
+
+Entry: push %r12 at 0x6353610, push %rbp at 0x6353612, push %rbx at 0x6353613; rbx = entry rsi (`mov %rsi,%rbx` at 0x6353614); rbp = entry rdi (`mov %rdi,%rbp` at 0x635362c). If rsi != 0 the window returns rsi immediately (`mov %rbx,%rax` at 0x635361c; ret at 0x6353623). Otherwise the byte at rdi+1 selects the path (`cmpb $0x0,0x1(%rdi)` at 0x6353628; jg 0x6353740 at 0x635362f).
+
+Main path (byte at rdi+1 == 0): the qword at +0x90 of the entry struct is loaded (`mov 0x90(%rdi),%rbx` at 0x6353635); if null, je 0x6353768 at 0x635363f takes the 0x6352fc0 path below. Otherwise the count global is read (`lea 0x1ac534(%rip),%r12` at 0x6353645, # 0x64ffb80; `mov (%r12),%esi` at 0x635364c); if the count is <= 2 the window returns early (`cmp $0x2,%esi` at 0x6353650; jbe 0x635361c at 0x6353653). The field at +0x13450 of the struct is read (`mov 0x13450(%rbx),%ecx` at 0x6353655) and the counter at 0x6511730 is read (`mov 0x1be0cf(%rip),%edx` at 0x635365b). If the count is exactly 4 and the counter is > 1, the counter is halved (`cmp $0x4,%esi` at 0x6353661; jne 0x6353678 at 0x6353664; `cmp $0x1,%edx` at 0x6353666; jbe 0x6353678 at 0x6353669; `mov %edx,%edi` at 0x635366b; `shr $1,%edx` at 0x635366d; `and $0x1,%edi` at 0x635366f; `cmp $0x1,%edi` at 0x6353672; `sbb $0xffffffff,%edx` at 0x6353675). Then `cmp %edx,%ecx` at 0x6353678 (jae 0x635361c at 0x635367a — early return) and `cmp 0x10(%rbx),%rbp` at 0x635367c (je 0x635361c at 0x6353680 — early return).
+
+sched_getcpu: call at 0x6353682 returns the cpu in eax. If the count is not 3 (`cmpl $0x3,(%r12)` at 0x6353687; je 0x63536a5 at 0x635368c), the cpu is adjusted by the halved counter (`mov 0x1be09b(%rip),%r8d` at 0x635368e, # 0x6511730; `mov %eax,%r9d` at 0x6353695; `shr $1,%r8d` at 0x6353698; `sub %r8d,%r9d` at 0x635369b; `cmp %r8d,%eax` at 0x635369e; `cmovae %r9d,%eax` at 0x63536a1). Then `cmp %eax,0x13450(%rbx)` at 0x63536a5; if the adjusted cpu differs from the stored field, jne 0x63536c0 at 0x63536ab takes the table-lookup path; if equal, `mov %rbp,0x10(%rbx)` at 0x63536ad stores rbp into the struct and the window returns early (jmp 0x635361c at 0x63536b1).
+
+Table lookup (0x63536c0): the qword at +0x90 of the rbp struct is loaded (`mov 0x90(%rbp),%rbx` at 0x63536c0); `cmp 0x13450(%rbx),%eax` at 0x63536c7; if equal, je 0x63536ad at 0x63536cd stores rbp and returns early. Otherwise the table at 0x65096c0 is indexed by the adjusted cpu (`mov %eax,%r10d` at 0x63536cf; `lea 0x1b5fe7(%rip),%r11` at 0x63536d2, # 0x65096c0; `mov (%r11,%r10,8),%r12` at 0x63536d9); if the slot is null (`test %r12,%r12` at 0x63536dd; je 0x63537d6 at 0x63536e0), the handler path below runs.
+
+The 0x63644xx trio (0x63536e6): `xor %esi,%esi` at 0x63536e6; `mov %rbx,%rdi` at 0x63536e8; call 0x6364420 at 0x63536eb; `xor %esi,%esi` at 0x63536f0; `mov %r12,%rdi` at 0x63536f2; call 0x6364410 at 0x63536f5; `mov %r12,0x90(%rbp)` at 0x63536fa (the table entry is stored into the rbp struct); `xor %esi,%esi` at 0x6353701; `mov %rbx,%rdi` at 0x6353703; call 0x6364400 at 0x6353706; `test %eax,%eax` at 0x635370b; if the third call returns 0, je 0x63537bf at 0x635370d takes the 0x6360ed0 path (`mov $0x1,%ecx` at 0x63537bf; `xor %edx,%edx` at 0x63537c4; `mov %rbx,%rsi` at 0x63537c6; `mov %rbp,%rdi` at 0x63537c9; call 0x6360ed0 at 0x63537cc; jmp 0x6353713 at 0x63537d1). Otherwise `cmpb $0x0,0x0(%rbp)` at 0x6353713; if the byte is 0, je 0x6353732 at 0x6353717 skips the 0x63edf10 call; else `lea 0x358(%rbp),%rdx` at 0x6353719, `lea 0x100(%rbp),%rsi` at 0x6353720, `mov %r12,%rcx` at 0x6353727, `mov %rbp,%rdi` at 0x635372a, call 0x63edf10 at 0x635372d. At 0x6353732 the qword at +0x90 of the rbp struct is re-loaded (`mov 0x90(%rbp),%rbx` at 0x6353732) and the window stores rbp and returns early (`jmp 0x63536ad` at 0x6353739).
+
+The 0x6352fc0 path (0x6353768, taken when the +0x90 qword of the entry struct is null): `xor %esi,%esi` at 0x6353768; call 0x6352fc0 at 0x635376a (rdi = entry rdi); `mov %rax,%rbx` at 0x6353773; `cmpb $0x0,0x0(%rbp)` at 0x635376f; if the byte is 0, je 0x6353645 at 0x6353776 loops back to the count read. Otherwise `mov 0x128(%rbp),%rax` at 0x635377c; `lea 0x100(%rbp),%rsi` at 0x6353783; `lea 0x358(%rbp),%rdx` at 0x635378a; `test %rax,%rax` at 0x6353791; if the +0x128 qword is null, je 0x63537af at 0x6353794 takes the 0x63ec4c0 call (`mov %rbx,%rcx` at 0x63537af; `mov %rbp,%rdi` at 0x63537b2; call 0x63ec4c0 at 0x63537b5; jmp 0x6353645 at 0x63537ba — loop back); if it equals rbx, je 0x6353645 at 0x6353799 loops back; else `mov %rbx,%rcx` at 0x635379f, `mov %rbp,%rdi` at 0x63537a2, call 0x63edf10 at 0x63537a5, jmp 0x6353645 at 0x63537aa — loop back. So the 0x6352fc0 path retries the count/table lookup at 0x6353645 (four backward jumps: je @0x6353776, je @0x6353799, jmp @0x63537aa, jmp @0x63537ba).
+
+The tail-jump path (0x6353740, taken when the byte at rdi+1 is > 0): the first qword of the table at 0x65096c0 is loaded (`mov 0x1b5f79(%rip),%rbx` at 0x6353740); if non-null, jne 0x635361c at 0x635374a returns it; if null, `lea 0x186d59(%rip),%rdx` at 0x6353750 (# 0x64da4b0), pops at 0x6353757/0x635375a/0x635375b, and `jmp 0x634ebb0` at 0x635375d jumps to the second handler and never returns.
+
+The null-slot handler path (0x63537d6, taken when the table slot is null): `lea 0x186cd3(%rip),%rdx` at 0x63537d6 (# 0x64da4b0); `mov %eax,%esi` at 0x63537dd; `mov %rbp,%rdi` at 0x63537df; call 0x634ebb0 at 0x63537e2; `mov %rax,%r12` at 0x63537e7 (the handler's result becomes the table entry); `jmp 0x63536e6` at 0x63537ea enters the trio.
+
+Exit: the single ret at 0x6353623 returns rax via a single reaching def, `mov %rbx,%rax` at 0x635361c; rbx's reaching defs are exactly {0x6353614 (entry rsi), 0x6353635 (qword at +0x90 of the entry struct), 0x63536c0 (qword at +0x90 of the rbp struct), 0x6353732 (qword at +0x90 of the rbp struct), 0x6353740 (first qword of table 0x65096c0), 0x6353773 (result of the 0x6352fc0 call)} — so the window returns either its entry rsi, a +0x90 struct qword, the table's first qword, or the 0x6352fc0 result. The tail-jump path at 0x635375d never returns. The window has fourteen backward jumps: jbe @0x6353653, jae @0x635367a, je @0x6353680, jmp @0x63536b1, je @0x63536cd, jmp @0x6353739, jne @0x635374a, jmp @0x635375d (outside, to the handler), je @0x6353776, je @0x6353799, jmp @0x63537aa, jmp @0x63537ba, jmp @0x63537d1 and jmp @0x63537ea.
+
+## Twin (stage 2, cited not claimed)
+
+An identical 479B copy starts at 0x63537f0, one padding byte below this window's end (0x63537ef). The twin is FDE 0x63537f0..0x63539cf (479 B, 124 strict, sha256 20aa03a8dacc897627c0a8b2d07d127bd5a04aef37b60cf947788edca9b34a97; first bytes `41 54 55 53`, last 5 bytes `e9 f7 fe ff ff` — the same as this window). A direct byte comparison finds 36 raw byte diffs at 18 offset pairs, ALL position-dependent (7 RIP-relative disp32 pairs and 11 rel32 call/jmp pairs), 0 other diffs, and 0 instruction-stream mismatches modulo immediates. The pairs, by instruction:
+
+| Offset pair | Instruction |
+|---|---|
+| 0x38–0x39 | lea 0x64ffb80 at 0x6353645 (RIP-relative) |
+| 0x4d–0x4e | mov 0x6511730 at 0x635365b (RIP-relative) |
+| 0x73–0x74 | call sched_getcpu at 0x6353682 (rel32) |
+| 0x81–0x82 | mov 0x6511730 at 0x635368e (RIP-relative) |
+| 0xc5–0xc6 | lea 0x65096c0 at 0x63536d2 (RIP-relative) |
+| 0xdc–0xdd | call 0x6364420 at 0x63536eb (rel32) |
+| 0xe6–0xe7 | call 0x6364410 at 0x63536f5 (rel32) |
+| 0xf7–0xf8 | call 0x6364400 at 0x6353706 (rel32) |
+| 0x11e–0x11f | call 0x63edf10 at 0x635372d (rel32) |
+| 0x133–0x134 | mov 0x65096c0 at 0x6353740 (RIP-relative) |
+| 0x143–0x144 | lea 0x64da4b0 at 0x6353750 (RIP-relative) |
+| 0x14e–0x14f | jmp 0x634ebb0 at 0x635375d (rel32) |
+| 0x15b–0x15c | call 0x6352fc0 at 0x635376a (rel32) |
+| 0x196–0x197 | call 0x63edf10 at 0x63537a5 (rel32) |
+| 0x1a6–0x1a7 | call 0x63ec4c0 at 0x63537b5 (rel32) |
+| 0x1bd–0x1be | call 0x6360ed0 at 0x63537cc (rel32) |
+| 0x1c9–0x1ca | lea 0x64da4b0 at 0x63537d6 (RIP-relative) |
+| 0x1d3–0x1d4 | call 0x634ebb0 at 0x63537e2 (rel32) |
+
+The twin has the same 10 calls shifted +0x1e0 (sched_getcpu at 0x6353862, 0x6364420 at 0x63538cb, 0x6364410 at 0x63538d5, 0x6364400 at 0x63538e6, 0x63edf10 at 0x635390d, 0x6352fc0 at 0x635394a, 0x63edf10 at 0x6353985, 0x63ec4c0 at 0x6353995, 0x6360ed0 at 0x63539ac, handler at 0x63539c2), 1 ret at 0x6353803 and 25 jumps. The duplication is flagged honestly here: the twin is NOT a distinct function — it is the same code at a different address, and it is the next stage (stage 2), not a separate claim.
+
+## Verification (direct checks only — thin packet)
+
+- Window bytes: 479 B extracted from `artifacts/node/115/hl-node` at file offset 0x6352610 (VA 0x6353610, delta 0x1000, verified against four spot bytes: `e8 49 e4 09 00` at 0x6353682, `c3` at 0x6353623, `e9 4e b4 ff ff` at 0x635375d, `e8 c9 b3 ff ff` at 0x63537e2); first bytes `41 54 55 53` (push %r12; push %rbp; push %rbx), last 5 bytes `e9 f7 fe ff ff` (jmp 0x63536e6); sha256 `ba90394dd608d031d2d3b3b5b034915a422635a97048899cae8eb6f827fcd344`. The `.hex` exhibit is byte-identical to the binary slice. The delta is 0x1000, NOT 0x10000: the binary slice at file offset 0x6343610 (VA − 0x10000) starts `28 72 c4 07`, not `41 54 55 53` — it does not match. File offset is VA − 0x1000 by direct subtraction.
+- Objdump census over the window disassembly (objdump -d of the binary .text, window slice; 124 strict lines): 10 calls, 1 ret, bsr 0, shr 2 (`shr $1,%edx` at 0x635366d, `shr $1,%r8d` at 0x6353698), shl 0, endbr64 0, canary 0, 25 jumps / 1 outside, 1 PLT call by `@plt` suffix.
+- FDE bounds: `readelf --debug-dump=frames` returns FDE pc=0x6353610..0x63537ef directly; the window ends at 0x63537ef, gap 1 to the twin's FDE start 0x63537f0 — the byte at VA 0x63537ef (file offset 0x63527ef) is 0xcc, one padding byte. (Note: the first brief for this packet stated gap 0 with the window ending at 0x63537f0, and the series survey sketch said the same; both were wrong — readelf gives the exclusive end 0x63537ef. The approved correction's gap-1 conclusion holds, but its file offset (0x63526ef) and byte value (0x00) were both wrong: VA 0x63537ef is file offset 0x63527ef by direct subtraction, and the byte there is 0xcc (int3 padding). The byte at file offset 0x63526ef is 0x00, but that is VA 0x63536ef — inside the window, the last byte of the call rel32 at 0x63536eb — not the padding byte. This packet uses gap 1 with the true padding byte 0xcc at file offset 0x63527ef.)
+- Twin verified by direct byte comparison (36 raw byte diffs at 18 offset pairs, all position-dependent; 0 other diffs; 0 instruction-stream mismatches modulo immediates; same 10 calls shifted +0x1e0, 1 ret at 0x6353803, 25 jumps).
+- Handler shape read straight from the handler disassembly (FDE 0x634ebb0..0x634eccd, 285 B, 78 strict, 9 calls, 1 ret at 0x634ec45): trylock on mutex 0x6511700, lock-wait fallback 0x63bf680, counters 0x65116f8/0x65116e8/0x65116f0, cmp ebx,0xffe, table 0x65096c0.
+- Exit reaching-definitions read straight from the disassembly: rbx defs {0x6353614, 0x6353635, 0x63536c0, 0x6353732, 0x6353740, 0x6353773} reach `mov %rbx,%rax` at 0x635361c; the tail-jump path at 0x635375d never returns.
+- Duplicate check: live upstream main a8616af9 (verified 2026-11-10 20:20 UTC, 2026-11-11 05:20 KST; this packet was built against a8616af9) — the slug path returns 404; GitHub issue search over open PR titles+bodies: `6353610` 0 hits; `63537f0` 0 hits; `634ebb0` 0 hits in repo-scoped search (index false negative — the 28 family PRs verified directly below cite it 2 times each); `RE-018` 9 search hits = closed PRs #408, #465, #550, #1035, #1041, #1265, #1267, #3369, #3375 (none open, none about this series); not a claim; a direct pulls scan of all 580 open PRs finds no other citation: `6353610` 0, `63537f0` 0, `63537ef` 0, `63539cf` 0, `634ebb0` 56 (2 each in the author's own 28 open lock-wait PRs #5996 #480 + #6000 #481 + #6007 #482 + #6017 #483 + #6025 #484 + #6035 #485 + #6043 #486 + #6050 #487 + #6055 #488 + #6063 #489 + #6072 #490 + #6078 #491 + #6084 #492 + #6087 #493 + #6092 #494 + #6096 #495 + #6156 #496 + #6209 #497 + #6220 #498 + #6227 #499 + #6231 #500 + #6336 #501 + #6339 #502 + #6345 #503 + #6450 #504 + #6455 #505 + #6464 #506 + #6567 #507), `RE-018` 0 — the 634ebb0 citations live in the author's own lock-wait PRs as cited context; no other PR claims this window; the author-scoped search returns 28 open and 478 closed PRs in this repo; local work-items tree: no other packet claims this window (0 records.json with window fde `0x6353610..0x63537ef` besides this one; the FDE range appears only as a caller entry in RE-001-node115-lu-opt-leaves-bin-cleanup's bin_setup_52fc0 callers census, site 0x635376a — a citation, not a claim — and the address 6353610 appears in 51 other records.json census/survey tables; the twin appears the same way, caller entry site 0x635394a).
+- NOT run (declared): no verifier tool, no unit tests, no `make verify`, no `make catalogue`, no full `make test`.
+
+## Results and limitations
+
+- This is the FIRST packet of the RE-018 series (second miss handler 0x634ebb0 callers; 8 planned stages). It establishes the caller shape: sched_getcpu + the 0x63644xx trio + 0x63edf10 + 0x6352fc0 + 0x63ec4c0 + 0x6360ed0 + a handler call + a tail-jump to the handler.
+- Corrections to any prior packet: NONE — this is the series opener; no prior RE-018 packet exists.
+- Unknown: entry inputs' caller-side meaning (rdi struct layout beyond the observed +0x1, +0x90, +0x10, +0x100, +0x128, +0x358 reads; rsi's role beyond the non-zero early return); field semantics beyond observed reads/writes (including the meaning of the count at 0x64ffb80, the counter at 0x6511730, and the table at 0x65096c0); the 0x63644xx trio's, 0x63edf10's, 0x6352fc0's, 0x63ec4c0's and 0x6360ed0's semantics beyond their call-site contracts; the second handler's semantics beyond its observed body (its table at 0x65096c0, the count at 0x65096b0, the meaning of the 0xffe bound, and the abort path via 0x63bf5b6); why the twin copy exists (the stage-2 question).
+- Next question: An identical 479B copy starts at 0x63537f0, one padding byte below this window's end (0x63537ef) — why does this function exist twice? The twin is FDE 0x63537f0..0x63539cf (479 B, 124 strict), byte-identical to this window modulo position-dependent immediates only (36 raw byte diffs at 18 offset pairs, all rel32/disp32; 0 other diffs; 0 instruction-stream mismatches modulo immediates), with the same 10 calls shifted +0x1e0, 1 ret at 0x6353803 and 25 jumps. It is the next stage (stage 2), not a distinct function.

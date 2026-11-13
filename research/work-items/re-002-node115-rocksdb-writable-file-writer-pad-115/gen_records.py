@@ -1,0 +1,645 @@
+#!/usr/bin/env python3
+"""Generate functions.tsv and records.json for this packet from the
+vendor census + the binary, so no hash is hand-transcribed.
+
+Body hashes are recomputed from work/hl-node-115.bin over the FDE
+range. Pad and Pad.cold are BOTH census-bound: their body hashes
+match the census target_body_sha256 exactly and their source hashes
+are reproduced by zeroing the recorded relocations (Pad: 10
+relocations, kinds 2/4; .cold: 3 relocations, kind 4). Neither has
+a kind-42 relocation, so no GOTPCRELX mov-lea restoration applies.
+"""
+import hashlib
+import json
+import subprocess
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+PACKET = Path(__file__).resolve().parent
+BIN = ROOT / "work" / "hl-node-115.bin"
+DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+
+# (start, end, name, slug, census-bound?)
+FUNCS = [
+    ("0x60525b0", "0x60527a5",
+     "rocksdb::WritableFileWriter::Pad",
+     "writable-file-writer-pad-60525b0", True),
+    ("0x605257c", "0x60525a8",
+     "rocksdb::WritableFileWriter::Pad.cold",
+     "writable-file-writer-pad-cold-605257c", True),
+]
+
+
+def va2off(va):
+    out = subprocess.check_output(["readelf", "-lW", str(BIN)]).decode()
+    for line in out.splitlines():
+        p = line.split()
+        if p and p[0] == "LOAD":
+            v, o, f = int(p[2], 16), int(p[1], 16), int(p[4], 16)
+            if v <= va < v + f:
+                return o + (va - v)
+    raise ValueError(hex(va))
+
+
+def _caller_sites():
+    sites = []
+    with open(PACKET / "callers.tsv") as fh:
+        header = fh.readline().rstrip("\n").split("\t")
+        for line in fh:
+            row = dict(zip(header, line.rstrip("\n").split("\t")))
+            sites.append({
+                "instruction": row["instruction"],
+                "kind": row["kind"], "site": row["site"],
+                "site_fde_end": row["site_fde_end"],
+                "site_fde_start": row["site_fde_start"],
+                "target": row["target"],
+                "target_name": row["target_name"]})
+    return sites
+
+
+def main():
+    data = open(BIN, "rb").read()
+    assert hashlib.sha256(data).hexdigest() == DIGEST
+    census = json.load(open(
+        ROOT / "research" / "work-items" / "RE-002-node115-vendor-census"
+        / "census.json"))["records"]
+    by_start = {r["start"]: r for r in census}
+    rows = []
+    functions = {}
+    for start_s, end_s, name, slug, census_bound in FUNCS:
+        start, end = int(start_s, 16), int(end_s, 16)
+        body = data[va2off(start):va2off(end)]
+        body_hash = hashlib.sha256(body).hexdigest()
+        if census_bound:
+            rec = by_start[start]
+            assert body_hash == rec["target_body_sha256"], name
+            zeroed = bytearray(body)
+            for rel in rec["relocations"]:
+                o, w = rel["offset"], rel["width"]
+                zeroed[o:o + w] = b"\x00" * w
+                if rel.get("relaxation") == "gotpcrelx-mov-lea":
+                    # GOTPCRELX relaxation: the linker rewrote the
+                    # source's MOV (0x8B) into a LEA (0x8D); restore
+                    # the MOV opcode before hashing. Pad has no
+                    # kind-42 relocation, so this never fires here.
+                    assert zeroed[o - 2] == 0x8D
+                    zeroed[o - 2] = 0x8B
+            source_hash = hashlib.sha256(bytes(zeroed)).hexdigest()
+            assert source_hash == rec["source_body_sha256"], name
+            relocs = ";".join(
+                "%d:kind%d%s" % (r["offset"], r["kind"],
+                                 "(mov-lea)" if r.get("relaxation")
+                                 == "gotpcrelx-mov-lea" else "")
+                for r in rec["relocations"])
+            row = {
+                "name": name, "start": start_s, "end": end_s,
+                "size": str(end - start), "body_sha256": body_hash,
+                "source_sha256": source_hash,
+                "raw_equal": str(rec["raw_equal"]),
+                "relocations": relocs,
+                "census_id": "node115-vendor-%s" % start_s[2:],
+                "symbol": rec["symbol"],
+                "excerpt": slug + ".objdump.txt", "hex": slug + ".hex",
+            }
+            functions[start_s] = {
+                "body_sha256": body_hash,
+                "source_sha256": source_hash,
+                "relocations": relocs,
+                "census_id": row["census_id"],
+                "mangled": rec["symbol"],
+                "callers": [],
+                "lea_refs": [],
+            }
+        else:
+            assert start not in by_start, name
+            row = {
+                "name": name, "start": start_s, "end": end_s,
+                "size": str(end - start), "body_sha256": body_hash,
+                "source_sha256": "", "raw_equal": "n/a",
+                "relocations": "0", "census_id": "none", "symbol": "",
+                "excerpt": slug + ".objdump.txt", "hex": slug + ".hex",
+            }
+            functions[start_s] = {
+                "body_sha256": body_hash,
+                "source_sha256": "",
+                "relocations": "0",
+                "census_id": "none",
+                "mangled": "",
+                "callers": [],
+                "lea_refs": [],
+            }
+        rows.append(row)
+    with open(PACKET / "functions.tsv", "w") as fh:
+        cols = ["name", "start", "end", "size", "body_sha256",
+                "source_sha256", "raw_equal", "relocations", "census_id",
+                "symbol", "excerpt", "hex"]
+        fh.write("\t".join(cols) + "\n")
+        for r in rows:
+            fh.write("\t".join(r[c] for c in cols) + "\n")
+    print("wrote functions.tsv (%d functions, all hashes verified)"
+          % len(rows))
+
+    # Caller census sites, read back from callers.tsv (no hand copy).
+    sites = _caller_sites()
+    main_calls = [s for s in sites if s["target"] == "0x60525b0"]
+    cold_jumps = [s for s in sites if s["target"] == "0x605257c"]
+    functions["0x60525b0"]["callers"] = [s["site"] for s in main_calls]
+    functions["0x605257c"]["callers"] = [s["site"] for s in cold_jumps]
+    functions["0x60525b0"]["model"] = (
+        "501-byte IOStatus Pad(uint64_t size, Env::IOPriority "
+        "priority) (sret 16-byte out-pointer in rdi, "
+        "WritableFileWriter* in rsi, size in rdx, priority in ecx). "
+        "Seen-error gate (0x60525d5): byte this+0x89 set -> return "
+        "IOStatus code 5 'Writer has previous error.' (27-byte heap "
+        "state_, old sret state_ delete[]'d first), nothing else "
+        "touched. Zero-fill loop (0x60525e4..0x60526c4): the entry "
+        "cursize_ (this+0x58) is saved at rsp+0x8 (the pad start) "
+        "and the remaining size is filled in chunks of min("
+        "buf_.capacity_ (this+0x50) - buf_.cursize_, remaining): "
+        "memset (buf_.bufstart_ (this+0x60) + buf_.cursize_, 0, "
+        "chunk) via the PLT memset at 0x63f0a90, cursize_ += chunk, "
+        "remaining -= chunk. When remaining is still non-zero the "
+        "buffer is full, so the routine calls Flush(priority) at "
+        "0x6051a20 (call site 0x605269a) with a 16-byte sret at "
+        "rsp+0x10; on a non-OK Flush status (code byte at 0x10(%rsp) "
+        "!= 0) it sets seen_error_ = 1 and returns that status at "
+        "once (0x6052758, move-assigned into the out sret with byte "
+        "2 forced to 0 -- pending_sync_ NOT set, filesize_ NOT "
+        "advanced). On success it delete[]s the Flush sret state_ "
+        "when non-null, reloads cursize_/capacity_ and loops. A "
+        "zero-size Pad skips the loop entirely (0x60525fa). "
+        "Epilogue (0x605262e): pending_sync_ (this+0x88) = 1; "
+        "filesize_ (this+0x70) += size. Verification arm "
+        "(0x6052641..0x605274f): only when "
+        "perform_data_verification_ (this+0xd1) is set, "
+        "buffered_data_crc32c_checksum_ (this+0xd4) = "
+        "crc32c::Extend(checksum, buf_.bufstart_ + ENTRY cursize_, "
+        "size) through the 0x61c25f0 dispatch thunk -- the pointer "
+        "is the SAVED entry cursize, not the final one. When no "
+        "Flush intervened the span is exactly the zeros just "
+        "written; when a Flush DID intervene (size exceeded the free "
+        "space at entry) the span runs past the buffer's capacity "
+        "-- the binary reads heap bytes past the allocation, so the "
+        "resulting checksum is NOT pinned by this model (recorded "
+        "as null with the pointer/length). "
+        "buffered_data_with_checksum_ (this+0xd8) is NOT consulted "
+        "here (unlike Flush's WriteDirectWithChecksum selection). "
+        "OK return (0x605264f): sret = {code 0, state_ null}. "
+        "Direct I/O note: Pad's binary has no use_direct_io() "
+        "check (upstream asserts !use_direct_io()); with direct I/O "
+        "and pending_sync_ clear, Flush skips the write, the buffer "
+        "stays full and the loop makes no progress -- the binary "
+        "does not terminate for size > free space in that "
+        "configuration. The model raises instead of hanging.")
+    functions["0x605257c"]["model"] = (
+        "44-byte .cold landing pad, entered by the single tail jump "
+        "at 0x60527a0 (the FDE's exception landing-pad tail): "
+        "delete[] the sret state_ when non-null, check the stack "
+        "canary, then _Unwind_Resume or __stack_chk_fail. "
+        "Unwind-only; no case exercises it.")
+    records = {
+        "artifact": "node #115",
+        "artifact_sha256": DIGEST,
+        "bound_context": [
+            "RE-002-node115-rocksdb-writable-file-writer-flush-115 "
+            "(open, PR #6057): reconstructs WritableFileWriter::Flush "
+            "0x6051a20, which Pad calls at 0x605269a whenever the "
+            "buffer fills mid-pad, and which lists Pad as one of its "
+            "13 callers. This packet is the direct follow-up the "
+            "#6057 entry left open, and it supersedes the Flush "
+            "packet's oracle note on Pad with the full body model. "
+            "The Flush oracle in this packet implements the #6057 "
+            "contract at the same fidelity.",
+            "RE-002-node115-rocksdb-writable-file-writer-append-115 "
+            "(open, PR #6041): reconstructs WritableFileWriter::Append "
+            "0x6054680 and pins the same 0xe0 writer layout, the "
+            "same seen-error gate (code 5, 27-byte heap state_) and "
+            "the same sret move-assign shape Pad uses on its Flush-"
+            "failure path.",
+            "RE-002-node115-vendor-census: Pad and Pad.cold are BOTH "
+            "census-bound (body hashes match target_body_sha256 "
+            "exactly; source hashes reproduced by zeroing the "
+            "recorded relocations: Pad 10 relocations, kinds 2/4; "
+            ".cold 3 relocations, kind 4; no kind-42 relocation in "
+            "either, so no GOTPCRELX restoration applies).",
+            "facebook/rocksdb v8.1.1, read live this cycle: "
+            "file/writable_file_writer.cc Pad (lines 342-411) "
+            "confirms the packet step for step -- the seen-error "
+            "gate, the saved pad_start = buf_.CurrentSize(), the "
+            "min(cap, left) chunking with PadWith(append_bytes, 0) "
+            "(inlined as memset in the binary), the Flush-when-left-"
+            "remains with the failure return, the cap recompute, "
+            "pending_sync_ = true, filesize_ += pad_bytes, and the "
+            "verification Extend over BufferStart() + pad_start "
+            "with length pad_bytes gated on "
+            "perform_data_verification_ alone. Two binary-vs-source "
+            "observations, recorded not hidden: the assert"
+            "(pad_bytes < kDefaultPageSize) is compiled out (the FDE "
+            "has no size-vs-4096 comparison, only the zero check), "
+            "and the over-read quirk is upstream code -- the source "
+            "comment says 'Assume pad_bytes is small compared to "
+            "buf_ capacity', and when that assumption fails the "
+            "Extend reads past the buffer. The direct-I/O "
+            "non-termination is pinned from the binary alone (the "
+            "binary has no use_direct_io() check in Pad).",
+        ],
+        "caller_census": {
+            "method": "Whole-.text scan for E8 calls, E9 tail jumps "
+                      "and RIP-relative LEA references landing on the "
+                      "targets, validated by decoding forward from the "
+                      "enclosing FDE start with Capstone (census.py). "
+                      "A site counts only on a real instruction "
+                      "boundary with the expected mnemonic.",
+            "notes": [
+                "WritableFileWriter::Pad 0x60525b0: exactly 1 direct "
+                "call, 0 tail jumps, 0 LEA refs. The sole caller is "
+                "rocksdb::BlockBasedTableBuilder::"
+                "WriteMaybeCompressedBlock 0x60e7200..0x60e7844 "
+                "(census-bound), call site 0x60e7649, with priority "
+                "IO_TOTAL (4) and size = (block_size - ((offset + 5) "
+                "% block_size)) % block_size -- the SST "
+                "block-alignment pad (block trailer: 1 type byte + 4 "
+                "CRC bytes). Pad itself never computes an alignment; "
+                "the caller does. The caller's alignment math is "
+                "pinned in the bindings group (caller_pad_size rows).",
+                "WritableFileWriter::Pad.cold 0x605257c: exactly 1 "
+                "tail jump at 0x60527a0 (the endbr64 stub at the main "
+                "FDE tail, 0x6052799: mov %rax,%rbx; jmp 0x605257c) "
+                "-- the exception landing-pad entry. No call sites.",
+                "Pad calls Flush (0x6051a20) at exactly one site, "
+                "0x605269a, inside its zero-fill loop (verified by "
+                "reading the Pad disassembly; Flush is not a "
+                "census.py target of this packet, so this site is "
+                "pinned by inspection, not by the scan). Pad calls "
+                "no other WritableFileWriter member: no Append call "
+                "exists in the FDE.",
+            ],
+            "sites": sites,
+            "validated_sites": len(sites),
+        },
+        "cases": {
+            "count": 2400,
+            "ledger": "cases.tsv",
+            "split": "600 gate (seen-error, zero/non-zero size, entry "
+                     "cursize/capacity, verification flags, priorities "
+                     "0..4, tracer selection, perf level 0..5, sync "
+                     "point, clock pairs, flag_d9, file names, "
+                     "scripted Flush/file-Flush/RangeSync failures) + "
+                     "600 pad_paths (the chunking matrix: size vs the "
+                     "free space at entry -- below, equal, just over, "
+                     "multi-buffer -- entry cursize 0/partial/full, "
+                     "capacities 512..8192, scripted write/file-Flush "
+                     "failures, the RangeSync arm, rate limiter, "
+                     "listeners, clock pairs) + 600 verification "
+                     "(perform_data_verification on/off x "
+                     "buffered_data_with_checksum on/off x sizes "
+                     "straddling the free-space boundary -- the "
+                     "pinned checksum rows vs the unpinned over-read "
+                     "rows -- plus the zero-size Extend) + 600 "
+                     "bindings (body hashes for Pad, .cold, Flush, "
+                     "WriteBuffered, WriteBufferedWithChecksum, "
+                     "WriteDirect, WriteDirectWithChecksum, "
+                     "RangeSync, Append, WriteMaybeCompressedBlock; "
+                     "both census records; 2 caller-census sites; the "
+                     "caller's alignment math; vtable slots 8/12/16/"
+                     "23/35/37/47; 30 writer-layout offsets; IOOptions "
+                     "defaults; 25-cell priority matrix; "
+                     "FileOperationType 4/7; RangeSync arm constants; "
+                     "Pad loop constants; CRC vectors incl. check "
+                     "vector '123456789' -> 0xE3069283, Combine "
+                     "identities, AlignedBuffer unit rows, "
+                     "write_zeros rows, timer-guard thresholds, "
+                     "file-selection matrix)",
+            "tests": "tests/test_writable_file_writer_pad115.py",
+            "tool": "tools/writable_file_writer_pad115.py",
+            "what_is_checked": [
+                "gate: seen_error returns code 5 with the 27-byte "
+                "heap state_ and writes nothing; zero-size pad sets "
+                "pending_sync_ only; a single chunk needs no Flush; "
+                "exact free space needs no Flush; one byte over free "
+                "space flushes exactly once; a full buffer at entry "
+                "flushes first (chunk 0, then the pad); a Flush "
+                "write failure sets seen_error_ and returns before "
+                "any file Flush, with filesize_ NOT advanced; a "
+                "file-Flush failure returns code 2 the same way",
+                "pad_paths: the chunking matrix is replayed exactly "
+                "(chunk sizes, flush counts, file bytes, cursize_, "
+                "filesize_, flushed_size_); the RangeSync arm fires "
+                "inside the mid-loop Flush when filesize > 1 MiB; a "
+                "direct-I/O writer with pending_sync_ clear makes no "
+                "progress and the model raises instead of hanging",
+                "verification: verification off leaves the checksum "
+                "alone; verification on with no Flush intervened pins "
+                "Extend(entry checksum, zeros) exactly; the arm "
+                "ignores buffered_data_with_checksum_; verification "
+                "on with a Flush intervened records the checksum as "
+                "null (the Extend reads past the buffer capacity); "
+                "zero-size pad leaves the checksum unchanged; the "
+                "stale first-chunk zeros survive the mid-loop Flush "
+                "in the buffer (AlignedBuffer::Clear resets cursize_ "
+                "only)",
+                "bindings: all ten FDE body hashes match the binary; "
+                "both census source hashes are reproduced by zeroing "
+                "the recorded relocations; the 1 call site and 1 "
+                "jump site are pinned; the caller's alignment math "
+                "holds for every (block_size, offset) row "
+                "((offset + 5 + pad) % block_size == 0); vtable slots "
+                "8/12/16/23 and the listener slots 35/37/47; the 30 "
+                "writer-layout offsets incl. the unnamed bool at "
+                "+0xd9; IOOptions defaults (0x58 B image, type 7, "
+                "rate_limiter_priority at +0x0c); the 25-cell "
+                "DecideRateLimiterPriority matrix; FileOperationType "
+                "kFlush 4 / kRangeSync 7; RangeSync constants 1 MiB / "
+                "4 KiB; CRC check vector, Combine == Value(a+b), "
+                "Mask/Unmask round-trip; timer guard armed iff "
+                "perf_level > 2; file selection raw vs wrapper",
+            ],
+        },
+        "engine_callees": {
+            "0x6051a20": "WritableFileWriter::Flush (census-bound, "
+                        "2908 B + 228 B .cold): the oracle Pad calls "
+                        "at 0x605269a whenever the buffer fills. "
+                        "Implemented here at the #6057 fidelity: "
+                        "buffered/direct write step, listener start "
+                        "times + finish/failure events, IOOptions with "
+                        "DecideRateLimiterPriority, file_->Flush, and "
+                        "the RangeSync arm.",
+            "0x604e140": "WritableFileWriter::WriteBuffered (no census, "
+                        "oracle): writes the data straight to the file, "
+                        "clears buf_, resets the buffer checksum, "
+                        "advances flushed_size_.",
+            "0x604f080": "WritableFileWriter::WriteBufferedWithChecksum "
+                        "(no census, oracle): as WriteBuffered, with the "
+                        "buffered_data_crc32c_checksum_ passed as the "
+                        "handoff checksum.",
+            "0x604fe80": "WritableFileWriter::WriteDirect (no census, "
+                        "oracle): page-pads the buffer, writes it "
+                        "positionally, refits the tail.",
+            "0x6050c80": "WritableFileWriter::WriteDirectWithChecksum "
+                        "(no census, oracle): as WriteDirect, with the "
+                        "buffered checksum recomputed as Value of the "
+                        "remaining buffer.",
+            "0x604d7b0": "WritableFileWriter::RangeSync (no census, "
+                        "oracle): the member the Flush oracle's arm "
+                        "calls; own seen-error gate, TEST_SYNC_POINT, "
+                        "timer guard, listener events, file->RangeSync "
+                        "slot 23.",
+            "0x604c800": "WritableFileWriter::DecideRateLimiterPriority "
+                        "(census-bound, 39 B): both IO_TOTAL -> "
+                        "IO_TOTAL; file TOTAL -> op; op TOTAL -> file; "
+                        "else op. Called by the Flush oracle's "
+                        "IOOptions build.",
+            "0x61c25f0": "crc32c::Extend dispatch thunk: the "
+                        "verification arm calls it as Extend(checksum, "
+                        "bufstart_ + entry cursize_, size). Resolves "
+                        "to ExtendImpl<Slow_CRC32> 0x61c21d0 per the "
+                        "#6012 packet; the table-driven Python Extend "
+                        "is bit-identical to the slow path.",
+            "0x63f0a90": "PLT memset: the zero-fill itself "
+                        "(bufstart_ + cursize_, 0, chunk).",
+            "0x604c670": "Base EventListener no-op skipped by the "
+                        "flush-finish notification (vtable slot 35).",
+            "0x604c690": "Base EventListener no-op skipped by the "
+                        "range-sync-finish notification (vtable slot "
+                        "37).",
+            "0x6042c20": "Base EventListener no-op skipped by the "
+                        "failure notification (vtable slot 47, shared "
+                        "by Flush and RangeSync).",
+            "0x606d9f0": "TEST_SYNC_POINT helper FDE (RELATIVE reloc "
+                        "from *0x64ed5d0): the sync-point gate for "
+                        "'WritableFileWriter::RangeSync:0', used by "
+                        "the RangeSync member inside the Flush oracle.",
+            "0x5df6e90": "Base FSWritableFile::GetIOPriority ('mov "
+                        "0x18(%rdi),%eax; ret'): the devirtualization "
+                        "guard compares vtable slot 16 against the "
+                        "RELATIVE reloc at 0x64ecf30; when equal the "
+                        "binary reads file+0x18 directly.",
+            "0x5d36110": "std::_Hashtable dtor for the IOOptions "
+                        "property_bag, called after file_->Flush and "
+                        "after file->RangeSync.",
+            "0x61cf610": "IOStatus::CopyState (census-bound, 63 B): "
+                        "deep-copies a status into the listener event "
+                        "structs.",
+            "0x63f0d70": "PLT __stack_chk_fail (the stack-canary "
+                        "failure path in the main epilogue and in .cold).",
+            "0x63f0dc0": "PLT operator delete[] _ZdaPv (the seen-error "
+                        "gate's delete of the old sret state_, the "
+                        "Flush-sret state_ delete after a successful "
+                        "mid-loop Flush, and the .cold pad's delete).",
+            "0x63f0e30": "PLT operator new[] _Znam (the 27-byte heap "
+                        "state_ in the seen-error gate).",
+            "0x63f0a50": "PLT _Unwind_Resume (the .cold landing pad).",
+        },
+        "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this "
+                               "VM. The target binary is never executed. "
+                               "The tool models the routine in Python; "
+                               "the callees Flush, WriteBuffered, "
+                               "WriteBufferedWithChecksum, WriteDirect, "
+                               "WriteDirectWithChecksum, RangeSync and "
+                               "the file's Flush/RangeSync are taken as "
+                               "scripted oracles, and the live engine "
+                               "check drives the model against a real "
+                               "file and asserts the model's file image "
+                               "equals the real file bytes after every "
+                               "Pad (a real file, not the node binary). "
+                               "make verify/test/catalogue-check in a "
+                               "tooled environment is still owed upstream.",
+        "functions": functions,
+        "layouts": {
+            "writer_0xe0": {
+                "+0x00": "file_name_ (std::string, 32 B)",
+                "+0x20": "writable_file_ (FSWritableFilePtr: io_tracer_ "
+                         "+0x20/+0x28, fs_tracer_ +0x30)",
+                "+0x38": "clock_ (SystemClock*, 8)",
+                "+0x40": "buf_ (AlignedBuffer: alignment_ +0x40, buf_ "
+                         "+0x48, capacity_ +0x50, cursize_ +0x58, "
+                         "bufstart_ +0x60)",
+                "+0x50": "buf_.capacity_ (size_t, 8) -- read: the "
+                         "chunk bound (free = capacity_ - cursize_)",
+                "+0x58": "buf_.cursize_ (size_t, 8) -- read: the pad "
+                         "start (saved at rsp+0x8); written: += chunk",
+                "+0x60": "buf_.bufstart_ (char*, 8) -- the memset "
+                         "destination base and the Extend pointer base",
+                "+0x68": "max_buffer_size_ (size_t, 8)",
+                "+0x70": "filesize_ (uint64, 8) -- written: += size in "
+                         "the epilogue (NOT advanced on a Flush "
+                         "failure)",
+                "+0x78": "flushed_size_ (uint64, 8) -- advanced by the "
+                         "Flush oracle's write step",
+                "+0x80": "next_write_offset_ (uint64, 8)",
+                "+0x88": "pending_sync_ (bool, 1) -- written: = 1 in "
+                         "the epilogue (NOT set on a Flush failure)",
+                "+0x89": "seen_error_ (bool, 1) -- read: the gate; "
+                         "written: = 1 on a Flush failure",
+                "+0x90": "last_sync_size_ (uint64, 8)",
+                "+0x98": "bytes_per_sync_ (uint64, 8)",
+                "+0xa0": "rate_limiter_ (RateLimiter*, 8)",
+                "+0xa8": "stats_ (Statistics*, 8)",
+                "+0xb0": "listeners_ (24 B)",
+                "+0xc8": "checksum_generator_ "
+                         "(FileChecksumGenerator*, 8) -- NOT read by "
+                         "Pad",
+                "+0xd0": "checksum_finalized_ (bool, 1)",
+                "+0xd1": "perform_data_verification_ (bool, 1) -- "
+                         "read: the verification-arm gate (the ONLY "
+                         "flag it tests)",
+                "+0xd4": "buffered_data_crc32c_checksum_ (uint32, 4) "
+                         "-- written: the Extend result; reset to 0 "
+                         "by every mid-loop Flush write step",
+                "+0xd8": "buffered_data_with_checksum_ (bool, 1) -- "
+                         "NOT consulted by Pad's verification arm",
+                "+0xd9": "UNNAMED bool (1) -- read into both finish "
+                         "events by the Flush oracle; not named by the "
+                         "Append layout; open unknown",
+                "+0xdc": "temperature_ (Temperature, 4)",
+            },
+            "aligned_buffer": {
+                "+0x00": "alignment_ (size_t, 8)",
+                "+0x08": "buf_ (char*, 8)",
+                "+0x10": "capacity_ (size_t, 8)",
+                "+0x18": "cursize_ (size_t, 8)",
+                "+0x20": "bufstart_ (char*, 8)",
+            },
+            "io_options_0x58": {
+                "+0x00": "timeout (uint64, 8) -- 0",
+                "+0x08": "prio (uint8, 1) -- 0 = kIOLow",
+                "+0x0c": "rate_limiter_priority (int, 4) -- the Flush "
+                         "oracle's DecideRateLimiterPriority result",
+                "+0x10": "type (uint8, 1) -- 7 = kUnknown",
+                "+0x18": "property_bag (unordered_map, 56 B) -- empty, "
+                         "self-pointer bucket, count 1, max_load 1.0f",
+                "+0x50": "force_dir_fsync (bool, 1) -- 0",
+                "+0x51": "do_not_recurse (bool, 1) -- 0",
+            },
+            "pad_verify_extend": {
+                "pointer": "buf_.bufstart_ + ENTRY cursize_ (the "
+                           "cursize_ saved at rsp+0x8 before the loop)",
+                "length": "size (the full Pad argument, rbp)",
+                "pinned_when": "entry cursize_ + size <= capacity_ "
+                               "(no Flush intervened); then the span "
+                               "is exactly the zeros just written",
+                "unpinned_when": "a Flush intervened (size > free "
+                                 "space at entry); the span runs past "
+                                 "the buffer capacity and the checksum "
+                                 "is heap-dependent -- recorded null",
+            },
+            "status_16": {
+                "+0x00": "code (uint8)",
+                "+0x01": "subcode (uint8)",
+                "+0x02": "severity (uint8) -- forced to 0 on every "
+                         "Pad return path (gate, Flush-failure "
+                         "move-assign, OK epilogue)",
+                "+0x03": "retryable (uint8)",
+                "+0x04": "data_loss (uint8)",
+                "+0x05": "scope (uint8)",
+                "+0x06..+0x07": "padding",
+                "+0x08..+0x0f": "state_ pointer (uint64) -- 0 = null, "
+                               "else a heap message",
+            },
+        },
+        "observations": [
+            "The verification Extend pointer is the ENTRY cursize_, "
+            "not the final one: the binary saves cursize_ at rsp+0x8 "
+            "before the loop (0x60525f2) and adds bufstart_ to that "
+            "saved value at 0x6052737..0x605273f. When no Flush "
+            "intervened, entry cursize_ + size == final cursize_, so "
+            "the span is exactly the zeros just written; the pointer "
+            "arithmetic is only observable when a Flush intervened.",
+            "When a Flush intervened, the Extend reads past the "
+            "buffer's capacity: entry cursize_ + size > capacity_ by "
+            "construction (a Flush happens exactly when size exceeded "
+            "the free space). The first (capacity_ - entry cursize_) "
+            "bytes are the first chunk's zeros -- still in the buffer "
+            "because AlignedBuffer::Clear only resets cursize_ -- and "
+            "the rest is heap memory past the allocation. The model "
+            "records the pointer/length and nulls the checksum "
+            "instead of inventing bytes; the file bytes and the "
+            "pending_sync_/filesize_ effects are still exact.",
+            "Every mid-loop Flush resets buffered_data_crc32c_"
+            "checksum_ to 0 (the WriteBuffered[WithChecksum] "
+            "contract from #6057), so a flush-intervened pad's "
+            "verification Extend starts from 0, not from the entry "
+            "checksum -- and the entry checksum is lost even before "
+            "the over-read. The model implements this through the "
+            "Flush oracle; the pinned rows (no flush) start from the "
+            "entry checksum.",
+            "Pad's verification arm tests ONLY perform_data_"
+            "verification_ (+0xd1). buffered_data_with_checksum_ "
+            "(+0xd8) is not consulted -- unlike Flush's "
+            "WriteDirectWithChecksum selection, which requires both "
+            "flags. Both flags are exercised independently in the "
+            "verification group.",
+            "A full buffer at entry flushes first: chunk 0, Flush, "
+            "then the pad. The chunk-0 iteration is pinned in the "
+            "cases (pad_chunks [0, ...]) and in the tests.",
+            "Direct I/O + pending_sync_ clear does not terminate: "
+            "Flush skips the write, the buffer stays full, the loop "
+            "repeats with chunk 0 forever. The binary has no "
+            "use_direct_io() check in Pad (upstream asserts "
+            "!use_direct_io()); the model raises ValueError on the "
+            "no-progress iteration instead of hanging, and no "
+            "generated case uses direct I/O.",
+            "The sole caller computes the pad size, not Pad: "
+            "WriteMaybeCompressedBlock pads with (block_size - "
+            "((offset + 5) % block_size)) % block_size (block "
+            "trailer: 1 type byte + 4 CRC bytes), so the next block "
+            "starts aligned. The alignment math is pinned in the "
+            "bindings group for block sizes 4096..65536.",
+            "Pad.cold is unwind-only (44 B): the single tail jump at "
+            "0x60527a0 is the FDE's exception landing-pad tail. The "
+            "seen-error gate's delete[] guard reads the sret state_ "
+            "slot after the binary zeroed it (0x60526dc), exactly as "
+            "in Append/Flush -- the delete never fires on that path; "
+            "the shape is described the same way as the sibling "
+            "packets.",
+            "The zero-size path skips the loop but still sets "
+            "pending_sync_ = 1 and runs the verification Extend with "
+            "length 0 (Extend(crc, ptr, 0) == crc -- checksum "
+            "unchanged).",
+        ],
+        "unknowns": [
+            "The bool at this+0xd9, read into both finish events by "
+            "the Flush oracle: it is not named by the Append "
+            "packet's writer layout and no upstream header in the "
+            "2019 mirror has a member at that offset. Modelled as "
+            "flag_d9, carried into the event dicts, and listed here "
+            "as an open unknown (shared with the Flush packet).",
+            "The listener method name for vtable slot 47: the slot "
+            "is the binary's observed position and the "
+            "FileOperationType values (4/7) plus the rocksdbjni 9.0.0 "
+            "docs support OnFileFlushFinish / OnFileRangeSyncFinish "
+            "for slots 35/37, but slot 47's method name is not "
+            "established. Recorded as open; no name is asserted.",
+            "The heap bytes the verification Extend reads when a "
+            "Flush intervened (past the buffer capacity): unpinned "
+            "by design -- the model records the pointer/length and "
+            "nulls the checksum rather than asserting heap contents.",
+            "Direct-I/O Pad behaviour beyond the no-progress "
+            "observation: the binary's Flush handles the direct arm "
+            "(WriteDirect when pending_sync_ is set), but upstream "
+            "asserts !use_direct_io() for Pad, so the direct path is "
+            "implemented in the Flush oracle but no Pad case uses "
+            "it; the pending_sync_-clear non-termination is "
+            "documented, not exercised as a case.",
+            "Flush, WriteBuffered, WriteBufferedWithChecksum, "
+            "WriteDirect, WriteDirectWithChecksum and the RangeSync "
+            "member are taken as oracles here (their bodies are "
+            "separate FDEs; only Pad/.cold are census-bound in this "
+            "packet). Their internal steps are modelled from the "
+            "#6057/#6041 contracts and upstream source, not from "
+            "their own binary bodies in this packet; the Write* "
+            "routines are the natural follow-ups.",
+            "make verify/test/catalogue-check in a tooled environment "
+            "is still owed upstream (no cargo/rustc/git-lfs/Ghidra on "
+            "this VM).",
+        ],
+    }
+    with open(PACKET / "records.json", "w") as fh:
+        json.dump(records, fh, indent=1, sort_keys=True)
+        fh.write("\n")
+    print("wrote records.json (%d caller sites)" % len(sites))
+    return rows
+
+
+if __name__ == "__main__":
+    main()
