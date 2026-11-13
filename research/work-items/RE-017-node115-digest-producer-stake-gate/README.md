@@ -1,0 +1,11 @@
+# Node #115: producer-to-weighted-comparison gate
+
+Target: `artifacts/node/115/hl-node`, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. This bridges the selected candidate producer in open [#6611](https://github.com/lalalune/hyperliquid-source/pull/6611) to the separately established weighted-comparison contract in the merged `RE-017-node115-staking-weight-comparison` packet. It does not establish vote authenticity or a canonical root.
+
+At `0x5afa3d4` the caller passes its incoming third argument as `rdx` into `0x5373e40`, which saves that pointer in `r15`. At `0x5373f6c` the producer reads `[r15+0x58]` once and later passes this exact word as `rsi` to `0x36c7f70` at `0x53742a8`, with `rdi=r15`. Before that call it passes the selected 0x68-item iterator to `0x53485b0` and passes the resulting local object as `rdx`. A zero low return byte resumes the inner scan; nonzero continues with that candidate. This identifies caller arguments, not their provenance outside this call.
+
+The merged predecessor independently binds a selected normal path of `0x36c7f70` to `0x422e0f0` at `0x36c82e4`, whose checked folds compare `3 * selected_weight > 2 * total_weight` with full-width products. It also documents missing-key and overflow refusal. Thus, **only when** the producer's prepared object satisfies that predecessor's iterator/map contract, the normal comparison result is one gate on continuation. The byte anchors here do not prove the preparation contract, collection validity, complete helper exits, or whether this path is reached with real data. Existing #6615/#6618/#6622 cover parts of preparation and remain separate unmerged prerequisites; the final constructor's complete semantics are not imported as established fact.
+
+This applies a known contract to a distinct caller. [#6051](https://github.com/lalalune/hyperliquid-source/pull/6051) studies a different walker. The comparison does not establish staking identity, signature validity, downstream canonicality, full candidate admission or complete node behavior. No component gate changes.
+
+Reproduce static caller anchors and mutation controls using `python3 research/work-items/RE-017-node115-digest-producer-stake-gate/verify.py`. Independently verify the predecessor with its documented Capstone 5.0.7 command. Neither verifier executes the target.
