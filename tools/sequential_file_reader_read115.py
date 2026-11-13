@@ -270,7 +270,7 @@ def _load_segments():
     file offsets correctly. The binary is non-PIE but its segments
     are not all vaddr == offset: the executable segment is shifted
     by 0x1000 (offset 0x1418300, vaddr 0x1419300)."""
-    path = ROOT / "work" / "hl-node-115.bin"
+    path = ROOT / "artifacts" / "node" / "115" / "hl-node"
     with open(path, "rb") as f:
         header = f.read(64)
         (e_phoff,) = struct.unpack_from("<Q", header, 0x20)
@@ -1637,7 +1637,7 @@ def _bindings_rows():
     # node #115 binary. This is the byte-checked ground for the
     # model -- every pinned byte is verified on replay.
     start = len(rows)
-    binary = ROOT / "work" / "hl-node-115.bin"
+    binary = ROOT / "artifacts" / "node" / "115" / "hl-node"
     blob = binary.read_bytes() if binary.exists() else b""
     for i in range(600 - start):
         off = i
@@ -1657,7 +1657,7 @@ def _bindings_rows():
 def _hex_window(addr, size):
     """Hex of a byte window of the node #115 binary (or the
     placeholder when the binary is unavailable)."""
-    path = ROOT / "work" / "hl-node-115.bin"
+    path = ROOT / "artifacts" / "node" / "115" / "hl-node"
     if not path.exists():
         return "unavailable"
     data = path.read_bytes()
@@ -1683,7 +1683,7 @@ def _replay_binding(row):
             return (False, "binary unavailable")
         return (actual == value, "byte window 0x6048e00")
     if kind == "byte_at":
-        path = ROOT / "work" / "hl-node-115.bin"
+        path = ROOT / "artifacts" / "node" / "115" / "hl-node"
         if not path.exists():
             return (False, "binary unavailable")
         blob = path.read_bytes()
@@ -1852,7 +1852,7 @@ def live_engine_check():
     assert bytes(scratch2[:100]) == data[:100], \
         "direct live bytes mismatch"
     # Empty-literal byte check against the node #115 binary.
-    binary = ROOT / "work" / "hl-node-115.bin"
+    binary = ROOT / "artifacts" / "node" / "115" / "hl-node"
     if binary.exists():
         blob = binary.read_bytes()
         assert blob[_vaddr_to_offset(EMPTY_SLICE_ADDR)] == 0x00, \

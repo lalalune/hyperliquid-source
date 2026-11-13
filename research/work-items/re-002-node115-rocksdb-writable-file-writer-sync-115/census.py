@@ -46,10 +46,7 @@ HERE = Path(__file__).resolve().parent
 
 
 def _bin_path():
-    for candidate in (Path(__file__).resolve().parents[3] / "work" /
-                      "hl-node-115.bin",
-                      Path(__file__).resolve().parents[3] /
-                      "artifacts" / "node" / "115" / "hl-node"):
+    for candidate in (Path(__file__).resolve().parents[3] / 'artifacts' / 'node' / '115' / 'hl-node',):
         data = open(candidate, "rb").read()
         if hashlib.sha256(data).hexdigest() == tool.ARTIFACT_SHA256:
             return candidate

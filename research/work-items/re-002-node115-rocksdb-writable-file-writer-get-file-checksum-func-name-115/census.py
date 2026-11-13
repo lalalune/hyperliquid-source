@@ -37,7 +37,7 @@ from pathlib import Path
 
 import os
 REPO = Path(os.environ.get("HL_REPO") or Path(__file__).resolve().parents[3])
-BIN_WORK = REPO / "work" / "hl-node-115.bin"
+BIN_WORK = REPO / "artifacts" / "node" / "115" / "hl-node"
 BIN_LFS = REPO / "artifacts" / "node" / "115" / "hl-node"
 ARTIFACT_SHA256 = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 

@@ -891,7 +891,7 @@ def live_engine_check():
     report = {"ok": False, "legs": []}
     try:
         root = Path(__file__).resolve().parents[1]
-        bin_path = root / "work" / "hl-node-115.bin"
+        bin_path = root / "artifacts" / "node" / "115" / "hl-node"
         data = open(bin_path, "rb").read()
         assert hashlib.sha256(data).hexdigest() == ARTIFACT_SHA256
         # Leg 1: FDE body hash matches the binary.

@@ -16,7 +16,7 @@ import subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
-BIN = os.path.join(ROOT, "work", "hl-node-115.bin")
+BIN = os.path.join(ROOT, 'artifacts', 'node', '115', 'hl-node')
 DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 
 EXCERPTS = [
@@ -49,7 +49,9 @@ def main():
              "--stop-address=" + stop, BIN],
             cwd=ROOT, capture_output=True, text=True, check=True)
         with open(os.path.join(HERE, name + ".objdump.txt"), "w") as fh:
-            fh.write(out.stdout)
+            # Preserve the original display-only filename in retained excerpts.
+            # Instruction and byte output is unchanged.
+            fh.write(out.stdout.replace("artifacts/node/115/hl-node:", "work/hl-node-115.bin:", 1))
         print(name, len(raw), "bytes")
 
 

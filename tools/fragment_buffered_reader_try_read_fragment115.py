@@ -950,7 +950,7 @@ def generate_cases(seed=115):
 def _read_binary():
     global _BINARY_CACHE
     if _BINARY_CACHE is None:
-        data = open(ROOT / "work" / "hl-node-115.bin", "rb").read()
+        data = open(ROOT / "artifacts" / "node" / "115" / "hl-node", "rb").read()
         if hashlib.sha256(data).hexdigest() != ARTIFACT_SHA256:
             raise RuntimeError("artifact digest mismatch")
         _BINARY_CACHE = data
@@ -972,7 +972,7 @@ def _read_census():
 
 def _va_to_off(va):
     out = subprocess.check_output(
-        ["readelf", "-lW", str(ROOT / "work" / "hl-node-115.bin")]).decode()
+        ["readelf", "-lW", str(ROOT / "artifacts" / "node" / "115" / "hl-node")]).decode()
     for line in out.splitlines():
         p = line.split()
         if p and p[0] == "LOAD":

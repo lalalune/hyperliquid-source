@@ -1114,10 +1114,7 @@ def verify_cases():
 # ---------------------------------------------------------------- live
 
 def _bin_path():
-    for path in (Path(__file__).resolve().parents[1] / "work" /
-                 "hl-node-115.bin",
-                 Path(__file__).resolve().parents[1] / "artifacts" /
-                 "node" / "115" / "hl-node"):
+    for path in (Path(__file__).resolve().parents[1] / 'artifacts' / 'node' / '115' / 'hl-node',):
         data = open(path, "rb").read()
         if hashlib.sha256(data).hexdigest() == ARTIFACT_SHA256:
             return path

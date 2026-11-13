@@ -125,7 +125,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PACKET = (ROOT / "research" / "work-items"
           / "re-002-node115-rocksdb-log-writer-emit-physical-record-115")
-BIN_WORK = ROOT / "work" / "hl-node-115.bin"
+BIN_WORK = ROOT / "artifacts" / "node" / "115" / "hl-node"
 BIN_LFS = ROOT / "artifacts" / "node" / "115" / "hl-node"
 ARTIFACT_SHA256 = (
     "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"

@@ -28,7 +28,7 @@ import line_file_reader_readline115 as m
 
 PACKET = (Path(__file__).resolve().parents[1] / "research" / "work-items"
           / "re-002-node115-line-file-reader-readline-115")
-BIN = Path(__file__).resolve().parents[1] / "work" / "hl-node-115.bin"
+BIN = Path(__file__).resolve().parents[1] / "artifacts" / "node" / "115" / "hl-node"
 DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 
 

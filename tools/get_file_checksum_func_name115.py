@@ -336,10 +336,7 @@ def verify_cases(path=CASES):
 
 
 def _bin_path():
-    for candidate in (Path(__file__).resolve().parents[1] / "work" /
-                      "hl-node-115.bin",
-                      Path(__file__).resolve().parents[1] / "artifacts" /
-                      "node" / "115" / "hl-node"):
+    for candidate in (Path(__file__).resolve().parents[1] / 'artifacts' / 'node' / '115' / 'hl-node',):
         data = open(candidate, "rb").read()
         if hashlib.sha256(data).hexdigest() == ARTIFACT_SHA256:
             return candidate

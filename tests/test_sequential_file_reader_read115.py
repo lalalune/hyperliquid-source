@@ -25,7 +25,7 @@ import sequential_file_reader_read115 as m
 
 PACKET = (Path(__file__).resolve().parents[1] / "research" / "work-items"
           / "re-002-node115-rocksdb-sequential-file-reader-read-115")
-BIN = Path(__file__).resolve().parents[1] / "work" / "hl-node-115.bin"
+BIN = Path(__file__).resolve().parents[1] / "artifacts" / "node" / "115" / "hl-node"
 CENSUS = (Path(__file__).resolve().parents[1] / "research" / "work-items"
           / "RE-002-node115-vendor-census" / "census.json")
 
