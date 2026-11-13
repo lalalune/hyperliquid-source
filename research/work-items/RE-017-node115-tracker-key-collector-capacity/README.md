@@ -1,0 +1,9 @@
+# Node #115: tracker-key collection capacity and growth
+
+Target: `artifacts/node/115/hl-node`, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. This complements the separately documented collection and sorting path by tracing the initial capacity and full-buffer growth inputs in `0x5b7b900`.
+
+An empty iterator produces output words `(0, 1, 0)` at `0x5b7bbf3`. Otherwise the first 20-byte entry is saved before sizing. For tag 2, `0x5b7b982..0x5b7b9af` converts the two remaining byte spans to 96-byte record counts and adds them; for the other iterator variant it uses the remaining count at `+0x40`. It saturates the count-plus-one increment at `UINT64_MAX` and selects capacity at least four (`0x5b7b9b5..0x5b7b9d1`). Multiplication by 20 checks both unsigned overflow and the signed high bit before allocation. On the selected successful nonzero allocation path, it copies the saved entry into the new storage.
+
+When the count reaches capacity, `0x5b7bb43..0x5b7bbb5` recomputes the remaining span/count estimate, again applies a saturating plus one, and calls `0x5963a10` with the vector descriptor, current length, estimate, alignment 1 and element size 20; on return the saved entry is appended. The function returns capacity, pointer and count in three output words. This establishes the caller's growth arguments, not the allocator helper's complete policy.
+
+The count interpretation assumes valid iterator state and ordinary allocator behavior; failure helpers, malformed state, element identity and runtime execution are not established. Run `python3 research/work-items/RE-017-node115-tracker-key-collector-capacity/verify.py` for digest, instruction anchors, direct-call and mutations without target execution. Disassembly and relocations are in `windows.txt`.
