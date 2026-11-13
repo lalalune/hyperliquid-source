@@ -50,7 +50,7 @@ from pathlib import Path
 
 PACKET = Path(__file__).resolve().parent
 ROOT = PACKET.parents[2]
-BINARY = ROOT / "work" / "hl-node-115.bin"
+BINARY = ROOT / "artifacts" / "node" / "115" / "hl-node"
 DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 
 sys.path.insert(0, str(ROOT / "tools"))

@@ -26,7 +26,7 @@ def main():
     for name, start, stop in WINDOWS:
         text = subprocess.run(
             ["objdump", "-d", "--start-address=%#x" % start,
-             "--stop-address=%#x" % stop, "work/hl-node-115.bin"],
+             "--stop-address=%#x" % stop, "artifacts/node/115/hl-node"],
             capture_output=True, text=True, check=True, cwd=ROOT).stdout
         (PACKET / name).write_text(text)
         print("wrote %s (%d bytes)" % (name, len(text)))

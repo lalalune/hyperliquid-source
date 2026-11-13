@@ -20,7 +20,7 @@ START, STOP = 0x143DDC0, 0x143DDF2
 def main():
     text = subprocess.run(
         ["objdump", "-d", "--start-address=%#x" % START,
-         "--stop-address=%#x" % STOP, "work/hl-node-115.bin"],
+         "--stop-address=%#x" % STOP, "artifacts/node/115/hl-node"],
         capture_output=True, text=True, check=True, cwd=ROOT).stdout
     (PACKET / "main.txt").write_text(text)
     print("wrote main.txt (%d bytes)" % len(text))

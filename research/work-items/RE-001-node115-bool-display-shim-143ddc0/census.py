@@ -27,7 +27,7 @@ from pathlib import Path
 
 PACKET = Path(__file__).resolve().parent
 ROOT = PACKET.parents[2]
-BINARY = ROOT / "work" / "hl-node-115.bin"
+BINARY = ROOT / "artifacts" / "node" / "115" / "hl-node"
 START, STOP = 0x143DDC0, 0x143DDF2
 TAIL_SLOT = 0x64DF720
 
@@ -65,7 +65,7 @@ def main():
 
     dump = subprocess.run(
         ["objdump", "-d", "--start-address=%#x" % START,
-         "--stop-address=%#x" % STOP, "work/hl-node-115.bin"],
+         "--stop-address=%#x" % STOP, "artifacts/node/115/hl-node"],
         capture_output=True, text=True, check=True, cwd=ROOT).stdout
     internal_calls = 0
     internal_direct_tail_jumps = 0

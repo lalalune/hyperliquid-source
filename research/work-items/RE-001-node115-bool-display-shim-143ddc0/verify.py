@@ -32,7 +32,7 @@ from pathlib import Path
 
 PACKET = Path(__file__).resolve().parent
 ROOT = PACKET.parents[2]
-BINARY = ROOT / "work" / "hl-node-115.bin"
+BINARY = ROOT / "artifacts" / "node" / "115" / "hl-node"
 DIGEST = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 
 ROUTINE_START, ROUTINE_STOP = 0x143DDC0, 0x143DDF2
@@ -167,9 +167,13 @@ def check_excerpts(data):
     for name, start, stop in WINDOWS:
         text = subprocess.run(
             ["objdump", "-d", "--start-address=%#x" % start,
-             "--stop-address=%#x" % stop, "work/hl-node-115.bin"],
+             "--stop-address=%#x" % stop, "artifacts/node/115/hl-node"],
             capture_output=True, text=True, check=True, cwd=ROOT).stdout
         stored = (PACKET / name).read_text()
+        # The captured export retains its original display path; only the
+        # objdump input filename header is normalized, never instruction text.
+        text = text.replace("artifacts/node/115/hl-node:     file format",
+                            "work/hl-node-115.bin:     file format", 1)
         if text != stored:
             fail("excerpt mismatch for %s" % name)
         for address, raw in parse_excerpt(stored):
@@ -192,7 +196,7 @@ def check_padding(data):
 
 def check_frames():
     dump = subprocess.run(
-        ["readelf", "--debug-dump=frames", "work/hl-node-115.bin"],
+        ["readelf", "--debug-dump=frames", "artifacts/node/115/hl-node"],
         capture_output=True, text=True, check=True, cwd=ROOT).stdout
     needed = "pc=000000000143ddc0..000000000143ddf2"
     if needed not in dump:
@@ -207,7 +211,7 @@ def check_frames():
 
 
 def check_relocations():
-    text = subprocess.run(["readelf", "-r", "work/hl-node-115.bin"],
+    text = subprocess.run(["readelf", "-r", "artifacts/node/115/hl-node"],
                           capture_output=True, text=True,
                           check=True, cwd=ROOT).stdout
     install = [l for l in text.splitlines()
@@ -383,7 +387,7 @@ _REL_CACHE = {}
 
 def relative_addend_for(slot):
     if not _REL_CACHE:
-        text = subprocess.run(["readelf", "-r", "work/hl-node-115.bin"],
+        text = subprocess.run(["readelf", "-r", "artifacts/node/115/hl-node"],
                               capture_output=True, text=True,
                               check=True, cwd=ROOT).stdout
         for line in text.splitlines():

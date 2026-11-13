@@ -42,7 +42,7 @@ from pathlib import Path
 
 PACKET = Path(__file__).resolve().parent
 ROOT = PACKET.parents[2]
-BINARY = ROOT / "work" / "hl-node-115.bin"
+BINARY = ROOT / "artifacts" / "node" / "115" / "hl-node"
 TARGETS = (0x50DF400,)
 ROUTINE_START, ROUTINE_STOP = 0x50DF400, 0x50DF4B6
 
