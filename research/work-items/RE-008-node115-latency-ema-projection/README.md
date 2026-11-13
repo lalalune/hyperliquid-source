@@ -5,7 +5,7 @@
 - Source commit: repository base `a8616af9432b8d8517b2af677880e117b7c28ef3`. No reference source was consulted.
 - Claim status: observations for bytes, edges, relocations and layouts; inferences and unresolved items are listed separately below.
 - Scope included: four complete FDE bodies on one direct-call chain, 1,621 bytes and 391 instructions.
-- Scope excluded: the two container search helpers, the key iterator, the ordering and container-building helpers, the consumer `0x4e3dfb0`, the caller of slot `0x64e8718`, every writer of the records, and all runtime behaviour.
+- Scope excluded: the two container search helpers, the key iterator, the ordering and container-building helpers, the consumer `0x4e3dfb0`, the contents of the caller's key collection, every writer of the records, and all runtime behaviour.
 
 ## Gap
 
@@ -24,7 +24,7 @@ Addresses are ELF virtual addresses. `instructions.tsv` holds every instruction 
 
 ### Call chain (observed)
 
-- Slot `0x64e8718` carries a `R_X86_64_RELATIVE` relocation with addend `0x5a71d90`. The scan finds no rel32 candidate for `0x5a71d90`.
+- Slot `0x64e8718` carries a `R_X86_64_RELATIVE` relocation with addend `0x5a71d90`. The scan finds no rel32 candidate for `0x5a71d90`. The existing `RE-001-node115-rpc-throttle-expiry/records.json` records an indirect call through this slot at `0x2e0a7f5`; that record was overlooked in the first version of this packet. This verifier now independently checks the call bytes, RIP displacement and relocation, as well as the preceding argument setup. At `0x2e0a7d2`, R12 is set to the owner's pointer plus `0x538`; at `0x2e0a7ea`, RSI is set to the stack buffer at `rsp+0x1d0`, and RDI is set to R12. The call at `0x2e0a7f5` thus reaches this packet's entry with those two arguments. The buffer's contents and any effects of the preceding call through `0x64e8710` remain unresolved.
 - `0x5a71e00` calls `0x4d55b50`; `0x4d55b90` calls `0x5b80ea0`; `0x5b80ee9` and `0x5b80fea` call `0x5a327a0`. For each of these three targets the scan over all `e8`/`e9` bytes in `.text` finds only the listed sites, and each site is a retained instruction.
 - The entry builds an 80-byte iterator state from its second argument (words at `+0` and `+8`, and the word at `+0x10` only when word `+0` is non-zero) and stores `arg0 + 0x148` at state `+0x48` (`0x5a71db2`, `0x5a71dee`).
 - The collector passes `&state[0x48]` as the closure environment (`0x5b80eb7`). The closure dereferences it twice (`0x5a327b4`, `0x5a327b7`), so its container pointer is `arg0 + 0x148`.
@@ -99,8 +99,8 @@ No command loads, runs or emulates the captured binary.
 
 - 391 of 391 instruction rows match the artifact, and the four bodies match their FDE extents and digests.
 - 97 instruction anchors, 14 direct calls, 2 PLT calls, 9 RIP-relative references, 7 RELATIVE relocations and 1 GLOB_DAT import are re-derived.
-- 20 of 20 corruptions are rejected: 11 changed instruction rows, 1 dropped row, 3 changed relocations, 1 changed literal byte, 1 planted caller and 3 wrong sanitisation forms.
+- 22 of 22 corruptions are rejected: 11 changed instruction rows, 1 dropped row, 3 changed relocations, 1 changed literal byte, 1 planted caller, 2 changed owner-call operands and 3 wrong sanitisation forms.
 
 This packet requests no component gate and adds no byte-window registration. It covers one reader chain. It does not establish quorum, latency units, the update rule, runtime reachability or equivalence of the Rust model with the target.
 
-Next question: which function loads slot `0x64e8718`, and what key collection does it pass as the second argument?
+Next question: how is the stack buffer at `rsp+0x1d0` populated before the owner call, and does the preceding call through `0x64e8710` change it?

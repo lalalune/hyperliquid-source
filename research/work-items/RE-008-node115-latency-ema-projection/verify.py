@@ -321,6 +321,20 @@ def validate_relocations(data: bytes, sections: list[dict], table: dict[int, tup
     require(found == (name, 0, 0), f"{slot:#x} imports {found[0]!r}, expected undefined {name!r}")
 
 
+def validate_owner_call(data: bytes, sections: list[dict], table: dict[int, tuple[int, int, int]]) -> dict:
+    """Bind the previously recorded owner call to this packet's entry."""
+    site, slot = 0x2E0A7F5, 0x64E8718
+    require(read(data, sections, ".text", 0x2E0A7D2, 7) == bytes.fromhex("4c8da038050000"),
+            "owner argument origin differs")
+    setup = read(data, sections, ".text", 0x2E0A7EA, 11)
+    require(setup == bytes.fromhex("488db424d00100004c89e7"), "owner call arguments differ")
+    raw = read(data, sections, ".text", site, 6)
+    require(raw[:2] == b"\xff\x15" and rel32_target(site, raw) == slot, "owner call slot differs")
+    require(table.get(slot) == (R_X86_64_RELATIVE, 0, 0x5A71D90), "owner call target differs")
+    return {"site": hex(site), "slot": hex(slot), "target": "0x5a71d90",
+            "arg0": "r12 (owner + 0x538)", "arg1": "rsp + 0x1d0"}
+
+
 def validate_literals(data: bytes, sections: list[dict], table: dict[int, tuple[int, int, int]]) -> None:
     address, literal = ASSERT_LITERAL
     require(len(literal) == 0x21, "assertion literal length changed")
@@ -436,6 +450,7 @@ def verify() -> dict:
     validate_plt_calls(data, sections, spans)
     table = relocations(data, sections)
     validate_relocations(data, sections, table)
+    owner_call = validate_owner_call(data, sections, table)
     validate_literals(data, sections, table)
     scans = census(data, sections, spans)
     samples = validate_sanitize()
@@ -452,6 +467,7 @@ def verify() -> dict:
         "plt_calls": {hex(site): name for site, (_, _, name) in PLT_CALLS.items()},
         "rip_references": len(RIP_REFERENCES),
         "relative_relocations": len(RELATIVE_SLOTS),
+        "owner_call": owner_call,
         "import_slot": {"slot": hex(IMPORT_SLOT[0]), "symbol": IMPORT_SLOT[1]},
         "assertion_literal": ASSERT_LITERAL[1].decode(),
         "location": f"{LOCATION[1].decode()}:{LOCATION[2]}:{LOCATION[3]}",
@@ -492,6 +508,12 @@ def self_test() -> dict:
         spans, _ = validate_rows(data, sections, fdes, rows)
         return lambda: census(changed, sections, spans)
 
+    def with_patched_owner(address: int, raw: bytes):
+        text = section(sections, ".text")
+        offset = text["offset"] + address - text["address"]
+        changed = data[:offset] + raw + data[offset + len(raw):]
+        return lambda: validate_owner_call(changed, sections, table)
+
     def with_literal(address: int, raw: bytes):
         rodata = section(sections, ".rodata")
         offset = rodata["offset"] + address - rodata["address"]
@@ -529,6 +551,10 @@ def self_test() -> dict:
         expect_rejection("assertion literal byte changed", with_literal(0x466DC4 + 29, b"<")),
         expect_rejection("extra rel32 caller of the row closure planted", with_patched_text(
             0x5B80EC6, b"\xe8" + struct.pack("<i", 0x5A327A0 - (0x5B80EC6 + 5)))),
+        expect_rejection("owner argument offset changed", with_patched_owner(
+            0x2E0A7EA, bytes.fromhex("488db424d8010000"))),
+        expect_rejection("owner call slot changed", with_patched_owner(
+            0x2E0A7F5, bytes.fromhex("ff1515df6d03"))),
         expect_rejection("closed form that keeps +infinity", infinity_kept),
         expect_rejection("closed form that clears negative zero", negative_zero_cleared),
         expect_rejection("closed form that clears positive subnormals", subnormal_cleared),

@@ -64,7 +64,7 @@ class Node115LatencyEmaProjectionTests(unittest.TestCase):
             self.assertEqual(packet.closed_form_sanitize(bits), expected, hex(bits))
 
     def test_every_corruption_control_is_rejected(self):
-        self.assertEqual(len(self.report["negative_controls"]), 20)
+        self.assertEqual(len(self.report["negative_controls"]), 22)
         self.assertFalse(self.report["captured_binary_executed"])
 
 
