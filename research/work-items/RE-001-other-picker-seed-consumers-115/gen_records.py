@@ -322,10 +322,12 @@ def main():
             "skiplist_height": {
                 "site": "0x6063165",
                 "rule": "rejection-sample: tries start at 1; each try advances "
-                        "once and stops at the first seed < bound (this+0x14); "
+                        "once and stops at the first seed >= bound (this+0x14; "
+                        "jb at 0x60631c2 redraws while seed < bound); "
                         "height = tries, capped at min(count (this+0x10), 32); "
                         "on exhaustion height = count (or 32); count <= 1 "
-                        "skips the seed entirely (height 1, seed untouched)",
+                        "does not advance the seed (height 1, seed unchanged; "
+                        "the thread-seed getter at 0x6063165 is still called)",
             },
             "random_descent": {
                 "site": "0x6066bc9",
