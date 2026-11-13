@@ -7,3 +7,7 @@ The scale is extracted as flags bits 16..23. For a nonzero scale, the instructio
 The following bit-5 branch uses the two-word representation of 10^32 and carries overflow checks to `0x5c44dd0`; higher unsupported combinations also leave through that branch. On the selected normal path, `0x5c44ccf..0x5c44d52` passes the divisor pair into the slot at `0x64dfaf8`, derives a two-word remainder by multiplication and subtraction, converts the remainder and divisor through separate helper slots, and performs binary64 division. Later rounding and sign handling lie outside this packet's behavioral claim.
 
 This finding assumes valid decimal representation and normal helper returns. Full conversion rounding, all flags, malformed encodings, upstream admission and runtime equivalence remain open. Run `python3 research/work-items/RE-017-node115-digest-decimal-divisor/verify.py` for digest, selected byte anchors and mutation controls; static disassembly and relocations are in `windows.txt`. The target is never executed.
+
+## Prior coverage
+
+Merged `RE-008-node115-fee-trial-source` also includes this helper, with a short-decimal implementation and fixtures limited to a bounded domain (scale up to 16). This packet isolates a selected static path and does not replace that implementation or establish complete conversion equivalence.
