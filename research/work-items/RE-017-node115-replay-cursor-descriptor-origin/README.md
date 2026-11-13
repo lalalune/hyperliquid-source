@@ -1,0 +1,9 @@
+# RE-017: selected replay lookup descriptor origin
+
+Target: Linux x86-64 node #115, `artifacts/node/115/hl-node`, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. [#6767](https://github.com/lalalune/hyperliquid-source/pull/6767) traces a selected slot lookup but leaves its descriptor origin unspecified. This packet records a conditional producer-to-lookup identity chain.
+
+At `0x5a861c8..0x5a861d9`, the selected future copies 16 bytes from stack `+0x1428` to future `+0x178`. Let their two qwords be A and C. At `0x5a86db9` the code forms the address of future `+0x178`; `0x5a86e91` stores that address at future `+0x1c8`, and `0x5a86e98` initializes future `+0x1d0` to zero. The caller at `0x5a86f7d..0x5a86f90` passes the address of `+0x1c8` to `0x59d6520`. The wrapper at `0x59d6527..0x59d653f` loads its first qword and passes it to `0x59640e0`, while passing the address of `+0x1d0` as a separate argument. Therefore, if the copied bytes and pointer survive unchanged on the selected continuations, `0x59640e0` receives a descriptor at future `+0x178`, and its descriptor cursor at `+8` is the copied second qword C at future `+0x180`. The separately initialized `+0x1d0` is not the cursor in this calling convention.
+
+The two qwords' upstream meaning, the future's lifecycle, intervening alias writes, all control transfers and runtime reachability remain unresolved. In particular C is not asserted to equal checkpoint height or H+1. The disassembly and byte checks describe a conditional composition, not a native trace, full call-graph proof or component completion. No target is executed.
+
+Run `python3 research/work-items/RE-017-node115-replay-cursor-descriptor-origin/verify.py` for target identity, selected byte anchors and mutation controls; static windows are in `windows.txt`.
