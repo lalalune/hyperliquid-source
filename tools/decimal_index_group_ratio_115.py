@@ -41,12 +41,6 @@ def to_i32(value):
     return value - (1 << 32) if value >= (1 << 31) else value
 
 
-def to_i64(value):
-    """Wrap an integer to signed 64-bit, as the binary's adds do."""
-    value &= U64_MAX
-    return value - (1 << 64) if value >= (1 << 63) else value
-
-
 def parse_decimal_u64(text):
     """Parse ``text`` (bytes) as an unsigned 64-bit decimal.
 
@@ -89,17 +83,21 @@ def group_ratio(elements):
     triples. Returns -1.0 when the range is empty or when the divisor
     sum (the sum of the f10 fields, 64-bit wrapping) is zero;
     otherwise returns float(numerator) / float(divisor), where the
-    numerator is the 64-bit wrapping sum of (f90 + f98) per element
-    and Python's int-to-float conversion matches the binary's
-    cvtsi2sd rounding.
+    numerator is the 64-bit wrapping sum of (f90 + f98) per element.
+    Both sums are converted as UNSIGNED 64-bit values: the binary
+    tests each sum's sign bit (0x5f6af2c, 0x5f6af3a) and, when it is
+    set, converts (x >> 1) | (x & 1) with cvtsi2sd and doubles the
+    result (0x5f6af50..0x5f6af65, 0x5f6af6e..0x5f6af87), which is the
+    u64 value correctly rounded to binary64, the same as Python's
+    int-to-float conversion of the non-negative sum.
     """
     if not elements:
         return -1.0
     numerator = 0
     divisor = 0
     for f10, f90, f98 in elements:
-        numerator = to_i64(numerator + to_i64(f90 + f98))
-        divisor = to_i64(divisor + f10)
+        numerator = (numerator + f90 + f98) & U64_MAX
+        divisor = (divisor + f10) & U64_MAX
     if divisor == 0:
         return -1.0
     return float(numerator) / float(divisor)
