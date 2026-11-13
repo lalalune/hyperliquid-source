@@ -1,0 +1,9 @@
+# Node #115: decimal scale divisor in selected factor conversion
+
+Target: `artifacts/node/115/hl-node`, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. This studies the nonzero-scale divisor construction in `0x5c44b40`, complementing the scale-zero path in #6754.
+
+The scale is extracted as flags bits 16..23. For a nonzero scale, the instruction blocks starting at `0x5c44ba2` select multiplicative constants by successive scale bits: 10 for bit 0, 100 for bit 1, 10,000 for bit 2, 100,000,000 for bit 3, and 10^16 for bit 4. Multiplication produces a 128-bit low/high pair, with conditional early exits to `0x5c44ccf` when no higher scale bits remain. For scales 1 through 28, composing the selected factors gives 10^scale and fits in 128 bits. This is an arithmetic consequence of those instructions, not a claim that every such scale is admitted upstream.
+
+The following bit-5 branch uses the two-word representation of 10^32 and carries overflow checks to `0x5c44dd0`; higher unsupported combinations also leave through that branch. On the selected normal path, `0x5c44ccf..0x5c44d52` passes the divisor pair into the slot at `0x64dfaf8`, derives a two-word remainder by multiplication and subtraction, converts the remainder and divisor through separate helper slots, and performs binary64 division. Later rounding and sign handling lie outside this packet's behavioral claim.
+
+This finding assumes valid decimal representation and normal helper returns. Full conversion rounding, all flags, malformed encodings, upstream admission and runtime equivalence remain open. Run `python3 research/work-items/RE-017-node115-digest-decimal-divisor/verify.py` for digest, selected byte anchors and mutation controls; static disassembly and relocations are in `windows.txt`. The target is never executed.
