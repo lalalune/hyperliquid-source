@@ -1,0 +1,9 @@
+# RE-017: selected replay payload slot lookup
+
+Target: Linux x86-64 node #115, `artifacts/node/115/hl-node`, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. The predecessor [#6766](https://github.com/lalalune/hyperliquid-source/pull/6766) maps a replay producer's return fields and leaves the source of the index-3 result pointer S open. This packet follows its direct callee `0x59640e0` on the first-lock, matching-sequence path.
+
+The selected caller `0x59d6520` passes a descriptor derived from its input and a local output to `0x59640e0`. At `0x59640ee..0x5964109`, the callee obtains a shared object from descriptor `+0`, reads its slot count at `+0x18`, mask at `+0x20`, and base at `+0x10`; it computes `i = mask & descriptor[+8]` and branches away if `i >= count`. On the in-range path `0x596410d..0x596412a` computes S = base + 48*i and tries an atomic byte transition 0 to 1 at S. On the successful first-lock path, if the qword at S+0x28 equals descriptor+8, `0x59641b3..0x59641c2` increments descriptor+8 and returns `(3, S)` in the output. This is the pointer consumed by the index-3 case documented in #6766.
+
+The observation assumes valid descriptors, arithmetic and memory, successful first lock and equality. Other branches, lock lifetime, concurrent mutations, mask validity, initialization and the content producer of S are not established. The output tag is an internal helper result; it does not authenticate or identify a block, checkpoint or root. Neither this packet nor #6766 proves the selected path occurs in a real replay. No captured binary is executed and no completion gate is changed.
+
+Run `python3 research/work-items/RE-017-node115-replay-payload-slot-selection/verify.py` for target identity, instruction anchors and negative controls. Static disassembly is in `windows.txt`.
