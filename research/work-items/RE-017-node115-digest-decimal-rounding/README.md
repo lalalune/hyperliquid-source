@@ -7,3 +7,7 @@ On the selected normal path the code computes a two-word quotient and remainder 
 Pinned relative relocations resolve those slots to `0x63f0080` and `0x63efe40`, respectively. The existing helper packets identify integer exponentiation by squaring and a round-half-away-from-zero helper. The sequence includes intermediate binary64 operations and cannot be replaced by a single exact rational rounding claim without further proof. Existing rounding mode, valid decimal encoding, nonzero divisor and normal helper returns are premises. Error/panic paths, all scale/flag combinations and complete target equivalence remain open.
 
 Run `python3 research/work-items/RE-017-node115-digest-decimal-rounding/verify.py` for the authenticated digest, selected instruction/literal anchors and mutation controls without target execution. `windows.txt` records static windows and relocations. No completion gate changes.
+
+## Prior coverage
+
+Merged `RE-008-node115-fee-trial-source` also includes this helper, with a short-decimal implementation and fixtures limited to a bounded domain (scale up to 16). This packet isolates a selected static path and does not replace that implementation or establish complete conversion equivalence.
