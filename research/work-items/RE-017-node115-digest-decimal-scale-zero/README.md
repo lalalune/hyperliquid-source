@@ -7,3 +7,7 @@ Pinned slot `0x64e4e68` resolves to `0x5c44b40`. It reads flags dword at input `
 The helper window at `0x63f0160..0x63f0207` uses the input high-word sign, computes a two-word magnitude, locates the highest set bit and builds a binary64 word with rounding-related bit operations. This supports its selected signed-integer conversion role, but this packet does not independently establish every rounding boundary or calling convention for all callers. Scale-nonzero paths, alternate decimal encodings, the full parser grammar and factor authority remain open. Do not interpret this static result as target execution or whole-node equivalence.
 
 Run `python3 research/work-items/RE-017-node115-digest-decimal-scale-zero/verify.py` for target digest, selected instruction anchors and mutation controls. Static windows and relocations are in `windows.txt`.
+
+## Prior coverage
+
+Merged `RE-008-node115-fee-trial-source` also includes this helper, with a short-decimal implementation and fixtures limited to a bounded domain (scale up to 16). This packet isolates a selected static path and does not replace that implementation or establish complete conversion equivalence.
