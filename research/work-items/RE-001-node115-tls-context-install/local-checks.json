@@ -1,0 +1,21 @@
+{
+  "versions": {
+    "python3": "Python 3.12.3",
+    "objdump": "GNU objdump (GNU Binutils for Ubuntu) 2.42",
+    "readelf": "GNU readelf (GNU Binutils for Ubuntu) 2.42"
+  },
+  "checks": [
+    {
+      "command": "python3 research/work-items/RE-001-node115-tls-context-install/check.py",
+      "exit_code": 0,
+      "stdout": "{\n  \"target_sha256\": \"a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301\",\n  \"coordinates\": \"ELF virtual addresses\",\n  \"frame\": \"003b4448 0000000000000050 0001dd20 FDE cie=0039672c pc=00000000015d6fd0..00000000015d8447\",\n  \"windows\": [\n    {\n      \"va\": \"0x15d7146\",\n      \"file_offset\": \"0x15d6146\",\n      \"bytes\": \"49c7c6d0eeffff644c8b3c25000000004d01f764410fb6464883f8010f8424010000\",\n      \"size\": 34,\n      \"sha256\": \"b4ea18e380599b3b236926981ea916b8df18af927354659397067c1cb1e0af6e\"\n    },\n    {\n      \"va\": \"0x15d7276\",\n      \"file_offset\": \"0x15d6276\",\n      \"bytes\": \"488d35938170044c89ffff158a92f0046441c6464801\",\n      \"size\": 22,\n      \"sha256\": \"7fbd2328476c2664434b15be2cfdae3918afadb022ffec8c04fd0940e128f0da\"\n    },\n    {\n      \"va\": \"0x15d728c\",\n      \"file_offset\": \"0x15d628c\",\n      \"bytes\": \"6449833e000f85200100006449c706ffffffff488bb424a0000000488b8424a8000000ba01000000b901000000f0480fc1084883fe01750a4885c97910e9970d00004885c90f888e0d000031d264498b4e0864498b7610644989560864498946106449ff06\",\n      \"size\": 101,\n      \"sha256\": \"120409386e71960bde0208b47c0e063a17ad3c7bf7b24ae9bc9670c7790ea231\"\n    }\n  ],\n  \"compared_bytes\": 157,\n  \"selected_windows\": 3,\n  \"normalization\": \"none\",\n  \"target_executed\": false\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python3 tests/test_node115_tls_context_install.py -v",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "test_authenticated_native_windows_and_frame (__main__.TLSContextInstall.test_authenticated_native_windows_and_frame) ... ok\ntest_coordinate_change_rejected (__main__.TLSContextInstall.test_coordinate_change_rejected) ... ok\ntest_every_selected_byte_corruption_rejected (__main__.TLSContextInstall.test_every_selected_byte_corruption_rejected) ... ok\ntest_mapping_not_guessed (__main__.TLSContextInstall.test_mapping_not_guessed) ... ok\ntest_truncation_rejected (__main__.TLSContextInstall.test_truncation_rejected) ... ok\ntest_wrong_frame_rejected (__main__.TLSContextInstall.test_wrong_frame_rejected) ... ok\ntest_wrong_target_rejected (__main__.TLSContextInstall.test_wrong_target_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 2.260s\n\nOK\n"
+    }
+  ]
+}
