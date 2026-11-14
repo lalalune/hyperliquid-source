@@ -1,0 +1,9 @@
+# RE-008 · EMA query helper descriptor and result effects
+
+Target: Linux x86-64 node #115, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. The selected first EMA query wrapper in open PR #6783 reaches `0x4de2150`; open PR #6784 records a context copy forwarded from there to this helper. This packet independently checks the helper's observable descriptor and result writes. It does not require those PRs to be merged to reproduce the authenticated helper bytes.
+
+The actual FDE at `0x1322010` covers `[0x514ef40,0x51506d0)` (6,032 bytes; SHA-256 `5c2fb47aef3e43bf495937434d561d8ae0e8e285f83cd4d56a5c912538669254`). At entry, the helper loads the prior qword at descriptor (`RSI`) `+0x18`, clears that qword, and branches on the prior value. If it is zero, the selected branch stores `0x8000000000000001` at result (`RDI`) `+0x08` and returns the result pointer. This is an instruction-level empty-descriptor result, not a claim about the caller's semantic error type.
+
+On a separate selected nonempty path near the end of the body, a call to `0x4d30990` precedes stores of 48 bytes into result offsets `+0x00..+0x2f` and a qword at `+0x30`. The same path then writes 24 bytes to descriptor offsets `+0x18..+0x2f` and rejoins the return epilogue. The input to `0x4d30990`, its output semantics, and reachability of this path from the first EMA wrapper remain unresolved. The initial clearing and later writeback mean the descriptor must not be modeled as read-only; they do not establish ownership for all paths or a complete container algorithm.
+
+Run `python3 research/work-items/RE-008-node115-ema-descriptor-result/verify.py` from the repository root. It checks the target digest, full FDE body digest, 16 complete instruction witnesses, three control-flow edges and five byte-mutation controls. The target is never executed.

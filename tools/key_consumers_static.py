@@ -500,8 +500,10 @@ FINDINGS = [
     'bytes are compared nowhere in any traced body - the '
     'only byte equality is delegated one level below the '
     'lookup callee, to 0x154c4e0',
-    'after placement, the shapers read the triple again '
-    'only to free it: guarded exit arms dealloc the '
+    'on selected gate paths, guarded exit arms can free the triple; '
+    'direct-offset census does not exclude accesses through aliases on other branches: '
+    'the tag-9 branch of 0x2ae41e0 copies the triple through phase +0xa8 '
+    'and passes it to 0x564a410. Guarded exit arms dealloc the '
     'lookup_d allocation through the spread pair '
     '(len at phase +0xa8, pointer at +0xb0) and through '
     'the record pair (len at +0x88, pointer at +0x90); '

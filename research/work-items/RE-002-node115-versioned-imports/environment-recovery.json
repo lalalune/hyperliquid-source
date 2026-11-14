@@ -1,0 +1,64 @@
+{
+  "purpose": "Single bounded prerequisite retry on controller-confirmed changed runner; not independent validation or full-suite success",
+  "platform": "Linux-6.12.116-fly-x86_64-with-glibc2.39",
+  "runner_image": "registry.fly.io/mothership-coding@sha256:b454046bfe70349228e9c49701dc7bfc21f864ff73b9580db65703374accf9fa",
+  "results": [
+    {
+      "command": [
+        "python3",
+        "-I",
+        "-c",
+        "import sys,numpy; print(sys.version); print(numpy.__version__)"
+      ],
+      "exit_code": 0,
+      "stdout": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]\n2.3.5\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "rustup",
+        "run",
+        "1.95.0",
+        "rustc",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "rustc 1.95.0 (59807616e 2026-04-14)\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "objdump",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "GNU objdump (GNU Binutils for Ubuntu) 2.42\nCopyright (C) 2024 Free Software Foundation, Inc.\nThis program is free software; you may redistribute it under the terms of\nthe GNU General Public License version 3 or (at your option) any later version.\nThis program has absolutely no warranty.\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--stat"
+      ],
+      "exit_code": 0,
+      "stdout": " README.md                                          |  2 +-\n docs/assets/research-progress.svg                  |  2 +-\n .../RE-002-node115-versioned-imports/README.md     | 93 ++++++++++++++++++++++\n .../environment-check.json                         | 30 +++++++\n .../RE-002-node115-versioned-imports/evidence.json | 93 ++++++++++++++++++++++\n .../readelf-crosscheck.txt                         |  3 +\n .../scoped-run.json                                | 68 ++++++++++++++++\n .../tree-inspection.json                           | 52 ++++++++++++\n tests/test_re002_node115_versioned_imports.py      | 61 ++++++++++++++\n tools/re002_node115_versioned_imports.py           | 85 ++++++++++++++++++++\n 10 files changed, 487 insertions(+), 2 deletions(-)\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--cached",
+        "--",
+        "README.md",
+        "docs/assets/research-progress.svg"
+      ],
+      "exit_code": 0,
+      "stdout": "diff --git a/README.md b/README.md\nindex 9dc26269..c92ca386 100644\n--- a/README.md\n+++ b/README.md\n@@ -16,7 +16,7 @@ an integrated, runnable node remains in progress.\n \n ![Node #115 progress](docs/assets/research-progress.svg)\n \n-**216 active Rust implementation areas \u00b7 179 top-level Cargo manifests \u00b7 3706 #115 research work items.**\n+**216 active Rust implementation areas \u00b7 179 top-level Cargo manifests \u00b7 3707 #115 research work items.**\n \n These inventory counts describe available work, not completed components.\n \ndiff --git a/docs/assets/research-progress.svg b/docs/assets/research-progress.svg\nindex 0d8f1808..d2aa1a79 100644\n--- a/docs/assets/research-progress.svg\n+++ b/docs/assets/research-progress.svg\n@@ -16,7 +16,7 @@\n <text x=\"338\" y=\"180\" fill=\"#71f1c6\" font-size=\"11\" font-weight=\"700\" letter-spacing=\".6\">TOP-LEVEL CARGO MANIFESTS</text>\n <text x=\"338\" y=\"204\" fill=\"#b0c9cb\" font-size=\"11\">Build scopes recorded in source</text>\n <rect x=\"608\" y=\"103\" width=\"272\" height=\"121\" rx=\"10\" fill=\"#102c33\" stroke=\"#21434a\"/>\n-<text x=\"626\" y=\"151\" fill=\"#f0faf7\" font-size=\"38\" font-weight=\"700\">3,706</text>\n+<text x=\"626\" y=\"151\" fill=\"#f0faf7\" font-size=\"38\" font-weight=\"700\">3,707</text>\n <text x=\"626\" y=\"180\" fill=\"#71f1c6\" font-size=\"11\" font-weight=\"700\" letter-spacing=\".6\">DOCUMENTED WORK ITEMS</text>\n <text x=\"626\" y=\"204\" fill=\"#b0c9cb\" font-size=\"11\">Research, evidence and limitations</text>\n <rect x=\"896\" y=\"103\" width=\"272\" height=\"121\" rx=\"10\" fill=\"#102c33\" stroke=\"#21434a\"/>\n",
+      "stderr": ""
+    }
+  ],
+  "limits": "No target or repository code executed; no network; pushed commit not requested because previous partial-clone lookup attempted fetch. Exact remote branch comparison remains unresolved."
+}

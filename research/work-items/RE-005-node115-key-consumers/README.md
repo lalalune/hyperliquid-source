@@ -113,13 +113,13 @@ body** — the single byte-equality is delegated one level
 below the lookup callee, to 0x154c4e0, and its verdict can
 only produce a log line.
 
-**After placement, the shapers read the triple only to free
-it.** Guarded exit arms dealloc the `lookup_d` allocation
+**On the selected gate paths, guarded exit arms can free
+the triple.** A direct-offset census does not exclude access through aliases on other command branches. In particular, the `0x2ae41e0` tag-9 branch copies the triple through a pointer to phase `+0xa8` and passes that copy to `0x564a410`; see `RE-012-node115-cli-key-triple-alias`. Guarded exit arms dealloc the `lookup_d` allocation
 (sentinel-checked length, dealloc slot 0x64df4a0) through the
 spread pair (length at phase +0xa8, pointer at +0xb0) and
 through the record pair (length at +0x88, pointer at +0x90);
 both pairs name the same allocation in its two placements.
-The phase censuses pin every access at the triple offsets,
+The phase censuses pin direct accesses through the censused phase register at the triple offsets,
 the tag qword (+0xa0), the tag byte (+0x1e8) and the
 ownership flag (+0x205) in both shapers.
 

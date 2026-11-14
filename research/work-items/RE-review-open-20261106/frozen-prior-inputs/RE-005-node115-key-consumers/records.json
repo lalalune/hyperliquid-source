@@ -1,0 +1,1017 @@
+{
+ "artifact": {
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "size": 105896032
+ },
+ "cmp_helper": {
+  "direct_calls": {
+   "0x14c2c18": "0x154c4e0",
+   "0x14c2c2a": "0x15d32ae",
+   "0x14c2c3a": "0x14c56b0",
+   "0x14c2c42": "0x63f0a50"
+  },
+  "rip_targets": {
+   "0x14c2b79": {
+    "kind": "call",
+    "target": "0x64dffe0"
+   },
+   "0x14c2b8b": {
+    "kind": "lea",
+    "target": "0x15ebba0"
+   },
+   "0x14c2b97": {
+    "kind": "lea",
+    "target": "0x448a8e"
+   },
+   "0x14c2ba1": {
+    "kind": "call",
+    "target": "0x64df4b8"
+   },
+   "0x14c2bb5": {
+    "kind": "call",
+    "target": "0x64df4a0"
+   },
+   "0x14c2bcc": {
+    "kind": "call",
+    "target": "0x64df4a0"
+   },
+   "0x14c2c06": {
+    "kind": "lea",
+    "target": "0x63f8db0"
+   }
+  }
+ },
+ "exported_bodies": [
+  "builder_c",
+  "lookup_d",
+  "key_lookup",
+  "cmp_helper"
+ ],
+ "findings": [
+  "the gates never receive the key triple: the embedded record the shapers hand over carries record +0x8..+0x30 at its +0x0..+0x28, the chain tag byte at +0x70 and dispatch byte 0 at +0x71; its +0x78..+0x98 slots are written by neither shaper (no access at phase +0x298..+0x2b0 in either body)",
+  "on the dispatch-0 arm the shaper-driven gate invocation takes, the gate manufactures the key pair itself: it stores the .rodata pointer \"hl-node\" (0x60f0b2 in gate_c, 0x605ccd in gate_a) at embedded +0x88 and 7 at +0x90, moves the pair to +0x78/+0x80, and calls the key-lookup callee with (tag, \"hl-node\", 7) after its config-slot check; the second gate arm instead moves a pre-existing +0x88/+0x90 pair down to +0x78/+0x80",
+  "the lookup callee consumes (tag, pointer, length) without ever using the pointer or length as a memory base: tag 0 returns at once, tags 1/2/3 select the reference string field at global +0xd0/+0xb8/+0xa0, the field is copied out (alloc + memcpy) and handed with the caller key to helper 0x14c2b50; the helper either reports the crit-msg state applied (al = 1, descriptor strings freed) or delegates to equality callee 0x154c4e0; a nonzero verdict only makes the lookup callee emit the \"crit msg initialization not applied\" log record (base/src/crit_msg.rs line 471); no caller tests the result, which does not exist",
+  "the chain tag is tested downstream only as the lookup callee's jump-table index and as the gate's post-call zero test (gate_c: test r15b,r15b at 0x2cb690d, immediately before the +0x11c outcome-byte compares at 0x2cb6912; gate_a mirrors both); the key bytes are compared nowhere in any traced body - the only byte equality is delegated one level below the lookup callee, to 0x154c4e0",
+  "after placement, the shapers read the triple again only to free it: guarded exit arms dealloc the lookup_d allocation through the spread pair (len at phase +0xa8, pointer at +0xb0) and through the record pair (len at +0x88, pointer at +0x90); the tag qword at phase +0xa0 is loaded once per shaper to form the lookup call's tag argument"
+ ],
+ "gate_call_census": {
+  "gate_a": [
+   "0x2ae4627",
+   "0x2ae548c"
+  ],
+  "gate_c": [
+   "0x2cde6f4",
+   "0x2cdf58b"
+  ],
+  "rela_addends_naming_gates": []
+ },
+ "gate_census": {
+  "gate_a": {
+   "leas": {
+    "rbx": {
+     "0x120": [
+      "0x2aeb1a1",
+      "0x2aeb1cd"
+     ],
+     "0x78": [
+      "0x2aeb175",
+      "0x2aeb1e0",
+      "0x2aeb5ad"
+     ],
+     "0x90": [
+      "0x2aeb52e",
+      "0x2aebb3f"
+     ]
+    }
+   },
+   "loads": {
+    "rbx": {
+     "0x108": [
+      "0x2aeb225"
+     ],
+     "0x11d": [
+      "0x2aeb2c0"
+     ],
+     "0x120": [
+      "0x2aeb1d9",
+      "0x2aefaaa"
+     ],
+     "0x121": [
+      "0x2aeb1f9"
+     ],
+     "0x122": [
+      "0x2aeb200"
+     ],
+     "0x123": [
+      "0x2aeb208"
+     ],
+     "0x124": [
+      "0x2aeb20f"
+     ],
+     "0x70": [
+      "0x2aeaf5e"
+     ],
+     "0x72": [
+      "0x2aeb170",
+      "0x2aebb0e"
+     ],
+     "0x78": [
+      "0x2aeb2e6",
+      "0x2aefb11"
+     ],
+     "0x80": [
+      "0x2aeb2ea",
+      "0x2aefb29"
+     ],
+     "0x88": [
+      "0x2aeb217"
+     ],
+     "0x90": [
+      "0x2aeb21e"
+     ]
+    }
+   },
+   "other_dst": {
+    "rbx": {
+     "0x11c": [
+      "0x2aeb302",
+      "0x2aeb317"
+     ],
+     "0x11e": [
+      "0x2af01d8"
+     ],
+     "0x72": [
+      "0x2aeb90a"
+     ],
+     "0x73": [
+      "0x2af060e"
+     ]
+    }
+   },
+   "stores": {
+    "rbx": {
+     "0x108": [
+      "0x2aeb19a",
+      "0x2aebbc5"
+     ],
+     "0x11c": [
+      "0x2aeb24b"
+     ],
+     "0x11d": [
+      "0x2aeb252"
+     ],
+     "0x11e": [
+      "0x2aeb230",
+      "0x2af010c",
+      "0x2af012a",
+      "0x2af01fc"
+     ],
+     "0x120": [
+      "0x2aeb1ad"
+     ],
+     "0x121": [
+      "0x2aeb1b4"
+     ],
+     "0x71": [
+      "0x2af023a",
+      "0x2af063c"
+     ],
+     "0x72": [
+      "0x2aeaf62"
+     ],
+     "0x73": [
+      "0x2aeaf6d",
+      "0x2aeb5a7",
+      "0x2aee46d",
+      "0x2af0638"
+     ],
+     "0x78": [
+      "0x2aeb239",
+      "0x2aeb5b6"
+     ],
+     "0x80": [
+      "0x2aeb23d"
+     ],
+     "0x88": [
+      "0x2aeb188",
+      "0x2aeb5bf"
+     ],
+     "0x90": [
+      "0x2aeb18f",
+      "0x2aebb55"
+     ],
+     "0x98": [
+      "0x2aeb244"
+     ]
+    }
+   }
+  },
+  "gate_c": {
+   "leas": {
+    "rbx": {
+     "0x120": [
+      "0x2cb67b1",
+      "0x2cb67dd"
+     ],
+     "0x78": [
+      "0x2cb6785",
+      "0x2cb67f0",
+      "0x2cb6bcd"
+     ],
+     "0x90": [
+      "0x2cb6b4e",
+      "0x2cb715f"
+     ]
+    }
+   },
+   "loads": {
+    "rbx": {
+     "0x108": [
+      "0x2cb6835"
+     ],
+     "0x11d": [
+      "0x2cb68d0"
+     ],
+     "0x120": [
+      "0x2cb67e9",
+      "0x2cbb053"
+     ],
+     "0x121": [
+      "0x2cb6809"
+     ],
+     "0x122": [
+      "0x2cb6810"
+     ],
+     "0x123": [
+      "0x2cb6818"
+     ],
+     "0x124": [
+      "0x2cb681f"
+     ],
+     "0x70": [
+      "0x2cb656e"
+     ],
+     "0x72": [
+      "0x2cb6780",
+      "0x2cb712e"
+     ],
+     "0x78": [
+      "0x2cb68f6",
+      "0x2cbb0ba"
+     ],
+     "0x80": [
+      "0x2cb68fa",
+      "0x2cbb0c3"
+     ],
+     "0x88": [
+      "0x2cb6827"
+     ],
+     "0x90": [
+      "0x2cb682e"
+     ]
+    }
+   },
+   "other_dst": {
+    "rbx": {
+     "0x11c": [
+      "0x2cb6912",
+      "0x2cb6927"
+     ],
+     "0x11e": [
+      "0x2cbb772"
+     ],
+     "0x72": [
+      "0x2cb6f2a"
+     ],
+     "0x73": [
+      "0x2cbbba8"
+     ]
+    }
+   },
+   "stores": {
+    "rbx": {
+     "0x108": [
+      "0x2cb67aa",
+      "0x2cb71e5"
+     ],
+     "0x11c": [
+      "0x2cb685b"
+     ],
+     "0x11d": [
+      "0x2cb6862"
+     ],
+     "0x11e": [
+      "0x2cb6840",
+      "0x2cbb6a6",
+      "0x2cbb6c4",
+      "0x2cbb796"
+     ],
+     "0x120": [
+      "0x2cb67bd"
+     ],
+     "0x121": [
+      "0x2cb67c4"
+     ],
+     "0x71": [
+      "0x2cbb7d4",
+      "0x2cbbbc7"
+     ],
+     "0x72": [
+      "0x2cb6572"
+     ],
+     "0x73": [
+      "0x2cb657d",
+      "0x2cb6bc7",
+      "0x2cb999d",
+      "0x2cbbbc3"
+     ],
+     "0x78": [
+      "0x2cb6849",
+      "0x2cb6bd6"
+     ],
+     "0x80": [
+      "0x2cb684d"
+     ],
+     "0x88": [
+      "0x2cb6798",
+      "0x2cb6bdf"
+     ],
+     "0x90": [
+      "0x2cb679f",
+      "0x2cb7175"
+     ],
+     "0x98": [
+      "0x2cb6854"
+     ]
+    }
+   }
+  }
+ },
+ "globals": {
+  "crit_global": {
+   "dword_0x40": "0x3",
+   "qwords": {
+    "0x0": "0x0",
+    "0x10": "0xe",
+    "0x18": "0x0",
+    "0x8": "0x0"
+   },
+   "section": ".data",
+   "va": "0x64efeb8"
+  },
+  "key_global": {
+   "lazy_dword_0x1c0": "0x3",
+   "reference_fields": {
+    "0xa0": "0x0",
+    "0xa8": "0x0",
+    "0xb0": "0x0",
+    "0xb8": "0x0",
+    "0xc0": "0x0",
+    "0xc8": "0x0",
+    "0xd0": "0x0",
+    "0xd8": "0x0",
+    "0xe0": "0x0"
+   },
+   "section": ".data",
+   "va": "0x64f0210"
+  }
+ },
+ "key_lookup": {
+  "argument_bracket_accesses": {},
+  "direct_calls": {
+   "0x150b110": "0x14c2b50",
+   "0x150b148": "0x5c842e0",
+   "0x150b300": "0x63f0a50"
+  },
+  "jump_table": {
+   "base": "0x465704",
+   "entries": {
+    "0x0": "0x150b209",
+    "0x1": "0x150ad51",
+    "0x2": "0x150ad7c",
+    "0x3": "0x150adb7",
+    "0x4": "0x150c679",
+    "0x5": "0x150c679",
+    "0x6": "0x150c697",
+    "0x7": "0x150c697"
+   }
+  },
+  "rip_targets": {
+   "0x150ad25": {
+    "kind": "use",
+    "target": "0x64f0100"
+   },
+   "0x150ad41": {
+    "kind": "lea",
+    "target": "0x465704"
+   },
+   "0x150ad51": {
+    "kind": "use",
+    "target": "0x64e0b40"
+   },
+   "0x150ad7c": {
+    "kind": "use",
+    "target": "0x64e0b40"
+   },
+   "0x150adb7": {
+    "kind": "use",
+    "target": "0x64e0b40"
+   },
+   "0x150addd": {
+    "kind": "use",
+    "target": "0x64e0b40"
+   },
+   "0x150adf9": {
+    "kind": "lea",
+    "target": "0x64f00f0"
+   },
+   "0x150ae0f": {
+    "kind": "lea",
+    "target": "0x64f0100"
+   },
+   "0x150ae16": {
+    "kind": "lea",
+    "target": "0x63fdb10"
+   },
+   "0x150ae1d": {
+    "kind": "lea",
+    "target": "0x63fdad0"
+   },
+   "0x150ae33": {
+    "kind": "call",
+    "target": "0x64df9f0"
+   },
+   "0x150ae56": {
+    "kind": "lea",
+    "target": "0x63fc048"
+   },
+   "0x150ae5d": {
+    "kind": "lea",
+    "target": "0x63fc008"
+   },
+   "0x150ae6e": {
+    "kind": "call",
+    "target": "0x64df9f0"
+   },
+   "0x150ae9c": {
+    "kind": "lea",
+    "target": "0x63fc048"
+   },
+   "0x150aea3": {
+    "kind": "lea",
+    "target": "0x63fc008"
+   },
+   "0x150aeb4": {
+    "kind": "call",
+    "target": "0x64df9f0"
+   },
+   "0x150aedd": {
+    "kind": "call",
+    "target": "0x64df480"
+   },
+   "0x150aef8": {
+    "kind": "call",
+    "target": "0x64df508"
+   },
+   "0x150aefe": {
+    "kind": "use",
+    "target": "0x64e0b40"
+   },
+   "0x150af1c": {
+    "kind": "use",
+    "target": "0x64e0b40"
+   },
+   "0x150af56": {
+    "kind": "call",
+    "target": "0x64df480"
+   },
+   "0x150af71": {
+    "kind": "call",
+    "target": "0x64df508"
+   },
+   "0x150afa0": {
+    "kind": "lea",
+    "target": "0x63fc048"
+   },
+   "0x150afa7": {
+    "kind": "lea",
+    "target": "0x63fc008"
+   },
+   "0x150afb8": {
+    "kind": "call",
+    "target": "0x64df9f0"
+   },
+   "0x150afd9": {
+    "kind": "lea",
+    "target": "0x63fc048"
+   },
+   "0x150afe0": {
+    "kind": "lea",
+    "target": "0x63fc008"
+   },
+   "0x150aff1": {
+    "kind": "call",
+    "target": "0x64df9f0"
+   },
+   "0x150b01a": {
+    "kind": "call",
+    "target": "0x64df480"
+   },
+   "0x150b035": {
+    "kind": "call",
+    "target": "0x64df508"
+   },
+   "0x150b05b": {
+    "kind": "call",
+    "target": "0x64df480"
+   },
+   "0x150b076": {
+    "kind": "call",
+    "target": "0x64df508"
+   },
+   "0x150b084": {
+    "kind": "call",
+    "target": "0x64e0b48"
+   },
+   "0x150b104": {
+    "kind": "lea",
+    "target": "0x64efeb8"
+   },
+   "0x150b11d": {
+    "kind": "lea",
+    "target": "0x43fea4"
+   },
+   "0x150b158": {
+    "kind": "call",
+    "target": "0x64e0a90"
+   },
+   "0x150b16c": {
+    "kind": "lea",
+    "target": "0x465b90"
+   },
+   "0x150b194": {
+    "kind": "lea",
+    "target": "0x14ce760"
+   },
+   "0x150b1ad": {
+    "kind": "use",
+    "target": "0x64e0a98"
+   },
+   "0x150b1b9": {
+    "kind": "lea",
+    "target": "0x448b05"
+   },
+   "0x150b1c5": {
+    "kind": "call",
+    "target": "0x64df4b8"
+   },
+   "0x150b1cb": {
+    "kind": "use",
+    "target": "0x64efe40"
+   },
+   "0x150b1e6": {
+    "kind": "call",
+    "target": "0x64df4a0"
+   },
+   "0x150b203": {
+    "kind": "call",
+    "target": "0x64df4a0"
+   },
+   "0x150b21a": {
+    "kind": "lea",
+    "target": "0x64efe38"
+   },
+   "0x150b236": {
+    "kind": "lea",
+    "target": "0x64efe40"
+   },
+   "0x150b23d": {
+    "kind": "lea",
+    "target": "0x63fbfe0"
+   },
+   "0x150b244": {
+    "kind": "lea",
+    "target": "0x63fc008"
+   },
+   "0x150b255": {
+    "kind": "call",
+    "target": "0x64df9f0"
+   },
+   "0x150b268": {
+    "kind": "call",
+    "target": "0x64df498"
+   },
+   "0x150b276": {
+    "kind": "call",
+    "target": "0x64df498"
+   },
+   "0x150b286": {
+    "kind": "call",
+    "target": "0x64df498"
+   },
+   "0x150b2ab": {
+    "kind": "call",
+    "target": "0x64df4a0"
+   },
+   "0x150b2da": {
+    "kind": "call",
+    "target": "0x64df4a0"
+   },
+   "0x150b2f7": {
+    "kind": "call",
+    "target": "0x64df4a0"
+   }
+  },
+  "tag_0_target": "0x150b209",
+  "tag_reference_fields": {
+   "0x1": "0xd0",
+   "0x2": "0xb8",
+   "0x3": "0xa0"
+  }
+ },
+ "key_slot_census": {
+  "callee": "0x150ad00",
+  "rip_relative_call_sites": [
+   "0x2ae4580",
+   "0x2aeb2f7",
+   "0x2cb6907",
+   "0x2cde645"
+  ],
+  "slot": "0x64e0b38"
+ },
+ "owners": {
+  "builder_c": {
+   "bytes": 348,
+   "end": "0x2b7b79c",
+   "file_offset": "0x2b7a640",
+   "sha256": "1ce5b5a8e849cc065b72f30af834a79f75454bd412d8c67df9137859bbcc8003",
+   "start": "0x2b7b640"
+  },
+  "cmp_helper": {
+   "bytes": 247,
+   "end": "0x14c2c47",
+   "file_offset": "0x14c1b50",
+   "sha256": "074affff6e4b9cdde4a45cde23119c255abf8f58d91fed46e8362100e5af0efc",
+   "start": "0x14c2b50"
+  },
+  "gate_a": {
+   "bytes": 22372,
+   "end": "0x2af0654",
+   "file_offset": "0x2ae9ef0",
+   "sha256": "d1b4e3ecb40fb4027b69240f48eacf2de2cf5f7e8c3ae5c0e6910a784fdcce29",
+   "start": "0x2aeaef0"
+  },
+  "gate_c": {
+   "bytes": 22239,
+   "end": "0x2cbbbdf",
+   "file_offset": "0x2cb5500",
+   "sha256": "62835f8a447ea034c30a4fa0663abad74226444817882c469f883d7d92e4a8d0",
+   "start": "0x2cb6500"
+  },
+  "key_lookup": {
+   "bytes": 1541,
+   "end": "0x150b305",
+   "file_offset": "0x1509d00",
+   "sha256": "c01b4b7405fad32a62db8e4df88040ad03075d91fee1edcb44f8c4b61a581cc7",
+   "start": "0x150ad00"
+  },
+  "lookup_d": {
+   "bytes": 598,
+   "end": "0x564cf36",
+   "file_offset": "0x564bce0",
+   "sha256": "e69561afd60a4ae323867f1eb25f2a6997c85c488524e15bf0ca9f9fed100e92",
+   "start": "0x564cce0"
+  },
+  "lvl3_c": {
+   "bytes": 10657,
+   "end": "0x2ce0dd1",
+   "file_offset": "0x2cdd430",
+   "sha256": "99c49a3e20f63cf199f2a160ba9560e439acb2b49a66968623aa9607acfa417b",
+   "start": "0x2cde430"
+  },
+  "lvl4_a": {
+   "bytes": 11142,
+   "end": "0x2ae6d66",
+   "file_offset": "0x2ae31e0",
+   "sha256": "90ae09003ca680bd4b5f32fec22ee1f7146cc1f67b758f8e2f2ac880545b730b",
+   "start": "0x2ae41e0"
+  }
+ },
+ "phase_map": {
+  "embedded_base": "0x220",
+  "embedded_dispatch": "0x291",
+  "embedded_tag": "0x290",
+  "record_base": "0x10",
+  "spread": {
+   "+0x78": "0xa8",
+   "+0x80": "0xb0",
+   "+0x88": "0xb8"
+  },
+  "tag_byte": "0x1e8"
+ },
+ "pins": {
+  "gate_a": {
+   "0x2aeb170": "440fb67b72",
+   "0x2aeb188": "48899388000000",
+   "0x2aeb18f": "48c7839000000007000000",
+   "0x2aeb239": "48895378",
+   "0x2aeb23d": "4889bb80000000",
+   "0x2aeb2e0": "ff159a579f03",
+   "0x2aeb2e6": "488b7378",
+   "0x2aeb2ea": "488b9380000000",
+   "0x2aeb2f7": "ff153b589f03"
+  },
+  "gate_c": {
+   "0x2cb6780": "440fb67b72",
+   "0x2cb6798": "48899388000000",
+   "0x2cb679f": "48c7839000000007000000",
+   "0x2cb6849": "48895378",
+   "0x2cb684d": "4889bb80000000",
+   "0x2cb68f0": "ff158aa18203",
+   "0x2cb68f6": "488b7378",
+   "0x2cb68fa": "488b9380000000",
+   "0x2cb6907": "ff152ba28203",
+   "0x2cb6912": "80bb1c01000002"
+  }
+ },
+ "shaper_census": {
+  "lvl3_c": {
+   "leas": {
+    "r13": {
+     "0x205": [
+      "0x2cdf3d7"
+     ],
+     "0xa8": [
+      "0x2cde665"
+     ]
+    }
+   },
+   "loads": {
+    "r13": {
+     "0x1e8": [
+      "0x2cde692",
+      "0x2cde868",
+      "0x2cde88f",
+      "0x2cdec50",
+      "0x2cdedc7",
+      "0x2cdee55",
+      "0x2cdef47",
+      "0x2cdf24b",
+      "0x2cdf2bb",
+      "0x2cdf527",
+      "0x2cdf5f3",
+      "0x2cdf60e",
+      "0x2cdf7b0",
+      "0x2cdf83e",
+      "0x2cdf89f",
+      "0x2cdfc1f",
+      "0x2cdfc3a"
+     ],
+     "0x88": [
+      "0x2ce0d0f"
+     ],
+     "0x90": [
+      "0x2ce0d1b"
+     ],
+     "0xa0": [
+      "0x2cde564"
+     ],
+     "0xa8": [
+      "0x2cdfeee",
+      "0x2ce0ce2"
+     ],
+     "0xb0": [
+      "0x2cdfeff",
+      "0x2ce0cee"
+     ]
+    }
+   },
+   "other_dst": {
+    "r13": {
+     "0x205": [
+      "0x2cdfee4",
+      "0x2ce0cd8"
+     ]
+    }
+   },
+   "stores": {
+    "r13": {
+     "0x1e8": [
+      "0x2cde56b"
+     ],
+     "0x205": [
+      "0x2cde4b3",
+      "0x2cde57a",
+      "0x2cde82e",
+      "0x2cde9cf",
+      "0x2cdf1e1",
+      "0x2cdf5b9",
+      "0x2cdf670",
+      "0x2cdfbe5",
+      "0x2cdff0e",
+      "0x2ce0cfd"
+     ],
+     "0x290": [
+      "0x2cde6d8",
+      "0x2cdf56f"
+     ],
+     "0x291": [
+      "0x2cde6df",
+      "0x2cdf576"
+     ],
+     "0xa8": [
+      "0x2cde58a"
+     ],
+     "0xb8": [
+      "0x2cde59a"
+     ]
+    }
+   }
+  },
+  "lvl4_a": {
+   "leas": {
+    "rbx": {
+     "0x205": [
+      "0x2ae52fe"
+     ],
+     "0xa8": [
+      "0x2ae45a0"
+     ]
+    }
+   },
+   "loads": {
+    "rbx": {
+     "0x1e8": [
+      "0x2ae45cc",
+      "0x2ae4792",
+      "0x2ae47b8",
+      "0x2ae4b72",
+      "0x2ae4cce",
+      "0x2ae4d6a",
+      "0x2ae4e61",
+      "0x2ae515e",
+      "0x2ae51d6",
+      "0x2ae542f",
+      "0x2ae54f0",
+      "0x2ae550a",
+      "0x2ae56b5",
+      "0x2ae5739",
+      "0x2ae57a5",
+      "0x2ae5b51",
+      "0x2ae5b6b"
+     ],
+     "0x88": [
+      "0x2ae6c96"
+     ],
+     "0x90": [
+      "0x2ae6ca7"
+     ],
+     "0xa0": [
+      "0x2ae44c8"
+     ],
+     "0xa8": [
+      "0x2ae5e29",
+      "0x2ae6c66"
+     ],
+     "0xb0": [
+      "0x2ae5e3a",
+      "0x2ae6c77"
+     ]
+    }
+   },
+   "other_dst": {
+    "rbx": {
+     "0x205": [
+      "0x2ae5e20",
+      "0x2ae6c5d"
+     ]
+    }
+   },
+   "stores": {
+    "rbx": {
+     "0x1e8": [
+      "0x2ae44ce"
+     ],
+     "0x205": [
+      "0x2ae4213",
+      "0x2ae44dc",
+      "0x2ae475b",
+      "0x2ae48e5",
+      "0x2ae50f7",
+      "0x2ae54b9",
+      "0x2ae556d",
+      "0x2ae5b1a",
+      "0x2ae5e49",
+      "0x2ae6c86"
+     ],
+     "0x290": [
+      "0x2ae460b",
+      "0x2ae5470"
+     ],
+     "0x291": [
+      "0x2ae4611",
+      "0x2ae5476"
+     ],
+     "0x90": [
+      "0x2ae448e"
+     ],
+     "0xa0": [
+      "0x2ae447f"
+     ],
+     "0xa8": [
+      "0x2ae44fa"
+     ],
+     "0xb8": [
+      "0x2ae44eb"
+     ]
+    }
+   }
+  }
+ },
+ "shaper_emb_key_offsets_untouched": true,
+ "slots": {
+  "alloc_slot": {
+   "addend": "0x6355830",
+   "relocation": "R_X86_64_JUMP_SLOT",
+   "slot": "0x64df480"
+  },
+  "config_slot": {
+   "callee": "0x1506840",
+   "relocation": "R_X86_64_JUMP_SLOT",
+   "slot": "0x64e0a80"
+  },
+  "copy_slot": {
+   "relocation": "R_X86_64_GLOB_DAT",
+   "slot": "0x64df508",
+   "symbol": "memcpy"
+  },
+  "crit_call_slot": {
+   "callee": "0x1534810",
+   "relocation": "R_X86_64_JUMP_SLOT",
+   "slot": "0x64e0eb0"
+  },
+  "dealloc_slot": {
+   "addend": "0x635de30",
+   "relocation": "R_X86_64_JUMP_SLOT",
+   "slot": "0x64df4a0"
+  },
+  "helper_state_slot": {
+   "callee": "0x154cd10",
+   "relocation": "R_X86_64_JUMP_SLOT",
+   "slot": "0x64dffe0"
+  },
+  "key_global_slot": {
+   "callee": "0x64f0210",
+   "relocation": "R_X86_64_JUMP_SLOT",
+   "slot": "0x64e0b40"
+  },
+  "key_slot": {
+   "callee": "0x150ad00",
+   "relocation": "R_X86_64_JUMP_SLOT",
+   "slot": "0x64e0b38"
+  },
+  "key_state_slot": {
+   "callee": "0x1562670",
+   "relocation": "R_X86_64_JUMP_SLOT",
+   "slot": "0x64e0b48"
+  },
+  "log_slot": {
+   "addend": "0x5c9b900",
+   "relocation": "R_X86_64_JUMP_SLOT",
+   "slot": "0x64df4b8"
+  }
+ },
+ "strings": {
+  "crit_file": {
+   "bytes": 20,
+   "section": ".rodata",
+   "va": "0x43fea4",
+   "value": "base/src/crit_msg.rs"
+  },
+  "crit_message": {
+   "descriptor_length": "0x47",
+   "prefix": "crit msg initialization not applied",
+   "section": ".rodata",
+   "va": "0x465b90"
+  },
+  "hl_node_gate_a": {
+   "bytes": 7,
+   "section": ".rodata",
+   "va": "0x605ccd",
+   "value": "hl-node"
+  },
+  "hl_node_gate_c": {
+   "bytes": 7,
+   "section": ".rodata",
+   "va": "0x60f0b2",
+   "value": "hl-node"
+  },
+  "infra_key": {
+   "bytes": 5,
+   "section": ".rodata",
+   "va": "0x60eb60",
+   "value": "infra"
+  }
+ },
+ "work_item": "RE-005-node115-key-consumers"
+}
