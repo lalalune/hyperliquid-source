@@ -1,0 +1,50 @@
+id	va	original	mutated	label	detected	tried	first_case	reason
+0	0x29137a8	4983fd65	4983fd64	arm0 name length gate 0x65 -> 0x64	1	57	331	call log differs
+1	0x29137ac	0f83	0f82	arm0 length gate jae -> jb	1	4	5241	call log differs
+2	0x2913818	498db6c0070000	498db6c8070000	arm0 A receiver ctx+0x7c0 -> +0x7c8	1	4	5241	call log differs
+3	0x291381f	ba01000000	ba02000000	arm0 default split start 1 -> 2	1	27	74	call log differs
+4	0x291383e	81f9a2010000	81f9a3010000	arm0 A success tag 0x1a2 -> 0x1a3	1	4	5241	call log differs
+5	0x2913844	0f85	0f84	arm0 A tag test jne -> je	1	4	5241	call log differs
+6	0x2913873	0f85	0f84	arm0 B tag test jne -> je	1	4	5241	call log differs
+7	0x2913879	483d0f270000	483d10270000	arm0 small id bound 9999 -> 10000	1	242	179	call log differs
+8	0x291387f	0f87	0f83	arm0 small id branch ja -> jae	1	366	322	call log differs
+9	0x2913fad	483d5f5af405	483d5e5af405	arm0 offset bound 0x5f45a5f -> 0x5f45a5e	1	153	7384	call log differs
+10	0x2913faf	5f5af405	605af405	arm0 offset bound 0x5f45a5f -> 0x5f45a60	1	7	119	call log differs
+11	0x2913fb3	0f86	0f82	arm0 offset bound jbe -> jb	1	153	7384	call log differs
+12	0x291408b	05a0860100	05a1860100	arm0 offset 100000 -> 100001	1	4	5241	call log differs
+13	0x29138d9	0f85	0f84	arm4 sentinel test jne -> je	1	2	7918	call log differs
+14	0x29138d2	4c39ae78030000	4c39ae70030000	arm4 sentinel word +0x378 -> +0x370	1	21	5977	call log differs
+15	0x29138df	66c7035601	66c7035701	arm4 sentinel tag 0x156 -> 0x157	1	21	5977	output bytes differ at +0x0
+16	0x2913d1a	4c39ae08040000	4c39ae00040000	arm4 second word +0x408 -> +0x400	1	2	7918	call log differs
+17	0x2913d21	0f85	0f84	arm4 second word test jne -> je	1	2	7918	call log differs
+18	0x2913e9a	66c703a101	66c703a201	arm4 tag 0x1a1 -> 0x1a2	1	6	1795	output bytes differ at +0x0
+19	0x2913d52	0f84	0f85	arm4 flag test je -> jne	1	2	7918	call log differs
+20	0x2913d5b	3c02	3c03	arm4 flag-set compare 2 -> 3	1	12	7923	call log differs
+21	0x2913f48	40b502	40b503	arm4 flag-clear mode 2 -> 3	1	46	4033	call log differs
+22	0x2913f4b	3c02	3c03	arm4 flag-clear compare 2 -> 3	1	54	6911	call log differs
+23	0x2913f4d	744f	754f	arm4 flag-clear branch je -> jne	1	46	4033	call log differs
+24	0x2913f4f	48b94b598638	48b94a598638	arm4 reciprocal constant low byte	1	433	1982	call log differs
+25	0x2913f5f	48c1ea0b	48c1ea0c	arm4 reciprocal shift 11 -> 12	1	12	7923	call log differs
+26	0x2913f76	400fb6cd	400fb6c5	arm4 mode register bpl -> not passed	1	12	7923	call log differs
+27	0x2913f98	0f85	0f84	arm4 divide result tag test jne -> je	1	38	6486	output bytes differ at +0x0
+28	0x2913979	488b4e18	488b4e10	arm3 length word +0x18 -> +0x10	1	8	9521	call log differs
+29	0x291397d	4883f965	4883f966	arm3 length gate 0x65 -> 0x66	1	49	9497	call log differs
+30	0x2913981	0f82	0f83	arm3 length gate jb -> jae	1	8	9521	call log differs
+31	0x291399f	66c7035801	66c7035901	arm3 over-length tag 0x158 -> 0x159	1	49	9497	output bytes differ at +0x0
+32	0x2913b18	0f85	0f84	arm3 sentinel test jne -> je	1	8	9521	output bytes differ at +0x0
+33	0x2913b1e	66c7035601	66c7035701	arm3 sentinel tag 0x156 -> 0x157	1	14	9564	output bytes differ at +0x0
+34	0x2913ea7	0f84	0f85	arm3 flag test je -> jne	1	8	9521	call log differs
+35	0x2913ead	c6806804000002	c6806804000003	arm3 record byte +0x468 set to 2 -> 3	1	140	5079	record byte +0x468 differs
+36	0x2913f3c	c6806804000000	c6806804000001	arm3 record byte +0x468 clear 0 -> 1	1	8	9521	record byte +0x468 differs
+37	0x22b31f0	b810270000	b811270000	range scale 10000 -> 10001	1	59	9883	kind panic:mul != model ret
+38	0x22b3178	4c29e3	4c01e3	range count subtract -> add	1	9	10005	emulation stopped: Halt
+39	0x22b317b	480f42d8	480f43d8	range count clamp cmovb -> cmovae	1	9	10005	emulation stopped: Halt
+40	0x22b319e	0f97c2	0f93c2	range size limit seta -> setae	1	5843	1614	call log differs
+41	0x22b31f9	704c	714c	range multiply overflow jo -> jno	1	47	9767	kind ret != model panic:mul
+42	0x22b3202	4839c2	4839d0	range add guard compare operands swapped	1	59	9883	kind panic:add != model ret
+43	0x22b3205	724f	764f	range add guard jb -> jbe	1	140	5079	kind panic:add != model ret
+44	0x22b31dd	7349	7249	range empty-loop test jae -> jb	1	47	9767	kind ret != model panic:mul
+45	0x2913a39	0f85	0f84	arm5 Z tag test jne -> je	1	156	3421	output bytes differ at +0x0
+46	0x2913a4d	493b86b8000000	493b86c0000000	arm6 limit word +0xb8 -> +0xc0	1	15	7775	call log differs
+47	0x2913a54	0f83	0f87	arm6 limit test jae -> ja	1	75	3558	call log differs
+48	0x2913b49	66c703fa00	66c703fb00	arm6 error tag 0xfa -> 0xfb	1	15	7775	output bytes differ at +0x0

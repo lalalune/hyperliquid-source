@@ -1,0 +1,46 @@
+{
+  "caller_0x55817e0": {
+    "mode_0_call": "0x5581a37 r8d=0 r9d=0, only when the predicate returns true",
+    "mode_3_call": "0x5581946 r8d=3 r9d=0",
+    "predicate_call": "0x55819ed slot 0x64e7180 -> 0x369b360, rdi=box+0x670 (Locus blp), ecx=0"
+  },
+  "component": "abci",
+  "gates_changed": false,
+  "mode_call_0x5609fb0": {
+    "direct_calls": 7,
+    "mode_to_inner": "0x560a11b ecx=bpl -> 0x55a03c0 -> 0x55a07e0 at 0x55a0504",
+    "mode_to_switch": "0x5609ff5 edi=r8d -> 0x57cbe30 (jump table 0x9351f4)",
+    "modes_0_and_3": "return at once with eax = mode (0x57cbfeb / 0x57cbfe6 -> 0x57cc0e3)",
+    "result": "inner returns 0x11 -> tag 0x1a2, else tag 0xf1 byte 0xc",
+    "switch_arms": {
+      "0": "0x57cbfeb",
+      "1": "0x57cbe4b",
+      "2": "0x57cbf16",
+      "3": "0x57cbfe6"
+    }
+  },
+  "move_0x5580d10": {
+    "ctr": "0x5580d32 Locus ctr +0xab0 += 1 (saturating) on entry",
+    "direct_calls": 51,
+    "early_exit": "r8 == stack arg 0 and (r8 == 0 or r9 == stack arg 1) -> tag 0x1a2, value 0",
+    "legs": {
+      "first": "0x55812c0 0x54df920 r8d=1, failure -> 0x432bcb 'move_token to_spot: '",
+      "second": "0x5581350 0x54df920 r8d=0, failure -> 0x438c95 'move_token from_spot: '"
+    }
+  },
+  "predicate_0x369b360": {
+    "lookup": "blp +0x88 map, 20-byte key (memcmp 0x14), then the u64 argument in the value inner map",
+    "on_this_path": "ecx = 0 -> tests the second half (+0x18)",
+    "test": "true when word at entry +0x8 + ((ecx ^ 1) << 4) == 0 or no entry"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "side_select_0x55a07e0": {
+    "reads": [
+      "0x55a0e5c",
+      "0x55a0f3c"
+    ],
+    "rule": "offset = (mode & 1) << 4: mode 3 -> +0x10 (second half), mode 0 -> +0x0 (first half)"
+  },
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}

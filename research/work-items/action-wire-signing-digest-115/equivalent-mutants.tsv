@@ -1,0 +1,4 @@
+mutant	address	reason
+domain-name-alloc-size	byte 0x44338c7 +1	the buffer is allocated for 26 bytes and written with exactly 26; the spare byte is never read, hashed or compared, and the buffer is freed with the same size argument
+final-length-immediate	byte 0x4433b5b +1	the real sponge was run and the 32-byte result and the tag are unchanged; the one extra squeezed byte lands in stack padding after the result and is never read (observed, not proven for every path)
+state-copy-size	byte 0x4433b48 +1	the real sponge was run and the result is unchanged; the one extra copied byte is overwritten or ignored before the state is used (observed, not proven for every path)

@@ -1,0 +1,164 @@
+3d517e0	push r15
+3d517e2	push r14
+3d517e4	push r13
+3d517e6	push r12
+3d517e8	push rbx
+3d517e9	sub rsp,0x20
+3d517ed	mov rbx,rdi
+3d517f0	cmp rdx,0x100
+3d517f7	jae 0x3d5183c
+3d517f9	mov r14,QWORD PTR [rsi]
+3d517fc	mov rsi,QWORD PTR [r14+0x10]
+3d51800	cmp QWORD PTR [r14],rsi
+3d51803	je 0x3d518b3
+3d51809	mov rax,QWORD PTR [r14]
+3d5180c	mov rsi,QWORD PTR [r14+0x10]
+3d51810	test dl,dl
+3d51812	js 0x3d51918
+3d51818	cmp rax,rsi
+3d5181b	je 0x3d519da
+3d51821	mov rax,QWORD PTR [r14+0x8]
+3d51825	mov BYTE PTR [rax+rsi*1],dl
+3d51828	inc QWORD PTR [r14+0x10]
+3d5182c	mov BYTE PTR [rbx+0x8],0x0
+3d51830	mov BYTE PTR [rbx+0x9],dl
+3d51833	mov QWORD PTR [rbx],0x2
+3d5183a	jmp 0x3d518a2
+3d5183c	cmp rdx,0x10000
+3d51843	jae 0x3d5185b
+3d51845	mov rdi,QWORD PTR [rsi]
+3d51848	mov esi,edx
+3d5184a	call 0x3d51d10
+3d5184f	cmp rax,0x2
+3d51853	jne 0x3d51891
+3d51855	mov BYTE PTR [rbx+0x8],0xcd
+3d51859	jmp 0x3d5189f
+3d5185b	mov rax,rdx
+3d5185e	shr rax,0x20
+3d51862	jne 0x3d5187a
+3d51864	mov rdi,QWORD PTR [rsi]
+3d51867	mov esi,edx
+3d51869	call 0x3d51f40
+3d5186e	cmp rax,0x2
+3d51872	jne 0x3d51891
+3d51874	mov BYTE PTR [rbx+0x8],0xce
+3d51878	jmp 0x3d5189f
+3d5187a	mov rdi,QWORD PTR [rsi]
+3d5187d	mov rsi,rdx
+3d51880	call 0x3d520d0
+3d51885	cmp rax,0x2
+3d51889	jne 0x3d51891
+3d5188b	mov BYTE PTR [rbx+0x8],0xcf
+3d5188f	jmp 0x3d5189f
+3d51891	movabs rcx,0x2600000003
+3d5189b	mov QWORD PTR [rbx+0x8],rcx
+3d5189f	mov QWORD PTR [rbx],rax
+3d518a2	mov rax,rbx
+3d518a5	add rsp,0x20
+3d518a9	pop rbx
+3d518aa	pop r12
+3d518ac	pop r13
+3d518ae	pop r14
+3d518b0	pop r15
+3d518b2	ret
+3d518b3	mov r12,rdx
+3d518b6	lea rax,[rsi+rsi*1]
+3d518ba	cmp rax,0x9
+3d518be	mov r15d,0x8
+3d518c4	cmovae r15,rax
+3d518c8	mov rdx,QWORD PTR [r14+0x8]
+3d518cc	lea rdi,[rsp+0x8]
+3d518d1	mov r8d,0x1
+3d518d7	mov r9d,0x1
+3d518dd	mov rcx,r15
+3d518e0	call 0x43bd550
+3d518e5	cmp BYTE PTR [rsp+0x8],0x0
+3d518ea	je 0x3d518fa
+3d518ec	test r12b,r12b
+3d518ef	js 0x3d51962
+3d518f1	mov QWORD PTR [rbx],0x0
+3d518f8	jmp 0x3d5194f
+3d518fa	mov rax,QWORD PTR [rsp+0x10]
+3d518ff	mov QWORD PTR [r14+0x8],rax
+3d51903	mov QWORD PTR [r14],r15
+3d51906	mov rdx,r12
+3d51909	mov rax,QWORD PTR [r14]
+3d5190c	mov rsi,QWORD PTR [r14+0x10]
+3d51910	test dl,dl
+3d51912	jns 0x3d51818
+3d51918	cmp rax,rsi
+3d5191b	je 0x3d51a01
+3d51921	mov rax,QWORD PTR [r14+0x8]
+3d51925	mov BYTE PTR [rax+rsi*1],0xcc
+3d51929	mov r15,QWORD PTR [r14]
+3d5192c	mov rax,QWORD PTR [r14+0x10]
+3d51930	lea rsi,[rax+0x1]
+3d51934	mov QWORD PTR [r14+0x10],rsi
+3d51938	cmp r15,rsi
+3d5193b	jne 0x3d519ba
+3d5193d	add rax,0x2
+3d51941	mov r13d,0x1
+3d51947	cmp rax,rsi
+3d5194a	jae 0x3d51967
+3d5194c	mov QWORD PTR [rbx],r13
+3d5194f	movabs rax,0x2600000003
+3d51959	mov QWORD PTR [rbx+0x8],rax
+3d5195d	jmp 0x3d518a2
+3d51962	xor r13d,r13d
+3d51965	jmp 0x3d5194c
+3d51967	mov r12,rdx
+3d5196a	lea rcx,[rsi+rsi*1]
+3d5196e	cmp rax,rcx
+3d51971	cmova rcx,rax
+3d51975	cmp rcx,0x9
+3d51979	mov r15d,0x8
+3d5197f	cmovae r15,rcx
+3d51983	mov rdx,QWORD PTR [r14+0x8]
+3d51987	lea rdi,[rsp+0x8]
+3d5198c	mov r8d,0x1
+3d51992	mov r9d,0x1
+3d51998	mov rcx,r15
+3d5199b	call 0x43bd550
+3d519a0	cmp DWORD PTR [rsp+0x8],0x1
+3d519a5	je 0x3d5194c
+3d519a7	mov rax,QWORD PTR [rsp+0x10]
+3d519ac	mov QWORD PTR [r14+0x8],rax
+3d519b0	mov QWORD PTR [r14],r15
+3d519b3	mov rsi,QWORD PTR [r14+0x10]
+3d519b7	mov rdx,r12
+3d519ba	cmp r15,rsi
+3d519bd	je 0x3d51a28
+3d519bf	mov rax,QWORD PTR [r14+0x8]
+3d519c3	mov BYTE PTR [rax+rsi*1],dl
+3d519c6	inc QWORD PTR [r14+0x10]
+3d519ca	mov QWORD PTR [rbx],0x2
+3d519d1	mov BYTE PTR [rbx+0x8],0xcc
+3d519d5	jmp 0x3d518a2
+3d519da	mov r15,rdx
+3d519dd	mov edx,0x1
+3d519e2	mov ecx,0x1
+3d519e7	mov r8d,0x1
+3d519ed	mov rdi,r14
+3d519f0	call 0x43bd910
+3d519f5	mov rdx,r15
+3d519f8	mov rsi,QWORD PTR [r14+0x10]
+3d519fc	jmp 0x3d51821
+3d51a01	mov r15,rdx
+3d51a04	mov edx,0x1
+3d51a09	mov ecx,0x1
+3d51a0e	mov r8d,0x1
+3d51a14	mov rdi,r14
+3d51a17	call 0x43bd910
+3d51a1c	mov rdx,r15
+3d51a1f	mov rsi,QWORD PTR [r14+0x10]
+3d51a23	jmp 0x3d51921
+3d51a28	mov r12,rdx
+3d51a2b	mov edx,0x1
+3d51a30	mov ecx,0x1
+3d51a35	mov r8d,0x1
+3d51a3b	mov rdi,r14
+3d51a3e	mov rsi,r15
+3d51a41	call 0x43bd910
+3d51a46	mov rdx,r12
+3d51a49	mov rsi,QWORD PTR [r14+0x10]
+3d51a4d	jmp 0x3d519bf

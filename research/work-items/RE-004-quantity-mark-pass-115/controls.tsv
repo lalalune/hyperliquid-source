@@ -1,0 +1,47 @@
+control	kind	detail	detected	first_difference
+0x2c4fe4b+1	patch	dex index bound jae -> jb	1	seed 1 differs: machine early:257 model panic:dex-index
+0x2c4ff06+0	patch	sentinel test on +0x408 inverted	1	seed 2 differs: machine early:414 model early:257
+0x2c4ff11+0	patch	busy flag +0x58 test inverted	1	seed 2 differs: machine sink model early:257
+0x2c4fef2+0	patch	None niche test on +0x378 jo -> jno	1	seed 2 differs: machine early:414 model early:257
+0x2c500b1+1	patch	slot key stride 10000 -> 10001	1	seed 3 panic differs: ('panic', 'key-mul') vs ('panic', 'key-add')
+0x2c500ba+1	patch	key multiply overflow jo -> jno	1	seed 3 panic differs: ('panic', 'key-mul') vs ('panic', 'key-add')
+0x2c500d0+1	patch	key add carry jb -> jae	1	seed 3 panic differs: ('panic', 'key-add') vs ('panic', 'key-add')
+0x2c500e5+0	patch	map-niche skip inside loop inverted	1	seed 3 panic differs: ('panic', 'key-add') vs ('panic', 'key-add')
+0x2c50131+1	patch	ordered-map miss test inverted	1	seed 3 halt: read outside every mapping: 0xd2d2d2d2d2d2d32d
+0x2c5016c+1	patch	ring length bound jae -> jb	1	seed 5 differs: machine sink model sink
+0x2c5017c+0	patch	ring wrap test inverted	1	seed 5 differs: machine sink model sink
+0x2c501c9+1	patch	dex id zero test inverted	1	seed 6 panic differs: ('panic', 'decimals') vs ('panic', 'decimals'
+0x2c50246+2	patch	u64 cast bias subsd -> addsd	1	seed 6 panic differs: ('panic', 'decimals') vs ('panic', 'decimals'
+0x2c50298+3	patch	cast floor 1 -> 2	1	seed 14 differs: machine sink model sink
+0x2c5029c+3	patch	cast floor adc 0 -> 1	1	seed 4 differs: machine sink model sink
+0x2c502b0+3	patch	division by 10000 shift 11 -> 12	1	seed 4 differs: machine panic:oracle-id model sink
+0x2c502bc+1	patch	oracle id mismatch test inverted	1	seed 4 differs: machine panic:oracle-id model sink
+0x2c502d0+1	patch	local asset bound jae -> jb	1	seed 4 differs: machine panic:oracle-id model sink
+0x2c502de+5	patch	size decimals byte offset 0x1d -> 0x1c	1	seed 6 differs: machine sink model panic:decimals
+0x2c502e4+3	patch	decimals bound 7 -> 8	1	seed 6 halt: read outside every mapping: 0x1005ed740
+0x2c502ee+1	patch	decimals base 6 -> 5	1	seed 4 differs: machine sink model sink
+0x2c50316+2	patch	power table stride 8 -> 4	1	seed 4 differs: machine sink model sink
+0x2c50347+1	patch	non-finite test jge -> jl	1	seed 4 differs: machine sink model sink
+0x2c50395+3	patch	name probe limit 0x270f -> 0x270e	1	seed 7 differs: machine sink model sink
+0x2c5039c+1	patch	name probe limit branch ja -> jbe	1	seed 6 panic differs: ('panic', 'decimals') vs ('panic', 'decimals'
+0x2c503c1+5	patch	name length 4 -> 5	1	seed 5 differs: machine sink model sink
+0x2c503c7+1	patch	name length test inverted	1	seed 5 differs: machine sink model sink
+0x2c50406+0	patch	zero mantissa test inverted	0	
+0x2c50426+1	patch	positive flag setns -> sets	1	seed 4 differs: machine sink model sink
+0x2c50436+2	patch	kernel is64 argument 1 -> 0	1	seed 4 halt: stub check failed: kernel flags
+0x2c5043c+2	patch	kernel rounding argument 1 -> 0	1	seed 4 halt: stub check failed: kernel flags
+0x2c50458+1	patch	kernel success tag test inverted	1	seed 4 differs: machine sink model sink
+round_half_even	model	variant of the statement	1	seed 125
+round_floor	model	variant of the statement	1	seed 14
+no_saturate	model	variant of the statement	1	seed 16
+floor_two	model	variant of the statement	1	seed 5
+no_floor	model	variant of the statement	1	seed 5
+ignore_flag58	model	variant of the statement	1	seed 2
+swap_codes	model	variant of the statement	1	seed 2
+scale_plain	model	variant of the statement	1	seed 4
+purr_off	model	variant of the statement	1	seed 6
+dealloc_always	model	variant of the statement	1	seed 35
+no_id_check	model	variant of the statement	1	seed 23
+dec_off_by_one	model	variant of the statement	1	seed 6
+sign_flip	model	variant of the statement	1	seed 4
+kernel_round_off	model	variant of the statement	1	seed 4

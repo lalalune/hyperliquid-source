@@ -145,11 +145,13 @@ def height_draw(seed, bound, count):
     """Draw a skiplist height the way 0x6063150 does.
 
     Returns (height, new_seed, advances). Tries start at 1; each try
-    advances the seed once and stops at the first seed < bound. The
+    advances the seed once and stops at the first seed >= bound (a
+    seed < bound takes the `jb` at 0x60631c2 and redraws). The
     height is the try number, capped at min(count, 32): when
     tries + 1 == count the draw exhausts with height = count; when
-    tries + 1 == 32 it caps at 32. When count <= 1 the seed is never
-    touched and the height is 1. The byte offset of the height slot
+    tries + 1 == 32 it caps at 32. When count <= 1 the seed is not
+    advanced and the height is 1 (the thread-seed getter at 0x6063165
+    is still called first). The byte offset of the height slot
     in the node is (height - 1) * 8.
     """
     if count <= 1:
@@ -158,7 +160,7 @@ def height_draw(seed, bound, count):
     cur = seed
     while True:
         cur = mersenne_step(cur)
-        if cur < bound:
+        if cur >= bound:
             return (tries, cur, tries)
         if tries + 1 == count:
             return (count, cur, tries)

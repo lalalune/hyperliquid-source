@@ -1,0 +1,42 @@
+{
+  "after_loop": {
+    "per_key": "0x5582180(out, box, &key, ecx 0, r8d 1) for each collected key",
+    "pmc": "if pmi set and memcmp(new key, entry key, 20) <= 0 -> pmc := block date-time"
+  },
+  "call_census": {
+    "0x4dcdfc0": 2,
+    "0x4dce210": 2,
+    "0x5582180": 4
+  },
+  "component": "abci",
+  "cursor": "pmi Some -> copied 20-byte key, None -> zero key",
+  "entry_guard": "pmn != 0 and box +0x710 != 0, else pmc := (0xf6401a, 0)",
+  "fields": {
+    "blp": "Locus field, box +0x670..+0x7c0: map at +0x6f8, word +0x710, byte +0x7b8",
+    "pmc": "ExchangeMisc +0xe8, box +0x39f0 (#6103)",
+    "pmi": "Exchange index 54, box +0x42b0 tag / +0x42b1 20-byte key",
+    "pmn": "Exchange index 55, box +0x4270 (u64 loop limit)"
+  },
+  "function": "0x54b66b0",
+  "gates_changed": false,
+  "iterators": {
+    "first": "0x4dcdfc0(map box +0x6f8, bounds (tag 1, key) .. (tag 2))",
+    "next": "0x4e18aa0",
+    "order": "first until it reports done (tag 3), then second",
+    "second": "0x4dce210(map box +0x6f8, key)"
+  },
+  "limit": "counter starts at pmn (0x54bff42, jmp 0x54bffd0 -> dec 0x54c0013); one decrement per step",
+  "loop": [
+    "0x54bffb9",
+    "0x54c0188"
+  ],
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "step": {
+    "collect_if": "record byte +0x3c == 4 and box +0x7b8 bit0 clear and slot 0x64e7190 (0x3693030)(value) true",
+    "collected": "Vec of 20-byte keys at rsp+0x280",
+    "lookup": "0x4ef4480(key); miss -> lazy default cell 0x64fd9b0 via slot 0x64e71a8",
+    "new_cursor": "yielded 20-byte key -> pmi key, pmi tag := 1 (0x54c008f)"
+  },
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}

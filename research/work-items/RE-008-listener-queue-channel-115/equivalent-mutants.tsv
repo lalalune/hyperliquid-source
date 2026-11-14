@@ -1,0 +1,6 @@
+function	instruction	kind	patched_byte	new_value	reason
+send	0x2cedaaf	jcc-flip	0x2cedaaf	0x74	retry branch after lock cmpxchg on the semaphore word; fires only when another thread changed the word between load and exchange
+locate	0x2cd00ef	imm8+1	0x2cd00f2	0x21	immediate of the add in the lost-race branch after the block-link cmpxchg; reachable only when another thread linked a block first
+locate	0x2cd0105	jcc-flip	0x2cd0105	0x75	jump after the second block-link cmpxchg; the lost-race path is unreachable without a concurrent producer
+locate	0x2cd0119	imm8+1	0x2cd011c	0x21	immediate of the add in the pause-retry loop of the lost-race path; unreachable without a concurrent producer
+locate	0x2cd0132	jcc-flip	0x2cd0132	0x74	retry jump of the lost-race loop; unreachable without a concurrent producer

@@ -1,0 +1,39 @@
+{
+  "component": "abci",
+  "driver_send": "0x5a34554..0x5a3459c: closure +0x30 counter, +0x28 channel, same permit shape, push 0x581a4f0",
+  "gates_changed": false,
+  "handle": {
+    "+0x0": "channel Arc: allocation 0x200 bytes, alignment 2^7 (0x5a6ccca, 0x5a6cccf)",
+    "+0x10": "name 'slow abci block' (0x93afd9, 15 bytes)",
+    "+0x20": "5000 (0x5a6cd68 -> 0x5a6ce72)",
+    "+0x8": "counter Arc {1, 1, 0}; +0x10 counts queued messages",
+    "builder": "0x5a6cbc0 (slot 0x64e7458), called at 0x2aed2f5, 0x2cb8915"
+  },
+  "observer_groups": {
+    "builder": "0x51c9cb0 (slot 0x64ebbc8; #5872): {name}_block_duration, {name}_backlog_from_node, {name}_begin_block_to_commit, writer {name}_block_times",
+    "driver": "'node_slow', 0.5 (0x5a3468a)",
+    "sender": "'node_fast', 0.35 (0x5a6e22a)"
+  },
+  "pollers": {
+    "move": "0x28 bytes into a 0x718-byte closure at +0x6e0 (0x2aee2dd..0x2aee306; 0x2cb980d..0x2cb982f)",
+    "state_offset": "+0xaf0..+0xb18 (lea r12, [rbx+0xaf0] at 0x2aecf7e is the builder rdi)",
+    "task": "'node handle client blocks', vtable 0x64471a0 (+0x18 -> 0x2a92960), spawned through slot 0x64e1750",
+    "task_body": "0x2a92960: rcx = &handle copy, call slot 0x64e71d0 -> 0x5a6e1e0"
+  },
+  "send": {
+    "capacity_check": "none: no [r13+0x20] read and no immediate 5000 in the sender",
+    "function": "0x5a6e1e0 0x5a6e1e0..0x5a70656",
+    "message": "Vec of 0x28-byte elements (cap, ptr, len) followed by 0x40 bytes, at [rsp+0x60]",
+    "site": "0x5a6fd83..0x5a6fe24 (reached from two paths)",
+    "steps": [
+      "counter +0x10 += 1 (0x5a6fd8b)",
+      "permit word chan+0x1c0: bit 0 set -> closed path; value -2 -> overflow path; else cmpxchg +2",
+      "push 0x581a2d0(rdi = chan+0x80, rsi = message) \u2014 the only direct call of 0x581a2d0",
+      "wake: or 2 into chan+0x110, then call the stored waker at chan+0x100/+0x108",
+      "closed: drop the message, counter +0x10 -= 1 (0x5a6ff1e)"
+    ]
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}

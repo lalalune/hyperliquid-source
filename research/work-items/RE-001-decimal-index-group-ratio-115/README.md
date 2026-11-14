@@ -69,7 +69,7 @@ group_ratio(obj, index32):
     numerator += [element + 0x90] + [element + 0x98]  # 64-bit wrapping
     divisor += [element + 0x10]                       # 64-bit wrapping
   if divisor == 0: return -1.0
-  return (double)numerator / (double)divisor   # signed conversions
+  return (double)numerator / (double)divisor   # unsigned (u64) conversions
 
 indexed_group_ratio(outer, out_string, view_ptr, view_len):
   member = [outer + 0x788]
@@ -106,6 +106,13 @@ Notes on the observed code, all verifiable in the excerpts:
   [begin, end); the third qword is never read. The element +0x10
   field reappears here as the divisor, as it was the summed field in
   #2268's aggregate sum; the +0x90/+0x98 pair is new to this item.
+- Both sums are converted to binary64 as unsigned u64 values, not as
+  signed i64. At 0x5f6af2c (`test rsi,rsi`) / 0x5f6af2f (`js`) and
+  0x5f6af3a / 0x5f6af3d for the divisor, a clear top bit takes plain
+  `cvtsi2sd`; a set top bit takes 0x5f6af50..0x5f6af65 and
+  0x5f6af6e..0x5f6af87 (`shr 1; or low bit; cvtsi2sd; addsd x,x`),
+  i.e. the full u64 correctly rounded. A wrapped sum such as
+  2**64 - 8 is therefore about 1.8e19, not -8.
 - The -1.0 sentinel is a real rodata double at 0x458dc8 (bytes
   `000000000000f0bf`), loaded by `movsd` on both the empty-range and
   the zero-divisor paths — it is not a NaN, and the caller formats it

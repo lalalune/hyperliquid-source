@@ -74,10 +74,12 @@ SkipListRep vtable slots 0 and 14, not code references.
   `*(arg3+0x08)` with a 1024-rounded decrement).
 * **0x6063150 — SkipListRep slot 0 (vtable base `0x64d26e8`).**
   Geometric height draw by rejection sampling: tries start at 1,
-  each try advances once and stops at the first seed `< this+0x14`;
-  height is the try number, capped at `min(count, 32)` where count
-  is the u16 at `this+0x10`; `count <= 1` never advances and gives
-  height 1. The node is allocated via vtable slot 0x18 on
+  each try advances once and stops at the first seed `>= this+0x14`
+  (`cmp edx,r8d` at `0x60631bf`, `jb` at `0x60631c2` redraws while the
+  seed is below the bound); height is the try number, capped at
+  `min(count, 32)` where count is the u16 at `this+0x10`; `count <= 1`
+  does not advance the seed (the thread-seed getter at `0x6063165` is
+  still called first) and gives height 1. The node is allocated via vtable slot 0x18 on
   `*(this+0x18)` with size `(height-1)*8 + arg2 + 8`; the height is
   stored at `buffer+(height-1)*8`.
 * **0x6066b80 — randomised descent.** Once per level: advance once,
@@ -153,11 +155,11 @@ duplicates a merged packet's window.
 `tools/other_seed_consumers_115.py` models the shared advance, the
 height draw, the descent pick, both sample flags, the sampler step,
 the ZSTD gate, the bitmap-node fields and the LevelIterator record
-construction. `tests/test_other_seed_consumers_115.py` has 27
+construction. `tests/test_other_seed_consumers_115.py` has 30
 tests: seeded random inputs drive every derivation end to end, the
 height draw is cross-checked against an independent transcription
 of the disassembly loop, and the boundary cases are covered
-(`count <= 1` skips the seed, the 32-cap, exhaustion, `N = 1`
+(`count <= 1` does not advance the seed, the 32-cap, exhaustion, `N = 1`
 always runs the ZSTD setup, `count = 1` start index is 0).
 
 ## Notes

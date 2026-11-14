@@ -1,0 +1,9 @@
+# Node #115 raw tracker: selected threshold split
+
+Target: `artifacts/node/115/hl-node`, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. This is a selected static path, not live state or a checkpoint-height interpretation.
+
+After the separately documented raw-pending insertion, `0x5afa4e1..0x5afa50f` computes `T = max(key - 50000, 0)` by unsigned subtraction with underflow saturation, using the current selected record's key, and passes T to `0x5376f80`. That callee passes tracker +0x18 and T to `0x4de55d0`, then swaps the returned four-qword descriptor into tracker +0x18, retaining the old descriptor locally.
+
+For the non-sentinel flat-ring branch of `0x4de55d0`, it calls `0x57f2890`. Under valid nonwrapped ring metadata and unsigned nondecreasing 64-bit keys in 80-byte records, this helper returns lower_bound(T): the first index i whose key is >=T, or count if none. It uses unsigned comparisons at `0x57f2900..0x57f2933`; an empty ring yields zero. The split helper computes suffix count `count-i`, requests an 80-byte-per-record allocation, copies the suffix, sets original count to i, and returns a descriptor for that suffix. Slot `0x64df508` is the pinned ELF `memcpy@GLIBC_2.14` dynamic relocation; runtime binding is not observed. Assuming successful allocation, valid nonaliasing metadata and the selected continuation, the tracker receives the >=T suffix while the <T prefix is held in the local old descriptor. No claim is made about later prefix processing, wrapped-ring behavior, failure cleanup, all tracker representations, the key's semantics, or runtime reachability.
+
+Run `python3 research/work-items/RE-017-node115-tracker-threshold-split/verify.py` for whole-target digest, anchored instructions and direct-call checks with mutation controls; disassembly and relocation evidence are in `windows.txt`. No captured target code is executed.

@@ -1,0 +1,300 @@
+{
+  "schema": "re002-node115-build-plan/v1",
+  "task": "RE-002",
+  "component": "foundation",
+  "target": {
+    "release": "node #115",
+    "path": "artifacts/node/115/hl-node",
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "size": 105896032
+  },
+  "note": [
+    "Each row marked `exact` is read from the artifact by verify.py and compared with `value`;",
+    "a byte change fails the check. Rows marked `inferred` state their reasoning and are not",
+    "derived. Rows marked `unresolved` carry no value: the field cannot be recovered from the",
+    "shipped bytes, and `would_resolve` says what would settle it. No value is invented."
+  ],
+  "fields": [
+    {
+      "field": "toolchain.stamps",
+      "status": "exact",
+      "derived_key": "comment",
+      "value": [
+        "rustc version 1.95.0 (59807616e 2026-04-14)",
+        "Linker: LLD 22.1.2 (/checkout/src/llvm-project/llvm 1cb4e3833c1919c2e6fb579a23ac0e2b22587b7e)",
+        "GCC: (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+        "clang version 22.1.0-rc2"
+      ],
+      "evidence": ".comment, four NUL-terminated stamps read at their section offsets"
+    },
+    {
+      "field": "toolchain.rustc_commit_path",
+      "status": "exact",
+      "derived_key": "rodata.rustc_commit_path_occurrences",
+      "value": 110,
+      "evidence": "occurrences of /rustc/59807616e1fa2540724bfbac14d7976d7e4a3860 in .rodata",
+      "note": "The standard-library source paths carry the compiler's own build root, so the toolchain is the published release build for that commit, not a locally rebuilt compiler."
+    },
+    {
+      "field": "target.triple",
+      "status": "inferred",
+      "value": "x86_64-unknown-linux-gnu",
+      "reasoning": "x86-64 ELF, GNU interpreter, glibc 2.39 symbol versions. No triple string is required in a binary, and none is present.",
+      "would_resolve": "a matched rebuild, or a build record from the original build"
+    },
+    {
+      "field": "target.cpu_features",
+      "status": "unresolved",
+      "value": null,
+      "would_resolve": "unconditional AVX/BMI use outside runtime-dispatched paths, itemised per function"
+    },
+    {
+      "field": "elf.type",
+      "status": "exact",
+      "derived_key": "elf.type",
+      "value": "DYN",
+      "evidence": "ELF header e_type"
+    },
+    {
+      "field": "elf.machine",
+      "status": "exact",
+      "derived_key": "elf.machine",
+      "value": "x86-64",
+      "evidence": "ELF header e_machine"
+    },
+    {
+      "field": "link.interpreter",
+      "status": "exact",
+      "derived_key": "interp",
+      "value": "/lib64/ld-linux-x86-64.so.2",
+      "evidence": ".interp"
+    },
+    {
+      "field": "link.shared_dependencies",
+      "status": "exact",
+      "derived_key": "dynamic.needed",
+      "value": [
+        "ld-linux-x86-64.so.2",
+        "libc.so.6",
+        "libcrypto.so.3",
+        "libgcc_s.so.1",
+        "libm.so.6",
+        "libssl.so.3",
+        "libstdc++.so.6"
+      ],
+      "evidence": "DT_NEEDED entries in .dynamic, names resolved through .dynstr",
+      "note": "libstdc++ and libgcc_s are required, so the C++ objects (rocksdb, zstd, blst) are dynamically linked against the system C++ runtime. A static or musl build cannot match these bytes."
+    },
+    {
+      "field": "link.runpath",
+      "status": "exact",
+      "derived_key": "dynamic.runpath",
+      "value": [],
+      "evidence": "no DT_RPATH or DT_RUNPATH entry"
+    },
+    {
+      "field": "link.pie",
+      "status": "exact",
+      "derived_key": "dynamic.pie_flag",
+      "value": true,
+      "evidence": "DF_1_PIE in DT_FLAGS_1"
+    },
+    {
+      "field": "link.bind_now",
+      "status": "exact",
+      "derived_key": "dynamic.bind_now",
+      "value": true,
+      "evidence": "DF_BIND_NOW in DT_FLAGS (and DF_1_NOW in DT_FLAGS_1): full RELRO, immediate binding"
+    },
+    {
+      "field": "link.dynamic_flags",
+      "status": "exact",
+      "derived_key": "dynamic.flags",
+      "value": {
+        "DT_FLAGS": "0x8",
+        "DT_FLAGS_1": "0x8000001"
+      },
+      "evidence": "raw DT_FLAGS and DT_FLAGS_1 values"
+    },
+    {
+      "field": "link.libc_requirement",
+      "status": "exact",
+      "derived_key": "dynamic.max_symbol_versions",
+      "value": {
+        "CXXABI": "1.3.11",
+        "GCC": "4.2.0",
+        "GLIBC": "2.39",
+        "GLIBCXX": "3.4.30",
+        "OPENSSL": "3.0.0"
+      },
+      "evidence": "highest requirement per prefix among whole .dynstr version strings; symbol names that merely contain a prefix are excluded"
+    },
+    {
+      "field": "hardening.imports",
+      "status": "exact",
+      "derived_key": "dynamic.hardening_imports",
+      "value": [
+        "__fprintf_chk",
+        "__memcpy_chk",
+        "__memset_chk",
+        "__realpath_chk",
+        "__snprintf_chk",
+        "__stack_chk_fail",
+        "__strncpy_chk",
+        "__vsnprintf_chk"
+      ],
+      "evidence": "_FORTIFY_SOURCE and stack-protector entry points present in .dynstr"
+    },
+    {
+      "field": "hardening.cxx_objects",
+      "status": "inferred",
+      "value": "stack protector and fortified libc calls enabled in the C and C++ objects",
+      "reasoning": "__stack_chk_fail and the __*_chk family are imported, and .gcc_except_table is present, so C++ exception handling and the Ubuntu 24.04 default hardening flags are in the objects. The flag text itself is not stored.",
+      "would_resolve": "a matched rebuild of one C++ object at the candidate flag set"
+    },
+    {
+      "field": "allocator.version_string",
+      "status": "exact",
+      "derived_key": "rodata.jemalloc_version_string_present",
+      "value": true,
+      "evidence": "jemalloc 5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7 string present in .rodata"
+    },
+    {
+      "field": "allocator.crate",
+      "status": "inferred",
+      "value": "tikv-jemalloc-sys with its bundled jemalloc",
+      "reasoning": "the bundled jemalloc version string is present and the allocator is not the system malloc",
+      "would_resolve": "a matched rebuild naming the crate version, or a crate-graph record from the original build"
+    },
+    {
+      "field": "sources.root",
+      "status": "exact",
+      "derived_key": "rodata.source_root_occurrences",
+      "value": 863,
+      "evidence": "occurrences of /home/ubuntu/hl/code_Mainnet in .rodata",
+      "note": "Source paths are absolute and unrewritten, so a byte-identical rebuild must place the tree at this path or reproduce the same remapping decision."
+    },
+    {
+      "field": "sources.vendor_layout",
+      "status": "exact",
+      "derived_key": "rodata.vendor_root_present",
+      "value": true,
+      "evidence": "z_vendor appears in embedded source paths"
+    },
+    {
+      "field": "sources.fork_layout",
+      "status": "exact",
+      "derived_key": "rodata.forks_root_present",
+      "value": true,
+      "evidence": "z_forks appears in embedded source paths"
+    },
+    {
+      "field": "sources.vendor_versions",
+      "status": "unresolved",
+      "value": null,
+      "would_resolve": "vendor directory names that carry a version, or the original vendor plan. Most embedded paths name the crate only, so most vendored versions cannot be recovered from the binary."
+    },
+    {
+      "field": "sources.first_party_versions",
+      "status": "unresolved",
+      "value": null,
+      "would_resolve": "first-party paths carry no version, so the original workspace is required"
+    },
+    {
+      "field": "sources.dependency_lock",
+      "status": "unresolved",
+      "value": null,
+      "would_resolve": "Cargo.lock is not embedded; only a build record or a matched rebuild"
+    },
+    {
+      "field": "strip",
+      "status": "exact",
+      "derived_key": "sections.absent",
+      "value": [
+        ".symtab",
+        ".debug_info",
+        ".debug_line",
+        ".debug_abbrev"
+      ],
+      "evidence": "no .symtab and no .debug* section in the section table"
+    },
+    {
+      "field": "strip.stage",
+      "status": "inferred",
+      "value": "either Cargo strip or a post-link strip",
+      "reasoning": "removed symbols and debug sections show that stripping happened; nothing in the file says which step did it",
+      "would_resolve": "the original build record"
+    },
+    {
+      "field": "profile.panic_strategy",
+      "status": "inferred",
+      "value": "unwind",
+      "reasoning": ".gcc_except_table is 2,900,276 bytes and Rust cleanup landing pads are present. panic=abort emits no Rust landing pads.",
+      "would_resolve": "not stored in the ELF, so a matched rebuild is the remaining test"
+    },
+    {
+      "field": "profile.debug_assertions",
+      "status": "inferred",
+      "value": "off",
+      "reasoning": "the std debug-assertion precondition message is absent, which is what a release-like profile produces",
+      "would_resolve": "a matched rebuild; the absence alone is weak evidence because an unused checked API also omits the message"
+    },
+    {
+      "field": "profile.opt_level",
+      "status": "unresolved",
+      "value": null,
+      "would_resolve": "compare instruction patterns of a rebuilt known function at each opt-level"
+    },
+    {
+      "field": "profile.codegen_units",
+      "status": "unresolved",
+      "value": null,
+      "would_resolve": "function ordering and partitioning in a matched rebuild"
+    },
+    {
+      "field": "profile.lto",
+      "status": "unresolved",
+      "value": null,
+      "would_resolve": "cross-crate inlining evidence against a matched rebuild; not stored in the ELF"
+    },
+    {
+      "field": "profile.rustflags",
+      "status": "unresolved",
+      "value": null,
+      "would_resolve": "RUSTFLAGS is not embedded; only the original build configuration or a matched rebuild"
+    },
+    {
+      "field": "profile.frame_pointers",
+      "status": "unresolved",
+      "value": null,
+      "would_resolve": "a prologue survey over FDE-bounded functions, kept separate from the CFA census in the CFA frame-policy packet"
+    },
+    {
+      "field": "profile.overflow_checks",
+      "status": "unresolved",
+      "value": null,
+      "would_resolve": "call sites into the core overflow helpers that are attributable to first-party code. The overflow panic strings alone do not prove the setting."
+    }
+  ],
+  "reproduce": {
+    "platform": "Linux x86-64",
+    "base_image": "Ubuntu 24.04 amd64 (glibc 2.39, GCC 13.3.0)",
+    "toolchain": "rustup toolchain 1.95.0 (59807616e), target x86_64-unknown-linux-gnu, rust-lld 22.1.2",
+    "linker": "rust-lld, position independent, immediate binding, full RELRO, no runpath",
+    "source_layout": "workspace at /home/ubuntu/hl/code_Mainnet with z_vendor and z_forks directories",
+    "cargo_profile": "release, panic=unwind, no debug symbols in the shipped file",
+    "allocator": "tikv-jemalloc-sys with bundled jemalloc 5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7",
+    "unresolved_inputs": [
+      "opt-level",
+      "codegen-units",
+      "LTO",
+      "RUSTFLAGS",
+      "target-cpu features",
+      "overflow-checks",
+      "frame pointers",
+      "Cargo.lock and the vendored crate versions",
+      "the C and C++ object flag set"
+    ],
+    "note": "This is the plan a matched image must satisfy. It is not a claim that a rebuild reproduces the bytes: the unresolved inputs above must be fixed before a comparison means anything."
+  }
+}

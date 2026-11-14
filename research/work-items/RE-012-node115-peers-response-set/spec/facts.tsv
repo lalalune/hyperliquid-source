@@ -1,0 +1,147 @@
+# id	address	objdump_text	role
+L01	2b6a7d9	cmp rcx,0x2	selector: qword tag compared with 2
+L02	2b6a7dd	je 0x2b6a82e	tag 2 branches away to the 120 limit
+L03	2b6a7df	mov r13d,0x2710	limit register preloaded with 0x2710 = 10,000
+L04	2b6a7e5	cmp ecx,0x1	low32 of the tag compared with 1
+L05	2b6a7e8	je 0x2b6a834	low32 tag 1 keeps 10,000
+L06	2b6a82e	mov r13d,0x78	tag 2 gets 0x78 = 120
+L07	2b6a8e0	mov QWORD PTR [rbx+0x180],r13	limit stored in the caller state +0x180
+L08	2b6a917	mov QWORD PTR [rbx+0x1a8],r13	limit stored in the reader input at +0x20 (input base +0x188)
+L09	2b6a925	lea r12,[rbx+0x188]	reader input is base +0x188
+L10	2b6a93a	call 0x2b788e0	frame reader 0x2b788e0 called with that input
+L11	2b6aa24	mov rcx,QWORD PTR [rbx+0x180]	same +0x180 limit loaded as the 4th argument
+L12	2b6aa53	call 0x26ff210	row-decoder state constructor 0x26ff210 called
+R01	2b7892b	mov rax,QWORD PTR [rbx+0x20]	reader: input +0x20 limit ...
+R02	2b7892f	mov QWORD PTR [rbx+0x28],rax	... copied to +0x28
+R03	2b7903f	cmp QWORD PTR [rbx+0x28],r14	reader: +0x28 limit compared with the frame length
+R04	2b79043	jae 0x2b791c6	length <= limit continues (jae), so the gate is inclusive
+R05	2b79abd	mov rcx,QWORD PTR [rbx+0x28]	reader: +0x28 limit loaded as the LZ4 capacity argument
+R06	2b79ace	call QWORD PTR [rip+0x396dcbc]	LZ4 adapter slot called (slot 0x64e7790)
+P01	2e466c0	call 0x2cd79c0	response parent reads the outer u32 tag
+P02	2e466c9	cmp al,0x12	tag read succeeded (0x12)
+P03	2e466dd	cmp eax,0x1	tag compared with 1
+P04	2e466e0	je 0x2e467e4	tag 1 branches to 0x2e467e4
+P05	2e467ea	call 0x2dd2980	tag 1 calls the vector/set wrapper 0x2dd2980
+P06	2e467f9	cmp BYTE PTR [rsp],0x0	wrapper result byte tested for success
+P07	2e46815	mov QWORD PTR [rbx],0x4	success stores result tag 4
+E01	26e57d8	mov r15d,DWORD PTR [rdi]	element decoder: wire key dword loaded
+E02	26e5853	mov QWORD PTR [rbx+0x8],r15	element result +8 := key (zero-extended dword)
+E03	26e5857	mov QWORD PTR [rbx+0x10],rax	element result +0x10 := scalar value
+E04	26e585b	mov BYTE PTR [rbx+0x18],bpl	element result +0x18 := boolean
+E05	26e585f	mov BYTE PTR [rbx],0x12	element result tag 0x12 = success
+W01	2dd298e	lea rdx,[rip+0xffffffffff912d7b]	wrapper passes the NodeIp element decoder 0x26e5710
+W02	2dd299a	call 0x232cd90	wrapper calls the vector helper 0x232cd90
+W03	2dd29a4	cmp al,0x12	vector helper success tag 0x12
+W04	2dd29a6	jne 0x2dd2a22	failure copies the error out, no sort
+W05	2dd29c1	cmp r15,0x2	fewer than 2 rows are not sorted
+W06	2dd29c5	jae 0x2dd2a5c	2 or more rows go to the sort
+W07	2dd2a5c	cmp r15,0x15	length compared with 21
+W08	2dd2a60	jae 0x2dd2b8a	21 or more rows take the slot at 0x64e8678
+W09	2dd2a76	call 0x26ca410	2..20 rows call the insertion sort 0x26ca410
+W10	2dd2a8f	cmp esi,DWORD PTR [rax-0x30]	first scan: key of row j compared with key of row j-1 (dword equality)
+W11	2dd2a92	je 0x2dd2ab0	equal pair found: jump to the first-pair swap
+W12	2dd2ab0	movups xmm0,XMMWORD PTR [rax-0x18]	first equal pair: swap the two rows (16 bytes)
+W13	2dd2ab4	movups xmm1,XMMWORD PTR [rax-0x30]	first equal pair: swap, second row
+W14	2dd2ab8	movups XMMWORD PTR [rax-0x18],xmm1	first equal pair: swap, store
+W15	2dd2abc	movups XMMWORD PTR [rax-0x30],xmm0	first equal pair: swap, store
+W16	2dd2ad0	lea rcx,[rdx-0x1]	kept count := j
+W17	2dd2afd	mov edi,DWORD PTR [rax]	later rows: load the current row key
+W18	2dd2aff	cmp edi,DWORD PTR [r14+rsi*8-0x18]	compared with the last kept row key (equality only)
+W19	2dd2b04	jne 0x2dd2adb	different key jumps to the plain copy
+W20	2dd2adb	mov rsi,QWORD PTR [rax+0x10]	different key: copy the row down (24 bytes) ...
+W21	2dd2adf	mov QWORD PTR [rdx+0x10],rsi	... to the kept prefix
+W22	2dd2ae9	inc rcx	kept count incremented
+W23	2dd2b06	mov rsi,QWORD PTR [rax]	equal key: swap current row with the last kept row ...
+W24	2dd2b09	mov rdi,QWORD PTR [rdx-0x18]	... (three qwords) so the later row is kept
+W25	2dd2b0d	mov QWORD PTR [rax],rdi	swap
+W26	2dd2b10	mov QWORD PTR [rdx-0x18],rsi	swap
+W27	2dd2b3d	cmp rcx,0x40	kept count compared with 0x40
+W28	2dd2b41	jbe 0x2dd2b82	<= 64 goes to the small-set path
+W29	2dd29ea	call 0x24d6e80	small-set path: 0x24d6e80 with min capacity 0
+W30	2dd2b69	call 0x23a3800	> 64: tree builder 0x23a3800
+W31	2dd2b95	call QWORD PTR [rip+0x3715add]	21+ rows: sort slot 0x64e8678 called
+I01	26ca461	mov esi,DWORD PTR [rdx-0x18]	insertion sort: left neighbour key ...
+I02	26ca464	mov r8d,DWORD PTR [rdx]	... and current key loaded ...
+I03	26ca467	bswap r8d	... byte-swapped so the compare is on big-endian value
+I04	26ca46a	bswap esi	swap
+I05	26ca46c	cmp r8d,esi	compare current with left neighbour
+I06	26ca46f	jae 0x26ca454	current >= neighbour: no move (strict less moves only)
+I07	26ca4bd	cmp r8d,r9d	inner loop: compare saved row with the next left row
+I08	26ca4c0	jb 0x26ca490	keeps shifting only while strictly less
+S01	4f3a6a3	cmp rsi,0x41	sort wrapper: length compared with 0x41
+S02	4f3a6a7	setb r8b	eager flag = length < 65
+S03	4f3a6b1	call 0x4f99e70	calls the drift core 0x4f99e70
+D01	4f9a03b	cmp r10d,ecx	run detection: v[1] against v[0] (bswapped)
+D02	4f9a041	jb 0x4f9a080	v[1] < v[0] strictly -> descending branch
+D03	4f9a06d	cmp r9d,r8d	ascending run: compare next with previous
+D04	4f9a070	jb 0x4f9a0d1	ascending run ends on strictly less (ties continue)
+D05	4f9a0ad	cmp r9d,r8d	descending run: compare next with previous
+D06	4f9a0b0	jae 0x4f9a0d1	descending run ends on not-less (ties end it)
+D07	4f9a0df	cmp r10d,ecx	run reversed only when v[1] < v[0]
+D08	4f9a0e2	setae dil	flag for ascending/equal
+D09	4f9a3b4	jbe 0x4f9a42c	merge direction: left run <= right run copies left to scratch
+D10	4f9a3d5	cmp esi,edi	backward merge: compare scratch tail with left tail
+D11	4f9a3d7	seta sil	greater flag
+D12	4f9a3db	sbb sil,0x0	minus less flag -> ordering
+D13	4f9a3eb	cmovns rcx,rdx	equal or greater takes the scratch (right) row first from the back
+D14	4f9a449	cmp eax,ecx	forward merge: compare right with left (scratch)
+D15	4f9a44b	seta al	greater flag
+D16	4f9a44e	sbb al,0x0	minus less flag -> ordering
+D17	4f9a45d	cmovns rdx,rsi	equal or greater takes the left (scratch) row
+D18	4f9a2c7	call QWORD PTR [rip+0x155127b]	unsorted left run: quicksort slot 0x64eb548
+D19	4f9a33d	call QWORD PTR [rip+0x1551205]	unsorted right run: quicksort slot 0x64eb548
+D20	4f99fe3	call QWORD PTR [rip+0x155155f]	eager short run: quicksort slot 0x64eb548
+Q01	4e880ff	cmp rsi,0x21	quicksort: length <= 32 goes to the small sort
+Q02	4e88103	jae 0x4e88123	jae 0x21
+Q03	4e88119	call 0x5403600	small sort 0x5403600
+Q04	4e88133	je 0x4e885a3	limit exhausted -> drift eager sort
+Q05	4e885af	mov r8d,0x1	eager flag 1
+Q06	4e885bd	call 0x4f99e70	drift core 0x4f99e70
+Q07	4e88202	cmp eax,ecx	ancestor pivot against chosen pivot
+Q08	4e88204	jae 0x4e88400	ancestor >= pivot -> equal partition
+Q09	4e8824b	cmp edi,r8d	partition: element against pivot
+Q10	4e8824e	seta dil	greater flag
+Q11	4e88252	sbb dil,0x0	minus less flag
+Q12	4e88267	cmovs rdi,r15	strictly less goes to the front of scratch
+Q13	4e883a2	test r13,r13	no element below the pivot ...
+Q14	4e883af	je 0x4e88400	... also takes the equal partition
+Q15	4e883e8	call QWORD PTR [rip+0x166315a]	right part recurses through slot 0x64eb548
+Q16	4e8843e	cmp esi,edi	equal partition: pivot against element
+Q17	4e88443	cmovae rsi,r15	pivot >= element goes left (element <= pivot)
+Q18	4e8845c	sbb rbp,0xffffffffffffffff	left count += 1 unless pivot < element
+Q19	4e884cf	lea r14,[r14+rax*8]	continue after the equal block
+M01	540364b	cmp edx,ecx	small sort 4-sort: c1 = v1 < v0
+M02	5403676	cmp r8d,r9d	c2 = v3 < v2
+M03	54036aa	cmp r10d,r8d	c4 = d < b
+M04	54036b6	cmp r9d,ecx	c3 = c < a
+M05	54036df	cmp ecx,r8d	c5 = right unknown < left unknown
+M06	540370b	cmp r9d,ecx	second 4-sort c1
+M07	540373c	cmp r10d,ebp	second 4-sort c2
+M08	5403777	cmp r15d,esi	second 4-sort c4
+M09	5403781	cmp r14d,ecx	second 4-sort c3
+M10	54037dd	cmp r15d,esi	second 4-sort c4 reuse
+M11	54037f2	cmp edx,esi	second 4-sort c5
+M12	5403914	cmp r9d,r10d	insert tail: current against left neighbour
+M13	5403917	jae 0x54038d5	no move unless strictly less
+M14	5403973	cmp r9d,r10d	insert tail: inner compare
+M15	5403976	jb 0x5403940	shift only while strictly less
+M16	5403afa	cmp esi,r10d	merge up: right against left
+M17	5403b12	setns bpl	left taken when right >= left
+M18	5403b31	cmp esi,r15d	merge down: right tail against left tail
+M19	5403b4d	setns r13b	right taken when right >= left
+M20	5403b51	jns 0x5403aa0	branch on not-less
+V01	4e62c7c	cmp ecx,eax	pivot median: a against b
+V02	4e62c97	js 0x4e62cb6	median selection
+V03	4e62caf	cmovs r14,rbx	median selection
+T01	23a3908	cmp r15,0x15	tree builder: length compared with 21
+T02	23a390c	jae 0x23a393a	21+ rows take the slot at 0x64e52d8
+T03	23a391e	call 0x26ca410	2..20 rows: same insertion sort 0x26ca410
+T04	23a3945	call QWORD PTR [rip+0x414198d]	21+ rows: sort slot 0x64e52d8
+T05	23a38b3	call 0x1d0e4d0	bulk builder 0x1d0e4d0
+T06	4f3ad31	call 0x4fa4110	tree sort wrapper calls core 0x4fa4110
+T07	4fa42d6	bswap r10d	tree sort core compares byte-swapped keys
+T08	4fa42db	cmp r10d,ecx	run detection compare
+T09	4fa430d	cmp r9d,r8d	ascending compare
+T10	4fa4310	jb 0x4fa4371	ascending ends on strictly less
+T11	4fa434d	cmp r9d,r8d	descending compare
+T12	4fa4350	jae 0x4fa4371	descending ends on not-less

@@ -1,0 +1,1272 @@
+{
+ "callers": {
+  "0x36aa9a0": [
+   57323021,
+   57323306
+  ],
+  "0x36b1600": [
+   57321974,
+   57432021,
+   62843959,
+   64158929,
+   69028162
+  ],
+  "0x46abec0": [
+   57351841
+  ]
+ },
+ "calls": [
+  {
+   "claim": "action dispatcher",
+   "sites": [
+    57321974
+   ],
+   "target": 57349632,
+   "window": "serializer"
+  },
+  {
+   "claim": "cancel writer",
+   "sites": [
+    57351841
+   ],
+   "target": 74104512,
+   "window": "dispatcher"
+  },
+  {
+   "claim": "other writer copy",
+   "sites": [
+    57362465
+   ],
+   "target": 74104864,
+   "window": "other_dispatcher"
+  },
+  {
+   "claim": "map header",
+   "sites": [
+    74104567
+   ],
+   "target": 64288464,
+   "window": "cancel_writer"
+  },
+  {
+   "claim": "string writer",
+   "sites": [
+    74104652,
+    74104676,
+    74104713,
+    74104777
+   ],
+   "target": 68968720,
+   "window": "cancel_writer"
+  },
+  {
+   "claim": "uint writer",
+   "sites": [
+    74104740,
+    74104798
+   ],
+   "target": 64296928,
+   "window": "cancel_writer"
+  }
+ ],
+ "data": {
+  "0x45a144": "74797065",
+  "0x79c888": "7477617043616e63656c",
+  "0x79d5a6": "416374696f6e",
+  "0x79d714": "5477617043616e63656c",
+  "0x7d9f88": "74",
+  "0x7d9f99": "61"
+ },
+ "elf_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "elf_size": 105896032,
+ "facts": [
+  {
+   "bytes": "4989cf",
+   "claim": "suffix record pointer kept in r15",
+   "len": 3,
+   "text": "mov r15,rcx",
+   "va": 57321903,
+   "window": "serializer"
+  },
+  {
+   "bytes": "89d5",
+   "claim": "chain selector kept in ebp",
+   "len": 2,
+   "text": "mov ebp,edx",
+   "va": 57321906,
+   "window": "serializer"
+  },
+  {
+   "bytes": "c744242800040001",
+   "claim": "writer spec dword; byte +0xb = 1 selects struct-map mode",
+   "len": 8,
+   "text": "mov DWORD PTR [rsp+0x28],0x1000400",
+   "va": 57321948,
+   "window": "serializer"
+  },
+  {
+   "bytes": "e8056c0000",
+   "claim": "action dispatcher call",
+   "len": 5,
+   "text": "call 0x36b1600",
+   "va": 57321974,
+   "window": "serializer"
+  },
+  {
+   "bytes": "48b80400000000000080",
+   "claim": "Ok discriminant compared after the dispatcher",
+   "len": 10,
+   "text": "movabs rax,0x8000000000000004",
+   "va": 57321979,
+   "window": "serializer"
+  },
+  {
+   "bytes": "0f85f1020000",
+   "claim": "any other result goes to the unwrap panic",
+   "len": 6,
+   "text": "jne 0x36aad04",
+   "va": 57321997,
+   "window": "serializer"
+  },
+  {
+   "bytes": "4d8b6710",
+   "claim": "nonce read from record +0x10",
+   "len": 4,
+   "text": "mov r12,QWORD PTR [r15+0x10]",
+   "va": 57322022,
+   "window": "serializer"
+  },
+  {
+   "bytes": "490fcc",
+   "claim": "nonce stored big-endian",
+   "len": 3,
+   "text": "bswap r12",
+   "va": 57322046,
+   "window": "serializer"
+  },
+  {
+   "bytes": "41807f1801",
+   "claim": "vault present iff byte +0x18 == 1",
+   "len": 5,
+   "text": "cmp BYTE PTR [r15+0x18],0x1",
+   "va": 57322067,
+   "window": "serializer"
+  },
+  {
+   "bytes": "755d",
+   "claim": "absent vault branch",
+   "len": 2,
+   "text": "jne 0x36aaab7",
+   "va": 57322072,
+   "window": "serializer"
+  },
+  {
+   "bytes": "42c644310801",
+   "claim": "vault marker 1",
+   "len": 6,
+   "text": "mov BYTE PTR [rcx+r14*1+0x8],0x1",
+   "va": 57322093,
+   "window": "serializer"
+  },
+  {
+   "bytes": "498d4719",
+   "claim": "vault bytes read from record +0x19",
+   "len": 4,
+   "text": "lea rax,[r15+0x19]",
+   "va": 57322125,
+   "window": "serializer"
+  },
+  {
+   "bytes": "4983c614",
+   "claim": "20 vault bytes appended",
+   "len": 4,
+   "text": "add r14,0x14",
+   "va": 57322150,
+   "window": "serializer"
+  },
+  {
+   "bytes": "41833f01",
+   "claim": "expiry present iff dword +0 == 1 (vault present path)",
+   "len": 4,
+   "text": "cmp DWORD PTR [r15],0x1",
+   "va": 57322159,
+   "window": "serializer"
+  },
+  {
+   "bytes": "42c644310800",
+   "claim": "vault marker 0 when absent",
+   "len": 6,
+   "text": "mov BYTE PTR [rcx+r14*1+0x8],0x0",
+   "va": 57322186,
+   "window": "serializer"
+  },
+  {
+   "bytes": "41833f01",
+   "claim": "expiry present iff dword +0 == 1 (vault absent path)",
+   "len": 4,
+   "text": "cmp DWORD PTR [r15],0x1",
+   "va": 57322201,
+   "window": "serializer"
+  },
+  {
+   "bytes": "42c6043000",
+   "claim": "zero marker before expiry",
+   "len": 5,
+   "text": "mov BYTE PTR [rax+r14*1],0x0",
+   "va": 57322227,
+   "window": "serializer"
+  },
+  {
+   "bytes": "4d8b7f08",
+   "claim": "expiry read from record +0x8",
+   "len": 4,
+   "text": "mov r15,QWORD PTR [r15+0x8]",
+   "va": 57322240,
+   "window": "serializer"
+  },
+  {
+   "bytes": "490fcf",
+   "claim": "expiry stored big-endian",
+   "len": 3,
+   "text": "bswap r15",
+   "va": 57322261,
+   "window": "serializer"
+  },
+  {
+   "bytes": "48c784241001000088000000",
+   "claim": "sponge rate 136",
+   "len": 12,
+   "text": "mov QWORD PTR [rsp+0x110],0x88",
+   "va": 57322396,
+   "window": "serializer"
+  },
+  {
+   "bytes": "66c78424180100000100",
+   "claim": "domain byte 1 (Keccak), unsqueezed flag 0",
+   "len": 10,
+   "text": "mov WORD PTR [rsp+0x118],0x1",
+   "va": 57322408,
+   "window": "serializer"
+  },
+  {
+   "bytes": "ff158555e302",
+   "claim": "update via slot 0x64e0148",
+   "len": 6,
+   "text": "call QWORD PTR [rip+0x2e35585]",
+   "va": 57322429,
+   "window": "serializer"
+  },
+  {
+   "bytes": "ba20000000",
+   "claim": "32 output bytes",
+   "len": 5,
+   "text": "mov edx,0x20",
+   "va": 57322467,
+   "window": "serializer"
+  },
+  {
+   "bytes": "ff155f55e302",
+   "claim": "finalize via slot 0x64e0150",
+   "len": 6,
+   "text": "call QWORD PTR [rip+0x2e3555f]",
+   "va": 57322475,
+   "window": "serializer"
+  },
+  {
+   "bytes": "4080fd03",
+   "claim": "tag test looks only at the selector low byte",
+   "len": 4,
+   "text": "cmp bpl,0x3",
+   "va": 57322546,
+   "window": "serializer"
+  },
+  {
+   "bytes": "0f94c1",
+   "claim": "equal flag",
+   "len": 3,
+   "text": "sete cl",
+   "va": 57322550,
+   "window": "serializer"
+  },
+  {
+   "bytes": "b262",
+   "claim": "base tag 0x62",
+   "len": 2,
+   "text": "mov dl,0x62",
+   "va": 57322553,
+   "window": "serializer"
+  },
+  {
+   "bytes": "28ca",
+   "claim": "0x61 when equal",
+   "len": 2,
+   "text": "sub dl,cl",
+   "va": 57322555,
+   "window": "serializer"
+  },
+  {
+   "bytes": "48c70301000000",
+   "claim": "record word 0 = 1",
+   "len": 7,
+   "text": "mov QWORD PTR [rbx],0x1",
+   "va": 57322574,
+   "window": "serializer"
+  },
+  {
+   "bytes": "48c7431001000000",
+   "claim": "record word 2 = 1",
+   "len": 8,
+   "text": "mov QWORD PTR [rbx+0x10],0x1",
+   "va": 57322585,
+   "window": "serializer"
+  },
+  {
+   "bytes": "0f114318",
+   "claim": "digest bytes 0..15 at +0x18",
+   "len": 4,
+   "text": "movups XMMWORD PTR [rbx+0x18],xmm0",
+   "va": 57322609,
+   "window": "serializer"
+  },
+  {
+   "bytes": "0f114b28",
+   "claim": "digest bytes 16..31 at +0x28",
+   "len": 4,
+   "text": "movups XMMWORD PTR [rbx+0x28],xmm1",
+   "va": 57322613,
+   "window": "serializer"
+  },
+  {
+   "bytes": "48c7433839050000",
+   "claim": "constant 1337 at +0x38",
+   "len": 8,
+   "text": "mov QWORD PTR [rbx+0x38],0x539",
+   "va": 57322617,
+   "window": "serializer"
+  },
+  {
+   "bytes": "0f114340",
+   "claim": "zero words +0x40..+0x50",
+   "len": 4,
+   "text": "movups XMMWORD PTR [rbx+0x40],xmm0",
+   "va": 57322562,
+   "window": "serializer"
+  },
+  {
+   "bytes": "48c7435000000000",
+   "claim": "zero word +0x50",
+   "len": 8,
+   "text": "mov QWORD PTR [rbx+0x50],0x0",
+   "va": 57322566,
+   "window": "serializer"
+  },
+  {
+   "bytes": "488b06",
+   "claim": "action tag qword",
+   "len": 3,
+   "text": "mov rax,QWORD PTR [rsi]",
+   "va": 57349637,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "482d86000000",
+   "claim": "table index = tag - 0x86",
+   "len": 6,
+   "text": "sub rax,0x86",
+   "va": 57349640,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "488d053b890efd",
+   "claim": "jump table base 0x799f5c",
+   "len": 7,
+   "text": "lea rax,[rip+0xfffffffffd0e893b]",
+   "va": 57349658,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "48630c88",
+   "claim": "signed 32-bit table entry",
+   "len": 4,
+   "text": "movsxd rcx,DWORD PTR [rax+rcx*4]",
+   "va": 57349665,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "4883c608",
+   "claim": "payload pointer = action + 8",
+   "len": 4,
+   "text": "add rsi,0x8",
+   "va": 57351740,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "488d05b8b80efd",
+   "claim": "variant name TwapCancel at 0x79d714",
+   "len": 7,
+   "text": "lea rax,[rip+0xfffffffffd0eb8b8]",
+   "va": 57351765,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "48c74424200a000000",
+   "claim": "variant name length 10",
+   "len": 9,
+   "text": "mov QWORD PTR [rsp+0x20],0xa",
+   "va": 57351777,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "488d05d382dafc",
+   "claim": "key text at 0x45a144",
+   "len": 7,
+   "text": "lea rax,[rip+0xfffffffffcda82d3]",
+   "va": 57351786,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "48c744243004000000",
+   "claim": "key length 4",
+   "len": 9,
+   "text": "mov QWORD PTR [rsp+0x30],0x4",
+   "va": 57351798,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "488d0502aa0efd",
+   "claim": "action name at 0x79c888",
+   "len": 7,
+   "text": "lea rax,[rip+0xfffffffffd0eaa02]",
+   "va": 57351807,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "48c74424400a000000",
+   "claim": "action name length 10",
+   "len": 9,
+   "text": "mov QWORD PTR [rsp+0x40],0xa",
+   "va": 57351819,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "4889542448",
+   "claim": "writer pointer passed on",
+   "len": 5,
+   "text": "mov QWORD PTR [rsp+0x48],rdx",
+   "va": 57351828,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "e81aa0ff00",
+   "claim": "twapCancel arm calls the cancel writer",
+   "len": 5,
+   "text": "call 0x46abec0",
+   "va": 57351841,
+   "window": "dispatcher"
+  },
+  {
+   "bytes": "4c8b7240",
+   "claim": "writer from descriptor +0x40",
+   "len": 4,
+   "text": "mov r14,QWORD PTR [rdx+0x40]",
+   "va": 74104545,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "41807e0b00",
+   "claim": "map/array mode byte",
+   "len": 5,
+   "text": "cmp BYTE PTR [r14+0xb],0x0",
+   "va": 74104549,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "ba03000000",
+   "claim": "map length 3 (map branch)",
+   "len": 5,
+   "text": "mov edx,0x3",
+   "va": 74104562,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "e8d4376aff",
+   "claim": "map header writer",
+   "len": 5,
+   "text": "call 0x3d4f6d0",
+   "va": 74104567,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "ba03000000",
+   "claim": "array branch length 3",
+   "len": 5,
+   "text": "mov edx,0x3",
+   "va": 74104593,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "e855436aff",
+   "claim": "array header writer (not selected: spec byte is 1)",
+   "len": 5,
+   "text": "call 0x3d50270",
+   "va": 74104598,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "41807e0b01",
+   "claim": "key written only in map mode",
+   "len": 5,
+   "text": "cmp BYTE PTR [r14+0xb],0x1",
+   "va": 74104632,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "498b742420",
+   "claim": "type key text",
+   "len": 5,
+   "text": "mov rsi,QWORD PTR [r12+0x20]",
+   "va": 74104639,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "e8bfa1b1ff",
+   "claim": "string writer: type key",
+   "len": 5,
+   "text": "call 0x41c6110",
+   "va": 74104652,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "4c89ee",
+   "claim": "action name text",
+   "len": 3,
+   "text": "mov rsi,r13",
+   "va": 74104670,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "e8a7a1b1ff",
+   "claim": "string writer: twapCancel",
+   "len": 5,
+   "text": "call 0x41c6110",
+   "va": 74104676,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "488d3518e012fc",
+   "claim": "key a at 0x7d9f99",
+   "len": 7,
+   "text": "lea rsi,[rip+0xfffffffffc12e018]",
+   "va": 74104698,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "e882a1b1ff",
+   "claim": "string writer: key a",
+   "len": 5,
+   "text": "call 0x41c6110",
+   "va": 74104713,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "418b542408",
+   "claim": "a is the u32 at payload +8",
+   "len": 5,
+   "text": "mov edx,DWORD PTR [r12+0x8]",
+   "va": 74104729,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "e837586aff",
+   "claim": "uint writer: a",
+   "len": 5,
+   "text": "call 0x3d517e0",
+   "va": 74104740,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "488d35c7df12fc",
+   "claim": "key t at 0x7d9f88",
+   "len": 7,
+   "text": "lea rsi,[rip+0xfffffffffc12dfc7]",
+   "va": 74104762,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "e842a1b1ff",
+   "claim": "string writer: key t",
+   "len": 5,
+   "text": "call 0x41c6110",
+   "va": 74104777,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "498b1424",
+   "claim": "t is the u64 at payload +0",
+   "len": 4,
+   "text": "mov rdx,QWORD PTR [r12]",
+   "va": 74104788,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "e8fd576aff",
+   "claim": "uint writer: t",
+   "len": 5,
+   "text": "call 0x3d517e0",
+   "va": 74104798,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "4983c704",
+   "claim": "Ok discriminant 0x8000000000000004",
+   "len": 4,
+   "text": "add r15,0x4",
+   "va": 74104813,
+   "window": "cancel_writer"
+  },
+  {
+   "bytes": "83fa10",
+   "claim": "fixmap for length < 16",
+   "len": 3,
+   "text": "cmp edx,0x10",
+   "va": 64288489,
+   "window": "map_header"
+  },
+  {
+   "bytes": "bd80000000",
+   "claim": "fixmap base 0x80",
+   "len": 5,
+   "text": "mov ebp,0x80",
+   "va": 64288495,
+   "window": "map_header"
+  },
+  {
+   "bytes": "e8ee2b0000",
+   "claim": "marker byte helper",
+   "len": 5,
+   "text": "call 0x3d52310",
+   "va": 64288541,
+   "window": "map_header"
+  },
+  {
+   "bytes": "42881c20",
+   "claim": "marker byte stored",
+   "len": 4,
+   "text": "mov BYTE PTR [rax+r12*1],bl",
+   "va": 64288561,
+   "window": "map_header"
+  },
+  {
+   "bytes": "4080e60f",
+   "claim": "fixmap/fixarray length mask",
+   "len": 4,
+   "text": "and sil,0xf",
+   "va": 64299848,
+   "window": "marker"
+  },
+  {
+   "bytes": "4080ce80",
+   "claim": "fixmap = 0x80 | len",
+   "len": 4,
+   "text": "or sil,0x80",
+   "va": 64299852,
+   "window": "marker"
+  },
+  {
+   "bytes": "4080e61f",
+   "claim": "fixstr length mask",
+   "len": 4,
+   "text": "and sil,0x1f",
+   "va": 64299833,
+   "window": "marker"
+  },
+  {
+   "bytes": "4080cea0",
+   "claim": "fixstr = 0xa0 | len",
+   "len": 4,
+   "text": "or sil,0xa0",
+   "va": 64299837,
+   "window": "marker"
+  },
+  {
+   "bytes": "4881fa00010000",
+   "claim": "8-bit boundary",
+   "len": 7,
+   "text": "cmp rdx,0x100",
+   "va": 64296944,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "84d2",
+   "claim": "bit 7 set means 128..255",
+   "len": 2,
+   "text": "test dl,dl",
+   "va": 64296976,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "0f8800010000",
+   "claim": "128..255 takes the 0xcc arm",
+   "len": 6,
+   "text": "js 0x3d51918",
+   "va": 64296978,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "881430",
+   "claim": "positive fixint byte",
+   "len": 3,
+   "text": "mov BYTE PTR [rax+rsi*1],dl",
+   "va": 64296997,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "c60430cc",
+   "claim": "uint8 marker",
+   "len": 4,
+   "text": "mov BYTE PTR [rax+rsi*1],0xcc",
+   "va": 64297253,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "4881fa00000100",
+   "claim": "16-bit boundary",
+   "len": 7,
+   "text": "cmp rdx,0x10000",
+   "va": 64297020,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "e8c1040000",
+   "claim": "u16 data helper",
+   "len": 5,
+   "text": "call 0x3d51d10",
+   "va": 64297034,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "c64308cd",
+   "claim": "uint16 marker returned",
+   "len": 4,
+   "text": "mov BYTE PTR [rbx+0x8],0xcd",
+   "va": 64297045,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "48c1e820",
+   "claim": "32-bit boundary",
+   "len": 4,
+   "text": "shr rax,0x20",
+   "va": 64297054,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "e8d2060000",
+   "claim": "u32 data helper",
+   "len": 5,
+   "text": "call 0x3d51f40",
+   "va": 64297065,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "c64308ce",
+   "claim": "uint32 marker returned",
+   "len": 4,
+   "text": "mov BYTE PTR [rbx+0x8],0xce",
+   "va": 64297076,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "e84b080000",
+   "claim": "u64 data helper",
+   "len": 5,
+   "text": "call 0x3d520d0",
+   "va": 64297088,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "c64308cf",
+   "claim": "uint64 marker returned",
+   "len": 4,
+   "text": "mov BYTE PTR [rbx+0x8],0xcf",
+   "va": 64297099,
+   "window": "uint_writer"
+  },
+  {
+   "bytes": "c60401cd",
+   "claim": "marker byte 0xcd written",
+   "len": 4,
+   "text": "mov BYTE PTR [rcx+rax*1],0xcd",
+   "va": 64298295,
+   "window": "uint16"
+  },
+  {
+   "bytes": "66c1c608",
+   "claim": "16-bit value big-endian",
+   "len": 4,
+   "text": "rol si,0x8",
+   "va": 64298441,
+   "window": "uint16"
+  },
+  {
+   "bytes": "c60401ce",
+   "claim": "marker byte 0xce written",
+   "len": 4,
+   "text": "mov BYTE PTR [rcx+rax*1],0xce",
+   "va": 64298855,
+   "window": "uint32"
+  },
+  {
+   "bytes": "0fce",
+   "claim": "32-bit value big-endian",
+   "len": 2,
+   "text": "bswap esi",
+   "va": 64299001,
+   "window": "uint32"
+  },
+  {
+   "bytes": "c60401cf",
+   "claim": "marker byte 0xcf written",
+   "len": 4,
+   "text": "mov BYTE PTR [rcx+rax*1],0xcf",
+   "va": 64299256,
+   "window": "uint64"
+  },
+  {
+   "bytes": "480fce",
+   "claim": "64-bit value big-endian",
+   "len": 3,
+   "text": "bswap rsi",
+   "va": 64299404,
+   "window": "uint64"
+  },
+  {
+   "bytes": "4183fe20",
+   "claim": "fixstr for length < 32",
+   "len": 4,
+   "text": "cmp r14d,0x20",
+   "va": 68968742,
+   "window": "str_writer"
+  },
+  {
+   "bytes": "b3a0",
+   "claim": "fixstr base 0xa0",
+   "len": 2,
+   "text": "mov bl,0xa0",
+   "va": 68968748,
+   "window": "str_writer"
+  },
+  {
+   "bytes": "e8dbc0b8ff",
+   "claim": "marker byte helper",
+   "len": 5,
+   "text": "call 0x3d52310",
+   "va": 68969008,
+   "window": "str_writer"
+  },
+  {
+   "bytes": "4d85f6",
+   "claim": "copy skipped for empty strings",
+   "len": 3,
+   "text": "test r14,r14",
+   "va": 68969513,
+   "window": "str_writer"
+  },
+  {
+   "bytes": "ff15c8903102",
+   "claim": "memcpy slot 0x64df508 copies the text",
+   "len": 6,
+   "text": "call QWORD PTR [rip+0x23190c8]",
+   "va": 68969530,
+   "window": "str_writer"
+  },
+  {
+   "bytes": "450fb6661b",
+   "claim": "other writer: mode byte at +0x1b (not +0xb)",
+   "len": 5,
+   "text": "movzx r12d,BYTE PTR [r14+0x1b]",
+   "va": 74104888,
+   "window": "other_writer"
+  },
+  {
+   "bytes": "4180f401",
+   "claim": "other writer: header derived from mode",
+   "len": 4,
+   "text": "xor r12b,0x1",
+   "va": 74104897,
+   "window": "other_writer"
+  },
+  {
+   "bytes": "41c0e404",
+   "claim": "other writer: header derived from mode",
+   "len": 4,
+   "text": "shl r12b,0x4",
+   "va": 74104901,
+   "window": "other_writer"
+  },
+  {
+   "bytes": "4180cc83",
+   "claim": "other writer: map 0x83 / array 0x93",
+   "len": 4,
+   "text": "or r12b,0x83",
+   "va": 74104905,
+   "window": "other_writer"
+  },
+  {
+   "bytes": "e882a5b1ff",
+   "claim": "other writer: its own string helper",
+   "len": 5,
+   "text": "call 0x41c6610",
+   "va": 74104969,
+   "window": "other_writer"
+  },
+  {
+   "bytes": "c60431a1",
+   "claim": "other writer: inline fixstr-1 marker for key a",
+   "len": 4,
+   "text": "mov BYTE PTR [rcx+rsi*1],0xa1",
+   "va": 74105035,
+   "window": "other_writer"
+  },
+  {
+   "bytes": "c6043161",
+   "claim": "other writer: key a",
+   "len": 4,
+   "text": "mov BYTE PTR [rcx+rsi*1],0x61",
+   "va": 74105055,
+   "window": "other_writer"
+  },
+  {
+   "bytes": "418b5708",
+   "claim": "other writer: a is the u32 at +8",
+   "len": 4,
+   "text": "mov edx,DWORD PTR [r15+0x8]",
+   "va": 74105066,
+   "window": "other_writer"
+  },
+  {
+   "bytes": "e855536aff",
+   "claim": "other writer: its own uint helper",
+   "len": 5,
+   "text": "call 0x3d51450",
+   "va": 74105078,
+   "window": "other_writer"
+  },
+  {
+   "bytes": "c6043174",
+   "claim": "other writer: key t",
+   "len": 4,
+   "text": "mov BYTE PTR [rcx+rsi*1],0x74",
+   "va": 74105141,
+   "window": "other_writer"
+  },
+  {
+   "bytes": "498b17",
+   "claim": "other writer: t is the u64 at +0",
+   "len": 3,
+   "text": "mov rdx,QWORD PTR [r15]",
+   "va": 74105152,
+   "window": "other_writer"
+  },
+  {
+   "bytes": "4881fa00010000",
+   "claim": "other copy: 8-bit boundary",
+   "len": 7,
+   "text": "cmp rdx,0x100",
+   "va": 64296024,
+   "window": "other_uint"
+  },
+  {
+   "bytes": "4881fa00000100",
+   "claim": "other copy: 16-bit boundary",
+   "len": 7,
+   "text": "cmp rdx,0x10000",
+   "va": 64296079,
+   "window": "other_uint"
+  },
+  {
+   "bytes": "42c6040fcd",
+   "claim": "other copy: uint16 marker",
+   "len": 5,
+   "text": "mov BYTE PTR [rdi+r9*1],0xcd",
+   "va": 64296108,
+   "window": "other_uint"
+  },
+  {
+   "bytes": "48c1e920",
+   "claim": "other copy: 32-bit boundary",
+   "len": 4,
+   "text": "shr rcx,0x20",
+   "va": 64296170,
+   "window": "other_uint"
+  },
+  {
+   "bytes": "42c6040fce",
+   "claim": "other copy: uint32 marker",
+   "len": 5,
+   "text": "mov BYTE PTR [rdi+r9*1],0xce",
+   "va": 64296200,
+   "window": "other_uint"
+  },
+  {
+   "bytes": "42c60409cc",
+   "claim": "other copy: uint8 marker",
+   "len": 5,
+   "text": "mov BYTE PTR [rcx+r9*1],0xcc",
+   "va": 64296276,
+   "window": "other_uint"
+  },
+  {
+   "bytes": "83fb20",
+   "claim": "other copy: fixstr boundary",
+   "len": 3,
+   "text": "cmp ebx,0x20",
+   "va": 68970023,
+   "window": "other_str"
+  },
+  {
+   "bytes": "40b5a0",
+   "claim": "other copy: fixstr base",
+   "len": 3,
+   "text": "mov bpl,0xa0",
+   "va": 68970028,
+   "window": "other_str"
+  },
+  {
+   "bytes": "e8c6bcb8ff",
+   "claim": "other copy: same marker helper",
+   "len": 5,
+   "text": "call 0x3d52310",
+   "va": 68970053,
+   "window": "other_str"
+  },
+  {
+   "bytes": "80bfd900000000",
+   "claim": "unsqueezed flag",
+   "len": 7,
+   "text": "cmp BYTE PTR [rdi+0xd9],0x0",
+   "va": 97364260,
+   "window": "sponge_update"
+  },
+  {
+   "bytes": "488bbbc8000000",
+   "claim": "absorbed length",
+   "len": 7,
+   "text": "mov rdi,QWORD PTR [rbx+0xc8]",
+   "va": 97364314,
+   "window": "sponge_update"
+  },
+  {
+   "bytes": "4c8babd0000000",
+   "claim": "rate",
+   "len": 7,
+   "text": "mov r13,QWORD PTR [rbx+0xd0]",
+   "va": 97364321,
+   "window": "sponge_update"
+  },
+  {
+   "bytes": "4d39ec",
+   "claim": "input length against remaining rate",
+   "len": 3,
+   "text": "cmp r12,r13",
+   "va": 97364337,
+   "window": "sponge_update"
+  },
+  {
+   "bytes": "734f",
+   "claim": "only inputs >= rate - cursor take the permutation path",
+   "len": 2,
+   "text": "jae 0x5cda9c5",
+   "va": 97364340,
+   "window": "sponge_update"
+  },
+  {
+   "bytes": "46310c01",
+   "claim": "word XOR into the state",
+   "len": 4,
+   "text": "xor DWORD PTR [rcx+r8*1],r9d",
+   "va": 97365124,
+   "window": "sponge_update"
+  },
+  {
+   "bytes": "44300402",
+   "claim": "byte XOR into the state",
+   "len": 4,
+   "text": "xor BYTE PTR [rdx+rax*1],r8b",
+   "va": 97365157,
+   "window": "sponge_update"
+  },
+  {
+   "bytes": "4c89bbc8000000",
+   "claim": "cursor = absorbed length",
+   "len": 7,
+   "text": "mov QWORD PTR [rbx+0xc8],r15",
+   "va": 97365172,
+   "window": "sponge_update"
+  },
+  {
+   "bytes": "80bc24e100000001",
+   "claim": "squeezed flag test",
+   "len": 8,
+   "text": "cmp BYTE PTR [rsp+0xe1],0x1",
+   "va": 97365355,
+   "window": "sponge_finalize"
+  },
+  {
+   "bytes": "0fb68c24e0000000",
+   "claim": "domain byte",
+   "len": 8,
+   "text": "movzx ecx,BYTE PTR [rsp+0xe0]",
+   "va": 97365471,
+   "window": "sponge_finalize"
+  },
+  {
+   "bytes": "304c0408",
+   "claim": "domain byte XORed at the absorbed length",
+   "len": 4,
+   "text": "xor BYTE PTR [rsp+rax*1+0x8],cl",
+   "va": 97365479,
+   "window": "sponge_finalize"
+  },
+  {
+   "bytes": "48ffcf",
+   "claim": "rate - 1",
+   "len": 3,
+   "text": "dec rdi",
+   "va": 97365492,
+   "window": "sponge_finalize"
+  },
+  {
+   "bytes": "80743c0880",
+   "claim": "0x80 at rate - 1",
+   "len": 5,
+   "text": "xor BYTE PTR [rsp+rdi*1+0x8],0x80",
+   "va": 97365514,
+   "window": "sponge_finalize"
+  },
+  {
+   "bytes": "ff15561d8100",
+   "claim": "permutation via slot 0x64ecb70",
+   "len": 6,
+   "text": "call QWORD PTR [rip+0x811d56]",
+   "va": 97365524,
+   "window": "sponge_finalize"
+  }
+ ],
+ "reloc_refs": {
+  "0x36aa9a0": [],
+  "0x36b1600": [],
+  "0x46abec0": []
+ },
+ "relocs": {
+  "0x64e0148": {
+   "addend": 97364240,
+   "type": 8
+  },
+  "0x64e0150": {
+   "addend": 97365312,
+   "type": 8
+  },
+  "0x64ecb70": {
+   "addend": 97362816,
+   "type": 8
+  }
+ },
+ "slot_symbol": {
+  "0x64df508": "memcpy"
+ },
+ "table": {
+  "entries_inside_dispatcher": 93,
+  "entry_0xa9": 57351740,
+  "indices_to_arm": [
+   35
+  ]
+ },
+ "windows": {
+  "cancel_writer": {
+   "end": 74104856,
+   "sha256": "f0e9248f8bda28c2752f28b16801f27562e44fa9bb03be4c16387366b35826f7",
+   "start": 74104512
+  },
+  "dispatcher": {
+   "end": 57360253,
+   "sha256": "7724c009fab41f48fdbcdb5c12dc5e3d4419846270bbec2bb6df83ff5ba4c9df",
+   "start": 57349632
+  },
+  "map_header": {
+   "end": 64289177,
+   "sha256": "c91d8474029221bb365f3c8eac4ff8d8137d66208a4c6104bbaea9eb5c56bda3",
+   "start": 64288464
+  },
+  "marker": {
+   "end": 64299870,
+   "sha256": "97a69885f4ce8f473e5c0139e173b3c35bbee945b4519ffa9ad5d7e5bdbe1aaa",
+   "start": 64299792
+  },
+  "other_dispatcher": {
+   "end": 57370877,
+   "sha256": "50235b154ac1581b08b8792199e8ab38cc39576ab580b4bdfc2941f5d1a3301b",
+   "start": 57360256
+  },
+  "other_str": {
+   "end": 68970532,
+   "sha256": "12a2f7238376a185f77e1dff69f6ca4baaf4df4b5accdb48a69dd596d97fc2bd",
+   "start": 68970000
+  },
+  "other_uint": {
+   "end": 64296917,
+   "sha256": "a3e11114e95fb6a85bbe334594156a4d1e0a1b4e9e61dae30ebff98d84fc2d96",
+   "start": 64296016
+  },
+  "other_writer": {
+   "end": 74105426,
+   "sha256": "6cf87d2bfceefec3733260eb8fc8d9f45358e9cf16ccdde2d816516664688dbf",
+   "start": 74104864
+  },
+  "permutation": {
+   "end": 97364226,
+   "sha256": "15d45b717ea70b1633e3d7972ca6a4dcc1240cc9e0518cfbfcbff4efc11838e8",
+   "start": 97362816
+  },
+  "serializer": {
+   "end": 57322982,
+   "sha256": "18c066ea3b97c2de167b8e7557d1e3e3cdbbd2f757dd83a00eafc827718eca9d",
+   "start": 57321888
+  },
+  "sponge_finalize": {
+   "end": 97366077,
+   "sha256": "94b1e9200106a1fc11ecd749e7eb693d22687fe87059406140f79c6bfdd53596",
+   "start": 97365312
+  },
+  "sponge_update": {
+   "end": 97365306,
+   "sha256": "e24dbc47639c217bb45897e746eb069fe9e323e4098cd53fda92d4b95afb390f",
+   "start": 97364240
+  },
+  "str_writer": {
+   "end": 68969990,
+   "sha256": "3f79f254c5b2d59af4407762eb70a62216bc1c0f8e157e54113b67c5591e0109",
+   "start": 68968720
+  },
+  "uint16": {
+   "end": 64298653,
+   "sha256": "7ad839d6212504d3ac065d51f13cd6e9e3ac0c5f44ae16e0268ed5df6c693df9",
+   "start": 64298256
+  },
+  "uint32": {
+   "end": 64299211,
+   "sha256": "06f4f222f1e0ca0304df5a331587e2eb875ed422f3cfd3538dd5225ecae54822",
+   "start": 64298816
+  },
+  "uint64": {
+   "end": 64299620,
+   "sha256": "2758643110bdef1d8ef564972d40ccb29dc38aa2ae2f091424d1d02ba61e733d",
+   "start": 64299216
+  },
+  "uint_writer": {
+   "end": 64297554,
+   "sha256": "c388d76609d2e06536318df3a5a303cc618d894e4dbc18e047462a42d46dfd83",
+   "start": 64296928
+  }
+ }
+}

@@ -1,0 +1,32 @@
+va	byte	new	kind	reason
+0x16961d2	3	0x19	immediate-low-byte	the 16-byte scalar-window loop and the 16-lane loop are both exact searches, so moving the length cut-over by one byte selects the other correct loop
+0x1696269	1	0x87	branch-retarget	jump after the panic call, which never returns
+0x1696273	4	0x31	displacement-low-byte	writes the haystack length into field +8 of the verifier state, which 0x1696870 never reads (the shifted store is overwritten by the next field store)
+0x1696284	5	0x8	immediate-low-byte	needle-tail length 8 instead of 9: the dropped last byte `t` was already required at lane offset 9 by the pair filter before every verifier call
+0x169628d	3	0x4b	immediate-low-byte	the 16-byte scalar-window loop and the 16-lane loop are both exact searches, so moving the length cut-over by one byte selects the other correct loop
+0x169629c	3	0x18	displacement-low-byte	moves a lane-loop guard by one byte: the loop runs one more in-bounds block, and the result is an any-match over blocks that the final unaligned window also covers
+0x16962a8	1	0x7c	branch-retarget	taken only with a match already recorded (flag byte nonzero); the skipped instruction can only contribute to an any-match that is already true, and the verifier answers false for flagged calls
+0x16962e3	3	0x28	displacement-low-byte	moves a lane-loop guard by one byte: the loop runs one more in-bounds block, and the result is an any-match over blocks that the final unaligned window also covers
+0x16962f5	1	0x2f	branch-retarget	taken only with a match already recorded (flag byte nonzero); the skipped instruction can only contribute to an any-match that is already true, and the verifier answers false for flagged calls
+0x1696316	3	0x28	displacement-low-byte	moves a lane-loop guard by one byte: the loop runs one more in-bounds block, and the result is an any-match over blocks that the final unaligned window also covers
+0x169652d	3	0x88	immediate-low-byte	moves a lane-loop guard by one byte: the loop runs one more in-bounds block, and the result is an any-match over blocks that the final unaligned window also covers
+0x1696549	1	0x52	branch-retarget	taken only with a match already recorded (flag byte nonzero); the skipped instruction can only contribute to an any-match that is already true, and the verifier answers false for flagged calls
+0x16966a4	4	0x41	displacement-low-byte	the next block start is consumed only after a match is recorded (flag byte nonzero), when every later step ends in the panic route
+0x16966a9	3	0x88	immediate-low-byte	moves a lane-loop guard by one byte: the loop runs one more in-bounds block, and the result is an any-match over blocks that the final unaligned window also covers
+0x16966f8	4	0x29	displacement-low-byte	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696702	1	0x20	branch-retarget	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696713	0	0x75	condition-flip	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696713	1	0xf	branch-retarget	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696715	3	0x9	displacement-low-byte	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696769	0	0x75	condition-flip	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696769	1	0xf	branch-retarget	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x169676b	3	0x9	displacement-low-byte	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x169681f	3	0x11	displacement-low-byte	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696826	0	0x75	condition-flip	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696826	1	0x10	branch-retarget	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696828	3	0x19	displacement-low-byte	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696834	3	0x29	immediate-low-byte	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696840	1	0x20	branch-retarget	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696851	0	0x75	condition-flip	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696851	1	0xf	branch-retarget	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds
+0x1696853	3	0x31	displacement-low-byte	cleanup landing pad: entered only when a callee unwinds, and no callee in this model unwinds

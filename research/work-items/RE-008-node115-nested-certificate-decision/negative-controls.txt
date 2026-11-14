@@ -1,0 +1,186 @@
+==== verify-wrong-pin-plain
+$ python3 -I <root>/research/work-items/RE-008-node115-nested-certificate-decision/verify_target.py <target> <tmp>/packet-copy --outdir <tmp>/o1 --no-flips
+exit status 1
+--- stdout
+FAIL pin decision 0x595fd34: raw decode is 'mov 0x20(%rsi),%rcx', pin says 'mov 0x18(%rax),%rdx'
+FAIL pin decision 0x595fd34: elf decode is 'mov 0x20(%rsi),%rcx', pin says 'mov 0x18(%rax),%rdx'
+functions	26
+bit_flips_detected_by_pin_text	0
+bit_flips_text_equivalent_hash_only	0
+bit_flips_tried	0
+data_pins	15
+distinct_pinned_instructions	675
+pins_tsv_rows	90
+relation_trace_items	674
+reloc_pins	10
+rows_collector	328
+rows_concat	102
+rows_decision	168
+rows_digest_builder	183
+rows_equal_iter	418
+rows_equality	116
+rows_keccak_f	354
+rows_keccak_finalize	171
+rows_keccak_update	269
+rows_message_ser	253
+rows_provider	123
+rows_put_array20	35
+rows_put_array32	35
+rows_put_varint	168
+rows_quorum	361
+rows_recover	210
+rows_secp_parse_compact	80
+rows_secp_recover	94
+rows_secp_scalar_set_b32	83
+rows_secp_serialize	110
+rows_signed_fold	126
+rows_signer_check	96
+rows_stake_test	99
+rows_tree_next	127
+rows_verifier	257
+rows_vote_ser	85
+failures	2
+--- stderr
+
+==== verify-wrong-pin-selftest
+$ python3 -I <root>/research/work-items/RE-008-node115-nested-certificate-decision/verify_target.py <target> <tmp>/packet-copy --outdir <tmp>/o2 --selftest
+exit status 1
+--- stdout
+baseline control FAILED: the unmodified inputs do not pass, so no damage can be judged
+FAIL pin decision 0x595fd34: raw decode is 'mov 0x20(%rsi),%rcx', pin says 'mov 0x18(%rax),%rdx'
+FAIL pin decision 0x595fd34: elf decode is 'mov 0x20(%rsi),%rcx', pin says 'mov 0x18(%rax),%rdx'
+--- stderr
+
+==== verify-packet-copy-unchanged-after-failing-runs
+packet copy hashes equal before and after the two failing runs: True
+
+==== verify-without-outdir
+$ python3 -I <root>/research/work-items/RE-008-node115-nested-certificate-decision/verify_target.py <target> <tmp>/packet-copy
+exit status 1
+--- stdout
+--- stderr
+--outdir is required: results are written only to a new directory, never into the packet
+
+==== verify-outdir-inside-packet
+$ python3 -I <root>/research/work-items/RE-008-node115-nested-certificate-decision/verify_target.py <target> <tmp>/packet-copy --outdir <tmp>/packet-copy/out
+exit status 1
+--- stdout
+--- stderr
+--outdir must not be the packet directory or inside it (or contain it): <tmp>/packet-copy/out
+
+==== verify-outdir-not-empty
+$ python3 -I <root>/research/work-items/RE-008-node115-nested-certificate-decision/verify_target.py <target> <tmp>/packet-copy --outdir <tmp>/nonempty
+exit status 1
+--- stdout
+--- stderr
+--outdir must not exist yet or be an empty directory: <tmp>/nonempty
+
+==== verify-packet-copy-unchanged-after-refusals
+packet copy unchanged: True
+
+==== mutate-fake-cargo-build-io-error
+$ python3 -I <root>/research/work-items/RE-008-node115-nested-certificate-decision/mutate.py <root> --outdir <tmp>/m-build-io-error --only D01,E01
+exit status 1
+--- stdout
+baseline: build ok, 27 tests ok
+D01	pair-equal arm: f30 < b becomes f30 <= b	decision.rs	no	no	no	-	-	ERROR build failed (exit 101), not a kill
+E01	entry compare ignores the signature	equality.rs	no	no	no	-	-	ERROR build failed (exit 101), not a kill
+mutants 2, not killed or in error 2
+--- stderr
+
+==== mutate-fake-cargo-build-io-error-counts-no-kill
+mutations.tsv rows: 2, rows counted as killed: 0
+D01	pair-equal arm: f30 < b becomes f30 <= b	decision.rs	no	no	no	-	-	ERROR build failed (exit 101), not a kill
+E01	entry compare ignores the signature	equality.rs	no	no	no	-	-	ERROR build failed (exit 101), not a kill
+
+==== mutate-fake-cargo-test-io-error
+$ python3 -I <root>/research/work-items/RE-008-node115-nested-certificate-decision/mutate.py <root> --outdir <tmp>/m-test-io-error --only D01,E01
+exit status 1
+--- stdout
+baseline: build ok, 27 tests ok
+D01	pair-equal arm: f30 < b becomes f30 <= b	decision.rs	yes	no	no	-	-	ERROR results missing for 27 tests (cargo exit 101)
+E01	entry compare ignores the signature	equality.rs	yes	no	no	-	-	ERROR results missing for 27 tests (cargo exit 101)
+mutants 2, not killed or in error 2
+--- stderr
+
+==== mutate-fake-cargo-test-io-error-counts-no-kill
+mutations.tsv rows: 2, rows counted as killed: 0
+D01	pair-equal arm: f30 < b becomes f30 <= b	decision.rs	yes	no	no	-	-	ERROR results missing for 27 tests (cargo exit 101)
+E01	entry compare ignores the signature	equality.rs	yes	no	no	-	-	ERROR results missing for 27 tests (cargo exit 101)
+
+==== mutate-harmless-edit-survives
+$ python3 -I <root>/research/work-items/RE-008-node115-nested-certificate-decision/mutate.py <root> --outdir <tmp>/m-survivor --only Z00 --add-mutant Z00::lib.rs::pub mod verifier;::pub mod verifier; // harmless
+exit status 1
+--- stdout
+baseline: build ok, 27 tests ok
+Z00	added on the command line	lib.rs	yes	yes	no	-	-	SURVIVED
+mutants 1, not killed or in error 1
+--- stderr
+
+==== mutate-harmless-edit-is-reported-as-surviving
+Z00	added on the command line	lib.rs	yes	yes	no	-	-	SURVIVED
+
+==== mutate-without-outdir
+$ python3 -I <root>/research/work-items/RE-008-node115-nested-certificate-decision/mutate.py <root> --only D01
+exit status 1
+--- stdout
+--- stderr
+--outdir is required: results are written only to a new directory
+
+==== repository-packet-unchanged-after-mutate-runs
+packet hashes equal before and after all mutate.py runs: True
+
+==== compare-damaged-output-plain
+$ python3 -I <root>/research/work-items/RE-008-node115-nested-certificate-decision/independent-trace/compare_trace.py <root>/research/work-items/RE-008-node115-nested-certificate-decision/cases.tsv <tmp>/damaged/outputs.tsv --outdir <tmp>/results/c1
+exit status 1
+--- stdout
+cases.tsv   sha256 dc84c30f0ffd28c5d8c996a69ac09e0bb4855e597e4263042b9735a6f6e4f912 rows 621
+outputs.tsv sha256 0746a0522858efcae8dd29fb0bead7fa750a6d52ddcbe5e641b23f96eb7750fc rows 621
+input columns of cases.tsv byte-identical to the independent side's inputs.tsv: True
+rows 621
+tag equal              621/621
+helper/verifier calls  621/621
+helper reference       621/621
+payload words          604/605 compared  (16 noreturn rows not compared: N4; 45 of the compared rows are `fwd`, checked against the input validator column: N3)
+DIFF c0001 pair tag=True calls=True ref=True words=False
+differing rows after normalization: 1
+--- stderr
+
+==== compare-damaged-output-selftest
+$ python3 -I <root>/research/work-items/RE-008-node115-nested-certificate-decision/independent-trace/compare_trace.py <root>/research/work-items/RE-008-node115-nested-certificate-decision/cases.tsv <tmp>/damaged/outputs.tsv --outdir <tmp>/results/c2 --selftest
+exit status 1
+--- stdout
+baseline control FAILED: the unmodified inputs do not compare clean, so no damage can be judged
+c0001 pair tag=True calls=True ref=True words=False
+--- stderr
+
+==== compare-without-outdir
+$ python3 -I <root>/research/work-items/RE-008-node115-nested-certificate-decision/independent-trace/compare_trace.py <root>/research/work-items/RE-008-node115-nested-certificate-decision/cases.tsv <tmp>/damaged/outputs.tsv
+exit status 1
+--- stdout
+--- stderr
+usage: compare_trace.py <cases.tsv> <outputs.tsv> --outdir NEW_DIR [--selftest]
+
+(the damaged row of the independent output is c0001)
+
+==== summary
+control	expected	got	verdict
+verify-wrong-pin-plain	non-zero	1	ok
+verify-wrong-pin-selftest	non-zero	1	ok
+verify-packet-copy-unchanged-after-failing-runs	true	true	ok
+verify-without-outdir	non-zero	1	ok
+verify-outdir-inside-packet	non-zero	1	ok
+verify-outdir-not-empty	non-zero	1	ok
+verify-packet-copy-unchanged-after-refusals	true	true	ok
+mutate-fake-cargo-build-io-error	non-zero	1	ok
+mutate-fake-cargo-build-io-error-counts-no-kill	true	true	ok
+mutate-fake-cargo-test-io-error	non-zero	1	ok
+mutate-fake-cargo-test-io-error-counts-no-kill	true	true	ok
+mutate-harmless-edit-survives	non-zero	1	ok
+mutate-harmless-edit-is-reported-as-surviving	true	true	ok
+mutate-without-outdir	non-zero	1	ok
+repository-packet-unchanged-after-mutate-runs	true	true	ok
+compare-damaged-output-plain	non-zero	1	ok
+compare-damaged-output-selftest	non-zero	1	ok
+compare-without-outdir	non-zero	1	ok
+controls failing: 0

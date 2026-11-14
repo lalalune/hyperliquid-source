@@ -1,0 +1,32 @@
+Oracle record for src/node115-peers-response-set. These times and hashes are the
+author's own record; no external timestamp service was used.
+
+Freeze 1 (before any Rust file existed in the crate directory; it held no file,
+checked with find immediately before):
+  utc: 2026-11-10T17:24:29Z
+  repository_base: a8616af9432b8d8517b2af677880e117b7c28ef3
+  generator_sha256: 6c4a53f56997176570fd46c20453ae7474fc503b6595b98f893dca8f52ef2982
+  corpus_sha256: 642b47e20da0f44bd6b696d16f05986531e75c6ad6a03448d8bd5410d953c8dc  (229 cases)
+
+First run of the Rust crate against freeze 1: 1 of 229 cases failed.
+  Case lz4-literal-n416 was defined as 416 distinct keys plus one repeated key,
+  which is 417 wire rows. The oracle's own rule (4 + 8 + 24*n <= 10,000, shown
+  by the limit-n416 / limit-n417 cases) makes that a limit error, and the crate
+  said so. The case definition, not the crate, was wrong. No expected value was
+  copied from crate output.
+
+Freeze 2 (the generator now asserts the 416-row cap for every success case, and
+that case uses 415 keys + 1 repeat):
+  utc: 2026-11-10T17:26:33Z
+  generator_sha256: 0cf045bd45674510edcbf46fa850e50ca0f464ab8eee31b72abc681ef1cb83ca
+  corpus_sha256: f2247c7d83228f0651a1c1c674a553a23c7280eb79864b969f8977808422925c  (229 cases)
+  The other 228 expectations were produced by the same generator logic as in
+  freeze 1 and the crate matched them on its first run.
+
+Tie policy that the corpus encodes (the last input row wins for a repeated
+four-byte key, at every input length) was fixed from the byte reading recorded
+in TIES.md before the generator was written, not from running anything.
+
+Reproduce the corpus into a new directory and compare with the crate's copy:
+  python3 -I research/work-items/RE-012-node115-peers-response-set/oracle/gen_oracle.py --outdir <new dir>
+  cmp <new dir>/corpus.tsv src/node115-peers-response-set/tests/corpus.tsv

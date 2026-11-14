@@ -1,0 +1,13 @@
+baseline control: unmodified inputs pass checks 1-7
+rejected	wrong pin text	FAIL pin decision 0x595fd34: raw decode is 'mov 0x20(%rsi),%rcx', pin says 'mov 0x20(%rsi),%rcx x'
+rejected	pin at a non-instruction address	FAIL pin decision 0x595fd35: raw decode is None, pin says 'mov 0x20(%rsi),%rcx'
+rejected	pin outside every function	FAIL pin 0x400000 outside decision
+rejected	pin for an unknown function	FAIL pin 0x595fd34: unknown function nope
+rejected	relation trace item with wrong text	FAIL pin decision 0x595fd34: raw decode is 'mov 0x20(%rsi),%rcx', pin says 'nop'
+rejected	relation trace item without address	FAIL relation decision X: malformed trace item 'no address here'
+rejected	wrong function hash	FAIL sha decision: 5bde584cbd4f4e7e0fa328d7438aa86ecaa592aeb063bc410a163be408477fcc != 0000000000000000000000000000000000000000000000000000000000000000
+rejected	wrong function end	FAIL fde decision: FDE is 0x595fd20..0x596000d, packet says 0x595fd20..0x596000e
+rejected	wrong data constant	FAIL data 0x4592b0: 000000000000f03f != 0000000000000000
+rejected	wrong relocation addend	FAIL reloc 0x64e0148: .rela.dyn has (8, 97364240), pin says RELATIVE addend 0x5cda918
+rejected	flipped byte in a pinned instruction	FAIL sha decision: b7f3b33b6d9244ef79a073135bdbd65ad95ecb25e8b5130616f346070349dd9b != 5bde584cbd4f4e7e0fa328d7438aa86ecaa592aeb063bc410a163be408477fcc
+damages rejected for their own reason: 11/11

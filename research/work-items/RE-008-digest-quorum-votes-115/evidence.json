@@ -1,0 +1,99 @@
+{
+  "census": {
+    "predicate": {
+      "callers": [
+        "0x36c7f70"
+      ],
+      "direct_calls": [
+        "0x36c82e4"
+      ],
+      "fn": "0x422e0f0"
+    },
+    "stake_check": {
+      "callers": [
+        "0x28a9b70",
+        "0x28a9db0",
+        "0x28aa370",
+        "0x28ab0a0",
+        "0x3686d90",
+        "0x36872c0",
+        "0x3687710",
+        "0x36879a0",
+        "0x36c93c0",
+        "0x5373810",
+        "0x5373ab0",
+        "0x5373e40",
+        "0x5374b70"
+      ],
+      "direct_calls": [
+        "0x28a9c5b",
+        "0x28a9e9a",
+        "0x28aa7d8",
+        "0x28ab508",
+        "0x3686e72",
+        "0x36873a0",
+        "0x36877f8",
+        "0x3687e04",
+        "0x36ca2b8",
+        "0x53738fa",
+        "0x5373c88",
+        "0x53742a8",
+        "0x5374fd8"
+      ],
+      "fn": "0x36c7f70"
+    },
+    "voter_sum": {
+      "callers": [
+        "0x422e0f0"
+      ],
+      "direct_calls": [
+        "0x422e100"
+      ],
+      "fn": "0x4351520"
+    },
+    "walker": {
+      "callers": [
+        "0x5afa5d0"
+      ],
+      "direct_calls": [
+        "0x5afa5f4"
+      ],
+      "fn": "0x5374b70"
+    }
+  },
+  "component": "abci",
+  "fde_ends": {
+    "0x36c7f70": "0x36c8424",
+    "0x422e0f0": "0x422e273",
+    "0x4351520": "0x43516c2",
+    "0x5374b70": "0x5375893"
+  },
+  "gates_changed": false,
+  "predicate": {
+    "S": "0x4351520 second return (u64 sum of looked-up weights; tag 0 on overflow)",
+    "formula": "tag == 1 and 2*sum(item+0x20 over 0x28-byte items) < 3*S, 128-bit unsigned",
+    "samples": {
+      "sum=2**63,S=2**63": true,
+      "sum=3,S=2": false,
+      "sum=3,S=3": true,
+      "sum=300,S=200": false,
+      "sum=300,S=201": true,
+      "tag=0": false
+    }
+  },
+  "second_gate": "store +0x38 f64; 0 passes; else count > len * store+0x38 (u64 -> f64) at 0x53754fc",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "stake_check": {
+    "absent": "error tag 0x9b via 0x36dae30, returns 0",
+    "present": "returns 0x422e0f0(..., vtable 0x6468cb0)"
+  },
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008",
+  "walker": {
+    "check_args": "rdi = insert arg 3 (r15), rsi = [r15+0x58], rdx = collected set",
+    "inner_entry": "0x60 bytes: 32-byte key +0x0, item collection +0x20 (0x68-byte items)",
+    "resolve": "0x5375588 value +0x20 = 0; 0x5375596/0x537559a value +0x21..+0x41 = inner key",
+    "skip": "0x5374d59 cmp byte [value+0x20], 0; je next value",
+    "store_map": "store +0x18 (0x50-byte values), walked via 0x4e18e60"
+  }
+}
