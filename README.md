@@ -16,7 +16,7 @@ an integrated, runnable node remains in progress.
 
 ![Node #115 progress](docs/assets/research-progress.svg)
 
-**241 active Rust implementation areas · 204 top-level Cargo manifests · 4616 #115 research work items.**
+**241 active Rust implementation areas · 204 top-level Cargo manifests · 4617 #115 research work items.**
 
 These inventory counts describe available work, not completed components.
 
