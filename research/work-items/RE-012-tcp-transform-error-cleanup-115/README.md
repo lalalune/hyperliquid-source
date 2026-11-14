@@ -89,8 +89,10 @@ make test
 ```
 
 Python standard library only; no setup/install hook, network or target execution.
-Observed runner Python 3.11.11 / GNU binutils 2.40. Historical packet versions
-(3.14.5 / 2.45) are not claimed as the current runner's tools.
+Original runner: Python 3.11.11 / GNU binutils 2.40. The bounded recovery
+used Python 3.12.3 / GNU binutils 2.42, NumPy 2.3.5 and Rust 1.95.0;
+see `environment-recovery.json` and `recovery-scoped-run.json`. Historical
+packet versions (3.14.5 / 2.45) are not claimed as this runner's tools.
 
 ## Evidence limits and next question
 
