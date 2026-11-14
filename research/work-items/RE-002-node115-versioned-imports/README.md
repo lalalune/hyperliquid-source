@@ -39,8 +39,8 @@ recorded commands exited zero; seven tests ran and passed. GNU readelf 2.40
 independently agrees on the three selected names, bindings and version indices;
 `readelf-crosscheck.txt` retains only those lines, not the full table.
 The target is only read; mutation controls operate on memory, never on its file.
-No network, signing or target execution is involved. Repository-wide checks and
-independent validation have **not yet run** for this packet.
+No network, signing or target execution is involved. This scoped run does not establish repository-wide or independent validation;
+consult the pull request validation record for those separate outcomes.
 
 ## Evidence
 
@@ -90,4 +90,4 @@ before execution. The root package declares no lifecycle scripts; its pinned
 182-package npm lock includes a Frida install hook, but this static packet does
 not install or invoke npm/Frida/REA. Artifact downloads and question-ownership
 network refresh are separate commands, not part of the required check paths.
-Before submission, finish all required independent validation.
+No hosted CI result is established by this local audit or scoped run.
