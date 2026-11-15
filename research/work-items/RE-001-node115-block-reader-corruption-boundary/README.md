@@ -12,7 +12,7 @@ Where does the already anchored `db/src/block_reader.rs:29:26` Location pointer 
 
 ## Evidence
 
-Coordinates below are link-time ELF virtual addresses, not runtime addresses. The 42-byte instruction sequence from `0x2b2c061` through `0x2b2c08b` is checked exactly against the authenticated target. The previously established boundary at `0x2b2c061` supplies alignment; this packet does not re-disassemble the entire function. The single retained [native excerpt](native-excerpt.txt) requests 128 bytes starting there; its tail stops part-way through a later instruction and is not used for the proof.
+Coordinates below are link-time ELF virtual addresses, not runtime addresses. The 42-byte instruction sequence from `0x2b2c061` through `0x2b2c08b` is checked exactly against the authenticated target. The previously established boundary at `0x2b2c061` supplies alignment; this packet does not re-disassemble the entire function. The single retained [native excerpt](native-excerpt.txt), with trailing whitespace removed, requests 128 bytes starting there; its tail stops part-way through a later instruction and is not used for the proof.
 
 - `0x2b2c061`: `lea rcx,[rip+0x391eb18]` loads Location `0x644ab80`.
 - The next instructions load `rdi = rsp+0x90`, `rsi = rsp+0x20`, and `rdx = r12`; none overwrites RCX before the direct call at `0x2b2c078` to `0x2698f40`.
