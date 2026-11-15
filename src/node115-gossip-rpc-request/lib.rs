@@ -12,7 +12,12 @@ pub enum Request {
     Variant2,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Error { Read(ReadError), InvalidVariant { index: u32 } }
+pub enum Error {
+    Read(ReadError),
+    InvalidVariant { index: u32 },
+    /// The prefix decoded successfully, but the caller requested an exact frame.
+    TrailingBytes { remaining: usize },
+}
 #[derive(Debug, PartialEq, Eq)]
 pub struct Outcome<'a> {
     pub result: Result<Request, Error>,
@@ -79,6 +84,19 @@ pub fn decode_prefix(mut input: &[u8], limit: Option<u64>, mut charged: u64) -> 
     Outcome { result, remaining: input, charged }
 }
 
+/// Decode a complete request frame, rejecting bytes after the selected prefix.
+/// Use [`decode_prefix`] when the surrounding transport intentionally carries a
+/// suffix; this helper makes the EOF policy explicit instead of silently
+/// discarding it.
+pub fn decode_exact(input: &[u8], limit: Option<u64>, charged: u64) -> Result<Request, Error> {
+    let out = decode_prefix(input, limit, charged);
+    match out.result {
+        Ok(request) if out.remaining.is_empty() => Ok(request),
+        Ok(_) => Err(Error::TrailingBytes { remaining: out.remaining.len() }),
+        Err(error) => Err(error),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -106,5 +124,12 @@ mod tests {
     fn nonminimal_tag_and_reused_reader_compose() {
         assert_eq!(decode_prefix(&[251, 0, 0, 251, 2, 0, 3, 99], Some(20), 0), Outcome {
             result: Ok(Request::Variant0 { first: 2, second: 3 }), remaining: &[99], charged: 20 });
+    }
+
+    #[test]
+    fn exact_mode_rejects_suffix_but_prefix_mode_retains_it() {
+        assert_eq!(decode_exact(&[1, 0xee], Some(4), 0),
+            Err(Error::TrailingBytes { remaining: 1 }));
+        assert_eq!(decode_exact(&[1], Some(4), 0), Ok(Request::Variant1));
     }
 }

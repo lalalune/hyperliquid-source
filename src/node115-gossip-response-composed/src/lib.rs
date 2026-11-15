@@ -1,6 +1,8 @@
 #![no_std]
 //! Bounded composition of existing node 115 response decoder components.
 //! This is a logical prefix API, not a native ABI or complete protocol.
+//! `decode_exact` is the opt-in whole-frame EOF policy; it does not change
+//! prefix cursor or charge semantics.
 extern crate alloc;
 use alloc::vec::Vec;
 use node115_client_blocks_error as client_error;
@@ -30,6 +32,8 @@ pub enum Error {
     ResultTag(scalar::ReadError),
     InvalidResultTag(u32),
     ClientBlocksError(client_error::Error),
+    /// The selected prefix decoded, but an exact-frame caller supplied a suffix.
+    TrailingBytes { remaining: usize },
 }
 #[derive(Debug, PartialEq, Eq)]
 pub struct Outcome<'a> {
@@ -106,5 +110,17 @@ pub fn decode_prefix(input: &[u8], limit: Option<u64>, charged: u64) -> Outcome<
             }
         }
         Ok(outer::Selection::OtherVariant(_)) => unreachable!("outer decoder accepts only 0 and 1"),
+    }
+}
+
+/// Decode one complete response frame. The existing prefix API deliberately
+/// preserves suffix bytes; this helper is the explicit EOF/framing policy for
+/// callers that own the whole frame.
+pub fn decode_exact(input: &[u8], limit: Option<u64>, charged: u64) -> Result<Response, Error> {
+    let out = decode_prefix(input, limit, charged);
+    match out.result {
+        Ok(response) if out.remaining.is_empty() => Ok(response),
+        Ok(_) => Err(Error::TrailingBytes { remaining: out.remaining.len() }),
+        Err(error) => Err(error),
     }
 }

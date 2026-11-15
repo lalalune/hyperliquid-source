@@ -1,4 +1,4 @@
-use node115_gossip_response_composed::{Error, Response, decode_prefix};
+use node115_gossip_response_composed::{decode_exact, Error, Response, decode_prefix};
 use node115_gossip_response_v2_envelope as outer;
 use node115_u32_varint::ReadError;
 
@@ -121,4 +121,13 @@ fn partial_nested_error_keeps_child_progress() {
     let out = decode_prefix(&[0, 1, 1, 5], None, 0);
     assert!(matches!(out.result, Err(Error::ClientBlocksError(_))));
     assert_eq!(out.remaining, &[]);
+}
+
+#[test]
+fn exact_mode_rejects_suffix_without_changing_prefix_contract() {
+    assert_eq!(decode_exact(&[2, 0, 0xee], Some(12), 0),
+        Err(Error::TrailingBytes { remaining: 1 }));
+    assert!(decode_exact(&[2, 0], Some(12), 0).is_ok());
+    let prefix = decode_prefix(&[2, 0, 0xee], Some(12), 0);
+    assert_eq!(prefix.remaining, &[0xee]);
 }

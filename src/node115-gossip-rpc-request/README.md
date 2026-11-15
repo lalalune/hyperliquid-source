@@ -33,3 +33,7 @@ fixed cases cover all256 first-byte classes, short/fast thresholds, marked
 truncations, nonminimal encodings, both payload positions, invalid variants,
 limit stores and u64 count overflow. Field names/units beyond `first/second`
 are unknown. Unit variants and successful two-value requests retain suffixes.
+
+For callers that own a complete frame, `decode_exact` applies an explicit EOF
+policy and returns `Error::TrailingBytes` when a successful prefix leaves a
+suffix. It does not alter the prefix decoder's cursor or charge behavior.
