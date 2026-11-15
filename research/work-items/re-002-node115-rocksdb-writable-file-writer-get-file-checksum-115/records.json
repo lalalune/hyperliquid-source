@@ -1,0 +1,112 @@
+{
+ "artifact": "node #115",
+ "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+ "bound_context": [
+  "RE-002-node115-rocksdb-writable-file-writer-update-file-checksum-115 (PR #6566, open at submission time): reconstructs WritableFileWriter::UpdateFileChecksum 0x604c7b0, the sibling dispatch on the same checksum_generator_ at this+0xc8. The #6566 packet names GetChecksum as vtable slot 4 of the generator; this packet reconstructs the writer-side reader of that result. The two packets share the vtable-order reasoning (complete-object dtor, deleting dtor, Update, Finalize, GetChecksum, Name).",
+  "RE-002-node115-file-checksum-get-checksum-115 (merged on upstream main): reconstructs the generator-side FileChecksumGenCrc32c::GetChecksum -- a DIFFERENT function (the generator's method, not the writer's reader). This packet covers only the WritableFileWriter copy at 0x604c710; the sibling GetFileChecksum copies in BlockBasedTableBuilder, CuckooTableBuilder and PlainTableBuilder are callers here, not targets.",
+  "RE-002-node115-vendor-census: the single FDE is census-bound (member a895f7517936a0f7-writable_file_writer.o, librocksdb-sys 0.11.0+8.1.1). Body 2c4cb495... / source faec8b67... (1 kind-4 relocation at offset 102, the __stack_chk_fail PLT call disp32; zeroing it reproduces the source hash exactly).",
+  "meta/rocksdb v8.1.1, read live this cycle: file/writable_file_writer.cc:415-422 defines this helper exactly as the binary behaves (if checksum_generator_ != nullptr, return checksum_generator_->GetChecksum() with an assert(checksum_finalized_); else return kUnknownFileChecksum); db/builder.cc:335-336 stores the result in meta->file_checksum and calls GetFileChecksumFuncName next -- the same BuildTable call site the census finds in the binary. include/rocksdb/file_checksum.h:27 defines kUnknownFileChecksum as constexpr char [] = \"\" and :28 kUnknownFileChecksumFuncName as \"Unknown\" (the latter is the null-branch literal of the sibling GetFileChecksumFuncName at 0x604c780, verified at 0x974e00 in the binary); :52-67 declares FileChecksumGenerator's virtuals in order (complete-object dtor, deleting dtor, Update, Finalize, GetChecksum, Name) -- the two Itanium ABI destructor slots come first -- so vtable slot 4 (*0x20 past the vptr) is GetChecksum() const. The binary matches v8.1.1 step for step.",
+  "Binary-vs-source observations (recorded, not hidden): the assert(checksum_finalized_) is compiled out -- no reference to the flag in the FDE, so the model does not gate on finalization; the null branch builds the empty SSO string inline (ptr = out+0x10, size 0, first byte NUL) instead of copying a global string, matching kUnknownFileChecksum == \"\"; the canary is checked on both paths, after the virtual call on the present path and after the empty-string build on the null path, so a bad canary fails even with no generator set; the 7-byte nop at 0x604c757 is alignment padding inside the FDE. The concrete checksum bytes are the generator's own behavior (already reconstructed for the CRC32C/XXH generators in earlier RE-002 packets), not this function's; this model pins the dispatch, the null branch and the returned value only. The FDE has no LSDA and no .cold FDE."
+ ],
+ "caller_census": {
+  "method": "Whole-.text scan for E8 calls, E9 tail jumps and RIP-relative LEA references landing on the target, validated by decoding forward from the enclosing FDE start with Capstone (census.py). A site counts only on a real instruction boundary with the expected mnemonic.",
+  "notes": [
+   "GetFileChecksum 0x604c710: exactly 6 direct calls, 0 tail jumps, 0 LEA refs -- rocksdb::BuildTable 0x5e1b9c0 (site 0x5e1f4df; main FDE has no vendor census record, its .cold FDE is census-bound as BuildTable, member builder.o), CompactionOutputs::WriterSyncClose 0x5e183f0 (site 0x5e1892e, census-bound, compaction_outputs.o), BlobLogWriter::AppendFooter 0x5e26e90 (site 0x5e2734f, census-bound, blob_log_writer.o), BlockBasedTableBuilder::GetFileChecksum 0x60e3f40 (site 0x60e3f6a, census-bound), CuckooTableBuilder::GetFileChecksum 0x615ced0 (site 0x615cef5, census-bound), PlainTableBuilder::GetFileChecksum 0x618b350 (site 0x618b378, census-bound). BuildTable stores the result in meta->file_checksum (db/builder.cc:335); the three table builders delegate to this function from their own GetFileChecksum wrappers.",
+   "No LSDA: the FDE record in .eh_frame (section offset 0x367130, length 0x20, initial_location 0x604c710, range 0x6a, aug_len 0) carries no LSDA pointer, so there is no call-site table and no landing pad. A throw from the generator's GetChecksum propagates with no cleanup, and the canary check never runs on that path. The function itself has no throw of its own: its only calls are the virtual GetChecksum dispatch and __stack_chk_fail."
+  ],
+  "sites": [
+   {
+    "target": "0x604c710",
+    "target_name": "rocksdb::WritableFileWriter::GetFileChecksum",
+    "kind": "call",
+    "site": "0x5e1892e",
+    "site_fde_start": "0x5e183f0",
+    "site_fde_end": "0x5e18b3b",
+    "instruction": "call 0x604c710"
+   },
+   {
+    "target": "0x604c710",
+    "target_name": "rocksdb::WritableFileWriter::GetFileChecksum",
+    "kind": "call",
+    "site": "0x5e1f4df",
+    "site_fde_start": "0x5e1b9c0",
+    "site_fde_end": "0x5e20481",
+    "instruction": "call 0x604c710"
+   },
+   {
+    "target": "0x604c710",
+    "target_name": "rocksdb::WritableFileWriter::GetFileChecksum",
+    "kind": "call",
+    "site": "0x5e2734f",
+    "site_fde_start": "0x5e26e90",
+    "site_fde_end": "0x5e278eb",
+    "instruction": "call 0x604c710"
+   },
+   {
+    "target": "0x604c710",
+    "target_name": "rocksdb::WritableFileWriter::GetFileChecksum",
+    "kind": "call",
+    "site": "0x60e3f6a",
+    "site_fde_start": "0x60e3f40",
+    "site_fde_end": "0x60e3faa",
+    "instruction": "call 0x604c710"
+   },
+   {
+    "target": "0x604c710",
+    "target_name": "rocksdb::WritableFileWriter::GetFileChecksum",
+    "kind": "call",
+    "site": "0x615cef5",
+    "site_fde_start": "0x615ced0",
+    "site_fde_end": "0x615cf32",
+    "instruction": "call 0x604c710"
+   },
+   {
+    "target": "0x604c710",
+    "target_name": "rocksdb::WritableFileWriter::GetFileChecksum",
+    "kind": "call",
+    "site": "0x618b378",
+    "site_fde_start": "0x618b350",
+    "site_fde_end": "0x618b3ba",
+    "instruction": "call 0x604c710"
+   }
+  ],
+  "validated_sites": 6
+ },
+ "cases": {
+  "count": 300,
+  "ledger": "cases.tsv",
+  "split": "100 checks (50 checksum variants -- 10 lens x 5 patterns -- x 2 generator states: null and FileChecksumGenCrc32c) + 100 edge (10 checksum values x 2 generator states x 5 conditions: canary ok, canary bad, generator throws, throw with bad canary, generator returns empty -- pinning that the canary is checked on the null path too, that a throw beats the canary check, and that gen_throws is vacuous with no generator) + 100 bindings (25 (generator, checksum) pairs x 4 recorded invariants: body_sha256, source_sha256, fde_record, caller_census -- each row records the invariant's expected value and replay compares it)",
+  "tests": "tests/test_get_file_checksum115.py",
+  "tool": "tools/get_file_checksum115.py",
+  "what_is_checked": [
+   "checks: a null generator always returns the empty string (kUnknownFileChecksum), for every checksum variant; a present generator returns its GetChecksum value verbatim, including empty and binary (NUL/0xff) payloads",
+   "edge: a bad canary fails on both paths (present and null); a generator throw propagates and beats the canary check (the throw happens inside the virtual call, before the check); with no generator, gen_throws has no effect but the canary check still applies",
+   "bindings: the result depends only on the writer state, the generator's returned checksum and the canary, never on the caller site; each bindings row records its invariant's expected value (body hash, source hash, FDE record, 6-site caller census) and replay compares it"
+  ]
+ },
+ "engine_callees": {
+  "FileChecksumGenerator::GetChecksum": "Virtual dispatch, not a direct call: the call at 0x604c73b goes to vtable slot 4 of the object at this+0xc8 (checksum_generator_). The slot is GetChecksum() const by the FileChecksumGenerator vtable order in include/rocksdb/file_checksum.h:52-67 (complete-object dtor, deleting dtor, Update, Finalize, GetChecksum, Name) -- the two Itanium ABI destructor slots come first, so the fifth entry is GetChecksum, returning std::string by value into the same sret out. The concrete GetChecksum implementation is the generator's (CRC32C/XXH generators reconstructed in earlier RE-002 packets); this packet claims no checksum algorithm, only the dispatch, the null branch and the returned value.",
+  "__stack_chk_fail": "Direct PLT call at 0x604c775, reached only from the canary check at 0x604c74c (jne). The FDE's single kind-4 relocation is this call's disp32 (offset 102)."
+ },
+ "environment_limits": "No cargo/rustc/git-lfs/Ghidra on this VM. The target binary is never executed. The tool models the helper in Python from its whole-FDE disassembly; checksum strings are deterministic values (the generator's GetChecksum may return arbitrary bytes, including non-printable ones, per the header comment), not real file bytes. The live check (--live) reads the binary: the FDE body hash, the source hash (1 kind-4 relocation), the FDE record (length 0x20, range 0x6a, aug_len 0, no LSDA), the 26 verbatim instructions, the 6-site caller census and the model end-to-end legs. make verify/test/catalogue-check in a tooled environment is still owed upstream.",
+ "functions": {
+  "0x604c710": {
+   "body_sha256": "2c4cb495674d79320e55e2b6908d84b6ac2e82fb4f2b5da278017d2975ed174f",
+   "callers": [
+    "0x5e1892e",
+    "0x5e1f4df",
+    "0x5e2734f",
+    "0x60e3f6a",
+    "0x615cef5",
+    "0x618b378"
+   ],
+   "census_id": "node115-vendor-604c710",
+   "lea_refs": [],
+   "mangled": "_ZN7rocksdb18WritableFileWriter15GetFileChecksumB5cxx11Ev",
+   "model": "106-byte GetFileChecksum() (hidden sret out in rdi, this in rsi; push rbx, sub rsp, 0x10; stack canary at rsp+0x8, checked before every return). Loads this+0xc8 (checksum_generator_, std::unique_ptr<FileChecksumGenerator>); if null, builds the empty SSO string in the sret out (ptr = out+0x10, size 0, first byte NUL) -- kUnknownFileChecksum == \"\" -- then jumps to the canary check and returns; else calls vtable slot 4 of the generator (*0x20(%rax)) with (out, generator) -- slot 4 is GetChecksum() const by the FileChecksumGenerator vtable order (complete-object dtor, deleting dtor, Update, Finalize, GetChecksum, Name) -- then checks the canary and returns the sret out. 26 instructions: endbr64; push rbx; mov rbx, rdi; sub rsp, 0x10; mov rsi, [rsi+0xc8]; mov rax, fs:[0x28]; mov [rsp+8], rax; xor eax, eax; test rsi, rsi; je 0x604c760; mov rax, [rsi]; call [rax+0x20]; mov rax, [rsp+8]; sub rax, fs:[0x28]; jne 0x604c775; add rsp, 0x10; mov rax, rbx; pop rbx; ret; nop (7-byte alignment padding); lea rax, [rdi+0x10]; mov [rdi+8], 0; mov [rdi], rax; mov byte [rdi+0x10], 0; jmp 0x604c73e; call __stack_chk_fail. The FDE has no .cold FDE and no LSDA (aug_len 0): no landing pad, no catch, no cleanup; a throw from GetChecksum propagates with no cleanup.",
+   "relocations": "1 kind-4 relocation at offset 102",
+   "source_sha256": "faec8b67ec0ac85231bb3db839ec724802e11175ee9d29d4cdff5ea6aff8941f",
+   "raw_equal": false
+  }
+ }
+}

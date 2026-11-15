@@ -59,8 +59,28 @@ def test_ratio_empty_and_zero_divisor():
     assert group_ratio([(-1, 5, 5), (1, 7, 7)]) == -1.0
 
 
-def test_ratio_negative():
-    assert group_ratio([(4, -10, 2)]) == -2.0
+def test_ratio_unsigned_conversion():
+    # 0x5f6af2c..0x5f6af87 test the sign bit of each sum and, when it is
+    # set, convert (x >> 1) | (x & 1) with cvtsi2sd and double it, i.e.
+    # the full u64 value rounded to binary64. Numerator here is
+    # (-10 + 2) mod 2**64 = 2**64 - 8, which rounds to 2**64; divisor 4.
+    assert group_ratio([(4, -10, 2)]) == 2.0 ** 62
+    # Numerator 2**63 - 1 (rounds to 2**63) over divisor 1.
+    assert group_ratio([(1, (1 << 63) - 1, 0)]) == 2.0 ** 63
+    # Numerator exactly 2**63 (sign bit set) over divisor 1.
+    assert group_ratio([(1, -(1 << 63), 0)]) == 2.0 ** 63
+    # The 64-bit sum of f90 + f98 may itself cross 2**63.
+    assert group_ratio([(1, (1 << 63) - 1, 1)]) == 2.0 ** 63
+    # Numerator u64::MAX (rounds to 2**64) over divisor 1.
+    assert group_ratio([(1, -1, 0)]) == 2.0 ** 64
+    # Divisor 2**63 - 1 (rounds to 2**63), 2**63 and u64::MAX (2**64).
+    assert group_ratio([((1 << 63) - 1, 1, 0)]) == 2.0 ** -63
+    assert group_ratio([(-(1 << 63), 1, 0)]) == 2.0 ** -63
+    assert group_ratio([(-1, 1, 0)]) == 2.0 ** -64
+    # Both sums at u64::MAX give exactly 1.0.
+    assert group_ratio([(-1, -1, 0)]) == 1.0
+    # Numerator wrapping to zero with a nonzero divisor is 0.0, not -1.0.
+    assert group_ratio([(1, -1, 0), (1, 1, 0)]) == 0.0
 
 
 def test_end_to_end():
@@ -86,6 +106,10 @@ def test_format_result():
     assert format_result(b"1", 2, groups) == "-1.000000"
     assert format_result(b"0x", 2, groups) is None
     assert format_result(b"2", 2, groups) is None
+    # A set sign bit converts as unsigned, so "%f" prints 2**62.
+    assert format_result(b"0", 1, [[(4, -10, 2)]]) == (
+        "4611686018427387904.000000"
+    )
 
 
 def test_missing_groups_guard():

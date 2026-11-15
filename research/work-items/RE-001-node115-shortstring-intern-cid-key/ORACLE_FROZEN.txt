@@ -1,0 +1,23 @@
+frozen_utc: 2026-11-11T02:37:53Z
+generator: gen_oracle.py
+generator_sha256: fa5b8044cae8343c9e89a663e3106423998fdf511a6b69789a7a38c446311654
+corpus: corpus.txt (334 lines; two independent runs gave identical bytes)
+corpus_sha256: 0ce4232adf64784206cdd3b68f62c403f471726e1ee5314b64d8a3b5a5263f88
+
+Ordering, stated plainly: at this freeze the crate directory src/node115-shortstring-intern
+did not exist. No Rust for this flow had been written, so the corpus was not fitted to it.
+The generator checked its hand SipHash against the published SipHash-2-4 vector, against the
+three scouting values, and against CPython's C siphash13 (PYTHONHASHSEED=0) on 21,957 messages
+(one skipped: hash(b"") is defined as 0) before writing a line.
+Any change to gen_oracle.py or the corpus after this point is listed in README.md under
+"Post-freeze changes"; the corpus is not edited to fit the Rust.
+The frozen time is the author's record, not an independent timestamp.
+
+Round 2 (after the crate and tests existed; so this is NOT a pre-Rust freeze):
+recorded_utc: 2026-11-11T03:09:24Z (author's record)
+generator_sha256: e0eded7b2ac3e01782b5d80dbd631f7da0c4cfc33ef51d774fbf9cb6449d9e9a
+corpus: corpus.txt (337 lines; two runs gave identical bytes)
+corpus_sha256: e2bcd5a0f46ebc893f2046712287a68ac3e90277dd7db70204dbd53663a342b0
+Changes against the round-1 corpus (diff-checked, nothing else differs): one header comment line,
+one KEY line (XGOKOCQCLX), one COLLIDE line, and the id cap-fail-after-insert renamed
+cap-last-slot-then-fail. The CPython cross-check passed again on the same 21,957 messages.

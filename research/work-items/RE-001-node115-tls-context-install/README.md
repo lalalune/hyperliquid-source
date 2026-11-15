@@ -3,7 +3,8 @@
 - Task: RE-001; component: Node runtime and gossip (partial static mapping).
 - Target: Linux x86-64 hl-node #115, SHA-256
   `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
-- Source baseline: `a8616af9432b8d8517b2af677880e117b7c28ef3`.
+- Discovery baseline: `a8616af9432b8d8517b2af677880e117b7c28ef3`.
+- Refreshed replay baseline: `a8a165e65d53abc1c996bcc9b609749529cfc41a`.
 - Status: observed instructions and native FDE; inferred runtime-context role.
 - No component/progress gate requested. No reconstruction/equivalence claim.
 

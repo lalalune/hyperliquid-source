@@ -1,0 +1,57 @@
+{
+  "callers": {
+    "0x56185e0": [
+      "0x54439ad",
+      "0x59ec2a8"
+    ],
+    "0x56186c0": [
+      "0x4fcb795"
+    ],
+    "0x59ec200": [
+      "0x4fcae48"
+    ],
+    "0x5a04e40": [
+      "0x5618630"
+    ],
+    "0x5a06600": [
+      "0x5618710"
+    ]
+  },
+  "component": "abci",
+  "counter_check": {
+    "wrapper_a": {
+      "compare": "0x5a0561a counter == box +0x28 read at 0x5a055e6",
+      "equal": "0x5a0561d -> 0x5a05fc1 -> step 0x5a07ec0 (0x5a05fc9)",
+      "fn": "0x5a04e40",
+      "increment": "0x5a05601 lock inc [[r12+0x458]+0x10]",
+      "tag_test": "0x5a055f2 cmp dword [r12], 2; jne skips",
+      "unequal": "0x5a0563e slot 0x64e1e68 (assert, edi=0, ecx=0)"
+    },
+    "wrapper_b": {
+      "compare": "0x5a06e4f counter == box +0x28 read at 0x5a06e1e",
+      "equal": "0x5a06e52 -> 0x5a077d9",
+      "fn": "0x5a06600",
+      "increment": "0x5a06e37 lock inc [[r15+0x458]+0x10]",
+      "tag_test": "0x5a06e2a cmp dword [r15], 2; jne skips",
+      "unequal": "0x5a06e73 slot 0x64e1e68"
+    }
+  },
+  "engine_value_tags": {
+    "fast": "0x5a6c0e0 input +0x0 = 2 -> fill 0x5a6c104 -> tag 2 (checks the counter)",
+    "fill": "0x38c6590 (slot 0x64e80e8): tag 2 -> fresh value tag 2; other tag -> copied unchanged (0x38c65aa)",
+    "slow": "0x5a6c3b6 = 2, 0x5a6c518 drop unless 2, 0x5a6c52f = 0, 0x438 copy to rsp+0x5508, 0x5a08f80 (0x5a6c5f8) passes rsi to fill 0x5a08fbc -> tag 0 (skips the check)"
+  },
+  "gates_changed": false,
+  "runner_to_wrapper": {
+    "fast": "0x4fcb590 (byte +0xb20 at 0x4fcb5b0) -> 0x56186c0 (0x4fcb795) -> wrapper B 0x5a06600 (0x5618710)",
+    "slow": "0x4fcac10 (byte +0xb40 at 0x4fcac4d) -> 0x59ec200 (0x4fcae48) -> 0x56185e0 (0x59ec2a8) -> wrapper A 0x5a04e40 (0x5618630); 0x56185e0 also called from 0x5443930 (0x54439ad)"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "shared_arc": {
+    "clone": "0x4fc174c mov rax, [runner+0xb08]; 0x4fc1753 lock inc [rax] (Arc strong count)",
+    "fast_init": "0x5a6c0b2/0x5a6c0dc counter = new box +0x28",
+    "swap": "0x5a6c3c2 lock dec fresh Arc at rsp+0x1668 (drop at 0x5a6c3d0 via slot 0x64e6eb0 when zero); 0x5a6c3d6 store clone (r12) at rsp+0x1668 = slow input +0x428"
+  },
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}

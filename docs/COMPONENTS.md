@@ -50,7 +50,7 @@ TCP framing, LZ4, channels, rate limits and reconnects.
 Votes, rounds, quorum certificates, validator sets and timers.
 
 - Target: node115.
-- Implementation paths: `src/node115-weighted-fastfold`, `src/node115-tree-next`, `src/node115-rpc-flat-materializer`, `src/node115-stake-predicate`, `src/node115-adjacent-last`, `src/node115-indirect-triplet-insert`.
+- Implementation paths: `src/node115-weighted-fastfold`, `src/node115-tree-next`, `src/node115-rpc-flat-materializer`, `src/node115-stake-predicate`, `src/node115-adjacent-last`, `src/node115-indirect-triplet-insert`, `src/node115-execution-history-selection`.
 - Observed diagnostic paths: 17.
 - First task: Map signed wire types and quorum arithmetic; validate invalid signatures and timeout transitions.
 
@@ -100,7 +100,7 @@ Agent-created handler splits and central dispatch.
 Trading orchestration, block hooks, deployment and ledger updates.
 
 - Target: node115.
-- Implementation paths: `src/node115-bole-entry-prefix`, `src/node115-user-admission-prefix`.
+- Implementation paths: `src/node115-bole-entry-prefix`, `src/node115-user-admission-prefix`, `src/node115-funding-read-reset`, `src/node115-modify-window-admission`.
 - Observed diagnostic paths: 15.
 - First task: Trace order placement through risk checks, matching, fees and ledger writes.
 
@@ -110,7 +110,7 @@ Trading orchestration, block hooks, deployment and ledger updates.
 Book storage, price/time priority and order lifecycle.
 
 - Target: node115.
-- Implementation paths: `src/node115-tif-name-codec`.
+- Implementation paths: `src/node115-tif-name-codec`, `src/node115-post-broadcast-targets`, `src/node115-twap-tag4-cleanup`, `src/node115-level-change-record`, `src/node115-order-group-admission`.
 - Observed diagnostic paths: 6.
 - First task: Recover matching and cancel/modify transitions with exact rounding and overflow behavior.
 
@@ -120,7 +120,7 @@ Book storage, price/time priority and order lifecycle.
 Positions, margin, oracles, liquidations and spot balances.
 
 - Target: node115.
-- Implementation paths: `src/node115-margin-range`, `src/node115-clearinghouse-ntl-ratio`, `src/node115-margin-row`, `src/node115-outcome-record-msgpack`, `src/node115-oracle-outcome-kind`, `src/node115-borrow-lend-codec`, `src/node115-margin-mode-codec`.
+- Implementation paths: `src/node115-margin-range`, `src/node115-clearinghouse-ntl-ratio`, `src/node115-margin-row`, `src/node115-outcome-record-msgpack`, `src/node115-oracle-outcome-kind`, `src/node115-borrow-lend-codec`, `src/node115-margin-mode-codec`, `src/node115-outcome-payload`, `src/node115-margin-tree-range`, `src/node115-borrow-lend-content-assembly`.
 - Observed diagnostic paths: 14.
 - First task: Map margin/liquidation formulas and state mutations; prove sign and unit conventions.
 
@@ -140,7 +140,7 @@ Price, size, notional and wei arithmetic plus asset metadata.
 Fee tiers, volume accounting and rebates.
 
 - Target: node115.
-- Implementation paths: `src/node115-fee-point-classifier`, `src/node115-raw-threshold`, `src/node115-fee-window-scan`, `src/node115-fee-active-scaling`.
+- Implementation paths: `src/node115-fee-point-classifier`, `src/node115-raw-threshold`, `src/node115-fee-window-scan`, `src/node115-fee-active-scaling`, `src/node115-fee-failure-selection`.
 - Observed diagnostic paths: 4.
 - First task: Recover maker/taker fee formulas and time-window rollover.
 
@@ -150,7 +150,7 @@ Fee tiers, volume accounting and rebates.
 Vault and subaccount accounting and permissions.
 
 - Target: node115.
-- Implementation paths: `src/node115-vault-identity-guards`.
+- Implementation paths: `src/node115-vault-identity-guards`, `src/node115-vault-create-context`.
 - Observed diagnostic paths: 2.
 - First task: Recover share accounting, transfer restrictions and liquidation interaction.
 
@@ -170,7 +170,7 @@ Deposit/withdrawal requests and cross-chain signing.
 EVM state, database adapters, transaction execution and hashing.
 
 - Target: node115.
-- Implementation paths: `src/node115-evm-precompile-outcome-names`.
+- Implementation paths: `src/node115-evm-precompile-outcome-names`, `src/node115-child-reserve-fold`.
 - Observed diagnostic paths: 4.
 - First task: Identify reth/revm private fork boundaries and state transition inputs.
 
@@ -210,7 +210,7 @@ Agent, system-user, nonce, timing and other cross-cutting state.
 Read-only info requests and position responses.
 
 - Target: node115.
-- Implementation paths: `src/node115-position-integer`.
+- Implementation paths: `src/node115-position-integer`, `src/node115-risk-candidate-scan`.
 - Observed diagnostic paths: 7.
 - First task: Recover request variants, response layouts and snapshot consistency.
 
@@ -220,7 +220,7 @@ Read-only info requests and position responses.
 JSON-RPC routing, EVM reads and transaction forwarding.
 
 - Target: node115.
-- Implementation paths: `src/node115-storage-key-builder`.
+- Implementation paths: `src/node115-storage-key-builder`, `src/node115-block-number-text`.
 - Observed diagnostic paths: 6.
 - First task: Map method dispatch and wire errors against the captured release.
 

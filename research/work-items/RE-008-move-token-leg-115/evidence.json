@@ -1,0 +1,30 @@
+{
+  "component": "abci",
+  "gates_changed": false,
+  "leg_0x54df920": {
+    "arguments": "rsi box, rdx clearinghouse index, rcx 20-byte key, r8 leg (0/1/2), r9 signed amount",
+    "direct_calls": 13,
+    "element": "box +0x7c8 + index * 0x510; reads +0x58; key looked up in Locus vlt (box +0xa18), entry byte +0xb7",
+    "index_check": "0x54df94b rdx < box +0x7d0 (Locus cls length), else l1/src/dex_registry/clearinghouses.rs:11:29 unwrap panic, tag 0x156",
+    "leg_0": "slot 0x64e5af8 -> 0x3bf4b00 on Locus scl (box +0x80) must pass, then 0x3bfa910 (ecx 1), 0x4472ea0, element +0x4a8 += amount (0x54dff8a)",
+    "leg_1": "balance slot 0x64e5078 -> 0x446bdd0 below amount -> tag 0x34; else slot 0x64e7170 -> 0x447db40, element +0x4a8 -= amount (0x54e0124)",
+    "leg_2": "amount from slot 0x64e7160 -> 0x4479470 (edx 2), then debit as leg 1 without the balance check",
+    "negative_amount": "0x54dfba7 js -> Result::unwrap panic at l1/src/qtys/mod.rs:847:1",
+    "non_positive": "0x54dfc41 amount <= 0 -> tag 0x1a2, no move",
+    "overflow": "signed overflow on +0x4a8 saturates (0x54e0232 cmovo) and is recorded at l1/src/qtys/impl_ntl.rs:70:1 via slot 0x64e4ea8",
+    "overflow_x100": "0x54dfbcd amount * 100 overflows -> tag 0x106"
+  },
+  "move_0x5580d10_legs": {
+    "early_exit": "r8 == [rsp+0x1b0] (stack arg 0) and (r8 == 0 or r9 == [rsp+0x1b8]) -> [out] = 0x1a2, 0",
+    "first": "0x55812c0 r8d = 1 (failure: move_token to_spot)",
+    "second": "0x5581350 r8d = 0 (failure: move_token from_spot)"
+  },
+  "path_0x5582180": {
+    "caller": "0x55817f4 r12 = rcx; 0x5581bfe stack arg 0 = r12; 0x5581c19 r8d = 0; call 0x5581c1c",
+    "outer": "0x558310a ecx = 0 before call 0x5583117",
+    "result": "r8 == arg 0 == 0 -> 0x5580d10 returns tag 0x1a2 before either leg; no token moves on this path"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}

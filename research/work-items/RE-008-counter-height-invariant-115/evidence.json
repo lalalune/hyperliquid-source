@@ -1,0 +1,49 @@
+{
+  "component": "abci",
+  "counter_start": {
+    "box": "0x548ce30 result (r14)",
+    "load": "0x5a6c0b2 mov r15, [rax+0x28]",
+    "store": "0x5a6c0dc mov [Arc+0x10], r15",
+    "value": "counter_0 == box height at build"
+  },
+  "gates_changed": false,
+  "height_store_census": {
+    "step_A": [],
+    "step_B": [],
+    "wrapper_A_before_compare": [],
+    "wrapper_B_before_compare": []
+  },
+  "height_store_control": "0x5489135 mov [rax+0x28], rcx (found)",
+  "inference": "the box height is advanced outside both wrappers and both steps, before the next wrapper call; the writer is not bound here",
+  "invariant": "counter after increment == box height read at wrapper entry; with counter_0 == build-time height h0, the n-th tag-2 check passes only if the box height is h0 + n",
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "step_direct_callers": {
+    "step_A": [
+      "0x5a05fc9",
+      "0x5a0901f"
+    ],
+    "step_B": [
+      "0x5a077e1",
+      "0x5a6c16a"
+    ]
+  },
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008",
+  "wrapper_order": {
+    "A": {
+      "compare": "0x5a0561a",
+      "height_load": "0x5a055e6",
+      "increment": "0x5a05601",
+      "step_call": "0x5a05fc9 -> 0x5a07ec0"
+    },
+    "B": {
+      "assert_call": "0x5a06e73 -> slot 0x64e1e68",
+      "compare": "0x5a06e4f",
+      "height_load": "0x5a06e1e",
+      "increment": "0x5a06e37",
+      "step_call": "0x5a077e1 -> 0x5a08720",
+      "tag_test": "0x5a06e2a"
+    },
+    "height_read_precedes_step": true
+  }
+}

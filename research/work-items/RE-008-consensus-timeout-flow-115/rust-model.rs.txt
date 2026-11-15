@@ -1,0 +1,201 @@
+// MIT. Independent projection of one node 115 timer event.
+// Signed-message construction, clock acquisition and channel internals are
+// caller-provided contracts; their byte-level implementations are not here.
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TimerResult {
+    Ready { seconds: u64, nanos: u32 },
+    Invalid,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Input {
+    pub count: u64,
+    pub voted: bool,
+    pub second: bool,
+    pub seconds: u64,
+    pub nanos: u32,
+    pub delta_seconds: u64,
+    pub delta_nanos: u32,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Transition {
+    pub count: u64,
+    pub voted: bool,
+    pub signing_calls: u8,
+    pub messages: u8,
+    pub timer: TimerResult,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Entry {
+    Start,
+    Resume,
+    Invalid,
+}
+
+pub fn entry(state: u8) -> Entry {
+    match state {
+        0 => Entry::Start,
+        3 => Entry::Resume,
+        _ => Entry::Invalid,
+    }
+}
+
+pub fn timer_sum(seconds: u64, nanos: u32, delta_seconds: u64, delta_nanos: u32) -> TimerResult {
+    let (signed, overflow) = (seconds as i64).overflowing_add(delta_seconds as i64);
+    if (delta_seconds >> 63 != 0) != overflow {
+        return TimerResult::Invalid;
+    }
+    let mut seconds = signed as u64;
+    let mut nanos = nanos.wrapping_add(delta_nanos);
+    if nanos >= 1_000_000_000 {
+        nanos = nanos.wrapping_sub(1_000_000_000);
+        let (_, carry_overflow) = (seconds as i64).overflowing_add(1);
+        if carry_overflow || nanos == 1_000_000_000 {
+            return TimerResult::Invalid;
+        }
+        seconds = seconds.wrapping_add(1);
+    }
+    TimerResult::Ready { seconds, nanos }
+}
+
+pub fn on_timeout(input: Input) -> Transition {
+    let count = input.count.saturating_add(1);
+    let signing_calls = u8::from(!input.voted) + u8::from(count > 1);
+    let messages = signing_calls * if input.second { 2 } else { 1 };
+    Transition {
+        count,
+        voted: input.voted || signing_calls != 0,
+        signing_calls,
+        messages,
+        timer: timer_sum(input.seconds, input.nanos, input.delta_seconds, input.delta_nanos),
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Mode {
+    Masked,
+    Off,
+    Pending,
+    Ready,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Selection {
+    pub tag: u8,
+    pub done_mask: u16,
+    pub enabled: [bool; 2],
+}
+
+pub fn select_timer(start: u8, modes: [Mode; 2]) -> Option<Selection> {
+    if start >= 9 {
+        return None;
+    }
+    let mut mask = 0x19f_u16;
+    let mut enabled = [modes[0] != Mode::Off, modes[1] != Mode::Off];
+    for index in 0..2 {
+        if modes[index] == Mode::Masked {
+            mask |= 0x20 << index;
+        }
+    }
+    let mut pending = false;
+    for step in 0..9 {
+        let arm = (start + step) % 9;
+        if arm != 5 && arm != 6 {
+            continue;
+        }
+        let index = usize::from(arm - 5);
+        if modes[index] == Mode::Masked {
+            continue;
+        }
+        if modes[index] == Mode::Ready {
+            enabled[index] = false;
+            mask |= 0x20 << index;
+            return Some(Selection { tag: 6 + index as u8, done_mask: mask, enabled });
+        }
+        pending = true;
+    }
+    Some(Selection { tag: if pending { 11 } else { 10 }, done_mask: mask, enabled })
+}
+
+pub fn local_match(tag: u8, local: &[u8; 20], value: &[u8; 20]) -> bool {
+    tag == 0x2e && local == value
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn number<T: std::str::FromStr>(s: &str) -> T
+    where
+        T::Err: std::fmt::Debug,
+    {
+        s.parse().unwrap()
+    }
+
+    #[test]
+    fn timeout_matches_byte_interpreter_fixtures() {
+        let mut checked = 0;
+        for line in include_str!("rust-cases.tsv").lines().skip(1) {
+            let f: Vec<_> = line.split('\t').collect();
+            assert_eq!(f.len(), 14);
+            let input = Input {
+                count: number(f[0]),
+                voted: f[1] != "0",
+                second: f[2] != "0",
+                seconds: number(f[3]),
+                nanos: number(f[4]),
+                delta_seconds: number(f[5]),
+                delta_nanos: number(f[6]),
+            };
+            let actual = on_timeout(input);
+            assert_eq!(actual.count, number(f[8]));
+            assert_eq!(u8::from(actual.voted), number(f[9]));
+            assert_eq!(actual.signing_calls, number(f[10]));
+            assert_eq!(actual.messages, number(f[11]));
+            let expected_timer = if f[7] == "panic" {
+                TimerResult::Invalid
+            } else {
+                TimerResult::Ready { seconds: number(f[12]), nanos: number(f[13]) }
+            };
+            assert_eq!(actual.timer, expected_timer, "fixture {checked}");
+            checked += 1;
+        }
+        assert!(checked >= 30);
+    }
+
+    #[test]
+    fn selection_rotation_and_pending_are_distinct() {
+        assert_eq!(select_timer(5, [Mode::Ready, Mode::Ready]).unwrap().tag, 6);
+        assert_eq!(select_timer(6, [Mode::Ready, Mode::Ready]).unwrap().tag, 7);
+        assert_eq!(select_timer(5, [Mode::Pending, Mode::Masked]).unwrap().tag, 11);
+        assert_eq!(select_timer(5, [Mode::Masked, Mode::Masked]).unwrap().tag, 10);
+        assert_eq!(select_timer(9, [Mode::Ready, Mode::Ready]), None);
+    }
+
+    #[test]
+    fn local_identity_requires_every_byte_and_the_success_tag() {
+        let first = [7; 20];
+        assert!(local_match(0x2e, &first, &first));
+        assert!(!local_match(0x10, &first, &first));
+        for index in 0..20 {
+            let mut other = first;
+            other[index] ^= 1;
+            assert!(!local_match(0x2e, &first, &other));
+        }
+    }
+
+    #[test]
+    fn only_two_outer_states_are_valid() {
+        for state in 0..=u8::MAX {
+            let expected = match state {
+                0 => Entry::Start,
+                3 => Entry::Resume,
+                _ => Entry::Invalid,
+            };
+            assert_eq!(entry(state), expected);
+        }
+    }
+}

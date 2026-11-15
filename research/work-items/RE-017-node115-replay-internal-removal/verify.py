@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Check bounded instruction anchors and direct calls in node #115; no execution."""
+import hashlib
+import struct
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+TARGET = ROOT / 'artifacts/node/115/hl-node'
+SHA = 'a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
+ANCHORS = {80944224: '534883ec704889fb488b06488b7e08488b4e104885ff0f84c6010000488b8cc8e80000004889f848ffc80f84be000000', 80944288: '440fb789e60000004a8b8cc9e800000049ffc04c39c675e84c29c04883ff07', 80944336: '0fb7b1e6000000488b8cf1e80000000fb7b1e6000000488b8cf1e80000000fb7b1e6000000488b8cf1e80000000fb7b1e6000000488b8cf1e80000000fb7b1e6000000488b8cf1e80000000fb7b1e6000000488b8cf1e80000000fb7b1e6000000488b8cf1e80000000fb7b1e6000000488b8cf1e80000004883c0f87582', 80944462: '0fb781e600000048ffc848894c245848c7442460000000004889442468488d7c2410488d742458e8e6a2ffff', 80944506: '488b7c2410488b442418488904248b44242089442408488b442428488b542430488b7424380fb788e60000004839ce721b0f1f4400000fb7b0e4000000488b0048ffc2663bb0e600000073ea4c8d0476488b4cf00848897cf008428b7c8068897c24184a8b7c806048897c2410488b3c244a897c80608b7c2408', 80921253: '488b4c2440488b442438488901488b442428488941088b442430894110488969184c8961204c896928'}
+
+
+def regions(data):
+    if data[:6] != b'\x7fELF\x02\x01':
+        raise ValueError('not ELF64 little endian')
+    phoff, = struct.unpack_from('<Q', data, 32)
+    entsize, count = struct.unpack_from('<HH', data, 54)
+    if entsize < 56 or phoff + count * entsize > len(data):
+        raise ValueError('invalid program headers')
+    out = []
+    for i in range(count):
+        typ, _, off, va, _, filesz, _, _ = struct.unpack_from('<IIQQQQQQ', data, phoff + i * entsize)
+        if typ == 1:
+            out.append((va, va + filesz, off))
+    return out
+
+
+def va_offset(data, addr, size):
+    hits = [off + addr - lo for lo, hi, off in regions(data) if lo <= addr and addr + size <= hi]
+    if len(hits) != 1 or hits[0] + size > len(data):
+        raise ValueError('address not uniquely file-backed')
+    return hits[0]
+
+
+def check(data, authenticate=True):
+    if authenticate and hashlib.sha256(data).hexdigest() != SHA:
+        raise ValueError('target digest mismatch')
+    for addr, hexdump in ANCHORS.items():
+        expected = bytes.fromhex(hexdump)
+        off = va_offset(data, addr, len(expected))
+        if data[off:off + len(expected)] != expected:
+            raise ValueError(f'instruction anchor mismatch at {addr:#x}')
+    for site, target in ((0x4d31d75, 0x4d2c060),):
+        off = va_offset(data, site, 5)
+        if data[off] != 0xe8 or site + 5 + struct.unpack_from('<i', data, off + 1)[0] != target:
+            raise ValueError(f'call target mismatch at {site:#x}')
+    return len(ANCHORS)
+
+
+def main():
+    data = TARGET.read_bytes()
+    count = check(data)
+    for addr in ANCHORS:
+        mutant = bytearray(data)
+        mutant[va_offset(mutant, addr, 1)] ^= 1
+        try:
+            check(mutant, authenticate=False)
+        except ValueError:
+            continue
+        raise AssertionError(f'mutation accepted at {addr:#x}')
+    print(f'OK: {count} anchors, 1 direct-call target; {count} anchor mutations rejected')
+
+
+if __name__ == '__main__':
+    main()

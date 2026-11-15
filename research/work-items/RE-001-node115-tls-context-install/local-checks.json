@@ -17,5 +17,62 @@
       "stdout": "",
       "stderr": "test_authenticated_native_windows_and_frame (__main__.TLSContextInstall.test_authenticated_native_windows_and_frame) ... ok\ntest_coordinate_change_rejected (__main__.TLSContextInstall.test_coordinate_change_rejected) ... ok\ntest_every_selected_byte_corruption_rejected (__main__.TLSContextInstall.test_every_selected_byte_corruption_rejected) ... ok\ntest_mapping_not_guessed (__main__.TLSContextInstall.test_mapping_not_guessed) ... ok\ntest_truncation_rejected (__main__.TLSContextInstall.test_truncation_rejected) ... ok\ntest_wrong_frame_rejected (__main__.TLSContextInstall.test_wrong_frame_rejected) ... ok\ntest_wrong_target_rejected (__main__.TLSContextInstall.test_wrong_target_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 2.260s\n\nOK\n"
     }
+  ],
+  "initial_independent_validation": {
+    "id": "6696fc6ced9643878299639506a92cdd",
+    "base_sha": "a8616af9432b8d8517b2af677880e117b7c28ef3",
+    "accepted": false,
+    "failed_command": "make verify catalogue-check",
+    "exit_code": 2,
+    "cause": "Stale generated README progress inventory; artifact, import and packet verification passed; reproduce, scoped tests and global suite not reached."
+  },
+  "refreshed_prerequisites": {
+    "base_sha": "a8a165e65d53abc1c996bcc9b609749529cfc41a",
+    "inspected_sha256": {
+      "AGENTS.md": "eba471230061d9801319358bc32fe444488b0b46dc0f7f2f59d029edb1cfe2b8",
+      "CONTRIBUTING.md": "3457aa36e8ccad9f1f52c91ccec016431cb85cdfd7d04eed7d366b987181f579",
+      "docs/SCOPE.md": "840fef2ae171e9a6bc2f7892b5659a9f663e89d0cf2ef37f3fe73bc6af98aea7",
+      "docs/TASKS.md": "be59f71108672f65aa347cde555ba3056b92216f4a733de81d9a8d231d003ec6",
+      "docs/REA.md": "a9035d0433fba87130c3cf6917db0fc222bac9da4d298e220e635c695e4e8e48",
+      "Makefile": "b176131df6f6838562f3dae150a70ad1c91fa1ee517df7a9ef541e73da0a9d54",
+      "scripts/setup.sh": "492c13845f71b36548f28d3533ab3103635708e0b7f7597433036e334ef0952c",
+      "package.json": "f3f1086fc304668d2e1dfe5e1bd247d93fcbc1058e120f5c8d51615b77b462e6",
+      "package-lock.json": "ea0f7e102c8d826f1f567bc892eb808be0e655178e310bd9896f28fc27a81a94",
+      "rust-toolchain.toml": "7d21c66a15f41bad66b82ed06a289f5dc8a6e3751951d2696bbf20ce296f2b0f",
+      "tools/catalogue.py": "2042260509ea0470a6be026de987c3de70e4aa2e3b8c15ca90f3872201e32594",
+      ".github/workflows/verify.yml": "82292b89b2e826c5b6448b8abfd0571b110d290ef09ef46143ac19289d5916a6"
+    },
+    "notes": [
+      "Python-only workflow; no npm install, setup, network or captured executable execution.",
+      "Lockfile resolves registry.npmjs.org packages and includes frida install hook; no dependency lifecycle script invoked.",
+      "Catalogue process invocation is read-only git ls-files; generation writes repository catalogue outputs normally.",
+      "Previous old-object git diff failed before writes; no unsupported git fetch or protected metadata edit used."
+    ]
+  },
+  "refreshed_local_checks": [
+    {
+      "command": "make catalogue",
+      "exit_code": 0,
+      "stdout": "python3 tools/catalogue.py\nCatalogue and progress tables regenerated.\n",
+      "stderr": ""
+    },
+    {
+      "command": "make catalogue-check",
+      "exit_code": 0,
+      "stdout": "python3 tools/catalogue.py --check\nCatalogue and progress tables match pinned inputs.\n",
+      "stderr": ""
+    },
+    {
+      "command": "python3 research/work-items/RE-001-node115-tls-context-install/check.py",
+      "exit_code": 0,
+      "stdout": "{\n  \"target_sha256\": \"a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301\",\n  \"coordinates\": \"ELF virtual addresses\",\n  \"frame\": \"003b4448 0000000000000050 0001dd20 FDE cie=0039672c pc=00000000015d6fd0..00000000015d8447\",\n  \"windows\": [\n    {\n      \"va\": \"0x15d7146\",\n      \"file_offset\": \"0x15d6146\",\n      \"bytes\": \"49c7c6d0eeffff644c8b3c25000000004d01f764410fb6464883f8010f8424010000\",\n      \"size\": 34,\n      \"sha256\": \"b4ea18e380599b3b236926981ea916b8df18af927354659397067c1cb1e0af6e\"\n    },\n    {\n      \"va\": \"0x15d7276\",\n      \"file_offset\": \"0x15d6276\",\n      \"bytes\": \"488d35938170044c89ffff158a92f0046441c6464801\",\n      \"size\": 22,\n      \"sha256\": \"7fbd2328476c2664434b15be2cfdae3918afadb022ffec8c04fd0940e128f0da\"\n    },\n    {\n      \"va\": \"0x15d728c\",\n      \"file_offset\": \"0x15d628c\",\n      \"bytes\": \"6449833e000f85200100006449c706ffffffff488bb424a0000000488b8424a8000000ba01000000b901000000f0480fc1084883fe01750a4885c97910e9970d00004885c90f888e0d000031d264498b4e0864498b7610644989560864498946106449ff06\",\n      \"size\": 101,\n      \"sha256\": \"120409386e71960bde0208b47c0e063a17ad3c7bf7b24ae9bc9670c7790ea231\"\n    }\n  ],\n  \"compared_bytes\": 157,\n  \"selected_windows\": 3,\n  \"normalization\": \"none\",\n  \"target_executed\": false\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "python3 tests/test_node115_tls_context_install.py -v",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "test_authenticated_native_windows_and_frame (__main__.TLSContextInstall.test_authenticated_native_windows_and_frame) ... ok\ntest_coordinate_change_rejected (__main__.TLSContextInstall.test_coordinate_change_rejected) ... ok\ntest_every_selected_byte_corruption_rejected (__main__.TLSContextInstall.test_every_selected_byte_corruption_rejected) ... ok\ntest_mapping_not_guessed (__main__.TLSContextInstall.test_mapping_not_guessed) ... ok\ntest_truncation_rejected (__main__.TLSContextInstall.test_truncation_rejected) ... ok\ntest_wrong_frame_rejected (__main__.TLSContextInstall.test_wrong_frame_rejected) ... ok\ntest_wrong_target_rejected (__main__.TLSContextInstall.test_wrong_target_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 2.182s\n\nOK\n"
+    }
   ]
 }

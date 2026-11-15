@@ -1,0 +1,70 @@
+{
+  "component": "abci",
+  "direct_calls": {
+    "0x4de1d80": [
+      "0x5afa260"
+    ],
+    "0x51515f0": [
+      "0x4de1fc6"
+    ],
+    "0x54cae80": [
+      "0x539200b",
+      "0x5392018",
+      "0x5392025",
+      "0x5392032",
+      "0x54cf27f"
+    ],
+    "0x5afa1f0": [
+      "0x5488dd2",
+      "0x548bf13"
+    ],
+    "0x5afa3b0": [
+      "0x54ca8a8",
+      "0x54cb078"
+    ],
+    "0x5afa5d0": [
+      "0x54ca888",
+      "0x54cb058"
+    ]
+  },
+  "extract_predicate": {
+    "deadline1": "time + f64 [closure+0x18] s (store+0x88); now >= deadline1 -> remove and push to store+0x48",
+    "deadline2": "time + 60.0 s (0x459718); now >= deadline2 and counter < threshold -> counter += 1, remove, no push",
+    "now": "[closure+0x0] (the take caller rdx)",
+    "overflow": "far-future tuple 0x4679d0 = (2147473118, 86399, 999999999)"
+  },
+  "gates_changed": false,
+  "insert": {
+    "ctx": "box (rsi from 0x54cae80); box +0x60 = consensus_time, +0x10 = initial_height (#6004)",
+    "fn": "0x5afa5d0",
+    "per_entry": "store+0x80 = max(store+0x80, height); map[height] = ctx+0x60 via 0x4dbe1e0; store+0x90 = 1 when height == ctx+0x10; then 0x5376540(height - 50000, sat)"
+  },
+  "map": {
+    "at": "store+0x60",
+    "btree_marker": "0x8000000000000000 (root +0x68, height +0x70, length +0x78)",
+    "entry": "key u64 (height), value 12-byte time",
+    "retain": "0x4de1d80 -> extract loop 0x51515f0; small form again when length < 0x20"
+  },
+  "selector": {
+    "arms_esi_0_to_3": [
+      "0x54caec4",
+      "0x54cb082",
+      "0x54cb042",
+      "0x54cb062"
+    ],
+    "dispatcher": "0x538cd30 calls it four times in a row, esi 0, 1, 2, 3",
+    "esi_2": "0x5afa5d0 on box +0x3d98",
+    "esi_3": "0x5afa3b0 on box +0x3e50",
+    "fn": "0x54cae80",
+    "table": "0x926a70"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "take": {
+    "after_retain": "take Vec store+0x48 (leave {0,8,0}); keep entries with qword +0x20 != 0",
+    "closure": "{rdx, store, &store+0x48, &store+0x88, rcx, &counter=0, &threshold}",
+    "fn": "0x5afa1f0",
+    "threshold": "max(0, store+0x78 - 1000)  (store+0x78 = map length)"
+  },
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}

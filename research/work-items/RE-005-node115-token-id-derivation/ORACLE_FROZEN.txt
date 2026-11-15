@@ -1,0 +1,51 @@
+Oracle frozen before any Rust source for this task existed (author's own record, not an
+external timestamp).
+
+frozen at (UTC)         2026-11-10T21:14:45Z
+gen_oracle.py sha256    42c16c7ec7d8de06b6d114bb43d4020fd068b1a70bfc8420ce177ffbcf3b861c
+corpus.tsv sha256       524845da2b2e9f22f05709c40eaf7443792c5989030e32924647bc8ff7a6ce4c   (104 cases)
+wrong-variants.tsv      85b2bcdf6008e5342f00d97b7589828d203e964ad4f04ca6684a5337cdc73adf   (602 wrong ids)
+
+At that moment `src/node115-token-id` did not exist in the working tree (`ls` reported
+"No such file or directory"). Two runs of `gen_oracle.py --outdir <new dir>` produced
+byte-identical directories (`diff -r` empty).
+
+What the generator contains (no library code, no copied tables, no Rust):
+  * MessagePack: written from the public spec; checked in --selftest against 17 byte-exact
+    spec examples (fixint, cc/cd/ce/cf widths at 127/128, 255/256, 65535/65536, 2^32-1/2^32,
+    u64 max; fixstr/str8/str16/str32 headers at 31/32, 255/256, 65535/65536).
+  * Keccak-256: lane matrix with rho offsets and round constants derived from their defining
+    recurrences, whole-message padding, then block absorption (a different shape from the
+    incremental absorb/finalize the Rust side uses). --selftest checks three published
+    Keccak-256 vectors (empty string, "abc", "The quick brown fox jumps over the lazy dog";
+    reproduced from the public Keccak/Ethereum test material, no network in this session)
+    and, with delimiter 0x06, equality with the OS hashlib.sha3_256 for every length 0..699,
+    1000 and 4096 (all rate boundaries up to five blocks). Delimiter 0x01 itself rests only
+    on the three published vectors.
+  * Scout anchor: name "X", szDecimals 6, weiDecimals 8, index 0 -> preimage
+    9283a46e...0800, digest 9058f458...dd40, recorded in SCOUT.md from Node crypto/OpenSSL; the
+    selftest asserts it. Node was not re-run here (not permitted in this session).
+
+The expected values follow what the #115 bytes do (field order, widths, truncation point),
+as pinned in README.md / pins.json, not the generic standard. Where the standard and the
+bytes could differ they agree here; see README "Differences from the standard".
+That reading of the bytes is the author's; this file does not make it independent.
+
+POST-FREEZE AMENDMENT (disclosed; again the author's own record, not an external timestamp)
+amended at (UTC)        2026-11-10T21:49:34Z, after the Rust crate and its tests existed and after a review
+The first review noticed that the `no_outer_array` wrong variant hashed the spec map alone, so it dropped
+the index as well as the outer array and gave one id for every index. After the freeze, gen_oracle.py was
+changed in `wrong_variants` only:
+  * `no_outer_array` was renamed `map_only_no_index` (same bytes, same ids, behaviour now named correctly);
+  * `map_then_index_no_outer_array` was added: spec map followed by the minimal unsigned index, without the
+    `0x92` array header. It keeps the index, so its ids differ per index, and none equals a #115 id
+    (the generator asserts it).
+Nothing else in gen_oracle.py changed: the preimage, Keccak, MessagePack and case-building code is
+byte-for-byte what was frozen. Consequently corpus.tsv is unchanged (cmp silent, same sha256 as above) and
+wrong-variants.tsv grew from 602 to 703 ids (101 new rows).
+amended gen_oracle.py sha256    622cfb4bd28140985e058180f7bc2b6c0d8dbb091121c825130445415fc9484f
+amended wrong-variants.tsv      ced8d8594d74711000913ce1bb6e157d04c4b8a5b213c75dd3649f60c7ef5e22   (703 wrong ids)
+The expectations in corpus.tsv were not touched, so the 104 frozen cases still predate the crate.
+Also changed after the freeze, outside the oracle: tests/token_id.rs (the registry test was split and its
+inputs changed so they pass the caller's decimals pre-check; the wrong-id count assertion became 703) and the
+test names in mutate.py.

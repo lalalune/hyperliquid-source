@@ -1,0 +1,195 @@
+Expected values for the new functions were fixed before any Rust for them was written.
+
+Frozen at 2026-11-10T14:40:35Z (epoch 1794321635). At that moment the crate directory
+src/node115-nested-certificate-decision/ held only Cargo.toml, rust-toolchain.toml and the round-1
+README.md; src/ and tests/ were empty (the round-1 lib.rs and corpus test were not yet restored or
+rewritten). The oracle inputs are the reading in relations.tsv and the generator below.
+
+sha256  gen_flow_corpus.py   69324170ecbd39bab1d43d01ba341fd5177eb8cf5c991c2eba6c44fa0c3f9a1a
+sha256  cases-equal.tsv      19eaba6d2a47fd86524caeef051652f8e02a6a5aa5e8234e0b41fbdabf859dfa   225 cases
+sha256  cases-collect.tsv    fc119d2038e93d54ca5cf3dd1f6cebf378374add38e53f8082d98c175cdde83b    54 cases
+sha256  cases-signer.tsv     4a4168679b57be3cb18be4488b8bfba74a5a1f7f8ca1f3858c41fa334617a746   144 cases
+sha256  cases-quorum.tsv     e7d08f912a16efd768988bba2332a8bbee195d31b90e36ee620d0fd02606758b   682 cases
+sha256  cases-flow.tsv       cf3b413f7693f51fcf87f217a1855bd96a4476ed9c3eb72904b4d41a3d189f4e   471 cases
+sha256  relations.tsv        f1788efd832a9655992c2b4b46fd91a8901f392a0cdc7372f4e015f29e2b3dae
+sha256  functions.tsv        9a459e4101de6c30182c5f9928b4a0dae95400017785f8954b5ee79790a385be
+
+ADDENDUM, after the first Rust run (one change, disclosed): the first run of the Rust flow code against
+the frozen files had 1 mismatch of the 1,576 new cases (cases-flow.tsv f0468, group decision-tail). Cause: a
+corpus encoding defect, not a rule difference. The generator wrote a 32 byte hash column as its first
+byte repeated, so the tail case "only byte 31 set" was stored as "00" and read back as an all-zero hash.
+The expected tag (0x06) came from the rule list and was right for the intended input. Fix: hash_text
+now writes all 64 hex digits for a non-uniform hash; the harness reads that form. Rule list, all other
+corpora, and every other row are unchanged (only f0468 and the generator differ):
+sha256  gen_flow_corpus.py   e5d765fe0d4b1b59cd44fca3f1681d5d8bc01771e3be65713d4eae1c02085c5f   (after fix)
+sha256  cases-flow.tsv       5a3ba71ee94571b8fd93cbb5ce004f04d44f5c4eff6a1c6634184f46cc76c51f   (after fix)
+The four other cases-*.tsv hashes above are still the current ones.
+
+ADDENDUM 2, after the first mutant run (second change): mutant Q02 (upper clamp 0.8 instead of
+0.7) survived because no case put count/validators between 0.7 and 0.8. Fix: build_quorum_band adds 252
+rows ("fraction-band", validator counts 4, 7, 14) to cases-quorum.tsv, using its own rng so nothing else
+moves. The first 682 quorum rows are byte-identical to the frozen file, and the cases-equal, -collect,
+-signer and -flow hashes are unchanged. The rule list is unchanged; the Rust code had not been edited in
+response. Current hashes:
+sha256  gen_flow_corpus.py   345297c00c27361aca7201fb907f8130b3f2a904613bd62df7a55f8c6c3cdeb9   (final)
+sha256  cases-quorum.tsv     7c91421dff3fac1ce82f4c5cc16ce091869cc624f2cacc9c72731da042e31f39   934 cases (final)
+sha256  cases-flow.tsv       5a3ba71ee94571b8fd93cbb5ce004f04d44f5c4eff6a1c6634184f46cc76c51f   (as in addendum 1)
+
+ADDENDUM 3, before delivery (encoding only): the five files were 1.05 MB mostly because every 20 byte key
+was written as 40 hex digits. The generator now writes the keys it builds from its pool as `K<first
+byte>` (pool_key in the generator, mirrored in the test harness) and everything else in hex; files shrank to
+242 KB. No expectation, rule or random draw changed: before the change the Rust tests, unchanged except for
+key parsing and printing, passed on the previous encoding and passed again on this one (2,449 of 2,449).
+These hashes supersede the lists above and are the delivered ones (relations.tsv and functions.tsv
+hashes above are still current):
+sha256  gen_flow_corpus.py   74600fc34453ab081bae4f9705d10564f7c8b450cb7786bb4f4f49481f797c32
+sha256  cases-equal.tsv      852876f257bbd019b9e18d254fec44112d518a8ce06abb99dcbc640974109a10
+sha256  cases-collect.tsv    80224f4944f7ca89848d80d9eb9bb0cc81da137e25527e0d6d080edb485e404c
+sha256  cases-signer.tsv     c690b3772c9248675a030a633ab8933860080eb45ca4c52a1407a4851ceaf5e4
+sha256  cases-quorum.tsv     3e7355cf2947701e7c5f55b80da6c04ce05163a62be42f322883f70572620aa2
+sha256  cases-flow.tsv       73608bade5610828ad0193325870a3724247b7c5261b245ef6ff7a15fa285766
+
+FREEZE 2 (stake-set provider 0x595e5c0), 2026-11-10T14:54:13Z, epoch 1794322453. After the verifier flow was
+done, the provider was closed too. The frozen state above was complete and passing without it (the provider
+was a trait seam with a fake). Before any Rust for the provider existed (no history.rs, no provider test),
+these were fixed; relations.tsv above is untouched, the provider paths PR3..PR6 are in a new file:
+sha256  relations-provider.tsv    0013dbc081929a9c5535b664cda126f45bd942e96f14a25eca31d96085662a2a
+sha256  gen_provider_corpus.py    80c267ea9327a1b3c05fc2d9cd85836ddf2248fb1d8e8d52129f425c4e35f90d
+sha256  cases-provider.tsv        774a139fbb4a90076b6174680ec8ce3e5b7646b18880cb339e8eb833e5129507   516 cases
+The rule list is in the docstring of gen_provider_corpus.py: it restates my reading of 0x595e5c0 (pinned in
+relations-provider.tsv) together with the history rule of the merged RE-008-proposer-selection-115 packet
+(greatest stored round <= q); the bodies of the history search itself were not re-read here.
+
+ADDENDUM 4 (provider corpus, after the mutant run): mutant H04 (lookup round without the max against the
+base) survived the 516 rows, because the max only matters for a base above MAX-200 and no history had rounds
+there. 6 rows ("boundary-high", history ending at MAX) were appended; the first 516 rows are byte-identical
+to the frozen file. Same rule list, no Rust change. Final provider hashes:
+sha256  gen_provider_corpus.py    9fb489d1e289368f0b378b5dd0e396c9a67cf772996cf3fb0f1a0770c69e342f   (final)
+sha256  cases-provider.tsv        4522b5c5959b7cb535fd30bcbeb90e66644663acb3219f25b5dc0d1275438cf5   522 cases (final)
+The same run showed that `cargo test` stops after the first failing test binary, so some mutants were
+credited to one corpus only; mutate.py now passes --no-fail-fast.
+
+Rust code: no logic line of the nine modules written before the first run (sigmap, stake, quorum, collect,
+signer, equality, verifier, decision, certificate) was changed in response to any corpus, mutant or
+addendum above; the only later source changes are history.rs (new, after Freeze 2) and doc comments. The
+test harnesses changed only for key tokens, the hash column and expected row counts.
+
+Regenerating with `python3 -I gen_flow_corpus.py <empty directory>` and `python3 -I gen_provider_corpus.py
+<empty directory>` must reproduce the six cases-*.tsv listed as final above byte for byte (verified
+before delivery; MANIFEST.sha256 covers them in the delivered tree). The frozen timestamps are records
+made by the author in the same session, not an external timestamp service; cases.tsv (621 rows for the
+0x595fd20 core) is unchanged from round 1.
+
+FREEZE 3 (round 3: findings of the independent trace), 2026-11-10T15:25:20Z, epoch 1794324320.
+A second model (OpenAI GPT-6.1 via Codex CLI), given only the binary and inputs and not the Rust or the
+expectations, traced the new functions and compared its trace with relations*.tsv (independent-trace/).
+It reported three differences. All three were checked in the bytes and are right; they are corrections of
+the rule TEXT, so the correction is disclosed here as a post-hoc change to an oracle input:
+  (1) relations.tsv V5 said the signature pointer is entry+0x18 for every entry. That holds for ring rows
+      only (595fb50). For a tree, 0x513b200 returns the key address (leaf+0x320+20*i) in rax and a
+      separate value address (leaf+8+72*i) in rdx (513b3c1..513b3d3); the verifier passes that rdx on
+      (595fbf4). V5 is now V5 (frame), V5r (ring), V5t (tree) plus T1 (the 0x513b200 return block).
+      EFFECT ON EXPECTED VALUES: none. The generator and every corpus work with (key, signature) pairs,
+      never with addresses, so no expected value of any existing case changed (the five existing cases-*.tsv
+      are byte-identical, checked below). The Rust crate was likewise value-level and already handed each
+      entry its own signature; no Rust logic line changed. What was missing was a case that would catch a
+      wrong value on the tree path with more than 64 signatures, so cases-tree.tsv (43 rows) was added.
+  (2) V7 said "every entry passed (or the collection is empty)". An empty collection never reaches that
+      branch: the stake test fails first (signed 0), the verifier writes 0x07. New rows F1 (0x4e44c00 returns
+      0 for an empty signer set) and V9 state the whole-verifier result; V7 is reworded. The corpora already
+      had the empty-certificate rows (cases-flow.tsv group empty-certificate, expected 0x07); cases-tree.tsv
+      adds zero-total-stake and provider-none variants.
+  (3) Z2 said a zero fraction returns true "without reading any signer". Z1's stake test runs before it and
+      walks the signer set (0x4d3e1a0 -> 0x4e44c00); only the count walk of Z3 is skipped. Z2 reworded.
+Two functions were added to functions.tsv so the new pins have a function to belong to: tree_next
+0x513b200..0x513b41a and signed_fold 0x4e44c00..0x4e44e03 (FDE-bounded, hashed; only the instructions
+cited in relations.tsv were read for this PR, not the whole bodies).
+The cases-tree.tsv expectations are my reference rules (ref_verify in gen_flow_corpus.py, unchanged) applied to
+inputs I chose AFTER seeing the finding, so they target it; they are not blind. They were fixed before any
+Rust test for them existed (tests/flow.rs and the crate were still the round-2 files at this moment).
+sha256  gen_flow_corpus.py   e2eb4fcaac7644c3e089e42d05f62af32cca426a088fca8b9ff676c74c2fd864
+sha256  cases-tree.tsv       e6774d9e7982ffcc411c8fea4977f8168397ab2fdf6e8ddeb523b8a1860fd888   43 cases
+sha256  relations.tsv        2d81fe252bdc0d27b8c987acb91613397519df663557740acc0ef9d5deb8219d   (was f1788efd832a9655992c2b4b46fd91a8901f392a0cdc7372f4e015f29e2b3dae)
+sha256  functions.tsv        88055cd2084e7ee85ef23d34c2fbc5692b30bcc8a27d3dfb56b9d020f4fb3adf   (9 rows unchanged, 2 added)
+The other five cases-*.tsv (equal 852876f2..., collect 80224f49..., signer c690b377..., quorum 3e7355cf...,
+flow 73608bad...) regenerate byte-identical from the changed generator (cmp, no output). The cases-tree.tsv
+stream has its own Rng(0x7EE5), so no other file can move.
+
+After the freeze, in this order (all disclosed, none changed a rule text, a corpus or a Rust logic line):
+  - One defect of the new generator code, found by its first run, before any Rust existed for it: the two
+    extra stake keys of the quorum-stake rows (first byte 0xE2) collided with a pool key; they now use first
+    bytes 0xFE and 0xFF, which are not in the pool. The hashes above are of the file after this fix; the
+    freeze was taken after it.
+  - tests/sigslot.rs, the tree_signature_corpus test (flow.rs refactored to take the file name), the doc
+    comment in src/sigmap.rs and the mutants T01..T04 were written after the freeze. All 18 tests passed on
+    the first run with no change to any crate source line other than that doc comment.
+  - First mutant run (71 mutants): all compiled and failed, but none was caught ONLY by the new tests (the
+    round-2 corpora already held an accepted 70-signature tree and bad signatures at positions 0..4 of small
+    trees). Mutant T05 (a bad signature is never refused above 64 signatures) was added to aim at what the
+    round-2 corpora lacked, the full run was repeated (72 mutants, T05 caught only by cases-tree.tsv and
+    sigslot.rs). No corpus row or test was added or changed in response.
+  - relations.tsv, cases-tree.tsv, gen_flow_corpus.py and functions.tsv are unchanged since the hashes above
+    (checked by sha256 at delivery); MANIFEST.sha256 covers the delivered files.
+
+FREEZE 4 (round 4: the digest builder 0x57e8d40, its serializers, the hasher and the recovery wrapper),
+2026-11-10T16:10:37Z, epoch 1794327037. At this moment the crate directory src/node115-nested-certificate-decision/
+held exactly the round-3 sources (11 files in src/, no keccak, digest or recover module, no test for them).
+The oracle inputs are my reading of the bytes in relations-digest.tsv (rows signer_check S1, DB1..DB6, MS1/MS2,
+VS1, FB1, PV1..PV4, PA1, PA2, CC1, KU1, KF1, RC1..RC9, SP1, SS1, SR1) and the generator below. Before the freeze
+`verify_target.py --no-flips` accepted all 674 relation trace items, the 15 data pins and 26 FDE-bounded
+function hashes with 0 failures (the bit-flip check was run after the freeze, with the final tool). The
+generator checks itself on every run: the permutation (derived there from the FIPS 202 LFSR and rotation walk,
+no shared table with the Rust) must reproduce five public values (SHA3-256 of the empty string and of "abc" from the
+FIPS 202 examples, Keccak-256 of the empty string, of "abc" and of "The quick brown fox jumps over the lazy dog"),
+the Ethereum address of the public key of private key 1 (7e5f4552..., the key is the generator point), and the
+standard library's SHA3-256 on 308 lengths around the 136 byte rate; it refuses to write otherwise.
+sha256  gen_digest_corpus.py   58b0b30ef8e491608527ad6b2066f3a46834fa3762bd48ae17e5c22162910800
+sha256  cases-keccak.tsv       abebb1044272907ff5ae27eaaa5afa236c27609c2a0b586d84e7aad6dc0c7845   347 cases
+sha256  cases-digest.tsv       fd5fc669a920a390d9a1f6d8b068b871599df96b1cc7b66bdc0f3f75e5615233   279 cases
+sha256  cases-recover.tsv      238e87334698d48479801ae3a63fbb0e0d775fa6667fd81ab86cfe1c0bc704d1   370 cases
+sha256  cases-primitives.tsv   b0edc6bc8bae2cbaa1fd5978cdb7bf2040edfb2cea634f117a388ea467e539c8   13 signatures in 4 certificates
+sha256  relations-digest.tsv   512d5c708b97596ee47da15ea0744e6556bf467ded20a3a6b7864439d9acccb7
+sha256  functions.tsv          3eef8234d4eefa5a35643f8c4edaf09f1f70c8a2f2387ba87c6ed963e20298cc   (was 88055cd2..., 11 rows kept, 15 added)
+sha256  data-pins.tsv          b57eb2fd91e87e08fc8a35074dedfdff317191e4c5b8ddf0130d93a22b2084c4   (was 4 rows, 11 added)
+sha256  reloc-pins.tsv         8eae0dad025b22ffc7e9c63007d21db26c8ac23a5e8568074c40e83182e25d61   (new file, checked by the tool after the freeze)
+The relations.tsv, relations-provider.tsv and the other cases-*.tsv are not touched by this round.
+Scope of the claim: the expected values are my reading of one disassembly, written down and hashed before the
+Rust. No second reader traced this part (the independent trace of round 3 predates it), and the values for the
+curve routine itself are not an oracle: the recovery rows only fix what the wrapper hands to the curve routine and
+what it does with the 64 bytes that come back. The rows of cases-primitives.tsv use stand-in public keys that are
+random 64 byte strings; no real signature is in any file (corrected in round 5: the secp256k1 generator point G, a
+public constant, is used as a key in cases-recover.tsv and for the address check of the generator).
+
+After FREEZE 4, in this order (all disclosed; no corpus, generator, rule text, trace item or expected value was
+changed by any of it; the nine files above are byte-identical to the hashes above at delivery, MANIFEST.sha256 has
+them):
+  - keccak.rs, digest.rs, recover.rs, primitives.rs and tests/digest.rs were written. The nine tests passed on the
+    first run with no change to the sources between writing and that run (one warning, from the `#![no_std]` line of
+    the included sponge-permutation file, later silenced with an `allow` on that `mod`).
+  - verify_target.py, run with the new relation rows before the freeze, accepted every row. Run in full after the
+    freeze (with the new reloc-pins.tsv check) it reported 9 undetected bit flips out of 3,079: flips of the REX.B bit
+    of RIP-relative instructions, which change no decoded text anywhere. The tool was then changed to count such
+    text-equivalent flips separately (they remain covered by the function hash) instead of calling them failures; no
+    pin, row or hash was touched. Both counts are in target-checks.tsv.
+  - A four-mutant smoke run showed that the first hasher test did not call `keccak256()` itself (only
+    `with_delimiter`), so a mutant forcing delimiter 0x06 there was killed only by the digest and recovery tests; the
+    test was given one more assertion (keccak256() against the delimiter-1 rows). No corpus row changed. The 104
+    mutants were run after that.
+  - Prior art for the recovery wrapper and the hasher (RE-010-gov-vote-path-115, RE-005-node115-signer-result,
+    evm-keccak-ripemd-hash-115, RE-002-node115-vendor-census, RE-002-node115-native-secp-generator-linkage) was found
+    by a search of the base tree after the freeze and after the Rust. relations-digest.tsv was left unchanged (its
+    text does not mention these packets); the credit is in README.md and PR_DRAFT.md. The rows RC2..RC9, KU1 and
+    KF1 agree with what those packets state.
+  - A Claude subagent re-read the digest builder and the recovery wrapper from the bytes without the packet and
+    its five preimages and its recovery table equal the corpora and the rows (independent-trace/xcheck3/).
+
+Round 5 (closing risks found in a strict reading of round 4; no corpus, generator, relation row, pin or expected
+value was changed, the corpora hashes above still hold):
+  - digest.rs::put_varint now calls the base tree's node115-varint-buffer-writer (RE-005-varint-buffer-writer-115)
+    instead of its own copy of the rule; the same corpora pass. mutate.py got that crate in its scratch copy and the
+    six varint mutants DG05..DG09, DG11 edit it there (same ids, same count, 104).
+  - Credit text for RE-005-varint-buffer-writer-115 and RE-005-fixed20-record-encoder-115 was added (README.md,
+    PR_DRAFT.md); relations-digest.tsv was again left unchanged.
+  - Text only: the contract of the three ring constructors, the 0x100000001 row of xcheck3/COMPARE.md (8 byte
+    class, not 4), the statement about public keys in README.md and above, and the note that the new checks are not
+    run by `make test`. A doc comment of sigmap.rs changed (no code).

@@ -1,0 +1,9 @@
+# Node #115: selected membership-set update contracts
+
+Target: `artifacts/node/115/hl-node`, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. This enters the two helpers left open by #6758, which calls them with the object later used by the selected digest producer's membership-count gate.
+
+Both helpers walk the object root at `+0`, using height at `+8`, and compare the supplied 20-byte key through the pinned `memcmp` slot `0x64dfb50`. On the selected lookup path `0x51d8660` returns zero for an empty or missing key. On exact equality it calls `0x4d317e0`, decrements object `+0x10`, performs the selected root-shrink path if the helper reports it, and returns one. In the caller loop this is the low-bit-zero arm.
+
+`0x51d2ae0`, used by the low-bit-one arm, returns one without incrementing count when the key is found. For an absent key it takes the selected insertion path, calls `0x4c39500` for a nonempty tree or initializes a leaf for an empty root, increments object `+0x10`, and returns zero on the observed normal path. At the caller these return values are not used for selection. Under valid tree invariants and normal helper/allocator returns, the observed updates act as a 20-byte set removal and insertion and the count field tracks the selected successful changes.
+
+The internal balancing helpers, allocation failure, malformed structures, upstream identity of keys, call reachability and authentication are not established. The post-loop selector calls and same-object relation are separately described in #6758; neither packet proves a quorum or canonical root. Run `python3 research/work-items/RE-017-node115-digest-membership-set-update/verify.py` for digest, selected byte/direct-call anchors and mutation controls without target execution. Static FDE windows and relocation are in `windows.txt`.

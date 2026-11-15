@@ -1,0 +1,12 @@
+mutant	change	reason
+flip-jcc huffman_decode 0x179d5e3	0x179d5e3:76->77	the spare-capacity test only decides whether reserve runs; put_slice grows the buffer anyway, so the returned bytes are the same
+flip-jcc decode_string 0x177bf7f	0x177bf80:83->82	log-record branch after the length check failed: every exit stores error 2 at 0x177bf1f, the gate cell is stubbed closed so the record is never formatted
+flip-jcc decode_string 0x177bf9d	0x177bf9d:74->75	log-record branch after the length check failed: every exit stores error 2 at 0x177bf1f, the gate cell is stubbed closed so the record is never formatted
+flip-jcc decode_string 0x177bfad	0x177bfae:84->85	log-record branch after the length check failed: every exit stores error 2 at 0x177bf1f, the gate cell is stubbed closed so the record is never formatted
+flip-jcc decode_string 0x177c00a	0x177c00b:84->85	log-record branch after the length check failed: every exit stores error 2 at 0x177bf1f, the gate cell is stubbed closed so the record is never formatted
+flip-jcc decode_string 0x177c040	0x177c041:86->87	log-record branch after the length check failed: every exit stores error 2 at 0x177bf1f, the gate cell is stubbed closed so the record is never formatted
+flip-jcc decode_string 0x177c202	0x177c203:84->85	log-record branch after the length check failed: every exit stores error 2 at 0x177bf1f, the gate cell is stubbed closed so the record is never formatted
+flip-jcc decode_string 0x177c223	0x177c224:85->84	log-record branch after the length check failed: every exit stores error 2 at 0x177bf1f, the gate cell is stubbed closed so the record is never formatted
+flip-jcc decode_string 0x177c29f	0x177c29f:74->75	unwind landing pad that only runs while a panic unwinds; the rig stops at the panic routine
+flip-jcc decode_string 0x177c2a9	0x177c2a9:74->75	unwind landing pad that only runs while a panic unwinds; the rig stops at the panic routine
+flip-jcc header_clone 0x177eadf	0x177eadf:74->75	unwind landing pad of Header::clone that only runs while a panic unwinds; the rig stops at the panic routine

@@ -61,16 +61,18 @@ def _reference_step(seed):
 
 def _reference_height_draw(seed, bound, count):
     """Independent transcription of the 0x6063150 loop: tries start
-    at 1, each try advances once and stops at the first seed < bound;
+    at 1, each try advances once, and `jb` at 0x60631c2 redraws while
+    the seed is < bound, so the draw stops at the first seed >= bound;
     tries + 1 == count exhausts with height = count, tries + 1 == 32
-    caps at 32; count <= 1 never advances and returns height 1."""
+    caps at 32; count <= 1 never advances the seed and returns height 1
+    (the thread-seed getter at 0x6063165 is still called first)."""
     if count <= 1:
         return (1, seed, 0)
     tries = 1
     cur = seed
     while True:
         cur = _reference_step(cur)
-        if cur < bound:
+        if cur >= bound:
             return (tries, cur, tries)
         if tries + 1 == count:
             return (count, cur, tries)
@@ -134,21 +136,44 @@ class TestHeightDraw(unittest.TestCase):
             self.assertEqual(height_draw(0x1234567, 0x100, count),
                              (1, 0x1234567, 0))
 
-    def test_bound_zero_exhausts_or_caps(self):
-        # No seed is ever < 0, so the draw always runs to the cap.
-        # count 5 exhausts after 4 advances (tries 1..4).
-        s = 0x1234567
-        for _ in range(4):
-            s = mersenne_step(s)
-        self.assertEqual(height_draw(0x1234567, 0, 5), (5, s, 4))
-        # count 33: tries + 1 hits 32 first.
+    def test_bound_zero_stops_on_first_try(self):
+        # 0x60631bf cmp edx,r8d / 0x60631c2 jb: a seed below the bound
+        # redraws, so every seed >= 0 stops the draw at height 1 after
+        # one advance. step(1) = 0x41a7.
+        self.assertEqual(height_draw(1, 0, 5), (1, 0x41A7, 1))
         h, s, a = height_draw(0x1234567, 0, 33)
-        self.assertEqual((h, a), (32, 31))
-
-    def test_bound_max_succeeds_on_first_try(self):
-        h, s, a = height_draw(0x1234567, MOD, 20)
         self.assertEqual((h, a), (1, 1))
         self.assertEqual(s, mersenne_step(0x1234567))
+
+    def test_seed_equal_to_bound_stops(self):
+        # jb is not taken when the new seed equals the bound.
+        self.assertEqual(height_draw(1, 0x41A7, 5), (1, 0x41A7, 1))
+
+    def test_seed_below_bound_redraws(self):
+        # One above the first draw: 0x41a7 < 0x41a8 redraws once;
+        # step(0x41a7) = 0x41a7 ** 2 = 282475249 >= bound stops.
+        self.assertEqual(height_draw(1, 0x41A8, 5), (2, 282475249, 2))
+
+    def test_unreachable_bound_exhausts_or_caps(self):
+        # The state never exceeds 0x7fffffff, so a bound of 2**31
+        # redraws until count (je 0x6063200) or 32 (je 0x6063210).
+        bound = 0x80000000
+        s = 1
+        seeds = []
+        for _ in range(31):
+            s = mersenne_step(s)
+            seeds.append(s)
+        self.assertEqual(height_draw(1, bound, 1), (1, 1, 0))
+        self.assertEqual(height_draw(1, bound, 2), (2, seeds[0], 1))
+        self.assertEqual(height_draw(1, bound, 5), (5, seeds[3], 4))
+        self.assertEqual(height_draw(1, bound, 32), (32, seeds[30], 31))
+        self.assertEqual(height_draw(1, bound, 33), (32, seeds[30], 31))
+
+    def test_bound_max_redraws_to_cap(self):
+        # With bound 0x7fffffff only a state of exactly 0x7fffffff stops
+        # the draw; the first 31 draws from seed 0x1234567 do not hit it.
+        h, s, a = height_draw(0x1234567, MOD, 20)
+        self.assertEqual((h, a), (20, 19))
 
     def test_height_byte_offset(self):
         self.assertEqual(height_byte_offset(1), 0)

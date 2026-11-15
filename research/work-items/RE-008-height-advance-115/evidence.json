@@ -1,0 +1,34 @@
+{
+  "component": "abci",
+  "gates_changed": false,
+  "height_advance_runs": [
+    "0x54838d3",
+    "0x5483fd3"
+  ],
+  "invariant": "begin adds 1 to box +0x28 once per wrapper call before the wrapper reads it; counter (starts at h0, +1 per tag-2 check) == height holds while each wrapper call runs begin exactly once",
+  "layouts": {
+    "A": {
+      "begin_block_call": "0x5483a78 -> 0x54b66b0",
+      "begin_fn": "0x5483850",
+      "called_once_from": "0x5a04fe9 in wrapper 0x5a04e40",
+      "height_store": "0x54838e5 mov [r13+0x28], rdx after inc/cmovne (saturating +1)",
+      "stop_check": "+0x39b0 flag, +0x39a8 height, byte +0xb9a != 3 -> explicit panic at 0x5483edf",
+      "wrapper_height_read_after": "0x5a055e6"
+    },
+    "B": {
+      "begin_block_call": "0x5484194 -> 0x54a9c70",
+      "begin_fn": "0x5483f50",
+      "called_once_from": "0x5a067ad in wrapper 0x5a06600",
+      "height_store": "0x5483fe5 mov [r13+0x28], rdx after inc/cmovne (saturating +1)",
+      "stop_check": "+0x4520 flag, +0x4518 height, byte +0x170a != 3 -> explicit panic at 0x54845ff",
+      "wrapper_height_read_after": "0x5a06e1e"
+    }
+  },
+  "panic": {
+    "location": "l1/src/simulate_panic.rs:10:13",
+    "message": "explicit panic"
+  },
+  "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "target": "artifacts/node/115/hl-node",
+  "task": "RE-008"
+}
