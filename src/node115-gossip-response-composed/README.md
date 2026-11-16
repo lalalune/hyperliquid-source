@@ -29,3 +29,10 @@ Run with an existing Rust 1.95 toolchain:
 ```sh
 cargo +1.95.0 test --locked --offline --manifest-path src/node115-gossip-response-composed/Cargo.toml
 ```
+
+`decode_prefix_with_success` is an opt-in composition that passes the actual
+parent's suffix, limit and cumulative charge to the metered ClientBlocks
+success child. It returns separate `ComposedResponse`, `ComposedError` and
+`ComposedOutcome` types; the original `decode_prefix` and its explicit success
+boundary remain available. This is a logical structural prefix decoder and
+does not claim native vote-map normalization or full response equivalence.

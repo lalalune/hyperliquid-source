@@ -137,26 +137,70 @@ pub struct Outcome<'a> {
 
 struct Decoder<'a> {
     remaining: &'a [u8],
+    limit: Option<u64>,
+    charged: u64,
 }
 
 impl<'a> Decoder<'a> {
     fn new(input: &'a [u8]) -> Self {
-        Self { remaining: input }
+        Self {
+            remaining: input,
+            limit: None,
+            charged: 0,
+        }
+    }
+
+    fn charge(&mut self, amount: u64) -> Result<(), Error> {
+        if let Some(limit) = self.limit {
+            let next = self
+                .charged
+                .checked_add(amount)
+                .ok_or(Error::U64(U64Error::Limit))?;
+            self.charged = next;
+            if next > limit {
+                return Err(Error::U64(U64Error::Limit));
+            }
+        }
+        Ok(())
+    }
+
+    fn reserve_rows(&mut self, count: u64, width: u64) -> Result<(), Error> {
+        if self.limit.is_some() {
+            let amount = count
+                .checked_mul(width)
+                .ok_or(Error::U64(U64Error::Limit))?;
+            self.charge(amount)?;
+        }
+        Ok(())
+    }
+
+    fn refund_row(&mut self, width: u64) {
+        if self.limit.is_some() {
+            self.charged -= width;
+        }
     }
 
     fn u64(&mut self) -> Result<u64, Error> {
-        let mut reader = Reader::new(self.remaining, None, 0);
+        let mut reader = Reader::new(self.remaining, self.limit, self.charged);
         let result = reader.read_u64().map_err(Error::U64);
         self.remaining = reader.remaining();
+        self.charged = reader.charged();
         result
     }
 
     fn u32(&mut self) -> Result<u32, Error> {
-        let mut charged = 0;
-        read_u32(&mut self.remaining, 0, 0, &mut charged).map_err(Error::U32)
+        let mode = u32::from(self.limit.is_some());
+        read_u32(
+            &mut self.remaining,
+            mode,
+            self.limit.unwrap_or(0),
+            &mut self.charged,
+        )
+        .map_err(Error::U32)
     }
 
     fn signed_i64(&mut self) -> Result<i64, Error> {
+        self.charge(8)?;
         let mut cursor = SignedCursor::new(self.remaining);
         let result = cursor.read_signed(0).map_err(Error::Signed);
         self.remaining = cursor.remaining();
@@ -164,6 +208,7 @@ impl<'a> Decoder<'a> {
     }
 
     fn raw<const N: usize>(&mut self) -> Result<[u8; N], Error> {
+        self.charge(N as u64)?;
         if self.remaining.len() < N {
             return Err(Error::UnexpectedEnd {
                 additional: N - self.remaining.len(),
@@ -177,6 +222,7 @@ impl<'a> Decoder<'a> {
     }
 
     fn bytes(&mut self, length: usize) -> Result<Vec<u8>, Error> {
+        self.charge(u64::try_from(length).map_err(|_| Error::U64(U64Error::Limit))?)?;
         if self.remaining.len() < length {
             return Err(Error::UnexpectedEnd {
                 additional: length - self.remaining.len(),
@@ -200,10 +246,19 @@ impl<'a> Decoder<'a> {
     }
 
     fn signature(&mut self) -> Result<Signature, Error> {
+        let mut reader = Reader::new(self.remaining, self.limit, self.charged);
+        let first = reader.read_four();
+        self.remaining = reader.remaining();
+        self.charged = reader.charged();
+        let first = first.map_err(Error::U64)?;
+        let mut reader = Reader::new(self.remaining, self.limit, self.charged);
+        let second = reader.read_four();
+        self.remaining = reader.remaining();
+        self.charged = reader.charged();
+        let second = second.map_err(Error::U64)?;
         let mut limbs = [0; 8];
-        for limb in &mut limbs {
-            *limb = self.u64()?;
-        }
+        limbs[..4].copy_from_slice(&first);
+        limbs[4..].copy_from_slice(&second);
         Ok(Signature {
             limbs,
             recovery: self.raw::<1>()?[0],
@@ -232,8 +287,10 @@ impl<'a> Decoder<'a> {
         }
         let hash = self.raw::<32>()?;
         let count = self.u64()?;
+        self.reserve_rows(count, 96)?;
         let mut votes = Vec::new();
         for _ in 0..count {
+            self.refund_row(96);
             votes.try_reserve(1).map_err(|_| Error::AllocationFailed)?;
             votes.push(self.quorum_vote()?);
         }
@@ -248,8 +305,10 @@ impl<'a> Decoder<'a> {
         let field = self.u64()?;
         let quorum_certificate = self.quorum_certificate()?;
         let count = self.u64()?;
+        self.reserve_rows(count, 104)?;
         let mut votes = Vec::new();
         for _ in 0..count {
+            self.refund_row(104);
             votes.try_reserve(1).map_err(|_| Error::AllocationFailed)?;
             votes.push(self.timeout_vote()?);
         }
@@ -263,8 +322,10 @@ impl<'a> Decoder<'a> {
     fn header(&mut self) -> Result<Header, Error> {
         let address = self.raw::<20>()?;
         let count = self.u64()?;
+        self.reserve_rows(count, 32)?;
         let mut hashes = Vec::new();
         for _ in 0..count {
+            self.refund_row(32);
             hashes.try_reserve(1).map_err(|_| Error::AllocationFailed)?;
             hashes.push(self.raw::<32>()?);
         }
@@ -314,8 +375,10 @@ impl<'a> Decoder<'a> {
             },
         };
         let count = self.u64()?;
+        self.reserve_rows(count, 40)?;
         let mut attachments = Vec::new();
         for _ in 0..count {
+            self.refund_row(40);
             attachments
                 .try_reserve(1)
                 .map_err(|_| Error::AllocationFailed)?;
@@ -337,8 +400,10 @@ pub fn decode_payload_prefix(input: &[u8]) -> Outcome<'_> {
     let mut decoder = Decoder::new(input);
     let result = (|| {
         let count = decoder.u64()?;
+        decoder.reserve_rows(count, 16)?;
         let mut clients = Vec::new();
         for _ in 0..count {
+            decoder.refund_row(16);
             clients
                 .try_reserve(1)
                 .map_err(|_| Error::AllocationFailed)?;
@@ -349,5 +414,46 @@ pub fn decode_payload_prefix(input: &[u8]) -> Outcome<'_> {
     Outcome {
         result,
         remaining: decoder.remaining,
+    }
+}
+
+/// Metered structural result with cursor and cumulative charge preserved on errors.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct MeteredOutcome<'a> {
+    pub result: Result<Vec<Client>, Error>,
+    pub remaining: &'a [u8],
+    pub charged: u64,
+}
+
+/// Decode one selected success payload using the native reader's canonical
+/// unlimited (`None`) or limited (`Some`) charge mode. Logical vote rows are
+/// retained; this does not model native map normalization or allocation ABI.
+pub fn decode_payload_prefix_metered(
+    input: &[u8],
+    limit: Option<u64>,
+    charged: u64,
+) -> MeteredOutcome<'_> {
+    let mut decoder = Decoder {
+        remaining: input,
+        limit,
+        charged,
+    };
+    let result = (|| {
+        let count = decoder.u64()?;
+        decoder.reserve_rows(count, 16)?;
+        let mut clients = Vec::new();
+        for _ in 0..count {
+            decoder.refund_row(16);
+            clients
+                .try_reserve(1)
+                .map_err(|_| Error::AllocationFailed)?;
+            clients.push(decoder.client()?);
+        }
+        Ok(clients)
+    })();
+    MeteredOutcome {
+        result,
+        remaining: decoder.remaining,
+        charged: decoder.charged,
     }
 }
