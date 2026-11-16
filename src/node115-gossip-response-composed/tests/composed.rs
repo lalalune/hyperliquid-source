@@ -122,3 +122,20 @@ fn partial_nested_error_keeps_child_progress() {
     assert!(matches!(out.result, Err(Error::ClientBlocksError(_))));
     assert_eq!(out.remaining, &[]);
 }
+
+#[test]
+fn selected_success_composes_budget_and_retains_suffix() {
+    use node115_gossip_response_composed::{ComposedResponse, decode_prefix_with_success};
+    let input = [0, 0, 0, 0xaa]; // outer result, success, empty client vector
+    let value = decode_prefix_with_success(&input, Some(16), 0);
+    assert_eq!(
+        value.result,
+        Ok(ComposedResponse::ClientBlocksSuccess(Vec::new()))
+    );
+    assert_eq!(value.charged, 16); // two U32 tags + one U64 count
+    assert_eq!(value.remaining, &[0xaa]);
+    let failure = decode_prefix_with_success(&input, Some(15), 0);
+    assert!(failure.result.is_err());
+    assert_eq!(failure.charged, 16);
+    assert_eq!(failure.remaining, &input[2..]);
+}

@@ -160,3 +160,129 @@ fn invalid_parent_and_option_tags_are_rejected() {
     fixture[option] = 2;
     assert!(decode_payload_prefix(&fixture).result.is_err());
 }
+
+#[test]
+fn metered_minimal_client_and_signature_reservation() {
+    use node115_client_block_success::{Error, decode_payload_prefix_metered};
+    let mut wire = vec![1]; // one Client
+    wire.extend([0; 9]); // signature
+    wire.extend([0; 20]); // header address
+    wire.extend([0, 0, 0, 0]); // no hashes, timestamp zero, parent QC
+    wire.extend([0; 5]); // QC scalars
+    wire.extend([0; 32]); // QC hash
+    wire.extend([0, 0, 0]); // no votes, proof, attachments
+    assert_eq!(wire.len(), 74);
+    let outcome = decode_payload_prefix_metered(&wire, Some(206), 0);
+    assert!(outcome.result.is_ok());
+    assert_eq!(outcome.charged, 206);
+    assert!(outcome.remaining.is_empty());
+    let failed = decode_payload_prefix_metered(&wire, Some(39), 0);
+    assert_eq!(
+        failed.result,
+        Err(Error::U64(node115_u64_reader_state::Error::Limit))
+    );
+    assert_eq!(failed.charged, 40);
+    assert_eq!(failed.remaining, &wire[1..]);
+}
+
+#[test]
+fn metered_reservations_preserve_error_cursor_and_charge() {
+    use node115_client_block_success::{Error, decode_payload_prefix_metered};
+    use node115_u64_reader_state::Error as ReaderError;
+    let no_rows = decode_payload_prefix_metered(&[0, 77], Some(8), 0);
+    assert_eq!(no_rows.charged, 8);
+    assert_eq!(no_rows.remaining, &[77]);
+    assert_eq!(no_rows.result.unwrap().len(), 0);
+
+    // Two client rows reserve 32 after the count; the store survives limit failure.
+    let reservation = decode_payload_prefix_metered(&[2, 7], Some(39), 0);
+    assert_eq!(reservation.result, Err(Error::U64(ReaderError::Limit)));
+    assert_eq!(reservation.charged, 40);
+    assert_eq!(reservation.remaining, &[7]);
+
+    // A missing first signature limb retains three reserved eight-byte words.
+    let short = decode_payload_prefix_metered(&[1], Some(100), 0);
+    assert_eq!(
+        short.result,
+        Err(Error::U64(ReaderError::UnexpectedEnd { additional: 1 }))
+    );
+    assert_eq!(short.charged, 40);
+    assert!(short.remaining.is_empty());
+
+    // Checked charge overflow fails before storing or consuming input.
+    let overflow = decode_payload_prefix_metered(&[0], Some(u64::MAX), u64::MAX - 7);
+    assert_eq!(overflow.result, Err(Error::U64(ReaderError::Limit)));
+    assert_eq!(overflow.charged, u64::MAX - 7);
+    assert_eq!(overflow.remaining, &[0]);
+
+    // Unlimited mode leaves the supplied counter untouched.
+    let unlimited = decode_payload_prefix_metered(&[0], None, 99);
+    assert!(unlimited.result.is_ok());
+    assert_eq!(unlimited.charged, 99);
+}
+
+#[test]
+fn metered_nested_payload_matches_existing_structure_and_suffix() {
+    use node115_client_block_success::decode_payload_prefix_metered;
+    let mut wire = successful_payload();
+    wire.extend([0xaa, 0xbb]);
+    let expected = decode_payload_prefix(&wire);
+    let metered = decode_payload_prefix_metered(&wire, Some(10_000), 11);
+    assert_eq!(metered.result, expected.result);
+    assert_eq!(metered.remaining, &[0xaa, 0xbb]);
+    // Independent field sum: 858 typed bytes plus the initial 11.
+    assert_eq!(metered.charged, 869);
+    let unmetered = decode_payload_prefix_metered(&wire, None, 11);
+    assert_eq!(unmetered.result, expected.result);
+    assert_eq!(unmetered.charged, 11);
+}
+
+#[test]
+fn vector_reservation_peaks_and_count_overflow() {
+    use node115_client_block_success::{Error, decode_payload_prefix_metered};
+    use node115_u64_reader_state::Error as ReaderError;
+    let mut qc = vec![1];
+    qc.extend([0; 9 + 20 + 4 + 5 + 32]);
+    assert_eq!(qc.len(), 71);
+    qc.push(1);
+    let peak = decode_payload_prefix_metered(&qc, Some(292), 0);
+    assert_eq!(peak.result, Err(Error::U64(ReaderError::Limit)));
+    assert_eq!(peak.charged, 293);
+    assert!(peak.remaining.is_empty());
+    qc[71] = 2;
+    let short = decode_payload_prefix_metered(&qc, Some(389), 0);
+    assert_eq!(short.result, Err(Error::UnexpectedEnd { additional: 20 }));
+    assert_eq!(short.charged, 313);
+    assert!(short.remaining.is_empty());
+
+    let mut tc = vec![1];
+    tc.extend([0; 9 + 20]);
+    tc.extend([0, 0, 0, 1, 0]); // hash count, timestamp, TC parent, TC field
+    tc.extend([0; 5 + 32 + 1]); // embedded QC, no QC votes
+    assert_eq!(tc.len(), 73);
+    tc.push(1); // one TC vote
+    let peak = decode_payload_prefix_metered(&tc, Some(316), 0);
+    assert_eq!(peak.result, Err(Error::U64(ReaderError::Limit)));
+    assert_eq!(peak.charged, 317);
+    assert!(peak.remaining.is_empty());
+
+    let mut huge = vec![253];
+    huge.extend(u64::MAX.to_le_bytes());
+    let overflow = decode_payload_prefix_metered(&huge, Some(u64::MAX), 0);
+    assert_eq!(overflow.result, Err(Error::U64(ReaderError::Limit)));
+    assert_eq!(overflow.charged, 8);
+    assert!(overflow.remaining.is_empty());
+}
+
+#[test]
+fn metered_invalid_proof_option_consumes_tag_and_keeps_charge() {
+    use node115_client_block_success::{Error, decode_payload_prefix_metered};
+    let mut wire = vec![1];
+    wire.extend([0; 9 + 20 + 4 + 5 + 32 + 1]); // signature, header, empty QC votes
+    assert_eq!(wire.len(), 72);
+    wire.extend([2, 0xaa]);
+    let outcome = decode_payload_prefix_metered(&wire, Some(1000), 0);
+    assert_eq!(outcome.result, Err(Error::InvalidOption(2)));
+    assert_eq!(outcome.charged, 198);
+    assert_eq!(outcome.remaining, &[0xaa]);
+}

@@ -30,3 +30,14 @@ an independently usable structural child decoder until that calling contract
 is established. New code is MIT. Timestamp admission is grounded in
 [`RE-001-node115-client-block-timestamp-admission`](../../research/work-items/RE-001-node115-client-block-timestamp-admission/README.md)
 and composes the existing MIT `node115-daycount-date` implementation.
+
+`decode_payload_prefix_metered(input, limit, charged)` adds the selected
+cumulative reader accounting while preserving the original unmetered API. It
+returns the active result, remaining suffix and charged value on success or
+failure. Canonical `None` disables accounting; `Some(limit)` stores a
+representable charge before testing the limit, while overflow leaves the old
+charge. Four-word signature arrays and vectors reserve their full typed cost
+before visiting children, then refund each child's reservation immediately
+before decoding it. Structural vote rows remain in wire order; native map
+normalization, result-union ABI, allocator failure and full node equivalence
+are outside this API's claim.
