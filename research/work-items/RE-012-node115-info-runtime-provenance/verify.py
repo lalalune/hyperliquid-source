@@ -55,7 +55,7 @@ def verify(target):
     decoder = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_64)
     rows = {}
     count = 0
-    for window in packet['windows']:
+    for window in packet['windows'] + packet['cited_only_not_claimed']:
         start, end = int(window['start'], 16), int(window['end'], 16)
         fde = tuple(int(v, 16) for v in window['fde'])
         require(fde in fdes and fde[0] <= start < end <= fde[1], 'wrong FDE boundary')
@@ -104,7 +104,7 @@ def verify(target):
         pass
     else:
         raise ValueError('wrong-target control accepted')
-    print(f'PASS: {len(packet["windows"])} windows, {count} instructions, '
+    print(f'PASS: {len(packet["windows"])} new and {len(packet["cited_only_not_claimed"])} cited windows, {count} instructions, '
           f'{len(packet["facts"])} instruction witnesses, 4 relocations, 2 import bindings, 5 data/thunk ranges, 14 negative controls')
 
 

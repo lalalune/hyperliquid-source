@@ -19,6 +19,8 @@ original evidence remains intact:
 - [RE-012-node115-info-file-sink](../RE-012-node115-info-file-sink/README.md)
   establishes the terminal file sink but leaves pathname initialization open.
 
+The existing [RE-001-node115-lu-leaf-write-class](../RE-001-node115-lu-leaf-write-class/README.md) owns the full `63777f0` handler, and [RE-001-node115-lu-value-leaves-bin](../RE-001-node115-lu-value-leaves-bin/README.md) owns the `63c4316..63c43a3` leaf within the automatic-start caller. The handler full FDE and a single call inside the automatic-start caller are retained as cited context, not new claims; this packet adds the registration-to-pathname-to-sink provenance join.
+
 The last packet's output callback chain is reused, not rediscovered or
 reimplemented. This contribution supplies the upstream registration and both
 pathname initialization branches. The downstream consumer is the RE-012
@@ -30,7 +32,7 @@ No generic allocator reimplementation or new logging feature is proposed.
 
 Target `artifacts/node/115/hl-node`, 105896032 bytes, SHA-256
 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
-All addresses are image VAs. The record retains six full FDEs and validates
+All addresses are image VAs. The record retains four newly claimed full FDEs and two cited-only windows and validates
 bytes, ELF relocation/import bindings, selected instructions, strings, control
 record data and import thunks. No target execution, emulation, profiling-log
 activation, file output or allocator control call was performed.
@@ -113,7 +115,7 @@ A new raw string hit alone would not establish this provenance.
 PYTHONPATH=/path/to/capstone-5.0.7-and-pyelftools python3 research/work-items/RE-012-node115-info-runtime-provenance/verify.py --target artifacts/node/115/hl-node
 ```
 
-The verifier checks six FDEs / 783 instructions, 145 selected witnesses,
+The verifier checks four newly claimed full FDEs and two cited-only windows / 603 instructions, 145 selected witnesses,
 four relocations, two import bindings, six labels and five raw data/thunk
 ranges. Fourteen negative controls reject wrong target/control records,
 wrong initializer, wrong new-value size, omitted profiling gate, different
