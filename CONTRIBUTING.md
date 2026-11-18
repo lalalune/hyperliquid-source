@@ -89,6 +89,51 @@ and state every normalized operand. Matching functions still need their calls,
 data, relocations, vtables and layout checked; passing a test of your own newly
 invented behavior does not validate the target.
 
+## Evidence
+
+Include an `## Evidence` section in every PR. Start each field on its own line
+with the exact name below. A Markdown bullet before the name is optional.
+Use `Change types:` with `docs` alone for documentation-only changes. For
+other work, list all applicable types from `non-ui`, `ui`, `performance`,
+and `hardware`, separated by commas.
+
+- `Test results:` Give the tested commit, environment, exact commands and
+  outcomes. Link the run or attach the relevant output. Identify failed,
+  skipped or blocked checks. For docs-only work, report the links and
+  instructions you checked.
+- `Proof of change:` Identify the affected supported workflow, why it matters
+  and how to reproduce it. For fixes, show the failure on the base and success
+  with the PR using the same inputs. For other changes, demonstrate the
+  approved outcome and link the supporting evidence.
+- `Runtime logs:` For non-UI changes, attach the redacted offline check,
+  comparison, or separately authorized runtime log. Include the work-item ID,
+  target digest and exact command. Link the evidence packet and raw output,
+  including negative controls and any mismatch.
+- `UI video:` For an approved UI fix that unblocks #115 work, show the blocked
+  task before and the complete working task after. Include the exact target
+  and tool build.
+- `Benchmarks:` For performance work, measure the same pinned #115 artifact
+  and analysis or reconstruction workload before and after. Give hardware,
+  tool versions, exact commands, repeated timing or memory results and output
+  correctness checks.
+- `On-device testing:` If the change affects behavior on target hardware,
+  record the physical Linux x86-64 machine, OS/kernel, build and target
+  digest, commands, and observed result from the authorized harness. Static
+  analysis remains the default. Captured binaries still require explicit
+  execution authorization.
+
+Give exact commands and observed results inline or link to attachments,
+job runs, or repository permalinks that reviewers can open. Each applicable
+field requires substantive evidence. Blank fields, placeholders, and `N/A`
+do not count. Redact credentials and private data from every attachment.
+Update the evidence when changes to the PR head affect the result. Include
+the signature supplied by the Slop.cash workflow on its submissions.
+
+We close PRs that lack evidence of a useful change, including added complexity
+for a highly unlikely path without evidence that it occurs in supported use
+or threatens an existing requirement. For Slop.cash contributions, this also
+costs the contributor points under the applicable points policy.
+
 ## Validation and progress updates
 
 Run the checks that cover your change:
