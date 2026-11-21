@@ -79,12 +79,28 @@ def parse(binary):
         if (info & 0xffffffff) == 8:
             relocations[where] = addend & ((1 << 64) - 1)
     descriptor_rows = []
+    field_names = []
     for i in range(10):
         slot = DESCRIPTOR + 16 * i
         length = struct.unpack('<Q', read(slot + 8, 8))[0]
         if slot not in relocations:
             raise ValueError(f'missing relative relocation for descriptor slot {slot:#x}')
-        descriptor_rows.append([i, hex(slot), hex(relocations[slot]), length])
+        raw_name = read(relocations[slot], length)
+        try:
+            name = raw_name.decode('ascii')
+        except UnicodeDecodeError as exc:
+            raise ValueError(f'non-ASCII descriptor bytes at {slot:#x}') from exc
+        if not name or b'\0' in raw_name:
+            raise ValueError(f'invalid descriptor bytes at {slot:#x}')
+        consumed = i < 5
+        descriptor_rows.append([i, hex(slot), hex(relocations[slot]), length,
+                                name, str(consumed).lower()])
+        if consumed:
+            field_names.append(name)
+    expected_fields = ['signatureChainId', 'hyperliquidChain', 'user',
+                       'isFinalize', 'nonce']
+    if field_names != expected_fields:
+        raise ValueError(f'five-entry decoder field slice changed: {field_names!r}')
     return {
         'binary_sha256': digest,
         'decoder_fde': [hex(decoder_fde['start']), hex(decoder_fde['end'])],
@@ -97,10 +113,12 @@ def parse(binary):
         'variant_name_bytes_hex': ACTION_NAME_BYTES.hex(),
         'arm_bytes_hex': arm.hex(),
         'field_count_argument': 5, 'name_length_argument': 21,
+        'field_names': field_names,
+        'field_names_interpretation': 'The first five relocation-backed pointer/length pairs are treated as the count-5 string slice passed in r8/r9; their field semantics are unresolved.',
         'result_internal_tag': '0x91', 'copied_payload_bytes': 64,
         'status_test': 'byte [rsp+0x5d] == 2 branches to decoder block 0x2bd8127',
         'descriptor_va': hex(DESCRIPTOR), 'descriptor_relocation_pairs': len(descriptor_rows),
-        'limits': 'Static decoder-arm evidence only. The helper field descriptor layout, payload field semantics, runtime acceptance, signer verdict and transaction persistence are not established here.'
+        'limits': 'Static decoder-arm evidence only. The field names and order are observed as helper arguments, but their payload semantics, runtime acceptance, signer verdict and transaction persistence are not established here.'
     }, descriptor_rows
 
 
@@ -110,7 +128,7 @@ def generate(binary, out):
     (out/'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
     with (out/'descriptor-relocations.tsv').open('w', newline='') as f:
         w = csv.writer(f, delimiter='\t', lineterminator='\n')
-        w.writerow(['slot_index','slot_va','relative_addend_va','paired_length_qword'])
+        w.writerow(['slot_index','slot_va','relative_addend_va','paired_length_qword','raw_name_ascii','inside_count_5_slice'])
         w.writerows(rows)
     return summary
 

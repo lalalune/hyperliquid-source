@@ -17,6 +17,8 @@ class LinkStakingActionDecode115Tests(unittest.TestCase):
         self.assertEqual(summary['variant_name'], 'LinkStakingUserAction')
         self.assertEqual(summary['result_internal_tag'], '0x91')
         self.assertEqual(summary['field_count_argument'], 5)
+        self.assertEqual(summary['field_names'], [
+            'signatureChainId', 'hyperliquidChain', 'user', 'isFinalize', 'nonce'])
         self.assertTrue(summary['arm_bytes_hex'].endswith('b891000000e9bb150000'))
         self.assertEqual(len(rows), 10)
 
