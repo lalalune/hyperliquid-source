@@ -16,10 +16,18 @@ PACKET = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / 'tools'))
 from elf_index import sections
 from fde_extents import fde_extents
+from foundation_millis import decode_export
 
 SHA = 'a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301'
 SLOTS = (0x64dfff8, 0x64e0000)
 OBJECTS = (0x64efc80, 0x64efcb0)
+MEMCMP_SLOT = 0x64dfb50
+CALLBACKS = (
+    {'object': 0x64efc80, 'target': 0x14c4570, 'end': 0x14c4741,
+     'call_register': 'rbp', 'expected_compares': 1, 'stride_register': 'r13'},
+    {'object': 0x64efcb0, 'target': 0x14c4020, 'end': 0x14c4567,
+     'call_register': 'r15', 'expected_compares': 4, 'stride_register': 'r12'},
+)
 TARGET = ROOT / 'artifacts/node/115/hl-node'
 
 
@@ -48,20 +56,22 @@ def parse_relocations(data, secs):
     return rows
 
 
-def parse_xrefs(text, fdes):
+def parse_xrefs(text, fdes, slots=SLOTS, scope=None):
     by_site = {}
     for line in text.splitlines():
-        if not any(f'# {slot:x} ' in line for slot in SLOTS):
+        if not any(f'# {slot:x} ' in line for slot in slots):
             continue
         match = re.match(r'\s*([0-9a-f]+):\s*((?:[0-9a-f]{2}\s+)+)\s*(.+)$', line)
         require(match is not None, 'unparsed direct reference instruction')
         site = int(match.group(1), 16)
+        if scope is not None and not any(start <= site < end for start, end in scope):
+            continue
         code = bytes.fromhex(match.group(2))
         instruction = match.group(3).strip()
         require(len(code) == 7 and code[:2] == b'\x48\x8b' or
                 len(code) == 7 and code[:2] == b'\x4c\x8b', 'reference is not a 64-bit RIP-relative load')
         slot = site + len(code) + struct.unpack('<i', code[-4:])[0]
-        require(slot in SLOTS, 'disassembly target disagrees with encoded displacement')
+        require(slot in slots, 'disassembly target disagrees with encoded displacement')
         require(re.match(r'mov\s+\w+,QWORD PTR \[rip\+', instruction) is not None,
                 'reference is not a direct load')
         owners = [f for f in fdes if f['start'] <= site < f['end']]
@@ -100,26 +110,100 @@ def collect(image, output):
         object_relocations.append({'slot': hex(va), 'relocation_type': 'R_X86_64_RELATIVE',
                                    'addend': hex(addend)})
 
-    objdump = shutil.which('objdump')
-    require(objdump is not None, 'objdump is required')
+    objdump, readelf = shutil.which('objdump'), shutil.which('readelf')
+    require(objdump is not None and readelf is not None, 'GNU objdump and readelf are required')
     env = {'PATH': os.environ.get('PATH', '/usr/bin:/bin'), 'LC_ALL': 'C'}
     version = subprocess.check_output([objdump, '--version'], text=True, env=env).splitlines()[0]
+    readelf_version = subprocess.check_output([readelf, '--version'], text=True, env=env).splitlines()[0]
     require('GNU' in version, 'GNU objdump is required')
+    require('GNU' in readelf_version, 'GNU readelf is required')
+    _, fdes, _ = fde_extents(image)
+    indexed_fdes = {}
+    for frame in fdes:
+        key = frame['start'], frame['end']
+        require(key not in indexed_fdes, 'duplicate FDE extent')
+        indexed_fdes[key] = frame
+    callback_ranges = []
+    callback_bodies = []
+    for callback in CALLBACKS:
+        frames = [f for f in fdes if f['start'] == callback['target']]
+        require(len(frames) == 1 and frames[0]['end'] == callback['end'],
+                f"callback FDE changed at {callback['target']:#x}")
+        frame = frames[0]
+        callback_ranges.append((frame['start'], frame['end']))
+        body = file_bytes(image, secs, frame['start'], frame['end'] - frame['start'])
+        callback_bodies.append((callback, frame, body))
     with __import__('tempfile').TemporaryDirectory(prefix='node115-selector-static-') as tmp:
         binary = Path(tmp) / 'node115.elf'
         binary.write_bytes(image)
         binary.chmod(0o400)
         disassembly = subprocess.check_output([objdump, '-d', '-w', '-Mintel', str(binary)], text=True, env=env)
-    _, fdes, _ = fde_extents(image)
+        callback_exports = {}
+        for callback, frame, body in callback_bodies:
+            raw = subprocess.check_output([objdump, '-d', '-w', '-Mintel',
+                f"--start-address={frame['start']}", f"--stop-address={frame['end']}", str(binary)],
+                text=True, env=env).replace(str(binary), 'artifacts/node/115/hl-node')
+            raw = '\n'.join(line.rstrip() for line in raw.splitlines()) + '\n'
+            decoded = decode_export(raw, frame['start'], frame['end'], body)
+            rows = []
+            for line in raw.splitlines():
+                match = re.match(r'^\s*([0-9a-f]+):\s*((?:[0-9a-f]{2}\s+)+)(.*)$', line)
+                if match and match[3].strip():
+                    rows.append((int(match[1], 16), bytes.fromhex(match[2]), match[3].strip()))
+            calls = [(va, code) for va, code, text in rows
+                     if re.search(rf'\bcall\s+{callback["call_register"]}\b', text)]
+            lengths = [(va, code) for va, code, text in rows
+                       if re.search(r'\bmov\s+edx,0x14\b', text)]
+            strides = [(va, code) for va, code, text in rows
+                       if re.search(rf'\badd\s+{callback["stride_register"]},0x14\b', text)]
+            signs = [(va, code) for va, code, text in rows
+                     if re.search(r'\bsets\s+cl\b|\bsetg\s+al\b|\bsub\s+al,cl\b', text)]
+            require(len(calls) == callback['expected_compares'], 'comparison call count changed')
+            require(len(lengths) == callback['expected_compares'], '20-byte compare length count changed')
+            require(len(strides) == callback['expected_compares'], '20-byte loop stride count changed')
+            require(len(signs) == callback['expected_compares'] * 3, 'comparison sign conversion changed')
+            callback_exports[frame['start']] = (raw, decoded, rows, calls, lengths, strides, signs)
+        native_relocations = subprocess.check_output([readelf, '-rW', str(binary)], text=True, env=env)
+
     xrefs = parse_xrefs(disassembly, fdes)
     require(len(xrefs) == 36, 'selector xref census changed')
     counts = {hex(slot): sum(row['slot'] == hex(slot) for row in xrefs) for slot in SLOTS}
     require(counts == {'0x64dfff8': 18, '0x64e0000': 18}, 'selector xref counts changed')
+    memcmp_rows = parse_xrefs(disassembly, fdes, (MEMCMP_SLOT,), callback_ranges)
+    require(len(memcmp_rows) == 5, 'callback memcmp GOT load count changed')
+    memcmp_relocs = [line.split() for line in native_relocations.splitlines()
+                     if re.match(r'^[0-9a-f]+\s', line) and int(line.split()[0], 16) == MEMCMP_SLOT]
+    require(len(memcmp_relocs) == 1 and len(memcmp_relocs[0]) >= 5 and
+            memcmp_relocs[0][2] == 'R_X86_64_GLOB_DAT' and
+            memcmp_relocs[0][4] == 'memcmp@GLIBC_2.2.5', 'memcmp import relocation changed')
+    output.mkdir(parents=True, exist_ok=True)
+    callback_records = []
+    for callback, frame, body in callback_bodies:
+        raw, decoded, rows, calls, lengths, strides, signs = callback_exports[frame['start']]
+        selected_refs = [row for row in memcmp_rows if row['fde_start'] == hex(frame['start'])]
+        require(len(selected_refs) == callback['expected_compares'], 'callback memcmp load count mismatch')
+        output_name = f'{frame["start"]:x}.objdump.txt'
+        callback_records.append({
+            'data_object': hex(callback['object']), 'target': hex(callback['target']),
+            'fde': {'start': hex(frame['start']), 'end': hex(frame['end']),
+                    'bytes': len(body), 'sha256': hashlib.sha256(body).hexdigest(),
+                    'lsda': None if frame['lsda'] is None else hex(frame['lsda'])},
+            'memcmp_slot': hex(MEMCMP_SLOT), 'memcmp_import': 'memcmp@GLIBC_2.2.5',
+            'direct_memcmp_loads': [row['site'] for row in selected_refs],
+            'indirect_compare_calls': [hex(va) for va, _ in calls],
+            'length_20_setup_sites': [hex(va) for va, _ in lengths],
+            'stride_20_sites': [hex(va) for va, _ in strides],
+            'sign_zero_conversion_sites': [hex(va) for va, _ in signs],
+            'decoded_instruction_count': len(decoded), 'disassembly_file': output_name,
+        })
+        (output / output_name).write_text(raw)
+    (output / 'memcmp-relocation.txt').write_text('\n'.join(' '.join(row) for row in memcmp_relocs) + '\n')
     record = {
         'target': 'Linux x86-64 node #115', 'target_sha256': digest,
-        'scope': 'Two fixed selector GOT slots: RELA initialization, pointed-to file-backed objects, and all direct code references.',
-        'method': 'Independent ELF section/RELA parsing, FDE extent decoding, and GNU objdump cross-check; static only.',
+        'scope': 'Two fixed selector GOT slots: RELA initialization, pointed-to objects, the two code targets, and direct references.',
+        'method': 'Independent ELF section/RELA parsing, FDE extent decoding, GNU objdump byte exports, and GNU readelf import cross-check; static only.',
         'got_bindings': bindings, 'object_first_word_relocations': object_relocations,
+        'callback_targets': callback_records,
         'direct_reference_counts': counts, 'direct_references': xrefs,
         'unique_fde_extents': [list(extent) for extent in
                                sorted({(row['fde_start'], row['fde_end']) for row in xrefs})],
@@ -127,7 +211,7 @@ def collect(image, output):
             'FDE ranges are unwind extents, not proven function boundaries.',
             'The inventory is limited to directly encoded RIP-relative references visible in disassembly.',
             'No source-level names, runtime selection policy, dynamic pointer writes, or object semantics are inferred.',
-            'The relocated code targets are address observations; no function meaning or ABI is assigned.',
+            'The two relocated code targets make 20-byte memcmp calls in 0x14-stride loops; no source-level type, comparator owner, or object meaning is assigned.',
             'No target code is executed or emulated.'
         ]
     }
@@ -136,7 +220,7 @@ def collect(image, output):
     (output / 'xref-instructions.txt').write_text('\n'.join(
         f"{row['site']} {row['instruction_bytes']} {row['instruction']} -> {row['slot']} FDE {row['fde_start']}..{row['fde_end']}"
         for row in xrefs) + '\n')
-    (output / 'tool-versions.json').write_text(json.dumps({'objdump': version}, indent=2) + '\n')
+    (output / 'tool-versions.json').write_text(json.dumps({'objdump': version, 'readelf': readelf_version}, indent=2) + '\n')
     return record
 
 
@@ -151,5 +235,6 @@ if __name__ == '__main__':
         require(result == json.loads((PACKET / 'records.json').read_text()), 'retained record changed')
     print(json.dumps({'target_sha256': result['target_sha256'],
                       'direct_references': len(result['direct_references']),
+                      'callback_targets': len(result['callback_targets']),
                       'unique_fde_extents': len(result['unique_fde_extents']),
                       'target_executed': False, 'record_check': args.check}))

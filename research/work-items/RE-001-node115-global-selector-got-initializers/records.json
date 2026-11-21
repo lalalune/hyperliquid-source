@@ -1,8 +1,8 @@
 {
   "target": "Linux x86-64 node #115",
   "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
-  "scope": "Two fixed selector GOT slots: RELA initialization, pointed-to file-backed objects, and all direct code references.",
-  "method": "Independent ELF section/RELA parsing, FDE extent decoding, and GNU objdump cross-check; static only.",
+  "scope": "Two fixed selector GOT slots: RELA initialization, pointed-to objects, the two code targets, and direct references.",
+  "method": "Independent ELF section/RELA parsing, FDE extent decoding, GNU objdump byte exports, and GNU readelf import cross-check; static only.",
   "got_bindings": [
     {
       "slot": "0x64dfff8",
@@ -29,6 +29,93 @@
       "slot": "0x64efcb0",
       "relocation_type": "R_X86_64_RELATIVE",
       "addend": "0x14c4020"
+    }
+  ],
+  "callback_targets": [
+    {
+      "data_object": "0x64efc80",
+      "target": "0x14c4570",
+      "fde": {
+        "start": "0x14c4570",
+        "end": "0x14c4741",
+        "bytes": 465,
+        "sha256": "e5442be25e28d2784c62e9dbbc8bc7cead786afcaa412155cd455840736f67e4",
+        "lsda": "0x172cac"
+      },
+      "memcmp_slot": "0x64dfb50",
+      "memcmp_import": "memcmp@GLIBC_2.2.5",
+      "direct_memcmp_loads": [
+        "0x14c45fd"
+      ],
+      "indirect_compare_calls": [
+        "0x14c4646"
+      ],
+      "length_20_setup_sites": [
+        "0x14c463e"
+      ],
+      "stride_20_sites": [
+        "0x14c4658"
+      ],
+      "sign_zero_conversion_sites": [
+        "0x14c464d",
+        "0x14c4650",
+        "0x14c4653"
+      ],
+      "decoded_instruction_count": 101,
+      "disassembly_file": "14c4570.objdump.txt"
+    },
+    {
+      "data_object": "0x64efcb0",
+      "target": "0x14c4020",
+      "fde": {
+        "start": "0x14c4020",
+        "end": "0x14c4567",
+        "bytes": 1351,
+        "sha256": "57614b0af5f1457fa985f4883a831b64dc4b8039e335fa61f0e4a2d5183a801d",
+        "lsda": "0x172c84"
+      },
+      "memcmp_slot": "0x64dfb50",
+      "memcmp_import": "memcmp@GLIBC_2.2.5",
+      "direct_memcmp_loads": [
+        "0x14c40ae",
+        "0x14c4175",
+        "0x14c4235",
+        "0x14c42f5"
+      ],
+      "indirect_compare_calls": [
+        "0x14c4106",
+        "0x14c41c6",
+        "0x14c4286",
+        "0x14c4346"
+      ],
+      "length_20_setup_sites": [
+        "0x14c40fe",
+        "0x14c41be",
+        "0x14c427e",
+        "0x14c433e"
+      ],
+      "stride_20_sites": [
+        "0x14c4119",
+        "0x14c41d9",
+        "0x14c4299",
+        "0x14c4359"
+      ],
+      "sign_zero_conversion_sites": [
+        "0x14c410e",
+        "0x14c4111",
+        "0x14c4114",
+        "0x14c41ce",
+        "0x14c41d1",
+        "0x14c41d4",
+        "0x14c428e",
+        "0x14c4291",
+        "0x14c4294",
+        "0x14c434e",
+        "0x14c4351",
+        "0x14c4354"
+      ],
+      "decoded_instruction_count": 284,
+      "disassembly_file": "14c4020.objdump.txt"
     }
   ],
   "direct_reference_counts": {
@@ -379,7 +466,7 @@
     "FDE ranges are unwind extents, not proven function boundaries.",
     "The inventory is limited to directly encoded RIP-relative references visible in disassembly.",
     "No source-level names, runtime selection policy, dynamic pointer writes, or object semantics are inferred.",
-    "The relocated code targets are address observations; no function meaning or ABI is assigned.",
+    "The two relocated code targets make 20-byte memcmp calls in 0x14-stride loops; no source-level type, comparator owner, or object meaning is assigned.",
     "No target code is executed or emulated."
   ]
 }
