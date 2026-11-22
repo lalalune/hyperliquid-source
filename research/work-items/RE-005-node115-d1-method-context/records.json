@@ -1,0 +1,149 @@
+{
+  "target": {
+    "release": 115,
+    "size": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+    "coordinate": "ELF virtual address"
+  },
+  "scope": "one d1 action-method dispatch, its nested callback boundary, and the digest-wrapper handoff",
+  "text": {
+    "address": "0x1419300",
+    "file_offset": "0x1418300",
+    "size": 83719936
+  },
+  "fdes": [
+    {
+      "start": "0x36c3180",
+      "end": "0x36c5348",
+      "bytes": 8648
+    },
+    {
+      "start": "0x442d000",
+      "end": "0x442d480",
+      "bytes": 1152
+    },
+    {
+      "start": "0x4433f90",
+      "end": "0x443431f",
+      "bytes": 911
+    },
+    {
+      "start": "0x46e6d30",
+      "end": "0x46e6f78",
+      "bytes": 584
+    }
+  ],
+  "reused_action_binding": {
+    "index": 75,
+    "nominal_tag": "0xd1",
+    "rust_variant": "SendToEvmWithData",
+    "wire_name": "sendToEvmWithData",
+    "source_file": "RE-017-node115-action-admission-binding/bindings.tsv",
+    "dispatch_arm_source": "PR #7082, action-wire-variant-methods-115/arms.tsv"
+  },
+  "dispatch": {
+    "call_site": "0x36c36af",
+    "slot": "0x64e8e48",
+    "relocated_target": "0x442d000",
+    "register_arguments": {
+      "rdi": "address of local 16-bit-result/record output at caller rsp+0x20",
+      "rsi": "incoming payload pointer advanced by 8 bytes",
+      "rdx": "zero-extended incoming dl",
+      "rcx": "incoming rcx preserved",
+      "r8": "incoming r8 preserved",
+      "r9": "incoming r9 preserved"
+    },
+    "stack_argument_7": "incoming r14 stored at caller rsp before the indirect call",
+    "post_call": "reads a 16-bit result at caller rsp+0x20 and compares it with 0x1a2"
+  },
+  "method": {
+    "entry": "0x442d000",
+    "nested_indirect_call": {
+      "site": "0x442d192",
+      "target": "first qword loaded from input+0x60",
+      "arguments": {
+        "rdi": "local output at method rsp+0x50",
+        "rsi": "address input+0x78",
+        "rdx": "qword input+0x68",
+        "rcx": "qword input+0x70"
+      },
+      "output": "copies 32 bytes from local rsp+0x50..0x70 to local rsp+0x118..0x138"
+    },
+    "intermediate_call": {
+      "site": "0x442d31f",
+      "target": "0x46e6d30",
+      "arguments": {
+        "rdi": "local 16-bit-result/record output at method rsp+0x50",
+        "rsi": "incoming stack argument 7 (loaded from method rsp+0x1d0)",
+        "rdx": "address of local record at method rsp+0xb8"
+      }
+    },
+    "wrapper_result": {
+      "wrapper": "0x4433f90",
+      "caller": "0x46e6d4c",
+      "tag_branch": "tag 1 follows the 0x7e result path; any other tag follows the 0x1a2 record path"
+    },
+    "digest_chain": [
+      {
+        "slot": "0x64ea978",
+        "target": "0x4428520"
+      },
+      {
+        "slot": "0x64ea980",
+        "target": "0x44290c0"
+      },
+      {
+        "builder_type": "HyperliquidTransaction:SendToEvmWithData(string hyperliquidChain,address payload_multi_sig_user,address outer_signer,string token,string amount,string source_dex,string destination_recipient,string address_encoding,uint32 destination_chain_id,uint64 gas_limit,bytes data,uint64 nonce)",
+        "source_file": "action-wire-typed-data-structs-115/eip712.tsv"
+      }
+    ]
+  },
+  "instruction_witnesses": {
+    "0x36c3696": "4883c6084c8934240fb6d2488d7c24204989cd4d89c44d89cfff159357e202",
+    "0x36c36b5": "0fb74424200f104424220f29842490020000",
+    "0x442d000": "554157415641554154534881ec9801",
+    "0x442d179": "498b442460498b542468498d742478498b4c2470488d7c2450ff10",
+    "0x442d194": "0f104424500f104c24600f118c24280100000f11842418010000",
+    "0x442d30a": "488bb424d0010000488d7c2450488d9424b8000000e80c9a2b00",
+    "0x442d324": "807c245001750f488b4424584889430866b97e00eb550fb74424556689442474",
+    "0x46e6d30": "415741564154534881ec380100004989f64889fb488d7c24604889d6e8",
+    "0x46e6d4c": "e83fd2d4ff",
+    "0x44340ef": "4c89f6ff1580680b02"
+  },
+  "relocations": [
+    {
+      "slot": "0x64e8e48",
+      "relocation_type": "R_X86_64_RELATIVE",
+      "addend": "0x442d000"
+    },
+    {
+      "slot": "0x64ea978",
+      "relocation_type": "R_X86_64_RELATIVE",
+      "addend": "0x4428520"
+    },
+    {
+      "slot": "0x64ea980",
+      "relocation_type": "R_X86_64_RELATIVE",
+      "addend": "0x44290c0"
+    }
+  ],
+  "claim_boundary": {
+    "observed": [
+      "the d1 arm calls the relocated method target 0x442d000",
+      "the method reads a callback pointer from input+0x60 and calls it with the recorded operands",
+      "the method forwards a local record and incoming stack argument 7 into 0x46e6d30",
+      "0x46e6d30 calls wrapper 0x4433f90, which reaches the mapped digest helper and builder"
+    ],
+    "unresolved": [
+      "concrete nested callback target and source object producer",
+      "meaning of the callback-produced 32-byte object",
+      "actual runtime field values and production digest",
+      "signature verification and replay/nonce behavior"
+    ]
+  },
+  "limitations": [
+    "FDE extents are unwind ranges and do not prove source-level function identity.",
+    "This is static byte/relocation evidence; the captured executable was not run or emulated.",
+    "No signature, production digest, or private-key behavior is claimed."
+  ]
+}
