@@ -99,6 +99,13 @@ PROGRESS.md, COMPONENTS.md or research/catalogue files. Check only relevant
 builds/tests beyond these; do not claim hosted CI or container success without
 its actual result.
 
+Complete the [required PR evidence](CONTRIBUTING.md#evidence).
+Report exact checks and #115 proof, attach real offline or authorized runtime
+logs for non-UI work, videos for approved UI fixes, comparable benchmarks for
+performance, and physical-device results for hardware changes. Maintainers
+close changes without proof and speculative changes that add complexity to
+unlikely paths. Slop.cash contributions closed on those grounds lose points.
+
 Report changes, verification scope, failures and remaining gaps. A complete
 task must satisfy its original acceptance criteria, not just pass a narrower
 check. docs/PROGRESS.md is milestone completion; it is not proof of correctness,
