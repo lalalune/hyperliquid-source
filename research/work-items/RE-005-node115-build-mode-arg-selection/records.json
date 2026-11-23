@@ -1,5 +1,5 @@
 {
- "question": "Which process argument does the base/src/build_mode.rs LazyLock initializer (0x1568de0, cell 0x64f01c0) pick to build the cached build-mode string -- the iteration order, the identity of the argument the \"/cham/\" search hits, the exact candidate set left after the lowercase transform (which of debug / release / run-client are reachable), and the source names of the static and its getter if the artifact carries them?",
+ "question": "Which process argument does the base/src/build_mode.rs LazyLock initializer (0x1568de0, cell 0x64f01c0) pick to build the cached build-mode string -- the iteration order, the identity of the argument the \"/cham/\" search hits, the exact candidate set left after the edge-trim transform (which of debug / release / run-client are reachable), and the source names of the static and its getter if the artifact carries them?",
  "artifact": "artifacts/node/115/hl-node",
  "artifact_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
  "base_commit": "05bc2de303c05525b71e7e257426e741bc66a390",
@@ -302,24 +302,51 @@
    ]
   }
  },
+ "trim_code_points": [
+  9,
+  10,
+  11,
+  12,
+  13,
+  32,
+  133,
+  160,
+  5760,
+  8192,
+  8193,
+  8194,
+  8195,
+  8196,
+  8197,
+  8198,
+  8199,
+  8200,
+  8201,
+  8202,
+  8232,
+  8233,
+  8239,
+  8287,
+  12288
+ ],
  "simulation_vectors": [
   {
    "argv": [
     "/opt/hl/cham/release"
    ],
-   "value": " release"
+   "value": "release"
   },
   {
    "argv": [
     "/opt/hl/cham/debug"
    ],
-   "value": " debug"
+   "value": "debug"
   },
   {
    "argv": [
     "/opt/hl/cham/run-client"
    ],
-   "value": " run"
+   "value": "run"
   },
   {
    "argv": [
@@ -327,14 +354,14 @@
     "--chain",
     "Mainnet"
    ],
-   "value": " run mainnet"
+   "value": "run Mainnet"
   },
   {
    "argv": [
     "--chain",
     "Mainnet"
    ],
-   "value": " mainnet"
+   "value": "Mainnet"
   },
   {
    "argv": [
@@ -350,63 +377,63 @@
    "argv": [
     "/srv/cham/release/bin/hl-node"
    ],
-   "value": " hl"
+   "value": "hl"
   },
   {
    "argv": [
     "rel-ease"
    ],
-   "value": " rel-ease"
+   "value": "rel-ease"
   },
   {
    "argv": [
     "/a/cham/x-y-z"
    ],
-   "value": " x-y"
+   "value": "x-y"
   },
   {
    "argv": [
     "/a/cham/-x"
    ],
-   "value": " "
+   "value": ""
   },
   {
    "argv": [
     "/a/cham/RELEASE"
    ],
-   "value": " release"
+   "value": "RELEASE"
   },
   {
    "argv": [
     "/a/cham/release",
     "/b/cham/debug"
    ],
-   "value": " release debug"
+   "value": "release debug"
   },
   {
    "argv": [
     "/a/cham/run_client"
    ],
-   "value": " run_client"
+   "value": "run_client"
   },
   {
    "argv": [
     "single"
    ],
-   "value": " single"
+   "value": "single"
   },
   {
    "argv": [
     "-"
    ],
-   "value": " -"
+   "value": "-"
   },
   {
    "argv": [
     "--",
     "x"
    ],
-   "value": " x"
+   "value": "x"
   },
   {
    "argv": [
@@ -419,7 +446,33 @@
     "/cham/"
    ],
    "value": "panic:assertion@build_mode.rs:28:13"
+  },
+  {
+   "argv": [
+    "run-client"
+   ],
+   "value": "run-client"
+  },
+  {
+   "argv": [
+    "\u3000MaInNet\u205f"
+   ],
+   "value": "MaInNet"
+  },
+  {
+   "argv": [
+    " A ",
+    "   ",
+    " B "
+   ],
+   "value": "A  B"
+  },
+  {
+   "argv": [
+    "\u001cX\u001f"
+   ],
+   "value": "\u001cX\u001f"
   }
  ],
- "reading": "The initializer runs std::env::args() over the whole argv in order, argv[0] included, with no early exit: the constructor collects the C argv cells into a vector from index 0, and next() converts each element through the UTF-8 validator, unwrapping at library/std/src/env.rs:864:51. Each argument of length >= 2 starting with \"--\" is skipped. Every other argument contributes one lowercased piece to an accumulator via format!(\"{} {}\", acc, piece): the piece is the argument itself, except that an argument containing \"/cham/\" contributes its last path component truncated at its last \"-\"; such an argument ending in \"/\" fires the build_mode.rs:28:13 assertion instead. After the last argument the accumulator is lowercased again and stored. The stored value therefore starts with a space whenever anything contributed and is never exactly \"debug\", \"release\" or \"run-client\"; \"run-client\" contributes only \"run\" through the /cham/ path. The static and getter carry no source name in the artifact (no BUILD_MODE / BuildMode / build-mode string exists); the naming evidence is the module path base/src/build_mode.rs and the assertion local name \"arg\"."
+ "reading": "The initializer runs std::env::args() over the whole argv in order, argv[0] included, with no early exit: the constructor collects the C argv cells into a vector from index 0, and next() converts each element through the UTF-8 validator, unwrapping at library/std/src/env.rs:864:51. Each argument of length >= 2 starting with \"--\" is skipped. Every other argument contributes one edge-trimmed piece to an accumulator via format!(\"{} {}\", acc, piece): the piece is the argument itself, except that an argument containing \"/cham/\" contributes its last path component truncated at its last \"-\"; such an argument ending in \"/\" fires the build_mode.rs:28:13 assertion instead. After the last argument the accumulator is trimmed again and stored, preserving case and interior separators. Individual argv inputs can yield exactly \"debug\", \"release\" or \"run-client\"; the /cham/ form of run-client is truncated to \"run\". The static and getter carry no source name in the artifact (no BUILD_MODE / BuildMode / build-mode string exists); the naming evidence is the module path base/src/build_mode.rs and the assertion local name \"arg\"."
 }

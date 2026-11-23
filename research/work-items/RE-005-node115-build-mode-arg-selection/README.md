@@ -10,7 +10,7 @@ accessor `0x1560a40`'s call sites, all of which discard the value.
 Neither packet established what the initializer computes: **which
 process argument it picks to build the string, in which order, what
 the `/cham/` search actually hits, and which of `debug` / `release`
-/ `run-client` can survive the lowercase transform as the stored
+/ `run-client` can survive the trim operation as the stored
 value** — and whether the artifact names the static or its getter.
 
 This packet answers that question from the node-115 binary alone.
@@ -18,6 +18,16 @@ Re-derivation of the bodies the earlier packets pinned agrees with
 them (initializer `c87c9590…`, transform `85a51029…`, accessor
 `4dd07ff0…`; Locations 28:13 / 30:26), so the answer layers on top
 of those packets without contradicting them.
+
+## Correction to the cached value
+
+The original packet modeled `0x150caf0` as lowercasing. For the argv
+`["--chain", "Mainnet"]` it emitted `" mainnet"`. Both caller sites
+instead trim a borrowed slice. The same input produces `"Mainnet"`.
+The input `["\u3000MiXeD\u205f"]` likewise yields `"MiXeD"`.
+The table and both caller sites below bind this correction to node 115.
+The neighbouring enum/key routine and the argument-selection branches
+retain their separate earlier evidence.
 
 ## Observed: the argument source is `std::env::args()`
 
@@ -82,7 +92,7 @@ The accumulator starts as the empty `String` (capacity 0, pointer
 3. **Plain arguments** (no `/cham/`) contribute themselves whole;
    the `-` cut does not apply to them.
 
-Each piece is lowercased by the transform `0x150caf0` (call pin
+Each piece is trimmed by the transform `0x150caf0` (call pin
 `0x1568e9c`) and merged into the accumulator through the
 packed-format `format` behind slot `0x64df6e8` (`0x141e3a0`; call
 pin `0x1568ef2`). The format machinery is this toolchain's packed
@@ -95,10 +105,10 @@ encoding to **`{0} {1}`**, with argument 0 the accumulator (via the
 String `Display` shim `0x155c6e0`, setup pin `0x1568eb9`) and
 argument 1 the piece (via the `&str` shim `0x15ebba0`, setup pin
 `0x1568ed2`). The merge is therefore
-`acc = format!("{} {}", acc, lowercased_piece)` — one literal
+`acc = format!("{} {}", acc, trimmed_piece)` — one literal
 space per contribution, including the first.
 
-After the last argument, the accumulator is lowercased once more
+After the last argument, the accumulator is trimmed once more
 by the same transform (pin `0x15695bb`) and stored as the cached
 value with equal capacity and length (store pins
 `0x1569609`–`0x1569615`).
@@ -111,31 +121,23 @@ tool. The decisive ones:
 
 | argv | stored value |
 | --- | --- |
-| `['/opt/hl/cham/release']` | `' release'` |
-| `['/opt/hl/cham/debug']` | `' debug'` |
-| `['/opt/hl/cham/run-client']` | `' run'` |
-| `['/opt/hl/cham/run-client', '--chain', 'Mainnet']` | `' run mainnet'` |
-| `['--chain', 'Mainnet']` | `' mainnet'` |
-| `['/srv/cham/release/bin/hl-node']` | `' hl'` |
-| `['rel-ease']` | `' rel-ease'` |
-| `['/a/cham/x-y-z']` | `' x-y'` |
-| `['/a/cham/-x']` | `' '` |
+| `['/opt/hl/cham/release']` | `'release'` |
+| `['/opt/hl/cham/debug']` | `'debug'` |
+| `['/opt/hl/cham/run-client']` | `'run'` |
+| `['/opt/hl/cham/run-client', '--chain', 'Mainnet']` | `'run Mainnet'` |
+| `['--chain', 'Mainnet']` | `'Mainnet'` |
+| `['/srv/cham/release/bin/hl-node']` | `'hl'` |
+| `['rel-ease']` | `'rel-ease'` |
+| `['/a/cham/x-y-z']` | `'x-y'` |
+| `['/a/cham/-x']` | `''` |
 | `['--version']` | `''` |
 | `['/cham/']`, `['/a/b/cham/']` | panic at `build_mode.rs:28:13` |
 
-Two consequences are pinned by construction, not by sampling:
-
-- **The stored value is never exactly `debug`, `release` or
-  `run-client`.** Every contribution prepends a space (the format
-  is `{0} {1}` over an initially empty accumulator), and *every*
-  non-flag argument contributes — the value is the space-joined,
-  lowercased pieces of the whole argv, so even a single matching
-  deployment path yields `' release'`, not `'release'`.
-- **`run-client` is unreachable even as a piece.** Through the
-  `/cham/` path its component is cut at the last `-`, leaving
-  `run`; as a bare argument it would survive whole, but then it
-  is one piece among the joined pieces, never the whole value.
-  Only `debug` and `release` can appear as whole pieces.
+The final trim removes the format separator before the first nonempty piece.
+A single deployment path can produce exactly `debug` or `release`. A bare
+`run-client` can be the entire stored value; the `/cham/run-client` path
+contributes only `run` because that component is truncated at its last hyphen.
+An empty interior piece still contributes its separator between two other pieces.
 
 The literal census agrees: a whole-`.text` scan for RIP-relative
 references finds **zero** references to `/cham/` itself (the
@@ -167,12 +169,11 @@ none.
 
 ## Boundary
 
-- The simulation is exact for the ASCII vectors in
-  `records.json`. The transform is the full Unicode lowercase
-  mapping (the table-driven body PR #2999 pinned), so non-ASCII
-  pieces follow Unicode rules the vectors do not enumerate;
-  context-sensitive mappings (e.g. final sigma) are the standard
-  library's, applied per piece and once to the whole.
+- The [trim classifier packet](../RE-001-startup-unicode-trim-115/README.md)
+  establishes that `0x150caf0` returns a borrowed slice between the
+  first and last retained scalar. Both calls preserve letter case.
+  Regeneration checks the 25 accepted Unicode scalars against the two
+  table masks and immediate page exceptions. U+001C..U+001F survive.
 - The semantics assume the `args()` conversion succeeds. A
   non-UTF-8 argument makes `next()` panic at the std site above
   before any selection happens; the initializer stores nothing in

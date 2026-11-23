@@ -113,18 +113,21 @@ class BuildModeArgSelectionTest(unittest.TestCase):
             self.assertEqual(
                 bm.build_mode_value(list(vec['argv'])), vec['value'],
                 vec['argv'])
-        # The stored value is never exactly one of the candidates:
-        # it carries a leading space whenever anything contributed,
-        # and run-client loses its tail at the last '-'.
-        values = {tuple(v['argv']): v['value']
-                  for v in self.payload['simulation_vectors']}
-        self.assertEqual(values[('/opt/hl/cham/run-client',)], ' run')
-        self.assertEqual(values[('/opt/hl/cham/release',)], ' release')
-        for value in values.values():
-            if value.startswith('panic:'):
-                continue
-            self.assertNotIn(value,
-                             ('debug', 'release', 'run-client'))
+        self.assertEqual(bm.build_mode_value(['--skip', '/cham/DEBUG']), 'DEBUG')
+        self.assertEqual(bm.build_mode_value(['/cham/run-client']), 'run')
+        self.assertEqual(bm.build_mode_value(['run-client']), 'run-client')
+
+    def test_each_native_whitespace_and_adjacent_controls(self):
+        admitted = set(self.payload['trim_code_points'])
+        self.assertEqual(len(admitted), 25)
+        cases = admitted | {p + delta for p in admitted for delta in (-1, 1)}
+        for p in cases | {0x1c, 0x1f, 0x180e, 0x200b, 0xfeff}:
+            scalar = chr(p)
+            word = scalar + 'MiX' + scalar
+            self.assertEqual(bm.build_mode_value([word]),
+                             'MiX' if p in admitted else word, hex(p))
+            self.assertEqual(bm.build_mode_value(['A' + scalar + 'B']),
+                             'A' + scalar + 'B')
 
     def _mutated_analyze(self, va, xor):
         data = bytearray(self.data)

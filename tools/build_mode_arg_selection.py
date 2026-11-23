@@ -13,7 +13,7 @@ in which order, and what string comes out.
 This tool re-derives, from the materialised artifact alone:
 
 - the body pins (FDE extent + SHA-256) of the initializer, the
-  lowercase transform, the accessor (consistency with PR #2999 /
+  edge-trim transform, the accessor (consistency with PR #2999 /
   H11), the argument-iterator constructor and `next`, the UTF-8
   validator `next` calls, the packed-format `format`/`write` pair,
   the `memrchr` used on the extracted component, the `/cham/`
@@ -65,21 +65,17 @@ empty accumulator `String`:
   is the prefix before the last `-`, empty when the `-` leads);
 - any other argument is the piece itself.
 
-Each piece is lowercased by the transform `0x150caf0` and merged
+Each piece is trimmed by the transform `0x150caf0` and merged
 with the packed-format call behind slot `0x64df6e8`, whose format
 string at `0x444a44` decodes to `"{} {}"`: the new accumulator is
 `format!("{} {}", accumulator, piece)`. After the last argument
-the accumulator is lowercased once more by the same transform and
+the accumulator is trimmed once more by the same transform and
 stored as the cached `String` (length, pointer, length).
 
-Consequences the simulation pins down: the stored value carries a
-leading space whenever at least one argument contributed, and it
-accumulates *every* non-flag argument, so it is never exactly
-`debug`, `release` or `run-client`; through the `/cham/` path
-`run-client` contributes only `run`, because the component is cut
-at its last `-`. Of the three candidate literals packed beside the
-assertion, only `debug` and `release` can appear as a whole piece,
-and none can be the whole stored value. No source name for the
+Trimming removes the leading format separator. A lone deployment path
+can yield exactly `debug` or `release`; a bare `run-client` survives,
+while `/cham/run-client` contributes `run`. Case and interior whitespace
+survive both trim operations. No source name for the
 static or its getter occurs in the artifact: the only naming
 evidence is the module path `base/src/build_mode.rs` and the
 assertion's local name `arg`.
@@ -144,7 +140,7 @@ BYTE_PINS = {
     0x1568e7c: '0f80b7060000',
     # length < 2 arguments bypass the prefix/search dispatch
     0x1568e8c: '4983fd02',
-    # per-piece lowercase transform call
+    # per-piece edge-trim transform call
     0x1568e9c: 'e84f3cfaff',
     # format arguments: (accumulator, String Display shim),
     # (piece, str Display shim)
@@ -172,7 +168,7 @@ BYTE_PINS = {
     0x15694a5: 'bf2d000000',
     0x15694ad: 'ff15ed7df704',
     0x15694b3: '4883f801',
-    # whole accumulator lowercased once more at the end
+    # whole accumulator trimmed once more at the end
     0x15695bb: 'e83035faff',
     # sret store of the built String: (len, ptr, len)
     0x1569609: '488b442478',
@@ -246,33 +242,39 @@ PACKED_FORMATS = {
 CENSUS_TARGETS = [0x4676f2, 0x4676f3, 0x4676f8,
                   0x46771d, 0x467722, 0x467729]
 
-# Simulation of the derived semantics. Arguments are `str` (the
-# args() conversion has already succeeded); lowercasing is exact
-# for the ASCII vectors used here. A vector whose extraction hits
-# the ends_with assertion yields the panic marker instead.
+# Valid UTF-8 strings only. These 25 scalars are derived again in analyze()
+# from the classifier's immediate operands and the two ELF table bit planes.
+# Python's default str.strip() additionally removes U+001C through U+001F.
+EDGE_SPACE = ('\t\n\v\f\r \u0085\u00a0\u1680'
+              + ''.join(chr(c) for c in range(0x2000, 0x200b))
+              + '\u2028\u2029\u202f\u205f\u3000')
 PANIC_28 = 'panic:assertion@build_mode.rs:28:13'
 
 VECTORS = [
-    (['/opt/hl/cham/release'], ' release'),
-    (['/opt/hl/cham/debug'], ' debug'),
-    (['/opt/hl/cham/run-client'], ' run'),
+    (['/opt/hl/cham/release'], 'release'),
+    (['/opt/hl/cham/debug'], 'debug'),
+    (['/opt/hl/cham/run-client'], 'run'),
     (['/opt/hl/cham/run-client', '--chain', 'Mainnet'],
-     ' run mainnet'),
-    (['--chain', 'Mainnet'], ' mainnet'),
+     'run Mainnet'),
+    (['--chain', 'Mainnet'], 'Mainnet'),
     (['--version'], ''),
     ([], ''),
-    (['/srv/cham/release/bin/hl-node'], ' hl'),
-    (['rel-ease'], ' rel-ease'),
-    (['/a/cham/x-y-z'], ' x-y'),
-    (['/a/cham/-x'], ' '),
-    (['/a/cham/RELEASE'], ' release'),
-    (['/a/cham/release', '/b/cham/debug'], ' release debug'),
-    (['/a/cham/run_client'], ' run_client'),
-    (['single'], ' single'),
-    (['-'], ' -'),
-    (['--', 'x'], ' x'),
+    (['/srv/cham/release/bin/hl-node'], 'hl'),
+    (['rel-ease'], 'rel-ease'),
+    (['/a/cham/x-y-z'], 'x-y'),
+    (['/a/cham/-x'], ''),
+    (['/a/cham/RELEASE'], 'RELEASE'),
+    (['/a/cham/release', '/b/cham/debug'], 'release debug'),
+    (['/a/cham/run_client'], 'run_client'),
+    (['single'], 'single'),
+    (['-'], '-'),
+    (['--', 'x'], 'x'),
     (['/a/b/cham/'], PANIC_28),
     (['/cham/'], PANIC_28),
+    (['run-client'], 'run-client'),
+    (['\u3000MaInNet\u205f'], 'MaInNet'),
+    ([' A ', '   ', ' B '], 'A  B'),
+    (['\x1cX\x1f'], '\x1cX\x1f'),
 ]
 
 
@@ -386,8 +388,8 @@ def build_mode_value(argv):
             idx = piece.rfind('-')
             if idx >= 0:
                 piece = piece[:idx]
-        acc = '{} {}'.format(acc, piece.lower())
-    return acc.lower()
+        acc = '{} {}'.format(acc, piece.strip(EDGE_SPACE))
+    return acc.strip(EDGE_SPACE)
 
 
 def rip_ref_census(data, secs):
@@ -460,6 +462,17 @@ def analyze(data):
         slots[name] = {'slot': hex(slot), 'target': hex(add),
                        'relocation': 'R_X86_64_RELATIVE'}
 
+    # The helper uses bits 0 and 1 of one table for Unicode pages 00 and 20.
+    typ, address = relocs[0x64dfc30]
+    if (typ, address) != (8, 0x479266):
+        raise ValueError('trim classification table relocation drift')
+    table = va_bytes(data, secs, address, 256)
+    edge_points = {*range(9, 14), 0x20, 0x1680, 0x3000}
+    edge_points.update(low for low in range(128, 256) if table[low] & 1)
+    edge_points.update(0x2000 + low for low in range(256) if table[low] & 2)
+    if edge_points != set(map(ord, EDGE_SPACE)):
+        raise ValueError('trim classifier differs from modeled whitespace')
+
     pins = {}
     for va, want in BYTE_PINS.items():
         got = va_bytes(data, secs, va, len(bytes.fromhex(want))).hex()
@@ -502,7 +515,7 @@ def analyze(data):
             'LazyLock initializer (0x1568de0, cell 0x64f01c0) pick to '
             'build the cached build-mode string -- the iteration '
             'order, the identity of the argument the "/cham/" search '
-            'hits, the exact candidate set left after the lowercase '
+            'hits, the exact candidate set left after the edge-trim '
             'transform (which of debug / release / run-client are '
             'reachable), and the source names of the static and '
             'its getter if the artifact carries them?'),
@@ -531,6 +544,7 @@ def analyze(data):
         },
         'packed_formats': packed,
         'literal_ref_census': rip_ref_census(data, secs),
+        'trim_code_points': sorted(edge_points),
         'simulation_vectors': vectors,
         'reading': (
             'The initializer runs std::env::args() over the whole '
@@ -540,18 +554,17 @@ def analyze(data):
             'through the UTF-8 validator, unwrapping at '
             'library/std/src/env.rs:864:51. Each argument of length '
             '>= 2 starting with "--" is skipped. Every other '
-            'argument contributes one lowercased piece to an '
+            'argument contributes one edge-trimmed piece to an '
             'accumulator via format!("{} {}", acc, piece): the '
             'piece is the argument itself, except that an argument '
             'containing "/cham/" contributes its last path '
             'component truncated at its last "-"; such an argument '
             'ending in "/" fires the build_mode.rs:28:13 assertion '
             'instead. After the last argument the accumulator is '
-            'lowercased again and stored. The stored value '
-            'therefore starts with a space whenever anything '
-            'contributed and is never exactly "debug", "release" '
-            'or "run-client"; "run-client" contributes only "run" '
-            'through the /cham/ path. The static and getter carry '
+            'trimmed again and stored, preserving case and interior '
+            'separators. Individual argv inputs can yield exactly '
+            '"debug", "release" or "run-client"; the /cham/ form '
+            'of run-client is truncated to "run". The static and getter carry '
             'no source name in the artifact (no BUILD_MODE / '
             'BuildMode / build-mode string exists); the naming '
             'evidence is the module path base/src/build_mode.rs '
