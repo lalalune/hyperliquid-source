@@ -1,0 +1,7 @@
+# Node 115 EVM checkpoint archive plan
+
+`plan_archive` lets an offline fixture predict the member arguments, temporary filename and final filename from a real dated status directory and an ordered checkpoint-height list. It only reads the fixture. For example, if the status names include `2` and `10`, heights `[2, 2, 10]` contribute three archive members. The final filename is `2_10.tar`. A status file named `02` alone cannot admit height 2.
+
+The arguments supply the node's already displayed root and calendar date, the checkpoint heights after native provider sorting, and a callback for the final temporary-name number. An absent status directory is an error. An empty intersection returns `Ok(None)` without requesting a temporary ID. For a nonempty match, the planner obtains the ID and then checks whether the final filename already denotes a regular file. A directory at that filename does not suppress the plan.
+
+The normal-path projection assumes stable Unix entries, valid root/date display inputs and successful allocation. It preserves duplicate checkpoint rows and the caller's order. The returned strings use the node's separators, including a doubled slash when the supplied root ends in a slash. The adapter ends before tar construction, archive publication and retention. See the [binary evidence and fixture commands](../../research/work-items/RE-011-node115-evm-archive-plan/README.md).
