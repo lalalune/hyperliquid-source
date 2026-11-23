@@ -10,10 +10,12 @@ GitHub ownership: **historical read-only GitHub context fetched 2026-11-09T05:51
 
 - Component: `storage`; work type: discovery; readiness: **ready**; evidence: **partial**.
 - Question: Where does the expected H+1 root reference enter the selected replay-validation path, and what contract supplies it?
-- Remaining gap: The selected evidence does not identify the external H+1 reference or its supplying contract. Identifying that producer is this discovery task, not an unmet input prerequisite: the authenticated node #115 artifact and the retained #4157/#4117 evidence are available, and there are no hard dependencies on another pilot question. The downstream integration fixture remains blocked until the producer is identified or an explicit fixture input contract is justified with provenance.
+- Remaining gap: A new bounded join connects one admitted ABCI digest-vote path to the tracker field consumed by the selected replay-reference path, conditional on the same state instance. The exact H+1 relation, canonical external-root authority, quorum policy, all other producers, and runtime identity remain unresolved. The downstream fixture must preserve these provenance limits.
 - Downstream consumer: A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.
+- Prior attempt: [4114](https://github.com/lalalune/hyperliquid-source/pull/4114) — maps the selected ABCI digest-vote admission path to tracker +0x3e50; does not join it to the replay comparator (ownership unknown).
 - Prior attempt: [4157](https://github.com/lalalune/hyperliquid-source/pull/4157) — maps the source of compact digest references and explicitly leaves external H+1 unresolved (merged attempt by @0xQueenQ as of 2026-11-09T05:51:52Z).
 - Prior attempt: [4117](https://github.com/lalalune/hyperliquid-source/pull/4117) — traces the ABCI digest quorum descriptor handoff (merged attempt by @0xQueenQ as of 2026-11-09T05:51:52Z).
+- Prior attempt: [7057](https://github.com/lalalune/hyperliquid-source/pull/7057) — adjacent replay-slot writer/reader join; does not establish expected-root provenance (ownership unknown).
 - Acceptance:
   - Trace the expected-root value to a digest-bound producer or define a minimal explicit fixture contract with provenance.
   - Keep local root production separate from externally expected root provenance.
