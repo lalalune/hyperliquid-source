@@ -25,6 +25,7 @@ ANCHORS = {
     0x294FEE1: "488db2503e0000",       # state +0x3e50 as tracker
     0x294FEE8: "4c89b424b8000000",     # record +0x8 = message height
     0x294FF0C: "4c89a424b0000000",     # record +0x0 = signature pointer
+    0x294FF19: "f30f7f8424e0000000",    # record +0x30 = third-argument identity
     0x294FF53: "e8680ce1ff",           # call 0x2760bc0
     0x2760F5D: "e8ae1f1500",           # insert helper 0x28b2f10
     0x548BF2D: "498db424503e0000",     # finalizer uses same owner +0x3e50
@@ -61,7 +62,7 @@ def check_image(image):
 def main():
     image = base.load_image()
     check_image(image)
-    print(f"target {base.SHA256}: 10 byte anchors, 3 call edges, 3 FDEs match")
+    print(f"target {base.SHA256}: 11 byte anchors, 3 call edges, 3 FDEs match")
 
 
 if __name__ == "__main__":
