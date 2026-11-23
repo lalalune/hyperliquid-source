@@ -1,0 +1,118 @@
+# llvm: complete FDE 0x297f560..0x297f70d
+ 297f560: 55                           	push	rbp
+ 297f561: 41 57                        	push	r15
+ 297f563: 41 56                        	push	r14
+ 297f565: 41 55                        	push	r13
+ 297f567: 41 54                        	push	r12
+ 297f569: 53                           	push	rbx
+ 297f56a: 48 83 ec 38                  	sub	rsp, 0x38
+ 297f56e: 48 89 f3                     	mov	rbx, rsi
+ 297f571: 49 89 fe                     	mov	r14, rdi
+ 297f574: 0f b6 46 29                  	movzx	eax, byte ptr [rsi + 0x29]
+ 297f578: 48 8d 0d 0d 0d c8 fd         	lea	rcx, [rip - 0x237f2f3]  # 0x60028c
+ 297f57f: 48 63 04 81                  	movsxd	rax, dword ptr [rcx + 4*rax]
+ 297f583: 48 01 c8                     	add	rax, rcx
+ 297f586: ff e0                        	jmp	rax
+ 297f588: 49 89 d7                     	mov	r15, rdx
+ 297f58b: 4c 8b 63 20                  	mov	r12, qword ptr [rbx + 0x20]
+ 297f58f: c6 43 28 00                  	mov	byte ptr [rbx + 0x28], 0x0
+ 297f593: 4c 8b 6b 10                  	mov	r13, qword ptr [rbx + 0x10]
+ 297f597: 48 8b 6b 18                  	mov	rbp, qword ptr [rbx + 0x18]
+ 297f59b: bf 20 00 00 00               	mov	edi, 0x20
+ 297f5a0: ff 15 da fe b5 03            	call	qword ptr [rip + 0x3b5feda] # 0x64df480
+ 297f5a6: 48 85 c0                     	test	rax, rax
+ 297f5a9: 0f 84 ca 00 00 00            	je	0x297f679 <.text+0x1566379>
+ 297f5af: 48 89 c6                     	mov	rsi, rax
+ 297f5b2: 4c 89 20                     	mov	qword ptr [rax], r12
+ 297f5b5: 4c 89 68 08                  	mov	qword ptr [rax + 0x8], r13
+ 297f5b9: 48 89 68 10                  	mov	qword ptr [rax + 0x10], rbp
+ 297f5bd: c6 40 18 00                  	mov	byte ptr [rax + 0x18], 0x0
+ 297f5c1: 48 89 03                     	mov	qword ptr [rbx], rax
+ 297f5c4: 48 8d 05 f5 34 ac 03         	lea	rax, [rip + 0x3ac34f5]  # 0x6442ac0
+ 297f5cb: 48 89 43 08                  	mov	qword ptr [rbx + 0x8], rax
+ 297f5cf: 4c 89 fa                     	mov	rdx, r15
+ 297f5d2: eb 07                        	jmp	0x297f5db <.text+0x15662db>
+ 297f5d4: 48 8b 33                     	mov	rsi, qword ptr [rbx]
+ 297f5d7: 48 8b 43 08                  	mov	rax, qword ptr [rbx + 0x8]
+ 297f5db: 48 8d 7c 24 20               	lea	rdi, [rsp + 0x20]
+ 297f5e0: ff 50 18                     	call	qword ptr [rax + 0x18]
+ 297f5e3: 31 c0                        	xor	eax, eax
+ 297f5e5: 48 3b 44 24 20               	cmp	rax, qword ptr [rsp + 0x20]
+ 297f5ea: 71 11                        	jno	0x297f5fd <.text+0x15662fd>
+ 297f5ec: 48 b8 00 00 00 00 00 00 00 80	movabs	rax, -0x8000000000000000
+ 297f5f6: 49 89 06                     	mov	qword ptr [r14], rax
+ 297f5f9: b0 03                        	mov	al, 0x3
+ 297f5fb: eb 67                        	jmp	0x297f664 <.text+0x1566364>
+ 297f5fd: 48 8b 44 24 30               	mov	rax, qword ptr [rsp + 0x30]
+ 297f602: 48 89 44 24 10               	mov	qword ptr [rsp + 0x10], rax
+ 297f607: 0f 10 44 24 20               	movups	xmm0, xmmword ptr [rsp + 0x20]
+ 297f60c: 0f 29 04 24                  	movaps	xmmword ptr [rsp], xmm0
+ 297f610: 4c 8b 3b                     	mov	r15, qword ptr [rbx]
+ 297f613: 4c 8b 63 08                  	mov	r12, qword ptr [rbx + 0x8]
+ 297f617: 49 8b 04 24                  	mov	rax, qword ptr [r12]
+ 297f61b: 48 85 c0                     	test	rax, rax
+ 297f61e: 74 05                        	je	0x297f625 <.text+0x1566325>
+ 297f620: 4c 89 ff                     	mov	rdi, r15
+ 297f623: ff d0                        	call	rax
+ 297f625: 49 8b 74 24 08               	mov	rsi, qword ptr [r12 + 0x8]
+ 297f62a: 48 85 f6                     	test	rsi, rsi
+ 297f62d: 74 22                        	je	0x297f651 <.text+0x1566351>
+ 297f62f: 49 8b 44 24 10               	mov	rax, qword ptr [r12 + 0x10]
+ 297f634: f3 48 0f bc c8               	tzcnt	rcx, rax
+ 297f639: 31 d2                        	xor	edx, edx
+ 297f63b: 48 39 f0                     	cmp	rax, rsi
+ 297f63e: 0f 47 d1                     	cmova	edx, ecx
+ 297f641: 48 83 f8 11                  	cmp	rax, 0x11
+ 297f645: 0f 43 d1                     	cmovae	edx, ecx
+ 297f648: 4c 89 ff                     	mov	rdi, r15
+ 297f64b: ff 15 4f fe b5 03            	call	qword ptr [rip + 0x3b5fe4f] # 0x64df4a0
+ 297f651: 48 8b 44 24 10               	mov	rax, qword ptr [rsp + 0x10]
+ 297f656: 49 89 46 10                  	mov	qword ptr [r14 + 0x10], rax
+ 297f65a: 0f 28 04 24                  	movaps	xmm0, xmmword ptr [rsp]
+ 297f65e: 41 0f 11 06                  	movups	xmmword ptr [r14], xmm0
+ 297f662: b0 01                        	mov	al, 0x1
+ 297f664: 88 43 29                     	mov	byte ptr [rbx + 0x29], al
+ 297f667: 4c 89 f0                     	mov	rax, r14
+ 297f66a: 48 83 c4 38                  	add	rsp, 0x38
+ 297f66e: 5b                           	pop	rbx
+ 297f66f: 41 5c                        	pop	r12
+ 297f671: 41 5d                        	pop	r13
+ 297f673: 41 5e                        	pop	r14
+ 297f675: 41 5f                        	pop	r15
+ 297f677: 5d                           	pop	rbp
+ 297f678: c3                           	ret
+ 297f679: bf 08 00 00 00               	mov	edi, 0x8
+ 297f67e: be 20 00 00 00               	mov	esi, 0x20
+ 297f683: ff 15 07 fe b5 03            	call	qword ptr [rip + 0x3b5fe07] # 0x64df490
+ 297f689: 0f 0b                        	ud2
+ 297f68b: 48 8d 3d 3e 3e ac 03         	lea	rdi, [rip + 0x3ac3e3e]  # 0x64434d0
+ 297f692: ff 15 c8 1c b6 03            	call	qword ptr [rip + 0x3b61cc8] # 0x64e1360
+ 297f698: 48 8d 3d 31 3e ac 03         	lea	rdi, [rip + 0x3ac3e31]  # 0x64434d0
+ 297f69f: ff 15 c3 1c b6 03            	call	qword ptr [rip + 0x3b61cc3] # 0x64e1368
+ 297f6a5: 49 89 c6                     	mov	r14, rax
+ 297f6a8: 49 8b 74 24 08               	mov	rsi, qword ptr [r12 + 0x8]
+ 297f6ad: 48 85 f6                     	test	rsi, rsi
+ 297f6b0: 74 3d                        	je	0x297f6ef <.text+0x15663ef>
+ 297f6b2: 49 8b 44 24 10               	mov	rax, qword ptr [r12 + 0x10]
+ 297f6b7: f3 48 0f bc c8               	tzcnt	rcx, rax
+ 297f6bc: 31 d2                        	xor	edx, edx
+ 297f6be: 48 39 f0                     	cmp	rax, rsi
+ 297f6c1: 0f 47 d1                     	cmova	edx, ecx
+ 297f6c4: 48 83 f8 11                  	cmp	rax, 0x11
+ 297f6c8: 0f 43 d1                     	cmovae	edx, ecx
+ 297f6cb: 4c 89 ff                     	mov	rdi, r15
+ 297f6ce: ff 15 cc fd b5 03            	call	qword ptr [rip + 0x3b5fdcc] # 0x64df4a0
+ 297f6d4: 4c 89 f7                     	mov	rdi, r14
+ 297f6d7: c6 43 29 02                  	mov	byte ptr [rbx + 0x29], 0x2
+ 297f6db: e8 70 13 a7 03               	call	0x63f0a50 <_Unwind_Resume@plt>
+ 297f6e0: 49 89 c6                     	mov	r14, rax
+ 297f6e3: 48 8b 3b                     	mov	rdi, qword ptr [rbx]
+ 297f6e6: 48 8b 73 08                  	mov	rsi, qword ptr [rbx + 0x8]
+ 297f6ea: e8 a1 25 06 00               	call	0x29e1c90 <.text+0x15c8990>
+ 297f6ef: 4c 89 f7                     	mov	rdi, r14
+ 297f6f2: c6 43 29 02                  	mov	byte ptr [rbx + 0x29], 0x2
+ 297f6f6: e8 55 13 a7 03               	call	0x63f0a50 <_Unwind_Resume@plt>
+ 297f6fb: ff 15 bf fd b5 03            	call	qword ptr [rip + 0x3b5fdbf] # 0x64df4c0
+ 297f701: 48 89 c7                     	mov	rdi, rax
+ 297f704: c6 43 29 02                  	mov	byte ptr [rbx + 0x29], 0x2
+ 297f708: e8 43 13 a7 03               	call	0x63f0a50 <_Unwind_Resume@plt>

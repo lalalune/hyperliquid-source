@@ -1,0 +1,43 @@
+{
+  "checked_at_utc": "2026-11-22T07:14:36Z",
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "issue": {
+    "number": 3921,
+    "url": "https://github.com/lalalune/hyperliquid-source/issues/3921",
+    "state": "OPEN",
+    "assignees": [],
+    "first_step": "Close one position or vault-summary request from actual dispatch through coherent state snapshot and complete serialized response, including async error and cancellation paths."
+  },
+  "open_pull_request_audit": {
+    "count": 132,
+    "method": "gh api --paginate repos/lalalune/hyperliquid-source/pulls?state=open&per_page=100; filter every returned PR body for 297f560, 2979c10, 29b1d20, 64430f0, small_vault_summaries_get, and vault query future",
+    "result": "No open PR body matched any query term."
+  },
+  "all_state_search": {
+    "queries": ["297f560", "2979c10", "29b1d20", "64430f0", "small_vault_summaries_get", "vault summary async"],
+    "result": "The address and async-phrase queries returned no PR. small_vault_summaries_get returned merged PR #1759 only; its body is node #94 query internals, not this node #115 poll envelope. GitHub search is a secondary check; exact open bodies were scanned directly."
+  },
+  "related_existing_work": [
+    {
+      "path": "research/work-items/RE-001-node115-vault-summary-refresh-trigger/README.md",
+      "relationship": "Owns the vault summary refresh trigger and final query call context. This packet reuses that caller record and claims only the poll-vtable binding/state envelope."
+    },
+    {
+      "path": "research/work-items/RE-001-node115-loc-edge-2979c48/README.md",
+      "relationship": "Owns the inner poll FDE's source-location/call edge at 0x2979c48..0x2979c61. This packet references its target address and does not claim or export that FDE."
+    },
+    {
+      "path": "research/work-items/RE-001-statisticsimpl-vtable-115/dispatch.tsv",
+      "relationship": "Lists a shared vtable slot-0x18 dispatch to 0x297f560. It is a dispatch census, not a claim of this vault caller's async result behavior."
+    },
+    {
+      "path": "research/work-items/RE-001-tablecache-tombstone-consumers-115/dispatch.tsv",
+      "relationship": "Lists slot-0x18 calls into 0x297f560 among generic dispatch context; no vault query result-state claim."
+    },
+    {
+      "path": "https://github.com/lalalune/hyperliquid-source/pull/1759",
+      "relationship": "Merged node #94 record-selection/query internals; it is used only as historical context, not evidence for node #115."
+    }
+  ],
+  "limits": "Repository-wide grep and open PR body scan found related address/context references; these do not prove no related closed PR exists. PR #1759 is node #94 and does not claim this node #115 poll envelope."
+}
