@@ -50,13 +50,15 @@ class ActionWireVariantDispatchCrosswalkTests(unittest.TestCase):
         with self.assertRaisesRegex(packet.EvidenceError, "targets are not unique"):
             packet.check_image(packet.Image(bytes(data)), self.variants)
 
-    def test_target_prefix_change_is_detected(self):
+    def test_wrong_binary_digest_is_rejected(self):
         data = bytearray(self.image.data)
-        _, original = packet.check_image(self.image, self.variants)
-        offset = self.image.offset(original[0]["target_va"], 1)
+        offset = self.image.offset(packet.DISPATCH_FDE[0], 1)
         data[offset] ^= 1
-        _, changed = packet.check_image(packet.Image(bytes(data)), self.variants)
-        self.assertNotEqual(original[0]["target_prefix_12_bytes_hex"], changed[0]["target_prefix_12_bytes_hex"])
+        with tempfile.TemporaryDirectory() as directory:
+            candidate = Path(directory) / "hl-node"
+            candidate.write_bytes(data)
+            with self.assertRaisesRegex(packet.EvidenceError, "target SHA-256 mismatch"):
+                packet.load_image(candidate)
 
     def test_manifest_reproducible(self):
         with tempfile.TemporaryDirectory() as directory:
