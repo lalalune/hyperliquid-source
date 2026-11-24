@@ -1,4 +1,4 @@
-//! Reconstructed input-acceptance predicates for two node #115 CLI validators.
+//! Reconstructed input-acceptance predicates for selected node #115 CLI validators.
 
 pub const TARGET_SHA256: &str = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301";
 
@@ -30,6 +30,18 @@ pub fn accepts_u64_decimal(input: &[u8]) -> bool {
 /// The observed Boolean callback admits only the exact lowercase ASCII words.
 pub fn accepts_lowercase_bool(input: &[u8]) -> bool {
     matches!(input, b"true" | b"false")
+}
+
+/// Validate the whole `node-ip` option and return the diagnostic text observed
+/// at the CLI callback. Its success case does not expose the parsed octets.
+pub fn validate_node_ip(input: &[u8]) -> Result<(), &'static str> {
+    if input.len() <= 15 {
+        let mut remaining = input;
+        if node115_host_ip_gates::read_ipv4(&mut remaining).is_some() && remaining.is_empty() {
+            return Ok(());
+        }
+    }
+    Err("NodeIpParseError")
 }
 
 #[cfg(test)]
