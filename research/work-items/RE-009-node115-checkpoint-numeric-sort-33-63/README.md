@@ -6,7 +6,14 @@ The [restore canonical-height packet](../RE-017-node115-restore-canonical-height
 
 For a selected N=33..511 valid unsigned vector, a nondecreasing scan returns unchanged; a strictly decreasing scan uses the recorded vector-plus-scalar reversal; mixed input enters the partition worker with budget 2*floor(log2(N)). The cited contracts describe a median pivot, strict partition, the equal-prefix shortcut under its propagated lower bound, smaller recursive/tail slices, small-range sorting and zero-budget heap fallback. Assuming each cited contract, valid buffers, normal returns and no interfering mutation, this composition returns the same multiset in ascending unsigned order. Existing restore evidence separately reverses the rendered candidate rows, subject to its own formatting and filesystem assumptions.
 
-This is a dependency-bound static composition, not independent verification of every cited packet, an execution of the target, evidence that a real checkpoint was selected, or a state-root match. These referenced PRs are unmerged and require review. Zero-budget and small-range behavior in the synthetic model are assumptions backed by the cited evidence, not reimplemented target behavior.
+This is a dependency-bound static composition, not independent verification of every cited packet, an execution of the target, evidence that a real checkpoint was selected, or a state-root match. The linked prerequisite PRs merged on 2026-11-09; the composition still depends on their scoped contracts. Zero-budget and small-range behavior in the synthetic model are assumptions backed by the cited evidence, not reimplemented target behavior.
+
+On duplicate heights the old model could select an equal value at the wrong
+address before partitioning. For N≥64 the model now preserves the called
+helper's tie choice. The [pivot packet](../RE-009-node115-checkpoint-large-sort-ninther/README.md#which-address-wins-a-tie)
+reproduces a mixed 64-entry input where the old first swap moved zero to slot
+36; the captured caller's address calculation places it at slot 32. The
+ascending multiset conclusion still holds.
 
 ## Reproduce
 
@@ -84,7 +91,11 @@ def walk(v,prior,budget):
  if prior is not None:assert all(x>=prior for x in v)
  if len(v)<33 or budget==0:return sorted(v) # cited small/heap contracts
  n=len(v);q=n//8
- def middle(ids):return sorted(ids,key=lambda i:v[i])[1]
+ # At N>=64 the called pivot helper breaks equal keys in reverse argument
+ # order. The smaller inline path here remains qualified for pivot value only.
+ def middle(ids):
+  candidates=reversed(ids) if n>=64 else ids
+  return sorted(candidates,key=lambda i:v[i])[1]
  ids=(0,4*q,7*q)
  if n>=64:
   r=q//8
