@@ -19,7 +19,7 @@ class EvidenceTests(unittest.TestCase):
         cls.data = path.TARGET.read_bytes()
         cls.secs = sections(cls.data)
         cls.bundle = path.collect(cls.data)
-        cls.functions, _, cls.switches, cls.edges, cls.relocs, _, cls.literals, constants, cls.summary = cls.bundle
+        cls.functions, _, cls.switches, cls.edges, cls.relocs, _, cls.literals, constants, cls.summary, cls.exception_sites = cls.bundle
         cls.constants = {row[0]: row[-1] for row in constants}
 
     def test_authenticated_target_and_summary(self):
@@ -31,6 +31,36 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(self.summary['selected_indirect_sites'], 5)
         self.assertEqual(self.summary['selected_relocations'], 3)
         self.assertEqual(self.summary['switch_entries_per_table'], 92)
+        self.assertEqual(self.summary['selected_lsda_call_sites'], 25)
+
+    def test_unwind_landings_do_not_cover_the_tree_insert_call(self):
+        sites = [row for row in self.exception_sites if row[0] == 'relationship_upsert']
+        self.assertEqual(len(sites), 5)
+        self.assertEqual([(row[4], row[5], row[6], row[7]) for row in sites], [
+            (0x3ce1080, 0x3ce11c0, None, 0),
+            (0x3ce11c0, 0x3ce11cb, 0x3ce158e, 0),
+            (0x3ce11cb, 0x3ce13a0, None, 0),
+            (0x3ce13a0, 0x3ce13ab, 0x3ce156b, 0),
+            (0x3ce13ab, 0x3ce15ad, None, 0),
+        ])
+        insert = next(row for row in self.edges if row[0] == 'upsert_insert_tree')
+        covering = [row for row in sites if row[4] <= insert[2] < row[5]]
+        self.assertEqual(len(covering), 1)
+        self.assertIsNone(covering[0][6])
+        by_function = {row[0]: row for row in self.functions}
+        self.assertIsNotNone(by_function['relationship_upsert'][6])
+        self.assertIsNone(by_function['tree_insert'][6])
+        self.assertIsNone(by_function['finalize_core'][6])
+
+    def test_lsda_corruption_is_rejected(self):
+        fde = next(f for f in path.eh_frame_records(self.data, self.secs)[1]
+                   if f['start'] == 0x3ce1080)
+        encoding_va = 0x3001ea
+        off = path.file_offset(self.secs, encoding_va, 1)
+        changed = bytearray(self.data)
+        changed[off] = 0
+        with self.assertRaisesRegex(ValueError, 'call-site encoding'):
+            path.read_lsda_sites(changed, self.secs, 'relationship_upsert', fde)
 
     def test_wrong_digest_rejected(self):
         with self.assertRaisesRegex(ValueError, 'SHA-256 mismatch'):
