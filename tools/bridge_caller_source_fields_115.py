@@ -9,7 +9,8 @@ from pathlib import Path
 import struct
 import sys
 
-from capstone import Cs, CS_ARCH_X86, CS_MODE_64, __version__ as CAPSTONE_VERSION
+from capstone import Cs, CS_ARCH_X86, CS_MODE_64, CS_OP_MEM, __version__ as CAPSTONE_VERSION
+from capstone.x86_const import X86_REG_RSP
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
@@ -35,13 +36,15 @@ TAG5_SPANS = (
     (0x08, 0x38, 8, 0x44D722A, 0x44D72D6),
 )
 TAG4_SPANS = (
-    (0x00, 0x00, 16, 0x44D6A71, 0x44D6A7B),
-    (0x10, 0x10, 16, 0x44D6A76, 0x44D6A83),
-    (0x20, 0x20, 16, 0x44D6A8B, 0x44D6AB4),
-    (0x30, 0x30, 16, 0x44D6A91, 0x44D6ABD),
-    (0x40, 0x40, 16, 0x44D6A97, 0x44D6AA2),
-    (0x50, 0x50, 16, 0x44D6A9D, 0x44D6AAB),
-    (0x60, 0x60, 8, 0x44D6AC5, 0x44D6AC9),
+    # Destination offsets are relative to the post-prologue RSP. The stores
+    # are not a contiguous copy into the buffer passed at RSP+0x1d0.
+    (0x00, 0x1D0, 16, 0x44D6A71, 0x44D6A7B),
+    (0x10, 0x1E0, 16, 0x44D6A76, 0x44D6A83),
+    (0x20, 0x230, 16, 0x44D6A8B, 0x44D6AB4),
+    (0x30, 0x240, 16, 0x44D6A91, 0x44D6ABD),
+    (0x40, 0x210, 16, 0x44D6A97, 0x44D6AA2),
+    (0x50, 0x220, 16, 0x44D6A9D, 0x44D6AAB),
+    (0x60, 0x250, 8, 0x44D6AC5, 0x44D6AC9),
 )
 
 
@@ -77,6 +80,7 @@ def collect(binary: Path) -> dict:
     _, fdes = eh_frame_records(data, rows)
     by_start = {row["start"]: row for row in fdes}
     md = Cs(CS_ARCH_X86, CS_MODE_64)
+    md.detail = True
     functions, instructions = [], []
     decoded_by_va = {}
     for start in FUNCTIONS:
@@ -101,6 +105,8 @@ def collect(binary: Path) -> dict:
     # relocated outer bridge helper with a local record.
     expected_anchors = {
         0x44D6AD6: ("lea", "rsi, [rsp + 0x1d0]"),
+        0x44D6ADE: ("call", "qword ptr [rip + 0x20121d4]"),
+        0x44D6D2E: ("call", "0x46e1cb0"),
         0x44D6CC2: ("mov", "byte ptr [rsp + 0x10], 4"),
         0x44D6CD8: ("call", "qword ptr [rip + 0x2013e0a]"),
         0x44D72DB: ("mov", "byte ptr [rsp], 5"),
@@ -111,6 +117,8 @@ def collect(binary: Path) -> dict:
         require(insn is not None and (insn.mnemonic, insn.op_str) == expected,
                 f"changed caller anchor at {va:#x}")
     relocs = relative_relocations(data, rows)
+    require(relocs.get(0x64E8CB8) == (0, 8, 0x364CC80),
+            "tag-4 preparatory helper relocation changed")
     require(relocs.get(OUTER_SLOT) == (0, 8, OUTER_HELPER), "outer helper relocation changed")
     require(relocs.get(CONSTRUCTOR_SLOT) == (0, 8, CONSTRUCTOR), "tagged constructor relocation changed")
 
@@ -119,8 +127,12 @@ def collect(binary: Path) -> dict:
         for src, dst, size, load_va, store_va in spans:
             require(load_va in decoded_by_va, f"missing {variant} source instruction {load_va:#x}")
             require(store_va in decoded_by_va, f"missing {variant} destination instruction {store_va:#x}")
+            store = decoded_by_va[store_va]
+            require(store.operands and store.operands[0].type == CS_OP_MEM and
+                    store.operands[0].mem.base == X86_REG_RSP and store.operands[0].mem.disp == dst,
+                    f"changed {variant} stack destination at {store_va:#x}")
             span_facts.append((variant, f"r8+{src:#x}",
-                               f"{'helper_input' if variant == 'tag4' else 'tag5_record'}+{dst:#x}",
+                               f"{'rsp' if variant == 'tag4' else 'tag5_record'}+{dst:#x}",
                                size, load_va, decoded_by_va[load_va].bytes.hex(),
                                store_va, decoded_by_va[store_va].bytes.hex()))
     return {
@@ -131,6 +143,12 @@ def collect(binary: Path) -> dict:
                      "execution": "static decode only; captured executable was not run"},
         "outer_helper": {"slot": hex(OUTER_SLOT), "relocation_type": 8,
                          "symbol_index": 0, "target": hex(OUTER_HELPER)},
+        "tag4_preparer": {"slot": hex(0x64E8CB8), "relocation_type": 8,
+                           "symbol_index": 0, "target": hex(0x364CC80),
+                           "call_site": hex(0x44D6ADE)},
+        "tag4_followup_helper": {"target": hex(0x46E1CB0),
+                                 "call_site": hex(0x44D6D2E),
+                                 "arguments": ["rsp+0x10", "rsp+0x170"]},
         "tagged_constructor": {"slot": hex(CONSTRUCTOR_SLOT), "relocation_type": 8,
                                "symbol_index": 0, "target": hex(CONSTRUCTOR)},
         "functions": functions,

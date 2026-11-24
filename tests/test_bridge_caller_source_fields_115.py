@@ -33,17 +33,27 @@ class BridgeCallerSourceFields115Tests(unittest.TestCase):
             ("r8+0x8", "tag5_record+0x38", 8),
         ])
 
-    def test_tag4_passes_fixed_r8_prefix_to_record_helper(self):
+    def test_tag4_source_spans_use_observed_stack_destinations(self):
         rows = [(row[1], row[2], row[3]) for row in self.result["source_spans"] if row[0] == "tag4"]
         self.assertEqual(rows, [
-            ("r8+0x0", "helper_input+0x0", 16),
-            ("r8+0x10", "helper_input+0x10", 16),
-            ("r8+0x20", "helper_input+0x20", 16),
-            ("r8+0x30", "helper_input+0x30", 16),
-            ("r8+0x40", "helper_input+0x40", 16),
-            ("r8+0x50", "helper_input+0x50", 16),
-            ("r8+0x60", "helper_input+0x60", 8),
+            ("r8+0x0", "rsp+0x1d0", 16),
+            ("r8+0x10", "rsp+0x1e0", 16),
+            ("r8+0x20", "rsp+0x230", 16),
+            ("r8+0x30", "rsp+0x240", 16),
+            ("r8+0x40", "rsp+0x210", 16),
+            ("r8+0x50", "rsp+0x220", 16),
+            ("r8+0x60", "rsp+0x250", 8),
         ])
+
+    def test_tag4_preparer_and_followup_calls_are_distinct(self):
+        self.assertEqual(self.result["tag4_preparer"], {
+            "slot": "0x64e8cb8", "relocation_type": 8,
+            "symbol_index": 0, "target": "0x364cc80", "call_site": "0x44d6ade",
+        })
+        self.assertEqual(self.result["tag4_followup_helper"], {
+            "target": "0x46e1cb0", "call_site": "0x44d6d2e",
+            "arguments": ["rsp+0x10", "rsp+0x170"],
+        })
 
     def test_shared_relocated_outer_helper(self):
         self.assertEqual(self.result["outer_helper"], {

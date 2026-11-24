@@ -32,7 +32,19 @@ The two complete extents contain 680 instructions across 3,696 bytes:
 
 `functions.tsv` gives file offsets and body hashes. `instructions.tsv` contains every instruction byte and decoded instruction. `source-spans.tsv` contains both the load and store anchors for every copied span. The collector also confirms the `.rela.dyn` bindings `0x64eaae8 -> 0x4526e40` (shared bridge helper) and `0x64eab68 -> 0x4526230` (tagged-record constructor), each an `R_X86_64_RELATIVE` relocation with symbol index zero.
 
-At entry to the tag-4 FDE, `R13` retains incoming `R8`. The caller copies seven adjacent spans, `R8+0x00..0x67`, into a stack buffer of the same relative layout at `helper_input+0x00..0x67`, then passes that buffer to `0x46e1cb0` at `0x44d6ad6`. On the selected constructor route it writes tag byte 4 into a separate local record and calls the shared helper through `0x64eaae8` at `0x44d6cd8`. This proves the forwarded byte ranges and branch shape; it does not identify the copied values or prove that the helper accepts them.
+At entry to the tag-4 FDE, `R13` retains incoming `R8`. The seven source spans are copied to these stack-relative destinations:
+
+| Incoming source | Destination from post-prologue `RSP` | Length |
+| --- | --- | ---: |
+| `R8+0x00` | `+0x1d0` | 16 |
+| `R8+0x10` | `+0x1e0` | 16 |
+| `R8+0x20` | `+0x230` | 16 |
+| `R8+0x30` | `+0x240` | 16 |
+| `R8+0x40` | `+0x210` | 16 |
+| `R8+0x50` | `+0x220` | 16 |
+| `R8+0x60` | `+0x250` | 8 |
+
+The first two spans form the 32-byte region at `RSP+0x1d0`; the other five are stored at the listed, different offsets. At `0x44d6ad6` the caller loads `RSP+0x1d0` into `RSI`; the actual call at `0x44d6ade` goes through relative relocation slot `0x64e8cb8 -> 0x364cc80`, with `RDI=&[RSP+0x10]`. This is not the call to `0x46e1cb0`. On the selected result-tag `0x1a2` route, the later direct call at `0x44d6d2e` targets `0x46e1cb0` with `RDI=&[RSP+0x10]` and `RSI=&[RSP+0x170]`. The packet records these call boundaries and raw spans only; helper semantics remain unresolved. On the selected constructor route it writes tag byte 4 into a separate local record and calls the shared helper through `0x64eaae8` at `0x44d6cd8`.
 
 The tag-5 caller builds a 64-byte local record with tag byte 5. Its initialized source spans are:
 
