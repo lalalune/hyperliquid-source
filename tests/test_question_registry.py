@@ -42,6 +42,20 @@ class QuestionRegistryTests(unittest.TestCase):
         self.assertNotIn('qcp-checkpoint-replay-root-fixture', ready)
         self.assertIn('Reservation: **unknown**', rendered)
 
+    def test_review_queue_distinguishes_a_complete_snapshot_from_a_missing_attempt(self):
+        path = self.root / 'research/questions/ownership-snapshot.json'
+        snapshot = json.loads(path.read_text())
+        for pull in snapshot['pull_requests'].values():
+            pull.update(state='merged', review_state='merged')
+        path.write_text(json.dumps(snapshot))
+        _, rendered = REGISTRY.render_question_catalogue(self.root)
+        self.assertIn(f"No linked attempts awaited review as of {snapshot['fetched_at']}", rendered)
+        del snapshot['pull_requests']['5584']
+        path.write_text(json.dumps(snapshot))
+        _, rendered = REGISTRY.render_question_catalogue(self.root)
+        self.assertIn('Unknown for attempts missing from the snapshot', rendered)
+        self.assertNotIn('No linked attempts awaited review', rendered)
+
     def test_wrong_target_digest_is_rejected(self):
         self.change('qcp-expected-root-provenance', lambda row: row['target'].update(sha256='0' * 64))
         with self.assertRaisesRegex(ValueError, 'target digest differs'):

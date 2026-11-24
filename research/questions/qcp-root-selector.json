@@ -12,12 +12,12 @@
     "include": ["The selected root setup caller", "The selector fallback decision path and repeated cell reads"],
     "exclude": ["Runtime CPU feature values", "All writers and synchronization for the selector cell", "Digest equality or whole-state correctness"]
   },
-  "readiness": "in-progress",
-  "evidence_status": "unreviewed",
+  "readiness": "recorded",
+  "evidence_status": "reviewed",
   "prior_attempts": [
-    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5584", "relation": "open static packet for selector production and fallback branches"}
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5584", "relation": "selector production and fallback branches"}
   ],
-  "remaining_gap": "The cited PR is open. The record does not treat an open attempt as reviewed evidence or as a completed component gate.",
+  "remaining_gap": "The fallback edge and repeated cell reads are recorded. Runtime CPU feature values and the behavior of the cell under concurrent access remain unresolved.",
   "dependencies": [],
   "downstream_consumer": "A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.",
   "acceptance_requirements": [
@@ -26,7 +26,9 @@
     "Do not infer runtime CPU values or complete the RE-009 gate from a partial selector packet."
   ],
   "required_capabilities": ["Static x86-64 control-flow and relocation analysis", "Independent packet reproduction"],
-  "evidence_review": [],
+  "evidence_review": [
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5584", "decision": "Merged in 791e0ffceea75d14b15d82e6bc19294a6ea2e659. The reproduced selector packet binds the selected fallback to 0x5cadd50 and the cell to 0x6500098. Runtime values remain unknown."}
+  ],
   "linked_issue": {"url": "https://github.com/lalalune/hyperliquid-source/issues/3923", "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"},
   "pilot_issue": "https://github.com/lalalune/hyperliquid-source/issues/5391"
 }

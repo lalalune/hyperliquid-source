@@ -3,8 +3,7 @@
 This five-record pilot exists to unblock a concrete #115 task: connecting the
 selected checkpoint restore and first replay path to a root-validation fixture.
 The broad queue (`docs/TASKS.md`) and component epic (#3923) do not identify that
-work's exact prerequisites or remaining gaps. The evidence is spread across
-merged #3988, #4011, #4117, and #4157, plus open #5584 and #5591. In particular,
+work's exact prerequisites or remaining gaps. The original pilot drew on #3988, #4011, #4117, #4157, #5584 and #5591. In particular,
 #4157 leaves the external H+1 expected-root source unresolved, while #5584 and
 #5591 record related selector and selected-writer attempts without a shared
 dependency record. This made it possible to start downstream fixture work
@@ -67,8 +66,23 @@ are the authenticated node #115 artifact and the retained #4157/#4117 packets,
 and it has no hard dependencies. A reader can select that question, trace the
 expected H+1 root producer, and stop at the recorded provenance boundary without
 first re-auditing all six attempts. The fixture question remains blocked on
-that result and the recorded selector/writer review conditions. This resolves
-the task-selection ambiguity; it does not resolve the unknown root semantics.
+the expected-root input contract. The selector and
+writer PRs merged together at `791e0ffceea75d14b15d82e6bc19294a6ea2e659`.
+To check their shared contract against the active node, run both static controls:
+
+```sh
+python3 research/work-items/RE-009-node115-root-digest-selector/verify.py --self-test
+python3 research/work-items/RE-009-node115-root-digest-cell-writer/verify.py --self-test
+```
+
+Both reports identify cell `0x6500098` on the same target digest. The selector's
+fallback `0x5cadd50` equals the writer's FDE entry. The writer records three
+eight-byte stores at offsets 0, 8 and 16. Both packets reject a changed
+relocation, and their other controls reject a changed selector mask and store
+offset respectively. The packets establish neither a live CPU value nor an
+external H+1 root.
+
+This resolves the task-selection ambiguity; it does not resolve the unknown root semantics.
 
 The pilot does not yet demonstrate active reservation grants, two concurrent claim attempts,
 expiry, or reassignment in a live coordinator workflow; no coordinator has

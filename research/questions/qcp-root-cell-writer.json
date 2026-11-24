@@ -12,13 +12,13 @@
     "include": ["The fallback target and its authenticated relocation", "The selected destination and exact store offsets"],
     "exclude": ["All other writers and readers", "Symbolic names for the stored qwords", "Synchronization and runtime CPUID values"]
   },
-  "readiness": "in-progress",
-  "evidence_status": "unreviewed",
+  "readiness": "recorded",
+  "evidence_status": "reviewed",
   "prior_attempts": [
-    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5584", "relation": "open selector packet that leaves the fallback writer unresolved"},
-    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5591", "relation": "open selected-writer packet with three store offsets and bounded unknowns"}
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5584", "relation": "selector packet that identifies the fallback entry"},
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5591", "relation": "selected-writer packet with three store offsets"}
   ],
-  "remaining_gap": "The selected writer packet is open and does not establish exclusivity, synchronization, or the meaning of the stored words. Its result must not be treated as a complete selector-cell contract.",
+  "remaining_gap": "The selected fallback writes three words into the selector cell. Writer exclusivity, synchronization, and the meanings of those words remain unresolved.",
   "dependencies": [
     {"question_id": "qcp-root-selector", "kind": "hard", "contract": "selected fallback target and destination cell", "condition": "The selector-to-fallback edge and destination relocation are reviewed together."}
   ],
@@ -29,7 +29,9 @@
     "Do not assign field meanings or a concurrency contract without evidence."
   ],
   "required_capabilities": ["Static x86-64 instruction and relocation analysis", "Negative-control evidence verification"],
-  "evidence_review": [],
+  "evidence_review": [
+    {"url": "https://github.com/lalalune/hyperliquid-source/pull/5591", "decision": "Merged in 791e0ffceea75d14b15d82e6bc19294a6ea2e659. The reproduced writer entry and destination match the selector packet, with stores at offsets 0, 8, and 16."}
+  ],
   "linked_issue": {"url": "https://github.com/lalalune/hyperliquid-source/issues/3923", "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"},
   "pilot_issue": "https://github.com/lalalune/hyperliquid-source/issues/5391"
 }
