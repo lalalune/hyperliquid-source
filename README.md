@@ -16,7 +16,7 @@ an integrated, runnable node remains in progress.
 
 ![Node #115 progress](docs/assets/research-progress.svg)
 
-**241 active Rust implementation areas · 204 top-level Cargo manifests · 4627 #115 research work items.**
+**242 active Rust implementation areas · 205 top-level Cargo manifests · 4628 #115 research work items.**
 
 These inventory counts describe available work, not completed components.
 
@@ -38,7 +38,7 @@ Byte percentages cover the authenticated comparison registry, including dependen
 they do not measure whole-node completion or remaining engineering effort.
 
 Registered bounded Rust work occurs in **20/23 component work areas**
-(**103 implementation paths**). These are fragment registrations, not completed components.
+(**104 implementation paths**). These are fragment registrations, not completed components.
 Each fragment keeps its own #115 contract; an integrated node executable remains unaccepted.
 
 <details open>
