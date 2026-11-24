@@ -63,7 +63,7 @@ passes field descriptor `0x642f3f0`, and directly calls payload helper
 `0x20647f0` at `0x2b8369c`.
 
 The descriptor begins with an `R_X86_64_RELATIVE` relocation from
-`0x642f3f0` to `0x5e5476`; the adjacent length is 11 bytes, and those bytes
+`0x642f3f0` to `0x5ed54a`; the adjacent length is 11 bytes, and those bytes
 spell `displayName`. The selected action arm's normal path sets `r14d` to
 `0x99` at `0x2b836bc`. Its shared return path stores that qword at output
 offset 0, allocates 0xf0 bytes, copies the object, then returns its pointer in
