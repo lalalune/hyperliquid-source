@@ -291,8 +291,8 @@ def interpret(items):
     else:
         f.inferred('stripped', 'not stripped',
                    '.symtab is present, so static symbols remain; elf.debug_sections records debug sections separately')
-    f.unknown('overflow_checks', 'overflow panic strings exist, but only callers into core panic_const '
-              'helpers from first-party code would show the profile; needs xref analysis (RE-001)')
+    f.unknown('overflow_checks', 'a checked operation constrains that site only. Recover compiler invocations '
+              'or equivalent build records for the relevant crates and their overrides')
     for key, resolve in [
         ('opt_level', 'compare instruction patterns of a rebuilt known function at each opt-level'),
         ('lto', 'cross-crate inlining evidence or a matched rebuild; not stored in the ELF'),
