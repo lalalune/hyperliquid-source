@@ -3,8 +3,8 @@
 - Component ID: bridge / serialization
 - Target release and full SHA-256: Linux x86-64 node #115, `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`
 - Source commit / reference commit: repository base `8f8a38d0d44f0c41a94aa156bb4274777f20fd4d`; public-contract comparison lead pinned at `d7e66aa751ffbd19bfd2b90fd5d9a3d8f32d99ee`
-- Claim status: static observations; ABI field-name mapping and resulting canonical encoding are an evidence-backed reconstruction, not a runtime observation
-- Scope included and excluded: the five tag-5 descriptors, their type normalization, head/tail sizing, word writes, dynamic label tail, and the resulting 224-byte serialized layout. Excludes execution of the captured node, bridge digest/sponge algorithm, signature semantics, and caller authorization.
+- Claim status: static observations; ABI field-name mapping and resulting canonical encoding are an evidence-backed reconstruction, not a runtime observation. The synthetic digest below is a source-model/OpenSSL comparison, not a captured-node output.
+- Scope included and excluded: the five tag-5 descriptors, their type normalization, head/tail sizing, word writes, dynamic label tail, the resulting 224-byte serialized layout, and one synthetic digest vector through the already target-bound #115 Keccak sponge. Excludes execution of the captured node, signature semantics, and caller authorization.
 
 ## Reproduce
 
@@ -17,6 +17,7 @@ objdump -d --start-address=0x169e350 --stop-address=0x169e59b artifacts/node/115
 objdump -d --start-address=0x169df80 --stop-address=0x169e1c4 artifacts/node/115/hl-node
 objdump -d --start-address=0x169de60 --stop-address=0x169df77 artifacts/node/115/hl-node
 cargo test --offline --manifest-path src/node115-bridge-request-abi/Cargo.toml
+python3 research/work-items/RE-005-node115-bridge-request-abi-layout/verify-vector.py
 ```
 
 All inspection is static. The verifier authenticates the full target digest, exact FDE extents, selected instruction bytes, relative jump-table destinations and the encoder relocation. The implementation tests synthetic byte values; they do not execute or differentially compare the native binary.
@@ -41,4 +42,10 @@ The observed widths and byte transformations support the tuple shape. Mapping th
 
 ## Results and limitations
 
-The verifier binds nine exact FDEs, 51 instruction-byte facts, ten selected relative switch-table entries, and one encoder relocation to the authentic #115 binary. One-byte corruption of a tag anchor is rejected. The calculated head/tail dimensions match the independent encoder's constants and tested output length. No completion gate is requested. Still unknown: concrete caller values, live reachability, exact semantic names independent of the contract comparison, and the digest/sponge result. Next question: establish the relation between these 224 bytes and the caller's finalized 32-byte output without claiming signing or authorization behavior.
+The verifier binds nine exact FDEs, 51 instruction-byte facts, ten selected relative switch-table entries, and one encoder relocation to the authentic #115 binary. One-byte corruption of a tag anchor is rejected. The calculated head/tail dimensions match the independent encoder's constants and tested output length. No completion gate is requested. Still unknown: concrete live caller values, runtime reachability, and exact semantic names independent of the contract comparison.
+
+## Synthetic 224-byte digest vector
+
+`synthetic-vector.json` records two distinct 20-byte values, two big-endian u64 values, and the fixed label. The independently encoded five-word head and two-word tail are 224 bytes. `verify-vector.py` checks the full node #115 digest, reconstructs those bytes, and computes the 32-byte output with the target-derived Keccak model in `tools/evm_keccak_ripemd_115.py`; it also compares against local OpenSSL `KECCAK-256`. For this fixture the encoded-input SHA-256 is `9f6bb175f0116f2059a9f67f7846ae9cc9d6731c7914a2a19aaf6edb9da9a0f1` and the Keccak-256 output is `a0d4d56c489cc5bc1bc0aef30e129c519acee3dd42c56d08fd53bd8cc8c6a655`.
+
+The producer packet at `RE-005-node115-bridge-input-producers` statically follows the 17-byte label path through `0x44e96a0`, then passes its returned pointer and length to the target-bound sponge slots and copies the 32-byte result into the outer bridge builder. This vector supplies synthetic field bytes for that already observed path; it does not prove live values, captured-node output, signature validity, authorization, or a complete bridge request schema.
