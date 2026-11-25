@@ -1,0 +1,97 @@
+{
+  "issue": 3917,
+  "target_sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301",
+  "windows": [
+    {"name":"tag5-producer","start":"0x44e96a0","end":"0x44e9835"},
+    {"name":"raw-token-normalizer","start":"0x169dcc0","end":"0x169de5b"},
+    {"name":"request-encoder","start":"0x169e350","end":"0x169e59b"},
+    {"name":"token-word-converter","start":"0x169df80","end":"0x169e1c4"},
+    {"name":"head-size","start":"0x169e650","end":"0x169e6ca"},
+    {"name":"tail-size","start":"0x169e6d0","end":"0x169e7c0"},
+    {"name":"word-vector-writer","start":"0x169e1d0","end":"0x169e342"},
+    {"name":"head-word-writer","start":"0x169e5a0","end":"0x169e649"},
+    {"name":"dynamic-tail-writer","start":"0x169de60","end":"0x169df77"}
+  ],
+  "facts": [
+    {"label":"producer type 6","address":"0x44e972b","hex":"c60306"},
+    {"label":"producer type 0 first","address":"0x44e973f","hex":"c6432800"},
+    {"label":"producer type 0 second","address":"0x44e9743","hex":"c6435000"},
+    {"label":"producer type 4 first","address":"0x44e9747","hex":"c6437804"},
+    {"label":"producer type 4 second","address":"0x44e9752","hex":"c683a000000004"},
+    {"label":"producer first scalar source qword","address":"0x44e96fc","hex":"498b4718"},
+    {"label":"producer second scalar source qword","address":"0x44e9715","hex":"498b4f48"},
+    {"label":"producer first scalar token write","address":"0x44e974b","hex":"48898380000000"},
+    {"label":"producer second scalar token write","address":"0x44e9759","hex":"48898ba8000000"},
+    {"label":"producer five token count","address":"0x44e976d","hex":"48c744241005000000"},
+    {"label":"producer calls encoder slot","address":"0x44e9781","hex":"ff15b969ff01"},
+    {"label":"raw normalization table","address":"0x169dcd3","hex":"488d0552daddfe"},
+    {"label":"raw tag 0 normalized tag and count","address":"0x169dce7","hex":"48b80000000001000000"},
+    {"label":"raw tag 6 dynamic length read","address":"0x169dd62","hex":"488b4618"},
+    {"label":"raw tag 6 length rounds up","address":"0x169dd70","hex":"4883c01f"},
+    {"label":"raw tag 6 length divides by 32","address":"0x169dd74","hex":"48c1e805"},
+    {"label":"raw tag 6 includes its length word","address":"0x169dd81","hex":"ffc0"},
+    {"label":"raw tag 6 stores block count","address":"0x169dd83","hex":"894304"},
+    {"label":"raw tag 6 normalized tag 2","address":"0x169dd8a","hex":"c70302000000"},
+    {"label":"raw tag 6 stores descriptor pointer","address":"0x169dd86","hex":"48897308"},
+    {"label":"encoder normalizes token array","address":"0x169e36c","hex":"488d7c2430"},
+    {"label":"encoder calls normalizer","address":"0x169e371","hex":"e81adeffff"},
+    {"label":"encoder head size call","address":"0x169e3b3","hex":"e898020000"},
+    {"label":"encoder tail size call","address":"0x169e3c4","hex":"e807030000"},
+    {"label":"encoder totals head and tail","address":"0x169e3da","hex":"4401e5"},
+    {"label":"encoder invokes word vector writer","address":"0x169e445","hex":"e886fdffff"},
+    {"label":"encoder flattens serialized words","address":"0x169e49d","hex":"e88eda ffff"},
+    {"label":"head size default 32","address":"0x169e654","hex":"8b0f"},
+    {"label":"head size type0 count","address":"0x169e66c","hex":"8b4704"},
+    {"label":"tail size type2 dispatch table","address":"0x169e6db","hex":"488d0da2d0ddfe"},
+    {"label":"tail size type2 count multiply","address":"0x169e6eb","hex":"8b5f04"},
+    {"label":"tail size type2 word scaling","address":"0x169e6fa","hex":"c1e305"},
+    {"label":"tail size starts at zero","address":"0x169e6d9","hex":"31db"},
+    {"label":"writer normalized tag switch table","address":"0x169e24c","hex":"488d2d1dd5ddfe"},
+    {"label":"writer starts tail pass","address":"0x169e245","hex":"4531e4"},
+    {"label":"writer reads normalized tag","address":"0x169e248","hex":"428b0423"},
+    {"label":"writer type2 reads original descriptor","address":"0x169e2ab","hex":"4a8b742308"},
+    {"label":"writer type2 delegates dynamic tail","address":"0x169e2b3","hex":"e8c8fcffff"},
+    {"label":"head loop passes accumulated tail offset","address":"0x169e228","hex":"89c2"},
+    {"label":"head writer offset byte swap","address":"0x169e5b4","hex":"0fca"},
+    {"label":"head writer writes offset low word","address":"0x169e5e3","hex":"8954081c"},
+    {"label":"type0 word delegates token","address":"0x169e5fd","hex":"488b7708"},
+    {"label":"dynamic tail length byte swap","address":"0x169de7a","hex":"89d30fcb"},
+    {"label":"dynamic tail length word write","address":"0x169dea9","hex":"42895c281c"},
+    {"label":"dynamic tail source pointer","address":"0x169df30","hex":"488b442408"},
+    {"label":"dynamic tail append chunks","address":"0x169df39","hex":"488d7c2410"},
+    {"label":"dynamic tail memcpy slot","address":"0x169df3e","hex":"ff15c415e404"},
+    {"label":"fixed address source bytes","address":"0x169e044","hex":"0f104601"},
+    {"label":"fixed address final source dword","address":"0x169e03d","hex":"8b4611"},
+    {"label":"scalar word qword swaps","address":"0x169dfe4","hex":"490fcd490fcc490fcf490fce"},
+    {"label":"scalar word first reversed qword store","address":"0x169e00d","hex":"4c892c08"}
+  ],
+  "tables": [
+    {"name":"raw type normalization 0x47b72c","base":"0x47b72c","entries":[
+      {"index":0,"target":"0x169dce3"}, {"index":4,"target":"0x169dce3"}, {"index":6,"target":"0x169dd62"}
+    ]},
+    {"name":"raw token conversion 0x47b754","base":"0x47b754","entries":[
+      {"index":0,"target":"0x169e02c"}, {"index":4,"target":"0x169dfd4"}, {"index":6,"target":"0x169dfb3"}
+    ]},
+    {"name":"normalized writer 0x47b770","base":"0x47b770","entries":[
+      {"index":0,"target":"0x169e290"}, {"index":2,"target":"0x169e2ab"}
+    ]},
+    {"name":"tail size dispatch 0x47b784","base":"0x47b784","entries":[
+      {"index":0,"target":"0x169e78c"}, {"index":2,"target":"0x169e6eb"}
+    ]}
+  ],
+  "relocations": [
+    {"address":"0x64e0140","type":8,"target":"0x169e350"}
+  ],
+  "layout": {
+    "raw_tags":[6,0,0,4,4],
+    "normalized_tags":[2,0,0,0,0],
+    "label_length":17,
+    "head_words":5,
+    "dynamic_offset":160,
+    "dynamic_tail_words":2,
+    "total_bytes":224
+  },
+  "controls":[
+    {"label":"reject altered producer tag","address":"0x44e972b","replacement_hex":"c60307"}
+  ]
+}
