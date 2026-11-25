@@ -19,9 +19,10 @@ replay, or authorization-safety claim.
 python3 research/work-items/RE-008-node115-hip3-permission-membership/verify.py
 ```
 
-The verifier authenticates the pinned node #115 ELF, checks the caller/helper
-instruction bytes and FDE extents, and confirms that the helper's indirect
-comparison slot resolves to imported `memcmp`. It reads the ELF only.
+The verifier authenticates the pinned node #115 ELF, checks the selector,
+caller/helper instruction bytes and FDE extents, confirms that the helper's
+indirect comparison slot resolves to imported `memcmp`, and rejects a
+one-byte mutation of the comparison call. It reads the ELF only.
 
 ## Findings
 

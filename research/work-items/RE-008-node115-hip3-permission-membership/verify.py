@@ -19,6 +19,7 @@ CALLERS = (
     (0x55B3645, "4883c7500fb6d1488db424d0020000", 0x55B3654, "e817ab0eff", "0f844f010000"),
 )
 FACTS = {
+    0x2C4830D: "b113eb3e",  # selector 0x13 for the raw-tag-14 arm
     0x469E184: "88542407",  # selector byte saved from DL
     0x469E22F: "4c8b251a19e401",  # load GOT comparison function
     0x469E265: "4c8d7614ba14000000",  # next element; compare 20 bytes
@@ -42,25 +43,14 @@ def mapped(data, secs, va, size):
     return data[off:off + size]
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--target", type=Path, default=ROOT / "artifacts/node/115/hl-node")
-    args = parser.parse_args()
-    data = args.target.read_bytes()
-    require(hashlib.sha256(data).hexdigest() == PIN, "target SHA-256")
-    secs = sections(data)
-    _, fdes = eh_frame_records(data, secs)
-    expected_fdes = {
-        0x469E170: 0x469E2D2,
-        0x2C47660: 0x2C4D2E9,
-        0x55ACA20: 0x55B271B,
-        0x55B2720: 0x55B841B,
-        0x35BF6C0: 0x35BF830,
-        0x4552D70: 0x4553089,
-    }
-    indexed_fdes = {row["start"]: row["end"] for row in fdes}
-    for start, end in expected_fdes.items():
-        require(indexed_fdes.get(start) == end, f"FDE extent {start:#x}")
+def file_offset(secs, va, size):
+    found = [s for s in secs if s["type"] != 8 and s["address"] <= va and va + size <= s["address"] + s["size"]]
+    require(len(found) == 1, f"unmapped/ambiguous VA {va:#x}")
+    s = found[0]
+    return s["offset"] + va - s["address"]
+
+
+def check_facts(data, secs):
     for address, code in FACTS.items():
         require(mapped(data, secs, address, len(bytes.fromhex(code))) == bytes.fromhex(code), f"instruction bytes {address:#x}")
     for setup, prefix, call, call_bytes, false_branch in CALLERS:
@@ -81,7 +71,38 @@ def main():
     start = dynstr["offset"] + sym_name
     end = data.find(b"\0", start, dynstr["offset"] + dynstr["size"])
     require(data[start:end] == b"memcmp", "comparison import name")
-    print("PASS: pinned target, selector-call byte paths, 20-byte identity compare, and memcmp relocation")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--target", type=Path, default=ROOT / "artifacts/node/115/hl-node")
+    args = parser.parse_args()
+    data = args.target.read_bytes()
+    require(hashlib.sha256(data).hexdigest() == PIN, "target SHA-256")
+    secs = sections(data)
+    _, fdes = eh_frame_records(data, secs)
+    expected_fdes = {
+        0x469E170: 0x469E2D2,
+        0x2C47660: 0x2C4D2E9,
+        0x55ACA20: 0x55B271B,
+        0x55B2720: 0x55B841B,
+        0x35BF6C0: 0x35BF830,
+        0x4552D70: 0x4553089,
+    }
+    indexed_fdes = {row["start"]: row["end"] for row in fdes}
+    for start, end in expected_fdes.items():
+        require(indexed_fdes.get(start) == end, f"FDE extent {start:#x}")
+    check_facts(data, secs)
+    mutated = bytearray(data)
+    offset = file_offset(secs, 0x469E271, 1)
+    mutated[offset] ^= 1
+    try:
+        check_facts(bytes(mutated), secs)
+    except ValueError:
+        pass
+    else:
+        raise ValueError("mutated indirect comparison call was not rejected")
+    print("PASS: pinned target, selector-call byte paths, 20-byte identity compare, memcmp relocation, and rejected byte mutation")
 
 
 if __name__ == "__main__":
