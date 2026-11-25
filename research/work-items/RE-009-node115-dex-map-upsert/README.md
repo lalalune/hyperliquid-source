@@ -18,7 +18,7 @@ python3 research/work-items/RE-009-node115-dex-map-upsert/verify.py > research/w
 python3 -m unittest tests.test_re009_node115_dex_map_upsert
 ```
 
-The verifier authenticates the pinned ELF and checks the FDE rows plus raw instruction anchors for the ring search result, low-bit branch, insert helper, replacement writes and result discriminants. Four in-memory byte mutations are rejected by the artifact-digest check. The observed output is retained in `verification-output.txt`. The target is read as data and is never executed.
+The verifier authenticates the pinned ELF, recomputes the three selected unwind extents from `.eh_frame` and `.eh_frame_hdr`, and checks that they agree with `fde.tsv`. It also checks raw instruction anchors for the ring search result, low-bit branch, insert helper, replacement writes and result discriminants. Its whole-file digest gate and byte checks are tested separately: a changed target is rejected by the digest gate, and an in-memory mutation of each of the 24 anchors is rejected by the corresponding byte comparison. The observed output is retained in `verification-output.txt`. The target is read as data and is never executed.
 
 ## Observations
 

@@ -30,6 +30,25 @@ class DexMapUpsertPacketTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "target digest mismatch"):
             VERIFY.check(bytes(data))
 
+    def test_each_anchor_comparison_rejects_a_byte_mutation(self) -> None:
+        data = VERIFY.ELF.read_bytes()
+        for address, expected in VERIFY.ANCHORS.items():
+            with self.subTest(address=hex(address)):
+                mutant = bytearray(data)
+                offset = VERIFY.va_to_offset(data, address)
+                mutant[offset + len(expected) - 1] ^= 1
+                with self.assertRaisesRegex(ValueError, "anchor mismatch"):
+                    VERIFY.check_anchors(bytes(mutant))
+
+    def test_fde_extents_are_recomputed_from_target_bytes(self) -> None:
+        data = VERIFY.ELF.read_bytes()
+        VERIFY.check_fde_rows(data)
+        retained = VERIFY.FDE_RECORD.read_text().replace(
+            "0x4dd59a0\t0x4dd6145\t1957\t.text\n", ""
+        )
+        with self.assertRaisesRegex(ValueError, "ELF-derived extents"):
+            VERIFY.check_fde_rows(data, retained)
+
     def test_packet_manifest_matches_files(self) -> None:
         for line in (PACKET / "MANIFEST.sha256").read_text().splitlines():
             expected, name = line.split("  ", 1)

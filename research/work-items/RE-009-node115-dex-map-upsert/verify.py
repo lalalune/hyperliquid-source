@@ -12,6 +12,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "tools"))
+from fde_extents import fde_extents
+
 ELF = ROOT / "artifacts/node/115/hl-node"
 SHA256 = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 FDE_START = 0x4DD59A0
@@ -61,46 +64,67 @@ def va_to_offset(data: bytes, va: int) -> int:
     raise ValueError(f"VA {va:#x} is not file-backed by a PT_LOAD segment")
 
 
-def check(data: bytes) -> list[str]:
-    digest = hashlib.sha256(data).hexdigest()
-    if digest != SHA256:
-        raise ValueError(f"target digest mismatch: {digest}")
+def check_anchors(data: bytes) -> list[str]:
+    """Check instruction anchors independently of the whole-file digest gate."""
     results = []
     for va, expected in ANCHORS.items():
         actual = data[va_to_offset(data, va):va_to_offset(data, va) + len(expected)]
         if actual != expected:
             raise ValueError(f"anchor mismatch at {va:#x}: {actual.hex()} != {expected.hex()}")
         results.append(f"{va:#x}: {actual.hex()} OK")
-    rows = set(FDE_RECORD.read_text().splitlines())
-    expected_rows = {
-        f"{start:#x}\t{end:#x}\t{end - start}\t.text"
+    return results
+
+
+def check_fde_rows(data: bytes, retained: str | None = None) -> None:
+    """Recompute the selected FDE extents from ELF bytes and compare the record."""
+    _, fdes, _ = fde_extents(data)
+    expected = {
+        (start, end, end - start, ".text")
         for start, end in (
             (FDE_START, FDE_END),
             (0x57ED5E0, 0x57ED70A),
             (0x57FC670, 0x57FC932),
         )
     }
-    if not expected_rows <= rows:
-        raise ValueError("retained FDE rows do not match the claimed extents")
+    derived = {
+        (row["start"], row["end"], row["end"] - row["start"], row["section"])
+        for row in fdes
+    }
+    if not expected <= derived:
+        raise ValueError("pinned ELF FDE extents do not match the claimed ranges")
+
+    rows = set((FDE_RECORD.read_text() if retained is None else retained).splitlines())
+    retained_expected = {f"{start:#x}\t{end:#x}\t{size}\t{section}"
+                         for start, end, size, section in expected}
+    if not retained_expected <= rows:
+        raise ValueError("retained FDE rows do not match the ELF-derived extents")
+
+
+def check(data: bytes) -> list[str]:
+    digest = hashlib.sha256(data).hexdigest()
+    if digest != SHA256:
+        raise ValueError(f"target digest mismatch: {digest}")
+    results = check_anchors(data)
+    check_fde_rows(data)
     return results
 
 
 def main() -> int:
     data = ELF.read_bytes()
     results = check(data)
-    # In-memory corruption controls ensure two decision-boundary witnesses fail closed.
-    for va in (0x4DD59D1, 0x4DD5B92, 0x4DD5C57, 0x4DD5F70):
+    # Exercise each byte-anchor comparison directly, after the separate full-file
+    # digest check above has authenticated the unmodified target.
+    for va, expected in ANCHORS.items():
         mutant = bytearray(data)
         pos = va_to_offset(data, va)
-        mutant[pos + len(ANCHORS[va]) - 1] ^= 1
+        mutant[pos + len(expected) - 1] ^= 1
         try:
-            check(bytes(mutant))
+            check_anchors(bytes(mutant))
         except ValueError as exc:
-            if "target digest mismatch" in str(exc):
-                # Digest authentication intentionally rejects mutated whole artifacts first.
-                results.append(f"mutation at {va:#x}: rejected by target digest")
-                continue
-            raise
+            if "anchor mismatch" not in str(exc):
+                raise
+            results.append(f"mutation at {va:#x}: rejected by anchor comparison")
+            continue
         raise AssertionError(f"mutation at {va:#x} was accepted")
     print(f"target SHA-256: {SHA256}")
     print("FDE extents: map upsert, ring insert helper, ring search helper verified")
