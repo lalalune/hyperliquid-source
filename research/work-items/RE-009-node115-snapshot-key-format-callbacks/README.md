@@ -1,0 +1,7 @@
+# RE-009: snapshot key formatter callback types
+
+The nonzero snapshot key formatter from #7138 supplies two arguments to a shared formatting call. This packet resolves their concrete callback bindings on the pinned #115 ELF. At 0x46aa497 and 0x46aa503 the first argument's callback loads from slot 0x64dfee8, whose relative relocation resolves to 0x168a370. The callback reads a 32-bit unit, with a one-byte write for ASCII on its buffered branch. The argument pointers select the read-only leading characters identified in #7138.
+
+The callback for the second argument loads from slot 0x64df6c8 at 0x46aa519. The relocation resolves to 0x1689420, which reads a full 64-bit input and uses unsigned divide-by-10000 arithmetic with a decimal-pair table at 0x46ea12. This binds the adjusted or unadjusted numeric argument from #7138 to a decimal conversion, independently of the inverse numeric-selector packets. The outer formatting entry at 0x46aa536 resolves through slot 0x64df6e8 to 0x141e3a0. This binding leaves the outer formatter's complete output handling and the callbacks' error paths open.
+
+Addresses are ELF virtual addresses for the digest recorded in the offline log. Run the verifier from the repository root with llvm-readelf on PATH. It checks the slot references, the exact relative relocations and the complete table of 100 ordered digit pairs. Captured instructions are read as bytes.
