@@ -108,3 +108,56 @@ pub fn decode_prefix(input: &[u8], limit: Option<u64>, charged: u64) -> Outcome<
         Ok(outer::Selection::OtherVariant(_)) => unreachable!("outer decoder accepts only 0 and 1"),
     }
 }
+
+/// Result of opt-in success composition, preserving the original parent enums.
+#[derive(Debug, PartialEq, Eq)]
+pub enum ComposedResponse {
+    Parent(Response),
+    ClientBlocksSuccess(Vec<node115_client_block_success::Client>),
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum ComposedError {
+    Parent(Error),
+    ClientBlocksSuccess(node115_client_block_success::Error),
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct ComposedOutcome<'a> {
+    pub result: Result<ComposedResponse, ComposedError>,
+    pub remaining: &'a [u8],
+    pub charged: u64,
+}
+
+/// Compose the selected success child; `decode_prefix` keeps its old boundary.
+pub fn decode_prefix_with_success(
+    input: &[u8],
+    limit: Option<u64>,
+    charged: u64,
+) -> ComposedOutcome<'_> {
+    let parent = decode_prefix(input, limit, charged);
+    if matches!(parent.result, Ok(Response::ResultSuccessBoundary)) {
+        let child = node115_client_block_success::decode_payload_prefix_metered(
+            parent.remaining,
+            limit,
+            parent.charged,
+        );
+        ComposedOutcome {
+            result: child
+                .result
+                .map(ComposedResponse::ClientBlocksSuccess)
+                .map_err(ComposedError::ClientBlocksSuccess),
+            remaining: child.remaining,
+            charged: child.charged,
+        }
+    } else {
+        ComposedOutcome {
+            result: parent
+                .result
+                .map(ComposedResponse::Parent)
+                .map_err(ComposedError::Parent),
+            remaining: parent.remaining,
+            charged: parent.charged,
+        }
+    }
+}
