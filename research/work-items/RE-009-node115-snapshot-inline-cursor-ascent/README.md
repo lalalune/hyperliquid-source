@@ -1,0 +1,5 @@
+# RE-009: snapshot inline cursor parent ascent
+
+For the live tag-one cursor used by #7178, the current candidate index is compared against the node key count at +0x42a. A candidate outside that count goes to the parent ascent loop. Before each normally returning cleanup call it saves the parent pointer and the child position at +0x428. The release size is 0x430 when the associated level is zero, and 0x490 otherwise. At the parent the saved child position is compared with the parent key count. An exhausted position continues ascent, while a position within bounds leaves the ascent loop to produce the next cursor result. The null-parent branch is outside this contract. This is distinct from the zero-remaining exhaustion path in #7180.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-inline-cursor-ascent/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
