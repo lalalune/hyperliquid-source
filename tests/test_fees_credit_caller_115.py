@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 import fees_credit_caller_115 as T  # noqa: E402
 import order_host_checks_115 as HASH_HELPER  # noqa: E402
+import token_decimal_scaling_115 as TOKEN_SCALE  # noqa: E402
 
 IMAGE = T.load_image()
 RIG = T.Rig(IMAGE)
@@ -73,6 +74,22 @@ class CallerTests(unittest.TestCase):
                 self.assertEqual(helper_machine.get(HASH_HELPER.RAX, 64), result)
                 saw_nonzero_key |= key != 0
         self.assertTrue(saw_nonzero_key)
+
+    def test_fee_scaler_contract_matches_the_scaler_bytes(self):
+        helper_image = TOKEN_SCALE.cpu.Image(bytearray(TOKEN_SCALE.TARGET.read_bytes()))
+        for case in CASES:
+            trace = RIG.emulate(case)[1]
+            image, base, a = case["image"], case["base"], case["A"]
+            toks_ptr = struct.unpack_from("<Q", image, a + 0x30 - base)[0]
+            toks_len = struct.unpack_from("<Q", image, a + 0x38 - base)[0]
+            toks = [tuple(image[toks_ptr + TOKEN_SCALE.TOKEN_STRIDE * i + off - base]
+                          for off in (0x48, 0x49)) for i in range(toks_len)]
+            for event in (entry for entry in trace if entry[0] == "scale"):
+                _, amount, token, value, _ctx, ok, scaled = event
+                got, _, _ = TOKEN_SCALE.execute(helper_image,
+                    {"kind": "muldiv", "a": amount, "tok": token, "b": value, "toks": toks})
+                self.assertEqual(got[0], "ok")
+                self.assertEqual((bool(got[1]), got[2]), (ok, scaled), (case["cfg"]["seed"], event))
 
     def test_every_model_variant_is_caught(self):
         for bug in T.BUG_TEXT:
