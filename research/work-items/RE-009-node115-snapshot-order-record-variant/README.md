@@ -1,0 +1,5 @@
+# RE-009: snapshot order record variant framing
+
+The row encoder reached by #7161 examines the leading 32-bit word. Value 1 tail-calls 0x25dd560 with the record pointer advanced eight bytes and the writer unchanged. All other values take the wrapped array path. That path checks the writer nesting word before incrementing it and writes an opening bracket and newline with separate capacity branches. Its trailing call to the same 0x25dd560 uses the original record pointer. Only a zero result from that call reaches the common array finalizer, with descriptor word 0x200 and the writer pointer. The result distinguishes the direct and wrapped paths and their payload offsets, without inferring enum names or complete byte-equivalence.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-order-record-variant/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
