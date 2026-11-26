@@ -1,0 +1,7 @@
+# RE-009: selected snapshot optional bundle handoff
+
+Prior [#7125](https://github.com/lalalune/hyperliquid-source/pull/7125) found that the second snapshot option gates a third transform. On the selected item path, this packet follows both sides to the next call: when the option byte is nonzero, the worker calls `0x22b6220`, copies the existing 48-byte bundle to stack `+0x200`, and appends the returned 24-byte descriptor at `+0x230`. When the byte is zero, it copies the same 48-byte bundle to `+0x208` and stores `0x8000000000000000` at `+0x200`; it does not invoke the third transform on that branch.
+
+Both paths converge at `0x22b7839` and pass the address of `+0x200` in RCX to `0x2dc31b0` at `0x22b7873`. The zero-option path's sentinel is an observed representation, not proof of a specific serialized wire tag or downstream storage semantics. The nonzero option path's output depends on the helper's normal return. This result is conditional on the prior selected CLI-to-worker path, valid buffers and no intervening corruption. The eventual sink semantics, real checkpoint contents and state-root equivalence remain open.
+
+Target: Linux x86-64 node #115, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. `verify.py` checks the digest, instruction windows, branch and call targets and independent byte mutations without executing captured code. The static run and disassembly are recorded in `offline-log.txt` and `windows.txt`.
