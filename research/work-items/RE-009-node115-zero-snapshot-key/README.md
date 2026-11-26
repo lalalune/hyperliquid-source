@@ -1,0 +1,5 @@
+# RE-009: snapshot tag-1 zero-key materialization
+
+For the tag-1 consumer covered by #7120, the selected index reaches formatter `0x46aa470` via the direct call at `0x2c6f14f`. If this index is zero, the formatter takes the branch to `0x46aa4aa`. After successful allocation it writes the nine bytes `PURR/USDC` and returns a three-word output with the allocation pointer between two words equal to nine. The caller returns that descriptor directly. The selected worker passes it in RDX to the sink as established by #7136. The result covers the zero formatter input only and assumes that the selected consumer and allocator return normally. It does not establish how often that input occurs in real snapshots.
+
+The main numeric-selector records cover parsing these bytes into zero. This packet establishes the opposite direction for the selected snapshot consumer by binding the call and literal stores to the #115 artifact. Full formatter behavior and the allocation failure path remain open. Run `python3 research/work-items/RE-009-node115-zero-snapshot-key/verify.py` from the root. The verifier reads the pinned file without executing its instructions.
