@@ -1,0 +1,5 @@
+# RE-009: snapshot storage first span cleanup
+
+The storage cleanup callee reached at 0x22b7ac5 derives the first physical span from four input words. For a valid ring descriptor with capacity C, start S and nonzero count N, it conditionally subtracts C once from S and chooses the first span length as min(N,C-S) after normalization. When N is zero, it sets both span counts to zero. The first loop starts at the backing base plus 96 times the normalized start and visits one 96-byte record per iteration. For each record a nonzero first word is passed with the pointer at +8 to the slot loaded from 0x64df4a0, and a separate call at record +0x18 runs regardless of that first word on the normal path. This packet covers the first physical span and ordinary returns. It leaves the second span and unwind paths open.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-storage-first-span-cleanup/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
