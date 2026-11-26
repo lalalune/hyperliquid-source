@@ -1,0 +1,5 @@
+# RE-009: snapshot rmp serializer result handoff
+
+The alternate serializer in the selected output helper, entered after the rmp extension comparison, calls 0x22513d0 with separate output, writer-state and iterator pointers. It recognizes the exact first-word result 0x8000000000000004 as the branch that rejoins the common path-and-buffer handoff documented in #7146. The rejoin reloads the buffer size word and pointer from the writer-owned descriptor. Other first-word values retain the three result words, release the buffer when its size word is nonzero, and pass the result words to 0x26a6bc0. This bounds the selected result protocol without interpreting every result variant or claiming runtime output equivalence.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-rmp-result-handoff/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
