@@ -1,0 +1,11 @@
+# RE-009: selected snapshot item tag-1 consumer paths
+
+Target Linux x86-64 node #115 `artifacts/node/115/hl-node`, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. [#7118](https://github.com/lalalune/hyperliquid-source/pull/7118) maps an entry pair to two selected snapshot consumers. [#7119](https://github.com/lalalune/hyperliquid-source/pull/7119) studies their non-1 branches. Existing location-edge packets `RE-001-node115-loc-edge-2c6f21e` and `RE-001-node115-loc-edge-2c6ed61` record the respective out-of-range call edges. This packet records the selected tag-1, in-range continuations of both consumers.
+
+For first qword 1 and index N below state `+0xa0`, `0x2c6f0ce..0x2c6f0fa` loads a qword at `state[+0x98] + 32*N`, passes it with `state+0xd8` to slot `0x64e5a60`, and supplies a local output buffer. Its RELATIVE relocation resolves to `0x3c087b0`. After normal return, if local output byte `+8` is at least 2 the consumer passes the original N to `0x46aa470`. For byte B less than 2, it computes the unsigned saturating value `min(2^64-1, 10*V + B + 100000000)` from local qword V and B, then passes that value to the same helper. The overflow and carry branches are visible in `0x2c6f10b..0x2c6f149`; this is a machine-level arithmetic projection, not an inferred unit, fee or protocol value.
+
+The other consumer's tag-1 branch compares N against state `+0x1fc8`. If in range, it forms `state[+0x1fc0] + 0x120*N`, then calls `0x23dc4e0` with that row and `state+0x90`. The two bounds are distinct; success of one does not prove success of the other. Their out-of-range paths are the previously recorded location edges.
+
+The observations assume the selected tag, valid non-overflowing storage, unchanged state, normal helper returns and the same argument relation established conditionally by #7118. Full helper behavior, allocation/unwind, returned-object interpretation, real item provenance, runtime scheduling and snapshot/root equivalence remain open. No target code executes and no component gate changes.
+
+Run `python3 research/work-items/RE-009-node115-snapshot-consumer-tag-one/verify.py` for target digest, selected spans, relocation, helper targets, synthetic arithmetic boundary cases and in-memory mutation controls. `offline-log.txt` records the static run; `windows.txt` retains disassembly.
