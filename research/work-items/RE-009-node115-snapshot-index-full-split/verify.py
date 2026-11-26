@@ -1,0 +1,17 @@
+import hashlib,struct,subprocess
+from pathlib import Path
+b=Path("artifacts/node/115/hl-node").read_bytes()
+assert hashlib.sha256(b).hexdigest()=="a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+A={30040471: '440fb7bd2a0400004983ff0b72384c8b6e104983fd0548897c24504c898424f801000048894c24080f83850000004c896c241841be04000000c744241000000000e909020000', 30040650: '0f846f0100004983fd060f857701000041be05000000b0018944241048c744241800000000e972010000', 30041023: 'c7442410000000004c896c24184d89eeeb154983c5f94c896c241841be06000000b00189442410498b04244889442430498b44240848894424404c8b7e08bf30040000ff15789083044885c00f846f0f00004889c34c8964242848c7000000000066c7802a0400000000', 30041129: '0fb7852a0400004d89f549f7d54901c5664489ab2a0400004b8d04764c8b64c508488b4cc51048894c2420488b44c51848894424484b8d04f6', 30041266: '4983fd0c0f83ab0e00004c89642430488d4508498d4e01488d0c49488d34c8488d7b0849c1e5034a8d146d000000004c01ea4c8b251d90830441ffd4498d4601488d04c0488d8d10010000488d34c1488dbb100100004a8d14ed000000004c01ea41ffd4664489b52a040000', 30041446: '31c9807c2410004989d848896c24104c0f44c548898424a0010000490f44cf'}
+def valid(d):
+ return all(d[x-0x1000:x-0x1000+len(bytes.fromhex(v))]==bytes.fromhex(v) for x,v in A.items()) and 0x1ca64eb+struct.unpack_from("<i",d,0x1ca64e7-0x1000)[0]==0x64df508
+assert valid(b)
+for x in A:
+ d=bytearray(b);d[x-0x1000]^=1;assert not valid(d)
+r=subprocess.check_output(["llvm-readelf","-r","artifacts/node/115/hl-node"],text=True)
+assert any("00000000064df508" in x and "R_X86_64_GLOB_DAT" in x and "memcpy@GLIBC_2.14" in x for x in r.splitlines())
+for i in range(12):
+ pivot,side,pos=((4,0,i) if i<5 else (5,0,5) if i==5 else (5,1,0) if i==6 else (6,1,i-7))
+ left=pivot;right=11-pivot-1
+ assert left+right+1==11 and 0<=pos<=(left if side==0 else right)
+print("PASS: digest, 6 spans, memcpy relocation, 6 mutations, 12 position controls")
