@@ -260,7 +260,13 @@ def render_question_catalogue(root=ROOT):
         for number, pull in snapshot["pull_requests"].items():
             if pull["state"] == "open" and pull["review_state"] != "approved-on-current-head":
                 pending_review.append(f"- [#{number}]({pull['url']}) — {pull['review_state']} as of {snapshot['fetched_at']}.")
-    md.extend(pending_review or ["- Unknown; refresh the GitHub snapshot."])
+    attempt_ids = {attempt["url"].rsplit("/", 1)[-1]
+                   for row in questions for attempt in row["prior_attempts"]}
+    md.extend(pending_review)
+    if not snapshot or attempt_ids.difference(snapshot["pull_requests"]):
+        md.append("- Unknown for attempts missing from the snapshot; refresh the GitHub snapshot.")
+    elif not pending_review:
+        md.append(f"- No linked attempts awaited review as of {snapshot['fetched_at']}.")
     md.extend(["",
                "## Reservation protocol", "",
                "The pilot defines task scope and dependencies; it does not grant reservations. A maintainer must designate one coordinator before claims become active. Only that coordinator may serialize grants and update the linked GitHub issue. Each grant records the question ID and definition revision, owner, reservation revision, UTC grant and expiry, progress handoff, and superseded reservation. Expired or superseded grants require a new coordinator decision. If the coordinator or ownership lookup is unavailable, the view says **unknown**; absence of an assignment is not treated as proof of no work.", "",

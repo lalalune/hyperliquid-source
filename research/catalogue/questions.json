@@ -4,7 +4,7 @@
     "path": "artifacts/node/115/hl-node",
     "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
   },
-  "ownership_freshness": "historical read-only GitHub context fetched 2026-11-09T05:51:52Z; treat as stale after 30 minutes and run `python3 tools/question_registry.py --status`",
+  "ownership_freshness": "historical read-only GitHub context fetched 2026-11-24T15:11:03Z; treat as stale after 30 minutes and run `python3 tools/question_registry.py --status`",
   "questions": [
     {
       "question_id": "qcp-checkpoint-replay-root-fixture",
@@ -49,14 +49,14 @@
         },
         {
           "url": "https://github.com/lalalune/hyperliquid-source/pull/5584",
-          "relation": "open root selector packet"
+          "relation": "selected root selector path"
         },
         {
           "url": "https://github.com/lalalune/hyperliquid-source/pull/5591",
-          "relation": "open selected fallback-writer packet"
+          "relation": "selected fallback writer"
         }
       ],
-      "remaining_gap": "The external expected H+1 reference is unresolved, and the selector/writer evidence remains open. Starting an implementation fixture now would silently invent a hard dependency contract.",
+      "remaining_gap": "The selector and selected writer agree on the fallback entry and destination cell. The remaining blocker for this fixture is the external expected H+1 root: identify its producer or document an independently justified fixture input with provenance.",
       "dependencies": [
         {
           "question_id": "qcp-first-replay-key",
@@ -253,19 +253,19 @@
           "Synchronization and runtime CPUID values"
         ]
       },
-      "readiness": "in-progress",
-      "evidence_status": "unreviewed",
+      "readiness": "recorded",
+      "evidence_status": "reviewed",
       "prior_attempts": [
         {
           "url": "https://github.com/lalalune/hyperliquid-source/pull/5584",
-          "relation": "open selector packet that leaves the fallback writer unresolved"
+          "relation": "selector packet that identifies the fallback entry"
         },
         {
           "url": "https://github.com/lalalune/hyperliquid-source/pull/5591",
-          "relation": "open selected-writer packet with three store offsets and bounded unknowns"
+          "relation": "selected-writer packet with three store offsets"
         }
       ],
-      "remaining_gap": "The selected writer packet is open and does not establish exclusivity, synchronization, or the meaning of the stored words. Its result must not be treated as a complete selector-cell contract.",
+      "remaining_gap": "The selected fallback writes three words into the selector cell. Writer exclusivity, synchronization, and the meanings of those words remain unresolved.",
       "dependencies": [
         {
           "question_id": "qcp-root-selector",
@@ -284,7 +284,12 @@
         "Static x86-64 instruction and relocation analysis",
         "Negative-control evidence verification"
       ],
-      "evidence_review": [],
+      "evidence_review": [
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/5591",
+          "decision": "Merged in 791e0ffceea75d14b15d82e6bc19294a6ea2e659. The reproduced writer entry and destination match the selector packet, with stores at offsets 0, 8, and 16."
+        }
+      ],
       "linked_issue": {
         "url": "https://github.com/lalalune/hyperliquid-source/issues/3923",
         "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"
@@ -312,15 +317,15 @@
           "Digest equality or whole-state correctness"
         ]
       },
-      "readiness": "in-progress",
-      "evidence_status": "unreviewed",
+      "readiness": "recorded",
+      "evidence_status": "reviewed",
       "prior_attempts": [
         {
           "url": "https://github.com/lalalune/hyperliquid-source/pull/5584",
-          "relation": "open static packet for selector production and fallback branches"
+          "relation": "selector production and fallback branches"
         }
       ],
-      "remaining_gap": "The cited PR is open. The record does not treat an open attempt as reviewed evidence or as a completed component gate.",
+      "remaining_gap": "The fallback edge and repeated cell reads are recorded. Runtime CPU feature values and the behavior of the cell under concurrent access remain unresolved.",
       "dependencies": [],
       "downstream_consumer": "A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.",
       "acceptance_requirements": [
@@ -332,7 +337,12 @@
         "Static x86-64 control-flow and relocation analysis",
         "Independent packet reproduction"
       ],
-      "evidence_review": [],
+      "evidence_review": [
+        {
+          "url": "https://github.com/lalalune/hyperliquid-source/pull/5584",
+          "decision": "Merged in 791e0ffceea75d14b15d82e6bc19294a6ea2e659. The reproduced selector packet binds the selected fallback to 0x5cadd50 and the cell to 0x6500098. Runtime values remain unknown."
+        }
+      ],
       "linked_issue": {
         "url": "https://github.com/lalalune/hyperliquid-source/issues/3923",
         "purpose": "active checkpoint and state validation work area; issue is an epic, not a task reservation"
@@ -343,7 +353,7 @@
   "ownership_snapshot": {
     "schema_version": 1,
     "source": "GitHub REST API via gh",
-    "fetched_at": "2026-11-09T05:51:52Z",
+    "fetched_at": "2026-11-24T15:11:03Z",
     "issues": {
       "3923": {
         "state": "open",
@@ -382,16 +392,16 @@
         "review_state": "merged"
       },
       "5584": {
-        "state": "open",
+        "state": "merged",
         "author": "Jonas-Augustinus-Linus",
         "url": "https://github.com/lalalune/hyperliquid-source/pull/5584",
-        "review_state": "no-approval-on-current-head"
+        "review_state": "merged"
       },
       "5591": {
-        "state": "open",
+        "state": "merged",
         "author": "Jonas-Augustinus-Linus",
         "url": "https://github.com/lalalune/hyperliquid-source/pull/5591",
-        "review_state": "no-approval-on-current-head"
+        "review_state": "merged"
       }
     }
   }
