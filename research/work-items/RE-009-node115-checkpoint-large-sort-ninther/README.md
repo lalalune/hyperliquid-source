@@ -4,7 +4,7 @@ Target Linux x86-64 node #115, SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8
 
 The [prune path packet](../RE-017-abci-prune-path-115/README.md) identifies a mixed numeric-sort partition boundary. [#5926](https://github.com/lalalune/hyperliquid-source/pull/5926) traces the different 33–63-word median selection. This packet resolves the selected larger-range pivot call for N=64..511 and nonzero partition budget.
 
-The caller computes q=floor(N/8) and invokes `0x1550340` with base candidates at word indices 0, 4q and 7q, and step q. Since 8<=q<=63, the helper performs exactly one recursive level: it uses r=floor(q/8), and recursively chooses the median from each base plus offsets 0, 4r and 7r. Each child receives r<8 and therefore takes the leaf comparison. The parent returns the median of those three medians. All nine resulting indices are in the selected range. This median-of-three-medians need not be the median of all nine words. For N>=512 the same helper recurses more than once: writing q0=floor(N/8), q(i+1)=floor(qi/8), it continues while qi>=8 and takes a three-candidate median leaf when qi<8. With a valid nonwrapping input buffer, the maximum candidate index is at most 7 times the sum of these q values, which is strictly less than 8q0<=N; this bounds every selected read. The return is a recursive median tree, not a global median. The equal-candidate pointer choice, later partition, actual checkpoint reachability and complete sort remain outside this packet. No captured target code executes.
+The caller computes q=floor(N/8) and invokes `0x1550340` with base candidates at word indices 0, 4q and 7q, and step q. Since 8<=q<=63, the helper performs exactly one recursive level: it uses r=floor(q/8), and recursively chooses the median from each base plus offsets 0, 4r and 7r. Each child receives r<8 and therefore takes the leaf comparison. The parent returns the median of those three medians. All nine resulting indices are in the selected range. This median-of-three-medians need not be the median of all nine words. For N>=512 the same helper recurses more than once: writing q0=floor(N/8), q(i+1)=floor(qi/8), it continues while qi>=8 and takes a three-candidate median leaf when qi<8. With a valid nonwrapping input buffer, the maximum candidate index is at most 7 times the sum of these q values, which is strictly less than 8q0<=N; this bounds every selected read. The return is a recursive median tree, not a global median. The later partition, actual checkpoint reachability and complete sort remain outside this packet. No captured target code executes.
 
 ## Reproduce
 
@@ -98,3 +98,40 @@ for addr in (0x1550371,0x1550846):
 print(f'{len(spans)} authenticated spans; 448 index cases and 19683 pivot models pass')
 PY
 ```
+
+## Which address wins a tie
+
+The three unsigned comparisons at `0x15503b2`, `0x15503bb` and `0x15503c3`
+produce bits for `a < b`, `a < c` and `b < c`. The helper begins with the
+address of b in RBX. At `0x15503cb` it selects the address of c if
+`(b < c) != (a < b)`. At `0x15503d1` it overrides that choice with the address
+of a if `(a < c) != (a < b)`. RAX returns this address. Equal keys therefore
+rank in reverse argument order within a triple. With three equal words the
+middle argument is returned. The same rule applies to the three child addresses
+after a recursive call.
+
+This matters even when two candidate addresses hold the same value. On the
+initial mixed-input path with no prior lower bound, the caller at `0x155084d`
+subtracts the base address, reads the selected word at `0x155085c`, then swaps
+that word with slot zero at `0x1550860` and `0x1550863`. In a 64-word buffer
+filled with ones except for zero at slot 0 and twos at 7, 39 and 63, ranking
+ties in forward argument order selects slot 36. The actual conditions select
+slot 32. Both contain one, but only the latter puts the zero at slot 32.
+
+From the repository root, reproduce the instruction spans and run the static
+model against an independent rank-based oracle:
+
+```sh
+target=artifacts/node/115/hl-node
+objdump -d -M intel --start-address=0x1550340 --stop-address=0x15503e7 "$target"
+objdump -d -M intel --start-address=0x1550846 --stop-address=0x1550867 "$target"
+python3 research/work-items/RE-009-node115-checkpoint-large-sort-ninther/verify_ties.py
+```
+
+The check binds the target digest, the complete existing helper FDE and the
+caller's 33-byte return-to-swap span. It compares addresses for all 27 triples
+over zero, the high bit and the unsigned maximum. For all-equal 64-, 512- and
+4,096-word inputs the helper alone selects slots 36, 292 and 2,340. Those
+helper-only controls bypass the entry scan, which would return early for an
+already ordered buffer. No captured code runs. This result covers the selected
+swap and leaves whole-sort reachability and ordering stability open.
