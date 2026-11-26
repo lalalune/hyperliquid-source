@@ -1,0 +1,5 @@
+# RE-009: snapshot mode-1 serializer iterator layout
+
+Before calling 0x258ba80, the mode-1 body at 0x26a5890 builds a tagged iterator input from the second wrapper word. The sentinel first word -2^63 selects an alternate arm that places a boolean computed from source +8 in the descriptor tag and reads the remaining direct fields from the input. When the first word differs from the sentinel, the constructed tag is 2. In that arm the code derives three byte addresses by scaling indices by 96 and adding the source base at +8, then writes the descriptor and calls the same serializer. If the count word at +0x18 is zero, the indexed arm starts from all-zero index terms. The packet describes the selected producer layout and does not infer the record types or complete wire format.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-mode1-iterator-descriptor/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
