@@ -168,6 +168,7 @@ pub fn normalize(wire: &[AddressRecord]) -> PeerSet {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum OtherResponse {
     Variant2,
+    ClientBlocks,
     ClientBlocksError,
     ResultSuccessBoundary,
 }
@@ -208,6 +209,7 @@ pub fn decode_payload(payload: &[u8]) -> Result<(PeerSet, usize, u64, usize), Er
             out.remaining.len(),
         )),
         Ok(Response::Variant2(_)) => Err(Error::NotPeers(OtherResponse::Variant2)),
+        Ok(Response::ClientBlocks(_)) => Err(Error::NotPeers(OtherResponse::ClientBlocks)),
         Ok(Response::ClientBlocksError(_)) => Err(Error::NotPeers(OtherResponse::ClientBlocksError)),
         Ok(Response::ResultSuccessBoundary) => {
             Err(Error::NotPeers(OtherResponse::ResultSuccessBoundary))
