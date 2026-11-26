@@ -1,0 +1,5 @@
+# RE-009: snapshot mode-1 array finalization
+
+After the element serializer at 0x258ba80 returns zero, the selected mode-1 array output marks the local state and checks a saved count before appending a newline. With valid writer storage and capacity available, it commits the used length immediately after the newline. A count greater than one allows repetitions of the configured byte slice when its length is nonzero; each copy updates the used length, and insufficient capacity takes the reserve call before copying. The subsequent closing bracket store and length increment feed the shared output route. This covers the direct append paths and the reserve handoff. It leaves helper internals and the semantic meaning of the repeated slice unclaimed.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-mode1-array-finalization/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
