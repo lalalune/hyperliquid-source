@@ -1,0 +1,5 @@
+# RE-009: snapshot adapter iteration cleanup
+
+This packet follows the worker at the boundary after the common adapter iteration. The zero-count entry at 0x22b7609 and the exhausted cursor at 0x22b7647 converge at 0x22b7913. There the first descriptor word saved at stack +0x30 gates the indirect call. If nonzero, the code passes the saved storage pointer from stack +0x08 and the first word times 16, with EDX cleared, to slot 0x64df4a0. A zero first word skips this call. This distinguishes the iteration count from the storage-size input and preserves the cleanup on the zero-count path when the size word is nonzero. Both cases proceed to the output helper selection. The higher-level slot semantics and unwinding remain outside scope.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-adapter-cleanup/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
