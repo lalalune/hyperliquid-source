@@ -1,0 +1,5 @@
+# RE-009: snapshot inline cursor successor publication
+
+After the live cursor has selected an in-bounds key, the helper publishes the original node, original level and selected key index in the three-word result consumed by #7178. Independently it updates the cursor. At depth zero, it keeps the selected node and advances the key position by one. At nonzero depth, it chooses child index i+1 by addressing node+0x438+8*i, descends through leftmost child links, and saves a zero-depth successor in the cursor without changing the original returned key location. This establishes which node is returned versus which node the next call uses. Valid indices and child pointers are prerequisites.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-inline-cursor-successor/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
