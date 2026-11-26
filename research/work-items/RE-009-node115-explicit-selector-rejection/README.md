@@ -1,0 +1,5 @@
+# RE-009: explicit snapshot selector rejection
+
+This packet completes the normal rejection cases excluded by #7141. Selector length at least 101 bypasses the parser and builds a local record with low word 0x158. A shorter selector whose parser result low word differs from 0x1a2 takes the other rejection branch and copies seven 16-byte blocks from the parser result to the local output object. Both cases pass their local objects to the same helper at 0x2308120. The long input conditionally calls the selector cleanup slot before reporting, while the parser rejection conditionally calls it after reporting. Neither rejection goes into the singleton loop. The meanings of the error record and the helper side effects remain open.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-explicit-selector-rejection/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
