@@ -110,4 +110,38 @@ impl RefillRequest<'_> {
         self.state.cursor = 1;
         self.state.buffer[0]
     }
+
+    /// Run the selected six-double-round four-block fallback and resume the
+    /// buffer. The caller must already have established that node #115's CPU
+    /// dispatch selected this fallback; accelerated alternatives are not
+    /// inferred or selected here.
+    pub fn complete_four_block_fallback(self) -> u32 {
+        let mut core = node115_rng_refill::State {
+            key: [0; 8],
+            tail: [0; 4],
+        };
+        for (index, word) in core.key.iter_mut().enumerate() {
+            let offset = index * 4;
+            *word = u32::from_le_bytes(
+                self.state.key_state[offset..offset + 4]
+                    .try_into()
+                    .expect("fixed key-state word"),
+            );
+        }
+        for (index, word) in core.tail.iter_mut().enumerate() {
+            let offset = 32 + index * 4;
+            *word = u32::from_le_bytes(
+                self.state.key_state[offset..offset + 4]
+                    .try_into()
+                    .expect("fixed tail-state word"),
+            );
+        }
+
+        let words = node115_rng_refill::refill(&mut core);
+        let mut key_state = [0; 48];
+        for (index, word) in core.key.iter().chain(core.tail.iter()).enumerate() {
+            key_state[index * 4..index * 4 + 4].copy_from_slice(&word.to_le_bytes());
+        }
+        self.complete(RefillOutput { key_state, words })
+    }
 }
