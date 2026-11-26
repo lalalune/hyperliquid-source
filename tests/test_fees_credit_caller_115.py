@@ -10,6 +10,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 import fees_credit_caller_115 as T  # noqa: E402
+import order_host_checks_115 as HASH_HELPER  # noqa: E402
 
 IMAGE = T.load_image()
 RIG = T.Rig(IMAGE)
@@ -57,6 +58,7 @@ class CallerTests(unittest.TestCase):
 
     def test_hash_b_oracle_records_the_u64_key_from_rdx(self):
         saw_nonzero_key = False
+        helper_image = HASH_HELPER.cpu.Image(bytearray(HASH_HELPER.TARGET.read_bytes()))
         for case in CASES:
             trace = RIG.emulate(case)[1]
             hash_events = [event for event in trace if event[0] == "hash_b"]
@@ -64,7 +66,11 @@ class CallerTests(unittest.TestCase):
             self.assertEqual(len(hash_events), len(position_events))
             for (_, k0, k1, key, result), position in zip(hash_events, position_events):
                 self.assertEqual(key, position[3])
-                self.assertEqual(result, T.crc_hash(b"b", k0, k1, key))
+                self.assertEqual(result, T.siphash13_u64(k0, k1, key))
+                byte_case = HASH_HELPER.Box(k0=k0, k1=k1, word=key)
+                matched, _, _, helper_machine = HASH_HELPER.sip_eval(helper_image, byte_case)
+                self.assertTrue(matched, (k0, k1, key))
+                self.assertEqual(helper_machine.get(HASH_HELPER.RAX, 64), result)
                 saw_nonzero_key |= key != 0
         self.assertTrue(saw_nonzero_key)
 
