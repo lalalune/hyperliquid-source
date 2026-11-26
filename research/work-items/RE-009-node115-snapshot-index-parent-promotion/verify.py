@@ -1,0 +1,14 @@
+import hashlib,struct,subprocess
+from pathlib import Path
+b=Path("artifacts/node/115/hl-node").read_bytes()
+assert hashlib.sha256(b).hexdigest()=="a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+A={30042153: '4889c50fb792280400000fb7982a0400004883fb0b4c897424384c89ac24580100004889b424b800000048899c24c00000000f82fb070000', 30044252: '8d7b014c8d7a01488d04524c8d34c5080000004901ee6639da0f83fb000000488d45084b8d0c7f897c2410488d3cc8488b9c24c00000004829d348c1e3034889542408488d145b4c89f64c8b2dbb84830441ffd5', 30044360: '488b4424084c8d34c04a8db4f5100100004b8d04ff488d3cc5100100004801ef488d14db41ffd5', 30044477: '4a8db4fd30040000488b442408488d3cc5400400004801ef4889da488b9c24c000000041ffd5', 30044628: '488d43024c89acd5380400006689bd2a0400004139c70f83ae000000', 30044688: '488b3cd648892f458d0417664489872804000048ffc24839d175e5', 30044736: '4a8b8cfd30040000488929664489b9280400004a8b8cfd38040000488929418d5701668991280400004a8b8cfd40040000488929418d5702668991280400004a8b8cfd48040000488929418d5703668991280400004983c7044939c775a2'}
+def valid(d):
+ return all(d[x-0x1000:x-0x1000+len(bytes.fromhex(v))]==bytes.fromhex(v) for x,v in A.items()) and 0x1ca70ad+struct.unpack_from("<i",d,0x1ca70a9-0x1000)[0]==0x64df568
+assert valid(b)
+for x in A:
+ d=bytearray(b);d[x-0x1000]^=1;assert not valid(d)
+r=subprocess.check_output(["llvm-readelf","-r","artifacts/node/115/hl-node"],text=True)
+assert any("00000000064df568" in x and "R_X86_64_GLOB_DAT" in x and "memmove@GLIBC_2.2.5" in x for x in r.splitlines())
+for n,i,v in [(0,0,(0,0,0)),(1,0,(24,72,8)),(10,5,(120,360,40)),(10,10,(0,0,0))]:assert tuple((n-i)*x for x in (24,72,8))==v
+print("PASS: digest, 7 spans, memmove relocation, 7 mutations, 4 arithmetic controls")

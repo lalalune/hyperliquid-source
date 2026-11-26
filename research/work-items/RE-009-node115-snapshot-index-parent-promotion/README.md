@@ -1,0 +1,7 @@
+# RE-009: selected snapshot nonfull-parent promotion
+
+This packet follows the full-leaf split in [#7132](https://github.com/lalalune/hyperliquid-source/pull/7132) when the old node has a parent and that parent has fewer than 11 keys. The helper obtains the child position `i` from the old node's 16-bit field `+0x428` and parent count `n` from parent `+0x42a`. Assuming `0<=i<=n`, valid buffers and pointers, and normal relocation, `0x1ca705c` handles the promoted key/value and the newly split sibling.
+
+When `i<n`, it shifts `n-i` key slots, value slots and child pointers one position right. Slot strides are respectively 24, 72 and 8 bytes, and the three calls use `0x64df568`, dynamically relocated to `memmove@GLIBC_2.2.5`. When `i==n`, the code takes the append branch and skips these moves. It places the promoted key/value at index `i`, the new sibling at child index `i+1`, and increments the parent count. The subsequent loop updates the parent pointer and 16-bit index at `+0x428` for the child pointers from `i+1` through `n+1`, including the new sibling and shifted children.
+
+Full-parent propagation, malformed positions, exceptional paths and ownership are outside scope. Key meaning, actual snapshots and state-root equality remain unknown. Target Linux x86-64 node #115 SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. `verify.py` checks digest, selected spans, relocation and mutation controls, plus shift-size arithmetic examples; it does not execute the captured target. Disassembly and the actual static run are included.
