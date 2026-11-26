@@ -1,0 +1,5 @@
+# RE-009: snapshot payload order field layout
+
+The payload writer called by #7158 takes the structured branch unless the first qword is the signed-minimum sentinel. That branch emits an opening brace, then calls the field-name helper for the exact literals book_orders and untriggered_orders, in that order. The selected value calls use the payload base and base +0x30 respectively. Each checked value call has a nonzero return path that bypasses the subsequent writer-state store. The sentinel alternative instead tail-calls the first value serializer with the payload pointer advanced eight bytes. This establishes field order and source addresses for the observed caller, leaving the nested order encodings open.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-payload-order-fields/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
