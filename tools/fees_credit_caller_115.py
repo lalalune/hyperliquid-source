@@ -4,7 +4,8 @@
 The function takes one tracked fill step (a table row), prices it, scales it through the token-decimal scaler, picks a mode
 (as is, a fifth, or an f64 factor), classifies the row owner, credits a per-user ledger, builds and passes the argument block of
 the fee-credit distribution call, and adds the per-record and per-kind tallies. `model` is the reconstruction; `Rig.emulate` runs the
-original bytes in the interpreter below (17 helper functions are served by a shared seeded oracle, the ring search runs for real);
+original bytes in the interpreter below (16 helper functions are served by a shared seeded oracle; the u64 hash uses the
+byte-checked SipHash-1-3 model; the ring search runs for real);
 `compare` demands the same helper-call trace, the same panics and the same heap bytes. Negative controls: wrong model variants,
 byte mutants of the function and corrupted inputs.
 
@@ -1189,6 +1190,36 @@ def crc_hash(*parts):
     return zlib.crc32(data) | zlib.crc32(data, 0x9E37) << 32
 
 
+def siphash13_u64(k0, k1, word):
+    """Rust SipHash-1-3 for one u64; independently byte-checked at node #115 0x47172c0."""
+    def rol(v, n):
+        return ((v << n) | (v >> (64 - n))) & M64
+
+    v = [k0 ^ 0x736F6D6570736575, k1 ^ 0x646F72616E646F6D,
+         k0 ^ 0x6C7967656E657261, k1 ^ 0x7465646279746573]
+
+    def rnd():
+        v[0] = (v[0] + v[1]) & M64
+        v[1] = rol(v[1], 13) ^ v[0]
+        v[0] = rol(v[0], 32)
+        v[2] = (v[2] + v[3]) & M64
+        v[3] = rol(v[3], 16) ^ v[2]
+        v[0] = (v[0] + v[3]) & M64
+        v[3] = rol(v[3], 21) ^ v[0]
+        v[2] = (v[2] + v[1]) & M64
+        v[1] = rol(v[1], 17) ^ v[2]
+        v[2] = rol(v[2], 32)
+
+    for block in (word & M64, 8 << 56):
+        v[3] ^= block
+        rnd()
+        v[0] ^= block
+    v[2] ^= 0xFF
+    for _ in range(3):
+        rnd()
+    return v[0] ^ v[1] ^ v[2] ^ v[3]
+
+
 class Pan(Exception):
     """A modelled panic: (return address of the call, first two argument registers)."""
 
@@ -1237,7 +1268,7 @@ class World:
         return h
 
     def hash_b(self, k0, k1, key):
-        h = crc_hash(b"b", k0, k1, key)
+        h = siphash13_u64(k0, k1, key)
         self.log("hash_b", k0, k1, key, h)
         return h
 
@@ -2197,7 +2228,7 @@ def load_image_bytes(blob, expected):
 # Evidence files
 # ----------------------------------------------------------------------------------------------------------------------
 TAB = "\t"
-ROLE = {0x4717440: "hash of a 20-byte key (SipHash state in the first two args)", 0x47172C0: "hash of one u64 key under two state words (key is RDX; output is a seeded oracle here)",
+ROLE = {0x4717440: "hash of a 20-byte key (SipHash state in the first two args)", 0x47172C0: "SipHash-1-3 of one u64 key under two state words (RDX); result byte-checked",
         0x3EE6280: "table probe by hash and key (ledger map)", 0x4717C50: "entry for the ledger map (occupied or vacant)",
         0x3CD7AA0: "inner map entry by u64 key", 0x3F14BC0: "inner map entry value cell", 0x3EE69C0: "table probe (tally map)",
         0x4717FB0: "entry for the tally map", 0x3CD6230: "per-kind pair entry", 0x3F18230: "per-kind pair cell array",
