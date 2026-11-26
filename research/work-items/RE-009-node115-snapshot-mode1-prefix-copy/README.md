@@ -1,0 +1,5 @@
+# RE-009: snapshot mode-1 integer prefix copy
+
+The sibling mode-1 body 0x26a5890 uses the integer formatter already established for body 0x26a5f70 by RE-012-snapshot-integer-prefix-115. In the selected body it passes the first wrapper word and a stack destination to 0x26d4420, then treats RAX and RDX as pointer and length. It copies a nonempty result to the existing buffer at its used offset when the remaining capacity suffices, then increments length by the returned byte count. The fast path subsequently writes comma and newline. Insufficient capacity branches away before copying, and a zero returned length skips the copy. This binds the shared formatter to the selected sibling writer and the subsequent framing; the first value’s business meaning remains open.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-mode1-prefix-copy/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
