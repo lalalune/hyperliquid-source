@@ -1,0 +1,5 @@
+# RE-009: snapshot recursive cleanup completion and unwind
+
+The recursive order cleanup in #7171 leaves its terminal owned byte span and exception path open. Normal completion reads size at +0x48 and tail-jumps through 0x64df4a0 with pointer +0x50 only if the size is nonzero. The selected landing block preserves its incoming exception object in R15, decrements the saved count, and invokes the same recursive cleanup on the pending 168-byte children. It conditionally releases the backing child array and the same terminal span before calling the unwind-resume entry. This maps the observed landing block and terminal cleanup ordering. It does not enumerate every throwing call or interpret the platform exception table.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-recursive-drop-unwind/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
