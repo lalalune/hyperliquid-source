@@ -28,7 +28,7 @@ This packet states that plan. It separates three things that are easy to mix:
 It does not restate the existing provenance record. It re-derives the exact rows
 from the artifact with its own reader and records agreement with the earlier
 record where both describe the same bytes. It performs no rebuild, so it makes no
-claim about byte identity.
+claim about byte identity. The independent compiler experiment below builds only its own fixture.
 
 New analysis code and documentation use the repository's MIT terms. The captured
 node retains its upstream rights. No source is copied or inferred from a rebuild.
@@ -150,11 +150,49 @@ What remains unknown, and why the bytes cannot settle it:
 | `lto` | cross-crate inlining evidence against a matched rebuild |
 | `RUSTFLAGS` | the original build configuration; it is not embedded |
 | `target.cpu_features` | itemised unconditional AVX/BMI use outside dispatched paths |
-| `overflow_checks` | overflow-helper call sites attributable to first-party code |
+| `overflow_checks` | per-crate compiler invocations or equivalent records covering profile overrides |
 | `frame_pointers` | a prologue survey, kept separate from the CFA census |
 | vendored crate versions | vendor directory names that carry a version, or the original vendor plan |
 | first-party crate versions | the original workspace; first-party paths carry no version |
 | `Cargo.lock` | not embedded; only the original build record or a matched rebuild |
+
+### What a checked increment establishes
+
+The [RE-001 caller record](../RE-001-node115-loc-edge-1563f76/record.json)
+already identifies the taken edge at node VA `0x1563e9b`, the source location
+`base/src/u.rs:163:17`, and the relocated callee at `0x1681da0`. On the
+fallthrough the caller increments the loaded 64-bit word and stores it back.
+At the all-ones boundary the taken path passes the location to a helper that
+loads the literal `attempt to add with overflow`. This establishes a checked
+operation at the site. The original Rust expression and the flags used for
+other compiler invocations remain unknown.
+
+Reproduce the additional instruction and literal reads with LLVM objdump
+from the repository root (link-time ELF virtual addresses):
+
+```sh
+target=artifacts/node/115/hl-node
+llvm-objdump -d --start-address=0x1563e93 --stop-address=0x1563ea8 "$target"
+llvm-objdump -d --start-address=0x1681da0 --stop-address=0x1681db9 "$target"
+# .rodata starts at both VA and file offset 0x430400 on this target.
+od -An -tc -j "$((0x46eadd))" -N28 "$target"
+python3 research/work-items/RE-002-node115-build-plan/profile_control.py
+```
+
+The first read shows a comparison against `-1`, a jump to `0x1563f76`
+on equality, and `incq %rdx` followed by a store on fallthrough. The helper's
+RIP-relative load at `0x1681da7` addresses `0x46eadd` (next IP
+`0x1681dae` plus signed displacement `-0x12132d1`), the start of the literal.
+
+The control builds one library with checks enabled and links that exact library
+into two executables. The root and library compile the same ordinary Rust
+addition. Only the root's overflow setting changes. With rustc 1.95.0
+(`59807616e`) on aarch64 macOS, both additions returned `u64::MAX` for
+`u64::MAX - 1`. For `u64::MAX` the library panicked in both executables;
+the root panicked with checks enabled and returned zero with checks disabled.
+Thus even an observed first-party checked addition is consistent with both
+root settings. This compiler-behavior control uses host-built fixture code.
+It makes no assumption about crate boundaries in the captured node.
 
 Requested progress gate: none. This packet does not cover the whole scope of any
 component gate. It covers one task row's remaining deliverable, and a gate stays
