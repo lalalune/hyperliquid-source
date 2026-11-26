@@ -1,0 +1,5 @@
+# RE-009: snapshot ring landing span helper
+
+The first-span landing flow in #7177 delegates its untouched second span to 0x24ad150. This helper takes an explicit base and count rather than a ring descriptor. It initializes the counter as count plus one, handles zero count without reading the base, and advances by 96 bytes per live record. It calls the release slot for a nonzero first record word and passes record+0x18 to the nested cleanup helper in either case. Its own visible landing path preserves the exception object, drains remaining records through 0x24ac6c0, and resumes unwinding. This distinguishes the recovery helper interface from the normal ring split and does not claim exhaustive exception-table coverage.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-ring-recovery-span-helper/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
