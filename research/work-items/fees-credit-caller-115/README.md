@@ -61,6 +61,7 @@ Negative controls (117): 15 wrong model variants (`BUG_TEXT`), 100 byte mutants 
 - cases: 12,000, mismatches: 0; statuses ok 11,066, panic 934; instructions executed 980 of 1001.
 - negative controls: 117, detected 116, equivalent 1 (see above).
 - Limits: the helper bodies are not reconstructed, so what is proved is the function's own logic and its calling contract: argument values, order, count of calls and the memory it touches. The key hashed by 0x4717440 is read as 20 bytes; whether the callee also reads the flag byte that follows it in the tally records is not shown. The entry helpers' occupied/vacant record layout (tag, table, hash or pointer, key copy) is inferred from what the code stores. The names (`fee`, `ledger`, `tally`) are inferences. The unwrap-failure exit is unreachable only under the clamps found in this function; it was not executed.
+- The `0x47172c0` stub now records its complete three-word call contract: two state words and the `u64` key in RDX. Its result remains a deterministic CRC oracle in this caller model; this packet does not claim that CRC value is the target SipHash result. The exact target helper is analyzed separately in the `order-host-checks-115` work.
 - No component gate is requested.
 
 Next question: the bodies of the two probe tables and entry helpers (0x3ee6280/0x4717c50 and 0x3ee69c0/0x4717fb0, hashbrown over a 20-byte key), then the scaler 0x434f660 inside this caller's contract.
