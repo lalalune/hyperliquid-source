@@ -1,0 +1,5 @@
+# RE-009: snapshot inline cursor exhaustion cleanup
+
+When the count at cursor +0x40 is zero, the helper reached by #7178 copies the cursor tag and leading fields, then clears the first cursor word before checking the saved tag. The tag-one branch with a nonnull node follows the first-qword parent chain. It saves each next pointer before releasing the current node. It selects release size 0x430 at zero depth or 0x490 otherwise and advances depth for later ancestors. The common exit writes zero to the first output word so the outer cleanup stops. The packet records the observed normal cursor-exhaustion path and does not assert how cursor inputs can be constructed from an external source.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-inline-cursor-exhaustion/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
