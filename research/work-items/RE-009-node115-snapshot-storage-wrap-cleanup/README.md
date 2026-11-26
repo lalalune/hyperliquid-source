@@ -1,0 +1,5 @@
+# RE-009: snapshot wrapped storage cleanup
+
+The selected cleanup callee takes the remaining count after the first physical span and uses it for a second loop starting from the original backing base. Under a valid descriptor with positive capacity and count not exceeding capacity, the remaining count is max(0,count-(capacity-normalized_start)). The second loop guard tests remaining count plus one against one, so no record is visited when no wrap remains. For a wrapped range it processes 96-byte records from slot zero through remaining count minus one. The optional cleanup slot receives the first two record words when the first word is nonzero, and the nested helper receives record +0x18 on both branches. This complements #7168 with the wrapped span and verifies the statically observed split without making runtime or unwind claims.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-storage-wrap-cleanup/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
