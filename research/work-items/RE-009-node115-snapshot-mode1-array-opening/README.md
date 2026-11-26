@@ -1,0 +1,5 @@
+# RE-009: snapshot mode-1 array writer setup
+
+The non-rmp path of the exact-mode-1 helper begins differently from the selected alternate-mode buffered serializer in #7146. At 0x26a5a06 the code loads two distinct words from the incoming wrapper, requests 128 bytes, and on success stores the allocation pointer and the capacity separately. Before entering element handling it emits ASCII [ as the first byte, sets used length to one, and installs the writer descriptor at stack +0x20. A null allocation branches before the opening byte store. These steps show the array framing supplied by the caller and the initial invariant available to following element writers; the closing byte, element encoder and wire equivalence require separate evidence.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-mode1-array-opening/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
