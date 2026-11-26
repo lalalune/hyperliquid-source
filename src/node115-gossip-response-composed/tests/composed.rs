@@ -23,11 +23,68 @@ fn raw_zero_nested_error_uses_existing_decoder() {
     assert_eq!(out.charged, 28);
 }
 #[test]
-fn success_boundary_is_not_a_complete_response() {
+fn limited_success_remains_an_explicit_budget_boundary() {
     let out = decode_prefix(&[0, 0, 42, 43], Some(8), 0);
     assert_eq!(out.result, Ok(Response::ResultSuccessBoundary));
     assert_eq!(out.remaining, &[42, 43]);
     assert_eq!(out.charged, 8);
+}
+
+fn empty_client_payload() -> Vec<u8> {
+    let mut wire = vec![0, 0, 1]; // outer tag 0, Result::Ok tag 0, one Client
+    wire.extend([0; 9]); // signature: eight zero limbs and recovery byte
+    wire.extend([0; 20]); // Header address
+    wire.push(0); // Header hashes
+    wire.extend([0, 0, 0]); // timestamp seconds, nanos, QC parent tag
+    wire.extend([0; 5]); // QC scalar fields
+    wire.extend([0; 32]); // QC hash
+    wire.push(0); // QC votes
+    wire.push(0); // no commit proof
+    wire.push(0); // no attachments
+    wire
+}
+
+#[test]
+fn unlimited_nested_success_uses_real_clientblocks_decoder_and_retains_suffix() {
+    let mut wire = empty_client_payload();
+    wire.extend([0xee, 0xff]);
+    let out = decode_prefix(&wire, None, 17);
+    assert_eq!(out.result, Ok(Response::ClientBlocks(vec![
+        node115_client_block_success::Client {
+            block: node115_client_block_success::Block {
+                signature: node115_client_block_success::Signature {
+                    limbs: [0; 8],
+                    recovery: 0,
+                },
+                header: node115_client_block_success::Header {
+                    address: [0; 20],
+                    hashes: vec![],
+                    timestamp: node115_client_block_success::AdmittedTimestamp {
+                        packed_date: 16138266,
+                        second_of_day: 0,
+                        nanoseconds: 0,
+                    },
+                    parent: node115_client_block_success::Parent::QuorumCertificate(
+                        node115_client_block_success::QuorumCertificate {
+                            fields: [0; 5],
+                            hash: [0; 32],
+                            votes: vec![],
+                        },
+                    ),
+                },
+                commit_proof: None,
+            },
+            attachments: vec![],
+        },
+    ])));
+    assert_eq!(out.remaining, &[0xee, 0xff]);
+    assert_eq!(out.charged, 17);
+}
+
+#[test]
+fn unlimited_nested_success_maps_child_parse_error() {
+    let out = decode_prefix(&[0, 0, 1, 0], None, 0);
+    assert!(matches!(out.result, Err(Error::ClientBlocksSuccess(_))));
 }
 #[test]
 fn variant_two_is_forwarded_without_double_tag() {

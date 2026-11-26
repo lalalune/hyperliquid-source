@@ -18,16 +18,15 @@ separately qualified #115 day-count constructor and admission predicate;
 signatures are eight U64 varints plus one raw recovery byte; attachment
 content stays opaque.
 No cryptographic verification, voter-map normalization, allocation-failure
-equivalence, native ABI, malformed-input cursor equivalence, response framing,
-or source-to-node equivalence is claimed. The safe parser's raw-field
+equivalence, native ABI, malformed-input cursor equivalence, metered response
+framing, or source-to-node equivalence is claimed. The safe parser's raw-field
 shortfall leaves that field unconsumed; reused integer readers retain their
 separately documented cursor behavior.
 
 Reads are unmetered because the existing caller's nested budget accounting
-has not been closed across this full graph. This crate does not replace the
-existing composed response decoder's explicit `ResultSuccessBoundary`. It is
-an independently usable structural child decoder until that calling contract
-is established. New code is MIT. Timestamp admission is grounded in
+has not been closed across this full graph. The composed response decoder uses
+this child only when its caller supplied no charge limit; limited decoding
+keeps its explicit `ResultSuccessBoundary`. New code is MIT. Timestamp admission is grounded in
 [`RE-001-node115-client-block-timestamp-admission`](../../research/work-items/RE-001-node115-client-block-timestamp-admission/README.md)
 and composes the existing MIT `node115-daycount-date` implementation.
 

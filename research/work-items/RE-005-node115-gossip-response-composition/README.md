@@ -1,10 +1,12 @@
 # RE-005: join selected node 115 Gossip response decoders
 
 This partial #3907 contribution joins previously separate logical decoders for
-three outer response routes into `src/node115-gossip-response-composed`.
-Nested Result success remains an explicit selection boundary: its payload is
-not decoded, so this is not a complete response or issue closure. All full
-component gates remain false.
+all three outer response selections into `src/node115-gossip-response-composed`.
+Nested Result success now reaches the separately qualified ClientBlocks
+structural decoder when budget accounting is disabled. In metered mode the
+composition retains an explicit success boundary because nested charge/error
+ordering is not closed. This is not a complete response or issue closure. All
+full component gates remain false.
 
 Target Linux x86-64 node #115, 105,896,032 bytes, SHA-256
 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`.
@@ -18,7 +20,10 @@ Raw 0 branches at `0x5aac7ec` to nested Result selection; raw 1 branches at
 `0x5aac7f5` to `0x5aac8fb`, which calls the address-vector decoder
 `0x4de6210` at `0x5aac901`; raw 2 enters the existing option/record path.
 At the nested selection, raw 1 branches to the ClientBlocksError decoder and
-raw 0 enters the separately delegated success payload. The fast u32 path's
+raw 0 enters the separately delegated success payload. The success callback
+binding is independently authenticated by the ClientBlocks vector-budget
+packet; the structural payload grammar and successful fixtures are covered by
+the ClientBlocks grammar packet. The fast u32 path's
 byte load and output+4 store are retained to distinguish raw wire tags from
 local labels. The existing u32 reader supplies the corresponding slow path.
 
@@ -47,5 +52,12 @@ cargo +1.95.0 test --locked --offline --manifest-path src/node115-gossip-respons
 
 The verifier requires the hydrated target and existing Capstone 5.0.7; the
 Rust build uses only local path dependencies and an installed Rust 1.95.
-Tests cover raw tag routing, actual vector and error children, all seven nested
-error variants, charge/cursor on failures, and unconsumed suffixes.
+Tests cover raw tag routing, actual address-vector, ClientBlocks success and
+error children, all seven nested error variants, charge/cursor on failures,
+and unconsumed suffixes. The success integration test uses an independently
+specified empty ClientBlocks fixture (76 bytes including the two response
+tags and vector count) plus a two-byte suffix. It asserts structural output,
+suffix preservation and unchanged caller charge in unmetered mode; a malformed
+child maps to the projected child error. Metered success remains an explicit
+boundary. These tests verify the new Rust composition contract, not execution
+or equivalence of the captured node.
