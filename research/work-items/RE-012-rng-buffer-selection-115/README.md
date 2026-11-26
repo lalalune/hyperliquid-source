@@ -7,6 +7,12 @@ RE-012 startup/helper scope. Independently authored MIT Rust/scripts/docs;
 captured disassembly retains original rights. No inferred unlicensed source
 copied. All component gates and byte-comparison counts remain unchanged.
 
+The exact source inputs used by this packet's original qualification are
+retained under `baseline/src/node115-rng-buffer-selection/`. The live
+component was subsequently extended by
+[RE-001-node115-rng-fallback-compose](../RE-001-node115-rng-fallback-compose/README.md);
+the baseline copies preserve this packet's original source-hash claims.
+
 ## Gap and delivered scope
 
 Earlier static PR #2792 recovered the generated-name function and observed its
