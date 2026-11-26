@@ -1,0 +1,5 @@
+# RE-009: snapshot nested record key and payload handoff
+
+Inside the selected nested snapshot serializer at 0x258ba80, the record key is framed by quote bytes with 0x25bf330 called between the two writes. Capacity equality before either quote branches to its own reserve path. The code commits the writer length after each quote, then sets writer byte +0x20 to one and appends comma and newline on the direct-capacity path. It later passes the saved record payload pointer from stack +0x60 and writer pointer to 0x22b90d0. A nonzero result branches away before the following writer state store. This ties together record framing, escaping callback and payload ownership at this caller. Existing packets identify the shared escaping routine in other callers. This packet does not infer the payload schema or evaluate the resulting bytes dynamically.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-nested-record-key-payload/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
