@@ -1,0 +1,45 @@
+artifacts/node/115/hl-node:	file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000001419300 <.text>:
+ 258ba91: 0f 10 06                     	movups	(%rsi), %xmm0
+ 258ba94: 0f 10 4e 10                  	movups	0x10(%rsi), %xmm1
+ 258ba98: 0f 10 56 20                  	movups	0x20(%rsi), %xmm2
+ 258ba9c: 0f 10 5e 30                  	movups	0x30(%rsi), %xmm3
+ 258baa0: 0f 29 44 24 10               	movaps	%xmm0, 0x10(%rsp)
+ 258baa5: 48 8b 46 40                  	movq	0x40(%rsi), %rax
+ 258baa9: 48 89 44 24 50               	movq	%rax, 0x50(%rsp)
+ 258baae: 0f 29 5c 24 40               	movaps	%xmm3, 0x40(%rsp)
+ 258bab3: 0f 29 54 24 30               	movaps	%xmm2, 0x30(%rsp)
+ 258bab8: 0f 29 4c 24 20               	movaps	%xmm1, 0x20(%rsp)
+ 258babd: 48 83 7c 24 10 02            	cmpq	$0x2, 0x10(%rsp)
+ 258bac3: 75 33                        	jne	0x258baf8 <.text+0x11727f8>
+ 258bac5: 48 8b 44 24 20               	movq	0x20(%rsp), %rax
+ 258baca: 48 8b 5c 24 30               	movq	0x30(%rsp), %rbx
+ 258bacf: 48 2b 44 24 18               	subq	0x18(%rsp), %rax
+ 258bad4: 48 c1 e8 05                  	shrq	$0x5, %rax
+ 258bad8: 48 b9 ab aa aa aa aa aa aa aa	movabsq	$-0x5555555555555555, %rcx # imm = 0xAAAAAAAAAAAAAAAB
+ 258bae2: 48 2b 5c 24 28               	subq	0x28(%rsp), %rbx
+ 258bae7: 48 0f af c1                  	imulq	%rcx, %rax
+ 258baeb: 48 c1 eb 05                  	shrq	$0x5, %rbx
+ 258baef: 48 0f af d9                  	imulq	%rcx, %rbx
+ 258baf3: 48 01 c3                     	addq	%rax, %rbx
+ 258baf6: eb 05                        	jmp	0x258bafd <.text+0x11727fd>
+ 258baf8: 48 8b 5c 24 50               	movq	0x50(%rsp), %rbx
+ 258bafd: 4d 8b 7d 18                  	movq	0x18(%r13), %r15
+ 258bb01: 49 83 ff ff                  	cmpq	$-0x1, %r15
+ 258bb05: 0f 84 13 07 00 00            	je	0x258c21e <.text+0x1172f1e>
+ 258bb0b: 4d 8b 75 00                  	movq	(%r13), %r14
+ 258bb0f: 49 8d 47 01                  	leaq	0x1(%r15), %rax
+ 258bb13: 49 89 45 18                  	movq	%rax, 0x18(%r13)
+ 258bb17: 41 c6 45 20 00               	movb	$0x0, 0x20(%r13)
+ 258bb1c: 49 8b 76 10                  	movq	0x10(%r14), %rsi
+ 258bb20: 49 39 36                     	cmpq	%rsi, (%r14)
+ 258bb23: 0f 84 82 06 00 00            	je	0x258c1ab <.text+0x1172eab>
+ 258bb29: 49 8b 46 08                  	movq	0x8(%r14), %rax
+ 258bb2d: c6 04 30 5b                  	movb	$0x5b, (%rax,%rsi)
+ 258bb31: 48 ff c6                     	incq	%rsi
+ 258bb34: 49 89 76 10                  	movq	%rsi, 0x10(%r14)
+ 258bb38: 48 85 db                     	testq	%rbx, %rbx
+ 258bb3b: 40 0f 94 c5                  	sete	%bpl
