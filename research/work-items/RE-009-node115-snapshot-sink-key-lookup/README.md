@@ -1,0 +1,9 @@
+# RE-009: selected snapshot sink byte-key lookup
+
+At the selected worker call identified by [#7128](https://github.com/lalalune/hyperliquid-source/pull/7128), `0x2dc31b0` receives a 24-byte input descriptor in RDX and a 72-byte payload in RCX. This packet examines the nested lookup branch beginning `0x2dc3512`, not every entry path into the callee. It assumes valid pointers, nonnegative lengths small enough for signed length subtraction, normal `memcmp` relocation and no concurrent mutation.
+
+The lookup takes the descriptor's pointer and length, reads a 16-bit count at node `+0x42a`, and scans 24-byte key descriptors. Slot `0x64dfb50` is dynamically relocated to `memcmp@GLIBC_2.2.5`. The helper compares the query and candidate prefix using the smaller length; for unequal prefixes it uses the sign of `memcmp`, otherwise it uses the length difference. A positive comparison advances to the next key. Equality enters `0x2dc35fc`; a negative comparison or exhaustion chooses the current child index. While depth remains, the child pointer is loaded from `node + 0x430 + 8*index` and the process repeats.
+
+For an equal key, `0x2dc3646..0x2dc36ab` addresses `node + 0x110 + 72*index`, writes the previous 72-byte value into the result pointer, then copies the input 72-byte payload into that slot. This is a conditional replacement observation; the meaning of the key, object, sentinel, full fallback paths and persisted snapshot is not established. No real checkpoint was loaded, and this does not establish state-root equivalence.
+
+Target: Linux x86-64 node #115 SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. `verify.py` checks target digest, instruction spans, memcmp relocation, mutation controls and small comparator examples; examples exercise a model, not the captured binary. The disassembly and actual static run are recorded in `windows.txt` and `offline-log.txt`.
