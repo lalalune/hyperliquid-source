@@ -1,4 +1,4 @@
-//! Bounded node #115 model for ring-buffer slices passed to sequence serializers.
+//! Node #115 iterator records passed from newtype serializers to their inner collectors.
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct RingSlices {
@@ -61,9 +61,59 @@ pub fn ring_slices(
     }
 }
 
+/// Defined words of the argument to the inner collector. The ring form has
+/// four trailing padding words in the captured layout, which are never read here.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum SequenceInput {
+    Tree([u64; 9]),
+    Ring([u64; 5]),
+}
+
+/// Produce the collector input for a sequence newtype. Element size is the
+/// recovered stride of the selected forwarder, in bytes.
+pub fn sequence_input(
+    name: &[u8],
+    value: [u64; 4],
+    element_size: u64,
+) -> Result<SequenceInput, &'static str> {
+    if name == b"_ExtStruct" {
+        return Err("expected tuple");
+    }
+    let [tag_or_capacity, pointer, height_or_head, length] = value;
+    if tag_or_capacity == 1 << 63 {
+        let has_root = u64::from(pointer != 0);
+        let count = if pointer == 0 { 0 } else { length };
+        return Ok(SequenceInput::Tree([
+            has_root,
+            0,
+            pointer,
+            height_or_head,
+            has_root,
+            0,
+            pointer,
+            height_or_head,
+            count,
+        ]));
+    }
+    let slices = ring_slices(
+        pointer,
+        tag_or_capacity,
+        height_or_head,
+        length,
+        element_size,
+    );
+    Ok(SequenceInput::Ring([
+        2,
+        slices.first_start,
+        slices.first_end,
+        slices.second_start,
+        slices.second_end,
+    ]))
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{ring_slices, RingSlices};
+    use super::{ring_slices, sequence_input, RingSlices, SequenceInput};
     use std::collections::BTreeMap;
 
     const CASES: &str = include_str!(
@@ -121,6 +171,61 @@ mod tests {
             checked += 1;
         }
         assert_eq!(checked, 725);
+    }
+
+    #[test]
+    fn matches_all_frozen_sequence_inputs() {
+        let sizes: BTreeMap<_, _> = BODIES
+            .lines()
+            .skip(1)
+            .filter_map(|line| {
+                let row = columns(line);
+                (row[4] == "seq").then(|| (row[0], hex(row[6])))
+            })
+            .collect();
+        let mut counts = BTreeMap::new();
+        let mut arms = [0, 0];
+        for line in CASES.lines().skip(1) {
+            let row = columns(line);
+            let Some(&size) = sizes.get(row[0]) else {
+                continue;
+            };
+            let name: Vec<_> = row[3]
+                .as_bytes()
+                .chunks_exact(2)
+                .map(|pair| u8::from_str_radix(std::str::from_utf8(pair).unwrap(), 16).unwrap())
+                .collect();
+            let value = words(row[6]).try_into().unwrap();
+            let expected = words(row[7]);
+            let record = sequence_input(&name, value, size).unwrap();
+            let actual: &[u64] = match &record {
+                SequenceInput::Tree(fields) => {
+                    arms[0] += 1;
+                    fields
+                }
+                SequenceInput::Ring(fields) => {
+                    arms[1] += 1;
+                    fields
+                }
+            };
+            assert_eq!(actual, expected, "body {} case {}", row[0], row[1]);
+            *counts.entry(row[0]).or_insert(0) += 1;
+        }
+        assert_eq!(arms, [725, 725]);
+        assert_eq!(counts.len(), 29);
+    }
+
+    #[test]
+    fn reserved_name_precedes_representation_selection() {
+        for tag in [1 << 63, 16] {
+            let value = [tag, 0, 0, 0];
+            assert_eq!(
+                sequence_input(b"_ExtStruct", value, 32),
+                Err("expected tuple")
+            );
+            assert!(sequence_input(b"_ExtStructX", value, 32).is_ok());
+            assert!(sequence_input(b"_extStruct", value, 32).is_ok());
+        }
     }
 
     #[test]
