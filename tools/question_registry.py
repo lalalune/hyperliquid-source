@@ -140,7 +140,15 @@ def load_questions(root=ROOT):
 
 def refresh_ownership(root=ROOT):
     questions = load_questions(root)
-    issues = {"5391", "3923"}
+    # The questions are the authority for which issues carry ownership context.
+    # Derive the snapshot set from their links instead of a fixed pair, so a
+    # newly linked issue is fetched rather than silently shown as unknown.
+    issues = set()
+    for row in questions:
+        for value in (row["linked_issue"]["url"], row["pilot_issue"]):
+            match = ISSUE_REF.fullmatch(value)
+            if match:
+                issues.add(match.group(1))
     pulls = {match.group(1) for row in questions for attempt in row["prior_attempts"]
              if (match := PR_REF.fullmatch(attempt["url"]))}
     result = {"schema_version": 1, "source": "GitHub REST API via gh", "fetched_at":
