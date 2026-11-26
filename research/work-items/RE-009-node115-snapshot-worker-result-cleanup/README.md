@@ -1,0 +1,5 @@
+# RE-009: snapshot worker result and storage cleanup
+
+After the selected output helper returns, the worker tests its result pointer. If nonzero, it loads the first qword from the object and calls through that table pointer with the object as argument. Both normal returns reach the storage cleanup discriminator. When the storage first word differs from the signed-minimum marker, the worker calls 0x24ff0b0 on the stack descriptor, then checks the first word again. A nonzero first word passes the backing pointer and 96 times that word to the shared cleanup slot; zero skips that call. This distinguishes the helper result callback from the storage cleanup and does not assign a semantic error type.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-worker-result-cleanup/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
