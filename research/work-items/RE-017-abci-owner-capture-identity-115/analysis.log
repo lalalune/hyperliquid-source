@@ -1,0 +1,29 @@
+Target: Linux x86-64 node #115, SHA-256 a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301
+Environment: Python 3.14.3, Capstone 5.0.7; Darwin arm64 static-analysis host
+
+$ python3 tools/abci_owner_capture_identity115.py --out research/work-items/RE-017-abci-owner-capture-identity-115
+verified 3 FDEs and 35 anchors; constructor slot 0x64e7458 -> 0x5a6cbc0
+
+$ python3 -m unittest tests.test_abci_owner_capture_identity115 -v
+Ran 4 tests; OK (5.620s)
+
+$ make catalogue-check
+Catalogue and progress tables match pinned inputs.
+
+$ git submodule update --init --recursive
+PASS: all six pinned submodules checked out at their recorded gitlink commits
+
+$ PATH=/opt/homebrew/opt/binutils/bin:$PATH make verify
+PASS: #115 and visor artifact hashes and signatures
+PASS: pinned upstream binary, signature and public key match
+PASS: verified 32 imported files and all pinned source repositories
+PASS: verified 4618 evidence-packet manifests and 33616 entries
+
+$ PYTHONHASHSEED=1 TZ=Etc/UTC python3 tools/abci_owner_capture_identity115.py --out work/owner-capture-repro/one
+verified 3 FDEs and 35 anchors; constructor slot 0x64e7458 -> 0x5a6cbc0
+$ PYTHONHASHSEED=314159 TZ=Pacific/Honolulu python3 tools/abci_owner_capture_identity115.py --out work/owner-capture-repro/two
+verified 3 FDEs and 35 anchors; constructor slot 0x64e7458 -> 0x5a6cbc0
+$ diff -r work/owner-capture-repro/one work/owner-capture-repro/two
+PASS
+$ diff -r --exclude=README.md --exclude=analysis.log --exclude=MANIFEST.sha256 research/work-items/RE-017-abci-owner-capture-identity-115 work/owner-capture-repro/one
+PASS
