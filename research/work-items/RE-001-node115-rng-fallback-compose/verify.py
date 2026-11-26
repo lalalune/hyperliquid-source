@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -14,8 +15,12 @@ ROOT = HERE.parents[2]
 PIN = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
 
 
-def run(command: list[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, cwd=ROOT, text=True, capture_output=True, check=True)
+def run(
+    command: list[str], *, env: dict[str, str] | None = None
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        command, cwd=ROOT, text=True, capture_output=True, check=True, env=env
+    )
 
 
 def verify(target: Path) -> dict:
@@ -39,6 +44,9 @@ def verify(target: Path) -> dict:
     rustup = shutil.which("rustup")
     if rustup is None:
         raise RuntimeError("rustup is required for the pinned Rust 1.95 reference comparison")
+    rustc = run([rustup, "which", "--toolchain", "1.95.0", "rustc"]).stdout.strip()
+    cargo_env = os.environ.copy()
+    cargo_env["RUSTC"] = rustc
     cargo = run([
         rustup,
         "run",
@@ -50,7 +58,7 @@ def verify(target: Path) -> dict:
         "--release",
         "--manifest-path",
         str(HERE / "reference/Cargo.toml"),
-    ])
+    ], env=cargo_env)
     comparison = json.loads(cargo.stdout.strip().splitlines()[-1])
     expected = records["comparison"]
     for key in (
