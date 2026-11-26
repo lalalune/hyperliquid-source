@@ -55,6 +55,19 @@ class CallerTests(unittest.TestCase):
         for name in ("scale", "mode", "sink", "alloc", "free", "rec", "arr", "tot", "inner", "find", "find2", "posa", "hashget"):
             self.assertIn(name, events)
 
+    def test_hash_b_oracle_records_the_u64_key_from_rdx(self):
+        saw_nonzero_key = False
+        for case in CASES:
+            trace = RIG.emulate(case)[1]
+            hash_events = [event for event in trace if event[0] == "hash_b"]
+            position_events = [event for event in trace if event[0] in ("posa", "posb")]
+            self.assertEqual(len(hash_events), len(position_events))
+            for (_, k0, k1, key, result), position in zip(hash_events, position_events):
+                self.assertEqual(key, position[3])
+                self.assertEqual(result, T.crc_hash(b"b", k0, k1, key))
+                saw_nonzero_key |= key != 0
+        self.assertTrue(saw_nonzero_key)
+
     def test_every_model_variant_is_caught(self):
         for bug in T.BUG_TEXT:
             caught = False

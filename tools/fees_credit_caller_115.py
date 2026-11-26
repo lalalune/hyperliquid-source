@@ -1236,9 +1236,9 @@ class World:
         self.log("hash_a", k0, k1, blob, h)
         return h
 
-    def hash_b(self, k0, k1):
-        h = crc_hash(b"b", k0, k1)
-        self.log("hash_b", k0, k1, h)
+    def hash_b(self, k0, k1, key):
+        h = crc_hash(b"b", k0, k1, key)
+        self.log("hash_b", k0, k1, key, h)
         return h
 
     def present(self, table, h):
@@ -1528,7 +1528,7 @@ def model(w, A, B, side, C, bug=0):
                 if rd(arr + 8) == owner:
                     pos = 0
             else:
-                hb = w.hash_b(rd(A + 0x90), rd(A + 0x98))
+                hb = w.hash_b(rd(A + 0x90), rd(A + 0x98), owner)
                 found, at = w.pos("posa", A + 0x58, hb, owner)
                 if found:
                     if at >= count:
@@ -1539,7 +1539,7 @@ def model(w, A, B, side, C, bug=0):
                 count2 = rd(A + 0xF8)
                 flag = 0
                 if count2 >= 2:
-                    hb2 = w.hash_b(rd(A + 0x120), rd(A + 0x128))
+                    hb2 = w.hash_b(rd(A + 0x120), rd(A + 0x128), rec)
                     found2, at2 = w.pos("posb", A + 0xE8, hb2, rec)
                     if found2 and at2 >= count2:
                         raise Pan(P_INDEX, at2, count2)
@@ -1680,7 +1680,7 @@ def install(m, w):
         mm.regs[RAX] = w.hash_a(mm.regs[RDI], mm.regs[RSI], mem.bytes_at(mm.regs[RDX], 20))
 
     def hook_hash_b(mm):
-        mm.regs[RAX] = w.hash_b(mm.regs[RDI], mm.regs[RSI])
+        mm.regs[RAX] = w.hash_b(mm.regs[RDI], mm.regs[RSI], mm.regs[RDX])
 
     def probe_blob(p):
         return mem.bytes_at(mem.read(p, 8), 20), mem.bytes_at(p + 8, 16)
@@ -2197,7 +2197,7 @@ def load_image_bytes(blob, expected):
 # Evidence files
 # ----------------------------------------------------------------------------------------------------------------------
 TAB = "\t"
-ROLE = {0x4717440: "hash of a 20-byte key (SipHash state in the first two args)", 0x47172C0: "hash of two state words",
+ROLE = {0x4717440: "hash of a 20-byte key (SipHash state in the first two args)", 0x47172C0: "hash of one u64 key under two state words (key is RDX; output is a seeded oracle here)",
         0x3EE6280: "table probe by hash and key (ledger map)", 0x4717C50: "entry for the ledger map (occupied or vacant)",
         0x3CD7AA0: "inner map entry by u64 key", 0x3F14BC0: "inner map entry value cell", 0x3EE69C0: "table probe (tally map)",
         0x4717FB0: "entry for the tally map", 0x3CD6230: "per-kind pair entry", 0x3F18230: "per-kind pair cell array",
