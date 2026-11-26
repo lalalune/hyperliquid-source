@@ -16,7 +16,7 @@ import struct
 import sys
 
 from elf_index import sections, unwind_index
-from fde_extents import eh_frame_records
+from fde_extents import eh_frame_records, uleb
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGET = ROOT / 'artifacts/node/115/hl-node'
@@ -431,6 +431,63 @@ def read_slices(data, secs, slices=None):
     return rows
 
 
+def read_lsda_sites(data, secs, role, fde):
+    """Decode the selected Rust LSDA call-site table; action chains stay opaque."""
+    va = fde['lsda']
+    if va is None:
+        return []
+    matches = [s for s in secs if s['type'] != 8 and s['address'] <= va < s['address'] + s['size']]
+    if len(matches) != 1:
+        raise ValueError('LSDA is not in one file-backed section')
+    section = matches[0]
+    start = file_offset(secs, va, 1)
+    end = section['offset'] + section['size']
+    pos = start
+
+    def byte():
+        nonlocal pos
+        if pos >= end:
+            raise ValueError('truncated LSDA')
+        value = data[pos]
+        pos += 1
+        return value
+
+    if byte() != 0xff:
+        raise ValueError('unexpected LSDA LPStart encoding')
+    type_encoding = byte()
+    if type_encoding == 0x9b:
+        type_offset, pos = uleb(data, pos, end)
+        if pos + type_offset > end:
+            raise ValueError('LSDA type table exceeds section')
+    elif type_encoding != 0xff:
+        raise ValueError('unexpected LSDA type encoding')
+    encoding_va = va + pos - start
+    if byte() != 1:
+        raise ValueError('unexpected LSDA call-site encoding')
+    table_size, pos = uleb(data, pos, end)
+    table_end = pos + table_size
+    if table_end > end:
+        raise ValueError('LSDA call-site table exceeds section')
+    rows, previous_end = [], fde['start']
+    while pos < table_end:
+        offset, pos = uleb(data, pos, table_end)
+        length, pos = uleb(data, pos, table_end)
+        landing, pos = uleb(data, pos, table_end)
+        action, pos = uleb(data, pos, table_end)
+        low = fde['start'] + offset
+        high = low + length
+        landing_va = fde['start'] + landing if landing else None
+        if not previous_end <= low <= high <= fde['end']:
+            raise ValueError('unordered or out-of-range LSDA call interval')
+        if landing_va is not None and not fde['start'] <= landing_va < fde['end']:
+            raise ValueError('LSDA landing pad outside selected FDE')
+        rows.append((role, fde['start'], va, encoding_va, low, high, landing_va, action))
+        previous_end = high
+    if pos != table_end:
+        raise ValueError('LSDA call-site table has trailing bytes')
+    return rows
+
+
 def validate_constants(constants):
     if (constants['dispatcher_bias'] != constants['formatter_bias']
             or constants['selector_bias'] != constants['dispatcher_bias']
@@ -472,6 +529,10 @@ def collect(data):
         functions.append((role, start, fde['end'], file_offset(secs, start, len(body)),
                           fde['fde'], fde['cie'], fde['lsda'], len(body), hashlib.sha256(body).hexdigest()))
         bodies.append((role, start, fde['end'], len(body), body.hex()))
+
+    exception_sites = []
+    for role, start, _, _ in FUNCTIONS:
+        exception_sites.extend(read_lsda_sites(data, secs, role, selected[start]))
 
     constants = {}
     for label, va, prefix, width in CONSTANTS:
@@ -541,6 +602,7 @@ def collect(data):
         'selected_dataflow_slices': len(SLICES),
         'selected_indirect_sites': len(indirect),
         'selected_relocations': len(relocations),
+        'selected_lsda_call_sites': len(exception_sites),
         'literal_records': len(literal_rows),
         'switch_entries_per_table': count,
         'switch_bound_source_va': hex(0x60c968),
@@ -555,7 +617,7 @@ def collect(data):
         'dispatch_table_va': hex(dispatch_table),
         'limitations': 'Selected static paths only. FDEs are unwind ranges, not complete source boundaries. No target execution, full helper closure, wire decoding, binary equivalence, or component gate is claimed.',
     }
-    return functions, bodies, switches, edges, relocations, indirect, literal_rows, constant_rows, summary
+    return functions, bodies, switches, edges, relocations, indirect, literal_rows, constant_rows, summary, exception_sites
 
 
 def format_cell(value):
@@ -575,7 +637,7 @@ def write_tsv(path, header, rows):
 
 
 def generate(data, out):
-    functions, bodies, switches, edges, relocs, indirect, literals, constants, summary = collect(data)
+    functions, bodies, switches, edges, relocs, indirect, literals, constants, summary, exception_sites = collect(data)
     slices = read_slices(data, sections(data))
     out.mkdir(parents=True, exist_ok=True)
     write_tsv(out / 'functions.tsv', ('role', 'start_va', 'end_va_exclusive', 'file_offset', 'fde_va', 'cie_va', 'lsda_va', 'length', 'sha256'), functions)
@@ -587,6 +649,7 @@ def generate(data, out):
     write_tsv(out / 'indirect.tsv', ('label', 'site_va', 'site_file_offset', 'raw_hex', 'slot_va'), indirect)
     write_tsv(out / 'literals.tsv', ('label', 'site_va', 'instruction_hex', 'literal_va', 'literal_file_offset', 'length', 'ascii'), literals)
     write_tsv(out / 'constants.tsv', ('label', 'site_va', 'site_file_offset', 'instruction_hex', 'value'), constants)
+    write_tsv(out / 'exception-sites.tsv', ('role', 'function_start_va', 'lsda_va', 'encoding_va', 'call_start_va', 'call_end_va_exclusive', 'landing_pad_va', 'action'), exception_sites)
     (out / 'summary.json').write_text(json.dumps(summary, sort_keys=True, indent=2) + '\n', encoding='utf-8')
     return summary
 
