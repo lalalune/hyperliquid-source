@@ -1,0 +1,5 @@
+# RE-009: snapshot third vector cleanup after child failure
+
+The selected landing path at 0x24aa434 saves the exception object to the stack and enters the loop at its count decrement. Starting from the already-advanced cursor, each remaining 200-byte record selects +8 or +0x20 based on its first word and calls the nested cleanup helper. Once the saved count is exhausted, a nonzero +0x30 word triggers release of the original third-array base with that word scaled by 200. The saved exception object is then passed to the unwind-resume entry. This covers the visible third-vector landing flow following the normal layout documented by the sibling packet, without enumerating every exception table entry.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-third-vector-unwind/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
