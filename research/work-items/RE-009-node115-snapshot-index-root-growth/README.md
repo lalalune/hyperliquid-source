@@ -1,0 +1,7 @@
+# RE-009: selected snapshot index root growth
+
+Following the full leaf split in [#7132](https://github.com/lalalune/hyperliquid-source/pull/7132), `0x1ca67f3` checks the old node's parent pointer. On the zero-parent path, the helper obtains the current root and height from the owning structure, requires a nonzero root, and requests a `0x490`-byte new internal node. Assuming this allocation succeeds, the height increment does not overflow, and the current root is the split old node, the code initializes the new node with count zero, writes the prior root as child 0 at `+0x430`, sets that child's parent to the new node and child index at `+0x428` to zero, then installs the new root and incremented height in the owner.
+
+The code then increments the new root's count from zero, writes the previously separated 24-byte key at `+0x08` and 72-byte value at `+0x110`, and writes the split sibling as child 1 at `+0x438`; it sets the sibling's parent and child index to the new root and one. The null-root, allocation failure, overflow and failed invariant branches are not analyzed here. This is a conditional static observation; the higher-level key semantics, real snapshots, concurrency and state-root correctness remain open.
+
+Target Linux x86-64 node #115 SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. `verify.py` checks the target digest, selected instruction windows, branch targets and independent byte mutations without executing the captured binary. Disassembly and an actual static run are retained alongside it.
