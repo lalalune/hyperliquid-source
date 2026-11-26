@@ -1,0 +1,5 @@
+# RE-009: snapshot nested cleanup second vector handoff
+
+The descriptor cleanup in #7170 walks a first array and then enters a second array. On the signed-minimum branch, the first release reads its size word from +8 and scales it by 200, using the saved first base. The next descriptor uses separate size, base and count positions at +0x20, +0x28 and +0x30. The second loop uses the 200-byte stride and again projects record +8 or +0x20 according to its first word. When the loop ends, a nonzero saved size tail-calls the cleanup slot with size times 200 and the saved second base. This closes the sentinel arm normal second-vector contract. The sibling descriptor and exception paths are outside scope.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-nested-vector-handoff/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
