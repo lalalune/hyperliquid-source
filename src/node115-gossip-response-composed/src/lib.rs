@@ -3,6 +3,7 @@
 //! This is a logical prefix API, not a native ABI or complete protocol.
 extern crate alloc;
 use alloc::vec::Vec;
+use node115_client_block_success as client_success;
 use node115_client_blocks_error as client_error;
 use node115_gossip_response_v2_envelope as outer;
 use node115_u32_varint as scalar;
@@ -19,8 +20,9 @@ pub use address_vector::Record as AddressRecord;
 pub enum Response {
     Addresses(Vec<AddressRecord>),
     ClientBlocksError(client_error::Value),
+    ClientBlocks(Vec<client_success::Client>),
     Variant2(Option<outer::Record>),
-    /// The nested success tag was consumed; its payload is not decoded here.
+    /// Limited decoding reached success, but payload metering is unresolved.
     ResultSuccessBoundary,
 }
 #[derive(Debug, PartialEq, Eq)]
@@ -30,6 +32,7 @@ pub enum Error {
     ResultTag(scalar::ReadError),
     InvalidResultTag(u32),
     ClientBlocksError(client_error::Error),
+    ClientBlocksSuccess(client_success::Error),
 }
 #[derive(Debug, PartialEq, Eq)]
 pub struct Outcome<'a> {
@@ -38,10 +41,11 @@ pub struct Outcome<'a> {
     pub charged: u64,
 }
 
-/// Decode a selected response prefix, preserving cursor and charge on errors.
+/// Decode selected response prefixes, preserving child cursor and charge.
 /// Raw outer tag 0 enters a nested Result; tag 1 is the address vector.
-/// The unimplemented nested success payload is an explicit boundary, not a
-/// successful complete response; no EOF or native layout is asserted.
+/// In unlimited mode, nested success uses the separately qualified structural
+/// ClientBlocks parser. In limited mode, that payload remains an explicit
+/// boundary because its nested charge behavior has not been established.
 pub fn decode_prefix(input: &[u8], limit: Option<u64>, charged: u64) -> Outcome<'_> {
     let result = outer::decode_prefix(input, limit, charged);
     let mut remaining = result.remaining;
@@ -82,6 +86,17 @@ pub fn decode_prefix(input: &[u8], limit: Option<u64>, charged: u64) -> Outcome<
                 }
             };
             match tag {
+                0 if limit.is_none() => {
+                    let value = client_success::decode_payload_prefix(remaining);
+                    Outcome {
+                        result: value
+                            .result
+                            .map(Response::ClientBlocks)
+                            .map_err(Error::ClientBlocksSuccess),
+                        remaining: value.remaining,
+                        charged,
+                    }
+                }
                 0 => Outcome {
                     result: Ok(Response::ResultSuccessBoundary),
                     remaining,
