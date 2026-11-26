@@ -1,0 +1,7 @@
+# RE-009: selected snapshot nonfull-index insertion
+
+On the nonzero-root path adjacent to [#7130](https://github.com/lalalune/hyperliquid-source/pull/7130), `0x26dcfc4` calls `0x1ca6180` with a selected node, a 24-byte key and a 72-byte payload. For a valid insertion position `i` in `0..=n`, where the node's 16-bit count `n` at `+0x42a` is less than 11, the helper takes its nonfull-node branch. This is a static branch analysis, not a claim about real snapshot contents.
+
+Key slot `i` begins at `node+0x08+24*i`, and value slot `i` at `node+0x110+72*i`. If `i<n`, the code shifts the existing `(n-i)` key slots and value slots one place right using two indirect calls via slot `0x64df568`; the binary's dynamic relocation identifies this slot as `memmove@GLIBC_2.2.5`. It then writes the input key and 72-byte payload at position `i` and stores `n+1` as the count. If `i==n`, it takes the append branch and skips those shifts. Count `>=11` branches elsewhere; splitting, errors and other paths remain outside this result.
+
+This conclusion assumes normal relocation, valid bounds and buffers, no concurrent mutation, and the prior selected path. It does not identify the key's semantics or establish node recovery or root equality. Target Linux x86-64 node #115 SHA-256 `a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`. `verify.py` checks pinned instruction spans, the relocation, boundary examples and byte mutations without executing the captured target. Disassembly and actual static run are recorded alongside it.
