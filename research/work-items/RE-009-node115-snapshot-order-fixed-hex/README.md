@@ -1,0 +1,5 @@
+# RE-009: snapshot wrapped order fixed-width hex handoff
+
+The wrapped order-record path in #7163 constructs a zeroed scratch region and calls 0x2630fd0 with destination span 42, source record +8, source length 20 and the writer pointer. The nonzero-length arm clears R8D before its hex conversion slot, then surrounds the converted span with quote bytes, dispatches escaping through 0x25bf330, and updates used length. This ties the generic wrapper identified in RE-008-hex-digest-callers-115 to its specific fixed-width snapshot call site. The 42-byte scratch size is consistent with a two-byte prefix and 40 hex digits. The packet does not assign a business meaning to the 20 bytes or claim a native output run.
+
+The packet uses ELF virtual addresses and the pinned #115 digest listed in the offline log. Run python3 research/work-items/RE-009-node115-snapshot-order-fixed-hex/verify.py from the repository root. The verifier checks relative edges and independent instruction anchors and rejects a mutation to each.
