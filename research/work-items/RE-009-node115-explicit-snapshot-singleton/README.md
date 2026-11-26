@@ -1,0 +1,7 @@
+# RE-009: explicit snapshot selector to the worker's singleton loop
+
+The earlier selected snapshot worker packets begin with the collection adapter. This packet examines the other entry in the same #115 worker at 0x22b7510. For a first selector word other than 0x8000000000000000, the worker takes 0x22b7984. The unsigned selector length at input +0x10 must be less than 101 before its three input words are passed to 0x2c6fa00. The merged numeric-selector packet analyzes that callee. This packet connects it to the worker's actual iteration input.
+
+On result low word 0x1a2, the worker copies the two words starting at result +8 into a new 16-byte allocation. After a conditional call through the cleanup slot for the selector buffer, it sets the iteration pointer to the new allocation and both count fields to one. It restores the saved option and jumps to 0x22b75e9. The common loop therefore starts at that singleton and uses its two words as the consumer arguments. The packet leaves parser result alternatives, allocator failure and the meaning of the pair outside scope. The selector buffer cleanup slot is recorded as an indirect call without identifying its implementation.
+
+The packet uses static ELF virtual addresses for the pinned #115 file. The verifier checks the direct call, singleton allocation and stores, the loop rejoin and the path conditions, with byte mutation controls. No captured instructions run.
