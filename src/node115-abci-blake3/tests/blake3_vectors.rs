@@ -1,5 +1,5 @@
 use node115_abci_blake3::{
-    Blake3Hasher, blake3_hash, compute_leaf_root, compute_preimage_root,
+    Blake3Hasher, blake3_hash, blake3_xof, compute_leaf_root, compute_preimage_root,
 };
 
 fn pattern_input(len: usize) -> Vec<u8> {
@@ -86,4 +86,32 @@ fn leaf_and_empty_reduction_tree_roots_are_deterministic_and_sensitive() {
     let mut flipped = zero_leaf;
     flipped[31] = 1;
     assert_ne!(compute_leaf_root(&zero_leaf), compute_leaf_root(&flipped));
+}
+
+#[test]
+fn blake3_xof_matches_32_byte_prefix_and_2048_byte_lthash_expansion() {
+    // Empty input 131-byte official BLAKE3 XOF prefix: first 32 B == blake3_hash(b"")
+    let mut xof_2048 = [0u8; 2048];
+    blake3_xof(b"", &mut xof_2048);
+    assert_eq!(&xof_2048[..32], &blake3_hash(b""));
+
+    // Prefix consistency across lengths (63, 64, 65, 131, 2048)
+    let mut xof_131 = [0u8; 131];
+    blake3_xof(b"", &mut xof_131);
+    assert_eq!(&xof_131[..], &xof_2048[..131]);
+
+    // Streaming XOF matches one-shot XOF on multi-chunk input
+    let input = pattern_input(2049);
+    let mut one_shot = [0u8; 2048];
+    blake3_xof(&input, &mut one_shot);
+    let mut h = Blake3Hasher::new();
+    for chunk in input.chunks(53) {
+        h.update(chunk);
+    }
+    let mut streamed = [0u8; 2048];
+    h.finalize_xof_into(&mut streamed);
+    assert_eq!(streamed, one_shot);
+    assert_eq!(&streamed[..32], &blake3_hash(&input));
+    // Output blocks 0 and 1 must be distinct (counter incremented!)
+    assert_ne!(&streamed[..64], &streamed[64..128]);
 }

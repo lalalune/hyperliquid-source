@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "work_item": "RE-009-node115-lthash-homomorphic-and-hardfork-version",
+  "target_binary": {
+    "path": "artifacts/node/115/hl-node",
+    "size": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "lthash_spec": {
+    "hash_bytes": 2048,
+    "lanes": 1024,
+    "lane_endianness": "big_endian_u16",
+    "xof_algorithm": "blake3_unkeyed_xof",
+    "checksum_algorithm": "blake3_unkeyed_32b",
+    "rebuild_batch_size": 1000000,
+    "lthash_wire_fields": [
+      "n_elements",
+      "n_bytes",
+      "hash"
+    ],
+    "lthashes_wire_fields": [
+      "accounts_hash",
+      "contracts_hash",
+      "storage_hash"
+    ]
+  },
+  "fdes": [
+    {
+      "label": "lthash_serialize",
+      "start_va": "0x36c5b50",
+      "end_va": "0x36c5ce5",
+      "size": 405,
+      "sha256": "b55eeddda63503e20fa0faa2ffe82924172bfe0299281938d75d98e04a33f1e4"
+    },
+    {
+      "label": "lthash_xof_expand",
+      "start_va": "0x36c6100",
+      "end_va": "0x36c628e",
+      "size": 398,
+      "sha256": "aec3e5d70e2ce3ab9f5621ead68ce2e0dbcdfb5fe6b470dac91fc680687498f2"
+    },
+    {
+      "label": "lthash_remove_1",
+      "start_va": "0x3c27a20",
+      "end_va": "0x3c27b98",
+      "size": 376,
+      "sha256": "d6095568d918906b0740cdb2e4dc31536ccdab9e07f28cdae5cbe4292deae4f6"
+    },
+    {
+      "label": "lthash_remove_2",
+      "start_va": "0x3c27ba0",
+      "end_va": "0x3c27d08",
+      "size": 360,
+      "sha256": "4514b05cd5529faeb61e9fa5359a4ae26290037056e898a9eaafc8cf9f0c3c12"
+    },
+    {
+      "label": "lthash_rebuild_checksum_1",
+      "start_va": "0x3c27f30",
+      "end_va": "0x3c28210",
+      "size": 736,
+      "sha256": "7668cd3267a79ecb0069dbf5e6c9c221914eff76556ae0948dd18a3471a0d7a9"
+    },
+    {
+      "label": "lthash_update_replace_1",
+      "start_va": "0x3c287d0",
+      "end_va": "0x3c28a81",
+      "size": 689,
+      "sha256": "6366cbd926651147535dfba27476550cb99583ceb503ea63e73c4d5cd570cd21"
+    },
+    {
+      "label": "blake3_xof_fill_step",
+      "start_va": "0x1609e70",
+      "end_va": "0x1609f57",
+      "size": 231,
+      "sha256": "9cab11f8baa0b6b62c060c654de66756b0929fcbf4a2583f2cf9085993ce4740"
+    },
+    {
+      "label": "hardfork_version_validate",
+      "start_va": "0x595aff0",
+      "end_va": "0x595b1a0",
+      "size": 432,
+      "sha256": "82412ede0b4b4a1b9cf14b4874f78f1a9377028311023435f153105eef403aba"
+    }
+  ],
+  "anchors": [
+    {
+      "label": "lthash_xof_fill_0x800",
+      "va": "0x36c61f0",
+      "bytes_hex": "488d7c2408488db42480000000e85e49f4fdc644247800488d7c2408488db42400080000ba00080000ff1559b7e102"
+    },
+    {
+      "label": "lthash_ser_n_elements",
+      "va": "0x36c5bd3",
+      "bytes_hex": "488d35ba7e0dfdba0a000000"
+    },
+    {
+      "label": "lthash_ser_n_bytes",
+      "va": "0x36c5c1e",
+      "bytes_hex": "488d35797e0dfdba07000000"
+    },
+    {
+      "label": "lthash_ser_hash_0x800",
+      "va": "0x36c5c5a",
+      "bytes_hex": "488d355342d9fcba040000004c89ffe8a204b0004883f8027546488d7c2408b9000800004c89fe4c89f2"
+    },
+    {
+      "label": "lthash_mix_out_be_psubw",
+      "va": "0x3c27b10",
+      "bytes_hex": "f3430f6f8466f8000000660f6fc8660f71d108660f71f008660febc1f3420f6f4c6440660f6fd1660f71d208660f71f108660febca660ff9c1660f6fc8660f71d108660f71f008660febc1f3430f7f8466f80000004983c4084981fc00040000759e"
+    },
+    {
+      "label": "lthash_mix_in_be_paddw",
+      "va": "0x3c289d0",
+      "bytes_hex": "f30f6f0443660f6fc8660f71d108660f71f008660febc1f30f6f8c4468ffffff660f6fd1660f71d208660f71f108660febca660ffdc8660f6fc1660f71d008660f71f108660febc8f30f7f0c434883c008483d7c04000075a7"
+    },
+    {
+      "label": "lthash_rebuild_batch_1m",
+      "va": "0x3c27fd4",
+      "bytes_hex": "ba40420f00"
+    },
+    {
+      "label": "lthash_checksum_0x800",
+      "va": "0x3c2808d",
+      "bytes_hex": "488d7c2470488db42488080000ba00080000ff156b748b02488d7c2410488d742470ff1563748b02"
+    },
+    {
+      "label": "hardfork_version_cmp",
+      "va": "0x595b0fa",
+      "bytes_hex": "488b44244048891c2448894424084839c375054531f6eb37"
+    },
+    {
+      "label": "hardfork_version_err_lea",
+      "va": "0x595b135",
+      "bytes_hex": "488d3d3d6cadfa"
+    }
+  ],
+  "literals": [
+    {
+      "label": "lthashes_fields_rodata",
+      "va": "0x793711",
+      "text": "accounts_hashcontracts_hashstorage_hash"
+    },
+    {
+      "label": "lthash_fields_n_elem_bytes",
+      "va": "0x793dc1",
+      "text": "n_elementsn_bytes"
+    },
+    {
+      "label": "lthash_field_hash",
+      "va": "0x459eb4",
+      "text": "hash"
+    },
+    {
+      "label": "hardfork_unexpected_tpl",
+      "va": "0x431d7a",
+      "text": "unexpected state hardfork version: "
+    }
+  ]
+}

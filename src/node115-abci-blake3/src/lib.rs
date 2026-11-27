@@ -129,18 +129,26 @@ impl Output {
     }
 
     fn root_hash_32(&self) -> [u8; 32] {
-        let words = compress(
-            &self.input_cv,
-            &self.block_words,
-            0,
-            self.block_len,
-            self.flags | ROOT,
-        );
         let mut out = [0u8; 32];
-        for (i, &w) in words[..8].iter().enumerate() {
-            out[i * 4..i * 4 + 4].copy_from_slice(&w.to_le_bytes());
-        }
+        self.root_output_bytes(&mut out);
         out
+    }
+
+    /// Standard BLAKE3 extendable-output function (XOF) matching node #115 `0x160ab60`/`0x1609e70`
+    /// (`ROOT` flag `0x08`, incrementing 64-byte `output_block_counter`).
+    fn root_output_bytes(&self, out_slice: &mut [u8]) {
+        for (output_block_counter, out_block) in (0_u64..).zip(out_slice.chunks_mut(BLOCK_LEN)) {
+            let words = compress(
+                &self.input_cv,
+                &self.block_words,
+                output_block_counter,
+                self.block_len,
+                self.flags | ROOT,
+            );
+            for (word, out_word) in words.iter().zip(out_block.chunks_mut(4)) {
+                out_word.copy_from_slice(&word.to_le_bytes()[..out_word.len()]);
+            }
+        }
     }
 }
 
@@ -287,7 +295,7 @@ impl Blake3Hasher {
         }
     }
 
-    pub fn finalize(&self) -> [u8; 32] {
+    fn final_output(&self) -> Output {
         let mut output = self.chunk_state.output();
         let mut parent_nodes_remaining = self.cv_stack_len as usize;
         while parent_nodes_remaining > 0 {
@@ -299,7 +307,16 @@ impl Blake3Hasher {
                 self.flags,
             );
         }
-        output.root_hash_32()
+        output
+    }
+
+    pub fn finalize(&self) -> [u8; 32] {
+        self.final_output().root_hash_32()
+    }
+
+    /// Fill `out` with standard BLAKE3 XOF output bytes (used by node #115 `LtHash` at `0x36c6100` for `0x800` B).
+    pub fn finalize_xof_into(&self, out: &mut [u8]) {
+        self.final_output().root_output_bytes(out);
     }
 }
 
@@ -308,6 +325,13 @@ pub fn blake3_hash(input: &[u8]) -> [u8; 32] {
     let mut hasher = Blake3Hasher::new();
     hasher.update(input);
     hasher.finalize()
+}
+
+/// One-shot standard unkeyed BLAKE3 XOF matching node #115's `0x36c6100` (`finalize_xof().fill`).
+pub fn blake3_xof(input: &[u8], out: &mut [u8]) {
+    let mut hasher = Blake3Hasher::new();
+    hasher.update(input);
+    hasher.finalize_xof_into(out);
 }
 
 /// Compute the exact node #115 leaf-mode digest (`0x41c51be..0x41c5220`):

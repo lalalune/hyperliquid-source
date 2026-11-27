@@ -98,6 +98,28 @@ pub enum FreezeHeightError {
     },
 }
 
+/// Hardfork version mismatch error proven in `0x595aff0..0x595b1a0` (`.rodata 0x431d7a`).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct HardforkVersionError {
+    pub state_version: u64,
+    pub expected_version: u64,
+}
+
+/// Enforces `state_version == expected_version` matching `0x595b0fa..0x595b146`:
+/// `"unexpected state hardfork version: {state}, expected hardfork version: {expected}"`.
+pub fn validate_hardfork_version(
+    state_version: u64,
+    expected_version: u64,
+) -> Result<(), HardforkVersionError> {
+    if state_version != expected_version {
+        return Err(HardforkVersionError {
+            state_version,
+            expected_version,
+        });
+    }
+    Ok(())
+}
+
 /// Enforces the `l1/src/abci/state.rs:201` invariant (`0x22ed1f0`):
 /// `freeze_height >= current_height`.
 pub fn validate_freeze_height(

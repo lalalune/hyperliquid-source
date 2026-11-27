@@ -424,3 +424,77 @@ fn apply_block_six_ordered_guards_and_history_split_off_cutoff() {
     assert_eq!(engine.local_raw_history.len(), 1);
     assert!(engine.local_raw_history.contains_key(&201));
 }
+
+#[test]
+fn lthash_big_endian_homomorphic_arithmetic_and_hardfork_version_check() {
+    use node115_abci::lt_hash::{
+        LT_HASH_BYTES, LT_HASH_LANES, LT_HASH_REBUILD_BATCH_SIZE, LT_HASH_WIRE_FIELDS,
+        LT_HASHES_WIRE_FIELDS, LtHash, LtHashes,
+    };
+    use node115_abci::state::{HardforkVersionError, validate_hardfork_version};
+
+    assert_eq!(LT_HASH_BYTES, 2048);
+    assert_eq!(LT_HASH_LANES, 1024);
+    assert_eq!(LT_HASH_REBUILD_BATCH_SIZE, 1_000_000);
+    assert_eq!(LT_HASH_WIRE_FIELDS, ["n_elements", "n_bytes", "hash"]);
+    assert_eq!(
+        LT_HASHES_WIRE_FIELDS,
+        ["accounts_hash", "contracts_hash", "storage_hash"]
+    );
+
+    // Big-endian u16 lane wraparound (`0x3c289d0` / `0x3c27b10`):
+    // BE 0x00ff + 0x0001 == 0x0100 ([0x01, 0x00]), NOT LE ([0x00, 0x00] or [0x01, 0x00])!
+    let mut acc = [0u8; LT_HASH_BYTES];
+    let mut delta = [0u8; LT_HASH_BYTES];
+    acc[0] = 0x00;
+    acc[1] = 0xff;
+    delta[0] = 0x00;
+    delta[1] = 0x01;
+    LtHash::add_be_u16_lanes(&mut acc, &delta);
+    assert_eq!((acc[0], acc[1]), (0x01, 0x00));
+    LtHash::sub_be_u16_lanes(&mut acc, &delta);
+    assert_eq!((acc[0], acc[1]), (0x00, 0xff));
+
+    // Commutativity and exact invertibility of BLAKE3-XOF homomorphic mix_in / mix_out / replace
+    let mut a = LtHash::new();
+    let mut b = LtHash::new();
+    a.mix_in(b"acct:alice:100");
+    a.mix_in(b"acct:bob:200");
+    b.mix_in(b"acct:bob:200");
+    b.mix_in(b"acct:alice:100");
+    assert_eq!(a, b);
+    assert_eq!(a.n_elements, 2);
+    assert_eq!(a.n_bytes, 26);
+    assert_eq!(a.checksum(), blake3_hash(&a.hash));
+
+    // In-place update matches direct construction
+    a.replace(Some(b"acct:alice:100"), b"acct:alice:150");
+    let mut direct = LtHash::new();
+    direct.mix_in(b"acct:bob:200");
+    direct.mix_in(b"acct:alice:150");
+    assert_eq!(a, direct);
+
+    // Full removal returns to zero identity
+    a.mix_out(b"acct:bob:200");
+    a.mix_out(b"acct:alice:150");
+    assert_eq!(a, LtHash::new());
+
+    // LtHashes triple checksums
+    let mut hashes = LtHashes::new();
+    hashes.accounts_hash.mix_in(b"acct0");
+    hashes.contracts_hash.mix_in(b"code0");
+    hashes.storage_hash.mix_in(b"slot0");
+    let (c_acc, c_con, c_sto) = hashes.checksums();
+    assert_ne!(c_acc, c_con);
+    assert_ne!(c_con, c_sto);
+
+    // Hardfork version validation (`0x595aff0..0x595b1a0`)
+    assert!(validate_hardfork_version(115, 115).is_ok());
+    assert_eq!(
+        validate_hardfork_version(116, 115),
+        Err(HardforkVersionError {
+            state_version: 116,
+            expected_version: 115,
+        })
+    );
+}

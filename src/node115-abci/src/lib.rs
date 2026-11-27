@@ -4,6 +4,7 @@
 pub mod abci_hash;
 pub mod engine;
 pub mod hash_signature_tracker;
+pub mod lt_hash;
 pub mod state;
 
 pub use node115_abci_blake3 as blake3;
