@@ -1,10 +1,22 @@
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
 use std::path::PathBuf;
 use std::sync::{Arc, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use action_dispatch::admission::{
+    ClassifierAction, PRIOR_KEY_REJECT_CODE, PriorKeyWrapperOutcome, TIMED_ROUTER_ARM61_OVERFLOW_CODE,
+    TIMED_ROUTER_ARM75_DISABLED_CODE, TIMED_ROUTER_CTX_B9A_REJECT_CODE,
+    TIMED_ROUTER_CTX_B9A_REJECT_VALUE, TIMED_ROUTER_MAX_CWITHDRAW_WORD, TimedRouterGuardOutcome,
+};
+use action_wire::error_display::ACTION_SUCCESS_TAG;
+use action_wire::rmp_signable::{ENVELOPE_ERR_BYTE, ENVELOPE_OK_BYTE};
 use clearinghouse::liquidation::LiquidationAction;
+use clearinghouse::spot_clearinghouse::{
+    ERR_GENESIS_ALREADY_HAPPENED, ERR_HYPERLIQUIDITY_MIN_1PCT, ERR_MAX_SUPPLY_MIN_100M_LOTS,
+    HYPERLIQUIDITY_ADDRESS, SpotClearinghouseError, SpotTokenSpec, TokenGenesis,
+};
 use evm::system::{
     BIG_BLOCK_GAS_LIMIT, CORE_WRITER_VERSION_V1, CoreWriterFrameError, SMALL_BLOCK_GAS_LIMIT,
     encode_core_writer_frame,
@@ -16,18 +28,26 @@ use hl_node::engine::{
 };
 use hl_node::http_server::{HttpServerConfig, LocalHttpServer, http_get, http_post};
 use hl_node::peer_loopback::run_loopback_peer_sync;
+use l1_shared::chain_ext::INVALID_CHAIN_ERROR;
 use node115_abci::state::{ApplyBlockPreconditionError, REQUIRED_FEATURE_VERSION};
 use node115_assets::pdi::Side;
 use node115_assets::qtys::{Ntl, Px, Sz};
+use node115_base::l1_map::SMALL_CAPACITY_THRESHOLD;
 use node115_consensus::commit::{
     CertifiedBlockNode, RegisterBlockOutcome, TwoChainCommitOutcome,
 };
 use node115_db::rocks_db::TCP_ROCKSDB_MAX_BYTES;
 use node115_fees::fee_schedule_compose::Outcome as FeeOutcome;
+use node115_fees::lifecycle::{
+    ERR_TOO_MANY_BUILDERS, FeeLifecycleError, MAX_APPROVED_BUILDERS,
+};
 use node115_fees::tiers::{BaseFeeRates, FeeSchedule};
 use node115_orderbook::matching::L2Level;
 use node115_orderbook::trigger::{Tpsl, TriggerCondition, TriggerOrder};
 use node115_staking::jailing::JailingTime;
+use node115_staking::stake_requirement::{
+    StakeRequirementCategory, StakeRequirementError, TAG_MUL_RESULT_ERROR,
+};
 use node115_staking::withdrawal_queue::WithdrawalQueueError;
 
 fn unique_temp_dir(label: &str) -> PathBuf {
@@ -695,4 +715,260 @@ fn e2e_persistent_kv_hardfork_guard_hotstuff2_and_impact_l2() {
     );
 
     let _ = fs::remove_dir_all(&data_dir);
+}
+
+#[test]
+fn e2e_phase5_full_closure_runtime_integration() {
+    let mainnet_dir = unique_temp_dir("phase5-mainnet");
+    let local_dir = unique_temp_dir("phase5-local");
+
+    let mut eng = NodeEngine::open_or_restore(ChainName::Mainnet, &mainnet_dir).expect("open mainnet");
+    let local_eng = NodeEngine::open_or_restore(ChainName::Local, &local_dir).expect("open local");
+
+    // 1. l1-shared::chain_ext privileged addresses + base::runtime_utils guards & wallet parsing
+    let mainnet_addrs = eng.privileged_chain_addresses().expect("mainnet addrs");
+    assert_eq!(mainnet_addrs.len(), 4);
+    assert_eq!(eng.is_privileged_chain_address(&mainnet_addrs[0]), Ok(true));
+    assert_eq!(eng.is_privileged_chain_address(&[0x11; 20]), Ok(false));
+    assert_eq!(local_eng.privileged_chain_addresses(), Err(INVALID_CHAIN_ERROR));
+
+    assert!(eng.validate_production_guard(false).is_ok());
+    assert!(eng.validate_production_guard(true).is_err());
+    assert!(local_eng.validate_production_guard(true).is_ok());
+    assert!(NodeEngine::has_strict_quorum_policy(67, 100));
+    assert!(!NodeEngine::has_strict_quorum_policy(66, 100));
+    let parsed_wallet = NodeEngine::parse_wallet_hex("0x1111111111111111111111111111111111111111")
+        .expect("parse wallet");
+    assert_eq!(parsed_wallet.0, [0x11; 20]);
+    assert!(NodeEngine::parse_wallet_hex("bad").is_err());
+
+    // 2. base::l1_map Small -> Large promotion across SMALL_CAPACITY_THRESHOLD
+    assert!(!eng.user_nonces_is_large());
+    for i in 0..=(SMALL_CAPACITY_THRESHOLD as u8) {
+        let mut user = [0u8; 20];
+        user[19] = i;
+        assert_eq!(eng.record_user_nonce(user, u64::from(i) + 100), None);
+    }
+    assert!(eng.user_nonces_is_large());
+    let mut probe = [0u8; 20];
+    probe[19] = 7;
+    assert_eq!(eng.user_nonce(&probe), Some(107));
+
+    // 3. action-wire::rmp_signable connection_id_preimage + l1-shared::utils::sha256
+    let (preimage, digest) =
+        NodeEngine::action_connection_id_sha256(b"\x81\xa4type", 42, Some([0x22; 20]), Some(999));
+    assert_eq!(preimage.len(), 6 + 8 + 21 + 9);
+    let (_, digest_same) =
+        NodeEngine::action_connection_id_sha256(b"\x81\xa4type", 42, Some([0x22; 20]), Some(999));
+    assert_eq!(digest, digest_same);
+    let (_, digest_diff) =
+        NodeEngine::action_connection_id_sha256(b"\x81\xa4type", 43, Some([0x22; 20]), Some(999));
+    assert_ne!(digest, digest_diff);
+
+    // 4. action-dispatch::admission timed router guards (0, 52, 61, 63, 75), classifier, prior-key wrapper
+    assert_eq!(
+        NodeEngine::check_timed_action_arm(0, 0, 1, 0),
+        TimedRouterGuardOutcome::ImmediateOk {
+            tag_byte: ENVELOPE_OK_BYTE,
+        }
+    );
+    assert_eq!(
+        NodeEngine::check_timed_action_arm(52, 0, 1, 0),
+        TimedRouterGuardOutcome::RecurseMultiSig
+    );
+    assert_eq!(
+        NodeEngine::check_timed_action_arm(61, 0, 1, TIMED_ROUTER_MAX_CWITHDRAW_WORD),
+        TimedRouterGuardOutcome::InlineError {
+            tag_byte: ENVELOPE_ERR_BYTE,
+            code: TIMED_ROUTER_ARM61_OVERFLOW_CODE,
+        }
+    );
+    assert_eq!(
+        NodeEngine::check_timed_action_arm(63, TIMED_ROUTER_CTX_B9A_REJECT_VALUE, 1, 0),
+        TimedRouterGuardOutcome::InlineError {
+            tag_byte: ENVELOPE_ERR_BYTE,
+            code: TIMED_ROUTER_CTX_B9A_REJECT_CODE,
+        }
+    );
+    assert_eq!(
+        NodeEngine::check_timed_action_arm(75, 0, 0, 0),
+        TimedRouterGuardOutcome::InlineError {
+            tag_byte: ENVELOPE_ERR_BYTE,
+            code: TIMED_ROUTER_ARM75_DISABLED_CODE,
+        }
+    );
+    assert_eq!(
+        NodeEngine::check_timed_action_arm(1, 0, 1, 0),
+        TimedRouterGuardOutcome::DispatchHandler
+    );
+
+    // 92-arm classifier (index 3 -> true, index 14 all-true vs mixed, MultiSig recursion)
+    let cancel_leaf = ClassifierAction::Leaf {
+        tag: 0x89, // index 3 (`Cancel`)
+        flag_byte: false,
+        order_flags: &[],
+    };
+    assert_eq!(NodeEngine::classify_action(&cancel_leaf), Some(true));
+    assert_eq!(
+        NodeEngine::classify_action(&ClassifierAction::MultiSig(&cancel_leaf)),
+        Some(true)
+    );
+    let order_mixed = ClassifierAction::Leaf {
+        tag: 0x94, // index 14 (`Order`)
+        flag_byte: false,
+        order_flags: &[true, false],
+    };
+    assert_eq!(NodeEngine::classify_action(&order_mixed), Some(false));
+
+    // Prior-key wrapper: rejects prior key with 0x120, bypasses via override_key
+    let orig = [0x33; 20];
+    let override_k = [0x44; 20];
+    let mut prior_keys = BTreeSet::new();
+    prior_keys.insert(orig);
+    let mut ok_slot = [0u8; 0x70];
+    ok_slot[0..2].copy_from_slice(&ACTION_SUCCESS_TAG.to_le_bytes());
+
+    let rejected = NodeEngine::admit_prior_key_action(
+        orig,
+        None,
+        &[],
+        &prior_keys,
+        |_| ok_slot,
+        |_| ok_slot,
+        |k| k,
+    );
+    assert_eq!(
+        rejected,
+        PriorKeyWrapperOutcome::PriorKeyRejected {
+            tag_byte: ENVELOPE_ERR_BYTE,
+            code: PRIOR_KEY_REJECT_CODE,
+        }
+    );
+    let bypassed = NodeEngine::admit_prior_key_action(
+        orig,
+        Some(override_k),
+        &[],
+        &prior_keys,
+        |_| ok_slot,
+        |_| ok_slot,
+        |k| k,
+    );
+    assert_eq!(
+        bypassed,
+        PriorKeyWrapperOutcome::Dispatched {
+            effective_key: override_k,
+            output: orig,
+        }
+    );
+
+    // 5. clearinghouse::spot_clearinghouse genesis rules (USDC reject, 100M lots, 1% HL, "HYPE" exempt)
+    let usdc_idx = eng.register_spot_token(SpotTokenSpec {
+        name: "USDC".to_string(),
+        sz_decimals: 2,
+        wei_decimals: 8,
+    });
+    assert_eq!(usdc_idx, 0);
+    assert_eq!(
+        eng.validate_spot_token_before_genesis(0),
+        Err(SpotClearinghouseError::GenesisFailed(ERR_GENESIS_ALREADY_HAPPENED))
+    );
+
+    let purr_idx = eng.register_spot_token(SpotTokenSpec {
+        name: "PURR".to_string(),
+        sz_decimals: 0,
+        wei_decimals: 5,
+    });
+    assert_eq!(eng.validate_spot_token_before_genesis(purr_idx), Ok(purr_idx));
+    let min_supply_wei = 100_000_000u64 * 100_000u64; // 100M lots * 10^5 wei/lot
+    assert_eq!(
+        eng.validate_spot_genesis_supply(purr_idx, min_supply_wei - 1, false, true),
+        Err(SpotClearinghouseError::GenesisFailed(ERR_MAX_SUPPLY_MIN_100M_LOTS))
+    );
+    let mut low_hl_balances = BTreeMap::new();
+    low_hl_balances.insert([0x55; 20], min_supply_wei);
+    eng.stage_spot_token_genesis(
+        purr_idx,
+        TokenGenesis {
+            user_balances: low_hl_balances,
+            existing_token_balances: BTreeMap::new(),
+            blacklist_users: BTreeSet::new(),
+        },
+    );
+    assert_eq!(
+        eng.validate_spot_genesis_supply(purr_idx, min_supply_wei, false, true),
+        Err(SpotClearinghouseError::GenesisFailed(ERR_HYPERLIQUIDITY_MIN_1PCT))
+    );
+    // HYPE token is explicitly exempt from the 1% Hyperliquidity minimum
+    let hype_idx = eng.register_spot_token(SpotTokenSpec {
+        name: "HYPE".to_string(),
+        sz_decimals: 2,
+        wei_decimals: 8,
+    });
+    let hype_min_wei = 100_000_000u64 * 1_000_000u64;
+    let mut hype_balances = BTreeMap::new();
+    hype_balances.insert([0x66; 20], hype_min_wei);
+    eng.stage_spot_token_genesis(
+        hype_idx,
+        TokenGenesis {
+            user_balances: hype_balances,
+            existing_token_balances: BTreeMap::new(),
+            blacklist_users: BTreeSet::new(),
+        },
+    );
+    assert!(eng.validate_spot_genesis_supply(hype_idx, hype_min_wei, false, true).is_ok());
+    let bal = eng
+        .credit_spot_user_balance([0x66; 20], hype_idx, 500_000)
+        .expect("credit spot balance");
+    assert_eq!(bal.total, 500_000);
+
+    // 6. node115-fees::lifecycle 10-builder approval cap (0x13c) + zero-fee system addresses
+    let fee_user = [0x77; 20];
+    for i in 0..MAX_APPROVED_BUILDERS {
+        let mut builder = [0x80; 20];
+        builder[19] = i as u8;
+        eng.approve_builder_fee(fee_user, builder, 0.0005)
+            .expect("approve within 10-builder cap");
+    }
+    let overflow_builder = [
+        0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+        0x80, 0x80, 0x80, 0x80, 0x99,
+    ];
+    let cap_err = eng
+        .approve_builder_fee(fee_user, overflow_builder, 0.0005)
+        .expect_err("11th builder must hit 0x13c cap");
+    assert_eq!(cap_err, FeeLifecycleError::TooManyBuildersApproved);
+    assert_eq!(cap_err.status_word(), Some(ERR_TOO_MANY_BUILDERS));
+    assert!(NodeEngine::is_zero_fee_system_user(&HYPERLIQUIDITY_ADDRESS));
+    assert!(NodeEngine::is_zero_fee_system_user(&[0xfe; 20]));
+    assert!(!NodeEngine::is_zero_fee_system_user(&fee_user));
+
+    // 7. node115-staking::stake_requirement 4x4 .rodata table + 0xc5 mul overflow
+    assert_eq!(
+        eng.unit_stake_requirement_for_chain(StakeRequirementCategory::Category0),
+        50_000_000_000_000
+    );
+    assert_eq!(
+        eng.unit_stake_requirement_for_chain(StakeRequirementCategory::Category1),
+        20_000_000_000_000
+    );
+    assert_eq!(
+        eng.category_required_stake_for_chain(
+            StakeRequirementCategory::Category0,
+            2,
+            Some(StakeRequirementCategory::Category0),
+        ),
+        Ok(150_000_000_000_000)
+    );
+    let mul_err = eng
+        .category_required_stake_for_chain(
+            StakeRequirementCategory::Category0,
+            u64::MAX,
+            Some(StakeRequirementCategory::Category0),
+        )
+        .expect_err("u64::MAX * 50e12 must overflow with 0xc5");
+    assert!(matches!(mul_err, StakeRequirementError::MulOverflow { .. }));
+    assert_eq!(mul_err.native_tag(), TAG_MUL_RESULT_ERROR);
+
+    let _ = fs::remove_dir_all(&mainnet_dir);
+    let _ = fs::remove_dir_all(&local_dir);
 }

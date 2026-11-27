@@ -1,11 +1,16 @@
 //! End-to-end offline block replay, BLAKE3 ABCI state-root verification,
 //! and `DbHome` checkpoint persistence/restart engine for node #115.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use action_dispatch::admission::{
+    ClassifierAction, PriorKeyWrapperOutcome, TimedRouterGuardOutcome, check_timed_router_arm_guard,
+    classify_action_tag, run_prior_key_wrapper,
+};
+use action_wire::rmp_signable::connection_id_preimage;
 use bincode_fork::{
     ByteVec, Decode, DecodeError, DecoderImpl, Encode, EncodeError, EncoderImpl, Reader, Writer,
     decode_from_slice, encode_to_vec, standard,
@@ -16,6 +21,9 @@ use clearinghouse::liquidation::{
     classify_liquidation,
 };
 use clearinghouse::margin_user_state::MarginStateError;
+use clearinghouse::spot_clearinghouse::{
+    SpotBalance, SpotClearinghouse, SpotClearinghouseError, SpotTokenSpec, TokenGenesis,
+};
 use evm::system::{
     CoreWriterFrame, CoreWriterFrameError, EvmBlockKind, parse_core_writer_frame,
 };
@@ -23,6 +31,10 @@ use exchange::bole_liquidation::{
     BeginBlockPhase, BoleLiquidationCrossOrder, SpotPairMeta, build_bole_liquidation_spot_order,
 };
 use global_constants::{ChainDisplay, ChainName};
+use l1_shared::chain_ext::{
+    ChainKind as SharedChainKind, chain_addresses, is_chain_privileged_address,
+};
+use l1_shared::utils::sha256;
 use node_runtime::error::NodeError;
 use node_runtime::peer_sync::{BlockSink, ConsensusHook};
 use node115_abci::abci_hash::{
@@ -39,6 +51,10 @@ use node115_abci::state::{
 use node115_assets::pdi::Side;
 use node115_assets::qtys::{NoopOverflowSink, Ntl, Px, Sz};
 use node115_base::bucket_guard::BucketGuard;
+use node115_base::l1_map::L1Map;
+use node115_base::runtime_utils::{
+    ChainKind as BaseChainKind, ProductionGuard, QuorumPolicy, WalletAddress,
+};
 use node115_base::short_string::try_pack_short_string;
 use node115_consensus::commit::{
     CertifiedBlockNode, RegisterBlockOutcome, TwoChainCommitOutcome, TwoChainCommitStore,
@@ -48,7 +64,10 @@ use node115_db::db_home::{DbHome, DbHomeError, LoadLatestCheckpointError};
 use node115_db::rocks_db::{
     PersistentShardKvStore, RocksDbShard, RocksDbTooLargeError, validate_tcp_rocksdb_size,
 };
-use node115_fees::tiers::FeeSchedule;
+use node115_fees::lifecycle::{
+    FeeLifecycleError, approve_builder_fee_capped, is_zero_fee_system_address,
+};
+use node115_fees::tiers::{BuilderFeeRegistry, FeeSchedule};
 use node115_orderbook::Books;
 use node115_orderbook::impact_walk::{aggregate_l2_levels, impact_walk_levels};
 use node115_orderbook::matching::L2Level;
@@ -56,6 +75,10 @@ use node115_orderbook::trigger::TriggerBook;
 use node115_orderbook::twap::TwapEngine;
 use node115_staking::delegation::StakingChain;
 use node115_staking::jailing::{Address as StakingAddress, JailingTime};
+use node115_staking::stake_requirement::{
+    StakeRequirementCategory, StakeRequirementError, category_required_stake,
+    unit_stake_requirement,
+};
 use node115_staking::withdrawal_queue::{
     QueuedWithdrawal, WithdrawalQueueError, WithdrawalQueueState,
 };
@@ -350,6 +373,24 @@ fn chain_to_staking_chain(chain: ChainName) -> StakingChain {
     }
 }
 
+fn chain_to_shared_chain(chain: ChainName) -> SharedChainKind {
+    match chain {
+        ChainName::Local => SharedChainKind::Local,
+        ChainName::Sandbox => SharedChainKind::Sandbox,
+        ChainName::Testnet => SharedChainKind::Testnet,
+        ChainName::Mainnet => SharedChainKind::Mainnet,
+    }
+}
+
+fn chain_to_base_chain(chain: ChainName) -> BaseChainKind {
+    match chain {
+        ChainName::Local => BaseChainKind::Local,
+        ChainName::Sandbox => BaseChainKind::Sandbox,
+        ChainName::Testnet => BaseChainKind::Testnet,
+        ChainName::Mainnet => BaseChainKind::Mainnet,
+    }
+}
+
 fn new_abci_state(checkpoint_path: PathBuf, height: u64, round: u64) -> AbciState {
     AbciState::new(
         RestoredState {
@@ -421,6 +462,9 @@ pub struct NodeEngine {
     last_begin_block_phases: Vec<&'static str>,
     next_bole_oid: u64,
     withdrawal_queue: WithdrawalQueueState,
+    spot_clearinghouse: SpotClearinghouse,
+    builder_fee_registry: BuilderFeeRegistry,
+    user_nonces: L1Map<[u8; 20], u64>,
     abci_state_root: [u8; 32],
     restored_from_checkpoint: Option<u64>,
 }
@@ -463,6 +507,9 @@ impl NodeEngine {
                     last_begin_block_phases: Vec::new(),
                     next_bole_oid: 1,
                     withdrawal_queue: WithdrawalQueueState::default(),
+                    spot_clearinghouse: SpotClearinghouse::new(),
+                    builder_fee_registry: BuilderFeeRegistry::default(),
+                    user_nonces: L1Map::new(),
                     abci_state_root: [0u8; 32],
                     restored_from_checkpoint: None,
                 };
@@ -551,6 +598,9 @@ impl NodeEngine {
             last_begin_block_phases: Vec::new(),
             next_bole_oid: 1,
             withdrawal_queue: WithdrawalQueueState::default(),
+            spot_clearinghouse: SpotClearinghouse::new(),
+            builder_fee_registry: BuilderFeeRegistry::default(),
+            user_nonces: L1Map::new(),
             abci_state_root: [0u8; 32],
             restored_from_checkpoint: Some(rec.height),
         };
@@ -852,6 +902,200 @@ impl NodeEngine {
     /// Pack an inline (`<= 16`-byte) name via `base/src/short_string.rs:52` (`0x15472b0`).
     pub fn pack_short_name(name: &str) -> Option<u128> {
         try_pack_short_string(name)
+    }
+
+    /// Resolve per-chain privileged addresses via `l1-shared::chain_ext` (`0x46f3fc0`).
+    pub fn privileged_chain_addresses(&self) -> Result<&'static [[u8; 20]; 4], &'static str> {
+        chain_addresses(chain_to_shared_chain(self.chain))
+    }
+
+    /// Check whether `addr` is in the active chain's privileged address set (`l1-shared::chain_ext`).
+    pub fn is_privileged_chain_address(&self, addr: &[u8; 20]) -> Result<bool, &'static str> {
+        is_chain_privileged_address(chain_to_shared_chain(self.chain), addr)
+    }
+
+    /// Validate `base/src/production.rs` test-override guard for the active chain.
+    pub fn validate_production_guard(
+        &self,
+        allow_unsafe_test_overrides: bool,
+    ) -> Result<(), &'static str> {
+        ProductionGuard {
+            chain: chain_to_base_chain(self.chain),
+            allow_unsafe_test_overrides,
+        }
+        .validate()
+    }
+
+    /// Evaluate strict `2/3` quorum via `base/src/quorum_policy.rs`.
+    pub fn has_strict_quorum_policy(stake: u128, total_stake: u128) -> bool {
+        QuorumPolicy::TWO_THIRDS.has_strict_quorum(stake, total_stake)
+    }
+
+    /// Parse a `0x`-prefixed 20-byte wallet address via `base/src/wallet.rs`.
+    pub fn parse_wallet_hex(input: &str) -> Result<WalletAddress, &'static str> {
+        WalletAddress::parse_hex(input)
+    }
+
+    /// Record a per-user nonce in the node #115 hybrid `L1Map` (`base/src/l1_map`).
+    pub fn record_user_nonce(&mut self, user: [u8; 20], nonce: u64) -> Option<u64> {
+        self.user_nonces.insert(user, nonce)
+    }
+
+    /// Read a user's last recorded nonce from the hybrid `L1Map`.
+    pub fn user_nonce(&self, user: &[u8; 20]) -> Option<u64> {
+        self.user_nonces.get(user).copied()
+    }
+
+    /// Returns `true` once `user_nonces` has promoted from `Small(VecDeque)` to `Large(BTreeMap)`.
+    pub fn user_nonces_is_large(&self) -> bool {
+        self.user_nonces.is_large()
+    }
+
+    /// Build an `action-wire::rmp_signable` connection-ID preimage (`0x36aa9a0`) and digest it
+    /// with `l1-shared::utils::sha256` (`0x38d2920`).
+    pub fn action_connection_id_sha256(
+        msgpack_action: &[u8],
+        nonce: u64,
+        vault_address: Option<[u8; 20]>,
+        expires_after: Option<u64>,
+    ) -> (Vec<u8>, [u8; 32]) {
+        let preimage = connection_id_preimage(msgpack_action, nonce, vault_address, expires_after);
+        let digest = sha256(&preimage);
+        (preimage, digest)
+    }
+
+    /// Evaluate timed router special-arm guards (`0x55f99b0`: arms 0, 52, 61, 63, 64, 75).
+    pub const fn check_timed_action_arm(
+        index: usize,
+        ctx_b9a: u8,
+        ctx_42ad: u8,
+        arm61_word: u64,
+    ) -> TimedRouterGuardOutcome {
+        check_timed_router_arm_guard(index, ctx_b9a, ctx_42ad, arm61_word)
+    }
+
+    /// Classify an action tag through the 92-arm classifier `0x36c30f0` (`action-dispatch::admission`).
+    pub fn classify_action(action: &ClassifierAction<'_>) -> Option<bool> {
+        classify_action_tag(action)
+    }
+
+    /// Run the 10-clone prior-key admission wrapper (`action-dispatch::admission`, `0x120` rejection).
+    pub fn admit_prior_key_action<F1, F2, S, R>(
+        original_key: [u8; 20],
+        override_key: Option<[u8; 20]>,
+        alias_table: &[([u8; 20], [u8; 20])],
+        prior_keys: &BTreeSet<[u8; 20]>,
+        check1: F1,
+        check2: F2,
+        sink: S,
+    ) -> PriorKeyWrapperOutcome<R>
+    where
+        F1: FnOnce([u8; 20]) -> [u8; 0x70],
+        F2: FnOnce([u8; 20]) -> [u8; 0x70],
+        S: FnOnce([u8; 20]) -> R,
+    {
+        run_prior_key_wrapper(
+            original_key,
+            override_key,
+            alias_table,
+            prior_keys,
+            check1,
+            check2,
+            sink,
+        )
+    }
+
+    /// Register a spot token spec in `SpotClearinghouse`, returning its assigned token index.
+    pub fn register_spot_token(&mut self, spec: SpotTokenSpec) -> usize {
+        let idx = self.spot_clearinghouse.tokens.len();
+        self.spot_clearinghouse.tokens.push(spec);
+        idx
+    }
+
+    /// Stage pre-genesis allocation data for `token` in `SpotClearinghouse`.
+    pub fn stage_spot_token_genesis(&mut self, token: usize, genesis: TokenGenesis) {
+        self.spot_clearinghouse
+            .token_to_genesis
+            .insert(token, genesis);
+    }
+
+    /// Credit a user's `SpotBalance` in `SpotClearinghouse` (`0x3bfa910`) and return the updated balance.
+    pub fn credit_spot_user_balance(
+        &mut self,
+        user: [u8; 20],
+        token: usize,
+        delta_wei: u64,
+    ) -> Result<SpotBalance, SpotClearinghouseError> {
+        let bal = self
+            .spot_clearinghouse
+            .user_states
+            .entry(user)
+            .or_default()
+            .entry(token)
+            .or_default();
+        bal.apply_delta(token, false, delta_wei, false, |_| None)?;
+        Ok(*bal)
+    }
+
+    /// Validate that `token` is eligible for genesis (`0x3bfa810`).
+    pub fn validate_spot_token_before_genesis(
+        &self,
+        token: usize,
+    ) -> Result<usize, SpotClearinghouseError> {
+        self.spot_clearinghouse.validate_token_before_genesis(token)
+    }
+
+    /// Validate genesis max supply (`>= 100M lots`), Hyperliquidity 1% rule (`"HYPE"` exempt),
+    /// and exact total supply equality (`0x3bf5120`).
+    pub fn validate_spot_genesis_supply(
+        &self,
+        token: usize,
+        max_supply_wei: u64,
+        no_hyperliquidity: bool,
+        enforce_hyperliquidity_min: bool,
+    ) -> Result<(), SpotClearinghouseError> {
+        self.spot_clearinghouse
+            .validate_genesis_supply_and_hyperliquidity(
+                token,
+                max_supply_wei,
+                no_hyperliquidity,
+                enforce_hyperliquidity_min,
+            )
+    }
+
+    /// Approve a builder fee enforcing node #115's 10-builder per-user cap (`0x3c1a510`, `0x13c`).
+    pub fn approve_builder_fee(
+        &mut self,
+        user: [u8; 20],
+        builder: [u8; 20],
+        max_fee_rate: f64,
+    ) -> Result<(), FeeLifecycleError> {
+        approve_builder_fee_capped(&mut self.builder_fee_registry, user, builder, max_fee_rate)
+    }
+
+    /// Check whether `user` is one of node #115's zero-fee system addresses (`[0xff; 20]` / `[0xfe; 20]`).
+    pub const fn is_zero_fee_system_user(user: &[u8; 20]) -> bool {
+        is_zero_fee_system_address(user)
+    }
+
+    /// Look up the node #115 `.rodata` per-unit stake requirement (`0x602d1c`) for the active chain.
+    pub fn unit_stake_requirement_for_chain(&self, category: StakeRequirementCategory) -> u64 {
+        unit_stake_requirement(category, chain_to_staking_chain(self.chain))
+    }
+
+    /// Compute the required stake for `category` on the active chain (`0x294ceb0`, `0xc5` overflow).
+    pub fn category_required_stake_for_chain(
+        &self,
+        category: StakeRequirementCategory,
+        existing_count: u64,
+        target_category: Option<StakeRequirementCategory>,
+    ) -> Result<u64, StakeRequirementError> {
+        category_required_stake(
+            chain_to_staking_chain(self.chain),
+            category,
+            existing_count,
+            target_category,
+        )
     }
 
     fn upsert_evm_kv(&mut self, k: Vec<u8>, v: Vec<u8>) -> Result<(), EngineError> {
