@@ -203,6 +203,11 @@ def read_ownership_snapshot(root):
     try:
         data = read_json(path)
         fetched = datetime.fromisoformat(data["fetched_at"].replace("Z", "+00:00"))
+        # snapshot_state() compares this against an aware UTC clock. A legacy
+        # or hand-edited timestamp without an offset parses as naive and would
+        # raise TypeError there; treat it as no usable snapshot instead.
+        if fetched.tzinfo is None or fetched.utcoffset() is None:
+            return None
     except (KeyError, TypeError, ValueError):
         return None
     if not isinstance(data.get("issues"), dict) or not isinstance(data.get("pull_requests"), dict):
