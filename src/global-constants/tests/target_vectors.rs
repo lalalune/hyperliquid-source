@@ -220,3 +220,84 @@ fn joined_chain_and_spot_mark_codecs() {
         assert_eq!(SpotMarkKind::from_name(k.name()), Some(k));
     }
 }
+
+#[test]
+fn aws_name_213_non_local_chain_guard_allows_non_local_and_panics_on_local() {
+    for chain in [ChainName::Sandbox, ChainName::Testnet, ChainName::Mainnet] {
+        AwsName::assert_non_local_chain(chain);
+    }
+    let panic_res = std::panic::catch_unwind(|| {
+        AwsName::assert_non_local_chain(ChainName::Local);
+    });
+    assert!(panic_res.is_err());
+}
+
+#[test]
+fn missing_aws_name_fallback_invalid_spelling_panics() {
+    let home = fresh_temp_dir("invalid-fallback");
+    let hl = home.join("hl");
+    let code = hl.join("code");
+    fs::create_dir_all(&code).unwrap();
+    fs::write(static_config_file_path(code.to_str().unwrap()), "{}").unwrap();
+    fs::write(aws_name_path_for_cham_dir(hl.to_str().unwrap()), "NotARealAwsName\n").unwrap();
+    // Matches 0x1774092 (aws_name.rs:295:68 parse unwrap panic).
+    let res = std::panic::catch_unwind(|| read_aws_name(code.to_str().unwrap(), hl.to_str().unwrap()));
+    assert!(res.is_err());
+    let _ = fs::remove_dir_all(&home);
+}
+
+#[test]
+fn resolve_cham_dir_panics_when_hl_blocked_by_regular_file() {
+    let home = fresh_temp_dir("hl-blocked");
+    let hl_file = home.join("hl");
+    fs::write(&hl_file, b"not a directory").unwrap();
+    // Matches 0x1778270 (static_config.rs:61:17 "could not create {hl}: {err}").
+    let res = std::panic::catch_unwind(|| resolve_cham_dir(home.to_str().unwrap()));
+    assert!(res.is_err());
+    let _ = fs::remove_dir_all(&home);
+}
+
+#[test]
+fn lazy_lock_concurrency_and_poisoning_and_home_dir_resolution() {
+    use std::sync::atomic::AtomicUsize;
+    use std::sync::{Arc, LazyLock};
+
+    // 1. Concurrent LazyLock initialization executes exactly once across 8 threads.
+    let home = fresh_temp_dir("lazy-conc");
+    let cham = home.join("cham");
+    let code = cham.join("code");
+    fs::create_dir_all(&code).unwrap();
+    fs::write(
+        static_config_file_path(code.to_str().unwrap()),
+        r#"{"aws_name":"EaTx"}"#,
+    )
+    .unwrap();
+
+    let init_calls = Arc::new(AtomicUsize::new(0));
+    let home_str = home.to_str().unwrap().to_owned();
+    let calls_ref = Arc::clone(&init_calls);
+    let cell = Arc::new(LazyLock::new(move || {
+        calls_ref.fetch_add(1, Ordering::SeqCst);
+        StaticConfig::load_from_home(home_str.clone())
+    }));
+
+    let mut handles = Vec::new();
+    for _ in 0..8 {
+        let c = Arc::clone(&cell);
+        handles.push(std::thread::spawn(move || c.aws_name));
+    }
+    for h in handles {
+        assert_eq!(h.join().unwrap(), AwsName::EaTx);
+    }
+    assert_eq!(init_calls.load(Ordering::SeqCst), 1);
+    let _ = fs::remove_dir_all(&home);
+
+    // 2. Poisoned LazyLock panics on subsequent access (matching 0x1774bf0/0x1774c80).
+    let poisoned: LazyLock<StaticConfig> = LazyLock::new(|| panic!("simulated init failure"));
+    assert!(std::panic::catch_unwind(|| &*poisoned).is_err());
+    assert!(std::panic::catch_unwind(|| &*poisoned).is_err());
+
+    // 3. `home_dir()` resolves non-empty path on Linux (using std::env::home_dir -> HOME / getpwuid_r).
+    let resolved = global_constants::home_dir();
+    assert!(!resolved.is_empty());
+}

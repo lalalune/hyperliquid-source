@@ -1,3 +1,4 @@
+#![forbid(unsafe_code)]
 //! Node #115 `global_constants` crate reconstruction.
 //!
 //! Target: Linux x86-64 node #115
@@ -10,9 +11,9 @@ pub use aws_name::{AwsName, AwsNameFileError, VariantNotFound};
 pub use node115_chain_name_codec::ChainName;
 pub use node115_spot_mark_codec::SpotMarkKind;
 pub use static_config::{
-    aws_name_path_for_cham_dir, code_dir_for_cham_dir, parse_static_config_json, read_aws_name,
-    resolve_cham_dir, static_config_file_path, StaticConfig, StaticConfigParseError,
-    JSON_WHITESPACE_MASK, STATIC_CONFIG,
+    aws_name_path_for_cham_dir, code_dir_for_cham_dir, home_dir, parse_static_config_json,
+    read_aws_name, resolve_cham_dir, static_config_file_path, StaticConfig,
+    StaticConfigParseError, JSON_WHITESPACE_MASK, STATIC_CONFIG,
 };
 
 /// Display wrapper matching `Chain::fmt` at node #115 VA `0x1778c60..0x1778cca`

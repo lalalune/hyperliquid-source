@@ -402,6 +402,16 @@ impl AwsName {
         let idx = self as u8;
         idx <= max_inclusive && idx < 64 && ((mask >> idx) & 1) != 0
     }
+
+    /// Guard observed inlined at `0x2e12c68` and `0x2e12fde` (`global_constants/src/aws_name.rs:213:29`,
+    /// inside validator-pair disconnect alerting `0x2e11b00..0x2e13c3a`): panics with
+    /// `unimplemented!()` (`"not implemented"` at `.rodata` `0x481f69`) when called for
+    /// `ChainName::Local` (discriminant `0`), and succeeds for `Sandbox`, `Testnet`, and `Mainnet`.
+    pub fn assert_non_local_chain(chain: node115_chain_name_codec::ChainName) {
+        if chain == node115_chain_name_codec::ChainName::Local {
+            unimplemented!();
+        }
+    }
 }
 
 impl fmt::Display for AwsName {

@@ -66,16 +66,16 @@ impl StaticConfig {
     }
 }
 
-/// Resolve the user's home directory (`0x17782e0`).
+/// Resolve the user's home directory (`0x17782e0` -> Rust 1.95.0 stdlib `0x5c9abb0`).
 ///
-/// Uses non-empty `HOME` environment variable (the `getpwuid_r` fallback for
-/// empty/unset `HOME` is outside the pure-std scope and returns empty string
-/// if `HOME` is absent).
+/// Calls `std::env::home_dir()`, which checks `HOME` and on Unix falls back to
+/// `sysconf(_SC_GETPW_R_SIZE_MAX)` + `getpwuid_r` when `HOME` is unset or empty,
+/// returning `String::new()` if absent or non-UTF-8 (exact behavior of `0x17782e0`).
 pub fn home_dir() -> String {
-    match env::var("HOME") {
-        Ok(v) if !v.is_empty() => v,
-        _ => String::new(),
-    }
+    #[allow(deprecated)]
+    env::home_dir()
+        .and_then(|p| p.to_str().map(str::to_owned))
+        .unwrap_or_default()
 }
 
 /// Select `{home_dir}/cham` if it is a directory, otherwise `{home_dir}/hl`,
