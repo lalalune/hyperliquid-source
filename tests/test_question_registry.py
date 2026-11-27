@@ -29,18 +29,29 @@ class QuestionRegistryTests(unittest.TestCase):
         mutate(row)
         target.write_text(json.dumps(row))
 
-    def test_discovery_unknown_is_ready_while_its_consumer_stays_blocked(self):
+    def test_recorded_pilot_questions_and_ready_blocked_rendering(self):
         rows = {row['question_id']: row for row in REGISTRY.load_questions(self.root)}
         discovery = rows['qcp-expected-root-provenance']
         self.assertEqual(discovery['work_type'], 'discovery')
-        self.assertEqual(discovery['readiness'], 'ready')
+        self.assertEqual(discovery['readiness'], 'recorded')
+        self.assertEqual(discovery['evidence_status'], 'reviewed')
         self.assertEqual(discovery['dependencies'], [])
-        self.assertEqual(rows['qcp-checkpoint-replay-root-fixture']['readiness'], 'blocked')
+        fixture = rows['qcp-checkpoint-replay-root-fixture']
+        self.assertEqual(fixture['readiness'], 'recorded')
+        self.assertEqual(fixture['evidence_status'], 'reviewed')
         _, rendered = REGISTRY.render_question_catalogue(self.root)
-        ready = rendered.split('## Ready\n', 1)[1].split('## Evidence-recorded', 1)[0]
+        self.assertIn('Reservation: **unknown**', rendered)
+        recorded = rendered.split('## Evidence-recorded\n', 1)[1].split('## In progress', 1)[0]
+        self.assertIn('qcp-expected-root-provenance', recorded)
+        self.assertIn('qcp-checkpoint-replay-root-fixture', recorded)
+
+        # Verify ready/blocked section rendering when a prerequisite is still open.
+        self.change('qcp-expected-root-provenance', lambda row: row.update(readiness='ready', evidence_status='partial'))
+        self.change('qcp-checkpoint-replay-root-fixture', lambda row: row.update(readiness='blocked', evidence_status='not-started'))
+        _, rendered_open = REGISTRY.render_question_catalogue(self.root)
+        ready = rendered_open.split('## Ready\n', 1)[1].split('## Evidence-recorded', 1)[0]
         self.assertIn('qcp-expected-root-provenance', ready)
         self.assertNotIn('qcp-checkpoint-replay-root-fixture', ready)
-        self.assertIn('Reservation: **unknown**', rendered)
 
     def test_review_queue_distinguishes_a_complete_snapshot_from_a_missing_attempt(self):
         path = self.root / 'research/questions/ownership-snapshot.json'

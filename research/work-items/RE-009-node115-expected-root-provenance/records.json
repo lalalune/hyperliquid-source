@@ -1,0 +1,884 @@
+{
+  "target": {
+    "path": "artifacts/node/115/hl-node",
+    "size": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "fdes": [
+    {
+      "name": "apply_block_slow",
+      "start": "0x5a04e40",
+      "end": "0x5a065f8"
+    },
+    {
+      "name": "execute_block_actions_slow",
+      "start": "0x5483850",
+      "end": "0x5483f43"
+    },
+    {
+      "name": "action_batch_driver_slow",
+      "start": "0x5b30f30",
+      "end": "0x5b3104d"
+    },
+    {
+      "name": "action_loop_slow",
+      "start": "0x5863ab0",
+      "end": "0x586405f"
+    },
+    {
+      "name": "action_router_slow",
+      "start": "0x54a3a00",
+      "end": "0x54a4468"
+    },
+    {
+      "name": "abci_vote_wrapper_slow",
+      "start": "0x5548a80",
+      "end": "0x55491f2"
+    },
+    {
+      "name": "abci_vote_handler_0xdd_slow",
+      "start": "0x5869400",
+      "end": "0x586960e"
+    },
+    {
+      "name": "tracker_record_wrapper_slow",
+      "start": "0x5afadd0",
+      "end": "0x5afb3a3"
+    },
+    {
+      "name": "tracker_insert_core_slow",
+      "start": "0x537aa60",
+      "end": "0x537b867"
+    },
+    {
+      "name": "support_predicate_slow",
+      "start": "0x5373810",
+      "end": "0x5373aae"
+    },
+    {
+      "name": "recheck_caller_slow",
+      "start": "0x54cae80",
+      "end": "0x54cb646"
+    },
+    {
+      "name": "recheck_wrapper_slow",
+      "start": "0x5afa3b0",
+      "end": "0x5afa5cf"
+    },
+    {
+      "name": "finalizer_b_slow",
+      "start": "0x54897e0",
+      "end": "0x548c8e0"
+    },
+    {
+      "name": "tracker_drain_slow",
+      "start": "0x5afa030",
+      "end": "0x5afa1ee"
+    },
+    {
+      "name": "end_root_selector_slow",
+      "start": "0x5a07ec0",
+      "end": "0x5a0871c"
+    }
+  ],
+  "anchors": [
+    {
+      "va": "0x5a04e54",
+      "bytes": "4989f4",
+      "fde": "apply_block_slow",
+      "role": "save replay context pointer in r12"
+    },
+    {
+      "va": "0x5a04ebb",
+      "bytes": "498b8c2450040000",
+      "fde": "apply_block_slow",
+      "role": "load state S = *[ctx+0x450]"
+    },
+    {
+      "va": "0x5a04eea",
+      "bytes": "4939fd",
+      "fde": "apply_block_slow",
+      "role": "check block.round > block.prev_round"
+    },
+    {
+      "va": "0x5a04ef3",
+      "bytes": "4c8b4130",
+      "fde": "apply_block_slow",
+      "role": "load state.round [S+0x30]"
+    },
+    {
+      "va": "0x5a04efc",
+      "bytes": "4939f8",
+      "fde": "apply_block_slow",
+      "role": "check [S+0x30] == block.prev_round"
+    },
+    {
+      "va": "0x5a04f05",
+      "bytes": "4c8b4118",
+      "fde": "apply_block_slow",
+      "role": "load [S+0x18]"
+    },
+    {
+      "va": "0x5a04f09",
+      "bytes": "488b7920",
+      "fde": "apply_block_slow",
+      "role": "load [S+0x20]"
+    },
+    {
+      "va": "0x5a04f17",
+      "bytes": "4939f0",
+      "fde": "apply_block_slow",
+      "role": "check [S+0x18] == block+0x28"
+    },
+    {
+      "va": "0x5a04f20",
+      "bytes": "4839d7",
+      "fde": "apply_block_slow",
+      "role": "check [S+0x20] == block+0x30"
+    },
+    {
+      "va": "0x5a04f5f",
+      "bytes": "498d842450040000",
+      "fde": "apply_block_slow",
+      "role": "compute &ctx.state (ctx+0x450)"
+    },
+    {
+      "va": "0x5a04f67",
+      "bytes": "48898424e8000000",
+      "fde": "apply_block_slow",
+      "role": "spill &ctx.state to [rsp+0xe8]"
+    },
+    {
+      "va": "0x5a04fde",
+      "bytes": "498db42450040000",
+      "fde": "apply_block_slow",
+      "role": "pass &ctx.state as rsi to execute_block_actions"
+    },
+    {
+      "va": "0x5a04fe9",
+      "bytes": "e862e8a7ff",
+      "fde": "apply_block_slow",
+      "role": "call execute_block_actions_slow (0x5483850)"
+    },
+    {
+      "va": "0x5a055a8",
+      "bytes": "488bb424e8000000",
+      "fde": "apply_block_slow",
+      "role": "reload identical &ctx.state from [rsp+0xe8]"
+    },
+    {
+      "va": "0x5a055b0",
+      "bytes": "e82b42a8ff",
+      "fde": "apply_block_slow",
+      "role": "call finalizer_b_slow (0x54897e0)"
+    },
+    {
+      "va": "0x5a05c14",
+      "bytes": "498d9c2480020000",
+      "fde": "apply_block_slow",
+      "role": "load abci_digest_quorum sink ctx+0x280"
+    },
+    {
+      "va": "0x5a05c5e",
+      "bytes": "e8bd4343ff",
+      "fde": "apply_block_slow",
+      "role": "forward each row to sink before comparison"
+    },
+    {
+      "va": "0x5a05df6",
+      "bytes": "e8b52ddfff",
+      "fde": "apply_block_slow",
+      "role": "look up row height in local history ctx+0x400"
+    },
+    {
+      "va": "0x5a05fc6",
+      "bytes": "4c89e6",
+      "fde": "apply_block_slow",
+      "role": "pass ctx to end_root_selector after comparison"
+    },
+    {
+      "va": "0x5a05fc9",
+      "bytes": "e8f21e0000",
+      "fde": "apply_block_slow",
+      "role": "call end_root_selector_slow (0x5a07ec0)"
+    },
+    {
+      "va": "0x5483867",
+      "bytes": "4c8b2e",
+      "fde": "execute_block_actions_slow",
+      "role": "dereference S = *[ctx+0x450] into r13"
+    },
+    {
+      "va": "0x54838d3",
+      "bytes": "498b7528",
+      "fde": "execute_block_actions_slow",
+      "role": "load restored/current height H = [S+0x28]"
+    },
+    {
+      "va": "0x54838d7",
+      "bytes": "48ffc6",
+      "fde": "execute_block_actions_slow",
+      "role": "increment height H + 1"
+    },
+    {
+      "va": "0x54838da",
+      "bytes": "48c7c2ffffffff",
+      "fde": "execute_block_actions_slow",
+      "role": "saturating fallback u64::MAX"
+    },
+    {
+      "va": "0x54838e1",
+      "bytes": "480f45d6",
+      "fde": "execute_block_actions_slow",
+      "role": "cmovne saturating H + 1"
+    },
+    {
+      "va": "0x54838e5",
+      "bytes": "49895528",
+      "fde": "execute_block_actions_slow",
+      "role": "store incremented height [S+0x28] = H + 1"
+    },
+    {
+      "va": "0x54838f1",
+      "bytes": "49894d30",
+      "fde": "execute_block_actions_slow",
+      "role": "store new round [S+0x30] = rcx"
+    },
+    {
+      "va": "0x5483e7a",
+      "bytes": "4c896c2448",
+      "fde": "execute_block_actions_slow",
+      "role": "store same S (r13) in driver arg+0x20"
+    },
+    {
+      "va": "0x5483e87",
+      "bytes": "e8a4d06a00",
+      "fde": "execute_block_actions_slow",
+      "role": "call action_batch_driver_slow (0x5b30f30)"
+    },
+    {
+      "va": "0x5b30fcf",
+      "bytes": "488b5320",
+      "fde": "action_batch_driver_slow",
+      "role": "load S from driver arg+0x20"
+    },
+    {
+      "va": "0x5b30fe6",
+      "bytes": "4889542438",
+      "fde": "action_batch_driver_slow",
+      "role": "store S into loop arg+0x18"
+    },
+    {
+      "va": "0x5b30ff5",
+      "bytes": "e8b62ad3ff",
+      "fde": "action_batch_driver_slow",
+      "role": "call action_loop_slow (0x5863ab0)"
+    },
+    {
+      "va": "0x5863ae1",
+      "bytes": "4c8b7e18",
+      "fde": "action_loop_slow",
+      "role": "load S from loop arg+0x18 into r15"
+    },
+    {
+      "va": "0x5863e0b",
+      "bytes": "4c89fe",
+      "fde": "action_loop_slow",
+      "role": "pass S in rsi to action_router_slow (arm 1)"
+    },
+    {
+      "va": "0x5863e1c",
+      "bytes": "e8dffbc3ff",
+      "fde": "action_loop_slow",
+      "role": "call action_router_slow (0x54a3a00, arm 1)"
+    },
+    {
+      "va": "0x5863e53",
+      "bytes": "4c89fe",
+      "fde": "action_loop_slow",
+      "role": "pass S in rsi to action_router_slow (arm 2)"
+    },
+    {
+      "va": "0x5863e64",
+      "bytes": "e897fbc3ff",
+      "fde": "action_loop_slow",
+      "role": "call action_router_slow (0x54a3a00, arm 2)"
+    },
+    {
+      "va": "0x54a3a17",
+      "bytes": "4989f5",
+      "fde": "action_router_slow",
+      "role": "save S in r13"
+    },
+    {
+      "va": "0x54a3a6d",
+      "bytes": "482d86000000",
+      "fde": "action_router_slow",
+      "role": "subtract action tag base 0x86"
+    },
+    {
+      "va": "0x54a3a7c",
+      "bytes": "488d05092e48fb",
+      "fde": "action_router_slow",
+      "role": "load jump table base 0x92688c"
+    },
+    {
+      "va": "0x54a3a8a",
+      "bytes": "ffe1",
+      "fde": "action_router_slow",
+      "role": "indirect dispatch to action arm"
+    },
+    {
+      "va": "0x54a430b",
+      "bytes": "4983c708",
+      "fde": "action_router_slow",
+      "role": "tag 0xdd arm: advance payload by 8"
+    },
+    {
+      "va": "0x54a4312",
+      "bytes": "4c89ee",
+      "fde": "action_router_slow",
+      "role": "pass S (r13) in rsi to abci_vote_wrapper_slow"
+    },
+    {
+      "va": "0x54a431b",
+      "bytes": "e860470a00",
+      "fde": "action_router_slow",
+      "role": "call abci_vote_wrapper_slow (0x5548a80)"
+    },
+    {
+      "va": "0x5548a91",
+      "bytes": "4989f7",
+      "fde": "abci_vote_wrapper_slow",
+      "role": "save S in r15"
+    },
+    {
+      "va": "0x554908d",
+      "bytes": "4c89f9",
+      "fde": "abci_vote_wrapper_slow",
+      "role": "pass S in rcx to abci_vote_handler_0xdd_slow"
+    },
+    {
+      "va": "0x5549090",
+      "bytes": "e86b033200",
+      "fde": "abci_vote_wrapper_slow",
+      "role": "call abci_vote_handler_0xdd_slow (0x5869400)"
+    },
+    {
+      "va": "0x5869411",
+      "bytes": "48894c2438",
+      "fde": "abci_vote_handler_0xdd_slow",
+      "role": "spill S to [rsp+0x38]"
+    },
+    {
+      "va": "0x5869451",
+      "bytes": "e8aa9606fe",
+      "fde": "abci_vote_handler_0xdd_slow",
+      "role": "hash vote preimage via 0x38d2b00"
+    },
+    {
+      "va": "0x5869461",
+      "bytes": "ff157176c700",
+      "fde": "abci_vote_handler_0xdd_slow",
+      "role": "recover signer via slot 0x64e0ad8"
+    },
+    {
+      "va": "0x58694f9",
+      "bytes": "48b8cccccccccccccc0c",
+      "fde": "abci_vote_handler_0xdd_slow",
+      "role": "load height upper bound 0xccccccccccccccc"
+    },
+    {
+      "va": "0x5869503",
+      "bytes": "4939c6",
+      "fde": "abci_vote_handler_0xdd_slow",
+      "role": "compare vote height against upper bound"
+    },
+    {
+      "va": "0x586950c",
+      "bytes": "488b542438",
+      "fde": "abci_vote_handler_0xdd_slow",
+      "role": "reload S from [rsp+0x38]"
+    },
+    {
+      "va": "0x5869511",
+      "bytes": "488db2503e0000",
+      "fde": "abci_vote_handler_0xdd_slow",
+      "role": "form tracker pointer S+0x3e50"
+    },
+    {
+      "va": "0x5869583",
+      "bytes": "e848182900",
+      "fde": "abci_vote_handler_0xdd_slow",
+      "role": "call tracker_record_wrapper_slow (0x5afadd0)"
+    },
+    {
+      "va": "0x5afb16f",
+      "bytes": "e8ecf887ff",
+      "fde": "tracker_record_wrapper_slow",
+      "role": "call tracker_insert_core_slow (0x537aa60)"
+    },
+    {
+      "va": "0x5afb243",
+      "bytes": "498d7660",
+      "fde": "tracker_record_wrapper_slow",
+      "role": "form pending timer map tracker+0x60"
+    },
+    {
+      "va": "0x5afb262",
+      "bytes": "e8792f2cff",
+      "fde": "tracker_record_wrapper_slow",
+      "role": "schedule pending height in tracker+0x60 (0x4dbe1e0)"
+    },
+    {
+      "va": "0x5afb284",
+      "bytes": "4881ea50c30000",
+      "fde": "tracker_record_wrapper_slow",
+      "role": "compute prune cutoff height - 50000"
+    },
+    {
+      "va": "0x5afb2ae",
+      "bytes": "e8cdbc87ff",
+      "fde": "tracker_record_wrapper_slow",
+      "role": "prune old heights via 0x5376f80"
+    },
+    {
+      "va": "0x537b28f",
+      "bytes": "807b2000",
+      "fde": "tracker_insert_core_slow",
+      "role": "check height entry selector [B+0x20] == 0"
+    },
+    {
+      "va": "0x537b2b0",
+      "bytes": "e85b85ffff",
+      "fde": "tracker_insert_core_slow",
+      "role": "call pre-insert support_predicate_slow (0x5373810)"
+    },
+    {
+      "va": "0x537b370",
+      "bytes": "e89b84ffff",
+      "fde": "tracker_insert_core_slow",
+      "role": "call post-insert support_predicate_slow (0x5373810)"
+    },
+    {
+      "va": "0x537b382",
+      "bytes": "c6432000",
+      "fde": "tracker_insert_core_slow",
+      "role": "false->true latch: store selector [B+0x20] = 0"
+    },
+    {
+      "va": "0x537b398",
+      "bytes": "f30f7f4321",
+      "fde": "tracker_insert_core_slow",
+      "role": "store low 16 bytes of voted digest at [B+0x21]"
+    },
+    {
+      "va": "0x537b39d",
+      "bytes": "f30f7f4b31",
+      "fde": "tracker_insert_core_slow",
+      "role": "store high 16 bytes of voted digest at [B+0x31]"
+    },
+    {
+      "va": "0x53738fa",
+      "bytes": "e8714635fe",
+      "fde": "support_predicate_slow",
+      "role": "call weighted stake gate 0x36c7f70"
+    },
+    {
+      "va": "0x53739f9",
+      "bytes": "e8a2d05400",
+      "fde": "support_predicate_slow",
+      "role": "call membership count gate 0x58c0aa0"
+    },
+    {
+      "va": "0x54cb062",
+      "bytes": "488dbd503e0000",
+      "fde": "recheck_caller_slow",
+      "role": "form tracker pointer S+0x3e50 for recheck"
+    },
+    {
+      "va": "0x54cb078",
+      "bytes": "e833f36200",
+      "fde": "recheck_caller_slow",
+      "role": "call recheck_wrapper_slow (0x5afa3b0)"
+    },
+    {
+      "va": "0x5afa3d4",
+      "bytes": "e8679a87ff",
+      "fde": "recheck_wrapper_slow",
+      "role": "call recheck core 0x5373e40"
+    },
+    {
+      "va": "0x5afa4cb",
+      "bytes": "e8103d2cff",
+      "fde": "recheck_wrapper_slow",
+      "role": "schedule newly selected height in tracker+0x60"
+    },
+    {
+      "va": "0x5afa50f",
+      "bytes": "e86cca87ff",
+      "fde": "recheck_wrapper_slow",
+      "role": "prune old heights via 0x5376f80"
+    },
+    {
+      "va": "0x54897fb",
+      "bytes": "4c8b26",
+      "fde": "finalizer_b_slow",
+      "role": "dereference exact same S = *[ctx+0x450] into r12"
+    },
+    {
+      "va": "0x548bf2d",
+      "bytes": "498db424503e0000",
+      "fde": "finalizer_b_slow",
+      "role": "form tracker pointer S+0x3e50 for drain"
+    },
+    {
+      "va": "0x548bf4b",
+      "bytes": "e8e0e06600",
+      "fde": "finalizer_b_slow",
+      "role": "call tracker_drain_slow (0x5afa030)"
+    },
+    {
+      "va": "0x5afa044",
+      "bytes": "488d7e60",
+      "fde": "tracker_drain_slow",
+      "role": "pass pending timer map tracker+0x60"
+    },
+    {
+      "va": "0x5afa04e",
+      "bytes": "482de8030000",
+      "fde": "tracker_drain_slow",
+      "role": "compute pending-map cutoff - 1000"
+    },
+    {
+      "va": "0x5afa0a0",
+      "bytes": "e89b642eff",
+      "fde": "tracker_drain_slow",
+      "role": "invoke timer pending-map processor 0x4de0540"
+    },
+    {
+      "va": "0x5a07ed7",
+      "bytes": "488bb650040000",
+      "fde": "end_root_selector_slow",
+      "role": "dereference exact same S = *[ctx+0x450]"
+    },
+    {
+      "va": "0x5a07ede",
+      "bytes": "4c8b7e28",
+      "fde": "end_root_selector_slow",
+      "role": "read incremented height H+1 from [S+0x28]"
+    },
+    {
+      "va": "0x5a07fce",
+      "bytes": "e8fd5aa8ff",
+      "fde": "end_root_selector_slow",
+      "role": "compute local state root via 0x548dad0"
+    },
+    {
+      "va": "0x5a07fd3",
+      "bytes": "498dbe00040000",
+      "fde": "end_root_selector_slow",
+      "role": "address local raw-root history ctx+0x400"
+    },
+    {
+      "va": "0x5a07fe2",
+      "bytes": "4c89fe",
+      "fde": "end_root_selector_slow",
+      "role": "pass height H+1 in rsi"
+    },
+    {
+      "va": "0x5a07fe5",
+      "bytes": "e8b6bfffff",
+      "fde": "end_root_selector_slow",
+      "role": "insert (H+1, local_root) into ctx+0x400 via 0x5a03fa0"
+    }
+  ],
+  "direct_calls": [
+    {
+      "call_va": "0x5a04fe9",
+      "target_va": "0x5483850"
+    },
+    {
+      "call_va": "0x5483e87",
+      "target_va": "0x5b30f30"
+    },
+    {
+      "call_va": "0x5b30ff5",
+      "target_va": "0x5863ab0"
+    },
+    {
+      "call_va": "0x5863e1c",
+      "target_va": "0x54a3a00"
+    },
+    {
+      "call_va": "0x5863e64",
+      "target_va": "0x54a3a00"
+    },
+    {
+      "call_va": "0x54a431b",
+      "target_va": "0x5548a80"
+    },
+    {
+      "call_va": "0x5549090",
+      "target_va": "0x5869400"
+    },
+    {
+      "call_va": "0x5869451",
+      "target_va": "0x38d2b00"
+    },
+    {
+      "call_va": "0x5869583",
+      "target_va": "0x5afadd0"
+    },
+    {
+      "call_va": "0x5afb16f",
+      "target_va": "0x537aa60"
+    },
+    {
+      "call_va": "0x5afb262",
+      "target_va": "0x4dbe1e0"
+    },
+    {
+      "call_va": "0x5afb2ae",
+      "target_va": "0x5376f80"
+    },
+    {
+      "call_va": "0x537b2b0",
+      "target_va": "0x5373810"
+    },
+    {
+      "call_va": "0x537b370",
+      "target_va": "0x5373810"
+    },
+    {
+      "call_va": "0x53738fa",
+      "target_va": "0x36c7f70"
+    },
+    {
+      "call_va": "0x53739f9",
+      "target_va": "0x58c0aa0"
+    },
+    {
+      "call_va": "0x54cb078",
+      "target_va": "0x5afa3b0"
+    },
+    {
+      "call_va": "0x5afa3d4",
+      "target_va": "0x5373e40"
+    },
+    {
+      "call_va": "0x5afa4cb",
+      "target_va": "0x4dbe1e0"
+    },
+    {
+      "call_va": "0x5afa50f",
+      "target_va": "0x5376f80"
+    },
+    {
+      "call_va": "0x5a055b0",
+      "target_va": "0x54897e0"
+    },
+    {
+      "call_va": "0x548bf4b",
+      "target_va": "0x5afa030"
+    },
+    {
+      "call_va": "0x5afa0a0",
+      "target_va": "0x4de0540"
+    },
+    {
+      "call_va": "0x5a05c5e",
+      "target_va": "0x4e3a020"
+    },
+    {
+      "call_va": "0x5a05df6",
+      "target_va": "0x57f8bb0"
+    },
+    {
+      "call_va": "0x5a05fc9",
+      "target_va": "0x5a07ec0"
+    },
+    {
+      "call_va": "0x5a07fce",
+      "target_va": "0x548dad0"
+    },
+    {
+      "call_va": "0x5a07fe5",
+      "target_va": "0x5a03fa0"
+    }
+  ],
+  "jump_table_0xdd": {
+    "table_base": "0x92688c",
+    "tag_base": 134,
+    "tag": 221,
+    "target_va": "0x54a430b"
+  },
+  "recovery_slot_check": {
+    "call_va": "0x5869461",
+    "slot_va": "0x64e0ad8"
+  },
+  "census_0x3e50": [
+    {
+      "disp_va": "0x269a60a",
+      "fde_start": "0x269a1b0",
+      "fde_end": "0x269ab6b",
+      "class": "root_capture_live"
+    },
+    {
+      "disp_va": "0x294fee4",
+      "fde_start": "0x294fdd0",
+      "fde_end": "0x294ffde",
+      "class": "producer_vote_0xdd_live"
+    },
+    {
+      "disp_va": "0x2ac4351",
+      "fde_start": "0x2ac3a80",
+      "fde_end": "0x2ac4808",
+      "class": "drop_normal"
+    },
+    {
+      "disp_va": "0x2ac47c2",
+      "fde_start": "0x2ac3a80",
+      "fde_end": "0x2ac4808",
+      "class": "drop_unwind"
+    },
+    {
+      "disp_va": "0x2beeeb5",
+      "fde_start": "0x2beecd0",
+      "fde_end": "0x2bef496",
+      "class": "producer_recheck_live"
+    },
+    {
+      "disp_va": "0x2c6c77f",
+      "fde_start": "0x2c6bee0",
+      "fde_end": "0x2c6c800",
+      "class": "serialize_live_1"
+    },
+    {
+      "disp_va": "0x2c6d124",
+      "fde_start": "0x2c6c800",
+      "fde_end": "0x2c6d273",
+      "class": "serialize_live_2"
+    },
+    {
+      "disp_va": "0x2c743c0",
+      "fde_start": "0x2c71eb0",
+      "fde_end": "0x2c74a69",
+      "class": "query_reader"
+    },
+    {
+      "disp_va": "0x2ca7701",
+      "fde_start": "0x2ca6e30",
+      "fde_end": "0x2ca7bb8",
+      "class": "drop_normal"
+    },
+    {
+      "disp_va": "0x2ca7b72",
+      "fde_start": "0x2ca6e30",
+      "fde_end": "0x2ca7bb8",
+      "class": "drop_unwind"
+    },
+    {
+      "disp_va": "0x2e03661",
+      "fde_start": "0x2e02d90",
+      "fde_end": "0x2e03b18",
+      "class": "drop_normal"
+    },
+    {
+      "disp_va": "0x2e03ad2",
+      "fde_start": "0x2e02d90",
+      "fde_end": "0x2e03b18",
+      "class": "drop_unwind"
+    },
+    {
+      "disp_va": "0x3c2efd6",
+      "fde_start": "0x3c2e860",
+      "fde_end": "0x3c2f45b",
+      "class": "checkpoint_restore_memcpy"
+    },
+    {
+      "disp_va": "0x3d15601",
+      "fde_start": "0x3d14c80",
+      "fde_end": "0x3d15aab",
+      "class": "drop_normal"
+    },
+    {
+      "disp_va": "0x3d15a75",
+      "fde_start": "0x3d14c80",
+      "fde_end": "0x3d15aab",
+      "class": "drop_unwind"
+    },
+    {
+      "disp_va": "0x4e3513a",
+      "fde_start": "0x4e34ce0",
+      "fde_end": "0x4e3569b",
+      "class": "root_capture_slow"
+    },
+    {
+      "disp_va": "0x548161d",
+      "fde_start": "0x5480950",
+      "fde_end": "0x548168c",
+      "class": "serialize_slow_1"
+    },
+    {
+      "disp_va": "0x548bf31",
+      "fde_start": "0x54897e0",
+      "fde_end": "0x548c8e0",
+      "class": "consumer_drain_slow"
+    },
+    {
+      "disp_va": "0x548d189",
+      "fde_start": "0x548ce30",
+      "fde_end": "0x548d8bd",
+      "class": "snapshot_clone_memcpy"
+    },
+    {
+      "disp_va": "0x54cb065",
+      "fde_start": "0x54cae80",
+      "fde_end": "0x54cb646",
+      "class": "producer_recheck_slow"
+    },
+    {
+      "disp_va": "0x55f26f0",
+      "fde_start": "0x55ea030",
+      "fde_end": "0x55f3d4c",
+      "class": "deserialize_memcpy"
+    },
+    {
+      "disp_va": "0x55fd740",
+      "fde_start": "0x55fcdf0",
+      "fde_end": "0x55fd88f",
+      "class": "serialize_slow_2"
+    },
+    {
+      "disp_va": "0x5642c31",
+      "fde_start": "0x5642360",
+      "fde_end": "0x56430db",
+      "class": "drop_normal"
+    },
+    {
+      "disp_va": "0x56430a5",
+      "fde_start": "0x5642360",
+      "fde_end": "0x56430db",
+      "class": "drop_unwind"
+    },
+    {
+      "disp_va": "0x5869514",
+      "fde_start": "0x5869400",
+      "fde_end": "0x586960e",
+      "class": "producer_vote_0xdd_slow"
+    },
+    {
+      "disp_va": "0x5a586e1",
+      "fde_start": "0x5a57e10",
+      "fde_end": "0x5a58b98",
+      "class": "drop_normal"
+    },
+    {
+      "disp_va": "0x5a58b52",
+      "fde_start": "0x5a57e10",
+      "fde_end": "0x5a58b98",
+      "class": "drop_unwind"
+    }
+  ]
+}

@@ -6,11 +6,36 @@ GitHub ownership: **historical read-only GitHub context fetched 2026-11-26T21:37
 
 ## Ready
 
+None currently identified.
+## Evidence-recorded
+
+### qcp-checkpoint-replay-root-fixture: Connect checkpoint restore, replay references, and root validation in one bounded fixture
+
+- Component: `storage`; work type: integration; readiness: **recorded**; evidence: **reviewed**.
+- Question: What is the smallest independently checked offline fixture that connects a restored checkpoint, its first replay record, and a provenance-bounded expected root?
+- Remaining gap: RE-009-node115-checkpoint-replay-root-fixture and src/node115-abci-checkpoint-replay-fixture connect all four reviewed prerequisite contracts over SHA-256-hashed, provenance-labeled synthetic offline inputs with positive and negative controls. Captured binary execution, live-chain canonical root authority, unresolved cryptographic/timer/CPUID boundaries, and the full storage/abci component gates remain out of scope.
+- Downstream consumer: A small offline checkpoint-to-replay-to-root-validation fixture, the shared consumer of all five pilot questions.
+- Prior attempt: [3988](https://github.com/lalalune/hyperliquid-source/pull/3988) — selected replay-key path (merged attempt by @0xQueenQ as of 2026-11-26T21:37:02Z).
+- Prior attempt: [4011](https://github.com/lalalune/hyperliquid-source/pull/4011) — selected restored round field (merged attempt by @0xQueenQ as of 2026-11-26T21:37:02Z).
+- Prior attempt: [4157](https://github.com/lalalune/hyperliquid-source/pull/4157) — compact digest reference provenance with external H+1 gap (merged attempt by @0xQueenQ as of 2026-11-26T21:37:02Z).
+- Prior attempt: [4117](https://github.com/lalalune/hyperliquid-source/pull/4117) — ABCI digest descriptor handoff (merged attempt by @0xQueenQ as of 2026-11-26T21:37:02Z).
+- Prior attempt: [5584](https://github.com/lalalune/hyperliquid-source/pull/5584) — selected root selector path (merged attempt by @Jonas-Augustinus-Linus as of 2026-11-26T21:37:02Z).
+- Prior attempt: [5591](https://github.com/lalalune/hyperliquid-source/pull/5591) — selected fallback writer (merged attempt by @Jonas-Augustinus-Linus as of 2026-11-26T21:37:02Z).
+- Hard dependency `qcp-first-replay-key`: The selected restore-to-replay field relationship is reproduced from its retained packet.
+- Hard dependency `qcp-expected-root-provenance`: The H+1 input producer or an explicit fixture contract with provenance is established.
+- Hard dependency `qcp-root-selector`: The selector path and runtime unknowns are reviewed.
+- Hard dependency `qcp-root-cell-writer`: The selected store destination and limits are reviewed with the selector evidence.
+- Acceptance:
+  - Name and hash every fixture input; use synthetic, offline data only.
+  - Require explicit provenance for an expected-root input and preserve unresolved branches.
+  - Compare only an observable result established by the prerequisite contracts.
+  - Keep captured execution and the full component gate out of scope.
+
 ### qcp-expected-root-provenance: Identify the expected root reference consumed during replay validation
 
-- Component: `storage`; work type: discovery; readiness: **ready**; evidence: **partial**.
+- Component: `storage`; work type: discovery; readiness: **recorded**; evidence: **reviewed**.
 - Question: Where does the expected H+1 root reference enter the selected replay-validation path, and what contract supplies it?
-- Remaining gap: A new bounded join connects one admitted ABCI digest-vote path to the tracker field consumed by the selected replay-reference path, conditional on the same state instance. The exact H+1 relation, canonical external-root authority, quorum policy, all other producers, and runtime identity remain unresolved. The downstream fixture must preserve these provenance limits.
+- Remaining gap: RE-009-node115-expected-root-provenance establishes the single-owner 0x5a04e40 join (&ctx.state = ctx+0x450) connecting action 0xdd ingestion (0x54a3a00 -> 0x5869400 -> 0x5afadd0 -> 0x537aa60) and recheck (0x54cae80 -> 0x5afa3b0 -> 0x5373e40) on S+0x3e50 with finalizer drain (0x54897e0 -> 0x5afa030), the H->H+1 saturating height advance at 0x54838d3..0x54838e5 feeding post-comparison local history (0x5a07ec0 -> 0x5a03fa0 into ctx+0x400), and the complete 27-site .text census of +0x3e50. ECDSA recovery internals (0x64e0ad8), timer delay configuration (tracker+0x88), alternate flat timer path (0x57f1690), registry rotation provenance, and live-chain canonical root authority remain open.
 - Downstream consumer: A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.
 - Prior attempt: [4114](https://github.com/lalalune/hyperliquid-source/pull/4114) — maps the selected ABCI digest-vote admission path to tracker +0x3e50; does not join it to the replay comparator (merged attempt by @0xQueenQ as of 2026-11-26T21:37:02Z).
 - Prior attempt: [4157](https://github.com/lalalune/hyperliquid-source/pull/4157) — maps the source of compact digest references and explicitly leaves external H+1 unresolved (merged attempt by @0xQueenQ as of 2026-11-26T21:37:02Z).
@@ -20,8 +45,6 @@ GitHub ownership: **historical read-only GitHub context fetched 2026-11-26T21:37
   - Trace the expected-root value to a digest-bound producer or define a minimal explicit fixture contract with provenance.
   - Keep local root production separate from externally expected root provenance.
   - Record unobserved producers and branches as unresolved.
-
-## Evidence-recorded
 
 ### qcp-first-replay-key: Relate restored checkpoint fields to the first replay key
 
@@ -67,28 +90,7 @@ GitHub ownership: **historical read-only GitHub context fetched 2026-11-26T21:37
 None currently identified.
 ## Blocked
 
-### qcp-checkpoint-replay-root-fixture: Connect checkpoint restore, replay references, and root validation in one bounded fixture
-
-- Component: `storage`; work type: integration; readiness: **blocked**; evidence: **not-started**.
-- Question: What is the smallest independently checked offline fixture that connects a restored checkpoint, its first replay record, and a provenance-bounded expected root?
-- Remaining gap: The selector and selected writer agree on the fallback entry and destination cell. The remaining blocker for this fixture is the external expected H+1 root: identify its producer or document an independently justified fixture input with provenance.
-- Downstream consumer: A small offline checkpoint-to-replay-to-root-validation fixture, the shared consumer of all five pilot questions.
-- Prior attempt: [3988](https://github.com/lalalune/hyperliquid-source/pull/3988) — selected replay-key path (merged attempt by @0xQueenQ as of 2026-11-26T21:37:02Z).
-- Prior attempt: [4011](https://github.com/lalalune/hyperliquid-source/pull/4011) — selected restored round field (merged attempt by @0xQueenQ as of 2026-11-26T21:37:02Z).
-- Prior attempt: [4157](https://github.com/lalalune/hyperliquid-source/pull/4157) — compact digest reference provenance with external H+1 gap (merged attempt by @0xQueenQ as of 2026-11-26T21:37:02Z).
-- Prior attempt: [4117](https://github.com/lalalune/hyperliquid-source/pull/4117) — ABCI digest descriptor handoff (merged attempt by @0xQueenQ as of 2026-11-26T21:37:02Z).
-- Prior attempt: [5584](https://github.com/lalalune/hyperliquid-source/pull/5584) — selected root selector path (merged attempt by @Jonas-Augustinus-Linus as of 2026-11-26T21:37:02Z).
-- Prior attempt: [5591](https://github.com/lalalune/hyperliquid-source/pull/5591) — selected fallback writer (merged attempt by @Jonas-Augustinus-Linus as of 2026-11-26T21:37:02Z).
-- Hard dependency `qcp-first-replay-key`: The selected restore-to-replay field relationship is reproduced from its retained packet.
-- Hard dependency `qcp-expected-root-provenance`: The H+1 input producer or an explicit fixture contract with provenance is established.
-- Hard dependency `qcp-root-selector`: The selector path and runtime unknowns are reviewed.
-- Hard dependency `qcp-root-cell-writer`: The selected store destination and limits are reviewed with the selector evidence.
-- Acceptance:
-  - Name and hash every fixture input; use synthetic, offline data only.
-  - Require explicit provenance for an expected-root input and preserve unresolved branches.
-  - Compare only an observable result established by the prerequisite contracts.
-  - Keep captured execution and the full component gate out of scope.
-
+None currently identified.
 ## Reserved and review-needed
 
 Reservation: **unknown** until a maintainer-designated coordinator records a grant. An open PR and its author are shown as an attempt, not a task reservation.

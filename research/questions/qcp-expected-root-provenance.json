@@ -12,15 +12,15 @@
     "include": ["The handoff from compact digest references to the selected replay comparison", "The source and identity of the expected root input"],
     "exclude": ["Recomputing or validating a live chain root", "Assuming a locally produced root is the external expected value", "Unrelated digest algorithms"]
   },
-  "readiness": "ready",
-  "evidence_status": "partial",
+  "readiness": "recorded",
+  "evidence_status": "reviewed",
   "prior_attempts": [
     {"url": "https://github.com/lalalune/hyperliquid-source/pull/4114", "relation": "maps the selected ABCI digest-vote admission path to tracker +0x3e50; does not join it to the replay comparator"},
     {"url": "https://github.com/lalalune/hyperliquid-source/pull/4157", "relation": "maps the source of compact digest references and explicitly leaves external H+1 unresolved"},
     {"url": "https://github.com/lalalune/hyperliquid-source/pull/4117", "relation": "traces the ABCI digest quorum descriptor handoff"},
     {"url": "https://github.com/lalalune/hyperliquid-source/pull/7057", "relation": "adjacent replay-slot writer/reader join; does not establish expected-root provenance"}
   ],
-  "remaining_gap": "A new bounded join connects one admitted ABCI digest-vote path to the tracker field consumed by the selected replay-reference path, conditional on the same state instance. The exact H+1 relation, canonical external-root authority, quorum policy, all other producers, and runtime identity remain unresolved. The downstream fixture must preserve these provenance limits.",
+  "remaining_gap": "RE-009-node115-expected-root-provenance establishes the single-owner 0x5a04e40 join (&ctx.state = ctx+0x450) connecting action 0xdd ingestion (0x54a3a00 -> 0x5869400 -> 0x5afadd0 -> 0x537aa60) and recheck (0x54cae80 -> 0x5afa3b0 -> 0x5373e40) on S+0x3e50 with finalizer drain (0x54897e0 -> 0x5afa030), the H->H+1 saturating height advance at 0x54838d3..0x54838e5 feeding post-comparison local history (0x5a07ec0 -> 0x5a03fa0 into ctx+0x400), and the complete 27-site .text census of +0x3e50. ECDSA recovery internals (0x64e0ad8), timer delay configuration (tracker+0x88), alternate flat timer path (0x57f1690), registry rotation provenance, and live-chain canonical root authority remain open.",
   "dependencies": [],
   "downstream_consumer": "A small independently checked checkpoint-to-replay-to-root-validation fixture shared by this pilot.",
   "acceptance_requirements": [
