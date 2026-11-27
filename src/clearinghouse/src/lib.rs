@@ -5,6 +5,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod margin_user_state;
 pub mod position_risk;
 
 pub use node115_borrow_lend_codec as borrow_lend_codec;
