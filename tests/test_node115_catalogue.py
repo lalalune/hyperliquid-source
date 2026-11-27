@@ -24,8 +24,16 @@ class CatalogueTests(unittest.TestCase):
         self.assertEqual(len(self.components), 23)
         self.assertEqual({c['artifact'] for c in self.components}, {'node115'})
         catalogue.validate_progress(self.components, self.progress, ROOT)
-        self.assertEqual(catalogue.progress_totals(self.components, self.progress), (12, 92))
-        accepted_three_of_four = {'constants', 'serialization', 'storage', 'abci'}
+        self.assertEqual(catalogue.progress_totals(self.components, self.progress), (21, 92))
+        accepted_three_of_four = {
+            'constants',
+            'serialization',
+            'storage',
+            'abci',
+            'fees',
+            'transport',
+            'node-runtime',
+        }
         for comp_id, row in self.progress['components'].items():
             if comp_id in accepted_three_of_four:
                 self.assertEqual(
