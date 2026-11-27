@@ -115,3 +115,36 @@ impl IndexedBlockReader {
             .collect()
     }
 }
+
+/// Single-run blocking-task wrapper modeling `db/src/block_reader.rs:29:26` (`0x2b2be60`:
+/// `[internal exception] blocking task ran twice`).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum BlockingBlockQueryError {
+    AlreadyPolled,
+}
+
+#[derive(Clone, Debug)]
+pub struct SingleRunBlockQuery {
+    height: u64,
+    completed: bool,
+}
+
+impl SingleRunBlockQuery {
+    pub const fn new(height: u64) -> Self {
+        Self {
+            height,
+            completed: false,
+        }
+    }
+
+    pub fn run_once<'a>(
+        &mut self,
+        reader: &'a IndexedBlockReader,
+    ) -> Result<Option<&'a [u8]>, BlockingBlockQueryError> {
+        if self.completed {
+            return Err(BlockingBlockQueryError::AlreadyPolled);
+        }
+        self.completed = true;
+        Ok(reader.block(self.height))
+    }
+}

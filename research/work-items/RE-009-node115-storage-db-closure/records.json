@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "work_item": "RE-009-node115-storage-db-closure",
+  "component": "storage",
+  "target_binary": {
+    "path": "artifacts/node/115/hl-node",
+    "size": 105896032,
+    "sha256": "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
+  },
+  "observed_source_files": [
+    "db/src/block_reader.rs",
+    "db/src/db_home.rs",
+    "db/src/db_hub.rs",
+    "db/src/owned_db_home.rs",
+    "db/src/rocks_db.rs"
+  ],
+  "db_src_fdes": [
+    {"start": "0x1692ca0", "end": "0x1692fe9", "size": 841, "role": "db_hub_checkpoint_copy_and_marker"},
+    {"start": "0x16961b0", "end": "0x1696729", "size": 1401, "role": "owned_db_home_checkpoint_guard"},
+    {"start": "0x25d3f20", "end": "0x25d4cab", "size": 3467, "role": "db_home_load_latest_checkpoint_copy_a"},
+    {"start": "0x2a0acc0", "end": "0x2a0b327", "size": 1639, "role": "block_reader_range_query_inclusive"},
+    {"start": "0x2a191e0", "end": "0x2a195a7", "size": 967, "role": "block_reader_block"},
+    {"start": "0x2b2be60", "end": "0x2b2c4f1", "size": 1681, "role": "block_reader_spawn_blocking_wrapper"},
+    {"start": "0x38b3ad0", "end": "0x38b3f8c", "size": 1212, "role": "db_hub_new_copy_a"},
+    {"start": "0x3d4c7c0", "end": "0x3d4cbe0", "size": 1056, "role": "db_hub_shard_route_live_a"},
+    {"start": "0x3d4cbe0", "end": "0x3d4d000", "size": 1056, "role": "db_hub_shard_route_live_b"},
+    {"start": "0x3d4d000", "end": "0x3d4d420", "size": 1056, "role": "db_hub_shard_route_live_c"},
+    {"start": "0x44681e0", "end": "0x4468b62", "size": 2434, "role": "db_home_checkpoint_and_lt_hashes_sync"},
+    {"start": "0x4468e30", "end": "0x44699c0", "size": 2960, "role": "db_home_load_latest_checkpoint_copy_b"},
+    {"start": "0x44699c0", "end": "0x4469bd8", "size": 536, "role": "db_home_evm_state_path_and_bundle_guard"},
+    {"start": "0x4524660", "end": "0x4524adb", "size": 1147, "role": "rocks_db_open_evm_state"},
+    {"start": "0x4e33ef0", "end": "0x4e342a5", "size": 949, "role": "db_hub_new_copy_b"},
+    {"start": "0x57c58d0", "end": "0x57c5cf0", "size": 1056, "role": "db_hub_shard_route_slow_a"},
+    {"start": "0x57c5cf0", "end": "0x57c6110", "size": 1056, "role": "db_hub_shard_route_slow_b"},
+    {"start": "0x57c6110", "end": "0x57c6530", "size": 1056, "role": "db_hub_shard_route_slow_c"},
+    {"start": "0x57c6530", "end": "0x57c70b4", "size": 2948, "role": "rocks_db_open_core_l1"},
+    {"start": "0x59ffa30", "end": "0x5a007bb", "size": 3467, "role": "db_home_load_latest_checkpoint_copy_c"},
+    {"start": "0x5a007c0", "end": "0x5a00af9", "size": 825, "role": "db_home_core_l1_paths_and_bundle_guard"}
+  ],
+  "location_count": 28,
+  "instruction_anchors": [
+    {"name": "db_hub_mkdir_0777", "va": "0x1692ce3", "hex": "c7442428ff010000", "note": "mov dword ptr [rsp+0x28], 0x1ff (0o777)"},
+    {"name": "db_home_reject_plus", "va": "0x4469183", "hex": "83fe2b", "note": "cmp esi, 0x2b ('+')"},
+    {"name": "db_home_reject_minus", "va": "0x4469188", "hex": "83fe2d", "note": "cmp esi, 0x2d ('-')"},
+    {"name": "db_home_digit_cmp", "va": "0x44691d7", "hex": "83fe09", "note": "cmp esi, 9 (unsigned decimal digit check)"}
+  ],
+  "rodata_literals": [
+    {"name": "db_hub_subdir", "va": "0x443e3b", "ascii": "/hyperliquid_data/db_hub"},
+    {"name": "ckpt_outer_missing", "va": "0x433a08", "ascii": "checkpoint outer dir does not exist "},
+    {"name": "no_ckpts_to_load", "va": "0x435938", "ascii": "no checkpoints to load: "},
+    {"name": "unable_load_ckpt", "va": "0x436988", "ascii": "unable to load any current checkpoint from "},
+    {"name": "ckpt_complete_path", "va": "0x44bb46", "ascii": "/CHECKPOINT_COMPLETE"},
+    {"name": "ckpt_subdir_path", "va": "0x43473b", "ascii": "/checkpoint"}
+  ],
+  "summary": {
+    "source_files": 5,
+    "locations": 28,
+    "db_src_fdes": 21,
+    "db_src_fde_bytes": 32810
+  }
+}

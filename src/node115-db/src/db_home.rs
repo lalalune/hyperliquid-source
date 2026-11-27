@@ -7,6 +7,8 @@
 //! - `0x25d3f20..0x25d4cab`, `0x4468e30..0x44699c0`, `0x59ffa30..0x5a007bb` (`db_home.rs:21:24`):
 //!   checkpoint directory discovery (`node115-checkpoint-discovery`).
 
+use std::fmt;
+use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -105,5 +107,83 @@ impl DbHome {
         selected_checkpoint_dir: &Path,
     ) -> io::Result<Command> {
         prepare_first_copy(selected_checkpoint_dir, &self.root)
+    }
+
+    /// Exact 3-stage latest-checkpoint loader proven in `db/src/db_home.rs:21:24`
+    /// (`0x4468e30`, `0x25d3f20`, `0x59ffa30`):
+    /// 1. Verifies `<db_home>/checkpoint` exists (`"checkpoint outer dir does not exist ..."`).
+    /// 2. Scans entries strictly matching unsigned ASCII digits (`+`/`-` rejected at `0x4469183`/`0x4469188`),
+    ///    returning `"no checkpoints to load: ..."` if none exist.
+    /// 3. Sorts descending by height and checks `<entry>/CHECKPOINT_COMPLETE` + optional
+    ///    `required_subdir`, returning `"unable to load any current checkpoint from ..."` if none qualify.
+    pub fn load_latest_checkpoint(
+        &self,
+        required_subdir: Option<&str>,
+    ) -> Result<CheckpointCandidate, LoadLatestCheckpointError> {
+        let outer = self.checkpoint_subdir();
+        if !outer.is_dir() {
+            return Err(LoadLatestCheckpointError::OuterDirDoesNotExist { dir: outer });
+        }
+        let mut parsed = Vec::new();
+        for entry in fs::read_dir(&outer).map_err(LoadLatestCheckpointError::Io)? {
+            let entry = entry.map_err(LoadLatestCheckpointError::Io)?;
+            let name = entry.file_name();
+            let Some(name_str) = name.to_str() else {
+                continue;
+            };
+            // Matches `0x4469183` ('+'), `0x4469188` ('-'), and `0x44691d7` (ASCII digits only)
+            if name_str.is_empty() || !name_str.bytes().all(|b| b.is_ascii_digit()) {
+                continue;
+            }
+            if let Ok(height) = name_str.parse::<u64>() {
+                parsed.push((height, entry.path()));
+            }
+        }
+        if parsed.is_empty() {
+            return Err(LoadLatestCheckpointError::NoCheckpointsToLoad { dir: outer });
+        }
+        parsed.sort_by_key(|b| std::cmp::Reverse(b.0));
+        for (height, path) in parsed {
+            if !path.join("CHECKPOINT_COMPLETE").exists() {
+                continue;
+            }
+            if let Some(sub) = required_subdir
+                && !path.join(sub).exists()
+            {
+                continue;
+            }
+            return Ok(CheckpointCandidate { height, path });
+        }
+        Err(LoadLatestCheckpointError::UnableToLoadAnyCurrentCheckpoint { dir: outer })
+    }
+}
+
+/// Exact 3-variant checkpoint load error ladder proven in `db/src/db_home.rs:21:24` (`0x4468e30`).
+#[derive(Debug)]
+pub enum LoadLatestCheckpointError {
+    OuterDirDoesNotExist { dir: PathBuf },
+    NoCheckpointsToLoad { dir: PathBuf },
+    UnableToLoadAnyCurrentCheckpoint { dir: PathBuf },
+    Io(io::Error),
+}
+
+impl fmt::Display for LoadLatestCheckpointError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::OuterDirDoesNotExist { dir } => {
+                write!(f, "checkpoint outer dir does not exist {}", dir.display())
+            }
+            Self::NoCheckpointsToLoad { dir } => {
+                write!(f, "no checkpoints to load: {}", dir.display())
+            }
+            Self::UnableToLoadAnyCurrentCheckpoint { dir } => {
+                write!(
+                    f,
+                    "unable to load any current checkpoint from {}",
+                    dir.display()
+                )
+            }
+            Self::Io(err) => write!(f, "{err}"),
+        }
     }
 }

@@ -7,6 +7,17 @@
 //! - `0x1692ca0..0x1692fe9` (`db_hub.rs:62/66/68`)
 
 use std::collections::BTreeMap;
+use std::fs;
+use std::io;
+use std::path::{Path, PathBuf};
+
+/// Default `DbHub` root suffix formatted relative to `STATIC_CONFIG.home_dir` (`0x4e33f70`, `.rodata 0x443e3b`).
+pub const DEFAULT_DB_HUB_SUBDIR: &str = "hyperliquid_data/db_hub";
+
+/// Build `{home_dir}/hyperliquid_data/db_hub` matching `db/src/db_hub.rs:25:38` (`0x4e33ef0`).
+pub fn default_db_hub_path(home_dir: &Path) -> PathBuf {
+    home_dir.join(DEFAULT_DB_HUB_SUBDIR)
+}
 
 pub use node115_db_hub_byte_key::{LayoutError, Lookup as ByteKeyLookup, Node as ByteKeyNode, lookup as byte_key_lookup};
 pub use node115_storage_value_decode::{Decoded as DecodedStorageValue, InvalidValue, decode as decode_storage_value};
@@ -264,5 +275,21 @@ impl OfflineDbHub {
     /// with its 2-byte prefix (`0x6479df0[kind * 8]`).
     pub fn get_kind(&self, kind: DbKind, suffix: &[u8]) -> Option<&[u8]> {
         self.get(kind.shard_id(), &kind.prefixed_key(suffix))
+    }
+
+    /// Persist a checkpoint directory with a shard sub-directory and completion marker
+    /// matching `db/src/db_hub.rs:62,66,68` (`0x1692ca0`: `create_dir_all` + shard copy + `write_bytes_to_file`).
+    pub fn write_checkpoint_marker(
+        &self,
+        dest_dir: &Path,
+        shard_subdir: &str,
+        marker_name: &str,
+        marker_bytes: &[u8],
+    ) -> io::Result<PathBuf> {
+        let target = dest_dir.join(shard_subdir);
+        fs::create_dir_all(&target)?;
+        let marker_path = dest_dir.join(marker_name);
+        fs::write(&marker_path, marker_bytes)?;
+        Ok(marker_path)
     }
 }

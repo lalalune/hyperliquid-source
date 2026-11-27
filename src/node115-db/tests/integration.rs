@@ -353,3 +353,66 @@ fn rocksdb_3_shard_profiles_tcp_ceiling_and_persistent_checkpoint_roundtrip() {
 
     let _ = fs::remove_dir_all(&root);
 }
+
+#[test]
+fn storage_db_closure_latest_checkpoint_loader_db_hub_path_and_single_run_block_query() {
+    use node115_db::block_reader::{
+        BlockingBlockQueryError, IndexedBlockReader, SingleRunBlockQuery,
+    };
+    use node115_db::db_home::LoadLatestCheckpointError;
+    use node115_db::db_hub::{DEFAULT_DB_HUB_SUBDIR, default_db_hub_path};
+
+    // db_hub.rs:25:38 (`0x4e33ef0`) default path & db_hub.rs:62/66/68 (`0x1692ca0`) marker write
+    assert_eq!(DEFAULT_DB_HUB_SUBDIR, "hyperliquid_data/db_hub");
+    assert_eq!(
+        default_db_hub_path(Path::new("/home/hl")),
+        Path::new("/home/hl/hyperliquid_data/db_hub")
+    );
+
+    let root = unique_tmp("closure");
+    let home = DbHome::new(&root).unwrap();
+
+    // 1. Missing outer `checkpoint` dir -> OuterDirDoesNotExist
+    let e1 = home.load_latest_checkpoint(Some("EvmState")).unwrap_err();
+    assert!(matches!(e1, LoadLatestCheckpointError::OuterDirDoesNotExist { .. }));
+    assert!(e1.to_string().starts_with("checkpoint outer dir does not exist "));
+
+    // 2. Empty `checkpoint` dir (or only signed/non-digit dirs like "+10", "-5", "tmp") -> NoCheckpointsToLoad
+    let outer = home.checkpoint_subdir();
+    fs::create_dir_all(outer.join("+10")).unwrap();
+    fs::create_dir_all(outer.join("-5")).unwrap();
+    fs::create_dir_all(outer.join("tmp")).unwrap();
+    let e2 = home.load_latest_checkpoint(Some("EvmState")).unwrap_err();
+    assert!(matches!(e2, LoadLatestCheckpointError::NoCheckpointsToLoad { .. }));
+    assert!(e2.to_string().starts_with("no checkpoints to load: "));
+
+    // 3. Numeric dir exists without CHECKPOINT_COMPLETE -> UnableToLoadAnyCurrentCheckpoint
+    fs::create_dir_all(outer.join("100")).unwrap();
+    let e3 = home.load_latest_checkpoint(Some("EvmState")).unwrap_err();
+    assert!(matches!(
+        e3,
+        LoadLatestCheckpointError::UnableToLoadAnyCurrentCheckpoint { .. }
+    ));
+    assert!(
+        e3.to_string()
+            .starts_with("unable to load any current checkpoint from ")
+    );
+
+    // 4. Higher incomplete dir 200 skipped; valid dir 100 with CHECKPOINT_COMPLETE + EvmState selected
+    fs::create_dir_all(outer.join("200")).unwrap();
+    let hub = OfflineDbHub::new();
+    hub.write_checkpoint_marker(&outer.join("100"), "EvmState", "CHECKPOINT_COMPLETE", b"")
+        .unwrap();
+    let latest = home.load_latest_checkpoint(Some("EvmState")).unwrap();
+    assert_eq!(latest.height, 100);
+    assert_eq!(latest.path, outer.join("100"));
+
+    // 5. block_reader.rs:29:26 (`0x2b2be60`) single-run blocking query contract
+    let mut reader = IndexedBlockReader::new();
+    reader.insert_block(42, b"blk42".to_vec());
+    let mut q = SingleRunBlockQuery::new(42);
+    assert_eq!(q.run_once(&reader), Ok(Some(b"blk42".as_slice())));
+    assert_eq!(q.run_once(&reader), Err(BlockingBlockQueryError::AlreadyPolled));
+
+    let _ = fs::remove_dir_all(&root);
+}
