@@ -7,6 +7,7 @@
 
 pub mod orchestrator;
 pub mod spot_deploy;
+pub mod stake_requirement;
 pub mod token_scaling;
 
 pub use action_dispatch;

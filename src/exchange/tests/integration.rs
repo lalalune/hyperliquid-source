@@ -160,3 +160,143 @@ fn exchange_orchestrator_runs_block_nonce_dispatch_and_funding_lifecycle() {
     assert!(slot.clearinghouse.funding_samples.is_empty());
     assert!(slot.clearinghouse.last_funding_rates.contains_key(&0));
 }
+
+#[test]
+fn stake_requirement_table_cooldown_and_gates_match_node115_0x2c59480() {
+    use exchange::stake_requirement::{
+        check_stake_requirement, compute_total_required_stake, stake_unit_amount, Chain,
+        Hip3DexStakeEntry, Hip3StakeStateTag, SpotQuoteTokenStakeEntry, StakeCheckOutcome,
+        StakeRequirement, UserStakeSnapshot, PRE_DEPLOY_ACCOUNT_CAP, STAKE_COOLDOWN_SECONDS,
+        TAG_ACCOUNT_CAP_EXCEEDED, TAG_DISALLOWED_ACCOUNT, TAG_INSUFFICIENT_STAKE, TAG_OK,
+    };
+
+    // Exact Mainnet stake amounts from 0x602d1c -> 0x457d00 / 0x457b00 / 0x457f00.
+    assert_eq!(
+        stake_unit_amount(StakeRequirement::Hip3PerpDex, Chain::Mainnet),
+        50_000_000_000_000
+    );
+    assert_eq!(
+        stake_unit_amount(StakeRequirement::SpotQuoteToken, Chain::Mainnet),
+        20_000_000_000_000
+    );
+    assert_eq!(
+        stake_unit_amount(StakeRequirement::UserSetMembership, Chain::Mainnet),
+        50_000_000_000_000
+    );
+    assert_eq!(
+        stake_unit_amount(StakeRequirement::OutcomeDeployer, Chain::Mainnet),
+        50_000_000_000_000
+    );
+    assert_eq!(STAKE_COOLDOWN_SECONDS, 183 * 86_400);
+
+    let deployer = [0xaa; 20];
+    let other = [0xbb; 20];
+    let base_time = 1_700_000_000u64;
+
+    let mut snap = UserStakeSnapshot {
+        user: deployer,
+        now_secs: base_time + STAKE_COOLDOWN_SECONDS,
+        account_disallowed_for_deploy: false,
+        account_and_sub_account_values: vec![1_000_000_000, 1_000_000_000],
+        perp_dexs: vec![
+            // Active HIP-3 DEX owned by deployer -> counts (1).
+            Hip3DexStakeEntry {
+                is_hip3: true,
+                deployer,
+                state_tag: Hip3StakeStateTag::Active0,
+                disabled_at_secs: None,
+            },
+            // DisabledPendingCooldown right at exact boundary `now == disabled_at + 183d` -> still counts (1).
+            Hip3DexStakeEntry {
+                is_hip3: true,
+                deployer,
+                state_tag: Hip3StakeStateTag::DisabledPendingCooldown,
+                disabled_at_secs: Some(base_time),
+            },
+            // Permanently Disabled -> skipped (0).
+            Hip3DexStakeEntry {
+                is_hip3: true,
+                deployer,
+                state_tag: Hip3StakeStateTag::Disabled,
+                disabled_at_secs: None,
+            },
+            // Main DEX or other deployer -> skipped (0).
+            Hip3DexStakeEntry {
+                is_hip3: false,
+                deployer,
+                state_tag: Hip3StakeStateTag::Active0,
+                disabled_at_secs: None,
+            },
+            Hip3DexStakeEntry {
+                is_hip3: true,
+                deployer: other,
+                state_tag: Hip3StakeStateTag::Active0,
+                disabled_at_secs: None,
+            },
+        ],
+        spot_quote_tokens: vec![
+            // Disabled past cooldown (`now > disabled_at + 183d`) -> skipped (0).
+            SpotQuoteTokenStakeEntry {
+                is_disabled: true,
+                disabled_at_secs: Some(base_time - 1),
+            },
+            // Active quote token -> counts (1).
+            SpotQuoteTokenStakeEntry {
+                is_disabled: false,
+                disabled_at_secs: None,
+            },
+        ],
+        in_special_user_set: true,
+        is_active_outcome_deployer: true,
+        active_stake: Some(220_000_000_000_000),
+    };
+
+    // Required = 2 * 500k + 1 * 200k + 1 * 500k + 1 * 500k = 2_200_000 HYPE = 220_000_000_000_000 wei.
+    assert_eq!(
+        compute_total_required_stake(Chain::Mainnet, &snap, None, false),
+        Ok(220_000_000_000_000)
+    );
+    // With `is_override = true` (unstake check 0x2bebe20), DisabledPendingCooldown drops out -> 1_700_000 HYPE.
+    assert_eq!(
+        compute_total_required_stake(Chain::Mainnet, &snap, None, true),
+        Ok(170_000_000_000_000)
+    );
+
+    // Exact match passes with tag 0x1a2.
+    assert_eq!(
+        check_stake_requirement(Chain::Mainnet, &snap, None),
+        StakeCheckOutcome::Ok {
+            tag: TAG_OK,
+            total_required: 220_000_000_000_000,
+        }
+    );
+
+    // Adding one more SpotQuoteToken (+200k HYPE) fails with 0x11a (InsufficientStake).
+    assert_eq!(
+        check_stake_requirement(Chain::Mainnet, &snap, Some(StakeRequirement::SpotQuoteToken)),
+        StakeCheckOutcome::Rejected {
+            tag: TAG_INSUFFICIENT_STAKE,
+            total_required: Some(240_000_000_000_000),
+        }
+    );
+
+    // Account cap exceeded (> 0x77359400 = 2_000_000_000) fails with 0x119 when additional is Some.
+    snap.account_and_sub_account_values = vec![PRE_DEPLOY_ACCOUNT_CAP, 1];
+    assert_eq!(
+        check_stake_requirement(Chain::Mainnet, &snap, Some(StakeRequirement::Hip3PerpDex)),
+        StakeCheckOutcome::Rejected {
+            tag: TAG_ACCOUNT_CAP_EXCEEDED,
+            total_required: None,
+        }
+    );
+
+    // Disallowed account flag fails first with 0x118.
+    snap.account_disallowed_for_deploy = true;
+    assert_eq!(
+        check_stake_requirement(Chain::Mainnet, &snap, Some(StakeRequirement::Hip3PerpDex)),
+        StakeCheckOutcome::Rejected {
+            tag: TAG_DISALLOWED_ACCOUNT,
+            total_required: None,
+        }
+    );
+}
