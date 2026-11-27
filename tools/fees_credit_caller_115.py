@@ -4,8 +4,8 @@
 The function takes one tracked fill step (a table row), prices it, scales it through the token-decimal scaler, picks a mode
 (as is, a fifth, or an f64 factor), classifies the row owner, credits a per-user ledger, builds and passes the argument block of
 the fee-credit distribution call, and adds the per-record and per-kind tallies. `model` is the reconstruction; `Rig.emulate` runs the
-original bytes in the interpreter below (16 helper functions are served by a shared seeded oracle; the u64 hash uses the
-byte-checked SipHash-1-3 model; the ring search runs for real);
+original bytes in the interpreter below (helper calls are intercepted; the u64 hash and token scaler use independently
+byte-checked contracts; the ring search runs for real);
 `compare` demands the same helper-call trace, the same panics and the same heap bytes. Negative controls: wrong model variants,
 byte mutants of the function and corrupted inputs.
 
@@ -28,6 +28,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from elf_index import sections  # noqa: E402
 from fde_extents import eh_frame_records  # noqa: E402
+import token_decimal_scaling_115 as TOKEN_SCALE  # noqa: E402
 
 BINARY = ROOT / "artifacts" / "node" / "115" / "hl-node"
 SHA256 = "a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301"
@@ -1325,19 +1326,16 @@ class World:
         return v
 
     def scale(self, amount, key, value, ctx):
-        h = crc_hash(b"x", amount, key, value, self.cfg["seed"])
-        ok = (h & 7) != 0
-        mode = h >> 8 & 15
-        if mode >= 14:
-            scaled = (999999, 1000000, 1000001, 5000000, 4999999, 5000004)[(h >> 16) % 6]
-        elif mode < 8:
-            scaled = (amount * (h >> 16 & 0x3FF)) >> 4 & M64
-        elif mode < 11:
-            scaled = CAP_CONST + (h >> 20 & 0xF) - 8
-        elif mode < 13:
-            scaled = M64 - (h >> 30 & 0xFF)
-        else:
-            scaled = h >> 3 & 0xFFFFFF
+        toks_ptr = self.mem.read(ctx + 0x20, 8)
+        toks_len = self.mem.read(ctx + 0x28, 8)
+        toks = [(self.mem.read(toks_ptr + TOKEN_SCALE.TOKEN_STRIDE * i + 0x48, 1),
+                 self.mem.read(toks_ptr + TOKEN_SCALE.TOKEN_STRIDE * i + 0x49, 1))
+                for i in range(toks_len)]
+        got, _ = TOKEN_SCALE.spec_muldiv({"kind": "muldiv", "a": amount, "b": value,
+                                         "tok": key, "toks": toks})
+        if got[0] != "ok":
+            raise Halt("fee scaler token table rejected caller key: %r" % (got,))
+        ok, scaled = bool(got[1]), got[2]
         self.log("scale", amount, key, value, ctx, ok, scaled)
         return ok, scaled
 
@@ -1883,14 +1881,24 @@ def gen_case(i):
     A = b.alloc(0x500)
     B = b.alloc(0x300)
     C = b.alloc(0x100)
-    pool_keys = [0x2000 + 7 * k for k in range(1, 6)]
+    pool_keys = [1, 2, 3, 4, 5]
+    toks_ptr = b.alloc(TOKEN_SCALE.TOKEN_STRIDE * (len(pool_keys) + 1))
+    token_decimals = [(0, 0)]
+    for token_index in range(1, len(pool_keys) + 1):
+        decimals = rng.randrange(0, 9)
+        diff = rng.choice([0, 1, 2, 3, 6, 9, 12, 18, 19])
+        token_decimals.append((decimals, decimals + diff))
+        b.put(toks_ptr + TOKEN_SCALE.TOKEN_STRIDE * token_index + 0x48, 1, decimals)
+        b.put(toks_ptr + TOKEN_SCALE.TOKEN_STRIDE * token_index + 0x49, 1, decimals + diff)
+    b.put(A + 0x30, 8, toks_ptr)
+    b.put(A + 0x38, 8, len(token_decimals))
     pool_owners = [0x9000 + 13 * k for k in range(1, 6)]
     n = rng.choice([1, 2, 3, 4])
     rows = b.alloc(32 * n)
     row_data = []
     for r in range(n):
         owner = rng.choice(pool_owners)
-        key = rng.choice([0] + pool_keys + pool_keys)
+        key = 0 if i == 0 else rng.choice([0] + pool_keys + pool_keys)
         row_data.append((owner, key))
         b.put(rows + 32 * r, 8, owner)
         b.put(rows + 32 * r + 8, 8, key)
@@ -1898,11 +1906,13 @@ def gen_case(i):
         b.put(rows + 32 * r + 24, 8, rng.getrandbits(64))
     b.put(A + 0x18, 8, rows)
     b.put(A + 0x20, 8, n)
-    idx = rng.randrange(n) if rng.random() > 0.04 else n + rng.randrange(3)
+    idx = 0 if i == 0 else (rng.randrange(n) if rng.random() > 0.04 else n + rng.randrange(3))
     owner_i, key_i = row_data[idx] if idx < n else row_data[0]
     mult_r = rng.random()
     mult = rng.randrange(1, 1000) if mult_r < 0.5 else rng.randrange(1, 10 ** 7) if mult_r < 0.8 else rng.randrange(1 << 20, 1 << 40) if mult_r < 0.92 else rng.randrange(1 << 40, 1 << 63)
     price = pick_value(rng)
+    if i == 0:
+        price, mult = 1_000_000, 1
     if rng.random() < 0.06:
         mult = rng.choice([2, 3])
         price = rng.randrange(1 << 62, (1 << 63) + (1 << 61))
@@ -1930,8 +1940,13 @@ def gen_case(i):
     put_set(A + 0x350, A + 0x358, key_set(pool_keys, 0.5))
     put_set(A + 0x338, A + 0x340, key_set(pool_owners, 0.5))
     put_set(A + 0x210, A + 0x218, key_set(pool_owners, 0.3))
-    lookup_keys = sorted(set(pool_keys + pool_owners))
+    lookup_keys = sorted(set(([0] if i == 0 else []) + pool_keys + pool_owners))
     entries = [(k, pick_value(rng)) for k in lookup_keys if rng.random() < 0.6]
+    if i == 0:
+        entries = [(k, (1 if k == 0 else v)) for k, v in entries]
+        if not any(k == 0 for k, _ in entries):
+            entries.append((0, 1))
+        entries.sort()
     if rng.random() < 0.5:
         b.put(A + 0x298, 8, SENT)
         if entries and rng.random() > 0.15:
@@ -1977,7 +1992,7 @@ def gen_case(i):
         b.put(blk + 0x98, 8, rng.randrange(0, 1000))
         b.put(blk + 0x78, 8, rng.randrange(0, 900))
         b.put(blk + 0x60, 8, SENT if rng.random() < 0.4 else rng.randrange(0, 1 << 40))
-        length = rng.choice([0, 1, 2, 3, 3, 2, 1]) if rng.random() < 0.97 else rng.choice([1 << 59, (1 << 58) + 5, 1 << 62])
+        length = 1 if i == 0 else (rng.choice([0, 1, 2, 3, 3, 2, 1]) if rng.random() < 0.97 else rng.choice([1 << 59, (1 << 58) + 5, 1 << 62]))
         b.put(blk + 0x70, 8, length)
         data = b.alloc(32 * 3)
         b.put_bytes(data, rng.randbytes(96))
@@ -1990,7 +2005,7 @@ def gen_case(i):
         b.put(blk + 0x98, 8, rng.randrange(0, 1000))
         b.put_bytes(blk + 0x100, rng.randbytes(20))
     cfg = {"seed": i, "near": rng.choice([0, 0, 1, 2, 4]), "pf": rng.choice([0, 64, 128, 192, 256]),
-           "mode": rng.choice([0, 1, 2, 2, 2, 3]), "alloc_fail": rng.random() < 0.03,
+           "mode": 0 if i == 0 else rng.choice([0, 1, 2, 2, 2, 3]), "alloc_fail": rng.random() < 0.03,
            "posmod_posa": max(count - 1, 0) + (1 if rng.random() < 0.2 else 0), "posmod_posb": 0}
     cfg["posmod_posb"] = max(mem_count2(b, A) - 1, 0) + (1 if rng.random() < 0.2 else 0)
     return {"base": b.base, "image": bytes(b.buf), "cfg": cfg, "A": A, "B": B, "C": C, "side": side, "zero_stack": i % 3 == 0}
