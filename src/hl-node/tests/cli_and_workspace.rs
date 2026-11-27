@@ -94,12 +94,12 @@ fn cli_rejects_invalid_node115_validator_inputs() {
 }
 
 #[test]
-fn workspace_health_links_all_25_first_party_crates() {
+fn workspace_health_links_all_26_first_party_crates() {
     let h = workspace_health(ChainName::Mainnet);
     assert_eq!(h.chain, "Mainnet");
     assert_eq!(h.api_url, "https://api.hyperliquid.xyz/");
     assert_eq!(h.bridge_cid, "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7");
-    assert_eq!(h.linked_subsystems.len(), 25);
+    assert_eq!(h.linked_subsystems.len(), 26);
 }
 
 #[test]
@@ -127,7 +127,7 @@ fn compiled_hl_node_binary_runs_offline_version_help_and_dry_run() {
     assert!(stdout.contains("chain=Mainnet"));
     assert!(stdout.contains("replica_style=recent-actions"));
     assert!(stdout.contains("serve_evm_rpc=true"));
-    assert!(stdout.contains("subsystems=25"));
+    assert!(stdout.contains("subsystems=26"));
 
     let bad = Command::new(bin).arg("no-such-command").output().unwrap();
     assert_eq!(bad.status.code(), Some(2));

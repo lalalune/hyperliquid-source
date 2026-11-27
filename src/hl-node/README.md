@@ -23,6 +23,7 @@ Independently authored, `#![forbid(unsafe_code)]`, zero-external-dependency Carg
 - **Bridge (`l1/bridge2`, `l1/bridge_request`)**: `bridge`
 - **HyperEVM (`l1/evm`)**: `evm`
 - **EVM JSON-RPC (`evm_rpc`)**: `evm-rpc`
+- **Info API (`info_server`)**: `info-api`
 - **CLI / Startup**: `node115-cli-validators`, `node115-startup-output`
 
 Target: Linux x86-64 node #115 (`a6e2897cd051213d004802deca416e8eca62b7a8278fa39f249e98c3867b5301`).
@@ -36,6 +37,6 @@ Release profile sets `overflow-checks = true` per `RE-002-node115-private-forks-
 
 ## Limitations
 
-- This unified binary validates CLI arguments and exercises offline cross-crate subsystem wiring only.
-- Live P2P networking, validator signing, live chain sync, HyperEVM execution, Info HTTP server, and EVM JSON-RPC server integration remain in progress across sibling streams and are wired in as those integrated crates land.
+- This unified binary links all 23/23 reconstructed components (all 8 real first-party crates: `base`, `db`, `net_utils`, `node`, `l1`, `global_constants`, `info_server`, `evm_rpc`), validates CLI arguments, and exercises offline cross-crate subsystem wiring only.
+- Live P2P networking, validator signing, live chain sync, and live HTTP/RPC socket listeners remain out of scope for offline dry-run execution.
 - No full-node acceptance or binary-equivalence claim is made.

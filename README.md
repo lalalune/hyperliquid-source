@@ -38,7 +38,7 @@ These inventory counts describe available work, not completed components.
 | First-party .text bytes compared | 57,572/83,719,936 | 0.06877% |
 | Compared windows vs. `.eh_frame_hdr` unwind starts | 7,977/135,313 | 5.89522% |
 | Component work areas with registered Rust paths | 23/23 | 100.00% |
-| Active `src/` Rust areas registered in `components.json` | 296/297 | 99.66% |
+| Active `src/` Rust areas registered in `components.json` | 297/297 | 100.00% |
 | Research work items with top-level `MANIFEST.sha256` | 4,770/4,892 | 97.51% |
 | Tracked research questions with reviewed evidence | 5/5 | 100.00% |
 
@@ -48,7 +48,7 @@ they do not measure whole-node completion or remaining engineering effort.
 Unwind starts (`make index`) are not a complete function census, and inventory/registration percentages do not claim component completion.
 
 Registered bounded Rust work occurs in **23/23 component work areas**
-(**296 implementation paths**, 100.00% of work areas). These are fragment registrations, not completed components.
+(**297 implementation paths**, 100.00% of work areas). These are fragment registrations, not completed components.
 Each fragment keeps its own #115 contract; an integrated node executable remains unaccepted.
 
 <details open>
