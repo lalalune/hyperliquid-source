@@ -62,6 +62,12 @@ class DecoderTests(Setup):
                   for fn in t.SUBJECTS}
         self.assertEqual(counts, {t.S_PA: 253, t.S_PB: 265, t.S_EA: 40, t.S_EB: 37})
 
+    def test_reserve_rehash_bodies_decode_to_their_fde_ends(self):
+        expected = {t.R_A: (0x3ed9141, 454), t.R_B: (0x3ee2461, 455)}
+        for fn, (end, count) in expected.items():
+            self.assertEqual(self.s['extents'][fn], (fn, end))
+            self.assertEqual(sum(fn <= v < end for v in self.s['code']), count)
+
     def test_ud2_is_decoded_but_never_run(self):
         ins = t.decode_one(b'\x0f\x0b' + b'\x90' * 16, 0, 0x1000)
         self.assertEqual((ins.op, ins.size), ('ud2', 2))
@@ -159,6 +165,16 @@ class InterpreterTests(Setup):
             self.assertEqual(obs[2][0], 4)
             self.assertEqual(obs[2][3], 5)
 
+    def test_full_table_executes_each_reserve_rehash_body(self):
+        for fn, target, end in ((t.S_PA, t.R_A, 0x3ed9141), (t.S_PB, t.R_B, 0x3ee2461)):
+            shape = t.SHAPE[fn]
+            hashes = [(k << 57) | k for k in range(7)]
+            c = hand_case(shape, (7 << 57) | 7, hashes, 8, growth=0)
+            obs, machine = t.run_push(self.s['img'], self.s['code'], fn, c)
+            self.assertTrue(t.agree(fn, obs, t.expected(fn, c)))
+            self.assertEqual(machine.rehash, 1)
+            self.assertTrue(any(target <= va < end for va in machine.seen))
+
     def test_rehash_stub_is_reached(self):
         n = 0
         for _, fn, c in first_cases(400):
@@ -244,7 +260,13 @@ class EvidenceFiles(unittest.TestCase):
         self.assertEqual(e['sha256'], t.SHA256)
         self.assertEqual(e['vectors'], 10600)
         self.assertEqual(e['subjects']['push_a'], [hex(t.S_PA), '0x3ec8f88'])
+        self.assertEqual(e['subjects']['reserve_rehash_a'], [hex(t.R_A), '0x3ed9141'])
+        self.assertEqual(e['subjects']['reserve_rehash_b'], [hex(t.R_B), '0x3ee2461'])
+        self.assertEqual(e['reserve_rehash_body_calls'], 1712)
         self.assertEqual(e['mutants']['detected'] + e['mutants']['survivors'], e['mutants']['listed'])
+        controls = (WORK / 'controls.tsv').read_text()
+        self.assertIn('reserve_rehash_a:0x3ed8f36:tag shift +1\tdetected', controls)
+        self.assertIn('reserve_rehash_b:0x3ee2256:tag shift +1\tdetected', controls)
 
 
 if __name__ == '__main__':

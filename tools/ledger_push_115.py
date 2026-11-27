@@ -309,9 +309,10 @@ def decode_one(code, i, va):
             reg, rm = modrm(32)
             x = ('x', reg | rr << 3)
             return done('movd', (x, rm) if b2 == 0x6e else (rm, x), 32)
-        if b2 in (0x60, 0x74, 0x76, 0xdb) and p66:
+        if b2 in (0x60, 0x64, 0x74, 0x76, 0xdb, 0xeb, 0xef) and p66:
             reg, rm = modrm(128, True)
-            names = {0x60: 'punpcklbw', 0x74: 'pcmpeqb', 0x76: 'pcmpeqd', 0xdb: 'pand'}
+            names = {0x60: 'punpcklbw', 0x64: 'pcmpgtb', 0x74: 'pcmpeqb', 0x76: 'pcmpeqd',
+                     0xdb: 'pand', 0xeb: 'por', 0xef: 'pxor'}
             return done(names[b2], (('x', reg | rr << 3), rm), 128)
         if b2 == 0x70 and (p66 or rep == 'f2'):
             reg, rm = modrm(128, True)
@@ -323,6 +324,12 @@ def decode_one(code, i, va):
         if b2 == 0xbc and rep == 'f3':
             reg, rm = modrm(width)
             return done('tzcnt', (gpr(reg | rr << 3, width), rm))
+        if b2 == 0xbd:
+            reg, rm = modrm(width)
+            return done('bsr', (gpr(reg | rr << 3, width), rm))
+        if b2 == 0xaf:
+            reg, rm = modrm(width)
+            return done('imul', (gpr(reg | rr << 3, width), rm))
         if b2 == 0x1f:
             reg, rm = modrm(width)
             return done('nop', ())
@@ -424,6 +431,11 @@ def decode_one(code, i, va):
         if reg not in (0, 4, 5, 7):
             raise EvidenceError(f'{va:#x}: unlisted shift /{reg}')
         return done({0: 'rol', 4: 'shl', 5: 'shr', 7: 'sar'}[reg], (rm, ('i', v[1] & 0xff)))
+    if b == 0xd1:
+        reg, rm = modrm(width)
+        if reg not in (4, 5):
+            raise EvidenceError(f'{va:#x}: unlisted d1 /{reg}')
+        return done('shl' if reg == 4 else 'shr', (rm, ('i', 1)))
     if b == 0xd3:
         reg, rm = modrm(width)
         if reg not in (4, 5):
@@ -454,13 +466,15 @@ def decode_one(code, i, va):
         return done('test', (rm, imm(1)), 8)
     if b == 0xf7:
         reg, rm = modrm(width)
-        if reg not in (3, 4):
+        if reg not in (2, 3, 4):
             raise EvidenceError(f'{va:#x}: unlisted f7 /{reg}')
-        return done('neg' if reg == 3 else 'mul', (rm,))
+        return done({2: 'not', 3: 'neg', 4: 'mul'}[reg], (rm,))
     if b == 0xff:
         reg, rm = modrm(width)
         if reg == 0:
             return done('inc', (rm,))
+        if reg == 1:
+            return done('dec', (rm,))
         if reg == 2:
             return done('call', (rm,), 64)
         raise EvidenceError(f'{va:#x}: unlisted ff /{reg}')
@@ -726,15 +740,21 @@ class Machine:
                 self.xmm[ops[0][1]] = [self.rd(ops[1]) & 0xffffffff, 0]
             else:
                 self.wr(ops[0], self.xmm[ops[1][1]][0] & 0xffffffff)
-        elif op in ('pcmpeqb', 'pcmpeqd', 'pand', 'punpcklbw', 'pshufd', 'pshuflw', 'pmovmskb'):
+        elif op in ('pcmpeqb', 'pcmpeqd', 'pcmpgtb', 'pand', 'por', 'pxor', 'punpcklbw', 'pshufd', 'pshuflw', 'pmovmskb'):
             d = self.xb(ops[1]) if op == 'pmovmskb' else self.xb(ops[0])
             s = self.xb(ops[1])
             if op == 'pcmpeqb':
                 r = bytes(255 if x == y else 0 for x, y in zip(d, s))
             elif op == 'pcmpeqd':
                 r = b''.join((b'\xff' * 4 if d[i:i + 4] == s[i:i + 4] else bytes(4)) for i in range(0, 16, 4))
+            elif op == 'pcmpgtb':
+                r = bytes(0xff if (d[i] - 256 if d[i] & 0x80 else d[i]) > (s[i] - 256 if s[i] & 0x80 else s[i]) else 0 for i in range(16))
             elif op == 'pand':
                 r = bytes(x & y for x, y in zip(d, s))
+            elif op == 'por':
+                r = bytes(x | y for x, y in zip(d, s))
+            elif op == 'pxor':
+                r = bytes(x ^ y for x, y in zip(d, s))
             elif op == 'punpcklbw':
                 r = bytes(b for i in range(8) for b in (d[i], s[i]))
             elif op == 'pshufd':
@@ -829,7 +849,10 @@ class Machine:
                 self.regs[2] = full >> 64
                 self.cf = self.of = self.regs[2] != 0
             elif op == 'imul':
-                v = signed(self.rd(ops[1]), ins.width) * ops[2][1]
+                if len(ops) == 2:
+                    v = signed(self.rd(ops[0]), ins.width) * signed(self.rd(ops[1]), ins.width)
+                else:
+                    v = signed(self.rd(ops[1]), ins.width) * ops[2][1]
                 self.wr(ops[0], v)
                 self.cf = self.of = v != signed(v & ((1 << ins.width) - 1), ins.width)
             elif op == 'neg':
@@ -839,10 +862,18 @@ class Machine:
                 self.of = a == 1 << (ins.width - 1)
                 self.nz(res, ins.width)
                 self.wr(ops[0], res)
+            elif op == 'not':
+                self.wr(ops[0], ~self.rd(ops[0]))
             elif op == 'inc':
                 a = self.rd(ops[0])
                 res = (a + 1) & ((1 << ins.width) - 1)
                 self.of = a == (1 << (ins.width - 1)) - 1
+                self.nz(res, ins.width)
+                self.wr(ops[0], res)
+            elif op == 'dec':
+                a = self.rd(ops[0])
+                res = (a - 1) & ((1 << ins.width) - 1)
+                self.of = a == (1 << (ins.width - 1))
                 self.nz(res, ins.width)
                 self.wr(ops[0], res)
             elif op == 'tzcnt':
@@ -851,6 +882,11 @@ class Machine:
                 self.cf = a == 0
                 self.zf = res == 0
                 self.wr(ops[0], res)
+            elif op == 'bsr':
+                a = self.rd(ops[1])
+                if a:
+                    self.wr(ops[0], a.bit_length() - 1)
+                self.zf = a == 0
             elif op in ('shl', 'shr', 'sar', 'rol'):
                 n = self.rd(ops[1]) & (63 if ins.width == 64 else 31)
                 a = self.rd(ops[0])
@@ -883,8 +919,10 @@ class Machine:
 # ---------------------------------------------------------------------------------------------------------
 S_PA, S_PB, S_EA, S_EB = 0x3ec8b70, 0x3ec7a90, 0x4718060, 0x4717fb0
 SUBJECTS = (S_PA, S_PB, S_EA, S_EB)
-CALLEES = ()
-NAMES = {S_PA: 'push_a', S_PB: 'push_b', S_EA: 'entry_a', S_EB: 'entry_b'}
+R_A, R_B = 0x3ed89a0, 0x3ee1cc0
+CALLEES = (R_A, R_B)
+NAMES = {S_PA: 'push_a', S_PB: 'push_b', S_EA: 'entry_a', S_EB: 'entry_b',
+         R_A: 'reserve_rehash_a', R_B: 'reserve_rehash_b'}
 PUSH_OF = {S_EA: S_PA, S_EB: S_PB}
 PANIC_SLOTS = (0x64df520, 0x64df620, 0x64df848)
 SLOT_MEMCPY, SLOT_ALLOC_ERR, FINISH_GROW = 0x64df508, 0x64df498, 0x43bd550
@@ -1110,36 +1148,55 @@ def new_machine(img, code, shape):
     def alloc_error():
         raise Panic(('alloc', m.regs[R['rdi']], m.regs[R['rsi']]))
 
-    def reserve():
-        tbl, add, ptr, ln, fallible = (m.regs[R[r]] for r in ('rdi', 'rsi', 'rdx', 'rcx', 'r8'))
-        if add != 1 or fallible != 1:
+    def rehash_bytes():
+        target = R_A if shape['reserve'] == SHAPE[S_PA]['reserve'] else R_B
+        if m.regs[R['rsi']] != 1 or m.regs[R['r8']] != 1:
             raise Unmodelled('reserve_rehash arguments')
-        ctrl, mask, _growth, items = (m.load(tbl + 8 * k, 8) for k in range(4))
-        n = mask + 1
-        full = full_cap(n)
-        if items + 1 <= full // 2:
-            raise Unmodelled('in-place rehash')
-        if n > 1 << 12 or items + 1 > 1 << 12:
-            raise Unmodelled('table larger than any modelled one')
-        nt = RawTable(buckets_for(max(items + 1, full + 1)))
-        for i in range(n):
-            if m.load(ctrl + i, 1) < 0x80:
-                idx = m.load(ctrl - 8 * (i + 1), 8)
-                nt.insert(m.load(ptr + idx * m.stride + m.hoff, 8), idx)
-        a = m.arena(nt.n * 8 + nt.n + 16 + 16)
-        for i in range(nt.n):
-            fill(a, nt.n * 8 - 8 * (i + 1), nt.vals[i].to_bytes(8, 'little'))
-        fill(a, nt.n * 8, bytes(nt.ctrl) + PAD[:16])
-        m.store(tbl, 8, a.base + nt.n * 8)
-        m.store(tbl + 8, 8, nt.mask)
-        m.store(tbl + 0x10, 8, full_cap(nt.n) - items)
+        m.regs[4] -= 8
+        m.run(target)
         m.rehash += 1
-        m.clobber(0)
+
+    def memmove():
+        dst, src, n = m.regs[R['rdi']], m.regs[R['rsi']], m.regs[R['rdx']]
+        raw = peek(m, src, n) if n else b''
+        for i, b in enumerate(raw):
+            m.store(dst + i, 1, b)
+        m.clobber(dst)
+
+    def memset():
+        dst, value, n = m.regs[R['rdi']], m.regs[R['rsi']] & 0xff, m.regs[R['rdx']]
+        if n > 1 << 16:
+            raise Unmodelled('memset larger than any modelled table')
+        if n:
+            a = m.find(dst, n)
+            if a is None:
+                raise Unmodelled(f'memset destination {dst:#x}')
+            fill(a, dst - a.base, bytes([value]) * n)
+        m.clobber(dst)
+
+    def alloc():
+        n = m.regs[R['rdi']]
+        if n > 1 << 16:
+            raise Unmodelled('allocation larger than any modelled table')
+        a = m.arena(max(n, 1), strict=False)
+        m.clobber(a.base)
+
+    def dealloc():
+        m.clobber()
+
+    def drop_table():
+        # The target's cleanup helper only releases the old allocation; it does not affect table bytes.
+        m.clobber()
 
     m.stubs[SLOT_MEMCPY] = memcpy
+    m.stubs[0x64df568] = memmove
+    m.stubs[0x64df750] = memset
+    m.stubs[0x64df480] = alloc
+    m.stubs[0x64df490] = dealloc
+    m.stubs[0x3ddd030] = drop_table
     m.stubs[FINISH_GROW] = finish_grow
     m.stubs[SLOT_ALLOC_ERR] = alloc_error
-    m.stubs[shape['reserve']] = reserve
+    m.stubs[shape['reserve']] = rehash_bytes
     return m
 
 
@@ -1435,6 +1492,14 @@ def mutant_list(code, extents):
         for ins in insns:
             if ins.op == 'mov' and ins.ops[1][0] == 'i' and ins.ops[0][0] == 'r' and ins.ops[0][2] == 32 and 0 < ins.ops[1][1] < 0x200:
                 muts.append((f'{NAMES[fn]}:{ins.va:#x}:immediate +1', {ins.va + 1: (ins.raw[1] + 1) & 0xff}, ins.va))
+    for fn in CALLEES:
+        lo, hi = extents[fn]
+        shifts = [code[v] for v in sorted(v for v in code if lo <= v < hi)
+                  if code[v].op == 'shr' and code[v].ops[1] == ('i', 57)]
+        if shifts:
+            ins = shifts[-1]  # The loop exit path is observed in the full case corpus.
+            muts.append((f'{NAMES[fn]}:{ins.va:#x}:tag shift +1',
+                         {ins.va + ins.size - 1: (ins.raw[-1] + 1) & 0xff}, ins.va))
     return muts
 
 
@@ -1467,6 +1532,18 @@ def control_vectors():
     for rows in picks.values():
         step = max(len(rows) // 90, 1)
         out.extend(rows[::step][:90])
+    # Force each reserve body through the full-table rehash arm for its byte-level negative control.
+    for fn in (S_PA, S_PB):
+        shape = SHAPE[fn]
+        table = RawTable(8)
+        rows = []
+        for k in range(7):
+            h = (k << 57) | k
+            table.insert(h, k)
+            rows.append(make_row(shape, bytes([k]) * shape['vsize'], h, bytes([0x40 + k]) * 20))
+        out.append((fn, dict(table=table, growth=0, items=7, rows=rows, cap=8, fail=(),
+                             hash=(7 << 57) | 7, key=bytes(range(1, 21)),
+                             value=b'\xa5' * shape['vsize'], kind='vacant', nrows=7)))
     return out
 
 
@@ -1500,7 +1577,9 @@ def run_mutants(data, code, extents, ctl, reached):
             continue
         c2 = {v: i for v, i in code.items() if not lo <= v < hi}
         c2.update({i.va: i for i in fresh})
-        why = detects(img, c2, ctl, {fn} | {e for e, p in PUSH_OF.items() if p == fn})
+        tested = ({R_A: {S_PA}, R_B: {S_PB}}.get(fn)
+                  if fn in CALLEES else {fn} | {e for e, p in PUSH_OF.items() if p == fn})
+        why = detects(img, c2, ctl, tested)
         if why:
             rows.append((name, 'detected', why))
             killed += 1
@@ -1588,7 +1667,7 @@ def main():
     selfcheck(img, fdes)
     with open(out / 'instructions.tsv', 'w') as f:
         f.write('function\taddress\tsize\tbytes\tdecoded\n')
-        for fn in SUBJECTS:
+        for fn in SUBJECTS + CALLEES:
             lo, hi = extents[fn]
             for va in sorted(v for v in code if lo <= v < hi):
                 ins = code[va]
@@ -1634,20 +1713,26 @@ def main():
             f.write(f'wrong model\t{name}\t{res}\t{why}\n')
         for name, ok in crows:
             f.write(f'corrupted input\t{name}\t{"detected" if ok else "MISSED"}\trefused by the tool\n')
-    insn_total = {NAMES[fn]: sum(1 for v in code if extents[fn][0] <= v < extents[fn][1]) for fn in SUBJECTS}
+    insn_total = {NAMES[fn]: sum(1 for v in code if extents[fn][0] <= v < extents[fn][1])
+                  for fn in SUBJECTS + CALLEES}
+    insn_reached = {NAMES[fn]: sum(1 for v in reached if extents[fn][0] <= v < extents[fn][1])
+                    for fn in SUBJECTS + CALLEES}
     unexecuted = sorted(v for v in code if v not in reached)
     evidence = {
         'binary': BINARY, 'sha256': digest,
-        'subjects': {NAMES[fn]: [hex(extents[fn][0]), hex(extents[fn][1])] for fn in SUBJECTS},
-        'instructions': insn_total, 'unexecuted': [hex(v) for v in unexecuted],
+        'subjects': {NAMES[fn]: [hex(extents[fn][0]), hex(extents[fn][1])]
+                     for fn in SUBJECTS + CALLEES},
+        'instructions': insn_total, 'executed_instructions': insn_reached,
+        'unexecuted': [hex(v) for v in unexecuted],
         'groups': dict(groups), 'vectors': total, 'rows_sha256': full.hexdigest(),
-        'rehash_stub_calls': rehashes, 'panics': dict(sorted(panics.items())),
+        'reserve_rehash_body_calls': rehashes, 'panics': dict(sorted(panics.items())),
         'mutants': {'listed': len(mrows), 'detected': killed, 'survivors': equiv},
         'wrong_models': len(wrows), 'corrupted_inputs': len(crows),
         'panic_locations': [hex(LOC_ITEMS_OVERFLOW), hex(LOC_BOUNDS_ENTRY)],
-        'stubbed_callees': {'memcpy_slot': hex(SLOT_MEMCPY), 'finish_grow': hex(FINISH_GROW),
-                            'alloc_error_slot': hex(SLOT_ALLOC_ERR),
-                            'reserve_rehash_slots': [hex(SHAPE[S_PA]['reserve']), hex(SHAPE[S_PB]['reserve'])]},
+        'stubbed_callees': {'memcpy_slot': hex(SLOT_MEMCPY), 'memmove_slot': hex(0x64df568),
+                            'memset_slot': hex(0x64df750), 'allocator_slot': hex(0x64df480),
+                            'deallocator_slot': hex(0x64df490), 'old_table_drop': hex(0x3ddd030),
+                            'finish_grow': hex(FINISH_GROW), 'alloc_error_slot': hex(SLOT_ALLOC_ERR)},
     }
     (out / 'evidence.json').write_text(json.dumps(evidence, indent=1, sort_keys=True) + '\n')
     (out / 'measure.json').write_text(json.dumps({'cases': total, 'negative_controls': n_neg,
