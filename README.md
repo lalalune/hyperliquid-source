@@ -32,13 +32,23 @@ These inventory counts describe available work, not completed components.
 | Components with full code/data identity | 0/23 | 0.00% |
 | Target .text bytes compared | 5,318,174/83,719,936 | 6.35234% |
 | Target .text bytes raw-equal | 4,968,370/83,719,936 | 5.93451% |
+| Target .text bytes relocation-qualified | 5,318,174/83,719,936 | 6.35234% |
+| Whole-ELF bytes compared | 5,318,174/105,896,032 | 5.02207% |
+| Whole-ELF bytes raw-equal | 4,968,370/105,896,032 | 4.69174% |
+| First-party .text bytes compared | 0/83,719,936 | 0.00000% |
+| Compared windows vs. `.eh_frame_hdr` unwind starts | 7,885/135,313 | 5.82723% |
+| Component work areas with registered Rust paths | 20/23 | 86.96% |
+| Active `src/` Rust areas registered in `components.json` | 104/270 | 38.52% |
+| Research work items with top-level `MANIFEST.sha256` | 4,731/4,853 | 97.49% |
+| Tracked research questions with reviewed evidence | 3/5 | 60.00% |
 
 Gate percentages require acceptance of the full component scope.
 Byte percentages cover the authenticated comparison registry, including dependencies;
 they do not measure whole-node completion or remaining engineering effort.
+Unwind starts (`make index`) are not a complete function census, and inventory/registration percentages do not claim component completion.
 
 Registered bounded Rust work occurs in **20/23 component work areas**
-(**104 implementation paths**). These are fragment registrations, not completed components.
+(**104 implementation paths**, 86.96% of work areas). These are fragment registrations, not completed components.
 Each fragment keeps its own #115 contract; an integrated node executable remains unaccepted.
 
 <details open>
@@ -83,16 +93,16 @@ Zero registered implementation comparisons do not mean zero correct code.
 Dependency windows count once in the target total and separately by source.
 Their equality does not establish first-party or whole-node completion.
 
-| Comparison | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows |
-| --- | ---: | ---: | ---: |
-| **Node #115 total** | 4,968,370/5,318,174 (93.42%) | 507/7,885 (6.43%) | 7,885/7,885 (100.00%) |
-| compiler-builtins | 2,769/2,874 (96.35%) | 5/13 (38.46%) | 13/13 (100.00%) |
-| native-libraries | 4,721,227/5,058,182 (93.34%) | 445/7,266 (6.12%) | 7,266/7,266 (100.00%) |
-| rust-alloc | 759/838 (90.57%) | 0/9 (0.00%) | 9/9 (100.00%) |
-| rust-core | 37,344/39,873 (93.66%) | 5/112 (4.46%) | 112/112 (100.00%) |
-| rust-std | 57,583/60,556 (95.09%) | 16/174 (9.20%) | 174/174 (100.00%) |
-| vendored-crates | 146,270/153,433 (95.33%) | 34/309 (11.00%) | 309/309 (100.00%) |
-| zstandard | 2,418/2,418 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
+| Comparison | % of #115 `.text` | Raw matching bytes / compared | Raw-equal windows | Raw + relocation-qualified windows |
+| --- | ---: | ---: | ---: | ---: |
+| **Node #115 total** | 6.35234% | 4,968,370/5,318,174 (93.42%) | 507/7,885 (6.43%) | 7,885/7,885 (100.00%) |
+| compiler-builtins | 0.00343% | 2,769/2,874 (96.35%) | 5/13 (38.46%) | 13/13 (100.00%) |
+| native-libraries | 6.04179% | 4,721,227/5,058,182 (93.34%) | 445/7,266 (6.12%) | 7,266/7,266 (100.00%) |
+| rust-alloc | 0.00100% | 759/838 (90.57%) | 0/9 (0.00%) | 9/9 (100.00%) |
+| rust-core | 0.04763% | 37,344/39,873 (93.66%) | 5/112 (4.46%) | 112/112 (100.00%) |
+| rust-std | 0.07233% | 57,583/60,556 (95.09%) | 16/174 (9.20%) | 174/174 (100.00%) |
+| vendored-crates | 0.18327% | 146,270/153,433 (95.33%) | 34/309 (11.00%) | 309/309 (100.00%) |
+| zstandard | 0.00289% | 2,418/2,418 (100.00%) | 2/2 (100.00%) | 2/2 (100.00%) |
 
 Compared code: **5,318,174/83,719,936 .text bytes (6.35234%)**.
 
