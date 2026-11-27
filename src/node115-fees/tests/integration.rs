@@ -321,3 +321,114 @@ fn fill_fee_scaling_and_settlement_pipeline_match_0x44896f0() {
     assert_eq!(cell.primary_paid, 400);
     assert_eq!(ledger.primary_cells[&(addr(2), 0)].credit, 400);
 }
+
+#[test]
+fn fee_tiers_staking_referral_spot_and_builder_fees() {
+    use node115_fees::{
+        BaseFeeRates, BuilderFeeError, BuilderFeeRegistry, FeeSchedule, MmFeeTier,
+        StakeDiscountTier, VipFeeTier,
+    };
+
+    let sched = FeeSchedule {
+        rates: BaseFeeRates {
+            perp_cross: 0.00045,
+            perp_add: 0.00015,
+            spot_cross: 0.00070,
+            spot_add: 0.00040,
+        },
+        vip_tiers: vec![
+            VipFeeTier {
+                ntl_cutoff: 5_000_000,
+                cross: 0.00040,
+                add: 0.00012,
+                spot_cross: 0.00060,
+                spot_add: 0.00030,
+                tail: 1.0,
+            },
+            VipFeeTier {
+                ntl_cutoff: 25_000_000,
+                cross: 0.00035,
+                add: 0.00010,
+                spot_cross: 0.00050,
+                spot_add: 0.00020,
+                tail: 1.0,
+            },
+        ],
+        mm_tiers: vec![
+            MmFeeTier {
+                maker_fraction_cutoff: 0.005,
+                add: -0.00001,
+            },
+            MmFeeTier {
+                maker_fraction_cutoff: 0.03,
+                add: -0.00003,
+            },
+        ],
+        referral_discount: 0.04,
+        referrer_keep: 0.10,
+        destination: addr(9),
+        extra_destination_fractions: vec![(addr(8), 0.20)],
+        stake_discount_tiers: vec![
+            StakeDiscountTier {
+                bps_of_max_supply_staked: 0.001,
+                discount: 0.05,
+            },
+            StakeDiscountTier {
+                bps_of_max_supply_staked: 0.1,
+                discount: 0.20,
+            },
+        ],
+        weigh_spot_volume_double: true,
+    };
+
+    // Passes `#115` `node115-fee-schedule-compose::evaluate`!
+    assert_eq!(sched.validate(), fee_schedule_compose::Outcome::Passed);
+
+    // Spot volume weighted 2x: perp 15M + 2 * spot 6M = 27M -> qualifies for VIP tier 2!
+    let rates = sched.user_fee_rates(15_000_000, 6_000_000, 0.03, 0.1, true);
+    // perp_cross = 0.00035 * (1 - 0.20) * (1 - 0.04) = 0.0002688
+    assert!((rates.perp_cross - 0.0002688).abs() < 1e-12);
+    // spot_cross = 0.00050 * 0.80 * 0.96 = 0.000384
+    assert!((rates.spot_cross - 0.000384).abs() < 1e-12);
+    // MM maker rebate (-0.00003) is NOT diluted by fee discounts!
+    assert_eq!(rates.perp_add, -0.00003);
+    assert_eq!(rates.spot_add, -0.00003);
+
+    // Builder fee approval & trade fee breakdown
+    let mut builders = BuilderFeeRegistry::default();
+    let trader = addr(1);
+    let builder = addr(7);
+    assert_eq!(
+        builders.validate_charge(&trader, &builder, 0.0005, false),
+        Err(BuilderFeeError::NotApproved)
+    );
+    builders.approve(trader, builder, 0.0005).unwrap();
+    assert_eq!(
+        builders.validate_charge(&trader, &builder, 0.0006, false),
+        Err(BuilderFeeError::ExceedsUserApproval)
+    );
+    assert_eq!(
+        builders.validate_charge(&trader, &builder, 0.002, false),
+        Err(BuilderFeeError::ExceedsProtocolMax)
+    );
+    let approved_rate = builders
+        .validate_charge(&trader, &builder, 0.0005, false)
+        .unwrap();
+
+    // Taker perp trade of 100_000_000 notional
+    let taker_fee =
+        sched.compute_trade_fee(100_000_000, false, true, rates, true, Some(approved_rate));
+    assert_eq!(taker_fee.user_fee, 26_880);
+    assert_eq!(taker_fee.maker_rebate, 0);
+    assert_eq!(taker_fee.referrer_reward, 2_688);
+    assert_eq!(taker_fee.protocol_fee, 24_192);
+    assert_eq!(taker_fee.builder_fee, 50_000);
+    builders.record_collected(builder, taker_fee.builder_fee);
+    assert_eq!(builders.collected_builder_fees[&builder], 50_000);
+
+    // Maker fill earns positive maker_rebate and pays 0 user_fee / 0 referrer_reward
+    let maker_fee = sched.compute_trade_fee(100_000_000, false, false, rates, true, None);
+    assert_eq!(maker_fee.user_fee, 0);
+    assert_eq!(maker_fee.maker_rebate, 3_000);
+    assert_eq!(maker_fee.referrer_reward, 0);
+}

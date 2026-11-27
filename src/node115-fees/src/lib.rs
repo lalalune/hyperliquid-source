@@ -10,6 +10,7 @@
 
 pub mod credit;
 pub mod schedule;
+pub mod tiers;
 pub mod vlm;
 
 /// Verified node #115 target binary SHA-256.
@@ -35,6 +36,11 @@ pub use credit::{
     scale_fill_fee_component, settle_fill_fee,
 };
 pub use schedule::is_monotonically_non_increasing;
+pub use tiers::{
+    BaseFeeRates, BuilderFeeError, BuilderFeeRegistry, FeeSchedule, MAX_PERP_BUILDER_FEE_RATE,
+    MAX_SPOT_BUILDER_FEE_RATE, MmFeeTier, StakeDiscountTier, TradeFeeBreakdown, UserFeeRates,
+    VipFeeTier,
+};
 pub use vlm::{
     BASE_OPEN_ORDER_CAP, MAX_BONUS_OPEN_ORDERS, OpenOrderDecision, OpenOrderDescriptor,
     PRIVILEGED_OPEN_ORDER_ADDRESSES, PRIVILEGED_OPEN_ORDER_CAP, RawVlm, ScaledVlm,
