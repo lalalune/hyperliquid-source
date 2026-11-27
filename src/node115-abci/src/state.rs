@@ -37,6 +37,45 @@ pub const CHECKPOINT_JSON_INITIAL_CAPACITY: usize = 0x80;
 /// Two-space pretty-JSON indentation literal at `0x26a2e4b` (`.rodata 0x5f3cc0`).
 pub const CHECKPOINT_JSON_INDENT: &str = "  ";
 
+/// Buffered ABCI state serialization capacity proven at `0x26a2881` (`state.rs:193/195`)
+/// and `0x4e4b8c1` (`state.rs:161`): `0x1000400` (`16 MiB + 1 KiB = 16,778,240` bytes).
+pub const STATE_SERIALIZE_BUF_CAPACITY: usize = 0x100_0400;
+
+/// Nanoseconds-per-second divisor proven at `0x26a2979` (`.rodata 0x458d50` = `1e9_f64`).
+pub const ELAPSED_NANOS_PER_SEC: f64 = 1_000_000_000.0;
+
+/// Convert elapsed wall-clock nanoseconds to finite seconds matching `0x26a2979..0x26a2985`:
+/// divides by `1e9` (`0x458d50`) and rejects non-finite (`>= f64::INFINITY` at `0x459010`).
+pub fn elapsed_secs_from_nanos(elapsed_nanos: f64) -> Option<f64> {
+    if !elapsed_nanos.is_finite() || elapsed_nanos < 0.0 {
+        return None;
+    }
+    let secs = elapsed_nanos / ELAPSED_NANOS_PER_SEC;
+    if secs.is_finite() { Some(secs) } else { None }
+}
+
+/// Error returned when zipped action/result slice lengths differ (`state.rs:340:21`,
+/// `0x229b760` / `0x5618890` / `0x5618990`: `cmp rsi, rcx; jne assert_failed`).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ZipLengthMismatchError {
+    pub left_len: usize,
+    pub right_len: usize,
+}
+
+/// Checked zip enforcing exact `left.len() == right.len()` matching `l1/src/abci/state.rs:340:21`.
+pub fn zip_exact_slices<'a, A, B>(
+    left: &'a [A],
+    right: &'a [B],
+) -> Result<Vec<(&'a A, &'a B)>, ZipLengthMismatchError> {
+    if left.len() != right.len() {
+        return Err(ZipLengthMismatchError {
+            left_len: left.len(),
+            right_len: right.len(),
+        });
+    }
+    Ok(left.iter().zip(right.iter()).collect())
+}
+
 /// Required feature-version byte checked at `0x5a04f52` (`cmp byte ptr [S + 0xb9a], 3`,
 /// `"assertion failed: features_ok"` at `0x93a641`).
 pub const REQUIRED_FEATURE_VERSION: u8 = 3;

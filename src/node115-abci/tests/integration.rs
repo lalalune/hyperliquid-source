@@ -647,3 +647,31 @@ fn snapshot_hardfork_compat_bundle_roundtrip_and_7_stage_apply_block_pipeline() 
 
     let _ = fs::remove_dir_all(&dir);
 }
+
+#[test]
+fn state_serialize_buffer_elapsed_seconds_and_zip_exact_slices() {
+    use node115_abci::state::{
+        ELAPSED_NANOS_PER_SEC, STATE_SERIALIZE_BUF_CAPACITY, ZipLengthMismatchError,
+        elapsed_secs_from_nanos, zip_exact_slices,
+    };
+
+    // state.rs:161 & 193/195: 0x1000400 (16 MiB + 1 KiB) serialization buffer + 1e9 elapsed secs
+    assert_eq!(STATE_SERIALIZE_BUF_CAPACITY, 16 * 1024 * 1024 + 1024);
+    assert_eq!(ELAPSED_NANOS_PER_SEC, 1_000_000_000.0);
+    assert_eq!(elapsed_secs_from_nanos(2_500_000_000.0), Some(2.5));
+    assert_eq!(elapsed_secs_from_nanos(0.0), Some(0.0));
+    assert_eq!(elapsed_secs_from_nanos(-1.0), None);
+    assert_eq!(elapsed_secs_from_nanos(f64::INFINITY), None);
+    assert_eq!(elapsed_secs_from_nanos(f64::NAN), None);
+
+    // state.rs:340:21: exact slice length equality guard
+    let zipped = zip_exact_slices(&[10u64, 20], &["a", "b"]).unwrap();
+    assert_eq!(zipped, vec![(&10u64, &"a"), (&20u64, &"b")]);
+    assert_eq!(
+        zip_exact_slices(&[10u64, 20], &["a"]),
+        Err(ZipLengthMismatchError {
+            left_len: 2,
+            right_len: 1,
+        })
+    );
+}
