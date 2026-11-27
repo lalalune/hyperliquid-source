@@ -1,1 +1,16 @@
-verified node115 d1 payload+0x60 => addressEncoding enum; callback output remains unresolved
+$ fnm exec --using=24.22.1 python3 tools/action_wire_d1_address_encoding_115.py --out research/work-items/RE-005-node115-d1-address-encoding-bridge
+PASS; verified node #115 digest, FDE ranges, instruction bytes, literals and schema/serializer crosswalk. Callback target/output remain unresolved.
+$ python3 -m unittest tests.test_action_wire_d1_address_encoding_115 -v
+PASS; 7 tests, including target identity, reproduction and five byte-corruption controls.
+$ make doctor
+PASS; analysis_ready=true; exact_rebuild_ready=false (recovered manifests/locks, exact Linux build flags/fork provenance and accepted reconstruction/harness remain missing; Java/Ghidra unavailable).
+$ make verify
+PASS; pinned signatures, 32 imported files and 4,851 packet manifests / 34,473 entries verified.
+$ make catalogue-check
+PASS; catalogue and progress tables match pinned inputs.
+$ git diff --check
+PASS.
+$ make test (session 89182)
+Still running when polled on 2026-11-28; latest visible module was test_bridge_event_json_reader_115.py. No terminal result; because the worktree was edited during this run, it is not an immutable-revision result.
+
+No captured executable was run. Static inference identifies the field-object handoff; its concrete callback implementation, emitted value and public/synthetic EIP-712 vector remain unresolved.

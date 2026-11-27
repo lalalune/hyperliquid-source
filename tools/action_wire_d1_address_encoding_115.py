@@ -18,6 +18,9 @@ EXPECTED_FDES = {
     0x240eef0: 0x240f26a,
     0x24580c0: 0x245812b,
     0x442d000: 0x442d480,
+    0x4428520: 0x44290b4,
+    0x4433f90: 0x443431f,
+    0x46e6d30: 0x46e6f78,
 }
 TEXT_WITNESSES = {
     # The SendToEvmWithData payload serializer emits the field before the
@@ -31,6 +34,16 @@ TEXT_WITNESSES = {
     # adjacent metadata/data fields; its 32-byte return enters the typed record.
     0x442d179: '498b442460498b542468498d742478498b4c2470488d7c2450ff10',
     0x442d194: '0f104424500f104c24600f118c24280100000f11842418010000',
+    # The method passes the record whose +0x60 slot holds those 32 returned bytes.
+    0x442d30a: '48 8b b4 24 d0 01 00 00 48 8d 7c 24 50 48 8d 94 24 b8 00 00 00 e8 0c 9a 2b 00'.replace(' ', ''),
+    # The bridge wrapper forwards the same record pointer to the typed-data wrapper.
+    0x46e6d44: '48 8d 7c 24 60 48 89 d6 e8 3f d2 d4 ff'.replace(' ', ''),
+    # The typed-data wrapper preserves its input record, then calls the mapped hash helper.
+    0x4433fa0: '4989f6',
+    0x44340ef: '4c89f6ff1580680b02',
+    # The hash helper preserves the record base and dispatches through its +0x60 object.
+    0x4428531: '4989f7',
+    0x44289b2: '498b4760498b5768498d7778498b4f70488dbc24a0010000ff10',
 }
 RODATA_WITNESSES = {
     0x5ed61a: b'destinationRecipientaddressEncoding',
@@ -92,7 +105,7 @@ def extract(data, *, expected_digest=TARGET_SHA256):
     return {
         'target': {'release': 115, 'size': len(data), 'sha256': digest,
                    'coordinate': 'ELF virtual address'},
-        'scope': 'field identity for the unresolved d1 action-method callback at payload+0x60',
+        'scope': 'field identity and typed-data handoff for the unresolved d1 action-method callback at payload+0x60',
         'fdes': [{'start': hex(a), 'end': hex(b), 'bytes': b - a}
                  for a, b in sorted(EXPECTED_FDES.items())],
         'observations': [
@@ -101,15 +114,19 @@ def extract(data, *, expected_digest=TARGET_SHA256):
             {'address': '0x2bced39', 'fact': 'the action enum record at 0x2bce570 binds variant index 75 / SendToEvmWithData to payload serializer 0x240eef0'},
             {'address': '0x24580c0', 'fact': 'the selected enum serializer branch passes the 11-byte variant label UnvalidatedBridgeEpoch to its serializer helper'},
             {'address': '0x442d192', 'fact': 'the d1 signing method invokes the first function pointer stored at payload+0x60, passing payload+0x78 and qwords at +0x68/+0x70; it copies 32 returned bytes into its local typed-data record'},
+            {'address': '0x442d30a', 'fact': 'the method passes a local record based at rsp+0xb8 to 0x46e6d30; the 32-byte callback return stored at rsp+0x118 is record+0x60'},
+            {'address': '0x46e6d44', 'fact': 'the bridge wrapper passes that record pointer to 0x4433f90'},
+            {'address': '0x44340f2', 'fact': '0x4433f90 forwards the unchanged record pointer through relocation slot 0x64ea978 to typed-data hash helper 0x4428520'},
+            {'address': '0x44289ca', 'fact': '0x4428520 loads qwords from record+0x60/+0x68/+0x70, passes record+0x78, and invokes the function pointer at the object stored in record+0x60'},
             {'address': '0x44290c0', 'fact': 'the existing target-bound EIP-712 builder schema orders address_encoding:string immediately after destination_recipient:string and before destination_chain_id:uint32'},
         ],
         'inference': [
             'The serializer call order, contiguous field-name bytes, enum variant serializer, and EIP-712 field order identify the payload+0x60 value as the addressEncoding/address_encoding field.',
-            'The callback in the signing method is associated with that field. The schema type string makes a 32-byte string-hash interpretation plausible, but the concrete callback target and output meaning are not established here.',
+            'The 32-byte return from the d1 method callback occupies the address_encoding field slot in the typed-data record and is later consumed as a callable field object by the hash helper. It is not established as a final string hash; the concrete callable target and its output semantics remain unknown.',
         ],
         'unresolved': [
             'concrete callback/vtable target and the producer that populates payload+0x60',
-            'whether the callback output equals the EIP-712 string hash of the selected variant',
+            'the concrete function pointer and behavior of the field object returned by the d1 callback',
             'runtime enum values, production digest, signature verification, replay checks, and error ordering',
         ],
         'instruction_witnesses': instruction_evidence,
@@ -134,7 +151,7 @@ def main(argv=None):
     report = extract(args.binary.read_bytes())
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / 'records.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
-    print('verified node115 d1 payload+0x60 => addressEncoding enum; callback output remains unresolved')
+    print('verified node115 d1 addressEncoding field object handoff into typed-data callback; concrete output remains unresolved')
 
 
 if __name__ == '__main__':

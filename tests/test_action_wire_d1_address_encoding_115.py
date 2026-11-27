@@ -45,6 +45,18 @@ class D1AddressEncodingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'instruction witness mismatch at 0x442d194'):
             subject.extract(bytes(changed), expected_digest=None)
 
+    def test_typed_data_callback_reuse_corruption_rejects(self):
+        changed = bytearray(self.original)
+        changed[0x44289ca - 0x1000] ^= 1
+        with self.assertRaisesRegex(ValueError, 'instruction witness mismatch at 0x44289b2'):
+            subject.extract(bytes(changed), expected_digest=None)
+
+    def test_typed_data_hash_handoff_corruption_rejects(self):
+        changed = bytearray(self.original)
+        changed[0x44340ef - 0x1000] ^= 1
+        with self.assertRaisesRegex(ValueError, 'instruction witness mismatch at 0x44340ef'):
+            subject.extract(bytes(changed), expected_digest=None)
+
 
 if __name__ == '__main__':
     unittest.main()
