@@ -8,6 +8,8 @@
 //!   advancement (`0x2e19920`);
 //! - [`admission`]: signed block (`0x57e8970` / `0x2786870`) and timeout
 //!   message (`0x2786a20`) admission front ends;
+//! - [`block_rules`]: block validation rules (`0x59d6b80`, `signed.rs:194`);
+//! - [`tc_verify`]: timeout certificate verification (`0x5960390` + `0x564b510`);
 //! - [`timeout_flow`]: first-timer polling selector (`0x2cdca20`) and
 //!   saturating timeout counter (`0x2e098e0` arm `0x8000000000000006`).
 //!
@@ -17,7 +19,9 @@
 //! explicit trait/value boundaries.
 
 pub mod admission;
+pub mod block_rules;
 pub mod round_progression;
+pub mod tc_verify;
 pub mod timeout_flow;
 
 // Re-export integrated node #115 consensus micro-crates for downstream
@@ -38,6 +42,13 @@ pub use admission::{
     AdmissionPrimitives, BlockAdmissionError, BlockEnvelope, BlockRules, SignedBlockInput,
     SignedTimeoutInput, TimeoutAdmissionError, TimeoutDigestPayload, admit_signed_block,
     admit_signed_timeout, select_block_certificate_round,
+};
+pub use block_rules::{
+    BlockJustification, BlockProposerProvider, BlockRuleError, ConsensusBlock, MAX_BLOCK_TX_HASHES,
+    verify_block_rules,
+};
+pub use tc_verify::{
+    TcSignatureEntry, TcVerifyError, VerifiableTimeoutCertificate, verify_timeout_certificate,
 };
 pub use nested_certificate::{
     Certificate, Context, Output as CertificateDecisionOutput, Rejection as CertificateRejection,
