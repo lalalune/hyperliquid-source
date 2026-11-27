@@ -1,11 +1,14 @@
 //! Node #115 `l1/src/abci/state.rs` checkpoint restore, loader handoff, freeze-height
 //! invariant, and block-state progression.
 //!
-//! Binary anchors (`RE-009-node115-abci-crate-map`):
+//! Binary anchors (`RE-009-node115-abci-crate-map`, `RE-009-node115-db-hub-routing-and-abci-schema`):
 //! - `0x3c12800..0x3c12af5` (`state.rs:76..82`): persisted height verification `[S+0x28]`
 //! - `0x3c13520..0x3c13609` (`state.rs:123:37`): loader handoff tag `1` (`0x3c1353b`)
+//! - `0x26a2c80..0x26a326e` (`state.rs:151`): `/dev/null` skip + `.rmp` vs pretty-JSON serialization
 //! - `0x22ed1f0..0x22ed70a` (`state.rs:201`): `assertion failed: freeze_height >= self.locus.context.height()`
 //! - `0x22ec9b0..0x22ed1ec` (`state.rs:460`): action success status `0x1a2` (`0x22ec9c9`)
+
+use std::path::Path;
 
 pub use node115_abci_checkpoint_replay_fixture::{
     ReplayInitializer, RestoreError, RestoredState, restore_checkpoint,
@@ -16,6 +19,41 @@ pub const ACTION_SUCCESS_CODE: u16 = 0x1a2;
 
 /// Loader handoff tag checked at `0x3c1353b` (`state.rs:123:37`).
 pub const LOADER_HANDOFF_TAG: u64 = 1;
+
+/// No-op checkpoint sink path checked at `0x26a2ce4` (`0x6c756e2f7665642f` + `'l'`).
+pub const CHECKPOINT_DEV_NULL_PATH: &str = "/dev/null";
+
+/// Extension selecting MessagePack serialization at `0x26a2da4` (`.rodata 0x4659e5`).
+pub const CHECKPOINT_RMP_EXTENSION: &str = "rmp";
+
+/// Initial `Vec<u8>` capacity for pretty-JSON fallback at `0x26a2e1b` (`mov edi, 0x80`).
+pub const CHECKPOINT_JSON_INITIAL_CAPACITY: usize = 0x80;
+
+/// Two-space pretty-JSON indentation literal at `0x26a2e4b` (`.rodata 0x5f3cc0`).
+pub const CHECKPOINT_JSON_INDENT: &str = "  ";
+
+/// Checkpoint serialization dispatch proven in `l1/src/abci/state.rs:151` (`0x26a2c80..0x26a326e`).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum CheckpointFormat {
+    SkipDevNull,
+    MessagePackRmp,
+    PrettyJson,
+}
+
+/// Classify a checkpoint output path identically to `0x26a2cda..0x26a2db7`:
+/// - exact `"/dev/null"` -> `SkipDevNull`
+/// - extension == `"rmp"` -> `MessagePackRmp`
+/// - everything else (including `".."` or missing/other extension) -> `PrettyJson`
+pub fn classify_checkpoint_path(path: &Path) -> CheckpointFormat {
+    if path == Path::new(CHECKPOINT_DEV_NULL_PATH) {
+        return CheckpointFormat::SkipDevNull;
+    }
+    if path.extension().and_then(|e| e.to_str()) == Some(CHECKPOINT_RMP_EXTENSION) {
+        CheckpointFormat::MessagePackRmp
+    } else {
+        CheckpointFormat::PrettyJson
+    }
+}
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum FreezeHeightError {

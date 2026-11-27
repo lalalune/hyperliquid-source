@@ -257,3 +257,92 @@ fn real_blake3_state_root_and_timer_maturity_end_to_end() {
     assert!(!timer_is_mature(t0, f64::NAN, t0 + 99_999_999_999));
     assert!(!timer_is_mature(t0, -1.0, t0 + 99_999_999_999));
 }
+
+#[test]
+fn tracker_wire_schema_checkpoint_format_and_straggler_filter() {
+    use node115_abci::engine::{
+        EvmCheckpointFilterOutcome, MARKED_FOR_DELETION_MARKER, classify_evm_checkpoint_entry,
+        daily_evm_checkpoint_tar_path,
+    };
+    use node115_abci::hash_signature_tracker::{
+        HASH_SIGNATURE_TRACKER_WIRE_FIELDS, PENDING_CUTOFF_WINDOW, QRS_ENTRY_SIZE_BYTES,
+        QuorumStatus,
+    };
+    use node115_abci::state::{
+        CHECKPOINT_JSON_INDENT, CHECKPOINT_JSON_INITIAL_CAPACITY, CheckpointFormat,
+        classify_checkpoint_path,
+    };
+    use std::path::Path;
+
+    assert_eq!(
+        HASH_SIGNATURE_TRACKER_WIRE_FIELDS,
+        ["tracker", "qrs", "highest_quorum_height", "htm", "adu", "h"]
+    );
+    assert_eq!(QRS_ENTRY_SIZE_BYTES, 0x68);
+    assert_eq!(QuorumStatus::NoQuorum.wire_tag(), "N");
+    assert_eq!(QuorumStatus::Quorum([0xaa; 32]).wire_tag(), "Q");
+
+    let mut tracker = HashSignatureTracker::new();
+    tracker.pending_heights.insert(500);
+    tracker.pending_heights.insert(1_500);
+    assert_eq!(tracker.quorum_status(500), QuorumStatus::NoQuorum);
+    assert_eq!(tracker.prune_pending_window(2_000), 2_000 - PENDING_CUTOFF_WINDOW);
+    assert!(!tracker.pending_heights.contains(&500));
+    assert!(tracker.pending_heights.contains(&1_500));
+
+    // Checkpoint path dispatch (`0x26a2c80`)
+    assert_eq!(
+        classify_checkpoint_path(Path::new("/dev/null")),
+        CheckpointFormat::SkipDevNull
+    );
+    assert_eq!(
+        classify_checkpoint_path(Path::new("/var/hl/abci_state.rmp")),
+        CheckpointFormat::MessagePackRmp
+    );
+    assert_eq!(
+        classify_checkpoint_path(Path::new("/var/hl/abci_state.json")),
+        CheckpointFormat::PrettyJson
+    );
+    assert_eq!(
+        classify_checkpoint_path(Path::new("..")),
+        CheckpointFormat::PrettyJson
+    );
+    assert_eq!(CHECKPOINT_JSON_INITIAL_CAPACITY, 0x80);
+    assert_eq!(CHECKPOINT_JSON_INDENT, "  ");
+
+    // Daily archive path (`0x38c4478`)
+    assert_eq!(
+        daily_evm_checkpoint_tar_path(Path::new("/home/hl"), "20260401", "evm", "10000"),
+        Path::new("/home/hl/data/daily_evm_checkpoints/20260401/evm_10000.tar")
+    );
+
+    // Straggler filter (`0x3d5dca0`)
+    let dir = unique_tmp("straggler");
+    let marked = dir.join("100");
+    let clean = dir.join("200");
+    fs::create_dir_all(&marked).unwrap();
+    fs::create_dir_all(&clean).unwrap();
+    fs::write(marked.join(MARKED_FOR_DELETION_MARKER), b"").unwrap();
+
+    assert_eq!(
+        classify_evm_checkpoint_entry(&marked, 100, 150, 300, 250),
+        EvmCheckpointFilterOutcome::SkippedMarkedForDeletion
+    );
+    assert_eq!(
+        classify_evm_checkpoint_entry(&clean, 100, 150, 300, 250),
+        EvmCheckpointFilterOutcome::DroppedStraggler
+    );
+    assert_eq!(
+        classify_evm_checkpoint_entry(&clean, 200, 150, 300, 250),
+        EvmCheckpointFilterOutcome::Retained
+    );
+    assert_eq!(
+        classify_evm_checkpoint_entry(&clean, 251, 150, 300, 250),
+        EvmCheckpointFilterOutcome::DroppedOutOfWindow
+    );
+    assert_eq!(
+        classify_evm_checkpoint_entry(&clean, 300, 150, 300, 400),
+        EvmCheckpointFilterOutcome::DroppedOutOfWindow
+    );
+    let _ = fs::remove_dir_all(&dir);
+}

@@ -201,3 +201,48 @@ fn rocks_db_niche_block_reader_and_indexed_artifact_variants() {
     );
     assert_eq!(IndexedArtifactVariant::from_name("nodeMetadata"), None);
 }
+
+#[test]
+fn db_hub_29_kind_prefix_table_and_3_shard_routing() {
+    use node115_db::db_hub::{
+        DB_HUB_CORE_TIER_MAX_INDEX, DB_HUB_SHARD_0_MASK, DB_HUB_SHARD_1_MASK, DbKind,
+    };
+
+    assert_eq!(DB_HUB_SHARD_0_MASK & DB_HUB_SHARD_1_MASK, 0);
+    assert_eq!(DbKind::ALL.len(), 29);
+
+    let mut shard_counts = [0usize; 3];
+    let mut core_count = 0usize;
+    for kind in DbKind::ALL {
+        shard_counts[kind.shard_id() as usize] += 1;
+        if kind.is_core_l1_tier() {
+            assert!((kind as u8) <= DB_HUB_CORE_TIER_MAX_INDEX);
+            core_count += 1;
+        }
+    }
+    assert_eq!(shard_counts, [22, 4, 3]);
+    assert_eq!(core_count, 21);
+
+    assert_eq!(DbKind::Candle.prefix_bytes(), b"cA");
+    assert_eq!(DbKind::Candle.shard_id(), 0);
+    assert_eq!(DbKind::ExplorerUserTxs.prefix_bytes(), b"et");
+    assert_eq!(DbKind::ExplorerUserTxs.shard_id(), 1);
+    assert_eq!(DbKind::EvmBlocks.prefix_bytes(), b"Eb");
+    assert_eq!(DbKind::EvmBlocks.shard_id(), 1);
+    assert_eq!(DbKind::EvmStateAccounts.prefix_bytes(), b"Ea");
+    assert_eq!(DbKind::EvmStateAccounts.shard_id(), 2);
+    assert_eq!(DbKind::EvmStateContracts.prefix_bytes(), b"Ec");
+    assert_eq!(DbKind::EvmStateContracts.shard_id(), 2);
+    assert_eq!(DbKind::EvmStateStorage.prefix_bytes(), b"Es");
+    assert_eq!(DbKind::EvmStateStorage.shard_id(), 2);
+
+    let mut hub = OfflineDbHub::new();
+    hub.put_kind(DbKind::Candle, b"BTC:1m", b"ohlcv".to_vec());
+    hub.put_kind(DbKind::EvmBlocks, b"42", b"blk".to_vec());
+    hub.put_kind(DbKind::EvmStateStorage, b"slot7", b"val".to_vec());
+    assert_eq!(hub.namespace_count(), 3);
+    assert_eq!(hub.get_kind(DbKind::Candle, b"BTC:1m"), Some(b"ohlcv".as_slice()));
+    assert_eq!(hub.get_kind(DbKind::EvmBlocks, b"42"), Some(b"blk".as_slice()));
+    assert_eq!(hub.get_kind(DbKind::EvmStateStorage, b"slot7"), Some(b"val".as_slice()));
+    assert_eq!(hub.get(2, b"Esslot7"), Some(b"val".as_slice()));
+}

@@ -26,6 +26,12 @@ pub const PRUNE_KEEP_EVM_CHECKPOINTS: usize = 100;
 /// Completion sentinel checked/written by `tar_evm_checkpoints` (`0x38c40f0`, rodata `0x7a1497`).
 pub const TAR_COMPLETE_MARKER: &str = "TAR_COMPLETE";
 
+/// Per-checkpoint deletion sentinel checked by `0x3d5dca0` (`0x3d5dd85`, rodata `0x44c7fc`).
+pub const MARKED_FOR_DELETION_MARKER: &str = "MARKED_FOR_DELETION";
+
+/// Daily EVM checkpoint archive subdirectory observed at `0x38c4478` (rodata `0x438f1d`).
+pub const DAILY_EVM_CHECKPOINTS_SUBDIR: &str = "data/daily_evm_checkpoints";
+
 /// Block input for `AbciEngine::apply_block`.
 #[derive(Clone, Debug)]
 pub struct EngineBlock {
@@ -217,4 +223,52 @@ pub fn build_daily_evm_tar_command(
 /// Return the path of the `TAR_COMPLETE` marker for a daily archive directory.
 pub fn tar_complete_marker_path(dir: &Path) -> PathBuf {
     dir.join(TAR_COMPLETE_MARKER)
+}
+
+/// Format the daily EVM checkpoint tar path observed at `0x38c4478` (`.rodata 0x438f1b`):
+/// `{home_dir}/data/daily_evm_checkpoints/{date_dir}/{name}_{suffix}.tar`.
+pub fn daily_evm_checkpoint_tar_path(
+    home_dir: &Path,
+    date_dir: &str,
+    name: &str,
+    suffix: &str,
+) -> PathBuf {
+    home_dir
+        .join(DAILY_EVM_CHECKPOINTS_SUBDIR)
+        .join(date_dir)
+        .join(format!("{name}_{suffix}.tar"))
+}
+
+/// Classification of an EVM checkpoint directory by `0x3d5dca0` (`l1/src/abci/engine.rs:557`).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum EvmCheckpointFilterOutcome {
+    /// Directory contains `MARKED_FOR_DELETION`; skipped from active filter (`0x3d5ddaa`).
+    SkippedMarkedForDeletion,
+    /// Height `< min_expected`; flagged as `"straggler evm state checkpoint"` (`0x3d5ddf1..0x3d5de14`) and dropped.
+    DroppedStraggler,
+    /// Height satisfies `h < upper_exclusive && h >= min_expected && h <= max_inclusive` (`0x3d5de80..0x3d5de9b`).
+    Retained,
+    /// Height is outside `[min_expected, min(upper_exclusive - 1, max_inclusive)]` and dropped.
+    DroppedOutOfWindow,
+}
+
+/// Evaluate the exact `0x3d5dca0` checkpoint filter predicate (`0x3d5dd85..0x3d5de9b`).
+pub fn classify_evm_checkpoint_entry(
+    checkpoint_dir: &Path,
+    height: u64,
+    min_expected: u64,
+    upper_exclusive: u64,
+    max_inclusive: u64,
+) -> EvmCheckpointFilterOutcome {
+    if checkpoint_dir.join(MARKED_FOR_DELETION_MARKER).exists() {
+        return EvmCheckpointFilterOutcome::SkippedMarkedForDeletion;
+    }
+    if height < min_expected {
+        return EvmCheckpointFilterOutcome::DroppedStraggler;
+    }
+    if height < upper_exclusive && height <= max_inclusive {
+        EvmCheckpointFilterOutcome::Retained
+    } else {
+        EvmCheckpointFilterOutcome::DroppedOutOfWindow
+    }
 }

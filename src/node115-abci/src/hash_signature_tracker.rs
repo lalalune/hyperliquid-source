@@ -23,8 +23,39 @@ use node115_quorum_line::quorum_log_line;
 /// Saturating prune window observed at `0x276063a` and `0x5afb284` (`0xc350`).
 pub const PRUNE_WINDOW_HEIGHTS: u64 = 50_000;
 
-/// Saturating pending-map cutoff observed at `0x5afa04e` (`0x3e8`).
+/// Saturating pending-map cutoff observed at `0x2760048` (live) and `0x5afa04e` (slow) (`0x3e8`).
 pub const PENDING_CUTOFF_WINDOW: u64 = 1_000;
+
+/// Exact `qrs` (`tracker + 0x48`) element stride observed at `0x27600f0` (`0x68` = 104 bytes).
+pub const QRS_ENTRY_SIZE_BYTES: usize = 0x68;
+
+/// Exact 6-field serialization wire order proven in `0x275ef30..0x275f127` (`.rodata 0x5f6b28`).
+pub const HASH_SIGNATURE_TRACKER_WIRE_FIELDS: [&str; 6] = [
+    "tracker",
+    "qrs",
+    "highest_quorum_height",
+    "htm",
+    "adu",
+    "h",
+];
+
+/// Binary-proven 2-variant `QuorumStatus` wire encoding (`0x28a05e0..0x28a0856`, `.rodata 0x5ff063`).
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum QuorumStatus {
+    /// Unit variant `"N"` (`0x5ff063`).
+    NoQuorum,
+    /// Payload variant `"Q"` (`0x5ff065`).
+    Quorum(Digest),
+}
+
+impl QuorumStatus {
+    pub const fn wire_tag(self) -> &'static str {
+        match self {
+            Self::NoQuorum => "N",
+            Self::Quorum(_) => "Q",
+        }
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RecordVoteResult {
@@ -250,6 +281,21 @@ impl HashSignatureTracker {
 
     pub fn selected_digest(&self, height: u64) -> Option<Digest> {
         self.snapshot.get(&height)?.selected
+    }
+
+    pub fn quorum_status(&self, height: u64) -> QuorumStatus {
+        match self.selected_digest(height) {
+            Some(digest) => QuorumStatus::Quorum(digest),
+            None => QuorumStatus::NoQuorum,
+        }
+    }
+
+    /// Prune pending timer heights below `current_height.saturating_sub(PENDING_CUTOFF_WINDOW)`
+    /// matching live `0x2760048` and slow `0x5afa04e` (`sub rax, 0x3e8; cmovae`).
+    pub fn prune_pending_window(&mut self, current_height: u64) -> u64 {
+        let cutoff = current_height.saturating_sub(PENDING_CUTOFF_WINDOW);
+        self.pending_heights.retain(|&h| h >= cutoff);
+        cutoff
     }
 
     pub fn retained_heights(&self) -> BTreeMap<u64, Option<Digest>> {
