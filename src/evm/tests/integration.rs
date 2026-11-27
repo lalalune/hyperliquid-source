@@ -280,3 +280,174 @@ fn dual_block_gas_limits_system_contracts_and_core_writer_frame() {
     );
     assert_eq!(read_precompile_input_decoder(0x0815), None);
 }
+
+#[test]
+fn mode13_gas_boundary_overflow_and_create_word_rounding() {
+    // CREATE initcode word rounding: 0 -> 0 words, 1..=32 -> 1 word, 33 -> 2 words.
+    let base_create = compute_mode13_gas(Mode13GasInput {
+        zero_bytes: 0,
+        nonzero_bytes: 0,
+        access_addresses: 0,
+        access_slots: 0,
+        auth_items: 0,
+        is_create: true,
+    })
+    .unwrap();
+    assert_eq!(base_create.initial, 53_000); // 21_000 + 32_000
+    assert_eq!(base_create.floor, 21_000);
+
+    let one_byte_create = compute_mode13_gas(Mode13GasInput::from_calldata(&[0u8; 1], true)).unwrap();
+    assert_eq!(one_byte_create.tokens, 1);
+    assert_eq!(one_byte_create.initial, 21_000 + 4 + 32_000 + 2);
+
+    let thirty_three_create =
+        compute_mode13_gas(Mode13GasInput::from_calldata(&[0u8; 33], true)).unwrap();
+    assert_eq!(thirty_three_create.initial, 21_000 + 33 * 4 + 32_000 + 4);
+
+    // Access list + EIP-7702 authorization items + floor-disabled admission override.
+    let with_lists = compute_mode13_gas(Mode13GasInput {
+        zero_bytes: 100,
+        nonzero_bytes: 10,
+        access_addresses: 2,
+        access_slots: 3,
+        auth_items: 1,
+        is_create: false,
+    })
+    .unwrap();
+    assert_eq!(with_lists.tokens, 140);
+    assert_eq!(with_lists.initial, 21_000 + 560 + 4_800 + 5_700 + 25_000);
+    assert_eq!(with_lists.floor, 22_400);
+
+    // When floor > initial, disable_floor=true admits at gas_limit == initial.
+    let heavy_calldata =
+        compute_mode13_gas(Mode13GasInput::from_calldata(&[0xffu8; 10], false)).unwrap();
+    assert!(heavy_calldata.floor > heavy_calldata.initial);
+    assert_eq!(
+        admit_mode13_gas(heavy_calldata, heavy_calldata.initial, false),
+        Mode13GasAdmission::FloorExceedsLimit
+    );
+    assert_eq!(
+        admit_mode13_gas(heavy_calldata, heavy_calldata.initial, true),
+        Mode13GasAdmission::Admitted
+    );
+
+    // Overflowing input counts fail closed with None instead of wrapping.
+    assert_eq!(
+        compute_mode13_gas(Mode13GasInput {
+            nonzero_bytes: u64::MAX,
+            ..Mode13GasInput::default()
+        }),
+        None
+    );
+    assert_eq!(
+        compute_mode13_gas(Mode13GasInput {
+            auth_items: u64::MAX,
+            ..Mode13GasInput::default()
+        }),
+        None
+    );
+}
+
+#[test]
+fn precompiles_lt_hash_full_lanes_and_core_writer_encoder_boundaries() {
+    use evm::{
+        encode_core_writer_frame, erase_transient_controls, parse_core_writer_frame,
+        CoreWriterFrameError, TransientInvalidControls, CORE_WRITER_MAX_RAW_LEN,
+        CORE_WRITER_VERSION_V1,
+    };
+
+    // Verify all 7 scaled precompile addresses, exact divisors, and callback error propagation.
+    for &(last_byte, expected_div) in &SCALED_PRECOMPILES {
+        let mut addr = [0u8; 20];
+        addr[19] = last_byte;
+        assert_eq!(scaled_precompile_divisor(&addr), Some(expected_div));
+        let (cost, ()) = run_scaled_precompile(&addr, expected_div * 100, |limit| {
+            assert_eq!(limit, 100);
+            Ok((7, ()))
+        })
+        .unwrap();
+        assert_eq!(cost, 7 * expected_div);
+        assert_eq!(
+            run_scaled_precompile::<()>(&addr, 100, |_| Err(())),
+            Err(ScaledPrecompileError::CallbackError)
+        );
+    }
+    // Non-zero upper bytes in address must never match scaled precompiles.
+    let mut polluted_addr = [0u8; 20];
+    polluted_addr[0] = 1;
+    polluted_addr[19] = 0x01;
+    assert_eq!(scaled_precompile_divisor(&polluted_addr), None);
+
+    // Read precompile total gas overflow and nonzero-input L1BlockNumber boundary.
+    assert_eq!(read_precompile_total_gas(0, usize::MAX), None);
+    let input_10 = [0xabu8; 10];
+    let exact_gas = 1000 + 33 * (10 + 32);
+    assert_eq!(
+        execute_l1_block_number_precompile(&input_10, exact_gas - 1, 77),
+        ReadPrecompileOutput::OutOfGas
+    );
+    assert_eq!(
+        execute_l1_block_number_precompile(&input_10, exact_gas, 77).outcome_name(),
+        ReadPrecompileOutcomeName::Ok
+    );
+
+    // LtHash zero identity and all-1024-lane independent big-endian u16 wrapping.
+    let mut x = LtHash::zero();
+    let mut y = LtHash::zero();
+    for lane in 0..evm::LT_HASH_LANES {
+        let off = lane * 2;
+        x.hash[off..off + 2].copy_from_slice(&(0xfffe_u16.wrapping_sub(lane as u16)).to_be_bytes());
+        y.hash[off..off + 2].copy_from_slice(&((lane as u16).wrapping_add(5)).to_be_bytes());
+    }
+    x.merge_assign(&LtHash::zero());
+    x.merge_assign(&y);
+    for lane in 0..evm::LT_HASH_LANES {
+        let off = lane * 2;
+        assert_eq!(u16::from_be_bytes([x.hash[off], x.hash[off + 1]]), 3);
+    }
+
+    // CoreWriter encoder rejects >24-bit action IDs and payloads pushing frame past 1000 bytes.
+    assert_eq!(encode_core_writer_frame(1, 0x0100_0000, &[]), None);
+    assert_eq!(
+        encode_core_writer_frame(1, 1, &vec![0u8; CORE_WRITER_MAX_RAW_LEN - 3]),
+        None
+    );
+    let max_frame =
+        encode_core_writer_frame(CORE_WRITER_VERSION_V1, 17, &vec![0x5a; CORE_WRITER_MAX_RAW_LEN - 4])
+            .unwrap();
+    assert_eq!(max_frame.len(), CORE_WRITER_MAX_RAW_LEN);
+    let parsed = parse_core_writer_frame(&max_frame, |_, _| false).unwrap();
+    assert_eq!(parsed.action_id, 17);
+    assert_eq!(parsed.payload.len(), CORE_WRITER_MAX_RAW_LEN - 4);
+    assert_eq!(
+        parse_core_writer_frame(&[1, 0, 0, 0], |_, _| false),
+        Err(CoreWriterFrameError::UnsupportedActionId(0))
+    );
+
+    // Transient rollback erase_controls & zero-restore micro-crate checks.
+    let mut controls = vec![0xffu8; 48];
+    controls[7] = 0x22;
+    controls[39] = 0x22;
+    let (mut growth, mut items) = (24u64, 1u64);
+    assert_eq!(
+        erase_transient_controls(&mut controls, 31, 7, &mut growth, &mut items),
+        Ok(0xff)
+    );
+    assert_eq!((growth, items), (25, 0));
+    assert_eq!(
+        erase_transient_controls(&mut controls, 31, 7, &mut growth, &mut items),
+        Err(TransientInvalidControls::NotOccupied)
+    );
+    let mut t = TransientStorage::new();
+    t.entry([9; 20]).or_default().insert([8; 32], [7; 32]);
+    restore_transient_journal(
+        Some(&mut t),
+        &TransientJournal {
+            address: [9; 20],
+            key: [8; 32],
+            old: [0; 32],
+        },
+    );
+    assert!(t.contains_key(&[9; 20]));
+    assert!(t[&[9; 20]].is_empty());
+}
