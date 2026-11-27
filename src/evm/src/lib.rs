@@ -7,11 +7,22 @@
 pub mod gas;
 pub mod lt_hash;
 pub mod precompiles;
+pub mod system;
 
 pub use gas::{
     admit_mode13_gas, compute_mode13_gas, Mode13GasAdmission, Mode13GasBreakdown, Mode13GasInput,
 };
 pub use lt_hash::{EvmDbKeyspace, EvmLtHashes, LtHash, LT_HASH_BYTES, LT_HASH_LANES};
+pub use system::{
+    encode_core_writer_frame, is_core_writer_action_id_active, parse_core_writer_frame,
+    read_precompile_input_decoder, CoreWriterFrame, CoreWriterFrameError, EvmBlockKind,
+    ReadPrecompileInputDecoder, SystemContractSpec, BIG_BLOCK_GAS_LIMIT, BIG_BLOCK_GUARD_PAIR,
+    BUILD_BIG_BLOCK_LABEL, BUILD_SMALL_BLOCK_LABEL, CORE_WRITER_ACTIVE_ACTION_IDS,
+    CORE_WRITER_ADDRESS, CORE_WRITER_MAX_ACTION_ID, CORE_WRITER_MAX_RAW_LEN,
+    CORE_WRITER_MIN_RAW_LEN, CORE_WRITER_RAW_ACTION_EVENT, CORE_WRITER_VERSION_V1,
+    HYPER_EVM_SYSTEM_CONTRACTS, HYPE_RECEIVED_EVENT, HYPE_SYSTEM_ADDRESS, SMALL_BLOCK_GAS_LIMIT,
+    SMALL_BLOCK_GUARD_PAIR, WHYPE_SYSTEM_ADDRESS,
+};
 pub use node115_child_reserve_fold::{
     fold as fold_child_reserve, CallResultWords, FrameWords, SpecialStatus54,
 };

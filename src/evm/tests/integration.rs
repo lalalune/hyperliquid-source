@@ -185,3 +185,98 @@ fn lt_hash_1024_big_endian_u16_lanes_and_joined_micro_crates() {
     );
     assert_eq!(transient[&[1; 20]][&[2; 32]], [3; 32]);
 }
+
+#[test]
+fn dual_block_gas_limits_system_contracts_and_core_writer_frame() {
+    use evm::{
+        encode_core_writer_frame, is_core_writer_action_id_active, parse_core_writer_frame,
+        read_precompile_input_decoder, CoreWriterFrameError, EvmBlockKind,
+        ReadPrecompileInputDecoder, BIG_BLOCK_GAS_LIMIT, CORE_WRITER_ACTIVE_ACTION_IDS,
+        CORE_WRITER_ADDRESS, CORE_WRITER_MAX_RAW_LEN, CORE_WRITER_VERSION_V1,
+        HYPER_EVM_SYSTEM_CONTRACTS, HYPE_SYSTEM_ADDRESS, SMALL_BLOCK_GAS_LIMIT,
+        WHYPE_SYSTEM_ADDRESS,
+    };
+
+    assert_eq!(SMALL_BLOCK_GAS_LIMIT, 3_000_000);
+    assert_eq!(BIG_BLOCK_GAS_LIMIT, 30_000_000);
+    assert_eq!(EvmBlockKind::from_using_big_blocks(false).gas_limit(), 3_000_000);
+    assert_eq!(EvmBlockKind::from_using_big_blocks(true).gas_limit(), 30_000_000);
+    assert_eq!(EvmBlockKind::Small.guard_pair(), (0.03, 0.07));
+    assert_eq!(EvmBlockKind::Big.guard_pair(), (0.05, 0.05));
+
+    assert_eq!(HYPER_EVM_SYSTEM_CONTRACTS.len(), 3);
+    assert_eq!(HYPER_EVM_SYSTEM_CONTRACTS[0].address, CORE_WRITER_ADDRESS);
+    assert_eq!(HYPER_EVM_SYSTEM_CONTRACTS[0].bytecode_len, 544);
+    assert_eq!(HYPER_EVM_SYSTEM_CONTRACTS[1].address, HYPE_SYSTEM_ADDRESS);
+    assert_eq!(HYPER_EVM_SYSTEM_CONTRACTS[1].bytecode_len, 122);
+    assert_eq!(HYPER_EVM_SYSTEM_CONTRACTS[2].address, WHYPE_SYSTEM_ADDRESS);
+    assert_eq!(HYPER_EVM_SYSTEM_CONTRACTS[2].bytecode_len, 2041);
+
+    // CoreWriter v1 boundary checks:
+    assert_eq!(
+        parse_core_writer_frame(&[], |_, _| false),
+        Err(CoreWriterFrameError::LengthOutOfRange(0))
+    );
+    assert_eq!(
+        parse_core_writer_frame(&[1, 0, 1], |_, _| false),
+        Err(CoreWriterFrameError::HeaderTooShort(3))
+    );
+    assert_eq!(
+        parse_core_writer_frame(&vec![1; CORE_WRITER_MAX_RAW_LEN + 1], |_, _| false),
+        Err(CoreWriterFrameError::LengthOutOfRange(1001))
+    );
+    // Disabled check runs before version/action_id check (0x38bf4e5 before 0x38bf508):
+    assert_eq!(
+        parse_core_writer_frame(&[2, 0, 0, 14], |v, a| v == 2 && a == 14),
+        Err(CoreWriterFrameError::ActionDisabled {
+            version: 2,
+            action_id: 14,
+        })
+    );
+    assert_eq!(
+        parse_core_writer_frame(&[2, 0, 0, 1], |_, _| false),
+        Err(CoreWriterFrameError::UnsupportedVersion(2))
+    );
+    assert!(!is_core_writer_action_id_active(0));
+    assert!(!is_core_writer_action_id_active(14));
+    assert!(!is_core_writer_action_id_active(18));
+    assert_eq!(
+        parse_core_writer_frame(&[1, 0, 0, 14], |_, _| false),
+        Err(CoreWriterFrameError::UnsupportedActionId(14))
+    );
+
+    for aid in CORE_WRITER_ACTIVE_ACTION_IDS {
+        assert!(is_core_writer_action_id_active(aid));
+        let frame = encode_core_writer_frame(CORE_WRITER_VERSION_V1, aid, &[0xaa, 0xbb]).unwrap();
+        let parsed = parse_core_writer_frame(&frame, |_, _| false).unwrap();
+        assert_eq!(parsed.version, 1);
+        assert_eq!(parsed.action_id, aid);
+        assert_eq!(parsed.payload, &[0xaa, 0xbb]);
+    }
+
+    // All 21 read precompile suffixes classify cleanly into the 5 observed decoder families:
+    for suffix in READ_PRECOMPILE_SUFFIXES {
+        assert!(read_precompile_input_decoder(suffix).is_some());
+    }
+    assert_eq!(
+        read_precompile_input_decoder(0x0809),
+        Some(ReadPrecompileInputDecoder::Empty)
+    );
+    assert_eq!(
+        read_precompile_input_decoder(0x0801),
+        Some(ReadPrecompileInputDecoder::AddressAndUint)
+    );
+    assert_eq!(
+        read_precompile_input_decoder(0x0806),
+        Some(ReadPrecompileInputDecoder::SingleWordUint)
+    );
+    assert_eq!(
+        read_precompile_input_decoder(0x0812),
+        Some(ReadPrecompileInputDecoder::SingleWord3897200)
+    );
+    assert_eq!(
+        read_precompile_input_decoder(0x0800),
+        Some(ReadPrecompileInputDecoder::GenericEthAbi)
+    );
+    assert_eq!(read_precompile_input_decoder(0x0815), None);
+}
