@@ -155,3 +155,72 @@ fn fee_history_and_store_key_codecs() {
     let sk = build_storage_key(b"Es", &[0x11; 20], [1, 2, 3, 4]);
     assert_eq!(sk.len(), 54);
 }
+
+#[test]
+fn evm_rpc_boundary_and_corruption_behaviors() {
+    use evm_rpc::{
+        BLOB_GAS_DIVISOR, EVM_RPC_ALL_METHOD_COUNT, EXPENSIVE_CALL_PERMIT_METRIC,
+        JSONRPC_CONTENT_TYPE, JSONRPC_INVALID_REQUEST, JSONRPC_PARSE_ERROR,
+        LOG_FILTER_LIMIT_ERROR, SYSTEM_TXS_BY_BLOCK_TABLE,
+    };
+
+    // Binary-anchored metadata constants
+    assert_eq!(EVM_RPC_ALL_METHOD_COUNT, 29);
+    assert_eq!(JSONRPC_PARSE_ERROR, -32700);
+    assert_eq!(JSONRPC_INVALID_REQUEST, -32600);
+    assert_eq!(JSONRPC_CONTENT_TYPE, "application/json");
+    assert_eq!(EXPENSIVE_CALL_PERMIT_METRIC, "evm_rpc_expensive_call_permit");
+    assert_eq!(
+        LOG_FILTER_LIMIT_ERROR,
+        "query exceeds max addresses or topics per position"
+    );
+    assert_eq!(SYSTEM_TXS_BY_BLOCK_TABLE, "system_txs_by_block");
+    assert_eq!(BLOB_GAS_DIVISOR, 786_432.0);
+
+    // Limiter hot-reload refresh_limits + saturating release
+    let mut lim = ExpensiveCallLimiter::new(1, 2, 1.5, 2.5);
+    assert_eq!(lim.timeout_secs(LimiterSelector::CallOrEstimateGas), 1.5);
+    assert_eq!(lim.timeout_secs(LimiterSelector::FilterLogs), 2.5);
+    assert_eq!(lim.refresh_limits(1, 2), [false, false]);
+    assert_eq!(lim.refresh_limits(3, usize::MAX), [true, true]);
+    assert_eq!(lim.limit(LimiterSelector::CallOrEstimateGas), 3);
+    assert_eq!(lim.limit(LimiterSelector::FilterLogs), MAX_PERMIT_COUNT);
+    lim.release(LimiterSelector::CallOrEstimateGas); // saturating at 0
+
+    // Fee-history edge cases: block_count=0, pending block_count=1 -> None, NaN, overflow
+    let latest = parse_number_text("latest").unwrap();
+    let pending = parse_number_text("pending").unwrap();
+    assert_eq!(compute_fee_history_range(0, latest, 50), Ok(None));
+    assert_eq!(compute_fee_history_range(1, pending, 50), Ok(None));
+    assert_eq!(
+        validate_reward_percentiles(&[f64::NAN, 50.0]),
+        Err(FeeHistoryError::InvalidRewardPercentiles)
+    );
+    assert_eq!(
+        validate_reward_percentiles(&[100.1, 100.2]),
+        Err(FeeHistoryError::InvalidRewardPercentiles)
+    );
+    assert_eq!(
+        select_weighted_rewards(&[], 0, &[10.0, 90.0]),
+        Ok(vec![0, 0])
+    );
+    let overflow_rows = [
+        RewardRow { effective_priority_fee: 1, gas_used: u64::MAX - 5 },
+        RewardRow { effective_priority_fee: 2, gas_used: 10 },
+    ];
+    assert_eq!(
+        select_weighted_rewards(&overflow_rows, u64::MAX, &[100.0]),
+        Err(FeeHistoryError::WeightOverflow)
+    );
+
+    // Store & raw-tx hex corruption cases
+    let hk = build_block_height_key(b"Eb", 42);
+    assert_eq!(decode_block_height_suffix(b"Ex", &hk), None);
+    assert_eq!(decode_block_height_suffix(b"Eb", &hk[..hk.len() - 1]), None);
+    assert_eq!(decode_raw_tx_hex(b""), Ok(vec![]));
+    assert_eq!(decode_raw_tx_hex(b"0x"), Ok(vec![]));
+    assert_eq!(
+        decode_raw_tx_hex(b"0x0g"),
+        Err(HexDecodeError::InvalidCharacter { byte: b'g', index: 1 })
+    );
+}

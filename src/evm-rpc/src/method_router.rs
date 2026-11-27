@@ -7,10 +7,18 @@
 
 use std::collections::BTreeMap;
 
+pub const JSONRPC_PARSE_ERROR: i32 = -32700;
+pub const JSONRPC_INVALID_REQUEST: i32 = -32600;
 pub const JSONRPC_METHOD_NOT_FOUND: i32 = -32601;
 pub const JSONRPC_INVALID_PARAMS: i32 = -32602;
 pub const JSONRPC_INTERNAL_ERROR: i32 = -32603;
 pub const JSONRPC_SERVER_ERROR: i32 = -32000;
+
+/// HTTP `Content-Type` header emitted by `method_router.rs` (`0x2e3cb60`, `.rodata` `0x44a912`).
+pub const JSONRPC_CONTENT_TYPE: &str = "application/json";
+
+/// Total registered JSON-RPC methods in node #115 (`26` core + `2` extra + `1` forwarder).
+pub const EVM_RPC_ALL_METHOD_COUNT: usize = 29;
 
 /// Exact 26 JSON-RPC methods registered in order by `0x2a05f60` (`evm_rpc/src/method_router.rs`).
 pub const EVM_RPC_CORE_METHODS: [&str; 26] = [

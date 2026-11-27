@@ -21,15 +21,16 @@ pub use forwarder::{
 };
 pub use limiter::{
     validate_log_filter_limits, ExpensiveCallLimiter, LimiterSelector, PermitOutcome,
-    MAX_FILTER_ITEMS, MAX_PERMIT_COUNT,
+    EXPENSIVE_CALL_PERMIT_METRIC, LOG_FILTER_LIMIT_ERROR, MAX_FILTER_ITEMS, MAX_PERMIT_COUNT,
 };
 pub use method_router::{
-    MethodRouter, RouterError, EVM_RPC_CORE_METHODS, EVM_RPC_EXTRA_METHODS,
-    EVM_RPC_WRITE_FORWARD_METHOD, JSONRPC_INTERNAL_ERROR, JSONRPC_INVALID_PARAMS,
-    JSONRPC_METHOD_NOT_FOUND, JSONRPC_SERVER_ERROR,
+    MethodRouter, RouterError, EVM_RPC_ALL_METHOD_COUNT, EVM_RPC_CORE_METHODS,
+    EVM_RPC_EXTRA_METHODS, EVM_RPC_WRITE_FORWARD_METHOD, JSONRPC_CONTENT_TYPE,
+    JSONRPC_INTERNAL_ERROR, JSONRPC_INVALID_PARAMS, JSONRPC_INVALID_REQUEST,
+    JSONRPC_METHOD_NOT_FOUND, JSONRPC_PARSE_ERROR, JSONRPC_SERVER_ERROR,
 };
 pub use node115_block_number_text::{parse_number_text, NumberSelector, ParseError as BlockNumberParseError};
 pub use node115_storage_key_builder::{
     build_storage_key, storage_key_suffix, ADDRESS_BYTES, SLOT_BYTES, STORAGE_KEY_SUFFIX_BYTES,
 };
-pub use store::{build_block_height_key, decode_block_height_suffix};
+pub use store::{build_block_height_key, decode_block_height_suffix, SYSTEM_TXS_BY_BLOCK_TABLE};

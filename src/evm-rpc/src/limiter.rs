@@ -12,6 +12,13 @@ pub const MAX_PERMIT_COUNT: usize = 0x1fff_ffff_ffff_ffff;
 /// Maximum addresses / topics per filter slot observed in `0x2a2cb70` (5 checks against 1000).
 pub const MAX_FILTER_ITEMS: usize = 1000;
 
+/// Metric name emitted by `expensive_call_limiter.rs` (`0x2a04070`, `.rodata` `0x6023ac`).
+pub const EXPENSIVE_CALL_PERMIT_METRIC: &str = "evm_rpc_expensive_call_permit";
+
+/// Error prefix returned when any of the 5 `eth_getLogs` filter slots exceeds `MAX_FILTER_ITEMS`
+/// (`0x2a2cb70`, `.rodata` `0x433a75`, formatted with `u64(1000)` at `0x459c00`).
+pub const LOG_FILTER_LIMIT_ERROR: &str = "query exceeds max addresses or topics per position";
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u8)]
 pub enum LimiterSelector {
